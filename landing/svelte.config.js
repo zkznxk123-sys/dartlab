@@ -180,6 +180,13 @@ const config = {
 				if (stripped === '/favicon.ico') {
 					return;
 				}
+				// /skills/* 미존재 spec — index.json 에는 등록되었지만 spec md 미작성된 134개. catalog.ts 단에서
+				// /skills 페이지 link는 차단했지만 hard-coded 링크 (redirectMap · section components) 가 남아있음.
+				// spec md 채워질 때까지 warn 처리. (engines.analysis.* · engines.company.sections 등)
+				if (stripped.startsWith('/skills/')) {
+					console.warn(`[prerender] skills 미존재 link 경고 (spec 미작성): ${path} (from ${referrer})`);
+					return;
+				}
 				throw new Error(`${message} (linked from ${referrer})`);
 			}
 		},
