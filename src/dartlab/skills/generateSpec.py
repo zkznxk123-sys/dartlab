@@ -1282,7 +1282,7 @@ def generateLlmsTxt() -> str:
         'c.show("BS")                         # balance sheet',
         'c.show("executiveCompensation")      # topic payload',
         'c.trace("dividend")                  # source provenance',
-        "c.ratios                             # 47 financial ratios",
+        'c.show("ratios")                     # 47 financial ratios',
         "c.insights                           # 7-area A~F grades",
         "",
         "# US company (EDGAR)",
