@@ -626,6 +626,8 @@ DETAIL_MAP: dict[str, str] = {
 
 # ── normalizeCause / normalizeDetail 매처 helper 는 sceMapperNormalize.py 로 분리 (규칙 3 LoC).
 from dartlab.providers.dart.finance.sceMapperNormalize import (  # noqa: E402, F401
+    CAUSE_LABELS,
+    DETAIL_LABELS,
     _matchAccumulatedOci,
     _matchCapitalSurplus,
     _matchDetailMap,
