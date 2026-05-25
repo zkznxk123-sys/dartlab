@@ -102,7 +102,7 @@ def help(query: str, *, limit: int = 5) -> list[HelpResult]:  # noqa: A001
 
     SeeAlso:
         - dartlab.ask: 자연어 질문 → AI 워크벤치 답변 + ref
-        - dartlab.core.plugins.listPlugins: 외부 plugin 목록 (T5-5)
+        - dartlab.plugins.listPlugins: 외부 plugin 목록 (T5-5)
         - dartlab.skills.readSkill: Skill OS 257 노드 검색
 
     Requires:
