@@ -100,6 +100,16 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "providers/dart/docs/sections/artifacts.py",
         # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
         "quant/risk/bottomUpBeta.py",
+        # skill spec/validate 런타임 — spec 디렉토리 부재 시 빈 결과가 옵셔널 semantic
+        "skills/validateSkills.py",
+        "skills/generateSpec.py",
+        # lineage / credential lifecycle — 사용자 생성 데이터 (~/.dartlab/), 부재 = 첫 실행
+        "core/dataAudit.py",
+        "core/credentialLifecycle.py",
+        # 메모리 dialectic / sessionIndex — 사용자 메모리 디렉토리 (~/.claude/memory/), 부재 = 빈
+        "ai/memory/dialectic/feedbackSignals.py",
+        "ai/memory/dialectic/userProfile.py",
+        "ai/memory/sessionIndex/search.py",
     }
 )
 
