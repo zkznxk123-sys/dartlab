@@ -125,7 +125,7 @@ def checkRuntime(whl: Path) -> int:
                 str(py),
                 "-X",
                 "utf8",
-                str(Path(__file__).resolve().parents[1] / "audit" / "productSmoke.py"),
+                str(Path(__file__).resolve().parents[2] / "tests" / "audit" / "productSmoke.py"),
                 "--suite",
                 "quick",
                 "--data-mode",
