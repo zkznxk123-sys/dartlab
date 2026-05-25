@@ -147,7 +147,7 @@ CLI 경로의 장점:
 - **셸 파이프라인 친화** — `dartlab show ... --json | jq ...` 식으로 합성
 - **MCP 서버 진입점 동일** — `dartlab mcp` 한 명령으로 외부 어시스턴트 도구 노출
 
-> CLI 명령 전체 목록 + 옵션은 `dartlab --help` 또는 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) 참조.
+> CLI 명령 전체 목록 + 옵션은 `dartlab --help` 또는 Skill OS (`src/dartlab/skills/specs/operation/code.md`) 참조.
 
 ## 결과 예시
 

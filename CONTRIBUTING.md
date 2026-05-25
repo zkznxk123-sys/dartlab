@@ -1,6 +1,6 @@
 # Contributing to DartLab
 
-기여에 관심 가져주셔서 감사합니다. 본 문서는 외부 기여자가 *첫 PR* 부터 *세계 최고 수준* 의 변경 단위로 진입하기까지의 강제 룰을 정합니다. 자세한 step-by-step 은 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), 자주 만나는 에러는 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+기여에 관심 가져주셔서 감사합니다. 본 문서는 외부 기여자가 *첫 PR* 부터 *세계 최고 수준* 의 변경 단위로 진입하기까지의 강제 룰을 정합니다. 더 자세한 운영 정책 + API 사양은 `src/dartlab/skills/specs/` Skill OS 가 SSOT.
 
 ---
 
@@ -13,7 +13,7 @@ uv sync
 uv run python -X utf8 tests/run.py gate smoke   # 약 30초
 ```
 
-상세: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) "첫 수정 10분 가이드".
+상세: `src/dartlab/skills/specs/operation/code.md` (Skill OS) + `src/dartlab/skills/specs/operation/testing.md`.
 
 ---
 
@@ -185,15 +185,13 @@ uv run python -X utf8 tests/run.py gate smoke   # 약 30초
 
 ## 관련 문서
 
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — 첫 수정 10분 가이드
-- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — 5 에러 시나리오 해결법
-- [docs/RELEASE.md](docs/RELEASE.md) — 출시 체크리스트
-- [docs/VERSIONING.md](docs/VERSIONING.md) — SemVer + LTS
-- [docs/SLO.md](docs/SLO.md) — Service Level Objectives 4종
-- [docs/INCIDENTS.md](docs/INCIDENTS.md) — 공개 사고 RCA
+- `src/dartlab/skills/specs/` — Skill OS (모든 운영 정책 + API 사양 SSOT)
+  - `operation/code.md` — 코드 품질·9 섹션 docstring·camelCase
+  - `operation/testing.md` — 테스트 마커·로컬 검증
+  - `operation/architecture.md` — 4 계층 단방향 import + 다이어그램
+  - `operation/apiContract.md` — API 추가 절차
 - [DEPRECATION.md](DEPRECATION.md) — API 제거 정책
-- [CHANGELOG.md](CHANGELOG.md) — 변경 이력
-- [TODO.md](TODO.md) — 14 KPI 트래커 + 70 T 작업 단위
+- [CHANGELOG.md](CHANGELOG.md) — 변경 이력 (release 단위)
 - [CLAUDE.md](CLAUDE.md) — L-local 강행규칙 (메모리 안전, UTF-8, master only)
 
 ---

@@ -27,7 +27,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SRC = REPO_ROOT / "src" / "dartlab"
-DOCS = REPO_ROOT / "docs"
+# docs/ 폐기 (2026-05-25) — Skill OS 가 모든 API + 운영 정책 SSOT. INCIDENTS 는 memory/incidents.md.
+SKILLS_SPECS = SRC / "skills" / "specs"
 TESTS = REPO_ROOT / "tests"
 BASELINE_FILE = REPO_ROOT / "tests" / "audit" / "_baselines" / "worldClassScorecard.json"
 
@@ -54,7 +55,8 @@ def _fileCount(root: Path, ext: str = "*.py") -> int:
 
 
 def _docFileExists(name: str) -> bool:
-    return (DOCS / name).exists() or (REPO_ROOT / name).exists()
+    # docs/ 폐기 후 root + Skill OS specs/operation/ 검사 (Skill OS = SSOT)
+    return (REPO_ROOT / name).exists() or (SKILLS_SPECS / "operation" / name.lower()).exists()
 
 
 def _gateExists(gateName: str) -> bool:
@@ -92,10 +94,12 @@ def measureOperations() -> dict[str, Any]:
     infoCalls = _grepCount(r"_log\.info\(|logger\.info\(")
     structuredRatio = (structuredCalls / max(structuredCalls + infoCalls, 1)) * 100
 
-    incidentsFile = DOCS / "INCIDENTS.md"
+    # docs/ 폐기 (2026-05-25) — INCIDENTS SSOT = memory/incidents.md (운영자 영역, gitignored).
+    # 측정 시도 후 미존재 시 incidentsCount=0 (scorecard 점수 하락 = 자기 강화 회로 차단 의도).
+    memoryRoot = Path.home() / ".claude" / "projects" / "C--Users-MSI-OneDrive-Desktop-sideProject-dartlab" / "memory"
+    incidentsFile = memoryRoot / "incidents.md"
     incidentsCount = 0
     if incidentsFile.exists():
-        # ## 2026-05 or ## 2025-XX or ## 2026-04-22 모두 매치 (YYYY 시작 + 공백 또는 dash)
         incidentsCount = len(
             re.findall(r"^## (?:19|20)\d{2}[-\s—]", incidentsFile.read_text(encoding="utf-8"), re.MULTILINE)
         )
@@ -370,7 +374,8 @@ def measureArchitecture() -> dict[str, Any]:
 
 
 def measureDocs() -> dict[str, Any]:
-    diagrams = _fileCount(DOCS / "diagrams", "*.md") + _fileCount(DOCS / "diagrams", "*.svg")
+    # docs/diagrams 폐기 (2026-05-25) — Skill OS specs/operation/architecture.md 가 SSOT.
+    diagrams = 1 if (SKILLS_SPECS / "operation" / "architecture.md").exists() else 0
     subNamespaceReadme = sum(1 for d in SRC.iterdir() if d.is_dir() and (d / "README.md").exists())
     contributingLines = 0
     contributingFile = REPO_ROOT / "CONTRIBUTING.md"
