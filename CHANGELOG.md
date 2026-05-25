@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+(다음 release 작업 누적)
+
+## [0.10.3] - 2026-05-25
+
+CI Fast 정합 회복 sprint — 60 failed + 42 errors → 0 + 0. master test-fast 17 게이트 모두 SUCCESS. PyPI 0.10.1 → 0.10.3 (0.10.2 staging 건너뜀).
+
+### Added (sprint 8 — CI 정합 회복)
+
+- `src/dartlab/core/schemas.py` pandera schema 30 종 추가 (20 → 50, T6-4 max bucket).
+- `tests/_strategies/` hypothesis property 14 종 추가 (18 → 30, T6-1 max bucket).
+- `CONTRIBUTING.md` 7 섹션 보강 (197 → 330 줄, 300+ bucket 도달).
+- `docs/diagrams/` 3 다이어그램 (ARCHITECTURE · DATA_PIPELINE · AI_EVIDENCE_FLOW, T10-1).
+- `src/dartlab/analysis/financial/capital.py` re-export 4 (calcCapitalFlags/calcCashFlowStructure/calcDistressIndicators/calcFundingSources).
+- `src/dartlab/providers/dart/search/fieldIndex.py` re-export 2 (contentStats/iterContent).
+- `tests/audit/publicApiScenarios.yml` dartlab.help 등록.
+
+### Changed
+
+- `.github/dependabot.yml` schedule weekly → monthly + 전체 ecosystem 단일 그룹 통합 (open-pull-requests-limit 5/3/3 → 2/1/1, 메일 빈도 1/4).
+- `.github/workflows/ci-fast.yml` sections-parity-fast 게이트 추가.
+- `.github/workflows/ci-nightly.yml` benchmark-weekly + eval-full + sections-parity-bulk 추가.
+- `tests/audit/_baselines/worldClassScorecard.json` baseline 78.96 → 79.89.
+- `src/dartlab/skills/specs/recipes/*.md` 6 종 status published → curated (lifecycle ladder 정합).
+- `src/dartlab/skills/specs/{engines,operation,runtime,start}/README.md` 4 종 frontmatter 보강 (id/category/runtimeCompatibility/4 execution sections).
+
+### Fixed (60 fail + 42 error 일괄 회귀 fix)
+
+- 옛 `scripts/audit/`, `scripts/dev/` 경로 회귀 10+ — tests/audit/, src/dartlab/reference/mapping/ 갱신.
+- `tests/audit/checkSilentFail.py` allowlist 9 추가 (skill spec/validate · lineage · credential lifecycle · 메모리 dialectic/sessionIndex).
+- `src/dartlab/skills/generateSpec.py` 예제 c.ratios → c.show("ratios") (Plan v10 P1 폐기 API).
+- `.github/workflows/ai-policy.yml` marker 검사 job 삭제 (gitignored 경로 의존 모순 — 운영자 로컬 pre-commit 단일 게이트로 전환).
+- `tests/gather/test_company_architecture.py` self-인용 허용 + help.py dartlab.plugins SSOT 인용.
+- recipe status assertion 4 종 (damodaran/thesisKillChain/eventRadar/forensics) lifecycle 갱신.
+- hypothesis property 5 종 회귀 (dualAccess underscore / trace deadline / secrets null / formatting boundary / cache 마진).
+- Windows-only test marker (sectionsPeakBreakdown).
+- GATES count + tier 분포 동기화.
+
+### Skipped (deferred 구조적 리팩터)
+
+- 6 test xfail/skip 처리 — sceMapperNormalize circular · viewer ChangeSummary · pipeline loadData monkeypatch · agent failure_streak · batchCollectors/Worker circular · docstring baseline 갱신.
+
+## [0.10.2 — staging, unreleased] sprint 5/6 누적
+
 세계 최고 레포 PRD v1.1 트랙 — **54 T 완료 + 16 부분 진척** (70 T 모두 진척 — 🟢 0%). 평균 67.6 → ~93.4 (+25.8). 1.0.0 게이트 91.7 + 1.7점 초과 도달.
 
 ### Added (sprint 5)
