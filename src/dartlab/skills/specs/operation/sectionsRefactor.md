@@ -298,7 +298,7 @@ silent → 측정 가능 상태 전환:
 
 무손실 인프라 (§9) 가 박힌 위에서 정밀도 향상을 측정 가능. 본 트랙은 *의미 변경* 이라 parity baseline regen 필요:
 
-1. **heading stack 부모 보존** ([§4 부채 5](#)) — textStructure.py 의 stack pop 룰. 같은 level heading 형제 시 부모 보존. notes topic textPath 깊이 1 → 2~3 회복. 측정: invariant 1 (충돌 0 유지) + memory peak 유지 + parity baseline regen.
+1. **heading stack 부모 보존** (§4 부채 5) — textStructure.py 의 stack pop 룰. 같은 level heading 형제 시 부모 보존. notes topic textPath 깊이 1 → 2~3 회복. 측정: invariant 1 (충돌 0 유지) + memory peak 유지 + parity baseline regen.
 2. **mapper.py 미매핑 패턴 측정·보강** — `tests/audit/sectionsMappingRate.py` 신설 (sample 200 종목 × `measureMappingRate`). 매핑률 < 98% 시 fail. unmapped top-10 stderr.
 3. **chapter dedup 8자 임계 골든** — 005930 또는 특정 종목의 chapter row + sub-section row 골든 박제. 임계 조정 시 회귀 가드.
 

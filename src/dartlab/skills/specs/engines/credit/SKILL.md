@@ -180,7 +180,7 @@ repayment = c.credit("채무상환")
 | 등급 transition / migration matrix | `credit.migration.buildTransitionMatrix()` (별도 모듈) | dcrBadge 만으로 X |
 | 외부 신평 비교 / 표본 79 개사 검증 | 본 skill 의 `detail=True` 호출 | dcrBadge 만으로 X |
 
-**회귀 가드** — 7 축 점수가 이미 `dcrBadge.axes` 에 있는데 `EngineCall("credit")` 재호출하면 axis 가이드 metadata (axis · label · description · group) 만 반환되어 "데이터 부족" 환각 (2026-05-17 OAuth P5 probe 재현). 약점 분해는 본문의 [기본 실행 순서](#기본-실행-순서) 가 정공.
+**회귀 가드** — 7 축 점수가 이미 `dcrBadge.axes` 에 있는데 `EngineCall("credit")` 재호출하면 axis 가이드 metadata (axis · label · description · group) 만 반환되어 "데이터 부족" 환각 (2026-05-17 OAuth P5 probe 재현). 약점 분해는 본문 § "기본 실행 순서" 가 정공.
 
 ### 강행 호출 룰 (agent 답변 품질 회귀 차단)
 
