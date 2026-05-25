@@ -1,3 +1,27 @@
+---
+id: operation.README
+title: Operation 카테고리 hub
+purpose: dartlab skills/specs/operation/ 카테고리 진입점.
+kind: curated
+category: operation
+status: curated
+requiredEvidence: []
+expectedOutputs: []
+runtimeCompatibility:
+  pyodide:
+    status: supported
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+whenToUse:
+  - operation 카테고리 시작점
+---
+
 # Skill OS — `operation/` 카테고리 hub
 
 > 운영 설계 SSOT. 사상 (philosophy) 부터 코드 품질 (code) · API 계약 (apiContract) · 테스트 (testing) 까지.

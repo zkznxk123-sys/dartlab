@@ -1,3 +1,27 @@
+---
+id: runtime.README
+title: Runtime 카테고리 hub
+purpose: dartlab skills/specs/runtime/ 카테고리 진입점.
+kind: curated
+category: runtime
+status: curated
+requiredEvidence: []
+expectedOutputs: []
+runtimeCompatibility:
+  pyodide:
+    status: supported
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+whenToUse:
+  - runtime 카테고리 시작점
+---
+
 # Skill OS — `runtime/` 카테고리 hub
 
 > 실행 환경 spec. MCP server / pyodide 브라우저 / VSCode 확장 / Workbench 흐름 등 *어디서 어떻게* 돌릴까.

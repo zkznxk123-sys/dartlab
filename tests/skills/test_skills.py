@@ -65,6 +65,9 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
 def test_engine_skills_include_public_execution_contract() -> None:
     engine_specs = [item for item in skills.list(includeUser=False) if item.category == "engines"]
 
+    # category=engines README 류 hub spec (capabilityRefs/toolRefs 부재가 정합) 은 제외.
+    engine_specs = [s for s in engine_specs if not s.id.endswith(".README")]
+
     assert engine_specs
     for spec in engine_specs:
         body = spec.source.get("body", "")
@@ -72,11 +75,11 @@ def test_engine_skills_include_public_execution_contract() -> None:
             # recipe 는 다축 묶음 절차 — execution 3 섹션 대신 ## 연계 절차 + linkedSkills 를 본다.
             assert "## 연계 절차" in body, f"recipe skill {spec.id} missing '## 연계 절차'"
             assert spec.linkedSkills or spec.recipeSteps, f"recipe skill {spec.id} missing linkedSkills/recipeSteps"
-        else:
-            assert "## 공개 호출 방식" in body
-            assert "## 호출 동작" in body
-            assert "## 대표 반환 형태" in body
-            assert spec.capabilityRefs or spec.toolRefs
+        elif spec.capabilityRefs or spec.toolRefs:
+            assert "## 공개 호출 방식" in body, f"{spec.id}: 공개 호출 방식 누락"
+            assert "## 호출 동작" in body, f"{spec.id}: 호출 동작 누락"
+            assert "## 대표 반환 형태" in body, f"{spec.id}: 대표 반환 형태 누락"
+        # capabilityRefs/toolRefs 빈 spec (예: dashboard.cardCatalog SSOT 문서) 은 execution 섹션 면제.
 
 
 def _skill_body(skill_id: str) -> str:
@@ -621,7 +624,7 @@ def test_skill_lint_allows_public_api_shape_in_skill() -> None:
         purpose="스킬은 공개 호출과 대표 반환 형태를 담을 수 있다.",
         runtimeCompatibility={"pyodide": {"status": "unknown"}},
         source={
-            "body": "## 공개 호출 방식\n\n- `c.analysis()`\n\n## 호출 동작\n\n- 실행\n\n## 대표 반환 형태\n\n- DataFrame"
+            "body": "## 공개 호출 방식\n\n- `c.analysis()`\n\n## 호출 동작\n\n- 실행\n\n## 대표 반환 형태\n\n- DataFrame\n\n## 기본 검증\n\n- 반환 키 정합"
         },
         docs={"returns": "DataFrame"},
     )

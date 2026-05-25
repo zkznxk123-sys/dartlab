@@ -1,3 +1,27 @@
+---
+id: start.README
+title: Start 카테고리 hub
+purpose: dartlab skills/specs/start/ 카테고리 진입점.
+kind: curated
+category: start
+status: curated
+requiredEvidence: []
+expectedOutputs: []
+runtimeCompatibility:
+  pyodide:
+    status: supported
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+whenToUse:
+  - start 카테고리 시작점
+---
+
 # Skill OS — `start/` 카테고리 hub
 
 > **외부 LLM / 신규 사용자 첫 진입점**. 다른 카테고리 (operation / runtime / engines) 가기 전에 본 hub 부터.

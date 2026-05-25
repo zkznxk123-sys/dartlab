@@ -1,3 +1,27 @@
+---
+id: engines.README
+title: Engines 카테고리 hub
+purpose: dartlab skills/specs/engines/ 카테고리 진입점.
+kind: curated
+category: engines
+status: curated
+requiredEvidence: []
+expectedOutputs: []
+runtimeCompatibility:
+  pyodide:
+    status: supported
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+whenToUse:
+  - engines 카테고리 시작점
+---
+
 # Skill OS — `engines/` 카테고리 hub
 
 > dartlab 의 15 분석 엔진 spec. 각 엔진 폴더는 `SKILL.md` (공개 호출 / 호출 동작 / 대표 반환 3 강제 섹션) 보유.
@@ -67,3 +91,19 @@ uv run python -X utf8 src/dartlab/skills/addEngine.py {name}
 - [operation/architecture.md](../operation/architecture.md) — 4 계층 단방향 import 룰
 - [operation/code.md](../operation/code.md) — engine 폴더 안 코드 룰
 - [SCHEMA.md](../SCHEMA.md) — SKILL.md frontmatter / capabilityRefs 명세
+
+## 공개 호출 방식
+
+본 카테고리 hub 는 인덱스 — 각 엔진 spec 의 진입점 모음.
+
+## 호출 동작
+
+특정 엔진 spec 으로 라우팅.
+
+## 대표 반환 형태
+
+각 엔진 spec 의 출력.
+
+## 기본 검증
+
+엔진 spec 자체의 검증 룰을 따른다.
