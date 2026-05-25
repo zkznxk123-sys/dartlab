@@ -36,33 +36,34 @@ if sys.platform == "win32":
     import ctypes
     from ctypes import byref, sizeof, wintypes
 
+    class _PMC(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("pageFaultCount", wintypes.DWORD),
+            ("peakWorkingSetSize", ctypes.c_size_t),
+            ("workingSetSize", ctypes.c_size_t),
+            ("quotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("quotaPagedPoolUsage", ctypes.c_size_t),
+            ("quotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("quotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("pagefileUsage", ctypes.c_size_t),
+            ("peakPagefileUsage", ctypes.c_size_t),
+        ]
 
-class _PMC(ctypes.Structure):
-    _fields_ = [
-        ("cb", wintypes.DWORD),
-        ("pageFaultCount", wintypes.DWORD),
-        ("peakWorkingSetSize", ctypes.c_size_t),
-        ("workingSetSize", ctypes.c_size_t),
-        ("quotaPeakPagedPoolUsage", ctypes.c_size_t),
-        ("quotaPagedPoolUsage", ctypes.c_size_t),
-        ("quotaPeakNonPagedPoolUsage", ctypes.c_size_t),
-        ("quotaNonPagedPoolUsage", ctypes.c_size_t),
-        ("pagefileUsage", ctypes.c_size_t),
-        ("peakPagefileUsage", ctypes.c_size_t),
-    ]
+    _psapi = ctypes.WinDLL("psapi", use_last_error=True)
+    _psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(_PMC), wintypes.DWORD]
+    _psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+    _kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 
+    def _peakMb() -> float:
+        pmc = _PMC()
+        pmc.cb = sizeof(_PMC)
+        _psapi.GetProcessMemoryInfo(_kernel32.GetCurrentProcess(), byref(pmc), pmc.cb)
+        return pmc.peakWorkingSetSize / 1024 / 1024
+else:
 
-_psapi = ctypes.WinDLL("psapi", use_last_error=True)
-_psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(_PMC), wintypes.DWORD]
-_psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
-_kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-
-
-def _peakMb() -> float:
-    pmc = _PMC()
-    pmc.cb = sizeof(_PMC)
-    _psapi.GetProcessMemoryInfo(_kernel32.GetCurrentProcess(), byref(pmc), pmc.cb)
-    return pmc.peakWorkingSetSize / 1024 / 1024
+    def _peakMb() -> float:  # type: ignore[misc]
+        raise RuntimeError("Windows 전용 — skipif 가 collection 단계 차단")
 
 
 def _hasDocs(stockCode: str) -> bool:
