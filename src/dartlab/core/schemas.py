@@ -823,19 +823,6 @@ class DriftAlertSchema(pa.DataFrameModel):
         coerce = False
 
 
-class ScoreCardSchema(pa.DataFrameModel):
-    """worldClassScorecard 결과 표 계약."""
-
-    perspective: Series[str] = pa.Field(nullable=False)
-    score: Series[float] = pa.Field(nullable=False, ge=0, le=100)
-
-    class Config:
-        """strict=False — 추가 컬럼 허용."""
-
-        strict = False
-        coerce = False
-
-
 __all__ = [
     "DocsSchema",
     "FinanceSchema",
@@ -888,5 +875,4 @@ __all__ = [
     "NamingViolationSchema",
     "ApiContractSchema",
     "DriftAlertSchema",
-    "ScoreCardSchema",
 ]

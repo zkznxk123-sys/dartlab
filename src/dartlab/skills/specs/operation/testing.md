@@ -201,5 +201,5 @@ python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dar
 
 | 스크립트 | 역할 |
 |---|---|
-| `src/dartlab/skills/measureProgress.py` | baseline 부채 · docstring backlog · pytest marker 분포 통합 시계열. [memory/baseline_quota.md](file://C:/Users/MSI/.claude/projects/c--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/baseline_quota.md) 의 분기 quota 측정 기준 |
+| `src/dartlab/skills/measureProgress.py` | baseline 부채 · docstring backlog · pytest marker 분포 통합 시계열 |
 

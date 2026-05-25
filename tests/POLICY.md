@@ -290,7 +290,7 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 | 룰 | PR diff 에서 `src/dartlab/**/*.py` 의 새 공개 함수 (def, non-private) 추가 → `tests/**/test_*.py` 에 해당 함수명 등장해야 함 (substring 휴리스틱) |
 | 예외 | `_private`, abstract method (ellipsis 본문), `@abstractmethod`, `@overload`, `__init__.py`, `cli/main.py` 진입점, `server/api/`, `providers/*/openapi/`, `viz/charts/`, `mcp/` |
 
-**Baseline 정책**: 본 PR 시점 1097 누락은 부채 ledger 로 동결 (`_baselines/testCoverage.json`). 향후 PR 은 *신규 누락만 fail 대상*. 부채 quota 는 [memory/baseline_quota.md](C:/Users/MSI/.claude/projects/C--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/baseline_quota.md) 분기 정책 따름.
+**Baseline 정책**: 본 PR 시점 1097 누락은 부채 ledger 로 동결 (`_baselines/testCoverage.json`). 향후 PR 은 *신규 누락만 fail 대상*.
 
 **부드러운 도입 단계**:
 1. **Phase 1 (현재, 2026-Q2)** — `continue-on-error: true` warning-only. PR diff 보고만, 머지 차단 X.
@@ -446,7 +446,7 @@ baseline 동결은 *부채 ledger* 다. 부채 자체는 잡지 못한 회귀이
 | import cycle | warn-only (P3 까지) | `cycleScan.py` |
 | docstring 4 section | scope 별 baseline | `_baselines/{scope}Docstring4Section.json` |
 
-**감축 quota** (`memory/baseline_quota.md` 참조):
+**감축 quota**:
 
 | 분기 | T6 quota | docstring quota |
 |---|---|---|

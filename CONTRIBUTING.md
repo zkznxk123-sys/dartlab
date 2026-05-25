@@ -302,27 +302,3 @@ def fetchSomeExternal(query: str) -> dict:
 
 prebuild 단계 (offline only) 와 sync 단계 (online) 의 책임 경계는 `CLAUDE.md` 의 "파이프라인 책임 경계" 섹션 참고.
 
----
-
-## 1.0.0 게이트 (2027-02-28 목표)
-
-다음 8 정량 + 5 정성 게이트 모두 통과 시 1.0.0 출시.
-
-**정량 8**:
-1. 14 KPI 평균 ≥ 91, 모든 관점 ≥ 90
-2. mutation score 30 모듈 ≥ 80%
-3. 테스트 커버리지 ≥ 70%
-4. SLO 4종 30일 95% 충족
-5. INCIDENTS.md 6개월 0 critical
-6. import-linter 0 violation (baseline 5+140 → 0)
-7. docstring 9 섹션 통과율 ≥ 80%
-8. 외부 기여자 첫 PR 성공률 ≥ 80%
-
-**정성 5**:
-1. 한국 OSS 카테고리 GitHub stars ≥ 500
-2. PyPI 월간 다운로드 ≥ 5,000
-3. 외부 기여자 (≠ 메인테이너) ≥ 5 명 적극 commit
-4. 공식 문서 영문 번역 완료
-5. 1.0.0 출시 PR 본문에 명시된 13 결심 사항 모두 0 회귀
-
-진척은 `tests/audit/worldClassScorecard.py` 매 분기 측정. 결과는 `memory/project_plan_world_class.md` 시계열에 박힘.
