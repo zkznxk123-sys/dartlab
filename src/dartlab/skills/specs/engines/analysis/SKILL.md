@@ -279,7 +279,7 @@ c.analysis("financial", "수익성")
 
 ## axis-specific 회피 (회귀 가드)
 
-각 axis 의 sub-spec 본문은 base SKILL.md 의 axis 표에 흡수됨 (2026-05-18 Phase C-3 정리). 22 axis 모두 inline (standalone 없음 — algorithm 구체 본문은 capability `Company.analysis` payload + `engines.analysis.{valuation,profitability}` 의 14 keys / OPM 양식 본문이 [별도 참조 섹션](#valuation-축--14-top-level-keys-기존-engines-analysis-valuation) 으로 보존).
+각 axis 의 sub-spec 본문은 base SKILL.md 의 axis 표에 흡수됨 (2026-05-18 Phase C-3 정리). 22 axis 모두 inline (standalone 없음 — algorithm 구체 본문은 capability `Company.analysis` payload + `engines.analysis.{valuation,profitability}` 의 14 keys / OPM 양식 본문이 본문 § "valuation 축 — 14 top-level keys" 섹션으로 보존).
 
 | axis | axis-specific 회피 |
 | --- | --- |
@@ -303,7 +303,7 @@ c.analysis("financial", "수익성")
 | revenueStructure | 사업부별 / 지역별 / 제품별 매출 분리 명시; 외화 매출 비중 명시 (환율 변동 영향 별도) |
 | scorecard | 5 영역 (수익성·안정성·성장성·효율성·현금흐름) 가중치 명시; 등급 (A-F) 임계값을 산업 평균 미참조 적용 X |
 | stability | 금융사 (은행·보험) 에 일반 부채비율 적용 X (BIS · LCR 별도); 부채비율 단일 metric 으로 위험 단정 X (ICR + OCF/부채 교차); 우발부채 (off-balance) 명시 |
-| valuation | DCF 가정 ref 없이 적정가 단정 X; 산업별 멀티플 차이 명시 (제조 PER vs 금융 PBR vs 바이오 PSR); 단일 멀티플 (PER) 만으로 결론 X (DCF + 멀티플 + RIM 교차). 14 keys 양식 [별도 섹션](#valuation-축--14-top-level-keys) 참조 |
+| valuation | DCF 가정 ref 없이 적정가 단정 X; 산업별 멀티플 차이 명시 (제조 PER vs 금융 PBR vs 바이오 PSR); 단일 멀티플 (PER) 만으로 결론 X (DCF + 멀티플 + RIM 교차). 14 keys 양식은 본문 § "valuation 축 — 14 top-level keys" 참조 |
 | valuationBand | 5y / 10y range 명시 없이 *밴드 상단/하단* 답변 X; 산업 평균 멀티플과 historical 밴드 동일시 X |
 
 **공통 forbidden** (모든 axis): 숫자 없는 수익성 판단 X · 결손값을 0 으로 대체 X · 단일 종목 분석을 scan/screen 으로 바꾸기 X.
