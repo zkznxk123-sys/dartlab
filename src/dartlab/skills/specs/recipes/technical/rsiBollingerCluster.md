@@ -118,7 +118,7 @@ emit_result(
 
 ## 호출 동작
 
-RSI(14) + 볼린저 밴드(20, 2σ) 동시 조건 충족 row 만 cluster. oversoldCluster = RSI<30 + close<lower, overboughtCluster = RSI>70 + close>upper.
+RSI(14) + 볼린저 밴드(20, 2σ) 동시 조건 충족 row 만 cluster. `oversoldCluster = RSI<30 + close<lower`, `overboughtCluster = RSI>70 + close>upper`.
 
 ## 대표 반환 형태
 
