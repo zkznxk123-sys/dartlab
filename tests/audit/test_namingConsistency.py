@@ -11,7 +11,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_SCRIPT = _REPO / "scripts" / "audit" / "namingConsistency.py"
+_SCRIPT = _REPO / "tests" / "audit" / "namingConsistency.py"
 
 
 def _loadModule():
