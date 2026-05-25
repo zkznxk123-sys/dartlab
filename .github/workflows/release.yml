@@ -39,7 +39,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Run full tier gates
-        run: python -X utf8 tests/run.py full
+        run: python -X utf8 tests/run.py tier full
       - name: Verify CHANGELOG has version section
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
