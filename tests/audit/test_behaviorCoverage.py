@@ -19,7 +19,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_AUDIT_SCRIPT = _REPO / "scripts" / "audit" / "behaviorCoverage.py"
+_AUDIT_SCRIPT = _REPO / "tests" / "audit" / "behaviorCoverage.py"
 
 
 @pytest.fixture(scope="module")
@@ -103,7 +103,7 @@ def test_match_any_snake_case(audit_module) -> None:
 
 def test_baseline_schema(audit_module) -> None:
     """baseline JSON 형식 안정성 — P-PR4/P-PR5 sweep 가 의존."""
-    baselinePath = _REPO / "scripts" / "audit" / "_baselines" / "behaviorCoverage.json"
+    baselinePath = _REPO / "tests" / "audit" / "_baselines" / "behaviorCoverage.json"
     if not baselinePath.exists():
         pytest.skip("baseline 미생성 (--update-baseline 한 번 실행 필요)")
     data = json.loads(baselinePath.read_text(encoding="utf-8"))

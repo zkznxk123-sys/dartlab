@@ -17,7 +17,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_AUDIT_SCRIPT = _REPO / "scripts" / "audit" / "providerSymmetry.py"
+_AUDIT_SCRIPT = _REPO / "tests" / "audit" / "providerSymmetry.py"
 
 
 @pytest.fixture(scope="module")
@@ -93,7 +93,7 @@ class Helper:
 
 def test_baseline_schema(audit_module) -> None:
     """baseline JSON 형식 안정성 — P-PR6/7/8 가 의존."""
-    baselinePath = _REPO / "scripts" / "audit" / "_baselines" / "providerSymmetry.json"
+    baselinePath = _REPO / "tests" / "audit" / "_baselines" / "providerSymmetry.json"
     if not baselinePath.exists():
         pytest.skip("baseline 미생성")
     data = json.loads(baselinePath.read_text(encoding="utf-8"))
@@ -105,7 +105,7 @@ def test_baseline_schema(audit_module) -> None:
 def test_scan_real_dart_edgar(audit_module) -> None:
     """실 dart/edgar company.py 에 대해 _scan() 호출 — baseline 안 통과해야."""
     missing, shallow = audit_module._scan()
-    baselinePath = _REPO / "scripts" / "audit" / "_baselines" / "providerSymmetry.json"
+    baselinePath = _REPO / "tests" / "audit" / "_baselines" / "providerSymmetry.json"
     if not baselinePath.exists():
         pytest.skip("baseline 미생성")
     baseline = json.loads(baselinePath.read_text(encoding="utf-8"))

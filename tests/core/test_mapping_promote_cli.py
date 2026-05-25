@@ -17,7 +17,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_SCRIPT_PATH = _REPO_ROOT / "scripts" / "dev" / "mappingPromote.py"
+_SCRIPT_PATH = _REPO_ROOT / "src" / "dartlab" / "reference" / "mapping" / "mappingPromote.py"
 
 
 @pytest.fixture
