@@ -16,7 +16,7 @@ _FIXTURE_DIR = _FIXTURE_FILE.parent
 
 
 def _loadScript(name: str):
-    script = _REPO / "scripts" / "audit" / name
+    script = _REPO / "tests" / "audit" / name
     spec = importlib.util.spec_from_file_location(name.removesuffix(".py"), script)
     assert spec is not None
     assert spec.loader is not None
