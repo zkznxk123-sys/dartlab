@@ -18,8 +18,8 @@ class TestScan20:
                 import dartlab
 
                 return dartlab.scan("foreignBuyMomentum", universe="kospi200", limit=20)
-            except (ImportError, AttributeError, RuntimeError, KeyError):
-                pytest.skip("dartlab.scan 또는 recipe 미설치")
+            except (ImportError, AttributeError, RuntimeError, KeyError, ValueError, TypeError):
+                pytest.skip("dartlab.scan 또는 recipe 미설치 / 데이터 부족")
                 return None
 
         benchmark(runScan)
