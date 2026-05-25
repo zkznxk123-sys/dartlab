@@ -72,7 +72,7 @@ def testThesisKillChainRecipeSpecsLoadAsObservedRecipes() -> None:
         spec = specs[skill_id]
         assert spec.kind == "recipe"
         assert spec.category == "recipes"
-        assert spec.status == "observed"
+        assert spec.status == "tested"
         assert spec.graphTier == "L1.5"
         assert spec.requiredEvidence
         assert spec.expectedOutputs
