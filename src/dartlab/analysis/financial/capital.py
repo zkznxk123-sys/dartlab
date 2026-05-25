@@ -6,6 +6,14 @@
 
 from __future__ import annotations
 
+from dartlab.analysis.financial._capitalCashflow import (
+    calcCashFlowStructure,
+    calcDistressIndicators,
+)
+from dartlab.analysis.financial._capitalFunding import (
+    calcCapitalFlags,
+    calcFundingSources,
+)
 from dartlab.analysis.financial._capitalLiquidity import (
     _calcFinDebtPct,
     _calcRetainedPct,
@@ -41,7 +49,11 @@ __all__ = [
     "_getRatios",
     "_latestAnnualVal",
     "_quarterlyCols",
+    "calcCapitalFlags",
     "calcCapitalOverview",
+    "calcCashFlowStructure",
+    "calcDistressIndicators",
+    "calcFundingSources",
     "calcCapitalTimeline",
     "calcDebtTimeline",
     "calcInterestBurden",

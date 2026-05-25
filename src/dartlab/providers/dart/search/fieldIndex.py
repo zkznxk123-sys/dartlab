@@ -468,6 +468,8 @@ def searchContent(
 # ── rebuildMain / rebuildDelta / push/pull 등 빌드 helper 는 fieldIndexRebuild.py 로 분리 (룰 3 LoC).
 from dartlab.providers.dart.search.fieldIndexRebuild import (  # noqa: E402, F401
     _clearDelta,
+    contentStats,
+    iterContent,
     pullContentIndex,
     pushContentIndex,
     rebuildDelta,
