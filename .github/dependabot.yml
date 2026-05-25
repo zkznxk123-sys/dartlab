@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "09:00"
       timezone: "Asia/Seoul"
@@ -13,9 +13,9 @@ updates:
     commit-message:
       prefix: "보안"
       include: "scope"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     groups:
-      core-runtime:
+      python-runtime:
         patterns:
           - "polars*"
           - "pyarrow"
@@ -23,9 +23,12 @@ updates:
           - "fastapi"
           - "uvicorn*"
           - "starlette"
+          - "sse-starlette"
           - "httpx"
+          - "huggingface-hub"
           - "pydantic*"
-      test-tooling:
+          - "plotly"
+      python-test-tooling:
         patterns:
           - "pytest*"
           - "hypothesis"
@@ -33,7 +36,7 @@ updates:
           - "pandera*"
           - "mutmut"
           - "ruff"
-      ai-tooling:
+      python-ai-tooling:
         patterns:
           - "openai"
           - "anthropic"
@@ -42,7 +45,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "09:00"
       timezone: "Asia/Seoul"
@@ -52,12 +55,16 @@ updates:
     commit-message:
       prefix: "보안"
       include: "scope"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 1
+    groups:
+      gh-actions-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: "npm"
     directory: "/landing"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "09:00"
       timezone: "Asia/Seoul"
@@ -67,4 +74,8 @@ updates:
     commit-message:
       prefix: "보안"
       include: "scope"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 1
+    groups:
+      landing-all:
+        patterns:
+          - "*"
