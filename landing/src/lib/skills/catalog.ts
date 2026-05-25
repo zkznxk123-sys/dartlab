@@ -136,6 +136,14 @@ export const skills: SkillDoc[] = ((skillIndex as { skills?: SkillDoc[] }).skill
 
 const skillById = new Map<string, SkillDoc>(skills.map((skill) => [skill.id, skill]));
 
+// operation/capability 도 prerender 대상 (Stability.svelte 등이 직접 링크).
+// UI 검색·메뉴는 위 skills (operation 제외) 사용, 페이지 라우트만 전체 catalog.
+const allSkillById = new Map<string, SkillDoc>(
+	((skillIndex as { skills?: SkillDoc[] }).skills ?? [])
+		.map(normalizeSkillCategory)
+		.map((skill) => [skill.id, skill])
+);
+
 export function normalizeSkillCategory(skill: SkillDoc): SkillDoc {
 	if (!skill.id.startsWith('recipes.')) return skill;
 	return {
@@ -152,7 +160,7 @@ export function getSkillSubGroup(skill: Pick<SkillDoc, 'id' | 'category'>): stri
 }
 
 export function getSkillMeta(id: string): SkillDoc | undefined {
-	return skillById.get(id);
+	return allSkillById.get(id);
 }
 
 export function getSkillComponent(id: string): ConstructorOfATypedSvelteComponent | undefined {
@@ -168,7 +176,7 @@ export function getSkillSourcePath(id: string): string | undefined {
 }
 
 export function allSkillIds(): string[] {
-	return skills.filter((skill) => componentsById.has(skill.id)).map((skill) => skill.id);
+	return Array.from(allSkillById.keys()).filter((id) => componentsById.has(id));
 }
 
 export function findRelatedSkills(id: string, limit = 6): SkillDoc[] {
