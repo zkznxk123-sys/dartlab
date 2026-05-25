@@ -52,6 +52,8 @@ jobs:
             timeout: 5
             artifact_name: test-coverage-gate
             artifact_path: coverage-gate-report.json
+          - gate: sections-parity-fast
+            timeout: 10
     steps:
       - uses: actions/checkout@v5
         with:
