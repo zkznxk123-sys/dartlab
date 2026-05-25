@@ -193,5 +193,5 @@ DART 공시는 법적 정형 문서다. 공시 유형이 257 개로 고정되고
 
 - [operation.stability](/skills/operation.stability) — API tier 와 deprecation 정책.
 - [operation.testing](/skills/operation.testing) — 테스트 규칙.
-- [engines.credit.creditRisk](/skills/engines.credit.creditRisk) — 신용 분석 엔진.
-- [engines.analysis.revenueForecast](/skills/engines.analysis.revenueForecast) — 매출 전망 엔진.
+- [engines.credit](/skills/engines.credit) — 신용 분석 엔진 (creditRisk 응용 포함).
+- [engines.analysis](/skills/engines.analysis) — 분석 엔진 (revenueForecast axis 포함).

@@ -261,7 +261,7 @@ dartlab.credit("005930", "채무상환")
 
 ## 기본 검증
 
-스킬은 공개 실행 문서다. `dartlab.credit()` / `Company.credit()` 의 호출 시그니처·반환 키·7 축 가중치가 바뀌면 본 파일과 [engines.credit.creditRisk](/skills/engines.credit.creditRisk) 응용 skill 을 같은 변경에서 갱신한다.
+스킬은 공개 실행 문서다. `dartlab.credit()` / `Company.credit()` 의 호출 시그니처·반환 키·7 축 가중치가 바뀌면 본 파일과 **engines.credit.creditRisk** 응용 skill (본문 § "(흡수) engines.credit.creditRisk 본문") 을 같은 변경에서 갱신한다.
 
 
 ---

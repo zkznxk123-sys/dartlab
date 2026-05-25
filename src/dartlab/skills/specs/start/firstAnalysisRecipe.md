@@ -135,7 +135,7 @@ print(result)
 - **시장 횡단** — `dartlab.scan("ratio", "roe")` 또는 [engines.scan](/skills/engines.scan) 에서 19 축 중 선택.
 - **매크로 환경** — [engines.macro](/skills/engines.macro) 군 12 축으로 거시 위치 잡기.
 - **스토리 보고서** — `c.story()` 로 구조화 보고서 + 보강은 [engines.story](/skills/engines.story).
-- **가치평가 깊이** — [engines.quant.damodaranValuation](/skills/engines.quant.damodaranValuation) 으로 DCF.
+- **가치평가 깊이** — [engines.quant](/skills/engines.quant) 의 damodaranValuation axis 로 DCF.
 - **AI workflow** — [runtime.workbenchEvidenceFlow](/skills/runtime.workbenchEvidenceFlow) 로 자연어 분석.
 
 ## 다음 단계

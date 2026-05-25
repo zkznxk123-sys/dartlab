@@ -9,7 +9,7 @@
 		'getting-started/installation': '/skills/start.installUv',
 		'getting-started/quickstart': '/skills/start.quickStart',
 		'getting-started/cli-maintenance': '/skills/operation.cliMaintenance',
-		'getting-started/sections': '/skills/engines.company.sections',
+		'getting-started/sections': '/skills/engines.company',
 		tutorials: '/skills/runtime.notebooks',
 		about: '/about',
 		stability: '/skills/operation.stability',

@@ -1112,8 +1112,8 @@ EDGAR 도 같은 구조. topic 이름만 SEC form 규약 (`10-K::item1Business`,
 ## 다음 단계
 
 - [engines.company](/skills/engines.company) — Company facade 전체 메서드 카탈로그.
-- [engines.company.disclosureEvent](/skills/engines.company.disclosureEvent) — 공시 이벤트 추적.
-- [engines.company.usEdgarReview](/skills/engines.company.usEdgarReview) — 미국 종목 EDGAR 리뷰.
+- **engines.company.disclosureEvent** — 공시 이벤트 추적 (본문 § "(흡수) engines.company.disclosureEvent 본문" 참고).
+- **engines.company.usEdgarReview** — 미국 종목 EDGAR 리뷰 (본문 § "(흡수) engines.company.usEdgarReview 본문" 참고).
 - [start.quickStart](/skills/start.quickStart) — 8 단계 walkthrough.
 
 ## (흡수) engines.company.usEdgarReview 본문
