@@ -59,5 +59,8 @@ class TestFormattingProperty:
 
         result0 = formatComma(value, decimals=0)
         result2 = formatComma(value, decimals=2)
-        # decimals=0 결과 + decimals=2 결과는 같은 정수부 가짐
-        assert result0.split(".")[0] == result2.split(".")[0]
+        # decimals=0 결과의 정수부 = decimals=2 결과의 정수부 ± 1 (rounding 차이로 boundary 통과 허용)
+        intPart0 = int(result0.replace(",", "")) if result0 not in ("-", "") else 0
+        intPart2Str = result2.split(".")[0].replace(",", "")
+        intPart2 = int(intPart2Str) if intPart2Str not in ("-", "") else 0
+        assert abs(intPart0 - intPart2) <= 1

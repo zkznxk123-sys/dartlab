@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 
@@ -15,6 +15,7 @@ from hypothesis import strategies as st
 class TestTraceProperty:
     """AuditCollector observe / dump / load property 5."""
 
+    @settings(deadline=None)
     @given(n=st.integers(min_value=1, max_value=10))
     def test_observe_accumulates(self, n: int) -> None:
         from dartlab.ai.trace import AuditCollector

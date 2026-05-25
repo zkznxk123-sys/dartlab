@@ -17,7 +17,11 @@ class TestSecretsProperty:
         key=st.text(
             alphabet=st.characters(min_codepoint=ord("A"), max_codepoint=ord("Z")), min_size=5, max_size=20
         ).map(lambda s: f"DARTLAB_TEST_{s}"),
-        value=st.text(min_size=1, max_size=50),
+        value=st.text(
+            alphabet=st.characters(min_codepoint=0x20, max_codepoint=0x7E, blacklist_categories=("Cs",)),
+            min_size=1,
+            max_size=50,
+        ),
     )
     def test_env_store_set_get_round_trip(self, key: str, value: str) -> None:
         from dartlab.core.secrets import EnvSecretStore

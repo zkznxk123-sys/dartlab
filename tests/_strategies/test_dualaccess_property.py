@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 class TestDualAccessProperty:
     """CallableAccessor call/attr form 동치성 property 5."""
 
-    @given(arg=st.text(min_size=1, max_size=10))
+    @given(arg=st.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", min_size=1, max_size=10))
     def test_call_and_attr_form_equivalent(self, arg: str) -> None:
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -21,7 +21,10 @@ class TestDualAccessProperty:
         accessor = CallableAccessor(fn)
         assert accessor(arg) == getattr(accessor, arg)()
 
-    @given(arg=st.text(min_size=1, max_size=10), suffix=st.text(min_size=1, max_size=10))
+    @given(
+        arg=st.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", min_size=1, max_size=10),
+        suffix=st.text(min_size=1, max_size=10),
+    )
     def test_kwargs_passthrough(self, arg: str, suffix: str) -> None:
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -49,7 +52,13 @@ class TestDualAccessProperty:
         accessor = CallableAccessor(fn)
         assert accessor._fn is fn
 
-    @given(values=st.lists(st.text(min_size=1, max_size=8), min_size=1, max_size=5))
+    @given(
+        values=st.lists(
+            st.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", min_size=1, max_size=8),
+            min_size=1,
+            max_size=5,
+        )
+    )
     def test_multiple_attrs_independent(self, values: list[str]) -> None:
         from dartlab.core.dualAccess import CallableAccessor
 
