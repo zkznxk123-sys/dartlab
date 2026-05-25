@@ -23,7 +23,7 @@ runtimeCompatibility:
   webAi:
     status: supported
 capabilityRefs:
-  - dartlab.Company.analysis
+  - Company.analysis
 ---
 
 # Analysis — 수익성 (profitability)
