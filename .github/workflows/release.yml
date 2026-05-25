@@ -106,7 +106,7 @@ jobs:
 
   pypi:
     name: Upload to pypi.org
-    needs: testpypi
+    needs: build
     runs-on: ubuntu-latest
     environment: pypi   # GitHub Environment 보호 + manual approval 권장
     if: ${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'rc') }}
