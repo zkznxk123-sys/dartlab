@@ -45,7 +45,7 @@ except ImportError:
     sys.exit(2)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_PATTERNS_FILE = _REPO_ROOT / "scripts" / "audit" / "stalePatterns.yaml"
+_PATTERNS_FILE = _REPO_ROOT / "tests" / "audit" / "stalePatterns.yaml"
 
 # 검사 대상 디렉토리 — planRealdata.py 의 INFRA_PREFIXES 와 일관
 _SCAN_ROOTS: tuple[str, ...] = (
