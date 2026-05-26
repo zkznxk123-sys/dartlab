@@ -23,8 +23,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 from dartlab.viz.catalog import CATALOG
-from dartlab.viz.data import _cache, normalize, ratios, statements
-from dartlab.viz.display.finance.accounts import extractSeries
+from dartlab.viz.data import _cache, normalize, ratios, statements  # noqa: F401 — _cache.getCompany + normalize 호환
+from dartlab.viz.display.finance._cache import getNormFinance, getTtmNorm
+from dartlab.viz.display.finance.accounts import allStock, extractSeries
 from dartlab.viz.display.finance.periods import lastNPeriods
 from dartlab.viz.schema import (
     CatalogEntry,
@@ -37,6 +38,11 @@ from dartlab.viz.schema import (
 )
 
 _ANALYSIS_PREFIX = "analysis."
+
+
+def _selectNorm(company: Any, useTtm: bool) -> Any:
+    """useTtm True → TTM 화 norm (분기 IS/CF 4Q 합산). False → raw norm."""
+    return getTtmNorm(company) if useTtm else getNormFinance(company)
 
 
 def _sumWeighted(norm: Any, terms: dict[str, int], periods: list[str]) -> list[float | None]:
@@ -64,12 +70,35 @@ def _sumWeighted(norm: Any, terms: dict[str, int], periods: list[str]) -> list[f
 
 
 def _ratioSeries(norm: Any, ratio: dict[str, Any], periods: list[str]) -> list[float | None]:
-    """ratio = {num: {key:sign}, den: {key:sign}, scale?: int} → 시계열."""
+    """ratio = {num, den, scale?, denMethod?} → 시계열.
+
+    denMethod (분모 처리):
+        - "latest" : 시점값 그대로 (default, legacy).
+        - "average": (begin+end)/2 trailing-2 평균. textbook ROE 정공법 — stock
+          분모 (BS 항목) 일 때만 의미 있음. flow/stock 자동 판정 안 됨.
+          명시 안 했고 den_terms 가 *모두* stock 이면 자동 "average" 적용.
+    """
     num_terms: dict[str, int] = ratio.get("num") or ratio.get("numerator") or {}
     den_terms: dict[str, int] = ratio.get("den") or ratio.get("denominator") or {}
     scale = float(ratio.get("scale", 100))
+    denMethod: str = ratio.get("denMethod") or ("average" if allStock(den_terms.keys()) else "latest")
     num = _sumWeighted(norm, num_terms, periods)
-    den = _sumWeighted(norm, den_terms, periods)
+    den_raw = _sumWeighted(norm, den_terms, periods)
+    if denMethod == "average":
+        # trailing-2 평균 — i==0 은 자기값. textbook (begin+end)/2 ROE 일치.
+        den: list[float | None] = []
+        for i in range(len(periods)):
+            cur = den_raw[i]
+            if cur is None:
+                den.append(None)
+                continue
+            if i == 0:
+                den.append(cur)
+                continue
+            prev = den_raw[i - 1]
+            den.append((cur + prev) / 2 if prev is not None else cur)
+    else:
+        den = den_raw
     out: list[float | None] = []
     for i in range(len(periods)):
         n, d = num[i], den[i]
@@ -182,7 +211,7 @@ def _seriesDataFromPlan(
     return None
 
 
-def _resolveLegacyCall(topic: str, stockCode: str) -> tuple[str, Any, Any]:
+def _resolveLegacyCall(topic: str, stockCode: str, useTtm: bool = False) -> tuple[str, Any, Any]:
     """statementsCall fallback 용 — topic → (kind, context, module)."""
     company = _cache.getCompany(stockCode)
     if topic.startswith(_ANALYSIS_PREFIX):
@@ -190,10 +219,10 @@ def _resolveLegacyCall(topic: str, stockCode: str) -> tuple[str, Any, Any]:
         mod = importlib.import_module(f"dartlab.analysis.financial.{moduleName}")
         return "analysis", company, mod
     if topic == "ratios":
-        norm = normalize.normalize(company.rawFinance)
+        norm = _selectNorm(company, useTtm)
         return "data", norm, ratios
     if topic in ("IS", "BS", "CF"):
-        norm = normalize.normalize(company.rawFinance)
+        norm = _selectNorm(company, useTtm)
         return "data", norm, statements
     raise ValueError(f"viz.builder: unknown topic '{topic}'")
 
@@ -266,7 +295,12 @@ _NON_TREND_KINDS = frozenset(
 
 
 def _buildKindSpecView(
-    entry: CatalogEntry, company: Any, stockCode: str, periodKind: PeriodKind, nPeriods: int
+    entry: CatalogEntry,
+    company: Any,
+    stockCode: str,
+    periodKind: PeriodKind,
+    nPeriods: int,
+    useTtm: bool = False,
 ) -> View | None:
     """kpiTile/diffView/topList/comparisonTable/gauge/phaseIndicator/sankey/scatter dispatch.
 
@@ -294,7 +328,7 @@ def _buildKindSpecView(
     norm = None
     periods: list[str] = []
     if needsNorm:
-        norm = normalize.normalize(company.rawFinance)
+        norm = _selectNorm(company, useTtm)
         periods = lastNPeriods(norm, nPeriods, periodKind)
 
     base_view: dict[str, Any] = {
@@ -531,6 +565,7 @@ def buildView(
     *,
     periodKind: PeriodKind = "annual",
     nPeriods: int = 8,
+    useTtm: bool = False,
 ) -> View:
     """cardKey + stockCode → 완성된 View JSON.
 
@@ -545,6 +580,11 @@ def buildView(
         raise KeyError(f"viz.buildView: cardKey '{cardKey}' not in CATALOG")
     entry: CatalogEntry = CATALOG[cardKey]
     topic: str = entry.get("topic", "BS")  # type: ignore[assignment]
+
+    # entry 의 ttmOptOut True → 카드 강제 raw norm. catalog 운영자가 분기 raw
+    # 비교가 의도인 카드 (분기-on-분기 매출 YoY 등) 에서 박는 escape hatch.
+    if entry.get("ttmOptOut"):
+        useTtm = False
 
     # quant 탭 카드 (topic="price") 는 가격 데이터만 사용 — Company.rawFinance 무관.
     # 동시 7 카드 build 시 Company 생성 fail (데이터셋 miss) 가 fatal 안 되도록 graceful.
@@ -563,7 +603,7 @@ def buildView(
         corpName = getattr(company, "corpName", None)
 
     # 비-시계열 kind 는 별도 어댑터.
-    kind_view = _buildKindSpecView(entry, company, stockCode, periodKind, nPeriods)
+    kind_view = _buildKindSpecView(entry, company, stockCode, periodKind, nPeriods, useTtm)
     if kind_view is not None:
         return kind_view  # type: ignore[return-value]
 
@@ -574,7 +614,7 @@ def buildView(
 
     if allHaveDataDef and not topic.startswith(_ANALYSIS_PREFIX):
         # 모든 series 가 catalog 정의 → norm 한 번 + 자동 추출
-        norm = normalize.normalize(company.rawFinance)
+        norm = _selectNorm(company, useTtm)
         periods = lastNPeriods(norm, nPeriods, periodKind)
         series: list[Series] = []
         for plan in plans:
@@ -585,7 +625,7 @@ def buildView(
         bindingTopic = topic
     else:
         # legacy: statementsCall 호출 → raw dict → key lookup
-        kind, context, mod = _resolveLegacyCall(topic, stockCode)
+        kind, context, mod = _resolveLegacyCall(topic, stockCode, useTtm)
         callName = entry.get("statementsCall")
         if not callName:
             raise ValueError(f"viz.builder: '{cardKey}' 의 seriesPlan 일부에 데이터 정의 누락 + statementsCall 없음")
@@ -593,7 +633,7 @@ def buildView(
         periods = _periodsFromRaw(raw)
         # 일부 series 는 catalog 정의, 일부는 raw lookup — 혼합 처리
         if not topic.startswith(_ANALYSIS_PREFIX) and topic in ("IS", "BS", "CF", "ratios"):
-            norm = normalize.normalize(company.rawFinance)
+            norm = _selectNorm(company, useTtm)
         else:
             norm = None
         series = []

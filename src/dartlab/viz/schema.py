@@ -202,6 +202,10 @@ class CatalogEntry(TypedDict, total=False):
     # 예: {"adapter": "distressGauge"} / {"adapter": "lifeCyclePhase"} /
     #     {"adapter": "kpiFromNorm", "tilePlans": [...]}.
     dataSpec: dict[str, Any]
+    # TTM 변환 무력화. True 면 quarterlyTtm 모드에서도 raw norm 사용 — 분기
+    # raw 비교 (e.g. 분기-on-분기 매출 YoY) 가 의도인 카드 전용. default False
+    # (= flow 시리즈 자동 TTM, stock 시리즈 pass-through, ratio 자동 분기).
+    ttmOptOut: bool
 
 
 class KpiTile(TypedDict, total=False):

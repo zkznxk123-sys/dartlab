@@ -194,6 +194,20 @@ def standard(key: str) -> StandardAccount:
     return _BY_KEY[key]
 
 
+def isStockKey(key: str) -> bool:
+    """key 가 BS (stock — 시점값) 항목인지. ratio 분모 평균자본 자동 판정용."""
+    sa = _BY_KEY.get(key)
+    return sa is not None and sa.sjDiv == "BS"
+
+
+def allStock(keys: Iterable[str]) -> bool:
+    """keys 모두 BS 항목인지. 한 개라도 미정의 / flow 면 False."""
+    keys_list = list(keys)
+    if not keys_list:
+        return False
+    return all(isStockKey(k) for k in keys_list)
+
+
 def extractSeries(
     norm: pl.DataFrame,
     key: str,

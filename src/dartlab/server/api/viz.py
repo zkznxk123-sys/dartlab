@@ -14,11 +14,13 @@ web 측이 dark/light 토글에 맞춰 자체 적용 (서버는 catalog 기본 h
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from collections import OrderedDict
-from typing import Any
+from typing import Any, AsyncIterator
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import StreamingResponse
 
 from dartlab.viz import (
     CATALOG,
@@ -35,15 +37,29 @@ router = APIRouter()
 
 
 # ── 카드 spec TTL 캐시 ──
-# (cardKey, code, periodKind, nPeriods) → (ts, spec). 같은 회사·기간 spec 이
+# (cardKey, code, periodKind, nPeriods, useTtm) → (ts, spec). 같은 회사·기간 spec 이
 # 여러 endpoint·동시 호출에서 중복 build 되던 비용 차단. error spec 은 캐시 X.
 # 5 분 TTL — 동일 세션 안 회사 전환·재진입·hover prefetch race 모두 보호.
-_SPEC_CACHE: "OrderedDict[tuple[str, str, str, int], tuple[float, dict[str, Any]]]" = OrderedDict()
+_SPEC_CACHE: "OrderedDict[tuple[str, str, str, int, bool], tuple[float, dict[str, Any]]]" = OrderedDict()
 _SPEC_CACHE_TTL_SEC = 300.0
 _SPEC_CACHE_MAX = 512
 
+# periodView (UI 표시) → (periodKind, useTtm). 3-mode:
+#   annual         → 연간 raw                  (Q4 spike 무, 1 점/년)
+#   quarterlyRaw   → 분기 cumulative-from-Jan  (DART 원본 누적치, 계절성 그대로)
+#   quarterlyTtm   → 분기 TTM (4Q rolling sum) (equity research 표준, V차트 방식)
+_PERIOD_VIEW_MAP: dict[str, tuple[str, bool]] = {
+    "annual": ("annual", False),
+    "quarterlyRaw": ("quarterly", False),
+    "quarterlyTtm": ("quarterly", True),
+}
 
-def _specCacheGet(key: tuple[str, str, str, int]) -> dict[str, Any] | None:
+
+def _resolvePeriodView(periodView: str) -> tuple[str, bool]:
+    return _PERIOD_VIEW_MAP.get(periodView, ("annual", False))
+
+
+def _specCacheGet(key: tuple[str, str, str, int, bool]) -> dict[str, Any] | None:
     item = _SPEC_CACHE.get(key)
     if item is None:
         return None
@@ -55,7 +71,7 @@ def _specCacheGet(key: tuple[str, str, str, int]) -> dict[str, Any] | None:
     return spec
 
 
-def _specCacheSet(key: tuple[str, str, str, int], spec: dict[str, Any]) -> None:
+def _specCacheSet(key: tuple[str, str, str, int, bool], spec: dict[str, Any]) -> None:
     if spec.get("error"):
         return
     _SPEC_CACHE[key] = (time.monotonic(), spec)
@@ -90,14 +106,16 @@ async def apiVizCatalog() -> dict[str, Any]:
     }
 
 
-def _safeBuildAndRender(cardKey: str, code: str, periodKind: str, nPeriods: int) -> dict[str, Any]:
+def _safeBuildAndRender(
+    cardKey: str, code: str, periodKind: str, nPeriods: int, useTtm: bool = False
+) -> dict[str, Any]:
     """buildView + toRechartsSpec — 예외는 카드 단위 error envelope. TTL 캐시 적용."""
-    cacheKey = (cardKey, str(code).zfill(6), periodKind, int(nPeriods))
+    cacheKey = (cardKey, str(code).zfill(6), periodKind, int(nPeriods), bool(useTtm))
     hit = _specCacheGet(cacheKey)
     if hit is not None:
         return hit
     try:
-        view = buildView(cardKey, code, periodKind=periodKind, nPeriods=nPeriods)  # type: ignore[arg-type]
+        view = buildView(cardKey, code, periodKind=periodKind, nPeriods=nPeriods, useTtm=useTtm)  # type: ignore[arg-type]
         spec = toRechartsSpec(view)
     except Exception as exc:  # noqa: BLE001
         return {
@@ -223,22 +241,31 @@ async def apiVizDashboard(
     stockCode: str,
     periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
     nPeriods: int = Query(40, ge=2, le=80),
+    periodView: str = Query(
+        "",
+        description="annual | quarterlyRaw | quarterlyTtm. 지정 시 periodKind 무시.",
+    ),
 ) -> dict[str, Any]:
     """대시보드 카드 일괄 빌드 → recharts spec list.
 
     Company rawFinance 를 먼저 한 번 collect 해서 LRU 안착시킨 뒤
     각 카드를 동시 빌드 (cold-start race 방지).
     """
+    if periodView:
+        periodKind, useTtm = _resolvePeriodView(periodView)
+    else:
+        useTtm = False
     await _prefetchCompany(stockCode)
     keys = list(FINANCE_DASHBOARD_KEYS)
 
     async def _one(k: str) -> dict[str, Any]:
-        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
+        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods, useTtm)
 
     specs = await asyncio.gather(*[_one(k) for k in keys])
     return {
         "stockCode": stockCode,
         "periodKind": periodKind,
+        "periodView": periodView or ("quarterlyRaw" if periodKind == "quarterly" else "annual"),
         "cards": dict(zip(keys, specs)),
         "order": keys,
     }
@@ -250,29 +277,36 @@ async def apiVizTabDashboard(
     stockCode: str,
     periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
     nPeriods: int = Query(40, ge=2, le=80),
+    periodView: str = Query("", description="annual | quarterlyRaw | quarterlyTtm"),
 ) -> dict[str, Any]:
     """탭별 카드 일괄 빌드. financial 외 7 탭은 placeholder 또는 시계열 proxy."""
     keys = TAB_KEYS.get(tab)
     if keys is None:
         raise HTTPException(status_code=404, detail=f"unknown tab: {tab}")
+    if periodView:
+        periodKind, useTtm = _resolvePeriodView(periodView)
+    else:
+        useTtm = False
     if not keys:
         return {
             "stockCode": stockCode,
             "tab": tab,
             "periodKind": periodKind,
+            "periodView": periodView or ("quarterlyRaw" if periodKind == "quarterly" else "annual"),
             "cards": {},
             "order": [],
         }
     await _prefetchCompany(stockCode)
 
     async def _one(k: str) -> dict[str, Any]:
-        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
+        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods, useTtm)
 
     specs = await asyncio.gather(*[_one(k) for k in keys])
     return {
         "stockCode": stockCode,
         "tab": tab,
         "periodKind": periodKind,
+        "periodView": periodView or ("quarterlyRaw" if periodKind == "quarterly" else "annual"),
         "cards": dict(zip(keys, specs)),
         "order": keys,
     }
@@ -284,11 +318,16 @@ async def apiVizSpec(
     stockCode: str,
     periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
     nPeriods: int = Query(40, ge=2, le=80),
+    periodView: str = Query("", description="annual | quarterlyRaw | quarterlyTtm"),
 ) -> dict[str, Any]:
     """단일 카드 lazy 호출 — 회사 전환 시 일부 카드 refresh 용."""
     if cardKey not in CATALOG:
         raise HTTPException(status_code=404, detail=f"unknown cardKey: {cardKey}")
-    spec = await asyncio.to_thread(_safeBuildAndRender, cardKey, stockCode, periodKind, nPeriods)
+    if periodView:
+        periodKind, useTtm = _resolvePeriodView(periodView)
+    else:
+        useTtm = False
+    spec = await asyncio.to_thread(_safeBuildAndRender, cardKey, stockCode, periodKind, nPeriods, useTtm)
     return spec
 
 
@@ -321,6 +360,7 @@ async def apiVizLayout(
         le=80,
         description="첫 페인트 즉시 build 할 카드 수. 나머지는 frontend 가 IntersectionObserver hit 시 /api/viz/spec/{cardKey}/{code} 호출 (TTL 캐시로 중복 build 0). 0=전체 lazy, 큰 값=전체 eager.",
     ),
+    periodView: str = Query("", description="annual | quarterlyRaw | quarterlyTtm"),
 ) -> dict[str, Any]:
     """탭 + 7 방법론 view → 12-col bento packed grid + 각 카드 spec.
 
@@ -336,6 +376,11 @@ async def apiVizLayout(
         }
     """
     effectiveView = _LEGACY_VIEW_REDIRECT.get(view or "", view)
+    if periodView:
+        periodKind, useTtm = _resolvePeriodView(periodView)
+    else:
+        useTtm = False
+    effectivePeriodView = periodView or ("quarterlyRaw" if periodKind == "quarterly" else "annual")
 
     # v3-r6 — planTabLayout 단일 호출 (view=null + tab=financial → OVERVIEW_KEYS 8 카드).
     # _isCardEmpty 2 단 packing 일시 폐기 (backend hang 회피). 후속 PR 에서 cost 낮춰 재도입.
@@ -346,6 +391,7 @@ async def apiVizLayout(
             "tab": tab,
             "view": effectiveView,
             "periodKind": periodKind,
+            "periodView": effectivePeriodView,
             "colCount": 24,
             "layout": [],
             "cards": {},
@@ -375,6 +421,7 @@ async def apiVizLayout(
             "tab": tab,
             "view": effectiveView,
             "periodKind": periodKind,
+            "periodView": effectivePeriodView,
             "colCount": 24,
             "layout": placed,
             "cards": {},
@@ -382,7 +429,7 @@ async def apiVizLayout(
         }
 
     async def _one(k: str) -> dict[str, Any]:
-        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
+        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods, useTtm)
 
     if tab == "quant":
         # 가격 데이터 fetcher (gather provider) 가 동시 진입에 안전하지 않음 —
@@ -401,9 +448,150 @@ async def apiVizLayout(
         "tab": tab,
         "view": effectiveView,
         "periodKind": periodKind,
+        "periodView": effectivePeriodView,
         "colCount": 24,
         "layout": placed,
         "cards": dict(zip(buildKeys, specs)),
         # frontend 가 viewport 진입 시 fetchCard 할 카드 목록 (eager 외).
         "lazyKeys": lazyCardKeys,
     }
+
+
+# ── streaming endpoint ──
+# NDJSON streaming. 1) layout 즉시 emit (placed cards 좌표만), 2) hero +
+# 모든 카드 build 를 asyncio.gather 가 아닌 as_completed 로 돌려, 완성 순서대로
+# {type:"card", cardKey, spec} 1 줄씩 emit. 가벼운 카드 (단순 ratio trend) 가
+# 무거운 카드 (snowflakeRadar/dupont5Step/distressEnsemble) 보다 먼저 도착 →
+# 사용자 체감 100ms 내 첫 카드 paint.
+#
+# 캐시 0 정공 — _SPEC_CACHE 안 거침. 같은 요청 안 norm 공유는 Company.normFinance
+# 1회 (instance lifecycle, storage cache 아님) 가 담당.
+
+
+def _buildSpecForStream(
+    cardKey: str, code: str, periodKind: str, nPeriods: int, useTtm: bool = False
+) -> dict[str, Any]:
+    """streaming 용 — TTL 캐시 우회. error envelope 동일."""
+    try:
+        view = buildView(cardKey, code, periodKind=periodKind, nPeriods=nPeriods, useTtm=useTtm)  # type: ignore[arg-type]
+        return toRechartsSpec(view)
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "cardKey": cardKey,
+            "error": str(exc),
+            "componentType": "Error",
+            "kind": "error",
+            "title": CATALOG.get(cardKey, {}).get("title", cardKey),
+        }
+
+
+@router.get("/api/viz/layout-stream/{tab}/{stockCode}")
+async def apiVizLayoutStream(
+    tab: str,
+    stockCode: str,
+    view: str | None = Query(None),
+    periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
+    nPeriods: int = Query(40, ge=2, le=80),
+    periodView: str = Query(
+        "",
+        description="annual | quarterlyRaw | quarterlyTtm. 지정 시 periodKind 무시.",
+    ),
+) -> StreamingResponse:
+    """NDJSON streaming. layout → 완성 카드 순차 emit → done.
+
+    line 1: {"type":"layout", "placed":[...], "colCount":24, "tab":..., "view":...}
+    line 2~N: {"type":"card", "cardKey":"...", "spec":{...}}
+    line last: {"type":"done"}
+
+    카드 build 실패 시에도 error envelope 가 spec 자리에 들어가 emit 계속.
+    """
+    effectiveView = _LEGACY_VIEW_REDIRECT.get(view or "", view)
+    if periodView:
+        periodKind, useTtm = _resolvePeriodView(periodView)
+    else:
+        useTtm = False
+    effectivePeriodView = periodView or ("quarterlyRaw" if periodKind == "quarterly" else "annual")
+    placed = planTabLayout(tab, sub=effectiveView)
+
+    async def _gen() -> AsyncIterator[bytes]:
+        head = {
+            "type": "layout",
+            "placed": placed,
+            "colCount": 24,
+            "tab": tab,
+            "view": effectiveView,
+            "periodKind": periodKind,
+            "periodView": effectivePeriodView,
+            "stockCode": stockCode,
+        }
+        # 분기 TTM 모드일 때만 가용성 진단 동봉 — UI badge 결정용. 신규 상장사
+        # 등 4Q 미충족 시 frontend 가 "TTM 가용 부족" 표시.
+        if useTtm and tab == "financial":
+            try:
+                from dartlab.viz.display.finance._cache import getCompany, ttmAvailability
+
+                head["ttmAvailability"] = ttmAvailability(getCompany(stockCode))
+            except Exception:  # noqa: BLE001
+                pass
+        yield (json.dumps(head, ensure_ascii=False) + "\n").encode("utf-8")
+
+        if not placed:
+            yield (json.dumps({"type": "done"}) + "\n").encode("utf-8")
+            return
+
+        cardKeys = [p["cardKey"] for p in placed]
+        buildKeys = cardKeys
+
+        # quant 탭은 fetchOhlcv race 방지 순차. financial 등은 동시.
+        if tab == "quant":
+            await _prefetchQuantPrice(stockCode)
+            for k in buildKeys:
+                spec = await asyncio.to_thread(_buildSpecForStream, k, stockCode, periodKind, nPeriods, useTtm)
+                yield (json.dumps({"type": "card", "cardKey": k, "spec": spec}, ensure_ascii=False) + "\n").encode(
+                    "utf-8"
+                )
+            yield (json.dumps({"type": "done"}) + "\n").encode("utf-8")
+            return
+
+        # prefetch (cold 시 5s+) 가 단일 await 라 그 사이 chunk 송신 0 — 일부 dev
+        # proxy/브라우저가 첫 chunk 만 받고 stream buffer 를 hold. 0.5s 주기 ping
+        # chunk 로 흐름 유지 (no-cache + chunked 강제 flush).
+        prefetchTask = asyncio.create_task(_prefetchCompany(stockCode))
+        while not prefetchTask.done():
+            try:
+                await asyncio.wait_for(asyncio.shield(prefetchTask), timeout=0.5)
+            except asyncio.TimeoutError:
+                yield (json.dumps({"type": "ping"}) + "\n").encode("utf-8")
+        # propagate any prefetch error (silent — 카드 build 가 자체 graceful 처리).
+        try:
+            await prefetchTask
+        except Exception as exc:  # noqa: BLE001
+            yield (json.dumps({"type": "error", "message": str(exc)}, ensure_ascii=False) + "\n").encode("utf-8")
+            yield (json.dumps({"type": "done"}) + "\n").encode("utf-8")
+            return
+
+        # 각 카드 build 를 (cardKey, spec) 튜플로 wrap — as_completed 가 wrapper
+        # coroutine 반환해도 결과 자체에 cardKey 동행. dict[future]=key lookup 회피.
+        async def _build(k: str) -> tuple[str, dict[str, Any]]:
+            spec = await asyncio.to_thread(_buildSpecForStream, k, stockCode, periodKind, nPeriods, useTtm)
+            return k, spec
+
+        tasks = [asyncio.create_task(_build(k)) for k in buildKeys]
+        for fut in asyncio.as_completed(tasks):
+            k, spec = await fut
+            yield (json.dumps({"type": "card", "cardKey": k, "spec": spec}, ensure_ascii=False) + "\n").encode("utf-8")
+
+        yield (json.dumps({"type": "done"}) + "\n").encode("utf-8")
+
+    return StreamingResponse(
+        _gen(),
+        media_type="application/x-ndjson",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # nginx/proxy buffer 끄기 (vite proxy 도 동일).
+            # GZipMiddleware 가 streaming chunk 모아 압축 시도 → 브라우저는 마지막에 한
+            # 번에 받음. Content-Encoding 이 이미 박혀있으면 미들웨어 skip — identity
+            # 로 박아 우회 (브라우저 raw bytes 그대로 받음).
+            "Content-Encoding": "identity",
+        },
+    )

@@ -3,10 +3,10 @@
 // (자산구조 → 부채상세 → 자본상세 → 손익구조) 한 viewport 진입, 그 다음 스크롤로
 // 마진/수익성/현금/안정 분기. 카드 KPI tile 8 폐기.
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { createFileRoute, getRouteApi } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CardShell } from '@/features/dashboard/cards/CardShell';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
@@ -26,13 +26,10 @@ import {
 	BENTO_CARD_PAD_PX,
 } from '@/features/dashboard/layout/BentoGrid';
 import {
-	fetchCard,
 	fetchCatalog,
-	fetchTabLayout,
 	type CatalogCard,
 	type FinancialSubCategory,
 	type PackedCard,
-	type PeriodKind,
 	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
@@ -46,14 +43,16 @@ type SubView = FinancialSubCategory;
 const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 	{
 		title: '자본구조 · 자산구조',
-		subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리는가 — CCC 까지.',
+		subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리는가 — 안정성·유동성·레버리지 포함.',
 		keys: new Set([
 			'assetComposition',
 			'liabilityDetail',
 			'equityDetail',
-			'cashAssetsRatio',
 			'incomeBreakdown',
 			'workingCapitalDays',
+			'stabilityRatio',
+			'liquidityTrend',
+			'leverageTrend',
 		]),
 	},
 	{
@@ -64,19 +63,18 @@ const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 			'returnTrend',
 			'dupont5Step',
 			'penmanRoeDecomp',
-			'roic',
 			'roicWaccGap',
 			'costStructureTrend',
 			'turnoverTrend',
 			'operatingLeverage',
 			'taxWalk',
-			'segmentRevenue',
 			'effectiveTaxRate',
+			'segmentRevenue',
 		]),
 	},
 	{
 		title: '현금 일생 · 자본배분',
-		subtitle: '현금흐름·FCF·자본배분·배당성향·이익품질·발생액·순차입금 — 번 돈은 어디로.',
+		subtitle: '현금흐름·FCF·자본배분·이익품질·발생액·순차입금·이자보상 — 번 돈은 어디로.',
 		keys: new Set([
 			'cashflowSigned',
 			'fcfTrend',
@@ -85,16 +83,12 @@ const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 			'earningsQuality',
 			'sloanAccruals',
 			'netDebt',
+			'interestCoverage',
 		]),
 	},
 	{
-		title: '재무 안정 · 부도 위험',
-		subtitle: '안정성·유동성·Altman Z·5 모델 ensemble·이자보상·레버리지 — 망할 수 있는가.',
-		keys: new Set(['stabilityRatio', 'liquidityTrend', 'leverageTrend', 'interestCoverage', 'altmanZ', 'distressEnsemble']),
-	},
-	{
 		title: '성장의 질 · 이상신호',
-		subtitle: '매출 YoY·자본 YoY·사업 집중도 — 성장이 진짜인가, 한 사업에 몰빵인가.',
+		subtitle: '매출/영업/순이익/자본 YoY·사업 집중도 — 성장이 진짜인가, 한 사업에 몰빵인가.',
 		keys: new Set(['growthYoy', 'equityGrowth', 'segmentConcentration']),
 	},
 ];
@@ -106,8 +100,6 @@ export const Route = createFileRoute('/analysis/$code/financial')({
 	},
 });
 
-const parentRoute = getRouteApi('/analysis/$code');
-
 function ChartLoading() {
 	return (
 		<div className="flex h-[220px] w-full items-center justify-center text-muted-foreground">
@@ -116,232 +108,22 @@ function ChartLoading() {
 	);
 }
 
-// Snowflake 5-axis hero — Simply Wall St 패턴. 다른 5 섹션과 시각 일관 위해
-// CardShell 로 감싸 동일 카드 단위. 운영자 명시 "음영·ring·hero 차등 강조 폐기"
-// 의 후속 (CardShell.tsx 주석) — hero plain section 잔존이 일관성 파편이라 제거.
-// spec 은 apiVizLayout bundle 에서 동행 (round-trip + prefetch 1 회 절약).
-function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
-	if (!spec || spec.error) {
-		return (
-			<div className="px-3 pt-2">
-				<CardShell title="" colSpan={12} rowSpan={3}>
-					<div className="flex h-[180px] w-full items-center justify-center text-muted-foreground">
-						<Loader2 className="size-5 animate-spin" />
-					</div>
-				</CardShell>
-			</div>
-		);
-	}
-	const scores = spec.series?.[0]?.data ?? [];
-	const rawValues = (spec.options?.rawValues as (number | null)[] | undefined) ?? [];
-	const rawUnits = (spec.options?.rawUnits as string[] | undefined) ?? [];
-	const categories = spec.categories ?? [];
-	const validScores = scores.filter((s): s is number => s != null);
-	const avgScore = validScores.length > 0
-		? validScores.reduce((sum, s) => sum + s, 0) / validScores.length
-		: 0;
-	// 절대 임계값 기반 verdict — peer 무관, 점수 그대로 5 구간.
-	const verdict = (() => {
-		if (avgScore >= 8.5) return { label: '매우 우수', tone: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' };
-		if (avgScore >= 7) return { label: '우수', tone: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' };
-		if (avgScore >= 5) return { label: '양호', tone: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500' };
-		if (avgScore >= 3) return { label: '주의', tone: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' };
-		return { label: '위험', tone: 'text-rose-600 dark:text-rose-400', dot: 'bg-rose-500' };
-	})();
-	const strongIdx = validScores.length > 0 ? scores.indexOf(Math.max(...validScores)) : -1;
-	const weakIdx = validScores.length > 0 ? scores.indexOf(Math.min(...validScores)) : -1;
-	const fmtRaw = (i: number) => {
-		const raw = rawValues[i];
-		const unit = rawUnits[i] ?? '';
-		return raw != null && Number.isFinite(raw) ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–';
-	};
-	// 점수 분포 카운트 — verdict 5 구간.
-	const distribution = validScores.reduce(
-		(acc, s) => {
-			if (s >= 8.5) acc.excellent += 1;
-			else if (s >= 7) acc.good += 1;
-			else if (s >= 5) acc.fair += 1;
-			else if (s >= 3) acc.warn += 1;
-			else acc.bad += 1;
-			return acc;
-		},
-		{ excellent: 0, good: 0, fair: 0, warn: 0, bad: 0 },
-	);
-	const toneBar = (s: number) =>
-		s >= 7 ? 'bg-emerald-500' : s >= 5 ? 'bg-amber-500' : s >= 3 ? 'bg-orange-500' : 'bg-rose-500';
-	return (
-		<div className="px-3 pt-2">
-			<CardShell title={spec.title} colSpan={12} rowSpan={5}>
-				<div className="grid grid-cols-12 gap-3">
-					{/* 좌 col-5 — radar 더 크게 (5 축 한눈에) */}
-					<div className="col-span-12 lg:col-span-5">
-						<VizChart spec={spec} height={360} size={{ w: 5, h: 5 }} />
-					</div>
-
-					{/* 중 col-3 — 풍부 정보 패널: 점수 / verdict / 5 구간 분포 / 강·약점 raw */}
-					<div className="col-span-12 flex flex-col justify-center gap-3 lg:col-span-3">
-						{/* 큰 점수 + verdict badge */}
-						<div className="flex flex-col gap-1">
-							<div className="flex items-baseline gap-1.5">
-								<span className="font-mono text-6xl font-bold leading-none tracking-tight tabular-nums text-foreground">
-									{avgScore.toFixed(1)}
-								</span>
-								<span className="font-mono text-lg text-muted-foreground">/ 10</span>
-							</div>
-							<div className="flex items-center gap-1.5">
-								<span className={`size-2 rounded-full ${verdict.dot}`} />
-								<span className={`text-[15px] font-semibold ${verdict.tone}`}>{verdict.label}</span>
-								<span className="text-[11px] text-muted-foreground">· 5 축 평균</span>
-							</div>
-						</div>
-
-						{/* 5 구간 분포 막대 — verdict tone 별 카운트 */}
-						<div className="flex flex-col gap-1">
-							<div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/70">
-								5 축 점수 분포
-							</div>
-							<div className="flex h-2 w-full overflow-hidden rounded-sm bg-muted/40">
-								{distribution.excellent > 0 && (
-									<div className="bg-emerald-500" style={{ flex: distribution.excellent }} />
-								)}
-								{distribution.good > 0 && (
-									<div className="bg-emerald-400" style={{ flex: distribution.good }} />
-								)}
-								{distribution.fair > 0 && (
-									<div className="bg-amber-500" style={{ flex: distribution.fair }} />
-								)}
-								{distribution.warn > 0 && (
-									<div className="bg-orange-500" style={{ flex: distribution.warn }} />
-								)}
-								{distribution.bad > 0 && (
-									<div className="bg-rose-500" style={{ flex: distribution.bad }} />
-								)}
-							</div>
-							<div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] tabular-nums text-muted-foreground">
-								{distribution.excellent + distribution.good > 0 && (
-									<span>
-										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-emerald-500 align-middle" />
-										우수 {distribution.excellent + distribution.good}
-									</span>
-								)}
-								{distribution.fair > 0 && (
-									<span>
-										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-amber-500 align-middle" />
-										양호 {distribution.fair}
-									</span>
-								)}
-								{distribution.warn > 0 && (
-									<span>
-										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-orange-500 align-middle" />
-										주의 {distribution.warn}
-									</span>
-								)}
-								{distribution.bad > 0 && (
-									<span>
-										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-rose-500 align-middle" />
-										위험 {distribution.bad}
-									</span>
-								)}
-							</div>
-						</div>
-
-						{/* 강·약점 raw value 같이 */}
-						{strongIdx >= 0 && (
-							<div className="flex flex-col gap-0.5">
-								<div className="flex items-baseline gap-1.5 text-[11px]">
-									<span className="font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400">↑ 강점</span>
-									<span className="truncate text-foreground" title={categories[strongIdx]}>
-										{categories[strongIdx]}
-									</span>
-									<span className="ml-auto font-mono font-semibold tabular-nums text-foreground">
-										{scores[strongIdx]?.toFixed(1)}
-									</span>
-									<span className="font-mono text-muted-foreground tabular-nums">
-										· {fmtRaw(strongIdx)}
-									</span>
-								</div>
-								{weakIdx >= 0 && weakIdx !== strongIdx && (
-									<div className="flex items-baseline gap-1.5 text-[11px]">
-										<span className="font-mono uppercase tracking-wider text-rose-600 dark:text-rose-400">↓ 약점</span>
-										<span className="truncate text-foreground" title={categories[weakIdx]}>
-											{categories[weakIdx]}
-										</span>
-										<span className="ml-auto font-mono font-semibold tabular-nums text-foreground">
-											{scores[weakIdx]?.toFixed(1)}
-										</span>
-										<span className="font-mono text-muted-foreground tabular-nums">
-											· {fmtRaw(weakIdx)}
-										</span>
-									</div>
-								)}
-							</div>
-						)}
-					</div>
-
-					{/* 우 col-4 — 5 축 bar (절대 임계값 marker 5·7) */}
-					<div className="col-span-12 flex flex-col justify-center gap-2.5 lg:col-span-4">
-						{categories.map((cat, i) => {
-							const score = scores[i] ?? 0;
-							const pct = Math.max(0, Math.min(100, (score / 10) * 100));
-							return (
-								<div key={cat} className="flex items-center gap-2">
-									<div className="w-32 truncate text-[11px] text-muted-foreground" title={cat}>
-										{cat}
-									</div>
-									<div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
-										{/* 절대 임계값 marker — 5 점 (양호 cutoff) · 7 점 (우수 cutoff) */}
-										<div className="absolute inset-y-0 left-[50%] w-px bg-border/70" />
-										<div className="absolute inset-y-0 left-[70%] w-px bg-border/70" />
-										<div className={`relative h-full ${toneBar(score)}`} style={{ width: `${pct}%` }} />
-									</div>
-									<div className="w-10 text-right font-mono text-[12.5px] font-semibold tabular-nums text-foreground">
-										{score.toFixed(1)}
-									</div>
-									<div className="w-16 text-right font-mono text-[10.5px] text-muted-foreground tabular-nums">
-										{fmtRaw(i)}
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			</CardShell>
-		</div>
-	);
-}
-
-// 카드 1 장 render — eager spec 은 prop 으로 주입. eager 외 카드는 *항상 mount* +
-// bundled spec 없으면 즉시 lazy fetch. content-visibility / IntersectionObserver
-// 게이트 폐기 (cell paint skip 이 lazy 트리거 막아 끝 카드 영영 spec 없음 회귀).
-// backend _SPEC_CACHE TTL + viz._prefetchCompany dedup 이 30 카드 동시 lazy 호출
-// race 차단. sparkline 만 폐기 (본 차트 데이터와 중복). footer (ChartMiniTable) +
-// headerMetric (latestValue + YoY Δ) 는 유지 — 정보 가치 충분.
-function CardRender({
-	spec: bundledSpec,
+// 카드 1 장 render — streaming endpoint 가 도착하는 즉시 spec 채워줌. 아직 미도착
+// 카드는 spinner 자리 유지. React.memo 로 spec/packed/meta 변경 없는 카드는 다른
+// 카드 도착 시 re-render skip — 35 setState (도착 순) cascade 비용 차단.
+const CardRender = memo(function CardRender({
+	spec,
 	packed,
 	meta,
 	cardOuterH,
 	computeHeaderMetric,
-	stockCode,
-	periodKind,
 }: {
 	spec: RechartsSpec | undefined;
 	packed: PackedCard;
 	meta: CatalogCard | undefined;
 	cardOuterH: number;
 	computeHeaderMetric: (spec: RechartsSpec | undefined) => React.ReactNode;
-	stockCode: string;
-	periodKind: PeriodKind;
 }) {
-	const needsLazy = !bundledSpec;
-	const { data: lazySpec } = useQuery({
-		queryKey: dashKeys.card(packed.cardKey, stockCode, periodKind),
-		queryFn: () => fetchCard(packed.cardKey, stockCode, periodKind, 40),
-		enabled: needsLazy,
-		staleTime: 5 * 60_000,
-		retry: 1,
-	});
-	const spec = bundledSpec ?? lazySpec;
 
 	const title = meta?.title || spec?.title || packed.title;
 	const help = meta?.help;
@@ -349,8 +131,6 @@ function CardRender({
 	const isDualStack = spec?.options?.dualStack === true;
 	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
 	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-	// footer 추정 — ChartMiniTable row 14px + thead 16px + wrapper(border-t + py-1) 9px.
-	// 카드 outer 의 40% 상한 가드 — series 많은 카드도 chart body 가 최소 60% 확보.
 	const footerHeight = hasFooter
 		? Math.min(14 * Math.min(seriesCount, 12) + 25, cardOuterH * 0.4)
 		: 0;
@@ -362,9 +142,33 @@ function CardRender({
 	const kind = spec?.kind ?? packed.kind;
 	const ready = !!spec && !spec.error;
 	const headerMetric = ready ? computeHeaderMetric(spec) : undefined;
+
+	// IntersectionObserver gate — viewport 안 카드만 차트 mount. spec 은 이미 도착
+	// (streaming 으로 모두 메모리에) — 옛 lazy-fetch 회귀 우려 무관. 30 차트 동시
+	// mount 의 2~3s long task 가 첫 viewport (~6 카드) mount 만 = 0.3~0.5s.
+	const cellRef = useRef<HTMLDivElement>(null);
+	const [visible, setVisible] = useState(false);
+	useEffect(() => {
+		if (visible) return;
+		const el = cellRef.current;
+		if (!el) return;
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((e) => e.isIntersecting)) {
+					setVisible(true);
+					io.disconnect();
+				}
+			},
+			{ rootMargin: '400px 0px' },
+		);
+		io.observe(el);
+		return () => io.disconnect();
+	}, [visible]);
+
 	return (
 		<>
 			<div
+				ref={cellRef}
 				onClick={() => ready && setOpen(true)}
 				className={ready ? 'h-full cursor-pointer transition-opacity hover:opacity-95' : 'h-full'}
 				role={ready ? 'button' : undefined}
@@ -382,10 +186,10 @@ function CardRender({
 					colSpan={packed.w}
 					rowSpan={packed.h}
 					kind={kind}
-					footer={ready ? footer : undefined}
+					footer={ready && visible ? footer : undefined}
 					headerExtra={headerMetric}
 				>
-					{ready ? (
+					{ready && visible ? (
 						<VizChart spec={spec} height={bodyHeight} size={{ w: packed.w, h: packed.h }} />
 					) : (
 						<ChartLoading />
@@ -421,12 +225,34 @@ function CardRender({
 			)}
 		</>
 	);
-}
+});
+
+type PeriodView = 'annual' | 'quarterlyRaw' | 'quarterlyTtm';
+
+const PERIOD_VIEW_OPTIONS: { value: PeriodView; label: string; hint: string }[] = [
+	{ value: 'annual', label: '연간', hint: '연간 — 사업보고서 (Jan~Dec). 1년 1점.' },
+	{
+		value: 'quarterlyRaw',
+		label: '분기',
+		hint: '분기 누적 (DART 원본 Jan~기말). 계절성 그대로.',
+	},
+	{
+		value: 'quarterlyTtm',
+		label: '분기 TTM',
+		hint:
+			'TTM = 최근 4분기 합산 (연환산). 계절성 제거 + 매분기 갱신. 손익·현금흐름만 적용, 자산·자본은 시점값 유지. V차트 (최준철) 방식.',
+	},
+];
 
 function FinancialTab() {
 	const { code } = Route.useParams();
-	const { period: periodKind } = parentRoute.useSearch();
 	const setLastMode = useDashboardMode((s) => s.setLastMode);
+
+	// periodView — 3-mode segmented (annual / quarterlyRaw / quarterlyTtm).
+	// 기본 quarterlyTtm: 분기 단위 갱신 + seasonality 제거. parent 의 ?period
+	// search param 은 다른 탭 의 정렬용 — financial 탭은 자기 토글 우선.
+	const [periodView, setPeriodView] = useState<PeriodView>('quarterlyTtm');
+	const periodKind: 'annual' | 'quarterly' = periodView === 'annual' ? 'annual' : 'quarterly';
 
 	// 종목 전환 시 직전 모드 복원에 사용. 본 탭 마운트 = financial 모드 진입.
 	useEffect(() => {
@@ -439,29 +265,132 @@ function FinancialTab() {
 		staleTime: Infinity,
 	});
 
-	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
-	// bundle load — backend asyncio.gather 가 polars rawFinance 1 회 collect dedup +
-	// 34 카드 동시 build. eagerN=40 (le=80) 으로 전체 eager 강제. 옛 eagerN=3 회귀:
-	// 첫 3 카드만 즉시 paint, 나머지 31 카드 lazy fetch 가 직렬 4~5s 체감 →
-	// 사용자 "초반 3 빨리 그 뒤 한참" 회귀. backend gather 34 동시 1.5~3s 가 lazy
-	// 직렬보다 체감 짧음 (모든 카드 한꺼번에 paint).
-	const apiView = null;
-	const { data, isError, isLoading, isFetching, error } = useQuery({
-		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
-		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, false, 40),
-		placeholderData: keepPreviousData,
-		staleTime: 5 * 60_000,
-		retry: 1,
-	});
+	// NDJSON streaming consumer — layout 즉시 + 카드 도착 순으로 cards 채움.
+	// StrictMode (dev) 가 useEffect 를 두 번 fire 함 → AbortController 패턴이 두 번째
+	// fetch 까지 죽이는 race. cancelled flag + reader.cancel() 로 첫 mount stream 은
+	// silent 하게 흘려보내고 두 번째 mount stream 만 state 반영. production 에선 1회.
+	const [placed, setPlaced] = useState<PackedCard[]>([]);
+	const [cards, setCards] = useState<Record<string, RechartsSpec>>({});
+	const [streaming, setStreaming] = useState(false);
+	const [streamError, setStreamError] = useState<string | null>(null);
+	const [ttmAvail, setTtmAvail] = useState<{
+		annualFyYears: number;
+		quarterlyPeriods: number;
+		ttmFullCount: number;
+		ttmFallbackCount: number;
+		sufficient: boolean;
+	} | null>(null);
 
-	const cardMetaByKey: Record<string, CatalogCard | undefined> = Object.fromEntries(
-		(catalog?.cards ?? []).map((c) => [c.cardKey, c]),
+	useEffect(() => {
+		let cancelled = false;
+		let activeReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+		setPlaced([]);
+		setCards({});
+		setStreamError(null);
+		setStreaming(true);
+		setTtmAvail(null);
+
+		// rAF batch — 같은 frame 안에 도착한 카드들은 한 번에 setCards. 카드 간 도착
+		// 간격이 frame (16ms) 보다 길면 자연스럽게 frame 단위 분산.
+		let pendingCards: Record<string, RechartsSpec> = {};
+		let drainHandle: number | null = null;
+		const flushPending = () => {
+			drainHandle = null;
+			if (cancelled) return;
+			const merged = pendingCards;
+			pendingCards = {};
+			if (Object.keys(merged).length === 0) return;
+			setCards((prev) => ({ ...prev, ...merged }));
+		};
+		const enqueueCard = (k: string, spec: RechartsSpec) => {
+			pendingCards[k] = spec;
+			if (drainHandle == null) {
+				drainHandle = requestAnimationFrame(flushPending);
+			}
+		};
+
+		(async () => {
+			const url = `/api/viz/layout-stream/financial/${code}?periodView=${periodView}&nPeriods=40`;
+			try {
+				const res = await fetch(url);
+				if (cancelled) {
+					await res.body?.cancel();
+					return;
+				}
+				if (!res.ok || !res.body) {
+					throw new Error(`HTTP ${res.status}`);
+				}
+				const reader = res.body.getReader();
+				activeReader = reader;
+				const decoder = new TextDecoder();
+				let buf = '';
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					if (cancelled) return;
+					buf += decoder.decode(value, { stream: true });
+					let nl = buf.indexOf('\n');
+					while (nl >= 0) {
+						const line = buf.slice(0, nl).trim();
+						buf = buf.slice(nl + 1);
+						nl = buf.indexOf('\n');
+						if (!line) continue;
+						let msg: {
+								type: string;
+								placed?: PackedCard[];
+								cardKey?: string;
+								spec?: RechartsSpec;
+								ttmAvailability?: {
+									annualFyYears: number;
+									quarterlyPeriods: number;
+									ttmFullCount: number;
+									ttmFallbackCount: number;
+									sufficient: boolean;
+								};
+							};
+						try {
+							msg = JSON.parse(line);
+						} catch {
+							continue;
+						}
+						if (cancelled) return;
+						if (msg.type === 'layout' && Array.isArray(msg.placed)) {
+							setPlaced(msg.placed);
+							if (msg.ttmAvailability) setTtmAvail(msg.ttmAvailability);
+						} else if (msg.type === 'card' && msg.cardKey && msg.spec) {
+							enqueueCard(msg.cardKey, msg.spec);
+						} else if (msg.type === 'done') {
+							setStreaming(false);
+						}
+					}
+				}
+				// 마지막 큐는 drain frame chain 이 자연 종료. streaming flag 는 큐가 비고
+				// done 메시지 도착 후 false 로 떨어짐 — UI 의 sticky progress bar 가 도착
+				// 진행 중 정확히 표시.
+				if (!cancelled) setStreaming(false);
+			} catch (e) {
+				if (cancelled) return;
+				setStreamError(String((e as Error)?.message || e));
+				setStreaming(false);
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+			if (drainHandle != null) cancelAnimationFrame(drainHandle);
+			activeReader?.cancel().catch(() => undefined);
+		};
+	}, [code, periodView]);
+
+	const cardMetaByKey: Record<string, CatalogCard | undefined> = useMemo(
+		() => Object.fromEntries((catalog?.cards ?? []).map((c) => [c.cardKey, c])),
+		[catalog],
 	);
 
 	// Tremor 정통 — 헤더 우측 latest value + YoY Δ (% point or 비율 변화). primary 시리즈
 	// (또는 첫 비-stack 시리즈) 의 마지막 유효값과 4 분기 전 값 비교. dual-stack / multi-axis
-	// 카드는 모호하므로 표시 생략.
-	function computeHeaderMetric(spec: RechartsSpec | undefined): React.ReactNode {
+	// 카드는 모호하므로 표시 생략. useCallback — memo CardRender 의 prop reference 안정.
+	const computeHeaderMetric = useCallback(function computeHeaderMetric(spec: RechartsSpec | undefined): React.ReactNode {
 		if (!spec || spec.kind !== 'trend') return null;
 		if (spec.options?.dualStack) return null;
 		if (!spec.series?.length) return null;
@@ -510,11 +439,13 @@ function FinancialTab() {
 				{deltaNode}
 			</>
 		);
-	}
+	}, [periodKind]);
 
-	const renderCard = (p: PackedCard, cellSize: number) => {
+	// renderCard 가 cards/meta 바뀔 때마다 새 closure — 그래도 memo CardRender 가
+	// spec reference 비교로 변경 없는 카드는 re-render skip. 35 카드 cascade 비용 차단.
+	const renderCard = useCallback((p: PackedCard, cellSize: number) => {
 		const meta = cardMetaByKey[p.cardKey];
-		const spec = data?.cards?.[p.cardKey];
+		const spec = cards[p.cardKey];
 		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
 		return (
 			<CardRender
@@ -523,38 +454,80 @@ function FinancialTab() {
 				meta={meta}
 				cardOuterH={cardOuterH}
 				computeHeaderMetric={computeHeaderMetric}
-				stockCode={code}
-				periodKind={periodKind}
 			/>
 		);
-	};
+	}, [cards, cardMetaByKey, computeHeaderMetric]);
 
 	// placeholder layout 폐기 — frontend sequential pack 좌표가 backend packSkyline
 	// 결과와 달라 첫 paint 시 카드 좌측 몰림 → 응답 도착 후 reorder layout shift
-	// 회귀 ("초반 왼쪽에 카드가 몰림"). 진입 초기엔 SECTIONS 헤더만 + 섹션별
-	// 단일 spinner 로 골격 표시, 좌표는 backend layout 도착 후 정확 1회 paint.
-	const placed = data?.layout ?? [];
+	// 회귀. 진입 초기엔 SECTIONS 헤더만 + 섹션별 단일 spinner 로 골격 표시,
+	// 좌표는 backend layout 도착 후 정확 1회 paint.
 
 	const grouped = SECTIONS.map((section) => {
-		const cards = placed.filter((p) => section.keys.has(p.cardKey));
-		if (cards.length === 0) return null;
-		const minY = Math.min(...cards.map((c) => c.y));
-		const normalized = cards.map((c) => ({ ...c, y: c.y - minY }));
+		const sectionCards = placed.filter((p) => section.keys.has(p.cardKey));
+		if (sectionCards.length === 0) return null;
+		const minY = Math.min(...sectionCards.map((c) => c.y));
+		const normalized = sectionCards.map((c) => ({ ...c, y: c.y - minY }));
 		return { section, cards: normalized };
-	}).filter((g): g is { section: typeof SECTIONS[0]; cards: typeof placed } => g !== null);
+	}).filter((g): g is { section: typeof SECTIONS[0]; cards: PackedCard[] } => g !== null);
+
+	const isLoading = placed.length === 0 && streaming;
+	const isError = !!streamError;
 
 	return (
 		<>
 			{isError && (
 				<div className="border-b bg-destructive/10 px-4 py-2 text-xs text-destructive">
-					백엔드 응답 오류: {String((error as Error)?.message || 'unknown')} — 서버 재시작 필요할 수 있음
+					백엔드 응답 오류: {streamError} — 서버 재시작 필요할 수 있음
 				</div>
 			)}
 
-			{/* 종목 변경 / refetch 진행 중 — isFetching && data 있음 (keepPreviousData 옛
-			    데이터 표시 중) 일 때 상단에 indeterminate progress bar. 사용자가 "갱신
-			    중" 명확히 인지. 첫 cold (data 없음) 는 본 화면 spinner 가 담당. */}
-			{isFetching && data && (
+			{/* periodView 토글 — 연간 / 분기 raw / 분기 TTM. 기본 quarterlyTtm. */}
+			<div className="flex items-center justify-between gap-3 border-b border-border/40 px-3 py-1.5">
+				<span className="hidden text-[10.5px] text-muted-foreground sm:inline">
+					{PERIOD_VIEW_OPTIONS.find((o) => o.value === periodView)?.hint}
+				</span>
+				<div className="ml-auto flex items-center gap-2">
+					{/* TTM 가용성 — quarterlyTtm 모드 + 부족 시 노랑 badge. 4Q 미충족 = annualize fallback */}
+					{periodView === 'quarterlyTtm' && ttmAvail && !ttmAvail.sufficient && (
+						<span
+							className="rounded-sm bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+							title={`TTM 가용 부족 — FY 데이터 ${ttmAvail.annualFyYears}년, fallback ${ttmAvail.ttmFallbackCount}개 분기는 단순 annualize (×12/N) 적용.`}
+						>
+							TTM 부족
+						</span>
+					)}
+					{periodView === 'quarterlyTtm' && ttmAvail && ttmAvail.sufficient && ttmAvail.ttmFallbackCount > 0 && (
+						<span
+							className="rounded-sm bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-medium text-sky-600 dark:text-sky-400"
+							title={`TTM 일부 annualize — full ${ttmAvail.ttmFullCount}분기 + fallback ${ttmAvail.ttmFallbackCount}분기.`}
+						>
+							일부 annualize
+						</span>
+					)}
+					<div className="inline-flex rounded-md border border-border/60 bg-muted/20 p-0.5 text-[11px]">
+						{PERIOD_VIEW_OPTIONS.map((opt) => (
+							<button
+								key={opt.value}
+								type="button"
+								onClick={() => setPeriodView(opt.value)}
+								className={
+									'rounded-sm px-2.5 py-1 font-medium transition-colors ' +
+									(periodView === opt.value
+										? 'bg-background text-foreground shadow-sm'
+										: 'text-muted-foreground hover:text-foreground')
+								}
+								title={opt.hint}
+							>
+								{opt.label}
+							</button>
+						))}
+					</div>
+				</div>
+			</div>
+
+			{/* streaming 진행 중 — placed 도착 후 카드 도착 진행 표시. */}
+			{streaming && placed.length > 0 && (
 				<div className="sticky top-0 z-30 h-0.5 w-full overflow-hidden bg-transparent">
 					<div className="h-full w-1/3 animate-[dl-progress_1.2s_ease-in-out_infinite] bg-primary/70" />
 				</div>
@@ -597,8 +570,7 @@ function FinancialTab() {
 				)
 			) : (
 				<div className="flex flex-col">
-					<SnowflakeHero spec={data?.cards?.snowflakeRadar} />
-					{grouped.map(({ section, cards }, idx) => (
+					{grouped.map(({ section, cards: sectionCards }, idx) => (
 						<section key={section.title} className={idx === 0 ? 'mt-1' : 'mt-0.5'}>
 							<header className="flex items-baseline justify-between gap-2 px-3 pt-2 pb-0">
 								<div className="flex items-baseline gap-2">
@@ -612,7 +584,7 @@ function FinancialTab() {
 								</div>
 								<div aria-hidden className="hidden flex-1 self-center border-t border-border/40 lg:block" />
 							</header>
-							<BentoGrid placed={cards} renderCard={renderCard} />
+							<BentoGrid placed={sectionCards} renderCard={renderCard} />
 						</section>
 					))}
 				</div>
