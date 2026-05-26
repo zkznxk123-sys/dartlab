@@ -39,6 +39,13 @@
 	--color-chart-6: var(--chart-6);
 	--color-chart-7: var(--chart-7);
 	--color-chart-8: var(--chart-8);
+	--color-chart-9: var(--chart-9);
+	--color-chart-10: var(--chart-10);
+	--color-chart-zinc-1: var(--chart-zinc-1);
+	--color-chart-zinc-2: var(--chart-zinc-2);
+	--color-chart-zinc-3: var(--chart-zinc-3);
+	--color-chart-zinc-4: var(--chart-zinc-4);
+	--color-chart-zinc-5: var(--chart-zinc-5);
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -74,15 +81,33 @@
 	--border: oklch(0.922 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
-	/* shadcn 기본 chart 5색. chart-6/7/8 은 1/2/3 alias (catalog COLORS[5~7] backward compat). */
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--chart-6: var(--chart-1);
-	--chart-7: var(--chart-2);
-	--chart-8: var(--chart-3);
+	/* Tableau 10 categorical palette — 데이터 시각화 표준 (Tableau Software).
+	 * dusty muted hue, 10색 distinct, 분석체 절제 톤. saturated Tailwind 색 아님.
+	 * stack 6~8 series 도 인접 명확 구분. SSOT: src/dartlab/viz/palette.py.
+	 *
+	 * 의미 (INTENT) 매핑:
+	 *   primary = chart-1 Blue (메인)
+	 *   accent  = chart-2 Orange (강조)
+	 *   negative = chart-3 Red (부정)
+	 *   neutral = chart-10 Grey (배경/참조)
+	 *   positive = chart-5 Green (긍정) */
+	--chart-1:  #5778a4;  /* Blue */
+	--chart-2:  #e49444;  /* Orange */
+	--chart-3:  #d1615d;  /* Red */
+	--chart-4:  #85b6b2;  /* Teal */
+	--chart-5:  #6a9f58;  /* Green */
+	--chart-6:  #e7ca60;  /* Yellow */
+	--chart-7:  #a87c9f;  /* Purple */
+	--chart-8:  #f1a2a9;  /* Pink */
+	--chart-9:  #967662;  /* Brown */
+	--chart-10: #b8b0ac;  /* Grey */
+
+	/* zinc ramp 미사용 (Tableau 10 채택 후 분기 폐기) — alias 유지 (다른 컴포넌트 참조 대비). */
+	--chart-zinc-1: #5778a4;
+	--chart-zinc-2: #e49444;
+	--chart-zinc-3: #6a9f58;
+	--chart-zinc-4: #b8b0ac;
+	--chart-zinc-5: #d1615d;
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
@@ -113,14 +138,23 @@
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--chart-6: var(--chart-1);
-	--chart-7: var(--chart-2);
-	--chart-8: var(--chart-3);
+	/* Tableau 10 (dark 모드) — light 와 동일 hex. dusty muted 라 dark bg 에서도 충분. */
+	--chart-1:  #5778a4;
+	--chart-2:  #e49444;
+	--chart-3:  #d1615d;
+	--chart-4:  #85b6b2;
+	--chart-5:  #6a9f58;
+	--chart-6:  #e7ca60;
+	--chart-7:  #a87c9f;
+	--chart-8:  #f1a2a9;
+	--chart-9:  #967662;
+	--chart-10: #b8b0ac;
+
+	--chart-zinc-1: #5778a4;
+	--chart-zinc-2: #e49444;
+	--chart-zinc-3: #6a9f58;
+	--chart-zinc-4: #b8b0ac;
+	--chart-zinc-5: #d1615d;
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
 	--sidebar-primary: oklch(0.488 0.243 264.376);
@@ -175,11 +209,17 @@
 }
 
 /* analysis/$code/viewer — DART 원본 HTML table (`<table rowspan colspan>`) 렌더 스타일.
-   rowspan/colspan 보존을 위해 native HTML table 사용 + 최소한의 border/padding 만 적용. */
+   rowspan/colspan 보존을 위해 native HTML table 사용 + 최소한의 border/padding 만 적용.
+   container (`.dartlab-html-table`) 는 `overflow-x-auto` — 좁은 column 폭일 때 한글이
+   char-by-char 세로 wrap 되지 않도록 `word-break: keep-all` + min cell width. */
+.dartlab-html-table {
+	overflow-x: auto;
+}
 .dartlab-html-table table {
-	width: 100%;
 	border-collapse: collapse;
 	font-size: 0.75rem;
+	table-layout: auto;
+	width: 100%;
 }
 .dartlab-html-table td,
 .dartlab-html-table th {
@@ -189,6 +229,10 @@
 	vertical-align: top;
 	font-weight: normal;
 	background-color: transparent;
+	/* 한글 단어 boundary 유지 (단일 char 세로 wrap 차단) + 긴 paragraph 는 cell 폭
+	   초과 시 wrap. overflow-wrap: anywhere — 단일 word 가 cell 폭 초과 시 break. */
+	word-break: keep-all;
+	overflow-wrap: anywhere;
 }
 .dartlab-html-table th {
 	background-color: var(--muted);

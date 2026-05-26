@@ -70,7 +70,10 @@ function AnalysisLayout() {
 					hidePeriodToggle={isViewerTab}
 				/>
 			</div>
-			<div className="min-h-0 flex-1 overflow-y-auto tiny-scroll">
+			{/* viewer 탭은 own scroll container (sticky timeline + body-only scroll) — 부모는
+			   overflow-hidden 으로 outer scroll 흡수 차단. 그 외 탭 (financial/quant/index) 은
+			   기존 outer scroll 유지. */}
+			<div className={isViewerTab ? 'min-h-0 flex-1 overflow-hidden' : 'min-h-0 flex-1 overflow-y-auto tiny-scroll'}>
 				<Outlet />
 			</div>
 		</div>

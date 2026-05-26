@@ -87,33 +87,46 @@ def _tableToMarkdown(table) -> str:
     ``.//TD`` 가 nested table 의 TR/cell 까지 외부에 포함시켜 한 table 420MB+
     markdown 폭발 (035720 회귀).
     """
-    out: list[str] = ["<table>"]
-    hasContent = False
+    # 1차 pass — TR/cell 수집. 단일 cell (1 row × 1 col, rowspan/colspan 없음) 은
+    # DART XML 의 paragraph framing 양식 (`<TABLE><TR><TD>본문...</TD></TR></TABLE>`)
+    # 으로 시각상 table 아님. 그대로 HTML table 로 emit 하면 좁은 viewer column 에서
+    # 본문이 한 cell 안 한 줄로 펼쳐져 가로 스크롤 트리거. 본 1×1 case 는 plain text
+    # 만 emit (paragraph 와 동일 wrap 동작).
+    collected: list[list[tuple[str, str, str, str]]] = []  # rows of [(tag, colspan, rowspan, text)]
     for tr in _findDirectTRs(table):
-        rowOut: list[str] = ["<tr>"]
-        cellEmitted = False
+        cells: list[tuple[str, str, str, str]] = []
         for cell in tr:
             if not isinstance(cell.tag, str) or cell.tag not in ("TD", "TH", "TU", "TE"):
                 continue
             tag = "th" if cell.tag in ("TH", "TU") else "td"
             colspan = cell.get("COLSPAN", "1") or "1"
             rowspan = cell.get("ROWSPAN", "1") or "1"
+            text = " ".join(cell.itertext()).strip().replace("\n", " ")
+            cells.append((tag, colspan, rowspan, text))
+        if cells:
+            collected.append(cells)
+    if not collected:
+        return ""
+
+    # 단일 cell paragraph framing — 1 row × 1 col + 병합 없음 → plain text
+    if len(collected) == 1 and len(collected[0]) == 1:
+        only = collected[0][0]
+        if only[1] in ("1", "") and only[2] in ("1", ""):
+            return only[3]
+
+    out: list[str] = ["<table>"]
+    for cells in collected:
+        rowOut: list[str] = ["<tr>"]
+        for tag, colspan, rowspan, text in cells:
             attrs = ""
             if colspan and colspan != "1":
                 attrs += f' colspan="{int(colspan)}"'
             if rowspan and rowspan != "1":
                 attrs += f' rowspan="{int(rowspan)}"'
-            # cell itertext 는 nested TABLE 의 cell text 도 포함 (flat inline)
-            text = " ".join(cell.itertext()).strip().replace("\n", " ")
             rowOut.append(f"<{tag}{attrs}>{_escapeHtml(text)}</{tag}>")
-            cellEmitted = True
         rowOut.append("</tr>")
-        if cellEmitted:
-            out.append("".join(rowOut))
-            hasContent = True
+        out.append("".join(rowOut))
     out.append("</table>")
-    if not hasContent:
-        return ""
     return "\n".join(out)
 
 
