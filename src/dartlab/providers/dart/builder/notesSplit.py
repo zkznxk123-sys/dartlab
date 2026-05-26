@@ -87,6 +87,7 @@ _NOTES_NAME_ALIASES: dict[str, tuple[int, str]] = {
     # 표준 29 fairValue
     "공정가치측정": (29, "fairValue"),
     "공정가치공시": (29, "fairValue"),
+    "공정가치": (29, "fairValue"),
     # 표준 30 segment
     "부문별보고": (30, "segment"),
     "영업부문": (30, "segment"),
@@ -118,6 +119,37 @@ _NOTES_PARENT_TOPICS: tuple[str, ...] = ("financialNotes", "consolidatedNotes")
 
 # ``N. {한글 이름}`` 헤딩 매처 — N + ". " + Korean name. &cr; / 줄바꿈 분기 수용.
 _NOTES_HEADING_RE = re.compile(r"^\s*(\d{1,2})\.\s+([^\n\r]{2,80})")
+
+# textPath root 에 흔히 붙는 한정자 suffix — `(연결)` / `(별도)` / `(주석)` 등.
+# textPath 의 root segment 는 note 이름이지만 한정자 suffix 가 붙어있을 수 있다.
+_TEXTPATH_ROOT_SUFFIX_RE = re.compile(r"\s*[\(（][^)）]*[\)）]\s*$")
+
+
+def _resolveNoteIdentityFromTextPath(textPath: str | None) -> tuple[int, str] | None:
+    """row 의 ``textPath`` root segment 를 note 이름으로 보고 standard (NN, slug) 매칭.
+
+    textPath 는 note 의 heading 구조에서 빌드된다 — root segment 가 곧 note 이름.
+    `판매비와관리비 (연결)` → root `판매비와관리비` → (22, sga).
+    `일반적 사항 > 주요 관계기업` → root `일반적 사항` → (1, general).
+
+    이게 body heading 검출보다 *훨씬* 신뢰. body 는 다음 케이스에서 실패:
+    - row 가 sub-table 본문만 있고 `N. 헤딩` 행이 다른 row 에 박힌 경우
+    - 옛 quarterly cell 만 있고 annual empty → annual heading 못 봄
+    """
+    if not isinstance(textPath, str) or not textPath:
+        return None
+    # root segment
+    root = textPath.split(" > ", 1)[0].strip()
+    if not root:
+        return None
+    # `(연결)` / `(별도)` / `(주석)` 등 한정자 suffix 제거
+    root = _TEXTPATH_ROOT_SUFFIX_RE.sub("", root).strip()
+    if not root:
+        return None
+    norm = _normalizeNoteName(root)
+    if not norm:
+        return None
+    return _NOTES_BY_NAME.get(norm)
 
 
 def _resolveNoteIdentity(body: str | None) -> tuple[int, str] | None:
@@ -212,18 +244,46 @@ def splitNotesSections(df: pl.DataFrame) -> pl.DataFrame:
                 return v
         return None
 
-    # to_dicts 로 row iteration — 의미 기반 (NN, slug) 추출 + cumsum 그룹화.
+    # to_dicts 로 row iteration — 의미 기반 (NN, slug) 추출.
+    #
+    # identity 우선순위 (2026-05-26 회귀 fix):
+    #   1. row 의 ``textPath`` root segment — heading 구조에서 빌드된 SSOT.
+    #      `판매비와관리비 (연결)` → (22, sga). `일반적 사항 > 주요 관계기업` → (1, general).
+    #      옛 quarterly cell 만 있고 annual empty 인 ghost row 도 올바른 note 로 분류.
+    #   2. body `N. {한글}` 헤딩 검출 — 옛 fallback. textPath 없는 row.
+    #   3. cumsum inherit — 위 둘 다 실패 시 직전 row 의 identity 흡수.
+    #      *단* inherit 은 같은 textPath root 안에서만 — root 가 바뀌면 chain 끊김.
+    #      이 차이가 005930 SGA 토픽 68 row 중 66 row 오분류 회귀 fix 의 핵심.
     rows = notes_df.to_dicts()
-    # parent topic 별로 cumsum (마지막 본 standard identity 유지 — 같은 주석 안 row 동일).
     last_identity: dict[str, tuple[int, str] | None] = {p: None for p in _NOTES_PARENT_TOPICS}
+    last_root: dict[str, str | None] = {p: None for p in _NOTES_PARENT_TOPICS}
     note_identities: list[tuple[int, str] | None] = []
     for row in rows:
         parent = row.get("topic")
-        body = _firstNonEmptyBody(row)
-        ident = _resolveNoteIdentity(body)
+        textPath = row.get("textPath")
+        rootSeg: str | None = None
+        if isinstance(textPath, str) and textPath:
+            rootSeg = textPath.split(" > ", 1)[0].strip()
+
+        # (1) textPath root 우선
+        ident = _resolveNoteIdentityFromTextPath(textPath)
+
+        # (2) body heading fallback
+        if ident is None:
+            body = _firstNonEmptyBody(row)
+            ident = _resolveNoteIdentity(body)
+
+        # (3) cumsum inherit — 같은 root 안에서만
+        if ident is None and rootSeg is not None and rootSeg == last_root.get(parent):
+            ident = last_identity.get(parent)
+
+        # last_identity / last_root 갱신
         if ident is not None:
             last_identity[parent] = ident
-        note_identities.append(last_identity.get(parent))
+        if rootSeg is not None:
+            last_root[parent] = rootSeg
+
+        note_identities.append(ident)
 
     # 새 topic key 계산 — None 이면 그대로 parent (매칭 못한 옛 row).
     new_topics: list[str] = []

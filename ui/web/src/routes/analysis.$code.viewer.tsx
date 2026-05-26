@@ -538,7 +538,7 @@ function ViewerTab() {
 						    스크롤 시에도 화면 상단에 고정 — 사용자가 본문 어디 보든 어느
 						    period 인지 + 어느 topic 인지 + 시간축 이동 버튼 항상 보임.
 						    전체보기 (isFullscreen) 모드 동일 동작. */}
-						<div className="sticky top-0 z-20 -mx-3 mb-6 border-b bg-background/95 px-3 backdrop-blur">
+						<div className="sticky top-0 z-20 -mx-3 mb-3 border-b bg-background/95 px-3 backdrop-blur">
 						<header className="pb-2 pt-2">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
@@ -724,57 +724,187 @@ function TimelineRibbon({
  *   blockType=table 인 cell 만 markdown table syntax → HTML table 변환 (시각 표시 용도).
  */
 
-// markdown table (`| a | b |\n| --- | --- |\n| 1 | 2 |`) → 2D string array.
-// separator row (`| --- | :--- |`) skip. dumb parser — 별 가공 없이 cell 분리만.
-function parseMarkdownTable(md: string): string[][] {
-	const lines = md.split('\n');
-	const out: string[][] = [];
-	for (const raw of lines) {
-		const line = raw.trim();
-		if (!line.startsWith('|')) continue;
-		const cells = line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
-		if (cells.every((c) => /^[:\-\s]*$/.test(c))) continue;
-		out.push(cells);
+// DART HTML → 마크다운 평탄화 결과는 흔히 한 셀 안에 여러 sub-table 이 연결돼 있고,
+// "(단위 : 백만원)" 같은 메타 텍스트 · "당기"/"전기"/"당분기"/"전분기"/"3개월"/"누적" 같은
+// period label 이 데이터 cell 로 흡수돼 있다. 본 파서는 그것을 다음 단계로 정리한다.
+//
+//   1) `splitTableBlocks` — `| --- |` 구분선이 *데이터행 뒤에 또 등장* 하면 새 sub-table.
+//   2) `extractUnit` — sub-table 첫 행들에서 `(단위`/`단위:` 패턴 발견 시 캡션으로 추출.
+//   3) `extractPeriodLabel` — 첫 데이터 셀 값이 period label (당기/전기/당분기/...) 만 또는
+//      label + 단위 인 경우 캡션으로 분리.
+//
+// 평탄 row 가 1 cell 만 가진 separator (`|  |`) 만 등장하면 빈 행 skip.
+
+interface MarkdownSubTable {
+	caption?: string;     // 표 위에 표시될 메타 텍스트 (당기 / 전기 등)
+	unit?: string;        // 우측 상단 단위 (단위 : 백만원)
+	rows: string[][];     // 데이터 그리드
+}
+
+// period 라벨 — "공시금액"/"장부금액" 같은 column 헤더는 caption 으로 흡수하지 않는다 (table 안 header row 로 유지).
+const PERIOD_LABEL_RE = /^(?:당기|전기|당기말|전기말|당분기|전분기|당반기|전반기|당기누적|전기누적|3개월|누적|보고기간말)$/;
+const UNIT_RE = /\(?\s*단위\s*[:：]?\s*[^\)]+\)?/;
+
+function parseRawCells(line: string): string[] {
+	return line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+}
+
+function parseMarkdownSubTables(md: string): MarkdownSubTable[] {
+	const lines = md.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('|'));
+	const blocks: MarkdownSubTable[] = [];
+	let cur: { rows: string[][]; sawDataAfterSep: boolean } = { rows: [], sawDataAfterSep: false };
+
+	const isSep = (cells: string[]) => cells.length > 0 && cells.every((c) => /^[:\-\s]*$/.test(c));
+	const isAllEmpty = (cells: string[]) => cells.every((c) => c === '');
+
+	const flush = () => {
+		if (cur.rows.length === 0) return;
+		blocks.push({ rows: cur.rows });
+		cur = { rows: [], sawDataAfterSep: false };
+	};
+
+	for (const line of lines) {
+		const cells = parseRawCells(line);
+		if (isSep(cells)) {
+			// 데이터 행을 본 *후* 등장하는 separator 는 새 sub-table 신호.
+			if (cur.sawDataAfterSep) flush();
+			continue;
+		}
+		if (isAllEmpty(cells)) {
+			// 완전 빈 줄은 skip — 일부 DART 표는 padding 으로 들어옴.
+			continue;
+		}
+		cur.rows.push(cells);
+		cur.sawDataAfterSep = true;
 	}
-	return out;
+	flush();
+	return blocks;
+}
+
+// sub-table 의 앞쪽 행들에서 캡션 (period label) + 단위 분리.
+function refineSubTable(block: MarkdownSubTable): MarkdownSubTable {
+	const rows = [...block.rows];
+	let caption = block.caption;
+	let unit = block.unit;
+
+	// 첫 행이 단일 텍스트 행 (실질 셀 1 개) 이면 caption 후보.
+	const consume = () => {
+		if (rows.length === 0) return false;
+		const first = rows[0];
+		const nonEmpty = first.filter((c) => c !== '');
+		if (nonEmpty.length === 0) {
+			rows.shift();
+			return true;
+		}
+		// (a) caption 전용 1 셀 — period label 또는 "...에 대한 공시" 같은 표 제목 패턴.
+		//     "공시금액"/"장부금액" 같은 컬럼 헤더는 흡수 X (테이블 안 헤더 행 유지).
+		if (nonEmpty.length === 1 && (PERIOD_LABEL_RE.test(nonEmpty[0]) || /에 대한 공시$/.test(nonEmpty[0]))) {
+			caption = caption ? `${caption} · ${nonEmpty[0]}` : nonEmpty[0];
+			rows.shift();
+			return true;
+		}
+		// (b) period label + 단위 두 셀 — 둘 다 prefix 메타.
+		if (nonEmpty.length === 2) {
+			const [a, b] = nonEmpty;
+			if (PERIOD_LABEL_RE.test(a) && UNIT_RE.test(b)) {
+				caption = caption ? `${caption} · ${a}` : a;
+				unit = unit || b.replace(/^\(|\)$/g, '');
+				rows.shift();
+				return true;
+			}
+			if (UNIT_RE.test(a) && (!b || PERIOD_LABEL_RE.test(b))) {
+				unit = unit || a.replace(/^\(|\)$/g, '');
+				if (b) caption = caption ? `${caption} · ${b}` : b;
+				rows.shift();
+				return true;
+			}
+		}
+		// (c) 행 안 어딘가 단위 표기만 있고 나머지 모두 empty
+		if (nonEmpty.length === 1 && UNIT_RE.test(nonEmpty[0])) {
+			unit = unit || nonEmpty[0].replace(/^\(|\)$/g, '');
+			rows.shift();
+			return true;
+		}
+		return false;
+	};
+
+	// 최대 4 행까지 caption/unit 흡수 시도 (DART 가 종종 2~3 행 메타 prefix).
+	let safety = 4;
+	while (safety-- > 0 && consume()) { /* loop */ }
+	return { caption, unit, rows };
 }
 
 function CellContent({ value, blockType }: { value: string; blockType: string }) {
 	if (!value) return null;
 	if (blockType === 'table' && value.includes('|')) {
-		const rows = parseMarkdownTable(value);
-		if (rows.length === 0) return <pre className="whitespace-pre-wrap break-words text-sm">{value}</pre>;
-		const ncols = Math.max(...rows.map((r) => r.length));
+		const blocks = parseMarkdownSubTables(value).map(refineSubTable).filter((b) => b.rows.length > 0 || b.caption || b.unit);
+		if (blocks.length === 0) return <pre className="whitespace-pre-wrap break-words text-sm">{value}</pre>;
 		return (
-			<table className="w-full border-collapse text-sm">
-				<tbody>
-					{rows.map((r, ri) => {
-						const padded = [...r];
-						while (padded.length < ncols) padded.push('');
-						return (
-							<tr key={ri}>
-								{padded.map((c, ci) => (
-									<td key={ci} className="border border-border px-2 py-1 align-top font-normal">
-										{c.replace(/&cr;/g, ' ')}
-									</td>
-								))}
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
+			<div className="space-y-3">
+				{blocks.map((b, bi) => {
+					const ncols = b.rows.length > 0 ? Math.max(...b.rows.map((r) => r.length)) : 0;
+					return (
+						<div key={bi} className="space-y-1">
+							{(b.caption || b.unit) && (
+								<div className="flex items-baseline justify-between gap-2 text-[11px]">
+									<div className="font-medium text-foreground">{b.caption}</div>
+									{b.unit && <div className="text-muted-foreground">{b.unit}</div>}
+								</div>
+							)}
+							{b.rows.length > 0 && (
+								<table className="w-full border-collapse text-xs">
+									<tbody>
+										{b.rows.map((r, ri) => {
+											const padded = [...r];
+											while (padded.length < ncols) padded.push('');
+											return (
+												<tr key={ri}>
+													{padded.map((c, ci) => (
+														<td key={ci} className="border border-border px-1.5 py-0.5 align-top font-normal">
+															{c.replace(/&cr;/g, ' ')}
+														</td>
+													))}
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							)}
+						</div>
+					);
+				})}
+			</div>
 		);
 	}
 	return <div className="whitespace-pre-wrap break-words text-sm">{value}</div>;
 }
 
-// sections SSOT 그대로 — row N 개 × period M 컬럼 grid. 가공 0.
+// row 가 visible window 안에 본문이 *하나라도* 있을 때만 렌더.
+// DART 의 옛 기간 row 가 신규 topic 으로 따라붙어 visible window 에서는 모두 empty 인
+// 경우가 흔하다 (consolidatedNotes_22_sga 68 row 중 2 row 만 2026Q1 본문 보유).
+function hasVisibleContent(row: ViewerRow, windowPeriods: string[]): boolean {
+	for (const p of windowPeriods) {
+		const v = row.cells?.[p];
+		if (typeof v === 'string' && v.trim().length > 0) return true;
+	}
+	return false;
+}
+
+// sections SSOT — row × period grid. 옛 기간 잔존 row 는 visible window 기준 filter.
 function SsotRowsView({ rows, windowPeriods }: { rows: ViewerRow[]; windowPeriods: string[] }) {
 	if (rows.length === 0) return null;
 	const periodsToShow = windowPeriods.length > 0 ? windowPeriods : Object.keys(rows[0]?.cells ?? {}).slice(0, 3);
+	const visible = rows.filter((r) => hasVisibleContent(r, periodsToShow));
+	if (visible.length === 0) {
+		return (
+			<div className="py-6 text-center text-xs text-muted-foreground">
+				선택한 기간에는 이 항목 본문이 없습니다. 타임라인에서 다른 기간을 선택하세요.
+			</div>
+		);
+	}
 	return (
-		<div className="space-y-4">
-			{rows.map((r) => (
+		<div className="space-y-3">
+			{visible.map((r) => (
 				<div
 					key={`${r.blockOrder}|${r.segmentKey ?? ''}`}
 					className="grid gap-3"

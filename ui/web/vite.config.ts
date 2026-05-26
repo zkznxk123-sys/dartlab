@@ -1,8 +1,15 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
+
+const pyprojectPath = path.resolve(__dirname, '../../pyproject.toml');
+const pyprojectText = fs.readFileSync(pyprojectPath, 'utf-8');
+const versionMatch = pyprojectText.match(/^version\s*=\s*"([^"]+)"/m);
+if (!versionMatch) throw new Error(`pyproject.toml version not found: ${pyprojectPath}`);
+const dartlabVersion = versionMatch[1];
 
 // dartlab UI 빌드 — Python wheel 안에 박혀서 dartlab 서버 (FastAPI) 가 정적 서빙
 //   - 빌드 출력: ui/web/build/  ← pyproject hatch include 패턴과 호환
@@ -25,6 +32,9 @@ export default defineConfig({
 			'/api': { target: 'http://localhost:8400', changeOrigin: true },
 			'/ws': { target: 'ws://localhost:8400', ws: true },
 		},
+	},
+	define: {
+		__DARTLAB_VERSION__: JSON.stringify(dartlabVersion),
 	},
 	build: {
 		outDir: 'build',

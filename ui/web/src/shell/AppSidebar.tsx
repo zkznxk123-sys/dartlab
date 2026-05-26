@@ -63,6 +63,7 @@ import {
 	SidebarRail,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { brand } from '@/lib/brand';
 import { useTheme } from '@/shell/ThemeProvider';
 import { ProviderSettingsDialog } from '@/features/provider/ProviderSettingsDialog';
 import { useChat, type Conversation } from '@/features/chat/store/chat';
@@ -116,7 +117,7 @@ export function AppSidebar() {
 						</Avatar>
 						<div className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
 							<span className="truncate text-sm font-semibold">DartLab</span>
-							<span className="truncate text-xs text-muted-foreground">v0.10.0</span>
+							<span className="truncate text-xs text-muted-foreground">v{brand.version}</span>
 						</div>
 					</Link>
 					<div className="flex items-center group-data-[collapsible=icon]:hidden">

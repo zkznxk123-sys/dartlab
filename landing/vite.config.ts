@@ -11,6 +11,11 @@ const skillsDir = path.resolve(__dirname, '..', 'src', 'dartlab', 'skills');
 const pyodideDir = path.resolve(__dirname, '..', 'pyodide');
 const sharedChartDir = path.resolve(__dirname, '..', 'ui', 'shared', 'chart');
 
+const pyprojectText = fs.readFileSync(path.resolve(__dirname, '..', 'pyproject.toml'), 'utf-8');
+const versionMatch = pyprojectText.match(/^version\s*=\s*"([^"]+)"/m);
+if (!versionMatch) throw new Error('pyproject.toml version not found');
+const dartlabVersion = versionMatch[1];
+
 function contentType(filePath: string): string {
 	const ext = path.extname(filePath).toLowerCase();
 	if (ext === '.svg') return 'image/svg+xml';
@@ -87,6 +92,9 @@ function skillCatalogPlugin() {
 
 export default defineConfig({
 	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), sveltekit()],
+	define: {
+		__DARTLAB_VERSION__: JSON.stringify(dartlabVersion)
+	},
 	worker: {
 		format: 'es'
 	},

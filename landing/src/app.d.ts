@@ -1,3 +1,1 @@
-/// <reference types="vite/client" />
-
 declare const __DARTLAB_VERSION__: string;
