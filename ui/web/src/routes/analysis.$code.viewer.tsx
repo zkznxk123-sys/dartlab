@@ -987,7 +987,10 @@ function SsotRowsView({ rows, windowPeriods }: { rows: ViewerRow[]; windowPeriod
 					style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}
 				>
 					{periodsToShow.map((p) => (
-						<div key={p} className="min-w-0">
+						<div
+							key={p}
+							className="min-w-0 max-h-[70vh] overflow-y-auto pr-2"
+						>
 							<CellContent value={r.cells?.[p] ?? ''} blockType={r.blockType} />
 						</div>
 					))}

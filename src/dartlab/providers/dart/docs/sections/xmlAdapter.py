@@ -60,12 +60,35 @@ def _escapeHtml(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def _cellTextPreservingBreaks(cell) -> str:
+    """TD/TH cell → text. 직속 P 가 ≥ 2 면 P 별 줄바꿈 보존, 아니면 itertext join.
+
+    DART XML 의 BORDER="0" paragraph-framing case — 단일 TD 안에 chapter 전체 본문
+    이 다수 P 로 들어있다. ``" ".join(cell.itertext())`` 로 join 하면 P 사이 줄바꿈
+    이 사라져 사용자 화면에 가/나/다/라 항목이 같은 라인으로 흐른다. P 별 줄바꿈
+    보존이 정공.
+    """
+    directPs = [c for c in cell if isinstance(c.tag, str) and c.tag == "P"]
+    if len(directPs) >= 2:
+        lines: list[str] = []
+        for p in directPs:
+            t = "".join(p.itertext())
+            t = _MULTISPACE_RE.sub(" ", t).strip()
+            if t:
+                lines.append(t)
+        return "\n".join(lines)
+    text = "".join(cell.itertext())
+    text = _MULTISPACE_RE.sub(" ", text).strip()
+    return text
+
+
 def _tableToHtml(table) -> str:
     """``<TABLE>`` → HTML ``<table>`` (rowspan/colspan 보존).
 
     DART XML 의 ``<TABLE BORDER="0">`` 양식은 시각 무 (paragraph framing / caption
     layout). 1×1 단일 cell 도 paragraph framing → plain text return. 진짜 데이터
-    표 (BORDER="1" 또는 multi-row/col 병합) 만 HTML ``<table>`` emit.
+    표 (BORDER="1" 또는 multi-row/col 병합) 만 HTML ``<table>`` emit. cell 안 직속
+    P 가 ≥ 2 면 P 별 줄바꿈 보존.
     """
     border = (table.get("BORDER", "1") or "1").strip()
     isBorderless = border in ("0", "")
@@ -79,7 +102,7 @@ def _tableToHtml(table) -> str:
             tag = "th" if cell.tag in ("TH", "TU") else "td"
             colspan = cell.get("COLSPAN", "1") or "1"
             rowspan = cell.get("ROWSPAN", "1") or "1"
-            text = " ".join(cell.itertext()).strip().replace("\n", " ")
+            text = _cellTextPreservingBreaks(cell)
             cells.append((tag, colspan, rowspan, text))
         if cells:
             collected.append(cells)
