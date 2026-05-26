@@ -298,4 +298,83 @@ def xmlChunkToPlain(rawXml: str) -> str:
     return "\n\n".join(lines).strip()
 
 
-__all__ = ["xmlChunkToMixed", "xmlChunkToPlain"]
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def stripTagsFromCell(cellValue) -> str:
+    """sections wide DataFrame 의 cell value (mixed string) → plain text.
+
+    HTML ``<table>...<tr>...<td>...`` 의 cell text 만 추출 + 모든 HTML/XML 태그 제거.
+    markdown ``## heading`` prefix 도 plain text. show / agent / analysis 호환.
+
+    Args:
+        cellValue: sections cell value (string or None).
+
+    Returns:
+        plain text — 태그 제거 + 다중 공백 정리.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> stripTagsFromCell('## 7. 매출채권\\n<table><tr><td>구분</td><td>금액</td></tr></table>')
+        '## 7. 매출채권\\n구분 금액'
+    """
+    if not cellValue:
+        return ""
+    if not isinstance(cellValue, str):
+        return ""
+    if "<" not in cellValue:
+        return cellValue
+    # HTML <table> 의 cell text 만 추출 (rowspan/colspan 무시, lxml 파서 빠름).
+    # 단순 regex 로도 충분 — DOMPurify 단계의 sanitize 가 frontend 영역, 여기는 backend.
+    text = _HTML_TAG_RE.sub(" ", cellValue)
+    # 다중 공백 single space, 그러나 줄바꿈 보존
+    lines = []
+    for ln in text.splitlines():
+        cleaned = _MULTISPACE_RE.sub(" ", ln).strip()
+        if cleaned:
+            lines.append(cleaned)
+    return "\n".join(lines)
+
+
+def stripTagsFromSectionsDf(df, periodCols=None):
+    """sections wide DataFrame 의 모든 period column cell → plain text.
+
+    period column 양식 — ``2026Q1`` / ``2025Q4`` / ``2025`` 등. ``periodCols=None``
+    이면 ``df.columns`` 에서 ``20\\d\\d`` prefix 자동 감지.
+
+    Args:
+        df: ``Company.sections`` 결과 wide DataFrame.
+        periodCols: 강제 지정 — None 이면 자동 감지.
+
+    Returns:
+        같은 schema 의 DataFrame — period column cell 만 stripTagsFromCell 적용.
+
+    Raises:
+        없음 — df=None 이면 None 반환.
+
+    Example:
+        >>> from dartlab import Company
+        >>> from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+        >>> df = stripTagsFromSectionsDf(Company('005930').sections)
+    """
+    if df is None:
+        return None
+    import polars as pl
+
+    if periodCols is None:
+        periodCols = [c for c in df.columns if c[:2] in ("20", "19") and any(ch.isdigit() for ch in c)]
+    if not periodCols:
+        return df
+    return df.with_columns(
+        [pl.col(c).map_elements(stripTagsFromCell, return_dtype=pl.Utf8).alias(c) for c in periodCols]
+    )
+
+
+__all__ = [
+    "xmlChunkToMixed",
+    "xmlChunkToPlain",
+    "stripTagsFromCell",
+    "stripTagsFromSectionsDf",
+]

@@ -12,6 +12,11 @@ def configureParser(subparsers) -> None:
     """sections 서브커맨드 등록 — pure docs 수평화 sections 출력."""
     parser = subparsers.add_parser("sections", help="pure docs 수평화 sections 출력")
     parser.add_argument("company", help="종목코드 (005930) 또는 회사명 (삼성전자)")
+    parser.add_argument(
+        "--raw",
+        action="store_true",
+        help="태그 보존 (viewer 양식, HTML <table rowspan colspan>). 기본은 태그 제거 plain text.",
+    )
     parser.set_defaults(handler=run)
 
 
@@ -31,7 +36,8 @@ def run(args) -> int:
 
     console.print(f"\n  [bold]{company.corpName}[/] ({company.stockCode})\n")
 
-    sections = company._docs.sections
+    # CLI 기본 — stripTags=True (콘솔 plain text). --raw 시 mixed (태그 보존).
+    sections = company.sectionsAs(stripTags=not args.raw)
     if sections is None:
         console.print(f"[dim]{company.corpName} sections 데이터가 없습니다.[/]")
         return 0

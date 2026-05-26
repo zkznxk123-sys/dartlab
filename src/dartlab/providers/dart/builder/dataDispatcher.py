@@ -557,6 +557,7 @@ def showSectionsTopic(
     raw: bool,
     freq: str,
     scope: str,
+    stripTags: bool = True,
 ) -> pl.DataFrame | None:
     """docs/report sections 기반 topic 조회.
 
@@ -571,6 +572,9 @@ def showSectionsTopic(
         raw: True 면 영문 컬럼.
         freq: ``"Q"``/``"Y"``/``"YTD"``.
         scope: ``"consolidated"``/``"separate"``.
+        stripTags: True (기본) — period column cell value 의 HTML/XML 태그 모두 제거
+            (show/agent/analysis 호환 plain text 양식). False — mixed 양식 보존
+            (HTML ``<table rowspan>`` + ``## `` heading marker, viewer 양식).
 
     Returns:
         DataFrame 또는 None.
@@ -634,7 +638,15 @@ def showSectionsTopic(
             cleaned = topicRows.select(keep_meta + period_cols)
             if period and isinstance(period, str) and period in cleaned.columns:
                 cleaned = cleaned.select(keep_meta + [period])
+            if stripTags:
+                from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+
+                cleaned = stripTagsFromSectionsDf(cleaned)
             return cleaned
+        if stripTags:
+            from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+
+            topicRows = stripTagsFromSectionsDf(topicRows)
         return topicRows
 
     boRows = topicRows.filter(pl.col("blockOrder") == block)
@@ -657,5 +669,13 @@ def showSectionsTopic(
 
     if topic in FINANCE_CLEAN_TOPICS and isinstance(result, pl.DataFrame) and "항목" in result.columns:
         result = cleanFinanceDataFrame(result, topic)
+
+    # stripTags 후처리 — show / agent / CLI 양식 (plain text). viewer 는 stripTags=False
+    # 명시. 옛 호출자 영향 — sections cell 의 HTML 태그가 plain text 화 됨 (CLI 콘솔
+    # 렌더 정상화).
+    if stripTags and isinstance(result, pl.DataFrame):
+        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+
+        result = stripTagsFromSectionsDf(result)
 
     return result if isinstance(result, pl.DataFrame) else None

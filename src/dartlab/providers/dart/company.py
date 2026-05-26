@@ -2236,6 +2236,41 @@ class Company:
 
         return buildSections(self)
 
+    def sectionsAs(self, stripTags: bool = True) -> pl.DataFrame | None:
+        """sections wide DataFrame — stripTags 파라미터로 cell value 양식 선택.
+
+        ``stripTags=True`` (기본): 모든 HTML/XML 태그 제거. show / agent / analysis /
+        story 등 plain text 양식 호출자 호환. ``<table>`` 의 cell text 만 추출 + 다중
+        공백 정리.
+
+        ``stripTags=False``: ``c.sections`` property 와 동일. markdown/HTML mixed 양식
+        보존 (HTML ``<table rowspan colspan>`` + ``## `` heading marker + plain text).
+        viewer / 시각 렌더링 호출자 호환.
+
+        Args:
+            stripTags: True 면 plain text, False 면 mixed 양식.
+
+        Returns:
+            pl.DataFrame — sections wide DataFrame (cell value 만 stripTags 적용). None.
+
+        Raises:
+            없음.
+
+        Example::
+
+            c = Company("005930")
+            c.sectionsAs(stripTags=True)   # show / agent 양식 (plain text)
+            c.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>)
+        """
+        df = self.sections
+        if df is None:
+            return None
+        if not stripTags:
+            return df
+        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+
+        return stripTagsFromSectionsDf(df)
+
     def _profileTable(self) -> pl.DataFrame | None:
         from dartlab.providers.dart.builder.docsProfileBuilder import profileTable
 
