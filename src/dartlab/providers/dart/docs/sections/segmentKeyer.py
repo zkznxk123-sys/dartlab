@@ -53,10 +53,20 @@ class SegmentKeyer:
         return self._emit(topic, "body|lv:0|a:empty")
 
     def forTextBody(self, topic: str, *, textLevel: int, textSemanticPathKey: str | None) -> tuple[str, int, str]:
-        """heading 아래 body block — ``body|p:{semanticPath}`` 또는 ``body|lv:{n}|a:empty``.
+        """heading 아래 body block — ``body|p:{semanticPath}|occ:{n}`` (occurrence-aware).
 
-        SSOT 정공법: path-anchored 인 경우 occurrence 미부여 → 같은 path = 1 row.
-        path 없는 경우만 _emit (orphan body 들 occurrence 분리 유지).
+        같은 semantic path 안 N-th body block (예: caption + body + 주석 paragraph) 은
+        XML 등장 순서별 occurrence 부여 → 별 row → table block 들과 *alternating
+        정렬* 보장. 옛 path-anchored 정공법 (occurrence 미부여, 같은 path = 1 row)
+        은 같은 path 의 body 들이 cell concat → table 들 보다 *나중* 정렬 → 사용자
+        viewer 시각 회귀 (005930 consolidatedNotes_04 financialInstruments: caption +
+        body 한 덩어리 → table 8개 연속).
+
+        회귀 가드: forTableBlock 의 path-anchored 정공법 (table|p:...|h:... 또는
+        table|p:...) 은 유지 — DART 표 header 변형 (시기별 "구분" vs "구 분") 의
+        path+hash 안정성 별개 보호. body 의 occurrence-aware 는 period 간 occurrence
+        분기 위험 (옛 period 3 caption, 새 period 4 caption → occ:3 misalign) 있으나,
+        ``_accumulatePeriodRows`` 의 cell concat 룰 (line 167) 이 자연 폴백.
 
         Args:
             topic: dartlab topic 키.
@@ -71,11 +81,11 @@ class SegmentKeyer:
 
         Example:
             >>> keyer.forTextBody("dividend", textLevel=2, textSemanticPathKey="배당정책")
-            ('body|p:배당정책', 1, 'body|p:배당정책')
+            ('body|p:배당정책', 1, 'body|p:배당정책|occ:1')
         """
         if textSemanticPathKey:
             base = f"body|p:{textSemanticPathKey}"
-            return base, 1, base
+            return self._emit(topic, base)
         base = f"body|lv:{textLevel}|a:empty"
         return self._emit(topic, base)
 
@@ -107,7 +117,7 @@ class SegmentKeyer:
             >>> keyer.forTextHeadingNode("dividend", "body|p:배당정책")
             ('body|p:배당정책', 1, 'body|p:배당정책')
         """
-        if segmentKeyBase.startswith("body|p:") or segmentKeyBase.startswith("heading|p:"):
+        if segmentKeyBase.startswith("heading|p:"):
             return segmentKeyBase, 1, segmentKeyBase
         return self._emit(topic, segmentKeyBase)
 
