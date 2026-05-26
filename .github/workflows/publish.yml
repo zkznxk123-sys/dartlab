@@ -102,10 +102,12 @@ jobs:
           node-version: "20"
 
       - name: Build Svelte UI
+        # tsc 는 routeTree.gen.ts 가 미존재 상태에서 fail (TanStackRouterVite 가 vite 시작 시
+        # 자동 생성). v0.10.0 시점 build script 가 'vite build' 만이었음 — 그 동작 재현.
         run: |
           cd ui/web
           npm ci
-          npm run build
+          npx vite build
 
       - name: Copy UI build into package
         run: |
