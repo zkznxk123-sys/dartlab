@@ -11,6 +11,14 @@ whenToUse:
   - 사외이사 비중
   - 다선 history
   - 거버넌스 점검
+examples:
+  - 005930 사외이사 비중 추세 연도별
+  - 이사회 독립성 — 다선 동시재직 횟수
+  - 거버넌스 실질 독립성 평가
+expectedOutputs:
+  - 사외이사 비중 5y 시계열 + YoY 변화
+  - 평균 임기 + 동시 다선 (interlocking) 카운트
+  - 라벨 (강 / 중 / 약 — 비중 + 다선 임계)
 linkedSkills:
   - engines.company
   - engines.analysis

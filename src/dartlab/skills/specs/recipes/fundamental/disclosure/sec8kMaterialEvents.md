@@ -11,6 +11,14 @@ whenToUse:
   - SEC material event
   - 임원 변동 cluster
   - 미국 이벤트 burst
+examples:
+  - AAPL 8-K 30일 안 burst 카운트
+  - SEC material event 폭증 종목
+  - Item 5.02 임원 변동 cluster
+expectedOutputs:
+  - 30d 안 8-K 총 건수 + Item 분류 분포
+  - Item 5.02 (임원 변동) 카운트
+  - burst 라벨 (≥ 5 건 OR Item 5.02 ≥ 2 = 전환점 후보)
 linkedSkills:
   - engines.edgar
   - engines.gather

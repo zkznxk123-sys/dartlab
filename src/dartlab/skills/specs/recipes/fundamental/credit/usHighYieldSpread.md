@@ -11,6 +11,14 @@ whenToUse:
   - high yield credit regime
   - OAS stress threshold
   - credit market 신호
+examples:
+  - 미국 HY spread 가 지금 stress 구간이야
+  - BofA OAS spread regime — 4%p / 8%p 임계
+  - 글로벌 credit market 위기 신호
+expectedOutputs:
+  - 현재 OAS spread (%p) + z-score (장기 평균 대비)
+  - regime 라벨 (normal / stress / crisis — 4%p / 8%p 임계)
+  - 시계열 chart (24mo OAS + z-score band)
 linkedSkills:
   - engines.credit
   - engines.macro

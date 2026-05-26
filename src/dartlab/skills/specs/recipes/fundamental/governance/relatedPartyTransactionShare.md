@@ -11,6 +11,14 @@ whenToUse:
   - 일감몰아주기 의심
   - related party transaction
   - 계열사 의존
+examples:
+  - 005930 특수관계자 매출 비중 연도별
+  - 계열사 매출 의존 — 일감몰아주기 의심 신호
+  - 대주주 자금대여 비중 추세
+expectedOutputs:
+  - 매출 / 매입 / 자금대여 특수관계자 비중 5y 시계열
+  - 비중 vs 전체 매출 성장률 비교 단일값
+  - 라벨 (의심 / 관찰 / 평상 — 30% 또는 전체보다 빠른 성장 임계)
 linkedSkills:
   - engines.company
   - engines.gather

@@ -11,6 +11,14 @@ whenToUse:
   - SEC 위험 요인 변화
   - 미국 공시 risk
   - Item 1A 신규 위험
+examples:
+  - AAPL 10-K 위험 요인 작년 대비 신규 / 삭제
+  - SEC Item 1A risk factor YoY 변화
+  - 미국 종목 경영진 위험 인식 전환 신호
+expectedOutputs:
+  - 신규 추가 risk factor list + count
+  - 삭제 risk factor list + count
+  - 라벨 (신규 ≥ 3 = 전환 신호 / 미만 = 평상)
 linkedSkills:
   - engines.edgar
   - engines.gather

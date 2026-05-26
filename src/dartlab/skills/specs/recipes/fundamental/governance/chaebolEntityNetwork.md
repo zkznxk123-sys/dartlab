@@ -11,6 +11,14 @@ whenToUse:
   - chaebol network
   - 지분율 cross-holding
   - 임원 동시재직
+examples:
+  - 삼성 그룹 계열사 망 지분율 cross-holding
+  - 재벌 그룹 안 임원 동시재직 (interlocking)
+  - 005930 속한 그룹 지주사 / 순환출자 구조
+expectedOutputs:
+  - 그룹 안 회사 list + 지분율 cross-holding 표
+  - interlocking directorate 카운트 (회사 × 임원)
+  - 지주사 / 순환출자 / 차등의결권 라벨 (구조 분류)
 linkedSkills:
   - engines.company
   - engines.scan
