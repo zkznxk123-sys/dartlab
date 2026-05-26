@@ -63,6 +63,52 @@ _REBUILD_SCHEMA = pa.schema(
 _RE_WHITESPACE = re.compile(r"\s+")
 _RE_MULTI_NEWLINE = re.compile(r"\n{3,}")
 
+# zip XML 의 DOCUMENT-NAME ACODE → report_type 매핑. DART 공식 보고서 코드:
+#   11011: 사업보고서, 11012: 반기보고서, 11013: 1분기보고서, 11014: 3분기보고서.
+_RE_DOC_NAME = re.compile(r'<DOCUMENT-NAME\s+ACODE="(\d+)"[^>]*>([^<]+)</DOCUMENT-NAME>')
+# rcept_date YYYYMMDD 의 month → reportKind 휴리스틱 (사업보고서 = 전년도 사업연도):
+#   03~04: annual (전년도), 05: Q1, 08: semi, 11: Q3.
+# ACODE → (name, fiscal end month). 사업기간 종료 month — report_type "(YYYY.MM)" 의 MM.
+_REPORT_ACODE_MAP = {
+    "11011": ("사업보고서", "12"),
+    "11012": ("반기보고서", "06"),
+    "11013": ("분기보고서", "03"),
+    "11014": ("분기보고서", "09"),
+}
+
+
+def _extractMetaFromXml(xml: str, rcptNo: str) -> tuple[str, str, str]:
+    """zip XML 의 첫 2KB 에서 (year, rcept_date, report_type) 추출.
+
+    rcept_date = rcept_no 앞 8자리 (YYYYMMDD). year = 사업연도 (annual 인 경우 rcept
+    year - 1, 그 외 rcept year). report_type = "{kind} ({year}.{fiscalMonth})" —
+    selectReport 의 _REPORT_KIND_MAP regex (예: ``분기보고서.*\\d{4}\\.03`` for Q1)
+    호환. fiscalMonth = ACODE 별 사업기간 종료 month (사업 12 / 반기 06 / Q1 03 / Q3 09).
+    """
+    rcptDate = rcptNo[:8] if len(rcptNo) >= 8 and rcptNo[:8].isdigit() else ""
+    rcptYear = rcptDate[:4] if rcptDate else ""
+
+    head = xml[:2000]
+    m = _RE_DOC_NAME.search(head)
+    acode = m.group(1) if m else ""
+    kindFiscal = _REPORT_ACODE_MAP.get(acode)
+    if not kindFiscal:
+        return rcptYear, rcptDate, ""
+    kind, fiscalMonth = kindFiscal
+
+    # 사업연도 = annual (사업보고서) 인 경우 rcept year - 1 (12월 결산), 그 외 rcept year
+    if kind == "사업보고서" and rcptYear:
+        try:
+            year = str(int(rcptYear) - 1)
+        except ValueError:
+            year = rcptYear
+    else:
+        year = rcptYear
+
+    reportType = f"{kind} ({year}.{fiscalMonth})" if year else kind
+    return year, rcptDate, reportType
+
+
 # ── XML → 텍스트 변환 ──
 
 
@@ -576,7 +622,10 @@ class ZipDocsCollector:
 
         written = 0
         skipped = 0
-        with pq.ParquetWriter(outPath, _REBUILD_SCHEMA, compression="snappy") as writer:
+        # version="1.0" — VSCode parquet viewer / DuckDB 등 1.0 호환 reader 대응
+        # (기본 2.6 은 일부 third-party viewer 가 못 읽음). pyarrow / polars / pandas
+        # 는 1.0 / 2.x 모두 정상 read.
+        with pq.ParquetWriter(outPath, _REBUILD_SCHEMA, compression="snappy", version="1.0") as writer:
             for zp in zips:
                 rcptNo = zp.stem
                 xml = _xmlFromZip(zp)
@@ -592,17 +641,20 @@ class ZipDocsCollector:
                 if not rows:
                     skipped += 1
                     continue
-                meta = rcptMeta.get(
-                    rcptNo,
-                    {
-                        "corp_code": self._corpCode,
-                        "corp_name": self._corpName,
-                        "stock_code": self.stockCode,
-                        "year": "",
-                        "rcept_date": "",
-                        "report_type": "",
-                    },
-                )
+                # zip XML 의 <DOCUMENT-NAME ACODE> + rcept_no 앞 8자리 = primary source
+                # (year / rcept_date / report_type). 옛 parquet 의 meta 는 corp_code/
+                # corp_name 만 fallback — 직전 rebuild 의 잘못된 report_type 이 살아남
+                # 아 새 빌드를 오염시키지 않도록.
+                xmlYear, xmlDate, xmlReportType = _extractMetaFromXml(xml, rcptNo)
+                metaFromParquet = rcptMeta.get(rcptNo, {})
+                meta = {
+                    "corp_code": metaFromParquet.get("corp_code") or self._corpCode,
+                    "corp_name": metaFromParquet.get("corp_name") or self._corpName,
+                    "stock_code": metaFromParquet.get("stock_code") or self.stockCode,
+                    "year": xmlYear or metaFromParquet.get("year", ""),
+                    "rcept_date": xmlDate or metaFromParquet.get("rcept_date", ""),
+                    "report_type": xmlReportType or metaFromParquet.get("report_type", ""),
+                }
                 table = _rcpRowsToTable(meta, self.stockCode, self._corpCode, self._corpName, rcptNo, rows)
                 writer.write_table(table)
                 written += table.num_rows
