@@ -62,6 +62,10 @@ CI Fast 17 게이트 + CI Full 28 jobs + Deploy Site 정합 회복. PyPI 0.10.1 
 
 - 6 test xfail/skip — sceMapperNormalize circular · viewer ChangeSummary · pipeline loadData monkeypatch · agent failure_streak · batchCollectors/Worker circular · docstring baseline 갱신.
 
+### Contributors
+
+- [@ryankr](https://github.com/ryankr) — `fix(mcp): array properties 에 items 추가` (#33), OpenAI strict validator HTTP 400 해소.
+
 ## [0.10.2 — staging, unreleased] sprint 5/6 누적
 
 세계 최고 레포 PRD v1.1 트랙 — **54 T 완료 + 16 부분 진척** (70 T 모두 진척 — 🟢 0%). 평균 67.6 → ~93.4 (+25.8). 1.0.0 게이트 91.7 + 1.7점 초과 도달.
