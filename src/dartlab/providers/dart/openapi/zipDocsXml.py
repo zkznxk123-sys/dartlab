@@ -87,11 +87,12 @@ def _tableToMarkdown(table) -> str:
     ``.//TD`` 가 nested table 의 TR/cell 까지 외부에 포함시켜 한 table 420MB+
     markdown 폭발 (035720 회귀).
     """
-    # 1차 pass — TR/cell 수집. 단일 cell (1 row × 1 col, rowspan/colspan 없음) 은
-    # DART XML 의 paragraph framing 양식 (`<TABLE><TR><TD>본문...</TD></TR></TABLE>`)
-    # 으로 시각상 table 아님. 그대로 HTML table 로 emit 하면 좁은 viewer column 에서
-    # 본문이 한 cell 안 한 줄로 펼쳐져 가로 스크롤 트리거. 본 1×1 case 는 plain text
-    # 만 emit (paragraph 와 동일 wrap 동작).
+    # 1차 pass — TR/cell 수집. DART XML 의 시각 무 `<TABLE BORDER="0">` 양식은 시각상
+    # table 아니라 layout 도구 (paragraph framing / caption+unit / 정렬 보조). 좁은
+    # viewer column 에서 본문 한 cell 한 줄 펼침 + 가로 스크롤 트리거 회귀 차단.
+    border = (table.get("BORDER", "1") or "1").strip()
+    isBorderless = border in ("0", "")
+
     collected: list[list[tuple[str, str, str, str]]] = []  # rows of [(tag, colspan, rowspan, text)]
     for tr in _findDirectTRs(table):
         cells: list[tuple[str, str, str, str]] = []
@@ -113,6 +114,17 @@ def _tableToMarkdown(table) -> str:
         only = collected[0][0]
         if only[1] in ("1", "") and only[2] in ("1", ""):
             return only[3]
+
+    # BORDER="0" 시각 무 layout table — paragraph + (단위) caption 양식. table tag 없이
+    # cell text 들 em-space ( ) 로 join + 줄바꿈으로 row 구분. multi-row 도 단순
+    # 줄바꿈 caption block 으로. 진짜 multi-col 데이터 table 은 BORDER="1" 양식 유지.
+    if isBorderless:
+        lines: list[str] = []
+        for cells in collected:
+            texts = [c[3] for c in cells if c[3]]
+            if texts:
+                lines.append(" ".join(texts))
+        return "\n".join(lines)
 
     out: list[str] = ["<table>"]
     for cells in collected:
