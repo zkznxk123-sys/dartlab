@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import polars as pl
 import pytest
 
@@ -56,20 +58,23 @@ def test_parse_text_structure_carries_heading_state_across_blocks():
     assert second[1]["textPathKey"] == "재무상태및영업실적연결기준 > 영업실적"
 
 
-@pytest.mark.xfail(
-    reason="_canonicalHeadingKey 룰 변경 (level<=1 Roman chapter 만 @topic alias) — sub-section row 흡수 차단 의도. test expectation 갱신 또는 fixture (Roman 'I. ' 사용) 마이그레이션 필요 (deferred)"
-)
 def test_parse_text_structure_uses_topic_canonical_key_for_root_alias(monkeypatch):
+    # fake_map_section_title 이 real mapSectionTitle 의 prefix strip 동작을 재현해야
+    # `_canonicalHeadingKey` 의 `mapped == topic` 분기가 정상 작동 (`1. 사업의 내용` 같은
+    # numeric/한글/Roman prefix 가 normalize 안 되면 set lookup 미스 → topic mismatch).
     def fake_map_section_title(title: str) -> str:
-        normalized = title.replace(" ", "")
+        stripped = re.sub(r"^\s*(?:\d+\.|[가-힣]\.|[IVXivx]+\.|\(\d+\))\s*", "", title)
+        normalized = stripped.replace(" ", "")
         if normalized in {"사업의개요", "사업의내용"}:
             return "businessOverview"
         return normalized
 
     monkeypatch.setattr(textStructure, "mapSectionTitle", fake_map_section_title)
 
+    # Roman 'I. ' chapter — `_canonicalHeadingKey` 의 level<=1 Roman chapter 만
+    # @topic alias 룰 (textStructure.py:172). Arabic '1.' 는 sub-section.
     rows = parseTextStructure(
-        "1. 사업의 내용\n가. 사업부문별 현황\n당사는 DX와 DS 부문을 운영합니다.",
+        "I. 사업의 내용\n가. 사업부문별 현황\n당사는 DX와 DS 부문을 운영합니다.",
         sourceBlockOrder=0,
         topic="businessOverview",
     )
@@ -92,18 +97,20 @@ def test_parse_text_structure_preserves_temporal_marker_without_polluting_path()
     assert rows[2]["textPathKey"] == "환율변동영향"
 
 
-@pytest.mark.xfail(reason="_canonicalHeadingKey 룰 변경 동일 영향 (deferred)")
 def test_parse_text_structure_demotes_redundant_topic_root_alias(monkeypatch):
     def fake_map_section_title(title: str) -> str:
-        normalized = title.replace(" ", "")
+        stripped = re.sub(r"^\s*(?:\d+\.|[가-힣]\.|[IVXivx]+\.|\(\d+\))\s*", "", title)
+        normalized = stripped.replace(" ", "")
         if normalized in {"사업의개요", "사업의내용"}:
             return "businessOverview"
         return normalized
 
     monkeypatch.setattr(textStructure, "mapSectionTitle", fake_map_section_title)
 
+    # Roman 'I.'/'II.' chapter — `_canonicalHeadingKey` level<=1 Roman 만 @topic alias.
+    # 두 번째 root alias (`II. 사업의 내용`) 는 redundant 로 demote → `@alias:사업의내용`.
     rows = parseTextStructure(
-        "1. 사업의 개요\n2. 사업의 내용\n가. 사업부문별 현황\n당사는 DX와 DS 부문을 운영합니다.",
+        "I. 사업의 개요\nII. 사업의 내용\n가. 사업부문별 현황\n당사는 DX와 DS 부문을 운영합니다.",
         sourceBlockOrder=0,
         topic="businessOverview",
     )
@@ -130,23 +137,24 @@ def test_parse_text_structure_adds_semantic_path_keys_for_alias_headings():
     assert rows[2]["textSemanticPathKey"] == "재무상태및영업실적 > 조직변경"
 
 
-@pytest.mark.xfail(reason="_canonicalHeadingKey 룰 변경 동일 영향 (deferred)")
 def test_parse_text_structure_normalizes_safe_business_overview_aliases(monkeypatch):
     def fake_map_section_title(title: str) -> str:
-        normalized = title.replace(" ", "")
+        stripped = re.sub(r"^\s*(?:\d+\.|[가-힣]\.|[IVXivx]+\.|\(\d+\))\s*", "", title)
+        normalized = stripped.replace(" ", "")
         if normalized in {"사업의개요", "사업의내용"}:
             return "businessOverview"
         return normalized
 
     monkeypatch.setattr(textStructure, "mapSectionTitle", fake_map_section_title)
 
+    # Roman chapter — `_canonicalHeadingKey` level<=1 Roman 만 @topic alias 룰.
     first = parseTextStructure(
-        "1. 사업의 개요\n가. 생산 및 설비에 관한 사항\n생산 능력을 설명합니다.",
+        "I. 사업의 개요\n가. 생산 및 설비에 관한 사항\n생산 능력을 설명합니다.",
         sourceBlockOrder=0,
         topic="businessOverview",
     )
     second = parseTextStructure(
-        "1. 사업의 내용\n가. 생산 및 설비\n생산 능력을 설명합니다.",
+        "I. 사업의 내용\n가. 생산 및 설비\n생산 능력을 설명합니다.",
         sourceBlockOrder=0,
         topic="businessOverview",
     )
@@ -159,15 +167,10 @@ def test_parse_text_structure_normalizes_safe_business_overview_aliases(monkeypa
     assert secondBody["textSemanticPathKey"] == "@topic:businessOverview > 생산및설비"
 
 
-@pytest.mark.xfail(
-    reason="sections sibling alias 처리 변경 (가/나/다/라 같은 topic alias stack label 갱신) "
-    "이후 textPathKey 가 wide-format 통합되어 옛 'firstBody != secondBody' 가정 안 맞음. "
-    "test 의도 (서로 다른 표기, 같은 semantic) 재설계 필요 — 후속 별 commit.",
-    strict=False,
-)
 def test_parse_text_structure_normalizes_safe_audit_system_aliases(monkeypatch):
     def fake_map_section_title(title: str) -> str:
-        normalized = title.replace(" ", "")
+        stripped = re.sub(r"^\s*(?:\d+\.|[가-힣]\.|[IVXivx]+\.|\(\d+\))\s*", "", title)
+        normalized = stripped.replace(" ", "")
         if normalized in {"감사및감사위원회", "감사위원회", "감사위원회에관한사항"}:
             return "auditSystem"
         return normalized
@@ -175,12 +178,12 @@ def test_parse_text_structure_normalizes_safe_audit_system_aliases(monkeypatch):
     monkeypatch.setattr(textStructure, "mapSectionTitle", fake_map_section_title)
 
     first = parseTextStructure(
-        "1. 감사 및 감사위원회\n가. 감사위원회\n(1) 감사위원 현황\n감사위원 현황입니다.",
+        "I. 감사 및 감사위원회\n가. 감사위원회\n(1) 감사위원 현황\n감사위원 현황입니다.",
         sourceBlockOrder=0,
         topic="auditSystem",
     )
     second = parseTextStructure(
-        "1. 감사 및 감사위원회\n가. 감사위원회에 관한 사항\n(1) 감사위원 현황\n감사위원 현황입니다.",
+        "I. 감사 및 감사위원회\n가. 감사위원회에 관한 사항\n(1) 감사위원 현황\n감사위원 현황입니다.",
         sourceBlockOrder=0,
         topic="auditSystem",
     )
@@ -304,10 +307,13 @@ def test_sections_horizontalize_numbering_changes_into_same_row(monkeypatch):
     assert legal_body.item(0, "segmentOccurrence") == 1
 
 
-@pytest.mark.xfail(reason="_canonicalHeadingKey 룰 변경 동일 영향 (deferred)")
+@pytest.mark.xfail(
+    reason="pipeline.sections post-process 깊은 영향 — parseTextStructure 직접 호출 test 5종은 fake prefix strip + Roman fixture 마이그레이션으로 해소 (commit f0a... 2026-05-26), 본 test 는 pipeline level post-process (chapter row vs sub-chapter body 분리) 가 새 알고리즘과 정합 안 맞아 test redesign 별도 trip."
+)
 def test_sections_preserve_pending_chapter_content_when_subitems_exist(monkeypatch):
     def fake_map_section_title(title: str) -> str:
-        normalized = title.replace(" ", "")
+        stripped = re.sub(r"^\s*(?:\d+\.|[가-힣]\.|[IVXivx]+\.|\(\d+\))\s*", "", title)
+        normalized = stripped.replace(" ", "")
         if normalized.endswith("사업의내용") or normalized.endswith("사업의개요"):
             return "businessOverview"
         return normalized
