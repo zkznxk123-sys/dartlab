@@ -140,7 +140,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원", "dualStack": True},
-        # v3-r7 12-col grid — 12×3 hero (운영자 명시 높이 줄임 2026-05-18).
+        # 자산구조 hero — 한 행 full width (12-col) + 높이 3.
         "layout": {"colSpan": 12, "rowSpan": 3},
         "help": "자산(왼쪽) = 부채+자본(오른쪽). 두 막대 높이는 항상 같다 (회계 등식). 매출채권·재고도 영업자산이지만 운전자본 회수기간 신호로 따로 분리. 기타 영업자산은 PPE·무형·관계사 등 비유동 본업 자본. 금융부채 ↑ 이자 부담, 이익잉여금 ↑ 내부유보 건전.",
     },
@@ -196,7 +196,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "매입채무는 무이자 영업부채 (좋은 부채). 단기차입금 ↑ 은 자금 압박 신호. 장기차입금·사채는 만기 분산되지만 이자 비용 부담. 영업부채 비중이 크면 운전자본으로 자금 조달 — 건전.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -251,7 +251,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "이익잉여금이 매년 누적 증가하면 건전한 내부유보. 자본금 변동 없이 잉여금만 증가하면 이상적. 기타자본 음수는 자기주식 매입 (주주환원). 자본잉여금은 주식발행초과금.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -295,7 +295,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "매출(막대·좌축) 과 영업이익·당기순이익(영역·우축) 별도 축. 우축이 좌축의 ~10% 스케일이라 이익 변동이 잘 보임. 매출 안정인데 이익 변동 크면 운영 레버리지 높음.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -347,7 +347,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "signed": True},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "정상 패턴: 영업+ / 투자- / 재무- (성숙기 기업). 영업CF 가 음수면 사업 자체로 현금 못 만드는 위험 신호. 투자+ 는 자산 매각, 재무+ 는 차입 증가 (성장기 또는 자금 부족).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -464,7 +464,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "영업이익 증가율이 매출 증가율을 넘으면 마진 동반 성장 (질 좋은 성장). 매출만 늘고 이익 정체는 가격 인하 또는 비용 증가 신호. 음수 = 역성장.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -571,7 +571,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "잉여현금흐름 = 영업현금흐름 - 자본적지출. 지속 양수면 배당·자사주 여력. 영업현금흐름/매출 비율은 이익 품질 지표 — 회계 이익이 진짜 현금으로 들어오는지.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -749,48 +749,65 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # ─────────────────────────────────────────────────────────────
     "earningsQuality": {
         "kind": "trend",
-        "title": "이익 품질",
+        "title": "이익 품질 (현금주의 vs 발생주의)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "cfNiRatio",
-                "label": "영업CF/순이익",
-                "color": COLORS[2],
+                "label": "영업CF/순이익 (배)",
+                "color": COLORS[0],
                 "intent": "primary",
                 "unit": "배",
                 "type": "line",
                 "ratio": {"num": {"cfOperating": 1}, "den": {"netIncome": 1}, "scale": 1},
             },
+            {
+                "key": "cfRevenueRatio",
+                "label": "영업CF/매출 (%)",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "axis": "right",
+                "ratio": {"num": {"cfOperating": 1}, "den": {"revenue": 1}, "scale": 100},
+            },
         ],
         "options": {
             "unit": "배",
-            "refLines": [
-                {"value": 1.0, "label": "1.0", "intent": "neutral"},
-            ],
+            "refLines": [{"value": 1.0, "label": "1.0×", "intent": "neutral"}],
         },
         "layout": {"colSpan": 3, "rowSpan": 3},
-        "help": "영업현금흐름 / 순이익. 1.0 미만이 지속되면 회계이익이 진짜 현금이 아니라는 신호 (재고·매출채권 누적). 1.0 이상이면 발생주의/현금주의 일치 — 건전. 음수면 본업이 현금을 잃는 중.",
+        "help": "좌축 영업CF/순이익 — 1.0배 이상 = 회계이익이 현금 동반 (건전). 우축 영업CF/매출 — 매출 1원당 현금 회수율, 산업 평균과 비교. 두 축이 같이 떨어지면 매출 인식 — 현금 회수 갭 확대 (위험).",
     },
     # ─────────────────────────────────────────────────────────────
     # 16. 이자보상배율 — 영업이익 / 금융비용. 부채 안전판.
     # ─────────────────────────────────────────────────────────────
     "interestCoverage": {
         "kind": "trend",
-        "title": "이자보상배율",
+        "title": "이자보상 (영업이익 · 영업CF)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "capitalStructure",
         "seriesPlan": [
             {
                 "key": "icr",
-                "label": "이자보상배율",
-                "color": COLORS[3],
-                "intent": "positive",
+                "label": "영업이익/이자",
+                "color": COLORS[0],
+                "intent": "primary",
                 "unit": "배",
                 "type": "line",
                 "ratio": {"num": {"operatingIncome": 1}, "den": {"financeCosts": 1}, "scale": 1},
+            },
+            {
+                "key": "icrCfo",
+                "label": "영업CF/이자",
+                "color": COLORS[4],
+                "intent": "positive",
+                "unit": "배",
+                "type": "line",
+                "ratio": {"num": {"cfOperating": 1}, "den": {"financeCosts": 1}, "scale": 1},
             },
         ],
         "options": {
@@ -825,7 +842,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "fn": "calcEarningsQualityFlags",
         },
         "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "전년 대비 변동 큰 지표 top 6 (절대 변동값 기준). DSO/DIO/마진/레버리지 동향.",
     },
     # riskLifeCycle (생애주기 단계) 폐기 — 운영자 명시 2026-05-18.
@@ -869,7 +886,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "일"},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "CCC = DSO + DIO − DPO. 짧을수록 현금이 빨리 회수. DPO ↑ = 매입채무 길게 끌어 현금 보유 (좋다). 매출 성장에도 CCC ↑ 면 운전자본 부담 — 진정한 성장 의심.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -939,7 +956,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "ROE = 세금부담 × 이자부담 × 영업이익률 × 자산회전 × 자본승수. 세금↓ 또는 이자↓ 가 부채로 ROE 끌어올리는 신호. 영업이익률↑ 만 본업 동력. Damodaran 5단 정통 (CFA Level 1).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -948,16 +965,34 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # ─────────────────────────────────────────────────────────────
     "roic": {
         "kind": "trend",
-        "title": "ROIC (투하자본수익률)",
+        "title": "수익성 3종 (ROE · ROA · ROIC)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "profitability",
         "seriesPlan": [
             {
-                "key": "roic",
-                "label": "ROIC",
-                "color": COLORS[2],
+                "key": "roe",
+                "label": "ROE (자기자본)",
+                "color": COLORS[0],
                 "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"netIncome": 1}, "den": {"equity": 1}, "scale": 100},
+            },
+            {
+                "key": "roa",
+                "label": "ROA (총자산)",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"netIncome": 1}, "den": {"assets": 1}, "scale": 100},
+            },
+            {
+                "key": "roic",
+                "label": "ROIC (투하자본)",
+                "color": COLORS[4],
+                "intent": "positive",
                 "unit": "%",
                 "type": "line",
                 "ratio": {
@@ -969,51 +1004,63 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         ],
         "options": {
             "unit": "%",
-            "refLines": [
-                {"value": 8, "label": "WACC ≈ 8%", "intent": "neutral"},
-            ],
+            "refLines": [{"value": 8, "label": "WACC ≈ 8%", "intent": "neutral"}],
         },
-        "layout": {"colSpan": 4, "rowSpan": 3},
-        "help": "ROIC = NOPAT / 투하자본. WACC (≈8%) 초과 = 가치창출. 미만 = 자본 파괴. ROE 와 달리 부채 효과 제거 — 본질적 자본 효율. 세효과 0.78 단순 적용.",
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "ROE 주주 수익률 (부채 효과 포함) · ROA 총자산 효율 · ROIC 투하자본 수익 (부채 효과 제거, WACC ≈8% 초과 시 가치창출). ROE 와 ROIC 갭이 크면 부채 레버리지 의존.",
     },
     # ─────────────────────────────────────────────────────────────
     # 19. 순차입금 — 차입금 − 현금. 음수 = net cash (재무 여유).
     # ─────────────────────────────────────────────────────────────
     "netDebt": {
         "kind": "trend",
-        "title": "순차입금",
+        "title": "순차입금 · 차입금 부담",
         "topic": "BS",
         "tab": "financial",
         "subCategory": "capitalStructure",
         "seriesPlan": [
             {
                 "key": "netDebt",
-                "label": "순차입금",
-                "color": COLORS[0],
+                "label": "순차입금 (원)",
+                "color": COLORS[2],
                 "intent": "negative",
                 "unit": "원",
                 "type": "bar",
                 "compose": {"shortDebt": 1, "longDebt": 1, "cash": -1},
             },
+            {
+                "key": "debtToEquity",
+                "label": "차입금/자기자본 (%)",
+                "color": COLORS[0],
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "axis": "right",
+                "ratio": {
+                    "num": {"shortDebt": 1, "longDebt": 1},
+                    "den": {"equity": 1},
+                    "scale": 100,
+                },
+            },
         ],
         "options": {"unit": "원", "signed": True},
         "layout": {"colSpan": 3, "rowSpan": 3},
-        "help": "(단기 + 장기차입금) − 현금. 양수 = 순차입 상태, 음수 = net cash (배당·자사주·M&A 여유). 분기 추세로 deleveraging 방향성 확인.",
+        "help": "좌축 순차입금 = (단기+장기차입금)−현금. 음수 = net cash 여유. 우축 차입금/자기자본 — 자본 대비 차입 의존도. 둘 다 ↓ = deleveraging.",
     },
     # ─────────────────────────────────────────────────────────────
     # 20. Sloan accruals — (순이익 − 영업CF) / 평균자산. 분식 의심 정량.
     # ─────────────────────────────────────────────────────────────
     "sloanAccruals": {
         "kind": "trend",
-        "title": "발생액 비율 (Sloan)",
+        "title": "발생액 품질 (Sloan + WC ratios)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "accruals",
-                "label": "발생액/자산",
-                "color": COLORS[2],
+                "label": "Sloan 발생액/자산",
+                "color": COLORS[0],
                 "intent": "primary",
                 "unit": "%",
                 "type": "line",
@@ -1022,6 +1069,24 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                     "den": {"assets": 1},
                     "scale": 100,
                 },
+            },
+            {
+                "key": "arRatio",
+                "label": "매출채권/매출",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"receivables": 1}, "den": {"revenue": 1}, "scale": 100},
+            },
+            {
+                "key": "invRatio",
+                "label": "재고/매출",
+                "color": COLORS[2],
+                "intent": "negative",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"inventories": 1}, "den": {"revenue": 1}, "scale": 100},
             },
         ],
         "options": {
@@ -1075,7 +1140,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 2.99, "label": "2.99 안전", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "Z' < 1.81 = 부실 위험, > 2.99 = 안전, 사이 = 회색. 단순화: equity/liabilities 비중 별도 카드(stabilityRatio). 5 요소 가중합 추세로 신용 등급 변화 사전 감지.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1111,7 +1176,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "CapEx (재투자) + 배당 (주주환원) 의 상대 비중으로 경영진 자본배분 의도 파악. CapEx ↑ = 성장기, 배당 ↑ = 성숙기. R&D·자사주매입은 회사별 보고 양식 달라 별도 카드로 분리 (표준 28 계정 한정).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1148,21 +1213,34 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # ─────────────────────────────────────────────────────────────
     "payoutRatio": {
         "kind": "trend",
-        "title": "배당성향",
+        "title": "환원율 (순이익 · 영업CF 기준)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "cashflow",
         "seriesPlan": [
             {
                 "key": "payout",
-                "label": "배당 / 순이익",
-                "color": COLORS[4],
+                "label": "배당/순이익",
+                "color": COLORS[0],
                 "intent": "primary",
                 "unit": "%",
                 "type": "line",
                 "ratio": {
                     "num": {"dividendsPaid": -100},
                     "den": {"netIncome": 1},
+                    "scale": 1,
+                },
+            },
+            {
+                "key": "payoutCfo",
+                "label": "배당/영업CF",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "ratio": {
+                    "num": {"dividendsPaid": -100},
+                    "den": {"cfOperating": 1},
                     "scale": 1,
                 },
             },
@@ -1203,7 +1281,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 10, "label": "10%", "intent": "neutral"},
             ],
         },
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "현금성자산 / 총자산. 10% 이상 = 보수적 경영 + M&A·배당·자사주 여력. 5% 미만 = 단기 유동성 부담 가능. 사업 모델별 정상 범위 다름 (현금 집약 IT 는 높고 제조는 낮음).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1211,57 +1289,88 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # ─────────────────────────────────────────────────────────────
     "equityGrowth": {
         "kind": "trend",
-        "title": "자본 성장",
+        "title": "자본 vs 매출 vs 순이익 (성장 비교)",
         "topic": "BS",
         "tab": "financial",
         "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "equityYoy",
-                "label": "자기자본 증가율",
-                "color": COLORS[3],
+                "label": "자기자본 YoY",
+                "color": COLORS[0],
                 "intent": "primary",
                 "unit": "%",
-                "type": "bar",
+                "type": "line",
                 "yoy": "equity",
+            },
+            {
+                "key": "revenueYoy",
+                "label": "매출 YoY",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "yoy": "revenue",
+            },
+            {
+                "key": "netIncomeYoy",
+                "label": "순이익 YoY",
+                "color": COLORS[4],
+                "intent": "positive",
+                "unit": "%",
+                "type": "line",
+                "yoy": "netIncome",
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
-        "help": "자기자본 전년 동기 대비 증가율. 양수 지속 = 내부유보 누적 (이익 안 빼가고 재투자). 음수 = 배당 + 자사주매입 > 순이익 (또는 결손금). 매출 성장과 비교해 자본 효율 변화 단서.",
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "자기자본 YoY = 내부유보 + 유상증자. 자기자본 < 순이익 YoY 면 배당·자사주 환원 활발. 자기자본 > 매출 YoY 지속 = 자본 누적 (자본 효율 ↓ 우려).",
     },
     # ─────────────────────────────────────────────────────────────
     # 28. 실효세율 — 법인세 / 세전이익. 24% 표준 + 안정성.
     # ─────────────────────────────────────────────────────────────
     "effectiveTaxRate": {
         "kind": "trend",
-        "title": "실효세율",
+        "title": "마진 layering (영업 → 세전 → 순)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "quality",
         "seriesPlan": [
             {
-                "key": "etr",
-                "label": "법인세 / 세전이익",
-                "color": COLORS[1],
+                "key": "opm",
+                "label": "영업이익률",
+                "color": COLORS[0],
                 "intent": "primary",
                 "unit": "%",
                 "type": "line",
+                "ratio": {"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
+            },
+            {
+                "key": "ptm",
+                "label": "세전이익률",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
                 "ratio": {
-                    "num": {"incomeTax": 100},
-                    "den": {"operatingIncome": 1, "financeIncome": 1, "financeCosts": -1},
-                    "scale": 1,
+                    "num": {"operatingIncome": 1, "financeIncome": 1, "financeCosts": -1},
+                    "den": {"revenue": 1},
+                    "scale": 100,
                 },
             },
+            {
+                "key": "npm",
+                "label": "순이익률",
+                "color": COLORS[4],
+                "intent": "positive",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"netIncome": 1}, "den": {"revenue": 1}, "scale": 100},
+            },
         ],
-        "options": {
-            "unit": "%",
-            "refLines": [
-                {"value": 24, "label": "24% (법정)", "intent": "neutral"},
-            ],
-        },
-        "layout": {"colSpan": 6, "rowSpan": 3},
-        "help": "법인세 / 세전이익. 한국 법정 24% (1억 초과). 5% 이하·100% 초과 같은 이상치는 일회성 세금조정 또는 세전이익 손실 신호. 추세 변동성 ↑ = 회계 추정 의존도 ↑.",
+        "options": {"unit": "%"},
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "영업 → 세전 → 순 마진 layering. 영업이익률 = 본업 수익. 세전 = 영업 + 영업외(이자/환). 순 = 세전 − 법인세. 세 라인 갭이 작으면 영업외+세금 부담 작음. 영업이익 ≈ 순이익 이면 영업외(+) 와 법인세(−) 가 cancel out.",
     },
     # ─────────────────────────────────────────────────────────────
     # 24. 영업이익 → 순이익 walk — 4 단 막대. 본업과 비본업/세금 분리.
@@ -1346,7 +1455,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": -2.22, "label": "−2.22 (정상)", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "Beneish 1999 정통 8 변수 (DSRI/GMI/AQI/SGI/DEPI/SGAI/TATA/LVGI) 합산. M > −1.78 = 회계조작 의심. K-IFRS 환경 false positive 잦음 — 추세 변동 함께 인용.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1362,7 +1471,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "penmanRoeBars"},
         "options": {"stacked": True, "unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "ROCE = RNOA (영업력) + FLEV × SPREAD (레버리지 효과). 진성 고수익 = RNOA > 15% + FLEV < 0.5. 레버리지 의존 = FLEV > 1 + RNOA 보통. Penman & Nissim (2001) 정통.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1378,7 +1487,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "roicWaccGap"},
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "Spread = ROIC − WACC. 양수 지속 = 경제적 가치 창출 (Damodaran). 음수 = 자본 파괴. WACC 단순 가정 8% (한국 평균). 정밀 WACC 필요 시 별도 카드.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1413,7 +1522,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 3, "label": "3 (위험)", "intent": "negative"},
             ],
         },
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "Piotroski 2000 정통 9 binary (수익성 4 + 건전성 3 + 효율성 2). ≥ 7 = 펀더멘털 강건, ≤ 3 = 부실 신호. 시계열 추세 ↑ = 개선, ↓ = 악화.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1429,7 +1538,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "segmentBreakdown"},
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "사업보고서 III '사업의 내용' top 6 부문 매출 시계열. 부문 단일 의존 = 사업 집중 위험. 부문 다각화 추세는 안정성 신호.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1445,7 +1554,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "segmentConcentration"},
         "options": {"unit": ""},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "HHI (Herfindahl) > 5000 = 고집중 (단일 사업 위험). 1위 부문 비중 ↑ = 사업 집중. 분산 추세 = 다각화 진행.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1477,7 +1586,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressEnsembleGauge"},
         "options": {},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "Altman Z·Z''·Ohlson O·Springate S·Zmijewski X 5 모델 다수결. 단일 모델 편향 제거. 일치도 < 60% = 신뢰 어려움 (모델 간 불일치).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1495,7 +1604,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "snowflakeRadar"},
         "options": {},
-        "layout": {"colSpan": 12, "rowSpan": 4},
+        "layout": {"colSpan": 3, "rowSpan": 4},
         "help": "5 정통 axis 0~10 점수 — 수익성(ROE)·자본효율(ROIC)·안정성(자기자본/자산)·유동성(유동비율)·현금흐름(FCF/매출). peer 비교 없이 절대 임계값으로 industry-agnostic 평가. 최근 4 분기 평균.",
     },
 }
@@ -1503,45 +1612,40 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
 
 
 FINANCE_DASHBOARD_KEYS: list[str] = [
-    # ─ 01 자본구조 · 자산구조 (정통 1+2). 3 row. ─
-    "assetComposition",  # row0   12 = 12
-    "liabilityDetail",  # row1   4 ┐
-    "equityDetail",  # row1   4 ├ = 12
-    "cashAssetsRatio",  # row1   4 ┘
-    "incomeBreakdown",  # row2   6 ┐ = 12
-    "workingCapitalDays",  # row2   6 ┘
-    # ─ 02 영업 효율 · 자본 효율 (정통 3+5). 4 row. DuPont 5단·Penman·ROIC-WACC·DOL 신설. ─
-    "marginTrend",  # row3   3 ┐
-    "returnTrend",  # row3   3 ├ = 12
-    "dupont5Step",  # row3   6 ┘  (N1 신설, dupont 3단 대체)
-    "penmanRoeDecomp",  # row4   4 ┐  (N3 신설)
-    "roic",  # row4   4 ├ = 12
-    "roicWaccGap",  # row4   4 ┘  (N4 신설)
-    "costStructureTrend",  # row5   3 ┐
-    "turnoverTrend",  # row5   3 ├
-    "operatingLeverage",  # row5   3 ├ = 12  (N8 신설)
-    "taxWalk",  # row5   3 ┘
-    "segmentRevenue",  # row6   6 ┐ = 12  (N6 신설)
-    "effectiveTaxRate",  # row6   6 ┘  (rndIntensity 005930 0% 회수 → 폐기, effectiveTaxRate 6 확장)
-    # ─ 03 현금 일생 · 자본배분 (정통 4+10). 2 row. ─
-    "cashflowSigned",  # row7   4 ┐
-    "fcfTrend",  # row7   4 ├ = 12
-    "capitalAllocation",  # row7   4 ┘
-    "payoutRatio",  # row8   3 ┐
-    "earningsQuality",  # row8   3 ├
-    "sloanAccruals",  # row8   3 ├ = 12
-    "netDebt",  # row8   3 ┘
-    # ─ 04 재무 안정 · 부도 위험. 2 row. (Beneish 데이터 sparse 폐기) ─
-    "stabilityRatio",  # row9   3 ┐
-    "liquidityTrend",  # row9   3 ├
-    "leverageTrend",  # row9   3 ├ = 12
-    "interestCoverage",  # row9   3 ┘
-    "altmanZ",  # row10  6 ┐ = 12  (Beneish 폐기 → 6 확장)
-    "distressEnsemble",  # row10  6 ┘  (gauge, 5 모델 종합)
-    # ─ 05 성장의 질 · 이상신호. 1 row. (Piotroski annual sparse, riskAnomaly 데이터 0 폐기) ─
-    "growthYoy",  # row11  4 ┐
-    "equityGrowth",  # row11  4 ├ = 12
-    "segmentConcentration",  # row11  4 ┘  (HHI 시계열, 부문 다각화 추이)
+    # ─ 01 자본구조 · 자산구조 — 자금조달과 자산 운용. ─
+    "assetComposition",  # full row hero
+    "liabilityDetail",
+    "equityDetail",
+    "incomeBreakdown",
+    "workingCapitalDays",
+    "stabilityRatio",  # 자본구조 안정성 (자기자본/부채 ratio)
+    "liquidityTrend",  # 유동성 (유동/당좌비율)
+    "leverageTrend",  # 레버리지 (부채/자본·부채/자산)
+    # ─ 02 영업 효율 · 자본 효율 — 본업 수익성. ─
+    "marginTrend",
+    "returnTrend",  # ROE/ROA/ROIC 3종 (보강)
+    "dupont5Step",
+    "penmanRoeDecomp",
+    "roicWaccGap",
+    "costStructureTrend",
+    "turnoverTrend",
+    "operatingLeverage",
+    "taxWalk",
+    "effectiveTaxRate",  # 영업/세전/순 마진 layering (보강)
+    "segmentRevenue",
+    # ─ 03 현금 일생 · 자본배분 — 번 돈은 어디로. ─
+    "cashflowSigned",
+    "fcfTrend",
+    "capitalAllocation",
+    "payoutRatio",  # 배당/순이익 + 배당/영업CF (보강)
+    "earningsQuality",  # CFO/NI + CFO/매출 (보강)
+    "sloanAccruals",  # 발생액 + 매출채권 증가/매출 (보강)
+    "netDebt",  # 순차입금 + 차입금/자본 dual axis (보강)
+    "interestCoverage",  # 영업이익/이자 + 영업CF/이자 (보강)
+    # ─ 04 성장의 질 · 이상신호 — 성장이 진짜인가. ─
+    "growthYoy",
+    "equityGrowth",  # 자본 YoY + 매출 YoY 비교 (보강)
+    "segmentConcentration",
 ]
 """34 카드 / 5 section / 12 row. 모든 row col 합 = 12 강행.
 01 자본+자산구조 (3 row) / 02 영업·자본 효율 (4 row) / 03 현금 일생·자본배분 (2 row)

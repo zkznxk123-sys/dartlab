@@ -13,7 +13,8 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
-from dartlab.viz.data import normalize
+from dartlab.viz.data import normalize  # noqa: F401 — _cache.getNormFinance 호출 시 lazy 사용
+from dartlab.viz.display.finance._cache import getNormFinance
 from dartlab.viz.display.finance.accounts import extractSeries
 
 
@@ -272,7 +273,7 @@ def buildDistressGauge(company: Any) -> dict[str, Any]:
     임계: Z' ≥ 2.9 안전 / 1.23~2.9 주의 / < 1.23 위험.
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 4, "annual")
@@ -323,7 +324,7 @@ def buildScenarioSensitivity(company: Any) -> dict[str, Any]:
     Returns: {cells, rowOrder, colOrder, tone}.
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 4, "annual")
@@ -373,7 +374,7 @@ def buildDistressDecomp(company: Any) -> dict[str, Any]:
         기여도 절대값 내림차순 정렬.
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 4, "annual")
@@ -458,7 +459,7 @@ def buildLifeCyclePhase(company: Any) -> dict[str, Any]:
       CFO+ CFI+ CFF+  → 회복 / 비정형
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 8, "annual")
@@ -695,7 +696,7 @@ def buildPeerScatter(company: Any) -> dict[str, Any]:
     각 기간이 하나의 점, 최근 기간이 self (별표).
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 12, "annual")
@@ -737,7 +738,7 @@ def buildPeerComparison(company: Any) -> dict[str, Any]:
     동종 wiring 후속. 현재는 회사 시계열의 분포 (자신과 자기 중앙값 비교).
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 12, "annual")
@@ -811,7 +812,7 @@ def buildAnomalyTopList(company: Any) -> list[dict[str, Any]]:
     경고성 (large change) + 정상 (small change) 모두 표시. 임계 기반 hard cut 폐기.
     """
     try:
-        norm = normalize.normalize(company.rawFinance)
+        norm = getNormFinance(company)
         from dartlab.viz.display.finance.periods import lastNPeriods
 
         periods = lastNPeriods(norm, 4, "annual")
@@ -1367,11 +1368,10 @@ def buildSnowflakeRadar(company: Any) -> dict[str, Any]:
     최근 4 분기 평균 (단일 분기 노이즈 흡수). 데이터 부족 axis 는 0p 처리 (radar 표시).
     회사 강·약점이 한 장에 보임.
     """
-    from dartlab.viz.data import normalize as _norm
     from dartlab.viz.display.finance.accounts import extractSeries
     from dartlab.viz.display.finance.periods import lastNPeriods
 
-    norm = _norm.normalize(company.rawFinance)
+    norm = getNormFinance(company)
     periods = lastNPeriods(norm, 4, "quarterly")
     if not periods:
         return {}

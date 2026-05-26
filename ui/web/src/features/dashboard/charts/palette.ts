@@ -1,38 +1,35 @@
-// shadcn 8 토큰 distinct hue 팔레트.
-// globals.css 의 `--chart-1~8` 가 muted oklch (low-chroma, 재무 분석체 톤).
-// 룰: stack 보유 시리즈는 stack 등장 순으로 chart-N 누적 할당. 같은 stack 내 시리즈는
-// 위 인덱스가 chart-1, 그다음 chart-2... (ramp 옅음 폐기 → 색 자체로 구분).
-// stack 없는 시리즈는 intent 기반 (primary/positive/negative/neutral/accent).
+// Tableau 10 categorical palette — 데이터 시각화 표준 (Tableau Software 2016).
+// dusty muted 10 hue. saturated 가 아니고 분석체 절제 톤. stack 6~8 series 도
+// 인접 명확 구분. SSOT: Python `dartlab.viz.palette`.
 //
-// SSOT: Python `dartlab.viz.palette` 의 INTENT_MAP 미러.
+// 의미 (INTENT) 매핑 — traffic-light:
+//   primary  = chart-1 Blue   메인
+//   positive = chart-5 Green  긍정
+//   negative = chart-3 Red    부정
+//   accent   = chart-2 Orange 강조
+//   neutral  = chart-10 Grey  배경/참조
 
 import type { RechartsSpec } from '../api/client';
 
 export type Intent = 'primary' | 'positive' | 'negative' | 'neutral' | 'accent';
 
-// traffic-light 의미 매핑 (Tableau 10 hue 순서):
-//   primary = chart-1 (blue, 핵심)
-//   positive = chart-5 (green, 좋은 신호)
-//   negative = chart-3 (red, 부정 신호)
-//   neutral = chart-4 (teal, 절제 배경)
-//   accent = chart-2 (orange, 강조)
 const INTENT_TO_TOKEN: Record<Intent, string> = {
 	primary: 'var(--chart-1)',
 	positive: 'var(--chart-5)',
 	negative: 'var(--chart-3)',
-	neutral: 'var(--chart-4)',
 	accent: 'var(--chart-2)',
+	neutral: 'var(--chart-10)',
 };
 
 const CHART_TOKENS = [
-	'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)',
-	'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)',
+	'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)',
+	'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)', 'var(--chart-9)', 'var(--chart-10)',
 ];
 
 // 시리즈 배열 → 토큰 색 배정.
-//   - stacked 시리즈: 전역 인덱스 (시리즈 등장 순) 로 chart-N 순환.
-//   - 비-stacked + intent: INTENT_TO_TOKEN.
-//   - fallback: chart-(idx % 8).
+//   - stacked: 등장 순 chart-N 순환
+//   - intent: INTENT_TO_TOKEN 매핑
+//   - fallback: chart-(idx % 10)
 export function applyShadcnPalette(spec: RechartsSpec): RechartsSpec {
 	let chartIdx = 0;
 	return {

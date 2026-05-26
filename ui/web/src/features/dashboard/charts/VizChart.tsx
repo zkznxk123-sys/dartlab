@@ -3,6 +3,7 @@
 // --color-{key} CSS 변수 inject. recharts Bar/Line 의 fill/stroke 는 var(--color-...).
 // dark/light 토큰 매핑은 palette.applyShadcnPalette 가 catalog hex → CSS 변수 치환.
 
+import { memo } from 'react';
 import {
 	Area,
 	Bar,
@@ -108,6 +109,8 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 		const t = s.type || (onlyLines ? 'line' : 'bar');
 		const axisId = s.axis === 'right' ? 'right' : 'left';
 		const colorVar = `var(--color-${s.key})`;
+		// 애니메이션 off — streaming 으로 카드 도착 자체가 시각적 신호. 카드 35 장 ×
+		// 1.5s 애니 = 메인 스레드 50s blocking 회귀 차단.
 		if (t === 'line') {
 			return (
 				<Line
@@ -121,6 +124,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 					dot={dense ? { r: 1.5, fill: colorVar, strokeWidth: 0 } : { r: 3, fill: colorVar }}
 					activeDot={{ r: 5, fill: colorVar, strokeWidth: 2, stroke: 'var(--background)' }}
 					connectNulls
+					isAnimationActive={false}
 				/>
 			);
 		}
@@ -138,6 +142,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 					strokeWidth={1.5}
 					stackId={stacked && s.stack ? s.stack : undefined}
 					connectNulls
+					isAnimationActive={false}
 				/>
 			);
 		}
@@ -150,6 +155,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 				fill={colorVar}
 				radius={[1, 1, 0, 0]}
 				stackId={stacked && s.stack ? s.stack : stacked ? 'stack' : undefined}
+				isAnimationActive={false}
 			/>
 		);
 	});
@@ -245,6 +251,7 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 						stroke={`var(--color-${s.key})`}
 						fill={`var(--color-${s.key})`}
 						fillOpacity={0.3}
+						isAnimationActive={false}
 					/>
 				))}
 				<ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
@@ -341,7 +348,7 @@ function KpiTileSingle({ spec, size }: { spec: RechartsSpec; size?: { w: number;
 	);
 }
 
-export function VizChart({ spec: rawSpec, height = 280, size }: Props) {
+export const VizChart = memo(function VizChart({ spec: rawSpec, height = 280, size }: Props) {
 	const spec = applyShadcnPalette(rawSpec);
 
 	if (spec.componentType === 'Error' || spec.error) {
@@ -511,4 +518,4 @@ export function VizChart({ spec: rawSpec, height = 280, size }: Props) {
 	}
 	if (spec.componentType === 'RadarChart') return <RadarBlock spec={spec} height={height} />;
 	return <TrendChart spec={spec} height={height} />;
-}
+});

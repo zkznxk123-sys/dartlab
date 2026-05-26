@@ -70,11 +70,6 @@ export function BentoGrid({ placed, renderCard }: Props) {
 			}}
 		>
 			{placed.map((p) => {
-				// content-visibility:auto + containIntrinsicSize 폐기 — 화면 밖 cell paint
-				// skip 이 카드 내 lazy fetch / Recharts mount 트리거를 막아 "끝까지 그래프
-				// 안 나옴" 회귀. 30 Recharts 동시 mount 가 main thread 점유한다지만 lazy
-				// spec 없는 카드는 ChartLoading spinner 만 그려서 실 비용 적음, eagerN=3
-				// 카드만 즉시 Recharts mount. 정확성 우선.
 				return (
 					<div
 						key={p.cardKey}

@@ -12,31 +12,36 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
+# Tableau 10 categorical palette — 데이터 시각화 표준 (Tableau Software 2016).
+# dusty muted hue 10색. saturated 아닌 분석체 절제 톤 + 인접 stack 명확 구분.
 COLORS: list[str] = [
-    "#ea4647",  # 0 primary red
-    "#fb923c",  # 1 accent orange
-    "#3b82f6",  # 2 blue
-    "#22c55e",  # 3 green
-    "#8b5cf6",  # 4 purple
-    "#06b6d4",  # 5 cyan
-    "#f59e0b",  # 6 amber
-    "#ec4899",  # 7 pink
+    "#5778a4",  # 0 Blue    primary
+    "#e49444",  # 1 Orange  accent
+    "#d1615d",  # 2 Red     negative
+    "#85b6b2",  # 3 Teal
+    "#6a9f58",  # 4 Green   positive
+    "#e7ca60",  # 5 Yellow
+    "#a87c9f",  # 6 Purple
+    "#f1a2a9",  # 7 Pink
+    "#967662",  # 8 Brown
+    "#b8b0ac",  # 9 Grey    neutral
 ]
-"""8 색 팔레트. 인덱스 순환: ``COLORS[i % len(COLORS)]``."""
+"""Tableau 10 — 10 색 categorical. 인덱스 순환: ``COLORS[i % 10]``."""
 
 
 Intent = Literal["primary", "positive", "negative", "neutral", "accent"]
 """차트 시리즈의 *의미* 슬롯. 소비처가 자기 토큰으로 매핑할 때 lookup 키."""
 
 
+# intent traffic-light 매핑 — Tableau 10 hue 기반.
 INTENT_MAP: dict[Intent, str] = {
-    "primary": COLORS[2],  # blue
-    "positive": COLORS[3],  # green
-    "negative": COLORS[0],  # red
-    "neutral": COLORS[4],  # purple
-    "accent": COLORS[1],  # orange
+    "primary": COLORS[0],  # Blue   메인
+    "positive": COLORS[4],  # Green  긍정
+    "negative": COLORS[2],  # Red    부정
+    "accent": COLORS[1],  # Orange 강조
+    "neutral": COLORS[9],  # Grey   배경/참조
 }
-"""intent → 기본 hex 매핑. `paletteOverride` 에 intent 키가 없으면 fallback."""
+"""intent → 기본 hex 매핑."""
 
 
 Tone = Literal["light", "dark"]
