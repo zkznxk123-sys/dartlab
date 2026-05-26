@@ -186,7 +186,16 @@ def _requestWithRetry(token: str, body: dict[str, Any]) -> str:
     try:
         response = post(headers)
     except httpx.TimeoutException as exc:
-        raise OAuthCodexError("network", "ChatGPT OAuth backend 응답 시간이 초과되었습니다.") from exc
+        # 1회 재시도 — 백엔드 일시 슬로다운 흡수. timeout 한 번에 끝나던 회귀 가드.
+        time.sleep(2)
+        try:
+            response = post(headers)
+        except httpx.TimeoutException as exc2:
+            raise OAuthCodexError(
+                "network", "ChatGPT OAuth backend 응답 시간이 초과되었습니다 (1회 재시도 후)."
+            ) from exc2
+        except httpx.HTTPError as exc2:
+            raise OAuthCodexError("network", f"ChatGPT OAuth backend 연결 실패: {exc2}") from exc2
     except httpx.HTTPError as exc:
         raise OAuthCodexError("network", f"ChatGPT OAuth backend 연결 실패: {exc}") from exc
 

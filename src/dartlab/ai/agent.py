@@ -147,6 +147,30 @@ def runAgent(
                 getattr(getattr(provider, "config", None), "provider", "?"),
                 iteration,
             )
+            # graceful fallback — 이미 모은 tool 결과 (refs) 가 있으면 무조건 답안 작성 시도.
+            # OAuth timeout 한 번에 41 분기 시계열 받아놓고도 사용자에게 한 글자 안 보여주던 회귀.
+            if refs or text_emitted:
+                yield TraceEvent(
+                    "error",
+                    {"error": f"{type(exc).__name__}: {exc}", "recoverable": True},
+                )
+                yield from _emitGracefulFinalize(provider, messages, refs, textEmitted=text_emitted, originalExc=exc)
+                yield TraceEvent(
+                    "done",
+                    {
+                        "refs": refs,
+                        "artifacts": artifacts,
+                        "verification": {"ok": True, "issues": ["provider_error_partial"], "refId": "verify:partial"},
+                        "responseMeta": {
+                            "finalEvent": "answer",
+                            "responseStatus": "partial",
+                            "refCount": len(refs),
+                            "passes": ["agent", "fallback"],
+                            "mode": "agent",
+                        },
+                    },
+                )
+                return
             yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}"})
             return
 
@@ -371,6 +395,71 @@ def _emitBlocked(tc: Any, messages: list[dict[str, Any]]) -> Iterator[TraceEvent
             ),
         }
     )
+
+
+def _emitGracefulFinalize(
+    provider: Any,
+    messages: list[dict[str, Any]],
+    refs: list[dict[str, Any]],
+    textEmitted: str,
+    originalExc: Exception,
+) -> Iterator[TraceEvent]:
+    """provider 실패 시 부분 답안 graceful finalize.
+
+    이미 tool 결과 (refs) 를 모았는데 다음 LLM turn 이 timeout/네트워크로 죽으면, 사용자한테
+    한 글자도 안 보여주고 끝나던 회귀 가드. 2 단계 fallback:
+    1. tools=[] + 한계 명시 지시로 같은 provider 마지막 시도 (도구 호출 없음 = 짧은 단일 round).
+    2. 그것도 실패 → 모은 refs id 목록을 텍스트 fallback 으로 직접 emit (LLM 0 호출).
+    """
+    instruction = (
+        "분석 중 일시 오류가 발생했습니다. 추가 도구 호출 없이, 지금까지 받은 "
+        "도구 결과만으로 사용자 질문에 부분 답안을 작성하세요. 못 받은 정보는 "
+        "솔직히 한계로 명시하세요."
+    )
+    messages.append({"role": "user", "content": instruction})
+    try:
+        final_chunk = None
+        text_added = ""
+        for chunk in streamProvider(provider, messages, []):
+            if chunk.final:
+                final_chunk = chunk
+                continue
+            if chunk.text:
+                text_added += chunk.text
+                yield TraceEvent("chunk", {"text": chunk.text})
+        if final_chunk and not text_added and getattr(final_chunk, "turn", None) and final_chunk.turn.content:
+            for piece in _chunks(final_chunk.turn.content, size=64):
+                yield TraceEvent("chunk", {"text": piece})
+        return
+    except Exception as exc2:  # noqa: BLE001
+        logger.exception("graceful finalize also failed (original=%s)", type(originalExc).__name__)
+        # 마지막 fallback — LLM 0 호출. 모은 ref 목록 + 원인 안내만 텍스트로.
+        fallback = _buildRefSummaryFallback(refs, originalExc, exc2)
+        for piece in _chunks(fallback, size=64):
+            yield TraceEvent("chunk", {"text": piece})
+
+
+def _buildRefSummaryFallback(refs: list[dict[str, Any]], originalExc: Exception, finalExc: Exception) -> str:
+    """LLM 호출 없이 refs 목록만으로 부분 답안 텍스트 생성. 모든 LLM 시도 실패 시 마지막 보루."""
+    lines = [
+        f"⚠ 분석 도중 일시 오류 발생 ({type(originalExc).__name__}). 모은 자료만 정리합니다.",
+        "",
+    ]
+    if not refs:
+        lines.append("아직 받은 자료가 없습니다. 잠시 후 다시 시도하세요.")
+    else:
+        table_refs = [r for r in refs if r.get("kind") == "tableRef"]
+        value_refs = [r for r in refs if r.get("kind") == "valueRef"]
+        lines.append(f"확보 근거: tableRef {len(table_refs)} · valueRef {len(value_refs)} · 전체 {len(refs)} 건")
+        lines.append("")
+        for r in table_refs[:5]:
+            title = r.get("title") or r.get("id")
+            lines.append(f"- {title}")
+        if len(table_refs) > 5:
+            lines.append(f"- ... (외 {len(table_refs) - 5} 건)")
+        lines.append("")
+        lines.append("재시도하면 같은 근거를 활용해 답을 다시 작성합니다.")
+    return "\n".join(lines)
 
 
 def _emitCached(
