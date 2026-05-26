@@ -77,13 +77,18 @@ def _assembleSectionsDataFrame(
         topicKeysByTopic.setdefault(key[0], []).append(key)
 
     def _topicRowSortKey(k: tuple[str, str]) -> tuple[int, int, int, int, str]:
-        """본문 원문 순서 보존 — chapter majorNum + 최신 period sourceBlockOrder/segmentOrder + occurrence + segmentKey.
+        """본문 원문 순서 보존 — chapter majorNum + 최신 period 첫 row sourceBlockOrder.
 
-        정렬 키는 모두 ``rowMeta`` (latest-period wins) 기반. ``rowOrder`` 의
-        across-periods ``min`` 휴리스틱은 옛 period 의 본문 chunking 차이로 의미
-        잃음 — 정렬에 쓰지 않는다. 회귀 사례 (SK하이닉스 companyOverview): 같은
-        block (sourceBlockOrder=4) 안 "나(seg=0) → 다(seg=2) → 라(seg=4)" 가 옛
-        period 영향으로 라(seg=0 min) 가 앞으로 → 본문 원문 역순.
+        정렬 키는 ``rowMeta`` (latest-period 의 *첫 등장* row) 기반. ``_accumulatePeriodRows``
+        가 같은 (key, period) 안 첫 row 만 박도록 (currRank > prevRank, strict greater)
+        수정 — 같은 segmentKey 의 caption + body text 들이 cell concat 시 *첫 caption
+        의 sourceBlockOrder* 박혀 table block 들과 alternating 정상 정렬 보장.
+
+        회귀 사례 (005930 consolidatedNotes_04 financialInstruments): 옛 ``>=``
+        구현은 같은 period 안 마지막 row 박아 body 합본 row 의 sourceBlockOrder=8
+        → 모든 table (src=1/3/5/7) 뒤로 밀려남. 옛 ``rowOrder.sourceBlockOrder``
+        min 휴리스틱은 옛 period chunking 차이로 잘못된 min (옛 SK하이닉스
+        companyOverview 회귀) — 정렬에 쓰지 않는다.
         """
         topic, _segmentKey = k
         majorNum, _firstSeq = topicFirstSeq.get(topic, (99, 999999))

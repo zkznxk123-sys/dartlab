@@ -206,7 +206,10 @@ def _accumulatePeriodRows(
             prevMeta = rowMeta.get(key)
             prevRank = _representativePeriodRank(prevMeta.get("_repPeriod")) if isinstance(prevMeta, dict) else -1
             currRank = _representativePeriodRank(periodKey)
-            if prevMeta is None or currRank >= prevRank:
+            # strict greater — 같은 period 안 *첫 row* 만 박힘. 옛 ``>=`` 은 마지막
+            # row 박아 caption+body 합본 segmentKey 의 sourceBlockOrder 가 *마지막*
+            # caption block 값 → table block 뒤로 밀림 (sectionsAssembler 정렬 회귀).
+            if prevMeta is None or currRank > prevRank:
                 rowMeta[key] = {
                     "chapter": chapter,
                     "topic": topic,
