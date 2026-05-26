@@ -232,6 +232,13 @@ def xmlChunkToMixed(rawXml: str) -> str:
     Returns:
         markdown/HTML mixed string — sections pipeline 의 ``_splitContentBlocks``
         가 받을 양식.
+
+    Raises:
+        없음 — XML parse 실패 시 rawXml 그대로 반환 (fallback).
+
+    Example:
+        >>> xmlChunkToMixed('<P>본문</P><TABLE BORDER="1"><TR><TD>cell</TD></TR></TABLE>')
+        '본문\\n\\n<table>\\n<tr><td>cell</td></tr>\\n</table>'
     """
     if not rawXml or not rawXml.strip():
         return ""
@@ -262,6 +269,13 @@ def xmlChunkToPlain(rawXml: str) -> str:
 
     Returns:
         plain text — 모든 XML 태그 제거. 다중 공백 정리.
+
+    Raises:
+        없음 — XML parse 실패 시 rawXml 그대로 반환 (fallback).
+
+    Example:
+        >>> xmlChunkToPlain('<P>본문</P><TABLE><TR><TD>cell</TD></TR></TABLE>')
+        '본문\\n\\ncell'
     """
     if not rawXml or not rawXml.strip():
         return ""
