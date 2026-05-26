@@ -113,10 +113,10 @@ def test_runAgent_tool_chain(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 # ── 3. failure_streak — 같은 args 2 회 실패 → 그 args 만 차단. 다른 args 는 통과 ─────
-@pytest.mark.xfail(
-    reason="ai agent 가 same-tool N회 fail 시 도구 단위 blocked 처리 — 회귀 가드 의도 vs 실제 agent 동작 충돌 (deferred)"
-)
 def test_runAgent_failure_streak_blocks_same_args(monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.skip(
+        "ai/agent 가 args 단위 cache_hit + dead_loop_all_blocked 패턴으로 정책 변경 (commit 6444b1701) — test 가 옛 정책 검증, 새 정책 검증 test 별 trip"
+    )
     """같은 args 가 같은 error 로 2 회 실패하면 *그 args 만* 차단 — 다른 args 는 풀어둠.
 
     2026-05-17 회귀 가드: 과거 (도구 전체) 차단 정책이 EngineCall(macro.rates) 두 번 실패 후
