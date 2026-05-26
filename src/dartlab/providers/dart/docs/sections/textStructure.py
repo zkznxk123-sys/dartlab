@@ -526,6 +526,19 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
         return None
     if len(stripped) > 120:
         return None
+    # `## ` markdown bold prefix — zipDocsXml._walk 가 SPAN-bold + TABLE-GROUP 안 nested
+    # TITLE 을 parent 본문에 흡수할 때 부여하는 marker. 같은 cache 로 재귀 위임 후 level
+    # +1 격하 (parent Roman chapter L=1 의 sub-section L=2 row 안에서 sub-sub heading
+    # L=3 자리). 005930 consolidatedNotes_12_borrowings 본문 손실 회귀 root fix.
+    if stripped.startswith("## "):
+        sub = stripped[3:].strip()
+        if not sub:
+            return None
+        inner = _detectHeading(sub)
+        if inner is None:
+            return _gateHeadingLabel(2, sub)
+        lvl, label, structural = inner
+        return (min(lvl + 1, 6), label, structural)
     # first-char dispatch: 한글 _RE_KOREAN 이 "가-힣" 매칭이므로 dict 검사 후
     # 한글 음절 추가 검사 — 대부분 본문 line 빠른 short-circuit.
     first = stripped[0]

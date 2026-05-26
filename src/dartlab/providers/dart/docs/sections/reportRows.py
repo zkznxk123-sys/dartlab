@@ -294,7 +294,14 @@ def _reportRowsToTopicRows(
     for values in subset.iter_rows():
         title = str(values[titleIdx] or "").strip()
         content = str(values[contentIdx] or "")
-        if not title or not content.strip():
+        if not title:
+            continue
+
+        majorNum = parseMajorNum(title)
+        # Roman chapter heading row 는 content empty 라도 currentMajorNum 추적용으로 통과.
+        # 새 parseSectionsByTitle 양식이 Roman 직속 본문을 empty 로 emit (sub-TITLE 안에 본문).
+        # sub-section row + content 빈 = skip (옛 동작 유지).
+        if not content.strip() and majorNum is None:
             continue
 
         record = {
@@ -302,7 +309,6 @@ def _reportRowsToTopicRows(
             contentCol: content,
         }
 
-        majorNum = parseMajorNum(title)
         if majorNum is not None:
             _flushPending()
             currentMajorNum = majorNum

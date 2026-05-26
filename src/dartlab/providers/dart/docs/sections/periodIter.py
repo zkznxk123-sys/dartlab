@@ -86,7 +86,13 @@ def iterPeriodSubsets(
             subset = (
                 report.select(["section_order", "section_title", ccol])
                 .with_columns(pl.col("section_title").cast(pl.Utf8))
-                .filter(pl.col(ccol).is_not_null() & (pl.col(ccol).str.len_chars() > 0))
+                .filter(
+                    (pl.col(ccol).is_not_null() & (pl.col(ccol).str.len_chars() > 0))
+                    # Roman chapter (`I./II./III./...`) 본문이 empty 라도 currentMajorNum
+                    # 추적용 marker 로 통과. 새 양식 (parseSectionsByTitle 의 TITLE 단위 분리) 가
+                    # Roman 직속 본문 = "" 로 emit — 옛 SECTION-1/2 양식과 호환 위해 예외 통과.
+                    | pl.col("section_title").str.contains(r"^[IVXivx]+\.\s")
+                )
                 .sort("section_order")
             )
             if subset.height == 0:
