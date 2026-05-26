@@ -209,6 +209,7 @@ def runAgent(
             # blocked / cached path 는 외부 호출 0 ms 라 분류 후 즉시 emit. 새 실행만 partition.
             fresh_read: list[tuple[Any, tuple[str, str]]] = []
             fresh_write: list[tuple[Any, tuple[str, str]]] = []
+            blocked_or_cached_in_turn = 0
             for tc in turn.toolCalls:
                 cache_key = (
                     tc.name,
@@ -216,6 +217,7 @@ def runAgent(
                 )
                 if cache_key in blocked_calls:
                     yield from _emitBlocked(tc, messages)
+                    blocked_or_cached_in_turn += 1
                     continue
                 cached = call_cache.get(cache_key)
                 if cached is not None:
@@ -223,8 +225,29 @@ def runAgent(
                     if cache_hit_count[cache_key] >= _CACHE_HIT_BLOCK_LIMIT:
                         blocked_calls.add(cache_key)
                     yield from _emitCached(tc, cached, cache_hit_count[cache_key], _CACHE_HIT_BLOCK_LIMIT, messages)
+                    blocked_or_cached_in_turn += 1
                     continue
                 (fresh_read if isToolReadOnly(tc.name) else fresh_write).append((tc, cache_key))
+
+            # 한 turn 의 모든 tool_calls 가 blocked/cached (새 실행 0 건) → LLM 헛돌이.
+            # 사용자 화면 회귀: EngineCall 한 번 차단 → LLM 이 또 같은 args → 또 차단 → turn 무한 →
+            # OAuth timeout 으로 대화 종료. 도구 한 번 막힌 게 대화 종료까지 가던 흐름의 진짜 원인.
+            # 즉시 finalize 강제 — tools=[] 로 한 round 답안 작성 후 종료.
+            dead_loop = blocked_or_cached_in_turn > 0 and not fresh_read and not fresh_write
+            if dead_loop:
+                logger.info(
+                    "dead-loop detected: all %d tool_calls blocked/cached → forcing answer finalize",
+                    blocked_or_cached_in_turn,
+                )
+                yield from _forceFinalize(
+                    provider,
+                    messages,
+                    refs,
+                    artifacts,
+                    reason="dead_loop_all_blocked",
+                )
+                _wireChatNativeMemory(question=userText, answerText=text_emitted, refs=refs, kwargs=_unused)
+                return
 
             # Phase 2: read-only 병렬 — tool_start 모두 즉시 + as_completed 로 결과 도착순 emit.
             if fresh_read:
@@ -394,6 +417,69 @@ def _emitBlocked(tc: Any, messages: list[dict[str, Any]]) -> Iterator[TraceEvent
                 ensure_ascii=False,
             ),
         }
+    )
+
+
+def _forceFinalize(
+    provider: Any,
+    messages: list[dict[str, Any]],
+    refs: list[dict[str, Any]],
+    artifacts: list[dict[str, Any]],
+    *,
+    reason: str,
+) -> Iterator[TraceEvent]:
+    """dead-loop / 도구 한도 도달 시 tools=[] 로 답안 작성 한 round 강제.
+
+    max_iterations 도달과 같은 finalize 로직을 dead-loop (모든 tool_calls blocked/cached) 에도
+    공유. provider 가 또 죽으면 ref-summary fallback 텍스트로 최후 답.
+    """
+    instruction_map = {
+        "dead_loop_all_blocked": (
+            "직전 turn 의 모든 도구 호출이 차단/캐시 hit 으로 새 결과 0 건이었습니다. "
+            "추가 도구 호출 없이 지금까지 모은 결과로 사용자 질문에 답을 작성하세요. "
+            "근거 부족은 솔직히 한계로 명시하세요."
+        ),
+        "max_iterations": (
+            "도구 호출 한도에 도달했습니다. 추가 도구 호출 없이 지금까지 "
+            "수집한 결과로 사용자 질문에 답을 작성하세요. 근거 부족 부분은 "
+            "솔직히 한계로 명시하고, 가능한 범위에서 답을 정리하세요."
+        ),
+    }
+    messages.append({"role": "user", "content": instruction_map.get(reason, instruction_map["max_iterations"])})
+    text_added = ""
+    try:
+        final_chunk = None
+        for chunk in streamProvider(provider, messages, []):
+            if chunk.final:
+                final_chunk = chunk
+                continue
+            if chunk.text:
+                text_added += chunk.text
+                yield TraceEvent("chunk", {"text": chunk.text})
+        if final_chunk and not text_added and getattr(final_chunk, "turn", None) and final_chunk.turn.content:
+            for piece in _chunks(final_chunk.turn.content, size=64):
+                yield TraceEvent("chunk", {"text": piece})
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("force finalize failed (reason=%s)", reason)
+        # 마지막 보루 — LLM 0 호출, refs 요약 텍스트만 emit.
+        yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}", "recoverable": True})
+        fallback = _buildRefSummaryFallback(refs, exc, exc)
+        for piece in _chunks(fallback, size=64):
+            yield TraceEvent("chunk", {"text": piece})
+    yield TraceEvent(
+        "done",
+        {
+            "refs": refs,
+            "artifacts": artifacts,
+            "verification": {"ok": True, "issues": [reason], "refId": f"verify:{reason}"},
+            "responseMeta": {
+                "finalEvent": "answer",
+                "responseStatus": "partial" if reason == "dead_loop_all_blocked" else "ok",
+                "refCount": len(refs),
+                "passes": ["agent", "force_finalize", reason],
+                "mode": "agent",
+            },
+        },
     )
 
 
