@@ -261,6 +261,9 @@ def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[s
     creditRef = _buildCreditRef(stockCode, companyName, company)
     if creditRef is not None:
         refs.append(creditRef)
+    industryRef = _buildIndustryRef(stockCode, companyName, company)
+    if industryRef is not None:
+        refs.append(industryRef)
     refs.append(
         Ref(
             id=f"date:{stockCode}:{topic}:{latestPeriod}",
@@ -307,6 +310,37 @@ def _findWeakestAxis(axes: list[dict[str, Any]]) -> dict[str, Any] | None:
         return None
     name, score, weight = max(scored, key=lambda x: x[1])
     return {"name": name, "score": score, "weight": weight}
+
+
+def _buildIndustryRef(stockCode: str, companyName: str, company: Any) -> Ref | None:
+    """industryBadge (산업 분류 + lifecycle phase + peers) 를 시맨틱 ref 로 분리.
+
+    creditRef 와 같은 패턴. 산업 phase / peers / stage 류 질문 답안 인용 정합.
+    id: industry:<stockCode>:<industryId>:phase.
+    """
+    badge = getIndustryBadge(company)
+    if badge is None:
+        return None
+    industryId = badge.get("industryId") or "unknown"
+    payload: dict[str, Any] = {
+        "stockCode": stockCode,
+        "industryId": industryId,
+        "industryName": badge.get("industryName"),
+        "phase": badge.get("phase"),
+        "stageName": badge.get("stageName"),
+        "role": badge.get("role"),
+        "stream": badge.get("stream"),
+        "peers": badge.get("peers") or [],
+        "confidence": badge.get("confidence"),
+        "confidenceMethod": badge.get("confidenceMethod"),
+    }
+    return Ref(
+        id=f"industry:{stockCode}:{industryId}:phase",
+        kind="industryRef",
+        title=f"{companyName or stockCode} {badge.get('industryName') or industryId} {badge.get('phase') or ''}".strip(),
+        source=f"Company({stockCode}).industry()",
+        payload=payload,
+    )
 
 
 def _showSummaryMessage(
