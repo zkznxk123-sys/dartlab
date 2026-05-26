@@ -66,7 +66,11 @@ def test_parseSectionsByTitle_no_nested_duplication():
 
 
 def test_parseSectionsByTitle_nested_table_no_explosion():
-    # nested TABLE 의 TR 이 외부 _tableToMarkdown 의 .//TR 로 캡쳐되어 폭증하던 회귀
+    # nested TABLE 의 TR 이 외부 _tableToMarkdown 의 .//TR 로 캡쳐되어 폭증하던 회귀.
+    # 2026-05-27 양식 변경 — section_content = raw XML chunks. xmlChunkToMixed 변환 후
+    # markdown/HTML 양식에서 검증.
+    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+
     inner_rows = "".join(f"<TR><TD>inner-{i}</TD></TR>" for i in range(50))
     xml = f"""<?xml version="1.0"?>
 <DOCUMENT><BODY>
@@ -79,19 +83,22 @@ def test_parseSectionsByTitle_nested_table_no_explosion():
 """
     rows = parseSectionsByTitle(xml)
     assert len(rows) == 1
-    content = rows[0]["content"]
-    # outer markdown table 만 2 row (3 lines: header + sep + 2 data). nested TR 50개가
-    # 외부 row 로 폭증하지 않아야.
-    md_lines = [ln for ln in content.split("\n") if ln.startswith("|")]
-    # outer TABLE 2 row (TR1 + TR2) → markdown 3 lines (header=TR1 + sep + TR2).
-    # nested TABLE 50 TR 가 외부 row 로 폭증하면 52 lines.
-    assert len(md_lines) == 3
+    content = xmlChunkToMixed(rows[0]["content"])
+    # outer HTML <table> 만 2 row. nested TR 50개가 외부 row 로 폭증 X.
+    tr_count = content.count("<tr>")
+    # outer table 2 rows + nested table 의 50 rows 가 xmlAdapter 의 _findDirectTRs 로
+    # 외부 row 안 inline 처리 (별 <tr> 안 만듦). outer 만 2 + (만약 nested 가 HTML 으로
+    # emit 되면 1 nested table 의 50 tr) — _findDirectTRs 가 nested 차단해 2 만 emit.
+    assert tr_count == 2, f"expected 2 outer <tr>, got {tr_count}"
     assert content.count("inner-") == 50  # nested cell text 는 outer cell 안 inline
 
 
 def test_parseSectionsByTitle_word_wrap_join_no_extra_space():
     # DART XML 의 <P> 안 <SPAN> 들이 word-wrap 단위로 부서진 경우, " ".join 이 한국어
-    # 단어 사이에 잘못 공백 추가하던 회귀 차단. 005930 분기보고서 실제 구조 재현.
+    # 단어 사이에 잘못 공백 추가하던 회귀 차단. 2026-05-27 양식 변경 — xmlChunkToMixed
+    # 변환 후 검증.
+    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+
     xml = """<?xml version="1.0"?>
 <DOCUMENT><BODY>
 <TITLE>테스트 섹션</TITLE>
@@ -100,7 +107,7 @@ def test_parseSectionsByTitle_word_wrap_join_no_extra_space():
 """
     rows = parseSectionsByTitle(xml)
     assert len(rows) == 1
-    content = rows[0]["content"]
+    content = xmlChunkToMixed(rows[0]["content"])
     # word-wrap 복원 — "국내 에서 는" 같은 잘못 추가 공백 0
     assert "국내에서는" in content
     assert "국내 에서 는" not in content
@@ -108,6 +115,9 @@ def test_parseSectionsByTitle_word_wrap_join_no_extra_space():
 
 
 def test_parseSectionsByTitle_span_bold_markdown_heading():
+    # 2026-05-27 양식 변경 — xmlChunkToMixed 변환 후 SPAN bold 가 markdown ## prefix.
+    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+
     xml = """<?xml version="1.0"?>
 <DOCUMENT><BODY>
 <TITLE>섹션</TITLE>
@@ -117,8 +127,9 @@ def test_parseSectionsByTitle_span_bold_markdown_heading():
 """
     rows = parseSectionsByTitle(xml)
     assert len(rows) == 1
-    assert "## 가. 첫번째 항목" in rows[0]["content"]
-    assert "본문 내용" in rows[0]["content"]
+    content = xmlChunkToMixed(rows[0]["content"])
+    assert "## 가. 첫번째 항목" in content
+    assert "본문 내용" in content
 
 
 @pytest.mark.skipif(

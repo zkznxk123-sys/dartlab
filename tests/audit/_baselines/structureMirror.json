@@ -115,6 +115,7 @@
     "dart/docs/sections/views.py",
     "dart/docs/sections/viewsContext.py",
     "dart/docs/sections/viewsRetrieval.py",
+    "dart/docs/sections/xmlAdapter.py",
     "dart/docs/tableAI.py",
     "dart/docs/topicStandard.py",
     "dart/docs/viewer.py",
