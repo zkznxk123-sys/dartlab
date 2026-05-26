@@ -13,6 +13,14 @@ whenToUse:
   - news velocity
   - 헤드라인 폭증
   - news pulse
+examples:
+  - 005930 뉴스 빈도가 평소보다 높나
+  - 헤드라인 폭증 종목 — 7일 / 30일 비율
+  - 뉴스 가속도 신호
+expectedOutputs:
+  - 7d 일평균 헤드라인 수 + 30d 일평균
+  - 가속 비율 (7d / 30d) 단일값
+  - 가속 / 감속 / 평상 라벨 (비율 임계 1.5x)
 linkedSkills:
   - engines.gather
   - recipes.news.eventTimelineFusion

@@ -11,6 +11,14 @@ whenToUse:
   - ATR ratio
   - 이벤트 induced vol
   - 공시 후 변동성 체제
+examples:
+  - 005930 공시 직후 변동성 확대했나
+  - 이벤트 induced volatility 정량 측정
+  - T+10 ATR이 baseline 대비 몇 배
+expectedOutputs:
+  - T-10 baseline ATR + T+10 ATR + ratio (단일값)
+  - 변동성 확대 / 축소 / 무변화 라벨 (ratio 임계 1.3x)
+  - 이벤트 시점 + 직전 / 직후 ATR 시계열
 linkedSkills:
   - engines.company
   - engines.gather

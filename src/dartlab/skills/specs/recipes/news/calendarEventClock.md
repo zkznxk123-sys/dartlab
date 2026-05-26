@@ -14,6 +14,14 @@ whenToUse:
   - 예정 실적 IR
   - 배당락 잔여일
   - calendar bracket
+examples:
+  - 005930 다음 실적 발표 며칠 남았어
+  - 배당락 / 주총 / IR 예정 이벤트 잔여일
+  - 7일 / 14일 / 30일 안 도래 이벤트 카운트
+expectedOutputs:
+  - 예정 이벤트 list (제목 + 잔여일 + 종류)
+  - 7d / 14d / 30d bucket 별 이벤트 카운트
+  - 가장 가까운 이벤트 단일 (제목 + 잔여일)
 linkedSkills:
   - engines.gather
   - recipes.news.eventTimelineFusion

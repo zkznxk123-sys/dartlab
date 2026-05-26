@@ -11,6 +11,14 @@ whenToUse:
   - peer 이벤트 영향
   - 산업 동조성
   - spillover lag
+examples:
+  - peer 공시 발생 직후 005930 가격 영향
+  - 산업 뉴스 spillover lag — T+1 T+3 T+5
+  - 동종 종목 이벤트 따라 움직이는 회사
+expectedOutputs:
+  - T+1 / T+3 / T+5 target 가격 변동 평균 (peer 이벤트 직후)
+  - peer 이벤트 row 카운트 + spillover 유의 lag (가장 강한 시점)
+  - 동조성 강도 라벨 (강 / 중 / 약 / 무 기준 T+3 변동 절대값)
 linkedSkills:
   - engines.industry
   - engines.gather

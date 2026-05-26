@@ -11,6 +11,14 @@ whenToUse:
   - 같은 사건 보도 빈도
   - 매체 확산
   - 사건 cluster
+examples:
+  - 005930 같은 사건이 여러 매체에 동시 확산
+  - 30일 안 반복 헤드라인 cluster 빈도
+  - 매체 확산도 — 같은 사건 보도 수
+expectedOutputs:
+  - cluster list (제목 키워드 + 매체 수 + 보도 시점)
+  - cluster 빈도 단일값 (30d window 안)
+  - 가장 확산도 큰 cluster top 3 (보도 수 기준)
 linkedSkills:
   - engines.company
   - engines.gather

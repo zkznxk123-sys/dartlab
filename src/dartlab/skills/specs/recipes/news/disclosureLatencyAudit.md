@@ -13,6 +13,14 @@ whenToUse:
   - disclosure news latency
   - news lag audit
   - 뉴스 보도 속도
+examples:
+  - 005930 공시 → 뉴스 평균 lag 얼마
+  - 공시 발표 후 뉴스 보도 속도 정량
+  - 동시 발생 뉴스 row 카운트
+expectedOutputs:
+  - 공시 → 뉴스 평균 lag (분 또는 시간 단위) + std-dev
+  - 동시 발생 (lag < 5분) row 카운트
+  - 분포 분위수 (p10/p50/p90)
 linkedSkills:
   - engines.gather
   - recipes.news.eventTimelineFusion
