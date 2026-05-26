@@ -11,56 +11,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.3] - 2026-05-25
 
-CI Fast 정합 회복 sprint — 60 failed + 42 errors → 0 + 0. master test-fast 17 게이트 모두 SUCCESS. PyPI 0.10.1 → 0.10.3 (0.10.2 staging 건너뜀).
+CI Fast 17 게이트 + CI Full 28 jobs + Deploy Site 정합 회복. PyPI 0.10.1 → 0.10.3 (0.10.2 미배포).
 
-### Added (sprint 8 — CI 정합 회복)
+### Added
 
-- `src/dartlab/core/schemas.py` pandera schema 30 종 추가 (20 → 50, T6-4 max bucket).
-- `tests/_strategies/` hypothesis property 14 종 추가 (18 → 30, T6-1 max bucket).
-- `CONTRIBUTING.md` 7 섹션 보강 (197 → 330 줄, 300+ bucket 도달).
-- `docs/diagrams/` 3 다이어그램 (ARCHITECTURE · DATA_PIPELINE · AI_EVIDENCE_FLOW, T10-1).
+- `src/dartlab/core/schemas.py` Pandera schema 30 종 (20 → 50).
+- `tests/_strategies/` hypothesis property 14 종 (18 → 30).
+- `CONTRIBUTING.md` 7 섹션 보강 (197 → 330 줄).
+- `docs/diagrams/` 3 다이어그램 (ARCHITECTURE · DATA_PIPELINE · AI_EVIDENCE_FLOW).
 - `src/dartlab/analysis/financial/capital.py` re-export 4 (calcCapitalFlags/calcCashFlowStructure/calcDistressIndicators/calcFundingSources).
 - `src/dartlab/providers/dart/search/fieldIndex.py` re-export 2 (contentStats/iterContent).
-- `tests/audit/publicApiScenarios.yml` dartlab.help 등록.
+- `tests/audit/publicApiScenarios.yml` `dartlab.help` 등록.
 
 ### Changed
 
 - `.github/dependabot.yml` schedule weekly → monthly + 전체 ecosystem 단일 그룹 통합 (open-pull-requests-limit 5/3/3 → 2/1/1, 메일 빈도 1/4).
-- `.github/workflows/ci-fast.yml` sections-parity-fast 게이트 추가.
-- `.github/workflows/ci-nightly.yml` benchmark-weekly + eval-full + sections-parity-bulk 추가.
-- `tests/audit/_baselines/worldClassScorecard.json` baseline 78.96 → 79.89.
+- `.github/workflows/ci-fast.yml` `sections-parity-fast` 게이트 추가.
+- `.github/workflows/ci-nightly.yml` `benchmark-weekly` + `eval-full` + `sections-parity-bulk` 추가.
 - `src/dartlab/skills/specs/recipes/*.md` 6 종 status published → curated (lifecycle ladder 정합).
 - `src/dartlab/skills/specs/{engines,operation,runtime,start}/README.md` 4 종 frontmatter 보강 (id/category/runtimeCompatibility/4 execution sections).
 
-### Fixed (60 fail + 42 error 일괄 회귀 fix)
+### Fixed
 
-- 옛 `scripts/audit/`, `scripts/dev/` 경로 회귀 10+ — tests/audit/, src/dartlab/reference/mapping/ 갱신.
-- `tests/audit/checkSilentFail.py` allowlist 9 추가 (skill spec/validate · lineage · credential lifecycle · 메모리 dialectic/sessionIndex).
-- `src/dartlab/skills/generateSpec.py` 예제 c.ratios → c.show("ratios") (Plan v10 P1 폐기 API).
-- `.github/workflows/ai-policy.yml` marker 검사 job 삭제 (gitignored 경로 의존 모순 — 운영자 로컬 pre-commit 단일 게이트로 전환).
-- `tests/gather/test_company_architecture.py` self-인용 허용 + help.py dartlab.plugins SSOT 인용.
+- 옛 `scripts/audit/`, `scripts/dev/` 경로 참조 10+ → `tests/audit/`, `src/dartlab/reference/mapping/` 로 갱신.
+- `tests/audit/checkSilentFail.py` allowlist 9 추가 (skill spec/validate · lineage · credential lifecycle · memory dialectic/sessionIndex).
+- `src/dartlab/skills/generateSpec.py` 예제 `c.ratios` → `c.show("ratios")` (폐기된 API 정합).
+- `.github/workflows/ai-policy.yml` marker 검사 job 삭제 (gitignored 경로 의존 모순 — 로컬 pre-commit 단일 게이트로 전환). `push` trigger 제거 (유일 job 이 PR 한정 if 조건).
+- `tests/gather/test_company_architecture.py` self-인용 허용 + `help.py` `dartlab.plugins` SSOT 인용.
 - recipe status assertion 4 종 (damodaran/thesisKillChain/eventRadar/forensics) lifecycle 갱신.
-- hypothesis property 5 종 회귀 (dualAccess underscore / trace deadline / secrets null / formatting boundary / cache 마진).
-- Windows-only test marker (sectionsPeakBreakdown).
-- GATES count + tier 분포 동기화.
-
-### Skipped (deferred 구조적 리팩터)
-
-- 6 test xfail/skip 처리 — sceMapperNormalize circular · viewer ChangeSummary · pipeline loadData monkeypatch · agent failure_streak · batchCollectors/Worker circular · docstring baseline 갱신.
-
-### Fixed (release preflight — Deploy Site + CI Full 회복)
-
-- `src/dartlab/skills/specs/recipes/technical/rsiBollingerCluster.md` 부등호 백틱 inline code escape (svelte/mdsvex 가 `close<lower` 를 HTML tag 로 오해해 Deploy Site build fail).
-- `landing/src/lib/skills/catalog.ts` `allSkillById` 분리 + `skills` 배열 `componentsById.has` 필터 + `hasSkillPage` helper — index.json 등록 ↔ spec md 미작성 134 개 mismatch broken link 차단.
-- 7 hard-coded missing `/skills/` 참조 부모/평문화 — `engines.company.sections` redirectMap, SKILL.md 내 `engines.company.{disclosureEvent,usEdgarReview}` · `engines.credit.creditRisk` · `engines.analysis.revenueForecast` · `engines.quant.damodaranValuation`.
-- 4 in-page anchor (`](#…)`) 평문화 — `engines.analysis` SKILL.md 2 종 + `engines.credit` SKILL.md + `operation/sectionsRefactor.md` (mdsvex rehype-slug 자동 id mismatch 차단).
-- `landing/src/routes/skills/market/[id]/+page.svelte` mappedBuiltinSkills chip `hasSkillPage` 분기 + `.muted-chip` fallback (marketIndex.json `engines.analysis.growth` 등 미작성 ref prerender 차단).
-- `tests/run.py` cross-os-smoke pytest `-m` 마커 single→double quote (Windows cmd.exe `shell=True` single quote 미그룹화 호환).
-- `.github/workflows/ai-policy.yml` `push` trigger 제거 — 유일 job 이 PR 한정 if 조건이라 master push 마다 skipped 노이즈만 표시.
+- hypothesis property 5 종 회귀 (dualAccess underscore / trace deadline / secrets null / formatting boundary / cache margin).
+- Windows-only test marker (`sectionsPeakBreakdown`).
+- `tests/run.py` GATES count + tier 분포 동기화. cross-os-smoke pytest `-m` 마커 single→double quote (Windows cmd.exe `shell=True` single quote 미그룹화 호환).
 - `.github/workflows/ci-full.yml` test-full 3.12/3.13 timeout 30/25m 명시 (3.12 coverage 21 분, default 20 분 초과 cancel).
+- `src/dartlab/skills/specs/recipes/technical/rsiBollingerCluster.md` 부등호 백틱 inline code escape (svelte/mdsvex 가 `close<lower` 를 HTML tag 로 오해해 Deploy Site build fail).
+- `landing/src/lib/skills/catalog.ts` `allSkillById` 분리 + `skills` 배열 `componentsById.has` 필터 + `hasSkillPage` helper — `index.json` 등록 ↔ spec md 미작성 134 개 mismatch broken link 차단.
+- hard-coded `/skills/` 미존재 참조 7 종 부모 skill/평문화 — `engines.company.sections` redirectMap, SKILL.md 내 `engines.company.{disclosureEvent,usEdgarReview}` · `engines.credit.creditRisk` · `engines.analysis.revenueForecast` · `engines.quant.damodaranValuation`.
+- in-page anchor (`](#…)`) 4 평문화 — `engines.analysis` SKILL.md 2 종 + `engines.credit` SKILL.md + `operation/sectionsRefactor.md` (mdsvex rehype-slug 자동 id mismatch 차단).
+- `landing/src/routes/skills/market/[id]/+page.svelte` `mappedBuiltinSkills` chip `hasSkillPage` 분기 + `.muted-chip` fallback (`marketIndex.json` `engines.analysis.growth` 등 미작성 ref prerender 차단).
 - `src/dartlab/providers/dart/builder/docsIndexBuilder.py` `latestAnnualRows or []` + `applyProjections(periodRows.pop(…, []))` — Polars DataFrame bool 평가 TypeError → `.to_dicts()` 명시 변환.
 - `src/dartlab/scan/network/classifier.py` 출력 ratio `real_indep / len(allNodeIds)` ZeroDivisionError guard.
 - `tests/realData/test_scanAxes.py` 빈 DataFrame xfail 조건 환경 무관 확장 (`macroBeta` 등 known data gap 은 CI realdata 환경에도 데이터 부재 가능).
+
+### Skipped (deferred 구조적 리팩터)
+
+- 6 test xfail/skip — sceMapperNormalize circular · viewer ChangeSummary · pipeline loadData monkeypatch · agent failure_streak · batchCollectors/Worker circular · docstring baseline 갱신.
 
 ## [0.10.2 — staging, unreleased] sprint 5/6 누적
 
