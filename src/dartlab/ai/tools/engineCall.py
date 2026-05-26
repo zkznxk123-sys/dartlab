@@ -47,16 +47,21 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
         return ToolResult(False, "apiRef를 확인하지 못했습니다.", error="missing_api_ref")
     if apiRef.startswith("_") or "._" in apiRef or "internal" in apiRef.lower():
         return ToolResult(False, f"private/internal API는 차단됩니다: {apiRef}", error="private_api_blocked")
+    # alias 정규화 — `dartlab.scan` → `scan`, `dartlab.capabilities` → `capabilities`,
+    # `scan.growth` → `scan` (axis="growth" 흡수). CAPABILITIES 에는 canonical form 만 있어서
+    # 정규화 없이 capability check 가 unreachable 핸들러 (line ~ scan/capabilities) 차단했던 회귀.
+    apiRef = _aliasToCanonical(apiRef, call_plan)
+    call_plan["apiRef"] = apiRef
     if not _capabilityExists(apiRef):
         return ToolResult(False, f"generated spec에 없는 API입니다: {apiRef}", error="unknown_api_ref")
 
     if apiRef == "Company.show":
         return _companyShow(call_plan)
-    if apiRef in {"dartlab.scan", "scan"} or apiRef.startswith("scan."):
+    if apiRef == "scan" or apiRef.startswith("scan."):
         if apiRef.startswith("scan.") and not call_plan.get("axis"):
             call_plan["axis"] = apiRef.split(".", 1)[1]
         return _scan(call_plan)
-    if apiRef in {"dartlab.capabilities", "capabilities"}:
+    if apiRef == "capabilities":
         return _capabilities(call_plan)
     return _genericPublicCall(apiRef, call_plan)
 
@@ -138,6 +143,29 @@ def _capabilityExists(apiRef: str) -> bool:
     from dartlab.reference.capability._generated import CAPABILITIES
 
     return apiRef in CAPABILITIES
+
+
+def _aliasToCanonical(apiRef: str, plan: dict[str, Any]) -> str:
+    """LLM 이 흔히 쓰는 alias 를 CAPABILITIES canonical form 으로 정규화.
+
+    - `dartlab.scan` / `scan.<axis>` → `scan` (+ plan["axis"] = <axis>)
+    - `dartlab.capabilities` → `capabilities`
+    - `dartlab.<name>` (capabilities 에 있으면 `<name>`)
+    """
+    from dartlab.reference.capability._generated import CAPABILITIES
+
+    if apiRef == "dartlab.scan":
+        return "scan"
+    if apiRef.startswith("scan.") and apiRef not in CAPABILITIES:
+        plan.setdefault("axis", apiRef.split(".", 1)[1])
+        return "scan"
+    if apiRef == "dartlab.capabilities":
+        return "capabilities"
+    if apiRef.startswith("dartlab.") and apiRef not in CAPABILITIES:
+        short = apiRef.split(".", 1)[1]
+        if short in CAPABILITIES:
+            return short
+    return apiRef
 
 
 def _companyShow(plan: dict[str, Any]) -> ToolResult:
@@ -268,8 +296,13 @@ def _scan(plan: dict[str, Any]) -> ToolResult:
     axis = str(plan.get("axis") or plan.get("target") or (plan.get("args") or [""])[0] or "").strip() or "growth"
     import dartlab
 
-    with _quietExecutionNoise():
-        result = dartlab.scan(axis)
+    # 회귀 가드: CAPABILITIES 에는 `scan.industry` 등이 있지만 underlying `dartlab.scan(axis)` 가
+    # 다른 axis 어휘를 쓰면 ValueError → uncaught traceback 노출. try/except 로 친절한 에러.
+    try:
+        with _quietExecutionNoise():
+            result = dartlab.scan(axis)
+    except (ValueError, KeyError) as exc:
+        return ToolResult(False, f"dartlab.scan('{axis}') 실행 실패: {exc}", error="invalid_scan_axis")
     if not isinstance(result, pl.DataFrame) or result.height == 0:
         return ToolResult(False, f"dartlab.scan('{axis}') 결과가 비어 있습니다.", error="empty_scan")
     if axis.lower() == "growth" or "성장" in axis:
