@@ -752,7 +752,7 @@ function parseRawCells(line: string): string[] {
 function parseMarkdownSubTables(md: string): MarkdownSubTable[] {
 	const lines = md.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('|'));
 	const blocks: MarkdownSubTable[] = [];
-	let cur: { rows: string[][]; sawDataAfterSep: boolean } = { rows: [], sawDataAfterSep: false };
+	let cur: { rows: string[][] } = { rows: [] };
 
 	const isSep = (cells: string[]) => cells.length > 0 && cells.every((c) => /^[:\-\s]*$/.test(c));
 	const isAllEmpty = (cells: string[]) => cells.every((c) => c === '');
@@ -760,22 +760,26 @@ function parseMarkdownSubTables(md: string): MarkdownSubTable[] {
 	const flush = () => {
 		if (cur.rows.length === 0) return;
 		blocks.push({ rows: cur.rows });
-		cur = { rows: [], sawDataAfterSep: false };
+		cur = { rows: [] };
 	};
 
+	// sub-table 경계는 **빈 행** (`|  |`) 이지 separator (`| --- |`) 가 아니다.
+	// markdown 표는 한 sub-table 안에서도 header row 와 data row 사이 separator 1 줄을 가진다
+	// (GFM 문법). DART HTML → 마크다운 평탄화 결과는 multi-row header (caption / period+unit /
+	// column header) 가 각자 `| --- |` 로 구분되지만 *논리적으로 같은 표*. separator 를
+	// boundary 로 보면 헤더와 데이터가 다른 grid 로 떨어져 컬럼 폭 불일치 발생.
+	//
+	// 경계 규칙: 빈 행 (모든 셀 빈) 만 boundary. separator 는 그냥 skip.
 	for (const line of lines) {
 		const cells = parseRawCells(line);
-		if (isSep(cells)) {
-			// 데이터 행을 본 *후* 등장하는 separator 는 새 sub-table 신호.
-			if (cur.sawDataAfterSep) flush();
+		if (isAllEmpty(cells)) {
+			flush();
 			continue;
 		}
-		if (isAllEmpty(cells)) {
-			// 완전 빈 줄은 skip — 일부 DART 표는 padding 으로 들어옴.
+		if (isSep(cells)) {
 			continue;
 		}
 		cur.rows.push(cells);
-		cur.sawDataAfterSep = true;
 	}
 	flush();
 	return blocks;
@@ -796,12 +800,22 @@ function refineSubTable(block: MarkdownSubTable): MarkdownSubTable {
 			rows.shift();
 			return true;
 		}
-		// (a) caption 전용 1 셀 — period label 또는 "...에 대한 공시" 같은 표 제목 패턴.
-		//     "공시금액"/"장부금액" 같은 컬럼 헤더는 흡수 X (테이블 안 헤더 행 유지).
-		if (nonEmpty.length === 1 && (PERIOD_LABEL_RE.test(nonEmpty[0]) || /에 대한 공시$/.test(nonEmpty[0]))) {
-			caption = caption ? `${caption} · ${nonEmpty[0]}` : nonEmpty[0];
-			rows.shift();
-			return true;
+		// (a) caption 전용 1 셀 — period label, "...에 대한 공시"/"...세부내역"/"...변동내역"
+		//     같은 표 제목 패턴, 또는 짧은 한글 heading-like 텍스트 (≤25 자, 숫자 콤마 0).
+		//     "공시금액"/"장부금액" 같은 컬럼 헤더는 length>=2 또는 다른 row 와 col 맞춰서
+		//     별개 처리 — 흡수 X.
+		const looksLikeHeading = (s: string): boolean => {
+			if (s.length === 0 || s.length > 25) return false;
+			if (/[\d,]/.test(s)) return false;
+			return /[가-힣]/.test(s);
+		};
+		if (nonEmpty.length === 1) {
+			const v = nonEmpty[0];
+			if (PERIOD_LABEL_RE.test(v) || /(에 대한 공시|세부내역|변동내역|내역)$/.test(v) || looksLikeHeading(v)) {
+				caption = caption ? `${caption} · ${v}` : v;
+				rows.shift();
+				return true;
+			}
 		}
 		// (b) period label + 단위 두 셀 — 둘 다 prefix 메타.
 		if (nonEmpty.length === 2) {
