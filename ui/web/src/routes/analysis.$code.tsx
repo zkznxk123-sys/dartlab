@@ -30,6 +30,9 @@ function AnalysisLayout() {
 	const { push } = useRecentCompanies();
 	const [periodKind, setPeriodKind] = useState<PeriodKind>(search.period);
 	const isViewerTab = location.pathname.endsWith('/viewer');
+	// financial 탭 = 자체 3-mode periodView 토글 SSOT (연간 / 분기 / 분기 TTM).
+	// 부모 [연간|분기] 토글은 financial 에서 redundant → hide.
+	const isFinancialTab = location.pathname.endsWith('/financial');
 
 	// URL 과 state 동기화
 	useEffect(() => {
@@ -67,7 +70,7 @@ function AnalysisLayout() {
 					corpName={corpName}
 					periodKind={periodKind}
 					onPeriodKindChange={setPeriodKind}
-					hidePeriodToggle={isViewerTab}
+					hidePeriodToggle={isViewerTab || isFinancialTab}
 				/>
 			</div>
 			{/* viewer 탭은 own scroll container (sticky timeline + body-only scroll) — 부모는

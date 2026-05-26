@@ -1,13 +1,13 @@
-// Tableau 10 categorical palette — 데이터 시각화 표준 (Tableau Software 2016).
-// dusty muted 10 hue. saturated 가 아니고 분석체 절제 톤. stack 6~8 series 도
-// 인접 명확 구분. SSOT: Python `dartlab.viz.palette`.
+// Anthropic warm earth palette — 공식 brand-guidelines (github.com/anthropics/skills)
+// 의 brand 7색 SSOT 를 categorical 10 색으로 확장. warm terracotta + sage + slate
+// blue 톤 unified. SSOT: Python `dartlab.viz.palette`.
 //
-// 의미 (INTENT) 매핑 — traffic-light:
-//   primary  = chart-1 Blue   메인
-//   positive = chart-5 Green  긍정
-//   negative = chart-3 Red    부정
-//   accent   = chart-2 Orange 강조
-//   neutral  = chart-10 Grey  배경/참조
+// 의미 (INTENT) 매핑:
+//   primary  = chart-1 Orange (Anthropic 메인)
+//   accent   = chart-2 Blue   (Anthropic 강조)
+//   negative = chart-3 Clay   (dark terracotta — 부정)
+//   positive = chart-4 Green  (Anthropic sage)
+//   neutral  = chart-10 MidGray (배경/참조)
 
 import type { RechartsSpec } from '../api/client';
 
@@ -15,7 +15,7 @@ export type Intent = 'primary' | 'positive' | 'negative' | 'neutral' | 'accent';
 
 const INTENT_TO_TOKEN: Record<Intent, string> = {
 	primary: 'var(--chart-1)',
-	positive: 'var(--chart-5)',
+	positive: 'var(--chart-4)',
 	negative: 'var(--chart-3)',
 	accent: 'var(--chart-2)',
 	neutral: 'var(--chart-10)',

@@ -12,34 +12,36 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-# Tableau 10 categorical palette — 데이터 시각화 표준 (Tableau Software 2016).
-# dusty muted hue 10색. saturated 아닌 분석체 절제 톤 + 인접 stack 명확 구분.
+# Anthropic warm earth palette — 공식 brand-guidelines (github.com/anthropics/skills)
+# 의 brand SSOT 7 색 (Dark/Light/MidGray/LightGray/Orange/Blue/Green) 을 categorical
+# 10 색으로 확장. warm terracotta + sage + slate blue 톤 unified — Tableau 10 의
+# dusty 채도 부족 + 따뜻 톤 vs 차가운 톤 혼재 회귀 대신 어스톤 일관성 우선.
 COLORS: list[str] = [
-    "#5778a4",  # 0 Blue    primary
-    "#e49444",  # 1 Orange  accent
-    "#d1615d",  # 2 Red     negative
-    "#85b6b2",  # 3 Teal
-    "#6a9f58",  # 4 Green   positive
-    "#e7ca60",  # 5 Yellow
-    "#a87c9f",  # 6 Purple
-    "#f1a2a9",  # 7 Pink
-    "#967662",  # 8 Brown
-    "#b8b0ac",  # 9 Grey    neutral
+    "#d97757",  # 0 Orange    primary    — Anthropic brand
+    "#6a9bcc",  # 1 Blue      accent     — Anthropic brand
+    "#a06a4a",  # 2 Clay      negative   — Orange shade-down (dark terracotta)
+    "#788c5d",  # 3 Green     positive   — Anthropic brand (sage)
+    "#c9a875",  # 4 Tan       확장 (warm sand)
+    "#97a7c9",  # 5 LightBlue 확장 (Blue shade-up)
+    "#5e7048",  # 6 DarkSage  확장 (Green shade-down)
+    "#d5cdb4",  # 7 Sand      확장 (Light Gray warm-shift)
+    "#c4836c",  # 8 Salmon    확장 (Orange shade-up)
+    "#b0aea5",  # 9 MidGray   neutral    — Anthropic brand
 ]
-"""Tableau 10 — 10 색 categorical. 인덱스 순환: ``COLORS[i % 10]``."""
+"""Anthropic warm earth 10 — 공식 brand 4 (Orange/Blue/Green/MidGray) + 보완 6."""
 
 
 Intent = Literal["primary", "positive", "negative", "neutral", "accent"]
 """차트 시리즈의 *의미* 슬롯. 소비처가 자기 토큰으로 매핑할 때 lookup 키."""
 
 
-# intent traffic-light 매핑 — Tableau 10 hue 기반.
+# intent traffic-light 매핑 — Anthropic brand 색 직접 매핑.
 INTENT_MAP: dict[Intent, str] = {
-    "primary": COLORS[0],  # Blue   메인
-    "positive": COLORS[4],  # Green  긍정
-    "negative": COLORS[2],  # Red    부정
-    "accent": COLORS[1],  # Orange 강조
-    "neutral": COLORS[9],  # Grey   배경/참조
+    "primary": COLORS[0],  # Orange  메인 — Anthropic 표준 primary
+    "positive": COLORS[3],  # Green   긍정 — sage
+    "negative": COLORS[2],  # Clay    부정 — dark terracotta
+    "accent": COLORS[1],  # Blue    강조 — Anthropic 표준 accent
+    "neutral": COLORS[9],  # MidGray 배경/참조
 }
 """intent → 기본 hex 매핑."""
 

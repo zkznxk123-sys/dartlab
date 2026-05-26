@@ -81,33 +81,33 @@
 	--border: oklch(0.922 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
-	/* Tableau 10 categorical palette — 데이터 시각화 표준 (Tableau Software).
-	 * dusty muted hue, 10색 distinct, 분석체 절제 톤. saturated Tailwind 색 아님.
-	 * stack 6~8 series 도 인접 명확 구분. SSOT: src/dartlab/viz/palette.py.
+	/* Anthropic warm earth palette — 공식 brand-guidelines (github.com/anthropics/skills)
+	 * 의 brand 7색 SSOT 를 categorical 10 색으로 확장. warm terracotta + sage + slate
+	 * blue 톤 unified. SSOT: src/dartlab/viz/palette.py.
 	 *
 	 * 의미 (INTENT) 매핑:
-	 *   primary = chart-1 Blue (메인)
-	 *   accent  = chart-2 Orange (강조)
-	 *   negative = chart-3 Red (부정)
-	 *   neutral = chart-10 Grey (배경/참조)
-	 *   positive = chart-5 Green (긍정) */
-	--chart-1:  #5778a4;  /* Blue */
-	--chart-2:  #e49444;  /* Orange */
-	--chart-3:  #d1615d;  /* Red */
-	--chart-4:  #85b6b2;  /* Teal */
-	--chart-5:  #6a9f58;  /* Green */
-	--chart-6:  #e7ca60;  /* Yellow */
-	--chart-7:  #a87c9f;  /* Purple */
-	--chart-8:  #f1a2a9;  /* Pink */
-	--chart-9:  #967662;  /* Brown */
-	--chart-10: #b8b0ac;  /* Grey */
+	 *   primary  = chart-1 Orange (Anthropic 메인)
+	 *   accent   = chart-2 Blue (Anthropic 강조)
+	 *   negative = chart-3 Clay (dark terracotta — 부정)
+	 *   positive = chart-4 Green sage (Anthropic 긍정)
+	 *   neutral  = chart-10 MidGray (배경/참조) */
+	--chart-1:  #d97757;  /* Orange — Anthropic */
+	--chart-2:  #6a9bcc;  /* Blue — Anthropic */
+	--chart-3:  #a06a4a;  /* Clay (dark terracotta) */
+	--chart-4:  #788c5d;  /* Green sage — Anthropic */
+	--chart-5:  #c9a875;  /* Tan (warm sand) */
+	--chart-6:  #97a7c9;  /* LightBlue */
+	--chart-7:  #5e7048;  /* DarkSage */
+	--chart-8:  #d5cdb4;  /* Sand */
+	--chart-9:  #c4836c;  /* Salmon */
+	--chart-10: #b0aea5;  /* MidGray — Anthropic */
 
-	/* zinc ramp 미사용 (Tableau 10 채택 후 분기 폐기) — alias 유지 (다른 컴포넌트 참조 대비). */
-	--chart-zinc-1: #5778a4;
-	--chart-zinc-2: #e49444;
-	--chart-zinc-3: #6a9f58;
-	--chart-zinc-4: #b8b0ac;
-	--chart-zinc-5: #d1615d;
+	/* zinc ramp 미사용 — alias 유지 (다른 컴포넌트 참조 대비). */
+	--chart-zinc-1: #d97757;
+	--chart-zinc-2: #6a9bcc;
+	--chart-zinc-3: #788c5d;
+	--chart-zinc-4: #b0aea5;
+	--chart-zinc-5: #a06a4a;
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
@@ -138,23 +138,23 @@
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
-	/* Tableau 10 (dark 모드) — light 와 동일 hex. dusty muted 라 dark bg 에서도 충분. */
-	--chart-1:  #5778a4;
-	--chart-2:  #e49444;
-	--chart-3:  #d1615d;
-	--chart-4:  #85b6b2;
-	--chart-5:  #6a9f58;
-	--chart-6:  #e7ca60;
-	--chart-7:  #a87c9f;
-	--chart-8:  #f1a2a9;
-	--chart-9:  #967662;
-	--chart-10: #b8b0ac;
+	/* Anthropic warm earth (dark 모드) — light 와 동일 hex. warm muted earth 라 dark bg 에서도 충분. */
+	--chart-1:  #d97757;
+	--chart-2:  #6a9bcc;
+	--chart-3:  #a06a4a;
+	--chart-4:  #788c5d;
+	--chart-5:  #c9a875;
+	--chart-6:  #97a7c9;
+	--chart-7:  #5e7048;
+	--chart-8:  #d5cdb4;
+	--chart-9:  #c4836c;
+	--chart-10: #b0aea5;
 
-	--chart-zinc-1: #5778a4;
-	--chart-zinc-2: #e49444;
-	--chart-zinc-3: #6a9f58;
-	--chart-zinc-4: #b8b0ac;
-	--chart-zinc-5: #d1615d;
+	--chart-zinc-1: #d97757;
+	--chart-zinc-2: #6a9bcc;
+	--chart-zinc-3: #788c5d;
+	--chart-zinc-4: #b0aea5;
+	--chart-zinc-5: #a06a4a;
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
 	--sidebar-primary: oklch(0.488 0.243 264.376);
