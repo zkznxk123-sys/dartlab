@@ -126,30 +126,41 @@ _TEXTPATH_ROOT_SUFFIX_RE = re.compile(r"\s*[\(（][^)）]*[\)）]\s*$")
 
 
 def _resolveNoteIdentityFromTextPath(textPath: str | None) -> tuple[int, str] | None:
-    """row 의 ``textPath`` root segment 를 note 이름으로 보고 standard (NN, slug) 매칭.
+    """row 의 ``textPath`` 의 *모든 level* 을 스캔해 note 이름 매칭. 더 깊은 (더 구체적) 매치 우선.
 
-    textPath 는 note 의 heading 구조에서 빌드된다 — root segment 가 곧 note 이름.
-    `판매비와관리비 (연결)` → root `판매비와관리비` → (22, sga).
-    `일반적 사항 > 주요 관계기업` → root `일반적 사항` → (1, general).
+    textPath 는 note 의 heading 구조에서 빌드된다. 새 reporting 양식은 root segment 가 곧
+    note 이름 (`판매비와관리비 (연결)` → (22, sga)). 옛 quarterly 양식은 모든 note 를
+    `1. 일반적 사항` 한 parent 안에 sub-heading 으로 넣어서 root 는 `일반적 사항` 이지만 *진짜*
+    note 는 level 2 segment 에 있다:
+    - `일반적 사항 > 공정가치 측정` → (29, fairValue)
+    - `일반적 사항 > 부문별 정보` → (30, segment)
+    - `일반적 사항 > 희석주당순이익` → (26, eps)
+    - `판매비와관리비 (연결)` → root match → (22, sga)
 
-    이게 body heading 검출보다 *훨씬* 신뢰. body 는 다음 케이스에서 실패:
+    deepest segment 우선 (more specific) — 옛 양식의 nested 구조도 정확히 분류된다.
+
+    body heading 검출보다 *훨씬* 신뢰:
     - row 가 sub-table 본문만 있고 `N. 헤딩` 행이 다른 row 에 박힌 경우
     - 옛 quarterly cell 만 있고 annual empty → annual heading 못 봄
     """
     if not isinstance(textPath, str) or not textPath:
         return None
-    # root segment
-    root = textPath.split(" > ", 1)[0].strip()
-    if not root:
-        return None
-    # `(연결)` / `(별도)` / `(주석)` 등 한정자 suffix 제거
-    root = _TEXTPATH_ROOT_SUFFIX_RE.sub("", root).strip()
-    if not root:
-        return None
-    norm = _normalizeNoteName(root)
-    if not norm:
-        return None
-    return _NOTES_BY_NAME.get(norm)
+    segments = [s.strip() for s in textPath.split(" > ")]
+    deepestMatch: tuple[int, str] | None = None
+    for seg in segments:
+        if not seg:
+            continue
+        # `(연결)` / `(별도)` / `(주석)` 등 한정자 suffix 제거
+        clean = _TEXTPATH_ROOT_SUFFIX_RE.sub("", seg).strip()
+        if not clean:
+            continue
+        norm = _normalizeNoteName(clean)
+        if not norm:
+            continue
+        hit = _NOTES_BY_NAME.get(norm)
+        if hit is not None:
+            deepestMatch = hit
+    return deepestMatch
 
 
 def _resolveNoteIdentity(body: str | None) -> tuple[int, str] | None:

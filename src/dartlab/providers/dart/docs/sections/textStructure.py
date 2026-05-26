@@ -549,7 +549,15 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
 
     m = _RE_NUMERIC.match(stripped)
     if m:
-        return _gateHeadingLabel(2, m.group(1).strip())
+        label = m.group(1).strip()
+        # 한 글자 한글 label (예: "1. 일") 은 본문 단어 끊김 fragment.
+        # 회귀 사례 (005930 옛 quarterly `1. 일반적 사항` 본문이 줄바꿈 깨져 `1. 일\n반적 사항`
+        # 로 흘러들어와 첫 줄 `1. 일` 이 L2 heading 으로 잡힘 → textPath segment `일` 만 잘림 →
+        # 365 row 가 `일 > ...` root 로 박혀 consolidatedNotes_22_sga / _01_general /
+        # _29_fairValue 등 잘못된 sub-topic 으로 오분류). 한글 heading 매처의 동일 가드와 짝.
+        if len(label) == 1 and "가" <= label <= "힣":
+            return None
+        return _gateHeadingLabel(2, label)
 
     m = _RE_KOREAN.match(stripped)
     if m:
