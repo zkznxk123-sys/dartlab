@@ -107,37 +107,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 공시 timing 이상 — event-statement 매칭.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "027410"  # 예 — 한화 (늑장공시 케이스)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 공시 시계열 — 의무 vs 자율, 정정 빈도
-disclosure_log = c.disclosure(window="3Y") if hasattr(c, "disclosure") else None
+statements = {}
+for topic in ("IS", "BS", "CF"):
+    try:
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
+    except Exception:
+        pass
 
-# 2. IS / BS 분기 — 공시-실적 연결
-qis = c.show("IS", freq="Q")
-qbs = c.show("BS", freq="Q")
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 3. 횡단 — disclosureRisk axis (정정·지연 빈도)
-risk = dartlab.scan("disclosureRisk")
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
 
-# 4. 호재/악재 분류 + timestamp ledger
-timing_ledger = {
-    "disclosure_count": disclosure_log.height if disclosure_log is not None and hasattr(disclosure_log, "height") else 0,
-    "qis_quarters": qis.shape[1] - 2 if qis is not None else 0,
-    "scan_risk_present": risk is not None and risk.filter(pl.col("stockCode") == target).height > 0,
-}
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[timing_ledger],
+    table=memo["tables"]["eventToStatementMatcher"],
     values={
         "target": target,
-        "disclosureLoaded": disclosure_log is not None,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date="latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

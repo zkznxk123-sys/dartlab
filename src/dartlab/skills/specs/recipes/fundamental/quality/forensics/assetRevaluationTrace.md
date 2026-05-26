@@ -110,50 +110,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 자산 재평가 — 계정 추적 ledger.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "001040"  # 예 — CJ (자산재평가 적용 사례)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. BS — 유형자산·재평가잉여금 시계열
-ybs = c.show("BS", freq="Y")
-# 유형자산·재평가잉여금 행 추출
-def find_rows(df, keywords: list[str]):
-    pattern = "|".join(keywords)
-    return df.filter(df[df.columns[1]].str.contains(pattern))
-
-tangible_rows = find_rows(ybs, ["유형자산", "토지", "건물", "재평가잉여금"])
-
-# 2. CIS — 기타포괄손익 (재평가잉여금 증감)
-ycis = c.show("CIS", freq="Y") if hasattr(c, "show") else None
-
-# 3. 감정평가·재평가 주석
-revaluation_section = None
-for topic in ("유형자산", "감정평가", "재평가"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            revaluation_section = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 4. 자산재평가 결의 공시
-reval_disc = c.disclosure("자산재평가") if hasattr(c, "disclosure") else None
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-ledger = {
-    "tangible_rows": tangible_rows.height if tangible_rows is not None else 0,
-    "cis_loaded": ycis is not None,
-    "reval_section_loaded": revaluation_section is not None,
-    "reval_disc_loaded": reval_disc is not None,
-}
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
+
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "tangibleRows": tangible_rows.height if tangible_rows is not None else 0},
-    date="latest",
+    table=memo["tables"]["accountTraceLedger"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

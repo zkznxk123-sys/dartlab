@@ -109,45 +109,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 감사인 독립성 — 주석 패턴.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "042660"  # 예 — 대우조선해양 (한화오션)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 감사인 정보 — 사업보고서 감사 관련 섹션
-auditor_info = None
-for topic in ("감사인", "회계감사인", "감사보수", "감사관련"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            auditor_info = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 2. 감사인 변경 공시
-auditor_change = c.disclosure("감사인") if hasattr(c, "disclosure") else None
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 3. 감사의견·정정 공시
-audit_opinion = c.disclosure("감사의견") if hasattr(c, "disclosure") else None
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
 
-# 4. 횡단 — disclosureRisk
-risk = dartlab.scan("disclosureRisk")
-risk_row = risk.filter(pl.col("stockCode") == target) if "stockCode" in risk.columns else None
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
 
-ledger = {
-    "auditor_info_loaded": auditor_info is not None,
-    "auditor_change_loaded": auditor_change is not None,
-    "audit_opinion_loaded": audit_opinion is not None,
-    "risk_row_loaded": risk_row is not None and risk_row.height > 0,
-}
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "auditorAvail": auditor_info is not None},
-    date="latest",
+    table=memo["tables"]["noteSignalExtractor"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

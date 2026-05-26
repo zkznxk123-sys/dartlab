@@ -107,48 +107,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 임원 보수 — 주석 신호.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "005380"  # 예 — 현대자동차
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 임원 보수 본문 (사업보고서 임원보수 섹션)
-exec_pay = None
-for topic in ("임원보수", "이사보수", "보수총액"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            exec_pay = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 2. IS / BS — KPI 시계열 + EPS
-yis = c.show("IS", freq="Y")
-qis = c.show("IS", freq="Q")
-ybs = c.show("BS", freq="Y")
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 3. 스톡옵션·자기주식 — 부여·행사·자사주 보상
-treasury = c.show("treasury") if hasattr(c, "show") else None
-options = c.disclosure("스톡옵션") if hasattr(c, "disclosure") else None
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
 
-# 4. governance — 사외이사·지분율
-gov = dartlab.scan("governance")
-gov_row = gov.filter(pl.col("stockCode") == target) if "stockCode" in gov.columns else None
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
 
-ledger = {
-    "exec_pay_loaded": exec_pay is not None,
-    "is_years_loaded": yis.shape[1] - 2 if yis is not None else 0,
-    "options_loaded": options is not None,
-    "gov_row_loaded": gov_row is not None and gov_row.height > 0,
-}
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "execPayAvail": exec_pay is not None},
-    date="latest",
+    table=memo["tables"]["noteSignalExtractor"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

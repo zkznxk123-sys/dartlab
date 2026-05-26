@@ -109,69 +109,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 지배력 판정 — falsifier 후보.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "207940"  # 예 — 삼성바이오로직스
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 관계기업·종속기업 sections
-related_entities = {}
-for topic_name in ["관계기업", "종속기업", "공동기업", "지배기업"]:
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        df = c.show(topic_name) if topic_name in (c.topics if hasattr(c, "topics") else []) else None
-        if df is not None and hasattr(df, "shape") and df.height > 0:
-            related_entities[topic_name] = {
-                "shape": df.shape,
-                "columns": list(df.columns)[:8],
-                "head_rows": df.head(8).to_dicts(),
-            }
-    except Exception as exc:
-        related_entities[topic_name] = {"error": str(exc)}
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
+    except Exception:
+        pass
 
-# 2. 주요주주 (자기 측 지분구조)
-try:
-    major = c.show("majorHolder")
-    major_info = {
-        "shape": major.shape if hasattr(major, "shape") else None,
-        "columns": list(major.columns)[:8] if hasattr(major, "columns") else None,
-        "head": major.head(5).to_dicts() if hasattr(major, "head") else None,
-    }
-except Exception as exc:
-    major_info = {"error": str(exc)}
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 3. 옵션 약정 sections (충당부채)
 try:
-    contingent = c.show("충당부채")
-    contingent_info = {
-        "shape": contingent.shape if hasattr(contingent, "shape") else None,
-        "head": contingent.head(5).to_dicts() if hasattr(contingent, "head") else None,
-    }
-except Exception as exc:
-    contingent_info = {"error": str(exc)}
-
-# 4. 합작·M&A 공시
-try:
-    join_disc = c.disclosure(keyword="합작", days=1825) if hasattr(c, "disclosure") else None
-    ma_disc = c.disclosure(keyword="인수", days=1825) if hasattr(c, "disclosure") else None
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
 except Exception:
-    join_disc, ma_disc = None, None
+    events = []
+
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[
-        {"side": "target", "related_topics": list(related_entities.keys()),
-         "majorHolder_avail": major_info.get("shape") is not None,
-         "contingent_avail": contingent_info.get("shape") is not None,
-         "join_disclosure": join_disc.height if hasattr(join_disc, "height") else 0,
-         "ma_disclosure": ma_disc.height if hasattr(ma_disc, "height") else 0},
-    ],
+    table=memo["tables"]["falsifierLedger"],
     values={
         "target": target,
-        "relatedTopicsCount": len(related_entities),
-        "majorHolderAvail": major_info.get("shape") is not None,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date="latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

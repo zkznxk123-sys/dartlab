@@ -107,48 +107,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 빅 배스 — 일회성 손실 + 경영자 변경 ledger.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "009540"  # 예 — 현대중공업
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 분기 IS — 일회성 손실 시계열 (영업외비용·기타비용·법인세 후 손익)
-qis = c.show("IS", freq="Q")
-yis = c.show("IS", freq="Y")
-
-# 2. BS — 충당부채·이연법인세·영업권 잔액 시계열
-qbs = c.show("BS", freq="Q")
-
-# 3. 경영자 변경 공시 — timestamp 추출
-exec_changes = c.disclosure("임원변동") if hasattr(c, "disclosure") else None
-
-# 4. 손상차손·구조조정 본문 (가능 시)
-impair_section = None
-for topic in ("손상차손", "구조조정", "충당부채"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None:
-            impair_section = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 5. 빅 배스 ledger — IS / BS 매칭
-bath_ledger = {
-    "qis_quarters": qis.shape[1] - 2 if qis is not None else 0,
-    "exec_changes_loaded": exec_changes is not None,
-    "impair_section_loaded": impair_section is not None,
-}
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
+
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
+
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[bath_ledger],
+    table=memo["tables"]["engineCandidateMemo"],
     values={
         "target": target,
-        "execChangeLoaded": exec_changes is not None,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date="latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

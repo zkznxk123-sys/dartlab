@@ -110,73 +110,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — TRS 파생 — 계정 추적.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "017800"  # 예 — 현대엘리베이터 (TRS 사용 사례)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. BS 파생자산·부채 시계열
-bs = c.show("BS", freq="Y")
-period_cols = [col for col in bs.columns if str(col)[:4].isdigit()]
-period_cols_5y = sorted(period_cols, reverse=True)[:5]
-
-def find_rows(df, keywords: list[str]):
-    pattern = "|".join(keywords)
-    return df.filter(df[df.columns[1]].str.contains(pattern))
-
-derivative_rows = find_rows(bs, ["파생", "선도", "선물", "옵션", "스왑", "TRS"])
-
-# 2. 충당부채 (우발손익·약정)
-try:
-    contingent = c.show("충당부채") if "충당부채" in (c.topics if hasattr(c, "topics") else []) else None
-except Exception:
-    contingent = None
-
-# 3. 차입금 본문 (파생 약정 포함 가능)
-try:
-    borrowings = c.show("차입금") if "차입금" in (c.topics if hasattr(c, "topics") else []) else None
-except Exception:
-    borrowings = None
-
-# 4. TRS·파생 공시
-disclosures = {}
-for keyword in ["TRS", "총수익스왑", "풋옵션", "콜옵션", "KIKO", "통화선도", "약정"]:
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        d = c.disclosure(keyword=keyword, days=1825) if hasattr(c, "disclosure") else None
-        if d is not None and hasattr(d, "height") and d.height > 0:
-            disclosures[keyword] = d.height
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
         pass
 
-# 5. 횡단 공시 위험 (disclosureRisk)
-try:
-    risk_scan = dartlab.scan("disclosureRisk")
-except Exception:
-    risk_scan = None
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-rows = []
-for p in period_cols_5y:
-    if p not in bs.columns:
-        continue
-    row = {"period": p}
-    if not derivative_rows.is_empty():
-        for r in derivative_rows.iter_rows(named=True):
-            label = r[bs.columns[1]][:30]
-            row[label] = r.get(p)
-    rows.append(row)
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
+
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=rows,
+    table=memo["tables"]["accountTraceLedger"],
     values={
         "target": target,
-        "derivativeRowCount": derivative_rows.height if not derivative_rows.is_empty() else 0,
-        "contingentAvail": contingent is not None,
-        "disclosureKeywords": list(disclosures.keys()),
-        "disclosureHits": sum(disclosures.values()) if disclosures else 0,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date=period_cols_5y[0] if period_cols_5y else "latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

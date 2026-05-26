@@ -111,45 +111,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 공정공시 위반 — event-statement 매칭.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "130960"  # 예 — CJ E&M (잠정실적 내부정보 사례)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 공시 시계열 (호재·악재 + 잠정실적 vs 확정실적)
-disclosure_log = c.disclosure(window="3Y") if hasattr(c, "disclosure") else None
-
-# 2. 임원거래·특수관계자 거래 본문
-exec_trades = None
-for topic in ("임원거래", "임원_주식소유", "특수관계자거래", "임원변동"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            exec_trades = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 3. IS / BS — 잠정 vs 확정 비교
-qis = c.show("IS", freq="Q")
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 4. 임원거래 공시
-exec_disc = c.disclosure("임원거래") if hasattr(c, "disclosure") else None
-preliminary_disc = c.disclosure("잠정실적") if hasattr(c, "disclosure") else None
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
 
-ledger = {
-    "disclosure_loaded": disclosure_log is not None,
-    "exec_trades_loaded": exec_trades is not None,
-    "exec_disc_loaded": exec_disc is not None,
-    "preliminary_disc_loaded": preliminary_disc is not None,
-}
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "execTradesAvail": exec_trades is not None},
-    date="latest",
+    table=memo["tables"]["eventToStatementMatcher"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

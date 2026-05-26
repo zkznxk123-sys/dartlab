@@ -108,63 +108,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 복합금융상품 분류 — 계정 추적.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "011200"  # 예 — HMM (영구채 발행 사례)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. BS 5 년 — 자본·부채 항목 시계열
-bs = c.show("BS", freq="Y")
-period_cols = [col for col in bs.columns if str(col)[:4].isdigit()]
-period_cols_5y = sorted(period_cols, reverse=True)[:5]
+statements = {}
+for topic in ("IS", "BS", "CF"):
+    try:
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
+    except Exception:
+        pass
 
-# 자본 항목 (영구채·우선주 포함 가능)
-def find_rows(df, keywords: list[str]):
-    pattern = "|".join(keywords)
-    return df.filter(df[df.columns[1]].str.contains(pattern))
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-capital_rows = find_rows(bs, ["영구", "전환", "상환", "우선주", "신주인수권", "하이브리드", "후순위"])
-
-# 2. 차입금 sections (가능 시)
 try:
-    borrowings = c.show("차입금") if "차입금" in (c.topics if hasattr(c, "topics") else []) else None
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
 except Exception:
-    borrowings = None
+    events = []
 
-# 3. 발행 공시 본문
-try:
-    disclosure = c.disclosure(keyword="영구채", days=1825) if hasattr(c, "disclosure") else None
-except Exception:
-    disclosure = None
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
 
-# 4. 횡단 자본 (capital scan)
-try:
-    capital_scan = dartlab.scan("capital")
-except Exception:
-    capital_scan = None
-
-rows = []
-for p in period_cols_5y:
-    if p not in bs.columns:
-        continue
-    row = {"period": p}
-    if not capital_rows.is_empty():
-        for r in capital_rows.iter_rows(named=True):
-            label = r[bs.columns[1]][:30]
-            row[label] = r.get(p)
-    rows.append(row)
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=rows,
+    table=memo["tables"]["accountTraceLedger"],
     values={
         "target": target,
-        "capitalRowCount": capital_rows.height if not capital_rows.is_empty() else 0,
-        "borrowingsAvailable": borrowings is not None,
-        "disclosureAvailable": disclosure is not None and (hasattr(disclosure, "height") and disclosure.height > 0),
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date=period_cols_5y[0] if period_cols_5y else "latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

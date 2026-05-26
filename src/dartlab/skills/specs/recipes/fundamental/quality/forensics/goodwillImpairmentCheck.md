@@ -100,69 +100,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 영업권 손상 — 계정 추적.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "005380"  # 예 — 현대차 (구조 보유)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. BS — 영업권 / 무형자산 / 총자산 시계열
-bs = c.show("BS", freq="Y")
-period_cols = [col for col in bs.columns if str(col)[:4].isdigit()]
-period_cols_5y = sorted(period_cols, reverse=True)[:5]
+statements = {}
+for topic in ("IS", "BS", "CF"):
+    try:
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
+    except Exception:
+        pass
 
-def get_row(df, label_substr):
-    return df.filter(pl.col(df.columns[1]).str.contains(label_substr))
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-goodwill_row = get_row(bs, "영업권")
-intangible_row = get_row(bs, "무형자산")
-total_assets_row = get_row(bs, "자산총계")
-
-# 2. 시총 (가능 시)
 try:
-    price = c.gather("price")
-    latest_close = price["close"][-1] if not price.is_empty() else None
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
 except Exception:
-    latest_close = None
+    events = []
 
-# 3. 부문 정보 (segment IS)
-try:
-    segments = c.show("부문정보") if "부문정보" in (c.topics if hasattr(c, "topics") else []) else None
-except Exception:
-    segments = None
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
 
-# 4. 사업보고서 주석 — 영업권 손상검사
-try:
-    notes = c.disclosure("영업권") if hasattr(c, "disclosure") else None
-except Exception:
-    notes = None
-
-rows = []
-for p in period_cols_5y:
-    if p not in bs.columns:
-        continue
-    gw = goodwill_row[p][0] if not goodwill_row.is_empty() else None
-    intang = intangible_row[p][0] if not intangible_row.is_empty() else None
-    ta = total_assets_row[p][0] if not total_assets_row.is_empty() else None
-    gw_ratio = (gw / ta * 100) if (gw and ta) else None
-    rows.append({
-        "period": p,
-        "goodwill": gw,
-        "intangible_assets": intang,
-        "total_assets": ta,
-        "goodwill_pct_assets": gw_ratio,
-    })
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=rows,
+    table=memo["tables"]["accountTraceLedger"],
     values={
         "target": target,
-        "yearCount": len(rows),
-        "notesAvailable": notes is not None,
-        "segmentsAvailable": segments is not None,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date=period_cols_5y[0] if period_cols_5y else "latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

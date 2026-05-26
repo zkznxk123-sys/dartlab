@@ -112,50 +112,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 회계정책 변경 — 주석 본문 신호 추출.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "003490"  # 예 — 대한항공 (IFRS 16 리스 도입 영향)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. IS / BS / CF — 변경 전후 비율 비교
-yis = c.show("IS", freq="Y")
-ybs = c.show("BS", freq="Y")
-ycf = c.show("CF", freq="Y")
-ycis = c.show("CIS", freq="Y") if hasattr(c, "show") else None
-
-# 2. 회계정책 주석
-policy_section = None
-for topic in ("회계정책", "주요회계정책", "정책변경"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            policy_section = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 3. 정책 변경·정정공시
-policy_disc = c.disclosure("회계정책") if hasattr(c, "disclosure") else None
-correction_disc = c.disclosure("정정") if hasattr(c, "disclosure") else None
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 4. 횡단 — disclosureRisk (정정 패턴)
-risk = dartlab.scan("disclosureRisk")
-risk_row = risk.filter(pl.col("stockCode") == target) if "stockCode" in risk.columns else None
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
 
-ledger = {
-    "is_years": yis.shape[1] - 2 if yis is not None else 0,
-    "cis_loaded": ycis is not None,
-    "policy_section_loaded": policy_section is not None,
-    "policy_disc_loaded": policy_disc is not None,
-    "correction_disc_loaded": correction_disc is not None,
-}
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "policyAvail": policy_section is not None},
-    date="latest",
+    table=memo["tables"]["noteSignalExtractor"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

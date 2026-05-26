@@ -101,66 +101,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 합병비율 공정성 — event-statement 매칭.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-# 합병 당사사 양쪽 — target = 합병 주체, counter = 합병 대상
-target = "028260"  # 예 — 삼성물산
-counter = "001300"  # 예 — 제일모직 (구)
+target = "005930"  # KOSPI/KOSDAQ 종목코드
+c = dartlab.Company(target)
 
-c_t = dartlab.Company(target)
-c_c = dartlab.Company(counter)
-
-# 1. 최근 5 년 BS / IS — NAV / 시장가 / 이익 baseline
-metrics_t = {
-    "BS": c_t.show("BS", freq="Y"),
-    "IS": c_t.show("IS", freq="Y"),
-}
-metrics_c = {
-    "BS": c_c.show("BS", freq="Y"),
-    "IS": c_c.show("IS", freq="Y"),
-}
-
-# 2. 합병 공시 본문 (가능 시)
-merger_sections = {}
-for c, label in [(c_t, "target"), (c_c, "counter")]:
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        merger_sections[label] = c.disclosure("합병") if hasattr(c, "disclosure") else None
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        merger_sections[label] = None
+        pass
 
-# 3. 자기주식 처분·취득 시계열
-treasury = {}
-for c, label in [(c_t, "target"), (c_c, "counter")]:
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        treasury[label] = c.show("treasury") if "treasury" in (c.topics if hasattr(c, "topics") else []) else None
+        sectionTexts[topic] = str(c.show(topic))[:20000]
     except Exception:
-        treasury[label] = None
+        pass
 
-# 4. 외부평가 가정 ledger
-assumptions_ledger = {
-    "target": {
-        "BS_years": len([col for col in metrics_t["BS"].columns if str(col)[:4].isdigit()]),
-        "merger_section_loaded": merger_sections["target"] is not None,
-    },
-    "counter": {
-        "BS_years": len([col for col in metrics_c["BS"].columns if str(col)[:4].isdigit()]),
-        "merger_section_loaded": merger_sections["counter"] is not None,
-    },
-}
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
+
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[
-        {"side": "target", **assumptions_ledger["target"]},
-        {"side": "counter", **assumptions_ledger["counter"]},
-    ],
+    table=memo["tables"]["eventToStatementMatcher"],
     values={
-        "targetCode": target,
-        "counterCode": counter,
-        "mergerSectionAvail": sum(1 for v in merger_sections.values() if v is not None),
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
     },
-    date="latest",
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

@@ -113,53 +113,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 부실 금융기관 — 엔진 후보 메모.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "055550"  # 예 — 신한금융지주
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. BS — 자기자본·NPL·대손충당금
-ybs = c.show("BS", freq="Y")
-qbs = c.show("BS", freq="Q")
-
-# 2. IS — 이자수익·대손비용·NIM
-yis = c.show("IS", freq="Y")
-
-# 3. 감독 지표 주석 (BIS·NPL·LCR·NIM)
-supervisory_section = None
-for topic in ("BIS", "자기자본비율", "NPL", "유동성", "위험가중자산"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            supervisory_section = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 4. 자본확충·인수·매각 공시
-capital_disc = c.disclosure("자본확충") if hasattr(c, "disclosure") else None
-merger_disc = c.disclosure("합병") if hasattr(c, "disclosure") else None
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 5. 횡단 — financialHealth (금융기관 부실 지표 횡단)
 try:
-    health_scan = dartlab.scan("financialHealth")
-    health_row = health_scan.filter(pl.col("stockCode") == target) if "stockCode" in health_scan.columns else None
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
 except Exception:
-    health_row = None
+    events = []
 
-ledger = {
-    "supervisory_loaded": supervisory_section is not None,
-    "capital_disc_loaded": capital_disc is not None,
-    "merger_disc_loaded": merger_disc is not None,
-    "health_row_loaded": health_row is not None and health_row.height > 0,
-}
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
+
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "supervisoryAvail": supervisory_section is not None},
-    date="latest",
+    table=memo["tables"]["engineCandidateMemo"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 

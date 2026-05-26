@@ -107,48 +107,67 @@ visualRefs:
 
 ## 공개 호출 방식
 
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 자기주식 사용 — event-statement.
+
 ```python
 import dartlab
-import polars as pl
+from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
 
-target = "005930"  # 예 — 삼성전자
+target = "005930"  # KOSPI/KOSDAQ 종목코드
 c = dartlab.Company(target)
 
-# 1. 자기주식 시계열 — 취득·처분·소각
-treasury = None
-for topic in ("treasury", "자기주식", "자사주"):
+statements = {}
+for topic in ("IS", "BS", "CF"):
     try:
-        sec = c.show(topic) if hasattr(c, "show") else None
-        if sec is not None and hasattr(sec, "shape"):
-            treasury = sec
-            break
+        statements[topic] = c.show(topic, freq="Y")
+    except TypeError:
+        statements[topic] = c.show(topic)
     except Exception:
-        continue
+        pass
 
-# 2. BS / IS — 자본 항목 + EPS / ROE 동행
-qbs = c.show("BS", freq="Q")
-qis = c.show("IS", freq="Q")
-ybs = c.show("BS", freq="Y")
-yis = c.show("IS", freq="Y")
+sectionTexts = {}
+for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+    try:
+        sectionTexts[topic] = str(c.show(topic))[:20000]
+    except Exception:
+        pass
 
-# 3. 자사주 공시 — 취득·처분·소각·합병
-treasury_disc = c.disclosure("자기주식") if hasattr(c, "disclosure") else None
+try:
+    disclosure = c.disclosure()
+    events = disclosure.head(20).to_dicts() if hasattr(disclosure, "head") else list(disclosure)[:20]
+except Exception:
+    events = []
 
-# 4. 횡단 — capital axis (자사주·증감자·배당)
-cap_scan = dartlab.scan("capital")
-cap_row = cap_scan.filter(pl.col("stockCode") == target) if "stockCode" in cap_scan.columns else None
+scanRows = []
+for axis in ("quality", "audit", "disclosureRisk"):
+    try:
+        df = dartlab.scan(axis)
+        rows = df.head(3).to_dicts() if hasattr(df, "head") else []
+        for row in rows:
+            row["axis"] = axis
+        scanRows.extend(rows)
+    except Exception:
+        pass
 
-ledger = {
-    "treasury_loaded": treasury is not None,
-    "treasury_disc_loaded": treasury_disc is not None,
-    "qis_quarters": qis.shape[1] - 2 if qis is not None else 0,
-    "cap_row_loaded": cap_row is not None and cap_row.height > 0,
-}
+memo = buildEvidenceForensicsMemo(
+    target=target,
+    market=str(getattr(c, "market", "KR")),
+    companyName=str(getattr(c, "corpName", target)),
+    statements=statements,
+    sectionTexts=sectionTexts,
+    events=events,
+    scanRows=scanRows,
+)
 
 emit_result(
-    table=[ledger],
-    values={"target": target, "treasuryAvail": treasury is not None},
-    date="latest",
+    table=memo["tables"]["eventToStatementMatcher"],
+    values={
+        "target": target,
+        "riskScore": memo["headline"].get("riskScore"),
+        "signalCount": memo["headline"].get("signalCount"),
+    },
+    date=memo.get("asOf", "latest"),
+    sources=memo["sources"],
 )
 ```
 
