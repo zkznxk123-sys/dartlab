@@ -234,69 +234,6 @@
       "limitations": []
     },
     {
-      "id": "engines.macro.assets",
-      "title": "Macro - 자산",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.corporate",
-      "title": "Macro - 기업집계",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.crisis",
-      "title": "Macro - 위기",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.cycle",
-      "title": "Macro - 사이클",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.forecast",
-      "title": "Macro - 예측",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.inventory",
-      "title": "Macro - 재고",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.liquidity",
-      "title": "Macro - 유동성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.macro.marketReview",
       "title": "거시 시장 환경 점검",
       "category": "engines",
@@ -311,51 +248,6 @@
       "limitations": [
         "live FRED, 환율, 금리 API 호출은 브라우저 CORS/인증 제약으로 제외한다."
       ]
-    },
-    {
-      "id": "engines.macro.rates",
-      "title": "Macro - 금리",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.scenario",
-      "title": "Macro - 시나리오",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.sentiment",
-      "title": "Macro - 심리",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.summary",
-      "title": "Macro - 종합",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.macro.trade",
-      "title": "Macro - 교역",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
     },
     {
       "id": "engines.mappers",
