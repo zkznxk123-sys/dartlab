@@ -32,6 +32,7 @@ def _mock_company():
     c.trace.return_value = None
     c.topics = ["BS", "IS"]
     c._docs.sections = None
+    c.sectionsAs.return_value = None
     c.facts = None
     c.BS = None
     c.IS = None
@@ -189,7 +190,7 @@ def test_sections_basic(monkeypatch, mock_output):
     _patch_dartlab(monkeypatch)
     from dartlab.cli.commands.sections import run
 
-    rc = run(_ns(company="999999"))
+    rc = run(_ns(company="999999", raw=False))
     assert rc == 0
 
 

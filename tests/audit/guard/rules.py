@@ -62,6 +62,7 @@ FROZEN_PROVIDER_COMPANY_SURFACE = {
         "retrievalBlocks",
         "search",
         "sections",
+        "sectionsAs",
         "sector",
         "sectorParams",
         "select",
