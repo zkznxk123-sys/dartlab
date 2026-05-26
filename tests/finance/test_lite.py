@@ -47,18 +47,15 @@ def test_lite_spec_constants():
 
 
 @pytest.mark.unit
-@pytest.mark.xfail(
-    reason="buildFinanceLite None 반환 — _scanDir monkeypatch 후 fixture 데이터 부족 회귀 (정합한 fixture 재구축 deferred)"
-)
 def test_buildFinanceLite_filters_correctly(tmp_path, monkeypatch):
     """buildFinanceLite 가 원본에서 sj_div/계정/연도 필터를 정확히 적용하는지."""
-    from dartlab.scan.builders.kr import core as builderCore
+    from dartlab.scan.builders.kr import financeLite
     from dartlab.scan.io.parquet import LITE_SINCE_YEAR
 
     # 가짜 finance.parquet 작성 — 원본과 동일 스키마
-    scanDir = tmp_path / "dart" / "scan"
-    scanDir.mkdir(parents=True)
-    fakeFinance = scanDir / "finance.parquet"
+    scanDirPath = tmp_path / "dart" / "scan"
+    scanDirPath.mkdir(parents=True)
+    fakeFinance = scanDirPath / "finance.parquet"
 
     df = pl.DataFrame(
         {
@@ -75,10 +72,12 @@ def test_buildFinanceLite_filters_correctly(tmp_path, monkeypatch):
     )
     df.write_parquet(str(fakeFinance))
 
-    # _scanDir 을 tmp_path 로 몽키패치
-    monkeypatch.setattr(builderCore, "_scanDir", lambda: scanDir)
+    # scanDir 는 financeLite 모듈이 `from common import scanDir` 로 *local
+    # namespace 에 bound* 했으므로 common.scanDir patch 가 아닌 financeLite.scanDir
+    # 직접 patch 필수 (옛 monkeypatch 가 core._scanDir 를 잘못 patch 해 효과 0 회귀).
+    monkeypatch.setattr(financeLite, "scanDir", lambda: scanDirPath)
 
-    outputPath = builderCore.buildFinanceLite(verbose=False)
+    outputPath = financeLite.buildFinanceLite(verbose=False)
     assert outputPath is not None
     assert outputPath.name == "finance-lite.parquet"
     assert outputPath.exists()
