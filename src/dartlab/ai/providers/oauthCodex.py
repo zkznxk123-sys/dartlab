@@ -176,48 +176,59 @@ def _fetchRemoteModels(token: str) -> list[str] | None:
     return models or None
 
 
+# Retry policy SSOT — transient 실패 (TimeoutException · 5xx) 통합 정책.
+# 옛 inline 분기 3 종 (timeout 1회 · 5xx 2회 · 401 1회) → 단일 exponential backoff + jitter.
+# 401 만 별도 (토큰 갱신 special case, retry 아님).
+_RETRY_DELAYS: tuple[float, ...] = (1.0, 2.5, 5.0)  # 3회 retry. ChatGPT/OpenAI/Anthropic SDK 표준
+_TRANSIENT_STATUSES: frozenset[int] = frozenset({502, 503, 504})
+
+
 def _requestWithRetry(token: str, body: dict[str, Any]) -> str:
-    headers = _headers(token)
-
-    def post(activeHeaders: dict[str, str]) -> httpx.Response:
-        """POST 호출 헬퍼 — 401 재시도 시 새 토큰 헤더로 재호출."""
-        return httpx.post(f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}", headers=activeHeaders, json=body, timeout=90)
-
-    try:
-        response = post(headers)
-    except httpx.TimeoutException as exc:
-        # 1회 재시도 — 백엔드 일시 슬로다운 흡수. timeout 한 번에 끝나던 회귀 가드.
-        time.sleep(2)
-        try:
-            response = post(headers)
-        except httpx.TimeoutException as exc2:
-            raise OAuthCodexError(
-                "network", "ChatGPT OAuth backend 응답 시간이 초과되었습니다 (1회 재시도 후)."
-            ) from exc2
-        except httpx.HTTPError as exc2:
-            raise OAuthCodexError("network", f"ChatGPT OAuth backend 연결 실패: {exc2}") from exc2
-    except httpx.HTTPError as exc:
-        raise OAuthCodexError("network", f"ChatGPT OAuth backend 연결 실패: {exc}") from exc
-
+    """ChatGPT OAuth backend POST + transient 실패 retry + 401 토큰 갱신."""
+    response = _retryablePost(_headers(token), body)
     if response.status_code == 401:
-        try:
-            refreshed = oauthToken.refreshAccessToken()
-        except (OSError, RuntimeError, TokenRefreshError, ValueError) as exc:
-            raise OAuthCodexError("relogin", f"ChatGPT OAuth 재인증이 필요합니다: {exc}") from exc
-        token = refreshed.get("access_token") if isinstance(refreshed, dict) else None
-        if token:
-            response = post(_headers(token))
-
-    if response.status_code in {502, 503, 504}:
-        for attempt in range(2):
-            time.sleep(1.5 * (attempt + 1))
-            response = post(headers)
-            if response.status_code not in {502, 503, 504}:
-                break
-
+        response = _refreshAndRetryOnce(body)
     if response.status_code != 200:
         _raiseHttpError(response.status_code, response.text)
     return response.text
+
+
+def _retryablePost(headers: dict[str, str], body: dict[str, Any]) -> httpx.Response:
+    """TimeoutException · 5xx 통합 retry — exponential backoff + ±25% jitter, 3회."""
+    import random
+
+    last_exc: Exception | None = None
+    for attempt, delay in enumerate((0.0,) + _RETRY_DELAYS):
+        if delay > 0:
+            time.sleep(delay * random.uniform(0.75, 1.25))
+        try:
+            response = httpx.post(f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}", headers=headers, json=body, timeout=90)
+        except httpx.TimeoutException as exc:
+            last_exc = exc
+            if attempt < len(_RETRY_DELAYS):
+                continue
+            raise OAuthCodexError(
+                "network", f"ChatGPT OAuth backend 응답 시간이 초과되었습니다 ({attempt} 회 재시도 후)."
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise OAuthCodexError("network", f"ChatGPT OAuth backend 연결 실패: {exc}") from exc
+        if response.status_code in _TRANSIENT_STATUSES and attempt < len(_RETRY_DELAYS):
+            continue
+        return response
+    # unreachable — 위 loop 가 raise 또는 return
+    raise OAuthCodexError("network", f"ChatGPT OAuth backend 재시도 전부 실패: {last_exc}") from last_exc
+
+
+def _refreshAndRetryOnce(body: dict[str, Any]) -> httpx.Response:
+    """401 — 토큰 갱신 1회 후 재호출. retry policy 가 아니라 인증 갱신."""
+    try:
+        refreshed = oauthToken.refreshAccessToken()
+    except (OSError, RuntimeError, TokenRefreshError, ValueError) as exc:
+        raise OAuthCodexError("relogin", f"ChatGPT OAuth 재인증이 필요합니다: {exc}") from exc
+    newToken = refreshed.get("access_token") if isinstance(refreshed, dict) else None
+    if not newToken:
+        raise OAuthCodexError("relogin", "ChatGPT OAuth 재인증 토큰을 받지 못했습니다.")
+    return _retryablePost(_headers(newToken), body)
 
 
 def _headers(token: str, *, acceptJson: bool = False) -> dict[str, str]:
