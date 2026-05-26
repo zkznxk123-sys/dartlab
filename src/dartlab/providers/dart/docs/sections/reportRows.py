@@ -116,11 +116,15 @@ def _normalizeRowspanShift(tableMd: str) -> str:
 
 
 def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
-    """content를 원문 순서대로 text/table block으로 분해."""
+    """content를 원문 순서대로 text/table block으로 분해.
+
+    table line 검출 — markdown ``|`` prefix 와 HTML ``<table``/``<tr``/``</table``
+    prefix 모두 인식. 2026-05-26 _tableToMarkdown 의 HTML 출력 전환과 짝.
+    """
     strippedContent = content.strip()
     if not strippedContent:
         return []
-    if "|" not in strippedContent:
+    if "|" not in strippedContent and "<table" not in strippedContent:
         return [("text", strippedContent)]
 
     rows: list[tuple[str, str]] = []
@@ -140,6 +144,9 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
             rowsAppend((kind, text))
         buffer = []
 
+    def _isTableLine(s: str) -> bool:
+        return s.startswith("|") or s.startswith("<table") or s.startswith("<tr") or s.startswith("</table")
+
     for raw in content.splitlines():
         stripped = raw.strip()
         if not stripped:
@@ -150,7 +157,7 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
                 buffer.append("")
             continue
 
-        nextKind = "table" if stripped.startswith("|") else "text"
+        nextKind = "table" if _isTableLine(stripped) else "text"
         if currentKind is None:
             currentKind = nextKind
             buffer.append(stripped)

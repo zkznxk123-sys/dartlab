@@ -271,7 +271,10 @@ def classifyContent(content: str) -> tuple[int, int, int]:
         line = raw.strip()
         if not line:
             continue
-        if line.startswith("|"):
+        # 2026-05-26 — `_tableToMarkdown` 가 HTML `<table>` 출력으로 전환된 이후
+        # table 라인 검출은 `|` (옛 markdown 양식) + `<table` / `<tr` / `</table` (새 HTML)
+        # 둘 다 인식. 옛 doc.parquet 와 호환 위해 markdown 도 유지.
+        if line.startswith("|") or line.startswith("<table") or line.startswith("<tr") or line.startswith("</table"):
             table_lines += 1
             continue
         if RE_MAJOR.match(line) or RE_MINOR.match(line):
@@ -544,7 +547,13 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
             if textBuffer:
                 textBuffer.append("")
             continue
-        if stripped.startswith("|"):
+        # markdown table (`|`) 또는 HTML table (`<table` / `<tr` / `</table`) 둘 다 table line.
+        if (
+            stripped.startswith("|")
+            or stripped.startswith("<table")
+            or stripped.startswith("<tr")
+            or stripped.startswith("</table")
+        ):
             flushText()
             tableBuffer.append(stripped)
             continue

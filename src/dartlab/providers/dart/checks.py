@@ -149,7 +149,15 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
     """DART docs parquet 최신성 확인 — L1 HF ETag → L2 TTL → L3 DART API.
 
     Returns: FreshnessResult | None (L3 체크 결과, API 키 없으면 None).
+
+    환경변수 ``DARTLAB_NO_REFRESH=1`` 시 freshness check 전체 우회 — 로컬 zip 재빌드
+    parquet 을 HF 의 옛 본문으로 덮어쓰지 않도록. 로컬 작업 / 디버그 / 정밀 회귀 검증 시.
     """
+    import os
+
+    if os.environ.get("DARTLAB_NO_REFRESH") == "1":
+        return None
+
     from dartlab.core.dataLoader import _checkRemoteFreshness, _dataDir, _download
     from dartlab.core.messaging import emit
 

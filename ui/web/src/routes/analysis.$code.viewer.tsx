@@ -15,6 +15,7 @@
 
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import DOMPurify from 'dompurify';
 import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -848,8 +849,69 @@ function refineSubTable(block: MarkdownSubTable): MarkdownSubTable {
 	return { caption, unit, rows };
 }
 
+// DART 원본 HTML `<table rowspan colspan>` 직접 렌더 — sanitize 후 dangerouslySetInnerHTML.
+// `_tableToMarkdown` 의 HTML 출력 (2026-05-26) 이후 신규 doc.parquet 의 table 본문은
+// 마크다운 평탄화 결과 (`| ... |`) 가 아니라 원본 rowspan/colspan 그대로의 HTML 이다.
+// DART 본문은 untrusted (CLAUDE.md L37) — DOMPurify 로 script/style/handler/iframe 모두 제거.
+const SANITIZE_CONFIG: DOMPurify.Config = {
+	ALLOWED_TAGS: ['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'br', 'span', 'div', 'b', 'i', 'u', 'strong', 'em', 'sub', 'sup'],
+	ALLOWED_ATTR: ['colspan', 'rowspan', 'class', 'align'],
+};
+
+function HtmlTable({ html, caption, unit }: { html: string; caption?: string; unit?: string }) {
+	const cleanHtml = DOMPurify.sanitize(html, SANITIZE_CONFIG) as string;
+	return (
+		<div className="space-y-1">
+			{(caption || unit) && (
+				<div className="flex items-baseline justify-between gap-2 text-[11px]">
+					<div className="font-medium text-foreground">{caption}</div>
+					{unit && <div className="text-muted-foreground">{unit}</div>}
+				</div>
+			)}
+			<div className="dartlab-html-table overflow-x-auto" dangerouslySetInnerHTML={{ __html: cleanHtml }} />
+		</div>
+	);
+}
+
+// HTML 본문에서 `<table>...</table>` block 추출 + 그 사이 텍스트도 보존.
+// returns 원본 순서대로 ['html-table' | 'text', body] 묶음.
+function splitHtmlAndText(value: string): Array<['html' | 'text', string]> {
+	const out: Array<['html' | 'text', string]> = [];
+	const re = /<table[\s\S]*?<\/table>/gi;
+	let last = 0;
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(value)) !== null) {
+		if (m.index > last) {
+			const before = value.slice(last, m.index).trim();
+			if (before) out.push(['text', before]);
+		}
+		out.push(['html', m[0]]);
+		last = m.index + m[0].length;
+	}
+	if (last < value.length) {
+		const tail = value.slice(last).trim();
+		if (tail) out.push(['text', tail]);
+	}
+	return out;
+}
+
 function CellContent({ value, blockType }: { value: string; blockType: string }) {
 	if (!value) return null;
+	// HTML `<table>` 본문 — 신규 doc.parquet (2026-05-26+) 이 rowspan/colspan 보존 HTML 으로 출력.
+	if (blockType === 'table' && value.includes('<table')) {
+		const parts = splitHtmlAndText(value);
+		return (
+			<div className="space-y-3">
+				{parts.map(([kind, body], i) =>
+					kind === 'html' ? (
+						<HtmlTable key={i} html={body} />
+					) : (
+						<div key={i} className="whitespace-pre-wrap break-words text-xs text-muted-foreground">{body.replace(/&cr;/g, ' ')}</div>
+					),
+				)}
+			</div>
+		);
+	}
 	if (blockType === 'table' && value.includes('|')) {
 		const blocks = parseMarkdownSubTables(value).map(refineSubTable).filter((b) => b.rows.length > 0 || b.caption || b.unit);
 		if (blocks.length === 0) return <pre className="whitespace-pre-wrap break-words text-sm">{value}</pre>;

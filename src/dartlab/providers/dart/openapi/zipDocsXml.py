@@ -63,36 +63,57 @@ def _findDirectTRs(table):
                     yield sub
 
 
+def _escapeHtml(text: str) -> str:
+    """raw text → HTML entity escape (`& < >`)."""
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def _tableToMarkdown(table) -> str:
-    """XML ``<TABLE>`` → markdown table. rowspan/colspan 직접 보존.
+    """XML ``<TABLE>`` → HTML table 문자열. rowspan/colspan attribute 보존.
+
+    이전 구현은 markdown table 문법 (`| ... |`) 출력이라 GFM 이 rowspan 미지원 →
+    DART HTML 의 multi-row header (`<th rowspan>`) 가 평탄화돼 stair-step row 다수.
+    회귀 사례 (005930 차입금/재고자산 multi-row header 시각 깨짐).
+
+    본 구현은 HTML 그대로 출력 (`<table><tr><td rowspan colspan>...`) — frontend 가
+    sanitize 후 raw HTML 렌더하면 원본 DART 표 시각 fidelity 100% 회복.
+
+    함수명은 호환 위해 ``_tableToMarkdown`` 유지 (caller 영향 0). 출력 형식 변경만.
+    downstream ``classifyContent`` / ``buildMarkdownBlocks`` 의 table line 검출은
+    `<table` prefix 도 인식하도록 동행 수정.
 
     nested ``<TABLE>`` 차단 — 외부 TR / cell 만. nested table cell 내용은
     itertext 로 inline (별도 row 안 만듦). 회귀 차단: 기존 ``iter('TR')`` +
     ``.//TD`` 가 nested table 의 TR/cell 까지 외부에 포함시켜 한 table 420MB+
     markdown 폭발 (035720 회귀).
     """
-    rows: list[list[str]] = []
+    out: list[str] = ["<table>"]
+    hasContent = False
     for tr in _findDirectTRs(table):
-        cells: list[str] = []
+        rowOut: list[str] = ["<tr>"]
+        cellEmitted = False
         for cell in tr:
             if not isinstance(cell.tag, str) or cell.tag not in ("TD", "TH", "TU", "TE"):
                 continue
-            colspan = int(cell.get("COLSPAN", "1") or "1")
-            # cell 의 itertext 는 nested TABLE 의 cell text 도 포함 (flat inline)
-            text = " ".join(cell.itertext()).strip().replace("\n", " ").replace("|", "｜")
-            cells.append(text)
-            cells.extend("" for _ in range(colspan - 1))
-        if cells:
-            rows.append(cells)
-    if not rows:
+            tag = "th" if cell.tag in ("TH", "TU") else "td"
+            colspan = cell.get("COLSPAN", "1") or "1"
+            rowspan = cell.get("ROWSPAN", "1") or "1"
+            attrs = ""
+            if colspan and colspan != "1":
+                attrs += f' colspan="{int(colspan)}"'
+            if rowspan and rowspan != "1":
+                attrs += f' rowspan="{int(rowspan)}"'
+            # cell itertext 는 nested TABLE 의 cell text 도 포함 (flat inline)
+            text = " ".join(cell.itertext()).strip().replace("\n", " ")
+            rowOut.append(f"<{tag}{attrs}>{_escapeHtml(text)}</{tag}>")
+            cellEmitted = True
+        rowOut.append("</tr>")
+        if cellEmitted:
+            out.append("".join(rowOut))
+            hasContent = True
+    out.append("</table>")
+    if not hasContent:
         return ""
-    nCols = max(len(r) for r in rows)
-    for r in rows:
-        while len(r) < nCols:
-            r.append("")
-    out = ["| " + " | ".join(rows[0]) + " |", "| " + " | ".join(["---"] * nCols) + " |"]
-    for r in rows[1:]:
-        out.append("| " + " | ".join(r) + " |")
     return "\n".join(out)
 
 

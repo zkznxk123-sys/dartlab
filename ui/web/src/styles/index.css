@@ -173,3 +173,24 @@
 		transform: translateX(400%);
 	}
 }
+
+/* analysis/$code/viewer — DART 원본 HTML table (`<table rowspan colspan>`) 렌더 스타일.
+   rowspan/colspan 보존을 위해 native HTML table 사용 + 최소한의 border/padding 만 적용. */
+.dartlab-html-table table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.75rem;
+}
+.dartlab-html-table td,
+.dartlab-html-table th {
+	border: 1px solid var(--border);
+	padding: 0.125rem 0.375rem;
+	text-align: left;
+	vertical-align: top;
+	font-weight: normal;
+	background-color: transparent;
+}
+.dartlab-html-table th {
+	background-color: var(--muted);
+	font-weight: 500;
+}
