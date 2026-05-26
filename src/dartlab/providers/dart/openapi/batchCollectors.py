@@ -9,22 +9,16 @@ import asyncio
 import io
 import re
 import zipfile
+from typing import TYPE_CHECKING
 
 import httpx
 import polars as pl
 
-from dartlab.providers.dart.openapi.batch import (
-    _CODE_TO_QUARTER,
-    _CODE_TO_QUARTER_KR,
-    _KR_TO_ENG_API_TYPE,
-    _PERIODIC_REPORT_CATEGORIES,
-    _REPORT_ENDPOINTS,
-    AsyncDartClient,
-    _buildAllPeriods,
-    _dataPath,
-    _existingFinancePeriods,
-    _existingReportPeriods,
-)
+# batch ↔ batchCollectors 양방향 import 회피 — AsyncDartClient 는 type annotation
+# (`from __future__ import annotations` 효과로 string lazy), 10 상수/helper 는 함수 본문
+# 안만 사용 → 각 함수 시작 lazy import.
+if TYPE_CHECKING:
+    from dartlab.providers.dart.openapi.batch import AsyncDartClient
 
 # ── 단일 종목 수집 (비동기) ──
 
@@ -46,6 +40,12 @@ async def _collectFinance(
             지정하면 88분기 차집합 우회. 누락 검사도 이 리스트로만 한정.
             None이면 기존 _buildAllPeriods 88분기 전체 + 차집합 (heavy fallback).
     """
+    from dartlab.providers.dart.openapi.batch import (
+        _CODE_TO_QUARTER,
+        _buildAllPeriods,
+        _dataPath,
+        _existingFinancePeriods,
+    )
     from dartlab.providers.dart.openapi.saver import enrichFinance, save, saveReplacingByKeys
 
     path = _dataPath("finance", stockCode)
@@ -126,6 +126,15 @@ async def _collectReport(
         targetPeriods: list.json에서 발견한 정확한 (bsns_year, reprt_code).
             지정하면 88분기 차집합 우회.
     """
+    from dartlab.providers.dart.openapi.batch import (
+        _CODE_TO_QUARTER_KR,
+        _KR_TO_ENG_API_TYPE,
+        _PERIODIC_REPORT_CATEGORIES,
+        _REPORT_ENDPOINTS,
+        _buildAllPeriods,
+        _dataPath,
+        _existingReportPeriods,
+    )
     from dartlab.providers.dart.openapi.saver import enrichReport, save, saveReplacingByKeys
 
     path = _dataPath("report", stockCode)

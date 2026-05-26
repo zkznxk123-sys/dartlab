@@ -17,17 +17,13 @@ import polars as pl
 import dartlab.config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.logger import getLogger
-from dartlab.providers.dart.search.fieldIndex import (
-    CONTENT_LIMIT,
-    _contentIndexDir,
-    _getSegments,
-    _IncrementalBuilder,
-    buildContentSegment,
-    clearCache,
-    loadSegment,
-    saveSegment,
-    searchContent,
-)
+
+# fieldIndex ↔ fieldIndexRebuild 양방향 import 회피 — 함수 본문 lazy import.
+# fieldIndex.py 가 본 모듈의 rebuildMain / rebuildDelta 외 7 항목을 re-export 하므로
+# module-level `from fieldIndex import ...` 시 direct import 가 partially initialized
+# 로 실패. fieldIndex 의 9 항목 (CONTENT_LIMIT · _contentIndexDir · _getSegments ·
+# _IncrementalBuilder · buildContentSegment · clearCache · loadSegment · saveSegment ·
+# searchContent) 사용은 모두 함수 본문 안 → 각 함수 시작 lazy import.
 
 _log = getLogger(__name__)
 
@@ -36,7 +32,7 @@ def rebuildMain(
     *,
     includeAllFilings: bool = True,
     includeDocs: bool = True,
-    contentLimit: int = CONTENT_LIMIT,
+    contentLimit: int | None = None,
     showProgress: bool = True,
 ) -> int:
     """main 세그먼트 풀리빌드 — 전체 docs + 과거 allFilings.
@@ -66,7 +62,15 @@ def rebuildMain(
     import gc
 
     from dartlab.providers.dart.openapi.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+    from dartlab.providers.dart.search.fieldIndex import (
+        CONTENT_LIMIT,
+        _IncrementalBuilder,
+        clearCache,
+        saveSegment,
+    )
 
+    if contentLimit is None:
+        contentLimit = CONTENT_LIMIT
     builder = _IncrementalBuilder()
     metaRecs: list[dict] = []
     totalDocs = 0
@@ -194,6 +198,11 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     from datetime import datetime, timedelta
 
     from dartlab.providers.dart.openapi.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+    from dartlab.providers.dart.search.fieldIndex import (
+        buildContentSegment,
+        clearCache,
+        saveSegment,
+    )
 
     if sinceDate is None:
         sinceDate = (datetime.now() - timedelta(days=daysBack)).strftime("%Y%m%d")
@@ -229,6 +238,8 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
 
 def _clearDelta() -> None:
     """delta 세그먼트 파일 제거."""
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+
     outDir = _contentIndexDir()
     for name in ("delta.npz", "delta_stems.json", "delta_meta.parquet", "delta_info.json"):
         p = outDir / name
@@ -252,6 +263,8 @@ def pushContentIndex(token: str | None = None) -> None:
         >>> pushContentIndex(...)
     """
     from huggingface_hub import HfApi
+
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
     outDir = _contentIndexDir()
     api = HfApi(token=token)
@@ -296,6 +309,7 @@ def pullContentIndex() -> int:
     from huggingface_hub import hf_hub_download
 
     from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, clearCache
 
     outDir = _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
@@ -348,6 +362,8 @@ def contentStats() -> dict:
     Returns:
         dict — 결과 통계.
     """
+    from dartlab.providers.dart.search.fieldIndex import _getSegments
+
     segments = _getSegments()
     out: dict = {}
     for name, (idx, meta) in segments.items():
@@ -385,6 +401,8 @@ def iterContent(
     Raises:
         없음.
     """
+    from dartlab.providers.dart.search.fieldIndex import searchContent
+
     df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():
         return

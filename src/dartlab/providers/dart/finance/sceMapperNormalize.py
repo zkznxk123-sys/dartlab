@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import re
 
-from dartlab.providers.dart.finance.sceMapper import (
-    _CAUSE_NOSPACE,
-    CAUSE_FALLBACK_PATTERNS,
-    CAUSE_SYNONYMS,
-    DETAIL_MAP,
-)
+# sceMapper ↔ sceMapperNormalize 양방향 import 회피 — 함수 본문 lazy import.
+# sceMapper.py 가 본 모듈의 normalizeCause / normalizeDetail 외 14 항목을 re-export 하므로
+# module-level `from sceMapper import ...` 시 direct import (`import sceMapperNormalize`)
+# 가 sceMapper partially initialized 로 실패. 4 상수 (_CAUSE_NOSPACE, CAUSE_FALLBACK_PATTERNS,
+# CAUSE_SYNONYMS, DETAIL_MAP) 사용은 normalizeCause + _matchDetailMap 2 함수 본문 안만 →
+# 각 함수 시작에서 lazy import (Python module cache 가 1 회 비용 흡수).
 
 
 def normalizeCause(accountNm: str) -> str:
@@ -63,6 +63,12 @@ def normalizeCause(accountNm: str) -> str:
         TargetMarkets:
             - KR (DART) — IFRS 한국 적용 회사 SCE 공시 한정.
     """
+    from dartlab.providers.dart.finance.sceMapper import (
+        _CAUSE_NOSPACE,
+        CAUSE_FALLBACK_PATTERNS,
+        CAUSE_SYNONYMS,
+    )
+
     nm = accountNm.strip()
     if nm in CAUSE_SYNONYMS:
         return CAUSE_SYNONYMS[nm]
@@ -237,6 +243,8 @@ def _parseDetailLast(detail: str) -> str | None:
 
 def _matchDetailMap(last: str) -> str | None:
     """DETAIL_MAP 직접 매칭 (공백 포함 + 무시)."""
+    from dartlab.providers.dart.finance.sceMapper import DETAIL_MAP
+
     for key, val in DETAIL_MAP.items():
         if key in last:
             return val

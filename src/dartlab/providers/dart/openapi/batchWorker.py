@@ -8,11 +8,16 @@ from __future__ import annotations
 import asyncio
 import zipfile
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import httpx
 import polars as pl
 
-from dartlab.providers.dart.openapi.batch import AsyncDartClient
+# batch ↔ batchWorker 양방향 import 회피 — AsyncDartClient 는 type annotation 만 사용
+# (`from __future__ import annotations` 효과로 string lazy). runtime 사용 0.
+if TYPE_CHECKING:
+    from dartlab.providers.dart.openapi.batch import AsyncDartClient
+
 from dartlab.providers.dart.openapi.batchCollectors import (
     _collectDocs,
     _collectFinance,
