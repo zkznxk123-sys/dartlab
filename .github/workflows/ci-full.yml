@@ -23,10 +23,12 @@ jobs:
         include:
           - gate: test-full
             python: "3.12"
+            timeout: 30
             artifact_name: coverage-report
             artifact_path: htmlcov/
           - gate: test-full
             python: "3.13"
+            timeout: 25
           - gate: fixture-integration
             timeout: 15
           - gate: cross-os-smoke
