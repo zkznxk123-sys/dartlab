@@ -13,6 +13,14 @@ whenToUse:
   - foreign holding cross-section
   - factor exposure
   - quartile ranking
+examples:
+  - 005930 외인 보유율 cross-section 어느 분위
+  - 외인 보유율 상위 quartile 종목
+  - foreign flow factor 노출도 정량
+expectedOutputs:
+  - universe quartile 분포 (4 bin 경계값)
+  - 자기 종목 percentile rank + quartile 라벨 (Q1~Q4)
+  - 상위 quartile 종목 list (top 10)
 linkedSkills:
   - engines.gather
   - recipes.sentiment.foreignHoldingLevel

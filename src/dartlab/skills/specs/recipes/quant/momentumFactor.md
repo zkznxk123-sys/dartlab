@@ -11,6 +11,14 @@ whenToUse:
   - 12-1m return
   - Jegadeesh momentum
   - 위험조정 모멘텀
+examples:
+  - 005930 12-1m 모멘텀 팩터 위치
+  - 위험 조정 모멘텀 (Sharpe) 상위 종목
+  - Jegadeesh 모멘텀 cross-section rank
+expectedOutputs:
+  - 12-1m return 단일값 + 변동성 조정 Sharpe
+  - peer percentile rank + quartile 라벨
+  - 모멘텀 상위 quartile 종목 list (Sharpe 기준)
 linkedSkills:
   - engines.company
   - engines.quant

@@ -11,6 +11,14 @@ whenToUse:
   - QMJ Asness
   - quality minus junk
   - 4 축 composite quality
+examples:
+  - 005930 quality 팩터 4 축 점수 (ROE / 성장 / 안정성 / 배당)
+  - QMJ 상위 종목 — junk 회피 screen
+  - 005930 이 quality vs junk 어디
+expectedOutputs:
+  - 4 축 (Profitability·Growth·Safety·Payout) 개별 z-score
+  - composite QMJ z-score 단일값
+  - peer percentile rank + 상위 / 하위 quartile 종목 list
 linkedSkills:
   - engines.company
   - engines.quant

@@ -11,6 +11,14 @@ whenToUse:
   - B/M E/P CF/P composite
   - Fama-French value
   - 가치주 rank
+examples:
+  - 005930 value 팩터 composite 어디
+  - Fama-French value 상위 종목 (B/M + E/P + CF/P)
+  - 가치주 cross-section rank — PER 단독 함정 회피
+expectedOutputs:
+  - B/M · E/P · CF/P 각각 단일값
+  - composite z-score (3 정의 평균) + percentile rank
+  - peer 상위 quartile 종목 list
 linkedSkills:
   - engines.company
   - engines.quant

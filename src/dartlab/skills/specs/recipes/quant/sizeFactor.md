@@ -11,6 +11,14 @@ whenToUse:
   - SMB Fama-French
   - market cap rank
   - small-cap premium
+examples:
+  - 005930 시총 rank — small / mid / large 어디
+  - Fama-French size 팩터 — small-cap premium 상위 종목
+  - log market cap cross-section 분위
+expectedOutputs:
+  - log(market cap) 단일값 + peer percentile
+  - quartile 라벨 (small / mid / mid-large / large)
+  - universe quartile 경계값 + 자기 종목 위치
 linkedSkills:
   - engines.company
   - engines.quant

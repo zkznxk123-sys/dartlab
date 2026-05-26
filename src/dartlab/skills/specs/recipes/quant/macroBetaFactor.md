@@ -13,6 +13,14 @@ whenToUse:
   - macroBeta cross-section
   - rate / FX / oil beta
   - factor exposure
+examples:
+  - 005930 금리 beta + 환율 beta cross-section
+  - 매크로 beta 가장 높은 종목 — 유가 / 환율 / 금리
+  - KOSPI 200 안 매크로 beta 분포
+expectedOutputs:
+  - 매크로 요인별 beta (금리·환율·유가) 단일값 + quartile 위치
+  - universe quartile 경계값 + 자기 종목 percentile
+  - 매크로 beta 상위 / 하위 5 종목 list
 linkedSkills:
   - engines.scan
   - recipes.macro.qualityMacroBeta
