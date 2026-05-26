@@ -29,7 +29,7 @@ def _autoEmit(company: Any, generatorName: str) -> None:
     """AI 런타임에서 도메인 차트 호출 시 VizSpec 마커를 자동 emit.
 
     Jupyter에서는 stdout에 HTML 주석이 찍히지만 사용자에게 보이지 않는다.
-    VSCode/CLI AI 런타임에서는 마커가 캡처되어 인터랙티브 차트로 렌더링된다.
+    CLI AI 런타임에서는 마커가 캡처되어 인터랙티브 차트로 렌더링된다.
     """
     try:
         from dartlab.viz import emitChart

@@ -523,13 +523,6 @@
         "inDegree": 0,
         "outDegree": 2,
         "title": "RunPython 신뢰 경계"
-      },
-      {
-        "id": "runtime.vscode",
-        "category": "runtime",
-        "inDegree": 0,
-        "outDegree": 1,
-        "title": "VSCode Extension"
       }
     ],
     "isolated": [

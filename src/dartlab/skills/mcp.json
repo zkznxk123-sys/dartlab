@@ -13,8 +13,8 @@
       {
         "id": "runtime",
         "title": "Runtime",
-        "description": "Local Python, Pyodide, Web AI, MCP, VSCode ?? ?? ??? ??? ?? ??.",
-        "count": 11
+        "description": "Local Python, Pyodide, Web AI, MCP ?? ?? ??? ??? ?? ??.",
+        "count": 10
       },
       {
         "id": "operation",
@@ -4927,23 +4927,6 @@
       ],
       "nextSkills": [],
       "bodyPreview": "## 신뢰 모델\n\ndartlab 의 RunPython 은 *단일 사용자 로컬 신뢰* 환경을 가정한다. 코드를 작성하는 주체는 (a) 사용자 자신이거나, (b) 사용자가 신뢰해서 attach 한 LLM 클라이언트다. sandbox 의 목적은 *완전 격리* 가 아니라 *우발적/실수성 destructive 호출 차단* + *신뢰 경계 명시* 다.\n\n운영 환경이 외부 공유 (팀/공개 attach) 로 확장되면 본 신뢰 모델은 재검토 필요하다.\n\n## 허용\n\n- **dartlab API 전체** — `dartlab.Company`, `dartlab.scan`, `dartlab.macro`, `dartlab.analysis`, `dartlab.story`, `dartlab.gather`, `dartlab.quant`, `dartlab.industry` 등.\n- **polars 전체** — `pl.DataFrame`, `pl.Series`, lazy frames, joins, window functions.\n- **pathlib 읽기** — `Path.read_text`, `Path.exists`, `Path.glob` 등.\n- **read mode `open`** — "
-    },
-    {
-      "id": "runtime.vscode",
-      "title": "VSCode Extension",
-      "category": "runtime",
-      "purpose": "VSCode Extension 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
-      "whenToUse": [
-        "VSCode Extension",
-        "vscode",
-        "1. 버전 — 0.2.x 끝자리만 올린다",
-        "2. 배포 — 7 단계로 진행한다",
-        "3. 아키텍처 — webview ↔ extension host ↔ Python backend 3 층으로 간다",
-        "4. stdio 프로토콜 — 이 메시지 타입으로 주고받는다",
-        "5. 프로바이더 연결 — 선택하면 바로 연결까지 끝낸다"
-      ],
-      "nextSkills": [],
-      "bodyPreview": "## Skill OS 흡수 규칙\n\n- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.\n- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.\n- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.\n\n## 실행 순서\n\n- 1. 버전 — 0.2.x 끝자리만 올린다 기준을 확인한다.\n- 2. 배포 — 7 단계로 진행한다 기준을 확인한다.\n- 3. 아키텍처 — webview ↔ extension host ↔ Python backend 3 층으로 간다 기준을 확인한다.\n- 4. stdio 프로토콜 — 이 메시지 타입으로 주고받는다 기준을 확인한다.\n- 5. 프로바이더 연결 — 선택하면 바로 연결까지 끝낸다 기준을 확인한다.\n- **0.2.x** — 끝자리만 올린다 (0.2.0 → 0.2.1 → 0.2.2 → …).\n- `ui/vscode/package.json` 의 `version` 필드가 진실의 원천.\n- 태그: `vsce-{버전}` (예: `vsce-0.2.1`).\n- CHANGELOG: `ui/vscode/CHANGELOG.md`."
     },
     {
       "id": "runtime.workbenchEvidenceFlow",

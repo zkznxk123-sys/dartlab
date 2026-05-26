@@ -2,7 +2,7 @@
   // @ts-nocheck
   /**
    * ChartSpec JSON → 적절한 차트 컴포넌트로 dispatch.
-   * dartlab.viz 의 단일 시각화 SSOT 진입점 — VSCode webview · landing · notebook
+   * dartlab.viz 의 단일 시각화 SSOT 진입점 — landing · notebook
    * 모두 같은 컴포넌트로 렌더한다.
    *
    * onPointClick 이 주어지면 series.data[i] 의 pointRefs[i] 를 인자로 받는다.
@@ -146,14 +146,14 @@
   }
   .chart-unsupported {
     font-size: 12px;
-    color: var(--vscode-descriptionForeground, #888);
+    color: #888;
   }
   .chart-loading {
     min-height: 180px;
     display: grid;
     place-items: center;
     font-size: 12px;
-    color: var(--vscode-descriptionForeground, #888);
+    color: #888;
     border: 1px dashed rgba(148, 163, 184, 0.25);
     border-radius: 6px;
   }
@@ -163,18 +163,18 @@
   .mermaid-title {
     font-size: 12px;
     font-weight: 500;
-    color: var(--vscode-foreground, #ccc);
+    color: #ccc;
     margin-bottom: 4px;
   }
   .mermaid-source {
     font-size: 11px;
     padding: 12px;
-    background: var(--vscode-editor-background, #1e1e1e);
-    border: 1px solid var(--vscode-panel-border, #333);
+    background: #1e1e1e;
+    border: 1px solid #333;
     border-radius: 6px;
     overflow-x: auto;
     line-height: 1.5;
-    color: var(--vscode-editor-foreground, #d4d4d4);
+    color: #d4d4d4;
   }
   .mermaid-copy {
     position: absolute;
@@ -184,7 +184,7 @@
     border-radius: 4px;
     background: transparent;
     border: none;
-    color: var(--vscode-descriptionForeground, #888);
+    color: #888;
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.15s;
@@ -193,6 +193,6 @@
     opacity: 1;
   }
   .mermaid-copy:hover {
-    background: var(--vscode-toolbar-hoverBackground, #333);
+    background: #333;
   }
 </style>

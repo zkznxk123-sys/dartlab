@@ -2477,15 +2477,6 @@
       "limitations": []
     },
     {
-      "id": "runtime.vscode",
-      "title": "VSCode Extension",
-      "category": "runtime",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "runtime.workbenchEvidenceFlow",
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",

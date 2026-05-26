@@ -111,7 +111,7 @@ DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가
 | 카테고리 | 의미 | 대표 skill |
 |---|---|---|
 | `start` | 첫 진입 — 설치 · walkthrough · 카탈로그 사용법 | `start.installUv`, `start.quickStart`, `start.useSkillsCatalog` |
-| `runtime` | 실행 환경 — Pyodide · MCP · Web AI · Local Python · VSCode · 노트북 | `runtime.mcp`, `runtime.notebooks`, `runtime.pyodideBrowser` |
+| `runtime` | 실행 환경 — Pyodide · MCP · Web AI · Local Python · 노트북 | `runtime.mcp`, `runtime.notebooks`, `runtime.pyodideBrowser` |
 | `operation` | 운영 규칙 — 사상 · 코드 품질 · API 계약 · 테스트 · 안정성 · 검증 방법론 | `operation.philosophy`, `operation.apiContract`, `operation.stability` |
 | `engines` | 엔진별 기본 사용법 + 응용 실행 — 회사 · 분석 · 시장 스캔 · 매크로 · 퀀트 · 스토리 | `engines.company`, `engines.analysis`, `engines.scan` |
 | `recipes` | 여러 엔진을 조합해 깊은 분석 품질을 강제하는 절차 | `recipes.fundamental.credit.deepDive`, `recipes.fundamental.governance.workforceAndCapital`, `recipes.macro.sixActs` |

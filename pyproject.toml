@@ -282,7 +282,6 @@ omit = [
     "src/dartlab/cli/main.py",
     "src/dartlab/cli/parser.py",
     "src/dartlab/cli/rendering.py",
-    "src/dartlab/cli/stdio.py",
     "src/dartlab/cli/services/*",
 
     # 서버 API — HTTP 핸들러, realData end-to-end 로 간접 검증.

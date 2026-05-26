@@ -44,14 +44,6 @@ POSTS: list[tuple[str, str, str]] = [
         "warm ambient lamp light, cinematic shallow depth of field, photorealistic, " + NO_TEXT,
     ),
     (
-        "02",
-        "vscode-extension-install",
-        "A wide shot of a modern editor window with VS Code style interface, sidebar panel open "
-        "showing an extension, Korean financial data dashboard visible on the right half, "
-        "dark IDE theme, syntax highlighted code lines, soft studio lighting, "
-        "photorealistic, cinematic, " + NO_TEXT,
-    ),
-    (
         "03",
         "scan-market-finance",
         "A wall of glowing screens showing dozens of financial market tickers and candlestick charts in a "

@@ -61,7 +61,7 @@ whenToUse:
 ## 다음 카테고리
 
 - **start/** — 첫 진입 (외부 LLM / 신규 사용자)
-- **runtime/** — 실행 환경 (mcp / pyodide / vscode)
+- **runtime/** — 실행 환경 (mcp / pyodide)
 - **engines/** — 15 분석 엔진
 - **recipes/** — 분석 recipe lifecycle
 

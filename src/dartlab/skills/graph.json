@@ -4425,19 +4425,6 @@
       "audiences": []
     },
     {
-      "id": "runtime.vscode",
-      "title": "VSCode Extension",
-      "category": "runtime",
-      "purpose": "VSCode Extension 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
-      "inDegree": 0,
-      "outDegree": 1,
-      "cluster": "runtime",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": true,
-      "audiences": []
-    },
-    {
       "id": "runtime.workbenchEvidenceFlow",
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
@@ -13358,11 +13345,6 @@
       "kind": "knowledge"
     },
     {
-      "src": "runtime.vscode",
-      "dst": "start.dartlabSkillOs",
-      "kind": "knowledge"
-    },
-    {
       "src": "start.dartlabSkillOs",
       "dst": "start.installUv",
       "kind": "linkedRecipe"
@@ -13721,8 +13703,7 @@
     "runtime.providerProtocol",
     "runtime.pyodide",
     "runtime.pyodideBrowser",
-    "runtime.python",
-    "runtime.vscode"
+    "runtime.python"
   ],
   "unreachable": [
     "engines.analysis.assetStructure",
@@ -13920,7 +13901,6 @@
     "runtime.pyodide",
     "runtime.pyodideBrowser",
     "runtime.python",
-    "runtime.vscode",
     "runtime.workbenchEvidenceFlow"
   ]
 }

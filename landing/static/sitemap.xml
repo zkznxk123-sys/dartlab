@@ -1281,11 +1281,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/runtime.vscode</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/runtime.workbenchEvidenceFlow</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1786,12 +1781,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-03-26</lastmod>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/vscode-extension-install</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-04-06</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/scan-market-finance</loc>

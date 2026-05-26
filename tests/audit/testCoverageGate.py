@@ -49,7 +49,6 @@ _EXEMPT_PATH_PREFIXES = (
     "cli/main.py",
     "cli/parser.py",
     "cli/rendering.py",
-    "cli/stdio.py",
     "cli/services/",
     "cli/commands/",
     "server/api/",

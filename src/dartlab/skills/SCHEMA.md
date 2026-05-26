@@ -17,7 +17,7 @@
 | 카테고리 | 위치 | 의미 |
 |---|---|---|
 | `start` | `specs/start/{name}.md` | 첫 진입 (DartLab Skill OS, install, catalog 사용) |
-| `runtime` | `specs/runtime/{name}.md` | 실행 환경 (Pyodide, MCP, Web AI, Local Python, VSCode) |
+| `runtime` | `specs/runtime/{name}.md` | 실행 환경 (Pyodide, MCP, Web AI, Local Python) |
 | `operation` | `specs/operation/{name}.md` | 운영 규칙 (philosophy, code, apiContract, architecture, testing) |
 | `engines` | `specs/engines/{group}/SKILL.md` (기본) + `specs/engines/{group}/{axis}.md` (응용) | 엔진별 기본 사용법 + 응용 실행 스킬 |
 | `recipes` | `specs/recipes/{persona}[/{domain}...]/{name}.md` | L1.5 이하 (core·gather/providers·scan/frame/synth/reference) 조합 실험장. 검증 통과 + 엔진 능가 → L2 엔진으로 흡수 |

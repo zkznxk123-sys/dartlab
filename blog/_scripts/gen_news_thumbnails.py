@@ -32,13 +32,6 @@ POSTS: list[tuple[str, str, str, list[str], str]] = [
         "Python 초보자를 위한 3단계 설치 가이드",
     ),
     (
-        "02",
-        "vscode-extension-install",
-        "DartLab 소식 · VSCode",
-        ["VSCode에서 dartlab을", "한 번에 쓰는 법"],
-        "사이드바 · 단축키 · 자동완성까지",
-    ),
-    (
         "03",
         "scan-market-finance",
         "DartLab 소식 · scan",

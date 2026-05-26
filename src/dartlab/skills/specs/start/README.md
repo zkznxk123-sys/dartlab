@@ -64,7 +64,7 @@ print(c.show("IS"))      # 손익계산서
 ## 다음 카테고리
 
 - **operation/** — 운영 설계 SSOT (philosophy / architecture / code / apiContract / testing 등 29 spec)
-- **runtime/** — 실행 환경 (mcp / pyodide / vscode / workbenchEvidenceFlow 등 12 spec)
+- **runtime/** — 실행 환경 (mcp / pyodide / workbenchEvidenceFlow 등 11 spec)
 - **engines/** — 15 분석 엔진 (analysis / company / credit / industry / macro / quant / scan / story 등)
 - **recipes/** — 분석 recipe 6-stage lifecycle
 

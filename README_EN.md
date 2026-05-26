@@ -374,8 +374,7 @@ L2  analysis/    Financial + forecast + valuation — analysis("group", "axis")
     macro/       Market-level macro — dartlab.macro()
     story/       5-engine composition (analysis + credit + scan + quant + macro)
 L3  ai/          Active analyst — dartlab.ask()
-L4  vscode/      VSCode extension (dartlab chat --stdio)
-    ui/web/      Svelte SPA web interface
+L4  ui/web/      Web interface (React + shadcn SPA)
 ```
 
 Import direction enforced by CI. Adding a new country means one provider package — zero core changes.
@@ -387,7 +386,7 @@ Who consumes whom across the stack:
 ```mermaid
 flowchart TB
     subgraph L4["L4 · User interface"]
-        UI["vscode / CLI / web"]
+        UI["CLI / web"]
     end
     subgraph L3["L3 · LLM analyst"]
         AI["ai<br/>dartlab.ask()"]

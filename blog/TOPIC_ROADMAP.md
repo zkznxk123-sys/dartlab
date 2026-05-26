@@ -82,7 +82,6 @@
 | # | slug |
 |---|------|
 | 01 | dartlab-easy-start |
-| 02 | vscode-extension-install |
 | 03 | scan-market-finance |
 | 04 | company-one-stock-code |
 | 05 | search-without-embeddings |
