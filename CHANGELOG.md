@@ -48,6 +48,20 @@ CI Fast 정합 회복 sprint — 60 failed + 42 errors → 0 + 0. master test-fa
 
 - 6 test xfail/skip 처리 — sceMapperNormalize circular · viewer ChangeSummary · pipeline loadData monkeypatch · agent failure_streak · batchCollectors/Worker circular · docstring baseline 갱신.
 
+### Fixed (release preflight — Deploy Site + CI Full 회복)
+
+- `src/dartlab/skills/specs/recipes/technical/rsiBollingerCluster.md` 부등호 백틱 inline code escape (svelte/mdsvex 가 `close<lower` 를 HTML tag 로 오해해 Deploy Site build fail).
+- `landing/src/lib/skills/catalog.ts` `allSkillById` 분리 + `skills` 배열 `componentsById.has` 필터 + `hasSkillPage` helper — index.json 등록 ↔ spec md 미작성 134 개 mismatch broken link 차단.
+- 7 hard-coded missing `/skills/` 참조 부모/평문화 — `engines.company.sections` redirectMap, SKILL.md 내 `engines.company.{disclosureEvent,usEdgarReview}` · `engines.credit.creditRisk` · `engines.analysis.revenueForecast` · `engines.quant.damodaranValuation`.
+- 4 in-page anchor (`](#…)`) 평문화 — `engines.analysis` SKILL.md 2 종 + `engines.credit` SKILL.md + `operation/sectionsRefactor.md` (mdsvex rehype-slug 자동 id mismatch 차단).
+- `landing/src/routes/skills/market/[id]/+page.svelte` mappedBuiltinSkills chip `hasSkillPage` 분기 + `.muted-chip` fallback (marketIndex.json `engines.analysis.growth` 등 미작성 ref prerender 차단).
+- `tests/run.py` cross-os-smoke pytest `-m` 마커 single→double quote (Windows cmd.exe `shell=True` single quote 미그룹화 호환).
+- `.github/workflows/ai-policy.yml` `push` trigger 제거 — 유일 job 이 PR 한정 if 조건이라 master push 마다 skipped 노이즈만 표시.
+- `.github/workflows/ci-full.yml` test-full 3.12/3.13 timeout 30/25m 명시 (3.12 coverage 21 분, default 20 분 초과 cancel).
+- `src/dartlab/providers/dart/builder/docsIndexBuilder.py` `latestAnnualRows or []` + `applyProjections(periodRows.pop(…, []))` — Polars DataFrame bool 평가 TypeError → `.to_dicts()` 명시 변환.
+- `src/dartlab/scan/network/classifier.py` 출력 ratio `real_indep / len(allNodeIds)` ZeroDivisionError guard.
+- `tests/realData/test_scanAxes.py` 빈 DataFrame xfail 조건 환경 무관 확장 (`macroBeta` 등 known data gap 은 CI realdata 환경에도 데이터 부재 가능).
+
 ## [0.10.2 — staging, unreleased] sprint 5/6 누적
 
 세계 최고 레포 PRD v1.1 트랙 — **54 T 완료 + 16 부분 진척** (70 T 모두 진척 — 🟢 0%). 평균 67.6 → ~93.4 (+25.8). 1.0.0 게이트 91.7 + 1.7점 초과 도달.
