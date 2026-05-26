@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 324,
+    "skillCount": 144,
     "categories": [
       {
         "id": "start",
@@ -26,13 +26,13 @@
         "id": "engines",
         "title": "Engines",
         "description": "??? ?? ???? ? ??? ??? ?? ?? ??.",
-        "count": 164
+        "count": 43
       },
       {
         "id": "recipes",
         "title": "Recipes",
         "description": "?? ??? L1/L1.5 ??? ?? ?? ??? ???? ?? ??.",
-        "count": 120
+        "count": 61
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
