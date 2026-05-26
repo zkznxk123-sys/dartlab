@@ -286,7 +286,10 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     topicFirstSeq: dict[str, tuple[int, int]] = {}
 
     for periodIdx, periodKey in enumerate(validPeriods):
-        projected = applyProjections(periodRows.pop(periodKey, []), teacherTopics)
+        # periodRows[*] 는 pl.DataFrame (_reportRowsToTopicRows 반환). applyProjections 는
+        # list[dict] 기대 → 호출 시점에 .to_dicts() 변환 (한 period 만 in-flight 라 메모리 압박 가벼움).
+        periodDf = periodRows.pop(periodKey, None)
+        projected = applyProjections(periodDf.to_dicts() if periodDf is not None else [], teacherTopics)
         for row in _expandStructuredRows(projected):
             chapter = row.get("chapter")
             topic = row.get("topic")
