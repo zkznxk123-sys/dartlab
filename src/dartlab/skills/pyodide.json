@@ -10,59 +10,6 @@
       "limitations": []
     },
     {
-      "id": "engines.analysis.assetStructure",
-      "title": "Analysis - 자산구조",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.capitalAllocation",
-      "title": "Analysis - 자본배분",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.cashflow",
-      "title": "현금흐름 분석",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "현금흐름표가 포함된 Company finance snapshot을 확인한다."
-      ],
-      "limitations": [
-        "세부 운전자본 주석이 없는 snapshot에서는 원인 판단을 제한한다."
-      ]
-    },
-    {
-      "id": "engines.analysis.costStructure",
-      "title": "Analysis - 비용구조",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.disclosureChange",
-      "title": "Analysis - 공시변화",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "recipes.fundamental.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
       "category": "recipes",
@@ -78,51 +25,6 @@
       "limitations": [
         "공시 당일 신규 주주환원 이벤트는 live filings가 가능한 서버 경로에서 보강한다."
       ]
-    },
-    {
-      "id": "engines.analysis.earningsQuality",
-      "title": "Analysis - 이익품질",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.efficiency",
-      "title": "Analysis - 효율성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.financialConsistency",
-      "title": "Analysis - 재무정합성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.financing",
-      "title": "Analysis - 자금조달",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.governance",
-      "title": "Analysis - 지배구조",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
     },
     {
       "id": "recipes.fundamental.governance.auditComposite",
@@ -142,60 +44,6 @@
       ]
     },
     {
-      "id": "engines.analysis.growth",
-      "title": "Analysis - 성장성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.investmentEfficiency",
-      "title": "Analysis - 투자효율",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.macroSensitivity",
-      "title": "Analysis - 매크로민감도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.peerComparison",
-      "title": "동종 기업 비교 분석",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "비교 대상별로 await dartlab.prefetch(stockCode)를 먼저 수행한다."
-      ],
-      "limitations": [
-        "여러 종목 parquet를 브라우저 메모리에 올리므로 대상 수를 작게 유지한다.",
-        "live market/macro 보강은 서버 환경에서만 한다."
-      ]
-    },
-    {
-      "id": "engines.analysis.predictionSignal",
-      "title": "Analysis - 예측신호",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.analysis.profitability",
       "title": "수익성 분석",
       "category": "engines",
@@ -213,53 +61,8 @@
       ]
     },
     {
-      "id": "engines.analysis.revenueForecast",
-      "title": "Analysis - 매출전망",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.revenueStructure",
-      "title": "Analysis - 수익구조",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.scorecard",
-      "title": "Analysis - 종합평가",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.analysis.stability",
       "title": "Analysis - 안정성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.valuation",
-      "title": "Analysis - 가치평가",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.analysis.valuationBand",
-      "title": "Analysis - 밸류에이션밴드",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -300,54 +103,6 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
-    },
-    {
-      "id": "engines.company.finance",
-      "title": "finance — 회사 재무 엔진 (XBRL + 주석 sub-domain)",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.company.researchStarter",
-      "title": "기업 분석 시작 라우터",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
-      ],
-      "requiredSetup": [],
-      "limitations": [
-        "live filings, macro 보강, 신규 수집은 서버 또는 로컬 Python 경로에서 수행한다."
-      ]
-    },
-    {
-      "id": "engines.company.sections",
-      "title": "sections — 회사 전체 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.company.usEdgarReview",
-      "title": "미국 기업 EDGAR 분석",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
-        "HuggingFace dartlab-data edgar/docs/{ticker}.parquet"
-      ],
-      "requiredSetup": [
-        "ticker별 prefetched EDGAR snapshot이 있는지 먼저 확인한다."
-      ],
-      "limitations": [
-        "SEC live API와 신규 filings 조회는 서버 또는 로컬 Python 경로에서 수행한다."
-      ]
     },
     {
       "id": "engines.credit",
@@ -452,134 +207,8 @@
       "limitations": []
     },
     {
-      "id": "engines.gather.collect",
-      "title": "Gather - 전체 snapshot",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.dividends",
-      "title": "Gather - 배당",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.flow",
-      "title": "Gather - 수급",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.history",
-      "title": "Gather - OHLCV 이력",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.industryPeers",
-      "title": "Gather - 동종 peer",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.insiderTrading",
-      "title": "Gather - 내부자 거래",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.gather.listing",
       "title": "listing — 카탈로그 단일 진입점 (companies · filings · topics · dartlist)",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.macro",
-      "title": "Gather - 거시 지표",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.majorShareholders",
-      "title": "Gather - 주요주주",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.news",
-      "title": "Gather - 뉴스",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.ownership",
-      "title": "Gather - 기관 보유",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.price",
-      "title": "Gather - 가격",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.revenueConsensus",
-      "title": "Gather - 매출 컨센서스",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.sector",
-      "title": "Gather - 섹터",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.gather.splits",
-      "title": "Gather - 분할",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1433,35 +1062,8 @@
       "limitations": []
     },
     {
-      "id": "engines.scan.account",
-      "title": "Scan - 계정",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.scan.audit",
       "title": "Scan - 감사리스크",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.capital",
-      "title": "Scan - 주주환원",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.cashflow",
-      "title": "Scan - 현금흐름",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1487,78 +1089,6 @@
       ]
     },
     {
-      "id": "engines.scan.debt",
-      "title": "Scan - 부채구조",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.disclosureRisk",
-      "title": "Scan - 공시리스크",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.dividendTrend",
-      "title": "Scan - 배당추이",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.efficiency",
-      "title": "Scan - 효율성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.fields",
-      "title": "Scan - 필드카탈로그",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.governance",
-      "title": "Scan - 거버넌스",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.growth",
-      "title": "Scan - 성장성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.insider",
-      "title": "Scan - 내부자지분",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.scan.krxIndexStrength",
       "title": "KRX 지수 강세 분석",
       "category": "engines",
@@ -1575,62 +1105,8 @@
       ]
     },
     {
-      "id": "engines.scan.liquidity",
-      "title": "Scan - 유동성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.macroBeta",
-      "title": "Scan - 거시베타",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.network",
-      "title": "Scan - 네트워크",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.scan.profitability",
       "title": "Scan - 수익성",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.quality",
-      "title": "Scan - 이익의 질",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.ratio",
-      "title": "Scan - 비율",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.screen",
-      "title": "Scan - 스크리닝",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1651,24 +1127,6 @@
       "limitations": [
         "full scan 축 전체가 아니라 prebuild에 포함된 지표 기준 후보만 만든다."
       ]
-    },
-    {
-      "id": "engines.scan.valuation",
-      "title": "Scan - 밸류에이션",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.scan.workforce",
-      "title": "Scan - 인력/급여",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
     },
     {
       "id": "engines.search",
