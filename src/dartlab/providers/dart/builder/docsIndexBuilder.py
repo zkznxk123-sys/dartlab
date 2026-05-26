@@ -222,7 +222,11 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     if not validPeriods:
         return []
 
-    teacherTopics = chapterTeacherTopics(latestAnnualRows or [])
+    # latestAnnualRows 는 pl.DataFrame (_reportRowsToTopicRows 반환).
+    # chapterTeacherTopics 는 list[dict] 기대 → to_dicts() 변환.
+    # `df or []` 패턴은 polars 가 bool(DataFrame) 에서 TypeError 발생.
+    teacherRows = latestAnnualRows.to_dicts() if latestAnnualRows is not None else []
+    teacherTopics = chapterTeacherTopics(teacherRows)
     validPeriods = sortPeriods(validPeriods)
     latestPeriod = validPeriods[-1]
 

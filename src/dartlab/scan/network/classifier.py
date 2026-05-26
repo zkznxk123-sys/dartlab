@@ -513,6 +513,8 @@ def classifyBalanced(
     group_counts = Counter(codeToGroup[n] for n in allNodeIds)
     real_indep = sum(1 for c in group_counts.values() if c == 1)
     _say(f"  Phase 5 (키워드): +{kw_count}, 독립: {len(still)}")
-    _say(f"  최종: {len(allNodeIds)} nodes, 독립 {real_indep} ({real_indep / len(allNodeIds):.0%})")
+    nodeCount = len(allNodeIds)
+    indepRatio = (real_indep / nodeCount) if nodeCount else 0.0
+    _say(f"  최종: {nodeCount} nodes, 독립 {real_indep} ({indepRatio:.0%})")
 
     return codeToGroup
