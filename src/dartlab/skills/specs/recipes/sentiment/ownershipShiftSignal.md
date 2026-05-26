@@ -13,6 +13,14 @@ whenToUse:
   - ownership shift
   - 5% 보유공시
   - 대량보유 트렌드
+examples:
+  - 005930 주요주주 보유 변화 누적 어디
+  - 5% 보유공시 매수 측 vs 매도 측 격차
+  - 대량보유 변동 가장 큰 종목
+expectedOutputs:
+  - 보고자별 보유비율 변화 표 (시계열)
+  - 매수 측 row 수 + 매도 측 row 수 + 누적 변화량 합
+  - 보유비율 증감 top 변동 보고자 (절대값 기준)
 linkedSkills:
   - engines.gather
   - recipes.sentiment.insiderClusterTiming

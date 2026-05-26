@@ -13,7 +13,10 @@ whenToUse:
   - flow imbalance
   - 수급 z-score
   - 외인 매수 cluster
-inputs:
+examples:
+  - 005930 외인 기관 개인 수급 비대칭 z-score
+  - 최근 외인 매수 - 개인 매도 imbalance 어디까지
+  - 수급 sentiment 정량 신호 표 — 20일 z-score
   - flow rows
 outputs:
   - flowImbalance table

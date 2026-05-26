@@ -13,6 +13,10 @@ whenToUse:
   - insider cluster sentiment
   - 집단 매수/매도
   - cluster 가격 lag
+examples:
+  - 005930 임원 주요주주 동시 매수 시점이 언제
+  - 내부자 cluster 매수 — 직전 30일 가격 어디서
+  - 집단 매도 cluster 형성된 종목
 inputs:
   - insider rows
   - price rows

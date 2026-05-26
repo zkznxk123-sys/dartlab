@@ -11,6 +11,14 @@ whenToUse:
   - retail flow reversal
   - 스마트머니 vs 개인
   - 수급 다이버전스
+examples:
+  - 005930 개인 매수 vs 외인+기관 매도 반전 신호
+  - 스마트머니와 개인 자금 방향 발산 종목
+  - retail vs institutional flow divergence
+expectedOutputs:
+  - 개인 z-score + (외인+기관) z-score 시계열
+  - 갭 (개인 - 스마트머니) 절대값 ≥ 3 row list
+  - 부호 반대 발산 횟수 단일값 (60d window)
 linkedSkills:
   - engines.company
   - engines.gather

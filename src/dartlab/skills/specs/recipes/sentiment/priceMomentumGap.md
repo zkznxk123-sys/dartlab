@@ -13,6 +13,14 @@ whenToUse:
   - momentum gap
   - 단기 중기 격차
   - price acceleration
+examples:
+  - 005930 단기 중기 모멘텀 격차 정량
+  - 5일 20일 60일 수익률 갭 — 가속인가 감속인가
+  - 가격 모멘텀 가속하는 종목
+expectedOutputs:
+  - 5d / 20d / 60d 수익률 단일값
+  - 갭 (5d - 60d) 단일값 + 부호
+  - 가속 / 감속 / 중립 라벨 (갭 부호 기반)
 linkedSkills:
   - engines.gather
   - recipes.sentiment.foreignBuyMomentum

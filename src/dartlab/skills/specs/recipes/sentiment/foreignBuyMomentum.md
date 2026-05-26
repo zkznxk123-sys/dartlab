@@ -11,6 +11,14 @@ whenToUse:
   - foreign buy acceleration
   - 외인 누적 순매수
   - flow 가속도
+examples:
+  - 005930 외인 매수 가속하고 있나
+  - 외국인 누적 순매수 5/20/60일 가속도 신호
+  - 외인 flow 가속 종목 (감속 종목)
+expectedOutputs:
+  - 5d / 20d / 60d 외인 누적 순매수 변화율 단일값 + 가속도 (5d/60d 기울기 비)
+  - 가속 / 감속 / 중립 라벨 (가속도 부호)
+  - 외인 누적 순매수 시계열 표 (60d window)
 linkedSkills:
   - engines.company
   - engines.gather
