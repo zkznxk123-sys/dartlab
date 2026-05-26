@@ -853,13 +853,13 @@ function refineSubTable(block: MarkdownSubTable): MarkdownSubTable {
 // `_tableToMarkdown` 의 HTML 출력 (2026-05-26) 이후 신규 doc.parquet 의 table 본문은
 // 마크다운 평탄화 결과 (`| ... |`) 가 아니라 원본 rowspan/colspan 그대로의 HTML 이다.
 // DART 본문은 untrusted (CLAUDE.md L37) — DOMPurify 로 script/style/handler/iframe 모두 제거.
-const SANITIZE_CONFIG: DOMPurify.Config = {
+const SANITIZE_CONFIG = {
 	ALLOWED_TAGS: ['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'br', 'span', 'div', 'b', 'i', 'u', 'strong', 'em', 'sub', 'sup'],
 	ALLOWED_ATTR: ['colspan', 'rowspan', 'class', 'align'],
 };
 
 function HtmlTable({ html, caption, unit }: { html: string; caption?: string; unit?: string }) {
-	const cleanHtml = DOMPurify.sanitize(html, SANITIZE_CONFIG) as string;
+	const cleanHtml = DOMPurify.sanitize(html, SANITIZE_CONFIG) as unknown as string;
 	return (
 		<div className="space-y-1">
 			{(caption || unit) && (

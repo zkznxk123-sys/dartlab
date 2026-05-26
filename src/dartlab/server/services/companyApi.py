@@ -527,12 +527,22 @@ def buildViewer(
     compact: bool = False,
     limit: int = 60,
     period: str | None = None,
+    windowPeriods: tuple[str, ...] | None = None,
+    rowsOnly: bool = False,
+    metaOnly: bool = False,
 ) -> dict[str, Any]:
     """topic별 뷰어 블록과 텍스트 문서를 직렬화하여 반환한다.
 
     compact=True 면 frontend 가 안 쓰는 무거운 필드 (views/timeline/blocks/
     entries) 를 제거하고 sections 를 limit 개로 잘라낸다. payload 80%+ 감소.
     period 인자는 dartUrl 해상도 용도 — period 매칭 보고서 URL 반환 (None 이면 최신).
+
+    Performance slim:
+        - ``windowPeriods``: 지정 시 그 period 의 cell 만 직렬화 + 빈 row skip.
+          50 period × 1000 row 의 50MB 페이로드 → 3-period window 시 ~3MB.
+        - ``rowsOnly``: True 면 textDocument 생략 — 본문 row 만 필요한 path.
+        - ``metaOnly``: True 면 rows 도 생략, dartUrl + corpName + topic 같은 메타만.
+          windowQueries 가 dartUrl 만 가져올 때 사용.
     """
     from dartlab.providers.dart.docs.viewer import (
         serializeViewerBlock,
@@ -540,6 +550,24 @@ def buildViewer(
         viewerBlocks,
         viewerTextDocument,
     )
+
+    dartUrl = _dartUrlForPeriod(company, period)
+    topicLabel = _topicDartLabel(topic, safeTopicLabel(company, topic))
+
+    # metaOnly path — viewer blocks / sections 계산 자체 우회. dartUrl 만 필요한
+    # windowQueries 가 호출. polars filter 0, JSON 직렬화 ~수 KB.
+    if metaOnly:
+        return {
+            "stockCode": company.stockCode,
+            "corpName": company.corpName,
+            "topic": topic,
+            "topicLabel": topicLabel,
+            "period": period,
+            "compact": True,
+            "metaOnly": True,
+            "dartUrl": dartUrl,
+            "rows": [],
+        }
 
     if not hasattr(company, "_viewer_cache"):
         company._viewer_cache = {}
@@ -549,12 +577,26 @@ def buildViewer(
         blocks = viewerBlocks(company, topic)
         company._viewer_cache[topic] = blocks
 
-    textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
-    dartUrl = _dartUrlForPeriod(company, period)
-    topicLabel = _topicDartLabel(topic, safeTopicLabel(company, topic))
     # Phase C — `rows` 단일 array 추가. sections row 의 SSOT 직렬화. frontend
     # 점진 마이그레이션을 위해 옛 sections/entries/tables 필드 유지 (Phase D 후 deprecate).
-    rows = _buildRowsForTopic(company, topic)
+    rows = _buildRowsForTopic(company, topic, windowPeriods=windowPeriods)
+
+    if rowsOnly:
+        # rowsOnly path — textDocument / blocks 직렬화 우회. sectionsOwn 가 필요 없는
+        # 단순 본문 viewer 호출에서 사용.
+        return {
+            "stockCode": company.stockCode,
+            "corpName": company.corpName,
+            "topic": topic,
+            "topicLabel": topicLabel,
+            "period": period,
+            "compact": True,
+            "rowsOnly": True,
+            "dartUrl": dartUrl,
+            "rows": rows,
+        }
+
+    textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
     if compact:
         serializedBlocks = [serializeViewerBlock(b) for b in blocks]
         return {
@@ -582,12 +624,23 @@ def buildViewer(
     }
 
 
-def _buildRowsForTopic(company: Company, topic: str) -> list[dict[str, Any]]:
+def _buildRowsForTopic(
+    company: Company,
+    topic: str,
+    *,
+    windowPeriods: tuple[str, ...] | None = None,
+) -> list[dict[str, Any]]:
     """sections row → SSOT 직렬화 (Phase C 신규).
 
     plan §Phase C-1 의 slim payload 핵심 — wide-format DataFrame 의 row × cell 을
     그대로 dict 직렬화. viewer.py 의 추상화 (ViewerBlock / ViewerTextSection /
     ViewerDocumentEntry) 우회. frontend 가 dumb row render 가능.
+
+    Args:
+        windowPeriods: None 이면 모든 period 의 cell 직렬화. tuple 이면 그 period
+            만 cell 포함 + 그 period 중 *하나라도* 본문 있는 row 만 반환.
+            payload 절약 — 50 period × 1000 row × ~1KB markdown ≈ 50MB 가 3-period
+            window 시 ≈ 3MB 로 감소 (95%+ 절감).
 
     schema:
       [
@@ -613,13 +666,21 @@ def _buildRowsForTopic(company: Company, topic: str) -> list[dict[str, Any]]:
     df = sec.filter(pl.col("topic") == topic)
     if df.is_empty():
         return []
-    period_cols = sorted(
+    allPeriodCols = sorted(
         [c for c in df.columns if _re.fullmatch(r"\d{4}(?:Q[1-4])?", c)],
         reverse=True,
     )
+    if windowPeriods is not None:
+        wantedPeriods = [p for p in allPeriodCols if p in set(windowPeriods)]
+    else:
+        wantedPeriods = allPeriodCols
     rows: list[dict[str, Any]] = []
     for r in df.iter_rows(named=True):
-        cells = {p: r.get(p) for p in period_cols if isinstance(r.get(p), str) and r.get(p)}
+        cells = {p: r.get(p) for p in wantedPeriods if isinstance(r.get(p), str) and r.get(p)}
+        # windowPeriods 가 지정됐고 그 period 중 본문 있는 셀이 하나도 없으면 skip.
+        # 옛 기간 ghost row 가 visible window 에서 빈 grid 로 그려지는 회귀 차단.
+        if windowPeriods is not None and not cells:
+            continue
         rows.append(
             {
                 "blockOrder": r.get("blockOrder"),
