@@ -1,0 +1,287 @@
+"""docs.parquet 의 raw XML chunk (section_content) → sections layer 입력 양식 변환.
+
+``ZipDocsCollector.rebuildFromZips`` 가 docs.parquet 의 ``section_content`` 컬럼에
+DART zip XML 의 TITLE 직속 본문 (P / SPAN / TABLE / TABLE-GROUP / COLGROUP / TR /
+TD 등 *모든 태그 그대로*) 의 raw XML chunk 들을 join 으로 저장한다. zip = SSOT
+원칙 — parse 로직 변경 시 docs.parquet 재빌드 0.
+
+본 모듈은 sections layer 의 첫 단계에서 호출되어:
+
+- ``stripTags=False`` (viewer): markdown/HTML mixed → 진짜 데이터 표 (BORDER="1") 는
+  HTML ``<table rowspan colspan>`` 그대로 보존, paragraph framing / caption layout
+  (BORDER="0" 또는 1×1 단일 cell) 은 plain text. ``<SPAN USERMARK="B">`` (bold) 는
+  ``## `` markdown heading prefix. ``<TABLE-GROUP>`` 안 nested TITLE/P/TABLE 은
+  parent 본문에 흡수.
+- ``stripTags=True`` (show / agent / analysis): 모든 태그 제거 + plain text. HTML
+  table 도 cell text 만 추출 (xml itertext).
+
+옛 양식 (markdown/HTML mixed in section_content) 은 폐기. docs.parquet 가 zip
+원본 SSOT 가 된다 — parser 변경 시 zip 재빌드 불필요.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Iterator
+
+from lxml import etree
+
+_MULTISPACE_RE = re.compile(r"\s+")
+_RE_WHITESPACE = re.compile(r"\s+")
+_RE_MULTI_NEWLINE = re.compile(r"\n{3,}")
+
+
+def _elemText(elem) -> str:
+    """element 안 모든 itertext concat (no separator) + 다중 공백 정리 + strip.
+
+    DART XML 의 ``<P>`` 안에는 ``<SPAN>`` 가 word-wrap 단위로 다수 분할된다. ``" ".join``
+    로 join 시 word boundary 의 공백 추가 → 의도 깨짐. concat 후 multi-space →
+    single space 정리.
+    """
+    raw = "".join(elem.itertext())
+    return _MULTISPACE_RE.sub(" ", raw).strip()
+
+
+def _findDirectTRs(table) -> Iterator:
+    """``<TABLE>`` 직속 + ``<TBODY>``/``<THEAD>``/``<TFOOT>`` 안 TR 만 (nested TABLE 의 TR 제외)."""
+    for child in table:
+        if not isinstance(child.tag, str):
+            continue
+        if child.tag == "TR":
+            yield child
+        elif child.tag in ("TBODY", "THEAD", "TFOOT"):
+            for sub in child:
+                if isinstance(sub.tag, str) and sub.tag == "TR":
+                    yield sub
+
+
+def _escapeHtml(text: str) -> str:
+    """raw text → HTML entity escape (``&`` ``<`` ``>``)."""
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _tableToHtml(table) -> str:
+    """``<TABLE>`` → HTML ``<table>`` (rowspan/colspan 보존).
+
+    DART XML 의 ``<TABLE BORDER="0">`` 양식은 시각 무 (paragraph framing / caption
+    layout). 1×1 단일 cell 도 paragraph framing → plain text return. 진짜 데이터
+    표 (BORDER="1" 또는 multi-row/col 병합) 만 HTML ``<table>`` emit.
+    """
+    border = (table.get("BORDER", "1") or "1").strip()
+    isBorderless = border in ("0", "")
+
+    collected: list[list[tuple[str, str, str, str]]] = []  # rows of [(tag, colspan, rowspan, text)]
+    for tr in _findDirectTRs(table):
+        cells: list[tuple[str, str, str, str]] = []
+        for cell in tr:
+            if not isinstance(cell.tag, str) or cell.tag not in ("TD", "TH", "TU", "TE"):
+                continue
+            tag = "th" if cell.tag in ("TH", "TU") else "td"
+            colspan = cell.get("COLSPAN", "1") or "1"
+            rowspan = cell.get("ROWSPAN", "1") or "1"
+            text = " ".join(cell.itertext()).strip().replace("\n", " ")
+            cells.append((tag, colspan, rowspan, text))
+        if cells:
+            collected.append(cells)
+    if not collected:
+        return ""
+
+    # 1×1 paragraph framing — plain text
+    if len(collected) == 1 and len(collected[0]) == 1:
+        only = collected[0][0]
+        if only[1] in ("1", "") and only[2] in ("1", ""):
+            return only[3]
+
+    # BORDER="0" multi-cell caption — em-space join + 줄바꿈 row 구분
+    if isBorderless:
+        lines: list[str] = []
+        for cells in collected:
+            texts = [c[3] for c in cells if c[3]]
+            if texts:
+                lines.append(" ".join(texts))
+        return "\n".join(lines)
+
+    # 진짜 데이터 표 — HTML <table>
+    out: list[str] = ["<table>"]
+    for cells in collected:
+        rowOut: list[str] = ["<tr>"]
+        for tag, colspan, rowspan, text in cells:
+            attrs = ""
+            if colspan and colspan != "1":
+                attrs += f' colspan="{int(colspan)}"'
+            if rowspan and rowspan != "1":
+                attrs += f' rowspan="{int(rowspan)}"'
+            rowOut.append(f"<{tag}{attrs}>{_escapeHtml(text)}</{tag}>")
+        rowOut.append("</tr>")
+        out.append("".join(rowOut))
+    out.append("</table>")
+    return "\n".join(out)
+
+
+_SENTENCE_END_SUFFIX = ("다.", "요.", "니다.", ".", "?", "!", ")", "]", ":", ";", "다", "요")
+_P_MERGE_MAX_LEN = 20
+
+
+def _canMergePs(prev: str, nxt: str, maxLen: int) -> bool:
+    """두 P 가 DART XML word-wrap 결함으로 분할된 case 인지 판정."""
+    if not prev or not nxt:
+        return False
+    if len(prev) > maxLen or len(nxt) > maxLen:
+        return False
+    if prev.startswith("## ") or nxt.startswith("## "):
+        return False
+    if prev.startswith("|") or nxt.startswith("|"):
+        return False
+    if prev.startswith("<table") or nxt.startswith("<table"):
+        return False
+    if prev.endswith(_SENTENCE_END_SUFFIX):
+        return False
+    return True
+
+
+def _mergeShortPs(parts: list[str], maxLen: int = _P_MERGE_MAX_LEN) -> list[str]:
+    """인접한 짧은 P 들을 같은 line 으로 합침 (DART XML word-wrap 결함 복원)."""
+    if len(parts) <= 1:
+        return parts
+    result: list[str] = []
+    buf = parts[0]
+    for nxt in parts[1:]:
+        if _canMergePs(buf, nxt, maxLen):
+            buf = buf + nxt
+        else:
+            result.append(buf)
+            buf = nxt
+    result.append(buf)
+    return result
+
+
+def _walkElementToMixed(elem, parts: list[str]) -> None:
+    """element → markdown/HTML mixed string parts 누적 (parseSectionsByTitle 의 옛 _walk 로직 이동)."""
+    tag = elem.tag
+    if not isinstance(tag, str):
+        return
+    if tag == "P":
+        t = _elemText(elem)
+        if t:
+            parts.append(t)
+        return
+    if tag == "SPAN":
+        usermark = (elem.get("USERMARK", "") or "").strip()
+        t = _elemText(elem)
+        if t:
+            isBold = "B" in usermark.split()
+            if isBold and len(t) < 80:
+                parts.append(f"## {t}")
+            else:
+                parts.append(t)
+        return
+    if tag == "TABLE":
+        html = _tableToHtml(elem)
+        if html:
+            parts.append(html)
+        return
+    if tag == "TABLE-GROUP":
+        # TABLE-GROUP 안 nested TITLE/P/TABLE 을 parent 본문에 흡수
+        for descendant in elem.iter():
+            dtag = descendant.tag
+            if not isinstance(dtag, str):
+                continue
+            if dtag in ("TITLE", "COVER-TITLE"):
+                t = _elemText(descendant)
+                if t:
+                    parts.append(f"## {t}")
+            elif dtag == "TABLE":
+                parent = descendant.getparent()
+                if parent is not None and parent.tag == "TABLE-GROUP":
+                    html = _tableToHtml(descendant)
+                    if html:
+                        parts.append(html)
+            elif dtag == "P":
+                parent = descendant.getparent()
+                if parent is not None and parent.tag == "TABLE-GROUP":
+                    t = _elemText(descendant)
+                    if t:
+                        parts.append(t)
+        return
+
+
+def _wrapAsBody(rawXml: str) -> str:
+    """raw XML chunks join → ``<BODY>`` wrap (lxml parse 용)."""
+    return f"<BODY>{rawXml}</BODY>"
+
+
+def xmlChunkToMixed(rawXml: str) -> str:
+    """raw XML chunks → markdown/HTML mixed string.
+
+    DART zip XML 의 TITLE 직속 본문 raw chunks (P/SPAN/TABLE/TABLE-GROUP 등 모든
+    태그 보존) 를 lxml parse → 각 leaf element 별 변환:
+
+    - ``<P>`` → plain text line
+    - ``<SPAN USERMARK="B">`` → ``## `` heading prefix
+    - ``<TABLE BORDER="1">`` → HTML ``<table>`` (rowspan/colspan 보존)
+    - ``<TABLE BORDER="0">`` → plain text (caption layout)
+    - ``<TABLE-GROUP>`` → nested TITLE/P/TABLE 흡수
+
+    XML 등장 순서 그대로 (alternating text/table 보존). 옛 ``parseSectionsByTitle``
+    의 emit 결과와 동일 양식.
+
+    Args:
+        rawXml: docs.parquet ``section_content`` 컬럼 — TITLE 직속 raw XML chunks
+            join 결과.
+
+    Returns:
+        markdown/HTML mixed string — sections pipeline 의 ``_splitContentBlocks``
+        가 받을 양식.
+    """
+    if not rawXml or not rawXml.strip():
+        return ""
+    parser = etree.XMLParser(recover=True, huge_tree=True)
+    try:
+        root = etree.fromstring(_wrapAsBody(rawXml).encode("utf-8"), parser)
+    except (etree.XMLSyntaxError, ValueError):
+        return rawXml  # fallback — XML parse 실패 시 raw 그대로
+    if root is None:
+        return rawXml
+    parts: list[str] = []
+    for child in root:
+        _walkElementToMixed(child, parts)
+    merged = _mergeShortPs(parts)
+    text = "\n\n".join(p for p in merged if p).strip()
+    text = _RE_MULTI_NEWLINE.sub("\n\n", text)
+    return text
+
+
+def xmlChunkToPlain(rawXml: str) -> str:
+    """raw XML chunks → plain text (모든 태그 제거).
+
+    stripTags=True 일 때 사용. HTML table 도 cell text 만 추출 (xml itertext).
+    show / agent / analysis 호환 양식. markdown prefix (``## ``) 도 추가 안 함.
+
+    Args:
+        rawXml: docs.parquet ``section_content`` 컬럼.
+
+    Returns:
+        plain text — 모든 XML 태그 제거. 다중 공백 정리.
+    """
+    if not rawXml or not rawXml.strip():
+        return ""
+    parser = etree.XMLParser(recover=True, huge_tree=True)
+    try:
+        root = etree.fromstring(_wrapAsBody(rawXml).encode("utf-8"), parser)
+    except (etree.XMLSyntaxError, ValueError):
+        return rawXml
+    if root is None:
+        return rawXml
+    lines: list[str] = []
+    for child in root:
+        ctag = child.tag
+        if not isinstance(ctag, str):
+            continue
+        text = " ".join(child.itertext()).strip()
+        text = _MULTISPACE_RE.sub(" ", text)
+        if text:
+            lines.append(text)
+    return "\n\n".join(lines).strip()
+
+
+__all__ = ["xmlChunkToMixed", "xmlChunkToPlain"]

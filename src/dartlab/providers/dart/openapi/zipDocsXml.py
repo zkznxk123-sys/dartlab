@@ -240,22 +240,20 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
     def _flush() -> None:
         nonlocal currentTitle, bodyParts, order
         if currentTitle is not None:
-            merged = _mergeShortPs(bodyParts)
-            currentTitle["content"] = "\n\n".join(p for p in merged if p).strip()
+            # raw XML chunks join — sections layer (xmlAdapter) 가 markdown/HTML
+            # mixed 또는 plain text 로 stripTags 파라미터로 변환.
+            currentTitle["content"] = "\n".join(p for p in bodyParts if p).strip()
             currentTitle["order"] = order
             sections.append(currentTitle)
             order += 1
         bodyParts = []
         currentTitle = None
 
-    # 명시 DFS — leaf 처리 후 descendant 안 들어감. body.iter() 재귀가 <TABLE> 안
-    # <P>, <P> 안 <SPAN> 을 중복 처리하던 회귀 (035720 표 다수 종목 100x 폭증) 차단.
-    #
-    # 2026-05-26 회귀 fix: ``TABLE-GROUP`` 안 TITLE 들은 별개 section row 로 emit 하지 않고
-    # parent TITLE 본문에 ``## heading`` 으로 흡수. 옛 zipCollector._parseSections 양식과 호환 —
-    # sections pipeline 의 ``_reportRowsToTopicRows`` 가 Roman chapter 안 sub-section 추적할 때
-    # TABLE-GROUP 안 sub-sub TITLE 이 별개 row 면 currentMajorNum 추적 깨져 차입금/사채 등
-    # notes sub-section 본문이 drop. parent 본문 안 ``## heading`` + content 로 흡수해 split.
+    # 명시 DFS — TITLE 단위로 분리하고 TITLE 직속 본문 (다음 TITLE 까지의 element 들)
+    # 의 *raw XML chunk* 를 그대로 보존. P/SPAN/TABLE/COLGROUP/TR/TD 등 모든 태그 살려.
+    # sections layer 의 xmlAdapter 가 stripTags 파라미터로 markdown/HTML 변환 또는
+    # plain text 추출. 옛 양식 (markdown/HTML mixed in section_content) 폐기 —
+    # docs.parquet 가 zip 원본 SSOT. parse 변경 시 zip 재빌드 불필요.
     def _walk(elem) -> None:
         nonlocal currentTitle
         tag = elem.tag
@@ -269,67 +267,18 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
                 "title": _elemText(elem),
                 "content": "",
             }
-            return  # descendants 는 title text 안에 이미 흡수
-        if tag == "P":
+            return  # TITLE 의 descendants 는 title text 안에 이미 흡수
+        # leaf body elements — raw XML chunk emit (descendants 포함, etree.tostring)
+        if tag in ("P", "SPAN", "TABLE", "TABLE-GROUP"):
             if currentTitle is not None:
-                t = _elemText(elem)
-                if t:
-                    bodyParts.append(t)
-            return  # P 안 SPAN 중복 차단
-        if tag == "SPAN":
-            if currentTitle is not None:
-                usermark = (elem.get("USERMARK", "") or "").strip()
-                t = _elemText(elem)
-                if t:
-                    isBold = "B" in usermark.split()
-                    if isBold and len(t) < 80:
-                        bodyParts.append(f"## {t}")
-                    else:
-                        bodyParts.append(t)
-            return
-        if tag == "TABLE":
-            if currentTitle is not None:
-                md = _tableToMarkdown(elem)
-                if md:
-                    bodyParts.append(md)
-            return  # TABLE 안 P/SPAN 중복 차단
-        if tag == "TABLE-GROUP":
-            # TABLE-GROUP 안 nested TITLE / P / SPAN / TABLE 들을 *parent TITLE 의 본문*
-            # 에 흡수. nested TITLE 은 ``## heading`` 으로, TABLE 은 HTML 그대로 합쳐서
-            # 옛 sections pipeline 의 chunking 이 chapter 안 sub-section 으로 인식 가능.
-            if currentTitle is not None:
-                for descendant in elem.iter():
-                    dtag = descendant.tag
-                    if not isinstance(dtag, str):
-                        continue
-                    if dtag in ("TITLE", "COVER-TITLE"):
-                        t = _elemText(descendant)
-                        if t:
-                            bodyParts.append(f"## {t}")
-                    elif dtag == "TABLE":
-                        # nested table 의 outer wrapper 만 처리 — ancestor TABLE-GROUP 인 case
-                        # 만 (다중 TABLE-GROUP nesting 의 inner TABLE-GROUP 안 TABLE 은 skip).
-                        # 단순화: TABLE 자체 처리 (콘텐츠 중복은 ``_tableToMarkdown`` 의 nested
-                        # 차단 로직 가 막음).
-                        # iter() 가 모든 descendant 를 yield 하므로 outer + nested 모두 보이지만
-                        # _tableToMarkdown 가 _findDirectTRs 로 outer 만 보고 nested 내용은
-                        # itertext flat inline 처리. 중복 없음.
-                        # 단 같은 outer 가 여러 번 등장하면 중복 → 처리: parent 가 TABLE-GROUP
-                        # 인 TABLE 만 (1-depth nested).
-                        parent = descendant.getparent()
-                        if parent is not None and parent.tag == "TABLE-GROUP":
-                            md = _tableToMarkdown(descendant)
-                            if md:
-                                bodyParts.append(md)
-                    elif dtag == "P":
-                        parent = descendant.getparent()
-                        # parent 가 TABLE-GROUP 인 P 만 (TABLE 안 P 중복 차단)
-                        if parent is not None and parent.tag == "TABLE-GROUP":
-                            t = _elemText(descendant)
-                            if t:
-                                bodyParts.append(t)
-            return  # TABLE-GROUP descendants 는 위에서 다 처리
-        # container — descend
+                try:
+                    xml_str = etree.tostring(elem, encoding="unicode").strip()
+                    if xml_str:
+                        bodyParts.append(xml_str)
+                except (ValueError, TypeError):
+                    pass
+            return  # descend X — etree.tostring 이 이미 descendants 포함
+        # container (SECTION-1/SECTION-2 등) — descend
         for child in elem:
             _walk(child)
 

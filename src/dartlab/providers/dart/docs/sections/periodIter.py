@@ -16,6 +16,7 @@ import polars as pl
 
 from dartlab.core.dataLoader import loadData
 from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, detectContentCol
+from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
 from dartlab.providers.reportSelector import selectReport
 
 
@@ -97,4 +98,8 @@ def iterPeriodSubsets(
             )
             if subset.height == 0:
                 continue
+            # docs.parquet 의 section_content 는 raw XML chunks (P/SPAN/TABLE/...) —
+            # xmlAdapter.xmlChunkToMixed 로 sections pipeline 호환 양식 (markdown/HTML
+            # mixed) 변환. _splitContentBlocks 가 받을 양식.
+            subset = subset.with_columns(pl.col(ccol).map_elements(xmlChunkToMixed, return_dtype=pl.Utf8).alias(ccol))
             yield periodKey, reportKind, ccol, subset
