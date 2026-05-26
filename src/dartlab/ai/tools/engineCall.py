@@ -224,7 +224,12 @@ def _fetchTableWithAutoGather(company: Any, topic: str) -> tuple[pl.DataFrame | 
 
 
 def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[str, Any], company: Any) -> list[Ref]:
-    """tableRef + valueRef × n + dateRef. enrich closure 가 docRef + confidence + provenance 부착."""
+    """tableRef + valueRef × n + dateRef + (선택) creditRef. enrich closure 가 docRef + confidence + provenance 부착.
+
+    creditRef 신규 — dcrBadge.axes (7축 신용 점수) 가 Company.show 의 부수 data 라 옛 코드는
+    별도 ref 없이 data 만 노출. 답안 작성 시 "신용 7축" 류 질문에 IS tableRef 부적합 인용 회귀.
+    creditRef 발행으로 시맨틱 정합 — `[evidenceRef:creditRef:credit:005930:dcr:axes]` 인용 가능.
+    """
     filingMap = buildPeriodToFiling(company)
     latestPeriod = summary["latestPeriod"]
 
@@ -253,6 +258,9 @@ def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[s
         )
         for row in summary["rows"]
     )
+    creditRef = _buildCreditRef(stockCode, companyName, company)
+    if creditRef is not None:
+        refs.append(creditRef)
     refs.append(
         Ref(
             id=f"date:{stockCode}:{topic}:{latestPeriod}",
@@ -263,6 +271,42 @@ def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[s
         )
     )
     return refs
+
+
+def _buildCreditRef(stockCode: str, companyName: str, company: Any) -> Ref | None:
+    """dcrBadge.axes (7축 신용 점수) 를 시맨틱 ref 로 분리.
+
+    옛 코드는 dcrBadge 를 data 에만 inline → 답안에서 "신용 7축" 류 질문에 IS tableRef 인용
+    회귀. creditRef 발행으로 정합 매칭 가능 (id: credit:<stockCode>:dcr:axes).
+    """
+    badge = getDcrBadge(company)
+    if badge is None:
+        return None
+    axes = badge.get("axes") or []
+    weakest = _findWeakestAxis(axes)
+    payload: dict[str, Any] = {
+        "stockCode": stockCode,
+        "grade": badge.get("grade"),
+        "axes": axes,
+    }
+    if weakest is not None:
+        payload["weakestAxis"] = weakest
+    return Ref(
+        id=f"credit:{stockCode}:dcr:axes",
+        kind="creditRef",
+        title=f"{companyName or stockCode} dCR 7축",
+        source=f"Company({stockCode}).creditDcr()",
+        payload=payload,
+    )
+
+
+def _findWeakestAxis(axes: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """7축 중 score 가장 높은 (= 가장 약한) 축 1개 추출. None 점수 제외."""
+    scored = [(a.get("name"), a.get("score"), a.get("weight")) for a in axes if a.get("score") is not None]
+    if not scored:
+        return None
+    name, score, weight = max(scored, key=lambda x: x[1])
+    return {"name": name, "score": score, "weight": weight}
 
 
 def _showSummaryMessage(
