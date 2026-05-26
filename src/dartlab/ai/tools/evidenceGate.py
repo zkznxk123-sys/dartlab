@@ -10,9 +10,7 @@ Track I (finance-grade rigor). Skill OS frontmatter 의 `requiredEvidence: list[
 
 from __future__ import annotations
 
-from typing import Any
-
-from dartlab.ai.contracts import Ref
+from dartlab.ai.contracts import Ref, refKind
 
 from .types import ToolResult
 
@@ -53,7 +51,7 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
     # 두 가지 혼재 시 gate 가 메타 필드를 "missing" 처리하면 영구 warn → broken-windows.
     requiredRefs = [k for k in required if k.endswith("Ref")]
     metaFields = [k for k in required if not k.endswith("Ref")]
-    presentKinds = sorted({_refKind(r) for r in (refs or []) if _refKind(r)})
+    presentKinds = sorted({refKind(r) for r in (refs or []) if refKind(r)})
     missing = [k for k in requiredRefs if k not in presentKinds]
     ok = not missing
     parts = []
@@ -93,14 +91,6 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
             "skillId": skillId,
         },
     )
-
-
-def _refKind(ref: Any) -> str:
-    if isinstance(ref, Ref):
-        return ref.kind
-    if isinstance(ref, dict):
-        return str(ref.get("kind") or "")
-    return ""
 
 
 __all__ = ["evidenceGate"]

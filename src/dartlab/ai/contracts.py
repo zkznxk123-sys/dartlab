@@ -63,6 +63,19 @@ class Ref:
         return asdict(self)
 
 
+def refKind(ref: Any) -> str:
+    """Ref 또는 dict 에서 kind 추출 SSOT. 미인식 입력은 빈 문자열.
+
+    evidenceGate / verifyAnswer / agent 가 같은 추출 로직을 중복 보유했었음 — 본 헬퍼로 통일.
+    Recipe 검증 (validate._refKindOf) 의 id-prefix fallback 은 별도 책임이라 미흡수.
+    """
+    if isinstance(ref, Ref):
+        return ref.kind
+    if isinstance(ref, dict):
+        return str(ref.get("kind") or "")
+    return ""
+
+
 @dataclass(frozen=True)
 class TraceEvent:
     """Internal research event.
