@@ -13,6 +13,14 @@ whenToUse:
   - sector flow concentration
   - 외인 보유율
   - 거래대금 share
+examples:
+  - 반도체 섹터 거래대금이 005930 한 종목으로 쏠려있나
+  - 섹터 안 외인 보유율 상위 종목
+  - 섹터 자금 집중도 정량 확인
+expectedOutputs:
+  - 섹터 종목별 거래대금 share + 외인 보유율 표 (top N)
+  - top1 종목 share + top3 합산 share — 집중도 측정값
+  - 자기 종목 위치 (share rank + 외인 비중 percentile)
 linkedSkills:
   - engines.gather
   - recipes.industry.peerPriceConvergence

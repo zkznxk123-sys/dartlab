@@ -11,6 +11,14 @@ whenToUse:
   - margin compression cluster
   - mature decline 신호
   - peer 3 축 마진 비교
+examples:
+  - 반도체 peer 마진 같이 무너지고 있나
+  - 매출총이익률 영업이익률 순이익률 동시 하락 종목 cluster
+  - 005930 속한 산업 마진 압축 신호 정량 측정
+expectedOutputs:
+  - 3 축 (GP·OM·NM) 동시 -1σ 이하 회사 list
+  - peer 평균 마진 + z-score 분포 표
+  - 같은 방향 절반 이상이면 cluster 변별력 없음 한계 명시
 linkedSkills:
   - engines.industry
   - engines.scan

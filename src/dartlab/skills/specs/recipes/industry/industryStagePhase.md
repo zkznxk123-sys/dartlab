@@ -11,6 +11,14 @@ whenToUse:
   - industry stage phase
   - ROIC-WACC spread 분포
   - 도입기 후행기 판정
+examples:
+  - 반도체 산업이 지금 어느 phase 야 — 성장? 성숙?
+  - 005930 속한 산업이 도입 / 성장 / 성숙 / 후행 중 어디
+  - peer ROIC - WACC spread 분포로 산업 단계 판정해줘
+expectedOutputs:
+  - phase 단일 라벨 (growth / mature / decline / transition / indeterminate) + peerCount
+  - peer 평균 ROIC-WACC spread + 표준편차 + 매출 5y CAGR 평균
+  - peer < 4 일 때 indeterminate 표기 + 한계 명시
 linkedSkills:
   - engines.industry
   - engines.scan

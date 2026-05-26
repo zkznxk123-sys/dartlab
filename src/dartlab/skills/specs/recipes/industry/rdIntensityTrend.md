@@ -11,6 +11,14 @@ whenToUse:
   - innovation lead 후보
   - R&D peer rank
   - 연구개발 비중 추세
+examples:
+  - 005930 R&D / 매출 비율이 peer 대비 어느 분위
+  - 반도체 산업에서 연구개발 강도 가장 높은 회사
+  - 5년간 R&D 강도가 상승 추세인 종목
+expectedOutputs:
+  - 회사 R&D / 매출 비율 5y 시계열 + YoY 변화율
+  - peer set 단면 percentile rank + 평균 / 중앙값
+  - innovation lead 후보 분류 (상위 quartile + 상승 추세 동시)
 linkedSkills:
   - engines.industry
   - engines.company

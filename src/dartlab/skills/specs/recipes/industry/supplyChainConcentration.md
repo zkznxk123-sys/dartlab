@@ -11,6 +11,14 @@ whenToUse:
   - 매입 거래처 집중도
   - 공급망 HHI
   - 단일 고객 의존
+examples:
+  - 005930 매출 상위 고객 의존도가 얼마
+  - 단일 고객 매출 비중 50% 넘는 종목
+  - 매출 / 매입 HHI 정량 — 가격 협상력 약화 신호
+expectedOutputs:
+  - 매출 top 5 고객 비중 + HHI 단일값 (0-1)
+  - 매입 top 5 거래처 비중 + HHI 단일값
+  - 사업보고서 출처 (특수관계자 거래·주요고객 본문 ref)
 linkedSkills:
   - engines.company
   - engines.industry

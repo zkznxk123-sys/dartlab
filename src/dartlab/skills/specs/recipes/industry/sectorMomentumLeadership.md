@@ -13,6 +13,14 @@ whenToUse:
   - 섹터 laggard
   - sector momentum ranking
   - peer percentile
+examples:
+  - 반도체 섹터에서 20일 모멘텀 leader 가 누구
+  - 005930 이 섹터 안 몇 분위에 있나
+  - peer 중 모멘텀 leader / laggard top 3 bottom 3
+expectedOutputs:
+  - peer 종목별 20d 수익률 + 분포 percentile rank 표
+  - top / bottom 3 종목 (leader / laggard)
+  - 자기 종목 위치 (percentile + 절대 수익률)
 linkedSkills:
   - engines.gather
   - recipes.industry.peerPriceConvergence

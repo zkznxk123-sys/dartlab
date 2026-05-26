@@ -13,6 +13,14 @@ whenToUse:
   - sector dispersion
   - 동종 종목 분포
   - 산업 회귀 phase
+examples:
+  - 반도체 peer 주가 60일 수익률이 수렴하고 있나
+  - 동종 종목들 가격 흩어짐 정도 어느 수준
+  - 산업이 회귀 phase 인지 발산 phase 인지 정량 확인
+expectedOutputs:
+  - peer 60d 수익률 평균 + 표준편차 + 분포 분위수 (p10/p50/p90)
+  - dispersion direction (convergent / divergent) — std-dev 변화 % 명시
+  - 자기 종목 위치 (peer 분포 안 percentile)
 linkedSkills:
   - engines.gather
   - recipes.technical.sectorRelativeStrength

@@ -11,6 +11,14 @@ whenToUse:
   - 산업 capex 동조
   - capex 선행 후행
   - 사이클 진입 단계
+examples:
+  - 반도체 capex 사이클 선행 회사가 누구
+  - peer 중 capex wave 후행 lag 회사 식별
+  - 005930 이 capex 사이클 선행이야 후행이야
+expectedOutputs:
+  - peer 종목별 lag (lead -2 ~ lag +2) + correlation 표
+  - lead / lag 라벨 분류 (lead = 음수 lag + corr > 0.6, lag = 양수 lag + corr > 0.6)
+  - capex / 매출 비율 peer 시계열 matrix
 linkedSkills:
   - engines.industry
   - engines.company
