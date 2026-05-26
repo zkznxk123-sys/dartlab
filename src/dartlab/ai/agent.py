@@ -147,29 +147,12 @@ def runAgent(
                 getattr(getattr(provider, "config", None), "provider", "?"),
                 iteration,
             )
-            # graceful fallback — 이미 모은 tool 결과 (refs) 가 있으면 무조건 답안 작성 시도.
-            # OAuth timeout 한 번에 41 분기 시계열 받아놓고도 사용자에게 한 글자 안 보여주던 회귀.
+            # 이미 모은 tool 결과 (refs) 가 있으면 _finalize 한 round 시도. OAuth timeout 한 번에
+            # 41 분기 시계열 받아놓고도 사용자에게 한 글자 안 보여주던 회귀 가드.
             if refs or text_emitted:
-                yield TraceEvent(
-                    "error",
-                    {"error": f"{type(exc).__name__}: {exc}", "recoverable": True},
-                )
-                yield from _emitGracefulFinalize(provider, messages, refs, textEmitted=text_emitted, originalExc=exc)
-                yield TraceEvent(
-                    "done",
-                    {
-                        "refs": refs,
-                        "artifacts": artifacts,
-                        "verification": {"ok": True, "issues": ["provider_error_partial"], "refId": "verify:partial"},
-                        "responseMeta": {
-                            "finalEvent": "answer",
-                            "responseStatus": "partial",
-                            "refCount": len(refs),
-                            "passes": ["agent", "fallback"],
-                            "mode": "agent",
-                        },
-                    },
-                )
+                yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}", "recoverable": True})
+                yield from _finalize(provider, messages, refs, artifacts, reason="provider_error", originalExc=exc)
+                _wireChatNativeMemory(question=userText, answerText=text_emitted, refs=refs, kwargs=_unused)
                 return
             yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}"})
             return
@@ -229,23 +212,13 @@ def runAgent(
                     continue
                 (fresh_read if isToolReadOnly(tc.name) else fresh_write).append((tc, cache_key))
 
-            # 한 turn 의 모든 tool_calls 가 blocked/cached (새 실행 0 건) → LLM 헛돌이.
-            # 사용자 화면 회귀: EngineCall 한 번 차단 → LLM 이 또 같은 args → 또 차단 → turn 무한 →
-            # OAuth timeout 으로 대화 종료. 도구 한 번 막힌 게 대화 종료까지 가던 흐름의 진짜 원인.
-            # 즉시 finalize 강제 — tools=[] 로 한 round 답안 작성 후 종료.
+            # 한 turn 의 모든 tool_calls 가 blocked/cached (새 실행 0 건) → 호출자 헛돌이.
+            # 사용자 화면 회귀: EngineCall 한 번 차단 → 또 같은 args → 또 차단 → turn 무한 → OAuth
+            # timeout 으로 대화 종료. 도구 한 번 막힌 게 대화 종료까지 가던 흐름의 진짜 원인.
             dead_loop = blocked_or_cached_in_turn > 0 and not fresh_read and not fresh_write
             if dead_loop:
-                logger.info(
-                    "dead-loop detected: all %d tool_calls blocked/cached → forcing answer finalize",
-                    blocked_or_cached_in_turn,
-                )
-                yield from _forceFinalize(
-                    provider,
-                    messages,
-                    refs,
-                    artifacts,
-                    reason="dead_loop_all_blocked",
-                )
+                logger.info("dead-loop: all %d tool_calls blocked/cached → finalize", blocked_or_cached_in_turn)
+                yield from _finalize(provider, messages, refs, artifacts, reason="dead_loop")
                 _wireChatNativeMemory(question=userText, answerText=text_emitted, refs=refs, kwargs=_unused)
                 return
 
@@ -319,69 +292,33 @@ def runAgent(
                 )
             continue  # 다시 LLM 호출
 
-        # tool_calls 없음 → 최종 답변
+        # tool_calls 없음 → 정상 종료 (LLM 이 답안 작성 완료)
         if not text_emitted and turn.content:
             # streaming 미지원 provider 가 final.turn.content 에 전체 텍스트
             text_emitted = turn.content
             for piece in _chunks(turn.content, size=64):
                 yield TraceEvent("chunk", {"text": piece})
-        break
-    else:
-        # max_iterations 도달 → graceful finalize. 에러로 죽이지 않고, tools=[] 로
-        # 마지막 1 회 turn 강제 — 지금까지 쌓인 tool 결과 컨텍스트로 답안 작성.
-        # 근거 부족은 답안 안에서 한계로 명시. 무한 도구 루프 차단 + 부분 답 보장.
-        messages.append(
+        _wireChatNativeMemory(question=userText, answerText=text_emitted, refs=refs, kwargs=_unused)
+        yield TraceEvent(
+            "done",
             {
-                "role": "user",
-                "content": (
-                    "도구 호출 한도에 도달했습니다. 추가 도구 호출 없이 지금까지 "
-                    "수집한 결과로 사용자 질문에 답을 작성하세요. 근거 부족 부분은 "
-                    "솔직히 한계로 명시하고, 가능한 범위에서 답을 정리하세요."
-                ),
-            }
-        )
-        final_chunk = None
-        try:
-            for chunk in streamProvider(provider, messages, []):
-                if chunk.final:
-                    final_chunk = chunk
-                    continue
-                if chunk.text:
-                    text_emitted += chunk.text
-                    yield TraceEvent("chunk", {"text": chunk.text})
-        except Exception as exc:  # noqa: BLE001
-            logger.exception("max_iterations finalize failed")
-            yield TraceEvent("error", {"error": f"max_iterations_finalize_failed: {exc}"})
-            return
-        if final_chunk and not text_emitted and getattr(final_chunk, "turn", None) and final_chunk.turn.content:
-            text_emitted = final_chunk.turn.content
-            for piece in _chunks(text_emitted, size=64):
-                yield TraceEvent("chunk", {"text": piece})
-
-    # chat-native HARVEST bridge — workbench HARVEST 와 동일 helper 로 memory 작성.
-    # SSOT.md Principle 6 정합 (모든 종료 경로 → decisions.jsonl + skill_stats.jsonl).
-    _wireChatNativeMemory(
-        question=userText,
-        answerText=text_emitted,
-        refs=refs,
-        kwargs=_unused,
-    )
-
-    yield TraceEvent(
-        "done",
-        {
-            "refs": refs,
-            "artifacts": artifacts,
-            "verification": {"ok": True, "issues": [], "refId": "verify:answer"},
-            "responseMeta": {
-                "finalEvent": "answer",
-                "responseStatus": "ok",
-                "refCount": len(refs),
-                "passes": ["agent", "memory"],
-                "mode": "agent",
+                "refs": refs,
+                "artifacts": artifacts,
+                "verification": {"ok": True, "issues": [], "refId": "verify:answer"},
+                "responseMeta": {
+                    "finalEvent": "answer",
+                    "responseStatus": "ok",
+                    "refCount": len(refs),
+                    "passes": ["agent", "memory"],
+                    "mode": "agent",
+                },
             },
-        },
-    )
+        )
+        return
+
+    # for-loop 가 break 없이 끝난 경로 = max_iterations 도달.
+    yield from _finalize(provider, messages, refs, artifacts, reason="max_iter")
+    _wireChatNativeMemory(question=userText, answerText=text_emitted, refs=refs, kwargs=_unused)
 
 
 def _emitBlocked(tc: Any, messages: list[dict[str, Any]]) -> Iterator[TraceEvent]:
@@ -420,32 +357,55 @@ def _emitBlocked(tc: Any, messages: list[dict[str, Any]]) -> Iterator[TraceEvent
     )
 
 
-def _forceFinalize(
+# Finalize SSOT — 답안 작성 한 round 강제하는 모든 종료 경로의 단일 진입점.
+# 3 reason 지원: provider_error / dead_loop / max_iter. 호출자는 reason 만 결정.
+# 옛 회귀: 같은 패턴 (_forceFinalize · _emitGracefulFinalize · _buildRefSummaryFallback) 3 helper
+# 가 80% 중복이라 instruction/done 분기를 manual 동기화. SSOT 위반 → 통합.
+
+_FINALIZE_INSTRUCTIONS: dict[str, str] = {
+    "provider_error": (
+        "분석 중 일시 오류가 발생했습니다. 추가 도구 호출 없이, 지금까지 받은 "
+        "도구 결과만으로 사용자 질문에 부분 답안을 작성하세요. 못 받은 정보는 "
+        "솔직히 한계로 명시하세요."
+    ),
+    "dead_loop": (
+        "직전 turn 의 모든 도구 호출이 차단/캐시 hit 으로 새 결과 0 건이었습니다. "
+        "추가 도구 호출 없이 지금까지 모은 결과로 사용자 질문에 답을 작성하세요. "
+        "근거 부족은 솔직히 한계로 명시하세요."
+    ),
+    "max_iter": (
+        "도구 호출 한도에 도달했습니다. 추가 도구 호출 없이 지금까지 "
+        "수집한 결과로 사용자 질문에 답을 작성하세요. 근거 부족 부분은 "
+        "솔직히 한계로 명시하고, 가능한 범위에서 답을 정리하세요."
+    ),
+}
+_FINALIZE_STATUS: dict[str, str] = {
+    "provider_error": "partial",
+    "dead_loop": "partial",
+    "max_iter": "ok",
+}
+
+
+def _finalize(
     provider: Any,
     messages: list[dict[str, Any]],
     refs: list[dict[str, Any]],
     artifacts: list[dict[str, Any]],
     *,
     reason: str,
+    originalExc: Exception | None = None,
 ) -> Iterator[TraceEvent]:
-    """dead-loop / 도구 한도 도달 시 tools=[] 로 답안 작성 한 round 강제.
+    """답안 작성 한 round + done event. 모든 종료 경로의 SSOT.
 
-    max_iterations 도달과 같은 finalize 로직을 dead-loop (모든 tool_calls blocked/cached) 에도
-    공유. provider 가 또 죽으면 ref-summary fallback 텍스트로 최후 답.
+    흐름:
+      1. reason 별 instruction messages 에 append
+      2. tools=[] 로 streamProvider 한 round (LLM 답안 작성)
+      3. 그 round 도 실패 → _refSummaryText fallback 텍스트 emit (LLM 0 호출)
+      4. done event emit (reason → responseStatus 매핑)
     """
-    instruction_map = {
-        "dead_loop_all_blocked": (
-            "직전 turn 의 모든 도구 호출이 차단/캐시 hit 으로 새 결과 0 건이었습니다. "
-            "추가 도구 호출 없이 지금까지 모은 결과로 사용자 질문에 답을 작성하세요. "
-            "근거 부족은 솔직히 한계로 명시하세요."
-        ),
-        "max_iterations": (
-            "도구 호출 한도에 도달했습니다. 추가 도구 호출 없이 지금까지 "
-            "수집한 결과로 사용자 질문에 답을 작성하세요. 근거 부족 부분은 "
-            "솔직히 한계로 명시하고, 가능한 범위에서 답을 정리하세요."
-        ),
-    }
-    messages.append({"role": "user", "content": instruction_map.get(reason, instruction_map["max_iterations"])})
+    instruction = _FINALIZE_INSTRUCTIONS.get(reason, _FINALIZE_INSTRUCTIONS["max_iter"])
+    messages.append({"role": "user", "content": instruction})
+
     text_added = ""
     try:
         final_chunk = None
@@ -460,12 +420,12 @@ def _forceFinalize(
             for piece in _chunks(final_chunk.turn.content, size=64):
                 yield TraceEvent("chunk", {"text": piece})
     except Exception as exc:  # noqa: BLE001
-        logger.exception("force finalize failed (reason=%s)", reason)
-        # 마지막 보루 — LLM 0 호출, refs 요약 텍스트만 emit.
+        logger.exception("finalize round failed (reason=%s)", reason)
         yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}", "recoverable": True})
-        fallback = _buildRefSummaryFallback(refs, exc, exc)
+        fallback = _refSummaryText(refs, originalExc or exc)
         for piece in _chunks(fallback, size=64):
             yield TraceEvent("chunk", {"text": piece})
+
     yield TraceEvent(
         "done",
         {
@@ -474,77 +434,31 @@ def _forceFinalize(
             "verification": {"ok": True, "issues": [reason], "refId": f"verify:{reason}"},
             "responseMeta": {
                 "finalEvent": "answer",
-                "responseStatus": "partial" if reason == "dead_loop_all_blocked" else "ok",
+                "responseStatus": _FINALIZE_STATUS.get(reason, "ok"),
                 "refCount": len(refs),
-                "passes": ["agent", "force_finalize", reason],
+                "passes": ["agent", "finalize", reason],
                 "mode": "agent",
             },
         },
     )
 
 
-def _emitGracefulFinalize(
-    provider: Any,
-    messages: list[dict[str, Any]],
-    refs: list[dict[str, Any]],
-    textEmitted: str,
-    originalExc: Exception,
-) -> Iterator[TraceEvent]:
-    """provider 실패 시 부분 답안 graceful finalize.
-
-    이미 tool 결과 (refs) 를 모았는데 다음 LLM turn 이 timeout/네트워크로 죽으면, 사용자한테
-    한 글자도 안 보여주고 끝나던 회귀 가드. 2 단계 fallback:
-    1. tools=[] + 한계 명시 지시로 같은 provider 마지막 시도 (도구 호출 없음 = 짧은 단일 round).
-    2. 그것도 실패 → 모은 refs id 목록을 텍스트 fallback 으로 직접 emit (LLM 0 호출).
-    """
-    instruction = (
-        "분석 중 일시 오류가 발생했습니다. 추가 도구 호출 없이, 지금까지 받은 "
-        "도구 결과만으로 사용자 질문에 부분 답안을 작성하세요. 못 받은 정보는 "
-        "솔직히 한계로 명시하세요."
-    )
-    messages.append({"role": "user", "content": instruction})
-    try:
-        final_chunk = None
-        text_added = ""
-        for chunk in streamProvider(provider, messages, []):
-            if chunk.final:
-                final_chunk = chunk
-                continue
-            if chunk.text:
-                text_added += chunk.text
-                yield TraceEvent("chunk", {"text": chunk.text})
-        if final_chunk and not text_added and getattr(final_chunk, "turn", None) and final_chunk.turn.content:
-            for piece in _chunks(final_chunk.turn.content, size=64):
-                yield TraceEvent("chunk", {"text": piece})
-        return
-    except Exception as exc2:  # noqa: BLE001
-        logger.exception("graceful finalize also failed (original=%s)", type(originalExc).__name__)
-        # 마지막 fallback — LLM 0 호출. 모은 ref 목록 + 원인 안내만 텍스트로.
-        fallback = _buildRefSummaryFallback(refs, originalExc, exc2)
-        for piece in _chunks(fallback, size=64):
-            yield TraceEvent("chunk", {"text": piece})
-
-
-def _buildRefSummaryFallback(refs: list[dict[str, Any]], originalExc: Exception, finalExc: Exception) -> str:
-    """LLM 호출 없이 refs 목록만으로 부분 답안 텍스트 생성. 모든 LLM 시도 실패 시 마지막 보루."""
-    lines = [
-        f"⚠ 분석 도중 일시 오류 발생 ({type(originalExc).__name__}). 모은 자료만 정리합니다.",
-        "",
-    ]
+def _refSummaryText(refs: list[dict[str, Any]], cause: Exception) -> str:
+    """LLM 0 호출 fallback 텍스트 — 모든 LLM 경로 실패 시 마지막 보루."""
+    lines = [f"⚠ 분석 도중 오류 발생 ({type(cause).__name__}). 모은 자료만 정리합니다.", ""]
     if not refs:
         lines.append("아직 받은 자료가 없습니다. 잠시 후 다시 시도하세요.")
-    else:
-        table_refs = [r for r in refs if r.get("kind") == "tableRef"]
-        value_refs = [r for r in refs if r.get("kind") == "valueRef"]
-        lines.append(f"확보 근거: tableRef {len(table_refs)} · valueRef {len(value_refs)} · 전체 {len(refs)} 건")
-        lines.append("")
-        for r in table_refs[:5]:
-            title = r.get("title") or r.get("id")
-            lines.append(f"- {title}")
-        if len(table_refs) > 5:
-            lines.append(f"- ... (외 {len(table_refs) - 5} 건)")
-        lines.append("")
-        lines.append("재시도하면 같은 근거를 활용해 답을 다시 작성합니다.")
+        return "\n".join(lines)
+    table_refs = [r for r in refs if r.get("kind") == "tableRef"]
+    value_refs = [r for r in refs if r.get("kind") == "valueRef"]
+    lines.append(f"확보 근거: tableRef {len(table_refs)} · valueRef {len(value_refs)} · 전체 {len(refs)} 건")
+    lines.append("")
+    for r in table_refs[:5]:
+        lines.append(f"- {r.get('title') or r.get('id')}")
+    if len(table_refs) > 5:
+        lines.append(f"- ... (외 {len(table_refs) - 5} 건)")
+    lines.append("")
+    lines.append("재시도하면 같은 근거를 활용해 답을 다시 작성합니다.")
     return "\n".join(lines)
 
 
