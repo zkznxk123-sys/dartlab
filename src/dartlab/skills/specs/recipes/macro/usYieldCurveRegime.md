@@ -11,6 +11,14 @@ whenToUse:
   - inversion signal
   - 10y-2y 10y-3m
   - US recession indicator
+examples:
+  - 미국 yield curve inversion 신호 정량
+  - 10y-2y + 10y-3m 동시 음수면 recession 신호
+  - US 국채 spread 체제 — strong / soft / steepening
+expectedOutputs:
+  - 10y-2y spread + 10y-3m spread 단일값 (bp)
+  - 두 spread 동시 inversion 여부 boolean
+  - regime 라벨 (strong recession / soft inversion / steepening / normal)
 linkedSkills:
   - engines.macro
   - engines.gather

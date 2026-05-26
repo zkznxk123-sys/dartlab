@@ -11,6 +11,14 @@ whenToUse:
   - market implied path
   - dot plot vs market
   - Fed funds futures
+examples:
+  - Fed dot plot 과 market 갭 — 시장이 더 비둘기파인가
+  - FOMC SEP median target vs Fed funds futures 1y 갭
+  - 시장이 Fed 보다 hawkish / dovish 어느 쪽
+expectedOutputs:
+  - Fed dot plot median target rate + market implied 1y rate
+  - 갭 (bp) 단일값
+  - 라벨 (dovish 갭 > +50bp / hawkish 갭 < -50bp / 정합)
 linkedSkills:
   - engines.macro
   - engines.gather
