@@ -4,16 +4,23 @@
 frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
 
 서브커맨드:
-- ``list [--status=<s>]`` — recipe 목록 + 현재 status + 누적 run 수 / pass rate.
+- ``list [--status=<s>] [--include-archive]`` — recipe 목록 + 현재 status + 누적 run 수 / pass rate.
 - ``inspect <id>`` — 단일 recipe 의 6 신호 scorecard + drift 진단 + 최근 N run.
 - ``promote <id>`` — tested → verified. scorecard 미달이면 거부. ``--force`` 우회 (운영자 책임).
 - ``deprecate <id> --reason="..."`` — drift / 중복 / 폐기 사유 기록.
+- ``archive [--status=drafted|unverified] [--dry-run]`` — status 기반 일괄 `.archive/` 격리 (페르소나 디렉토리 보존).
 - ``promote-to-storyboard <id>`` — verified → storyboard 이식 가이드 (수동).
 
 실행:
     uv run python -X utf8 src/dartlab/skills/recipePromote.py list
     uv run python -X utf8 src/dartlab/skills/recipePromote.py inspect recipes.fundamental.credit.distressDual
     uv run python -X utf8 src/dartlab/skills/recipePromote.py promote recipes.fundamental.credit.distressDual
+    uv run python -X utf8 src/dartlab/skills/recipePromote.py archive --status drafted --dry-run
+
+격리 정책 (`.archive/`):
+- drafted / unverified 상태 recipe 는 사용자 노출 (index/agent/mcp/web/pyodide/graph.json 6 종 + landing /skills) 차단.
+- `registry.py::_builtinSpecPaths` 가 `.archive/` 폴더 path 를 필터링 — listSkills cascade 에서 invisible.
+- 페르소나 디렉토리 구조 (fundamental/credit/, macro/, meta/screen/, technical/ 등) 그대로 보존 — 승격 시 원위치 git mv 1 회로 복원.
 """
 
 from __future__ import annotations
@@ -146,7 +153,10 @@ def _skillIdForPath(path: Path) -> str:
 
 
 def cmdList(args: argparse.Namespace) -> int:
-    """recipe 목록과 status·run·passRate 표 출력."""
+    """recipe 목록과 status·run·passRate 표 출력.
+
+    `.archive/` 폴더는 기본 제외 — `--include-archive` 명시 시 포함.
+    """
     from dartlab.ai.recipes import loadRuns
 
     if not RECIPE_DIR.is_dir():
@@ -154,6 +164,8 @@ def cmdList(args: argparse.Namespace) -> int:
         return 1
     rows: list[tuple[str, str, int, float]] = []
     for path in sorted(RECIPE_DIR.rglob("*.md")):
+        if not args.includeArchive and ".archive" in path.parts:
+            continue
         skill_id = _skillIdForPath(path)
         try:
             _, front, _ = _readSpec(path)
@@ -370,6 +382,75 @@ def cmdValidate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmdArchive(args: argparse.Namespace) -> int:
+    """`.archive/` 일괄 격리 — drafted/unverified status 의 recipe 를 페르소나 보존 git mv.
+
+    `_builtinSpecPaths` 가 `.archive/` 폴더 path 를 필터링하므로 격리 후 즉시
+    listSkills cascade 와 landing /skills 에서 invisible. 승격은 역방향 git mv
+    1 회 + 운영자 6 JSON 동기화 수동 commit.
+    """
+    import subprocess
+
+    target_statuses = {args.status} if args.status else {"drafted", "unverified"}
+    archive_root = RECIPE_DIR / ".archive"
+
+    candidates: list[tuple[Path, Path, str]] = []
+    for path in sorted(RECIPE_DIR.rglob("*.md")):
+        if ".archive" in path.parts:
+            continue
+        try:
+            _, front, _ = _readSpec(path)
+        except ValueError:
+            continue
+        status = str(front.get("status", "unknown"))
+        if status not in target_statuses:
+            continue
+        rel = path.relative_to(RECIPE_DIR)
+        dest = archive_root / rel
+        candidates.append((path, dest, status))
+
+    if not candidates:
+        print(f"격리 대상 0 건 (status filter: {sorted(target_statuses)})")
+        return 0
+
+    if args.dryRun:
+        print(f"=== dry-run: 격리 후보 {len(candidates)} 건 ===")
+        for src, dest, status in candidates[:30]:
+            print(f"  [{status}] {src.relative_to(REPO_ROOT)} → {dest.relative_to(REPO_ROOT)}")
+        if len(candidates) > 30:
+            print(f"  ... (외 {len(candidates) - 30} 건)")
+        print()
+        print("실행: --dry-run 제거 + 운영자가 본 batch 검토 후 진행")
+        return 0
+
+    moved = 0
+    failed: list[tuple[Path, str]] = []
+    for src, dest, _status in candidates:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            ["git", "mv", str(src), str(dest)],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        if result.returncode != 0:
+            failed.append((src, result.stderr.strip()))
+            continue
+        moved += 1
+
+    print(f"격리 완료: {moved} 건 → {archive_root.relative_to(REPO_ROOT)}/")
+    if failed:
+        print(f"실패 {len(failed)} 건:", file=sys.stderr)
+        for src, err in failed[:10]:
+            print(f"  {src.name}: {err}", file=sys.stderr)
+        return 1
+    print()
+    print("후속 (운영자 수동 commit — feedback_no_skill_json_auto_build 강행):")
+    print("  1. src/dartlab/skills/{index,agent,mcp,web,pyodide,graph}.json 의 격리 entry 제거")
+    print("  2. landing build 검증 — cd landing && npm run build")
+    return 0
+
+
 def cmdPromoteToStoryboard(args: argparse.Namespace) -> int:
     """verified/curated recipe 의 storyboard 이식 수동 가이드 출력."""
     skill_id = args.skillId
@@ -414,6 +495,12 @@ def main(argv: list[str] | None = None) -> int:
 
     p_list = sub.add_parser("list", help="recipe 목록 + status + run 통계")
     p_list.add_argument("--status", help="특정 status 만 필터 (drafted/unverified/tested/verified/curated/deprecated)")
+    p_list.add_argument(
+        "--include-archive",
+        dest="includeArchive",
+        action="store_true",
+        help="`.archive/` 폴더의 격리 recipe 포함 (기본 제외)",
+    )
     p_list.set_defaults(func=cmdList)
 
     p_inspect = sub.add_parser("inspect", help="단일 recipe 의 scorecard + drift")
@@ -460,6 +547,23 @@ def main(argv: list[str] | None = None) -> int:
         help="capture 비활성 — run 기록 디스크에 저장 안 함",
     )
     p_validate.set_defaults(func=cmdValidate)
+
+    p_archive = sub.add_parser(
+        "archive",
+        help="status 기반 일괄 `.archive/` 격리 (drafted/unverified 페르소나 보존)",
+    )
+    p_archive.add_argument(
+        "--status",
+        choices=["drafted", "unverified"],
+        help="단일 status 만 격리 (미지정시 drafted + unverified 둘 다)",
+    )
+    p_archive.add_argument(
+        "--dry-run",
+        dest="dryRun",
+        action="store_true",
+        help="후보 list 출력만, git mv 미실행",
+    )
+    p_archive.set_defaults(func=cmdArchive)
 
     p_storyboard = sub.add_parser(
         "promote-to-storyboard",

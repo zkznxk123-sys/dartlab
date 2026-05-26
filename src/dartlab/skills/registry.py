@@ -474,17 +474,35 @@ def _sectionHasSubstance(sectionBody: str, heading: str) -> bool:
 
 
 def _builtinSpecPaths() -> list[Path]:
+    """builtin spec 전수 수집 — `.archive/` 폴더 제외.
+
+    `.archive/` 는 drafted/unverified recipe 페르소나 보존 격리 (T4 archive).
+    index/agent/mcp/web/pyodide/graph.json 에 미등록 + registry/landing 노출 X.
+    승격 시 `recipePromote.py archive --restore <id>` 또는 git mv 로 다시 활성.
+    """
     root = _builtinSpecsRoot()
     if not root.exists():
         return []
-    return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
+    paths: list[Path] = [
+        *root.rglob("*.md"),
+        *root.rglob("*.yaml"),
+        *root.rglob("*.yml"),
+        *root.rglob("*.json"),
+    ]
+    return sorted(p for p in paths if ".archive" not in p.parts)
 
 
 def _userSpecPaths() -> list[Path]:
     root = _repoRoot() / ".dartlab" / "skills"
     if not root.exists():
         return []
-    return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
+    paths: list[Path] = [
+        *root.rglob("*.md"),
+        *root.rglob("*.yaml"),
+        *root.rglob("*.yml"),
+        *root.rglob("*.json"),
+    ]
+    return sorted(p for p in paths if ".archive" not in p.parts)
 
 
 def _loadSpec(path: Path, *, defaultScope: str, forceUser: bool = False) -> SkillSpec:

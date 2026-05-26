@@ -65,6 +65,17 @@ recipes/
 - `recipes.macro.sixActs` (3 parts — persona 가 곧 분야인 경우)
 - `recipes.meta.report.dailyMorningNote` (4 parts — meta + 종류 + name)
 
+## `.archive/` 격리 정책 (2026-05-26 T4)
+
+`drafted` / `unverified` status 의 recipe 는 `recipes/.archive/` 하위에 페르소나 디렉토리 구조 그대로 격리한다. 사용자 노출 (index/agent/mcp/web/pyodide/graph.json 6 종 + landing `/skills`) 차단.
+
+- **격리 메커니즘**: `src/dartlab/skills/registry.py::_builtinSpecPaths` 가 `.archive/` 폴더 path 를 필터링 — `listSkills` cascade 에서 invisible.
+- **격리 진입**: `uv run python -X utf8 src/dartlab/skills/recipePromote.py archive --dry-run` 후 batch 검토 → 본 실행.
+- **승격 (복원)**: 역방향 git mv 1 회 — `git mv recipes/.archive/{path} recipes/{path}` + status frontmatter `tested|verified` 변경 + 6 JSON 동기화 (운영자 수동, `feedback_no_skill_json_auto_build` 강행).
+- **현재 격리 76 건** (2026-05-26): drafted 25 + unverified 51. 페르소나 분포: fundamental/credit 10 · disclosure 6 · dividend 5 · governance 5 · quality 10 · valuation 7 · macro 8 · meta/report 6 · meta/screen 9 · meta/workflow 2 · quant 1 · sentiment 1 · technical 6.
+
+배경 (`memory/feedback_recipe_lifecycle.md` 강행): drafted/unverified 가 카탈로그 220 의 35% 차지하면 *검증 안 된 recipe 가 사용자 표면을 오염*. 6-stage lifecycle (drafted → unverified → tested → verified → curated) 의 `tested` 미달은 표면 X — `.archive/` 격리가 정공.
+
 ## engines/ 와의 직교성
 
 | 축 | 설명 |
