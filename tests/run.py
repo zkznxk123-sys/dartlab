@@ -332,7 +332,7 @@ GATES: dict[str, Gate] = {
         env={"PYTHONIOENCODING": "utf-8", "DARTLAB_TEST_LOCKED": "1"},
         cmd=(
             "python -X utf8 -m pytest tests/core/test_bundledResources.py "
-            "tests/audit/test_wheelPackaging.py -m 'unit and not heavy' --tb=short "
+            'tests/audit/test_wheelPackaging.py -m "unit and not heavy" --tb=short '
             "--no-cov --benchmark-disable && "
             "python -X utf8 tests/audit/checkSilentFail.py"
         ),
