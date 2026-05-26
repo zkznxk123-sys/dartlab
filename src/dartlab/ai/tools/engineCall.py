@@ -169,11 +169,9 @@ def _aliasToCanonical(apiRef: str, plan: dict[str, Any]) -> str:
 
 
 def _companyShow(plan: dict[str, Any]) -> ToolResult:
+    """Company.show — 5 책임 분할 (topic 해결 / company 해결 / table fetch / refs / data)."""
     target = str(plan.get("target") or plan.get("stockCode") or "").strip()
-    args = list(plan.get("args") or [])
-    kwargs = dict(plan.get("kwargs") or {})
-    topic = str(plan.get("topic") or (args[0] if args else "") or kwargs.get("topic") or "").strip() or "BS"
-    topic = _normalizeStatement(topic)
+    topic = _resolveTopic(plan)
     if topic not in _STMT_LABELS:
         return _genericCompanyMethod("show", target, [topic], {})
     company = _resolveCompany(target or str(plan.get("question") or ""))
@@ -187,17 +185,10 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         )
     companyName = str(getattr(company, "corpName", None) or getattr(company, "name", None) or "")
     stockCode = str(getattr(company, "stockCode", None) or target or "")
-    with _quietExecutionNoise():
-        table = company.show(topic)
-    auto_gather_used = False
-    if (not isinstance(table, pl.DataFrame) or table.height == 0) and _AUTO_GATHER_ENABLED:
-        if _tryAutoUpdate(company, "finance"):
-            auto_gather_used = True
-            with _quietExecutionNoise():
-                table = company.show(topic)
+    table, autoGatherUsed = _fetchTableWithAutoGather(company, topic)
     if not isinstance(table, pl.DataFrame) or table.height == 0:
         msg = f"{companyName or stockCode} {topic} 데이터를 찾지 못했습니다."
-        if auto_gather_used:
+        if autoGatherUsed:
             msg += " (자동 update 후에도 빈 결과 — 미공시 분기 또는 폐상장 가능성)."
         return ToolResult(False, msg, error="empty_result")
     summary = _summarizeStatement(topic, table)
@@ -205,32 +196,60 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         return ToolResult(
             False, f"{companyName or stockCode} {topic} 표를 요약하지 못했습니다.", error="unreadable_table"
         )
+    refs = _buildShowRefs(stockCode, companyName, topic, summary, company)
+    summaryMsg = _showSummaryMessage(companyName, stockCode, topic, summary, autoGatherUsed)
+    data = _buildShowData(company, companyName, stockCode, topic, summary, autoGatherUsed)
+    return ToolResult(True, summaryMsg, refs=refs, data=data)
+
+
+def _resolveTopic(plan: dict[str, Any]) -> str:
+    """plan → topic 결정. args (list/dict) · kwargs · topic 키 검사 후 한글 별칭 정규화."""
+    args = list(plan.get("args") or [])
+    kwargs = dict(plan.get("kwargs") or {})
+    raw = str(plan.get("topic") or (args[0] if args else "") or kwargs.get("topic") or "").strip() or "BS"
+    return _normalizeStatement(raw)
+
+
+def _fetchTableWithAutoGather(company: Any, topic: str) -> tuple[pl.DataFrame | None, bool]:
+    """company.show(topic) + 빈 결과 시 자동 update 1회 재시도. (table, autoGatherUsed) 반환."""
+    with _quietExecutionNoise():
+        table = company.show(topic)
+    if isinstance(table, pl.DataFrame) and table.height > 0:
+        return table, False
+    if not _AUTO_GATHER_ENABLED or not _tryAutoUpdate(company, "finance"):
+        return table, False
+    with _quietExecutionNoise():
+        table = company.show(topic)
+    return table, True
+
+
+def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[str, Any], company: Any) -> list[Ref]:
+    """tableRef + valueRef × n + dateRef. enrich closure 가 docRef + confidence + provenance 부착."""
     filingMap = buildPeriodToFiling(company)
     latestPeriod = summary["latestPeriod"]
 
-    def _enrich(base: dict[str, Any]) -> dict[str, Any]:
-        """payload 에 docRef + confidence (filing_direct = 95) + provenance 부착."""
+    def enrich(base: dict[str, Any]) -> dict[str, Any]:
+        """payload 에 docRef + confidence (filing_direct=95) + confidenceMethod 부착."""
         out = attachDocRef(base, latestPeriod, filingMap)
         out.setdefault("confidence", _FILING_DIRECT_CONFIDENCE)
         out.setdefault("confidenceMethod", "filing_direct")
         return out
 
-    tablePayload = _enrich(summary)
-    table_ref = Ref(
+    tableRef = Ref(
         id=f"table:{stockCode}:{topic}:{latestPeriod}",
         kind="tableRef",
         title=f"{companyName or stockCode} {_STMT_LABELS[topic]} {latestPeriod}",
         source=f"Company({stockCode}).show('{topic}')",
-        payload=tablePayload,
+        payload=enrich(summary),
     )
-    refs = [table_ref]
+    refs: list[Ref] = [tableRef]
     refs.extend(
         Ref(
             id=f"value:{stockCode}:{topic}:{latestPeriod}:{row['snakeId']}",
             kind="valueRef",
             title=f"{row['item']} {latestPeriod}",
-            source=table_ref.id,
-            payload={**_enrich(row), "provenance": [table_ref.id]},
+            source=tableRef.id,
+            payload={**enrich(row), "provenance": [tableRef.id]},
         )
         for row in summary["rows"]
     )
@@ -239,17 +258,34 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
             id=f"date:{stockCode}:{topic}:{latestPeriod}",
             kind="dateRef",
             title=f"{_STMT_LABELS[topic]} 기준시점",
-            source=table_ref.id,
-            payload={**_enrich({"period": latestPeriod}), "provenance": [table_ref.id]},
+            source=tableRef.id,
+            payload={**enrich({"period": latestPeriod}), "provenance": [tableRef.id]},
         )
     )
-    periods_all = summary.get("periods") or [summary["latestPeriod"]]
-    period_label = (
-        f"{periods_all[-1]}~{periods_all[0]} ({len(periods_all)} 분기)" if len(periods_all) > 1 else periods_all[0]
-    )
-    summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {period_label} 확인"
-    if auto_gather_used:
-        summary_msg += " (자동 update 후 재조회 성공)"
+    return refs
+
+
+def _showSummaryMessage(
+    companyName: str, stockCode: str, topic: str, summary: dict[str, Any], autoGatherUsed: bool
+) -> str:
+    """tool result summary 문자열 — 기간 range + auto-gather 표기."""
+    periods = summary.get("periods") or [summary["latestPeriod"]]
+    periodLabel = f"{periods[-1]}~{periods[0]} ({len(periods)} 분기)" if len(periods) > 1 else periods[0]
+    msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {periodLabel} 확인"
+    if autoGatherUsed:
+        msg += " (자동 update 후 재조회 성공)"
+    return msg
+
+
+def _buildShowData(
+    company: Any,
+    companyName: str,
+    stockCode: str,
+    topic: str,
+    summary: dict[str, Any],
+    autoGatherUsed: bool,
+) -> dict[str, Any]:
+    """ToolResult.data — 호출자 종합 페이로드 (summary + markdown + dcr/industry badge)."""
     data: dict[str, Any] = {
         "companyName": companyName,
         "stockCode": stockCode,
@@ -257,7 +293,7 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         "label": _STMT_LABELS[topic],
         "summary": summary,
         "markdown": _statementMarkdown(companyName, stockCode, topic, summary),
-        "autoGatherUsed": auto_gather_used,
+        "autoGatherUsed": autoGatherUsed,
     }
     badge = getDcrBadge(company)
     if badge is not None:
@@ -265,12 +301,7 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
     industryBadge = getIndustryBadge(company)
     if industryBadge is not None:
         data["industryBadge"] = industryBadge
-    return ToolResult(
-        True,
-        summary_msg,
-        refs=refs,
-        data=data,
-    )
+    return data
 
 
 def _tryAutoUpdate(company: Any, category: str) -> bool:
