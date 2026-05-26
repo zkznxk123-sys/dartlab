@@ -13,6 +13,14 @@ whenToUse:
   - relative strength
   - sector RS
   - 섹터 outperform
+examples:
+  - 005930 섹터 평균 대비 상대 강도
+  - 섹터 outperform 종목 — 20d / 60d 기준
+  - sector RS 정량 — 종목 - 섹터 차
+expectedOutputs:
+  - 20d / 60d 종목 수익률 + 섹터 평균 수익률 + 차 단일값
+  - 라벨 (outperform / underperform / 동행 — 임계 ±3%p)
+  - 시계열 chart (relative strength 6mo)
 linkedSkills:
   - engines.gather
   - recipes.sentiment.priceMomentumGap

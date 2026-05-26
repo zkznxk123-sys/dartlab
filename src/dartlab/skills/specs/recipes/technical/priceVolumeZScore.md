@@ -13,6 +13,14 @@ whenToUse:
   - volume z-score
   - 가격 거래량 동조
   - high-volume day
+examples:
+  - 005930 거래량 폭증 + 가격 동조 신호
+  - 거래량 z ≥ 2 row 가 양수 / 음수 수익률 쏠림
+  - high-volume day 가격 방향 정량
+expectedOutputs:
+  - 거래량 z ≥ 2 row 수 + 양수 / 음수 카운트 분리
+  - 양수 비율 단일값 (rising 측 쏠림 정도)
+  - 가장 큰 z + 그날 수익률 (event highlight)
 linkedSkills:
   - engines.gather
   - recipes.sentiment.priceMomentumGap

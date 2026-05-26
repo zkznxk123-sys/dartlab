@@ -11,6 +11,14 @@ whenToUse:
   - 추세 합의
   - 골든크로스 confirmation
   - MA confluence
+examples:
+  - 005930 5/20/60/120 이동평균선 완전 정렬 상태
+  - 추세 합의 종목 — 4 MA 동시 정렬
+  - 골든크로스 confirmation 신호
+expectedOutputs:
+  - 4 MA (5/20/60/120) 단일값 + 정렬 순서
+  - 라벨 (상승 정렬 / 하강 정렬 / 혼재)
+  - 정렬 유지 일수 (현재 추세 합의 지속 기간)
 linkedSkills:
   - engines.gather
   - engines.quant

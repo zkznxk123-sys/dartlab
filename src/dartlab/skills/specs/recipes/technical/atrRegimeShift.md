@@ -11,6 +11,14 @@ whenToUse:
   - ATR ratio z
   - vol regime shift
   - 단기 vs 장기 변동성
+examples:
+  - 005930 변동성 체제 확대 / 수축 신호
+  - ATR(5) / ATR(60) ratio z-score
+  - 단기 vol 폭증 종목
+expectedOutputs:
+  - ATR(5) + ATR(60) + ratio + z-score 단일값
+  - 체제 라벨 (확대 / 수축 / 평상 — z 임계 ±1.5σ)
+  - 시계열 chart (ratio z-score 6mo window)
 linkedSkills:
   - engines.gather
   - engines.quant

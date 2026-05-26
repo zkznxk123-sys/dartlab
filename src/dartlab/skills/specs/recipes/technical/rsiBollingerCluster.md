@@ -11,6 +11,14 @@ whenToUse:
   - 볼린저 밴드 cluster
   - 이중 oversold
   - 기술 신호 confirmation
+examples:
+  - 005930 RSI + 볼린저 밴드 동시 oversold 신호
+  - 이중 과매수 cluster 형성된 날
+  - RSI < 30 + 볼린저 하단 동시 close
+expectedOutputs:
+  - RSI(14) 현재값 + 볼린저 상단 / 하단 close 여부
+  - cluster row list (oversold cluster + overbought cluster 분리)
+  - 라벨 (oversold cluster / overbought cluster / 무신호)
 linkedSkills:
   - engines.gather
   - engines.quant
