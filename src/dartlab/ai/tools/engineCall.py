@@ -530,13 +530,10 @@ def _summarizeStatement(statement: str, table: pl.DataFrame) -> dict[str, Any] |
     periods = [col for col in table.columns if _PERIOD_RE.match(str(col))]
     if not periods:
         return None
-    latest = periods[0]
-    rows = _selectRows(statement, table, latest)
-    if not rows:
+    priorityRows = _findPriorityRows(statement, table, periods)
+    if not priorityRows:
         return None
-    # 시계열 추가 — `latest` 만 주면 LLM 이 "5년 추이" 같은 시간축 질문에 같은 args 로 재호출
-    # → cache hit block → turn 무한 → OAuth timeout 회귀 (2026-05-26). 모든 period 포함.
-    timeseries = _selectTimeseries(statement, table, periods)
+    latest = periods[0]
     return {
         "statement": statement,
         "label": _STMT_LABELS[statement],
@@ -544,14 +541,17 @@ def _summarizeStatement(statement: str, table: pl.DataFrame) -> dict[str, Any] |
         "periods": periods,
         "rowCount": table.height,
         "columnCount": len(table.columns),
-        "rows": rows,
-        "timeseries": timeseries,
+        "rows": _projectLatest(priorityRows, latest),
+        "timeseries": _projectTimeseries(priorityRows),
     }
 
 
-def _selectTimeseries(statement: str, table: pl.DataFrame, periods: list[str]) -> list[dict[str, Any]]:
-    """전 분기 시계열 — 시간축 질문 ("최근 5년 매출 추이" 등) 대응. LLM 이 cache hit 재호출
-    없이 한 번에 시계열 답안 작성 가능. priority 항목 (IS 8 · BS 10 · CF 8) 만 추출.
+def _findPriorityRows(statement: str, table: pl.DataFrame, periods: list[str]) -> list[dict[str, Any]]:
+    """priority list (IS 8 · BS 10 · CF 8) 순회 한 번. 매칭된 row 의 모든 period 값 보존.
+
+    SSOT: _projectLatest / _projectTimeseries 가 같은 데이터를 두 형태로 가공. priority 순회 2번
+    중복 (옛 _selectRows + _selectTimeseries) 제거. 모든 period 가 None 인 row 만 skip — 한 period
+    이라도 값 있으면 보존 (latest None 이면 _projectLatest 에서 제외, timeseries 는 유지).
     """
     if "snakeId" not in table.columns:
         return []
@@ -559,67 +559,64 @@ def _selectTimeseries(statement: str, table: pl.DataFrame, periods: list[str]) -
     if not available_periods:
         return []
     labelCol = "항목" if "항목" in table.columns else table.columns[0]
-    cols = ["snakeId", labelCol] + available_periods
-    table_rows = table.select(cols).to_dicts()
+    table_rows = table.select(["snakeId", labelCol] + available_periods).to_dicts()
     available = {str(row["snakeId"]): row for row in table_rows}
     out: list[dict[str, Any]] = []
     used: set[str] = set()
+    limit = 10 if statement == "BS" else 8
     for snakeId, label in _ACCOUNT_PRIORITY[statement]:
         row = available.get(snakeId) or _findRowByLabel(table_rows, label, used, labelCol=labelCol)
         if row is None:
             continue
-        resolved_snake = str(row.get("snakeId") or snakeId)
-        if resolved_snake in used:
+        resolvedSnake = str(row.get("snakeId") or snakeId)
+        if resolvedSnake in used:
             continue
-        used.add(resolved_snake)
         values = {p: row.get(p) for p in available_periods if row.get(p) is not None}
         if not values:
             continue
-        formatted = {p: formatMoney(v) for p, v in values.items()}
+        used.add(resolvedSnake)
         out.append(
             {
-                "snakeId": resolved_snake,
+                "snakeId": resolvedSnake,
                 "item": str(row.get(labelCol) or snakeId),
                 "values": values,
-                "formatted": formatted,
             }
         )
-        if len(out) >= (10 if statement == "BS" else 8):
+        if len(out) >= limit:
             break
     return out
 
 
-def _selectRows(statement: str, table: pl.DataFrame, period: str) -> list[dict[str, Any]]:
-    if "snakeId" not in table.columns or period not in table.columns:
-        return []
-    labelCol = "항목" if "항목" in table.columns else table.columns[0]
-    table_rows = table.select(["snakeId", labelCol, period]).to_dicts()
-    available = {str(row["snakeId"]): row for row in table_rows}
-    rows: list[dict[str, Any]] = []
-    used: set[str] = set()
-    for snakeId, label in _ACCOUNT_PRIORITY[statement]:
-        row = available.get(snakeId) or _findRowByLabel(table_rows, label, used, labelCol=labelCol)
-        if row is None:
-            continue
-        resolved_snake = str(row.get("snakeId") or snakeId)
-        if resolved_snake in used:
-            continue
-        value = row.get(period)
+def _projectLatest(priorityRows: list[dict[str, Any]], latest: str) -> list[dict[str, Any]]:
+    """latest period 단일 값 형태. valueRef refs 생성 + 단일 period markdown 용."""
+    out: list[dict[str, Any]] = []
+    for r in priorityRows:
+        value = r["values"].get(latest)
         if value is None:
             continue
-        used.add(resolved_snake)
-        rows.append(
+        out.append(
             {
-                "snakeId": resolved_snake,
-                "item": str(row.get(labelCol) or snakeId),
-                "period": period,
+                "snakeId": r["snakeId"],
+                "item": r["item"],
+                "period": latest,
                 "value": value,
                 "formatted": formatMoney(value),
             }
         )
-        if len(rows) >= (10 if statement == "BS" else 8):
-            break
-    return rows
+    return out
+
+
+def _projectTimeseries(priorityRows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """전 period 시계열 형태. 시계열 markdown + 시간축 질문 답안 용."""
+    return [
+        {
+            "snakeId": r["snakeId"],
+            "item": r["item"],
+            "values": r["values"],
+            "formatted": {p: formatMoney(v) for p, v in r["values"].items()},
+        }
+        for r in priorityRows
+    ]
 
 
 def _findRowByLabel(rows: list[dict[str, Any]], label: str, used: set[str], *, labelCol: str) -> dict[str, Any] | None:
