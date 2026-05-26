@@ -215,7 +215,11 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
             payload={**_enrich({"period": latestPeriod}), "provenance": [table_ref.id]},
         )
     )
-    summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인"
+    periods_all = summary.get("periods") or [summary["latestPeriod"]]
+    period_label = (
+        f"{periods_all[-1]}~{periods_all[0]} ({len(periods_all)} 분기)" if len(periods_all) > 1 else periods_all[0]
+    )
+    summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {period_label} 확인"
     if auto_gather_used:
         summary_msg += " (자동 update 후 재조회 성공)"
     data: dict[str, Any] = {
@@ -497,14 +501,59 @@ def _summarizeStatement(statement: str, table: pl.DataFrame) -> dict[str, Any] |
     rows = _selectRows(statement, table, latest)
     if not rows:
         return None
+    # 시계열 추가 — `latest` 만 주면 LLM 이 "5년 추이" 같은 시간축 질문에 같은 args 로 재호출
+    # → cache hit block → turn 무한 → OAuth timeout 회귀 (2026-05-26). 모든 period 포함.
+    timeseries = _selectTimeseries(statement, table, periods)
     return {
         "statement": statement,
         "label": _STMT_LABELS[statement],
         "latestPeriod": latest,
+        "periods": periods,
         "rowCount": table.height,
         "columnCount": len(table.columns),
         "rows": rows,
+        "timeseries": timeseries,
     }
+
+
+def _selectTimeseries(statement: str, table: pl.DataFrame, periods: list[str]) -> list[dict[str, Any]]:
+    """전 분기 시계열 — 시간축 질문 ("최근 5년 매출 추이" 등) 대응. LLM 이 cache hit 재호출
+    없이 한 번에 시계열 답안 작성 가능. priority 항목 (IS 8 · BS 10 · CF 8) 만 추출.
+    """
+    if "snakeId" not in table.columns:
+        return []
+    available_periods = [p for p in periods if p in table.columns]
+    if not available_periods:
+        return []
+    labelCol = "항목" if "항목" in table.columns else table.columns[0]
+    cols = ["snakeId", labelCol] + available_periods
+    table_rows = table.select(cols).to_dicts()
+    available = {str(row["snakeId"]): row for row in table_rows}
+    out: list[dict[str, Any]] = []
+    used: set[str] = set()
+    for snakeId, label in _ACCOUNT_PRIORITY[statement]:
+        row = available.get(snakeId) or _findRowByLabel(table_rows, label, used, labelCol=labelCol)
+        if row is None:
+            continue
+        resolved_snake = str(row.get("snakeId") or snakeId)
+        if resolved_snake in used:
+            continue
+        used.add(resolved_snake)
+        values = {p: row.get(p) for p in available_periods if row.get(p) is not None}
+        if not values:
+            continue
+        formatted = {p: formatMoney(v) for p, v in values.items()}
+        out.append(
+            {
+                "snakeId": resolved_snake,
+                "item": str(row.get(labelCol) or snakeId),
+                "values": values,
+                "formatted": formatted,
+            }
+        )
+        if len(out) >= (10 if statement == "BS" else 8):
+            break
+    return out
 
 
 def _selectRows(statement: str, table: pl.DataFrame, period: str) -> list[dict[str, Any]]:
@@ -558,15 +607,30 @@ def _compact(text: str) -> str:
 
 def _statementMarkdown(companyName: str, stockCode: str, statement: str, summary: dict[str, Any]) -> str:
     display = f"{companyName}({stockCode})" if companyName and stockCode else companyName or stockCode
+    periods = summary.get("periods") or [summary["latestPeriod"]]
+    timeseries = summary.get("timeseries") or []
+    period_range = f"{periods[-1]}~{periods[0]}" if len(periods) > 1 else periods[0]
     lines = [
-        f"{display} {_STMT_LABELS[statement]}를 확인했습니다.",
+        f"{display} {_STMT_LABELS[statement]} 시계열을 확인했습니다 ({period_range}, {len(periods)} 분기).",
         "",
-        f"## {_STMT_LABELS[statement]} ({summary['latestPeriod']})",
-        "| 항목 | 값 |",
-        "|---|---:|",
+        f"## {_STMT_LABELS[statement]} ({period_range})",
     ]
-    for row in summary["rows"]:
-        lines.append(f"| {row['item']} | {row['formatted']} |")
+    if timeseries:
+        header_periods = periods[:12]
+        lines.append("| 항목 | " + " | ".join(header_periods) + " |")
+        lines.append("|---|" + "|".join(["---:"] * len(header_periods)) + "|")
+        for row in timeseries:
+            formatted = row.get("formatted") or {}
+            cells = [formatted.get(p, "-") for p in header_periods]
+            lines.append(f"| {row['item']} | " + " | ".join(cells) + " |")
+        if len(periods) > 12:
+            lines.append("")
+            lines.append(f"(직전 {len(header_periods)} 분기만 표기 — 전체 {len(periods)} 분기는 timeseries 필드 참조)")
+    else:
+        lines.append("| 항목 | 값 |")
+        lines.append("|---|---:|")
+        for row in summary["rows"]:
+            lines.append(f"| {row['item']} | {row['formatted']} |")
     lines.append("")
     lines.append("근거는 tableRef, valueRef, dateRef로 남겼습니다.")
     return "\n".join(lines)
