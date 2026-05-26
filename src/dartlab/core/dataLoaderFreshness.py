@@ -2,11 +2,21 @@
 
 from __future__ import annotations
 
+import os
 import socket
 import time
 from pathlib import Path
 from typing import Callable
 from urllib.error import URLError
+
+
+def _noRefreshEnv() -> bool:
+    """``DARTLAB_NO_REFRESH=1`` 시 HF refresh 우회 — 로컬 zip 재빌드 docs.parquet
+    가 HF 의 옛 본문으로 덮어쓰이지 않도록. 로컬 작업 / 디버그 / 정밀 회귀 검증 시.
+
+    ``checks.py::_checkDartDocsFreshness`` 와 짝 — L1/L2/L3 freshness 경로 전수 차단.
+    """
+    return os.environ.get("DARTLAB_NO_REFRESH") == "1"
 
 
 def downloadWithRetry(
@@ -111,6 +121,8 @@ def shouldRefreshDart(
     warnStale: Callable[[Path], None],
 ) -> bool:
     """DART 카테고리 로컬 파일의 갱신 필요 여부를 판단한다."""
+    if _noRefreshEnv():
+        return False
     if refresh == "local_only":
         return False
     if refresh == "force_check":
@@ -142,6 +154,8 @@ def shouldRefreshHfCategory(
     shouldRefreshDartFunc: Callable[[Path, str], bool],
 ) -> bool:
     """HF 공개 parquet 카테고리별 freshness 정책."""
+    if _noRefreshEnv():
+        return False
     if category not in {"krxPrices", "krxIndices"}:
         return shouldRefreshDartFunc(path, refresh)
     if refresh == "local_only":
