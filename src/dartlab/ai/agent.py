@@ -105,24 +105,13 @@ def runAgent(
     refs: list[dict[str, Any]] = []
     artifacts: list[dict[str, Any]] = []
     text_emitted = ""
-    # 실패 streak — 같은 (도구, error code, args) 가 임계 회 누적되면 그 *args 만* 차단.
-    # 과거 (도구, error) 단위 차단은 한 호출의 invalid args 때문에 다른 valid args 도 막혔던
-    # 회귀 (2026-05-17): EngineCall("macro.rates") → unknown_api_ref → EngineCall("gather.macro") →
-    # unknown_api_ref → EngineCall("macro") (valid) 차단. 도구 전체 막지 말고 args 만.
-    failure_streak: dict[tuple[str, str, str], int] = {}
-    blocked_calls: set[tuple[str, str]] = set()  # (name, argsHash)
-    _FAILURE_STREAK_LIMIT = 2
-    # 동일 (name, args) 호출 결과 캐시 — LLM 이 같은 도구·인자를 반복하면 재실행하지 않고
-    # cached 결과 즉시 반환 + LLM 메시지에 "이미 호출됐음, 다시 부르지 마라" 명시.
-    # 사용자 audit 에서 ReadCapability 2 회 / 같은 Read 3 회 같은 비효율 루프 차단.
-    call_cache: dict[tuple[str, str], dict[str, Any]] = {}
-    # 같은 (name, args) 가 cache_hit 임계 회 반복되면 강제 차단 — LLM 이 자연어 가드 무시하고
-    # 계속 부르는 회귀 (사용자 audit: scan.ratio 4 회 연속 cached) 방지.
-    # 1 = 첫 번째 cache hit 부터 즉시 block + blocked_calls 영구 등록. 2026-05-20 OAuth probe 에서
-    # 시나리오 A 가 30 회 호출 (Company.analysis 수익성 9 회 / show ratios 8 회) — limit=2 라 turn
-    # 마다 cached 메시지만 반복하고 LLM 이 무시. 1 로 박으면 hit 1 회에 영구 차단.
-    cache_hit_count: dict[tuple[str, str], int] = {}
-    _CACHE_HIT_BLOCK_LIMIT = 1
+    # 도구 호출 상태 SSOT — cache / blocked / cacheHit / failureStreak 4 종 통합. 옛 inline
+    # 4 변수 (failure_streak/blocked_calls/call_cache/cache_hit_count) 가 매 회 manual 동기화.
+    # 실패 streak partition (name, error, args) — 같은 도구의 valid 호출까지 차단되던 회귀
+    # (2026-05-17 EngineCall macro.rates → unknown → gather.macro → unknown → macro valid 차단)
+    # 방지. _CACHE_HIT_BLOCK_LIMIT=1 = cache hit 1회에 즉시 영구 차단 (2026-05-20 사용자 audit
+    # scan.ratio 4 회 연속 cached 회귀 가드).
+    tracker = _ToolCallTracker(failureStreakLimit=2, cacheHitBlockLimit=1)
 
     for iteration in range(maxIterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
@@ -188,26 +177,21 @@ def runAgent(
             messages.append(assistant_msg)
 
             # ── 2 단 fan-out: read-only 병렬 + write 시퀀셜 ──
-            # turn 안 toolCalls 는 LLM 이 의존성 없음 보증 (의존 있으면 다른 turn 분리).
+            # turn 안 toolCalls 는 호출자가 의존성 없음 보증 (의존 있으면 다른 turn 분리).
             # blocked / cached path 는 외부 호출 0 ms 라 분류 후 즉시 emit. 새 실행만 partition.
             fresh_read: list[tuple[Any, tuple[str, str]]] = []
             fresh_write: list[tuple[Any, tuple[str, str]]] = []
             blocked_or_cached_in_turn = 0
             for tc in turn.toolCalls:
-                cache_key = (
-                    tc.name,
-                    json.dumps(tc.args or {}, ensure_ascii=False, sort_keys=True, default=str),
-                )
-                if cache_key in blocked_calls:
+                cache_key = _ToolCallTracker.keyOf(tc.name, tc.args)
+                if tracker.isBlocked(cache_key):
                     yield from _emitBlocked(tc, messages)
                     blocked_or_cached_in_turn += 1
                     continue
-                cached = call_cache.get(cache_key)
+                cached = tracker.cachedResult(cache_key)
                 if cached is not None:
-                    cache_hit_count[cache_key] = cache_hit_count.get(cache_key, 0) + 1
-                    if cache_hit_count[cache_key] >= _CACHE_HIT_BLOCK_LIMIT:
-                        blocked_calls.add(cache_key)
-                    yield from _emitCached(tc, cached, cache_hit_count[cache_key], _CACHE_HIT_BLOCK_LIMIT, messages)
+                    hits = tracker.recordCacheHit(cache_key)
+                    yield from _emitCached(tc, cached, hits, tracker.hitLimit, messages)
                     blocked_or_cached_in_turn += 1
                     continue
                 (fresh_read if isToolReadOnly(tc.name) else fresh_write).append((tc, cache_key))
@@ -237,29 +221,9 @@ def runAgent(
                     }
                     for fut in as_completed(fut_to_meta):
                         tc, cache_key = fut_to_meta[fut]
-                        try:
-                            resultDict = fut.result()
-                        except Exception as exc:  # noqa: BLE001
-                            logger.exception("tool %s threw uncaught (parallel)", tc.name)
-                            resultDict = {
-                                "ok": False,
-                                "summary": f"{tc.name} 실행 오류: {type(exc).__name__}",
-                                "data": None,
-                                "error": type(exc).__name__,
-                                "refs": [],
-                            }
-                        call_cache[cache_key] = resultDict
-                        yield from _finalizeResult(
-                            tc,
-                            cache_key,
-                            resultDict,
-                            refs,
-                            artifacts,
-                            failure_streak,
-                            blocked_calls,
-                            messages,
-                            failureStreakLimit=_FAILURE_STREAK_LIMIT,
-                        )
+                        resultDict = _runOrFallback(fut.result, tc.name, parallel=True)
+                        tracker.recordResult(cache_key, tc.name, resultDict)
+                        yield from _finalizeResult(tc, resultDict, refs, artifacts, messages)
 
             # Phase 3: write 시퀀셜 — 순서 의존 가능 (SaveArtifact 덮어쓰기 등).
             for tc, cache_key in fresh_write:
@@ -267,30 +231,10 @@ def runAgent(
                     "tool_start",
                     {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 호출"},
                 )
-                try:
-                    resultDict = executeTool(tc.name, tc.args)
-                except Exception as exc:  # noqa: BLE001
-                    logger.exception("tool %s threw uncaught (sequential)", tc.name)
-                    resultDict = {
-                        "ok": False,
-                        "summary": f"{tc.name} 실행 오류: {type(exc).__name__}",
-                        "data": None,
-                        "error": type(exc).__name__,
-                        "refs": [],
-                    }
-                call_cache[cache_key] = resultDict
-                yield from _finalizeResult(
-                    tc,
-                    cache_key,
-                    resultDict,
-                    refs,
-                    artifacts,
-                    failure_streak,
-                    blocked_calls,
-                    messages,
-                    failureStreakLimit=_FAILURE_STREAK_LIMIT,
-                )
-            continue  # 다시 LLM 호출
+                resultDict = _runOrFallback(lambda tc=tc: executeTool(tc.name, tc.args), tc.name, parallel=False)
+                tracker.recordResult(cache_key, tc.name, resultDict)
+                yield from _finalizeResult(tc, resultDict, refs, artifacts, messages)
+            continue  # 다시 호출
 
         # tool_calls 없음 → 정상 종료 (LLM 이 답안 작성 완료)
         if not text_emitted and turn.content:
@@ -516,36 +460,90 @@ def _emitCached(
     )
 
 
+class _ToolCallTracker:
+    """도구 호출 상태 SSOT — cache / blocked / cacheHit / failureStreak 통합.
+
+    옛 4 변수 (failure_streak / blocked_calls / call_cache / cache_hit_count) 가 runAgent 본문
+    inline + 매 회 manual 동기화. 호출자는 keyOf / isBlocked / cachedResult / recordCacheHit /
+    recordResult 5 메서드만 안다. state mutation 은 모두 내부.
+    """
+
+    def __init__(self, *, failureStreakLimit: int, cacheHitBlockLimit: int) -> None:
+        self._cache: dict[tuple[str, str], dict[str, Any]] = {}
+        self._blocked: set[tuple[str, str]] = set()
+        self._cacheHits: dict[tuple[str, str], int] = {}
+        self._failStreak: dict[tuple[str, str, str], int] = {}
+        self._failLimit = failureStreakLimit
+        self._hitLimit = cacheHitBlockLimit
+
+    @staticmethod
+    def keyOf(name: str, args: Any) -> tuple[str, str]:
+        """(도구명, args JSON-serialized) — 동일 호출 동등성 키."""
+        return (name, json.dumps(args or {}, ensure_ascii=False, sort_keys=True, default=str))
+
+    @property
+    def hitLimit(self) -> int:
+        """cache hit block limit — _emitCached UI 메시지 분기용으로 노출."""
+        return self._hitLimit
+
+    def isBlocked(self, key: tuple[str, str]) -> bool:
+        """영구 차단 set 검사."""
+        return key in self._blocked
+
+    def cachedResult(self, key: tuple[str, str]) -> dict[str, Any] | None:
+        """캐시된 결과 (없으면 None)."""
+        return self._cache.get(key)
+
+    def recordCacheHit(self, key: tuple[str, str]) -> int:
+        """cache hit 카운트 + limit 도달 시 자동 blocked 등록. 현재 hit 수 반환."""
+        self._cacheHits[key] = self._cacheHits.get(key, 0) + 1
+        if self._cacheHits[key] >= self._hitLimit:
+            self._blocked.add(key)
+        return self._cacheHits[key]
+
+    def recordResult(self, key: tuple[str, str], name: str, result: dict[str, Any]) -> None:
+        """새 실행 결과 저장 + failure streak 갱신. limit 도달 시 자동 blocked 등록."""
+        self._cache[key] = result
+        argsHash = key[1]
+        if not result.get("ok"):
+            errKey = str(result.get("error") or "unknown")
+            streakKey = (name, errKey, argsHash)
+            self._failStreak[streakKey] = self._failStreak.get(streakKey, 0) + 1
+            if self._failStreak[streakKey] >= self._failLimit:
+                self._blocked.add(key)
+        else:
+            # 같은 도구 + 같은 args 성공 → 그 args 의 모든 error streak 리셋.
+            for k in [k for k in self._failStreak if k[0] == name and k[2] == argsHash]:
+                self._failStreak.pop(k, None)
+
+
+def _runOrFallback(executor: Any, toolName: str, *, parallel: bool) -> dict[str, Any]:
+    """도구 실행 + uncaught 예외를 표준 error result dict 로 변환. 병렬/순차 공통 패턴 SSOT."""
+    try:
+        return executor()
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("tool %s threw uncaught (%s)", toolName, "parallel" if parallel else "sequential")
+        return {
+            "ok": False,
+            "summary": f"{toolName} 실행 오류: {type(exc).__name__}",
+            "data": None,
+            "error": type(exc).__name__,
+            "refs": [],
+        }
+
+
 def _finalizeResult(
     tc: Any,
-    cacheKey: tuple[str, str],
     resultDict: dict[str, Any],
     refs: list[dict[str, Any]],
     artifacts: list[dict[str, Any]],
-    failureStreak: dict[tuple[str, str, str], int],
-    blockedCalls: set[tuple[str, str]],
     messages: list[dict[str, Any]],
-    failureStreakLimit: int,
 ) -> Iterator[TraceEvent]:
-    """새 실행 결과 후처리 — streak 갱신 + tool_result emit + visualRef view_spec + tool message append.
+    """새 실행 결과 후처리 — tool_result emit + visualRef view_spec + tool message append.
 
-    메인 thread 에서만 호출 (read-only fan-out 의 as_completed 콜백 포함 — fut.result() 후 메인 generator
-    가 본 함수 호출). thread 안에서는 호출 금지 — 공유 state mutation 있음.
-
-    실패 streak partition: (name, error_code, argsHash) — 같은 도구의 valid 호출까지 차단되는
-    회귀 (2026-05-17) 방지. blockedCalls 도 (name, argsHash) 단위로 — 도구 자체는 풀어둠.
+    state mutation (failure streak / blocked set) 은 호출 직전 _ToolCallTracker.recordResult 가
+    이미 처리. 본 함수는 순수 emit + messages.append.
     """
-    argsHash = cacheKey[1]
-    if not resultDict.get("ok"):
-        err_key = str(resultDict.get("error") or "unknown")
-        streak_key = (tc.name, err_key, argsHash)
-        failureStreak[streak_key] = failureStreak.get(streak_key, 0) + 1
-        if failureStreak[streak_key] >= failureStreakLimit:
-            blockedCalls.add(cacheKey)
-    else:
-        # 같은 도구 + 같은 args 성공 → 그 args 의 모든 error streak 리셋.
-        for k in [k for k in failureStreak if k[0] == tc.name and k[2] == argsHash]:
-            failureStreak.pop(k, None)
     tool_refs = list(resultDict.get("refs") or [])
     refs.extend(tool_refs)
     tool_artifacts = [ref for ref in tool_refs if ref.get("kind") == "artifactRef"]
