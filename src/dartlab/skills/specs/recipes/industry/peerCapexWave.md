@@ -124,7 +124,44 @@ emit_result(
 
 ## 호출 동작
 
-target 의 capex / 매출 시계열 vs 각 peer 의 시계열을 동시 Pearson corr (`corr0`) + lag-1 corr (`corrLag1`, peer 가 1 년 후행 가정) 계산. corrLag1 > corr0 + 0.1 = `target_leads`, < corr0 - 0.1 = `peer_leads`, 그 외 = `sync`.
+### 1. 결론 도출
+
+target vs peer capex wave 선후 단정 (target_leads / peer_leads / sync). 예: "target 005930 vs peer 000660 capex / 매출 — corr0=+0.65, corrLag1=+0.81 → target_leads (target 이 1년 선행)."
+
+### 2. 핵심 근거 수집
+
+- target 의 capex / 매출 5y 시계열 (Company.show 의 capex 시계열 + revenue)
+- peer 별 capex / 매출 5y 시계열
+- Pearson corr0 (동시) + Pearson corrLag1 (peer 1년 후행 가정)
+
+### 3. 메커니즘 분석
+
+```
+target 시계열: [capex/rev_2021, capex/rev_2022, ..., capex/rev_2025]
+peer 시계열: [capex/rev_2021, capex/rev_2022, ..., capex/rev_2025]
+   ↓
+corr0 = Pearson(target, peer) 동시
+corrLag1 = Pearson(target[:-1], peer[1:]) — peer 1년 후행
+   ↓
+corrLag1 - corr0 > +0.1  → target_leads (target capex 가 peer 보다 1년 앞)
+corrLag1 - corr0 < -0.1  → peer_leads (peer capex 가 target 보다 앞 — 후행)
+abs 차 ≤ 0.1            → sync (capex 동시 진행)
+```
+
+target_leads + corr0 양수 = capex 사이클 진입 선행자. peer_leads + corr0 양수 = target 이 capex 사이클 후행자 (캐치업 phase).
+
+### 4. 반례·한계
+
+- 5년 5 점 표본 — Pearson corr 신뢰도 낮음. peer 수 ≥ 5 일 때만 lead/lag 단정.
+- capex 정의 차이 (PP&E 증가 vs 현금흐름 capex) peer 비교 시 raw 노이즈.
+- 회계연도 차이 (12월 결산 vs 3월 결산) lag 분석 왜곡.
+- 일회성 대규모 capex (공장 신설) 1 회만으로 lead 단정 위험.
+
+### 5. 후속 모니터링
+
+- target_leads 일관 시: `recipes.industry.industryStagePhase` 로 산업 phase 정합 (lead 회사 = phase 진입 신호).
+- peer_leads 다수: `recipes.industry.marginCompressionScan` 으로 cycle 후기 마진 압축 cluster 확인.
+- corr0 절대값 낮음 (< 0.3): peer 정의 재검토 — `recipes.industry.sectorFlowConcentration` 자금 집중도 cross-check.
 
 ## 대표 반환 형태
 

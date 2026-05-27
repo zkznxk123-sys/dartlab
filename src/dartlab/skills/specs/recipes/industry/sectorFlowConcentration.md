@@ -167,7 +167,46 @@ emit_result(
 
 ## 호출 동작
 
-종목 5 거래일 평균 거래대금 + 섹터 총 거래대금 → share 계산. 외인 보유율 (flow row) 같이 표면. share > 20% = concentrated, < 5% = diffuse, 그 외 normal. 추론 X.
+### 1. 결론 도출
+
+섹터 거래대금 share + 외인 보유율 phase 단정 (concentrated > 20% / normal / diffuse < 5%). 예: "종목 share 18.5% (섹터 1위), 외인 49% → concentrated phase 직전 — 단일 종목 자금 집중 우려."
+
+### 2. 핵심 근거 수집
+
+- 종목 5 거래일 평균 거래대금 (Company.gather('price') volume × close)
+- 섹터 총 거래대금 (sector universe 합산)
+- 외인 보유율 (Company.gather('flow') 또는 분기 ownership)
+
+### 3. 메커니즘 분석
+
+```
+종목 5d 평균 거래대금 / 섹터 N peer 5d 평균 거래대금 합
+   ↓
+share = 종목 거래대금 / 섹터 거래대금 합
+   ↓
+share > 20%  → concentrated (단일 종목 집중)
+5-20%        → normal (정상)
+< 5%         → diffuse (분산 거래)
+   +
+외인 보유율 (분기 또는 일별)
+   > 40%     → 외인 강한 영향
+   < 10%     → 개인/기관 위주
+```
+
+share + 외인 보유율 동시 본 → concentrated + 외인 ↑ = 외인 자금 단일 종목 집중 (외인 매도 시 가격 충격 큼).
+
+### 4. 반례·한계
+
+- 섹터 분류 (GICS/KRX) 차이로 peer 정의 달라짐.
+- 5거래일 평균 짧음 — 일시적 거래량 폭증 (공시 일자) 왜곡.
+- 외인 보유율 분기 데이터 사용 시 최근 변동 미반영.
+- 시총 차이 큰 peer (top-heavy 섹터) share 자동 왜곡.
+
+### 5. 후속 모니터링
+
+- concentrated phase 지속: `recipes.sentiment.foreignBuyMomentum` 으로 외인 가속도 확인.
+- 외인 보유율 급변 (분기 ±5%p): `recipes.sentiment.ownershipShiftSignal` 추적.
+- diffuse 진입: `recipes.industry.peerPriceConvergence` 로 peer 가격 발산 여부 확인.
 
 ## 대표 반환 형태
 

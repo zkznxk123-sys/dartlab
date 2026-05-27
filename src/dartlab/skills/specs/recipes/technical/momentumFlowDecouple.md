@@ -145,7 +145,45 @@ emit_result(
 
 ## 호출 동작
 
-종목별 직전 60 거래일 (단, 최근 20 일 제외) 가격 일변동률 vs 수급 (외인+기관 순매수) Pearson 상관 `corr60` + 최근 20 거래일 상관 `corr20` 산출. `decouple = corr60 - corr20` 가 양수 (상관 와해) / 음수 (상관 강화). 5 종목 단면 std 가 0.20 이상이면 변별력 통과.
+### 1. 결론 도출
+
+가격-수급 상관 decouple 단정 (corr60 - corr20). 양수 = 상관 와해 (수급 이탈), 음수 = 상관 강화. 예: "corr60=+0.45 vs corr20=+0.12 → decouple=+0.33 (상관 와해) — 가격 상승 vs 수급 정체 신호."
+
+### 2. 핵심 근거 수집
+
+- 종목 가격 시계열 60+20 거래일 (Company.gather('price'))
+- 수급 시계열 (외인 + 기관 순매수, Company.gather('flow'))
+- Pearson 상관 계산 — 이전 60d (최근 20d 제외) + 최근 20d 분리
+
+### 3. 메커니즘 분석
+
+```
+가격 일변동률 + 수급 (외인+기관) 60+20 거래일
+   ↓
+이전 60일 (latest -80 ~ -20) Pearson 상관 = corr60
+   ↓
+최근 20일 Pearson 상관 = corr20
+   ↓
+decouple = corr60 - corr20
+   > +0.2  → 상관 와해 (수급 vs 가격 이격 강함)
+   ±0.2    → 상관 유지 (정상)
+   < -0.2  → 상관 강화 (수급-가격 동행 강화)
+```
+
+decouple 양수 + 가격 상승 → 수급 따라가지 않는 가격 (skeptical buying). decouple 음수 + 가격 하락 → 수급 일관 매도 (capitulation 위험).
+
+### 4. 반례·한계
+
+- 거래량 적은 종목 (volume < average) 의 수급 데이터 노이즈 큼.
+- 시장 전체 동시 충격 (지수 변동) 보정 없음.
+- Pearson 상관은 선형 관계만 — 비선형 (jump · gap) 신호 포착 X.
+- 60d/20d 짧으면 표본 부족, 길면 regime shift 묻혀.
+
+### 5. 후속 모니터링
+
+- decouple 양수 지속: `recipes.sentiment.flowImbalance` 로 외인/기관 imbalance 확인.
+- decouple 음수 + 가격 하락: `recipes.sentiment.retailFlowReversal` 로 개인 vs 스마트머니 발산 확인.
+- corr60 절대값 < 0.2 종목: 가격-수급 비동조 — 다른 신호 source (공시·뉴스) cross-check.
 
 ## 대표 반환 형태
 

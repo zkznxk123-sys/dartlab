@@ -158,7 +158,44 @@ emit_result(
 
 ## 호출 동작
 
-news gather row 에서 일자 파싱 → 7 일 / 30 일 row 카운트 → 일평균 환산 → 단기/장기 비율 (velocityRatio). > 1.5 = 가속, < 0.66 = 감속, 그 외 = steady. 추론 X.
+### 1. 결론 도출
+
+뉴스 빈도 가속도 phase 단정 (accelerate > 1.5x / steady / decelerate < 0.66x). 예: "7d 일평균 8건 vs 30d 일평균 2.5건 → velocityRatio 3.2x → accelerate (뉴스 빈도 폭증)."
+
+### 2. 핵심 근거 수집
+
+- 종목 뉴스 row (Company.gather('news'))
+- 7d 발생 row 카운트 / 7 = 단기 일평균
+- 30d 발생 row 카운트 / 30 = 장기 일평균
+
+### 3. 메커니즘 분석
+
+```
+news row → date 파싱
+   ↓
+7일 안 row 수 / 7  = velocity7d
+30일 안 row 수 / 30 = velocity30d
+   ↓
+velocityRatio = velocity7d / velocity30d
+   > 1.5    → accelerate (빈도 1.5배 폭증)
+   0.66-1.5 → steady (정상)
+   < 0.66   → decelerate (관심 이탈)
+```
+
+velocityRatio 큼 = 최근 뉴스 폭증. velocityRatio > 3 + 매체 다수 동시 = 사건 큰 가능성. 단순 같은 사건 복수 매체 보도 (`recipes.news.repeatedHeadlineFrequency`) 와 별도 분리 필요.
+
+### 4. 반례·한계
+
+- 같은 사건의 복수 매체 동시 보도 → velocity 부풀려짐.
+- 정정·재공시 뉴스 cluster 도 별개 카운트.
+- date 파싱 실패 row (이상 format) drop — 실제 빈도보다 낮게 측정.
+- 휴장일·공휴일 효과 (월요일 spike) 보정 없음.
+
+### 5. 후속 모니터링
+
+- accelerate phase + 7d 안 ≥ 3 매체: `recipes.news.repeatedHeadlineFrequency` 로 사건 cluster 확인.
+- accelerate + 가격 변동 동행: `recipes.news.eventVolatilityCheck` 로 변동성 확대 확인.
+- decelerate 지속 (관심 이탈): `recipes.sentiment.flowImbalance` 로 수급 변화 cross-check.
 
 ## 대표 반환 형태
 

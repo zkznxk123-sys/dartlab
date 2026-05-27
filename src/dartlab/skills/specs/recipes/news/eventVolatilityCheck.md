@@ -142,7 +142,44 @@ emit_result(
 
 ## 호출 동작
 
-이벤트 시점 직전 20 거래일 평균 ATR vs 직후 20 거래일 평균 ATR 의 ratio. ≥ 1.3 = expand (변동성 확대), ≤ 0.7 = contract, 그 외 = stable.
+### 1. 결론 도출
+
+이벤트 ±20거래일 ATR ratio phase 단정 (expand ≥ 1.3 / stable / contract ≤ 0.7). 예: "공시 직전 ATR 2.1%, 직후 ATR 3.2% → ratio 1.52 → expand phase (변동성 50% 확대)."
+
+### 2. 핵심 근거 수집
+
+- 이벤트 시점 (Company.disclosure 또는 liveFilings 의 rcept_dt)
+- 가격 row ±20거래일 (Company.gather('price') high/low/close)
+- ATR(N) = N일 평균 True Range = avg(max(H-L, |H-prevC|, |L-prevC|))
+
+### 3. 메커니즘 분석
+
+```
+이벤트 시점 T
+   ↓
+직전 20 거래일 (T-20 ~ T-1): ATR_pre = avg(true_range)
+직후 20 거래일 (T+1 ~ T+20): ATR_post = avg(true_range)
+   ↓
+ratio = ATR_post / ATR_pre
+   ≥ 1.3   → expand (이벤트 변동성 확대 — 시장 반응 강함)
+   0.7-1.3 → stable (반응 약함)
+   ≤ 0.7   → contract (변동성 흡수 — 이벤트 해소)
+```
+
+이벤트 정보 큼직 → ATR ratio 1.3 이상 → 시장 가격 적응 중. ratio < 0.7 이면 시장이 이벤트를 이미 가격에 반영했거나 의미 약함.
+
+### 4. 반례·한계
+
+- 시장 전체 변동성 (KOSPI VIX) 동시 변동 보정 없음 — 시장 효과 vs 이벤트 효과 분리 X.
+- 이벤트 ±20일 안 다른 이벤트 발생 시 ATR 혼합.
+- 시장 휴장일 (설·추석) 으로 거래일 부족 시 직후 20일 계산 불가.
+- ATR 은 magnitude 만 — 방향성 (상승/하락) 정보 X.
+
+### 5. 후속 모니터링
+
+- ratio ≥ 1.3 지속: `recipes.news.eventTimelineFusion` 으로 cluster 안 가격 leader 확인.
+- ratio ≤ 0.7 + 이벤트 큼직: `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 으로 수급 반응 확인.
+- 연쇄 이벤트 (30일 안 2+) 시 `recipes.news.calendarEventClock` 으로 다음 이벤트 사전 추적.
 
 ## 대표 반환 형태
 
