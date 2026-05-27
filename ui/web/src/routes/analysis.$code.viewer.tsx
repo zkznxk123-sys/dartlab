@@ -534,10 +534,10 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="flex w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden pt-3">
-						{/* 상위 타임라인 + 토픽 제목 — main flex column 상단 고정 (스크롤 아님).
-						    아래 body scroll div 가 단일 vertical scroll source. 여백 최소화 —
-						    타임라인 ↔ 본문 사이 박스 여백 제거 (border-b 만). */}
+					<>
+						{/* main 직속 자식 — wrapper div 없음. 상위 타임라인 + 토픽 제목 → 본문
+						    스크롤 div. 옛 wrapper 의 pt-3 / overflow-hidden 이 본문 스크롤바를
+						    우측 edge 에서 inset 시키던 박스 여백 회귀 fix. */}
 						<div className="shrink-0 border-b bg-background px-3">
 						<header className="pb-0 pt-2">
 							<div className="flex items-baseline justify-between gap-3">
@@ -627,7 +627,7 @@ function ViewerTab() {
 								<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
 							</div>
 						</div>
-					</div>
+					</>
 				)}
 			</main>
 		</div>
