@@ -180,7 +180,45 @@ emit_result(
 
 ## 호출 동작
 
-종목 + 최대 8 peer 의 60 거래일 수익률 분포 산출. dispersion (pstdev) < 5% = converging, > 15% = diverging, 그 외 = normal. 자기 종목 수익률은 분포 위치 비교용. 추론 X.
+### 1. 결론 도출
+
+peer 60d 수익률 dispersion phase 단정 (converging < 5% / normal / diverging > 15%). 예: "peer dispersion 8.2% → normal, 자기 종목 +4.5% (peer mean +3.1%, 분포 안)."
+
+### 2. 핵심 근거 수집
+
+- 자기 종목 + 최대 8 peer 의 60 거래일 close 시계열
+- peer 분포 — pstdev (population std-dev) + mean + percentile (p10/p50/p90)
+- 자기 종목 위치 (분포 안 percentile rank)
+
+### 3. 메커니즘 분석
+
+```
+종목 + peer 8 → 60거래일 close
+              → ret60d = closes[-1]/closes[-61] - 1
+              → peer ret60d 분포
+                            ↓
+dispersion (peer pstdev) 산출
+        < 5%    → converging (peer 가격 수렴 phase, beta 동조성 ↑)
+        5-15%   → normal (정상 분산)
+        > 15%   → diverging (peer 가격 발산 phase, idiosyncratic 강함)
+                            ↓
+자기 종목 percentile = (own_ret > peer_ret 카운트) / peer_count
+```
+
+converging phase 에서 자기 종목 outlier (p90 또는 p10) 는 idiosyncratic 신호 강함. diverging phase 에서 자기 종목 mean 근처는 평범.
+
+### 4. 반례·한계
+
+- peer set 5 미만 시 dispersion 신뢰도 낮음.
+- 60d 미만 history (신규 상장) 비교 불가.
+- 같은 산업이지만 segment 다른 peer 섞이면 dispersion 왜곡 (예: 메모리 vs 시스템반도체).
+- M&A · spin-off 직후 peer 의 ret60d 는 비교 base 깨짐.
+
+### 5. 후속 모니터링
+
+- converging phase + 자기 종목 outlier: `recipes.sentiment.flowImbalance` 로 수급 idiosyncratic 신호 확인.
+- diverging phase 지속: `recipes.industry.sectorFlowConcentration` 로 자금 집중도 변화 확인.
+- 자기 종목 p90 ↑ 또는 p10 ↓: `recipes.industry.sectorMomentumLeadership` 으로 leader/laggard 분류.
 
 ## 대표 반환 형태
 

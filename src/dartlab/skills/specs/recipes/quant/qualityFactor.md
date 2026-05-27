@@ -151,7 +151,47 @@ emit_result(
 
 ## 호출 동작
 
-QMJ 4 축 (Profitability / Growth / Safety / Payout) 각각 peer 단면 z-score → 평균이 composite. 측정 가능한 축 ≤ 2 면 composite X.
+### 1. 결론 도출
+
+QMJ composite z-score 단일값 + 4 축 개별 z-score 단정 + peer 분위. 예: "QMJ composite z=+1.2 (top 15%) — Profit z=+0.9 / Growth z=+1.5 / Safety z=+0.3 / Payout z=+2.0 → quality 후보 confirmed."
+
+### 2. 핵심 근거 수집
+
+- Profitability — ROE / ROA (analysis.profitabilityRatios)
+- Growth — 매출 5y CAGR (show revenue 시계열)
+- Safety — debt/equity + earnings volatility (show BS + earnings std)
+- Payout — FCF / NI (analysis.capitalAllocation)
+- peer set (산업 cross-section)
+
+### 3. 메커니즘 분석
+
+```
+4 축 raw 산출
+   ↓
+각 축 peer 단면 z-score = (own - peer_mean) / peer_std
+   ↓
+composite z = avg(measurable axis z-scores)
+   ↓
+composite z ≥ +1.0  → quality 후보 (QMJ Q1)
+composite z 0 ~ +1  → mid quality
+composite z < 0     → junk 후보 (QMJ Q5)
+측정 가능 축 ≤ 2    → composite X (한계 표기)
+```
+
+4 축 모두 양수면 가장 강한 quality 신호. Payout z 만 높고 다른 축 낮으면 거짓 quality (배당만 높은 junk 위장).
+
+### 4. 반례·한계
+
+- 회계 정책 차이 (revenue recognition · depreciation) peer 비교 시 raw 비교 노이즈.
+- 신규 상장 (history < 5y) Growth 측정 불가.
+- 금융사 (은행·증권·보험) 의 debt/equity 정의 다름 — Safety 축 비교 의미 X.
+- 일회성 이익 (자산매각 · 충당금환입) peer mean inflated.
+
+### 5. 후속 모니터링
+
+- composite z ≥ +1 시: `recipes.fundamental.valuation.damodaran.relativeCheck` 로 가격 검증.
+- Safety z < -1 시: `recipes.fundamental.credit.usHighYieldSpread` regime 확인.
+- Payout z 높음 + Growth z 낮음: `recipes.fundamental.dividend.foreignOwnershipCorr` 외인 매수 정합 확인.
 
 ## 대표 반환 형태
 

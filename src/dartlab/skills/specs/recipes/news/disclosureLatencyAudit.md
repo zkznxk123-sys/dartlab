@@ -176,7 +176,43 @@ emit_result(
 
 ## 호출 동작
 
-각 공시마다 48 시간 안 첫 뉴스 1 건 매칭 → latency (hr) 분포. mean < 1 = fastBroadcast, < 6 = normal, > 6 = slow. 추론 X.
+### 1. 결론 도출
+
+공시 → 뉴스 보도 lag (hr) phase 단정 (fastBroadcast < 1h / normal 1-6h / slow > 6h). 예: "최근 30일 매칭 pair N 건, mean lag 2.3h → normal phase."
+
+### 2. 핵심 근거 수집
+
+- 공시 row (Company.disclosure 시각 정보)
+- 뉴스 row (Company.gather('news') 시각 정보)
+- 48 시간 window 안 첫 뉴스 1 건 best-match
+
+### 3. 메커니즘 분석
+
+```
+공시 시각 t₁ → t₁ ~ t₁+48h window 안 뉴스 시각 t₂ 모두 후보
+            → 가장 빠른 t₂ 선택 (best match)
+            → latency = t₂ - t₁ (시간 단위)
+                            ↓
+                    mean(latency) 산출
+        < 1h    → fastBroadcast (실시간 보도)
+        1-6h    → normal (정상 lag)
+        > 6h    → slow (느린 보도)
+```
+
+분포 std 가 크면 매체별 보도 속도 편차 큼. matchedPairs 수 ↑ + std ↓ = 신뢰도 ↑.
+
+### 4. 반례·한계
+
+- 정정·재공시는 원공시 시각 기준이라 lag 부풀려짐.
+- 같은 사건의 일괄 보도 (한 시점에 다수 뉴스) 는 첫 1 건만 매칭.
+- 48 시간 window 너무 짧으면 미매칭, 너무 길면 무관 이벤트 매칭.
+- 공시·뉴스 시각 timezone 불일치 시 lag 오류.
+
+### 5. 후속 모니터링
+
+- newsAt < disclosureAt (lag 음수) row 발생 시: `recipes.news.eventTimelineFusion` 으로 정보 비대칭 의심 확인.
+- slow phase 지속 시 매체별 보도 cluster `recipes.news.newsHeadlineVelocity` cross-check.
+- 매칭 pair 적은 종목 (< 10) 은 `recipes.news.disclosureNewsCrosscheck` 키워드 매칭 정밀화.
 
 ## 대표 반환 형태
 

@@ -180,7 +180,43 @@ emit_result(
 
 ## 호출 동작
 
-종목 + 최대 8 peer 의 20 거래일 수익률 ranking. 자기 종목 percentile ≥ 75% = leader, ≤ 25% = laggard, 그 외 = middle. 추론 X.
+### 1. 결론 도출
+
+종목 vs peer 20일 모멘텀 percentile rank 단정 (leader ≥ 75% / middle / laggard ≤ 25%). 예: "종목 20d +8.4% (peer 분포 p82) → leader phase, top 3: A · B · C."
+
+### 2. 핵심 근거 수집
+
+- 자기 종목 + 최대 8 peer 의 20 거래일 수익률
+- peer 분포 (p10/p50/p90 분위수)
+- 자기 종목 rank + percentile
+
+### 3. 메커니즘 분석
+
+```
+종목 + peer 8 → 20거래일 close 시계열
+              → ret20d 계산 (closes[-1]/closes[-21] - 1)
+              → ranking (오름차순 또는 내림차순)
+              → 자기 종목 percentile rank
+                            ↓
+percentile ≥ 75%  → leader (상위 quartile)
+25% < x < 75%     → middle (peer 동행)
+percentile ≤ 25%  → laggard (하위 quartile)
+```
+
+peer 분포 dispersion 이 좁으면 leader/laggard 차이 marginal — 답안에 분포 std 명시.
+
+### 4. 반례·한계
+
+- peer set 5 종목 미만 시 분포 신뢰도 낮음.
+- 신규 상장 종목 (price history < 20 거래일) 비교 base 부재.
+- 같은 산업 peer 중 시총 격차 큰 종목 섞이면 변동성 차이 큼 — size factor 보정 X.
+- 단기 20일 ranking 만으로 추세 단정 금지 — 60d/120d 결합 권장.
+
+### 5. 후속 모니터링
+
+- leader 진입 직후: `recipes.sentiment.priceMomentumGap` 로 단/중기 momentum gap 확인.
+- laggard 지속 시 (3 측정 모두 laggard): `recipes.industry.sectorFlowConcentration` 로 자금 이탈 확인.
+- middle phase + dispersion 좁음: peer convergence `recipes.industry.peerPriceConvergence` cross-check.
 
 ## 대표 반환 형태
 

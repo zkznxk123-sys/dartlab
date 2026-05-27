@@ -179,7 +179,51 @@ emit_result(
 
 ## 호출 동작
 
-`sourceCoverageAudit`부터 `visualDecisionPack`까지 한 번에 만들고, 마지막 `finalDecision` row는 radarScore와 decisionStatus만 요약한다.
+### 1. 결론 도출
+
+eventRadar `finalDecision` row 의 `radarScore` + `decisionStatus` 단정. 예: "radarScore=72/100, decision=actionable — 촉매 후보 N 건 확정, 시장 반응 검증 후 매수 후보 K 건."
+
+### 2. 핵심 근거 수집
+
+- IS/BS/CF 시계열 (Company.show)
+- 공시 row 50 건 (Company.disclosure)
+- 가격·수급·컨센서스 row (Company.gather price/flow/consensus)
+- L1.5 ledger 7 단계 (sourceCoverageAudit → eventInbox → priceFlowReaction → consensusReactionAudit → catalystThesisBridge → premortemCheck → visualDecisionPack)
+
+### 3. 메커니즘 분석
+
+```
+공시 + 뉴스 + 가격 + 수급 + 컨센서스 5 layer 입력
+   ↓
+sourceCoverageAudit (각 layer 데이터 신뢰도 점검)
+   ↓
+eventInbox (잠재 촉매 row 분류)
+   ↓
+priceFlowReaction (촉매 시점 ±5일 가격·수급 반응)
+   ↓
+consensusReactionAudit (컨센서스 revision 동행 여부)
+   ↓
+catalystThesisBridge (반응 + 컨센서스 동행 → 촉매 후보 확정)
+   ↓
+premortemCheck (반증 검증)
+   ↓
+visualDecisionPack + finalDecision: radarScore + decisionStatus
+```
+
+각 ledger 의 missing/ok/watch/risk status 가 누적돼 radarScore 산출. 5 layer 모두 ok 면 decisionStatus=actionable.
+
+### 4. 반례·한계
+
+- 가격·수급·컨센서스 5 layer 중 2+ layer missing 시 catalystThesisBridge 신뢰도 ↓.
+- 단일 이벤트만 보고 시장 반응 단정 금지 — peer 동행 여부 별도 확인.
+- thesis 가 너무 일반적이면 catalystThesisBridge 가 weak narrative 만 생성 — premortemCheck risk row 발생.
+- decisionStatus=operatorReview 시 보강 EngineCall 목록 답안 우선.
+
+### 5. 후속 모니터링
+
+- radarScore ≥ 70 & actionable: `recipes.fundamental.disclosure.eventRadar.eventInbox` 의 confirmed 후보 매주 추적.
+- watchStatus row 1+ 건: 다음 turn `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 재측정.
+- premortemCheck risk row: `recipes.meta.thesisKillChain.deepDive` 로 thesis 전반 재검토.
 
 ## 대표 반환 형태
 
