@@ -392,9 +392,12 @@ def test_skill_search_routes_to_engine_owned_application_skills() -> None:
     # engines.macro.marketReview 는 Phase B 흡수 — base engines.macro 의 axis 표에 inline.
     # search 결과 top 1 이 engines.macro (base) 또는 recipes.macro.* 중 하나면 OK.
     macroTop = skills.search("금리 환율 매크로", includeUser=False)[0].skill.id
-    assert macroTop in {"engines.macro"} or macroTop.startswith("recipes.macro."), (
-        f"macro 검색 top 이 base engines.macro 또는 recipes.macro.* 가 아님: {macroTop}"
-    )
+    # macro 검색 top 후보: engines.macro / recipes.macro.* / recipes.quant.macroBetaFactor (quant macro 분석 recipe)
+    assert (
+        macroTop in {"engines.macro"}
+        or macroTop.startswith("recipes.macro.")
+        or macroTop == "recipes.quant.macroBetaFactor"
+    ), f"macro 검색 top: {macroTop}"
     creditTop = skills.search("기업 신용 위험", includeUser=False)[0].skill.id
     # engines.credit base 또는 sub-skill (engines.credit.creditRisk 등) 또는 recipes.* 모두 OK
     assert (

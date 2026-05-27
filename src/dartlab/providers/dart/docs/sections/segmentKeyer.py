@@ -166,6 +166,11 @@ class SegmentKeyer:
             ('table|p:배당현황|h:abc123', 1, 'table|p:배당현황|h:abc123')
         """
         if isNotesTopic and notesHeadingKey:
+            # path + hash 우선 — 같은 sem 안 다른 schema 표 분리. cross-period 정합.
+            # 옛 occurrence-only 룰은 period 별 표 개수/순서 다를 때 swap.
+            if headerHash and headerHash != "empty":
+                base = f"table|sem:{notesHeadingKey}|h:{headerHash}"
+                return base, 1, base
             base = f"table|sem:{notesHeadingKey}"
             return self._emit(topic, base)
         if textSemanticPathKey and headerHash and headerHash != "empty":

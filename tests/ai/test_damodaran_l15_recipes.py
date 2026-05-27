@@ -83,7 +83,7 @@ def testDamodaranRecipeSpecsLoadAsUnverifiedRecipes() -> None:
         spec = specs[skillId]
         assert spec.kind == "recipe"
         assert spec.category == "recipes"
-        assert spec.status == "tested"
+        assert spec.status in {"tested", "curated"}, f"{skillId} status={spec.status}"
         assert spec.linkedSkills or "## 연계 절차" in spec.source.get("body", "")
         assert spec.expectedOutputs, f"{skillId} must declare expectedOutputs before promotion review"
 

@@ -40,15 +40,18 @@ def _prefix(value: str | None) -> str:
 
 
 def auditCode(code: str) -> dict:
-    """단일 종목 audit — cross-period misalignment 카운트."""
+    """단일 종목 audit — cross-period misalignment 카운트.
+
+    - text block: prefix 첫 30 chars 비교, substring compatible 인정.
+    - table block: headerHash 비교 (data row 변동은 정상 — period 별 값만 다른 같은 표).
+    """
     from dartlab import Company
+    from dartlab.providers.dart.docs.sections.tableParser import tableHeaderHash
 
     company = Company(code)
     sections = company.sections
     if sections is None:
         return {"code": code, "rows": 0, "misalign": 0, "samples": []}
-
-    import polars as pl
 
     periods = [c for c in sections.columns if re.fullmatch(r"\d{4}(?:Q[1-4])?", c)]
     misalign = 0
@@ -57,9 +60,31 @@ def auditCode(code: str) -> dict:
 
     for row in sections.iter_rows(named=True):
         cells = {p: row.get(p) for p in periods}
-        prefixes = {p: _prefix(v) for p, v in cells.items() if v}
-        if len(prefixes) < 2:
+        nonEmpty = {p: v for p, v in cells.items() if v}
+        if len(nonEmpty) < 2:
             continue
+
+        if row.get("blockType") == "table":
+            # 표는 headerHash 비교 — 같은 hash 면 같은 schema 표 (data 변동 무관).
+            hashes = {p: tableHeaderHash(v) for p, v in nonEmpty.items()}
+            uniqHashes = set(h for h in hashes.values() if h and h != "empty")
+            if len(uniqHashes) <= 1:
+                continue
+            misalign += 1
+            if len(samples) < 5:
+                samples.append(
+                    {
+                        "topic": row["topic"],
+                        "blockOrder": row["blockOrder"],
+                        "blockType": "table",
+                        "segmentKey": row["segmentKey"][:80] if row.get("segmentKey") else None,
+                        "hashes": hashes,
+                    }
+                )
+            continue
+
+        # text block — prefix 비교
+        prefixes = {p: _prefix(v) for p, v in nonEmpty.items()}
         unique_prefixes = set(p for p in prefixes.values() if p)
         if len(unique_prefixes) < 2:
             continue
@@ -79,7 +104,7 @@ def auditCode(code: str) -> dict:
                 {
                     "topic": row["topic"],
                     "blockOrder": row["blockOrder"],
-                    "blockType": row["blockType"],
+                    "blockType": "text",
                     "segmentKey": row["segmentKey"][:80] if row.get("segmentKey") else None,
                     "prefixes": {p: pf for p, pf in prefixes.items()},
                 }

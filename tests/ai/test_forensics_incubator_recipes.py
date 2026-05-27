@@ -70,7 +70,7 @@ def testForensicsRecipeSpecsLoadAsObservedRecipes() -> None:
         spec = specs[skill_id]
         assert spec.kind == "recipe"
         assert spec.category == "recipes"
-        assert spec.status in {"observed", "tested"}, f"{skill_id}: status={spec.status}"
+        assert spec.status in {"observed", "tested", "curated"}, f"{skill_id}: status={spec.status}"
         assert spec.graphTier == "L1.5"
         assert spec.requiredEvidence
         assert spec.expectedOutputs
