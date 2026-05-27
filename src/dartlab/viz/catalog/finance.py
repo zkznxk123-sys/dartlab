@@ -145,6 +145,114 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "help": "자산(왼쪽) = 부채+자본(오른쪽). 두 막대 높이는 항상 같다 (회계 등식). 매출채권·재고도 영업자산이지만 운전자본 회수기간 신호로 따로 분리. 기타 영업자산은 PPE·무형·관계사 등 비유동 본업 자본. 금융부채 ↑ 이자 부담, 이익잉여금 ↑ 내부유보 건전.",
     },
     # ─────────────────────────────────────────────────────────────
+    # 1-A2. 회계 등식 시각 검증 (diverging stacked bar) — 자산구조 보조
+    # ─────────────────────────────────────────────────────────────
+    "bsMirror": {
+        "kind": "trend",
+        "title": "회계 등식 시각 (자산 ↔ 부채+자본)",
+        "topic": "BS",
+        "tab": "financial",
+        "subCategory": "capitalStructure",
+        "seriesPlan": [
+            # 좌측 (음수, 0 line 아래로 stack) — 자산 측 4 항목
+            {
+                "key": "cashNeg",
+                "label": "현금성자산",
+                "color": COLORS[6],
+                "intent": "primary",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"cash": -1},
+            },
+            {
+                "key": "receivablesNeg",
+                "label": "매출채권",
+                "color": COLORS[0],
+                "intent": "primary",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"receivables": -1},
+            },
+            {
+                "key": "inventoriesNeg",
+                "label": "재고자산",
+                "color": COLORS[3],
+                "intent": "primary",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"inventories": -1},
+            },
+            {
+                "key": "opAssetNeg",
+                "label": "기타 영업자산",
+                "color": COLORS[8],
+                "intent": "primary",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"assets": -1, "cash": 1, "receivables": 1, "inventories": 1},
+            },
+            # 우측 (양수, 0 line 위로 stack) — 부채+자본 측 5 항목
+            {
+                "key": "opLiab2",
+                "label": "영업부채",
+                "color": COLORS[5],
+                "intent": "accent",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"liabilities": 1, "shortDebt": -1, "longDebt": -1},
+            },
+            {
+                "key": "finDebt2",
+                "label": "금융부채",
+                "color": COLORS[2],
+                "intent": "negative",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"shortDebt": 1, "longDebt": 1},
+            },
+            {
+                "key": "capitalStock2",
+                "label": "자본금",
+                "color": COLORS[4],
+                "intent": "neutral",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "account": "capitalStock",
+            },
+            {
+                "key": "retainedEarnings2",
+                "label": "이익잉여금",
+                "color": COLORS[1],
+                "intent": "positive",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "account": "retainedEarnings",
+            },
+            {
+                "key": "otherEquity2",
+                "label": "기타자본",
+                "color": COLORS[7],
+                "intent": "neutral",
+                "unit": "원",
+                "type": "bar",
+                "stack": "balance",
+                "compose": {"equity": 1, "capitalStock": -1, "retainedEarnings": -1},
+            },
+        ],
+        "options": {"stacked": True, "unit": "원", "diverging": True},
+        # 자산구조 바로 아래 한 행 — colSpan=12 + rowSpan=2 (덜 dense, 양변 대칭 가독).
+        "layout": {"colSpan": 12, "rowSpan": 2},
+        "help": "회계 등식 자산 = 부채 + 자본 의 시각 검증. 0 line 기준 아래 막대 (자산 측 4 항목 = 현금/매출채권/재고/기타영업자산) 와 위 막대 (부채+자본 측 5 항목 = 영업부채/금융부채/자본금/이익잉여금/기타자본) 의 절대값이 항상 같음 = 등식 성립. 기존 자산구조 카드의 분해 표시를 양변 명시 시각으로 보강.",
+    },
+    # ─────────────────────────────────────────────────────────────
     # 1-B. 부채 상세 (매입채무 → 기타 영업부채 → 단기차입금 → 장기차입금·사채)
     # ─────────────────────────────────────────────────────────────
     "liabilityDetail": {
@@ -1613,7 +1721,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
 
 FINANCE_DASHBOARD_KEYS: list[str] = [
     # ─ 01 자본구조 · 자산구조 — 자금조달과 자산 운용. ─
-    "assetComposition",  # full row hero
+    "assetComposition",  # full row hero (분해 stack)
+    "bsMirror",  # 회계 등식 시각 검증 (diverging)
     "liabilityDetail",
     "equityDetail",
     "incomeBreakdown",

@@ -48,6 +48,7 @@ const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 		subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리는가 — 안정성·유동성·레버리지 포함.',
 		keys: new Set([
 			'assetComposition',
+			'bsMirror',
 			'liabilityDetail',
 			'equityDetail',
 			'incomeBreakdown',
