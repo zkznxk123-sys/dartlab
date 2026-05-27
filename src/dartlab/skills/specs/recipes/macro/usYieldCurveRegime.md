@@ -113,7 +113,52 @@ emit_result(
 
 ## 호출 동작
 
-FRED DGS10/DGS2/DGS3MO 시리즈에서 두 spread 동시 추적. 두 spread 모두 음수 = `inversionBoth=True` = strong recession signal.
+### 1. 결론 도출
+
+dual spread inversion + regime 단정. 예: "최신 60일: 10y-2y = -0.45% / 10y-3m = +0.08% → inversionBoth=False (10y-3m 정상화). 60일 안 inversionBoth=True 일수 18일 (30% 비중) → soft inversion (단일 spread만 음수) phase — strong recession 임계 미달."
+
+### 2. 핵심 근거 수집
+
+- FRED DGS10 (10y), DGS2 (2y), DGS3MO (3m) — macro.seriesFetch 3 시리즈
+- 일자별 spread 계산: spread_10y_2y, spread_10y_3m
+- inversionBoth = (10y < 2y) AND (10y < 3m)
+- 최근 60일 + 누적 inversionBoth 일수
+
+### 3. 메커니즘 분석
+
+```
+3 시리즈 → 일자별 join → 2 spread + boolean
+   spread_10y_2y > 0  → 정상 (long > short)
+   spread_10y_2y < 0  → 부분 inversion
+   spread_10y_3m > 0  → 단기 정상
+   spread_10y_3m < 0  → 단기 inversion (정책금리 vs 장기 mismatch)
+   ↓
+4 regime 판정:
+   둘 다 음수 (inversionBoth) + 60일 누적 ≥ 30일 → strong recession signal
+   1 spread 만 음수                                 → soft inversion (대기)
+   둘 다 양수 + 추세 확장                            → steepening (회복 후)
+   둘 다 양수 + 평탄                                 → normal
+   ↓
+historical 패턴:
+   1955-2024 US — inversionBoth 발생 후 12-18M 침체 (10/10)
+   2022-2024 inversionBoth 후 침체 미발현 (예외 가능성)
+   inversion 해제 후 침체 도래까지 lag 잔존
+```
+
+dual spread inversion = strong signal — 단일 spread (10y-2y 만) 함정 회피. 10y-3m 도 동시 음수 필요. 통계 상관 (인과 아님) — 1955 이후 모든 recession 선행 패턴.
+
+### 4. 반례·한계
+
+- 두 시리즈 raw 필요 — 하나만 결손 시 결론 X.
+- 60일 window 너무 짧으면 일시 inversion 으로 strong recession 오인.
+- 2022-2024 inversion 후 침체 미발현 — 모델 예외 패턴 검증 필요.
+- *상관* 아니라 *인과* 단정 금지 — Fed 정책 → curve 형성 → 침체 도래 mechanism.
+
+### 5. 후속 모니터링
+
+- inversionBoth=True + 60일 누적 ≥ 30일 → `recipes.macro.tailRiskScenarioScan` 으로 침체 시나리오.
+- soft inversion (1 spread 만) → `recipes.macro.usFedDotPlotGap` 으로 Fed-시장 갭 점검.
+- inversion + HY spread 확대 → `recipes.fundamental.credit.usHighYieldSpread` 로 credit market 동조 확인.
 
 ## 대표 반환 형태
 

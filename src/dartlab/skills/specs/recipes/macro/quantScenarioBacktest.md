@@ -100,9 +100,52 @@ emit_result(table=rows, values={"market": market, "regimeCount": len(rows), "sce
 
 ## 호출 동작
 
-1. 3 시나리오 (1997/2008/2020) × 3 팩터 (value/quality/momentum) cross-product = 9 cell.
-2. 각 cell `dartlab.quant("walkForward")` — refit walk-forward backtest.
-3. IR / Sharpe / MaxDD 추출.
+### 1. 결론 도출
+
+3 regime × 3 factor 매트릭스 IR/Sharpe/MDD 단정. 예: "9 cell backtest — quality 2008: Sharpe +1.4 / IR +0.8 / MDD -12% (학술 결과 일치, FPA 2014). momentum 2020 COVID: Sharpe -0.6 (급락기 momentum crash 패턴). value 1997 IMF: Sharpe +0.3 (KR 시장에서 value 약함). → 이번 사이클 (cycle 후반) 에서 quality 우세 가설."
+
+### 2. 핵심 근거 수집
+
+- macro('scenario', market=KR) — 시나리오 period 정의 (1997-IMF / 2008-GFC / 2020-COVID)
+- quant('walkForward') — refit walk-forward backtest (look-ahead bias 회피)
+- 3 factor × 3 scenario = 9 cell IR / Sharpe / MDD
+
+### 3. 메커니즘 분석
+
+```
+3 scenario × 3 factor = 9 cell matrix
+   각 cell:
+     - scenario period (시작/종료)
+     - factor universe (KR 상장사 ≥ 100)
+     - walk-forward refit (3M 단위, 1Y lookback)
+     - IR = factor return / tracking error
+     - Sharpe = factor return / std
+     - MDD = max drawdown
+   ↓
+factor 작동 패턴 (학술 expected):
+   quality 2008 GFC      → outperform (FPA 2014)
+   value 1997 IMF        → outperform (cheap KR universe)
+   momentum 2020 COVID   → underperform (crash pattern)
+   ↓
+이번 사이클 추정:
+   현재 phase 가 어느 historical 과 닮았는지 historical positioning 과 결합
+   → 그 시나리오의 factor 작동 패턴 차용
+```
+
+walk-forward 강제 (look-ahead bias 회피). 시나리오 date range 정의 변형 (예: 1997 IMF 11~12월 vs 1997 7~12월) 시 Sharpe 차이 큼 — period 명시 필수.
+
+### 4. 반례·한계
+
+- 시나리오 date range 정의 차이로 Sharpe ±0.5 변동.
+- factor 정의 (book/price vs ROE) 별 결과 다름 — 일관된 정의 필수.
+- US 학술 결과 (FPA 2014) 의 KR 시장 적용성 검증 미흡.
+- 3 시나리오만으로 일반화 X — black swan (cyber / 지정학) 미커버.
+
+### 5. 후속 모니터링
+
+- quality 2008 Sharpe > +1 → `recipes.macro.qualityMacroBeta` 로 단일 회사 phase 정합 확인.
+- value 1997 underperform → `recipes.quant.valueFactor` 로 KR 시장 value 정의 재검증.
+- momentum 2020 crash → `recipes.quant.momentumFactor` 로 12-1m 정의 + crash 회피 기간 확인.
 
 ## 대표 반환 형태
 

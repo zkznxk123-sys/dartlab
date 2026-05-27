@@ -140,7 +140,57 @@ emit_result(
 
 ## 호출 동작
 
-source별 `status`, `rowCount`, `latestDate`, `requiredFor`를 만든다. missing source는 다음 단계의 제한으로 그대로 전달한다.
+### 1. 결론 도출
+
+9 source coverage audit 단정. 예: "9 source audit — filings 50 rows latest 2026-05-26 / news 18 / price 40 / flow 40 / insiderTrading 0 (missing — KR 임원 신고 미수신) / ownership 12 / dividends 16 / splits 4 / consensus 12 → 8 of 9 ok + 1 missing (insiderOwnershipSignal 후속 제한 발생)."
+
+### 2. 핵심 근거 수집
+
+- Company.disclosure() filings (limit 50)
+- Company.gather() × 8 axis (news / price / flow / insiderTrading / ownership / dividends / splits / consensus)
+- 각 source rowCount + latestDate 추출
+- buildEventRadarMemo() → sourceCoverageAudit table
+
+### 3. 메커니즘 분석
+
+```
+9 source × (rowCount + latestDate + status + requiredFor)
+   status 판정:
+     rowCount ≥ 1 → ok
+     rowCount = 0 → missing
+     stale (latestDate > 30d) → watch
+   ↓
+requiredFor 매핑 (어떤 후속 recipe 가 필요로 하나):
+   filings → eventInbox + capitalActionMonitor + falsifierLedger
+   news    → eventInbox
+   price   → priceFlowReaction + falsifierLedger + visualDecisionPack (priceChart)
+   flow    → priceFlowReaction
+   insider → insiderOwnershipSignal
+   ownership → insiderOwnershipSignal
+   dividends → capitalActionMonitor
+   splits  → capitalActionMonitor
+   consensus → consensusDriftWatch
+   ↓
+missing source 의 영향:
+   priceRows 결손 → priceChart 비활성 + priceFlowReaction 결론 X
+   filings 결손  → eventInbox 결론 X (whole pack 차단)
+   insider 결손  → insiderOwnershipSignal 만 미산출 (전체 차단 X)
+```
+
+이벤트 레이더의 *첫 중단점* — 실행 전 게이트. missing source 가 어떤 후속 recipe 를 차단하는지 명시 필수.
+
+### 4. 반례·한계
+
+- 결손 source 를 0 또는 없음으로 단정 → forbidden 위반 (불확실로 표기).
+- priceRows 결손인데 priceChart 만들면 false visualization.
+- filings 결손인데 eventInbox 정상 처리 시 missing 누락.
+- KR vs US source 비대칭 (insider 신고 형식 다름) — market 별 조정 필요.
+
+### 5. 후속 모니터링
+
+- 8+ source ok → `recipes.fundamental.disclosure.eventRadar.index` 로 전체 pack 진입.
+- missing 다수 → `recipes.fundamental.disclosure.eventRadar.deepDive` 의 ledger 결손 처리 점검.
+- stale (≥30일) → 데이터 sync recipe 또는 manual refresh trigger.
 
 ## 대표 반환 형태
 

@@ -130,7 +130,54 @@ emit_result(
 
 ## 호출 동작
 
-priceRows, coverage, signal count를 기준으로 priceChart, kpiRibbon, evidenceCoverage, mermaidDiagram의 ready/blocked를 결정한다.
+### 1. 결론 도출
+
+4 visualRef ready/blocked + requiredBinding 단정. 예: "visualDecisionPack 4 row — priceChart ready (priceRows 40개 + date/close/volume 컬럼 통과) / kpiRibbon ready (action count + filing count 동행) / evidenceCoverage ready (coverage table 통과) / mermaidDiagram blocked (사건 cluster 노드 < 3 — 메커니즘 부재). 3 ready + 1 blocked → blocked 항목은 tableRef 로 우회."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('price') latest 40 row — priceChart binding
+- Company.disclosure() filings — kpiRibbon + evidenceCoverage binding
+- buildEventRadarMemo() → visualDecisionPack table (4 viz × status + requiredBinding)
+- viz status (engines.viz.{name}) observed 상태 확인
+
+### 3. 메커니즘 분석
+
+```
+4 visualRef × (status + requiredBinding + evidence)
+   priceChart:
+     ready 조건  → priceRows 존재 + date/close/volume 컬럼 통과
+     blocked 시 → priceRows 결손 또는 컬럼 부적합 (tableRef 우회)
+   kpiRibbon:
+     ready 조건  → action count + filing count ≥ 1
+     blocked 시 → 모든 row 0 (의미 없음)
+   evidenceCoverage:
+     ready 조건  → sourceCoverageAudit table 통과
+     blocked 시 → audit 비어 있음
+   mermaidDiagram:
+     ready 조건  → cluster 노드 ≥ 3 + edge 근거 명시
+     blocked 시 → 메커니즘 흐름 부재 (8 노드 이하 의미 X)
+   ↓
+forbidden 발동 (회피):
+   unverified viz skill (예: engines.viz.experimental) → visualRefs 추가 X
+   priceRows 없이 priceChart → 차트 만들지 X (tableRef 우회)
+   blocked visual emit → false visualization
+```
+
+visualDecisionPack 은 *시각화 품질 게이트* — completed observed viz 만 통과. blocked 시 차트 대신 tableRef 로 답변 (forbidden 위반 회피).
+
+### 4. 반례·한계
+
+- visualRefs 에 unverified viz skill (incubator / experimental) 포함 → 품질 게이트 무너짐.
+- priceRows 결손인데 priceChart=ready 표시 → false binding.
+- requiredBinding 정의 모호 (예: "data 필요") → 실제 검증 불가.
+- 4 viz 외 mermaidDiagram 가 8 노드 이상 → engines.viz 가이드 위반.
+
+### 5. 후속 모니터링
+
+- 4 visualRef 모두 ready → `recipes.fundamental.disclosure.eventRadar.deepDive` 의 visual gate 통과.
+- priceChart blocked → `recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit` 으로 source 확인.
+- mermaidDiagram blocked → cluster 분석 부재 — `recipes.news.eventTimelineFusion` 으로 cluster 만들기.
 
 ## 대표 반환 형태
 

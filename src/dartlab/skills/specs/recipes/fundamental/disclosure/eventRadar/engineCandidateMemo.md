@@ -135,7 +135,51 @@ emit_result(
 
 ## 호출 동작
 
-eventInbox, priceFlowReaction, insiderOwnershipSignal, capitalActionMonitor, consensusDriftWatch, scanContext를 후보 signal로 정리한다.
+### 1. 결론 도출
+
+6 signal 후보 + promotionGate 단정. 예: "engineCandidateMemo 6 row — eventInbox status=watch promotionGate='ledger 통과 4 회 누적' / priceFlowReaction status=ok promotionGate='falsifier resolved 60%+' / insiderOwnershipSignal status=missing (data 없음) / capitalActionMonitor status=ok promotionGate='action 추세 12M+' / consensusDriftWatch status=watch / scanContext status=ok. 4 of 6 signal 승격 후보 (status=ok 또는 watch + gate 명시)."
+
+### 2. 핵심 근거 수집
+
+- Company.disclosure() filings + gather('price') + gather('consensus') 3 source
+- buildEventRadarMemo() → 6 signal × (status + recommendedEngineOwner + promotionGate + keepAsSkillAfterPromotion)
+- 각 signal 별 *recipe 검산 경로 유지* 명시 (keepAsSkillAfterPromotion=True)
+
+### 3. 메커니즘 분석
+
+```
+6 signal 후보 → status 분류 + promotion 조건
+   signalId               status        promotionGate                    engineOwner
+   eventInbox             ok/watch      ledger 통과 ≥ 4 회                Company.disclosure
+   priceFlowReaction      ok            falsifier resolved 비율 ≥ 60%    Company.gather(price/flow)
+   insiderOwnershipSignal ok/missing    insider rows ≥ 12 회 (12M+)      Company.gather(insider)
+   capitalActionMonitor   ok            action 추세 12M+                  Company.gather(dividend)
+   consensusDriftWatch    ok/watch      consensus rows ≥ 12 회            Company.gather(consensus)
+   scanContext            ok            scan universe 정합 12M+           scan.market
+   ↓
+승격 의사결정:
+   status=ok + promotionGate 충족 → 엔진 환류 (구현 시작)
+   status=watch + gate 부분 충족 → 검증 더 (1-2 분기 추적)
+   status=missing               → 데이터 부재 (제외)
+   ↓
+keepAsSkillAfterPromotion=True 강제:
+   엔진화 이후에도 recipe 보존 — 검산 경로 유지 + dogfood 가능성
+```
+
+본 메모는 *후보 정리* — 실제 엔진 구현 X. 단일 실행 결과를 엔진 완료처럼 표현 시 forbidden 위반.
+
+### 4. 반례·한계
+
+- 단일 실행 결과를 엔진 구현으로 표현 → forbidden 위반.
+- promotionGate 가 없는 후보는 미완성 — 실패 처리.
+- selfRun 없이 status=ok 단정 → 데이터 미검증 위험.
+- engineOwner 정의가 너무 모호 (예: "Company") → 실제 환류 어려움.
+
+### 5. 후속 모니터링
+
+- promotionGate 충족 → engine 환류 plan 시작 (운영자 결정).
+- 모든 후보 status=watch → `recipes.fundamental.disclosure.eventRadar.falsifierLedger` 로 ledger 통과율 점검.
+- selfRun 결과 일관 → `recipes.fundamental.disclosure.eventRadar.visualDecisionPack` 으로 observed viz binding.
 
 ## 대표 반환 형태
 

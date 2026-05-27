@@ -111,16 +111,58 @@ emit_result(
 
 ## 호출 동작
 
-1. 장단기 스프레드와 금리 레벨 원자료를 gather로 확인한다.
-2. `macro("rates")` 로 정책/곡선 해석을 대조한다.
-3. `macro("forecast")` 로 침체확률/LEI와 같은 후속 신호를 점검한다.
-4. 역전, 정상화, steepening을 경기 신호와 정책 신호로 분리해 설명한다.
+### 1. 결론 도출
+
+T10Y2Y + T10Y3M + recessionProb 단정. 예: "T10Y2Y = -0.45% (역전 18M 지속) / T10Y3M = +0.05% (정상화 진행) / DGS10 = 4.2% / FEDFUNDS = 5.25% / recessionProb = 38% → curve 일부 역전 + 정상화 mix phase — 침체 nowcast 강하지 않으나 1y lag 후행 risk 잔존."
+
+### 2. 핵심 근거 수집
+
+- FRED 금리 6 시리즈 (T10Y2Y, T10Y3M, DGS10, DGS2, DGS3MO, FEDFUNDS) — gather macro
+- macro('rates') outlook direction (cutting / peak / hiking)
+- macro('forecast').recessionProb.probability — 침체 확률 (모델 산출)
+- macro('summary') overall — 거시 종합
+
+### 3. 메커니즘 분석
+
+```
+2 spread 시리즈 → curve 상태
+   T10Y2Y < 0 (역전)        → 2024-2025 강한 침체 선행 신호 (US historical)
+   T10Y3M < 0 (단기 역전)   → 단기 통화정책 vs 10년 mismatch
+   둘 다 정상화 (양수)      → 침체 위험 후퇴
+   ↓
+정책 vs 시장 분리:
+   FEDFUNDS - DGS2 큰 갭   → 시장이 인하 baseline (Fed peak 의식)
+   rate direction=peak     → 정책 정점 — curve normalization 임박
+   rate direction=cutting  → 정책 + 시장 동조 (curve 역전 해제 가속)
+   ↓
+recessionProb 결합:
+   curve 역전 + recessionProb > 40% → 침체 nowcast 강
+   curve 정상화 + recessionProb < 20% → 침체 위험 완화
+   curve 역전 + recessionProb 낮음   → lag risk 잔존 (역전 후 12-24M 침체 도래)
+```
+
+US historical (1955-2024) — yield curve 역전 후 평균 12-18M 침체 도래 (10/10 신뢰). 단, 2022-2024 역전 후 침체 미발현 (예외 가능성) — *지속 기간* + 다른 신호 동행 필수.
+
+### 4. 반례·한계
+
+- 일별 금리 vs 월별 macro forecast 기준일 불일치.
+- 장단기 스프레드 정상화 후에도 recession lag 12-18M 잔존.
+- KR/US 금리 코드 섞으면 의미 무효 — 시장 명시 필수.
+- 2022-2024 역전 후 침체 미발현 — 모델 예외 검증 필요.
+
+### 5. 후속 모니터링
+
+- 역전 + 정상화 mix → `recipes.macro.laborMarketTurningPoint` 로 고용 후행 신호.
+- 정책금리 hiking 지속 → `recipes.macro.inflationBreadthWatch` 로 인플레 확산성.
+- HY spread 동시 확대 → `recipes.fundamental.credit.usHighYieldSpread` 로 credit market 신호 cross-check.
 
 ## 대표 반환 형태
 
-- `tableRef`: 금리 지표별 원자료.
-- `valueRef`: rateDirection, recessionProb, summaryOverall.
-- 답변 본문: 역전 여부, 곡선 정상화 여부, 침체 신호의 lag 위험.
+| column | 의미 |
+|---|---|
+| `indicator` | T10Y2Y / T10Y3M / DGS10 / DGS2 / DGS3MO / FEDFUNDS |
+| `data` | 시계열 원자료 |
+| `ok` | gather 성공 여부 |
 
 ## 연계 절차
 
@@ -131,4 +173,4 @@ emit_result(
 ## 기본 검증
 
 - `T10Y2Y`와 `T10Y3M` 중 적어도 하나가 있어야 곡선 판단을 한다.
-- forecast와 rates가 충돌하면 “시장금리 선행 vs macro forecast 지연”으로 분리한다.
+- forecast와 rates가 충돌하면 "시장금리 선행 vs macro forecast 지연"으로 분리한다.
