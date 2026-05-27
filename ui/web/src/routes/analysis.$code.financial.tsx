@@ -4,9 +4,11 @@
 // 마진/수익성/현금/안정 분기. 카드 KPI tile 8 폐기.
 
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { useFinancialView } from '@/features/dashboard/store/financialView';
 
 import { CardShell } from '@/features/dashboard/cards/CardShell';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
@@ -227,31 +229,18 @@ const CardRender = memo(function CardRender({
 	);
 });
 
-type PeriodView = 'annual' | 'quarterlyRaw' | 'quarterlyTtm';
-
-const PERIOD_VIEW_OPTIONS: { value: PeriodView; label: string; hint: string }[] = [
-	{ value: 'annual', label: '연간', hint: '연간 — 사업보고서 (Jan~Dec). 1년 1점.' },
-	{
-		value: 'quarterlyRaw',
-		label: '분기',
-		hint: '분기 누적 (DART 원본 Jan~기말). 계절성 그대로.',
-	},
-	{
-		value: 'quarterlyTtm',
-		label: '분기 TTM',
-		hint:
-			'TTM = 최근 4분기 합산 (연환산). 계절성 제거 + 매분기 갱신. 손익·현금흐름만 적용, 자산·자본은 시점값 유지. V차트 (최준철) 방식.',
-	},
-];
+const parentRoute = getRouteApi('/analysis/$code');
 
 function FinancialTab() {
 	const { code } = Route.useParams();
 	const setLastMode = useDashboardMode((s) => s.setLastMode);
 
-	// periodView — 3-mode segmented (annual / quarterlyRaw / quarterlyTtm).
-	// 기본 quarterlyTtm: 분기 단위 갱신 + seasonality 제거. parent 의 ?period
-	// search param 은 다른 탭 의 정렬용 — financial 탭은 자기 토글 우선.
-	const [periodView, setPeriodView] = useState<PeriodView>('quarterlyTtm');
+	// periodView 는 부모 라우트 URL search param SSOT (?periodView=...). CompanyHeader
+	// 가 토글 노출 + setter 가 URL 갱신. financial 탭은 read-only. ttmAvailability 는
+	// Zustand store 로 부모 헤더 badge 에 동기화.
+	const { periodView: pv } = parentRoute.useSearch();
+	const periodView = pv ?? 'quarterlyTtm';
+	const setTtmAvail = useFinancialView((s) => s.setTtmAvail);
 	const periodKind: 'annual' | 'quarterly' = periodView === 'annual' ? 'annual' : 'quarterly';
 
 	// 종목 전환 시 직전 모드 복원에 사용. 본 탭 마운트 = financial 모드 진입.
@@ -273,13 +262,6 @@ function FinancialTab() {
 	const [cards, setCards] = useState<Record<string, RechartsSpec>>({});
 	const [streaming, setStreaming] = useState(false);
 	const [streamError, setStreamError] = useState<string | null>(null);
-	const [ttmAvail, setTtmAvail] = useState<{
-		annualFyYears: number;
-		quarterlyPeriods: number;
-		ttmFullCount: number;
-		ttmFallbackCount: number;
-		sufficient: boolean;
-	} | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -482,59 +464,13 @@ function FinancialTab() {
 				</div>
 			)}
 
-			{/* sticky wrapper — 토글 + streaming progress bar 한 묶음. scroll container
-			   top 에 stuck. backdrop-blur 로 카드 콘텐츠 위에 떠있을 때 reading-friendly. */}
-			<div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-			<div className="flex items-center justify-between gap-3 border-b border-border/40 px-3 py-1.5">
-				<span className="hidden text-[10.5px] text-muted-foreground sm:inline">
-					{PERIOD_VIEW_OPTIONS.find((o) => o.value === periodView)?.hint}
-				</span>
-				<div className="ml-auto flex items-center gap-2">
-					{/* TTM 가용성 — quarterlyTtm 모드 + 부족 시 노랑 badge. 4Q 미충족 = annualize fallback */}
-					{periodView === 'quarterlyTtm' && ttmAvail && !ttmAvail.sufficient && (
-						<span
-							className="rounded-sm bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
-							title={`TTM 가용 부족 — FY 데이터 ${ttmAvail.annualFyYears}년, fallback ${ttmAvail.ttmFallbackCount}개 분기는 단순 annualize (×12/N) 적용.`}
-						>
-							TTM 부족
-						</span>
-					)}
-					{periodView === 'quarterlyTtm' && ttmAvail && ttmAvail.sufficient && ttmAvail.ttmFallbackCount > 0 && (
-						<span
-							className="rounded-sm bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-medium text-sky-600 dark:text-sky-400"
-							title={`TTM 일부 annualize — full ${ttmAvail.ttmFullCount}분기 + fallback ${ttmAvail.ttmFallbackCount}분기.`}
-						>
-							일부 annualize
-						</span>
-					)}
-					<div className="inline-flex rounded-md border border-border/60 bg-muted/20 p-0.5 text-[11px]">
-						{PERIOD_VIEW_OPTIONS.map((opt) => (
-							<button
-								key={opt.value}
-								type="button"
-								onClick={() => setPeriodView(opt.value)}
-								className={
-									'rounded-sm px-2.5 py-1 font-medium transition-colors ' +
-									(periodView === opt.value
-										? 'bg-background text-foreground shadow-sm'
-										: 'text-muted-foreground hover:text-foreground')
-								}
-								title={opt.hint}
-							>
-								{opt.label}
-							</button>
-						))}
-					</div>
-				</div>
-			</div>
-
-			{/* streaming 진행 중 — 토글 wrapper 안 한 줄로. */}
+			{/* streaming 진행 중 — 카드 도착 진행 표시. sticky top-0 z-10 — 부모 CompanyHeader
+			   (z-20) 아래 자식 scroll container 상단. 토글은 부모 헤더가 SSOT. */}
 			{streaming && placed.length > 0 && (
-				<div className="h-0.5 w-full overflow-hidden bg-transparent">
+				<div className="sticky top-0 z-10 h-0.5 w-full overflow-hidden bg-transparent">
 					<div className="h-full w-1/3 animate-[dl-progress_1.2s_ease-in-out_infinite] bg-primary/70" />
 				</div>
 			)}
-			</div>
 
 			{placed.length === 0 ? (
 				isLoading ? (

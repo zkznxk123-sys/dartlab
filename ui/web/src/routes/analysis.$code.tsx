@@ -1,6 +1,7 @@
 // /analysis/$code 부모 layout — CompanyHeader + 8 탭 nav + Outlet.
 // periodKind 는 URL search param (?period=annual|quarterly), 기본 quarterly.
-// 자식 라우트는 Route.useSearch() 또는 outlet context 로 받음.
+// financial 탭은 3-mode periodView (?periodView=annual|quarterlyRaw|quarterlyTtm).
+// CompanyHeader 가 financial 탭일 때 3-mode 토글 노출, 다른 탭은 2-mode 유지.
 
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -10,15 +11,23 @@ import { CompanyHeader } from '@/features/dashboard/layout/CompanyHeader';
 import { fetchCompanyMeta, type PeriodKind } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
 import { useRecentCompanies } from '@/features/dashboard/hooks/useRecentCompanies';
+import { useFinancialView, type PeriodView } from '@/features/dashboard/store/financialView';
 
 interface SearchParams {
 	period: PeriodKind;
+	periodView?: PeriodView;
 }
 
+const _PERIOD_VIEW_VALID = new Set<string>(['annual', 'quarterlyRaw', 'quarterlyTtm']);
+
 export const Route = createFileRoute('/analysis/$code')({
-	validateSearch: (search: Record<string, unknown>): SearchParams => ({
-		period: search.period === 'annual' ? 'annual' : 'quarterly',
-	}),
+	validateSearch: (search: Record<string, unknown>): SearchParams => {
+		const pv = typeof search.periodView === 'string' && _PERIOD_VIEW_VALID.has(search.periodView) ? (search.periodView as PeriodView) : undefined;
+		return {
+			period: search.period === 'annual' ? 'annual' : 'quarterly',
+			...(pv ? { periodView: pv } : {}),
+		};
+	},
 	component: AnalysisLayout,
 });
 
@@ -29,21 +38,30 @@ function AnalysisLayout() {
 	const location = useLocation();
 	const { push } = useRecentCompanies();
 	const [periodKind, setPeriodKind] = useState<PeriodKind>(search.period);
+	const [periodView, setPeriodView] = useState<PeriodView>(search.periodView ?? 'quarterlyTtm');
+	const ttmAvail = useFinancialView((s) => s.ttmAvail);
+	const setTtmAvail = useFinancialView((s) => s.setTtmAvail);
 	const isViewerTab = location.pathname.endsWith('/viewer');
-	// financial 탭 = 자체 3-mode periodView 토글 SSOT (연간 / 분기 / 분기 TTM).
-	// 부모 [연간|분기] 토글은 financial 에서 redundant → hide.
 	const isFinancialTab = location.pathname.endsWith('/financial');
 
-	// URL 과 state 동기화
+	// URL 과 state 동기화 — financial 탭에서 periodView 도 URL 에 동기 (bookmark).
 	useEffect(() => {
-		if (search.period !== periodKind) {
+		const needSync = isFinancialTab
+			? search.periodView !== periodView || search.period !== periodKind
+			: search.period !== periodKind;
+		if (needSync) {
 			navigate({
 				to: '.',
-				search: () => ({ period: periodKind }),
+				search: () => (isFinancialTab ? { period: periodKind, periodView } : { period: periodKind }),
 				replace: true,
 			});
 		}
-	}, [periodKind, search.period, navigate]);
+	}, [periodKind, periodView, search.period, search.periodView, isFinancialTab, navigate]);
+
+	// 탭 전환 시 ttmAvail reset — financial 외 탭에선 의미 없음.
+	useEffect(() => {
+		if (!isFinancialTab) setTtmAvail(null);
+	}, [isFinancialTab, setTtmAvail]);
 
 	// 회사명 — kindlist parquet 단일 룩업 (0~5ms). CompanyHeader 도 같은 queryKey
 	// 라 React Query 가 자동 dedup → 회사 진입 시 meta 호출 1 회. 이전엔 dashboard
@@ -70,7 +88,11 @@ function AnalysisLayout() {
 					corpName={corpName}
 					periodKind={periodKind}
 					onPeriodKindChange={setPeriodKind}
-					hidePeriodToggle={isViewerTab || isFinancialTab}
+					periodView={periodView}
+					onPeriodViewChange={setPeriodView}
+					showPeriodView={isFinancialTab}
+					ttmAvail={isFinancialTab ? ttmAvail : null}
+					hidePeriodToggle={isViewerTab}
 				/>
 			</div>
 			{/* viewer 탭은 own scroll container (sticky timeline + body-only scroll) — 부모는
