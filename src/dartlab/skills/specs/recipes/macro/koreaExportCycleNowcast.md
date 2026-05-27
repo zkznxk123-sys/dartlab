@@ -4,7 +4,7 @@ title: 한국 수출 사이클 원자료 나우캐스트
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: ECOS/FRED/KRX 원자료와 macro.trade 해석을 묶어 한국 수출 경기의 현재 방향을 빠르게 점검하는 절차. macro 축에 없는 반도체·원화·KOSPI 반응 proxy를 gather로 보강한다. 트리거 — '한국 수출', '수출 사이클', '반도체 경기', '교역조건'.
 whenToUse:
   - 한국 수출
@@ -72,6 +72,7 @@ runtimeCompatibility:
     status: limited
   pyodide:
     status: limited
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
