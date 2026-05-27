@@ -4,7 +4,7 @@ title: 지분율 괴리도·순환출자·차등의결권 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 지배주주의 *현금흐름권* (배당 받을 권리) vs *의결권* (지배력) 괴리도, 순환출자·피라미드 지배구조 깊이, 차등의결권·복수의결권·황금주 활용을 공시·사업보고서·지분율 본문으로 정량 분해하는 L1.5 절차. 트리거 — '지분율 괴리', '순환출자', '피라미드 지배구조', '차등의결권', '지주사 전환 지배권 강화'.
