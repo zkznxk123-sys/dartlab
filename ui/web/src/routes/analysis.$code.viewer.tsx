@@ -534,10 +534,10 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="flex w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden px-3 py-4">
+					<div className="flex w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden py-4">
 						{/* 상위 타임라인 + 토픽 제목 — main flex column 상단 고정 (스크롤 아님).
 						    아래 ScrollArea 가 단일 vertical scroll source. */}
-						<div className="-mx-3 mb-3 shrink-0 border-b bg-background px-3">
+						<div className="mb-3 shrink-0 border-b bg-background px-3">
 						<header className="pb-2 pt-2">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
@@ -589,11 +589,11 @@ function ViewerTab() {
 						)}
 
 						{/* 본문 영역 — 단순 overflow-y-auto + tiny-scroll. 박스/wrapper 없음.
-						    period header 는 본문 영역 안 sticky top-0 → 스크롤 시 column 라벨 +
-						    원본 링크 상단 고정. 단일 스크롤 source. */}
+						    스크롤바가 main 우측 끝에 위치 (px padding 본문 안쪽에). period header
+						    는 본문 영역 안 sticky top-0 → 스크롤 시 column 라벨 + 원본 링크 상단 고정. */}
 						<div className="min-h-0 flex-1 overflow-y-auto tiny-scroll">
 							<div
-								className="sticky top-0 z-10 grid gap-3 border-b bg-background py-2"
+								className="sticky top-0 z-10 grid gap-3 border-b bg-background px-3 py-2"
 								style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
 							>
 								{windowPeriods.map((p) => {
@@ -622,7 +622,7 @@ function ViewerTab() {
 								})}
 							</div>
 							{/* 본문 — sections SSOT rows (period × content) 직접 dumb render */}
-							<div className="py-3">
+							<div className="px-3 py-3">
 								<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
 							</div>
 						</div>
