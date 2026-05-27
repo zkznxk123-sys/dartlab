@@ -283,6 +283,12 @@ def savePreparedDiskCache(
     # in-place 사용이라 list/set 둘 다 동작).
     teacherSerializable = {k: (sorted(v) if isinstance(v, (set, frozenset)) else v) for k, v in teacherTopics.items()}
     try:
+        # zstd 압축 IPC — 사용자 측정: uncompressed mmap 보다 단일 종목 build 빠름.
+        # uncompressed = 15ms read + Phase 2 작업에서 lazy mmap page fault 누적 (Windows
+        # mmap overhead) → 총 8s. zstd = 125ms decompress + heap 보유 (Phase 2 작업 시
+        # in-memory hit) → 총 5s. mmap=True 가 "Could not memory_map compressed IPC file"
+        # 경고 후 normal read fallback 하는 게 *우리 워크로드엔 더 빠른 경로*. 단일
+        # 종목 viewer (user-visible 핵심) 에서 -3s 의 가치 > mmap RSS 위임 가치.
         periodRowsDf.write_ipc(str(arrowPath), compression="zstd")
         jsonPath.write_text(
             json.dumps(
