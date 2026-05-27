@@ -134,11 +134,47 @@ emit_result(
 
 ## 호출 동작
 
-1. `c.quant("qmj")` — QMJ 종합 점수 + decile.
-2. `dartlab.macro("cycle", market="KR")` — 현재 사이클 phase 분류.
-3. `c.scan("macroBeta")` — 60M rolling rate / FX beta.
-4. phase ↔ quality 적합도 매핑 (Frazzini-Pedersen 2014 학술 결과).
-5. phaseAlignment True → 기대 outperform.
+### 1. 결론 도출
+
+QMJ × 매크로 사이클 phase 적합도 + macroBeta 단정. 예: "QMJ decile 8 + 매크로 phase=확장중반 + macroBeta 0.8 → phaseAlignment=True → quality 후보 outperform 기대 (FPA 2014 학술 결과 기반)."
+
+### 2. 핵심 근거 수집
+
+- QMJ 종합 점수 + decile (Company.quant('qmj'))
+- 매크로 cycle phase (dartlab.macro('cycle', market='KR'))
+- macroBeta 60M rolling rate / FX (Company.scan('macroBeta'))
+- 학술 매핑: FPA 2014 phase ↔ quality 적합도
+
+### 3. 메커니즘 분석
+
+```
+4 source → 결합 판정
+   QMJ decile (1~10, 10=top quality)
+   cycle phase (저점/회복/확장 초입/확장 중반/정점/하강 enum 5단계)
+   macroBeta (low 0~0.5 / mid 0.5~1.0 / high > 1.0)
+   ↓
+phase ↔ quality 학술 적합 매핑 (FPA 2014)
+   확장 초입 + QMJ decile ≥ 8  → outperform 후보 (quality 작동)
+   정점/하강 + QMJ decile ≤ 3  → underperform (junk 노출)
+   회복 + macroBeta high       → cyclical 후보 (quality 신호 약함)
+   ↓
+phaseAlignment = True/False
+```
+
+QMJ 만으로는 모든 phase 작동 X — 사이클과 결합해야 outperform 신호 신뢰도 ↑. FPA 학술 결과는 정점/하강 phase 의 QMJ 가장 강함.
+
+### 4. 반례·한계
+
+- 매크로 phase 분류 자체 불확실 (현재 측정 신뢰도 60~70%).
+- macroBeta 60M rolling — regime shift (COVID/금리 급변) 시 후행.
+- QMJ decile 산업별 base 차이 (금융 vs 제조) 보정 없음.
+- 학술 결과는 US 시장 1956-2012 — KR 시장 일치성 검증 추가 필요.
+
+### 5. 후속 모니터링
+
+- phaseAlignment True 지속: `recipes.quant.qualityFactor` 로 quality 축 세부 점검.
+- macroBeta 급변 (+0.5/-0.5): `recipes.quant.macroBetaFactor` 로 universe 비교 위치 확인.
+- phase 전환 (예: 확장 중반 → 정점): `recipes.macro.scenarioDiagram` 으로 시나리오 결합.
 
 ## 대표 반환 형태
 

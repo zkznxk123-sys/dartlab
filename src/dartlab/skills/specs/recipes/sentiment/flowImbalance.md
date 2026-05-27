@@ -143,7 +143,42 @@ emit_result(
 
 ## 호출 동작
 
-일별 외국인·기관·개인 순매수 row 를 받아 imbalance = (외인 + 기관) − 개인 시계열 산출. 직전 20 거래일 rolling mean / stdev 로 z-score. z ≥ 2 또는 z ≤ -2 row 만 *비대칭 cluster 후보* 로 표시.
+### 1. 결론 도출
+
+외인+기관 vs 개인 imbalance z-score cluster 단정. 예: "20거래일 imbalance row 중 z ≥ 2 인 day 5건 (모두 양수 — 외인+기관 매수 우세), z ≤ -2 인 day 1건 → 스마트머니 매수 cluster 강함."
+
+### 2. 핵심 근거 수집
+
+- 일별 외인·기관·개인 순매수 row (Company.gather('flow'))
+- imbalance = (foreignNet + institutionNet) - retailNet
+- 직전 20거래일 rolling mean + stdev → z-score
+
+### 3. 메커니즘 분석
+
+```
+일별 imbalance 시계열 60+거래일
+   ↓
+20거래일 rolling mean/stdev → z = (imb[t] - rolling_mean) / rolling_std
+   ↓
+z ≥ +2  → 스마트머니 매수 cluster 후보 (외인+기관 ↑, 개인 ↓ 또는 매수 동기 약)
+z ≤ -2  → 스마트머니 매도 cluster 후보 (외인+기관 ↓, 개인 ↑)
+±2 안   → 정상 imbalance
+```
+
+z ≥ 2 row 다수 발생 + 가격 상승 = 스마트머니 매수 신호 강함. z ≤ -2 + 가격 상승 = 개인 매수 추격 (역사적 고점 후보).
+
+### 4. 반례·한계
+
+- 20거래일 rolling baseline 짧음 — regime shift 시 z-score 후행.
+- 외인 vs 기관 분리 안 함 — 외인 매도 + 기관 매수 동시면 imbalance 작아 보임.
+- single-day spike (대규모 block deal) 영향 큼.
+- 분기 조정 (MSCI 리밸런싱 · 배당락) 시점 noise.
+
+### 5. 후속 모니터링
+
+- z ≥ 2 cluster 다수: `recipes.sentiment.foreignBuyMomentum` 으로 외인 가속도 cross-check.
+- z ≤ -2 + 가격 상승: `recipes.sentiment.retailFlowReversal` 로 개인 매수 추격 신호 확인.
+- z 부호 빈번 전환 (±2 사이 oscillation): `recipes.industry.sectorFlowConcentration` 으로 자금 집중도 확인.
 
 ## 대표 반환 형태
 

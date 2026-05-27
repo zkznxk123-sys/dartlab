@@ -152,7 +152,47 @@ emit_result(
 
 ## 호출 동작
 
-ownership gather row 마다 보유비율 변화 (`changeRatio` / 또는 `currentRatio - previousRatio`) 추출 → 양/음 row 분리 → 누적 변화량 합산. 결과는 양 row 수·음 row 수·누적 +/- 합 + net delta. 추론 X.
+### 1. 결론 도출
+
+5% 보유공시 변동 누적 + net delta 단정. 예: "최근 1년 양수 row 8 / 음수 row 3, 누적 +2.4%p / -0.6%p, net delta +1.8%p — 매수 측 우세 (대량보유자 누적 진입)."
+
+### 2. 핵심 근거 수집
+
+- 5% 보유공시 row (Company.gather('ownership'))
+- changeRatio 또는 (currentRatio - previousRatio) 계산
+- 보고자별 + 시점별 누적
+
+### 3. 메커니즘 분석
+
+```
+ownership row → 보유비율 변화 산출
+   change > 0 → positiveRow (매수 측 신고)
+   change < 0 → negativeRow (매도 측 신고)
+   ↓
+positiveRows / negativeRows 카운트
+positiveSum  = sum(change > 0)
+negativeSum  = abs(sum(change < 0))
+   ↓
+netDelta = positiveSum - negativeSum
+   netDelta > +1%p   → 매수 측 강함
+   ±1%p              → balanced
+   netDelta < -1%p   → 매도 측 강함
+```
+
+5% 보유공시는 의무 공시 → 큰 자금 움직임 신호. positiveRows 많음 + netDelta 양수 = 대량보유자 진입 추세.
+
+### 4. 반례·한계
+
+- 5% 임계 미만 변동은 미공시 — 작은 변화 누적 측정 X.
+- 상속·합병에 의한 의무 신고 (자발적 매매 아님) 가 netDelta 왜곡.
+- 자기주식 취득 (회사 자체) 도 ownership 으로 잡힘 — 대주주 신고와 혼합.
+- 보고 timing lag (5 영업일) 가 실제 매매와 시점 불일치.
+
+### 5. 후속 모니터링
+
+- netDelta 큼 + 양수: `recipes.sentiment.foreignBuyMomentum` 으로 외인 동행 확인.
+- positiveRows 다수 + 가격 하락: 저점 매수 후보 — `recipes.sentiment.insiderClusterTiming` cross-check.
+- negativeRows 다수 + 가격 상승: 고점 매도 후보 — `recipes.fundamental.governance.relatedPartyTransactionShare` 로 거버넌스 risk 확인.
 
 ## 대표 반환 형태
 

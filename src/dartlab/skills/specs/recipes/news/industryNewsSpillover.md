@@ -137,7 +137,47 @@ emit_result(
 
 ## 호출 동작
 
-peer 회사들의 뉴스 시점 + target 의 T+1/T+3/T+5 가격 변동 lag 측정. 다수 row 의 평균 T+1 return 이 |1%| 이상이면 *유의미 spillover* 후보.
+### 1. 결론 도출
+
+peer 이벤트 spillover lag 단정 (T+1 평균 return). 예: "peer 이벤트 12 건 평균 target T+1 +0.8%, T+3 +1.4%, T+5 +2.1% — 동조성 강함 (산업 spillover effect 신호)."
+
+### 2. 핵심 근거 수집
+
+- peer 회사 list (Company.industry('peers'))
+- peer 별 뉴스/공시 이벤트 시점 (Company.gather('news') 또는 disclosure)
+- target 가격 시계열 (Company.gather('price'))
+- T+1 / T+3 / T+5 가격 변동률 (이벤트 직후 1/3/5 거래일)
+
+### 3. 메커니즘 분석
+
+```
+peer 이벤트 시점 t_i (N 건)
+   ↓
+각 t_i 별 target 가격
+   T+1: close[t_i+1] / close[t_i] - 1
+   T+3: close[t_i+3] / close[t_i] - 1
+   T+5: close[t_i+5] / close[t_i] - 1
+   ↓
+N 건 평균 T+1 / T+3 / T+5 산출
+   |avg T+1| > 1%  → 유의미 spillover 후보
+   < 0.5%          → 비유의미 (시장 noise)
+   부호 일관성     → 양수 / 음수 spillover 방향
+```
+
+peer 이벤트 빈도 ↑ + 평균 lag return 큼 = 산업 동조성 강함. 부호 음수 = 시장 risk-off spillover (peer 악재 → target 동반 하락).
+
+### 4. 반례·한계
+
+- peer 정의 (GICS sub-industry vs broad) 차이로 spillover 강도 변화.
+- 같은 시점 다수 peer 이벤트 (산업 전반) → spillover 측정 오염 (어떤 peer event 가 driver 인지 식별 X).
+- 시장 전체 충격 (KOSPI ±3%) 시점은 spillover 와 시장 효과 혼합.
+- T+5 너무 길면 다른 이벤트 (자기 종목 공시 등) overlap.
+
+### 5. 후속 모니터링
+
+- 유의미 spillover 발생 (|T+1| > 1%): `recipes.industry.sectorMomentumLeadership` 로 leader/laggard 위치 확인.
+- 음수 spillover 일관 시: `recipes.industry.marginCompressionScan` 으로 산업 mature/decline 신호 확인.
+- spillover 방향 mixed: peer 이벤트 종류별 분리 (실적 vs 인수 vs 임원 변동) 필요 — `recipes.news.eventTimelineFusion` cluster 활용.
 
 ## 대표 반환 형태
 

@@ -151,7 +151,43 @@ emit_result(
 
 ## 호출 동작
 
-종가 70 거래일을 받아 5/20/60d 누적 수익률을 계산하고, 단기-중기 갭 (5d − 60d) 으로 가속/감속 phase 라벨링. 추론 X — 갭 자체만 정량 표기.
+### 1. 결론 도출
+
+5/20/60d 수익률 갭 phase 단정 (가속 / 감속 / 중립). 예: "5d +2.4% / 20d +5.1% / 60d +12.8% → 갭 (5d - 60d) = -10.4%p → 감속 phase (60d 강세 후 단기 둔화)."
+
+### 2. 핵심 근거 수집
+
+- 종가 70 거래일 (Company.gather('price'))
+- ret5d = close[-1]/close[-6] - 1
+- ret20d = close[-1]/close[-21] - 1
+- ret60d = close[-1]/close[-61] - 1
+- 갭 = ret5d - ret60d (또는 5d 일평균 - 60d 일평균)
+
+### 3. 메커니즘 분석
+
+```
+종가 70 거래일 → 5/20/60d 누적 수익률 산출
+   ↓
+갭 = (5d/5 일평균) - (60d/60 일평균)
+   > +0.5%p   → 가속 (단기 모멘텀 급격)
+   ±0.5%p     → 중립
+   < -0.5%p   → 감속 (장기 강세 후 단기 둔화 또는 reversal)
+```
+
+가속 = 단기 추세 강화. 감속 = 추세 둔화. 갭 큰 양수 + ret60d 양수 = momentum 가속. 갭 음수 + ret60d 양수 = reversal 신호.
+
+### 4. 반례·한계
+
+- 70 거래일 부족 종목 (신규 상장) 60d 측정 불가.
+- 갭 단독 매수/매도 단정 금지 — 가격 시계열 + 거래량 동행 필요.
+- 시장 전체 강세장에서는 모든 종목 가속 양수 — relative 비교 필요.
+- 누적 수익률만 — 변동성 (Sharpe) 무시.
+
+### 5. 후속 모니터링
+
+- 가속 phase + 거래량 ↑: `recipes.technical.priceVolumeZScore` 로 거래량 동행 확인.
+- 감속 phase + 60d 강세: reversal 후보 — `recipes.technical.rsiBollingerCluster` 로 overbought 확인.
+- 갭 부호 빈번 전환: `recipes.technical.atrRegimeShift` 로 변동성 체제 확인.
 
 ## 대표 반환 형태
 
