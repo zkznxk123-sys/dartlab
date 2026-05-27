@@ -57,19 +57,51 @@ def _normalizeHashCell(cell: str) -> str:
 _RE_SENTENCE_ENDING = re.compile(r"(?:니다|입니다|같습니다|있습니다|없습니다|됩니다|합니다)\.?\s*$")
 
 
+_RE_HTML_TR = re.compile(r"<tr\b[^>]*>(.*?)</tr>", re.IGNORECASE | re.DOTALL)
+_RE_HTML_CELL = re.compile(r"<(t[dh])\b[^>]*>(.*?)</\1>", re.IGNORECASE | re.DOTALL)
+_RE_HTML_STRIP = re.compile(r"<[^>]+>")
+
+
+def _htmlTableHeaderHash(html: str) -> str:
+    """HTML ``<table><tr><th|td>...`` 첫 진짜 header row → blake2b 4-byte hex.
+
+    commit 8dc4233b8 이후 docs.parquet 가 markdown 대신 HTML 표 출력 — 옛
+    tableHeaderHash 는 markdown ``|`` row 만 지원 → HTML 표 hash="empty" 폴백 →
+    같은 path 안 표 들이 occurrence-only 매칭 → cross-period swap 회귀.
+
+    추출 룰:
+    - 첫 ``<tr>`` ~ ``</tr>`` 안 ``<th>`` 또는 ``<td>`` cells.
+    - cell text strip + 정규화.
+    - intro 문 row ("...같습니다.") skip → 다음 row.
+    - cells 정규화 + sorted → blake2b 4-byte hex.
+    """
+    for trMatch in _RE_HTML_TR.finditer(html):
+        rowInner = trMatch.group(1)
+        cells: list[str] = []
+        for cellMatch in _RE_HTML_CELL.finditer(rowInner):
+            cellText = _RE_HTML_STRIP.sub(" ", cellMatch.group(2))
+            cells.append(_normalizeHashCell(cellText))
+        nonEmpty = [c for c in cells if c]
+        if not nonEmpty:
+            continue
+        if any(_RE_SENTENCE_ENDING.search(c) for c in nonEmpty):
+            continue
+        norm = tuple(sorted(nonEmpty))
+        return hashlib.blake2b(str(norm).encode("utf-8"), digest_size=4).hexdigest()
+    return "empty"
+
+
 def tableHeaderHash(md: str) -> str:
-    """markdown 표의 *real header row* (period-variable meta + intro 문 제외) cells 의 안정 hash.
+    """markdown 또는 HTML 표의 *real header row* cells 의 안정 hash.
 
     옛/최근 보고서의 *다른 의미* 표가 sourceBlockOrder 위치만 같다고 같은 segmentKey
     받는 회귀 차단용. 진짜 column header row 추출:
-    - separator row (---) skip
-    - meta-only row (기준일/단위/연도) skip
-    - **intro 문 row** ("...같습니다.", "...입니다." 류 종결사 sentence) skip — period 별
-      변동되는 본문 sentence 가 첫 row 인 경우 차단
-    - 첫 진짜 header (column names) 의 cells 정규화 + sorted → blake2b 4-byte hex.
+    - HTML 양식 (``<table><tr><th>...``): 첫 진짜 header row 의 cells. (2026-05-27 추가)
+    - markdown 양식 (``| h |``): separator (---) skip, intro 문 row skip.
+    - cells 정규화 + sorted → blake2b 4-byte hex.
 
     Args:
-        md: markdown 표 본문.
+        md: markdown 또는 HTML 표 본문.
 
     Returns:
         str — 8 글자 hex hash. 진짜 header row 없으면 ``"empty"``.
@@ -80,7 +112,11 @@ def tableHeaderHash(md: str) -> str:
     Example:
         >>> tableHeaderHash("| 항목 | 금액 |\\n|---|---|\\n| A | 100 |")
         '...'
+        >>> tableHeaderHash('<table><tr><th>항목</th><th>금액</th></tr></table>')
+        '...'
     """
+    if "<table" in md or "<tr" in md:
+        return _htmlTableHeaderHash(md)
     for line in md.strip().split("\n"):
         stripped = line.strip()
         if not stripped.startswith("|"):

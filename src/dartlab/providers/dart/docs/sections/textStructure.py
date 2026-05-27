@@ -6,6 +6,7 @@ import re
 from functools import lru_cache
 from typing import Any, Literal
 
+from dartlab.core.textNormalize import stripPeriodMarkers
 from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 
 TextNodeType = Literal["heading", "body"]
@@ -201,9 +202,13 @@ def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
 
     key = _RE_SUFFIX_EGWANHAN.sub("", key)
     key = key.replace("종속기업", "종속사").replace("종속회사", "종속사")
-    # period-variable date + 회사수 strip
+    # period-variable date + 회사수 + 한국어 날짜/분기/누계/단위 strip — cross-period
+    # semantic key invariance. opt: "기준일2025년06월30일" → "기준일" (date strip).
+    # 회귀: 000660 회사의 개요 "연결대상종속사현황요약 > 기준일2025년06월30일" 가
+    # period 별 다른 segmentKey 로 분기 → 같은 표가 다른 row → 시각 misalign.
     key = _RE_PERIOD_DATE.sub("", key)
     key = _RE_COUNT_SUFFIX.sub("", key)
+    key = stripPeriodMarkers(key)
 
     if isinstance(topic, str) and topic == "businessOverview":
         key = key.replace("영업의개황", "영업현황")
