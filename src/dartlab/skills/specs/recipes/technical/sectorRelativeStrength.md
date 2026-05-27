@@ -199,7 +199,45 @@ emit_result(
 
 ## 호출 동작
 
-종목 가격 + 섹터 인덱스 (또는 row-level ret) 70 거래일 가져와 20/60d 수익률 차분. rs60 > 5% → outperform, < -5% → underperform, 그 외 → inline. 추론 X.
+### 1. 결론 도출
+
+종목 vs 섹터 60d 상대 강도 phase 단정 (outperform / inline / underperform / insufficient). 예: "종목 60d +12.4% vs 섹터 60d +5.1% → rs60d=+7.3%p → outperform phase."
+
+### 2. 핵심 근거 수집
+
+- 종목 가격 row 70 거래일 (Company.gather('price'))
+- 섹터 인덱스 또는 row-level ret 70 거래일 (Company.gather('sector'))
+- 20d / 60d 수익률 계산 (closes[-1]/closes[-N-1] - 1)
+
+### 3. 메커니즘 분석
+
+```
+종목 close 시계열 → 20d / 60d 수익률 산출
+섹터 indexClose 시계열 → 20d / 60d 수익률 산출
+                       ↓
+rs20d = 종목ret20d - 섹터ret20d
+rs60d = 종목ret60d - 섹터ret60d
+                       ↓
+rs60d > +5%   → outperform (섹터 평균 대비 강세)
+rs60d < -5%   → underperform (섹터 평균 대비 약세)
+±5% 안       → inline (섹터 동행)
+data < 60d   → insufficient
+```
+
+rs60d 부호 + 절대값 같이 봐야 일관성 판정. rs20d 와 rs60d 부호 다르면 단기 reversal 신호.
+
+### 4. 반례·한계
+
+- 섹터 분류 변경 직후 row (M&A · spin-off) 는 비교 base 깨짐 — 한계 표기.
+- rs 부호로 매수/매도 단정 금지 — 정량 차분 표면만.
+- 섹터 인덱스가 큰 종목 weight 에 영향받으면 (top-heavy) 자기 종목 영향 자동 제거 안 됨.
+- 60d 미만 데이터 → phase=insufficient.
+
+### 5. 후속 모니터링
+
+- rs20d vs rs60d 부호 다르면: `recipes.sentiment.priceMomentumGap` 로 단/중기 모멘텀 갭 확인.
+- outperform 진입 직후: `recipes.technical.movingAverageConfluence` 로 추세 합의 검증.
+- underperform 진입 + 60d 갭 -10%p 초과: `recipes.industry.sectorMomentumLeadership` 로 laggard 위치 확인.
 
 ## 대표 반환 형태
 

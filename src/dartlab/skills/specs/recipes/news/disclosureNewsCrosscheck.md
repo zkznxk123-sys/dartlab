@@ -223,7 +223,40 @@ emit_result(
 
 ## 호출 동작
 
-DART 공시 row 와 Naver 뉴스 row 를 ±1 day window 안에서 이벤트 키워드 (유상증자·합병·분할·실적·정정 등 17 종) 교집합 점수로 매칭한다. 매칭 row 는 `matched`, 공시만 있는 row 는 `dartOnly`, 키워드 있는 뉴스만 있는 row 는 `newsOnly`. `leadDays = newsDate - filingDate` 가 음수면 뉴스가 공시보다 먼저 나왔음을 표시한다.
+### 1. 결론 도출
+
+DART 공시 ↔ 뉴스 정합성을 *matched / dartOnly / newsOnly 3 분류* + *뉴스 선행 row 수* 로 단정. 예: "최근 14 일 공시-뉴스 매칭률 N%, 뉴스 선행 row M 건 — 정보 비대칭 의심 여부 X."
+
+### 2. 핵심 근거 수집
+
+- DART 공시 row 60 건 (Company.liveFilings(14d) 또는 Company.disclosure fallback)
+- 뉴스 row 80 건 (Company.gather('news'))
+- 이벤트 키워드 17 종 (유상증자·무상증자·전환사채·신주인수권부사채·감자·합병·분할·지분·취득·처분·배당·실적·공시·정정·주식분할·자사주)
+
+### 3. 메커니즘 분석
+
+```
+공시 row × 뉴스 row → ±1 day window 필터 → 키워드 교집합 점수
+→ score > 0 + 같은 회사 → matched (best score)
+→ score = 0 + 공시만 → dartOnly
+→ score > 0 + 뉴스만 → newsOnly (newsLead 검증 후보)
+→ leadDays = newsDate - filingDate (음수면 뉴스 선행)
+```
+
+키워드 교집합 점수가 클수록 같은 이벤트 매칭 신뢰도 ↑. 뉴스 선행 (leadDays < 0) 은 정보 비대칭 의심 신호.
+
+### 4. 반례·한계
+
+- `newsOnly` row 만 결론 근거로 쓰면 외부 untrusted 본문 단독 인용 — 1 차 출처 (DART) 검증 없이 답안 작성 시 falsifier 발동.
+- 같은 사건의 정정·재공시 뉴스를 별도 매칭으로 처리하면 매칭 수 인플레.
+- 회사명 동음이의 (예: "한화"·"신세계") 다른 회사 뉴스 매칭 위험.
+- 매칭 window 14d 너무 넓으면 무관 이벤트 결합.
+
+### 5. 후속 모니터링
+
+- `newsLead > 0` row 1 건 이상 발생 시: `recipes.news.eventTimelineFusion` 으로 가격 시계열 결합 → 정보 비대칭 정량.
+- matched row 중 score ≥ 2 만 `recipes.fundamental.disclosure.eventRadar.eventInbox` 로 승격.
+- newsOnly 키워드 빈도가 7 일 평균 대비 2x ↑: `recipes.news.newsHeadlineVelocity` 호출.
 
 ## 대표 반환 형태
 

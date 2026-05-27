@@ -200,7 +200,39 @@ emit_result(
 
 ## 호출 동작
 
-내부자 거래 row 를 시간순 정렬한 뒤, 각 row 시점 기준 직전 180 일 안 *같은 방향* 거래자 수 ≥3 명이면 cluster row 로 표시. cluster row 마다 직전 30 거래일 누적 가격 변동 (lag) 을 같이 표기. 단일 거래 (1 명) 는 cluster 아님.
+### 1. 결론 도출
+
+내부자 cluster 형성 여부 + 방향 (buy/sell) + 직전 30 거래일 가격 lag 단정. 예: "최근 180 일 buy cluster N 건, sell cluster M 건. 직전 cluster 시점 30 거래일 가격 +X% — 가격 vs 내부자 방향 정합 여부 판정."
+
+### 2. 핵심 근거 수집
+
+- 내부자 거래 row 200 건 (Company.gather('insider'))
+- 가격 row 200 건 (Company.gather('price'))
+- 거래 방향 추론: tradeType 직접 또는 changeShares 부호 fallback
+
+### 3. 메커니즘 분석
+
+```
+insider events 시간순 정렬 → 각 시점 t 기준 직전 180일 window 안 같은 방향 거래자 N 명
+→ N ≥ 3 → cluster 형성 (date=t, direction=buy|sell)
+→ 동시 직전 30 거래일 누적 가격 변동 (pricePctBefore30d) 계산
+→ buy cluster + 가격 하락 = 저점 매수 신호 / sell cluster + 가격 상승 = 고점 매도 신호
+```
+
+cluster 안 personsInWindow 가 크고 같은 방향이 일관 → 집단 timing 신뢰도 ↑.
+
+### 4. 반례·한계
+
+- 자사주 취득·임원 stock option 행사·상속·분할 등 *의무 거래* 가 cluster 에 섞이면 sentiment 신호 X.
+- 단일 거래자가 분할 매매 N 회 → 같은 사람이지만 cluster 로 잘못 분류 (현재 person 명 dedup 없음).
+- 가격 lag 만으로 인과 단정 금지 — 시장 전체 동시 변동 보정 없음.
+- 180 day window 너무 길면 무관 이벤트 결합, 짧으면 cluster 미감지.
+
+### 5. 후속 모니터링
+
+- 직전 cluster 후 30일 가격 vs 60일 가격 차로 cluster 적중률 추적 (`recipes.sentiment.foreignBuyMomentum` 와 cross-check).
+- buy cluster + sell cluster 동시 발현 시 `recipes.sentiment.flowImbalance` 로 수급 imbalance 확인.
+- cluster 시점 ±5일 안 공시 동행 여부 `recipes.fundamental.disclosure.eventRadar.eventInbox`.
 
 ## 대표 반환 형태
 

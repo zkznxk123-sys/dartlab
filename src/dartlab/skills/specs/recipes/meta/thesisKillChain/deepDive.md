@@ -191,7 +191,48 @@ emit_result(
 
 ## 호출 동작
 
-`thesisIntake`부터 `premortemQualityGate`까지 한 번에 만들고, 마지막 `finalDecision` row는 killRiskScore, qualityGateStatus, decisionStatus를 요약한다.
+### 1. 결론 도출
+
+`finalDecision` row 의 `killRiskScore` + `qualityGateStatus` + `decisionStatus` 3 축 단정. 예: "killRiskScore=0.6, qualityGate=acceptable, decisionStatus=usable — thesis 유효하지만 propagationPath 2 단계 + tripwire X 활성 필요."
+
+### 2. 핵심 근거 수집
+
+- IS/BS/CF 시계열 (Company.show)
+- 공시 row 50 건 (Company.disclosure)
+- L1.5 ledger 11 단계 (thesisIntake → evidenceCoverageAudit → assumptionLedger → fragilityMap → triggerCatalog → propagationPath → tripwireMonitor → falsifierLedger → scenarioStoryboard → visualDecisionPack → premortemQualityGate)
+
+### 3. 메커니즘 분석
+
+```
+thesis 입력 → buildThesisKillChainMemo
+   ↓
+thesisIntake → assumption 추출 → fragilityMap (가정 깨질 조건)
+   ↓
+triggerCatalog (외부 충격 후보) → propagationPath (충격 → 결론 전파)
+   ↓
+tripwireMonitor (조기 경보 임계) + falsifierLedger (open 반증)
+   ↓
+scenarioStoryboard (baseIntact / erosionCase / killChainCase 3 시나리오)
+   ↓
+visualDecisionPack + premortemQualityGate (10 gate 검증)
+   ↓
+finalDecision: killRiskScore + qualityGateStatus + decisionStatus
+```
+
+각 ledger 의 status (missing/ok/watch/risk) 가 누적돼 killRiskScore 산출. qualityGate weak 이면 decisionStatus=usable 진입 불가.
+
+### 4. 반례·한계
+
+- thesis 가 모호하면 (예: "좋아 보임") fragilityMap 추출 실패 → assumption ledger 빈약.
+- propagationPath 가 정량 ref 없이 순수 narrative 면 추적 불가능 — qualityGate 가 weak 판정.
+- L2/L3 엔진 (c.analysis/c.credit/c.quant/c.macro 등) 호출 금지 — 호출 시 본 recipe 의 *원자료 trace* 정체성 위반.
+- premortemQualityGate risk row 가 있으면 결론보다 차단 사유 우선 답안.
+
+### 5. 후속 모니터링
+
+- decisionStatus=operatorReview 시: 보강할 EngineCall 목록 + 막힌 gate 명시 후 다음 turn 에 보강 (`recipes.meta.thesisKillChain.evidenceCoverageAudit`).
+- killRiskScore > 0.5: `recipes.meta.thesisKillChain.tripwireMonitor` 임계 활성 추적.
+- open falsifier 1+ 건: `recipes.meta.thesisKillChain.falsifierLedger` 매 분기 재측정.
 
 ## 대표 반환 형태
 

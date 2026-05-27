@@ -210,7 +210,42 @@ emit_result(
 
 ## 호출 동작
 
-3 source 의 row 를 시간순 정렬하고 ±3 day window 로 cluster 한다. cluster 안 첫 row 가 `news` 인데 뒤에 `filing` 이 있으면 `newsLead`, 첫 row 가 `price` 인데 뒤에 `filing` 이 있으면 `priceLead`. 그 외는 `normal`. 가격은 일변동 ±3% 이상만 cluster 에 포함시켜 noise 를 줄인다.
+### 1. 결론 도출
+
+이벤트 cluster 분류 (normal / newsLead / priceLead) + 의심 cluster 수로 단정. 예: "최근 30 일 cluster N 개, newsLead M 건 + priceLead K 건 — 정보 비대칭 의심 cluster 비율 P%."
+
+### 2. 핵심 근거 수집
+
+- 공시 row 80 건 (Company.liveFilings(30d))
+- 뉴스 row 120 건 (Company.gather('news'))
+- 가격 row 120 건 (Company.gather('price'), ±3% noise 필터)
+- 시간 window: ±3 day cluster boundary
+
+### 3. 메커니즘 분석
+
+```
+filings + news + price → 시간순 정렬 (같은 date 면 filing/news/price 우선순위)
+→ ±3 day cluster boundary 로 group
+→ cluster 안 leader = 첫 row source
+→ leader=news + filing 후행 → newsLead (뉴스가 공시보다 선행 = 의심)
+→ leader=price + filing 후행 → priceLead (가격 변동이 공시 전 = 의심)
+→ leader=filing 또는 cluster 단일 source → normal
+```
+
+cluster items 수 ↑ = 이벤트 중요도 ↑. priceLead + newsLead 동시 발현은 가장 강한 의심 신호.
+
+### 4. 반례·한계
+
+- `newsLead`/`priceLead` 단독으로 정보 비대칭 단정 금지 — *추적 후보* 로만.
+- 가격 임계 ±3% 는 시장 지수 동시 변동 보정 없음 — 답안에 한계 명시.
+- cluster window ±3 day 너무 짧으면 정정·재공시를 별개 cluster 로 분리.
+- 외부 뉴스 본문 마커 안 숫자는 untrusted — 공시 검증 없이 인용 금지.
+
+### 5. 후속 모니터링
+
+- newsLead/priceLead cluster 발생 시: `recipes.news.untrustedToneAudit` 로 본문 마커 검증.
+- cluster 안 매칭 정밀화: `recipes.news.disclosureNewsCrosscheck`.
+- 의심 cluster 만 `recipes.fundamental.disclosure.eventRadar.eventInbox` 로 승격.
 
 ## 대표 반환 형태
 
