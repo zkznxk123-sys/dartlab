@@ -35,13 +35,16 @@ def _killPort(port: int) -> bool:
     pids: set[int] = set()
 
     if system == "Windows":
+        # netstat 출력은 OEM 코드페이지 (한국어 Windows = cp949). text=True 의 기본
+        # UTF-8 디코드 시 UnicodeDecodeError → result.stdout=None → 좀비 정리 전면
+        # 실패. bytes 로 받고 errors='ignore' 로 안전 디코드 (PID 라인은 ASCII).
         result = subprocess.run(
             ["netstat", "-ano", "-p", "TCP"],
             capture_output=True,
-            text=True,
             timeout=10,
         )
-        for line in result.stdout.splitlines():
+        stdout_text = (result.stdout or b"").decode("ascii", errors="ignore")
+        for line in stdout_text.splitlines():
             parts = line.split()
             if len(parts) >= 5 and f":{port}" in parts[1] and parts[3] == "LISTENING":
                 pid = int(parts[4])
