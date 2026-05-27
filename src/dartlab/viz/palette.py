@@ -12,36 +12,36 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-# Anthropic warm earth palette — 공식 brand-guidelines (github.com/anthropics/skills)
-# 의 brand SSOT 7 색 (Dark/Light/MidGray/LightGray/Orange/Blue/Green) 을 categorical
-# 10 색으로 확장. warm terracotta + sage + slate blue 톤 unified — Tableau 10 의
-# dusty 채도 부족 + 따뜻 톤 vs 차가운 톤 혼재 회귀 대신 어스톤 일관성 우선.
+# Tailwind 500 saturate categorical 10 — modern SaaS 표준 (Vercel · Linear · Stripe).
+# saturate 통일 (500 단계) + cool/warm 교차 배치 → 9 시리즈 stack 인접 hue 명확.
+# 옛 muted earth (Tableau dusty / Anthropic warm) 가 dense stack 에서 인접 구분
+# 부족 회귀 → saturate hue 분리로 전환. neutral 만 zinc (채도 0).
 COLORS: list[str] = [
-    "#d97757",  # 0 Orange    primary    — Anthropic brand
-    "#6a9bcc",  # 1 Blue      accent     — Anthropic brand
-    "#a06a4a",  # 2 Clay      negative   — Orange shade-down (dark terracotta)
-    "#788c5d",  # 3 Green     positive   — Anthropic brand (sage)
-    "#c9a875",  # 4 Tan       확장 (warm sand)
-    "#97a7c9",  # 5 LightBlue 확장 (Blue shade-up)
-    "#5e7048",  # 6 DarkSage  확장 (Green shade-down)
-    "#d5cdb4",  # 7 Sand      확장 (Light Gray warm-shift)
-    "#c4836c",  # 8 Salmon    확장 (Orange shade-up)
-    "#b0aea5",  # 9 MidGray   neutral    — Anthropic brand
+    "#0ea5e9",  # 0 sky-500       primary  cool
+    "#f59e0b",  # 1 amber-500     accent   warm
+    "#f43f5e",  # 2 rose-500      negative warm
+    "#10b981",  # 3 emerald-500   positive cool
+    "#8b5cf6",  # 4 violet-500    cool
+    "#f97316",  # 5 orange-500    warm
+    "#06b6d4",  # 6 cyan-500      cool
+    "#d946ef",  # 7 fuchsia-500   warm
+    "#84cc16",  # 8 lime-500      cool
+    "#71717a",  # 9 zinc-500      neutral
 ]
-"""Anthropic warm earth 10 — 공식 brand 4 (Orange/Blue/Green/MidGray) + 보완 6."""
+"""Tailwind 500 saturate 10 — sky/amber/rose/emerald/violet/orange/cyan/fuchsia/lime/zinc."""
 
 
 Intent = Literal["primary", "positive", "negative", "neutral", "accent"]
 """차트 시리즈의 *의미* 슬롯. 소비처가 자기 토큰으로 매핑할 때 lookup 키."""
 
 
-# intent traffic-light 매핑 — Anthropic brand 색 직접 매핑.
+# intent traffic-light 매핑 — Tailwind 표준 hue.
 INTENT_MAP: dict[Intent, str] = {
-    "primary": COLORS[0],  # Orange  메인 — Anthropic 표준 primary
-    "positive": COLORS[3],  # Green   긍정 — sage
-    "negative": COLORS[2],  # Clay    부정 — dark terracotta
-    "accent": COLORS[1],  # Blue    강조 — Anthropic 표준 accent
-    "neutral": COLORS[9],  # MidGray 배경/참조
+    "primary": COLORS[0],  # sky     메인
+    "positive": COLORS[3],  # emerald 긍정
+    "negative": COLORS[2],  # rose    부정
+    "accent": COLORS[1],  # amber   강조
+    "neutral": COLORS[9],  # zinc    배경/참조
 }
 """intent → 기본 hex 매핑."""
 

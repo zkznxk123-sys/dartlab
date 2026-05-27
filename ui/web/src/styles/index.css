@@ -81,33 +81,33 @@
 	--border: oklch(0.922 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
-	/* Anthropic warm earth palette — 공식 brand-guidelines (github.com/anthropics/skills)
-	 * 의 brand 7색 SSOT 를 categorical 10 색으로 확장. warm terracotta + sage + slate
-	 * blue 톤 unified. SSOT: src/dartlab/viz/palette.py.
+	/* Tailwind 500 saturate categorical 10 — modern SaaS 표준 (Vercel · Linear · Stripe).
+	 * saturate 통일 + cool/warm 교차 → 9 시리즈 stack 인접 hue 명확. neutral 만 zinc.
+	 * SSOT: src/dartlab/viz/palette.py.
 	 *
 	 * 의미 (INTENT) 매핑:
-	 *   primary  = chart-1 Orange (Anthropic 메인)
-	 *   accent   = chart-2 Blue (Anthropic 강조)
-	 *   negative = chart-3 Clay (dark terracotta — 부정)
-	 *   positive = chart-4 Green sage (Anthropic 긍정)
-	 *   neutral  = chart-10 MidGray (배경/참조) */
-	--chart-1:  #d97757;  /* Orange — Anthropic */
-	--chart-2:  #6a9bcc;  /* Blue — Anthropic */
-	--chart-3:  #a06a4a;  /* Clay (dark terracotta) */
-	--chart-4:  #788c5d;  /* Green sage — Anthropic */
-	--chart-5:  #c9a875;  /* Tan (warm sand) */
-	--chart-6:  #97a7c9;  /* LightBlue */
-	--chart-7:  #5e7048;  /* DarkSage */
-	--chart-8:  #d5cdb4;  /* Sand */
-	--chart-9:  #c4836c;  /* Salmon */
-	--chart-10: #b0aea5;  /* MidGray — Anthropic */
+	 *   primary  = chart-1 sky      (cool 메인)
+	 *   accent   = chart-2 amber    (warm 강조)
+	 *   negative = chart-3 rose     (warm 부정)
+	 *   positive = chart-4 emerald  (cool 긍정)
+	 *   neutral  = chart-10 zinc    (배경/참조) */
+	--chart-1:  #0ea5e9;  /* sky-500 */
+	--chart-2:  #f59e0b;  /* amber-500 */
+	--chart-3:  #f43f5e;  /* rose-500 */
+	--chart-4:  #10b981;  /* emerald-500 */
+	--chart-5:  #8b5cf6;  /* violet-500 */
+	--chart-6:  #f97316;  /* orange-500 */
+	--chart-7:  #06b6d4;  /* cyan-500 */
+	--chart-8:  #d946ef;  /* fuchsia-500 */
+	--chart-9:  #84cc16;  /* lime-500 */
+	--chart-10: #71717a;  /* zinc-500 */
 
 	/* zinc ramp 미사용 — alias 유지 (다른 컴포넌트 참조 대비). */
-	--chart-zinc-1: #d97757;
-	--chart-zinc-2: #6a9bcc;
-	--chart-zinc-3: #788c5d;
-	--chart-zinc-4: #b0aea5;
-	--chart-zinc-5: #a06a4a;
+	--chart-zinc-1: #0ea5e9;
+	--chart-zinc-2: #f59e0b;
+	--chart-zinc-3: #10b981;
+	--chart-zinc-4: #71717a;
+	--chart-zinc-5: #f43f5e;
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
@@ -138,23 +138,23 @@
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
-	/* Anthropic warm earth (dark 모드) — light 와 동일 hex. warm muted earth 라 dark bg 에서도 충분. */
-	--chart-1:  #d97757;
-	--chart-2:  #6a9bcc;
-	--chart-3:  #a06a4a;
-	--chart-4:  #788c5d;
-	--chart-5:  #c9a875;
-	--chart-6:  #97a7c9;
-	--chart-7:  #5e7048;
-	--chart-8:  #d5cdb4;
-	--chart-9:  #c4836c;
-	--chart-10: #b0aea5;
+	/* Tailwind 500 saturate (dark 모드) — light 와 동일 hex. saturate 500 은 dark bg 에서도 충분. */
+	--chart-1:  #0ea5e9;
+	--chart-2:  #f59e0b;
+	--chart-3:  #f43f5e;
+	--chart-4:  #10b981;
+	--chart-5:  #8b5cf6;
+	--chart-6:  #f97316;
+	--chart-7:  #06b6d4;
+	--chart-8:  #d946ef;
+	--chart-9:  #84cc16;
+	--chart-10: #71717a;
 
-	--chart-zinc-1: #d97757;
-	--chart-zinc-2: #6a9bcc;
-	--chart-zinc-3: #788c5d;
-	--chart-zinc-4: #b0aea5;
-	--chart-zinc-5: #a06a4a;
+	--chart-zinc-1: #0ea5e9;
+	--chart-zinc-2: #f59e0b;
+	--chart-zinc-3: #10b981;
+	--chart-zinc-4: #71717a;
+	--chart-zinc-5: #f43f5e;
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
 	--sidebar-primary: oklch(0.488 0.243 264.376);
