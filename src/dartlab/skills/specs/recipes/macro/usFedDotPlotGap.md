@@ -4,7 +4,7 @@ title: 미국 Fed dot plot vs market path 갭
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: Fed dot plot 의 median target rate (FOMC SEP) vs market implied path (Fed funds futures) 의 1y 갭. 갭 > +50bp = market dovish, < -50bp = market hawkish. *market vs Fed* 정합성 점검.
 whenToUse:
   - Fed dot plot
@@ -56,6 +56,7 @@ testUniverse:
 falsifier:
   description: "FOMC SEP 또는 Fed funds futures raw 누락 시 결론 X. 단일 시점 dot 만 보고 추세 단정 금지."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
