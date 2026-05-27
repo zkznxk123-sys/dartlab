@@ -112,7 +112,55 @@ emit_result(
 
 ## 호출 동작
 
-각 거래일 5/20/60/120 일 SMA 정렬 분류. 완전 오름차순 (ma5>20>60>120) = bullish, 완전 내림차순 = bearish, 그 외 = mixed. latest row 의 alignment 가 핵심.
+### 1. 결론 도출
+
+latest alignment + 정렬 일수 단정. 예: "최신: ma5=78,500 / ma20=77,200 / ma60=74,800 / ma120=71,500 → bullish 완전 정렬 (오름차순). 40일 history 중 bullish 25일 (62%) + bearish 5일 + mixed 10일 → 현재 추세 합의 phase, latest 5일 연속 bullish 유지."
+
+### 2. 핵심 근거 수집
+
+- dartlab.gather('price', target) latest 160 row close 시계열
+- 각 거래일 × 5/20/60/120 SMA 4 종
+- alignment 분류: bullish (ma5>20>60>120) / bearish (ma5<20<60<120) / mixed
+- 40+ 일 history bullish / bearish / mixed 카운트
+
+### 3. 메커니즘 분석
+
+```
+close 시계열 160 row → 각 시점 4 MA 계산
+   SMA(5)   → 단기 (1주)
+   SMA(20)  → 1개월
+   SMA(60)  → 3개월
+   SMA(120) → 6개월
+   ↓
+alignment 분류 (각 거래일):
+   ma5 > ma20 > ma60 > ma120 → bullish (완전 오름차순)
+   ma5 < ma20 < ma60 < ma120 → bearish (완전 내림차순)
+   그 외                      → mixed (혼재)
+   ↓
+40+ 일 history 누적:
+   bullishDays / bearishDays / mixedDays 카운트
+   latest = 가장 최신 alignment
+   ↓
+*추세 합의* 신호:
+   bullish 비율 > 50% + latest=bullish → 강세 추세 합의 (multi timeframe)
+   bearish 비율 > 50% + latest=bearish → 약세 추세 합의
+   mixed 다수                            → 추세 불분명 (consolidation)
+```
+
+단일 골든크로스 (ma5 ma20 교차) 함정 회피 — 4 MA 동시 정렬 강제. *추세 합의* = multi timeframe (1주 + 1월 + 3월 + 6월) 같은 방향 confirm.
+
+### 4. 반례·한계
+
+- 거래일 < 130 → 120일 MA 결론 X.
+- 완전 정렬 비율 < 5% → 변별력 작음 (KOSPI 일반적 mixed 다수).
+- 단독 매수 결론 X — 거래량/펀더멘털 결합 필수.
+- range bound 종목 (consolidation 장기) → 항상 mixed → 신호 없음.
+
+### 5. 후속 모니터링
+
+- bullish 지속 → `recipes.technical.atrRegimeShift` 로 변동성 체제 결합.
+- bullish + momentum → `recipes.quant.momentumFactor` 로 12-1m return 정합.
+- bearish 진입 → `recipes.technical.priceVolumeZScore` 로 거래량 burst 점검.
 
 ## 대표 반환 형태
 

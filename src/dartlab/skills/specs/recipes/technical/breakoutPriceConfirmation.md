@@ -126,7 +126,55 @@ emit_result(
 
 ## 호출 동작
 
-종목별 (1) `breakoutZ = close / max(high, 52주) - 1` (2) 직전일 거래대금의 20 거래일 z-score `volZ` 두 신호 산출. `confirmed = breakoutZ ≥ -0.005 AND volZ ≥ 1.0` — 신고가 근처 + 거래대금 1σ 이상 동반.
+### 1. 결론 도출
+
+universe 5 종목 confirmed breakout 카운트 단정. 예: "5 종목 universe — 005930 breakoutZ=-0.012 volZ=+0.8 confirmed=False / 000660 breakoutZ=-0.003 volZ=+1.5 confirmed=True (52주 고가 -0.3% + 거래대금 1.5σ) / 035420 breakoutZ=-0.020 volZ=+0.4 False / 051910 breakoutZ=-0.015 volZ=+2.1 False (신고가 미달) / 207940 breakoutZ=+0.005 volZ=+3.2 True → 2 of 5 confirmed (000660 + 207940 신고가 + 거래대금 동시)."
+
+### 2. 핵심 근거 수집
+
+- 5 종목 codes × dartlab.gather('price') latest 260 row
+- 각 code × (close + high + volume) 시계열
+- 52주 고가 = max(highs latest 252)
+- breakoutZ = close[-1] / high52 - 1, volZ = (vol[-1] - mean(vol[-20:-1])) / std
+
+### 3. 메커니즘 분석
+
+```
+universe 5+ 종목 × 2 신호 cross-section
+   breakoutZ = (close 현재가 / 52주 고가) - 1
+     -0.005 ≥ → 신고가 근처 (0.5% 안)
+     -0.05 ~ -0.005 → 근접
+     < -0.05 → 신고가 미달
+   ↓
+volZ = 직전일 거래대금 20일 z-score
+   ≥ +1.0 → 거래대금 confirmation 강
+   0 ~ +1.0 → 보통
+   < 0 → 거래대금 약화 (false breakout 위험)
+   ↓
+confirmed = breakoutZ ≥ -0.005 AND volZ ≥ +1.0
+   양 신호 동시 → 진성 breakout 후보
+   1 신호만 → 가짜 breakout (failed breakout) 위험
+   ↓
+v1 (binary flag) 실패 모드 회피:
+   v1: 모든 종목 신고가 = True OR 모든 False → 변별력 0
+   v2: 분포 형태 (breakoutZ stdev > 0.5) → 변별력 확보
+   pythonCheck 강제 검증
+```
+
+v1 → v2 변형 — binary flag 의 universe 강세장 치우침 (5종 모두 신고가 가능성) 회피. 분포 z-score 로 *상대 위치* 측정.
+
+### 4. 반례·한계
+
+- 표본 거래일 < 60 → breakoutZ / volZ 결론 X.
+- 52주 고가 산출 시 액면분할·무상증자 보정 누락 → 가짜 신고가 (보정 row 확인 필요).
+- 거래대금 평균이 1회성 대규모 거래로 왜곡 → volZ 부정확.
+- confirmed 단독 매수 결론 X — momentumFlow / sentiment 결합 필수.
+
+### 5. 후속 모니터링
+
+- confirmed = True → `recipes.technical.momentumFlowDecouple` 으로 수급 동조성.
+- 신고가 시점 → `recipes.sentiment.flowImbalance` 로 수급 imbalance.
+- v1 vs v2 비교 → `recipes.technical.breakoutNewsConfirmation` 로 binary flag 결과 cross-check.
 
 ## 대표 반환 형태
 
