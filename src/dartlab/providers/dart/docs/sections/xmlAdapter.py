@@ -124,7 +124,9 @@ def _tableToHtml(table) -> str:
                 lines.append(" ".join(texts))
         return "\n".join(lines)
 
-    # 진짜 데이터 표 — HTML <table>
+    # 진짜 데이터 표 — HTML <table>. cell 안 \n (multi-P paragraph framing) 은
+    # <br/> 로 치환해야 _splitContentBlocks 의 line-by-line table detection 이
+    # 같은 td 안에서 새 line 으로 잘못 인식하지 않음 (2026-05-27 회귀 fix).
     out: list[str] = ["<table>"]
     for cells in collected:
         rowOut: list[str] = ["<tr>"]
@@ -134,7 +136,8 @@ def _tableToHtml(table) -> str:
                 attrs += f' colspan="{int(colspan)}"'
             if rowspan and rowspan != "1":
                 attrs += f' rowspan="{int(rowspan)}"'
-            rowOut.append(f"<{tag}{attrs}>{_escapeHtml(text)}</{tag}>")
+            escaped = _escapeHtml(text).replace("\n", "<br/>")
+            rowOut.append(f"<{tag}{attrs}>{escaped}</{tag}>")
         rowOut.append("</tr>")
         out.append("".join(rowOut))
     out.append("</table>")
