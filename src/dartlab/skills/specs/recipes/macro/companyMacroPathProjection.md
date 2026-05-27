@@ -123,11 +123,52 @@ emit_result(
 
 ## 호출 동작
 
-1. `c.analysis("revenueForecast")` — base revenue forecast.
-2. `c.analysis("macroSensitivity")` — rate / FX elasticity.
-3. `dartlab.macro("scenario")` — 146 시나리오 (rate × FX × phase grid).
-4. 각 시나리오 → revenue shock → fair value (multiple 기반).
-5. 분포 p25/50/75 + 현재가 대비 above 확률.
+### 1. 결론 도출
+
+146 시나리오 fair value 분포 + probAboveCurrent 단정. 예: "005930 현재가 78,000 / p25 fair=72,500 / p50=82,300 / p75=94,100 / probAboveCurrent=0.62 → median fair value > 현재가 (5.5% 상회) + 62% 시나리오에서 상회 — 중장기 우상향 분포 우세."
+
+### 2. 핵심 근거 수집
+
+- c.analysis('growth') — base revenue forecast
+- c.analysis('macroSensitivity') — rate / FX elasticity 계수
+- macro('scenario', market='KR') — 146 시나리오 grid (rate × FX × cyclePhase × 침체)
+- c.analysis('valuationBand') — 적정 multiple band
+- c.show('BS') — 기준 balance + 발행주식
+
+### 3. 메커니즘 분석
+
+```
+146 시나리오 (rate × FX × phase × 침체)
+   각 시나리오 → revenue elasticity 적용 → P&L path
+   ↓
+146 P&L path → multiple 적용 → 146 fair value
+   ↓
+분포 산출:
+   p25 = 하위 25% fair value (보수적 valuation)
+   p50 = median (중앙값)
+   p75 = 상위 25% (낙관 valuation)
+   probAboveCurrent = (fair > current price) 비율
+   ↓
+single point estimate 보완:
+   p50 > current + probAboveCurrent > 60% → 상승 분포 우세
+   p25 < current < p50 + probAbove ~ 50% → 양면 분포
+   p75 < current                     → 하락 분포 우세
+```
+
+분포 std-dev 가 base price 의 5% 이상 → sensitivity 유효. < 5% → 시나리오 collapse (가정 무효 — pythonCheck falsifier 발동).
+
+### 4. 반례·한계
+
+- elasticity 가 회사별 추정 vs 산업 평균 — 산업 평균 사용 시 회사 고유성 무시.
+- WACC (discount rate) 가 시나리오별 변동 — 일정 가정 시 분포 좁아짐 (보수적).
+- 146 시나리오는 historical pattern 기반 — black swan 미커버.
+- multiple 기반 fair value — multiple regime shift 시 분포 위치 이동.
+
+### 5. 후속 모니터링
+
+- probAboveCurrent > 70% → `recipes.quant.qualityFactor` 로 quality cross-check.
+- distribution std-dev 큼 (sensitive) → `recipes.macro.qualityMacroBeta` 로 phase 정합 확인.
+- p25 < 현재가 < p50 → `recipes.macro.tailRiskScenarioScan` 으로 하방 시나리오 매칭.
 
 ## 대표 반환 형태
 

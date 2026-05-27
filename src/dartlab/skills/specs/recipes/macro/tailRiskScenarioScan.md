@@ -119,16 +119,57 @@ emit_result(
 
 ## 호출 동작
 
-1. 현재 `macro("summary")` 를 기준선으로 고정한다.
-2. 역사적·유형별 하방 scenario를 6개 이상 실행한다.
-3. 각 scenario의 `delta`, `meta`, `scenario.overall/score`를 표로 모은다.
-4. 가장 나쁜 score 하나보다, 어느 축이 반복적으로 취약한지 확인한다.
+### 1. 결론 도출
+
+6 scenario delta + 취약 축 단정. 예: "현재 overall=cautious / score=-0.3 기준선 → 6 scenario severe 충격 시 score 분포: 신용충격 -1.8 (worst) / 2008 -1.6 / 자산버블 -1.4 / 금리충격 -1.0 / 2020 -0.8 / 인플레 -0.6. 반복 취약 축 = 신용 (4/6 시나리오에서 credit zone alarm)."
+
+### 2. 핵심 근거 수집
+
+- macro('summary', market) — 기준선 overall + score + latestAsOf
+- macro('scenario', name, severity='severe') × 6 — 역사 (2008/2020) + 유형 (신용/금리/인플레/버블)
+- 각 scenario meta + delta + scenario.score 추출
+
+### 3. 메커니즘 분석
+
+```
+6 scenario × 1 기준선 → delta matrix
+   delta = scenario.score - current.score
+   ↓
+하방 ranking — delta 큰 순서 정렬
+   worst 1개 = 가장 위험 시나리오
+   ↓
+반복 취약 축 추출:
+   6 scenario 중 credit zone alarm 4건 → 신용 = 반복 취약
+   FX zone alarm 2건                   → 환율 = 부분 취약
+   ↓
+worst scenario 단일 vs 반복 취약 축 분리:
+   worst 단일 — 특정 시나리오 가정 의존
+   반복 취약 — 시나리오 무관 구조적 약점
+```
+
+worst scenario 보다 반복 취약 축이 더 신호 강함 — 1 시나리오는 가정 의존이지만 4+ 시나리오 공통 취약 축은 구조적 weakness.
+
+### 4. 반례·한계
+
+- scenario API delta 는 hypothetical — 확률 분포 X.
+- severity='severe' 비교는 시나리오 유형별 동일 확률 의미 X.
+- 6 시나리오는 알려진 패턴 — black swan (예: cyber / 지정학) 미포함.
+- US-only — KR/EU 동시 비교 필요 시 market 별 재호출.
+
+### 5. 후속 모니터링
+
+- 반복 취약 축 = 신용 → `recipes.fundamental.credit.cycleStressMap` 으로 신용 사이클 추적.
+- 반복 취약 축 = 환율 → `recipes.macro.dollarFundingStress` 로 달러 펀딩 압력 점검.
+- worst scenario 일관 historical → `recipes.macro.historicalPositioning` 으로 현재 위치 비교.
 
 ## 대표 반환 형태
 
-- `tableRef`: scenarioName, meta, delta, scenario.
-- `valueRef`: currentScore, scenario별 score/delta.
-- 답변 본문: 하방 시나리오 순위, 반복 취약 축, 현재 기준선과의 차이.
+| column | 의미 |
+|---|---|
+| `scenarioName` | 2008 / 2020 / 신용 / 금리 / 인플레 / 자산버블 |
+| `meta` | scenario meta |
+| `delta` | 기준선 대비 변화 |
+| `scenario` | scenario 결과 본문 |
 
 ## 연계 절차
 
@@ -140,4 +181,4 @@ emit_result(
 
 - 최소 3개 이상의 scenario를 실행한다.
 - `severity`를 명시하고, 역사적 사건과 유형별 stress를 구분한다.
-- scenario 결과는 확률이 아니라 “조건부 충격 경로”라고 설명한다.
+- scenario 결과는 확률이 아니라 "조건부 충격 경로"라고 설명한다.

@@ -118,18 +118,54 @@ emit_result(
 
 ## 호출 동작
 
-1. `market="KR"` 를 모든 macro 호출에 명시한다.
-2. `trade` 로 수출/교역조건 축을 먼저 확인한다.
-3. `rates/liquidity/crisis` 로 금융 스트레스와 정책 환경을 확인한다.
-4. `assets/sentiment` 로 시장 반응을 확인한다.
-5. `summary` 와 개별 축이 충돌하면 개별 축의 기준일과 결손을 확인한다.
+### 1. 결론 도출
+
+7 축 결합 stress 지도 단정. 예: "summary overall=cautious / trade.termsOfTrade=deteriorating / rates=peak / liquidity=neutral / crisis.zone=watch / assets=mixed / sentiment=neutral → KR 매크로 스트레스 phase=mid-stress (7 축 중 3 negative + 3 neutral + 1 mixed). 가장 취약 축: 교역조건 + 신용 zone."
+
+### 2. 핵심 근거 수집
+
+- macro('summary', KR) overall + score — 거시 종합
+- macro('trade', KR).termsOfTrade.direction — 교역조건
+- macro('rates', KR), macro('liquidity', KR) — 금융 환경
+- macro('crisis', KR).recessionDashboard.zone — 위기 zone (normal / watch / alarm)
+- macro('assets', KR), macro('sentiment', KR) — 시장 반응
+
+### 3. 메커니즘 분석
+
+```
+7 축 (summary / trade / rates / liquidity / crisis / assets / sentiment)
+   각 축별 status code → negative / neutral / positive
+   ↓
+스트레스 score 집계:
+   negative 5+ → high-stress
+   negative 3-4 + crisis.zone=watch → mid-stress
+   neutral majority + negative ≤ 2 → low-stress
+   ↓
+가장 취약 축 (negative status) 1-2 종 명시
+   weak axis = 다음 모니터링 대상 (이 recipe 가 leadership 정함)
+```
+
+KR 시장 특성: 외인 수급 + 수출 의존도 ↑ → trade + assets 축이 sentiment leading. rates/liquidity 는 US 의존 — Fed 정책 spillover.
+
+### 4. 반례·한계
+
+- 7 축 데이터 결손 — fragmentation 신호 vs 데이터 부재 분리 X (혼동 위험).
+- US macro 의 KR 적용 — Fed 정책 → BOK 정책 lag 변동.
+- 환율 단일 축으로 모든 KR stress 단정 금지 — 내수주 vs 수출주 분리 필요.
+- 정치 risk (선거 / 외교) 는 7 축 외 — 본 recipe 미커버.
+
+### 5. 후속 모니터링
+
+- crisis.zone=alarm → `recipes.macro.tailRiskScenarioScan` 으로 tail risk 시나리오.
+- trade 취약 축 → `recipes.macro.koreaExportCycleNowcast` 로 수출 nowcast.
+- assets/sentiment 동시 negative → `recipes.sentiment.flowImbalance` 로 외인 수급 cluster 확인.
 
 ## 대표 반환 형태
 
-- `tableRef`: KR macro 축별 결과.
-- `valueRef`: overall, score, tradeDirection, crisisZone.
-- `dateRef`: 각 축의 최신 관측일.
-- 답변 본문: 환율/교역, 금리/유동성, 신용/위기, 자산/심리의 스트레스 지도.
+| column | 의미 |
+|---|---|
+| `axis` | summary / trade / rates / liquidity / crisis / assets / sentiment |
+| `result` | macro 축별 raw result |
 
 ## 연계 절차
 

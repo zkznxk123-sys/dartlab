@@ -112,17 +112,51 @@ emit_result(
 
 ## 호출 동작
 
-1. 현재 `summary`, `cycle`, `crisis` 를 먼저 고정한다.
-2. 1997/2008/2020/2022 대표 충격을 `macro("scenario", name)` 으로 호출한다.
-3. 각 scenario의 meta, delta, outcome을 현재 summary와 구분해 비교한다.
-4. 가장 가까운 사건 1개를 고르기보다, 닮은 축과 다른 축을 분리한다.
+### 1. 결론 도출
+
+현재 + 4 시나리오 비교 단정. 예: "현재 KR cyclePhase=late-cycle / crisisZone=watch / overall=cautious → 1997 (외환위기, KR-specific) 다름 (FX 보유 ↑) / 2008 (글로벌 신용) 일부 닮음 (HY spread ↑) / 2020 (COVID 충격) 다름 (liquidity easing 아님) / 2022 (인플레 긴축) 가장 유사 (금리 peak + 자산 valuation 압축)."
+
+### 2. 핵심 근거 수집
+
+- macro('summary', market) — 현재 overall + score + latestAsOf
+- macro('cycle', market).phase — 현재 사이클 위치
+- macro('crisis', market).recessionDashboard.zone — 위기 zone
+- macro('scenario', name, market) × 4 — 1997 / 2008 / 2020 / 2022 시나리오 meta + outcome
+
+### 3. 메커니즘 분석
+
+```
+현재 vector (cyclePhase + crisisZone + summaryScore)
+   vs 4 시나리오 outcome vector
+   ↓
+닮은 축 (rate level / FX / credit spread / volatility) 매칭
+다른 축 (정책공간 / 부채구성 / 외부충격 / FX 보유) 분리
+   ↓
+유사도 ranking — 가장 닮은 시나리오 1순위 + 차이점 명시
+   "전체 동일" 단정 금지 — 항상 닮은/다른 축 동시 제시
+```
+
+각 위기는 다른 transmission mechanism. 1997 = KR FX + 외채 / 2008 = US 신용 + 글로벌 전이 / 2020 = pandemic + 정책 완화 / 2022 = 인플레 + 긴축. 현재와 1:1 매칭 시 어떤 mechanism 닮았는지 명시 필수.
+
+### 4. 반례·한계
+
+- scenario API 의 outcome 은 hypothesis — 실제 outcome 아님.
+- 시나리오 period 길이 ≠ 현재 측정 period — 직접 수치 비교 왜곡.
+- 1997 KR 위기를 US 시장 frame 으로 가져오면 무의미.
+- 2022 와 현재 (2026) 는 같은 사이클 후반 — 비교 vs 연속 구분 필요.
+
+### 5. 후속 모니터링
+
+- 1997/2008 유사도 ↑ → `recipes.fundamental.credit.cycleStressMap` 으로 신용 사이클 확인.
+- 2020 유사도 ↑ → `recipes.macro.tailRiskScenarioScan` 으로 tail 시나리오 분포.
+- 2022 유사도 ↑ → `recipes.macro.koreaMacroStressMap` 으로 KR 시장 stress 확장.
 
 ## 대표 반환 형태
 
-- `tableRef`: 역사적 사건별 scenario 결과와 delta.
-- `valueRef`: 현재 overall/score, cyclePhase, crisisZone.
-- `dateRef`: 현재 macro 기준일과 scenario period.
-- 답변 본문: 닮은 점, 다른 점, 현재 판단에서 버려야 할 과거 아날로그.
+| column | 의미 |
+|---|---|
+| `scenarioName` | 1997 / 2008 / 2020 / 2022 |
+| `scenario` | scenario meta + outcome |
 
 ## 연계 절차
 
@@ -134,4 +168,4 @@ emit_result(
 
 - 현재 데이터와 scenario override를 같은 행에 두되 `current` / `scenario` 라벨을 분리한다.
 - 비교 결과에는 최소 2개 이상의 역사적 사건을 포함한다.
-- 가장 유사한 사건을 말할 때도 “완전 동일” 표현은 금지한다.
+- 가장 유사한 사건을 말할 때도 "완전 동일" 표현은 금지한다.
