@@ -143,7 +143,50 @@ emit_result(
 
 ## 호출 동작
 
-calendar gather row 에서 미래 일자만 추출 → 잔여일 계산 → 7 / 14 / 30 일 bracket 안 row 카운트. 추론 X — 시점 표면화만.
+### 1. 결론 도출
+
+events bucket 카운트 + earliest 단정. 예: "events total=12 / in7d=2 (실적발표 + 배당락 D-3) / in14d=4 (+IR + 주총 추가) / in30d=8 / daysUntilEarliest=3 (다음 실적발표) → 7d 안 2 이벤트 도래 (실적 + 배당락 동시 → 단기 가격 변동 가능 시점)."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('calendar') latest 200 row
+- 각 row 의 date / eventDate / scheduledAt 파싱
+- 오늘 기준 미래 row 만 (daysUntil ≥ 0)
+- 7d / 14d / 30d bucket 카운트
+
+### 3. 메커니즘 분석
+
+```
+calendar 200 rows → date 파싱 → daysUntil 계산
+   d < today → 제외 (과거 이벤트)
+   d ≥ today → events list 추가
+   ↓
+정렬 + bucket 카운트:
+   in7d  = daysUntil ≤ 7 row 수
+   in14d = daysUntil ≤ 14 row 수
+   in30d = daysUntil ≤ 30 row 수
+   earliest = events[0] (가장 가까운 이벤트)
+   ↓
+시점 표면화 (추론 X):
+   "다음 IR 5일 / 다음 실적 7일 / 배당락 10일 후"
+   → 시점 자체만 정량 사실
+   → 매수/매도 결정 단정 금지 (forbidden)
+```
+
+calendar = *시점 표면화* — 추론 라벨 X. 잔여일 자체가 정량 사실. 7d/14d/30d bucket 은 트레이딩 window 기준.
+
+### 4. 반례·한계
+
+- calendar row 0 → 결론 X (coverage 한계).
+- 'TBD' / 추정 일자 → parseDate 실패 → events 에서 제외 (강제).
+- 잔여일 음수 (과거 이벤트) → 미래 이벤트로 처리 시 forbidden.
+- 휴장일 기준 vs 캘린더일 기준 혼동 (실제 거래일 ≠ 캘린더 7일).
+
+### 5. 후속 모니터링
+
+- in7d ≥ 2 → `recipes.news.eventTimelineFusion` 으로 이벤트 시점 ± 가격 반응 결합.
+- earliest = earnings → `recipes.fundamental.disclosure.eventRadar.eventInbox` 로 실적 인박스.
+- earliest = dividend ex-date → `recipes.fundamental.dividend.payoutFcfCoverage` 로 배당 sustainability.
 
 ## 대표 반환 형태
 

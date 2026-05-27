@@ -111,7 +111,61 @@ emit_result(
 
 ## 호출 동작
 
-source별 `status`, `rowCount`, `latestDate`, `requiredFor`를 만든다.
+### 1. 결론 도출
+
+8 source coverage audit 단정. 예: "evidenceCoverageAudit 8 source — IS/BS/CF 3 statements (5y 모두 ok) / filings 50 (latest 2026-05) / price 40 / flow 40 / consensus 12 / scan-peers 8 / assumptions 6 → 8 of 8 ok. fragilityMap 정상 동작 가능 (모든 source coverage 통과)."
+
+### 2. 핵심 근거 수집
+
+- Company.show('IS' / 'BS' / 'CF', freq='Y') × 3 statement
+- Company.disclosure() filings
+- Company.gather('price' / 'flow' / 'consensus') × 3 axis
+- scan.market peers
+- assumption list (사용자 입력)
+- buildThesisKillChainMemo() → evidenceCoverageAudit table
+
+### 3. 메커니즘 분석
+
+```
+8 source × (rowCount + latestDate + status + requiredFor)
+   status:
+     rowCount ≥ 1 + stale 아님 → ok
+     rowCount = 0             → missing
+     stale (latestDate > 90d) → watch
+   ↓
+requiredFor 매핑 (어떤 후속 recipe 가 필요로):
+   statements (IS/BS/CF) → fragilityMap 의 4 metric
+   filings               → triggerCatalog + falsifierLedger
+   price                 → fragilityMap.priceReaction
+   flow                  → fragilityMap.flowPressure
+   consensus             → fragilityMap.consensusRevision
+   scan peers            → triggerCatalog.peerStress
+   assumptions           → assumptionLedger
+   ↓
+missing source 영향:
+   IS/BS/CF 결손 → fragilityMap 4 metric 미산출 (대부분 차단)
+   filings 결손  → triggerCatalog 일부 차단
+   consensus 결손 → consensusRevision metric 만 차단
+   ↓
+forbidden 발동 회피:
+   결손 source 를 0 으로 채우면 분석 왜곡 (failureMode)
+   missing 은 명시 + 답변 한계로 표기
+```
+
+coverage audit = thesisKillChain 의 *바닥*. 없는 데이터를 상상으로 채우면 fragility 가 가짜로 보임. missing 명시 강제 — 답변 한계로 노출.
+
+### 4. 반례·한계
+
+- 결손 source 를 0 으로 채우면 forbidden 위반 (failureMode 발동).
+- statements 결손인데 fragilityMap 정상처럼 표시 → 분석 왜곡.
+- coverage chart 가 source 없이 emit → blocked viz.
+- 8 source 외 영역 (예: ESG / 정치) 은 본 audit 미커버.
+
+### 5. 후속 모니터링
+
+- 모든 source ok → `recipes.meta.thesisKillChain.fragilityMap` 으로 진입.
+- missing 다수 → 보강 EngineCall 실행 후 재audit.
+- coverage 약함 → `recipes.meta.thesisKillChain.visualDecisionPack` 에서 chart 차단.
 
 ## 대표 반환 형태
 

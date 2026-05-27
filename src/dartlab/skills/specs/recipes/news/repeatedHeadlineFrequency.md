@@ -114,7 +114,52 @@ emit_result(
 
 ## 호출 동작
 
-뉴스 헤드라인 토큰화 (한국어/영어 2 자 이상) 후 같은 키워드 3+ 어 중복 row 묶어 cluster. repeatCount = cluster 멤버 수. 큰 cluster = *매체 확산* 강한 사건.
+### 1. 결론 도출
+
+cluster + repeatCount + 확산도 단정. 예: "30일 뉴스 150 row → cluster 8 개 (≥ 2 매체 중복). top 3: '반도체 가격 인상' repeat=12 / 'AI 협력 발표' repeat=8 / 'CEO 신임' repeat=5 → top cluster repeat=12 → *매체 확산* 강함 (12 매체 동일 사건 보도)."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('news') latest 150 row
+- 각 row title 토큰화 (한국어/영어 2자 이상)
+- 키워드 매칭: 같은 키워드 ≥ 3 어 중복 → cluster
+- cluster × (headline + repeatCount + firstDate + latestDate)
+
+### 3. 메커니즘 분석
+
+```
+news 150 → title 토큰화 (한국어/영어 2자+)
+   row[i] tokens vs row[j] tokens
+   intersection ≥ 3 → same cluster
+   ↓
+cluster 형성:
+   repeatCount = cluster 멤버 수 (≥ 2 필수)
+   firstDate / latestDate = 시간 spread
+   ↓
+확산도 ranking:
+   repeatCount ≥ 10 → 매체 확산 강 (top tier)
+   repeatCount 3-9  → 보통 확산
+   repeatCount 2    → 약한 확산 (noise 가능)
+   ↓
+정량 사실 (label X):
+   확산 자체가 사건 중요도 의미 X
+   sentiment / 호재/악재 단정 금지 (forbidden)
+```
+
+cluster = *매체 확산* 정량 — 사건 중요도 단정 X. 확산 자체가 정량 사실 (sentiment 라벨 분리). 단순 retweet (같은 source 의 다른 매체 카피) 도 cluster 로 잡힘.
+
+### 4. 반례·한계
+
+- 뉴스 < 10 → 결론 X (coverage 한계).
+- 키워드 매칭 3 어 미만 → 별 사건 (false negative).
+- 한국어 조사/접속어 (의/은/는/이/가) 미제거 → false positive (의미 없는 매칭).
+- 동일 사건 vs 단순 카피 분리 X — 매체 확산만 측정.
+
+### 5. 후속 모니터링
+
+- top cluster repeat ≥ 10 → `recipes.news.disclosureNewsCrosscheck` 로 공시 정합성.
+- cluster + 가격 변동 동조 → `recipes.news.eventTimelineFusion` 으로 가격 반응 cluster.
+- cluster 본문 → `recipes.news.untrustedToneAudit` 로 untrusted wrap 검증.
 
 ## 대표 반환 형태
 

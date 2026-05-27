@@ -108,7 +108,59 @@ emit_result(
 
 ## 호출 동작
 
-scenarioStoryboard, propagationPath, evidenceCoverageAudit 존재 여부로 scenarioVisuals, mermaidDiagram, evidenceCoverage, kpiRibbon의 ready/blocked를 결정한다.
+### 1. 결론 도출
+
+4 visualRef ready/blocked + requiredBinding 단정. 예: "visualDecisionPack 4 row — scenarioVisuals ready (scenario 3 + monitoring 통과) / mermaidDiagram ready (propagationPath 4 edge + sourceRef 명시) / evidenceCoverage ready (audit 8 source) / kpiRibbon ready (premortemQualityScore + headline). 4 of 4 ready → 모든 viz emit 가능."
+
+### 2. 핵심 근거 수집
+
+- scenarioStoryboard (3 scenario base/erosion/kill)
+- propagationPath (4-8 edge)
+- evidenceCoverageAudit (8 source coverage)
+- headline metric (premortemQualityScore)
+- buildThesisKillChainMemo() → visualDecisionPack table
+
+### 3. 메커니즘 분석
+
+```
+4 visualRef × (status + requiredBinding + evidence)
+   scenarioVisuals:
+     ready 조건  → scenarioStoryboard table 3 row + monitoring 필드 통과
+     blocked 시 → scenario table 비어 있음 (engines.viz.scenarioVisuals 가이드 위반)
+   mermaidDiagram:
+     ready 조건  → propagationPath 4 edge 이하 + 각 edge sourceRef
+     blocked 시 → path 0 또는 8 edge 초과
+   evidenceCoverage:
+     ready 조건  → evidenceCoverageAudit table 통과
+     blocked 시 → audit 비어 있음
+   kpiRibbon:
+     ready 조건  → premortemQualityScore + qualityGateStatus headline
+     blocked 시 → score 미산출
+   ↓
+forbidden 회피:
+   unverified viz skill (incubator) → visualRefs 추가 X
+   blocked visualRef emit → false visualization
+   scenario table 없이 scenarioVisuals → failureMode 발동
+   ↓
+tableRef 우회:
+   blocked viz 는 tableRef 로 답변
+   chart 만들기 전 requiredBinding 확인 필수
+```
+
+visualDecisionPack = thesisKillChain 의 *시각화 품질 게이트*. observed viz 만 통과. blocked 시 chart 대신 tableRef 로 우회.
+
+### 4. 반례·한계
+
+- unverified viz skill 을 visualRefs 에 연결 → forbidden.
+- blocked visualRef emit → 가짜 visualization.
+- scenario table 없이 scenarioVisuals emit → failureMode.
+- requiredBinding 정의 모호 → 실제 검증 불가.
+
+### 5. 후속 모니터링
+
+- 4 viz 모두 ready → `recipes.meta.thesisKillChain.deepDive` 의 최종 visual gate 통과.
+- scenarioVisuals blocked → `recipes.meta.thesisKillChain.scenarioStoryboard` 로 3 scenario 보강.
+- mermaidDiagram blocked → `recipes.meta.thesisKillChain.propagationPath` 로 path 추가.
 
 ## 대표 반환 형태
 
