@@ -184,17 +184,19 @@ def _accumulatePeriodRows(
             if topic not in topicFirstSeq or (majorNum, sortOrder) < topicFirstSeq[topic]:
                 topicFirstSeq[topic] = (majorNum, sortOrder)
 
-            orderInfo = rowOrder.setdefault(
-                key,
-                {
+            # setdefault 의 default arg 는 hit/miss 무관 매번 평가 (28k row × dict literal
+            # = ~30K 불필요 dict alloc). get + None 체크로 miss 시만 dict 생성.
+            orderInfo = rowOrder.get(key)
+            if orderInfo is None:
+                orderInfo = {
                     "latestRank": 999999999,
                     "latestMissing": 1,
                     "firstRank": 999999999,
                     "sourceBlockOrder": int(row.get("sourceBlockOrder") or 0),
                     "segmentOrder": int(row.get("segmentOrder") or 0),
                     "segmentOccurrence": int(row.get("segmentOccurrence") or 1),
-                },
-            )
+                }
+                rowOrder[key] = orderInfo
             orderInfo["firstRank"] = min(orderInfo["firstRank"], sortOrder)
             orderInfo["sourceBlockOrder"] = min(orderInfo["sourceBlockOrder"], int(row.get("sourceBlockOrder") or 0))
             orderInfo["segmentOrder"] = min(orderInfo["segmentOrder"], int(row.get("segmentOrder") or 0))

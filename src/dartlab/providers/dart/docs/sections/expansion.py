@@ -14,6 +14,7 @@ caller API 0 변경 — pipeline.py 가 본 함수를 re-import.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from functools import lru_cache
 
 from dartlab.providers.dart.docs.sections.segmentKeyer import SegmentKeyer
 from dartlab.providers.dart.docs.sections.tableParser import tableHeaderHash
@@ -22,41 +23,63 @@ from dartlab.providers.dart.docs.sections.textStructure import parseTextStructur
 _NOTES_TOPICS = frozenset({"financialNotes", "consolidatedNotes"})
 
 
-def _headingPathStrings(
-    headings: list[dict[str, object]],
-) -> tuple[list[str], list[str], list[str], str | None, str | None, str | None, str | None, str | None]:
-    """heading stack → (labels, keys, semanticKeys, textPath, textPathKey,
-    textParentPathKey, textSemanticPathKey, textSemanticParentPathKey).
+@lru_cache(maxsize=4096)
+def _headingPathStringsCached(
+    headingsKey: tuple[tuple[str, str, str], ...],
+) -> tuple[
+    tuple[str, ...], tuple[str, ...], tuple[str, ...], str | None, str | None, str | None, str | None, str | None
+]:
+    """heading stack → 8-tuple. 본 함수는 hashable tuple key 받아 5 join 결과 cache.
 
-    이전: 3 회 list comprehension + 5 회 ' > '.join. 본 helper 가 1 패스 + 5 join 으로
-    축소. 200k rows × 5 stack items 핫 패스에서 단일 list iterate 로 메모리 +
-    CPU 절약.
+    cache key 는 ``((label, key, semanticKey), ...)`` immutable tuple. heading stack
+    이 같으면 join 결과 동일 — 31 period 안 같은 topic 의 같은 depth 반복 횟수
+    높아 hit rate 50-70% 예상. labels/keys/semanticKeys 도 tuple 로 반환해
+    immutable. caller 가 list 필요 시 변환 부담은 미미 (실측 ms 단위).
     """
     pathLabels: list[str] = []
     pathKeys: list[str] = []
     semanticPathKeys: list[str] = []
-    for item in headings:
-        pathLabels.append(str(item["label"]))
-        k = str(item["key"])
-        if k:
-            pathKeys.append(k)
-        sk = str(item.get("semanticKey") or "")
-        if sk:
-            semanticPathKeys.append(sk)
+    for label, key, semanticKey in headingsKey:
+        pathLabels.append(label)
+        if key:
+            pathKeys.append(key)
+        if semanticKey:
+            semanticPathKeys.append(semanticKey)
     textPath = " > ".join(pathLabels) if pathLabels else None
     textPathKey = " > ".join(pathKeys) if pathKeys else None
     textParentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
     textSemanticPathKey = " > ".join(semanticPathKeys) if semanticPathKeys else None
     textSemanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
     return (
-        pathLabels,
-        pathKeys,
-        semanticPathKeys,
+        tuple(pathLabels),
+        tuple(pathKeys),
+        tuple(semanticPathKeys),
         textPath,
         textPathKey,
         textParentPathKey,
         textSemanticPathKey,
         textSemanticParentPathKey,
+    )
+
+
+def _headingPathStrings(
+    headings: list[dict[str, object]],
+) -> tuple[list[str], list[str], list[str], str | None, str | None, str | None, str | None, str | None]:
+    """heading stack → (labels, keys, semanticKeys, textPath, textPathKey,
+    textParentPathKey, textSemanticPathKey, textSemanticParentPathKey).
+
+    캐싱 wrapper — caller 인터페이스 (list 입력 + 결과 list 3 종) 유지. heading
+    stack 의 immutable representation (tuple of 3-tuples) 로 변환 후 lru_cache
+    매개체로 위임. 200k+ row 호출에서 _headingPathStringsCached hit rate 가
+    50-70% 인 경우 5 join × hits = 100~300ms 절감.
+    """
+    headingsKey = tuple((str(item["label"]), str(item["key"]), str(item.get("semanticKey") or "")) for item in headings)
+    pathLabels, pathKeys, semanticPathKeys, *rest = _headingPathStringsCached(headingsKey)
+    return (
+        list(pathLabels),
+        list(pathKeys),
+        list(semanticPathKeys),
+        *rest,
     )
 
 
