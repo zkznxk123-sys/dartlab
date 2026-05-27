@@ -126,7 +126,41 @@ emit_result(
 
 ## 호출 동작
 
-RSI(14) + 볼린저 밴드(20, 2σ) 동시 조건 충족 row 만 cluster. `oversoldCluster = RSI<30 + close<lower`, `overboughtCluster = RSI>70 + close>upper`.
+### 1. 결론 도출
+
+RSI + 볼린저 동시 cluster 단정 (oversoldCluster / overboughtCluster / 무신호). 예: "최근 60 거래일 oversold cluster 3 건 (RSI<30 + close<lower), overbought 0 건 — 이중 oversold 신호 활성."
+
+### 2. 핵심 근거 수집
+
+- 가격 row 60+ 거래일 (Company.gather('price') high/low/close)
+- RSI(14) — 14일 평균 상승 / (상승+하락) × 100
+- 볼린저 밴드(20, 2σ) — 20일 이동평균 ± 2 × 20일 표준편차
+
+### 3. 메커니즘 분석
+
+```
+60거래일 close → RSI(14) 시계열 + 볼린저(20, 2σ) upper/lower band
+   ↓
+각 row 에서 두 조건 동시 점검
+   RSI<30 AND close<lower → oversoldCluster (이중 oversold)
+   RSI>70 AND close>upper → overboughtCluster (이중 overbought)
+   둘 다 아님              → 무신호
+```
+
+단일 oscillator 함정 회피 — RSI 또는 볼린저 단독으로는 흔한 false positive. 두 정의 동시 충족만 신호로 사용. cluster row 수 ↑ 또는 연속 발생 = 신호 강도 ↑.
+
+### 4. 반례·한계
+
+- 강한 추세 (uptrend) 중에는 RSI > 70 + close > upper 가 정상 — overbought 신호 false positive.
+- 변동성 낮은 종목 (zero band width) 의 볼린저 cluster 신뢰도 낮음.
+- 60일 미만 history 시 cluster 측정 불가.
+- 단일 cluster 만으로 매수/매도 단정 금지 — 다른 신호 (수급 · 가격 모멘텀) cross-check.
+
+### 5. 후속 모니터링
+
+- oversoldCluster 발생 직후: `recipes.technical.priceVolumeZScore` 로 거래량 동행 확인 (오버솔드 + 거래량 폭증 = 저점 매수 후보 강함).
+- overboughtCluster 지속 (3 row+): `recipes.technical.atrRegimeShift` 로 변동성 확대 확인 (고점 신호).
+- 신호 없는 종목 (cluster 0): 60d 추세 우세 — `recipes.technical.movingAverageConfluence` 로 추세 합의 확인.
 
 ## 대표 반환 형태
 

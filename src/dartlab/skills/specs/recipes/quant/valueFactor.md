@@ -138,7 +138,51 @@ emit_result(
 
 ## 호출 동작
 
-target 의 B/M, E/P, CF/P 3 정의 + peer set 단면 percentile rank 산출. composite = 3 rank 평균 (0~1, 1 = 가장 cheap). 단일 지표 우월 단정 금지.
+### 1. 결론 도출
+
+value composite rank 단정 (0~1, 1 = 가장 cheap). 예: "B/M peer rank 0.82, E/P 0.78, CF/P 0.65 → composite 0.75 (top quartile) → value 후보 강함."
+
+### 2. 핵심 근거 수집
+
+- 회사 market cap + 재무 BS·IS·CF (Company.show)
+- B/M (Book/Market) = 자본 / 시총
+- E/P (Earnings yield) = 순이익 / 시총
+- CF/P (Cash flow yield) = 영업CF / 시총
+- peer set 단면 분포
+
+### 3. 메커니즘 분석
+
+```
+재무제표 → 3 yield 정의
+   B/M = totalEquity / marketCap
+   E/P = netIncome / marketCap
+   CF/P = operatingCF / marketCap
+   ↓
+peer 단면 분포에서 percentile rank (오름차순)
+   rank_BM = (own_BM > peer_BM 카운트) / peer_count   (1=가장 cheap)
+   rank_EP = (own_EP > peer_EP 카운트) / peer_count
+   rank_CFP = (own_CFP > peer_CFP 카운트) / peer_count
+   ↓
+composite = (rank_BM + rank_EP + rank_CFP) / 3
+   composite ≥ 0.75  → cheap value 후보 (top quartile)
+   0.25-0.75         → fair value
+   composite < 0.25  → expensive (bottom quartile)
+```
+
+3 정의 동시 cheap = 강한 value 신호 (단일 지표 PER 함정 회피). E/P 만 높고 B/M·CF/P 낮으면 일회성 이익 (value trap) 위험.
+
+### 4. 반례·한계
+
+- 적자 회사 (E/P 음수) 의 E/P 분위 의미 X — earnings normalized 필요.
+- 자본잠식 회사 B/M 음수 — peer 비교에서 outlier.
+- 금융사 valuation 정의 다름 (P/PreProvisionPPnR 등) — 비교 무의미.
+- IFRS / GAAP 차이로 자본 raw 비교 노이즈.
+
+### 5. 후속 모니터링
+
+- composite ≥ 0.75: `recipes.quant.qualityFactor` 로 quality 동행 확인 (cheap + high quality = value 후보).
+- composite ≥ 0.75 + Quality z < 0: value trap 후보 — `recipes.fundamental.quality.forensics.deepDive` 회계 fact check.
+- composite < 0.25 + momentum 강함: growth 후보 — `recipes.fundamental.valuation.damodaran.growthFeasibility` 로 성장 정합 확인.
 
 ## 대표 반환 형태
 

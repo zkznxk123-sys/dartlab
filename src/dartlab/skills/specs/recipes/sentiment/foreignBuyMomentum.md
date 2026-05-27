@@ -121,7 +121,44 @@ emit_result(
 
 ## 호출 동작
 
-외국인 일별 순매수 누적 → 5/20/60 일 변화. 가속도 = (5일 일평균 / 60일 일평균) - 1. > 0.2 = 가속, < -0.2 = 감속, 그 외 = steady.
+### 1. 결론 도출
+
+외인 누적 순매수 가속도 phase 단정 (accelerate > +20% / steady / decelerate < -20%). 예: "5일 일평균 +180억 vs 60일 일평균 +75억 → 가속도 +1.4x → accelerate phase (외인 매수 강화)."
+
+### 2. 핵심 근거 수집
+
+- 외인 일별 순매수 row 60+ 거래일 (Company.gather('flow') foreignNet)
+- 5일 누적 순매수 → 일평균 5d
+- 60일 누적 순매수 → 일평균 60d
+
+### 3. 메커니즘 분석
+
+```
+외인 일별 순매수 시계열 60+ 거래일
+   ↓
+5일 합 / 5  = velocity5d (단기 일평균)
+60일 합 / 60 = velocity60d (장기 일평균)
+   ↓
+가속도 = velocity5d / velocity60d - 1
+   > +0.2  → accelerate (단기 매수 가속)
+   ±0.2    → steady (정상)
+   < -0.2  → decelerate (매수 둔화 또는 매도 전환)
+```
+
+velocity60d 양수 + 가속도 양수 = 매수 강화 (가장 강한 외인 buying 신호). velocity60d 음수 + 가속도 음수 = 매도 강화.
+
+### 4. 반례·한계
+
+- 외인 순매수 데이터 분기 조정 (스왑·차익) noise 큼.
+- 5일 표본 너무 작아 single-day spike 영향 큼.
+- 시장 전체 외인 자금 흐름 (KOSPI 합산) 보정 없음.
+- 외인 = 외국인 법인+개인 합산 — 외국인 PE / 헤지펀드 분리 X.
+
+### 5. 후속 모니터링
+
+- accelerate phase 지속 (3 측정 모두): `recipes.sentiment.flowImbalance` 로 기관/개인 imbalance cross-check.
+- decelerate + 가격 상승: `recipes.sentiment.retailFlowReversal` 로 개인 매수 반전 확인.
+- 가속도 절대값 큼 + 공시 동행: `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 으로 이벤트 동행 검증.
 
 ## 대표 반환 형태
 

@@ -137,7 +137,49 @@ emit_result(
 
 ## 호출 동작
 
-12-1m return (직전 12 개월 누적 수익률, 단 직전 1 개월 제외) + Sharpe (위험조정) + peer 단면 percentile rank. 1 개월 제외는 단기 reversal 효과 차단.
+### 1. 결론 도출
+
+Jegadeesh 12-1m return + Sharpe + peer percentile 단정. 예: "12-1m return +28.4%, Sharpe 1.8, peer top 12% → momentum 후보 강함 (위험조정 분위 상위)."
+
+### 2. 핵심 근거 수집
+
+- 종목 일별 close 시계열 13 개월 이상 (Company.gather('price'))
+- peer set close 시계열 (산업 또는 universe)
+- 12-1m return = close[-1m] / close[-13m] - 1 (직전 1개월 제외)
+- 변동성 (12 개월 일별 수익률 std) → Sharpe
+
+### 3. 메커니즘 분석
+
+```
+종목 close 13+ 개월 → 일별 수익률
+   ↓
+12-1m return = close[t-21] / close[t-252] - 1
+   (252 거래일 = 12개월, 21 거래일 제외 = 단기 reversal 회피)
+   ↓
+σ_annual = std(daily_returns_12mo) × √252
+Sharpe = 12-1m return / σ_annual
+   ↓
+peer 단면 12-1m return 분포 → 자기 종목 percentile rank
+   ↓
+percentile ≥ 70% + Sharpe ≥ 1   → momentum 후보 강함
+percentile ≥ 70% + Sharpe < 1   → 변동성 큰 momentum (주의)
+percentile < 30%                → momentum 부재
+```
+
+직전 1개월 제외 — Jegadeesh-Titman 1993 이 발견한 단기 reversal 효과 (1개월 mean-reversion) 차단. Sharpe 결합 = pure return 만이 아닌 risk-adjusted 신호.
+
+### 4. 반례·한계
+
+- 13개월 미만 history (신규 상장) 측정 불가.
+- 시장 전체 강세장에서는 거의 모든 종목 momentum 양수 — relative rank 만 의미.
+- 분할·인수합병 등 corporate action 12개월 안에 있으면 return 비교 불가능.
+- Sharpe 분모 σ 가 0 이면 Sharpe undefined.
+
+### 5. 후속 모니터링
+
+- 강한 momentum (percentile ≥ 80%) 진입: `recipes.fundamental.valuation.damodaran.relativeCheck` 로 가격 검증 (momentum vs valuation 갭).
+- Sharpe < 0.5 + momentum 큼: `recipes.technical.atrRegimeShift` 로 변동성 체제 확인.
+- momentum 부재 (percentile < 30%): `recipes.quant.valueFactor` 로 contrarian value 후보 cross-check.
 
 ## 대표 반환 형태
 

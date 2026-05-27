@@ -160,7 +160,49 @@ emit_result(
 
 ## 호출 동작
 
-종가·거래량 80 거래일 row 에서 일별 수익률 + 20 거래일 rolling 거래량 z-score 계산. z ≥ 2 인 row 만 *event row* — 그 row 의 양/음 수익률 카운트 + skew = (pos − neg) / total. 추론 X.
+### 1. 결론 도출
+
+거래량 폭증 event row + 가격 방향 skew 단정. 예: "최근 80거래일 z≥2 event row 12 건 (양수 8 / 음수 4) → skew +0.33 (rising 측 쏠림) — 매수 거래량 우세."
+
+### 2. 핵심 근거 수집
+
+- 가격·거래량 80거래일 row (Company.gather('price'))
+- 일별 수익률 (close/prev_close - 1)
+- 20거래일 rolling 거래량 z-score = (volume - rolling_mean) / rolling_std
+
+### 3. 메커니즘 분석
+
+```
+80거래일 close + volume 시계열
+   ↓
+일별 수익률 = close[t] / close[t-1] - 1
+20일 rolling volume z = (volume[t] - mean_20d) / std_20d
+   ↓
+z ≥ 2 인 row 만 event row 추출 (거래량 폭증)
+   ↓
+event row 의 수익률 부호 카운트
+   posCount = (return > 0) 카운트
+   negCount = (return < 0) 카운트
+   skew = (posCount - negCount) / total
+   skew > +0.3   → rising-side dominant (상승 거래량 우세)
+   ±0.3          → 양방향 (혼재)
+   skew < -0.3   → falling-side dominant (하락 거래량 우세)
+```
+
+거래량 z ≥ 2 + 수익률 큼 = capitulation 또는 breakout 후보. event row 수 ↑ + skew 절대값 ↑ = 신호 강도 ↑.
+
+### 4. 반례·한계
+
+- 지수 동시 변동일 (장 전체 폭증) 의 event row 종목 고유 신호 X.
+- 신규 상장 종목 (volume 변동성 큼) z-score 정의 불안정.
+- 호가 단위 변경·액면분할 직후 거래량 시계열 break.
+- 80일 단기 표본 — 변동성 regime shift 안 잡힘.
+
+### 5. 후속 모니터링
+
+- skew > +0.5 + event row 다수: `recipes.sentiment.foreignBuyMomentum` 으로 외인 매수 동행 확인.
+- skew < -0.5: `recipes.sentiment.retailFlowReversal` 로 capitulation 가능성 확인.
+- event row 시점 ±공시: `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 으로 이벤트 동행 검증.
 
 ## 대표 반환 형태
 
