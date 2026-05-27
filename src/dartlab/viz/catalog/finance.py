@@ -248,8 +248,10 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원", "diverging": True},
-        # 자산구조 바로 아래 한 행 — colSpan=12 + rowSpan=2 (덜 dense, 양변 대칭 가독).
-        "layout": {"colSpan": 12, "rowSpan": 2},
+        # 자산구조 바로 아래 한 행 — colSpan=12 + rowSpan=3 (양변 대칭 가독).
+        # 회귀 가드: 12x2 는 trend variance 미허용 → resolveLayout ValueError →
+        # packSkyline 가 queue pop 안 한 채 skip → 무한 loop → backend hang.
+        "layout": {"colSpan": 12, "rowSpan": 3},
         "help": "회계 등식 자산 = 부채 + 자본 의 시각 검증. 0 line 기준 아래 막대 (자산 측 4 항목 = 현금/매출채권/재고/기타영업자산) 와 위 막대 (부채+자본 측 5 항목 = 영업부채/금융부채/자본금/이익잉여금/기타자본) 의 절대값이 항상 같음 = 등식 성립. 기존 자산구조 카드의 분해 표시를 양변 명시 시각으로 보강.",
     },
     # ─────────────────────────────────────────────────────────────

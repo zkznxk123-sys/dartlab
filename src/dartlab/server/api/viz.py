@@ -526,14 +526,23 @@ async def apiVizLayoutStream(
         }
         # 분기 TTM 모드일 때만 가용성 진단 동봉 — UI badge 결정용. 신규 상장사
         # 등 4Q 미충족 시 frontend 가 "TTM 가용 부족" 표시.
+        # head 는 즉시 emit — 회귀 가드: 과거 ttmAvailability 를 head 안에 sync 로
+        # 박았다가 cold start 30~60s Polars collect 가 main loop block → 첫 chunk
+        # 도착 안 해 frontend 무한 spinner. 가용성은 별도 ttm chunk 로 나중에 emit.
+        yield (json.dumps(head, ensure_ascii=False) + "\n").encode("utf-8")
+
         if useTtm and tab == "financial":
-            try:
+
+            def _ttmAvailSync() -> Any:
                 from dartlab.viz.display.finance._cache import getCompany, ttmAvailability
 
-                head["ttmAvailability"] = ttmAvailability(getCompany(stockCode))
+                return ttmAvailability(getCompany(stockCode))
+
+            try:
+                avail = await asyncio.to_thread(_ttmAvailSync)
+                yield (json.dumps({"type": "ttmAvailability", **avail}, ensure_ascii=False) + "\n").encode("utf-8")
             except Exception:  # noqa: BLE001
                 pass
-        yield (json.dumps(head, ensure_ascii=False) + "\n").encode("utf-8")
 
         if not placed:
             yield (json.dumps({"type": "done"}) + "\n").encode("utf-8")

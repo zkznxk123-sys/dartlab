@@ -106,14 +106,13 @@ async def lifespan(_: FastAPI):
     # background thread 로 미리 깨움 — 사용자 첫 호출은 cache hit (즉시 응답).
     # 회귀 가드: 과거 secret_store prewarm 은 잘못된 DPAPI 가설 기반이라 제거됨.
     # 이번 prewarm 은 측정 기반 (cold availableModels() = 43s 검증).
-    # DARTLAB_NO_PREWARM=1 — prewarm 일괄 비활성화 (event loop 100% 점거 회귀 가드).
-    # 과거 prewarm task (oauth-codex token validate 또는 viz catalog cold import) 가
-    # CPU bound 무한 retry → main loop block → 모든 후속 API hang 사고 발생 시
-    # 임시 우회 또는 진단용. 정상 환경에서는 끄지 말 것 (퀀트 탭 cold 30s 회귀).
-    _noPrewarm = os.environ.get("DARTLAB_NO_PREWARM", "").strip().lower() in {"1", "true", "yes"}
-    models_prewarm_task = None if _noPrewarm else asyncio.create_task(_prewarmOauthCodexModels())
-    viz_prewarm_task = None if _noPrewarm else asyncio.create_task(_prewarmVizCatalog())
-    preload_task = asyncio.create_task(_preloadOllamaOnce()) if (not _noPrewarm and _should_preload_ollama()) else None
+    # prewarm task 는 default OFF — 회귀: 첫 catalog 응답 후 prewarm task 가 main
+    # event loop 점거 → 모든 후속 API hang → 사용자 화면 무한 spinner. 정공 fix 가
+    # 들어오기 전까지 opt-in (DARTLAB_PREWARM=1) 으로만 활성.
+    _doPrewarm = os.environ.get("DARTLAB_PREWARM", "").strip().lower() in {"1", "true", "yes"}
+    models_prewarm_task = asyncio.create_task(_prewarmOauthCodexModels()) if _doPrewarm else None
+    viz_prewarm_task = asyncio.create_task(_prewarmVizCatalog()) if _doPrewarm else None
+    preload_task = asyncio.create_task(_preloadOllamaOnce()) if (_doPrewarm and _should_preload_ollama()) else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
     from .room import roomManager
@@ -176,14 +175,38 @@ def _corsOrigins() -> list[str]:
     ]
 
 
-class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, callNext):
-        """보안 헤더(X-Content-Type-Options 등)를 모든 응답에 추가한다."""
-        response = await callNext(request)
-        response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("X-Frame-Options", "DENY")
-        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        return response
+class _SecurityHeadersMiddleware:
+    """보안 헤더 (X-Content-Type-Options 등) 를 모든 응답에 부착.
+
+    회귀 가드: 옛 BaseHTTPMiddleware 구현이 StreamingResponse 의 chunk 를 buffer
+    → /api/viz/layout-stream NDJSON 첫 chunk 가 *모든* 카드 build 완료 후 도착
+    → 사용자 화면 cold start 1~3 분 무한 spinner. pure ASGI 로 재작성 — http.response.start
+    message 만 가로채 헤더 추가, body chunk 는 그대로 통과 (streaming 보존).
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def _send(message):
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                _existing = {k.lower() for k, _ in headers}
+                for k, v in (
+                    (b"x-content-type-options", b"nosniff"),
+                    (b"x-frame-options", b"DENY"),
+                    (b"referrer-policy", b"strict-origin-when-cross-origin"),
+                ):
+                    if k not in _existing:
+                        headers.append((k, v))
+                message["headers"] = headers
+            await send(message)
+
+        await self.app(scope, receive, _send)
 
 
 app.add_middleware(_SecurityHeadersMiddleware)

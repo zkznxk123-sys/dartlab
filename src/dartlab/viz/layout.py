@@ -242,15 +242,26 @@ def packSkyline(
                 break
 
         # 큐에서 width <= availWidth 인 첫 카드.
+        # 회귀 가드: resolveLayout ValueError (variance 위반 entry) 는 *queue 에서
+        # 즉시 제거*. 옛 코드는 continue 만 했고 entry 가 queue 에 남아 chosenIdx=None
+        # 분기에서 skyline maxRow 영원히 증가 → 무한 loop → backend hang (사용자 화면
+        # 무한 spinner + Ctrl+C 불가). 잘못된 variance 카드는 layout 에서 빼고 진행.
         chosenIdx = None
+        invalidIdxs: list[int] = []
         for i, (_, e) in enumerate(queue):
             try:
                 w, _ = resolveLayout(e)
             except ValueError:
+                invalidIdxs.append(i)
                 continue
             if w <= availWidth:
                 chosenIdx = i
                 break
+        # invalid entry 들 역순 pop (idx 안 밀림).
+        for i in reversed(invalidIdxs):
+            queue.pop(i)
+            if chosenIdx is not None and chosenIdx > i:
+                chosenIdx -= 1
 
         if chosenIdx is None:
             # 큐 모든 카드가 availWidth 초과 — 다음 row 로 진입 (skyline 의
