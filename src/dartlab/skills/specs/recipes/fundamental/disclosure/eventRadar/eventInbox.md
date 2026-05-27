@@ -4,7 +4,7 @@ title: Event Radar Event Inbox
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.
@@ -79,6 +79,7 @@ testUniverse:
   market: KR
   stockCodes:
     - "005930"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
