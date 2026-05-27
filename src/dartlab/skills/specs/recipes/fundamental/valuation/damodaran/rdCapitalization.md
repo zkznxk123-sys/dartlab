@@ -4,7 +4,7 @@ title: Damodaran R&D 자본화 감사
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: L1 재무제표의 연구개발비 라인을 찾아 R&D 자본화 필요 여부와 결손을 표시하는 Damodaran식 정규화 절차. 트리거 — 'R&D capitalization', '연구개발비 자본화', 'Damodaran R&D adjustment'.
 whenToUse:
   - R&D capitalization
@@ -69,6 +69,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

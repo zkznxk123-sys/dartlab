@@ -4,7 +4,7 @@ title: 경제 시나리오 인과 다이어그램
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: macro.scenario 또는 경제분석 결과를 Mermaid 인과 그래프로 emit 하여 충격 전파 경로를 시각화하는 절차. 트리거 — '시나리오 그래프', '인과 다이어그램', '충격 전파', '경제 흐름도'.
 whenToUse:
   - 시나리오 그래프
@@ -69,6 +69,7 @@ runtimeCompatibility:
     status: limited
   pyodide:
     status: limited
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

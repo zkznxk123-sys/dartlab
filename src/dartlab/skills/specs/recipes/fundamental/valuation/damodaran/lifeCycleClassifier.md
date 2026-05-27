@@ -4,7 +4,7 @@ title: Damodaran 생애주기 분류
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: L1 재무 패널만으로 Damodaran식 기업 생애주기(highGrowth, matureGrowth, matureStable, decline, turnaround, financialFirmOnly)를 분류하고 DCF 가정의 출발점을 고정하는 절차. 트리거 — 'Damodaran life cycle', '기업 생애주기 분류', '성장 단계 판정'.
 whenToUse:
   - Damodaran life cycle
@@ -78,6 +78,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

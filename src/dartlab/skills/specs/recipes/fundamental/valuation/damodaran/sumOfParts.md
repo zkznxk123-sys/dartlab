@@ -4,7 +4,7 @@ title: Damodaran Sum-of-Parts 경로
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 세그먼트·지주회사·복합 사업에 대해 단일 FCFF 대신 segment별 revenue/EBIT 근거와 결손을 분리하는 절차. 트리거 — 'sum of parts', 'SOTP', '세그먼트 가치평가'.
 whenToUse:
   - sum of parts
@@ -69,6 +69,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

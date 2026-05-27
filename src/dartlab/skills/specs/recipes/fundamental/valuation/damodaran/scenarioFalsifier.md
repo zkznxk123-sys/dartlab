@@ -4,7 +4,7 @@ title: Damodaran 시나리오 반증
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: bull/base/bear 민감도, reverse DCF, 현재 가격이 요구하는 성장·마진·ROC를 계산해 Damodaran식 내재 스토리를 반증하는 절차. 트리거 — 'reverse DCF', '내재 성장률', 'Damodaran scenario falsifier'.
 whenToUse:
   - reverse DCF
@@ -79,6 +79,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

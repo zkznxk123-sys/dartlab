@@ -4,7 +4,7 @@ title: Damodaran 내러티브 맵
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: Company metadata, topics, 재무 패널, reference mapping을 엮어 사업 스토리를 성장·마진·리스크·모델 경로로 구조화하는 L1/L1.5 절차. 트리거 — 'Damodaran narrative map', '스토리 숫자 연결', '사업 내러티브 가치평가'.
 whenToUse:
   - Damodaran narrative map
@@ -73,6 +73,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

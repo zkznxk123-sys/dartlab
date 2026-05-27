@@ -4,7 +4,7 @@ title: Damodaran 상대가치 검산
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: EV/Sales, EV/EBIT, PE, PB 등 상대가치를 DCF 결론의 sanity check로만 사용하고 US valuation scan 부재는 partial gap으로 남기는 절차. 트리거 — 'relative valuation check', 'DCF peer sanity', 'Damodaran multiple cross-check'.
 whenToUse:
   - relative valuation check
@@ -78,6 +78,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

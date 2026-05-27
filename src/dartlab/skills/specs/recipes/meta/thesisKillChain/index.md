@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Scenario 진입점
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.thesisKillChain
@@ -139,6 +139,7 @@ audiences:
   human: 투자 thesis를 방어하기 전에 어떤 조건에서 깨지는지 보는 pre-mortem 시나리오 팩이다.
 humanIntro: "Thesis Kill-Chain은 완전히 다른 관점의 시나리오 팩이다. 좋은 점을 더 찾는 대신, 내가 믿는 thesis가 어떤 작은 균열에서 시작해 어떤 경로로 무너지는지 구조화한다."
 lastUpdated: "2026-05-17"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
