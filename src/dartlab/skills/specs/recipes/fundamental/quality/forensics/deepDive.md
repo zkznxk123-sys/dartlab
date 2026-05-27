@@ -4,7 +4,7 @@ title: Evidence Forensics Deep Dive
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.forensics
@@ -111,6 +111,7 @@ audiences:
   human: 깊은 분석처럼 보이는 결론보다, 어떤 원표와 공시 증거가 어떤 엔진 후보를 만들었는지 확인하는 절차다.
 humanIntro: "deepDive는 포렌식 팩의 실제 사용 경로다. 여러 세부 ledger를 하나로 묶되, 결론은 항상 반증 조건과 함께 남긴다. 나중에 일부 신호가 L2 엔진으로 승격돼도 이 스킬은 원표 검산 절차로 계속 사용된다."
 lastUpdated: "2026-05-17"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

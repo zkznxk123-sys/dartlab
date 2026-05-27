@@ -4,7 +4,7 @@ title: Forensics Data Coverage Audit
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 포렌식 분석 전에 Company.show 원표와 L1.5 helper가 실제로 어떤 기간·계정 coverage를 갖는지 확인해 결손을 0으로 채우는 회귀를 막는다. 트리거 — '포렌식 데이터 coverage', '원표 결손 점검'.
@@ -77,6 +77,7 @@ visualRefs:
   - "engines.viz.evidenceCoverage"
   - "engines.viz.mermaidDiagram"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

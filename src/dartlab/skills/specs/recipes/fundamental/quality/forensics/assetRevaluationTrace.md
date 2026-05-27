@@ -4,7 +4,7 @@ title: 자산재평가 추적 — 토지·건물 공정가 평가 효과 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 유형자산 (토지·건물·기계장치) 재평가 (revaluation) 적용 시점·평가증·재평가잉여금 시계열 + 재평가 이후 ROE·ROA·부채비율 변동 효과 + 재평가 의도 (자본 보강·부채비율 개선·담보가치 상승) + 평가 가정 (감정평가법인·평가일·평가방법) 을 BS·CIS·주석으로 진단하는 L1.5 절차. 트리거 — '자산재평가', '재평가잉여금', '토지 평가증', '공정가 모델', 'IFRS 16 자산재평가'.

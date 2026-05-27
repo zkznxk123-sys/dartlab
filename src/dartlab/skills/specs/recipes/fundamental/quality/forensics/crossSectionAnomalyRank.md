@@ -4,7 +4,7 @@ title: Cross Section Anomaly Rank
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: scan.quality, scan.audit, scan.disclosureRisk 같은 L1.5 횡단 primitive를 포렌식 후보 발굴에만 사용하고, 단일 기업 결론은 원표 selfRun으로 다시 검증하게 만든다. 트리거 — '포렌식 이상치 랭킹', 'scan primitive 이상치'.

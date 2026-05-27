@@ -4,7 +4,7 @@ title: 공시 타이밍 이상 — 늑장·집중·호재 부풀리기 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 부정적 사건의 공시 지연 (늑장공시) · 호재 공시 집중·반복 발표 · 실적 발표 직전 비공식 가이던스 · 보물선/신사업 류 일시 호재 패턴을 공시 timestamp + 본문 + 후속 정정·재공시 시계열로 진단하는 L1.5 절차. 트리거 — '늑장공시', '공시 timing', '호재 부풀리기', '어닝 서프라이즈 게임', '정정공시'.

@@ -4,7 +4,7 @@ title: Forensics Engine Candidate Memo
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 포렌식 스킬 실행 결과에서 반복 가능하고 반증 조건이 명확한 신호를 L2 엔진 후보로 정리하되, 승격 후에도 recipe 검산 경로로 계속 남기는 계약을 만든다. 트리거 — '엔진 후보 memo', '스킬에서 엔진 환류'.
@@ -80,6 +80,7 @@ visualRefs:
   - "engines.viz.evidenceCoverage"
   - "engines.viz.mermaidDiagram"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
