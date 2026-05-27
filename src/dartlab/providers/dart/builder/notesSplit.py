@@ -54,6 +54,10 @@ for _num, _slug, _korean in NOTES_SUB_SECTIONS:
 
 # 회사별 변형 이름 alias (DART 회사들 실측 cell 기준).
 _NOTES_NAME_ALIASES: dict[str, tuple[int, str]] = {
+    # 표준 1 general — 별도재무제표 주석 sub-heading 부재 시 첫 본문 textPath
+    # 가 'sub-section' 없이 바로 '회사의 개요' 인 경우 (000660 sk하이닉스).
+    # _NOTES_PARENT_TOPICS = ("financialNotes", "consolidatedNotes") 한정 → companyOverview 토픽과 무관.
+    "회사의개요": (1, "general"),
     # 표준 14 definedBenefit — "순확정급여부채(자산)" 외 변형
     "퇴직급여제도": (14, "definedBenefit"),
     "확정급여제도": (14, "definedBenefit"),
