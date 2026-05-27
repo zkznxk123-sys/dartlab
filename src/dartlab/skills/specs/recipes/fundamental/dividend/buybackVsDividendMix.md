@@ -133,7 +133,47 @@ emit_result(
 
 ## 호출 동작
 
-연도별 dividends / buyback / FCF / capex 4 row 를 묶어 `buybackRatio = abs(buyback) / abs(buyback + dividends)` 와 `fcfCoverage = totalReturn / FCF` 를 만든다. mix shift 시점은 `buybackRatio` 의 ±0.2 이상 변화 row 로 식별. shift 시점 row 의 capex 변화·leverage 변화를 같이 표기.
+### 1. 결론 도출
+
+buyback vs dividend mix shift + FCF coverage 단정. 예: "2024 buybackRatio 0.32 → 2025 0.65 (mix shift +0.33), fcfCoverage 0.78 — buyback 우선 자본배분 전환 (배당 → 자사주)."
+
+### 2. 핵심 근거 수집
+
+- 5년 dividends / buyback / FCF / capex 시계열 (analysis.capitalAllocation + show CF)
+- buybackRatio = abs(buyback) / abs(buyback + dividends)
+- fcfCoverage = (dividends + buyback) / FCF — total return / 잉여 흐름
+- shift 시점 = buybackRatio 전년 대비 ±0.2 이상 변화
+
+### 3. 메커니즘 분석
+
+```
+연도별 4 row → buybackRatio + fcfCoverage 시계열
+   ↓
+연도별 buybackRatio 변화 산출
+   |Δ| ≥ 0.2  → mix shift 시점
+   ↓
+shift 시점 row 의 capex 변화 + leverage (D/E) 변화 동반 분석
+   ↓
+buyback ↑ + capex ↑       → 자사주 + 재투자 동시 (강한 자본 보유)
+buyback ↑ + capex ↓       → 자사주 우선 (재투자 기회 부재)
+dividend ↑ + buyback ↓    → 안정 배당 정책 강화
+fcfCoverage > 1           → FCF 초과 자본배분 (부채 또는 현금 사용)
+```
+
+mix shift 시점이 빈번 (≥ 2 회 / 5년) = 자본배분 정책 불안정. 1 회 = phase 전환. 0 회 = 일관 정책.
+
+### 4. 반례·한계
+
+- buyback 자체가 회계상 자기주식 취득과 다름 — 일부 회사 (취득 후 소각) 만 비교 가능.
+- FCF 정의 차이 (자유현금흐름 직접 vs 영업CF - capex) peer 비교 노이즈.
+- 분기·반기 dividend (특별배당) 가 연간 합계에 비대칭 영향.
+- fcfCoverage > 1 일관 시 부채 누적 신호 — 별도 leverage 점검 필요.
+
+### 5. 후속 모니터링
+
+- mix shift 발생 (≥ 0.2): `recipes.fundamental.dividend.payoutShiftEvent` 로 변동 원인 추적.
+- fcfCoverage > 1 + 부채 ↑: `recipes.fundamental.credit.usHighYieldSpread` regime 확인.
+- buyback 우선 + 주가 하락: `recipes.fundamental.dividend.foreignOwnershipCorr` 로 외인 동행 검증.
 
 ## 대표 반환 형태
 

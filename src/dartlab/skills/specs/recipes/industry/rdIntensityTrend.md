@@ -137,7 +137,48 @@ emit_result(
 
 ## 호출 동작
 
-target 의 최근 5 년 R&D / 매출 비율 linear regression slope + peer set 단면에서 percentile rank 산출. `trendDirection` = rising/falling/flat 라벨.
+### 1. 결론 도출
+
+R&D / 매출 비율 5y slope + peer percentile rank 단정 (innovation lead 후보 / inline / lag). 예: "R&D/매출 6.8% (peer p82), 5y slope +0.4%/yr → rising trend + 상위 quartile → innovation lead 후보."
+
+### 2. 핵심 근거 수집
+
+- 회사 R&D 비용 5y 시계열 (Company.show 의 R&D 항목)
+- 매출 5y 시계열 (Company.show revenue)
+- peer set 단면 R&D / 매출 분포 (산업)
+
+### 3. 메커니즘 분석
+
+```
+회사 R&D 5년 + 매출 5년
+   ↓
+ratio[t] = R&D[t] / revenue[t] (각 연도)
+   ↓
+linear regression slope (5점 fit) → trendDirection
+   slope > +0.5%/yr → rising
+   slope < -0.5%/yr → falling
+   ±0.5%/yr          → flat
+   ↓
+peer 단면 비교 → percentile rank (1 = 가장 높음)
+   percentile ≥ 75% + rising → innovation lead 후보
+   percentile ≥ 75% + flat  → 고강도 유지 (mature R&D)
+   percentile < 25%          → R&D 강도 낮음 (cost-leadership 또는 mature)
+```
+
+추세 + cross-section 결합 = 단순 ratio 가 아닌 *추세 + 위치* 신호. innovation lead 후보 = 두 조건 동시 충족.
+
+### 4. 반례·한계
+
+- R&D 정의 차이 (자본화 vs 비용화) peer 비교 노이즈.
+- 5점 표본 너무 작아 slope 신뢰도 낮음.
+- 일회성 R&D 폭증 (대형 인수 직후) outlier 영향.
+- 산업별 R&D 강도 base 다름 (반도체 vs 식품) — 같은 산업 peer 만 비교 의미.
+
+### 5. 후속 모니터링
+
+- innovation lead 후보 진입: `recipes.fundamental.valuation.damodaran.reinvestmentRoc` 로 reinvestment ROC 정합 확인.
+- R&D 강도 falling 지속: `recipes.industry.industryStagePhase` 으로 산업 mature/decline 확인.
+- R&D 강도 percentile p25 미만 + 매출 성장 둔화: `recipes.fundamental.quality.forensics.deepDive` 로 회사 quality 점검.
 
 ## 대표 반환 형태
 

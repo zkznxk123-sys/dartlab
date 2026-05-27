@@ -155,7 +155,44 @@ emit_result(
 
 ## 호출 동작
 
-`gather.news` 가 sourceType=external 로 발급된 응답인지를 row 별 본문 안 sentinel 마커 substring 으로 확인한다. injection 키워드는 한국어/영어 시스템 지시 패턴 6 종을 regex 로 단순 카운트한다. row 수, 마커 누락 row, injection 매칭 합이 headline 으로 묶인다.
+### 1. 결론 도출
+
+뉴스 row 의 untrusted marker 보존 + injection 키워드 카운트 단정. 예: "news row 80건 중 marker 보유 78건 (97.5%), injection 매칭 0건 → marker coverage 양호 + injection 신호 없음."
+
+### 2. 핵심 근거 수집
+
+- 뉴스 row 본문 (Company.gather('news') body 또는 content)
+- sentinel marker `[EXTERNAL CONTENT START — untrusted]` ~ `[EXTERNAL CONTENT END]` 보존 여부
+- injection 키워드 6 종 regex: "이전 지시 무시" · "다음 답변에서는" · "X 를 실행해라" · "ignore previous" · "override system" · "execute the following"
+
+### 3. 메커니즘 분석
+
+```
+news row 본문 → marker substring 검사
+   marker 있음 → row 안전 (untrusted 명시)
+   marker 없음 → marker 누락 row (잠재적 injection 통로)
+   ↓
+본문 regex 6종 매칭 → injection 카운트
+   ↓
+headline:
+   markerRowCount + markerMissingCount + injectionMatchCount
+   markerMissing > 0 또는 injectionMatch > 0 → 보안 risk row 발생
+```
+
+본 recipe 는 *외부 본문 untrusted* 가드 (operation 룰의 한 축). injection 매칭은 LLM 이 답변 작성 시 본문 내 지시 따라가는 사고 방지. marker 누락은 발신 인프라 문제.
+
+### 4. 반례·한계
+
+- regex 단순 substring — 변형된 injection (예: "ignore the above") 미감지.
+- 한국어 자연스러운 사용 (예: "이전 지시 무시" 가 뉴스 본문의 일부) false positive.
+- markerMissing row 가 정상 데이터일 수도 있음 (gather 응답 양식 변화).
+- regex 6종 외 패턴 (코드 주입 등) 측정 안 됨.
+
+### 5. 후속 모니터링
+
+- injectionMatch ≥ 1: 해당 row 본문 직접 확인 + `recipes.news.disclosureNewsCrosscheck` 로 공시 검증.
+- markerMissing 비율 ↑ (10% 이상): gather 인프라 문제 — 운영자 alert.
+- 새 injection 패턴 발견 시: regex 6종 → N종 확장 (본 recipe 본문 보강).
 
 ## 대표 반환 형태
 

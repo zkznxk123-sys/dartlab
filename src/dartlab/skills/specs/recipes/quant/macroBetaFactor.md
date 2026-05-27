@@ -157,7 +157,44 @@ emit_result(
 
 ## 호출 동작
 
-`scan('macroBeta')` cross-section row 에서 macroBeta 점수 컬럼 추출 → 정렬 → q1/median/q3 cut 계산 → target 종목 percentile 위치 표면화. 추론 X.
+### 1. 결론 도출
+
+macroBeta cross-section percentile + quartile 단정. 예: "macroBeta 1.42, universe percentile 0.78 (Q1 = top 25%) — 매크로 충격 민감도 상위 분위 (Beta 큰 종목)."
+
+### 2. 핵심 근거 수집
+
+- scan('macroBeta') cross-section row (KOSPI 200 universe)
+- 종목별 macroBeta 점수 (금리·환율·유가 등 매크로 요인 회귀계수)
+- universe 분포 q1/median/q3 분위수
+
+### 3. 메커니즘 분석
+
+```
+scan('macroBeta') → universe N 종목의 macroBeta 점수
+   ↓
+정렬 → q1 / median / q3 cut 계산
+   ↓
+target 종목 위치 percentile = (own > peer 카운트) / universe_size
+   ↓
+percentile ≥ 0.75  → Q1 (top quartile, 매크로 충격 민감도 큼)
+0.25-0.75          → mid
+percentile < 0.25  → Q4 (bottom quartile, 매크로 충격 둔감)
+```
+
+macroBeta 큰 종목 = 매크로 환경 변화 (금리·환율) 에 가격 변동 큰 회사 (시클리컬). 작은 종목 = defensive (필수소비재·유틸 등).
+
+### 4. 반례·한계
+
+- macroBeta 추정 회귀 기간 (lookback) 따라 값 변동.
+- 시장 전체 충격 (COVID 2020) 데이터 포함 시 모든 종목 beta 부풀려짐.
+- 신규 상장 (history 부족) macroBeta 산출 불가.
+- 단일 macroBeta 값으로 매수/매도 단정 금지 — 시나리오 결합 필요.
+
+### 5. 후속 모니터링
+
+- Q1 macroBeta (top 분위) 종목: `recipes.macro.qualityMacroBeta` 로 macro elasticity 사례별 추적.
+- macroBeta 급변 (분기별 ±0.5): 산업 사이클 phase 변화 의심 — `recipes.industry.industryStagePhase` 확인.
+- 매크로 충격 시나리오: `recipes.macro.scenarioDiagram` 으로 종목별 영향 정량.
 
 ## 대표 반환 형태
 

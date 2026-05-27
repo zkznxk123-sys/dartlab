@@ -135,7 +135,45 @@ emit_result(
 
 ## 호출 동작
 
-각 peer 의 3 마진 (GP / OM / NM) z-score 산출 후, 최근 연도가 직전 3 년 baseline 대비 ≤ -1σ 인 축 카운트 (`compressionScore`). compressionScore ≥ 2 이면 *동시 압축 cluster* 후보.
+### 1. 결론 도출
+
+peer 3축 마진 압축 cluster 단정. 예: "5 peer 중 3 회사가 compressionScore ≥ 2 (GP·OM·NM 동시 -1σ) → 산업 광범위 마진 압축 cluster — mature/decline phase 진입 후보."
+
+### 2. 핵심 근거 수집
+
+- peer set 별 5년 IS 시계열 (Company.show IS)
+- 3 마진 계산: GP (gross) = 매출총이익/매출, OM (operating) = 영업이익/매출, NM (net) = 순이익/매출
+- 각 축 직전 3년 baseline mean/std → 최근 연도 z-score
+
+### 3. 메커니즘 분석
+
+```
+peer 별 5년 IS → GP / OM / NM ratio 시계열
+   ↓
+직전 3년 (Y-3 ~ Y-1) baseline: mean + std
+최근 연도 (Y) → z = (Y - baseline_mean) / baseline_std
+   ↓
+3 축 중 z ≤ -1σ 인 축 카운트 = compressionScore (0~3)
+   ↓
+회사별 compressionScore 집계
+peer 절반 이상이 compressionScore ≥ 2  → 광범위 압축 cluster
+peer 절반 이상이 양수 방향 (-1σ 미만 아님) → 변별력 없음 (falsifier 발동)
+```
+
+3 축 모두 동시 압축 = 매출 둔화 + 비용 압박 + 수익성 전반 약화 (산업 cycle 후기 신호). 단일 축 압축은 일회성.
+
+### 4. 반례·한계
+
+- peer 거의 모두 같은 방향 (압축 또는 확장) 이면 산업 전체 신호 — cluster 변별력 없음.
+- 회계 정책 차이 (revenue recognition · COGS classification) peer raw 비교 노이즈.
+- 신규 상장 (3년 baseline 부족) 측정 불가.
+- 일회성 항목 (자산매각 차익 · 충당금 환입) NM z-score 왜곡.
+
+### 5. 후속 모니터링
+
+- 광범위 압축 cluster: `recipes.industry.industryStagePhase` 로 산업 phase 확인 (mature/decline 신호 정합).
+- compression 상위 회사: `recipes.fundamental.quality.forensics.deepDive` 로 회사 specific 회계 점검.
+- peer 동시 확장 (반대 방향): `recipes.industry.peerCapexWave` 로 capex cycle 진입 여부 확인.
 
 ## 대표 반환 형태
 
