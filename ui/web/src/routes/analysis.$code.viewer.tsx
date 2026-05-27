@@ -20,7 +20,6 @@ import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, 
 import { useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
 import { cn } from '@/lib/utils';
 
@@ -589,14 +588,12 @@ function ViewerTab() {
 							</div>
 						)}
 
-						{/* 단일 ScrollArea — period header + 본문 한 묶음. 외부/내부 이중스크롤 회피.
-						    period header 는 ScrollArea viewport 안 sticky top-0 → 본문 스크롤 시에도
-						    column 라벨 + 원본 링크 viewport 상단 고정. 박스 테두리 없음 (radix
-						    ScrollArea 자체 스크롤바 UX). */}
-						<ScrollArea className="min-h-0 flex-1">
-							{/* viewport-internal sticky — period 라벨 + 원본 링크 */}
+						{/* 본문 영역 — 단순 overflow-y-auto + tiny-scroll. 박스/wrapper 없음.
+						    period header 는 본문 영역 안 sticky top-0 → 스크롤 시 column 라벨 +
+						    원본 링크 상단 고정. 단일 스크롤 source. */}
+						<div className="min-h-0 flex-1 overflow-y-auto tiny-scroll">
 							<div
-								className="sticky top-0 z-10 grid gap-3 border-b bg-background px-1 py-2"
+								className="sticky top-0 z-10 grid gap-3 border-b bg-background py-2"
 								style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
 							>
 								{windowPeriods.map((p) => {
@@ -625,10 +622,10 @@ function ViewerTab() {
 								})}
 							</div>
 							{/* 본문 — sections SSOT rows (period × content) 직접 dumb render */}
-							<div className="px-1 py-3">
+							<div className="py-3">
 								<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
 							</div>
-						</ScrollArea>
+						</div>
 					</div>
 				)}
 			</main>
