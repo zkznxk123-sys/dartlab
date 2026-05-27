@@ -40,6 +40,9 @@ _ORIGINAL_DOCS_DIR_NAME = "dart/original/docs"
 
 # rebuildFromZips streaming parquet schema — regular string (large_string 회피).
 # cell split (MAX_CELL_BYTES=1MB) 으로 pa.string() 32-bit offset 안전.
+# section_content_mixed: section_content (raw XML) 의 xmlChunkToMixed 결과 사전 계산.
+# sections build 의 핫 패스 (per-period map_elements(xmlChunkToMixed) ~11s) 영구 제거.
+# zstd dedup + mixed 양식이 raw 보다 작아 parquet 사이즈 +/- 0 (실측: 27.7→18.4MB 감소).
 _REBUILD_SCHEMA = pa.schema(
     [
         ("corp_code", pa.string()),
@@ -53,6 +56,7 @@ _REBUILD_SCHEMA = pa.schema(
         ("section_title", pa.string()),
         ("section_url", pa.string()),
         ("section_content", pa.string()),
+        ("section_content_mixed", pa.string()),
         ("atocid", pa.string()),
         ("assocnote", pa.string()),
     ]
@@ -292,6 +296,13 @@ def _rcpRowsToTable(
             expanded.append({**r, "content": p})
 
     n = len(expanded)
+    # section_content_mixed pre-compute — sections build 의 per-row xmlChunkToMixed
+    # (~11s for 2K rows × 31 periods × map_elements) 를 docs.parquet 빌드 시점 1 회로
+    # 옮겨 사용자 화면 cold first build 영구 가속. import lazy 로 cycle 회피.
+    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+
+    rawContents = [r["content"] for r in expanded]
+    mixedContents = [xmlChunkToMixed(content) for content in rawContents]
     cols = {
         "corp_code": [meta.get("corp_code", "") or corpCode] * n,
         "corp_name": [meta.get("corp_name", "") or corpName] * n,
@@ -303,7 +314,8 @@ def _rcpRowsToTable(
         "section_order": list(range(n)),
         "section_title": [r["title"] for r in expanded],
         "section_url": [""] * n,
-        "section_content": [r["content"] for r in expanded],
+        "section_content": rawContents,
+        "section_content_mixed": mixedContents,
         "atocid": [r.get("atocid", "") or "" for r in expanded],
         "assocnote": [r.get("assocnote", "") or "" for r in expanded],
     }

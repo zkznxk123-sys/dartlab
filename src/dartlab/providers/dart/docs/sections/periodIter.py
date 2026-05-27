@@ -37,6 +37,9 @@ _SECTIONS_REQUIRED_COLS = [
     "rcept_date",
     "section_order",
     "section_title",
+    # section_content_mixed 가 있으면 iterPeriodSubsets 가 xmlChunkToMixed 호출 우회.
+    # 옛 양식 (mixed 없음) 도 동일 코드 경로 호환 — detect 후 분기.
+    "section_content_mixed",
     "section_content",
     "content",
 ]
@@ -72,6 +75,12 @@ def iterPeriodSubsets(
     """
     df = loadData(stockCode, sinceYear=sinceYear, columns=_SECTIONS_REQUIRED_COLS)
     ccol = detectContentCol(df)
+    # docs.parquet 양식 분기 — section_content_mixed 가 있으면 xmlChunkToMixed 사전 계산본.
+    # 매 period subset 마다 map_elements(xmlChunkToMixed) 호출 (~11s for 31 periods × 2K rows)
+    # 우회. 옛 양식은 종래 ccol (section_content 또는 content) 그대로 사용 + 동적 변환.
+    hasMixed = "section_content_mixed" in df.columns
+    if hasMixed:
+        ccol = "section_content_mixed"
     years = sorted(df["year"].unique().to_list(), reverse=True)
 
     for year in years:
@@ -101,5 +110,10 @@ def iterPeriodSubsets(
             # docs.parquet 의 section_content 는 raw XML chunks (P/SPAN/TABLE/...) —
             # xmlAdapter.xmlChunkToMixed 로 sections pipeline 호환 양식 (markdown/HTML
             # mixed) 변환. _splitContentBlocks 가 받을 양식.
-            subset = subset.with_columns(pl.col(ccol).map_elements(xmlChunkToMixed, return_dtype=pl.Utf8).alias(ccol))
+            # section_content_mixed (pre-computed) 가 있으면 ccol = "section_content_mixed"
+            # 로 박혀 이 변환 우회 — sections build 핫 패스 ~11s 영구 제거.
+            if not hasMixed:
+                subset = subset.with_columns(
+                    pl.col(ccol).map_elements(xmlChunkToMixed, return_dtype=pl.Utf8).alias(ccol)
+                )
             yield periodKey, reportKind, ccol, subset
