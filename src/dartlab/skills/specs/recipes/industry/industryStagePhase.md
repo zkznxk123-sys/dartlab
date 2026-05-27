@@ -4,7 +4,7 @@ title: 산업 단계 매핑 — ROIC-WACC spread 분포로 phase 판정
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: peer set 의 ROIC-WACC spread 분포 (mean·std·skew) + 매출 CAGR 5y 결합으로 산업의 *도입 / 성장 / 성숙 / 후행* phase 판정. 단일 회사가 아닌 peer set 단면 분포가 판정 신호. industry ↔ scan 격리 메우는 조합.
 whenToUse:
   - 산업 단계 매핑
@@ -60,6 +60,7 @@ testUniverse:
 falsifier:
   description: "peer set ≤ 3 종목이면 분포 신호 결론 X. mean ROIC-WACC spread 의 95% CI 가 0 을 포함하면 *phase 미정* 처리."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

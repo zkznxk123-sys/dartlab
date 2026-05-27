@@ -4,7 +4,7 @@ title: SEC 10-K Item 1A 위험 요인 변화 (YoY 신규/삭제 항목 수)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 미국 10-K Item 1A "Risk Factors" 의 직전 연도 대비 *신규 추가* / *삭제* 항목 수. 신규 risk factor ≥ 3 = 경영진의 위험 인식 전환 신호. EDGAR provider raw.
 whenToUse:
   - 10-K risk factor YoY
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "10-K 본문 raw 누락 또는 직전 연도 없음 → 결론 X. 단순 wording 변경을 신규 위험으로 카운트하면 false positive."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

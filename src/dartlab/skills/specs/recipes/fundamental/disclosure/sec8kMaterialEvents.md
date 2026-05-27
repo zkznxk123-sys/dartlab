@@ -4,7 +4,7 @@ title: SEC 8-K material event burst (30 day 윈도우 카운트)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 미국 8-K material event filing 의 30 일 윈도우 카운트 + Item 분류 분포. ≥ 5 건 또는 Item 5.02 (임원 변동) ≥ 2 건 = *전환점 burst* 후보. EDGAR raw.
 whenToUse:
   - 8-K burst
@@ -58,6 +58,7 @@ testUniverse:
 falsifier:
   description: "8-K filing < 3 이면 burst 결론 X. 정기 (Item 8.01 disclosure) 만 burst 처리하면 false positive."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

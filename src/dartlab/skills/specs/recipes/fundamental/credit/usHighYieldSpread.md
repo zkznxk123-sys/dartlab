@@ -4,7 +4,7 @@ title: 미국 High Yield OAS spread regime (BofA HY OAS)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: ICE BofA US High Yield OAS spread 시계열 z-score. 4%p 이상 = stress, 8%p 이상 = crisis 임계. 단일 회사가 아닌 *credit market regime* 신호. FRED `BAMLH0A0HYM2` raw.
 whenToUse:
   - US HY spread
@@ -58,6 +58,7 @@ testUniverse:
 falsifier:
   description: "임계 단일값만으로 recession 결론 금지 — *지속 기간* + 다른 신호 (yield curve) 동행 필수."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
