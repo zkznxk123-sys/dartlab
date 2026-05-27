@@ -137,6 +137,18 @@ emit_result(
 
 ## 호출 동작
 
+### 1. 결론 도출
+
+10 gate × premortemQualityScore + qualityGateStatus 단정. 예: "premortemQualityGate 10 row — 8 ok + 2 risk (sourceBreadth + falsifierOpen). qualityScore=8/10 → qualityGateStatus=operatorReview (90% 미달, weak 아님). decisionStatus=mediated — 누락 gate 2 종 보강 후 결론 가능."
+
+### 2. 핵심 근거 수집
+
+- thesisIntake + assumptionLedger + fragilityMap + triggerCatalog + propagationPath + tripwireMonitor + falsifierLedger + scenarioStoryboard + visualDecisionPack (9 sub-recipe)
+- evidenceCoverageAudit (source 폭)
+- buildThesisKillChainMemo() → premortemQualityGate table
+
+### 3. 메커니즘 분석
+
 10개 gate를 모두 확인한다.
 
 | gate | 차단 의미 |
@@ -151,6 +163,19 @@ emit_result(
 | `falsifierOpen` | counter-evidence가 없으면 confirmation bias다. |
 | `scenarioComplete` | base/erosion/kill-chain 세 시나리오가 모두 필요하다. |
 | `visualBindingReady` | observed viz라도 table/value ref에 묶이지 않으면 emit하지 않는다. |
+
+### 4. 반례·한계
+
+- qualityGateStatus=weak 인데 thesis 결론 확정 → forbidden + falsifier 위반.
+- risk row 삭제 또는 평균 점수로 숨김 → 스킬 실패 (forbidden).
+- sourceBreadth 부족하지만 narrative 로 보강 → failureMode (분석 왜곡).
+- propagationPath 없이 trigger 만 나열 → failureMode + premortem 무효.
+
+### 5. 후속 모니터링
+
+- flagshipReady → `recipes.meta.thesisKillChain.deepDive` 로 최종 답변 통합.
+- operatorReview → 누락 gate 보강 (사용자에게 nextAction 제시).
+- weak → 답변 차단 + 보강 EngineCall 목록 제시.
 
 ## 대표 반환 형태
 

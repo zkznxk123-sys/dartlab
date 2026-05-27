@@ -105,7 +105,55 @@ emit_result(
 
 ## 호출 동작
 
-thesisIntake, propagationPath, tripwireMonitor, falsifierLedger를 baseIntact, erosionCase, killChainCase로 요약한다.
+### 1. 결론 도출
+
+3 scenario storyboard (base/erosion/kill) 단정. 예: "storyboard 3 row — baseIntact status=ok plot='OPM 유지 + CFO/NI ≥ 1 + valuation discount 점진 해소' monitoring='4Q 실적 + consensus 모니터링' / erosionCase status=watch plot='OPM 1-2%p 압축 + cash conversion 약화 + discount 유지' monitoring='월간 fragility 재측정' / killChainCase status=risk plot='OPM 3%p+ 압축 + CB 추가 발행 + multiple compression' monitoring='tripwire trigger 발동 시 reversion 점검'. 3 scenario + 각 monitoring 완비."
+
+### 2. 핵심 근거 수집
+
+- thesisIntake (원문 + themes)
+- propagationPath (path 4-8)
+- tripwireMonitor (current + threshold)
+- falsifierLedger (open/notTriggered)
+- buildThesisKillChainMemo() → scenarioStoryboard table
+
+### 3. 메커니즘 분석
+
+```
+4 source → 3 scenario 요약
+   baseIntact:
+     모든 assumption 유지 + tripwire ok 다수
+     plot = "thesis 유지 시 시장 반응 + monitoring 시점"
+   erosionCase:
+     일부 assumption watch + tripwire 일부 risk
+     plot = "thesis 약화 시작 + multiple 압축 추세"
+   killChainCase:
+     2+ assumption broken + tripwire 다수 risk
+     plot = "thesis 붕괴 + valuation 완전 reset"
+   ↓
+각 scenario × (status + plot + requiredEvidence + monitoring) 필수:
+   monitoring 없는 row → 실패 (forbidden)
+   killChainCase 만 제시 + baseIntact 생략 → forbidden
+   소설처럼 plot 만 + tripwire 사라짐 → failureMode
+   ↓
+3 scenario 모두 강제:
+   사용자가 *유지되는 조건* + *약화되는 경로* + *붕괴되는 경로* 동시 비교
+```
+
+storyboard = pre-mortem 의 *최종 전달 형태*. 3 scenario 모두 + monitoring 강제 — 무너지는 경로만 보면 confirmation bias.
+
+### 4. 반례·한계
+
+- 3 scenario 모두 없으면 실패.
+- killChainCase 만 + baseIntact 생략 → forbidden.
+- monitoring 없는 row → failureMode.
+- plot 이 너무 길어 tripwire 사라짐 → 운영 불가능.
+
+### 5. 후속 모니터링
+
+- 3 scenario ready → `recipes.meta.thesisKillChain.visualDecisionPack` 으로 chart 가능 여부.
+- erosionCase + killChainCase 동시 risk → `recipes.meta.thesisKillChain.deepDive` 으로 최종 답변.
+- baseIntact 만 ok → `recipes.meta.thesisKillChain.premortemQualityGate` 로 thesis 견조 confirm.
 
 ## 대표 반환 형태
 

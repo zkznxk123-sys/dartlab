@@ -103,7 +103,55 @@ emit_result(
 
 ## 호출 동작
 
-fragility metric마다 threshold와 action을 붙여 monitoring row를 만든다.
+### 1. 결론 도출
+
+tripwire current + threshold + action 단정. 예: "tripwireMonitor 6 row — T1=opmYoY current=-1.5% threshold=-2% status=watch action='3Q 컨퍼런스콜 모니터링' / T2=cfoNi current=0.85 threshold=0.7 status=ok / T3=price60d current=-12% threshold=-15% status=watch action='reverse signal 확인' / T4=consensus current=-3% threshold=-5% status=ok / T5=foreignFlow current=-5건 missing → 4 ok/watch + 1 missing — 운영 가능 monitor 5 종."
+
+### 2. 핵심 근거 수집
+
+- fragilityMap (current value)
+- triggerCatalog (threshold 정의)
+- Company.show/gather (실시간 current 재측정)
+- buildThesisKillChainMemo() → tripwireMonitor table
+
+### 3. 메커니즘 분석
+
+```
+fragility metric → tripwire row 변환
+   current (실시간 값) + threshold (임계) + status (현재 거리)
+   ↓
+status 판정:
+   |current - threshold| > 1 std → ok (안전 거리)
+   |current - threshold| < 1 std → watch (근접)
+   current 가 threshold 를 trigger 방향으로 넘어섬 → risk
+   data 결손              → missing
+   ↓
+action 강제:
+   각 watch/risk row 에 action 정의:
+     "3Q 컨퍼런스콜 모니터링"
+     "reverse signal 확인"
+     "consensus 재측정 (월간)"
+   threshold + action 없는 row → 실패 (forbidden)
+   ↓
+운영 가능성:
+   thesis 를 *계속 들고 갈지* 판단하는 조기 경보선
+   사용자가 나중에 재검사 가능한 체크리스트
+```
+
+tripwireMonitor = scenario 를 *운영 체크리스트* 로 변환. threshold + action 없는 watch/risk → forbidden 위반.
+
+### 4. 반례·한계
+
+- threshold 없는 watch/risk → forbidden + failureMode.
+- current 값만 표시 + action 누락 → 운영 불가능.
+- threshold 가 vague ("적절한 수준") → quantitative 임계 강제.
+- missing tripwire 를 결론에 사용 → 실패.
+
+### 5. 후속 모니터링
+
+- watch/risk 다수 → `recipes.meta.thesisKillChain.falsifierLedger` 로 반증 조건.
+- 모든 tripwire 가 ok → `recipes.meta.thesisKillChain.premortemQualityGate` 로 thesis 견조 확인.
+- tripwire trigger 발동 → `recipes.meta.thesisKillChain.scenarioStoryboard` 로 시나리오 전개.
 
 ## 대표 반환 형태
 

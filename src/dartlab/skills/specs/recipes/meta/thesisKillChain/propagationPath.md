@@ -104,7 +104,52 @@ emit_result(
 
 ## 호출 동작
 
-triggerCatalog의 watch/risk trigger를 mechanism, affectedAssumption, tripwire로 연결한다.
+### 1. 결론 도출
+
+trigger → mechanism → assumption path 단정. 예: "propagationPath 4 row order=1-4. Path 1: opmCompression → margin pressure 누적 → marginDurability 가정 깨짐 → tripwire OPM YoY > -2%p. Path 2: cbIssuance → 희석 +3% → valuationSupport 깨짐 → tripwire 전환비율 ≥ 30%. → 4 path 모두 mechanism + tripwire 명시 (trigger → conclusion 직행 회피)."
+
+### 2. 핵심 근거 수집
+
+- triggerCatalog (watch/risk trigger)
+- assumptionLedger (5 표준 카테고리)
+- Company.show + disclosure + gather 보조 데이터
+- buildThesisKillChainMemo() → propagationPath table
+
+### 3. 메커니즘 분석
+
+```
+각 trigger × 매칭 assumption 연결
+   triggerId → mechanism (1-3 단계 인과 chain) → affectedAssumption → tripwire
+   ↓
+mechanism 정의 (구체 동사):
+   "margin pressure 누적" / "희석 가중" / "수요 둔화" / "FX 이익 감소"
+   1 mechanism 만 (직접 연결) → trigger → conclusion 직행 (forbidden)
+   2-3 mechanism (간접 chain) → 진성 propagation
+   ↓
+order (경로 순서):
+   1 = root trigger
+   2-N = downstream propagation
+   각 step 에 tripwire (임계값 + 모니터링 조건) 명시 필수
+   ↓
+diagram (mermaid):
+   8 edge 이하 제한 (engines.viz.mermaidDiagram 가이드)
+   각 edge = mechanism 문장 + sourceRef 명시
+```
+
+mermaidDiagram 으로 시각화 시 8 edge 이하 — engines.viz 가이드. mechanism 없이 trigger → conclusion 직접 연결 시 forbidden 위반 (failureMode 발동).
+
+### 4. 반례·한계
+
+- mechanism 없이 trigger → conclusion 직행 → forbidden + failureMode.
+- affectedAssumption 누락 path → 실패.
+- diagram 8 edge 초과 → engines.viz.mermaidDiagram 가이드 위반.
+- 단일 trigger → 단일 path 강제 X — 1 trigger 가 multi assumption 영향 가능.
+
+### 5. 후속 모니터링
+
+- 4+ path → `recipes.meta.thesisKillChain.tripwireMonitor` 로 임계 모니터링.
+- mechanism 약함 → `recipes.meta.thesisKillChain.fragilityMap` 로 fragility 재측정.
+- path 가 scenario 로 → `recipes.meta.thesisKillChain.scenarioStoryboard` 로 변환.
 
 ## 대표 반환 형태
 
