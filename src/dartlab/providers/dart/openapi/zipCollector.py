@@ -96,6 +96,16 @@ def _extractMetaFromXml(xml: str, rcptNo: str) -> tuple[str, str, str]:
         return rcptYear, rcptDate, ""
     kind, fiscalMonth = kindFiscal
 
+    # DART 메타 회귀 보강 — 분기보고서 ACODE 11013 이 Q1/Q3 둘 다 한 코드로 박혀온다
+    # (ACODE 11014 = 폐기 추정, 실제 zip 검사 시 Q3 보고서도 11013). rcept_date 의
+    # 월로 분기 판정: 11월 제출 (1114~1116) = Q3 (9월말, fiscalMonth=09).
+    # 미보강 시 selectReport(reportKind="Q3") regex (`분기보고서.*\d{4}\.09`) 가
+    # 0 row → 전 종목 Q3 column 누락 (사용자 화면 Q3 안 보임 회귀).
+    if acode == "11013" and rcptDate:
+        rcptMonth = rcptDate[4:6]
+        if rcptMonth >= "10":
+            fiscalMonth = "09"
+
     # 사업연도 = annual (사업보고서) 인 경우 rcept year - 1 (12월 결산), 그 외 rcept year
     if kind == "사업보고서" and rcptYear:
         try:
