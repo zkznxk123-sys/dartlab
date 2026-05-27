@@ -534,11 +534,12 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="flex w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden py-4">
+					<div className="flex w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden pt-3">
 						{/* 상위 타임라인 + 토픽 제목 — main flex column 상단 고정 (스크롤 아님).
-						    아래 ScrollArea 가 단일 vertical scroll source. */}
-						<div className="mb-3 shrink-0 border-b bg-background px-3">
-						<header className="pb-2 pt-2">
+						    아래 body scroll div 가 단일 vertical scroll source. 여백 최소화 —
+						    타임라인 ↔ 본문 사이 박스 여백 제거 (border-b 만). */}
+						<div className="shrink-0 border-b bg-background px-3">
+						<header className="pb-0 pt-2">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
 									<div className="text-xs text-muted-foreground">
