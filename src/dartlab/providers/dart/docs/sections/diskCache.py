@@ -18,6 +18,7 @@ Freshness rule:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 from pathlib import Path
 
@@ -29,6 +30,10 @@ _log = logging.getLogger(__name__)
 
 _DOCS_DIR_REL = "dart/docs"
 _SECTIONS_CACHE_REL = "dart/sectionsCache"
+# Phase 1 (_PreparedRows) disk cache — Phase 3 (final wide DF) 의 *상위* 캐시.
+# 같은 종목 다른 topics 부분 호출 시 Phase 3 가 miss 면 본 cache 가 XML parsing
+# 11s + 421MB peak 우회 (mmap IPC + tiny JSON).
+_PREPARED_CACHE_REL = "dart/sectionsCache"  # 같은 폴더, suffix 로 구분
 
 
 def _docsPath(stockCode: str) -> Path:
@@ -186,6 +191,128 @@ def clearDiskCache(stockCode: str | None = None) -> None:
                 p.unlink()
             except OSError:
                 pass
+
+
+# ── Phase 1 (_PreparedRows) disk cache ──
+# periodRowsDf (polars DF, 50~100MB) + validPeriods (list[str]) + teacherTopics
+# (dict[str,str]). docs.parquet mtime 변경 시 stale → rebuild.
+
+
+def preparedCachePath(stockCode: str) -> tuple[Path, Path]:
+    """_PreparedRows disk cache 경로 — (arrow IPC, json sidecar) tuple.
+
+    arrow IPC mmap → periodRowsDf 의 polars DF zero-copy load. sidecar JSON 은
+    validPeriods + teacherTopics + docs_mtime 메타.
+
+    Args:
+        stockCode: 종목코드 (6 자리).
+
+    Returns:
+        (arrow_path, json_path) tuple.
+
+    Example:
+        >>> preparedCachePath("005930")[0].name
+        '005930_prepared.arrow'
+    """
+    base = Path(_cfg.dataDir) / _PREPARED_CACHE_REL
+    return (base / f"{stockCode}_prepared.arrow", base / f"{stockCode}_prepared.json")
+
+
+def loadPreparedDiskCache(stockCode: str):
+    """``_PreparedRows`` disk cache read. miss / stale / corrupt → None.
+
+    docs.parquet mtime > arrow mtime 이면 stale (rebuild 필요). mmap memory_map=True
+    로 RSS 위임 → 다중 process 공유 + page cache 활용. caller 는 본 함수 결과를
+    ``_PreparedRows`` instance 로 받아 in-memory LRU 에 박는다.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        ``(periodRowsDf, validPeriods, teacherTopics)`` tuple 또는 None.
+
+    Example:
+        >>> loadPreparedDiskCache("005930")  # doctest: +SKIP
+    """
+    arrowPath, jsonPath = preparedCachePath(stockCode)
+    if not arrowPath.exists() or not jsonPath.exists():
+        return None
+    docsPath = _docsPath(stockCode)
+    if docsPath.exists() and docsPath.stat().st_mtime > arrowPath.stat().st_mtime:
+        return None
+    try:
+        meta = json.loads(jsonPath.read_text(encoding="utf-8"))
+        periodRowsDf = pl.read_ipc(str(arrowPath), memory_map=True)
+        validPeriods: list[str] = list(meta.get("validPeriods") or [])
+        rawTeacher = meta.get("teacherTopics") or {}
+        # 저장 시 set → list 직렬화. caller (pipeline._getPrepared) 는 set 형이
+        # 자연스러우니 list 인 값들을 set 으로 복원. scalar (str) 값은 그대로.
+        teacherTopics: dict[str, object] = {k: (set(v) if isinstance(v, list) else v) for k, v in rawTeacher.items()}
+        return (periodRowsDf, validPeriods, teacherTopics)
+    except (OSError, ValueError, json.JSONDecodeError, pl.exceptions.ComputeError) as exc:
+        _log.warning("preparedDiskCache read 실패 %s — rebuild (%s)", stockCode, exc)
+        return None
+
+
+def savePreparedDiskCache(
+    stockCode: str,
+    periodRowsDf: pl.DataFrame,
+    validPeriods: list[str],
+    teacherTopics: dict[str, str],
+) -> None:
+    """``_PreparedRows`` disk cache write. write 실패 = silent warn + in-memory only.
+
+    arrow IPC + sidecar JSON 2 파일 atomic-ish write. 실패 시 cache 누락이 다음
+    process restart 의 11s cold rebuild 로 잠재화 — 명시 노출 위해 warning 로깅.
+
+    Args:
+        stockCode: 종목코드.
+        periodRowsDf: Phase 1 결과 polars DF (모든 period × topic row + _periodKey).
+        validPeriods: sorted period list (annual + Q1/Q2/Q3).
+        teacherTopics: chapter→topic 매핑 (first annual 기준).
+
+    Example:
+        >>> savePreparedDiskCache("005930", df, periods, teacher)  # doctest: +SKIP
+    """
+    if periodRowsDf is None or periodRowsDf.is_empty():
+        return
+    arrowPath, jsonPath = preparedCachePath(stockCode)
+    arrowPath.parent.mkdir(parents=True, exist_ok=True)
+    # teacherTopics 의 값이 set 인 경우 (chapter → topic 후보 집합) JSON 직렬화 불가 →
+    # list 로 정규화. load 시 caller 가 다시 set 으로 변환할 책임 (현재 caller 는
+    # in-place 사용이라 list/set 둘 다 동작).
+    teacherSerializable = {k: (sorted(v) if isinstance(v, (set, frozenset)) else v) for k, v in teacherTopics.items()}
+    try:
+        periodRowsDf.write_ipc(str(arrowPath), compression="zstd")
+        jsonPath.write_text(
+            json.dumps(
+                {"validPeriods": validPeriods, "teacherTopics": teacherSerializable},
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+    except (OSError, ValueError, pl.exceptions.ComputeError) as exc:
+        _log.warning("preparedDiskCache write 실패 %s (%s) — in-memory only", stockCode, exc)
+
+
+def clearPreparedDiskCache(stockCode: str | None = None) -> None:
+    """``_PreparedRows`` disk cache 해제. stockCode=None 이면 전체.
+
+    Args:
+        stockCode: 특정 종목 prepared cache 만 해제. None = 전체.
+
+    Example:
+        >>> clearPreparedDiskCache("005930")
+    """
+    cacheDir = Path(_cfg.dataDir) / _PREPARED_CACHE_REL
+    if not cacheDir.exists():
+        return
+    pattern = f"{stockCode}_prepared.*" if stockCode else "*_prepared.*"
+    for p in cacheDir.glob(pattern):
+        try:
+            p.unlink()
+        except OSError:
+            pass
 
 
 def _buildOneForBatch(code: str) -> tuple[str, bool]:

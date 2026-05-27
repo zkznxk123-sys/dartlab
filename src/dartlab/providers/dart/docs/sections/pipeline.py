@@ -357,11 +357,35 @@ from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
 
 
 def _getPrepared(stockCode: str) -> _PreparedRows:
-    """Phase 1 결과를 캐싱하여 반환. 같은 종목 반복 호출 시 parquet 재로드 방지."""
+    """Phase 1 결과를 캐싱하여 반환. 같은 종목 반복 호출 시 parquet 재로드 방지.
+
+    캐시 계층 — in-memory LRU (process 수명) → disk IPC + JSON sidecar (process
+    restart resilience) → cold build (xmlChunkToMixed 11s + 421MB peak). disk
+    cache hit 시 mmap RSS 위임 + 50ms 안 reload (cold rebuild 의 0.5%).
+    """
     with _cacheLock:
         cached = _preparedCache.get(stockCode)
     if cached is not None:
         return cached
+
+    # Phase 1 disk cache — process restart 후 첫 호출도 XML parsing 11s 우회.
+    from dartlab.providers.dart.docs.sections.diskCache import (
+        loadPreparedDiskCache as _loadPreparedDiskCache,
+    )
+
+    diskHit = _loadPreparedDiskCache(stockCode)
+    if diskHit is not None:
+        periodRowsDfHit, validPeriodsHit, teacherTopicsHit = diskHit
+        preparedHit = _PreparedRows(periodRowsDfHit, validPeriodsHit, teacherTopicsHit)
+        with _cacheLock:
+            existingHit = _preparedCache.get(stockCode)
+            if existingHit is not None:
+                return existingHit
+            if len(_preparedCache) >= _PREPARED_CACHE_MAX:
+                oldestHit = next(iter(_preparedCache))
+                del _preparedCache[oldestHit]
+            _preparedCache[stockCode] = preparedHit
+        return preparedHit
 
     validPeriods: list[str] = []
     latestAnnualRows: list[dict[str, object]] | None = None
@@ -392,6 +416,17 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
     gc.collect()
 
     prepared = _PreparedRows(periodRowsDf, validPeriods, teacherTopics)
+
+    # Phase 1 disk cache write — 다음 process restart 첫 호출이 mmap reload 로 50ms.
+    # write 비용 ~30~50ms (zstd IPC compression), build 한 후 1 회. None / 빈 DF 면 skip.
+    try:
+        from dartlab.providers.dart.docs.sections.diskCache import (
+            savePreparedDiskCache as _savePreparedDiskCache,
+        )
+
+        _savePreparedDiskCache(stockCode, periodRowsDf, validPeriods, teacherTopics)
+    except Exception as exc:  # noqa: BLE001 — disk cache write 실패가 build 자체 실패로 번지면 안 됨
+        _log.warning("preparedDiskCache save 실패 %s (%s) — in-memory only", stockCode, exc)
 
     # LRU 방식: 최대치 초과 시 가장 오래된 항목 제거. lock 가드 — concurrent build race 차단.
     with _cacheLock:
