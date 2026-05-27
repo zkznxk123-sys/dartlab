@@ -4,7 +4,7 @@ title: 뉴스 헤드라인 빈도 가속 (7/30 일 분당 비율)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: news
 purpose: 종목 news gather row 의 7 일 / 30 일 발생 빈도를 일평균 단위로 환산. 단기 일평균 / 장기 일평균 비율로 *뉴스 가속도* 측정. 추론 라벨 (긍정/부정) 없이 빈도 정량만. news gather 단일.
@@ -64,6 +64,7 @@ failureModes:
   - 자동 재배포 중복 row 가 빈도 과대 측정
   - 30 일 < 60 day-old row 일 때 장기 베이스 불안정
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

@@ -4,7 +4,7 @@ title: 섹터 자금 흐름 집중도 (외인 비중 + 거래대금 share)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: industry
 purpose: 종목이 속한 섹터의 외인 보유 비율 + 거래대금 share 의 단순 정량 표기. 섹터 안 종목 거래대금이 한 종목으로 집중되면 *집중*, 분산되면 *분산*. 추론 라벨 없이 절대 수치만. sector + price gather 결합.
@@ -64,6 +64,7 @@ failureModes:
   - 단일 거래일 변동을 집중도로 오인
   - 외인 보유율 (보유 vs 매매) 정의 혼동
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

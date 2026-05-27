@@ -4,7 +4,7 @@ title: 이벤트 직전·직후 변동성 (ATR ratio)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 공시 이벤트 시점 ±10 거래일 ATR (Average True Range) ratio. T-10 baseline 대비 T+10 ATR 이 1.3x+ 이면 *이벤트 induced 변동성* 확대. 단일 가격 변동 X — *변동성 체제* 측정.
 whenToUse:
   - 이벤트 변동성
@@ -58,6 +58,7 @@ testUniverse:
 falsifier:
   description: "ATR < 5 거래일 sample 이면 결론 X. 시장 전체 변동성 (KOSPI VKOSPI) 동시 확대 시 이벤트 induced 분리 불가."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
