@@ -106,10 +106,14 @@ async def lifespan(_: FastAPI):
     # background thread 로 미리 깨움 — 사용자 첫 호출은 cache hit (즉시 응답).
     # 회귀 가드: 과거 secret_store prewarm 은 잘못된 DPAPI 가설 기반이라 제거됨.
     # 이번 prewarm 은 측정 기반 (cold availableModels() = 43s 검증).
-    models_prewarm_task = asyncio.create_task(_prewarmOauthCodexModels())
-    # viz catalog cold import — quant 탭 진입 시 useQuery 30s timeout 사고 차단.
-    viz_prewarm_task = asyncio.create_task(_prewarmVizCatalog())
-    preload_task = asyncio.create_task(_preloadOllamaOnce()) if _should_preload_ollama() else None
+    # DARTLAB_NO_PREWARM=1 — prewarm 일괄 비활성화 (event loop 100% 점거 회귀 가드).
+    # 과거 prewarm task (oauth-codex token validate 또는 viz catalog cold import) 가
+    # CPU bound 무한 retry → main loop block → 모든 후속 API hang 사고 발생 시
+    # 임시 우회 또는 진단용. 정상 환경에서는 끄지 말 것 (퀀트 탭 cold 30s 회귀).
+    _noPrewarm = os.environ.get("DARTLAB_NO_PREWARM", "").strip().lower() in {"1", "true", "yes"}
+    models_prewarm_task = None if _noPrewarm else asyncio.create_task(_prewarmOauthCodexModels())
+    viz_prewarm_task = None if _noPrewarm else asyncio.create_task(_prewarmVizCatalog())
+    preload_task = asyncio.create_task(_preloadOllamaOnce()) if (not _noPrewarm and _should_preload_ollama()) else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
     from .room import roomManager
@@ -134,14 +138,16 @@ async def lifespan(_: FastAPI):
         with suppress(asyncio.CancelledError):
             if preload_task is not None:
                 await preload_task
-        if not models_prewarm_task.done():
+        if models_prewarm_task is not None and not models_prewarm_task.done():
             models_prewarm_task.cancel()
         with suppress(asyncio.CancelledError):
-            await models_prewarm_task
-        if not viz_prewarm_task.done():
+            if models_prewarm_task is not None:
+                await models_prewarm_task
+        if viz_prewarm_task is not None and not viz_prewarm_task.done():
             viz_prewarm_task.cancel()
         with suppress(asyncio.CancelledError):
-            await viz_prewarm_task
+            if viz_prewarm_task is not None:
+                await viz_prewarm_task
 
 
 # dartlab logger 초기화 후 tool 진행 라인을 SSE 로 흘리기 위한 capture 설치.
