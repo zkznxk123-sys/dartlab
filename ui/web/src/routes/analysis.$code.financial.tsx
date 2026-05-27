@@ -482,7 +482,9 @@ function FinancialTab() {
 				</div>
 			)}
 
-			{/* periodView 토글 — 연간 / 분기 raw / 분기 TTM. 기본 quarterlyTtm. */}
+			{/* sticky wrapper — 토글 + streaming progress bar 한 묶음. scroll container
+			   top 에 stuck. backdrop-blur 로 카드 콘텐츠 위에 떠있을 때 reading-friendly. */}
+			<div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
 			<div className="flex items-center justify-between gap-3 border-b border-border/40 px-3 py-1.5">
 				<span className="hidden text-[10.5px] text-muted-foreground sm:inline">
 					{PERIOD_VIEW_OPTIONS.find((o) => o.value === periodView)?.hint}
@@ -526,12 +528,13 @@ function FinancialTab() {
 				</div>
 			</div>
 
-			{/* streaming 진행 중 — placed 도착 후 카드 도착 진행 표시. */}
+			{/* streaming 진행 중 — 토글 wrapper 안 한 줄로. */}
 			{streaming && placed.length > 0 && (
-				<div className="sticky top-0 z-30 h-0.5 w-full overflow-hidden bg-transparent">
+				<div className="h-0.5 w-full overflow-hidden bg-transparent">
 					<div className="h-full w-1/3 animate-[dl-progress_1.2s_ease-in-out_infinite] bg-primary/70" />
 				</div>
 			)}
+			</div>
 
 			{placed.length === 0 ? (
 				isLoading ? (
