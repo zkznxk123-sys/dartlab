@@ -4,7 +4,7 @@ title: 회계감사인 독립성·이력 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 회계감사인 (회계법인) 의 계속 감사기간, 강제교체 (Mandatory Auditor Rotation) 준수, 비감사 서비스 (자문) 동시 수행 비중, 감사인 변경 timestamp 와 회사 사건 (합병·분식·구조조정) 의 동행 패턴을 공시·사업보고서 본문으로 진단하는 L1.5 절차. 트리거 — '감사인 변경', '감사인 독립성', '강제교체', '한정의견', '비감사 보수 비중'.

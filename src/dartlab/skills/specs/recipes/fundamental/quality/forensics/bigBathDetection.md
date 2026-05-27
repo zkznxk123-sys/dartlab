@@ -4,7 +4,7 @@ title: 빅 배스 (Big Bath) 회계처리 탐지
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 신임 경영자 취임·구조조정·인수합병 직후 대규모 일회성 손실 (손상차손·충당금·재고폐기·구조조정 비용) 을 한꺼번에 인식해 다음 분기 인위적 회복 (이익 점프) 을 만드는 빅 배스 패턴을 IS·BS 시계열 + 경영자 변경 timestamp + 손상차손 주석으로 진단하는 L1.5 절차. 트리거 — '빅 배스', 'big bath', '취임 직후 대규모 손실', '손상차손 일시 집중', '구조조정 충당금'.
