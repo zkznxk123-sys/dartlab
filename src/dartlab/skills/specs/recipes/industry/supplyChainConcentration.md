@@ -4,7 +4,7 @@ title: 매출 상위 고객 / 매입 상위 거래처 비중 (HHI 기반)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 회사의 매출 상위 5 고객 비중 + 매입 상위 5 거래처 비중을 HHI (Herfindahl) 로 정량화. 단일 큰 고객 의존 = 가격 협상력 약화·credit 리스크 누적. 사업보고서 본문 (특수관계자 거래·주요고객) raw 가 들어와야. analysis 단일축.
 whenToUse:
   - 매출 고객 집중도
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "사업보고서에 상위 고객/거래처 명시 안 된 회사 (B2C 소매 등) 는 본 recipe 비적용. peer 데이터 < 4 면 cross-section 한계."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
