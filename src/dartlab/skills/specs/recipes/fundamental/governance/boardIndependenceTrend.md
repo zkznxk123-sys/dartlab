@@ -103,7 +103,49 @@ emit_result(
 
 ## 호출 동작
 
-연도별 (1) 사외이사 비중 (2) 평균 임기 (3) 다선 회수 3 축 시계열. 사외이사 비중 ≥ 0.5 + 평균 임기 ≤ 6 + multi-seat 0 이 권장 임계 (한국 상장사 기준).
+### 1. 결론 도출
+
+3 축 시계열 + 실질 독립성 단정. 예: "최근 5y: 사외이사 비중 0.55 → 0.60 (개선) / 평균 임기 4.2y → 6.8y (악화 — 6y 초과) / multiSeat 0 → 2 (이사 2 명이 다른 이사회 동시 재직) → 표면 비중 ↑ but 실질 독립성 약화 (임기 + multiSeat 동시 악화)."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('boardComposition') 연도별 row
+- 연도별 (total / independent / avgTenure / multiSeat) 4 컬럼
+- independentPct = independent / total
+- 한국 상장사 권장 임계: 비중 ≥ 0.5 + 임기 ≤ 6 + multiSeat = 0
+
+### 3. 메커니즘 분석
+
+```
+3 축 시계열 → 5y 추세
+   independentPct YoY  ↑ → 비중 개선
+   avgTenureYears 추세 ↑ → 임기 길어짐 (장기화 = 회사 의존도 ↑)
+   multiSeatCount 추세  ↑ → 다선 (다른 이사회 동시) = 시간/주의 분산
+   ↓
+실질 독립성 = 3 축 결합:
+   비중 ≥ 0.5 + 임기 ≤ 6 + multi=0 → 강
+   2/3 충족                      → 중
+   1/3 이하                      → 약 (실질 독립성 우려)
+   ↓
+표면 vs 실질 분리:
+   비중만 보면 ↑ but 임기 + multiSeat 악화 → 실질 ↓
+   (사외이사가 형식만 채우고 *실질 감시 기능* 약화)
+```
+
+KR governance — 한국 상장사 ≥ 4 인 사외이사 의무 (총 7 인 이사회 시 비중 0.57). 비중 0.5 임계는 *최소* — 실질 독립성은 임기 + multiSeat 결합 필요.
+
+### 4. 반례·한계
+
+- 다선 (multiSeat) 회수 0 이어도 임원-주주 관계 (혈연/사외 컨설팅) 미커버.
+- 임기 ≤ 6y 권장은 KR 모범 기준 — US/EU 기준 다름.
+- boardComposition raw 누락 시 결론 불가 (forensic 추정 X).
+- 사외이사 *전문성* (회계 / 산업 / 법무) 분리 안 됨 — *비중* 만 측정.
+
+### 5. 후속 모니터링
+
+- 실질 독립성 약 → `recipes.fundamental.governance.audit` 로 거버넌스 종합 audit.
+- multiSeat ↑ → `recipes.fundamental.governance.chaebolEntityNetwork` 로 그룹 내 이사 cross-holding 점검.
+- 임기 ↑ + 보상 ↑ → `recipes.fundamental.quality.forensics.executiveCompensationAudit` 로 보상-이사회 정합.
 
 ## 대표 반환 형태
 

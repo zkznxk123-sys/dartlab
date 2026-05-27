@@ -138,7 +138,49 @@ emit_result(
 
 ## 호출 동작
 
-`gather.ownership` 의 연도별 외국인 보유율과 `analysis.capitalAllocation` 의 연도별 payoutNi 를 year-key 로 join 한 뒤 Pearson 상관 2 개 산출: 동일 연도 r0, 외인 1 년 선행 r1. r0 ≥ 0.5 이면 동기 영향, r1 ≥ 0.5 이면 외인이 1 년 선행 가설 지지.
+### 1. 결론 도출
+
+Pearson r0 + r1 임계 단정. 예: "10y 표본 (2016-2025): foreignPct 49% → 54% / payoutNi 0.28 → 0.36 추세. Pearson r0 (동기) = +0.62 / r1 (외인 1y 선행) = +0.71 → 둘 다 |r| ≥ 0.5 통과 — 외인이 1년 선행 가설 지지 (상관 = 인과 아님 명시 필수)."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('ownership') 연도별 외국인 보유율 (foreignPct)
+- Company.analysis('capitalAllocation') 연도별 (dividends_paid + net_income) → payoutNi
+- year-key 로 join, 표본 ≥ 5 년
+- Pearson r0 (동일 연도) + Pearson r1 (외인 1y 선행)
+
+### 3. 메커니즘 분석
+
+```
+2 시계열 → year-key join
+   foreignPct[t]
+   payoutNi[t] = dividends_paid[t] / net_income[t]
+   ↓
+Pearson 상관 2 종:
+   r0 = corr(foreignPct[t], payoutNi[t]) — 동기 상관
+   r1 = corr(foreignPct[t-1], payoutNi[t]) — 외인 1y 선행 lag
+   ↓
+임계 판정:
+   |r0| ≥ 0.5 + |r1| ≥ 0.5 → 동기 + 선행 모두 — 외인 영향 강
+   |r0| < 0.5 + |r1| ≥ 0.5 → 외인 선행 우세 — 외인이 배당 정책 trigger 후보
+   |r0| ≥ 0.5 + |r1| < 0.5 → 동기만 — 외인이 결정 *이후* 매수 (배당이 외인 attract)
+   둘 다 < 0.5            → 외인 영향 약 (다른 요인 우세)
+```
+
+상관 ≠ 인과 — 외인이 배당 결정에 영향? 또는 배당 인상이 외인 attract? r1 (선행 lag) 가 r0 보다 강하면 외인 선행 가설 지지.
+
+### 4. 반례·한계
+
+- 표본 < 5 년이면 상관 강도 결론 X — 노이즈 영향 큼.
+- 우선주 분리 발행 시 보통주 보유율만 사용해야 함 (보통주 배당 매칭).
+- 외국인 보유율 측정 시점 (연말 vs 연평균) 일관성 필요.
+- *외인* 단일 카테고리 — 헤지펀드 / 장기 패시브 분리 X.
+
+### 5. 후속 모니터링
+
+- r1 ≥ 0.5 → `recipes.fundamental.dividend.capitalReturn` 으로 환원 thesis 진입.
+- r0 + r1 둘 다 ≥ 0.5 → `recipes.sentiment.foreignBuyMomentum` 으로 외인 가속도 cross-check.
+- 둘 다 < 0.5 → `recipes.fundamental.dividend.payoutFcfCoverage` 로 fcf 충당으로 다른 driver 점검.
 
 ## 대표 반환 형태
 

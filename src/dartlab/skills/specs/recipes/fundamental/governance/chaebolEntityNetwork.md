@@ -116,7 +116,51 @@ emit_result(
 
 ## 호출 동작
 
-그룹 식별 후 같은 그룹 계열사 universe 수집. 각 affiliate 와 (1) target → affiliate 지분율 (2) 역방향 지분율 (3) 공유 이사 수 산출. 양방향 지분 > 0 = `crossHolding`.
+### 1. 결론 도출
+
+그룹 affiliate × crossHolding × sharedDirectors 단정. 예: "005930 그룹='삼성' / affiliates=15 / crossHoldings=3 (양방향 지분 동시 보유 — 005930↔028260, 005930↔010140 등) / 평균 sharedDirectors=1.2 / 최대 sharedDirectors=4 (특정 계열사 임원 중첩) → cross 구조 + 임원 network 동조 — 그룹 결속력 강."
+
+### 2. 핵심 근거 수집
+
+- Company.show('groupAffiliation') → groupName 식별
+- Company.scan('groupAffiliates', groupName) → 같은 그룹 계열사 list
+- 각 affiliate × (ownershipPct + reverseOwnershipPct + sharedDirectorCount) 3 metric
+- crossHolding = outwardPct > 0 AND inwardPct > 0
+
+### 3. 메커니즘 분석
+
+```
+그룹 universe (≤ 15 affiliate) → 3 metric 매트릭스
+   outwardPct (target → affiliate)
+   inwardPct  (affiliate → target)
+   sharedDirectors (공유 이사 수)
+   ↓
+crossHolding 카운트:
+   crossHolding True 다수 → 순환출자 구조 의심 (2014 개정 이후 신규는 위법)
+   sharedDirectors 평균 ≥ 2 → interlocking directorate 강
+   outward 큼 + inward 0 → 단방향 지배 (지주사 구조)
+   outward 0 + inward 큼 → 단방향 피지배
+   ↓
+구조 분류:
+   지주사    → 1 affiliate 가 다수 outward (peak 30%+)
+   순환출자  → cross 3+ (예: A→B→C→A)
+   차등의결권 → 별 metric (본 recipe 미커버)
+```
+
+KR 재벌 — 공정거래위원회 발표 그룹 (대규모기업집단 = 자산 5조+). IFRS 연결범위 ≠ 공정위 그룹 (지배구조 vs 회계 기준 차이).
+
+### 4. 반례·한계
+
+- 그룹 식별 reference 누락 회사 (비재벌·소규모) 비적용.
+- 공정위 그룹 ≠ IFRS 연결범위 → 분리 표기 필수.
+- 순환출자 자체 위법 X (2014 이후 신규만 금지) — *의심 후보* 표기.
+- 우회 cross-holding (재단/사모펀드 경유) → 미커버.
+
+### 5. 후속 모니터링
+
+- crossHolding 3+ → `recipes.fundamental.quality.forensics.ownershipDisparityMap` 으로 지배 vs 의결 괴리.
+- sharedDirectors 평균 ≥ 2 → `recipes.fundamental.governance.boardIndependenceTrend` 로 이사회 multiSeat 추세.
+- outward 단방향 큼 (지주사 의심) → `recipes.fundamental.quality.forensics.controllingPowerJudgment` 로 실질지배력 판정.
 
 ## 대표 반환 형태
 

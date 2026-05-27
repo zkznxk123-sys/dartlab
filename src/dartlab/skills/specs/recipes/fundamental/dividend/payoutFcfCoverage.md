@@ -130,7 +130,52 @@ emit_result(
 
 ## 호출 동작
 
-연도별 `payoutNi = dividends / netIncome` 과 `payoutFcf = dividends / FCF` 를 만들고, 최근 연도의 trailing baseline 대비 z-score 2 개를 산출. 두 z-score 의 gap (`zFcf - zNi`) 이 음수 + |gap| ≥ 1.0 이면 *EPS 는 견조하지만 현금 기준 배당 부담 가중* 신호.
+### 1. 결론 도출
+
+zNi + zFcf gap 단정. 예: "최근 5y baseline payoutNi 평균 0.28 / std 0.05 → 최신 0.32 → zNi = +0.8. payoutFcf 평균 0.45 / std 0.08 → 최신 0.68 → zFcf = +2.9. gap = +2.1 → 회계이익 기준 정상이나 현금 기준 부담 가중 (z 갭 ≥ 1.0 — 회계이익↔현금 괴리 의심)."
+
+### 2. 핵심 근거 수집
+
+- Company.analysis('capitalAllocation') 연도별 (dividends_paid + net_income + free_cash_flow)
+- payoutNi = dividends / netIncome
+- payoutFcf = dividends / FCF (= OCF - capex)
+- trailing baseline (직전 4 년) 평균 + std → 최신 z-score 2 종
+
+### 3. 메커니즘 분석
+
+```
+연도별 → 2 ratio
+   payoutNi  = dividends / netIncome  (EPS 기준)
+   payoutFcf = dividends / FCF        (현금 기준)
+   ↓
+최근 연도 z-score:
+   zNi  = (payoutNi[-1]  - mean(payoutNi[:-1]))  / std
+   zFcf = (payoutFcf[-1] - mean(payoutFcf[:-1])) / std
+   ↓
+gap = zFcf - zNi
+   gap > +1.0 → EPS 정상 / 현금 압박 (FCF 약화 또는 capex 가속)
+   |gap| < 1.0 → 동조 (EPS+FCF 같은 방향)
+   gap < -1.0 → EPS 약화 / 현금 정상 (NI 일회성 하향)
+   ↓
+배당 sustainability:
+   payoutFcf > 1.0 + zFcf > +2 → cut 위험 후보 (단, 자본구조 조정 분리 필요)
+   gap 큼 + |zFcf| > 2 → forensics 후속 (회계↔현금 괴리)
+```
+
+EPS 기준만 보면 못 보는 *현금 기준 배당 부담* 을 z-score 로 본다. NI 가 일회성 손익으로 튀면 zNi 만 깨지고 zFcf 는 정상 — 분리 필요.
+
+### 4. 반례·한계
+
+- baseline 표본 < 3 년이면 z-score 계산 무의미 — coverage 한계 명시.
+- payoutFcf > 1 단독으로 "cut 위험" 단정 X — 차입 + 자본구조 조정 동반 가능.
+- 일회성 손익 (감액손실 / 처분이익) 으로 NI 튄 연도는 baseline 분리.
+- capex lump-sum 산업 (유통 부동산) 에서 단년 FCF noise 를 z 신호로 오인.
+
+### 5. 후속 모니터링
+
+- gap > +1.0 → `recipes.fundamental.quality.forensics.revenueToCashBridge` 로 회계↔현금 괴리 깊이.
+- payoutFcf > 1 + zFcf > +2 → `recipes.fundamental.dividend.stressTest` 로 매크로 침체 시 cut 임계.
+- 일관 zNi + zFcf ≥ 0 → `recipes.fundamental.dividend.capitalReturn` 으로 환원 thesis 진입.
 
 ## 대표 반환 형태
 
