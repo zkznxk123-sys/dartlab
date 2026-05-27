@@ -4,7 +4,7 @@ title: 52주 신고가 돌파율 z-score (breakoutNewsConfirmation v2 변형)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: breakoutNewsConfirmation 의 신고가 binary flag 가 universe 강세장 치우침 (5 종 중 3 종 all_high) 으로 변별력 0 였던 문제 보강. v2 는 *binary 신고가* 대신 *돌파 폭 z-score* (현재가 / 52주 고가 - 1) 의 단면 분포 + 거래대금 confirmation 동시 검증. 트리거 — '신고가 돌파', 'breakout confirmation', '신고가 z'.
 whenToUse:
   - 신고가 돌파 변별
@@ -71,6 +71,7 @@ runtimeCompatibility:
     status: limited
 visualRefs:
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

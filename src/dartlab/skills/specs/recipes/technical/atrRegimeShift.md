@@ -4,7 +4,7 @@ title: ATR 변동성 체제 전환 (단기 vs 장기 ATR ratio)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: ATR(5) vs ATR(60) ratio 의 z-score. > +1.5σ = 변동성 확대 체제, < -1.5σ = 수축 체제. 단일 변동성 절대값이 아닌 *체제 전환* 추적.
 whenToUse:
   - 변동성 체제 전환
@@ -57,6 +57,7 @@ testUniverse:
 falsifier:
   description: "거래일 < 80 이면 ATR(60) 결론 X. 시장 전체 변동성 (KOSPI VKOSPI) 동시 확대 시 회사별 신호 분리 어려움."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

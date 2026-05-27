@@ -4,7 +4,7 @@ title: 이동평균선 정합 (5/20/60/120 동시 정렬)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 5/20/60/120 일 단순 이동평균선의 *정렬* 상태 분류 — 완전 정렬 (오름차순 또는 내림차순) row 만 *추세 합의* 후보. 단일 골든크로스 함정 회피.
 whenToUse:
   - 이동평균선 정렬
@@ -57,6 +57,7 @@ testUniverse:
 falsifier:
   description: "거래일 < 130 이면 120 일 MA 결론 X. 완전 정렬 row 비율이 < 5% 이면 변별력 작음."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
