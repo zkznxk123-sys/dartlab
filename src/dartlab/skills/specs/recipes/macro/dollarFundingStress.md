@@ -110,16 +110,53 @@ emit_result(
 
 ## 호출 동작
 
-1. 달러지수, 원달러, VIX, HY spread, NFCI 원자료를 모은다.
-2. `macro("crisis", market="US")` 의 dollarSafeHaven 신호를 확인한다.
-3. `macro("assets", market="KR")` 와 `summary` 로 한국 시장 반응을 검산한다.
-4. 달러 강세가 위험회피인지 금리/성장 차이인지 나눠 설명한다.
+### 1. 결론 도출
+
+6 indicator 원자료 + dollarSafeHaven + krOverall 단정. 예: "DXY +2.4% 1M / USDKRW +1.8% / VIX 22 (정상 14-18 위) / HY spread 4.1% (3M+) / NFCI +0.3 (loose→tight 전환) → 달러 펀딩 스트레스 phase 진행 (4 of 5 위험 신호 동조)."
+
+### 2. 핵심 근거 수집
+
+- DTWEXBGS (US trade-weighted dollar), DEXKOUS (USDKRW), VIXCLS (VIX), BAMLH0A0HYM2 (HY spread), NFCI (Chicago Fed FCI), FEDFUNDS (정책금리) — gather macro 6 시리즈
+- macro('crisis', US) dollarSafeHaven status (safeHaven / strengthOnGrowth / normal)
+- macro('summary', KR) overall + score — KR 시장 동조 신호
+
+### 3. 메커니즘 분석
+
+```
+6 source → 압력 합산
+  DXY MoM > +1.5% + USDKRW MoM > +1%
+     ↓
+  VIX > 20 + HY spread > 4%
+     ↓
+  NFCI tightening (+ 추세) + dollarSafeHaven=safeHaven
+     ↓
+4 of 5 신호 동조 → 달러 펀딩 스트레스 phase
+1-3 신호 → mixed (성장 호조 vs 위험회피 분리 필요)
+0-1 신호 → normal
+```
+
+스트레스 phase + krOverall<0 = KR 시장 동조. 스트레스 phase + krOverall>0 = decoupling (KR 펀더멘털 우위).
+
+### 4. 반례·한계
+
+- DXY 와 USDKRW 동시 상승 = 달러 강세 우세, but 한쪽만 = 양자 요인.
+- VIX/HY 안정 + USDKRW 만 상승 → 한국 고유 위험 (정치/지정학) — 글로벌 달러 stress 아님.
+- 금리차 (Fed-BOK spread) 확대 시 USDKRW 자연 상승 — 위험회피 아닐 수 있음.
+- NFCI 는 weekly, 즉시 신호 약함.
+
+### 5. 후속 모니터링
+
+- safeHaven phase 지속 → `recipes.macro.koreaMacroStressMap` 으로 KR 시장 전이 확인.
+- HY spread 확대 일관 → `recipes.fundamental.credit.cycleStressMap` 으로 신용 사이클 확인.
+- DXY 약세 + USDKRW 강세 (decoupling) → `recipes.macro.koreaExportCycleNowcast` 로 KR 수출 사이클 점검.
 
 ## 대표 반환 형태
 
-- `tableRef`: dollar/funding indicator별 원자료.
-- `valueRef`: usDollarSafeHaven, krOverall, krScore.
-- 답변 본문: 글로벌 달러 압력, 한국 환율 압력, 위험회피 여부.
+| column | 의미 |
+|---|---|
+| `indicator` | DTWEXBGS / DEXKOUS / VIXCLS / BAMLH0A0HYM2 / NFCI / FEDFUNDS |
+| `data` | 시계열 원자료 |
+| `ok` | gather 성공 여부 |
 
 ## 연계 절차
 

@@ -117,16 +117,55 @@ emit_result(
 
 ## 호출 동작
 
-1. 노동시장 원자료를 gather로 모은다.
-2. 실업률, 신규실업수당, 고용자수, 임금, 구인건수의 방향을 분리한다.
-3. `macro("forecast")` 의 Sahm/침체확률 신호와 대조한다.
-4. `macro("cycle")` 과 종합해 “둔화 초기/후기/판정불가”로 말한다.
+### 1. 결론 도출
+
+UNRATE + ICSA + sahmRule + cyclePhase 결합 단정. 예: "UNRATE 3.9% (3M low 3.4% → +0.5%p) / ICSA 245k (12M high) / PAYEMS +175k (slowing) / AHEPA +4.1% / sahmRule=triggered (≥0.5%p) / cyclePhase=late-cycle → 노동시장 전환점 임박 (둔화 초기 phase confirmed)."
+
+### 2. 핵심 근거 수집
+
+- UNRATE (실업률), ICSA (initial claims), PAYEMS (비농업고용), AHEPA (시간당임금), CIVPART (참가율), JTSJOL (구인) — gather macro 6 시리즈
+- macro('forecast').sahmRule.signal — 0.5%p rule trigger 여부
+- macro('cycle').phase — early-recovery / mid-expansion / late-cycle / contraction
+- macro('summary') overall
+
+### 3. 메커니즘 분석
+
+```
+6 source → 전환점 phase
+  UNRATE 3M low 대비 +0.5%p 이상 (Sahm 발동)
+     → 침체 nowcast 강함
+  ICSA 4주 평균 상승 + PAYEMS 둔화 (<150k)
+     → 둔화 초기
+  JTSJOL/UNRATE > 1.5 (구인↑) + AHEPA 안정
+     → 아직 tight (둔화 늦음)
+     ↓
+sahmRule=triggered + ICSA 상승 + PAYEMS<150k → 전환 confirm
+1-2 신호만 → 둔화 초기 (단정 보류)
+0 신호 → 노동시장 강세 유지
+```
+
+UNRATE 와 ICSA 는 선후행 — ICSA (주간) 선행, UNRATE (월간) 후행. PAYEMS revision ±50k 큼 — 한달치만으로 단정 X.
+
+### 4. 반례·한계
+
+- PAYEMS 발표 후 revision 으로 1-2 개월 후 바뀜.
+- AHEPA 상승 = 노동수요 강함 + 인플레 압력 — sentiment 양면.
+- CIVPART 하락 (구조적 은퇴) → UNRATE 하락이 강세 아님.
+- Sahm rule 은 1948-2024 US-only 패턴 — KR/EU 직접 적용 X.
+
+### 5. 후속 모니터링
+
+- sahmRule=triggered + cyclePhase=late-cycle → `recipes.macro.tailRiskScenarioScan` 으로 침체 시나리오.
+- ICSA 추세 상승만 → `recipes.macro.yieldCurveStress` 로 금리곡선 선행 신호 확인.
+- 노동시장 강세 유지 → `recipes.macro.inflationBreadthWatch` 로 임금-인플레 spiral 확인.
 
 ## 대표 반환 형태
 
-- `tableRef`: 노동시장 indicator별 원자료.
-- `valueRef`: sahmRule, cyclePhase, summaryOverall.
-- 답변 본문: 노동시장 전환 신호와 아직 버티는 신호.
+| column | 의미 |
+|---|---|
+| `indicator` | UNRATE / ICSA / PAYEMS / AHEPA / CIVPART / JTSJOL |
+| `data` | 시계열 원자료 |
+| `ok` | gather 성공 여부 |
 
 ## 연계 절차
 

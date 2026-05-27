@@ -112,16 +112,55 @@ emit_result(
 
 ## 호출 동작
 
-1. `gather("macro", indicator)` 로 달러 유동성 원자료 후보를 행 단위로 조회한다.
-2. 실패한 지표는 버리지 않고 `error` 로 기록한다.
-3. `macro("liquidity")`, `macro("rates")`, `macro("summary")` 로 해석 결과와 충돌 여부를 확인한다.
-4. 결론은 “유동성 펄스 확장/수축/혼재”처럼 방향과 불확실성을 함께 쓴다.
+### 1. 결론 도출
+
+liquidityRegime + rateDirection 결합 단정. 예: "WALCL 6M MoM -2.1% (QT 진행) / RRP 4M -45% (시장 흡수) / M2SL +0.2% / FFR 5.25 (peak) / SOFR 5.31 → liquidityRegime=tightening (수축 phase), rateDirection=peak — 유동성 펄스 수축 + 정점 금리 결합."
+
+### 2. 핵심 근거 수집
+
+- WALCL (Fed balance sheet), RRPONTSYD (overnight reverse repo), M2SL (광의통화), FEDFUNDS (정책금리), SOFR (시장금리), NFCI (financial conditions) — gather macro 6 시리즈
+- macro('liquidity') regime (easing / neutral / tightening)
+- macro('rates') outlook direction (cutting / peak / hiking)
+- macro('summary') overall — 거시 종합 점수
+
+### 3. 메커니즘 분석
+
+```
+6 source → 유동성 방향
+  WALCL 6M MoM > +0.5% + RRP 감소(시장 자금 흡수)
+     → easing 후보
+  WALCL MoM < -1% (QT) + M2 둔화 + NFCI 상승
+     → tightening 후보
+  방향 mixed → neutral
+     ↓
+  rate direction 결합
+     hiking + tightening → 강한 긴축 (자산가격 하방)
+     cutting + easing → 강한 완화 (자산가격 상방)
+     hiking + easing → 금리/유동성 분리 (혼재)
+```
+
+WALCL 추세 > RRP 추세 > M2 추세 우선순위. RRP 감소는 시장 유동성 증가 (Fed→시장) 의미 — balance sheet 감소와 다른 신호.
+
+### 4. 반례·한계
+
+- 정책금리 hiking 중에도 WALCL 증가 (긴급 지원) 시 유동성 신호 혼재.
+- M2 는 월간, WALCL 은 주간 — 동기화 어려움.
+- RRP 잔액 0 도달 후 추가 흡수 불가 — 신호 포화.
+- 글로벌 유동성 (ECB/BOJ/PBOC) 미반영 — US-only.
+
+### 5. 후속 모니터링
+
+- liquidityRegime=tightening + rateDirection=hiking → `recipes.macro.yieldCurveStress` 로 금리곡선 inversion 점검.
+- liquidityRegime=easing 지속 → `recipes.macro.dollarFundingStress` 로 위험자산 sentiment 확인.
+- WALCL 급변 (긴급 지원) → `recipes.macro.tailRiskScenarioScan` 으로 tail event 점검.
 
 ## 대표 반환 형태
 
-- `tableRef`: indicator별 원자료 조회 결과와 실패 사유.
-- `valueRef`: liquidityRegime, rateDirection, summaryOverall.
-- `dateRef`: 원자료의 latestAsOf/date 또는 summary 기준일.
+| column | 의미 |
+|---|---|
+| `indicator` | WALCL / RRPONTSYD / M2SL / FEDFUNDS / SOFR / NFCI |
+| `data` | 시계열 원자료 |
+| `ok` | gather 성공 여부 |
 
 ## 연계 절차
 

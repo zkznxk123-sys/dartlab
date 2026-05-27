@@ -117,16 +117,54 @@ emit_result(
 
 ## 호출 동작
 
-1. headline CPI, core CPI, PPI, 유가, 기대인플레이션, 정책금리 원자료를 모은다.
-2. headline/core/producer/commodity 방향을 분리한다.
-3. `macro("rates")` 로 정책 압력을 검산한다.
-4. 필요하면 `macro("scenario", "인플레이션 충격")` 으로 조건부 경로를 비교한다.
+### 1. 결론 도출
+
+6 시리즈 + breadth 단정. 예: "headline CPI +3.2% YoY / core +3.1% / PPI +2.8% / WTI +18% YoY / 5Y BEI 2.6% (anchored) / FFR 5.25 → 확산성=넓음 (headline+core+PPI 동조 + 기대 anchored — 공급충격 한정 아님)."
+
+### 2. 핵심 근거 수집
+
+- CPIAUCSL (headline CPI), CPILFESL (core CPI), PPIACO (PPI), DCOILWTICO (WTI), T5YIE (5Y BEI), FEDFUNDS — gather macro 6
+- macro('rates') outlook direction (cutting / peak / hiking)
+- macro('scenario', "인플레이션 충격") type — 조건부 시나리오 type
+- macro('summary') overall — 거시 종합
+
+### 3. 메커니즘 분석
+
+```
+headline vs core vs PPI vs commodity 분리
+   headline > core (gap > 0.5%p) → 공급충격 (에너지/식품)
+   core > headline           → 수요 압력 + sticky
+   PPI 상승 > CPI 상승 + lag → pipeline pressure (6-12M 후 CPI 전이)
+   5Y BEI > 2.5% + 추세      → 기대 unanchor (정책 압박)
+   ↓
+breadth 판정:
+   headline + core + PPI 동조 상승 → 넓음
+   headline 만 (commodity 단독)    → 좁음 (공급충격)
+   headline + core 추세 분리      → 혼재
+```
+
+기대인플레이션 anchored (BEI < 2.5%) + core 하락 = peak inflation 후보. unanchored + PPI lag pressure = 재가속 위험.
+
+### 4. 반례·한계
+
+- 유가 단기 spike (지정학) 는 headline 만 일시 상승 — 확산성 아님.
+- core CPI 는 주거비 lag 12-18M 으로 후행 — 실시간 신호 약함.
+- T5YIE 는 시장 유동성 thin → 추세 신호 noisy.
+- US-only (CPIAUCSL). KR/EU 인플레 분리 필요.
+
+### 5. 후속 모니터링
+
+- 확산성=넓음 + rateDirection=hiking → `recipes.macro.yieldCurveStress` 로 금리곡선 inversion.
+- PPI 선행 + CPI lag → `recipes.macro.tailRiskScenarioScan` 으로 재가속 시나리오.
+- 유가 충격 단독 → `recipes.macro.dollarFundingStress` 로 commodity-dollar 동조 확인.
 
 ## 대표 반환 형태
 
-- `tableRef`: inflation indicator별 원자료.
-- `valueRef`: rateDirection, scenarioType, summaryOverall.
-- 답변 본문: 확산성, 공급충격/수요압력 구분, 정책 압력.
+| column | 의미 |
+|---|---|
+| `indicator` | CPIAUCSL / CPILFESL / PPIACO / DCOILWTICO / T5YIE / FEDFUNDS |
+| `data` | 시계열 원자료 |
+| `ok` | gather 성공 여부 |
 
 ## 연계 절차
 
@@ -137,4 +175,4 @@ emit_result(
 ## 기본 검증
 
 - CPI 계열과 상품/생산자 계열을 최소 하나씩 확인한다.
-- 확산성은 “넓음/좁음/혼재/판정불가” 중 하나로 표현한다.
+- 확산성은 "넓음/좁음/혼재/판정불가" 중 하나로 표현한다.

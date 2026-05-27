@@ -117,16 +117,56 @@ emit_result(
 
 ## 호출 동작
 
-1. 수출/환율/물가 proxy를 gather로 먼저 모은다.
-2. KOSPI 지수 close를 시장 반응 proxy로 추가한다.
-3. `macro("trade")` 로 교역조건과 수출이익 선행 신호를 검산한다.
-4. `macro("corporate")` 와 `summary` 로 기업집계와 전체 매크로 결론을 확인한다.
+### 1. 결론 도출
+
+EXPORT + USDKRW + KOSPI + tradeDirection 결합 단정. 예: "KR EXPORT YoY +8.2% (3M 연속 +) / USDKRW 1340 (-1.5% MoM) / KOSPI +4.2% MoM / tradeDirection=improving → 수출 사이클 개선 phase (수출 + 교역조건 + 주식 동조)."
+
+### 2. 핵심 근거 수집
+
+- KR EXPORT YoY, USDKRW, CPI (ECOS) — gather macro 3 시리즈
+- KOSPI close (gather krxIndex) — 시장 반응 proxy
+- macro('trade').termsOfTrade.direction — 교역조건 방향 (improving / deteriorating / flat)
+- macro('corporate') — 기업이익 집계
+- macro('summary') overall + score — KR 거시 종합
+
+### 3. 메커니즘 분석
+
+```
+4 source → 수출 사이클 phase
+  EXPORT YoY > +5% (3M 연속) + tradeDirection=improving
+     → 회복 phase
+  USDKRW 약세 + KOSPI 상승 (수출주 우세)
+     → 환율-주식 동조 confirm
+  EXPORT YoY < 0 (2M 연속) + tradeDirection=deteriorating
+     → 수축 phase
+   ↓
+4 신호 동조 → 결론 강함
+2-3 동조 → 방향성 약함 (보완 필요)
+1 이하 동조 → 결론 보류 (혼재)
+```
+
+USDKRW 강세 + EXPORT 증가 = 가격 효과 (물량 둔화 가능). USDKRW 약세 + EXPORT 증가 = 물량 + 가격 모두 회복.
+
+### 4. 반례·한계
+
+- 반도체 export 비중 20%+ → 반도체 사이클 ≠ 전체 수출 사이클 (시차).
+- USDKRW 효과는 수출물량 (단기) vs 원화매출 (즉시) 반대.
+- ECOS EXPORT 는 월간 + 발표 lag 20 일 — 실시간 nowcast 약함.
+- COVID/원자재 충격 시 base effect 왜곡.
+
+### 5. 후속 모니터링
+
+- 회복 phase + 반도체 강세 → `recipes.industry.sectorMomentumLeadership` 로 sector leader 확인.
+- 환율 약세 + 수출 약세 (이중악재) → `recipes.macro.dollarFundingStress` 로 외인 자금 압박 점검.
+- 교역조건 악화 지속 → `recipes.macro.koreaMacroStressMap` 으로 KR 거시 종합 stress 확인.
 
 ## 대표 반환 형태
 
-- `tableRef`: KR export proxy와 KOSPI 원자료.
-- `valueRef`: tradeDirection, summaryOverall, summaryScore.
-- 답변 본문: 수출 사이클 방향, 환율/교역조건 영향, 주식시장 반응 proxy.
+| column | 의미 |
+|---|---|
+| `indicator` | EXPORT / USDKRW / CPI / KOSPI.close |
+| `data` | 시계열 원자료 |
+| `ok` | gather 성공 여부 |
 
 ## 연계 절차
 
