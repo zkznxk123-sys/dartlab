@@ -4,7 +4,7 @@ title: RSI + 볼린저 밴드 동시 cluster (이중 oversold/overbought)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: RSI(14) < 30 또는 > 70 + 동시 가격이 볼린저 밴드 (20, 2σ) 하단/상단 close 인 row 만 cluster 로 표기. 단일 oscillator 함정 회피 (두 정의 동시 충족만 신호).
 whenToUse:
   - RSI 과매도 과매수
@@ -58,6 +58,7 @@ testUniverse:
 falsifier:
   description: "거래일 < 30 이면 RSI/Bollinger 계산 불안정. 갭상승·하한가 등 단일 day 노이즈를 cluster 로 처리하면 fail."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

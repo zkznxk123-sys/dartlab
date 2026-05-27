@@ -4,7 +4,7 @@ title: Value 팩터 composite (Fama-French B/M + E/P + CF/P)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: Fama-French 1992 의 Value 팩터를 B/M (Book/Market) + E/P (Earnings yield) + CF/P (Cash flow yield) 3 정의 평균으로 composite 산출. 단일 회사 + peer set percentile rank. 단일 지표 (PER 단독) 함정 회피.
 whenToUse:
   - value 팩터
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "3 정의 부호가 갈리면 (B/M 높은데 E/P 음수) composite 결론 X. peer < 10 이면 percentile rank 불안정."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

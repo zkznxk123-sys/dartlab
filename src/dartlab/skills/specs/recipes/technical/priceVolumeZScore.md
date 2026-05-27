@@ -4,7 +4,7 @@ title: 거래량 z-score + 가격 변화율 동조 신호
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: technical
 purpose: 일별 종가 변화율과 거래량 20 거래일 z-score 의 동조 점검. 거래량 z ≥ 2 인 row 가 양수/음수 수익률 어느 쪽으로 쏠리는지 정량 카운트. 추론 라벨 없이 *event row 비율* 만. price gather 단일.
@@ -64,6 +64,7 @@ failureModes:
   - 액면분할·권리락 같은 corporate action 후 점프
   - 시간외 거래 거래량 포함 여부 불명
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
