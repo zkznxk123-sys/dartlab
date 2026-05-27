@@ -582,38 +582,10 @@ function ViewerTab() {
 							/>
 						</header>
 
-						{/* 3-column header — period + DART link. 상위 sticky 묶음 안. */}
-						<div
-							className="grid gap-3 py-2"
-							style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
-						>
-							{windowPeriods.map((p) => {
-								const url = dartUrlByPeriod[p];
-								return (
-									<div key={p} className="flex items-center justify-between gap-2 px-2">
-										<div>
-											<div className="font-mono text-xs font-semibold">{p}</div>
-											<div className="text-[10px] text-muted-foreground">
-												{changedSet.has(p) ? '변경 포함' : '동일'}
-											</div>
-										</div>
-										{url && (
-											<a
-												href={url}
-												target="_blank"
-												rel="noreferrer noopener"
-												title={`${p} 시점 DART 원본`}
-												className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent"
-											>
-												<ExternalLink className="size-2.5" /> 원본
-											</a>
-										)}
-									</div>
-								);
-							})}
 						</div>
-					</div>
-					{/* sticky 묶음 끝 */}
+					{/* sticky 묶음 끝 — 타임라인까지만 sticky. 3-column period header + 본문은
+					    별도 박스로 묶어 그 박스 안에서 vertical scroll. 박스 안 period header
+					    는 박스-internal sticky 로 column 라벨 + 원본 링크 항상 보임. */}
 
 						{windowLoading && (
 							<div className="my-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -621,8 +593,43 @@ function ViewerTab() {
 							</div>
 						)}
 
-						{/* 본문 — sections SSOT rows (period × content) 직접 dumb render */}
-						<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
+						{/* period header + 본문 = 한 박스. 박스 안 vertical scroll. */}
+						<div className="rounded-lg border bg-card max-h-[calc(100vh-220px)] overflow-y-auto">
+							{/* 박스-internal sticky — period 라벨 + 원본 링크 박스 상단 고정. */}
+							<div
+								className="sticky top-0 z-10 grid gap-3 border-b bg-card/95 px-3 py-2 backdrop-blur"
+								style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
+							>
+								{windowPeriods.map((p) => {
+									const url = dartUrlByPeriod[p];
+									return (
+										<div key={p} className="flex items-center justify-between gap-2 px-2">
+											<div>
+												<div className="font-mono text-xs font-semibold">{p}</div>
+												<div className="text-[10px] text-muted-foreground">
+													{changedSet.has(p) ? '변경 포함' : '동일'}
+												</div>
+											</div>
+											{url && (
+												<a
+													href={url}
+													target="_blank"
+													rel="noreferrer noopener"
+													title={`${p} 시점 DART 원본`}
+													className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent"
+												>
+													<ExternalLink className="size-2.5" /> 원본
+												</a>
+											)}
+										</div>
+									);
+								})}
+							</div>
+							{/* 본문 — sections SSOT rows (period × content) 직접 dumb render */}
+							<div className="px-3 py-3">
+								<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
+							</div>
+						</div>
 					</div>
 				)}
 			</main>
@@ -987,10 +994,7 @@ function SsotRowsView({ rows, windowPeriods }: { rows: ViewerRow[]; windowPeriod
 					style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}
 				>
 					{periodsToShow.map((p) => (
-						<div
-							key={p}
-							className="min-w-0 max-h-[70vh] overflow-y-auto pr-2"
-						>
+						<div key={p} className="min-w-0">
 							<CellContent value={r.cells?.[p] ?? ''} blockType={r.blockType} />
 						</div>
 					))}
