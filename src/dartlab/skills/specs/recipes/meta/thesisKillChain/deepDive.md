@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Deep Dive
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.thesisKillChain
@@ -117,6 +117,7 @@ audiences:
   human: thesis가 깨지는 경로를 한 번에 실행하는 실제 사용 경로다.
 humanIntro: "deepDive는 Thesis Kill-Chain 팩의 실제 사용 경로다. 투자 논리를 더 멋지게 만드는 게 아니라, 그 논리가 어디서부터 무너질 수 있는지 끝까지 추적한다."
 lastUpdated: "2026-05-17"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

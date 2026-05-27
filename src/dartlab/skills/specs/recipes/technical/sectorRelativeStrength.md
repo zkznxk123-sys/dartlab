@@ -4,7 +4,7 @@ title: 섹터 대비 상대 강도 (20d / 60d 수익률 차)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: technical
 purpose: 종목 20/60d 수익률 vs 동일 sector 평균 수익률 차 (relative strength). 상대 강도 양수면 *섹터 outperform*, 음수면 *underperform*. 추론 라벨 없이 정량 차분만. price + sector gather 결합.
@@ -64,6 +64,7 @@ failureModes:
   - 60 거래일 윈도우 미충족
   - 섹터 분류 (GICS / KRX) 변경 직후 row 오염
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
