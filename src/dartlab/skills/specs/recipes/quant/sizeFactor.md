@@ -126,7 +126,54 @@ emit_result(
 
 ## 호출 동작
 
-target 의 log(market cap) + peer 단면 percentile rank. small premium 측면이므로 *작을수록 rank 1* 로 invert 표기.
+### 1. 결론 도출
+
+logMarketCap + percentile rank 단정. 예: "005930 시총 460조 (logCap=33.5) peer 20개 중 percentile=0.95 (대비 95%가 작음) → smbRankSmallIs1=0.05 → large-cap quartile (SMB premium 측면에서 unfavored). 반도체 industry peer 평균 시총 12조 — 005930 은 industry leader (size dominance)."
+
+### 2. 핵심 근거 수집
+
+- target market_cap (Company.show('snapshot'))
+- Company.industry('peers') latest 20 종목 × market_cap
+- logCap = ln(marketCap) 변환 후 peer 단면
+- percentile rank: percentileLargeToSmall = below count / N
+
+### 3. 메커니즘 분석
+
+```
+target market_cap → log 변환
+   logCap = ln(marketCap)
+   원래 시총 분포가 power-law 라 log 변환 필요 (Fama-French 1992)
+   ↓
+peer 단면 percentile:
+   peer 20 종목 logCap 정렬
+   own_rank = (target 보다 작은 peer 수) / N
+   ↓
+SMB invert 표기 (small premium 측면):
+   smbRankSmallIs1 = 1 - own_rank
+   → 0.05 = 가장 큰 quartile (large-cap unfavored)
+   → 0.95 = 가장 작은 quartile (small-cap favored)
+   ↓
+quartile 분류:
+   smbRank 0.75-1.0 → small (premium 후보)
+   smbRank 0.5-0.75 → mid
+   smbRank 0.25-0.5 → mid-large
+   smbRank 0.0-0.25 → large (premium 미해당)
+```
+
+Fama-French SMB premium — 1926-2000 US 시장에서 small minus big = +3.5%/y annual. KR 시장에서도 일부 확인 (1990-2010 강함, 2010s 약화). 산업 peer 단면이라 산업 평균 size 따라 결론 변동.
+
+### 4. 반례·한계
+
+- peer < 10 → percentile 불안정.
+- 산업 peer 단면이라 KOSPI 전체 단면 결과 다름 (병행 트랙 필요).
+- small cap = high return 단정 금지 — 2010s anomaly 약화.
+- IT 산업 시총 분포 right-skewed → log 변환 후에도 outlier 영향.
+
+### 5. 후속 모니터링
+
+- smbRank > 0.7 (small) → `recipes.quant.qualityFactor` 로 small × quality (junk 제거).
+- smbRank > 0.7 + value factor 동조 → `recipes.quant.valueFactor` 로 double sort.
+- smbRank > 0.7 → `recipes.meta.screen.smallCapDiscovery` 로 small cap 발굴 트랙.
 
 ## 대표 반환 형태
 

@@ -122,7 +122,57 @@ emit_result(
 
 ## 호출 동작
 
-ATR(5) / ATR(60) 비율 + 시계열 z-score. z ≥ 1.5 = expand 체제, ≤ -1.5 = contract, 그 외 = steady.
+### 1. 결론 도출
+
+ATR ratio + z + regime 단정. 예: "ATR(5)=1,820 / ATR(60)=950 → ratio=1.92 (단기 변동성 평년 대비 1.9배). 60일 baseline mean=1.05 / std=0.45 → z=+1.93 → regime=expand (단기 변동성 확대 phase, 평년 대비 +1.93σ)."
+
+### 2. 핵심 근거 수집
+
+- gather('price', target) latest 100 row OHLC
+- True Range = max(high-low, |high-prevClose|, |low-prevClose|)
+- ATR(5) = mean(TR latest 5), ATR(60) = mean(TR latest 60)
+- ratio = ATR(5) / ATR(60), baseline 60일 rolling z-score
+
+### 3. 메커니즘 분석
+
+```
+OHLC 100 row → True Range 계산
+   TR[i] = max(high-low, |high-prevClose|, |low-prevClose|)
+   ↓
+ATR(N) = mean(TR latest N)
+   ATR(5)  → 단기 변동성 (최근 1주)
+   ATR(60) → 장기 변동성 (3개월)
+   ratio = ATR(5) / ATR(60)
+   ↓
+rolling z-score (60일 baseline):
+   각 시점 i → ratio[i] 계산
+   mean(ratio 60일 history) + std → ratio[t] z
+   ↓
+regime 판정:
+   z ≥ +1.5 → expand (단기 변동성 평년 대비 가속)
+   |z| < 1.5 → steady (정상)
+   z ≤ -1.5 → contract (단기 변동성 수축, 정체 phase)
+   ↓
+체제 전환 신호:
+   expand 진입 → 이벤트 driven 변동성 가속 (catalysts watch)
+   contract 진입 → 정체 / consolidation phase
+   체제 전환 빈번 → 변동성 cycle 짧음 (KOSPI 일반 패턴)
+```
+
+ATR ratio 는 *상대 변동성* — 절대값 아님. 단순 ATR 절대값 비교 시 시기별 levels 다름 (cross-time 비교 무의미). ratio + z 는 시기 정규화.
+
+### 4. 반례·한계
+
+- 거래일 < 80 → ATR(60) 결론 X.
+- 시장 전체 변동성 (VKOSPI) 동시 확대 시 회사별 신호 분리 어려움.
+- regime 변경 단독 매수 결론 X — *체제 변화* 사실만.
+- 60일 baseline 짧음 — 큰 regime shift 시 후행.
+
+### 5. 후속 모니터링
+
+- expand 진입 → `recipes.news.eventVolatilityCheck` 로 이벤트 induced 변동성 비교.
+- contract 지속 → `recipes.quant.lowVolFactor` 로 변동성 팩터 정합.
+- regime 빈번 전환 → `recipes.technical.priceVolumeZScore` 로 거래량 burst event 점검.
 
 ## 대표 반환 형태
 
