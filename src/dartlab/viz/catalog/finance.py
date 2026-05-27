@@ -46,12 +46,16 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "tab": "financial",
         "subCategory": "capitalStructure",
         "seriesPlan": [
-            # ── 자산 stack ─────────────────────────────────────
+            # 회계 의미 묶음 색상 SSOT — 9 hue chaos 폐기. 자산 = sky monochrome
+            # (cool, 4 shade 유동→비유동), 부채 = amber monochrome (warm, 2 shade
+            # 영업→금융), 자본 = emerald monochrome (cool, 3 shade 자본금→잉여→기타).
+            # Tailwind shade ramp — dense stack 인접 색 명확 구분 + 영역별 의미 통일.
+            # ── 자산 stack (sky monochrome) ────────────────────
             {
                 "key": "cash",
                 "label": "현금성자산",
-                "color": COLORS[5],
-                "intent": "neutral",
+                "color": "#bae6fd",  # sky-200
+                "intent": "primary",
                 "unit": "원",
                 "type": "bar",
                 "stack": "asset",
@@ -60,8 +64,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "receivables",
                 "label": "매출채권",
-                "color": COLORS[1],
-                "intent": "accent",
+                "color": "#38bdf8",  # sky-400
+                "intent": "primary",
                 "unit": "원",
                 "type": "bar",
                 "stack": "asset",
@@ -70,8 +74,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "inventories",
                 "label": "재고자산",
-                "color": COLORS[6],
-                "intent": "accent",
+                "color": "#0284c7",  # sky-600
+                "intent": "primary",
                 "unit": "원",
                 "type": "bar",
                 "stack": "asset",
@@ -80,18 +84,18 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "opAssetCore",
                 "label": "기타 영업자산",
-                "color": COLORS[2],
+                "color": "#075985",  # sky-800
                 "intent": "primary",
                 "unit": "원",
                 "type": "bar",
                 "stack": "asset",
                 "compose": {"assets": 1, "cash": -1, "receivables": -1, "inventories": -1},
             },
-            # ── 부채+자본 stack ────────────────────────────────
+            # ── 부채+자본 stack (amber 2 + emerald 3) ─────────
             {
                 "key": "opLiab",
                 "label": "영업부채",
-                "color": COLORS[1],
+                "color": "#fcd34d",  # amber-300
                 "intent": "accent",
                 "unit": "원",
                 "type": "bar",
@@ -101,7 +105,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "finDebt",
                 "label": "금융부채",
-                "color": COLORS[0],
+                "color": "#d97706",  # amber-600
                 "intent": "negative",
                 "unit": "원",
                 "type": "bar",
@@ -111,8 +115,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "capitalStock",
                 "label": "자본금",
-                "color": COLORS[4],
-                "intent": "neutral",
+                "color": "#6ee7b7",  # emerald-300
+                "intent": "positive",
                 "unit": "원",
                 "type": "bar",
                 "stack": "liabEq",
@@ -121,7 +125,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "retainedEarnings",
                 "label": "이익잉여금",
-                "color": COLORS[3],
+                "color": "#10b981",  # emerald-500
                 "intent": "positive",
                 "unit": "원",
                 "type": "bar",
@@ -131,8 +135,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "otherEquity",
                 "label": "기타자본",
-                "color": COLORS[7],
-                "intent": "primary",
+                "color": "#047857",  # emerald-700
+                "intent": "positive",
                 "unit": "원",
                 "type": "bar",
                 "stack": "liabEq",
@@ -154,11 +158,14 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "tab": "financial",
         "subCategory": "capitalStructure",
         "seriesPlan": [
-            # 좌측 (음수, 0 line 아래로 stack) — 자산 측 4 항목
+            # assetComposition 과 동일 색상 SSOT — 회계 의미 묶음 (자산 sky / 부채
+            # amber / 자본 emerald) monochrome shade. 두 카드 한 행 같은 색상 체계
+            # 라 사용자 시각 일관성.
+            # 좌측 (음수, 0 line 아래로 stack) — 자산 측 4 항목 (sky)
             {
                 "key": "cashNeg",
                 "label": "현금성자산",
-                "color": COLORS[6],
+                "color": "#bae6fd",  # sky-200
                 "intent": "primary",
                 "unit": "원",
                 "type": "bar",
@@ -168,7 +175,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "receivablesNeg",
                 "label": "매출채권",
-                "color": COLORS[0],
+                "color": "#38bdf8",  # sky-400
                 "intent": "primary",
                 "unit": "원",
                 "type": "bar",
@@ -178,7 +185,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "inventoriesNeg",
                 "label": "재고자산",
-                "color": COLORS[3],
+                "color": "#0284c7",  # sky-600
                 "intent": "primary",
                 "unit": "원",
                 "type": "bar",
@@ -188,18 +195,18 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "opAssetNeg",
                 "label": "기타 영업자산",
-                "color": COLORS[8],
+                "color": "#075985",  # sky-800
                 "intent": "primary",
                 "unit": "원",
                 "type": "bar",
                 "stack": "balance",
                 "compose": {"assets": -1, "cash": 1, "receivables": 1, "inventories": 1},
             },
-            # 우측 (양수, 0 line 위로 stack) — 부채+자본 측 5 항목
+            # 우측 (양수, 0 line 위로 stack) — 부채 2 (amber) + 자본 3 (emerald)
             {
                 "key": "opLiab2",
                 "label": "영업부채",
-                "color": COLORS[5],
+                "color": "#fcd34d",  # amber-300
                 "intent": "accent",
                 "unit": "원",
                 "type": "bar",
@@ -209,7 +216,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "finDebt2",
                 "label": "금융부채",
-                "color": COLORS[2],
+                "color": "#d97706",  # amber-600
                 "intent": "negative",
                 "unit": "원",
                 "type": "bar",
@@ -219,8 +226,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "capitalStock2",
                 "label": "자본금",
-                "color": COLORS[4],
-                "intent": "neutral",
+                "color": "#6ee7b7",  # emerald-300
+                "intent": "positive",
                 "unit": "원",
                 "type": "bar",
                 "stack": "balance",
@@ -229,7 +236,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "retainedEarnings2",
                 "label": "이익잉여금",
-                "color": COLORS[1],
+                "color": "#10b981",  # emerald-500
                 "intent": "positive",
                 "unit": "원",
                 "type": "bar",
@@ -239,8 +246,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             {
                 "key": "otherEquity2",
                 "label": "기타자본",
-                "color": COLORS[7],
-                "intent": "neutral",
+                "color": "#047857",  # emerald-700
+                "intent": "positive",
                 "unit": "원",
                 "type": "bar",
                 "stack": "balance",
