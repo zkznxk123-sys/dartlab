@@ -97,7 +97,49 @@ emit_result(
 
 ## 호출 동작
 
-BofA US HY OAS spread 시계열에서 최근 값 + 직전 60 일 baseline z-score + regime 분류 (>8% crisis, >4% stress, 그 외 normal).
+### 1. 결론 도출
+
+latestSpread + regime + zScore 단정. 예: "BofA US HY OAS = 4.2% (latest) → regime=stress (4%p 임계 초과). 60일 baseline mean 3.5% / std 0.4 → z = +1.8 (현재 평균 대비 1.8σ 위) — credit market 진입 stress 초기, crisis 임계 (8%) 까지 3.8%p 여유."
+
+### 2. 핵심 근거 수집
+
+- FRED 'BAMLH0A0HYM2' (ICE BofA US HY OAS) — macro.seriesFetch
+- 최근 60 일 (sampleN ≥ 30) baseline mean + std
+- 최신 spread vs baseline → z-score
+- regime 임계: < 4% (normal) / 4-8% (stress) / ≥ 8% (crisis)
+
+### 3. 메커니즘 분석
+
+```
+HY OAS 시계열 → 최근 60 일 + 최신 값
+   mean(60일) + std(60일) → baseline
+   z = (latest - mean) / std
+   ↓
+regime 판정:
+   spread < 4%      → normal (정상)
+   4% ≤ spread < 8% → stress (긴장 — 회사채 issue 비용 ↑)
+   spread ≥ 8%      → crisis (위기 — 2008 / 2020 수준)
+   ↓
+z-score 보조:
+   z > +2          → 평균 대비 급등 (regime 전환 후보)
+   |z| < 1         → 안정 추세
+   z < -2          → 평균 대비 급락 (compression — 자산가격 동행 가능)
+```
+
+크레딧 cycle 의 가장 빠른 신호. yield curve + HY spread 동시 신호 시 recession nowcast 강 (Tobin / Bernanke 학계 결과). 단일 시점 임계 초과만으로 recession 단정 X — 지속 기간 (≥ 3 개월) 필수.
+
+### 4. 반례·한계
+
+- 임계 4%/8% 는 historical 평균 기반 — 시기별 정의 다름 (현재 baseline 은 1997-2024).
+- 60 일 baseline 짧음 — regime shift 시 z 후행.
+- HY index 구성 (B/CCC 비중) 시기별 변화 — apple-to-apple 비교 한계.
+- US-only — KR 시장 spread 분리 필요.
+
+### 5. 후속 모니터링
+
+- stress 진입 → `recipes.macro.tailRiskScenarioScan` 으로 신용 시나리오 매핑.
+- stress + yield curve inversion → `recipes.macro.usFedDotPlotGap` 으로 Fed-시장 갭 점검.
+- crisis 진입 → `recipes.fundamental.credit.cycleStressMap` 으로 회사별 credit cycle 영향.
 
 ## 대표 반환 형태
 

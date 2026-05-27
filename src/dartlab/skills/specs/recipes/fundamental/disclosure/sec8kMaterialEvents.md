@@ -129,7 +129,56 @@ emit_result(
 
 ## 호출 동작
 
-직전 60 일 8-K filing 시간순 정렬 후, 30 일 윈도우 안 ≥ 5 건 cluster 검출. Item 분포 (5.02 임원변동, 1.01 신규계약, 2.02 실적, 5.07 의결 결과 등) 도 같이.
+### 1. 결론 도출
+
+filingCount + execEvents burst 단정. 예: "AAPL 직전 60일 8-K 12건 → 30일 윈도우 안 7건 cluster (≥ 5 임계 통과) — Item 분포: 1.01 신규계약 2 + 2.02 실적 1 + 5.02 임원변동 3 (≥ 2 임계 통과) + 8.01 기타 1 → 양 임계 동시 통과 — 전환점 burst phase (임원 cluster + 계약 동행)."
+
+### 2. 핵심 근거 수집
+
+- EDGAR provider fetch8kFilings(ticker, days=60) — 직전 60일 8-K filing
+- 각 filing 의 filingDate + item (SEC Item code) + title
+- 30일 sliding window cluster 검출
+- Item 5.02 (임원/이사 변동) 카운트 (별도 임계)
+
+### 3. 메커니즘 분석
+
+```
+60일 8-K 시계열 → 30일 window cluster
+   각 시점 → 직전 30일 안 filing 수 카운트
+   ≥ 5 건 → burst 후보
+   ↓
+Item 분류 분포 (SEC Item code):
+   1.01 신규/만료계약   → 사업 변경
+   2.01 자산 취득/매각  → 구조조정
+   2.02 실적 release    → 정기 (burst 제외)
+   5.02 임원/이사 변동  → 거버넌스 변경 (≥ 2 = 별도 임계)
+   5.07 의결 결과       → 주주 의결
+   8.01 기타            → 의무 공시 (큰 의미 약)
+   ↓
+burst 판정 (OR):
+   filingCount ≥ 5         → 양적 burst
+   execEvents ≥ 2          → 임원 cluster (질적 burst)
+   둘 다                    → 강한 전환점 후보
+   ↓
+정기성 분리:
+   8.01 정기 disclosure 만으로 burst → false positive (제외 필요)
+   비정기 Item (5.02 / 2.01 / 1.01) 중심 burst → 진성 신호
+```
+
+8-K burst 자체 = recession 단정 X — 정량 사실 표기. 회사 단위 *전환점 후보* 표지. 정기 (Item 8.01 routine disclosure) 가중치 낮춰야 false positive 방지.
+
+### 4. 반례·한계
+
+- 8-K filing < 3 → burst 결론 X.
+- Item 8.01 만 burst 처리 시 false positive (routine disclosure 다수).
+- 60일 window 너무 길면 다른 catalyst 와 overlap.
+- 미국 한정 — KR 공시 (분기보고서 + 임원 변동) 별도 recipe 필요.
+
+### 5. 후속 모니터링
+
+- filingCount ≥ 5 + 가격 변동 → `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 으로 시장 반응 정량화.
+- execEvents ≥ 2 → `recipes.fundamental.quality.forensics.executiveCompensationAudit` 으로 임원 보상 변화 cross-check.
+- 1.01 신규계약 burst → `recipes.news.eventTimelineFusion` 으로 deal cluster 분류.
 
 ## 대표 반환 형태
 

@@ -132,13 +132,53 @@ emit_result(
 
 ## 호출 동작
 
-peer set 의 ROIC - WACC spread 평균 + 매출 5y CAGR 평균으로 4 phase 판정:
-- `growth`: 평균 CAGR > 15% + spread > 5%
-- `mature`: spread > 10% + CAGR < 10%
-- `decline`: CAGR < 2% + spread < 0
-- `transition`: 기타
+### 1. 결론 도출
 
-peer < 4 이면 `indeterminate`.
+peer 분포 4 phase 단정. 예: "반도체 peer set 8 종목 — mean ROIC-WACC spread +12.3% / std 4.8% / mean CAGR 8.4% → phase=mature (spread > 10% + CAGR < 10%). 분산 4.8% 중간 — peer 간 vendor lock-in 상이 (HBM 강자 vs 범용 메모리)."
+
+### 2. 핵심 근거 수집
+
+- Company.industry('peers') peer set (8-15 종목)
+- 각 peer × (ROIC + WACC + revenueCagr5y) 3 metric
+- peer spread = ROIC - WACC, peer CAGR = 매출 5y CAGR
+- mean + std + count 산출
+
+### 3. 메커니즘 분석
+
+```
+peer set → 분포 산출
+   mean(ROIC-WACC spread)  → 산업 평균 *경제적 부가가치 창출* 강도
+   std(ROIC-WACC spread)   → peer 간 dispersion (winner-take-all vs 균등)
+   mean(revenueCagr5y)     → 산업 성장 속도
+   ↓
+4 phase 매트릭스:
+   growth     → CAGR > 15% + spread > 5%  (성장 + 부가가치 동시)
+   mature     → spread > 10% + CAGR < 10% (성장 둔화 but 수익성 견조)
+   decline    → CAGR < 2% + spread < 0    (성장 + 수익성 동시 약화)
+   transition → 기타 (혼재)
+   indeterminate → peer < 4 또는 95% CI 0 포함
+   ↓
+phase 별 투자 implication:
+   growth     → multiple expansion 후보
+   mature     → cash return 강점 (dividend / buyback)
+   decline    → pricing power 약화 — 사양산업
+   transition → phase 전환 watch (재진입 시점 후보)
+```
+
+단일 phase 영구 아님 — 분기/연 단위 전환. std 큼 = winner-take-all (mature 라도 일부 peer 만 spread 양수).
+
+### 4. 반례·한계
+
+- peer < 4 → 분포 신호 결론 X (indeterminate).
+- ROIC/WACC 둘 다 누락 peer 비율 > 50% → coverage 한계.
+- 신생 산업 (5y 미달) 은 CAGR 신호 약 — growth phase 단정 어려움.
+- mature → decline 전환은 lag 2-3 년 — 단년 신호로 후행.
+
+### 5. 후속 모니터링
+
+- mature/decline phase → `recipes.industry.marginCompressionScan` 으로 peer 마진 압축 cluster.
+- growth phase + peer dispersion 큼 → `recipes.industry.sectorMomentumLeadership` 로 leader 추출.
+- phase 전환 (transition) → `recipes.industry.peerCapexWave` 로 capex 변화 추적.
 
 ## 대표 반환 형태
 
