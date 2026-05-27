@@ -4,7 +4,7 @@ title: 실질지배력·연결범위·방어권 판단 진단 (IFRS 10)
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: IFRS 10 실질지배력 판단 (의결권 50%+ 또는 미만에서 실질지배) 적정성을 종속·관계기업 목록 + 지분율 시계열 + 옵션 약정 (콜옵션·풋옵션) + 방어권 vs 경영권 분류 + 합작 공시 본문 5 차원으로 진단하는 L1.5 절차. 트리거 — '실질지배력', '연결범위', '방어권', '삼바 회계처리', '합작 회사 분류'.

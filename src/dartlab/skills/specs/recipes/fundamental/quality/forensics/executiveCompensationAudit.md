@@ -4,7 +4,7 @@ title: 임원 보수·스톡옵션·성과급 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 임원 보수 (현금·주식·옵션) 규모와 성과 KPI 정합성, 스톡옵션 부여·행사 패턴, 단기 EPS 부풀리기 동행 신호, 사외이사 독립성 (보수·재임기간·지명 경로) 을 공시 본문 + IS·BS 시계열로 진단하는 L1.5 절차. 트리거 — '임원 보수 과도', '스톡옵션 부여', '성과급 KPI 정렬', '사외이사 독립성'.

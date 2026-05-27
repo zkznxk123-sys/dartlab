@@ -4,7 +4,7 @@ title: 합병비율·소수주주 보호 점검 (forensics)
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 합병·분할·자기주식 처분에서 합병가액·합병비율의 적정성, 소수주주 squeeze-out 여부, NAV/시장가/공정가 산정 방식 차이를 공시 원문 + 재무제표 원표만으로 진단하는 L1.5 절차. 트리거 — '합병비율 적정', '소수주주 보호', 'squeeze out', 'NAV 평가'.

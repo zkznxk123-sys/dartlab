@@ -4,7 +4,7 @@ title: 자사주 취득·처분·소각 의도 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 자기주식 (자사주) 의 취득·처분·소각 패턴을 통해 주가 부양·지배권 강화·주식보상 활용·지주사 전환 (인적분할 후 현물출자) 등 의도를 IS·BS 시계열 + 자기주식 공시 + 지분 변동으로 진단하는 L1.5 절차. 트리거 — '자사주 매입', '자사주 소각', '자기주식 처분', '지주사 전환', '주가 부양'.

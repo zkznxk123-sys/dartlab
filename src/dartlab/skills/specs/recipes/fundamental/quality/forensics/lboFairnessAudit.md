@@ -4,7 +4,7 @@ title: LBO 차입매수 적정성·재무부담 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 차입매수 (LBO·Leveraged Buyout) 거래에서 *인수가 산정 적정성* + *인수 SPC·SPAC 부채 구조* + *피인수 회사 재무 부담 (Net Debt/EBITDA·이자보상비율·DSCR)* + *합병 후 영업권 손상 가능성* + *사모펀드 의무상환 일정* 5 차원을 IS·BS·CF + 인수 공시 + 합병 공시로 분해하는 L1.5 절차. 트리거 — 'LBO', '차입매수', '사모펀드 인수', 'SPC 합병', '인수 부채 부담', '인수 후 부실'.

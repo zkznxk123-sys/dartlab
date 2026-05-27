@@ -4,7 +4,7 @@ title: 영업권 손상검사 정량 (forensics)
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 인수 후 누적 영업권의 손상검사 적정성을 영업권/자산·영업권/시총 비율 + CGU 별 회수가능액 vs 장부가 + 손상검사 가정 (할인율·성장률) + 인수 segment 영업이익 추세 4 차원으로 진단하는 L1.5 절차. 트리거 — '영업권 손상', '인수 후 사후평가', 'PPA 결과', '인수 segment 이익 악화'.

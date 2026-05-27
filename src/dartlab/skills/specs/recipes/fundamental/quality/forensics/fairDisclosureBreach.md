@@ -4,7 +4,7 @@ title: 미공개 내부정보·공정공시 위반 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 실적 발표 직전 비공식 가이던스·미공개 내부정보 유출·임원·관계인 사전 매매·공정공시 위반 패턴을 공시 timestamp + 임원·특수관계자 거래 시계열 + 외부 보도 매칭으로 진단하는 L1.5 절차. 트리거 — '내부정보 유출', '공정공시 위반', '사전 매매', '실적 발표 직전 보고서 발간', 'CJ E&M 한미약품 마사 스튜어트 패턴'.
