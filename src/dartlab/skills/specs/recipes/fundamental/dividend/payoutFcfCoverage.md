@@ -4,7 +4,7 @@ title: 배당성향 vs FCF 커버리지 z-score
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 회사의 배당성향 (Dividends / Net Income) 과 FCF 커버리지 (Dividends / FCF) 두 축의 trailing 5y baseline 대비 z-score 를 동시에 본다. EPS 기준 payout 은 정상인데 FCF 기준이 무너진 row 가 *회계이익↔현금* 괴리 신호. analysis 단일축. 트리거 — '배당 FCF 커버리지', 'payout sustainable', '배당 갭'.
 whenToUse:
   - 배당 FCF 커버리지
@@ -71,6 +71,7 @@ audiences:
   human: EPS 기준만 보면 안 보이는 *현금 기준 배당 부담* 을 z-score 로 본다.
 humanIntro: "payoutFcfCoverage 는 동일한 배당총액에 대해 *회계이익 기준* 과 *현금 기준* 두 z-score 를 비교한다. 한쪽만 깨지는 row 가 자본구조 조정 또는 회계이익 부풀림 의심 row 다."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

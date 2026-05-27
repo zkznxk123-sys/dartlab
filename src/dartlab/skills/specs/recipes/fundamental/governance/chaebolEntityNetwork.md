@@ -4,7 +4,7 @@ title: 재벌 계열사 망 (지분율·이사 동시재직)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 한국 재벌 그룹 안 회사들의 지분율 cross-holding + 임원/이사 동시재직 (interlocking directorate) network 매핑. 지주사·순환출자·차등의결권의 정량 진입점. governance ↔ scan 결합.
 whenToUse:
   - 재벌 계열사 망
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "그룹 식별 reference 누락 시 결론 X. 단일 회사만 보고 *재벌 network* 결론 금지 — 그룹 전체 universe 필수."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

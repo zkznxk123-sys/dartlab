@@ -4,7 +4,7 @@ title: 외국인 보유율 vs 배당성향 상관
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 한국 시장에서 외국인 보유율 변화와 배당성향 변화의 시차 상관을 본다. 외국인이 *배당 정책에 영향* 한 종목 (높은 상관) vs *영향 없는* 종목 (낮은 상관) 분리. 단일 회사 시계열 5~10 년. gather ↔ analysis 격리 메우는 조합. 트리거 — '외국인 배당', 'foreign ownership dividend', '주주환원 외인 영향'.
 whenToUse:
   - 외국인 보유율 배당
@@ -71,6 +71,7 @@ audiences:
   human: 외인이 배당 결정에 영향이 있는지 시계열 상관으로 본다. 인과 아님.
 humanIntro: "foreignOwnershipCorr 는 한국 시장 특유의 *외국인 영향* 가설을 단일 회사 시계열로 검증한다. 상관 ≠ 인과지만, 상관 임계 미통과 회사의 배당 thesis 에서 *외인 변동성* 은 1 차 변수가 아니다."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

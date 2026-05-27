@@ -4,7 +4,7 @@ title: 이사회 독립성 추세 (사외이사 비중 + 다선 history)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 사외이사 비중 + 평균 임기 + 동시 다선 (다른 회사 이사회 동시 재직) 횟수의 연도별 추세. 단순 사외이사 비율이 아닌 *실질적 독립성* 측정. governance ↔ analysis 격리.
 whenToUse:
   - 이사회 독립성 추세
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "이사회 명부 raw 누락 회사는 결론 X. 다선 회수가 0 인데 사외이사 비중만 본 결론은 *실질적 독립성* 미증명."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
