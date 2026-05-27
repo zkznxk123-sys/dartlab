@@ -20,6 +20,7 @@ import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, 
 import { useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
 import { cn } from '@/lib/utils';
 
@@ -522,9 +523,9 @@ function ViewerTab() {
 				)}
 			</aside>
 
-			{/* 중앙 본문 — own scroll container. 안 sticky top-0 timeline + 본문 row.
-			   timeline 이 main scroll 시 상단 고정. */}
-			<main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+			{/* 중앙 본문 — main 자체는 overflow 없음. 본문 박스 안 ScrollArea 가 단일 vertical
+			   scroll source. 이중스크롤 회피 — sticky timeline + 본문 ScrollArea 만 vertical. */}
+			<main className="min-h-0 min-w-0 flex-1 overflow-x-hidden flex flex-col">
 				{!activeTopic ? (
 					<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
 						왼쪽에서 항목을 선택하세요.
@@ -534,12 +535,10 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="w-full min-w-0 max-w-full overflow-hidden px-3 py-4">
-						{/* 상위 타임라인 + 3-column period header 를 한 묶음으로 sticky.
-						    스크롤 시에도 화면 상단에 고정 — 사용자가 본문 어디 보든 어느
-						    period 인지 + 어느 topic 인지 + 시간축 이동 버튼 항상 보임.
-						    전체보기 (isFullscreen) 모드 동일 동작. */}
-						<div className="sticky top-0 z-20 -mx-3 mb-3 border-b bg-background/95 px-3 backdrop-blur">
+					<div className="flex w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden px-3 py-4">
+						{/* 상위 타임라인 + 토픽 제목 — main flex column 상단 고정 (스크롤 아님).
+						    아래 ScrollArea 가 단일 vertical scroll source. */}
+						<div className="-mx-3 mb-3 shrink-0 border-b bg-background px-3">
 						<header className="pb-2 pt-2">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
@@ -583,9 +582,6 @@ function ViewerTab() {
 						</header>
 
 						</div>
-					{/* sticky 묶음 끝 — 타임라인까지만 sticky. 3-column period header + 본문은
-					    별도 박스로 묶어 그 박스 안에서 vertical scroll. 박스 안 period header
-					    는 박스-internal sticky 로 column 라벨 + 원본 링크 항상 보임. */}
 
 						{windowLoading && (
 							<div className="my-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -593,11 +589,14 @@ function ViewerTab() {
 							</div>
 						)}
 
-						{/* period header + 본문 = 한 박스. 박스 안 vertical scroll. */}
-						<div className="rounded-lg border bg-card max-h-[calc(100vh-220px)] overflow-y-auto">
-							{/* 박스-internal sticky — period 라벨 + 원본 링크 박스 상단 고정. */}
+						{/* 단일 ScrollArea — period header + 본문 한 묶음. 외부/내부 이중스크롤 회피.
+						    period header 는 ScrollArea viewport 안 sticky top-0 → 본문 스크롤 시에도
+						    column 라벨 + 원본 링크 viewport 상단 고정. 박스 테두리 없음 (radix
+						    ScrollArea 자체 스크롤바 UX). */}
+						<ScrollArea className="min-h-0 flex-1">
+							{/* viewport-internal sticky — period 라벨 + 원본 링크 */}
 							<div
-								className="sticky top-0 z-10 grid gap-3 border-b bg-card/95 px-3 py-2 backdrop-blur"
+								className="sticky top-0 z-10 grid gap-3 border-b bg-background px-1 py-2"
 								style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
 							>
 								{windowPeriods.map((p) => {
@@ -626,10 +625,10 @@ function ViewerTab() {
 								})}
 							</div>
 							{/* 본문 — sections SSOT rows (period × content) 직접 dumb render */}
-							<div className="px-3 py-3">
+							<div className="px-1 py-3">
 								<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
 							</div>
-						</div>
+						</ScrollArea>
 					</div>
 				)}
 			</main>
