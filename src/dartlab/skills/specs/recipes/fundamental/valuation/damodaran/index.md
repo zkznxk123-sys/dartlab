@@ -4,7 +4,7 @@ title: Damodaran L1/L1.5 분석체계 진입점
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 entryHint: true
 graphTier: L1.5
 cluster: valuation.damodaran
@@ -130,6 +130,7 @@ runtimeCompatibility:
     status: limited
   pyodide:
     status: limited
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

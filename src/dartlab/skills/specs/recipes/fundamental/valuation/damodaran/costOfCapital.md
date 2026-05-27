@@ -4,7 +4,7 @@ title: Damodaran 비용자본 가정
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 국가 ERP, 무위험금리, 세율, 산업 beta와 debt/capital 기본값을 L1.5 reference에서 읽어 WACC 가정과 fallback reason을 만드는 절차. 트리거 — 'WACC 가정', 'Damodaran ERP beta', '비용자본 reference'.
 whenToUse:
   - WACC 가정
@@ -77,6 +77,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

@@ -4,7 +4,7 @@ title: Damodaran FCFF DCF 밴드
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 정규화 FCFF, 재투자율, ROC, WACC를 조합해 고성장기, 전환기, 정상상태의 FCFF DCF 가치 밴드를 만드는 절차. 트리거 — 'FCFF DCF', 'Damodaran DCF band', 'terminal ROC consistency'.
 whenToUse:
   - FCFF DCF
@@ -80,6 +80,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

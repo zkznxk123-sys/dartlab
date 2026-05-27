@@ -4,7 +4,7 @@ title: Working Capital Pressure Map
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: raw BS/IS만으로 DSO, DIO, DPO, CCC와 재고 성장 gap을 계산해 운전자본 압력이 이익품질·유동성 신호로 승격 가능한지 실험한다. 트리거 — '운전자본 pressure', 'CCC 원표 계산', '재고 매출 gap'.
@@ -77,6 +77,7 @@ visualRefs:
   - "engines.viz.evidenceCoverage"
   - "engines.viz.mermaidDiagram"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

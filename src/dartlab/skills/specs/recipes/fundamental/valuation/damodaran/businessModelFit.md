@@ -4,7 +4,7 @@ title: Damodaran 모델 적합성 게이트
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 일반 FCFF DCF를 적용해도 되는 회사인지 금융업, 보험, 지주, 적자, 고성장, 경기순환, 구조전환 유형으로 먼저 분류하는 절차. 트리거 — 'DCF 모델 적합성', '금융업 DCF 차단', 'Damodaran business model fit'.
 whenToUse:
   - DCF 모델 적합성
@@ -78,6 +78,7 @@ visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

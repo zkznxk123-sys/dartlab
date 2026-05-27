@@ -4,7 +4,7 @@ title: TRS·파생·의결권 분리 거래 진단
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 총수익스왑 (TRS)·풋옵션·콜옵션·KIKO·통화선도 거래에서 회계상 자산 제거 가능성 + 의결권 분리 + 우발손익 추적 + 거래 상대방 위험 4 차원으로 진단하는 L1.5 절차. 트리거 — 'TRS 거래', '풋옵션 우발', 'KIKO 손실', '의결권 분리', '파생 잠재 위험'.
