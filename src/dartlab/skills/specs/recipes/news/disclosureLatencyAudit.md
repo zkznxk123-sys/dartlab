@@ -4,7 +4,7 @@ title: 공시 ↔ 뉴스 시간 간격 분포 (latency audit)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: news
 purpose: 공시 (dartDoc) 와 뉴스 (news) 의 시간 차이 분포 측정. 공시 → 뉴스 평균 lag, std-dev, 동시 발생 row 카운트. 추론 라벨 없이 정량 분포만. dartDoc + news gather 결합.
@@ -64,6 +64,7 @@ failureModes:
   - 동일 공시에 대한 다중 뉴스 보도 → 중복 매칭
   - 시간외 공시 + 익일 뉴스 시차 자연 변동
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

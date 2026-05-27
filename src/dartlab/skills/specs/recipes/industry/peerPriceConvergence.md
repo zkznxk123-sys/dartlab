@@ -4,7 +4,7 @@ title: 동종 peer 가격 수렴 / 발산 (60d ret 분포)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: industry
 purpose: 종목의 industry peer 들의 60 거래일 수익률 분포 측정. peer 수익률 std-dev 가 좁아지면 *수렴 phase*, 넓어지면 *발산 phase*. 추론 라벨 없이 분산 정량만. peers + price gather 결합.
@@ -64,6 +64,7 @@ failureModes:
   - 단일 outlier 가 dispersion 좌우
   - peer 정의 (GICS / KRX / cross-listed) 차이로 결과 변동
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

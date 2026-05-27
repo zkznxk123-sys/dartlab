@@ -4,7 +4,7 @@ title: 섹터 안 모멘텀 leader / laggard (20d 분포 top/bottom)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: industry
 purpose: 종목 peer set 의 20 거래일 수익률 분포에서 자기 종목 percentile 위치 + 분포 top/bottom 보고. 추론 라벨 없이 ranking + 절대 위치만. peers + price gather 결합.
@@ -64,6 +64,7 @@ failureModes:
   - 단일 outlier peer 가 percentile 위치 좌우
   - peer 정의 (sub-industry vs 산업 전체) 차이
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

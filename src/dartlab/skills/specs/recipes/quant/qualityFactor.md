@@ -4,7 +4,7 @@ title: Quality 팩터 — QMJ (Frazzini-Pedersen-Asness 2014)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: Frazzini-Pedersen-Asness 2014 "Quality Minus Junk" 의 4 축 — Profitability (ROE/ROA) + Growth (5y CAGR) + Safety (low leverage·low earnings vol) + Payout (FCF / NI) — composite z-score. junk 회사 회피용 quality screen.
 whenToUse:
   - quality 팩터
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "4 축 중 측정 가능한 게 ≤ 2 개면 composite 결론 X. peer < 8 이면 z-score 불안정."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

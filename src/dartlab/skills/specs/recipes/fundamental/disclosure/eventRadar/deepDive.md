@@ -4,7 +4,7 @@ title: Event Radar Deep Dive
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.eventRadar
@@ -111,6 +111,7 @@ audiences:
   human: 이벤트 후보, 반응, 반증, 시각화 가능 여부를 한 번에 보는 실제 사용 경로다.
 humanIntro: "deepDive는 이벤트 레이더 팩의 실제 사용 경로다. 신호를 만들기보다 원자료와 반증 조건, 시각화 가능 여부를 함께 묶는다."
 lastUpdated: "2026-05-17"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
