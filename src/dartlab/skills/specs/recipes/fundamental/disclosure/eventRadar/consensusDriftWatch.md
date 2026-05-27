@@ -118,7 +118,50 @@ emit_result(
 
 ## 호출 동작
 
-최근 두 consensus row의 revenue, operatingProfit, eps, targetPrice 값을 비교해 revisionPct와 status를 만든다.
+### 1. 결론 도출
+
+4 metric revisionPct 단정. 예: "consensus latest vs previous: revenue +2.1% / opProfit -4.5% / EPS -3.2% / targetPrice -1.8% → 영업이익 + EPS 동시 하향 phase (revenue 견조하나 마진 하향 — 비용 압력 신호)."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('consensus') latest 12 row
+- 최근 2 row (date 기준 정렬) — latest + previous
+- revenue / operatingProfit / eps / targetPrice 4 metric × revisionPct
+- buildEventRadarMemo() → drift table
+
+### 3. 메커니즘 분석
+
+```
+12 row consensus 시계열 → date 정렬 → latest + previous 2 row
+   ↓
+metric 별 revisionPct = (latest - previous) / previous × 100
+   ↓
+status 판정 (metric 별):
+   |revisionPct| < 1%  → ok (안정)
+   1% ~ 3%             → watch (변화 시작)
+   > 3%                → risk (큰 변화)
+   row 1 미만          → missing (drift 측정 불가)
+   ↓
+패턴 분류:
+   revenue + opProfit + EPS 동방향 → 일관 상향/하향
+   revenue 상향 + opProfit 하향 → 마진 우려 (비용 압력)
+   targetPrice 만 변동 → multiple regime 변경
+```
+
+drift 자체는 *시장 기대* 변화 — 실적 결론 아님. 컨센서스 후행 (실적 발표 lag) → 선행성 약함.
+
+### 4. 반례·한계
+
+- 단일 broker 의 stale update 가 latest 만 갱신하면 drift 의미 X — broker 수 ≥ 3 필요.
+- 단위/통화 변경 (원 → 백만원) 시 revisionPct 왜곡.
+- IFRS vs K-GAAP 전환기 row 는 비교 불가.
+- 분기/연간 mix 시점 → 단순 직전 row 비교 무의미.
+
+### 5. 후속 모니터링
+
+- opProfit + EPS 동시 하향 → `recipes.fundamental.disclosure.eventRadar.deepDive` 로 7-ledger radar 확장.
+- targetPrice 만 변동 → `recipes.industry.peerPriceConvergence` 로 sector dispersion 점검.
+- revenue 만 상향 (마진 약화) → `recipes.industry.marginCompressionScan` 으로 peer 비교.
 
 ## 대표 반환 형태
 

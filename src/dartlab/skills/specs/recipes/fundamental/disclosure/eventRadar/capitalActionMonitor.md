@@ -135,7 +135,49 @@ emit_result(
 
 ## 호출 동작
 
-dividend/split row와 filing event의 capitalAction category를 하나의 action table로 합친다.
+### 1. 결론 도출
+
+dividend / split / capitalAction action table 단정. 예: "최근 12개월 capital action 8건 — 정기배당 4 (분기 5,500원) + 무상증자 1 + 자사주 매입 2 (총 1.2조) + 전환사채 1 (희석 +2.3%) → action mix 정기 + buyback 우세 (희석 1건 한정)."
+
+### 2. 핵심 근거 수집
+
+- Company.disclosure() filings — capitalAction category (배당결정·무상증자·유상증자·CB·자사주취득/소각)
+- Company.gather('dividends') — 배당 시계열
+- Company.gather('splits') — 분할 시계열
+- buildEventRadarMemo() → action table 통합
+
+### 3. 메커니즘 분석
+
+```
+3 source → action category 통합
+   dividend rows → action="dividend" value=배당금
+   split rows    → action="split"    value=비율
+   filings       → action="filingCapitalAction" value=공시 제목
+   ↓
+12M action mix:
+   buyback > issuance → 주주환원 우세
+   issuance > buyback → 희석 우세 (유상증자 + CB)
+   dividend 정기성 일관 → 안정 배당정책
+   특별배당 / 자사주 소각 → 일회성 호재
+   ↓
+status="watch": 향후 12M 예상 action (인지 가능)
+status="missing": disclosure 부재 row
+```
+
+action 자체는 호재/악재 판정 X — 정기성 분리 + 희석 vs 환원 비교가 핵심. CB/유상증자 = 희석. 자사주 매입/소각 + 배당 = 환원.
+
+### 4. 반례·한계
+
+- 유상증자와 무상증자 자본 영향 다름 (희석 vs 단순 분할).
+- 자사주 *매입* vs *소각* 구분 — 매입은 자본 감소, 소각은 EPS 즉시 상승.
+- CB 발행은 즉시 희석 아님 — 전환 시점에 발현 (5-10% 가정).
+- 분기 정기배당 변동은 *변화* 만 신호 — 같은 금액 4회 반복은 baseline.
+
+### 5. 후속 모니터링
+
+- buyback 큰 규모 → `recipes.fundamental.dividend.buybackVsDividendMix` 로 환원 mix 변화 확인.
+- CB/유상증자 → `recipes.fundamental.governance.relatedPartyTransactionShare` 로 거버넌스 risk.
+- 정기배당 변동 → `recipes.fundamental.dividend.payoutFcfCoverage` 로 fcf 충당 점검.
 
 ## 대표 반환 형태
 

@@ -126,7 +126,48 @@ emit_result(
 
 ## 호출 동작
 
-내부자 거래와 지분 변화 row에서 holder, direction, amount, status를 추출한다.
+### 1. 결론 도출
+
+insider + ownership signal table 단정. 예: "최근 12M insider 5건 (buy 3 / sell 2, net +120k 주) + ownership 3건 (대주주 ratio +0.8%p / 외인 +1.2%p / 기관 -0.4%p) → net insider 매수 우세 + 외인 지분 증가 — direction 양수 동조."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('insiderTrading') latest 20 row — 임원 + 대주주 거래
+- Company.gather('ownership') latest 20 row — 5% 보유공시 + 분기 외인/기관 ratio
+- buildEventRadarMemo() → holder / direction / amount / date / status table
+
+### 3. 메커니즘 분석
+
+```
+2 source → signal table
+   insider rows → direction = buy / sell / treasury / planned
+   ownership rows → direction = ownershipChange (+/-) / snapshot
+   ↓
+holder 별 net direction:
+   대주주 net buy + 외인 ratio ↑ → 양수 동조
+   임원 sell 다수 + 외인 ↓     → 음수 동조
+   mixed (대주주 buy + 임원 sell) → 해석 보류
+   ↓
+amount 부호 vs 의도 분리:
+   계획 매도 (10b5-1) / 주식보상 vesting / treasury transfer
+   → buy/sell 부호 있어도 *의도 신호 아님*
+   → falsifier 로 분리
+```
+
+direction 자체는 *방향* 신호 — 의도/타이밍 해석 X. cluster 분석 (≥3 명 동시 + 30일 윈도우) 은 별 recipe (insiderClusterTiming).
+
+### 4. 반례·한계
+
+- 계획 매도 (사전 신고된 10b5-1 plan) 는 *신호 아님* — 분리 필수.
+- 주식보상 vesting 행사도 sell 로 잡힘 — false negative 위험.
+- KR 5% 보유공시 lag 5 영업일 — 실제 매매 시점과 불일치.
+- 자기주식 (treasury) transfer 는 대주주 매수와 별개 — 혼합 시 의미 왜곡.
+
+### 5. 후속 모니터링
+
+- net insider buy 동조 + 가격 하락 → `recipes.sentiment.insiderClusterTiming` 로 cluster 형성 확인.
+- ownership 대주주 ↓ + 임원 sell ↑ → `recipes.fundamental.disclosure.eventRadar.falsifierLedger` 로 계획 매도 반증.
+- 외인 ratio 급변 → `recipes.sentiment.foreignBuyMomentum` 으로 가속도 확인.
 
 ## 대표 반환 형태
 

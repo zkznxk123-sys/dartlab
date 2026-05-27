@@ -134,7 +134,47 @@ emit_result(
 
 ## 호출 동작
 
-event, reaction, insider, capital, consensus 신호마다 supportingEvidence와 counterEvidenceNeeded를 만든다.
+### 1. 결론 도출
+
+claim 별 open/notTriggered ledger 단정. 예: "5 claim 검증: event(자사주취득) → open (반응 +1.2% 미미, counter='거래량 평년 대비 1.5배 미달') / reaction(가격 +1.2%) → open (시장 동조 의심) / insider → notTriggered / capital(CB발행) → open (희석 모의 미완료) / consensus → notTriggered. open 3건 → 촉매 결론 보류."
+
+### 2. 핵심 근거 수집
+
+- Company.disclosure() filings — capital / governance event
+- Company.gather('price') latest 40 row — reaction 측정
+- Company.gather('flow') latest 40 row — 외인/기관 매매 동조
+- buildEventRadarMemo() → 5 claim (event / reaction / insider / capital / consensus) × 2 column (supporting / counterNeeded)
+
+### 3. 메커니즘 분석
+
+```
+5 claim × 각 supportingEvidence + counterEvidenceNeeded 매트릭스
+   ↓
+status 판정:
+   notTriggered → 해당 claim 자체가 트리거 X (이벤트 없음)
+   open         → 트리거 있으나 supporting 약함 OR counter 미해소
+   resolved     → supporting 강함 + counter 해소 (확정 결론 가능)
+   ↓
+open count ≥ 1 → 확정 결론 보류 (forbidden 발동)
+모두 resolved or notTriggered → 결론 가능
+   ↓
+counterEvidenceNeeded 빈 문자열 → 본 recipe 실패 (조건 누락)
+```
+
+falsifier 의 역할은 *틀릴 수 있는 이유* 명시 — radarScore 만으로는 false positive 위험.
+
+### 4. 반례·한계
+
+- counter 가 verifiable 한지 — "다른 시장 데이터 부족" 같이 검증 불가능한 counter 는 의미 없음.
+- 5 claim 외 미커버 영역 (회계 / 거시 / 산업) — 본 ledger 범위 외.
+- open 만 보면 over-conservative — 의미 있는 신호도 보류됨.
+- claim 간 dependency (event → reaction) 가 ledger 에 직접 반영 X.
+
+### 5. 후속 모니터링
+
+- open 다수 → `recipes.fundamental.disclosure.eventRadar.engineCandidateMemo` 로 후보 좁히기.
+- resolved 다수 → `recipes.fundamental.disclosure.eventRadar.deepDive` 로 종합 radarScore.
+- counterEvidence 가 price/flow → `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 으로 reaction 정량화.
 
 ## 대표 반환 형태
 

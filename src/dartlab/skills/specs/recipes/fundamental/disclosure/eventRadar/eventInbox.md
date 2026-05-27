@@ -130,7 +130,52 @@ emit_result(
 
 ## 호출 동작
 
-공시·뉴스 row를 날짜 역순으로 정렬하고 earnings, capitalAction, financing, governance, regulatory, filingRisk, deal category로 분류한다.
+### 1. 결론 도출
+
+7 category event inbox 단정. 예: "최근 7일 inbox 14건 — earnings 2 + capitalAction 3 (자사주취득) + financing 1 (CB발행) + governance 2 + regulatory 0 + filingRisk 1 (정정신고) + deal 5 (M&A 루머 news) → financing + filingRisk 동시 발생 → 단기 watch."
+
+### 2. 핵심 근거 수집
+
+- Company.liveFilings(days=7) 우선 (없으면 disclosure() fallback)
+- Company.gather('news') latest 20 row
+- buildEventRadarMemo() → 키워드 매칭 7 category 분류
+- 각 row date / source (filing/news) / title / category / status
+
+### 3. 메커니즘 분석
+
+```
+filing + news rows → 날짜 역순 정렬
+   ↓
+키워드 매칭 7 category:
+   earnings (실적/잠정/공정)
+   capitalAction (배당/분할/자사주/증자)
+   financing (사채/대출/CB)
+   governance (이사회/임원/주총)
+   regulatory (제재/조사/과징금)
+   filingRisk (정정/지연/감리)
+   deal (M&A/계약/MOU)
+   ↓
+status 판정:
+   ok      → 정기 보고 (3월 정기보고서 등)
+   watch   → 비정기 + 단일 source
+   risk    → filingRisk / regulatory category
+   missing → 데이터 없음
+```
+
+inbox 자체는 *후보 목록* — 중요도/방향 결론 아님. 다음 단계 (priceFlowReaction, falsifierLedger) 에서 reaction + 정기성 검증 필요.
+
+### 4. 반례·한계
+
+- 정기보고서 (분기/연간) 가 일시 inbox spike 보여도 *새 신호* 아님.
+- 뉴스 키워드 매칭은 false positive 다수 — title 만으로 category 단정 약함.
+- liveFilings days=7 너무 짧으면 큰 이벤트 누락, 너무 길면 dilution.
+- 같은 사건의 filing + news 중복 — dedupe 필요.
+
+### 5. 후속 모니터링
+
+- inbox 비정기 row → `recipes.fundamental.disclosure.eventRadar.priceFlowReaction` 으로 가격/거래량 reaction.
+- regulatory / filingRisk row → `recipes.fundamental.disclosure.eventRadar.falsifierLedger` 로 정기성/중복 반증.
+- earnings + capitalAction 동시 → `recipes.fundamental.disclosure.eventRadar.deepDive` 로 7-ledger radar.
 
 ## 대표 반환 형태
 

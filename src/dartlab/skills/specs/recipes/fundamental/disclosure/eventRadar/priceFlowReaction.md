@@ -129,7 +129,51 @@ emit_result(
 
 ## 호출 동작
 
-최근 2개 price row로 `priceChangePct`와 `volumeRatio`를 계산하고, 최신 flow row의 외국인·기관 순매수를 함께 둔다.
+### 1. 결론 도출
+
+price + volume + net flow reaction 단정. 예: "기준일 close=78,500 / priceChangePct=+2.1% (직전 종가 대비) / volumeRatio=1.8× (평균 거래량 대비) / netFlow=+45억 (외인+기관) → 가격 + 거래량 + 수급 3 신호 양수 동조 = reaction watch (이벤트 trigger candidate)."
+
+### 2. 핵심 근거 수집
+
+- Company.gather('price') latest 40 row — close + volume
+- Company.gather('flow') latest 40 row — 외인 + 기관 순매수
+- 최근 2 price row → priceChangePct + volumeRatio 계산
+- 최신 flow row → 외인 + 기관 합산 netFlow
+
+### 3. 메커니즘 분석
+
+```
+price[-1] vs price[-2] → priceChangePct = (close[-1]/close[-2] - 1) × 100
+volume[-1] vs avg(volume[-21:-1]) → volumeRatio = volume[-1] / avg
+flow[-1] → netFlow = foreignNet + institutionNet
+   ↓
+3 signal 동조 판정:
+   priceChangePct > 1% + volumeRatio > 1.5 + netFlow > 0 → 강한 reaction (양수)
+   priceChangePct < -1% + volumeRatio > 1.5 + netFlow < 0 → 강한 reaction (음수)
+   1 신호만 → weak (noise 가능)
+   부호 mixed → 해석 어려움 (예: 가격 ↑ + flow ↓ → 개인 매수 추격)
+   ↓
+status:
+   watch  → 3 신호 동조 (이벤트 신호 강함)
+   risk   → 가격 -3%+ 또는 거래정지
+   ok     → 정상 범위
+   missing → row 부재
+```
+
+reaction 자체는 *시장 반응* — 원인 단정 X (이벤트 inbox 와 결합 필요). 시장 전체 같은 시점 같은 방향 변동 시 → 회사 고유 신호 아님.
+
+### 4. 반례·한계
+
+- 시장 전체 ±2%+ 움직임 시 → 회사 고유 신호와 분리 불가.
+- 거래정지·액면분할 직후 priceChangePct 무의미 (-30% 가짜).
+- 거래량 평균 20 일 윈도우 — 분기 이벤트 (실적/배당) 시점 base 왜곡.
+- flow 데이터 lag 1 영업일 — 같은 날 price 와 동기화 X.
+
+### 5. 후속 모니터링
+
+- watch + 같은 시점 inbox 이벤트 → `recipes.fundamental.disclosure.eventRadar.eventInbox` 와 cross-check.
+- mixed 부호 → `recipes.fundamental.disclosure.eventRadar.falsifierLedger` 로 market-wide 반증.
+- volumeRatio 큼 + netFlow 부호 일관 → `recipes.technical.priceVolumeZScore` 로 z-score event 점검.
 
 ## 대표 반환 형태
 
