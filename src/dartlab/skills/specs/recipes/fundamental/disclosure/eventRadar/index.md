@@ -4,7 +4,7 @@ title: Event Radar Incubator 진입점
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.eventRadar
@@ -132,6 +132,7 @@ audiences:
   human: 새 분석 엔진을 만들기 전, 원자료 이벤트와 시장 반응이 반복 가능한지 확인하는 촉매 인큐베이터다.
 humanIntro: "이 팩은 복잡한 엔진 호출법을 여러 스킬로 쪼개는 대신, 이미 있는 L1/L1.5 표면을 조합해 촉매 후보와 반증 조건을 빠르게 남긴다. 유효한 축은 나중에 엔진으로 환류하되 recipe는 원자료 검산 경로로 유지한다."
 lastUpdated: "2026-05-17"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

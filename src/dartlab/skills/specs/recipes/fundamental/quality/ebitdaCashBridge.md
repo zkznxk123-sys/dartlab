@@ -4,7 +4,7 @@ title: EBITDA·OCF·인수가격 적정성 bridge
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: curated
 graphTier: L1.5
 purpose: EBITDA / EBIT / EBT 정의 차이와 OCF (영업현금흐름) 의 bridge, 인수가격 EV/EBITDA multiple 적정성, EBITDA 한계 (CAPEX·운전자본·이자·법인세 비포함) 를 IS·CF·BS 시계열로 정량 분해하는 L1.5 절차. 트리거 — 'EBITDA 적정', 'EV/EBITDA', '인수가격 적정성', 'EBITDA vs OCF 괴리', 'EBITDA 함정'.
 whenToUse:
