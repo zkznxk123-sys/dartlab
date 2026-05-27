@@ -4,7 +4,7 @@ title: 미국 yield curve regime (10y-2y / 10y-3m 동시)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 미국 국채 10y-2y + 10y-3m 두 spread 동시 추적. 둘 다 inversion (음수) 이면 *strong recession signal*. 단일 spread (10y-2y만) 함정 회피. FRED raw 직접.
 whenToUse:
   - 미국 yield curve
@@ -60,6 +60,7 @@ testUniverse:
 falsifier:
   description: "단일 spread inversion 만으로 recession 단정 X — 두 spread 동시 + 지속 6 개월 임계."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

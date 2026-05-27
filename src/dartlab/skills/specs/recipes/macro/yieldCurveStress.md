@@ -4,7 +4,7 @@ title: 수익률곡선 스트레스 원자료 점검
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 장단기 금리차, 정책금리, 장기금리 원자료를 gather로 직접 확인하고 macro.rates 해석과 대조해 경기침체 선행 신호와 정책 압력을 점검하는 절차. 트리거 — '수익률곡선', '장단기 금리차', 'yield curve', '금리 역전'.
 whenToUse:
   - 수익률곡선
@@ -72,6 +72,7 @@ runtimeCompatibility:
     status: limited
   pyodide:
     status: limited
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
