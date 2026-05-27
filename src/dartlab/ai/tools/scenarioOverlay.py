@@ -15,6 +15,7 @@ from typing import Any
 from dartlab.ai.contracts import Ref
 from dartlab.core.confidence import baseScore
 
+from .companyResolve import resolveCompanyOrNone
 from .types import ToolResult
 
 # overrides 키 → 거시 충격 추출 (baseline 대비 변화량).
@@ -24,19 +25,6 @@ _FX_KEY = "usdkrw"  # 원달러
 _FX_BASELINE = 1350.0  # 평년 baseline (rough)
 _RATE_KEY = "fedfunds"
 _RATE_BASELINE_US = 4.5
-
-
-def _resolveCompany(target: str) -> Any:
-    if not target:
-        return None
-    try:
-        from dartlab.company import Company
-    except ImportError:
-        return None
-    try:
-        return Company(target)
-    except Exception:
-        return None
 
 
 def _sectorKey(company: Any) -> str | None:
@@ -114,7 +102,7 @@ def scenarioOverlay(scenarioName: str, stockCode: str = "", severity: str = "", 
     overrides = dict(preset.get("overrides") or {})
     if inferredMarket == "KR":
         overrides.update(preset.get("kr_overrides") or {})
-    company = _resolveCompany(stockCode)
+    company = resolveCompanyOrNone(stockCode)
     sectorKey = _sectorKey(company) if company is not None else None
     elasticity = getElasticity(sectorKey)
     estimates = _estimateImpact(overrides, elasticity) if company is not None else {}

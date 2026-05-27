@@ -25,6 +25,7 @@ from typing import Any, Literal
 from dartlab.ai.contracts import Ref
 from dartlab.core.confidence import baseScore
 
+from .companyResolve import resolveCompanyOrNone
 from .types import ToolResult
 
 CorporateType = Literal[
@@ -67,19 +68,6 @@ _QUESTION_KEYWORDS_GROWTH = ("성장", "growth", "CAGR")
 
 _DISTRESS_GRADES = {"D", "C", "CCC-", "CCC", "CCC+"}
 _HIGH_YIELD_GRADES = {"BB-", "BB", "BB+", "B-", "B", "B+"}
-
-
-def _resolveCompany(target: str) -> Any:
-    if not target:
-        return None
-    try:
-        from dartlab.company import Company
-    except ImportError:
-        return None
-    try:
-        return Company(target)
-    except Exception:
-        return None
 
 
 def _classify(company: Any, question: str) -> tuple[str, str, int]:
@@ -138,7 +126,7 @@ def pickStoryTemplate(stockCode: str = "", question: str = "") -> ToolResult:
 
     stockCode 없으면 question 만으로 거친 분류. dartlab Company 조회 실패 시 ``general``.
     """
-    company = _resolveCompany(stockCode)
+    company = resolveCompanyOrNone(stockCode)
     corporateType, rationale, confidence = _classify(company, question)
     focusSections = _TYPE_TO_SECTIONS.get(corporateType, _GENERAL_SECTIONS)
     templateId = f"story.{corporateType}"

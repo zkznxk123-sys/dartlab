@@ -18,6 +18,7 @@ import polars as pl
 from dartlab.ai.contracts import Ref
 from dartlab.core.confidence import baseScore
 
+from .companyResolve import resolveCompanyOrNone
 from .creditBadge import getDcrBadge
 from .industryContext import getIndustryBadge
 from .types import ToolResult
@@ -62,19 +63,6 @@ def _latestValueFromShow(table: pl.DataFrame, snakeId: str) -> float | None:
     try:
         return float(val)
     except (TypeError, ValueError):
-        return None
-
-
-def _resolveCompany(target: str) -> Any:
-    if not target:
-        return None
-    try:
-        from dartlab.company import Company
-    except ImportError:
-        return None
-    try:
-        return Company(target)
-    except Exception:
         return None
 
 
@@ -129,7 +117,7 @@ def compareCompanies(stockCodes: list[str] | str | None = None) -> ToolResult:
     rows: list[dict[str, Any]] = []
     badges: list[dict[str, Any]] = []
     for code in codes:
-        company = _resolveCompany(code)
+        company = resolveCompanyOrNone(code)
         if company is None:
             rows.append({"stockCode": code, "corpName": None, "error": "company_not_resolved"})
             continue
