@@ -99,7 +99,56 @@ emit_result(
 
 ## 호출 동작
 
-thesis 키워드와 명시 assumption을 합쳐 `assumptionId`, `claim`, `source`, `evidenceNeeded`를 만든다.
+### 1. 결론 도출
+
+assumptionId 별 claim + evidenceNeeded 단정. 예: "ledger 6 row — A1=revenueGrowth (parsedThesis) status=untested evidenceNeeded='최근 4Q revenue YoY' / A2=cashConversion (parsedThesis) evidenceNeeded='CFO / NI ratio 5y' / A3=marginDurability (user) / A4=valuationSupport (parsedThesis) / A5=balanceSheet (fallback) / A6=competitivePosition (user). 6 testable assumption + 모두 evidenceNeeded 명시 (검증 절차 정의)."
+
+### 2. 핵심 근거 수집
+
+- thesisIntake 의 themes 결과 (8 theme 매핑)
+- 사용자가 명시한 assumption list (optional)
+- buildThesisKillChainMemo() → assumptionLedger table
+- assumption 5 표준 카테고리: revenueGrowth / marginDurability / cashConversion / balanceSheet / valuationSupport
+
+### 3. 메커니즘 분석
+
+```
+thesis themes → assumption 분해
+   growth theme   → A=revenueGrowth (claim: "매출 YoY 둔화 없음")
+   margin theme   → A=marginDurability (claim: "OPM 유지")
+   cash theme     → A=cashConversion (claim: "CFO/NI ≥ 1")
+   balanceSheet   → A=balanceSheet (claim: "차입금 / EBITDA < 임계")
+   valuation      → A=valuationSupport (claim: "현재 multiple < peer 평균")
+   ↓
+각 assumption × (claim + source + evidenceNeeded + status)
+   source 분류:
+     parsedThesis → thesis 본문에서 자동 추출
+     user        → 사용자 명시 보강
+     fallback    → 표준 5 카테고리 default
+   ↓
+evidenceNeeded 강제:
+   비어 있으면 실패 (검증 절차 정의 안 됨)
+   "최근 4Q revenue YoY", "OPM trailing 5y std" 등 구체
+   ↓
+status:
+   untested  → 아직 검증 X (fragilityMap 진입 대상)
+   missing   → evidenceNeeded 정의 안 됨 (실패)
+```
+
+assumption 은 *검증 대상* — claim 아님. 가정을 숫자 근거 없이 참이라고 두면 forbidden 위반. evidenceNeeded 는 다음 단계 호출 근거.
+
+### 4. 반례·한계
+
+- assumptionId 가 없는 row 실패.
+- evidenceNeeded 빈 문자열 → 실패 (검증 불가능).
+- thesis 문장을 그대로 결론으로 사용 → failureMode 발동.
+- 5 표준 카테고리 외 영역 (예: 정치 risk) 은 user 보강으로만 추가.
+
+### 5. 후속 모니터링
+
+- 6 assumption 모두 untested → `recipes.meta.thesisKillChain.fragilityMap` 으로 각 assumption fragility 측정.
+- evidenceNeeded 매핑 → `recipes.meta.thesisKillChain.evidenceCoverageAudit` 으로 데이터 coverage 점검.
+- assumption 충돌 (예: growth + cash 동시 가정 X) → `recipes.meta.thesisKillChain.premortemQualityGate` 로 일관성 확인.
 
 ## 대표 반환 형태
 

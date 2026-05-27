@@ -109,7 +109,55 @@ emit_result(
 
 ## 호출 동작
 
-watch/risk fragility, filing risk keyword, scan primitive score를 trigger row로 변환한다.
+### 1. 결론 도출
+
+triggerId × source 별 trigger catalog 단정. 예: "catalog 8 row — T1=opmCompression source=fragilityMap status=risk evidence='OPM -2%p 5y trend' / T2=consensusDownRevision source=fragilityMap status=risk / T3=marginCompressionFiling source=filing status=watch evidence='3Q 컨퍼런스콜 비용 가속' / T4=peerStress source=scan status=watch / T5-T8 routine missing → 3 risk trigger + 2 watch + 3 routine. 진성 trigger 5 종 (filing routine 제외)."
+
+### 2. 핵심 근거 수집
+
+- fragilityMap watch/risk metric → triggerId 변환
+- Company.disclosure() filings risk keyword (구조조정 / 감액 / 정정신고 등)
+- scan primitive score (peer 동조 / 시장 stress)
+- buildThesisKillChainMemo() → triggerCatalog table
+
+### 3. 메커니즘 분석
+
+```
+3 source → trigger row 변환
+   fragilityMap risk/watch metric → triggerId = metricId
+     status 그대로 보존
+     evidence = metric 값 + thesisBreak
+   filing risk keyword 매칭:
+     "감액 / 정정 / 구조조정 / 감리"  → status=risk
+     "신규계약 / 자사주" 일부 호재    → status=watch
+     "분기보고서 / 정기" → routine 제외
+   scan primitive:
+     peer 동조 stress 신호  → status=watch
+     market-wide vol expand → status=watch
+   ↓
+trigger 의 의미:
+   *시나리오 시작점* — propagationPath 의 root 노드
+   1 trigger = 결론 아님 (assumption ledger 와 결합 필요)
+   ↓
+filing trigger 처리:
+   routine (정기보고서 / 8.01) → catalog 제외
+   비정기 (5.02 / 1.01 / 8.01 중 risk) → catalog 포함
+```
+
+trigger 는 *균열의 시작점* — 결론 아님. 공시 제목만으로 thesis 파괴 확정 X (forbidden). routine filing 을 risk trigger 로 오인 시 false positive (failureMode 발동).
+
+### 4. 반례·한계
+
+- 공시 제목만으로 thesis 파괴 확정 → forbidden.
+- 정기 공시를 risk trigger 로 오인 (예: 분기보고서를 catalog 에 포함) → false positive.
+- scan primitive score 임계가 산업/시장별 다름 — 일관 적용 어려움.
+- triggerId 없는 row → 실패.
+
+### 5. 후속 모니터링
+
+- risk ≥ 3 → `recipes.meta.thesisKillChain.propagationPath` 로 assumption 에 연결.
+- filing trigger → `recipes.meta.thesisKillChain.falsifierLedger` 로 counter-evidence 작성.
+- scan trigger → `recipes.industry.sectorMomentumLeadership` 으로 peer 동조성 확인.
 
 ## 대표 반환 형태
 

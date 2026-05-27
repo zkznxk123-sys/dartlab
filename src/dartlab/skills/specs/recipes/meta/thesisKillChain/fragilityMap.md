@@ -112,7 +112,61 @@ emit_result(
 
 ## 호출 동작
 
-revenueGrowth, operatingMarginTrend, cashConversion, debtToEquity, cashToDebt, priceReaction, flowPressure, consensusRevision을 만든다.
+### 1. 결론 도출
+
+8 fragility metric 단정. 예: "fragilityMap 8 row — revenueGrowth value=+8% status=ok / operatingMarginTrend value=-2%p status=risk thesisBreak='OPM 압축 시 valuation discount 유지' / cashConversion value=0.85 status=watch / debtToEquity value=42% status=ok / cashToDebt value=1.8 status=ok / priceReaction value=-3% status=watch / flowPressure value=-120억 status=risk / consensusRevision value=-2.5% status=risk → 4 of 8 risk/watch — kill 후보 4 (OPM + flow + consensus)."
+
+### 2. 핵심 근거 수집
+
+- Company.show('IS' / 'BS' / 'CF', freq='Y') 3 statement
+- Company.gather('price' / 'flow' / 'consensus') 3 보조
+- buildThesisKillChainMemo() → 8 metric 표
+- 각 metric × (value + status + thesisBreak)
+
+### 3. 메커니즘 분석
+
+```
+3 source × 8 metric 계산
+   revenueGrowth     = YoY revenue 변화
+   operatingMargin   = OPM 추세 (5y std)
+   cashConversion    = CFO / netIncome
+   debtToEquity      = 총부채 / 총자본
+   cashToDebt        = 현금 / 차입금
+   priceReaction     = 60d 가격 변화
+   flowPressure      = 외인+기관 net flow
+   consensusRevision = EPS consensus 추세
+   ↓
+status 판정 (metric 별 임계):
+   ok      → 정상 (thesis 견조)
+   watch   → 약화 시작 (thesis 일부 위협)
+   risk    → 명백한 위협 (thesis 무너질 가능성)
+   missing → 데이터 결손 (0으로 채우지 X — forbidden)
+   ↓
+watch/risk → thesisBreak 명시 필수:
+   "OPM 압축 시 valuation discount 유지"
+   "consensus 하향 → 시장 기대 무너짐"
+   "flow 음수 → 매도 압력 가속"
+   ↓
+kill 후보 정량:
+   risk 카운트 ≥ 3 → thesis 강한 위협
+   watch ≥ 4       → thesis 약화 phase
+   ok 다수         → thesis 견조
+```
+
+fragility = *깨질 수 있는 수치 지점* — thesis 결론 아님. 단일 가격 하락 (priceReaction 만) 으로 thesis 취약성 단정 X — 5+ metric 동조 필요.
+
+### 4. 반례·한계
+
+- 결손값을 0 으로 채우면 forbidden 위반 (missing 으로 둠).
+- 단일 metric (예: priceReaction) 만으로 thesis 취약 단정 — 5+ metric 동조 필요.
+- 5y baseline 짧음 — 산업 cycle 짧은 회사 (반도체) 에 적합.
+- IS/BS/CF 결손 시 fragility 4 종 (debt/cash/margin/revenue) 미산출.
+
+### 5. 후속 모니터링
+
+- risk 카운트 ≥ 3 → `recipes.meta.thesisKillChain.triggerCatalog` 로 trigger 전환.
+- watch metric → `recipes.meta.thesisKillChain.tripwireMonitor` 로 임계 모니터링.
+- 모든 ok → `recipes.meta.thesisKillChain.premortemQualityGate` 로 thesis 견조 확인.
 
 ## 대표 반환 형태
 
