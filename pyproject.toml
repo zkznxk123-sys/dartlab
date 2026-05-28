@@ -209,6 +209,8 @@ markers = [
     "memory: RSS 회귀 가드 — Company 1개 분석 시 peak RSS 검증",
     # T3-3 — pytest-xdist serial 강제. Company / OOM 위험 테스트는 단일 worker 에서만.
     "serial: pytest-xdist 병렬 제외 (Company 인스턴스 / Polars 힙 OOM 위험 / 전역 상태 변경)",
+    # 마스터 플랜 v2 트랙 7 PR-M5 — MCP 출시 자동 smoke. CI Fast 에 등록.
+    "mcpDogfood: MCP 출시 가드 — stdio + Streamable HTTP transport 통합 dispatch 검증",
 ]
 
 # ════════════════════════════════════════════════════════════════════
