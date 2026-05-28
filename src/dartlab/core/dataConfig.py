@@ -53,6 +53,17 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 공시 문서 데이터",
         "public": True,
     },
+    "edgarSections": {
+        # plan delegated-prancing-tower — EDGAR sections SSOT 통합 artifact.
+        # nested: data/edgar/sections/{ticker}/{period}.parquet (period-sharded).
+        # sectionsBuilder (PR-E2) 가 1 회 영속화 + HF push (PR-E3).
+        # 런타임은 sectionsStorage.loadSectionsWide → mmap parquet → 콜드 1s 목표.
+        # 2 content column: content_raw (iXBRL HTML, viewer SSOT) + content_plain (markdown, 분석 SSOT).
+        "dir": "edgar/sections",
+        "label": "SEC EDGAR sections SSOT artifact (period-sharded, raw+plain 2 column)",
+        "public": True,
+        "nested": True,
+    },
     "edgar": {
         "dir": "edgar/finance",
         "label": "SEC EDGAR 재무 데이터 (companyfacts.zip 벌크 파생)",
