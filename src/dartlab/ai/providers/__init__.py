@@ -569,6 +569,12 @@ _TIER_MODELS: dict[str, dict[str, str]] = {
         "standard": "gemini-2.5-pro",
         "deep": "gemini-2.5-pro",
     },
+    # PR-M3 alias — google SDK 키 (providers/google.py) 와 일관
+    "google": {
+        "cheap": "gemini-2.5-flash",
+        "standard": "gemini-2.5-pro",
+        "deep": "gemini-2.5-pro",
+    },
 }
 
 # deep tier 키워드 (정확/정밀 분석 + multi-step 계산 + 추론).
