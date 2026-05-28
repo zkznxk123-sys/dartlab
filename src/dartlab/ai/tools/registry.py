@@ -27,6 +27,7 @@ from .readCapability import readCapability
 from .readFile import readFile
 from .readSkill import getSkillBody, readSkill
 from .readSkillMarket import readSkillMarket
+from .regressionForecast import regressionForecast
 from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
@@ -418,6 +419,27 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "RegressionForecast": ToolSpec(
+        "RegressionForecast",
+        "단일 종목 매출 성장률 회귀 예측 (cross-section/panel 사전 적합 모델 cache load). '매출 성장 예측', '내년 매출 전망', 'regression forecast' 류 질문에 본 도구 1 회 호출. cache miss 시 model_unavailable — 사전 학습 필요.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "year": {"type": "integer", "description": "회계연도. None 시 직전 연도 자동."},
+                "modelKind": {
+                    "type": "string",
+                    "enum": ["panel", "cross"],
+                    "description": "panel=다년 안정, cross=단일 연도 횡단면. 기본 panel.",
+                },
+            },
+            "required": ["stockCode"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "SensitivityAnalysis": ToolSpec(
         "SensitivityAnalysis",
         "단일 종목 DCF parameter grid (WACC × terminalGrowth NxM) 민감도 매트릭스 — heatmap-friendly. 'WACC 민감도', '할인율 변화', '성장률 민감도', '민감도 매트릭스' 류 질문에 본 도구 1 회 호출.",
@@ -718,6 +740,7 @@ _TOOLS: dict[str, ToolFn] = {
     "PeerCompareN": peerCompareN,
     "CompileFinancialDashboard": compileFinancialDashboard,
     "CreditScorecard": creditScorecard,
+    "RegressionForecast": regressionForecast,
     "SensitivityAnalysis": sensitivityAnalysis,
     "DCFValuation": dcfValuationTool,
     "ScenarioCompareN": scenarioCompareN,
@@ -759,6 +782,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "PeerCompareN",
     "DCFValuation",
     "CompileFinancialDashboard",
+    "RegressionForecast",
     "SensitivityAnalysis",
     "CreditScorecard",
     "ScenarioCompareN",
@@ -782,6 +806,7 @@ _LEGACY_NAME_MAP = {
     "credit_scorecard": "CreditScorecard",
     "sensitivity_analysis": "SensitivityAnalysis",
     "compile_financial_dashboard": "CompileFinancialDashboard",
+    "regression_forecast": "RegressionForecast",
     "scenario_compare_n": "ScenarioCompareN",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",

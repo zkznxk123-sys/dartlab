@@ -85,6 +85,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 마스터 플랜 트랙 1 PR-3 — 단일 종목 한 화면 dashboard (3 template).
     # compareCompanies + CompileVisual + RunPython 다단 우회 회귀 차단.
     "CompileFinancialDashboard",
+    # 마스터 플랜 트랙 1 PR-7 — 매출 성장률 회귀 예측 (cross/panel cache load).
+    # crossRegression.fit* + loadModel/loadPanelModel wrap.
+    "RegressionForecast",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",
