@@ -173,7 +173,10 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
             sections frame 의 iter_rows 전체 순회라 가장 무거운 부분 —
             TOC 진입 시 화면 표시에 필요 없으면 metaOnly=True.
     """
-    sec = company.sections
+    # plan snazzy-wibbling-origami PR-3 — viewer/TOC path 는 sectionsRaw() 사용 (intent 명시).
+    # sections 와 alias 지만 architecture test (test_sections_artifact.py) 가 sectionsRaw()
+    # 호출자를 server/parse/viewer 화이트리스트만 허용 — 분석 path 가 raw cell 페이지 fault 회귀 차단.
+    sec = company.sectionsRaw()
     if sec is None:
         return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=[]).model_dump()
 
@@ -660,7 +663,10 @@ def _buildRowsForTopic(
 
     import polars as pl
 
-    sec = company.sections
+    # plan snazzy-wibbling-origami PR-3 — viewer 전용 cell 양식 (mixed HTML+markdown,
+    # ALIGN/VALIGN/rowspan/colspan 모두 보존). architecture test 가 호출자를 server/
+    # 화이트리스트로 제한 — 분석 path 가 mixed cell 페이지 fault 회귀 차단.
+    sec = company.sectionsRaw()
     if sec is None:
         return []
     df = sec.filter(pl.col("topic") == topic)

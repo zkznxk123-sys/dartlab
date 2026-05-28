@@ -2237,9 +2237,9 @@ class Company:
         Raises:
             없음.
         """
-        # 신 artifact 우선 — period-sharded parquet mmap (콜드 1s 목표).
-        # artifact 부재 시 _ensureFromHf 가 huggingface_hub.snapshot_download 으로 lazy
-        # 다운로드 (한 종목 디렉터리만, ~수 MB). 한 종목 1 회 시도, 실패 시 fallback.
+        # plan snazzy-wibbling-origami PR-2 — default = plain (clean break).
+        # mixed 양식 (HTML 태그 + ALIGN 보존) 은 c.sectionsRaw() / c.sectionsAs(False).
+        # plain 양식 = show/agent/analysis 호환 — wide cell 에 태그 없음.
         from dartlab.providers.dart.docs.sections.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
@@ -2248,20 +2248,27 @@ class Company:
 
         _ensureFromHf(self.stockCode)
         if hasSectionsArtifact(self.stockCode):
-            cached = loadSectionsWide(self.stockCode)
+            cached = loadSectionsWide(self.stockCode, valueColumn="content_plain")
             if cached is not None and not cached.is_empty():
                 return cached
-        # fallback — 옛 런타임 build (artifact 부재 + HF 다운로드 실패 시).
+        # fallback — 옛 런타임 build + stripTagsFromSectionsDf 로 plain 변환.
         from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
 
-        return buildSections(self)
+        wide = buildSections(self)
+        if wide is None:
+            return None
+        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+
+        return stripTagsFromSectionsDf(wide)
 
     def sectionsRaw(self) -> pl.DataFrame | None:
         """sections artifact mixed (모든 태그 + ALIGN/VALIGN 보존) wide DataFrame — viewer 전용.
 
-        plan snazzy-wibbling-origami PR-2b. ``sectionsAs(stripTags=False)`` 의 명시
-        alias — 호출자 의도를 코드 레벨에서 분명히 함. 사용처: viewer / 시각 렌더링
-        (frontend ``CellContent`` 가 raw HTML/markdown 직접 sanitize 후 표시).
+        plan snazzy-wibbling-origami PR-2b. ``c.sections`` (default plain) 와 *다른 경로* —
+        artifact long 의 ``content`` 컬럼 (mixed) 으로 pivot. 사용처: viewer / 시각 렌더링
+        (frontend ``CellContent`` 가 mixed HTML/markdown 직접 sanitize 후 표시).
+        architecture test (test_sections_artifact.py) 가 호출자를 server/parse/viewer
+        화이트리스트만 허용.
 
         Returns:
             pl.DataFrame — sections wide. cell 양식 = mixed (HTML ``<table rowspan colspan align>``
@@ -2275,7 +2282,21 @@ class Company:
             c = Company("005930")
             wide = c.sectionsRaw()  # viewer 사용 의도 명시
         """
-        return self.sectionsAs(stripTags=False)
+        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+            _ensureFromHf,
+            hasSectionsArtifact,
+            loadSectionsWide,
+        )
+
+        _ensureFromHf(self.stockCode)
+        if hasSectionsArtifact(self.stockCode):
+            cached = loadSectionsWide(self.stockCode, valueColumn="content")
+            if cached is not None and not cached.is_empty():
+                return cached
+        # fallback — 옛 런타임 build (artifact 부재 환경, mixed 그대로).
+        from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
+
+        return buildSections(self)
 
     def sectionsTables(self, *, periods: list[str] | None = None) -> pl.DataFrame | None:
         """sections artifact ``content_table_struct`` 컬럼만 read — HTML 표 구조 SSOT.
@@ -2380,17 +2401,14 @@ class Company:
         Example::
 
             c = Company("005930")
-            c.sectionsAs(stripTags=True)   # show / agent 양식 (plain text)
-            c.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>)
+            c.sectionsAs(stripTags=True)   # show / agent 양식 (plain text) — c.sections 와 동일
+            c.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>) — c.sectionsRaw() 와 동일
         """
-        df = self.sections
-        if df is None:
-            return None
-        if not stripTags:
-            return df
-        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
-
-        return stripTagsFromSectionsDf(df)
+        # PR-2 이후: c.sections = plain, c.sectionsRaw() = mixed. sectionsAs 는 두 path 의
+        # 명시 alias — stripTags 으로 분기. 옛 stripTags=True 호출자 호환.
+        if stripTags:
+            return self.sections
+        return self.sectionsRaw()
 
     def _profileTable(self) -> pl.DataFrame | None:
         from dartlab.providers.dart.builder.docsProfileBuilder import profileTable

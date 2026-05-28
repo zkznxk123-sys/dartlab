@@ -237,15 +237,22 @@ def loadSectionsWide(
     stockCode: str,
     *,
     periods: list[str] | None = None,
+    valueColumn: str = "content",
 ) -> pl.DataFrame | None:
     """sections artifact wide format read — long → pivot(period).
 
-    long format 을 read 후 ``pivot(values="content", index=[meta cols], columns="period")``
-    로 wide 양식 복원. 기존 ``Company.sections`` 출력과 schema 호환.
+    long format 을 read 후 pivot 으로 wide 양식 복원. ``valueColumn`` 으로 cell 값
+    종류 선택 — ``"content"`` (mixed, viewer 전용), ``"content_plain"`` (분석/show),
+    ``"content_table_struct"`` (finance 표 파서).
+
+    plan snazzy-wibbling-origami PR-2 — ``Company.sections`` default 가 plain.
+    ``c.sectionsRaw()`` 가 mixed.
 
     Args:
         stockCode: 종목코드.
         periods: 특정 period 만 wide 컬럼으로. None = 전체.
+        valueColumn: pivot value 컬럼 — ``"content"`` / ``"content_plain"`` /
+            ``"content_table_struct"``. default ``"content"`` (옛 호환).
 
     Returns:
         wide format DataFrame 또는 None.
@@ -257,19 +264,25 @@ def loadSectionsWide(
         >>> df = loadSectionsWide("005930")  # doctest: +SKIP
         >>> df.columns  # doctest: +SKIP
         ['topic', 'blockType', 'blockOrder', 'segmentKey', '2025Q3', '2025', '2024', ...]
+        >>> df_plain = loadSectionsWide("005930", valueColumn="content_plain")  # doctest: +SKIP
     """
-    long = loadSectionsLong(stockCode, periods=periods)
+    # 필요 컬럼만 read — columnar projection 으로 다른 content* 페이지 fault 0.
+    selectCols = None  # 일단 전체 (meta cols 파악 후 trim 가능)
+    long = loadSectionsLong(stockCode, periods=periods, columns=selectCols)
     if long is None or long.is_empty():
         return None
-    # PR-5a/b: content_plain / content_table_struct 컬럼은 *long-only* 보조 컬럼 (period 별 값
-    # 다름) — wide pivot 시 index 포함되면 period collapse 안 됨. drop 후 pivot.
-    for col in ("content_plain", "content_table_struct"):
-        if col in long.columns:
-            long = long.drop(col)
-    metaCols = [c for c in long.columns if c not in ("period", "content")]
+    if valueColumn not in long.columns:
+        _log.warning("sectionsWide: valueColumn '%s' 부재 (사용 가능: %s)", valueColumn, long.columns)
+        return None
+    # 보조 content 컬럼들은 index 에서 제외 (period 별 값이 달라 collapse 안 되면 wide 폭주).
+    auxContentCols = {"content", "content_plain", "content_table_struct"} - {valueColumn}
+    dropCols = [c for c in auxContentCols if c in long.columns]
+    if dropCols:
+        long = long.drop(dropCols)
+    metaCols = [c for c in long.columns if c not in ("period", valueColumn)]
     try:
         return long.pivot(
-            values="content",
+            values=valueColumn,
             index=metaCols,
             on="period",
             aggregate_function="first",

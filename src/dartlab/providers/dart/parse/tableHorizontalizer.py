@@ -276,8 +276,69 @@ def _hzCollectKvMatrix(sub, p: str, allItems, seenItems, periodItemVal) -> None:
                 periodItemVal.setdefault(item, {})[p] = val
 
 
+def _htmlTablesToMarkdownSubtables(content: str) -> list[list[str]]:
+    """HTML ``<table>`` block → markdown subtable line list (splitSubtables 호환 양식).
+
+    plan snazzy-wibbling-origami PR-5c. mixed format cell value 가 HTML ``<table>``
+    포함 시 htmlTableParser.cellGrid 로 rowspan/colspan 펼친 grid 추출 → markdown
+    pipe-format subtable lines 으로 변환. ``_classifyStructure`` / ``_headerCells`` /
+    ``_dataRows`` 가 처리할 수 있는 양식. ALIGN 등 시각 속성은 plain text 양식 으로 평탄화
+    (수평화 path 는 값만 사용 — viewer 전용 속성 무관).
+
+    Args:
+        content: cell value (HTML ``<table>`` 1+ block 포함 가능, 다른 텍스트 혼합 OK).
+
+    Returns:
+        list[list[str]] — 각 element 는 한 subtable 의 markdown line list:
+            ``["| h1 | h2 |", "| --- | --- |", "| v1 | v2 |", ...]``. 표 없으면 빈 list.
+
+    Example:
+        >>> html = '<table><tr><th>구분</th><th>금액</th></tr><tr><td>매출</td><td>100</td></tr></table>'
+        >>> _htmlTablesToMarkdownSubtables(html)
+        [['| 구분 | 금액 |', '| --- | --- |', '| 매출 | 100 |']]
+    """
+    if not content or "<table" not in content.lower():
+        return []
+    from dartlab.providers.dart.parse.htmlTableParser import parseHtmlTable
+
+    out: list[list[str]] = []
+    # 다중 <table> 분리 — 단순 split (lxml 가 첫 표만 반환하므로 직접 분할 필요).
+    table_re = re.compile(r"<table[\s\S]*?</table>", re.IGNORECASE)
+    for match in table_re.findall(content):
+        parsed = parseHtmlTable(match)
+        if parsed is None or not parsed.rows:
+            continue
+        lines: list[str] = []
+        # header row 들 (multi-row header 첫 N row)
+        headerRows = parsed.rows[: parsed.headerRowCount] if parsed.headerRowCount > 0 else parsed.rows[:1]
+        dataRows = parsed.rows[parsed.headerRowCount :] if parsed.headerRowCount > 0 else parsed.rows[1:]
+        # 첫 header row 만 markdown header 로 (multi-row header 는 합쳐 한 줄로)
+        if headerRows:
+            firstHeader = headerRows[0]
+            cells = []
+            for c in firstHeader.cells:
+                cells.extend([c.text] * max(1, c.colspan))
+            if cells:
+                lines.append("| " + " | ".join(cells) + " |")
+                lines.append("| " + " | ".join(["---"] * len(cells)) + " |")
+        for row in dataRows:
+            cells = []
+            for c in row.cells:
+                cells.extend([c.text] * max(1, c.colspan))
+            if cells:
+                lines.append("| " + " | ".join(cells) + " |")
+        if lines:
+            out.append(lines)
+    return out
+
+
 def _hzProcessPeriod(boRow, p: str, bestHeader: str, allItems, seenItems, periodItemVal) -> None:
-    """단일 기간의 모든 서브테이블을 처리하여 items/values 수집."""
+    """단일 기간의 모든 서브테이블을 처리하여 items/values 수집.
+
+    plan snazzy-wibbling-origami PR-5c — mixed format cell 의 HTML ``<table>`` block 도
+    인식. markdown pipe-format subtable 외 HTML subtable 도 ``_htmlTablesToMarkdownSubtables``
+    경유로 변환 후 같은 path. ALIGN/rowspan/colspan 보존 (rowspan/colspan 펼친 grid).
+    """
     from dartlab.providers.dart.docs.sections.tableParser import (
         _classifyStructure,
         _dataRows,
@@ -294,7 +355,12 @@ def _hzProcessPeriod(boRow, p: str, bestHeader: str, allItems, seenItems, period
         return
     pYear = int(m.group())
 
-    for sub in splitSubtables(str(md)):
+    # 옛 markdown pipe-format subtable + 신 HTML <table> subtable 통합 iter.
+    contentStr = str(md)
+    subtables = list(splitSubtables(contentStr))
+    subtables.extend(_htmlTablesToMarkdownSubtables(contentStr))
+
+    for sub in subtables:
         hc = _headerCells(sub)
         if _isJunk(hc):
             continue
