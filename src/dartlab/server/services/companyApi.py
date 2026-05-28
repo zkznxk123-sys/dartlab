@@ -547,12 +547,23 @@ def buildViewer(
         - ``metaOnly``: True 면 rows 도 생략, dartUrl + corpName + topic 같은 메타만.
           windowQueries 가 dartUrl 만 가져올 때 사용.
     """
-    from dartlab.providers.dart.docs.viewer import (
-        serializeViewerBlock,
-        serializeViewerTextDocument,
-        viewerBlocks,
-        viewerTextDocument,
-    )
+    # plan delegated-prancing-tower PR-E5 — provider 분기. EDGAR Company 면 EDGAR
+    # viewer (text/table block only, finance/report 제외). DART 회사는 기존 dart viewer.
+    # 분기 기준: Company.market property (EDGAR="US", DART="KR").
+    if getattr(company, "market", "") == "US":
+        from dartlab.providers.edgar.docs.viewer import (
+            serializeViewerBlock,
+            serializeViewerTextDocument,
+            viewerBlocks,
+            viewerTextDocument,
+        )
+    else:
+        from dartlab.providers.dart.docs.viewer import (
+            serializeViewerBlock,
+            serializeViewerTextDocument,
+            viewerBlocks,
+            viewerTextDocument,
+        )
 
     dartUrl = _dartUrlForPeriod(company, period)
     topicLabel = _topicDartLabel(topic, safeTopicLabel(company, topic))
