@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: KGB 국고채 yield curve 역전 (10Y-2Y < 0 또는 10Y-3M < 0) 신호 — recession 1~2 년 선행 (US 학술 정통). KR 시장 partial 적용. **status=drafted**.
+purpose: KGB 국고채 yield curve 역전 (10Y-2Y < 0 또는 10Y-3M < 0) 신호 — recession 1~2 년 선행 (US 학술 정통). KR 시장 partial 적용. **status=drafted**. 트리거 — 'yield curve 역전', '국고채 inversion', '2s10s', '3m10y', 'recession indicator'.
 whenToUse:
   - yield curve inversion
   - 국고채 역전

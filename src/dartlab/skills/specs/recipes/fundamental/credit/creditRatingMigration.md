@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: KR 신용평가 3 사 (NICE/KIS/한신평) 신용등급 변동 추적 + dCR rating delta 비교. 등급 하향 = 진짜 신호 (lag 큼 그러나 강도 강). **status=drafted — 신용평가 3 사 API 인프라 선결**.
+purpose: KR 신용평가 3 사 (NICE/KIS/한신평) 신용등급 변동 추적 + dCR rating delta 비교. 등급 하향 = 진짜 신호 (lag 큼 그러나 강도 강). **status=drafted — 신용평가 3 사 API 인프라 선결**. 트리거 — '신용등급 변동', 'rating migration', '등급 하향', 'rating downgrade', 'dCR rating delta'.
 whenToUse:
   - credit rating migration
   - 신용등급 변동

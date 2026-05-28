@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: 공매도 잔고 z-score > 2 종목 detection — 단기 squeeze 위험 vs 진짜 하방 신호 구분 (잔고 비율 + 대차잔고 동행 확인). **status=drafted**.
+purpose: 공매도 잔고 z-score > 2 종목 detection — 단기 squeeze 위험 vs 진짜 하방 신호 구분 (잔고 비율 + 대차잔고 동행 확인). **status=drafted**. 트리거 — '공매도 spike', 'short interest spike', '공매도 잔고 급증', 'short squeeze'.
 whenToUse:
   - 공매도 spike
   - short interest spike

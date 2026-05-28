@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: Copper-Gold ratio (구리 / 금) — 성장 vs 안전 sentiment 정량. ratio ↑ = risk on (위험자산 alpha), ratio ↓ = risk off (defensive). 미국채 10Y yield 와 동행. **status=drafted**.
+purpose: Copper-Gold ratio (구리 / 금) — 성장 vs 안전 sentiment 정량. ratio ↑ = risk on (위험자산 alpha), ratio ↓ = risk off (defensive). 미국채 10Y yield 와 동행. **status=drafted**. 트리거 — 'copper-gold ratio', '구리 금 비율', 'risk on off', '성장 sentiment'.
 whenToUse:
   - copper gold ratio
   - 구리 금 비율

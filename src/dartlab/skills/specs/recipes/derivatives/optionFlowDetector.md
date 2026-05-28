@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: 옵션 거래량 / 미결제약정 (open interest) z-score 급증 detection — 정보 비대칭 신호. unusual options activity 학술 (Pan-Poteshman 2006). **status=drafted**.
+purpose: 옵션 거래량 / 미결제약정 (open interest) z-score 급증 detection — 정보 비대칭 신호. unusual options activity 학술 (Pan-Poteshman 2006). **status=drafted**. 트리거 — '옵션 flow', 'unusual options', '옵션 OI 급증', 'option flow detector'.
 whenToUse:
   - option flow
   - unusual options

@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: 프로그램매매 imbalance (차익거래 net + 비차익 net) z-score — 차익거래 net 신호 (KOSPI200 mispricing 정도) + 비차익 신호 (패시브 flow). **status=drafted**.
+purpose: 프로그램매매 imbalance (차익거래 net + 비차익 net) z-score — 차익거래 net 신호 (KOSPI200 mispricing 정도) + 비차익 신호 (패시브 flow). **status=drafted**. 트리거 — '프로그램매매', 'program trade imbalance', '차익거래 net', '비차익 net'.
 whenToUse:
   - 프로그램매매
   - program trade

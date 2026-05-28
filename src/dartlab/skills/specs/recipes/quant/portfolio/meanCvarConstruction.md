@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: Mean-CVaR (Conditional Value-at-Risk) 포트폴리오 — Rockafellar-Uryasev 2000 정통. tail risk 직접 최적화. quant `meanCVaR` 모듈 사용자 표면 recipe. **status=drafted (코드는 Sprint 5 완료, 사용자 진입점 spec 부재)**.
+purpose: Mean-CVaR (Conditional Value-at-Risk) 포트폴리오 — Rockafellar-Uryasev 2000 정통. tail risk 직접 최적화. quant `meanCVaR` 모듈 사용자 표면 recipe. **status=drafted (코드는 Sprint 5 완료, 사용자 진입점 spec 부재)**. 트리거 — 'Mean-CVaR', 'CVaR portfolio', 'tail risk 최적화', 'Rockafellar-Uryasev', 'portfolio construction'.
 whenToUse:
   - mean-CVaR
   - CVaR portfolio

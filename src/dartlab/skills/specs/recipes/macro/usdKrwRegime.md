@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: USD/KRW 4 regime × KR 수출주 alpha 정합 — KRW 절하 시 수출주 outperform (반도체/자동차/조선). DXY + REER 동행. **status=drafted (engines.macro.fxRegime 신설 동행)**.
+purpose: USD/KRW 4 regime × KR 수출주 alpha 정합 — KRW 절하 시 수출주 outperform (반도체/자동차/조선). DXY + REER 동행. **status=drafted (engines.macro.fxRegime 신설 동행)**. 트리거 — 'USD/KRW regime', '환율 regime', 'KRW 절하', '수출주 alpha', 'FX regime'.
 whenToUse:
   - USD/KRW regime
   - 원/달러 regime

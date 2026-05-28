@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: 25Δ put-call skew z-score extreme (|z| > 2) 진입 시 시장 turning point 후보 — extreme high (z > 2) = 극단적 하방 우려 (contrarian long 신호), extreme low (z < -2) = 안일 (contrarian short). **status=drafted**.
+purpose: 25Δ put-call skew z-score extreme (|z| > 2) 진입 시 시장 turning point 후보 — extreme high (z > 2) = 극단적 하방 우려 (contrarian long 신호), extreme low (z < -2) = 안일 (contrarian short). **status=drafted**. 트리거 — 'skew extreme', 'put-call skew', 'fear extreme', 'complacency 신호'.
 whenToUse:
   - put-call skew signal
   - 25Δ skew extreme

@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: VKOSPI 4 regime × macro cycle 5 regime 정합 — calm/normal/elevated/panic vs expansion/slowdown/contraction/recovery/crisis. 시장 fear 와 macro cycle 일치성 진단. **status=drafted**.
+purpose: VKOSPI 4 regime × macro cycle 5 regime 정합 — calm/normal/elevated/panic vs expansion/slowdown/contraction/recovery/crisis. 시장 fear 와 macro cycle 일치성 진단. **status=drafted**. 트리거 — 'VKOSPI regime', '변동성 regime', 'fear gauge regime', 'macro cycle 정합'.
 whenToUse:
   - VKOSPI regime
   - macro cycle 정합

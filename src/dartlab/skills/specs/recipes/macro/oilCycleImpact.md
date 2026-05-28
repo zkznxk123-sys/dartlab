@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: WTI 사이클 × KR 산업별 sensitivity — 정유/석유화학 (positive) vs 항공/물류 (negative). 회사 단위 oil beta 산출. **status=drafted**.
+purpose: WTI 사이클 × KR 산업별 sensitivity — 정유/석유화학 (positive) vs 항공/물류 (negative). 회사 단위 oil beta 산출. **status=drafted**. 트리거 — '유가 영향', 'oil cycle', 'WTI impact', 'oil beta', '정유 항공 sensitivity'.
 whenToUse:
   - oil cycle
   - WTI impact

@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: Black-Litterman 1992 — equilibrium prior + investor views → posterior expected returns + covariance. quant `blackLitterman` 모듈 사용자 표면 recipe. **status=drafted**.
+purpose: Black-Litterman 1992 — equilibrium prior + investor views → posterior expected returns + covariance. quant `blackLitterman` 모듈 사용자 표면 recipe. **status=drafted**. 트리거 — 'Black-Litterman', 'BL views', 'equilibrium prior', 'posterior returns', 'investor views'.
 whenToUse:
   - Black-Litterman
   - BL views

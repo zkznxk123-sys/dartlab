@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: 외국인 vs 기관 순매수 divergence — 두 그룹 매매 방향 반대 + cumulative net 누적 z 정량화. 정보 비대칭 신호 (외국인 ahead 가설 학술). **status=drafted — KRX 투자자별 데이터 수집 인프라 선결**.
+purpose: 외국인 vs 기관 순매수 divergence — 두 그룹 매매 방향 반대 + cumulative net 누적 z 정량화. 정보 비대칭 신호 (외국인 ahead 가설 학술). **status=drafted — KRX 투자자별 데이터 수집 인프라 선결**. 트리거 — '외국인 vs 기관', 'flow divergence', '투자자별 매매', '외국인 순매수'.
 whenToUse:
   - 외국인 vs 기관
   - foreign vs institutional

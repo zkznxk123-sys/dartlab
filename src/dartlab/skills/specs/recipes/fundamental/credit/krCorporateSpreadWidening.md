@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: KR 회사채 spread (AAA~BBB) widening 신호 — 252 일 z > 1 진입 시 신용 risk regime 진입. risk-off detection. **status=drafted**.
+purpose: KR 회사채 spread (AAA~BBB) widening 신호 — 252 일 z > 1 진입 시 신용 risk regime 진입. risk-off detection. **status=drafted**. 트리거 — '회사채 spread 확대', 'corporate spread widening', '신용 risk regime', 'rating spread'.
 whenToUse:
   - 회사채 spread 확대
   - corporate spread widening
