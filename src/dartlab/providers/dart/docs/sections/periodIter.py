@@ -78,7 +78,16 @@ def iterPeriodSubsets(
     # docs.parquet 양식 분기 — section_content_mixed 가 있으면 xmlChunkToMixed 사전 계산본.
     # 매 period subset 마다 map_elements(xmlChunkToMixed) 호출 (~11s for 31 periods × 2K rows)
     # 우회. 옛 양식은 종래 ccol (section_content 또는 content) 그대로 사용 + 동적 변환.
-    hasMixed = "section_content_mixed" in df.columns
+    #
+    # DARTLAB_SECTIONS_NO_MIXED env (plan snazzy-wibbling-origami PR-1c) — sectionsBuilder
+    # 가 sections artifact build 시 *현재 xmlChunkToMixed 룰* (예 ALIGN/VALIGN 보존) 강제
+    # 적용 위해 mixed 컬럼 사전계산본 무시 옵션. 옛 docs.parquet 의 stale mixed cache 우회
+    # → raw section_content 에서 매번 변환 (~11s 추가, 1 회 batch 비용). 사용자 측 default
+    # 동작 (env 미set) 은 변함 없음 — 옛 mixed 우선 유지.
+    import os as _os
+
+    _forceRaw = _os.environ.get("DARTLAB_SECTIONS_NO_MIXED", "").strip() in ("1", "true", "True")
+    hasMixed = ("section_content_mixed" in df.columns) and (not _forceRaw)
     if hasMixed:
         ccol = "section_content_mixed"
     years = sorted(df["year"].unique().to_list(), reverse=True)

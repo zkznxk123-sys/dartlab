@@ -20,6 +20,8 @@ MVP 단계 (PR-1a):
 from __future__ import annotations
 
 import logging
+import os
+from contextlib import contextmanager
 from pathlib import Path
 
 import polars as pl
@@ -31,6 +33,26 @@ from dartlab.providers.dart.docs.sections.sectionsStorage import (
 )
 
 _log = logging.getLogger(__name__)
+
+
+@contextmanager
+def _forceRawSectionContent():
+    """sectionsBuilder build 시 docs.parquet 의 stale mixed cache 무시.
+
+    periodIter.iterPeriodSubsets 가 DARTLAB_SECTIONS_NO_MIXED env 인식. context 안에서
+    raw section_content + 현재 xmlChunkToMixed 룰 (ALIGN/VALIGN 보존 등) 적용.
+    context exit 시 env 원상복구.
+    """
+    KEY = "DARTLAB_SECTIONS_NO_MIXED"
+    prev = os.environ.get(KEY)
+    os.environ[KEY] = "1"
+    try:
+        yield
+    finally:
+        if prev is None:
+            os.environ.pop(KEY, None)
+        else:
+            os.environ[KEY] = prev
 
 
 def _isPeriodColumn(name: str) -> bool:
@@ -124,12 +146,21 @@ def saveSectionsByPeriod(
     return result
 
 
-def buildSectionsArtifact(stockCode: str, *, compression: str = "snappy") -> dict[str, int]:
+def buildSectionsArtifact(
+    stockCode: str,
+    *,
+    compression: str = "snappy",
+    forceRaw: bool = True,
+) -> dict[str, int]:
     """zip → docs.parquet → ``Company.sections`` → period-shard parquet 영속화 (1 회 비용).
 
     sync stage 의 entry point. 본 함수는 다음을 수행:
-        1. ``Company(stockCode).sections`` 호출 → wide DataFrame (런타임 build, 18s)
-        2. ``saveSectionsByPeriod`` 로 period 별 분할 + parquet 저장
+        1. (``forceRaw=True``) docs.parquet 의 stale ``section_content_mixed`` 컬럼
+           무시 → raw section_content + 현재 ``xmlChunkToMixed`` 룰 강제 적용.
+           ALIGN/VALIGN 등 신 룰 변경분이 신 artifact 에 즉시 반영.
+        2. ``Company(stockCode).sections`` 호출 → wide DataFrame (런타임 build).
+           forceRaw 시 ~11s 추가 (raw → mixed 변환), 1 회 batch 비용.
+        3. ``saveSectionsByPeriod`` 로 period 별 분할 + parquet 저장.
 
     런타임 (사용자 측) 은 본 함수 호출 0. ``sectionsStorage.loadSectionsWide`` 만 호출
     → mmap parquet → 콜드 1s 목표 달성.
@@ -137,6 +168,8 @@ def buildSectionsArtifact(stockCode: str, *, compression: str = "snappy") -> dic
     Args:
         stockCode: 종목코드 (6 자리).
         compression: parquet compression.
+        forceRaw: True 시 mixed 사전계산 무시 + raw 에서 매번 변환 (신 룰 강제).
+            False 시 옛 mixed cache 사용 (속도 ↑, ALIGN 신 룰 미반영).
 
     Returns:
         ``{period: rowCount}`` dict — 저장된 period 별 row 수. 빌드 실패 시 빈 dict.
@@ -152,8 +185,13 @@ def buildSectionsArtifact(stockCode: str, *, compression: str = "snappy") -> dic
     try:
         from dartlab import Company
 
-        c = Company(stockCode)
-        sectionsWide = c.sections
+        if forceRaw:
+            with _forceRawSectionContent():
+                c = Company(stockCode)
+                sectionsWide = c.sections
+        else:
+            c = Company(stockCode)
+            sectionsWide = c.sections
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
         _log.warning("sections build 실패 (%s): %s", stockCode, exc)
         return {}
