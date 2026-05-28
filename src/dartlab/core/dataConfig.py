@@ -49,9 +49,16 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
     },
     "edgarDocs": {
+        # plan delegated-prancing-tower PR-E7a — deprecated 마킹.
+        # 안전 게이트 (4 주 sectionsParityEdgar 0 violations + D.1 2 주 + viewer
+        # Playwright 0 + sync 14 일 무사고 + 운영자 명시 결정) 통과 후 PR-E7b 가 완전
+        # 제거. 본 마킹 후에도 dual-write (fetchEdgarDocs) 가 계속 emit — 옛 path 호출자
+        # 회귀 0 보장.
         "dir": "edgar/docs",
-        "label": "SEC EDGAR 공시 문서 데이터",
+        "label": "SEC EDGAR 공시 문서 데이터 (deprecated — edgarSections 로 이행 중)",
         "public": True,
+        "deprecated": True,
+        "successor": "edgarSections",
     },
     "edgarSections": {
         # plan delegated-prancing-tower — EDGAR sections SSOT 통합 artifact.
