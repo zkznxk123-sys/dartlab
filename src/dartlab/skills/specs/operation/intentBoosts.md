@@ -317,6 +317,70 @@ intentBoosts:
       - 외부감사인
       - audit shopping
     boost: 11.0
+  - skillIds: ["engines.company.executivePay"]
+    terms:
+      - 임원 보수
+      - 5억 이상 보수
+      - 임원 연봉
+      - 등기임원 보수
+      - 미등기임원 보수
+      - 퇴직 임원 보수
+      - 스톡옵션 행사
+      - 상여
+      - 급여 narrative
+      - executive compensation
+      - 임원 산정기준
+    boost: 11.0
+  - skillIds: ["engines.company.relatedPartyTx"]
+    terms:
+      - 관계자 거래
+      - RPT
+      - 계열사 거래
+      - 특수관계자
+      - 공정거래법 26
+      - 100억 RPT
+      - 지급보증
+      - 매출 거래
+      - 매입 거래
+      - 자산 양수도
+      - chaebol RPT
+      - inter-affiliate
+      - 대규모기업집단현황공시
+    boost: 11.0
+  - skillIds: ["engines.company.notesDetail"]
+    terms:
+      - 주석
+      - K-IFRS 주석
+      - footnote
+      - 리스 약정
+      - 우발채무
+      - 퇴직급여
+      - 퇴직급여 가정
+      - 파생금융상품
+      - contingent liability
+      - 금융자산
+      - 금융부채
+      - 차입금
+      - 신종자본증권
+      - 영업권
+      - 무형자산
+    boost: 11.0
+  - skillIds: ["engines.company.flow"]
+    terms:
+      - 외국인 net-buy
+      - 외국인 매수세
+      - 외국인 매도
+      - 기관 net-buy
+      - 기관 매수
+      - 개인 매수
+      - 일별 수급
+      - foreign netbuy
+      - institution netbuy
+      - 수급 추세
+      - 외국인 보유
+      - 한도소진율
+      - KRX flow
+    boost: 11.0
 source:
   type: manual_skill
   format: markdown
