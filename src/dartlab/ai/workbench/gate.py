@@ -22,7 +22,7 @@ from .state import WorkbenchState
 
 _CODE_SPAN_RE = re.compile(r"`[^`]*`")
 _CODE_BLOCK_RE = re.compile(r"```.*?```", re.DOTALL)
-_REF_KIND = r"value|table|execution|date|web|artifact|api|skill|verify|dataset"
+_REF_KIND = r"value|table|execution|date|web|artifact|api|skill|verify|dataset|doc"
 # 단일 형식 — `<kindRef:id>` (angle bracket + Ref 접미사). markdown link 문법 충돌 회피
 # + LLM 자작 fake token 차단. 이전 `[kind:id]` 사각괄호 형식 폐기 (P-revised).
 _REF_TOKEN_RE = re.compile(rf"<({_REF_KIND})Ref:[^>]+>")

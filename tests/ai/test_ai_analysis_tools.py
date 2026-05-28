@@ -190,6 +190,106 @@ def test_grounding_check_dispatch_via_registry():
     assert result.get("data", {}).get("materialNumber") is True
 
 
+# ── Korean disclosure evidence trail (cryptic-discovering-kettle E 트랙) ──
+
+
+def test_grounding_check_korean_disclosure_claim_without_rcept_fails():
+    """한국 공시 키워드 답변 + DART rceptNo payload 없음 → grounded=False + missing_dart_rcept."""
+    from dartlab.ai.tools.groundingCheck import groundingCheck
+
+    answer = "삼성전자 사외이사 비율 60% 다."
+    result = groundingCheck(answer=answer, refs=[])
+    assert result.data.get("koreanDisclosureClaim") is True
+    assert result.data.get("dartRceptPresent") is False
+    assert result.data.get("grounded") is False
+    assert result.error == "grounding_check_missing_dart_rcept"
+
+
+def test_grounding_check_korean_disclosure_claim_with_rcept_grounded():
+    """한국 공시 키워드 답변 + ref payload.docId 14 자리 DART rcept → grounded=True."""
+    from dartlab.ai.tools.groundingCheck import groundingCheck
+
+    refs = [
+        {
+            "id": "doc:005930:20250404000000",
+            "kind": "docRef",
+            "title": "사업보고서",
+            "source": "DART",
+            "payload": {
+                "docId": "20250404000000",
+                "section": "II. 사업의 내용",
+                "page": 42,
+                "confidence": 95,
+            },
+        }
+    ]
+    answer = "삼성전자 사외이사 비율 60% <docRef:doc:005930:20250404000000> 다."
+    result = groundingCheck(answer=answer, refs=refs)
+    assert result.data.get("koreanDisclosureClaim") is True
+    assert result.data.get("dartRceptPresent") is True
+    assert result.data.get("grounded") is True
+
+
+def test_grounding_check_non_korean_claim_not_affected():
+    """한국 공시 키워드 없음 → koreanDisclosureClaim=False · DART rcept 검증 skip."""
+    from dartlab.ai.tools.groundingCheck import groundingCheck
+
+    answer = "Apple AAPL revenue grew 8% YoY."
+    result = groundingCheck(answer=answer, refs=[])
+    assert result.data.get("koreanDisclosureClaim") is False
+    assert result.data.get("koreanEvidenceOk") is True
+
+
+def test_evidence_gate_korean_skill_with_meta_rcept_missing():
+    """engines.company.* skill 의 requiredEvidence 에 rceptNo 명시 → payload 안에 박힘 X 면 missing 분류."""
+    from dartlab.ai.tools.evidenceGate import evidenceGate
+
+    # ref 박혀있지만 payload.docId 없음 — 한국 공시 evidence 부족.
+    refs = [
+        {
+            "id": "doc:005930:foo",
+            "kind": "docRef",
+            "title": "사업보고서",
+            "payload": {"page": 42},  # docId 누락
+        }
+    ]
+    result = evidenceGate("engines.company.executivePay", refs=refs)
+    assert result.ok is True  # 도구 호출 자체는 성공
+    assert result.data.get("isKoreanDisclosure") is True
+    korean_missing = result.data.get("koreanMissing") or []
+    assert any("rceptNo" in m for m in korean_missing)
+
+
+def test_evidence_gate_korean_skill_with_full_payload_ok():
+    """engines.company.* skill + payload.docId 14 자리 + section 박힘 → koreanMissing=[]."""
+    from dartlab.ai.tools.evidenceGate import evidenceGate
+
+    refs = [
+        {
+            "id": "doc:005930:20250404000000",
+            "kind": "docRef",
+            "title": "사업보고서",
+            "payload": {
+                "docId": "20250404000000",
+                "section": "II. 사업의 내용",
+                "page": 42,
+            },
+        }
+    ]
+    result = evidenceGate("engines.company.executivePay", refs=refs)
+    assert result.data.get("isKoreanDisclosure") is True
+    assert (result.data.get("koreanMissing") or []) == []
+
+
+def test_evidence_gate_non_korean_skill_skips_dart_check():
+    """non engines.company.* skill → isKoreanDisclosure=False · koreanMissing 검사 skip."""
+    from dartlab.ai.tools.evidenceGate import evidenceGate
+
+    result = evidenceGate("engines.scan", refs=[])
+    assert result.data.get("isKoreanDisclosure") is False
+    assert (result.data.get("koreanMissing") or []) == []
+
+
 # ── 회귀: 새 도구 등록이 alias map / registry 다른 검사 안 깨뜨림 ────────
 
 
