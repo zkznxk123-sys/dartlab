@@ -1330,6 +1330,13 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "topics: sections 기반 topic 요약 (더 간결)\nshow: 특정 topic 데이터 조회\nindex: 전체 구조 메타데이터 목차",
         "summary": "sections — docs + finance + report 통합 지도."
     },
+    "Company.sectionsAs": {
+        "args": "stripTags: True 면 plain text, False 면 mixed 양식.",
+        "example": "c = Company(\"005930\")\nc.sectionsAs(stripTags=True)   # show / agent 양식 (plain text)\nc.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>)",
+        "kind": "method",
+        "returns": "pl.DataFrame — sections wide DataFrame (cell value 만 stripTags 적용). None.\n\nRaises:\n없음.",
+        "summary": "sections wide DataFrame — stripTags 파라미터로 cell value 양식 선택."
+    },
     "Company.sector": {
         "aicontext": "섹터 분류 결과로 동종업계 비교, 섹터 파라미터 자동 선택\nanalysis/valuation에서 섹터별 벤치마크 기준으로 활용",
         "capabilities": "WICS 11대 섹터 + 하위 산업그룹 자동 분류\nKIND 업종명 + 주요제품 키워드 기반 매칭\noverride 테이블 우선 → 키워드 → 업종명 순 fallback",
@@ -2908,6 +2915,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "업종 분류 (KR KIND+Naver / US sectorCode).",
         "kind": "gather_axis",
         "summary": "업종"
+    },
+    "help": {
+        "aicontext": "외부 LLM / 신규 사용자의 *어디서 시작?* 질문에 답하는 진입점. T8-2 의\n핵심. README \"세 가지 시작점\" 의 3 분기 중 자연어 진입을 보강.",
+        "args": "query: 자연어 또는 키워드 (예: \"외인 매수\", \"재무비율\", \"신용 점수\").\n빈 문자열 시 전체 __all__ 둘러보기 (score 0.5).\nlimit: 반환 결과 최대 개수 (기본 5).",
+        "capabilities": "dartlab.__all__ 안 모든 심볼의 docstring 첫 줄 + 이름을 자연어 query 토큰\n과 substring 매칭하여 관련 API 5 개 (또는 limit) 를 score 순서로 반환.",
+        "example": ">>> import dartlab\n>>> results = dartlab.help(\"재무비율\")\n>>> for r in results:\n...     print(f\"{r.name} ({r.score:.2f}) — {r.summary}\")",
+        "guide": "결과가 0 이면 query 토큰을 줄여 재시도. 정확한 API 모를 때는\n``dartlab.help(\"\")`` 로 전체 ``__all__`` 둘러보기 가능. CLI 등가 명령:\n``dartlab help <query>``.",
+        "kind": "function",
+        "llmSpecs": {
+            "_raw": "AntiPatterns: 본 함수가 LLM tool registry 가 아니다 — 단순 검색 only.\n실제 tool 호출은 dartlab.ai.tools 또는 MCP server.\nOutputSchema: list[HelpResult] / HelpResult = {name, kind, summary, score}.\nPrerequisites: dartlab 패키지가 sys.path 안.\nFreshness: 매 호출 시 __all__ 최신 상태 반영 (캐시 X).\nDataflow: query → tokens → __all__ 순회 → score 계산 → top N.\nTargetMarkets: 외부 사용자 + LLM agent + CLI dartlab help."
+        },
+        "requires": "dartlab 패키지가 import 가능해야 한다. lazy import 패턴이라 순환 import\n회피.",
+        "returns": "score (0.0~1.0) desc 정렬된 HelpResult 리스트. score = (name match × 2 + doc\nmatch) / (len(tokens) × 3). HelpResult 는 name / kind / summary / score 4\n필드 dataclass.",
+        "seeAlso": "dartlab.ask: 자연어 질문 → AI 워크벤치 답변 + ref\ndartlab.plugins.listPlugins: 외부 plugin 목록 (T5-5)\ndartlab.skills.readSkill: Skill OS 257 노드 검색",
+        "summary": "dartlab 공개 API 검색 — 자연어 query 매칭 9 섹션 docstring (T10-4)."
     },
     "industry": {
         "guide": "AI 역할: AI는 industry를 섹터/밸류체인 맥락 엔진으로 보고 기업 지표와 산업 driver를 분리해 연결한다.\nWhen: 개별 기업 지표를 산업 공정, 밸류체인, peer 맥락으로 해석할 때.\nHow: industry() 로 산업 목록 확인 → industry(industryId) 로 공정별 기업 위치 확인 → analysis/scan 근거와 연결.",

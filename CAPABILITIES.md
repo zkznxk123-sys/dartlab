@@ -1,12 +1,12 @@
 # dartlab Capabilities
 
-> v0.10.1 기준 자동 생성. 직접 수정 금지.  
+> v0.10.3 기준 자동 생성. 직접 수정 금지.  
 > `uv run python src/dartlab/skills/generateSpec.py`로 재생성.
 
 
 ---
 
-## Python API (30개)
+## Python API (31개)
 
 `import dartlab` 후 사용 가능한 공개 API.
 
@@ -18,6 +18,7 @@
 | `OpenEdgar` | class | SEC public API facade. |
 | `config` | module | dartlab 전역 설정. |
 | `ask` | function | LLM 에게 dartlab 컨텍스트로 질문 — dartlab.ai.kernel.ask wrapper. |
+| `help` | function | dartlab 공개 API 검색 — 자연어 query 매칭 9 섹션 docstring (T10-4). |
 | `setup` | function | AI provider 설정 안내 + 인터랙티브 설정. |
 | `search` | function | 공시 검색. **⚠ BETA — AI 사용 비권장**. |
 | `listing` | function | 목록 조회 단일 진입점. |
@@ -82,6 +83,20 @@ search: 종목 검색 (종목코드 모를 때)
 scan: 전종목 횡단분석 (Company-독립)
 macro: 시장 레벨 거시 (Company-독립)
 industry: 섹터 밸류체인 (Company-독립)
+
+#### help
+**Capabilities:** dartlab.__all__ 안 모든 심볼의 docstring 첫 줄 + 이름을 자연어 query 토큰
+과 substring 매칭하여 관련 API 5 개 (또는 limit) 를 score 순서로 반환.
+**Requires:** dartlab 패키지가 import 가능해야 한다. lazy import 패턴이라 순환 import
+회피.
+**AIContext:** 외부 LLM / 신규 사용자의 *어디서 시작?* 질문에 답하는 진입점. T8-2 의
+핵심. README "세 가지 시작점" 의 3 분기 중 자연어 진입을 보강.
+**Guide:** 결과가 0 이면 query 토큰을 줄여 재시도. 정확한 API 모를 때는
+``dartlab.help("")`` 로 전체 ``__all__`` 둘러보기 가능. CLI 등가 명령:
+``dartlab help <query>``.
+**SeeAlso:** dartlab.ask: 자연어 질문 → AI 워크벤치 답변 + ref
+dartlab.plugins.listPlugins: 외부 plugin 목록 (T5-5)
+dartlab.skills.readSkill: Skill OS 257 노드 검색
 
 #### setup
 **Capabilities:** 전체 AI provider 설정 현황 테이블 표시
@@ -304,7 +319,7 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 
 ---
 
-## Server API (95개 엔드포인트)
+## Server API (96개 엔드포인트)
 
 FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로.
 
@@ -405,6 +420,7 @@ FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로
 | GET | `/api/viz/tab/{tab}/{stockCode}` | 탭별 카드 일괄 빌드. financial 외 7 탭은 placeholder 또는 시계열 proxy. |
 | GET | `/api/viz/spec/{cardKey}/{stockCode}` | 단일 카드 lazy 호출 — 회사 전환 시 일부 카드 refresh 용. |
 | GET | `/api/viz/layout/{tab}/{stockCode}` | 탭 + 7 방법론 view → 12-col bento packed grid + 각 카드 spec. |
+| GET | `/api/viz/layout-stream/{tab}/{stockCode}` | NDJSON streaming. layout → 완성 카드 순차 emit → done. |
 
 ---
 
@@ -584,7 +600,7 @@ us.market                    # "US"
 
 ### Company 메서드/프로퍼티
 
-DartCompany에서 동적 추출 (60개).
+DartCompany에서 동적 추출 (61개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
@@ -630,6 +646,7 @@ DartCompany에서 동적 추출 (60개).
 | `retrievalBlocks` | property | 원문 markdown 보존 retrieval block DataFrame. |
 | `search` | method | 회사명 부분 검색 (KIND 목록 기준). |
 | `sections` | property | sections — docs + finance + report 통합 지도. |
+| `sectionsAs` | method | sections wide DataFrame — stripTags 파라미터로 cell value 양식 선택. |
 | `sector` | property | WICS 투자 섹터 분류 (KIND 업종 + 키워드 기반). |
 | `sectorParams` | property | 현재 종목의 섹터별 밸류에이션 파라미터. |
 | `select` | property | ``show()`` 결과에서 행/열 필터 — dual access proxy. |
