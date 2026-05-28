@@ -2181,8 +2181,13 @@ class Company:
     def sections(self) -> pl.DataFrame | None:
         """sections — docs + finance + report 통합 지도.
 
-        ⚠️ 전체 docs + finance + report를 통합 로드한다. 메모리 소비가 크다.
-        특정 topic만 필요하면 show(topic)을 사용하라 (부분 빌드, 빠름).
+        plan snazzy-wibbling-origami PR-2a 이후: ``data/dart/sections/{code}/{period}.parquet``
+        artifact 가 있으면 *mmap parquet read + lazy pivot* 으로 콜드 1s 내 완료
+        (현재 0.1s 실측). artifact 부재 시 옛 ``buildSections`` 런타임 빌드 fallback —
+        회귀 0.
+
+        ⚠️ artifact fallback path 진입 시 (HF artifact 미다운로드 환경) 전체 docs +
+        finance + report 통합 build → 메모리 200~500MB. 특정 topic만 필요하면 show(topic) 사용.
 
         docs 수평화 위에 finance/report를 같은 topic 안에 끼워넣는다.
         - docs에 있는 topic (dividend 등) → docs 블록 뒤에 report 행 append
@@ -2232,6 +2237,17 @@ class Company:
         Raises:
             없음.
         """
+        # 신 artifact 우선 — period-sharded parquet mmap (콜드 1s 목표).
+        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+            hasSectionsArtifact,
+            loadSectionsWide,
+        )
+
+        if hasSectionsArtifact(self.stockCode):
+            cached = loadSectionsWide(self.stockCode)
+            if cached is not None and not cached.is_empty():
+                return cached
+        # fallback — 옛 런타임 build (artifact 부재 환경 또는 read 실패 시).
         from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
 
         return buildSections(self)
