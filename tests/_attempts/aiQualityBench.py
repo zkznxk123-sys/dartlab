@@ -197,20 +197,118 @@ def _renderReport(results: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _measureStrict(question: dict[str, Any]) -> Any:
+    """PR-Q2 — events=True 로 ask 호출 + evaluateStrict 평가.
+
+    legacy ``_measure`` 가 ``stream=False`` 로 단일 텍스트만 받아 substring 검증 →
+    답변에 키워드만 있어도 100% 통과. 본 함수는 TraceEvent stream 을 *동시* 수집 →
+    rubric 5 차원 평가 (accuracy hard gate 포함). 1 회 ask 호출만 — 비용 동일.
+    """
+    import dartlab  # noqa: PLC0415
+    from tests.audit._aiQualityGoldenV2 import _GOLDEN_V2  # noqa: PLC0415
+    from tests.audit.aiQualityRubric import evaluateStrict  # noqa: PLC0415
+
+    # legacy golden item.id 를 v2 dataset 에 매칭
+    qid = question["id"]
+    v2_item = next((g for g in _GOLDEN_V2 if g["id"] == qid), None)
+    if v2_item is None:
+        return {
+            "id": qid,
+            "question": question["question"],
+            "totalScore": 0.0,
+            "passed": False,
+            "elapsedSec": 0.0,
+            "error": f"golden v2 entry not found for id={qid!r}",
+        }
+    try:
+        events = list(dartlab.ask(question["question"], events=True))
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "id": qid,
+            "question": question["question"],
+            "totalScore": 0.0,
+            "passed": False,
+            "elapsedSec": 0.0,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    answerText = "".join(e.data.get("text", "") for e in events if e.kind == "chunk")
+    report = evaluateStrict(goldenItem=v2_item, answerText=answerText, traceEvents=events)
+    return {
+        "id": report.goldenId,
+        "question": question["question"],
+        "totalScore": report.totalScore,
+        "passed": report.passed,
+        "answerLen": report.answerLen,
+        "elapsedSec": report.elapsedSec,
+        "dimensions": {k: {"raw": v.raw, "passed": v.passed} for k, v in report.dimensions.items()},
+        "error": report.error,
+    }
+
+
+def _renderStrictReport(results: list[dict[str, Any]]) -> str:
+    """strict mode 결과 — 5 차원 분해 + 총점."""
+    if not results:
+        return "결과 없음"
+    lines = []
+    lines.append("=" * 70)
+    lines.append(f"dartlab.ask() strict quality benchmark — N={len(results)}")
+    lines.append("=" * 70)
+    avg_total = sum(r.get("totalScore", 0.0) for r in results) / len(results)
+    pass_count = sum(1 for r in results if r.get("passed"))
+    pass_rate = 100.0 * pass_count / len(results)
+    avg_lat = sum(r.get("elapsedSec", 0.0) for r in results) / len(results)
+    lines.append(f"평균 total: {avg_total:.1f}/100   합격률 (passed): {pass_rate:.0f}% ({pass_count}/{len(results)})")
+    lines.append(f"평균 응답 시간: {avg_lat:.2f}s")
+    lines.append("")
+    lines.append(f"{'id':<22} {'total':>6} {'acc':>5} {'comp':>5} {'tool':>5} {'ref':>5} {'lat':>5} {'time':>7}")
+    lines.append("-" * 70)
+    for r in results:
+        marker = "✓" if r.get("passed") else "✗"
+        err = f" [ERR: {r['error']}]" if r.get("error") else ""
+        dims = r.get("dimensions") or {}
+        acc = dims.get("accuracy", {}).get("raw", 0.0)
+        comp = dims.get("completeness", {}).get("raw", 0.0)
+        tool = dims.get("toolSelection", {}).get("raw", 0.0)
+        refs = dims.get("refsQuality", {}).get("raw", 0.0)
+        lat = dims.get("latency", {}).get("raw", 0.0)
+        lines.append(
+            f"{marker} {r['id']:<20} {r.get('totalScore', 0.0):>5.1f}% "
+            f"{acc:>4.0f} {comp:>4.0f} {tool:>4.0f} {refs:>4.0f} {lat:>4.0f} "
+            f"{r.get('elapsedSec', 0.0):>6.2f}s{err}"
+        )
+    return "\n".join(lines)
+
+
 def main() -> int:
+    """legacy mode (substring) 또는 strict mode (rubric 5 차원) 진입점.
+
+    ``DARTLAB_QUALITY_MODE=strict`` 시 v2 rubric 평가, 그 외 legacy substring.
+    """
+    mode = os.getenv("DARTLAB_QUALITY_MODE", "legacy").lower()
     n = int(os.getenv("DARTLAB_QUALITY_BENCH_N", str(len(_GOLDEN))))
     start = int(os.getenv("DARTLAB_QUALITY_BENCH_START", "0"))
     targets = _GOLDEN[start : start + n]
-    print(f"[quality] golden dataset N={len(targets)} (of {len(_GOLDEN)}) 실 호출 시작")
+    print(f"[quality] mode={mode} golden dataset N={len(targets)} (of {len(_GOLDEN)}) 실 호출 시작")
     results: list[dict[str, Any]] = []
     for i, q in enumerate(targets):
         print(f"[quality] [{i + 1}/{len(targets)}] {q['id']} — {q['question']!r}")
-        r = _measure(q)
+        if mode == "strict":
+            r = _measureStrict(q)
+            mark = "✓" if r.get("passed") else "✗"
+            print(
+                f"          {mark} total={r.get('totalScore', 0.0):.0f}% "
+                f"len={r.get('answerLen', 0)} time={r.get('elapsedSec', 0.0):.2f}s"
+            )
+        else:
+            r = _measure(q)
+            mark = "✓" if r["score"] >= 50.0 else "✗"
+            print(f"          {mark} score={r['score']:.0f}% len={r['answerLen']} time={r['elapsedSec']:.2f}s")
         results.append(r)
-        marker = "✓" if r["score"] >= 50.0 else "✗"
-        print(f"          {marker} score={r['score']:.0f}% len={r['answerLen']} time={r['elapsedSec']:.2f}s")
     print()
-    print(_renderReport(results))
+    if mode == "strict":
+        print(_renderStrictReport(results))
+    else:
+        print(_renderReport(results))
     return 0
 
 
