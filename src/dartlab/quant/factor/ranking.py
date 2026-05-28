@@ -216,7 +216,13 @@ def _loadAccount(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str
     return getAccountValue(annual, account, year=year)
 
 
-def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
+def calcRanking(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    asof: str | None = None,
+    **kwargs,
+) -> dict:
     """전종목 멀티팩터 횡단면 순위 — 5 팩터 (KR) / 3 팩터 (US) 복합 score.
 
     Capabilities:
@@ -328,7 +334,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
         try:
             from dartlab.gather.bulkData.hfBulk import loadFiltered
 
-            mc_long = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
+            mc_long = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw", asof=asof)
             if mc_long is not None and not mc_long.is_empty():
                 latest = (
                     mc_long.sort("BAS_DD", descending=True)

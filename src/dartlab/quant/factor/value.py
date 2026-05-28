@@ -40,14 +40,17 @@ log = logging.getLogger(__name__)
 _UNIVERSE_CACHE: dict[tuple[str, str], dict[str, list[float]]] = {}
 
 
-def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
-    """연도말 시총 (KR 만 — KRX MKTCAP, US 는 빈 dict). factorBuild 와 동일 SSOT."""
+def _fetchYearEndMarketcaps(market: str, year: str, *, asof: str | None = None) -> dict[str, float]:
+    """연도말 시총 (KR 만 — KRX MKTCAP, US 는 빈 dict). factorBuild 와 동일 SSOT.
+
+    Sprint 4 PR4 — asof default None → 기존 동작. bitemporal HF 활성 후 PIT 컷오프.
+    """
     if market != "KR":
         return {}
     try:
         from dartlab.gather.bulkData.hfBulk import loadFiltered
 
-        long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
+        long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw", asof=asof)
         if long_df is None or long_df.is_empty():
             return {}
         latest = (

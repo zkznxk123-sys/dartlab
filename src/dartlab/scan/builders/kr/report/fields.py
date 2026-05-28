@@ -483,20 +483,22 @@ def _loadKrx(field: str, spec: dict[str, Any]) -> pl.DataFrame:
     return _finalizeKrxValues(raw, name, field)
 
 
-def _loadKrxLatestYear() -> pl.DataFrame:
+def _loadKrxLatestYear(*, asof: str | None = None) -> pl.DataFrame:
+    """Sprint 4 PR4 — asof 옵션 패스스루. default None → 기존 동작."""
     from dartlab.gather.bulkData.hfBulk import loadFiltered
 
     this_year = date.today().year
-    raw = loadFiltered(year=this_year, adjustment="raw")
+    raw = loadFiltered(year=this_year, adjustment="raw", asof=asof)
     if raw is None or raw.is_empty():
-        raw = loadFiltered(year=this_year - 1, adjustment="raw")
+        raw = loadFiltered(year=this_year - 1, adjustment="raw", asof=asof)
     return raw
 
 
-def _loadKrxWindow(*, start: str | None, end: str | None) -> pl.DataFrame:
+def _loadKrxWindow(*, start: str | None, end: str | None, asof: str | None = None) -> pl.DataFrame:
+    """Sprint 4 PR4 — asof 옵션 패스스루. default None → 기존 동작."""
     from dartlab.gather.bulkData.hfBulk import loadFiltered
 
-    return loadFiltered(start=start, end=end, adjustment="raw")
+    return loadFiltered(start=start, end=end, adjustment="raw", asof=asof)
 
 
 def _finalizeKrxValues(raw: pl.DataFrame, name: str, field: str) -> pl.DataFrame:

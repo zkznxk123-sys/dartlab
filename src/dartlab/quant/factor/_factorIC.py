@@ -35,6 +35,7 @@ def calcFactorIC(
     *,
     market: str = "KR",
     horizon: int = 1,
+    asof: str | None = None,
 ) -> dict | None:
     """팩터 Information Coefficient — Grinold & Kahn 표준 IC mean/std/ICIR/HitRate.
 
@@ -168,6 +169,7 @@ def calcFactorIC(
             start=f"{ret_year}-04-01",
             end=f"{ret_year}-12-31",
             adjustment="raw",
+            asof=asof,
         )
     except Exception as exc:  # noqa: BLE001
         log.warning("calcFactorIC loadFiltered 실패: %s", type(exc).__name__)
