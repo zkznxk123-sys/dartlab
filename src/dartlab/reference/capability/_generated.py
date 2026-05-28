@@ -540,6 +540,52 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "dartlab.search: **전종목 공시 검색 — 키워드 기반 (이 함수 대안)**\nliveFilings: 실시간 최신 공시 (정규화된 포맷, 단일 종목)\nreadFiling: 공시 원문 텍스트 읽기\nfilings: 로컬 보유 공시 목록 (단일 종목)",
         "summary": "**[단일 종목 전용]** OpenDART 공시 목록 조회. **stockCode 필수**."
     },
+    "Company.executivePay": {
+        "aicontext": "한국 unique disclosure — US proxy 가 숨기는 미등기/퇴직 임원 보수 노출\n산정기준 narrative 가 보수 메커니즘 추적 가능 (스톡옵션 행사 timing 등)\n회사별 보수 top 1~3 의 직위 변경 = 인사 리스크 신호",
+        "args": "없음 (self 바인딩).",
+        "capabilities": "임원 보수 ≥ 5억 원 individual 공개 추출 (US proxy NEO-5 와 달리 *전원* 공개)\n등기/미등기/퇴직 분리\n급여/상여/주식매수선택권 행사이익/기타 근로소득/퇴직소득 분해\n회사별 상위 보수 임원 list",
+        "example": "c = Company(\"005930\")\npay = c.executivePay()\nprint(pay.payByType)   # 등기/미등기/퇴직 분해\nprint(pay.topPay)      # 상위 보수 list",
+        "guide": "\"삼성전자 임원 보수\" → c.executivePay()\n\"5억 이상 임원 명단\" → c.executivePay().topPay\n\"퇴직 임원 보수\" → c.executivePay().payByType.filter(구분=\"퇴직\")",
+        "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "topPay 전체 dump 답변 본문에 (수십 행 — 상위 5~10 명만 인용)",
+                "산정기준 narrative 생략 후 보수 총액만 인용 (메커니즘 불명)",
+                "직책 정규화 없이 회사 간 비교 (대표이사 vs 부회장 vs 사장 의미 차이)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "payByType : DataFrame [구분, 급여, 상여, 주식매수선택권행사이익, 기타근로소득, 퇴직소득, 기타]",
+                "topPay : DataFrame [성명, 직위, 보수총액, 산정기준]"
+            ],
+            "prerequisites": "사업보고서 박힘 (자동 다운로드)",
+            "targetMarkets": [
+                "KR (DART · 자본시장법 §159)",
+                "Raises:",
+                "없음."
+            ]
+        },
+        "requires": "DART 사업보고서 본문 (executivePay 섹션 자동 파싱).",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "payByType",
+                "type": "[구분, 급여, 상여, 주식매수선택권 행사이익, 기타근로소득, 퇴직소득, 기타]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "topPay",
+                "type": "[성명, 직위, 보수총액, 근로소득, 퇴직소득, 기타, 산정기준 narrative]",
+                "unit": null
+            }
+        ],
+        "returns": "ExecutivePayResult 또는 None — payByType DataFrame + topPay DataFrame 보유.\npayByType: [구분, 급여, 상여, 주식매수선택권 행사이익, 기타근로소득, 퇴직소득, 기타]\ntopPay: [성명, 직위, 보수총액, 근로소득, 퇴직소득, 기타, 산정기준 narrative]",
+        "seeAlso": "governance: 이사회 구성 + 사외이사 비율\nrelatedPartyTx: 관계자 거래 (executive 와 회사 사이 거래)",
+        "summary": "임원 보수 ≥ 5억 원 individual 공개 (자본시장법 §159, 2013-11-29 시행)."
+    },
     "Company.facts": {
         "kind": "property",
         "llmSpecs": {
@@ -594,6 +640,38 @@ CAPABILITIES: dict[str, dict] = json.loads(
         },
         "returns": "\"12-31\".\n\nRaises:\n없음.",
         "summary": "회계연도 종료 월-일 (한국 종목은 12-31 표준)."
+    },
+    "Company.flow": {
+        "aicontext": "KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal\n외국인 net-buy 누적 추세 + 기관 동조/역행 패턴이 단기 시세 driver\n한국 unique — 외국인/기관/개인 종목별 일별 net-buy 가 공개 (US 시장은 없음)",
+        "args": "없음 (self 바인딩).",
+        "capabilities": "외국인 net-buy 일별\n기관 net-buy 일별\n개인 net-buy 일별",
+        "example": "c = Company(\"005930\")\nf = c.flow()           # 일별 외국인/기관/개인 순매수",
+        "guide": "\"삼성전자 외국인 매수세\" → c.flow()\n\"005930 기관 vs 외국인 추세\" → c.flow()\n\"외국인 순매수 누적\" → c.flow() + cumsum",
+        "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "일별 raw flow 전체 dump (답변 본문 — 최근 5~30 일 + 누적 비중만)",
+                "외국인 net-buy 단독 신호 해석 (기관 동조/역행 context 동반 필수)",
+                "KR 외 시장에 호출 (빈 결과 정상 — 시장 제한 명시)"
+            ],
+            "freshness": "EOD (T+1).",
+            "outputSchema": [
+                "date : Date",
+                "foreignNet : Int64 (단위 = 원)",
+                "institutionNet : Int64",
+                "individualNet : Int64"
+            ],
+            "prerequisites": "KR 시장 + Naver flow API 박힘",
+            "targetMarkets": [
+                "KR (Naver 한정)",
+                "Raises:",
+                "없음."
+            ]
+        },
+        "requires": "Naver flow API (KR 시장 한정). 외 시장 빈 결과.",
+        "returns": "pl.DataFrame — 외국인/기관/개인 net-buy 시계열. 빈 결과면 빈 DataFrame.",
+        "seeAlso": "gather(\"flow\") : 동일 본체 — flow axis 직접 호출\nkrx : KRX 시장 전체 axis (시장 평균과 비교)",
+        "summary": "KRX 외국인/기관 일별 net-buy (Company.gather(\"flow\") wrapper)."
     },
     "Company.gather": {
         "aicontext": "ask()/chat()에서 주가/수급/거시 데이터를 컨텍스트로 주입\n기업 분석 시 시장 데이터 보충 자료로 활용",
@@ -1089,6 +1167,40 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "liveFilings: 최신 공시 (뉴스가 아닌 공식 공시)\ngather: 뉴스 포함 4축 외부 데이터 수집\n\nRaises:\n없음.",
         "summary": "최근 뉴스 수집."
     },
+    "Company.notesDetail": {
+        "aicontext": "footnote-grade Q&A 의 raw 데이터 (Bloomberg/FactSet 미보유 영역)\n\"LG energy 의 리스 약정 중 중국 비중\" 같은 질문은 본 method 의 답 source\n주석 양식이 분기별로 미세 변경 — narrative 비교 시 변경 가능성 인지",
+        "args": "keyword: 주석 키워드 (NOTES_KEYWORDS 23 종 중 하나 — 리스 · 우발채무 · 퇴직급여 · 파생 등)\nperiod: \"y\" 연간 · \"q\" 분기 · \"h\" 반기 (default \"y\").",
+        "capabilities": "K-IFRS 주석 표 본문 파싱 (NOTES_KEYWORDS 23 종 — 리스/우발/퇴직/파생/금융자산 등)\n연간/분기/반기 분기\n최근 5 년 historical panel\naudit-grade citation 의 핵심 evidence layer",
+        "example": "c = Company(\"005930\")\nlease = c.notesDetail(\"리스\")           # 리스 약정 5 년 panel\ncontingent = c.notesDetail(\"우발\", \"y\") # 우발채무 연간",
+        "guide": "\"삼성전자 리스 약정\" → c.notesDetail(\"리스\")\n\"셀트리온 우발채무\" → c.notesDetail(\"우발\")\n\"LG화학 퇴직급여 가정\" → c.notesDetail(\"퇴직급여\")\n\"현대차 파생금융상품\" → c.notesDetail(\"파생\")",
+        "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "keyword 미지원 (NOTES_KEYWORDS 23 종 밖 — 직접 호출 X)",
+                "연간 답변에 분기 비교 (period 인자 무시)",
+                "5 년 panel 전체 dump (답변 본문 상위 3~5 년만 인용)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "corpName : str",
+                "tables : dict[키워드, list[NotesPeriod]]",
+                "NotesPeriod : [year, kind, items, unit]"
+            ],
+            "prerequisites": [
+                "정기보고서 박힘 (자동 다운로드)",
+                "keyword 가 NOTES_KEYWORDS 박힘"
+            ],
+            "targetMarkets": [
+                "KR (K-IFRS 1701/1019/1024)",
+                "Raises:",
+                "없음."
+            ]
+        },
+        "requires": "DART 정기보고서 docs (주석 본문 자동 파싱).",
+        "returns": "NotesDetailResult 또는 None — corpName + tables (keyword 별 NotesPeriod list) 보유.",
+        "seeAlso": "audit: 감사보고서 (KAM 와 주석은 보완)\ngovernance: 지배구조 본문",
+        "summary": "K-IFRS 주석 세부항목 (리스 약정 · 우발채무 · 퇴직급여 가정 · 파생 등) 추출."
+    },
     "Company.priority": {
         "example": ">>> Company(\"005930\").priority()",
         "kind": "method",
@@ -1234,6 +1346,37 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "liveFilings: 최신 공시 목록에서 접수번호 확인\ndisclosure: 과거 공시 목록에서 접수번호 확인",
         "summary": "접수번호 또는 liveFilings row로 공시 원문을 읽는다."
     },
+    "Company.relatedPartyTx": {
+        "aicontext": "2024-01-01 부터 threshold 100억 원 (이전 10억 원 X — 룰 변경 주의)\n2025 FTC 데이터: top-10 chaebol = 193 조 원 = 전체 disclosed RPT 의 70%\nchaebol RPT graph 구축 시 affiliateGroup 와 join 필수 (회사 단독 X)",
+        "args": "없음 (self 바인딩).",
+        "capabilities": "K-IFRS 1024 footnote 의 특수관계자 거래 line-item 추출\n공정거래법 §26 의 대규모기업집단현황공시 100억 원 threshold rows\n보증/대여/매출/매입/자산 양수도 분류\nchaebol inter-affiliate 거래 graph 의 raw input",
+        "example": "c = Company(\"005930\")\nrpt = c.relatedPartyTx()\nprint(rpt.guarantees)   # 지급보증 list\nprint(rpt.revenue)      # 매출 거래 list",
+        "guide": "\"삼성전자 관계자 거래\" → c.relatedPartyTx()\n\"삼성그룹 RPT 흐름\" → affiliateGroup × relatedPartyTx 모든 계열사 join\n\"100억 이상 RPT\" → 본 method 의 결과 자체 (threshold 이상만 disclosed)",
+        "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "threshold 10억 원으로 답변 (구 룰 — 2024-01-01 부터 100억)",
+                "단일 회사 RPT 만 인용 + chaebol 전체 흐름 무시 (RPT 의 핵심 = inter-affiliate)",
+                "RPT 본문 narrative 생략 + 금액만 인용 (목적 + 조건 빠짐)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "guarantees : DataFrame [거래상대방, 거래종류, 금액, 기간, 조건]",
+                "revenue : DataFrame [거래상대방, 거래종류, 금액]",
+                "등 거래 분류 별 DataFrame"
+            ],
+            "prerequisites": "사업보고서 박힘 (자동 다운로드)",
+            "targetMarkets": [
+                "KR (DART · 공정거래법 §26)",
+                "Raises:",
+                "없음."
+            ]
+        },
+        "requires": "DART 사업보고서 본문 (관계자거래 섹션 자동 파싱).",
+        "returns": "RelatedPartyTxResult 또는 None — guarantees / revenue / etc DataFrame list 보유.",
+        "seeAlso": "governance: 이사회 의결 RPT (board-approved)\nexecutivePay: 임원 개인 보수 (RPT 와 별도)",
+        "summary": "관계자 거래 (RPT) — 공정거래법 §26 chaebol disclosure 100억 원 threshold (2024-01-01 시행)."
+    },
     "Company.resolve": {
         "aicontext": "AI 가 사용자 발화 \"삼성전자\" / \"005930\" 모두 처리 — 일관 stockCode 반환.",
         "args": "stockCode: 종목코드 (\"005930\") 또는 종목명 (\"삼성전자\").",
@@ -1332,10 +1475,37 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.sectionsAs": {
         "args": "stripTags: True 면 plain text, False 면 mixed 양식.",
-        "example": "c = Company(\"005930\")\nc.sectionsAs(stripTags=True)   # show / agent 양식 (plain text)\nc.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>)",
+        "example": "c = Company(\"005930\")\nc.sectionsAs(stripTags=True)   # show / agent 양식 (plain text) — c.sections 와 동일\nc.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>) — c.sectionsRaw() 와 동일",
         "kind": "method",
         "returns": "pl.DataFrame — sections wide DataFrame (cell value 만 stripTags 적용). None.\n\nRaises:\n없음.",
         "summary": "sections wide DataFrame — stripTags 파라미터로 cell value 양식 선택."
+    },
+    "Company.sectionsLazy": {
+        "args": "periods: 특정 period 만 scan. None = 전체.",
+        "example": "c = Company(\"005930\")\nlf = c.sectionsLazy()\ndf = lf.select([\"topic\", \"period\", \"content_plain\"]).filter(\npl.col(\"period\").str.starts_with(\"2025\")\n).collect()",
+        "kind": "method",
+        "returns": "``pl.LazyFrame`` — sections artifact long format. 부재 시 None.",
+        "summary": "sections artifact LazyFrame — 메모리 한 자리 MB 달성 path."
+    },
+    "Company.sectionsLong": {
+        "args": "columns: select 할 컬럼 list. None = 전체. polars columnar projection 으로\ncontent 컬럼 미선택 시 페이지 fault 0 (메모리 절약).\nperiods: 특정 period 만 read. None = 전체.",
+        "example": "c = Company(\"005930\")\n# plain text only — content 컬럼만 mmap\ndf = c.sectionsLong(columns=[\"topic\", \"period\", \"content\"])\n# 특정 period 만\ndf = c.sectionsLong(periods=[\"2025\", \"2025Q3\"])",
+        "kind": "method",
+        "returns": "long format DataFrame — meta cols + ``period`` + ``content``. artifact\n부재 시 fallback wide → long 변환. None.\n\nRaises:\n없음.",
+        "summary": "sections artifact long format read — period-sharded mmap parquet 직접 노출."
+    },
+    "Company.sectionsRaw": {
+        "example": "c = Company(\"005930\")\nwide = c.sectionsRaw()  # viewer 사용 의도 명시",
+        "kind": "method",
+        "returns": "pl.DataFrame — sections wide. cell 양식 = mixed (HTML ``<table rowspan colspan align>``\n+ markdown heading + plain text). None — artifact + fallback 모두 부재 시.\n\nRaises:\n없음.",
+        "summary": "sections artifact mixed (모든 태그 + ALIGN/VALIGN 보존) wide DataFrame — viewer 전용."
+    },
+    "Company.sectionsTables": {
+        "args": "periods: 특정 period 만. None = 전체.",
+        "example": "c = Company(\"005930\")\ntables = c.sectionsTables(periods=[\"2025\"])\n# tableHorizontalizer 등 HTML 표 파서가 content_table_struct 컬럼 직접 입력",
+        "kind": "method",
+        "returns": "long DataFrame — meta cols + ``period`` + ``content_table_struct``. None.\ncontent_table_struct 가 빈 문자열인 row (표 없는 paragraph block) 포함.\n\nRaises:\n없음.",
+        "summary": "sections artifact ``content_table_struct`` 컬럼만 read — HTML 표 구조 SSOT."
     },
     "Company.sector": {
         "aicontext": "섹터 분류 결과로 동종업계 비교, 섹터 파라미터 자동 선택\nanalysis/valuation에서 섹터별 벤치마크 기준으로 활용",
@@ -2891,6 +3061,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
             ]
         }
     },
+    "gather.narrative": {
+        "capabilities": "Phase A/B/C/D 통합 archive (RSS + GDELT) 진입. target 분기: None/'raw'=원본 archive, 'pulse'=date×topic 격자, 'score'=12 번째 macro 축 dict, 'topics'=top topic 랭킹, 6자리 코드=종목명 keyword 필터, 그 외 문자열=키워드 필터. days kwarg 기본 30 (start/end 미명시 시 today-days~today). asof PIT-safe.",
+        "kind": "gather_axis",
+        "summary": "뉴스 내러티브 archive"
+    },
     "gather.news": {
         "capabilities": "Google News RSS 뉴스 수집 (기본 최근 30일).",
         "kind": "gather_axis",
@@ -3245,6 +3420,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "M2 + 연준 B/S + NFCI + 자체 FCI",
         "kind": "macro_axis",
         "summary": "유동성"
+    },
+    "macro.narrative": {
+        "capabilities": "news headline 30 일 sentiment + topic pulse + regime shift (Phase A/B archive 입력)",
+        "kind": "macro_axis",
+        "summary": "내러티브"
     },
     "macro.rates": {
         "capabilities": "금리 방향 + 고용/물가 + 수익률곡선 + 기간프리미엄",
