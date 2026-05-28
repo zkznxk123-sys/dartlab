@@ -2,8 +2,9 @@
 
 매일 실행:
 1. 최근 N일 allFilings 수집 (collectMeta + fillContent)
-2. content delta 세그먼트 빌드 (rebuildContentDelta)
-3. HF `eddmpython/dartlab-data` 에 `dart/contentIndex/delta.*` 업로드
+2. allFilings parquet HF 업로드 (lookback 기간 — 신규/정정/error retry 모두 반영)
+3. content delta 세그먼트 빌드 (rebuildContentDelta)
+4. HF `eddmpython/dartlab-data` 에 `dart/contentIndex/delta.*` 업로드
 
 main 풀리빌드는 별도 워크플로우 (월 1회).
 
@@ -48,6 +49,23 @@ def main() -> int:
     t0 = time.perf_counter()
     fillContent()
     print(f"  content 채우기 완료, {time.perf_counter() - t0:.0f}초")
+
+    # Phase 2.5: allFilings parquet HF 업로드 (lookback 기간 신규/정정/retry 반영)
+    if hfToken:
+        print("[delta] Phase 2.5: allFilings HF 업로드")
+        from datetime import datetime as _dt
+        from datetime import timedelta as _td
+
+        from dartlab.providers.dart.openapi.allFilingsCollector import pushAllFilings
+
+        # lookback 기간의 일자만 — 옛 immutable parquet 재업로드 비용 회피.
+        _today = _dt.now()
+        _lookbackDates = [(_today - _td(days=i)).strftime("%Y%m%d") for i in range(lookback)]
+        t0 = time.perf_counter()
+        nUp = pushAllFilings(_lookbackDates, token=hfToken)
+        print(f"  allFilings 업로드: {nUp} 파일, {time.perf_counter() - t0:.0f}초")
+    else:
+        print("[delta] Phase 2.5: HF_TOKEN 없음 — allFilings 업로드 skip")
 
     # Phase 3: delta 인덱스 빌드
     print("[delta] Phase 3: content delta 세그먼트 빌드")

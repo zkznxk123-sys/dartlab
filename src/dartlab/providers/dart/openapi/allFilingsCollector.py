@@ -562,22 +562,146 @@ def pendingDates() -> list[str]:
     return dates
 
 
-def loadDay(period: str) -> pl.DataFrame | None:
-    """수집된 하루치 데이터 로드.
+# ═══════════════════════════════════════════
+# HF 동기화 (push / lazy pull)
+# ═══════════════════════════════════════════
+
+# 다운로드 1 회 시도 가드 (period 또는 "_ALL_") — 실패 시 무한 retry 회피.
+_HF_DOWNLOAD_ATTEMPTED: set[str] = set()
+
+
+def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None) -> int:
+    """allFilings parquet 을 HF dataset 에 업로드.
+
+    sectionsStorage / fieldIndexRebuild 의 push 패턴과 동일 — `huggingface_hub.HfApi`
+    `upload_file` 로 일자별 `.parquet` 을 `{HF_REPO}:dart/allFilings/{period}.parquet`
+    경로에 저장. 옛 파일 같은 경로면 자동 덮어쓰기 (HF Hub 의 commit-based 업로드).
 
     Args:
-        period: 인자.
+        periods: 업로드 일자 list (YYYYMMDD). None 이면 로컬 `data/dart/allFilings/`
+            에 있는 모든 `.parquet` (정기 `*_meta.parquet` 제외).
+        token: HF token. None 이면 env `HF_TOKEN`.
+
+    Returns:
+        int — 업로드 성공 파일 수.
+
+    Raises:
+        없음 — HF 호출 실패는 warning 로그 후 다음 파일 진행.
+
+    Example:
+        >>> pushAllFilings(["20260527", "20260528"], token=os.environ["HF_TOKEN"])  # doctest: +SKIP
+    """
+    import os as _os
+
+    hfToken = token or _os.environ.get("HF_TOKEN", "")
+    if not hfToken:
+        _log.warning("[HF↑] HF_TOKEN 없음 — 업로드 skip")
+        return 0
+
+    outDir = _allFilingsDir()
+    if periods is None:
+        files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
+    else:
+        files = [outDir / f"{p}.parquet" for p in periods]
+        files = [f for f in files if f.exists()]
+
+    if not files:
+        _log.info("[HF↑] 업로드 대상 0")
+        return 0
+
+    from huggingface_hub import HfApi
+
+    from dartlab.core.dataConfig import HF_REPO
+
+    relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
+    api = HfApi(token=hfToken)
+    ok = 0
+    for f in files:
+        dst = f"{relDir}/{f.name}"
+        try:
+            api.upload_file(
+                path_or_fileobj=str(f),
+                path_in_repo=dst,
+                repo_id=HF_REPO,
+                repo_type="dataset",
+            )
+            ok += 1
+            _log.info("[HF↑] %s (%.1f MB)", dst, f.stat().st_size / 1024 / 1024)
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("[HF↑] %s 실패: %s", dst, exc)
+    _log.info("[HF↑] 완료: %d/%d 파일", ok, len(files))
+    return ok
+
+
+def _ensureFromHf(period: str | None = None) -> bool:
+    """artifact 부재 시 HF dataset 에서 lazy 다운로드.
+
+    sectionsStorage `_ensureFromHf` 동일 패턴 — `huggingface_hub.snapshot_download`
+    로 `{HF_REPO}:dart/allFilings/` 의 parquet 받음.
+
+    Args:
+        period: 특정 일자만 (YYYYMMDD) 받기. None 이면 디렉토리 전체.
+
+    Returns:
+        bool — 다운로드 성공 (또는 이미 로컬에 있음).
+
+    Raises:
+        없음 — 네트워크 / 인증 / 부재 실패는 warning 로그 후 False.
+
+    환경변수 `DARTLAB_NO_HF_DOWNLOAD=1` 시 즉시 skip. 한 (period or "_ALL_") 1 회만 시도.
+    """
+    import os as _os
+
+    outDir = _allFilingsDir()
+    if period is not None:
+        if (outDir / f"{period}.parquet").exists():
+            return True
+
+    if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
+        return False
+
+    key = period or "_ALL_"
+    if key in _HF_DOWNLOAD_ATTEMPTED:
+        return False
+    _HF_DOWNLOAD_ATTEMPTED.add(key)
+
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import HF_REPO
+
+        relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
+        pattern = f"{relDir}/{period}.parquet" if period else f"{relDir}/*.parquet"
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=[pattern],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+        return True
+    except Exception as exc:  # noqa: BLE001
+        _log.warning("[HF↓] allFilings 다운로드 실패 (%s): %s", period or "ALL", exc)
+        return False
+
+
+def loadDay(period: str) -> pl.DataFrame | None:
+    """수집된 하루치 데이터 로드. 로컬 부재 시 HF 에서 lazy 다운로드.
+
+    Args:
+        period: YYYYMMDD.
 
     Raises:
         없음.
 
     Example:
-        >>> loadDay(...)
+        >>> loadDay("20260527")  # doctest: +SKIP
 
     Returns:
         pl.DataFrame 또는 None — 수집 결과.
     """
     path = _allFilingsDir() / f"{period}.parquet"
+    if not path.exists():
+        _ensureFromHf(period)
     if not path.exists():
         return None
     return pl.read_parquet(path)
@@ -585,7 +709,7 @@ def loadDay(period: str) -> pl.DataFrame | None:
 
 @withMemoryBudget(limitMb=500)
 def loadAll() -> pl.DataFrame:
-    """원문 수집 완료된 전체 데이터 로드.
+    """원문 수집 완료된 전체 데이터 로드. 로컬 디렉토리 비어있으면 HF 에서 lazy 다운로드.
 
     Args:
         (인자 자동 생성).
@@ -594,13 +718,16 @@ def loadAll() -> pl.DataFrame:
         없음.
 
     Example:
-        >>> loadAll(...)
+        >>> loadAll()  # doctest: +SKIP
 
     Returns:
         pl.DataFrame — 결과.
     """
     outDir = _allFilingsDir()
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
+    if not files:
+        _ensureFromHf()
+        files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
     if not files:
         return pl.DataFrame()
     return pl.scan_parquet(files).collect(engine="streaming")

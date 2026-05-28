@@ -76,6 +76,61 @@ def test_stats_callable() -> None:
     assert callable(stats)
 
 
+def test_push_all_filings_callable() -> None:
+    """pushAllFilings() callable smoke."""
+    from dartlab.providers.dart.openapi.allFilingsCollector import pushAllFilings
+
+    assert callable(pushAllFilings)
+
+
+def test_ensure_from_hf_callable() -> None:
+    """_ensureFromHf() callable smoke."""
+    from dartlab.providers.dart.openapi.allFilingsCollector import _ensureFromHf
+
+    assert callable(_ensureFromHf)
+
+
+def test_push_all_filings_no_token(monkeypatch, tmp_path) -> None:
+    """HF_TOKEN 없으면 즉시 0 반환 — 외부 호출 없음."""
+    import dartlab.config as _cfg
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+    n = mod.pushAllFilings()
+    assert n == 0
+
+
+def test_ensure_from_hf_env_skip(monkeypatch) -> None:
+    """DARTLAB_NO_HF_DOWNLOAD=1 환경에서 즉시 False — 외부 호출 없음."""
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
+    mod._HF_DOWNLOAD_ATTEMPTED.clear()
+    result = mod._ensureFromHf("20990101")
+    assert result is False
+
+
+def test_ensure_from_hf_local_exists_short_circuit(monkeypatch, tmp_path) -> None:
+    """로컬에 이미 .parquet 있으면 HF 호출 없이 True."""
+    import dartlab.config as _cfg
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    outDir = mod._allFilingsDir()
+    (outDir / "20260527.parquet").write_bytes(b"stub")
+
+    # snapshot_download 가 호출되면 실패 — 호출 없음 검증.
+    def shouldNotBeCalled(*args, **kwargs):
+        raise AssertionError("snapshot_download 호출됨 — short-circuit 실패")
+
+    import huggingface_hub
+
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", shouldNotBeCalled)
+    mod._HF_DOWNLOAD_ATTEMPTED.clear()
+    assert mod._ensureFromHf("20260527") is True
+
+
 _STUB_DART_014 = (
     b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     b"<result><status>014</status><message>\xed\x8c\x8c\xec\x9d\xbc\xec\x9d\xb4 "
