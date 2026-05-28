@@ -17,7 +17,7 @@ import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import DOMPurify from 'dompurify';
 import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
@@ -729,288 +729,50 @@ function TimelineRibbon({
  *   blockType=table 인 cell 만 markdown table syntax → HTML table 변환 (시각 표시 용도).
  */
 
-// DART HTML → 마크다운 평탄화 결과는 흔히 한 셀 안에 여러 sub-table 이 연결돼 있고,
-// "(단위 : 백만원)" 같은 메타 텍스트 · "당기"/"전기"/"당분기"/"전분기"/"3개월"/"누적" 같은
-// period label 이 데이터 cell 로 흡수돼 있다. 본 파서는 그것을 다음 단계로 정리한다.
-//
-//   1) `splitTableBlocks` — `| --- |` 구분선이 *데이터행 뒤에 또 등장* 하면 새 sub-table.
-//   2) `extractUnit` — sub-table 첫 행들에서 `(단위`/`단위:` 패턴 발견 시 캡션으로 추출.
-//   3) `extractPeriodLabel` — 첫 데이터 셀 값이 period label (당기/전기/당분기/...) 만 또는
-//      label + 단위 인 경우 캡션으로 분리.
-//
-// 평탄 row 가 1 cell 만 가진 separator (`|  |`) 만 등장하면 빈 행 skip.
 
-interface MarkdownSubTable {
-	caption?: string;     // 표 위에 표시될 메타 텍스트 (당기 / 전기 등)
-	unit?: string;        // 우측 상단 단위 (단위 : 백만원)
-	rows: string[][];     // 데이터 그리드
-}
-
-// period 라벨 — "공시금액"/"장부금액" 같은 column 헤더는 caption 으로 흡수하지 않는다 (table 안 header row 로 유지).
-const PERIOD_LABEL_RE = /^(?:당기|전기|당기말|전기말|당분기|전분기|당반기|전반기|당기누적|전기누적|3개월|누적|보고기간말)$/;
-const UNIT_RE = /\(?\s*단위\s*[:：]?\s*[^\)]+\)?/;
-
-function parseRawCells(line: string): string[] {
-	return line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
-}
-
-function parseMarkdownSubTables(md: string): MarkdownSubTable[] {
-	const lines = md.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('|'));
-	const blocks: MarkdownSubTable[] = [];
-	let cur: { rows: string[][] } = { rows: [] };
-
-	const isSep = (cells: string[]) => cells.length > 0 && cells.every((c) => /^[:\-\s]*$/.test(c));
-	const isAllEmpty = (cells: string[]) => cells.every((c) => c === '');
-
-	const flush = () => {
-		if (cur.rows.length === 0) return;
-		blocks.push({ rows: cur.rows });
-		cur = { rows: [] };
-	};
-
-	// sub-table 경계는 **빈 행** (`|  |`) 이지 separator (`| --- |`) 가 아니다.
-	// markdown 표는 한 sub-table 안에서도 header row 와 data row 사이 separator 1 줄을 가진다
-	// (GFM 문법). DART HTML → 마크다운 평탄화 결과는 multi-row header (caption / period+unit /
-	// column header) 가 각자 `| --- |` 로 구분되지만 *논리적으로 같은 표*. separator 를
-	// boundary 로 보면 헤더와 데이터가 다른 grid 로 떨어져 컬럼 폭 불일치 발생.
-	//
-	// 경계 규칙: 빈 행 (모든 셀 빈) 만 boundary. separator 는 그냥 skip.
-	for (const line of lines) {
-		const cells = parseRawCells(line);
-		if (isAllEmpty(cells)) {
-			flush();
-			continue;
-		}
-		if (isSep(cells)) {
-			continue;
-		}
-		cur.rows.push(cells);
-	}
-	flush();
-	return blocks;
-}
-
-// sub-table 의 앞쪽 행들에서 캡션 (period label) + 단위 분리.
-function refineSubTable(block: MarkdownSubTable): MarkdownSubTable {
-	const rows = [...block.rows];
-	let caption = block.caption;
-	let unit = block.unit;
-
-	// 첫 행이 단일 텍스트 행 (실질 셀 1 개) 이면 caption 후보.
-	const consume = () => {
-		if (rows.length === 0) return false;
-		const first = rows[0];
-		const nonEmpty = first.filter((c) => c !== '');
-		if (nonEmpty.length === 0) {
-			rows.shift();
-			return true;
-		}
-		// (a) caption 전용 1 셀 — period label, "...에 대한 공시"/"...세부내역"/"...변동내역"
-		//     같은 표 제목 패턴, 또는 짧은 한글 heading-like 텍스트 (≤25 자, 숫자 콤마 0).
-		//     "공시금액"/"장부금액" 같은 컬럼 헤더는 length>=2 또는 다른 row 와 col 맞춰서
-		//     별개 처리 — 흡수 X.
-		const looksLikeHeading = (s: string): boolean => {
-			if (s.length === 0 || s.length > 25) return false;
-			if (/[\d,]/.test(s)) return false;
-			return /[가-힣]/.test(s);
-		};
-		if (nonEmpty.length === 1) {
-			const v = nonEmpty[0];
-			if (PERIOD_LABEL_RE.test(v) || /(에 대한 공시|세부내역|변동내역|내역)$/.test(v) || looksLikeHeading(v)) {
-				caption = caption ? `${caption} · ${v}` : v;
-				rows.shift();
-				return true;
-			}
-		}
-		// (b) period label + 단위 두 셀 — 둘 다 prefix 메타.
-		if (nonEmpty.length === 2) {
-			const [a, b] = nonEmpty;
-			if (PERIOD_LABEL_RE.test(a) && UNIT_RE.test(b)) {
-				caption = caption ? `${caption} · ${a}` : a;
-				unit = unit || b.replace(/^\(|\)$/g, '');
-				rows.shift();
-				return true;
-			}
-			if (UNIT_RE.test(a) && (!b || PERIOD_LABEL_RE.test(b))) {
-				unit = unit || a.replace(/^\(|\)$/g, '');
-				if (b) caption = caption ? `${caption} · ${b}` : b;
-				rows.shift();
-				return true;
-			}
-		}
-		// (c) 행 안 어딘가 단위 표기만 있고 나머지 모두 empty
-		if (nonEmpty.length === 1 && UNIT_RE.test(nonEmpty[0])) {
-			unit = unit || nonEmpty[0].replace(/^\(|\)$/g, '');
-			rows.shift();
-			return true;
-		}
-		return false;
-	};
-
-	// 최대 4 행까지 caption/unit 흡수 시도 (DART 가 종종 2~3 행 메타 prefix).
-	let safety = 4;
-	while (safety-- > 0 && consume()) { /* loop */ }
-	return { caption, unit, rows };
-}
-
-// DART 원본 HTML `<table rowspan colspan>` 직접 렌더 — sanitize 후 dangerouslySetInnerHTML.
-// `_tableToMarkdown` 의 HTML 출력 (2026-05-26) 이후 신규 doc.parquet 의 table 본문은
-// 마크다운 평탄화 결과 (`| ... |`) 가 아니라 원본 rowspan/colspan 그대로의 HTML 이다.
-// DART 본문은 untrusted (CLAUDE.md L37) — DOMPurify 로 script/style/handler/iframe 모두 제거.
+// plan snazzy-wibbling-origami v4 — sections artifact content_raw = raw XML 그대로
+// (P/SPAN/USERMARK/TABLE/COLGROUP/COL/TBODY/TR/TD/TH/ALIGN/VALIGN/COLSPAN/ROWSPAN 모두 보존).
+// DOMPurify allowlist 확장 — 모든 raw XML 양식 + DART 비표준 attr (USERMARK / WIDTH /
+// BORDER / AFIXTABLE / ACLASS / ACOPY / ADELETETABLE / xmlns:xsi) 허용. script/style/
+// handler/iframe 만 차단 (untrusted 외부 본문 가드, CLAUDE.md L37).
 const SANITIZE_CONFIG = {
-	ALLOWED_TAGS: ['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'br', 'span', 'div', 'b', 'i', 'u', 'strong', 'em', 'sub', 'sup'],
-	ALLOWED_ATTR: ['colspan', 'rowspan', 'class', 'align'],
+	ALLOWED_TAGS: [
+		// table 양식
+		'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
+		'colgroup', 'col', 'caption',
+		// text 양식 (DART P/SPAN 포함)
+		'p', 'span', 'div', 'br',
+		// inline formatting
+		'b', 'i', 'u', 'strong', 'em', 'sub', 'sup', 's',
+		// list
+		'ul', 'ol', 'li',
+	],
+	ALLOWED_ATTR: [
+		'colspan', 'rowspan', 'align', 'valign', 'width', 'class',
+		// DART 비표준 attr (시각 fidelity 핵심)
+		'usermark', 'border', 'afixtable', 'aclass', 'acopy', 'adeletetable',
+		'data-usermark', 'data-atocid', 'data-assocnote',
+	],
+	// xmlns 같은 namespace attr 도 허용 — DART XML 의 xmlns:xsi.
+	ALLOW_DATA_ATTR: true,
+	ALLOW_UNKNOWN_PROTOCOLS: false,
 };
-
-function HtmlTable({ html, caption, unit }: { html: string; caption?: string; unit?: string }) {
-	const cleanHtml = DOMPurify.sanitize(html, SANITIZE_CONFIG) as unknown as string;
-	return (
-		<div className="space-y-1">
-			{(caption || unit) && (
-				<div className="flex items-baseline justify-between gap-2 text-[11px]">
-					<div className="font-medium text-foreground">{caption}</div>
-					{unit && <div className="text-muted-foreground">{unit}</div>}
-				</div>
-			)}
-			<div className="dartlab-html-table overflow-x-auto" dangerouslySetInnerHTML={{ __html: cleanHtml }} />
-		</div>
-	);
-}
-
-// HTML 본문에서 `<table>...</table>` block 추출 + 그 사이 텍스트도 보존.
-// returns 원본 순서대로 ['html-table' | 'text', body] 묶음.
-function splitHtmlAndText(value: string): Array<['html' | 'text', string]> {
-	const out: Array<['html' | 'text', string]> = [];
-	const re = /<table[\s\S]*?<\/table>/gi;
-	let last = 0;
-	let m: RegExpExecArray | null;
-	while ((m = re.exec(value)) !== null) {
-		if (m.index > last) {
-			const before = value.slice(last, m.index).trim();
-			if (before) out.push(['text', before]);
-		}
-		out.push(['html', m[0]]);
-		last = m.index + m[0].length;
-	}
-	if (last < value.length) {
-		const tail = value.slice(last).trim();
-		if (tail) out.push(['text', tail]);
-	}
-	return out;
-}
-
-// HTML <table> 직전 paragraph 가 (단위 …) / 회기 일자 / period label 패턴이면 표 caption/unit
-// 으로 흡수 — 사용자 viewer 에서 (단위 : 백만원) 가 표 우측 상단 박스에 박힘. 옛 markdown 경로
-// (refineSubTable) 가 이미 같은 흡수 룰. HTML 경로도 동일 시각 효과 제공 — plan
-// snazzy-wibbling-origami PR-3 의 정공법.
-const _PERIOD_DATE_RE = /^제\s*\d+\s*기/;
-function absorbCaptionUnitFromText(textBefore: string): { caption: string; unit: string; remaining: string } {
-	const lines = textBefore.split('\n').map((l) => l.trim()).filter(Boolean);
-	let caption = '';
-	let unit = '';
-	const remaining: string[] = [];
-	for (const line of lines) {
-		// 단위 패턴 ("(단위 : 백만원)" 등) — table caption 박스 우측에 박음
-		if (UNIT_RE.test(line) && line.length < 40) {
-			if (!unit) unit = line.replace(/^\(|\)$/g, '');
-			continue;
-		}
-		// period label ("당기", "전기", "당분기" 등) 단독 — caption 좌측
-		if (PERIOD_LABEL_RE.test(line)) {
-			caption = caption ? `${caption} · ${line}` : line;
-			continue;
-		}
-		// 회기 일자 ("제 58 기 1분기말 2026.03.31 현재" 류) — caption 좌측
-		if (_PERIOD_DATE_RE.test(line) && line.length < 80) {
-			caption = caption ? `${caption} · ${line}` : line;
-			continue;
-		}
-		remaining.push(line);
-	}
-	return { caption, unit, remaining: remaining.join('\n') };
-}
-
 function CellContent({ value, blockType }: { value: string; blockType: string }) {
+	// plan snazzy-wibbling-origami v4 정공법:
+	// sections artifact content_raw = DART zip XML 의 P/SPAN/USERMARK/TABLE/COLGROUP
+	// 모든 태그 그대로 (xmlChunkToMixed 변환 0). frontend 는 DOMPurify allowlist 만
+	// 적용 + dangerouslySetInnerHTML 직접 렌더. 옛 markdown 분기 / splitHtmlAndText /
+	// absorbCaptionUnitFromText / parseMarkdownSubTables / refineSubTable 모두 폐기
+	// (~150 LOC, 6 cycle 회귀의 frontend 부분).
 	if (!value) return null;
-	// HTML `<table>` 본문 — 신규 sections artifact (PR-1+) rowspan/colspan/ALIGN/VALIGN 보존 HTML.
-	// HTML 경로도 markdown 경로처럼 caption/unit 흡수 — 표 직전 (단위 …) / 회기 일자 paragraph 를
-	// 다음 <HtmlTable> 의 caption/unit slot 으로 묶음. 옛 viewer 의 misalign (2025Q4 표 밀림)
-	// 부분 해소 — sections artifact 의 row-level 정렬과 동행한다.
-	if (blockType === 'table' && value.includes('<table')) {
-		const parts = splitHtmlAndText(value);
-		const elements: ReactElement[] = [];
-		let pendingCaption = '';
-		let pendingUnit = '';
-		parts.forEach(([kind, body], i) => {
-			if (kind === 'text') {
-				const { caption, unit, remaining } = absorbCaptionUnitFromText(body);
-				if (caption) pendingCaption = pendingCaption ? `${pendingCaption} · ${caption}` : caption;
-				if (unit) pendingUnit = pendingUnit || unit;
-				if (remaining) {
-					elements.push(
-						<div key={i} className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
-							{remaining.replace(/&cr;/g, ' ')}
-						</div>,
-					);
-				}
-			} else {
-				elements.push(<HtmlTable key={i} html={body} caption={pendingCaption || undefined} unit={pendingUnit || undefined} />);
-				pendingCaption = '';
-				pendingUnit = '';
-			}
-		});
-		// 잔여 caption/unit (table 없이 끝났을 때) — 단독 박스 형태로 노출
-		if (pendingCaption || pendingUnit) {
-			elements.push(
-				<div key="trailing-caption" className="flex items-baseline justify-between gap-2 text-[11px]">
-					<div className="font-medium text-foreground">{pendingCaption}</div>
-					{pendingUnit && <div className="text-muted-foreground">{pendingUnit}</div>}
-				</div>,
-			);
-		}
-		return <div className="space-y-3">{elements}</div>;
+	const cleanHtml = DOMPurify.sanitize(value, SANITIZE_CONFIG) as unknown as string;
+	if (blockType === 'table') {
+		return <div className="dartlab-html-table overflow-x-auto" dangerouslySetInnerHTML={{ __html: cleanHtml }} />;
 	}
-	if (blockType === 'table' && value.includes('|')) {
-		const blocks = parseMarkdownSubTables(value).map(refineSubTable).filter((b) => b.rows.length > 0 || b.caption || b.unit);
-		if (blocks.length === 0) return <pre className="whitespace-pre-wrap break-words text-sm">{value}</pre>;
-		return (
-			<div className="space-y-3">
-				{blocks.map((b, bi) => {
-					const ncols = b.rows.length > 0 ? Math.max(...b.rows.map((r) => r.length)) : 0;
-					return (
-						<div key={bi} className="space-y-1">
-							{(b.caption || b.unit) && (
-								<div className="flex items-baseline justify-between gap-2 text-[11px]">
-									<div className="font-medium text-foreground">{b.caption}</div>
-									{b.unit && <div className="text-muted-foreground">{b.unit}</div>}
-								</div>
-							)}
-							{b.rows.length > 0 && (
-								<table className="w-full border-collapse text-xs">
-									<tbody>
-										{b.rows.map((r, ri) => {
-											const padded = [...r];
-											while (padded.length < ncols) padded.push('');
-											return (
-												<tr key={ri}>
-													{padded.map((c, ci) => (
-														<td key={ci} className="border border-border px-1.5 py-0.5 align-top font-normal">
-															{c.replace(/&cr;/g, ' ')}
-														</td>
-													))}
-												</tr>
-											);
-										})}
-									</tbody>
-								</table>
-							)}
-						</div>
-					);
-				})}
-			</div>
-		);
+	if (blockType === 'heading') {
+		return <div className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: cleanHtml }} />;
 	}
-	return <div className="whitespace-pre-wrap break-words text-sm">{value}</div>;
+	return <div className="dartlab-html-text break-words text-sm" dangerouslySetInnerHTML={{ __html: cleanHtml }} />;
 }
 
 // row 가 visible window 안에 본문이 *하나라도* 있을 때만 렌더.

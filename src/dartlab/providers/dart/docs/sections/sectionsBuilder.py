@@ -1,155 +1,142 @@
-"""sections artifact 빌더 — SSOT 단순 schema (raw XML + 메타 통합).
+"""sections artifact 빌더 — zip XML → period-sharded parquet 직접 (plan v4).
 
-plan snazzy-wibbling-origami 사용자 비전 100%:
-    - cell = raw XML 그대로 (모든 DART 태그 P/SPAN/TABLE/TD ALIGN/AUNIT/ADENO/CLASS/USERMARK 보존)
-    - 메타 컬럼 통합 (rcept_no, rcept_date, section_url, corp_name, atocid, assocnote)
-    - 추가 파일 0 (_index, _raw 같은 부수 파일 폐기)
-    - 추가 컬럼 0 (content_plain, content_table_struct 같은 derive 컬럼 폐기)
-    - docs.parquet 완전 폐기 가능 — sections artifact 가 모든 정보 보유
+플로우:
+    data/dart/original/docs/{code}/*.zip → ``_xmlFromZip`` → ``zipToTopicRows`` (v4
+    sub-section walk + raw XML 보존) → period 별 그룹 → ``write_parquet`` (zstd /
+    row_group 32K / statistics).
 
-저장 양식:
-    ``data/dart/sections/{code}/{period}.parquet`` (period sharded long format)
-    schema: chapter / topic / section_order / section_title /
-            section_content (raw XML) /
-            rcept_no / rcept_date / section_url / corp_name / atocid / assocnote / period
+종목당 ~15s (005930 31 period 18s 측정). GitHub Actions 8 shard matrix 분산 ~ 1.5h
+전체 2900+ 종목.
 
-호출:
-    - ``c.sectionsRaw()`` — wide pivot, cell = raw XML 그대로 (viewer / parser 룰 변경)
-    - ``c.sections`` — wide pivot + polars native regex strip (분석 / show / agent)
-    - ``c.sectionsLong()`` — period sharded long read (메모리 절약)
-
-block 단위 분리 (text/table/heading) 는 호출자 (viewer / show) 가 runtime parsing.
-빌더는 section 단위만 carry — 단순 SSOT.
+LLM Specifications:
+    AntiPatterns:
+        - ``Company.sections`` 호출 X — sectionsBuilder 가 자기 자신 sections 의
+          input 이면 무한 chain.
+        - ``loadData(category="docs")`` 호출 X — docs.parquet 의존 0 (sections 가 SSOT).
+        - period 누적 dict (``_accumulatePeriodRows``) 호출 X — period sharded 양식
+          이라 cross-period merge 는 사용자 측 ``loadSectionsWide`` pivot 에서.
+        - content_plain / content_mixed 사전 계산 X (memory/feedback_no_content_plain_precompute.md).
+          content_raw 단일 + runtime stripTagsExpr 만.
+    OutputSchema:
+        - ``data/dart/sections/{code}/{period}.parquet`` × N period.
+        - 10 컬럼 (PROVIDER_AGNOSTIC_COLS SSOT): topic / blockType / blockOrder /
+          textLevel / textPath / textSemanticPathKey / segmentKey / content_raw /
+          period / rcept_no.
+    Prerequisites:
+        - ``data/dart/original/docs/{code}/*.zip`` 로컬 보유.
+    Freshness:
+        - parser 룰 변경 시 zip 재추출 0 (zip = SSOT). 5 baseline 빌드 검증 후 prod 반영.
+    Dataflow:
+        - zip → zipToTopicRows v4 → DataFrame (10 컬럼) → write_parquet (period 분리).
+    TargetMarkets:
+        - KR (DART). EDGAR 는 ``providers/edgar/docs/sections/`` 별도 builder 동일 schema.
 """
 
 from __future__ import annotations
 
 import logging
-import os
-from contextlib import contextmanager
+from pathlib import Path
 
 import polars as pl
 
+import dartlab.config as _cfg
 from dartlab.providers.dart.docs.sections.sectionsStorage import (
     sectionsDir,
     sectionsPath,
 )
+from dartlab.providers.dart.docs.sections.zipToTopicRows import zipToTopicRows
+from dartlab.providers.dart.openapi.zipCollector import _xmlFromZip
 
 _log = logging.getLogger(__name__)
 
-
-@contextmanager
-def _builderMode():
-    """빌더 mode env set — dataLoader 가 docs.parquet 합성 path 우회 (무한 루프 차단)."""
-    KEY = "DARTLAB_BUILDER_MODE"
-    prev = os.environ.get(KEY)
-    os.environ[KEY] = "1"
-    try:
-        yield
-    finally:
-        if prev is None:
-            os.environ.pop(KEY, None)
-        else:
-            os.environ[KEY] = prev
-
-
-_META_COLS = (
-    "rcept_no",
-    "rcept_date",
-    "section_url",
-    "corp_name",
-    "atocid",
-    "assocnote",
-)
-
-
-def _periodSuffixExpr() -> pl.Expr:
-    """report_type 텍스트 → period suffix (Q1/Q2/Q3/Q4). selectReport SSOT 일관.
-
-    사업보고서 → Q4 (annual alias), 반기보고서 → Q2, 분기보고서 03월 → Q1, 09월 → Q3.
-    매칭 없으면 Q4.
-    """
-    rt = pl.col("report_type").cast(pl.Utf8).fill_null("")
-    return (
-        pl.when(rt.str.contains("사업보고서"))
-        .then(pl.lit("Q4"))
-        .when(rt.str.contains("반기보고서"))
-        .then(pl.lit("Q2"))
-        .when(rt.str.contains(r"분기보고서.*\d{4}\.03"))
-        .then(pl.lit("Q1"))
-        .when(rt.str.contains(r"분기보고서.*\d{4}\.09"))
-        .then(pl.lit("Q3"))
-        .otherwise(pl.lit("Q4"))
-    )
+_ORIGINAL_DOCS_REL = "dart/original/docs"
 
 
 def buildSectionsArtifact(
     stockCode: str,
     *,
+    zipDir: Path | None = None,
     compression: str = "zstd",
+    rowGroupSize: int = 32_768,
+    dataPageSize: int = 65_536,
+    forceRaw: bool = True,  # v4 noop — 항상 raw XML 양식.
 ) -> dict[str, int]:
-    """docs.parquet → period sharded long parquet 영속화 (1 회 비용).
+    """종목 1 개 → ``data/dart/sections/{code}/{period}.parquet`` × N period.
 
-    SSOT 단순화: section 단위 long, cell = raw XML, 메타 통합.
+    내부 단계:
+        1. zip glob → 각 zip 별 ``_xmlFromZip`` → ``zipToTopicRows`` (v4 — TITLE 단위
+           parseSectionsByTitle + raw XML walk + USERMARK B / heading marker 검출).
+        2. row DF 의 ``period`` 컬럼 기준 그룹 — 같은 zip 안 다중 period 가능.
+        3. period 별 write_parquet — zstd 압축 + row_group 32K (topic pushdown 최적)
+           + statistics True (filter pushdown).
 
     Args:
-        stockCode: 종목코드 (6 자리).
-        compression: parquet compression. default zstd (raw XML 압축률 80%+).
+        stockCode: 종목코드.
+        zipDir: zip 디렉터리 override. None 이면 ``data/dart/original/docs/{code}``.
+        compression: parquet compression (default ``zstd`` — 5~10x 압축).
+        rowGroupSize: row group 사이즈 (default 32_768 — topic pushdown 최적).
+        dataPageSize: data page 사이즈 (default 64KB — columnar projection 최적).
+        forceRaw: noop v4 — 항상 raw XML 양식 (구 mixed cache path 폐기).
 
     Returns:
-        ``{period: rowCount}`` dict — 저장된 period 별 row 수.
+        ``{period: rowCount}`` dict. zip 디렉터리 부재 / 빈 zip 시 빈 dict.
 
     Raises:
-        없음 — docs.parquet 부재 / read 실패 silent + 빈 dict.
+        없음 — 실패 silent + ``log.warning``.
+
+    Example:
+        >>> buildSectionsArtifact("005930")
+        {'2025Q4': 4376, '2025Q3': 2156, ...}
     """
-    with _builderMode():
+    zipDirPath = zipDir or (Path(_cfg.dataDir) / _ORIGINAL_DOCS_REL / stockCode)
+    if not zipDirPath.exists() or not zipDirPath.is_dir():
+        _log.warning("zip 디렉터리 부재 (%s): %s", stockCode, zipDirPath)
+        return {}
+    zips = sorted(zipDirPath.glob("*.zip"))
+    if not zips:
+        _log.warning("zip 파일 0 (%s)", stockCode)
+        return {}
+
+    # zip → row DF (zipToTopicRows v4 가 10 컬럼 + period emit).
+    # 옛 lossy chain (_expandStructuredRows / _periodDfToLong / xmlChunkToMixed) 호출 0.
+    periodFrames: dict[str, list[pl.DataFrame]] = {}
+    for zipPath in zips:
         try:
-            from dartlab.core.dataLoader import loadData
+            xml = _xmlFromZip(zipPath)
+        except (OSError, ValueError) as exc:
+            _log.warning("zip read 실패 (%s/%s): %s", stockCode, zipPath.name, exc)
+            continue
+        if not xml:
+            continue
+        df = zipToTopicRows(xml, rcptNo=zipPath.stem, stockCode=stockCode)
+        if df.is_empty():
+            continue
+        period = df["period"][0]
+        if not period:
+            continue
+        periodFrames.setdefault(period, []).append(df)
 
-            cols = ["year", "report_type", "section_order", "section_title", "section_content", *_META_COLS]
-            df = loadData(stockCode, category="docs", columns=cols)
-        except (FileNotFoundError, ValueError, RuntimeError) as exc:
-            _log.warning("sections build 실패 (%s): %s", stockCode, exc)
-            return {}
-    if df is None or df.is_empty():
+    if not periodFrames:
         return {}
-    if "section_content" not in df.columns or "year" not in df.columns:
-        return {}
-
-    # period 매핑 — sectionsStorage.listAvailablePeriods 의 sort 와 호환.
-    df = df.with_columns(pl.concat_str([pl.col("year").cast(pl.Utf8), _periodSuffixExpr()]).alias("period"))
-
-    # chapter / topic 매핑 — section_title 의 Roman prefix 에서 chapter, title 자체가 topic.
-    # 옛 시스템 (pipeline.sections) 의 chapter / topic canonical 매핑은 향후 마이그레이션.
-    # 본 단순 빌더는 section_title 그대로 topic 으로 사용.
-    df = df.with_columns(
-        pl.col("section_title").str.extract(r"^([IVXivx]+)\.", 1).fill_null("").alias("chapter"),
-        pl.col("section_title").alias("topic"),
-    )
-
-    # 비어있는 section_content row drop — sparse cell 제거.
-    df = df.filter(pl.col("section_content").is_not_null() & (pl.col("section_content").str.len_chars() > 0))
-
-    keepCols = (
-        ["chapter", "topic", "section_order", "section_title", "section_content"]
-        + [c for c in _META_COLS if c in df.columns]
-        + ["period"]
-    )
-    df = df.select(keepCols)
 
     outDir = sectionsDir(stockCode)
     outDir.mkdir(parents=True, exist_ok=True)
     result: dict[str, int] = {}
-    for periodTuple, periodDf in df.group_by("period", maintain_order=True):
-        period = periodTuple[0] if isinstance(periodTuple, tuple) else periodTuple
-        if not isinstance(period, str):
-            continue
+    for period, frames in periodFrames.items():
+        periodDf = pl.concat(frames) if len(frames) > 1 else frames[0]
         path = sectionsPath(stockCode, period)
         try:
-            periodDf.write_parquet(path, compression=compression)
+            periodDf.write_parquet(
+                path,
+                compression=compression,
+                row_group_size=rowGroupSize,
+                statistics=True,
+                data_page_size=dataPageSize,
+            )
             result[period] = periodDf.height
         except (OSError, pl.exceptions.ComputeError) as exc:
             _log.warning("sections period save 실패 (%s/%s): %s", stockCode, period, exc)
+
     return result
 
 
@@ -160,7 +147,7 @@ def clearSectionsArtifact(stockCode: str) -> int:
         stockCode: 종목코드.
 
     Returns:
-        삭제된 파일 수.
+        삭제된 parquet 파일 수.
     """
     d = sectionsDir(stockCode)
     if not d.exists():
@@ -177,3 +164,6 @@ def clearSectionsArtifact(stockCode: str) -> int:
     except OSError:
         pass
     return count
+
+
+__all__ = ["buildSectionsArtifact", "clearSectionsArtifact"]

@@ -698,11 +698,14 @@ def _buildRowsForTopic(
         # 옛 기간 ghost row 가 visible window 에서 빈 grid 로 그려지는 회귀 차단.
         if windowPeriods is not None and not cells:
             continue
+        # plan v4 — textNodeType 컬럼 drop (blockType 으로 흡수, redundant).
+        # frontend 호환 위해 alias 유지.
+        blockType = r.get("blockType")
         rows.append(
             {
                 "blockOrder": r.get("blockOrder"),
-                "blockType": r.get("blockType"),
-                "textNodeType": r.get("textNodeType"),
+                "blockType": blockType,
+                "textNodeType": blockType,
                 "textLevel": r.get("textLevel"),
                 "textPath": r.get("textPath"),
                 "segmentKey": r.get("segmentKey"),
