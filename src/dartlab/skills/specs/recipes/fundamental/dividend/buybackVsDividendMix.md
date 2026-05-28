@@ -4,7 +4,7 @@ title: 자사주 매입 vs 배당 환원 mix
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 회사의 주주환원이 배당 단독·자사주 단독·혼합 중 어느 modus 인지 + 시점별 mix shift 가 capital allocation 의 어떤 신호 (잉여현금 정점·EPS 부양·지배구조 강화) 인지 row 단위로 분리. 단일 dividend yield 만 보는 함정 회피. analysis 격리 메우는 조합. 트리거 — '자사주 vs 배당', 'buyback vs dividend', '환원 mix'.
 whenToUse:
   - 자사주 vs 배당 환원
@@ -73,6 +73,7 @@ audiences:
   human: 환원 정책이 배당 중심인지 자사주 중심인지 시계열로 본다.
 humanIntro: "buybackVsDividendMix 는 dividend yield 만 보면 안 보이는 *환원 modus* 변화를 1 차 출처 (현금흐름표) 에서 row 단위로 분리한다. 자사주 매입과 배당은 같은 환원이지만 신호 함의가 다르다."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

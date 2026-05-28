@@ -4,7 +4,7 @@ title: 매크로 beta 팩터 cross-section
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: quant
 purpose: KOSPI 200 universe 에서 종목별 매크로 beta (금리·환율·유가 등) 의 cross-section 분포를 측정. quartile 분포 + 자기 종목 위치 표면화. 추론 라벨 없이 ranking 정량만.
@@ -64,6 +64,7 @@ failureModes:
   - 시기 따라 beta 부호 자체가 변하는 종목 (regime dependent)
   - rate / FX / oil 베타 가중치 명시 안 한 단일 점수
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

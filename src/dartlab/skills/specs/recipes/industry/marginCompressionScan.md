@@ -4,7 +4,7 @@ title: peer set 마진 압축 cluster (GP·OM·NM 동시 하락)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: peer set 의 매출총이익률·영업이익률·순이익률 3 축 동시 하락 (≥ -1σ z-score) cluster 식별. 산업 mature/decline phase 의 가장 빠른 정량 신호. industry ↔ scan ↔ analysis 조합.
 whenToUse:
   - 산업 마진 압축
@@ -59,6 +59,7 @@ testUniverse:
 falsifier:
   description: "peer 모두 같은 방향 (마진 압축 또는 마진 확장) 이면 산업 전체 신호이므로 *cluster* 변별력 없음. 절반 이상이 동일 부호면 fail."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

@@ -4,7 +4,7 @@ title: R&D / 매출 비율 추세 + peer cross-section rank
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 purpose: 회사의 R&D / 매출 비율 5y 시계열 + 같은 산업 peer set 단면 분포에서 percentile rank. R&D 강도가 peer 대비 *상위 quartile* + *상승 추세* 인 회사는 *innovation lead* 후보. 단순 ratio 가 아닌 추세 + cross-section 결합.
 whenToUse:
   - R&D 강도 추세
@@ -60,6 +60,7 @@ testUniverse:
 falsifier:
   description: "R&D 항목이 비용처리·자산화 정책 변경된 연도가 추세 안에 있으면 신호 왜곡 가능 — 회계정책 변경 row 별도 명시 필수."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

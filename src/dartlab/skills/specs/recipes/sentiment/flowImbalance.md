@@ -4,7 +4,7 @@ title: 외국인·기관·개인 순매수 imbalance z-score
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: sentiment
 purpose: 일별 외국인·기관·개인 순매수 row 에서 imbalance (외인 - 기관 - 개인 또는 외인+기관 vs 개인) 시계열을 만들고 20 거래일 z-score 산출. 추론 라벨 (긍정/부정) 없이 *수급 비대칭* 정량만. gather L1 단일. 트리거 — '수급 imbalance', '외인 기관 z-score', 'flow sentiment'.
@@ -79,6 +79,7 @@ audiences:
   human: 외인·기관·개인 *수급 비대칭* 자체가 정량 신호. 의미 해석은 별 절차.
 humanIntro: "flowImbalance 는 sentiment 페르소나의 가장 기본 정량 신호다. 외국인이 사고 개인이 파는 패턴이 *과거 20 거래일 평균 대비* 얼마나 튀는지만 본다."
 lastUpdated: "2026-05-22"
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

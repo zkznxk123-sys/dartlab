@@ -4,7 +4,7 @@ title: 주요주주 보유 변화 신호 (5% 보유공시 누적 변화)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: sentiment
 purpose: 5% 보유공시 (대량보유 + 임원·주요주주) row 에서 보고자별 보유비율 변화의 정량 격차를 본다. 누적 매수 측 (보유비율 증가) vs 매도 측 (감소) row 수 + 누적 변화량. 추론 라벨 없이 숫자만. ownership gather 단일.
@@ -63,6 +63,7 @@ failureModes:
   - 자기주식 처분과 외부 매수 혼동
   - 보유율 변화 + 절대 보유율 혼동
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식

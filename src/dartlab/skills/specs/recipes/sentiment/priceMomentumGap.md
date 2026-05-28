@@ -4,7 +4,7 @@ title: 가격 모멘텀 갭 (5/20/60 일 변화율 격차)
 category: recipes
 kind: recipe
 scope: builtin
-status: tested
+status: curated
 graphTier: L1.5
 cluster: sentiment
 purpose: 종가 시계열의 5·20·60 거래일 수익률 변화율 갭을 산출. 단기 (5d) - 중기 (60d) 갭이 양수면 *모멘텀 가속*, 음수면 *모멘텀 감속*. 추론 라벨 (강세/약세) 없이 정량 갭만. price gather 단일.
@@ -64,6 +64,7 @@ failureModes:
   - 권리락/액면분할 직후는 가격 점프로 갭 오염
   - 한 종목 갭을 sector / 시장 갭과 비교 안 하면 의미 약함
 lastUpdated: '2026-05-23'
+validatedAt: '2026-05-27'
 ---
 
 ## 공개 호출 방식
