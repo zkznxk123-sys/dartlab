@@ -79,6 +79,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 마스터 플랜 트랙 1 PR-6 — dCR 신용등급 + 1Y PD + 7 축 분석.
     # credit.engine.evaluateCompany wrap, RunPython 으로 ad-hoc credit 계산 우회.
     "CreditScorecard",
+    # 마스터 플랜 트랙 1 PR-4 — DCF parameter grid (WACC × growth) 민감도 매트릭스.
+    # multiStageDcf 반복 호출 grid loop wrap.
+    "SensitivityAnalysis",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",

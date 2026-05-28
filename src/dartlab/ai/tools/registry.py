@@ -33,6 +33,7 @@ from .saveArtifact import saveArtifact
 from .scenarioCompareN import scenarioCompareN
 from .scenarioOverlay import scenarioOverlay
 from .searchPastSessions import searchPastSessions
+from .sensitivityAnalysis import sensitivityAnalysis
 from .storyTemplate import pickStoryTemplate
 from .types import ToolResult, ToolSpec
 from .validateRecipe import validateRecipe
@@ -395,6 +396,32 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "SensitivityAnalysis": ToolSpec(
+        "SensitivityAnalysis",
+        "단일 종목 DCF parameter grid (WACC × terminalGrowth NxM) 민감도 매트릭스 — heatmap-friendly. 'WACC 민감도', '할인율 변화', '성장률 민감도', '민감도 매트릭스' 류 질문에 본 도구 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "waccRange": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[min, max, steps] 예: [8.0, 12.0, 5]. 기본 [8.0, 12.0, 5].",
+                },
+                "growthRange": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[min, max, steps] 예: [1.0, 5.0, 5]. 기본 [1.0, 5.0, 5].",
+                },
+                "projectionYears": {"type": "integer", "description": "초기 고성장 구간 (년). 기본 5."},
+            },
+            "required": ["stockCode"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "DCFValuation": ToolSpec(
         "DCFValuation",
         "단일 종목 Damodaran 2-stage DCF 내재가치 밴드 (bear/base/bull) 자동 계산. discountRate ± 100bps + terminalGrowth ± 50bps 표준 변형. '삼성전자 적정가격', 'AAPL 공정가치', 'DCF 평가' 류 질문에 본 도구 1 회 호출 — RunPython ad-hoc 회피 (token 30% 절감).",
@@ -668,6 +695,7 @@ _TOOLS: dict[str, ToolFn] = {
     "CompareCompanies": compareCompanies,
     "PeerCompareN": peerCompareN,
     "CreditScorecard": creditScorecard,
+    "SensitivityAnalysis": sensitivityAnalysis,
     "DCFValuation": dcfValuationTool,
     "ScenarioCompareN": scenarioCompareN,
     "ScenarioOverlay": scenarioOverlay,
@@ -707,6 +735,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "CompileVisual",
     "PeerCompareN",
     "DCFValuation",
+    "SensitivityAnalysis",
     "CreditScorecard",
     "ScenarioCompareN",
     "ScenarioOverlay",
@@ -727,6 +756,7 @@ _LEGACY_NAME_MAP = {
     "peer_compare_n": "PeerCompareN",
     "dcf_valuation": "DCFValuation",
     "credit_scorecard": "CreditScorecard",
+    "sensitivity_analysis": "SensitivityAnalysis",
     "scenario_compare_n": "ScenarioCompareN",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
