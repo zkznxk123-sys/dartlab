@@ -1805,6 +1805,53 @@ class Company:
         """
         return self._profileAccessor.sections
 
+    def sectionsRaw(self) -> pl.DataFrame | None:
+        """viewer / parser 전용 raw HTML wide DataFrame.
+
+        plan delegated-prancing-tower PR-E4 — ``content_raw`` 컬럼 (filing-level
+        sanitized iXBRL HTML, ALIGN/COLGROUP/rowspan/USERMARK 등 모든 태그 보존) pivot.
+
+        ``Company.sections`` 가 ``content_plain`` (markdown) 을 default cell 로 반환하는
+        반면 본 함수는 viewer 시각 fidelity 가 필요한 호출자 (``server/services/companyApi``
+        / ``providers/edgar/parse/tableHorizontalizer`` 등) 전용 raw HTML surface.
+        artifact 부재 시 ``Company.sections`` 와 동일 fallback path 거치고 None 반환.
+
+        Returns:
+            wide DataFrame (topic / blockType / blockOrder / textNodeType / textLevel /
+            textPath + period 컬럼들 — cell = raw HTML) 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> raw = Company("AAPL").sectionsRaw()  # doctest: +SKIP
+
+        LLM Specifications:
+            AntiPatterns:
+                - 본 결과를 LLM 컨텍스트로 통째 노출 금지 — raw HTML 토큰 비용 큼.
+                  viewer / table parser 전용. 분석 path 는 ``Company.sections``.
+                - artifact (sectionsStorage) 부재 시 None 반환 — caller None 분기 의무.
+            OutputSchema:
+                - pl.DataFrame — meta + period 컬럼 (cell = HTML str) 또는 None.
+            Prerequisites:
+                - ``data/edgar/sections/{ticker}/{period}.parquet`` 의 ``content_raw`` 컬럼.
+                - PR-E2 dual-write 후 sectionsBuilder 가 emit. 옛 docs.parquet only 환경 시 None.
+            Freshness:
+                - sections artifact 갱신 시점 (``edgarSync.yml`` daily).
+            Dataflow:
+                - sectionsStorage.loadSectionsWide(valueColumn="content_raw") → 본 함수.
+            TargetMarkets:
+                - US (SEC EDGAR) — iXBRL HTML raw 보존 surface.
+        """
+        from dartlab.providers.edgar.docs.sections.sectionsStorage import (
+            hasSectionsArtifact,
+            loadSectionsWide,
+        )
+
+        if not hasSectionsArtifact(self.ticker):
+            return None
+        return loadSectionsWide(self.ticker, valueColumn="content_raw")
+
     def _buildRatios(self) -> pl.DataFrame | None:
         """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출."""
         from dartlab.providers.edgar.builder.dataDispatcher import buildRatios

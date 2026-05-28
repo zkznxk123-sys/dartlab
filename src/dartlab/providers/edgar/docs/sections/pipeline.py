@@ -93,11 +93,18 @@ def _rowsToTopicRows(df: pl.DataFrame) -> list[dict[str, object]]:
 def sections(stockCode: str, *, sinceYear: int | None = None) -> pl.DataFrame | None:
     """전 기간 보고서 섹션 — (topic, blockType) × period DataFrame.
 
+    plan delegated-prancing-tower PR-E4 — 신우선/구fallback. sectionsStorage artifact
+    (period-sharded parquet) 가 있으면 mmap read + columnar projection 으로 즉시 반환
+    (콜드 1s 목표). 부재 시 옛 ``_legacySectionsBuild`` (docs.parquet + runtime
+    parseTextStructure) fallback. 환경변수 ``DARTLAB_EDGAR_LEGACY=1`` 시 강제 fallback
+    (긴급 롤백 게이트).
+
     텍스트와 테이블을 분리하여 같은 topic이라도 text 행과 table 행으로 나뉜다.
 
     Args:
         stockCode: ticker (예: "AAPL").
-        sinceYear: 이 연도 이후만 포함 (optional).
+        sinceYear: 이 연도 이후만 포함 (optional). 신 path 는 lazy filter, 구 path 는
+            ``loadData`` 단계.
 
     Returns:
         (topic, blockType)(행) × period(열) DataFrame. 값은 텍스트(str).
@@ -107,7 +114,34 @@ def sections(stockCode: str, *, sinceYear: int | None = None) -> pl.DataFrame | 
         없음.
 
     Example:
-        >>> sections("AAPL", sinceYear=2020)
+        >>> sections("AAPL", sinceYear=2020)  # doctest: +SKIP
+    """
+    import os as _os
+
+    forceLegacy = _os.environ.get("DARTLAB_EDGAR_LEGACY", "").strip() in ("1", "true", "True")
+    if not forceLegacy:
+        from dartlab.providers.edgar.docs.sections.sectionsStorage import (
+            hasSectionsArtifact,
+            loadSectionsWide,
+        )
+
+        if hasSectionsArtifact(stockCode):
+            wide = loadSectionsWide(stockCode)
+            if wide is not None and not wide.is_empty():
+                if sinceYear is not None:
+                    keep = [c for c in wide.columns if not (len(c) >= 4 and c[:4].isdigit() and int(c[:4]) < sinceYear)]
+                    if len(keep) < len(wide.columns):
+                        wide = wide.select(keep)
+                return wide
+    # fallback — 옛 runtime build (docs.parquet 의존). PR-E7 게이트 통과 후 폐기.
+    return _legacySectionsBuild(stockCode, sinceYear=sinceYear)
+
+
+def _legacySectionsBuild(stockCode: str, *, sinceYear: int | None = None) -> pl.DataFrame | None:
+    """옛 sections build path — docs.parquet runtime parseTextStructure.
+
+    plan delegated-prancing-tower PR-E4 fallback. PR-E7 안전 게이트 통과 후 폐기.
+    sectionsStorage artifact 부재 ticker 또는 ``DARTLAB_EDGAR_LEGACY=1`` 시만 hit.
     """
     df = loadData(stockCode, category="edgarDocs", sinceYear=sinceYear)
     if "period_key" not in df.columns:
