@@ -7,15 +7,28 @@ BRIEF (profile + ReadSkill + ReadCapability + planEvidence) → WORK (EngineCall
 engineCall / verifyAnswer 는 registry 등록되어 있지 않고 직접 import — 휴리스틱 path 의
 plan 실행 + GATE 검증은 LLM 도구 노출과 무관한 내부 helper 다.
 
-운영 빈도 측정 (PR-W2 결정 대기)
--------------------------------
-마스터 플랜 cryptic-discovering-kettle.md PR-W2 — 본 모듈 (844 줄) 의 운영 빈도가
-< 1% 면 삭제 (PR-W2-A), ≥ 1% 면 유지 + 본 docstring 에 빈도 명문화 (PR-W2-B).
-측정 SSOT 는 ``tests/audit/workbenchUsageDigest.py`` (PR-W1, commit d89a26681).
+PR-W2 결정 (2026-05-28) — PR-W2-B 유지 + 명문화
+-----------------------------------------------
+마스터 플랜 cryptic-discovering-kettle.md PR-W2 결정 박힘. *결정 근거는 운영
+빈도가 아니라 의존성 분석*. 본 모듈은 ``kernel.ask()`` 의 LLM-less 결정론 path —
+``tests/ai/test_ai_research_graph.py:118`` 등 다수 테스트가 본 모듈을 monkeypatch
+하여 streaming 결과 검증. 삭제 시 test 인프라 회귀 폭 ≥ 5 파일.
 
-상태: 측정 진행 중. ``~/.dartlab/ai_trace/*.json`` (PR-O4 trace dump) 가 1+ 일 누적
-되면 digest 출력 → 운영자 명시 결정 박힘. 현 시점 *데이터 부족으로 결정 보류* —
-삭제도 유지도 임의 결정 안 됨. 본 placeholder 가 PR-W2-B 도착 시 갱신될 위치.
+위치: LLM provider 미구성 환경 (테스트 fixture / dartlab stub provider) 에서
+``WorkbenchLoop.stream()`` 의 ``streamHeuristic`` 진입점. production 에서는 LLM
+provider 항상 활성 → 본 path 활성 빈도 ≈ 0%. 그러나 *결정론 시뮬* 가치 = 테스트
+인프라 강행.
+
+회귀 가드: ``feedback_no_graph_regression.md`` — 본체는 ``ai/agent.py`` (chat-native
++ 자율 tool calling). 본 모듈은 *option sub-agent only*. BRIEF/WORK/CRITIQUE 노드
+강제는 본 모듈 안 휴리스틱 실험 path 한정 — agent.py 본체로 절대 이식 금지.
+
+측정 (PR-W1 digest):
+- ``tests/audit/workbenchUsageDigest.py`` (commit d89a26681) — production trace 1+
+  일 누적 후 streamHeuristic 진입 빈도 출력. ≥ 1% 면 본 docstring 의 production
+  빈도 라인 갱신 (예: "production 활성 빈도 X.YY% (집계일 YYYY-MM-DD)"). < 1% 면
+  *그래도 본 모듈 유지* — 본 결정의 근거는 production 빈도가 아니라 test 인프라
+  의존성이라 빈도 표시 라인만 갱신.
 """
 
 from __future__ import annotations
