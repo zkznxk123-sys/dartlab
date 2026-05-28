@@ -143,10 +143,34 @@ def loadSectionsLong(
             if not wantedCols:
                 return None
             scan = scan.select(wantedCols)
-        return scan.collect()
+        df = scan.collect()
     except (OSError, pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("sectionsLong load 실패 (%s): %s", stockCode, exc)
         return None
+    # 신 sectionsNew schema → 옛 docs.parquet 호환 컬럼 자동 양립. 기존 sectionsLegacy
+    # caller (loadSectionsWide / dataLoader synthesis / c.sections 의 wide pivot 등) 가
+    # topic / section_title / section_content / section_order 컬럼 의존. 신 chain 의
+    # blockLeaf / contentRaw / blockOrder / disclosureKey 와 자동 매핑.
+    if "blockLeaf" in df.columns and "section_title" not in df.columns:
+        df = df.rename(
+            {
+                "blockLeaf": "section_title",
+                "contentRaw": "section_content",
+                "blockOrder": "section_order",
+            }
+        )
+    if "topic" not in df.columns:
+        if "disclosureKey" in df.columns and "xbrlClass" in df.columns:
+            df = df.with_columns(pl.coalesce([pl.col("disclosureKey"), pl.col("xbrlClass")]).alias("topic"))
+        elif "disclosureKey" in df.columns:
+            df = df.with_columns(pl.col("disclosureKey").alias("topic"))
+        elif "xbrlClass" in df.columns:
+            df = df.with_columns(pl.col("xbrlClass").alias("topic"))
+    if "rceptNo" in df.columns and "rcept_no" not in df.columns:
+        df = df.rename({"rceptNo": "rcept_no"})
+    if "corp" in df.columns and "stock_code" not in df.columns:
+        df = df.rename({"corp": "stock_code"})
+    return df
 
 
 def loadSectionsWide(
@@ -192,6 +216,59 @@ def loadSectionsWide(
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("sectionsWide pivot 실패 (%s): %s", stockCode, exc)
         return None
+
+
+def loadSectionsRawXml(stockCode: str) -> pl.DataFrame | None:
+    """sections artifact 를 docs.parquet 합성용 row-major DataFrame 으로 read.
+
+    dataLoader._trySynthesizeDocsFromSections (plan snazzy-wibbling-origami PR-4b) 가
+    docs.parquet 부재 시 본 함수 → year/report_kind 부착 → docs.parquet 양식 저장.
+
+    schema 변환 — sectionsNew (chapter/sectionLeaf/blockLeaf/contentRaw/blockOrder/
+    xbrlClass/disclosureKey/period/corp/rceptNo) → docs.parquet 호환 (topic/
+    section_title/section_content/section_order/stock_code/rcept_no/period) :
+
+        - chapter       → chapter         (그대로)
+        - sectionLeaf   → section_leaf    (그대로, 보조 컬럼)
+        - blockLeaf     → section_title   (블록 라벨)
+        - contentRaw    → section_content (raw XML 보존)
+        - blockOrder    → section_order   (정수 순서)
+        - disclosureKey → topic           (universal canonical key, null 시 xbrlClass fallback)
+        - corp          → stock_code      (DART 종목코드)
+        - rceptNo       → rcept_no        (공시 접수번호)
+        - period        → period          (YYYYQ[1-4], year/report_kind 합성용)
+
+    topic 변환 — disclosureKey (IFRS taxonomy snakeId) 가 신 chain canonical. 옛 16
+    카테고리 매핑은 별도 bridge (Layer 3 tier2/3 확장 시).
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        DataFrame 또는 None (artifact 부재).
+    """
+    # loadSectionsLong 이 이미 신 schema → 옛 호환 자동 rename (topic/section_title/
+    # section_content/section_order/stock_code/rcept_no). 본 함수는 별도 변환 없이 그대로 노출.
+    return loadSectionsLong(stockCode, columns=None)
+
+
+def loadSectionsIndex(stockCode: str) -> pl.DataFrame | None:
+    """sections artifact 의 period 별 메타 (rcept_no/corp_name/...) index.
+
+    dataLoader._trySynthesizeDocsFromSections 가 본 함수 → period 별 unique 메타를
+    rawXml 결과에 join. 옛 _index.parquet 폐기 (plan snazzy-wibbling-origami) —
+    sectionsNew artifact 의 행별 메타 컬럼에서 직접 추출.
+
+    Returns:
+        DataFrame ``period / rcept_no [+ 부속 메타]`` unique by period. None = artifact 부재.
+    """
+    long = loadSectionsLong(stockCode, columns=None)
+    if long is None or long.is_empty():
+        return None
+    # period 별 unique 메타 — loadSectionsLong 이 rceptNo→rcept_no 자동 rename 후 반환.
+    if "rcept_no" not in long.columns or "period" not in long.columns:
+        return None
+    return long.select(["period", "rcept_no"]).unique(subset=["period"])
 
 
 def stripTagsExpr(col: str) -> pl.Expr:
