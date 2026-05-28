@@ -456,10 +456,110 @@ def evaluateBatch(
     return out
 
 
+_QUALITY_REGRESSION_TOLERANCE_PCT: float = 10.0
+"""마스터 플랜 v2 트랙 5 PR-Q3 — quality score 회귀 임계.
+
+5 차원 가중 평균 (total) 및 5 차원 각각의 raw score 가 baseline 대비 -10% 초과 하락 시 회귀
+판정. accuracy 는 hard gate 라 더 엄격하게 처리하고 싶으면 본 상수 별도 조정 (현재는 모든
+차원 동일 임계). 본 상수 변경 시 baseline 재측 동행 필수 (회귀 비교 의미 변경).
+"""
+
+
+def reportsToBaseline(reports: Sequence[ScoreReport]) -> dict[str, Any]:
+    """ScoreReport N 종 → baseline JSON 직렬화 dict.
+
+    Sig:
+        reportsToBaseline(reports) -> dict
+    Args:
+        reports: evaluateBatch 결과.
+    Returns:
+        ``{"createdAt", "itemCount", "averages": {totalScore, accuracy, completeness,
+        toolSelection, refsQuality, latency}, "perItem": {{id: {totalScore, dims}}}}``
+    Note:
+        평균은 *valid* 차원만 (raw=None 제외). N=0 → 모든 필드 0.0.
+    """
+    import datetime as _dt
+
+    valid = [r for r in reports if r.error is None]
+    n = len(valid)
+    avg_total = (sum(r.totalScore for r in valid) / n) if n else 0.0
+    avg_dim: dict[str, float] = {}
+    for key in ("accuracy", "completeness", "toolSelection", "refsQuality", "latency"):
+        vals = [r.dimensions[key].raw for r in valid if key in r.dimensions and r.dimensions[key].raw is not None]
+        avg_dim[key] = (sum(vals) / len(vals)) if vals else 0.0
+    per_item = {
+        r.goldenId: {
+            "totalScore": r.totalScore,
+            "dims": {k: (d.raw if d.raw is not None else 0.0) for k, d in r.dimensions.items()},
+        }
+        for r in valid
+    }
+    return {
+        "createdAt": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+        "itemCount": n,
+        "averages": {"totalScore": avg_total, **avg_dim},
+        "perItem": per_item,
+    }
+
+
+def compareReportsToBaseline(
+    reports: Sequence[ScoreReport],
+    baseline: dict[str, Any],
+) -> tuple[list[tuple[str, float, float, float, bool]], bool]:
+    """현 reports 의 평균 점수 vs baseline 평균 → 차원별 회귀 판정.
+
+    Sig:
+        compareReportsToBaseline(reports, baseline) -> ([row...], hasRegression)
+    Args:
+        reports: 현 측정 ScoreReport list.
+        baseline: ``reportsToBaseline`` 결과 또는 동일 schema dict.
+    Returns:
+        ``(rows, hasRegression)``. rows: ``[(label, baselineVal, currentVal, deltaPct, regressed)]``.
+        regressed=True 이면 deltaPct < -10% (절대 하락). baselineVal=0 인 차원은 비교 skip.
+    """
+    cur = reportsToBaseline(reports)
+    cur_avg = cur["averages"]
+    base_avg = baseline.get("averages", {})
+    rows: list[tuple[str, float, float, float, bool]] = []
+    any_regressed = False
+    for label in ("totalScore", "accuracy", "completeness", "toolSelection", "refsQuality", "latency"):
+        base_v = float(base_avg.get(label) or 0.0)
+        cur_v = float(cur_avg.get(label) or 0.0)
+        if base_v <= 0.0:
+            continue
+        delta_pct = ((cur_v - base_v) / base_v) * 100.0
+        regressed = delta_pct < -_QUALITY_REGRESSION_TOLERANCE_PCT
+        if regressed:
+            any_regressed = True
+        rows.append((label, base_v, cur_v, delta_pct, regressed))
+    return rows, any_regressed
+
+
+def renderQualityBaselineDiff(rows: Sequence[tuple[str, float, float, float, bool]]) -> str:
+    """compareReportsToBaseline rows → markdown 표 출력."""
+    if not rows:
+        return "_quality baseline 비교 가능 차원 0_"
+    lines = [
+        "## baseline 비교",
+        "",
+        "| 차원 | baseline | 현재 | 변화 | 회귀 |",
+        "|---|---:|---:|---:|---|",
+    ]
+    for label, base_v, cur_v, delta, regressed in rows:
+        flag = "❌" if regressed else "✅"
+        sign = "+" if delta >= 0 else ""
+        lines.append(f"| {label} | {base_v:.1f} | {cur_v:.1f} | {sign}{delta:.1f}% | {flag} |")
+    return "\n".join(lines)
+
+
 __all__ = [
     "DimensionScore",
     "ScoreReport",
-    "evaluateStrict",
+    "_QUALITY_REGRESSION_TOLERANCE_PCT",
+    "compareReportsToBaseline",
     "evaluateBatch",
+    "evaluateStrict",
+    "renderQualityBaselineDiff",
     "renderRubricReport",
+    "reportsToBaseline",
 ]

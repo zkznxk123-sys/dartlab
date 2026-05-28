@@ -1,0 +1,29 @@
+{
+  "_note": "마스터 플랜 v2 트랙 5 PR-Q3 — strict quality eval baseline 템플릿. 실측은 `DARTLAB_QUALITY_MODE=strict tests/_attempts/aiQualityBench.py` 실행 후 --write-baseline 으로 갱신.",
+  "_schema": {
+    "createdAt": "UTC ISO 8601",
+    "itemCount": "측정 item N",
+    "averages": {
+      "totalScore": "가중 평균 (0~100)",
+      "accuracy": "5 차원 각 raw score (0~100)",
+      "completeness": "...",
+      "toolSelection": "...",
+      "refsQuality": "...",
+      "latency": "..."
+    },
+    "perItem": {
+      "_format": "{goldenId: {totalScore, dims: {...}}}"
+    }
+  },
+  "createdAt": "1970-01-01T00:00:00+00:00",
+  "itemCount": 0,
+  "averages": {
+    "totalScore": 0.0,
+    "accuracy": 0.0,
+    "completeness": 0.0,
+    "toolSelection": 0.0,
+    "refsQuality": 0.0,
+    "latency": 0.0
+  },
+  "perItem": {}
+}
