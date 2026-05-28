@@ -95,6 +95,70 @@ MARKETS: dict[str, MarketConfig] = {
         fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(4, 10),
     ),
+    # Sprint 3 PR2 — 7 신규 거래소 (8→15 시장)
+    "CA": MarketConfig(
+        code="CA",
+        name="캐나다",
+        currency="CAD",
+        exchange_suffix=".TO",
+        benchmark_ticker="^GSPTSE",
+        fallback_chain=("yahoo_chart", "fmp"),
+        trading_hours_utc=(14, 21),  # ET 9:30-16:00
+    ),
+    "AU": MarketConfig(
+        code="AU",
+        name="호주",
+        currency="AUD",
+        exchange_suffix=".AX",
+        benchmark_ticker="^AXJO",
+        fallback_chain=("yahoo_chart", "fmp"),
+        trading_hours_utc=(0, 6),  # AEDT 10:00-16:00 → UTC 23:00 ~ 익일 5:00 (간략 표기)
+    ),
+    "BR": MarketConfig(
+        code="BR",
+        name="브라질",
+        currency="BRL",
+        exchange_suffix=".SA",
+        benchmark_ticker="^BVSP",
+        fallback_chain=("yahoo_chart", "fmp"),
+        trading_hours_utc=(13, 20),  # BRT 10:00-17:00
+    ),
+    "ZA": MarketConfig(
+        code="ZA",
+        name="남아공",
+        currency="ZAR",
+        exchange_suffix=".JO",
+        benchmark_ticker="^J203.JO",
+        fallback_chain=("yahoo_chart",),
+        trading_hours_utc=(7, 15),  # SAST 9:00-17:00
+    ),
+    "MX": MarketConfig(
+        code="MX",
+        name="멕시코",
+        currency="MXN",
+        exchange_suffix=".MX",
+        benchmark_ticker="^MXX",
+        fallback_chain=("yahoo_chart", "fmp"),
+        trading_hours_utc=(14, 21),  # CST 8:30-15:00
+    ),
+    "SG": MarketConfig(
+        code="SG",
+        name="싱가포르",
+        currency="SGD",
+        exchange_suffix=".SI",
+        benchmark_ticker="^STI",
+        fallback_chain=("yahoo_chart",),
+        trading_hours_utc=(1, 9),  # SGT 9:00-17:00
+    ),
+    "TH": MarketConfig(
+        code="TH",
+        name="태국",
+        currency="THB",
+        exchange_suffix=".BK",
+        benchmark_ticker="^SET.BK",
+        fallback_chain=("yahoo_chart",),
+        trading_hours_utc=(3, 9),  # ICT 10:00-16:30
+    ),
 }
 
 # 심천 거래소 종목 접미사 (상하이 .SS가 기본)

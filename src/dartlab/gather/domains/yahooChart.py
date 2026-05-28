@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 
 _BASE_URL = "https://query2.finance.yahoo.com/v8/finance/chart"
 
-# Yahoo 거래소 접미사 매핑
+# Yahoo 거래소 접미사 매핑 (Sprint 3 PR2 — 8→15 시장 확장)
 _EXCHANGE_SUFFIX: dict[str, str] = {
     "US": "",
     "JP": ".T",
@@ -39,6 +39,14 @@ _EXCHANGE_SUFFIX: dict[str, str] = {
     "CN_SH": ".SS",
     "CN_SZ": ".SZ",
     "IN": ".NS",
+    # Sprint 3 PR2 — 7 신규 거래소 (Yahoo 일봉 커버리지 검증 완료)
+    "CA": ".TO",  # Toronto Stock Exchange
+    "AU": ".AX",  # Australian Securities Exchange
+    "BR": ".SA",  # B3 (Brasil Bolsa Balcão)
+    "ZA": ".JO",  # Johannesburg Stock Exchange
+    "MX": ".MX",  # Bolsa Mexicana de Valores
+    "SG": ".SI",  # Singapore Exchange
+    "TH": ".BK",  # Stock Exchange of Thailand
 }
 
 

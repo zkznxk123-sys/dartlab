@@ -27,7 +27,24 @@ class TestMarketConfig:
     """시장 설정 + ticker 변환."""
 
     def test_all_markets_defined(self):
-        expected = {"KR", "US", "JP", "HK", "UK", "DE", "CN", "IN"}
+        # Sprint 3 PR2 — 8→15 시장 확장 (CA/AU/BR/ZA/MX/SG/TH 추가)
+        expected = {
+            "KR",
+            "US",
+            "JP",
+            "HK",
+            "UK",
+            "DE",
+            "CN",
+            "IN",
+            "CA",
+            "AU",
+            "BR",
+            "ZA",
+            "MX",
+            "SG",
+            "TH",
+        }
         assert set(MARKETS.keys()) == expected
 
     def test_get_market_config_known(self):
@@ -84,8 +101,12 @@ class TestMarketConfig:
         assert resolveTicker("SAP", "DE", "fmp") == "SAP.DE"
 
     def test_fallback_chains_not_empty(self):
+        # Sprint 3 PR2 — 신규 시장 (ZA/SG/TH) 는 Yahoo only (≥ 1 허용).
+        # 기존 8 시장 + CA/AU/BR/MX 는 ≥ 2 유지.
+        single_chain_markets = {"ZA", "SG", "TH"}
         for code, config in MARKETS.items():
-            assert len(config.fallback_chain) >= 2, f"{code} fallback 체인이 너무 짧음"
+            min_len = 1 if code in single_chain_markets else 2
+            assert len(config.fallback_chain) >= min_len, f"{code} fallback 체인이 너무 짧음 (min {min_len})"
 
 
 # ══════════════════════════════════════
