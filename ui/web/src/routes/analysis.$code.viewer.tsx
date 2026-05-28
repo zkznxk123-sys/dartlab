@@ -17,7 +17,7 @@ import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import DOMPurify from 'dompurify';
 import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
@@ -899,22 +899,76 @@ function splitHtmlAndText(value: string): Array<['html' | 'text', string]> {
 	return out;
 }
 
+// HTML <table> 직전 paragraph 가 (단위 …) / 회기 일자 / period label 패턴이면 표 caption/unit
+// 으로 흡수 — 사용자 viewer 에서 (단위 : 백만원) 가 표 우측 상단 박스에 박힘. 옛 markdown 경로
+// (refineSubTable) 가 이미 같은 흡수 룰. HTML 경로도 동일 시각 효과 제공 — plan
+// snazzy-wibbling-origami PR-3 의 정공법.
+const _PERIOD_DATE_RE = /^제\s*\d+\s*기/;
+function absorbCaptionUnitFromText(textBefore: string): { caption: string; unit: string; remaining: string } {
+	const lines = textBefore.split('\n').map((l) => l.trim()).filter(Boolean);
+	let caption = '';
+	let unit = '';
+	const remaining: string[] = [];
+	for (const line of lines) {
+		// 단위 패턴 ("(단위 : 백만원)" 등) — table caption 박스 우측에 박음
+		if (UNIT_RE.test(line) && line.length < 40) {
+			if (!unit) unit = line.replace(/^\(|\)$/g, '');
+			continue;
+		}
+		// period label ("당기", "전기", "당분기" 등) 단독 — caption 좌측
+		if (PERIOD_LABEL_RE.test(line)) {
+			caption = caption ? `${caption} · ${line}` : line;
+			continue;
+		}
+		// 회기 일자 ("제 58 기 1분기말 2026.03.31 현재" 류) — caption 좌측
+		if (_PERIOD_DATE_RE.test(line) && line.length < 80) {
+			caption = caption ? `${caption} · ${line}` : line;
+			continue;
+		}
+		remaining.push(line);
+	}
+	return { caption, unit, remaining: remaining.join('\n') };
+}
+
 function CellContent({ value, blockType }: { value: string; blockType: string }) {
 	if (!value) return null;
-	// HTML `<table>` 본문 — 신규 doc.parquet (2026-05-26+) 이 rowspan/colspan 보존 HTML 으로 출력.
+	// HTML `<table>` 본문 — 신규 sections artifact (PR-1+) rowspan/colspan/ALIGN/VALIGN 보존 HTML.
+	// HTML 경로도 markdown 경로처럼 caption/unit 흡수 — 표 직전 (단위 …) / 회기 일자 paragraph 를
+	// 다음 <HtmlTable> 의 caption/unit slot 으로 묶음. 옛 viewer 의 misalign (2025Q4 표 밀림)
+	// 부분 해소 — sections artifact 의 row-level 정렬과 동행한다.
 	if (blockType === 'table' && value.includes('<table')) {
 		const parts = splitHtmlAndText(value);
-		return (
-			<div className="space-y-3">
-				{parts.map(([kind, body], i) =>
-					kind === 'html' ? (
-						<HtmlTable key={i} html={body} />
-					) : (
-						<div key={i} className="whitespace-pre-wrap break-words text-xs text-muted-foreground">{body.replace(/&cr;/g, ' ')}</div>
-					),
-				)}
-			</div>
-		);
+		const elements: ReactElement[] = [];
+		let pendingCaption = '';
+		let pendingUnit = '';
+		parts.forEach(([kind, body], i) => {
+			if (kind === 'text') {
+				const { caption, unit, remaining } = absorbCaptionUnitFromText(body);
+				if (caption) pendingCaption = pendingCaption ? `${pendingCaption} · ${caption}` : caption;
+				if (unit) pendingUnit = pendingUnit || unit;
+				if (remaining) {
+					elements.push(
+						<div key={i} className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
+							{remaining.replace(/&cr;/g, ' ')}
+						</div>,
+					);
+				}
+			} else {
+				elements.push(<HtmlTable key={i} html={body} caption={pendingCaption || undefined} unit={pendingUnit || undefined} />);
+				pendingCaption = '';
+				pendingUnit = '';
+			}
+		});
+		// 잔여 caption/unit (table 없이 끝났을 때) — 단독 박스 형태로 노출
+		if (pendingCaption || pendingUnit) {
+			elements.push(
+				<div key="trailing-caption" className="flex items-baseline justify-between gap-2 text-[11px]">
+					<div className="font-medium text-foreground">{pendingCaption}</div>
+					{pendingUnit && <div className="text-muted-foreground">{pendingUnit}</div>}
+				</div>,
+			);
+		}
+		return <div className="space-y-3">{elements}</div>;
 	}
 	if (blockType === 'table' && value.includes('|')) {
 		const blocks = parseMarkdownSubTables(value).map(refineSubTable).filter((b) => b.rows.length > 0 || b.caption || b.unit);
