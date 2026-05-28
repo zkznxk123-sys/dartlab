@@ -30,6 +30,7 @@ _RAW_ALLOWED_PREFIXES: tuple[str, ...] = (
     "providers/dart/docs/sections/",  # sections layer 자체 (definition + fallback)
     "providers/dart/parse/",  # htmlTableParser / tableHorizontalizer (raw HTML 직접 파싱)
     "providers/dart/company.py",  # Company surface (method 정의)
+    "providers/edgar/",  # EDGAR sections (별도 SSOT, EDGAR own content_raw schema)
 )
 
 # content_table_struct / sectionsTables() — finance 표 파서 전용.

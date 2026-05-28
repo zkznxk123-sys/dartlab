@@ -320,16 +320,40 @@ def loadSectionsWide(
     # 필요 컬럼만 read — columnar projection 으로 다른 content* + 거대 path variants 페이지
     # fault 0. wide pivot 후 cell 중복으로 메모리 폭주 → 정공법 = pivot 입력 long 자체를 좁힘.
     # 한 종목 long parquet ~54MB → 필수 컬럼만 ~10MB 로 5x 절감. 사용자 비전 "메모리 한 자리 MB".
+    # 분석 / viewer / segment 결합 path 모두 필요한 컬럼 집합.
+    # tests/sections/test_text_structure.py 가 강제: textPathVariants 등 구조 컬럼은
+    # diff / structure 분석 path 의 SSOT. 메모리는 ~15MB 추가지만 호출자 호환 필수.
     _MINIMAL_META = (
         "chapter",
         "topic",
         "blockType",
         "blockOrder",
+        "sourceBlockOrder",
         "textNodeType",
+        "textStructural",
         "textLevel",
         "textPath",
         "textPathKey",
+        "textParentPathKey",
+        "textPathVariantCount",
+        "textPathVariants",
+        "textParentPathVariants",
+        "textSemanticPathKey",
+        "textSemanticParentPathKey",
+        "textComparablePathKey",
+        "textComparableParentPathKey",
+        "textSemanticPathVariants",
+        "textSemanticParentPathVariants",
         "segmentKey",
+        "segmentOrder",
+        "segmentOccurrence",
+        "freqKey",
+        "freqScope",
+        "annualPeriodCount",
+        "quarterlyPeriodCount",
+        "latestAnnualPeriod",
+        "latestQuarterlyPeriod",
+        "sourceTopic",
         "source",
     )
     selectCols = list(_MINIMAL_META) + ["period", valueColumn]
