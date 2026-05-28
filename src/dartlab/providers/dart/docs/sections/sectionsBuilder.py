@@ -64,14 +64,20 @@ def _isPeriodColumn(name: str) -> bool:
     return name[4:] in ("Q1", "Q2", "Q3", "Q4")
 
 
-def wideToLong(sectionsWide: pl.DataFrame) -> pl.DataFrame:
+def wideToLong(sectionsWide: pl.DataFrame, *, addPlain: bool = True) -> pl.DataFrame:
     """sections wide DataFrame → long format (period 컬럼 → row).
+
+    PR-5a 이후: ``content_plain`` 컬럼 자동 추가 — HTML/markdown 태그 strip 결과. D.1
+    분석 모듈 (sentiment / risk / search / disclosureDiff 등) 이 plain text 만 필요할 때
+    ``Company.sectionsLong(columns=['topic','period','content_plain'])`` 으로 페이지 fault
+    절약. polars columnar projection 으로 ``content`` (mixed) 컬럼은 RAM 0.
 
     Args:
         sectionsWide: 기존 ``Company.sections`` 출력. row meta + period 컬럼 N 개.
+        addPlain: ``content_plain`` 컬럼 자동 생성 여부 (default True).
 
     Returns:
-        long format DataFrame — meta cols + ``period`` + ``content``.
+        long format DataFrame — meta cols + ``period`` + ``content`` (+ ``content_plain``).
         null content row 는 제거.
 
     Raises:
@@ -79,7 +85,7 @@ def wideToLong(sectionsWide: pl.DataFrame) -> pl.DataFrame:
 
     Example:
         >>> long = wideToLong(c.sections)  # doctest: +SKIP
-        >>> set(long.columns) >= {"period", "content"}
+        >>> set(long.columns) >= {"period", "content", "content_plain"}
         True
     """
     periodCols = [c for c in sectionsWide.columns if _isPeriodColumn(c)]
@@ -96,7 +102,15 @@ def wideToLong(sectionsWide: pl.DataFrame) -> pl.DataFrame:
     # str.len_chars() 호출 위해 String cast 강제. 이미 String 이면 no-op.
     long = long.with_columns(pl.col("content").cast(pl.Utf8))
     # null 또는 빈 content row drop — sparse cell 제거. period-shard 저장 효율 ↑.
-    return long.filter(pl.col("content").is_not_null() & (pl.col("content").str.len_chars() > 0))
+    long = long.filter(pl.col("content").is_not_null() & (pl.col("content").str.len_chars() > 0))
+    if addPlain:
+        # content_plain 컬럼 — HTML/markdown 태그 모두 strip. xmlAdapter.stripTagsFromCell SSOT.
+        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromCell
+
+        long = long.with_columns(
+            pl.col("content").map_elements(stripTagsFromCell, return_dtype=pl.Utf8).alias("content_plain")
+        )
+    return long
 
 
 def saveSectionsByPeriod(
