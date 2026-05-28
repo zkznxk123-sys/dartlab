@@ -2252,6 +2252,56 @@ class Company:
 
         return buildSections(self)
 
+    def sectionsRaw(self) -> pl.DataFrame | None:
+        """sections artifact mixed (모든 태그 + ALIGN/VALIGN 보존) wide DataFrame — viewer 전용.
+
+        plan snazzy-wibbling-origami PR-2b. ``sectionsAs(stripTags=False)`` 의 명시
+        alias — 호출자 의도를 코드 레벨에서 분명히 함. 사용처: viewer / 시각 렌더링
+        (frontend ``CellContent`` 가 raw HTML/markdown 직접 sanitize 후 표시).
+
+        Returns:
+            pl.DataFrame — sections wide. cell 양식 = mixed (HTML ``<table rowspan colspan align>``
+            + markdown heading + plain text). None — artifact + fallback 모두 부재 시.
+
+        Raises:
+            없음.
+
+        Example::
+
+            c = Company("005930")
+            wide = c.sectionsRaw()  # viewer 사용 의도 명시
+        """
+        return self.sectionsAs(stripTags=False)
+
+    def sectionsTables(self, *, periods: list[str] | None = None) -> pl.DataFrame | None:
+        """sections artifact ``content_table_struct`` 컬럼만 read — HTML 표 구조 SSOT.
+
+        plan snazzy-wibbling-origami PR-5b. finance pipeline (analysis/financial/* 60 모듈)
+        의 향후 입력. ALIGN/VALIGN/rowspan/colspan 모두 보존된 HTML ``<table>`` 만.
+        paragraph 본문 / markdown heading 제거. polars columnar projection 으로 다른
+        컬럼 RAM 0 — finance 분석 메모리 최소화.
+
+        Args:
+            periods: 특정 period 만. None = 전체.
+
+        Returns:
+            long DataFrame — meta cols + ``period`` + ``content_table_struct``. None.
+            content_table_struct 가 빈 문자열인 row (표 없는 paragraph block) 포함.
+
+        Raises:
+            없음.
+
+        Example::
+
+            c = Company("005930")
+            tables = c.sectionsTables(periods=["2025"])
+            # tableHorizontalizer 등 HTML 표 파서가 content_table_struct 컬럼 직접 입력
+        """
+        return self.sectionsLong(
+            columns=["topic", "blockType", "blockOrder", "period", "content_table_struct"],
+            periods=periods,
+        )
+
     def sectionsLong(
         self, *, columns: list[str] | None = None, periods: list[str] | None = None
     ) -> pl.DataFrame | None:
