@@ -226,7 +226,20 @@ def loadSectionsLong(
     try:
         scan = pl.scan_parquet(files)
         if columns:
-            scan = scan.select(columns)
+            # 옛 schema (content_plain / content_table_struct 부재) 호환 — 실 schema 와
+            # 교집합 만 select. polars ColumnNotFoundError 회귀 차단. 호출자는 결과 컬럼
+            # 부재로 자체 fallback 판단 (예: loadSectionsWide 가 valueColumn None 검증).
+            availableSchema = set(scan.collect_schema().names())
+            wantedCols = [c for c in columns if c in availableSchema]
+            if not wantedCols:
+                _log.warning(
+                    "sectionsLong (%s): 요청 columns %s 모두 schema (%s) 부재 — None",
+                    stockCode,
+                    columns,
+                    sorted(availableSchema)[:10],
+                )
+                return None
+            scan = scan.select(wantedCols)
         return scan.collect()
     except (OSError, pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("sectionsLong load 실패 (%s): %s", stockCode, exc)
@@ -283,8 +296,30 @@ def loadSectionsWide(
     )
     selectCols = list(_MINIMAL_META) + ["period", valueColumn]
     long = loadSectionsLong(stockCode, periods=periods, columns=selectCols)
+    # 옛 schema 호환 — valueColumn (content_plain 등) 부재 시 content (mixed) 로 fallback +
+    # stripTags 처리. 신 builder 가 빌드한 artifact 는 plain/table_struct 모두 보유 → 정상 path.
     if long is None or long.is_empty():
-        return None
+        if valueColumn == "content":
+            return None
+        _log.info(
+            "loadSectionsWide (%s): valueColumn '%s' 부재 (옛 schema) — content fallback + stripTags",
+            stockCode,
+            valueColumn,
+        )
+        fallbackCols = list(_MINIMAL_META) + ["period", "content"]
+        long = loadSectionsLong(stockCode, periods=periods, columns=fallbackCols)
+        if long is None or long.is_empty():
+            return None
+        if valueColumn == "content_plain":
+            from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromCell
+
+            long = long.with_columns(pl.col("content").map_elements(stripTagsFromCell, return_dtype=pl.Utf8))
+        elif valueColumn == "content_table_struct":
+            from dartlab.providers.dart.docs.sections.sectionsBuilder import _extractTableStruct
+
+            long = long.with_columns(pl.col("content").map_elements(_extractTableStruct, return_dtype=pl.Utf8))
+        # 호출자가 valueColumn 이름으로 pivot 하므로 content → valueColumn 으로 rename.
+        long = long.rename({"content": valueColumn})
     if valueColumn not in long.columns:
         _log.warning("sectionsWide: valueColumn '%s' 부재 (사용 가능: %s)", valueColumn, long.columns)
         return None
