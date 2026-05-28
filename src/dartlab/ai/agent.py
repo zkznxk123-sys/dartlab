@@ -815,7 +815,52 @@ def _injectPastContextIfAvailable(
         # 피드백 시그널은 컨텍스트 *끝* — 가장 최근 학습 신호라 LLM 우선 활용.
         systemPrompt = f"{systemPrompt}\n\n{feedback_block}"
 
+    # 마스터 플랜 트랙 3 PR-W3 — workbench/targets._buildQuestionProfile 본체 흡수.
+    # 사용자 질문에서 taskType / targets / comparison / showTopic 추정 → tool 선택 가이드.
+    # workbench 의 옵션 sub-agent 도 동일 helper 를 사용 — 본 호출은 *읽기만*, graph 회귀 0.
+    intent_block = _formatIntentProfileBlock(kwargs)
+    if intent_block:
+        systemPrompt = f"{systemPrompt}\n\n{intent_block}"
+
     return systemPrompt
+
+
+def _formatIntentProfileBlock(kwargs: dict[str, Any]) -> str:
+    """workbench/targets._buildQuestionProfile 결과 → system prompt markdown 블록.
+
+    질문 의도 추정으로 LLM 의 tool 선택 가이드 — 예: comparison=True 면 PeerCompareN
+    먼저, showTopic='IS' 면 EngineCall(Company.show, topic='IS') 우선 등.
+    """
+    # 질문은 caller (server/agent_gateway) 가 history 마지막 user msg 또는 kwargs.question
+    # 으로 전달. 본 helper 는 정보 없으면 빈 문자열 반환 (안전).
+    question = str(kwargs.get("question") or "").strip()
+    stockCode = kwargs.get("stockCode")
+    if not question and not stockCode:
+        return ""
+    try:
+        from .workbench.targets import _buildQuestionProfile
+
+        profile = _buildQuestionProfile(question, stockCode=stockCode)
+    except Exception:  # noqa: BLE001
+        return ""
+
+    targets = profile.get("targets") or []
+    comparison = profile.get("comparison")
+    show_topic = profile.get("showTopic")
+    task_type = profile.get("taskType")
+    if not targets and not show_topic and task_type == "research":
+        return ""
+
+    lines: list[str] = ["## 질문 의도 추정 (참고 — LLM 자율 도구 선택 가이드)"]
+    if task_type:
+        lines.append(f"- 작업 유형: `{task_type}`")
+    if targets:
+        lines.append(f"- 추정 종목: {', '.join(f'`{t}`' for t in targets[:5])}")
+    if comparison:
+        lines.append("- 비교형 질문 — `PeerCompareN` (N≥2) 또는 `CompareCompanies` (max 3) 우선.")
+    if show_topic:
+        lines.append(f"- 추정 토픽: `{show_topic}` — `EngineCall(Company.show, topic='{show_topic}')` 우선.")
+    return "\n".join(lines)
 
 
 def _formatDashboardSnapshotBlock(snapshot: dict[str, Any]) -> str:
