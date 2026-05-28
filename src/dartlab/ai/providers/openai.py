@@ -73,9 +73,17 @@ class OpenAIProvider(BaseProvider):
             return
 
         kwargs["stream"] = True
+        # 마스터 플랜 v2 트랙 7 PR-M2 — stream 마지막 chunk 에 usage payload 포함 요청
+        # (chat.completions stream 기본은 usage 없음, opt-in 필요).
+        kwargs["stream_options"] = {"include_usage": True}
         tool_buf: dict[int, dict[str, str]] = {}
         finish: str = ""
+        final_usage: dict[str, Any] = {}
         for chunk in client.chat.completions.create(**kwargs):
+            # usage chunk — choices 가 비어 있고 usage 만 채워진 마지막 chunk
+            chunk_usage = getattr(chunk, "usage", None)
+            if chunk_usage is not None:
+                final_usage = _usageDict(chunk_usage)
             choice = chunk.choices[0] if chunk.choices else None
             if choice is None:
                 continue
@@ -102,7 +110,7 @@ class OpenAIProvider(BaseProvider):
                 "tool_use",
                 {"id": buf["id"], "name": buf["name"], "input": parsed},
             )
-        yield LLMEvent("stop", {"reason": finish or "stop", "usage": {}})
+        yield LLMEvent("stop", {"reason": finish or "stop", "usage": final_usage})
 
 
 def _toOpenAIMessages(messages: list[Msg]) -> list[dict[str, Any]]:
@@ -200,11 +208,24 @@ def _eventsFromChatCompletion(resp: Any) -> Iterator[LLMEvent]:
 
 
 def _usageDict(usage: Any) -> dict[str, Any]:
+    """OpenAI usage → 표준 dict — cache observability 동행.
+
+    마스터 플랜 v2 트랙 7 PR-M2 — OpenAI gpt-4o 자동 prompt cache 의 ``prompt_tokens_details.
+    cached_tokens`` 추출 → 표준 키 ``cache_read_input_tokens`` 매핑 (anthropic 양식 통일).
+    cache_creation 은 OpenAI 가 별도 노출 안 함 (input 안에 포함) → 0 fix.
+    """
     if usage is None:
         return {}
+    prompt = int(getattr(usage, "prompt_tokens", 0) or 0)
+    cached = 0
+    details = getattr(usage, "prompt_tokens_details", None)
+    if details is not None:
+        cached = int(getattr(details, "cached_tokens", 0) or 0)
     return {
-        "input_tokens": getattr(usage, "prompt_tokens", 0),
-        "output_tokens": getattr(usage, "completion_tokens", 0),
+        "input_tokens": prompt,
+        "output_tokens": int(getattr(usage, "completion_tokens", 0) or 0),
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": cached,
     }
 
 

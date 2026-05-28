@@ -70,9 +70,14 @@ class GoogleProvider(BaseProvider):
             yield from _eventsFromGenaiResponse(resp)
             return
 
+        last_usage: dict[str, Any] = {}
         for chunk in client.models.generate_content_stream(**kwargs):
+            # 마스터 플랜 v2 트랙 7 PR-M2 — Gemini stream chunk 의 usage_metadata 누적 추적.
+            chunk_meta = getattr(chunk, "usage_metadata", None)
+            if chunk_meta is not None:
+                last_usage = _usageDict(chunk_meta)
             yield from _eventsFromGenaiResponse(chunk, terminal=False)
-        yield LLMEvent("stop", {"reason": "stop", "usage": {}})
+        yield LLMEvent("stop", {"reason": "stop", "usage": last_usage})
 
 
 def _toGenaiContents(messages: list[Msg]) -> list[dict[str, Any]]:
@@ -159,7 +164,28 @@ def _eventsFromGenaiResponse(resp: Any, *, terminal: bool = True) -> Iterator[LL
                     },
                 )
     if terminal:
-        yield LLMEvent("stop", {"reason": "stop", "usage": {}})
+        usage = _usageDict(getattr(resp, "usage_metadata", None))
+        yield LLMEvent("stop", {"reason": "stop", "usage": usage})
+
+
+def _usageDict(meta: Any) -> dict[str, Any]:
+    """Gemini usage_metadata → 표준 dict — cache observability 동행.
+
+    마스터 플랜 v2 트랙 7 PR-M2 — Gemini context caching (``cached_content_token_count``)
+    추출. ``prompt_token_count`` 가 input 전체 (cached 포함), ``cached_content_token_count``
+    가 그 중 cache hit 분. cache_creation 은 별도 API (cachedContents.create) — usage 에서
+    노출 안 됨, 0 fix.
+    """
+    if meta is None:
+        return {}
+    prompt = int(getattr(meta, "prompt_token_count", 0) or 0)
+    cached = int(getattr(meta, "cached_content_token_count", 0) or 0)
+    return {
+        "input_tokens": prompt,
+        "output_tokens": int(getattr(meta, "candidates_token_count", 0) or 0),
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": cached,
+    }
 
 
 def _stripJsonSchema(schema: dict[str, Any]) -> dict[str, Any]:

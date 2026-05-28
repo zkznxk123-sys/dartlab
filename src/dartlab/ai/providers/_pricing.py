@@ -28,15 +28,17 @@ _PRICE_TABLE: dict[tuple[str, str], dict[str, float | None]] = {
     ("anthropic", "claude-sonnet"): {"input": 3.0, "output": 15.0, "cacheCreate": 3.75, "cacheRead": 0.3},
     ("anthropic", "claude-haiku-4-5"): {"input": 0.8, "output": 4.0, "cacheCreate": 1.0, "cacheRead": 0.08},
     ("anthropic", "claude-haiku"): {"input": 0.8, "output": 4.0, "cacheCreate": 1.0, "cacheRead": 0.08},
-    # OpenAI — 2026-05 공식 (gpt-5 가정값, 실 공식 확인 후 갱신)
-    ("openai", "gpt-5"): {"input": 10.0, "output": 40.0, "cacheCreate": None, "cacheRead": None},
-    ("openai", "gpt-4o"): {"input": 2.5, "output": 10.0, "cacheCreate": None, "cacheRead": None},
-    ("openai", "gpt-4"): {"input": 30.0, "output": 60.0, "cacheCreate": None, "cacheRead": None},
-    # Google Gemini
-    ("gemini", "gemini-2.5-pro"): {"input": 1.25, "output": 5.0, "cacheCreate": None, "cacheRead": None},
-    ("gemini", "gemini-2.5-flash"): {"input": 0.075, "output": 0.3, "cacheCreate": None, "cacheRead": None},
-    ("gemini", "gemini-1.5-pro"): {"input": 1.25, "output": 5.0, "cacheCreate": None, "cacheRead": None},
-    ("google", "gemini-2.5-pro"): {"input": 1.25, "output": 5.0, "cacheCreate": None, "cacheRead": None},
+    # OpenAI — 2026-05 공식. PR-M2 — cacheRead 명시 (자동 prompt cache 50% 할인).
+    ("openai", "gpt-5"): {"input": 10.0, "output": 40.0, "cacheCreate": 0.0, "cacheRead": 5.0},
+    ("openai", "gpt-4o"): {"input": 2.5, "output": 10.0, "cacheCreate": 0.0, "cacheRead": 1.25},
+    ("openai", "gpt-4o-mini"): {"input": 0.15, "output": 0.6, "cacheCreate": 0.0, "cacheRead": 0.075},
+    ("openai", "gpt-4"): {"input": 30.0, "output": 60.0, "cacheCreate": 0.0, "cacheRead": 30.0},
+    # Google Gemini — PR-M2 cached_content_token_count 가 cache hit (context caching).
+    # cacheRead = input × 0.25 (Gemini 75% 할인).
+    ("gemini", "gemini-2.5-pro"): {"input": 1.25, "output": 5.0, "cacheCreate": 0.0, "cacheRead": 0.3125},
+    ("gemini", "gemini-2.5-flash"): {"input": 0.075, "output": 0.3, "cacheCreate": 0.0, "cacheRead": 0.01875},
+    ("gemini", "gemini-1.5-pro"): {"input": 1.25, "output": 5.0, "cacheCreate": 0.0, "cacheRead": 0.3125},
+    ("google", "gemini-2.5-pro"): {"input": 1.25, "output": 5.0, "cacheCreate": 0.0, "cacheRead": 0.3125},
     # xAI Grok
     ("xai", "grok"): {"input": 5.0, "output": 15.0, "cacheCreate": None, "cacheRead": None},
     # OAuth / Codex / Ollama / DartLab — local 또는 무과금 가정
