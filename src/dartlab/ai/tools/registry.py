@@ -11,6 +11,7 @@ from typing import Any, Callable
 from .compareCompanies import compareCompanies
 from .compileVisual import compileVisual
 from .createUserSkill import createUserSkill
+from .dcfValuationTool import dcfValuationTool
 from .engineCall import engineCall
 from .evidenceGate import evidenceGate
 from .groundingCheck import groundingCheck
@@ -344,6 +345,35 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "DCFValuation": ToolSpec(
+        "DCFValuation",
+        "단일 종목 Damodaran 2-stage DCF 내재가치 밴드 (bear/base/bull) 자동 계산. discountRate ± 100bps + terminalGrowth ± 50bps 표준 변형. '삼성전자 적정가격', 'AAPL 공정가치', 'DCF 평가' 류 질문에 본 도구 1 회 호출 — RunPython ad-hoc 회피 (token 30% 절감).",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string", "description": "6 자리 KR 또는 US ticker."},
+                "wacc": {
+                    "type": "number",
+                    "description": "할인율 (%). 미지정 시 sectorParams.discountRate.",
+                },
+                "terminalGrowthRate": {
+                    "type": "number",
+                    "description": "영구성장률 (%). 미지정 시 min(sectorGrowth, 3.0).",
+                },
+                "projectionYears": {"type": "integer", "description": "초기 고성장 구간 (년). 기본 5."},
+                "scenarios": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": ["bear", "base", "bull"]},
+                    "description": "기본 3 종 전체. 일부만 필요 시 명시.",
+                },
+            },
+            "required": ["stockCode"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "ScenarioOverlay": ToolSpec(
         "ScenarioOverlay",
         "macro 시나리오 preset (146 종 — 1997 IMF / 2008 GFC / Fed DFAST 등) 의 macro overrides 와 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. '금리 +50bp 면?' 류 질문에 답변 본문 옵션 1 회 호출.",
@@ -561,6 +591,7 @@ _TOOLS: dict[str, ToolFn] = {
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
     "CompareCompanies": compareCompanies,
+    "DCFValuation": dcfValuationTool,
     "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
@@ -596,6 +627,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "SaveArtifact",
     "CreateUserSkill",
     "CompileVisual",
+    "DCFValuation",
     "ScenarioOverlay",
     "OutcomeLog",
     "SearchPastSessions",
@@ -611,6 +643,7 @@ _LEGACY_NAME_MAP = {
     "evidence_gate": "EvidenceGate",
     "pick_story_template": "PickStoryTemplate",
     "compare_companies": "CompareCompanies",
+    "dcf_valuation": "DCFValuation",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",

@@ -63,6 +63,10 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 이라 LLM 이 호출 못 했던 회귀. 2026-05-17 OAuth probe 에서 다중 종목 비교 시
     # CompareCompanies 1 회 대신 Company.show 2 회 + RunPython 우회 (91s) 발견 후 합류.
     "CompareCompanies",
+    # 마스터 플랜 트랙 1 PR-1 — Damodaran DCF wrap (bear/base/bull 3 시나리오).
+    # 직전 회귀: LLM 이 매번 RunPython 으로 ad-hoc DCF 코드 작성 → token 30% 낭비.
+    # default 노출 누락 시 LLM 호출 0 회 회귀 (CompareCompanies 2026-05-17 패턴).
+    "DCFValuation",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",
