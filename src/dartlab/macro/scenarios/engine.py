@@ -314,6 +314,25 @@ def _computeDelta(baseline: dict, scenario: dict) -> dict:
         "changed": b_risk != s_risk,
     }
 
+    # narrative — Phase C, news headline pulse 기여 (scenarios overrides 는 macro 변수만
+    # 강제 가능, narrative 는 *과거 데이터 기반*이라 override 불가. baseline narrative 만
+    # 활용 + scenario 결과는 similarPastPeriods 인용 — 사용자 의도 매칭).
+    b_narr = baseline.get("narrative") or {}
+    s_narr = scenario.get("narrative") or {}
+    similar = b_narr.get("similarPastPeriods") or []
+    delta["narrative_signal"] = {
+        "baseline_score": b_narr.get("score"),
+        "baseline_label": b_narr.get("label"),
+        "regime_shift_delta": (b_narr.get("regimeShift") or {}).get("delta"),
+        "scenario_score_from_similar": similar[0].get("score") if similar else None,
+        "similar_period_cited": similar[0].get("period") if similar else None,
+        "topic_pulse_top1": (b_narr.get("topicPulse") or [{}])[0].get("topic_label")
+        if b_narr.get("topicPulse")
+        else None,
+        # 신규 narrative 축 미실행 또는 scenario narrative 동일 시 baseline 값 그대로 반환.
+        "scenario_score": s_narr.get("score"),
+    }
+
     # 종합 서술
     changes: list[str] = []
     if delta["score"]["change"] < -2:

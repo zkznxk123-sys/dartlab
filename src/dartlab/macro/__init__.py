@@ -171,6 +171,14 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='macro("심리")',
         act=5,
     ),
+    "narrative": _AxisEntry(
+        module="dartlab.macro.narrative.narrative",
+        fn="analyzeNarrative",
+        label="내러티브",
+        description="news headline 30 일 sentiment + topic pulse + regime shift (Phase A/B archive 입력)",
+        example='macro("내러티브")',
+        act=5,
+    ),
     # ── 6막: 앞으로 어떻게 되나 (전망 + 시나리오) ──
     "forecast": _AxisEntry(
         module="dartlab.macro.forecast.forecast",
@@ -211,6 +219,10 @@ _ALIASES: dict[str, str] = {
     "심리": "sentiment",
     "시장심리": "sentiment",
     "공포탐욕": "sentiment",
+    "내러티브": "narrative",
+    "뉴스내러티브": "narrative",
+    "뉴스심리": "narrative",
+    "헤드라인": "narrative",
     "유동성": "liquidity",
     "유동성환경": "liquidity",
     "예측": "forecast",

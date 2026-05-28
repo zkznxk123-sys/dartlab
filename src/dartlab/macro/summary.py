@@ -62,6 +62,30 @@ def _scoreSentiment(sentiment: dict) -> tuple[float, list[str]]:
     return 0.0, []
 
 
+def _scoreNarrative(narrative: dict | None) -> tuple[float, list[str]]:
+    """narrative 축 점수 — Phase C, news headline pulse 기반 (-0.7~+0.4 contrib).
+
+    score ≤ -2 → -0.7 (극단공포 narrative — 방어 신호)
+    score ≤ -1 → -0.4 (비관)
+    score ≥ +2 → -0.2 (극단탐욕 — 과열 경계, 역방향 감점)
+    score ≥ +1 → +0.4 (낙관)
+    else → 0.0.
+    """
+    if not narrative or not isinstance(narrative, dict):
+        return 0.0, []
+    s = float(narrative.get("score", 0.0))
+    label = narrative.get("label", "중립")
+    if s <= -2:
+        return -0.7, [f"narrative 극단 비관 ({label})"]
+    if s <= -1:
+        return -0.4, ["narrative 비관"]
+    if s >= 2:
+        return -0.2, [f"narrative 극단 낙관 ({label}) — 과열 경계"]
+    if s >= 1:
+        return 0.4, ["narrative 낙관"]
+    return 0.0, []
+
+
 def _scoreLiquidity(liquidity: dict) -> tuple[float, list[str]]:
     regime = liquidity.get("regime", "")
     if regime == "abundant":
@@ -442,11 +466,20 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
+    narrativeResult: dict | None = None
+    try:
+        from dartlab.macro.narrative.narrative import analyzeNarrative
+
+        narrativeResult = analyzeNarrative(market=market, asOf=asOf)
+        _gcAfterAxis()
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError):
+        narrativeResult = None
+
     score = 0.0
     reasons: list[str] = []
     contributions: dict[str, float] = {}
 
-    # 9 축 scoring 을 sub 에 위임 — 각 sub 는 (contrib, reason_list) 리턴.
+    # 10 축 scoring 을 sub 에 위임 — 각 sub 는 (contrib, reason_list) 리턴.
     for axisName, contrib, axReasons in (
         ("cycle", *_scoreCycle(cycle)),
         ("rates", *_scoreRates(rates)),
@@ -457,6 +490,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
         ("inventory", *_scoreInventory(inventoryResult)),
         ("trade", *_scoreTrade(tradeResult, market)),
         ("corporate", *_scoreCorporate(corporateResult)),
+        ("narrative", *_scoreNarrative(narrativeResult)),
     ):
         score += contrib
         contributions[axisName] = contrib
@@ -505,6 +539,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
         "inventory": inventoryResult,
         "trade": tradeResult,
         "corporate": corporateResult,
+        "narrative": narrativeResult,
         "allocation": allocation_result,
         "strategies": strategies_result,
     }
