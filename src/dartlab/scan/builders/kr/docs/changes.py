@@ -11,12 +11,38 @@ import polars as pl
 from dartlab.scan.builders.kr.common import BATCH_SIZE, docsDir, mergeBatchFiles, say, scanDir
 
 
+def _loadDocsLike(parquetPath: Path, stockCode: str) -> pl.DataFrame | None:
+    """sections artifact 우선 + 옛 docs.parquet fallback 진입점.
+
+    plan snazzy-wibbling-origami v4 — sections artifact 보유 종목은 sub-section
+    row 를 (period, topic) group_by aggregate → 옛 docs schema (year/section_title/
+    section_content) 호환 양식 노출. 미보유 종목은 옛 docs.parquet 직접 read.
+
+    Args:
+        parquetPath: 옛 docs.parquet 경로 (fallback 용).
+        stockCode: 종목코드 (sections artifact 조회 키).
+
+    Returns:
+        호환 schema DataFrame 또는 None.
+    """
+    from dartlab.providers.dart.docs.sections.sectionsCompat import loadDocsCompat
+
+    compat = loadDocsCompat(stockCode)
+    if compat is not None and not compat.is_empty():
+        # docs schema 와 호환: section_order 컬럼 dummy 부여 (옛 sort key).
+        return compat.with_columns(pl.lit(0).cast(pl.Int32).alias("section_order"))
+    try:
+        return pl.read_parquet(str(parquetPath))
+    except (pl.exceptions.PolarsError, OSError):
+        return None
+
+
 def _buildRawChanges(parquetPath: Path, stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | None:
-    """raw docs parquet → section 단위 변화 감지.
+    """raw docs (sections compat 우선) → section 단위 변화 감지.
 
     Parameters:
-        parquetPath: 종목별 docs parquet 경로.
-        stockCode: 종목코드.
+        parquetPath: 종목별 docs parquet 경로 (sections 미보유 시 fallback).
+        stockCode: 종목코드 (sections artifact 조회 키).
         sinceYear: 시작 연도. 이전 연도는 비교 기준으로만 사용.
 
     Returns:
@@ -41,17 +67,18 @@ def _buildRawChanges(parquetPath: Path, stockCode: str, sinceYear: int = 2021) -
         ``buildChanges`` 가 종목별 docs parquet 을 순회할 때.
 
     How:
-        section_order/title 기준 shift 후 변경 row 만 추출해 표준 컬럼으로 select.
+        sections artifact 우선 (topic group_by) → 옛 docs fallback → section_order/title
+        기준 shift 후 변경 row 만 추출.
 
     Requires:
-        ``year`` · ``section_order`` · ``section_title`` · ``section_content`` 컬럼.
+        sections artifact 또는 옛 docs.parquet 중 하나. 옛 docs 의 경우 ``year`` ·
+        ``section_order`` · ``section_title`` · ``section_content`` 컬럼.
 
     SeeAlso:
-        ``buildChanges``.
+        ``buildChanges`` · ``_loadDocsLike``.
     """
-    try:
-        raw = pl.read_parquet(str(parquetPath))
-    except (pl.exceptions.PolarsError, OSError):
+    raw = _loadDocsLike(parquetPath, stockCode)
+    if raw is None:
         return None
 
     needed = {"year", "section_order", "section_title", "section_content"}
@@ -190,10 +217,20 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     batchDir = outDir / "_tmp_changes"
     batchDir.mkdir(parents=True, exist_ok=True)
 
-    allFiles = sorted(docsDirValue.glob("*.parquet"))
+    # plan v4 — sections artifact 종목 + 옛 docs.parquet 종목 union.
+    # docs 폐기 보류 (사용자 명시) 상태에서 양쪽 입력 동시 지원.
+    docsCodes: set[str] = set()
+    if docsDirValue.exists():
+        docsCodes = {p.stem for p in docsDirValue.glob("*.parquet") if p.stem.isdigit() and len(p.stem) == 6}
+    sectionsRoot = scanDir().parent / "sections"
+    sectionsCodes: set[str] = set()
+    if sectionsRoot.exists():
+        sectionsCodes = {d.name for d in sectionsRoot.iterdir() if d.is_dir() and d.name.isdigit() and len(d.name) == 6}
+    allCodes = sorted(docsCodes | sectionsCodes)
+    allFiles = [docsDirValue / f"{c}.parquet" for c in allCodes]
     if not allFiles:
         if verbose:
-            say("docs parquet 없음 — changes 빌드 건너뜀")
+            say("docs/sections 모두 부재 — changes 빌드 건너뜀")
         return None
 
     if verbose:

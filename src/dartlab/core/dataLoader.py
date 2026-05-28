@@ -460,8 +460,19 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
     long = loadSectionsLong(stockCode, columns=None)
     if long is None or long.is_empty():
         return False
-    if "section_content" not in long.columns or "period" not in long.columns:
+    if "period" not in long.columns:
         return False
+    # plan v4 신 schema (content_raw 만) → 옛 호환 컬럼 alias + runtime stripTagsExpr.
+    if "section_content" not in long.columns:
+        if "content_raw" not in long.columns or "topic" not in long.columns:
+            return False
+        from dartlab.providers.dart.docs.sections.sectionsStorage import stripTagsExpr
+
+        long = long.with_columns(
+            pl.col("topic").alias("section_title"),
+            (pl.col("blockOrder") if "blockOrder" in long.columns else pl.lit(0)).alias("section_order"),
+            stripTagsExpr("content_raw").alias("section_content"),
+        )
     try:
         year = pl.col("period").str.slice(0, 4)
         suffix = pl.col("period").str.slice(4)
