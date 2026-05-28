@@ -61,10 +61,12 @@ forbidden:
   - rceptNo 또는 section paragraph 의 sourceRef 없이 임원 보수 수치 인용 금지
   - 상위 보수 list 전체 dump (답변 본문 상위 5~10 명만)
 examples:
-  - 삼성전자 임원 보수 - c.executivePay()
-  - 5억 이상 임원 명단 - c.executivePay().topPay
-  - 퇴직 임원 보수 - c.executivePay().payByType filter 구분 퇴직
-  - NAVER 미등기 임원 보수 분포 - c.executivePay() + topPay 의 미등기 필터
+  - 삼성전자 임원 보수 - Company.executivePay
+  - 5억 이상 임원 명단 - Company.executivePay + topPay 인용
+  - 퇴직 임원 보수 - Company.executivePay + payByType filter 구분 퇴직
+  - NAVER 미등기 임원 보수 분포 - Company.executivePay + topPay 의 미등기 필터
+  - 카카오 스톡옵션 행사이익 - Company.executivePay + payByType 주식매수선택권 행사이익
+  - 현대차 대표이사 산정기준 narrative - Company.executivePay + topPay 산정기준
 procedure:
   - 종목코드 - Company 객체 생성
   - c.executivePay() 호출

@@ -63,10 +63,12 @@ forbidden:
   - tableRef 또는 sourceRef 없이 수급 수치 인용 금지
   - 일별 raw 데이터 전체 dump 금지 (답변 본문 상위 5~30 일 + 누적만)
 examples:
-  - 삼성전자 외국인 매수세 - c.flow()
-  - 005930 기관 vs 외국인 추세 - c.flow()
-  - 외국인 순매수 누적 - c.flow() + cumsum
-  - 최근 30 일 외국인 net-buy - c.flow() + date filter
+  - 삼성전자 외국인 매수세 - Company.flow
+  - 005930 기관 vs 외국인 추세 - Company.flow + 두 컬럼 비교
+  - 외국인 순매수 누적 - Company.flow + foreignNet cumsum
+  - 최근 30 일 외국인 net-buy - Company.flow + date head 30
+  - 외국인 매수 + 기관 매도 분리 신호 - Company.flow + foreignNet vs institutionNet 부호
+  - SK하이닉스 일별 수급 - Company.flow + 일별 raw
 procedure:
   - 종목코드 - Company 객체 생성 (KR 한정)
   - c.flow() 호출 - Naver flow API 자동

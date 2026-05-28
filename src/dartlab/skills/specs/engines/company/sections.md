@@ -70,6 +70,8 @@ examples:
   - LG화학 배터리 사업 지역별 매출 비중 - Company.sections + topic filter
   - 현대차 ICE vs EV 전환 narrative drift Q1 Q4 2024 - Company.sections + period pair diff
   - POSCO 철광석 원재료 가격 변동 - Company.sections + section 원재료 및 생산설비
+  - 005930 wide pivot period x topic - Company.sectionsAs(wide)
+  - SK하이닉스 시장점유율 narrative 분기별 - Company.sections + topic filter 시장점유율
 procedure:
   - 종목코드 → Company 객체 생성
   - sectionsStorage 사용 여부 확인 (`hasSectionsArtifact`) — 박혀있으면 빠른 load

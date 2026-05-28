@@ -63,10 +63,12 @@ forbidden:
   - DART rceptNo 또는 section ref 없이 지배구조 분석 결론을 내지 않는다
   - 15 핵심지표의 yes/no 만으로 결론짓지 않고 미준수 narrative 까지 확인한다
 examples:
-  - 삼성전자 사외이사 비율 5 년 추세
-  - POSCO 15 핵심지표 yes/no + 미준수 사유
-  - 카카오 CEO Chair 분리 여부
-  - 셀트리온 최대주주 변경 이력
+  - 삼성전자 사외이사 비율 5 년 추세 - Company.governance + period loop
+  - POSCO 15 핵심지표 yes/no + 미준수 사유 - Company.governance + disclosure key
+  - 카카오 CEO Chair 분리 여부 - Company.governance + board.ceoChairSeparated
+  - 셀트리온 최대주주 변경 이력 - Company.governance + majorHolder
+  - LG화학 감사위원회 독립성 - Company.governance + auditCommittee.independenceScore
+  - NAVER 누적투표제 도입 - Company.governance + disclosure.indicator15
 procedure:
   - 종목코드 → Company 객체 생성
   - Company.governance() 호출 (선택 period)

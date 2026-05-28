@@ -64,10 +64,12 @@ forbidden:
   - DART rceptNo 또는 KAM section paragraph 의 sourceRef 없이 감사 의견을 인용하지 않는다
   - 감사보고서 narrative 는 wrapExternalInResult 의 untrusted marker 강제
 examples:
-  - 005930 최신 감사보고서 의견
-  - 셀트리온 계속기업 가정 의문 flag 5 년 추세
-  - 카카오 핵심감사사항 (KAM) 카테고리 분포
-  - POSCO 외부감사인 변경 이력
+  - 005930 최신 감사보고서 의견 - Company.audit + opinion key
+  - 셀트리온 계속기업 가정 의문 flag 5 년 추세 - Company.audit + goingConcernFlag + period loop
+  - 카카오 핵심감사사항 (KAM) 카테고리 분포 - Company.audit + keyAuditMatters
+  - POSCO 외부감사인 변경 이력 - Company.audit + auditorChange + Company.disclosure 감사인변경
+  - LG에너지솔루션 KAM 본문 5 년 - Company.audit + keyAuditMatters per period
+  - 한진 한정 의견 종목 스크리닝 - Company.audit + opinion filter
 procedure:
   - 종목코드 → Company 객체 생성
   - Company.audit() 호출 (선택 period = 회계연도)

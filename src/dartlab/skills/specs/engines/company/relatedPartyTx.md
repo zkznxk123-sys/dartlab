@@ -65,10 +65,12 @@ forbidden:
   - threshold 10억 원 답변 금지 (2024-01-01 부터 100억 원 — 10배 차이)
   - chaebol 전체 흐름 무시 후 단일 회사 RPT 결론
 examples:
-  - 삼성전자 관계자 거래 - c.relatedPartyTx()
-  - 삼성그룹 RPT 흐름 - 모든 계열사 c.relatedPartyTx() + affiliateGroup join
-  - 100억 이상 지급보증 - c.relatedPartyTx().guarantees
-  - 매출 거래 inter-affiliate - c.relatedPartyTx().revenue
+  - 삼성전자 관계자 거래 - Company.relatedPartyTx
+  - 삼성그룹 RPT 흐름 - Company.relatedPartyTx per 계열사 + affiliateGroup join
+  - 100억 이상 지급보증 - Company.relatedPartyTx + guarantees
+  - 매출 거래 inter-affiliate - Company.relatedPartyTx + revenue
+  - SK이노베이션 자산 양수도 RPT - Company.relatedPartyTx + 자산 양수도 분류
+  - 현대차그룹 chaebol RPT graph - Company.relatedPartyTx + affiliate.affiliateGroup graph 구축
 procedure:
   - 종목코드 - Company 객체 생성
   - c.relatedPartyTx() 호출
