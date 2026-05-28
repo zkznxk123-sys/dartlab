@@ -82,6 +82,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 마스터 플랜 트랙 1 PR-4 — DCF parameter grid (WACC × growth) 민감도 매트릭스.
     # multiStageDcf 반복 호출 grid loop wrap.
     "SensitivityAnalysis",
+    # 마스터 플랜 트랙 1 PR-3 — 단일 종목 한 화면 dashboard (3 template).
+    # compareCompanies + CompileVisual + RunPython 다단 우회 회귀 차단.
+    "CompileFinancialDashboard",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",

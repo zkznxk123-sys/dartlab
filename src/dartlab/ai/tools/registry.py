@@ -9,6 +9,7 @@ import inspect
 from typing import Any, Callable
 
 from .compareCompanies import compareCompanies
+from .compileFinancialDashboard import compileFinancialDashboard
 from .compileVisual import compileVisual
 from .createUserSkill import createUserSkill
 from .creditScorecard import creditScorecard
@@ -373,6 +374,27 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "CompileFinancialDashboard": ToolSpec(
+        "CompileFinancialDashboard",
+        "단일 종목 한 화면 dashboard — growth/value/credit 3 template 자동 spec 생성. Company.show + _companyMetrics 재사용 + visualRef spec 박음. '대시보드', '한 화면 요약', '성장성 차트' 류 질문에 본 도구 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "template": {
+                    "type": "string",
+                    "enum": ["growth", "value", "credit"],
+                    "description": "기본 'growth'. growth=매출/영업이익/순이익, value=ROE/equity, credit=부채/안정성.",
+                },
+                "periods": {"type": "integer", "description": "시계열 기간 (정보성). 기본 8."},
+            },
+            "required": ["stockCode"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "CreditScorecard": ToolSpec(
         "CreditScorecard",
         "단일 종목 dCR 신용등급 + 1Y PD + 7 축 분석 (채무상환/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/공시리스크). includeFactors=True 시 Altman Z + Beneish M 동행. '신용등급', '회사채 등급', '재무 안정성' 류 질문에 본 도구 1 회 호출.",
@@ -694,6 +716,7 @@ _TOOLS: dict[str, ToolFn] = {
     "PickStoryTemplate": pickStoryTemplate,
     "CompareCompanies": compareCompanies,
     "PeerCompareN": peerCompareN,
+    "CompileFinancialDashboard": compileFinancialDashboard,
     "CreditScorecard": creditScorecard,
     "SensitivityAnalysis": sensitivityAnalysis,
     "DCFValuation": dcfValuationTool,
@@ -735,6 +758,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "CompileVisual",
     "PeerCompareN",
     "DCFValuation",
+    "CompileFinancialDashboard",
     "SensitivityAnalysis",
     "CreditScorecard",
     "ScenarioCompareN",
@@ -757,6 +781,7 @@ _LEGACY_NAME_MAP = {
     "dcf_valuation": "DCFValuation",
     "credit_scorecard": "CreditScorecard",
     "sensitivity_analysis": "SensitivityAnalysis",
+    "compile_financial_dashboard": "CompileFinancialDashboard",
     "scenario_compare_n": "ScenarioCompareN",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
