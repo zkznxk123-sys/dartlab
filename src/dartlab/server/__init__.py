@@ -31,6 +31,7 @@ from .api import (
     data_router,
     dl_router,
     macro_router,
+    price_events_router,
     room_router,
     viz_router,
 )
@@ -230,6 +231,7 @@ app.include_router(company_router)
 app.include_router(data_router)
 app.include_router(dl_router)
 app.include_router(macro_router)
+app.include_router(price_events_router)
 app.include_router(room_router)
 app.include_router(dart_router)
 app.include_router(embed_router)
