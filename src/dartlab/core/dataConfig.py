@@ -148,6 +148,16 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "nested": True,
     },
+    "newsEnriched": {
+        # Phase B — sentiment + topic enrichment 결과.
+        # `data/news/enriched/{market}/{YYYY}-{MM}-{DD}.parquet` raw 와 동일 sharding.
+        # raw 컬럼 + (sentiment_score, sentiment_label, model_version, topic_id, topic_label, topic_prob).
+        # enrichNewsHeadlines.py cron, narrativePulse.buildNarrativePulse 가 입력.
+        "dir": "news/enriched",
+        "label": "news headlines enriched (sentiment + topic, Phase B 산출)",
+        "public": True,
+        "nested": True,
+    },
 }
 
 
