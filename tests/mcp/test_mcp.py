@@ -82,14 +82,15 @@ def test_mcp_unknown_tool_message():
 
 
 def test_mcp_advertised_tools_carry_annotations():
-    """0.11 — 모든 도구가 readOnly/destructive/idempotent/openWorld hint 를 노출.
+    """0.11 — 모든 advertise 도구가 readOnly/destructive/idempotent/openWorld hint 를 노출.
 
-    0.12 부터 분석 추론 도구 3 종 (OutcomeLog / LookAheadGuard / GroundingCheck) 도 추가.
+    마스터 플랜 v2 트랙 7 PR-M1 — advertise SSOT 가 CANONICAL_V2 추종으로 전환되며 옛 workbench-
+    internal 3 종 (LookAheadGuard / GroundingCheck / RequestUserInput) 은 advertise 에서 제외.
     """
     from dartlab.mcp import _advertisedTools
 
     tools = {t["name"]: t for t in _advertisedTools()}
-    # canonical 9 + ask 모두 annotations 키 보유
+    # CANONICAL_V2 (21 종) + ask = 22 종 모두 annotations 키 보유 — 핵심 도구 sample 검증
     for name in (
         "ask",
         "ReadSkill",
@@ -99,9 +100,9 @@ def test_mcp_advertised_tools_carry_annotations():
         "SaveArtifact",
         "CompileVisual",
         "OutcomeLog",
-        "LookAheadGuard",
-        "GroundingCheck",
-        "RequestUserInput",
+        "DCFValuation",
+        "PeerCompareN",
+        "CreditScorecard",
     ):
         ann = tools[name]["annotations"]
         for key in ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"):
@@ -114,8 +115,6 @@ def test_mcp_advertised_tools_carry_annotations():
     assert tools["RunPython"]["annotations"]["idempotentHint"] is False
     # 분석 추론 surfacing — 분류 검증
     assert tools["OutcomeLog"]["annotations"]["readOnlyHint"] is False  # write tool
-    assert tools["LookAheadGuard"]["annotations"]["readOnlyHint"] is True  # read tool
-    assert tools["GroundingCheck"]["annotations"]["idempotentHint"] is True
 
 
 def test_recipe_skills_all_exposed_as_prompts():

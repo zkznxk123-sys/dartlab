@@ -82,6 +82,26 @@ RunPython 안에서 직접 호출하는 패턴으로 통합되었다. DARTLAB_MC
 """
 
 
+def mcpAdvertisedToolNames() -> tuple[str, ...]:
+    """MCP tools/list 에 advertise 할 도구 이름 SSOT — registry 변경 자동 추종.
+
+    마스터 플랜 v2 트랙 7 PR-M1 — 옛 ``MCP_WORKSPACE_AGENT_TOOL_NAMES`` 정적 14 종 (LookAheadGuard /
+    SearchSemantic / ParseChart stub 포함) 은 ``CANONICAL_V2`` (21 종 정제 production-grade) 와
+    deviation 발생. 본 함수가 ``"ask" + CANONICAL_V2`` 를 SSOT 로 노출 → 신규 도구 추가 시
+    advertise 도 자동 sync.
+
+    Returns:
+        tuple[str, ...]: ``("ask",) + CANONICAL_V2`` 합 (= 22 종). 옛 함수 의존 호출자는
+        ``MCP_WORKSPACE_AGENT_TOOL_NAMES`` 유지 (deprecate 트래커 부착).
+
+    Example:
+        ``names = mcpAdvertisedToolNames()``  # → ("ask", "ReadSkill", ..., "SearchPastSessions")
+    """
+    from dartlab.ai.tools.registry import CANONICAL_V2
+
+    return ("ask", *CANONICAL_V2)
+
+
 def askWorkbenchToolSpecs() -> list[dict[str, Any]]:
     """Ask Workbench registry 에서 MCP 노출 도구 spec 을 만든다.
 
@@ -110,7 +130,9 @@ def askWorkbenchToolSpecs() -> list[dict[str, Any]]:
         "idempotentHint": False,
         "openWorldHint": False,
     }
-    return [specs[name] for name in MCP_WORKSPACE_AGENT_TOOL_NAMES]
+    # PR-M1 — mcpAdvertisedToolNames SSOT 추종. registry 에 누락된 이름은 silently skip.
+    advertised = mcpAdvertisedToolNames()
+    return [specs[name] for name in advertised if name in specs]
 
 
 def executeAskWorkbenchTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
