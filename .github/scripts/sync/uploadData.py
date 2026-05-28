@@ -33,8 +33,19 @@ def _dataDir(category: str) -> Path:
     return base / DATA_RELEASES[category]["dir"]
 
 
-def _changedFiles(localDir: Path) -> list[Path] | None:
-    """changed.txt에서 변경 파일 목록 로드. 없으면 None (전체 fallback)."""
+def _changedFiles(localDir: Path, category: str | None = None) -> list[Path] | None:
+    """changed.txt에서 변경 파일 목록 로드. 없으면 None (전체 fallback).
+
+    sections category (nested period-sharded) 는 ``dist/changed_sections.txt`` 우선 —
+    양식 ``{code}/{period}.parquet``. 일반 카테고리는 기존 ``dist/changed.txt``.
+    """
+    if category == "sections":
+        sectionsChangedFile = Path("dist/changed_sections.txt")
+        if sectionsChangedFile.exists():
+            names = [n.strip() for n in sectionsChangedFile.read_text(encoding="utf-8").splitlines() if n.strip()]
+            if not names:
+                return []
+            return [localDir / name for name in names if (localDir / name).exists()]
     if not CHANGED_FILE.exists():
         return None
     names = [n.strip() for n in CHANGED_FILE.read_text(encoding="utf-8").splitlines() if n.strip()]
@@ -65,7 +76,8 @@ def _uploadHf(category: str) -> None:
     dirPath = DATA_RELEASES[category]["dir"]
     localDir = _dataDir(category)
 
-    changed = _changedFiles(localDir)
+    changed = _changedFiles(localDir, category=category)
+    isNested = bool(DATA_RELEASES[category].get("nested"))
 
     # changed.txt가 있고 변경 없음 → 스킵
     if changed is not None and len(changed) == 0:
@@ -82,7 +94,11 @@ def _uploadHf(category: str) -> None:
             batch = changed[i : i + batchSize]
             operations = [
                 CommitOperationAdd(
-                    path_in_repo=f"{dirPath}/{f.name}",
+                    # nested category (sections): localDir 기준 상대경로 보존 (예 "005930/2025.parquet").
+                    # 일반 category: 파일명만 (top-level).
+                    path_in_repo=f"{dirPath}/{f.relative_to(localDir).as_posix()}"
+                    if isNested
+                    else f"{dirPath}/{f.name}",
                     path_or_fileobj=str(f),
                 )
                 for f in batch
@@ -102,8 +118,11 @@ def _uploadHf(category: str) -> None:
         print("[uploadData] HuggingFace 증분 업로드 완료")
         return
 
-    # fallback: 전체 폴더 업로드 (parquet + .arrow IPC mirror)
-    files = list(localDir.glob("*.parquet")) + list(localDir.glob("*.arrow"))
+    # fallback: 전체 폴더 업로드. nested category 는 rglob (디렉터리 안 nested 파일 포함).
+    if isNested:
+        files = list(localDir.rglob("*.parquet")) + list(localDir.rglob("*.arrow"))
+    else:
+        files = list(localDir.glob("*.parquet")) + list(localDir.glob("*.arrow"))
     if not files:
         print(f"[uploadData] {localDir}에 업로드할 파일 없음")
         return

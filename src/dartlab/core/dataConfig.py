@@ -20,6 +20,17 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "ipcMirror": True,
     },
+    "sections": {
+        # plan snazzy-wibbling-origami — sections SSOT 통합 artifact.
+        # nested: data/dart/sections/{code}/{period}.parquet (period-sharded).
+        # sectionsBuilder.buildSectionsArtifact 가 1 회 영속화 + HF push.
+        # 런타임은 sectionsStorage.loadSectionsWide → mmap parquet → 콜드 1s 목표.
+        # nested=True 는 uploadData.py 가 rglob 으로 종목 디렉터리 안 파일 모두 업로드.
+        "dir": "dart/sections",
+        "label": "DART 공시 sections SSOT artifact (period-sharded)",
+        "public": True,
+        "nested": True,
+    },
     "finance": {
         "dir": "dart/finance",
         "label": "재무 숫자 데이터",
