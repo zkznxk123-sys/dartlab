@@ -148,6 +148,74 @@ class AnthropicProvider(BaseProvider):
                         },
                     )
 
+    def generateStream(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> Iterator[Any]:
+        """ProviderConfig 진영의 streamProvider 호환 진입점 — Iterator[StreamChunk] 반환.
+
+        마스터 플랜 v2 트랙 6 PR-L3 — agent.py 의 ``streamProvider(provider, messages, tools)``
+        가 ``hasattr(provider, "generateStream")`` 으로 본 메서드를 우선 호출. text 델타는
+        즉시 ``StreamChunk(text=...)``, 종료 시 ``StreamChunk(final=True, turn=ProviderTurn(...))``.
+
+        ``complete()`` 가 이미 ``client.messages.stream`` 으로 진짜 SSE streaming 하니까
+        그 LLMEvent 출력을 StreamChunk 로 어댑팅. tool spec 양식만 OpenAI → Anthropic 변환.
+        """
+        from dartlab.ai.providers import ProviderTurn, StreamChunk, ToolCall
+
+        accumulated = ""
+        tool_calls: list[ToolCall] = []
+        norm_messages = list(messages)
+        tool_specs = _openaiToolsToAnthropic(tools)
+
+        for ev in self.complete(norm_messages, tool_specs, stream=True):
+            if ev.kind == "text":
+                delta = str(ev.data.get("delta", ""))
+                if delta:
+                    accumulated += delta
+                    yield StreamChunk(text=delta)
+            elif ev.kind == "tool_use":
+                tool_calls.append(
+                    ToolCall(
+                        id=str(ev.data.get("id", "")),
+                        name=str(ev.data.get("name", "")),
+                        args=dict(ev.data.get("input") or {}),
+                    )
+                )
+            elif ev.kind == "stop":
+                raw = {"usage": dict(ev.data.get("usage") or {}), "reason": ev.data.get("reason", "")}
+                yield StreamChunk(
+                    final=True,
+                    turn=ProviderTurn(content=accumulated, toolCalls=tool_calls, raw=raw),
+                )
+
+
+def _openaiToolsToAnthropic(tools: list[dict[str, Any]]) -> list[Any]:
+    """OpenAI function-calling 양식 tool dict → Anthropic native ToolSpec-호환 객체.
+
+    agent.py 의 ``_selectTools`` 는 OpenAI 양식 (``{type:"function", function:{name,description,parameters}}``)
+    으로 emit. complete() 는 ToolSpec 객체 받음 → 본 helper 가 변환.
+    """
+    out: list[Any] = []
+    for tool in tools or []:
+        fn = tool.get("function") if isinstance(tool, dict) else None
+        if not isinstance(fn, dict):
+            continue
+
+        class _Spec:
+            __slots__ = ("name", "description", "inputSchema")
+
+            def __init__(self, name: str, description: str, inputSchema: dict[str, Any]) -> None:
+                self.name = name
+                self.description = description
+                self.inputSchema = inputSchema
+
+        out.append(
+            _Spec(
+                name=str(fn.get("name", "")),
+                description=str(fn.get("description", "")),
+                inputSchema=dict(fn.get("parameters") or {"type": "object", "properties": {}}),
+            )
+        )
+    return out
+
 
 def _splitSystem(messages: list[Msg]) -> tuple[str, list[dict[str, Any]]]:
     system_parts: list[str] = []

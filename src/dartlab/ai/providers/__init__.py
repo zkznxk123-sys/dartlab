@@ -549,6 +549,114 @@ def availableProviders() -> list[str]:
 
 from .base import BaseProvider, LLMEvent, LLMProvider, Msg, RateLimitError
 
+# 마스터 플랜 v2 트랙 6 PR-L3 — provider 별 role-based 모델 routing.
+# 질문 복잡도 (길이 + 키워드) 기반으로 cheap/standard/deep tier 결정. DARTLAB_AI_TIER 환경변수
+# 강제 override. 호출자는 세션 시작 시 한 번 호출 → ProviderConfig.model 설정 후 createProvider.
+# turn 중간 모델 교체는 회귀 위험 (cache prefix 깨짐) — *세션 시작 1 회* 만.
+_TIER_MODELS: dict[str, dict[str, str]] = {
+    "anthropic": {
+        "cheap": "claude-haiku-4-5",
+        "standard": "claude-sonnet-4-5-20250929",
+        "deep": "claude-opus-4-7",
+    },
+    "openai": {
+        "cheap": "gpt-4o-mini",
+        "standard": "gpt-4o",
+        "deep": "gpt-5",
+    },
+    "gemini": {
+        "cheap": "gemini-2.5-flash",
+        "standard": "gemini-2.5-pro",
+        "deep": "gemini-2.5-pro",
+    },
+}
+
+# deep tier 키워드 (정확/정밀 분석 + multi-step 계산 + 추론).
+_DEEP_KEYWORDS: frozenset[str] = frozenset(
+    {
+        "DCF",
+        "scenario",
+        "시나리오",
+        "민감도",
+        "sensitivity",
+        "신용등급",
+        "credit",
+        "추론",
+        "왜",
+        "정확",
+        "정밀",
+        "복합",
+        "다단",
+        "regression",
+        "회귀",
+        "스트레스",
+        "stress",
+    }
+)
+
+# cheap tier 키워드 (단순 lookup / 정의 / 단일 숫자 조회).
+_CHEAP_KEYWORDS: frozenset[str] = frozenset(
+    {
+        "ROE",
+        "PER",
+        "EPS",
+        "BPS",
+        "시총",
+        "주가",
+        "정의",
+        "뭐",
+        "무엇",
+        "what is",
+        "안녕",
+        "헬로",
+    }
+)
+
+
+def routeModelByComplexity(
+    question: str,
+    provider: str,
+    *,
+    configuredTier: str | None = None,
+) -> str | None:
+    """질문 + provider → tier (cheap/standard/deep) 결정 → 실 모델명 반환.
+
+    ``configuredTier`` 가 cheap/standard/deep 중 하나면 그 값 사용 (환경변수 강제 override).
+    그 외에는 질문 길이 + 키워드로 자동 결정. provider 가 _TIER_MODELS 에 없으면 None.
+
+    회귀 가드: 세션 시작 시 1 회 호출. turn 마다 다른 모델 emit 시 Anthropic cache prefix
+    깨짐 → cache hit rate 0% 회귀. 호출자가 세션 단일 결정 보장.
+    """
+    table = _TIER_MODELS.get(provider.lower())
+    if not table:
+        return None
+    tier = (configuredTier or "").lower().strip()
+    if tier in {"cheap", "standard", "deep"}:
+        return table[tier]
+    env_tier = os.environ.get("DARTLAB_AI_TIER", "").lower().strip()
+    if env_tier in {"cheap", "standard", "deep"}:
+        return table[env_tier]
+    inferred = _inferTier(question)
+    return table[inferred]
+
+
+def _inferTier(question: str) -> str:
+    """질문 본문 → cheap/standard/deep 추론."""
+    text = (question or "").strip()
+    if not text:
+        return "standard"
+    # 매우 짧고 cheap keyword 매칭 → cheap
+    if len(text) <= 30 and any(k.lower() in text.lower() for k in _CHEAP_KEYWORDS):
+        return "cheap"
+    # deep keyword 매칭 → deep
+    if any(k.lower() in text.lower() for k in _DEEP_KEYWORDS):
+        return "deep"
+    # 매우 김 (200 자+) → deep (multi-part 가능성)
+    if len(text) >= 200:
+        return "deep"
+    return "standard"
+
+
 __all__ = [
     "BaseProvider",
     "LLMEvent",
@@ -563,5 +671,6 @@ __all__ = [
     "availableProviders",
     "createProvider",
     "get_config",
+    "routeModelByComplexity",
     "stream_provider",
 ]
