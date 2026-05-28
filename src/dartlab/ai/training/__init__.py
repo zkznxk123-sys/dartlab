@@ -9,12 +9,26 @@
 
 from __future__ import annotations
 
-__all__ = ["traceToSftSample", "loadTraceDir", "writeJsonl", "buildSftDataset"]
+__all__ = [
+    "traceToSftSample",
+    "loadTraceDir",
+    "writeJsonl",
+    "buildSftDataset",
+    "extractDpoPairs",
+    "buildDpoDataset",
+]
+
+_TRACE_NAMES = {"traceToSftSample", "loadTraceDir", "writeJsonl", "buildSftDataset"}
+_DPO_NAMES = {"extractDpoPairs", "buildDpoDataset"}
 
 
 def __getattr__(name: str):
-    if name in __all__:
+    if name in _TRACE_NAMES:
         from dartlab.ai.training import traceToDataset as _td
 
         return getattr(_td, name)
+    if name in _DPO_NAMES:
+        from dartlab.ai.training import dpoPairs as _dpo
+
+        return getattr(_dpo, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
