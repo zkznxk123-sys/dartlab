@@ -117,6 +117,44 @@ def _periodSortKey(period: str) -> tuple[int, int]:
     return (year, 4)  # annual (no suffix)
 
 
+def sectionsIndexPath(stockCode: str) -> Path:
+    """종목 docs 메타 _index.parquet path — plan snazzy-wibbling-origami PR-4b.
+
+    sections artifact 본문 (content/plain/table_struct) 의 동행 메타 파일.
+    schema: period / rcept_no / rcept_dt / doc_url / corp_name / atocid.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        ``data/dart/sections/{stockCode}/_index.parquet`` path.
+    """
+    return sectionsDir(stockCode) / "_index.parquet"
+
+
+def loadSectionsIndex(stockCode: str) -> pl.DataFrame | None:
+    """``_index.parquet`` (docs 메타 caryy) read — 빠른 메타 lookup.
+
+    plan snazzy-wibbling-origami PR-4b. docs.parquet 완전 폐기 path. callers (filingsCatalog
+    의 dartUrl 생성 / search 의 rcept_no 필터) 가 본문 + 메타 join 으로 docs.parquet
+    없이 동작. 본 함수는 메타 only — 본문은 ``loadSectionsLong/Wide`` 별도 호출.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        DataFrame — period / rcept_no / rcept_dt / doc_url / corp_name / atocid. 부재 시 None.
+    """
+    p = sectionsIndexPath(stockCode)
+    if not p.exists():
+        return None
+    try:
+        return pl.read_parquet(p)
+    except (OSError, pl.exceptions.ComputeError) as exc:
+        _log.warning("sectionsIndex load 실패 (%s): %s", stockCode, exc)
+        return None
+
+
 def hasSectionsArtifact(stockCode: str) -> bool:
     """artifact 가 1 개 이상 period 존재하면 True.
 

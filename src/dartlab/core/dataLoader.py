@@ -448,6 +448,7 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
         from dartlab.providers.dart.docs.sections.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
+            loadSectionsIndex,
             loadSectionsLong,
         )
     except ImportError:
@@ -471,15 +472,22 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
             pl.col(plainCol).alias("section_content"),
             pl.col("topic").alias("section_title"),
         )
+        # _index.parquet 의 메타 (rcept_no/rcept_dt/doc_url/corp_name/atocid) join — period
+        # 기준. 옛 종목 (index 부재) 은 메타 컬럼 부재 → 호출자 메타 의존 path 만 실패.
+        index = loadSectionsIndex(stockCode)
+        if index is not None and not index.is_empty():
+            indexCols = [c for c in index.columns if c != "period"]
+            synthesized = synthesized.join(index.select(["period"] + indexCols), on="period", how="left")
         dest.parent.mkdir(parents=True, exist_ok=True)
         synthesized.write_parquet(dest, compression="snappy")
         from dartlab.core.logger import getLogger
 
         _log = getLogger(__name__)
         _log.info(
-            "docs.parquet 합성 (%s, sections artifact → %d rows): %s",
+            "docs.parquet 합성 (%s, sections artifact → %d rows, index=%s): %s",
             stockCode,
             synthesized.height,
+            index is not None,
             dest.name,
         )
         return True

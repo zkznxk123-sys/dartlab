@@ -198,6 +198,76 @@ def saveSectionsByPeriod(
     return result
 
 
+def _buildSectionsIndex(stockCode: str, compression: str = "snappy") -> bool:
+    """docs.parquet 의 종목-period 메타 (rcept_no/rcept_dt/doc_url/corp_name/atocid) →
+    ``data/dart/sections/{code}/_index.parquet`` save.
+
+    plan snazzy-wibbling-origami PR-4b — docs.parquet 완전 폐기 path. sections artifact
+    가 컬럼 schema 의 본문 (content/plain/table_struct) 만 보유 → 메타는 별도 작은
+    파일 (~수 KB). callers (filingsCatalog 의 dartUrl 생성 / search 의 rcept_no 필터)
+    가 _index.parquet 만 join 하면 docs.parquet 없이 동작.
+
+    Args:
+        stockCode: 종목코드.
+        compression: parquet compression.
+
+    Returns:
+        bool — 메타 추출 + save 성공 시 True. docs.parquet 부재 또는 메타 컬럼 부재
+        시 False (옛 호환).
+    """
+    import os as _os
+
+    from dartlab.providers.dart.docs.sections.sectionsStorage import sectionsDir
+
+    # 빌더 모드 표시 — dataLoader 가 합성 path 우회 → docs.parquet 직접 read.
+    _os.environ["DARTLAB_BUILDER_MODE"] = "1"
+    try:
+        from dartlab.core.dataLoader import loadData
+
+        # docs.parquet schema: year + report_type + rcept_no + rcept_date + section_url +
+        # corp_name + atocid + assocnote. sections artifact 의 period 양식 (YYYY/YYYYQn)
+        # 과 호환 위해 report_type 를 그대로 사용 (옛 schema 호환 — report_type 값이
+        # "" 또는 "Q1" 등 양식).
+        meta_cols = ["year", "report_type", "rcept_no", "rcept_date", "section_url", "corp_name", "atocid", "assocnote"]
+        df = loadData(stockCode, category="docs", columns=meta_cols)
+        if df is None or df.is_empty():
+            return False
+        availableCols = [c for c in meta_cols if c in df.columns]
+        if "year" not in availableCols or "rcept_no" not in availableCols:
+            return False
+        # period 매핑 — sectionsBuilder periodIter 의 양식 (annual="YYYY", Q1/Q2/Q3="YYYYQn")
+        # 과 일치. report_type 텍스트 패턴 (사업보고서 / 반기보고서 / 분기보고서 + 월) 으로
+        # suffix 결정. selectReport SSOT (_REPORT_KIND_MAP) 와 동일 룰.
+        if "report_type" in availableCols:
+            rt = pl.col("report_type").cast(pl.Utf8).fill_null("")
+            # sections artifact 의 periodKey 가 annual 도 Q4 alias 양식 ("YYYYQ4") 으로 emit
+            # — periodIter SSOT 양식 일치. index 도 같은 양식으로 통일.
+            suffix = (
+                pl.when(rt.str.contains("사업보고서"))
+                .then(pl.lit("Q4"))
+                .when(rt.str.contains("반기보고서"))
+                .then(pl.lit("Q2"))
+                .when(rt.str.contains(r"분기보고서.*\d{4}\.03"))
+                .then(pl.lit("Q1"))
+                .when(rt.str.contains(r"분기보고서.*\d{4}\.09"))
+                .then(pl.lit("Q3"))
+                .otherwise(pl.lit("Q4"))
+            )
+            df = df.with_columns(pl.concat_str([pl.col("year").cast(pl.Utf8), suffix]).alias("period"))
+        else:
+            df = df.with_columns(pl.col("year").cast(pl.Utf8).alias("period"))
+        keepCols = ["period"] + [c for c in availableCols if c not in ("year", "report_type")]
+        index = df.select(keepCols).unique(subset=["period", "rcept_no"], keep="first")
+        outDir = sectionsDir(stockCode)
+        outDir.mkdir(parents=True, exist_ok=True)
+        index.write_parquet(outDir / "_index.parquet", compression=compression)
+        return True
+    except (FileNotFoundError, ValueError, RuntimeError, pl.exceptions.ComputeError):
+        return False
+    finally:
+        _os.environ.pop("DARTLAB_BUILDER_MODE", None)
+
+
 def buildSectionsArtifact(
     stockCode: str,
     *,
@@ -250,7 +320,11 @@ def buildSectionsArtifact(
     if sectionsWide is None:
         _log.warning("sections build 결과 None (%s) — docs.parquet 부재?", stockCode)
         return {}
-    return saveSectionsByPeriod(stockCode, sectionsWide, compression=compression)
+    result = saveSectionsByPeriod(stockCode, sectionsWide, compression=compression)
+    # plan snazzy-wibbling-origami PR-4b — _index.parquet 동행 빌드 (docs 메타 carry).
+    # 실패 silent — index 부재 시 callers 가 _index 없는 path fallback.
+    _buildSectionsIndex(stockCode, compression=compression)
+    return result
 
 
 def clearSectionsArtifact(stockCode: str) -> int:
