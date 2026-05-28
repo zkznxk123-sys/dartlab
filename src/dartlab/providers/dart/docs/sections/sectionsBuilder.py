@@ -1,0 +1,198 @@
+"""sections artifact 빌더 — wide DataFrame → period-shard long parquet 영속화.
+
+본 모듈은 ``operation.sectionsRefactor`` 의 *SSOT 통합* 의 writer 진입점이다. 빌드는
+sync stage 의 1 회 비용이고, 사용자 측은 ``sectionsStorage.py`` 의 read API 만 호출.
+
+MVP 단계 (PR-1a):
+    - 기존 ``Company(code).sections`` 호출 → wide DataFrame
+    - period 컬럼을 long format 으로 melt
+    - period 별로 split + ``data/dart/sections/{code}/{period}.parquet`` save
+    - schema: topic / blockType / blockOrder / segmentKey / period / content
+
+다음 단계:
+    - content 컬럼을 content_raw / content_plain / content_table_struct 3 분리
+    - segmentKey 의 sourceChunkIds 메타 추가 (raw XML lookup join 용)
+    - rcept_no / rcept_date / doc_url 등 doc meta 컬럼 denormalize
+
+본 모듈은 sync stage 에서만 호출. 런타임 호출 0 (sectionsStorage 가 read 전담).
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+import polars as pl
+
+from dartlab.providers.dart.docs.sections.sectionsStorage import (
+    _periodSortKey,
+    sectionsDir,
+    sectionsPath,
+)
+
+_log = logging.getLogger(__name__)
+
+
+def _isPeriodColumn(name: str) -> bool:
+    """``"2025"`` / ``"2025Q1..Q4"`` 양식 매처. sections() 는 annual 을 ``"YYYYQ4"`` 로 emit."""
+    if not name or len(name) < 4 or not name[:4].isdigit():
+        return False
+    if len(name) == 4:
+        return True
+    return name[4:] in ("Q1", "Q2", "Q3", "Q4")
+
+
+def wideToLong(sectionsWide: pl.DataFrame) -> pl.DataFrame:
+    """sections wide DataFrame → long format (period 컬럼 → row).
+
+    Args:
+        sectionsWide: 기존 ``Company.sections`` 출력. row meta + period 컬럼 N 개.
+
+    Returns:
+        long format DataFrame — meta cols + ``period`` + ``content``.
+        null content row 는 제거.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> long = wideToLong(c.sections)  # doctest: +SKIP
+        >>> set(long.columns) >= {"period", "content"}
+        True
+    """
+    periodCols = [c for c in sectionsWide.columns if _isPeriodColumn(c)]
+    if not periodCols:
+        return sectionsWide.head(0)
+    metaCols = [c for c in sectionsWide.columns if c not in periodCols]
+    long = sectionsWide.unpivot(
+        index=metaCols,
+        on=periodCols,
+        variable_name="period",
+        value_name="content",
+    )
+    # sections cell value 가 polars Categorical dtype 인 경우 (메모리 최적화 결과) 가 있다 —
+    # str.len_chars() 호출 위해 String cast 강제. 이미 String 이면 no-op.
+    long = long.with_columns(pl.col("content").cast(pl.Utf8))
+    # null 또는 빈 content row drop — sparse cell 제거. period-shard 저장 효율 ↑.
+    return long.filter(pl.col("content").is_not_null() & (pl.col("content").str.len_chars() > 0))
+
+
+def saveSectionsByPeriod(
+    stockCode: str,
+    sectionsWide: pl.DataFrame,
+    *,
+    compression: str = "snappy",
+) -> dict[str, int]:
+    """wide DataFrame 을 period 별 parquet 으로 분할 저장.
+
+    Args:
+        stockCode: 종목코드.
+        sectionsWide: ``Company.sections`` 출력 wide DataFrame.
+        compression: parquet compression. default snappy (read 속도 우선).
+
+    Returns:
+        ``{period: rowCount}`` dict — 저장된 period 별 row 수.
+
+    Raises:
+        없음 — write 실패 시 warning + 부분 저장 결과 반환.
+
+    Example:
+        >>> result = saveSectionsByPeriod("005930", c.sections)  # doctest: +SKIP
+        >>> result["2025Q3"]  # doctest: +SKIP
+        2070
+    """
+    if sectionsWide is None or sectionsWide.is_empty():
+        return {}
+    long = wideToLong(sectionsWide)
+    if long.is_empty():
+        return {}
+    outDir = sectionsDir(stockCode)
+    outDir.mkdir(parents=True, exist_ok=True)
+    result: dict[str, int] = {}
+    for periodTuple, periodDf in long.group_by("period", maintain_order=True):
+        period = periodTuple[0] if isinstance(periodTuple, tuple) else periodTuple
+        if not isinstance(period, str):
+            continue
+        # period 컬럼 유지 — load 시 scan_parquet 결과에 period 식별 필수.
+        # parquet dictionary encoding 으로 동일 값 반복은 사이즈 무시 (수 KB).
+        path = sectionsPath(stockCode, period)
+        try:
+            periodDf.write_parquet(path, compression=compression)
+            result[period] = periodDf.height
+        except (OSError, pl.exceptions.ComputeError) as exc:
+            _log.warning("sections period save 실패 (%s/%s): %s", stockCode, period, exc)
+    return result
+
+
+def buildSectionsArtifact(stockCode: str, *, compression: str = "snappy") -> dict[str, int]:
+    """zip → docs.parquet → ``Company.sections`` → period-shard parquet 영속화 (1 회 비용).
+
+    sync stage 의 entry point. 본 함수는 다음을 수행:
+        1. ``Company(stockCode).sections`` 호출 → wide DataFrame (런타임 build, 18s)
+        2. ``saveSectionsByPeriod`` 로 period 별 분할 + parquet 저장
+
+    런타임 (사용자 측) 은 본 함수 호출 0. ``sectionsStorage.loadSectionsWide`` 만 호출
+    → mmap parquet → 콜드 1s 목표 달성.
+
+    Args:
+        stockCode: 종목코드 (6 자리).
+        compression: parquet compression.
+
+    Returns:
+        ``{period: rowCount}`` dict — 저장된 period 별 row 수. 빌드 실패 시 빈 dict.
+
+    Raises:
+        없음 — Company 생성 실패 또는 sections 빌드 실패 시 warning + 빈 dict.
+
+    Example:
+        >>> result = buildSectionsArtifact("005930")  # doctest: +SKIP
+        >>> result["2025"]  # doctest: +SKIP
+        2053
+    """
+    try:
+        from dartlab import Company
+
+        c = Company(stockCode)
+        sectionsWide = c.sections
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        _log.warning("sections build 실패 (%s): %s", stockCode, exc)
+        return {}
+    if sectionsWide is None:
+        _log.warning("sections build 결과 None (%s) — docs.parquet 부재?", stockCode)
+        return {}
+    return saveSectionsByPeriod(stockCode, sectionsWide, compression=compression)
+
+
+def clearSectionsArtifact(stockCode: str) -> int:
+    """artifact 디렉터리의 모든 period parquet 삭제 + 디렉터리 제거.
+
+    rebuild 전 청소 또는 stale artifact 정리 용도. ``_index.parquet`` 도 포함 삭제.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        삭제된 파일 수.
+
+    Raises:
+        없음 — OSError 는 무시 (best effort 삭제).
+
+    Example:
+        >>> clearSectionsArtifact("005930")  # doctest: +SKIP
+        31
+    """
+    d = sectionsDir(stockCode)
+    if not d.exists():
+        return 0
+    count = 0
+    for p in d.glob("*.parquet"):
+        try:
+            p.unlink()
+            count += 1
+        except OSError:
+            pass
+    try:
+        d.rmdir()
+    except OSError:
+        pass
+    return count

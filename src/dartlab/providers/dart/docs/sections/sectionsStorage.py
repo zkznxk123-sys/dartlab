@@ -1,0 +1,221 @@
+"""sections artifact SSOT 영속화 read/write — period-sharded parquet.
+
+본 모듈은 ``operation.sectionsRefactor`` 의 *SSOT 통합* 단계의 read 진입점이다.
+기존 ``data/dart/docs/{code}.parquet`` + 런타임 sections() build (6~18s) 의 콜드 비용을
+zip ingest 시점 1 회 영속화로 옮긴다. 본 모듈은 *읽기 전용 SSOT* — 빌더는 별도
+``sectionsBuilder.py`` 가 담당.
+
+저장 양식 (period-sharded long format):
+    ``data/dart/sections/{code}/{period}.parquet``
+    schema: topic / blockType / blockOrder / segmentKey / content + (향후 다컬럼 확장)
+
+read 의 핵심 효과:
+    - polars mmap parquet → 런타임 XML parse 0
+    - columnar projection — 필요 컬럼만 페이지 fault (분석 path 가 content_raw 페이지 fault 안 함)
+    - period filter — viewer 가 한 period 만 보면 그 파일 page 만 RAM
+    - lazy pivot — long → wide 변환은 호출 시점
+
+본 단계 (MVP) 는 *단일 content 컬럼* + 기존 cell 양식 그대로 (mixed string). 다음
+단계에서 content_raw / content_plain / content_table_struct 3 컬럼 분리.
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+import polars as pl
+
+import dartlab.config as _cfg
+
+_log = logging.getLogger(__name__)
+
+# data/dart/sections/{code}/{period}.parquet — docs.parquet 과 같은 dataDir 아래
+# 별 디렉터리 위계. period-sharded.
+_SECTIONS_REL = "dart/sections"
+
+
+def sectionsDir(stockCode: str) -> Path:
+    """종목별 sections artifact 디렉터리 path.
+
+    Args:
+        stockCode: 종목코드 (6 자리).
+
+    Returns:
+        ``data/dart/sections/{stockCode}/`` Path. 미생성 (caller 가 builder 호출 시 자동 mkdir).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sectionsDir("005930").name
+        '005930'
+    """
+    return Path(_cfg.dataDir) / _SECTIONS_REL / stockCode
+
+
+def sectionsPath(stockCode: str, period: str) -> Path:
+    """단일 period parquet path.
+
+    Args:
+        stockCode: 종목코드.
+        period: ``"2025"`` / ``"2025Q1"`` / ``"2025Q2"`` / ``"2025Q3"`` 양식.
+
+    Returns:
+        period 별 parquet 파일 path.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sectionsPath("005930", "2025Q1").name
+        '2025Q1.parquet'
+    """
+    return sectionsDir(stockCode) / f"{period}.parquet"
+
+
+def listAvailablePeriods(stockCode: str) -> list[str]:
+    """저장된 period 목록 (newer first). 디렉터리 미생성 시 빈 list.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        period 문자열 list. 정렬: 연도 desc, 분기 desc (annual=Q4 후).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> listAvailablePeriods("005930")  # doctest: +SKIP
+        ['2025Q3', '2025', '2025Q1', '2024', ...]
+    """
+    d = sectionsDir(stockCode)
+    if not d.exists():
+        return []
+    periods = [p.stem for p in d.glob("*.parquet") if not p.stem.startswith("_")]
+    return sorted(periods, key=_periodSortKey, reverse=True)
+
+
+def _periodSortKey(period: str) -> tuple[int, int]:
+    """period → (year, quarter rank) sort key. annual=4, Q1=1, Q2=2, Q3=3, Q4=4.
+
+    sections() 가 annual 을 ``"2025Q4"`` 양식으로 emit 하므로 Q4 = annual = rank 4.
+    ``"2025"`` 양식도 동일 rank 4 (호환).
+    """
+    if not period or len(period) < 4 or not period[:4].isdigit():
+        return (-1, -1)
+    year = int(period[:4])
+    if period.endswith("Q1"):
+        return (year, 1)
+    if period.endswith("Q2"):
+        return (year, 2)
+    if period.endswith("Q3"):
+        return (year, 3)
+    if period.endswith("Q4"):
+        return (year, 4)
+    return (year, 4)  # annual (no suffix)
+
+
+def hasSectionsArtifact(stockCode: str) -> bool:
+    """artifact 가 1 개 이상 period 존재하면 True.
+
+    HF 다운로드 검증 / sectionsBuilder 가 빌드 필요 판단에 사용.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        bool — 1 개 이상 period parquet 존재 시 True.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> hasSectionsArtifact("005930")  # doctest: +SKIP
+        True
+    """
+    return bool(listAvailablePeriods(stockCode))
+
+
+def loadSectionsLong(
+    stockCode: str,
+    *,
+    periods: list[str] | None = None,
+    columns: list[str] | None = None,
+) -> pl.DataFrame | None:
+    """sections artifact long format read — period-sharded glob + columnar projection.
+
+    MVP 단계: schema = (topic, blockType, blockOrder, segmentKey, period, content).
+    polars ``scan_parquet([files]).select(columns)`` 로 select 안 한 컬럼은 페이지 fault 0.
+
+    Args:
+        stockCode: 종목코드.
+        periods: 특정 period 만 read. None = 전체 period.
+        columns: 특정 컬럼만 select. None = 전체.
+
+    Returns:
+        long format DataFrame 또는 None (artifact 부재).
+
+    Raises:
+        없음 — IO 에러는 warning + None.
+
+    Example:
+        >>> df = loadSectionsLong("005930", periods=["2025", "2024"])  # doctest: +SKIP
+    """
+    available = listAvailablePeriods(stockCode)
+    if not available:
+        return None
+    targetPeriods = available if periods is None else [p for p in available if p in set(periods)]
+    if not targetPeriods:
+        return None
+    files = [str(sectionsPath(stockCode, p)) for p in targetPeriods]
+    try:
+        scan = pl.scan_parquet(files)
+        if columns:
+            scan = scan.select(columns)
+        return scan.collect()
+    except (OSError, pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
+        _log.warning("sectionsLong load 실패 (%s): %s", stockCode, exc)
+        return None
+
+
+def loadSectionsWide(
+    stockCode: str,
+    *,
+    periods: list[str] | None = None,
+) -> pl.DataFrame | None:
+    """sections artifact wide format read — long → pivot(period).
+
+    long format 을 read 후 ``pivot(values="content", index=[meta cols], columns="period")``
+    로 wide 양식 복원. 기존 ``Company.sections`` 출력과 schema 호환.
+
+    Args:
+        stockCode: 종목코드.
+        periods: 특정 period 만 wide 컬럼으로. None = 전체.
+
+    Returns:
+        wide format DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> df = loadSectionsWide("005930")  # doctest: +SKIP
+        >>> df.columns  # doctest: +SKIP
+        ['topic', 'blockType', 'blockOrder', 'segmentKey', '2025Q3', '2025', '2024', ...]
+    """
+    long = loadSectionsLong(stockCode, periods=periods)
+    if long is None or long.is_empty():
+        return None
+    metaCols = [c for c in long.columns if c not in ("period", "content")]
+    try:
+        return long.pivot(
+            values="content",
+            index=metaCols,
+            on="period",
+            aggregate_function="first",
+        )
+    except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
+        _log.warning("sectionsWide pivot 실패 (%s): %s", stockCode, exc)
+        return None
