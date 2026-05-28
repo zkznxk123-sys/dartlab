@@ -5,6 +5,82 @@
 
 from __future__ import annotations
 
+# 마스터 플랜 v2 트랙 6 PR-L2 — system prompt 압축. 기존 §"분석 의도 → 금융 primitive
+# 도구 매핑" 표 (1500 자) 가 매 turn 송신 됐던 회귀를 trigger 데이터화로 교체. agent
+# _formatIntentProfileBlock 이 질문에 매칭되는 trigger 만 dynamic inline → 매 turn
+# 인용 비용 ~80% 감소.
+_TOOL_TRIGGER_HINTS: tuple[tuple[tuple[str, ...], str, str], ...] = (
+    (
+        ("적정가격", "공정가치", "DCF", "내재가치", "intrinsic"),
+        "DCFValuation(stockCode)",
+        "bear/base/bull 3 시나리오 자동",
+    ),
+    (
+        ("5 개", "여러 회사", "peer 분석", "peer compare", "ROE 랭킹"),
+        "PeerCompareN(stockCodes)",
+        "N≥2, 12 max + percentile rank",
+    ),
+    (
+        ("WACC 민감도", "할인율 변화", "성장률 민감도", "민감도 매트릭스"),
+        "SensitivityAnalysis(stockCode)",
+        "WACC × growth grid 5x5",
+    ),
+    (
+        ("여러 시나리오", "스트레스 테스트", "최악 케이스", "최선 케이스"),
+        "ScenarioCompareN(scenarioNames)",
+        "baseline 대비 score_delta 정렬",
+    ),
+    (
+        ("신용등급", "회사채 등급", "재무 안정성", "AAA", "dCR"),
+        "CreditScorecard(stockCode)",
+        "7 축 + 1Y PD + includeFactors",
+    ),
+    (
+        ("매출 성장 예측", "내년 매출 전망", "regression forecast"),
+        "RegressionForecast(stockCode)",
+        "panel 우선, cross fallback",
+    ),
+    (
+        ("대시보드", "한 화면 요약", "성장성 패널", "가치평가 패널"),
+        "CompileFinancialDashboard(stockCode, template)",
+        "growth/value/credit 3 template",
+    ),
+    (
+        ("금리 +", "환율 +", "유가 ", "IMF 시나리오", "GFC 재현", "Fed DFAST", "bp"),
+        "ScenarioOverlay(scenarioName, stockCode)",
+        "146 preset macro 시나리오 × 업종 탄성치",
+    ),
+)
+
+
+def matchTriggerHints(question: str) -> list[tuple[str, str]]:
+    """질문에서 매칭된 trigger → (도구 시그니처, 비고) 페어 list.
+
+    Sig:
+        matchTriggerHints(question) -> list[tuple[str, str]]
+    Args:
+        question: 사용자 질문 텍스트.
+    Returns:
+        [(toolSig, hint), ...] — 매칭 항목만. 매칭 0 이면 빈 list.
+    Example:
+        >>> matchTriggerHints("삼성전자 적정가격 알려줘")
+        [('DCFValuation(stockCode)', 'bear/base/bull 3 시나리오 자동')]
+    """
+    if not question:
+        return []
+    qlower = question.lower()
+    out: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for triggers, toolSig, hint in _TOOL_TRIGGER_HINTS:
+        for trigger in triggers:
+            if trigger.lower() in qlower:
+                if toolSig not in seen:
+                    seen.add(toolSig)
+                    out.append((toolSig, hint))
+                break
+    return out
+
+
 ANALYST_IDENTITY = """당신은 DartLab 분석가입니다. 한국 / 미국 자본시장의 회사·재무제표·주가·거시·산업을 \
 DartLab 라이브러리 (dartlab) 와 Polars 로 직접 계산하고, 모든 숫자·날짜·랭킹 답에는 ref 를 붙입니다. \
 근거 없는 숫자는 답하지 않고, 데이터 부족 시 어떤 호출을 먼저 해야 하는지 안내합니다. \
@@ -139,23 +215,9 @@ skill 없으면 ReadCapability 로 fallback (skill 의 capabilityRefs 가 비었
 7-1. **dcrBadge.axes 7 축 중 약축 (score ≤ 3) 2 개는 답변 안 risk narrative 진입점으로 강행** — chip 만 보여주고 본문에서 무시 금지. `data.dcrBadge.axes` 는 `{debt, cashflow, revenue, profit, capital, liquidity, governance}` 7 dict 형태 (각각 score 0~5). score 가 가장 낮은 2 축을 골라 본문 *반례·한계* 또는 *후속 모니터링* 섹션에 "약축 1: <axis> [<score>/5] — <원인 1 문장>, 임계: <정량 지표>" 양식으로 박는다. 7 축 narrative 가 외부 chat AI 못 만드는 finance-native 차별화. dcrBadge 없으면 본 룰 적용 안 함.
 7-2. **macro 시나리오 / 정책 충격 질문 = `ScenarioOverlay(scenarioName, stockCode)` 1 회 호출**. 트리거 키워드: *"금리 +50bp 면", "환율 +5% 면", "유가 100$ 면", "IMF 시나리오", "GFC 재현", "Fed DFAST"*. 146 종 preset macro 시나리오 × 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. 결과 ref + 본문에 "X 시나리오 시 매출 -Y%, 영업이익 -Z%" 식 정량 답변. preset 이름 추측 금지 — ReadCapability("ScenarioOverlay") 또는 ReadSkill 결과의 catalog 인용.
 
-### 분석 의도 → 금융 primitive 도구 매핑 (few-shot)
+### 분석 의도 → 금융 primitive 도구 (RunPython 우회 금지)
 
-다음 질문 유형 trigger 키워드 발견 시 해당 도구 1 회 호출 (RunPython 우회 금지):
-
-| 질문 trigger | 첫 도구 | 비고 |
-|---|---|---|
-| "삼성전자 적정가격", "AAPL 공정가치", "DCF 평가", "내재가치" | `DCFValuation(stockCode)` | bear/base/bull 3 시나리오 자동 |
-| "5 개 회사 비교", "삼성 vs SK vs LG vs 마이크론 vs Intel", "peer 분석" | `PeerCompareN(stockCodes)` | N≥2, 12 max + percentile rank |
-| "WACC 민감도", "할인율 변화", "성장률 민감도", "민감도 매트릭스" | `SensitivityAnalysis(stockCode)` | WACC × growth grid 5x5 기본 |
-| "여러 시나리오 비교", "스트레스 테스트", "최악 케이스" (2+ 시나리오) | `ScenarioCompareN(scenarioNames)` | baseline 대비 score_delta 정렬 |
-| "신용등급", "회사채 등급", "재무 안정성", "AAA 인가", "dCR" | `CreditScorecard(stockCode)` | 7 축 + 1Y PD + includeFactors 옵션 |
-| "매출 성장 예측", "내년 매출 전망", "regression forecast" | `RegressionForecast(stockCode)` | panel 우선, cross fallback |
-| "대시보드", "한 화면 요약", "성장성 패널", "가치평가 패널" | `CompileFinancialDashboard(stockCode, template)` | growth/value/credit 3 template |
-| "A vs B" (2~3 개) wide 비교만 | `CompareCompanies(stockCodes)` | max 3, 빠른 wide table |
-| "macro 시나리오 + 종목 임팩트" (단일 시나리오) | `ScenarioOverlay(scenarioName, stockCode)` | 종목 단위 매출/마진/NIM |
-
-회귀 가드: 위 9 종 trigger 에 RunPython 으로 ad-hoc 코드 작성 (DCF formula / peer compare loop / sensitivity grid / scenario compare / Altman score / regression / dashboard spec) 금지 — 본 도구 1 회로 token 25~30% 절감 + 정확도 +15%. 사용자가 명시적으로 "직접 Polars 로 짜줘" 요청한 경우만 RunPython.
+질문에 다음 trigger 키워드 매칭 시 해당 도구 1 회 호출. 매칭되는 trigger 가 있으면 system prompt 끝 "## 질문 의도 추정" 블록에 해당 row 가 자동 inline. DCFValuation / PeerCompareN / SensitivityAnalysis / ScenarioCompareN / CreditScorecard / RegressionForecast / CompileFinancialDashboard / CompareCompanies / ScenarioOverlay — 9 종 모두 본 도구 1 회로 token 25~30% 절감 + 정확도 +15%. 사용자가 명시적으로 "Polars 로 직접 짜줘" 요청한 경우만 RunPython.
 
 ## 외부 본문 가드
 

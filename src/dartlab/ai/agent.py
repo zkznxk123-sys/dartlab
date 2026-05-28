@@ -860,6 +860,19 @@ def _formatIntentProfileBlock(kwargs: dict[str, Any]) -> str:
         lines.append("- 비교형 질문 — `PeerCompareN` (N≥2) 또는 `CompareCompanies` (max 3) 우선.")
     if show_topic:
         lines.append(f"- 추정 토픽: `{show_topic}` — `EngineCall(Company.show, topic='{show_topic}')` 우선.")
+    # 마스터 플랜 v2 트랙 6 PR-L2 — trigger 표 dynamic inline (system prompt 압축 대체).
+    # 기존 §"분석 의도 → 금융 primitive 도구 매핑" 9 row 평면 표 (~1500 자) 가 매 turn
+    # 송신 → trigger 매칭된 도구만 표시 (평균 1~2 row, ~150 자). 매 turn token ~290 절감.
+    try:
+        from .workbench.prompts import matchTriggerHints
+
+        hints = matchTriggerHints(question)
+    except Exception:  # noqa: BLE001
+        hints = []
+    if hints:
+        lines.append("- 권장 금융 primitive 도구 (질문 trigger 매칭):")
+        for toolSig, hint in hints[:3]:
+            lines.append(f"  - `{toolSig}` — {hint}")
     return "\n".join(lines)
 
 
