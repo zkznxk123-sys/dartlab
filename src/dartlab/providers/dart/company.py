@@ -2252,6 +2252,57 @@ class Company:
 
         return buildSections(self)
 
+    def sectionsLong(
+        self, *, columns: list[str] | None = None, periods: list[str] | None = None
+    ) -> pl.DataFrame | None:
+        """sections artifact long format read — period-sharded mmap parquet 직접 노출.
+
+        plan snazzy-wibbling-origami PR-4. D.1 모듈 (sentiment / risk / disclosureDiff /
+        scan changes / industry edges 등) 이 ``docs.parquet`` 의 ``section_content`` 컬럼
+        직접 read 하던 패턴을 *Company.sectionsLong* 경유로 수렴. SSOT 일원화.
+
+        Args:
+            columns: select 할 컬럼 list. None = 전체. polars columnar projection 으로
+                content 컬럼 미선택 시 페이지 fault 0 (메모리 절약).
+            periods: 특정 period 만 read. None = 전체.
+
+        Returns:
+            long format DataFrame — meta cols + ``period`` + ``content``. artifact
+            부재 시 fallback wide → long 변환. None.
+
+        Raises:
+            없음.
+
+        Example::
+
+            c = Company("005930")
+            # plain text only — content 컬럼만 mmap
+            df = c.sectionsLong(columns=["topic", "period", "content"])
+            # 특정 period 만
+            df = c.sectionsLong(periods=["2025", "2025Q3"])
+        """
+        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+            hasSectionsArtifact,
+            loadSectionsLong,
+        )
+
+        if hasSectionsArtifact(self.stockCode):
+            return loadSectionsLong(self.stockCode, periods=periods, columns=columns)
+
+        # fallback — wide 양식을 long 으로 변환 (artifact 부재 환경).
+        wide = self.sections
+        if wide is None or wide.is_empty():
+            return None
+        from dartlab.providers.dart.docs.sections.sectionsBuilder import wideToLong
+
+        long = wideToLong(wide)
+        if periods is not None:
+            long = long.filter(pl.col("period").is_in(periods))
+        if columns is not None:
+            avail = [c for c in columns if c in long.columns]
+            long = long.select(avail) if avail else long
+        return long
+
     def sectionsAs(self, stripTags: bool = True) -> pl.DataFrame | None:
         """sections wide DataFrame — stripTags 파라미터로 cell value 양식 선택.
 
