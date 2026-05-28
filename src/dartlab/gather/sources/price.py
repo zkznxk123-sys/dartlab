@@ -8,6 +8,7 @@ import time
 
 from ..domains import getPriceFallback, loadDomain
 from ..infra.cache import GatherCache
+from ..infra.consolidation import checkDiff as _checkConsolidation
 from ..infra.resilience import circuitBreaker, healthTracker
 from ..infra.telemetry import emitGatherFallback
 from ..marketConfig import getMarketConfig
@@ -25,6 +26,7 @@ async def fetch(
     market: str = "KR",
     client=None,
     limit: int | None = None,
+    consolidate: bool = False,
 ) -> PriceSnapshot | None:
     """주가 — 시장별 fallback 체인 + circuit breaker + health scoring (async).
 
@@ -64,6 +66,11 @@ async def fetch(
         HTTP 클라이언트. None이면 GatherHttpClient 자동 생성.
     limit : int | None
         단건 스냅샷 반환 함수라 무시된다. 인터페이스 호환 목적으로만 존재.
+    consolidate : bool
+        True 면 primary 성공 후 chain 의 다음 alive source 도 시도해서
+        ``infra.consolidation.checkDiff`` 로 drift 측정. breached 시 logger.warning
+        + ``data/qualityIncidents/priceConsolidation.parquet`` 박제. default False
+        (호출량 2 배 증가하므로 명시 호출 시만).
 
     Returns
     -------
@@ -130,6 +137,11 @@ async def fetch(
                 healthTracker.record(source_name, success=True, latency=latency)
                 # stale cache에도 저장 (fallback용)
                 _staleCache.putTyped(stockCode, "price", result)
+
+                # Sprint 1 PR3 — 정확도 drift 감지 (consolidate=True 시만)
+                if consolidate:
+                    await _verifyConsolidation(stockCode, market, result, chain, i, client)
+
                 return result
 
             # None 반환 = 데이터 없음 (에러는 아님)
@@ -154,3 +166,61 @@ async def fetch(
         return stale_copy
 
     return None
+
+
+async def _verifyConsolidation(
+    stockCode: str,
+    market: str,
+    primary: PriceSnapshot,
+    chain: list[str],
+    primaryIdx: int,
+    client,
+) -> None:
+    """primary 성공 후 다음 alive source 도 시도 → checkDiff 박제.
+
+    Sig: ``_verifyConsolidation(stockCode, market, primary, chain, primaryIdx, client) -> None``
+
+    Capabilities: chain 내 primary 이후 첫 alive source 호출 + diff 측정 + breached 시 archive.
+    AIContext: ``fetch(consolidate=True)`` 의 후속 hook — 사용자 직접 호출 금지.
+    Guide: 두 번째 source 실패는 silent (drift 측정 못 한 것은 incident 아님).
+    When: primary 성공 + consolidate=True.
+    How: chain[primaryIdx+1:] 순회 → circuit open skip → loadDomain → fetchPrice → checkDiff.
+
+    Args:
+        stockCode: 종목 코드.
+        market: 시장 코드.
+        primary: 1순위 응답 (이미 currency/market 채워짐).
+        chain: reorder 된 fallback chain.
+        primaryIdx: chain 안 primary 의 인덱스.
+        client: GatherHttpClient (재사용).
+
+    Returns:
+        None — incident 박제는 ``infra.consolidation`` 가 처리.
+
+    Raises:
+        없음 — 모든 예외 흡수 (관찰성 hook 이지 본 fetch 흐름 차단 금지).
+
+    Example:
+        내부 헬퍼. 직접 호출 안 함.
+
+    See Also:
+        ``infra.consolidation.checkDiff`` — diff 측정 + archive.
+    """
+    config = getMarketConfig(market)
+    for source_name in chain[primaryIdx + 1 :]:
+        if circuitBreaker.isOpen(source_name):
+            continue
+        try:
+            module = loadDomain(source_name)
+            if not hasattr(module, "fetchPrice"):
+                continue
+            secondary = await module.fetchPrice(stockCode, client, market=market)
+            if secondary is None:
+                continue
+            secondary.currency = config.currency
+            secondary.market = market
+            _checkConsolidation(primary, secondary)
+            return
+        except (GatherError, ImportError, OSError, ValueError) as exc:
+            log.debug("consolidation secondary %s 실패 (silent): %s", source_name, exc)
+            continue
