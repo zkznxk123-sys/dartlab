@@ -82,28 +82,49 @@ def _cellTextPreservingBreaks(cell) -> str:
     return text
 
 
+_VALID_ALIGN = frozenset({"left", "center", "right", "justify"})
+_VALID_VALIGN = frozenset({"top", "middle", "bottom", "baseline"})
+
+
+def _normAlign(raw: str, valid: frozenset[str]) -> str:
+    """DART XML ALIGN/VALIGN 속성 정규화 — uppercase → lowercase + whitelist 검증."""
+    if not raw:
+        return ""
+    v = raw.strip().lower()
+    return v if v in valid else ""
+
+
 def _tableToHtml(table) -> str:
-    """``<TABLE>`` → HTML ``<table>`` (rowspan/colspan 보존).
+    """``<TABLE>`` → HTML ``<table>`` (rowspan/colspan + ALIGN/VALIGN 보존).
 
     DART XML 의 ``<TABLE BORDER="0">`` 양식은 시각 무 (paragraph framing / caption
     layout). 1×1 단일 cell 도 paragraph framing → plain text return. 진짜 데이터
     표 (BORDER="1" 또는 multi-row/col 병합) 만 HTML ``<table>`` emit. cell 안 직속
     P 가 ≥ 2 면 P 별 줄바꿈 보존.
+
+    ALIGN/VALIGN 보존 (plan snazzy-wibbling-origami PR-1b): DART 원본 ``<TD ALIGN="RIGHT">``
+    의 ALIGN 속성을 ``<td align="right">`` 로 emit. viewer (sanitize whitelist 가 이미
+    ``align`` 허용) 에서 숫자 cell 우측정렬이 원본대로 보존된다. 옛 구현은 ALIGN 을
+    cell.get() 호출조차 안 해 viewer 에서 모든 cell 이 좌측정렬 회귀 (2026-05-28
+    사용자 발견). VALIGN 도 동일 패턴.
     """
     border = (table.get("BORDER", "1") or "1").strip()
     isBorderless = border in ("0", "")
 
-    collected: list[list[tuple[str, str, str, str]]] = []  # rows of [(tag, colspan, rowspan, text)]
+    # rows of [(tag, colspan, rowspan, align, valign, text)]
+    collected: list[list[tuple[str, str, str, str, str, str]]] = []
     for tr in _findDirectTRs(table):
-        cells: list[tuple[str, str, str, str]] = []
+        cells: list[tuple[str, str, str, str, str, str]] = []
         for cell in tr:
             if not isinstance(cell.tag, str) or cell.tag not in ("TD", "TH", "TU", "TE"):
                 continue
             tag = "th" if cell.tag in ("TH", "TU") else "td"
             colspan = cell.get("COLSPAN", "1") or "1"
             rowspan = cell.get("ROWSPAN", "1") or "1"
+            align = _normAlign(cell.get("ALIGN", "") or "", _VALID_ALIGN)
+            valign = _normAlign(cell.get("VALIGN", "") or "", _VALID_VALIGN)
             text = _cellTextPreservingBreaks(cell)
-            cells.append((tag, colspan, rowspan, text))
+            cells.append((tag, colspan, rowspan, align, valign, text))
         if cells:
             collected.append(cells)
     if not collected:
@@ -113,13 +134,13 @@ def _tableToHtml(table) -> str:
     if len(collected) == 1 and len(collected[0]) == 1:
         only = collected[0][0]
         if only[1] in ("1", "") and only[2] in ("1", ""):
-            return only[3]
+            return only[5]
 
     # BORDER="0" multi-cell caption — em-space join + 줄바꿈 row 구분
     if isBorderless:
         lines: list[str] = []
         for cells in collected:
-            texts = [c[3] for c in cells if c[3]]
+            texts = [c[5] for c in cells if c[5]]
             if texts:
                 lines.append(" ".join(texts))
         return "\n".join(lines)
@@ -130,12 +151,16 @@ def _tableToHtml(table) -> str:
     out: list[str] = ["<table>"]
     for cells in collected:
         rowOut: list[str] = ["<tr>"]
-        for tag, colspan, rowspan, text in cells:
+        for tag, colspan, rowspan, align, valign, text in cells:
             attrs = ""
             if colspan and colspan != "1":
                 attrs += f' colspan="{int(colspan)}"'
             if rowspan and rowspan != "1":
                 attrs += f' rowspan="{int(rowspan)}"'
+            if align:
+                attrs += f' align="{align}"'
+            if valign:
+                attrs += f' valign="{valign}"'
             escaped = _escapeHtml(text).replace("\n", "<br/>")
             rowOut.append(f"<{tag}{attrs}>{escaped}</{tag}>")
         rowOut.append("</tr>")
