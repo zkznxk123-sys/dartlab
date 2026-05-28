@@ -56,7 +56,7 @@ def _(c):
 @app.cell
 def _(c):
     # sections — topic × period 그리드 전체 (전 기간 비교 가능성의 핵심)
-    c.sections.head(20)
+    c.sections
     return
 
 
