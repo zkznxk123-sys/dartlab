@@ -52,11 +52,107 @@ See Also:
 
 from __future__ import annotations
 
+import logging
+import re
 from typing import Any
 
 import polars as pl
 
 from .dispatch import INDEX_SYMBOLS, _fetchNaverIndex
+
+log = logging.getLogger(__name__)
+
+# Sprint 3 PR3 — 글로벌 자산 ID 정규식
+_ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
+_FIGI_RE = re.compile(r"^BBG[A-Z0-9]{9}$")
+
+# OpenFIGI exchCode → marketConfig market 코드 매핑 (주요만).
+# 미등록은 사용자 지정 market 유지.
+_OPENFIGI_EXCH_TO_MARKET: dict[str, str] = {
+    "US": "US",
+    "UN": "US",  # NYSE/Nasdaq Composite
+    "UQ": "US",  # Nasdaq Global Market
+    "UR": "US",  # NYSE Arca
+    "KS": "KR",
+    "KQ": "KR",
+    "JT": "JP",
+    "HK": "HK",
+    "LN": "UK",
+    "GR": "DE",
+    "CH": "CN",
+    "SZ": "CN",
+    "IN": "IN",
+    "CT": "CA",
+    "AT": "AU",
+    "BZ": "BR",
+    "SJ": "ZA",
+    "MM": "MX",
+    "SP": "SG",
+    "TB": "TH",
+}
+
+
+def _maybeResolveAssetId(
+    target: str | None,
+    market: str,
+    marketExplicit: bool,
+) -> tuple[str | None, str]:
+    """target 이 ISIN/FIGI 형식이면 symbology 위임 → (ticker, market) 변환.
+
+    Sig: ``_maybeResolveAssetId(target, market, marketExplicit) -> (target, market)``
+
+    Capabilities: ISIN/FIGI 정규식 매치 → symbology 헬퍼 호출 → ticker 추출.
+    AIContext: handlePrice 진입 직후 hook — TICKER 이면 no-op.
+    Guide: marketExplicit=True 면 사용자 명시 market 우선. False 면 OpenFIGI exch → market.
+    When: handlePrice 진입.
+    How: 정규식 매치 → isinToTicker/figiToTicker → exch 매핑 (옵션) → 변환된 target 반환.
+
+    Args:
+        target: 사용자 입력 (ticker / ISIN / FIGI).
+        market: 사용자 명시 market.
+        marketExplicit: True 면 market 변경 금지.
+
+    Returns:
+        ``(target, market)`` — ISIN/FIGI 변환 성공 시 ticker + (옵션) 매핑 market.
+        실패/TICKER 입력 시 (원본, 원본).
+
+    Raises:
+        없음 — 모든 예외 흡수.
+
+    Example:
+        >>> _maybeResolveAssetId("US0378331005", "KR", False)
+        ('AAPL', 'US')
+
+    See Also:
+        ``dartlab.gather.mapping.symbology`` — 위임 대상.
+    """
+    if not target:
+        return target, market
+    try:
+        # FIGI 우선 (BBG prefix 명확). FIGI 도 ISIN 정규식에 우연히 매치할 수 있으므로 먼저.
+        if _FIGI_RE.match(target):
+            from dartlab.gather.mapping.symbology import figiToTicker
+
+            resolved = figiToTicker(target)
+            if resolved is None:
+                return target, market
+            new_ticker, exch = resolved
+            new_market = market if marketExplicit else _OPENFIGI_EXCH_TO_MARKET.get(exch, market)
+            log.info("symbology FIGI→ticker: %s → %s (market=%s)", target, new_ticker, new_market)
+            return new_ticker, new_market
+        if _ISIN_RE.match(target):
+            from dartlab.gather.mapping.symbology import isinToTicker
+
+            resolved = isinToTicker(target)
+            if resolved is None:
+                return target, market
+            new_ticker, exch = resolved
+            new_market = market if marketExplicit else _OPENFIGI_EXCH_TO_MARKET.get(exch, market)
+            log.info("symbology ISIN→ticker: %s → %s (market=%s)", target, new_ticker, new_market)
+            return new_ticker, new_market
+    except Exception as exc:  # noqa: BLE001 — silent observer (handler 흐름 차단 금지)
+        log.debug("symbology lookup 실패 (target=%s, silent): %s", target, exc)
+    return target, market
 
 
 def handlePrice(
@@ -104,6 +200,9 @@ def handlePrice(
         dispatch.AXIS_REGISTRY : axis 메타.
         transforms/indicatorDispatch.addIndicators : 보조지표 후처리.
     """
+    # Sprint 3 PR3 — ISIN/FIGI 자동 감지 → symbology 위임 → ticker 변환
+    target, market = _maybeResolveAssetId(target, market, marketExplicit)
+
     if target and target in INDEX_SYMBOLS:
         result = _fetchNaverIndex(INDEX_SYMBOLS[target])
     else:

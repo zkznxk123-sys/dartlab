@@ -99,6 +99,9 @@ class PriceSnapshot:
     exchange: str = ""
     market: str = "KR"
     is_stale: bool = False
+    # Sprint 3 PR3 — 글로벌 ID (OpenFIGI). 사용자 입력이 ISIN/FIGI 인 경우 보존.
+    isin: str | None = None
+    figi: str | None = None
 
     def __repr__(self) -> str:
         stale_tag = " [stale]" if self.is_stale else ""
