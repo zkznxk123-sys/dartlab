@@ -121,6 +121,7 @@ def iterPeriodSubsets(
             # mixed) 변환. _splitContentBlocks 가 받을 양식.
             # section_content_mixed (pre-computed) 가 있으면 ccol = "section_content_mixed"
             # 로 박혀 이 변환 우회 — sections build 핫 패스 ~11s 영구 제거.
+            # raw XML 보존은 별도 _raw.parquet 으로 (sectionsBuilder._buildSectionsRawXml).
             if not hasMixed:
                 subset = subset.with_columns(
                     pl.col(ccol).map_elements(xmlChunkToMixed, return_dtype=pl.Utf8).alias(ccol)

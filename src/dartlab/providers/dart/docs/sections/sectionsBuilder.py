@@ -268,6 +268,70 @@ def _buildSectionsIndex(stockCode: str, compression: str = "snappy") -> bool:
         _os.environ.pop("DARTLAB_BUILDER_MODE", None)
 
 
+def _buildSectionsRawXml(stockCode: str, compression: str = "zstd") -> bool:
+    """docs.parquet 의 raw section_content (모든 XML 태그) → ``_raw.parquet`` save.
+
+    plan snazzy-wibbling-origami — 사용자 비전 핵심. sections artifact 가 모든 DART
+    XML 태그 (P/SPAN/TABLE/TD ALIGN/AUNIT/ADENO/CLASS/USERMARK 등) 보존. viewer 가
+    raw XML 직접 사용. parser 룰 변경 시 sections 만 재빌드 (zip 재추출 0).
+
+    schema: period / section_order / section_title / section_content / rcept_no.
+    zstd compression — 종목당 ~수 MB (raw XML 압축률 80%+).
+
+    Args:
+        stockCode: 종목코드.
+        compression: parquet compression. default zstd (raw XML 압축률 우선).
+
+    Returns:
+        bool — 성공 시 True. docs.parquet 부재 시 False.
+    """
+    import os as _os
+
+    from dartlab.providers.dart.docs.sections.sectionsStorage import sectionsDir
+
+    _os.environ["DARTLAB_BUILDER_MODE"] = "1"
+    try:
+        from dartlab.core.dataLoader import loadData
+
+        raw_cols = ["year", "report_type", "section_order", "section_title", "section_content", "rcept_no"]
+        df = loadData(stockCode, category="docs", columns=raw_cols)
+        if df is None or df.is_empty():
+            return False
+        availableCols = [c for c in raw_cols if c in df.columns]
+        if "section_content" not in availableCols:
+            return False
+        # period 매핑 (사업보고서 → Q4, 반기보고서 → Q2, 분기보고서 03/09 → Q1/Q3).
+        if "report_type" in availableCols:
+            rt = pl.col("report_type").cast(pl.Utf8).fill_null("")
+            suffix = (
+                pl.when(rt.str.contains("사업보고서"))
+                .then(pl.lit("Q4"))
+                .when(rt.str.contains("반기보고서"))
+                .then(pl.lit("Q2"))
+                .when(rt.str.contains(r"분기보고서.*\d{4}\.03"))
+                .then(pl.lit("Q1"))
+                .when(rt.str.contains(r"분기보고서.*\d{4}\.09"))
+                .then(pl.lit("Q3"))
+                .otherwise(pl.lit("Q4"))
+            )
+            df = df.with_columns(pl.concat_str([pl.col("year").cast(pl.Utf8), suffix]).alias("period"))
+        else:
+            df = df.with_columns(pl.col("year").cast(pl.Utf8).alias("period"))
+        keepCols = ["period"] + [c for c in availableCols if c not in ("year", "report_type")]
+        raw = df.select(keepCols).filter(
+            pl.col("section_content").is_not_null() & (pl.col("section_content").str.len_chars() > 0)
+        )
+        outDir = sectionsDir(stockCode)
+        outDir.mkdir(parents=True, exist_ok=True)
+        raw.write_parquet(outDir / "_raw.parquet", compression=compression)
+        return True
+    except (FileNotFoundError, ValueError, RuntimeError, pl.exceptions.ComputeError) as exc:
+        _log.warning("_buildSectionsRawXml (%s): %s", stockCode, exc)
+        return False
+    finally:
+        _os.environ.pop("DARTLAB_BUILDER_MODE", None)
+
+
 def buildSectionsArtifact(
     stockCode: str,
     *,
@@ -321,9 +385,11 @@ def buildSectionsArtifact(
         _log.warning("sections build 결과 None (%s) — docs.parquet 부재?", stockCode)
         return {}
     result = saveSectionsByPeriod(stockCode, sectionsWide, compression=compression)
-    # plan snazzy-wibbling-origami PR-4b — _index.parquet 동행 빌드 (docs 메타 carry).
-    # 실패 silent — index 부재 시 callers 가 _index 없는 path fallback.
+    # plan snazzy-wibbling-origami PR-4b — _index.parquet (docs 메타) + _raw.parquet (raw
+    # XML 모든 태그) 동행 빌드. 사용자 비전 100%: sections artifact 가 모든 정보 보유,
+    # docs.parquet 완전 폐기 가능.
     _buildSectionsIndex(stockCode, compression=compression)
+    _buildSectionsRawXml(stockCode)
     return result
 
 

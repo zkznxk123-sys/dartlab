@@ -450,6 +450,7 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
             hasSectionsArtifact,
             loadSectionsIndex,
             loadSectionsLong,
+            loadSectionsRawXml,
         )
     except ImportError:
         return False
@@ -457,6 +458,39 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
     if not hasSectionsArtifact(stockCode):
         if not _ensureFromHf(stockCode):
             return False
+    # _raw.parquet 우선 — 사용자 비전 100% (raw XML 모든 태그 보존). 신 schema 종목 보유,
+    # 옛 종목 부재 시 long fallback (mixed → section_content alias, lossy).
+    rawXml = loadSectionsRawXml(stockCode)
+    if rawXml is not None and not rawXml.is_empty():
+        try:
+            year = pl.col("period").str.slice(0, 4)
+            suffix = pl.col("period").str.slice(4)
+            synthesized = rawXml.with_columns(year.alias("year"), suffix.alias("report_kind"))
+            index = loadSectionsIndex(stockCode)
+            if index is not None and not index.is_empty():
+                # _raw 가 이미 rcept_no 보유 — _index 의 rcept_no 제외 (중복 차단).
+                indexCols = [c for c in index.columns if c not in ("period", "rcept_no")]
+                if indexCols:
+                    synthesized = synthesized.join(
+                        index.select(["period"] + indexCols).unique(subset=["period"]),
+                        on="period",
+                        how="left",
+                    )
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            synthesized.write_parquet(dest, compression="snappy")
+            from dartlab.core.logger import getLogger
+
+            _log = getLogger(__name__)
+            _log.info(
+                "docs.parquet 합성 (%s, _raw.parquet → %d rows): %s",
+                stockCode,
+                synthesized.height,
+                dest.name,
+            )
+            return True
+        except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):
+            pass  # fallback to long-based synthesis below
+    # 옛 schema fallback — long format (mixed → section_content alias, raw XML lossy).
     long = loadSectionsLong(stockCode, columns=None)
     if long is None or long.is_empty():
         return False

@@ -132,6 +132,40 @@ def sectionsIndexPath(stockCode: str) -> Path:
     return sectionsDir(stockCode) / "_index.parquet"
 
 
+def sectionsRawXmlPath(stockCode: str) -> Path:
+    """raw XML 보존 파일 path — 사용자 비전 핵심.
+
+    ``data/dart/sections/{stockCode}/_raw.parquet``. schema: period / section_order /
+    section_title / section_content (raw XML 모든 태그) / rcept_no. viewer 가 raw XML
+    직접 사용 가능 — parser 룰 변경 시 sections 만 재빌드 (zip 재추출 0).
+    """
+    return sectionsDir(stockCode) / "_raw.parquet"
+
+
+def loadSectionsRawXml(stockCode: str, *, periods: list[str] | None = None) -> pl.DataFrame | None:
+    """``_raw.parquet`` (raw XML 모든 태그) read — viewer / parser 룰 변경 입력.
+
+    Args:
+        stockCode: 종목코드.
+        periods: 특정 period 만. None = 전체.
+
+    Returns:
+        DataFrame — period / section_order / section_title / section_content / rcept_no.
+        부재 시 None.
+    """
+    p = sectionsRawXmlPath(stockCode)
+    if not p.exists():
+        return None
+    try:
+        df = pl.read_parquet(p)
+        if periods is not None:
+            df = df.filter(pl.col("period").is_in(periods))
+        return df
+    except (OSError, pl.exceptions.ComputeError) as exc:
+        _log.warning("sectionsRawXml load 실패 (%s): %s", stockCode, exc)
+        return None
+
+
 def loadSectionsIndex(stockCode: str) -> pl.DataFrame | None:
     """``_index.parquet`` (docs 메타 caryy) read — 빠른 메타 lookup.
 
