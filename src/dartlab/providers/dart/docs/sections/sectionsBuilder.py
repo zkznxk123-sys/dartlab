@@ -64,7 +64,39 @@ def _isPeriodColumn(name: str) -> bool:
     return name[4:] in ("Q1", "Q2", "Q3", "Q4")
 
 
-def wideToLong(sectionsWide: pl.DataFrame, *, addPlain: bool = True) -> pl.DataFrame:
+_TABLE_BLOCK_RE = None  # lazy compile
+
+
+def _extractTableStruct(content: str) -> str:
+    """mixed content 에서 HTML ``<table>...</table>`` block 만 추출 (concat).
+
+    plan snazzy-wibbling-origami PR-5b — finance pipeline (analysis/financial/* 60 모듈)
+    의 향후 입력. ALIGN/VALIGN/rowspan/colspan 모두 보존된 HTML 표 구조만. paragraph 본문 +
+    markdown heading 등 제거. 다중 ``<table>`` 발견 시 ``\\n\\n`` join.
+
+    Args:
+        content: ``content`` 컬럼 mixed string (markdown + HTML mixed).
+
+    Returns:
+        HTML ``<table>...</table>`` block 만의 concat string. 표 없으면 빈 문자열.
+    """
+    global _TABLE_BLOCK_RE
+    if _TABLE_BLOCK_RE is None:
+        import re as _re
+
+        _TABLE_BLOCK_RE = _re.compile(r"<table[\s\S]*?</table>", _re.IGNORECASE)
+    if not content or "<table" not in content:
+        return ""
+    matches = _TABLE_BLOCK_RE.findall(content)
+    return "\n\n".join(matches) if matches else ""
+
+
+def wideToLong(
+    sectionsWide: pl.DataFrame,
+    *,
+    addPlain: bool = True,
+    addTableStruct: bool = True,
+) -> pl.DataFrame:
     """sections wide DataFrame → long format (period 컬럼 → row).
 
     PR-5a 이후: ``content_plain`` 컬럼 자동 추가 — HTML/markdown 태그 strip 결과. D.1
@@ -109,6 +141,12 @@ def wideToLong(sectionsWide: pl.DataFrame, *, addPlain: bool = True) -> pl.DataF
 
         long = long.with_columns(
             pl.col("content").map_elements(stripTagsFromCell, return_dtype=pl.Utf8).alias("content_plain")
+        )
+    if addTableStruct:
+        # content_table_struct 컬럼 — HTML <table> block 만 추출 (ALIGN/rowspan/colspan 보존).
+        # finance pipeline (analysis/financial/* 60 모듈) 의 향후 입력. 표 없는 row 는 "" 값.
+        long = long.with_columns(
+            pl.col("content").map_elements(_extractTableStruct, return_dtype=pl.Utf8).alias("content_table_struct")
         )
     return long
 

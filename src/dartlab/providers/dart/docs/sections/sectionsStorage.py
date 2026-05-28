@@ -208,10 +208,11 @@ def loadSectionsWide(
     long = loadSectionsLong(stockCode, periods=periods)
     if long is None or long.is_empty():
         return None
-    # PR-5a: content_plain 컬럼은 *long-only* 보조 컬럼 (period 별 plain text 값) — wide pivot
-    # 시 index 에 포함되면 period collapse 안 됨 (period 별 다른 값이라 unique row 증가). drop 후 pivot.
-    if "content_plain" in long.columns:
-        long = long.drop("content_plain")
+    # PR-5a/b: content_plain / content_table_struct 컬럼은 *long-only* 보조 컬럼 (period 별 값
+    # 다름) — wide pivot 시 index 포함되면 period collapse 안 됨. drop 후 pivot.
+    for col in ("content_plain", "content_table_struct"):
+        if col in long.columns:
+            long = long.drop(col)
     metaCols = [c for c in long.columns if c not in ("period", "content")]
     try:
         return long.pivot(
