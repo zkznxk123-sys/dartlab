@@ -138,6 +138,56 @@ def hasSectionsArtifact(stockCode: str) -> bool:
     return bool(listAvailablePeriods(stockCode))
 
 
+# HF 다운로드 시도 캐시 — 한 종목 1 회만 시도 (실패 시 반복 호출 회피).
+_HF_DOWNLOAD_ATTEMPTED: set[str] = set()
+
+
+def _ensureFromHf(stockCode: str) -> bool:
+    """artifact 부재 시 HF dataset 에서 lazy 다운로드 — sections category nested 양식.
+
+    plan snazzy-wibbling-origami PR-4b-ii. ``huggingface_hub.snapshot_download`` 의
+    allow_patterns 으로 *한 종목 디렉터리만* 선택 다운로드 (전체 dataset 무관). 한
+    종목 ~1.5MB × 분기 수 = ~수 MB. 첫 호출 시 1 회 다운로드, 이후 mmap.
+
+    환경변수 ``DARTLAB_NO_HF_DOWNLOAD=1`` 또는 offline 환경 시 skip.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        bool — 다운로드 성공 또는 이미 존재 시 True.
+
+    Raises:
+        없음 — 네트워크 실패 / huggingface_hub 미설치 / 다른 IO 에러는 warning + False.
+    """
+    if hasSectionsArtifact(stockCode):
+        return True
+    import os as _os
+
+    if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
+        return False
+    # 한 종목 당 1 회만 시도 (실패 시 반복 HF 호출 회피).
+    if stockCode in _HF_DOWNLOAD_ATTEMPTED:
+        return False
+    _HF_DOWNLOAD_ATTEMPTED.add(stockCode)
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+        sectionsDirRel = DATA_RELEASES["sections"]["dir"]
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=[f"{sectionsDirRel}/{stockCode}/*.parquet"],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+        return hasSectionsArtifact(stockCode)
+    except Exception as exc:  # noqa: BLE001 — HF/네트워크 모든 에러 silent (fallback path 진행)
+        _log.warning("sections artifact HF 다운로드 실패 (%s): %s — fallback path 진행", stockCode, exc)
+        return False
+
+
 def loadSectionsLong(
     stockCode: str,
     *,
@@ -163,6 +213,9 @@ def loadSectionsLong(
     Example:
         >>> df = loadSectionsLong("005930", periods=["2025", "2024"])  # doctest: +SKIP
     """
+    # artifact 부재 시 HF lazy 다운로드 (DARTLAB_NO_HF_DOWNLOAD 미설정 + 첫 시도).
+    if not hasSectionsArtifact(stockCode):
+        _ensureFromHf(stockCode)
     available = listAvailablePeriods(stockCode)
     if not available:
         return None

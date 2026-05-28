@@ -2238,16 +2238,20 @@ class Company:
             없음.
         """
         # 신 artifact 우선 — period-sharded parquet mmap (콜드 1s 목표).
+        # artifact 부재 시 _ensureFromHf 가 huggingface_hub.snapshot_download 으로 lazy
+        # 다운로드 (한 종목 디렉터리만, ~수 MB). 한 종목 1 회 시도, 실패 시 fallback.
         from dartlab.providers.dart.docs.sections.sectionsStorage import (
+            _ensureFromHf,
             hasSectionsArtifact,
             loadSectionsWide,
         )
 
+        _ensureFromHf(self.stockCode)
         if hasSectionsArtifact(self.stockCode):
             cached = loadSectionsWide(self.stockCode)
             if cached is not None and not cached.is_empty():
                 return cached
-        # fallback — 옛 런타임 build (artifact 부재 환경 또는 read 실패 시).
+        # fallback — 옛 런타임 build (artifact 부재 + HF 다운로드 실패 시).
         from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
 
         return buildSections(self)
