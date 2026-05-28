@@ -1,29 +1,77 @@
 {
-  "_note": "마스터 플랜 v2 트랙 5 PR-Q3 — strict quality eval baseline 템플릿. 실측은 `DARTLAB_QUALITY_MODE=strict tests/_attempts/aiQualityBench.py` 실행 후 --write-baseline 으로 갱신.",
-  "_schema": {
-    "createdAt": "UTC ISO 8601",
-    "itemCount": "측정 item N",
-    "averages": {
-      "totalScore": "가중 평균 (0~100)",
-      "accuracy": "5 차원 각 raw score (0~100)",
-      "completeness": "...",
-      "toolSelection": "...",
-      "refsQuality": "...",
-      "latency": "..."
-    },
-    "perItem": {
-      "_format": "{goldenId: {totalScore, dims: {...}}}"
-    }
-  },
-  "createdAt": "1970-01-01T00:00:00+00:00",
-  "itemCount": 0,
+  "_note": "v2 PR-Q3 strict baseline — 2026-05-28 cycle 6 (provider=oauth-codex/gpt-5.5)",
+  "createdAt": "2026-05-28T09:38:40+00:00",
+  "itemCount": 10,
   "averages": {
-    "totalScore": 0.0,
+    "totalScore": 79.5,
     "accuracy": 0.0,
     "completeness": 0.0,
     "toolSelection": 0.0,
     "refsQuality": 0.0,
     "latency": 0.0
   },
-  "perItem": {}
+  "passRate": 80.0,
+  "avgLatencySec": 117.19,
+  "perItem": {
+    "q1_roe_basic": {
+      "totalScore": 57.0,
+      "passed": false,
+      "elapsedSec": 70.25,
+      "answerLen": 1644
+    },
+    "q2_dcf_valuation": {
+      "totalScore": 46.0,
+      "passed": false,
+      "elapsedSec": 220.28,
+      "answerLen": 4248
+    },
+    "q3_peer_compare": {
+      "totalScore": 84.0,
+      "passed": true,
+      "elapsedSec": 147.01,
+      "answerLen": 3760
+    },
+    "q4_credit": {
+      "totalScore": 95.0,
+      "passed": true,
+      "elapsedSec": 104.6,
+      "answerLen": 2764
+    },
+    "q5_sensitivity": {
+      "totalScore": 77.0,
+      "passed": true,
+      "elapsedSec": 127.0,
+      "answerLen": 3364
+    },
+    "q6_scenario": {
+      "totalScore": 78.0,
+      "passed": true,
+      "elapsedSec": 93.83,
+      "answerLen": 2995
+    },
+    "q7_regression": {
+      "totalScore": 95.0,
+      "passed": true,
+      "elapsedSec": 95.77,
+      "answerLen": 2822
+    },
+    "q8_dashboard": {
+      "totalScore": 78.0,
+      "passed": true,
+      "elapsedSec": 102.14,
+      "answerLen": 2965
+    },
+    "q9_growth_scan": {
+      "totalScore": 95.0,
+      "passed": true,
+      "elapsedSec": 68.36,
+      "answerLen": 2873
+    },
+    "q10_recall_check": {
+      "totalScore": 90.0,
+      "passed": true,
+      "elapsedSec": 142.62,
+      "answerLen": 1334
+    }
+  }
 }

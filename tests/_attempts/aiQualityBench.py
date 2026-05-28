@@ -304,6 +304,23 @@ def main() -> int:
             mark = "✓" if r["score"] >= 50.0 else "✗"
             print(f"          {mark} score={r['score']:.0f}% len={r['answerLen']} time={r['elapsedSec']:.2f}s")
         results.append(r)
+        # 질문 사이 메모리 회수 — critical_prefixes (_docs / _sections) 가 EMERGENCY 에서도
+        # 보존되는 회귀 가드. multi-company 질문 (peer_compare 3 사 등) 누적 시 6GB+ OOM
+        # 직전 박은 force-clear. 정확 path = Company 인스턴스 ._cache 비우기 + gc.collect.
+        try:
+            import gc as _gc
+
+            _gc.collect()
+            # 모든 Company 인스턴스의 cache 비우기
+            from dartlab.company import Company as _Company
+
+            if hasattr(_Company, "_instances"):
+                for inst in list(_Company._instances.values()):
+                    if hasattr(inst, "_cache"):
+                        inst._cache.clear()
+            _gc.collect()
+        except Exception:
+            pass
     print()
     if mode == "strict":
         print(_renderStrictReport(results))

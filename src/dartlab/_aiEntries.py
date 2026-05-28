@@ -25,6 +25,14 @@ def ask(question: str, **kwargs: Any) -> Any:
 
     stream = kwargs.pop("stream", True)
     raw = kwargs.pop("raw", False)
+    events = kwargs.pop("events", False)
+
+    # events=True → TraceEvent iterator 직접 반환 (auto-print / join 우회).
+    # 마스터 플랜 v2 측정 path (tests/_attempts/aiQualityBench.py strict mode 등) 진입점.
+    # 옛 wrapper 가 events=True 무시하고 매 TraceEvent 를 print(...) 한 뒤 "".join 으로
+    # TypeError 발생 → bench 가 silent fail → strict score 0% 위장. 회귀 가드.
+    if events:
+        return _ask(question, stream=stream, events=True, **kwargs)
 
     if raw:
         return _ask(question, stream=stream, **kwargs)
