@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class _GatherMacroMixin(GatherMixinContext):
-    """거시지표 메서드 모음 — Gather 클래스 4 메서드 + 2 클래스 상수."""
+    """거시지표 메서드 모음 — KR/US + Sprint 2 EU/GLOBAL (ECB/BIS/OECD/IMF SDMX)."""
 
-    _KNOWN_MARKETS = {"KR", "US"}
+    _KNOWN_MARKETS = {"KR", "US", "EU", "GLOBAL"}
 
     # eddmpython PRIORITY_INDICATORS (12개)
     _MACRO_KR = [
@@ -34,6 +34,36 @@ class _GatherMacroMixin(GatherMixinContext):
         "TRADE",
         "HOUSE_PRICE",
         "APT_PRICE",
+    ]
+
+    # Sprint 2 PR2 — ECB Data Portal 8 핵심 지표 (SDMX live, HF 미동기)
+    _MACRO_EU = [
+        "ECB_M3",
+        "ECB_HICP",
+        "ECB_DEPO_RATE",
+        "ECB_MRO_RATE",
+        "ECB_UNEMP",
+        "ECB_EURUSD",
+        "ECB_BUND_10Y",
+        "ECB_GDP_EA",
+    ]
+
+    # Sprint 2 PR3~5 — BIS + OECD + IMF 핵심 지표 (SDMX live)
+    _MACRO_GLOBAL = [
+        # BIS — 글로벌 정책금리 4 국 + 환율
+        "BIS_POLICY_RATE_US",
+        "BIS_POLICY_RATE_EU",
+        "BIS_POLICY_RATE_JP",
+        "BIS_POLICY_RATE_KR",
+        "BIS_EER_BROAD_USD",
+        # OECD — 선행지표 + 신뢰지수
+        "OECD_LEI",
+        "OECD_BCI",
+        "OECD_CCI",
+        # IMF — 환율 + 원유
+        "IMF_FX_USD_KRW",
+        "IMF_FX_USD_JPY",
+        "IMF_OIL_BRENT",
     ]
 
     # eddmpython fred/config.py INDICATORS (24개)
@@ -141,24 +171,37 @@ class _GatherMacroMixin(GatherMixinContext):
                 market = self._detectMarket(indicator)
             if market == "KR":
                 return self._macroKR(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
+            if market == "EU":
+                return self._macroEU(indicator, start=start, end=end)
+            if market == "GLOBAL":
+                return self._macroGlobal(indicator, start=start, end=end)
             return self._macroUS(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
         finally:
             emitGatherFetch("macro", (time.monotonic() - t0) * 1000, cacheHit=False, market=market)
 
     def _detectMarket(self, indicator: str) -> str:
-        """지표 코드로 market 자동 감지 — ECOS 카탈로그에 있으면 KR, 없으면 US.
+        """지표 코드로 market 자동 감지.
+
+        Sprint 2 prefix 룰 (ECB_/BIS_/OECD_/IMF_) 가 KR/US 보다 우선. 그 외:
+        ECOS 카탈로그에 있으면 KR, 없으면 US.
 
         Parameters
         ----------
         indicator : str
-            거시지표 코드 ("CPI", "FEDFUNDS" 등).
+            거시지표 코드 ("CPI", "FEDFUNDS", "ECB_M3", "BIS_POLICY_RATE_US" 등).
 
         Returns
         -------
         str
-            "KR" — ECOS 카탈로그에 등록된 지표.
-            "US" — 그 외 (FRED 지표로 간주).
+            "EU" — ``ECB_`` prefix.
+            "GLOBAL" — ``BIS_`` / ``OECD_`` / ``IMF_`` prefix.
+            "KR" — ECOS 카탈로그 등록.
+            "US" — 그 외 (FRED 가정).
         """
+        if indicator.startswith("ECB_"):
+            return "EU"
+        if indicator.startswith(("BIS_", "OECD_", "IMF_")):
+            return "GLOBAL"
         try:
             from dartlab.gather.ecos.catalog import getEntry
 
@@ -167,6 +210,167 @@ class _GatherMacroMixin(GatherMixinContext):
         except ImportError:
             pass
         return "US"
+
+    def _macroEU(
+        self,
+        indicator: str | None,
+        *,
+        start: str | None,
+        end: str | None,
+    ):
+        """EU 거시지표 — ECB SDMX live fetch.
+
+        Sig: ``_macroEU(indicator, *, start, end) -> pl.DataFrame | None``
+
+        Capabilities: ECB facade 위임 — 단일 indicator 또는 _MACRO_EU 전체.
+        AIContext: macro(market="EU") 의 backend.
+        Guide: HF 동기화 없음 — 항상 live SDMX. apiKey 불필요 (ECB 무인증).
+        When: market="EU" 분기 진입 시.
+        How: indicator None 이면 _MACRO_EU compare 흉내 (각 series 호출), 있으면 단일 series.
+
+        Args:
+            indicator: ``ECB_`` prefix ID 또는 None.
+            start: ``startPeriod`` (예: ``"2020-01"``). None 가능.
+            end: ``endPeriod``. None 가능.
+
+        Returns:
+            pl.DataFrame | None — SDMX 응답. 실패 시 logger.warning + None.
+
+        Raises:
+            없음 — 모든 예외 흡수.
+
+        Example:
+            >>> g.macro("EU", "ECB_M3")
+
+        See Also:
+            ``dartlab.gather.ecb.Ecb`` — 위임 대상.
+        """
+        t0 = time.monotonic()
+        try:
+            try:
+                from dartlab.gather.ecb import Ecb
+                from dartlab.gather.infra.sdmxClient import SdmxClientError
+            except ImportError:
+                log.debug("ecb 모듈 없음 — EU macro 수집 생략")
+                return None
+            e = Ecb()
+            try:
+                if indicator:
+                    return e.series(indicator, startPeriod=start, endPeriod=end)
+                # 전체 — _MACRO_EU 8 지표 wide
+                import polars as pl
+
+                out: pl.DataFrame | None = None
+                for ind in self._MACRO_EU:
+                    try:
+                        df = e.series(ind, startPeriod=start, endPeriod=end)
+                        df = df.select(["date", pl.col("value").alias(ind)])
+                        out = df if out is None else out.join(df, on="date", how="full", coalesce=True)
+                    except SdmxClientError as exc:
+                        log.debug("macro EU %s 실패: %s", ind, exc)
+                return out.sort("date") if out is not None else None
+            finally:
+                e.close()
+        except Exception as exc:  # noqa: BLE001 — silent observer
+            log.warning("macro EU 실패: %s", exc)
+            return None
+        finally:
+            emitGatherFetch("macroEU", (time.monotonic() - t0) * 1000, cacheHit=False, market="EU")
+
+    def _macroGlobal(
+        self,
+        indicator: str | None,
+        *,
+        start: str | None,
+        end: str | None,
+    ):
+        """GLOBAL 거시지표 — BIS/OECD/IMF SDMX live fetch.
+
+        Sig: ``_macroGlobal(indicator, *, start, end) -> pl.DataFrame | None``
+
+        Capabilities: prefix (``BIS_``/``OECD_``/``IMF_``) → 해당 facade 위임.
+        AIContext: macro(market="GLOBAL") 의 backend — 3 SDMX provider 공통 진입.
+        Guide: indicator 가 None 이면 _MACRO_GLOBAL compare. 단일 indicator 는 prefix 라우팅.
+        When: market="GLOBAL" 분기 진입.
+        How: indicator prefix → provider 선택 → facade.series 위임.
+
+        Args:
+            indicator: ``BIS_``/``OECD_``/``IMF_`` prefix ID 또는 None.
+            start: ``startPeriod``.
+            end: ``endPeriod``.
+
+        Returns:
+            pl.DataFrame | None — wide (전체) 또는 단일 series.
+
+        Raises:
+            없음 — 모든 예외 흡수.
+
+        Example:
+            >>> g.macro("GLOBAL", "BIS_POLICY_RATE_US")
+
+        See Also:
+            ``dartlab.gather.bis.Bis`` · ``dartlab.gather.oecd.Oecd`` · ``dartlab.gather.imf.Imf``.
+        """
+        t0 = time.monotonic()
+        try:
+            from dartlab.gather.infra.sdmxClient import SdmxClientError
+
+            try:
+                from dartlab.gather.bis import Bis
+                from dartlab.gather.imf import Imf
+                from dartlab.gather.oecd import Oecd
+            except ImportError:
+                log.debug("bis/oecd/imf 일부 모듈 없음 — GLOBAL macro 부분 생략")
+                return None
+
+            def _factoryFor(ind: str):
+                if ind.startswith("BIS_"):
+                    return Bis()
+                if ind.startswith("OECD_"):
+                    return Oecd()
+                if ind.startswith("IMF_"):
+                    return Imf()
+                return None
+
+            if indicator:
+                facade = _factoryFor(indicator)
+                if facade is None:
+                    log.warning("macro GLOBAL prefix 미인식: %s", indicator)
+                    return None
+                try:
+                    return facade.series(indicator, startPeriod=start, endPeriod=end)
+                except SdmxClientError as exc:
+                    log.warning("macro GLOBAL %s 실패: %s", indicator, exc)
+                    return None
+                finally:
+                    facade.close()
+
+            # 전체 — _MACRO_GLOBAL wide
+            import polars as pl
+
+            facades: dict[str, object] = {}
+            try:
+                out: pl.DataFrame | None = None
+                for ind in self._MACRO_GLOBAL:
+                    prov = ind.split("_", 1)[0]
+                    if prov not in facades:
+                        f = _factoryFor(ind)
+                        if f is None:
+                            continue
+                        facades[prov] = f
+                    try:
+                        df = facades[prov].series(ind, startPeriod=start, endPeriod=end)  # type: ignore[attr-defined]
+                        df = df.select(["date", pl.col("value").alias(ind)])
+                        out = df if out is None else out.join(df, on="date", how="full", coalesce=True)
+                    except SdmxClientError as exc:
+                        log.debug("macro GLOBAL %s 실패: %s", ind, exc)
+                return out.sort("date") if out is not None else None
+            finally:
+                for f in facades.values():
+                    if hasattr(f, "close"):
+                        f.close()  # type: ignore[attr-defined]
+        finally:
+            emitGatherFetch("macroGlobal", (time.monotonic() - t0) * 1000, cacheHit=False, market="GLOBAL")
 
     def _macroKR(
         self,
