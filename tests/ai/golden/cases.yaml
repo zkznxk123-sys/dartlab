@@ -290,3 +290,179 @@ cases:
     industryBranch:
       mustMention: true
       keywords: [원자재, LME, 아연]
+
+  # ── Korean disclosure depth (cryptic-discovering-kettle F 트랙) ──
+  # 7 sub-skill (executivePay · relatedPartyTx · notesDetail · governance · audit · sections · flow) × 1~2 case = 10
+  # 각 case 의 ground truth = tests/ai/golden/groundTruth/{caseId}.md (DART rceptNo + snippet 동결)
+  # runner = string-match scoring (LLM judge 의존 X)
+
+  - id: kd_005930_executivePay
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_executivePay
+    questionType: korean_disclosure
+    question: 삼성전자 5억 이상 임원 보수 명단 + 산정기준
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.executivePay
+      - engines.company.koreanDisclosure
+    expectedRefKinds:
+      - docRef
+      - tableRef
+    expectedRcePattern: '^\d{14}$'
+    requiredKeywords: [임원 보수, 5억 이상, 산정기준]
+    forbiddenPatterns:
+      - NEO-5  # 한국 individual disclosure 를 US proxy 와 1:1 매핑 금지
+    groundTruthFile: groundTruth/kd_005930_executivePay.md
+
+  - id: kd_035420_executivePay_unregistered
+    stockCode: '035420'
+    market: KR
+    industryHint: korean_disclosure_executivePay
+    questionType: korean_disclosure
+    question: NAVER 미등기 임원 보수 분포
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.executivePay
+    requiredKeywords: [미등기, 임원 보수]
+    groundTruthFile: groundTruth/kd_035420_executivePay_unregistered.md
+
+  - id: kd_005930_relatedPartyTx
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_rpt
+    questionType: korean_disclosure
+    question: 삼성전자 관계자 거래 100억 이상 항목
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.relatedPartyTx
+      - engines.company.koreanDisclosure
+    expectedRefKinds:
+      - docRef
+    expectedRcePattern: '^\d{14}$'
+    requiredKeywords: [관계자 거래, 100억, 공정거래법]
+    forbiddenPatterns:
+      - 10억 threshold  # 옛 룰 (2023-12 까지)
+    groundTruthFile: groundTruth/kd_005930_relatedPartyTx.md
+
+  - id: kd_005930_notesDetail_lease
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_notes
+    questionType: korean_disclosure
+    question: 삼성전자 리스 약정 주석
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.notesDetail
+    expectedRefKinds:
+      - docRef
+    requiredKeywords: [리스, K-IFRS]
+    groundTruthFile: groundTruth/kd_005930_notesDetail_lease.md
+
+  - id: kd_005930_governance_outsideDirectors
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_governance
+    questionType: korean_disclosure
+    question: 삼성전자 사외이사 비율 + 감사위원회 독립성
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.governance
+      - engines.company.koreanDisclosure
+    expectedRefKinds:
+      - docRef
+    expectedRcePattern: '^\d{14}$'
+    requiredKeywords: [사외이사, 감사위원회, 기업지배구조보고서]
+    groundTruthFile: groundTruth/kd_005930_governance_outsideDirectors.md
+
+  - id: kd_005930_audit_opinion
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_audit
+    questionType: korean_disclosure
+    question: 삼성전자 감사 의견 + 핵심감사사항 (KAM)
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.audit
+    expectedRefKinds:
+      - docRef
+    requiredKeywords: [감사보고서, 적정, KAM]
+    forbiddenPatterns:
+      - PCAOB ICFR  # 한국 K-IFRS audit 을 US PCAOB 양식과 1:1 매핑 금지
+    groundTruthFile: groundTruth/kd_005930_audit_opinion.md
+
+  - id: kd_005930_sections_memoryAsp
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_sections
+    questionType: korean_disclosure
+    question: 삼성전자 메모리 ASP 분기별 narrative
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.sections
+    expectedRefKinds:
+      - docRef
+      - tableRef
+    requiredKeywords: [사업의 내용, 메모리, ASP]
+    groundTruthFile: groundTruth/kd_005930_sections_memoryAsp.md
+
+  - id: kd_005930_flow_foreignNet
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_flow
+    questionType: korean_disclosure
+    question: 삼성전자 외국인 net-buy 최근 30 일 추세
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.flow
+    expectedRefKinds:
+      - tableRef
+    requiredKeywords: [외국인, 기관, net-buy]
+    groundTruthFile: groundTruth/kd_005930_flow_foreignNet.md
+
+  - id: kd_005930_separate_vs_consolidated
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_basis
+    questionType: korean_disclosure
+    question: 삼성전자 별도 vs 연결 영업이익 차이
+    expectedTools:
+      - ReadSkill
+      - EngineCall
+    expectedSkillRefs:
+      - engines.company.koreanDisclosure
+    expectedRefKinds:
+      - tableRef
+    requiredKeywords: [별도, 연결, basis]
+    forbiddenPatterns:
+      - parent only  # 한글 명시 필요
+    groundTruthFile: groundTruth/kd_005930_separate_vs_consolidated.md
+
+  - id: kd_routing_disclosure_kind
+    stockCode: '005930'
+    market: KR
+    industryHint: korean_disclosure_routing
+    questionType: korean_disclosure
+    question: 사업보고서 vs 기업지배구조보고서 차이
+    expectedTools:
+      - ReadSkill
+    expectedSkillRefs:
+      - engines.company.koreanDisclosure
+    requiredKeywords: [사업보고서, 기업지배구조보고서]
+    groundTruthFile: groundTruth/kd_routing_disclosure_kind.md
