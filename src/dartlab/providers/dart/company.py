@@ -2237,21 +2237,28 @@ class Company:
         Raises:
             없음.
         """
-        # plan snazzy-wibbling-origami PR-2 — default = plain (clean break).
-        # mixed 양식 (HTML 태그 + ALIGN 보존) 은 c.sectionsRaw() / c.sectionsAs(False).
-        # plain 양식 = show/agent/analysis 호환 — wide cell 에 태그 없음.
+        # plan snazzy-wibbling-origami SSOT — sections artifact (raw XML cell) + runtime strip.
+        # sectionsRaw 가 raw XML 그대로, sections 는 polars native regex strip 적용 (~0.3s).
+        # docs.parquet 완전 폐기 가능 — sections artifact 가 모든 정보 (raw + 메타) 보유.
         from dartlab.providers.dart.docs.sections.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
             loadSectionsWide,
+            stripTagsExpr,
         )
 
         _ensureFromHf(self.stockCode)
         if hasSectionsArtifact(self.stockCode):
-            cached = loadSectionsWide(self.stockCode, valueColumn="content_plain")
-            if cached is not None and not cached.is_empty():
-                return cached
-        # fallback — 옛 런타임 build + stripTagsFromSectionsDf 로 plain 변환.
+            wide = loadSectionsWide(self.stockCode)
+            if wide is not None and not wide.is_empty():
+                # period 컬럼들 (cell = raw XML) 일괄 strip — rust SIMD vectorize.
+                import re as _re
+
+                periodCols = [c for c in wide.columns if _re.fullmatch(r"\d{4}(?:Q[1-4])?", c)]
+                if periodCols:
+                    wide = wide.with_columns([stripTagsExpr(c) for c in periodCols])
+                return wide
+        # fallback — 옛 런타임 build (artifact 부재 환경, 옛 schema mixed).
         from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
 
         wide = buildSections(self)
@@ -2290,10 +2297,10 @@ class Company:
 
         _ensureFromHf(self.stockCode)
         if hasSectionsArtifact(self.stockCode):
-            cached = loadSectionsWide(self.stockCode, valueColumn="content")
-            if cached is not None and not cached.is_empty():
-                return cached
-        # fallback — 옛 런타임 build (artifact 부재 환경, mixed 그대로).
+            wide = loadSectionsWide(self.stockCode)
+            if wide is not None and not wide.is_empty():
+                return wide  # cell = raw XML 그대로 (viewer / parser 룰 변경)
+        # fallback — 옛 런타임 build (artifact 부재 환경).
         from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
 
         return buildSections(self)
