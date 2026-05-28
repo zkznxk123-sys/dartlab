@@ -154,3 +154,4 @@ tests/audit/_camelcaseIndex.json
 # 구 Svelte UI 백업 (2026-05-16 React 재구축 시) — 참고용 로컬 보존
 ui/web.backup/
 .venv-ci/
+ui/web/test-results/
