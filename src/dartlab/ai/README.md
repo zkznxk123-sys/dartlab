@@ -40,6 +40,31 @@ result = dartlab.ask("삼성전자 재무건전성")
 
 ---
 
+## 운영 KPI 측정 시작 (cryptic-discovering-kettle.md 트랙 2)
+
+마스터 플랜 박힌 측정 인프라 4 종 — 운영자가 환경변수 활성 후 1+ 일 누적 시 즉시 정량 측정 시작.
+
+```bash
+# 1. trace dump 활성 — 모든 runAgent 호출 자동 JSON dump (~/.dartlab/ai_trace/{sessionId}.json)
+export DARTLAB_AI_TRACE_DUMP=1
+
+# 2. Anthropic prompt cache 활성 (Claude provider 사용 시) — system + 마지막 tool spec ephemeral 마커
+export DARTLAB_ANTHROPIC_CACHE=1
+
+# 3. 1+ 일 운영 후 KPI digest 출력
+uv run python -X utf8 tests/audit/aiMetricsDigest.py --last 1d
+
+# 4. workbench 빈도 확인 (PR-W2 production 빈도 라인 갱신용)
+uv run python -X utf8 tests/audit/workbenchUsageDigest.py --last 7d
+
+# 5. recall A/B harness (PR-O6, scripted N=20 baseline)
+uv run --no-sync python -X utf8 tests/_attempts/memoryRecallAb.py
+```
+
+KPI 7 종 목표 + scripted baseline 은 `C:\Users\MSI\.claude\plans\cryptic-discovering-kettle.md` 의 "KPI 측정 결과" 표 참조. 운영 trace 1+ 주 누적 후 본 baseline 과 비교 → token 35% 감소 / cache hit > 60% / recall +15% 도달 검증.
+
+---
+
 ## 관련
 
 - [src/dartlab/skills/specs/runtime/workbenchEvidenceFlow.md](../skills/specs/runtime/workbenchEvidenceFlow.md) — evidence flow 본문 SSOT
