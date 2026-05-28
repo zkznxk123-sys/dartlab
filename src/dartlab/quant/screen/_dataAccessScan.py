@@ -186,6 +186,34 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
     """
     import polars as pl
 
+    # plan snazzy-wibbling-origami PR-4a-ii — sections artifact 우선 + 옛 호환 schema 변환.
+    # 옛 docs.parquet (long: year/section_title/section_content) 와 동일 schema 노출 →
+    # 호출자 (sentiment/risk/changes/disclosureDiff/edges 등 D.1 10 모듈) 0 변경.
+    # docs.parquet 폐기 (PR-4b) 후에도 sections artifact 만으로 동일 분석 가능.
+    from dartlab.providers.dart.docs.sections.sectionsStorage import (
+        hasSectionsArtifact,
+        loadSectionsLong,
+    )
+
+    if hasSectionsArtifact(stockCode):
+        long = loadSectionsLong(stockCode, columns=None)
+        if long is not None and not long.is_empty():
+            # period (예 "2025Q1" / "2025Q4" annual) → year (4 자리) + report_kind 분리.
+            # sections artifact 는 annual 을 "YYYYQ4" 양식으로 emit.
+            try:
+                return long.with_columns(
+                    pl.col("period").str.slice(0, 4).alias("year"),
+                    pl.col("period").str.slice(4).alias("report_kind"),
+                    pl.col("content_plain").alias("section_content")
+                    if "content_plain" in long.columns
+                    else pl.col("content").alias("section_content"),
+                    pl.col("topic").alias("section_title"),
+                )
+            except (pl.exceptions.ComputeError, pl.exceptions.SchemaError) as exc:
+                log.warning("sections artifact → docs 호환 schema 변환 실패 (%s): %s", stockCode, exc)
+                # fallback path 로 진행
+
+    # 옛 docs.parquet 직접 read (artifact 부재 시 또는 변환 실패).
     root = _scanDataRoot()
     path = root / "dart" / "docs" / f"{stockCode}.parquet"
     if not path.exists():
