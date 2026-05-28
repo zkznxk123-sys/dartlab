@@ -318,15 +318,29 @@ def fetchEdgarDocs(
     if not rows:
         raise ValueError(f"{ticker} EDGAR docs에서 section 추출 실패")
 
-    outPath.parent.mkdir(parents=True, exist_ok=True)
-    df = pl.DataFrame(rows)
-    summary = summarizeEdgarDocsFrame(df)
-    if strictQuality:
-        _assertEdgarDocsQuality(summary)
-    df.write_parquet(outPath)
-    if skippedFilings:
-        emit("edgar:docs_skip", ticker=ticker, count=len(skippedFilings))
-    emit("edgar:docs_save", path=str(outPath))
+    # plan delegated-prancing-tower PR-E7b — 운영자 트리거 게이트.
+    # DARTLAB_EDGAR_DOCS_DEPRECATED=1 환경변수 set 시 옛 docs.parquet emit 자동 skip.
+    # 운영자는 PR-E7a 의 sectionsParityEdgar 가 4 주 연속 0 violations + D.1 회귀 0 +
+    # viewer Playwright 0 + sync 14 일 무사고 모두 통과 확인 후 환경변수 set + 1 회 sync.
+    # 그 시점부터 신 sections artifact 단독 운영. HF 의 옛 artifact 실제 삭제는 별 운영
+    # 행동 (HF API curl) — 본 코드 path 외.
+    import os as _os
+
+    docsDeprecated = _os.environ.get("DARTLAB_EDGAR_DOCS_DEPRECATED", "").strip() in ("1", "true", "True")
+
+    if not docsDeprecated:
+        outPath.parent.mkdir(parents=True, exist_ok=True)
+        df = pl.DataFrame(rows)
+        summary = summarizeEdgarDocsFrame(df)
+        if strictQuality:
+            _assertEdgarDocsQuality(summary)
+        df.write_parquet(outPath)
+        if skippedFilings:
+            emit("edgar:docs_skip", ticker=ticker, count=len(skippedFilings))
+        emit("edgar:docs_save", path=str(outPath))
+    else:
+        emit("edgar:docs_skip_deprecated", ticker=ticker, reason="DARTLAB_EDGAR_DOCS_DEPRECATED=1")
+        _log.info("docs.parquet emit skip (%s) — DARTLAB_EDGAR_DOCS_DEPRECATED gate active", ticker)
 
     # PR-E2 dual-write — sections artifact 도 동시 emit. emit 실패 시 옛 docs.parquet 만
     # 보존 (warning + 진행). PR-E7 안전 게이트 통과 전까지 옛 path 단독으로 fallback 가능.

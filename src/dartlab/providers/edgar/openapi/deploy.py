@@ -123,6 +123,16 @@ def deployEdgarToHF(
 
     cats = categories or ["scan", "docs", "sections"]
 
+    # plan delegated-prancing-tower PR-E7b — 운영자 트리거 게이트.
+    # DARTLAB_EDGAR_DOCS_DEPRECATED=1 환경변수 set 시 'docs' 카테고리 HF push 자동 제외.
+    # PR-E7a 의 sectionsParityEdgar 4 주 연속 0 violations 통과 후 운영자가 env set.
+    import os as _os
+
+    if _os.environ.get("DARTLAB_EDGAR_DOCS_DEPRECATED", "").strip() in ("1", "true", "True"):
+        if "docs" in cats:
+            cats = [c for c in cats if c != "docs"]
+            _log.info("[deploy] DARTLAB_EDGAR_DOCS_DEPRECATED gate — 'docs' 카테고리 자동 제외")
+
     validCats: list[str] = []
     for cat in cats:
         if cat in _BULK_ORIGIN_CATEGORIES:

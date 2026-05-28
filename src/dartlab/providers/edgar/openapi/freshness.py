@@ -75,7 +75,31 @@ def _saveFreshnessResult(result: EdgarFreshnessResult, category: str = "edgarDoc
 
 
 def _loadLocalAccessionNos(ticker: str) -> tuple[set[str], str | None]:
-    """로컬 docs parquet에서 accession_no 세트 + 최신 filing_date."""
+    """로컬 sections artifact (_index.parquet) 우선, docs.parquet fallback.
+
+    plan delegated-prancing-tower PR-E7b — sections _index.parquet 가 freshness diff
+    의 1 차 source. 옛 docs.parquet 는 fallback (PR-E7b 게이트 활성 시 skip).
+    DARTLAB_EDGAR_DOCS_DEPRECATED=1 시 docs.parquet path 자동 skip.
+    """
+    import os as _os
+
+    # 1차 — sections artifact 의 _index.parquet (PR-E1 sectionsBuilder 결과).
+    try:
+        from dartlab.providers.edgar.docs.sections.sectionsStorage import loadSectionsIndex
+
+        idx = loadSectionsIndex(ticker)
+        if idx is not None and not idx.is_empty() and "accession_no" in idx.columns:
+            accessions = set(idx["accession_no"].drop_nulls().to_list())
+            latestDate = idx["filing_date"].drop_nulls().max() if "filing_date" in idx.columns else None
+            if accessions:
+                return accessions, str(latestDate) if latestDate else None
+    except (ImportError, OSError, pl.exceptions.ComputeError):
+        pass
+
+    # 2차 — 옛 docs.parquet (PR-E7b gate active 시 skip).
+    if _os.environ.get("DARTLAB_EDGAR_DOCS_DEPRECATED", "").strip() in ("1", "true", "True"):
+        return set(), None
+
     path = _edgarDataDir("edgarDocs") / f"{ticker}.parquet"
     if not path.exists():
         return set(), None
