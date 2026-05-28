@@ -398,6 +398,43 @@ def apiCompanySections(code: str, request: Request, response: Response):
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
+@router.get("/api/company/{code}/sections/raw")
+def apiCompanySectionsRaw(
+    code: str,
+    request: Request,
+    period: str | None = Query(None, description="단일 period 필터"),
+    sectionTitle: str | None = Query(None, alias="section_title", description="단일 section_title 필터"),
+    response: Response = None,
+):
+    """raw XML 원본 — 모든 DART 태그 보존. viewer / parser 룰 변경 입력.
+
+    plan snazzy-wibbling-origami. sections artifact 의 ``_raw.parquet`` 직접 응답:
+    P / SPAN / TABLE / TD ALIGN / AUNIT / ADENO / CLASS / USERMARK 등 모든 태그.
+    frontend renderer 가 raw XML 직접 파싱 가능. docs.parquet 우회 (사용자 측 폐기 path).
+    """
+    try:
+        company = getCompany(code)
+        from dartlab.providers.dart.docs.sections.sectionsStorage import loadSectionsRawXml
+
+        periods_filter = [period] if period else None
+        df = loadSectionsRawXml(company.stockCode, periods=periods_filter)
+        if df is None:
+            raise HTTPException(status_code=404, detail=f"raw XML artifact 부재 (code={code})")
+        if sectionTitle:
+            import polars as pl
+
+            df = df.filter(pl.col("section_title") == sectionTitle)
+        data = {
+            "stockCode": company.stockCode,
+            "corpName": company.corpName,
+            "rowCount": df.height,
+            "rows": df.to_dicts(),
+        }
+        return etagResponse(request, response, data, maxAge=300, swr=1800)
+    except HANDLED_API_ERRORS as exc:
+        raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
+
+
 @router.get("/api/company/{code}/init")
 def apiCompanyInit(
     code: str,

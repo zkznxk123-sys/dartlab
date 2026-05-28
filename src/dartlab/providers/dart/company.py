@@ -2327,6 +2327,45 @@ class Company:
             periods=periods,
         )
 
+    def sectionsLazy(self, *, periods: list[str] | None = None):
+        """sections artifact LazyFrame — 메모리 한 자리 MB 달성 path.
+
+        plan snazzy-wibbling-origami. polars ``scan_parquet`` LazyFrame 직접 반환.
+        호출자가 ``.select(["topic","period","content_plain"])`` 같은 lazy projection +
+        ``.filter`` + ``.collect()`` 으로 필요한 columnar projection 만 페이지 fault.
+        wide pivot collect 회피 — 한 종목당 RSS 증분 ~수 MB.
+
+        Args:
+            periods: 특정 period 만 scan. None = 전체.
+
+        Returns:
+            ``pl.LazyFrame`` — sections artifact long format. 부재 시 None.
+
+        Example::
+
+            c = Company("005930")
+            lf = c.sectionsLazy()
+            df = lf.select(["topic", "period", "content_plain"]).filter(
+                pl.col("period").str.starts_with("2025")
+            ).collect()
+        """
+        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+            _ensureFromHf,
+            hasSectionsArtifact,
+            listAvailablePeriods,
+            sectionsPath,
+        )
+
+        _ensureFromHf(self.stockCode)
+        if not hasSectionsArtifact(self.stockCode):
+            return None
+        available = listAvailablePeriods(self.stockCode)
+        targetPeriods = available if periods is None else [p for p in available if p in set(periods)]
+        if not targetPeriods:
+            return None
+        files = [str(sectionsPath(self.stockCode, p)) for p in targetPeriods]
+        return pl.scan_parquet(files)
+
     def sectionsLong(
         self, *, columns: list[str] | None = None, periods: list[str] | None = None
     ) -> pl.DataFrame | None:
