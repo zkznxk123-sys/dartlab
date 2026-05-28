@@ -1,9 +1,13 @@
-"""전체 공시 원문 수집기 — 2단계 증분 수집 + raw HTML 전체 태그 보존.
+"""전체 공시 원문 수집기 — 2단계 증분 수집 + raw 본문 생긴 그대로 보존.
 
 Phase 1: 목록 수집 (collectMeta) — 일자별 API 1회, 매우 가볍다.
 Phase 2: 원문 수집 (fillContent) — 건당 API 1회, 키 소비 큼. 본문은 zip 안 largest
-HTML 파일을 *raw 그대로* (`content_html` 컬럼) 저장한다. 태그·테이블·구조 모두
-보존. plain text 가 필요한 소비자는 BeautifulSoup `get_text()` 등으로 변환.
+파일을 *생긴 그대로* (`content_raw` 컬럼) 저장한다. DART 는 공시 종류별로 두 포맷을
+섞어 반환한다 — (a) dart4.xsd XML (`<DOCUMENT>` / `<TITLE ATOC ...>` / `<TABLE>`),
+(b) xforms HTML (`<html><head><meta charset="euc-kr"><STYLE>.xforms ...</STYLE>`).
+모든 태그·attribute 보존. plain text 가 필요한 소비자는 BeautifulSoup ``lxml``
+parser 의 `get_text()` 등으로 변환 (lxml 은 XML/HTML 양쪽 안전). sections
+`_raw.parquet` 와 동일 비전.
 
 목록을 먼저 전부 모은 뒤, 원문은 키 여유 있을 때 점진적으로 채운다.
 
@@ -59,10 +63,11 @@ def _allFilingsDir() -> Path:
     return d
 
 
-def _collectOneHtml(client: DartClient, rceptNo: str) -> str | None:
-    """단일 공시 원문 raw HTML 반환 — 모든 태그·테이블·구조 보존.
+def _collectOneRaw(client: DartClient, rceptNo: str) -> str | None:
+    """단일 공시 원문 raw 본문 반환 — 생긴 그대로, 모든 태그·attribute 보존.
 
-    zip 안 largest 파일을 utf-8/euc-kr/cp949 순으로 디코딩만 한다. 후처리 0.
+    DART 가 반환하는 zip 안 largest 파일은 공시 종류별로 dart4.xsd XML 또는 xforms
+    HTML 두 포맷 중 하나. utf-8/euc-kr/cp949 순으로 디코딩만 한다. 후처리 0.
     빈 문자열·디코딩 실패는 None.
     """
     try:
@@ -85,20 +90,20 @@ def _collectOneHtml(client: DartClient, rceptNo: str) -> str | None:
     largest = max(names, key=lambda n: zf.getinfo(n).file_size)
     content = zf.read(largest)
 
-    htmlContent: str | None = None
+    rawContent: str | None = None
     for enc in ("utf-8", "euc-kr", "cp949"):
         try:
-            htmlContent = content.decode(enc)
+            rawContent = content.decode(enc)
             break
         except (UnicodeDecodeError, LookupError):
             continue
-    if htmlContent is None:
-        htmlContent = content.decode("utf-8", errors="replace")
+    if rawContent is None:
+        rawContent = content.decode("utf-8", errors="replace")
 
-    if not htmlContent.strip():
+    if not rawContent.strip():
         return None
 
-    return htmlContent
+    return rawContent
 
 
 # ═══════════════════════════════════════════
@@ -308,9 +313,9 @@ def fillContent(
             skippedPeriodic += 1
             continue
 
-        html = _collectOneHtml(client, rceptNo)
+        raw = _collectOneRaw(client, rceptNo)
 
-        if html:
+        if raw:
             success += 1
         else:
             empty += 1
@@ -325,7 +330,7 @@ def fillContent(
                 "rcept_no": rceptNo,
                 "report_nm": row["report_nm"],
                 "flr_nm": row.get("flr_nm", ""),
-                "content_html": html,
+                "content_raw": raw,
             }
         )
 

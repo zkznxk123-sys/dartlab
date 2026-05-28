@@ -76,60 +76,108 @@ def test_stats_callable() -> None:
     assert callable(stats)
 
 
-def test_fill_content_schema_html(monkeypatch, tmp_path) -> None:
-    """fillContent 결과 schema 는 content_html 만 — section_* 3 컬럼 모두 부재.
-
-    HTML 태그 (`<table>` · `<p>`) 가 raw 그대로 보존되는지 확인. 정공법 클린 컷오버
-    회귀 가드 (옛 section_content / section_title / section_order 컬럼이 다시 생기면
-    실패).
-    """
-    import dartlab.config as _cfg
-    from dartlab.providers.dart.openapi import allFilingsCollector as mod
-
-    # 격리된 임시 dataDir
-    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
-    outDir = mod._allFilingsDir()
-
-    # meta parquet 1 row 작성 (정기공시 패턴 회피)
+def _writeStubMeta(outDir, period: str, rceptNo: str) -> None:
+    """공통 meta fixture writer."""
     metaRow = {
         "corp_code": "00126380",
         "corp_name": "삼성전자",
         "stock_code": "005930",
         "corp_cls": "Y",
-        "rcept_dt": "20260527",
-        "rcept_no": "20260527000001",
+        "rcept_dt": period,
+        "rcept_no": rceptNo,
         "report_nm": "주요사항보고서(자기주식취득결정)",
         "flr_nm": "삼성전자",
     }
-    pl.DataFrame([metaRow]).write_parquet(outDir / "20260527_meta.parquet")
+    pl.DataFrame([metaRow]).write_parquet(outDir / f"{period}_meta.parquet")
 
-    # _collectOneHtml stub — raw HTML with 태그 보존
-    stubHtml = (
-        "<html><body><p>본문 시작</p><table><tr><td>항목</td><td>값</td></tr></table><p>본문 끝</p></body></html>"
-    )
 
-    def stubCollect(client, rceptNo):
-        return stubHtml
-
-    monkeypatch.setattr(mod, "_collectOneHtml", stubCollect)
-
-    # client 도 stub (실제 API 호출 차단)
-    class _StubClient:
-        pass
-
-    df = mod.fillContent("20260527", client=_StubClient(), showProgress=False)
-
-    assert df is not None, "fillContent 결과 None — 승격 차단됐을 가능성"
+def _assertSchema(df) -> None:
+    """공통 schema 회귀 가드 — content_raw 만, section_* 부재."""
     cols = set(df.columns)
-    assert "content_html" in cols, f"content_html 컬럼 없음: {cols}"
+    assert "content_raw" in cols, f"content_raw 컬럼 없음: {cols}"
     assert "section_content" not in cols, f"옛 section_content 컬럼 잔존: {cols}"
     assert "section_title" not in cols, f"옛 section_title 컬럼 잔존: {cols}"
     assert "section_order" not in cols, f"옛 section_order 컬럼 잔존: {cols}"
 
-    htmlValue = df["content_html"][0]
-    assert "<table>" in htmlValue, "HTML 태그 손실 — raw 보존 실패"
-    assert "<p>" in htmlValue, "HTML 태그 손실 — raw 보존 실패"
 
-    # _meta 는 승격 후 제거됨
+class _StubClient:
+    pass
+
+
+def test_fill_content_schema_raw_xml(monkeypatch, tmp_path) -> None:
+    """fillContent 결과 schema 는 content_raw 만, DART dart4.xsd XML 태그·attribute 보존.
+
+    DART 가 반환하는 두 포맷 중 (a) dart4.xsd XML 회귀 가드 — `<DOCUMENT>` /
+    `<TITLE ATOC ...>` / `<TABLE>` 와 ATOC / AASSOCNOTE / ACODE attribute 가 raw
+    그대로 살아있는지 확인.
+    """
+    import dartlab.config as _cfg
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    outDir = mod._allFilingsDir()
+    _writeStubMeta(outDir, "20260527", "20260527000001")
+
+    stubXml = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<DOCUMENT xsi:noNamespaceSchemaLocation="dart4.xsd">'
+        '<DOCUMENT-NAME ACODE="10136">주요사항보고서</DOCUMENT-NAME>'
+        '<BODY ATOCID="32">'
+        '<TITLE ATOC="Y" AASSOCNOTE="COVER" ATOCID="1">개요</TITLE>'
+        "<P>본문 시작</P>"
+        '<TABLE BORDER="1"><TR><TD>항목</TD><TD>값</TD></TR></TABLE>'
+        "<P>본문 끝</P>"
+        "</BODY></DOCUMENT>"
+    )
+    monkeypatch.setattr(mod, "_collectOneRaw", lambda client, rceptNo: stubXml)
+
+    df = mod.fillContent("20260527", client=_StubClient(), showProgress=False)
+    assert df is not None
+    _assertSchema(df)
+
+    raw = df["content_raw"][0]
+    assert "<DOCUMENT" in raw
+    assert "<TITLE" in raw
+    assert "<TABLE" in raw
+    assert 'ATOC="Y"' in raw
+    assert 'AASSOCNOTE="COVER"' in raw
+
     assert not (outDir / "20260527_meta.parquet").exists()
     assert (outDir / "20260527.parquet").exists()
+
+
+def test_fill_content_schema_raw_html(monkeypatch, tmp_path) -> None:
+    """fillContent 결과 schema 는 content_raw 만, xforms HTML 태그·attribute 보존.
+
+    DART 가 반환하는 두 포맷 중 (b) xforms HTML 회귀 가드 — `<html>` / `<head>` /
+    `<STYLE>` / `<meta charset>` 와 xforms CSS class 가 raw 그대로 살아있는지 확인.
+    """
+    import dartlab.config as _cfg
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    outDir = mod._allFilingsDir()
+    _writeStubMeta(outDir, "20260528", "20260528000002")
+
+    stubHtml = (
+        "<html><head>"
+        '<meta content="text/html; charset=euc-kr" http-equiv="Content-Type">'
+        "<STYLE>.xforms * { font-family: 돋움체; } .xforms_title * { font-size: 13pt; }</STYLE>"
+        '</head><body class="xforms">'
+        '<table><tr><td class="xforms_title">최대주주변동</td></tr></table>'
+        "</body></html>"
+    )
+    monkeypatch.setattr(mod, "_collectOneRaw", lambda client, rceptNo: stubHtml)
+
+    df = mod.fillContent("20260528", client=_StubClient(), showProgress=False)
+    assert df is not None
+    _assertSchema(df)
+
+    raw = df["content_raw"][0]
+    assert "<html>" in raw
+    assert "<STYLE>" in raw
+    assert "xforms" in raw
+    assert "charset=euc-kr" in raw
+
+    assert not (outDir / "20260528_meta.parquet").exists()
+    assert (outDir / "20260528.parquet").exists()

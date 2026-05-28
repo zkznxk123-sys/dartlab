@@ -75,9 +75,9 @@ def rebuildMain(
     metaRecs: list[dict] = []
     totalDocs = 0
 
-    # allFilings 는 content_html (raw HTML 모든 태그 보존) 컬럼만 갖는다. docs/ 는 옛
-    # section_content (XML chunk + 분할) 그대로. allFilings 측은 BeautifulSoup get_text
-    # 로 검색용 텍스트 추출.
+    # allFilings 는 content_raw (DART XML/HTML 생긴 그대로 모든 태그 보존) 컬럼만
+    # 갖는다. docs/ 는 옛 section_content (XML chunk + 분할) 그대로. allFilings 측은
+    # BeautifulSoup ``lxml`` parser (XML/HTML 양쪽 안전) get_text 로 검색용 텍스트 추출.
     from bs4 import BeautifulSoup
 
     def feedDf(df: pl.DataFrame, source: str, *, contentColumn: str) -> int:
@@ -86,8 +86,8 @@ def rebuildMain(
         Args:
             df: parquet DataFrame.
             source: 인덱스 라벨 (예 ``"main"`` / ``"delta"``).
-            contentColumn: 본문 컬럼명. ``"content_html"`` 이면 BeautifulSoup get_text
-                변환, ``"section_content"`` 이면 그대로 사용.
+            contentColumn: 본문 컬럼명. ``"content_raw"`` 이면 BeautifulSoup ``lxml``
+                parser get_text 변환, ``"section_content"`` 이면 그대로 사용.
 
         Returns:
             추가된 doc 수.
@@ -96,12 +96,12 @@ def rebuildMain(
             없음.
 
         Example:
-            >>> feedDf(df, "allFilings", contentColumn="content_html")  # doctest: +SKIP
+            >>> feedDf(df, "allFilings", contentColumn="content_raw")  # doctest: +SKIP
         """
         added = 0
         for row in df.iter_rows(named=True):
             raw = row.get(contentColumn) or ""
-            if contentColumn == "content_html" and raw:
+            if contentColumn == "content_raw" and raw:
                 raw = BeautifulSoup(raw, "lxml").get_text(" ", strip=True)
             content = raw[:contentLimit]
             builder.addDoc(content)
@@ -131,10 +131,10 @@ def rebuildMain(
             _log.info(f"[main] allFilings 스트리밍: {len(files)}개 파일")
         for i, f in enumerate(files):
             try:
-                df = pl.read_parquet(f).filter(pl.col("content_html").is_not_null())
+                df = pl.read_parquet(f).filter(pl.col("content_raw").is_not_null())
             except (pl.exceptions.PolarsError, OSError):
                 continue
-            totalDocs += feedDf(df, "allFilings", contentColumn="content_html")
+            totalDocs += feedDf(df, "allFilings", contentColumn="content_raw")
             del df
             if (i + 1) % 50 == 0:
                 gc.collect()
@@ -228,14 +228,14 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     rows: list[dict] = []
     for f in files:
         try:
-            df = pl.read_parquet(f).filter(pl.col("content_html").is_not_null())
+            df = pl.read_parquet(f).filter(pl.col("content_raw").is_not_null())
         except (pl.exceptions.PolarsError, OSError):
             continue
         for row in df.iter_rows(named=True):
-            html = row.get("content_html") or ""
+            raw = row.get("content_raw") or ""
             # buildContentSegment 는 section_content 컬럼을 본문으로 읽으므로 변환 결과를
-            # 동일 키로 채워준다 (스키마 호환).
-            row["section_content"] = BeautifulSoup(html, "lxml").get_text(" ", strip=True) if html else ""
+            # 동일 키로 채워준다 (스키마 호환). lxml parser 는 XML/HTML 양쪽 안전.
+            row["section_content"] = BeautifulSoup(raw, "lxml").get_text(" ", strip=True) if raw else ""
             row.setdefault("section_order", 0)
             row.setdefault("section_title", "")
             row["source"] = "allFilings"

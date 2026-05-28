@@ -194,8 +194,9 @@ def buildNgramIndex(
     # docs (사업보고서 등) 는 여전히 section 분할이라 (rcept_no, section_order) 필요.
     existingKeys: set[tuple[str, int]] = set()
 
-    # allFilings — raw HTML 단일 컬럼 (content_html). 표시용 text 는 BeautifulSoup
-    # get_text 로 변환. 토큰화는 report_nm 만 사용 (section_title / contentHead 없음).
+    # allFilings — raw 본문 단일 컬럼 (content_raw, DART XML/HTML 생긴 그대로). 표시용
+    # text 는 BeautifulSoup ``lxml`` parser (XML/HTML 양쪽 안전) get_text 로 변환.
+    # 토큰화는 report_nm 만 사용 (section_title / contentHead 없음).
     if parquetPaths:
         from bs4 import BeautifulSoup
 
@@ -210,9 +211,9 @@ def buildNgramIndex(
                         "stock_code",
                         "rcept_dt",
                         "report_nm",
-                        "content_html",
+                        "content_raw",
                     ],
-                ).filter(pl.col("content_html").is_not_null())
+                ).filter(pl.col("content_raw").is_not_null())
             except (pl.exceptions.PolarsError, OSError):
                 continue
 
@@ -232,8 +233,8 @@ def buildNgramIndex(
                         seenStems.add(stemId)
                         invertedIndex[stemId].append(globalDocId)
 
-                html = row.get("content_html") or ""
-                displayText = BeautifulSoup(html, "lxml").get_text(" ", strip=True)[:2000] if html else ""
+                raw = row.get("content_raw") or ""
+                displayText = BeautifulSoup(raw, "lxml").get_text(" ", strip=True)[:2000] if raw else ""
                 allMeta.append(
                     {
                         "rcept_no": row["rcept_no"],
