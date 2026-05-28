@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
@@ -117,10 +118,18 @@ def runAgent(
     # scan.ratio 4 회 연속 cached 회귀 가드).
     tracker = _ToolCallTracker(failureStreakLimit=2, cacheHitBlockLimit=1)
 
+    # 마스터 플랜 트랙 2 PR-O2 — 첫 chunk 까지 ms 측정용. session 전체 1 회만 emit.
+    session_start_ms = time.monotonic()
+    first_chunk_emitted = False
+
     for iteration in range(maxIterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
         # 회귀 가드: 노드 추가 아님. 기계적 메모리 관리만.
         _microcompact(messages, keepLast=2)
+
+        # PR-O2 — turn timing. stream 진입/종료 ms 분리 측정.
+        turn_start_ms = time.monotonic()
+        stream_first_chunk_ms: float | None = None
 
         # lazy 소비 — provider 가 토큰 yield 하는 즉시 SSE chunk emit (typing 효과).
         # 회귀 가드: list(streamProvider(...)) 로 한 번에 모은 뒤 풀면 LLM 응답 끝까지 블록 →
@@ -132,6 +141,14 @@ def runAgent(
                     final_chunk = chunk
                     continue
                 if chunk.text:
+                    if stream_first_chunk_ms is None:
+                        stream_first_chunk_ms = (time.monotonic() - turn_start_ms) * 1000.0
+                    if not first_chunk_emitted:
+                        first_chunk_emitted = True
+                        yield TraceEvent(
+                            "first_chunk_ms",
+                            {"ms": round((time.monotonic() - session_start_ms) * 1000.0, 2), "iter": iteration},
+                        )
                     text_emitted += chunk.text
                     yield TraceEvent("chunk", {"text": chunk.text})
         except Exception as exc:  # noqa: BLE001
@@ -238,6 +255,17 @@ def runAgent(
                 resultDict = _runOrFallback(lambda tc=tc: executeTool(tc.name, tc.args), tc.name, parallel=False)
                 tracker.recordResult(cache_key, tc.name, resultDict)
                 yield from _finalizeResult(tc, resultDict, refs, artifacts, messages)
+
+            # PR-O2 — turn 종료 timing emit. stream_first_chunk_ms 는 None 가능 (tool_calls only turn).
+            yield TraceEvent(
+                "turn_timing",
+                {
+                    "iter": iteration,
+                    "elapsedMs": round((time.monotonic() - turn_start_ms) * 1000.0, 2),
+                    "firstChunkMs": (round(stream_first_chunk_ms, 2) if stream_first_chunk_ms is not None else None),
+                    "toolCallCount": len(turn.toolCalls),
+                },
+            )
             continue  # 다시 호출
 
         # tool_calls 없음 → 정상 종료 (LLM 이 답안 작성 완료)
@@ -246,6 +274,17 @@ def runAgent(
             text_emitted = turn.content
             for piece in _chunks(turn.content, size=64):
                 yield TraceEvent("chunk", {"text": piece})
+        # PR-O2 — 정상 종료 turn timing.
+        yield TraceEvent(
+            "turn_timing",
+            {
+                "iter": iteration,
+                "elapsedMs": round((time.monotonic() - turn_start_ms) * 1000.0, 2),
+                "firstChunkMs": (round(stream_first_chunk_ms, 2) if stream_first_chunk_ms is not None else None),
+                "toolCallCount": 0,
+                "final": True,
+            },
+        )
         _wireChatNativeMemory(question=userText, answerText=text_emitted, refs=refs, kwargs=_unused)
         yield TraceEvent(
             "done",
