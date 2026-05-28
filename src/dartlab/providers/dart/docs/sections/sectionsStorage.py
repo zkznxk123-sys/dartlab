@@ -198,6 +198,34 @@ def loadSectionsWide(
     dropCols = [c for c in _AUX_COLS | otherContent | _INTERNAL_COLS if c in long.columns]
     if dropCols:
         long = long.drop(dropCols)
+
+    # plan v4.1 — rowIdentityKey (topic, parentNorm, leafNorm, anchorHash) 기준 collapse.
+    # 초강화 수평화 SSOT — heading prefix normalize + content anchor 단어 fingerprint
+    # 결합. 같은 의미 sub-section 의 본문이 매년 살짝 달라도 anchor 단어 (예 "관계기업",
+    # "공정가치") 가 같으면 같은 row 로 cross-period 매칭. polars SIMD only, 외부 ML 0.
+    # textComparablePathKey 는 legacy 호환 — granularity="leaf" fallback path.
+    pivotKey = "rowIdentityKey" if "rowIdentityKey" in long.columns else "textComparablePathKey"
+    if pivotKey in long.columns:
+        groupKeys = ["topic", pivotKey, "period"]
+        metaCols = [c for c in long.columns if c not in groupKeys and c != valueColumn]
+        collapsed = long.group_by(groupKeys).agg(
+            [pl.col(valueColumn).str.concat("\n\n").alias(valueColumn)] + [pl.col(c).first().alias(c) for c in metaCols]
+        )
+        try:
+            pivoted = collapsed.pivot(
+                values=valueColumn,
+                index=["topic", pivotKey],
+                on="period",
+                aggregate_function="first",
+            )
+            # representative meta — 같은 (topic, pivotKey) 의 첫 row.
+            if metaCols:
+                meta = collapsed.group_by(["topic", pivotKey]).agg([pl.col(c).first().alias(c) for c in metaCols])
+                pivoted = pivoted.join(meta, on=["topic", pivotKey], how="left")
+            return pivoted
+        except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
+            _log.warning("sectionsWide collapse-pivot 실패 (%s): %s", stockCode, exc)
+            # fallback to legacy pivot
     indexCols = [c for c in long.columns if c not in ("period", valueColumn)]
     try:
         return long.pivot(

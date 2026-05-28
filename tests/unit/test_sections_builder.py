@@ -34,6 +34,9 @@ _EXPECTED_COLS = frozenset(
         "textLevel",
         "textPath",
         "textSemanticPathKey",
+        "textComparablePathKey",
+        "rowIdentityKey",
+        "anchorHash",
         "segmentKey",
         "content_raw",
         "period",
@@ -65,7 +68,7 @@ def _hasZips(code: str) -> bool:
 @pytest.mark.unit
 @pytest.mark.parametrize("code", _BASELINE)
 def testSchema10Cols(code: str) -> None:
-    """sections artifact schema = 정확히 10 컬럼."""
+    """sections artifact schema = 정확히 13 컬럼 (v4.1 — rowIdentityKey + anchorHash 추가)."""
     df = _latestPeriodDf(code)
     if df is None:
         pytest.skip(f"{code} sections artifact 부재")

@@ -82,10 +82,18 @@ def testEdgarSchemaParity() -> None:
 
 @pytest.mark.architecture
 def testProviderAgnosticColsConstant() -> None:
-    """PROVIDER_AGNOSTIC_COLS 가 정확히 10 컬럼 (plan v4 §1 #4)."""
-    assert len(PROVIDER_AGNOSTIC_COL_NAMES) == 10, (
-        f"PROVIDER_AGNOSTIC_COLS = {len(PROVIDER_AGNOSTIC_COL_NAMES)} 컬럼, 10 기대"
+    """PROVIDER_AGNOSTIC_COLS 가 정확히 13 컬럼 (plan v4.1 — rowIdentityKey/anchorHash 추가)."""
+    assert len(PROVIDER_AGNOSTIC_COL_NAMES) == 13, (
+        f"PROVIDER_AGNOSTIC_COLS = {len(PROVIDER_AGNOSTIC_COL_NAMES)} 컬럼, 13 기대"
     )
     # 필수 컬럼 — drop 불가.
-    required = {"topic", "blockType", "blockOrder", "textPath", "content_raw", "period"}
+    required = {
+        "topic",
+        "blockType",
+        "blockOrder",
+        "textPath",
+        "rowIdentityKey",
+        "content_raw",
+        "period",
+    }
     assert required <= PROVIDER_AGNOSTIC_COL_NAMES, f"필수 컬럼 누락: {required - PROVIDER_AGNOSTIC_COL_NAMES}"
