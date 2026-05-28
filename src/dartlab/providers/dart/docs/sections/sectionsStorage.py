@@ -1,25 +1,20 @@
-"""sections artifact SSOT read API — period sharded, raw XML 보존, 10 컬럼 단일 schema.
+"""sections artifact SSOT read API — period sharded, raw XML 보존, 단순 단일 schema.
 
-plan snazzy-wibbling-origami v4 사용자 비전 100%:
-    - 10 컬럼 schema (PROVIDER_AGNOSTIC_COLS SSOT): topic / blockType / blockOrder /
-      textLevel / textPath / textSemanticPathKey / segmentKey / content_raw / period / rcept_no.
-    - 추가 컬럼 0 (content_plain / mixed / table_struct 사전 계산 금지 —
-      memory/feedback_no_content_plain_precompute.md). runtime stripTagsExpr 만.
-    - 추가 파일 0 (_index / _raw 폐기). period sharded parquet 가 SSOT.
-    - sub-section row 양식 (1500+ row / period 005930 vs 옛 docs ~30 row).
-      sub-section split + cross-period 매칭 — textSemanticPathKey / segmentKey.
-    - docs.parquet 보존 (사용자 명시 — dual-write 룰).
+plan snazzy-wibbling-origami 사용자 비전 100%:
+    - 단일 schema: chapter / topic / section_order / section_title /
+                   section_content (raw XML) + 메타 / period
+    - 추가 파일 0 (_index, _raw 폐기)
+    - 추가 컬럼 0 (content_plain, content_table_struct 폐기)
+    - docs.parquet 완전 폐기 가능 (sections artifact 가 모든 정보 보유)
 
 저장:
     ``data/dart/sections/{code}/{period}.parquet``
 
 호출:
-    - ``loadSectionsLong`` — period sharded long read (메모리 절약, lazy projection).
-    - ``loadSectionsWide`` — wide pivot (period 컬럼 N 개, cell = raw XML).
-    - ``Company.sectionsRaw()`` — wide 그대로 (viewer / parser 룰).
-    - ``Company.sections`` — wide + cell strip (polars native regex, ~0.3s).
-    - ``sectionsCompat.loadDocsCompat`` — 옛 docs schema 호환 양식 (sub-section row →
-      topic 단위 group_by aggregate).
+    - ``loadSectionsLong`` — period sharded long read (메모리 절약, lazy projection)
+    - ``loadSectionsWide`` — wide pivot (period 컬럼 N개, cell = raw XML)
+    - ``Company.sectionsRaw()`` — wide 그대로 (viewer / parser 룰)
+    - ``Company.sections`` — wide + cell strip (polars native regex, ~0.3s)
 """
 
 from __future__ import annotations
@@ -120,9 +115,8 @@ def loadSectionsLong(
 ) -> pl.DataFrame | None:
     """sections artifact long format read — period sharded glob + columnar projection.
 
-    schema (10 컬럼, PROVIDER_AGNOSTIC_COLS SSOT):
-        topic / blockType / blockOrder / textLevel / textPath / textSemanticPathKey /
-        segmentKey / content_raw / period / rcept_no.
+    schema: chapter / topic / section_order / section_title / section_content (raw XML)
+           + 메타 (rcept_no/rcept_date/section_url/corp_name/atocid/assocnote) + period.
 
     Args:
         stockCode: 종목코드.
@@ -130,7 +124,7 @@ def loadSectionsLong(
         columns: select 할 컬럼 list. None = 전체.
 
     Returns:
-        long format DataFrame 또는 None (artifact 부재 / 변환 실패).
+        long format DataFrame 또는 None.
     """
     if not hasSectionsArtifact(stockCode):
         _ensureFromHf(stockCode)
@@ -155,81 +149,42 @@ def loadSectionsLong(
         return None
 
 
-# pivot index 에서 제외되는 컬럼 — period 별 다르거나 cell value 후보.
-_AUX_COLS: frozenset[str] = frozenset({"rcept_no", "rcept_date", "section_url", "corp_name", "atocid", "assocnote"})
-_CONTENT_COLS: frozenset[str] = frozenset({"content", "content_plain", "content_raw", "section_content_raw", "text"})
-# internal carry 컬럼 — pivot index 에서 제외 (디버깅 / period 별 다른 값).
-_INTERNAL_COLS: frozenset[str] = frozenset({"sortOrder", "majorNum", "orderSeq", "sourceTopic", "segmentKeyBase"})
-
-
 def loadSectionsWide(
     stockCode: str,
     *,
     periods: list[str] | None = None,
-    valueColumn: str = "content_raw",
 ) -> pl.DataFrame | None:
-    """sections artifact wide pivot — period 컬럼 N 개 + meta.
+    """sections artifact wide pivot — section_content (raw XML) cell.
 
-    plan snazzy-wibbling-origami SSOT. content_raw (lossless XML→HTML, viewer
-    SSOT) 가 default. 분석 path 는 ``Company.sections`` 가 runtime
-    ``stripTagsExpr`` 적용 (polars SIMD ~50ms).
+    index = (chapter, topic, section_order, section_title)
+    columns = period (N개)
+    values = section_content (raw XML 그대로)
 
-    추가 컬럼 0 룰 (memory/feedback_no_content_plain_precompute.md): sections
-    artifact 의 content 컬럼 = content_raw 1 개. plain/mixed 사전 계산 금지.
+    viewer / sectionsRaw 가 cell 그대로 사용. ``Company.sections`` 는 cell 에 polars
+    native regex strip 적용.
 
     Args:
         stockCode: 종목코드.
         periods: 특정 period 만. None = 전체.
-        valueColumn: pivot cell value (default ``content_raw``). 옛 호환 컬럼
-            (``content`` / ``section_content_raw``) 도 지원 — 옛 schema artifact
-            read 시 fallback.
 
     Returns:
-        wide DataFrame — pivot index (meta + 수평화 axis) + period 컬럼 N. None
-        시 fallback (artifact 부재 / valueColumn 부재 / schema mismatch).
+        wide DataFrame 또는 None.
     """
     long = loadSectionsLong(stockCode, periods=periods)
     if long is None or long.is_empty():
         return None
-    if "period" not in long.columns or valueColumn not in long.columns:
+    indexCols = ["chapter", "topic", "section_order", "section_title"]
+    indexCols = [c for c in indexCols if c in long.columns]
+    if not indexCols or "period" not in long.columns or "section_content" not in long.columns:
         return None
-    # 메타 + 보조 content + internal 컬럼은 pivot index 에서 제외.
-    otherContent = _CONTENT_COLS - {valueColumn}
-    dropCols = [c for c in _AUX_COLS | otherContent | _INTERNAL_COLS if c in long.columns]
-    if dropCols:
-        long = long.drop(dropCols)
-
-    # plan v4.1 — rowIdentityKey (topic, parentNorm, leafNorm, anchorHash) 기준 collapse.
-    # 초강화 수평화 SSOT — heading prefix normalize + content anchor 단어 fingerprint
-    # 결합. 같은 의미 sub-section 의 본문이 매년 살짝 달라도 anchor 단어 (예 "관계기업",
-    # "공정가치") 가 같으면 같은 row 로 cross-period 매칭. polars SIMD only, 외부 ML 0.
-    # textComparablePathKey 는 legacy 호환 — granularity="leaf" fallback path.
-    pivotKey = "rowIdentityKey" if "rowIdentityKey" in long.columns else "textComparablePathKey"
-    if pivotKey in long.columns:
-        groupKeys = ["topic", pivotKey, "period"]
-        metaCols = [c for c in long.columns if c not in groupKeys and c != valueColumn]
-        collapsed = long.group_by(groupKeys).agg(
-            [pl.col(valueColumn).str.concat("\n\n").alias(valueColumn)] + [pl.col(c).first().alias(c) for c in metaCols]
-        )
-        try:
-            pivoted = collapsed.pivot(
-                values=valueColumn,
-                index=["topic", pivotKey],
-                on="period",
-                aggregate_function="first",
-            )
-            # representative meta — 같은 (topic, pivotKey) 의 첫 row.
-            if metaCols:
-                meta = collapsed.group_by(["topic", pivotKey]).agg([pl.col(c).first().alias(c) for c in metaCols])
-                pivoted = pivoted.join(meta, on=["topic", pivotKey], how="left")
-            return pivoted
-        except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
-            _log.warning("sectionsWide collapse-pivot 실패 (%s): %s", stockCode, exc)
-            # fallback to legacy pivot
-    indexCols = [c for c in long.columns if c not in ("period", valueColumn)]
     try:
+        # 메타 컬럼은 period 별 값 다름 — pivot 시 index 포함하면 collapse 안 됨. drop.
+        metaCols = ("rcept_no", "rcept_date", "section_url", "corp_name", "atocid", "assocnote")
+        dropCols = [c for c in metaCols if c in long.columns]
+        if dropCols:
+            long = long.drop(dropCols)
         return long.pivot(
-            values=valueColumn,
+            values="section_content",
             index=indexCols,
             on="period",
             aggregate_function="first",

@@ -108,9 +108,10 @@ def _tableToHtml(table) -> str:
     cell.get() 호출조차 안 해 viewer 에서 모든 cell 이 좌측정렬 회귀 (2026-05-28
     사용자 발견). VALIGN 도 동일 패턴.
     """
-    # plan snazzy-wibbling-origami 정공법 — 옛 lossy 판정 (BORDER 흡수, 1×1
-    # 흡수, BORDER=0 multi-cell em-space join) 모두 폐기. 모든 TABLE → <table>
-    # lossless. viewer 가 raw 그대로 받아 frontend sanitize.
+    border = (table.get("BORDER", "1") or "1").strip()
+    isBorderless = border in ("0", "")
+
+    # rows of [(tag, colspan, rowspan, align, valign, text)]
     collected: list[list[tuple[str, str, str, str, str, str]]] = []
     for tr in _findDirectTRs(table):
         cells: list[tuple[str, str, str, str, str, str]] = []
@@ -128,6 +129,21 @@ def _tableToHtml(table) -> str:
             collected.append(cells)
     if not collected:
         return ""
+
+    # 1×1 paragraph framing — plain text
+    if len(collected) == 1 and len(collected[0]) == 1:
+        only = collected[0][0]
+        if only[1] in ("1", "") and only[2] in ("1", ""):
+            return only[5]
+
+    # BORDER="0" multi-cell caption — em-space join + 줄바꿈 row 구분
+    if isBorderless:
+        lines: list[str] = []
+        for cells in collected:
+            texts = [c[5] for c in cells if c[5]]
+            if texts:
+                lines.append(" ".join(texts))
+        return "\n".join(lines)
 
     # 진짜 데이터 표 — HTML <table>. cell 안 \n (multi-P paragraph framing) 은
     # <br/> 로 치환해야 _splitContentBlocks 의 line-by-line table detection 이
