@@ -505,7 +505,10 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
             # huggingface_hub 의 allow_patterns 는 fnmatch — `**` 가 특수문자가 아니라
             # 중간 디렉토리 최소 1개를 강제한다. `dart/scan/**/*.parquet` 는 루트 파일을
             # 제외시키므로 두 패턴을 모두 넘겨야 finance.parquet 같은 루트 파일까지 받아진다.
-            pattern = [f"{hfDir}/*.parquet", f"{hfDir}/**/*.parquet"] if category == "scan" else f"{hfDir}/*.parquet"
+            # nested=True 카테고리 (sections — period-sharded {code}/{period}.parquet) 도
+            # 같은 두 패턴 — 루트 _index.parquet (있다면) + 종목 디렉터리 안 period parquet.
+            isNested = DATA_RELEASES[category].get("nested", False) or category == "scan"
+            pattern = [f"{hfDir}/*.parquet", f"{hfDir}/**/*.parquet"] if isNested else f"{hfDir}/*.parquet"
             snapshot_download(
                 repo_id=HF_REPO,
                 repo_type="dataset",
@@ -526,10 +529,11 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
             f"마지막 에러: {lastErr}"
         )
 
-    globPattern = "**/*.parquet" if category == "scan" else "*.parquet"
+    isNested = DATA_RELEASES[category].get("nested", False) or category == "scan"
+    globPattern = "**/*.parquet" if isNested else "*.parquet"
     fileCount = len(list(dataDir.glob(globPattern)))
-    # scan은 테마별 parquet (안에 전종목 포함) → 파일 수 ≠ 종목 수
-    countLabel = f"{fileCount}파일" if category == "scan" else f"{fileCount}종목"
+    # scan/sections 처럼 nested 카테고리는 파일 수 ≠ 종목 수 (sections 는 종목당 분기 수 만큼).
+    countLabel = f"{fileCount}파일" if isNested else f"{fileCount}종목"
     emit("download_all:hf_done", label=label, count=countLabel, dataDir=str(dataDir))
     _log.info("[green]✓[/] %s (%s)", label, countLabel)
 
