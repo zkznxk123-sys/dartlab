@@ -6,12 +6,13 @@ SEC 자체 벌크(`companyfacts.zip` daily + 분기 `{Y}q{Q}.zip`) 가 원본이
 
 HF 에 올리는 것은 **dartlab 파생물** 만:
 - `scan` → edgar/scan  (buildEdgarFinance() 프리빌드, 재계산 비용 큼)
-- `docs` → edgar/docs  (submissions API HTML 섹션 파싱 결과)
+- `docs` → edgar/docs  (submissions API HTML 섹션 파싱 결과, PR-E7 안전 게이트 통과 후 폐기 대상)
+- `sections` → edgar/sections  (period-sharded SSOT, plan delegated-prancing-tower PR-E3)
 
 사용법::
 
     from dartlab.providers.edgar.openapi.deploy import deployEdgarToHF
-    deployEdgarToHF(categories=["scan", "docs"])  # 기본값
+    deployEdgarToHF(categories=["scan", "docs", "sections"])  # 기본값
 
 `data.sec.gov/api/xbrl/companyfacts` API 파생물은 업로드 대상이 아니다 —
 사용자가 `c.refreshFromApi()` 로 로컬만 갱신한다.
@@ -32,6 +33,9 @@ _log = logging.getLogger(__name__)
 _CATEGORY_MAP = {
     "scan": "edgarScan",
     "docs": "edgarDocs",
+    # plan delegated-prancing-tower PR-E3 — period-sharded sections SSOT artifact.
+    # nested=True (data/edgar/sections/{ticker}/{period}.parquet) — rglob 자동 처리.
+    "sections": "edgarSections",
 }
 
 # 업로드 명시 차단 목록 (원본이 SEC 벌크, HF 미러링 정책상 제외)
@@ -117,7 +121,7 @@ def deployEdgarToHF(
     if not hfToken and not dryRun:
         raise ValueError("HF_TOKEN이 필요합니다. 환경변수 또는 token 파라미터로 설정하세요.")
 
-    cats = categories or ["scan", "docs"]
+    cats = categories or ["scan", "docs", "sections"]
 
     validCats: list[str] = []
     for cat in cats:

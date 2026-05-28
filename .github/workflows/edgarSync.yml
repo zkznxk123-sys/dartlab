@@ -74,6 +74,15 @@ jobs:
           key: dartlab-edgar-docs-${{ github.run_id }}
           restore-keys: dartlab-edgar-docs-
 
+      # plan delegated-prancing-tower PR-E3 — sections artifact cache.
+      # fetchEdgarDocs 가 dual-write 로 sections artifact 도 emit (PR-E2).
+      - name: Restore EDGAR sections cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/edgar/sections
+          key: dartlab-edgar-sections-${{ github.run_id }}
+          restore-keys: dartlab-edgar-sections-
+
       # ── 1. daily 벌크: companyfacts.zip → {cik}.parquet ──
       - name: Download + convert companyfacts.zip (daily bulk)
         run: |
@@ -152,8 +161,8 @@ jobs:
 
       # ── 5. HF 업로드 (dartlab 파생물만) ──
       # finance / meta 는 SEC 벌크가 원본이므로 HF 미러링 없음 (사용자 PC 자동 다운로드).
-      # HF 업로드 대상: scan 프리빌드 + docs 섹션 파싱 결과.
-      - name: Deploy to HuggingFace (scan + docs)
+      # HF 업로드 대상: scan 프리빌드 + docs 섹션 파싱 결과 + sections SSOT (PR-E3).
+      - name: Deploy to HuggingFace (scan + docs + sections)
         run: |
           uv run python -X utf8 -c "
           import os
@@ -162,6 +171,10 @@ jobs:
           cats = ['scan']
           if '${{ github.event.schedule }}' == '0 3 * * 0' or '${{ github.event.inputs.collectDocs }}' == 'true':
               cats.append('docs')
+              # plan delegated-prancing-tower PR-E3 — fetchEdgarDocs 가 dual-write 로
+              # data/edgar/sections/{ticker}/{period}.parquet 동시 emit. PR-E7 안전
+              # 게이트 통과 후 docs 카테고리 폐기 예정.
+              cats.append('sections')
           result = deployEdgarToHF(categories=cats)
           print(result)
           "
@@ -196,6 +209,14 @@ jobs:
         with:
           path: data/edgar/docs
           key: dartlab-edgar-docs-${{ github.run_id }}
+
+      # plan delegated-prancing-tower PR-E3 — sections cache save (dual-write 산출물).
+      - name: Save EDGAR sections cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/edgar/sections
+          key: dartlab-edgar-sections-${{ github.run_id }}
 
       - name: Summary
         if: always()
