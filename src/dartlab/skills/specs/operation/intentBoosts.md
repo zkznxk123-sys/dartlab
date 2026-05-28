@@ -255,6 +255,68 @@ intentBoosts:
       - governance
       - audit
     boost: 10.0
+  - skillIds: ["engines.company.koreanDisclosure"]
+    terms:
+      - DART 공시
+      - 한국 공시
+      - 공정공시
+      - 주요사항
+      - 주요사항보고
+      - 공시 routing
+      - 공시 종류
+      - 별도 vs 연결
+      - parent-only
+      - separate consolidated
+      - K-IFRS
+      - 분기보고서
+      - 사업보고서
+    boost: 12.0
+  - skillIds: ["engines.company.governance"]
+    terms:
+      - 사외이사
+      - 사외이사 비율
+      - 기업지배구조보고서
+      - 이사회 구성
+      - 감사위원회
+      - 최대주주
+      - CEO Chair
+      - 누적투표제
+      - 15 핵심지표
+      - corporate governance
+      - K-ESG
+    boost: 11.0
+  - skillIds: ["engines.company.sections"]
+    terms:
+      - 사업의 내용
+      - segment
+      - 부문별 매출
+      - 제품별 ASP
+      - 메모리 ASP
+      - 지역별 매출
+      - 주요 제품
+      - 사업보고서 II
+      - business content
+      - 사업 부문
+      - narrative drift
+      - 원재료 가격
+      - 시장점유율
+    boost: 11.0
+  - skillIds: ["engines.company.audit"]
+    terms:
+      - 감사보고서
+      - audit report
+      - auditor opinion
+      - key audit matters
+      - KAM
+      - 계속기업 가정
+      - going concern
+      - 강조사항
+      - 부적정 의견
+      - 의견거절
+      - 한정 의견
+      - 외부감사인
+      - audit shopping
+    boost: 11.0
 source:
   type: manual_skill
   format: markdown
