@@ -392,6 +392,8 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
     """카테고리별 로컬 parquet 보장 (최초 로드 + refresh 통합 라우터).
 
     - ``edgar`` → SEC 벌크 (companyfacts.zip) 자동 다운로드·변환, HF 미러링 없음
+    - ``docs`` → sections artifact 합성 fallback (plan snazzy-wibbling-origami PR-4b
+      docs.parquet 사용자 측 폐기) → HF docs.parquet → 일반
     - 그 외 → HF 다운로드 + ETag 기반 증분 갱신
     """
     if category == "edgar":
@@ -405,11 +407,84 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
         return
 
     if not path.exists():
+        # plan snazzy-wibbling-origami PR-4b — docs 카테고리 사용자 측 폐기 path.
+        # sections artifact 가 있고 빌더 모드 아니면 docs.parquet 합성 fallback —
+        # HF docs.parquet 다운로드 회피, 사용자 측 docs 카테고리 의존 0.
+        # 빌더 (sectionsBuilder) 는 DARTLAB_BUILDER_MODE env 로 합성 path 우회 —
+        # 자기 자신 input 으로 재귀하면 무한 루프.
+        if category == "docs" and _trySynthesizeDocsFromSections(stockCode, path):
+            return
         _downloadFromHf(stockCode, path, category)
         return
 
     if shouldRefresh:
         _refreshFromHf(stockCode, path, category)
+
+
+def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
+    """sections artifact 가 있으면 docs.parquet 호환 schema 로 합성 저장 (1 회).
+
+    plan snazzy-wibbling-origami PR-4b — 사용자 측 docs.parquet 폐기 path. 빌더 측
+    zip → docs.parquet 양식 호환 (section_title/section_content/year/reportKind 컬럼)
+    로 변환하여 dest 에 저장. 호출자 (loadData) 의 후속 path (mmap/predicate 등) 와
+    schema 호환 — D.1 분석 모듈 95+ caller 무변경 동작.
+
+    빌더 모드 (sectionsBuilder 가 호출 흐름 안에) 는 무한 루프 방지 위해 우회. env
+    ``DARTLAB_BUILDER_MODE=1`` 또는 docs.parquet 이 sectionsBuilder context 의 source
+    of truth 일 때 본 합성 skip.
+
+    Args:
+        stockCode: 종목코드.
+        dest: docs.parquet 저장 경로.
+
+    Returns:
+        bool — 합성 성공 시 True, sections artifact 부재 또는 빌더 모드 시 False.
+    """
+    import os as _os
+
+    if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() in ("1", "true", "True"):
+        return False
+    try:
+        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+            _ensureFromHf,
+            hasSectionsArtifact,
+            loadSectionsLong,
+        )
+    except ImportError:
+        return False
+    # sections artifact 부재 시 HF lazy download 시도 — 한 종목 디렉터리만 (~수 MB).
+    if not hasSectionsArtifact(stockCode):
+        if not _ensureFromHf(stockCode):
+            return False
+    long = loadSectionsLong(stockCode, columns=None)
+    if long is None or long.is_empty():
+        return False
+    try:
+        # period (YYYY 또는 YYYYQn) → year + reportKind 분리. sections 가 annual 을 YYYYQ4
+        # 양식으로 emit (sectionsBuilder)
+        year = pl.col("period").str.slice(0, 4)
+        suffix = pl.col("period").str.slice(4)
+        plainCol = "content_plain" if "content_plain" in long.columns else "content"
+        synthesized = long.with_columns(
+            year.alias("year"),
+            suffix.alias("report_kind"),
+            pl.col(plainCol).alias("section_content"),
+            pl.col("topic").alias("section_title"),
+        )
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        synthesized.write_parquet(dest, compression="snappy")
+        from dartlab.core.logger import getLogger
+
+        _log = getLogger(__name__)
+        _log.info(
+            "docs.parquet 합성 (%s, sections artifact → %d rows): %s",
+            stockCode,
+            synthesized.height,
+            dest.name,
+        )
+        return True
+    except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):
+        return False
 
 
 def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
