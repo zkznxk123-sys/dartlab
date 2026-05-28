@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+from dartlab.providers.dart.docs.sectionsLegacy.xmlAdapter import xmlChunkToMixed
 
 pytestmark = [pytest.mark.unit]
 

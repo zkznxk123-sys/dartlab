@@ -18,7 +18,7 @@ def test_sectionsLong_uses_artifact_when_present(monkeypatch, tmp_path):
     """artifact 있으면 loadSectionsLong 직접 호출 — fallback buildSections 0."""
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
     code = "LONGART"
-    from dartlab.providers.dart.docs.sections.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {
@@ -52,7 +52,7 @@ def test_sectionsLong_uses_artifact_when_present(monkeypatch, tmp_path):
 def test_sectionsLong_period_filter(monkeypatch, tmp_path):
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
     code = "LONGFILT"
-    from dartlab.providers.dart.docs.sections.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {
@@ -80,7 +80,7 @@ def test_sectionsLong_period_filter(monkeypatch, tmp_path):
 def test_sectionsLong_columnar_projection(monkeypatch, tmp_path):
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
     code = "LONGCOL"
-    from dartlab.providers.dart.docs.sections.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {

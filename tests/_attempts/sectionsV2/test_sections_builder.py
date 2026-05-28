@@ -20,7 +20,7 @@ import polars as pl
 import pytest
 
 import dartlab.config as _cfg
-from dartlab.providers.dart.docs.sections.sectionsBuilder import (
+from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import (
     buildSectionsArtifact,
     clearSectionsArtifact,
 )

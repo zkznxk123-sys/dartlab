@@ -69,7 +69,7 @@ def test_parseSectionsByTitle_nested_table_no_explosion():
     # nested TABLE 의 TR 이 외부 _tableToMarkdown 의 .//TR 로 캡쳐되어 폭증하던 회귀.
     # 2026-05-27 양식 변경 — section_content = raw XML chunks. xmlChunkToMixed 변환 후
     # markdown/HTML 양식에서 검증.
-    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+    from dartlab.providers.dart.docs.sectionsLegacy.xmlAdapter import xmlChunkToMixed
 
     inner_rows = "".join(f"<TR><TD>inner-{i}</TD></TR>" for i in range(50))
     xml = f"""<?xml version="1.0"?>
@@ -97,7 +97,7 @@ def test_parseSectionsByTitle_word_wrap_join_no_extra_space():
     # DART XML 의 <P> 안 <SPAN> 들이 word-wrap 단위로 부서진 경우, " ".join 이 한국어
     # 단어 사이에 잘못 공백 추가하던 회귀 차단. 2026-05-27 양식 변경 — xmlChunkToMixed
     # 변환 후 검증.
-    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+    from dartlab.providers.dart.docs.sectionsLegacy.xmlAdapter import xmlChunkToMixed
 
     xml = """<?xml version="1.0"?>
 <DOCUMENT><BODY>
@@ -116,7 +116,7 @@ def test_parseSectionsByTitle_word_wrap_join_no_extra_space():
 
 def test_parseSectionsByTitle_span_bold_markdown_heading():
     # 2026-05-27 양식 변경 — xmlChunkToMixed 변환 후 SPAN bold 가 markdown ## prefix.
-    from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+    from dartlab.providers.dart.docs.sectionsLegacy.xmlAdapter import xmlChunkToMixed
 
     xml = """<?xml version="1.0"?>
 <DOCUMENT><BODY>

@@ -49,7 +49,7 @@ def sectionsFrame() -> pl.DataFrame:
     from dartlab.core import dataLoader
 
     dataLoader._shouldRefreshDart = lambda *a, **k: False  # noqa: SLF001
-    from dartlab.providers.dart.docs.sections.pipeline import _preparedCache, sections
+    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _preparedCache, sections
 
     _preparedCache.clear()
     df = sections(_STOCK, topics=None)

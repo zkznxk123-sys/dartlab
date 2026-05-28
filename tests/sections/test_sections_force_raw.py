@@ -15,7 +15,7 @@ import os
 
 import pytest
 
-from dartlab.providers.dart.docs.sections.sectionsBuilder import _forceRawSectionContent
+from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import _forceRawSectionContent
 
 pytestmark = [pytest.mark.unit]
 
@@ -59,7 +59,7 @@ def test_periodIter_recognizes_no_mixed_env(monkeypatch):
     """
     import polars as pl
 
-    from dartlab.providers.dart.docs.sections import periodIter
+    from dartlab.providers.dart.docs.sectionsLegacy import periodIter
 
     # mock loadData — section_content + section_content_mixed 둘 다 가진 df
     fakeDf = pl.DataFrame(
@@ -75,7 +75,7 @@ def test_periodIter_recognizes_no_mixed_env(monkeypatch):
         }
     )
 
-    monkeypatch.setattr("dartlab.providers.dart.docs.sections.periodIter.loadData", lambda *a, **kw: fakeDf)
+    monkeypatch.setattr("dartlab.providers.dart.docs.sectionsLegacy.periodIter.loadData", lambda *a, **kw: fakeDf)
 
     # 1. env 미설정 → mixed 우선
     monkeypatch.delenv(_KEY, raising=False)

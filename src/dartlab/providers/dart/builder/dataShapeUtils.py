@@ -268,7 +268,7 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
     """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
-    from dartlab.providers.dart.docs.sections import rawPeriod
+    from dartlab.providers.dart.docs.sectionsLegacy import rawPeriod
 
     requestedPeriod = str(period)
     normalizedPeriod = rawPeriod(period)

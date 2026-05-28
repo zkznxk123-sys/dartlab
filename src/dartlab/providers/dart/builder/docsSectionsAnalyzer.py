@@ -130,9 +130,13 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = empty
             return empty
 
-        from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
-        from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, detectContentCol, periodOrderValue
-        from dartlab.providers.dart.docs.sections.views import splitMarkdownBlocks
+        from dartlab.providers.dart.docs.sectionsLegacy.mapper import mapSectionTitle
+        from dartlab.providers.dart.docs.sectionsLegacy.sectionsBase import (
+            REPORT_KINDS,
+            detectContentCol,
+            periodOrderValue,
+        )
+        from dartlab.providers.dart.docs.sectionsLegacy.views import splitMarkdownBlocks
         from dartlab.providers.reportSelector import selectReport
 
         contentCol = detectContentCol(raw)
@@ -236,7 +240,7 @@ class SectionsAnalyzer:
         if sectionsFrame is None:
             self._cache[cacheKey] = None
             return None
-        from dartlab.providers.dart.docs.sections import projectFreqRows
+        from dartlab.providers.dart.docs.sectionsLegacy import projectFreqRows
 
         result = projectFreqRows(sectionsFrame, freqScope=normalizedScope, includeMixed=includeMixed)
         self._cache[cacheKey] = result
@@ -275,7 +279,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart.docs.sections import reorderPeriodColumns
+        from dartlab.providers.dart.docs.sectionsLegacy import reorderPeriodColumns
 
         result = reorderPeriodColumns(sectionsFrame.raw, descending=recentFirst, annualAsQ4=annualAsQ4)
         self._cache[cacheKey] = result
@@ -318,7 +322,7 @@ class SectionsAnalyzer:
             return None
 
         from dartlab.providers.dart.checks import _isPeriodColumn
-        from dartlab.providers.dart.docs.sections import displayPeriod, sortPeriods
+        from dartlab.providers.dart.docs.sectionsLegacy import displayPeriod, sortPeriods
 
         rawFrame = sectionsFrame.raw
         scoped = rawFrame if topic is None else rawFrame.filter(pl.col("topic") == topic)
@@ -406,7 +410,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart.docs.sections import semanticCollisions, semanticRegistry
+        from dartlab.providers.dart.docs.sectionsLegacy import semanticCollisions, semanticRegistry
 
         if collisionsOnly:
             result = semanticCollisions(
@@ -469,7 +473,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart.docs.sections import structureCollisions, structureRegistry
+        from dartlab.providers.dart.docs.sectionsLegacy import structureCollisions, structureRegistry
 
         if collisionsOnly:
             result = structureCollisions(
@@ -534,7 +538,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart.docs.sections import structureEvents
+        from dartlab.providers.dart.docs.sectionsLegacy import structureEvents
 
         result = structureEvents(
             sectionsFrame,
@@ -589,7 +593,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart.docs.sections import structureSummary
+        from dartlab.providers.dart.docs.sectionsLegacy import structureSummary
 
         result = structureSummary(
             sectionsFrame,
@@ -648,7 +652,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart.docs.sections import structureChanges
+        from dartlab.providers.dart.docs.sectionsLegacy import structureChanges
 
         result = structureChanges(
             sectionsFrame,
@@ -686,7 +690,7 @@ class SectionsAnalyzer:
         if isEmptyDf(blocks):
             self._cache[cacheKey] = None
             return None
-        from dartlab.providers.dart.docs.sections import topicSubtables
+        from dartlab.providers.dart.docs.sectionsLegacy import topicSubtables
 
         result = topicSubtables(blocks, topic)
         self._cache[cacheKey] = result

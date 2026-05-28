@@ -29,8 +29,8 @@ from __future__ import annotations
 
 import sys
 
-from dartlab.providers.dart.docs.sections import diskCache, textStructure
-from dartlab.providers.dart.docs.sections.pipeline import sections
+from dartlab.providers.dart.docs.sectionsLegacy import diskCache, textStructure
+from dartlab.providers.dart.docs.sectionsLegacy.pipeline import sections
 
 # disk cache bypass — 진짜 build path 측정용. 함수 monkeypatch.
 diskCache.loadDiskCache = lambda *args, **kwargs: None  # type: ignore[assignment]

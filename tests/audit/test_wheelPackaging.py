@@ -358,7 +358,7 @@ def test_rrCrisisDB_loadRrCrises_loudFail_onMissingData(monkeypatch):
 def test_loadProjectionRules_loudFail_onKnownChapterMissing(monkeypatch):
     """loadProjectionRules 가 알려진 chapter 의 파일 부재 시 loud-fail."""
 
-    import dartlab.providers.dart.docs.sections.artifacts as mod
+    import dartlab.providers.dart.docs.sectionsLegacy.artifacts as mod
 
     # 정상 로드 확인
     mod.loadProjectionRules.cache_clear()

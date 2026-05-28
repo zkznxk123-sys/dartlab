@@ -51,10 +51,10 @@ def buildTopicManifest(*, stockCode: str, hasDocs: bool, cache: Any, emptyDf: pl
         cache[cacheKey] = emptyDf
         return emptyDf
 
-    from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
-    from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
-    from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
-    from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, periodOrderValue
+    from dartlab.providers.dart.docs.sectionsLegacy.chunker import parseMajorNum
+    from dartlab.providers.dart.docs.sectionsLegacy.mapper import mapSectionTitle
+    from dartlab.providers.dart.docs.sectionsLegacy.runtime import chapterFromMajorNum
+    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBase import REPORT_KINDS, periodOrderValue
     from dartlab.providers.reportSelector import selectReport
 
     years = sorted({str(year) for year in raw["year"].drop_nulls().to_list()}, reverse=True)

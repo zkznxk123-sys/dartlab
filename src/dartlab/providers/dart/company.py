@@ -1181,7 +1181,7 @@ class Company:
                 columns=["year", "report_type", "section_order", "section_title", "section_content"],
             )
             if raw is not None and not raw.is_empty() and "section_content" in raw.columns:
-                from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
+                from dartlab.providers.dart.docs.sectionsLegacy.mapper import mapSectionTitle
                 from dartlab.providers.reportSelector import selectReport
 
                 # 최신 연도의 사업보고서에서 추출
@@ -2083,7 +2083,7 @@ class Company:
         cacheKey = "retrievalBlocks"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.providers.dart.docs.sections import retrievalBlocks
+        from dartlab.providers.dart.docs.sectionsLegacy import retrievalBlocks
 
         result = retrievalBlocks(self.stockCode)
         self._cache[cacheKey] = result
@@ -2095,7 +2095,7 @@ class Company:
         cacheKey = "contextSlices"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.providers.dart.docs.sections import contextSlices
+        from dartlab.providers.dart.docs.sectionsLegacy import contextSlices
 
         result = contextSlices(self.stockCode)
         self._cache[cacheKey] = result
@@ -2240,7 +2240,7 @@ class Company:
         # plan snazzy-wibbling-origami SSOT — sections artifact (raw XML cell) + runtime strip.
         # sectionsRaw 가 raw XML 그대로, sections 는 polars native regex strip 적용 (~0.3s).
         # docs.parquet 완전 폐기 가능 — sections artifact 가 모든 정보 (raw + 메타) 보유.
-        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+        from dartlab.providers.dart.docs.sectionsLegacy.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
             loadSectionsWide,
@@ -2264,7 +2264,7 @@ class Company:
         wide = buildSections(self)
         if wide is None:
             return None
-        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+        from dartlab.providers.dart.docs.sectionsLegacy.xmlAdapter import stripTagsFromSectionsDf
 
         return stripTagsFromSectionsDf(wide)
 
@@ -2289,7 +2289,7 @@ class Company:
             c = Company("005930")
             wide = c.sectionsRaw()  # viewer 사용 의도 명시
         """
-        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+        from dartlab.providers.dart.docs.sectionsLegacy.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
             loadSectionsWide,
@@ -2356,7 +2356,7 @@ class Company:
                 pl.col("period").str.starts_with("2025")
             ).collect()
         """
-        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+        from dartlab.providers.dart.docs.sectionsLegacy.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
             listAvailablePeriods,
@@ -2402,7 +2402,7 @@ class Company:
             # 특정 period 만
             df = c.sectionsLong(periods=["2025", "2025Q3"])
         """
-        from dartlab.providers.dart.docs.sections.sectionsStorage import (
+        from dartlab.providers.dart.docs.sectionsLegacy.sectionsStorage import (
             hasSectionsArtifact,
             loadSectionsLong,
         )
@@ -2414,7 +2414,7 @@ class Company:
         wide = self.sections
         if wide is None or wide.is_empty():
             return None
-        from dartlab.providers.dart.docs.sections.sectionsBuilder import wideToLong
+        from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import wideToLong
 
         long = wideToLong(wide)
         if periods is not None:
@@ -3982,7 +3982,7 @@ class Company:
         result = self._topicSubtables(topic)
         if result is None:
             return None
-        from dartlab.providers.dart.docs.sections import parseSubtopicTable
+        from dartlab.providers.dart.docs.sectionsLegacy import parseSubtopicTable
 
         parsed = parseSubtopicTable(result, subtopic, numeric=numeric)
         if parsed is None:

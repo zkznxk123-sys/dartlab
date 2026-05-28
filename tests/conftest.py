@@ -144,7 +144,7 @@ def _clear_sections_prepared_cache():
     """sections pipeline Phase 1 캐시를 테스트마다 초기화."""
     yield
     try:
-        from dartlab.providers.dart.docs.sections.pipeline import clearPreparedCache
+        from dartlab.providers.dart.docs.sectionsLegacy.pipeline import clearPreparedCache
 
         clearPreparedCache()
     except ImportError:

@@ -29,7 +29,7 @@ import sys
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sections.pipeline import (
+from dartlab.providers.dart.docs.sectionsLegacy.pipeline import (
     clearPreparedCache,
     sections,
 )

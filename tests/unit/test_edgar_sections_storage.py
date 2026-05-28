@@ -14,7 +14,7 @@ import inspect
 import pytest
 
 from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.providers.dart.docs.sections import sectionsStorage as dartStorage
+from dartlab.providers.dart.docs.sectionsLegacy import sectionsStorage as dartStorage
 from dartlab.providers.edgar.docs.sections import sectionsStorage as edgarStorage
 
 
