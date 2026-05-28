@@ -266,19 +266,28 @@ def loadSectionsWide(
         ['topic', 'blockType', 'blockOrder', 'segmentKey', '2025Q3', '2025', '2024', ...]
         >>> df_plain = loadSectionsWide("005930", valueColumn="content_plain")  # doctest: +SKIP
     """
-    # 필요 컬럼만 read — columnar projection 으로 다른 content* 페이지 fault 0.
-    selectCols = None  # 일단 전체 (meta cols 파악 후 trim 가능)
+    # 필요 컬럼만 read — columnar projection 으로 다른 content* + 거대 path variants 페이지
+    # fault 0. wide pivot 후 cell 중복으로 메모리 폭주 → 정공법 = pivot 입력 long 자체를 좁힘.
+    # 한 종목 long parquet ~54MB → 필수 컬럼만 ~10MB 로 5x 절감. 사용자 비전 "메모리 한 자리 MB".
+    _MINIMAL_META = (
+        "chapter",
+        "topic",
+        "blockType",
+        "blockOrder",
+        "textNodeType",
+        "textLevel",
+        "textPath",
+        "textPathKey",
+        "segmentKey",
+        "source",
+    )
+    selectCols = list(_MINIMAL_META) + ["period", valueColumn]
     long = loadSectionsLong(stockCode, periods=periods, columns=selectCols)
     if long is None or long.is_empty():
         return None
     if valueColumn not in long.columns:
         _log.warning("sectionsWide: valueColumn '%s' 부재 (사용 가능: %s)", valueColumn, long.columns)
         return None
-    # 보조 content 컬럼들은 index 에서 제외 (period 별 값이 달라 collapse 안 되면 wide 폭주).
-    auxContentCols = {"content", "content_plain", "content_table_struct"} - {valueColumn}
-    dropCols = [c for c in auxContentCols if c in long.columns]
-    if dropCols:
-        long = long.drop(dropCols)
     metaCols = [c for c in long.columns if c not in ("period", valueColumn)]
     try:
         return long.pivot(
