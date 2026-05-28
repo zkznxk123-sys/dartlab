@@ -21,6 +21,7 @@ from .inspectDataset import inspectDataset
 from .listEngineGaps import listEngineGaps
 from .lookAheadGuard import lookAheadGuard
 from .outcomeLog import outcomeLog
+from .parseChart import parseChart
 from .peerCompareN import peerCompareN
 from .proposeRecipe import proposeRecipe
 from .readCapability import readCapability
@@ -35,6 +36,7 @@ from .saveArtifact import saveArtifact
 from .scenarioCompareN import scenarioCompareN
 from .scenarioOverlay import scenarioOverlay
 from .searchPastSessions import searchPastSessions
+from .searchSemantic import searchSemantic
 from .sensitivityAnalysis import sensitivityAnalysis
 from .storyTemplate import pickStoryTemplate
 from .types import ToolResult, ToolSpec
@@ -726,6 +728,41 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=False,
         openWorldHint=False,
     ),
+    # ── runtime.ragPipeline + runtime.multimodal stub (Phase 3.B drafted) ──
+    "SearchSemantic": ToolSpec(
+        "SearchSemantic",
+        "RAG semantic search — section_content 본문 cosine top-k. runtime.ragPipeline SSOT. status=drafted (sectionEmbedding cache 미활성).",
+        {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "corpCode": {"type": "string"},
+                "topK": {"type": "integer"},
+            },
+            "required": ["query"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+    "ParseChart": ToolSpec(
+        "ParseChart",
+        "Multimodal vision wrapper — 차트/PDF 이미지 → JSON schema. runtime.multimodal SSOT. schema 강행, 결과 untrusted wrap. status=drafted (vision API 미활성).",
+        {
+            "type": "object",
+            "properties": {
+                "imagePath": {"type": "string"},
+                "schema": {"type": "object"},
+                "sourceUrl": {"type": "string"},
+            },
+            "required": ["imagePath", "schema"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
 }
 
 _TOOLS: dict[str, ToolFn] = {
@@ -761,6 +798,8 @@ _TOOLS: dict[str, ToolFn] = {
     "ValidateRecipe": validateRecipe,
     "RunWorkbench": runWorkbench,
     "SearchPastSessions": searchPastSessions,
+    "SearchSemantic": searchSemantic,
+    "ParseChart": parseChart,
 }
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
