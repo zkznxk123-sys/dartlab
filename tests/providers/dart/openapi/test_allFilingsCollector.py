@@ -76,25 +76,42 @@ def test_stats_callable() -> None:
     assert callable(stats)
 
 
-def _writeStubMeta(outDir, period: str, rceptNo: str) -> None:
-    """공통 meta fixture writer."""
-    metaRow = {
-        "corp_code": "00126380",
-        "corp_name": "삼성전자",
-        "stock_code": "005930",
-        "corp_cls": "Y",
-        "rcept_dt": period,
-        "rcept_no": rceptNo,
-        "report_nm": "주요사항보고서(자기주식취득결정)",
-        "flr_nm": "삼성전자",
-    }
-    pl.DataFrame([metaRow]).write_parquet(outDir / f"{period}_meta.parquet")
+_STUB_DART_014 = (
+    b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    b"<result><status>014</status><message>\xed\x8c\x8c\xec\x9d\xbc\xec\x9d\xb4 "
+    b"\xec\xa1\xb4\xec\x9e\xac\xed\x95\x98\xec\xa7\x80 \xec\x95\x8a\xec\x8a\xb5\xeb\x8b\x88\xeb\x8b\xa4."
+    b"</message></result>"
+)
+_STUB_DART_013 = (
+    b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    b"<result><status>013</status><message>\xec\xa0\x91\xec\x88\x98\xeb\xb2\x88\xed\x98\xb8 "
+    b"\xec\x98\xa4\xeb\xa5\x98</message></result>"
+)
+
+
+def _stubMeta(rceptNo: str, reportNm: str = "주요사항보고서(자기주식취득결정)"):
+    """단일 row meta DataFrame 반환."""
+    return pl.DataFrame(
+        [
+            {
+                "corp_code": "00126380",
+                "corp_name": "삼성전자",
+                "stock_code": "005930",
+                "corp_cls": "Y",
+                "rcept_dt": "20260527",
+                "rcept_no": rceptNo,
+                "report_nm": reportNm,
+                "flr_nm": "삼성전자",
+            }
+        ]
+    )
 
 
 def _assertSchema(df) -> None:
-    """공통 schema 회귀 가드 — content_raw 만, section_* 부재."""
+    """공통 schema 회귀 가드 — content_raw + fetch_status, section_* 부재."""
     cols = set(df.columns)
     assert "content_raw" in cols, f"content_raw 컬럼 없음: {cols}"
+    assert "fetch_status" in cols, f"fetch_status 컬럼 없음: {cols}"
     assert "section_content" not in cols, f"옛 section_content 컬럼 잔존: {cols}"
     assert "section_title" not in cols, f"옛 section_title 컬럼 잔존: {cols}"
     assert "section_order" not in cols, f"옛 section_order 컬럼 잔존: {cols}"
@@ -104,19 +121,18 @@ class _StubClient:
     pass
 
 
-def test_fill_content_schema_raw_xml(monkeypatch, tmp_path) -> None:
-    """fillContent 결과 schema 는 content_raw 만, DART dart4.xsd XML 태그·attribute 보존.
+def _patchListFilings(monkeypatch, mod, metaDf):
+    """fillContent → collectMetaDay → listFilings 경로 stub."""
+    monkeypatch.setattr(mod, "listFilings", lambda *a, **kw: metaDf)
 
-    DART 가 반환하는 두 포맷 중 (a) dart4.xsd XML 회귀 가드 — `<DOCUMENT>` /
-    `<TITLE ATOC ...>` / `<TABLE>` 와 ATOC / AASSOCNOTE / ACODE attribute 가 raw
-    그대로 살아있는지 확인.
-    """
+
+def test_fill_content_schema_raw_xml(monkeypatch, tmp_path) -> None:
+    """raw XML (dart4.xsd) 태그·attribute 보존 + fetch_status="ok" 회귀 가드."""
     import dartlab.config as _cfg
     from dartlab.providers.dart.openapi import allFilingsCollector as mod
 
     monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
-    outDir = mod._allFilingsDir()
-    _writeStubMeta(outDir, "20260527", "20260527000001")
+    _patchListFilings(monkeypatch, mod, _stubMeta("20260527000001"))
 
     stubXml = (
         '<?xml version="1.0" encoding="utf-8"?>'
@@ -129,7 +145,7 @@ def test_fill_content_schema_raw_xml(monkeypatch, tmp_path) -> None:
         "<P>본문 끝</P>"
         "</BODY></DOCUMENT>"
     )
-    monkeypatch.setattr(mod, "_collectOneRaw", lambda client, rceptNo: stubXml)
+    monkeypatch.setattr(mod, "_collectOneRaw", lambda client, rceptNo: (stubXml, "ok"))
 
     df = mod.fillContent("20260527", client=_StubClient(), showProgress=False)
     assert df is not None
@@ -141,23 +157,20 @@ def test_fill_content_schema_raw_xml(monkeypatch, tmp_path) -> None:
     assert "<TABLE" in raw
     assert 'ATOC="Y"' in raw
     assert 'AASSOCNOTE="COVER"' in raw
+    assert df["fetch_status"][0] == "ok"
 
+    outDir = mod._allFilingsDir()
     assert not (outDir / "20260527_meta.parquet").exists()
     assert (outDir / "20260527.parquet").exists()
 
 
 def test_fill_content_schema_raw_html(monkeypatch, tmp_path) -> None:
-    """fillContent 결과 schema 는 content_raw 만, xforms HTML 태그·attribute 보존.
-
-    DART 가 반환하는 두 포맷 중 (b) xforms HTML 회귀 가드 — `<html>` / `<head>` /
-    `<STYLE>` / `<meta charset>` 와 xforms CSS class 가 raw 그대로 살아있는지 확인.
-    """
+    """raw HTML (xforms) 태그·attribute 보존 + fetch_status="ok" 회귀 가드."""
     import dartlab.config as _cfg
     from dartlab.providers.dart.openapi import allFilingsCollector as mod
 
     monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
-    outDir = mod._allFilingsDir()
-    _writeStubMeta(outDir, "20260528", "20260528000002")
+    _patchListFilings(monkeypatch, mod, _stubMeta("20260528000002"))
 
     stubHtml = (
         "<html><head>"
@@ -167,7 +180,7 @@ def test_fill_content_schema_raw_html(monkeypatch, tmp_path) -> None:
         '<table><tr><td class="xforms_title">최대주주변동</td></tr></table>'
         "</body></html>"
     )
-    monkeypatch.setattr(mod, "_collectOneRaw", lambda client, rceptNo: stubHtml)
+    monkeypatch.setattr(mod, "_collectOneRaw", lambda client, rceptNo: (stubHtml, "ok"))
 
     df = mod.fillContent("20260528", client=_StubClient(), showProgress=False)
     assert df is not None
@@ -178,6 +191,189 @@ def test_fill_content_schema_raw_html(monkeypatch, tmp_path) -> None:
     assert "<STYLE>" in raw
     assert "xforms" in raw
     assert "charset=euc-kr" in raw
+    assert df["fetch_status"][0] == "ok"
 
-    assert not (outDir / "20260528_meta.parquet").exists()
+    outDir = mod._allFilingsDir()
     assert (outDir / "20260528.parquet").exists()
+
+
+def test_collect_one_raw_no_body_014(monkeypatch) -> None:
+    """DART status=014 (파일 부재) → (None, "no_body") — 영원히 retry 불가."""
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    class _C:
+        def getBytes(self, endpoint, params):
+            return _STUB_DART_014
+
+    content, status = mod._collectOneRaw(_C(), "20260527100051")
+    assert content is None
+    assert status == "no_body"
+
+
+def test_collect_one_raw_no_body_013(monkeypatch) -> None:
+    """DART status=013 (잘못된 rcept_no) → (None, "no_body")."""
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    class _C:
+        def getBytes(self, endpoint, params):
+            return _STUB_DART_013
+
+    content, status = mod._collectOneRaw(_C(), "99999999999999")
+    assert content is None
+    assert status == "no_body"
+
+
+def test_collect_one_raw_error_exception(monkeypatch) -> None:
+    """client.getBytes 가 RuntimeError raise → (None, "error") — retry 대상."""
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    class _C:
+        def getBytes(self, endpoint, params):
+            raise RuntimeError("api rate limit")
+
+    content, status = mod._collectOneRaw(_C(), "20260527000001")
+    assert content is None
+    assert status == "error"
+
+
+def test_fill_content_diff_retry(monkeypatch, tmp_path) -> None:
+    """기존 .parquet 의 error row 만 retry, no_body/ok 는 skip, 신규 row 추가."""
+    import dartlab.config as _cfg
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    outDir = mod._allFilingsDir()
+
+    # 기존 .parquet: ok / error / no_body 각 1
+    existingRows = [
+        {
+            "corp_code": "001",
+            "corp_name": "A",
+            "stock_code": "001",
+            "corp_cls": "Y",
+            "rcept_dt": "20260527",
+            "rcept_no": "R_OK",
+            "report_nm": "공시1",
+            "flr_nm": "A",
+            "content_raw": "<DOC>기존 ok</DOC>",
+            "fetch_status": "ok",
+        },
+        {
+            "corp_code": "002",
+            "corp_name": "B",
+            "stock_code": "002",
+            "corp_cls": "Y",
+            "rcept_dt": "20260527",
+            "rcept_no": "R_ERR",
+            "report_nm": "공시2",
+            "flr_nm": "B",
+            "content_raw": None,
+            "fetch_status": "error",
+        },
+        {
+            "corp_code": "003",
+            "corp_name": "C",
+            "stock_code": "003",
+            "corp_cls": "Y",
+            "rcept_dt": "20260527",
+            "rcept_no": "R_NB",
+            "report_nm": "공시3",
+            "flr_nm": "C",
+            "content_raw": None,
+            "fetch_status": "no_body",
+        },
+    ]
+    pl.DataFrame(existingRows).write_parquet(outDir / "20260527.parquet")
+
+    # listFilings 가 기존 3 + 신규 1 = 4 건 반환
+    metaRows = [
+        {
+            "corp_code": r["corp_code"],
+            "corp_name": r["corp_name"],
+            "stock_code": r["stock_code"],
+            "corp_cls": r["corp_cls"],
+            "rcept_dt": r["rcept_dt"],
+            "rcept_no": r["rcept_no"],
+            "report_nm": r["report_nm"],
+            "flr_nm": r["flr_nm"],
+        }
+        for r in existingRows
+    ]
+    metaRows.append(
+        {
+            "corp_code": "004",
+            "corp_name": "D",
+            "stock_code": "004",
+            "corp_cls": "Y",
+            "rcept_dt": "20260527",
+            "rcept_no": "R_NEW",
+            "report_nm": "공시4",
+            "flr_nm": "D",
+        }
+    )
+    _patchListFilings(monkeypatch, mod, pl.DataFrame(metaRows))
+
+    # _collectOneRaw — error retry / 신규는 모두 ok 반환
+    collectCalls: list[str] = []
+
+    def stubCollect(client, rceptNo):
+        collectCalls.append(rceptNo)
+        return (f"<DOC>{rceptNo} 신규 ok</DOC>", "ok")
+
+    monkeypatch.setattr(mod, "_collectOneRaw", stubCollect)
+
+    df = mod.fillContent("20260527", client=_StubClient(), showProgress=False)
+    assert df is not None
+
+    # 처리 대상은 신규 + retry 만 (ok / no_body 는 skip)
+    assert set(collectCalls) == {"R_ERR", "R_NEW"}
+
+    rowsByRcept = {r["rcept_no"]: r for r in df.iter_rows(named=True)}
+    assert len(rowsByRcept) == 4
+
+    # ok / no_body 는 그대로 보존
+    assert rowsByRcept["R_OK"]["fetch_status"] == "ok"
+    assert rowsByRcept["R_OK"]["content_raw"] == "<DOC>기존 ok</DOC>"
+    assert rowsByRcept["R_NB"]["fetch_status"] == "no_body"
+    assert rowsByRcept["R_NB"]["content_raw"] is None
+
+    # error 는 retry 결과로 업데이트
+    assert rowsByRcept["R_ERR"]["fetch_status"] == "ok"
+    assert "R_ERR 신규 ok" in rowsByRcept["R_ERR"]["content_raw"]
+
+    # 신규 추가
+    assert rowsByRcept["R_NEW"]["fetch_status"] == "ok"
+
+
+def test_collect_meta_day_always_calls_list_filings(monkeypatch, tmp_path) -> None:
+    """기존 .parquet 존재 여부와 무관하게 listFilings 가 항상 호출됨 — idempotent diff 전제."""
+    import dartlab.config as _cfg
+    from dartlab.providers.dart.openapi import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    outDir = mod._allFilingsDir()
+    # 옛 .parquet + _meta.parquet 둘 다 미리 작성 (옛 skip 가드라면 둘 다 차단)
+    pl.DataFrame(
+        [
+            {
+                "corp_code": "001",
+                "corp_name": "A",
+                "stock_code": "001",
+                "corp_cls": "Y",
+                "rcept_dt": "20260527",
+                "rcept_no": "R_OLD",
+                "report_nm": "옛 공시",
+                "flr_nm": "A",
+            }
+        ]
+    ).write_parquet(outDir / "20260527_meta.parquet")
+
+    callCount = {"n": 0}
+
+    def stubList(*args, **kwargs):
+        callCount["n"] += 1
+        return _stubMeta("R_NEW", reportNm="신규 공시")
+
+    monkeypatch.setattr(mod, "listFilings", stubList)
+    mod.collectMetaDay("20260527", client=_StubClient(), showProgress=False)
+    assert callCount["n"] == 1, f"listFilings 호출 0 — skip 가드 잔존: {callCount}"

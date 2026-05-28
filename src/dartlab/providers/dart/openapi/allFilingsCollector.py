@@ -63,47 +63,73 @@ def _allFilingsDir() -> Path:
     return d
 
 
-def _collectOneRaw(client: DartClient, rceptNo: str) -> str | None:
+def _collectOneRaw(client: DartClient, rceptNo: str) -> tuple[str | None, str]:
     """단일 공시 원문 raw 본문 반환 — 생긴 그대로, 모든 태그·attribute 보존.
 
     DART 가 반환하는 zip 안 largest 파일은 공시 종류별로 dart4.xsd XML 또는 xforms
     HTML 두 포맷 중 하나. utf-8/euc-kr/cp949 순으로 디코딩만 한다. 후처리 0.
-    빈 문자열·디코딩 실패는 None.
+
+    Returns:
+        (content_raw, fetch_status) tuple.
+        fetch_status:
+            - ``"ok"``: 정상 본문 수집 — content_raw 는 raw XML/HTML.
+            - ``"no_body"``: DART 명시 데이터 truth (행정 통지 / 첨부정정 / 접수번호
+              오류). 영원히 retry 불가. status 013 (접수번호 오류) 또는 014 (파일
+              부재) 응답. content_raw 는 None.
+            - ``"error"``: API 장애 (network · 한도 · 시스템 점검 · decode 실패).
+              retry 대상. content_raw 는 None.
+
+    DART API 응답 구조:
+        정상: ``b'PK\\x03\\x04'`` ZIP magic prefix → zip 내 largest 파일 디코딩.
+        본문 부재: 147 bytes XML ``<result><status>014</status><message>파일이
+        존재하지 않습니다</message></result>``.
+        접수번호 오류: 147 bytes XML ``<status>013</status><message>접수번호 오류
+        ...``.
+        기타 에러: status 010/011/012 (API key) · 020 (한도) · 800 (점검) · 900
+        (불명) → "error".
     """
     try:
         raw = client.getBytes("document.xml", {"rcept_no": rceptNo})
     except (RuntimeError, OSError):
-        return None
+        return (None, "error")
 
-    if raw is None:
-        return None
+    if raw is None or len(raw) == 0:
+        return (None, "error")
 
-    try:
-        zf = zipfile.ZipFile(io.BytesIO(raw))
-    except zipfile.BadZipFile:
-        return None
-
-    names = zf.namelist()
-    if not names:
-        return None
-
-    largest = max(names, key=lambda n: zf.getinfo(n).file_size)
-    content = zf.read(largest)
-
-    rawContent: str | None = None
-    for enc in ("utf-8", "euc-kr", "cp949"):
+    # 정상 응답 — ZIP magic prefix
+    if raw[:4] == b"PK\x03\x04":
         try:
-            rawContent = content.decode(enc)
-            break
-        except (UnicodeDecodeError, LookupError):
-            continue
-    if rawContent is None:
-        rawContent = content.decode("utf-8", errors="replace")
+            zf = zipfile.ZipFile(io.BytesIO(raw))
+        except zipfile.BadZipFile:
+            return (None, "error")
 
-    if not rawContent.strip():
-        return None
+        names = zf.namelist()
+        if not names:
+            return (None, "error")
 
-    return rawContent
+        largest = max(names, key=lambda n: zf.getinfo(n).file_size)
+        content = zf.read(largest)
+
+        rawContent: str | None = None
+        for enc in ("utf-8", "euc-kr", "cp949"):
+            try:
+                rawContent = content.decode(enc)
+                break
+            except (UnicodeDecodeError, LookupError):
+                continue
+        if rawContent is None:
+            rawContent = content.decode("utf-8", errors="replace")
+
+        if not rawContent.strip():
+            return (None, "error")
+
+        return (rawContent, "ok")
+
+    # status XML 응답 — DART 명시 결과
+    text = raw[:300].decode("utf-8", errors="replace")
+    if "<status>014" in text or "<status>013" in text:
+        return (None, "no_body")
+    return (None, "error")
 
 
 # ═══════════════════════════════════════════
@@ -145,19 +171,8 @@ def collectMetaDay(
 
     outDir = _allFilingsDir()
     metaPath = outDir / f"{period}{_META_SUFFIX}.parquet"
-    fullPath = outDir / f"{period}.parquet"
 
-    # 원문까지 완료됐거나 목록이 있으면 건너뜀
-    if fullPath.exists():
-        if showProgress:
-            _log.info("[%s] 원문 수집 완료됨", period)
-        return None
-    if metaPath.exists():
-        if showProgress:
-            df = pl.read_parquet(metaPath)
-            _log.info("[%s] 목록 있음 (%d건)", period, df.height)
-        return None
-
+    # listFilings 1 호출 (1.5초) — 항상 호출. 당일 추가 공시 / 옛 날짜 정정공시 발견.
     meta = listFilings(client, start=period, end=period, fetchAll=True)
     if meta.height == 0:
         if showProgress:
@@ -172,13 +187,14 @@ def collectMetaDay(
             _log.info("[%s] 상장사 공시 없음", period)
         return None
 
-    # 저장
+    # 저장 — 옛 meta 가 있어도 신규 결과로 덮어씀 (listFilings 는 정정 포함 최신 list 반환).
+    # 본문 .parquet 는 fillContent 가 별도 diff 로 incremental update.
     tmpPath = metaPath.with_suffix(".parquet.tmp")
     meta.write_parquet(tmpPath)
-    tmpPath.rename(metaPath)
+    tmpPath.replace(metaPath)
 
     if showProgress:
-        _log.info("[%s] 목록 %d건 저장", period, meta.height)
+        _log.info("[%s] 목록 %d건 갱신", period, meta.height)
 
     return meta
 
@@ -252,29 +268,58 @@ def collectMetaRange(
 # ═══════════════════════════════════════════
 
 
+def _rowFromMeta(metaRow: dict, content: str | None, status: str) -> dict:
+    """meta row + 본문 수집 결과 → 본문 parquet row dict."""
+    return {
+        "corp_code": metaRow["corp_code"],
+        "corp_name": metaRow["corp_name"],
+        "stock_code": metaRow.get("stock_code", ""),
+        "corp_cls": metaRow["corp_cls"],
+        "rcept_dt": metaRow["rcept_dt"],
+        "rcept_no": metaRow["rcept_no"],
+        "report_nm": metaRow["report_nm"],
+        "flr_nm": metaRow.get("flr_nm", ""),
+        "content_raw": content,
+        "fetch_status": status,
+    }
+
+
 def fillContent(
     period: str,
     *,
     client: DartClient | None = None,
     showProgress: bool = True,
 ) -> pl.DataFrame | None:
-    """하루치 목록의 원문을 채운다. _meta.parquet → .parquet 승격.
+    """하루치 본문 incremental 수집. **idempotent + diff retry**.
 
-    이미 원문이 있는 날짜는 건너뛴다.
+    매번 호출 시:
+        1. ``collectMetaDay`` 호출 — listFilings 1 회 (1.5초) 로 최신 공시 목록 갱신.
+           당일 추가 공시 / 옛 날짜 정정공시 발견 보장.
+        2. 기존 ``.parquet`` 의 rcept_no → fetch_status 맵 빌드.
+        3. 처리 대상:
+           - 신규 rcept_no (목록엔 있지만 .parquet 에 없는 것) → 본문 수집
+           - 기존 ``fetch_status="error"`` → retry
+           - 기존 ``fetch_status="ok"`` / ``"no_body"`` → skip (final)
+        4. 정기공시 (``_PERIODIC_REPORT_PATTERNS``) 는 row 자체 생략 — docs/ owner.
+        5. atomic merge — skip row + 신규/retry row → tmp.parquet → rename.
+
+    본문 0 건 안전장치 — incremental update (기존 .parquet 있음) 의 경우엔 트리거 X.
+    *최초 수집* 에서 모든 row error 일 때만 .parquet 갱신 차단 (옛 사고 가드).
 
     Args:
-        period: 인자.
-        client: 인자.
-        showProgress: 인자.
+        period: YYYYMMDD.
+        client: DartClient 인스턴스. None 이면 자동 생성.
+        showProgress: True 면 progress 로그.
+
+    Returns:
+        pl.DataFrame 또는 None — 본문 .parquet 의 최종 내용. 변경 0 시에도 기존
+        .parquet 의 DataFrame 반환. listFilings 결과 0 또는 처리 대상 0 시 None.
 
     Raises:
         없음.
 
     Example:
-        >>> fillContent(...)
-
-    Returns:
-        pl.DataFrame 또는 None — 수집 결과.
+        >>> fillContent("20260527")  # doctest: +SKIP
     """
     if client is None:
         client = DartClient()
@@ -283,97 +328,124 @@ def fillContent(
     metaPath = outDir / f"{period}{_META_SUFFIX}.parquet"
     fullPath = outDir / f"{period}.parquet"
 
-    # 원문 완료 → 건너뜀
-    if fullPath.exists():
-        if showProgress:
-            _log.info("[%s] 원문 이미 완료", period)
-        return None
-
-    # 목록 없음
+    # Step 1: meta 갱신 — listFilings 항상 호출.
+    collectMetaDay(period, client=client, showProgress=showProgress)
     if not metaPath.exists():
         if showProgress:
-            _log.info("[%s] 목록 없음 (먼저 collectMetaDay 실행)", period)
+            _log.info("[%s] 목록 없음 (휴일)", period)
         return None
-
     meta = pl.read_parquet(metaPath)
-    total = meta.height
 
-    if showProgress:
-        _log.info("[%s] %d건 원문 수집 시작", period, total)
+    # Step 2: 기존 본문 .parquet 의 rcept_no → fetch_status 맵 + row dict 보존.
+    existingRows: dict[str, dict] = {}
+    if fullPath.exists():
+        existingDf = pl.read_parquet(fullPath)
+        for r in existingDf.iter_rows(named=True):
+            existingRows[r["rcept_no"]] = r
 
-    allRows: list[dict] = []
-    success = empty = skippedPeriodic = 0
+    # Step 3: 처리 대상 분리.
+    skipPeriodic = 0
+    skipExisting = 0
+    targets: list[dict] = []  # 신규 + retry — 본문 수집 대상 meta row
+    for metaRow in meta.iter_rows(named=True):
+        rceptNo = metaRow["rcept_no"]
+        reportNm = metaRow.get("report_nm", "") or ""
 
-    for idx, row in enumerate(meta.iter_rows(named=True)):
-        rceptNo = row["rcept_no"]
-        reportNm = row.get("report_nm", "") or ""
-
-        # 정기공시 스킵 — docs/ 가 owner.
+        # 정기공시 — docs/ owner. row 자체 생략.
         if any(p in reportNm for p in _PERIODIC_REPORT_PATTERNS):
-            skippedPeriodic += 1
+            skipPeriodic += 1
             continue
 
-        raw = _collectOneRaw(client, rceptNo)
-
-        if raw:
-            success += 1
+        existing = existingRows.get(rceptNo)
+        if existing is None:
+            targets.append(metaRow)  # 신규
+        elif existing.get("fetch_status") == "error":
+            targets.append(metaRow)  # retry
         else:
-            empty += 1
+            skipExisting += 1  # ok / no_body — final, skip
 
-        allRows.append(
-            {
-                "corp_code": row["corp_code"],
-                "corp_name": row["corp_name"],
-                "stock_code": row.get("stock_code", ""),
-                "corp_cls": row["corp_cls"],
-                "rcept_dt": row["rcept_dt"],
-                "rcept_no": rceptNo,
-                "report_nm": row["report_nm"],
-                "flr_nm": row.get("flr_nm", ""),
-                "content_raw": raw,
-            }
-        )
+    if not targets:
+        if showProgress:
+            _log.info(
+                "[%s] 변경 없음: 기존 ok/no_body %d, 정기공시 skip %d, 처리 대상 0",
+                period,
+                skipExisting,
+                skipPeriodic,
+            )
+        # 기존 .parquet 이 있으면 그대로 반환, 없으면 None
+        return pl.read_parquet(fullPath) if fullPath.exists() else None
 
-        if showProgress and (idx + 1) % 100 == 0:
-            _log.info("  [%d/%d] 성공=%d 빈=%d", idx + 1, total, success, empty)
-
-    if not allRows:
-        return None
-
-    # 안전장치 — 본문 0 건 성공이면 .parquet 으로 승격 X, _meta 유지.
-    # 과거 사고 (2025-04 ~ 2026-02, 222 일치) 재발 방지: API 키 한도 / 네트워크 실패로
-    # 전 row 가 empty 로 끝나도 빈 .parquet 으로 저장되어 영구 데드락 마킹됐었다.
-    # 본 가드는 *0 건 성공 = 수집 실패* 로 간주하고 retry 가능 상태로 유지한다.
-    # (정기공시만 있는 날은 skippedPeriodic > 0 이지만 success > 0 보장 안 됨 — 정기공시만 있는 날은
-    #  처리 대상 0 건이라 빈 본문 .parquet 가 합법이라 별도 분기 불필요.)
-    if success == 0 and (success + empty) > 0:
-        _log.warning(
-            "[%s] 본문 수집 0 건 (시도 %d 건 모두 empty, 정기공시 %d 건 skip) — .parquet 승격 차단, _meta 보존. "
-            "원인 확인 후 재시도 필요 (API 키 한도 / 네트워크 / URL 변경 가능).",
+    if showProgress:
+        _log.info(
+            "[%s] 처리 시작: 신규/retry %d, 기존 skip %d (ok/no_body), 정기공시 skip %d",
             period,
-            empty,
-            skippedPeriodic,
+            len(targets),
+            skipExisting,
+            skipPeriodic,
+        )
+
+    # Step 4: 본문 수집 — 신규 + retry.
+    processedRows: dict[str, dict] = {}
+    okCount = noBodyCount = errorCount = 0
+    for idx, metaRow in enumerate(targets):
+        rceptNo = metaRow["rcept_no"]
+        content, status = _collectOneRaw(client, rceptNo)
+        processedRows[rceptNo] = _rowFromMeta(metaRow, content, status)
+        if status == "ok":
+            okCount += 1
+        elif status == "no_body":
+            noBodyCount += 1
+        else:
+            errorCount += 1
+        if showProgress and (idx + 1) % 100 == 0:
+            _log.info(
+                "  [%d/%d] ok=%d no_body=%d error=%d",
+                idx + 1,
+                len(targets),
+                okCount,
+                noBodyCount,
+                errorCount,
+            )
+
+    # Step 5: 본문 0 건 성공 안전장치 — 최초 수집만 트리거 (incremental update 는
+    # 기존 데이터 보존이 0건 가드보다 우선).
+    isFirstFill = not fullPath.exists()
+    if isFirstFill and okCount == 0 and errorCount > 0:
+        _log.warning(
+            "[%s] 최초 수집인데 ok 0 / error %d / no_body %d — .parquet 승격 차단, _meta 보존. "
+            "원인 확인 후 재시도 필요 (API 키 한도 / 네트워크 / URL 변경).",
+            period,
+            errorCount,
+            noBodyCount,
         )
         return None
 
-    df = pl.DataFrame(allRows)
+    # Step 6: skip 기존 row + 신규/retry row → atomic merge.
+    finalRows: list[dict] = []
+    for rceptNo, r in existingRows.items():
+        if rceptNo in processedRows:
+            continue  # retry 결과로 대체
+        finalRows.append(r)
+    finalRows.extend(processedRows.values())
 
-    # 원자적 저장 → .parquet (원문 완료)
+    df = pl.DataFrame(finalRows)
+
     tmpPath = fullPath.with_suffix(".parquet.tmp")
     df.write_parquet(tmpPath)
-    tmpPath.rename(fullPath)
+    tmpPath.replace(fullPath)
 
-    # _meta 제거 (승격 완료)
+    # _meta 제거 (.parquet 승격 완료) — 매번 호출 시 재생성됨.
     if metaPath.exists():
         metaPath.unlink()
 
     if showProgress:
         _log.info(
-            "[%s] 완료: %d건 성공, %d건 빈, %d건 정기공시 skip(→docs/), %d행, %.1fMB",
+            "[%s] 완료: ok=%d no_body=%d error=%d (처리 %d), 전체 %d행, %.1fMB",
             period,
-            success,
-            empty,
-            skippedPeriodic,
+            okCount,
+            noBodyCount,
+            errorCount,
+            len(targets),
             df.height,
             fullPath.stat().st_size / 1024 / 1024,
         )

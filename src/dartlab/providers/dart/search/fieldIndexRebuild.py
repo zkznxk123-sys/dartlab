@@ -131,7 +131,7 @@ def rebuildMain(
             _log.info(f"[main] allFilings 스트리밍: {len(files)}개 파일")
         for i, f in enumerate(files):
             try:
-                df = pl.read_parquet(f).filter(pl.col("content_raw").is_not_null())
+                df = pl.read_parquet(f).filter(pl.col("fetch_status") == "ok")
             except (pl.exceptions.PolarsError, OSError):
                 continue
             totalDocs += feedDf(df, "allFilings", contentColumn="content_raw")
@@ -228,7 +228,7 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     rows: list[dict] = []
     for f in files:
         try:
-            df = pl.read_parquet(f).filter(pl.col("content_raw").is_not_null())
+            df = pl.read_parquet(f).filter(pl.col("fetch_status") == "ok")
         except (pl.exceptions.PolarsError, OSError):
             continue
         for row in df.iter_rows(named=True):

@@ -212,8 +212,9 @@ def buildNgramIndex(
                         "rcept_dt",
                         "report_nm",
                         "content_raw",
+                        "fetch_status",
                     ],
-                ).filter(pl.col("content_raw").is_not_null())
+                ).filter(pl.col("fetch_status") == "ok")
             except (pl.exceptions.PolarsError, OSError):
                 continue
 
