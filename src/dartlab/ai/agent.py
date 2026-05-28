@@ -70,6 +70,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 직전 회귀: LLM 이 매번 RunPython 으로 ad-hoc DCF 코드 작성 → token 30% 낭비.
     # default 노출 누락 시 LLM 호출 0 회 회귀 (CompareCompanies 2026-05-17 패턴).
     "DCFValuation",
+    # 마스터 플랜 트랙 1 PR-2 — N(2~12) 종목 비교 + percentile rank.
+    # compareCompanies max 3 한계 확장 + peer-internal ranking 신규.
+    "PeerCompareN",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",

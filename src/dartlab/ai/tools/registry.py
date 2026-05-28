@@ -19,6 +19,7 @@ from .inspectDataset import inspectDataset
 from .listEngineGaps import listEngineGaps
 from .lookAheadGuard import lookAheadGuard
 from .outcomeLog import outcomeLog
+from .peerCompareN import peerCompareN
 from .proposeRecipe import proposeRecipe
 from .readCapability import readCapability
 from .readFile import readFile
@@ -345,6 +346,30 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "PeerCompareN": ToolSpec(
+        "PeerCompareN",
+        "N (2~12) 종목 wide-format 비교 + peer-internal percentile rank (각 metric 별 0.0~1.0, 1.0=best). compareCompanies max 3 한계 확장. '5 개 회사 비교', '삼성 vs SK vs LG vs ...' 류 질문에 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCodes": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "2~12 개 종목 코드. 초과 시 앞 12 개만.",
+                },
+                "metrics": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "비교 metric list. 기본 8 종 (revenue/operatingProfit/netIncome/totalAssets/totalEquity/totalLiabilities/debtRatio/roe).",
+                },
+            },
+            "required": ["stockCodes"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "DCFValuation": ToolSpec(
         "DCFValuation",
         "단일 종목 Damodaran 2-stage DCF 내재가치 밴드 (bear/base/bull) 자동 계산. discountRate ± 100bps + terminalGrowth ± 50bps 표준 변형. '삼성전자 적정가격', 'AAPL 공정가치', 'DCF 평가' 류 질문에 본 도구 1 회 호출 — RunPython ad-hoc 회피 (token 30% 절감).",
@@ -591,6 +616,7 @@ _TOOLS: dict[str, ToolFn] = {
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
     "CompareCompanies": compareCompanies,
+    "PeerCompareN": peerCompareN,
     "DCFValuation": dcfValuationTool,
     "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
@@ -627,6 +653,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "SaveArtifact",
     "CreateUserSkill",
     "CompileVisual",
+    "PeerCompareN",
     "DCFValuation",
     "ScenarioOverlay",
     "OutcomeLog",
@@ -643,6 +670,7 @@ _LEGACY_NAME_MAP = {
     "evidence_gate": "EvidenceGate",
     "pick_story_template": "PickStoryTemplate",
     "compare_companies": "CompareCompanies",
+    "peer_compare_n": "PeerCompareN",
     "dcf_valuation": "DCFValuation",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
