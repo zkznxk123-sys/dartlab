@@ -30,6 +30,7 @@ log = logging.getLogger(__name__)
 _CATEGORY = "newsHeadlines"
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _LOCAL_ROOT = _REPO_ROOT / "data" / "news" / "headlines"
+_GDELT_ROOT = _REPO_ROOT / "data" / "news" / "gdelt"
 
 _EMPTY_SCHEMA = {
     "date": pl.Date,
@@ -114,6 +115,56 @@ def _loadDay(market: str, dayIso: str) -> pl.DataFrame | None:
         return None
 
 
+@lru_cache(maxsize=128)
+def _loadGdeltDay(market: str, dayIso: str) -> pl.DataFrame | None:
+    """GDELT 일자별 parquet 로드 — Phase D backfill 결과 통합.
+
+    Sig: ``_loadGdeltDay(market, dayIso) -> pl.DataFrame | None``
+
+    Capabilities: 로컬 GDELT parquet 우선, 없으면 HF newsGdelt 카테고리 lazy fetch.
+    AIContext: loadNewsArchive 가 RSS + GDELT 두 source 통합 시 호출.
+    Guide: GDELT 와 RSS 는 schema 호환 (diagonal_relaxed concat).
+    When: loadNewsArchive 일자 루프.
+    How: 로컬 path 확인 → 없으면 dataLoader newsGdelt.
+
+    Args:
+        market: 대문자 정규화.
+        dayIso: YYYY-MM-DD.
+
+    Returns:
+        pl.DataFrame | None.
+
+    Raises:
+        없음.
+
+    Example::
+
+        df = _loadGdeltDay("KR", "2026-05-28")
+
+    Requires:
+        Phase D backfill 실행 또는 HF newsGdelt 카테고리.
+
+    See Also:
+        ``loadNewsArchive``: caller.
+    """
+    marketU = market.upper()
+    local = _GDELT_ROOT / marketU / f"{dayIso}.parquet"
+    if local.exists():
+        try:
+            return pl.read_parquet(local)
+        except (OSError, pl.exceptions.ComputeError) as exc:
+            log.debug("gdelt local read 실패 %s: %s", local, exc)
+            return None
+    try:
+        from dartlab.core.dataLoader import loadData
+
+        stockCode = f"{marketU}/{dayIso}"
+        return loadData(stockCode, category="newsGdelt")
+    except Exception as exc:
+        log.debug("newsGdelt/%s/%s.parquet 미가용: %s", marketU, dayIso, type(exc).__name__)
+        return None
+
+
 def loadNewsArchive(
     start: str | _date,
     end: str | _date,
@@ -181,6 +232,9 @@ def loadNewsArchive(
         df = _loadDay(marketU, day.isoformat())
         if df is not None and df.height > 0:
             frames.append(df)
+        gdelt_df = _loadGdeltDay(marketU, day.isoformat())
+        if gdelt_df is not None and gdelt_df.height > 0:
+            frames.append(gdelt_df)
 
     if not frames:
         return pl.DataFrame(schema=_EMPTY_SCHEMA)

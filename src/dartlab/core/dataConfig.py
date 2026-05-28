@@ -158,6 +158,17 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "nested": True,
     },
+    "newsGdelt": {
+        # Phase D — GDELT 2.0 GKG 글로벌 5 년 백필.
+        # `data/news/gdelt/{market}/{YYYY}-{MM}-{DD}.parquet` 일별 sharding.
+        # newsEnriched 와 호환 schema + (themes list, language, tone_raw) 추가.
+        # syncGdeltBackfill.py 가 GDELT 슬롯 15-min 부터 일별 통합.
+        # narrativePulse 호환 (sentiment_score + topic_label 동일 의미).
+        "dir": "news/gdelt",
+        "label": "GDELT 2.0 GKG 글로벌 뉴스 archive (URL + sentiment + themes, Phase D 백필)",
+        "public": True,
+        "nested": True,
+    },
 }
 
 

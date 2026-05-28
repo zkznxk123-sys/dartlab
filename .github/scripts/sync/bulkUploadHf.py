@@ -26,11 +26,12 @@ CATEGORY_DIR = {
     "krxPricesV2": "krx/prices/v2",
     "newsHeadlines": "news/headlines",
     "newsEnriched": "news/enriched",
+    "newsGdelt": "news/gdelt",
 }
 
 # nested=True 카테고리는 sub-dir (예: news/headlines/{market}/) 까지 rglob 으로 수집,
 # HF path_in_repo 도 dirPath + relpath 형태로 유지. nested=False 는 flat dirPath/*.parquet.
-NESTED_CATEGORIES = {"newsHeadlines", "newsEnriched"}
+NESTED_CATEGORIES = {"newsHeadlines", "newsEnriched", "newsGdelt"}
 
 
 def main():
