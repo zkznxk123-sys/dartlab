@@ -47,12 +47,20 @@ from dartlab.mcp.protocol import (
     resourcePayload as _resourcePayload,
 )
 from dartlab.mcp.server import createServer
-from dartlab.mcp.transports import createSseApp, runSse, runStdio
+from dartlab.mcp.transports import (
+    createSseApp,
+    createStreamableHttpApp,
+    runSse,
+    runStdio,
+    runStreamableHttp,
+)
 
 __all__ = [
     "createServer",
     "createSseApp",
+    "createStreamableHttpApp",
     "installMcpConfig",
     "runSse",
     "runStdio",
+    "runStreamableHttp",
 ]
