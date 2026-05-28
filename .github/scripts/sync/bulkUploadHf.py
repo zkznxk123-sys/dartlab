@@ -5,6 +5,7 @@
     python bulkUploadHf.py docs                 # 미업로드만
     python bulkUploadHf.py docs --force         # 전체 재업로드 (schema 마이그레이션)
     python bulkUploadHf.py docs --since 86400   # 최근 N초 안 mtime 변경분만
+    python bulkUploadHf.py krxPricesV2 --force  # bitemporal v2 schema 일괄 push
 """
 
 import argparse
@@ -22,12 +23,13 @@ CATEGORY_DIR = {
     "docs": "dart/docs",
     "finance": "dart/finance",
     "report": "dart/report",
+    "krxPricesV2": "krx/prices/v2",
 }
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("category", nargs="?", default="finance", help="finance/report/docs")
+    parser.add_argument("category", nargs="?", default="finance", help="finance/report/docs/krxPricesV2")
     parser.add_argument("--force", action="store_true", help="전체 재업로드 (schema 마이그레이션)")
     parser.add_argument(
         "--since",
