@@ -23,9 +23,11 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Any
 
 from .contracts import TraceEvent
@@ -87,7 +89,37 @@ def runAgent(
     maxIterations: int = 30,
     **_unused: Any,
 ) -> Iterator[TraceEvent]:
-    """본체 — chat-native autonomous tool-calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환."""
+    """본체 — chat-native autonomous tool-calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환.
+
+    마스터 플랜 트랙 2 PR-O4 — 환경변수 ``DARTLAB_AI_TRACE_DUMP=1`` 활성 시 본
+    함수의 TraceEvent 시퀀스를 ``~/.dartlab/ai_trace/{sessionId}.json`` 으로 자동
+    저장 (7 일 retention). KPI digest (PR-O5) 의 입력. 기본 OFF — production
+    영향 0.
+    """
+    raw_iter = _runAgentImpl(
+        question,
+        provider=provider,
+        history=history,
+        toolNames=toolNames,
+        maxIterations=maxIterations,
+        **_unused,
+    )
+    if _traceDumpEnabled():
+        yield from _wrapWithAuditDump(question=question, provider=provider, rawIter=raw_iter)
+    else:
+        yield from raw_iter
+
+
+def _runAgentImpl(
+    question: str,
+    *,
+    provider: Any,
+    history: list[dict[str, Any]] | None = None,
+    toolNames: tuple[str, ...] = _DEFAULT_TOOL_NAMES,
+    maxIterations: int = 30,
+    **_unused: Any,
+) -> Iterator[TraceEvent]:
+    """runAgent 본체 — public alias 는 ``runAgent``."""
     history = history or []
     systemPrompt = _injectPastContextIfAvailable(DARTLAB_CHAT_SYSTEM, _unused, history=history)
     messages: list[dict[str, Any]] = [{"role": "system", "content": systemPrompt}]
@@ -887,6 +919,66 @@ def _microcompact(messages: list[dict[str, Any]], *, keepLast: int = 2) -> None:
         msg = messages[idx]
         if msg.get("tool_calls") and msg.get("content"):
             msg["content"] = None
+
+
+def _traceDumpEnabled() -> bool:
+    """환경변수 ``DARTLAB_AI_TRACE_DUMP`` 활성 검사 — 기본 OFF."""
+    return os.getenv("DARTLAB_AI_TRACE_DUMP", "").lower() in ("1", "true", "yes")
+
+
+def _resolveTraceDir() -> Path:
+    """trace dump 디렉토리 — ``~/.dartlab/ai_trace/``.
+
+    환경변수 ``DARTLAB_AI_TRACE_DIR`` override 가능 (PII 우려 시 사용자 명시 경로).
+    """
+    custom = os.getenv("DARTLAB_AI_TRACE_DIR")
+    if custom:
+        return Path(custom)
+    return Path.home() / ".dartlab" / "ai_trace"
+
+
+def _pruneOldTraces(directory: Path, *, retentionDays: int = 7) -> None:
+    """7 일 retention rotate — 오래된 trace 파일 정리. 디스크 비대 가드."""
+    if not directory.is_dir():
+        return
+    cutoff = time.time() - retentionDays * 86400
+    for path in directory.glob("*.json"):
+        try:
+            if path.stat().st_mtime < cutoff:
+                path.unlink()
+        except OSError:
+            continue
+
+
+def _wrapWithAuditDump(*, question: str, provider: Any, rawIter: Iterator[TraceEvent]) -> Iterator[TraceEvent]:
+    """runAgent 의 TraceEvent stream 을 가로채 AuditCollector 누적 + 종료 시 dump.
+
+    환경변수 ``DARTLAB_AI_TRACE_DUMP=1`` 활성 시만 호출. 모든 TraceEvent 가 pass-through
+    + collector 동행. 본 wrapper 자체는 yield 흐름 변경 0 — SSE 소비자 영향 0.
+    """
+    from .trace import AuditCollector
+
+    cfg = getattr(provider, "config", None)
+    collector = AuditCollector(
+        question=question,
+        provider=getattr(cfg, "provider", None),
+        model=getattr(cfg, "model", None),
+    )
+    try:
+        for ev in rawIter:
+            try:
+                collector.observe(ev.kind, ev.data)
+            except Exception:  # noqa: BLE001
+                logger.exception("audit observe failed (kind=%s)", ev.kind)
+            yield ev
+    finally:
+        try:
+            trace_dir = _resolveTraceDir()
+            trace_dir.mkdir(parents=True, exist_ok=True)
+            _pruneOldTraces(trace_dir, retentionDays=7)
+            collector.dumpToJson(trace_dir / f"{collector.sessionId}.json")
+        except Exception:  # noqa: BLE001
+            logger.exception("ai trace dump failed")
 
 
 __all__ = ["runAgent"]
