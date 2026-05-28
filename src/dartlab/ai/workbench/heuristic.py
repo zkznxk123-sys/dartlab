@@ -6,6 +6,16 @@ BRIEF (profile + ReadSkill + ReadCapability + planEvidence) → WORK (EngineCall
 본 모듈은 외부 LLM 의존 없음. targets / intent 의 정적 함수 + workbench tools 만 사용.
 engineCall / verifyAnswer 는 registry 등록되어 있지 않고 직접 import — 휴리스틱 path 의
 plan 실행 + GATE 검증은 LLM 도구 노출과 무관한 내부 helper 다.
+
+운영 빈도 측정 (PR-W2 결정 대기)
+-------------------------------
+마스터 플랜 cryptic-discovering-kettle.md PR-W2 — 본 모듈 (844 줄) 의 운영 빈도가
+< 1% 면 삭제 (PR-W2-A), ≥ 1% 면 유지 + 본 docstring 에 빈도 명문화 (PR-W2-B).
+측정 SSOT 는 ``tests/audit/workbenchUsageDigest.py`` (PR-W1, commit d89a26681).
+
+상태: 측정 진행 중. ``~/.dartlab/ai_trace/*.json`` (PR-O4 trace dump) 가 1+ 일 누적
+되면 digest 출력 → 운영자 명시 결정 박힘. 현 시점 *데이터 부족으로 결정 보류* —
+삭제도 유지도 임의 결정 안 됨. 본 placeholder 가 PR-W2-B 도착 시 갱신될 위치.
 """
 
 from __future__ import annotations
