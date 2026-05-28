@@ -13,10 +13,7 @@ contentPlain 은 row-level markdown (text/table 분리 후 별도).
 
 from __future__ import annotations
 
-import re
 from typing import Any
-
-import polars as pl  # noqa: F401  (caller 가 schema 동일 dict 입력 가정 — type 힌트 reuse)
 
 from dartlab.providers.edgar.docs.sections.mapper import mapSectionTitle
 from dartlab.providers.edgar.docs.sections.textStructure import parseTextStructure
@@ -52,25 +49,23 @@ def splitTextTable(content: str) -> tuple[str, str]:
     return "\n".join(textLines).strip(), "\n".join(tableLines).strip()
 
 
-_IX_DECOMPOSE_RE = re.compile(r"<(ix:header|ix:hidden|ix:references|ix:resources|xbrli:|dei:|link:)", re.IGNORECASE)
-
-
 def sanitizeRawHtml(html: str) -> str:
-    """filing raw HTML 을 viewer 안전 양식으로 sanitize.
+    """filing raw HTML 의 *최소 보안 sanitize* — 태그 보존 강행.
 
-    BeautifulSoup decompose 양식 — script/style/meta/link/header/footer/nav 제거.
-    ``<ix:*>`` 도 unwrap. 표 (``<table>``) 의 ALIGN/rowspan/colspan/COLGROUP 은 그대로
-    보존 — viewer 시각 fidelity 핵심.
+    DART sectionsStorage 의 ``loadSectionsRawXml`` 평행 — sections artifact 에 *모든
+    태그* 보존이 사용자 비전 (viewer 0 손실 + ALIGN/COLGROUP/USERMARK + ix:* +
+    header/footer/nav 등 모두 raw 그대로). 노이즈 제거는 viewer 가 frontend DOMPurify
+    단계에서 담당.
 
-    옛 ``_htmlToText`` ([fetchHtmlParse.py:225-255](src/dartlab/providers/edgar/docs/fetchHtmlParse.py#L225-L255))
-    의 decompose 룰과 동일. 단 본 함수는 표 → markdown 변환 *전* 단계에서 중단해
-    raw HTML 그대로 emit.
+    유일 decompose 대상: ``<script>`` / ``<style>`` — 실행 가능 페이로드 차단 (SSRF /
+    XSS) 보안 최소선. SEC 가 보낸 inline script 가 viewer 안에서 실행되면 안 됨. 나머지
+    레이아웃 / 메타 / 표 구조 / inline XBRL 마커는 *전부 보존*.
 
     Args:
         html: filing 원본 iXBRL HTML.
 
     Returns:
-        sanitized HTML — 노이즈 태그 제거됐지만 표 구조 + 본문 layout 보존.
+        sanitized HTML — script/style 만 decompose, 그 외 모든 태그 보존.
 
     Raises:
         없음.
@@ -81,21 +76,9 @@ def sanitizeRawHtml(html: str) -> str:
     from bs4 import BeautifulSoup
 
     soup = BeautifulSoup(html, "lxml")
-    for tag in soup(["script", "style", "meta", "link", "header", "footer", "nav"]):
+    # 보안 최소선 — 실행 가능 페이로드만 차단. 나머지 모든 태그 보존.
+    for tag in soup(["script", "style"]):
         tag.decompose()
-    # display:none / visibility:hidden style 제거 — viewer 표시 무의미.
-    for tag in soup.find_all(style=True):
-        attrs = getattr(tag, "attrs", None)
-        if not attrs:
-            continue
-        style = str(attrs.get("style") or "").lower()
-        if "display:none" in style or "visibility:hidden" in style:
-            tag.decompose()
-    # ix:* (inline XBRL) — decompose 또는 unwrap.
-    for tag in soup.find_all(re.compile(r"^(ix:header|ix:hidden|ix:references|ix:resources|xbrli:|dei:|link:)")):
-        tag.decompose()
-    for tag in soup.find_all(re.compile(r"^ix:")):
-        tag.unwrap()
     return str(soup.body or soup)
 
 

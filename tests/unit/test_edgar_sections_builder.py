@@ -68,29 +68,43 @@ def test_split_text_table_only_table() -> None:
     assert "| a | b |" in table
 
 
-def test_sanitize_raw_html_removes_noise() -> None:
-    """script/style/header/footer/nav 제거 + table ALIGN 보존."""
+def test_sanitize_raw_html_preserves_tags() -> None:
+    """태그 보존 강행 — script/style 만 decompose, 그 외 모든 태그 보존.
+
+    사용자 비전 (delegated-prancing-tower 보강): viewer 0 손실 + ALIGN/COLGROUP/USERMARK +
+    inline XBRL 마커 + 레이아웃 태그 모두 raw 그대로. 노이즈 제거는 frontend DOMPurify 책임.
+    """
     html = """
     <html><body>
     <script>alert('x')</script>
     <style>p {color:red}</style>
     <header>Site Header</header>
     <p>Real content</p>
+    <ix:nonNumeric contextRef="c1">Apple Inc.</ix:nonNumeric>
     <table>
-      <tr><td align="right">100</td><td align="left">a</td></tr>
+      <colgroup><col width="50%"/></colgroup>
+      <tr><td align="right" rowspan="2" colspan="3">100</td><td align="left">a</td></tr>
     </table>
     <footer>Site Footer</footer>
+    <nav>Site Nav</nav>
     </body></html>
     """
     out = sanitizeRawHtml(html)
+    # 보안 최소선 — script/style 만 제거.
     assert "<script" not in out.lower()
     assert "<style" not in out.lower()
-    assert "<header" not in out.lower()
-    assert "<footer" not in out.lower()
-    assert "Real content" in out
-    # ALIGN 속성 보존 (viewer 시각 fidelity 핵심).
+    # 그 외 모든 태그 보존 (사용자 비전).
+    assert "<header" in out.lower()
+    assert "<footer" in out.lower()
+    assert "<nav" in out.lower()
+    # 표 구조 + 속성 모두 보존 (viewer 시각 fidelity 핵심).
     assert 'align="right"' in out.lower()
+    assert 'rowspan="2"' in out.lower()
+    assert 'colspan="3"' in out.lower()
+    assert "<colgroup" in out.lower()
     assert "<table" in out.lower()
+    # 본문 인용 유지.
+    assert "Real content" in out
 
 
 def test_extract_item_chunks_schema() -> None:
