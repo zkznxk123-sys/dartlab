@@ -186,7 +186,14 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
     """
     import polars as pl
 
-    # plan snazzy-wibbling-origami PR-4a-ii — sections artifact 우선 + 옛 호환 schema 변환.
+    # plan delegated-prancing-tower PR-E6 — EDGAR ticker 분기.
+    # 6 자리 숫자: DART 기존 path. 영문 ticker (US): EDGAR sectionsStorage path.
+    if _looksLikeEdgarTicker(stockCode):
+        edgarDf = _loadEdgarSectionsAsDocs(stockCode)
+        if edgarDf is not None:
+            return edgarDf
+
+    # plan snazzy-wibbling-origami PR-4a-ii — DART sections artifact 우선 + 옛 호환 schema 변환.
     # 옛 docs.parquet (long: year/section_title/section_content) 와 동일 schema 노출 →
     # 호출자 (sentiment/risk/changes/disclosureDiff/edges 등 D.1 10 모듈) 0 변경.
     # docs.parquet 폐기 (PR-4b) 후에도 sections artifact 만으로 동일 분석 가능.
@@ -221,6 +228,62 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
         return None
 
     return pl.read_parquet(path)
+
+
+def _looksLikeEdgarTicker(stockCode: str) -> bool:
+    """EDGAR ticker 양식 판별 — 영문 1~5 자.
+
+    DART 6 자리 숫자와 cross-pollination 0 — 6-digit ticker (예 "AAPL45") 면 False.
+    EDGAR ticker 의 일부는 dash (BRK.B / BRK-B) 또는 dot 포함 — 본 함수는 단순화 위해
+    영문/숫자/dot/dash 만 허용, 길이 1~10.
+    """
+    if not stockCode:
+        return False
+    if stockCode.isdigit():
+        return False  # KR stockCode
+    return 1 <= len(stockCode) <= 10 and all(c.isalnum() or c in "-." for c in stockCode)
+
+
+def _loadEdgarSectionsAsDocs(ticker: str) -> "pl.DataFrame | None":
+    """EDGAR sections artifact → 옛 docs.parquet 호환 schema 변환.
+
+    D.1 모듈 (sentiment/risk/toneChange/governance/disclosureDiff) 의 호출자 변경 0 —
+    같은 columns (year / section_title / section_content) 노출. EDGAR ticker 만 hit.
+
+    Args:
+        ticker: 영문 US ticker.
+
+    Returns:
+        DataFrame (year/section_title/section_content/period/report_kind) 또는 None.
+    """
+    import polars as pl
+
+    from dartlab.providers.edgar.docs.sections.sectionsStorage import (
+        hasSectionsArtifact as edgarHasArtifact,
+    )
+    from dartlab.providers.edgar.docs.sections.sectionsStorage import (
+        loadSectionsLong as edgarLoadLong,
+    )
+
+    tickerUpper = ticker.upper()
+    if not edgarHasArtifact(tickerUpper):
+        return None
+    long = edgarLoadLong(
+        tickerUpper,
+        columns=["topic", "period", "content_plain", "accession_no", "filing_date", "form_type"],
+    )
+    if long is None or long.is_empty():
+        return None
+    try:
+        return long.with_columns(
+            pl.col("period").str.slice(0, 4).alias("year"),
+            pl.col("period").str.slice(4).alias("report_kind"),
+            pl.col("content_plain").alias("section_content"),
+            pl.col("topic").alias("section_title"),
+        )
+    except (pl.exceptions.ComputeError, pl.exceptions.SchemaError) as exc:
+        log.warning("EDGAR sections → docs 호환 schema 변환 실패 (%s): %s", ticker, exc)
+        return None
 
 
 def loadChangesForStock(stockCode: str) -> "pl.DataFrame | None":
