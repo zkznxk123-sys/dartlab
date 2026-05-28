@@ -285,13 +285,35 @@ def fetchEdgarDocs(
     emit("edgar:docs_start", ticker=ticker, count=len(filings), sinceYear=sinceYear)
 
     rows: list[dict] = []
+    sectionRows: list[dict] = []
+    filingIndex: list[dict] = []
     skippedFilings: list[str] = []
     if showProgress:
         _prog, _bar = _makeProgress(len(filings), f"EDGAR 원문 수집 | {ticker}")
         with _prog:
-            _collectFilingRows(rows, filings, meta, ticker, _bar, filingTimeout, skippedFilings)
+            _collectFilingRows(
+                rows,
+                filings,
+                meta,
+                ticker,
+                _bar,
+                filingTimeout,
+                skippedFilings,
+                sectionRows=sectionRows,
+                filingIndex=filingIndex,
+            )
     else:
-        _collectFilingRows(rows, filings, meta, ticker, None, filingTimeout, skippedFilings)
+        _collectFilingRows(
+            rows,
+            filings,
+            meta,
+            ticker,
+            None,
+            filingTimeout,
+            skippedFilings,
+            sectionRows=sectionRows,
+            filingIndex=filingIndex,
+        )
 
     if not rows:
         raise ValueError(f"{ticker} EDGAR docs에서 section 추출 실패")
@@ -305,6 +327,27 @@ def fetchEdgarDocs(
     if skippedFilings:
         emit("edgar:docs_skip", ticker=ticker, count=len(skippedFilings))
     emit("edgar:docs_save", path=str(outPath))
+
+    # PR-E2 dual-write — sections artifact 도 동시 emit. emit 실패 시 옛 docs.parquet 만
+    # 보존 (warning + 진행). PR-E7 안전 게이트 통과 전까지 옛 path 단독으로 fallback 가능.
+    if sectionRows:
+        try:
+            from dartlab.providers.edgar.docs.sections.sectionsBuilder import (
+                emitIndexArtifact,
+                emitPeriodArtifacts,
+            )
+
+            secResult = emitPeriodArtifacts(ticker, sectionRows)
+            emitIndexArtifact(ticker, filingIndex)
+            emit(
+                "edgar:sections_save",
+                ticker=ticker,
+                periodsWritten=secResult["periodsWritten"],
+                totalRows=secResult["totalRows"],
+            )
+        except (OSError, ValueError, pl.exceptions.ComputeError) as exc:
+            _log.warning("sections artifact emit 실패 (%s): %s — docs.parquet 만 유지", ticker, exc)
+
     return outPath
 
 
@@ -425,12 +468,21 @@ def _collectFilingRows(
     bar,
     filingTimeout: int,
     skippedFilings: list[str],
+    sectionRows: list[dict] | None = None,
+    filingIndex: list[dict] | None = None,
 ) -> None:
+    """filing list 를 순회하면서 옛 rows (docs.parquet) + 신 sectionRows (sections artifact) 동시 누적.
+
+    plan delegated-prancing-tower PR-E2 — dual-write 강행. ``sectionRows`` 가 None 이면
+    옛 path 단독 (back-compat). non-None 이면 buildSectionRowsFromFiling 호출해 신
+    sections artifact row 도 누적. raw HTML 은 ``html`` 변수에서 두 path 동시 활용.
+    """
     for filing in filings:
         if bar is not None:
             formType = filing.get("formType", "")
             filingDate = filing.get("filingDate", "")
             bar.title = f"EDGAR | {ticker} | {formType} {filingDate}"
+        html: str | None = None
         try:
             timer = _FilingTimeout(filingTimeout)
             with timer:
@@ -469,6 +521,43 @@ def _collectFilingRows(
                     "section_content": item["content"],
                 }
             )
+
+        # PR-E2 dual-write — sections artifact 신 path 동시 누적.
+        if sectionRows is not None and html is not None and items:
+            from dartlab.providers.edgar.docs.sections.sectionsBuilder import (
+                buildSectionRowsFromFiling,
+            )
+
+            sectionMeta = {
+                "ticker": ticker,
+                "cik": meta["cik"],
+                "accession_no": filing["accessionNumber"],
+                "filing_date": filing["filingDate"],
+                "period_end": filing.get("periodEnd"),
+                "form_type": filing["formType"],
+                "report_type": reportType,
+                "period_key": periodKey,
+                "filing_url": filing["filingUrl"],
+                "year": filing["year"],
+            }
+            try:
+                secRows = buildSectionRowsFromFiling(
+                    items=items,
+                    rawHtml=html,
+                    formType=filing["formType"],
+                    meta=sectionMeta,
+                )
+                sectionRows.extend(secRows)
+                if filingIndex is not None:
+                    filingIndex.append(sectionMeta)
+            except (ValueError, AttributeError, OSError) as exc:
+                _log.warning(
+                    "sections artifact 빌드 실패 (%s %s): %s — docs.parquet 만 emit",
+                    ticker,
+                    filing["accessionNumber"],
+                    exc,
+                )
+
         if bar is not None:
             bar()
 
