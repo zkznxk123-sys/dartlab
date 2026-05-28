@@ -58,11 +58,16 @@ def _latestYear(snap: pl.DataFrame, minCount: int = 1000) -> str | None:
     return None
 
 
-def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
+def _fetchYearEndMarketcaps(market: str, year: str, *, asof: str | None = None) -> dict[str, float]:
     """연도말 (12월 마지막 거래일) 종목별 시가총액.
 
     KR: KRX OpenAPI ``MKTCAP`` 컬럼 직접 (gather/_hfBulk.loadFiltered).
     US: EDGAR 시총 미수집 → 빈 dict (fallback 으로 book equity proxy 사용).
+
+    Args:
+        market: 시장 코드 (현재 KR 만 지원).
+        year: 연도 (str).
+        asof: Sprint 4 PIT 컷오프 (default None → 기존 동작). bitemporal HF 활성 후 의미 있음.
 
     Returns:
         {stockCode: marketCap (원)} — 연도말 마지막 거래일 기준.
@@ -73,7 +78,12 @@ def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
         from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         # 연말 ~6일 (12-25 ~ 12-31) 중 마지막 거래일 시총 사용 (휴일 robust)
-        long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
+        long_df = loadFiltered(
+            start=f"{year}-12-25",
+            end=f"{year}-12-31",
+            adjustment="raw",
+            asof=asof,
+        )
         if long_df is None or long_df.is_empty():
             log.info("factorBuild: 연도말 시총 부재 (year=%s) — book proxy fallback", year)
             return {}
