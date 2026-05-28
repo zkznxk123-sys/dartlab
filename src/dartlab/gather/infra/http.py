@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 import httpx
 
 from ..types import DomainConfig, RateLimitExceededError, SourceUnavailableError
+from . import quota
 
 log = logging.getLogger(__name__)
 
@@ -378,6 +379,11 @@ class GatherHttpClient:
         semaphore = self._getSemaphore(domain)
         req_timeout = timeout or policy.timeout
 
+        # Sprint 1 PR2 — 일일 quota 사전 차단 (80% 도달 시 fallback chain 으로 즉시 전환)
+        if not quota.checkDaily(domain):
+            log.warning("%s 일일 quota 80%% 초과 — 사전 차단", domain)
+            raise SourceUnavailableError(f"{domain} 일일 quota 80% 초과 (DAILY_LIMITS)")
+
         last_exc: Exception | None = None
         for attempt in range(maxRetries):
             # 랜덤 지터: 동일 도메인 연속 호출 시 버스트 패턴 방지
@@ -396,6 +402,7 @@ class GatherHttpClient:
                         headers=req_headers,
                         timeout=req_timeout,
                     )
+                    quota.record(domain)  # 응답 받음 = quota 1 회 소비
                     if resp.status_code == 429:
                         base = 2**attempt
                         wait = base * (attempt + 1) + random.uniform(0.5, 2.0)
@@ -410,6 +417,7 @@ class GatherHttpClient:
                     resp.raise_for_status()
                     return resp
                 except httpx.HTTPError as exc:
+                    quota.record(domain)  # 네트워크 실패도 vendor 측 cap 소비로 간주
                     last_exc = exc
                     if attempt < maxRetries - 1:
                         await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))
@@ -477,6 +485,11 @@ class GatherHttpClient:
         semaphore = self._getSemaphore(domain)
         req_timeout = timeout or policy.timeout
 
+        # Sprint 1 PR2 — 일일 quota 사전 차단 (POST 동행)
+        if not quota.checkDaily(domain):
+            log.warning("%s 일일 quota 80%% 초과 — POST 사전 차단", domain)
+            raise SourceUnavailableError(f"{domain} 일일 quota 80% 초과 (DAILY_LIMITS)")
+
         last_exc: Exception | None = None
         for attempt in range(maxRetries):
             jitter = random.uniform(policy.jitter_min, policy.jitter_max)
@@ -495,6 +508,7 @@ class GatherHttpClient:
                         headers=req_headers,
                         timeout=req_timeout,
                     )
+                    quota.record(domain)
                     if resp.status_code == 429:
                         base = 2**attempt
                         wait = base * (attempt + 1) + random.uniform(0.5, 2.0)
@@ -509,6 +523,7 @@ class GatherHttpClient:
                     resp.raise_for_status()
                     return resp
                 except httpx.HTTPError as exc:
+                    quota.record(domain)
                     last_exc = exc
                     if attempt < maxRetries - 1:
                         await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))
