@@ -4788,6 +4788,253 @@ class Company:
 
         return analyzeAudit(self)
 
+    def executivePay(self):
+        """임원 보수 ≥ 5억 원 individual 공개 (자본시장법 §159, 2013-11-29 시행).
+
+        Capabilities:
+            - 임원 보수 ≥ 5억 원 individual 공개 추출 (US proxy NEO-5 와 달리 *전원* 공개)
+            - 등기/미등기/퇴직 분리
+            - 급여/상여/주식매수선택권 행사이익/기타 근로소득/퇴직소득 분해
+            - 회사별 상위 보수 임원 list
+
+        Args:
+            없음 (self 바인딩).
+
+        Returns:
+            ExecutivePayResult 또는 None — payByType DataFrame + topPay DataFrame 보유.
+            payByType: [구분, 급여, 상여, 주식매수선택권 행사이익, 기타근로소득, 퇴직소득, 기타]
+            topPay: [성명, 직위, 보수총액, 근로소득, 퇴직소득, 기타, 산정기준 narrative]
+
+        Requires:
+            DART 사업보고서 본문 (executivePay 섹션 자동 파싱).
+
+        Example::
+
+            c = Company("005930")
+            pay = c.executivePay()
+            print(pay.payByType)   # 등기/미등기/퇴직 분해
+            print(pay.topPay)      # 상위 보수 list
+
+        AIContext:
+            - 한국 unique disclosure — US proxy 가 숨기는 미등기/퇴직 임원 보수 노출
+            - 산정기준 narrative 가 보수 메커니즘 추적 가능 (스톡옵션 행사 timing 등)
+            - 회사별 보수 top 1~3 의 직위 변경 = 인사 리스크 신호
+
+        Guide:
+            - "삼성전자 임원 보수" → c.executivePay()
+            - "5억 이상 임원 명단" → c.executivePay().topPay
+            - "퇴직 임원 보수" → c.executivePay().payByType.filter(구분="퇴직")
+
+        SeeAlso:
+            - governance: 이사회 구성 + 사외이사 비율
+            - relatedPartyTx: 관계자 거래 (executive 와 회사 사이 거래)
+
+        LLM Specifications:
+            AntiPatterns:
+                - topPay 전체 dump 답변 본문에 (수십 행 — 상위 5~10 명만 인용)
+                - 산정기준 narrative 생략 후 보수 총액만 인용 (메커니즘 불명)
+                - 직책 정규화 없이 회사 간 비교 (대표이사 vs 부회장 vs 사장 의미 차이)
+            OutputSchema:
+                - payByType : DataFrame [구분, 급여, 상여, 주식매수선택권행사이익, 기타근로소득, 퇴직소득, 기타]
+                - topPay : DataFrame [성명, 직위, 보수총액, 산정기준]
+            Prerequisites:
+                - 사업보고서 박힘 (자동 다운로드)
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR (DART · 자본시장법 §159)
+
+        Raises:
+            없음.
+        """
+        from dartlab.providers.dart.docs.finance.executivePay import executivePay as _executivePay
+
+        return _executivePay(self.stockCode)
+
+    def relatedPartyTx(self):
+        """관계자 거래 (RPT) — 공정거래법 §26 chaebol disclosure 100억 원 threshold (2024-01-01 시행).
+
+        Capabilities:
+            - K-IFRS 1024 footnote 의 특수관계자 거래 line-item 추출
+            - 공정거래법 §26 의 대규모기업집단현황공시 100억 원 threshold rows
+            - 보증/대여/매출/매입/자산 양수도 분류
+            - chaebol inter-affiliate 거래 graph 의 raw input
+
+        Args:
+            없음 (self 바인딩).
+
+        Returns:
+            RelatedPartyTxResult 또는 None — guarantees / revenue / etc DataFrame list 보유.
+
+        Requires:
+            DART 사업보고서 본문 (관계자거래 섹션 자동 파싱).
+
+        Example::
+
+            c = Company("005930")
+            rpt = c.relatedPartyTx()
+            print(rpt.guarantees)   # 지급보증 list
+            print(rpt.revenue)      # 매출 거래 list
+
+        AIContext:
+            - 2024-01-01 부터 threshold 100억 원 (이전 10억 원 X — 룰 변경 주의)
+            - 2025 FTC 데이터: top-10 chaebol = 193 조 원 = 전체 disclosed RPT 의 70%
+            - chaebol RPT graph 구축 시 affiliateGroup 와 join 필수 (회사 단독 X)
+
+        Guide:
+            - "삼성전자 관계자 거래" → c.relatedPartyTx()
+            - "삼성그룹 RPT 흐름" → affiliateGroup × relatedPartyTx 모든 계열사 join
+            - "100억 이상 RPT" → 본 method 의 결과 자체 (threshold 이상만 disclosed)
+
+        SeeAlso:
+            - governance: 이사회 의결 RPT (board-approved)
+            - executivePay: 임원 개인 보수 (RPT 와 별도)
+
+        LLM Specifications:
+            AntiPatterns:
+                - threshold 10억 원으로 답변 (구 룰 — 2024-01-01 부터 100억)
+                - 단일 회사 RPT 만 인용 + chaebol 전체 흐름 무시 (RPT 의 핵심 = inter-affiliate)
+                - RPT 본문 narrative 생략 + 금액만 인용 (목적 + 조건 빠짐)
+            OutputSchema:
+                - guarantees : DataFrame [거래상대방, 거래종류, 금액, 기간, 조건]
+                - revenue : DataFrame [거래상대방, 거래종류, 금액]
+                - 등 거래 분류 별 DataFrame
+            Prerequisites:
+                - 사업보고서 박힘 (자동 다운로드)
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR (DART · 공정거래법 §26)
+
+        Raises:
+            없음.
+        """
+        from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx as _relatedPartyTx
+
+        return _relatedPartyTx(self.stockCode)
+
+    def notesDetail(self, keyword: str, period: str = "y"):
+        """K-IFRS 주석 세부항목 (리스 약정 · 우발채무 · 퇴직급여 가정 · 파생 등) 추출.
+
+        Capabilities:
+            - K-IFRS 주석 표 본문 파싱 (NOTES_KEYWORDS 23 종 — 리스/우발/퇴직/파생/금융자산 등)
+            - 연간/분기/반기 분기
+            - 최근 5 년 historical panel
+            - audit-grade citation 의 핵심 evidence layer
+
+        Args:
+            keyword: 주석 키워드 (NOTES_KEYWORDS 23 종 중 하나 — 리스 · 우발채무 · 퇴직급여 · 파생 등)
+            period: "y" 연간 · "q" 분기 · "h" 반기 (default "y").
+
+        Returns:
+            NotesDetailResult 또는 None — corpName + tables (keyword 별 NotesPeriod list) 보유.
+
+        Requires:
+            DART 정기보고서 docs (주석 본문 자동 파싱).
+
+        Example::
+
+            c = Company("005930")
+            lease = c.notesDetail("리스")           # 리스 약정 5 년 panel
+            contingent = c.notesDetail("우발", "y") # 우발채무 연간
+
+        AIContext:
+            - footnote-grade Q&A 의 raw 데이터 (Bloomberg/FactSet 미보유 영역)
+            - "LG energy 의 리스 약정 중 중국 비중" 같은 질문은 본 method 의 답 source
+            - 주석 양식이 분기별로 미세 변경 — narrative 비교 시 변경 가능성 인지
+
+        Guide:
+            - "삼성전자 리스 약정" → c.notesDetail("리스")
+            - "셀트리온 우발채무" → c.notesDetail("우발")
+            - "LG화학 퇴직급여 가정" → c.notesDetail("퇴직급여")
+            - "현대차 파생금융상품" → c.notesDetail("파생")
+
+        SeeAlso:
+            - audit: 감사보고서 (KAM 와 주석은 보완)
+            - governance: 지배구조 본문
+
+        LLM Specifications:
+            AntiPatterns:
+                - keyword 미지원 (NOTES_KEYWORDS 23 종 밖 — 직접 호출 X)
+                - 연간 답변에 분기 비교 (period 인자 무시)
+                - 5 년 panel 전체 dump (답변 본문 상위 3~5 년만 인용)
+            OutputSchema:
+                - corpName : str
+                - tables : dict[키워드, list[NotesPeriod]]
+                - NotesPeriod : [year, kind, items, unit]
+            Prerequisites:
+                - 정기보고서 박힘 (자동 다운로드)
+                - keyword 가 NOTES_KEYWORDS 박힘
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR (K-IFRS 1701/1019/1024)
+
+        Raises:
+            없음.
+        """
+        from dartlab.providers.dart.docs.finance.notesDetail import notesDetail as _notesDetail
+
+        return _notesDetail(self.stockCode, keyword, period)
+
+    def flow(self):
+        """KRX 외국인/기관 일별 net-buy (Company.gather("flow") wrapper).
+
+        Capabilities:
+            - 외국인 net-buy 일별
+            - 기관 net-buy 일별
+            - 개인 net-buy 일별
+
+        Args:
+            없음 (self 바인딩).
+
+        Returns:
+            pl.DataFrame — 외국인/기관/개인 net-buy 시계열. 빈 결과면 빈 DataFrame.
+
+        Requires:
+            Naver flow API (KR 시장 한정). 외 시장 빈 결과.
+
+        Example::
+
+            c = Company("005930")
+            f = c.flow()           # 일별 외국인/기관/개인 순매수
+
+        AIContext:
+            - KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal
+            - 외국인 net-buy 누적 추세 + 기관 동조/역행 패턴이 단기 시세 driver
+            - 한국 unique — 외국인/기관/개인 종목별 일별 net-buy 가 공개 (US 시장은 없음)
+
+        Guide:
+            - "삼성전자 외국인 매수세" → c.flow()
+            - "005930 기관 vs 외국인 추세" → c.flow()
+            - "외국인 순매수 누적" → c.flow() + cumsum
+
+        SeeAlso:
+            - gather("flow") : 동일 본체 — flow axis 직접 호출
+            - krx : KRX 시장 전체 axis (시장 평균과 비교)
+
+        LLM Specifications:
+            AntiPatterns:
+                - 일별 raw flow 전체 dump (답변 본문 — 최근 5~30 일 + 누적 비중만)
+                - 외국인 net-buy 단독 신호 해석 (기관 동조/역행 context 동반 필수)
+                - KR 외 시장에 호출 (빈 결과 정상 — 시장 제한 명시)
+            OutputSchema:
+                - date : Date
+                - foreignNet : Int64 (단위 = 원)
+                - institutionNet : Int64
+                - individualNet : Int64
+            Prerequisites:
+                - KR 시장 + Naver flow API 박힘
+            Freshness:
+                EOD (T+1).
+            TargetMarkets:
+                - KR (Naver 한정)
+
+        Raises:
+            없음.
+        """
+        return self.gather("flow")
+
     @property
     def market(self) -> str:
         """시장 코드 (DART 제공자는 항상 KR).
