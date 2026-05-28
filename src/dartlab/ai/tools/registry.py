@@ -29,6 +29,7 @@ from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
+from .scenarioCompareN import scenarioCompareN
 from .scenarioOverlay import scenarioOverlay
 from .searchPastSessions import searchPastSessions
 from .storyTemplate import pickStoryTemplate
@@ -399,6 +400,31 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "ScenarioCompareN": ToolSpec(
+        "ScenarioCompareN",
+        "macro 시나리오 N (2~5) 개 baseline 대비 동시 비교 — score_delta + cycle_phase + crisis_zone 매트릭스. '여러 시나리오 비교', '스트레스 테스트', '최악 케이스' 류 질문에 본 도구 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "scenarioNames": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "2~5 시나리오 이름 (예: ['2008 금융위기', '금리 충격']).",
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": ["mild", "moderate", "severe", "extreme", ""],
+                    "description": "모든 시나리오 공통 심각도.",
+                },
+                "market": {"type": "string", "enum": ["KR", "US", ""]},
+            },
+            "required": ["scenarioNames"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
     "ScenarioOverlay": ToolSpec(
         "ScenarioOverlay",
         "macro 시나리오 preset (146 종 — 1997 IMF / 2008 GFC / Fed DFAST 등) 의 macro overrides 와 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. '금리 +50bp 면?' 류 질문에 답변 본문 옵션 1 회 호출.",
@@ -618,6 +644,7 @@ _TOOLS: dict[str, ToolFn] = {
     "CompareCompanies": compareCompanies,
     "PeerCompareN": peerCompareN,
     "DCFValuation": dcfValuationTool,
+    "ScenarioCompareN": scenarioCompareN,
     "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
@@ -655,6 +682,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "CompileVisual",
     "PeerCompareN",
     "DCFValuation",
+    "ScenarioCompareN",
     "ScenarioOverlay",
     "OutcomeLog",
     "SearchPastSessions",
@@ -672,6 +700,7 @@ _LEGACY_NAME_MAP = {
     "compare_companies": "CompareCompanies",
     "peer_compare_n": "PeerCompareN",
     "dcf_valuation": "DCFValuation",
+    "scenario_compare_n": "ScenarioCompareN",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",

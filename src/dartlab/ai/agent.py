@@ -73,6 +73,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 마스터 플랜 트랙 1 PR-2 — N(2~12) 종목 비교 + percentile rank.
     # compareCompanies max 3 한계 확장 + peer-internal ranking 신규.
     "PeerCompareN",
+    # 마스터 플랜 트랙 1 PR-5 — N(2~5) macro 시나리오 baseline 대비 동시 비교.
+    # ScenarioOverlay 1 회 + RunPython loop 우회 → 1 회 호출.
+    "ScenarioCompareN",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",
