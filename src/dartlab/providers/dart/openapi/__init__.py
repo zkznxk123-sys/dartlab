@@ -47,5 +47,5 @@ __all__ = [
 
 # Sections batch build — ProcessPool 병렬 + 디스크 캐시 (Phase 3 옵션 3).
 # 본진 API 격상 (커밋 후) 후 사용:
-#   from dartlab.providers.dart.docs.sectionsLegacy.diskCache import buildBatchParallel
+#   from dartlab.providers.dart.docs.sectionsArchive.diskCache import buildBatchParallel
 #   results = buildBatchParallel(["005930", "035720", ...])

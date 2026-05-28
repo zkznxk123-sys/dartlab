@@ -41,9 +41,9 @@ def benchSerial(codes: list[str]) -> tuple[float, list[tuple[str, float, tuple[i
     results = []
     t0 = time.time()
     for code in codes:
-        from dartlab.providers.dart.docs.sectionsLegacy.diskCache import clearDiskCache
-        from dartlab.providers.dart.docs.sectionsLegacy.pipeline import clearPreparedCache
-        from dartlab.providers.dart.docs.sectionsLegacy.textStructure import _detectHeading, _normalizeHeadingText
+        from dartlab.providers.dart.docs.sectionsArchive.diskCache import clearDiskCache
+        from dartlab.providers.dart.docs.sectionsArchive.pipeline import clearPreparedCache
+        from dartlab.providers.dart.docs.sectionsArchive.textStructure import _detectHeading, _normalizeHeadingText
 
         clearPreparedCache()
         clearDiskCache(code)
@@ -57,7 +57,7 @@ def benchSerial(codes: list[str]) -> tuple[float, list[tuple[str, float, tuple[i
 def benchParallel(codes: list[str], workers: int) -> tuple[float, list[tuple[str, float, tuple[int, int]]]]:
     """병렬 build — ProcessPool workers process."""
     # Pre-clear disk cache to force cold builds
-    from dartlab.providers.dart.docs.sectionsLegacy.diskCache import clearDiskCache
+    from dartlab.providers.dart.docs.sectionsArchive.diskCache import clearDiskCache
 
     for code in codes:
         clearDiskCache(code)

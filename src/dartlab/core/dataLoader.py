@@ -445,7 +445,7 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
     if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() in ("1", "true", "True"):
         return False
     try:
-        from dartlab.providers.dart.docs.sectionsLegacy.sectionsStorage import (
+        from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
             loadSectionsIndex,

@@ -287,7 +287,7 @@ def _buildTopicChangeLedger(topicBlocks: pl.DataFrame | None) -> pl.DataFrame:
     if isEmptyDf(topicBlocks):
         return pl.DataFrame(schema=schema)
 
-    from dartlab.providers.dart.docs.sectionsLegacy import sortPeriods
+    from dartlab.providers.dart.docs.sectionsArchive import sortPeriods
 
     canonicalBlocks = [_canonicalBlockRecord(record) for record in topicBlocks.to_dicts()]
     periods = sortPeriods(sorted({block["period"] for block in canonicalBlocks}), descending=False)
@@ -372,7 +372,7 @@ def _buildTopicChangeLedger(topicBlocks: pl.DataFrame | None) -> pl.DataFrame:
     result = pl.DataFrame(rows, schema=schema, strict=False)
     if result.is_empty():
         return result
-    from dartlab.providers.dart.docs.sectionsLegacy import sortPeriods
+    from dartlab.providers.dart.docs.sectionsArchive import sortPeriods
 
     ordered = sortPeriods(result.get_column("period").to_list())
     orderMap = {period: idx for idx, period in enumerate(ordered)}
@@ -380,7 +380,7 @@ def _buildTopicChangeLedger(topicBlocks: pl.DataFrame | None) -> pl.DataFrame:
 
 
 def _buildTopicEvidence(topicBlocks: pl.DataFrame | None, period: str) -> pl.DataFrame:
-    from dartlab.providers.dart.docs.sectionsLegacy import rawPeriod
+    from dartlab.providers.dart.docs.sectionsArchive import rawPeriod
 
     period = rawPeriod(period)
     schema = {
@@ -401,7 +401,7 @@ def _buildTopicEvidence(topicBlocks: pl.DataFrame | None, period: str) -> pl.Dat
     if isEmptyDf(topicBlocks):
         return pl.DataFrame(schema=schema)
 
-    from dartlab.providers.dart.docs.sectionsLegacy import sortPeriods
+    from dartlab.providers.dart.docs.sectionsArchive import sortPeriods
 
     canonicalBlocks = [_canonicalBlockRecord(record) for record in topicBlocks.to_dicts()]
     periods = sortPeriods(sorted({block["period"] for block in canonicalBlocks}), descending=False)

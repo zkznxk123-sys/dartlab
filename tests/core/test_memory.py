@@ -63,7 +63,7 @@ class TestCacheCaps:
         _PreparedRows 는 DataFrame 을 list[dict] 로 변환 보유 → 회사 1 종목 ~수백 MB.
         2 이상이면 회사 다중 분석 시 동시 보유로 OOM 위험.
         """
-        from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _PREPARED_CACHE_MAX
+        from dartlab.providers.dart.docs.sectionsArchive.pipeline import _PREPARED_CACHE_MAX
 
         assert _PREPARED_CACHE_MAX == 1, (
             f"_PREPARED_CACHE_MAX={_PREPARED_CACHE_MAX} — 1 초과는 회사 동시 보유로 GB 압박"

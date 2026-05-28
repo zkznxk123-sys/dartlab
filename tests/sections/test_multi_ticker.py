@@ -18,7 +18,7 @@ pytestmark = pytest.mark.unit
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsLegacy.analysis import (
+from dartlab.providers.dart.docs.sectionsArchive.analysis import (
     projectFreqRows,
     semanticRegistry,
     structureRegistry,

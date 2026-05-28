@@ -85,7 +85,7 @@ def test_load_data_peak_under_200mb() -> None:
         pytest.skip("docs parquet 부재")
 
     from dartlab.core.dataLoader import loadData
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _SECTIONS_REQUIRED_COLS
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _SECTIONS_REQUIRED_COLS
 
     gc.collect()
     p0 = _peakMb()
@@ -107,8 +107,8 @@ def test_subsets_build_peak_under_30mb() -> None:
         pytest.skip("docs parquet 부재")
 
     from dartlab.core.dataLoader import loadData
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _SECTIONS_REQUIRED_COLS
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBase import REPORT_KINDS, detectContentCol
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _SECTIONS_REQUIRED_COLS
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import REPORT_KINDS, detectContentCol
     from dartlab.providers.reportSelector import selectReport
 
     df = loadData(_stockCode(), sinceYear=2016, columns=_SECTIONS_REQUIRED_COLS)
@@ -142,7 +142,7 @@ def test_report_rows_polars_accumulation_under_200mb() -> None:
     if not _hasDocs(_stockCode()):
         pytest.skip("docs parquet 부재")
 
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _reportRowsToTopicRows, iterPeriodSubsets
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _reportRowsToTopicRows, iterPeriodSubsets
 
     subsets = list(iterPeriodSubsets(_stockCode()))
 
@@ -169,7 +169,7 @@ def test_full_sections_peak_under_800mb() -> None:
     if not _hasDocs(_stockCode()):
         pytest.skip("docs parquet 부재")
 
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import clearPreparedCache, sections
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import clearPreparedCache, sections
 
     clearPreparedCache()
     gc.collect()

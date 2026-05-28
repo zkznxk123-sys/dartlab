@@ -197,7 +197,7 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
     # 옛 docs.parquet (long: year/section_title/section_content) 와 동일 schema 노출 →
     # 호출자 (sentiment/risk/changes/disclosureDiff/edges 등 D.1 10 모듈) 0 변경.
     # docs.parquet 폐기 (PR-4b) 후에도 sections artifact 만으로 동일 분석 가능.
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsStorage import (
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
         hasSectionsArtifact,
         loadSectionsLong,
     )

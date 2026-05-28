@@ -7,7 +7,7 @@ pytestmark = pytest.mark.unit
 
 def test_imports() -> None:
     """모듈 import smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy import viewsContext
+    from dartlab.providers.dart.docs.sectionsArchive import viewsContext
 
     assert hasattr(viewsContext, "contextSlices")
     assert hasattr(viewsContext, "splitContextText")
@@ -16,20 +16,20 @@ def test_imports() -> None:
 
 def test_split_context_text_callable() -> None:
     """splitContextText() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.viewsContext import splitContextText
+    from dartlab.providers.dart.docs.sectionsArchive.viewsContext import splitContextText
 
     assert callable(splitContextText)
 
 
 def test_split_markdown_table_callable() -> None:
     """splitMarkdownTable() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.viewsContext import splitMarkdownTable
+    from dartlab.providers.dart.docs.sectionsArchive.viewsContext import splitMarkdownTable
 
     assert callable(splitMarkdownTable)
 
 
 def test_context_slices_callable() -> None:
     """contextSlices() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.viewsContext import contextSlices
+    from dartlab.providers.dart.docs.sectionsArchive.viewsContext import contextSlices
 
     assert callable(contextSlices)

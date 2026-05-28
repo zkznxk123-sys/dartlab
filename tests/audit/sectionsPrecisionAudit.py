@@ -63,7 +63,7 @@ def _textPathDepthStats(df: pl.DataFrame) -> dict[str, float]:
 
 def _mappingRate(stockCode: str) -> dict[str, float | int]:
     from dartlab.core.dataLoader import loadData
-    from dartlab.providers.dart.docs.sectionsLegacy.mapper import measureMappingRate
+    from dartlab.providers.dart.docs.sectionsArchive.mapper import measureMappingRate
 
     df = loadData(stockCode, category="docs", columns=["section_title"])
     if df is None or df.is_empty():
@@ -85,9 +85,9 @@ def _chapter8charLossCount(stockCode: str) -> int:
     결과 중 모든 line < 8 자인 block 만 카운트. sub-section 과 비교는 안 함 (전체 후보).
     """
     from dartlab.core.dataLoader import loadData
-    from dartlab.providers.dart.docs.sectionsLegacy.chunker import parseMajorNum
-    from dartlab.providers.dart.docs.sectionsLegacy.reportRows import _splitContentBlocks
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBase import detectContentCol
+    from dartlab.providers.dart.docs.sectionsArchive.chunker import parseMajorNum
+    from dartlab.providers.dart.docs.sectionsArchive.reportRows import _splitContentBlocks
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import detectContentCol
 
     try:
         df = loadData(stockCode, category="docs", columns=["section_title", "section_content", "content"])
@@ -112,7 +112,7 @@ def _chapter8charLossCount(stockCode: str) -> int:
 
 
 def precisionAuditPerStock(stockCode: str) -> dict[str, object] | None:
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import sections
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import sections
 
     try:
         df = sections(stockCode, topics=None)

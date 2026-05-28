@@ -33,7 +33,7 @@ def test_polars_only_shape_and_schema(stockCode: str) -> None:
     if not _hasBaseline(stockCode):
         pytest.skip(f"baseline fixture 부재: {stockCode}")
 
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _sectionsPolarsOnly
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _sectionsPolarsOnly
 
     baseline = pl.read_parquet(_BASELINE_DIR / f"{stockCode}.parquet")
     result = _sectionsPolarsOnly(stockCode, None)
@@ -60,7 +60,7 @@ def test_polars_only_values_parity(stockCode: str) -> None:
     if not _hasBaseline(stockCode):
         pytest.skip(f"baseline fixture 부재: {stockCode}")
 
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _sectionsPolarsOnly
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _sectionsPolarsOnly
 
     baseline = pl.read_parquet(_BASELINE_DIR / f"{stockCode}.parquet")
     result = _sectionsPolarsOnly(stockCode, None)
@@ -88,7 +88,7 @@ def test_polars_only_topic_filter() -> None:
     if not _hasBaseline(stockCode):
         pytest.skip(f"baseline fixture 부재: {stockCode}")
 
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import _sectionsPolarsOnly
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _sectionsPolarsOnly
 
     baseline = pl.read_parquet(_BASELINE_DIR / f"{stockCode}.parquet")
     topics = {"businessOverview"}

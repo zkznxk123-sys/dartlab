@@ -84,7 +84,7 @@ def _processOne(code: str, name: str) -> tuple[dict | None, list[dict]]:
         (per_corp_summary, unmatched_rows). 데이터 없으면 (None, []).
     """
     from dartlab.providers.dart.builder.notesSplit import splitNotesSections
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import sections as _buildSections
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import sections as _buildSections
 
     try:
         raw = _buildSections(code)

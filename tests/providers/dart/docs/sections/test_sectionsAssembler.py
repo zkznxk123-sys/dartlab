@@ -11,6 +11,6 @@ pytestmark = pytest.mark.unit
 
 
 def test_import() -> None:
-    import dartlab.providers.dart.docs.sectionsLegacy.sectionsAssembler as mod
+    import dartlab.providers.dart.docs.sectionsArchive.sectionsAssembler as mod
 
     assert mod is not None

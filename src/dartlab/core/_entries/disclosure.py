@@ -77,7 +77,7 @@ _DISCLOSURE_ENTRIES: list[DataEntry] = [
         dataType="dataframe",
         description="사업보고서 전체 섹션 텍스트를 topic(행) × period(열) DataFrame으로 구조화. "
         "leaf title 기준 수평 비교 가능. 연간+분기+반기 전 기간 포함.",
-        modulePath="dartlab.providers.dart.docs.sectionsLegacy",
+        modulePath="dartlab.providers.dart.docs.sectionsArchive",
         funcName="sections",
         extractor=None,
         requires="docs",

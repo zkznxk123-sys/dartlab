@@ -17,7 +17,7 @@ def test_sectionsRaw_returns_mixed_format(monkeypatch, tmp_path):
     """sectionsRaw 가 sectionsAs(stripTags=False) 와 동일 결과."""
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
     code = "RAWTEST"
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {
@@ -48,7 +48,7 @@ def test_sectionsTables_returns_table_struct_column(monkeypatch, tmp_path):
     """sectionsTables 가 content_table_struct 컬럼만 select."""
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
     code = "TABTEST"
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {
@@ -86,7 +86,7 @@ def test_sectionsTables_returns_table_struct_column(monkeypatch, tmp_path):
 def test_sectionsTables_period_filter(monkeypatch, tmp_path):
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
     code = "TABFILT"
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {

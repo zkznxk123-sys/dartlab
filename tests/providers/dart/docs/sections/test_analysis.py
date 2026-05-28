@@ -7,62 +7,62 @@ pytestmark = pytest.mark.unit
 
 def test_imports():
     try:
-        import dartlab.providers.dart.docs.sectionsLegacy.analysis  # noqa: F401
+        import dartlab.providers.dart.docs.sectionsArchive.analysis  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
 
 
 def test_project_freq_rows_callable() -> None:
     """projectFreqRows() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import projectFreqRows
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import projectFreqRows
 
     assert callable(projectFreqRows)
 
 
 def test_semantic_collisions_callable() -> None:
     """semanticCollisions() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import semanticCollisions
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import semanticCollisions
 
     assert callable(semanticCollisions)
 
 
 def test_semantic_registry_callable() -> None:
     """semanticRegistry() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import semanticRegistry
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import semanticRegistry
 
     assert callable(semanticRegistry)
 
 
 def test_structure_changes_callable() -> None:
     """structureChanges() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import structureChanges
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import structureChanges
 
     assert callable(structureChanges)
 
 
 def test_structure_collisions_callable() -> None:
     """structureCollisions() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import structureCollisions
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import structureCollisions
 
     assert callable(structureCollisions)
 
 
 def test_structure_events_callable() -> None:
     """structureEvents() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import structureEvents
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import structureEvents
 
     assert callable(structureEvents)
 
 
 def test_structure_registry_callable() -> None:
     """structureRegistry() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import structureRegistry
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import structureRegistry
 
     assert callable(structureRegistry)
 
 
 def test_structure_summary_callable() -> None:
     """structureSummary() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.analysis import structureSummary
+    from dartlab.providers.dart.docs.sectionsArchive.analysis import structureSummary
 
     assert callable(structureSummary)

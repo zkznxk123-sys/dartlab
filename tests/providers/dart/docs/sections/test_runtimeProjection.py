@@ -7,13 +7,13 @@ pytestmark = pytest.mark.unit
 
 def test_imports() -> None:
     """모듈 import smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy import runtimeProjection
+    from dartlab.providers.dart.docs.sectionsArchive import runtimeProjection
 
     assert hasattr(runtimeProjection, "applyProjections")
 
 
 def test_apply_projections_callable() -> None:
     """applyProjections() callable smoke."""
-    from dartlab.providers.dart.docs.sectionsLegacy.runtimeProjection import applyProjections
+    from dartlab.providers.dart.docs.sectionsArchive.runtimeProjection import applyProjections
 
     assert callable(applyProjections)

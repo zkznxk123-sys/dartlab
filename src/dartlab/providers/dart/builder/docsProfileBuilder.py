@@ -83,7 +83,7 @@ def profileTable(company: Company) -> pl.DataFrame | None:
     cacheKey = "_sectionProfileTable"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
-    from dartlab.providers.dart.docs.sectionsLegacy.artifacts import loadSectionProfileTable
+    from dartlab.providers.dart.docs.sectionsArchive.artifacts import loadSectionProfileTable
 
     table = loadSectionProfileTable()
     company._cache[cacheKey] = table
@@ -338,7 +338,7 @@ def buildSections(company: Company) -> pl.DataFrame | None:
             - KR (DART) sections + profile.
     """
     from dartlab.providers.dart.company import _CHAPTER_TITLES, _topicForApiType
-    from dartlab.providers.dart.docs.sectionsLegacy import reorderPeriodColumns
+    from dartlab.providers.dart.docs.sectionsArchive import reorderPeriodColumns
 
     cacheKey = "_sections"
     if cacheKey in company._cache:

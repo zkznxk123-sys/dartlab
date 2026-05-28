@@ -1,0 +1,286 @@
+"""sections artifact SSOT read API — period sharded, raw XML 보존, 단순 단일 schema.
+
+plan snazzy-wibbling-origami 사용자 비전 100%:
+    - 단일 schema: chapter / topic / section_order / section_title /
+                   section_content (raw XML) + 메타 / period
+    - 추가 파일 0 (_index, _raw 폐기)
+    - 추가 컬럼 0 (content_plain, content_table_struct 폐기)
+    - docs.parquet 완전 폐기 가능 (sections artifact 가 모든 정보 보유)
+
+저장:
+    ``data/dart/sections/{code}/{period}.parquet``
+
+호출:
+    - ``loadSectionsLong`` — period sharded long read (메모리 절약, lazy projection)
+    - ``loadSectionsWide`` — wide pivot (period 컬럼 N개, cell = raw XML)
+    - ``Company.sectionsRaw()`` — wide 그대로 (viewer / parser 룰)
+    - ``Company.sections`` — wide + cell strip (polars native regex, ~0.3s)
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+import polars as pl
+
+import dartlab.config as _cfg
+
+_log = logging.getLogger(__name__)
+
+_SECTIONS_REL = "dart/sections"
+
+
+def sectionsDir(stockCode: str) -> Path:
+    """종목별 sections artifact 디렉터리 path."""
+    return Path(_cfg.dataDir) / _SECTIONS_REL / stockCode
+
+
+def sectionsPath(stockCode: str, period: str) -> Path:
+    """단일 period parquet path."""
+    return sectionsDir(stockCode) / f"{period}.parquet"
+
+
+def listAvailablePeriods(stockCode: str) -> list[str]:
+    """저장된 period 목록 (newer first). 디렉터리 미생성 시 빈 list."""
+    d = sectionsDir(stockCode)
+    if not d.exists():
+        return []
+    periods = [p.stem for p in d.glob("*.parquet") if not p.stem.startswith("_")]
+    return sorted(periods, key=_periodSortKey, reverse=True)
+
+
+def _periodSortKey(period: str) -> tuple[int, int]:
+    """period → (year, quarter rank). sectionsBuilder 가 annual 을 Q4 alias 로 emit."""
+    if not period or len(period) < 4 or not period[:4].isdigit():
+        return (-1, -1)
+    year = int(period[:4])
+    if period.endswith("Q1"):
+        return (year, 1)
+    if period.endswith("Q2"):
+        return (year, 2)
+    if period.endswith("Q3"):
+        return (year, 3)
+    if period.endswith("Q4"):
+        return (year, 4)
+    return (year, 4)
+
+
+def hasSectionsArtifact(stockCode: str) -> bool:
+    """artifact 가 1 개 이상 period 존재하면 True."""
+    return bool(listAvailablePeriods(stockCode))
+
+
+_HF_DOWNLOAD_ATTEMPTED: set[str] = set()
+
+
+def _ensureFromHf(stockCode: str) -> bool:
+    """artifact 부재 시 HF dataset 에서 lazy 다운로드 — 한 종목 디렉터리만.
+
+    환경변수 ``DARTLAB_NO_HF_DOWNLOAD=1`` 또는 offline 시 skip.
+    한 종목 1 회만 시도 (실패 시 반복 회피).
+    """
+    if hasSectionsArtifact(stockCode):
+        return True
+    import os as _os
+
+    if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
+        return False
+    if stockCode in _HF_DOWNLOAD_ATTEMPTED:
+        return False
+    _HF_DOWNLOAD_ATTEMPTED.add(stockCode)
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+        sectionsDirRel = DATA_RELEASES["sections"]["dir"]
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=[f"{sectionsDirRel}/{stockCode}/*.parquet"],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+        return hasSectionsArtifact(stockCode)
+    except Exception as exc:  # noqa: BLE001
+        _log.warning("sections artifact HF 다운로드 실패 (%s): %s", stockCode, exc)
+        return False
+
+
+def loadSectionsLong(
+    stockCode: str,
+    *,
+    periods: list[str] | None = None,
+    columns: list[str] | None = None,
+) -> pl.DataFrame | None:
+    """sections artifact long format read — period sharded glob + columnar projection.
+
+    schema: chapter / topic / section_order / section_title / section_content (raw XML)
+           + 메타 (rcept_no/rcept_date/section_url/corp_name/atocid/assocnote) + period.
+
+    Args:
+        stockCode: 종목코드.
+        periods: 특정 period 만. None = 전체.
+        columns: select 할 컬럼 list. None = 전체.
+
+    Returns:
+        long format DataFrame 또는 None.
+    """
+    if not hasSectionsArtifact(stockCode):
+        _ensureFromHf(stockCode)
+    available = listAvailablePeriods(stockCode)
+    if not available:
+        return None
+    targetPeriods = available if periods is None else [p for p in available if p in set(periods)]
+    if not targetPeriods:
+        return None
+    files = [str(sectionsPath(stockCode, p)) for p in targetPeriods]
+    try:
+        scan = pl.scan_parquet(files)
+        if columns:
+            availableSchema = set(scan.collect_schema().names())
+            wantedCols = [c for c in columns if c in availableSchema]
+            if not wantedCols:
+                return None
+            scan = scan.select(wantedCols)
+        df = scan.collect()
+    except (OSError, pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
+        _log.warning("sectionsLong load 실패 (%s): %s", stockCode, exc)
+        return None
+    # 신 sectionsNew schema → 옛 docs.parquet 호환 컬럼 자동 양립. 기존 sectionsLegacy
+    # caller (loadSectionsWide / dataLoader synthesis / c.sections 의 wide pivot 등) 가
+    # topic / section_title / section_content / section_order 컬럼 의존. 신 chain 의
+    # blockLeaf / contentRaw / blockOrder / disclosureKey 와 자동 매핑.
+    if "blockLeaf" in df.columns and "section_title" not in df.columns:
+        df = df.rename(
+            {
+                "blockLeaf": "section_title",
+                "contentRaw": "section_content",
+                "blockOrder": "section_order",
+            }
+        )
+    if "topic" not in df.columns:
+        if "disclosureKey" in df.columns and "xbrlClass" in df.columns:
+            df = df.with_columns(pl.coalesce([pl.col("disclosureKey"), pl.col("xbrlClass")]).alias("topic"))
+        elif "disclosureKey" in df.columns:
+            df = df.with_columns(pl.col("disclosureKey").alias("topic"))
+        elif "xbrlClass" in df.columns:
+            df = df.with_columns(pl.col("xbrlClass").alias("topic"))
+    if "rceptNo" in df.columns and "rcept_no" not in df.columns:
+        df = df.rename({"rceptNo": "rcept_no"})
+    if "corp" in df.columns and "stock_code" not in df.columns:
+        df = df.rename({"corp": "stock_code"})
+    return df
+
+
+def loadSectionsWide(
+    stockCode: str,
+    *,
+    periods: list[str] | None = None,
+) -> pl.DataFrame | None:
+    """sections artifact wide pivot — section_content (raw XML) cell.
+
+    index = (chapter, topic, section_order, section_title)
+    columns = period (N개)
+    values = section_content (raw XML 그대로)
+
+    viewer / sectionsRaw 가 cell 그대로 사용. ``Company.sections`` 는 cell 에 polars
+    native regex strip 적용.
+
+    Args:
+        stockCode: 종목코드.
+        periods: 특정 period 만. None = 전체.
+
+    Returns:
+        wide DataFrame 또는 None.
+    """
+    long = loadSectionsLong(stockCode, periods=periods)
+    if long is None or long.is_empty():
+        return None
+    indexCols = ["chapter", "topic", "section_order", "section_title"]
+    indexCols = [c for c in indexCols if c in long.columns]
+    if not indexCols or "period" not in long.columns or "section_content" not in long.columns:
+        return None
+    try:
+        # 메타 컬럼은 period 별 값 다름 — pivot 시 index 포함하면 collapse 안 됨. drop.
+        metaCols = ("rcept_no", "rcept_date", "section_url", "corp_name", "atocid", "assocnote")
+        dropCols = [c for c in metaCols if c in long.columns]
+        if dropCols:
+            long = long.drop(dropCols)
+        return long.pivot(
+            values="section_content",
+            index=indexCols,
+            on="period",
+            aggregate_function="first",
+        )
+    except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
+        _log.warning("sectionsWide pivot 실패 (%s): %s", stockCode, exc)
+        return None
+
+
+def loadSectionsRawXml(stockCode: str) -> pl.DataFrame | None:
+    """sections artifact 를 docs.parquet 합성용 row-major DataFrame 으로 read.
+
+    dataLoader._trySynthesizeDocsFromSections (plan snazzy-wibbling-origami PR-4b) 가
+    docs.parquet 부재 시 본 함수 → year/report_kind 부착 → docs.parquet 양식 저장.
+
+    schema 변환 — sectionsNew (chapter/sectionLeaf/blockLeaf/contentRaw/blockOrder/
+    xbrlClass/disclosureKey/period/corp/rceptNo) → docs.parquet 호환 (topic/
+    section_title/section_content/section_order/stock_code/rcept_no/period) :
+
+        - chapter       → chapter         (그대로)
+        - sectionLeaf   → section_leaf    (그대로, 보조 컬럼)
+        - blockLeaf     → section_title   (블록 라벨)
+        - contentRaw    → section_content (raw XML 보존)
+        - blockOrder    → section_order   (정수 순서)
+        - disclosureKey → topic           (universal canonical key, null 시 xbrlClass fallback)
+        - corp          → stock_code      (DART 종목코드)
+        - rceptNo       → rcept_no        (공시 접수번호)
+        - period        → period          (YYYYQ[1-4], year/report_kind 합성용)
+
+    topic 변환 — disclosureKey (IFRS taxonomy snakeId) 가 신 chain canonical. 옛 16
+    카테고리 매핑은 별도 bridge (Layer 3 tier2/3 확장 시).
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        DataFrame 또는 None (artifact 부재).
+    """
+    # loadSectionsLong 이 이미 신 schema → 옛 호환 자동 rename (topic/section_title/
+    # section_content/section_order/stock_code/rcept_no). 본 함수는 별도 변환 없이 그대로 노출.
+    return loadSectionsLong(stockCode, columns=None)
+
+
+def loadSectionsIndex(stockCode: str) -> pl.DataFrame | None:
+    """sections artifact 의 period 별 메타 (rcept_no/corp_name/...) index.
+
+    dataLoader._trySynthesizeDocsFromSections 가 본 함수 → period 별 unique 메타를
+    rawXml 결과에 join. 옛 _index.parquet 폐기 (plan snazzy-wibbling-origami) —
+    sectionsNew artifact 의 행별 메타 컬럼에서 직접 추출.
+
+    Returns:
+        DataFrame ``period / rcept_no [+ 부속 메타]`` unique by period. None = artifact 부재.
+    """
+    long = loadSectionsLong(stockCode, columns=None)
+    if long is None or long.is_empty():
+        return None
+    # period 별 unique 메타 — loadSectionsLong 이 rceptNo→rcept_no 자동 rename 후 반환.
+    if "rcept_no" not in long.columns or "period" not in long.columns:
+        return None
+    return long.select(["period", "rcept_no"]).unique(subset=["period"])
+
+
+def stripTagsExpr(col: str) -> pl.Expr:
+    """polars native regex tag strip — XML 태그 제거 + 다중 공백 정리.
+
+    rust SIMD 가속. Python map_elements 대비 50x 빠름. ``Company.sections`` 가 wide
+    cell 들에 본 expr 일괄 적용 → 0.3s 안 strip 완료.
+
+    Args:
+        col: 대상 컬럼명.
+
+    Returns:
+        pl.Expr — strip 결과 string.
+    """
+    return pl.col(col).str.replace_all(r"<[^>]+>", " ").str.replace_all(r"[ \t]+", " ").str.strip_chars()

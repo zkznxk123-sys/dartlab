@@ -299,7 +299,7 @@ def _rcpRowsToTable(
     # section_content_mixed pre-compute — sections build 의 per-row xmlChunkToMixed
     # (~11s for 2K rows × 31 periods × map_elements) 를 docs.parquet 빌드 시점 1 회로
     # 옮겨 사용자 화면 cold first build 영구 가속. import lazy 로 cycle 회피.
-    from dartlab.providers.dart.docs.sectionsLegacy.xmlAdapter import xmlChunkToMixed
+    from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import xmlChunkToMixed
 
     rawContents = [r["content"] for r in expanded]
     mixedContents = [xmlChunkToMixed(content) for content in rawContents]

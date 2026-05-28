@@ -151,7 +151,7 @@ class _SectionsSource:
         frame = self.raw
         if frame is None:
             return []
-        from dartlab.providers.dart.docs.sectionsLegacy import periodColumns
+        from dartlab.providers.dart.docs.sectionsArchive import periodColumns
 
         return periodColumns(frame.columns, descending=recentFirst, annualAsQ4=annualAsQ4)
 

@@ -4,7 +4,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.providers.dart.docs.sectionsLegacy.types import SectionChunk, SectionResult, YearSections
+from dartlab.providers.dart.docs.sectionsArchive.types import SectionChunk, SectionResult, YearSections
 
 
 def _section_result_fixture() -> SectionResult:

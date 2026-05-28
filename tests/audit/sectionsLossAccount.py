@@ -39,7 +39,7 @@ _log = logging.getLogger("sectionsLossAccount")
 def _sourceTotals(stockCode: str) -> dict[str, int] | None:
     """원본 ``docs.parquet`` 의 byte/line/row 총량."""
     from dartlab.core.dataLoader import loadData
-    from dartlab.providers.dart.docs.sectionsLegacy.sectionsBase import detectContentCol
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import detectContentCol
 
     try:
         df = loadData(
@@ -62,7 +62,7 @@ def _sourceTotals(stockCode: str) -> dict[str, int] | None:
 
 def _sectionsTotals(stockCode: str) -> dict[str, int] | None:
     """``c.sections`` 결과의 모든 period 컬럼 byte/line/row 총량."""
-    from dartlab.providers.dart.docs.sectionsLegacy.pipeline import sections
+    from dartlab.providers.dart.docs.sectionsArchive.pipeline import sections
 
     df = sections(stockCode, topics=None)
     if df is None or df.is_empty():
