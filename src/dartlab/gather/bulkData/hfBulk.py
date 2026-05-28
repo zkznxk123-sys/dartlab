@@ -33,6 +33,11 @@ _CATEGORY = "krxPrices"
 _COL_DATE = "BAS_DD"  # 기준일 (YYYYMMDD string)
 _COL_CODE = "ISU_CD"  # 단축코드 6 자리 (예: "005930")
 
+# Sprint 4 PR3 — Bitemporal SSOT. parquet schema 마이그레이션 후 활성.
+# 현재 HF parquet 에는 미존재 — loadFiltered 가 자동 fallback (BAS_DD = business_time).
+_COL_BUSINESS_TIME = "business_time"  # 실제 발생일 (event)
+_COL_KNOWLEDGE_TIME = "knowledge_time"  # 우리가 알게 된 일 (수집 시각)
+
 
 def _toDate(d: str | _date) -> _date:
     """YYYY-MM-DD / YYYYMMDD / date → date."""
@@ -111,6 +116,7 @@ def loadFiltered(
     start: str | _date | None = None,
     end: str | _date | None = None,
     adjustment: Literal["raw", "split", "tr"] = "split",
+    asof: str | _date | None = None,
 ) -> pl.DataFrame:
     """엔진 내부 — HF 데이터셋에서 raw 받아 수정주가까지 통합 반환.
 
@@ -196,14 +202,28 @@ def loadFiltered(
     raw = pl.concat(frames, how="diagonal_relaxed")
 
     if adjustment == "raw":
-        return raw
-    from dartlab.gather.transforms.adjustPrice import applyAdjustment, detectEventsFromPrices
+        result = raw
+    else:
+        from dartlab.gather.transforms.adjustPrice import applyAdjustment, detectEventsFromPrices
 
-    # Stage 2 우선 — HF `krx/events/` parquet 있으면 정확 이벤트 사용
-    events = _loadEvents(stockCode)
-    if events is None:
-        # Stage 1 fallback — 가격 시계열에서 자동 감지 (marcap 방식 + FLUC_RT 정밀화)
-        # DART 공시 파싱 트랙 도착 전엔 이게 split-adjusted 의 정답.
-        # TR 모드는 dividend events 가 있어야 하므로 자동 감지로는 raw 그대로 (warning).
-        events = detectEventsFromPrices(raw)
-    return applyAdjustment(raw, events, mode=adjustment)
+        # Stage 2 우선 — HF `krx/events/` parquet 있으면 정확 이벤트 사용
+        events = _loadEvents(stockCode)
+        if events is None:
+            # Stage 1 fallback — 가격 시계열에서 자동 감지 (marcap 방식 + FLUC_RT 정밀화)
+            # DART 공시 파싱 트랙 도착 전엔 이게 split-adjusted 의 정답.
+            # TR 모드는 dividend events 가 있어야 하므로 자동 감지로는 raw 그대로 (warning).
+            events = detectEventsFromPrices(raw)
+        result = applyAdjustment(raw, events, mode=adjustment)
+
+    # Sprint 4 PR3 — PIT 컷오프. asof=None 이면 no-op (기존 동작 100% 보존).
+    if asof is not None:
+        from dartlab.gather.transforms.pit import applyAsOf
+
+        # bitemporal 컬럼 미존재 시 fallback — BAS_DD (string YYYYMMDD) 를 business_time 으로 간주.
+        # applyAsOf 의 fallbackCol 인자 사용 + str cast 매개.
+        cutoff_yyyymmdd = _toDate(asof).strftime("%Y%m%d")
+        if _COL_BUSINESS_TIME in result.columns and _COL_KNOWLEDGE_TIME in result.columns:
+            result = applyAsOf(result, asof)
+        elif _COL_DATE in result.columns:
+            result = result.filter(pl.col(_COL_DATE) <= cutoff_yyyymmdd)
+    return result
