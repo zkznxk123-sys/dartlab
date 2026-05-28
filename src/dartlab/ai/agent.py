@@ -48,6 +48,29 @@ logger = logging.getLogger(__name__)
 # 함께 묶임. 8 까지 늘려도 안전하나 LLM provider rate-limit 측면에서 보수적.
 _PARALLEL_READ_WORKERS = 4
 
+# 마스터 플랜 v2 트랙 6 PR-L4 — lazy tool spec.
+# turn 1 은 _DEFAULT_TOOL_NAMES 전체 (LLM 첫 자율 선택), turn 2+ 는 _CORE_TOOL_NAMES ∪ 본 세션
+# 실제 호출된 도구들로 좁혀 전송 → 매 turn input token 감소. _CORE_TOOL_NAMES 가 항상 포함되어
+# 직전 turn 에 호출 안 한 *새* 도구 필요 시도 cover (LLM 자율 행동 회귀 가드).
+# 환경변수 ``DARTLAB_LAZY_TOOL_SPEC=0`` 으로 비활성화 가능 (기본 ON).
+_CORE_TOOL_NAMES: frozenset[str] = frozenset(
+    {
+        "ReadSkill",
+        "GetSkillBody",
+        "ReadCapability",
+        "EngineCall",
+        "RunPython",
+        "Read",
+        "SaveArtifact",
+        "WebSearch",
+    }
+)
+
+
+def _lazyToolSpecEnabled() -> bool:
+    return os.getenv("DARTLAB_LAZY_TOOL_SPEC", "1").lower() in ("1", "true", "yes")
+
+
 # LLM 노출 도구 set — PascalCase (Claude 도구 체계 호환). Skill 우선 → Capability → 실행 → 시각화.
 # EngineCall = 단일 capability 1 회. RunPython = 다단 계산. Read = 파일 직접 인용.
 # RunWorkbench 는 5 패스 elevate 명시 경로 — feedback_no_graph_regression.md 정당 활성 경로 (2).
@@ -153,6 +176,9 @@ def _runAgentImpl(
         messages.append({"role": "user", "content": userText})
 
     tools = _selectTools(toolNames)
+    # PR-L4 — turn 2+ tool spec narrowing 용 누적 (LLM 이 본 세션에 실제 호출한 도구 names).
+    recently_used_tools: set[str] = set()
+    lazy_tool_spec_enabled = _lazyToolSpecEnabled()
 
     # chat-native 흐름은 phase (단계) 가 없다. 도구 카드 + 텍스트 streaming 이 모든 진행 표현.
     # 무의미한 graph_node 1 회 emit 은 UI groupActivities 가 잘못된 phase ("작성") 라벨 붙이게 만들어 제거.
@@ -176,6 +202,21 @@ def _runAgentImpl(
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
         # 회귀 가드: 노드 추가 아님. 기계적 메모리 관리만.
         _microcompact(messages, keepLast=2)
+
+        # PR-L4 — turn 2+ 부터 lazy tool spec (recently used + _CORE 만). turn 1 은 전체 유지.
+        if lazy_tool_spec_enabled and iteration >= 1 and recently_used_tools:
+            narrowed = _selectTools(toolNames, recentlyUsed=recently_used_tools)
+            if len(narrowed) < len(tools):
+                yield TraceEvent(
+                    "tool_spec_narrowed",
+                    {
+                        "iter": iteration,
+                        "before": len(tools),
+                        "after": len(narrowed),
+                        "kept": sorted({t["function"]["name"] for t in narrowed}),
+                    },
+                )
+                tools = narrowed
 
         # PR-O2 — turn timing. stream 진입/종료 ms 분리 측정.
         turn_start_ms = time.monotonic()
@@ -266,6 +307,7 @@ def _runAgentImpl(
                     blocked_or_cached_in_turn += 1
                     continue
                 (fresh_read if isToolReadOnly(tc.name) else fresh_write).append((tc, cache_key))
+                recently_used_tools.add(tc.name)
 
             # 한 turn 의 모든 tool_calls 가 blocked/cached (새 실행 0 건) → 호출자 헛돌이.
             # 사용자 화면 회귀: EngineCall 한 번 차단 → 또 같은 args → 또 차단 → turn 무한 → OAuth
@@ -948,12 +990,25 @@ def _wireChatNativeMemory(
     )
 
 
-def _selectTools(toolNames: tuple[str, ...]) -> list[dict[str, Any]]:
+def _selectTools(
+    toolNames: tuple[str, ...],
+    *,
+    recentlyUsed: set[str] | None = None,
+) -> list[dict[str, Any]]:
     """toolSpecs() raw dict ({name, description, inputSchema}) → OpenAI function calling 형식.
 
     각 provider 가 자체 toolSchema 변환 가지면 호출자가 별도 처리. 본 helper 는 OpenAI 호환만.
+
+    ``recentlyUsed`` 가 None (turn 1) → ``toolNames`` 전체.
+    ``recentlyUsed`` 가 set (turn 2+) → ``_CORE_TOOL_NAMES ∪ recentlyUsed`` 와의 교집합.
+    회귀 가드: ``recentlyUsed`` 가 비어 있어도 ``_CORE_TOOL_NAMES`` 가 항상 포함되어 turn 2+ 에
+    새 도구 호출 가능. ``feedback_no_graph_regression.md`` 의 강박 노드 추가 아님.
     """
-    allowed = set(toolNames)
+    if recentlyUsed is not None:
+        narrow_allow = _CORE_TOOL_NAMES | recentlyUsed
+        allowed = set(toolNames) & narrow_allow
+    else:
+        allowed = set(toolNames)
     out: list[dict[str, Any]] = []
     for spec in toolSpecs():
         if not isinstance(spec, dict):
