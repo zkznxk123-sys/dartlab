@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: 사용자 thesis를 revenueGrowth, marginDurability, cashConversion, balanceSheet, valuationSupport 등 testable assumption으로 분해하는 L1/L1.5 절차다.
+purpose: 사용자 thesis를 revenueGrowth, marginDurability, cashConversion, balanceSheet, valuationSupport 등 testable assumption으로 분해하는 L1/L1.5 절차다. 트리거 — 'Thesis Kill-Chain Assumption Ledger', 'assumption ledger', 'assumptionLedger'.
 whenToUse:
   - assumption ledger
   - thesis 가정 분해

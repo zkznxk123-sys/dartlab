@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: quant
-purpose: 다종목 cross-section 에서 외인 보유 비율의 quartile 분포 측정 + 자기 종목 percentile 위치. quant factor 5 + (value/momentum/quality/size/lowVol) 와 같은 cross-section 형식. 추론 라벨 없이 ranking 만. flow gather 결합.
+purpose: 다종목 cross-section 에서 외인 보유 비율의 quartile 분포 측정 + 자기 종목 percentile 위치. quant factor 5 + (value/momentum/quality/size/lowVol) 와 같은 cross-section 형식. 추론 라벨 없이 ranking 만. flow gather 결합. 트리거 — '외인 보유율 factor cross-section (5종 quartile)', 'foreign flow factor', 'foreignFlowFactor'.
 whenToUse:
   - 외인 보유 factor
   - foreign holding cross-section

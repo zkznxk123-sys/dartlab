@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 회사의 매출 상위 5 고객 비중 + 매입 상위 5 거래처 비중을 HHI (Herfindahl) 로 정량화. 단일 큰 고객 의존 = 가격 협상력 약화·credit 리스크 누적. 사업보고서 본문 (특수관계자 거래·주요고객) raw 가 들어와야. analysis 단일축.
+purpose: 회사의 매출 상위 5 고객 비중 + 매입 상위 5 거래처 비중을 HHI (Herfindahl) 로 정량화. 단일 큰 고객 의존 = 가격 협상력 약화·credit 리스크 누적. 사업보고서 본문 (특수관계자 거래·주요고객) raw 가 들어와야. analysis 단일축. 트리거 — '매출 상위 고객 / 매입 상위 거래처 비중 (HHI 기반)', 'supply chain concentration', 'supplyChainConcentration'.
 whenToUse:
   - 매출 고객 집중도
   - 매입 거래처 집중도

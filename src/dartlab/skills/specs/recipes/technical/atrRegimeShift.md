@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: ATR(5) vs ATR(60) ratio 의 z-score. > +1.5σ = 변동성 확대 체제, < -1.5σ = 수축 체제. 단일 변동성 절대값이 아닌 *체제 전환* 추적.
+purpose: ATR(5) vs ATR(60) ratio 의 z-score. > +1.5σ = 변동성 확대 체제, < -1.5σ = 수축 체제. 단일 변동성 절대값이 아닌 *체제 전환* 추적. 트리거 — 'ATR 변동성 체제 전환 (단기 vs 장기 ATR ratio)', 'atr regime shift', 'atrRegimeShift'.
 whenToUse:
   - 변동성 체제 전환
   - ATR ratio z

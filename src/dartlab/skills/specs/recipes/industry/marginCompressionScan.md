@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: peer set 의 매출총이익률·영업이익률·순이익률 3 축 동시 하락 (≥ -1σ z-score) cluster 식별. 산업 mature/decline phase 의 가장 빠른 정량 신호. industry ↔ scan ↔ analysis 조합.
+purpose: peer set 의 매출총이익률·영업이익률·순이익률 3 축 동시 하락 (≥ -1σ z-score) cluster 식별. 산업 mature/decline phase 의 가장 빠른 정량 신호. industry ↔ scan ↔ analysis 조합. 트리거 — 'peer set 마진 압축 cluster (GP·OM·NM 동시 하락)', 'margin compression scan', 'marginCompressionScan'.
 whenToUse:
   - 산업 마진 압축
   - margin compression cluster

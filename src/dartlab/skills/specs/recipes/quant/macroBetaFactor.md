@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: quant
-purpose: KOSPI 200 universe 에서 종목별 매크로 beta (금리·환율·유가 등) 의 cross-section 분포를 측정. quartile 분포 + 자기 종목 위치 표면화. 추론 라벨 없이 ranking 정량만.
+purpose: KOSPI 200 universe 에서 종목별 매크로 beta (금리·환율·유가 등) 의 cross-section 분포를 측정. quartile 분포 + 자기 종목 위치 표면화. 추론 라벨 없이 ranking 정량만. 트리거 — '매크로 beta 팩터 cross-section', 'macro beta factor', 'macroBetaFactor'.
 whenToUse:
   - 매크로 beta 팩터
   - macroBeta cross-section

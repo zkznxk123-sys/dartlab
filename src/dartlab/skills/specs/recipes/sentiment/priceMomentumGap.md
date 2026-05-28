@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: sentiment
-purpose: 종가 시계열의 5·20·60 거래일 수익률 변화율 갭을 산출. 단기 (5d) - 중기 (60d) 갭이 양수면 *모멘텀 가속*, 음수면 *모멘텀 감속*. 추론 라벨 (강세/약세) 없이 정량 갭만. price gather 단일.
+purpose: 종가 시계열의 5·20·60 거래일 수익률 변화율 갭을 산출. 단기 (5d) - 중기 (60d) 갭이 양수면 *모멘텀 가속*, 음수면 *모멘텀 감속*. 추론 라벨 (강세/약세) 없이 정량 갭만. price gather 단일. 트리거 — '가격 모멘텀 갭 (5/20/60 일 변화율 격차)', 'price momentum gap', 'priceMomentumGap'.
 whenToUse:
   - 가격 모멘텀
   - momentum gap

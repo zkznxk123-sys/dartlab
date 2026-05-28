@@ -8,7 +8,7 @@ status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다.
+purpose: source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다. 트리거 — 'Event Radar Deep Dive', 'deep dive', 'deepDive'.
 whenToUse:
   - 이벤트 레이더 deep dive
   - 촉매 후보 전체 실행

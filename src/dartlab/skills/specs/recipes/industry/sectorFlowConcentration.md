@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: industry
-purpose: 종목이 속한 섹터의 외인 보유 비율 + 거래대금 share 의 단순 정량 표기. 섹터 안 종목 거래대금이 한 종목으로 집중되면 *집중*, 분산되면 *분산*. 추론 라벨 없이 절대 수치만. sector + price gather 결합.
+purpose: 종목이 속한 섹터의 외인 보유 비율 + 거래대금 share 의 단순 정량 표기. 섹터 안 종목 거래대금이 한 종목으로 집중되면 *집중*, 분산되면 *분산*. 추론 라벨 없이 절대 수치만. sector + price gather 결합. 트리거 — '섹터 자금 흐름 집중도 (외인 비중 + 거래대금 share)', 'sector flow concentration', 'sectorFlowConcentration'.
 whenToUse:
   - 섹터 자금 집중
   - sector flow concentration

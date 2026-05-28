@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 사외이사 비중 + 평균 임기 + 동시 다선 (다른 회사 이사회 동시 재직) 횟수의 연도별 추세. 단순 사외이사 비율이 아닌 *실질적 독립성* 측정. governance ↔ analysis 격리.
+purpose: 사외이사 비중 + 평균 임기 + 동시 다선 (다른 회사 이사회 동시 재직) 횟수의 연도별 추세. 단순 사외이사 비율이 아닌 *실질적 독립성* 측정. governance ↔ analysis 격리. 트리거 — '이사회 독립성 추세 (사외이사 비중 + 다선 history)', 'board independence trend', 'boardIndependenceTrend'.
 whenToUse:
   - 이사회 독립성 추세
   - 사외이사 비중

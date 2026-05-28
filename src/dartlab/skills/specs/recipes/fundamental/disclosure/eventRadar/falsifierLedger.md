@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: 이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.
+purpose: 이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다. 트리거 — 'Event Radar Falsifier Ledger', 'falsifier ledger', 'falsifierLedger'.
 whenToUse:
   - event radar falsifier
   - 촉매 반증

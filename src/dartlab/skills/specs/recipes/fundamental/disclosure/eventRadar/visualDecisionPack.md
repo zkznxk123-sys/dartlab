@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: 이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.
+purpose: 이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다. 트리거 — 'Event Radar Visual Decision Pack', 'visual decision pack', 'visualDecisionPack'.
 whenToUse:
   - event radar visualization
   - 촉매 레이더 차트

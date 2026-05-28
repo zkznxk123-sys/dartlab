@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: IS/BS/CF, price/flow, consensus 원자료에서 thesis를 깨기 쉬운 revenue, margin, cash, leverage, market, expectation 취약 지표를 계산하는 L1/L1.5 절차다.
+purpose: IS/BS/CF, price/flow, consensus 원자료에서 thesis를 깨기 쉬운 revenue, margin, cash, leverage, market, expectation 취약 지표를 계산하는 L1/L1.5 절차다. 트리거 — 'Thesis Kill-Chain Fragility Map', 'fragility map', 'fragilityMap'.
 whenToUse:
   - fragility map
   - thesis 취약 지표

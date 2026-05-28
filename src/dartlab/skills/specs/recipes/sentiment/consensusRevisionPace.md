@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: deprecated
-purpose: 30/60/90 일 윈도우 별 EPS 추정 변화율 + revision count 의 z-score. 본 신호는 *애널리스트 합의의 변화 속도* 정량화 — 단순 컨센서스 절대값이 아닌 *변화율*. sentiment 페르소나 보조.
+purpose: 30/60/90 일 윈도우 별 EPS 추정 변화율 + revision count 의 z-score. 본 신호는 *애널리스트 합의의 변화 속도* 정량화 — 단순 컨센서스 절대값이 아닌 *변화율*. sentiment 페르소나 보조. 트리거 — '컨센서스 revision 속도 (애널리스트 EPS 추정 변화율 z-score)', 'consensus revision pace', 'consensusRevisionPace'.
 whenToUse:
   - 컨센서스 revision 속도
   - EPS 추정 변화율

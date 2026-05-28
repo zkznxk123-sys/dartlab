@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: news
-purpose: 향후 예정된 IR/실적발표/배당락/주주총회 row 를 받아 잔여일 기준으로 정렬. 7 일 / 14 일 / 30 일 anchor 안 진입 row 카운트. 추론 라벨 없이 *시점 표면화* 만. calendar gather 단일.
+purpose: 향후 예정된 IR/실적발표/배당락/주주총회 row 를 받아 잔여일 기준으로 정렬. 7 일 / 14 일 / 30 일 anchor 안 진입 row 카운트. 추론 라벨 없이 *시점 표면화* 만. calendar gather 단일. 트리거 — '이벤트 캘린더 시계 (예정 IR/실적/배당락 + 잔여일)', 'calendar event clock', 'calendarEventClock'.
 whenToUse:
   - 이벤트 캘린더
   - event clock

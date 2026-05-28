@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: Jegadeesh-Titman 1993 "Returns to Buying Winners and Selling Losers" 의 12-1m return (직전 12 개월 수익률, 단 직전 1 개월 제외) + 변동성 조정 (Sharpe) + peer rank. 단순 모멘텀이 아닌 *위험 조정* + cross-section.
+purpose: Jegadeesh-Titman 1993 "Returns to Buying Winners and Selling Losers" 의 12-1m return (직전 12 개월 수익률, 단 직전 1 개월 제외) + 변동성 조정 (Sharpe) + peer rank. 단순 모멘텀이 아닌 *위험 조정* + cross-section. 트리거 — 'Momentum 팩터 (Jegadeesh-Titman 12-1m return)', 'momentum factor', 'momentumFactor'.
 whenToUse:
   - 모멘텀 팩터
   - 12-1m return

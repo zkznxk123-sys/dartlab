@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: 이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다.
+purpose: 이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다. 트리거 — 'Event Radar Engine Candidate Memo', 'engine candidate memo', 'engineCandidateMemo'.
 whenToUse:
   - event radar engine candidate
   - 엔진 환류 후보

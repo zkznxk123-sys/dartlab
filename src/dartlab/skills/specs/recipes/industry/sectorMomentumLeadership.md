@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: industry
-purpose: 종목 peer set 의 20 거래일 수익률 분포에서 자기 종목 percentile 위치 + 분포 top/bottom 보고. 추론 라벨 없이 ranking + 절대 위치만. peers + price gather 결합.
+purpose: 종목 peer set 의 20 거래일 수익률 분포에서 자기 종목 percentile 위치 + 분포 top/bottom 보고. 추론 라벨 없이 ranking + 절대 위치만. peers + price gather 결합. 트리거 — '섹터 안 모멘텀 leader / laggard (20d 분포 top/bottom)', 'sector momentum leadership', 'sectorMomentumLeadership'.
 whenToUse:
   - 섹터 leader
   - 섹터 laggard

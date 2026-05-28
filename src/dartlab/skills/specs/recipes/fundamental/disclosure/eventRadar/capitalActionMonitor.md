@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.
+purpose: dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다. 트리거 — 'Event Radar Capital Action Monitor', 'capital action monitor', 'capitalActionMonitor'.
 whenToUse:
   - capital action monitor
   - 배당 자사주 분할 증자

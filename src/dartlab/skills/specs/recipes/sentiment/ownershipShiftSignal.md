@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: sentiment
-purpose: 5% 보유공시 (대량보유 + 임원·주요주주) row 에서 보고자별 보유비율 변화의 정량 격차를 본다. 누적 매수 측 (보유비율 증가) vs 매도 측 (감소) row 수 + 누적 변화량. 추론 라벨 없이 숫자만. ownership gather 단일.
+purpose: 5% 보유공시 (대량보유 + 임원·주요주주) row 에서 보고자별 보유비율 변화의 정량 격차를 본다. 누적 매수 측 (보유비율 증가) vs 매도 측 (감소) row 수 + 누적 변화량. 추론 라벨 없이 숫자만. ownership gather 단일. 트리거 — '주요주주 보유 변화 신호 (5% 보유공시 누적 변화)', 'ownership shift signal', 'ownershipShiftSignal'.
 whenToUse:
   - 주요주주 보유 변화
   - ownership shift

@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 회사의 R&D / 매출 비율 5y 시계열 + 같은 산업 peer set 단면 분포에서 percentile rank. R&D 강도가 peer 대비 *상위 quartile* + *상승 추세* 인 회사는 *innovation lead* 후보. 단순 ratio 가 아닌 추세 + cross-section 결합.
+purpose: 회사의 R&D / 매출 비율 5y 시계열 + 같은 산업 peer set 단면 분포에서 percentile rank. R&D 강도가 peer 대비 *상위 quartile* + *상승 추세* 인 회사는 *innovation lead* 후보. 단순 ratio 가 아닌 추세 + cross-section 결합. 트리거 — 'R&D / 매출 비율 추세 + peer cross-section rank', 'rd intensity trend', 'rdIntensityTrend'.
 whenToUse:
   - R&D 강도 추세
   - innovation lead 후보

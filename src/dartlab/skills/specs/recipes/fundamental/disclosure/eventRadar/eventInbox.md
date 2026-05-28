@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.
+purpose: Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다. 트리거 — 'Event Radar Event Inbox', 'event inbox', 'eventInbox'.
 whenToUse:
   - event inbox
   - 공시 뉴스 촉매

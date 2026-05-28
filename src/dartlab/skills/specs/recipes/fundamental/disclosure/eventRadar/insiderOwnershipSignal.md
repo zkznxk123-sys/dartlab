@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.
+purpose: gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다. 트리거 — 'Event Radar Insider Ownership Signal', 'insider ownership signal', 'insiderOwnershipSignal'.
 whenToUse:
   - insider ownership signal
   - 내부자 거래

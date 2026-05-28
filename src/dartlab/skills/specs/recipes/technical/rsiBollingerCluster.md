@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: RSI(14) < 30 또는 > 70 + 동시 가격이 볼린저 밴드 (20, 2σ) 하단/상단 close 인 row 만 cluster 로 표기. 단일 oscillator 함정 회피 (두 정의 동시 충족만 신호).
+purpose: RSI(14) < 30 또는 > 70 + 동시 가격이 볼린저 밴드 (20, 2σ) 하단/상단 close 인 row 만 cluster 로 표기. 단일 oscillator 함정 회피 (두 정의 동시 충족만 신호). 트리거 — 'RSI + 볼린저 밴드 동시 cluster (이중 oversold/overbought)', 'rsi bollinger cluster', 'rsiBollingerCluster'.
 whenToUse:
   - RSI 과매도 과매수
   - 볼린저 밴드 cluster

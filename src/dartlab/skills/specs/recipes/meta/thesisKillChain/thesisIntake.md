@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: 사용자 thesis를 받아 growth, margin, cash, balance sheet, valuation, event, macro, governance theme으로 파싱하는 pre-mortem 시작 절차다.
+purpose: 사용자 thesis를 받아 growth, margin, cash, balance sheet, valuation, event, macro, governance theme으로 파싱하는 pre-mortem 시작 절차다. 트리거 — 'Thesis Kill-Chain Thesis Intake', 'thesis intake', 'thesisIntake'.
 whenToUse:
   - thesis intake
   - 투자 thesis 파싱

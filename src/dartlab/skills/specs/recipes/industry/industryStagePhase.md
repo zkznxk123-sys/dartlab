@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: peer set 의 ROIC-WACC spread 분포 (mean·std·skew) + 매출 CAGR 5y 결합으로 산업의 *도입 / 성장 / 성숙 / 후행* phase 판정. 단일 회사가 아닌 peer set 단면 분포가 판정 신호. industry ↔ scan 격리 메우는 조합.
+purpose: peer set 의 ROIC-WACC spread 분포 (mean·std·skew) + 매출 CAGR 5y 결합으로 산업의 *도입 / 성장 / 성숙 / 후행* phase 판정. 단일 회사가 아닌 peer set 단면 분포가 판정 신호. industry ↔ scan 격리 메우는 조합. 트리거 — '산업 단계 매핑', 'industry stage phase', 'industryStagePhase'.
 whenToUse:
   - 산업 단계 매핑
   - industry stage phase

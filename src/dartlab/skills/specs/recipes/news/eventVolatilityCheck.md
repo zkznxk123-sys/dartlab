@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 공시 이벤트 시점 ±10 거래일 ATR (Average True Range) ratio. T-10 baseline 대비 T+10 ATR 이 1.3x+ 이면 *이벤트 induced 변동성* 확대. 단일 가격 변동 X — *변동성 체제* 측정.
+purpose: 공시 이벤트 시점 ±10 거래일 ATR (Average True Range) ratio. T-10 baseline 대비 T+10 ATR 이 1.3x+ 이면 *이벤트 induced 변동성* 확대. 단일 가격 변동 X — *변동성 체제* 측정. 트리거 — '이벤트 직전·직후 변동성 (ATR ratio)', 'event volatility check', 'eventVolatilityCheck'.
 whenToUse:
   - 이벤트 변동성
   - ATR ratio

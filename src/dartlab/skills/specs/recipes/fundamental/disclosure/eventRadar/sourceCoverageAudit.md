@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: incubator.eventRadar
-purpose: 이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.
+purpose: 이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다. 트리거 — 'Event Radar Source Coverage Audit', 'source coverage audit', 'sourceCoverageAudit'.
 whenToUse:
   - 이벤트 레이더 coverage
   - catalyst source audit

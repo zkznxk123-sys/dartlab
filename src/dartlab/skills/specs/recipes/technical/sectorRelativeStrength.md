@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: technical
-purpose: 종목 20/60d 수익률 vs 동일 sector 평균 수익률 차 (relative strength). 상대 강도 양수면 *섹터 outperform*, 음수면 *underperform*. 추론 라벨 없이 정량 차분만. price + sector gather 결합.
+purpose: 종목 20/60d 수익률 vs 동일 sector 평균 수익률 차 (relative strength). 상대 강도 양수면 *섹터 outperform*, 음수면 *underperform*. 추론 라벨 없이 정량 차분만. price + sector gather 결합. 트리거 — '섹터 대비 상대 강도 (20d / 60d 수익률 차)', 'sector relative strength', 'sectorRelativeStrength'.
 whenToUse:
   - 섹터 상대 강도
   - relative strength

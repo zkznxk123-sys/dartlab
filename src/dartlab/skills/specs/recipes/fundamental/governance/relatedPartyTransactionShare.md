@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 특수관계자 (대주주·계열사) 와의 매출 + 매입 + 자금대여 비중의 연도별 추세. 비중 > 30% 또는 *전체 매출보다 빠르게 성장* 시 일감몰아주기·이전가격 의심 후보. governance + forensics 결합.
+purpose: 특수관계자 (대주주·계열사) 와의 매출 + 매입 + 자금대여 비중의 연도별 추세. 비중 > 30% 또는 *전체 매출보다 빠르게 성장* 시 일감몰아주기·이전가격 의심 후보. governance + forensics 결합. 트리거 — '특수관계자 매출·매입 비중 추세', 'related party transaction share', 'relatedPartyTransactionShare'.
 whenToUse:
   - 특수관계자 거래 비중
   - 일감몰아주기 의심

@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: news
-purpose: 공시·뉴스·가격 3 source 를 시간순으로 fuse 해 같은 사건이 어디서 먼저 나타났는지 row 단위로 본다. 뉴스 선행 또는 가격 선행 row 만 의심 후보로 emit.
+purpose: 공시·뉴스·가격 3 source 를 시간순으로 fuse 해 같은 사건이 어디서 먼저 나타났는지 row 단위로 본다. 뉴스 선행 또는 가격 선행 row 만 의심 후보로 emit. 트리거 — 'Event Timeline Fusion', 'event timeline fusion', 'eventTimelineFusion'.
 whenToUse:
   - 공시 뉴스 가격 시간순
   - 정보 비대칭 의심 row

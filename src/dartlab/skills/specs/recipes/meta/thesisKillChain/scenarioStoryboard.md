@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: baseIntact, erosionCase, killChainCase 세 시나리오로 thesis pre-mortem을 정리하는 L1/L1.5 절차다.
+purpose: baseIntact, erosionCase, killChainCase 세 시나리오로 thesis pre-mortem을 정리하는 L1/L1.5 절차다. 트리거 — 'Thesis Kill-Chain Scenario Storyboard', 'scenario storyboard', 'scenarioStoryboard'.
 whenToUse:
   - scenario storyboard
   - pre-mortem 시나리오

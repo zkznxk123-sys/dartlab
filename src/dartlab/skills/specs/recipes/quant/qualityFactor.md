@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: Frazzini-Pedersen-Asness 2014 "Quality Minus Junk" 의 4 축 — Profitability (ROE/ROA) + Growth (5y CAGR) + Safety (low leverage·low earnings vol) + Payout (FCF / NI) — composite z-score. junk 회사 회피용 quality screen.
+purpose: Frazzini-Pedersen-Asness 2014 "Quality Minus Junk" 의 4 축 — Profitability (ROE/ROA) + Growth (5y CAGR) + Safety (low leverage·low earnings vol) + Payout (FCF / NI) — composite z-score. junk 회사 회피용 quality screen. 트리거 — 'Quality 팩터', 'quality factor', 'qualityFactor'.
 whenToUse:
   - quality 팩터
   - QMJ Asness

@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 미국 국채 10y-2y + 10y-3m 두 spread 동시 추적. 둘 다 inversion (음수) 이면 *strong recession signal*. 단일 spread (10y-2y만) 함정 회피. FRED raw 직접.
+purpose: 미국 국채 10y-2y + 10y-3m 두 spread 동시 추적. 둘 다 inversion (음수) 이면 *strong recession signal*. 단일 spread (10y-2y만) 함정 회피. FRED raw 직접. 트리거 — '미국 yield curve regime (10y-2y / 10y-3m 동시)', 'us yield curve regime', 'usYieldCurveRegime'.
 whenToUse:
   - 미국 yield curve
   - inversion signal

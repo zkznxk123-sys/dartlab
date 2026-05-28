@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다.
+purpose: scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다. 트리거 — 'Thesis Kill-Chain Visual Decision Pack', 'visual decision pack', 'visualDecisionPack'.
 whenToUse:
   - thesis kill-chain visualization
   - pre-mortem chart gate

@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: news
-purpose: 종목 news gather row 의 7 일 / 30 일 발생 빈도를 일평균 단위로 환산. 단기 일평균 / 장기 일평균 비율로 *뉴스 가속도* 측정. 추론 라벨 (긍정/부정) 없이 빈도 정량만. news gather 단일.
+purpose: 종목 news gather row 의 7 일 / 30 일 발생 빈도를 일평균 단위로 환산. 단기 일평균 / 장기 일평균 비율로 *뉴스 가속도* 측정. 추론 라벨 (긍정/부정) 없이 빈도 정량만. news gather 단일. 트리거 — '뉴스 헤드라인 빈도 가속 (7/30 일 분당 비율)', 'news headline velocity', 'newsHeadlineVelocity'.
 whenToUse:
   - 뉴스 빈도 가속
   - news velocity

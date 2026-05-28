@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: news
-purpose: DART 공시 (1 차 출처) 와 Naver 뉴스 헤드라인 (외부 untrusted) 를 같은 ±1 day window 안에서 회사명·키워드·이벤트 단어로 매칭해 정합성을 보는 절차다.
+purpose: DART 공시 (1 차 출처) 와 Naver 뉴스 헤드라인 (외부 untrusted) 를 같은 ±1 day window 안에서 회사명·키워드·이벤트 단어로 매칭해 정합성을 보는 절차다. 트리거 — 'Disclosure News Crosscheck', 'disclosure news crosscheck', 'disclosureNewsCrosscheck'.
 whenToUse:
   - 공시 뉴스 정합성
   - 뉴스 선행 vs 공시 선행 확인

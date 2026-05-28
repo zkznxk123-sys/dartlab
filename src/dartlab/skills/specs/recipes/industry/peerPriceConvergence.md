@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: industry
-purpose: 종목의 industry peer 들의 60 거래일 수익률 분포 측정. peer 수익률 std-dev 가 좁아지면 *수렴 phase*, 넓어지면 *발산 phase*. 추론 라벨 없이 분산 정량만. peers + price gather 결합.
+purpose: 종목의 industry peer 들의 60 거래일 수익률 분포 측정. peer 수익률 std-dev 가 좁아지면 *수렴 phase*, 넓어지면 *발산 phase*. 추론 라벨 없이 분산 정량만. peers + price gather 결합. 트리거 — '동종 peer 가격 수렴 / 발산 (60d ret 분포)', 'peer price convergence', 'peerPriceConvergence'.
 whenToUse:
   - peer 가격 수렴
   - sector dispersion

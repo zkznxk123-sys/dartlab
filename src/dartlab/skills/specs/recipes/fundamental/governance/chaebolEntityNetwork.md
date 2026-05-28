@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: curated
-purpose: 한국 재벌 그룹 안 회사들의 지분율 cross-holding + 임원/이사 동시재직 (interlocking directorate) network 매핑. 지주사·순환출자·차등의결권의 정량 진입점. governance ↔ scan 결합.
+purpose: 한국 재벌 그룹 안 회사들의 지분율 cross-holding + 임원/이사 동시재직 (interlocking directorate) network 매핑. 지주사·순환출자·차등의결권의 정량 진입점. governance ↔ scan 결합. 트리거 — '재벌 계열사 망 (지분율·이사 동시재직)', 'chaebol entity network', 'chaebolEntityNetwork'.
 whenToUse:
   - 재벌 계열사 망
   - chaebol network

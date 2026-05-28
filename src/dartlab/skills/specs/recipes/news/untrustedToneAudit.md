@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: news
-purpose: gather.news 응답이 sentinel 마커로 감싸지는지 + 마커 안 injection 시도 카운트하는 untrusted wrap 검증 절차다.
+purpose: gather.news 응답이 sentinel 마커로 감싸지는지 + 마커 안 injection 시도 카운트하는 untrusted wrap 검증 절차다. 트리거 — 'News Untrusted Tone Audit', 'untrusted tone audit', 'untrustedToneAudit'.
 whenToUse:
   - untrusted wrap 검증
   - 뉴스 fetch 마커 누락 확인

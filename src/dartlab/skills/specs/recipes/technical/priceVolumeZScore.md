@@ -7,7 +7,7 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: technical
-purpose: 일별 종가 변화율과 거래량 20 거래일 z-score 의 동조 점검. 거래량 z ≥ 2 인 row 가 양수/음수 수익률 어느 쪽으로 쏠리는지 정량 카운트. 추론 라벨 없이 *event row 비율* 만. price gather 단일.
+purpose: 일별 종가 변화율과 거래량 20 거래일 z-score 의 동조 점검. 거래량 z ≥ 2 인 row 가 양수/음수 수익률 어느 쪽으로 쏠리는지 정량 카운트. 추론 라벨 없이 *event row 비율* 만. price gather 단일. 트리거 — '거래량 z-score + 가격 변화율 동조 신호', 'price volume z score', 'priceVolumeZScore'.
 whenToUse:
   - 거래량 폭증
   - volume z-score

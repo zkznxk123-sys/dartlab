@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: pre-mortem 시나리오에 필요한 statements, filings, price, flow, consensus, scan, assumptions coverage를 확인하는 L1/L1.5 절차다.
+purpose: pre-mortem 시나리오에 필요한 statements, filings, price, flow, consensus, scan, assumptions coverage를 확인하는 L1/L1.5 절차다. 트리거 — 'Thesis Kill-Chain Evidence Coverage Audit', 'evidence coverage audit', 'evidenceCoverageAudit'.
 whenToUse:
   - thesis evidence coverage
   - pre-mortem source audit

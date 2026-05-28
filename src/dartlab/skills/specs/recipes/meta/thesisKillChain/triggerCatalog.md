@@ -7,7 +7,7 @@ scope: builtin
 status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: fragilityMap, filings, scan primitive에서 thesis를 흔드는 촉발 조건을 모으는 L1/L1.5 절차다.
+purpose: fragilityMap, filings, scan primitive에서 thesis를 흔드는 촉발 조건을 모으는 L1/L1.5 절차다. 트리거 — 'Thesis Kill-Chain Trigger Catalog', 'trigger catalog', 'triggerCatalog'.
 whenToUse:
   - trigger catalog
   - thesis 촉발 조건
