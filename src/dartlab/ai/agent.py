@@ -76,6 +76,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # 마스터 플랜 트랙 1 PR-5 — N(2~5) macro 시나리오 baseline 대비 동시 비교.
     # ScenarioOverlay 1 회 + RunPython loop 우회 → 1 회 호출.
     "ScenarioCompareN",
+    # 마스터 플랜 트랙 1 PR-6 — dCR 신용등급 + 1Y PD + 7 축 분석.
+    # credit.engine.evaluateCompany wrap, RunPython 으로 ad-hoc credit 계산 우회.
+    "CreditScorecard",
     "PickStoryTemplate",
     "EvidenceGate",
     "GroundingCheck",

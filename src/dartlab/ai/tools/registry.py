@@ -11,6 +11,7 @@ from typing import Any, Callable
 from .compareCompanies import compareCompanies
 from .compileVisual import compileVisual
 from .createUserSkill import createUserSkill
+from .creditScorecard import creditScorecard
 from .dcfValuationTool import dcfValuationTool
 from .engineCall import engineCall
 from .evidenceGate import evidenceGate
@@ -371,6 +372,29 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "CreditScorecard": ToolSpec(
+        "CreditScorecard",
+        "단일 종목 dCR 신용등급 + 1Y PD + 7 축 분석 (채무상환/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/공시리스크). includeFactors=True 시 Altman Z + Beneish M 동행. '신용등급', '회사채 등급', '재무 안정성' 류 질문에 본 도구 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "basePeriod": {
+                    "type": "string",
+                    "description": "평가 기준 분기 ('2024Q4'/'2023'). 미지정 시 최신.",
+                },
+                "includeFactors": {
+                    "type": "boolean",
+                    "description": "Altman Z + Beneish M 동행 (기본 False). 분식회계/distress 의도 시 True.",
+                },
+            },
+            "required": ["stockCode"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "DCFValuation": ToolSpec(
         "DCFValuation",
         "단일 종목 Damodaran 2-stage DCF 내재가치 밴드 (bear/base/bull) 자동 계산. discountRate ± 100bps + terminalGrowth ± 50bps 표준 변형. '삼성전자 적정가격', 'AAPL 공정가치', 'DCF 평가' 류 질문에 본 도구 1 회 호출 — RunPython ad-hoc 회피 (token 30% 절감).",
@@ -643,6 +667,7 @@ _TOOLS: dict[str, ToolFn] = {
     "PickStoryTemplate": pickStoryTemplate,
     "CompareCompanies": compareCompanies,
     "PeerCompareN": peerCompareN,
+    "CreditScorecard": creditScorecard,
     "DCFValuation": dcfValuationTool,
     "ScenarioCompareN": scenarioCompareN,
     "ScenarioOverlay": scenarioOverlay,
@@ -682,6 +707,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "CompileVisual",
     "PeerCompareN",
     "DCFValuation",
+    "CreditScorecard",
     "ScenarioCompareN",
     "ScenarioOverlay",
     "OutcomeLog",
@@ -700,6 +726,7 @@ _LEGACY_NAME_MAP = {
     "compare_companies": "CompareCompanies",
     "peer_compare_n": "PeerCompareN",
     "dcf_valuation": "DCFValuation",
+    "credit_scorecard": "CreditScorecard",
     "scenario_compare_n": "ScenarioCompareN",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
