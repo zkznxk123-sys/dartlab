@@ -765,6 +765,115 @@ def handleCalendar(
     )
 
 
+def handleNarrative(
+    g: Any,  # noqa: ARG001
+    target: str | None,
+    *,
+    market: str,
+    start: str | None,
+    end: str | None,
+    marketExplicit: bool,  # noqa: ARG001
+    **kwargs: Any,
+) -> pl.DataFrame:
+    """narrative axis dispatch — Phase A/B/C/D 통합 news archive 진입.
+
+    target 분기:
+        - None / "raw" / "" : raw archive (loadNewsArchive)
+        - "pulse" : (date × topic) 격자 (buildNarrativePulse)
+        - "score" : 12 번째 macro 축 dict → 1행 DataFrame (analyzeNarrative)
+        - "topics" : top topic 랭킹 (volume + sentiment mean)
+        - 6자리 숫자 : 종목명 keyword 필터 (KRX codeToName)
+        - 그 외 : 자유 keyword title contains 필터
+
+    Args:
+        g: 무시 (read-only archive).
+        target: 위 분기 키 또는 None.
+        market: "KR" | "US".
+        start/end: ISO date 또는 None. None + days 시 today-days~today.
+        marketExplicit: 무시.
+        **kwargs: days (default 30), asof, sentimentModel, top.
+
+    Returns:
+        pl.DataFrame — 분기별 schema.
+
+    Raises:
+        없음 — 빈 archive 면 동일 schema 빈 DataFrame.
+
+    See Also:
+        ``gather.bulkData.newsHeadlines.loadNewsArchive`` — raw archive 로더.
+        ``quant.text.narrativePulse.buildNarrativePulse`` — pulse 격자.
+        ``macro.narrative.narrative.analyzeNarrative`` — score 결과.
+    """
+    from datetime import date as _date
+    from datetime import timedelta
+
+    days = kwargs.pop("days", 30)
+    asof = kwargs.pop("asof", None)
+    sentimentModel = kwargs.pop("sentimentModel", "auto")
+    top = kwargs.pop("top", 10)
+
+    # start/end 기본값 — today-days~today
+    if start is None and end is None:
+        end_d = _date.today()
+        start_d = end_d - timedelta(days=days)
+        start = start_d.isoformat()
+        end = end_d.isoformat()
+    elif start is None:
+        start = (_date.fromisoformat(end) - timedelta(days=days)).isoformat() if end else None
+    elif end is None:
+        end = _date.today().isoformat()
+
+    from dartlab.gather.bulkData.newsHeadlines import loadNewsArchive
+
+    if target is None or target in ("", "raw"):
+        return loadNewsArchive(start, end, market, asof=asof)
+
+    if target == "pulse":
+        from dartlab.quant.text.narrativePulse import buildNarrativePulse
+
+        return buildNarrativePulse(start, end, market, asof=asof, sentimentModel=sentimentModel)
+
+    if target == "score":
+        from dartlab.macro.narrative.narrative import analyzeNarrative
+
+        result = analyzeNarrative(market=market, asOf=asof, lookbackDays=days, sentimentModel=sentimentModel)
+        return pl.DataFrame([result])
+
+    if target == "topics":
+        from dartlab.quant.text.narrativePulse import buildNarrativePulse
+
+        pulse = buildNarrativePulse(start, end, market, asof=asof, sentimentModel=sentimentModel)
+        if pulse.height == 0:
+            return pulse
+        topic_col = "topic_label" if "topic_label" in pulse.columns else "topic_id"
+        agg = pulse.group_by(topic_col).agg(
+            pl.col("volume").sum().alias("volume_total")
+            if "volume" in pulse.columns
+            else pl.lit(0).alias("volume_total"),
+            pl.col("sentiment_mean").mean().alias("sentiment_mean")
+            if "sentiment_mean" in pulse.columns
+            else pl.lit(0.0).alias("sentiment_mean"),
+        )
+        return agg.sort("volume_total", descending=True).head(top)
+
+    # target 이 6 자리 숫자 → 종목명 resolve → keyword 필터
+    keyword = target
+    if target.isdigit() and len(target) == 6:
+        try:
+            from dartlab.gather.krx.listing.registry import codeToName
+
+            name = codeToName(target)
+            if name:
+                keyword = name
+        except Exception:
+            pass
+
+    arch = loadNewsArchive(start, end, market, asof=asof)
+    if arch.height == 0 or "title" not in arch.columns:
+        return arch
+    return arch.filter(pl.col("title").str.contains(keyword, literal=True))
+
+
 def handleDartDoc(
     g: Any,  # noqa: ARG001
     target: str | None,

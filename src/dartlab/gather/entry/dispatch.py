@@ -122,6 +122,20 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         targetRequired=False,
         targetType="columnName",
     ),
+    "narrative": GatherAxisEntry(
+        label="뉴스 내러티브 archive",
+        description=(
+            "Phase A/B/C/D 통합 archive (RSS + GDELT) 진입. "
+            "target 분기: None/'raw'=원본 archive, 'pulse'=date×topic 격자, "
+            "'score'=12 번째 macro 축 dict, 'topics'=top topic 랭킹, "
+            "6자리 코드=종목명 keyword 필터, 그 외 문자열=키워드 필터. "
+            "days kwarg 기본 30 (start/end 미명시 시 today-days~today). "
+            "asof PIT-safe."
+        ),
+        example='gather("narrative", market="KR", days=30) / gather("narrative", "score") / gather("narrative", "005930", days=30)',
+        targetRequired=False,
+        targetType="keyword",
+    ),
     "dartDoc": GatherAxisEntry(
         label="DART 공시 원문",
         description=(
@@ -162,6 +176,7 @@ API_KEY_INFO: dict[str, str] = {
     "peers": "불필요",
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
     "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
+    "narrative": "불필요 (Phase A/D HF + 로컬 archive)",
     "dartDoc": "불필요 (viewer 무인증 단건 fetch)",
     "calendar": "DART_API_KEY (Company.disclosure 사용)",
 }
@@ -179,6 +194,10 @@ AXIS_ALIASES: dict[str, str] = {
     "동종업종": "peers",
     "일정": "calendar",
     "캘린더": "calendar",
+    "내러티브": "narrative",
+    "뉴스내러티브": "narrative",
+    "뉴스심리": "narrative",
+    "헤드라인": "narrative",
 }
 
 
