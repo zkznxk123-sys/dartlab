@@ -233,12 +233,92 @@ def _renderText(stats: dict[str, Any], *, since: float | None) -> str:
     return "\n".join(lines)
 
 
+# PR-L5 — KPI baseline 회귀 가드. 4 KPI 의 ±15% 회귀 시 exit 1.
+# 차이가 *나쁜 쪽* (지연 증가, turn 증가) 일 때만 회귀. *좋은 쪽* (지연 감소) 은 OK.
+_KPI_REGRESSION_TOLERANCE_PCT: float = 15.0
+_KPI_TRACKED_PATHS: tuple[tuple[str, str, str], ...] = (
+    # (label, dotted path in stats, direction — "lower" = 작을수록 좋음)
+    ("turnsPerSession.p95", "turnsPerSession.p95", "lower"),
+    ("firstChunkMs.p95", "firstChunkMs.p95", "lower"),
+    ("turnElapsedMs.p50", "turnElapsedMs.p50", "lower"),
+    ("turnElapsedMs.p95", "turnElapsedMs.p95", "lower"),
+)
+
+
+def _statsToBaseline(stats: dict[str, Any]) -> dict[str, Any]:
+    """현 stats → baseline JSON 양식. 4 KPI + 생성 시각."""
+    import datetime as _dt
+
+    out: dict[str, Any] = {
+        "createdAt": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+        "sessionCount": stats.get("sessionCount", 0),
+        "kpis": {},
+    }
+    for label, path, _direction in _KPI_TRACKED_PATHS:
+        head, tail = path.split(".", 1)
+        out["kpis"][label] = (stats.get(head) or {}).get(tail)
+    return out
+
+
+def _compareWithBaseline(
+    stats: dict[str, Any], baseline: dict[str, Any]
+) -> tuple[list[tuple[str, float, float, float, bool]], bool]:
+    """baseline 대비 현 stats 회귀 검사.
+
+    Returns:
+        (rows, hasRegression) — rows = (label, baselineVal, currentVal, deltaPct, regressed) list.
+        deltaPct = (current - baseline) / baseline * 100. lower-better KPI 에서 양수 = 회귀.
+    """
+    rows: list[tuple[str, float, float, float, bool]] = []
+    hasRegression = False
+    base_kpis = (baseline or {}).get("kpis") or {}
+    for label, path, direction in _KPI_TRACKED_PATHS:
+        head, tail = path.split(".", 1)
+        cur = (stats.get(head) or {}).get(tail)
+        base = base_kpis.get(label)
+        if not isinstance(cur, (int, float)) or not isinstance(base, (int, float)) or base == 0:
+            continue
+        deltaPct = (cur - base) / base * 100.0
+        regressed = False
+        if direction == "lower":
+            regressed = deltaPct > _KPI_REGRESSION_TOLERANCE_PCT
+        else:  # higher-better
+            regressed = -deltaPct > _KPI_REGRESSION_TOLERANCE_PCT
+        if regressed:
+            hasRegression = True
+        rows.append((label, float(base), float(cur), deltaPct, regressed))
+    return rows, hasRegression
+
+
+def _renderBaselineDiff(rows: list[tuple[str, float, float, float, bool]]) -> str:
+    """baseline 비교 결과 텍스트 — 4 KPI 표."""
+    if not rows:
+        return "(baseline 비교 가능 KPI 없음 — 현 측정값 부재)"
+    lines = ["", "── baseline 비교 ──"]
+    lines.append(f"{'KPI':<22} {'baseline':>10} {'current':>10} {'delta':>8}  status")
+    lines.append("-" * 60)
+    for label, base, cur, delta, regressed in rows:
+        mark = "✗" if regressed else "✓"
+        lines.append(f"{mark} {label:<20} {base:>10.1f} {cur:>10.1f} {delta:>+7.1f}%")
+    return "\n".join(lines)
+
+
 def main(argv: list[str] | None = None) -> int:
-    """digest CLI entry point. 반환 = exit code (CI ci-fast 비차단)."""
+    """digest CLI entry point. 반환 = exit code (회귀 시 1, baseline write 시 0)."""
     parser = argparse.ArgumentParser(description="ai trace KPI daily digest")
     parser.add_argument("--dir", default=None, help="trace 디렉토리 (기본 ~/.dartlab/ai_trace/)")
     parser.add_argument("--last", default=None, help="기간 (예: 30d / 7d / 24h / 60m)")
     parser.add_argument("--json", action="store_true", help="JSON stdout")
+    parser.add_argument(
+        "--baseline",
+        default=None,
+        help="baseline JSON 경로 — 비교 후 회귀 (±15%%) 시 exit 1 (PR-L5)",
+    )
+    parser.add_argument(
+        "--write-baseline",
+        default=None,
+        help="baseline JSON 저장 경로 — 현 측정값을 baseline 으로 박음 (PR-L5)",
+    )
     args = parser.parse_args(argv)
 
     directory = Path(args.dir) if args.dir else _resolveDefaultTraceDir()
@@ -246,10 +326,33 @@ def main(argv: list[str] | None = None) -> int:
     traces = _loadTraces(directory, since=since)
     stats = _aggregate(traces)
 
+    # --write-baseline 박기
+    if args.write_baseline:
+        baseline = _statsToBaseline(stats)
+        out_path = Path(args.write_baseline)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(baseline, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        print(f"[baseline] 저장 → {out_path} (session={baseline['sessionCount']})")
+        return 0
+
     if args.json:
         print(json.dumps(stats, ensure_ascii=False, indent=2, default=str))
     else:
         print(_renderText(stats, since=since))
+
+    # --baseline 비교
+    if args.baseline:
+        try:
+            baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"[baseline] 로드 실패: {exc}", file=sys.stderr)
+            return 2
+        rows, hasRegression = _compareWithBaseline(stats, baseline)
+        if not args.json:
+            print(_renderBaselineDiff(rows))
+        if hasRegression:
+            print(f"[baseline] 회귀 감지 — {_KPI_REGRESSION_TOLERANCE_PCT:.0f}% 임계 초과", file=sys.stderr)
+            return 1
     return 0
 
 
