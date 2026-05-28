@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 import os
 import time
+from collections.abc import Iterator
 from typing import Any
 
 import httpx
 
 from dartlab.ai.settings.modelResolver import fallbackModels, sortOpenaiModels
 
-from . import ProviderConfig, ProviderTurn, ToolCall
+from . import ProviderConfig, ProviderTurn, StreamChunk, ToolCall
 from .support import oauthToken
 from .support.oauthToken import TokenRefreshError
 
@@ -90,6 +91,22 @@ class OAuthCodexProvider:
         body = _buildBody(messages, tools, model=self.resolvedModel)
         response_text = _requestWithRetry(token, body)
         return _parseSseResponse(response_text)
+
+    def generateStream(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> Iterator[StreamChunk]:
+        """OAuth 토큰 → SSE *진짜* streaming. text delta 즉시 yield, 종료 시 final 조립.
+
+        마스터 플랜 v2 PR-L1 (cryptic-discovering-kettle.md). 기존 ``stream()`` 은
+        text delta 만 (tool 호출 무시) + ``generate()`` 는 response 통째 버퍼링 후
+        파싱. 본 메서드는 *streamProvider* 추상화 호환 = 첫 token 즉시 chunk emit +
+        function_call 누적 + ``response.completed`` 도착 시 ``StreamChunk(final=True,
+        turn=ProviderTurn(...))`` yield.
+
+        효과: 첫 chunk latency 측정 가능화 (이전 ``n/a`` → ~1800ms 예상), 평균 응답
+        체감 -20% (typing 효과 — UI 가 사용자에게 "기다림 중" 인지 시간 단축).
+        """
+        token = _validTokenOrRaise()
+        body = _buildBody(messages, tools, model=self.resolvedModel)
+        yield from _streamProviderTurnFromSse(token, body)
 
     def _getTokenOrRaise(self) -> str:
         return _validTokenOrRaise()
@@ -454,3 +471,152 @@ def _parseArgs(raw: str) -> dict[str, Any]:
     except json.JSONDecodeError:
         return {"_raw": raw}
     return parsed if isinstance(parsed, dict) else {}
+
+
+# ── PR-L1: 진짜 SSE streaming (마스터 플랜 v2 트랙 6) ──
+#
+# 기존 _requestWithRetry / _parseSseResponse 조합: response.text 완전 버퍼링 후 파싱
+# → first chunk latency 측정 불가 (response 도착 시점 = 답안 완성 시점). 운영 측정에서
+# 첫 chunk p95 = n/a 회귀의 직접 원인.
+#
+# 본 helper 는 httpx.stream + iter_lines 사용 → backend 가 SSE 양식으로 흘려보내는
+# event 를 *line-by-line* 즉시 소비. text delta 도착 시 즉시 yield → StreamChunk
+# (text=delta). response.completed 도착 시 누적 buffer 로 최종 ProviderTurn 조립
+# → StreamChunk(final=True, turn=...).
+
+
+def _streamProviderTurnFromSse(token: str, body: dict[str, Any]) -> Iterator[StreamChunk]:
+    """SSE 라인 streaming → StreamChunk yield. text delta 즉시 + final turn 종료.
+
+    retry policy 는 *첫 응답 도착 전* 만. stream 시작 후 중단은 abort (재시도 X).
+    """
+    text_parts: list[str] = []
+    completed_text: list[str] = []
+    buffers: dict[str, dict[str, str]] = {}
+    finished: list[dict[str, str]] = []
+
+    for event in _iterSseRawEvents(token, body):
+        eventType = event.get("type")
+        if eventType == "response.output_text.delta":
+            delta = event.get("delta")
+            if isinstance(delta, str) and delta:
+                text_parts.append(delta)
+                yield StreamChunk(text=delta)
+        elif eventType == "response.output_item.added":
+            item = event.get("item") if isinstance(event.get("item"), dict) else {}
+            if item.get("type") == "function_call":
+                item_id = str(item.get("id") or f"fc_{len(buffers)}")
+                buffers[item_id] = {
+                    "id": str(item.get("call_id") or item_id),
+                    "name": str(item.get("name") or ""),
+                    "args": "",
+                }
+        elif eventType == "response.function_call_arguments.delta":
+            item_id = str(event.get("item_id") or "")
+            if item_id in buffers:
+                buffers[item_id]["args"] += str(event.get("delta") or "")
+        elif eventType == "response.function_call_arguments.done":
+            item_id = str(event.get("item_id") or "")
+            buffer = buffers.pop(item_id, None)
+            if buffer is not None:
+                final_args = event.get("arguments") if isinstance(event.get("arguments"), str) else None
+                if final_args is not None:
+                    buffer["args"] = final_args
+                finished.append(buffer)
+        elif eventType == "response.output_item.done":
+            item = event.get("item") if isinstance(event.get("item"), dict) else {}
+            if item.get("type") == "function_call":
+                item_id = str(item.get("id") or "")
+                buffer = buffers.pop(item_id, None)
+                if buffer is not None:
+                    final_args = item.get("arguments") if isinstance(item.get("arguments"), str) else None
+                    if final_args is not None:
+                        buffer["args"] = final_args
+                    finished.append(buffer)
+            elif item.get("type") == "message":
+                completed_text.extend(_textFromMessageItem(item))
+        elif eventType == "response.completed":
+            response = event.get("response") if isinstance(event.get("response"), dict) else {}
+            for item in response.get("output") or []:
+                if not isinstance(item, dict):
+                    continue
+                if item.get("type") == "message":
+                    completed_text.extend(_textFromMessageItem(item))
+                elif item.get("type") == "function_call":
+                    finished.append(
+                        {
+                            "id": str(item.get("call_id") or item.get("id") or f"fc_{len(finished)}"),
+                            "name": str(item.get("name") or ""),
+                            "args": str(item.get("arguments") or "{}"),
+                        }
+                    )
+
+    calls: list[ToolCall] = []
+    seen: set[tuple[str, str]] = set()
+    for item in finished:
+        if not item.get("name"):
+            continue
+        key = (item.get("id") or "", item.get("name") or "")
+        if key in seen:
+            continue
+        seen.add(key)
+        calls.append(ToolCall(id=item["id"], name=item["name"], args=_parseArgs(item.get("args") or "{}")))
+    turn = ProviderTurn(content="".join(completed_text) or "".join(text_parts), toolCalls=calls)
+    yield StreamChunk(text="", final=True, turn=turn)
+
+
+def _iterSseRawEvents(token: str, body: dict[str, Any]) -> Iterator[dict[str, Any]]:
+    """httpx.stream → SSE line 즉시 yield. 401 시 token refresh 1 회.
+
+    각 line `data: {...}` 만 yield (parse 후 dict). `[DONE]` 시 break.
+    """
+    headers = _headers(token)
+    url = f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}"
+    try:
+        with httpx.stream("POST", url, headers=headers, json=body, timeout=90) as response:
+            if response.status_code == 401:
+                # token refresh 1 회 — non-streaming path 와 동일 policy
+                refreshed = _refreshAndRetryOnce(body)
+                # refresh 후에는 buffered response — line 으로 변환
+                if refreshed.status_code != 200:
+                    _raiseHttpError(refreshed.status_code, refreshed.text)
+                for line in refreshed.text.splitlines():
+                    parsed = _parseSseLine(line)
+                    if parsed is None:
+                        continue
+                    if parsed == _SSE_DONE_MARK:
+                        return
+                    yield parsed
+                return
+            if response.status_code != 200:
+                # error path — full body read 후 raise
+                error_body = response.read().decode("utf-8", errors="replace")
+                _raiseHttpError(response.status_code, error_body)
+            for line in response.iter_lines():
+                parsed = _parseSseLine(line)
+                if parsed is None:
+                    continue
+                if parsed == _SSE_DONE_MARK:
+                    return
+                yield parsed
+    except httpx.TimeoutException as exc:
+        raise OAuthCodexError("network", f"ChatGPT OAuth backend stream timeout: {exc}") from exc
+    except httpx.HTTPError as exc:
+        raise OAuthCodexError("network", f"ChatGPT OAuth backend stream 연결 실패: {exc}") from exc
+
+
+_SSE_DONE_MARK: dict[str, Any] = {"_done": True}
+
+
+def _parseSseLine(line: str) -> dict[str, Any] | None:
+    """SSE 단일 line → event dict 또는 None (skip)."""
+    if not isinstance(line, str) or not line.startswith("data: "):
+        return None
+    data = line[6:]
+    if data == "[DONE]":
+        return _SSE_DONE_MARK
+    try:
+        event = json.loads(data)
+    except json.JSONDecodeError:
+        return None
+    return event if isinstance(event, dict) else None
