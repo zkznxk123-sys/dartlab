@@ -24,7 +24,12 @@ CATEGORY_DIR = {
     "finance": "dart/finance",
     "report": "dart/report",
     "krxPricesV2": "krx/prices/v2",
+    "newsHeadlines": "news/headlines",
 }
+
+# nested=True 카테고리는 sub-dir (예: news/headlines/{market}/) 까지 rglob 으로 수집,
+# HF path_in_repo 도 dirPath + relpath 형태로 유지. nested=False 는 flat dirPath/*.parquet.
+NESTED_CATEGORIES = {"newsHeadlines"}
 
 
 def main():
@@ -54,17 +59,25 @@ def main():
             break
 
     api = HfApi(token=token)
+    nested = category in NESTED_CATEGORIES
 
-    # 이미 올라간 파일 확인
+    # 이미 올라간 파일 확인 — nested 면 recursive, flat 이면 surface 만.
     try:
         existing = set()
-        for f in api.list_repo_tree(REPO, path_in_repo=dirPath, repo_type="dataset", recursive=False):
-            existing.add(f.rfilename.split("/")[-1])
+        for f in api.list_repo_tree(REPO, path_in_repo=dirPath, repo_type="dataset", recursive=nested):
+            # nested: 'news/headlines/KR/2026-05-28.parquet' → 'KR/2026-05-28.parquet' relpath
+            # flat: 'dart/docs/foo.parquet' → 'foo.parquet'
+            relpath = f.rfilename[len(dirPath) + 1 :] if f.rfilename.startswith(dirPath + "/") else f.rfilename
+            existing.add(relpath)
         print(f"이미 업로드: {len(existing)}개")
     except Exception:
         existing = set()
 
-    allFiles = sorted(localDir.glob("*.parquet"))
+    allFiles = sorted(localDir.rglob("*.parquet") if nested else localDir.glob("*.parquet"))
+
+    def _relpath(p: Path) -> str:
+        return str(p.relative_to(localDir)).replace("\\", "/") if nested else p.name
+
     if args.force:
         remaining = list(allFiles)
         print(f"--force: 전체 {len(remaining)}개 재업로드 (schema 마이그레이션 모드)")
@@ -73,7 +86,7 @@ def main():
         remaining = [f for f in allFiles if f.stat().st_mtime >= cutoff]
         print(f"--since {args.since}s: 최근 변경 {len(remaining)}개 / 전체 {len(allFiles)}개")
     else:
-        remaining = [f for f in allFiles if f.name not in existing]
+        remaining = [f for f in allFiles if _relpath(f) not in existing]
         print(f"미업로드: {len(remaining)}개 / 전체: {len(allFiles)}개")
 
     if not remaining:
@@ -88,7 +101,9 @@ def main():
         batchNum = i // BATCH_SIZE + 1
         print(f"[{batchNum}/{totalBatches}] {len(batch)}개 업로드 중...")
 
-        operations = [CommitOperationAdd(path_in_repo=f"{dirPath}/{f.name}", path_or_fileobj=str(f)) for f in batch]
+        operations = [
+            CommitOperationAdd(path_in_repo=f"{dirPath}/{_relpath(f)}", path_or_fileobj=str(f)) for f in batch
+        ]
 
         for attempt in range(MAX_RETRIES):
             try:

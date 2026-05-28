@@ -138,6 +138,16 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "AI 분석 지식 (인사이트/스킬/에러패턴)",
         "public": False,
     },
+    "newsHeadlines": {
+        # Phase A — Google News RSS 일별 헤드라인 archive (forward-only).
+        # `data/news/headlines/{market}/{YYYY}-{MM}-{DD}.parquet` 일별 sharding.
+        # 본문 archive 영구 제외 (ToS) — headline + url + source + date 메타데이터만.
+        # syncNewsHeadlines.py cron 박제, enrichNewsHeadlines.py (Phase B) 가 sentiment/topic 추가.
+        "dir": "news/headlines",
+        "label": "Google News RSS 일별 헤드라인 archive (forward-only, 메타데이터만)",
+        "public": True,
+        "nested": True,
+    },
 }
 
 

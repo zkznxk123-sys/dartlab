@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from html import unescape
 
 import polars as pl
@@ -266,6 +267,120 @@ def fetchNews(
     df = toDataFrame(items)
     if limit is not None and limit > 0:
         return df.head(limit)
+    return df
+
+
+_ARCHIVE_SCHEMA = {
+    "date": pl.Date,
+    "title": pl.Utf8,
+    "source": pl.Utf8,
+    "url": pl.Utf8,
+    "market": pl.Utf8,
+    "query": pl.Utf8,
+    "captured_at": pl.Datetime("us", time_zone="UTC"),
+}
+
+
+def fetchHeadlinesForArchive(
+    queries: list[str],
+    *,
+    market: str = "KR",
+    days: int = 1,
+    concurrency: int = 8,
+) -> pl.DataFrame:
+    """RSS 헤드라인 다중 쿼리 fan-out — archive cron 진입점.
+
+    Capabilities:
+        - N 쿼리 비동기 fan-out (asyncio.gather, concurrency 제한)
+        - url 기준 dedup (첫 매치 query 유지)
+        - captured_at (수집 시각, UTC) + query (검색 시드) 추가 컬럼
+        - TTL 캐시 우회 (archive 는 매 cron fresh 필요)
+
+    AIContext:
+        Phase A (news archive forward-only) 의 daily cron 단일 진입점.
+        결과 DataFrame 을 `data/news/headlines/{market}/{YYYY}-{MM}-{DD}.parquet`
+        upsert 하는 caller (`syncNewsHeadlines.main`) 가 사용.
+
+    Guide:
+        days=1 (기본) 은 어제~오늘 수집 — 일 1~2 회 cron 시 적합.
+        days=7 시 RSS 가 헤드라인 중복 비율 ↑ — dedup 으로 처리되지만
+        cron 빈도 ↑ + days ↓ 가 안정적.
+
+    When:
+        `.github/scripts/sync/syncNewsHeadlines.py main()` 호출 시.
+
+    How:
+        queries 를 asyncio.Semaphore(concurrency) 로 게이트 → 각 query 별
+        `_fetchAsync` 호출 → 결과 NewsItem 평탄화 → url dedup →
+        captured_at + query + market 컬럼 부착 → pl.DataFrame.
+
+    Args:
+        queries: 검색 시드 (KOSPI200 종목명 + 매크로 키워드 등).
+        market: "KR" | "US".
+        days: 최근 N 일 윈도우. 기본 1.
+        concurrency: 동시 fetch 상한. RSS 비공식 rate-limit 보호.
+
+    Returns:
+        pl.DataFrame — (date, title, source, url, market, query, captured_at).
+        빈 결과 시 동일 schema 빈 DataFrame.
+
+    Raises:
+        없음 — 개별 쿼리 실패는 빈 결과로 흡수 (circuit breaker 가드).
+
+    Example::
+
+        df = fetchHeadlinesForArchive(["삼성전자","SK하이닉스"], market="KR", days=1)
+        # → (date, title, source, url, market="KR", query, captured_at)
+
+    Requires:
+        네트워크 (Google News RSS). 결과 본문은 untrusted external 메타데이터.
+
+    See Also:
+        ``_fetchAsync``: 단일 쿼리 backend.
+        ``toDataFrame``: 단일 쿼리 결과 변환.
+    """
+    if not queries:
+        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+
+    from ..infra.http import runAsync
+
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def _one(q: str) -> tuple[str, list[NewsItem]]:
+        async with sem:
+            items = await _fetchAsync(q, market=market, days=days)
+            return q, items
+
+    async def _gatherAll() -> list[tuple[str, list[NewsItem]]]:
+        return await asyncio.gather(*(_one(q) for q in queries))
+
+    pairs = runAsync(_gatherAll())
+    capturedAt = datetime.now(tz=timezone.utc)
+
+    rows: list[dict] = []
+    seen: set[str] = set()
+    for q, items in pairs:
+        for it in items:
+            if not it.url or it.url in seen:
+                continue
+            seen.add(it.url)
+            rows.append(
+                {
+                    "date": it.date,
+                    "title": it.title,
+                    "source": it.source,
+                    "url": it.url,
+                    "market": market.upper(),
+                    "query": q,
+                    "captured_at": capturedAt,
+                }
+            )
+
+    if not rows:
+        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+    df = pl.DataFrame(rows)
+    df = df.with_columns(pl.col("date").cast(pl.Date))
+    df = df.sort(["date", "url"], descending=[True, False])
     return df
 
 
