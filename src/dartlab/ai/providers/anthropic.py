@@ -1,4 +1,14 @@
-"""Anthropic provider adapter (Claude)."""
+"""Anthropic provider adapter (Claude).
+
+마스터 플랜 트랙 2 PR-O3 — Anthropic ``cache_control`` 도입. 환경변수
+``DARTLAB_ANTHROPIC_CACHE=1`` ON 시 system prompt 블록 + 마지막 tool spec 에
+``ephemeral`` 캐시 마커 부착 (4-block hard limit 중 2 block 사용 — 사용자
+history 는 캐시 안 함 → 멀티턴 대화에서 가장 큰 블록인 system + tool spec 만
+캐시 → 70%+ input_tokens 절약 목표). usage dict 에
+``cache_creation_input_tokens`` / ``cache_read_input_tokens`` 노출.
+
+OFF 가 기본 — provider 호환성 회귀 즉시 토글 가능.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +17,11 @@ from typing import Any, Iterator
 
 from dartlab.ai.providers.base import BaseProvider, LLMEvent, Msg
 from dartlab.ai.tools.types import ToolSpec
+
+
+def _cacheEnabled() -> bool:
+    """환경변수 ``DARTLAB_ANTHROPIC_CACHE`` truthy → 캐시 ON."""
+    return os.getenv("DARTLAB_ANTHROPIC_CACHE", "0").strip().lower() in {"1", "true", "yes", "on"}
 
 
 class AnthropicProvider(BaseProvider):
@@ -43,6 +58,15 @@ class AnthropicProvider(BaseProvider):
             "input_schema": spec.inputSchema,
         }
 
+    @property
+    def supportsCacheControl(self) -> bool:
+        """캐시 활성 여부 — ``DARTLAB_ANTHROPIC_CACHE`` 환경변수 게이트.
+
+        BaseProvider 의 ``@property supportsCacheControl`` 시그니처를 그대로 override.
+        OFF 가 기본 — provider 호환성 회귀 즉시 토글.
+        """
+        return _cacheEnabled()
+
     def complete(
         self,
         messages: list[Msg],
@@ -50,20 +74,31 @@ class AnthropicProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
-        """messages + tools → Anthropic API 호출 → LLMEvent stream (text/tool_call/stop)."""
+        """messages + tools → Anthropic API 호출 → LLMEvent stream (text/tool_call/stop).
+
+        ``DARTLAB_ANTHROPIC_CACHE=1`` ON 시 system 블록 + 마지막 tool spec 에
+        ``cache_control: {type: ephemeral}`` 마커 부착. 4-block hard limit 중 2
+        block 만 사용 — 사용자 history 는 캐시 안 함.
+        """
         client = self._client()
         system, normalized = _splitSystem(messages)
+        cache_on = self.supportsCacheControl
         kwargs: dict[str, Any] = {
             "model": self.resolvedModel,
             "messages": normalized,
             "max_tokens": self.config.maxTokens or 4096,
         }
         if system:
-            kwargs["system"] = system
+            kwargs["system"] = _systemBlocksWithCache(system) if cache_on else system
         if self.config.temperature is not None:
             kwargs["temperature"] = self.config.temperature
         if tools:
-            kwargs["tools"] = [self.toolSchema(t) for t in tools]
+            tool_dicts = [self.toolSchema(t) for t in tools]
+            if cache_on and tool_dicts:
+                # 마지막 tool 한 곳에만 ephemeral 마커 — 그 이전 도구는 자동으로 같은
+                # 캐시 prefix 안에 들어감 (Anthropic 캐시 동작 — 마커 위치까지 누적 캐싱).
+                tool_dicts[-1] = {**tool_dicts[-1], "cache_control": {"type": "ephemeral"}}
+            kwargs["tools"] = tool_dicts
 
         if not stream:
             resp = client.messages.create(**kwargs)
@@ -147,12 +182,30 @@ def _eventsFromAnthropicMessage(resp: Any) -> Iterator[LLMEvent]:
     )
 
 
+def _systemBlocksWithCache(system: str) -> list[dict[str, Any]]:
+    """system 문자열 → cache_control 부착 single text block.
+
+    PR-O3 — 멀티턴 대화의 system prompt 는 변경 가능성 매우 낮은데 매 turn 모든 input
+    토큰으로 청구되던 비효율 차단. ``ephemeral`` 5 분 TTL 캐시 → 5 분 안에 같은 system
+    재호출 시 90% 할인 (Anthropic 가격표 기준).
+    """
+    return [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
+
+
 def _usageDict(usage: Any) -> dict[str, Any]:
+    """Anthropic usage → dict. PR-O3 cache_creation/read tokens 동행 노출.
+
+    ``cache_creation_input_tokens`` = 캐시 *생성* (첫 호출), 일반 input 1.25x 가격.
+    ``cache_read_input_tokens`` = 캐시 *적중* (재호출), 일반 input 0.1x 가격.
+    KPI digest 가 두 값으로 hit rate (= cache_read / (cache_read + cache_create)) 계산.
+    """
     if usage is None:
         return {}
     return {
         "input_tokens": getattr(usage, "input_tokens", 0),
         "output_tokens": getattr(usage, "output_tokens", 0),
+        "cache_creation_input_tokens": getattr(usage, "cache_creation_input_tokens", 0) or 0,
+        "cache_read_input_tokens": getattr(usage, "cache_read_input_tokens", 0) or 0,
     }
 
 
