@@ -190,10 +190,15 @@ def buildNgramIndex(
     invertedIndex: dict[int, list[int]] = defaultdict(list)
     allMeta: list[dict] = []
     globalDocId = 0
-    existingKeys: set[tuple[str, int]] = set()  # (rcept_no, section_order) 중복 방지
+    # allFilings 신규 schema 는 한 공시 = 1 row 이라 rcept_no 자체로 unique.
+    # docs (사업보고서 등) 는 여전히 section 분할이라 (rcept_no, section_order) 필요.
+    existingKeys: set[tuple[str, int]] = set()
 
-    # allFilings
+    # allFilings — raw HTML 단일 컬럼 (content_html). 표시용 text 는 BeautifulSoup
+    # get_text 로 변환. 토큰화는 report_nm 만 사용 (section_title / contentHead 없음).
     if parquetPaths:
+        from bs4 import BeautifulSoup
+
         for p in parquetPaths:
             try:
                 df = pl.read_parquet(
@@ -205,20 +210,17 @@ def buildNgramIndex(
                         "stock_code",
                         "rcept_dt",
                         "report_nm",
-                        "section_title",
-                        "section_order",
-                        "section_content",
+                        "content_html",
                     ],
-                ).filter(pl.col("section_content").is_not_null())
+                ).filter(pl.col("content_html").is_not_null())
             except (pl.exceptions.PolarsError, OSError):
                 continue
 
             for row in df.iter_rows(named=True):
-                key = (row["rcept_no"], row.get("section_order", 0))
+                key = (row["rcept_no"], 0)
                 existingKeys.add(key)
 
-                contentHead = (row.get("section_content", "") or "")[:_CONTENT_INDEX_CHARS]
-                text = f"{row['report_nm']} {row.get('section_title', '') or ''} {contentHead}"
+                text = row["report_nm"]
                 tokens = _tokenize(text)
                 seenStems: set[int] = set()
                 for token in tokens:
@@ -230,6 +232,8 @@ def buildNgramIndex(
                         seenStems.add(stemId)
                         invertedIndex[stemId].append(globalDocId)
 
+                html = row.get("content_html") or ""
+                displayText = BeautifulSoup(html, "lxml").get_text(" ", strip=True)[:2000] if html else ""
                 allMeta.append(
                     {
                         "rcept_no": row["rcept_no"],
@@ -238,9 +242,9 @@ def buildNgramIndex(
                         "stock_code": row.get("stock_code", ""),
                         "rcept_dt": row.get("rcept_dt", ""),
                         "report_nm": row.get("report_nm", ""),
-                        "section_title": row.get("section_title", "") or "",
+                        "section_title": "",
                         "source": "allFilings",
-                        "text": (row.get("section_content", "") or "")[:2000],
+                        "text": displayText,
                     }
                 )
                 globalDocId += 1

@@ -75,12 +75,19 @@ def rebuildMain(
     metaRecs: list[dict] = []
     totalDocs = 0
 
-    def feedDf(df: pl.DataFrame, source: str) -> int:
+    # allFilings 는 content_html (raw HTML 모든 태그 보존) 컬럼만 갖는다. docs/ 는 옛
+    # section_content (XML chunk + 분할) 그대로. allFilings 측은 BeautifulSoup get_text
+    # 로 검색용 텍스트 추출.
+    from bs4 import BeautifulSoup
+
+    def feedDf(df: pl.DataFrame, source: str, *, contentColumn: str) -> int:
         """parquet DataFrame 의 각 row 를 builder 에 추가 + meta record 동행 — 빌드 건수 반환.
 
         Args:
-            df: parquet DataFrame (``section_content`` + meta 컬럼 포함).
+            df: parquet DataFrame.
             source: 인덱스 라벨 (예 ``"main"`` / ``"delta"``).
+            contentColumn: 본문 컬럼명. ``"content_html"`` 이면 BeautifulSoup get_text
+                변환, ``"section_content"`` 이면 그대로 사용.
 
         Returns:
             추가된 doc 수.
@@ -89,11 +96,14 @@ def rebuildMain(
             없음.
 
         Example:
-            >>> feedDf(df, "main")  # doctest: +SKIP
+            >>> feedDf(df, "allFilings", contentColumn="content_html")  # doctest: +SKIP
         """
         added = 0
         for row in df.iter_rows(named=True):
-            content = (row.get("section_content") or "")[:contentLimit]
+            raw = row.get(contentColumn) or ""
+            if contentColumn == "content_html" and raw:
+                raw = BeautifulSoup(raw, "lxml").get_text(" ", strip=True)
+            content = raw[:contentLimit]
             builder.addDoc(content)
             metaRecs.append(  # noqa: F821
                 {
@@ -121,10 +131,10 @@ def rebuildMain(
             _log.info(f"[main] allFilings 스트리밍: {len(files)}개 파일")
         for i, f in enumerate(files):
             try:
-                df = pl.read_parquet(f).filter(pl.col("section_content").is_not_null())
+                df = pl.read_parquet(f).filter(pl.col("content_html").is_not_null())
             except (pl.exceptions.PolarsError, OSError):
                 continue
-            totalDocs += feedDf(df, "allFilings")
+            totalDocs += feedDf(df, "allFilings", contentColumn="content_html")
             del df
             if (i + 1) % 50 == 0:
                 gc.collect()
@@ -144,7 +154,7 @@ def rebuildMain(
                 df = pl.read_parquet(f).filter(pl.col("section_content").is_not_null())
             except (pl.exceptions.PolarsError, OSError):
                 continue
-            totalDocs += feedDf(df, "docs")
+            totalDocs += feedDf(df, "docs", contentColumn="section_content")
             del df
             if (i + 1) % 200 == 0:
                 gc.collect()
@@ -213,13 +223,21 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     if showProgress:
         _log.info(f"[delta] {sinceDate} 이후: {len(files)}개 파일")
 
+    from bs4 import BeautifulSoup
+
     rows: list[dict] = []
     for f in files:
         try:
-            df = pl.read_parquet(f).filter(pl.col("section_content").is_not_null())
+            df = pl.read_parquet(f).filter(pl.col("content_html").is_not_null())
         except (pl.exceptions.PolarsError, OSError):
             continue
         for row in df.iter_rows(named=True):
+            html = row.get("content_html") or ""
+            # buildContentSegment 는 section_content 컬럼을 본문으로 읽으므로 변환 결과를
+            # 동일 키로 채워준다 (스키마 호환).
+            row["section_content"] = BeautifulSoup(html, "lxml").get_text(" ", strip=True) if html else ""
+            row.setdefault("section_order", 0)
+            row.setdefault("section_title", "")
             row["source"] = "allFilings"
             rows.append(row)
 

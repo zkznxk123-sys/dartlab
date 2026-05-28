@@ -1,7 +1,9 @@
-"""전체 공시 원문 수집기 — 2단계 증분 수집.
+"""전체 공시 원문 수집기 — 2단계 증분 수집 + raw HTML 전체 태그 보존.
 
 Phase 1: 목록 수집 (collectMeta) — 일자별 API 1회, 매우 가볍다.
-Phase 2: 원문 수집 (fillContent) — 건당 API 1회, 키 소비 큼.
+Phase 2: 원문 수집 (fillContent) — 건당 API 1회, 키 소비 큼. 본문은 zip 안 largest
+HTML 파일을 *raw 그대로* (`content_html` 컬럼) 저장한다. 태그·테이블·구조 모두
+보존. plain text 가 필요한 소비자는 BeautifulSoup `get_text()` 등으로 변환.
 
 목록을 먼저 전부 모은 뒤, 원문은 키 여유 있을 때 점진적으로 채운다.
 
@@ -26,7 +28,6 @@ import zipfile
 from pathlib import Path
 
 import polars as pl
-from bs4 import BeautifulSoup
 
 import dartlab.config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
@@ -36,11 +37,6 @@ from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.disclosure import listFilings
 
 _log = getLogger(__name__)
-from dartlab.providers.dart.openapi.zipCollector import (
-    _RE_MULTI_NEWLINE,
-    _collectOneZip,
-    _tableToMarkdown,
-)
 
 # ── 상수 ──
 
@@ -63,58 +59,33 @@ def _allFilingsDir() -> Path:
     return d
 
 
-def _htmlToPlainText(html: str) -> str:
-    """HTML 전문 → plain text (section 구조 없는 공시 fallback)."""
-    soup = BeautifulSoup(html, "lxml")
-    for tag in soup(["script", "style", "meta", "link", "header", "footer", "nav"]):
-        tag.decompose()
+def _collectOneHtml(client: DartClient, rceptNo: str) -> str | None:
+    """단일 공시 원문 raw HTML 반환 — 모든 태그·테이블·구조 보존.
 
-    for table in soup.find_all("table"):
-        md = _tableToMarkdown(table)
-        if md:
-            table.replace_with(BeautifulSoup(f"\n\n{md}\n\n", "lxml"))
-        else:
-            table.decompose()
-
-    for br in soup.find_all("br"):
-        br.replace_with("\n")
-    for p in soup.find_all(["p", "div", "li"]):
-        p.insert_after("\n")
-
-    text = soup.get_text()
-    lines = [line.strip() for line in text.splitlines()]
-    text = "\n".join(line for line in lines if line)
-    text = _RE_MULTI_NEWLINE.sub("\n\n", text)
-    return text.strip()
-
-
-def _collectOneDoc(client: DartClient, rceptNo: str) -> list[dict]:
-    """단일 공시 원문 수집. section 구조가 있으면 섹션별, 없으면 전문 1개."""
-    sections = _collectOneZip(client, rceptNo)
-    if sections and len(sections) > 0:
-        return sections
-
+    zip 안 largest 파일을 utf-8/euc-kr/cp949 순으로 디코딩만 한다. 후처리 0.
+    빈 문자열·디코딩 실패는 None.
+    """
     try:
         raw = client.getBytes("document.xml", {"rcept_no": rceptNo})
     except (RuntimeError, OSError):
-        return []
+        return None
 
     if raw is None:
-        return []
+        return None
 
     try:
         zf = zipfile.ZipFile(io.BytesIO(raw))
     except zipfile.BadZipFile:
-        return []
+        return None
 
     names = zf.namelist()
     if not names:
-        return []
+        return None
 
     largest = max(names, key=lambda n: zf.getinfo(n).file_size)
     content = zf.read(largest)
 
-    htmlContent = None
+    htmlContent: str | None = None
     for enc in ("utf-8", "euc-kr", "cp949"):
         try:
             htmlContent = content.decode(enc)
@@ -124,11 +95,10 @@ def _collectOneDoc(client: DartClient, rceptNo: str) -> list[dict]:
     if htmlContent is None:
         htmlContent = content.decode("utf-8", errors="replace")
 
-    text = _htmlToPlainText(htmlContent)
-    if not text.strip():
-        return []
+    if not htmlContent.strip():
+        return None
 
-    return [{"order": 0, "title": "(전문)", "content": text}]
+    return htmlContent
 
 
 # ═══════════════════════════════════════════
@@ -338,43 +308,26 @@ def fillContent(
             skippedPeriodic += 1
             continue
 
-        sections = _collectOneDoc(client, rceptNo)
+        html = _collectOneHtml(client, rceptNo)
 
-        if sections:
+        if html:
             success += 1
-            for s in sections:
-                allRows.append(
-                    {
-                        "corp_code": row["corp_code"],
-                        "corp_name": row["corp_name"],
-                        "stock_code": row.get("stock_code", ""),
-                        "corp_cls": row["corp_cls"],
-                        "rcept_dt": row["rcept_dt"],
-                        "rcept_no": rceptNo,
-                        "report_nm": row["report_nm"],
-                        "flr_nm": row.get("flr_nm", ""),
-                        "section_order": s["order"],
-                        "section_title": s["title"],
-                        "section_content": s["content"],
-                    }
-                )
         else:
             empty += 1
-            allRows.append(
-                {
-                    "corp_code": row["corp_code"],
-                    "corp_name": row["corp_name"],
-                    "stock_code": row.get("stock_code", ""),
-                    "corp_cls": row["corp_cls"],
-                    "rcept_dt": row["rcept_dt"],
-                    "rcept_no": rceptNo,
-                    "report_nm": row["report_nm"],
-                    "flr_nm": row.get("flr_nm", ""),
-                    "section_order": 0,
-                    "section_title": "",
-                    "section_content": None,
-                }
-            )
+
+        allRows.append(
+            {
+                "corp_code": row["corp_code"],
+                "corp_name": row["corp_name"],
+                "stock_code": row.get("stock_code", ""),
+                "corp_cls": row["corp_cls"],
+                "rcept_dt": row["rcept_dt"],
+                "rcept_no": rceptNo,
+                "report_nm": row["report_nm"],
+                "flr_nm": row.get("flr_nm", ""),
+                "content_html": html,
+            }
+        )
 
         if showProgress and (idx + 1) % 100 == 0:
             _log.info("  [%d/%d] 성공=%d 빈=%d", idx + 1, total, success, empty)
@@ -398,9 +351,7 @@ def fillContent(
         )
         return None
 
-    df = pl.DataFrame(allRows).with_columns(
-        pl.col("section_order").cast(pl.Int32),
-    )
+    df = pl.DataFrame(allRows)
 
     # 원자적 저장 → .parquet (원문 완료)
     tmpPath = fullPath.with_suffix(".parquet.tmp")
