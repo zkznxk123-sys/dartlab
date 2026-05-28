@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import {
 	BookOpen,
+	CandlestickChart,
 	Download,
 	FileText,
 	LayoutDashboard,
@@ -224,13 +225,15 @@ function DashboardNav() {
 	// v3-r6 — view 없으면 OVERVIEW_KEYS curated 노출 (재무분석 1 view).
 	const activeSubView = isFinancial ? (search?.view ?? null) : null;
 	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
+	const isEvents = !!code && pathname.startsWith(`/analysis/${code}/events`);
 
-	// 기업분석 그룹 — 단일 기업 심층 분석. 현재 2 항목 (재무제표분석 / 공시뷰어).
+	// 기업분석 그룹 — 단일 기업 심층 분석. 3 항목 (재무제표분석 / 공시뷰어 / 주가+이벤트).
 	// quant 는 응답성 회귀 (viz catalog cold + 카드 다수) 가 정리되기 전까지 사이드바에서 제거.
 	// 라우트 + backend 는 유지 — 항목 한 줄 복귀 시 즉시 노출.
 	const corpItems = [
 		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial' },
 		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer' },
+		{ id: 'events', title: '주가+이벤트', icon: CandlestickChart, isActive: isEvents, route: '/analysis/$code/events' },
 	] as const;
 
 	const renderCorpButton = (t: (typeof corpItems)[number]) => {
