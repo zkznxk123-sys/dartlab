@@ -336,12 +336,13 @@ def fillContent(
         return None
     meta = pl.read_parquet(metaPath)
 
-    # Step 2: 기존 본문 .parquet 의 rcept_no → fetch_status 맵 + row dict 보존.
-    existingRows: dict[str, dict] = {}
+    # Step 2: 기존 본문 .parquet 의 rcept_no → fetch_status 맵 (diff 판정용).
+    # 본문 row dict 자체는 후속 concat 단계에서 .parquet 그대로 재사용 — 메모리에 안 올림.
+    existingStatus: dict[str, str] = {}
     if fullPath.exists():
-        existingDf = pl.read_parquet(fullPath)
-        for r in existingDf.iter_rows(named=True):
-            existingRows[r["rcept_no"]] = r
+        statusDf = pl.read_parquet(fullPath, columns=["rcept_no", "fetch_status"])
+        for r in statusDf.iter_rows(named=True):
+            existingStatus[r["rcept_no"]] = r["fetch_status"]
 
     # Step 3: 처리 대상 분리.
     skipPeriodic = 0
@@ -356,10 +357,10 @@ def fillContent(
             skipPeriodic += 1
             continue
 
-        existing = existingRows.get(rceptNo)
+        existing = existingStatus.get(rceptNo)
         if existing is None:
             targets.append(metaRow)  # 신규
-        elif existing.get("fetch_status") == "error":
+        elif existing == "error":
             targets.append(metaRow)  # retry
         else:
             skipExisting += 1  # ok / no_body — final, skip
@@ -421,14 +422,15 @@ def fillContent(
         return None
 
     # Step 6: skip 기존 row + 신규/retry row → atomic merge.
-    finalRows: list[dict] = []
-    for rceptNo, r in existingRows.items():
-        if rceptNo in processedRows:
-            continue  # retry 결과로 대체
-        finalRows.append(r)
-    finalRows.extend(processedRows.values())
-
-    df = pl.DataFrame(finalRows)
+    # polars DataFrame schema 추론은 mixed-size 큰 string row 에서 fragile —
+    # 신규 row 만 `infer_schema_length=None` 으로 build 후 기존 .parquet (이미
+    # parquet schema 박혀있음) 과 concat 한다.
+    processedDf = pl.DataFrame(list(processedRows.values()), infer_schema_length=None)
+    if fullPath.exists():
+        keepDf = pl.read_parquet(fullPath).filter(~pl.col("rcept_no").is_in(list(processedRows.keys())))
+        df = pl.concat([keepDf, processedDf], how="diagonal_relaxed")
+    else:
+        df = processedDf
 
     tmpPath = fullPath.with_suffix(".parquet.tmp")
     df.write_parquet(tmpPath)
