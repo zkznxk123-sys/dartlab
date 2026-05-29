@@ -88,20 +88,6 @@ dependencies = [
     "marimo>=0.23.6",
 ]
 
-[project.optional-dependencies]
-# 마스터 플랜 v2 트랙 8 PR-T4 — fine-tuning extra group.
-# 기본 설치 (`pip install dartlab`) 영향 0 — `pip install dartlab[ft]` 명시 시만 활성.
-# 모델: Qwen2.5-7B-Instruct (1 순위 — Apache 2.0 + native tool calling + LoRA 호환).
-# 자세한 모델 선택 ledger: src/dartlab/ai/training/modelChoices.md.
-ft = [
-    "transformers>=4.45,<5; sys_platform != 'emscripten'",
-    "peft>=0.13,<1; sys_platform != 'emscripten'",
-    "trl>=0.11,<1; sys_platform != 'emscripten'",
-    "datasets>=3.0,<4; sys_platform != 'emscripten'",
-    "accelerate>=1.0,<2; sys_platform != 'emscripten'",
-    "bitsandbytes>=0.44,<1; sys_platform == 'linux'",
-]
-
 [project.scripts]
 dartlab = "dartlab.cli.main:main"
 

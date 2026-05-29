@@ -19,9 +19,6 @@ MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "LookAheadGuard",
     "GroundingCheck",
     "RequestUserInput",
-    # runtime.ragPipeline + runtime.multimodal stub (Phase 3.B A-track)
-    "SearchSemantic",
-    "ParseChart",
 )
 
 
