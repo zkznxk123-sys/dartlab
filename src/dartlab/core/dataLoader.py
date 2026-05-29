@@ -496,23 +496,35 @@ def _loadDocsFromSections(
     if not files:
         return pl.DataFrame()
 
-    lf = pl.scan_parquet([str(f) for f in files])
+    # 메모리 가드 — section_content (raw XML concat) 가 비싼 컬럼. caller 가 명시적으로
+    # 요청 안 하면 (예: corp_name 만) concat skip → +수백MB 회피. 신규 artifact 의 필요
+    # 컬럼만 lazy projection + sinceYear lazy 필터로 element row scan 량 축소 + streaming.
+    needContent = columns is None or "section_content" in columns
+    srcCols = ["period", "chapter", "sectionLeaf", "blockOrder", "rceptNo", "atocId", "aassocnote"]
+    if needContent:
+        srcCols.append("contentRaw")
+    lf = pl.scan_parquet([str(f) for f in files]).select(srcCols)
+    if sinceYear is not None:
+        lf = lf.filter(pl.col("period").str.slice(0, 4).cast(pl.Int32, strict=False) >= sinceYear)
+
+    aggs = [
+        pl.col("blockOrder").min().alias("_minOrder"),
+        pl.col("rceptNo").first().alias("rcept_no"),
+        pl.col("atocId").first().alias("atocid"),
+        pl.col("aassocnote").first().alias("assocnote"),
+    ]
+    if needContent:
+        aggs.insert(0, pl.col("contentRaw").str.join("").alias("section_content"))
     grouped = (
         lf.sort("blockOrder")
         .group_by(["period", "chapter", "sectionLeaf"], maintain_order=True)
-        .agg(
-            pl.col("contentRaw").str.join("").alias("section_content"),
-            pl.col("blockOrder").min().alias("_minOrder"),
-            pl.col("rceptNo").first().alias("rcept_no"),
-            pl.col("atocId").first().alias("atocid"),
-            pl.col("aassocnote").first().alias("assocnote"),
-        )
-        .collect()
+        .agg(aggs)
+        .collect(engine="streaming")
     )
     if grouped.is_empty():
         return pl.DataFrame()
 
-    # 옛 docs.parquet 14 col schema 재현 (section_content_mixed 제외).
+    # 옛 docs.parquet schema 재현 (section_content_mixed 제외).
     corpName = None
     try:
         from dartlab.core.listingResolver import getListingResolver
@@ -534,8 +546,6 @@ def _loadDocsFromSections(
         pl.format("https://dart.fss.or.kr/dsaf001/main.do?rcpNo={}", pl.col("rcept_no")).alias("section_url"),
     ).drop("_minOrder")
 
-    if sinceYear is not None:
-        df = df.filter(pl.col("year").cast(pl.Int32, strict=False) >= sinceYear)
     if predicate is not None:
         df = df.filter(predicate)
     if columns:
