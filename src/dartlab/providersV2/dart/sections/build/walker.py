@@ -157,14 +157,6 @@ def _markContainers(root) -> None:
     root.set(_CONTAINER_MARK, "1")
 
 
-def _unmarkContainers(root) -> None:
-    """emit 후 attribute 청소 — contentRaw 에 잔재 방지 (안전망)."""
-    for el in root.iter():
-        if isinstance(el.tag, str):
-            if el.get(_CONTAINER_MARK) is not None:
-                del el.attrib[_CONTAINER_MARK]
-
-
 def walkSections(
     root,
     era: str,

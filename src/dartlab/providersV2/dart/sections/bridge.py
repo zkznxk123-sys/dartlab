@@ -58,13 +58,14 @@ def _tier1Seed() -> list[dict]:
         ("consolidatedBalanceSheet", "kr", "BS_C", 1.0),
         ("standaloneBalanceSheet", "kr", "BS_S", 1.0),
         # IS_C1 = 손익+포괄손익 통합 (035720/207940/000660 양식)
-        # IS_C2 = 손익 / IS_C3 = 포괄손익 (005930/005380 분리 양식)
+        # IS_C2 = 손익 / IS_C3 = 포괄손익 — 의미 다른 별개 statement → 별 disclosureKey
+        # (단독 앵커 시 손익+포괄손익 행 병합·데이터 손실 방지)
         ("consolidatedIncomeStatement", "kr", "IS_C1", 1.0),
         ("consolidatedIncomeStatement", "kr", "IS_C2", 1.0),
-        ("consolidatedIncomeStatement", "kr", "IS_C3", 1.0),
+        ("consolidatedComprehensiveIncome", "kr", "IS_C3", 1.0),
         ("standaloneIncomeStatement", "kr", "IS_S1", 1.0),
         ("standaloneIncomeStatement", "kr", "IS_S2", 1.0),
-        ("standaloneIncomeStatement", "kr", "IS_S3", 1.0),
+        ("standaloneComprehensiveIncome", "kr", "IS_S3", 1.0),
         ("consolidatedCashFlowStatement", "kr", "CF_C", 1.0),
         ("standaloneCashFlowStatement", "kr", "CF_S", 1.0),
         ("consolidatedEquityChanges", "kr", "EF_C", 1.0),
@@ -73,7 +74,7 @@ def _tier1Seed() -> list[dict]:
         # corpCount 1,988 (전종목 68%) — 누락 시 옛 분기 연결재무 매핑 0
         ("consolidatedBalanceSheet", "kr", "BS", 1.0),
         ("consolidatedIncomeStatement", "kr", "IS2", 1.0),
-        ("consolidatedIncomeStatement", "kr", "IS3", 1.0),
+        ("consolidatedComprehensiveIncome", "kr", "IS3", 1.0),
         ("consolidatedCashFlowStatement", "kr", "CF", 1.0),
         ("consolidatedEquityChanges", "kr", "EF", 1.0),
         # ── 주석 핵심 disclosure (NT_C_D###### + NT_S_D###### 페어) ──

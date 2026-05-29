@@ -167,12 +167,29 @@ def readSectionsWide(
         return None
     if valueColumn not in long.columns:
         return None
-    indexCols = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "xbrlClass"]
+    # 최신기준 수평화 (요구 #7) — 과거 era 의 xbrlClass·제목 drift 를 (disclosureKey,
+    # scope) 단일 행으로 정렬. scope 가 xbrlClass 를 대체해 era drift 흡수.
+    from .canonical import anchorLatest
+
+    long = anchorLatest(long)
+    indexCols = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"]
     indexCols = [c for c in indexCols if c in long.columns]
     if not indexCols or "period" not in long.columns:
         return None
+    # pivot 전 collapse — 한 period 에 같은 canonical 행(특히 disclosureKey null
+    # narrative)이 다중 블록이면 blockOrder 순 contentRaw concat (무손실). pivot
+    # aggregate_function="first" 가 다중 블록 중 1개만 남겨 버리는 손실 방지.
+    if valueColumn == "contentRaw":
+        aggExpr = pl.col("contentRaw").str.join("")
+    else:
+        aggExpr = pl.col(valueColumn).first()
     try:
-        return long.pivot(
+        collapsed = (
+            long.sort("blockOrder")
+            .group_by([*indexCols, "period"], maintain_order=True)
+            .agg(aggExpr.alias(valueColumn))
+        )
+        return collapsed.pivot(
             values=valueColumn,
             index=indexCols,
             on="period",

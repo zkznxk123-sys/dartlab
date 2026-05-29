@@ -39,4 +39,8 @@ SECTIONS_SCHEMA: dict[str, pl.DataType] = {
 }
 
 # canonical pivot index (회사 내 다기간 + 회사 간 정렬 키).
-PIVOT_INDEX: list[str] = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "xbrlClass"]
+# 최신기준 수평화(요구 #7): keyed 행은 (disclosureKey, scope) 단일 앵커 — era 마다
+# 흔들리는 xbrlClass 대신 scope(연결/별도, xbrlClass 파생)로 대체해 BS↔BS_C drift 흡수.
+# chapter/sectionLeaf/blockLeaf 는 anchorLatest 가 최신값으로 통일 → 표시 라벨 겸 정렬 안정.
+# scope = canonical.scopeExpr(xbrlClass) 런타임 파생 (저장 14-col 불변).
+PIVOT_INDEX: list[str] = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"]
