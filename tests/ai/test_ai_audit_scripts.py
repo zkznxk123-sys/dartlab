@@ -113,7 +113,7 @@ def test_server_ask_audit_compacts_refs_and_selected_skills():
 
 
 def test_generate_spec_parses_ai_contract_block():
-    path = _REPO_ROOT / "src" / "dartlab" / "skills" / "generateSpec.py"
+    path = _REPO_ROOT / "src" / "dartlab" / "reference" / "capability" / "generateSpec.py"
     spec = importlib.util.spec_from_file_location("generateSpec", path)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)

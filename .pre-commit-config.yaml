@@ -59,11 +59,3 @@ repos:
         types: [python]
         pass_filenames: false
         exclude: ^(tests/|experiments/|notebooks/)
-
-      - id: generate-spec
-        name: generate-spec (CAPABILITIES + llms.txt + reference.md)
-        entry: uv run python src/dartlab/skills/generateSpec.py
-        language: system
-        always_run: true
-        pass_filenames: false
-        stages: [pre-commit]

@@ -117,7 +117,7 @@ uv run python -X utf8 -c "import dartlab; print(dartlab.industry())"
 uv run python -X utf8 -c "import dartlab; print(dartlab.Company('신규코드').industry())"
 
 # 4. 6 JSON 동기화 (운영자 수동 — feedback_no_skill_json_auto_build)
-uv run python -X utf8 src/dartlab/skills/generateSpec.py
+uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py
 ```
 
 ## 대표 반환 형태

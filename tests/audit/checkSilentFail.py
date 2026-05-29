@@ -102,7 +102,7 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "quant/risk/bottomUpBeta.py",
         # skill spec/validate 런타임 — spec 디렉토리 부재 시 빈 결과가 옵셔널 semantic
         "skills/validateSkills.py",
-        "skills/generateSpec.py",
+        "reference/capability/generateSpec.py",
         # lineage / credential lifecycle — 사용자 생성 데이터 (~/.dartlab/), 부재 = 첫 실행
         "core/dataAudit.py",
         "core/credentialLifecycle.py",

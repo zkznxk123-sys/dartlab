@@ -10,7 +10,7 @@ dartlab.core.registry + 엔진 docstring(9 섹션) + axis registry 를 introspec
 - src/dartlab/reference/capability/_generated_analysis_graph.py — analysisGraph 가 import
 
 docstring/capability 변경 시 운영자가 수동 실행 (자동 CI 실행 없음):
-    uv run python -X utf8 src/dartlab/skills/generateSpec.py
+    uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py
 """
 
 from __future__ import annotations
@@ -24,7 +24,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parent.parent.parent.parent
+# reference/capability/generateSpec.py → capability → reference → dartlab → src → repo root (5)
+ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 SRC = ROOT / "src"
 sys.path.insert(0, str(SRC))
 
@@ -489,24 +490,24 @@ def _buildProcessMaps(contracts: dict[str, dict[str, Any]], routes: list[dict[st
                             "purpose": f"{contractId} evidence candidate",
                         }
                     )
-        required_evidence = _unique(v for c in route_contracts for v in c.get("requiredEvidence") or [])
-        artifact_policy = _mergeDicts(c.get("artifactPolicy") for c in route_contracts)
-        visual_policy = _mergeDicts(c.get("visualPolicy") for c in route_contracts)
+        requiredEvidence = _unique(v for c in route_contracts for v in c.get("requiredEvidence") or [])
+        artifactPolicy = _mergeDicts(c.get("artifactPolicy") for c in route_contracts)
+        visualPolicy = _mergeDicts(c.get("visualPolicy") for c in route_contracts)
         freshness = _mergeDicts(c.get("freshness") for c in route_contracts)
         acceptance_criteria = _buildAcceptanceCriteria(
             route_contracts,
-            required_evidence=required_evidence,
-            artifact_policy=artifact_policy,
-            visual_policy=visual_policy,
+            requiredEvidence=requiredEvidence,
+            artifactPolicy=artifactPolicy,
+            visualPolicy=visualPolicy,
         )
         failure_policy = _mergeDicts(c.get("failurePolicy") for c in route_contracts) or {
             "onMissingEvidence": "repair_once",
             "onUnsupportedClaim": "disclose_or_repair",
         }
         primary_tools = _unique(step.get("tool") for step in steps if step.get("primaryEvidence"))
-        required_artifacts = ["primary_csv"] if artifact_policy.get("primaryCsv") else []
+        required_artifacts = ["primary_csv"] if artifactPolicy.get("primaryCsv") else []
         required_visuals = (
-            [str(visual_policy.get("preferredType") or "visual")] if visual_policy.get("requiredFor") else []
+            [str(visualPolicy.get("preferredType") or "visual")] if visualPolicy.get("requiredFor") else []
         )
         out[f"{question_type}.default"] = {
             "id": f"{question_type}.default",
@@ -516,15 +517,15 @@ def _buildProcessMaps(contracts: dict[str, dict[str, Any]], routes: list[dict[st
             "contractIds": list(route.get("contractIds") or []),
             "toolNames": list(route.get("toolNames") or []),
             "requiredTools": primary_tools,
-            "requiredEvidence": required_evidence,
+            "requiredEvidence": requiredEvidence,
             "requiredArtifacts": required_artifacts,
             "requiredVisuals": required_visuals,
             "freshness": freshness,
-            "artifactPolicy": artifact_policy,
-            "visualPolicy": visual_policy,
+            "artifactPolicy": artifactPolicy,
+            "visualPolicy": visualPolicy,
             "acceptanceCriteria": acceptance_criteria,
             "failurePolicy": failure_policy,
-            "steps": _dedupe_steps(steps),
+            "steps": _dedupeSteps(steps),
         }
     return out
 
@@ -532,17 +533,17 @@ def _buildProcessMaps(contracts: dict[str, dict[str, Any]], routes: list[dict[st
 def _buildAcceptanceCriteria(
     contracts: list[dict[str, Any]],
     *,
-    required_evidence: list[str],
-    artifact_policy: dict[str, Any],
-    visual_policy: dict[str, Any],
+    requiredEvidence: list[str],
+    artifactPolicy: dict[str, Any],
+    visualPolicy: dict[str, Any],
 ) -> dict[str, Any]:
     """Derive process acceptance criteria from contract metadata only."""
     out = _mergeDicts(c.get("acceptanceCriteria") for c in contracts)
-    if required_evidence:
-        out.setdefault("requiredEvidence", list(required_evidence))
-    if artifact_policy.get("primaryCsv"):
+    if requiredEvidence:
+        out.setdefault("requiredEvidence", list(requiredEvidence))
+    if artifactPolicy.get("primaryCsv"):
         out.setdefault("primaryCsv", True)
-    if visual_policy.get("requiredFor"):
+    if visualPolicy.get("requiredFor"):
         out.setdefault("visual", True)
     if any(c.get("comparisonCompleteness") for c in contracts):
         out.setdefault("sameAxisComparison", True)
@@ -567,7 +568,7 @@ def _mergeDicts(values: Any) -> dict[str, Any]:
     return out
 
 
-def _dedupe_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _dedupeSteps(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     out: list[dict[str, Any]] = []
     for step in steps:
@@ -618,7 +619,7 @@ def _generateAnalysisGraphPy(entries: dict[str, dict[str, Any]]) -> str:
     return (
         '"""Analysis Graph generated from CAPABILITIES.\n'
         "\n"
-        "수정하지 마세요. src/dartlab/skills/generateSpec.py 를 실행하세요.\n"
+        "수정하지 마세요. src/dartlab/reference/capability/generateSpec.py 를 실행하세요.\n"
         '"""\n'
         "\n"
         "import json\n"
@@ -765,7 +766,7 @@ def _generateCapabilitiesPy() -> str:
     return (
         '"""런타임 capabilities 카탈로그 (자동 생성).\n'
         "\n"
-        "이 파일은 src/dartlab/skills/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
+        "이 파일은 src/dartlab/reference/capability/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
         '"""\n'
         "\n"
         "import json\n"
@@ -788,6 +789,7 @@ def _generateCapabilitiesPy() -> str:
 
 
 def main():
+    """런타임 capability 카탈로그 2종 재생성 — _generated.py + _generated_analysis_graph.py."""
     capabilitiesPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated.py"
     analysisGraphPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated_analysis_graph.py"
 
