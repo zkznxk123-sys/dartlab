@@ -200,22 +200,35 @@ def loadSectionsWide(
     long = loadSectionsLong(stockCode, periods=periods)
     if long is None or long.is_empty():
         return None
-    indexCols = ["chapter", "topic", "section_order", "section_title"]
-    indexCols = [c for c in indexCols if c in long.columns]
-    if not indexCols or "period" not in long.columns or "section_content" not in long.columns:
+    if "period" not in long.columns or "section_content" not in long.columns:
         return None
     try:
-        # 메타 컬럼은 period 별 값 다름 — pivot 시 index 포함하면 collapse 안 됨. drop.
+        # artifact 는 BUILD 단계에서 이미 canonical 섹션/주석 단위로 수평화됨 (v5Builder.
+        # _groupToSections, key = coalesce(xbrlClass, sectionLeaf, blockLeaf)). RUNTIME 은
+        # 무거운 grouping 없이 동일 canonical 키로 cheap pivot 만 — period 간 한 줄 정렬.
+        # 메타 컬럼 (period 별 상이) 은 pivot 전 drop.
         metaCols = ("rcept_no", "rcept_date", "section_url", "corp_name", "atocid", "assocnote")
-        dropCols = [c for c in metaCols if c in long.columns]
-        if dropCols:
-            long = long.drop(dropCols)
-        return long.pivot(
+        long = long.drop([c for c in metaCols if c in long.columns])
+        keyParts = [
+            pl.col(c).replace("", None) for c in ("xbrlClass", "sectionLeaf", "section_title") if c in long.columns
+        ]
+        long = long.with_columns(pl.coalesce(keyParts).fill_null("").alias("_key"))
+        # period 무관 대표 메타 (정렬·표시용) — pre-grouped 라 입력 작음, join 저렴.
+        metaAggs = [pl.col("section_title").drop_nulls().first().alias("section_title")]
+        if "topic" in long.columns:
+            metaAggs.append(pl.col("topic").drop_nulls().first().alias("topic"))
+        if "section_order" in long.columns:
+            metaAggs.append(pl.col("section_order").min().alias("section_order"))
+        keyMeta = long.group_by(["chapter", "_key"], maintain_order=True).agg(metaAggs)
+        wide = long.pivot(
             values="section_content",
-            index=indexCols,
+            index=["chapter", "_key"],
             on="period",
             aggregate_function="first",
-        )
+        ).join(keyMeta, on=["chapter", "_key"], how="left")
+        if "section_order" in wide.columns:
+            wide = wide.sort("section_order", "chapter")
+        return wide.drop("_key")
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("sectionsWide pivot 실패 (%s): %s", stockCode, exc)
         return None

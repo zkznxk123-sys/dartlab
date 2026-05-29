@@ -261,6 +261,7 @@ def buildSections(
         if not rows:
             continue
         df = pl.DataFrame(rows, schema=SCHEMA_V5)
+        df = _groupToSections(df)  # BUILD 단계 수평화 — canonical 섹션/주석 단위 굳힘
         outPath = outDir / f"{period}.parquet"
         if outPath.exists() and not overwrite:
             continue
@@ -270,6 +271,48 @@ def buildSections(
             _log.info("  %s %s: %d row", code, period, df.height)
 
     return result
+
+
+def _groupToSections(df: pl.DataFrame) -> pl.DataFrame:
+    """element-granular walker rows → canonical 섹션/주석 단위 row (BUILD 단계 수평화).
+
+    수평화의 정렬 키는 position 무관 canonical 이어야 period 간 한 줄로 정렬된다.
+    key = coalesce(xbrlClass, sectionLeaf, blockLeaf):
+        - 주석 TABLE-GROUP (xbrlClass=NT_C_D######) → 주석 단위 (주석까지 수평화)
+        - 그 외 SECTION-N 본문 → sectionLeaf 단위
+    같은 key 의 element 들을 blockOrder 순서로 ``contentRaw`` concat (raw XML 100% 무손실 —
+    etree.tostring 원본 문자열 이어붙이기, 태그 0 손실). 무거운 grouping 을 BUILD 에서
+    1 회 수행 → RUNTIME (loadSectionsWide) 은 cheap read + pivot.
+
+    Returns:
+        SCHEMA_V5 동일 컬럼, 섹션/주석 단위로 축약된 DataFrame.
+    """
+    if df.is_empty():
+        return df
+    keyExpr = pl.coalesce(
+        [
+            pl.col("xbrlClass").replace("", None),
+            pl.col("sectionLeaf").replace("", None),
+            pl.col("blockLeaf").replace("", None),
+        ]
+    ).fill_null("")
+    df = df.with_columns(keyExpr.alias("_key")).sort("blockOrder")
+    grouped = df.group_by(["chapter", "_key"], maintain_order=True).agg(
+        pl.col("contentRaw").str.join("").alias("contentRaw"),
+        pl.col("sectionLeaf").first().alias("sectionLeaf"),
+        pl.col("blockLeaf").first().alias("blockLeaf"),
+        pl.col("xbrlClass").first().alias("xbrlClass"),
+        pl.col("xbrlMatched").first().alias("xbrlMatched"),
+        pl.col("xbrlMatchScore").first().alias("xbrlMatchScore"),
+        pl.col("atocId").first().alias("atocId"),
+        pl.col("aassocnote").first().alias("aassocnote"),
+        pl.col("blockOrder").min().alias("blockOrder"),
+        pl.col("period").first().alias("period"),
+        pl.col("corp").first().alias("corp"),
+        pl.col("rceptNo").first().alias("rceptNo"),
+        pl.col("disclosureKey").first().alias("disclosureKey"),
+    )
+    return grouped.drop("_key").sort("blockOrder").select(list(SCHEMA_V5.keys()))
 
 
 _GLOBAL_REF: pl.DataFrame | None = None
