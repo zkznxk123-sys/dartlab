@@ -8,7 +8,7 @@ LLM Specifications:
         - 옛 docs.parquet schema 호환 금지 — 신 14 col schema 단독.
     OutputSchema:
         - ``buildSections(code) -> dict[period, rowCount]``
-        - 출력: ``data/dart/sections/{code}/{period}.parquet`` (신 sections SSOT).
+        - 출력: ``data/dart/docs/{code}/{period}.parquet`` (신 sections SSOT, 옛 docs.parquet 위치 대체).
         - 14 col schema.
     Prerequisites:
         - data/dart/original/docs/{code}/*.zip
@@ -203,7 +203,8 @@ def buildSections(
         ``{period: rowCount}`` dict.
     """
     if outBaseDir is None:
-        outBaseDir = Path(_cfg.dataDir) / "dart" / "sections"
+        # 사용자 결정: 신규 artifact 가 옛 docs.parquet 위치 대체 (data/dart/docs/).
+        outBaseDir = Path(_cfg.dataDir) / "dart" / "docs"
     outBaseDir = Path(outBaseDir)
     outDir = outBaseDir / code
     outDir.mkdir(parents=True, exist_ok=True)
@@ -320,7 +321,7 @@ def _buildOne(args: tuple[str, str, str]) -> tuple[str, int, int, float]:
 def buildSectionsAll(
     *,
     refPath: str | Path = "data/dart/sectionsXbrlRef.parquet",
-    outBaseDir: str | Path = "data/dart/sections",
+    outBaseDir: str | Path = "data/dart/docs",
     codes: list[str] | None = None,
     numWorkers: int = 8,
     progressEvery: int = 50,

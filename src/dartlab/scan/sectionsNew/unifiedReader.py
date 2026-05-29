@@ -42,11 +42,12 @@ _log = logging.getLogger(__name__)
 def _sectionsDir(code: str, marketNs: str = "kr") -> Path:
     """sections artifact read 디렉터리 (신 sections SSOT).
 
-    KR: ``data/dart/sections/{code}/``
+    KR: ``data/dart/docs/{code}/`` (사용자 결정 — 옛 docs.parquet 위치 대체).
     US: ``data/edgar/sections/{cik_or_ticker}/`` ([추측] EDGAR builder 명세).
     """
-    base = "dart" if marketNs == "kr" else "edgar"
-    return Path(_cfg.dataDir) / base / "sections" / code
+    if marketNs == "kr":
+        return Path(_cfg.dataDir) / "dart" / "docs" / code
+    return Path(_cfg.dataDir) / "edgar" / "sections" / code
 
 
 def readSectionsLong(

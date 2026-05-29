@@ -28,7 +28,10 @@ import dartlab.config as _cfg
 
 _log = logging.getLogger(__name__)
 
-_SECTIONS_REL = "dart/sections"
+# 사용자 결정 (plan snazzy-wibbling-origami): 신규 artifact 가 옛 docs.parquet 위치를
+# 폴더명까지 대체. data/dart/docs/{code}/{period}.parquet. 옛 flat data/dart/docs/{code}.parquet
+# 와 파일 vs 디렉터리로 공존 (옛 flat 은 사용자 명시 전 보존, 코드는 하위폴더만 read).
+_SECTIONS_REL = "dart/docs"
 
 
 def sectionsDir(stockCode: str) -> Path:

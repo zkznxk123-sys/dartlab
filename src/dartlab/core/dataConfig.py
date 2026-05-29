@@ -22,11 +22,14 @@ DATA_RELEASES: dict[str, dict] = {
     },
     "sections": {
         # plan snazzy-wibbling-origami — sections SSOT 통합 artifact.
-        # nested: data/dart/sections/{code}/{period}.parquet (period-sharded).
+        # 사용자 결정: 옛 docs.parquet 위치(폴더명 포함)를 신규 artifact 가 대체.
+        # nested: data/dart/docs/{code}/{period}.parquet (period-sharded).
+        #   옛 flat docs.parquet (data/dart/docs/{code}.parquet) 와 파일 vs 디렉터리로 공존.
+        #   옛 flat 파일은 사용자 명시 전 보존 — 코드는 신규 하위폴더만 read.
         # sectionsBuilder.buildSectionsArtifact 가 1 회 영속화 + HF push.
         # 런타임은 sectionsStorage.loadSectionsWide → mmap parquet → 콜드 1s 목표.
         # nested=True 는 uploadData.py 가 rglob 으로 종목 디렉터리 안 파일 모두 업로드.
-        "dir": "dart/sections",
+        "dir": "dart/docs",
         "label": "DART 공시 sections SSOT artifact (period-sharded)",
         "public": True,
         "nested": True,
