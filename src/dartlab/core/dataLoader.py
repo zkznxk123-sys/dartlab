@@ -299,11 +299,18 @@ def loadData(
     from dartlab.core.memory import checkMemoryAndGc
 
     # plan snazzy-wibbling-origami Phase 2 — docs.parquet loader 끊기.
-    # ⚠️ 의존성 발견: show/select/diff/trace 파이프라인이 옛 docs.parquet 의 row
-    # 세분도에 강결합 → 어댑터의 section-granular 재구성으로 show 블록 손실
-    # (dividend 62297→23527 char). 따라서 loader flip 은 Phase 3 (show/select/diff/
-    # trace 를 신규 artifact 직접 read 로 재배선) 완료 후에만 안전. _loadDocsFromSections
-    # 어댑터 (finance 파서 40+ 6/6 parity 검증 완료) 는 그때 활성.
+    # 옛 flat docs.parquet (data/dart/docs/{code}.parquet) read 0. 신규 sections artifact
+    # (element-granular) 를 section-granular 로 재구성하는 in-memory 어댑터 경유.
+    # 빌더 모드 (DARTLAB_BUILDER_MODE) 만 자기 재귀 회피 위해 우회.
+    # finance 파서 40+ 6/6 parity 검증 완료. show/select/diff/trace 는 신규 artifact
+    # 정렬에 맞춰 재배선 (Phase 3) — 옛 mapper 세분도 기준 아님.
+    if category == "docs":
+        import os as _os
+
+        if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() not in ("1", "true", "True"):
+            checkMemoryAndGc(f"loadData({stockCode},docs)")
+            return _loadDocsFromSections(stockCode, columns=columns, sinceYear=sinceYear, predicate=predicate)
+
     dataDir = _dataDir(category)
     path = dataDir / f"{stockCode}.parquet"
 
