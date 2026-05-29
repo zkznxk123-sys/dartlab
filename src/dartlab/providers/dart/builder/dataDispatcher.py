@@ -548,6 +548,55 @@ def showFinanceStatement(
     return result if isinstance(result, pl.DataFrame) else None
 
 
+def _showFromSectionsArtifact(
+    company: Company,
+    topic: str,
+    *,
+    period: str | None,
+    stripTags: bool,
+) -> pl.DataFrame | None:
+    """c.sections (신규 수평화 artifact) 직접 필터 — docs 본문 topic 경량 경로.
+
+    사용자 철학 (plan snazzy-wibbling-origami): sections 가 확립(빠름·경량·수평화)되면
+    show 는 c.sections 직접 필터로 따라온다. 무거운 merged board (docsProfileBuilder) +
+    SectionsAnalyzer 경유 없이 c.sections 의 sectionLeaf 를 mapSectionTitle 로 분류 →
+    topic 필터. report/finance 소스 전용 topic 은 매칭 0 → None 반환 (호출자가 옛 보드
+    fallback). mapper 는 591줄 파이프라인이 아니라 ~240 행 분류기로만 사용.
+
+    Returns:
+        topic 매칭 c.sections 행 (label cols + period cols) 또는 None (매칭 0 / artifact 부재).
+    """
+    cacheKey = "_sectionsTagged"
+    if cacheKey in company._cache:
+        tagged = company._cache[cacheKey]
+    else:
+        base = company.sections
+        if base is None or "sectionLeaf" not in base.columns:
+            company._cache[cacheKey] = None
+            return None
+        from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle
+
+        tagged = base.with_columns(
+            pl.col("sectionLeaf").fill_null("").map_elements(mapSectionTitle, return_dtype=pl.Utf8).alias("_mtopic")
+        )
+        company._cache[cacheKey] = tagged
+    if tagged is None:
+        return None
+    rows = tagged.filter(pl.col("_mtopic") == topic).drop("_mtopic")
+    if rows.is_empty():
+        return None
+    labelCols = [c for c in ("chapter", "sectionLeaf", "section_title", "topic", "section_order") if c in rows.columns]
+    periodCols = [c for c in rows.columns if _isPeriodColumn(c)]
+    if period and isinstance(period, str) and period in periodCols:
+        periodCols = [period]
+    rows = rows.select(labelCols + periodCols)
+    if stripTags:
+        from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import stripTagsFromSectionsDf
+
+        rows = stripTagsFromSectionsDf(rows)
+    return rows
+
+
 def showSectionsTopic(
     company: Company,
     topic: str,
@@ -587,6 +636,14 @@ def showSectionsTopic(
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex
+
+    # c.sections 직접 필터 경로 (docs 본문 topic, 경량 SSOT). block 미지정 시 우선 시도 —
+    # 매칭되면 무거운 merged board 안 거치고 반환. report/finance 전용 topic 은 매칭 0 →
+    # 아래 옛 보드 경로로 fallback (안전).
+    if block in (None, 0):
+        direct = _showFromSectionsArtifact(company, topic, period=period, stripTags=stripTags)
+        if direct is not None:
+            return direct
 
     if "_sections" in company._cache:
         sec = company._cache["_sections"]
