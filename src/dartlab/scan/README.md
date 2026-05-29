@@ -43,5 +43,5 @@ result = dartlab.scan("foreignBuyMomentum", universe="kospi200", window="20d")
 ## 관련
 
 - [src/dartlab/skills/specs/operation/recipePromote.md](../skills/specs/operation/recipePromote.md) — recipe lifecycle
-- [src/dartlab/skills/recipePromotion.py](../skills/recipePromotion.py) — 자동 승급 평가 (T5-3)
+- [src/dartlab/skills/recipePromote.py](../skills/recipePromote.py) — 승급 CLI (status frontmatter 단독 권한)
 - [tests/audit/moduleSizeAudit.py](../../../tests/audit/moduleSizeAudit.py) (T9-4) — sub-namespace 크기 측정
