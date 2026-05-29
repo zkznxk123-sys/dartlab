@@ -213,8 +213,12 @@ def loadSectionsWide(
             pl.col(c).replace("", None) for c in ("xbrlClass", "sectionLeaf", "section_title") if c in long.columns
         ]
         long = long.with_columns(pl.coalesce(keyParts).fill_null("").alias("_key"))
-        # period 무관 대표 메타 (정렬·표시용) — pre-grouped 라 입력 작음, join 저렴.
+        # period 무관 대표 메타 (정렬·표시·필터용) — pre-grouped 라 입력 작음, join 저렴.
+        # sectionLeaf (SECTION-N 절 이름 "6. 배당에 관한 사항") 노출 필수 — show/select 가
+        # c.sections 직접 필터로 동작하려면 사람이 읽는 절 이름이 컬럼에 있어야 한다.
         metaAggs = [pl.col("section_title").drop_nulls().first().alias("section_title")]
+        if "sectionLeaf" in long.columns:
+            metaAggs.append(pl.col("sectionLeaf").drop_nulls().first().alias("sectionLeaf"))
         if "topic" in long.columns:
             metaAggs.append(pl.col("topic").drop_nulls().first().alias("topic"))
         if "section_order" in long.columns:
