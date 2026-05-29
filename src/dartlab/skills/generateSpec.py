@@ -1,16 +1,16 @@
-"""registry 기반 자동 문서 생성.
+"""런타임 capability 카탈로그 생성 — 엔진 docstring/registry → reference/capability 산출물 2종.
 
-7개 surface에서 코드를 수집하여 다음 파일을 자동 생성한다:
-- CAPABILITIES.md           — 루트 총괄 스펙맵
-- landing/static/llms.txt   — AI 크롤러용 구조화 문서
-- .claude/skills/dartlab/reference.md — Claude Code 스킬 레퍼런스
-- src/dartlab/ai/conversation/_generated_catalog.py — AI 시스템 프롬프트용 도구 카탈로그
-- src/dartlab/core/capability/_generated.py — 런타임 capabilities 카탈로그
+dartlab.core.registry + 엔진 docstring(9 섹션) + axis registry 를 introspect 해 런타임
+카탈로그를 생성한다. 사람/크롤러용 문서 surface (CAPABILITIES.md · llms.txt · reference.md) 는
+더 이상 생성하지 않는다 — 런타임 무소비라 폐기 (llms.txt 는 landing 정적 SEO 로 동결).
 
-실행:
-    uv run python src/dartlab/skills/generateSpec.py
+생성 산출물 (둘 다 load-bearing, 직접 수정 금지):
+- src/dartlab/reference/capability/_generated.py — 런타임 CAPABILITIES 카탈로그
+  (EngineCall · ReadCapability · ReadSkill · server 가 소비하는 경량 인덱스)
+- src/dartlab/reference/capability/_generated_analysis_graph.py — analysisGraph 가 import
 
-릴리즈 시 CI에서 자동 실행하여 수동 관리 포인트를 제거한다.
+docstring/capability 변경 시 운영자가 수동 실행 (자동 CI 실행 없음):
+    uv run python -X utf8 src/dartlab/skills/generateSpec.py
 """
 
 from __future__ import annotations
@@ -2281,25 +2281,8 @@ def _collectSpecAxesLabels(specPath: Path) -> dict[str, str]:
 
 
 def main():
-    capabilitiesPath = ROOT / "CAPABILITIES.md"
-    llmsTxtPath = ROOT / "landing" / "static" / "llms.txt"
-    skillRefPath = ROOT / ".claude" / "skills" / "dartlab" / "reference.md"
     capabilitiesPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated.py"
     analysisGraphPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated_analysis_graph.py"
-
-    skillRefPath.parent.mkdir(parents=True, exist_ok=True)
-
-    capabilities = generateCapabilities()
-    capabilitiesPath.write_text(capabilities, encoding="utf-8")
-    print(f"  CAPABILITIES.md ({len(capabilities):,} chars) -> {capabilitiesPath}")
-
-    llmsTxt = generateLlmsTxt()
-    llmsTxtPath.write_text(llmsTxt, encoding="utf-8")
-    print(f"  llms.txt        ({len(llmsTxt):,} chars) -> {llmsTxtPath}")
-
-    skillRef = generateSkillRef()
-    skillRefPath.write_text(skillRef, encoding="utf-8")
-    print(f"  reference.md    ({len(skillRef):,} chars) -> {skillRefPath}")
 
     capabilitiesPy = _generateCapabilitiesPy()
     capabilitiesPyPath.write_text(capabilitiesPy, encoding="utf-8")
