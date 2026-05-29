@@ -57,7 +57,6 @@ _SCAN_ROOTS: tuple[str, ...] = (
     "landing/src",
     "README.md",
     "README_EN.md",
-    "CAPABILITIES.md",
 )
 
 # 라인 단위 예외 마커 — 라인 끝에 이 주석이 있으면 해당 라인 검사 제외
