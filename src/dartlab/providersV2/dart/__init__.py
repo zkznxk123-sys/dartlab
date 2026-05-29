@@ -7,6 +7,6 @@ Company facade 는 후속 phase. 공개 표면은 본 __init__ 에 모은다
 
 from __future__ import annotations
 
-from . import finance, sections
+from . import finance, report, sections
 
-__all__ = ["finance", "sections"]
+__all__ = ["finance", "report", "sections"]
