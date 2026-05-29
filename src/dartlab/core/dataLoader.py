@@ -298,6 +298,12 @@ def loadData(
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
     from dartlab.core.memory import checkMemoryAndGc
 
+    # plan snazzy-wibbling-origami Phase 2 — docs.parquet loader 끊기.
+    # ⚠️ 의존성 발견: show/select/diff/trace 파이프라인이 옛 docs.parquet 의 row
+    # 세분도에 강결합 → 어댑터의 section-granular 재구성으로 show 블록 손실
+    # (dividend 62297→23527 char). 따라서 loader flip 은 Phase 3 (show/select/diff/
+    # trace 를 신규 artifact 직접 read 로 재배선) 완료 후에만 안전. _loadDocsFromSections
+    # 어댑터 (finance 파서 40+ 6/6 parity 검증 완료) 는 그때 활성.
     dataDir = _dataDir(category)
     path = dataDir / f"{stockCode}.parquet"
 
@@ -419,6 +425,117 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
 
     if shouldRefresh:
         _refreshFromHf(stockCode, path, category)
+
+
+def _docsReportTypeExpr() -> pl.Expr:
+    """period (YYYYQn) → 옛 docs.parquet report_type 문자열 합성.
+
+    selectReport 호환 — annual=사업보고서, semi=반기보고서, Q1/Q3=분기보고서 (월 .03/.09).
+    """
+    year = pl.col("period").str.slice(0, 4)
+    q = pl.col("period").str.slice(4)
+    return (
+        pl.when(q == "Q1")
+        .then(pl.format("분기보고서 ({}.03)", year))
+        .when(q == "Q2")
+        .then(pl.format("반기보고서 ({}.06)", year))
+        .when(q == "Q3")
+        .then(pl.format("분기보고서 ({}.09)", year))
+        .otherwise(pl.format("사업보고서 ({}.12)", year))
+        .alias("report_type")
+    )
+
+
+def _loadDocsFromSections(
+    stockCode: str,
+    *,
+    columns: list[str] | None = None,
+    sinceYear: int | None = None,
+    predicate: "pl.Expr | None" = None,
+) -> pl.DataFrame:
+    """신규 sections artifact → 옛 docs.parquet 호환 (section-granular) DataFrame.
+
+    plan snazzy-wibbling-origami Phase 2 — docs.parquet 폐기 어댑터. 옛 flat
+    docs.parquet (mapper 산출) 을 read 하지 않고, 신규 element-granular artifact
+    (``data/dart/docs/{code}/{period}.parquet``) 를 ``(period, chapter, sectionLeaf)``
+    로 group + ``contentRaw`` concat 해 section-granular row 로 재구성한다.
+
+    section content/table parity 실측 ~100% (005930 임원현황 101612→101629, 배당
+    table 11→11). finance 파서 40+ + ``selectReport`` 가 의존하는 schema 재현:
+    section_content / section_title / report_type / year / rcept_no + 메타.
+
+    section_content_mixed 는 *생성 안 함* — 어떤 finance 파서도 미소비 (옛 빌더
+    zipCollector 사전 계산 잔재). content_plain 류 derive 0 (사용자 요구 #6).
+
+    Args:
+        stockCode: 종목코드.
+        columns: select 할 컬럼 list. None = 전체.
+        sinceYear: year >= sinceYear 필터.
+        predicate: polars 필터 expression.
+
+    Returns:
+        옛 docs.parquet 호환 DataFrame (빈 artifact 시 빈 DataFrame).
+    """
+    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
+        _ensureFromHf,
+        hasSectionsArtifact,
+        sectionsDir,
+    )
+
+    if not hasSectionsArtifact(stockCode):
+        _ensureFromHf(stockCode)
+    d = sectionsDir(stockCode)
+    files = sorted(d.glob("*.parquet")) if d.exists() else []
+    if not files:
+        return pl.DataFrame()
+
+    lf = pl.scan_parquet([str(f) for f in files])
+    grouped = (
+        lf.sort("blockOrder")
+        .group_by(["period", "chapter", "sectionLeaf"], maintain_order=True)
+        .agg(
+            pl.col("contentRaw").str.join("").alias("section_content"),
+            pl.col("blockOrder").min().alias("_minOrder"),
+            pl.col("rceptNo").first().alias("rcept_no"),
+            pl.col("atocId").first().alias("atocid"),
+            pl.col("aassocnote").first().alias("assocnote"),
+        )
+        .collect()
+    )
+    if grouped.is_empty():
+        return pl.DataFrame()
+
+    # 옛 docs.parquet 14 col schema 재현 (section_content_mixed 제외).
+    corpName = None
+    try:
+        from dartlab.core.listingResolver import getListingResolver
+
+        resolver = getListingResolver()
+        if resolver is not None:
+            corpName = resolver.codeToName(stockCode)
+    except Exception:  # noqa: BLE001 — 이름 조회 실패는 비치명 (corp_name null fallback)
+        corpName = None
+
+    df = grouped.with_columns(
+        pl.col("period").str.slice(0, 4).alias("year"),
+        _docsReportTypeExpr(),
+        pl.coalesce([pl.col("sectionLeaf"), pl.col("chapter")]).alias("section_title"),
+        pl.col("_minOrder").rank("ordinal").over("period").cast(pl.Int64).alias("section_order"),
+        pl.lit(stockCode).alias("stock_code"),
+        pl.lit(corpName).cast(pl.Utf8).alias("corp_name"),
+        pl.col("rcept_no").str.slice(0, 8).alias("rcept_date"),
+        pl.format("https://dart.fss.or.kr/dsaf001/main.do?rcpNo={}", pl.col("rcept_no")).alias("section_url"),
+    ).drop("_minOrder")
+
+    if sinceYear is not None:
+        df = df.filter(pl.col("year").cast(pl.Int32, strict=False) >= sinceYear)
+    if predicate is not None:
+        df = df.filter(predicate)
+    if columns:
+        available = [c for c in columns if c in df.columns]
+        if available:
+            df = df.select(available)
+    return _normalizeLoadedFrame(df, "docs")
 
 
 def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
