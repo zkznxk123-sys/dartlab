@@ -13,12 +13,70 @@ import 0 (gather ↛ providers, R1 · core_boundary).
 from __future__ import annotations
 
 from .build import buildPanel, buildPanelAll, buildPanelBaseline
+from .index import buildIndex, indexPath
 from .learn import bridgeCoverage, learnBridge
 
 __all__ = [
     "bridgeCoverage",
+    "buildIndex",
     "buildPanel",
     "buildPanelAll",
     "buildPanelBaseline",
+    "indexPath",
     "learnBridge",
+    "panelXbrlRefPath",
 ]
+
+
+def panelXbrlRefPath() -> "Path":  # noqa: F821
+    """panelXbrlRef ref table 경로 — refScan 산출 + build/learn 입력 SSOT.
+
+    Args:
+        없음.
+
+    Returns:
+        ``data/dart/panelXbrlRef.parquet`` Path.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> panelXbrlRefPath().name
+        'panelXbrlRef.parquet'
+
+    SeeAlso:
+        - ``build.refScan.scanAllZips`` — 본 경로 생산.
+        - ``learn.learnBridge`` — 본 ref 로 학습.
+        - ``build.buildPanelAll`` — 본 ref 로 fuzzy 매칭.
+
+    Requires:
+        - dartlab.config.
+
+    Capabilities:
+        - ref truth(S4) 단일 경로 — refScan write·build/learn read 공유.
+
+    Guide:
+        - refScan 후 build/learn 이 본 경로 참조.
+
+    AIContext:
+        - 경로 계산만.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 경로 분산 하드코딩 금지.
+        OutputSchema:
+            - ``pathlib.Path``.
+        Prerequisites:
+            - config.dataDir.
+        Freshness:
+            - 정적.
+        Dataflow:
+            - config.dataDir → data/dart/panelXbrlRef.parquet.
+        TargetMarkets:
+            - KR (DART).
+    """
+    from pathlib import Path
+
+    import dartlab.config as _cfg
+
+    return Path(_cfg.dataDir) / "dart" / "panelXbrlRef.parquet"
