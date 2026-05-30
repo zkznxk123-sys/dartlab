@@ -36,8 +36,9 @@ from lxml import etree
 
 import dartlab.config as _cfg
 
-from ..canonical import resolveBatch
-from ..schema import SECTIONS_SCHEMA as SCHEMA_V5
+from dartlab.core.sections.canonical import resolveBatch
+from dartlab.core.sections.schema import SECTIONS_SCHEMA as SCHEMA_V5
+
 from .refScan import scanRefBaseline
 from .walker import (
     detectSchemaEra,
@@ -472,7 +473,7 @@ def buildSectionsBaseline(
 
 
 def _main() -> None:
-    """CLI entry — ``python -m dartlab.providersV2.dart.sections.build.builder --codes 005930,005380``."""
+    """CLI entry — ``python -m dartlab.gather.dart.sections.build.builder --codes 005930,005380``."""
     import argparse
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")

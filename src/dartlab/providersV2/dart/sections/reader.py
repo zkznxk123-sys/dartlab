@@ -135,7 +135,7 @@ def readSectionsLong(
         return None
     # disclosureKey 부착 — BUILD 에서 이미 채워짐. 옛 artifact (전부 null) 만 fallback.
     if "disclosureKey" not in df.columns or df["disclosureKey"].null_count() == df.height:
-        from .canonical import resolveBatch
+        from dartlab.core.sections.canonical import resolveBatch
 
         if "disclosureKey" in df.columns:
             df = df.drop("disclosureKey")
@@ -169,7 +169,7 @@ def readSectionsWide(
         return None
     # 최신기준 수평화 (요구 #7) — 과거 era 의 xbrlClass·제목 drift 를 (disclosureKey,
     # scope) 단일 행으로 정렬. scope 가 xbrlClass 를 대체해 era drift 흡수.
-    from .canonical import anchorLatest
+    from .anchor import anchorLatest
 
     long = anchorLatest(long)
     indexCols = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"]
