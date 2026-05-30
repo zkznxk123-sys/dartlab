@@ -60,6 +60,11 @@ def parseHtmlTable(html: str) -> HtmlTable | None:
     Returns:
         HtmlTable 또는 None (parse 실패 / 비어있음).
 
+    Example:
+        >>> t = parseHtmlTable("<table><tr><th>구분</th></tr><tr><td>매출</td></tr></table>")
+        >>> (t.headerRowCount, len(t.rows))
+        (1, 2)
+
     Raises:
         없음 — XMLSyntaxError silent + None.
     """
@@ -150,6 +155,9 @@ def extractItemValuePairs(html: str) -> dict[str, str]:
     Example:
         >>> extractItemValuePairs('<table><tr><th>구분</th><th>금액</th></tr><tr><td>매출</td><td align="right">100</td></tr></table>')
         {'매출': '100'}
+
+    Raises:
+        없음 — parseHtmlTable 위임, parse 실패는 빈 dict 로 흡수한다.
     """
     parsed = parseHtmlTable(html)
     if parsed is None:
@@ -178,6 +186,14 @@ def cellGrid(html: str) -> list[list[HtmlTableCell]]:
 
     Returns:
         ``grid[row][col]`` 양식 2D list. parse 실패 시 빈 list.
+
+    Example:
+        >>> g = cellGrid('<table><tr><td colspan="2">병합</td></tr><tr><td>a</td><td>b</td></tr></table>')
+        >>> g[0][0].text == g[0][1].text  # colspan 으로 같은 cell 이 두 좌표에
+        True
+
+    Raises:
+        없음 — parseHtmlTable 위임, parse 실패는 빈 list 로 흡수한다.
     """
     parsed = parseHtmlTable(html)
     if parsed is None:

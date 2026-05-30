@@ -99,6 +99,10 @@ def buildSectionsArtifact(
     Returns:
         ``{period: rowCount}`` dict — 저장된 period 별 row 수.
 
+    Example:
+        >>> buildSectionsArtifact("005930")  # doctest: +SKIP
+        {'2024Q1': 312, '2023Q4': 298}
+
     Raises:
         없음 — docs.parquet 부재 / read 실패 silent + 빈 dict.
     """
@@ -161,6 +165,13 @@ def clearSectionsArtifact(stockCode: str) -> int:
 
     Returns:
         삭제된 파일 수.
+
+    Example:
+        >>> clearSectionsArtifact("005930")  # doctest: +SKIP
+        3
+
+    Raises:
+        없음 — 디렉터리 부재 시 0 반환.
     """
     d = sectionsDir(stockCode)
     if not d.exists():

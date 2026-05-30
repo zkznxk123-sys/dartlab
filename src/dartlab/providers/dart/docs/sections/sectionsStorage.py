@@ -35,17 +35,60 @@ _SECTIONS_REL = "dart/docs"
 
 
 def sectionsDir(stockCode: str) -> Path:
-    """종목별 sections artifact 디렉터리 path."""
+    """종목별 sections artifact 디렉터리 path.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        ``{dataDir}/dart/docs/{stockCode}`` Path. 존재 여부는 검사하지 않는다.
+
+    Example:
+        >>> sectionsDir("005930").name
+        '005930'
+
+    Raises:
+        없음 — 순수 경로 조합.
+    """
     return Path(_cfg.dataDir) / _SECTIONS_REL / stockCode
 
 
 def sectionsPath(stockCode: str, period: str) -> Path:
-    """단일 period parquet path."""
+    """단일 period parquet path.
+
+    Args:
+        stockCode: 종목코드.
+        period: period 라벨 (예 ``2024Q1``).
+
+    Returns:
+        ``{sectionsDir}/{period}.parquet`` Path.
+
+    Example:
+        >>> sectionsPath("005930", "2024Q1").name
+        '2024Q1.parquet'
+
+    Raises:
+        없음 — 순수 경로 조합.
+    """
     return sectionsDir(stockCode) / f"{period}.parquet"
 
 
 def listAvailablePeriods(stockCode: str) -> list[str]:
-    """저장된 period 목록 (newer first). 디렉터리 미생성 시 빈 list."""
+    """저장된 period 목록 (newer first). 디렉터리 미생성 시 빈 list.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        newer-first 정렬된 period 라벨 list. 디렉터리 부재면 빈 list.
+
+    Example:
+        >>> "2024Q1" in listAvailablePeriods("005930")  # doctest: +SKIP
+        True
+
+    Raises:
+        없음 — 디렉터리 부재를 빈 list 로 흡수한다.
+    """
     d = sectionsDir(stockCode)
     if not d.exists():
         return []
@@ -70,7 +113,21 @@ def _periodSortKey(period: str) -> tuple[int, int]:
 
 
 def hasSectionsArtifact(stockCode: str) -> bool:
-    """artifact 가 1 개 이상 period 존재하면 True."""
+    """artifact 가 1 개 이상 period 존재하면 True.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        period parquet 가 1 개 이상이면 True, 디렉터리 부재·빈 디렉터리면 False.
+
+    Example:
+        >>> hasSectionsArtifact("005930")
+        True
+
+    Raises:
+        없음 — listAvailablePeriods 가 디렉터리 부재를 빈 list 로 흡수한다.
+    """
     return bool(listAvailablePeriods(stockCode))
 
 
@@ -128,6 +185,14 @@ def loadSectionsLong(
 
     Returns:
         long format DataFrame 또는 None.
+
+    Example:
+        >>> df = loadSectionsLong("005930", periods=["2024Q1"])
+        >>> "section_content" in df.columns
+        True
+
+    Raises:
+        없음 — OSError/ComputeError/ShapeError 는 내부에서 포착해 경고 로그 후 None 반환.
     """
     if not hasSectionsArtifact(stockCode):
         _ensureFromHf(stockCode)
@@ -196,6 +261,14 @@ def loadSectionsWide(
 
     Returns:
         wide DataFrame 또는 None.
+
+    Example:
+        >>> wide = loadSectionsWide("005930")
+        >>> any(c.endswith("Q1") or c.endswith("Q4") for c in wide.columns)
+        True
+
+    Raises:
+        없음 — pivot 실패(ComputeError/ShapeError)는 내부 포착 후 None 반환.
     """
     long = loadSectionsLong(stockCode, periods=periods)
     if long is None or long.is_empty():
@@ -266,6 +339,14 @@ def loadSectionsRawXml(stockCode: str) -> pl.DataFrame | None:
 
     Returns:
         DataFrame 또는 None (artifact 부재).
+
+    Example:
+        >>> raw = loadSectionsRawXml("005930")
+        >>> "section_content" in raw.columns
+        True
+
+    Raises:
+        없음 — loadSectionsLong 에 위임, 내부에서 실패를 None 으로 흡수한다.
     """
     # loadSectionsLong 이 이미 신 schema → 옛 호환 자동 rename (topic/section_title/
     # section_content/section_order/stock_code/rcept_no). 본 함수는 별도 변환 없이 그대로 노출.
@@ -281,6 +362,14 @@ def loadSectionsIndex(stockCode: str) -> pl.DataFrame | None:
 
     Returns:
         DataFrame ``period / rcept_no [+ 부속 메타]`` unique by period. None = artifact 부재.
+
+    Example:
+        >>> idx = loadSectionsIndex("005930")
+        >>> idx.columns
+        ['period', 'rcept_no']
+
+    Raises:
+        없음 — artifact·필수 컬럼(rcept_no/period) 부재 시 None 반환.
     """
     long = loadSectionsLong(stockCode, columns=None)
     if long is None or long.is_empty():
@@ -302,5 +391,14 @@ def stripTagsExpr(col: str) -> pl.Expr:
 
     Returns:
         pl.Expr — strip 결과 string.
+
+    Example:
+        >>> import polars as pl
+        >>> pl.DataFrame({"x": ["<p>가</p>"]}).select(stripTagsExpr("x")).item()
+        '가'
+
+    Raises:
+        없음 — 순수 expr 빌더. 평가 시 col 이 DataFrame 에 없으면 polars 가
+        ColumnNotFoundError 를 던진다.
     """
     return pl.col(col).str.replace_all(r"<[^>]+>", " ").str.replace_all(r"[ \t]+", " ").str.strip_chars()

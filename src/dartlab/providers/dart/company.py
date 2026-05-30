@@ -2355,6 +2355,10 @@ class Company:
             df = lf.select(["topic", "period", "content_plain"]).filter(
                 pl.col("period").str.starts_with("2025")
             ).collect()
+
+        Raises:
+            없음 — artifact 부재 시 None 반환. scan_parquet 는 lazy 라 collect 시점에
+            평가된다.
         """
         from dartlab.providers.dart.docs.sections.sectionsStorage import (
             _ensureFromHf,
