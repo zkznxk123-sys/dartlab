@@ -21,3 +21,23 @@ def test_ref_matcher_symbols_callable() -> None:
 
     assert callable(precomputeRefTokens)
     assert callable(setGlobalRefTokens)
+
+
+def test_match_to_ref_empty_title_guard() -> None:
+    """matchToRef: 빈 title → (None, 0.0) (global state 무관 deterministic)."""
+    import polars as pl
+
+    from dartlab.gather.dart.panel.build.refScan.refMatcher import matchToRef
+
+    ref = pl.DataFrame(
+        {"rawId": [], "rawTitleCanonical": [], "corpCount": []},
+        schema={"rawId": pl.Utf8, "rawTitleCanonical": pl.Utf8, "corpCount": pl.Int64},
+    )
+    assert matchToRef("", ref) == (None, 0.0)
+
+
+def test_evaluate_threshold_callable() -> None:
+    """evaluateThreshold 공개표면 존재 (threshold sweep 평가)."""
+    from dartlab.gather.dart.panel.build.refScan.refMatcher import evaluateThreshold
+
+    assert callable(evaluateThreshold)
