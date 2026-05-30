@@ -38,9 +38,14 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 _MAX_YEARS = 8
 
 _SECTOR_DATA = json.loads(
-    (_Path(__file__).resolve().parents[2] / "providers" / "data" / "parserMappings" / "sectorPriors.json").read_text(
-        encoding="utf-8"
-    )
+    (
+        _Path(__file__).resolve().parents[2]
+        / "providers"
+        / "mappers"
+        / "mapperData"
+        / "parserMappings"
+        / "sectorPriors.json"
+    ).read_text(encoding="utf-8")
 )
 _SECTOR_MACRO_MAP: dict[str, list[dict]] = _SECTOR_DATA.get("sectorMacroMap", {})
 _sensitivity = _SECTOR_DATA.get("sectorSensitivity", {})
