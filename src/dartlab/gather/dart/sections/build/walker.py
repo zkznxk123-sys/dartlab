@@ -71,6 +71,9 @@ def detectSchemaEra(root) -> str:
         >>> root = etree.fromstring(b'<BODY><TITLE ATOCID="3">Hi</TITLE></BODY>')
         >>> detectSchemaEra(root)
         'v2'
+
+    Raises:
+        없음 — lxml root element 를 가정, find/iter 만 사용한다.
     """
     if _hasATOCID(root):
         return "v2"
@@ -180,6 +183,14 @@ def walkSections(
         row dict (10 keys, schema 동결):
             chapter, sectionLeaf, blockLeaf, xbrlClass, xbrlMatched,
             xbrlMatchScore, atocId, aassocnote, blockOrder, contentRaw.
+
+    Example:
+        >>> rows = list(walkSections(root, "v2"))  # doctest: +SKIP
+        >>> set(rows[0]) >= {"chapter", "contentRaw", "blockOrder"}  # doctest: +SKIP
+        True
+
+    Raises:
+        없음 — lxml etree root 를 가정. refDf None 이면 fuzzy match 를 skip 한다.
     """
     # 1-pass — container attribute mark (SECTION-N / wrapper TG / 그 ancestor).
     _markContainers(root)

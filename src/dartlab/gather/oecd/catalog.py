@@ -99,9 +99,24 @@ _INDICATORS: dict[str, SdmxCatalogEntry] = {
 }
 
 
-def listCatalog() -> list[SdmxCatalogEntry]:
-    """모든 OECD 지표 entry 리스트 반환."""
-    return list(_INDICATORS.values())
+def listCatalog(*, limit: int | None = None) -> list[SdmxCatalogEntry]:
+    """모든 OECD 지표 entry 리스트 반환.
+
+    Args:
+        limit: 반환 entry 최대 개수. None=전체(8).
+
+    Returns:
+        SdmxCatalogEntry list. limit 지정 시 앞에서 limit 개.
+
+    Example:
+        >>> len(listCatalog(limit=3))
+        3
+
+    Raises:
+        없음.
+    """
+    entries = list(_INDICATORS.values())
+    return entries[:limit] if limit is not None else entries
 
 
 def getEntry(indicatorId: str) -> SdmxCatalogEntry:

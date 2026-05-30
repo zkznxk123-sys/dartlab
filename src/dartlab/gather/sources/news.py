@@ -287,6 +287,7 @@ def fetchHeadlinesForArchive(
     market: str = "KR",
     days: int = 1,
     concurrency: int = 8,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """RSS 헤드라인 다중 쿼리 fan-out — archive cron 진입점.
 
@@ -319,6 +320,7 @@ def fetchHeadlinesForArchive(
         market: "KR" | "US".
         days: 최근 N 일 윈도우. 기본 1.
         concurrency: 동시 fetch 상한. RSS 비공식 rate-limit 보호.
+        limit: 반환 행 상한 (date desc 정렬 후 head). None=전체.
 
     Returns:
         pl.DataFrame — (date, title, source, url, market, query, captured_at).
@@ -381,7 +383,7 @@ def fetchHeadlinesForArchive(
     df = pl.DataFrame(rows)
     df = df.with_columns(pl.col("date").cast(pl.Date))
     df = df.sort(["date", "url"], descending=[True, False])
-    return df
+    return df.head(limit) if limit is not None else df
 
 
 def iterFetchNews(

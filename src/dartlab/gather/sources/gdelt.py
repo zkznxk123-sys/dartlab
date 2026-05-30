@@ -195,6 +195,7 @@ def fetchGdeltGkg(
     *,
     markets: list[str] | None = None,
     timeout: float = 30.0,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """단일 GKG 15-min 슬롯 download + parse + market 필터.
 
@@ -226,6 +227,7 @@ def fetchGdeltGkg(
         timestamp: UTC 시각 (GDELT 슬롯 — 15 분 단위).
         markets: ["KR","US","JP","CN","GLOBAL"] 필터. None=전체.
         timeout: HTTP timeout (초).
+        limit: 반환 행 상한 (date·url 정렬 후 head). None=전체 (1 슬롯 ≈ 5만 row).
 
     Returns:
         pl.DataFrame — 16 컬럼 (date/title/source/url/market/query/captured_at/
@@ -345,7 +347,7 @@ def fetchGdeltGkg(
     # url dedup (같은 article 이 여러 record 로 분리될 수 있음)
     df = df.unique(subset=["url"], keep="first")
     df = df.sort(["date", "url"])
-    return df
+    return df.head(limit) if limit is not None else df
 
 
 def iterGdeltSlots(start: datetime, end: datetime, *, stepMinutes: int = 15) -> list[datetime]:

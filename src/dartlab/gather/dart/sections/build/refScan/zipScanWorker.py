@@ -110,6 +110,22 @@ def scanZipFiles(
 ) -> pl.DataFrame:
     """zip path iterable → Layer 1 ``sectionsXbrlRef.parquet`` DataFrame.
 
+    Capabilities:
+        zip 본문 XML 의 ``<TABLE-GROUP ACLASS>`` ref 추출 → (rawId, rawTitleCanonical)
+        집계 → corpCount/periodCount/occurrenceCount 계산 → Layer 1 SSOT 11-col table.
+
+    AIContext:
+        sectionsXbrlRef SSOT 빌드 1단계 (zip path → ref). scanAllZips 가 전종목 병렬 호출.
+
+    Guide:
+        baseline (5 종목) 검증 시 minCorpCount=1 로 모든 entry 확인. 전종목은 기본 3.
+
+    When:
+        sectionsXbrlRef.parquet 재빌드 시 (build-time 잡, runtime 아님).
+
+    How:
+        zip 본문 read → extractAclassEntries → (rawId, title) bag 집계 → minCorpCount 필터 → DataFrame.
+
     Args:
         zipPaths: 처리할 zip 파일 path iterable.
         minCorpCount: SSOT 입성 최소 회사 수 (기본 3).
@@ -124,6 +140,21 @@ def scanZipFiles(
 
         marketNs 는 항상 ``"kr"``. taxonomyVersion 은 [추정] — baseline 단계
         에선 NULL, 전종목 스캔에서 IFRS taxonomy 매핑 추가 layer 로.
+
+    Requires:
+        zip 양식 ``{code}/{rcept_no}.zip`` + 읽기 가능. polars.
+
+    Raises:
+        없음 — 개별 zip read/parse 실패는 worker 가 흡수해 빈 결과로 skip.
+
+    Example:
+        >>> df = scanZipFiles(zipPaths, minCorpCount=1)  # doctest: +SKIP
+        >>> df.columns[:2]  # doctest: +SKIP
+        ['rawId', 'rawTitleCanonical']
+
+    SeeAlso:
+        ``scanAllZips`` — 전종목 병렬 호출 래퍼.
+        ``extractAclassEntries`` — zip 본문 ACLASS 추출기.
 
     LLM Specifications:
         AntiPatterns:
@@ -255,6 +286,22 @@ def scanAllZips(
 ) -> pl.DataFrame:
     """전종목 zip → Layer 1 ref table (multiprocessing).
 
+    Capabilities:
+        ``data/dart/original/docs/`` 전 zip 을 multiprocessing 으로 scanZipFiles 병렬 처리 →
+        Layer 1 sectionsXbrlRef table (corpCount desc 정렬).
+
+    AIContext:
+        sectionsXbrlRef SSOT 전종목 빌드 entry. scanZipFiles 의 병렬 래퍼.
+
+    Guide:
+        numWorkers 는 IO-heavy 라 코어 수보다 크게(8) 잡아도 무방. minCorpCount=3 권장.
+
+    When:
+        sectionsXbrlRef.parquet 전체 재빌드 시 (build-time 잡, ~시간).
+
+    How:
+        baseDir glob → multiprocessing.Pool.imap → scanZipFiles → 집계 → DataFrame.
+
     Args:
         baseDir: ``data/dart/original/docs/`` 경로. None = config default.
         minCorpCount: SSOT 입성 minimum corpCount. 기본 3.
@@ -265,10 +312,20 @@ def scanAllZips(
     Returns:
         Layer 1 schema DataFrame (11 col).
 
+    Raises:
+        없음 — 개별 zip read/parse 실패는 worker 가 흡수해 빈 entry 로 skip,
+        전체 스캔은 계속된다.
+
     Examples:
         >>> df = scanAllZips(numWorkers=8)  # doctest: +SKIP
         >>> df.height >= 200  # doctest: +SKIP
         True
+
+    Requires:
+        ``data/dart/original/docs/{code}/*.zip`` 전종목 + multiprocessing 가용.
+
+    SeeAlso:
+        ``scanZipFiles`` — 단일 batch 스캔 로직. ``scanRefBaseline`` — 5 종목 검증 버전.
 
     LLM Specifications:
         AntiPatterns:
@@ -383,6 +440,21 @@ def scanRefBaseline(
 ) -> pl.DataFrame:
     """검증용 — 5 baseline 종목의 전 기간 zip scan.
 
+    Capabilities:
+        지정 codes (기본 5 baseline) 의 전 기간 zip → scanZipFiles → Layer 1 ref table.
+
+    AIContext:
+        sectionsXbrlRef 검증 게이트 입력. 전종목 scanAllZips 의 소규모 검증 버전.
+
+    Guide:
+        codes=None 이면 5 baseline (005930/005380/035720/207940/000660). minCorpCount=1 로 전 entry 노출.
+
+    When:
+        sectionsXbrlRef 빌더 검증 (손실 0 / 정렬 확인) 시.
+
+    How:
+        codes → 각 code 디렉터리 zip glob → scanZipFiles 위임.
+
     Args:
         codes: 종목코드 list. None = 5 baseline default.
         minCorpCount: 기본 1 (5 회사 중 1 이상 발견 entry 모두 보기).
@@ -391,10 +463,19 @@ def scanRefBaseline(
     Returns:
         Layer 1 schema DataFrame. 5 baseline 의 모든 ACLASS entry.
 
+    Requires:
+        ``data/dart/original/docs/{code}/*.zip`` 존재.
+
+    Raises:
+        없음 — 종목 디렉터리 부재 시 경고 로그 후 skip.
+
     Examples:
         >>> df = scanRefBaseline(codes=['005930'], minCorpCount=1)  # doctest: +SKIP
         >>> df.height > 50  # doctest: +SKIP
         True
+
+    SeeAlso:
+        ``scanAllZips`` — 전종목 버전. ``scanZipFiles`` — 실제 스캔 로직.
 
     LLM Specifications:
         AntiPatterns:
