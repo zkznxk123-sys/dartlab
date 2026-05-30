@@ -12,7 +12,7 @@ import re
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.providers.dart.docs.sectionsArchive.analysis import (
+from dartlab.providers.dart.docs.sections.analysis import (
     _allowedStructurePeriodLanes,
     _changedPaths,
     _emptyStructureChangesFrame,
@@ -29,7 +29,7 @@ from dartlab.providers.dart.docs.sectionsArchive.analysis import (
     semanticRegistry,
     structureRegistry,
 )
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import periodOrderValue, sortPeriods
+from dartlab.providers.dart.docs.sections.sectionsBase import periodOrderValue, sortPeriods
 
 
 def structureEvents(

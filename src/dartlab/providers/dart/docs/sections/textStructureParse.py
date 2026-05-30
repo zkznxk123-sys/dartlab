@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.providers.dart.docs.sectionsArchive.textStructure import (
+from dartlab.providers.dart.docs.sections.textStructure import (
     _bodyAnchor,
     _canonicalHeadingKey,
     _cleanLine,

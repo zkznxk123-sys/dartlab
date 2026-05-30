@@ -11,7 +11,7 @@ from pathlib import Path
 
 import polars as pl
 
-_PROFILE_PACKAGE = "dartlab.providers.dart.docs.sectionsArchive.profileData"
+_PROFILE_PACKAGE = "dartlab.providers.dart.docs.sections.profileData"
 
 
 @contextmanager

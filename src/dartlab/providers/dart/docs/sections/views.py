@@ -7,9 +7,9 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle, stripSectionPrefix
-from dartlab.providers.dart.docs.sectionsArchive.pipeline import iterPeriodSubsets
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import (
+from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
+from dartlab.providers.dart.docs.sections.pipeline import iterPeriodSubsets
+from dartlab.providers.dart.docs.sections.sectionsBase import (
     periodOrderValue,
     sortPeriods,
 )
@@ -629,12 +629,12 @@ def saveView(df: pl.DataFrame, path: Path) -> None:
 # ── 분할 (룰 3 LoC) ───────────────────────────────────────────────
 # views.py 1175 LoC → 본 파일 + viewsRetrieval + viewsContext 3 파일로 분할.
 # 외부 caller 호환 위해 본 모듈에서 re-export.
-from dartlab.providers.dart.docs.sectionsArchive.viewsContext import (
+from dartlab.providers.dart.docs.sections.viewsContext import (
     contextSlices,
     splitContextText,
     splitMarkdownTable,
 )
-from dartlab.providers.dart.docs.sectionsArchive.viewsRetrieval import retrievalBlocks
+from dartlab.providers.dart.docs.sections.viewsRetrieval import retrievalBlocks
 
 __all__ = [
     "blockPriority",

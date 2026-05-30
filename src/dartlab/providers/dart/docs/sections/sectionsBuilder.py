@@ -30,7 +30,7 @@ from contextlib import contextmanager
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
+from dartlab.providers.dart.docs.sections.sectionsStorage import (
     sectionsDir,
     sectionsPath,
 )

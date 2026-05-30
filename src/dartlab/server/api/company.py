@@ -414,7 +414,7 @@ def apiCompanySectionsRaw(
     """
     try:
         company = getCompany(code)
-        from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import loadSectionsRawXml
+        from dartlab.providers.dart.docs.sections.sectionsStorage import loadSectionsRawXml
 
         periods_filter = [period] if period else None
         df = loadSectionsRawXml(company.stockCode, periods=periods_filter)

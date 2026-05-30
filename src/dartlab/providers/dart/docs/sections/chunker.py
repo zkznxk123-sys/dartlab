@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 
-from dartlab.providers.dart.docs.sectionsArchive.types import SectionChunk
+from dartlab.providers.dart.docs.sections.types import SectionChunk
 
 ROMAN_MAP = {
     "I": 1,

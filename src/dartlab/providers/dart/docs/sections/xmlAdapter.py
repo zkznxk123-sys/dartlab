@@ -407,7 +407,7 @@ def stripTagsFromSectionsDf(df, periodCols=None):
 
     Example:
         >>> from dartlab import Company
-        >>> from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import stripTagsFromSectionsDf
+        >>> from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
         >>> df = stripTagsFromSectionsDf(Company('005930').sections)
     """
     if df is None:

@@ -20,7 +20,7 @@ def test_sections_entry_present():
 def test_sections_dir_matches_storage_module():
     # sectionsStorage._SECTIONS_REL 와 DATA_RELEASES["sections"]["dir"] 일치.
     # 둘이 분리되면 build path 와 HF push path 가 어긋남 → 사용자 측 다운로드 0.
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import _SECTIONS_REL
+    from dartlab.providers.dart.docs.sections.sectionsStorage import _SECTIONS_REL
 
     assert DATA_RELEASES["sections"]["dir"] == _SECTIONS_REL
 

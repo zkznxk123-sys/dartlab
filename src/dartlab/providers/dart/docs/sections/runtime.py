@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from dartlab.providers.dart.docs.sectionsArchive.artifacts import loadProjectionRules
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import RE_SPLIT_SUFFIX
+from dartlab.providers.dart.docs.sections.artifacts import loadProjectionRules
+from dartlab.providers.dart.docs.sections.sectionsBase import RE_SPLIT_SUFFIX
 
 _RE_MAJOR_HEADING = re.compile(r"^([가-힣])\.\s*(.+)$")
 _RE_TABLE_SEP = re.compile(r"^\|(?:\s*:?-{3,}:?\s*\|)+$")
@@ -51,7 +51,7 @@ def chapterFromMajorNum(majorNum: int) -> str | None:
         str | None — 로마숫자 chapter ("I"/"II"/"III"/...). 매핑 없음 → None.
 
     Example:
-        >>> from dartlab.providers.dart.docs.sectionsArchive.runtime import chapterFromMajorNum
+        >>> from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
         >>> chapterFromMajorNum(2)
         'II'
         >>> chapterFromMajorNum(999) is None
@@ -252,7 +252,7 @@ def splitByMajorHeading(text: str) -> list[tuple[str, str]]:
         heading 자체가 없으면 ``[("(root)", text)]`` (root 만 1 개).
 
     Example:
-        >>> from dartlab.providers.dart.docs.sectionsArchive.runtime import splitByMajorHeading
+        >>> from dartlab.providers.dart.docs.sections.runtime import splitByMajorHeading
         >>> text = "가. 개요\\n본문 1\\n나. 상세\\n본문 2"
         >>> result = splitByMajorHeading(text)
         >>> len(result) == 2 and result[0][0].startswith("가.")
@@ -391,7 +391,7 @@ def semanticTopicForLabel(topic: str, label: str) -> str | None:
         str | None — 세분 semantic topic ID. 매칭 없음 → None.
 
     Example:
-        >>> from dartlab.providers.dart.docs.sectionsArchive.runtime import semanticTopicForLabel
+        >>> from dartlab.providers.dart.docs.sections.runtime import semanticTopicForLabel
         >>> semanticTopicForLabel("segmentOverview", "가. 반도체부문")
         'segmentSemiconductor'
         >>> semanticTopicForLabel("randomTopic", "label") is None
@@ -631,7 +631,7 @@ def detailTopicForBlock(
         매칭 없음 → None.
 
     Example:
-        >>> from dartlab.providers.dart.docs.sectionsArchive.runtime import detailTopicForBlock
+        >>> from dartlab.providers.dart.docs.sections.runtime import detailTopicForBlock
         >>> result = detailTopicForBlock("productService", "productService", "가. 신탁업무(상세)", "text", "본문")
         >>> result
         'trustBusinessDetail'
@@ -755,7 +755,7 @@ def detailTopicForBlock(
 # ── 분할 (룰 3 LoC) ───────────────────────────────────────────────
 # runtime.py 921 LoC → 본 파일 + runtimeProjection 2 파일로 분할.
 # 외부 caller 호환 위해 본 모듈에서 re-export.
-from dartlab.providers.dart.docs.sectionsArchive.runtimeProjection import (  # noqa: E402
+from dartlab.providers.dart.docs.sections.runtimeProjection import (  # noqa: E402
     _routeChapterIISegment,
     applyProjections,
 )

@@ -16,9 +16,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 from functools import lru_cache
 
-from dartlab.providers.dart.docs.sectionsArchive.segmentKeyer import SegmentKeyer
-from dartlab.providers.dart.docs.sectionsArchive.tableParser import tableHeaderHash
-from dartlab.providers.dart.docs.sectionsArchive.textStructure import parseTextStructureWithState
+from dartlab.providers.dart.docs.sections.segmentKeyer import SegmentKeyer
+from dartlab.providers.dart.docs.sections.tableParser import tableHeaderHash
+from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
 
 _NOTES_TOPICS = frozenset({"financialNotes", "consolidatedNotes"})
 

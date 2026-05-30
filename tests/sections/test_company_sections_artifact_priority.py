@@ -18,8 +18,8 @@ def test_company_sections_uses_artifact_when_present(monkeypatch, tmp_path):
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
 
     code = "TESTART"
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import saveSectionsByPeriod
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import hasSectionsArtifact
+    from dartlab.providers.dart.docs.sections.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sections.sectionsStorage import hasSectionsArtifact
 
     fixtureWide = pl.DataFrame(
         {
@@ -60,7 +60,7 @@ def test_company_sections_falls_back_when_artifact_missing(monkeypatch, tmp_path
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
 
     code = "NOARTIFACT"
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import hasSectionsArtifact
+    from dartlab.providers.dart.docs.sections.sectionsStorage import hasSectionsArtifact
 
     assert not hasSectionsArtifact(code)
 
@@ -90,7 +90,7 @@ def test_company_sections_falls_back_when_artifact_empty(monkeypatch, tmp_path):
     monkeypatch.setattr("dartlab.config.dataDir", str(tmp_path))
 
     code = "EMPTYART"
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import sectionsDir
+    from dartlab.providers.dart.docs.sections.sectionsStorage import sectionsDir
 
     sectionsDir(code).mkdir(parents=True, exist_ok=True)
 

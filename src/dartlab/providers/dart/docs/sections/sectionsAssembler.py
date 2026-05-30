@@ -11,7 +11,7 @@ import gc
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsArchive.freqMeta import _rowFreqMeta
+from dartlab.providers.dart.docs.sections.freqMeta import _rowFreqMeta
 from dartlab.providers.dart.docs.topicStandard import TOPIC_CANONICAL_CHAPTER
 
 # final wide DataFrame 의 schema — 30 fixed columns + period dynamic columns.

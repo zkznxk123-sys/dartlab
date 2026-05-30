@@ -38,7 +38,7 @@ def discoverCodes() -> list[str]:
 
 def measureCode(code: str) -> dict:
     from dartlab.providers.dart import Company
-    from dartlab.providers.dart.docs.sectionsArchive.pipeline import clearPreparedCache
+    from dartlab.providers.dart.docs.sections.pipeline import clearPreparedCache
     from tests.audit.sectionsParity import auditCode
 
     try:

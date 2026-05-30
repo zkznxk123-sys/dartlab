@@ -46,7 +46,7 @@ def auditCode(code: str) -> dict:
     - table block: headerHash 비교 (data row 변동은 정상 — period 별 값만 다른 같은 표).
     """
     from dartlab import Company
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import tableHeaderHash
+    from dartlab.providers.dart.docs.sections.tableParser import tableHeaderHash
 
     company = Company(code)
     sections = company.sections

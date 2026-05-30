@@ -7,8 +7,8 @@ import re
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.providers.dart.docs.sectionsArchive.pipeline import _joinPathSegments, _splitPathSegments
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import periodOrderValue, sortPeriods
+from dartlab.providers.dart.docs.sections.pipeline import _joinPathSegments, _splitPathSegments
+from dartlab.providers.dart.docs.sections.sectionsBase import periodOrderValue, sortPeriods
 
 
 def projectFreqRows(
@@ -663,7 +663,7 @@ def structureCollisions(
 
 
 # ── 추가 structure / collision 분석 함수는 analysisStructure.py 로 분리 (규칙 3 LoC).
-from dartlab.providers.dart.docs.sectionsArchive.analysisStructure import (  # noqa: E402, F401
+from dartlab.providers.dart.docs.sections.analysisStructure import (  # noqa: E402, F401
     semanticCollisions,
     structureChanges,
     structureEvents,

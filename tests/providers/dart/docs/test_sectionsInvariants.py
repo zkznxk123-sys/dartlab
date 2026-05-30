@@ -41,9 +41,9 @@ def test_no_pivot_key_collision(stockCode: str, caplog) -> None:
 
     import logging
 
-    from dartlab.providers.dart.docs.sectionsArchive.pipeline import sections
+    from dartlab.providers.dart.docs.sections.pipeline import sections
 
-    with caplog.at_level(logging.WARNING, logger="dartlab.providers.dart.docs.sectionsArchive.pipeline"):
+    with caplog.at_level(logging.WARNING, logger="dartlab.providers.dart.docs.sections.pipeline"):
         df = sections(stockCode, topics=None)
 
     assert df is not None and not df.is_empty()
@@ -60,7 +60,7 @@ def test_chapter_dedup_8char_recall() -> None:
     sub-section 안에 동일 line 이 없어도 unique block 으로 *간주 안 됨* → drop.
     pipeline.py:1023 `meaningful = [ln for ln in missing if len(ln) >= 8]`.
     """
-    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _splitContentBlocks
+    from dartlab.providers.dart.docs.sections.pipeline import _splitContentBlocks
 
     shortOnly = "| 1 |\n|A|B|\n|C|"
     blocks = _splitContentBlocks(shortOnly)

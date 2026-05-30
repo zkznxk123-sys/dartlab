@@ -2,7 +2,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.providers.dart.docs.sectionsArchive.mapper import (
+from dartlab.providers.dart.docs.sections.mapper import (
     loadSectionMappings,
     mapSectionTitle,
     normalizeSectionTitle,

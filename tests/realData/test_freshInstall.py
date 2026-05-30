@@ -38,7 +38,7 @@ def freshSectionsCache():
     "fresh install 첫 호출" 시나리오가 재현되지 않는다.
     """
     try:
-        from dartlab.providers.dart.docs.sectionsArchive.pipeline import clearPreparedCache
+        from dartlab.providers.dart.docs.sections.pipeline import clearPreparedCache
 
         clearPreparedCache()
         yield

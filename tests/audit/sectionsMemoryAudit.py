@@ -34,7 +34,7 @@ def _rssMb() -> float:
 
 
 def memoryAuditPerStock(stockCode: str) -> dict[str, float] | None:
-    from dartlab.providers.dart.docs.sectionsArchive.pipeline import clearPreparedCache, sections
+    from dartlab.providers.dart.docs.sections.pipeline import clearPreparedCache, sections
 
     clearPreparedCache(stockCode)
     gc.collect()

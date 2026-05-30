@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
+from dartlab.providers.dart.docs.sections.sectionsStorage import (
     _HF_DOWNLOAD_ATTEMPTED,
     _ensureFromHf,
     hasSectionsArtifact,
@@ -28,7 +28,7 @@ def test_ensure_returns_true_when_artifact_present(monkeypatch, tmp_path):
     # 픽스처 artifact 생성
     import polars as pl
 
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import saveSectionsByPeriod
+    from dartlab.providers.dart.docs.sections.sectionsBuilder import saveSectionsByPeriod
 
     fixture = pl.DataFrame(
         {"topic": ["A"], "blockType": ["text"], "blockOrder": [0], "segmentKey": ["x"], "2025": ["v"]}
@@ -99,7 +99,7 @@ def test_ensure_returns_true_after_successful_download(monkeypatch, tmp_path):
         # 다운로드 시뮬레이션 — sectionsDir 안 dummy parquet 생성
         import polars as pl
 
-        from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import sectionsDir
+        from dartlab.providers.dart.docs.sections.sectionsStorage import sectionsDir
 
         d = sectionsDir(code)
         d.mkdir(parents=True, exist_ok=True)

@@ -531,11 +531,11 @@ class _ProfileAccessor:
         SeeAlso:
             - ``facts`` / ``sections`` — 본 함수의 source.
             - ``_sourcePriority`` (모듈 private) — whySelected 의 priority 로직.
-            - ``dartlab.providers.dart.docs.sectionsArchive.rawPeriod`` — period 정규화.
+            - ``dartlab.providers.dart.docs.sections.rawPeriod`` — period 정규화.
 
         Requires:
             - polars — DataFrame group_by + filter.
-            - dartlab.providers.dart.docs.sectionsArchive — rawPeriod.
+            - dartlab.providers.dart.docs.sections — rawPeriod.
 
         AIContext:
             AI 가 "이 값이 어디서 나온 거냐" 출처 질문 처리 시 entry. primarySource 만 사용자
@@ -560,7 +560,7 @@ class _ProfileAccessor:
         Raises:
             없음.
         """
-        from dartlab.providers.dart.docs.sectionsArchive import rawPeriod
+        from dartlab.providers.dart.docs.sections import rawPeriod
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
         facts = self.facts

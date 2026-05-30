@@ -1,6 +1,6 @@
 """사업보고서 섹션 구조화 모듈."""
 
-from dartlab.providers.dart.docs.sectionsArchive.analysis import (
+from dartlab.providers.dart.docs.sections.analysis import (
     projectFreqRows,
     semanticCollisions,
     semanticRegistry,
@@ -10,14 +10,14 @@ from dartlab.providers.dart.docs.sectionsArchive.analysis import (
     structureRegistry,
     structureSummary,
 )
-from dartlab.providers.dart.docs.sectionsArchive.extractors import (
+from dartlab.providers.dart.docs.sections.extractors import (
     ParsedSubtopicTable,
     TopicSubtables,
     parseSubtopicTable,
     topicSubtables,
 )
-from dartlab.providers.dart.docs.sectionsArchive.pipeline import sections
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import (
+from dartlab.providers.dart.docs.sections.pipeline import sections
+from dartlab.providers.dart.docs.sections.sectionsBase import (
     displayPeriod,
     formatPeriodRange,
     periodColumns,
@@ -25,12 +25,12 @@ from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import (
     reorderPeriodColumns,
     sortPeriods,
 )
-from dartlab.providers.dart.docs.sectionsArchive.types import (
+from dartlab.providers.dart.docs.sections.types import (
     SectionChunk,
     SectionResult,
     YearSections,
 )
-from dartlab.providers.dart.docs.sectionsArchive.views import (
+from dartlab.providers.dart.docs.sections.views import (
     buildMarkdownBlocks,
     buildMarkdownWide,
     contextSlices,

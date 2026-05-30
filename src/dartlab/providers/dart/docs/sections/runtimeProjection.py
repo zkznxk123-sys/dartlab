@@ -6,8 +6,8 @@ runtime.py 921 LoC 분할 (룰 3 LoC 임계 회피). 본 모듈은 chapter II �
 
 from __future__ import annotations
 
-from dartlab.providers.dart.docs.sectionsArchive.artifacts import loadProjectionRules
-from dartlab.providers.dart.docs.sectionsArchive.runtime import (
+from dartlab.providers.dart.docs.sections.artifacts import loadProjectionRules
+from dartlab.providers.dart.docs.sections.runtime import (
     _CHAPTER_II_SPLIT_FALLBACK_TARGETS,
     _CHAPTER_II_SPLIT_SOURCE,
     splitByMajorHeading,
@@ -54,7 +54,7 @@ def applyProjections(
         가드). projection 규칙이 비면 입력 그대로 반환.
 
     Example:
-        >>> from dartlab.providers.dart.docs.sectionsArchive.runtime import applyProjections
+        >>> from dartlab.providers.dart.docs.sections.runtime import applyProjections
         >>> rows = [{"chapter": "II", "topic": "X", "text": "ABC", "blockType": "text", "blockOrder": 0}]
         >>> result = applyProjections(rows, {"II": {"X"}})
         >>> len(result) >= 1
@@ -73,7 +73,7 @@ def applyProjections(
         - ``_routeChapterIISegment`` (모듈 private) — 분할 segment 의 키워드 라우팅 로직.
 
     Requires:
-        - dartlab.providers.dart.docs.sectionsArchive.artifacts.loadProjectionRules — 매핑 source.
+        - dartlab.providers.dart.docs.sections.artifacts.loadProjectionRules — 매핑 source.
         - 본 모듈 함수 ``splitByMajorHeading`` / ``_routeChapterIISegment`` — 분할/라우팅.
 
     AIContext:

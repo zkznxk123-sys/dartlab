@@ -9,7 +9,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import _extractTableStruct, wideToLong
+from dartlab.providers.dart.docs.sections.sectionsBuilder import _extractTableStruct, wideToLong
 
 pytestmark = [pytest.mark.unit]
 

@@ -7,7 +7,7 @@ from functools import lru_cache
 from typing import Any, Literal
 
 from dartlab.core.textNormalize import stripPeriodMarkers
-from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle, stripSectionPrefix
+from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 
 TextNodeType = Literal["heading", "body"]
 
@@ -686,7 +686,7 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
 
 
 # ── 재내보내기 (분리: textStructureParse.py) ────────────────────
-from dartlab.providers.dart.docs.sectionsArchive.textStructureParse import (  # noqa: E402  re-export
+from dartlab.providers.dart.docs.sections.textStructureParse import (  # noqa: E402  re-export
     parseTextStructure,
     parseTextStructureWithState,
 )

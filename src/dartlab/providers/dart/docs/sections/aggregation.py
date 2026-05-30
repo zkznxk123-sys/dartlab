@@ -20,11 +20,11 @@ import os
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsArchive.expansion import _expandStructuredRows
-from dartlab.providers.dart.docs.sectionsArchive.pathNormalizer import _comparablePathInfo
+from dartlab.providers.dart.docs.sections.expansion import _expandStructuredRows
+from dartlab.providers.dart.docs.sections.pathNormalizer import _comparablePathInfo
 from dartlab.providers.dart.docs.topicStandard import TOPIC_CANONICAL_CHAPTER
 
-_log = logging.getLogger("dartlab.providers.dart.docs.sectionsArchive.pipeline")
+_log = logging.getLogger("dartlab.providers.dart.docs.sections.pipeline")
 
 
 def _periodRowsForKey(periodRowsDf: pl.DataFrame, periodKey: str) -> list[dict[str, object]]:
@@ -40,9 +40,9 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     parity test: ``tests/providers/dart/docs/test_sectionsPolarsParity.py``
     (5 종목 × shape/dtypes/values strict equals).
     """
-    from dartlab.providers.dart.docs.sectionsArchive.pipeline import _getPrepared
-    from dartlab.providers.dart.docs.sectionsArchive.runtime import detailTopicForTopic, projectionSuppressedTopics
-    from dartlab.providers.dart.docs.sectionsArchive.runtimeProjection import applyProjections
+    from dartlab.providers.dart.docs.sections.pipeline import _getPrepared
+    from dartlab.providers.dart.docs.sections.runtime import detailTopicForTopic, projectionSuppressedTopics
+    from dartlab.providers.dart.docs.sections.runtimeProjection import applyProjections
 
     prepared = _getPrepared(stockCode)
     validPeriods = prepared.validPeriods

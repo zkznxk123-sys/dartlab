@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle
-from dartlab.providers.dart.docs.sectionsArchive.pipeline import iterPeriodSubsets
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import periodOrderValue
+from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
+from dartlab.providers.dart.docs.sections.pipeline import iterPeriodSubsets
+from dartlab.providers.dart.docs.sections.sectionsBase import periodOrderValue
 
 _BOILERPLATE_SET = [
     "사업보고서",
@@ -176,7 +176,7 @@ def retrievalBlocks(stockCode: str) -> pl.DataFrame:
     cTableLines: list[int] = []
 
     # 순환 import 회피 — views.py 의 normalizeTitle/splitMarkdownBlocks 를 retrieval 진입 시 lazy.
-    from dartlab.providers.dart.docs.sectionsArchive.views import normalizeTitle, splitMarkdownBlocks
+    from dartlab.providers.dart.docs.sections.views import normalizeTitle, splitMarkdownBlocks
 
     for period, _reportKind, ccol, subset in iterPeriodSubsets(stockCode):
         pOrder = periodOrderValue(period)

@@ -153,7 +153,7 @@ def _hzNormalizeItem(name: str) -> str:
 
 def _hzGroupHeader(hc: list[str]) -> str:
     """헤더 시그니처 — 기간 키워드 제거 후 normalize."""
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import _normalizeHeader
+    from dartlab.providers.dart.docs.sections.tableParser import _normalizeHeader
 
     h = _normalizeHeader(hc)
     h = _HZ_PERIOD_KW_RE.sub("", h)
@@ -163,7 +163,7 @@ def _hzGroupHeader(hc: list[str]) -> str:
 
 def _hzFixSubtable(sub, hc, dr):
     """dr 비어 있으면 stripUnitHeader 로 재파싱. 반환: (sub, hc, dr) or None (불가)."""
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import (
+    from dartlab.providers.dart.docs.sections.tableParser import (
         _dataRows,
         _headerCells,
         _isJunk,
@@ -183,7 +183,7 @@ def _hzFixSubtable(sub, hc, dr):
 
 def _hzResolveStructType(sub, hc, structType):
     """structType == 'skip' 이면 stripUnitHeader 로 재분류 시도. 반환: (sub, hc, structType)."""
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import (
+    from dartlab.providers.dart.docs.sections.tableParser import (
         _classifyStructure,
         _dataRows,
         _headerCells,
@@ -204,7 +204,7 @@ def _hzResolveStructType(sub, hc, structType):
 
 def _hzCollectHeaderGroups(boRow, periodCols: list[str]) -> dict[str, list[str]]:
     """기간별 서브테이블 헤더 시그니처 수집. 반환: {헤더: [기간..]}."""
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import (
+    from dartlab.providers.dart.docs.sections.tableParser import (
         _classifyStructure,
         _dataRows,
         _headerCells,
@@ -236,7 +236,7 @@ def _hzCollectHeaderGroups(boRow, periodCols: list[str]) -> dict[str, list[str]]
 
 def _hzCollectMultiYear(sub, pYear: int, p: str, allItems, seenItems, periodItemVal) -> None:
     """multi-year 서브테이블 → (item, period, val) 수집."""
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import _parseMultiYear
+    from dartlab.providers.dart.docs.sections.tableParser import _parseMultiYear
 
     triples, _ = _parseMultiYear(sub, pYear)
     for rawItem, year, val in triples:
@@ -251,7 +251,7 @@ def _hzCollectMultiYear(sub, pYear: int, p: str, allItems, seenItems, periodItem
 
 def _hzCollectKvMatrix(sub, p: str, allItems, seenItems, periodItemVal) -> None:
     """key-value / matrix → (item, period, val) 수집."""
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import _parseKeyValueOrMatrix
+    from dartlab.providers.dart.docs.sections.tableParser import _parseKeyValueOrMatrix
 
     rows, headerNames, _ = _parseKeyValueOrMatrix(sub)
     for rawItem, vals in rows:
@@ -339,7 +339,7 @@ def _hzProcessPeriod(boRow, p: str, bestHeader: str, allItems, seenItems, period
     인식. markdown pipe-format subtable 외 HTML subtable 도 ``_htmlTablesToMarkdownSubtables``
     경유로 변환 후 같은 path. ALIGN/rowspan/colspan 보존 (rowspan/colspan 펼친 grid).
     """
-    from dartlab.providers.dart.docs.sectionsArchive.tableParser import (
+    from dartlab.providers.dart.docs.sections.tableParser import (
         _classifyStructure,
         _dataRows,
         _headerCells,

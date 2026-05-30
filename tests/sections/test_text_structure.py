@@ -8,15 +8,15 @@ import pytest
 from dartlab import Company
 
 pytestmark = pytest.mark.integration
-from dartlab.providers.dart.docs.sectionsArchive import analysis as _analysis
-from dartlab.providers.dart.docs.sectionsArchive import (
+from dartlab.providers.dart.docs.sections import analysis as _analysis
+from dartlab.providers.dart.docs.sections import (
     displayPeriod,
     pipeline,
     rawPeriod,
     reorderPeriodColumns,
     textStructure,
 )
-from dartlab.providers.dart.docs.sectionsArchive.textStructure import parseTextStructure, parseTextStructureWithState
+from dartlab.providers.dart.docs.sections.textStructure import parseTextStructure, parseTextStructureWithState
 
 SAMSUNG = "005930"
 

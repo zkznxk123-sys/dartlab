@@ -32,13 +32,13 @@ import polars as pl
 
 _log = logging.getLogger(__name__)
 
-from dartlab.providers.dart.docs.sectionsArchive.runtime import (
+from dartlab.providers.dart.docs.sections.runtime import (
     applyProjections,
     chapterTeacherTopics,
     detailTopicForTopic,
     projectionSuppressedTopics,
 )
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import (
+from dartlab.providers.dart.docs.sections.sectionsBase import (
     sortPeriods,
 )
 
@@ -309,7 +309,7 @@ def _mergeFragmentTables(
 
 
 # ── _assembleSectionsDataFrame + _SECTIONS_SCHEMA_FIXED 는 sectionsAssembler.py 로 분리 (룰 3 LoC).
-from dartlab.providers.dart.docs.sectionsArchive.sectionsAssembler import (  # noqa: E402, F401
+from dartlab.providers.dart.docs.sections.sectionsAssembler import (  # noqa: E402, F401
     _SECTIONS_SCHEMA_FIXED,
     _assembleSectionsDataFrame,
 )
@@ -321,7 +321,7 @@ def _cacheSectionsResult(cacheKey: tuple[str, "frozenset[str] | None"], result: 
     Phase 3 추가: 디스크 캐시 (data/dart/sectionsCache/{code}_{hash}.parquet) 도 동시
     저장. 프로세스 재시작 후에도 build cost 회피.
     """
-    from dartlab.providers.dart.docs.sectionsArchive.diskCache import saveDiskCache as _saveDiskCache
+    from dartlab.providers.dart.docs.sections.diskCache import saveDiskCache as _saveDiskCache
 
     with _cacheLock:
         if len(_sectionsResultCache) >= _SECTIONS_RESULT_CACHE_MAX:
@@ -353,7 +353,7 @@ class _PreparedRows:
         self.teacherTopics = teacherTopics
 
 
-from dartlab.providers.dart.docs.sectionsArchive.aggregation import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
     _periodRowsForKey,
 )
 
@@ -371,7 +371,7 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
         return cached
 
     # Phase 1 disk cache — process restart 후 첫 호출도 XML parsing 11s 우회.
-    from dartlab.providers.dart.docs.sectionsArchive.diskCache import (
+    from dartlab.providers.dart.docs.sections.diskCache import (
         loadPreparedDiskCache as _loadPreparedDiskCache,
     )
 
@@ -422,7 +422,7 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
     # Phase 1 disk cache write — 다음 process restart 첫 호출이 mmap reload 로 50ms.
     # write 비용 ~30~50ms (zstd IPC compression), build 한 후 1 회. None / 빈 DF 면 skip.
     try:
-        from dartlab.providers.dart.docs.sectionsArchive.diskCache import (
+        from dartlab.providers.dart.docs.sections.diskCache import (
             savePreparedDiskCache as _savePreparedDiskCache,
         )
 
@@ -499,19 +499,19 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
                 _sectionsResultCache.pop(k, None)
 
 
-from dartlab.providers.dart.docs.sectionsArchive.aggregation import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
     _sectionsPolarsOnly,
 )
-from dartlab.providers.dart.docs.sectionsArchive.expansion import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.expansion import (  # noqa: F401
     _NOTES_TOPICS,
     _expandStructuredRows,
 )
-from dartlab.providers.dart.docs.sectionsArchive.freqMeta import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.freqMeta import (  # noqa: F401
     _freqSortKey,
     _periodFreq,
     _rowFreqMeta,
 )
-from dartlab.providers.dart.docs.sectionsArchive.pathNormalizer import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.pathNormalizer import (  # noqa: F401
     _BUSINESS_OVERVIEW_COMPARABLE_ROOTS,
     _BUSINESS_UNIT_SEGMENT_LITERALS,
     _RE_BUSINESS_UNIT_SEGMENT,
@@ -523,12 +523,12 @@ from dartlab.providers.dart.docs.sectionsArchive.pathNormalizer import (  # noqa
     _normalizeComparableSegment,
     _splitPathSegments,
 )
-from dartlab.providers.dart.docs.sectionsArchive.periodIter import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.periodIter import (  # noqa: F401
     _SECTIONS_REQUIRED_COLS,
     _periodSortKey,
     iterPeriodSubsets,
 )
-from dartlab.providers.dart.docs.sectionsArchive.reportRows import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.reportRows import (  # noqa: F401
     _REPORT_ROW_SCHEMA,
     _reportRowsToTopicRows,
     _splitContentBlocks,
@@ -580,7 +580,7 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     Requires:
         - polars
         - gc (대량 row 처리 후 회수)
-        - dartlab.providers.dart.docs.sectionsArchive.* (chunker/views/runtime/mapper)
+        - dartlab.providers.dart.docs.sections.* (chunker/views/runtime/mapper)
 
     Capabilities:
         - DART 사업/분기/반기 보고서 16 topic 정형화 + 수평화 wide 보드.
@@ -638,7 +638,7 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         return cached  # type: ignore[return-value]
     # Phase 3 디스크 캐시 — 프로세스 재시작 후에도 build cost 회피. docs.parquet
     # 보다 새로운 cache 만 신뢰 (sectionsCache/{code}_{hash}.parquet).
-    from dartlab.providers.dart.docs.sectionsArchive.diskCache import loadDiskCache as _loadDiskCache
+    from dartlab.providers.dart.docs.sections.diskCache import loadDiskCache as _loadDiskCache
 
     diskCached = _loadDiskCache(stockCode, cacheKey[1])
     if diskCached is not None:
@@ -719,8 +719,8 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
 # chapter title catch-all 매칭 — sectionMappings.json 의 "I. 회사의 개요" / "II. 사업의 내용"
 # 류 룰이 만든 sourceTopic. specific leaf row 가 같은 (chapter, sourceBlockOrder) 로 존재하면
 # catch-all 쪽은 중복 — 1.회사의 개요 leaf 화면이 4.주식의 총수 표를 머금는 회귀 차단.
-from dartlab.providers.dart.docs.sectionsArchive.dedupCleanup import (  # noqa: F401
+from dartlab.providers.dart.docs.sections.dedupCleanup import (  # noqa: F401
     _CHAPTER_CATCH_ALL_RE,
     _dropChapterCatchAllDuplicates,
 )
-from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle  # noqa: F401, E402
+from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle  # noqa: F401, E402

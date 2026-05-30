@@ -193,8 +193,8 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     if not company._hasDocs:
         return []
 
-    from dartlab.providers.dart.docs.sectionsArchive import displayPeriod, formatPeriodRange, sortPeriods
-    from dartlab.providers.dart.docs.sectionsArchive.pipeline import (
+    from dartlab.providers.dart.docs.sections import displayPeriod, formatPeriodRange, sortPeriods
+    from dartlab.providers.dart.docs.sections.pipeline import (
         _expandStructuredRows,
         _reportRowsToTopicRows,
         _rowFreqMeta,

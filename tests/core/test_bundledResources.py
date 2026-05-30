@@ -138,7 +138,7 @@ def test_loadSections_returnsPopulatedDict():
 
 def test_chapterFromMajorNum_mapsKnownRange():
     """runtime.chapterFromMajorNum 이 1~9 모두 non-None 매핑."""
-    from dartlab.providers.dart.docs.sectionsArchive.runtime import chapterFromMajorNum
+    from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
 
     for majorNum in range(1, 10):
         result = chapterFromMajorNum(majorNum)

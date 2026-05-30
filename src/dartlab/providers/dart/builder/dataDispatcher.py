@@ -101,7 +101,7 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
     Example:
         >>> traceFinanceTopic(c, "BS", period="2024")
     """
-    from dartlab.providers.dart.docs.sectionsArchive import rawPeriod
+    from dartlab.providers.dart.docs.sections import rawPeriod
 
     requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
     rows: list[tuple[str, str]] = []
@@ -574,7 +574,7 @@ def _showFromSectionsArtifact(
         if base is None or "sectionLeaf" not in base.columns:
             company._cache[cacheKey] = None
             return None
-        from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle
+        from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
 
         tagged = base.with_columns(
             pl.col("sectionLeaf").fill_null("").map_elements(mapSectionTitle, return_dtype=pl.Utf8).alias("_mtopic")
@@ -591,7 +591,7 @@ def _showFromSectionsArtifact(
         periodCols = [period]
     rows = rows.select(labelCols + periodCols)
     if stripTags:
-        from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import stripTagsFromSectionsDf
+        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
 
         rows = stripTagsFromSectionsDf(rows)
     return rows
@@ -696,12 +696,12 @@ def showSectionsTopic(
             if period and isinstance(period, str) and period in cleaned.columns:
                 cleaned = cleaned.select(keep_meta + [period])
             if stripTags:
-                from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import stripTagsFromSectionsDf
+                from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
 
                 cleaned = stripTagsFromSectionsDf(cleaned)
             return cleaned
         if stripTags:
-            from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import stripTagsFromSectionsDf
+            from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
 
             topicRows = stripTagsFromSectionsDf(topicRows)
         return topicRows
@@ -731,7 +731,7 @@ def showSectionsTopic(
     # 명시. 옛 호출자 영향 — sections cell 의 HTML 태그가 plain text 화 됨 (CLI 콘솔
     # 렌더 정상화).
     if stripTags and isinstance(result, pl.DataFrame):
-        from dartlab.providers.dart.docs.sectionsArchive.xmlAdapter import stripTagsFromSectionsDf
+        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
 
         result = stripTagsFromSectionsDf(result)
 

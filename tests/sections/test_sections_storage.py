@@ -17,12 +17,12 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from dartlab.providers.dart.docs.sectionsArchive.sectionsBuilder import (
+from dartlab.providers.dart.docs.sections.sectionsBuilder import (
     clearSectionsArtifact,
     saveSectionsByPeriod,
     wideToLong,
 )
-from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
+from dartlab.providers.dart.docs.sections.sectionsStorage import (
     _periodSortKey,
     hasSectionsArtifact,
     listAvailablePeriods,

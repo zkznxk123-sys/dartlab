@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sectionsArchive.viewsRetrieval import retrievalBlocks
+from dartlab.providers.dart.docs.sections.viewsRetrieval import retrievalBlocks
 
 
 def splitContextText(text: str, maxChars: int) -> list[str]:

@@ -483,7 +483,7 @@ def _loadDocsFromSections(
     Returns:
         옛 docs.parquet 호환 DataFrame (빈 artifact 시 빈 DataFrame).
     """
-    from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
+    from dartlab.providers.dart.docs.sections.sectionsStorage import (
         _ensureFromHf,
         hasSectionsArtifact,
         sectionsDir,
@@ -579,7 +579,7 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
     if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() in ("1", "true", "True"):
         return False
     try:
-        from dartlab.providers.dart.docs.sectionsArchive.sectionsStorage import (
+        from dartlab.providers.dart.docs.sections.sectionsStorage import (
             _ensureFromHf,
             hasSectionsArtifact,
             loadSectionsIndex,
