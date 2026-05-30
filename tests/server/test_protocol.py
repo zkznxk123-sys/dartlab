@@ -160,6 +160,14 @@ _DART_ONLY_EXEMPT: set[str] = {
     "industry",  # DART docs 밸류체인 분석 (SEC 공정 구조화 데이터 없음)
     # ── DART zip XML sections 전용 (SEC EDGAR 등가 layer 미구현) ──
     "sectionsAs",  # DART zip XML sections wide DataFrame (stripTags 파라미터)
+    "sectionsLazy",  # DART sections LazyFrame (columnar projection) — SEC iXBRL 등가 미구현
+    "sectionsLong",  # DART sections long format (period sharded) — SEC iXBRL 등가 미구현
+    "sectionsTables",  # DART sections 표 추출 (raw XML cell) — SEC iXBRL 등가 미구현
+    # ── DART docs/report 구조화 accessor 전용 (SEC 동등 구조 없음) ──
+    "executivePay",  # DART 임원 보수 (사업보고서 구조화) — SEC DEF 14A 구조 상이
+    "relatedPartyTx",  # DART 특수관계자 거래 (사업보고서) — SEC 구조 상이
+    "notesDetail",  # DART 주석 상세 테이블 (docs sections) — SEC 미지원
+    "flow",  # DART 자금/거래 흐름 docs accessor — SEC 동등 구조 없음
 }
 
 

@@ -1,10 +1,14 @@
 {
   "_note": "P-PR 트랙 — method-level symmetry baseline. P-PR6 (XBRL) / P-PR7 (10-K sections + Form 4) / P-PR8 (DEF 14A + 8-K + strict) 통과마다 missing/shallow 축소. P-PR8 종료 시 strict 0.",
   "missing": [
-    "edgar.network (dart.network)",
+    "edgar.executivePay (dart.executivePay)",
+    "edgar.flow (dart.flow)",
+    "edgar.notesDetail (dart.notesDetail)",
+    "edgar.relatedPartyTx (dart.relatedPartyTx)",
     "edgar.sectionsAs (dart.sectionsAs)",
-    "edgar.topicSummaries (dart.topicSummaries)",
-    "edgar.update (dart.update)"
+    "edgar.sectionsLazy (dart.sectionsLazy)",
+    "edgar.sectionsLong (dart.sectionsLong)",
+    "edgar.sectionsTables (dart.sectionsTables)"
   ],
   "shallow": []
 }
