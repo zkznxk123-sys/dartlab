@@ -4,7 +4,7 @@ import re
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.executive.parser import (
     aggregateExecutives,
@@ -42,7 +42,7 @@ def executive(stockCode: str) -> ExecutiveResult | None:
     if df is None or df.is_empty() or "year" not in df.columns:
         return None
     corpName = extractCorpName(df)
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     execRows: list[dict] = []
     individualRows: list[dict] = []

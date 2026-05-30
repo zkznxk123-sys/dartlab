@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import parsePeriodKey, selectReport
 from dartlab.providers._common.tableParser import extractAccounts
 
@@ -404,7 +404,7 @@ def statements(
     corpName = extractCorpName(df)
 
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     # 기간별 각 제표 데이터 수집
     bsData: dict[str, tuple[dict, list]] = {}

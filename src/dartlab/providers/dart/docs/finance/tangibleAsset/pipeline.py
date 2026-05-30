@@ -2,7 +2,7 @@
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.tangibleAsset.parser import findMovementTables
@@ -27,7 +27,7 @@ def tangibleAsset(stockCode: str) -> TangibleAssetResult | None:
     df = loadData(stockCode)
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
+    years = yearsDesc(df)[:5]  # 최근 5년
 
     allMovements: dict[str, list[TangibleMovement]] = {}
     allWarnings: list[str] = []

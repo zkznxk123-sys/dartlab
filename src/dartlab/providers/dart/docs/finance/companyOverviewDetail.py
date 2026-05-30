@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import selectReport
 
 
@@ -187,7 +187,7 @@ def companyOverviewDetail(stockCode: str) -> CompanyOverviewDetailResult | None:
         return None
 
     corpName = extractCorpName(df)
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     for year in years[:2]:
         report = selectReport(df, year, reportKind="annual")

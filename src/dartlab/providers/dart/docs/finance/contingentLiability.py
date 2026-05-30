@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import selectReport
 
 if TYPE_CHECKING:
@@ -350,7 +350,7 @@ def contingentLiability(stockCode: str) -> ContingentLiabilityResult | None:
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     guaranteeRows: list[dict] = []
     lawsuitRows: list[dict] = []

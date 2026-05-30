@@ -2,7 +2,7 @@ import re
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import parsePeriodKey, selectReport
 from dartlab.providers._common.tableParser import extractAccounts
 from dartlab.providers.dart.docs.finance.summary.bridgeMatcher import numberBridgeMatch, periodToIndex
@@ -32,7 +32,7 @@ def loadYearData(
     """
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
     yearData: dict[str, YearAccounts] = {}
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     for year in years:
         for kind in kinds:

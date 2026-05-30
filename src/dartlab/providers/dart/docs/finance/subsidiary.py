@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 from dartlab.providers._common.tableParser import parseAmount
 
@@ -156,7 +156,7 @@ def subsidiary(stockCode: str) -> SubsidiaryResult | None:
     df = loadData(stockCode)
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     yearData: dict[int, list[dict]] = {}
 

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import selectReport
 
 if TYPE_CHECKING:
@@ -230,7 +230,7 @@ def affiliateGroup(stockCode: str) -> AffiliateGroupResult | None:
         return None
 
     corpName = extractCorpName(df)
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     for year in years:
         report = selectReport(df, year, reportKind="annual")

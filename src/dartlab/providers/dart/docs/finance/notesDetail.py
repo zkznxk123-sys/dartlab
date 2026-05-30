@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData, yearsDesc
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
 from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.providers._common.reportSelector import selectReport
@@ -199,7 +199,7 @@ def notesDetail(
 
     keywords = NOTES_KEYWORDS.get(keyword, [keyword])
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
-    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
+    years = yearsDesc(df)[:5]  # 최근 5년
 
     allTables: dict[str, list[NotesPeriod]] = {}
     unitByYear: dict[str, float] = {}

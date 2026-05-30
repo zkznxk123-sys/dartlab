@@ -4,7 +4,7 @@ import re
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.executivePay.parser import (
     classifyBlock,
@@ -43,7 +43,7 @@ def executivePay(stockCode: str) -> ExecutivePayResult | None:
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     typeRows: list[dict] = []
     topPayRows: list[dict] = []

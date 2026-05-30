@@ -2,7 +2,7 @@
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.affiliate.extractor import parseTableRows
@@ -44,7 +44,7 @@ def affiliates(
     corpName = extractCorpName(df)
 
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
-    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
+    years = yearsDesc(df)[:5]  # 최근 5년
 
     allProfiles: dict[str, list[AffiliateProfile]] = {}
     allMovements: dict[str, list[AffiliateMovement]] = {}

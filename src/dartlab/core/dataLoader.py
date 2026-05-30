@@ -947,6 +947,32 @@ def extractCorpName(df: pl.DataFrame) -> str | None:
     return None
 
 
+def yearsDesc(df: pl.DataFrame | None, *, limit: int | None = None) -> list:
+    """DataFrame 'year' 컬럼 → 내림차순 고유 연도 list (빈/결측 시 []).
+
+    빈 회사 (loadData 빈 결과 — year 컬럼 부재) 에서 ``sorted(df["year"]...)`` 가
+    ColumnNotFoundError 로 크래시하는 것을 차단하는 docs/finance accessor 공통 가드.
+
+    Args:
+        df: loadData 결과 DataFrame (None/empty 허용).
+        limit: 반환 연도 최대 개수. None=전체.
+
+    Returns:
+        내림차순 정렬된 고유 연도 list. df None/empty/year 부재 시 빈 list.
+
+    Raises:
+        없음 — 빈 입력을 빈 list 로 흡수.
+
+    Example:
+        >>> yearsDesc(loadData("005930"))[:2]  # doctest: +SKIP
+        [2024, 2023]
+    """
+    if df is None or df.is_empty() or "year" not in df.columns:
+        return []
+    ordered = sorted(df["year"].unique().to_list(), reverse=True)
+    return ordered[:limit] if limit is not None else ordered
+
+
 def _docIdColumn(df: pl.DataFrame) -> str | None:
     for col in ("rcept_no", "accession_no"):
         if col in df.columns:

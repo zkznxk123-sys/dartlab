@@ -2,7 +2,7 @@
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 from dartlab.providers.dart.docs.finance.majorHolder.parser import (
     parseBigHolders,
@@ -38,7 +38,7 @@ def majorHolder(stockCode: str) -> MajorHolderResult | None:
     df = loadData(stockCode)
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     yearData: dict[int, dict] = {}
 
@@ -136,7 +136,7 @@ def holderOverview(stockCode: str) -> HolderOverview | None:
         return None
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
     if not years:
         return None
     report = selectReport(df, years[0], reportKind="annual")

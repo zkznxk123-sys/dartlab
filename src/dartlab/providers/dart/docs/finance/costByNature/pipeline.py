@@ -4,7 +4,7 @@ import re
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers._common.notesExtractor import extractNotesContent
 from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.costByNature.parser import (
@@ -41,7 +41,7 @@ def costByNature(stockCode: str, period: str = "y") -> CostByNatureResult | None
     df = loadData(stockCode)
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
+    years = yearsDesc(df)[:5]  # 최근 5년
     reportKinds = PERIOD_KINDS.get(period, ["annual"])
 
     yearData: dict[str, dict[str, float | None]] = {}

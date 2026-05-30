@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData, yearsDesc
 from dartlab.providers.dart.docs.finance.audit.parser import (
     classifyBlock,
     dedup,
@@ -35,7 +35,7 @@ def audit(stockCode: str) -> AuditResult | None:
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = yearsDesc(df)
 
     opinionRows: list[dict] = []
     feeRows: list[dict] = []
