@@ -11,7 +11,13 @@ def launchViewer(companyId: str, *, port: int = 8400) -> None:
 
     Args:
         companyId: 종목코드(DART) 또는 ticker(EDGAR).
-        port: 로컬 서버 포트.
+        port: 로컬 서버 포트. default 8400.
+
+    Example:
+        >>> launchViewer("005930")  # doctest: +SKIP  # 브라우저 자동 오픈
+
+    Raises:
+        없음 — 포트 이미 사용 중이면 서버 재기동 없이 브라우저만 연다.
     """
     import socket
     import threading

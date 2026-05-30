@@ -1,25 +1,4 @@
 {
   "_note": "P-트랙 P4 에서 docstring 메우며 축소",
-  "violations": [
-    "src/dartlab/providers/_common/diff.py::buildDiffMatrix",
-    "src/dartlab/providers/_common/diff.py::buildHeatmapSpec",
-    "src/dartlab/providers/_common/diff.py::changeRate",
-    "src/dartlab/providers/_common/diff.py::charDiff",
-    "src/dartlab/providers/_common/diff.py::diffSummaryDataFrame",
-    "src/dartlab/providers/_common/diff.py::keywordFrequency",
-    "src/dartlab/providers/_common/diff.py::lineDiffDataFrame",
-    "src/dartlab/providers/_common/diff.py::sectionsDiff",
-    "src/dartlab/providers/_common/diff.py::stable",
-    "src/dartlab/providers/_common/diff.py::topChanged",
-    "src/dartlab/providers/_common/diff.py::topicDiff",
-    "src/dartlab/providers/_common/diff.py::topicHistoryDataFrame",
-    "src/dartlab/providers/_common/diff.py::totalChanges",
-    "src/dartlab/providers/_common/diff.py::totalLines",
-    "src/dartlab/providers/_common/show.py::buildBlockIndex",
-    "src/dartlab/providers/_common/show.py::isPeriodColumn",
-    "src/dartlab/providers/_common/show.py::normalizeItemKey",
-    "src/dartlab/providers/_common/show.py::selectFromShow",
-    "src/dartlab/providers/_common/show.py::transposeToVertical",
-    "src/dartlab/providers/_common/viewer.py::launchViewer"
-  ]
+  "violations": []
 }

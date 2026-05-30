@@ -21,7 +21,21 @@ _PERIOD_COLUMN_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 
 def isPeriodColumn(name: str) -> bool:
-    """컬럼명이 기간 패턴(YYYY 또는 YYYYQ1~Q4)인지 판별."""
+    """컬럼명이 기간 패턴(YYYY 또는 YYYYQ1~Q4)인지 판별.
+
+    Args:
+        name: 컬럼명.
+
+    Returns:
+        ``2024``·``2024Q1`` 같은 기간 패턴이면 True.
+
+    Example:
+        >>> isPeriodColumn("2024Q1"), isPeriodColumn("topic")
+        (True, False)
+
+    Raises:
+        없음.
+    """
     return bool(_PERIOD_COLUMN_RE.fullmatch(name))
 
 
@@ -34,6 +48,13 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
 
     Returns:
         필터된 DataFrame 또는 None (매칭 기간 없을 때).
+
+    Example:
+        >>> transposeToVertical(wide, ["2024"])  # doctest: +SKIP
+        shape: (n, ...)
+
+    Raises:
+        없음 — 매칭 기간 없으면 None.
     """
     periodCols = [c for c in wide.columns if isPeriodColumn(c)]
     metaCols = [c for c in wide.columns if not isPeriodColumn(c)]
@@ -54,7 +75,23 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
 
 
 def normalizeItemKey(name: str) -> str:
-    """항목명 정규화: NFKC + 공백제거 + HTML entity + lower."""
+    """항목명 정규화: NFKC + 공백제거 + HTML entity + lower.
+
+    show() 의 항목 매칭 키 — 표기 흔들림(전각/공백/entity/대소문자)을 흡수한다.
+
+    Args:
+        name: 원본 항목명.
+
+    Returns:
+        정규화된 lookup 키 (lower-case, 공백·entity 제거).
+
+    Example:
+        >>> normalizeItemKey("매 출 액")
+        '매출액'
+
+    Raises:
+        없음 — 순수 문자열 변환.
+    """
     name = html.unescape(name)
     name = unicodedata.normalize("NFKC", name)
     name = re.sub(r"\s+", "", name)
@@ -249,7 +286,23 @@ def selectFromShow(
     indList: list[str] | None = None,
     colList: list[str] | None = None,
 ) -> pl.DataFrame | None:
-    """show() 결과에서 indList(행) + colList(열) 필터."""
+    """show() 결과에서 indList(행) + colList(열) 필터.
+
+    Args:
+        df: show() 수평화 결과 DataFrame.
+        indList: 행 필터 항목명 list. None = 전체 행.
+        colList: 열 필터 기간 list. None = 전체 기간. 연도만 주면 Q4 fallback.
+
+    Returns:
+        필터된 DataFrame. 매칭 없거나 빈 결과면 None.
+
+    Example:
+        >>> selectFromShow(df, ["매출액"], ["2024"])  # doctest: +SKIP
+        shape: (1, ...)
+
+    Raises:
+        없음 — 빈 입력·무매칭 시 None.
+    """
     if df.is_empty():
         return None
 
@@ -304,7 +357,21 @@ def selectFromShow(
 
 
 def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
-    """topic의 블록 목차 DataFrame. DART/EDGAR Company._buildBlockIndex 공통 구현."""
+    """topic 의 블록 목차 DataFrame. DART/EDGAR Company._buildBlockIndex 공통 구현.
+
+    Args:
+        topicRows: topic(행) × period(열) 수평화 DataFrame.
+
+    Returns:
+        블록 목차 DataFrame (블록 단위 메타 행). 중복 블록은 1행으로.
+
+    Example:
+        >>> buildBlockIndex(topicRows)  # doctest: +SKIP
+        shape: (blockCount, ...)
+
+    Raises:
+        없음.
+    """
     periodCols = [c for c in topicRows.columns if isPeriodColumn(c)]
     rows: list[dict[str, object]] = []
     seen: set[int] = set()

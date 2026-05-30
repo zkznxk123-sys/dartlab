@@ -54,7 +54,18 @@ class DiffSummary:
 
     @property
     def changeRate(self) -> float:
-        """전체 인접 기간 대비 변화 비율 (0.0~1.0)."""
+        """전체 인접 기간 대비 변화 비율 (0.0~1.0).
+
+        Returns:
+            changedCount / (totalPeriods - 1). 기간 1개 이하면 0.0.
+
+        Example:
+            >>> DiffSummary("t", None, 3, 1, 1).changeRate
+            0.5
+
+        Raises:
+            없음.
+        """
         if self.totalPeriods <= 1:
             return 0.0
         return self.changedCount / (self.totalPeriods - 1)
@@ -69,11 +80,36 @@ class DiffResult:
 
     @property
     def totalChanges(self) -> int:
-        """전체 변화 지점 수."""
+        """전체 변화 지점 수.
+
+        Returns:
+            entries(CHANGED 지점) 총 개수.
+
+        Example:
+            >>> DiffResult().totalChanges
+            0
+
+        Raises:
+            없음.
+        """
         return len(self.entries)
 
     def topChanged(self, n: int = 10) -> list[DiffSummary]:
-        """changeRate 상위 N개 topic 요약."""
+        """changeRate 상위 N개 topic 요약.
+
+        Args:
+            n: 반환할 상위 개수. default 10.
+
+        Returns:
+            changeRate 내림차순 정렬된 DiffSummary 상위 n개.
+
+        Example:
+            >>> DiffResult().topChanged(3)
+            []
+
+        Raises:
+            없음.
+        """
         return sorted(
             self.summaries,
             key=lambda s: s.changeRate,
@@ -81,7 +117,18 @@ class DiffResult:
         )[:n]
 
     def stable(self) -> list[DiffSummary]:
-        """변화 없는 topic 목록."""
+        """변화 없는 topic 목록.
+
+        Returns:
+            changedCount == 0 인 DiffSummary list.
+
+        Example:
+            >>> DiffResult().stable()
+            []
+
+        Raises:
+            없음.
+        """
         return [s for s in self.summaries if s.changedCount == 0]
 
 
@@ -93,6 +140,14 @@ def sectionsDiff(sections: pl.DataFrame) -> DiffResult:
 
     Returns:
         DiffResult — entries(변화 지점 목록) + summaries(topic별 요약).
+
+    Example:
+        >>> import polars as pl
+        >>> sectionsDiff(pl.DataFrame({"topic": ["a"], "2024": ["x"]})).totalChanges
+        0
+
+    Raises:
+        없음 — topic/period 컬럼 부족 시 빈 DiffResult.
     """
     periods = _periodCols(sections)
     if len(periods) < 2:
@@ -200,7 +255,18 @@ class LineDiff:
 
     @property
     def totalLines(self) -> int:
-        """전체 줄 수 (추가 + 삭제 + 유지)."""
+        """전체 줄 수 (추가 + 삭제 + 유지).
+
+        Returns:
+            len(added) + len(removed) + len(kept).
+
+        Example:
+            >>> LineDiff("2024", "2025", added=["a"], kept=["b"]).totalLines
+            2
+
+        Raises:
+            없음.
+        """
         return len(self.added) + len(self.removed) + len(self.kept)
 
 
@@ -220,6 +286,9 @@ def topicDiff(
 
     Returns:
         LineDiff 또는 None (해당 topic/기간 데이터 없을 때).
+
+    Raises:
+        없음 — topic/period 부재 시 None 반환.
     """
     topicCol = "topic"
     if topicCol not in sections.columns:
@@ -286,6 +355,13 @@ def lineDiffDataFrame(
 
     Returns:
         DataFrame(line, status, text) 또는 None.
+
+    Example:
+        >>> lineDiffDataFrame(sections, "사업의 개요", "2024", "2025")  # doctest: +SKIP
+        shape: (n, 3)
+
+    Raises:
+        없음 — topic/period 부재 시 None.
     """
     import difflib
 
@@ -333,7 +409,23 @@ def lineDiffDataFrame(
 
 
 def topicHistoryDataFrame(diffResult: DiffResult, topic: str) -> pl.DataFrame:
-    """특정 topic의 기간별 변경 이력 DataFrame."""
+    """특정 topic 의 기간별 변경 이력 DataFrame.
+
+    Args:
+        diffResult: sectionsDiff 결과.
+        topic: 대상 topic명.
+
+    Returns:
+        DataFrame(fromPeriod, toPeriod, status, fromLen, toLen, delta, deltaRate).
+        해당 topic 변경 이력 없으면 빈 schema DataFrame.
+
+    Example:
+        >>> topicHistoryDataFrame(sectionsDiff(sections), "사업의 개요")  # doctest: +SKIP
+        shape: (n, 7)
+
+    Raises:
+        없음.
+    """
     topicEntries = [e for e in diffResult.entries if e.topic == topic]
     if not topicEntries:
         return pl.DataFrame(
@@ -364,7 +456,21 @@ def topicHistoryDataFrame(diffResult: DiffResult, topic: str) -> pl.DataFrame:
 
 
 def diffSummaryDataFrame(diffResult: DiffResult) -> pl.DataFrame:
-    """전체 topic 변경 요약 DataFrame."""
+    """전체 topic 변경 요약 DataFrame.
+
+    Args:
+        diffResult: sectionsDiff 결과.
+
+    Returns:
+        DataFrame(chapter, topic, periods, changed, stable, changeRate) — topic 1행씩.
+
+    Example:
+        >>> diffSummaryDataFrame(sectionsDiff(sections))  # doctest: +SKIP
+        shape: (topicCount, 6)
+
+    Raises:
+        없음.
+    """
     return pl.DataFrame(
         [
             {
@@ -397,6 +503,13 @@ def buildDiffMatrix(
     Returns:
         {matrix: [{topic, chapter, changeRate, period1: 0|1, ...}],
          periods: [...], topic_count, period_count}
+
+    Example:
+        >>> buildDiffMatrix(sections)["topic_count"]  # doctest: +SKIP
+        15
+
+    Raises:
+        없음 — 변화 없으면 빈 matrix.
     """
     df = sections
     if textOnly and "blockType" in df.columns:
@@ -444,6 +557,13 @@ def buildHeatmapSpec(
 
     Returns:
         {chartType, title, xLabels, yLabels, data, meta}
+
+    Example:
+        >>> buildHeatmapSpec(buildDiffMatrix(sections), "삼성전자")["chartType"]  # doctest: +SKIP
+        'heatmap'
+
+    Raises:
+        없음.
     """
     rows = matrixData["matrix"][:topN]
     periods = matrixData["periods"]
@@ -473,6 +593,14 @@ def charDiff(fromText: str, toText: str) -> list[CharPart]:
 
     Returns:
         CharPart 리스트 — kind("equal"|"insert"|"delete") + text.
+        diff_match_patch 미설치 시 None.
+
+    Example:
+        >>> [p.kind for p in charDiff("abc", "abd")]  # doctest: +SKIP
+        ['equal', 'delete', 'insert']
+
+    Raises:
+        없음 — diff_match_patch ImportError 시 None 반환.
     """
     try:
         import diff_match_patch as dmp_module
@@ -513,6 +641,13 @@ def keywordFrequency(
 
     Returns:
         (topic, period, keyword, category, count) DataFrame. count>0만 포함.
+
+    Example:
+        >>> keywordFrequency(sections, ["AI"])  # doctest: +SKIP
+        shape: (n, 5)
+
+    Raises:
+        없음 — period 컬럼 부재 시 빈 schema DataFrame.
     """
     periods = _periodCols(sections)
     if not periods:
