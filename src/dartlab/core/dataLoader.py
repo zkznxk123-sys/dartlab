@@ -483,11 +483,15 @@ def _loadDocsFromSections(
     Returns:
         옛 docs.parquet 호환 DataFrame (빈 artifact 시 빈 DataFrame).
     """
-    from dartlab.providers.dart.docs.sections.sectionsStorage import (
-        _ensureFromHf,
-        hasSectionsArtifact,
-        sectionsDir,
-    )
+    # sections→docs 합성은 본래 providers 책임 (PR-4b 이행 단계라 core docs 로더에 잔존).
+    # 정적 ``from dartlab.providers import`` 은 단방향 import 위반 → importlib 런타임 dispatch
+    # (modulePath 는 문자열 데이터, 정적 의존 0). 본격 이관(providers 측 합성)은 후속.
+    import importlib
+
+    _ss = importlib.import_module("dartlab.providers.dart.docs.sections.sectionsStorage")
+    _ensureFromHf = _ss._ensureFromHf
+    hasSectionsArtifact = _ss.hasSectionsArtifact
+    sectionsDir = _ss.sectionsDir
 
     if not hasSectionsArtifact(stockCode):
         _ensureFromHf(stockCode)
@@ -578,16 +582,18 @@ def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
 
     if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() in ("1", "true", "True"):
         return False
+    # sections→docs 합성 (PR-4b) — 단방향 import 보존 위해 importlib 런타임 dispatch.
+    import importlib
+
     try:
-        from dartlab.providers.dart.docs.sections.sectionsStorage import (
-            _ensureFromHf,
-            hasSectionsArtifact,
-            loadSectionsIndex,
-            loadSectionsLong,
-            loadSectionsRawXml,
-        )
+        _ss = importlib.import_module("dartlab.providers.dart.docs.sections.sectionsStorage")
     except ImportError:
         return False
+    _ensureFromHf = _ss._ensureFromHf
+    hasSectionsArtifact = _ss.hasSectionsArtifact
+    loadSectionsIndex = _ss.loadSectionsIndex
+    loadSectionsLong = _ss.loadSectionsLong
+    loadSectionsRawXml = _ss.loadSectionsRawXml
     # sections artifact 부재 시 HF lazy download 시도 — 한 종목 디렉터리만 (~수 MB).
     if not hasSectionsArtifact(stockCode):
         if not _ensureFromHf(stockCode):
