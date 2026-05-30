@@ -1,1 +1,17 @@
-{"_note": "P-G7.2 strict — 65 mirror placeholder 슬롯 생성 후 baseline 비움.", "missingMirrors": []}
+{
+  "missingMirrors": [
+    "bis/catalog.py",
+    "bulkData/newsHeadlines.py",
+    "dart/sections/build/builder.py",
+    "dart/sections/build/refScan/aclassExtractor.py",
+    "dart/sections/build/refScan/refMatcher.py",
+    "dart/sections/build/refScan/titleNormalizer.py",
+    "dart/sections/build/refScan/zipScanWorker.py",
+    "dart/sections/build/walker.py",
+    "ecb/catalog.py",
+    "imf/catalog.py",
+    "infra/sdmxTypes.py",
+    "oecd/catalog.py"
+  ],
+  "_note": "gather src↔tests mirror 부채 원장. P-G7 점진 충원."
+}
