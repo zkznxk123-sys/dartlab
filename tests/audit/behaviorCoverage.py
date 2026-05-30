@@ -34,7 +34,7 @@ if hasattr(sys.stdout, "reconfigure"):
 _REPO = Path(__file__).resolve().parents[2]
 _PROVIDERS_SRC = _REPO / "src" / "dartlab" / "providers"
 _PROVIDERS_TESTS = _REPO / "tests" / "providers"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "behaviorCoverage.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "behaviorCoverage.json"
 
 _DUNDER_RE = re.compile(r"^__.+__$")
 _CAMEL_SPLIT_RE = re.compile(r"(?<!^)(?=[A-Z])")

@@ -20,7 +20,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "providers"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "underscoreModules.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "underscoreModules.json"
 
 
 def _scan(target: Path) -> list[str]:

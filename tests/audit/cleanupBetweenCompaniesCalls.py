@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "cleanupCalls.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "cleanupCalls.json"
 _SCAN_ROOTS = ("src/dartlab",)
 
 _LOOP_VAR_HINTS = ("code", "ticker", "cik", "stock")  # 변수명 substring

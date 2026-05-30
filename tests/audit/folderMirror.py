@@ -27,7 +27,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 _REPO = Path(__file__).resolve().parents[2]
 _PROVIDERS = _REPO / "src" / "dartlab" / "providers"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "folderMirror.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "folderMirror.json"
 _DEFAULT_TARGETS = ("dart", "edgar")
 
 

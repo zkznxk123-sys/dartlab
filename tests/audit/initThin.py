@@ -30,7 +30,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "providers"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "initThin.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "initThin.json"
 
 
 def _isThinBody(node: ast.AST) -> tuple[bool, str]:

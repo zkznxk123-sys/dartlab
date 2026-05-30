@@ -34,7 +34,7 @@ if hasattr(sys.stdout, "reconfigure"):
 _REPO = Path(__file__).resolve().parents[2]
 _DART_COMPANY = _REPO / "src" / "dartlab" / "providers" / "dart" / "company.py"
 _EDGAR_COMPANY = _REPO / "src" / "dartlab" / "providers" / "edgar" / "company.py"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "providerSymmetry.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "providerSymmetry.json"
 
 # ── _SYMMETRY_MAP — runtime.providerProtocol SSOT ──
 

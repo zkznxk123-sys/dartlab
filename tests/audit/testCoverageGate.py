@@ -225,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--baseline",
         type=Path,
-        default=_REPO / "scripts" / "audit" / "_baselines" / "testCoverage.json",
+        default=_REPO / "tests" / "audit" / "_baselines" / "testCoverage.json",
         help="baseline JSON 경로. 기존 누락은 면제, 신규만 fail (default 첨부 파일).",
     )
     parser.add_argument(

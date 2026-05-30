@@ -39,7 +39,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "gather"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "gatherDocstring9Section.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "gatherDocstring9Section.json"
 
 
 # ── 9 섹션 키워드 (한/영 변종 포함) ──────────────────────────────
