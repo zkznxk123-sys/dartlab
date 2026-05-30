@@ -34,6 +34,19 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "nested": True,
     },
+    "panel": {
+        # plan snazzy-wibbling-origami — panel(공시 수평화) SSOT artifact (S5).
+        # nested: data/dart/panel/{code}/{period}.parquet (period-sharded, 14-col) + _index.parquet.
+        # gather.dart.panel.build 가 zip→14col 생산, disclosureKey 부착(build) → reader 가
+        # scan_parquet lazy read (콜드 <1s). 옛 sections(dart/docs overlap) 와 분리된 별도 트리.
+        # nested=True 는 uploadData.py 가 rglob 으로 종목 디렉터리 안 파일(+_index) 모두 업로드.
+        # 빌드 입력(panelXbrlRef.parquet)·어휘(bridge/panelBridge.parquet)는 build-side
+        # (사용자는 disclosureKey 채워진 artifact 만 다운로드 — bridge 불요).
+        "dir": "dart/panel",
+        "label": "DART 공시 panel 수평화 artifact (period-sharded, 14-col)",
+        "public": True,
+        "nested": True,
+    },
     "finance": {
         "dir": "dart/finance",
         "label": "재무 숫자 데이터",
