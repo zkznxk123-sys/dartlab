@@ -75,9 +75,9 @@ def normalizeTitle(raw: str) -> str:
 
     Example:
         >>> normalizeTitle("1. 회사의 개요")
-        '회사의 개요'
+        '회사'
         >>> normalizeTitle("1. (제조서비스업)사업의 개요")
-        '사업의 개요'
+        '사업'
         >>> normalizeTitle("3-1. 매출원가의 구성")
         '매출원가'
         >>> normalizeTitle("Ⅲ. 재무에 관한 사항")
@@ -100,6 +100,12 @@ def normalizeTitle(raw: str) -> str:
 
     AIContext:
         - 순수 변환 — 외부 의존 0, 형태소 분석 미사용(KISS).
+
+    When:
+        - ACLASS/TITLE 집계·fuzzy 매칭의 canonical key 가 필요할 때.
+
+    How:
+        - NFKC → 숫자/Roman/괄호 prefix strip → 어미 strip → 공백 정리.
 
     LLM Specifications:
         AntiPatterns:
@@ -147,7 +153,7 @@ def tokenize(text: str) -> set[str]:
 
     Example:
         >>> sorted(tokenize("매출원가의 구성"))
-        ['구성', '매출원가']
+        ['구성', '매출원가의']
         >>> sorted(tokenize("Revenue Recognition Policy"))
         ['Policy', 'Recognition', 'Revenue']
         >>> tokenize("")
@@ -168,6 +174,12 @@ def tokenize(text: str) -> set[str]:
 
     AIContext:
         - 순수 추출 — 한글 2자+ / 영문 2자+ token.
+
+    When:
+        - canonical title 의 Jaccard 유사도 입력이 필요할 때.
+
+    How:
+        - NFKC → ``_TOKEN_RE`` findall → set.
 
     LLM Specifications:
         AntiPatterns:
@@ -226,6 +238,12 @@ def jaccardSimilarity(a: set[str], b: set[str]) -> float:
 
     AIContext:
         - 순수 집합 연산 — 부작용 0.
+
+    When:
+        - 두 제목 token set 의 근접도로 best match 를 고를 때.
+
+    How:
+        - ``|a ∩ b| / |a ∪ b|`` (빈 set 은 0.0).
 
     LLM Specifications:
         AntiPatterns:

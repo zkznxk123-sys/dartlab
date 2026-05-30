@@ -63,6 +63,12 @@ def horizontalize(df: pl.DataFrame) -> pl.DataFrame:
     AIContext:
         - 순수 변환 — contentRaw 순서 concat, 태그·char 무손실.
 
+    When:
+        - builder 가 walker element 행을 section 단위로 묶을 때 (period 별 1회).
+
+    How:
+        - (chapter, gkey) group → blockOrder 순 contentRaw join → section 행.
+
     LLM Specifications:
         AntiPatterns:
             - group_by maintain_order=False 금지 — blockOrder 순서 보존 필수(무손실 순서).

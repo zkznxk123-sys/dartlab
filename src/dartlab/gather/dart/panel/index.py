@@ -83,6 +83,12 @@ def buildIndex(
     AIContext:
         - scan_parquet columnar projection — contentRaw 미read(슬림·고속).
 
+    When:
+        - 전종목 빌드 후 cross-entity 가속 index 가 필요할 때.
+
+    How:
+        - {code}/*.parquet scan → locator projection → _index.parquet write.
+
     LLM Specifications:
         AntiPatterns:
             - contentRaw 포함 금지 — locator 만.

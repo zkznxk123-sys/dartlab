@@ -130,6 +130,12 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
     AIContext:
         - keyed 행만 라벨 통일, narrative 는 보존 — 무손실.
 
+    When:
+        - pivot 이 회사내 wide 변환 전 era drift 를 흡수할 때.
+
+    How:
+        - scope 부착 → (disclosureKey, scope) 최신 period 라벨 → join 덮어쓰기.
+
     LLM Specifications:
         AntiPatterns:
             - disclosureKey 단독 group 금지 — (disclosureKey, scope) 페어(연결/별도 병합 방지).

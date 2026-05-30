@@ -102,7 +102,6 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # 로컬 빌드 산출물 (data/dart/docs/{code}/{period}.parquet · original zip). 부재 =
         # "아직 빌드/다운로드 안 됨" = 빈 결과가 정상 semantic. builder 계열은 warning 로그.
         "filings/dart/build/builder.py",
-        "gather/dart/sections/build/builder.py",
         "providers/dart/docs/sections/sectionsStorage.py",
         "providers/dart/docs/sections/sectionsBuilder.py",
         "providers/edgar/docs/sections/sectionsStorage.py",

@@ -267,6 +267,12 @@ def seedBridgeTier1(*, overwrite: bool = False) -> pl.DataFrame:
     AIContext:
         - parquet write 부작용 — overwrite 인자로 보호.
 
+    When:
+        - 최초 또는 tier1 seed 갱신 시 (운영자).
+
+    How:
+        - _tier1Seed → DataFrame → parquet write → loadBridge.cache_clear.
+
     LLM Specifications:
         AntiPatterns:
             - 매 build 마다 overwrite=True 금지 — learn(tier2/3) 산출 소실.
@@ -325,6 +331,12 @@ def loadBridge() -> pl.DataFrame:
     AIContext:
         - lru_cache — parquet 변경 시 invalidateCache 필요.
 
+    When:
+        - rawId → disclosureKey lookup 의 데이터 원천이 필요할 때.
+
+    How:
+        - parquet → DataFrame (lru_cache 1회 read).
+
     LLM Specifications:
         AntiPatterns:
             - 매 호출 read 금지 — lru_cache 1회.
@@ -381,6 +393,12 @@ def writeBridge(df: pl.DataFrame, *, invalidate: bool = True) -> None:
 
     AIContext:
         - parquet write + cache invalidate 부작용. 양식 자유 추가 금지(R5).
+
+    When:
+        - learnBridge 가 tier1+tier2 결합본을 SSOT 로 저장할 때.
+
+    How:
+        - df → BRIDGE_SCHEMA select → parquet write → (invalidate) cache_clear.
 
     LLM Specifications:
         AntiPatterns:

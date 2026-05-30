@@ -77,6 +77,12 @@ def readPanelWide(
     AIContext:
         - contentRaw 는 join(무손실), 그 외 first. anchorLatest 후 pivot.
 
+    When:
+        - 한 회사 다기간을 항목 × period 로 수평화할 때.
+
+    How:
+        - readLong → anchorLatest → group collapse → period pivot.
+
     LLM Specifications:
         AntiPatterns:
             - contentRaw 다중블록 first 금지 — blockOrder 순 join.

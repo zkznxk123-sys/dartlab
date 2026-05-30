@@ -9,7 +9,7 @@ changed.txt가 있으면 변경된 파일만, 없으면 전체 폴더 업로드 
 환경변수:
   HF_TOKEN: HuggingFace write 토큰 (--target hf)
   GH_TOKEN: GitHub 토큰 (--target gh, Actions에서 자동 제공)
-  SYNC_CATEGORY: finance / report / docs / edgarDocs
+  SYNC_CATEGORY: finance / report / docs / sections / panel / edgarDocs
   DARTLAB_DATA_DIR: 데이터 경로 (기본: ./data)
 """
 
@@ -36,13 +36,14 @@ def _dataDir(category: str) -> Path:
 def _changedFiles(localDir: Path, category: str | None = None) -> list[Path] | None:
     """changed.txt에서 변경 파일 목록 로드. 없으면 None (전체 fallback).
 
-    sections category (nested period-sharded) 는 ``dist/changed_sections.txt`` 우선 —
-    양식 ``{code}/{period}.parquet``. 일반 카테고리는 기존 ``dist/changed.txt``.
+    nested period-sharded category (sections / panel) 는 ``dist/changed_{category}.txt``
+    우선 — 양식 ``{code}/{period}.parquet`` (+ panel 은 글로벌 ``_index.parquet``).
+    일반 카테고리는 기존 ``dist/changed.txt``.
     """
-    if category == "sections":
-        sectionsChangedFile = Path("dist/changed_sections.txt")
-        if sectionsChangedFile.exists():
-            names = [n.strip() for n in sectionsChangedFile.read_text(encoding="utf-8").splitlines() if n.strip()]
+    if category in ("sections", "panel"):
+        nestedChangedFile = Path(f"dist/changed_{category}.txt")
+        if nestedChangedFile.exists():
+            names = [n.strip() for n in nestedChangedFile.read_text(encoding="utf-8").splitlines() if n.strip()]
             if not names:
                 return []
             return [localDir / name for name in names if (localDir / name).exists()]

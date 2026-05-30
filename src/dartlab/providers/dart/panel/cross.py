@@ -37,6 +37,9 @@ from .pivot import readPanelWide
 
 _log = logging.getLogger(__name__)
 
+# codes=None 자동발견 상한 — 초과 시 OOM 가드로 raise (전 회사 wide 풀로드 방지).
+_MAX_AUTO_CODES = 100
+
 
 def _indexCodesFor(disclosureKey: str, marketNs: str) -> list[str] | None:
     """slim _index.parquet 로 disclosureKey 보유 종목 발견 (G6 가속).
@@ -123,7 +126,8 @@ def crossCompany(
         한 회사도 없으면 None.
 
     Raises:
-        없음 — 회사별 read 실패는 skip(로그).
+        ValueError: codes=None 자동발견이 ``_MAX_AUTO_CODES``(100) 초과 시 — 전 회사 wide
+            풀로드 OOM 가드. 명시 codes 를 전달하면 우회. 회사별 read 실패는 skip(로그).
 
     Example:
         >>> crossCompany(["005930", "000660"], "inventoryDisclosure")  # doctest: +SKIP
@@ -143,6 +147,12 @@ def crossCompany(
 
     AIContext:
         - per-company read + diagonal concat — corp 컬럼으로 출처 보존.
+
+    When:
+        - 같은 disclosure 를 여러 회사에 걸쳐 가로 비교할 때.
+
+    How:
+        - codes(또는 _index 자동발견) → readPanelWide filter → diagonal concat.
 
     LLM Specifications:
         AntiPatterns:
@@ -164,6 +174,12 @@ def crossCompany(
         codes = _indexCodesFor(disclosureKey, marketNs)
         if not codes:
             return None
+        if len(codes) > _MAX_AUTO_CODES:
+            raise ValueError(
+                f"crossCompany(codes=None, '{disclosureKey}') 자동발견 {len(codes)} 종목 — "
+                f"전 회사 wide 풀로드는 OOM 위험({_MAX_AUTO_CODES} 초과, Polars 네이티브 힙). "
+                "명시 codes 를 전달하시오 (locator 기반 lazy cell pull 최적화는 후속)."
+            )
     frames: list[pl.DataFrame] = []
     for code in codes:
         wide = readPanelWide(code, marketNs=marketNs, periods=periods)
@@ -216,6 +232,12 @@ def crossMarket(
 
     AIContext:
         - crossCompany 를 시장별 호출 후 diagonal concat.
+
+    When:
+        - DART↔EDGAR 동일 disclosure 를 한 보드로 정렬할 때.
+
+    How:
+        - market 별 crossCompany → diagonal concat.
 
     LLM Specifications:
         AntiPatterns:

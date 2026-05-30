@@ -88,6 +88,12 @@ def learnBridge(
     AIContext:
         - 충돌 그룹 skip = 추측 안 함 (정공). 전파는 제목 유일 seed 그룹만.
 
+    When:
+        - refScan 산출 후 회사간 disclosureKey 어휘를 갱신할 때.
+
+    How:
+        - tier1 seed → 제목 그룹 유일성 검사 → tier2 전파 → writeBridge.
+
     LLM Specifications:
         AntiPatterns:
             - tier1 rawId 에 tier2 덮어쓰기 금지 — seed 우선.
@@ -198,6 +204,12 @@ def bridgeCoverage(refDf: pl.DataFrame, *, marketNs: str = "kr", topN: int = 50)
 
     AIContext:
         - 측정 전용 — 부작용 0. 80% 강제 X, 실측 보고.
+
+    When:
+        - learnBridge 후 G3 회사간 정규화 커버리지를 정직 측정할 때.
+
+    How:
+        - ref rawId → resolveDisclosureKey → occurrence/entry/topN 가중.
 
     LLM Specifications:
         AntiPatterns:

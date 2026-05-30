@@ -93,6 +93,12 @@ def detectSchemaEra(root) -> str:
     AIContext:
         - 순수 판별 — find/iter 만, tree 변경 0.
 
+    When:
+        - walker 가 본문 양식별 ACLASS 추출 분기를 정하기 직전.
+
+    How:
+        - ATOCID/ACLASS/AASSOCNOTE 존재 여부로 v2/v1.5/v1 판별.
+
     LLM Specifications:
         AntiPatterns:
             - itertext 후 regex 로 era 판별 금지 — element find 직접.
@@ -240,6 +246,12 @@ def walkSections(
 
     AIContext:
         - container mark 후 1-pass iterwalk — 같은 element 두 번 emit 0.
+
+    When:
+        - builder 가 zip XML 을 손실0/dup0 element 행으로 풀 때.
+
+    How:
+        - _markContainers → iterwalk → leaf content unit 마다 row yield.
 
     LLM Specifications:
         AntiPatterns:

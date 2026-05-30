@@ -122,6 +122,12 @@ def scanPanel(code: str, *, marketNs: str = "kr", periods: list[str] | None = No
     AIContext:
         - scan_parquet only — materialize 0.
 
+    When:
+        - lazy 파이프라인·대량에서 본문 미read scan 이 필요할 때.
+
+    How:
+        - dir glob → (periods filter) → scan_parquet.
+
     LLM Specifications:
         AntiPatterns:
             - read_parquet eager 금지(전체 본문 로드) — scan_parquet.
@@ -180,6 +186,12 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
 
     AIContext:
         - build 가 채운 disclosureKey 사용, 옛 artifact(전부 null)만 fallback resolve.
+
+    When:
+        - 한 회사 long 본문 + disclosureKey 가 필요할 때.
+
+    How:
+        - parquet read → disclosureKey null 검사 → (fallback) resolveBatch.
 
     LLM Specifications:
         AntiPatterns:

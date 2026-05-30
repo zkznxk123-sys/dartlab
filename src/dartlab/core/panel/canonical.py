@@ -179,6 +179,12 @@ def resolveBatch(df: pl.DataFrame, *, marketNs: str) -> pl.DataFrame:
     AIContext:
         - map_elements lookup — row 수 적어 OK.
 
+    When:
+        - build write 시점 artifact 에 disclosureKey 를 부착할 때.
+
+    How:
+        - xbrlClass → _lookupDict → disclosureKey 컬럼.
+
     LLM Specifications:
         AntiPatterns:
             - runtime 매 read resolve 금지 — build 에서 1회 부착.

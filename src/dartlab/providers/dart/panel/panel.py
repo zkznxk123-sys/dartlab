@@ -306,6 +306,12 @@ class Panel:
         AIContext:
             - disclosureKey 필터 후 wide — 태그 무손실(raw).
 
+        When:
+            - 한 disclosure 의 다기간 본문을 볼 때.
+
+        How:
+            - readPanelWide → filter(disclosureKey == key).
+
         LLM Specifications:
             AntiPatterns:
                 - disclosureKey null 행 반환 금지 — 지정 키만.
@@ -404,6 +410,12 @@ class Panel:
 
         AIContext:
             - scan only — 본문 read 0.
+
+        When:
+            - 회사 가용 기간을 조회해 periods 인자를 정할 때.
+
+        How:
+            - scanPanel → period unique → sortPeriods.
 
         LLM Specifications:
             AntiPatterns:

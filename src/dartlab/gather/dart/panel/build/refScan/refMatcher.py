@@ -76,6 +76,12 @@ def precomputeRefTokens(
     AIContext:
         - 순수 변환 — frozenset 으로 매칭 cache 가능.
 
+    When:
+        - build worker init 에서 ref token 을 1회 준비할 때.
+
+    How:
+        - ref filter(corpCount) → tokenize(rawTitleCanonical) → (rawId, frozenset).
+
     LLM Specifications:
         AntiPatterns:
             - corpCount 필터 생략 금지 — noise entry 가 매칭 오염.
@@ -133,6 +139,12 @@ def setGlobalRefTokens(refTokens: list[tuple[str, frozenset]]) -> None:
 
     AIContext:
         - global mutation + cache_clear 부작용.
+
+    When:
+        - worker init 직후 ref token 을 module-global 로 공유할 때.
+
+    How:
+        - ``_REF_TOKENS`` 에 set + ``_matchCached.cache_clear()``.
 
     LLM Specifications:
         AntiPatterns:
@@ -196,6 +208,9 @@ def matchToRef(
     Returns:
         ``(rawId or None, score)`` — threshold 미달 시 ``(None, best_score)``.
 
+    Raises:
+        없음 — title 빈/normalize 빈/token 빈 시 ``(None, 0.0)`` 반환.
+
     Examples:
         >>> import polars as pl
         >>> ref = pl.DataFrame({
@@ -221,6 +236,12 @@ def matchToRef(
 
     AIContext:
         - 손수 regex 0 — token Jaccard 만 (mapper.py 260 regex 회귀 차단).
+
+    When:
+        - walker 가 옛 양식(ACLASS 부재) TITLE 을 ref 와 매칭할 때.
+
+    How:
+        - normalizeTitle → tokenize → ref Jaccard best ≥ threshold.
 
     LLM Specifications:
         AntiPatterns:
@@ -311,6 +332,12 @@ def evaluateThreshold(
 
     AIContext:
         - 평가 전용 — 부작용 0.
+
+    When:
+        - 운영자가 fuzzy threshold 를 튜닝·검증할 때.
+
+    How:
+        - threshold sweep → matchToRef → tp/fp/fn → precision/recall/f1.
 
     LLM Specifications:
         AntiPatterns:

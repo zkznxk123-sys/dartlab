@@ -89,6 +89,12 @@ def periodFromEnd(endYear: int, endMonth: int) -> str:
     AIContext:
         - 순수 변환 함수 — 값 환산 0, 종료일 그대로 분기 매핑.
 
+    When:
+        - build 가 표지 종료(year, month)를 분기축에 배치할 때.
+
+    How:
+        - _MONTH_TO_QUARTER 매핑 + 1~2월 종료는 직전년도 Q4.
+
     LLM Specifications:
         AntiPatterns:
             - endMonth 를 결산월로 보정 금지 — 달력월 그대로 매핑.

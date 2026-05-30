@@ -85,6 +85,12 @@ def syncPanel(
     AIContext:
         - 단계 플래그로 부분 실행 — refScan 은 비싸 기본 off.
 
+    When:
+        - panel 생산 전 단계를 한 진입점으로 묶어 실행할 때 (CI/운영자).
+
+    How:
+        - 단계 플래그로 refScan→learn→build→index 순차 호출.
+
     LLM Specifications:
         AntiPatterns:
             - collect/HF 포함 금지 — 분리(R1).

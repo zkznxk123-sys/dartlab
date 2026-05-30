@@ -198,6 +198,12 @@ def extractAclassEntries(xml: str) -> list[dict]:
     AIContext:
         - 데이터 추출 — 손수 regex 0, ACLASS attribute 직접.
 
+    When:
+        - refScan 이 본문 XML 에서 ACLASS+TITLE truth 를 수집할 때.
+
+    How:
+        - iterTableGroups 로 TABLE-GROUP 열거 → ACLASS/TITLE/parent 추출.
+
     LLM Specifications:
         AntiPatterns:
             - XML parse 실패 시 raise 금지 — return [] (caller 가 skip 가능).

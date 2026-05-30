@@ -212,6 +212,12 @@ def buildPanel(
     AIContext:
         - strict per-corp 빌드 — 다른 종목 zip 미접근.
 
+    When:
+        - 운영자/CI 가 한 종목의 panel artifact 를 (재)생산할 때.
+
+    How:
+        - 로컬 zip → walker → horizontalize → resolveBatch → period 별 parquet write.
+
     LLM Specifications:
         AntiPatterns:
             - period 별 parquet 외 단일 flat parquet 금지 — nested {code}/{period}.
@@ -391,6 +397,12 @@ def buildPanelAll(
     AIContext:
         - imap_unordered chunk=4 — IO/CPU 균형.
 
+    When:
+        - 전종목(또는 changed codes) 을 일괄 빌드할 때 (CI sync / 운영자).
+
+    How:
+        - Pool(_initWorker) 로 종목별 buildPanel 병렬 실행 → 통계 집계.
+
     LLM Specifications:
         AntiPatterns:
             - Pool.map 금지 — large input memory 폭발. imap_unordered.
@@ -486,6 +498,12 @@ def buildPanelBaseline(
 
     AIContext:
         - 단일 process — debug 용이.
+
+    When:
+        - 5 baseline 손실0/dup0 검증·디버그 시.
+
+    How:
+        - scanRefBaseline ref 로 종목별 buildPanel 순차 호출 → 중첩 dict.
 
     LLM Specifications:
         AntiPatterns:
