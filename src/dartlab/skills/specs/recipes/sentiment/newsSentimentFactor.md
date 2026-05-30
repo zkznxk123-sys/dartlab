@@ -99,3 +99,10 @@ print(f"유의: {result['is_significant']}")
 - archive 7 일 이내 lookback 은 분산 부족 — 30 일 권장.
 - lm_dict 만 사용 시 동음이의·문맥 무시. transformers 모델 (`sentimentModel="auto"`) 은 GPU 권장.
 - forward return horizon 너무 길면 (>20 일) IC 약화.
+
+## 연계 절차
+
+1. 본 recipe → news sentiment 팩터 빌드 + IC / 분위 스프레드 검증.
+2. `engines.gather` 뉴스 archive + `engines.quant` 팩터 프레임 결합.
+3. `recipes.news.newsImpact` 이벤트 임팩트와 교차 검증.
+4. `recipes.sentiment.priceMomentumGap` 과 결합해 모멘텀-센티먼트 갭 점검.

@@ -11,7 +11,7 @@ purpose: 종목 1 년 일별 abnormal return (market model 잔차) 의 σ 임계
 whenToUse:
   - 가격 급변 일자 자동 검출
   - shock 사후 원인 뉴스 매칭
-  - "왜 +/- N% 움직였나" 질문
+  - "왜 +/- N% 움직였나 질문"
 examples:
   - 005930 1 년 |AR|>3σ shock 일자 + 인접 뉴스
   - 가격 급락 일자 + 그날 공시·뉴스 컨텍스트
@@ -98,3 +98,10 @@ for ev in result["shock_events"]:
 ## L4 UI 차트 연동
 
 `/analysis/$code/events` (PriceEventChart) 가 본 결과를 직접 소비 — `is_significant` shock 은 빨강 (up) / 파랑 (down) 깃발 마커로 차트 상단 표시. 클릭 시 EventSidePanel Sheet 에 동일 dict 의 news 컨텍스트 노출.
+
+## 연계 절차
+
+1. 본 recipe → |AR|>3σ 가격 shock 일자 자동 검출 + 인접 뉴스 컨텍스트.
+2. `engines.gather` 뉴스 archive + `engines.quant` market model (abnormal return) 결합.
+3. shock 일자 → `recipes.news.newsImpact` 로 CAR / t-stat 임팩트 정량화.
+4. `recipes.news.eventTimelineFusion` 으로 이벤트 타임라인 결합.

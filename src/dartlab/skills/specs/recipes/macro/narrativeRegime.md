@@ -103,3 +103,10 @@ for t in result["topics_hot"]:
 - Pettitt 는 *one change* 검정 — multiple shifts 는 binary search 또는 sliding window 별도 필요.
 - p-value 가 exp 근사식 (small n 부정확). n ≥ 60 권장.
 - volume-weighted 가 noise topic (자동 재배포) 에 민감 — Phase C `repeatedHeadlineFrequency` 보정 권장.
+
+## 연계 절차
+
+1. 본 recipe → news 내러티브 sentiment/topic pulse regime shift 검출.
+2. `engines.macro` 내러티브 축 + `engines.scan` 전종목 신호와 결합.
+3. regime shift 종목 → `recipes.sentiment.newsSentimentFactor` 로 팩터화.
+4. `recipes.macro.qualityMacroBeta` 와 결합해 매크로 베타 민감도 점검.

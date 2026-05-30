@@ -104,3 +104,10 @@ else:
 - estimation window (-120, -30) 가 부족하면 (history < 50 일) error 반환. 짧은 IPO 종목 제외.
 - benchmark 시장 지수와 거래일 join 후 50 일 미만이면 결과 신뢰 X.
 - t-stat 비유의 시 사건 영향 확인되지 않은 것 — "영향 작다" 추론 금지 (검정 부정 아님).
+
+## 연계 절차
+
+1. 본 recipe → 이벤트 전후 abnormal return (CAR / t-stat) 측정.
+2. `engines.gather` 뉴스 archive + `engines.quant` market model 결합.
+3. `recipes.news.priceShockNews` 의 shock 일자 → 본 recipe 로 임팩트 정량화.
+4. `recipes.news.eventTimelineFusion` 으로 이벤트 타임라인 결합.
