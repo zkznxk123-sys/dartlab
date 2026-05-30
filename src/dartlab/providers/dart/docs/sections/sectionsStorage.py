@@ -73,14 +73,16 @@ def sectionsPath(stockCode: str, period: str) -> Path:
     return sectionsDir(stockCode) / f"{period}.parquet"
 
 
-def listAvailablePeriods(stockCode: str) -> list[str]:
+def listAvailablePeriods(stockCode: str, *, limit: int | None = None) -> list[str]:
     """저장된 period 목록 (newer first). 디렉터리 미생성 시 빈 list.
 
     Args:
         stockCode: 종목코드.
+        limit: 반환할 최근(newer-first) period 최대 개수. None = 전체.
 
     Returns:
         newer-first 정렬된 period 라벨 list. 디렉터리 부재면 빈 list.
+        limit 지정 시 가장 최근 limit 개만.
 
     Example:
         >>> "2024Q1" in listAvailablePeriods("005930")  # doctest: +SKIP
@@ -93,7 +95,8 @@ def listAvailablePeriods(stockCode: str) -> list[str]:
     if not d.exists():
         return []
     periods = [p.stem for p in d.glob("*.parquet") if not p.stem.startswith("_")]
-    return sorted(periods, key=_periodSortKey, reverse=True)
+    ordered = sorted(periods, key=_periodSortKey, reverse=True)
+    return ordered[:limit] if limit is not None else ordered
 
 
 def _periodSortKey(period: str) -> tuple[int, int]:
