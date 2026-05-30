@@ -27,6 +27,8 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import difflib
+
 import polars as pl
 
 from dartlab.core.dualAccess import CallableAccessor
@@ -441,3 +443,76 @@ class Company:
             "sections": "sections artifact (수평화 contentRaw)",
         }[kind]
         return {"topic": topic, "kind": kind, "resolved": resolved, "source": source}
+
+    def diff(
+        self,
+        topic: str,
+        fromPeriod: str,
+        toPeriod: str,
+        *,
+        scope: str = "consolidated",
+    ) -> pl.DataFrame | None:
+        """topic 의 두 기간 line-level 텍스트 변경 (unified diff).
+
+        Args:
+            topic: 비교 대상 (주로 sections 서술 — finance/report 도 셀 텍스트 비교).
+            fromPeriod: 기준 기간 (예: "2024Q4" 또는 "2024-Q4").
+            toPeriod: 비교 기간.
+            scope: "consolidated"/"standalone".
+
+        Returns:
+            DataFrame ``(change, text)`` — change ∈ {added, removed}. 변경 없으면
+            빈 DataFrame, topic/기간 부재 시 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").diff("inventoryDisclosure", "2024Q4", "2025Q4")  # doctest: +SKIP
+
+        SeeAlso:
+            - ``show`` — diff 가 내부적으로 raw=False wide 를 사용.
+            - ``trace`` — topic 출처.
+
+        Requires:
+            - dartlab
+            - polars
+
+        Capabilities:
+            - sections 위 얇은 derivation — 태그 strip 후 line unified_diff. period 명
+              은 dash 유무 (2024Q4 / 2024-Q4) 양형 매칭.
+
+        AIContext:
+            공시 변화 추적 진입 — 두 기간 같은 disclosure 의 +/- 라인.
+        """
+        df = self._showImpl(topic, scope=scope, raw=False)
+        if df is None or df.is_empty():
+            return None
+        cols = set(df.columns)
+
+        def _findCol(p: str) -> str | None:
+            for cand in (p, p.replace("-", ""), p.replace("Q", "-Q")):
+                if cand in cols:
+                    return cand
+            return None
+
+        cFrom, cTo = _findCol(fromPeriod), _findCol(toPeriod)
+        if cFrom is None or cTo is None:
+            return None
+
+        def _lines(col: str) -> list[str]:
+            return "\n".join(str(v) for v in df[col].to_list() if v).splitlines()
+
+        rows: list[dict] = []
+        for line in difflib.unified_diff(_lines(cFrom), _lines(cTo), lineterm="", n=0):
+            if line.startswith(("---", "+++", "@@")):
+                continue
+            tag = line[:1]
+            content = line[1:].strip()
+            if not content:  # strip 후 빈 줄(HTML 공백) 노이즈 제거
+                continue
+            if tag == "+":
+                rows.append({"change": "added", "text": content})
+            elif tag == "-":
+                rows.append({"change": "removed", "text": content})
+        return pl.DataFrame(rows, schema={"change": pl.Utf8, "text": pl.Utf8})
