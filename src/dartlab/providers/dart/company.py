@@ -2418,7 +2418,17 @@ class Company:
         wide = self.sections
         if wide is None or wide.is_empty():
             return None
-        from dartlab.providers.dart.docs.sections.sectionsBuilder import wideToLong
+        try:
+            from dartlab.providers.dart.docs.sections.sectionsBuilder import wideToLong
+        except ImportError:
+            # sections 사전빌드 파이프라인 (wide→long 변환) 미완성 — parked
+            # (plan snazzy-wibbling-origami §3.5 B). artifact 존재 시에만 long 제공
+            # (loadSectionsLong). 빌드 완성 후 fallback 활성화.
+            _log.warning(
+                "sectionsLong wide→long fallback 미구현 (parked) — sections artifact 빌드 후 사용 (%s)",
+                self.stockCode,
+            )
+            return None
 
         long = wideToLong(wide)
         if periods is not None:

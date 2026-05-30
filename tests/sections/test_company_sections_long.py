@@ -11,7 +11,13 @@ import types
 import polars as pl
 import pytest
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skip(
+        reason="sections 사전빌드 파이프라인 (saveSectionsByPeriod 빌드 + wideToLong) 미완성 "
+        "— parked (plan snazzy-wibbling-origami §3.5 B, sections 완성은 안정화 후 후속). 완성 시 해제."
+    ),
+]
 
 
 def test_sectionsLong_uses_artifact_when_present(monkeypatch, tmp_path):

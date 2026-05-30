@@ -36,5 +36,7 @@ def test_sections_marked_public():
 
 
 def test_sections_hf_url_resolves():
+    # sections artifact = docs 파케 경로 활용 (2026-05-30 §7 결정 — 별도 dart/sections
+    # 트리 안 만듦, data/dart/docs/{code}/{period}.parquet). dataConfig dir 와 정합.
     url = hfBaseUrl("sections")
-    assert url.endswith("/dart/sections")
+    assert url.endswith("/dart/docs")
