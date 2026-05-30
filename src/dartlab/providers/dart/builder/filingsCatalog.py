@@ -109,6 +109,16 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
             }
         )
     df = loadData(company.stockCode)
+    if df is None or df.is_empty() or "year" not in df.columns:
+        return pl.DataFrame(
+            schema={
+                "year": pl.Utf8,
+                "rceptDate": pl.Utf8,
+                "rceptNo": pl.Utf8,
+                "reportType": pl.Utf8,
+                "dartUrl": pl.Utf8,
+            }
+        )
     docs = (
         df.select("year", "rcept_date", "rcept_no", "report_type")
         .unique(subset=["rcept_no"])
