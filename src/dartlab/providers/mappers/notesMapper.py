@@ -16,7 +16,7 @@ from pathlib import Path
 
 from dartlab.core.mapperEngine import BaseMapper, MapperStats
 
-_STRUCTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "notesStructure.json"
+_STRUCTURE_PATH = Path(__file__).resolve().parent / "mapperData" / "notesStructure.json"
 
 
 def _loadKeywords() -> dict[str, list[str]]:

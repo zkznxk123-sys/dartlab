@@ -29,7 +29,7 @@ from dartlab.providers.mappers.common import normalizeName
 
 log = logging.getLogger(__name__)
 
-_STRUCTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "notesStructure.json"
+_STRUCTURE_PATH = Path(__file__).resolve().parent / "mapperData" / "notesStructure.json"
 
 # 비금액 패턴 — pipeline.py의 _NON_AMOUNT_PATTERNS + 추가 발견 패턴
 _RATE_PATTERNS = re.compile(

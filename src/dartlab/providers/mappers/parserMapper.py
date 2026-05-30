@@ -14,7 +14,7 @@ from pathlib import Path
 
 from dartlab.core.mapperEngine import BaseMapper, MapperStats
 
-_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "parserMappings"
+_DATA_DIR = Path(__file__).resolve().parent / "mapperData" / "parserMappings"
 
 
 def _loadRequired(filename: str) -> dict:
