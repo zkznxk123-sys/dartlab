@@ -35,7 +35,6 @@ import polars as pl
 from lxml import etree
 
 import dartlab.config as _cfg
-
 from dartlab.core.sections.canonical import resolveBatch
 from dartlab.core.sections.schema import SECTIONS_SCHEMA as SCHEMA_V5
 
