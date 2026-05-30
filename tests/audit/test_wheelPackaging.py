@@ -110,10 +110,10 @@ def test_parserMappings_inWheel(builtWheel: Path):
     with zipfile.ZipFile(builtWheel) as zf:
         names = zf.namelist()
     required = [
-        "dartlab/providers/data/parserMappings/sections.json",
-        "dartlab/providers/data/parserMappings/affiliate.json",
-        "dartlab/providers/data/parserMappings/costByNature.json",
-        "dartlab/providers/data/parserMappings/sectorPriors.json",
+        "dartlab/providers/mappers/mapperData/parserMappings/sections.json",
+        "dartlab/providers/mappers/mapperData/parserMappings/affiliate.json",
+        "dartlab/providers/mappers/mapperData/parserMappings/costByNature.json",
+        "dartlab/providers/mappers/mapperData/parserMappings/sectorPriors.json",
     ]
     for req in required:
         assert req in names, (

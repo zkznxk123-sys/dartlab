@@ -33,14 +33,14 @@ from pathlib import Path
 # `tests/audit/test_wheelPackaging.py::test_parserMappings_inWheel` 와 동기화.
 _REQUIRED_BUNDLE_FILES = [
     # parserMappings
-    "dartlab/providers/data/parserMappings/sections.json",
-    "dartlab/providers/data/parserMappings/affiliate.json",
-    "dartlab/providers/data/parserMappings/costByNature.json",
-    "dartlab/providers/data/parserMappings/sectorPriors.json",
+    "dartlab/providers/mappers/mapperData/parserMappings/sections.json",
+    "dartlab/providers/mappers/mapperData/parserMappings/affiliate.json",
+    "dartlab/providers/mappers/mapperData/parserMappings/costByNature.json",
+    "dartlab/providers/mappers/mapperData/parserMappings/sectorPriors.json",
     # reference data
     "dartlab/reference/data/accountMappings.json",
     "dartlab/reference/data/labelSupplements.json",
-    "dartlab/providers/data/notesStructure.json",
+    "dartlab/providers/mappers/mapperData/notesStructure.json",
     "dartlab/reference/data/dalio48Cases.json",
     "dartlab/reference/data/dalioDetailCases.json",
     "dartlab/reference/data/damodaranDefaults.json",
