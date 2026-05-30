@@ -305,6 +305,8 @@ def relatedPartyTx(stockCode: str) -> RelatedPartyTxResult | None:
         >>> relatedPartyTx(...)
     """
     df = loadData(stockCode)
+    if df is None or df.is_empty() or "year" not in df.columns:
+        return None
     corpName = extractCorpName(df)
     years = sorted(df["year"].unique().to_list(), reverse=True)
 
