@@ -98,6 +98,14 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "industry/build/stage4_review.py",
         # artifacts.loadProjectionRules — 알려진 chapter 만 loud-fail, 미등록은 빈 dict (의도적)
         "providers/dart/docs/sections/artifacts.py",
+        # sections 사전빌드/다운로드 데이터 로더 — 번들 리소스가 아니라 HF 다운로드/
+        # 로컬 빌드 산출물 (data/dart/docs/{code}/{period}.parquet · original zip). 부재 =
+        # "아직 빌드/다운로드 안 됨" = 빈 결과가 정상 semantic. builder 계열은 warning 로그.
+        "filings/dart/build/builder.py",
+        "gather/dart/sections/build/builder.py",
+        "providers/dart/docs/sections/sectionsStorage.py",
+        "providers/dart/docs/sections/sectionsBuilder.py",
+        "providers/edgar/docs/sections/sectionsStorage.py",
         # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
         "quant/risk/bottomUpBeta.py",
         # skill spec/validate 런타임 — spec 디렉토리 부재 시 빈 결과가 옵셔널 semantic
