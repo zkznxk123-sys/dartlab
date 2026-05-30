@@ -5,8 +5,8 @@
 
 import re
 
+from dartlab.providers._common.tableParser import parseAmount as _coreParseAmount
 from dartlab.providers.dart.docs.finance.affiliate.types import AffiliateMovement, AffiliateProfile
-from dartlab.providers.tableParser import parseAmount as _coreParseAmount
 
 # ── 금액 파싱 ──────────────────────────────────────────────────
 # affiliate-specific: "0" → 0.0 (지분율 0% 유효 값) + "−" (U+2212) → None (no data marker).

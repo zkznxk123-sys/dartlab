@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.providers.reportSelector import extractReportYear, selectReport
+from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 
 SECTION_KEYS = {
     "overview": ["사업의 개요"],

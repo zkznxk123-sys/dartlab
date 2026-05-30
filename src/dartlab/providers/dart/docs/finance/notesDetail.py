@@ -16,11 +16,11 @@ import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
+from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
+from dartlab.providers._common.reportSelector import selectReport
+from dartlab.providers._common.tableParser import detectUnit, parseAmount, parseNotesTable
 from dartlab.providers.mappers.common import isCurrentPeriod, normalizeName, pickValue
 from dartlab.providers.mappers.notesMapper import NOTES_KEYWORDS, NotesMapper
-from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
-from dartlab.providers.reportSelector import selectReport
-from dartlab.providers.tableParser import detectUnit, parseAmount, parseNotesTable
 
 if TYPE_CHECKING:
     import polars as pl

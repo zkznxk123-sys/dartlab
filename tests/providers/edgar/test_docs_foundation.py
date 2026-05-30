@@ -319,7 +319,7 @@ def test_loadData_edgarDocs_force_check_runs_incremental_when_stale(monkeypatch,
 
 def test_selectEdgarReport_annual_and_quarter():
     from dartlab.core.dataLoader import _normalizeLoadedFrame
-    from dartlab.providers.reportSelector import selectEdgarReport
+    from dartlab.providers._common.reportSelector import selectEdgarReport
 
     df = pl.read_parquet(FIXTURE_EDGAR_DOCS)
     df = _normalizeLoadedFrame(df, "edgarDocs")
@@ -1149,7 +1149,7 @@ Exhibit body
 
 
 def test_parseEdgarPeriodKey_and_extractEdgarReportYear():
-    from dartlab.providers.reportSelector import extractEdgarReportYear, parseEdgarPeriodKey
+    from dartlab.providers._common.reportSelector import extractEdgarReportYear, parseEdgarPeriodKey
 
     assert parseEdgarPeriodKey("10-K (2024.09)") == "2024"
     assert parseEdgarPeriodKey("20-F (2024.12)") == "2024"

@@ -5,6 +5,7 @@ import re
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.executive.parser import (
     aggregateExecutives,
     classifyBlock,
@@ -13,7 +14,6 @@ from dartlab.providers.dart.docs.finance.executive.parser import (
     parseUnregisteredPayBlock,
 )
 from dartlab.providers.dart.docs.finance.executive.types import ExecutiveResult
-from dartlab.providers.reportSelector import selectReport
 
 EXECUTIVE_SECTION_PATTERNS = [
     r"임원.*직원.*현황",

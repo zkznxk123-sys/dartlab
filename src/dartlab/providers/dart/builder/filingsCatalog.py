@@ -21,7 +21,12 @@ import polars as pl
 
 from dartlab.core.dataLoader import DART_VIEWER, loadData
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.providers.filingHelpers import filingRecord, filterFilingsByKeyword, resolveDateWindow, truncateText
+from dartlab.providers._common.filingHelpers import (
+    filingRecord,
+    filterFilingsByKeyword,
+    resolveDateWindow,
+    truncateText,
+)
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -234,13 +239,13 @@ def buildDisclosure(
         - ``buildFilings`` — 로컬 parquet 기반 (rate limit X).
         - ``buildLiveFilings`` — 정규화된 ``filedAt/title/formType`` schema.
         - ``Company.disclosure`` — 본 함수의 facade.
-        - ``dartlab.providers.filingHelpers.filterFilingsByKeyword`` — 키워드 필터.
+        - ``dartlab.providers._common.filingHelpers.filterFilingsByKeyword`` — 키워드 필터.
 
     Requires:
         - polars — DataFrame.
         - dartlab.providers.dart.openapi.dart — Dart 클라이언트.
         - DART_API_KEY 환경변수.
-        - dartlab.providers.filingHelpers — filterFilingsByKeyword.
+        - dartlab.providers._common.filingHelpers — filterFilingsByKeyword.
 
     AIContext:
         AI 가 "최근 X 일 공시" / "키워드 검색" / "특정 유형 공시" 질문 entry. 로컬 parquet
@@ -331,12 +336,12 @@ def buildLiveFilings(
         - ``buildFilings`` / ``buildDisclosure`` — 다른 schema 의 동등 함수.
         - ``Company.liveFilings`` — 본 함수의 facade.
         - ``dartlab.providers.dart.openapi.dart.OpenDart`` — 본 함수 본체.
-        - ``dartlab.providers.filingHelpers.resolveDateWindow`` — 날짜 윈도우 정규화.
+        - ``dartlab.providers._common.filingHelpers.resolveDateWindow`` — 날짜 윈도우 정규화.
 
     Requires:
         - polars — DataFrame.
         - dartlab.providers.dart.openapi.dart — OpenDart.
-        - dartlab.providers.filingHelpers — filterFilingsByKeyword + resolveDateWindow.
+        - dartlab.providers._common.filingHelpers — filterFilingsByKeyword + resolveDateWindow.
         - dartlab.core.dataLoader — DART_VIEWER 상수.
         - dartlab.core.messaging — progress (사용자 알림).
         - DART_API_KEY.
@@ -491,10 +496,10 @@ def buildReadFiling(
     SeeAlso:
         - ``buildLiveFilings`` — 본 함수의 filing 입력 source.
         - ``Company.readFiling`` — 본 함수의 facade.
-        - ``dartlab.providers.filingHelpers.filingRecord`` / ``truncateText`` — 입력/출력 헬퍼.
+        - ``dartlab.providers._common.filingHelpers.filingRecord`` / ``truncateText`` — 입력/출력 헬퍼.
 
     Requires:
-        - polars (입력 Series 처리) + dartlab.providers.filingHelpers — filingRecord / truncateText.
+        - polars (입력 Series 처리) + dartlab.providers._common.filingHelpers — filingRecord / truncateText.
         - dartlab.core.dataLoader — DART_VIEWER.
         - dartlab.providers.dart.openapi — ZIP 다운로드 (sections=True 시).
         - DART_API_KEY (ZIP 다운로드 시).

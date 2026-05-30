@@ -3,10 +3,10 @@
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
+from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.tangibleAsset.parser import findMovementTables
 from dartlab.providers.dart.docs.finance.tangibleAsset.types import TangibleAssetResult, TangibleMovement
-from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
-from dartlab.providers.reportSelector import selectReport
 
 
 def tangibleAsset(stockCode: str) -> TangibleAssetResult | None:

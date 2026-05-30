@@ -1181,8 +1181,8 @@ class Company:
                 columns=["year", "report_type", "section_order", "section_title", "section_content"],
             )
             if raw is not None and not raw.is_empty() and "section_content" in raw.columns:
+                from dartlab.providers._common.reportSelector import selectReport
                 from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle
-                from dartlab.providers.reportSelector import selectReport
 
                 # 최신 연도의 사업보고서에서 추출
                 years = sorted(
@@ -2478,7 +2478,7 @@ class Company:
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""
-        from dartlab.providers.show import buildBlockIndex
+        from dartlab.providers._common.show import buildBlockIndex
 
         return buildBlockIndex(topicRows)
 
@@ -2867,7 +2867,7 @@ class Company:
             c.select("IS", ["매출액"]).chart()
         """
         from dartlab.frame.select import SelectResult
-        from dartlab.providers.show import selectFromShow
+        from dartlab.providers._common.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None X)
         try:
@@ -5952,7 +5952,7 @@ class Company:
             OutputSchema:
                 - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - 로컬 표시 가능 환경 + dartlab.providers.viewer.
+                - 로컬 표시 가능 환경 + dartlab.providers._common.viewer.
             Freshness:
                 - 호출 시점 (서버 데이터 별도 fetch X).
             Dataflow:
@@ -5960,7 +5960,7 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 viewer).
         """
-        from dartlab.providers.viewer import launchViewer
+        from dartlab.providers._common.viewer import launchViewer
 
         launchViewer(self.stockCode, port=port)
 

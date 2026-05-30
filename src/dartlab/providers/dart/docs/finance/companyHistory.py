@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.providers.reportSelector import selectReport
+from dartlab.providers._common.reportSelector import selectReport
 
 if TYPE_CHECKING:
     pass

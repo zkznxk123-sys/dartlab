@@ -7,8 +7,8 @@
 import re
 
 from dartlab.core.utils.unitNormalize import normalizeFinanceAmount
+from dartlab.providers._common.tableParser import parseAmount
 from dartlab.providers.dart.docs.finance.segment.types import SegmentTable
-from dartlab.providers.tableParser import parseAmount
 
 # ── 메타 컬럼 패턴 (부문명이 아닌 컬럼) ──────────────────────
 

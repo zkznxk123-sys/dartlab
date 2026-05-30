@@ -107,9 +107,9 @@ def test_subsets_build_peak_under_30mb() -> None:
         pytest.skip("docs parquet 부재")
 
     from dartlab.core.dataLoader import loadData
+    from dartlab.providers._common.reportSelector import selectReport
     from dartlab.providers.dart.docs.sectionsArchive.pipeline import _SECTIONS_REQUIRED_COLS
     from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import REPORT_KINDS, detectContentCol
-    from dartlab.providers.reportSelector import selectReport
 
     df = loadData(_stockCode(), sinceYear=2016, columns=_SECTIONS_REQUIRED_COLS)
     ccol = detectContentCol(df)

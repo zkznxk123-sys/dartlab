@@ -39,14 +39,14 @@ class TestDocsStructure:
 
 class TestReportSelector:
     def test_selectReportAnnual(self, docsDf):
-        from dartlab.providers.reportSelector import selectReport
+        from dartlab.providers._common.reportSelector import selectReport
 
         result = selectReport(docsDf, "2024", "annual")
         assert result is not None
         assert result.height > 0
 
     def test_parsePeriodKey(self):
-        from dartlab.providers.reportSelector import parsePeriodKey
+        from dartlab.providers._common.reportSelector import parsePeriodKey
 
         assert parsePeriodKey("사업보고서 (2024.12)") == "2024Q4"
         assert parsePeriodKey("분기보고서 (2024.03)") == "2024Q1"
@@ -54,7 +54,7 @@ class TestReportSelector:
         assert parsePeriodKey("invalid") is None
 
     def test_extractReportYear(self):
-        from dartlab.providers.reportSelector import extractReportYear
+        from dartlab.providers._common.reportSelector import extractReportYear
 
         assert extractReportYear("사업보고서 (2024.12)") == 2024
         assert extractReportYear("no year") is None
@@ -62,7 +62,7 @@ class TestReportSelector:
 
 class TestTableParser:
     def test_parseAmount(self):
-        from dartlab.providers.tableParser import parseAmount
+        from dartlab.providers._common.tableParser import parseAmount
 
         assert parseAmount("1,234,567") == 1234567
         assert parseAmount("△1,000") == -1000
@@ -70,7 +70,7 @@ class TestTableParser:
         assert parseAmount("") is None
 
     def test_extractTables(self):
-        from dartlab.providers.tableParser import extractTables
+        from dartlab.providers._common.tableParser import extractTables
 
         md = "| A | B |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |"
         tables = extractTables(md)

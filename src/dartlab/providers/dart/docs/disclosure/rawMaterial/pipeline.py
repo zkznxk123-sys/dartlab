@@ -3,6 +3,7 @@
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 from dartlab.providers.dart.docs.disclosure.rawMaterial.parser import (
     parseCapex,
     parseEquipment,
@@ -15,7 +16,6 @@ from dartlab.providers.dart.docs.disclosure.rawMaterial.types import (
     RawMaterialResult,
     YearSnapshot,
 )
-from dartlab.providers.reportSelector import extractReportYear, selectReport
 
 
 def _parseYear(

@@ -3,9 +3,9 @@
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 from dartlab.providers.dart.docs.disclosure.companyOverview.parser import parseOverview
 from dartlab.providers.dart.docs.disclosure.companyOverview.types import OverviewResult
-from dartlab.providers.reportSelector import extractReportYear, selectReport
 
 
 def companyOverview(stockCode: str) -> OverviewResult | None:

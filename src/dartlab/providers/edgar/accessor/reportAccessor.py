@@ -198,7 +198,7 @@ class _ReportAccessor:
 
 def _extractDividend(company: "Company") -> pl.DataFrame | None:
     """배당 데이터 — CF dividends_paid + IS DPS 시계열."""
-    from dartlab.providers.show import isPeriodColumn, selectFromShow
+    from dartlab.providers._common.show import isPeriodColumn, selectFromShow
 
     cf = company.show("CF")
     isDf = company.show("IS")
@@ -224,7 +224,7 @@ def _extractDividend(company: "Company") -> pl.DataFrame | None:
 
 def _extractTreasuryStock(company: "Company") -> pl.DataFrame | None:
     """자사주 데이터 — BS treasury_stock 시계열."""
-    from dartlab.providers.show import isPeriodColumn, selectFromShow
+    from dartlab.providers._common.show import isPeriodColumn, selectFromShow
 
     bs = company.show("BS")
     if bs is None:

@@ -3,6 +3,7 @@
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 from dartlab.providers.dart.docs.finance.majorHolder.parser import (
     parseBigHolders,
     parseMajorHolderTable,
@@ -17,7 +18,6 @@ from dartlab.providers.dart.docs.finance.majorHolder.types import (
     Minority,
     VotingRights,
 )
-from dartlab.providers.reportSelector import extractReportYear, selectReport
 
 
 def majorHolder(stockCode: str) -> MajorHolderResult | None:

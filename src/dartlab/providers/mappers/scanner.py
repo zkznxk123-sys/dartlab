@@ -75,10 +75,10 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     """
     try:
         from dartlab.core.dataLoader import loadData
+        from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
+        from dartlab.providers._common.reportSelector import selectReport
+        from dartlab.providers._common.tableParser import parseNotesTable
         from dartlab.providers.mappers.notesMapper import NOTES_KEYWORDS
-        from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
-        from dartlab.providers.reportSelector import selectReport
-        from dartlab.providers.tableParser import parseNotesTable
     except ImportError:
         return {}
 

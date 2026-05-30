@@ -81,7 +81,7 @@ def test_chapter_dedup_8char_recall() -> None:
 # ── invariant 3 — selectReport 정정공시 정책 ─────────────────────────────
 @pytest.mark.unit
 def test_selectReport_correction_policy() -> None:
-    from dartlab.providers.reportSelector import selectReport
+    from dartlab.providers._common.reportSelector import selectReport
 
     df = pl.DataFrame(
         {

@@ -5,6 +5,8 @@ import re
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.notesExtractor import extractNotesContent
+from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.costByNature.parser import (
     findCostByNatureSection,
     isTotalRow,
@@ -12,8 +14,6 @@ from dartlab.providers.dart.docs.finance.costByNature.parser import (
     parseCostByNature,
 )
 from dartlab.providers.dart.docs.finance.costByNature.types import CostByNatureResult
-from dartlab.providers.notesExtractor import extractNotesContent
-from dartlab.providers.reportSelector import selectReport
 
 PERIOD_KINDS = {
     "y": ["annual"],

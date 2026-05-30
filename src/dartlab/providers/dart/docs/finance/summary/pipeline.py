@@ -3,12 +3,12 @@ import re
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.providers._common.reportSelector import parsePeriodKey, selectReport
+from dartlab.providers._common.tableParser import extractAccounts
 from dartlab.providers.dart.docs.finance.summary.bridgeMatcher import numberBridgeMatch, periodToIndex
 from dartlab.providers.dart.docs.finance.summary.contentExtractor import extractSummaryContent
 from dartlab.providers.dart.docs.finance.summary.segmentation import detectBreakpoints
 from dartlab.providers.dart.docs.finance.summary.types import AnalysisResult, YearAccounts
-from dartlab.providers.reportSelector import parsePeriodKey, selectReport
-from dartlab.providers.tableParser import extractAccounts
 
 
 def loadYearData(

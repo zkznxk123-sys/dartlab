@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.providers.reportSelector import extractReportYear, selectReport
+from dartlab.providers._common.reportSelector import extractReportYear, selectReport
 
 KOREAN_NUMS = {
     "가": 1,

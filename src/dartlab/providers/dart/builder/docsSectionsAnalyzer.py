@@ -130,6 +130,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = empty
             return empty
 
+        from dartlab.providers._common.reportSelector import selectReport
         from dartlab.providers.dart.docs.sectionsArchive.mapper import mapSectionTitle
         from dartlab.providers.dart.docs.sectionsArchive.sectionsBase import (
             REPORT_KINDS,
@@ -137,7 +138,6 @@ class SectionsAnalyzer:
             periodOrderValue,
         )
         from dartlab.providers.dart.docs.sectionsArchive.views import splitMarkdownBlocks
-        from dartlab.providers.reportSelector import selectReport
 
         contentCol = detectContentCol(raw)
         years = sorted({str(year) for year in raw["year"].drop_nulls().to_list()}, reverse=True)

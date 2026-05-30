@@ -237,7 +237,7 @@ def _parseOneCellTable(
         (items, unitLabel, pattern)
         items: [{"name": str, "value": str|float|None}, ...]
     """
-    from dartlab.providers.tableParser import (
+    from dartlab.providers._common.tableParser import (
         detectUnitLabel,
         extractRawTables,
         parseAmount,

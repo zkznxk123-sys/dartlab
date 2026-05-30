@@ -5,6 +5,7 @@ import re
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.boardOfDirectors.parser import (
     classifyBlock,
     extractTableBlocks,
@@ -14,7 +15,6 @@ from dartlab.providers.dart.docs.finance.boardOfDirectors.parser import (
     parseDirectorCountFromText,
 )
 from dartlab.providers.dart.docs.finance.boardOfDirectors.types import BoardResult
-from dartlab.providers.reportSelector import selectReport
 
 BOARD_SECTION_PATTERNS = [
     r"이사회에\s*관한\s*사항",

@@ -3,6 +3,8 @@
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
+from dartlab.providers._common.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.affiliate.extractor import parseTableRows
 from dartlab.providers.dart.docs.finance.affiliate.parser import (
     extractMovements,
@@ -15,8 +17,6 @@ from dartlab.providers.dart.docs.finance.affiliate.types import (
     AffiliateProfile,
     AffiliatesResult,
 )
-from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
-from dartlab.providers.reportSelector import selectReport
 
 _AFFILIATE_KEYWORDS = ["관계기업", "지분법", "공동기업"]
 

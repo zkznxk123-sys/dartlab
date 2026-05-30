@@ -32,7 +32,7 @@ def parsePeriodKey(reportType: str) -> str | None:
         >>> parsePeriodKey("분기보고서 (2024.03)")
         '2024Q1'
     SeeAlso:
-        ``dartlab.providers.reportSelector``.
+        ``dartlab.providers._common.reportSelector``.
     """
     m = _RE_YEAR_MONTH.search(reportType)
     if not m:

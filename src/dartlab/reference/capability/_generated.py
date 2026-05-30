@@ -1989,7 +1989,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             "dataflow": "self.stockCode → launchViewer → FastAPI 서버 + 브라우저 open.",
             "freshness": "호출 시점 (서버 데이터 별도 fetch X).",
             "outputSchema": "None — side effect (브라우저 자동 open).",
-            "prerequisites": "로컬 표시 가능 환경 + dartlab.providers.viewer.",
+            "prerequisites": "로컬 표시 가능 환경 + dartlab.providers._common.viewer.",
             "targetMarkets": "KR (DART 정기보고서 viewer)."
         },
         "requires": "데이터: HuggingFace docs parquet (자동 다운로드)",

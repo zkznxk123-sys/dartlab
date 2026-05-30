@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_is_period_column_year():
-    from dartlab.providers.show import isPeriodColumn
+    from dartlab.providers._common.show import isPeriodColumn
 
     assert isPeriodColumn("2024") is True
     assert isPeriodColumn("2023") is True
@@ -25,7 +25,7 @@ def test_is_period_column_year():
 
 
 def test_is_period_column_quarter():
-    from dartlab.providers.show import isPeriodColumn
+    from dartlab.providers._common.show import isPeriodColumn
 
     assert isPeriodColumn("2024Q1") is True
     assert isPeriodColumn("2024Q4") is True
@@ -33,7 +33,7 @@ def test_is_period_column_quarter():
 
 
 def test_is_period_column_rejects_non_period():
-    from dartlab.providers.show import isPeriodColumn
+    from dartlab.providers._common.show import isPeriodColumn
 
     assert isPeriodColumn("항목") is False
     assert isPeriodColumn("account") is False
@@ -44,7 +44,7 @@ def test_is_period_column_rejects_non_period():
 
 
 def test_is_period_column_rejects_partial():
-    from dartlab.providers.show import isPeriodColumn
+    from dartlab.providers._common.show import isPeriodColumn
 
     assert isPeriodColumn("202") is False
     assert isPeriodColumn("20240") is False
@@ -54,40 +54,40 @@ def test_is_period_column_rejects_partial():
 
 
 def test_normalize_item_key_basic():
-    from dartlab.providers.show import normalizeItemKey
+    from dartlab.providers._common.show import normalizeItemKey
 
     assert normalizeItemKey("매출액") == "매출액"
 
 
 def test_normalize_item_key_strips_whitespace():
-    from dartlab.providers.show import normalizeItemKey
+    from dartlab.providers._common.show import normalizeItemKey
 
     assert normalizeItemKey("매 출 액") == "매출액"
     assert normalizeItemKey("  매출액  ") == "매출액"
 
 
 def test_normalize_item_key_html_entities():
-    from dartlab.providers.show import normalizeItemKey
+    from dartlab.providers._common.show import normalizeItemKey
 
     assert normalizeItemKey("매출&amp;이익") == "매출&이익"
 
 
 def test_normalize_item_key_nfkc():
-    from dartlab.providers.show import normalizeItemKey
+    from dartlab.providers._common.show import normalizeItemKey
 
     # fullwidth A → normal A
     assert normalizeItemKey("Ａ") == "a"
 
 
 def test_normalize_item_key_removes_cr_nbsp():
-    from dartlab.providers.show import normalizeItemKey
+    from dartlab.providers._common.show import normalizeItemKey
 
     assert normalizeItemKey("매출&cr;액") == "매출액"
     assert normalizeItemKey("매출&nbsp;액") == "매출액"
 
 
 def test_normalize_item_key_lowercase():
-    from dartlab.providers.show import normalizeItemKey
+    from dartlab.providers._common.show import normalizeItemKey
 
     assert normalizeItemKey("Sales") == "sales"
     assert normalizeItemKey("ROE") == "roe"
@@ -97,7 +97,7 @@ def test_normalize_item_key_lowercase():
 
 
 def test_transpose_to_vertical_basic():
-    from dartlab.providers.show import transposeToVertical
+    from dartlab.providers._common.show import transposeToVertical
 
     wide = pl.DataFrame(
         {
@@ -115,7 +115,7 @@ def test_transpose_to_vertical_basic():
 
 def test_transpose_to_vertical_q4_fallback():
     """연도 요청 시 Q4 컬럼으로 fallback."""
-    from dartlab.providers.show import transposeToVertical
+    from dartlab.providers._common.show import transposeToVertical
 
     wide = pl.DataFrame(
         {
@@ -131,7 +131,7 @@ def test_transpose_to_vertical_q4_fallback():
 
 
 def test_transpose_to_vertical_no_match():
-    from dartlab.providers.show import transposeToVertical
+    from dartlab.providers._common.show import transposeToVertical
 
     wide = pl.DataFrame(
         {
@@ -145,7 +145,7 @@ def test_transpose_to_vertical_no_match():
 
 def test_transpose_to_vertical_preserves_meta():
     """meta 컬럼(비-기간)이 보존된다."""
-    from dartlab.providers.show import transposeToVertical
+    from dartlab.providers._common.show import transposeToVertical
 
     wide = pl.DataFrame(
         {
@@ -167,7 +167,7 @@ def test_transpose_to_vertical_preserves_meta():
 
 
 def test_select_from_show_row_filter():
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame(
         {
@@ -183,7 +183,7 @@ def test_select_from_show_row_filter():
 
 
 def test_select_from_show_col_filter():
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame(
         {
@@ -201,7 +201,7 @@ def test_select_from_show_col_filter():
 
 
 def test_select_from_show_row_and_col():
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame(
         {
@@ -217,7 +217,7 @@ def test_select_from_show_row_and_col():
 
 
 def test_select_from_show_empty_df():
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame({"항목": [], "2024": []}).cast({"항목": pl.Utf8, "2024": pl.Int64})
     result = selectFromShow(df)
@@ -225,7 +225,7 @@ def test_select_from_show_empty_df():
 
 
 def test_select_from_show_no_match_rows():
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame(
         {
@@ -239,7 +239,7 @@ def test_select_from_show_no_match_rows():
 
 def test_select_from_show_col_q4_fallback():
     """colList에 연도 지정 시 Q4 fallback."""
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame(
         {
@@ -253,7 +253,7 @@ def test_select_from_show_col_q4_fallback():
 
 
 def test_select_from_show_no_col_match():
-    from dartlab.providers.show import selectFromShow
+    from dartlab.providers._common.show import selectFromShow
 
     df = pl.DataFrame(
         {
@@ -269,7 +269,7 @@ def test_select_from_show_no_col_match():
 
 
 def test_cascade_exact_match():
-    from dartlab.providers.show import _cascadeFilterRows
+    from dartlab.providers._common.show import _cascadeFilterRows
 
     df = pl.DataFrame({"항목": ["매출액", "영업이익", "순이익"]})
     result = _cascadeFilterRows(df, "항목", ["매출액"])
@@ -280,7 +280,7 @@ def test_cascade_exact_match():
 
 def test_cascade_normalized_match():
     """정규화 매칭 — 공백 차이를 무시한다."""
-    from dartlab.providers.show import _cascadeFilterRows
+    from dartlab.providers._common.show import _cascadeFilterRows
 
     df = pl.DataFrame({"항목": ["매 출 액", "영업이익"]})
     result = _cascadeFilterRows(df, "항목", ["매출액"])
@@ -290,7 +290,7 @@ def test_cascade_normalized_match():
 
 def test_cascade_contains_match():
     """substring 포함 매칭."""
-    from dartlab.providers.show import _cascadeFilterRows
+    from dartlab.providers._common.show import _cascadeFilterRows
 
     df = pl.DataFrame({"항목": ["연결매출액합계", "영업이익"]})
     result = _cascadeFilterRows(df, "항목", ["매출액"])
@@ -300,7 +300,7 @@ def test_cascade_contains_match():
 
 def test_cascade_fuzzy_match():
     """fuzzy 매칭 (유사도 기반)."""
-    from dartlab.providers.show import _cascadeFilterRows
+    from dartlab.providers._common.show import _cascadeFilterRows
 
     df = pl.DataFrame({"항목": ["매출총이익", "영업이익"]})
     # "매출총이" is close to "매출총이익"
@@ -309,7 +309,7 @@ def test_cascade_fuzzy_match():
 
 
 def test_cascade_no_match():
-    from dartlab.providers.show import _cascadeFilterRows
+    from dartlab.providers._common.show import _cascadeFilterRows
 
     df = pl.DataFrame({"항목": ["매출액"]})
     result = _cascadeFilterRows(df, "항목", ["완전히다른항목임"])
@@ -320,7 +320,7 @@ def test_cascade_no_match():
 
 
 def test_build_block_index_basic():
-    from dartlab.providers.show import buildBlockIndex
+    from dartlab.providers._common.show import buildBlockIndex
 
     df = pl.DataFrame(
         {
@@ -340,7 +340,7 @@ def test_build_block_index_basic():
 
 def test_build_block_index_dedup_block_order():
     """같은 blockOrder는 한 번만 포함한다."""
-    from dartlab.providers.show import buildBlockIndex
+    from dartlab.providers._common.show import buildBlockIndex
 
     df = pl.DataFrame(
         {
@@ -356,7 +356,7 @@ def test_build_block_index_dedup_block_order():
 
 def test_build_block_index_finance_preview():
     """finance source는 preview에 '(finance)' 표시."""
-    from dartlab.providers.show import buildBlockIndex
+    from dartlab.providers._common.show import buildBlockIndex
 
     df = pl.DataFrame(
         {
@@ -372,7 +372,7 @@ def test_build_block_index_finance_preview():
 
 def test_build_block_index_report_preview():
     """report source는 preview에 '(report)' 표시."""
-    from dartlab.providers.show import buildBlockIndex
+    from dartlab.providers._common.show import buildBlockIndex
 
     df = pl.DataFrame(
         {
@@ -388,7 +388,7 @@ def test_build_block_index_report_preview():
 
 def test_build_block_index_without_block_order():
     """blockOrder 컬럼이 없으면 자동 인덱스 사용."""
-    from dartlab.providers.show import buildBlockIndex
+    from dartlab.providers._common.show import buildBlockIndex
 
     df = pl.DataFrame(
         {
@@ -404,7 +404,7 @@ def test_build_block_index_without_block_order():
 
 def test_build_block_index_no_period_cols():
     """기간 컬럼이 없을 때도 동작한다."""
-    from dartlab.providers.show import buildBlockIndex
+    from dartlab.providers._common.show import buildBlockIndex
 
     df = pl.DataFrame(
         {
