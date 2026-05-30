@@ -1,6 +1,6 @@
 ---
 id: recipes.news.priceShockNews
-title: |AR|>3σ 가격 shock 자동 검출 + 인접 뉴스 컨텍스트
+title: "|AR|>3σ 가격 shock 자동 검출 + 인접 뉴스 컨텍스트"
 category: recipes
 kind: recipe
 scope: builtin
