@@ -62,6 +62,24 @@ from .dispatch import INDEX_SYMBOLS, _fetchNaverIndex
 
 log = logging.getLogger(__name__)
 
+# narrative axis 의 분석 provider 는 L2(quant/macro)에 산다. gather(L1)가 이를 정적으로
+# import 하면 단방향 import 위반이므로, modulePath 를 *데이터(문자열)*로 보관하고 importlib 로
+# 런타임 dispatch 한다 (providers/dart/company.py 의 engine accessor 와 동형 — 정적 L1→L2 import 0,
+# 모듈은 해당 target 이 실제 호출될 때만 로드). cycle 회피용 lazy from-import 이 아니라 의도적 layer dispatch.
+_NARRATIVE_PROVIDERS: dict[str, tuple[str, str]] = {
+    "pulse": ("dartlab.quant.text.narrativePulse", "buildNarrativePulse"),
+    "score": ("dartlab.macro.narrative.narrative", "analyzeNarrative"),
+}
+
+
+def _narrativeProvider(key: str):
+    """narrative target → L2 분석 함수 (modulePath importlib 런타임 dispatch)."""
+    import importlib
+
+    modulePath, attr = _NARRATIVE_PROVIDERS[key]
+    return getattr(importlib.import_module(modulePath), attr)
+
+
 # Sprint 3 PR3 — 글로벌 자산 ID 정규식
 _ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
 _FIGI_RE = re.compile(r"^BBG[A-Z0-9]{9}$")
@@ -829,18 +847,18 @@ def handleNarrative(
         return loadNewsArchive(start, end, market, asof=asof)
 
     if target == "pulse":
-        from dartlab.quant.text.narrativePulse import buildNarrativePulse
+        buildNarrativePulse = _narrativeProvider("pulse")
 
         return buildNarrativePulse(start, end, market, asof=asof, sentimentModel=sentimentModel)
 
     if target == "score":
-        from dartlab.macro.narrative.narrative import analyzeNarrative
+        analyzeNarrative = _narrativeProvider("score")
 
         result = analyzeNarrative(market=market, asOf=asof, lookbackDays=days, sentimentModel=sentimentModel)
         return pl.DataFrame([result])
 
     if target == "topics":
-        from dartlab.quant.text.narrativePulse import buildNarrativePulse
+        buildNarrativePulse = _narrativeProvider("pulse")
 
         pulse = buildNarrativePulse(start, end, market, asof=asof, sentimentModel=sentimentModel)
         if pulse.height == 0:
