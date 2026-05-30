@@ -45,7 +45,18 @@ class NotesMapper(BaseMapper):
 
     @property
     def name(self) -> str:
-        """매퍼 이름 — ``"notes"`` 고정 식별자 (registry/diff 비교용)."""
+        """매퍼 이름 — ``"notes"`` 고정 식별자 (registry/diff 비교용).
+
+        Returns:
+            항상 ``"notes"``.
+
+        Example:
+            >>> NotesMapper().name
+            'notes'
+
+        Raises:
+            없음.
+        """
         return "notes"
 
     def _data(self) -> dict:
@@ -64,18 +75,32 @@ class NotesMapper(BaseMapper):
         return self._data().get("aliases", {})
 
     def reload(self) -> None:
-        """캐시 무효화 — scanner 갱신 후 호출."""
+        """캐시 무효화 — scanner 갱신 후 호출.
+
+        Example:
+            >>> m = NotesMapper(); m.reload()  # 다음 lookup 시 JSON 재로드
+
+        Raises:
+            없음 — 다음 조회 시점에 lazy 재로드.
+        """
         self._cache = None
 
     def lookup(self, key: str) -> dict | None:
-        """항목명으로 구조 정보 조회.
+        """항목명으로 구조 정보 조회. 정확 매칭 실패 시 공백 제거 후 재시도.
+
+        Args:
+            key: 항목명 (정규화 전/후 모두 허용).
 
         Returns:
-            {"type": "amount"|"rate"|"text",
-             "category": "inventory"|"borrowings"|...,
-             "foreignCurrency": bool,
-             "frequency": float,  # 0.0~1.0 (전체 종목 중 출현 비율)
-             "skip": bool}  # True면 파싱에서 제외
+            {"name", "type": "amount"|"rate"|"text", "category", "foreignCurrency": bool,
+             "frequency": float(0~1), "skip": bool}. 미등록 항목은 None.
+
+        Example:
+            >>> NotesMapper().lookup("재고자산")  # doctest: +SKIP
+            {'name': '재고자산', 'type': 'amount', 'category': '재고자산', ...}
+
+        Raises:
+            없음 — 미등록 시 None 반환.
         """
         items = self._items()
         if key in items:
@@ -91,16 +116,43 @@ class NotesMapper(BaseMapper):
         return None
 
     def isAmount(self, itemName: str) -> bool:
-        """금액 항목인지 판별. 매핑 없으면 True (기본=금액)."""
+        """금액 항목인지 판별. 매핑 없으면 True (기본=금액).
+
+        Args:
+            itemName: 항목명.
+
+        Returns:
+            type 이 "amount" 또는 미등록이면 True. rate/text 면 False.
+
+        Example:
+            >>> NotesMapper().isAmount("미등록항목")
+            True
+
+        Raises:
+            없음.
+        """
         info = self.lookup(itemName)
         if info is None:
             return True  # 미등록 항목은 금액으로 간주
         return info.get("type") == "amount"
 
     def resolveAlias(self, itemName: str) -> str:
-        """항목명을 canonical로 정규화. 매핑 없으면 원본 반환.
+        """항목명을 canonical 로 정규화. 매핑 없으면 원본 반환.
 
-        alias에서 _skip_* 로 시작하면 제거 대상.
+        공백 제거 후 alias dict 조회. canonical 이 ``_skip_*`` 면 제거 대상 신호.
+
+        Args:
+            itemName: 항목명 (variant 가능).
+
+        Returns:
+            canonical 항목명. alias 미등록이면 입력 원본.
+
+        Example:
+            >>> NotesMapper().resolveAlias("재고자산계")  # doctest: +SKIP
+            '재고자산'
+
+        Raises:
+            없음.
         """
         import re
 
@@ -109,7 +161,23 @@ class NotesMapper(BaseMapper):
         return aliases.get(normalized, itemName)
 
     def isSkip(self, itemName: str) -> bool:
-        """파싱에서 제외할 항목인지."""
+        """파싱에서 제외할 항목인지.
+
+        ``_skip_`` alias 또는 등록 항목의 skip 플래그(rate/text)로 판정.
+
+        Args:
+            itemName: 항목명.
+
+        Returns:
+            제외 대상이면 True. 미등록이면 False.
+
+        Example:
+            >>> NotesMapper().isSkip("미등록항목")
+            False
+
+        Raises:
+            없음.
+        """
         # alias에서 _skip_ 으로 시작하면 제거
         resolved = self.resolveAlias(itemName)
         if resolved.startswith("_skip_"):
@@ -120,19 +188,58 @@ class NotesMapper(BaseMapper):
         return info.get("skip", False)
 
     def hasForeignCurrency(self, itemName: str) -> bool:
-        """외화 혼합 항목인지."""
+        """외화 혼합 항목인지.
+
+        Args:
+            itemName: 항목명.
+
+        Returns:
+            등록 항목의 foreignCurrency 플래그. 미등록이면 False.
+
+        Example:
+            >>> NotesMapper().hasForeignCurrency("미등록항목")
+            False
+
+        Raises:
+            없음.
+        """
         info = self.lookup(itemName)
         if info is None:
             return False
         return info.get("foreignCurrency", False)
 
     def category(self, itemName: str) -> str | None:
-        """항목의 카테고리 (inventory, borrowings, ...)."""
+        """항목의 카테고리 (inventory, borrowings, ...).
+
+        Args:
+            itemName: 항목명.
+
+        Returns:
+            카테고리 문자열. 미등록·카테고리 부재면 None.
+
+        Example:
+            >>> NotesMapper().category("재고자산")  # doctest: +SKIP
+            '재고자산'
+
+        Raises:
+            없음.
+        """
         info = self.lookup(itemName)
         return info.get("category") if info else None
 
     def stats(self) -> MapperStats:
-        """매퍼 통계 — 총 항목 수 / 금액 항목 비율 (coverage) / 마지막 스캔 시각."""
+        """매퍼 통계 — 총 항목 수 / 금액 항목 비율 (coverage) / 마지막 스캔 시각.
+
+        Returns:
+            MapperStats(name, totalEntries, mappedEntries=금액항목수, coverage, lastUpdated).
+
+        Example:
+            >>> NotesMapper().stats().name
+            'notes'
+
+        Raises:
+            없음 — 빈 매퍼면 coverage 0.0.
+        """
         items = self._items()
         meta = self._data().get("_metadata", {})
         amountItems = sum(1 for v in items.values() if v.get("type") == "amount")
@@ -145,13 +252,49 @@ class NotesMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
-        """등록된 항목 키 list — items dict 키 순서 유지."""
+        """등록된 항목 키 list — items dict 키 순서 유지.
+
+        Returns:
+            등록 항목명 전체 list.
+
+        Example:
+            >>> isinstance(NotesMapper().allKeys(), list)
+            True
+
+        Raises:
+            없음.
+        """
         return list(self._items().keys())
 
     def byCategory(self, cat: str) -> list[str]:
-        """특정 카테고리의 항목 목록."""
+        """특정 카테고리의 항목 목록.
+
+        Args:
+            cat: 카테고리 키 (inventory, borrowings, ...).
+
+        Returns:
+            해당 카테고리 항목명 list. 매칭 없으면 빈 list.
+
+        Example:
+            >>> NotesMapper().byCategory("재고자산")  # doctest: +SKIP
+            ['재고자산', '제품및상품', ...]
+
+        Raises:
+            없음.
+        """
         return [k for k, v in self._items().items() if v.get("category") == cat]
 
     def unmapped(self) -> list[str]:
-        """type이 지정되지 않은 항목."""
+        """type 이 지정되지 않은 항목.
+
+        Returns:
+            type 키 부재 항목명 list (스캔 미분류 잔여).
+
+        Example:
+            >>> isinstance(NotesMapper().unmapped(), list)
+            True
+
+        Raises:
+            없음.
+        """
         return [k for k, v in self._items().items() if "type" not in v]

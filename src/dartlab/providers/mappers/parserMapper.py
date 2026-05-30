@@ -46,19 +46,52 @@ def _loadRequired(filename: str) -> dict:
 
 @lru_cache(maxsize=1)
 def loadAffiliate() -> dict:
-    """affiliate 파서 매핑 로드."""
+    """affiliate 파서 매핑 로드 (movement/profile/transposedMovement).
+
+    Returns:
+        affiliate.json 파싱 dict. lru_cache 로 1회만 read.
+
+    Example:
+        >>> "movement" in loadAffiliate()  # doctest: +SKIP
+        True
+
+    Raises:
+        FileNotFoundError: 번들 affiliate.json 누락(패키징 사고) 시.
+    """
     return _loadRequired("affiliate.json")
 
 
 @lru_cache(maxsize=1)
 def loadCostByNature() -> dict:
-    """costByNature 파서 매핑 로드."""
+    """costByNature 파서 매핑 로드 (normalize/totalPatterns/skipKeywords).
+
+    Returns:
+        costByNature.json 파싱 dict. lru_cache 로 1회만 read.
+
+    Example:
+        >>> "normalize" in loadCostByNature()  # doctest: +SKIP
+        True
+
+    Raises:
+        FileNotFoundError: 번들 costByNature.json 누락 시.
+    """
     return _loadRequired("costByNature.json")
 
 
 @lru_cache(maxsize=1)
 def loadSections() -> dict:
-    """sections 파서 매핑 로드."""
+    """sections 파서 매핑 로드 (detailTopicMap/detailTopicKeywords/chapterByMajor).
+
+    Returns:
+        sections.json 파싱 dict. lru_cache 로 1회만 read.
+
+    Example:
+        >>> "chapterByMajor" in loadSections()  # doctest: +SKIP
+        True
+
+    Raises:
+        FileNotFoundError: 번들 sections.json 누락 시 (2026-04-19 사고 class).
+    """
     return _loadRequired("sections.json")
 
 
@@ -67,27 +100,94 @@ class ParserMapper(BaseMapper):
 
     @property
     def name(self) -> str:
-        """매퍼 이름 — ``"parser"`` 고정 식별자 (affiliate + cost + sections 통합 매퍼)."""
+        """매퍼 이름 — ``"parser"`` 고정 식별자 (affiliate + cost + sections 통합 매퍼).
+
+        Returns:
+            항상 ``"parser"``.
+
+        Example:
+            >>> ParserMapper().name
+            'parser'
+
+        Raises:
+            없음.
+        """
         return "parser"
 
     # ── affiliate ──
 
     def affiliateMovement(self, key: str) -> str | None:
-        """변동내역 열 이름 → canonical (opening/closing/acquisition/...)."""
+        """변동내역 열 이름 → canonical (opening/closing/acquisition/...).
+
+        Args:
+            key: 원본 열 이름.
+
+        Returns:
+            canonical 필드명. 매핑 없으면 None.
+
+        Example:
+            >>> ParserMapper().affiliateMovement("기초")  # doctest: +SKIP
+            'opening'
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         return loadAffiliate().get("movement", {}).get(key)
 
     def affiliateProfile(self, key: str) -> str | None:
-        """프로파일 필드 → canonical (ownership/bookValue/location/...)."""
+        """프로파일 필드 → canonical (ownership/bookValue/location/...).
+
+        Args:
+            key: 원본 프로파일 필드명.
+
+        Returns:
+            canonical 필드명. 매핑 없으면 None.
+
+        Example:
+            >>> ParserMapper().affiliateProfile("지분율")  # doctest: +SKIP
+            'ownership'
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         return loadAffiliate().get("profile", {}).get(key)
 
     def affiliateTransposedMovement(self, key: str) -> str | None:
-        """횡전개 변동 필드 → canonical."""
+        """횡전개 변동 필드 → canonical.
+
+        Args:
+            key: 횡전개 변동 필드명.
+
+        Returns:
+            canonical 필드명. 매핑 없으면 None.
+
+        Example:
+            >>> ParserMapper().affiliateTransposedMovement("취득")  # doctest: +SKIP
+            'acquisition'
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         return loadAffiliate().get("transposedMovement", {}).get(key)
 
     # ── costByNature ──
 
     def costNormalize(self, rawName: str) -> str | None:
-        """비용 항목 정규화. 원재료/인건비 등 → canonical."""
+        """비용 항목 정규화. 원재료/인건비 등 → canonical.
+
+        Args:
+            rawName: 원본 비용 항목명 (공백 포함 가능).
+
+        Returns:
+            canonical 비용 항목. 매핑 없으면 None.
+
+        Example:
+            >>> ParserMapper().costNormalize("원재료비")  # doctest: +SKIP
+            'rawMaterials'
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         cleaned = rawName.replace(" ", "")
         for canonical, aliases in loadCostByNature().get("normalize", []):
             if any(alias in cleaned for alias in aliases):
@@ -95,34 +195,118 @@ class ParserMapper(BaseMapper):
         return None
 
     def isCostTotal(self, name: str) -> bool:
-        """합계 행인지."""
+        """합계 행인지.
+
+        Args:
+            name: 비용 항목명.
+
+        Returns:
+            totalPatterns 매칭 시 True.
+
+        Example:
+            >>> ParserMapper().isCostTotal("합계")  # doctest: +SKIP
+            True
+
+        Raises:
+            없음.
+        """
         cleaned = name.replace(" ", "")
         return any(p in cleaned for p in loadCostByNature().get("totalPatterns", []))
 
     def isCostSkip(self, name: str) -> bool:
-        """건너뛸 키워드인지."""
+        """건너뛸 키워드인지.
+
+        Args:
+            name: 비용 항목명.
+
+        Returns:
+            skipKeywords 정확 매칭 시 True.
+
+        Example:
+            >>> ParserMapper().isCostSkip("주석")  # doctest: +SKIP
+            True
+
+        Raises:
+            없음.
+        """
         cleaned = name.replace(" ", "")
         return cleaned in loadCostByNature().get("skipKeywords", set())
 
     # ── sections ──
 
     def sectionTopic(self, heading: str) -> str | None:
-        """명세서 제목 → topic code."""
+        """명세서 제목 → topic code.
+
+        Args:
+            heading: 명세서 heading 텍스트.
+
+        Returns:
+            topic code. 매핑 없으면 None.
+
+        Example:
+            >>> ParserMapper().sectionTopic("배당에관한사항")  # doctest: +SKIP
+            'dividend'
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         cleaned = heading.replace(" ", "")
         return loadSections().get("detailTopicMap", {}).get(cleaned)
 
     def sectionKeywords(self, topicCode: str) -> list[str]:
-        """topic code → 키워드 목록."""
+        """topic code → 키워드 목록.
+
+        Args:
+            topicCode: topic 식별 코드.
+
+        Returns:
+            키워드 list. 미등록이면 빈 list.
+
+        Example:
+            >>> ParserMapper().sectionKeywords("dividend")  # doctest: +SKIP
+            ['배당', '주당배당금', ...]
+
+        Raises:
+            없음.
+        """
         return loadSections().get("detailTopicKeywords", {}).get(topicCode, [])
 
     def chapterFromMajor(self, majorNum: int) -> str | None:
-        """정수 장번호 → 로마숫자."""
+        """정수 장번호 → 로마숫자.
+
+        Args:
+            majorNum: 정수 장 번호 (1, 2, ...).
+
+        Returns:
+            로마숫자 chapter 라벨. 매핑 없으면 None.
+
+        Example:
+            >>> ParserMapper().chapterFromMajor(1)  # doctest: +SKIP
+            'I'
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         return loadSections().get("chapterByMajor", {}).get(str(majorNum))
 
     # ── BaseMapper ──
 
     def lookup(self, key: str) -> dict | None:
-        """통합 검색 — affiliate → cost → sections 순."""
+        """통합 검색 — affiliate → cost → sections 순.
+
+        Args:
+            key: 검색 키 (열 이름·항목명·heading 등).
+
+        Returns:
+            {"source", "canonical"|"topicCode"} dict. 어느 source 도 안 맞으면 None.
+
+        Example:
+            >>> ParserMapper().lookup("기초")  # doctest: +SKIP
+            {'source': 'affiliate.movement', 'canonical': 'opening'}
+
+        Raises:
+            없음 — 미매핑 시 None.
+        """
         # affiliate movement
         val = self.affiliateMovement(key)
         if val:
@@ -146,7 +330,18 @@ class ParserMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
-        """통합 통계 — 4 source (affiliate movement/profile/transposed + costNormalize + sectionTopicMap) 합계."""
+        """통합 통계 — 4 source (affiliate movement/profile/transposed + costNormalize + sectionTopicMap) 합계.
+
+        Returns:
+            MapperStats(name, totalEntries=합계, mappedEntries=동일, coverage=1.0, lastUpdated="").
+
+        Example:
+            >>> ParserMapper().stats().name
+            'parser'
+
+        Raises:
+            FileNotFoundError: 번들 매핑 JSON 누락 시 (load* 경유).
+        """
         aff = loadAffiliate()
         cost = loadCostByNature()
         sec = loadSections()
@@ -166,7 +361,18 @@ class ParserMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
-        """4 source 의 모든 key 합쳐서 list — 통합 검색 / debug 용."""
+        """4 source 의 모든 key 합쳐서 list — 통합 검색 / debug 용.
+
+        Returns:
+            affiliate movement/profile + cost normalize + sections topicMap 의 key 합본 list.
+
+        Example:
+            >>> isinstance(ParserMapper().allKeys(), list)  # doctest: +SKIP
+            True
+
+        Raises:
+            FileNotFoundError: 번들 매핑 JSON 누락 시 (load* 경유).
+        """
         keys: list[str] = []
         aff = loadAffiliate()
         keys.extend(aff.get("movement", {}).keys())

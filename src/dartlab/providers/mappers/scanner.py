@@ -70,8 +70,19 @@ def _hasForeignInName(name: str) -> bool:
 def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     """단일 종목의 notes 구조 패턴 추출.
 
+    Args:
+        stockCode: 종목코드.
+
     Returns:
-        {항목명: {"type", "category", "foreignCurrency", "count", "years": set[str]}}
+        {항목명: {"type", "category", "foreignCurrency", "count", "years": set[str]}}.
+        import/데이터 실패 시 빈 dict.
+
+    Example:
+        >>> scanNotes("005930")  # doctest: +SKIP
+        {'재고자산': {'type': 'amount', 'category': '재고자산', ...}}
+
+    Raises:
+        없음 — import/데이터 로드 실패는 빈 dict 로 흡수한다.
     """
     try:
         from dartlab.core.dataLoader import loadData
@@ -157,6 +168,13 @@ def discoverAliases(
 
     Returns:
         {variant: canonical} — alias 후보
+
+    Example:
+        >>> discoverAliases(["005930", "000660"], minSupport=2)  # doctest: +SKIP
+        {'재고자산계': '재고자산'}
+
+    Raises:
+        없음 — 종목별 스캔 실패(MemoryError/OSError)는 건너뛴다.
     """
 
     # category별 항목 출현 패턴 수집
@@ -264,6 +282,13 @@ def scanAll(
 
     Returns:
         {"scanned": int, "newItems": int, "updatedItems": int, "totalItems": int}
+
+    Example:
+        >>> scanAll(limit=100)  # doctest: +SKIP
+        {'scanned': 100, 'newItems': 12, 'updatedItems': 88, ...}
+
+    Raises:
+        없음 — 데이터 디렉터리 부재 시 scanned=0 stats 로 반환.
     """
     outPath = output or _STRUCTURE_PATH
 
