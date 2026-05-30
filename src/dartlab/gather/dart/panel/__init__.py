@@ -13,9 +13,12 @@ import 0 (gather ↛ providers, R1 · core_boundary).
 from __future__ import annotations
 
 from .build import buildPanel, buildPanelAll, buildPanelBaseline
+from .learn import bridgeCoverage, learnBridge
 
 __all__ = [
+    "bridgeCoverage",
     "buildPanel",
     "buildPanelAll",
     "buildPanelBaseline",
+    "learnBridge",
 ]

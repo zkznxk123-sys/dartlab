@@ -13,12 +13,13 @@ SSOT. build(write)=gather / reader(read)=providers 가 본 계약만 의존해 �
 
 from __future__ import annotations
 
-from .bridge import loadBridge, seedBridgeTier1
+from .bridge import BRIDGE_SCHEMA, loadBridge, seedBridgeTier1, writeBridge
 from .canonical import invalidateCache, resolveBatch, resolveDisclosureKey
 from .period import isPeriodColumn, periodFromEnd, sortPeriods
 from .schema import PANEL_SCHEMA, PIVOT_INDEX
 
 __all__ = [
+    "BRIDGE_SCHEMA",
     "PANEL_SCHEMA",
     "PIVOT_INDEX",
     "invalidateCache",
@@ -29,4 +30,5 @@ __all__ = [
     "resolveDisclosureKey",
     "seedBridgeTier1",
     "sortPeriods",
+    "writeBridge",
 ]

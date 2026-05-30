@@ -39,7 +39,7 @@ import polars as pl
 import dartlab.config as _cfg
 
 # bridge parquet 7-col schema (seed·learn 공통).
-_BRIDGE_SCHEMA: dict[str, pl.DataType] = {
+BRIDGE_SCHEMA: dict[str, pl.DataType] = {
     "disclosureKey": pl.Utf8,
     "marketNs": pl.Utf8,
     "rawId": pl.Utf8,
@@ -285,7 +285,7 @@ def seedBridgeTier1(*, overwrite: bool = False) -> pl.DataFrame:
     bridgePath.parent.mkdir(parents=True, exist_ok=True)
     if bridgePath.exists() and not overwrite:
         return pl.read_parquet(str(bridgePath))
-    df = pl.DataFrame(_tier1Seed(), schema=_BRIDGE_SCHEMA)
+    df = pl.DataFrame(_tier1Seed(), schema=BRIDGE_SCHEMA)
     df.write_parquet(str(bridgePath))
     loadBridge.cache_clear()
     return df
@@ -341,5 +341,66 @@ def loadBridge() -> pl.DataFrame:
     """
     p = _bridgePath()
     if not p.exists():
-        return pl.DataFrame(schema=_BRIDGE_SCHEMA)
+        return pl.DataFrame(schema=BRIDGE_SCHEMA)
     return pl.read_parquet(str(p))
+
+
+def writeBridge(df: pl.DataFrame, *, invalidate: bool = True) -> None:
+    """bridge DataFrame 을 panelBridge.parquet 로 write (SSOT 갱신).
+
+    gather ``learn.learnBridge`` 가 tier1 seed + tier2 corpus-learned 결합본을 본 함수로
+    저장한다. write 책임은 gather(L1) 이지만 SSOT 포맷·경로는 core(L0) 소유 — 본 함수가
+    경계.
+
+    Args:
+        df: 7-col bridge DataFrame (BRIDGE_SCHEMA). tier1 + tier2 결합본.
+        invalidate: True 면 write 후 canonical/bridge lru_cache 무효화.
+
+    Returns:
+        None.
+
+    Raises:
+        없음 — 디렉터리 자동 생성.
+
+    Example:
+        >>> writeBridge(combinedDf)  # doctest: +SKIP
+
+    SeeAlso:
+        - ``loadBridge`` — 본 함수가 쓴 parquet read.
+        - ``seedBridgeTier1`` — tier1 seed 생성.
+        - gather ``learn.learnBridge`` — tier2 corpus 전파 후 본 함수로 저장.
+
+    Requires:
+        - polars. dartlab.config.
+
+    Capabilities:
+        - tier1+tier2 결합 bridge SSOT 단일 write 경로 — 회사간·세계마켓간 정규화 어휘 확정.
+
+    Guide:
+        - learnBridge 가 호출 — 직접 호출 X.
+
+    AIContext:
+        - parquet write + cache invalidate 부작용. 양식 자유 추가 금지(R5).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 컬럼 추가/이름 변경 금지 — BRIDGE_SCHEMA 7-col 동결.
+            - invalidate=False 후 동일 프로세스 resolve 금지 — stale lookup.
+        OutputSchema:
+            - ``None`` + 부수효과 data/bridge/panelBridge.parquet.
+        Prerequisites:
+            - df 가 BRIDGE_SCHEMA 7-col.
+        Freshness:
+            - write 즉시 (invalidate 시) 다음 resolve 반영.
+        Dataflow:
+            - df → parquet write → (invalidate) cache_clear.
+        TargetMarkets:
+            - KR + US 통합.
+    """
+    bridgePath = _bridgePath()
+    bridgePath.parent.mkdir(parents=True, exist_ok=True)
+    df.select(list(BRIDGE_SCHEMA.keys())).write_parquet(str(bridgePath))
+    if invalidate:
+        from .canonical import invalidateCache
+
+        invalidateCache()
