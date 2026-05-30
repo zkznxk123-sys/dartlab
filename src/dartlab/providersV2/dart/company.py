@@ -29,6 +29,8 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.dualAccess import CallableAccessor
+
 from .finance import AccountMapper, buildTimeseries
 from .report import API_TYPE_LABELS, API_TYPES, extractClean
 from .sections import readSectionsMeta, readSectionsWide
@@ -137,6 +139,7 @@ class Company:
 
     def __init__(self, stockCode: str) -> None:
         self.stockCode = str(stockCode).strip()
+        self._cache: dict = {}
 
     def __repr__(self) -> str:
         return f"Company({self.stockCode!r}, market={self.market})"
@@ -171,7 +174,40 @@ class Company:
         """
         return readSectionsMeta(self.stockCode)
 
-    def show(
+    @property
+    def show(self) -> CallableAccessor:
+        """topic 보드 dual-access — ``c.show("BS")`` = ``c.show.BS()``.
+
+        Returns:
+            CallableAccessor — call/attribute 양형. 실 dispatch 는 ``_showImpl``.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").show("BS")   # doctest: +SKIP
+            >>> Company("005930").show.BS()    # doctest: +SKIP
+
+        SeeAlso:
+            - ``_showImpl`` — classify dispatch 실구현.
+            - ``index`` — 가용 topic 카탈로그.
+
+        Requires:
+            - dartlab
+            - polars
+
+        Capabilities:
+            - dual-access proxy (옛 dart facade api-contract 동일). topic 을 인자
+              또는 attribute 로 (``c.show.dividend()``).
+
+        AIContext:
+            단일 read 진입 — attribute 형도 동일 classify dispatch.
+        """
+        if "_show" not in self._cache:
+            self._cache["_show"] = CallableAccessor(self._showImpl, name="show")
+        return self._cache["_show"]
+
+    def _showImpl(
         self,
         topic: str,
         *,
@@ -179,7 +215,7 @@ class Company:
         scope: str = "consolidated",
         raw: bool = False,
     ) -> pl.DataFrame | None:
-        """topic 보드 조회 — classify 로 finance/report/sections 분기.
+        """topic 보드 조회 (실 dispatch) — classify 로 finance/report/sections 분기.
 
         Capabilities:
             - 재무제표(BS/IS/CF) → finance 정규화 wide (label 행 × period 열, 정렬).
@@ -287,3 +323,121 @@ class Company:
             periodCols = [c for c in sub.columns if c[:4].isdigit()]
             sub = sub.with_columns([stripExpr(c) for c in periodCols])
         return sub
+
+    @property
+    def index(self) -> pl.DataFrame | None:
+        """가용 topic 카탈로그 — finance/report/sections 통합 discovery 보드.
+
+        Returns:
+            DataFrame ``(topic, label, kind, scope, nPeriods)`` 또는 None.
+                kind ∈ {finance, report, sections}. nPeriods = 데이터 있는 기간 수.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").index  # doctest: +SKIP
+
+        SeeAlso:
+            - ``show`` — 카탈로그의 topic 을 조회.
+
+        Requires:
+            - dartlab
+            - polars
+
+        Capabilities:
+            - 옛 topics/sources 흡수 — 한 보드에 3-source 가용 topic + 기간 수.
+              finance(BS/IS/CF) + report(present apiType) + sections(disclosure).
+
+        AIContext:
+            discovery 진입 — show 전 "무엇이 있나" 카탈로그. 본문 디코드 0.
+        """
+        rows: list[dict] = []
+        fin = buildTimeseries(self.stockCode)
+        if fin is not None:
+            series, periods = fin
+            for stmt, label in (("BS", "재무상태표"), ("IS", "손익계산서"), ("CF", "현금흐름표")):
+                if series.get(stmt):
+                    rows.append(
+                        {
+                            "topic": stmt,
+                            "label": label,
+                            "kind": "finance",
+                            "scope": "consolidated",
+                            "nPeriods": len(periods),
+                        }
+                    )
+        from dartlab.core.dataLoader import loadData
+
+        rep = loadData(self.stockCode, category="report")
+        if rep is not None and "apiType" in rep.columns:
+            for at in rep["apiType"].unique().to_list():
+                if not at:
+                    continue
+                sub = rep.filter(pl.col("apiType") == at)
+                nper = sub.select([c for c in ("year", "quarterNum") if c in sub.columns]).unique().height
+                rows.append(
+                    {
+                        "topic": at,
+                        "label": API_TYPE_LABELS.get(at, at),
+                        "kind": "report",
+                        "scope": "consolidated",
+                        "nPeriods": nper,
+                    }
+                )
+        meta = readSectionsMeta(self.stockCode)
+        if meta is not None:
+            pcols = [c for c in meta.columns if c[:4].isdigit()]
+            for r in meta.iter_rows(named=True):
+                nper = sum(1 for c in pcols if r[c] is not None)
+                label = r.get("blockLeaf") or r.get("sectionLeaf") or ""
+                rows.append(
+                    {
+                        "topic": r.get("disclosureKey") or label,
+                        "label": label,
+                        "kind": "sections",
+                        "scope": r.get("scope") or "",
+                        "nPeriods": nper,
+                    }
+                )
+        if not rows:
+            return None
+        return pl.DataFrame(rows)
+
+    def trace(self, topic: str) -> dict:
+        """topic 의 데이터 출처(provenance) — classify 부산물.
+
+        Args:
+            topic: 조회 대상 topic.
+
+        Returns:
+            ``{topic, kind, resolved, source}`` dict. kind ∈ {finance, report,
+            sections}, source = 사람용 출처 설명.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").trace("BS")
+            {'topic': 'BS', 'kind': 'finance', 'resolved': 'BS', 'source': 'finance parquet (XBRL 정규화)'}
+
+        SeeAlso:
+            - ``classify`` — kind/resolved 결정.
+            - ``show`` — 실제 데이터 조회.
+
+        Requires:
+            - dartlab
+
+        Capabilities:
+            - show 가 어느 source 로 분기하는지 미리 확인 — 디버그/감사 진입.
+
+        AIContext:
+            치환 정책(재무제표→finance / 정형→report / 서술→sections) 추적.
+        """
+        kind, resolved = classify(topic)
+        source = {
+            "finance": "finance parquet (XBRL 정규화)",
+            "report": "report parquet (OpenDART apiType)",
+            "sections": "sections artifact (수평화 contentRaw)",
+        }[kind]
+        return {"topic": topic, "kind": kind, "resolved": resolved, "source": source}
