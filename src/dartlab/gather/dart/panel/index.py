@@ -173,3 +173,53 @@ def indexPath(marketNs: str = "kr") -> Path:
     """
     base = "dart" if marketNs == "kr" else "edgar"
     return Path(_cfg.dataDir) / base / "panel" / "_index.parquet"
+
+
+def panelXbrlRefPath() -> Path:
+    """panelXbrlRef ref table 경로 — refScan 산출 + build/learn 입력 SSOT.
+
+    Args:
+        없음.
+
+    Returns:
+        ``data/dart/panelXbrlRef.parquet`` Path.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> panelXbrlRefPath().name
+        'panelXbrlRef.parquet'
+
+    SeeAlso:
+        - ``build.refScan.scanAllZips`` — 본 경로 생산.
+        - ``learn.learnBridge`` — 본 ref 로 학습.
+        - ``build.buildPanelAll`` — 본 ref 로 fuzzy 매칭.
+
+    Requires:
+        - dartlab.config.
+
+    Capabilities:
+        - ref truth(S4) 단일 경로 — refScan write·build/learn read 공유.
+
+    Guide:
+        - refScan 후 build/learn 이 본 경로 참조.
+
+    AIContext:
+        - 경로 계산만.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 경로 분산 하드코딩 금지.
+        OutputSchema:
+            - ``pathlib.Path``.
+        Prerequisites:
+            - config.dataDir.
+        Freshness:
+            - 정적.
+        Dataflow:
+            - config.dataDir → data/dart/panelXbrlRef.parquet.
+        TargetMarkets:
+            - KR (DART).
+    """
+    return Path(_cfg.dataDir) / "dart" / "panelXbrlRef.parquet"
