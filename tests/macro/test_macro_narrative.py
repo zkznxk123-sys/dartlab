@@ -11,10 +11,18 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_analyze_narrative_smoke_empty_archive() -> None:
-    """archive 0 일 (또는 enrichment 미실행) → score 0 + label 중립 + 빈 topicPulse."""
+def test_analyze_narrative_smoke_empty_archive(monkeypatch) -> None:
+    """archive 0 일 (또는 enrichment 미실행) → score 0 + label 중립 + 빈 topicPulse.
+
+    unit 결정성 — buildNarrativePulse 를 빈 결과로 mock 해 archive 부재 경로를 강제한다
+    (실 archive auto-download 시 비결정적 score 회귀 가드).
+    """
     from dartlab.macro.narrative.narrative import analyzeNarrative
 
+    monkeypatch.setattr(
+        "dartlab.quant.text.narrativePulse.buildNarrativePulse",
+        lambda *a, **k: pl.DataFrame(),
+    )
     r = analyzeNarrative(market="KR", lookbackDays=7)
     assert r["market"] == "KR"
     assert r["score"] == 0.0
