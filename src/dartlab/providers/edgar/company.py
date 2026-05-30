@@ -3545,7 +3545,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) 10-K/Q 변경 추적.
         """
-        from dartlab.providers.docs.diff import (
+        from dartlab.providers._common.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
@@ -3621,7 +3621,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) 10-K/Q 텍스트 분석.
         """
-        from dartlab.providers.docs.diff import keywordFrequency
+        from dartlab.providers._common.diff import keywordFrequency
 
         docsSections = self._docs.sections
         if docsSections is None:

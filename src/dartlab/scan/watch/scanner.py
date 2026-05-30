@@ -25,7 +25,7 @@ _log = getLogger(__name__)
 
 import polars as pl
 
-from dartlab.providers.docs.diff import DiffResult, sectionsDiff
+from dartlab.providers._common.diff import DiffResult, sectionsDiff
 from dartlab.scan.watch.scorer import ScoredChange, scoreChanges, scoredToDataframe
 
 

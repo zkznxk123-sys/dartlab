@@ -1,6 +1,6 @@
 """DART/EDGAR 공통 docs 유틸리티."""
 
-from dartlab.providers.docs.diff import (
+from dartlab.providers._common.diff import (
     DiffEntry,
     DiffResult,
     DiffSummary,

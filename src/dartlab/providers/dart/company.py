@@ -3116,7 +3116,7 @@ class Company:
         """
         if topic is not None:
             topic = _resolveTopic(topic)
-        from dartlab.providers.docs.diff import (
+        from dartlab.providers._common.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
@@ -3193,7 +3193,7 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 텍스트).
         """
-        from dartlab.providers.docs.diff import keywordFrequency
+        from dartlab.providers._common.diff import keywordFrequency
 
         docsSections = self._docs.sections
         if docsSections is None:

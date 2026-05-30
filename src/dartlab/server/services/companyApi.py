@@ -715,7 +715,7 @@ def _buildRowsForTopic(
 def buildDiffSummary(company: Company, topic: str) -> dict[str, Any] | None:
     """topic의 기간 간 변경 요약(변경률, 추가/삭제 발췌)을 생성한다."""
     try:
-        from dartlab.providers.docs.diff import sectionsDiff
+        from dartlab.providers._common.diff import sectionsDiff
 
         sec = company._docs.sections
         if sec is None:
