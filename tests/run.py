@@ -179,6 +179,7 @@ GATES: dict[str, Gate] = {
         cmd=(
             "pytest tests/ -n auto --dist loadfile --tb=short "
             "-m 'unit and not requires_data' "
+            "--ignore=tests/_attempts "
             "--ignore=tests/test_fixture_analysis_real.py "
             "--ignore=tests/test_fixture_credit_real.py "
             "--ignore=tests/test_fixture_story_real.py "
@@ -297,6 +298,7 @@ GATES: dict[str, Gate] = {
         cmd=(
             "pytest tests/ -n 2 --dist loadfile --tb=short "
             "-m 'not requires_data and not heavy and not realData and not freshInstall' "
+            "--ignore=tests/_attempts "
             "--ignore=tests/_fixtures/test_analysis_real.py "
             "--ignore=tests/_fixtures/test_credit_real.py "
             "--ignore=tests/_fixtures/test_story_real.py "
