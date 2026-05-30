@@ -62,8 +62,14 @@ def test_calcCostUsd_cache_tokens_anthropic() -> None:
     assert cost["cacheReadUsd"] == pytest.approx(0.015, abs=1e-6)
 
 
-def test_calcCostUsd_cache_fallback_for_openai() -> None:
-    """openai 는 cacheCreate=None 등록 → input × 1.25 fallback 적용."""
+def test_calcCostUsd_openai_cacheCreate_is_zero() -> None:
+    """openai 는 cacheCreate=0.0 등록 — 캐시 생성 별도 과금 없음.
+
+    Anthropic 은 cache write 가 input×1.25 프리미엄이지만 OpenAI prompt caching 은
+    cache write 무과금 (정상 input 으로만 계산, cache read 만 50% 할인). 게다가 OpenAI
+    usage dict 에 cache_creation_input_tokens 필드가 없어 cacheCreateTokens 는 실무상 0.
+    가격표가 0.0 으로 명시 override → fallback(1.25×) 미적용이 정상.
+    """
     cost = calcCostUsd(
         "openai",
         "gpt-4o",
@@ -71,9 +77,8 @@ def test_calcCostUsd_cache_fallback_for_openai() -> None:
         outputTokens=0,
         cacheCreateTokens=1000,
     )
-    # gpt-4o input 2.5 → cacheCreate fallback 2.5 × 1.25 = 3.125
-    # 1000 * 3.125 / 1M = 0.003125
-    assert cost["cacheCreateUsd"] == pytest.approx(0.003125, abs=1e-6)
+    # gpt-4o cacheCreate=0.0 (명시) → 1000 * 0.0 / 1M = 0.0
+    assert cost["cacheCreateUsd"] == pytest.approx(0.0, abs=1e-6)
 
 
 def test_calcCostFromUsage_anthropic_usage_dict() -> None:
