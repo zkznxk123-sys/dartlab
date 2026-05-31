@@ -15,10 +15,11 @@ pytestmark = pytest.mark.unit
 
 
 def test_sync_panel_callable_and_keyword_only() -> None:
-    """syncPanel 존재 + 단계 플래그 keyword 인자 (refScan/learn/build/index)."""
+    """syncPanel 존재 + 단계 플래그 keyword 인자 (refScan/build/index/label, learn 폐기)."""
     from dartlab.gather.dart.panel import syncPanel
 
     assert callable(syncPanel)
     params = inspect.signature(syncPanel).parameters
-    for flag in ("refScan", "learn", "build", "index"):
+    for flag in ("refScan", "build", "index", "label"):
         assert flag in params, f"syncPanel 단계 플래그 {flag} 누락"
+    assert "learn" not in params, "learn 단계 폐기 — canonicalKey 가 KR 정렬 대체"

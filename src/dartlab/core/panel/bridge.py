@@ -1,19 +1,18 @@
-"""panel disclosureKey bridge SSOT (L0) — rawId ↔ universal disclosureKey.
+"""panel disclosureKey bridge SSOT (L0) — US↔KR cross-market overlay.
 
-Layer 3 — DART ACLASS rawId / EDGAR us-gaap TextBlock concept ↔ universal
-disclosureKey(snakeId SSOT). 회사간·세계마켓간 정규화의 핵심 — 같은 의미 disclosure 가
-시장·era 무관 동일 disclosureKey 로 묶인다.
+EDGAR us-gaap TextBlock concept ↔ universal disclosureKey(snakeId). **KR within-market 정렬은
+core.panel.canonicalKey(native ACLASS scope-strip)가 대체** — 본 bridge 는 이제 두 택소노미
+(us-gaap ↔ KR ACLASS)를 화해시키는 cross-market overlay 전용(비가역 매핑이라 hand-seed 유지).
+손수 KR seed + corpus 학습 농장은 2026-05 redesign 으로 폐기.
 
-bridge = parquet 데이터 (코드 regex 0, [[feedback]] R5). tier1 ~60 seed(운영자 큐레이션)
-+ tier2/3 corpus-learned(gather ``learn.learnBridge`` 가 채움). 본 모듈은 seed 생성 +
-loader 만 — 학습 전파는 gather 책임 (build write 층).
+bridge = parquet 데이터 (코드 regex 0, R5). US us-gaap tier1 seed 만(운영자 큐레이션, ~10).
+본 모듈은 seed 생성 + loader. (cross-market 활성은 EDGAR panel 빌드 후속.)
 
 LLM Specifications:
     AntiPatterns:
-        - tier1 entry 손수 per-title regex 매핑 금지 — rawId 직접 참조 (정부 표준 canonical).
-        - finance 영역 매핑(BS/IS/CF line item) 포함 금지 — panel = narrative + footnote
-          disclosure 한정. line item 은 finance 엔진.
-        - disclosureKey 양식 자유 추가 금지 — snakeId 의미 단위 SSOT.
+        - KR rawId(ACLASS) 추가 금지 — KR 은 canonicalKey 가 SSOT(bridge 우회).
+        - tier1 entry 손수 per-title regex 매핑 금지 — concept 직접 참조.
+        - finance line item 매핑 포함 금지 — panel = disclosure 한정.
     OutputSchema:
         - ``loadBridge() -> pl.DataFrame`` 7 col (disclosureKey/marketNs/rawId/tier/
           confidence/curatorNote/addedAt).
@@ -21,11 +20,11 @@ LLM Specifications:
     Prerequisites:
         - polars. data/bridge/panelBridge.parquet (seedBridgeTier1 으로 생성).
     Freshness:
-        - tier2/3 확장(learn) 시 별도 cycle. tier1 stable.
+        - US seed stable. KR 은 canonicalKey(코드 규칙).
     Dataflow:
-        - bridge parquet read → canonical.resolveDisclosureKey 가 rawId → disclosureKey lookup.
+        - bridge parquet read → canonical.resolveDisclosureKey 가 us-gaap → disclosureKey lookup.
     TargetMarkets:
-        - KR + US 통합 (동일 disclosureKey 어휘).
+        - US cross-market overlay (KR within = canonicalKey).
 """
 
 from __future__ import annotations
@@ -38,7 +37,7 @@ import polars as pl
 
 import dartlab.config as _cfg
 
-# bridge parquet 7-col schema (seed·learn 공통).
+# bridge parquet 7-col schema (US overlay seed).
 BRIDGE_SCHEMA: dict[str, pl.DataType] = {
     "disclosureKey": pl.Utf8,
     "marketNs": pl.Utf8,
@@ -100,115 +99,65 @@ def _bridgePath() -> Path:
 
 
 def _tier1Seed() -> list[dict]:
-    """tier1 ~60 entry seed — DART ACLASS + EDGAR us-gaap TextBlock 매핑.
+    """tier1 US us-gaap TextBlock → universal disclosureKey seed (cross-market overlay, ~10).
 
-    DART side = 5 baseline scan 에서 확인된 NT_C_D######/NT_S_D######(재고/유형/무형/
-    법인세/금융손익 등) + 재무제표 ACLASS(BS/IS/CF/EF, 신·옛 양식). EDGAR side = us-gaap
-    표준 TextBlock concept. corpus-learned tier2/3 은 gather ``learn`` 이 추가.
+    EDGAR us-gaap 표준 TextBlock concept ↔ universal disclosureKey. **KR ACLASS seed 는 폐기**
+    (KR within = core.panel.canonicalKey native 정렬). 두 택소노미 화해는 비가역 매핑이라 US
+    overlay 만 hand-seed 유지. cross-market 활성은 EDGAR panel 빌드 후속.
 
     Args:
         없음.
 
     Returns:
-        seed dict 리스트 (~60 entry, 7-col).
+        seed dict 리스트 (US us-gaap, ~10 entry, 7-col).
 
     Raises:
         없음.
 
     Example:
         >>> rows = _tier1Seed()
-        >>> rows[0]["disclosureKey"]
-        'consolidatedBalanceSheet'
+        >>> rows[0]["marketNs"]
+        'us'
 
     SeeAlso:
         - ``seedBridgeTier1`` — 본 seed 를 parquet 로 write.
-        - gather ``learn.learnBridge`` — tier2/3 corpus 전파.
+        - ``canonical.canonicalKey`` — KR within 정렬키(bridge 우회).
 
     Requires:
         - datetime.
 
     Capabilities:
-        - 회사간·세계마켓간 정규화의 manual anchor — 가장 빈출 disclosure 의 cross-market 어휘.
+        - US↔KR cross-market 정규화의 manual anchor — us-gaap TextBlock 어휘.
 
     Guide:
         - 내부 helper — seedBridgeTier1 경유.
 
     AIContext:
-        - 정적 큐레이션 데이터 — AI 자유 추가 금지(R5).
+        - 정적 큐레이션 데이터 — KR rawId 추가 금지(canonicalKey SSOT).
 
     LLM Specifications:
         AntiPatterns:
+            - KR rawId 추가 금지 — canonicalKey 가 KR SSOT.
             - finance line item 추가 금지 (panel = disclosure 한정).
-            - 손수 regex 기반 entry 금지 — rawId 직접.
         OutputSchema:
             - ``list[dict]`` (disclosureKey/marketNs/rawId/tier/confidence/curatorNote/addedAt).
         Prerequisites:
             - 없음.
         Freshness:
-            - tier1 stable. 확장은 learn(tier2/3).
+            - US seed stable.
         Dataflow:
             - 정적 튜플 → dict 리스트.
         TargetMarkets:
-            - KR (ACLASS) + US (us-gaap TextBlock).
+            - US (us-gaap TextBlock). KR = canonicalKey.
     """
     today = datetime.date.today()
     note = "tier1 seed — 운영자 큐레이션"
     # 형식: (disclosureKey, marketNs, rawId, confidence)
+    # KR within-market 정렬은 core.panel.canonicalKey(native ACLASS scope-strip)가 대체 —
+    # 손수 KR seed 농장 폐기(2026-05 redesign). bridge 는 이제 US↔KR cross-market overlay 전용
+    # (두 택소노미 화해는 비가역 매핑이라 hand-seed 유지). KR rawId 는 절대 추가 금지.
     rows: list[tuple[str, str, str, float]] = [
-        # ── 재무제표 표 (신 양식 ACLASS) ──
-        ("consolidatedBalanceSheet", "kr", "BS_C", 1.0),
-        ("standaloneBalanceSheet", "kr", "BS_S", 1.0),
-        ("consolidatedIncomeStatement", "kr", "IS_C1", 1.0),
-        ("consolidatedIncomeStatement", "kr", "IS_C2", 1.0),
-        ("consolidatedComprehensiveIncome", "kr", "IS_C3", 1.0),
-        ("standaloneIncomeStatement", "kr", "IS_S1", 1.0),
-        ("standaloneIncomeStatement", "kr", "IS_S2", 1.0),
-        ("standaloneComprehensiveIncome", "kr", "IS_S3", 1.0),
-        ("consolidatedCashFlowStatement", "kr", "CF_C", 1.0),
-        ("standaloneCashFlowStatement", "kr", "CF_S", 1.0),
-        ("consolidatedEquityChanges", "kr", "EF_C", 1.0),
-        ("standaloneEquityChanges", "kr", "EF_S", 1.0),
-        # ── 재무제표 표 (옛 양식 suffix 없는 ACLASS, ~2020) ──
-        ("consolidatedBalanceSheet", "kr", "BS", 1.0),
-        ("consolidatedIncomeStatement", "kr", "IS2", 1.0),
-        ("consolidatedComprehensiveIncome", "kr", "IS3", 1.0),
-        ("consolidatedCashFlowStatement", "kr", "CF", 1.0),
-        ("consolidatedEquityChanges", "kr", "EF", 1.0),
-        # ── 주석 핵심 disclosure (NT_C_D###### + NT_S_D###### 페어) ──
-        ("inventoryDisclosure", "kr", "NT_C_D826380", 1.0),
-        ("inventoryDisclosure", "kr", "NT_S_D826385", 1.0),
-        ("propertyPlantEquipmentDisclosure", "kr", "NT_C_D822100", 1.0),
-        ("propertyPlantEquipmentDisclosure", "kr", "NT_S_D822105", 1.0),
-        ("intangibleAssetsDisclosure", "kr", "NT_C_D823180", 1.0),
-        ("intangibleAssetsDisclosure", "kr", "NT_S_D823185", 1.0),
-        ("incomeTaxDisclosure", "kr", "NT_C_D835110", 1.0),
-        ("incomeTaxDisclosure", "kr", "NT_S_D835115", 1.0),
-        ("financialIncomeAndCosts", "kr", "NT_C_D834330", 1.0),
-        ("financialIncomeAndCosts", "kr", "NT_S_D834335", 1.0),
-        ("generalInformation", "kr", "NT_C_D810000", 1.0),
-        ("generalInformation", "kr", "NT_S_D800600", 1.0),
-        # ── 주석 확장 (top corpCount entry) ──
-        ("cashAndEquivalentsDisclosure", "kr", "NT_C_D822410", 1.0),
-        ("cashAndEquivalentsDisclosure", "kr", "NT_S_D822415", 1.0),
-        ("provisionsDisclosure", "kr", "NT_C_D827570", 1.0),
-        ("provisionsDisclosure", "kr", "NT_S_D827575", 1.0),
-        ("earningsPerShareDisclosure", "kr", "NT_C_D838000", 1.0),
-        ("earningsPerShareDisclosure", "kr", "NT_S_D838005", 1.0),
-        ("sellingGeneralAdminExpenses", "kr", "NT_C_D834310", 1.0),
-        ("sellingGeneralAdminExpenses", "kr", "NT_S_D834315", 1.0),
-        ("relatedPartyDisclosure", "kr", "NT_C_D818000", 1.0),
-        ("relatedPartyDisclosure", "kr", "NT_S_D818005", 1.0),
-        ("accountingEstimatesDisclosure", "kr", "NT_C_D810010", 1.0),
-        ("accountingEstimatesDisclosure", "kr", "NT_S_D810015", 1.0),
-        ("tradeReceivablesDisclosure", "kr", "NT_C_D822420", 1.0),
-        ("tradeReceivablesDisclosure", "kr", "NT_S_D822425", 1.0),
-        ("financialInstrumentsByCategory", "kr", "NT_C_D822430", 1.0),
-        ("financialInstrumentsByCategory", "kr", "NT_S_D822435", 1.0),
-        ("otherLiabilitiesDisclosure", "kr", "NT_C_D822310", 1.0),
-        ("otherLiabilitiesDisclosure", "kr", "NT_S_D822315", 1.0),
-        ("capitalDisclosure", "kr", "NT_C_D861200", 1.0),
-        ("capitalDisclosure", "kr", "NT_S_D861205", 1.0),
-        # ── EDGAR us-gaap TextBlock 매핑 (세계마켓간 seed) ──
+        # ── EDGAR us-gaap TextBlock ↔ universal disclosureKey (세계마켓간 overlay) ──
         ("consolidatedBalanceSheet", "us", "us-gaap:BalanceSheetTextBlock", 1.0),
         ("consolidatedIncomeStatement", "us", "us-gaap:IncomeStatementTextBlock", 1.0),
         ("consolidatedCashFlowStatement", "us", "us-gaap:CashFlowStatementTextBlock", 1.0),
@@ -241,51 +190,51 @@ def seedBridgeTier1(*, overwrite: bool = False) -> pl.DataFrame:
         overwrite: 기존 parquet 덮어쓰기 여부. False 면 존재 시 read 만.
 
     Returns:
-        seed DataFrame (~60 entry, 7-col).
+        seed DataFrame (US us-gaap, ~10 entry, 7-col).
 
     Raises:
         없음.
 
     Example:
         >>> df = seedBridgeTier1(overwrite=True)  # doctest: +SKIP
-        >>> df.height >= 60  # doctest: +SKIP
+        >>> df.height >= 10  # doctest: +SKIP
         True
 
     SeeAlso:
         - ``loadBridge`` — 생성된 parquet read.
-        - gather ``learn.learnBridge`` — tier2/3 corpus 전파.
+        - ``canonical.canonicalKey`` — KR within 정렬키(bridge 우회).
 
     Requires:
         - polars. dartlab.config.
 
     Capabilities:
-        - 회사간·세계마켓간 정규화의 manual anchor 데이터 부트스트랩.
+        - US↔KR cross-market 정규화의 manual anchor 부트스트랩 (EDGAR panel 후속).
 
     Guide:
-        - 최초 1회 또는 seed 갱신 시 운영자 호출. learn 이 그 위에 tier2/3 누적.
+        - cross-market 활성 시 운영자 호출. KR within 은 canonicalKey(seed 불요).
 
     AIContext:
         - parquet write 부작용 — overwrite 인자로 보호.
 
     When:
-        - 최초 또는 tier1 seed 갱신 시 (운영자).
+        - US cross-market overlay seed 가 필요할 때 (운영자).
 
     How:
         - _tier1Seed → DataFrame → parquet write → loadBridge.cache_clear.
 
     LLM Specifications:
         AntiPatterns:
-            - 매 build 마다 overwrite=True 금지 — learn(tier2/3) 산출 소실.
+            - KR rawId seed 추가 금지 — canonicalKey 가 KR SSOT.
         OutputSchema:
             - ``pl.DataFrame`` (7-col).
         Prerequisites:
             - data/bridge/ 디렉터리(자동 생성).
         Freshness:
-            - tier1 갱신 시점.
+            - US seed 갱신 시점.
         Dataflow:
             - _tier1Seed → DataFrame → parquet write → cache invalidate.
         TargetMarkets:
-            - KR + US 통합.
+            - US (cross-market overlay).
     """
     bridgePath = _bridgePath()
     bridgePath.parent.mkdir(parents=True, exist_ok=True)
@@ -358,14 +307,13 @@ def loadBridge() -> pl.DataFrame:
 
 
 def writeBridge(df: pl.DataFrame, *, invalidate: bool = True) -> None:
-    """bridge DataFrame 을 panelBridge.parquet 로 write (SSOT 갱신).
+    """bridge DataFrame 을 panelBridge.parquet 로 write (US overlay SSOT 갱신).
 
-    gather ``learn.learnBridge`` 가 tier1 seed + tier2 corpus-learned 결합본을 본 함수로
-    저장한다. write 책임은 gather(L1) 이지만 SSOT 포맷·경로는 core(L0) 소유 — 본 함수가
-    경계.
+    US cross-market overlay seed 를 SSOT 포맷·경로(core L0 소유)로 저장하는 write 경계 primitive.
+    (KR within 은 canonicalKey 라 bridge write 불요 — 본 함수는 US 도구용.)
 
     Args:
-        df: 7-col bridge DataFrame (BRIDGE_SCHEMA). tier1 + tier2 결합본.
+        df: 7-col bridge DataFrame (BRIDGE_SCHEMA). US us-gaap overlay.
         invalidate: True 면 write 후 canonical/bridge lru_cache 무효화.
 
     Returns:
@@ -375,27 +323,26 @@ def writeBridge(df: pl.DataFrame, *, invalidate: bool = True) -> None:
         없음 — 디렉터리 자동 생성.
 
     Example:
-        >>> writeBridge(combinedDf)  # doctest: +SKIP
+        >>> writeBridge(usOverlayDf)  # doctest: +SKIP
 
     SeeAlso:
         - ``loadBridge`` — 본 함수가 쓴 parquet read.
-        - ``seedBridgeTier1`` — tier1 seed 생성.
-        - gather ``learn.learnBridge`` — tier2 corpus 전파 후 본 함수로 저장.
+        - ``seedBridgeTier1`` — US seed 생성.
 
     Requires:
         - polars. dartlab.config.
 
     Capabilities:
-        - tier1+tier2 결합 bridge SSOT 단일 write 경로 — 회사간·세계마켓간 정규화 어휘 확정.
+        - US cross-market overlay bridge SSOT 단일 write 경로.
 
     Guide:
-        - learnBridge 가 호출 — 직접 호출 X.
+        - US overlay 도구가 호출 — KR 파이프라인은 미사용(canonicalKey).
 
     AIContext:
-        - parquet write + cache invalidate 부작용. 양식 자유 추가 금지(R5).
+        - parquet write + cache invalidate 부작용. KR rawId 추가 금지(R5).
 
     When:
-        - learnBridge 가 tier1+tier2 결합본을 SSOT 로 저장할 때.
+        - US cross-market overlay 를 SSOT 로 저장할 때.
 
     How:
         - df → BRIDGE_SCHEMA select → parquet write → (invalidate) cache_clear.
@@ -413,7 +360,7 @@ def writeBridge(df: pl.DataFrame, *, invalidate: bool = True) -> None:
         Dataflow:
             - df → parquet write → (invalidate) cache_clear.
         TargetMarkets:
-            - KR + US 통합.
+            - US (cross-market overlay).
     """
     bridgePath = _bridgePath()
     bridgePath.parent.mkdir(parents=True, exist_ok=True)

@@ -104,7 +104,7 @@ def main() -> int:
     print(f"[buildPanel] 대상 {len(codes)} 종목 — workers={numWorkers}")
     from dartlab.gather.dart.panel import syncPanel
 
-    out = syncPanel(codes=codes, refScan=False, learn=True, build=True, index=True, numWorkers=numWorkers, verbose=True)
+    out = syncPanel(codes=codes, refScan=False, build=True, index=True, label=True, numWorkers=numWorkers, verbose=True)
 
     built = (out.get("build") or {}).get("codes", 0)
     idx = out.get("index") or {}

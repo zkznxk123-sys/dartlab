@@ -326,7 +326,7 @@ def buildLabel(
 
 
 def panelXbrlRefPath() -> Path:
-    """panelXbrlRef ref table 경로 — refScan 산출 + build/learn 입력 SSOT.
+    """panelXbrlRef ref table 경로 — refScan 산출 + build(v1 fuzzy)·label 입력 SSOT.
 
     Args:
         없음.
@@ -343,17 +343,17 @@ def panelXbrlRefPath() -> Path:
 
     SeeAlso:
         - ``build.refScan.scanAllZips`` — 본 경로 생산.
-        - ``learn.learnBridge`` — 본 ref 로 학습.
-        - ``build.buildPanelAll`` — 본 ref 로 fuzzy 매칭.
+        - ``buildLabel`` — 본 ref 로 canonicalKey 표시라벨 파생.
+        - ``build.buildPanelAll`` — 본 ref 로 옛 양식(v1) fuzzy 매칭.
 
     Requires:
         - dartlab.config.
 
     Capabilities:
-        - ref truth(S4) 단일 경로 — refScan write·build/learn read 공유.
+        - ref truth(S4) 단일 경로 — refScan write·build/label read 공유.
 
     Guide:
-        - refScan 후 build/learn 이 본 경로 참조.
+        - refScan 후 build(v1 fuzzy)·buildLabel 이 본 경로 참조.
 
     AIContext:
         - 경로 계산만.
