@@ -2627,13 +2627,19 @@ class Company:
             Freshness:
                 - 매 접근 read.
             Dataflow:
-                - self.stockCode → Panel.
+                - self.stockCode → Panel(wide) + _showFn/_strongFn 주입.
             TargetMarkets:
                 - KR (DART). US 는 marketNs="us" (EDGAR panel, 후속).
         """
+        from dartlab.providers.dart.builder.dataDispatcher import isStrongTopic
         from dartlab.providers.dart.panel import Panel as _Panel
 
-        return _Panel(self.stockCode, marketNs="kr")
+        p = _Panel(self.stockCode, marketNs="kr")
+        # facade 주입 — c.panel("IS") 강한 소스는 show(finance/report) 위임, 그 외 raw 공시 행 검색.
+        # panel 패키지는 finance 를 import 안 함 — 주입된 callable 만 호출(layer 격리, cycle 0).
+        p._showFn = self.show
+        p._strongFn = isStrongTopic
+        return p
 
     @property
     def show(self):
