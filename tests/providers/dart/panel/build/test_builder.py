@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 def test_prev_year() -> None:
     """_prevYear: 연도 문자열 → 직전 연도 (변환 실패 시 원본)."""
-    from dartlab.gather.dart.panel.build.builder import _prevYear
+    from dartlab.providers.dart.panel.build.builder import _prevYear
 
     assert _prevYear("2024") == "2023"
     assert _prevYear("abcd") == "abcd"
@@ -22,7 +22,7 @@ def test_prev_year() -> None:
 
 def test_build_callables_public() -> None:
     """buildPanel/buildPanelAll/buildPanelBaseline 공개표면 존재."""
-    from dartlab.gather.dart.panel import buildPanel, buildPanelAll, buildPanelBaseline
+    from dartlab.providers.dart.panel.build import buildPanel, buildPanelAll, buildPanelBaseline
 
     assert callable(buildPanel)
     assert callable(buildPanelAll)

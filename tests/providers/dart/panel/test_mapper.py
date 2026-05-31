@@ -9,12 +9,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from dartlab.core.panel import (
-    canonicalKey,
-    canonicalKeyExpr,
-    resolveBatch,
-    resolveDisclosureKey,
-)
+from dartlab.providers.dart.panel.mapper import canonicalKey, canonicalKeyExpr, resolveBatch, resolveDisclosureKey
 
 pytestmark = pytest.mark.unit
 

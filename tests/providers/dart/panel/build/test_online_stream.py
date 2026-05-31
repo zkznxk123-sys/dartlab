@@ -34,7 +34,7 @@ requires_zips = pytest.mark.skipif(not _hasZips(_BASE), reason="로컬 zip 없�
 
 
 def _loadRef() -> pl.DataFrame:
-    from dartlab.gather.dart.panel.build.refScan import scanRefBaseline
+    from dartlab.providers.dart.panel.build.refScan import scanRefBaseline
 
     if _REF_PATH.exists():
         return pl.read_parquet(str(_REF_PATH))
@@ -44,7 +44,7 @@ def _loadRef() -> pl.DataFrame:
 @requires_zips
 def test_disk_and_stream_builds_are_identical(tmp_path: Path) -> None:
     """buildPanel(zip 디스크) ≡ buildPanelFromStream(zip bytes) — period 별 parquet 바이트 동형."""
-    from dartlab.gather.dart.panel.build import buildPanel, buildPanelFromStream
+    from dartlab.providers.dart.panel.build import buildPanel, buildPanelFromStream
 
     ref = _loadRef()
     zps = sorted((_ZIP_DIR / _BASE).glob("*.zip"))
@@ -73,7 +73,7 @@ def test_disk_and_stream_builds_are_identical(tmp_path: Path) -> None:
 @requires_zips
 def test_read_zip_bytes_matches_disk() -> None:
     """_readZipBytes(bytes) ≡ _readZip(Path) — 동일 zip 의 decoded XML 동일."""
-    from dartlab.gather.dart.panel.build.builder import _readZip, _readZipBytes
+    from dartlab.providers.dart.panel.build.builder import _readZip, _readZipBytes
 
     zp = sorted((_ZIP_DIR / _BASE).glob("*.zip"))[0]
     rceptDisk, xmlsDisk = _readZip(zp)

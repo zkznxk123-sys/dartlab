@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.core.panel import isPeriodColumn, periodFromEnd, sortPeriods
+from dartlab.providers.dart.panel._period import isPeriodColumn, periodFromEnd, sortPeriods
 
 pytestmark = pytest.mark.unit
 

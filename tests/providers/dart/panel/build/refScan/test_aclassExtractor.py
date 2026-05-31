@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 def test_aclass_extractor_symbols_callable() -> None:
     """extractAclassEntries / iterTableGroups 공개표면 존재 + callable."""
-    from dartlab.gather.dart.panel.build.refScan import extractAclassEntries, iterTableGroups
+    from dartlab.providers.dart.panel.build.refScan import extractAclassEntries, iterTableGroups
 
     assert callable(extractAclassEntries)
     assert callable(iterTableGroups)

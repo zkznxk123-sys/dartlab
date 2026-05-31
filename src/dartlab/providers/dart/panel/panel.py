@@ -447,7 +447,7 @@ class Panel:
             TargetMarkets:
                 - KR + US.
         """
-        from dartlab.core.panel import sortPeriods
+        from ._period import sortPeriods
 
         lf = scanPanel(self.code, marketNs=self.marketNs)
         if lf is None:

@@ -10,7 +10,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from dartlab.core.panel import BRIDGE_SCHEMA, loadBridge, seedBridgeTier1, writeBridge
+from dartlab.providers.dart.panel.bridge import BRIDGE_SCHEMA, loadBridge, seedBridgeTier1, writeBridge
 
 pytestmark = pytest.mark.unit
 

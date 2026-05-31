@@ -41,14 +41,14 @@ def _sourceTotals(code: str) -> tuple[int, int]:
     """zip → walker element rows 의 (contentRaw 글자 합, `<` 태그 합). build 와 동일 경로."""
     from lxml import etree
 
-    from dartlab.gather.dart.panel.build.builder import _readZip
-    from dartlab.gather.dart.panel.build.refScan import scanRefBaseline
-    from dartlab.gather.dart.panel.build.refScan.refMatcher import (
+    from dartlab.providers.dart.panel.build.builder import _readZip
+    from dartlab.providers.dart.panel.build.refScan import scanRefBaseline
+    from dartlab.providers.dart.panel.build.refScan.refMatcher import (
         _REF_TOKENS,
         precomputeRefTokens,
         setGlobalRefTokens,
     )
-    from dartlab.gather.dart.panel.build.walker import detectSchemaEra, walkSections
+    from dartlab.providers.dart.panel.build.walker import detectSchemaEra, walkSections
 
     ref = pl.read_parquet(str(_REF_PATH)) if _REF_PATH.exists() else scanRefBaseline(minCorpCount=1)
     if _REF_TOKENS is None:

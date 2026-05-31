@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 def test_zip_scan_worker_symbols_callable() -> None:
     """scanAllZips / scanRefBaseline / scanZipFiles 공개표면 존재 + callable."""
-    from dartlab.gather.dart.panel.build.refScan import scanAllZips, scanRefBaseline, scanZipFiles
+    from dartlab.providers.dart.panel.build.refScan import scanAllZips, scanRefBaseline, scanZipFiles
 
     assert callable(scanAllZips)
     assert callable(scanRefBaseline)

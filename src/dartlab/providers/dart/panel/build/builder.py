@@ -42,8 +42,9 @@ import polars as pl
 from lxml import etree
 
 import dartlab.config as _cfg
-from dartlab.core.panel import PANEL_SCHEMA, periodFromEnd, resolveBatch
-
+from .._period import periodFromEnd
+from ..mapper import resolveBatch
+from ..schema import PANEL_SCHEMA
 from .horizontalize import horizontalize
 from .refScan import scanRefBaseline
 from .walker import detectSchemaEra, walkSections
@@ -51,6 +52,55 @@ from .walker import detectSchemaEra, walkSections
 _log = logging.getLogger(__name__)
 
 _RCEPT_RE = re.compile(r"^(\d{14})\.zip$", re.IGNORECASE)
+
+
+def panelXbrlRefPath() -> "Path":
+    """panelXbrlRef ref table 경로 — refScan 산출 + build(v1 fuzzy) 입력 SSOT.
+
+    Args:
+        없음.
+
+    Returns:
+        ``data/dart/panelXbrlRef.parquet`` Path.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> panelXbrlRefPath().name
+        'panelXbrlRef.parquet'
+
+    SeeAlso:
+        - ``refScan.scanAllZips`` — 본 경로 생산.
+        - ``buildPanelAll`` — 본 ref 로 옛 양식(v1) fuzzy 매칭.
+
+    Requires:
+        - dartlab.config.
+
+    Capabilities:
+        - ref truth 단일 경로 — refScan write·build read 공유 (build 가 ref 경로 SSOT 소유).
+
+    Guide:
+        - refScan 후 build(v1 fuzzy)·online sync entry 가 본 경로 참조.
+
+    AIContext:
+        - 경로 계산만 — 부작용 0.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 경로 분산 하드코딩 금지 — 본 함수 단일.
+        OutputSchema:
+            - ``pathlib.Path``.
+        Prerequisites:
+            - config.dataDir.
+        Freshness:
+            - 정적.
+        Dataflow:
+            - config.dataDir → data/dart/panelXbrlRef.parquet.
+        TargetMarkets:
+            - KR (DART).
+    """
+    return Path(_cfg.dataDir) / "dart" / "panelXbrlRef.parquet"
 
 # 표지 "사업연도 YYYY년 MM월 DD일 부터 YYYY년 MM월 DD일 까지" — 종료(year, month) 추출.
 _FISCAL_PERIOD_RE = re.compile(

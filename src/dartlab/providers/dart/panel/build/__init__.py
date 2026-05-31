@@ -18,6 +18,7 @@ from .builder import (
     buildPanelAll,
     buildPanelBaseline,
     buildPanelFromStream,
+    panelXbrlRefPath,
 )
 from .horizontalize import horizontalize
 from .refScan import scanAllZips, scanRefBaseline, scanZipFiles
@@ -30,6 +31,7 @@ __all__ = [
     "buildPanelFromStream",
     "detectSchemaEra",
     "horizontalize",
+    "panelXbrlRefPath",
     "scanAllZips",
     "scanRefBaseline",
     "scanZipFiles",

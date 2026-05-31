@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 def test_walker_public_symbols_callable() -> None:
     """walkSections / detectSchemaEra 공개표면 존재 + callable."""
-    from dartlab.gather.dart.panel.build import detectSchemaEra, walkSections
+    from dartlab.providers.dart.panel.build import detectSchemaEra, walkSections
 
     assert callable(walkSections)
     assert callable(detectSchemaEra)
@@ -24,7 +24,7 @@ def test_detect_schema_era_on_minimal_doc() -> None:
     """최소 lxml 문서에서 detectSchemaEra 가 예외 없이 era 값을 반환."""
     from lxml import etree
 
-    from dartlab.gather.dart.panel.build import detectSchemaEra
+    from dartlab.providers.dart.panel.build import detectSchemaEra
 
     root = etree.fromstring(b"<DOCUMENT><BODY></BODY></DOCUMENT>")
     era = detectSchemaEra(root)

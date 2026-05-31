@@ -1,16 +1,18 @@
-"""panel 4계층 단방향 import 강제 (R1) — core ← gather(write) · providers(read).
+"""panel 단일 패키지 자급 격리 강제 (R1) — providers/dart/panel 자족.
 
-plan snazzy-wibbling-origami R1. panel 3 서브트리의 import 방향을 고정:
+PRD jazzy-napping-seal: panel 도메인(schema·mapper·bridge·build·read)을 ``providers/dart/panel``
+한 패키지로 통합 (core/panel·gather/dart/panel 소멸). 단일 패키지라 옛 3-서브트리 cross 방향
+규칙은 사라지고, 대신 **패키지 자급 격리**를 강제한다:
 
-- ``core/panel`` (L0): dartlab.gather·dartlab.providers 0 (하위 계약은 상위를 모름).
-- ``gather/dart/panel`` (L1 write): dartlab.providers 0 (gather ↛ providers, core_boundary).
-- ``providers/dart/panel`` (L1 read): dartlab.gather 0 (read 는 gather 를 모름 — 경로는 config).
+- ``providers/dart/panel`` 는 ``dartlab.gather`` 를 import 0 (수집은 openapi, build 가 bytes 만 받음).
+- ``providers/dart/panel`` 는 다른 분석 엔진(analysis·credit·quant·macro·industry·story·scan)을
+  import 0 (panel = 자급 read/build 도메인, 상위 소비층을 모름).
+- ``providers/dart/panel`` 는 ``providers.dart.company`` 를 import 0 (finance/report 주입은 facade
+  층 책임 — panel 자체는 company 를 모름, cycle 0).
 
-전역 가드(``test_l1_no_cross_import`` module-level gather↔providers, ``dartlabGuard``
-census)를 panel 특이 케이스로 보강: 본 가드는 **module+function body 전수**(lazy 포함)라
-core/panel 의 하위 순수성까지 잠근다(broad ``test_import_direction_layers`` 가 core→gather
-prefix 를 known-violation 으로 허용해 새는 구멍을 메움). cross 의 index 접근은 gather import
-가 아니라 ``dartlab.config`` 경로 직접 read 여야 한다(providers ↛ gather).
+config(경로)·openapi(streamZipBytes, build 입력) 의존만 허용. 전역 가드
+(``test_l1_no_cross_import`` module-level gather↔providers, ``dartlabGuard`` census) 위에
+본 가드가 panel 자급 격리를 AST 전수(lazy 포함)로 잠근다.
 """
 
 from __future__ import annotations
@@ -24,11 +26,22 @@ pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 
+# 다른 분석/상위 엔진 (panel 이 import 하면 자급 격리 위반 — 상위 소비층).
+_FORBIDDEN_ENGINES = (
+    "dartlab.gather",
+    "dartlab.analysis",
+    "dartlab.credit",
+    "dartlab.quant",
+    "dartlab.macro",
+    "dartlab.industry",
+    "dartlab.story",
+    "dartlab.scan",
+    "dartlab.providers.dart.company",
+)
+
 # (서브트리 상대경로, 금지 import prefix 튜플, 사유)
 _RULES: tuple[tuple[str, tuple[str, ...], str], ...] = (
-    ("core/panel", ("dartlab.gather", "dartlab.providers"), "L0 계약 — 상위 계층 import 0"),
-    ("gather/dart/panel", ("dartlab.providers",), "gather ↛ providers (core_boundary)"),
-    ("providers/dart/panel", ("dartlab.gather",), "providers ↛ gather (경로는 config 직접 read)"),
+    ("providers/dart/panel", _FORBIDDEN_ENGINES, "panel 자급 격리 — gather·상위 엔진·company import 0 (cycle 0)"),
 )
 
 

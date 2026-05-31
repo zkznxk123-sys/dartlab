@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.gather.dart.panel.build.refScan.titleNormalizer import (
+from dartlab.providers.dart.panel.build.refScan.titleNormalizer import (
     jaccardSimilarity,
     normalizeTitle,
     tokenize,
