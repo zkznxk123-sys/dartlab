@@ -2,8 +2,8 @@
 
 plan snazzy-wibbling-origami P6. ``buildPanel.py``(로컬 zip 트랙 A)의 online 쌍둥이(트랙 B):
 
-    docs.parquet rcept → streamZipBytes(providers, 메모리) → buildPanelFromStream(gather)
-        → buildIndex/buildLabel → dist/changed_panel.txt → uploadData(SYNC_CATEGORY=panel)
+    docs.parquet rcept → streamZipBytes(providers, 메모리) → buildPanelFromStream(providers.panel.build)
+        → dist/changed_panel.txt → uploadData(SYNC_CATEGORY=panel)
 
 R1(gather↛providers): 본 entry 는 ``.github/scripts``(dartlab 패키지 밖, import 가드 비대상)라
 providers fetch + gather build 를 한 프로세스에서 조합한다 (``syncRecent.py`` 동형 패턴 — 정공,
@@ -42,8 +42,8 @@ def _resolveChangedCodes() -> list[str]:
 def _writeChangedPanel(codes: list[str], dataDir: str) -> None:
     """uploadData(SYNC_CATEGORY=panel) 증분 업로드용 changed list 작성.
 
-    종목별 period 파일 상대경로 ``{code}/{period}.parquet`` + 글로벌 ``_index.parquet``/
-    ``_label.parquet`` (data/dart/panel 기준 상대).
+    종목별 period 파일 상대경로 ``{code}/{period}.parquet`` (data/dart/panel 기준 상대).
+    (_index/_label 은 PRD jazzy-napping-seal 에서 폐기 — panel artifact 는 period shard 단일.)
     """
     panelBase = Path(dataDir) / "dart" / "panel"
     lines: list[str] = []
@@ -53,9 +53,6 @@ def _writeChangedPanel(codes: list[str], dataDir: str) -> None:
             continue
         for p in sorted(d.glob("*.parquet")):
             lines.append(f"{code}/{p.name}")
-    for globalFile in ("_index.parquet", "_label.parquet"):
-        if (panelBase / globalFile).exists():
-            lines.append(globalFile)
 
     distDir = Path("dist")
     distDir.mkdir(exist_ok=True)
@@ -87,13 +84,12 @@ def main() -> int:
 
     import polars as pl
 
-    from dartlab.gather.dart.panel import buildIndex, buildLabel, panelXbrlRefPath
-    from dartlab.gather.dart.panel.build import buildPanelFromStream
     from dartlab.providers.dart.openapi import (
         DartClient,
         buildTargetsFromDocsParquet,
         streamZipBytes,
     )
+    from dartlab.providers.dart.panel.build import buildPanelFromStream, panelXbrlRefPath
 
     refPath = panelXbrlRefPath()
     if not refPath.exists():
@@ -118,8 +114,6 @@ def main() -> int:
             totalRows += sum(res.values())
 
     print(f"[onlinePanel] online 빌드: {built}/{len(codes)} 종목, {totalRows} rows")
-    buildIndex(verbose=True)
-    buildLabel(verbose=True)
     _writeChangedPanel(codes, dataDir)
     return 0 if built else 1
 

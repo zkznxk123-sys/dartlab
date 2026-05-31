@@ -6,9 +6,10 @@ period-sharded panel artifact(14-col) + slim ``_index.parquet`` 를 빌드해 HF
 
     docs zip 수집 → 변경 종목 list → buildPanel (본 entry) → uploadData (SYNC_CATEGORY=panel)
 
-본 entry 는 network 0 — 로컬 zip 만 소비한다 (zip 수집은 별도 DART 수집기 선행, gather ↛
-providers 가드 R1 준수). 오케스트레이션 본체는 ``dartlab.gather.dart.panel.syncPanel``
-(refScan→learn→build→index). 본 파일은 CI 진입(코드 해석 + changed list 작성)만 담당.
+본 entry 는 network 0 — 로컬 zip 만 소비한다 (zip 수집은 별도 DART 수집기 선행). build 본체는
+``dartlab.providers.dart.panel.build.buildPanelAll`` (zip→14col, multiprocessing). 본 파일은
+CI 진입(코드 해석 + changed list 작성)만 담당. _index/_label 은 PRD jazzy-napping-seal 에서
+폐기 (cross·라벨검색 표면 제거) — panel artifact 는 ``{code}/{period}.parquet`` 단일.
 
 사용법:
     # 변경 종목만 (dist/changed_docs.txt 또는 dist/changed.txt 기반)
@@ -55,8 +56,9 @@ def _resolveAllCodes(dataDir: str) -> list[str]:
 def _writeChangedPanel(codes: list[str], dataDir: str) -> None:
     """uploadData(SYNC_CATEGORY=panel) 가 증분 업로드 시 참고할 changed list.
 
-    양식 — 종목별 period 파일 상대경로 ``{code}/{period}.parquet`` + 글로벌 ``_index.parquet``.
-    경로는 ``data/dart/panel`` (localDir) 기준 상대.
+    양식 — 종목별 period 파일 상대경로 ``{code}/{period}.parquet``. 경로는 ``data/dart/panel``
+    (localDir) 기준 상대. (_index/_label 은 PRD jazzy-napping-seal 에서 폐기 — panel artifact 는
+    ``{code}/{period}.parquet`` 단일.)
     """
     panelBase = Path(dataDir) / "dart" / "panel"
     lines: list[str] = []
@@ -66,9 +68,6 @@ def _writeChangedPanel(codes: list[str], dataDir: str) -> None:
             continue
         for p in sorted(d.glob("*.parquet")):
             lines.append(f"{code}/{p.name}")
-    indexPath = panelBase / "_index.parquet"
-    if indexPath.exists():
-        lines.append("_index.parquet")
 
     distDir = Path("dist")
     distDir.mkdir(exist_ok=True)
@@ -102,13 +101,18 @@ def main() -> int:
         return 0
 
     print(f"[buildPanel] 대상 {len(codes)} 종목 — workers={numWorkers}")
-    from dartlab.gather.dart.panel import syncPanel
+    from dartlab.providers.dart.panel.build import buildPanelAll, panelXbrlRefPath
 
-    out = syncPanel(codes=codes, refScan=False, build=True, index=True, label=True, numWorkers=numWorkers, verbose=True)
-
-    built = (out.get("build") or {}).get("codes", 0)
-    idx = out.get("index") or {}
-    print(f"[buildPanel] 완료: build codes={built}, index rows={idx.get('rowCount', 0)}")
+    panelBase = Path(dataDir) / "dart" / "panel"
+    out = buildPanelAll(
+        refPath=str(panelXbrlRefPath()),
+        outBaseDir=str(panelBase),
+        codes=codes,
+        numWorkers=numWorkers,
+        verbose=True,
+    )
+    built = sum(1 for _code, stats in out.items() if stats and stats[1] > 0)
+    print(f"[buildPanel] 완료: build codes={built}/{len(codes)}")
 
     _writeChangedPanel(codes, dataDir)
     return 0 if built else 1
