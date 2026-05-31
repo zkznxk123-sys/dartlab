@@ -113,7 +113,7 @@ testUniverse:
 import 정책 (P-CORE B 정리 결과):
 
 1. **상하 단방향 절대 강제**: `L0 ← L1 ← L1.5 ← L2 ← L3 ← L4` (CI lint — `pyproject [tool.importlinter]` + [tests/architecture/test_import_direction.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_import_direction.py)).
-2. **L1 cross import 금지**: gather ↛ providers ([tests/architecture/test_l1_no_cross_import.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l1_no_cross_import.py)).
+2. **L1 cross import 금지**: gather ↛ providers ([tests/architecture/test_l1_no_cross_import.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l1_no_cross_import.py)). gather 가 providers 의 network fetch 가 필요하면 **이관 금지 — layer-밖 entry(`.github/scripts/sync/*`, 패키지 밖)에서 providers fetch + gather build 를 조합**한다 (`syncRecent.py`·`onlinePanel.py` 가 동형 선례). 정공이지 우회 아님.
 3. **L1.5 4 형제 cross import 금지**: scan ↛ frame ↛ synth ↛ reference ([tests/architecture/test_l15_no_cross_import.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l15_no_cross_import.py)). core 잡동사니화 재발 방지.
 4. **L1.5 진입 룰**: 새 모듈 추가 시 ≥ 2 분석엔진이 같은 형태로 사용해야 함 ([tests/architecture/test_l15_entry_rule.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l15_entry_rule.py)). 1 개만 쓰면 그 분석엔진 owner.
 5. **core L0 only**: core/ 가 상위 계층 import 금지 ([tests/architecture/test_core_l0_only.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_core_l0_only.py)). di.py 만 lazy import 예외.

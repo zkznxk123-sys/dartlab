@@ -283,6 +283,44 @@ def streamZipBytes(
     Example:
         >>> for code, rcept, raw in streamZipBytes(client, [("005930", "...")]):
         ...     pass  # doctest: +SKIP
+
+    SeeAlso:
+        - ``iterZipsParallel`` — 디스크 저장 버전(메타 yield).
+        - ``buildTargetsFromDocsParquet`` — (code, rceptNo) targets 생산.
+        - gather ``buildPanelFromStream`` — 본 bytes 스트림을 14-col parquet 화.
+
+    Requires:
+        - ``DartClient`` (DART_API_KEYS). concurrent.futures.
+
+    Capabilities:
+        - online 1패스 — zip 디스크 저장 없이 document.xml bytes 를 메모리 스트림으로 흘림.
+
+    Guide:
+        - layer-밖 sync entry(onlinePanel.py)가 종목 단위로 호출 — gather build 와 조합.
+
+    AIContext:
+        - 유효 zip 만 yield (실패/미달 skip) — 호출측은 즉시 소비 후 bytes 폐기(메모리 bound).
+
+    When:
+        - online 1패스 panel 빌드가 신규/변경 rcept 를 디스크 zip 없이 받을 때.
+
+    How:
+        - ThreadPool(getBytes document.xml) → 유효(_MIN_VALID_BYTES) zip bytes as_completed yield.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 전 종목 targets 한 번에 호출 금지 — 종목 단위(bytes 메모리 폭주 가드).
+            - 디스크 저장 금지 — 메모리 1패스(iterZipsParallel 이 디스크 버전).
+        OutputSchema:
+            - ``Iterator[tuple[str, str, bytes]]`` (유효 zip 만).
+        Prerequisites:
+            - DartClient. targets (code, rceptNo).
+        Freshness:
+            - 매 호출 fetch (증분 신규 rcept).
+        Dataflow:
+            - targets → ThreadPool getBytes → 유효 bytes yield.
+        TargetMarkets:
+            - KR (DART document.xml).
     """
     if not targets:
         return

@@ -71,10 +71,31 @@ L3: axis / recipe
 |---|---|---|---|
 | DART finance | dart/ | bs/is/cf/cis/sce | analysis 22 + credit + quant 일부 |
 | DART sections | dart/ | section_content | search + sections deep dive |
+| DART panel | dart/ | panel/{code}/{period} (14-col) + _index + _label | 공시 수평화 보드 (회사내·회사간) |
 | EDGAR XBRL | edgar/ | finance/* | edgar SKILL |
 | KRX OHLCV | krx/ | prices/raw-YYYY | quant 30+ + scan |
 | KRX events | krx/ | events/* | _adjustPrice (split/dividend) |
 | 한은 macro | macro/ | (외부 API) | macro 12 axis |
+
+### panel 수집 2-트랙 (공시 수평화)
+
+```
+(A) 로컬 zip 트랙 — 전수·재빌드 (양식 era 변경·택소노미 갱신 시 SSOT)
+    DART API → data/dart/original/docs/{code}/*.zip (로컬 전용·HF skip)
+             → buildPanel(gather, lxml/zip) → data/dart/panel/{code}/{period}.parquet
+
+(B) online 1패스 트랙 — 증분·신규분기 (디스크 zip 0)
+    docs.parquet rcept → streamZipBytes(providers, 메모리) → buildPanelFromStream(gather)
+                       → data/dart/panel/{code}/{period}.parquet   (A 와 바이트 동형)
+
+공통: 정렬키 = core.panel.canonicalKey (native ACLASS scope-strip, 손 매핑 0)
+      → buildIndex(_index.parquet) + buildLabel(_label.parquet) → HF push(SYNC_CATEGORY=panel)
+      → providers Panel/crossCompany read (scan_parquet, 콜드 <1s)
+```
+
+> zip 원본은 local-only(HF skip, 3층 가드). online(B)은 zip 을 디스크에 만들지조차 않으므로
+> refScan(zip 전수 스캔) 불가 → 항상 HF seed ``panelXbrlRef`` 를 refDf 로 주입. 전수 재빌드·
+> 양식 era 변경 대응은 영구히 zip 트랙(A) 책임.
 
 ## 갱신 절차
 
@@ -82,6 +103,8 @@ L3: axis / recipe
 2. parquet schema 변경 → migration 절차 (별 spec).
 3. L2 cache invalidation (`BoundedCache.clear`).
 4. L3 axis 영향 확인 → 본 매핑 표 갱신.
+5. **panel 양식 era 변경** → zip 트랙(A) 전수 재빌드. **택소노미(ACLASS) 갱신** → canonicalKey
+   규칙 검토 + refScan→HF seed `panelXbrlRef` 교체(online B 는 seed ref 만 갱신).
 
 ## 강행 룰
 
