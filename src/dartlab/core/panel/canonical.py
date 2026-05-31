@@ -23,11 +23,181 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 
 import polars as pl
 
 from .bridge import loadBridge
+
+# canonicalKey scope-strip 형식 규칙 (R5: ACLASS 구조 규칙이지 per-title 의미매핑 아님).
+# 정부 표준 ACLASS 카탈로그(bridge._tier1Seed rawId) 위에서 scope marker 만 정규화.
+_XBRL_PREFIX = "{XBRL}"
+_NT_RE = re.compile(r"^NT_[CS]_(D\d+)$")  # NT_C_D826380 → D826380
+_IS_RE = re.compile(r"^IS(?:_[CS])?(\d)$")  # IS_C2 / IS_S2 / 옛 IS2 → 2
+_FS_RE = re.compile(r"^(BS|CF|EF)(?:_[CS])?$")  # BS / BS_C / BS_S → BS
+
+
+def canonicalKey(xbrlClass: str | None) -> str | None:
+    """raw ACLASS(xbrlClass) → scope-정규화 canonical 정렬키 (순수함수, 테이블 0).
+
+    DART XBRL 표준 ACLASS(정부 발행 Link Role)에서 scope marker(_C/_S)만 벗겨 회사내·회사간
+    수평화의 단일 정렬키를 만든다 — bridge 매핑 농장 없이 native 코드 자체가 SSOT. era drift
+    (옛 ``BS`` ↔ 신 ``BS_C``)는 같은 키로 병합되고, 변종(``IS_C2`` 손익 vs ``IS_C3`` 포괄손익)·
+    주석 D-code 는 분리 유지. 연결/별도 분리는 ``anchor.scopeExpr`` 가 raw 의 ``_S`` 에서 독립 산출.
+
+    Args:
+        xbrlClass: walker 가 추출한 raw ACLASS (예 "BS_C", "NT_C_D826380"). None/"" 허용.
+
+    Returns:
+        canonical 키 (예 "BS", "IS2", "NT_D826380") 또는 None (narrative — xbrlClass 부재).
+
+    Raises:
+        없음 — None/빈 입력은 None 반환.
+
+    Example:
+        >>> canonicalKey("BS_C"), canonicalKey("BS")
+        ('BS', 'BS')
+        >>> canonicalKey("IS_C2"), canonicalKey("IS2")
+        ('IS2', 'IS2')
+        >>> canonicalKey("NT_C_D826380")
+        'NT_D826380'
+        >>> canonicalKey(None) is None
+        True
+
+    SeeAlso:
+        - ``canonicalKeyExpr`` — 동일 규칙의 polars Expr (build/read 공통 SSOT).
+        - ``anchor.scopeExpr`` — 연결/별도 scope 독립 산출.
+        - ``resolveBatch`` — DataFrame 일괄 disclosureKey 부착.
+
+    Requires:
+        - 없음 (순수 문자열 함수).
+
+    Capabilities:
+        - 회사내·회사간 수평화 정렬키를 native ACLASS 에서 직접 산출 — 손매핑·학습·scatter 0.
+
+    Guide:
+        - resolveBatch/canonicalKeyExpr 경유 권장. 직접 호출도 안전(순수).
+
+    AIContext:
+        - 정부 표준 코드 위 형식 규칙만 — 의미 추론 0 (mapper farm 회귀 차단).
+
+    When:
+        - raw ACLASS 를 era·scope 무관 단일 정렬키로 정규화할 때.
+
+    How:
+        - {XBRL} prefix strip → NT_[CS]_D / IS(_[CS])?digit / (BS|CF|EF)(_[CS])? 매칭 → 정규화, else passthrough.
+
+    LLM Specifications:
+        AntiPatterns:
+            - per-title 의미 regex 추가 금지 — ACLASS 형식 구조 규칙만(R5).
+            - 주석 C/S D-code 번호차(826380 vs 826385) 임의 +offset 병합 금지 — 추측.
+            - narrative(None) 에 임의 키 부여 금지 — None 유지.
+        OutputSchema:
+            - ``str | None`` (canonical 키 또는 None).
+        Prerequisites:
+            - 없음.
+        Freshness:
+            - 순수함수 — 입력 외 의존 0.
+        Dataflow:
+            - xbrlClass → prefix strip → 패턴 매칭 → scope-strip canonical.
+        TargetMarkets:
+            - KR (DART ACLASS). US 는 후속 (us-gaap concept 별도).
+    """
+    if not xbrlClass:
+        return None
+    x = xbrlClass.strip()
+    if x.startswith(_XBRL_PREFIX):
+        x = x[len(_XBRL_PREFIX) :]
+    if not x:
+        return None
+    m = _NT_RE.match(x)
+    if m:
+        return f"NT_{m.group(1)}"
+    m = _IS_RE.match(x)
+    if m:
+        return f"IS{m.group(1)}"
+    m = _FS_RE.match(x)
+    if m:
+        return m.group(1)
+    return x
+
+
+def canonicalKeyExpr(col: str = "xbrlClass") -> pl.Expr:
+    """``canonicalKey`` 의 polars Expr — build/read 동일 규칙 단일 SSOT.
+
+    scalar ``canonicalKey`` 와 바이트 동치(동일 scope-strip 규칙). build(disclosureKey 부착)·
+    read(fallback) 양쪽이 본 Expr 하나만 의존 → 규칙 분기 0.
+
+    Args:
+        col: xbrlClass 컬럼명 (기본 "xbrlClass").
+
+    Returns:
+        ``canonicalKey`` 별칭 Utf8 Expr (xbrlClass null/미매칭은 §규칙대로 null/passthrough).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> import polars as pl
+        >>> df = pl.DataFrame({"xbrlClass": ["BS_C", "NT_C_D826380", "IS_S2", None]})
+        >>> df.select(canonicalKeyExpr())["canonicalKey"].to_list()
+        ['BS', 'NT_D826380', 'IS2', None]
+
+    SeeAlso:
+        - ``canonicalKey`` — scalar 동치.
+        - ``resolveBatch`` — 본 Expr 로 disclosureKey 컬럼 채움.
+
+    Requires:
+        - polars.
+
+    Capabilities:
+        - 일괄 canonical 키 산출 — map_elements 회피, SIMD columnar.
+
+    Guide:
+        - resolveBatch 내부 또는 reader fallback 에서 사용. 직접 호출 가능.
+
+    AIContext:
+        - regex extract + when/then — scalar 규칙과 1:1.
+
+    When:
+        - DataFrame 의 xbrlClass 컬럼을 canonical 키로 일괄 변환할 때.
+
+    How:
+        - {XBRL} strip → str.extract(NT/IS/FS regex) → when/then 우선순위 → canonical.
+
+    LLM Specifications:
+        AntiPatterns:
+            - scalar ``canonicalKey`` 와 규칙 분기 금지 — 동일 패턴(테스트로 동치 강제).
+            - map_elements 금지 — str.extract Expr.
+        OutputSchema:
+            - ``pl.Expr`` (alias "canonicalKey", Utf8).
+        Prerequisites:
+            - polars. xbrlClass 컬럼.
+        Freshness:
+            - read/build 파생.
+        Dataflow:
+            - col → {XBRL} strip → NT/IS/FS extract → when/then canonical.
+        TargetMarkets:
+            - KR (DART ACLASS). US 후속.
+    """
+    base = pl.col(col).str.strip_chars().str.replace(r"^\{XBRL\}", "")
+    base = pl.when(base.str.len_chars() == 0).then(None).otherwise(base)
+    nt = base.str.extract(r"^NT_[CS]_(D\d+)$", 1)
+    isn = base.str.extract(r"^IS(?:_[CS])?(\d)$", 1)
+    fs = base.str.extract(r"^(BS|CF|EF)(?:_[CS])?$", 1)
+    return (
+        pl.when(base.is_null())
+        .then(None)
+        .when(nt.is_not_null())
+        .then(pl.lit("NT_") + nt)
+        .when(isn.is_not_null())
+        .then(pl.lit("IS") + isn)
+        .when(fs.is_not_null())
+        .then(fs)
+        .otherwise(base)
+        .alias("canonicalKey")
+    )
 
 
 @lru_cache(maxsize=1)

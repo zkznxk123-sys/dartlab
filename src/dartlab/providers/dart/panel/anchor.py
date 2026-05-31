@@ -91,12 +91,13 @@ def scopeExpr(col: str = "xbrlClass") -> pl.Expr:
 
 
 def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
-    """과거 기간을 최신기준으로 수평화 — disclosureKey 단일 앵커 정렬 (요구 #7).
+    """과거 기간을 최신기준으로 수평화 — canonical 앵커 정렬 (요구 #7).
 
     같은 disclosure 가 era 마다 xbrlClass(BS→BS_C)·제목이 흔들려 pivot 이 era 별로 행을
-    쪼갬 → ``(disclosureKey, scope)`` 그룹의 **최신 period 라벨**(chapter/sectionLeaf/
-    blockLeaf)을 전 기간에 덮어써 한 행으로 정렬. scope 로 연결/별도 분리 보존. disclosureKey
-    null(narrative) 행은 손대지 않음(텍스트 정렬 유지).
+    쪼갬 → ``coalesce(disclosureKey, xbrlClass)`` 앵커(disclosureKey 가 canonical 키면 그 자체가
+    era-안정 — ``core.panel.canonicalKey`` 가 build 에서 scope-strip 채움) 의 ``(_, scope)`` 그룹
+    **최신 period 라벨**(chapter/sectionLeaf/blockLeaf)을 전 기간에 덮어써 한 행으로 정렬. scope
+    로 연결/별도 분리 보존. 앵커 null(narrative) 행은 손대지 않음(텍스트 정렬 유지).
 
     Args:
         df: panel long DataFrame (disclosureKey/xbrlClass/period/chapter/sectionLeaf/
@@ -138,8 +139,8 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
 
     LLM Specifications:
         AntiPatterns:
-            - disclosureKey 단독 group 금지 — (disclosureKey, scope) 페어(연결/별도 병합 방지).
-            - xbrlClass 를 pivot index 유지 금지 — era drift 로 행 쪼개짐(scope 대체).
+            - 앵커 단독 group 금지 — (anchorKey, scope) 페어(연결/별도 병합 방지).
+            - raw xbrlClass 를 pivot index 유지 금지 — era drift 로 행 쪼개짐(canonicalKey/scope 대체).
             - 최신 = period 최대 문자열(YYYYQn 정렬, 12월결산화라 안전).
         OutputSchema:
             - 입력 + ``scope``, keyed 행 라벨 최신 통일.
@@ -155,19 +156,29 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
     if df.is_empty() or "disclosureKey" not in df.columns or "period" not in df.columns:
         return df
     df = df.with_columns(scopeExpr())
-    keyed = df.filter(pl.col("disclosureKey").is_not_null())
+    # 앵커 키 = disclosureKey 우선, 없으면 xbrlClass fallback. build 가 core.panel.canonicalKey 로
+    # disclosureKey 를 scope-strip canonical(BS_C→BS, NT_C_D826380→NT_D826380)로 채우면 그 자체가
+    # era-안정 앵커라 주석·재무제표 모두 단일 행 정렬(2026-05 redesign). 옛 bridge artifact(snakeId)
+    # 호환 위해 coalesce 유지 — disclosureKey null 시 raw xbrlClass 로라도 묶어 scatter 완화.
+    anchorExpr = (
+        pl.coalesce([pl.col("disclosureKey"), pl.col("xbrlClass")])
+        if "xbrlClass" in df.columns
+        else pl.col("disclosureKey")
+    )
+    df = df.with_columns(anchorExpr.alias("_anchorKey"))
+    keyed = df.filter(pl.col("_anchorKey").is_not_null())
     if keyed.is_empty():
-        return df
+        return df.drop("_anchorKey")
     latest = (
         keyed.sort("period")
-        .group_by(["disclosureKey", "scope"], maintain_order=True)
+        .group_by(["_anchorKey", "scope"], maintain_order=True)
         .agg(
             pl.col("chapter").last().alias("_chapterL"),
             pl.col("sectionLeaf").last().alias("_sectionLeafL"),
             pl.col("blockLeaf").last().alias("_blockLeafL"),
         )
     )
-    df = df.join(latest, on=["disclosureKey", "scope"], how="left")
+    df = df.join(latest, on=["_anchorKey", "scope"], how="left")
     return df.with_columns(
         pl.when(pl.col("_chapterL").is_not_null())
         .then(pl.col("_chapterL"))
@@ -181,4 +192,4 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
         .then(pl.col("_blockLeafL"))
         .otherwise(pl.col("blockLeaf"))
         .alias("blockLeaf"),
-    ).drop(["_chapterL", "_sectionLeafL", "_blockLeafL"])
+    ).drop(["_chapterL", "_sectionLeafL", "_blockLeafL", "_anchorKey"])
