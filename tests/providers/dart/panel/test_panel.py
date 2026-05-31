@@ -37,3 +37,33 @@ def test_panel_call_none_on_empty_or_blank_key() -> None:
     p = Panel("000000nonexistent")
     assert p("") is None
     assert p("재고") is None
+
+
+def test_is_strong_topic_classification() -> None:
+    """isStrongTopic SSOT — finance/report 강함, canonicalKey/한글 섹션명은 raw 공시."""
+    from dartlab.providers.dart.builder.dataDispatcher import isStrongTopic
+
+    assert isStrongTopic("IS") is True  # finance
+    assert isStrongTopic("BS") is True  # finance
+    assert isStrongTopic("dividend") is True  # report
+    assert isStrongTopic("NT_D826380") is False  # canonicalKey → raw panel
+    assert isStrongTopic("재고") is False  # 한글 섹션명 → raw panel
+
+
+def test_panel_facade_injection_routes_strong_to_showfn() -> None:
+    """facade 주입(_showFn/_strongFn) 시 강한 소스는 showFn 위임, raw 는 panel 검색 (데이터 0)."""
+    from dartlab.providers.dart.panel import Panel
+
+    p = Panel("000000nonexistent")
+    calls = []
+    p._showFn = lambda topic: f"finance:{topic}"  # 가짜 show 주입
+    p._strongFn = lambda topic: topic in {"IS", "BS"}  # 가짜 분류
+
+    # 강한 소스 → showFn 위임
+    assert p("IS") == "finance:IS"
+    # source="finance" 강제 → strongFn 무관 위임
+    assert p("anything", source="finance") == "finance:anything"
+    # source="raw" → 주입 무시, raw panel 검색 (artifact 없어 None)
+    assert p("IS", source="raw") is None
+    # 약한 소스(strongFn False) → raw panel 검색 (artifact 없어 None)
+    assert p("재고") is None

@@ -166,15 +166,22 @@ class Panel(pl.DataFrame):
         self,
         key: str,
         *,
+        source: str = "auto",
         tag: bool | None = None,
         periods: list[str] | None = None,
     ) -> pl.DataFrame | None:
-        """섹션명/canonicalKey 매칭 행 검색 — disclosureKey exact + 한글 라벨 substring.
+        """섹션 행 검색 + 강한 소스(finance/report) 주입 — facade 진입점.
+
+        ``source="auto"``(기본): 강한 소스 topic(BS/IS/CF/ratios/inventory/dividend…)은 facade 가
+        주입한 ``c.show`` 로 위임(finance/report 가 raw 공시보다 강함). canonicalKey·한글 섹션명은
+        raw 공시(panel) 행 검색. ``source="raw"`` 면 강제로 raw 공시만. 주입(``_showFn``/``_strongFn``)은
+        ``Company.panel`` facade 가 set — standalone ``Panel(code)`` 는 주입 없어 항상 raw 검색.
 
         Args:
-            key: canonicalKey("NT_D826380"/"BS") 또는 한글 섹션명 substring("재고").
-            tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override).
-            periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read.
+            key: canonicalKey("NT_D826380"/"BS") 또는 한글 섹션명("재고"), 또는 강한 소스 topic("IS").
+            source: "auto"(기본, 강한 소스는 show 주입) / "raw"(강제 raw 공시) / "finance"/"report"(강제 주입).
+            tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override). raw 검색만 적용.
+            periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read. raw 검색만 적용.
 
         Returns:
             매칭 행 wide DataFrame (period 가로 정렬) 또는 None (빈 key / 매칭 0 / artifact 없음).
@@ -227,6 +234,13 @@ class Panel(pl.DataFrame):
         """
         if not key:
             return None
+        # 강한 소스(finance/report/notes) 주입 — facade(Company.panel)가 _showFn/_strongFn 주입 시.
+        # panel.py 는 finance 를 모름 — 주입된 callable 만 호출(layer 격리, cycle 0).
+        if source != "raw":
+            showFn = getattr(self, "_showFn", None)
+            strongFn = getattr(self, "_strongFn", None)
+            if showFn is not None and (source in ("finance", "report") or (strongFn is not None and strongFn(key))):
+                return showFn(key)
         effTag = self._tag if tag is None else tag
         code = getattr(self, "_code", None)
         # tag/periods override + code 보유(fresh 인스턴스) 시 재read, 그 외 self 필터.

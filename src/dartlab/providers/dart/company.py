@@ -2567,38 +2567,41 @@ class Company:
 
     @property
     def panel(self):
-        """공시 수평화 보드 facade — 항목 × 기간 2D 정렬 (panel 엔진).
+        """공시 수평화 보드 — 잡는 순간 항목 × 기간 wide DataFrame (panel 엔진).
 
-        DART 공시 본문(재무제표·주석·서술)을 native canonicalKey(정부 표준 ACLASS scope-strip)
-        로 회사내·회사간 수평 정렬한 보드. 사전빌드 artifact 를 lazy read (콜드 <1s, 태그 무손실).
-        본 Company 의 종목코드로 ``Panel`` 인스턴스를 돌려준다.
+        DART 공시 본문(재무제표·주석·서술)을 native canonicalKey(정부 표준 ACLASS scope-strip)로
+        수평 정렬한 wide. ``c.panel`` 은 그 자체가 ``pl.DataFrame``(Panel subclass) — shape/filter
+        등 polars 연산 그대로. ``c.panel("재고")`` 로 섹션 행 검색, ``c.panel("IS")`` 같은 강한 소스는
+        ``show`` 의 finance/report 를 끼워넣어 위임(더 강한 정규화 숫자·정형 공시). 사전빌드 artifact
+        lazy read (콜드 <1s). 기본 plain(태그 strip), ``Panel(code, tag=True)`` 면 원본 XML 무손실.
 
         Args:
             없음 (property — self.stockCode 사용).
 
         Returns:
-            ``Panel`` 인스턴스. ``c.panel.board()`` / ``c.panel.show(key)`` / ``c.panel.wide()`` /
-            ``c.panel.long()`` / ``c.panel.periods()`` 로 접근.
+            ``Panel`` 인스턴스(= wide ``pl.DataFrame``). ``c.panel`` 자체가 wide, ``c.panel(key)`` 로
+            섹션 검색 / 강한 소스 주입.
 
         Raises:
-            없음 — artifact 부재 시 각 메서드가 None 반환.
+            없음 — artifact 부재 시 빈 DataFrame.
 
         Example:
             >>> c = Company("005930")
-            >>> c.panel.board()                       # presence board
-            >>> c.panel.show("재고")                   # 한글 라벨 또는 canonicalKey
-            >>> c.panel.show("NT_D826380", byLabel=False)
+            >>> c.panel.shape                          # wide (항목 × period) — DataFrame 그대로
+            >>> c.panel("재고")                        # 섹션명/canonicalKey 행 (raw 공시)
+            >>> c.panel("재고", tag=True)              # 원본 XML 행
+            >>> c.panel("IS")                          # 강한 소스 — finance 주입 (show 위임)
+            >>> c.panel("재고", source="raw")          # 강제 raw 공시
 
         SeeAlso:
-            - ``providers.dart.panel.Panel`` — 반환 facade 본체.
-            - ``providers.dart.panel.crossCompany`` — 회사간 동일 disclosure (Company 밖).
-            - ``show`` — 단일 회사 원본 데이터(재무제표/주석) 단건 surface.
+            - ``providers.dart.panel.Panel`` — 반환 본체 (pl.DataFrame subclass + __call__).
+            - ``show`` — 강한 소스(finance/report/notes) dispatch — c.panel 이 주입 재사용.
 
         Requires:
             - data/dart/panel/{code}/*.parquet (사전빌드 artifact).
 
         Capabilities:
-            - 한 회사 공시를 항목 × 기간 보드로 — Company 진입점에서 바로 수평화 접근.
+            - 한 회사 공시를 항목 × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.
 
         Guide:
             - `c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel.show(key)`. 회사간은 모듈
