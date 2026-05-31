@@ -62,29 +62,8 @@ def _(c):
 
 @app.cell
 def _(c):
-    # facts — 모든 XBRL/공시 fact 의 long-form
-    c.facts.head(20)
-    return
-
-
-@app.cell
-def _(c):
-    # trace — 어느 보고서/태그에서 왔는지 source provenance
-    c.trace("BS")
-    return
-
-
-@app.cell
-def _(c):
     # filings — 모든 보고서 (DART 뷰어 URL 포함)
     c.filings().head(10)
-    return
-
-
-@app.cell
-def _(c):
-    # diff — 작년 대비 텍스트 변화
-    c.diff()
     return
 
 
