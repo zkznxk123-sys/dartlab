@@ -1,456 +1,249 @@
-"""Panel facade (L1 read) — DART 공시 수평화 보드 진입점.
+"""Panel — 한 회사 공시 수평화 보드 (그 자체가 pl.DataFrame, callable 로 섹션 검색).
 
-``Panel(code)`` 로 한 회사의 panel artifact 를 읽어 회사내 수평화 보드(항목 × period)를
-제공한다. 로컬 artifact read only — network·lxml import 0 (R2). 상태 없는 lazy read →
-multi-company 루프에서 누적 0 (Polars Rust heap OOM 가드, ``with Panel() as p:`` 권장).
+``Panel(code)`` 또는 ``Company(code).panel`` 을 잡는 순간 그 회사의 큰 분기별 시계열 wide
+DataFrame 이 된다 (행 = 공시 항목, 열 = period, cell = 본문). ``Panel`` 은 ``pl.DataFrame``
+subclass — polars 연산(filter/shape/select…)을 그대로 받는다. ``panel("재고")`` callable 로
+섹션명·canonicalKey 매칭 행을 검색한다.
+
+성능·메모리: 로컬 artifact read only (network·lxml import 0, R2). ``tag=False``(기본) 면 build 가
+저장한 raw XML 을 collapse 단계에서 1회 strip → plain wide(raw 의 ~22%, 표시·메모리 경량).
+``tag=True`` 면 원본 XML 무손실(R4). 상태 없는 read — ``c.panel`` 매 접근 새 인스턴스(누적 0,
+Polars Rust heap OOM 가드). 대형 종목은 ``periods=`` 로 파일 prune.
 
 LLM Specifications:
     AntiPatterns:
         - network/외부 API 호출 금지 — 로컬 panel artifact only(R2).
         - per-instance unbounded 캐시 금지 — 상태 없는 read(누적 0).
-        - contentRaw 사전 strip 저장 금지 — show(raw=False) 가 runtime on-demand.
+        - tag=False 결과를 raw 로 가정 금지 — plain(태그 제거). raw 는 tag=True.
+        - 큰 wide 를 인스턴스에 보관 후 다종목 루프 금지 — 매 회사 새 Panel + GC.
     OutputSchema:
-        - ``Panel(code).board() -> pl.DataFrame | None`` (presence board).
-        - ``Panel(code).show(key, ...) -> pl.DataFrame | None`` (canonicalKey/라벨 한 disclosure wide).
-        - ``Panel(code).wide(...) / .long(...) / .periods()``.
+        - ``Panel(code, *, marketNs, periods, tag)`` → pl.DataFrame subclass (wide).
+        - ``Panel(code)(key, *, tag, periods) -> pl.DataFrame | None`` (매칭 행).
     Prerequisites:
-        - data/dart/panel/{code}/*.parquet.
+        - data/{dart|edgar}/panel/{code}/*.parquet (build 결과).
     Freshness:
-        - 매 호출 read (artifact 변경 즉시 반영).
+        - 매 생성 read (artifact 변경 즉시 반영).
     Dataflow:
-        - Panel(code) → reader/pivot → wide board.
+        - Panel(code) → _read.readWide → wide. Panel(code)(key) → in-memory 행 필터.
     TargetMarkets:
-        - KR (DART). US 는 marketNs="us" (EDGAR panel, 후속).
+        - KR (DART). US 는 marketNs="us" (EDGAR panel).
 """
 
 from __future__ import annotations
 
 import polars as pl
 
-from . import pivot as _pivot
-from .reader import readLong, resolveKeyArg, scanPanel
+from . import _read
 
 
-class Panel:
-    """한 회사의 panel(공시 수평화) 보드 facade — 로컬 artifact read only.
+class Panel(pl.DataFrame):
+    """한 회사 공시 수평화 wide — pl.DataFrame subclass, callable 로 섹션 검색.
 
     Args:
         code: 종목코드 (KR 6자리) 또는 CIK/ticker (US).
         marketNs: 시장 namespace ("kr" / "us", 기본 "kr").
+        periods: 특정 period 만 (파일 prune, 대형 종목 메모리 핸들). None = 전체.
+        tag: False(기본) 면 본문 태그 strip(plain), True 면 원본 XML 무손실(raw).
 
     Returns:
-        Panel 인스턴스 (메서드로 board/show/wide/long 제공).
+        ``Panel`` 인스턴스 = wide pl.DataFrame (행 = 공시 항목, 열 = period). artifact 없으면 빈.
 
     Raises:
-        없음 — artifact 부재 시 메서드가 None 반환.
+        없음 — artifact 부재 시 빈 DataFrame (예외 없음).
 
     Example:
-        >>> with Panel("005930") as p:  # doctest: +SKIP
-        ...     board = p.board()
-        ...     inv = p.show("재고")  # canonicalKey "NT_D826380" 또는 한글 라벨
+        >>> from dartlab.providers.dart.panel import Panel
+        >>> p = Panel("005930")              # doctest: +SKIP
+        >>> p.shape                          # doctest: +SKIP
+        (25, 47)
+        >>> inv = p("재고")                  # doctest: +SKIP  — 섹션명/canonicalKey 행
+        >>> raw = p("재고", tag=True)        # doctest: +SKIP  — 원본 XML
 
     SeeAlso:
-        - ``pivot.readPanelWide`` — 회사내 수평화.
-        - ``cross.crossCompany`` — 회사간 정렬.
-        - ``reader.readLong`` — long read.
+        - ``_read.readWide`` — wide 수평화 구현.
+        - ``providers.dart.company.Company.panel`` — facade 진입점 (finance/report 주입).
 
     Requires:
         - polars. panel artifact.
 
     Capabilities:
-        - 한 회사 공시(재무제표·주석·서술)를 항목 × period 보드로 — 콜드 <1s, 태그 무손실.
+        - 한 회사 공시(재무제표·주석·서술)를 항목 × period wide 로 — 잡는 순간 DataFrame.
+        - callable 로 섹션명/canonicalKey 행 검색 — 별도 verb 없이 호출.
+        - tag 로 plain(기본)/raw 전환 — 무손실 저장, 표시 경량.
 
     Guide:
-        - ``with Panel(code) as p:`` 로 multi-company 루프 (누적 0). 단건은 직접 사용.
+        - ``p = Panel(code)`` → 그대로 polars 연산. ``p("재고")`` → 행 검색. 다종목은 매 회사 새 Panel.
 
     AIContext:
-        - 상태 없는 lazy read — 외부 본문은 untrusted(soruceType external 마커는 ai 층).
+        - 상태 없는 lazy read — 외부 본문(contentRaw)은 untrusted(ai 층이 마커로 감쌈).
+
+    When:
+        - 한 회사 공시를 다기간 wide 로 보거나 특정 섹션 행을 검색할 때.
+
+    How:
+        - __init__: readWide(code, tag) → super().__init__(wide). __call__: in-memory 행 필터.
 
     LLM Specifications:
         AntiPatterns:
-            - network 호출 금지(R2). per-instance unbounded cache 금지.
+            - network 호출 금지(R2). per-instance unbounded cache 금지(누적 0).
+            - tag=False 를 raw 로 가정 금지 — plain.
         OutputSchema:
-            - 메서드별 ``pl.DataFrame | None`` / ``list[str]``.
+            - pl.DataFrame subclass (wide) / ``__call__`` → ``pl.DataFrame | None``.
         Prerequisites:
             - panel artifact.
         Freshness:
-            - 매 호출 read.
+            - 매 생성 read.
         Dataflow:
-            - Panel(code) → reader/pivot.
+            - Panel(code) → readWide → wide. (key) → 행 필터.
         TargetMarkets:
             - KR + US.
     """
 
-    def __init__(self, code: str, *, marketNs: str = "kr") -> None:
-        self.code = code
-        self.marketNs = marketNs
-
-    def __enter__(self) -> "Panel":
-        """context 진입 — Panel 반환.
-
-        Args:
-            없음.
-
-        Returns:
-            self.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> with Panel("005930") as p:  # doctest: +SKIP
-            ...     pass
-
-        SeeAlso:
-            - ``__exit__`` — context 종료.
-
-        Requires:
-            - 없음.
-
-        Capabilities:
-            - ``with`` 블록 — multi-company 루프 누적 0 패턴.
-
-        Guide:
-            - ``with Panel(code) as p:``.
-
-        AIContext:
-            - 상태 없음 — 진입 부작용 0.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 없음.
-            OutputSchema:
-                - ``Panel``.
-            Prerequisites:
-                - 없음.
-            Freshness:
-                - N/A.
-            Dataflow:
-                - self 반환.
-            TargetMarkets:
-                - KR + US.
-        """
-        return self
-
-    def __exit__(self, *exc) -> bool:
-        """context 종료 — 상태 없어 정리 0 (예외 비흡수).
-
-        Args:
-            *exc: 예외 정보 (type, value, tb).
-
-        Returns:
-            False (예외 전파).
-
-        Raises:
-            없음.
-
-        Example:
-            >>> with Panel("005930"):  # doctest: +SKIP
-            ...     pass
-
-        SeeAlso:
-            - ``__enter__``.
-
-        Requires:
-            - 없음.
-
-        Capabilities:
-            - 상태 없는 reader → 정리 불필요(누적 0).
-
-        Guide:
-            - 자동 호출.
-
-        AIContext:
-            - 예외 비흡수(False).
-
-        LLM Specifications:
-            AntiPatterns:
-                - 예외 흡수(True 반환) 금지.
-            OutputSchema:
-                - ``bool`` (False).
-            Prerequisites:
-                - 없음.
-            Freshness:
-                - N/A.
-            Dataflow:
-                - no-op.
-            TargetMarkets:
-                - KR + US.
-        """
-        return False
-
-    def board(self, *, periods: list[str] | None = None) -> pl.DataFrame | None:
-        """presence board — 어떤 disclosure 가 어느 기간에 있는지 (콜드 <1s, contentRaw 제외).
-
-        Args:
-            periods: 특정 period 만. None = 전체.
-
-        Returns:
-            blockOrder presence board (항목 × period) 또는 None.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> Panel("005930").board()  # doctest: +SKIP
-
-        SeeAlso:
-            - ``pivot.readMeta`` — 구현.
-            - ``show`` — 한 disclosure 본문.
-
-        Requires:
-            - polars. panel artifact.
-
-        Capabilities:
-            - 회사 공시 구조 한눈에 — 본문 디코드 0(<1MB).
-
-        Guide:
-            - 첫 진입 overview. 본문은 show 로.
-
-        AIContext:
-            - cheap board — presence 만.
-
-        LLM Specifications:
-            AntiPatterns:
-                - contentRaw 포함 금지.
-            OutputSchema:
-                - ``pl.DataFrame | None``.
-            Prerequisites:
-                - panel artifact.
-            Freshness:
-                - 매 호출.
-            Dataflow:
-                - readMeta(code).
-            TargetMarkets:
-                - KR + US.
-        """
-        return _pivot.readMeta(self.code, marketNs=self.marketNs, periods=periods)
-
-    def wide(self, *, periods: list[str] | None = None, valueColumn: str = "contentRaw") -> pl.DataFrame | None:
-        """전체 회사내 수평화 wide (항목 × period, cell=contentRaw).
-
-        Args:
-            periods: 특정 period 만. None = 전체.
-            valueColumn: cell 값 컬럼 (기본 contentRaw).
-
-        Returns:
-            wide DataFrame 또는 None.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> Panel("005930").wide()  # doctest: +SKIP
-
-        SeeAlso:
-            - ``pivot.readPanelWide`` — 구현.
-            - ``show`` — 한 disclosure 필터.
-
-        Requires:
-            - polars. panel artifact.
-
-        Capabilities:
-            - 회사 전 disclosure 다기간 수평화(G2).
-
-        Guide:
-            - 전체 보드 필요 시. 단일 항목은 show.
-
-        AIContext:
-            - contentRaw join(무손실), anchorLatest 정렬.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 없음.
-            OutputSchema:
-                - ``pl.DataFrame | None``.
-            Prerequisites:
-                - panel artifact.
-            Freshness:
-                - 매 호출.
-            Dataflow:
-                - readPanelWide(code).
-            TargetMarkets:
-                - KR + US.
-        """
-        return _pivot.readPanelWide(self.code, marketNs=self.marketNs, periods=periods, valueColumn=valueColumn)
-
-    def show(
+    def __init__(
         self,
-        key: str | None = None,
+        code: str,
         *,
-        disclosureKey: str | None = None,
+        marketNs: str = "kr",
         periods: list[str] | None = None,
-        byLabel: bool = True,
+        tag: bool = False,
+    ) -> None:
+        """code → wide read 후 pl.DataFrame 초기화 + 검색용 메타 보관.
+
+        Args:
+            code: 종목코드 (KR 6자리) 또는 CIK/ticker (US).
+            marketNs: 시장 namespace ("kr" / "us").
+            periods: 특정 period 만 (파일 prune). None = 전체.
+            tag: False(기본) plain / True raw XML.
+
+        Returns:
+            None (생성자). self 가 wide pl.DataFrame.
+
+        Raises:
+            없음 — artifact 부재 시 빈 DataFrame.
+
+        Example:
+            >>> Panel("005930", tag=True).is_empty()  # doctest: +SKIP
+            False
+
+        SeeAlso:
+            - ``_read.readWide`` — wide 생성.
+            - ``__call__`` — 행 검색.
+
+        Requires:
+            - polars. panel artifact.
+
+        Capabilities:
+            - 잡는 순간 wide — readWide 결과를 DataFrame 본체로 채택, 검색 메타(code/tag) 보관.
+
+        Guide:
+            - 직접 또는 facade(c.panel) 경유 생성. 다종목은 매 회사 새 인스턴스.
+
+        AIContext:
+            - readWide(tag) 1회 — raw wide 2중 materialize 회피(strip 은 collapse 단계).
+
+        LLM Specifications:
+            AntiPatterns:
+                - super().__init__ 우회(_df 직접 대입) 금지 — polars 정식 경로.
+            OutputSchema:
+                - None (self = wide).
+            Prerequisites:
+                - panel artifact.
+            Freshness:
+                - 매 생성 read.
+            Dataflow:
+                - readWide(code, marketNs, periods, tag) → super().__init__.
+            TargetMarkets:
+                - KR + US.
+        """
+        wide = _read.readWide(code, marketNs=marketNs, periods=periods, tag=tag)
+        super().__init__(wide if wide is not None else pl.DataFrame())
+        self._code = code
+        self._marketNs = marketNs
+        self._periods = periods
+        self._tag = tag
+
+    def __call__(
+        self,
+        key: str,
+        *,
+        tag: bool | None = None,
+        periods: list[str] | None = None,
     ) -> pl.DataFrame | None:
-        """한 disclosure 의 다기간 수평화 — canonicalKey exact 또는 한글 라벨 substring.
+        """섹션명/canonicalKey 매칭 행 검색 — disclosureKey exact + 한글 라벨 substring.
 
         Args:
-            key: canonicalKey("NT_D826380"/"BS") 또는 한글 라벨 substring("재고"). byLabel 시 후자 매칭.
-            disclosureKey: 하위호환 별칭(deprecated, P5 까지). key 미지정 시 사용.
-            periods: 특정 period 만. None = 전체.
-            byLabel: True(기본) 면 한글 라벨 substring 도 매칭, False 면 canonicalKey exact 만.
+            key: canonicalKey("NT_D826380"/"BS") 또는 한글 섹션명 substring("재고").
+            tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override).
+            periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read.
 
         Returns:
-            매칭 disclosure 의 wide DataFrame (period 가로 정렬) 또는 None.
+            매칭 행 wide DataFrame (period 가로 정렬) 또는 None (빈 key / 매칭 0 / artifact 없음).
 
         Raises:
             없음.
 
         Example:
-            >>> Panel("005930").show("재고")  # doctest: +SKIP
-            >>> Panel("005930").show("NT_D826380", byLabel=False)  # doctest: +SKIP
+            >>> p = Panel("005930")               # doctest: +SKIP
+            >>> p("재고")                         # doctest: +SKIP  — sectionLeaf/blockLeaf substring
+            >>> p("NT_D826380")                   # doctest: +SKIP  — canonicalKey exact
+            >>> p("재고", tag=True)               # doctest: +SKIP  — 원본 XML 행
 
         SeeAlso:
-            - ``wide`` — 전체.
-            - ``reader.resolveKeyArg`` — key → canonicalKey 정규화.
-            - ``cross.crossCompany`` — 회사간 동일 disclosure.
+            - ``_read.readWide`` — tag/periods override 시 재read.
+            - ``Panel`` — 본 callable 의 wide 본체.
 
         Requires:
-            - polars. panel artifact. (byLabel) _label.parquet.
+            - polars. panel artifact.
 
         Capabilities:
-            - 재무제표·주석을 동일 호출로 — canonicalKey/라벨로 기간 가로 정렬.
+            - 별도 verb 없이 호출로 섹션 행 검색 — canonicalKey exact + 섹션명 substring(라벨 테이블 0).
 
         Guide:
-            - board 에서 키 확인 후 show(key). 한글명("재고")으로도 검색 가능.
+            - board 없이 바로 ``p("재고")``. 원본 태그는 ``p("재고", tag=True)``.
 
         AIContext:
-            - resolveKeyArg(key) → is_in 필터 후 wide — 태그 무손실(raw).
+            - 기본은 self(이미 wide) in-memory 필터(즉시). tag/periods override 시만 readWide 재호출.
 
         When:
-            - 한 disclosure 의 다기간 본문을 볼 때.
+            - 한 공시 섹션의 다기간 행을 검색할 때.
 
         How:
-            - readPanelWide → resolveKeyArg(key) → filter(disclosureKey is_in keys).
+            - (override 시 readWide) → disclosureKey==key | sectionLeaf/blockLeaf.contains(key) 필터.
 
         LLM Specifications:
             AntiPatterns:
-                - disclosureKey null 행 반환 금지 — 매칭 키만.
-                - 라벨 미스 시 빈 반환 강제 금지 — exact canonicalKey 는 항상 시도.
+                - _label.parquet 검색 테이블 의존 금지 — wide 행 식별 컬럼 in-memory 필터.
+                - 빈 key 에 전체 반환 금지 — None.
             OutputSchema:
-                - ``pl.DataFrame | None``.
+                - ``pl.DataFrame | None`` (매칭 행).
             Prerequisites:
-                - panel artifact. (byLabel) _label.parquet.
+                - panel artifact (override 시) 또는 self(이미 wide).
             Freshness:
-                - 매 호출.
+                - override 시 재read, 아니면 self 스냅샷.
             Dataflow:
-                - readPanelWide → resolveKeyArg → filter(disclosureKey is_in keys).
+                - key → (disclosureKey exact | sectionLeaf/blockLeaf substring) 필터.
             TargetMarkets:
                 - KR + US.
         """
-        keyArg = key if key is not None else disclosureKey
-        if not keyArg:
+        if not key:
             return None
-        wide = _pivot.readPanelWide(self.code, marketNs=self.marketNs, periods=periods)
-        if wide is None or "disclosureKey" not in wide.columns:
+        effTag = self._tag if tag is None else tag
+        code = getattr(self, "_code", None)
+        # tag/periods override + code 보유(fresh 인스턴스) 시 재read, 그 외 self 필터.
+        if code is not None and ((tag is not None and effTag != self._tag) or periods is not None):
+            board: pl.DataFrame | None = _read.readWide(
+                code, marketNs=self._marketNs, periods=periods or self._periods, tag=effTag
+            )
+        else:
+            board = self
+        if board is None or board.is_empty():
             return None
-        keys = resolveKeyArg(keyArg, marketNs=self.marketNs, byLabel=byLabel)
-        out = wide.filter(pl.col("disclosureKey").is_in(keys))
+        cols = [c for c in ("disclosureKey", "sectionLeaf", "blockLeaf") if c in board.columns]
+        if not cols:
+            return None
+        mask = pl.lit(False)
+        for c in cols:
+            colExpr = pl.col(c)
+            mask = mask | (colExpr == key) | colExpr.str.contains(key, literal=True)
+        out = board.filter(mask)
         return out if not out.is_empty() else None
-
-    def long(self, *, periods: list[str] | None = None) -> pl.DataFrame | None:
-        """raw long read (14-col + disclosureKey, 수평화 전).
-
-        Args:
-            periods: 특정 period 만. None = 전체.
-
-        Returns:
-            long DataFrame 또는 None.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> Panel("005930").long()  # doctest: +SKIP
-
-        SeeAlso:
-            - ``reader.readLong`` — 구현.
-            - ``wide`` — 수평화.
-
-        Requires:
-            - polars. panel artifact.
-
-        Capabilities:
-            - 수평화 전 원본 long (디버그·커스텀 집계).
-
-        Guide:
-            - 일반 사용은 board/show/wide. long 은 raw.
-
-        AIContext:
-            - build 산출 그대로.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 없음.
-            OutputSchema:
-                - ``pl.DataFrame | None``.
-            Prerequisites:
-                - panel artifact.
-            Freshness:
-                - 매 호출.
-            Dataflow:
-                - readLong(code).
-            TargetMarkets:
-                - KR + US.
-        """
-        return readLong(self.code, marketNs=self.marketNs, periods=periods)
-
-    def periods(self) -> list[str]:
-        """사용 가능한 period 목록 (정렬).
-
-        Args:
-            없음.
-
-        Returns:
-            "YYYYQn" period 문자열 list (오름차순). artifact 없으면 빈 list.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> Panel("005930").periods()  # doctest: +SKIP
-            ['2015Q4', ..., '2026Q1']
-
-        SeeAlso:
-            - ``reader.scanPanel`` — period 파일 스캔.
-            - ``core.panel.sortPeriods`` — 정렬.
-
-        Requires:
-            - polars. panel artifact.
-
-        Capabilities:
-            - 회사 가용 기간 조회 — board/show periods 인자 결정.
-
-        Guide:
-            - period 선택 전 호출.
-
-        AIContext:
-            - scan only — 본문 read 0.
-
-        When:
-            - 회사 가용 기간을 조회해 periods 인자를 정할 때.
-
-        How:
-            - scanPanel → period unique → sortPeriods.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 본문 read 금지 — period 컬럼 unique 만.
-            OutputSchema:
-                - ``list[str]`` (정렬).
-            Prerequisites:
-                - panel artifact.
-            Freshness:
-                - 매 호출.
-            Dataflow:
-                - scanPanel → period unique → sortPeriods.
-            TargetMarkets:
-                - KR + US.
-        """
-        from ._period import sortPeriods
-
-        lf = scanPanel(self.code, marketNs=self.marketNs)
-        if lf is None:
-            return []
-        vals = lf.select("period").unique().collect()["period"].to_list()
-        return sortPeriods([v for v in vals if v])
