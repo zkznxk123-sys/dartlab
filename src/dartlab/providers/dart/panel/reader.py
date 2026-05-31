@@ -86,6 +86,101 @@ def _panelDir(code: str, marketNs: str = "kr") -> Path:
     return Path(_cfg.dataDir) / base / "panel" / code
 
 
+def _labelPath(marketNs: str = "kr") -> Path:
+    """canonicalKey→labelKr 테이블 경로 (gather index.labelPath 의 providers-side mirror, R1).
+
+    Args:
+        marketNs: 시장 namespace ("kr"/"us").
+
+    Returns:
+        ``data/{dart|edgar}/panel/_label.parquet`` Path.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _labelPath().name
+        '_label.parquet'
+    """
+    base = "dart" if marketNs == "kr" else "edgar"
+    return Path(_cfg.dataDir) / base / "panel" / "_label.parquet"
+
+
+def resolveKeyArg(key: str, *, marketNs: str = "kr", byLabel: bool = True) -> list[str]:
+    """사용자 key → canonicalKey list (exact canonicalKey + byLabel 시 한글 라벨 substring).
+
+    show/cross 가 받는 key 를 정렬키(canonicalKey)로 정규화. exact canonicalKey("NT_D826380"/
+    "BS")는 항상 자기 자신 포함, ``byLabel=True`` 면 ``_label.parquet`` labelKr substring 매칭
+    canonicalKey 도 추가("재고"→재고자산 연결/별도 canonicalKey). _label 없으면 exact 만(라벨
+    보강은 표시 전용 — 정렬은 canonicalKey 가 책임).
+
+    Args:
+        key: canonicalKey exact 또는 한글 라벨 substring.
+        marketNs: 시장 namespace (기본 "kr").
+        byLabel: True 면 labelKr substring 매칭도 포함 (기본 True).
+
+    Returns:
+        canonicalKey 후보 list (정렬). 매칭 없으면 ``[key]`` (exact 자기 자신).
+
+    Raises:
+        없음 — _label read 실패는 exact 만.
+
+    Example:
+        >>> resolveKeyArg("NT_D826380")  # doctest: +SKIP
+        ['NT_D826380']
+        >>> resolveKeyArg("재고")  # doctest: +SKIP
+        ['NT_D826380', 'NT_D826385', '재고']
+
+    SeeAlso:
+        - ``gather.dart.panel.buildLabel`` — _label.parquet 생산.
+        - ``Panel.show`` / ``cross.crossCompany`` — 본 helper 로 key 정규화.
+
+    Requires:
+        - polars. (byLabel 시) _label.parquet.
+
+    Capabilities:
+        - D-code canonicalKey 의 UX 저하를 한글 라벨 substring 검색으로 보완.
+
+    Guide:
+        - show/cross 가 disclosure 필터 전 호출. 결과를 ``is_in`` 필터.
+
+    AIContext:
+        - exact 우선 + 라벨 보강 — 라벨 없거나 미스 시에도 exact canonicalKey 동작.
+
+    When:
+        - show/cross 가 사용자 key 를 canonicalKey 정렬키로 정규화할 때.
+
+    How:
+        - {key} ∪ (byLabel ∧ _label 존재 시) labelKr.str.contains(key) canonicalKey.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 라벨을 정렬키로 저장 금지 — 검색 입력만, 출력은 canonicalKey.
+            - _label 부재 시 raise 금지 — exact 만 반환.
+        OutputSchema:
+            - ``list[str]`` (canonicalKey 후보, 정렬).
+        Prerequisites:
+            - (byLabel) _label.parquet.
+        Freshness:
+            - 매 호출 read (_label 작음).
+        Dataflow:
+            - key → {key} ∪ labelKr substring 매칭 canonicalKey.
+        TargetMarkets:
+            - KR + US.
+    """
+    keys = {key}
+    if byLabel:
+        p = _labelPath(marketNs)
+        if p.exists():
+            try:
+                label = pl.read_parquet(str(p))
+                matched = label.filter(pl.col("labelKr").str.contains(key, literal=True))["canonicalKey"].to_list()
+                keys.update(m for m in matched if m)
+            except (pl.exceptions.PolarsError, OSError):
+                pass
+    return sorted(keys)
+
+
 def scanPanel(code: str, *, marketNs: str = "kr", periods: list[str] | None = None) -> pl.LazyFrame | None:
     """panel artifact LazyFrame (collect 0 — show/pivot 가 per-query 필터).
 
@@ -227,5 +322,6 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
 
         if "disclosureKey" in df.columns:
             df = df.drop("disclosureKey")
-        df = resolveBatch(df, marketNs=marketNs)
+        # KR within = native canonicalKey (옛 artifact·미빌드 fallback). US = bridge overlay.
+        df = resolveBatch(df, marketNs=marketNs, useCanonical=(marketNs == "kr"))
     return df

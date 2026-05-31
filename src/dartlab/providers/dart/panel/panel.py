@@ -11,7 +11,7 @@ LLM Specifications:
         - contentRaw 사전 strip 저장 금지 — show(raw=False) 가 runtime on-demand.
     OutputSchema:
         - ``Panel(code).board() -> pl.DataFrame | None`` (presence board).
-        - ``Panel(code).show(disclosureKey, ...) -> pl.DataFrame | None`` (한 disclosure wide).
+        - ``Panel(code).show(key, ...) -> pl.DataFrame | None`` (canonicalKey/라벨 한 disclosure wide).
         - ``Panel(code).wide(...) / .long(...) / .periods()``.
     Prerequisites:
         - data/dart/panel/{code}/*.parquet.
@@ -28,7 +28,7 @@ from __future__ import annotations
 import polars as pl
 
 from . import pivot as _pivot
-from .reader import readLong, scanPanel
+from .reader import readLong, resolveKeyArg, scanPanel
 
 
 class Panel:
@@ -47,7 +47,7 @@ class Panel:
     Example:
         >>> with Panel("005930") as p:  # doctest: +SKIP
         ...     board = p.board()
-        ...     inv = p.show("inventoryDisclosure")
+        ...     inv = p.show("재고")  # canonicalKey "NT_D826380" 또는 한글 라벨
 
     SeeAlso:
         - ``pivot.readPanelWide`` — 회사내 수평화.
@@ -274,62 +274,78 @@ class Panel:
         """
         return _pivot.readPanelWide(self.code, marketNs=self.marketNs, periods=periods, valueColumn=valueColumn)
 
-    def show(self, disclosureKey: str, *, periods: list[str] | None = None) -> pl.DataFrame | None:
-        """한 disclosure 의 다기간 수평화 (해당 disclosureKey 행만).
+    def show(
+        self,
+        key: str | None = None,
+        *,
+        disclosureKey: str | None = None,
+        periods: list[str] | None = None,
+        byLabel: bool = True,
+    ) -> pl.DataFrame | None:
+        """한 disclosure 의 다기간 수평화 — canonicalKey exact 또는 한글 라벨 substring.
 
         Args:
-            disclosureKey: universal disclosureKey (예: "inventoryDisclosure").
+            key: canonicalKey("NT_D826380"/"BS") 또는 한글 라벨 substring("재고"). byLabel 시 후자 매칭.
+            disclosureKey: 하위호환 별칭(deprecated, P5 까지). key 미지정 시 사용.
             periods: 특정 period 만. None = 전체.
+            byLabel: True(기본) 면 한글 라벨 substring 도 매칭, False 면 canonicalKey exact 만.
 
         Returns:
-            해당 disclosure 의 wide DataFrame (period 가로 정렬) 또는 None.
+            매칭 disclosure 의 wide DataFrame (period 가로 정렬) 또는 None.
 
         Raises:
             없음.
 
         Example:
-            >>> Panel("005930").show("inventoryDisclosure")  # doctest: +SKIP
+            >>> Panel("005930").show("재고")  # doctest: +SKIP
+            >>> Panel("005930").show("NT_D826380", byLabel=False)  # doctest: +SKIP
 
         SeeAlso:
             - ``wide`` — 전체.
+            - ``reader.resolveKeyArg`` — key → canonicalKey 정규화.
             - ``cross.crossCompany`` — 회사간 동일 disclosure.
 
         Requires:
-            - polars. panel artifact.
+            - polars. panel artifact. (byLabel) _label.parquet.
 
         Capabilities:
-            - 재무제표·주석을 동일 호출로 — disclosureKey 로 기간 가로 정렬.
+            - 재무제표·주석을 동일 호출로 — canonicalKey/라벨로 기간 가로 정렬.
 
         Guide:
-            - board 에서 키 확인 후 show(key).
+            - board 에서 키 확인 후 show(key). 한글명("재고")으로도 검색 가능.
 
         AIContext:
-            - disclosureKey 필터 후 wide — 태그 무손실(raw).
+            - resolveKeyArg(key) → is_in 필터 후 wide — 태그 무손실(raw).
 
         When:
             - 한 disclosure 의 다기간 본문을 볼 때.
 
         How:
-            - readPanelWide → filter(disclosureKey == key).
+            - readPanelWide → resolveKeyArg(key) → filter(disclosureKey is_in keys).
 
         LLM Specifications:
             AntiPatterns:
-                - disclosureKey null 행 반환 금지 — 지정 키만.
+                - disclosureKey null 행 반환 금지 — 매칭 키만.
+                - 라벨 미스 시 빈 반환 강제 금지 — exact canonicalKey 는 항상 시도.
             OutputSchema:
                 - ``pl.DataFrame | None``.
             Prerequisites:
-                - panel artifact + disclosureKey.
+                - panel artifact. (byLabel) _label.parquet.
             Freshness:
                 - 매 호출.
             Dataflow:
-                - readPanelWide → filter(disclosureKey == key).
+                - readPanelWide → resolveKeyArg → filter(disclosureKey is_in keys).
             TargetMarkets:
                 - KR + US.
         """
+        keyArg = key if key is not None else disclosureKey
+        if not keyArg:
+            return None
         wide = _pivot.readPanelWide(self.code, marketNs=self.marketNs, periods=periods)
         if wide is None or "disclosureKey" not in wide.columns:
             return None
-        out = wide.filter(pl.col("disclosureKey") == disclosureKey)
+        keys = resolveKeyArg(keyArg, marketNs=self.marketNs, byLabel=byLabel)
+        out = wide.filter(pl.col("disclosureKey").is_in(keys))
         return out if not out.is_empty() else None
 
     def long(self, *, periods: list[str] | None = None) -> pl.DataFrame | None:

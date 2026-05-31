@@ -6,26 +6,31 @@ import 0 (gather ↛ providers, R1 · core_boundary). 수집(zip)·HF push 는 C
 (.github/scripts/sync, layer-밖) 가 앞뒤로 묶음.
 
 공개표면 SSOT (deep leaf import 금지, R6):
-    - ``buildPanel`` / ``buildPanelAll`` / ``buildPanelBaseline`` (build, zip→parquet).
-    - ``learnBridge`` / ``bridgeCoverage`` (bridge-learning, 회사간 disclosureKey).
+    - ``buildPanel`` / ``buildPanelAll`` / ``buildPanelBaseline`` (build, 로컬 zip→parquet).
+    - ``buildPanelFromStream`` (online 1패스 — (rcept,bytes) 스트림 → parquet, 디스크 zip 0).
+    - ``learnBridge`` / ``bridgeCoverage`` (bridge-learning, US cross-market overlay).
     - ``buildIndex`` / ``indexPath`` / ``panelXbrlRefPath`` (slim 인덱스 + 경로 SSOT).
-    - ``syncPanel`` (refScan→learn→build→index 오케스트레이션).
+    - ``buildLabel`` / ``labelPath`` (canonicalKey → 한글 표시라벨 _label.parquet).
+    - ``syncPanel`` (refScan→learn→build→index→label 오케스트레이션).
 """
 
 from __future__ import annotations
 
-from .build import buildPanel, buildPanelAll, buildPanelBaseline
-from .index import buildIndex, indexPath, panelXbrlRefPath
+from .build import buildPanel, buildPanelAll, buildPanelBaseline, buildPanelFromStream
+from .index import buildIndex, buildLabel, indexPath, labelPath, panelXbrlRefPath
 from .learn import bridgeCoverage, learnBridge
 from .sync import syncPanel
 
 __all__ = [
     "bridgeCoverage",
     "buildIndex",
+    "buildLabel",
     "buildPanel",
     "buildPanelAll",
     "buildPanelBaseline",
+    "buildPanelFromStream",
     "indexPath",
+    "labelPath",
     "learnBridge",
     "panelXbrlRefPath",
     "syncPanel",

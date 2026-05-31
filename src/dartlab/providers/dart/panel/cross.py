@@ -34,6 +34,7 @@ import polars as pl
 import dartlab.config as _cfg
 
 from .pivot import readPanelWide
+from .reader import resolveKeyArg
 
 _log = logging.getLogger(__name__)
 
@@ -41,11 +42,11 @@ _log = logging.getLogger(__name__)
 _MAX_AUTO_CODES = 100
 
 
-def _indexCodesFor(disclosureKey: str, marketNs: str) -> list[str] | None:
-    """slim _index.parquet 로 disclosureKey 보유 종목 발견 (G6 가속).
+def _indexCodesFor(keys: list[str], marketNs: str) -> list[str] | None:
+    """slim _index.parquet 로 canonicalKey(들) 보유 종목 발견 (G6 가속).
 
     Args:
-        disclosureKey: universal disclosureKey.
+        keys: canonicalKey 후보 list (resolveKeyArg 산출 — exact + 라벨 매칭).
         marketNs: 시장 namespace ("kr"/"us").
 
     Returns:
@@ -55,7 +56,7 @@ def _indexCodesFor(disclosureKey: str, marketNs: str) -> list[str] | None:
         없음 — index 부재/실패 시 None (caller fallback).
 
     Example:
-        >>> _indexCodesFor("inventoryDisclosure", "kr")  # doctest: +SKIP
+        >>> _indexCodesFor(["NT_D826380"], "kr")  # doctest: +SKIP
 
     SeeAlso:
         - ``gather.dart.panel.buildIndex`` — _index.parquet 생산.
@@ -71,7 +72,7 @@ def _indexCodesFor(disclosureKey: str, marketNs: str) -> list[str] | None:
         - crossCompany(codes=None) 내부에서 사용.
 
     AIContext:
-        - scan_parquet + filter — locator 컬럼만(contentRaw 없음).
+        - scan_parquet + filter(is_in) — locator 컬럼만(contentRaw 없음).
 
     LLM Specifications:
         AntiPatterns:
@@ -84,7 +85,7 @@ def _indexCodesFor(disclosureKey: str, marketNs: str) -> list[str] | None:
         Freshness:
             - index 갱신 시.
         Dataflow:
-            - _index scan → filter(disclosureKey) → corp unique.
+            - _index scan → filter(disclosureKey is_in keys) → corp unique.
         TargetMarkets:
             - KR + US.
     """
@@ -95,7 +96,7 @@ def _indexCodesFor(disclosureKey: str, marketNs: str) -> list[str] | None:
     try:
         corps = (
             pl.scan_parquet(str(p))
-            .filter(pl.col("disclosureKey") == disclosureKey)
+            .filter(pl.col("disclosureKey").is_in(keys))
             .select("corp")
             .unique()
             .collect()["corp"]
@@ -112,14 +113,16 @@ def crossCompany(
     *,
     marketNs: str = "kr",
     periods: list[str] | None = None,
+    byLabel: bool = True,
 ) -> pl.DataFrame | None:
     """여러 회사의 동일 disclosure 를 가로 정렬 (회사간 수평화).
 
     Args:
         codes: 종목코드 list. None 이면 ``_index.parquet`` 로 disclosure 보유 종목 자동 발견(G6).
-        disclosureKey: universal disclosureKey (예: "inventoryDisclosure").
+        disclosureKey: canonicalKey("NT_D826380") 또는 한글 라벨 substring("재고", byLabel 시).
         marketNs: 시장 namespace (기본 "kr").
         periods: 특정 period 만. None = 전체.
+        byLabel: True(기본) 면 한글 라벨 substring 도 매칭.
 
     Returns:
         rows = (corp, scope, …), columns = period 인 DataFrame. 해당 disclosure 가
@@ -170,8 +173,9 @@ def crossCompany(
     """
     if not disclosureKey:
         return None
+    keys = resolveKeyArg(disclosureKey, marketNs=marketNs, byLabel=byLabel)
     if codes is None:
-        codes = _indexCodesFor(disclosureKey, marketNs)
+        codes = _indexCodesFor(keys, marketNs)
         if not codes:
             return None
         if len(codes) > _MAX_AUTO_CODES:
@@ -185,7 +189,7 @@ def crossCompany(
         wide = readPanelWide(code, marketNs=marketNs, periods=periods)
         if wide is None or "disclosureKey" not in wide.columns:
             continue
-        sub = wide.filter(pl.col("disclosureKey") == disclosureKey)
+        sub = wide.filter(pl.col("disclosureKey").is_in(keys))
         if sub.is_empty():
             continue
         sub = sub.with_columns(pl.lit(code).alias("corp"), pl.lit(marketNs).alias("marketNs"))

@@ -35,6 +35,7 @@ from pathlib import Path
 import polars as pl
 
 import dartlab.config as _cfg
+from dartlab.core.panel import canonicalKeyExpr
 
 _log = logging.getLogger(__name__)
 
@@ -179,6 +180,149 @@ def indexPath(marketNs: str = "kr") -> Path:
     """
     base = "dart" if marketNs == "kr" else "edgar"
     return Path(_cfg.dataDir) / base / "panel" / "_index.parquet"
+
+
+def labelPath(marketNs: str = "kr") -> Path:
+    """canonicalKey → 한글 표시라벨 테이블 경로 (_label.parquet).
+
+    Args:
+        marketNs: 시장 namespace ("kr"/"us").
+
+    Returns:
+        ``data/{dart|edgar}/panel/_label.parquet`` Path (_index 와 동거, nested 업로드 포함).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> labelPath().name
+        '_label.parquet'
+
+    SeeAlso:
+        - ``buildLabel`` — 본 경로 write.
+        - ``providers.dart.panel.reader`` — 본 경로 read(show byLabel).
+
+    Requires:
+        - dartlab.config.
+
+    Capabilities:
+        - 표시라벨 단일 경로 SSOT — gather build·providers read 공유.
+
+    Guide:
+        - show byLabel 이 존재 확인 후 read.
+
+    AIContext:
+        - 경로 계산만.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 경로 분산 하드코딩 금지.
+        OutputSchema:
+            - ``pathlib.Path``.
+        Prerequisites:
+            - config.dataDir.
+        Freshness:
+            - 정적.
+        Dataflow:
+            - marketNs → data/{dart|edgar}/panel/_label.parquet.
+        TargetMarkets:
+            - KR + US.
+    """
+    base = "dart" if marketNs == "kr" else "edgar"
+    return Path(_cfg.dataDir) / base / "panel" / "_label.parquet"
+
+
+def buildLabel(
+    *,
+    marketNs: str = "kr",
+    refPath: Path | str | None = None,
+    outPath: Path | str | None = None,
+    verbose: bool = True,
+) -> dict:
+    """panelXbrlRef → canonicalKey 별 대표 한글 라벨 (_label.parquet). 큐레이션 0.
+
+    표시 전용 보강 — 정렬은 canonicalKey 가 책임(라벨은 UX). ref 의 (rawId→canonicalKey,
+    rawTitleCanonical, corpCount) 에서 canonicalKey 별 corpCount 최빈 제목을 대표 라벨로 선정
+    (회사들이 실제 쓰는 제목 = 라벨, 손 큐레이션 0). 라벨 부정확해도 정렬 무영향.
+
+    Args:
+        marketNs: 시장 namespace (기본 "kr").
+        refPath: panelXbrlRef 경로. None = panelXbrlRefPath().
+        outPath: 출력 경로. None = labelPath(marketNs).
+        verbose: 진행 로그.
+
+    Returns:
+        통계 dict — ``{rowCount, path}``. ref 없으면 rowCount 0.
+
+    Raises:
+        없음 — ref 부재 시 빈 결과.
+
+    Example:
+        >>> buildLabel(marketNs="kr")  # doctest: +SKIP
+        {'rowCount': 312, 'path': 'data/dart/panel/_label.parquet'}
+
+    SeeAlso:
+        - ``canonicalKeyExpr`` — rawId → canonicalKey.
+        - ``providers.dart.panel.Panel.show`` — 본 라벨로 byLabel 검색.
+        - ``panelXbrlRefPath`` — 입력 ref.
+
+    Requires:
+        - polars. core.panel.canonicalKeyExpr. panelXbrlRef.
+
+    Capabilities:
+        - canonicalKey 의 한글 표시라벨을 corpus 에서 파생 — show("재고") substring 검색 지원.
+
+    Guide:
+        - refScan/build 후 syncPanel 에서 호출. ref 갱신 시 재생성(idempotent).
+
+    AIContext:
+        - 표시 전용 — 정렬 비핵심. 손 큐레이션 0(corpus 최빈 제목).
+
+    When:
+        - canonicalKey 의 사람용 표시라벨이 필요할 때 (refScan 후).
+
+    How:
+        - ref filter(marketNs·제목) → canonicalKeyExpr(rawId) → corpCount 최빈 제목 → write.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 손수 라벨 큐레이션 금지 — corpus rawTitleCanonical 최빈.
+            - 라벨을 정렬키로 사용 금지 — 정렬은 canonicalKey, 라벨은 표시.
+        OutputSchema:
+            - ``dict`` (rowCount/path) + _label.parquet (canonicalKey/labelKr 2-col).
+        Prerequisites:
+            - panelXbrlRef (refScan 산출).
+        Freshness:
+            - ref 갱신 시 재생성.
+        Dataflow:
+            - ref → canonicalKeyExpr → group_by(canonicalKey) 최빈 제목 → _label.parquet.
+        TargetMarkets:
+            - KR (DART). US 후속.
+    """
+    refP = Path(refPath) if refPath is not None else panelXbrlRefPath()
+    out = Path(outPath) if outPath is not None else labelPath(marketNs)
+    if not refP.exists():
+        _log.warning("panelXbrlRef 없음: %s", refP)
+        return {"rowCount": 0, "path": str(out)}
+
+    ref = pl.read_parquet(str(refP))
+    if "marketNs" in ref.columns:
+        ref = ref.filter(pl.col("marketNs") == marketNs)
+    ref = ref.filter(pl.col("rawTitleCanonical").is_not_null() & (pl.col("rawTitleCanonical").str.len_chars() > 0))
+    ref = ref.with_columns(canonicalKeyExpr("rawId")).filter(pl.col("canonicalKey").is_not_null())
+    if ref.is_empty():
+        return {"rowCount": 0, "path": str(out)}
+
+    label = (
+        ref.sort("corpCount", descending=True)
+        .group_by("canonicalKey", maintain_order=True)
+        .agg(pl.col("rawTitleCanonical").first().alias("labelKr"))
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    label.write_parquet(str(out), compression="zstd")
+    if verbose:
+        _log.info("buildLabel: %d canonicalKey → %s", label.height, out)
+    return {"rowCount": label.height, "path": str(out)}
 
 
 def panelXbrlRefPath() -> Path:

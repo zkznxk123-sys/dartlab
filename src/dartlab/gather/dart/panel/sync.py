@@ -29,7 +29,7 @@ import logging
 import polars as pl
 
 from .build import buildPanelAll
-from .index import buildIndex, panelXbrlRefPath
+from .index import buildIndex, buildLabel, panelXbrlRefPath
 from .learn import learnBridge
 
 _log = logging.getLogger(__name__)
@@ -42,6 +42,7 @@ def syncPanel(
     learn: bool = True,
     build: bool = True,
     index: bool = True,
+    label: bool = True,
     numWorkers: int = 8,
     verbose: bool = True,
 ) -> dict:
@@ -51,14 +52,16 @@ def syncPanel(
         codes: build 대상 종목 list. None = 전종목.
         refScan: True 면 전 corpus refScan 재실행(102k zip ~시간) → panelXbrlRef.parquet.
             기본 False (기존 ref 재사용).
-        learn: True 면 ref → learnBridge → panelBridge (회사간 disclosureKey).
+        learn: True 면 ref → learnBridge → panelBridge (US cross-market overlay; KR within 은
+            canonicalKey 가 대체 — P5 에서 KR 전파 제거).
         build: True 면 buildPanelAll (zip → 14-col artifact).
         index: True 면 buildIndex (slim _index.parquet).
+        label: True 면 buildLabel (canonicalKey → 한글 표시라벨 _label.parquet).
         numWorkers: build/refScan multiprocessing workers.
         verbose: 진행 로그.
 
     Returns:
-        단계별 통계 dict — ``{ref, learn, build, index}`` (수행 안 한 단계는 None).
+        단계별 통계 dict — ``{ref, learn, build, index, label}`` (수행 안 한 단계는 None).
 
     Raises:
         없음 — 단계별 실패는 흡수(로그).
@@ -106,7 +109,7 @@ def syncPanel(
         TargetMarkets:
             - KR (DART).
     """
-    out: dict = {"ref": None, "learn": None, "build": None, "index": None}
+    out: dict = {"ref": None, "learn": None, "build": None, "index": None, "label": None}
     refPath = panelXbrlRefPath()
 
     if refScan:
@@ -133,6 +136,9 @@ def syncPanel(
 
     if index:
         out["index"] = buildIndex(verbose=verbose)
+
+    if label:
+        out["label"] = buildLabel(verbose=verbose)
 
     if verbose:
         _log.info("[syncPanel] 완료: %s", out)

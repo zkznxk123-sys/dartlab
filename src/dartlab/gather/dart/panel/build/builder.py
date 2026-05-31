@@ -301,7 +301,7 @@ def _writePeriodShards(
             continue
         df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
         df = horizontalize(df)
-        df = resolveBatch(df, marketNs="kr")
+        df = resolveBatch(df, marketNs="kr", useCanonical=True)  # KR within = native canonicalKey
         df = df.select(list(PANEL_SCHEMA.keys()))
         outPath = outDir / f"{period}.parquet"
         if outPath.exists() and not overwrite:

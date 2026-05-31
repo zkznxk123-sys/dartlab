@@ -313,12 +313,17 @@ def resolveDisclosureKey(rawId: str | None, marketNs: str) -> str | None:
     return _lookupDict().get((rawId, marketNs))
 
 
-def resolveBatch(df: pl.DataFrame, *, marketNs: str) -> pl.DataFrame:
-    """sections/panel artifact DataFrame → disclosureKey 컬럼 부착.
+def resolveBatch(df: pl.DataFrame, *, marketNs: str, useCanonical: bool = False) -> pl.DataFrame:
+    """panel artifact DataFrame → disclosureKey 컬럼 부착 (canonicalKey 또는 bridge).
+
+    KR within-market 정렬키는 ``useCanonical=True`` 시 ``canonicalKeyExpr``(native ACLASS
+    scope-strip, 테이블 0, 커버 ~100%)로 채운다. 옛 bridge 경로(``useCanonical=False``, 손수
+    seed lookup)는 US cross-market overlay·하위호환용으로 유지.
 
     Args:
         df: panel artifact (xbrlClass 컬럼 보유).
-        marketNs: 빌드 시장 ("kr" / "us").
+        marketNs: 빌드 시장 ("kr" / "us"). bridge 경로에서만 lookup 키로 사용.
+        useCanonical: True 면 canonicalKey 순수함수, False(기본) 면 bridge lookup.
 
     Returns:
         ``disclosureKey`` 컬럼이 채워진 DataFrame (원본 비면 그대로).
@@ -329,48 +334,51 @@ def resolveBatch(df: pl.DataFrame, *, marketNs: str) -> pl.DataFrame:
     Example:
         >>> import polars as pl
         >>> df = pl.DataFrame({"xbrlClass": ["NT_C_D826380", "UNKNOWN"]})
-        >>> out = resolveBatch(df, marketNs="kr")  # doctest: +SKIP
-        >>> out["disclosureKey"].to_list()  # doctest: +SKIP
-        ['inventoryDisclosure', None]
+        >>> resolveBatch(df, marketNs="kr", useCanonical=True)["disclosureKey"].to_list()
+        ['NT_D826380', 'UNKNOWN']
 
     SeeAlso:
-        - ``resolveDisclosureKey`` — 단건 조회.
-        - gather ``builder`` — BUILD 단계 본 함수로 disclosureKey 채움.
+        - ``canonicalKeyExpr`` — useCanonical 경로의 native 정렬키.
+        - ``resolveDisclosureKey`` — bridge 단건 조회.
+        - gather ``builder`` — BUILD 단계 본 함수로 disclosureKey 채움(KR=useCanonical).
 
     Requires:
-        - polars.
+        - polars. (useCanonical=False 시 bridge parquet)
 
     Capabilities:
         - BUILD 단계 일괄 disclosureKey 부착 → runtime resolve 회피(경량).
 
     Guide:
-        - build write 시점 호출. reader 는 이미 채워진 컬럼 사용(없을 때만 fallback).
+        - build write 시점 호출. KR=useCanonical=True, US=False(bridge). reader 는 채워진 컬럼 사용.
 
     AIContext:
-        - map_elements lookup — row 수 적어 OK.
+        - useCanonical=canonicalKeyExpr(SIMD). bridge=map_elements lookup.
 
     When:
         - build write 시점 artifact 에 disclosureKey 를 부착할 때.
 
     How:
-        - xbrlClass → _lookupDict → disclosureKey 컬럼.
+        - useCanonical: xbrlClass → canonicalKeyExpr. else: xbrlClass → _lookupDict.
 
     LLM Specifications:
         AntiPatterns:
             - runtime 매 read resolve 금지 — build 에서 1회 부착.
+            - KR 에 bridge(useCanonical=False) 고정 금지 — 손 seed scatter 회귀(P5 후 canonical 기본).
         OutputSchema:
             - ``pl.DataFrame`` (+ disclosureKey Utf8).
         Prerequisites:
-            - xbrlClass 컬럼 + bridge parquet.
+            - xbrlClass 컬럼. (bridge 경로 시 bridge parquet)
         Freshness:
-            - bridge 변경 시 재빌드 또는 invalidateCache.
+            - bridge 변경 시 재빌드 또는 invalidateCache. canonical 은 코드 규칙(재빌드만).
         Dataflow:
-            - xbrlClass → _lookupDict → disclosureKey 컬럼.
+            - useCanonical: xbrlClass → canonicalKeyExpr → disclosureKey. else: _lookupDict.
         TargetMarkets:
-            - KR + US 통합.
+            - KR (canonical) + US (bridge overlay).
     """
     if df.is_empty() or "xbrlClass" not in df.columns:
         return df
+    if useCanonical:
+        return df.with_columns(canonicalKeyExpr("xbrlClass").alias("disclosureKey"))
     lookup = _lookupDict()
     keys = df["xbrlClass"].map_elements(
         lambda x: lookup.get((x, marketNs)) if x else None,
