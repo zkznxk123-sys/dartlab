@@ -97,7 +97,7 @@ wide 로 수평화**하는 엔진이다. 양식(era)·회사마다 흔들리는 
 - **단일 패키지 자급** — schema·mapper·build·read 가 `providers/dart/panel/` 한 곳. 수집(OpenDART
   API)은 이미 `providers/dart/openapi` 라 build 도 providers 가 자급 (gather panel 폐기).
 - **BUILD/READ import 격리** — build(`build/`, lxml/zipfile)는 무거운 zip→14col 생산, read 표면
-  (`panel.py`·`_read.py`)은 build 를 import 안 함 → `import providers.dart.panel.panel` 시 lxml 0
+  (`panel.py`·`read.py`)은 build 를 import 안 함 → `import providers.dart.panel.panel` 시 lxml 0
   (콜드 <1s, R2).
 - **태그 무손실** — contentRaw = 원본 XML 그대로 저장. 기본 read 는 plain(태그 strip), `tag=True`
   면 원본 XML (collapse 단계 1회 strip, raw wide 2중 materialize 회피).

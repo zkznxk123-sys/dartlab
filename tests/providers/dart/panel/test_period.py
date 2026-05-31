@@ -1,6 +1,6 @@
-"""core/panel period (S2) mirror — 12월결산화 순수 변환 (데이터 0).
+"""panel period (S2) mirror — 12월결산화 순수 변환 (데이터 0).
 
-``core/panel/period.py`` 의 ``periodFromEnd``/``isPeriodColumn``/``sortPeriods`` 검증.
+``providers/dart/panel/period.py`` 의 ``periodFromEnd``/``isPeriodColumn``/``sortPeriods`` 검증.
 결산월 무관 달력월 매핑 + 1~2월 직전년도 Q4 (12월결산 양식).
 """
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.providers.dart.panel._period import isPeriodColumn, periodFromEnd, sortPeriods
+from dartlab.providers.dart.panel.period import isPeriodColumn, periodFromEnd, sortPeriods
 
 pytestmark = pytest.mark.unit
 

@@ -35,8 +35,8 @@ def _row(blockOrder: int, contentRaw: str, *, xbrlClass: str = "BS_C", chapter: 
 
 def test_horizontalize_groups_and_is_char_lossless() -> None:
     """같은 (chapter, xbrlClass) element 2개 → 1 section 행, contentRaw 글자 합 보존."""
-    from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
     from dartlab.providers.dart.panel.build import horizontalize
+    from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
 
     rows = [_row(1, "<P>aaa</P>"), _row(2, "<TABLE><TR>b</TR></TABLE>")]
     df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
@@ -53,8 +53,8 @@ def test_horizontalize_groups_and_is_char_lossless() -> None:
 
 def test_horizontalize_empty_passthrough() -> None:
     """빈 입력은 그대로 반환."""
-    from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
     from dartlab.providers.dart.panel.build import horizontalize
+    from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
 
     empty = pl.DataFrame(schema=PANEL_SCHEMA)
     assert horizontalize(empty).height == 0

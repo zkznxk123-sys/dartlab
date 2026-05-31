@@ -24,7 +24,7 @@ LLM Specifications:
     Freshness:
         - 매 생성 read (artifact 변경 즉시 반영).
     Dataflow:
-        - Panel(code) → _read.readWide → wide. Panel(code)(key) → in-memory 행 필터.
+        - Panel(code) → read.readWide → wide. Panel(code)(key) → in-memory 행 필터.
     TargetMarkets:
         - KR (DART). US 는 marketNs="us" (EDGAR panel).
 """
@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from . import _read
+from . import read as _read
 
 
 class Panel(pl.DataFrame):
@@ -60,7 +60,7 @@ class Panel(pl.DataFrame):
         >>> raw = p("재고", tag=True)        # doctest: +SKIP  — 원본 XML
 
     SeeAlso:
-        - ``_read.readWide`` — wide 수평화 구현.
+        - ``read.readWide`` — wide 수평화 구현.
         - ``providers.dart.company.Company.panel`` — facade 진입점 (finance/report 주입).
 
     Requires:
@@ -126,7 +126,7 @@ class Panel(pl.DataFrame):
             False
 
         SeeAlso:
-            - ``_read.readWide`` — wide 생성.
+            - ``read.readWide`` — wide 생성.
             - ``__call__`` — 행 검색.
 
         Requires:
@@ -196,7 +196,7 @@ class Panel(pl.DataFrame):
             >>> p("재고", tag=True)               # doctest: +SKIP  — 원본 XML 행
 
         SeeAlso:
-            - ``_read.readWide`` — tag/periods override 시 재read.
+            - ``read.readWide`` — tag/periods override 시 재read.
             - ``Panel`` — 본 callable 의 wide 본체.
 
         Requires:
