@@ -2566,6 +2566,73 @@ class Company:
         return applyPeriodFilter(payload, period)
 
     @property
+    def panel(self):
+        """공시 수평화 보드 facade — 항목 × 기간 2D 정렬 (panel 엔진).
+
+        DART 공시 본문(재무제표·주석·서술)을 native canonicalKey(정부 표준 ACLASS scope-strip)
+        로 회사내·회사간 수평 정렬한 보드. 사전빌드 artifact 를 lazy read (콜드 <1s, 태그 무손실).
+        본 Company 의 종목코드로 ``Panel`` 인스턴스를 돌려준다.
+
+        Args:
+            없음 (property — self.stockCode 사용).
+
+        Returns:
+            ``Panel`` 인스턴스. ``c.panel.board()`` / ``c.panel.show(key)`` / ``c.panel.wide()`` /
+            ``c.panel.long()`` / ``c.panel.periods()`` 로 접근.
+
+        Raises:
+            없음 — artifact 부재 시 각 메서드가 None 반환.
+
+        Example:
+            >>> c = Company("005930")
+            >>> c.panel.board()                       # presence board
+            >>> c.panel.show("재고")                   # 한글 라벨 또는 canonicalKey
+            >>> c.panel.show("NT_D826380", byLabel=False)
+
+        SeeAlso:
+            - ``providers.dart.panel.Panel`` — 반환 facade 본체.
+            - ``providers.dart.panel.crossCompany`` — 회사간 동일 disclosure (Company 밖).
+            - ``show`` — 단일 회사 원본 데이터(재무제표/주석) 단건 surface.
+
+        Requires:
+            - data/dart/panel/{code}/*.parquet (사전빌드 artifact).
+
+        Capabilities:
+            - 한 회사 공시를 항목 × 기간 보드로 — Company 진입점에서 바로 수평화 접근.
+
+        Guide:
+            - `c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel.show(key)`. 회사간은 모듈
+              레벨 `crossCompany` (회사 단위 facade 밖).
+
+        AIContext:
+            - 상태 없는 lazy read — 매 접근 새 Panel (누적 0). contentRaw 는 외부 untrusted.
+
+        When:
+            - 한 회사의 공시 수평화 보드가 Company 흐름에서 필요할 때.
+
+        How:
+            - self.stockCode → Panel(stockCode, marketNs="kr") lazy 인스턴스.
+
+        LLM Specifications:
+            AntiPatterns:
+                - c.panel 결과 캐싱 강제 금지 — 상태 없는 lazy(누적 0).
+                - canonicalKey 추측 금지 — board 로 확인 후 show.
+            OutputSchema:
+                - ``Panel`` (board/show/wide/long/periods 메서드).
+            Prerequisites:
+                - panel artifact.
+            Freshness:
+                - 매 접근 read.
+            Dataflow:
+                - self.stockCode → Panel.
+            TargetMarkets:
+                - KR (DART). US 는 marketNs="us" (EDGAR panel, 후속).
+        """
+        from dartlab.providers.dart.panel import Panel as _Panel
+
+        return _Panel(self.stockCode, marketNs="kr")
+
+    @property
     def show(self):
         """원본 데이터 단일 진입점 — 재무제표 (BS/IS/CF/CIS) / 주석 / 공시 DataFrame.
 

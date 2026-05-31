@@ -173,6 +173,15 @@ def test_news_callable() -> None:
     assert hasattr(Company, "news")
 
 
+def test_panel_property() -> None:
+    """panel property — 공시 수평화 보드 facade 연결 (c.panel → Panel)."""
+    import inspect
+
+    from dartlab.providers.dart.company import Company
+
+    assert isinstance(inspect.getattr_static(Company, "panel"), property)
+
+
 def test_priority_callable() -> None:
     """priority() callable smoke."""
     from dartlab.providers.dart.company import Company
