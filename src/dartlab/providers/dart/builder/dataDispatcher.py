@@ -637,13 +637,10 @@ def showSectionsTopic(
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex
 
-    # c.sections 직접 필터 경로 (docs 본문 topic, 경량 SSOT). block 미지정 시 우선 시도 —
-    # 매칭되면 무거운 merged board 안 거치고 반환. report/finance 전용 topic 은 매칭 0 →
-    # 아래 옛 보드 경로로 fallback (안전).
-    if block in (None, 0):
-        direct = _showFromSectionsArtifact(company, topic, period=period, stripTags=stripTags)
-        if direct is not None:
-            return direct
+    # 정본(v0.10.3) 블록 단위 docs show 복구 — sections-artifact 직접 필터 short-circuit 제거.
+    # docs 본문 topic 은 아래 _docs.sections 블록 경로(blockOrder/blockType/textPath/sourceTopic +
+    # period)로 회수한다. section-level(chapter/sectionLeaf) 뭉태기 회귀를 막는다.
+    # (_showFromSectionsArtifact 는 sections 재설계 전까지 미사용 — 재설계 세션이 정리.)
 
     if "_sections" in company._cache:
         sec = company._cache["_sections"]
