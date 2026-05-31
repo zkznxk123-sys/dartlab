@@ -74,8 +74,8 @@ procedure:
   - 진입은 `from dartlab.providers.dart.panel import Panel`; `Panel(code).board()` 로 presence 확인.
   - 특정 항목은 `Panel(code).show("재고")`(한글 라벨) 또는 `show("NT_D826380", byLabel=False)`(canonicalKey).
   - 회사간은 `crossCompany("재고")` 또는 `crossCompany(disclosureKey="NT_D826380", codes=None)` — _index 자동 발견.
-  - 세계마켓간은 `crossMarket({"kr": [...], "us": [...]}, disclosureKey)` (US bridge overlay, 후속).
-  - 빌드 2-트랙 — 로컬 zip(A): `python -m dartlab.gather.dart.panel.build` / `buildPanel.py`. online 1패스(B, 디스크 zip 0): `.github/scripts/sync/onlinePanel.py`.
+  - '세계마켓간은 `crossMarket({"kr": [...], "us": [...]}, disclosureKey)` (US bridge overlay, 후속).'
+  - '빌드 2-트랙 — 로컬 zip(A) `python -m dartlab.gather.dart.panel.build` / `buildPanel.py`. online 1패스(B, 디스크 zip 0) `.github/scripts/sync/onlinePanel.py`.'
 linkedSkills:
   - engines.company
   - engines.gather

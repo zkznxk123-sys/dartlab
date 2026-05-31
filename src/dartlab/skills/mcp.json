@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 144,
+    "skillCount": 145,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "??? ?? ???? ? ??? ??? ?? ?? ??.",
-        "count": 43
+        "count": 44
       },
       {
         "id": "recipes",
@@ -2698,6 +2698,30 @@
         "recipes.meta.thesisKillChain.triggerCatalog"
       ],
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `Company.gather`, `scan.market`, `scan.audit`, `scan.quality`는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildThesisKillChainMemo(\n    target=target,\n    thesis=thesis,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    filings=filings,\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", "
+    },
+    {
+      "id": "engines.panel",
+      "title": "Panel (공시 수평화 보드)",
+      "category": "engines",
+      "purpose": "Panel 은 DART 공시 본문(재무제표·주석·서술)을 항목 × 기간 2D 보드로 수평 정렬하는 엔진 — zip 사전빌드 artifact 를 lazy read 해 콜드 <1s, 태그 무손실 보존, native ACLASS canonicalKey(정부 표준 Link Role scope-strip) 로 회사내·회사간 정규화 + 한글 라벨 검색. 트리거 — '공시 수평화', 'panel', '재무제표 다기간', '공시 항목 회사 비교', 'canonicalKey', 'disclosureKey'.",
+      "whenToUse": [
+        "panel",
+        "공시 수평화",
+        "재무제표 다기간 정렬",
+        "주석 다기간",
+        "공시 항목 회사간 비교",
+        "disclosureKey",
+        "canonicalKey",
+        "항목 × 기간 보드",
+        "회사내 수평화",
+        "회사간 수평화"
+      ],
+      "nextSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.data"
+      ],
+      "bodyPreview": "## 엔진 역할\n\n`panel` 은 DART 공시 본문(재무제표·주석·서술)을 항목(행) × 기간(열) 2D 보드로 수평 정렬한다. 정렬키 = native ACLASS canonicalKey(정부 표준 Link Role scope-strip, BS_C→BS / NT_C_D826380→NT_D826380) — 손 매핑 농장 0. BUILD(gather, lxml/zip)·READ(providers, scan_parquet) 물리 분리로 콜드 <1s, 태그 무손실.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.providers.dart.panel import Panel, crossCompany\nPanel(\"005930\").board()                     # presence\nPanel(\"005930\").show(\"재고\")                 # 한글 라벨 또는 show(\"NT_D826380\", byLabel=False)\ncrossCompany(\"재고\")                          # 회사간\n```\n또는 `Company(\"005930\").panel`. 빌드 2-트랙 — 로컬 zip(buildPanel.py) / online 1패스(onlinePanel.py, 디스크 zip 0)."
     }
   ]
 }
