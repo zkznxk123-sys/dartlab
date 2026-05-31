@@ -254,6 +254,58 @@ def iterZipsParallel(
             yield fut.result()
 
 
+def streamZipBytes(
+    client: DartClient,
+    targets: list[tuple[str, str]],
+    *,
+    workers: int | None = None,
+) -> "Iterator[tuple[str, str, bytes]]":
+    """``iterZipsParallel`` 의 메모리 쌍둥이 — (code, rceptNo, zipBytes) yield, 디스크 저장 0.
+
+    online 1패스 panel 빌드 전용: document.xml API 결과를 파일로 안 쓰고 bytes 그대로 흘려
+    gather ``buildPanelFromStream`` 이 메모리에서 14-col parquet 화. ``data/dart/original/docs``
+    에 zip 을 만들지 않는다 (로컬 전용 zip 우회). 실패·미달(_MIN_VALID_BYTES)은 yield 생략.
+
+    메모리 가드: 호출측은 **종목 단위로 끊어** 호출(전 종목 targets 한 번에 X) — 동시 in-flight
+    bytes 를 workers × zip크기로 bound (Q4 대형 zip 폭주 방지).
+
+    Args:
+        client: ``DartClient`` (스레드 안전 키 풀, 020 cooldown 자동 마이그레이션).
+        targets: ``[(stockCode, rceptNo), ...]`` (한 종목 단위 권장).
+        workers: ThreadPoolExecutor 워커 수. None = len(client._slots).
+
+    Yields:
+        ``(stockCode, rceptNo, zipBytes)`` — 유효 zip 만 (실패/미달 skip).
+
+    Raises:
+        없음 — 개별 fetch 실패는 yield 생략.
+
+    Example:
+        >>> for code, rcept, raw in streamZipBytes(client, [("005930", "...")]):
+        ...     pass  # doctest: +SKIP
+    """
+    if not targets:
+        return
+    if workers is None:
+        workers = len(client._slots)
+
+    def _fetchBytes(code: str, rceptNo: str) -> "tuple[str, str, bytes] | None":
+        try:
+            raw = client.getBytes("document.xml", {"rcept_no": rceptNo})
+            if not raw or len(raw) < _MIN_VALID_BYTES:
+                return None
+            return code, rceptNo, raw
+        except (OSError, RuntimeError, ValueError):
+            return None
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = [ex.submit(_fetchBytes, code, rceptNo) for code, rceptNo in targets]
+        for fut in as_completed(futures):
+            res = fut.result()
+            if res is not None:
+                yield res
+
+
 def buildTargetsFromDocsParquet(
     codes: Iterable[str] | None = None,
     *,

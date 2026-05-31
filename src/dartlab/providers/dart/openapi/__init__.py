@@ -24,6 +24,7 @@ from dartlab.providers.dart.openapi.bulkZipFetcher import (
     collectAllOriginalZips,
     fetchZipsParallel,
     safeWriteBytes,
+    streamZipBytes,
 )
 from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.dart import Dart, DartCompany, OpenDart, OpenDartCompany
@@ -42,6 +43,7 @@ __all__ = [
     "collectAllOriginalZips",
     "fetchZipsParallel",
     "safeWriteBytes",
+    "streamZipBytes",
     "korColumns",
 ]
 
