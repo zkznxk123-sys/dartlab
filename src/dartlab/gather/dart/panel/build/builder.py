@@ -29,11 +29,13 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import io
 import logging
 import multiprocessing as mp
 import re
 import time
 import zipfile
+from collections.abc import Iterable
 from pathlib import Path
 
 import polars as pl
@@ -56,11 +58,37 @@ _FISCAL_PERIOD_RE = re.compile(
 )
 
 
-def _readZip(zp: Path) -> tuple[str | None, list[str]]:
-    """zip → (rcept_no, [xml strings]). encoding trial decode.
+def _zipToXmls(zf: zipfile.ZipFile) -> list[str]:
+    """열린 ZipFile → 모든 .xml 의 decoded 문자열 list (입력원 무관 공유 코어).
 
-    DART zip 의 모든 XML 처리 — 사업보고서(Q4) 첨부 양식(감사보고서·내부회계관리제도 등)도
-    panel 에 포함. declaration encoding 거짓말(옛 양식 utf-8 선언이나 실제 cp949) 회피.
+    DART zip 의 모든 XML — 사업보고서(Q4) 첨부 양식(감사보고서·내부회계관리제도 등)도 포함.
+    declaration encoding 거짓말(옛 양식 utf-8 선언이나 실제 cp949) 회피 (_decodeXmlBytes trial).
+
+    Args:
+        zf: 열린 ``zipfile.ZipFile`` (Path/BytesIO 무관).
+
+    Returns:
+        sorted .xml name 순서의 decoded XML 문자열 list.
+
+    Raises:
+        없음 — caller(_readZip/_readZipBytes)가 BadZipFile/OSError/KeyError 흡수.
+
+    Example:
+        >>> with zipfile.ZipFile(p) as zf: _zipToXmls(zf)  # doctest: +SKIP
+    """
+    from .refScan.zipScanWorker import _decodeXmlBytes
+
+    xmls: list[str] = []
+    names = sorted(n for n in zf.namelist() if n.lower().endswith(".xml"))
+    for n in names:
+        with zf.open(n) as f:
+            raw = f.read()
+        xmls.append(_decodeXmlBytes(raw))
+    return xmls
+
+
+def _readZip(zp: Path) -> tuple[str | None, list[str]]:
+    """로컬 zip 파일 경로 → (rcept_no, [xml strings]). (A) 디스크 트랙.
 
     Args:
         zp: zip 파일 경로.
@@ -74,20 +102,41 @@ def _readZip(zp: Path) -> tuple[str | None, list[str]]:
     Example:
         >>> _readZip(Path("data/dart/original/docs/005930/...zip"))  # doctest: +SKIP
     """
-    from .refScan.zipScanWorker import _decodeXmlBytes
-
     m = _RCEPT_RE.match(zp.name)
     rcept = m.group(1) if m else zp.stem
-    xmls: list[str] = []
     try:
         with zipfile.ZipFile(zp) as zf:
-            names = sorted(n for n in zf.namelist() if n.lower().endswith(".xml"))
-            for n in names:
-                with zf.open(n) as f:
-                    raw = f.read()
-                xmls.append(_decodeXmlBytes(raw))
+            xmls = _zipToXmls(zf)
     except (zipfile.BadZipFile, OSError, KeyError) as exc:
         _log.warning("zip read 실패 %s: %s", zp, exc)
+        return (None, [])
+    return (rcept, xmls)
+
+
+def _readZipBytes(raw: bytes, rcept: str) -> tuple[str | None, list[str]]:
+    """zip bytes(메모리) → (rcept_no, [xml strings]). (B) online 1패스 트랙 — 디스크 0.
+
+    ``_readZip``(Path)의 bytes 쌍둥이 — ``zipfile.ZipFile(io.BytesIO(raw))`` 로 디스크 저장 없이
+    동일 ``_zipToXmls`` 코어 호출. online (DART API → 메모리 zip) 경로 전용.
+
+    Args:
+        raw: DART document.xml API 가 반환한 zip bytes.
+        rcept: 접수번호 (provenance — bytes 엔 파일명 없음).
+
+    Returns:
+        ``(rcept, [xml str])``. read 실패 시 ``(None, [])``.
+
+    Raises:
+        없음 — BadZipFile/OSError/KeyError 흡수.
+
+    Example:
+        >>> _readZipBytes(zipBytes, "20240514000001")  # doctest: +SKIP
+    """
+    try:
+        with zipfile.ZipFile(io.BytesIO(raw)) as zf:
+            xmls = _zipToXmls(zf)
+    except (zipfile.BadZipFile, OSError, KeyError) as exc:
+        _log.warning("zip bytes read 실패 %s: %s", rcept, exc)
         return (None, [])
     return (rcept, xmls)
 
@@ -164,6 +213,104 @@ def _prevYear(year: str) -> str:
         return str(int(year) - 1)
     except ValueError:
         return year
+
+
+def _xmlsToPeriodRows(
+    xmls: list[str],
+    rcept: str,
+    code: str,
+    refDf: pl.DataFrame | None,
+    matchThreshold: float,
+) -> dict[str, list[dict]]:
+    """한 zip(rcept)의 XML 문자열 list → {period: [row]} (zip/bytes/online 공통 walker 코어).
+
+    period 는 첫 파싱 성공 XML 의 표지 사업연도 종료일로 1회 결정 → 같은 zip 의 모든 XML row 에
+    동일 부착(1 zip = 1 rcept = 1 report = 1 period). walker(손실0/dup0) row 에 period/corp/
+    rceptNo/disclosureKey(None) 부착. buildPanel(disk)·buildPanelFromStream(online) 둘 다 호출.
+
+    Args:
+        xmls: 한 zip 의 decoded XML 문자열 list.
+        rcept: 접수번호.
+        code: 종목코드.
+        refDf: 옛 양식(v1) fuzzy 매칭 ref table.
+        matchThreshold: fuzzy Jaccard threshold.
+
+    Returns:
+        ``{period: [row dict]}``. 파싱 가능한 XML 0 이면 빈 dict.
+
+    Raises:
+        없음 — XML 파싱 실패 XML 은 skip.
+
+    Example:
+        >>> _xmlsToPeriodRows(xmls, "20240514000001", "005930", ref, 0.70)  # doctest: +SKIP
+    """
+    parser = etree.XMLParser(recover=True, huge_tree=True)
+    periodRows: dict[str, list[dict]] = {}
+    period: str | None = None
+    for xml in xmls:
+        try:
+            root = etree.fromstring(xml.encode("utf-8"), parser)
+        except (etree.XMLSyntaxError, ValueError):
+            continue
+        if root is None:
+            continue
+        era = detectSchemaEra(root)
+        if period is None:
+            period = _periodFromXml(root, rcept)
+        for row in walkSections(root, era, refDf, matchThreshold=matchThreshold):
+            row["period"] = period
+            row["corp"] = code
+            row["rceptNo"] = rcept
+            row["disclosureKey"] = None
+            periodRows.setdefault(period, []).append(row)
+    return periodRows
+
+
+def _writePeriodShards(
+    periodRows: dict[str, list[dict]],
+    *,
+    code: str,
+    outDir: Path,
+    overwrite: bool,
+    verbose: bool,
+) -> dict[str, int]:
+    """{period: [row]} → period 별 14-col parquet write (disk/online 공통 write 코어).
+
+    horizontalize(무손실 concat) → resolveBatch(disclosureKey 부착) → 14-col select → zstd write.
+    buildPanel·buildPanelFromStream 의 동일 write 단계.
+
+    Args:
+        periodRows: ``{period: [row dict]}`` 누적 결과.
+        code: 종목코드 (로그용).
+        outDir: ``data/dart/panel/{code}`` 출력 디렉터리 (caller 가 mkdir).
+        overwrite: 기존 period parquet overwrite 여부.
+        verbose: 진행 로그.
+
+    Returns:
+        ``{period: rowCount}`` write 결과.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _writePeriodShards(rows, code="005930", outDir=p, overwrite=True, verbose=False)  # doctest: +SKIP
+    """
+    result: dict[str, int] = {}
+    for period, rows in periodRows.items():
+        if not rows:
+            continue
+        df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
+        df = horizontalize(df)
+        df = resolveBatch(df, marketNs="kr")
+        df = df.select(list(PANEL_SCHEMA.keys()))
+        outPath = outDir / f"{period}.parquet"
+        if outPath.exists() and not overwrite:
+            continue
+        df.write_parquet(str(outPath), compression="zstd")
+        result[period] = df.height
+        if verbose:
+            _log.info("  %s %s: %d row", code, period, df.height)
+    return result
 
 
 def buildPanel(
@@ -254,47 +401,122 @@ def buildPanel(
         _log.warning("zip dir 없음: %s", zipDir)
         return {}
 
-    parser = etree.XMLParser(recover=True, huge_tree=True)
     periodRows: dict[str, list[dict]] = {}
     for zp in sorted(zipDir.glob("*.zip")):
         rcept, xmls = _readZip(zp)
         if not xmls or not rcept:
             continue
-        period: str | None = None
-        for xml in xmls:
-            try:
-                root = etree.fromstring(xml.encode("utf-8"), parser)
-            except (etree.XMLSyntaxError, ValueError):
-                continue
-            if root is None:
-                continue
-            era = detectSchemaEra(root)
-            if period is None:
-                period = _periodFromXml(root, rcept)
-            for row in walkSections(root, era, refDf, matchThreshold=matchThreshold):
-                row["period"] = period
-                row["corp"] = code
-                row["rceptNo"] = rcept
-                row["disclosureKey"] = None
-                periodRows.setdefault(period, []).append(row)
+        for period, rows in _xmlsToPeriodRows(xmls, rcept, code, refDf, matchThreshold).items():
+            periodRows.setdefault(period, []).extend(rows)
 
-    result: dict[str, int] = {}
-    for period, rows in periodRows.items():
-        if not rows:
-            continue
-        df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
-        df = horizontalize(df)
-        df = resolveBatch(df, marketNs="kr")
-        df = df.select(list(PANEL_SCHEMA.keys()))
-        outPath = outDir / f"{period}.parquet"
-        if outPath.exists() and not overwrite:
-            continue
-        df.write_parquet(str(outPath), compression="zstd")
-        result[period] = df.height
-        if verbose:
-            _log.info("  %s %s: %d row", code, period, df.height)
+    return _writePeriodShards(periodRows, code=code, outDir=outDir, overwrite=overwrite, verbose=verbose)
 
-    return result
+
+def buildPanelFromStream(
+    code: str,
+    docStream: Iterable[tuple[str, bytes]],
+    *,
+    refDf: pl.DataFrame | None = None,
+    matchThreshold: float = 0.70,
+    outBaseDir: Path | str | None = None,
+    overwrite: bool = True,
+    verbose: bool = False,
+) -> dict[str, int]:
+    """online 1패스 — (rcept, zipBytes) 스트림 → period sharded 14-col parquet. 디스크 zip 0.
+
+    ``buildPanel`` 의 메모리 쌍둥이 — 로컬 zip 대신 DART API 가 흘리는 zip bytes 를 받아 동일
+    코어(``_readZipBytes`` → ``_xmlsToPeriodRows`` → ``_writePeriodShards``)로 14-col artifact
+    생산. 산출물은 ``buildPanel`` 과 바이트 동형(같은 walker/horizontalize/resolveBatch/zstd),
+    입력원만 stream. ``data/dart/original/docs`` 에 zip 을 만들지 않음 → refScan 불가라 refDf 필수
+    (online 은 HF seed ``panelXbrlRef.parquet`` 를 강제 주입, 자동 scanRefBaseline 금지).
+
+    Args:
+        code: 종목코드 (예 "005930").
+        docStream: ``(rceptNo, zipBytes)`` iterable — providers ``streamZipBytes`` 산출(메모리).
+        refDf: panelXbrlRef ref table. **None 이면 ValueError** (online 엔 zip 없어 자동 scan 불가).
+        matchThreshold: 옛 양식 fuzzy Jaccard threshold (검증 0.70).
+        outBaseDir: 출력 base dir. None = ``data/dart/panel``.
+        overwrite: 기존 period parquet overwrite 여부.
+        verbose: 진행 로그.
+
+    Returns:
+        ``{period: rowCount}`` dict. stream 빈/전부 실패 시 빈 dict.
+
+    Raises:
+        ValueError: ``refDf is None`` (online 1패스는 ref 자동 scan 금지 — HF seed 필수).
+
+    Example:
+        >>> from dartlab.providers.dart.openapi import DartClient, streamZipBytes  # doctest: +SKIP
+        >>> stream = ((r, b) for _, r, b in streamZipBytes(DartClient(), [("005930", rcept)]))  # doctest: +SKIP
+        >>> buildPanelFromStream("005930", stream, refDf=ref)  # doctest: +SKIP
+        {'2025Q1': 142}
+
+    SeeAlso:
+        - ``buildPanel`` — 로컬 zip(A) 디스크 트랙 쌍둥이.
+        - ``_readZipBytes`` / ``_xmlsToPeriodRows`` / ``_writePeriodShards`` — 공유 코어.
+        - ``providers.dart.openapi.streamZipBytes`` — (rcept, bytes) 스트림 생산.
+
+    Requires:
+        - polars. lxml. refDf (HF seed panelXbrlRef). providers streamZipBytes (호출측).
+
+    Capabilities:
+        - 신규 분기를 zip 디스크 저장 없이 즉시 panel artifact 화 (증분 online sync 트랙).
+
+    Guide:
+        - layer-밖 sync entry(`.github/scripts/sync/onlinePanel.py`)가 providers fetch 와 조합 호출.
+          gather↛providers(R1) 라 gather 내부에서 fetch 금지 — bytes 만 받음.
+
+    AIContext:
+        - strict per-corp (한 종목 stream 만). bytes 는 즉시 소비 후 폐기 (메모리 bounded).
+
+    When:
+        - CI online sync 가 신규/변경 분기를 zip 없이 panel 화할 때.
+
+    How:
+        - docStream 각 (rcept,bytes) → _readZipBytes → _xmlsToPeriodRows 누적 → _writePeriodShards.
+
+    LLM Specifications:
+        AntiPatterns:
+            - refDf None 시 scanRefBaseline 자동 호출 금지 — online 엔 zip 없음(ValueError).
+            - 전 종목 stream 한 번에 모으기 금지 — 종목 단위 호출(bytes 메모리 폭주 가드).
+            - zip 디스크 저장 금지 — 메모리 1패스 (data/dart/original/docs 안 만듦).
+        OutputSchema:
+            - ``dict[str, int]`` + 부수효과 data/dart/panel/{code}/{period}.parquet.
+        Prerequisites:
+            - refDf (HF seed). docStream (providers streamZipBytes).
+        Freshness:
+            - 분기 incremental — 신규 rcept 만.
+        Dataflow:
+            - docStream → _readZipBytes → _xmlsToPeriodRows → _writePeriodShards → parquet.
+        TargetMarkets:
+            - KR (DART).
+    """
+    if refDf is None:
+        raise ValueError(
+            "buildPanelFromStream: refDf 필수 — online 1패스는 zip 부재로 자동 scanRefBaseline 금지 (HF seed panelXbrlRef 주입)."
+        )
+
+    if outBaseDir is None:
+        outBaseDir = Path(_cfg.dataDir) / "dart" / "panel"
+    outDir = Path(outBaseDir) / code
+    outDir.mkdir(parents=True, exist_ok=True)
+
+    # 가속: refMatcher token set pre-compute (worker init 후 이미 done 이면 skip).
+    from .refScan.refMatcher import _REF_TOKENS as _existing
+    from .refScan.refMatcher import precomputeRefTokens, setGlobalRefTokens
+
+    if _existing is None:
+        setGlobalRefTokens(precomputeRefTokens(refDf))
+
+    periodRows: dict[str, list[dict]] = {}
+    for rcept, raw in docStream:
+        r2, xmls = _readZipBytes(raw, rcept)
+        if not xmls or not r2:
+            continue
+        for period, rows in _xmlsToPeriodRows(xmls, r2, code, refDf, matchThreshold).items():
+            periodRows.setdefault(period, []).extend(rows)
+
+    return _writePeriodShards(periodRows, code=code, outDir=outDir, overwrite=overwrite, verbose=verbose)
 
 
 _GLOBAL_REF: pl.DataFrame | None = None
