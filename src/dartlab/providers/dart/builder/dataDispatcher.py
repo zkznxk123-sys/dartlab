@@ -733,3 +733,70 @@ def showSectionsTopic(
         result = stripTagsFromSectionsDf(result)
 
     return result if isinstance(result, pl.DataFrame) else None
+
+
+def isStrongTopic(topic: str) -> bool:
+    """topic 이 finance/notes/report 강한 소스인지 — c.panel facade 주입 라우팅 SSOT.
+
+    panel facade(``c.panel``)가 ``c.panel("IS")`` 같은 호출을 raw 공시(panel) vs 강한 소스
+    (finance/report — XBRL 정규화 숫자·정형 공시)로 가른다. 본 함수가 그 단일 판정 — show 와
+    동일 분류 기준(``SHOW_FINANCE_TOPICS`` · ``_NOTES_DISPATCH`` · registry apiType)을 재사용해
+    panel·show 가 한 SSOT 를 공유한다(분류 중복 0).
+
+    Args:
+        topic: 토픽 이름 (BS/IS/CF/ratios/inventory/dividend/canonicalKey/한글 섹션명 등).
+
+    Returns:
+        True 면 강한 소스(finance/notes/report — c.show 위임 대상), False 면 raw 공시(panel 행).
+
+    Raises:
+        없음 — registry 조회 실패는 False.
+
+    Example:
+        >>> isStrongTopic("IS")  # doctest: +SKIP
+        True
+        >>> isStrongTopic("NT_D826380")  # doctest: +SKIP  (canonicalKey → raw panel)
+        False
+
+    SeeAlso:
+        - ``showImpl`` — 강한 소스의 실제 dispatch (finance/notes/report).
+        - ``providers.dart.panel.Panel.__call__`` — 본 판정을 facade 주입으로 받아 라우팅.
+
+    Requires:
+        - dartlab. registry (report 판정).
+
+    Capabilities:
+        - panel·show 분류 SSOT — finance(BS/IS/…) · notes(inventory/…) · report(dividend/…) 식별.
+
+    Guide:
+        - facade(Company.panel)가 ``_strongFn`` 으로 주입. panel.py 는 직접 import 안 함(주입만).
+
+    AIContext:
+        - 순수 판정 — finance set ∪ notes dispatch ∪ (apiType 매핑되는) report.
+
+    LLM Specifications:
+        AntiPatterns:
+            - panel.py 에서 직접 import 금지 — facade 가 _strongFn 으로 주입(panel 은 finance 모름).
+            - 분류 중복 정의 금지 — SHOW_FINANCE_TOPICS·_NOTES_DISPATCH SSOT 재사용.
+        OutputSchema:
+            - ``bool``.
+        Prerequisites:
+            - registry (report apiType 판정).
+        Freshness:
+            - registry 변경 시 반영.
+        Dataflow:
+            - _resolveTopic → finance set / notes dispatch / apiType 매핑 → bool.
+        TargetMarkets:
+            - KR (DART). US 후속.
+    """
+    from dartlab.core.registry import getModuleEntries
+    from dartlab.providers.dart.company import _resolveTopic
+    from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
+
+    t = _resolveTopic(topic)
+    if t in SHOW_FINANCE_TOPICS or t in _NOTES_DISPATCH:
+        return True
+    # report/notes/finance category = 정규화된 강한 소스 (dividend 등 정형 공시). disclosure(서술
+    # docs)·canonicalKey·한글 섹션명은 raw 공시(panel 본분) → False.
+    strongCats = {"finance", "report", "notes"}
+    return any(e.name == t and getattr(e, "category", None) in strongCats for e in getModuleEntries())
