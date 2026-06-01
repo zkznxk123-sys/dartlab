@@ -1,63 +1,56 @@
-"""Horizon Meaning Learner V190 - canonical token typed sibling proof.
+"""Horizon Meaning Learner V192 - predictive contrast capsule.
 
 아이디어:
-    V189 의 local deletion sibling 은 term 표면이 너무 넓어 문자 유사 충돌이 의미 충돌보다 많았다. V190 은 sibling 을
-    한국어 term 자체에서 직접 만들지 않고, train alias 가 연결된 canonical snakeId 의 token 경험으로 한 단계 올린다.
+    V191 은 query surface 가 예측하는 canonical token 을 candidate snakeId token 과 직접 비교했다. 이번 시도는 그
+    token 목록을 그대로 점수화하지 않고, 경험을 한 단계 응결해 `object-action`, `object-modifier`,
+    `statement-action`, `token-role` atom 으로 만든 뒤 query capsule 과 candidate capsule 을 비교한다.
 
     절차:
-    - candidate snakeId 를 canonical token sequence 로 분해한다. 예: cash_inflows_from_other_investing_activities 는
-      cash/inflow/other/investing/activity token 경험이 된다.
-    - train alias 의 2~5 gram surface term 이 어떤 canonical token 들을 예측하는지 term->token proof 를 학습한다.
-      held-out alias 는 train entry 에서 제거되어 query surface leak 이 없다.
-    - canonical token sequence 에서 같은 context 를 공유하는 token 대체항을 자동 sibling 으로 학습한다. 예를 들어
-      cash_*_from_other_investing_activity 문맥에서는 inflow/outflow 가 손으로 적지 않아도 갈라진다.
-    - scoring 은 V188 counterPath 위에 typedSiblingDelta 를 더한다. query 가 예측한 token 과 candidate token 이 겹치면
-      작은 support, query token 의 자동 sibling 을 candidate 가 갖고 있으면 counter proof 로 penalty 를 준다.
+    - train alias 의 surface term 이 예측하는 canonical token proof 를 V190/V191 처럼 만든다.
+    - query token proof 와 candidate token proof 를 role(object/action/modifier/statement/generic) 로 나눈다.
+    - role token 들을 `oa:*`, `om:*`, `os:*`, `sa:*`, `sm:*`, `tok:*` capsule atom 으로 재응결한다.
+    - 초안은 shared capsule reward, sibling contradiction, prediction residual penalty 를 함께 넣었지만 80 held-out 에서
+      Top1 을 떨어뜨렸다. 최종판은 penalty 를 제거하고, 실제 object overlap 이 있으며 복합 capsule atom 이 겹칠 때만
+      작은 support 를 준다.
 
-    목표는 hand contrast group 을 늘리는 것이 아니라, `유입/유출`, `증가/감소`, `유동/비유동`, broad/current/other
-    계열을 canonical object/action token 경험으로 자동 분리해 V188 counterPathWithSj 를 넘는지 확인하는 것이다.
+    목표는 "경험 목록" 이 아니라 비교 가능한 의미 응결체를 만들 수 있는지 확인하는 것이다. 단, corpus/accountMappings
+    open held-out 에서 V191 보다 내려가면 실패로 본다.
 
 실행 코드:
-    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
-    $env:DARTLAB_HORIZON_V190_HELDOUT_LIMIT='80'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
-    $env:DARTLAB_HORIZON_V190_HELDOUT_LIMIT='600'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
-    uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
+    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV192Test.py
+    $env:DARTLAB_HORIZON_V192_HELDOUT_LIMIT='80'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV192Test.py
+    $env:DARTLAB_HORIZON_V192_HELDOUT_LIMIT='600'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV192Test.py
+    uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV192Test.py
 
 검증 기준:
     - held-out query surface 는 train candidate alias 에 없어야 한다.
     - corpus matcher 도 train alias 만 사용해야 하며 held-out alias 를 문서에서 직접 찾으면 안 된다.
     - 후보는 평가 11개가 아니라 accountMappings 의 수천 canonical snakeId 여야 한다.
-    - baseline, V186 alias path, V187 corpus path, V188 counter path, V190 typed sibling path 를 같은 split 에서 비교한다.
-    - V190 typedSiblingPathWithSj 가 V188 counterPathWithSj 의 320/497 MRR 을 넘고 Top1 을 떨어뜨리지 않으면 성공이다.
+    - baseline, V186 alias path, V187 corpus path, V188 counter path, V192 typed sibling path 를 같은 split 에서 비교한다.
+    - 80 held-out 에서 V191 의 Top1/MRR 을 넘지 못하면 320/497 은 돌리지 않고 실패로 기록한다.
 
 결과:
-    20 smoke: counterPathWithSj Top1=9/20, Top3=15/20, Top5=16/20, MRR=0.6066,
-    typedSiblingPathWithSj Top1=9/20, Top3=15/20, Top5=16/20, MRR=0.6137,
-    typed-vs-counter movement=1/16/3 이었다.
+    초안(full penalty/residual capsule) 20 smoke 는 counterPathWithSj Top1=9/20, MRR=0.6066 에서
+    typedSiblingPathWithSj Top1=9/20, Top3=16/20, Top5=17/20, MRR=0.6248 로 올랐지만 movement=3/16/1 이었다.
+    같은 초안 80 held-out 은 counterPathWithSj Top1=34/80, MRR=0.5703 대비 typedSiblingPathWithSj Top1=33/80,
+    Top3=54/80, Top5=61/80, MRR=0.5703, movement=7/65/8 로 Top1 이 깨졌다.
 
-    80 held-out: counterPathWithSj Top1=34/80, Top3=52/80, Top5=59/80, MRR=0.5703,
-    typedSiblingPathWithSj Top1=34/80, Top3=53/80, Top5=59/80, MRR=0.5710,
-    typed-vs-counter movement=5/68/7 이었다.
+    최종 conservative capsule 20 smoke 는 counterPathWithSj Top1=9/20, Top3=15/20, Top5=16/20, MRR=0.6066 에서
+    typedSiblingPathWithSj Top1=9/20, Top3=15/20, Top5=17/20, MRR=0.6204, movement=3/17/0 이었다.
 
-    320 held-out: corpusPathWithSj Top1=131/320, Top3=214/320, Top5=241/320, MRR=0.5645,
-    counterPathWithSj Top1=131/320, Top3=215/320, Top5=241/320, MRR=0.5657,
-    typedSiblingPathWithSj Top1=133/320, Top3=217/320, Top5=241/320, MRR=0.5669,
-    typed-vs-counter movement=15/273/32 이었다.
+    최종 conservative capsule 80 held-out 은 corpusPathWithSj Top1=33/80, Top3=51/80, Top5=59/80, MRR=0.5622,
+    counterPathWithSj Top1=34/80, Top3=52/80, Top5=59/80, MRR=0.5697, typedSiblingPathWithSj Top1=33/80,
+    Top3=52/80, Top5=61/80, MRR=0.5677, movement=8/66/6 이었다.
 
-    HELDOUT_LIMIT=600 은 실제 497 eligible held-out 이며 corpus docFiles=12, allFilingsFiles=6,
-    rowsScanned=15173, aliasMatches=65571, leakedAliases=0 이었다. corpusPathWithSj Top1=209/497,
-    Top3=333/497, Top5=379/497, MRR=0.5704, counterPathWithSj Top1=209/497, Top3=336/497,
-    Top5=380/497, MRR=0.5717, typedSiblingPathWithSj Top1=211/497, Top3=337/497, Top5=382/497,
-    MRR=0.5734, typed-vs-counter movement=22/426/49 이었다.
+    320/497 은 80 held-out 에서 이미 V191 과 counterPath 대비 Top1/MRR 이 떨어져 실행하지 않았다.
 
 결론:
-    성공/작은 개념 상승. V189 의 term deletion sibling 은 실패했지만, query fragment 가 예측하는 canonical
-    object/action token 과 candidate snakeId token 을 비교하면 V188 counterPath 위에서 320/497 Top1 과 MRR 이 모두
-    오른다. 특히 이 proof 는 hand Korean contrast group 을 새로 늘리지 않고 snakeId token context 에서 inflow/outflow,
-    increase/decrease 같은 sibling 을 자동으로 만든다. 한계는 movement 상 worsened 도 적지 않아 아직 강한 classifier 가
-    아니라 약한 sparse proof delta 라는 점이다. 다음은 token-level support 를 candidate 전체에 뿌리는 대신 query/candidate
-    둘 다 typed object(role, action, object, modifier, statement) 로 먼저 묶고 object family 내부에서만 sibling counter 를
-    적용해야 한다.
+    실패/진단 성공. 경험을 capsule atom 으로 응결하는 아이디어 자체는 구현됐지만, 현재 canonical token 기반 capsule 은
+    `cash/flow/operating` 같은 넓은 statement 경험을 잘못된 후보에도 보상한다. object-only gate 와 support-only 로 줄여도
+    80 held-out 에서 V191 보다 낮다. 의미 응결체는 token pair 보상이 아니라 후보 존재론을 먼저 고정해야 한다. 다음은
+    canonical snakeId token 이 아니라 accountMappings cluster 내부 alias/corpus fragment 에서 직접 `(target object, action,
+    modifier, statement, evidence source)` capsule 을 만들고, target object 가 같은 cohort 안에서만 contrast/support 를
+    비교해야 한다.
 """
 
 from __future__ import annotations
@@ -70,6 +63,7 @@ import os
 import re
 import time
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -80,28 +74,29 @@ MAPPING_PATH = ROOT / "src" / "dartlab" / "reference" / "data" / "accountMapping
 DOCS_DIR = ROOT / "data" / "dart" / "docs"
 ALL_FILINGS_DIR = ROOT / "data" / "dart" / "allFilings"
 
-HELDOUT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_HELDOUT_LIMIT", "320"))
-MIN_CLUSTER_SIZE = int(os.environ.get("DARTLAB_HORIZON_V190_MIN_CLUSTER_SIZE", "4"))
-MAX_TRAIN_ALIASES_PER_SNAKE = int(os.environ.get("DARTLAB_HORIZON_V190_MAX_TRAIN_ALIASES_PER_SNAKE", "80"))
-POOL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_POOL_LIMIT", "5200"))
-POSTING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_POSTING_ROW_LIMIT", "2600"))
-TOP_K = int(os.environ.get("DARTLAB_HORIZON_V190_TOP_K", "10"))
-NUM_MH = int(os.environ.get("DARTLAB_HORIZON_V190_NUM_MH", "32"))
-PATH_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_PATH_ATOM_LIMIT", "96"))
-PATH_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_PATH_RESIDUAL_LIMIT", "64"))
-CORPUS_DOC_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_DOC_FILE_LIMIT", "18"))
-CORPUS_ALL_FILINGS_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_ALL_FILINGS_FILE_LIMIT", "6"))
-CORPUS_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_ROW_LIMIT", "18000"))
-CORPUS_TEXT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_TEXT_LIMIT", "3600"))
-CORPUS_GRAM_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_GRAM_POSTING_LIMIT", "160"))
-CORPUS_ALIAS_MATCH_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_ALIAS_MATCH_LIMIT", "90000"))
-CORPUS_PROFILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_PROFILE_LIMIT", "96"))
-CORPUS_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_RESIDUAL_LIMIT", "64"))
-CORPUS_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_FRAGMENT_LIMIT", "64"))
-COUNTER_SCALE = float(os.environ.get("DARTLAB_HORIZON_V190_COUNTER_SCALE", "0.50"))
-TYPED_SIBLING_SCALE = float(os.environ.get("DARTLAB_HORIZON_V190_TYPED_SIBLING_SCALE", "0.55"))
-TYPED_SUPPORT_SCALE = float(os.environ.get("DARTLAB_HORIZON_V190_TYPED_SUPPORT_SCALE", "0.30"))
-TYPED_TERM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_TYPED_TERM_LIMIT", "80"))
+HELDOUT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_HELDOUT_LIMIT", "320"))
+MIN_CLUSTER_SIZE = int(os.environ.get("DARTLAB_HORIZON_V192_MIN_CLUSTER_SIZE", "4"))
+MAX_TRAIN_ALIASES_PER_SNAKE = int(os.environ.get("DARTLAB_HORIZON_V192_MAX_TRAIN_ALIASES_PER_SNAKE", "80"))
+POOL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_POOL_LIMIT", "5200"))
+POSTING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_POSTING_ROW_LIMIT", "2600"))
+TOP_K = int(os.environ.get("DARTLAB_HORIZON_V192_TOP_K", "10"))
+NUM_MH = int(os.environ.get("DARTLAB_HORIZON_V192_NUM_MH", "32"))
+PATH_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_PATH_ATOM_LIMIT", "96"))
+PATH_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_PATH_RESIDUAL_LIMIT", "64"))
+CORPUS_DOC_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_DOC_FILE_LIMIT", "18"))
+CORPUS_ALL_FILINGS_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_ALL_FILINGS_FILE_LIMIT", "6"))
+CORPUS_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_ROW_LIMIT", "18000"))
+CORPUS_TEXT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_TEXT_LIMIT", "3600"))
+CORPUS_GRAM_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_GRAM_POSTING_LIMIT", "160"))
+CORPUS_ALIAS_MATCH_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_ALIAS_MATCH_LIMIT", "90000"))
+CORPUS_PROFILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_PROFILE_LIMIT", "96"))
+CORPUS_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_RESIDUAL_LIMIT", "64"))
+CORPUS_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CORPUS_FRAGMENT_LIMIT", "64"))
+COUNTER_SCALE = float(os.environ.get("DARTLAB_HORIZON_V192_COUNTER_SCALE", "0.50"))
+TYPED_SIBLING_SCALE = float(os.environ.get("DARTLAB_HORIZON_V192_TYPED_SIBLING_SCALE", "0.55"))
+TYPED_SUPPORT_SCALE = float(os.environ.get("DARTLAB_HORIZON_V192_TYPED_SUPPORT_SCALE", "0.30"))
+TYPED_TERM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_TYPED_TERM_LIMIT", "80"))
+CAPSULE_TOKEN_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V192_CAPSULE_TOKEN_LIMIT", "18"))
 
 HANGUL_START = 0xAC00
 HANGUL_END = 0xD7A3
@@ -113,6 +108,7 @@ CORPUS_FRAGMENT_ATOMS: dict[str, Counter[str]] = {}
 CANON_TOKEN_ALTERNATIVES: dict[str, frozenset[str]] = {}
 CANON_TOKEN_IDF: dict[str, float] = {}
 SURFACE_TOKEN_HINTS: dict[str, Counter[str]] = {}
+CANDIDATE_CAPSULE_CACHE: dict[str, tuple[Counter[str], Counter[str]]] = {}
 
 SLOT_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("flow:in", ("유입", "수입", "입금", "수취", "회수")),
@@ -405,6 +401,244 @@ CANON_STOP_TOKENS = frozenset(
         "with",
     }
 )
+
+ACTION_TOKENS = frozenset(
+    {
+        "addition",
+        "acquire",
+        "acquisition",
+        "amortization",
+        "borrow",
+        "borrowing",
+        "collection",
+        "decrease",
+        "depreciation",
+        "derecognition",
+        "dispose",
+        "disposal",
+        "expense",
+        "gain",
+        "impairment",
+        "increase",
+        "inflow",
+        "issue",
+        "loss",
+        "outflow",
+        "paid",
+        "payment",
+        "proceed",
+        "purchase",
+        "receipt",
+        "received",
+        "recognition",
+        "redeem",
+        "redemption",
+        "reduction",
+        "reversal",
+        "sale",
+        "settlement",
+        "transfer",
+    }
+)
+
+MODIFIER_TOKENS = frozenset(
+    {
+        "adjusted",
+        "amortized",
+        "basic",
+        "carrying",
+        "consolidated",
+        "current",
+        "diluted",
+        "fair",
+        "foreign",
+        "gross",
+        "longterm",
+        "net",
+        "noncurrent",
+        "other",
+        "separate",
+        "shortterm",
+        "total",
+        "weighted",
+    }
+)
+
+STATEMENT_TOKENS = frozenset(
+    {
+        "balance",
+        "cash",
+        "comprehensive",
+        "equity",
+        "financing",
+        "flow",
+        "income",
+        "investing",
+        "operating",
+        "profit",
+        "statement",
+    }
+)
+
+GENERIC_OBJECT_TOKENS = frozenset(
+    {
+        "account",
+        "activity",
+        "amount",
+        "change",
+        "effect",
+        "item",
+        "portion",
+        "transaction",
+        "year",
+    }
+)
+
+
+def canonTokenRole(token: str) -> str:
+    if token in ACTION_TOKENS:
+        return "action"
+    if token in MODIFIER_TOKENS:
+        return "modifier"
+    if token in STATEMENT_TOKENS:
+        return "statement"
+    if token in GENERIC_OBJECT_TOKENS:
+        return "generic"
+    return "object"
+
+
+def canonTokenParts(tokens: Iterable[str]) -> dict[str, set[str]]:
+    parts = {"action": set(), "modifier": set(), "statement": set(), "object": set(), "generic": set()}
+    for token in tokens:
+        role = canonTokenRole(token)
+        parts[role].add(token)
+    return parts
+
+
+def roleWeight(role: str) -> float:
+    if role == "object":
+        return 1.20
+    if role == "action":
+        return 1.55
+    if role == "modifier":
+        return 1.35
+    if role == "statement":
+        return 1.05
+    return 0.45
+
+
+def topRoleTokens(tokenProof: Counter[str], role: str, limit: int) -> list[tuple[str, float]]:
+    rows: list[tuple[str, float]] = []
+    for token, weight in tokenProof.items():
+        if canonTokenRole(token) != role:
+            continue
+        tokenWeight = max(0.0, float(weight))
+        if tokenWeight <= 0.0:
+            continue
+        rows.append((token, tokenWeight))
+    rows.sort(key=lambda row: (-row[1], row[0]))
+    return rows[:limit]
+
+
+def capsuleAtomField(tokenProof: Counter[str]) -> Counter[str]:
+    if not tokenProof:
+        return Counter()
+    atoms: Counter[str] = Counter()
+    compact = Counter(dict(tokenProof.most_common(CAPSULE_TOKEN_LIMIT)))
+    for token, rawWeight in compact.items():
+        role = canonTokenRole(token)
+        if role == "generic":
+            continue
+        tokenIdf = max(0.35, CANON_TOKEN_IDF.get(token, 0.35))
+        weight = math.sqrt(max(0.0, float(rawWeight)) * tokenIdf) * roleWeight(role)
+        atoms[f"tok:{role}:{token}"] += min(5.0, weight)
+
+    objects = topRoleTokens(compact, "object", 5)
+    actions = topRoleTokens(compact, "action", 5)
+    modifiers = topRoleTokens(compact, "modifier", 5)
+    statements = topRoleTokens(compact, "statement", 4)
+    for obj, objWeight in objects:
+        objMass = math.sqrt(max(0.0, objWeight) * max(0.35, CANON_TOKEN_IDF.get(obj, 0.35)))
+        for action, actionWeight in actions:
+            actionMass = math.sqrt(max(0.0, actionWeight) * max(0.35, CANON_TOKEN_IDF.get(action, 0.35)))
+            atoms[f"oa:{obj}|{action}"] += min(5.5, math.sqrt(objMass * actionMass) * 1.90)
+        for modifier, modifierWeight in modifiers:
+            modifierMass = math.sqrt(max(0.0, modifierWeight) * max(0.35, CANON_TOKEN_IDF.get(modifier, 0.35)))
+            atoms[f"om:{obj}|{modifier}"] += min(4.2, math.sqrt(objMass * modifierMass) * 1.55)
+        for statement, statementWeight in statements:
+            statementMass = math.sqrt(max(0.0, statementWeight) * max(0.35, CANON_TOKEN_IDF.get(statement, 0.35)))
+            atoms[f"os:{obj}|{statement}"] += min(3.8, math.sqrt(objMass * statementMass) * 1.20)
+    for statement, statementWeight in statements:
+        statementMass = math.sqrt(max(0.0, statementWeight) * max(0.35, CANON_TOKEN_IDF.get(statement, 0.35)))
+        for action, actionWeight in actions:
+            actionMass = math.sqrt(max(0.0, actionWeight) * max(0.35, CANON_TOKEN_IDF.get(action, 0.35)))
+            atoms[f"sa:{statement}|{action}"] += min(4.6, math.sqrt(statementMass * actionMass) * 1.45)
+        for modifier, modifierWeight in modifiers:
+            modifierMass = math.sqrt(max(0.0, modifierWeight) * max(0.35, CANON_TOKEN_IDF.get(modifier, 0.35)))
+            atoms[f"sm:{statement}|{modifier}"] += min(3.4, math.sqrt(statementMass * modifierMass) * 1.10)
+    return Counter(dict(atoms.most_common(64)))
+
+
+def candidateTokenProof(entry: AliasEntry, profile: SnakeProfile | None) -> Counter[str]:
+    proof: Counter[str] = Counter()
+    for token in entry.canonTokens:
+        proof[token] += max(0.45, CANON_TOKEN_IDF.get(token, 0.45)) * 2.0
+    if profile is not None:
+        for token, weight in profile.canonTokens.items():
+            proof[token] += min(5.0, math.sqrt(max(0.0, float(weight))))
+    return Counter(dict(proof.most_common(CAPSULE_TOKEN_LIMIT)))
+
+
+def candidateCapsule(entry: AliasEntry, profile: SnakeProfile | None) -> tuple[Counter[str], Counter[str]]:
+    cached = CANDIDATE_CAPSULE_CACHE.get(entry.snake)
+    if cached is not None:
+        return cached
+    proof = candidateTokenProof(entry, profile)
+    capsule = capsuleAtomField(proof)
+    CANDIDATE_CAPSULE_CACHE[entry.snake] = (proof, capsule)
+    return proof, capsule
+
+
+def predictiveCapsuleDelta(
+    queryTokens: Counter[str],
+    queryCapsule: Counter[str],
+    entry: AliasEntry,
+    profile: SnakeProfile | None,
+) -> float:
+    if profile is None or not queryTokens or not queryCapsule:
+        return 0.0
+    candidateProof, candidateField = candidateCapsule(entry, profile)
+    if not candidateProof or not candidateField:
+        return 0.0
+
+    queryParts = canonTokenParts(queryTokens.keys())
+    candidateParts = canonTokenParts(candidateProof.keys())
+    objectOverlap = queryParts["object"] & candidateParts["object"]
+    if not objectOverlap:
+        return 0.0
+
+    shared = 0.0
+    compositeShared = 0.0
+    for atom, qWeight in queryCapsule.items():
+        cWeight = candidateField.get(atom, 0.0)
+        if cWeight <= 0.0:
+            continue
+        gain = 1.0
+        if atom.startswith("oa:"):
+            gain = 1.55
+        elif atom.startswith("om:") or atom.startswith("sa:"):
+            gain = 1.35
+        elif atom.startswith("tok:action:") or atom.startswith("tok:modifier:"):
+            gain = 1.18
+        value = math.sqrt(max(0.0, float(qWeight))) * math.sqrt(max(0.0, float(cWeight))) * gain
+        shared += value
+        if atom.startswith(("oa:", "om:", "os:", "sa:", "sm:")):
+            compositeShared += value
+
+    if compositeShared < 1.0:
+        return 0.0
+    support = min(3.0, compositeShared * 0.10 + shared * 0.025)
+    return -support
 
 
 def normalizeCanonToken(token: str) -> str:
@@ -1363,6 +1597,7 @@ def counterPathObjectDelta(
 def typedSiblingDelta(
     query: str,
     queryTokens: Counter[str],
+    queryCapsule: Counter[str],
     querySj: str,
     entry: AliasEntry,
     profile: SnakeProfile | None,
@@ -1378,26 +1613,47 @@ def typedSiblingDelta(
     if not candidateTokens:
         return 0.0
 
+    queryParts = canonTokenParts(queryTokens.keys())
+    candidateParts = canonTokenParts(candidateTokens)
+    objectOverlap = queryParts["object"] & candidateParts["object"]
+    statementOverlap = queryParts["statement"] & candidateParts["statement"]
+    familyGate = bool(objectOverlap or statementOverlap)
+    if not familyGate:
+        return 0.0
+
     support = 0.0
     penalty = 0.0
     matchedTokens = 0
     for token, weight in queryTokens.most_common(12):
         tokenWeight = max(0.0, float(weight))
+        role = canonTokenRole(token)
         if token in candidateTokens:
             matchedTokens += 1
-            support += min(2.2, tokenWeight * 0.10)
+            if role in {"action", "modifier"}:
+                support += min(2.4, tokenWeight * 0.11)
+            elif role == "statement":
+                support += min(1.4, tokenWeight * 0.06)
+            elif role == "object":
+                support += min(1.1, tokenWeight * 0.05)
+            continue
+        if role not in {"action", "modifier", "statement"}:
             continue
         alternatives = CANON_TOKEN_ALTERNATIVES.get(token, frozenset())
         conflicts = alternatives & candidateTokens
         if conflicts:
-            conflictIdf = max(CANON_TOKEN_IDF.get(conflict, 0.0) for conflict in conflicts)
-            penalty += min(4.5, tokenWeight * (0.30 + conflictIdf * 0.08))
+            sameRoleConflicts = {conflict for conflict in conflicts if canonTokenRole(conflict) == role}
+            if not sameRoleConflicts:
+                continue
+            conflictIdf = max(CANON_TOKEN_IDF.get(conflict, 0.0) for conflict in sameRoleConflicts)
+            penalty += min(5.2, tokenWeight * (0.34 + conflictIdf * 0.10))
 
     queryText = cleanSurface(query)
     entryText = cleanSurface(entry.alias)
     if entryText and entryText in queryText and queryText != entryText:
         for token, weight in queryTokens.most_common(8):
             if token in candidateTokens:
+                continue
+            if canonTokenRole(token) not in {"action", "modifier"}:
                 continue
             if CANON_TOKEN_IDF.get(token, 0.0) < 1.2:
                 continue
@@ -1406,10 +1662,12 @@ def typedSiblingDelta(
         for token, weight in queryTokens.most_common(8):
             if token in candidateTokens:
                 continue
-            if CANON_TOKEN_IDF.get(token, 0.0) >= 1.6:
+            if canonTokenRole(token) in {"action", "modifier"} and CANON_TOKEN_IDF.get(token, 0.0) >= 1.6:
                 penalty += min(1.4, float(weight) * 0.07)
 
-    return max(-2.8, min(9.0, penalty * TYPED_SIBLING_SCALE - support * TYPED_SUPPORT_SCALE))
+    tokenDelta = max(-2.8, min(9.0, penalty * TYPED_SIBLING_SCALE - support * TYPED_SUPPORT_SCALE))
+    capsuleDelta = predictiveCapsuleDelta(queryTokens, queryCapsule, entry, profile)
+    return max(-4.2, min(11.0, tokenDelta + capsuleDelta))
 
 
 def rankCase(
@@ -1499,6 +1757,7 @@ def rankCaseVariants(
     qPathAtoms = pathAtomsForAlias(query, case.sj)
     qCorpusAtoms = corpusAtomsFromFragments(query, case.sj, CORPUS_FRAGMENT_ATOMS)
     qTokenProof = queryTokenProof(query)
+    qCapsuleProof = capsuleAtomField(qTokenProof)
     pool = candidatePool(query, case.sj, entries, bigramPostings, charPostings, withSj=withSj)
     bestByMode: dict[str, dict[str, tuple[float, str]]] = {
         "baseline": {},
@@ -1519,7 +1778,7 @@ def rankCaseVariants(
         counterScore = corpusScore
         counterScore += counterPathObjectDelta(query, qSlots, qCoreSlots, case.sj, entry, profile, requireSj=withSj)
         typedScore = counterScore
-        typedScore += typedSiblingDelta(query, qTokenProof, case.sj, entry, profile, requireSj=withSj)
+        typedScore += typedSiblingDelta(query, qTokenProof, qCapsuleProof, case.sj, entry, profile, requireSj=withSj)
         for mode, score in (
             ("baseline", baseScore),
             ("aliasPath", aliasScore),
@@ -1559,7 +1818,7 @@ def main() -> None:
     started = time.perf_counter()
     heldout, entries, clusterSizes, profiles, corpusStats = buildSplit()
     leaked = sorted({case.alias for case in heldout} & {entry.alias for entry in entries})
-    print("V190 canonical token typed sibling proof")
+    print("V192 predictive contrast capsule")
     print(
         f"heldout={len(heldout)} trainEntries={len(entries)} snakes={len(clusterSizes)} "
         f"eligibleClusters={sum(1 for _snake, size in clusterSizes.items() if size >= MIN_CLUSTER_SIZE)} leakedAliases={len(leaked)}"

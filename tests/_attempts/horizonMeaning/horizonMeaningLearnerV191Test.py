@@ -1,7 +1,7 @@
-"""Horizon Meaning Learner V190 - canonical token typed sibling proof.
+"""Horizon Meaning Learner V191 - canonical token typed sibling proof.
 
 아이디어:
-    V189 의 local deletion sibling 은 term 표면이 너무 넓어 문자 유사 충돌이 의미 충돌보다 많았다. V190 은 sibling 을
+    V189 의 local deletion sibling 은 term 표면이 너무 넓어 문자 유사 충돌이 의미 충돌보다 많았다. V191 은 sibling 을
     한국어 term 자체에서 직접 만들지 않고, train alias 가 연결된 canonical snakeId 의 token 경험으로 한 단계 올린다.
 
     절차:
@@ -18,17 +18,17 @@
     계열을 canonical object/action token 경험으로 자동 분리해 V188 counterPathWithSj 를 넘는지 확인하는 것이다.
 
 실행 코드:
-    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
-    $env:DARTLAB_HORIZON_V190_HELDOUT_LIMIT='80'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
-    $env:DARTLAB_HORIZON_V190_HELDOUT_LIMIT='600'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
-    uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV190Test.py
+    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV191Test.py
+    $env:DARTLAB_HORIZON_V191_HELDOUT_LIMIT='80'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV191Test.py
+    $env:DARTLAB_HORIZON_V191_HELDOUT_LIMIT='600'; uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV191Test.py
+    uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV191Test.py
 
 검증 기준:
     - held-out query surface 는 train candidate alias 에 없어야 한다.
     - corpus matcher 도 train alias 만 사용해야 하며 held-out alias 를 문서에서 직접 찾으면 안 된다.
     - 후보는 평가 11개가 아니라 accountMappings 의 수천 canonical snakeId 여야 한다.
-    - baseline, V186 alias path, V187 corpus path, V188 counter path, V190 typed sibling path 를 같은 split 에서 비교한다.
-    - V190 typedSiblingPathWithSj 가 V188 counterPathWithSj 의 320/497 MRR 을 넘고 Top1 을 떨어뜨리지 않으면 성공이다.
+    - baseline, V186 alias path, V187 corpus path, V188 counter path, V191 typed sibling path 를 같은 split 에서 비교한다.
+    - V191 typedSiblingPathWithSj 가 V188 counterPathWithSj 의 320/497 MRR 을 넘고 Top1 을 떨어뜨리지 않으면 성공이다.
 
 결과:
     20 smoke: counterPathWithSj Top1=9/20, Top3=15/20, Top5=16/20, MRR=0.6066,
@@ -70,6 +70,7 @@ import os
 import re
 import time
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -80,28 +81,28 @@ MAPPING_PATH = ROOT / "src" / "dartlab" / "reference" / "data" / "accountMapping
 DOCS_DIR = ROOT / "data" / "dart" / "docs"
 ALL_FILINGS_DIR = ROOT / "data" / "dart" / "allFilings"
 
-HELDOUT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_HELDOUT_LIMIT", "320"))
-MIN_CLUSTER_SIZE = int(os.environ.get("DARTLAB_HORIZON_V190_MIN_CLUSTER_SIZE", "4"))
-MAX_TRAIN_ALIASES_PER_SNAKE = int(os.environ.get("DARTLAB_HORIZON_V190_MAX_TRAIN_ALIASES_PER_SNAKE", "80"))
-POOL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_POOL_LIMIT", "5200"))
-POSTING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_POSTING_ROW_LIMIT", "2600"))
-TOP_K = int(os.environ.get("DARTLAB_HORIZON_V190_TOP_K", "10"))
-NUM_MH = int(os.environ.get("DARTLAB_HORIZON_V190_NUM_MH", "32"))
-PATH_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_PATH_ATOM_LIMIT", "96"))
-PATH_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_PATH_RESIDUAL_LIMIT", "64"))
-CORPUS_DOC_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_DOC_FILE_LIMIT", "18"))
-CORPUS_ALL_FILINGS_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_ALL_FILINGS_FILE_LIMIT", "6"))
-CORPUS_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_ROW_LIMIT", "18000"))
-CORPUS_TEXT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_TEXT_LIMIT", "3600"))
-CORPUS_GRAM_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_GRAM_POSTING_LIMIT", "160"))
-CORPUS_ALIAS_MATCH_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_ALIAS_MATCH_LIMIT", "90000"))
-CORPUS_PROFILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_PROFILE_LIMIT", "96"))
-CORPUS_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_RESIDUAL_LIMIT", "64"))
-CORPUS_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_CORPUS_FRAGMENT_LIMIT", "64"))
-COUNTER_SCALE = float(os.environ.get("DARTLAB_HORIZON_V190_COUNTER_SCALE", "0.50"))
-TYPED_SIBLING_SCALE = float(os.environ.get("DARTLAB_HORIZON_V190_TYPED_SIBLING_SCALE", "0.55"))
-TYPED_SUPPORT_SCALE = float(os.environ.get("DARTLAB_HORIZON_V190_TYPED_SUPPORT_SCALE", "0.30"))
-TYPED_TERM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V190_TYPED_TERM_LIMIT", "80"))
+HELDOUT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_HELDOUT_LIMIT", "320"))
+MIN_CLUSTER_SIZE = int(os.environ.get("DARTLAB_HORIZON_V191_MIN_CLUSTER_SIZE", "4"))
+MAX_TRAIN_ALIASES_PER_SNAKE = int(os.environ.get("DARTLAB_HORIZON_V191_MAX_TRAIN_ALIASES_PER_SNAKE", "80"))
+POOL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_POOL_LIMIT", "5200"))
+POSTING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_POSTING_ROW_LIMIT", "2600"))
+TOP_K = int(os.environ.get("DARTLAB_HORIZON_V191_TOP_K", "10"))
+NUM_MH = int(os.environ.get("DARTLAB_HORIZON_V191_NUM_MH", "32"))
+PATH_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_PATH_ATOM_LIMIT", "96"))
+PATH_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_PATH_RESIDUAL_LIMIT", "64"))
+CORPUS_DOC_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_DOC_FILE_LIMIT", "18"))
+CORPUS_ALL_FILINGS_FILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_ALL_FILINGS_FILE_LIMIT", "6"))
+CORPUS_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_ROW_LIMIT", "18000"))
+CORPUS_TEXT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_TEXT_LIMIT", "3600"))
+CORPUS_GRAM_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_GRAM_POSTING_LIMIT", "160"))
+CORPUS_ALIAS_MATCH_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_ALIAS_MATCH_LIMIT", "90000"))
+CORPUS_PROFILE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_PROFILE_LIMIT", "96"))
+CORPUS_RESIDUAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_RESIDUAL_LIMIT", "64"))
+CORPUS_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_CORPUS_FRAGMENT_LIMIT", "64"))
+COUNTER_SCALE = float(os.environ.get("DARTLAB_HORIZON_V191_COUNTER_SCALE", "0.50"))
+TYPED_SIBLING_SCALE = float(os.environ.get("DARTLAB_HORIZON_V191_TYPED_SIBLING_SCALE", "0.55"))
+TYPED_SUPPORT_SCALE = float(os.environ.get("DARTLAB_HORIZON_V191_TYPED_SUPPORT_SCALE", "0.30"))
+TYPED_TERM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V191_TYPED_TERM_LIMIT", "80"))
 
 HANGUL_START = 0xAC00
 HANGUL_END = 0xD7A3
@@ -405,6 +406,118 @@ CANON_STOP_TOKENS = frozenset(
         "with",
     }
 )
+
+ACTION_TOKENS = frozenset(
+    {
+        "addition",
+        "acquire",
+        "acquisition",
+        "amortization",
+        "borrow",
+        "borrowing",
+        "collection",
+        "decrease",
+        "depreciation",
+        "derecognition",
+        "dispose",
+        "disposal",
+        "expense",
+        "gain",
+        "impairment",
+        "increase",
+        "inflow",
+        "issue",
+        "loss",
+        "outflow",
+        "paid",
+        "payment",
+        "proceed",
+        "purchase",
+        "receipt",
+        "received",
+        "recognition",
+        "redeem",
+        "redemption",
+        "reduction",
+        "reversal",
+        "sale",
+        "settlement",
+        "transfer",
+    }
+)
+
+MODIFIER_TOKENS = frozenset(
+    {
+        "adjusted",
+        "amortized",
+        "basic",
+        "carrying",
+        "consolidated",
+        "current",
+        "diluted",
+        "fair",
+        "foreign",
+        "gross",
+        "longterm",
+        "net",
+        "noncurrent",
+        "other",
+        "separate",
+        "shortterm",
+        "total",
+        "weighted",
+    }
+)
+
+STATEMENT_TOKENS = frozenset(
+    {
+        "balance",
+        "cash",
+        "comprehensive",
+        "equity",
+        "financing",
+        "flow",
+        "income",
+        "investing",
+        "operating",
+        "profit",
+        "statement",
+    }
+)
+
+GENERIC_OBJECT_TOKENS = frozenset(
+    {
+        "account",
+        "activity",
+        "amount",
+        "change",
+        "effect",
+        "item",
+        "portion",
+        "transaction",
+        "year",
+    }
+)
+
+
+def canonTokenRole(token: str) -> str:
+    if token in ACTION_TOKENS:
+        return "action"
+    if token in MODIFIER_TOKENS:
+        return "modifier"
+    if token in STATEMENT_TOKENS:
+        return "statement"
+    if token in GENERIC_OBJECT_TOKENS:
+        return "generic"
+    return "object"
+
+
+def canonTokenParts(tokens: Iterable[str]) -> dict[str, set[str]]:
+    parts = {"action": set(), "modifier": set(), "statement": set(), "object": set(), "generic": set()}
+    for token in tokens:
+        role = canonTokenRole(token)
+        parts[role].add(token)
+    return parts
 
 
 def normalizeCanonToken(token: str) -> str:
@@ -1378,26 +1491,47 @@ def typedSiblingDelta(
     if not candidateTokens:
         return 0.0
 
+    queryParts = canonTokenParts(queryTokens.keys())
+    candidateParts = canonTokenParts(candidateTokens)
+    objectOverlap = queryParts["object"] & candidateParts["object"]
+    statementOverlap = queryParts["statement"] & candidateParts["statement"]
+    familyGate = bool(objectOverlap or statementOverlap)
+    if not familyGate:
+        return 0.0
+
     support = 0.0
     penalty = 0.0
     matchedTokens = 0
     for token, weight in queryTokens.most_common(12):
         tokenWeight = max(0.0, float(weight))
+        role = canonTokenRole(token)
         if token in candidateTokens:
             matchedTokens += 1
-            support += min(2.2, tokenWeight * 0.10)
+            if role in {"action", "modifier"}:
+                support += min(2.4, tokenWeight * 0.11)
+            elif role == "statement":
+                support += min(1.4, tokenWeight * 0.06)
+            elif role == "object":
+                support += min(1.1, tokenWeight * 0.05)
+            continue
+        if role not in {"action", "modifier", "statement"}:
             continue
         alternatives = CANON_TOKEN_ALTERNATIVES.get(token, frozenset())
         conflicts = alternatives & candidateTokens
         if conflicts:
-            conflictIdf = max(CANON_TOKEN_IDF.get(conflict, 0.0) for conflict in conflicts)
-            penalty += min(4.5, tokenWeight * (0.30 + conflictIdf * 0.08))
+            sameRoleConflicts = {conflict for conflict in conflicts if canonTokenRole(conflict) == role}
+            if not sameRoleConflicts:
+                continue
+            conflictIdf = max(CANON_TOKEN_IDF.get(conflict, 0.0) for conflict in sameRoleConflicts)
+            penalty += min(5.2, tokenWeight * (0.34 + conflictIdf * 0.10))
 
     queryText = cleanSurface(query)
     entryText = cleanSurface(entry.alias)
     if entryText and entryText in queryText and queryText != entryText:
         for token, weight in queryTokens.most_common(8):
             if token in candidateTokens:
+                continue
+            if canonTokenRole(token) not in {"action", "modifier"}:
                 continue
             if CANON_TOKEN_IDF.get(token, 0.0) < 1.2:
                 continue
@@ -1406,7 +1540,7 @@ def typedSiblingDelta(
         for token, weight in queryTokens.most_common(8):
             if token in candidateTokens:
                 continue
-            if CANON_TOKEN_IDF.get(token, 0.0) >= 1.6:
+            if canonTokenRole(token) in {"action", "modifier"} and CANON_TOKEN_IDF.get(token, 0.0) >= 1.6:
                 penalty += min(1.4, float(weight) * 0.07)
 
     return max(-2.8, min(9.0, penalty * TYPED_SIBLING_SCALE - support * TYPED_SUPPORT_SCALE))
@@ -1559,7 +1693,7 @@ def main() -> None:
     started = time.perf_counter()
     heldout, entries, clusterSizes, profiles, corpusStats = buildSplit()
     leaked = sorted({case.alias for case in heldout} & {entry.alias for entry in entries})
-    print("V190 canonical token typed sibling proof")
+    print("V191 object-family gated typed sibling proof")
     print(
         f"heldout={len(heldout)} trainEntries={len(entries)} snakes={len(clusterSizes)} "
         f"eligibleClusters={sum(1 for _snake, size in clusterSizes.items() if size >= MIN_CLUSTER_SIZE)} leakedAliases={len(leaked)}"
