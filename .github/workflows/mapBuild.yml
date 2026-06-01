@@ -24,7 +24,9 @@ jobs:
   build-map:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # 체인 decouple (하나 깨지면 다 깨진다 가드): upstream(Data Prebuild) 실패에도 실행 — 자체 HF seed +
+    # Smoke import 가 데이터·src 를 독립 보장. cancelled 만 skip. dispatch 항상 실행.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
 
     steps:
       - uses: actions/checkout@v5

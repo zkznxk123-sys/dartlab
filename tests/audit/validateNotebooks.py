@@ -12,8 +12,10 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-EXCLUDE_DIRS = {"_backup", ".ipynb_checkpoints", "node_modules", ".venv"}
+REPO_ROOT = (
+    Path(__file__).resolve().parents[2]
+)  # tests/audit/<file> → repo root (parent.parent 는 tests/ 라 vacuous 였음)
+EXCLUDE_DIRS = {"_backup", ".ipynb_checkpoints", "node_modules", ".venv", "experiments"}
 
 
 def findNotebooks(root: Path) -> list[Path]:

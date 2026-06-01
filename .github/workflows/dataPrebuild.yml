@@ -25,7 +25,10 @@ jobs:
   prebuild-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # 체인 decouple (하나 깨지면 다 깨진다 가드): upstream(Data Sync) 실패에도 실행 — prebuild 가
+    # HF seed(source of truth)로 데이터 충전하고, 자체 Smoke import 가 src 회귀를 별도로 막는다.
+    # cancelled 만 skip (의도적 중단). dispatch 는 항상 실행. docs/dartNewStocks 와 동일 resilient 패턴.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
 
     steps:
       - uses: actions/checkout@v5
