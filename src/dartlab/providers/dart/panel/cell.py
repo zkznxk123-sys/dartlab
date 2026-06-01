@@ -130,16 +130,16 @@ def readCellWide(
 
     SeeAlso:
         - ``build.cell.buildPanelCells`` — 본 artifact 생산.
-        - ``panel.Panel.__call__`` — ``c.panel("IS", freq="year")`` 진입점 (본 함수 위임).
+        - ``readStatement`` — 항목명 statement view(`c.panel("is")`). 본 함수는 acode 정밀 차원 view(직접 호출).
 
     Requires:
         - polars. data/dart/panelCell/{code}/*.parquet.
 
     Capabilities:
-        - 정부 native 셀을 freq 토큰 선택만으로 acode×period 격자 — 추측·산수 0, 깊이는 axisPath 행.
+        - 정부 native XBRL 셀을 freq 토큰 선택만으로 acode×period 격자 — 추측·산수 0, 깊이는 axisPath 행.
 
     Guide:
-        - ``c.panel("IS", freq="year")`` 로 호출. statement 매핑은 Panel._FIVE_STMT.
+        - 직접 호출 (acode/축 정밀 view). 사람용 statement 는 ``readStatement``/``c.panel("is")``.
 
     AIContext:
         - 상태 없는 read. valueRaw(콤마/괄호) 그대로 — 숫자화는 소비자.
@@ -178,7 +178,13 @@ def readCellWide(
         return None
 
     df = pl.concat([pl.read_parquet(str(f)) for f in files], how="vertical")
-    df = df.filter((pl.col("statement") == statement) & (pl.col("scope") == scope) & _freqMask(freq))
+    # readCellWide = XBRL acode 정밀 view (옛 acode=None 셀은 readStatement 전용).
+    df = df.filter(
+        (pl.col("statement") == statement)
+        & (pl.col("scope") == scope)
+        & pl.col("acode").is_not_null()
+        & _freqMask(freq)
+    )
     if df.is_empty():
         return None
 
@@ -198,3 +204,120 @@ def readCellWide(
 
     periodCols = sorted((c for c in wide.columns if c not in CELL_PIVOT_INDEX and c != "label"), reverse=True)
     return wide.select([*CELL_PIVOT_INDEX, "label", *periodCols])
+
+
+# 정규화 매칭 키: (주N) 주석참조 제거 + 공백 제거 (XBRL label ↔ 옛 항목명 통합).
+_NOTE_PAT = r"\(주[\s\d,]+\)"
+
+
+def _normalizeLabel(col: pl.Expr) -> pl.Expr:
+    """label → 매칭 키: ``(주N)`` strip + 전 공백 제거. ("매출액 (주30)"→"매출액")."""
+    return col.str.replace_all(_NOTE_PAT, "").str.replace_all(r"\s+", "")
+
+
+def readStatement(
+    code: str,
+    *,
+    statement: str,
+    freq: str = "year",
+    scope: str = "consolidated",
+    marketNs: str = "kr",
+    periods: list[str] | None = None,
+) -> pl.DataFrame | None:
+    """native 재무제표 — 항목명 × 전 기간 (XBRL 최근 + 옛 표 과거 통합, 2011~).
+
+    셀 artifact(XBRL 정밀 + 옛 위치파싱)를 **정규화 항목명**으로 통합 pivot. top-level axis
+    (ConsolidatedMember, 깊이 1) 만 = 재무제표 라인아이템. 겹치는 해는 최신 filing(=XBRL) 우선.
+    `readCellWide`(acode 정밀 차원 view) 와 별개 — 본 함수가 `c.panel("is")` statement view.
+
+    Args:
+        code: 종목코드.
+        statement: 5표 ("BS"/"IS2"/"IS3"/"CF"/"EF").
+        freq: "year"(연간) / "quarter"(분기) / "ytd"(누적). 기본 year.
+        scope: "consolidated" / "standalone". 기본 consolidated.
+        marketNs: 시장 namespace.
+        periods: 특정 filing period parquet 만 (prune). None=전체.
+
+    Returns:
+        wide DataFrame — 행=(account 정규화명, label 표시명), 열=period(최신 좌측), cell=valueRaw.
+        또는 None (artifact 없음 / statement 미존재 / 매칭 0).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> readStatement("005930", statement="IS2", freq="year")  # doctest: +SKIP — 손익 2011~ 연속
+
+    SeeAlso:
+        - ``build.cell.buildPanelCells`` — XBRL+옛 셀 생산.
+        - ``readCellWide`` — acode 정밀 차원 view (본 함수는 항목명 statement view).
+        - ``panel.Panel.__call__`` — ``c.panel("is", freq=)`` 진입점.
+
+    Requires:
+        - polars. data/dart/panelCell/{code}/*.parquet.
+
+    Capabilities:
+        - native 재무제표를 XBRL 경계(2022) 넘어 항목명 매칭으로 과거 연장 — docs.parquet 0.
+
+    Guide:
+        - ``c.panel("is")`` 소문자 호출 → 본 함수. 대문자 IS 는 finance(파사드).
+
+    AIContext:
+        - 상태 없는 read. valueRaw 그대로. 항목명 다르면 별 행(숨김 0).
+
+    When:
+        - native 재무제표를 전 기간 연속으로 볼 때.
+
+    How:
+        - parquet glob → statement/scope/depth-1/freq filter → 정규화명 pivot → 최신 filing dedup.
+
+    LLM Specifications:
+        AntiPatterns:
+            - lxml import 금지(R2). 항목명 매칭 실패를 숨기지 말 것(별 행).
+        OutputSchema:
+            - ``pl.DataFrame | None`` (항목명×period).
+        Prerequisites:
+            - 셀 artifact.
+        Freshness:
+            - 매 read.
+        Dataflow:
+            - glob → filter → 정규화명 pivot → dedup.
+        TargetMarkets:
+            - KR + US.
+    """
+    if statement not in _CELL_STATEMENTS:
+        return None
+    base = _cellDir(code, marketNs)
+    if not base.exists():
+        return None
+    files = sorted(base.glob("*.parquet"))
+    if periods is not None:
+        keep = set(periods)
+        files = [f for f in files if f.stem in keep]
+    if not files:
+        return None
+
+    df = pl.concat([pl.read_parquet(str(f)) for f in files], how="vertical")
+    df = df.filter(
+        (pl.col("statement") == statement)
+        & (pl.col("scope") == scope)
+        & ~pl.col("axisPath").str.contains("|", literal=True)  # depth-1 top-level 라인아이템
+        & _freqMask(freq)
+    )
+    if df.is_empty():
+        return None
+
+    df = df.with_columns(
+        _normalizeLabel(pl.col("label")).alias("_name"),
+        _periodLabelExpr(freq).alias("_period"),
+    ).sort("rceptNo", descending=True)  # 최신 filing(=XBRL) 우선
+    deduped = df.unique(subset=["_name", "_period"], keep="first", maintain_order=True)
+    meta = df.group_by("_name", maintain_order=True).agg(
+        pl.col("label").first().alias("label"),  # 최신 filing 표시명
+        pl.col("cellOrder").min().alias("_ord"),
+    )
+
+    wide = deduped.pivot(values="valueRaw", index="_name", on="_period", aggregate_function="first")
+    wide = wide.join(meta, on="_name", how="left").sort("_ord").drop("_ord").rename({"_name": "account"})
+    periodCols = sorted((c for c in wide.columns if c not in ("account", "label")), reverse=True)
+    return wide.select(["account", "label", *periodCols])

@@ -58,16 +58,29 @@ def test_search_separate_from_call() -> None:
     assert p("anything") is None  # 이름표 검색
 
 
-def test_freq_five_statement_mapping() -> None:
-    """5표 topic → statement 매핑 (SCE=EF, CIS=IS3)."""
-    from dartlab.providers.dart.panel.panel import _FIVE_STMT
+def test_native_stmt_mapping_lowercase() -> None:
+    """소문자 5표 → native statement 매핑 (sce=EF, cis=IS3). 소스 = 대소문자."""
+    from dartlab.providers.dart.panel.panel import _NATIVE_STMT
 
-    assert _FIVE_STMT == {"IS": "IS2", "CIS": "IS3", "CF": "CF", "BS": "BS", "SCE": "EF"}
+    assert _NATIVE_STMT == {"is": "IS2", "cis": "IS3", "cf": "CF", "bs": "BS", "sce": "EF"}
 
 
-def test_freq_no_artifact_returns_none() -> None:
-    """freq + 5표 topic 인데 셀 artifact 없으면 None (예외 없음)."""
+def test_case_dispatch_native_vs_finance() -> None:
+    """소문자=native(자급), 대문자=finance(파사드 주입). artifact/주입 없으면 둘 다 None."""
     from dartlab.providers.dart.panel import Panel
 
     p = Panel("000000nonexistent")
-    assert p("IS", freq="year") is None
+    assert p("is", freq="year") is None  # native — 셀 artifact 없음
+    assert p("IS", freq="year") is None  # finance — standalone 주입 없음
+
+
+def test_freq_not_source_switch() -> None:
+    """freq 는 입도일 뿐 — 대문자 IS 는 freq 와 무관히 native 안 부름(소스=대소문자)."""
+    import inspect
+
+    from dartlab.providers.dart.panel.panel import Panel
+
+    # __call__ 에 freq 인자는 있지만 native 분기는 _NATIVE_STMT(소문자)로만
+    src = inspect.getsource(Panel.__call__)
+    assert "_NATIVE_STMT" in src
+    assert "readStatement" in src  # native 는 readStatement, freq→readCellWide 버그 제거

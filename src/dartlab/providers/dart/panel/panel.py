@@ -36,9 +36,11 @@ import polars as pl
 from . import read as _read
 from .period import isPeriodColumn as _isPeriodColumn
 
-# 재무 5표 topic → 셀 artifact statement(canonicalKey). freq 호출 시 native 셀 위임 매핑.
+# 소스 = 대소문자. 소문자 5표 → native(panel 자급 statement). 대문자 5표 → finance(파사드 _showFn).
 # SCE(자본변동표)=EF, CIS(포괄손익)=IS3 — ACLASS 실측 (EF_C/IS_C3).
-_FIVE_STMT: dict[str, str] = {"IS": "IS2", "CIS": "IS3", "CF": "CF", "BS": "BS", "SCE": "EF"}
+_NATIVE_STMT: dict[str, str] = {"is": "IS2", "cis": "IS3", "cf": "CF", "bs": "BS", "sce": "EF"}
+# panel freq(입도) → finance freq (대문자 IS 경로). 소스 스위치 아님.
+_FINANCE_FREQ: dict[str, str] = {"year": "Y", "quarter": "Q", "ytd": "YTD"}
 
 
 class Panel(pl.DataFrame):
@@ -185,17 +187,18 @@ class Panel(pl.DataFrame):
         ``Company.panel`` facade 가 set — standalone ``Panel(code)`` 는 주입 없어 항상 raw 검색.
 
         Args:
-            key: None(기본) 면 전체 격자(tag/periods override 시 재read, 아니면 self). canonicalKey
-                ("NT_D826380"/"BS") 또는 한글 섹션명("재고"), 또는 강한 소스 topic("IS").
-            source: "auto"(기본, 강한 소스는 show 주입) / "raw"(강제 raw 공시) / "finance"/"report"(강제 주입).
+            key: None(기본) 면 전체 격자. **소스 = 대소문자** — 소문자 5표(is/bs/cf/cis/sce) = native
+                재무제표(panel 자급, XBRL+옛 통합 전기간). 대문자 5표(IS/BS/CF/CIS/SCE) = finance(파사드
+                _showFn 주입). canonicalKey("NT_D826380")·한글 섹션명("재고") = raw 공시 행 검색.
+            source: "auto"(기본) / "raw"(강제 raw 공시) / "finance"/"report"(강제 주입).
             tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override). raw 검색만 적용.
-            periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read. raw 검색만 적용.
-            freq: None(기본) 면 blob 경로(wide 불가침). "year"/"quarter"/"ytd" + 5표 topic(IS/BS/CF/
-                CIS/SCE) 면 native 셀 세분화(readCellWide) 위임 — 정부 토큰(dFY/eFY/TQQ/TQA) 선택.
+            periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read.
+            freq: **입도** — "year"(연)/"quarter"(분기)/"ytd"(누적). native(소문자)·finance(대문자) 둘 다
+                받음. 소스 스위치 아님. native 기본 year, finance 는 _FINANCE_FREQ 매핑(Y/Q/YTD).
 
         Returns:
-            매칭 행 wide DataFrame (period 가로 정렬), key 없으면 전체 격자, freq 면 acode×period 셀
-            wide. 또는 None (매칭 0 / artifact 없음).
+            소문자 5표 → native 재무제표 wide(항목명×기간). 대문자 5표 → finance wide. key 없으면 전체
+            격자. 한글/canonicalKey → 매칭 행. 또는 None (매칭 0 / artifact 없음 / finance 주입 없음).
 
         Raises:
             없음.
@@ -244,13 +247,6 @@ class Panel(pl.DataFrame):
                 - KR + US.
         """
         code = getattr(self, "_code", None)
-        # freq + 5표 topic → 셀 세분화(native XBRL) 위임 (Phase 2). freq 없으면 blob 경로(wide 불가침).
-        if freq is not None and key is not None and key in _FIVE_STMT and code is not None:
-            from . import cell as _cell
-
-            return _cell.readCellWide(
-                code, statement=_FIVE_STMT[key], freq=freq, marketNs=self._marketNs, periods=periods or self._periods
-            )
         effTag = self._tag if tag is None else tag
         # key 미전달(None): tag/periods override 면 전체 격자 재read, 아니면 self (이미 격자).
         if key is None:
@@ -260,12 +256,26 @@ class Panel(pl.DataFrame):
         # 명시 빈 key("") → None (하위호환).
         if not key:
             return None
-        # 강한 소스(finance/report/notes) 주입 — facade(Company.panel)가 _showFn/_strongFn 주입 시.
-        # panel.py 는 finance 를 모름 — 주입된 callable 만 호출(layer 격리, cycle 0).
+        # native 재무제표 (소문자 5표 is/bs/cf/cis/sce) → panel 자급 statement(XBRL+옛 통합, docs 0).
+        # freq=입도(year/quarter/ytd), 기본 year. 소스 스위치 아님.
+        if key in _NATIVE_STMT and code is not None:
+            from . import cell as _cell
+
+            return _cell.readStatement(
+                code,
+                statement=_NATIVE_STMT[key],
+                freq=freq or "year",
+                marketNs=self._marketNs,
+                periods=periods or self._periods,
+            )
+        # 강한 소스(finance/report, 대문자 5표 IS/BS/CF/CIS/SCE 포함) 주입 — facade(Company.panel) _showFn.
+        # panel.py 는 finance 를 모름 — 주입된 callable 만 호출(layer 격리, cycle 0). freq 는 finance 입도로 전달.
         if source != "raw":
             showFn = getattr(self, "_showFn", None)
             strongFn = getattr(self, "_strongFn", None)
             if showFn is not None and (source in ("finance", "report") or (strongFn is not None and strongFn(key))):
+                if freq is not None:
+                    return showFn(key, freq=_FINANCE_FREQ.get(freq, freq))
                 return showFn(key)
         # tag/periods override + code 보유(fresh 인스턴스) 시 재read, 그 외 self 필터.
         if code is not None and ((tag is not None and effTag != self._tag) or periods is not None):
