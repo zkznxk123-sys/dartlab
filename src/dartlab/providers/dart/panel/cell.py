@@ -376,8 +376,12 @@ def readStatement(
     df = _cellsFromPanel(code, marketNs, periods)
     if df is None:
         return None
-    # 폴백 우선순위: 손익(is=IS2)은 IS2→IS3(포괄손익)→IS1(단일) 순으로 — 회사마다 손익 표현이 다름.
-    # 각 statement 는 연결(consolidated) 없으면 별도(standalone) — 별도만 공시하는 회사 해소.
+    return _statementWithFallback(df, statement=statement, freq=freq, scope=scope)
+
+
+def _statementWithFallback(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame | None:
+    """셀 DataFrame → statement (소스-중립). 손익(is=IS2)은 IS2→IS3(포괄손익)→IS1(단일) 순 폴백 —
+    회사마다 손익 표현이 다름. 각 statement 는 연결 없으면 별도(별도만 공시하는 회사) 폴백."""
     stmtChain = ["IS2", "IS3", "IS1"] if statement == "IS2" else [statement]
     scopeChain = [scope, "standalone"] if scope == "consolidated" else [scope]
     for sc in scopeChain:
@@ -576,8 +580,12 @@ def readRatios(
         TargetMarkets:
             - KR (DART).
     """
+    # panel.parquet 1회 파싱 후 bs/is/cf 를 캐시 셀에서 추출 (readStatement×3 = 파싱 3회 중복 회피).
+    cells = _cellsFromPanel(code, marketNs, periods)
+    if cells is None:
+        return None
     statements = {
-        sjKey: readStatement(code, statement=stmt, freq=freq, scope=scope, marketNs=marketNs, periods=periods)
+        sjKey: _statementWithFallback(cells, statement=stmt, freq=freq, scope=scope)
         for sjKey, stmt in _RATIO_SOURCE_STMTS.items()
     }
     assembled = _assembleRatioSeries(statements)

@@ -290,7 +290,9 @@ def test_read_ratios_wide(monkeypatch) -> None:
     )
     cf = _ratioStmt([("영업활동현금흐름", {"2024": "350", "2023": "300"})])
     table = {"BS": bs, "IS2": is2, "CF": cf}
-    monkeypatch.setattr(C, "readStatement", lambda code, *, statement, **k: table.get(statement))
+    # readRatios 는 _cellsFromPanel 1회 파싱 후 _statementWithFallback 로 bs/is/cf 추출.
+    monkeypatch.setattr(C, "_cellsFromPanel", lambda code, *a, **k: pl.DataFrame({"_": [1]}))
+    monkeypatch.setattr(C, "_statementWithFallback", lambda df, *, statement, **k: table.get(statement))
 
     w = C.readRatios("X")
     assert w is not None

@@ -3,67 +3,97 @@
 panelCell 별 artifact 없이 ``c.panel("is")``/``c.panel("ratios")`` 는 panel.parquet 의 5표 contentRaw 를
 read-time 분해(``cell._cellsFromPanel``)한다. 본 census 는 ``data/dart/panel/{code}/`` 종목별로:
     - panel.parquet period 수
-    - 재무 5표(BS/IS2/IS3/CF/EF) 셀 커버 (in-memory 분해 결과)
-    - ``readRatios`` 비율 행 수 (native 비율 산출 성공)
-    - ``readStatement("IS2")`` 최소 연도 (과거 연장 도달)
+    - 재무 5표(BS/IS1/IS2/IS3/CF/EF) 셀 커버 (in-memory 분해 결과)
+    - 손익(IS1/2/3) 읽힘 여부 (연간→분기 폴백)
+    - native 비율 행 수
 
-결손 종목(셀 0 / 5표 결손 / 비율 0)을 리포트하고 ``dist/panelNative_census.json`` 으로 영속화.
-panel.parquet stale(옛 disclosureKey)이면 5표 셀 0 → 본 census 가 즉시 검출.
+회사당 ``_cellsFromPanel`` 1회만 파싱(lxml) 후 순수 함수로 재사용. 전수는 multiprocessing.
+
+핵심 판정:
+    - ``no_panel`` / ``no_cells``: panel.parquet 없음 / 5표 셀 분해 0 (stale disclosureKey = 재빌드 필요).
+    - ``no_income_statement``: IS1/2/3 자체 부재 (구조화 재무 없는 신규/SPAC = 정상).
+    - ``income_unreadable``: 손익 셀은 있는데 read 실패 = **진짜 버그 신호** (0 이어야 정상).
 
 사용법::
 
-    uv run python -X utf8 tests/audit/panelNativeCensus.py            # 전종목
+    uv run python -X utf8 tests/audit/panelNativeCensus.py                 # 전종목 (multiprocessing)
     uv run python -X utf8 tests/audit/panelNativeCensus.py --codes 005930,000660
-    uv run python -X utf8 tests/audit/panelNativeCensus.py --limit 100  # 표본
+    uv run python -X utf8 tests/audit/panelNativeCensus.py --limit 200 --workers 4
 
-종료 코드: 0 (보고용). --strict 면 결손 발견 시 1.
+종료 코드: 0 (보고용). --strict 면 income_unreadable 발견 시 1.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import multiprocessing as mp
 import sys
 from pathlib import Path
 
-import polars as pl
-
 import dartlab.config as _cfg
-from dartlab.providers.dart.panel.cell import _cellsFromPanel, cellStatements, readRatios, readStatement
 
-_FIVE = cellStatements()  # {BS, IS2, IS3, CF, EF}
+_INCOME = {"IS1", "IS2", "IS3"}
 
 
 def _censusOne(code: str) -> dict:
-    """종목 1개 census — panel period/5표커버/비율행/최소연도 (panel.parquet 단일)."""
+    """종목 1개 census — _cellsFromPanel 1회 파싱 후 순수 함수 재사용 (손익/비율)."""
+    import polars as pl
+
+    from dartlab.core.ratios import calcRatioSeries
+    from dartlab.providers.dart.panel.cell import (
+        _assembleRatioSeries,
+        _cellsFromPanel,
+        _ratiosToWide,
+        _statementWithFallback,
+        cellStatements,
+    )
+
+    five = cellStatements()
     panelDir = Path(_cfg.dataDir) / "dart" / "panel" / code
     files = sorted(panelDir.glob("*.parquet")) if panelDir.exists() else []
     rec: dict = {"code": code, "periods": len(files), "statements": [], "ratioRows": 0, "isMinYear": None, "issues": []}
     if not files:
         rec["issues"].append("no_panel")
         return rec
-    cells = _cellsFromPanel(code)  # panel.parquet 5표 contentRaw → in-memory 셀
+    cells = _cellsFromPanel(code)  # 1회 lxml 파싱
     if cells is None:
-        rec["issues"].append("no_cells")  # 5표 행 0 (stale disclosureKey 등)
+        rec["issues"].append("no_cells")
         return rec
-    rec["statements"] = sorted(s for s in cells["statement"].unique().to_list() if s in _FIVE)
-    incomeStmts = {"IS1", "IS2", "IS3"}
-    if not (set(rec["statements"]) & incomeStmts):
-        rec["issues"].append("no_income_statement")  # 손익(IS1/2/3) 자체 부재 (구조화 재무 없음)
-    # 비율·손익 — 연간 우선, 없으면 분기(신규 상장 등 연간 미신고 회사). 둘 다 0 이면 결손.
-    ratios = readRatios(code, freq="year")
-    if ratios is None or ratios.is_empty():
-        ratios = readRatios(code, freq="quarter")
-    rec["ratioRows"] = 0 if ratios is None else ratios.height
-    isw = readStatement(code, statement="IS2", freq="year")
-    if isw is None or isw.is_empty():
-        isw = readStatement(code, statement="IS2", freq="quarter")
-    rec["hasIncome"] = isw is not None and isw.height > 0
-    if not rec["hasIncome"] and (set(rec["statements"]) & incomeStmts):
-        rec["issues"].append("income_unreadable")  # 손익 셀은 있는데 read 실패 (진짜 버그 신호)
-    if isw is not None:
-        cols = [c for c in isw.columns if c[:4].isdigit()]
+    rec["statements"] = sorted(s for s in cells["statement"].unique().to_list() if s in five)
+    hasIncomeStmt = bool(set(rec["statements"]) & _INCOME)
+    if not hasIncomeStmt:
+        rec["issues"].append("no_income_statement")
+
+    income = None
+    for fr in ("year", "quarter", "ytd"):
+        w = _statementWithFallback(cells, statement="IS2", freq=fr, scope="consolidated")
+        if w is not None and not w.is_empty():
+            income = w
+            break
+    rec["hasIncome"] = income is not None
+    if not rec["hasIncome"] and hasIncomeStmt:
+        rec["issues"].append("income_unreadable")  # 진짜 버그 신호
+    if income is not None:
+        cols = [c for c in income.columns if c[:4].isdigit()]
         rec["isMinYear"] = min(cols) if cols else None
+
+    for fr in ("year", "quarter", "ytd"):
+        src = {
+            "BS": _statementWithFallback(cells, statement="BS", freq=fr, scope="consolidated"),
+            "IS": _statementWithFallback(cells, statement="IS2", freq=fr, scope="consolidated"),
+            "CF": _statementWithFallback(cells, statement="CF", freq=fr, scope="consolidated"),
+        }
+        asm = _assembleRatioSeries(src)
+        if asm is None:
+            continue
+        series, years = asm
+        rs = calcRatioSeries(series, years, yoyLag=(4 if fr == "quarter" else 1))
+        wide = _ratiosToWide(rs, years)
+        if wide is not None and not wide.is_empty():
+            rec["ratioRows"] = wide.height
+            break
+    _ = pl  # noqa
     return rec
 
 
@@ -71,8 +101,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="panel native 전수 census")
     ap.add_argument("--codes", type=str, default="", help="콤마구분 종목. 빈값=전종목")
     ap.add_argument("--limit", type=int, default=0, help="표본 N 종목 (0=전체)")
+    ap.add_argument("--workers", type=int, default=4, help="multiprocessing workers")
     ap.add_argument("--out", type=str, default="dist/panelNative_census.json", help="JSON 출력 경로")
-    ap.add_argument("--strict", action="store_true", help="결손 발견 시 exit 1")
+    ap.add_argument("--strict", action="store_true", help="income_unreadable 발견 시 exit 1")
     args = ap.parse_args()
 
     base = Path(_cfg.dataDir) / "dart" / "panel"
@@ -85,18 +116,25 @@ def main() -> int:
     if args.limit > 0:
         codes = codes[: args.limit]
 
-    records = [_censusOne(c) for c in codes]
+    if args.workers > 1 and len(codes) > 1:
+        with mp.Pool(processes=args.workers) as pool:
+            records = pool.map(_censusOne, codes, chunksize=8)
+    else:
+        records = [_censusOne(c) for c in codes]
+
     withCells = [r for r in records if r["statements"]]
     withRatios = [r for r in records if r["ratioRows"] > 0]
-    issues = [r for r in records if r["issues"]]
+    unreadable = [r for r in records if "income_unreadable" in r["issues"]]
+    noIncome = [r for r in records if "no_income_statement" in r["issues"]]
+    noPanel = [r for r in records if "no_panel" in r["issues"] or "no_cells" in r["issues"]]
 
-    print(
-        f"[panelNative-census] {len(codes)}종목 — 셀보유 {len(withCells)}, 비율보유 {len(withRatios)}, 결손 {len(issues)}"
-    )
-    for r in issues[:50]:
-        print(f"  {r['code']}: {'; '.join(r['issues'])}")
-    if len(issues) > 50:
-        print(f"  ... +{len(issues) - 50} more")
+    print(f"[panelNative-census] {len(codes)}종목")
+    print(f"  셀보유 {len(withCells)} / 비율보유 {len(withRatios)}")
+    print(f"  no_panel·no_cells(미빌드/stale) {len(noPanel)}")
+    print(f"  no_income_statement(구조화재무 없음=정상) {len(noIncome)}")
+    print(f"  ★ income_unreadable(셀있는데 read실패=버그) {len(unreadable)}")
+    for r in unreadable[:30]:
+        print(f"    BUG {r['code']}: statements={r['statements']}")
 
     outPath = Path(args.out)
     outPath.parent.mkdir(parents=True, exist_ok=True)
@@ -106,7 +144,9 @@ def main() -> int:
                 "total": len(codes),
                 "withCells": len(withCells),
                 "withRatios": len(withRatios),
-                "issueCount": len(issues),
+                "noPanel": len(noPanel),
+                "noIncome": len(noIncome),
+                "incomeUnreadable": len(unreadable),
                 "records": records,
             },
             ensure_ascii=False,
@@ -115,7 +155,7 @@ def main() -> int:
         encoding="utf-8",
     )
     print(f"[panelNative-census] → {outPath}")
-    return 1 if (args.strict and issues) else 0
+    return 1 if (args.strict and unreadable) else 0
 
 
 if __name__ == "__main__":
