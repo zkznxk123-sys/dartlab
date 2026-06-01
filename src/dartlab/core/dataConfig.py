@@ -47,6 +47,17 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "nested": True,
     },
+    "panelCell": {
+        # PRD jazzy-napping-seal Phase 4 — 재무 5표 native 셀 + native 비율 재료.
+        # nested: data/dart/panelCell/{code}/{period}.parquet (14-col CELL_SCHEMA).
+        # build/cell.buildPanelCells 가 panel.parquet contentRaw → 셀 생산 (zip 재처리 0).
+        # providers.dart.panel.cell 이 read (readStatement/readRatios/readCellWide). 사용자 자동로드
+        # = cell._ensureCellFromHf (sectionsStorage._ensureFromHf 미러). panel.parquet 파생이라 stale 시 재빌드.
+        "dir": "dart/panelCell",
+        "label": "DART 재무 5표 native 셀 artifact (period-sharded, 14-col)",
+        "public": True,
+        "nested": True,
+    },
     "finance": {
         "dir": "dart/finance",
         "label": "재무 숫자 데이터",

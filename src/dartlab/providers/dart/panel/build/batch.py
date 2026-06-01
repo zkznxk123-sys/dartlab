@@ -200,6 +200,100 @@ def buildPanelAll(
     return result
 
 
+def _buildOneCells(args: tuple[str, str]) -> tuple[str, int, int, float]:
+    """worker — (code, outBaseDir) → (code, periodCount, cellRow, elapsed). 실패 흡수.
+
+    panelCell 빌드는 panel.parquet contentRaw 파싱 (zip/ref 불요) → _initWorker 불요.
+    """
+    code, outBaseDir = args
+    t0 = time.perf_counter()
+    try:
+        from .cell import buildPanelCells
+
+        stats = buildPanelCells(code, outBaseDir=Path(outBaseDir), overwrite=True, verbose=False)
+        return (code, len(stats), sum(stats.values()), time.perf_counter() - t0)
+    except (OSError, ValueError, RuntimeError, pl.exceptions.PolarsError) as exc:
+        _log.warning("buildPanelCells 실패 %s: %s", code, exc)
+        return (code, 0, 0, time.perf_counter() - t0)
+
+
+def buildPanelCellsAll(
+    *,
+    panelBaseDir: str | Path = "data/dart/panel",
+    outBaseDir: str | Path = "data/dart/panelCell",
+    codes: list[str] | None = None,
+    numWorkers: int = 8,
+    progressEvery: int = 50,
+    verbose: bool = True,
+) -> dict[str, tuple[int, int]]:
+    """panelCell 전종목 빌드 — panel.parquet 기빌드 종목 순회 (zip/ref 불요).
+
+    ``buildPanelAll`` 미러. panelCell 은 panel.parquet contentRaw 파생이라 ref table·_initWorker
+    불요 — worker 가 직접 ``buildPanelCells`` 호출. strict per-corp (memory 무관).
+
+    Args:
+        panelBaseDir: panel.parquet base (종목 자동추출 소스). codes 지정 시 무시.
+        outBaseDir: panelCell 출력 base.
+        codes: 종목 list. None = ``panelBaseDir`` 의 모든 종목(spine 제외).
+        numWorkers: Pool workers.
+        progressEvery: 진행 로그 빈도.
+        verbose: 진행 로그.
+
+    Returns:
+        ``{code: (periodCount, cellRow)}`` dict.
+
+    Raises:
+        없음 — 종목별 실패 흡수.
+
+    Example:
+        >>> buildPanelCellsAll(codes=["005930"])  # doctest: +SKIP
+
+    SeeAlso:
+        - ``build.cell.buildPanelCells`` — 단일 종목 셀 빌드 (worker 가 위임).
+        - ``buildPanelAll`` — panel.parquet 전종목 빌드 (본 함수의 선행).
+    """
+    if codes is None:
+        base = Path(_cfg.dataDir) / "dart" / "panel"
+        codes = sorted(d.name for d in base.iterdir() if d.is_dir() and d.name != "spine")
+
+    if verbose:
+        _log.info("buildPanelCellsAll: %d 종목, %d workers", len(codes), numWorkers)
+
+    outBaseStr = str(outBaseDir)
+    Path(outBaseStr).mkdir(parents=True, exist_ok=True)
+
+    args = [(c, outBaseStr) for c in codes]
+    result: dict[str, tuple[int, int]] = {}
+    processed = 0
+    empty = 0
+    totalRows = 0
+    t0 = time.perf_counter()
+    with mp.Pool(processes=numWorkers) as pool:
+        for code, pcount, rowCount, _elapsed in pool.imap_unordered(_buildOneCells, args, chunksize=4):
+            result[code] = (pcount, rowCount)
+            processed += 1
+            totalRows += rowCount
+            if pcount == 0:
+                empty += 1
+            if verbose and processed % progressEvery == 0:
+                wall = time.perf_counter() - t0
+                rate = processed / wall if wall > 0 else 0
+                eta = (len(codes) - processed) / rate if rate > 0 else 0
+                _log.info(
+                    "[%d/%d] %.1f code/s, ETA %.1f min, totalRows=%d, empty=%d",
+                    processed,
+                    len(codes),
+                    rate,
+                    eta / 60,
+                    totalRows,
+                    empty,
+                )
+    if verbose:
+        wall = time.perf_counter() - t0
+        _log.info("완료: %d codes, %d empty, %d cellRows, %.1f min", len(codes), empty, totalRows, wall / 60)
+    return result
+
+
 def _main() -> None:
     """CLI entry — ``python -X utf8 -m dartlab.providers.dart.panel.build --codes 005930``.
 
@@ -243,6 +337,9 @@ def _main() -> None:
         return
 
     if args.cells:
+        if args.all:
+            buildPanelCellsAll(outBaseDir="data/dart/panelCell")
+            return
         from .cell import buildPanelCells
 
         codes = [c.strip() for c in args.codes.split(",") if c.strip()] or ["005930"]

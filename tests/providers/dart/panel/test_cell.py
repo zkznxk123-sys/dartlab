@@ -323,3 +323,62 @@ def test_read_ratios_wide(monkeypatch) -> None:
     assert "roe" in ratios and "debtRatio" in ratios
     assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["2024"] is not None
     assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["label"] == "자기자본이익률 (ROE %)"
+
+
+# ── panelCell HF 자동로드 + dataConfig 등재 (Phase 4 파이프라인) ──
+
+
+def test_dataconfig_panelcell_registered() -> None:
+    """DATA_RELEASES 에 panelCell 등재 (HF 업로드/seed 자동 반영) — nested/public/dir."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+
+    assert "panelCell" in DATA_RELEASES
+    pc = DATA_RELEASES["panelCell"]
+    assert pc["dir"] == "dart/panelCell"
+    assert pc.get("nested") is True
+    assert pc.get("public") is True
+
+
+def test_ensure_cell_from_hf_skips_when_present(monkeypatch, tmp_path) -> None:
+    """artifact 디렉터리 존재 시 HF 미시도 (로컬 우선)."""
+    import dartlab.config as _cfg
+    import dartlab.providers.dart.panel.cell as C
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    (tmp_path / "dart" / "panelCell" / "005930").mkdir(parents=True)
+    called = {"n": 0}
+
+    def _boom(*a, **k):
+        called["n"] += 1
+        raise AssertionError("로컬 존재 시 snapshot_download 호출 금지")
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", _boom, raising=False)
+    C._ensureCellFromHf("005930", "kr")
+    assert called["n"] == 0
+
+
+def test_ensure_cell_from_hf_skips_when_no_hf_env(monkeypatch, tmp_path) -> None:
+    """DARTLAB_NO_HF_DOWNLOAD=1 시 다운로드 미시도 (offline)."""
+    import dartlab.config as _cfg
+    import dartlab.providers.dart.panel.cell as C
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))  # 디렉터리 부재
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
+    C._HF_CELL_ATTEMPTED.discard("999999")
+
+    def _boom(*a, **k):
+        raise AssertionError("NO_HF 시 snapshot_download 호출 금지")
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", _boom, raising=False)
+    C._ensureCellFromHf("999999", "kr")  # 예외 없이 즉시 반환
+
+
+def test_ensure_cell_from_hf_us_skip(monkeypatch, tmp_path) -> None:
+    """marketNs!=kr → skip (panelCell KR 전용, US 후속)."""
+    import dartlab.providers.dart.panel.cell as C
+
+    def _boom(*a, **k):
+        raise AssertionError("US 는 panelCell 미지원 — 호출 금지")
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", _boom, raising=False)
+    C._ensureCellFromHf("AAPL", "us")

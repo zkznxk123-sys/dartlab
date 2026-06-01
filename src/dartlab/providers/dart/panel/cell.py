@@ -77,6 +77,41 @@ def _cellDir(code: str, marketNs: str) -> Path:
     return Path(_cfg.dataDir) / "dart" / sub / code
 
 
+_HF_CELL_ATTEMPTED: set[str] = set()
+
+
+def _ensureCellFromHf(code: str, marketNs: str = "kr") -> None:
+    """panelCell artifact 부재 시 HF lazy 다운로드 — 한 종목만, 1회 시도.
+
+    sections ``_ensureFromHf`` 미러. 로컬 우선 — 디렉터리 있으면 즉시 반환. offline/
+    ``DARTLAB_NO_HF_DOWNLOAD=1`` skip. 실패는 graceful(빈 결과). KR(panelCell) 전용 — US 후속.
+    """
+    import os as _os
+
+    if marketNs != "kr":
+        return
+    if _cellDir(code, marketNs).exists():
+        return
+    if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
+        return
+    if code in _HF_CELL_ATTEMPTED:
+        return
+    _HF_CELL_ATTEMPTED.add(code)
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=[f"{DATA_RELEASES['panelCell']['dir']}/{code}/*.parquet"],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+    except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
+        pass
+
+
 def _freqMask(freq: str) -> pl.Expr:
     """freq → ctxFlow/ctxMode filter mask (토큰 선택, 산수 0).
 
@@ -175,6 +210,7 @@ def readCellWide(
     """
     if statement not in _CELL_STATEMENTS:
         return None
+    _ensureCellFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선)
     base = _cellDir(code, marketNs)
     if not base.exists():
         return None
@@ -339,6 +375,7 @@ def readStatement(
     """
     if statement not in _CELL_STATEMENTS:
         return None
+    _ensureCellFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선)
     base = _cellDir(code, marketNs)
     if not base.exists():
         return None

@@ -15,7 +15,7 @@ import 금지, R6). lxml·zipfile 사용은 본 build 패키지에 격리 (reade
 
 from __future__ import annotations
 
-from .batch import buildPanelAll
+from .batch import buildPanelAll, buildPanelCellsAll
 from .builder import (
     buildPanel,
     buildPanelBaseline,
@@ -33,6 +33,7 @@ __all__ = [
     "buildPanelAll",
     "buildPanelBaseline",
     "buildPanelCells",
+    "buildPanelCellsAll",
     "buildPanelFromStream",
     "buildSpine",
     "detectSchemaEra",
