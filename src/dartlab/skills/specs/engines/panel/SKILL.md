@@ -27,6 +27,8 @@ outputs:
   - 섹션 검색 행 (panel(key)) / 본문 전체검색 (panel.search(term))
   - native 재무제표 (c.panel("is", freq="year") = 항목명×기간, XBRL+옛 통합 2011~)
   - finance 재무제표 (c.panel("IS", freq="year") = 파사드 attach, deep history)
+  - native 재무비율 (c.panel("ratios") = BS/IS/CF native 항목 → core 공식, 자급, deep history)
+  - finance 재무비율 (c.panel("RATIOS") = 파사드 attach, 기존)
 knowledgeRefs:
   - start.dartlabSkillOs
   - engines.company
@@ -176,6 +178,20 @@ panel.parquet → `build/cell.buildPanelCells`(lxml) → panelCell → `cell.rea
   freq/통합은 표현이라 read. valueRaw 콤마·괄호 무손실(숫자화는 소비자). 셀은 panel.parquet 파생이라 stale 면
   재빌드(파생 체인).
 - **주석 미포함** — 확정 범위 = 5표만. NT_* 주석은 schema `statement` 컬럼이라 후속 확장 대비(미착수).
+
+### native 재무비율 (ratios) — 공시 표 아닌 native 5표 항목의 산수
+
+- **소스 = 대소문자** — 소문자 `c.panel("ratios")` = native(panel 자급), 대문자 `c.panel("RATIOS")` = finance
+  (파사드 위임, 기존). is/IS 와 대칭.
+- **비율은 "공시 표 읽기"가 아니라 "재무제표 항목 산수"** — DART 에 표준 재무비율 표 없음(5표가 전부). native
+  비율 = `readStatement`(bs/is/cf native, 2013~) 항목 → core mappings 로 snakeId series 조립 →
+  `core.ratios.calcRatioSeries`(공식 SSOT) → 비율 wide. **공식·매핑·파서·라벨 전부 core(L0) 호출, panel
+  재구현 0**(농장 금지). native 5표 과거연장 덕에 finance(2016~)보다 깊은 history.
+- **계산 위치 = panel 자급** — cell.py 가 core(L0)만 import(finance/reference 0, R1 유지). standalone
+  `Panel(code)("ratios")` 도 동작. snakeId 버킷 = 읽은 statement(BS/IS/CF) — `standardAccounts.sj` COMMON 모호
+  회피. 단위는 동일 표 항목 몫이라 상쇄.
+- **정직성** — 밸류에이션(PER/PBR)은 price 미보유로 제외(statement-only: 수익성/안정성/효율성/현금흐름/복합/
+  성장). 매핑 갭은 그 비율만 해당 period None(숨김 0) — 갭은 core `accountMappings.json` 보강(panel-local 0).
 
 ```
 DART zip / DART API ──build(providers/dart/panel/build)─→ {code}/{period}.parquet (14-col)
