@@ -19,11 +19,13 @@ inputs:
   - 종목코드 (KR 6자리)
   - 섹션 검색 key — canonicalKey(NT_D826380/BS) 또는 한글 섹션명 substring(재고) 또는 강한 소스 topic(IS/dividend)
   - period 목록 (선택, YYYYQn)
-  - tag (선택, 기본 plain / True 면 원본 XML)
+  - tag (선택, 기본 raw 원본 XML / False 면 plain 태그 strip)
+  - freq (선택, 5표 native 셀 — year 연간/quarter 분기단독/ytd 분기누적)
 outputs:
   - 항목 × period 수평화 wide (pl.DataFrame, Panel subclass)
-  - 섹션 검색 행 (panel(key))
+  - 섹션 검색 행 (panel(key)) / 본문 전체검색 (panel.search(term))
   - 강한 소스(finance/report) 주입 결과 (c.panel("IS") = c.show("IS"))
+  - 재무 5표 native 셀 격자 (c.panel("IS", freq="year") = acode×period)
 knowledgeRefs:
   - start.dartlabSkillOs
   - engines.company
@@ -55,20 +57,23 @@ runtimeCompatibility:
     notes: 로컬 panel artifact 필요 — HF fetch 또는 사전 다운로드 후 read.
 failureModes:
   - canonicalKey/섹션명을 추측 (Panel(code) wide 를 먼저 보고 행 식별 컬럼 확인 안 함)
-  - tag=False(기본, plain)를 raw XML 로 가정 (원본 태그는 tag=True)
+  - tag=True(기본, raw 원본 XML)를 plain 으로 가정 (태그 strip 은 tag=False)
   - 연결/별도(scope) 무시하고 BS_C↔BS_S 병합으로 착시
   - c.panel("IS") 를 raw 공시로 가정 (강한 소스는 finance 주입 — source="raw" 로 raw 강제)
+  - freq 셀을 2025-03 이전 기간에 기대 (ACONTEXT 는 그 사업보고서부터 — 이전은 빈 열)
 examples:
-  - 005930 잡는 순간 wide (Panel("005930") 또는 c.panel)
-  - 재고자산 주석 다기간 행 검색 (c.panel("재고"))
-  - 원본 XML 보존 행 (c.panel("재고", tag=True))
-  - 재무제표는 finance 주입 (c.panel("IS") = c.show("IS"))
+  - 005930 잡는 순간 wide raw (Panel("005930") 또는 c.panel) / plain 은 c.panel(tag=False)
+  - 재고자산 주석 다기간 행 검색 (c.panel("재고")) / 본문 전체검색 (c.panel.search("반도체"))
+  - 손익 연간 native 셀 (c.panel("IS", freq="year") — acode×연도, 정부 dFY 토큰)
+  - 재무제표 blob 은 finance 주입 (c.panel("IS") = c.show("IS"))
 procedure:
   - 진입은 `from dartlab.providers.dart.panel import Panel` 또는 `Company(code).panel`.
   - `Panel(code)` / `c.panel` 자체가 wide pl.DataFrame — shape/filter/columns 등 polars 연산 그대로.
-  - 섹션 검색은 `panel("재고")`(한글) 또는 `panel("NT_D826380")`(canonicalKey). 원본 태그는 `tag=True`.
-  - 강한 소스(BS/IS/CF/ratios/dividend 등)는 facade `c.panel("IS")` 가 finance/report 주입(c.show 위임). raw 공시 강제는 `source="raw"`.
-  - 빌드는 운영자/CI — 로컬 zip `python -m dartlab.providers.dart.panel.build` 또는 online `.github/scripts/sync/onlinePanel.py`.
+  - 섹션 검색은 `panel("재고")`(한글) 또는 `panel("NT_D826380")`(canonicalKey). 기본 raw, plain 은 `tag=False`.
+  - 본문 전체검색(이름표 아닌 내용)은 `panel.search("키워드")` — 별 메서드(의도 분리).
+  - 재무 5표 native 셀은 `panel("IS", freq="year"|"quarter"|"ytd")` — 정부 ACONTEXT 토큰(dFY/eFY/TQQ/TQA) 선택, acode×period wide. 2025-03 사업보고서부터(그 이전 빈 열). SCE=자본변동표(EF), CIS=포괄손익(IS3).
+  - 강한 소스(BS/IS/CF/ratios/dividend 등) blob 은 facade `c.panel("IS")` 가 finance/report 주입(c.show 위임). raw 공시 강제는 `source="raw"`.
+  - 빌드는 운영자/CI — 로컬 zip `python -m dartlab.providers.dart.panel.build`, 셀은 `--cells`, 또는 online `.github/scripts/sync/onlinePanel.py`.
 linkedSkills:
   - engines.company
   - engines.data
@@ -140,10 +145,29 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
   wide period 셀**에 1회. 큰 셀 1회 정규식이 작은 조각 수천개보다 빠름 → **콜드 ~1s→0.35s (2.8x)**,
   byte-identical(10481 셀 불일치 0)·plain 기본·tag 옵션·wide 정체성 0 변경. `read._stripExpr` 재사용
   Expr. 이미 적용.
-- **후속(lazy, 미착수)**: strip 을 "잡는 순간"이 아니라 "표시/특정 셀 접근" 시점으로 더 미루면 콜드
-  ~0.16s 가능 — 단 잡는 순간 셀이 raw(태그 포함)가 되어 plain 직관성과 충돌. `Panel(pl.DataFrame)`
-  eager subclass 와 lazy 경계 정합도 미해결. 기본 plain 직관성 > 0.16s 라 보류, 별도 검토.
+- **raw 기본(채택)**: 기본 `tag=True` raw 라 **잡는 순간 strip 자체를 안 함** → 정부 native 태그
+  (ACODE/ACONTEXT) 보존 + AI 이해 + 콜드 더 빠름. plain 은 `tag=False` opt-in (strip-relocation 2.8x
+  는 이제 plain 경로 전용). 근거: panel 정체성 = native truth, plain strip 은 그 truth 를 지움 → 기본이
+  자기 정체성을 지우면 모순. 사람 표시는 `c.panel(tag=False)` 한 칸.
 - **금지**: build plain 사전계산(R4 위반) · wide 를 metadata-only/long 으로 교체(정체성 파괴).
+
+### 셀 세분화 (freq) — 재무 5표 native XBRL, 별개 평행 artifact
+
+메인 14-col blob 격자(wide 정체성 불가침)는 안 건드리고, 재무 5표(BS/IS/CIS/CF/SCE)의 정부
+`<TE ACODE ACONTEXT>` 셀을 **별개 평행 artifact** `panelCell/{code}/{period}.parquet`(14-col
+CELL_SCHEMA)로 분해. `build/cell.buildPanelCells`(lxml) 생산 → `cell.readCellWide`(parquet, lxml 0)
+소비 → facade `c.panel("IS", freq=...)` 위임.
+
+- **ACONTEXT 토큰 = 정부가 계산해 박은 기간** — `[C|P|BP]FY{year}[d|e]{marker}` (당기/전기/전전기 ×
+  흐름/시점 × FY연간·FQ1분기·HY반기·TQ3분기, 접미 A누적·Q단독). 우리는 **산수 0, 토큰 선택만**:
+  `freq="year"`→dFY/eFY(연간), `"quarter"`→단독(Q), `"ytd"`→누적(A). 행별 d/e(흐름/시점)로 연간토큰 자동.
+- **평탄화** — 행 정체성 = `acode@axisPath`(개념×축경로). 깊이(자본구성·자산클래스 N차원)는 행을 늘릴
+  뿐 wide 불변. label(한글, 주석번호 변동)은 정체성 아님 → 최신 filing 대표만 부착.
+- **저장 원칙 적용** — TE 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 정부 truth 위
+  순수 규칙이라 build 에서 굽고, freq 선택은 표현이라 read. valueRaw 콤마·괄호 무손실(숫자화는 소비자).
+- **시간 경계** — ACONTEXT 는 **2025-03 사업보고서부터**(실측, 42 zip 전수). 그 이전 period 는 셀 0 →
+  파일 미생성 → read 빈 열. panel 최신앵커 격자의 graceful 저하로 자연 정합(우회 아님, 데이터 truth).
+- **주석 미포함** — 확정 범위 = 5표만. NT_* 주석은 schema `statement` 컬럼이라 후속 확장 대비(미착수).
 
 ```
 DART zip / DART API ──build(providers/dart/panel/build)─→ {code}/{period}.parquet (14-col)

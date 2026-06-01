@@ -4,7 +4,9 @@
     "src/dartlab/providers/dart/company.py",
     "src/dartlab/providers/edgar/company.py"
   ],
-  "over_split": [],
+  "over_split": [
+    "src/dartlab/providers/dart/panel/spine"
+  ],
   "under_split": [
     "src/dartlab/providers/dart/accessor/docsAccessor.py",
     "src/dartlab/providers/dart/accessor/reportAccessor.py",
