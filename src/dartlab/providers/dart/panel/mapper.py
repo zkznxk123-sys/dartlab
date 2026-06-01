@@ -330,10 +330,11 @@ def rowIdentityExpr(
         TargetMarkets:
             - KR + US 공통.
     """
-    key = pl.col(keyCol)
-    narr = (
-        pl.lit(_NARR_PREFIX) + pl.col(chapterCol).fill_null("") + pl.lit(_NARR_SEP) + pl.col(sectionCol).fill_null("")
-    )
+    # cast(Utf8) — all-null 컬럼이 Null dtype 으로 추론돼도 문자열 연산 안전.
+    key = pl.col(keyCol).cast(pl.Utf8)
+    chap = pl.col(chapterCol).cast(pl.Utf8).fill_null("")
+    sect = pl.col(sectionCol).cast(pl.Utf8).fill_null("")
+    narr = pl.lit(_NARR_PREFIX) + chap + pl.lit(_NARR_SEP) + sect
     return pl.when(key.is_not_null() & (key.str.len_chars() > 0)).then(key).otherwise(narr).alias("_rowIdentity")
 
 
