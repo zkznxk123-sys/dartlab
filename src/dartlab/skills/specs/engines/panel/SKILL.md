@@ -70,11 +70,11 @@ examples:
   - finance 손익 (c.panel("IS", freq="year") — 파사드 attach, OpenDART deep history)
 procedure:
   - 진입은 `from dartlab.providers.dart.panel import Panel` 또는 `Company(code).panel`.
-  - `Panel(code)` / `c.panel` 자체가 wide pl.DataFrame — shape/filter/columns 등 polars 연산 그대로.
+  - 잡는 순간 `Panel(code)`·`c.panel` 이 wide pl.DataFrame — shape/filter/columns 등 polars 연산 그대로.
   - 섹션 검색은 `panel("재고")`(한글) 또는 `panel("NT_D826380")`(canonicalKey). 기본 raw, plain 은 `tag=False`.
   - 본문 전체검색(이름표 아닌 내용)은 `panel.search("키워드")` — 별 메서드(의도 분리).
-  - **소스 = 대소문자**. native 재무제표는 **소문자** `panel("is"|"bs"|"cf"|"cis"|"sce", freq=)` — XBRL 정밀(2022+) + 옛 표 항목명 파싱(과거 2011~) 통합 statement, panel 자급(docs.parquet 0). finance 는 **대문자** `panel("IS", freq=)` — 파사드가 `c.show` 주입(deep history). SCE=자본변동표(EF), CIS=포괄손익(IS3).
-  - **freq = 입도** (year/quarter/ytd), 소스 스위치 아님 — native·finance 둘 다 받음. finance 는 Y/Q/YTD 로 매핑.
+  - 소스는 대소문자로 가른다. native 재무제표는 소문자 `panel("is"|"bs"|"cf"|"cis"|"sce", freq=)` — XBRL 정밀(2022+) + 옛 표 항목명 파싱(과거 2011~) 통합 statement, panel 자급(docs.parquet 0). finance 는 대문자 `panel("IS", freq=)` — 파사드가 `c.show` 주입(deep history). SCE=자본변동표(EF), CIS=포괄손익(IS3).
+  - freq 는 입도(year/quarter/ytd), 소스 스위치 아님 — native·finance 둘 다 받음. finance 는 Y/Q/YTD 로 매핑.
   - report(dividend 등) 정형공시도 facade `c.panel("dividend")` 가 주입. raw 공시 강제는 `source="raw"`.
   - 빌드는 운영자/CI — 로컬 zip `python -m dartlab.providers.dart.panel.build`, 셀은 `--cells`, 또는 online `.github/scripts/sync/onlinePanel.py`.
 linkedSkills:
