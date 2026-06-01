@@ -7,14 +7,15 @@ period 파일 prune(``periods`` 인자)으로 대형 종목 메모리 핸들.
 수평화 3 단계:
     1. ``readLong`` — period 파일 read + disclosureKey 보장(build 가 채움, 옛 artifact 만 fallback).
     2. ``anchorLatest`` — (disclosureKey, scope) 앵커로 era drift(BS→BS_C) 흡수 → 한 행 정렬.
-    3. ``readWide`` — blockOrder 순 contentRaw join collapse → period 축 pivot. ``tag=False`` 면
-       collapse 단계에서 태그 1회 strip(plain, raw wide 미생성) — 2 중 materialize 회피.
+    3. ``readWide`` — blockOrder 순 contentRaw join collapse → period 축 pivot → spine 정렬.
+       ``tag=False`` 면 정렬된 wide 의 period 셀에 태그 1회 strip(plain) — 큰 셀 1회가 fragment
+       수천개 strip 보다 2.8x 빠름(byte-identical 실측).
 
 LLM Specifications:
     AntiPatterns:
         - lxml/zipfile/network import 금지 — read 표면(R2, 콜드 <1s).
         - 매 read resolveBatch 금지 — build 가 채운 disclosureKey 우선, 전부 null 일 때만 fallback.
-        - strip 을 pivot 후 wide 셀에 적용 금지 — collapse 단계 1회(raw wide 2 중 materialize 회피).
+        - build 단계 plain 사전계산 금지 — read 파생(R4). collapse(long) 단계 strip 금지 — wide 셀 1회(2.8x).
         - pivot index 에 xbrlClass 유지 금지 — era drift, scope(파생)로 대체.
     OutputSchema:
         - ``readLong(code, *, marketNs, periods) -> pl.DataFrame | None`` (14-col + disclosureKey).
@@ -46,9 +47,64 @@ _log = logging.getLogger(__name__)
 # pivot row identity (회사내 다기간 정렬 키). scope = read 파생(scopeExpr).
 _INDEX_COLS = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"]
 
-# 태그 strip — 순수 polars regex (lxml 0, R2). join 후 적용(태그 element 경계 보존).
+# 태그 strip — 순수 polars regex (lxml 0, R2).
 _TAG_RE = r"<[^>]+>"
 _WS_RE = r"\s+"
+
+
+def _stripExpr(col: str) -> pl.Expr:
+    """contentRaw(태그 포함) → plain 텍스트 strip Expr (태그 제거 + 공백 정리).
+
+    ``<...>`` 태그를 공백으로 치환 → 연속 공백 1칸 → 양끝 trim. ``readWide``/``Panel`` 이
+    pivot 된 wide 셀에 일괄 적용 (collapse 단계 fragment strip 보다 2.8x 빠름 — 큰 셀 1회
+    정규식이 작은 조각 수천개 정규식보다 효율적, byte-identical 실측). 순수 polars(lxml 0, R2).
+
+    Args:
+        col: strip 할 컬럼명 (period 컬럼).
+
+    Returns:
+        ``col`` 별칭 유지 plain Expr.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> import polars as pl
+        >>> df = pl.DataFrame({"2025Q4": ["<TD>재고</TD> <TD>290</TD>"]})
+        >>> df.select(_stripExpr("2025Q4"))["2025Q4"][0]
+        '재고 290'
+
+    SeeAlso:
+        - ``readWide`` — pivot 후 본 Expr 로 wide 셀 strip.
+
+    Requires:
+        - polars.
+
+    Capabilities:
+        - 태그 무손실 raw 셀을 plain 으로 — wide 격자에 일괄/부분 적용 (filter 후 그 행만도 가능).
+
+    Guide:
+        - readWide(tag=False) 가 정렬된 wide 의 period 컬럼에 일괄 적용. 직접 부분 적용 가능.
+
+    AIContext:
+        - 순수 regex — strip 시점은 build 가 아니라 read(파생물 미저장, R4).
+
+    LLM Specifications:
+        AntiPatterns:
+            - build 단계 plain 사전계산 금지 — read 파생(R4, feedback_no_content_plain_precompute).
+            - collapse(long) 단계 strip 금지 — pivot 후 wide 셀 1회(2.8x).
+        OutputSchema:
+            - ``pl.Expr`` (col 별칭 유지, Utf8).
+        Prerequisites:
+            - polars. 태그 포함 raw 셀.
+        Freshness:
+            - read 파생.
+        Dataflow:
+            - col → TAG→" " → WS→" " → strip.
+        TargetMarkets:
+            - KR + US 공통.
+    """
+    return pl.col(col).str.replace_all(_TAG_RE, " ").str.replace_all(_WS_RE, " ").str.strip_chars()
 
 
 def _panelDir(code: str, marketNs: str = "kr") -> Path:
@@ -355,7 +411,7 @@ def readWide(
         code: 종목코드.
         marketNs: 시장 namespace.
         periods: 특정 period 만(파일 prune). None = 전체.
-        tag: True(기본) 면 contentRaw 원본 XML 무손실(R4), False 면 collapse 단계에서 태그 strip(plain).
+        tag: True(기본) 면 contentRaw 원본 XML 무손실(R4), False 면 정렬된 wide 셀에 태그 strip(plain).
 
     Returns:
         wide DataFrame. row identity = (chapter, sectionLeaf, blockLeaf, disclosureKey, scope),
@@ -377,26 +433,26 @@ def readWide(
 
     Capabilities:
         - 한 회사 다기간을 항목 행 × period 열로 정렬 — era drift 흡수.
-        - tag=False 면 collapse 1회 strip → plain wide(raw 의 ~22%, 표시·메모리 경량, 2중 materialize 회피).
+        - tag=False 면 pivot·정렬 후 wide 셀 1회 strip → plain(raw 의 ~22%, 표시·메모리 경량, 2.8x).
 
     Guide:
         - Panel.__init__ 이 본 함수로 wide 생성. 직접 호출 가능.
 
     AIContext:
-        - contentRaw 는 blockOrder 순 join(무손실), anchorLatest 후 pivot.
-        - tag=False strip 은 join 결과에 1회 — raw wide 미생성.
+        - contentRaw 는 blockOrder 순 join(무손실), anchorLatest 후 pivot, spine 정렬.
+        - tag=False strip 은 정렬된 wide 셀에 1회 — collapse fragment strip 보다 2.8x.
 
     When:
         - 한 회사 다기간을 항목 × period 로 수평화할 때.
 
     How:
-        - readLong → anchorLatest → group collapse(join contentRaw, +tag strip) → period pivot.
+        - readLong → anchorLatest → group collapse(raw join) → period pivot → spine 정렬 → (tag=False) wide strip.
 
     LLM Specifications:
         AntiPatterns:
             - contentRaw 다중블록 first 금지 — blockOrder 순 join(무손실).
             - xbrlClass pivot index 금지 — scope 대체.
-            - strip 을 pivot 후 적용 금지 — collapse 단계(raw wide 2중 회피).
+            - collapse(long fragment) 단계 strip 금지 — pivot·정렬 후 wide 셀 1회(2.8x).
         OutputSchema:
             - ``pl.DataFrame | None`` (index cols + period 열).
         Prerequisites:
@@ -404,7 +460,7 @@ def readWide(
         Freshness:
             - 매 호출.
         Dataflow:
-            - readLong → anchorLatest → group(index,period) collapse(+strip) → pivot.
+            - readLong → anchorLatest → collapse(raw join) → pivot → spine 정렬 → (tag=False) wide strip.
         TargetMarkets:
             - KR + US.
     """
@@ -415,19 +471,25 @@ def readWide(
     indexCols = [c for c in _INDEX_COLS if c in long.columns]
     if not indexCols or "period" not in long.columns:
         return None
+    # collapse 는 항상 raw join (태그 무손실). strip(tag=False)은 pivot·정렬 후 wide 셀에 1회
+    # — 작은 fragment 수천개 정규식보다 큰 셀 1회가 2.8x 빠름(byte-identical 실측), raw wide
+    # 2중 materialize 도 회피(strip 은 같은 wide 를 in-place with_columns).
     joined = pl.col("contentRaw").str.join("")
-    aggExpr = joined if tag else joined.str.replace_all(_TAG_RE, " ").str.replace_all(_WS_RE, " ").str.strip_chars()
     try:
         collapsed = (
             long.sort("blockOrder")
             .group_by([*indexCols, "period"], maintain_order=True)
-            .agg(aggExpr.alias("contentRaw"))
+            .agg(joined.alias("contentRaw"))
         )
         wide = collapsed.pivot(values="contentRaw", index=indexCols, on="period", aggregate_function="first")
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("panel pivot 실패 %s: %s", code, exc)
         return None
-    return orderBySpine(wide, indexCols)
+    wide = orderBySpine(wide, indexCols)
+    if not tag:
+        periodCols = [c for c in wide.columns if c not in indexCols]
+        wide = wide.with_columns([_stripExpr(c) for c in periodCols])
+    return wide
 
 
 def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:

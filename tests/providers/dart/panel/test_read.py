@@ -72,6 +72,14 @@ def test_read_long_and_wide_none_when_absent() -> None:
     assert readWide("000000nonexistent", tag=False) is None
 
 
+def test_strip_expr_removes_tags_and_collapses_whitespace() -> None:
+    """_stripExpr: <태그> 제거 + 연속공백 1칸 + 양끝 trim (순수 polars, lxml 0)."""
+    from dartlab.providers.dart.panel.read import _stripExpr
+
+    df = pl.DataFrame({"c": ["<TABLE-GROUP><TD>재고</TD>  <TD>290</TD></TABLE-GROUP>"]})
+    assert df.select(_stripExpr("c"))["c"][0] == "재고 290"
+
+
 def test_order_by_spine_period_columns_latest_first() -> None:
     """orderBySpine: period 열 최신순(내림차순) 배치, index 컬럼 먼저."""
     from dartlab.providers.dart.panel.read import orderBySpine

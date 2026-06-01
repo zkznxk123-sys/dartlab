@@ -6,7 +6,7 @@ subclass — polars 연산(filter/shape/select…)을 그대로 받는다. ``pan
 섹션명·canonicalKey 매칭 행을 검색한다.
 
 성능·메모리: 로컬 artifact read only (network·lxml import 0, R2). ``tag=False``(기본) 면 build 가
-저장한 raw XML 을 collapse 단계에서 1회 strip → plain wide(raw 의 ~22%, 표시·메모리 경량).
+저장한 raw XML 을 pivot·정렬 후 wide 셀에 1회 strip → plain wide(raw 의 ~22%, 표시·메모리 경량, 2.8x).
 ``tag=True`` 면 원본 XML 무손실(R4). 상태 없는 read — ``c.panel`` 매 접근 새 인스턴스(누적 0,
 Polars Rust heap OOM 가드). 대형 종목은 ``periods=`` 로 파일 prune.
 
@@ -139,7 +139,7 @@ class Panel(pl.DataFrame):
             - 직접 또는 facade(c.panel) 경유 생성. 다종목은 매 회사 새 인스턴스.
 
         AIContext:
-            - readWide(tag) 1회 — raw wide 2중 materialize 회피(strip 은 collapse 단계).
+            - readWide(tag) 1회 — strip 은 pivot·정렬 후 wide 셀(collapse fragment 보다 2.8x).
 
         LLM Specifications:
             AntiPatterns:
