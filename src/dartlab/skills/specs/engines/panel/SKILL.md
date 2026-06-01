@@ -173,8 +173,17 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
   ((주N) strip)로 매칭 → 전 기간 연속(2011~). 정밀 최근 + 과거 한 줄. **개명 항목**("수익(매출액)"→"매출액")은
   `_stitchRecentName` 이 **금액 겹침**(연속 보고서 당기/전기 겹친 해의 동일 금액)으로 묶어 **최근 이름** 기준
   한 줄(식별력 있는 큰 금액=콤마만 링크, over-merge 회피). 겹치는 해는 최신 filing(=XBRL) 우선.
+- **statement resolution = 단일 SSOT (`STATEMENT_VARIANTS`)** — 논리 키(`is`/`bs`/`cf`/`cis`/`sce`)를
+  물리 XBRL class 후보(우선순위)로 해소하는 *한 테이블*. 회사마다 손익을 단일(IS1)/별도(IS2)/포괄(IS3)로,
+  공시를 연결/별도로 달리 내므로 그 변형을 한 곳이 흡수한다 — 폴백을 코드에 흩지 않음(덕지덕지 금지).
+  `is → (IS2, IS3, IS1)` · `cis → (IS3, IS2, IS1)` · `bs → (BS,)` · `cf → (CF,)` · `sce → (EF,)`,
+  scope 는 `SCOPE_ORDER=(consolidated, standalone)`. `readStatement(statement=논리키)` →
+  `_resolveStatement(variants × scope)` 단일 resolver. panel.py 는 `_NATIVE_KEYS`(논리 키)만 넘긴다
+  (물리 매핑 중복 0). 비율도 `_RATIO_SOURCE`(논리키)로 동일 해소. **이게 panel native 의 근본 축**.
 - **freq = 입도** (소스 스위치 아님) — `year`(연)/`quarter`(분기)/`ytd`(누적), native·finance 둘 다. native
-  XBRL 은 ctxMode 토큰 선택, 옛은 사업보고서(Y)/분기(A). `readCellWide`(acode 정밀 차원 view)는 XBRL 전용 유지.
+  XBRL 은 ctxMode 토큰 선택. **연간 = dFY(Y) 또는 Q4 누적(A & Q4=12M)** — 회사별 연간 인코딩 차이 흡수.
+  옛 분기만 신고한 신규 상장사는 `ytd`/`quarter` 로 도달(연간 미신고). `readCellWide`(acode 정밀 차원 view,
+  물리 statement)는 XBRL 전용 유지.
 - **저장 원칙 적용** — 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 순수 규칙이라 build,
   freq/통합은 표현이라 read. valueRaw 콤마·괄호 무손실(숫자화는 소비자). 셀은 panel.parquet 파생이라 stale 면
   재빌드(파생 체인).
