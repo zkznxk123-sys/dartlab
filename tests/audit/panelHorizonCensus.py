@@ -3,8 +3,9 @@
 사용자 요청: "zip 에 있는게 panel 파케로 갈 때 하나라도 빠진 게 있는지, panel 파케에서 panel 호출
 수평화할 때 하나라도 빠진 게 있는지" 정밀 점검. 본 census 는 ``data/dart/panel/{code}/`` 종목별로:
 
-    1. **parquet→grid 손실 (stage b)**: parquet 모든 행의 contentRaw(strip)가 ``readWide`` 격자에
-       surface 하는지. 수평화 pivot 이 행을 묵음 드롭하면 검출. ``content_dropped`` = **버그 신호**.
+    1. **parquet→grid 손실 (stage b)**: period 별 총 content 글자수가 parquet == ``readWide`` 격자에서
+       정확히 일치하는지. collapse 는 contentRaw 를 무손실 concat join 하므로 char-parity 가 깨지면
+       (grid < parquet) 수평화가 content 를 드롭한 것 — ``content_dropped`` = **버그 신호** (byte-exact).
     2. **주석 de-chunk 연속성**: 과거 연간(2023 이전 Q4)이 ``NT_*`` 주석을 갖는지 (옛 덩어리 분해 적용률).
        ``note_discontinuous`` (과거연간 있는데 NT_* 0) = **버그 신호**.
     3. **잔여 미분해 덩어리**: disclosureKey null 주석 섹션 수 (택소노미 미등재 헤더 — 소수 정상).
@@ -26,20 +27,10 @@ from __future__ import annotations
 import argparse
 import json
 import multiprocessing as mp
-import re
 import sys
 from pathlib import Path
 
 import dartlab.config as _cfg
-
-_TAG = re.compile(r"<[^>]+>")
-_WS = re.compile(r"\s+")
-_PROBE = 60  # surface 판정 prefix 길이
-_MIN = 8  # 무시할 최소 strip 길이
-
-
-def _strip(s: str | None) -> str:
-    return _WS.sub(" ", _TAG.sub(" ", s or "")).strip()
 
 
 def _censusOne(code: str) -> dict:
@@ -53,8 +44,8 @@ def _censusOne(code: str) -> dict:
     rec: dict = {
         "code": code,
         "periods": len(files),
-        "parquetRows": 0,
-        "uncovered": 0,
+        "parquetChars": 0,
+        "charDrop": 0,
         "annualPre2023": 0,
         "ntPeriodsPre2023": 0,
         "residualChunks": 0,
@@ -64,12 +55,12 @@ def _censusOne(code: str) -> dict:
         rec["issues"].append("no_panel")
         return rec
 
-    grid = R.readWide(code, tag=False)
+    grid = R.readWide(code, tag=True)  # raw — char-parity 비교(strip 차 없이 byte-exact)
     if grid is None or grid.is_empty():
         rec["issues"].append("no_grid")
         return rec
     pcols = [c for c in grid.columns if c[:4].isdigit()]
-    gridText = {p: " ".join(v for v in grid[p].to_list() if v) for p in pcols}
+    gridChars = {p: sum(len(v) for v in grid[p].to_list() if v) for p in pcols}
 
     sample: list[str] = []
     for f in files:
@@ -87,19 +78,16 @@ def _censusOne(code: str) -> dict:
             rec["annualPre2023"] += 1
             if nt.height > 0:
                 rec["ntPeriodsPre2023"] += 1
-        # stage b — parquet 행 content 가 grid period 텍스트에 surface 하는지
-        gt = gridText.get(period, "")
-        for cr in df["contentRaw"].to_list():
-            st = _strip(cr)
-            if len(st) < _MIN:
-                continue
-            rec["parquetRows"] += 1
-            if st[:_PROBE] not in gt:
-                rec["uncovered"] += 1
-                if len(sample) < 3:
-                    sample.append(f"{period}:{st[:40]}")
+        # stage b — period 총 content 글자수 parquet == grid (collapse 무손실 concat → 정확 일치)
+        pc = sum(len(v) for v in df["contentRaw"].to_list() if v)
+        gc = gridChars.get(period, 0)
+        rec["parquetChars"] += pc
+        if pc != gc:  # grid<parquet=드롭, grid>parquet=중복증식 — 둘 다 버그
+            rec["charDrop"] += pc - gc
+            if len(sample) < 3:
+                sample.append(f"{period}:parquet={pc} grid={gc}")
 
-    if rec["uncovered"] > 0:
+    if rec["charDrop"] != 0:
         rec["issues"].append("content_dropped")
         rec["sample"] = sample
     if rec["annualPre2023"] > 0 and rec["ntPeriodsPre2023"] == 0:
@@ -136,20 +124,20 @@ def main() -> int:
     noPanel = [r for r in recs if "no_panel" in r["issues"] or "no_grid" in r["issues"]]
     withPre = [r for r in recs if r["annualPre2023"] > 0]
     applied = [r for r in withPre if r["ntPeriodsPre2023"] > 0]
-    parquetRows = sum(r["parquetRows"] for r in recs)
-    uncovered = sum(r["uncovered"] for r in recs)
+    parquetChars = sum(r["parquetChars"] for r in recs)
+    charDrop = sum(r["charDrop"] for r in recs)
 
     print(f"\n=== panel 수평화 census ({len(codes)} 종목) ===")
-    print("  [stage b] parquet→grid:")
+    print("  [stage b] parquet→grid (char-parity, byte-exact):")
     print(
-        f"    총 parquet 행 {parquetRows:,} | grid 미surface {uncovered:,} ({100 * uncovered / max(parquetRows, 1):.3f}%)"
+        f"    총 parquet content {parquetChars:,}자 | grid 불일치 {charDrop:,}자 ({100 * abs(charDrop) / max(parquetChars, 1):.4f}%)"
     )
     print(f"    content_dropped 종목: {len(dropped)}")
     print("  [주석 de-chunk]:")
     print(f"    과거연간 보유 {len(withPre)} | 적용 {len(applied)} ({100 * len(applied) / max(len(withPre), 1):.1f}%)")
     print(f"    note_discontinuous: {len(discont)} | no_panel/grid: {len(noPanel)}")
     if dropped:
-        print(f"  ⚠ content_dropped(앞10): {[(r['code'], r['uncovered']) for r in dropped[:10]]}")
+        print(f"  ⚠ content_dropped(앞10): {[(r['code'], r['charDrop']) for r in dropped[:10]]}")
     if discont:
         print(f"  ⚠ note_discontinuous(앞20): {[r['code'] for r in discont[:20]]}")
 
@@ -159,8 +147,8 @@ def main() -> int:
         json.dumps(
             {
                 "total": len(codes),
-                "parquetRows": parquetRows,
-                "uncovered": uncovered,
+                "parquetChars": parquetChars,
+                "charDrop": charDrop,
                 "contentDropped": [r["code"] for r in dropped],
                 "noteDiscontinuous": [r["code"] for r in discont],
                 "noPanel": [r["code"] for r in noPanel],
