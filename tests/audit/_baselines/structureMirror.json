@@ -17,6 +17,7 @@
     "dart/finance/pivotArrow.py",
     "dart/openapi/bulkZipFetcher.py",
     "dart/openapi/zipDocsXml.py",
+    "dart/panel/build/noteTaxonomyData.py",
     "dart/panel/spine/spineData.py",
     "dart/parse/htmlTableParser.py",
     "edgar/docs/sections/itemBoundary.py",
