@@ -1,6 +1,6 @@
 """panel build CLI entry — ``python -X utf8 -m dartlab.providers.dart.panel.build``.
 
-``batch._main`` 위임 (argparse: --codes / --ref / --out / --all).
+``batch._main`` 위임 (argparse: --codes / --ref / --out / --all / --spine).
 """
 
 from __future__ import annotations

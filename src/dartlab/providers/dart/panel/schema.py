@@ -5,7 +5,7 @@ panel reader(`providers/dart/panel`)·facade 는 이 schema 만 안다 → EDGAR
 us-gaap 에서 같은 14-col 을 내면 reader/facade 무변경 동작 (다시장 깨끗함의 토대).
 
 수평화 2-레벨을 담는 그릇:
-    - L1 (수평화 축) = ``xbrlClass``(ACLASS raw) / ``disclosureKey``(bridge canonical).
+    - L1 (수평화 축) = ``xbrlClass``(ACLASS raw) / ``disclosureKey``(native canonicalKey, scope-strip).
     - L2 (하부) = ``sectionLeaf``(heading) + ``contentRaw``(body, 태그 무손실).
     - 행 = (disclosureKey, scope) 단일 앵커 × 열 = period.
 
@@ -46,7 +46,7 @@ PANEL_SCHEMA: dict[str, pl.DataType] = {
     "period": pl.Utf8,  # YYYYQn (결산월 무관 calendar quarter)
     "corp": pl.Utf8,  # 종목코드
     "rceptNo": pl.Utf8,  # 접수번호 provenance
-    "disclosureKey": pl.Utf8,  # bridge canonical (xbrlClass→snakeId, cross-company/market)
+    "disclosureKey": pl.Utf8,  # native canonicalKey (xbrlClass scope-strip, cross-company/market)
 }
 
 # canonical pivot index (회사 내 다기간 + 회사 간 정렬 키).

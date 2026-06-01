@@ -342,7 +342,7 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
         - ``mapper.resolveBatch`` — disclosureKey fallback.
 
     Requires:
-        - polars. panel artifact. (fallback 시) bridge parquet.
+        - polars. panel artifact. (fallback 시) native canonicalKey 규칙(mapper, 데이터 0).
 
     Capabilities:
         - 한 회사 전(또는 일부) 기간 long 본문 read — disclosureKey 보장, period 파일 prune.

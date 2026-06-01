@@ -20,7 +20,7 @@ LLM Specifications:
     Dataflow:
         - xbrlClass → canonicalKey. (disclosureKey, chapter, sectionLeaf) → rowIdentity.
     TargetMarkets:
-        - KR (DART ACLASS). US 는 build/usSeed overlay (후속).
+        - KR (DART ACLASS). US cross-market 정규화는 후속(별도 설계, scan.sectionsNew bridge 재사용).
 """
 
 from __future__ import annotations
@@ -395,7 +395,7 @@ def resolveBatch(df: pl.DataFrame, *, marketNs: str = "kr") -> pl.DataFrame:
         Dataflow:
             - xbrlClass → canonicalKeyExpr → disclosureKey.
         TargetMarkets:
-            - KR (canonical). US 후속 (build/usSeed overlay).
+            - KR (canonical). US 후속 (별도 설계, scan.sectionsNew bridge 재사용).
     """
     if df.is_empty() or "xbrlClass" not in df.columns:
         return df

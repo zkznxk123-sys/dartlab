@@ -3,7 +3,7 @@
 zip → XML → walker(손실0/dup0) → horizontalize(무손실 concat) → disclosureKey 부착
 (BUILD) → period 별 group → ``data/dart/panel/{code}/{period}.parquet`` (panel SSOT).
 
-period 는 표지 사업연도 종료일 → ``core.panel.periodFromEnd`` (결산월 무관 12월결산화).
+period 는 표지 사업연도 종료일 → ``..period.periodFromEnd`` (결산월 무관 12월결산화).
 XML 표지 파싱(lxml)은 본 build 층 책임 — core 는 (year, month) 순수 변환만(R2).
 
 LLM Specifications:
@@ -192,7 +192,7 @@ def _readZipBytes(raw: bytes, rcept: str) -> tuple[str | None, list[str]]:
 
 
 def _periodFromXml(root, rceptNo: str) -> str:
-    """XML 표지의 "사업연도" 종료일 → calendar quarter (core.panel.periodFromEnd).
+    """XML 표지의 "사업연도" 종료일 → calendar quarter (..period.periodFromEnd).
 
     1순위 = 표지 "사업연도 ... 부터 YYYY년 MM월" 종료(year, month) → periodFromEnd.
     fallback = DOCUMENT-NAME ACODE + rcept_no 접수월 추정 (표지 패턴 미발견 시).
@@ -395,7 +395,7 @@ def buildPanel(
     SeeAlso:
         - ``buildPanelAll`` — 전종목 multiprocessing 빌드.
         - ``horizontalize`` — element→section 수평화.
-        - ``core.panel.resolveBatch`` — disclosureKey 부착.
+        - ``..mapper.resolveBatch`` — disclosureKey(=native canonicalKey) 부착.
 
     Requires:
         - data/dart/original/docs/{code}/*.zip. polars. lxml.
@@ -602,7 +602,7 @@ def buildPanelBaseline(
         - 검증 게이트(G1 손실0/dup0) 입력 빌드.
 
     Guide:
-        - CLI ``python -m dartlab.gather.dart.panel.build.builder`` 기본 경로.
+        - CLI ``python -m dartlab.providers.dart.panel.build`` 기본 경로.
 
     AIContext:
         - 단일 process — debug 용이.
