@@ -49,6 +49,7 @@ def _censusOne(code: str) -> dict:
         "annualPre2023": 0,
         "ntPeriodsPre2023": 0,
         "residualChunks": 0,
+        "dupNtKeys": 0,
         "issues": [],
     }
     if not files:
@@ -74,6 +75,8 @@ def _censusOne(code: str) -> dict:
         rec["residualChunks"] += df.filter(
             pl.col("disclosureKey").is_null() & pl.col("sectionLeaf").str.contains("주석")
         ).height
+        # 같은 NT_* 가 한 period 에 >1행 = 본문+첨부 중복(READ 가 join 해 셀 content 증식) — 0 이어야 정상
+        rec["dupNtKeys"] += nt.group_by("disclosureKey").len().filter(pl.col("len") > 1).height
         if year < 2023 and period.endswith("Q4"):
             rec["annualPre2023"] += 1
             if nt.height > 0:
@@ -92,6 +95,8 @@ def _censusOne(code: str) -> dict:
         rec["sample"] = sample
     if rec["annualPre2023"] > 0 and rec["ntPeriodsPre2023"] == 0:
         rec["issues"].append("note_discontinuous")
+    if rec["dupNtKeys"] > 0:
+        rec["issues"].append("note_duplicated")
     return rec
 
 
@@ -121,6 +126,7 @@ def main() -> int:
 
     dropped = [r for r in recs if "content_dropped" in r["issues"]]
     discont = [r for r in recs if "note_discontinuous" in r["issues"]]
+    duped = [r for r in recs if "note_duplicated" in r["issues"]]
     noPanel = [r for r in recs if "no_panel" in r["issues"] or "no_grid" in r["issues"]]
     withPre = [r for r in recs if r["annualPre2023"] > 0]
     applied = [r for r in withPre if r["ntPeriodsPre2023"] > 0]
@@ -135,7 +141,9 @@ def main() -> int:
     print(f"    content_dropped 종목: {len(dropped)}")
     print("  [주석 de-chunk]:")
     print(f"    과거연간 보유 {len(withPre)} | 적용 {len(applied)} ({100 * len(applied) / max(len(withPre), 1):.1f}%)")
-    print(f"    note_discontinuous: {len(discont)} | no_panel/grid: {len(noPanel)}")
+    print(f"    note_discontinuous: {len(discont)} | note_duplicated: {len(duped)} | no_panel/grid: {len(noPanel)}")
+    if duped:
+        print(f"  ⚠ note_duplicated(앞10): {[(r['code'], r['dupNtKeys']) for r in duped[:10]]}")
     if dropped:
         print(f"  ⚠ content_dropped(앞10): {[(r['code'], r['charDrop']) for r in dropped[:10]]}")
     if discont:
@@ -151,6 +159,7 @@ def main() -> int:
                 "charDrop": charDrop,
                 "contentDropped": [r["code"] for r in dropped],
                 "noteDiscontinuous": [r["code"] for r in discont],
+                "noteDuplicated": [r["code"] for r in duped],
                 "noPanel": [r["code"] for r in noPanel],
                 "records": recs,
             },
@@ -161,7 +170,7 @@ def main() -> int:
     )
     print(f"  → {outPath}")
 
-    return 1 if (args.strict and (dropped or discont)) else 0
+    return 1 if (args.strict and (dropped or discont or duped)) else 0
 
 
 if __name__ == "__main__":
