@@ -223,6 +223,7 @@ def _main() -> None:
     ap.add_argument("--ref", type=str, default="data/dart/panelXbrlRef.parquet", help="ref parquet")
     ap.add_argument("--out", type=str, default="data/dart/panel", help="출력 base dir")
     ap.add_argument("--all", action="store_true", help="전종목 빌드 (multiprocessing)")
+    ap.add_argument("--spine", action="store_true", help="전역 정부 뼈대(spineData.py) 생성")
     args = ap.parse_args()
 
     refDf: pl.DataFrame | None = None
@@ -230,6 +231,14 @@ def _main() -> None:
     if refPath.exists():
         refDf = pl.read_parquet(str(refPath))
         _log.info("ref table load: %s (%d entry)", refPath, refDf.height)
+
+    if args.spine:
+        from .spineBuilder import buildSpine
+
+        codes = [c.strip() for c in args.codes.split(",") if c.strip()] or None
+        stats = buildSpine(codes=codes, refDf=refDf, verbose=True)
+        _log.info("=== spine 완료: codes=%d, rows=%d ===", stats["codes"], stats["rows"])
+        return
 
     if args.all:
         buildPanelAll(refPath=args.ref, outBaseDir=args.out)

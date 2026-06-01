@@ -22,6 +22,7 @@ from .builder import (
 )
 from .horizontalize import horizontalize
 from .refScan import scanAllZips, scanRefBaseline, scanZipFiles
+from .spineBuilder import buildSpine
 from .walker import detectSchemaEra, walkSections
 
 __all__ = [
@@ -29,6 +30,7 @@ __all__ = [
     "buildPanelAll",
     "buildPanelBaseline",
     "buildPanelFromStream",
+    "buildSpine",
     "detectSchemaEra",
     "horizontalize",
     "panelXbrlRefPath",
