@@ -28,11 +28,19 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import re
+from functools import lru_cache
 from pathlib import Path
 
 import polars as pl
 
 import dartlab.config as _cfg
+
+# 재무비율 = native 5표 항목의 산수. 공식·매핑·파서·라벨 전부 core(L0) SSOT 호출 (panel 자급, 농장 0).
+from dartlab.core.ratioCategories import RATIO_CATEGORIES, RATIO_FIELD_LABELS
+from dartlab.core.ratios import calcRatioSeries, toSeriesDict
+from dartlab.core.utils.helpers import parseNumStr
+from dartlab.core.utils.labels import _loadAccountMappings
 
 from .cellSchema import CELL_PIVOT_INDEX
 
@@ -366,3 +374,175 @@ def readStatement(
     wide = wide.join(meta, on="_name", how="left").sort("_ord").drop("_ord").rename({"_name": "account"})
     periodCols = sorted((c for c in wide.columns if c not in ("account", "label")), reverse=True)
     return wide.select(["account", "label", *periodCols])
+
+
+# ── native 재무비율 (소문자 ratios — BS/IS/CF native 항목으로 core 공식 산출, panel 자급) ──
+
+# 비율 재료를 읽을 native statement. 버킷 = 읽은 표(BS/IS/CF) — standardAccounts.sj COMMON 모호 회피.
+_RATIO_SOURCE_STMTS: dict[str, str] = {"BS": "BS", "IS": "IS2", "CF": "CF"}
+
+_NOTE_RE = re.compile(_NOTE_PAT)
+_WS_RE = re.compile(r"\s+")
+
+
+def _normKey(s: str) -> str:
+    """항목명 → 매칭 키 — ``_normalizeLabel`` 의 스칼라 짝 ((주N) strip + 전 공백 제거)."""
+    return _WS_RE.sub("", _NOTE_RE.sub("", s or ""))
+
+
+@lru_cache(maxsize=1)
+def _labelToSnakeId() -> dict[str, str]:
+    """정규화 한국어 항목명 → snakeId — core ``mappings`` SSOT 재색인 (readStatement account 와 동일 정규화).
+
+    Returns:
+        ``{정규화항목명: snakeId}`` — 충돌 시 첫 등록 우선.
+
+    SeeAlso:
+        - ``core.utils.labels._loadAccountMappings`` — 원천 mappings(34,000+) 로더.
+    """
+    mappings = _loadAccountMappings().get("mappings", {})
+    out: dict[str, str] = {}
+    for korName, snakeId in mappings.items():
+        key = _normKey(korName)
+        if key and key not in out:
+            out[key] = snakeId
+    return out
+
+
+def _assembleRatioSeries(
+    statements: dict[str, pl.DataFrame | None],
+) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
+    """native statement wide(항목명×period) → ``calcRatioSeries`` series + years.
+
+    버킷 = 읽은 statement(BS/IS/CF). snakeId = core mappings(정규화 항목명). 값 = ``parseNumStr``(valueRaw,
+    △/콤마). period = 표 간 union(오름차순 — YoY 정합, 각 series list 가 years 와 같은 길이로 정렬·None-fill).
+
+    Args:
+        statements: ``{"BS"|"IS"|"CF": readStatement 결과 | None}``.
+
+    Returns:
+        ``(series, years)`` 또는 None (재료 0). ``series={"BS":{snakeId:[...]}, ...}``.
+    """
+    labelMap = _labelToSnakeId()
+    periodSet: set[str] = set()
+    for df in statements.values():
+        if df is not None:
+            periodSet.update(c for c in df.columns if c not in ("account", "label"))
+    if not periodSet:
+        return None
+    years = sorted(periodSet)  # 오름차순 (calcRatioSeries yoyLag 정합)
+    series: dict[str, dict[str, list[float | None]]] = {}
+    for sjKey, df in statements.items():
+        if df is None or df.is_empty():
+            continue
+        bucket: dict[str, list[float | None]] = {}
+        for row in df.iter_rows(named=True):
+            snakeId = labelMap.get(row["account"])
+            if snakeId is None or snakeId in bucket:  # 첫 행 우선(최신 filing 정렬됨)
+                continue
+            bucket[snakeId] = [parseNumStr(row.get(y)) for y in years]
+        if bucket:
+            series[sjKey] = bucket
+    if not series:
+        return None
+    return series, years
+
+
+def _ratiosToWide(rs, years: list[str]) -> pl.DataFrame | None:
+    """RatioSeriesResult → ``[ratio, label, *period]`` wide (period 최신 좌측, RATIO_CATEGORIES 순서)."""
+    ratioDict = toSeriesDict(rs)[0]["RATIO"]
+    if not ratioDict:
+        return None
+    ordered = [f for _, fields in RATIO_CATEGORIES for f in fields if f in ratioDict]
+    rows: list[dict] = []
+    for field in ordered:
+        vals = ratioDict[field]
+        rec: dict = {"ratio": field, "label": RATIO_FIELD_LABELS.get(field, field)}
+        for i, y in enumerate(years):
+            rec[y] = vals[i] if i < len(vals) else None
+        rows.append(rec)
+    if not rows:
+        return None
+    wide = pl.DataFrame(rows)
+    periodCols = sorted((c for c in wide.columns if c not in ("ratio", "label")), reverse=True)
+    return wide.select(["ratio", "label", *periodCols])
+
+
+def readRatios(
+    code: str,
+    *,
+    freq: str = "year",
+    scope: str = "consolidated",
+    marketNs: str = "kr",
+    periods: list[str] | None = None,
+) -> pl.DataFrame | None:
+    """native 재무비율 — BS/IS/CF native statement 항목으로 core 공식 산출 (panel 자급, docs 0).
+
+    ``readStatement``(bs/is/cf, XBRL+옛 통합 전기간) 의 항목을 core mappings 로 snakeId series 로 조립 →
+    ``core.ratios.calcRatioSeries`` (공식 SSOT) → 비율 wide. 공식·매핑·파서·라벨 전부 core(L0) 호출,
+    panel 재구현 0. native 5표 과거연장 덕에 finance(``c.panel("RATIOS")``)보다 깊은 history.
+
+    Args:
+        code: 종목코드.
+        freq: "year"(연, yoyLag=1) / "quarter"(분기, yoyLag=4) / "ytd"(누적). 기본 year.
+        scope: "consolidated" / "standalone". 기본 consolidated.
+        marketNs: 시장 namespace.
+        periods: 특정 filing period parquet 만 (prune). None=전체.
+
+    Returns:
+        wide DataFrame — 행=(ratio snakeId, label 한글), 열=period(최신 좌측), cell=비율값. 재료 없으면 None.
+
+    Raises:
+        없음 — artifact/재료 부재 시 None.
+
+    Example:
+        >>> readRatios("005930", freq="year")  # doctest: +SKIP  — ROE/부채비율 × 연도
+
+    SeeAlso:
+        - ``readStatement`` — 재료 native 재무제표(bs/is/cf).
+        - ``core.ratios.calcRatioSeries`` / ``toSeriesDict`` — 비율 공식·시계열 dict SSOT.
+        - ``core.ratioCategories.RATIO_FIELD_LABELS`` — 비율 한글 라벨 SSOT.
+
+    Requires:
+        - polars. data/dart/panelCell/{code}/*.parquet. core(L0) 공식·매핑.
+
+    Capabilities:
+        - native 재무제표 항목만으로 재무비율 — 외부 price 0 → 밸류에이션 제외 statement-only.
+
+    Guide:
+        - ``c.panel("ratios")`` 소문자 → 본 함수(native). 대문자 RATIOS 는 finance(파사드).
+
+    AIContext:
+        - 상태 없는 read. 공식·매핑·파서 core SSOT 호출(농장 0). 매핑 갭은 core accountMappings.json 보강.
+
+    When:
+        - native 재무비율을 깊은 기간으로 볼 때.
+
+    How:
+        - bs/is/cf readStatement → _assembleRatioSeries(snakeId series) → calcRatioSeries → _ratiosToWide.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 비율 공식·snakeId 매핑 재구현 금지(농장) — core SSOT 호출만.
+            - lxml import 금지(R2). finance/company/docs import 금지(R1). docs.parquet read 금지(R3).
+        OutputSchema:
+            - ``pl.DataFrame | None`` ([ratio, label, *period]).
+        Prerequisites:
+            - 셀 artifact + core 번들 리소스.
+        Freshness:
+            - 매 read.
+        Dataflow:
+            - readStatement×3 → snakeId series → calcRatioSeries → wide.
+        TargetMarkets:
+            - KR (DART).
+    """
+    statements = {
+        sjKey: readStatement(code, statement=stmt, freq=freq, scope=scope, marketNs=marketNs, periods=periods)
+        for sjKey, stmt in _RATIO_SOURCE_STMTS.items()
+    }
+    assembled = _assembleRatioSeries(statements)
+    if assembled is None:
+        return None
+    series, years = assembled
+    rs = calcRatioSeries(series, years, yoyLag=(4 if freq == "quarter" else 1))
+    return _ratiosToWide(rs, years)

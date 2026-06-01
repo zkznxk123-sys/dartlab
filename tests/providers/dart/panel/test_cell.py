@@ -240,3 +240,86 @@ def test_read_statement_rename_stitch(renameEnv) -> None:
     assert w["account"][0] == "매출액"  # 최근 이름 기준
     row = w.row(0, named=True)
     assert row["2023"] == "10,000" and row["2022"] == "9,000" and row["2021"] == "8,000"  # 전 기간 연속
+
+
+# ── native 재무비율 (소문자 ratios — BS/IS/CF native 항목 → core 공식, panel 자급) ──
+
+
+def test_label_to_snake_id() -> None:
+    """core mappings 재색인 — 정규화 항목명 → snakeId (calcRatioSeries 재료 키)."""
+    from dartlab.providers.dart.panel.cell import _labelToSnakeId
+
+    m = _labelToSnakeId()
+    assert m.get("매출액") == "sales"
+    assert m.get("자산총계") == "total_assets"
+    assert m.get("자본총계") == "total_stockholders_equity"
+
+
+def _ratioStmt(rows: list[tuple[str, dict[str, str]]]) -> pl.DataFrame:
+    """합성 native statement wide — [(account, {period: valueRaw})] → [account, label, *period]."""
+    periods = sorted({p for _, vals in rows for p in vals}, reverse=True)
+    recs = []
+    for account, vals in rows:
+        rec: dict = {"account": account, "label": account}
+        for p in periods:
+            rec[p] = vals.get(p)
+        recs.append(rec)
+    return pl.DataFrame(recs)
+
+
+def test_assemble_ratio_series() -> None:
+    """버킷=읽은 표(BS/IS/CF), snakeId=mappings, △/콤마 파싱, period union 오름차순 정렬."""
+    from dartlab.providers.dart.panel.cell import _assembleRatioSeries
+
+    bs = _ratioStmt([("자산총계", {"2024": "1,000", "2023": "900"}), ("자본총계", {"2024": "600", "2023": "500"})])
+    is2 = _ratioStmt([("매출액", {"2024": "2,000", "2023": "1,800"}), ("당기순이익", {"2024": "△100", "2023": "200"})])
+    cf = _ratioStmt([("영업활동현금흐름", {"2024": "300", "2023": "250"})])
+
+    out = _assembleRatioSeries({"BS": bs, "IS": is2, "CF": cf})
+    assert out is not None
+    series, years = out
+    assert years == ["2023", "2024"]  # 오름차순 (calcRatioSeries yoyLag 정합)
+    assert series["BS"]["total_assets"] == [900.0, 1000.0]
+    assert series["IS"]["sales"] == [1800.0, 2000.0]
+    assert series["IS"]["net_profit"] == [200.0, -100.0]  # △ 음수
+    assert series["CF"]["operating_cashflow"] == [250.0, 300.0]
+
+
+def test_assemble_ratio_series_empty() -> None:
+    """재료 0 → None."""
+    from dartlab.providers.dart.panel.cell import _assembleRatioSeries
+
+    assert _assembleRatioSeries({"BS": None, "IS": None, "CF": None}) is None
+
+
+def test_read_ratios_wide(monkeypatch) -> None:
+    """readRatios → [ratio, label, *period] wide, roe/debtRatio 행, period 최신 좌측, 한글 라벨."""
+    import dartlab.providers.dart.panel.cell as C
+
+    bs = _ratioStmt(
+        [
+            ("자산총계", {"2024": "1000", "2023": "900"}),
+            ("자본총계", {"2024": "600", "2023": "500"}),
+            ("부채총계", {"2024": "400", "2023": "400"}),
+        ]
+    )
+    is2 = _ratioStmt(
+        [
+            ("매출액", {"2024": "2000", "2023": "1800"}),
+            ("영업이익", {"2024": "300", "2023": "250"}),
+            ("당기순이익", {"2024": "200", "2023": "150"}),
+        ]
+    )
+    cf = _ratioStmt([("영업활동현금흐름", {"2024": "350", "2023": "300"})])
+    table = {"BS": bs, "IS2": is2, "CF": cf}
+    monkeypatch.setattr(C, "readStatement", lambda code, *, statement, **k: table.get(statement))
+
+    w = C.readRatios("X")
+    assert w is not None
+    assert w.columns[:2] == ["ratio", "label"]
+    pcols = [c for c in w.columns if c not in ("ratio", "label")]
+    assert pcols == ["2024", "2023"]  # 최신 좌측
+    ratios = w["ratio"].to_list()
+    assert "roe" in ratios and "debtRatio" in ratios
+    assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["2024"] is not None
+    assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["label"] == "자기자본이익률 (ROE %)"

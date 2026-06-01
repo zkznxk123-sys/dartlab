@@ -10,6 +10,9 @@ from typing import Any
 
 import polars as pl
 
+# 라벨 메타데이터 SSOT = core (RATIO_CATEGORIES 와 동일 사유 — providers/analysis/viz/panel 공유).
+from dartlab.core.ratioCategories import RATIO_FIELD_LABELS as _RATIO_FIELD_LABELS
+
 _RATIO_CATEGORY_LABELS: dict[str, str] = {
     "profitability": "수익성",
     "stability": "안정성",
@@ -18,73 +21,6 @@ _RATIO_CATEGORY_LABELS: dict[str, str] = {
     "cashflow": "현금흐름",
     "composite": "복합지표",
     "absolute": "절대규모",
-}
-
-_RATIO_FIELD_LABELS: dict[str, str] = {
-    # 수익성
-    "roe": "자기자본이익률 (ROE %)",
-    "roa": "총자산이익률 (ROA %)",
-    "roce": "사용자본이익률 (ROCE %)",
-    "roic": "투하자본이익률 (ROIC %)",
-    "operatingMargin": "영업이익률 (%)",
-    "netMargin": "순이익률 (%)",
-    "grossMargin": "매출총이익률 (%)",
-    "ebitdaMargin": "EBITDA마진 (%)",
-    "preTaxMargin": "세전이익률 (%)",
-    "effectiveTaxRate": "유효세율 (%)",
-    "costOfSalesRatio": "매출원가율 (%)",
-    "sgaRatio": "판관비율 (%)",
-    # 안정성/유동성
-    "debtRatio": "부채비율 (%)",
-    "currentRatio": "유동비율 (%)",
-    "quickRatio": "당좌비율 (%)",
-    "cashRatio": "현금비율 (%)",
-    "equityRatio": "자기자본비율 (%)",
-    "interestCoverage": "이자보상배율 (x)",
-    "netDebtRatio": "순차입금비율 (%)",
-    "noncurrentRatio": "비유동비율 (%)",
-    "workingCapital": "운전자본",
-    "debtToEbitda": "순차입금/EBITDA (배)",
-    # 성장성
-    "revenueGrowth": "매출 YoY (%)",
-    "operatingProfitGrowth": "영업이익 YoY (%)",
-    "netProfitGrowth": "순이익 YoY (%)",
-    "assetGrowth": "자산 YoY (%)",
-    "equityGrowthRate": "자본 YoY (%)",
-    # 효율성
-    "totalAssetTurnover": "총자산회전율 (x)",
-    "inventoryTurnover": "재고자산회전율 (x)",
-    "receivablesTurnover": "매출채권회전율 (x)",
-    "payablesTurnover": "매입채무회전율 (x)",
-    "fixedAssetTurnover": "유형자산회전율 (x)",
-    "ccc": "현금전환주기 (일)",
-    "dso": "매출채권회수기간 (일)",
-    "dio": "재고보유기간 (일)",
-    "dpo": "매입채무지급기간 (일)",
-    "operatingCycle": "영업주기 (일)",
-    # 현금흐름
-    "fcf": "잉여현금흐름 (FCF)",
-    "operatingCfMargin": "영업CF마진 (%)",
-    "operatingCfToNetIncome": "영업CF/순이익 (%)",
-    "operatingCfToCurrentLiab": "영업CF/유동부채 (%)",
-    "fcfToOcfRatio": "FCF/영업CF (%)",
-    "capexRatio": "CAPEX비율 (%)",
-    "dividendPayoutRatio": "배당성향 (%)",
-    "incomeQualityRatio": "이익품질비율 (%)",
-    # DuPont
-    "dupontMargin": "DuPont 순이익률 (%)",
-    "dupontTurnover": "DuPont 회전율 (x)",
-    "dupontLeverage": "DuPont 레버리지 (x)",
-    # 절대규모
-    "revenue": "매출",
-    "operatingProfit": "영업이익",
-    "netProfit": "순이익",
-    "totalAssets": "총자산",
-    "totalEquity": "자본(지배)",
-    "operatingCashflow": "영업현금흐름",
-    # 부실 예측
-    "piotroskiFScore": "재무건전성 (Piotroski F-Score, 0~9)",
-    "altmanZScore": "부실위험 (Altman Z-Score)",
 }
 
 

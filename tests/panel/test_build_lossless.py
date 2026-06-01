@@ -175,3 +175,22 @@ def test_native_statement_extends_past_xbrl() -> None:
     years = sorted(int(c) for c in w.columns if c.isdigit())
     assert years[0] <= 2016, f"native 과거 연장 실패 — 최소연도 {years[0]} (옛 표 파싱 안 됨)"
     assert max(years) >= 2024, "최근 XBRL 연도 누락"
+
+
+@requires_cell_inputs
+def test_native_ratios_005930() -> None:
+    """native 재무비율(소문자 ratios)이 BS/IS/CF native 항목으로 계산 — finance 보다 깊은 history."""
+    from dartlab.providers.dart.panel.build import buildPanelCells
+    from dartlab.providers.dart.panel.cell import readRatios
+
+    buildPanelCells(_BASE)
+    w = readRatios(_BASE, freq="year")
+    assert w is not None
+    assert w.columns[:2] == ["ratio", "label"]
+    ratios = w["ratio"].to_list()
+    assert "roe" in ratios and "debtRatio" in ratios, "핵심 비율 누락"
+    years = sorted(int(c) for c in w.columns if c.isdigit())
+    assert years[0] <= 2016, f"native 비율 과거연장 실패 — 최소연도 {years[0]}"
+    # ROE 행에 유효 값(native 5표 항목 산출 성공)
+    roe = w.filter(pl.col("ratio") == "roe").row(0, named=True)
+    assert any(roe[str(y)] is not None for y in years), "ROE 전 기간 None (재료 매핑 실패)"
