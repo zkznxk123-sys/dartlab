@@ -105,15 +105,49 @@ wide 로 수평화**하는 엔진이다. 양식(era)·회사마다 흔들리는 
   (OpenDART API)은 이미 `providers/dart/openapi` 라 build 도 providers 가 자급 (gather panel 폐기).
 - **BUILD/READ import 격리** — build(`build/`, lxml/zipfile)는 무거운 zip→14col·spine 생산, read 표면
   (`panel.py`·`read.py`·`spine/`)은 build 를 import 안 함 → read 표면 lxml 0 (콜드 <1s, R2).
-  US cross-market overlay seed 는 dormant — `build/usSeed.py` 로 격리(KR 은 canonicalKey 가 대체).
+  KR 정규화는 native canonicalKey 단독(bridge lookup 농장 0) — US cross-market 정규화는 후속(별도
+  설계, `scan.sectionsNew` bridge 재사용).
 - **태그 무손실** — contentRaw = 원본 XML 그대로 저장. 기본 read 는 plain(태그 strip), `tag=True`
   면 원본 XML (collapse 단계 1회 strip, raw wide 2중 materialize 회피).
+
+### parquet 저장 기준 — "불변 원본 + 순수 규칙 산물"만 굽는다 (SSOT)
+
+panel artifact(`{code}/{period}.parquet`)에 **굽는 것**과 **read 가 매번 계산하는 것**을 가르는 단일
+기준: **그 값이 "언제 어떻게 바뀔지 모르는가"**. 바뀔 수 있으면 굽지 않는다.
+
+| 무엇 | 굽나 | 왜 |
+|---|---|---|
+| `contentRaw` (원본 XML) | ✅ build | **불변 원본** — etree.tostring 그대로(R4). 원본이라 영원히 안 변함 |
+| `disclosureKey`(=canonicalKey)·`xbrlClass`·`blockOrder`·`atocId` 등 | ✅ build | walker 가 뽑은 원본 속성 + `canonicalKey` **순수함수 규칙** (read fallback 보유 → 규칙 변경 시 재빌드 전에도 동작) |
+| `scope` (연결/별도) | ❌ read 파생 | `scopeExpr(xbrlClass)` 판정 — **규칙이 바뀔 수 있음** → 안 구움, read 가 계산 |
+| 행 순서·계층 (spine) | ❌ read 정렬 | 전역 spine `(chapterRank, spineOrder)` — corpus 확대·정부 양식 변경 시 재산정 → artifact 불변, spineData.py 만 재생성 |
+| plain (태그 strip) | ❌ read strip | raw 의 파생 표현 — strip 규칙 변경 가능 + 같은 정보 이중저장([[feedback_no_content_plain_precompute]]) → 안 구움 |
+
+**원칙**: 파생물·정렬·표현·판정은 **굽지(build) 도, 즉시 다 계산(eager)도 강제하지 않는다.** 굽으면
+규칙 변경 시 전 종목 재빌드 폭탄 + 이중저장 회귀. → scope·spine·plain 이 전부 read 시점인 이유.
+[[feedback_panel_wide_identity]] (wide 정체성 불가침) 와 한 사상.
+
+### 콜드스타트 — strip 위치(채택) + lazy(후속), build 굽기·wide 교체 금지
+
+read plain 콜드 비용의 90%가 173MB raw→plain 정규식 strip (정규식 chain 자체는 floor — per-row·
+대체정규식 전부 더 느리거나 틀림, 측정 확인). I/O 72ms·anchor·pivot·orderBySpine 는 ≤10ms.
+strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 세 제약 충족: (1) wide 형태·내용 불가침
+([[feedback_panel_wide_identity]]), (2) build 굽기 금지(위 저장 기준, R4), (3) plain 결과 불변.
+
+- **채택(strip 위치 이동)**: strip 을 collapse(long fragment) 단계가 아니라 **pivot·spine 정렬 후
+  wide period 셀**에 1회. 큰 셀 1회 정규식이 작은 조각 수천개보다 빠름 → **콜드 ~1s→0.35s (2.8x)**,
+  byte-identical(10481 셀 불일치 0)·plain 기본·tag 옵션·wide 정체성 0 변경. `read._stripExpr` 재사용
+  Expr. 이미 적용.
+- **후속(lazy, 미착수)**: strip 을 "잡는 순간"이 아니라 "표시/특정 셀 접근" 시점으로 더 미루면 콜드
+  ~0.16s 가능 — 단 잡는 순간 셀이 raw(태그 포함)가 되어 plain 직관성과 충돌. `Panel(pl.DataFrame)`
+  eager subclass 와 lazy 경계 정합도 미해결. 기본 plain 직관성 > 0.16s 라 보류, 별도 검토.
+- **금지**: build plain 사전계산(R4 위반) · wide 를 metadata-only/long 으로 교체(정체성 파괴).
 
 ```
 DART zip / DART API ──build(providers/dart/panel/build)─→ {code}/{period}.parquet (14-col)
                                                               │
                                                               ↓
-                          Panel(code) / c.panel  (read, 콜드 <1s, pl.DataFrame subclass)
+                          Panel(code) / c.panel  (read, plain 콜드 ~0.35s, pl.DataFrame subclass)
 ```
 
 ## 공개 호출 방식
