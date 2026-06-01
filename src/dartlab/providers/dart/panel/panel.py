@@ -189,7 +189,9 @@ class Panel(pl.DataFrame):
         Args:
             key: None(기본) 면 전체 격자. **소스 = 대소문자** — 소문자 5표(is/bs/cf/cis/sce) = native
                 재무제표(panel 자급, XBRL+옛 통합 전기간). 대문자 5표(IS/BS/CF/CIS/SCE) = finance(파사드
-                _showFn 주입). canonicalKey("NT_D826380")·한글 섹션명("재고") = raw 공시 행 검색.
+                _showFn 주입). 소문자 "ratios" = native 재무비율(BS/IS/CF native 항목 → core 공식, 자급),
+                대문자 "RATIOS" = finance 비율(파사드). canonicalKey("NT_D826380")·한글 섹션명("재고") = raw
+                공시 행 검색.
             source: "auto"(기본) / "raw"(강제 raw 공시) / "finance"/"report"(강제 주입).
             tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override). raw 검색만 적용.
             periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read.
@@ -268,6 +270,19 @@ class Panel(pl.DataFrame):
                 marketNs=self._marketNs,
                 periods=periods or self._periods,
             )
+        # native 재무비율 (소문자 ratios) → panel 자급 (BS/IS/CF native 항목 → core 공식, docs 0).
+        # 대문자 RATIOS → finance topic 으로 치환해 아래 strong 블록(파사드 _showFn) 위임. is/IS 와 대칭.
+        if key == "ratios" and code is not None:
+            from . import cell as _cell
+
+            return _cell.readRatios(
+                code,
+                freq=freq or "year",
+                marketNs=self._marketNs,
+                periods=periods or self._periods,
+            )
+        if key == "RATIOS":
+            key = "ratios"
         # 강한 소스(finance/report, 대문자 5표 IS/BS/CF/CIS/SCE 포함) 주입 — facade(Company.panel) _showFn.
         # panel.py 는 finance 를 모름 — 주입된 callable 만 호출(layer 격리, cycle 0). freq 는 finance 입도로 전달.
         if source != "raw":

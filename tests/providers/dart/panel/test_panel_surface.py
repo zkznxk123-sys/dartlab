@@ -84,3 +84,41 @@ def test_freq_not_source_switch() -> None:
     src = inspect.getsource(Panel.__call__)
     assert "_NATIVE_STMT" in src
     assert "readStatement" in src  # native 는 readStatement, freq→readCellWide 버그 제거
+
+
+# ── native 재무비율 (소문자 ratios) vs finance 비율 (대문자 RATIOS) 디스패치 ──
+
+
+def test_ratios_lowercase_native(monkeypatch) -> None:
+    """소문자 'ratios' → cell.readRatios(native 자급), showFn 미경유 (is/IS 대칭)."""
+    import dartlab.providers.dart.panel.cell as C
+    from dartlab.providers.dart.panel import Panel
+
+    sentinel = pl.DataFrame({"ratio": ["roe"], "label": ["x"], "2024": [1.0]})
+    seen: dict = {}
+    monkeypatch.setattr(C, "readRatios", lambda code, **k: (seen.update(code=code), sentinel)[1])
+
+    p = Panel("005930fake")
+    p._showFn = lambda *a, **k: pytest.fail("native ratios 는 finance showFn 경유 금지")
+    p._strongFn = lambda key: True
+    out = p("ratios")
+    assert out is sentinel
+    assert seen["code"] == "005930fake"
+
+
+def test_ratios_uppercase_finance() -> None:
+    """대문자 'RATIOS' → key='ratios' 치환 후 finance showFn 위임 (기존 동작 보존)."""
+    from dartlab.providers.dart.panel import Panel
+
+    p = Panel("005930fake")
+    seen: dict = {}
+
+    def _show(key, **k):
+        seen["key"] = key
+        return pl.DataFrame({"x": [1]})
+
+    p._showFn = _show
+    p._strongFn = lambda key: key == "ratios"
+    out = p("RATIOS")
+    assert seen.get("key") == "ratios"  # 대문자 → 소문자 finance topic
+    assert out is not None
