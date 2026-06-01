@@ -101,3 +101,63 @@ def test_build_tag_lossless() -> None:
         f"태그(`<`) 토큰 수 불일치 — source {srcTags:,} vs artifact {artTags:,} "
         f"(차 {artTags - srcTags:,}) — build 에서 태그 strip/가공 발생 (R4 위반)"
     )
+
+
+def _latestAnnualZip(code: str) -> Path | None:
+    """가장 최신 사업보고서(dFY·IS_C2 보유) zip — Revenue 직접 파싱용."""
+    from dartlab.providers.dart.panel.build.builder import _readZip
+
+    for zp in sorted((_ZIP_DIR / code).glob("*.zip"), reverse=True):
+        _rcept, xmls = _readZip(zp)
+        if any("dFY" in xml and "IS_C2" in xml for xml in xmls):
+            return zp
+    return None
+
+
+_hasCellZip = (_ZIP_DIR / _BASE).exists() and any((_ZIP_DIR / _BASE).glob("*.zip"))
+requires_cell_zip = pytest.mark.skipif(not _hasCellZip, reason="005930 zip 없음 (셀 빌드 불가)")
+
+
+@requires_cell_zip
+def test_cell_roundtrip_revenue() -> None:
+    """셀 무손실 — zip 의 IS_C2 Revenue dFY 값 == readCellWide('IS2', year) 복원값.
+
+    독립 직접 파싱(lxml) vs build→parquet→read 파이프라인 동치 = 셀 손실0·무가공 증명.
+    """
+    import re
+
+    from lxml import etree
+
+    from dartlab.providers.dart.panel.build import buildPanelCells
+    from dartlab.providers.dart.panel.build.builder import _readZip
+    from dartlab.providers.dart.panel.cell import readCellWide
+
+    # 1) 셀 build (기본 dataDir) → read
+    res = buildPanelCells(_BASE)
+    assert res, "셀 빌드 결과 없음 (ACONTEXT 보유 zip 부재?)"
+    wide = readCellWide(_BASE, statement="IS2", freq="year")
+    assert wide is not None and wide.height > 0
+
+    # 2) 독립 직접 파싱 — 최신 사업보고서 IS_C2 Revenue dFY (단일축)
+    zp = _latestAnnualZip(_BASE)
+    assert zp is not None
+    _rcept, xmls = _readZip(zp)
+    parser = etree.XMLParser(recover=True, huge_tree=True)
+    direct: dict[int, str] = {}
+    for xml in xmls:
+        root = etree.fromstring(xml.encode("utf-8"), parser)
+        for tg in root.iter("TABLE-GROUP"):
+            if (tg.get("ACLASS", "") or "").replace("{XBRL}", "") != "IS_C2":
+                continue
+            for te in tg.iter("TE"):
+                ctx = te.get("ACONTEXT") or ""
+                if (te.get("ACODE") or "").endswith("_Revenue") and "dFY" in ctx and ctx.count("Member") == 1:
+                    direct[int(re.search(r"FY(\d{4})", ctx).group(1))] = "".join(te.itertext()).strip()
+    assert direct, "직접 파싱 Revenue dFY 0"
+
+    # 3) 동치 — 직접 파싱 값이 셀 격자에 그대로 (손실·가공 0)
+    rev = wide.filter((pl.col("acode") == "ifrs-full_Revenue") & (pl.col("axisPath") == "ConsolidatedMember"))
+    assert rev.height == 1, "Revenue 단일축 행 1개 (평탄화 충돌 0)"
+    for yr, val in direct.items():
+        if str(yr) in rev.columns:
+            assert rev[str(yr)][0] == val, f"{yr} Revenue 불일치: 직접 {val} vs 셀 {rev[str(yr)][0]}"

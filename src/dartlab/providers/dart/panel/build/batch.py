@@ -224,6 +224,7 @@ def _main() -> None:
     ap.add_argument("--out", type=str, default="data/dart/panel", help="출력 base dir")
     ap.add_argument("--all", action="store_true", help="전종목 빌드 (multiprocessing)")
     ap.add_argument("--spine", action="store_true", help="정부 서식 뼈대(spineData.py) 생성 — 기준 종목 1개")
+    ap.add_argument("--cells", action="store_true", help="재무 5표 native XBRL 셀 → panelCell/ (--codes 종목)")
     args = ap.parse_args()
 
     refDf: pl.DataFrame | None = None
@@ -239,6 +240,15 @@ def _main() -> None:
         codes = [c.strip() for c in args.codes.split(",") if c.strip()]
         stats = buildSpine(codes[0] if codes else "005930", refDf=refDf, verbose=True)
         _log.info("=== spine 완료: code=%d, rows=%d ===", stats["code"], stats["rows"])
+        return
+
+    if args.cells:
+        from .cell import buildPanelCells
+
+        codes = [c.strip() for c in args.codes.split(",") if c.strip()] or ["005930"]
+        for code in codes:
+            stats = buildPanelCells(code, verbose=True)
+            _log.info("=== cell %s: %d period, %d row ===", code, len(stats), sum(stats.values()))
         return
 
     if args.all:
