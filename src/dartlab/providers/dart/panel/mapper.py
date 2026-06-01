@@ -400,3 +400,42 @@ def resolveBatch(df: pl.DataFrame, *, marketNs: str = "kr") -> pl.DataFrame:
     if df.is_empty() or "xbrlClass" not in df.columns:
         return df
     return df.with_columns(canonicalKeyExpr("xbrlClass").alias("disclosureKey"))
+
+
+def dedupKeyed(df: pl.DataFrame) -> pl.DataFrame:
+    """keyed 행(BS/IS/CF/NT_* 등 disclosureKey 보유)의 본문+첨부 중복을 (key, scope, period) 당 1개로 축약.
+
+    DART 보고서는 같은 재무제표·주석을 본문("III. 재무에 관한 사항")과 첨부("(첨부)재무제표")에 중복
+    수록한다. 그래서 같은 canonicalKey 가 여러 행이 되고, READ collapse 의 ``str.join`` 이 합쳐 격자 셀
+    content 가 2~3배 증식한다. 본 함수가 ``(disclosureKey, scope, period)`` 당 **구조화(xbrlClass 보유) >
+    최장** 1개만 남겨 증식을 차단한다 — narrative(disclosureKey null) 행은 불변(section 별 고유).
+
+    **READ 정렬(alignment) 단계** — ``readWide`` 가 ``anchorLatest`` 직후·collapse 직전에 호출한다.
+    scope 는 anchorLatest 가 부여한 ``scope`` 컬럼(era-안정화)을 그대로 쓴다(자체 재계산 안 함 — collapse
+    의 indexCols scope 와 동일 축 보장). period 를 subset 에 넣어야 다기간 격자가 보존된다(readLong 이
+    여러 period parquet 을 concat 하므로).
+
+    Args:
+        df: anchorLatest 후 DataFrame (disclosureKey·scope·period·contentRaw 컬럼 보유).
+
+    Returns:
+        keyed 중복이 제거된 동일 schema DataFrame. scope 컬럼 부재/중복 없음이면 입력 그대로.
+    """
+    if df.is_empty() or "disclosureKey" not in df.columns or "scope" not in df.columns:
+        return df
+    keyedMask = pl.col("disclosureKey").is_not_null()
+    subset = ["disclosureKey", "scope"] + (["period"] if "period" in df.columns else [])
+    keyed = df.filter(keyedMask)
+    if keyed.height == keyed.select(subset).unique().height:
+        return df  # 중복 없음 — 원본 그대로
+    tmp = df.with_columns(
+        (pl.col("xbrlClass").is_not_null() if "xbrlClass" in df.columns else pl.lit(False)).alias("_hx"),
+        pl.col("contentRaw").str.len_chars().fill_null(0).alias("_ln"),
+    )
+    deduped = (
+        tmp.filter(keyedMask)
+        .sort(["_hx", "_ln"], descending=True)
+        .unique(subset=subset, keep="first", maintain_order=True)
+    )
+    narrative = tmp.filter(~keyedMask)
+    return pl.concat([deduped, narrative], how="vertical").drop(["_hx", "_ln"])

@@ -353,7 +353,8 @@ def _writePeriodShards(
         df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
         df = horizontalize(df)
         df = resolveBatch(df, marketNs="kr")  # KR within = native canonicalKey
-        df = dechunkNotes(df)  # 옛 "주석" 덩어리 → 항목별 NT_* sub-note (2023 이전 수평화 정합)
+        df = dechunkNotes(df)  # 미분해 주석 블록 → 항목별 NT_* sub-note (구조무관 분류). 본문+첨부 중복
+        # 제거(dedupKeyed)는 BUILD 아님 — READ 정렬(readWide)에서 read-time 처리(재빌드 무관).
         df = df.select(list(PANEL_SCHEMA.keys()))
         outPath = outDir / f"{period}.parquet"
         if outPath.exists() and not overwrite:

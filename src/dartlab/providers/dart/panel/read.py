@@ -530,10 +530,13 @@ def readWide(
         TargetMarkets:
             - KR + US.
     """
+    from .mapper import dedupKeyed
+
     long = readLong(code, marketNs=marketNs, periods=periods)
     if long is None or long.is_empty() or "contentRaw" not in long.columns:
         return None
     long = anchorLatest(long)
+    long = dedupKeyed(long)  # 본문+첨부 중복 keyed 행 → (key,scope,period) 당 1개 (collapse 증식 차단)
     indexCols = [c for c in _INDEX_COLS if c in long.columns]
     if not indexCols or "period" not in long.columns:
         return None

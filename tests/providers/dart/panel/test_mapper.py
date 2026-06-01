@@ -12,6 +12,7 @@ import pytest
 from dartlab.providers.dart.panel.mapper import (
     canonicalKey,
     canonicalKeyExpr,
+    dedupKeyed,
     resolveBatch,
     rowIdentity,
     rowIdentityExpr,
@@ -114,3 +115,66 @@ def test_canonical_key_expr_matches_scalar() -> None:
     exprOut = df.select(canonicalKeyExpr())["canonicalKey"].to_list()
     scalarOut = [canonicalKey(r) for r in raws]
     assert exprOut == scalarOut
+
+
+def _keyedRow(key: str, scope: str, period: str, content: str, xc: str | None) -> dict:
+    """dedupKeyed 테스트용 최소 행 (READ 정렬 단계 입력 형태)."""
+    return {"disclosureKey": key, "scope": scope, "period": period, "contentRaw": content, "xbrlClass": xc}
+
+
+def test_dedup_keyed_body_attachment_one_per_period() -> None:
+    """같은 (key,scope,period)가 본문+첨부 2행이면 1행으로 — 구조화(xbrlClass)>최장 우선."""
+    df = pl.DataFrame(
+        [
+            _keyedRow("BS", "consolidated", "2024Q4", "X" * 50, "BS_C"),  # 구조화(짧음)
+            _keyedRow("BS", "consolidated", "2024Q4", "Y" * 99, None),  # 첨부(길지만 비구조화)
+        ]
+    )
+    out = dedupKeyed(df)
+    assert out.height == 1
+    assert out["xbrlClass"][0] == "BS_C"  # xbrlClass 보유 우선 (길이보다 먼저)
+
+
+def test_dedup_keyed_distinct_periods_preserved() -> None:
+    """period 가 subset 에 있어 다기간 격자 보존 — 같은 (key,scope) 라도 period 다르면 둘 다 유지."""
+    df = pl.DataFrame(
+        [
+            _keyedRow("BS", "consolidated", "2024Q4", "a" * 10, "BS_C"),
+            _keyedRow("BS", "consolidated", "2023Q4", "b" * 10, "BS_C"),
+        ]
+    )
+    out = dedupKeyed(df)
+    assert out.height == 2
+    assert set(out["period"].to_list()) == {"2024Q4", "2023Q4"}
+
+
+def test_dedup_keyed_scope_separates() -> None:
+    """연결/별도(scope)는 같은 canonicalKey 라도 분리 보존."""
+    df = pl.DataFrame(
+        [
+            _keyedRow("BS", "consolidated", "2024Q4", "c" * 10, "BS_C"),
+            _keyedRow("BS", "standalone", "2024Q4", "s" * 10, "BS_S"),
+        ]
+    )
+    out = dedupKeyed(df)
+    assert out.height == 2
+    assert set(out["scope"].to_list()) == {"consolidated", "standalone"}
+
+
+def test_dedup_keyed_narrative_untouched() -> None:
+    """narrative(disclosureKey null) 행은 dedup 대상 아님 — 전부 보존."""
+    df = pl.DataFrame(
+        [
+            {"disclosureKey": None, "scope": "consolidated", "period": "2024Q4", "contentRaw": "n1", "xbrlClass": None},
+            {"disclosureKey": None, "scope": "consolidated", "period": "2024Q4", "contentRaw": "n2", "xbrlClass": None},
+        ]
+    )
+    out = dedupKeyed(df)
+    assert out.height == 2
+
+
+def test_dedup_keyed_no_scope_column_passthrough() -> None:
+    """scope 컬럼 부재(빌드 단계 등) 시 입력 그대로 — READ 전용 가드."""
+    df = pl.DataFrame([{"disclosureKey": "BS", "period": "2024Q4", "contentRaw": "x", "xbrlClass": "BS_C"}])
+    out = dedupKeyed(df)
+    assert out.height == 1
