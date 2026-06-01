@@ -45,7 +45,8 @@ from dartlab.core.utils.labels import _loadAccountMappings
 from .cellSchema import CELL_PIVOT_INDEX, CELL_SCHEMA
 
 # 재무 5표 statement (build/cell.CELL_STATEMENTS 와 동일 값 — read 표면 SSOT).
-_CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS2", "IS3", "CF", "EF"})
+# IS1/IS2/IS3 = 손익(단일/별도/포괄) — 회사마다 표현이 달라 셋 다 포함.
+_CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS1", "IS2", "IS3", "CF", "EF"})
 
 
 def cellStatements() -> frozenset[str]:
@@ -125,7 +126,8 @@ def _freqMask(freq: str) -> pl.Expr:
         polars 불리언 Expr. 미지원 freq 는 항상 False.
     """
     if freq == "year":
-        return pl.col("ctxMode") == "Y"
+        # 연간 = dFY/eFY(Y) 또는 Q4 누적(A & Q4=12M=연간). 회사마다 연간 인코딩이 Y 또는 A-Q4 로 갈림.
+        return (pl.col("ctxMode") == "Y") | ((pl.col("ctxMode") == "A") & (pl.col("ctxQuarter") == 4))
     if freq == "quarter":
         # 흐름=단독(Q), 시점=당기말 잔액(A 또는 연말 Y).
         return ((pl.col("ctxFlow") == "d") & (pl.col("ctxMode") == "Q")) | (
@@ -374,7 +376,16 @@ def readStatement(
     df = _cellsFromPanel(code, marketNs, periods)
     if df is None:
         return None
-    return _statementFromCells(df, statement=statement, freq=freq, scope=scope)
+    # 폴백 우선순위: 손익(is=IS2)은 IS2→IS3(포괄손익)→IS1(단일) 순으로 — 회사마다 손익 표현이 다름.
+    # 각 statement 는 연결(consolidated) 없으면 별도(standalone) — 별도만 공시하는 회사 해소.
+    stmtChain = ["IS2", "IS3", "IS1"] if statement == "IS2" else [statement]
+    scopeChain = [scope, "standalone"] if scope == "consolidated" else [scope]
+    for sc in scopeChain:
+        for st in stmtChain:
+            out = _statementFromCells(df, statement=st, freq=freq, scope=sc)
+            if out is not None:
+                return out
+    return None
 
 
 def _statementFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame | None:

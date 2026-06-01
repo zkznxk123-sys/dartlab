@@ -43,10 +43,11 @@ from ..cellSchema import CELL_SCHEMA
 _log = logging.getLogger(__name__)
 
 # 재무 5표 statement (= panel.parquet disclosureKey). SCE(자본변동표)=EF, CIS(포괄손익)=IS3 (ACLASS 실측).
-CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS2", "IS3", "CF", "EF"})
+# IS1=단일 손익계산서, IS2=별도 손익, IS3=포괄손익 — 회사마다 손익 표현이 달라 셋 다 포함.
+CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS1", "IS2", "IS3", "CF", "EF"})
 
 # statement → 흐름(d=duration)/시점(e=instant). 옛 표(태그 없음)는 statement 로 ctxFlow 도출.
-_STMT_FLOW: dict[str, str] = {"BS": "e", "IS2": "d", "IS3": "d", "CF": "d", "EF": "e"}
+_STMT_FLOW: dict[str, str] = {"BS": "e", "IS1": "d", "IS2": "d", "IS3": "d", "CF": "d", "EF": "e"}
 
 # 금액 단위 → 배율(원 기준). DART 재무제표 표준은 백만원.
 _UNIT_RE = re.compile(r"단위\s*[:：]\s*(백만원|천원|원)")

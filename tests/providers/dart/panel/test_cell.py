@@ -61,10 +61,10 @@ def cellEnv() -> pl.DataFrame:
 
 
 def test_cell_statements() -> None:
-    """셀 대상 = 재무 5표."""
+    """셀 대상 = 재무 5표 (손익 IS1/IS2/IS3 — 단일/별도/포괄)."""
     from dartlab.providers.dart.panel.cell import cellStatements
 
-    assert cellStatements() == frozenset({"BS", "IS2", "IS3", "CF", "EF"})
+    assert cellStatements() == frozenset({"BS", "IS1", "IS2", "IS3", "CF", "EF"})
 
 
 def test_freq_year_selects_fy(cellEnv) -> None:

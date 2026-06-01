@@ -47,17 +47,19 @@ def _censusOne(code: str) -> dict:
         rec["issues"].append("no_cells")  # 5표 행 0 (stale disclosureKey 등)
         return rec
     rec["statements"] = sorted(s for s in cells["statement"].unique().to_list() if s in _FIVE)
-    missing = sorted(_FIVE - set(rec["statements"]))
-    if missing:
-        rec["issues"].append(f"missing_statements:{','.join(missing)}")
-    ratios = readRatios(code, freq="year")
+    incomeStmts = {"IS1", "IS2", "IS3"}
+    if not (set(rec["statements"]) & incomeStmts):
+        rec["issues"].append("no_income_statement")  # 손익(IS1/2/3) 자체 부재 (구조화 재무 없음)
+    # 비율·손익 — 연간 우선, 없으면 분기(신규 상장 등 연간 미신고 회사). 둘 다 0 이면 결손.
+    ratios = readRatios(code, freq="year") or readRatios(code, freq="quarter")
     rec["ratioRows"] = 0 if ratios is None else ratios.height
-    if rec["ratioRows"] == 0:
-        rec["issues"].append("no_ratios")
-    isw = readStatement(code, statement="IS2", freq="year")
+    isw = readStatement(code, statement="IS2", freq="year") or readStatement(code, statement="IS2", freq="quarter")
+    rec["hasIncome"] = isw is not None and isw.height > 0
+    if not rec["hasIncome"] and (set(rec["statements"]) & incomeStmts):
+        rec["issues"].append("income_unreadable")  # 손익 셀은 있는데 read 실패 (진짜 버그 신호)
     if isw is not None:
-        years = [int(c) for c in isw.columns if c.isdigit()]
-        rec["isMinYear"] = min(years) if years else None
+        cols = [c for c in isw.columns if c[:4].isdigit()]
+        rec["isMinYear"] = min(cols) if cols else None
     return rec
 
 
