@@ -224,6 +224,7 @@ def _main() -> None:
     ap.add_argument("--out", type=str, default="data/dart/panel", help="출력 base dir")
     ap.add_argument("--all", action="store_true", help="전종목 빌드 (multiprocessing)")
     ap.add_argument("--spine", action="store_true", help="정부 서식 뼈대(spineData.py) 생성 — 기준 종목 1개")
+    ap.add_argument("--workers", type=int, default=8, help="Pool workers (OOM 가드: polars 힙 200~500MB/종목, ≤4 권장)")
     args = ap.parse_args()
 
     refDf: pl.DataFrame | None = None
@@ -242,7 +243,7 @@ def _main() -> None:
         return
 
     if args.all:
-        buildPanelAll(refPath=args.ref, outBaseDir=args.out)
+        buildPanelAll(refPath=args.ref, outBaseDir=args.out, numWorkers=args.workers)
         return
 
     codes = [c.strip() for c in args.codes.split(",") if c.strip()] or None

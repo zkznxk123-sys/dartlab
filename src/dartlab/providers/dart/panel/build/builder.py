@@ -44,6 +44,7 @@ import dartlab.config as _cfg
 from ..mapper import resolveBatch
 from ..period import periodFromEnd
 from ..schema import PANEL_SCHEMA
+from .dechunkNotes import dechunkNotes
 from .horizontalize import horizontalize
 from .refScan import scanRefBaseline
 from .walker import detectSchemaEra, walkSections
@@ -352,6 +353,7 @@ def _writePeriodShards(
         df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
         df = horizontalize(df)
         df = resolveBatch(df, marketNs="kr")  # KR within = native canonicalKey
+        df = dechunkNotes(df)  # 옛 "주석" 덩어리 → 항목별 NT_* sub-note (2023 이전 수평화 정합)
         df = df.select(list(PANEL_SCHEMA.keys()))
         outPath = outDir / f"{period}.parquet"
         if outPath.exists() and not overwrite:
