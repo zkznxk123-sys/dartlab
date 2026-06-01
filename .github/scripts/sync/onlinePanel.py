@@ -61,24 +61,6 @@ def _writeChangedPanel(codes: list[str], dataDir: str) -> None:
     print(f"[onlinePanel] dist/changed_panel.txt: {len(lines)} entries")
 
 
-def _writeChangedCells(codes: list[str], dataDir: str) -> None:
-    """uploadData(SYNC_CATEGORY=panelCell) 증분 업로드용 changed list — {code}/{period}.parquet."""
-    cellBase = Path(dataDir) / "dart" / "panelCell"
-    lines: list[str] = []
-    for code in codes:
-        d = cellBase / code
-        if not d.exists():
-            continue
-        for p in sorted(d.glob("*.parquet")):
-            lines.append(f"{code}/{p.name}")
-
-    distDir = Path("dist")
-    distDir.mkdir(exist_ok=True)
-    target = distDir / "changed_panelCell.txt"
-    target.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
-    print(f"[onlinePanel] dist/changed_panelCell.txt: {len(lines)} entries")
-
-
 def main() -> int:
     """online 1패스 panel 빌드 CLI entry — providers fetch + gather build 조합 (R1 layer-밖)."""
     parser = argparse.ArgumentParser(description="online 1패스 panel 빌더 (디스크 zip 0)")
@@ -134,19 +116,6 @@ def main() -> int:
     print(f"[onlinePanel] online 빌드: {built}/{len(codes)} 종목, {totalRows} rows")
     _writeChangedPanel(codes, dataDir)
 
-    # panelCell — panel.parquet contentRaw → 재무 5표 native 셀 (사용자 native is/bs/cf/ratios 재료).
-    # panel.parquet 파생이라 zip/ref 불요 — 방금 빌드한 종목만 셀화 후 changed list 작성.
-    from dartlab.providers.dart.panel.build import buildPanelCellsAll
-
-    cellStats = buildPanelCellsAll(
-        codes=codes,
-        outBaseDir=str(Path(dataDir) / "dart" / "panelCell"),
-        numWorkers=workers,
-        verbose=False,
-    )
-    cellBuilt = sum(1 for v in cellStats.values() if v[0] > 0)
-    print(f"[onlinePanel] panelCell 빌드: {cellBuilt}/{len(codes)} 종목")
-    _writeChangedCells(codes, dataDir)
     return 0 if built else 1
 
 

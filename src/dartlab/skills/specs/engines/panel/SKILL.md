@@ -156,13 +156,14 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
   자기 정체성을 지우면 모순. 사람 표시는 `c.panel(tag=False)` 한 칸.
 - **금지**: build plain 사전계산(R4 위반) · wide 를 metadata-only/long 으로 교체(정체성 파괴).
 
-### native 재무제표 (is) — 별개 평행 셀 artifact, XBRL 정밀 + 옛 표 과거 연장
+### native 재무제표 (is) — panel.parquet 단일 artifact, read-time 분해, XBRL 정밀 + 옛 표 과거 연장
 
-메인 14-col blob 격자(wide 정체성 불가침)는 안 건드리고, 재무 5표(BS/IS/CIS/CF/SCE)를 **별개 평행
-artifact** `panelCell/{code}/{period}.parquet`(14-col CELL_SCHEMA)로 셀화. **소스 = 이미 빌드된
-panel.parquet 의 contentRaw**(zip 재처리 0, **docs.parquet 0**). 파생 체인 zip → buildPanel →
-panel.parquet → `build/cell.buildPanelCells`(lxml) → panelCell → `cell.readStatement`(parquet, lxml 0)
-→ `c.panel("is", freq=)`(소문자, panel 자급). finance(대문자 IS)는 파사드 attach(별개).
+메인 14-col blob 격자(wide 정체성 불가침)는 안 건드리고, 재무 5표(BS/IS/CIS/CF/SCE)를 **별개 parquet 파일
+없이** panel.parquet 의 5표 row `contentRaw`(표 XML)에서 **read-time 분해**(`cell._cellsFromPanel` →
+`build/cell.cellsFromContent` 함수 lazy lxml). **소스 = panel.parquet 단일**(zip 재처리 0, **docs.parquet 0**,
+별 panelCell artifact 0). 체인 zip → buildPanel → panel.parquet → (read 시) `cellsFromContent` 분해 →
+`cell.readStatement` → `c.panel("is", freq=)`(소문자, panel 자급, 단일 artifact). 콜드: 모듈 top-level lxml 0
+(분해는 panel("is") 호출 시에만 lazy 로드). finance(대문자 IS)는 파사드 attach(별개).
 
 - **두 era 통합** — XBRL 있으면(2022+) `<TE ACODE ACONTEXT>` 정밀 셀(`decodeAcontext`: 정부 토큰
   `[C|P|BP]FY{year}[d|e]{marker}`, 산수 0). 없으면(2021 이전, XBRL 태그 없음) **옛 표 위치 파싱**(첫 셀=항목명,

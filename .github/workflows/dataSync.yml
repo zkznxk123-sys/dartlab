@@ -277,15 +277,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: panel
-
-      # panelCell — onlinePanel.py 가 panel.parquet 후 재무 5표 native 셀까지 빌드 + changed_panelCell.txt
-      # 작성 (사용자 native is/bs/cf/ratios 재료). panel 과 동일 gate.
-      - name: Upload panelCell to HuggingFace
-        if: vars.PANEL_ONLINE_ENABLED == '1' && hashFiles('dist/changed_panelCell.txt') != ''
-        run: uv run python .github/scripts/sync/uploadData.py --target hf
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          SYNC_CATEGORY: panelCell
+        # native is/bs/cf/ratios 는 사용자 환경에서 panel.parquet contentRaw 를 read-time 분해 —
+        # 별 panelCell artifact 0 (단일 artifact). 업로드는 panel 하나면 충분.
 
       # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 

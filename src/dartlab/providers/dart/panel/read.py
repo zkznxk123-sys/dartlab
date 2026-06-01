@@ -157,6 +157,42 @@ def _panelDir(code: str, marketNs: str = "kr") -> Path:
     return Path(_cfg.dataDir) / base / "panel" / code
 
 
+_HF_PANEL_ATTEMPTED: set[str] = set()
+
+
+def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
+    """panel.parquet 부재 시 HF lazy 다운로드 — 한 종목만, 1회 시도 (단일 artifact 자동로드).
+
+    sections ``_ensureFromHf`` 미러. 로컬 우선 — 디렉터리 있으면 즉시 반환. offline/
+    ``DARTLAB_NO_HF_DOWNLOAD=1`` skip. 실패는 graceful(빈 결과). KR 전용(US 후속).
+    native is/bs/cf/ratios(셀)도 이 한 artifact 에서 파생되므로 panel.parquet 만 받으면 충분.
+    """
+    import os as _os
+
+    if marketNs != "kr":
+        return
+    if _panelDir(code, marketNs).exists():
+        return
+    if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
+        return
+    if code in _HF_PANEL_ATTEMPTED:
+        return
+    _HF_PANEL_ATTEMPTED.add(code)
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=[f"{DATA_RELEASES['panel']['dir']}/{code}/*.parquet"],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+    except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
+        pass
+
+
 def scopeExpr(col: str = "xbrlClass") -> pl.Expr:
     """xbrlClass → scope ('consolidated' / 'standalone') 파생 Expr (연결/별도 분리 보존).
 
@@ -373,6 +409,7 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
         TargetMarkets:
             - KR + US.
     """
+    ensurePanelFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선, 단일 자동로드)
     d = _panelDir(code, marketNs)
     if not d.exists():
         return None

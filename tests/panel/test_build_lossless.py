@@ -128,13 +128,10 @@ def test_cell_roundtrip_revenue() -> None:
 
     from lxml import etree
 
-    from dartlab.providers.dart.panel.build import buildPanelCells
     from dartlab.providers.dart.panel.build.builder import _readZip
-    from dartlab.providers.dart.panel.cell import readCellWide, readStatement
+    from dartlab.providers.dart.panel.cell import readCellWide
 
-    # 1) 셀 build (panel.parquet contentRaw) → read
-    res = buildPanelCells(_BASE)
-    assert res, "셀 빌드 결과 없음 (panel.parquet 부재?)"
+    # 1) read — readCellWide 가 panel.parquet 5표 contentRaw 를 read-time 분해 (별 panelCell 0)
     wide = readCellWide(_BASE, statement="IS2", freq="year")
     assert wide is not None and wide.height > 0
 
@@ -166,10 +163,8 @@ def test_cell_roundtrip_revenue() -> None:
 @requires_cell_inputs
 def test_native_statement_extends_past_xbrl() -> None:
     """native 재무제표(is)가 XBRL 경계(2022) 너머 옛 표 파싱으로 과거 연장."""
-    from dartlab.providers.dart.panel.build import buildPanelCells
     from dartlab.providers.dart.panel.cell import readStatement
 
-    buildPanelCells(_BASE)
     w = readStatement(_BASE, statement="IS2", freq="year")
     assert w is not None
     years = sorted(int(c) for c in w.columns if c.isdigit())
@@ -180,10 +175,8 @@ def test_native_statement_extends_past_xbrl() -> None:
 @requires_cell_inputs
 def test_native_ratios_005930() -> None:
     """native 재무비율(소문자 ratios)이 BS/IS/CF native 항목으로 계산 — finance 보다 깊은 history."""
-    from dartlab.providers.dart.panel.build import buildPanelCells
     from dartlab.providers.dart.panel.cell import readRatios
 
-    buildPanelCells(_BASE)
     w = readRatios(_BASE, freq="year")
     assert w is not None
     assert w.columns[:2] == ["ratio", "label"]

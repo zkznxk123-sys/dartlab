@@ -54,21 +54,10 @@ def _row(fp, stmt, acode, label, year, flow, q, mode, member, val):
     }
 
 
-def _writeCells(tmp: Path) -> None:
-    out = tmp / "dart" / "panelCell" / "TEST01"
-    out.mkdir(parents=True)
-    df = pl.DataFrame(_cellRows(), schema=CELL_SCHEMA)
-    for fp in df["filingPeriod"].unique():
-        df.filter(pl.col("filingPeriod") == fp).write_parquet(str(out / f"{fp}.parquet"))
-
-
 @pytest.fixture
-def cellEnv(tmp_path, monkeypatch):
-    import dartlab.config as cfg
-
-    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
-    _writeCells(tmp_path)
-    return tmp_path
+def cellEnv() -> pl.DataFrame:
+    """합성 셀 DataFrame — panelCell 파일 0, 순수 _cellWideFromCells 직접 검증."""
+    return pl.DataFrame(_cellRows(), schema=CELL_SCHEMA)
 
 
 def test_cell_statements() -> None:
@@ -80,9 +69,9 @@ def test_cell_statements() -> None:
 
 def test_freq_year_selects_fy(cellEnv) -> None:
     """freq=year → ctxMode=Y (dFY) 만, 열=연도."""
-    from dartlab.providers.dart.panel.cell import readCellWide
+    from dartlab.providers.dart.panel.cell import _cellWideFromCells
 
-    w = readCellWide("TEST01", statement="IS2", freq="year")
+    w = _cellWideFromCells(cellEnv, statement="IS2", freq="year", scope="consolidated")
     assert w is not None
     periodCols = [c for c in w.columns if c.isdigit()]
     assert set(periodCols) == {"2025", "2024"}
@@ -92,10 +81,10 @@ def test_freq_year_selects_fy(cellEnv) -> None:
 
 def test_freq_quarter_vs_ytd_token_split(cellEnv) -> None:
     """freq=quarter → 단독(Q)=30, ytd → 누적(A)=75 (같은 분기, 다른 토큰)."""
-    from dartlab.providers.dart.panel.cell import readCellWide
+    from dartlab.providers.dart.panel.cell import _cellWideFromCells
 
-    q = readCellWide("TEST01", statement="IS2", freq="quarter")
-    y = readCellWide("TEST01", statement="IS2", freq="ytd")
+    q = _cellWideFromCells(cellEnv, statement="IS2", freq="quarter", scope="consolidated")
+    y = _cellWideFromCells(cellEnv, statement="IS2", freq="ytd", scope="consolidated")
     qv = q.filter(pl.col("acode") == "ifrs-full_Revenue")["2025Q3"][0]
     yv = y.filter(pl.col("acode") == "ifrs-full_Revenue")["2025Q3"][0]
     assert qv == "30"  # 단독
@@ -104,19 +93,20 @@ def test_freq_quarter_vs_ytd_token_split(cellEnv) -> None:
 
 def test_axispath_no_collision(cellEnv) -> None:
     """같은 acode 다른 axisPath → 별 행 (평탄화 충돌 0)."""
-    from dartlab.providers.dart.panel.cell import readCellWide
+    from dartlab.providers.dart.panel.cell import _cellWideFromCells
 
-    w = readCellWide("TEST01", statement="EF", freq="year")
+    w = _cellWideFromCells(cellEnv, statement="EF", freq="year", scope="consolidated")
     eq = w.filter(pl.col("acode") == "ifrs-full_Equity")
     assert eq.height == 2  # RetainedEarnings + IssuedCapital
     assert set(eq["axisPath"].to_list()) == {"RetainedEarningsMember", "IssuedCapitalMember"}
 
 
 def test_absent_artifact_returns_none(tmp_path, monkeypatch) -> None:
-    """셀 artifact 없는 종목 → None (경계 이전 graceful)."""
+    """panel.parquet 없는 종목 → None (graceful, HF 미시도)."""
     import dartlab.config as cfg
 
     monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
     from dartlab.providers.dart.panel.cell import readCellWide
 
     assert readCellWide("999999", statement="IS2", freq="year") is None
@@ -174,23 +164,16 @@ def _oldRow(fp, label, year, val):
 
 
 @pytest.fixture
-def statementEnv(tmp_path, monkeypatch):
-    import dartlab.config as cfg
-
-    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
-    out = tmp_path / "dart" / "panelCell" / "ST01"
-    out.mkdir(parents=True)
-    df = pl.DataFrame(_statementRows(), schema=CELL_SCHEMA)
-    for fp in df["filingPeriod"].unique():
-        df.filter(pl.col("filingPeriod") == fp).write_parquet(str(out / f"{fp}.parquet"))
-    return tmp_path
+def statementEnv() -> pl.DataFrame:
+    """합성 셀 DataFrame (XBRL+옛 통합) — 순수 _statementFromCells 직접 검증."""
+    return pl.DataFrame(_statementRows(), schema=CELL_SCHEMA)
 
 
 def test_read_statement_unifies_xbrl_and_old(statementEnv) -> None:
     """항목명 정규화 통합 — '매출액'(XBRL+옛 통합) 한 행이 2025~2020 연속, 개명 '수익(매출액)' 별 행."""
-    from dartlab.providers.dart.panel.cell import readStatement
+    from dartlab.providers.dart.panel.cell import _statementFromCells
 
-    w = readStatement("ST01", statement="IS2", freq="year")
+    w = _statementFromCells(statementEnv, statement="IS2", freq="year", scope="consolidated")
     assert w is not None
     years = sorted([c for c in w.columns if c.isdigit()])
     assert years == ["2015", "2020", "2024", "2025"]  # XBRL 경계(2024) 넘어 옛 연장
@@ -203,9 +186,9 @@ def test_read_statement_unifies_xbrl_and_old(statementEnv) -> None:
 
 def test_read_statement_old_acode_none(statementEnv) -> None:
     """옛 셀은 acode 없이도 항목명으로 statement view 에 들어감."""
-    from dartlab.providers.dart.panel.cell import readStatement
+    from dartlab.providers.dart.panel.cell import _statementFromCells
 
-    w = readStatement("ST01", statement="IS2", freq="year")
+    w = _statementFromCells(statementEnv, statement="IS2", freq="year", scope="consolidated")
     assert "2015" in w.columns  # acode=None 옛 셀이 과거 열 제공
 
 
@@ -214,9 +197,7 @@ def renameEnv(tmp_path, monkeypatch):
     """개명 stitch — 최근 '매출액'(2023/2022) + 옛 '수익(매출액)'(2022/2021), 2022 금액 겹침."""
     import dartlab.config as cfg
 
-    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
-    out = tmp_path / "dart" / "panelCell" / "RN01"
-    out.mkdir(parents=True)
+    _ = (tmp_path, monkeypatch)
     rows = [
         # 최신 filing(높은 rceptNo) '매출액' — 2023/2022
         {**_oldRow("2023Q4", "매출액 (주30)", 2023, "10,000"), "rceptNo": "20240301000000"},
@@ -225,17 +206,14 @@ def renameEnv(tmp_path, monkeypatch):
         {**_oldRow("2022Q4", "수익(매출액)", 2022, "9,000"), "rceptNo": "20230301000000"},
         {**_oldRow("2022Q4", "수익(매출액)", 2021, "8,000"), "rceptNo": "20230301000000"},
     ]
-    df = pl.DataFrame(rows, schema=CELL_SCHEMA)
-    for fp in df["filingPeriod"].unique():
-        df.filter(pl.col("filingPeriod") == fp).write_parquet(str(out / f"{fp}.parquet"))
-    return tmp_path
+    return pl.DataFrame(rows, schema=CELL_SCHEMA)
 
 
 def test_read_statement_rename_stitch(renameEnv) -> None:
     """개명 항목 → 금액 겹침(2022)으로 한 줄, **최근 이름**('매출액') 기준."""
-    from dartlab.providers.dart.panel.cell import readStatement
+    from dartlab.providers.dart.panel.cell import _statementFromCells
 
-    w = readStatement("RN01", statement="IS2", freq="year")
+    w = _statementFromCells(renameEnv, statement="IS2", freq="year", scope="consolidated")
     assert w.height == 1, "개명 전후가 한 행으로 통합 (수익(매출액) 별 행 아님)"
     assert w["account"][0] == "매출액"  # 최근 이름 기준
     row = w.row(0, named=True)
@@ -323,62 +301,3 @@ def test_read_ratios_wide(monkeypatch) -> None:
     assert "roe" in ratios and "debtRatio" in ratios
     assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["2024"] is not None
     assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["label"] == "자기자본이익률 (ROE %)"
-
-
-# ── panelCell HF 자동로드 + dataConfig 등재 (Phase 4 파이프라인) ──
-
-
-def test_dataconfig_panelcell_registered() -> None:
-    """DATA_RELEASES 에 panelCell 등재 (HF 업로드/seed 자동 반영) — nested/public/dir."""
-    from dartlab.core.dataConfig import DATA_RELEASES
-
-    assert "panelCell" in DATA_RELEASES
-    pc = DATA_RELEASES["panelCell"]
-    assert pc["dir"] == "dart/panelCell"
-    assert pc.get("nested") is True
-    assert pc.get("public") is True
-
-
-def test_ensure_cell_from_hf_skips_when_present(monkeypatch, tmp_path) -> None:
-    """artifact 디렉터리 존재 시 HF 미시도 (로컬 우선)."""
-    import dartlab.config as _cfg
-    import dartlab.providers.dart.panel.cell as C
-
-    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
-    (tmp_path / "dart" / "panelCell" / "005930").mkdir(parents=True)
-    called = {"n": 0}
-
-    def _boom(*a, **k):
-        called["n"] += 1
-        raise AssertionError("로컬 존재 시 snapshot_download 호출 금지")
-
-    monkeypatch.setattr("huggingface_hub.snapshot_download", _boom, raising=False)
-    C._ensureCellFromHf("005930", "kr")
-    assert called["n"] == 0
-
-
-def test_ensure_cell_from_hf_skips_when_no_hf_env(monkeypatch, tmp_path) -> None:
-    """DARTLAB_NO_HF_DOWNLOAD=1 시 다운로드 미시도 (offline)."""
-    import dartlab.config as _cfg
-    import dartlab.providers.dart.panel.cell as C
-
-    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))  # 디렉터리 부재
-    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
-    C._HF_CELL_ATTEMPTED.discard("999999")
-
-    def _boom(*a, **k):
-        raise AssertionError("NO_HF 시 snapshot_download 호출 금지")
-
-    monkeypatch.setattr("huggingface_hub.snapshot_download", _boom, raising=False)
-    C._ensureCellFromHf("999999", "kr")  # 예외 없이 즉시 반환
-
-
-def test_ensure_cell_from_hf_us_skip(monkeypatch, tmp_path) -> None:
-    """marketNs!=kr → skip (panelCell KR 전용, US 후속)."""
-    import dartlab.providers.dart.panel.cell as C
-
-    def _boom(*a, **k):
-        raise AssertionError("US 는 panelCell 미지원 — 호출 금지")
-
-    monkeypatch.setattr("huggingface_hub.snapshot_download", _boom, raising=False)
-    C._ensureCellFromHf("AAPL", "us")

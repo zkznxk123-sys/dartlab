@@ -1,8 +1,8 @@
-"""panel 셀 read 표면 — 재무 5표 native 셀 artifact → acode×period wide (freq 토큰 선택, lxml 0).
+"""panel 셀 read 표면 — panel.parquet 5표 contentRaw 를 read-time 분해 → 항목×period (별 artifact 0).
 
-``build/cell.buildPanelCells`` 가 구운 ``data/dart/panelCell/{code}/{period}.parquet`` (14-col) 를
-읽어, freq(연간/분기/누적)에 맞는 ACONTEXT 토큰을 **선택만** 해서 acode×period wide 로 pivot. 산수 0
-(정부가 단독/누적/연간 다 계산해 토큰으로 박음). R2: parquet only, lxml/zipfile import 0.
+``_cellsFromPanel`` 이 panel.parquet 의 5표 row contentRaw 를 ``build.cell.cellsFromContent`` 로
+lazy 분해(콜드 0)해, freq(연간/분기/누적)에 맞는 ACONTEXT 토큰을 **선택만** 해서 acode×period wide 로 pivot. 산수 0
+(정부가 단독/누적/연간 다 계산해 토큰으로 박음). 모듈 top-level lxml 0 — 분해는 함수 lazy(콜드 보존, R2).
 
 freq→토큰 규칙 (행별 ctxFlow 분기):
     - ``year``  : ctxMode=="Y" (dFY 흐름 / eFY 잔액). 열 = ctxYear. 사업보고서가 당기/전기/전전기 3년 운반.
@@ -17,7 +17,7 @@ LLM Specifications:
     OutputSchema:
         - ``readCellWide(code,*,statement,freq,scope,...) -> pl.DataFrame | None`` (acode×period wide).
     Prerequisites:
-        - data/dart/panelCell/{code}/*.parquet (build/cell.buildPanelCells 산출).
+        - data/dart/panel/{code}/*.parquet 의 5표 contentRaw (별 panelCell 0).
     Freshness:
         - 매 read (artifact 변경 즉시).
     Dataflow:
@@ -42,12 +42,10 @@ from dartlab.core.ratios import calcRatioSeries, toSeriesDict
 from dartlab.core.utils.helpers import parseNumStr
 from dartlab.core.utils.labels import _loadAccountMappings
 
-from .cellSchema import CELL_PIVOT_INDEX
+from .cellSchema import CELL_PIVOT_INDEX, CELL_SCHEMA
 
-# 재무 5표 statement (build/cell.CELL_STATEMENTS 와 동일 — read 표면 SSOT, build import 안 함).
+# 재무 5표 statement (build/cell.CELL_STATEMENTS 와 동일 값 — read 표면 SSOT).
 _CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS2", "IS3", "CF", "EF"})
-
-_MARKET_DIR = {"kr": "panelCell", "us": "edgarPanelCell"}
 
 
 def cellStatements() -> frozenset[str]:
@@ -71,45 +69,50 @@ def cellStatements() -> frozenset[str]:
     return _CELL_STATEMENTS
 
 
-def _cellDir(code: str, marketNs: str) -> Path:
-    """셀 artifact 디렉터리 — ``data/dart/{panelCell}/{code}``."""
-    sub = _MARKET_DIR.get(marketNs, "panelCell")
-    return Path(_cfg.dataDir) / "dart" / sub / code
+def _cellsFromPanel(code: str, marketNs: str = "kr", periods: list[str] | None = None) -> pl.DataFrame | None:
+    """panel.parquet 5표 row contentRaw → in-memory 셀 DataFrame (호출 시 lazy 파싱, 별 artifact 0).
 
+    panelCell 파일을 따로 두지 않고 **panel.parquet 의 5표 contentRaw 를 그 자리에서 분해**한다 (단일
+    artifact). lxml 은 함수 내 lazy import — ``import dartlab`` 콜드스타트 무영향(R2 목적 보존,
+    panel("is") 호출 시에만 로드). panel.parquet 자동로드(HF)는 read.ensurePanelFromHf 가 담당.
 
-_HF_CELL_ATTEMPTED: set[str] = set()
+    Args:
+        code: 종목코드.
+        marketNs: 시장 namespace.
+        periods: 특정 filing period parquet 만 (prune). None=전체.
 
-
-def _ensureCellFromHf(code: str, marketNs: str = "kr") -> None:
-    """panelCell artifact 부재 시 HF lazy 다운로드 — 한 종목만, 1회 시도.
-
-    sections ``_ensureFromHf`` 미러. 로컬 우선 — 디렉터리 있으면 즉시 반환. offline/
-    ``DARTLAB_NO_HF_DOWNLOAD=1`` skip. 실패는 graceful(빈 결과). KR(panelCell) 전용 — US 후속.
+    Returns:
+        CELL_SCHEMA in-memory DataFrame 또는 None (panel.parquet/5표 부재).
     """
-    import os as _os
+    from . import read as _read
+    from .build.cell import CELL_STATEMENTS, cellsFromContent  # lazy: 콜드 0, 호출 시에만 lxml
 
-    if marketNs != "kr":
-        return
-    if _cellDir(code, marketNs).exists():
-        return
-    if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
-        return
-    if code in _HF_CELL_ATTEMPTED:
-        return
-    _HF_CELL_ATTEMPTED.add(code)
-    try:
-        from huggingface_hub import snapshot_download
-
-        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
-
-        snapshot_download(
-            repo_id=HF_REPO,
-            repo_type="dataset",
-            allow_patterns=[f"{DATA_RELEASES['panelCell']['dir']}/{code}/*.parquet"],
-            local_dir=str(Path(_cfg.dataDir)),
-        )
-    except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
-        pass
+    _read.ensurePanelFromHf(code, marketNs)
+    panelDir = _read._panelDir(code, marketNs)
+    files = sorted(panelDir.glob("*.parquet")) if panelDir.exists() else []
+    if periods is not None:
+        keep = set(periods)
+        files = [f for f in files if f.stem in keep]
+    if not files:
+        return None
+    rows: list[dict] = []
+    for fp in files:
+        df = pl.read_parquet(str(fp), columns=["disclosureKey", "xbrlClass", "contentRaw", "period", "rceptNo"])
+        stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
+        for row in stmt.iter_rows(named=True):
+            scope2 = "standalone" if "_S" in (row["xbrlClass"] or "") else "consolidated"
+            for cell in cellsFromContent(
+                row["contentRaw"],
+                statement=row["disclosureKey"],
+                scope=scope2,
+                period=row["period"],
+                code=code,
+                rcept=row["rceptNo"] or "",
+            ):
+                rows.append(cell)
+    if not rows:
+        return None
+    return pl.DataFrame(rows, schema=CELL_SCHEMA)
 
 
 def _freqMask(freq: str) -> pl.Expr:
@@ -172,11 +175,11 @@ def readCellWide(
         >>> readCellWide("005930", statement="BS", freq="quarter")  # doctest: +SKIP — 재무상태 분기말
 
     SeeAlso:
-        - ``build.cell.buildPanelCells`` — 본 artifact 생산.
+        - ``build.cell.cellsFromContent`` — 5표 contentRaw → 셀 분해 (lazy).
         - ``readStatement`` — 항목명 statement view(`c.panel("is")`). 본 함수는 acode 정밀 차원 view(직접 호출).
 
     Requires:
-        - polars. data/dart/panelCell/{code}/*.parquet.
+        - polars. data/dart/panel/{code}/*.parquet (5표 contentRaw).
 
     Capabilities:
         - 정부 native XBRL 셀을 freq 토큰 선택만으로 acode×period 격자 — 추측·산수 0, 깊이는 axisPath 행.
@@ -195,7 +198,7 @@ def readCellWide(
 
     LLM Specifications:
         AntiPatterns:
-            - lxml import 금지(R2). freq 빼기 산수 금지(토큰 선택).
+            - 모듈 top-level lxml import 금지(R2 콜드). freq 빼기 산수 금지(토큰 선택).
             - 5표 외 statement 금지.
         OutputSchema:
             - ``pl.DataFrame | None`` (acode×period wide).
@@ -210,23 +213,18 @@ def readCellWide(
     """
     if statement not in _CELL_STATEMENTS:
         return None
-    _ensureCellFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선)
-    base = _cellDir(code, marketNs)
-    if not base.exists():
+    df = _cellsFromPanel(code, marketNs, periods)
+    if df is None:
         return None
-    files = sorted(base.glob("*.parquet"))
-    if periods is not None:
-        keep = set(periods)
-        files = [f for f in files if f.stem in keep]
-    if not files:
-        return None
+    return _cellWideFromCells(df, statement=statement, freq=freq, scope=scope)
 
-    df = pl.concat([pl.read_parquet(str(f)) for f in files], how="vertical")
-    # readCellWide = XBRL acode 정밀 view (옛 acode=None 셀은 readStatement 전용).
+
+def _cellWideFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame | None:
+    """셀 DataFrame → acode×period wide (XBRL acode 정밀 view). 소스-중립 순수 함수."""
     df = df.filter(
         (pl.col("statement") == statement)
         & (pl.col("scope") == scope)
-        & pl.col("acode").is_not_null()
+        & pl.col("acode").is_not_null()  # 옛 acode=None 셀은 readStatement 전용
         & _freqMask(freq)
     )
     if df.is_empty():
@@ -235,9 +233,7 @@ def readCellWide(
     df = df.with_columns(_periodLabelExpr(freq).alias("_period"))
     # 최신 접수(rceptNo desc) 우선 — dedup·대표 label·대표 cellOrder 모두 최신 filing 기준.
     df = df.sort("rceptNo", descending=True)
-    # 같은 (행 정체성, period) 가 여러 filing 에 — 최신 우선 dedup.
     deduped = df.unique(subset=[*CELL_PIVOT_INDEX, "_period"], keep="first", maintain_order=True)
-    # 행 정체성별 대표 label(최신 filing) + 정렬용 cellOrder(최소).
     meta = df.group_by(CELL_PIVOT_INDEX, maintain_order=True).agg(
         pl.col("label").first().alias("label"),  # rceptNo desc 정렬 후라 최신 filing label
         pl.col("cellOrder").min().alias("_ord"),
@@ -337,12 +333,12 @@ def readStatement(
         >>> readStatement("005930", statement="IS2", freq="year")  # doctest: +SKIP — 손익 2011~ 연속
 
     SeeAlso:
-        - ``build.cell.buildPanelCells`` — XBRL+옛 셀 생산.
+        - ``build.cell.cellsFromContent`` — XBRL+옛 셀 분해 (lazy).
         - ``readCellWide`` — acode 정밀 차원 view (본 함수는 항목명 statement view).
         - ``panel.Panel.__call__`` — ``c.panel("is", freq=)`` 진입점.
 
     Requires:
-        - polars. data/dart/panelCell/{code}/*.parquet.
+        - polars. data/dart/panel/{code}/*.parquet (5표 contentRaw).
 
     Capabilities:
         - native 재무제표를 XBRL 경계(2022) 넘어 항목명 매칭으로 과거 연장 — docs.parquet 0.
@@ -375,18 +371,14 @@ def readStatement(
     """
     if statement not in _CELL_STATEMENTS:
         return None
-    _ensureCellFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선)
-    base = _cellDir(code, marketNs)
-    if not base.exists():
+    df = _cellsFromPanel(code, marketNs, periods)
+    if df is None:
         return None
-    files = sorted(base.glob("*.parquet"))
-    if periods is not None:
-        keep = set(periods)
-        files = [f for f in files if f.stem in keep]
-    if not files:
-        return None
+    return _statementFromCells(df, statement=statement, freq=freq, scope=scope)
 
-    df = pl.concat([pl.read_parquet(str(f)) for f in files], how="vertical")
+
+def _statementFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame | None:
+    """셀 DataFrame → 정규화 항목명×period statement (XBRL+옛 통합). 소스-중립 순수 함수."""
     df = df.filter(
         (pl.col("statement") == statement)
         & (pl.col("scope") == scope)
@@ -541,7 +533,7 @@ def readRatios(
         - ``core.ratioCategories.RATIO_FIELD_LABELS`` — 비율 한글 라벨 SSOT.
 
     Requires:
-        - polars. data/dart/panelCell/{code}/*.parquet. core(L0) 공식·매핑.
+        - polars. data/dart/panel/{code}/*.parquet. core(L0) 공식·매핑.
 
     Capabilities:
         - native 재무제표 항목만으로 재무비율 — 외부 price 0 → 밸류에이션 제외 statement-only.

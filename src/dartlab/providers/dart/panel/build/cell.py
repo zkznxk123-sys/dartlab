@@ -1,29 +1,27 @@
-"""panel 셀 세분화 build — 재무 5표를 셀 행으로 (XBRL 정밀 + 옛 표 과거 연장, lxml, build 서브트리).
+"""panel 셀 세분화 파싱 — 재무 5표 표 XML → 셀 dict (lxml, build 서브트리). 별 artifact 0.
 
-소스 = **이미 빌드된 panel.parquet 의 contentRaw**(zip 재처리 0, **docs.parquet 0**). 재무 5표
-(BS/IS/CIS/CF/SCE)의 표 XML 을 셀화 → ``data/dart/panelCell/{code}/{period}.parquet`` (14-col CELL_SCHEMA).
-메인 14-col buildPanel 경로 미수정 — 셀은 독립 평행 artifact. 두 era 통합:
+``cellsFromContent(contentRaw, ...)`` 가 5표(BS/IS/CIS/CF/SCE) 표 XML 을 셀 dict(CELL_SCHEMA)로 분해.
+**read 표면 ``cell._cellsFromPanel`` 이 panel.parquet 의 5표 contentRaw 위에 호출 시 lazy 로 부른다** —
+panelCell 별 parquet 파일을 두지 않고 panel.parquet 단일 artifact 에서 그 자리 분해(파생 사슬 0). 두 era:
     - XBRL(2022+): 정부 `<TE ACODE ACONTEXT>` 정밀 셀 (decodeAcontext, 산수 0).
     - 옛(2021 이전, 태그 없음): 표 위치 파싱 (첫 셀=항목명, 이후=당기/전기/전전기 금액, _parseAmount/
       _detectUnit — docs/finance extractAccounts/parseAmount 로직 *참고* 재구현). 과거 ~2011 연장.
 
-저장 원칙: 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 순수 규칙이라 build, freq/통합은
-표현이라 read(``..cell.readStatement``/``readCellWide``). valueRaw 콤마·괄호 무손실.
+build 서브트리(lxml 격리) — read 표면은 이 모듈을 **함수 내 lazy import**(콜드스타트 무영향).
 
 LLM Specifications:
     AntiPatterns:
         - zip 재처리/docs.parquet read 금지 — panel.parquet contentRaw 만 (R3).
-        - valueRaw 숫자화(콤마/괄호 제거) build 금지 — 불변 원본, 파싱은 read.
-        - buildPanel(메인 14-col) 수정 금지 — 독립 평행 함수.
+        - valueRaw 숫자화(콤마/괄호 제거) 금지 — 불변 원본, 숫자화는 소비자.
+        - 셀을 디스크 parquet 로 영속 금지 — read 가 호출 시 in-memory 분해 (단일 artifact).
     OutputSchema:
-        - ``buildPanelCells(code) -> dict[period, cellRowCount]``.
-        - 출력: ``data/dart/panelCell/{code}/{period}.parquet`` (14-col).
+        - ``cellsFromContent(contentRaw, *, statement, scope, period, code, rcept) -> Iterator[dict]``.
     Prerequisites:
-        - data/dart/panel/{code}/*.parquet (선빌드). lxml.
+        - panel.parquet 5표 row contentRaw (read 가 공급). lxml.
     Freshness:
-        - panel.parquet 갱신 시 재빌드(파생).
+        - 매 호출 (read-time 파생).
     Dataflow:
-        - panel.parquet 5표 row → contentRaw → cellsFromContent(XBRL/옛 분기) → 14-col parquet.
+        - panel.parquet 5표 contentRaw → cellsFromContent(XBRL/옛 분기) → 셀 dict.
     TargetMarkets:
         - KR (DART). XBRL 2025-03+, 옛 표는 전 기간.
 """
@@ -412,116 +410,3 @@ def _parseOldStatementTable(root, *, statement: str, scope: str, period: str, co
                 "cellOrder": order,
             }
             order += 1
-
-
-def buildPanelCells(
-    code: str,
-    *,
-    outBaseDir: Path | str | None = None,
-    overwrite: bool = True,
-    verbose: bool = False,
-) -> dict[str, int]:
-    """종목별 셀 artifact 빌드 — panel.parquet contentRaw → 5표 셀 → period sharded parquet (평행).
-
-    이미 빌드된 메인 panel.parquet(`data/dart/panel/{code}/*.parquet`)의 5표 row contentRaw 를 파싱
-    (zip 재처리 0, docs.parquet 0). XBRL 있으면 정밀 셀(2022+), 없으면 옛 표 위치 파싱(과거 ~2011 연장).
-    파생 체인 panel.parquet → buildPanelCells → panelCell.parquet.
-
-    Args:
-        code: 종목코드.
-        outBaseDir: 출력 base dir. None = ``data/dart/panelCell``.
-        overwrite: 기존 period parquet overwrite.
-        verbose: 진행 로그.
-
-    Returns:
-        ``{period: cellRowCount}`` (셀 있는 period 만). panel.parquet 부재 시 빈 dict.
-
-    Raises:
-        없음 — 파싱 실패 skip.
-
-    Example:
-        >>> buildPanelCells("005930", verbose=True)  # doctest: +SKIP
-        {'2025Q4': 663, '2015Q4': ...}
-
-    SeeAlso:
-        - ``buildPanel`` — 메인 14-col(소스, 본 함수가 contentRaw 재사용).
-        - ``..cell.readStatement`` — 본 artifact 소비 (native 재무제표).
-
-    Requires:
-        - data/dart/panel/{code}/*.parquet (선빌드). polars. lxml.
-
-    Capabilities:
-        - 한 종목 5표를 XBRL(최근)+옛 표 파싱(과거) native 셀로 — 메인 wide 무손상.
-
-    Guide:
-        - 운영자/CI build-time. ``python -X utf8 -m ...build --cells --codes 005930`` (panel.parquet 선빌드).
-
-    AIContext:
-        - strict per-corp. panel.parquet 파생(메인 경로 미수정).
-
-    When:
-        - 5표 셀 artifact 를 (재)생산할 때.
-
-    How:
-        - panel.parquet 5표 row → contentRaw → cellsFromContent → period group → parquet write.
-
-    LLM Specifications:
-        AntiPatterns:
-            - zip 재처리/docs.parquet read 금지 — panel.parquet contentRaw 만.
-            - buildPanel 수정 금지 — 독립 평행(wide 불가침).
-            - 빈 period parquet write 금지.
-        OutputSchema:
-            - ``dict[str, int]`` + data/dart/panelCell/{code}/{period}.parquet.
-        Prerequisites:
-            - panel.parquet 선빌드.
-        Freshness:
-            - panel.parquet 갱신 시 재빌드(파생).
-        Dataflow:
-            - panel.parquet → contentRaw → cellsFromContent → write.
-        TargetMarkets:
-            - KR (DART).
-    """
-    if outBaseDir is None:
-        outBaseDir = Path(_cfg.dataDir) / "dart" / "panelCell"
-    outDir = Path(outBaseDir) / code
-
-    panelDir = Path(_cfg.dataDir) / "dart" / "panel" / code
-    files = sorted(panelDir.glob("*.parquet")) if panelDir.exists() else []
-    if not files:
-        _log.warning("panel.parquet 없음(선빌드 필요): %s", panelDir)
-        return {}
-
-    periodRows: dict[str, list[dict]] = {}
-    for fp in files:
-        df = pl.read_parquet(str(fp), columns=["disclosureKey", "xbrlClass", "contentRaw", "period", "rceptNo"])
-        stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
-        for row in stmt.iter_rows(named=True):
-            statement = row["disclosureKey"]
-            scope = "standalone" if "_S" in (row["xbrlClass"] or "") else "consolidated"
-            period = row["period"]
-            for cell in cellsFromContent(
-                row["contentRaw"],
-                statement=statement,
-                scope=scope,
-                period=period,
-                code=code,
-                rcept=row["rceptNo"] or "",
-            ):
-                periodRows.setdefault(period, []).append(cell)
-
-    result: dict[str, int] = {}
-    if not any(periodRows.values()):
-        return result
-    outDir.mkdir(parents=True, exist_ok=True)
-    for period, rows in periodRows.items():
-        if not rows:
-            continue
-        df = pl.DataFrame(rows, schema=CELL_SCHEMA)
-        outPath = outDir / f"{period}.parquet"
-        if outPath.exists() and not overwrite:
-            continue
-        df.write_parquet(str(outPath), compression="zstd")
-        result[period] = df.height
-        if verbose:
-            _log.info("  cell %s %s: %d row", code, period, df.height)
-    return result

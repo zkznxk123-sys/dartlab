@@ -36,11 +36,11 @@ def _dataDir(category: str) -> Path:
 def _changedFiles(localDir: Path, category: str | None = None) -> list[Path] | None:
     """changed.txt에서 변경 파일 목록 로드. 없으면 None (전체 fallback).
 
-    nested period-sharded category (sections / panel / panelCell) 는 ``dist/changed_{category}.txt``
+    nested period-sharded category (sections / panel) 는 ``dist/changed_{category}.txt``
     우선 — 양식 ``{code}/{period}.parquet``.
     일반 카테고리는 기존 ``dist/changed.txt``.
     """
-    if category in ("sections", "panel", "panelCell"):
+    if category in ("sections", "panel"):
         nestedChangedFile = Path(f"dist/changed_{category}.txt")
         if nestedChangedFile.exists():
             names = [n.strip() for n in nestedChangedFile.read_text(encoding="utf-8").splitlines() if n.strip()]
