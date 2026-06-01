@@ -114,15 +114,15 @@ def _latestAnnualZip(code: str) -> Path | None:
     return None
 
 
-_hasCellZip = (_ZIP_DIR / _BASE).exists() and any((_ZIP_DIR / _BASE).glob("*.zip"))
-requires_cell_zip = pytest.mark.skipif(not _hasCellZip, reason="005930 zip 없음 (셀 빌드 불가)")
+_hasCellInputs = _hasInputs(_BASE) and any((_ZIP_DIR / _BASE).glob("*.zip"))
+requires_cell_inputs = pytest.mark.skipif(not _hasCellInputs, reason="005930 panel.parquet/zip 없음")
 
 
-@requires_cell_zip
+@requires_cell_inputs
 def test_cell_roundtrip_revenue() -> None:
     """셀 무손실 — zip 의 IS_C2 Revenue dFY 값 == readCellWide('IS2', year) 복원값.
 
-    독립 직접 파싱(lxml) vs build→parquet→read 파이프라인 동치 = 셀 손실0·무가공 증명.
+    독립 직접 파싱(lxml) vs panel.parquet→build→read 파이프라인 동치 = 셀 손실0·무가공 증명.
     """
     import re
 
@@ -130,11 +130,11 @@ def test_cell_roundtrip_revenue() -> None:
 
     from dartlab.providers.dart.panel.build import buildPanelCells
     from dartlab.providers.dart.panel.build.builder import _readZip
-    from dartlab.providers.dart.panel.cell import readCellWide
+    from dartlab.providers.dart.panel.cell import readCellWide, readStatement
 
-    # 1) 셀 build (기본 dataDir) → read
+    # 1) 셀 build (panel.parquet contentRaw) → read
     res = buildPanelCells(_BASE)
-    assert res, "셀 빌드 결과 없음 (ACONTEXT 보유 zip 부재?)"
+    assert res, "셀 빌드 결과 없음 (panel.parquet 부재?)"
     wide = readCellWide(_BASE, statement="IS2", freq="year")
     assert wide is not None and wide.height > 0
 
@@ -161,3 +161,17 @@ def test_cell_roundtrip_revenue() -> None:
     for yr, val in direct.items():
         if str(yr) in rev.columns:
             assert rev[str(yr)][0] == val, f"{yr} Revenue 불일치: 직접 {val} vs 셀 {rev[str(yr)][0]}"
+
+
+@requires_cell_inputs
+def test_native_statement_extends_past_xbrl() -> None:
+    """native 재무제표(is)가 XBRL 경계(2022) 너머 옛 표 파싱으로 과거 연장."""
+    from dartlab.providers.dart.panel.build import buildPanelCells
+    from dartlab.providers.dart.panel.cell import readStatement
+
+    buildPanelCells(_BASE)
+    w = readStatement(_BASE, statement="IS2", freq="year")
+    assert w is not None
+    years = sorted(int(c) for c in w.columns if c.isdigit())
+    assert years[0] <= 2016, f"native 과거 연장 실패 — 최소연도 {years[0]} (옛 표 파싱 안 됨)"
+    assert max(years) >= 2024, "최근 XBRL 연도 누락"

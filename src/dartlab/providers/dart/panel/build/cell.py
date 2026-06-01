@@ -1,31 +1,31 @@
-"""panel 셀 세분화 build — 재무 5표 native XBRL `<TE ACODE ACONTEXT>` → 셀 행 (lxml, build 서브트리).
+"""panel 셀 세분화 build — 재무 5표를 셀 행으로 (XBRL 정밀 + 옛 표 과거 연장, lxml, build 서브트리).
 
-정부가 재무·주석 표의 모든 숫자에 박은 `<TE ACODE="ifrs-full_Revenue" ACONTEXT="CFY2025dFY_..._
-ConsolidatedMember">333,605,938</TE>` 를 재무 5표(BS/IS/CIS/CF/SCE)에 한해 셀 단위로 분해 →
-``data/dart/panelCell/{code}/{period}.parquet`` (13-col CELL_SCHEMA). 메인 14-col buildPanel 경로는
-**literally 미수정** — 셀은 독립 평행 artifact (wide 정체성 불가침). ACONTEXT 는 2025-03 사업보고서부터만
-박히므로(실측) 그 이전 period 는 셀 0 → 파일 미생성 (graceful 저하).
+소스 = **이미 빌드된 panel.parquet 의 contentRaw**(zip 재처리 0, **docs.parquet 0**). 재무 5표
+(BS/IS/CIS/CF/SCE)의 표 XML 을 셀화 → ``data/dart/panelCell/{code}/{period}.parquet`` (14-col CELL_SCHEMA).
+메인 14-col buildPanel 경로 미수정 — 셀은 독립 평행 artifact. 두 era 통합:
+    - XBRL(2022+): 정부 `<TE ACODE ACONTEXT>` 정밀 셀 (decodeAcontext, 산수 0).
+    - 옛(2021 이전, 태그 없음): 표 위치 파싱 (첫 셀=항목명, 이후=당기/전기/전전기 금액, _parseAmount/
+      _detectUnit — docs/finance extractAccounts/parseAmount 로직 *참고* 재구현). 과거 ~2011 연장.
 
-저장 원칙: ACONTEXT 분해(ctxYear/ctxFlow/ctxScope/axisPath)·acode·label 은 정부 truth 위 결정론적
-순수 규칙이라 build 에서 굽고, freq(분기/연도) 선택은 표현이라 read(``..cell.readCellWide``). valueRaw 는
-콤마·괄호 그대로 무손실.
+저장 원칙: 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 순수 규칙이라 build, freq/통합은
+표현이라 read(``..cell.readStatement``/``readCellWide``). valueRaw 콤마·괄호 무손실.
 
 LLM Specifications:
     AntiPatterns:
+        - zip 재처리/docs.parquet read 금지 — panel.parquet contentRaw 만 (R3).
         - valueRaw 숫자화(콤마/괄호 제거) build 금지 — 불변 원본, 파싱은 read.
-        - 5표 외(NT_* 주석) 셀화 금지 — canonicalKey 필터 (확정 범위).
         - buildPanel(메인 14-col) 수정 금지 — 독립 평행 함수.
     OutputSchema:
         - ``buildPanelCells(code) -> dict[period, cellRowCount]``.
-        - 출력: ``data/dart/panelCell/{code}/{period}.parquet`` (13-col).
+        - 출력: ``data/dart/panelCell/{code}/{period}.parquet`` (14-col).
     Prerequisites:
-        - data/dart/original/docs/{code}/*.zip (로컬). lxml.
+        - data/dart/panel/{code}/*.parquet (선빌드). lxml.
     Freshness:
-        - ACONTEXT 양식 변경 시 decodeAcontext + cellSchema 동시 정합.
+        - panel.parquet 갱신 시 재빌드(파생).
     Dataflow:
-        - zip → XML → iterTableGroups(5표) → TR/TE → decodeAcontext → 13-col parquet.
+        - panel.parquet 5표 row → contentRaw → cellsFromContent(XBRL/옛 분기) → 14-col parquet.
     TargetMarkets:
-        - KR (DART). ACONTEXT 2025-03+.
+        - KR (DART). XBRL 2025-03+, 옛 표는 전 기간.
 """
 
 from __future__ import annotations
@@ -41,14 +41,21 @@ from lxml import etree
 import dartlab.config as _cfg
 
 from ..cellSchema import CELL_SCHEMA
-from ..mapper import canonicalKey
-from .builder import _periodFromXml, _readZip
-from .refScan.aclassExtractor import iterTableGroups
 
 _log = logging.getLogger(__name__)
 
-# 재무 5표 statement (canonicalKey(ACLASS)). SCE(자본변동표)=EF, CIS(포괄손익)=IS3 (ACLASS 실측).
+# 재무 5표 statement (= panel.parquet disclosureKey). SCE(자본변동표)=EF, CIS(포괄손익)=IS3 (ACLASS 실측).
 CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS2", "IS3", "CF", "EF"})
+
+# statement → 흐름(d=duration)/시점(e=instant). 옛 표(태그 없음)는 statement 로 ctxFlow 도출.
+_STMT_FLOW: dict[str, str] = {"BS": "e", "IS2": "d", "IS3": "d", "CF": "d", "EF": "e"}
+
+# 금액 단위 → 배율(원 기준). DART 재무제표 표준은 백만원.
+_UNIT_RE = re.compile(r"단위\s*[:：]\s*(백만원|천원|원)")
+_UNIT_SCALE = {"백만원": 1_000_000, "천원": 1_000, "원": 1}
+# 음수 표기: △/▲/(괄호). (주N) 주석번호는 금액 아님.
+_NUM_RE = re.compile(r"^[△▲\-(]?\s*[\d,]+\.?\d*\s*\)?$")
+_NOTE_RE = re.compile(r"^\(?주[\s\d,]")
 
 # ACONTEXT period 토큰: prefix(당기/전기/전전기) + FY + 4자리연도 + 흐름/시점(d|e) + marker.
 # marker = FY(연간) / FQ?(1분기) / HY?(반기·2분기) / TQ?(3분기), 접미 A(누적)·Q(단독)·∅(시점).
@@ -148,7 +155,7 @@ def decodeAcontext(ctx: str) -> tuple[int, str, int, str, str] | None:
         없음 — 미매칭은 None.
 
     SeeAlso:
-        - ``iterCellRows`` — 본 분해를 TE 마다 호출.
+        - ``_xbrlCellsFromContent`` — 본 분해를 TE 마다 호출.
         - ``..cell.readCellWide`` — 분해 결과 컬럼(ctxFlow/ctxQuarter/ctxMode)으로 freq 선택.
 
     Requires:
@@ -226,105 +233,185 @@ def _rowLabel(tes: list) -> str:
     return ""
 
 
-def iterCellRows(root, *, period: str, code: str, rcept: str) -> Iterator[dict]:
-    """본문 XML root → 재무 5표 셀 행 (13-col CELL_SCHEMA dict) iter.
+def _parseAmount(text: str) -> float | None:
+    """금액 텍스트 → float (△/▲/괄호 음수, 콤마 strip). 주석번호/비숫자는 None.
 
-    ``iterTableGroups`` 로 TABLE-GROUP 열거 → ``canonicalKey(ACLASS) in CELL_STATEMENTS`` 만(NT_*
-    자동 제외) → TR 별 첫 ACODE-없는 TE=label, ACONTEXT TE=value 셀. ctx 0 표(2025-03 이전)는
-    자연히 0 행 emit.
+    (docs/finance ``tableParser.parseAmount`` 로직 참고 재구현 — panel 자급, cross-import 0.)
+
+    Examples:
+        >>> _parseAmount("200,653,482")
+        200653482.0
+        >>> _parseAmount("△500")
+        -500.0
+        >>> _parseAmount("(1,234)")
+        -1234.0
+        >>> _parseAmount("(주30)") is None
+        True
+        >>> _parseAmount("매출액") is None
+        True
+    """
+    t = (text or "").strip()
+    if not t or _NOTE_RE.match(t) or not _NUM_RE.match(t):
+        return None
+    neg = t[0] in "△▲-" or (t.startswith("(") and t.endswith(")"))
+    digits = re.sub(r"[^\d.]", "", t)
+    if not digits or digits == ".":
+        return None
+    try:
+        val = float(digits)
+    except ValueError:
+        return None
+    return -val if neg else val
+
+
+def _detectUnit(text: str) -> int:
+    """본문에서 ``단위 : 백만원|천원|원`` → 원 기준 배율. 미발견 시 백만원(기본 1_000_000)."""
+    m = _UNIT_RE.search(text or "")
+    return _UNIT_SCALE.get(m.group(1), 1_000_000) if m else 1_000_000
+
+
+def _parseFragment(contentRaw: str):
+    """panel.parquet 의 contentRaw(요소 concat) → ``<root>`` 래핑 lxml parse. 실패 시 None."""
+    if not contentRaw:
+        return None
+    try:
+        return etree.fromstring(f"<root>{contentRaw}</root>".encode(), etree.XMLParser(recover=True, huge_tree=True))
+    except (etree.XMLSyntaxError, ValueError):
+        return None
+
+
+def cellsFromContent(
+    contentRaw: str, *, statement: str, scope: str, period: str, code: str, rcept: str
+) -> Iterator[dict]:
+    """panel.parquet 한 5표 row 의 contentRaw → 셀 행 iter (XBRL/옛 분기).
+
+    contentRaw 에 ACONTEXT TE 가 있으면 XBRL 정밀 경로(decodeAcontext), 없으면 옛 표 위치 파싱
+    (`_parseOldStatementTable`). panel 은 docs.parquet 안 봄 — 자기 artifact(panel.parquet) contentRaw 만.
 
     Args:
-        root: lxml 본문 root.
-        period: 보고서 period (YYYYQn, ``_periodFromXml`` 결과).
+        contentRaw: 5표 row 의 표 XML (panel.parquet contentRaw).
+        statement: disclosureKey (BS/IS2/IS3/CF/EF).
+        scope: consolidated/standalone.
+        period: 보고서 period (YYYYQn).
         code: 종목코드.
         rcept: 접수번호.
 
     Yields:
-        CELL_SCHEMA 13-col dict (corp/rceptNo/filingPeriod/statement/scope/acode/label/
-        ctxYear/ctxFlow/ctxScope/axisPath/valueRaw/cellOrder).
+        CELL_SCHEMA 14-col dict.
 
     Raises:
-        없음 — 분해 실패 TE skip.
+        없음 — 파싱 실패 시 0 행.
 
     Example:
-        >>> for row in iterCellRows(root, period="2025Q4", code="005930", rcept="2026..."):  # doctest: +SKIP
-        ...     pass
-
-    SeeAlso:
-        - ``..build.refScan.aclassExtractor.iterTableGroups`` — TABLE-GROUP 열거 (재사용).
-        - ``decodeAcontext`` — ACONTEXT 분해.
-        - ``..mapper.canonicalKey`` — ACLASS → statement.
-
-    Requires:
-        - lxml root.
-
-    Capabilities:
-        - 5표 표 셀을 native 라벨(추측 0)로 (개념, 기간, 축, 값) 행화 + 한글 라벨 동거.
-
-    Guide:
-        - buildPanelCells 내부 호출. 주석(NT_*)은 canonicalKey 필터로 제외.
-
-    AIContext:
-        - 순수 추출 — tree 변경 0.
-
-    When:
-        - 5표 셀을 artifact 행으로 추출할 때.
-
-    How:
-        - iterTableGroups → 5표 필터 → TR/TE → decodeAcontext → dict.
-
-    LLM Specifications:
-        AntiPatterns:
-            - NT_* 주석 셀화 금지 (확정 범위). value 숫자화 금지(read).
-        OutputSchema:
-            - ``Iterator[dict]`` (13-col).
-        Prerequisites:
-            - lxml root.
-        Freshness:
-            - 양식 변경 시 CELL_STATEMENTS/decodeAcontext 재검증.
-        Dataflow:
-            - root → TABLE-GROUP(5표) → TR/TE → cell dict.
-        TargetMarkets:
-            - KR (DART).
+        >>> list(cellsFromContent("<TABLE>...</TABLE>", statement="IS2", scope="consolidated",
+        ...                       period="2025Q4", code="005930", rcept="R1"))  # doctest: +SKIP
     """
-    for tg, _parent in iterTableGroups(root):
-        rawAclass = (tg.get("ACLASS", "") or "").strip()
-        statement = canonicalKey(rawAclass)
-        if statement not in CELL_STATEMENTS:
+    root = _parseFragment(contentRaw)
+    if root is None:
+        return
+    if root.find(".//TE[@ACONTEXT]") is not None:
+        yield from _xbrlCellsFromContent(root, statement=statement, scope=scope, period=period, code=code, rcept=rcept)
+    else:
+        yield from _parseOldStatementTable(
+            root, statement=statement, scope=scope, period=period, code=code, rcept=rcept
+        )
+
+
+def _xbrlCellsFromContent(root, *, statement: str, scope: str, period: str, code: str, rcept: str) -> Iterator[dict]:
+    """XBRL era(ACONTEXT 박힘) — TR 별 첫 ACODE-없는 TE=label, ACONTEXT TE=value 정밀 셀.
+
+    Args:
+        root: contentRaw 파싱 root.
+        statement/scope/period/code/rcept: 셀 메타.
+
+    Yields:
+        CELL_SCHEMA dict (acode 정밀, axisPath 차원).
+    """
+    order = 0
+    for tr in root.iter("TR"):
+        tes = list(tr.iter("TE"))
+        if not tes:
             continue
-        scope = "standalone" if "_S" in rawAclass.replace("{XBRL}", "") else "consolidated"
-        order = 0
-        for tr in tg.iter("TR"):
-            tes = list(tr.iter("TE"))
-            if not tes:
+        label = _rowLabel(tes)
+        for te in tes:
+            actx = (te.get("ACONTEXT", "") or "").strip()
+            acode = (te.get("ACODE", "") or "").strip()
+            if not actx or not acode:
                 continue
-            label = _rowLabel(tes)
-            for te in tes:
-                actx = (te.get("ACONTEXT", "") or "").strip()
-                acode = (te.get("ACODE", "") or "").strip()
-                if not actx or not acode:
-                    continue
-                decoded = decodeAcontext(actx)
-                if decoded is None:
-                    continue
-                ctxYear, ctxFlow, ctxQuarter, ctxMode, axisPath = decoded
-                yield {
-                    "corp": code,
-                    "rceptNo": rcept,
-                    "filingPeriod": period,
-                    "statement": statement,
-                    "scope": scope,
-                    "acode": acode,
-                    "label": label,
-                    "ctxYear": ctxYear,
-                    "ctxFlow": ctxFlow,
-                    "ctxQuarter": ctxQuarter,
-                    "ctxMode": ctxMode,
-                    "axisPath": axisPath,
-                    "valueRaw": _teText(te),
-                    "cellOrder": order,
-                }
-                order += 1
+            decoded = decodeAcontext(actx)
+            if decoded is None:
+                continue
+            ctxYear, ctxFlow, ctxQuarter, ctxMode, axisPath = decoded
+            yield {
+                "corp": code,
+                "rceptNo": rcept,
+                "filingPeriod": period,
+                "statement": statement,
+                "scope": scope,
+                "acode": acode,
+                "label": label,
+                "ctxYear": ctxYear,
+                "ctxFlow": ctxFlow,
+                "ctxQuarter": ctxQuarter,
+                "ctxMode": ctxMode,
+                "axisPath": axisPath,
+                "valueRaw": _teText(te),
+                "cellOrder": order,
+            }
+            order += 1
+
+
+def _parseOldStatementTable(root, *, statement: str, scope: str, period: str, code: str, rcept: str) -> Iterator[dict]:
+    """옛 era(ACONTEXT 없음) — 표 위치 파싱: TR 첫 셀=항목명, 이후 셀=당기/전기/전전기 금액.
+
+    한 보고서가 당기/전기/전전기를 운반 → 컬럼 i = ctxYear(period연도 −i). acode=None(태그 없음),
+    label=항목명, axisPath=ConsolidatedMember(top-level), ctxFlow=statement 파생. (docs/finance
+    ``extractAccounts``/``parseAmount`` 로직 참고 — panel 자급, contentRaw 만.)
+
+    Args:
+        root: contentRaw 파싱 root.
+        statement/scope/period/code/rcept: 셀 메타. period 연도 = 당기.
+
+    Yields:
+        CELL_SCHEMA dict (acode=None, label=항목명).
+    """
+    periodYear = int(period[:4])
+    isAnnual = period.endswith("Q4")
+    quarter = 4 if isAnnual else (int(period[5]) if len(period) > 5 and period[5].isdigit() else 4)
+    mode = "Y" if isAnnual else "A"  # 옛 분기는 누적(A) — 단독(Q)은 태그 없어 불가
+    flow = _STMT_FLOW.get(statement, "d")
+    order = 0
+    for tr in root.iter("TR"):
+        cells = [c for c in tr if c.tag in ("TD", "TE")]
+        if len(cells) < 2:
+            continue
+        label = _teText(cells[0])
+        if not label or _parseAmount(label) is not None:
+            continue  # 첫 셀은 비숫자 항목명
+        amounts = [_teText(c) for c in cells[1:]]
+        parsed = [_parseAmount(a) for a in amounts]
+        if not any(p is not None for p in parsed):
+            continue  # 데이터 행만 (헤더/단위 행 제외)
+        for col, (rawV, num) in enumerate(zip(amounts, parsed)):
+            if num is None:
+                continue
+            yield {
+                "corp": code,
+                "rceptNo": rcept,
+                "filingPeriod": period,
+                "statement": statement,
+                "scope": scope,
+                "acode": None,
+                "label": label,
+                "ctxYear": periodYear - col,
+                "ctxFlow": flow,
+                "ctxQuarter": quarter,
+                "ctxMode": mode,
+                "axisPath": "ConsolidatedMember",
+                "valueRaw": rawV,
+                "cellOrder": order,
+            }
+            order += 1
 
 
 def buildPanelCells(
@@ -334,10 +421,11 @@ def buildPanelCells(
     overwrite: bool = True,
     verbose: bool = False,
 ) -> dict[str, int]:
-    """종목별 셀 artifact 빌드 — zip → 5표 셀 → period sharded 13-col parquet (독립 평행).
+    """종목별 셀 artifact 빌드 — panel.parquet contentRaw → 5표 셀 → period sharded parquet (평행).
 
-    메인 buildPanel(14-col)과 별개로 자체 zip 루프. ctx TE 0 인 period(2025-03 이전)는 셀 0 → 파일
-    미생성. refDf 불요 (셀은 ACLASS 정확한 신양식만 존재).
+    이미 빌드된 메인 panel.parquet(`data/dart/panel/{code}/*.parquet`)의 5표 row contentRaw 를 파싱
+    (zip 재처리 0, docs.parquet 0). XBRL 있으면 정밀 셀(2022+), 없으면 옛 표 위치 파싱(과거 ~2011 연장).
+    파생 체인 panel.parquet → buildPanelCells → panelCell.parquet.
 
     Args:
         code: 종목코드.
@@ -346,49 +434,50 @@ def buildPanelCells(
         verbose: 진행 로그.
 
     Returns:
-        ``{period: cellRowCount}`` (셀 있는 period 만). zip dir 부재 시 빈 dict.
+        ``{period: cellRowCount}`` (셀 있는 period 만). panel.parquet 부재 시 빈 dict.
 
     Raises:
-        없음 — zip/XML 실패 skip.
+        없음 — 파싱 실패 skip.
 
     Example:
         >>> buildPanelCells("005930", verbose=True)  # doctest: +SKIP
-        {'2025Q4': 663, '2025Q3': ...}
+        {'2025Q4': 663, '2015Q4': ...}
 
     SeeAlso:
-        - ``buildPanel`` — 메인 14-col (본 함수가 미수정으로 보존).
-        - ``..cell.readCellWide`` — 본 artifact 소비 (freq).
+        - ``buildPanel`` — 메인 14-col(소스, 본 함수가 contentRaw 재사용).
+        - ``..cell.readStatement`` — 본 artifact 소비 (native 재무제표).
 
     Requires:
-        - data/dart/original/docs/{code}/*.zip. polars. lxml.
+        - data/dart/panel/{code}/*.parquet (선빌드). polars. lxml.
 
     Capabilities:
-        - 한 종목 5표를 native 셀 artifact 로 — 추측 0, 메인 wide 무손상.
+        - 한 종목 5표를 XBRL(최근)+옛 표 파싱(과거) native 셀로 — 메인 wide 무손상.
 
     Guide:
-        - 운영자/CI build-time. ``python -X utf8 -m ...build --cells --codes 005930``.
+        - 운영자/CI build-time. ``python -X utf8 -m ...build --cells --codes 005930`` (panel.parquet 선빌드).
 
     AIContext:
-        - strict per-corp. 독립 파스(메인 경로 literally 미수정 보장).
+        - strict per-corp. panel.parquet 파생(메인 경로 미수정).
 
     When:
         - 5표 셀 artifact 를 (재)생산할 때.
 
     How:
-        - zip → XML → iterCellRows → period group → 13-col parquet write.
+        - panel.parquet 5표 row → contentRaw → cellsFromContent → period group → parquet write.
 
     LLM Specifications:
         AntiPatterns:
-            - buildPanel 수정해 셀 끼우기 금지 — 독립 평행(wide 불가침).
-            - 빈 period parquet write 금지 — 셀 0 이면 파일 미생성.
+            - zip 재처리/docs.parquet read 금지 — panel.parquet contentRaw 만.
+            - buildPanel 수정 금지 — 독립 평행(wide 불가침).
+            - 빈 period parquet write 금지.
         OutputSchema:
             - ``dict[str, int]`` + data/dart/panelCell/{code}/{period}.parquet.
         Prerequisites:
-            - 로컬 zip.
+            - panel.parquet 선빌드.
         Freshness:
-            - zip 갱신 시 재빌드.
+            - panel.parquet 갱신 시 재빌드(파생).
         Dataflow:
-            - zip → iterCellRows → period group → write.
+            - panel.parquet → contentRaw → cellsFromContent → write.
         TargetMarkets:
             - KR (DART).
     """
@@ -396,29 +485,29 @@ def buildPanelCells(
         outBaseDir = Path(_cfg.dataDir) / "dart" / "panelCell"
     outDir = Path(outBaseDir) / code
 
-    zipDir = Path(_cfg.dataDir) / "dart" / "original" / "docs" / code
-    if not zipDir.exists():
-        _log.warning("zip dir 없음: %s", zipDir)
+    panelDir = Path(_cfg.dataDir) / "dart" / "panel" / code
+    files = sorted(panelDir.glob("*.parquet")) if panelDir.exists() else []
+    if not files:
+        _log.warning("panel.parquet 없음(선빌드 필요): %s", panelDir)
         return {}
 
-    parser = etree.XMLParser(recover=True, huge_tree=True)
     periodRows: dict[str, list[dict]] = {}
-    for zp in sorted(zipDir.glob("*.zip")):
-        rcept, xmls = _readZip(zp)
-        if not xmls or not rcept:
-            continue
-        period: str | None = None
-        for xml in xmls:
-            try:
-                root = etree.fromstring(xml.encode("utf-8"), parser)
-            except (etree.XMLSyntaxError, ValueError):
-                continue
-            if root is None:
-                continue
-            if period is None:
-                period = _periodFromXml(root, rcept)
-            for row in iterCellRows(root, period=period, code=code, rcept=rcept):
-                periodRows.setdefault(period, []).append(row)
+    for fp in files:
+        df = pl.read_parquet(str(fp), columns=["disclosureKey", "xbrlClass", "contentRaw", "period", "rceptNo"])
+        stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
+        for row in stmt.iter_rows(named=True):
+            statement = row["disclosureKey"]
+            scope = "standalone" if "_S" in (row["xbrlClass"] or "") else "consolidated"
+            period = row["period"]
+            for cell in cellsFromContent(
+                row["contentRaw"],
+                statement=statement,
+                scope=scope,
+                period=period,
+                code=code,
+                rcept=row["rceptNo"] or "",
+            ):
+                periodRows.setdefault(period, []).append(cell)
 
     result: dict[str, int] = {}
     if not any(periodRows.values()):

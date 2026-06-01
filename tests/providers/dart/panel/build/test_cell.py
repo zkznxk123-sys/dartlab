@@ -1,14 +1,12 @@
-"""panel build/cell mirror — ACONTEXT 분해 + 5표 셀 추출 (인라인 합성 XML, 데이터 0).
+"""panel build/cell mirror — ACONTEXT 분해 + XBRL/옛 표 셀 추출 (인라인 합성 contentRaw, 데이터 0).
 
-``build/cell.py`` 의 ``decodeAcontext``/``_markerToQuarterMode``/``iterCellRows``. 실 zip(5표 본문)은
-git 미추적(요약첨부는 ctx 0)이라 인라인 합성 XML 로 검증. 실 zip 라운드트립은 tests/panel
-(requires_data) 담당.
+``build/cell.py`` 의 ``decodeAcontext``/``_parseAmount``/``_detectUnit``/``cellsFromContent``(XBRL+옛
+분기). 실 panel.parquet contentRaw 라운드트립은 tests/panel (requires_data) 담당.
 """
 
 from __future__ import annotations
 
 import pytest
-from lxml import etree
 
 pytestmark = pytest.mark.unit
 
@@ -53,66 +51,73 @@ def test_axis_members_strip_standard_prefix() -> None:
     assert _axisMembers(segs2) == ["entity00126380_FooClassMemberOfBarTableOfMember"]
 
 
-_XML = """<BODY>
-  <TABLE-GROUP ACLASS="{XBRL}IS_C2">
-    <TITLE>연결 손익계산서</TITLE>
-    <TABLE>
-      <TR>
-        <TE>매출액 (주30)</TE>
-        <TE ACODE="ifrs-full_Revenue" ACONTEXT="CFY2025dFY_ifrs-full_Ax_ifrs-full_ConsolidatedMember">100</TE>
-        <TE ACODE="ifrs-full_Revenue" ACONTEXT="PFY2024dFY_ifrs-full_Ax_ifrs-full_ConsolidatedMember">90</TE>
-      </TR>
-    </TABLE>
-  </TABLE-GROUP>
-  <TABLE-GROUP ACLASS="{XBRL}EF_C">
-    <TITLE>연결 자본변동표</TITLE>
-    <TABLE>
-      <TR>
-        <TE>이익잉여금</TE>
-        <TE ACODE="ifrs-full_RetainedEarnings" ACONTEXT="CFY2025eFY_ifrs-full_Ax_ifrs-full_ConsolidatedMember_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember">7</TE>
-      </TR>
-    </TABLE>
-  </TABLE-GROUP>
-  <TABLE-GROUP ACLASS="{XBRL}NT_C_D826380">
-    <TITLE>재고자산</TITLE>
-    <TABLE>
-      <TR>
-        <TE>재고</TE>
-        <TE ACODE="ifrs-full_Inventories" ACONTEXT="CFY2025eFY_ifrs-full_Ax_ifrs-full_ConsolidatedMember">50</TE>
-      </TR>
-    </TABLE>
-  </TABLE-GROUP>
-</BODY>"""
+def test_parse_amount() -> None:
+    """금액 파싱 — △/괄호 음수, 콤마, (주N)/비숫자 None."""
+    from dartlab.providers.dart.panel.build.cell import _parseAmount
+
+    assert _parseAmount("200,653,482") == 200653482.0
+    assert _parseAmount("△500") == -500.0
+    assert _parseAmount("(1,234)") == -1234.0
+    assert _parseAmount("(주30)") is None
+    assert _parseAmount("매출액") is None
+    assert _parseAmount("") is None
 
 
-def _rows() -> list[dict]:
-    from dartlab.providers.dart.panel.build.cell import iterCellRows
+def test_detect_unit() -> None:
+    """단위 감지 — 백만원/천원/원, 미발견 백만원 기본."""
+    from dartlab.providers.dart.panel.build.cell import _detectUnit
 
-    root = etree.fromstring(_XML.encode("utf-8"), etree.XMLParser(recover=True))
-    return list(iterCellRows(root, period="2025Q4", code="005930", rcept="20260310002820"))
-
-
-def test_iter_cell_rows_five_statements_only() -> None:
-    """iterCellRows 는 5표(IS_C2/EF_C)만 — 주석(NT_*)은 제외."""
-    rows = _rows()
-    statements = {r["statement"] for r in rows}
-    assert statements == {"IS2", "EF"}  # NT_D826380(Inventories) 제외
-    assert all(r["acode"] != "ifrs-full_Inventories" for r in rows)
+    assert _detectUnit("(단위 : 백만원)") == 1_000_000
+    assert _detectUnit("단위:천원") == 1_000
+    assert _detectUnit("단위 : 원") == 1
+    assert _detectUnit("매출액 표") == 1_000_000
 
 
-def test_label_colocation() -> None:
-    """value 셀에 같은 TR 한글 라벨 동거 (빈 문자열 아님)."""
-    rows = _rows()
+# XBRL era contentRaw (ACONTEXT 박힘) — 한 5표 row 의 표 XML
+_XBRL_CONTENT = """<TITLE>연결 손익계산서</TITLE><TABLE><TR>
+  <TE>매출액 (주30)</TE>
+  <TE ACODE="ifrs-full_Revenue" ACONTEXT="CFY2025dFY_ifrs-full_Ax_ifrs-full_ConsolidatedMember">100</TE>
+  <TE ACODE="ifrs-full_Revenue" ACONTEXT="PFY2024dFY_ifrs-full_Ax_ifrs-full_ConsolidatedMember">90</TE>
+</TR></TABLE>"""
+
+# 옛 era contentRaw (ACONTEXT 없음, TD 표) — 첫 셀 항목명 + 당기/전기/전전기
+_OLD_CONTENT = """<TABLE><TR>
+  <TD><P>제 47 기</P></TD></TR><TR>
+  <TD><P>수익(매출액)</P></TD>
+  <TD ALIGN="RIGHT"><P>200,653,482</P></TD>
+  <TD ALIGN="RIGHT"><P>206,205,987</P></TD>
+  <TD ALIGN="RIGHT"><P>228,692,667</P></TD>
+</TR></TABLE>"""
+
+
+def test_cells_from_content_xbrl() -> None:
+    """ACONTEXT 있는 contentRaw → XBRL 정밀 셀 (acode, label 동거, ctxYear)."""
+    from dartlab.providers.dart.panel.build.cell import cellsFromContent
+
+    rows = list(
+        cellsFromContent(
+            _XBRL_CONTENT, statement="IS2", scope="consolidated", period="2025Q4", code="005930", rcept="R1"
+        )
+    )
     rev = [r for r in rows if r["acode"] == "ifrs-full_Revenue"]
-    assert len(rev) == 2  # CFY + PFY
+    assert len(rev) == 2  # CFY 2025 + PFY 2024
     assert all(r["label"] == "매출액 (주30)" for r in rev)
+    assert {r["ctxYear"] for r in rev} == {2025, 2024}
     assert rev[0]["valueRaw"] == "100"
 
 
-def test_iter_cell_rows_axis_depth_preserved() -> None:
-    """깊은 축(자본구성)은 axisPath 에 멤버경로로 보존."""
-    rows = _rows()
-    re_row = next(r for r in rows if r["acode"] == "ifrs-full_RetainedEarnings")
-    assert "RetainedEarningsMember" in re_row["axisPath"]
-    assert re_row["statement"] == "EF"
-    assert re_row["ctxQuarter"] == 4 and re_row["ctxMode"] == "Y" and re_row["ctxFlow"] == "e"
+def test_parse_old_statement_table() -> None:
+    """ACONTEXT 없는 옛 표 → 위치 파싱 (당기/전기/전전기 = ctxYear, acode=None)."""
+    from dartlab.providers.dart.panel.build.cell import cellsFromContent
+
+    rows = list(
+        cellsFromContent(
+            _OLD_CONTENT, statement="IS2", scope="consolidated", period="2015Q4", code="005930", rcept="R0"
+        )
+    )
+    assert all(r["acode"] is None for r in rows)  # 태그 없음
+    byYear = {r["ctxYear"]: r["valueRaw"] for r in rows if r["label"] == "수익(매출액)"}
+    assert byYear == {2015: "200,653,482", 2014: "206,205,987", 2013: "228,692,667"}  # 당기/전기/전전기
+    assert all(r["ctxMode"] == "Y" and r["ctxFlow"] == "d" for r in rows)  # 사업보고서 연간, IS=흐름
+    # 헤더 행(제 47 기)은 데이터 아님 → 제외
+    assert "제 47 기" not in {r["label"] for r in rows}
