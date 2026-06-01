@@ -20,12 +20,13 @@ inputs:
   - 섹션 검색 key — canonicalKey(NT_D826380/BS) 또는 한글 섹션명 substring(재고) 또는 강한 소스 topic(IS/dividend)
   - period 목록 (선택, YYYYQn)
   - tag (선택, 기본 raw 원본 XML / False 면 plain 태그 strip)
-  - freq (선택, 5표 native 셀 — year 연간/quarter 분기단독/ytd 분기누적)
+  - 소스 = 대소문자 5표 — 소문자 is/bs/cf/cis/sce = native(자급) / 대문자 IS/BS/CF/CIS/SCE = finance(파사드)
+  - freq (선택, 입도 — year 연/quarter 분기/ytd 누적, 소스와 직교)
 outputs:
   - 항목 × period 수평화 wide (pl.DataFrame, Panel subclass)
   - 섹션 검색 행 (panel(key)) / 본문 전체검색 (panel.search(term))
-  - 강한 소스(finance/report) 주입 결과 (c.panel("IS") = c.show("IS"))
-  - 재무 5표 native 셀 격자 (c.panel("IS", freq="year") = acode×period)
+  - native 재무제표 (c.panel("is", freq="year") = 항목명×기간, XBRL+옛 통합 2011~)
+  - finance 재무제표 (c.panel("IS", freq="year") = 파사드 attach, deep history)
 knowledgeRefs:
   - start.dartlabSkillOs
   - engines.company
@@ -60,19 +61,21 @@ failureModes:
   - tag=True(기본, raw 원본 XML)를 plain 으로 가정 (태그 strip 은 tag=False)
   - 연결/별도(scope) 무시하고 BS_C↔BS_S 병합으로 착시
   - c.panel("IS") 를 raw 공시로 가정 (강한 소스는 finance 주입 — source="raw" 로 raw 강제)
-  - freq 셀을 2025-03 이전 기간에 기대 (ACONTEXT 는 그 사업보고서부터 — 이전은 빈 열)
+  - freq 를 native↔finance 스위치로 오인 (freq=입도, 소스는 대소문자 is/IS)
+  - native(is)에 XBRL 정밀(acode/축)을 2022 이전 기대 (옛 표는 항목명 파싱 — XBRL 태그 없음)
 examples:
   - 005930 잡는 순간 wide raw (Panel("005930") 또는 c.panel) / plain 은 c.panel(tag=False)
   - 재고자산 주석 다기간 행 검색 (c.panel("재고")) / 본문 전체검색 (c.panel.search("반도체"))
-  - 손익 연간 native 셀 (c.panel("IS", freq="year") — acode×연도, 정부 dFY 토큰)
-  - 재무제표 blob 은 finance 주입 (c.panel("IS") = c.show("IS"))
+  - native 손익 연속 (c.panel("is", freq="year") — 항목명×연도, XBRL 최근+옛 표 과거 2011~)
+  - finance 손익 (c.panel("IS", freq="year") — 파사드 attach, OpenDART deep history)
 procedure:
   - 진입은 `from dartlab.providers.dart.panel import Panel` 또는 `Company(code).panel`.
   - `Panel(code)` / `c.panel` 자체가 wide pl.DataFrame — shape/filter/columns 등 polars 연산 그대로.
   - 섹션 검색은 `panel("재고")`(한글) 또는 `panel("NT_D826380")`(canonicalKey). 기본 raw, plain 은 `tag=False`.
   - 본문 전체검색(이름표 아닌 내용)은 `panel.search("키워드")` — 별 메서드(의도 분리).
-  - 재무 5표 native 셀은 `panel("IS", freq="year"|"quarter"|"ytd")` — 정부 ACONTEXT 토큰(dFY/eFY/TQQ/TQA) 선택, acode×period wide. 2025-03 사업보고서부터(그 이전 빈 열). SCE=자본변동표(EF), CIS=포괄손익(IS3).
-  - 강한 소스(BS/IS/CF/ratios/dividend 등) blob 은 facade `c.panel("IS")` 가 finance/report 주입(c.show 위임). raw 공시 강제는 `source="raw"`.
+  - **소스 = 대소문자**. native 재무제표는 **소문자** `panel("is"|"bs"|"cf"|"cis"|"sce", freq=)` — XBRL 정밀(2022+) + 옛 표 항목명 파싱(과거 2011~) 통합 statement, panel 자급(docs.parquet 0). finance 는 **대문자** `panel("IS", freq=)` — 파사드가 `c.show` 주입(deep history). SCE=자본변동표(EF), CIS=포괄손익(IS3).
+  - **freq = 입도** (year/quarter/ytd), 소스 스위치 아님 — native·finance 둘 다 받음. finance 는 Y/Q/YTD 로 매핑.
+  - report(dividend 등) 정형공시도 facade `c.panel("dividend")` 가 주입. raw 공시 강제는 `source="raw"`.
   - 빌드는 운영자/CI — 로컬 zip `python -m dartlab.providers.dart.panel.build`, 셀은 `--cells`, 또는 online `.github/scripts/sync/onlinePanel.py`.
 linkedSkills:
   - engines.company
@@ -151,22 +154,26 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
   자기 정체성을 지우면 모순. 사람 표시는 `c.panel(tag=False)` 한 칸.
 - **금지**: build plain 사전계산(R4 위반) · wide 를 metadata-only/long 으로 교체(정체성 파괴).
 
-### 셀 세분화 (freq) — 재무 5표 native XBRL, 별개 평행 artifact
+### native 재무제표 (is) — 별개 평행 셀 artifact, XBRL 정밀 + 옛 표 과거 연장
 
-메인 14-col blob 격자(wide 정체성 불가침)는 안 건드리고, 재무 5표(BS/IS/CIS/CF/SCE)의 정부
-`<TE ACODE ACONTEXT>` 셀을 **별개 평행 artifact** `panelCell/{code}/{period}.parquet`(14-col
-CELL_SCHEMA)로 분해. `build/cell.buildPanelCells`(lxml) 생산 → `cell.readCellWide`(parquet, lxml 0)
-소비 → facade `c.panel("IS", freq=...)` 위임.
+메인 14-col blob 격자(wide 정체성 불가침)는 안 건드리고, 재무 5표(BS/IS/CIS/CF/SCE)를 **별개 평행
+artifact** `panelCell/{code}/{period}.parquet`(14-col CELL_SCHEMA)로 셀화. **소스 = 이미 빌드된
+panel.parquet 의 contentRaw**(zip 재처리 0, **docs.parquet 0**). 파생 체인 zip → buildPanel →
+panel.parquet → `build/cell.buildPanelCells`(lxml) → panelCell → `cell.readStatement`(parquet, lxml 0)
+→ `c.panel("is", freq=)`(소문자, panel 자급). finance(대문자 IS)는 파사드 attach(별개).
 
-- **ACONTEXT 토큰 = 정부가 계산해 박은 기간** — `[C|P|BP]FY{year}[d|e]{marker}` (당기/전기/전전기 ×
-  흐름/시점 × FY연간·FQ1분기·HY반기·TQ3분기, 접미 A누적·Q단독). 우리는 **산수 0, 토큰 선택만**:
-  `freq="year"`→dFY/eFY(연간), `"quarter"`→단독(Q), `"ytd"`→누적(A). 행별 d/e(흐름/시점)로 연간토큰 자동.
-- **평탄화** — 행 정체성 = `acode@axisPath`(개념×축경로). 깊이(자본구성·자산클래스 N차원)는 행을 늘릴
-  뿐 wide 불변. label(한글, 주석번호 변동)은 정체성 아님 → 최신 filing 대표만 부착.
-- **저장 원칙 적용** — TE 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 정부 truth 위
-  순수 규칙이라 build 에서 굽고, freq 선택은 표현이라 read. valueRaw 콤마·괄호 무손실(숫자화는 소비자).
-- **시간 경계** — ACONTEXT 는 **2025-03 사업보고서부터**(실측, 42 zip 전수). 그 이전 period 는 셀 0 →
-  파일 미생성 → read 빈 열. panel 최신앵커 격자의 graceful 저하로 자연 정합(우회 아님, 데이터 truth).
+- **두 era 통합** — XBRL 있으면(2022+) `<TE ACODE ACONTEXT>` 정밀 셀(`decodeAcontext`: 정부 토큰
+  `[C|P|BP]FY{year}[d|e]{marker}`, 산수 0). 없으면(2021 이전, XBRL 태그 없음) **옛 표 위치 파싱**(첫 셀=항목명,
+  이후 셀=당기/전기/전전기 금액, `_parseAmount`/`_detectUnit` — docs/finance 로직 참고 재구현). 한 보고서가
+  당기/전기/전전기 3년 운반.
+- **항목명 통합** — `readStatement` 가 XBRL `label`("매출액 (주30)")과 옛 항목명("매출액")을 `_normalizeLabel`
+  ((주N) strip)로 매칭 → 전 기간 연속(2011~). 정밀 최근 + 과거 한 줄. 개명 항목("수익(매출액)"→"매출액")은
+  별 행(숨김 0, 금액 stitch 는 후속). 겹치는 해는 최신 filing(=XBRL) 우선.
+- **freq = 입도** (소스 스위치 아님) — `year`(연)/`quarter`(분기)/`ytd`(누적), native·finance 둘 다. native
+  XBRL 은 ctxMode 토큰 선택, 옛은 사업보고서(Y)/분기(A). `readCellWide`(acode 정밀 차원 view)는 XBRL 전용 유지.
+- **저장 원칙 적용** — 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 순수 규칙이라 build,
+  freq/통합은 표현이라 read. valueRaw 콤마·괄호 무손실(숫자화는 소비자). 셀은 panel.parquet 파생이라 stale 면
+  재빌드(파생 체인).
 - **주석 미포함** — 확정 범위 = 5표만. NT_* 주석은 schema `statement` 컬럼이라 후속 확장 대비(미착수).
 
 ```
