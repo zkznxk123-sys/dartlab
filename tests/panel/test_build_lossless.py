@@ -165,7 +165,7 @@ def test_native_statement_extends_past_xbrl() -> None:
     """native 재무제표(is)가 XBRL 경계(2022) 너머 옛 표 파싱으로 과거 연장."""
     from dartlab.providers.dart.panel.cell import readStatement
 
-    w = readStatement(_BASE, statement="IS2", freq="year")
+    w = readStatement(_BASE, statement="is", freq="year")
     assert w is not None
     years = sorted(int(c) for c in w.columns if c.isdigit())
     assert years[0] <= 2016, f"native 과거 연장 실패 — 최소연도 {years[0]} (옛 표 파싱 안 됨)"

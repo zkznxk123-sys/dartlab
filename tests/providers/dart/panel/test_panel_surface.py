@@ -59,10 +59,13 @@ def test_search_separate_from_call() -> None:
 
 
 def test_native_stmt_mapping_lowercase() -> None:
-    """소문자 5표 → native statement 매핑 (sce=EF, cis=IS3). 소스 = 대소문자."""
-    from dartlab.providers.dart.panel.panel import _NATIVE_STMT
+    """소문자 논리 키 5종 = native. 물리 해소는 cell.STATEMENT_VARIANTS SSOT (is→IS2/IS3/IS1)."""
+    from dartlab.providers.dart.panel.cell import STATEMENT_VARIANTS
+    from dartlab.providers.dart.panel.panel import _NATIVE_KEYS
 
-    assert _NATIVE_STMT == {"is": "IS2", "cis": "IS3", "cf": "CF", "bs": "BS", "sce": "EF"}
+    assert _NATIVE_KEYS == frozenset({"is", "bs", "cf", "cis", "sce"})
+    assert STATEMENT_VARIANTS["is"] == ("IS2", "IS3", "IS1")  # 손익 변형 흡수
+    assert STATEMENT_VARIANTS["sce"] == ("EF",)
 
 
 def test_case_dispatch_native_vs_finance() -> None:
@@ -80,9 +83,9 @@ def test_freq_not_source_switch() -> None:
 
     from dartlab.providers.dart.panel.panel import Panel
 
-    # __call__ 에 freq 인자는 있지만 native 분기는 _NATIVE_STMT(소문자)로만
+    # __call__ 에 freq 인자는 있지만 native 분기는 _NATIVE_KEYS(소문자 논리 키)로만
     src = inspect.getsource(Panel.__call__)
-    assert "_NATIVE_STMT" in src
+    assert "_NATIVE_KEYS" in src
     assert "readStatement" in src  # native 는 readStatement, freq→readCellWide 버그 제거
 
 

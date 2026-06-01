@@ -42,10 +42,11 @@ def _censusOne(code: str) -> dict:
 
     from dartlab.core.ratios import calcRatioSeries
     from dartlab.providers.dart.panel.cell import (
+        STATEMENT_VARIANTS,
         _assembleRatioSeries,
         _cellsFromPanel,
         _ratiosToWide,
-        _statementWithFallback,
+        _resolveStatement,
         cellStatements,
     )
 
@@ -67,7 +68,7 @@ def _censusOne(code: str) -> dict:
 
     income = None
     for fr in ("year", "quarter", "ytd"):
-        w = _statementWithFallback(cells, statement="IS2", freq=fr, scope="consolidated")
+        w = _resolveStatement(cells, variants=STATEMENT_VARIANTS["is"], freq=fr)
         if w is not None and not w.is_empty():
             income = w
             break
@@ -80,9 +81,9 @@ def _censusOne(code: str) -> dict:
 
     for fr in ("year", "quarter", "ytd"):
         src = {
-            "BS": _statementWithFallback(cells, statement="BS", freq=fr, scope="consolidated"),
-            "IS": _statementWithFallback(cells, statement="IS2", freq=fr, scope="consolidated"),
-            "CF": _statementWithFallback(cells, statement="CF", freq=fr, scope="consolidated"),
+            "BS": _resolveStatement(cells, variants=STATEMENT_VARIANTS["bs"], freq=fr),
+            "IS": _resolveStatement(cells, variants=STATEMENT_VARIANTS["is"], freq=fr),
+            "CF": _resolveStatement(cells, variants=STATEMENT_VARIANTS["cf"], freq=fr),
         }
         asm = _assembleRatioSeries(src)
         if asm is None:

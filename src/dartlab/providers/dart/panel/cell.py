@@ -44,9 +44,22 @@ from dartlab.core.utils.labels import _loadAccountMappings
 
 from .cellSchema import CELL_PIVOT_INDEX, CELL_SCHEMA
 
-# 재무 5표 statement (build/cell.CELL_STATEMENTS 와 동일 값 — read 표면 SSOT).
+# 재무 5표 물리 statement (build/cell.CELL_STATEMENTS 와 동일 값 — read 표면 SSOT).
 # IS1/IS2/IS3 = 손익(단일/별도/포괄) — 회사마다 표현이 달라 셋 다 포함.
 _CELL_STATEMENTS: frozenset[str] = frozenset({"BS", "IS1", "IS2", "IS3", "CF", "EF"})
+
+# ── statement resolution SSOT — 논리 키(사용자) → 물리 XBRL class 후보(우선순위) ──
+# 회사마다 손익 표현(단일 IS1 / 별도 IS2 / 포괄 IS3)·공시 범위(연결/별도)가 달라, 그 변형을 *한 곳*에서
+# 흡수한다. 폴백 체인을 코드에 흩지 않고 이 테이블이 단일 진실 — panel.py 는 논리 키만 넘긴다.
+STATEMENT_VARIANTS: dict[str, tuple[str, ...]] = {
+    "bs": ("BS",),  # 재무상태표
+    "is": ("IS2", "IS3", "IS1"),  # 손익 — 별도손익 > 포괄손익 > 단일
+    "cis": ("IS3", "IS2", "IS1"),  # 포괄손익 — 포괄 우선, 없으면 손익
+    "cf": ("CF",),  # 현금흐름표
+    "sce": ("EF",),  # 자본변동표
+}
+# scope 우선순위 — 연결(consolidated) 우선, 없으면 별도(standalone, 별도만 공시하는 회사).
+SCOPE_ORDER: tuple[str, ...] = ("consolidated", "standalone")
 
 
 def cellStatements() -> frozenset[str]:
@@ -306,21 +319,22 @@ def readStatement(
     *,
     statement: str,
     freq: str = "year",
-    scope: str = "consolidated",
+    scope: str | None = None,
     marketNs: str = "kr",
     periods: list[str] | None = None,
 ) -> pl.DataFrame | None:
-    """native 재무제표 — 항목명 × 전 기간 (XBRL 최근 + 옛 표 과거 통합, 2011~).
+    """native 재무제표 — 논리 키 → 회사별 표현 해소 → 항목명 × 전 기간 (XBRL 최근 + 옛 표 통합, 2011~).
 
-    셀 artifact(XBRL 정밀 + 옛 위치파싱)를 **정규화 항목명**으로 통합 pivot. top-level axis
-    (ConsolidatedMember, 깊이 1) 만 = 재무제표 라인아이템. 겹치는 해는 최신 filing(=XBRL) 우선.
+    ``statement`` 은 **논리 키**(``STATEMENT_VARIANTS``: is/bs/cf/cis/sce)다. 회사마다 손익을 단일(IS1)/
+    별도(IS2)/포괄(IS3)로, 공시를 연결/별도로 달리 내므로, 그 변형을 단일 테이블이 해소한다(폴백 흩지 않음).
+    셀을 **정규화 항목명**으로 통합 pivot — top-level axis(깊이 1) 라인아이템, 겹치는 해는 최신 filing 우선.
     `readCellWide`(acode 정밀 차원 view) 와 별개 — 본 함수가 `c.panel("is")` statement view.
 
     Args:
         code: 종목코드.
-        statement: 5표 ("BS"/"IS2"/"IS3"/"CF"/"EF").
+        statement: 논리 키 — "is"(손익)/"bs"(재무상태)/"cf"(현금흐름)/"cis"(포괄손익)/"sce"(자본변동).
         freq: "year"(연간) / "quarter"(분기) / "ytd"(누적). 기본 year.
-        scope: "consolidated" / "standalone". 기본 consolidated.
+        scope: None(기본)=연결→별도 자동 / "consolidated" / "standalone" 강제.
         marketNs: 시장 namespace.
         periods: 특정 filing period parquet 만 (prune). None=전체.
 
@@ -371,21 +385,26 @@ def readStatement(
         TargetMarkets:
             - KR + US.
     """
-    if statement not in _CELL_STATEMENTS:
+    variants = STATEMENT_VARIANTS.get(statement)
+    if variants is None:
         return None
     df = _cellsFromPanel(code, marketNs, periods)
     if df is None:
         return None
-    return _statementWithFallback(df, statement=statement, freq=freq, scope=scope)
+    return _resolveStatement(df, variants=variants, freq=freq, scope=scope)
 
 
-def _statementWithFallback(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame | None:
-    """셀 DataFrame → statement (소스-중립). 손익(is=IS2)은 IS2→IS3(포괄손익)→IS1(단일) 순 폴백 —
-    회사마다 손익 표현이 다름. 각 statement 는 연결 없으면 별도(별도만 공시하는 회사) 폴백."""
-    stmtChain = ["IS2", "IS3", "IS1"] if statement == "IS2" else [statement]
-    scopeChain = [scope, "standalone"] if scope == "consolidated" else [scope]
-    for sc in scopeChain:
-        for st in stmtChain:
+def _resolveStatement(
+    df: pl.DataFrame, *, variants: tuple[str, ...], freq: str, scope: str | None = None
+) -> pl.DataFrame | None:
+    """셀 → 물리 후보(variants) × scope 우선순위로 가장 적합한 statement (소스-중립 SSOT 해소).
+
+    scope=None 이면 ``SCOPE_ORDER``(연결→별도) 자동, 지정 시 그 scope 만. variants 는 손익처럼 표현
+    변형이 있는 논리 키의 물리 후보(우선순위) — 첫 비어있지 않은 결과 반환.
+    """
+    scopes = SCOPE_ORDER if scope is None else (scope,)
+    for sc in scopes:
+        for st in variants:
             out = _statementFromCells(df, statement=st, freq=freq, scope=sc)
             if out is not None:
                 return out
@@ -422,8 +441,8 @@ def _statementFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: s
 
 # ── native 재무비율 (소문자 ratios — BS/IS/CF native 항목으로 core 공식 산출, panel 자급) ──
 
-# 비율 재료를 읽을 native statement. 버킷 = 읽은 표(BS/IS/CF) — standardAccounts.sj COMMON 모호 회피.
-_RATIO_SOURCE_STMTS: dict[str, str] = {"BS": "BS", "IS": "IS2", "CF": "CF"}
+# 비율 재료 — series 버킷(BS/IS/CF) → 논리 키(STATEMENT_VARIANTS). 손익은 is(IS2→IS3→IS1) 자동 해소.
+_RATIO_SOURCE: dict[str, str] = {"BS": "bs", "IS": "is", "CF": "cf"}
 
 _NOTE_RE = re.compile(_NOTE_PAT)
 _WS_RE = re.compile(r"\s+")
@@ -516,7 +535,7 @@ def readRatios(
     code: str,
     *,
     freq: str = "year",
-    scope: str = "consolidated",
+    scope: str | None = None,
     marketNs: str = "kr",
     periods: list[str] | None = None,
 ) -> pl.DataFrame | None:
@@ -580,13 +599,13 @@ def readRatios(
         TargetMarkets:
             - KR (DART).
     """
-    # panel.parquet 1회 파싱 후 bs/is/cf 를 캐시 셀에서 추출 (readStatement×3 = 파싱 3회 중복 회피).
+    # panel.parquet 1회 파싱 후 bs/is/cf 를 캐시 셀에서 해소 (readStatement×3 = 파싱 3회 중복 회피).
     cells = _cellsFromPanel(code, marketNs, periods)
     if cells is None:
         return None
     statements = {
-        sjKey: _statementWithFallback(cells, statement=stmt, freq=freq, scope=scope)
-        for sjKey, stmt in _RATIO_SOURCE_STMTS.items()
+        sjKey: _resolveStatement(cells, variants=STATEMENT_VARIANTS[key], freq=freq, scope=scope)
+        for sjKey, key in _RATIO_SOURCE.items()
     }
     assembled = _assembleRatioSeries(statements)
     if assembled is None:

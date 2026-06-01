@@ -36,9 +36,9 @@ import polars as pl
 from . import read as _read
 from .period import isPeriodColumn as _isPeriodColumn
 
-# 소스 = 대소문자. 소문자 5표 → native(panel 자급 statement). 대문자 5표 → finance(파사드 _showFn).
-# SCE(자본변동표)=EF, CIS(포괄손익)=IS3 — ACLASS 실측 (EF_C/IS_C3).
-_NATIVE_STMT: dict[str, str] = {"is": "IS2", "cis": "IS3", "cf": "CF", "bs": "BS", "sce": "EF"}
+# 소스 = 대소문자. 소문자 논리 키 → native(panel 자급 statement). 대문자 → finance(파사드 _showFn).
+# 논리 키→물리 XBRL 해소는 cell.STATEMENT_VARIANTS SSOT (회사별 손익 IS1/2/3·연결/별도 변형 흡수).
+_NATIVE_KEYS: frozenset[str] = frozenset({"is", "bs", "cf", "cis", "sce"})
 # panel freq(입도) → finance freq (대문자 IS 경로). 소스 스위치 아님.
 _FINANCE_FREQ: dict[str, str] = {"year": "Y", "quarter": "Q", "ytd": "YTD"}
 
@@ -258,14 +258,14 @@ class Panel(pl.DataFrame):
         # 명시 빈 key("") → None (하위호환).
         if not key:
             return None
-        # native 재무제표 (소문자 5표 is/bs/cf/cis/sce) → panel 자급 statement(XBRL+옛 통합, docs 0).
-        # freq=입도(year/quarter/ytd), 기본 year. 소스 스위치 아님.
-        if key in _NATIVE_STMT and code is not None:
+        # native 재무제표 (소문자 논리 키 is/bs/cf/cis/sce) → panel 자급 statement(XBRL+옛 통합, docs 0).
+        # 논리 키→물리 해소는 cell.STATEMENT_VARIANTS. freq=입도(year/quarter/ytd), 기본 year. 소스 스위치 아님.
+        if key in _NATIVE_KEYS and code is not None:
             from . import cell as _cell
 
             return _cell.readStatement(
                 code,
-                statement=_NATIVE_STMT[key],
+                statement=key,
                 freq=freq or "year",
                 marketNs=self._marketNs,
                 periods=periods or self._periods,
