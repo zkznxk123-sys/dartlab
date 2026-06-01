@@ -39,6 +39,8 @@ import polars as pl
 
 import dartlab.config as _cfg
 
+from .period import sortPeriods
+
 _log = logging.getLogger(__name__)
 
 # pivot row identity (회사내 다기간 정렬 키). scope = read 파생(scopeExpr).
@@ -421,7 +423,82 @@ def readWide(
             .group_by([*indexCols, "period"], maintain_order=True)
             .agg(aggExpr.alias("contentRaw"))
         )
-        return collapsed.pivot(values="contentRaw", index=indexCols, on="period", aggregate_function="first")
+        wide = collapsed.pivot(values="contentRaw", index=indexCols, on="period", aggregate_function="first")
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("panel pivot 실패 %s: %s", code, exc)
         return None
+    return orderBySpine(wide, indexCols)
+
+
+def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:
+    """wide 행을 전역 정부 뼈대(SPINE) 순서로 정렬 + period 열 최신순 배치.
+
+    각 행의 ``rowIdentity`` 로 ``SPINE`` 을 조회해 (chapterRank, spineOrder) 정렬 — 정부 문서
+    표시순서. spine 미등재 행은 chapter 말미(nulls_last). period 열은 최신순(2026Q1 좌측), index
+    컬럼이 먼저.
+
+    Args:
+        wide: pivot 직후 wide DataFrame (index 컬럼 + period 열).
+        indexCols: 행 식별 컬럼 (PIVOT_INDEX 교집합).
+
+    Returns:
+        SPINE 순서 정렬 + period 최신순 wide. spine 빈/identity 컬럼 부재 시 원본 컬럼순.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> orderBySpine(wide, ["disclosureKey", "chapter", "sectionLeaf"])  # doctest: +SKIP
+
+    SeeAlso:
+        - ``mapper.rowIdentityExpr`` — 행 identity 산출.
+        - ``spine.SPINE`` — 전역 정부 순서.
+
+    Requires:
+        - polars. spine.SPINE (없으면 정렬 skip).
+
+    Capabilities:
+        - 정부 문서순서로 wide 행 정렬 — blockOrder 재발견(기간 리셋) 없이 전역 truth.
+
+    Guide:
+        - readWide 가 pivot 후 호출. 직접 호출 가능.
+
+    AIContext:
+        - SPINE module-level dict O(1) lookup — 누적 0.
+
+    When:
+        - wide 행을 정부 뼈대 순서로 세우고 period 열을 최신순으로 배치할 때.
+
+    How:
+        - rowIdentityExpr → SPINE map(chapterRank, spineOrder) → sort → period 최신순 select.
+
+    LLM Specifications:
+        AntiPatterns:
+            - blockOrder 로 행 정렬 금지 — 기간 리셋(전역 truth=SPINE).
+            - spine 미등재에 임의 순서 금지 — nulls_last(chapter 말미).
+        OutputSchema:
+            - ``pl.DataFrame`` (정부순서 행 + 최신순 period 열).
+        Prerequisites:
+            - polars. SPINE dict.
+        Freshness:
+            - SPINE 재생성 시 반영.
+        Dataflow:
+            - rowIdentity → SPINE → (chapterRank, spineOrder) sort → period 최신순.
+        TargetMarkets:
+            - KR + US 공통.
+    """
+    from .mapper import rowIdentityExpr
+    from .spine import SPINE
+
+    periodCols = sortPeriods([c for c in wide.columns if c not in indexCols])
+    orderedCols = [*indexCols, *reversed(periodCols)]  # period 최신순(좌측)
+    if not SPINE or "chapter" not in wide.columns or "sectionLeaf" not in wide.columns:
+        return wide.select(orderedCols)
+    chapterRank = {k: v[2] for k, v in SPINE.items()}
+    spineOrder = {k: v[0] for k, v in SPINE.items()}
+    ranked = wide.with_columns(rowIdentityExpr())
+    ranked = ranked.with_columns(
+        pl.col("_rowIdentity").replace_strict(chapterRank, default=None, return_dtype=pl.Int64).alias("_chRank"),
+        pl.col("_rowIdentity").replace_strict(spineOrder, default=None, return_dtype=pl.Int64).alias("_spOrder"),
+    )
+    return ranked.sort(["_chRank", "_spOrder"], nulls_last=True).select(orderedCols)
