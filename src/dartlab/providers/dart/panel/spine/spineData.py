@@ -1,10 +1,10 @@
-"""panel 전역 정부-택소노미 뼈대 데이터 — spineBuilder.buildSpine 생성물 (사람 미수정).
+"""panel 행 뼈대 데이터 — spineBuilder.buildSpine 생성물 (사람 미수정).
 
 각 행 = (identity, spineOrder, parentKey, chapterRank). identity = canonicalKey(keyed) /
 NARR::chapter␟section(narrative). spineOrder = 정부 문서 표시순서, chapterRank = 챕터 대순서,
 parentKey = TABLE-GROUP 트리 부모(canonicalKey, Phase 2 셀 세분화 토대).
 
-재생성: ``python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes <codes>``.
+재생성: ``python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes <기준종목>``.
 """
 
 from __future__ import annotations
@@ -20,18 +20,18 @@ SPINE_ROWS: tuple[tuple[str, int, str | None, int], ...] = (
     ("SM_VEN_CMP", 7, None, 3),
     ("SPC_CRT", 8, None, 3),
     ("NARR::I. 회사의 개요␟2. 회사의 연혁", 9, None, 3),
-    ("NARR::I. 회사의 개요␟3. 자본금 변동사항", 10, None, 3),
-    ("NARR::I. 회사의 개요␟4. 주식의 총수 등", 11, None, 3),
-    ("TOT_STK", 12, None, 3),
-    ("NARR::I. 회사의 개요␟5. 정관에 관한 사항", 13, None, 3),
-    ("BPP_CS", 14, None, 3),
-    ("NARR::(첨부)재 무 제 표␟(첨부)재 무 제 표", 15, None, 4),
-    ("COVER2", 16, None, 4),
-    ("NARR::(첨부)재 무 제 표␟주석", 17, None, 4),
-    ("NARR::(첨부)연 결 재 무 제 표␟(첨부)연 결 재 무 제 표", 18, None, 5),
-    ("NARR::(첨부)연 결 재 무 제 표␟주석", 19, None, 5),
-    ("NARR::II. 사업의 내용␟II. 사업의 내용", 20, None, 6),
-    ("NARR::II. 사업의 내용␟1. 사업의 개요", 21, None, 6),
+    ("NARR::(첨부)재 무 제 표␟(첨부)재 무 제 표", 10, None, 4),
+    ("NARR::I. 회사의 개요␟3. 자본금 변동사항", 11, None, 3),
+    ("COVER2", 12, None, 4),
+    ("NARR::(첨부)연 결 재 무 제 표␟(첨부)연 결 재 무 제 표", 13, None, 5),
+    ("NARR::I. 회사의 개요␟4. 주식의 총수 등", 14, None, 3),
+    ("TOT_STK", 15, None, 3),
+    ("NARR::I. 회사의 개요␟5. 정관에 관한 사항", 16, None, 3),
+    ("BPP_CS", 17, None, 3),
+    ("NARR::II. 사업의 내용␟II. 사업의 내용", 18, None, 6),
+    ("NARR::II. 사업의 내용␟1. 사업의 개요", 19, None, 6),
+    ("NARR::(첨부)재 무 제 표␟주석", 20, None, 4),
+    ("NARR::(첨부)연 결 재 무 제 표␟주석", 21, None, 5),
     ("NARR::II. 사업의 내용␟2. 주요 제품 및 서비스", 22, None, 6),
     ("NARR::II. 사업의 내용␟3. 원재료 및 생산설비", 23, None, 6),
     ("NARR::II. 사업의 내용␟4. 매출 및 수주상황", 24, None, 6),
@@ -135,19 +135,19 @@ SPINE_ROWS: tuple[tuple[str, int, str | None, int], ...] = (
     ("NARR::외부감사 실시내용␟1. 감사대상업무", 122, None, 9),
     ("INS_SUB", 123, None, 9),
     ("NARR::외부감사 실시내용␟2. 감사참여자 구분별 인원수 및 감사시간", 124, None, 9),
-    ("INS_NUT", 125, None, 9),
-    ("NARR::외부감사 실시내용␟3. 주요 감사실시내용", 126, None, 9),
-    ("INS_CONT", 127, None, 9),
-    ("NARR::외부감사 실시내용␟4. 감사(감사위원회)와의 커뮤니케이션", 128, None, 9),
-    ("INS_COMM", 129, None, 9),
-    ("NARR::IV. 이사의 경영진단 및 분석의견␟IV. 이사의 경영진단 및 분석의견", 130, None, 10),
-    ("NARR::IV. 이사의 경영진단 및 분석의견␟1. 예측정보에 대한 주의사항", 131, None, 10),
-    ("NARR::IV. 이사의 경영진단 및 분석의견␟2. 개요", 132, None, 10),
+    ("NARR::IV. 이사의 경영진단 및 분석의견␟IV. 이사의 경영진단 및 분석의견", 125, None, 10),
+    ("INS_NUT", 126, None, 9),
+    ("NARR::IV. 이사의 경영진단 및 분석의견␟1. 예측정보에 대한 주의사항", 127, None, 10),
+    ("NARR::외부감사 실시내용␟3. 주요 감사실시내용", 128, None, 9),
+    ("INS_CONT", 129, None, 9),
+    ("NARR::IV. 이사의 경영진단 및 분석의견␟2. 개요", 130, None, 10),
+    ("NARR::외부감사 실시내용␟4. 감사(감사위원회)와의 커뮤니케이션", 131, None, 9),
+    ("INS_COMM", 132, None, 9),
     ("NARR::IV. 이사의 경영진단 및 분석의견␟3. 재무상태 및 영업실적", 133, None, 10),
     ("NARR::IV. 이사의 경영진단 및 분석의견␟4. 유동성 및 자금조달과 지출", 134, None, 10),
     ("NARR::IV. 이사의 경영진단 및 분석의견␟5. 부외거래", 135, None, 10),
-    ("NARR::IV. 이사의 경영진단 및 분석의견␟6. 그 밖에 투자의사결정에 필요한 사항", 136, None, 10),
-    ("NARR::연결 내부회계관리제도 감사 또는 검토의견␟연결 내부회계관리제도 감사 또는 검토의견", 137, None, 11),
+    ("NARR::연결 내부회계관리제도 감사 또는 검토의견␟연결 내부회계관리제도 감사 또는 검토의견", 136, None, 11),
+    ("NARR::IV. 이사의 경영진단 및 분석의견␟6. 그 밖에 투자의사결정에 필요한 사항", 137, None, 10),
     ("NARR::V. 회계감사인의 감사의견 등␟V. 회계감사인의 감사의견 등", 138, None, 12),
     ("NARR::V. 회계감사인의 감사의견 등␟1. 외부감사에 관한 사항", 139, None, 12),
     ("NARR::V. 회계감사인의 감사의견 등␟2. 내부통제에 관한 사항", 140, None, 12),

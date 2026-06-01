@@ -223,7 +223,7 @@ def _main() -> None:
     ap.add_argument("--ref", type=str, default="data/dart/panelXbrlRef.parquet", help="ref parquet")
     ap.add_argument("--out", type=str, default="data/dart/panel", help="출력 base dir")
     ap.add_argument("--all", action="store_true", help="전종목 빌드 (multiprocessing)")
-    ap.add_argument("--spine", action="store_true", help="전역 정부 뼈대(spineData.py) 생성")
+    ap.add_argument("--spine", action="store_true", help="정부 서식 뼈대(spineData.py) 생성 — 기준 종목 1개")
     args = ap.parse_args()
 
     refDf: pl.DataFrame | None = None
@@ -235,9 +235,10 @@ def _main() -> None:
     if args.spine:
         from .spineBuilder import buildSpine
 
-        codes = [c.strip() for c in args.codes.split(",") if c.strip()] or None
-        stats = buildSpine(codes=codes, refDf=refDf, verbose=True)
-        _log.info("=== spine 완료: codes=%d, rows=%d ===", stats["codes"], stats["rows"])
+        # 기준 종목 1개 (정부 표준 서식이라 한 회사 reference 로 충분). 첫 --codes 또는 기본.
+        codes = [c.strip() for c in args.codes.split(",") if c.strip()]
+        stats = buildSpine(codes[0] if codes else "005930", refDf=refDf, verbose=True)
+        _log.info("=== spine 완료: code=%d, rows=%d ===", stats["code"], stats["rows"])
         return
 
     if args.all:

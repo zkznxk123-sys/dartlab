@@ -493,11 +493,12 @@ def readWide(
 
 
 def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:
-    """wide 행을 전역 정부 뼈대(SPINE) 순서로 정렬 + period 열 최신순 배치.
+    """wide 행을 정부 뼈대(SPINE) 순서로 정렬 + period 열 최신순 배치.
 
-    각 행의 ``rowIdentity`` 로 ``SPINE`` 을 조회해 (chapterRank, spineOrder) 정렬 — 정부 문서
-    표시순서. spine 미등재 행은 chapter 말미(nulls_last). period 열은 최신순(2026Q1 좌측), index
-    컬럼이 먼저.
+    각 행의 ``rowIdentity`` 로 ``SPINE`` 을 조회해 **(chapterRank 우선, spineOrder 차선)** 정렬 —
+    챕터(I~XII) 단위로 모은 뒤 챕터 내 정부 문서순서. chapterRank 우선이라 정부가 본문 중간에
+    물리 삽입한 '(첨부)재무제표' 같은 블록은 흩어지지 않고 자기 챕터로 모인다(한눈에 정돈된 격자).
+    spine 미등재 행은 chapter 말미(nulls_last). period 열은 최신순(2026Q1 좌측), index 컬럼이 먼저.
 
     Args:
         wide: pivot 직후 wide DataFrame (index 컬럼 + period 열).
@@ -514,13 +515,13 @@ def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:
 
     SeeAlso:
         - ``mapper.rowIdentityExpr`` — 행 identity 산출.
-        - ``spine.SPINE`` — 전역 정부 순서.
+        - ``spine.SPINE`` — 정부 서식 순서.
 
     Requires:
         - polars. spine.SPINE (없으면 정렬 skip).
 
     Capabilities:
-        - 정부 문서순서로 wide 행 정렬 — blockOrder 재발견(기간 리셋) 없이 전역 truth.
+        - 정부 문서순서로 wide 행 정렬 — blockOrder 재발견(기간 리셋) 없이 정부 서식 truth.
 
     Guide:
         - readWide 가 pivot 후 호출. 직접 호출 가능.
@@ -536,7 +537,7 @@ def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:
 
     LLM Specifications:
         AntiPatterns:
-            - blockOrder 로 행 정렬 금지 — 기간 리셋(전역 truth=SPINE).
+            - blockOrder 로 행 정렬 금지 — 기간 리셋(정렬 truth=SPINE).
             - spine 미등재에 임의 순서 금지 — nulls_last(chapter 말미).
         OutputSchema:
             - ``pl.DataFrame`` (정부순서 행 + 최신순 period 열).

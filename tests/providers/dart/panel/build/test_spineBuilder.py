@@ -1,68 +1,27 @@
-"""panel spineBuilder mirror — 순수 헬퍼(consensus·render) 합성 검증 (데이터 0).
+"""panel spineBuilder mirror — 순수 헬퍼(render) + 공개표면 합성 검증 (데이터 0).
 
-``build/spineBuilder.py`` 의 ``_consensus``(median rank)/``_renderModule``(생성 소스)/공개
-``buildSpine`` 표면. 실 zip→spine 빌드(최신 사업보고서 파싱)는 requires_data 라 제외 —
-순수 집계·직렬화 로직만 합성 입력으로 검증.
+``build/spineBuilder.py`` 의 ``_renderModule``(생성 소스)/공개 ``buildSpine`` 표면. 실 zip→spine
+빌드(최신 사업보고서 파싱)는 requires_data 라 제외 — 직렬화 로직만 합성 입력으로 검증. spine 은
+한 회사 reference 순서(회사간 합의는 panel 책임 밖 = scan 엔진).
 """
 
 from __future__ import annotations
+
+import inspect
 
 import pytest
 
 pytestmark = pytest.mark.unit
 
 
-def test_build_spine_public_callable() -> None:
-    """buildSpine 공개표면 존재 (build/__init__ export)."""
-    from dartlab.providers.dart.panel.build import buildSpine
+def test_build_spine_public_callable_single_code() -> None:
+    """buildSpine 공개표면 존재 + 단일 code 시그니처 (다종목 codes·consensus 제거)."""
+    from dartlab.providers.dart.panel.build import buildSpine, spineBuilder
 
     assert callable(buildSpine)
-
-
-def test_consensus_single_company_preserves_order() -> None:
-    """단일 종목 → 그 회사 문서순서 그대로 (spineOrder 0..N 재부여)."""
-    from dartlab.providers.dart.panel.build.spineBuilder import _consensus
-
-    company = [
-        ("NARR::I␟I", 0, None, 0),
-        ("BS", 1, None, 1),
-        ("NT_D826380", 2, None, 1),
-    ]
-    out = _consensus([company])
-    assert [r[0] for r in out] == ["NARR::I␟I", "BS", "NT_D826380"]
-    assert [r[1] for r in out] == [0, 1, 2]  # spineOrder 0..N
-
-
-def test_consensus_median_rank_across_companies() -> None:
-    """다종목 → identity 별 (chapterRank, order) median 정렬 → spineOrder 재부여."""
-    from dartlab.providers.dart.panel.build.spineBuilder import _consensus
-
-    # A 에서 X 가 BS 앞, B 에서 X 가 BS 뒤 → median 으로 안정 정렬.
-    a = [("BS", 0, None, 0), ("X", 1, None, 0)]
-    b = [("X", 0, None, 0), ("BS", 1, None, 0)]
-    c = [("BS", 0, None, 0), ("X", 1, None, 0)]
-    out = _consensus([a, b, c])
-    idents = [r[0] for r in out]
-    # BS median order = median(0,1,0)=0, X = median(1,0,1)=1 → BS 먼저.
-    assert idents == ["BS", "X"]
-    assert [r[1] for r in out] == [0, 1]
-
-
-def test_consensus_parent_first_nonnull() -> None:
-    """parentKey 는 회사 가로질러 첫 non-null 채택 (트리 안정)."""
-    from dartlab.providers.dart.panel.build.spineBuilder import _consensus
-
-    a = [("NT_D826380", 0, None, 0)]
-    b = [("NT_D826380", 0, "NT_D810000", 0)]
-    out = _consensus([a, b])
-    assert out[0][2] == "NT_D810000"
-
-
-def test_consensus_empty() -> None:
-    """빈 입력 → 빈 spine."""
-    from dartlab.providers.dart.panel.build.spineBuilder import _consensus
-
-    assert _consensus([]) == []
+    params = inspect.signature(buildSpine).parameters
+    assert "code" in params and "codes" not in params  # 단일 회사 reference
+    assert not hasattr(spineBuilder, "_consensus")  # 다종목 median 합의 제거
 
 
 def test_render_module_valid_python_and_importable() -> None:

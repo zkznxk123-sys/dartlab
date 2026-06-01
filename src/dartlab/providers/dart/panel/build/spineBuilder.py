@@ -1,35 +1,35 @@
-"""panel 전역 정부-택소노미 뼈대(spine) 생성 — 최신 사업보고서 문서순서·계층 → spineData.py.
+"""panel 행 뼈대(spine) 생성 — 한 회사 최신 사업보고서 문서순서·계층 → spineData.py.
 
-panel wide 의 행 순서·계층은 **정부 IFRS 택소노미/기업공시서식 속성** = 회사 무관 전역 truth.
-``blockOrder`` 는 보고서마다 0 리셋이라 read 가 재발견할 수 없고, ``canonicalKey`` 는 정렬 가능
-번호가 아니다 (실측: 주석 문서순 ≠ D-번호 오름차순). → 정부 표시순서를 **빌드 시 1회 명시
-spine 으로 굽는다.**
+panel wide 의 행 순서·계층은 **정부 기업공시서식 표준 문서순서**. ``blockOrder`` 는 보고서마다
+0 리셋이라 read 가 재발견할 수 없고, ``canonicalKey`` 는 정렬 가능 번호가 아니다 (실측: 주석
+문서순 ≠ D-번호 오름차순). → 정부 표시순서를 **빌드 시 1회 명시 spine 으로 굽는다.**
 
-알고리즘 (회사별 → consensus):
-    1. 각 종목 최신 사업보고서(Q4) zip 을 raw 파싱 (stale parquet 무관, build 헬퍼 재사용).
+알고리즘 (한 회사 reference):
+    1. 기준 종목 최신 사업보고서(Q4) zip 을 raw 파싱 (stale parquet 무관, build 헬퍼 재사용).
     2. walker → horizontalize → resolveBatch 로 read 와 동일 section-granular 행 산출.
-    3. ``rowIdentity`` 별 문서순서(blockOrder) rank + chapter 대순서 rank + ``extractAclassEntries``
-       parentRawId→canonicalKey 트리.
-    4. 다종목이면 identity 별 median rank consensus (단일 부트스트랩은 그 회사 정부순서 그대로).
-    5. ``spineData.py`` 생성 — ``SPINE_ROWS`` ordered tuple literal (git-diff 추적, import 로드).
+    3. ``rowIdentity`` 별 문서순서(blockOrder) → ``spineOrder`` + chapter 대순서 ``chapterRank`` +
+       ``extractAclassEntries`` parentRawId→canonicalKey 트리.
+    4. ``spineData.py`` 생성 — ``SPINE_ROWS`` ordered tuple literal (git-diff 추적, import 로드).
 
 산출은 **순수 코드** (루트 data orphan parquet 아님) — git diff 로 정부 순서/트리 변화 추적,
-``import`` 만으로 read 표면이 로드 (importlib.resources 불요).
+``import`` 만으로 read 표면이 로드 (importlib.resources 불요). 회사간 순서 표준화·합의는 panel 책임
+밖(scan 엔진의 cross-market 일) — panel 은 한 회사 격자, spine 도 한 회사 reference 순서.
 
 LLM Specifications:
     AntiPatterns:
         - 분기보고서를 뼈대로 금지 — 분기 ⊄ 연간(배당·임원·주총 누락). 최신 Q4 사업보고서만.
+        - 다종목 median/합의 금지 — 회사간 순서 표준화는 scan 엔진 책임(panel = 한 회사 격자).
         - stale parquet artifact read 금지 — raw zip 직접 파싱(disclosureKey 미부착 무관).
         - spine 을 parquet 로 저장 금지 — 순수 .py(git 추적·import 로드).
     OutputSchema:
-        - ``buildSpine(codes, *, outModulePath, refDf) -> dict`` (생성 통계).
+        - ``buildSpine(code, *, outModulePath, refDf) -> dict`` (생성 통계).
         - 부수효과: ``spine/spineData.py`` (SPINE_ROWS tuple).
     Prerequisites:
         - data/dart/original/docs/{code}/*.zip 로컬. lxml.
     Freshness:
-        - corpus 재빌드/확대 시 재생성 (consensus 강화).
+        - 기준 종목 재빌드·정부 양식 변경 시 재생성.
     Dataflow:
-        - zip → walker → horizontalize → rowIdentity·blockOrder·parentKey → consensus → spineData.py.
+        - zip → walker → horizontalize → rowIdentity·blockOrder·parentKey → spineData.py.
     TargetMarkets:
         - KR (DART). EDGAR 는 별도 spine (후속).
 """
@@ -37,7 +37,6 @@ LLM Specifications:
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from pathlib import Path
 
 import polars as pl
@@ -178,49 +177,8 @@ def _companySpine(
     return out
 
 
-def _consensus(
-    perCompany: list[list[tuple[str, int, str | None, int]]],
-) -> list[tuple[str, int, str | None, int]]:
-    """다종목 회사별 spine → identity 별 median rank consensus → 최종 ordered rows.
-
-    identity 별 (order, chapterRank) median + parentKey 첫 non-null 채택 → (chapterRank, order)
-    정렬 후 dense spineOrder 0..N 재부여. 단일 종목이면 그 순서 그대로.
-
-    Args:
-        perCompany: 회사별 ``[(identity, order, parentKey, chapterRank)]`` list.
-
-    Returns:
-        consensus ``[(identity, spineOrder, parentKey, chapterRank)]`` (spineOrder 0..N 단조).
-
-    Raises:
-        없음.
-    """
-    orders: dict[str, list[int]] = defaultdict(list)
-    chRanks: dict[str, list[int]] = defaultdict(list)
-    parents: dict[str, str | None] = {}
-    for company in perCompany:
-        for ident, order, parentKey, chRank in company:
-            orders[ident].append(order)
-            chRanks[ident].append(chRank)
-            if ident not in parents or parents[ident] is None:
-                parents[ident] = parentKey
-
-    def _median(xs: list[int]) -> float:
-        s = sorted(xs)
-        n = len(s)
-        mid = n // 2
-        return s[mid] if n % 2 else (s[mid - 1] + s[mid]) / 2
-
-    ranked = [(ident, _median(chRanks[ident]), _median(orders[ident]), parents[ident]) for ident in orders]
-    ranked.sort(key=lambda t: (t[1], t[2], t[0]))
-    return [
-        (ident, spineOrder, parentKey, int(chMed))
-        for spineOrder, (ident, chMed, _orderMed, parentKey) in enumerate(ranked)
-    ]
-
-
 def _renderModule(rows: list[tuple[str, int, str | None, int]]) -> str:
-    """consensus rows → ``spineData.py`` 소스 문자열 (SPINE_ROWS tuple literal).
+    """spine rows → ``spineData.py`` 소스 문자열 (SPINE_ROWS tuple literal).
 
     Args:
         rows: ``[(identity, spineOrder, parentKey, chapterRank)]``.
@@ -232,11 +190,11 @@ def _renderModule(rows: list[tuple[str, int, str | None, int]]) -> str:
         없음.
     """
     header = (
-        '"""panel 전역 정부-택소노미 뼈대 데이터 — spineBuilder.buildSpine 생성물 (사람 미수정).\n\n'
+        '"""panel 행 뼈대 데이터 — spineBuilder.buildSpine 생성물 (사람 미수정).\n\n'
         "각 행 = (identity, spineOrder, parentKey, chapterRank). identity = canonicalKey(keyed) /\n"
         "NARR::chapter␟section(narrative). spineOrder = 정부 문서 표시순서, chapterRank = 챕터 대순서,\n"
         "parentKey = TABLE-GROUP 트리 부모(canonicalKey, Phase 2 셀 세분화 토대).\n\n"
-        "재생성: ``python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes <codes>``.\n"
+        "재생성: ``python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes <기준종목>``.\n"
         '"""\n\n'
         "from __future__ import annotations\n\n"
         "SPINE_ROWS: tuple[tuple[str, int, str | None, int], ...] = (\n"
@@ -255,31 +213,31 @@ def _renderModule(rows: list[tuple[str, int, str | None, int]]) -> str:
 
 
 def buildSpine(
-    codes: list[str] | None = None,
+    code: str = "005930",
     *,
     outModulePath: Path | str | None = None,
     refDf: pl.DataFrame | None = None,
     matchThreshold: float = 0.70,
     verbose: bool = True,
 ) -> dict[str, int]:
-    """전역 정부-택소노미 spine 생성 — 최신 사업보고서 문서순서·계층 → spineData.py.
+    """panel 행 뼈대(spine) 생성 — 한 회사 최신 사업보고서 문서순서·계층 → spineData.py.
 
     Args:
-        codes: 종목코드 list. None = ["005930"] 부트스트랩.
+        code: 기준 종목코드 (기본 "005930"). 정부 표준 서식이라 한 회사 reference 로 충분.
         outModulePath: 생성 모듈 경로. None = ``panel/spine/spineData.py``.
         refDf: 옛 양식 fuzzy 매칭 ref table. None = baseline scan.
         matchThreshold: fuzzy Jaccard threshold (검증 0.70).
         verbose: 진행 로그.
 
     Returns:
-        ``{"codes": 처리 종목수, "rows": spine 행수}``.
+        ``{"code": 1 또는 0, "rows": spine 행수}`` (zip/Q4 없으면 code=0, rows=0).
 
     Raises:
-        없음 — zip 없는 종목은 skip.
+        없음 — zip 없는 종목은 빈 spine.
 
     Example:
-        >>> buildSpine(["005930"], verbose=False)  # doctest: +SKIP
-        {'codes': 1, 'rows': 96}
+        >>> buildSpine("005930", verbose=False)  # doctest: +SKIP
+        {'code': 1, 'rows': 182}
 
     SeeAlso:
         - ``spine.SPINE`` — 생성물 read 표면 dict.
@@ -290,61 +248,49 @@ def buildSpine(
         - data/dart/original/docs/{code}/*.zip. lxml. polars.
 
     Capabilities:
-        - 정부 문서순서·계층을 회사 무관 전역 뼈대(순수 코드)로 1회 굽는다 — read 재발견 0.
+        - 한 회사 정부 문서순서·계층을 panel 행 뼈대(순수 코드)로 1회 굽는다 — read 재발견 0.
 
     Guide:
-        - 운영자/CI build-time 호출 (``--spine``). corpus 확대 시 재생성으로 consensus 강화.
+        - 운영자/CI build-time 호출 (``--spine``). 기준 종목 재빌드·양식 변경 시 재생성.
 
     AIContext:
-        - raw zip 직접 파싱 (stale parquet 무관). 다종목 median rank consensus.
+        - raw zip 직접 파싱 (stale parquet 무관). 회사간 합의는 panel 책임 밖(scan 엔진).
 
     When:
         - panel 행 정렬 기준(정부 뼈대)을 (재)생성할 때.
 
     How:
-        - 종목별 최신 Q4 → walker→horizontalize→rowIdentity·blockOrder·parentKey → consensus → 모듈 생성.
+        - 기준 종목 최신 Q4 → walker→horizontalize→rowIdentity·blockOrder·parentKey → 모듈 생성.
 
     LLM Specifications:
         AntiPatterns:
             - 분기보고서 뼈대 금지 — 최신 Q4 사업보고서만.
+            - 다종목 median/합의 금지 — 회사간 순서 표준화는 scan 엔진(panel = 한 회사 격자).
             - parquet 저장 금지 — 순수 .py(git 추적).
         OutputSchema:
             - ``dict[str, int]`` + 부수효과 spineData.py.
         Prerequisites:
             - 로컬 zip. refDf (또는 baseline scan).
         Freshness:
-            - corpus 재빌드/확대 시 재생성.
+            - 기준 종목 재빌드·양식 변경 시 재생성.
         Dataflow:
-            - zip → walker → horizontalize → identity·order·parent → consensus → spineData.py.
+            - zip → walker → horizontalize → identity·order·parent → spineData.py.
         TargetMarkets:
             - KR (DART).
     """
-    if codes is None:
-        codes = ["005930"]
     if refDf is None:
         refDf = scanRefBaseline(minCorpCount=1)
     outPath = Path(outModulePath) if outModulePath else _DEFAULT_SPINE_MODULE
 
-    perCompany: list[list[tuple[str, int, str | None, int]]] = []
-    processed = 0
-    for code in codes:
-        company = _companySpine(code, refDf, matchThreshold)
-        if company is None:
-            if verbose:
-                _log.warning("spine skip (zip/Q4 없음): %s", code)
-            continue
-        perCompany.append(company)
-        processed += 1
-        if verbose:
-            _log.info("spine scanned %s: %d rows", code, len(company))
-
-    rows = _consensus(perCompany) if perCompany else []
+    rows = _companySpine(code, refDf, matchThreshold) or []
+    if not rows and verbose:
+        _log.warning("spine 빈 결과 (zip/Q4 없음): %s", code)
     outPath.parent.mkdir(parents=True, exist_ok=True)
     outPath.write_text(_renderModule(rows), encoding="utf-8")
     _ruffFormat(outPath)  # 긴 identity 줄 분할 등 ruff 정본화 (생성물 CI 게이트 통과)
     if verbose:
-        _log.info("spine 생성: %s (codes=%d, rows=%d)", outPath, processed, len(rows))
-    return {"codes": processed, "rows": len(rows)}
+        _log.info("spine 생성: %s (code=%s, rows=%d)", outPath, code, len(rows))
+    return {"code": 1 if rows else 0, "rows": len(rows)}
 
 
 def _ruffFormat(path: Path) -> None:

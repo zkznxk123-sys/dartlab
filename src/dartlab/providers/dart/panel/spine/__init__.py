@@ -1,4 +1,4 @@
-"""panel 전역 정부-택소노미 뼈대(spine) read 표면 — 행 순서·계층 lookup (순수 dict, lxml 0).
+"""panel 정부 서식 뼈대(spine) read 표면 — 행 순서·계층 lookup (순수 dict, lxml 0).
 
 ``spineData.py``(spineBuilder 생성물, git 추적)를 module-level dict 로 1회 변환. ``read.readWide``
 가 wide 각 행의 ``rowIdentity`` 로 ``SPINE`` 을 조회해 정부 문서순서(chapterRank, spineOrder)로
@@ -55,7 +55,7 @@ def spineOrderOf(identity: str) -> int | None:
         - 없음 (module-level dict).
 
     Capabilities:
-        - 한 행 identity 의 전역 정부 순서를 O(1) 조회.
+        - 한 행 identity 의 정부 서식 순서를 O(1) 조회.
 
     Guide:
         - readWide 가 일괄 map. 직접 호출 가능.

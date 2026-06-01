@@ -94,13 +94,15 @@ wide 로 수평화**하는 엔진이다. 양식(era)·회사마다 흔들리는 
 - **정렬키 = native canonicalKey** — `disclosureKey` 는 정부 발행 ACLASS(DART XBRL 표준 Link
   Role)를 scope-strip 한 순수함수 산출(`mapper.canonicalKey`, BS_C→BS / NT_C_D826380→NT_D826380).
   손매핑·학습 0 ([[feedback_xml_native_truth]]).
-- **행 순서·계층 = 전역 정부-택소노미 뼈대(spine)** — `blockOrder` 는 보고서마다 0 리셋이라 read 가
+- **행 순서·계층 = 정부 서식 뼈대(spine)** — `blockOrder` 는 보고서마다 0 리셋이라 read 가
   재발견 못 하고 `canonicalKey` 는 정렬 가능 번호가 아니다 → 정부 문서 표시순서·트리를 빌드 시 1회
-  명시 spine 으로 굽는다. `build.buildSpine` 이 각 종목 최신 사업보고서(Q4)를 raw 파싱 →
-  `rowIdentity`(keyed=disclosureKey / narrative=NARR::chapter␟section)별 문서순서·parentKey →
-  `spine/spineData.py`(생성 .py, git-diff 추적) 생성. `read.readWide` 가 `SPINE` dict 로
-  `(chapterRank, spineOrder)` 정렬 → 표지→I→II→III→재무→주석 정부순서. 회사 무관 전역 truth라
-  회사간 비교도 같은 뼈대 위 행 정렬. `parentKey` 트리는 Phase 2 셀 세분화 토대.
+  명시 spine 으로 굽는다. `build.buildSpine` 이 **기준 종목 한 회사**(정부 표준 서식이라 reference
+  하나로 충분) 최신 사업보고서(Q4)를 raw 파싱 → `rowIdentity`(keyed=disclosureKey /
+  narrative=NARR::chapter␟section)별 문서순서·parentKey → `spine/spineData.py`(생성 .py, git-diff
+  추적) 생성. `read.readWide` 가 `SPINE` dict 로 `(chapterRank 우선, spineOrder 차선)` 정렬 →
+  표지→I→II→III→재무→주석 정부순서(챕터 단위 그룹핑, '(첨부)' 본문 중간 삽입도 자기 챕터로 모음).
+  회사간 비교는 `disclosureKey`(같은 항목 같은 키)로 — 회사간 순서 표준화/합의는 panel 책임 밖(scan
+  엔진의 cross-market 일). `parentKey` 트리는 Phase 2 셀 세분화 토대.
 - **단일 패키지 자급** — schema·mapper·spine·build·read 가 `providers/dart/panel/` 한 곳. 수집
   (OpenDART API)은 이미 `providers/dart/openapi` 라 build 도 providers 가 자급 (gather panel 폐기).
 - **BUILD/READ import 격리** — build(`build/`, lxml/zipfile)는 무거운 zip→14col·spine 생산, read 표면
@@ -189,7 +191,7 @@ python .github/scripts/sync/buildPanel.py --changed                       # sync
 # 빌드 트랙 B — online 1패스 (DART API → 메모리 → parquet, 디스크 zip 0)
 python .github/scripts/sync/onlinePanel.py --changed                      # docs.parquet rcept fetch
 
-# 전역 정부 뼈대(spine) 생성 — 최신 사업보고서 문서순서·트리 → spine/spineData.py (git 추적)
+# 정부 서식 뼈대(spine) 생성 — 기준 종목 최신 사업보고서 문서순서·트리 → spine/spineData.py (git 추적)
 python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes 005930,000660
 ```
 
@@ -233,7 +235,7 @@ c.panel("IS")     # 강한 소스 — finance 주입 (c.show("IS") 와 동일)
 14-col artifact schema (PANEL_SCHEMA): chapter · sectionLeaf · blockLeaf · xbrlClass ·
 xbrlMatched · xbrlMatchScore · atocId · aassocnote · blockOrder · contentRaw · period · corp ·
 rceptNo · disclosureKey(=canonicalKey). `scope`(연결/별도)는 read 파생 (저장 안 함). 행 순서·계층은
-artifact 가 아니라 전역 spine(`spine/spineData.py`, 회사 무관)이 결정 — schema 불변.
+artifact 가 아니라 정부 서식 spine(`spine/spineData.py`, 기준 종목 reference)이 결정 — schema 불변.
 
 ## evidence 기준
 

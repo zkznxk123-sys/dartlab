@@ -49,15 +49,18 @@ def test_spine_order_monotonic_unique() -> None:
     assert orders == list(range(len(orders)))
 
 
-def test_spine_chapter_rank_nondecreasing_with_order() -> None:
-    """spineOrder 증가 시 chapterRank 비감소 (챕터 경계 단조 — 정부 문서순)."""
+def test_spine_chapter_rank_valid_range() -> None:
+    """chapterRank 는 유효 범위 정수 (0~N). 단, native 문서순서라 단조는 아니다 — 정부 사업보고서는
+    '(첨부)재무제표' 블록이 본문 중간에 삽입돼 chapterRank 가 spineOrder 순으로 단조 증가하지 않음.
+    """
     from dartlab.providers.dart.panel.spine import SPINE
 
     if not SPINE:
         pytest.skip("spineData 비어있음")
-    byOrder = sorted(SPINE.values(), key=lambda v: v[0])
-    chRanks = [v[2] for v in byOrder]
-    assert chRanks == sorted(chRanks)
+    chRanks = [v[2] for v in SPINE.values()]
+    maxRank = max(chRanks)
+    assert all(0 <= r <= maxRank for r in chRanks)  # 유효 범위
+    assert set(chRanks) == set(range(maxRank + 1))  # 0..maxRank 빈틈 0 (dense rank)
 
 
 def test_spine_lookup_helpers() -> None:

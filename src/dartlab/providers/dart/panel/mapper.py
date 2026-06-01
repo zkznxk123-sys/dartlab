@@ -236,7 +236,7 @@ def rowIdentity(disclosureKey: str | None, chapter: str | None, sectionLeaf: str
         - 없음 (순수 문자열 함수).
 
     Capabilities:
-        - spine 전역 뼈대·diff 의 행 join 키를 keyed/narrative 통합 산출 — 회사·기간 안정.
+        - spine 뼈대·diff 의 행 join 키를 keyed/narrative 통합 산출 — 회사·기간 안정.
 
     Guide:
         - build(spine 생성)·read(spine 정렬)가 공유. 직접 호출 안전(순수).
