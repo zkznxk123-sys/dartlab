@@ -132,7 +132,7 @@ dartlab `자금조달.capitalOverview`:
 ```python
 # 사업부 조회 (EDGAR 10-K Mdna 섹션)
 c = dartlab.Company("LMT")
-c.show("10-K::item7Mdna", period="2024")  # 부문별 매출·영업이익 추출
+c.panel("10-K::item7Mdna", period="2024")  # 부문별 매출·영업이익 추출
 ```
 
 | 사업부 | 2024 매출 ($B) | 비중 (%) | 주력 제품 |
@@ -489,7 +489,7 @@ print(c.credit("등급"))                                                    # d
 | 이자보상배율 8.4배 | `c.analysis("financial","자금조달")["interestBurden"]` | ✅ 실측 |
 | dCR-BBB+ / score 24.24 / health 75.76 | `c.credit("등급")` | ✅ 실측 |
 | Beta 0.04 / R² 0.4% | `c.quant("종합")` | ✅ 실측 |
-| **4개 사업부 매출 비중 (2024)** | `c.show("10-K::item7Mdna", period="2024")` 수동 파싱 | 📰 외부 출처 (10-K MD&A 직접 확인) |
+| **4개 사업부 매출 비중 (2024)** | `c.panel("10-K::item7Mdna", period="2024")` 수동 파싱 | 📰 외부 출처 (10-K MD&A 직접 확인) |
 | **사업부별 OPM (Aero 9~10·MFC 14~16·RMS 8~10·Space 7~9)** | 회사 10-K 부문별 정보 | 📰 외부 출처 (10-K) |
 | Cost-Plus 계약 비중 50~60% | 회사 10-K item1Business | 📰 외부 출처 |
 | Sentinel ICBM 손실 $1.7B (2024) | 회사 IR Q4 2023 어닝콜 | 📰 외부 출처 (IR) |
@@ -543,12 +543,12 @@ print(c.credit("등급"))                                                    # d
 > ```python
 > import dartlab
 > c = dartlab.Company("LMT")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 $M

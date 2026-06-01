@@ -103,7 +103,7 @@ SKT의 2017~2024년이 정확히 이 황금기였다.
 
 ```python
 c = dartlab.Company("017670")
-c.show("CF", period=["2020", "2021", "2022", "2023", "2024"])
+c.panel("CF", period=["2020", "2021", "2022", "2023", "2024"])
 # CAPEX (유형자산 취득):
 #   2020: -3.04조  2021: -2.77조  2022: -2.54조
 #   2023: -2.53조  2024: -2.66조
@@ -204,7 +204,7 @@ SKT 연간 매출이 약 17조 원이니, 3.9%p는 **6,630억 원**에 해당한
 
 ```python
 c = dartlab.Company("017670")
-c.show("IS", period=["2023", "2024", "2025"])
+c.panel("IS", period=["2023", "2024", "2025"])
 # revenue: 17.3조 → 17.5조 → 16.7조 (-4.7%)
 # operatingProfit: 1.63조 → 1.78조 → 1.05조 (-41%)
 # netProfit: 1.15조 → 1.26조 → 0.34조 (-73%)
@@ -604,12 +604,12 @@ SKT를 조각별로 보면:
 > ```python
 > import dartlab
 > c = dartlab.Company("017670")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

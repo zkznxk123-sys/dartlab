@@ -154,7 +154,7 @@ print(prof["marginWaterfall"]["history"][0])
 ```python
 # 사업부 믹스·매출총이익률 확인
 c = dartlab.Company("000100")
-c.show("businessOverview")                   # II장 사업 개요
+c.panel("businessOverview")                   # II장 사업 개요
 c.analysis("financial", "수익성")            # GPM 33.38%
 ```
 
@@ -580,7 +580,7 @@ print(c.credit("등급"))                                                       
 - ✅ **dartlab 엔진 실측 수치**: 매출 2.19조·영업이익 1,044억·OPM 4.77%·순이익 1,853억·매출총이익률 33.38% — 모두 실측
 - ❌→✏️ **유한킴벌리 지분법이익 "매년 500~700억 고정" 서술 — 정정 완료**: `nonOperatingBreakdown.notesDetail.affiliates` 주석 실측으로 2021·2022·2024·2025는 **사실상 0**, 2023만 **469억**으로 확인됨. 본문 2막·4막 서술 재검증 메모로 갱신
 - ⚠️ **렉라자 얀센 마일스톤 2024·2025 추산 금액 (300~500억)**: dartlab `nonOperatingBreakdown.otherIncome`이 전 기간 0으로 표시 — **사업보고서 "기타수익" 주석** 원본 확인 필요. 본문 금액은 **업계 추정**
-- ⚠️ **사업부 4축 매출 비중 (ETC 55·OTC 15·수의 5·해외 10·유통 15)**: `c.show("businessOverview")` 원문 미확인. IR 발표·시장 통상 비중 추정치
+- ⚠️ **사업부 4축 매출 비중 (ETC 55·OTC 15·수의 5·해외 10·유통 15)**: `c.panel("businessOverview")` 원문 미확인. IR 발표·시장 통상 비중 추정치
 - ⚠️ **렉라자 계약 $1.255B + 로열티 10~20%**: DART 2018.11.06 공시 실측. 로열티 비율 "10~20%"는 J&J 10-K 공시 기반 **추정 범위**
 - 📰 **글로벌 EGFR 1차 치료제 시장 $80억**: IQVIA 2024 시장 분석 기반. 정확한 점유율·예상 매출은 시나리오 추정
 
@@ -621,7 +621,7 @@ print(c.credit("등급"))                                                       
 | FDA 승인 2024.8.19 | J&J FDA 보도자료 | 📰 외부 출처 |
 | 유한킴벌리 지분 30% / 매출 1.5조 / 순이익 2,100억 | 사업보고서 IX장 관계기업 + 업계 추정 | 📰 외부 출처 + 추정 |
 | 유한킴벌리 지분법이익 500~700억 | 사업보고서 주석 지분법 손익 | 📰 외부 출처 + 추정 |
-| 1926 창업 / 1962 상장 | `c.show("companyHistory")` | ✅ 실측 |
+| 1926 창업 / 1962 상장 | `c.panel("companyHistory")` | ✅ 실측 |
 | 렉라자 국내 신약 승인 2021.1 (31번째) | 식약처 공고 | 📰 외부 출처 |
 | MARIPOSA 임상 PFS 23.7 vs 16.6개월 | N Engl J Med 2024 · ASCO 2023 | 📰 외부 출처 |
 | EGFR 1차 치료제 시장 $80억 | IQVIA 2024 시장 분석 | 📰 외부 출처 |
@@ -669,12 +669,12 @@ print(c.credit("등급"))                                                       
 > ```python
 > import dartlab
 > c = dartlab.Company("000100")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

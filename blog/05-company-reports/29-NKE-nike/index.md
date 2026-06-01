@@ -140,7 +140,7 @@ FY2022부터 FY2024까지 3년간 매출은 $46.7B → $51.2B → $51.4B. 연평
 그리고 FY2025. DTC마저 -13%로 역성장. Wholesale도 -7%. **양쪽 다 줄었다.**
 
 ```python
-c.show("IS")  # revenue breakdown by channel
+c.panel("IS")  # revenue breakdown by channel
 ```
 
 ### 빈 선반의 물리학
@@ -601,12 +601,12 @@ Nike의 턴어라운드는 "세계 1위 탈환"이 아니라 **"적정 성장률
 > ```python
 > import dartlab
 > c = dartlab.Company("NKE")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 $M

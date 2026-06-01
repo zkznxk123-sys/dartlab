@@ -572,8 +572,8 @@ Monster Beverage는 지난 30년 S&P 500 누적 수익률 1위 종목이다. 그
 | 9년 자사주 $8.3B | `c.analysis("자본배분").shareholderReturn` | ✅ 자체 출력 인용 |
 | 9년 배당 $0 | `c.select("CF",["배당금 지급"])` 합산 | ✅ 실측 |
 | 2024 자사주 $3.77B | `c.select("CF",["자기주식 취득"])` 2024 | ✅ 실측 |
-| 2024 장기차입 $374M 최초 발생 | `c.show("BS").longterm_borrowings` 시계열 | ✅ 실측 |
-| 2025 장기차입 $374M 유지 | `c.show("BS").longterm_borrowings` 2025 | ✅ 실측 |
+| 2024 장기차입 $374M 최초 발생 | `c.panel("BS").longterm_borrowings` 시계열 | ✅ 실측 |
+| 2025 장기차입 $374M 유지 | `c.panel("BS").longterm_borrowings` 2025 | ✅ 실측 |
 | 현금전환주기 2021 74일 | `c.analysis("효율성").turnoverTrend.ccc[2021]` | ✅ 실측 |
 | 현금전환주기 2023 105일 | `c.analysis("효율성").turnoverTrend.ccc[2023]` | ✅ 실측 |
 | 현금전환주기 2025 95일 | `c.analysis("효율성").turnoverTrend.ccc[2025]` | ✅ 실측 |
@@ -585,11 +585,11 @@ Monster Beverage는 지난 30년 S&P 500 누적 수익률 1위 종목이다. 그
 | 매출채권 +25%p 빠른 경보 | `c.analysis("종합평가").summaryFlags` | ✅ 자체 출력 인용 |
 | 매출채권 +35.5% vs 매출 +10.7% | `c.select("BS",["매출채권"])` / `c.select("IS",["매출액"])` YoY | ✅ 실측 |
 | 순이익 2025 $1.91B | `c.select("IS",["당기순이익"])` 2025 | ✅ 실측 |
-| PPE/총자산 5.1% | `c.show("BS")` 유형자산(순)/총자산 2025 | ✅ 실측 |
+| PPE/총자산 5.1% | `c.panel("BS")` 유형자산(순)/총자산 2025 | ✅ 실측 |
 | 감가상각 매출 1.2% | `c.select("CF",["감가상각비"])` / 매출 2025 | ✅ 실측 |
-| 자기자본 2011 $1.42B → 2025 $8.25B | `c.show("BS")` 자본총계 시계열 | ✅ 실측 |
+| 자기자본 2011 $1.42B → 2025 $8.25B | `c.panel("BS")` 자본총계 시계열 | ✅ 실측 |
 | 자기자본수익률 2025 23.1% | `c.select("ratios",["자기자본수익률 (%)"])` 2025 | ✅ 실측 |
-| 현금+단기투자 2025 $2.77B | `c.show("BS")` 현금성자산+단기투자 2025 | ✅ 실측 |
+| 현금+단기투자 2025 $2.77B | `c.panel("BS")` 현금성자산+단기투자 2025 | ✅ 실측 |
 | 운영 equity 기준 투하자본수익률 33% | `c.analysis("투자효율").roicAdjusted` | ✅ 자체 출력 인용 |
 | 신용 dCR-AA+ 96.28점 | `c.credit("등급")["grade"/"healthScore"]` | ✅ 자체 출력 인용 |
 | 이자보상배율 161배 | `c.analysis("안정성").interestCoverage` 2025 | ✅ 실측 |
@@ -652,12 +652,12 @@ Monster Beverage는 지난 30년 S&P 500 누적 수익률 1위 종목이다. 그
 > ```python
 > import dartlab
 > c = dartlab.Company("MNST")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 $M

@@ -556,7 +556,7 @@ print(c.credit("등급"))                                                       
 | 자본잠식률 236% | -이익잉여금 850 / 자본금 360 | 🧮 수동 계산 (이익잉여금 추정) |
 | **에스퓨얼셀 매출 158억 · OPM -95.1% · 현금 6억** | 블로그 [#47](/blog/sfuelcell) 검증표 | 🔗 블로그 내부 인용 |
 | **뉴스케일파워 매출 $31M · 영업손실 $690M · 현금 $1.25B** | 블로그 [#44](/blog/nuscale-power) 검증표 | 🔗 블로그 내부 인용 |
-| 2019.10 분할 재상장 | `c.show("companyHistory")` | ✅ 실측 |
+| 2019.10 분할 재상장 | `c.panel("companyHistory")` | ✅ 실측 |
 | HPS 입찰 낙찰가 170→120원대 | 산업통상자원부 입찰 공고 | 📰 외부 출처 |
 | 백금 가격 $950→$1,200 / 인산 +18% | London Metal Exchange · SMM | 📰 외부 출처 |
 | LNG 산업용 +15% | 한국가스공사 요금 공고 | 📰 외부 출처 |
@@ -606,12 +606,12 @@ print(c.credit("등급"))                                                       
 > ```python
 > import dartlab
 > c = dartlab.Company("336260")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

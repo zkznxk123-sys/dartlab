@@ -168,9 +168,9 @@ import dartlab
 
 c = dartlab.Company("005930")  # 삼성전자
 
-print(c.sections)  # 사업보고서 전체 지도
-print(c.show("IS"))        # 손익계산서 (매출, 영업이익 등)
-print(c.show("BS"))        # 재무상태표 (자산, 부채, 자본)
+print(c.panel())  # 사업보고서 전체 지도
+print(c.panel("IS"))        # 손익계산서 (매출, 영업이익 등)
+print(c.panel("BS"))        # 재무상태표 (자산, 부채, 자본)
 ```
 
 > **"005930"이 뭔가요?** — 삼성전자의 종목코드다. 한국 상장기업마다 고유한 6자리 숫자가 있다. 다른 기업을 보고 싶으면 이 숫자만 바꾸면 된다. 네이버에서 "삼성SDI 종목코드" 같이 검색하면 바로 나온다.
@@ -201,7 +201,7 @@ uv run python main.py
 ...
 ```
 
-이게 `c.sections`의 결과다. 삼성전자가 매 분기 제출하는 사업보고서를 **항목별 × 기간별** 표로 정리한 것이다. 한눈에 여러 기간의 공시가 어떻게 바뀌었는지 볼 수 있다.
+이게 `c.panel()`의 결과다. 삼성전자가 매 분기 제출하는 사업보고서를 **항목별 × 기간별** 표로 정리한 것이다. 한눈에 여러 기간의 공시가 어떻게 바뀌었는지 볼 수 있다.
 
 그 아래에 손익계산서(매출, 영업이익 등)와 재무상태표(자산, 부채 등)가 숫자 표로 출력된다.
 
@@ -223,7 +223,7 @@ uv run python main.py
 import dartlab
 
 c = dartlab.Company("005930")
-print(c.show("ratios"))  # 수익성, 안정성, 성장성 등 50개 비율
+print(c.panel("ratios"))  # 수익성, 안정성, 성장성 등 50개 비율
 ```
 
 자기자본수익률(자기자본이익률), 부채비율, 영업이익률 같은 투자 지표가 자동으로 계산된다. [자세히 보기 →](/blog/dartlab-easy-start)
@@ -234,7 +234,7 @@ print(c.show("ratios"))  # 수익성, 안정성, 성장성 등 50개 비율
 import dartlab
 
 c = dartlab.Company("005930")
-print(c.diff())  # "지난 분기 대비 뭐가 바뀌었지?"
+print(c.panel())  # 기간을 열로 나란히 — "지난 분기 대비 뭐가 바뀌었지?"
 ```
 
 사업보고서에서 전 분기 대비 바뀐 부분만 뽑아준다.
@@ -245,8 +245,8 @@ print(c.diff())  # "지난 분기 대비 뭐가 바뀌었지?"
 import dartlab
 
 c = dartlab.Company("AAPL")  # Apple
-print(c.sections)
-print(c.show("IS"))
+print(c.panel())
+print(c.panel("IS"))
 ```
 
 한국 종목코드(6자리 숫자) 대신 미국 티커(AAPL, MSFT 같은 영문 약자)를 넣으면 된다. 사용법은 완전히 동일하다.

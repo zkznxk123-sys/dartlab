@@ -45,9 +45,9 @@ c = dartlab.Company("MSFT")   # Microsoft
 ## 재무제표 — 3줄이면 IS, BS, CF 전부
 
 ```python
-c.show("IS")   # 손익계산서 — 매출, 영업이익, 순이익
-c.show("BS")   # 재무상태표 — 자산, 부채, 자본
-c.show("CF")   # 현금흐름표 — 영업/투자/재무 현금흐름
+c.panel("IS")   # 손익계산서 — 매출, 영업이익, 순이익
+c.panel("BS")   # 재무상태표 — 자산, 부채, 자본
+c.panel("CF")   # 현금흐름표 — 영업/투자/재무 현금흐름
 ```
 
 각각이 **계정명 × 기간** 테이블로 돌아온다. 기간은 분기별 시계열이다.
@@ -61,7 +61,7 @@ c.show("CF")   # 현금흐름표 — 영업/투자/재무 현금흐름
 ...
 ```
 
-포괄손익계산서(`c.show("CIS")`)와 자본변동표(`c.show("SCE")`)도 같은 방식으로 접근한다.
+포괄손익계산서(`c.panel("CIS")`)와 자본변동표(`c.panel("SCE")`)도 같은 방식으로 접근한다.
 
 ![재무제표 3줄 — IS, BS, CF가 각각 계정 × 기간 테이블로](./assets/130-financial-statements.svg)
 
@@ -70,7 +70,7 @@ c.show("CF")   # 현금흐름표 — 영업/투자/재무 현금흐름
 ## 비율 50개 — 자동 계산, 시계열로
 
 ```python
-c.show("ratios")
+c.panel("ratios")
 ```
 
 이것 하나로 수익성, 안정성, 성장성, 효율성, 밸류에이션 비율이 분기별 시계열로 나온다. 자기자본수익률, 부채비율, 영업이익률, 자산회전율, PER, PBR 같은 지표를 직접 계산할 필요가 없다.
@@ -88,14 +88,14 @@ c.select("ratios", ["ROE", "ROA"]).chart()   # ROE + ROA 비교
 
 재무제표는 숫자다. 하지만 기업을 이해하려면 **텍스트**도 봐야 한다. "이 회사가 뭘 하는 회사인지", "임원이 누구인지", "배당 정책이 어떤지". 이런 건 사업보고서에 있다.
 
-`c.show()`가 이 모든 걸 꺼낸다.
+`c.panel()`가 이 모든 걸 꺼낸다.
 
 ```python
-c.show("businessOverview")     # 사업의 내용
-c.show("dividend")             # 배당 정보
-c.show("boardOfDirectors")     # 임원 현황
-c.show("employee")             # 직원 현황
-c.show("majorShareholder")     # 최대주주
+c.panel("businessOverview")     # 사업의 내용
+c.panel("dividend")             # 배당 정보
+c.panel("boardOfDirectors")     # 임원 현황
+c.panel("employee")             # 직원 현황
+c.panel("majorShareholder")     # 최대주주
 ```
 
 120개 이상의 topic이 있다. 뭐가 있는지 모르겠으면:
@@ -107,8 +107,8 @@ c.topics   # 전체 데이터 지도 — topic, source, 기간, 블록 수
 기간 필터도 된다.
 
 ```python
-c.show("IS", period="2023")                    # 2023년만
-c.show("IS", period=["2022", "2023"])          # 2022 vs 2023 나란히
+c.panel("IS", period="2023")                    # 2023년만
+c.panel("IS", period=["2022", "2023"])          # 2022 vs 2023 나란히
 ```
 
 ---
@@ -134,8 +134,8 @@ c.select("IS", ["매출액"]).chart()               # 매출 추이 차트
 사업보고서는 매 분기 제출된다. 그런데 **어디가 바뀌었는지** 찾으려면 두 문서를 나란히 놓고 눈으로 비교해야 한다. dartlab이 이걸 자동으로 한다.
 
 ```python
-c.diff()                          # 전체 변경 요약 — 어떤 topic이 바뀌었는지
-c.diff("businessOverview")        # 사업 개요의 변경 이력
+c.panel()                         # 전체 격자 — 기간을 열로 나란히 두고 변화를 읽는다
+c.panel("사업")                    # 사업 개요 본문 — 기간별로 나란히 비교
 ```
 
 "사업의 내용"에서 새로운 사업 계획이 추가됐거나, "위험 요인"이 바뀌었거나, 임원이 교체됐으면 diff가 잡아낸다. 공시 텍스트의 변화는 종종 숫자보다 먼저 신호를 보낸다. [사업보고서 텍스트가 왜 중요한지](/blog/reading-business-reports)는 별도 글에서 다뤘다.
@@ -147,19 +147,19 @@ c.diff("businessOverview")        # 사업 개요의 변경 이력
 재무제표의 총액만으로는 안 보이는 것이 있다. "재고자산 1조"라고 적혀 있어도, 그게 상품인지 원재료인지 미착품인지 모른다. 이 분해가 K-IFRS 주석에 있다.
 
 ```python
-c.show("inventory")        # 재고자산 분해 (상품/제품/원재료/미착품)
-c.show("borrowings")       # 차입금 분해 (단기/장기, 이자율)
-c.show("tangibleAsset")    # 유형자산 변동 (카테고리별 기초/기말)
-c.show("segments")         # 부문정보 (부문별 매출/이익)
-c.show("receivables")      # 매출채권 (대손충당금 포함)
-c.show("costByNature")     # 비용 성격별 분류 (원재료/급여/감가상각)
+c.panel("inventory")        # 재고자산 분해 (상품/제품/원재료/미착품)
+c.panel("borrowings")       # 차입금 분해 (단기/장기, 이자율)
+c.panel("tangibleAsset")    # 유형자산 변동 (카테고리별 기초/기말)
+c.panel("segments")         # 부문정보 (부문별 매출/이익)
+c.panel("receivables")      # 매출채권 (대손충당금 포함)
+c.panel("costByNature")     # 비용 성격별 분류 (원재료/급여/감가상각)
 ```
 
 한글로도 접근 가능하다.
 
 ```python
-c.show("inventory")        # 재고자산
-c.show("borrowings")       # 차입금
+c.panel("inventory")        # 재고자산
+c.panel("borrowings")       # 차입금
 ```
 
 뭐가 있는지 모르겠으면 `c.topics`에서 topic 목록을 확인한다.
@@ -187,7 +187,7 @@ c.trace("businessOverview") # → docs (사업보고서 원문)
 Company의 근간은 **sections**다. 사업보고서의 모든 항목(topic)을 기간(period)별로 정리한 표다.
 
 ```python
-c.sections
+c.panel()
 ```
 
 ```
@@ -200,7 +200,7 @@ c.sections
 
 같은 항목이 기간별로 나란히 놓여 있으니, **어떤 기간이든 비교 가능**하다. 2022년 사업 개요와 2024년 사업 개요를 나란히 보고 뭐가 바뀌었는지 확인할 수 있다. dartlab이 "모든 기간은 비교 가능해야 한다"는 전제 위에 만들어진 이유다.
 
-> sections는 전체 데이터를 통합 로드하므로 메모리를 많이 쓴다. 특정 항목만 볼 때는 `c.show(topic)`이 훨씬 빠르다.
+> sections는 전체 데이터를 통합 로드하므로 메모리를 많이 쓴다. 특정 항목만 볼 때는 `c.panel(topic)`이 훨씬 빠르다.
 
 ---
 
@@ -215,22 +215,22 @@ uv run dartlab ask "삼성전자 재무건전성 분석해줘"
 AI가 뒤에서 하는 일:
 
 1. `dartlab.Company("005930")` — 삼성전자 Company 객체 생성
-2. `c.show("IS")`, `c.show("BS")`, `c.show("CF")` — 재무제표 꺼내기
-3. `c.show("ratios")` — 비율 계산
-4. `c.show("borrowings")` — 차입금 주석 확인
+2. `c.panel("IS")`, `c.panel("BS")`, `c.panel("CF")` — 재무제표 꺼내기
+3. `c.panel("ratios")` — 비율 계산
+4. `c.panel("borrowings")` — 차입금 주석 확인
 5. 전부 종합해서 재무건전성을 판단하고 돌려준다
 
 ```bash
 uv run dartlab ask "삼성전자 사업보고서에서 바뀐 부분 알려줘"
 ```
 
-→ AI가 `c.diff()`를 호출해서 변경 사항을 정리한다.
+→ AI가 `c.panel()` 격자에서 기간별 변화를 읽어 정리한다.
 
 ```bash
 uv run dartlab ask "삼성전자 재고자산 구성이 어떻게 되어 있어?"
 ```
 
-→ AI가 `c.show("inventory")`를 호출해서 분해 결과를 설명한다.
+→ AI가 `c.panel("inventory")`를 호출해서 분해 결과를 설명한다.
 
 [scan 글](/blog/scan-market-finance)에서 본 것처럼, 코드가 편하면 코드를 쓰고, 질문이 편하면 질문을 하면 된다. Company도 scan도 AI의 도구다.
 

@@ -810,10 +810,10 @@ from dartlab import Company
 
 c = Company("005930")    # 삼성전자
 
-# 재무제표
-c.show("BS")    # 재무상태표 DataFrame
-c.show("IS")    # 손익계산서 DataFrame
-c.show("CF")    # 현금흐름표 DataFrame
+# 재무제표 — c.panel 단일 표면 (대문자=finance 정규화 / 소문자=native 사업보고서)
+c.panel("BS")    # 재무상태표 DataFrame
+c.panel("IS")    # 손익계산서 DataFrame
+c.panel("CF")    # 현금흐름표 DataFrame
 
 # 정기보고서
 c.dividend        # 배당 시계열
@@ -827,13 +827,13 @@ c.contingentLiability  # 우발부채, 소송
 c.relatedPartyTx       # 특수관계자 거래
 c.sanction             # 제재 현황
 
-# K-IFRS 주석
-c.show("inventory")        # 재고자산
-c.show("tangibleAsset")    # 유형자산
-c.show("borrowings")       # 차입금
-c.show("provisions")       # 충당부채
-c.show("segments")         # 부문정보
-c.show("receivables")      # 매출채권
+# K-IFRS 주석 — c.panel(topic) 통합
+c.panel("inventory")        # 재고자산
+c.panel("tangibleAsset")    # 유형자산
+c.panel("borrowings")       # 차입금
+c.panel("provisions")       # 충당부채
+c.panel("segments")         # 부문정보
+c.panel("receivables")      # 매출채권
 
 # 공시 텍스트
 c.business        # 사업의 내용
@@ -850,7 +850,7 @@ d = c.all()       # 40개 모듈 전체를 dict로
 
 ### K-IFRS 주석 통합
 
-12개 주요 주석 항목을 `c.show(topic)`으로 통합 접근한다.
+12개 주요 주석 항목을 `c.panel(topic)`으로 통합 접근한다.
 
 ---
 

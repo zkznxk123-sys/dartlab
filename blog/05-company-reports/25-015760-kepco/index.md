@@ -513,7 +513,7 @@ kWh당 10원 인상이 가져올 변화를 시뮬레이션하면:
 ```python
 import dartlab
 c = dartlab.Company("015760")
-c.show("majorHolder")
+c.panel("majorHolder")
 # 산업통상자원부 18.2%, 한국산업은행 32.9% = 51.1%
 ```
 
@@ -683,7 +683,7 @@ c.analysis("financial", "종합평가")
 | 한전채 31.8조(2022) | 금융투자협회 채권발행통계 | 외부 보도 |
 | 정승일 사장 사의(2023.5) | 연합뉴스 2023.05 | 외부 보도 |
 | 김동철 사장 취임(2023.9) | 한전 공식 발표 | 외부 보도 |
-| 배당 214원(2025) | dartlab `c.show("dividend")` | dartlab 실측 |
+| 배당 214원(2025) | dartlab `c.panel("dividend")` | dartlab 실측 |
 | 정부 지분 51.1% | 한전 사업보고서 | 외부 확인 |
 | 영업이익률 스윙 59.6%p | -45.8% → +13.8% | dartlab 실측 |
 | 연료비 구성(LNG 40%/석탄 30%) | 한전 사업보고서 연료비 주석 | 외부 확인 |
@@ -727,12 +727,12 @@ c.analysis("financial", "종합평가")
 > ```python
 > import dartlab
 > c = dartlab.Company("015760")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

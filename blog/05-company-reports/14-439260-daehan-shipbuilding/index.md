@@ -230,7 +230,7 @@ c.analysis("financial", "종합평가")
 BS(재무상태표)를 보면 이 구조가 더 명확해진다.
 
 ```python
-c.show("BS", freq="Y")
+c.panel("BS", freq="Y")
 ```
 
 ### 계약부채 2,154억 + IPO 4,000억 — 부채비율 29%까지 떨어진 구조
@@ -429,12 +429,12 @@ for code in ["439260","009540","042660","010140"]:
 > ```python
 > import dartlab
 > c = dartlab.Company("439260")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 재무상태표 (BS) — 단위 억원

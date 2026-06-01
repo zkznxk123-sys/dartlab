@@ -158,7 +158,7 @@ c.analysis("financial", "안정성")
 이걸 가장 극명하게 보여주는 비교가 있다. 한온시스템의 BS를 펼쳐보자.
 
 ```python
-c.show("BS", freq="Y")
+c.panel("BS", freq="Y")
 ```
 
 2024년 기준 부채 총계 **7.62조원**, 자본 총계 **3.0조원**. 부채비율 **254%**다. 부채비율 254% 자체가 치명적인 것은 아니다 — 제조업에서 부채비율이 높은 회사는 많다. 문제는 **부채의 구성**이다. 한온시스템의 부채 7.62조 중 차입금(이자가 붙는 부채)이 4.5조다. 매입채무나 선수금 같은 영업부채가 아니라, 금융기관에서 빌린 돈이 부채의 60%를 차지한다.
@@ -214,7 +214,7 @@ c.show("BS", freq="Y")
 이게 진짜 회복인가, 빅배스 기저효과인가. 이 질문에 답하려면 분기별로 쪼개서 봐야 한다.
 
 ```python
-c.show("IS")   # 분기별 손익
+c.panel("IS")   # 분기별 손익
 ```
 
 2025년 분기별 영업이익률 추이:
@@ -338,7 +338,7 @@ c.analysis("financial", "안정성")   # 이자보상배율 추이 확인
 
 ```python
 c.analysis("financial", "현금흐름")
-c.show("CF", freq="Y")
+c.panel("CF", freq="Y")
 ```
 
 | 연도 | 영업CF | 설비투자 | 이자비용 | 잉여현금흐름 (영업CF-설비투자) | 잉여현금흐름-이자 |
@@ -441,12 +441,12 @@ dartlab.scan("debt")
 > ```python
 > import dartlab
 > c = dartlab.Company("018880")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

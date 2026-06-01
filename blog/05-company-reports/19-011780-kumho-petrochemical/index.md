@@ -184,7 +184,7 @@ c.analysis("financial", "안정성")
 
 ```python
 c.analysis("financial", "수익구조")
-c.show("segments")
+c.panel("segments")
 ```
 
 ### 글로벌 점유율 25~30%, 생산능력 94.6만 톤
@@ -233,7 +233,7 @@ NB라텍스 이야기의 클라이맥스는 **2020~2021년 코로나**였다.
 
 ```python
 c.analysis("financial", "자본배분")
-c.show("dividend")
+c.panel("dividend")
 ```
 
 | 연도 | 배당금총액(억) | 배당성향 | 자사주 매입·소각 |
@@ -499,12 +499,12 @@ dartlab.scan("capital")  # 주주환원 비교
 > ```python
 > import dartlab
 > c = dartlab.Company("011780")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

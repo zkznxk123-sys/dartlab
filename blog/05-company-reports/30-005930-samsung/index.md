@@ -106,7 +106,7 @@ c.select("IS", ["매출액", "영업이익", "당기순이익"], freq="Y")
 삼성전자의 사업보고서를 열면 부문이 4개 나온다. DS(디바이스솔루션, 반도체), DX(디바이스경험, 스마트폰+가전), SDC(디스플레이), 하만(차량 전장). 각각이 독립된 회사 규모다.
 
 ```python
-c.show("segments")
+c.panel("segments")
 ```
 
 | 부문 | 매출 (조원) | 비중 | 영업이익률 (추정) | 정체 |
@@ -375,7 +375,7 @@ c.analysis("현금흐름")
 삼성물산이 삼성생명 지분 19.3%를 보유하고, 삼성생명이 삼성전자 지분 8.5%를 보유한다. 이재용 회장은 삼성물산 지분 18.13%를 직접 보유한다. 삼성물산 → 삼성생명 → 삼성전자로 이어지는 순환출자 구조다.
 
 ```python
-c.show("majorHolder")
+c.panel("majorHolder")
 ```
 
 | 주주 | 지분율 |
@@ -497,8 +497,8 @@ SOTP(Sum-of-the-Parts, 부문별 가치 합산) 방식으로 삼성전자의 가
 | 국내 현금 ~11조 | 삼성전자 사업보고서 주석 | O |
 | 자사주 소각 16조 | 삼성전자 주주환원 정책 공시 | O |
 | 특별배당 1.3조 | 삼성전자 배당 공시 | O |
-| 이재용 지분 1.63% | dartlab `c.show("majorHolder")` | O |
-| 삼성생명 지분 8.51% | dartlab `c.show("majorHolder")` | O |
+| 이재용 지분 1.63% | dartlab `c.panel("majorHolder")` | O |
+| 삼성생명 지분 8.51% | dartlab `c.panel("majorHolder")` | O |
 | 설비투자 52.2조 (2025) | dartlab `c.select("CF")` | O |
 | 영업활동현금흐름 85.3조 (2025) | dartlab `c.select("CF")` | O |
 | 잉여현금흐름 33.2조 (2025) | 85.3 - 52.2 | O |
@@ -551,12 +551,12 @@ SOTP(Sum-of-the-Parts, 부문별 가치 합산) 방식으로 삼성전자의 가
 > ```python
 > import dartlab
 > c = dartlab.Company("005930")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

@@ -398,9 +398,9 @@ PUBG가 5년간 벌어준 돈은 사라진 게 아니다. 금융자산에 2.6조
 
 ```python
 # 이 글의 모든 숫자를 직접 확인하려면
-c.show("IS", freq="Y")
-c.show("BS", freq="Y")
-c.show("CF", freq="Y")
+c.panel("IS", freq="Y")
+c.panel("BS", freq="Y")
+c.panel("CF", freq="Y")
 c.analysis("financial", "성장성")
 c.analysis("financial", "자본배분")
 c.analysis("financial", "종합평가")
@@ -443,12 +443,12 @@ c.story()
 > ```python
 > import dartlab
 > c = dartlab.Company("259960")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

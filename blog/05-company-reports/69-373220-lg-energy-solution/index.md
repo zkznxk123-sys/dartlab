@@ -714,7 +714,7 @@ print(c.credit("등급"))                                                       
 | 미국 2024 EV 판매 +7.3% / 유럽 -5.9% | 외부 통계 | 📰 외부 출처 (EV-Volumes, ACEA) |
 | 4사 배터리 점유율 | SNE Research 2025년 추정 | 📰 외부 출처 |
 | 공장 위치·용량 | 회사 IR 발표 + 공시 | 📰 외부 출처 (LG에너지솔루션 사업보고서 II장) |
-| 기업설립·연혁 (2020.12 분할·2022.01 상장) | `c.show("companyHistory")` | ✅ 실측 |
+| 기업설립·연혁 (2020.12 분할·2022.01 상장) | `c.panel("companyHistory")` | ✅ 실측 |
 
 **검증 기준**:
 - ✅ 실측 = dartlab 엔진 직접 반환값
@@ -756,12 +756,12 @@ print(c.credit("등급"))                                                       
 > ```python
 > import dartlab
 > c = dartlab.Company("373220")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

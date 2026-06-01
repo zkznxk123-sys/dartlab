@@ -405,8 +405,8 @@ HDC현산은 **자체개발 자금력이라는 해자**로 시간을 벌었다. 
 
 ```python
 # 이 글의 모든 숫자를 직접 확인하려면
-c.show("IS", freq="Y")
-c.show("BS", freq="Y")
+c.panel("IS", freq="Y")
+c.panel("BS", freq="Y")
 c.analysis("financial", "자본배분")
 c.analysis("financial", "종합평가")
 ```
@@ -595,12 +595,12 @@ c.analysis("financial", "종합평가")
 > ```python
 > import dartlab
 > c = dartlab.Company("294870")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

@@ -157,11 +157,11 @@ import dartlab
 c = dartlab.Company("011760")
 
 # 부문 공시 데이터
-c.show("segments")
+c.panel("segments")
 # → 무역, 자원개발, 철강, 물류 부문별 매출/영업이익
 
 # 주요 재무비율 5년
-c.show("ratios")
+c.panel("ratios")
 # → operatingMargin, netMargin, ROE, ROA 시계열
 ```
 
@@ -353,8 +353,8 @@ c.analysis("financial", "안정성")
 
 | 항목 | 수치 | 출처 |
 |------|------|------|
-| 2025 매출 | 1조 9,200억 | dartlab c.show("IS") |
-| 2025 영업이익 | 1,401억 | dartlab c.show("IS") |
+| 2025 매출 | 1조 9,200억 | dartlab c.panel("IS") |
+| 2025 영업이익 | 1,401억 | dartlab c.panel("IS") |
 | 2025 영업이익률 | 7.3% | 계산 |
 | 2024→2025 OI 변화 | +400% | dartlab ratio 비교 |
 | 정몽혁 회장 개인 지분 | 20% 이상 (+에이치앤디에이치) | 주주현황 공시 |
@@ -364,7 +364,7 @@ c.analysis("financial", "안정성")
 | 재계 순위 | 40위권 | 공정위 대기업집단 |
 | 상사 4사 영업이익률 비교 | 삼성 3.1%, LX 3.8%, 포스코 4.5%, 현대코퍼 7.3% | dartlab.scan |
 | PBR | 0.5~0.7배 | 시장 데이터 |
-| 부채비율 | 120~150% | dartlab c.show("ratios") |
+| 부채비율 | 120~150% | dartlab c.panel("ratios") |
 
 외부 출처: 현대코퍼레이션 IR 자료, DART 사업보고서, 위키백과 (정몽혁, 현대종합상사), 상사업계 통계, 공정거래위원회 대기업집단 지정 현황.
 
@@ -414,12 +414,12 @@ c.analysis("financial", "안정성")
 > ```python
 > import dartlab
 > c = dartlab.Company("011760")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

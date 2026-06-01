@@ -576,7 +576,7 @@ print(c.credit("등급"))                                                      #
 | 이익 변동계수 0.77 | `c.analysis("financial","이익품질")["earningsQualityFlags"]` | ✅ 실측 |
 | 유형자산 2024Q4 11,327억 → 2025Q4 10,206억 | `c.select("BS",["유형자산"])` Q4 | ✅ 실측 |
 | 자본총계 2025Q4 12,017억 | `c.select("BS",["자본총계"])` Q4 | ✅ 실측 |
-| 2010 설립 / 2014 상장 | `c.show("companyHistory")` | ✅ 실측 |
+| 2010 설립 / 2014 상장 | `c.panel("companyHistory")` | ✅ 실측 |
 | 2023.7 Vestas 타워 사업부 인수 $1.2억 | DART 공시 2023.07.28 "주요경영사항" | 📰 외부 출처 |
 | 공장 8개국 위치 | 회사 IR + 사업보고서 II장 | 📰 외부 출처 |
 | 풍력 타워 글로벌 점유율 30%+ | GWEC (Global Wind Energy Council) 2024 보고서 | 📰 외부 출처 |
@@ -630,12 +630,12 @@ print(c.credit("등급"))                                                      #
 > ```python
 > import dartlab
 > c = dartlab.Company("112610")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 억원

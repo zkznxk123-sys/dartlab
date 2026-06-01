@@ -337,7 +337,7 @@ SVG **최소 5개** Write → FLUX 2~3 (12 초 간격) → 본문 참조 → SEO
 
 - `blog/05-company-reports/{nn}-{code}-{slug}/`
 - `ai:` 블록 필수
-- dartlab `c.show("IS/BS/CF")` 숫자 교차검증
+- dartlab `c.panel("IS/BS/CF")` 숫자 교차검증
 - `uv run python -X utf8 blog/_scripts/audit_seo.py` — SEO **95 점 이상**
 - `TOPIC_ROADMAP.md` 갱신
 - 빌드 확인 + 커밋 + 푸시
@@ -521,7 +521,7 @@ fund["fundingSources"]["notesDetail"]["borrowings"]  # 차입금 항목별
 ca = c.analysis("financial", "자본배분")
 ca["dividendPolicy"]["history"]  # CF dividendsPaid 1년치 합산
 
-c.show("dividend").dps  # 주당 현금배당금 (DART 정기보고서)
+c.panel("dividend").dps  # 주당 현금배당금 (DART 정기보고서)
 ```
 
 ⚠ 두 출처는 다를 수 있음 (CF = 자본 재구성·우선주 포함, report = 보통주만). 어느 출처를 썼는지 검증표에 명시.

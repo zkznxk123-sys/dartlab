@@ -45,7 +45,7 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 ```python
 import dartlab
 c = dartlab.Company("SMR")
-c.show("IS")
+c.panel("IS")
 # 매출 $31.5M, 영업손실 -$689.6M (2025 분기 합산)
 ```
 
@@ -412,12 +412,12 @@ NRC 인증은 졸업장이다. 졸업장은 있다. 취업은 아직이다. 그 
 > ```python
 > import dartlab
 > c = dartlab.Company("SMR")
-> c.show("IS")              # 손익계산서 (분기)
-> c.show("IS", freq="Y")    # 손익계산서 (연간)
-> c.show("BS")              # 재무상태표
-> c.show("CF")              # 현금흐름표
-> c.show("SCE")             # 자본변동표
-> c.show("ratios")          # 재무비율
+> c.panel("IS")              # 손익계산서 (분기)
+> c.panel("IS", freq="Y")    # 손익계산서 (연간)
+> c.panel("BS")              # 재무상태표
+> c.panel("CF")              # 현금흐름표
+> c.panel("SCE")             # 자본변동표
+> c.panel("ratios")          # 재무비율
 > ```
 
 ### 손익계산서 (IS) — 단위 $M
