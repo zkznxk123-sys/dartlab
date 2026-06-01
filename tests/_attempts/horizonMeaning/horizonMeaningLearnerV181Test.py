@@ -1,79 +1,353 @@
-"""Horizon Meaning Learner V169 - trace-conditioned target alignment selector.
+"""Horizon Meaning Learner V181 - target/context typed object split.
 
-V169 trace-conditioned selector 기록
---------------
+V181 target/context typed object split 정본 기록
+-----------------------------------------------
 아이디어:
-    V168 은 path-local trace 자체는 만들었다. sequenceMatchedAtoms 가 direct 10318, frame 20708 로 커져
-    "경험 trace" 가 비교 가능한 매개체라는 신호는 확인했다. 그러나 trace 를 direct route/frame multiplier 로
-    더하는 구조는 실패했다. 정답 target 이 후보에 없거나, 같은 ledger/role sibling 인 `매출`, `손실충당` 같은
-    넓은 member 가 proof mass 를 먼저 흡수했기 때문이다.
+    V180 은 accountRow, occurrence, relationEvent, relationSlot 을 같은 `txp:*` object 공간에 올려
+    accountRow 밖의 경험장을 proof 에 넣는 데 성공했다. 그러나 occurrence/relation object 가 candidate
+    postings 까지 만들면서 `미래`, `동기`, `제품력`, `대부분` 같은 broad context tail 이 낮은 점수로
+    따라붙었다.
 
-    V169 는 trace overlap 을 더 키우는 실험이 아니다. path-local trace 를 evidence 로 두고, 그 evidence 가
-    target 후보를 어떻게 정렬하고 고를지의 selector 를 만든다. 후보 seed 를 relation/typed/path-local route 에서
-    가져온 뒤, contrast semantic unit member, dynamic route, generalized reverse slot row 의 reverseTarget 을
-    sibling cohort 로 확장한다. 각 candidate 는 path-local trace proof, directional ledger agreement,
-    mutual transport proof, source expected target role compatibility 를 하나의 trace-alignment score 로 만든다.
-
-    핵심은 candidate absolute score 가 아니라 같은 sibling cohort 안 peer baseline 과의 residual 이다.
-    `매출채권` 과 `매출`, `대손충당금` 과 `손실충당` 처럼 같은 근처 후보들이 켜질 때, source trace 가 어느 member 를
-    더 지지하는지 residual/ratio 로 비교한다. 이 selector 는 candidate seed 단계에서 후보를 살리고, frame scoring
-    뒤에는 cohort 대표를 주입하는 두 위치에서 동작한다.
-
-    수평선 좌표는 의미가 아니다. stem 의 fixed lookup address 일 뿐이다. 의미는 그 주소 주변에 누적된
-    path-local trace, ledger, role, reverse-slot 경험이고, V169 는 그 경험을 sibling 경쟁 안에서 비교 가능한
-    선택장으로 만드는 시도다.
+    V181 은 typed object 를 target object 와 context object 로 나눈다. accountRow, role,
+    statement role, value slot, head/suffix/modifier, neighborSeq 는 target postings 를 만들 수 있지만
+    occurrence/relationEvent/relationSlot 은 candidate 를 만들지 않고 이미 target proof 가 있는 후보의
+    support 로만 쓴다. 160-unit 의 absent `매출채권` 은 corpusObjectAccountRow synthetic signature 가
+    있을 때만 target 으로 승격한다. context proof 는 target proof 를 대체할 수 없으며, source/candidate
+    role 이 다르고 role specificity mass 와 targetProof 가 약하면 sibling residual 로 잘라낸다.
 
 실행 코드:
-    $env:DARTLAB_HORIZON_V169_MAX_RECORDS_PER_SOURCE='120'
-    $env:DARTLAB_HORIZON_V169_MAX_UNITS='1200'
-    uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV169Test.py
+    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV181Test.py
+
+    $env:DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE='80'
+    $env:DARTLAB_HORIZON_V181_MAX_UNITS='160'
+    $env:DARTLAB_HORIZON_V181_MAX_FILES_PER_SOURCE='30'
+    # runpy 로 buildModel + targetMemberTargetContextObjectRoute/proof
+    # 4 positive + 7 negative probe 를 호출한다.
+
+    $env:DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE='300'
+    $env:DARTLAB_HORIZON_V181_MAX_UNITS='600'
+    $env:DARTLAB_HORIZON_V181_MAX_FILES_PER_SOURCE='30'
+    # 같은 runpy 루틴으로 600-unit targeted probe 를 호출한다.
 
 검증 기준:
     1. 데이터는 data/dart/allFilings 와 data/dart/docs 계열만 사용한다.
-    2. V160 generalized reverse slot recall 은 유지한다.
-    3. V163 broad field-family 대표 선택은 primary route 로 쓰지 않는다.
-    4. path event proof atom 에 source/target surface literal 을 직접 넣지 않는다.
-    5. V166 의 build-time event bundle/source-target same namespace 는 유지한다.
-    6. source 가 얕으면 내부 fragment 의 position 을 query weight 로만 쓰고 atom namespace 는 event bundle 과 호환시킨다.
-    7. candidate 는 build-time incoming event bundle field 를 사용한다. reverse row 를 사후 변환하지 않는다.
-    8. target field df/IDF 로 path event signature 선택, proof norm, proof raw 를 모두 residualize 한다.
-    9. path-local trace 는 occurrence row 를 유지하고, query trace 와 target incoming trace 의 top pair aggregate 를 본다.
-    10. 특정 단어 하드코딩, forbidden 단어 패널티, 케이스별 gate 없이 corpus 통계와 구조만 쓴다.
-    11. fixed route/search guard 는 positiveHits=3/4, badAccepted=0/7, reliableSearch=4/5 수준을 유지해야 한다.
-    12. path-local trace 는 primary multiplier 가 아니라 candidate alignment/selector evidence 로 쓴다.
-    13. sibling cohort 는 corpus 통계와 기존 route/reverse slot 에서만 확장한다.
-    14. rare semantic transfer 는 최소 V147 의 `외상매출금 -> 매출채권 rank=7` 보다 나아지는지 확인한다.
+    2. 수평선 좌표는 의미가 아니라 주소계로만 둔다. 의미 비교는 target/context 경험 field 로 한다.
+    3. 특정 pair 하드코딩, forbidden 단어 패널티, 케이스별 정답 주입 없이 corpus object 구조로 경쟁시킨다.
+    4. guard 는 BadTop1=0/7, BadTop5=0/7 을 유지해야 한다.
+    5. 160-unit 에서 `외상매출금 -> 매출채권` synthetic route 를 유지해야 한다.
+    6. 600-unit 에서 V176/V179/V180 의 `외상매출금 -> 매출채권 rank=1` 을 보존해야 한다.
+    7. V180 보다 broad occurrence/relation tail 을 줄여야 한다.
 
 결과:
     py_compile 통과.
 
-    80-unit targeted 실행:
-        targetMemberTraceAlignment positive 는 Top1=1/4, Top5=1/4 수준이었다.
-        `현금성자산 -> 현금및현금성자산` 만 rank=1 이고,
-        `외상매출금 -> 매출채권`, `영업손익 -> 영업이익`, `손실충당금 -> 대손충당금` 은 rank=NA 였다.
-        targetMemberFrame 도 `현금성자산 -> 현금및현금성자산` 만 rank=1 이고 negative badTop1 은 0/7 이었다.
+    160-unit targeted targetContextObject 진단:
+        buildSeconds=63.6, totalSeconds=91.0
+        targetSurfaces=266, contextSurfaces=266, targetFeatures=1681, postings=7545
+        Top1=4/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+        외상매출금 -> 매출채권: rank=1, targetProof=1.1459/20, contextProof=0.2049/5,
+            synthetic=1, siblingCuts=24, top=매출채권
+        영업손익 -> 영업이익: rank=1, targetProof=0.9103/15, contextProof=0.1892/2,
+            top=영업이익
+        현금성자산 -> 현금및현금성자산: rank=1, targetProof=1.0537/26, contextProof=0.7464/26,
+            top=현금및현금성자산/자산총계
+        손실충당금 -> 대손충당금: rank=1, targetProof=0.7186/18, contextProof=0.5128/12,
+            top=대손충당금/충당부채
+        negatives: 모두 forbidden rank=NA. `판매보증충당금`, `하자보수충당금`,
+            `반품충당부채` 는 contextProof 가 있었지만 targetProof-first sibling residual 로 제외됐다.
 
-    1,200-unit 부분 본실행:
-        model build 는 322.9s 에 완료됐고 stderr 는 비어 있었다.
-        bidirectionalPairEvidence 는 positive candidateHit=4/4 를 만들었고
-        `손실충당금 -> 대손충당금` 은 rank=10 까지 올라왔다.
-        그러나 targetMemberTraceAlignment 는 positive Top1=1/4, Top5=1/4 에 그쳤다.
-        `외상매출금 -> 매출채권` top=`수주량`,
-        `영업손익 -> 영업이익` top=`변동성`,
-        `손실충당금 -> 대손충당금` top=`불확실성` 으로 broad/source-slot/event occupant 가 앞섰다.
-        traceAlignment proof 는 후보당 peer 10개를 비교하면서 96 후보 기준 계산량이 커졌고,
-        negative/frame 평가까지 완료 전에 장시간 실행되어 수동 중단했다.
+    600-unit targeted targetContextObject 진단:
+        buildSeconds=148.0, totalSeconds=218.1
+        targetSurfaces=422, contextSurfaces=422, targetFeatures=2480, postings=11829
+        Top1=4/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+        외상매출금 -> 매출채권: rank=1, targetProof=1.0934/19, contextProof=0.1335/3,
+            top=매출채권
+        영업손익 -> 영업이익: rank=1, targetProof=0.7464/15, contextProof=0.1111/3,
+            top=영업이익
+        현금성자산 -> 현금및현금성자산: rank=1, targetProof=0.9675/30, contextProof=0.6420/19,
+            top=현금및현금성자산/자산
+        손실충당금 -> 대손충당금: rank=1, targetProof=0.6665/18, contextProof=0.5287/6,
+            top=대손충당금/충당부채
+        negatives: 모두 forbidden rank=NA. 대표 top 은 원화대출채권/채권, 배당금지급,
+            당기순손익, 복구충당부채/충당부채, 충당부채.
 
 결론:
-    실패/진단 성공.
-    trace-conditioned selector 와 source-slot projection 은 후보 recall 을 넓히는 신호는 만들었지만,
-    의미 rank 를 올리는 결정 매체는 아니었다. 수평선은 여전히 fixed lookup 좌표일 뿐이고,
-    의미는 경험 field 에 있다는 전제는 유지된다. 다만 현재의 경험 비교는 "비슷한 경험의 양" 에 머물러
-    `수주량`, `변동성`, `불확실성`, `시장금리` 같은 broad occupant 를 정답보다 강하게 만든다.
-    다음 단계는 후보를 더 넓히는 실험이 아니라, source path 가 target member 로 변환되는
-    role/ledger/order 제약을 먼저 만족시키는 path grammar 또는 anti-cohort residual contest 로 가야 한다.
-    또한 본진 투입 전에는 trace proof 를 후보 96개 전체에 peer 10개씩 계산하는 구조를 중단하고,
-    proof cache/materialized cohort 또는 two-stage rerank 로 계산량을 줄여야 한다.
+    성공/구조 개선.
+
+    V181 은 V180 의 typed shared slot proof 를 유지하면서, target 후보를 160-unit 4303 -> 266,
+    600-unit 6270 -> 422 로 줄였다. postings 도 160-unit 36616 -> 7545, 600-unit 56833 -> 11829 로
+    줄었고, V180 의 broad tail(`미래`, `동기`, `제품력`, `대부분`) 이 상위 route 에서 사라졌다.
+    160-unit 의 `외상매출금 -> 매출채권` 은 synthetic=1 로 확인되듯 observed target 이 아니라
+    accountRow synthetic target signature 로 rank 1 이 됐다.
+
+    병목:
+        contextProof 는 이제 support 로만 작동하지만, 아직 proof 자체가 왜 필요한 relation context 인지
+        sequence/role path 단위로 설명하지는 못한다. 다음 단계는 context 를 단순 가중치가 아니라
+        target proof 를 보강하는 typed path certificate 로 바꿔야 한다.
+
+    유지: target/context split, synthetic target promotability, target proof-first sibling residual.
+    폐기: occurrence/relation object 가 직접 target postings 를 만드는 방식.
+    다음 실험: target proof 와 context proof 를 곱하는 방식이 아니라, role/statement/value/relation
+    path 가 하나의 certificate 를 만들고 그 certificate 가 target 후보를 설명하는 구조.
+
+아래 누적 로그는 이전 V176~V180 단계의 비교용 기록이다. V181 정본 판단은 위 target/context split 기록까지만 본다.
+
+아이디어:
+    V175 는 statement/account role, value-row lineage, pseudo cold target 차단으로 Top1=3/4 와
+    guard 0/7 을 만들었지만, `외상매출금 -> 매출채권` 은 target-known proof 가 강해도 route 후보가
+    `매출채권` 을 안정적으로 끌어오지 못했다. 원인은 후보가 아직 canonical account row label 이 아니라
+    surface/posting 섞임이라는 점이었다.
+
+    V181 은 후보 존재론을 한 번 더 좁힌다.
+
+    1. 후보는 arbitrary surface scan 이 아니라 account-role 이 있는 canonical accountRow label 이다.
+    2. accountRow 는 같은 row/window 의 account label, value cell 근접, statement role, relation,
+       lane, 주변 account role 순서를 묶은 sparse field 다.
+    3. cold source 는 내부 fragment 를 그냥 합산하지 않고, fragment 위치/순서 + account role + row alias key 로
+       accountRow 후보에 붙인다.
+    4. `장래매출채권` 처럼 같은 role/family 안에서 추가 modifier 가 붙은 후보는 shared anchor 앞 modifier 가
+       source 경험에 없으면 canonical representative contest 에서 낮춘다. 이것은 특정 단어 패널티가 아니라
+       row-label residual 규칙이다.
+    5. cross-role weak proof 는 candidate score 에서 제거한다. `대출채권` 과 `매출채권`,
+       `당기순이익` 과 `영업이익` 처럼 role 이 다르고 proof 도 약한 경우를 막기 위한 일반 gate 다.
+
+실행 코드:
+    $env:DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE='300'
+    $env:DARTLAB_HORIZON_V181_MAX_UNITS='600'
+    uv run python -X utf8 tests/_attempts/horizonMeaning/horizonMeaningLearnerV181Test.py
+
+    빠른 진단:
+    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV181Test.py
+    $env:DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE='80'
+    $env:DARTLAB_HORIZON_V181_MAX_UNITS='160'
+    # runpy 로 buildModel + targetMemberAccountRowRoute/proof 4 positive + 7 negative probe 를 호출한다.
+
+검증 기준:
+    1. 데이터는 data/dart/allFilings 와 data/dart/docs 계열만 사용한다.
+    2. 수평선 좌표를 의미로 쓰지 않고, accountRow 경험 field 만 비교한다.
+    3. 특정 pair 하드코딩, forbidden 단어 패널티, 케이스별 정답 주입 없이 corpus 구조와 account-role grammar 만 쓴다.
+    4. role-filtered surfaceDf scan 을 route 후보 생성에 쓰지 않는다.
+    5. fixed guard 는 BadTop1=0/7, BadTop5=0/7 을 유지해야 한다.
+    6. rare semantic transfer 는 V147 의 `외상매출금 -> 매출채권 rank=7` 보다 나아지는지 확인한다.
+
+결과:
+    py_compile 통과.
+
+    160-unit targeted accountRow 진단:
+        buildSeconds=47.3, totalSeconds=64.6
+        Top1=2/4, Top5=3/4, BadTop1=0/7, BadTop5=0/7
+        accountRowSurfaces=276
+
+        외상매출금 -> 매출채권:
+            rank=NA
+            proof=1.7068, matched=52
+            top=전환사채권
+            진단: 이 샘플에는 `매출채권` independent/surface occurrence 가 없어 accountRow label 로
+            후보 universe 에 들어오지 못했다. cold proof 는 강하지만 absent target generation 은 아직 없다.
+        영업손익 -> 영업이익: rank=1, proof=0.8615/7
+        현금성자산 -> 현금및현금성자산: rank=1, proof=2.5271/63
+        손실충당금 -> 대손충당금: rank=2, proof=0.6948/12, top=충당금/대손충당금
+
+    600-unit targeted accountRow 진단:
+        buildSeconds=123.8, totalSeconds=167.2
+        Top1=3/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+        accountRowSurfaces=440
+
+        외상매출금 -> 매출채권:
+            rank=1
+            proof=0.6958, matched=6
+            top=매출채권/전환사채권
+            V147 의 rank=7 을 넘어섰다.
+        영업손익 -> 영업이익: rank=1, proof=0.8589/8
+        현금성자산 -> 현금및현금성자산: rank=1, proof=2.6246/96
+        손실충당금 -> 대손충당금: rank=2, proof=0.8179/15, top=충당금/대손충당금
+
+        negative:
+            대출채권 -/-> 매출채권: rank=NA, proof=0.0170/21
+            현금배당금 -/-> 현금및현금성자산: rank=NA, proof=0.0462/31
+            당기순이익 -/-> 영업이익: rank=NA, proof=0.0241/22
+            복구충당금 -/-> 대손충당금: rank=NA, proof=0.0022/7
+            나머지 대손충당금 negative 도 rank=NA.
+
+결론:
+    의미 있는 개선/부분 성공.
+
+    개념 신호:
+        accountRow canonical label universe 는 V175 의 가장 큰 병목이던 `외상매출금 -> 매출채권` 을 실제로
+        풀었다. target label 이 corpus accountRow 로 존재하는 600-unit 에서는 cold source `외상매출금` 이
+        `매출채권` 으로 rank 1 이동했고, guard 도 BadTop5=0/7 로 유지됐다. 이것은 수평선 좌표가 아니라
+        row/value/statement/role 경험 field 를 sparse 역인덱스로 비교한 결과다.
+
+    병목:
+        1. target accountRow label 이 corpus 에 없으면 proof 가 강해도 route 후보로 생성되지 않는다.
+           160-unit 의 `매출채권` 실패가 이 병목이다.
+        2. `손실충당금 -> 대손충당금` 은 여전히 generic canonical `충당금` 이 더 강해 rank 2 다.
+           같은 role family 안의 대표 label 선택에는 row-label residual 만으로 부족하다.
+
+    폐기/유지:
+        유지: accountRow 후보 universe, alias posting, row-label representative contest, cross-role weak gate,
+        statement role/value-row/account role field.
+        폐기: role 이 맞는 surfaceDf 를 뒤지는 보강 루프. route 후보 생성에는 쓰지 않는다.
+
+    다음 실험:
+        absent target 을 route 후보로 만들 수 있는 latent accountRow synthesis 가 필요하다.
+        target 이 직접 등장하지 않아도 fragment/sub-stem 의 row 경험, role, statement/value slot 을 묶어
+        synthetic canonical row label 을 생성하고, 그 synthetic label 이 실제 accountRow label 과 경쟁해야 한다.
+        동시에 `충당금` 같은 generic family representative 를 이기기 위해 source-target modifier residual 과
+        sibling peer contrast 를 accountRow 내부에서 더 강하게 분리해야 한다.
+
+V181 실제 추가:
+    위 V176 결론을 이어 받아 accountRowScores 를 얇게 고치지 않고, 별도 latent 계층을 추가했다.
+
+    1. source 내부 fragment 는 위치/순서, corpus surface/row evidence, sourceRole 과 결합 가능한지로
+       synthetic head 후보가 된다.
+    2. suffix 는 정답 단어가 아니라 corpus 의 accountRow label 에서 role-compatible carrier 로 학습한다.
+       receivable group row label 들의 경험에서 `채권` carrier 를 얻고, source 내부 `매출` head 와 결합해
+       `매출채권` synthetic accountRow 를 만든다.
+    3. synthetic label 은 별도 shortcut 이 아니라 V176 accountRow target signature/proof 공간에 들어가
+       실제 canonical accountRow label 과 경쟁한다.
+    4. role hierarchy depth 로 sibling peer contrast 를 넣었다. source 가 `lossAllowance` 인데 candidate 가
+       더 넓은 `provision` 이면 낮추고, 같은 role 의 `대손충당금` 을 올린다.
+
+V181 실행 코드:
+    uv run python -X utf8 -m py_compile tests/_attempts/horizonMeaning/horizonMeaningLearnerV181Test.py
+
+    $env:DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE='80'
+    $env:DARTLAB_HORIZON_V181_MAX_UNITS='160'
+    # runpy 로 buildModel + targetMemberLatentAccountRowRoute/proof 4 positive + 7 negative probe 를 호출한다.
+
+    $env:DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE='300'
+    $env:DARTLAB_HORIZON_V181_MAX_UNITS='600'
+    # 같은 runpy 루틴으로 600-unit targeted probe 를 호출한다.
+
+V181 결과:
+    py_compile 통과.
+
+    160-unit targeted latentAccountRow 진단:
+        buildSeconds=59.5, totalSeconds=85.3
+        Top1=4/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+
+        외상매출금 -> 매출채권:
+            rank=1
+            proof=1.8559, matched=55
+            top=매출채권/외상매채권
+            syntheticCandidates=28, syntheticScored=28, syntheticAbsentRows=28
+            진단: 160-unit 에서 `매출채권` 은 V176 후보 우주에 없었지만, V181 은 source head `매출` 과
+            receivable accountRow suffix carrier `채권` 을 결합해 synthetic accountRow 로 생성했다.
+        영업손익 -> 영업이익: rank=1, proof=0.9406/9
+        현금성자산 -> 현금및현금성자산: rank=1, proof=2.5266/65
+        손실충당금 -> 대손충당금: rank=1, proof=0.7489/14, top=대손충당금/충당금
+
+        negative:
+            대출채권 -/-> 매출채권: rank=NA, proof=0.0892/53, top=원화대출채권/채권
+            현금배당금 -/-> 현금및현금성자산: rank=NA, proof=0.0568/29, top=배당금/현금
+            당기순이익 -/-> 영업이익: rank=NA, proof=0.0301/10, top=당기순손익
+            복구충당금 -/-> 대손충당금: rank=NA, proof=0.0025/6, top=복구충당부채/충당금
+            나머지 대손충당금 negative 도 rank=NA.
+
+    600-unit targeted latentAccountRow 진단:
+        buildSeconds=145.8, totalSeconds=203.0
+        Top1=4/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+
+        외상매출금 -> 매출채권:
+            rank=1
+            proof=0.6752, matched=6
+            top=매출채권/외상매채권
+            V176 의 600-unit rank=1 을 보존했다.
+        영업손익 -> 영업이익: rank=1, proof=0.9891/10
+        현금성자산 -> 현금및현금성자산: rank=1, proof=2.6234/95
+        손실충당금 -> 대손충당금: rank=1, proof=0.8609/17, top=대손충당금/충당금
+
+        negative:
+            대출채권 -/-> 매출채권: rank=NA, proof=0.0170/21
+            현금배당금 -/-> 현금및현금성자산: rank=NA, proof=0.0462/31
+            당기순이익 -/-> 영업이익: rank=NA, proof=0.0241/22
+            복구충당금 -/-> 대손충당금: rank=NA, proof=0.0022/7
+            나머지 대손충당금 negative 도 rank=NA.
+
+V181 결론:
+    성공/개념 신호 강함.
+
+    V176 의 accountRow experience field 를 유지하면서 absent target label 을 synthetic accountRow 로 생성해
+    같은 proof 공간에서 경쟁시켰다. 160-unit 의 `매출채권` 후보 부재 병목을 풀었고, 600-unit 의 기존 rank 1 도
+    보존했다. 이것은 수평선 좌표가 의미라는 주장이 아니라, 좌표/fragment 를 주소로 삼아
+    row/value/statement/role 경험을 재조합하면 미관측 account label 도 만들 수 있다는 신호다.
+
+    남은 병목은 `외상매채권` 같은 어색한 합성 label 이 낮은 점수로 함께 생긴다는 점이다. 다음은 head+suffix
+    문자열 조합이 아니라 canonical accountRow object `(role, statement, valueSlot, modifier, head, suffix,
+    neighborRoleSeq)` 를 먼저 만들고 label 을 마지막에 렌더링하는 구조가 필요하다.
+
+V181 실제 추가:
+    V177 의 남은 병목은 synthetic label 을 너무 일찍 문자열로 만든다는 점이었다. V181 은 observed
+    accountRow score 와 synthetic object score 를 분리하고, synthetic 후보는 먼저
+    `(role, statementRole, valueSlot, modifier, head, suffix, carrierRole, neighborSeq)` object 로 만든 뒤
+    마지막에 label 로 렌더링한다.
+
+    1. head 는 source substring 이면서 corpus surface/row evidence 가 있는 fragment 만 허용한다.
+       따라서 `외상매` 처럼 boundary 는 만들 수 있지만 corpus 경험이 없는 조각은 object head 에서 탈락한다.
+    2. 렌더링된 label 의 accountRole 이 sourceRole 과 같아야 한다. 같은 group 이더라도 depth 가 약하면
+       object 후보에서 탈락한다.
+    3. V181 route 는 V177 latentScores 를 그대로 섞지 않고, V176 observed accountRow score +
+       V181 object-synthesized 후보만 합친다. 문자열 조합 잡음을 별도 경로로 가져오지 않기 위해서다.
+
+V181 object 결과:
+    py_compile 통과.
+
+    160-unit targeted objectAccountRow 진단:
+        buildSeconds=74.7, totalSeconds=106.9
+        Top1=4/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+
+        외상매출금 -> 매출채권:
+            rank=1
+            proof=1.8559, matched=55
+            top=매출채권/전환사채권
+            objectLabels=8, objectScored=8, syntheticAbsentRows=8
+            진단: V177 의 top 두 번째였던 `외상매채권` 이 object head evidence filter 와 role-exact
+            render gate 로 사라졌다. `매출` head + `채권` suffix 는 유지되어 `매출채권` 은 rank 1 이다.
+        영업손익 -> 영업이익: rank=1, proof=0.9406/9
+        현금성자산 -> 현금및현금성자산: rank=1, proof=2.5264/64
+        손실충당금 -> 대손충당금: rank=1, proof=0.7489/14
+
+        negative:
+            대출채권 -/-> 매출채권: rank=NA, proof=0.0892/53
+            현금배당금 -/-> 현금및현금성자산: rank=NA, proof=0.0568/29
+            당기순이익 -/-> 영업이익: rank=NA, proof=0.0301/10
+            복구충당금 -/-> 대손충당금: rank=NA, proof=0.0025/6
+            나머지 대손충당금 negative 도 rank=NA.
+
+    600-unit targeted objectAccountRow 진단:
+        buildSeconds=171.5, totalSeconds=240.0
+        Top1=4/4, Top5=4/4, BadTop1=0/7, BadTop5=0/7
+
+        외상매출금 -> 매출채권:
+            rank=1
+            proof=0.6752, matched=6
+            top=매출채권/전환사채권
+            objectLabels=16, objectScored=16, syntheticAbsentRows=15
+            V176/V177 의 600-unit rank=1 을 보존했고 malformed synthetic top 을 제거했다.
+        영업손익 -> 영업이익: rank=1, proof=0.9891/10
+        현금성자산 -> 현금및현금성자산: rank=1, proof=2.6233/95
+        손실충당금 -> 대손충당금: rank=1, proof=0.8609/17
+
+        negative:
+            대출채권 -/-> 매출채권: rank=NA, proof=0.0170/21
+            현금배당금 -/-> 현금및현금성자산: rank=NA, proof=0.0462/31
+            당기순이익 -/-> 영업이익: rank=NA, proof=0.0241/22
+            복구충당금 -/-> 대손충당금: rank=NA, proof=0.0022/7
+            나머지 대손충당금 negative 도 rank=NA.
+
+V181 object 결론:
+    성공/구조 개선.
+
+    V177 의 absent target synthesis 신호를 유지하면서 후보 생성 단위를 문자열에서 object 로 한 단계 올렸다.
+    160-unit 에서 object 후보 수는 28개에서 8개로 줄었고, `외상매채권` 같은 malformed label 이 top 에서
+    사라졌다. 의미는 label 문자열이 아니라 role/statement/value/head/suffix/neighbor slot 이 성립한
+    object 의 경험 구조로 먼저 만들어야 한다는 방향이 맞다.
+
+    남은 병목은 object slot 이 아직 실제 row extraction object 가 아니라 source/corpus evidence 로 만든
+    projected object 라는 점이다. 다음은 corpus accountRow 자체를 `(role, statementRole, valueSlot,
+    modifier, head, suffix, neighborSeq)` 로 물리화하고, synthetic object 를 그 object index 안에서 직접
+    nearest/contrast 비교해야 한다.
 """
 
 from __future__ import annotations
@@ -96,799 +370,1307 @@ ROOT = Path(__file__).resolve().parents[3]
 ALL_FILINGS_DIR = ROOT / "data" / "dart" / "allFilings"
 DOCS_DIR = ROOT / "data" / "dart" / "docs"
 
-MAX_FILES_PER_SOURCE = int(os.environ.get("DARTLAB_HORIZON_V169_MAX_FILES_PER_SOURCE", "30"))
-MAX_RECORDS_PER_SOURCE = int(os.environ.get("DARTLAB_HORIZON_V169_MAX_RECORDS_PER_SOURCE", "700"))
-MAX_UNITS = int(os.environ.get("DARTLAB_HORIZON_V169_MAX_UNITS", "8000"))
-MAX_WINDOWS_PER_RECORD = int(os.environ.get("DARTLAB_HORIZON_V169_MAX_WINDOWS_PER_RECORD", "3"))
+MAX_FILES_PER_SOURCE = int(os.environ.get("DARTLAB_HORIZON_V181_MAX_FILES_PER_SOURCE", "30"))
+MAX_RECORDS_PER_SOURCE = int(os.environ.get("DARTLAB_HORIZON_V181_MAX_RECORDS_PER_SOURCE", "700"))
+MAX_UNITS = int(os.environ.get("DARTLAB_HORIZON_V181_MAX_UNITS", "8000"))
+MAX_WINDOWS_PER_RECORD = int(os.environ.get("DARTLAB_HORIZON_V181_MAX_WINDOWS_PER_RECORD", "3"))
 SIDE_MAX_FILES_PER_SOURCE = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SIDE_MAX_FILES_PER_SOURCE", str(max(20, MAX_FILES_PER_SOURCE)))
+    os.environ.get("DARTLAB_HORIZON_V181_SIDE_MAX_FILES_PER_SOURCE", str(max(20, MAX_FILES_PER_SOURCE)))
 )
 SIDE_MAX_RECORDS_PER_SOURCE = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SIDE_MAX_RECORDS_PER_SOURCE", str(max(600, MAX_RECORDS_PER_SOURCE)))
+    os.environ.get("DARTLAB_HORIZON_V181_SIDE_MAX_RECORDS_PER_SOURCE", str(max(600, MAX_RECORDS_PER_SOURCE)))
 )
-SIDE_MAX_UNITS = int(os.environ.get("DARTLAB_HORIZON_V169_SIDE_MAX_UNITS", "600"))
-WINDOW_CHARS = int(os.environ.get("DARTLAB_HORIZON_V169_WINDOW_CHARS", "720"))
-RADIUS = int(os.environ.get("DARTLAB_HORIZON_V169_RADIUS", "6"))
-SKETCH_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SKETCH_LIMIT", "32"))
-SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SIGNATURE_LIMIT", "96"))
-POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_POSTING_LIMIT", "1200"))
-SEARCH_RELATION_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEARCH_RELATION_POSTING_LIMIT", "2400"))
-SEARCH_CANDIDATE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEARCH_CANDIDATE_LIMIT", "420"))
-DYNAMIC_TARGET_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_TARGET_LIMIT", "80"))
-DYNAMIC_COORD_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_COORD_ROW_LIMIT", "220"))
-DYNAMIC_COMPOUND_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_COMPOUND_ROW_LIMIT", "260"))
-DYNAMIC_QUERY_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_QUERY_ATOM_LIMIT", "48"))
-DYNAMIC_MEANING_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_MEANING_ATOM_LIMIT", "36"))
-DYNAMIC_MEANING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_MEANING_ROW_LIMIT", "220"))
-DYNAMIC_RELATION_SURFACE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_RELATION_SURFACE_LIMIT", "420"))
-DYNAMIC_RELATION_UNIT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_RELATION_UNIT_LIMIT", "160"))
-DYNAMIC_BRIDGE_ONLY_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_BRIDGE_ONLY_PENALTY", "0.80"))
+SIDE_MAX_UNITS = int(os.environ.get("DARTLAB_HORIZON_V181_SIDE_MAX_UNITS", "600"))
+WINDOW_CHARS = int(os.environ.get("DARTLAB_HORIZON_V181_WINDOW_CHARS", "720"))
+RADIUS = int(os.environ.get("DARTLAB_HORIZON_V181_RADIUS", "6"))
+SKETCH_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SKETCH_LIMIT", "32"))
+SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SIGNATURE_LIMIT", "96"))
+POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_POSTING_LIMIT", "1200"))
+SEARCH_RELATION_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEARCH_RELATION_POSTING_LIMIT", "2400"))
+SEARCH_CANDIDATE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEARCH_CANDIDATE_LIMIT", "420"))
+DYNAMIC_TARGET_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_TARGET_LIMIT", "80"))
+DYNAMIC_COORD_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_COORD_ROW_LIMIT", "220"))
+DYNAMIC_COMPOUND_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_COMPOUND_ROW_LIMIT", "260"))
+DYNAMIC_QUERY_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_QUERY_ATOM_LIMIT", "48"))
+DYNAMIC_MEANING_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_MEANING_ATOM_LIMIT", "36"))
+DYNAMIC_MEANING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_MEANING_ROW_LIMIT", "220"))
+DYNAMIC_RELATION_SURFACE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_RELATION_SURFACE_LIMIT", "420"))
+DYNAMIC_RELATION_UNIT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_RELATION_UNIT_LIMIT", "160"))
+DYNAMIC_BRIDGE_ONLY_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_BRIDGE_ONLY_PENALTY", "0.80"))
 DYNAMIC_OWNER_ROLE_SIGNATURE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_SIGNATURE_LIMIT", "64")
+    os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_SIGNATURE_LIMIT", "64")
 )
-DYNAMIC_OWNER_ROLE_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_ATOM_LIMIT", "40"))
-DYNAMIC_OWNER_ROLE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_ROW_LIMIT", "220"))
+DYNAMIC_OWNER_ROLE_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_ATOM_LIMIT", "40"))
+DYNAMIC_OWNER_ROLE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_ROW_LIMIT", "220"))
 DYNAMIC_OWNER_ROLE_UNIT_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_UNIT_ATOM_LIMIT", "36")
+    os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_UNIT_ATOM_LIMIT", "36")
 )
-DYNAMIC_OWNER_ROLE_MIN_BOUND = float(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_MIN_BOUND", "0.55"))
+DYNAMIC_OWNER_ROLE_MIN_BOUND = float(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_MIN_BOUND", "0.55"))
 DYNAMIC_OWNER_ROLE_CANDIDATE_BONUS = float(
-    os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_CANDIDATE_BONUS", "2.40")
+    os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_CANDIDATE_BONUS", "2.40")
 )
-DYNAMIC_OWNER_ROLE_ROUTE_BONUS = float(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_ROUTE_BONUS", "0.90"))
-DYNAMIC_OWNER_ROLE_WEAK_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_ROLE_WEAK_PENALTY", "0.16"))
-DYNAMIC_OWNER_FRAME_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_FRAME_RADIUS", "5"))
-DYNAMIC_OWNER_FRAME_BETWEEN_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DYNAMIC_OWNER_FRAME_BETWEEN_LIMIT", "7"))
-MASKED_FRAME_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_SIGNATURE_LIMIT", "72"))
-MASKED_FRAME_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_ATOM_LIMIT", "48"))
-MASKED_FRAME_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_ROW_LIMIT", "240"))
-MASKED_FRAME_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_EVAL_LIMIT", "800"))
-MASKED_FRAME_HOLDOUT_MOD = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_HOLDOUT_MOD", "5"))
-MASKED_FRAME_PROBE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_PROBE_LIMIT", "12"))
-MASKED_CONTEXT_SURFACE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_CONTEXT_SURFACE_ROW_LIMIT", "12"))
-MASKED_CONTEXT_WEIGHT = float(os.environ.get("DARTLAB_HORIZON_V169_MASKED_CONTEXT_WEIGHT", "0.35"))
-MASKED_CONTEXT_RELATION_WINDOW = int(os.environ.get("DARTLAB_HORIZON_V169_MASKED_CONTEXT_RELATION_WINDOW", "140"))
-MASKED_FRAME_SURPRISAL_POWER = float(os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_SURPRISAL_POWER", "2.0"))
+DYNAMIC_OWNER_ROLE_ROUTE_BONUS = float(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_ROUTE_BONUS", "0.90"))
+DYNAMIC_OWNER_ROLE_WEAK_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_ROLE_WEAK_PENALTY", "0.16"))
+DYNAMIC_OWNER_FRAME_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_FRAME_RADIUS", "5"))
+DYNAMIC_OWNER_FRAME_BETWEEN_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DYNAMIC_OWNER_FRAME_BETWEEN_LIMIT", "7"))
+MASKED_FRAME_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_SIGNATURE_LIMIT", "72"))
+MASKED_FRAME_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_ATOM_LIMIT", "48"))
+MASKED_FRAME_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_ROW_LIMIT", "240"))
+MASKED_FRAME_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_EVAL_LIMIT", "800"))
+MASKED_FRAME_HOLDOUT_MOD = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_HOLDOUT_MOD", "5"))
+MASKED_FRAME_PROBE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_PROBE_LIMIT", "12"))
+MASKED_CONTEXT_SURFACE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_CONTEXT_SURFACE_ROW_LIMIT", "12"))
+MASKED_CONTEXT_WEIGHT = float(os.environ.get("DARTLAB_HORIZON_V181_MASKED_CONTEXT_WEIGHT", "0.35"))
+MASKED_CONTEXT_RELATION_WINDOW = int(os.environ.get("DARTLAB_HORIZON_V181_MASKED_CONTEXT_RELATION_WINDOW", "140"))
+MASKED_FRAME_SURPRISAL_POWER = float(os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_SURPRISAL_POWER", "2.0"))
 MASKED_FRAME_SURFACE_PRIOR_POWER = float(
-    os.environ.get("DARTLAB_HORIZON_V169_MASKED_FRAME_SURFACE_PRIOR_POWER", "0.45")
+    os.environ.get("DARTLAB_HORIZON_V181_MASKED_FRAME_SURFACE_PRIOR_POWER", "0.45")
 )
-RELATION_OWNER_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_SIGNATURE_LIMIT", "64"))
-RELATION_OWNER_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_ROW_LIMIT", "220"))
-RELATION_OWNER_BRIDGE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_BRIDGE_LIMIT", "12"))
-RELATION_OWNER_PROJECTION_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_PROJECTION_LIMIT", "24"))
+RELATION_OWNER_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_SIGNATURE_LIMIT", "64"))
+RELATION_OWNER_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_ROW_LIMIT", "220"))
+RELATION_OWNER_BRIDGE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_BRIDGE_LIMIT", "12"))
+RELATION_OWNER_PROJECTION_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_PROJECTION_LIMIT", "24"))
 RELATION_OWNER_PROJECTION_OWNER_ROLE_MIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_PROJECTION_OWNER_ROLE_MIN", "0.18")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_PROJECTION_OWNER_ROLE_MIN", "0.18")
 )
 RELATION_OWNER_PROJECTION_QUERY_ROLE_MIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_PROJECTION_QUERY_ROLE_MIN", "0.05")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_PROJECTION_QUERY_ROLE_MIN", "0.05")
 )
 RELATION_OWNER_GENERATED_BRIDGE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_GENERATED_BRIDGE_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_GENERATED_BRIDGE_LIMIT", "48")
 )
 RELATION_OWNER_GENERATED_BRIDGE_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_GENERATED_BRIDGE_WEIGHT", "2.4")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_GENERATED_BRIDGE_WEIGHT", "2.4")
 )
-RELATION_OWNER_ROLE_COMPAT_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_RELATION_OWNER_ROLE_COMPAT_MIN", "0.16"))
-RELATION_BOUND_ROLE_PAIR_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_BOUND_ROLE_PAIR_LIMIT", "24"))
+RELATION_OWNER_ROLE_COMPAT_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_RELATION_OWNER_ROLE_COMPAT_MIN", "0.16"))
+RELATION_BOUND_ROLE_PAIR_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_BOUND_ROLE_PAIR_LIMIT", "24"))
 RELATION_BOUND_ROLE_PAIR_BRIDGE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_BOUND_ROLE_PAIR_BRIDGE_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_BOUND_ROLE_PAIR_BRIDGE_LIMIT", "10")
 )
 RELATION_BOUND_ROLE_PAIR_BRIDGE_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_BOUND_ROLE_PAIR_BRIDGE_WEIGHT", "0.46")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_BOUND_ROLE_PAIR_BRIDGE_WEIGHT", "0.46")
 )
 RELATION_SOURCE_EXPERIENCE_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SOURCE_EXPERIENCE_ATOM_LIMIT", "44")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SOURCE_EXPERIENCE_ATOM_LIMIT", "44")
 )
 RELATION_SOURCE_EXPERIENCE_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SOURCE_EXPERIENCE_ROW_LIMIT", "180")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SOURCE_EXPERIENCE_ROW_LIMIT", "180")
 )
 RELATION_SOURCE_SHINGLE_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SOURCE_SHINGLE_ATOM_LIMIT", "28")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SOURCE_SHINGLE_ATOM_LIMIT", "28")
 )
-RELATION_SOURCE_SHINGLE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_SOURCE_SHINGLE_ROW_LIMIT", "160"))
-RELATION_SOURCE_SHINGLE_KEY_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_SOURCE_SHINGLE_KEY_LIMIT", "56"))
+RELATION_SOURCE_SHINGLE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_SOURCE_SHINGLE_ROW_LIMIT", "160"))
+RELATION_SOURCE_SHINGLE_KEY_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_SOURCE_SHINGLE_KEY_LIMIT", "56"))
 RELATION_ANCHORED_COARSE_SHINGLE_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_ANCHORED_COARSE_SHINGLE_ROW_LIMIT", "180")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_ANCHORED_COARSE_SHINGLE_ROW_LIMIT", "180")
 )
 RELATION_ANCHORED_COARSE_SHINGLE_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_ANCHORED_COARSE_SHINGLE_KEY_LIMIT", "72")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_ANCHORED_COARSE_SHINGLE_KEY_LIMIT", "72")
 )
-HORIZON_MASK_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_SIGNATURE_LIMIT", "96"))
-HORIZON_MASK_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_ATOM_LIMIT", "56"))
-HORIZON_MASK_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_ROW_LIMIT", "220"))
-HORIZON_MASK_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_EVAL_LIMIT", "900"))
-HORIZON_MASK_HOLDOUT_MOD = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_HOLDOUT_MOD", "7"))
-HORIZON_MASK_SURFACE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_SURFACE_ROW_LIMIT", "24"))
+HORIZON_MASK_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_SIGNATURE_LIMIT", "96"))
+HORIZON_MASK_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_ATOM_LIMIT", "56"))
+HORIZON_MASK_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_ROW_LIMIT", "220"))
+HORIZON_MASK_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_EVAL_LIMIT", "900"))
+HORIZON_MASK_HOLDOUT_MOD = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_HOLDOUT_MOD", "7"))
+HORIZON_MASK_SURFACE_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_SURFACE_ROW_LIMIT", "24"))
 HORIZON_MASK_NEIGHBOR_EXPERIENCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_NEIGHBOR_EXPERIENCE_LIMIT", "5")
+    os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_NEIGHBOR_EXPERIENCE_LIMIT", "5")
 )
-HORIZON_MASK_COORD_CELL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_COORD_CELL_LIMIT", "5"))
-HORIZON_MASK_COORD_BUCKET_DIGITS = int(os.environ.get("DARTLAB_HORIZON_V169_HORIZON_MASK_COORD_BUCKET_DIGITS", "5"))
+HORIZON_MASK_COORD_CELL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_COORD_CELL_LIMIT", "5"))
+HORIZON_MASK_COORD_BUCKET_DIGITS = int(os.environ.get("DARTLAB_HORIZON_V181_HORIZON_MASK_COORD_BUCKET_DIGITS", "5"))
 LOCAL_FRAME_PREDICTION_SIGNATURE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_SIGNATURE_LIMIT", "132")
+    os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_SIGNATURE_LIMIT", "132")
 )
-LOCAL_FRAME_PREDICTION_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_ATOM_LIMIT", "76"))
-LOCAL_FRAME_PREDICTION_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_ROW_LIMIT", "260"))
-LOCAL_FRAME_PREDICTION_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_EVAL_LIMIT", "900"))
+LOCAL_FRAME_PREDICTION_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_ATOM_LIMIT", "76"))
+LOCAL_FRAME_PREDICTION_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_ROW_LIMIT", "260"))
+LOCAL_FRAME_PREDICTION_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_EVAL_LIMIT", "900"))
 LOCAL_FRAME_PREDICTION_SURFACE_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_SURFACE_ROW_LIMIT", "18")
+    os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_SURFACE_ROW_LIMIT", "18")
 )
-LOCAL_FRAME_PREDICTION_HOLDOUT_MOD = int(os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_HOLDOUT_MOD", "9"))
+LOCAL_FRAME_PREDICTION_HOLDOUT_MOD = int(os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_HOLDOUT_MOD", "9"))
 LOCAL_FRAME_PREDICTION_NEIGHBOR_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_NEIGHBOR_LIMIT", "5")
+    os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_NEIGHBOR_LIMIT", "5")
 )
 LOCAL_FRAME_PREDICTION_NEIGHBOR_EXPERIENCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_NEIGHBOR_EXPERIENCE_LIMIT", "5")
+    os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_NEIGHBOR_EXPERIENCE_LIMIT", "5")
 )
 LOCAL_FRAME_PREDICTION_SEQUENCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_LOCAL_FRAME_PREDICTION_SEQUENCE_LIMIT", "5")
+    os.environ.get("DARTLAB_HORIZON_V181_LOCAL_FRAME_PREDICTION_SEQUENCE_LIMIT", "5")
 )
 QUERY_LOCAL_FRAME_OCCURRENCE_INDEX_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_QUERY_LOCAL_FRAME_OCCURRENCE_INDEX_ROW_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_QUERY_LOCAL_FRAME_OCCURRENCE_INDEX_ROW_LIMIT", "96")
 )
 QUERY_LOCAL_FRAME_OCCURRENCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_QUERY_LOCAL_FRAME_OCCURRENCE_LIMIT", "72")
+    os.environ.get("DARTLAB_HORIZON_V181_QUERY_LOCAL_FRAME_OCCURRENCE_LIMIT", "72")
 )
-QUERY_LOCAL_FRAME_PROXY_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_QUERY_LOCAL_FRAME_PROXY_LIMIT", "8"))
-QUERY_LOCAL_FRAME_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_QUERY_LOCAL_FRAME_ATOM_LIMIT", "132"))
-QUERY_LOCAL_FRAME_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_QUERY_LOCAL_FRAME_EVAL_LIMIT", "260"))
-QUERY_SEMANTIC_UNIT_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_QUERY_SEMANTIC_UNIT_ATOM_LIMIT", "120"))
-QUERY_SEMANTIC_UNIT_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_QUERY_SEMANTIC_UNIT_EVAL_LIMIT", "260"))
+QUERY_LOCAL_FRAME_PROXY_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_QUERY_LOCAL_FRAME_PROXY_LIMIT", "8"))
+QUERY_LOCAL_FRAME_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_QUERY_LOCAL_FRAME_ATOM_LIMIT", "132"))
+QUERY_LOCAL_FRAME_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_QUERY_LOCAL_FRAME_EVAL_LIMIT", "260"))
+QUERY_SEMANTIC_UNIT_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_QUERY_SEMANTIC_UNIT_ATOM_LIMIT", "120"))
+QUERY_SEMANTIC_UNIT_EVAL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_QUERY_SEMANTIC_UNIT_EVAL_LIMIT", "260"))
 QUERY_SEMANTIC_UNIT_SURFACE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_QUERY_SEMANTIC_UNIT_SURFACE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_QUERY_SEMANTIC_UNIT_SURFACE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 SEMANTIC_UNIT_SIGNATURE_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_SIGNATURE_ATOM_LIMIT", "18")
+    os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_SIGNATURE_ATOM_LIMIT", "18")
 )
-SEMANTIC_UNIT_POSTING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_POSTING_ROW_LIMIT", "90"))
-SEMANTIC_UNIT_CANDIDATE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_CANDIDATE_LIMIT", "180"))
+SEMANTIC_UNIT_POSTING_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_POSTING_ROW_LIMIT", "90"))
+SEMANTIC_UNIT_CANDIDATE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_CANDIDATE_LIMIT", "180"))
 SEMANTIC_UNIT_MIN_EXPERIENCE_SIM = float(
-    os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_MIN_EXPERIENCE_SIM", "0.46")
+    os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_MIN_EXPERIENCE_SIM", "0.46")
 )
-SEMANTIC_UNIT_MIN_MIXED_SIM = float(os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_MIN_MIXED_SIM", "0.34"))
+SEMANTIC_UNIT_MIN_MIXED_SIM = float(os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_MIN_MIXED_SIM", "0.34"))
 SEMANTIC_UNIT_MIN_COORD_RESONANCE = float(
-    os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_MIN_COORD_RESONANCE", "0.045")
+    os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_MIN_COORD_RESONANCE", "0.045")
 )
 SEMANTIC_UNIT_MASK_SIGNATURE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_MASK_SIGNATURE_LIMIT", "120")
+    os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_MASK_SIGNATURE_LIMIT", "120")
 )
-SEMANTIC_UNIT_MASK_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_MASK_ATOM_LIMIT", "64"))
-SEMANTIC_UNIT_MASK_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_MASK_ROW_LIMIT", "260"))
-SEMANTIC_UNIT_ROUTE_MEMBER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SEMANTIC_UNIT_ROUTE_MEMBER_LIMIT", "4"))
+SEMANTIC_UNIT_MASK_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_MASK_ATOM_LIMIT", "64"))
+SEMANTIC_UNIT_MASK_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_MASK_ROW_LIMIT", "260"))
+SEMANTIC_UNIT_ROUTE_MEMBER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SEMANTIC_UNIT_ROUTE_MEMBER_LIMIT", "4"))
 CONTRAST_SEMANTIC_UNIT_MIN_EXPERIENCE_SIM = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_SEMANTIC_UNIT_MIN_EXPERIENCE_SIM", "0.46")
+    os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_SEMANTIC_UNIT_MIN_EXPERIENCE_SIM", "0.46")
 )
 CONTRAST_SEMANTIC_UNIT_STRONG_EXPERIENCE_SIM = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_SEMANTIC_UNIT_STRONG_EXPERIENCE_SIM", "0.62")
+    os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_SEMANTIC_UNIT_STRONG_EXPERIENCE_SIM", "0.62")
 )
 CONTRAST_SEMANTIC_UNIT_MIN_MIXED_SIM = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_SEMANTIC_UNIT_MIN_MIXED_SIM", "0.36")
+    os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_SEMANTIC_UNIT_MIN_MIXED_SIM", "0.36")
 )
 CONTRAST_SEMANTIC_UNIT_MIN_COORD_RESONANCE = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_SEMANTIC_UNIT_MIN_COORD_RESONANCE", "0.050")
+    os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_SEMANTIC_UNIT_MIN_COORD_RESONANCE", "0.050")
 )
 CONTRAST_SEMANTIC_UNIT_MIN_RELATION_COMPAT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_SEMANTIC_UNIT_MIN_RELATION_COMPAT", "0.28")
+    os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_SEMANTIC_UNIT_MIN_RELATION_COMPAT", "0.28")
 )
 CONTRAST_SEMANTIC_UNIT_SUFFIX_RELATION_COMPAT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_SEMANTIC_UNIT_SUFFIX_RELATION_COMPAT", "0.18")
+    os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_SEMANTIC_UNIT_SUFFIX_RELATION_COMPAT", "0.18")
 )
-MEMBER_BALANCE_MEMBER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_BALANCE_MEMBER_LIMIT", "10"))
-MEMBER_BALANCE_MIN_MULTIPLIER = float(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_BALANCE_MIN_MULTIPLIER", "0.015"))
+MEMBER_BALANCE_MEMBER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_BALANCE_MEMBER_LIMIT", "10"))
+MEMBER_BALANCE_MIN_MULTIPLIER = float(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_BALANCE_MIN_MULTIPLIER", "0.015"))
 MEMBER_BALANCE_UNSUPPORTED_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_BALANCE_UNSUPPORTED_FACTOR", "0.12")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_BALANCE_UNSUPPORTED_FACTOR", "0.12")
 )
-MEMBER_BALANCE_POSITIVE_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_BALANCE_POSITIVE_GAIN", "1.10"))
-MEMBER_BALANCE_NEGATIVE_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_BALANCE_NEGATIVE_GAIN", "1.60"))
+MEMBER_BALANCE_POSITIVE_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_BALANCE_POSITIVE_GAIN", "1.10"))
+MEMBER_BALANCE_NEGATIVE_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_BALANCE_NEGATIVE_GAIN", "1.60"))
 MEMBER_BALANCE_POSITIVE_SHIELD_RATIO = float(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_BALANCE_POSITIVE_SHIELD_RATIO", "0.85")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_BALANCE_POSITIVE_SHIELD_RATIO", "0.85")
 )
 MEMBER_BALANCE_CACHE: dict[tuple[int, str, str], tuple[float, float, float, int]] = {}
 MEMBER_BALANCE_PROFILE_CACHE: dict[tuple[int, str], Counter[str]] = {}
 MEMBER_BALANCE_SIGNATURE_CACHE: dict[tuple[int, str], Counter[str]] = {}
 MEMBER_CONDITIONED_MASK_SIGNATURE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_CONDITIONED_MASK_SIGNATURE_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_CONDITIONED_MASK_SIGNATURE_LIMIT", "96")
 )
 MEMBER_CONDITIONED_MASK_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_CONDITIONED_MASK_ATOM_LIMIT", "64")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_CONDITIONED_MASK_ATOM_LIMIT", "64")
 )
-MEMBER_CONDITIONED_MASK_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_CONDITIONED_MASK_ROW_LIMIT", "220"))
+MEMBER_CONDITIONED_MASK_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_CONDITIONED_MASK_ROW_LIMIT", "220"))
 MEMBER_CONDITIONED_ROUTE_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_CONDITIONED_ROUTE_MEMBER_LIMIT", "180")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_CONDITIONED_ROUTE_MEMBER_LIMIT", "180")
 )
 MEMBER_CONDITIONED_LABEL_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_CONDITIONED_LABEL_MEMBER_LIMIT", "6")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_CONDITIONED_LABEL_MEMBER_LIMIT", "6")
 )
 MEMBER_CONDITIONED_MEMBER_CACHE: dict[tuple[int, str, str], tuple[float, float, float, int]] = {}
-MEMBER_SUPPORTED_LABEL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_SUPPORTED_LABEL_LIMIT", "80"))
-MEMBER_SUPPORTED_MEMBER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_SUPPORTED_MEMBER_LIMIT", "120"))
+MEMBER_SUPPORTED_LABEL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_SUPPORTED_LABEL_LIMIT", "80"))
+MEMBER_SUPPORTED_MEMBER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_SUPPORTED_MEMBER_LIMIT", "120"))
 MEMBER_SUPPORTED_ACTIVE_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_SUPPORTED_ACTIVE_MEMBER_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_SUPPORTED_ACTIVE_MEMBER_LIMIT", "8")
 )
 MEMBER_SUPPORTED_MIN_MULTIPLIER = float(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_SUPPORTED_MIN_MULTIPLIER", str(MEMBER_BALANCE_MIN_MULTIPLIER))
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_SUPPORTED_MIN_MULTIPLIER", str(MEMBER_BALANCE_MIN_MULTIPLIER))
 )
 MEMBER_ROLE_RESIDUAL_ROLES = ("owner", "metric", "modifier", "fragment")
 MEMBER_ROLE_RESIDUAL_SEPARATOR = "||"
 MEMBER_ROLE_RESIDUAL_MASK_SIGNATURE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_ROLE_RESIDUAL_MASK_SIGNATURE_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_ROLE_RESIDUAL_MASK_SIGNATURE_LIMIT", "96")
 )
 MEMBER_ROLE_RESIDUAL_MASK_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_ROLE_RESIDUAL_MASK_ATOM_LIMIT", "64")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_ROLE_RESIDUAL_MASK_ATOM_LIMIT", "64")
 )
 MEMBER_ROLE_RESIDUAL_MASK_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_ROLE_RESIDUAL_MASK_ROW_LIMIT", "220")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_ROLE_RESIDUAL_MASK_ROW_LIMIT", "220")
 )
-MEMBER_ROLE_RESIDUAL_LABEL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_MEMBER_ROLE_RESIDUAL_LABEL_LIMIT", "80"))
+MEMBER_ROLE_RESIDUAL_LABEL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_MEMBER_ROLE_RESIDUAL_LABEL_LIMIT", "80"))
 MEMBER_ROLE_RESIDUAL_MIN_MULTIPLIER = float(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_ROLE_RESIDUAL_MIN_MULTIPLIER", "0.25")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_ROLE_RESIDUAL_MIN_MULTIPLIER", "0.25")
 )
 MEMBER_ROLE_RESIDUAL_CONFLICT_RATIO = float(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_ROLE_RESIDUAL_CONFLICT_RATIO", "1.35")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_ROLE_RESIDUAL_CONFLICT_RATIO", "1.35")
 )
 MEMBER_TARGET_SELECTOR_LABEL_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_TARGET_SELECTOR_LABEL_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_TARGET_SELECTOR_LABEL_LIMIT", "48")
 )
 MEMBER_TARGET_SELECTOR_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_TARGET_SELECTOR_MEMBER_LIMIT", "14")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_TARGET_SELECTOR_MEMBER_LIMIT", "14")
 )
 MEMBER_TARGET_SELECTOR_BALANCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_TARGET_SELECTOR_BALANCE_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_TARGET_SELECTOR_BALANCE_LIMIT", "96")
 )
 MEMBER_TARGET_SELECTOR_SURFACE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_MEMBER_TARGET_SELECTOR_SURFACE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_MEMBER_TARGET_SELECTOR_SURFACE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 SELECTED_TARGET_PROJECTION_SOURCE_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SELECTED_TARGET_PROJECTION_SOURCE_ATOM_LIMIT", "72")
+    os.environ.get("DARTLAB_HORIZON_V181_SELECTED_TARGET_PROJECTION_SOURCE_ATOM_LIMIT", "72")
 )
 SELECTED_TARGET_PROJECTION_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SELECTED_TARGET_PROJECTION_ROW_LIMIT", "220")
+    os.environ.get("DARTLAB_HORIZON_V181_SELECTED_TARGET_PROJECTION_ROW_LIMIT", "220")
 )
 SELECTED_TARGET_PROJECTION_TARGET_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SELECTED_TARGET_PROJECTION_TARGET_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_SELECTED_TARGET_PROJECTION_TARGET_LIMIT", "8")
 )
 SELECTED_TARGET_PROJECTION_SELECTOR_LABEL_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SELECTED_TARGET_PROJECTION_SELECTOR_LABEL_LIMIT", "12")
+    os.environ.get("DARTLAB_HORIZON_V181_SELECTED_TARGET_PROJECTION_SELECTOR_LABEL_LIMIT", "12")
 )
 SELECTED_TARGET_PROJECTION_SELECTOR_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SELECTED_TARGET_PROJECTION_SELECTOR_MEMBER_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_SELECTED_TARGET_PROJECTION_SELECTOR_MEMBER_LIMIT", "8")
 )
-SELECTOR_PATH_JOIN_SOURCE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SELECTOR_PATH_JOIN_SOURCE_LIMIT", "12"))
+SELECTOR_PATH_JOIN_SOURCE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SELECTOR_PATH_JOIN_SOURCE_LIMIT", "12"))
 SELECTOR_PATH_JOIN_PAIR_TARGET_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_SELECTOR_PATH_JOIN_PAIR_TARGET_LIMIT", "16")
+    os.environ.get("DARTLAB_HORIZON_V181_SELECTOR_PATH_JOIN_PAIR_TARGET_LIMIT", "16")
 )
-SELECTOR_PATH_JOIN_SELECTED_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SELECTOR_PATH_JOIN_SELECTED_LIMIT", "8"))
-SELECTOR_PATH_JOIN_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SELECTOR_PATH_JOIN_ROW_LIMIT", "36"))
+SELECTOR_PATH_JOIN_SELECTED_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SELECTOR_PATH_JOIN_SELECTED_LIMIT", "8"))
+SELECTOR_PATH_JOIN_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SELECTOR_PATH_JOIN_ROW_LIMIT", "36"))
 BIDIRECTIONAL_PAIR_CANDIDATE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_BIDIRECTIONAL_PAIR_CANDIDATE_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_BIDIRECTIONAL_PAIR_CANDIDATE_LIMIT", "96")
 )
-BIDIRECTIONAL_PAIR_ROUTE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_BIDIRECTIONAL_PAIR_ROUTE_LIMIT", "12"))
-BIDIRECTIONAL_PAIR_DYNAMIC_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_BIDIRECTIONAL_PAIR_DYNAMIC_LIMIT", "80"))
+BIDIRECTIONAL_PAIR_ROUTE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_BIDIRECTIONAL_PAIR_ROUTE_LIMIT", "12"))
+BIDIRECTIONAL_PAIR_DYNAMIC_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_BIDIRECTIONAL_PAIR_DYNAMIC_LIMIT", "80"))
 BIDIRECTIONAL_PAIR_REVERSE_RELATION_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_BIDIRECTIONAL_PAIR_REVERSE_RELATION_LIMIT", "2")
+    os.environ.get("DARTLAB_HORIZON_V181_BIDIRECTIONAL_PAIR_REVERSE_RELATION_LIMIT", "2")
 )
 PAIR_LOCAL_CONTRAST_CANDIDATE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_CONTRAST_CANDIDATE_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_CONTRAST_CANDIDATE_LIMIT", "96")
 )
-PAIR_LOCAL_CONTRAST_PEER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_CONTRAST_PEER_LIMIT", "18"))
-PAIR_LOCAL_CONTRAST_NEAR_BONUS = float(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_CONTRAST_NEAR_BONUS", "0.42"))
-PAIR_LOCAL_CONTRAST_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_CONTRAST_MIN_MARGIN", "0.015"))
+PAIR_LOCAL_CONTRAST_PEER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_CONTRAST_PEER_LIMIT", "18"))
+PAIR_LOCAL_CONTRAST_NEAR_BONUS = float(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_CONTRAST_NEAR_BONUS", "0.42"))
+PAIR_LOCAL_CONTRAST_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_CONTRAST_MIN_MARGIN", "0.015"))
 TARGET_MEMBER_FRAME_OCCURRENCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_OCCURRENCE_LIMIT", "56")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_OCCURRENCE_LIMIT", "56")
 )
-TARGET_MEMBER_FRAME_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_ATOM_LIMIT", "120"))
-TARGET_MEMBER_FRAME_PEER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_PEER_LIMIT", "8"))
+TARGET_MEMBER_FRAME_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_ATOM_LIMIT", "120"))
+TARGET_MEMBER_FRAME_PEER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_PEER_LIMIT", "8"))
 TARGET_MEMBER_FRAME_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 TARGET_MEMBER_FRAME_NEIGHBOR_RADIUS = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_NEIGHBOR_RADIUS", "3")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_NEIGHBOR_RADIUS", "3")
 )
 TARGET_MEMBER_FRAME_NEIGHBOR_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_NEIGHBOR_ATOM_LIMIT", "14")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_NEIGHBOR_ATOM_LIMIT", "14")
 )
 TARGET_MEMBER_FRAME_RELATION_WINDOW = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_RELATION_WINDOW", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_RELATION_WINDOW", "8")
 )
 TARGET_MEMBER_FRAME_CANDIDATE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_CANDIDATE_LIMIT", str(BIDIRECTIONAL_PAIR_CANDIDATE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_CANDIDATE_LIMIT", str(BIDIRECTIONAL_PAIR_CANDIDATE_LIMIT))
 )
 TARGET_MEMBER_FRAME_QUERY_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FRAME_QUERY_ROUTE_LIMIT", "24")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FRAME_QUERY_ROUTE_LIMIT", "24")
 )
 COMPOSITIONAL_FRAME_MIN_QUERY_ROWS = int(
-    os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_MIN_QUERY_ROWS", "24")
+    os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_MIN_QUERY_ROWS", "24")
 )
 COMPOSITIONAL_FRAME_FRAGMENT_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_FRAGMENT_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_FRAGMENT_LIMIT", "10")
 )
 COMPOSITIONAL_FRAME_FRAGMENT_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_FRAGMENT_ROW_LIMIT", "18")
+    os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_FRAGMENT_ROW_LIMIT", "18")
 )
 COMPOSITIONAL_FRAME_MIN_FRAGMENT_LEN = int(
-    os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_MIN_FRAGMENT_LEN", "2")
+    os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_MIN_FRAGMENT_LEN", "2")
 )
 COMPOSITIONAL_FRAME_MAX_FRAGMENT_LEN = int(
-    os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_MAX_FRAGMENT_LEN", "6")
+    os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_MAX_FRAGMENT_LEN", "6")
 )
-COMPOSITIONAL_FRAME_ATOM_SCALE = float(os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_ATOM_SCALE", "0.58"))
+COMPOSITIONAL_FRAME_ATOM_SCALE = float(os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_ATOM_SCALE", "0.58"))
 COMPOSITIONAL_FRAME_SIGNATURE_SCALE = float(
-    os.environ.get("DARTLAB_HORIZON_V169_COMPOSITIONAL_FRAME_SIGNATURE_SCALE", "0.24")
+    os.environ.get("DARTLAB_HORIZON_V181_COMPOSITIONAL_FRAME_SIGNATURE_SCALE", "0.24")
 )
-RELATION_SLOT_SUBSTITUTION_WINDOW = int(os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_WINDOW", "8"))
+RELATION_SLOT_SUBSTITUTION_WINDOW = int(os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_WINDOW", "8"))
 RELATION_SLOT_SUBSTITUTION_MIN_KEY_DF = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_MIN_KEY_DF", "2")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_MIN_KEY_DF", "2")
 )
 RELATION_SLOT_SUBSTITUTION_MAX_KEY_DF = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_MAX_KEY_DF", "260")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_MAX_KEY_DF", "260")
 )
 RELATION_SLOT_SUBSTITUTION_POSTING_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_POSTING_LIMIT", "80")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_POSTING_LIMIT", "80")
 )
 RELATION_SLOT_SUBSTITUTION_SURFACE_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_SURFACE_KEY_LIMIT", "36")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_SURFACE_KEY_LIMIT", "36")
 )
 RELATION_SLOT_SUBSTITUTION_QUERY_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_QUERY_KEY_LIMIT", "64")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_QUERY_KEY_LIMIT", "64")
 )
 RELATION_SLOT_SUBSTITUTION_FRAGMENT_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_FRAGMENT_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_FRAGMENT_LIMIT", "8")
 )
 RELATION_SLOT_SUBSTITUTION_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 RELATION_SLOT_SUBSTITUTION_SEED_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_SEED_WEIGHT", "1.15")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_SEED_WEIGHT", "1.15")
 )
 RELATION_SLOT_SUBSTITUTION_TYPED_SPECIFICITY_MIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_TYPED_SPECIFICITY_MIN", "0.16")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_TYPED_SPECIFICITY_MIN", "0.16")
 )
 RELATION_SLOT_SUBSTITUTION_TYPED_HUBNESS_MAX = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_TYPED_HUBNESS_MAX", "0.66")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_TYPED_HUBNESS_MAX", "0.66")
 )
 RELATION_SLOT_SUBSTITUTION_TYPED_ENTROPY_MAX = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_TYPED_ENTROPY_MAX", "0.86")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_TYPED_ENTROPY_MAX", "0.86")
 )
 RELATION_SLOT_SUBSTITUTION_TYPED_CONCEPT_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_TYPED_CONCEPT_WEIGHT", "1.18")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_TYPED_CONCEPT_WEIGHT", "1.18")
 )
 RELATION_SLOT_SUBSTITUTION_TYPED_GENERIC_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_TYPED_GENERIC_WEIGHT", "0.42")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_TYPED_GENERIC_WEIGHT", "0.42")
 )
 RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_TARGET_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_TARGET_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_TARGET_LIMIT", "10")
 )
 RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_WEAK_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_WEAK_WEIGHT", "0.52")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_WEAK_WEIGHT", "0.52")
 )
 RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_GENERIC_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_GENERIC_WEIGHT", "0.24")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_GENERIC_WEIGHT", "0.24")
 )
 RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_TARGET_KEY_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_TARGET_KEY_WEIGHT", "0.32")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_TARGET_KEY_WEIGHT", "0.32")
 )
 RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_MIN_PAIR_SCORE = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_MIN_PAIR_SCORE", "0.035")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_OWNER_BOUND_MIN_PAIR_SCORE", "0.035")
 )
 RELATION_SLOT_SUBSTITUTION_LEDGER_OCCURRENCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_LEDGER_OCCURRENCE_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_LEDGER_OCCURRENCE_LIMIT", "48")
 )
 RELATION_SLOT_SUBSTITUTION_LEDGER_TARGET_KEY_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_LEDGER_TARGET_KEY_WEIGHT", "0.38")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_LEDGER_TARGET_KEY_WEIGHT", "0.38")
 )
 RELATION_SLOT_SUBSTITUTION_LEDGER_BROAD_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_RELATION_SLOT_SUBSTITUTION_LEDGER_BROAD_WEIGHT", "0.34")
+    os.environ.get("DARTLAB_HORIZON_V181_RELATION_SLOT_SUBSTITUTION_LEDGER_BROAD_WEIGHT", "0.34")
 )
-PAIR_LOCAL_LEDGER_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_FRAGMENT_LIMIT", "10"))
-PAIR_LOCAL_LEDGER_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_ATOM_LIMIT", "48"))
-PAIR_LOCAL_LEDGER_BAND_SIZE = int(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_BAND_SIZE", "3"))
-PAIR_LOCAL_LEDGER_BAND_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_BAND_LIMIT", "12"))
-PAIR_LOCAL_LEDGER_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_GAIN", "1.45"))
-PAIR_LOCAL_LEDGER_MARGIN_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_MARGIN_GAIN", "2.20"))
+PAIR_LOCAL_LEDGER_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_FRAGMENT_LIMIT", "10"))
+PAIR_LOCAL_LEDGER_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_ATOM_LIMIT", "48"))
+PAIR_LOCAL_LEDGER_BAND_SIZE = int(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_BAND_SIZE", "3"))
+PAIR_LOCAL_LEDGER_BAND_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_BAND_LIMIT", "12"))
+PAIR_LOCAL_LEDGER_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_GAIN", "1.45"))
+PAIR_LOCAL_LEDGER_MARGIN_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_MARGIN_GAIN", "2.20"))
 PAIR_LOCAL_LEDGER_NEGATIVE_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_NEGATIVE_FACTOR", "0.74")
+    os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_NEGATIVE_FACTOR", "0.74")
 )
-PAIR_LOCAL_LEDGER_EMPTY_FACTOR = float(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_EMPTY_FACTOR", "0.88"))
-PAIR_LOCAL_LEDGER_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_MIN_MARGIN", "0.018"))
+PAIR_LOCAL_LEDGER_EMPTY_FACTOR = float(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_EMPTY_FACTOR", "0.88"))
+PAIR_LOCAL_LEDGER_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_MIN_MARGIN", "0.018"))
 PAIR_LOCAL_LEDGER_RESIDUAL_COMMON_POWER = float(
-    os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_RESIDUAL_COMMON_POWER", "0.72")
+    os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_RESIDUAL_COMMON_POWER", "0.72")
 )
 PAIR_LOCAL_LEDGER_RESIDUAL_IDF_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_RESIDUAL_IDF_GAIN", "0.58")
+    os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_RESIDUAL_IDF_GAIN", "0.58")
 )
 PAIR_LOCAL_LEDGER_RESIDUAL_MIN_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_RESIDUAL_MIN_WEIGHT", "0.018")
+    os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_RESIDUAL_MIN_WEIGHT", "0.018")
 )
 PAIR_LOCAL_LEDGER_RESIDUAL_PEER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_PAIR_LOCAL_LEDGER_RESIDUAL_PEER_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_PAIR_LOCAL_LEDGER_RESIDUAL_PEER_LIMIT", "8")
 )
-DIRECTIONAL_LEDGER_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_FRAGMENT_LIMIT", "8"))
+DIRECTIONAL_LEDGER_FRAGMENT_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_FRAGMENT_LIMIT", "8"))
 DIRECTIONAL_LEDGER_SOURCE_TARGET_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_SOURCE_TARGET_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_SOURCE_TARGET_LIMIT", "10")
 )
-DIRECTIONAL_LEDGER_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_ATOM_LIMIT", "64"))
-DIRECTIONAL_LEDGER_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_GAIN", "1.72"))
-DIRECTIONAL_LEDGER_MARGIN_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_MARGIN_GAIN", "2.45"))
+DIRECTIONAL_LEDGER_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_ATOM_LIMIT", "64"))
+DIRECTIONAL_LEDGER_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_GAIN", "1.72"))
+DIRECTIONAL_LEDGER_MARGIN_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_MARGIN_GAIN", "2.45"))
 DIRECTIONAL_LEDGER_NEGATIVE_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_NEGATIVE_FACTOR", "0.72")
+    os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_NEGATIVE_FACTOR", "0.72")
 )
-DIRECTIONAL_LEDGER_EMPTY_FACTOR = float(os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_EMPTY_FACTOR", "0.90"))
-DIRECTIONAL_LEDGER_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V169_DIRECTIONAL_LEDGER_MIN_MARGIN", "0.014"))
+DIRECTIONAL_LEDGER_EMPTY_FACTOR = float(os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_EMPTY_FACTOR", "0.90"))
+DIRECTIONAL_LEDGER_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V181_DIRECTIONAL_LEDGER_MIN_MARGIN", "0.014"))
 TARGET_MEMBER_PRIOR_SOURCE_TARGET_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_SOURCE_TARGET_LIMIT", "16")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_SOURCE_TARGET_LIMIT", "16")
 )
 TARGET_MEMBER_PRIOR_HARD_NEGATIVE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_HARD_NEGATIVE_LIMIT", "14")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_HARD_NEGATIVE_LIMIT", "14")
 )
-TARGET_MEMBER_PRIOR_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_GAIN", "2.35"))
-TARGET_MEMBER_PRIOR_MARGIN_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_MARGIN_GAIN", "2.10"))
+TARGET_MEMBER_PRIOR_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_GAIN", "2.35"))
+TARGET_MEMBER_PRIOR_MARGIN_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_MARGIN_GAIN", "2.10"))
 TARGET_MEMBER_PRIOR_NEGATIVE_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_NEGATIVE_FACTOR", "0.68")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_NEGATIVE_FACTOR", "0.68")
 )
 TARGET_MEMBER_PRIOR_EMPTY_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_EMPTY_FACTOR", "0.92")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_EMPTY_FACTOR", "0.92")
 )
-TARGET_MEMBER_PRIOR_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PRIOR_MIN_MARGIN", "0.012"))
-TARGET_MEMBER_TRANSPORT_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRANSPORT_GAIN", "3.20"))
+TARGET_MEMBER_PRIOR_MIN_MARGIN = float(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PRIOR_MIN_MARGIN", "0.012"))
+TARGET_MEMBER_TRANSPORT_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRANSPORT_GAIN", "3.20"))
 TARGET_MEMBER_TRANSPORT_ANCHOR_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRANSPORT_ANCHOR_GAIN", "1.35")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRANSPORT_ANCHOR_GAIN", "1.35")
 )
 TARGET_MEMBER_TRANSPORT_ROLE_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRANSPORT_ROLE_GAIN", "0.86")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRANSPORT_ROLE_GAIN", "0.86")
 )
 TARGET_MEMBER_TRANSPORT_EMPTY_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRANSPORT_EMPTY_FACTOR", "0.94")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRANSPORT_EMPTY_FACTOR", "0.94")
 )
 TARGET_MEMBER_TRANSPORT_LOW_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRANSPORT_LOW_FACTOR", "0.78")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRANSPORT_LOW_FACTOR", "0.78")
 )
 TARGET_MEMBER_TRANSPORT_MIN_LIKELIHOOD = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRANSPORT_MIN_LIKELIHOOD", "0.045")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRANSPORT_MIN_LIKELIHOOD", "0.045")
 )
 TARGET_MEMBER_CONDITIONAL_TRANSPORT_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_CONDITIONAL_TRANSPORT_GAIN", "2.35")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CONDITIONAL_TRANSPORT_GAIN", "2.35")
 )
 TARGET_MEMBER_CONDITIONAL_TRANSPORT_RESIDUAL_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_CONDITIONAL_TRANSPORT_RESIDUAL_GAIN", "1.15")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CONDITIONAL_TRANSPORT_RESIDUAL_GAIN", "1.15")
 )
 TARGET_MEMBER_CONDITIONAL_ANCHOR_RESIDUAL_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_CONDITIONAL_ANCHOR_RESIDUAL_GAIN", "0.72")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CONDITIONAL_ANCHOR_RESIDUAL_GAIN", "0.72")
 )
 TARGET_MEMBER_CONDITIONAL_TRANSPORT_EMPTY_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_CONDITIONAL_TRANSPORT_EMPTY_FACTOR", "0.92")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CONDITIONAL_TRANSPORT_EMPTY_FACTOR", "0.92")
 )
 TARGET_MEMBER_CONDITIONAL_TRANSPORT_LOW_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_CONDITIONAL_TRANSPORT_LOW_FACTOR", "0.82")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CONDITIONAL_TRANSPORT_LOW_FACTOR", "0.82")
 )
 TARGET_MEMBER_CONDITIONAL_TRANSPORT_PEER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_CONDITIONAL_TRANSPORT_PEER_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CONDITIONAL_TRANSPORT_PEER_LIMIT", "10")
 )
 TARGET_MEMBER_EXPERIENCE_FAMILY_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_EXPERIENCE_FAMILY_MEMBER_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_EXPERIENCE_FAMILY_MEMBER_LIMIT", "8")
 )
 TARGET_MEMBER_EXPERIENCE_FAMILY_SCORE_FLOOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_EXPERIENCE_FAMILY_SCORE_FLOOR", "0.045")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_EXPERIENCE_FAMILY_SCORE_FLOOR", "0.045")
 )
 TARGET_MEMBER_FIELD_FAMILY_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_MEMBER_LIMIT", "14")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_MEMBER_LIMIT", "14")
 )
 TARGET_MEMBER_FIELD_FAMILY_EXPANSION_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_EXPANSION_LIMIT", "6")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_EXPANSION_LIMIT", "6")
 )
 TARGET_MEMBER_FIELD_FAMILY_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_ATOM_LIMIT", "72")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_ATOM_LIMIT", "72")
 )
 TARGET_MEMBER_FIELD_FAMILY_SOURCE_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_SOURCE_ATOM_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_SOURCE_ATOM_LIMIT", "96")
 )
 TARGET_MEMBER_FIELD_FAMILY_SIM_MIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_SIM_MIN", "0.215")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_SIM_MIN", "0.215")
 )
 TARGET_MEMBER_FIELD_FAMILY_COMMON_RATIO = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_COMMON_RATIO", "0.46")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_COMMON_RATIO", "0.46")
 )
 TARGET_MEMBER_FIELD_FAMILY_COMMON_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_COMMON_FACTOR", "0.78")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_COMMON_FACTOR", "0.78")
 )
 TARGET_MEMBER_FIELD_FAMILY_RESIDUAL_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_RESIDUAL_GAIN", "1.35")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_RESIDUAL_GAIN", "1.35")
 )
 TARGET_MEMBER_FIELD_FAMILY_FULL_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_FULL_GAIN", "0.34")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_FULL_GAIN", "0.34")
 )
 TARGET_MEMBER_FIELD_FAMILY_MUTUAL_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_FIELD_FAMILY_MUTUAL_GAIN", "0.22")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_FIELD_FAMILY_MUTUAL_GAIN", "0.22")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_LEDGER_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_LEDGER_KEY_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_LEDGER_KEY_LIMIT", "10")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_PROFILE_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_PROFILE_KEY_LIMIT", "4")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_PROFILE_KEY_LIMIT", "4")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_POSTING_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_POSTING_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_POSTING_LIMIT", "96")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_QUERY_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_QUERY_KEY_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_QUERY_KEY_LIMIT", "96")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_SEED_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_SEED_WEIGHT", "1.28")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_SEED_WEIGHT", "1.28")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_MIN_KEY_DF = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_MIN_KEY_DF", "1")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_MIN_KEY_DF", "1")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_MAX_KEY_DF = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_MAX_KEY_DF", "220")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_MAX_KEY_DF", "220")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_RARITY_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_RARITY_GAIN", "0.22")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_RARITY_GAIN", "0.22")
 )
 TARGET_MEMBER_TYPED_MICRO_EDGE_BACKOFF_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TYPED_MICRO_EDGE_BACKOFF_WEIGHT", "0.38")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_MICRO_EDGE_BACKOFF_WEIGHT", "0.38")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_LEDGER_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_LEDGER_KEY_LIMIT", "6")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_LEDGER_KEY_LIMIT", "6")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_PROFILE_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_PROFILE_KEY_LIMIT", "3")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_PROFILE_KEY_LIMIT", "3")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SOURCE_PATH_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SOURCE_PATH_LIMIT", "16")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SOURCE_PATH_LIMIT", "16")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_REVERSE_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_REVERSE_ROW_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_REVERSE_ROW_LIMIT", "48")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_TARGET_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_TARGET_ATOM_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_TARGET_ATOM_LIMIT", "96")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_QUERY_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_QUERY_ATOM_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_QUERY_ATOM_LIMIT", "96")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_POSTING_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_POSTING_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_POSTING_LIMIT", "96")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_MAX_ATOM_DF = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_MAX_ATOM_DF", "180")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_MAX_ATOM_DF", "180")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SEED_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SEED_WEIGHT", "1.42")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SEED_WEIGHT", "1.42")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_RARITY_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_RARITY_GAIN", "0.38")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_RARITY_GAIN", "0.38")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_PROOF_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_PROOF_GAIN", "1.08")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_PROOF_GAIN", "1.08")
 )
 TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SEQUENCE_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SEQUENCE_GAIN", "0.18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_BOUND_HYPEREDGE_SEQUENCE_GAIN", "0.18")
 )
 TARGET_MEMBER_PATH_EVENT_FIELD_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_FIELD_LIMIT", "128")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_FIELD_LIMIT", "128")
 )
 TARGET_MEMBER_PATH_EVENT_FRAGMENT_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_FRAGMENT_LIMIT", "18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_FRAGMENT_LIMIT", "18")
 )
 TARGET_MEMBER_PATH_EVENT_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 TARGET_MEMBER_PATH_EVENT_SEED_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_SEED_WEIGHT", "1.18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_SEED_WEIGHT", "1.18")
 )
 TARGET_MEMBER_PATH_EVENT_PROOF_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_PROOF_GAIN", "1.04")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_PROOF_GAIN", "1.04")
 )
 TARGET_MEMBER_PATH_EVENT_SEQUENCE_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_SEQUENCE_GAIN", "0.24")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_SEQUENCE_GAIN", "0.24")
 )
 TARGET_MEMBER_PATH_EVENT_RESIDUAL_IDF_FLOOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_RESIDUAL_IDF_FLOOR", "0.08")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_RESIDUAL_IDF_FLOOR", "0.08")
 )
 TARGET_MEMBER_PATH_EVENT_RESIDUAL_IDF_SELECT_FLOOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_RESIDUAL_IDF_SELECT_FLOOR", "0.18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_RESIDUAL_IDF_SELECT_FLOOR", "0.18")
 )
 TARGET_MEMBER_PATH_EVENT_RESIDUAL_SEQUENCE_BOOST = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_RESIDUAL_SEQUENCE_BOOST", "1.16")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_RESIDUAL_SEQUENCE_BOOST", "1.16")
 )
 TARGET_MEMBER_PATH_EVENT_RESIDUAL_LOW_IDF_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_EVENT_RESIDUAL_LOW_IDF_FACTOR", "0.58")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_EVENT_RESIDUAL_LOW_IDF_FACTOR", "0.58")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_LIMIT", "40")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_LIMIT", "40")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_ATOM_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_ATOM_LIMIT", "34")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_ATOM_LIMIT", "34")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_QUERY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_QUERY_LIMIT", "22")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_QUERY_LIMIT", "22")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT", "24")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT", "24")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_PAIR_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_PAIR_LIMIT", "160")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_PAIR_LIMIT", "160")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_SEED_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_SEED_WEIGHT", "1.22")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_SEED_WEIGHT", "1.22")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_PROOF_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_PROOF_GAIN", "1.10")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_PROOF_GAIN", "1.10")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_SEQUENCE_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_SEQUENCE_GAIN", "0.30")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_SEQUENCE_GAIN", "0.30")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_RARE_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_RARE_GAIN", "0.18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_RARE_GAIN", "0.18")
 )
 TARGET_MEMBER_PATH_LOCAL_TRACE_LOW_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_PATH_LOCAL_TRACE_LOW_FACTOR", "0.88")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_LOCAL_TRACE_LOW_FACTOR", "0.88")
+)
+TARGET_MEMBER_PATH_GRAMMAR_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_QUERY_FEATURE_LIMIT", "96")
+)
+TARGET_MEMBER_PATH_GRAMMAR_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_TARGET_FEATURE_LIMIT", "96")
+)
+TARGET_MEMBER_PATH_GRAMMAR_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_POSTING_LIMIT", "120")
+)
+TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_TARGET_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_TARGET_LIMIT", "12")
+)
+TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_FEATURE_LIMIT", "26")
+)
+TARGET_MEMBER_PATH_GRAMMAR_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_PATH_GRAMMAR_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_CANDIDATE_LIMIT", str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)
+    )
+)
+TARGET_MEMBER_PATH_GRAMMAR_MIN_MATCHED = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_MIN_MATCHED", "2")
+)
+TARGET_MEMBER_PATH_GRAMMAR_MIN_CORE = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_MIN_CORE", "1")
+)
+TARGET_MEMBER_PATH_GRAMMAR_MIN_MEAN_IDF = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_MIN_MEAN_IDF", "0.12")
+)
+TARGET_MEMBER_PATH_GRAMMAR_IDF_FLOOR = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_IDF_FLOOR", "0.055")
+)
+TARGET_MEMBER_PATH_GRAMMAR_SEQUENCE_BOOST = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_SEQUENCE_BOOST", "1.20")
+)
+TARGET_MEMBER_PATH_GRAMMAR_SEED_WEIGHT = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_SEED_WEIGHT", "1.34")
+)
+TARGET_MEMBER_PATH_GRAMMAR_LOW_IDF_FACTOR = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PATH_GRAMMAR_LOW_IDF_FACTOR", "0.58")
+)
+TARGET_MEMBER_PROMOTABLE_OCCURRENCE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_OCCURRENCE_LIMIT", "96")
+)
+TARGET_MEMBER_PROMOTABLE_MIN_SCORE = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_MIN_SCORE", "1.05")
+)
+TARGET_MEMBER_PROMOTABLE_CONTEXT_MAX = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_CONTEXT_MAX", "1.42")
+)
+TARGET_MEMBER_PROMOTABLE_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_QUERY_FEATURE_LIMIT", "112")
+)
+TARGET_MEMBER_PROMOTABLE_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_TARGET_FEATURE_LIMIT", "96")
+)
+TARGET_MEMBER_PROMOTABLE_CONTEXT_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_CONTEXT_FEATURE_LIMIT", "40")
+)
+TARGET_MEMBER_PROMOTABLE_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_POSTING_LIMIT", "120")
+)
+TARGET_MEMBER_PROMOTABLE_FRAGMENT_TARGET_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_FRAGMENT_TARGET_LIMIT", "18")
+)
+TARGET_MEMBER_PROMOTABLE_FRAGMENT_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_FRAGMENT_FEATURE_LIMIT", "30")
+)
+TARGET_MEMBER_PROMOTABLE_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_CANDIDATE_LIMIT", str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)
+    )
+)
+TARGET_MEMBER_PROMOTABLE_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_PROMOTABLE_SEED_WEIGHT = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_SEED_WEIGHT", "1.48")
+)
+TARGET_MEMBER_PROMOTABLE_CONTEXT_QUERY_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_CONTEXT_QUERY_GAIN", "0.22")
+)
+TARGET_MEMBER_PROMOTABLE_PROMOTION_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_PROMOTABLE_PROMOTION_GAIN", "0.48")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_QUERY_FEATURE_LIMIT", "112")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_TARGET_FEATURE_LIMIT", "96")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_SLOT_KEY_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_SLOT_KEY_LIMIT", "34")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_SLOT_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_SLOT_POSTING_LIMIT", "96")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_COHORT_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_COHORT_LIMIT", "22")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_CANDIDATE_LIMIT",
+        str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+    )
+)
+TARGET_MEMBER_SLOT_RESIDUAL_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_TARGET_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_TARGET_LIMIT", "22")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT", "18")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_POSTING_LIMIT", "220")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CANDIDATE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CANDIDATE_LIMIT", "120")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_MIN_PROOF = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_MIN_PROOF", "0.004")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_SEED_WEIGHT = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_SEED_WEIGHT", "1.46")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_GAIN", "0.92")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_GAIN", "0.72")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_MARGIN_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_MARGIN_GAIN", "1.44")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_NEGATIVE_FACTOR = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_NEGATIVE_FACTOR", "0.78")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_COMMON_RATIO = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_COMMON_RATIO", "0.44")
+)
+TARGET_MEMBER_SLOT_RESIDUAL_LOW_SLOT_FACTOR = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_SLOT_RESIDUAL_LOW_SLOT_FACTOR", "0.62")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_QUERY_FEATURE_LIMIT", "128")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_TARGET_FEATURE_LIMIT", "112")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_SEED_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_SEED_LIMIT", "48")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT", "18")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_COMPOUND_MEMBER_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_COMPOUND_MEMBER_LIMIT", "96")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_CANDIDATE_LIMIT",
+        str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+    )
+)
+TARGET_MEMBER_ACCOUNT_AXIS_SEED_RERANK_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_SEED_RERANK_LIMIT", "800")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_INDEX_SURFACE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_INDEX_SURFACE_LIMIT", "1600")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_POSTING_LIMIT", "128")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_ACCOUNT_AXIS_MIN_PROOF = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_MIN_PROOF", "0.030")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_MIN_MARGIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_MIN_MARGIN", "-0.018")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_SEED_WEIGHT = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_SEED_WEIGHT", "1.58")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_LEDGER_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_LEDGER_GAIN", "0.54")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_STRUCT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_STRUCT_GAIN", "0.42")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_MARGIN_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_MARGIN_GAIN", "1.35")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_NEGATIVE_FACTOR = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_NEGATIVE_FACTOR", "0.68")
+)
+TARGET_MEMBER_ACCOUNT_AXIS_ROUTE_FLOOR = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_AXIS_ROUTE_FLOOR", "0.00001")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_OCCURRENCE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_OCCURRENCE_LIMIT", "72")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_FEATURE_LIMIT", "160")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_FEATURE_LIMIT", "132")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT", "112")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_CANDIDATE_LIMIT",
+        str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+    )
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_SEED_RERANK_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_SEED_RERANK_LIMIT", "720")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_SURFACE_SCAN_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_SURFACE_SCAN_LIMIT", "6000")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT", "20")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_FAMILY_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_FAMILY_LIMIT", "18")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_QUALITY = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_QUALITY", "0.30")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_PROOF = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_PROOF", "0.020")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_MARGIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_MARGIN", "-0.012")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_AXIS_PROOF_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_AXIS_PROOF_GAIN", "0.38")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_SLOT_SEED_WEIGHT = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_SLOT_SEED_WEIGHT", "0.62")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_QUALITY_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_QUALITY_GAIN", "0.34")
+)
+TARGET_MEMBER_ACCOUNT_REGISTRY_MARGIN_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_REGISTRY_MARGIN_GAIN", "1.42")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_OCCURRENCE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_OCCURRENCE_LIMIT", "80")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_QUERY_FEATURE_LIMIT", "176")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_TARGET_FEATURE_LIMIT", "144")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_POSTING_LIMIT", "160")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_ROLE_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_ROLE_POSTING_LIMIT", "260")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_SURFACE_SCAN_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_SURFACE_SCAN_LIMIT", "6000")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_CANDIDATE_LIMIT",
+        str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+    )
+)
+TARGET_MEMBER_STATEMENT_LEDGER_SEED_RERANK_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_SEED_RERANK_LIMIT", "760")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_STATEMENT_LEDGER_FRAGMENT_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_FRAGMENT_LIMIT", "22")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_FAMILY_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_FAMILY_LIMIT", "18")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_MIN_QUALITY = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_MIN_QUALITY", "0.16")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_MIN_PROOF = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_MIN_PROOF", "0.018")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_MIN_MARGIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_MIN_MARGIN", "-0.010")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_REGISTRY_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_REGISTRY_GAIN", "0.24")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_AXIS_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_AXIS_GAIN", "0.18")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_QUALITY_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_QUALITY_GAIN", "0.30")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_ROLE_COMPAT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_ROLE_COMPAT_GAIN", "0.72")
+)
+TARGET_MEMBER_STATEMENT_LEDGER_MARGIN_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_STATEMENT_LEDGER_MARGIN_GAIN", "1.58")
+)
+TARGET_MEMBER_ACCOUNT_ROW_OCCURRENCE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_OCCURRENCE_LIMIT", "96")
+)
+TARGET_MEMBER_ACCOUNT_ROW_QUERY_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_QUERY_FEATURE_LIMIT", "192")
+)
+TARGET_MEMBER_ACCOUNT_ROW_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_TARGET_FEATURE_LIMIT", "156")
+)
+TARGET_MEMBER_ACCOUNT_ROW_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_POSTING_LIMIT", "180")
+)
+TARGET_MEMBER_ACCOUNT_ROW_ROLE_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_ROLE_POSTING_LIMIT", "360")
+)
+TARGET_MEMBER_ACCOUNT_ROW_ALIAS_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_ALIAS_POSTING_LIMIT", "360")
+)
+TARGET_MEMBER_ACCOUNT_ROW_CANDIDATE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_CANDIDATE_LIMIT",
+        str(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+    )
+)
+TARGET_MEMBER_ACCOUNT_ROW_SEED_RERANK_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_SEED_RERANK_LIMIT", "820")
+)
+TARGET_MEMBER_ACCOUNT_ROW_ROUTE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+)
+TARGET_MEMBER_ACCOUNT_ROW_FRAGMENT_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_FRAGMENT_LIMIT", "24")
+)
+TARGET_MEMBER_ACCOUNT_ROW_FAMILY_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_FAMILY_LIMIT", "24")
+)
+TARGET_MEMBER_ACCOUNT_ROW_MIN_QUALITY = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_MIN_QUALITY", "0.18")
+)
+TARGET_MEMBER_ACCOUNT_ROW_MIN_PROOF = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_MIN_PROOF", "0.016")
+)
+TARGET_MEMBER_ACCOUNT_ROW_MIN_MARGIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_MIN_MARGIN", "-0.018")
+)
+TARGET_MEMBER_ACCOUNT_ROW_REGISTRY_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_REGISTRY_GAIN", "0.18")
+)
+TARGET_MEMBER_ACCOUNT_ROW_LEDGER_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_LEDGER_GAIN", "0.42")
+)
+TARGET_MEMBER_ACCOUNT_ROW_ALIAS_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_ALIAS_GAIN", "1.72")
+)
+TARGET_MEMBER_ACCOUNT_ROW_ROLE_COMPAT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_ROLE_COMPAT_GAIN", "0.86")
+)
+TARGET_MEMBER_ACCOUNT_ROW_QUALITY_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_QUALITY_GAIN", "0.36")
+)
+TARGET_MEMBER_ACCOUNT_ROW_MARGIN_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_ACCOUNT_ROW_MARGIN_GAIN", "1.12")
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_LIMIT", "18")
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_SUFFIX_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_SUFFIX_LIMIT", "28")
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_LIMIT", "72")
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROUTE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROUTE_LIMIT",
+        str(TARGET_MEMBER_ACCOUNT_ROW_ROUTE_LIMIT),
+    )
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_MIN_SYNTHETIC_SCORE = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_MIN_SYNTHETIC_SCORE", "0.018")
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_GAIN", "1.42")
+)
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROLE_SPECIFIC_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROLE_SPECIFIC_GAIN", "0.72")
+)
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_HEAD_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_OBJECT_ACCOUNT_ROW_HEAD_LIMIT", "18")
+)
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_OBJECT_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_OBJECT_ACCOUNT_ROW_OBJECT_LIMIT", "64")
+)
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT",
+        str(TARGET_MEMBER_ACCOUNT_ROW_ROUTE_LIMIT),
+    )
+)
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_MIN_OBJECT_SCORE = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_OBJECT_ACCOUNT_ROW_MIN_OBJECT_SCORE", "0.024")
+)
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_GAIN", "1.64")
+)
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_FEATURE_LIMIT", "96")
+)
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_POSTING_LIMIT", "160")
+)
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_CANDIDATE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_CANDIDATE_LIMIT", "160")
+)
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT",
+        str(TARGET_MEMBER_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT),
+    )
+)
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_OBJECT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_OBJECT_GAIN", "1.26")
+)
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_SUPPORT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_SUPPORT_GAIN", "0.74")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_FEATURE_LIMIT", "128")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_POSTING_LIMIT", "180")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_CANDIDATE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_CANDIDATE_LIMIT", "180")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_ROUTE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_ROUTE_LIMIT",
+        str(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT),
+    )
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_OCCURRENCE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_OCCURRENCE_LIMIT", "48")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_EVENT_ATOM_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_EVENT_ATOM_LIMIT", "18")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SURFACE_SCAN_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SURFACE_SCAN_LIMIT", "5600")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_GAIN", "1.12")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_BASE_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_BASE_GAIN", "0.72")
+)
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SUPPORT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SUPPORT_GAIN", "0.68")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_FEATURE_LIMIT", "112")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_FEATURE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_FEATURE_LIMIT", "96")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_POSTING_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_POSTING_LIMIT", "160")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CANDIDATE_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CANDIDATE_LIMIT", "160")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_ROUTE_LIMIT = int(
+    os.environ.get(
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_ROUTE_LIMIT",
+        str(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_ROUTE_LIMIT),
+    )
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SURFACE_SCAN_LIMIT = int(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SURFACE_SCAN_LIMIT", "5200")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_BASE_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_BASE_GAIN", "0.84")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_GAIN", "1.18")
+)
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_GAIN = float(
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_GAIN", "0.72")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SEED_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SEED_LIMIT", "24")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SEED_LIMIT", "24")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SCORE_LIMIT = int(
     os.environ.get(
-        "DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SCORE_LIMIT",
+        "DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SCORE_LIMIT",
         str(max(TARGET_MEMBER_TRACE_ALIGNMENT_SEED_LIMIT, min(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT, 96))),
     )
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_EXPAND_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_EXPAND_LIMIT", "16")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_EXPAND_LIMIT", "16")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_COHORT_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_COHORT_LIMIT", "10")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_COHORT_LIMIT", "10")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_PATH_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_PATH_LIMIT", "14")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_PATH_LIMIT", "14")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_KEY_LIMIT", "14")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_KEY_LIMIT", "14")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_ROW_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_ROW_LIMIT", "48")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_ROUTE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_ROUTE_LIMIT", str(MASKED_FRAME_PROBE_LIMIT))
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_FRAME_SOURCE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_FRAME_SOURCE_LIMIT", "16")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_FRAME_SOURCE_LIMIT", "16")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_MIN_SCORE = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_MIN_SCORE", "0.030")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_MIN_SCORE", "0.030")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_MIN_RESIDUAL = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_MIN_RESIDUAL", "0.006")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_MIN_RESIDUAL", "0.006")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SEED_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SEED_WEIGHT", "1.36")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SEED_WEIGHT", "1.36")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_WEIGHT", "1.18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_SOURCE_SLOT_WEIGHT", "1.18")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_FRAME_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_FRAME_GAIN", "1.22")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_FRAME_GAIN", "1.22")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_RESIDUAL_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_RESIDUAL_GAIN", "1.65")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_RESIDUAL_GAIN", "1.65")
 )
 TARGET_MEMBER_TRACE_ALIGNMENT_RATIO_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_TRACE_ALIGNMENT_RATIO_GAIN", "0.18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_TRACE_ALIGNMENT_RATIO_GAIN", "0.18")
 )
 TARGET_MEMBER_MUTUAL_PROOF_SOURCE_PATH_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_SOURCE_PATH_LIMIT", "18")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_SOURCE_PATH_LIMIT", "18")
 )
 TARGET_MEMBER_MUTUAL_PROOF_REVERSE_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_REVERSE_ROW_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_REVERSE_ROW_LIMIT", "48")
 )
 TARGET_MEMBER_MUTUAL_PROOF_FAMILY_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_FAMILY_MEMBER_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_FAMILY_MEMBER_LIMIT", "8")
 )
 TARGET_MEMBER_MUTUAL_PROOF_PEER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_PEER_LIMIT", "8")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_PEER_LIMIT", "8")
 )
 TARGET_MEMBER_MUTUAL_PROOF_SLOT_KEY_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_SLOT_KEY_LIMIT", "56")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_SLOT_KEY_LIMIT", "56")
 )
 TARGET_MEMBER_MUTUAL_PROOF_SLOT_ROW_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_SLOT_ROW_LIMIT", "96")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_SLOT_ROW_LIMIT", "96")
 )
 TARGET_MEMBER_MUTUAL_PROOF_SLOT_MEMBER_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_SLOT_MEMBER_LIMIT", "6")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_SLOT_MEMBER_LIMIT", "6")
 )
 TARGET_MEMBER_MUTUAL_PROOF_SLOT_WEIGHT = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_SLOT_WEIGHT", "0.74")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_SLOT_WEIGHT", "0.74")
 )
-TARGET_MEMBER_MUTUAL_PROOF_GAIN = float(os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_GAIN", "2.60"))
+TARGET_MEMBER_MUTUAL_PROOF_GAIN = float(os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_GAIN", "2.60"))
 TARGET_MEMBER_MUTUAL_PROOF_MARGIN_GAIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_MARGIN_GAIN", "1.85")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_MARGIN_GAIN", "1.85")
 )
 TARGET_MEMBER_MUTUAL_PROOF_NEGATIVE_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_NEGATIVE_FACTOR", "0.72")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_NEGATIVE_FACTOR", "0.72")
 )
 TARGET_MEMBER_MUTUAL_PROOF_EMPTY_FACTOR = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_EMPTY_FACTOR", "0.94")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_EMPTY_FACTOR", "0.94")
 )
 TARGET_MEMBER_MUTUAL_PROOF_MIN_MARGIN = float(
-    os.environ.get("DARTLAB_HORIZON_V169_TARGET_MEMBER_MUTUAL_PROOF_MIN_MARGIN", "0.010")
+    os.environ.get("DARTLAB_HORIZON_V181_TARGET_MEMBER_MUTUAL_PROOF_MIN_MARGIN", "0.010")
 )
-ROUTE_MIN_SCORE = float(os.environ.get("DARTLAB_HORIZON_V169_ROUTE_MIN_SCORE", "0.075"))
-ROUTE_MIN_EXPERIENCE = float(os.environ.get("DARTLAB_HORIZON_V169_ROUTE_MIN_EXPERIENCE", "0.018"))
-COHORT_SUFFIX_MIN = int(os.environ.get("DARTLAB_HORIZON_V169_COHORT_SUFFIX_MIN", "2"))
-COHORT_SUFFIX_MAX = int(os.environ.get("DARTLAB_HORIZON_V169_COHORT_SUFFIX_MAX", "4"))
-CONTRAST_COMMON_RATIO = float(os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_COMMON_RATIO", "0.34"))
-CONTRAST_ACCEPT_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_CONTRAST_ACCEPT_MIN", "0.010"))
-RESONANCE_ACCEPT_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_RESONANCE_ACCEPT_MIN", "0.030"))
-COMPOUND_ASSOC_ACCEPT_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_COMPOUND_ASSOC_ACCEPT_MIN", "0.045"))
-LANE_MISMATCH_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V169_LANE_MISMATCH_PENALTY", "0.18"))
-LANE_ARTIFACT_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V169_LANE_ARTIFACT_PENALTY", "0.10"))
-NEAREST_ORDER_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_NEAREST_ORDER_SIGNATURE_LIMIT", "24"))
-NEAREST_ORDER_PENALTY_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_NEAREST_ORDER_PENALTY_MIN", "0.05"))
-NEAREST_ORDER_PENALTY_SCALE = float(os.environ.get("DARTLAB_HORIZON_V169_NEAREST_ORDER_PENALTY_SCALE", "0.16"))
+ROUTE_MIN_SCORE = float(os.environ.get("DARTLAB_HORIZON_V181_ROUTE_MIN_SCORE", "0.075"))
+ROUTE_MIN_EXPERIENCE = float(os.environ.get("DARTLAB_HORIZON_V181_ROUTE_MIN_EXPERIENCE", "0.018"))
+COHORT_SUFFIX_MIN = int(os.environ.get("DARTLAB_HORIZON_V181_COHORT_SUFFIX_MIN", "2"))
+COHORT_SUFFIX_MAX = int(os.environ.get("DARTLAB_HORIZON_V181_COHORT_SUFFIX_MAX", "4"))
+CONTRAST_COMMON_RATIO = float(os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_COMMON_RATIO", "0.34"))
+CONTRAST_ACCEPT_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_CONTRAST_ACCEPT_MIN", "0.010"))
+RESONANCE_ACCEPT_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_RESONANCE_ACCEPT_MIN", "0.030"))
+COMPOUND_ASSOC_ACCEPT_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_COMPOUND_ASSOC_ACCEPT_MIN", "0.045"))
+LANE_MISMATCH_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V181_LANE_MISMATCH_PENALTY", "0.18"))
+LANE_ARTIFACT_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V181_LANE_ARTIFACT_PENALTY", "0.10"))
+NEAREST_ORDER_SIGNATURE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_NEAREST_ORDER_SIGNATURE_LIMIT", "24"))
+NEAREST_ORDER_PENALTY_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_NEAREST_ORDER_PENALTY_MIN", "0.05"))
+NEAREST_ORDER_PENALTY_SCALE = float(os.environ.get("DARTLAB_HORIZON_V181_NEAREST_ORDER_PENALTY_SCALE", "0.16"))
 NEAREST_ORDER_COHORT_SURFACE_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_NEAREST_ORDER_COHORT_SURFACE_LIMIT", "384")
+    os.environ.get("DARTLAB_HORIZON_V181_NEAREST_ORDER_COHORT_SURFACE_LIMIT", "384")
 )
 NEAREST_ORDER_COHORT_POSITION_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_NEAREST_ORDER_COHORT_POSITION_LIMIT", "8192")
+    os.environ.get("DARTLAB_HORIZON_V181_NEAREST_ORDER_COHORT_POSITION_LIMIT", "8192")
 )
 NEAREST_ORDER_SURFACE_POSITION_LIMIT = int(
-    os.environ.get("DARTLAB_HORIZON_V169_NEAREST_ORDER_SURFACE_POSITION_LIMIT", "48")
+    os.environ.get("DARTLAB_HORIZON_V181_NEAREST_ORDER_SURFACE_POSITION_LIMIT", "48")
 )
-SUFFIX_ANCHOR_SUPPORT_MIN = int(os.environ.get("DARTLAB_HORIZON_V169_SUFFIX_ANCHOR_SUPPORT_MIN", "1"))
-ROUTE_ACCEPT_MARGIN_RATIO = float(os.environ.get("DARTLAB_HORIZON_V169_ROUTE_ACCEPT_MARGIN_RATIO", "0.42"))
-ROUTE_ACCEPT_MARGIN_GAP = float(os.environ.get("DARTLAB_HORIZON_V169_ROUTE_ACCEPT_MARGIN_GAP", "0.060"))
-SEARCH_EVIDENCE_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_SEARCH_EVIDENCE_MIN", "0.34"))
-SPAN_MAX_DISTANCE = int(os.environ.get("DARTLAB_HORIZON_V169_SPAN_MAX_DISTANCE", "160"))
-FRAME_MAX_DISTANCE = int(os.environ.get("DARTLAB_HORIZON_V169_FRAME_MAX_DISTANCE", "180"))
-FOCUSED_FRAME_DISTANCE = int(os.environ.get("DARTLAB_HORIZON_V169_FOCUSED_FRAME_DISTANCE", str(FRAME_MAX_DISTANCE * 2)))
-TABLE_ROW_LEAK_EVIDENCE_CAP = float(os.environ.get("DARTLAB_HORIZON_V169_TABLE_ROW_LEAK_EVIDENCE_CAP", "0.18"))
-TABLE_ROW_LEAK_SEARCH_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V169_TABLE_ROW_LEAK_SEARCH_PENALTY", "8.0"))
-ROLE_BOUND_EVIDENCE_CAP = float(os.environ.get("DARTLAB_HORIZON_V169_ROLE_BOUND_EVIDENCE_CAP", "0.48"))
-ROLE_BOUND_SEARCH_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V169_ROLE_BOUND_SEARCH_PENALTY", "5.0"))
-RELIABLE_BOUND_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_RELIABLE_BOUND_MIN", "0.55"))
-WEAK_BOUND_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_WEAK_BOUND_MIN", "0.34"))
-RELIABLE_EVIDENCE_MIN = float(os.environ.get("DARTLAB_HORIZON_V169_RELIABLE_EVIDENCE_MIN", "0.70"))
-SIDE_FALLBACK_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SIDE_FALLBACK_LIMIT", "220"))
-RAW_BRIDGE_MIN_SIM = float(os.environ.get("DARTLAB_HORIZON_V169_RAW_BRIDGE_MIN_SIM", "0.24"))
-RAW_BRIDGE_MIN_SIZE = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_BRIDGE_MIN_SIZE", "4"))
-RAW_BRIDGE_MAX_SIZE = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_BRIDGE_MAX_SIZE", "8"))
-RAW_BRIDGE_MAX_TOKEN = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_BRIDGE_MAX_TOKEN", "18"))
-CORPUS_BRIDGE_SEED_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_SEED_LIMIT", "2400"))
-CORPUS_BRIDGE_SEED_MIN_DF = int(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_SEED_MIN_DF", "1"))
-CORPUS_BRIDGE_GRAM_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_GRAM_POSTING_LIMIT", "360"))
+SUFFIX_ANCHOR_SUPPORT_MIN = int(os.environ.get("DARTLAB_HORIZON_V181_SUFFIX_ANCHOR_SUPPORT_MIN", "1"))
+ROUTE_ACCEPT_MARGIN_RATIO = float(os.environ.get("DARTLAB_HORIZON_V181_ROUTE_ACCEPT_MARGIN_RATIO", "0.42"))
+ROUTE_ACCEPT_MARGIN_GAP = float(os.environ.get("DARTLAB_HORIZON_V181_ROUTE_ACCEPT_MARGIN_GAP", "0.060"))
+SEARCH_EVIDENCE_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_SEARCH_EVIDENCE_MIN", "0.34"))
+SPAN_MAX_DISTANCE = int(os.environ.get("DARTLAB_HORIZON_V181_SPAN_MAX_DISTANCE", "160"))
+FRAME_MAX_DISTANCE = int(os.environ.get("DARTLAB_HORIZON_V181_FRAME_MAX_DISTANCE", "180"))
+FOCUSED_FRAME_DISTANCE = int(os.environ.get("DARTLAB_HORIZON_V181_FOCUSED_FRAME_DISTANCE", str(FRAME_MAX_DISTANCE * 2)))
+TABLE_ROW_LEAK_EVIDENCE_CAP = float(os.environ.get("DARTLAB_HORIZON_V181_TABLE_ROW_LEAK_EVIDENCE_CAP", "0.18"))
+TABLE_ROW_LEAK_SEARCH_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V181_TABLE_ROW_LEAK_SEARCH_PENALTY", "8.0"))
+ROLE_BOUND_EVIDENCE_CAP = float(os.environ.get("DARTLAB_HORIZON_V181_ROLE_BOUND_EVIDENCE_CAP", "0.48"))
+ROLE_BOUND_SEARCH_PENALTY = float(os.environ.get("DARTLAB_HORIZON_V181_ROLE_BOUND_SEARCH_PENALTY", "5.0"))
+RELIABLE_BOUND_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_RELIABLE_BOUND_MIN", "0.55"))
+WEAK_BOUND_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_WEAK_BOUND_MIN", "0.34"))
+RELIABLE_EVIDENCE_MIN = float(os.environ.get("DARTLAB_HORIZON_V181_RELIABLE_EVIDENCE_MIN", "0.70"))
+SIDE_FALLBACK_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SIDE_FALLBACK_LIMIT", "220"))
+RAW_BRIDGE_MIN_SIM = float(os.environ.get("DARTLAB_HORIZON_V181_RAW_BRIDGE_MIN_SIM", "0.24"))
+RAW_BRIDGE_MIN_SIZE = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_BRIDGE_MIN_SIZE", "4"))
+RAW_BRIDGE_MAX_SIZE = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_BRIDGE_MAX_SIZE", "8"))
+RAW_BRIDGE_MAX_TOKEN = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_BRIDGE_MAX_TOKEN", "18"))
+CORPUS_BRIDGE_SEED_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_SEED_LIMIT", "2400"))
+CORPUS_BRIDGE_SEED_MIN_DF = int(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_SEED_MIN_DF", "1"))
+CORPUS_BRIDGE_GRAM_POSTING_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_GRAM_POSTING_LIMIT", "360"))
 CORPUS_BRIDGE_NON_CONTAINMENT_MIN_SIM = float(
-    os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_NON_CONTAINMENT_MIN_SIM", "0.46")
+    os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_NON_CONTAINMENT_MIN_SIM", "0.46")
 )
-CORPUS_BRIDGE_RELATION_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_RELATION_RADIUS", "9"))
-CORPUS_BRIDGE_VALUE_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_VALUE_RADIUS", "7"))
-CORPUS_BRIDGE_MIN_EVIDENCE = float(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_MIN_EVIDENCE", "0.55"))
-CORPUS_BRIDGE_SUBSURFACE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_CORPUS_BRIDGE_SUBSURFACE_LIMIT", "4"))
-COHORT_CONTRAST_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_COHORT_CONTRAST_ATOM_LIMIT", "48"))
-RELAY_NEIGHBOR_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELAY_NEIGHBOR_LIMIT", "6"))
-RELAY_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELAY_ATOM_LIMIT", "16"))
-RAW_PRUNE_XP_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_PRUNE_XP_LIMIT", "96"))
-RAW_PRUNE_HX_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_PRUNE_HX_LIMIT", "96"))
-RAW_PRUNE_EL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_PRUNE_EL_LIMIT", "48"))
-RAW_PRUNE_OTHER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RAW_PRUNE_OTHER_LIMIT", "32"))
-RELAY_COMMON_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELAY_COMMON_ATOM_LIMIT", "40"))
-RELAY_COMMON_RATIO = float(os.environ.get("DARTLAB_HORIZON_V169_RELAY_COMMON_RATIO", str(CONTRAST_COMMON_RATIO)))
-RELAY_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELAY_ROW_LIMIT", "160"))
-RELAY_SPECIFIC_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_RELAY_SPECIFIC_ROW_LIMIT", "320"))
-SIGNATURE_OCC_FULL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SIGNATURE_OCC_FULL_LIMIT", "8"))
-SIGNATURE_OCC_BUDGET = int(os.environ.get("DARTLAB_HORIZON_V169_SIGNATURE_OCC_BUDGET", "48"))
-SIGNATURE_OCC_BUCKETS = int(os.environ.get("DARTLAB_HORIZON_V169_SIGNATURE_OCC_BUCKETS", "12"))
-SIGNATURE_OCC_RELATION_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V169_SIGNATURE_OCC_RELATION_RADIUS", "8"))
-SIGNATURE_OCC_VALUE_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V169_SIGNATURE_OCC_VALUE_RADIUS", "6"))
-SKETCH_OCC_FULL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V169_SKETCH_OCC_FULL_LIMIT", "12"))
-SKETCH_OCC_BUDGET = int(os.environ.get("DARTLAB_HORIZON_V169_SKETCH_OCC_BUDGET", "96"))
-SKETCH_OCC_BUCKETS = int(os.environ.get("DARTLAB_HORIZON_V169_SKETCH_OCC_BUCKETS", "16"))
+CORPUS_BRIDGE_RELATION_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_RELATION_RADIUS", "9"))
+CORPUS_BRIDGE_VALUE_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_VALUE_RADIUS", "7"))
+CORPUS_BRIDGE_MIN_EVIDENCE = float(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_MIN_EVIDENCE", "0.55"))
+CORPUS_BRIDGE_SUBSURFACE_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_CORPUS_BRIDGE_SUBSURFACE_LIMIT", "4"))
+COHORT_CONTRAST_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_COHORT_CONTRAST_ATOM_LIMIT", "48"))
+RELAY_NEIGHBOR_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELAY_NEIGHBOR_LIMIT", "6"))
+RELAY_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELAY_ATOM_LIMIT", "16"))
+RAW_PRUNE_XP_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_PRUNE_XP_LIMIT", "96"))
+RAW_PRUNE_HX_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_PRUNE_HX_LIMIT", "96"))
+RAW_PRUNE_EL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_PRUNE_EL_LIMIT", "48"))
+RAW_PRUNE_OTHER_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RAW_PRUNE_OTHER_LIMIT", "32"))
+RELAY_COMMON_ATOM_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELAY_COMMON_ATOM_LIMIT", "40"))
+RELAY_COMMON_RATIO = float(os.environ.get("DARTLAB_HORIZON_V181_RELAY_COMMON_RATIO", str(CONTRAST_COMMON_RATIO)))
+RELAY_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELAY_ROW_LIMIT", "160"))
+RELAY_SPECIFIC_ROW_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_RELAY_SPECIFIC_ROW_LIMIT", "320"))
+SIGNATURE_OCC_FULL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SIGNATURE_OCC_FULL_LIMIT", "8"))
+SIGNATURE_OCC_BUDGET = int(os.environ.get("DARTLAB_HORIZON_V181_SIGNATURE_OCC_BUDGET", "48"))
+SIGNATURE_OCC_BUCKETS = int(os.environ.get("DARTLAB_HORIZON_V181_SIGNATURE_OCC_BUCKETS", "12"))
+SIGNATURE_OCC_RELATION_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V181_SIGNATURE_OCC_RELATION_RADIUS", "8"))
+SIGNATURE_OCC_VALUE_RADIUS = int(os.environ.get("DARTLAB_HORIZON_V181_SIGNATURE_OCC_VALUE_RADIUS", "6"))
+SKETCH_OCC_FULL_LIMIT = int(os.environ.get("DARTLAB_HORIZON_V181_SKETCH_OCC_FULL_LIMIT", "12"))
+SKETCH_OCC_BUDGET = int(os.environ.get("DARTLAB_HORIZON_V181_SKETCH_OCC_BUDGET", "96"))
+SKETCH_OCC_BUCKETS = int(os.environ.get("DARTLAB_HORIZON_V181_SKETCH_OCC_BUCKETS", "16"))
 
 TOKEN_RE = re.compile(r"[가-힣A-Za-z0-9]+")
 TAG_RE = re.compile(r"<[^>]+>")
@@ -8885,6 +9667,164 @@ TARGET_MEMBER_PATH_LOCAL_TRACE_PROOF_CACHE: dict[tuple[int, str, str, tuple[str,
 TARGET_MEMBER_PATH_LOCAL_TRACE_SCORE_CACHE: dict[
     tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
 ] = {}
+TARGET_MEMBER_PATH_GRAMMAR_TRACE_FEATURE_CACHE: dict[tuple[tuple[str, float], ...], Counter[str]] = {}
+TARGET_MEMBER_PATH_GRAMMAR_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[str, Counter[str]],
+        Counter[str],
+        dict[str, tuple[tuple[str, float], ...]],
+        Counter[str],
+    ],
+] = {}
+TARGET_MEMBER_PATH_GRAMMAR_QUERY_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_PATH_GRAMMAR_TARGET_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_PATH_GRAMMAR_SCORE_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_PROMOTABLE_EVIDENCE_CACHE: dict[tuple[int, str], tuple[float, float, Counter[str]]] = {}
+TARGET_MEMBER_PROMOTABLE_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[str, Counter[str]],
+        dict[str, Counter[str]],
+        Counter[str],
+        dict[str, tuple[tuple[str, float], ...]],
+        Counter[str],
+        Counter[str],
+    ],
+] = {}
+TARGET_MEMBER_PROMOTABLE_QUERY_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_PROMOTABLE_TARGET_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_PROMOTABLE_SCORE_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_SLOT_RESIDUAL_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[str, tuple[tuple[str, float], ...]],
+        dict[str, tuple[tuple[str, float], ...]],
+        Counter[str],
+    ],
+] = {}
+TARGET_MEMBER_SLOT_RESIDUAL_QUERY_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], tuple[tuple[str, float], ...], Counter[str]]
+] = {}
+TARGET_MEMBER_SLOT_RESIDUAL_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], tuple[tuple[str, float], ...], Counter[str]]
+] = {}
+TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_SUPPORT_CACHE: dict[
+    tuple[int, str, str, tuple[str, ...]], tuple[float, Counter[str]]
+] = {}
+TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CACHE: dict[tuple[int, str, str], tuple[float, Counter[str]]] = {}
+TARGET_MEMBER_SLOT_RESIDUAL_SCORE_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_AXIS_QUERY_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_AXIS_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[str, Counter[str]],
+        Counter[str],
+        dict[str, tuple[tuple[str, float], ...]],
+        Counter[str],
+    ],
+] = {}
+TARGET_MEMBER_ACCOUNT_AXIS_TARGET_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_CACHE: dict[
+    tuple[int, str, str, tuple[str, ...]], tuple[tuple[str, ...], Counter[str]]
+] = {}
+TARGET_MEMBER_ACCOUNT_AXIS_PROOF_CACHE: dict[tuple[int, str, str, tuple[str, ...]], tuple[float, Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_AXIS_SCORE_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_REGISTRY_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[str, Counter[str]],
+        Counter[str],
+        Counter[str],
+        dict[str, tuple[tuple[str, float], ...]],
+        dict[str, tuple[str, ...]],
+        Counter[str],
+    ],
+] = {}
+TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], float, Counter[str]]
+] = {}
+TARGET_MEMBER_ACCOUNT_REGISTRY_PROOF_CACHE: dict[tuple[int, str, str, tuple[str, ...]], tuple[float, Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_REGISTRY_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_STATEMENT_LEDGER_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[str, Counter[str]],
+        Counter[str],
+        Counter[str],
+        dict[str, tuple[tuple[str, float], ...]],
+        dict[tuple[str, str], tuple[tuple[str, float], ...]],
+        dict[str, tuple[str, ...]],
+        Counter[str],
+    ],
+] = {}
+TARGET_MEMBER_STATEMENT_LEDGER_QUERY_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_STATEMENT_LEDGER_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], float, Counter[str]]
+] = {}
+TARGET_MEMBER_STATEMENT_LEDGER_PROOF_CACHE: dict[tuple[int, str, str, tuple[str, ...]], tuple[float, Counter[str]]] = {}
+TARGET_MEMBER_STATEMENT_LEDGER_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_ACCOUNT_ROW_INDEX_CACHE: dict[int, tuple] = {}
+TARGET_MEMBER_ACCOUNT_ROW_QUERY_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_ROW_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], float, Counter[str]]
+] = {}
+TARGET_MEMBER_ACCOUNT_ROW_PROOF_CACHE: dict[tuple[int, str, str, tuple[str, ...]], tuple[float, Counter[str]]] = {}
+TARGET_MEMBER_ACCOUNT_ROW_SCORE_CACHE: dict[tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]] = {}
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_SUFFIX_CACHE: dict[tuple[int, str], tuple[tuple[str, float, str], ...]] = {}
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_CACHE: dict[tuple[int, str], tuple[tuple[str, float, str], ...]] = {}
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_LATENT_ACCOUNT_ROW_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_HEAD_CACHE: dict[tuple[int, str], tuple[tuple[str, float, str, str, str], ...]] = {}
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_INDEX_CACHE: dict[int, tuple] = {}
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_QUERY_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], float, Counter[str]]
+] = {}
+TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_INDEX_CACHE: dict[int, tuple] = {}
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_QUERY_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], float, Counter[str]]
+] = {}
+TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_INDEX_CACHE: dict[int, tuple] = {}
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_QUERY_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str], Counter[str]]
+] = {}
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str], float, Counter[str]]
+] = {}
+TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SCORE_CACHE: dict[
+    tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
+] = {}
 TARGET_MEMBER_TRACE_ALIGNMENT_EXPECTED_ROLE_CACHE: dict[
     tuple[int, str, tuple[str, ...]], tuple[Counter[str], Counter[str]]
 ] = {}
@@ -11581,6 +12521,7654 @@ def targetMemberPathLocalTraceRoute(
     return tuple(scores.most_common(TARGET_MEMBER_PATH_LOCAL_TRACE_ROUTE_LIMIT))
 
 
+def targetMemberPathGrammarAdd(features: Counter[str], key: str, weight: float) -> None:
+    if key and weight > 0.0:
+        features[key] += float(weight)
+
+
+def targetMemberPathGrammarTraceFeatures(trace: tuple[tuple[str, float], ...]) -> Counter[str]:
+    cached = TARGET_MEMBER_PATH_GRAMMAR_TRACE_FEATURE_CACHE.get(trace)
+    if cached is not None:
+        return Counter(cached)
+
+    features: Counter[str] = Counter()
+    for atom, atomWeight in trace:
+        weight = max(0.0, float(atomWeight))
+        if weight <= 0.0:
+            continue
+        if atom.startswith("plt:rel:"):
+            match = re.match(
+                r"^plt:rel:(?P<rel>.*?):pol:(?P<pol>[^:]+):srcRole:(?P<src>[^:]+):"
+                r"tgtRole:(?P<tgt>[^:]+):srcSide:(?P<srcSide>[^:]+):tgtSide:(?P<tgtSide>[^:]+)(?P<rest>.*)$",
+                atom,
+            )
+            if not match:
+                continue
+            relation = match.group("rel") or "any"
+            polarity = match.group("pol") or "none"
+            rolePair = f"{match.group('src')}>{match.group('tgt')}"
+            sidePair = f"{match.group('srcSide')}>{match.group('tgtSide')}"
+            rest = match.group("rest") or ""
+            targetMemberPathGrammarAdd(features, f"pg:rolepair:{rolePair}", weight * 0.62)
+            targetMemberPathGrammarAdd(
+                features,
+                f"pg:core:rel:{relation}:pol:{polarity}:role:{rolePair}",
+                weight * 0.92,
+            )
+            targetMemberPathGrammarAdd(
+                features,
+                f"pg:path:rel:{relation}:pol:{polarity}:role:{rolePair}:side:{sidePair}",
+                weight * 1.10,
+            )
+            dirMatch = re.search(r":dir:(?P<direction>[^:]+)", rest)
+            if dirMatch:
+                direction = dirMatch.group("direction")
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:seq:rel:{relation}:role:{rolePair}:side:{sidePair}:dir:{direction}",
+                    weight * 1.16,
+                )
+            distMatch = re.search(r":rd:(?P<rd>[^:]+):td:(?P<td>[^:]+)", rest)
+            if distMatch:
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:dist:rel:{relation}:role:{rolePair}:rd:{distMatch.group('rd')}:td:{distMatch.group('td')}",
+                    weight * 0.76,
+                )
+            laneMatch = re.search(r":lane:(?P<lane>.+)$", rest)
+            if laneMatch:
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:lane:pol:{polarity}:role:{rolePair}:lane:{stableHash(laneMatch.group('lane'), 16)}",
+                    weight * 0.58,
+                )
+            continue
+        if atom.startswith("pltseq:role:"):
+            match = re.match(r"^pltseq:role:(?P<role>[^:]+):side:(?P<side>[^:]+):dir:(?P<direction>[^:]+)$", atom)
+            if match:
+                rolePair = match.group("role")
+                targetMemberPathGrammarAdd(features, f"pg:rolepair:{rolePair}", weight * 0.72)
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:seq:role:{rolePair}:side:{match.group('side')}:dir:{match.group('direction')}",
+                    weight * 1.28,
+                )
+            continue
+        if atom.startswith("pltseq:lane:"):
+            match = re.match(r"^pltseq:lane:(?P<lane>.*):rd:(?P<rd>[^:]+):td:(?P<td>[^:]+)$", atom)
+            if match:
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:laneDist:lane:{stableHash(match.group('lane'), 16)}:rd:{match.group('rd')}:td:{match.group('td')}",
+                    weight * 0.74,
+                )
+            continue
+        if atom.startswith("pltseq:tled:"):
+            match = re.match(r"^pltseq:tled:(?P<ledger>.*):role:(?P<role>[^:]+):side:(?P<side>[^:]+)$", atom)
+            if match:
+                rolePair = match.group("role")
+                targetMemberPathGrammarAdd(features, f"pg:rolepair:{rolePair}", weight * 0.46)
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:tled:role:{rolePair}:side:{match.group('side')}:led:{stableHash(match.group('ledger'), 18)}",
+                    weight * 1.18,
+                )
+            continue
+        if atom.startswith("pltseq:sled:"):
+            match = re.match(r"^pltseq:sled:(?P<ledger>.*):role:(?P<role>[^:]+):side:(?P<side>[^:]+)$", atom)
+            if match:
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:sled:role:{match.group('role')}:side:{match.group('side')}:led:{stableHash(match.group('ledger'), 18)}",
+                    weight * 0.76,
+                )
+            continue
+        if atom.startswith("pltowner:role:"):
+            match = re.match(r"^pltowner:role:(?P<role>[^:]+):pol:(?P<pol>[^:]+):lane:(?P<lane>.*)$", atom)
+            if match:
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:owner:role:{match.group('role')}:pol:{match.group('pol')}:lane:{stableHash(match.group('lane'), 16)}",
+                    weight * 0.72,
+                )
+            continue
+        if atom.startswith("pltprof:src:"):
+            match = re.match(r"^pltprof:src:(?P<src>[^:]+):tgt:(?P<tgt>[^:]+):pol:(?P<pol>[^:]+)$", atom)
+            if match:
+                targetMemberPathGrammarAdd(
+                    features,
+                    f"pg:prof:src:{match.group('src')}:tgt:{match.group('tgt')}:pol:{match.group('pol')}",
+                    weight * 0.64,
+                )
+            continue
+        if atom.startswith("pltprof:spec:"):
+            targetMemberPathGrammarAdd(features, f"pg:{atom}", weight * 0.44)
+
+    selected = Counter(dict(features.most_common(TARGET_MEMBER_PATH_GRAMMAR_TARGET_FEATURE_LIMIT)))
+    TARGET_MEMBER_PATH_GRAMMAR_TRACE_FEATURE_CACHE[trace] = Counter(selected)
+    return selected
+
+
+def targetMemberPathGrammarBuildIndex(
+    model: Model,
+) -> tuple[dict[str, Counter[str]], Counter[str], dict[str, tuple[tuple[str, float], ...]], Counter[str]]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_PATH_GRAMMAR_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    rawSignatures: dict[str, Counter[str]] = defaultdict(Counter)
+    stats: Counter[str] = Counter()
+    for (_surface, _relation), traces in model.relationPathLocalTargetTraces.items():
+        surface = normStem(_surface)
+        if not surface or not isContentStem(surface):
+            continue
+        for traceRank, trace in enumerate(traces[:TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT], start=1):
+            features = targetMemberPathGrammarTraceFeatures(trace)
+            if not features:
+                continue
+            traceScale = 1.0 / math.sqrt(float(traceRank))
+            for feature, featureWeight in features.items():
+                rawSignatures[surface][feature] += float(featureWeight) * traceScale
+            stats["pathGrammarIndexedTraceRows"] += 1
+            stats["pathGrammarIndexedFeatureRows"] += len(features)
+
+    targetSignatures: dict[str, Counter[str]] = {}
+    featureDf: Counter[str] = Counter()
+    postingRaw: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    for surface, signature in rawSignatures.items():
+        limited = Counter(dict(signature.most_common(TARGET_MEMBER_PATH_GRAMMAR_TARGET_FEATURE_LIMIT)))
+        if not limited:
+            continue
+        targetSignatures[surface] = limited
+        for feature, featureWeight in limited.items():
+            featureDf[feature] += 1
+            postingRaw[feature].append((surface, float(featureWeight)))
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRaw.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_PATH_GRAMMAR_POSTING_LIMIT])
+    stats["pathGrammarTargetSurfaces"] = len(targetSignatures)
+    stats["pathGrammarFeatureDfKeys"] = len(featureDf)
+    stats["pathGrammarPostingKeys"] = len(postings)
+    result = (targetSignatures, featureDf, postings, Counter(stats))
+    TARGET_MEMBER_PATH_GRAMMAR_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberPathGrammarFeatureIdf(feature: str, featureDf: Counter[str], targetCount: int) -> float:
+    df = max(0, int(featureDf.get(feature, 0)))
+    rarity = math.log1p(max(1, targetCount) / (1.0 + df)) / max(1e-9, math.log1p(max(1, targetCount)))
+    if feature.startswith(("pg:seq:", "pg:tled:")):
+        rarity *= TARGET_MEMBER_PATH_GRAMMAR_SEQUENCE_BOOST
+    return min(1.58, max(TARGET_MEMBER_PATH_GRAMMAR_IDF_FLOOR, rarity))
+
+
+def targetMemberPathGrammarLimitSignature(
+    signature: Counter[str], featureDf: Counter[str], targetCount: int, limit: int
+) -> Counter[str]:
+    if len(signature) <= limit:
+        return Counter(signature)
+    strictQuota = max(10, min(limit // 3, 34))
+    selected: Counter[str] = Counter()
+    ranked = sorted(
+        signature.items(),
+        key=lambda item: (
+            float(item[1]) * targetMemberPathGrammarFeatureIdf(item[0], featureDf, targetCount),
+            float(item[1]),
+        ),
+        reverse=True,
+    )
+    for feature, weight in ranked:
+        if len(selected) >= strictQuota:
+            break
+        if feature.startswith(("pg:seq:", "pg:path:", "pg:tled:")):
+            selected[feature] = weight
+    for feature, weight in ranked:
+        if len(selected) >= limit:
+            break
+        selected[feature] = weight
+    return selected
+
+
+def targetMemberPathGrammarQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_PATH_GRAMMAR_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    targetSignatures, featureDf, _postings, indexStats = targetMemberPathGrammarBuildIndex(model)
+    targetCount = max(1, len(targetSignatures))
+    traces, traceStats = targetMemberPathLocalQueryTraces(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(traceStats)
+    signature: Counter[str] = Counter()
+    for traceRank, trace in enumerate(traces[:TARGET_MEMBER_PATH_LOCAL_TRACE_QUERY_LIMIT], start=1):
+        features = targetMemberPathGrammarTraceFeatures(trace)
+        if not features:
+            continue
+        traceScale = 1.0 / math.sqrt(float(traceRank))
+        for feature, featureWeight in features.items():
+            signature[feature] += float(featureWeight) * traceScale
+        stats["pathGrammarQueryTraceRows"] += 1
+        stats["pathGrammarQueryFeatureRows"] += len(features)
+
+    for pathRank, (fragment, relation, _positionKind, sourceRole, expectedTargetRole, pathWeight) in enumerate(
+        targetMemberMutualProofSourcePaths(source, relations, model)[:TARGET_MEMBER_MUTUAL_PROOF_SOURCE_PATH_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment) or pathWeight <= 0.0:
+            continue
+        relationKey = relation or "any"
+        polarity = targetMemberTypedMicroPolarity(relation)
+        rolePair = f"{sourceRole}>{expectedTargetRole}"
+        pathScale = max(0.0, float(pathWeight)) / math.sqrt(float(pathRank))
+        signature[f"pg:rolepair:{rolePair}"] += pathScale * 0.36
+        signature[f"pg:core:rel:{relationKey}:pol:{polarity}:role:{rolePair}"] += pathScale * 0.42
+        stats["pathGrammarQuerySourcePathRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_PATH_EVENT_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionWeight = 0.82 if positionKind in {"edge", "prefix", "suffix"} else 0.52
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionWeight / math.sqrt(float(fragmentRank))
+        if fragmentScale <= 0.0:
+            continue
+        relationCandidates = tuple(
+            dict.fromkeys((*(relations or tuple()), *(relation for relation, _ in RELATIONS), ""))
+        )
+        for relationRank, relation in enumerate(relationCandidates, start=1):
+            relationScale = 1.0 if relation in relations else 0.46 / math.sqrt(float(relationRank))
+            for targetRank, (targetSurface, targetScore) in enumerate(
+                model.relationBoundRolePairPostings.get((fragment, relation), tuple())[
+                    :TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_TARGET_LIMIT
+                ],
+                start=1,
+            ):
+                targetSurface = normStem(targetSurface)
+                if not targetSurface or not isContentStem(targetSurface):
+                    continue
+                targetSignature = targetSignatures.get(targetSurface, Counter())
+                if not targetSignature:
+                    continue
+                targetScale = (
+                    fragmentScale
+                    * relationScale
+                    * math.log1p(max(0.0, float(targetScore)))
+                    / math.sqrt(float(targetRank))
+                )
+                for feature, featureWeight in targetSignature.most_common(
+                    TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_FEATURE_LIMIT
+                ):
+                    signature[feature] += targetScale * float(featureWeight) * 0.34
+                stats["pathGrammarQueryFragmentTargetRows"] += 1
+                if relation not in relations:
+                    stats["pathGrammarQueryFragmentBackoffRows"] += 1
+                stats["pathGrammarQueryFragmentTargetFeatures"] += min(
+                    len(targetSignature),
+                    TARGET_MEMBER_PATH_GRAMMAR_FRAGMENT_FEATURE_LIMIT,
+                )
+
+    limited = targetMemberPathGrammarLimitSignature(
+        signature,
+        featureDf,
+        targetCount,
+        TARGET_MEMBER_PATH_GRAMMAR_QUERY_FEATURE_LIMIT,
+    )
+    stats["pathGrammarQueryFeatures"] = len(limited)
+    TARGET_MEMBER_PATH_GRAMMAR_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberPathGrammarTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_PATH_GRAMMAR_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    targetSignatures, featureDf, _postings, indexStats = targetMemberPathGrammarBuildIndex(model)
+    targetCount = max(1, len(targetSignatures))
+    raw = targetSignatures.get(candidate, Counter())
+    limited = targetMemberPathGrammarLimitSignature(
+        raw,
+        featureDf,
+        targetCount,
+        TARGET_MEMBER_PATH_GRAMMAR_TARGET_FEATURE_LIMIT,
+    )
+    stats: Counter[str] = Counter(indexStats)
+    stats["pathGrammarTargetFeatures"] = len(limited)
+    TARGET_MEMBER_PATH_GRAMMAR_TARGET_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberPathGrammarWeightedOverlap(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    targetCount: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+    queryNorm = math.sqrt(
+        sum(
+            (float(weight) * targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)) ** 2
+            for feature, weight in querySignature.items()
+        )
+    )
+    targetNorm = math.sqrt(
+        sum(
+            (float(weight) * targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)) ** 2
+            for feature, weight in targetSignature.items()
+        )
+    )
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    raw = 0.0
+    matched = 0
+    coreMatched = 0
+    sequenceMatched = 0
+    ledgerMatched = 0
+    idfMass = 0.0
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        idf = targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)
+        raw += float(leftWeight) * float(rightWeight) * idf * idf
+        matched += 1
+        idfMass += idf
+        if feature.startswith(("pg:core:", "pg:path:", "pg:seq:")):
+            coreMatched += 1
+        if feature.startswith("pg:seq:"):
+            sequenceMatched += 1
+        if feature.startswith(("pg:tled:", "pg:sled:")):
+            ledgerMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    meanIdf = idfMass / matched
+    score = raw / max(1e-9, queryNorm * targetNorm)
+    if matched < TARGET_MEMBER_PATH_GRAMMAR_MIN_MATCHED or coreMatched < TARGET_MEMBER_PATH_GRAMMAR_MIN_CORE:
+        score *= 0.34
+        stats["pathGrammarWeakGateRows"] += 1
+    if meanIdf < TARGET_MEMBER_PATH_GRAMMAR_MIN_MEAN_IDF:
+        score *= TARGET_MEMBER_PATH_GRAMMAR_LOW_IDF_FACTOR
+        stats["pathGrammarLowIdfRows"] += 1
+    residualFactor = max(
+        TARGET_MEMBER_PATH_GRAMMAR_LOW_IDF_FACTOR,
+        min(1.38, 0.48 + meanIdf * 0.82 + min(0.22, sequenceMatched * 0.035 + ledgerMatched * 0.055)),
+    )
+    score *= residualFactor
+    stats["pathGrammarMatchedFeatures"] = matched
+    stats["pathGrammarCoreMatchedFeatures"] = coreMatched
+    stats["pathGrammarSequenceMatchedFeatures"] = sequenceMatched
+    stats["pathGrammarLedgerMatchedFeatures"] = ledgerMatched
+    stats["pathGrammarMeanIdfMilli"] = int(meanIdf * 1000)
+    stats["pathGrammarResidualFactorMilli"] = int(residualFactor * 1000)
+    stats["pathGrammarOverlapMilli"] = int(max(0.0, score) * 1000)
+    return max(0.0, score), stats
+
+
+def targetMemberPathGrammarScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_PATH_GRAMMAR_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    targetSignatures, featureDf, postings, indexStats = targetMemberPathGrammarBuildIndex(model)
+    targetCount = max(1, len(targetSignatures))
+    querySignature, queryStats = targetMemberPathGrammarQuerySignature(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    pool: Counter[str] = Counter()
+    for feature, queryWeight in querySignature.most_common(TARGET_MEMBER_PATH_GRAMMAR_QUERY_FEATURE_LIMIT):
+        idf = targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)
+        for surface, targetWeight in postings.get(feature, tuple()):
+            candidate = normStem(surface)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            pool[candidate] += float(queryWeight) * float(targetWeight) * idf * idf
+            stats["pathGrammarPostingRows"] += 1
+    stats["pathGrammarPoolRows"] = len(pool)
+    scores: Counter[str] = Counter()
+    if not querySignature or not pool:
+        stats["pathGrammarEmptyQueryOrPool"] += 1
+        TARGET_MEMBER_PATH_GRAMMAR_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    for rank, (candidate, seedScore) in enumerate(
+        pool.most_common(TARGET_MEMBER_PATH_GRAMMAR_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidateSignature, targetStats = targetMemberPathGrammarTargetSignature(candidate, relations, model)
+        if not candidateSignature:
+            stats["pathGrammarEmptyTargetRows"] += 1
+            continue
+        overlap, overlapStats = targetMemberPathGrammarWeightedOverlap(
+            querySignature,
+            candidateSignature,
+            featureDf,
+            targetCount,
+        )
+        stats.update(overlapStats)
+        if overlap <= 0.0 or overlapStats.get("pathGrammarMatchedFeatures", 0) <= 0:
+            stats["pathGrammarZeroOverlapRows"] += 1
+            continue
+        profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+        breadthPenalty = 1.0 + min(
+            0.44, len(candidateSignature) / max(1.0, TARGET_MEMBER_PATH_GRAMMAR_TARGET_FEATURE_LIMIT) * 0.32
+        )
+        hubPenalty = 1.0 + min(0.28, profile.hubness * 0.18)
+        grammarMass = (
+            1.0
+            + min(0.38, overlapStats.get("pathGrammarCoreMatchedFeatures", 0) * 0.035)
+            + min(0.34, overlapStats.get("pathGrammarSequenceMatchedFeatures", 0) * 0.060)
+            + min(0.28, overlapStats.get("pathGrammarLedgerMatchedFeatures", 0) * 0.075)
+        )
+        rankMass = 1.0 / math.sqrt(1.0 + (rank - 1) * 0.08)
+        score = (
+            math.log1p(max(0.0, float(seedScore))) * overlap * grammarMass * rankMass / (breadthPenalty * hubPenalty)
+        )
+        if score <= 0.0:
+            continue
+        scores[candidate] += score
+        stats["pathGrammarScored"] += 1
+        stats["pathGrammarTargetFeatures"] += targetStats.get("pathGrammarTargetFeatures", 0)
+        stats["pathGrammarScoreMilli"] += int(score * 1000)
+
+    limited = Counter(dict(scores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)))
+    stats["pathGrammarRouteRows"] = len(limited)
+    TARGET_MEMBER_PATH_GRAMMAR_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberPathGrammarRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberPathGrammarScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_PATH_GRAMMAR_ROUTE_LIMIT))
+
+
+def targetMemberPromotableEvidence(surface: str, model: Model) -> tuple[float, float, Counter[str]]:
+    surface = normStem(surface)
+    cacheKey = (id(model), surface)
+    cached = TARGET_MEMBER_PROMOTABLE_EVIDENCE_CACHE.get(cacheKey)
+    if cached is not None:
+        promotion, context, stats = cached
+        return promotion, context, Counter(stats)
+
+    stats: Counter[str] = Counter()
+    if not surface or not isContentStem(surface) or relationTokenLike(surface):
+        stats["promotableRejectedSurface"] += 1
+        result = (0.0, 1.0, Counter(stats))
+        TARGET_MEMBER_PROMOTABLE_EVIDENCE_CACHE[cacheKey] = result
+        return result
+
+    sentence, artifact, owner = surfaceLaneProfile(surface, model)
+    profile = inferredOwnerRoleSpecificityProfile(surface, model)
+    role = relationSlotSubstitutionTargetRole(surface, model)
+    independent = model.independentSurfaceDf.get(surface, 0)
+    bridge = model.bridgeSurfaceDf.get(surface, 0)
+    boundRows = 0
+    frameRows = 0
+    spanRows = 0
+    pathTargetRows = 0
+    for relation, _terms in RELATIONS:
+        boundRows += len(model.relationBoundPostings.get((surface, relation), ()))
+        frameRows += len(model.relationFramePostings.get((surface, relation), ()))
+        spanRows += len(model.relationSpanPostings.get((surface, relation), ()))
+        pathTargetRows += len(model.relationPathLocalTargetTraces.get((surface, relation), ()))
+    surfaceKeyRows = len(model.relationSlotSubstitutionSurfaceKeys.get(surface, ()))
+
+    ownerAxis = 0.0
+    artifactAxis = 0.0
+    valueAxis = 0.0
+    relationAxis = 0.0
+    directAxis = 0.0
+    plainSentence = 0.0
+    inspected = 0
+    for unitId, position, marker in model.queryLocalFrameOccurrenceIndex.get(surface, ())[
+        :TARGET_MEMBER_PROMOTABLE_OCCURRENCE_LIMIT
+    ]:
+        if unitId < 0 or unitId >= len(model.caches):
+            continue
+        cache = model.caches[unitId]
+        if position < 0 or position >= len(cache.stems):
+            continue
+        inspected += 1
+        lane = cache.lanes[position] if cache.lanes and position < len(cache.lanes) else "sentence"
+        valueDistance = nearestTokenDistance(position, cache.valuePositions or [])
+        relationDistance = nearestTokenDistance(position, cache.relationPositions or [])
+        if lane == "owner":
+            ownerAxis += 1.0
+        elif lane == "artifact":
+            artifactAxis += 1.0
+        else:
+            plainSentence += 1.0
+        if valueDistance is not None:
+            if valueDistance <= 2:
+                valueAxis += 1.0
+            elif valueDistance <= SIGNATURE_OCC_VALUE_RADIUS:
+                valueAxis += 0.48
+        if relationDistance is not None:
+            if relationDistance <= 3:
+                relationAxis += 0.72
+            elif relationDistance <= SIGNATURE_OCC_RELATION_RADIUS:
+                relationAxis += 0.34
+        if marker != "~":
+            directAxis += 1.0
+
+    denom = max(1.0, float(inspected))
+    ownerShare = ownerAxis / denom
+    artifactShare = artifactAxis / denom
+    valueShare = valueAxis / denom
+    relationShare = relationAxis / denom
+    directShare = directAxis / denom
+    plainShare = plainSentence / denom
+
+    roleMass = 0.0
+    if role in {"owner", "metric"}:
+        roleMass += 0.52
+    if profile.role in {"owner", "artifact"}:
+        roleMass += 0.44
+    if profile.specificity >= 0.42:
+        roleMass += min(0.36, profile.specificity * 0.42)
+
+    structureMass = (
+        owner * 0.80
+        + artifact * 0.66
+        + ownerShare * 0.72
+        + artifactShare * 0.58
+        + valueShare * 0.76
+        + relationShare * 0.34
+        + directShare * 0.18
+        + min(0.82, math.log1p(boundRows) / 2.8)
+        + min(0.58, math.log1p(pathTargetRows) / 2.4)
+        + min(0.36, math.log1p(surfaceKeyRows) / 4.8)
+        + roleMass
+    )
+    contextPressure = (
+        sentence * 0.58
+        + plainShare * 0.46
+        + profile.hubness * 0.64
+        + profile.laneEntropy * 0.34
+        + profile.relationEntropy * 0.24
+        + min(0.42, math.log1p(frameRows + spanRows) / 8.0)
+    )
+    if bridge > independent and boundRows <= 0:
+        contextPressure += 0.28
+    if boundRows > 0 and valueShare > 0.0:
+        contextPressure *= 0.86
+
+    promotion = max(0.0, structureMass - max(0.0, contextPressure - 0.92) * 0.36)
+    stats["promotableOccurrenceRows"] = inspected
+    stats["promotableBoundRows"] = boundRows
+    stats["promotablePathTargetRows"] = pathTargetRows
+    stats["promotableSurfaceKeyRows"] = surfaceKeyRows
+    stats["promotableOwnerShareMilli"] = int(ownerShare * 1000)
+    stats["promotableArtifactShareMilli"] = int(artifactShare * 1000)
+    stats["promotableValueShareMilli"] = int(valueShare * 1000)
+    stats["promotableRelationShareMilli"] = int(relationShare * 1000)
+    stats["promotablePromotionMilli"] = int(promotion * 1000)
+    stats["promotableContextMilli"] = int(contextPressure * 1000)
+    result = (promotion, contextPressure, Counter(stats))
+    TARGET_MEMBER_PROMOTABLE_EVIDENCE_CACHE[cacheKey] = result
+    return promotion, contextPressure, Counter(stats)
+
+
+def targetMemberPromotableSurfaceAllowed(surface: str, model: Model) -> tuple[bool, float, float, Counter[str]]:
+    surface = normStem(surface)
+    promotion, context, stats = targetMemberPromotableEvidence(surface, model)
+    artifactShare = stats.get("promotableArtifactShareMilli", 0) / 1000.0
+    valueShare = stats.get("promotableValueShareMilli", 0) / 1000.0
+    profile = inferredOwnerRoleSpecificityProfile(surface, model)
+    noValueNarrativeOwner = valueShare <= 0.10 and artifactShare <= 0.10
+    numericBucket = any(ch.isdigit() for ch in surface)
+    shortContextRole = len(surface) <= 2 and valueShare < 0.82 and artifactShare < 0.10
+    weakValueOwnerPhrase = (
+        profile.role == "owner"
+        and valueShare < 0.45
+        and artifactShare < 0.10
+        and stats.get("promotableOccurrenceRows", 0) < TARGET_MEMBER_PROMOTABLE_OCCURRENCE_LIMIT
+    )
+    allowed = (
+        promotion >= TARGET_MEMBER_PROMOTABLE_MIN_SCORE
+        and context <= TARGET_MEMBER_PROMOTABLE_CONTEXT_MAX + promotion * 0.34
+        and promotion >= context * 0.58
+        and not noValueNarrativeOwner
+        and not numericBucket
+        and not shortContextRole
+        and not weakValueOwnerPhrase
+    )
+    stats["promotableNoValueNarrativeReject"] = int(noValueNarrativeOwner)
+    stats["promotableNumericBucketReject"] = int(numericBucket)
+    stats["promotableShortContextReject"] = int(shortContextRole)
+    stats["promotableWeakValueOwnerReject"] = int(weakValueOwnerPhrase)
+    stats["promotableAllowed"] = int(allowed)
+    return allowed, promotion, context, stats
+
+
+def targetMemberPromotableBuildIndex(
+    model: Model,
+) -> tuple[
+    dict[str, Counter[str]],
+    dict[str, Counter[str]],
+    Counter[str],
+    dict[str, tuple[tuple[str, float], ...]],
+    Counter[str],
+    Counter[str],
+]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_PROMOTABLE_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    targetRaw: dict[str, Counter[str]] = defaultdict(Counter)
+    contextRaw: dict[str, Counter[str]] = defaultdict(Counter)
+    promotionScores: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    for (_surface, _relation), traces in model.relationPathLocalTargetTraces.items():
+        surface = normStem(_surface)
+        if not surface or not isContentStem(surface):
+            continue
+        allowed, promotion, context, evidenceStats = targetMemberPromotableSurfaceAllowed(surface, model)
+        stats.update(evidenceStats)
+        sink = targetRaw if allowed else contextRaw
+        scaleBase = 1.0 + min(0.72, promotion * TARGET_MEMBER_PROMOTABLE_PROMOTION_GAIN)
+        if not allowed:
+            scaleBase = max(0.34, TARGET_MEMBER_PROMOTABLE_CONTEXT_QUERY_GAIN / (1.0 + max(0.0, context)))
+            stats["promotableContextSurfaces"] += 1
+        else:
+            promotionScores[surface] = max(promotionScores.get(surface, 0.0), promotion)
+            stats["promotableTargetSurfacesSeen"] += 1
+        for traceRank, trace in enumerate(traces[:TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT], start=1):
+            features = targetMemberPathGrammarTraceFeatures(trace)
+            if not features:
+                continue
+            traceScale = scaleBase / math.sqrt(float(traceRank))
+            for feature, featureWeight in features.items():
+                sink[surface][feature] += float(featureWeight) * traceScale
+            if allowed:
+                stats["promotableTargetTraceRows"] += 1
+                stats["promotableTargetFeatureRows"] += len(features)
+            else:
+                stats["promotableContextTraceRows"] += 1
+                stats["promotableContextFeatureRows"] += len(features)
+
+    targetSignatures: dict[str, Counter[str]] = {}
+    contextSignatures: dict[str, Counter[str]] = {}
+    featureDf: Counter[str] = Counter()
+    postingRaw: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    for surface, signature in targetRaw.items():
+        limited = Counter(dict(signature.most_common(TARGET_MEMBER_PROMOTABLE_TARGET_FEATURE_LIMIT)))
+        if not limited:
+            continue
+        targetSignatures[surface] = limited
+        for feature, featureWeight in limited.items():
+            featureDf[feature] += 1
+            postingRaw[feature].append((surface, float(featureWeight)))
+    for surface, signature in contextRaw.items():
+        limited = Counter(dict(signature.most_common(TARGET_MEMBER_PROMOTABLE_CONTEXT_FEATURE_LIMIT)))
+        if limited:
+            contextSignatures[surface] = limited
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRaw.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_PROMOTABLE_POSTING_LIMIT])
+    stats["promotableTargetSurfaces"] = len(targetSignatures)
+    stats["promotableContextSignatureSurfaces"] = len(contextSignatures)
+    stats["promotableFeatureDfKeys"] = len(featureDf)
+    stats["promotablePostingKeys"] = len(postings)
+    result = (targetSignatures, contextSignatures, featureDf, postings, promotionScores, Counter(stats))
+    TARGET_MEMBER_PROMOTABLE_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberPromotableLimitSignature(
+    signature: Counter[str],
+    featureDf: Counter[str],
+    targetCount: int,
+    limit: int,
+) -> Counter[str]:
+    return targetMemberPathGrammarLimitSignature(signature, featureDf, targetCount, limit)
+
+
+def targetMemberPromotableQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_PROMOTABLE_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    targetSignatures, contextSignatures, featureDf, _postings, _promotionScores, indexStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    targetCount = max(1, len(targetSignatures))
+    traces, traceStats = targetMemberPathLocalQueryTraces(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(traceStats)
+    signature: Counter[str] = Counter()
+    for traceRank, trace in enumerate(traces[:TARGET_MEMBER_PATH_LOCAL_TRACE_QUERY_LIMIT], start=1):
+        features = targetMemberPathGrammarTraceFeatures(trace)
+        if not features:
+            continue
+        traceScale = 1.0 / math.sqrt(float(traceRank))
+        for feature, featureWeight in features.items():
+            signature[feature] += float(featureWeight) * traceScale
+        stats["promotableQueryTraceRows"] += 1
+        stats["promotableQueryTraceFeatures"] += len(features)
+
+    for pathRank, (fragment, relation, _positionKind, sourceRole, expectedTargetRole, pathWeight) in enumerate(
+        targetMemberMutualProofSourcePaths(source, relations, model)[:TARGET_MEMBER_MUTUAL_PROOF_SOURCE_PATH_LIMIT],
+        start=1,
+    ):
+        relationKey = relation or "any"
+        polarity = targetMemberTypedMicroPolarity(relation)
+        rolePair = f"{sourceRole}>{expectedTargetRole}"
+        pathScale = max(0.0, float(pathWeight)) / math.sqrt(float(pathRank))
+        if pathScale <= 0.0:
+            continue
+        signature[f"pg:rolepair:{rolePair}"] += pathScale * 0.34
+        signature[f"pg:core:rel:{relationKey}:pol:{polarity}:role:{rolePair}"] += pathScale * 0.40
+        stats["promotableQuerySourcePathRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_PATH_EVENT_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionWeight = 0.84 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionWeight / math.sqrt(float(fragmentRank))
+        if fragmentScale <= 0.0:
+            continue
+
+        directTarget = targetSignatures.get(fragment)
+        if directTarget:
+            for feature, featureWeight in directTarget.most_common(TARGET_MEMBER_PROMOTABLE_FRAGMENT_FEATURE_LIMIT):
+                signature[feature] += fragmentScale * float(featureWeight) * 0.28
+            stats["promotableQueryFragmentDirectTargetRows"] += 1
+        directContext = contextSignatures.get(fragment)
+        if directContext:
+            for feature, featureWeight in directContext.most_common(TARGET_MEMBER_PROMOTABLE_CONTEXT_FEATURE_LIMIT):
+                signature[feature] += fragmentScale * float(featureWeight) * TARGET_MEMBER_PROMOTABLE_CONTEXT_QUERY_GAIN
+            stats["promotableQueryFragmentDirectContextRows"] += 1
+
+        relationCandidates = tuple(
+            dict.fromkeys((*(relations or tuple()), *(relation for relation, _ in RELATIONS), ""))
+        )
+        for relationRank, relation in enumerate(relationCandidates, start=1):
+            relationScale = 1.0 if relation in relations else 0.42 / math.sqrt(float(relationRank))
+            for targetRank, (targetSurface, targetScore) in enumerate(
+                model.relationBoundRolePairPostings.get((fragment, relation), tuple())[
+                    :TARGET_MEMBER_PROMOTABLE_FRAGMENT_TARGET_LIMIT
+                ],
+                start=1,
+            ):
+                targetSurface = normStem(targetSurface)
+                if not targetSurface or not isContentStem(targetSurface):
+                    continue
+                targetScale = (
+                    fragmentScale
+                    * relationScale
+                    * math.log1p(max(0.0, float(targetScore)))
+                    / math.sqrt(float(targetRank))
+                )
+                targetSignature = targetSignatures.get(targetSurface)
+                if targetSignature:
+                    for feature, featureWeight in targetSignature.most_common(
+                        TARGET_MEMBER_PROMOTABLE_FRAGMENT_FEATURE_LIMIT
+                    ):
+                        signature[feature] += targetScale * float(featureWeight) * 0.34
+                    stats["promotableQueryFragmentPromotedRows"] += 1
+                    if relation not in relations:
+                        stats["promotableQueryFragmentBackoffRows"] += 1
+                    continue
+                contextSignature = contextSignatures.get(targetSurface)
+                if contextSignature:
+                    for feature, featureWeight in contextSignature.most_common(
+                        TARGET_MEMBER_PROMOTABLE_CONTEXT_FEATURE_LIMIT
+                    ):
+                        signature[feature] += (
+                            targetScale * float(featureWeight) * TARGET_MEMBER_PROMOTABLE_CONTEXT_QUERY_GAIN
+                        )
+                    stats["promotableQueryFragmentContextRows"] += 1
+
+    limited = targetMemberPromotableLimitSignature(
+        signature,
+        featureDf,
+        targetCount,
+        TARGET_MEMBER_PROMOTABLE_QUERY_FEATURE_LIMIT,
+    )
+    stats["promotableQueryFeatures"] = len(limited)
+    TARGET_MEMBER_PROMOTABLE_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberPromotableTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_PROMOTABLE_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    targetSignatures, _contextSignatures, featureDf, _postings, _promotionScores, indexStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    targetCount = max(1, len(targetSignatures))
+    raw = targetSignatures.get(candidate, Counter())
+    limited = targetMemberPromotableLimitSignature(
+        raw,
+        featureDf,
+        targetCount,
+        TARGET_MEMBER_PROMOTABLE_TARGET_FEATURE_LIMIT,
+    )
+    stats: Counter[str] = Counter(indexStats)
+    stats["promotableTargetFeatures"] = len(limited)
+    TARGET_MEMBER_PROMOTABLE_TARGET_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberPromotableScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_PROMOTABLE_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    targetSignatures, _contextSignatures, featureDf, postings, promotionScores, indexStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    targetCount = max(1, len(targetSignatures))
+    querySignature, queryStats = targetMemberPromotableQuerySignature(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    pool: Counter[str] = Counter()
+    for feature, queryWeight in querySignature.most_common(TARGET_MEMBER_PROMOTABLE_QUERY_FEATURE_LIMIT):
+        idf = targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)
+        for surface, targetWeight in postings.get(feature, tuple()):
+            candidate = normStem(surface)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            pool[candidate] += float(queryWeight) * float(targetWeight) * idf * idf
+            stats["promotablePostingRows"] += 1
+    stats["promotablePoolRows"] = len(pool)
+    scores: Counter[str] = Counter()
+    if not querySignature or not pool:
+        stats["promotableEmptyQueryOrPool"] += 1
+        TARGET_MEMBER_PROMOTABLE_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    for rank, (candidate, seedScore) in enumerate(
+        pool.most_common(TARGET_MEMBER_PROMOTABLE_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidateSignature, targetStats = targetMemberPromotableTargetSignature(candidate, relations, model)
+        if not candidateSignature:
+            stats["promotableEmptyTargetRows"] += 1
+            continue
+        overlap, overlapStats = targetMemberPathGrammarWeightedOverlap(
+            querySignature,
+            candidateSignature,
+            featureDf,
+            targetCount,
+        )
+        stats.update(overlapStats)
+        if overlap <= 0.0 or overlapStats.get("pathGrammarMatchedFeatures", 0) <= 0:
+            stats["promotableZeroOverlapRows"] += 1
+            continue
+        promotion = max(0.0, float(promotionScores.get(candidate, 0.0)))
+        profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+        breadthPenalty = 1.0 + min(
+            0.34,
+            len(candidateSignature) / max(1.0, TARGET_MEMBER_PROMOTABLE_TARGET_FEATURE_LIMIT) * 0.24,
+        )
+        hubPenalty = 1.0 + min(0.24, profile.hubness * 0.16)
+        promotionMass = 1.0 + min(0.82, promotion * TARGET_MEMBER_PROMOTABLE_PROMOTION_GAIN)
+        grammarMass = (
+            1.0
+            + min(0.36, overlapStats.get("pathGrammarCoreMatchedFeatures", 0) * 0.035)
+            + min(0.34, overlapStats.get("pathGrammarSequenceMatchedFeatures", 0) * 0.060)
+            + min(0.28, overlapStats.get("pathGrammarLedgerMatchedFeatures", 0) * 0.075)
+        )
+        rankMass = 1.0 / math.sqrt(1.0 + (rank - 1) * 0.08)
+        score = (
+            math.log1p(max(0.0, float(seedScore)))
+            * overlap
+            * grammarMass
+            * promotionMass
+            * rankMass
+            / (breadthPenalty * hubPenalty)
+        )
+        if score <= 0.0:
+            continue
+        scores[candidate] += score
+        stats["promotableScored"] += 1
+        stats["promotableTargetFeatures"] += targetStats.get("promotableTargetFeatures", 0)
+        stats["promotableMatchedFeatures"] += overlapStats.get("pathGrammarMatchedFeatures", 0)
+        stats["promotableCoreMatchedFeatures"] += overlapStats.get("pathGrammarCoreMatchedFeatures", 0)
+        stats["promotableSequenceMatchedFeatures"] += overlapStats.get("pathGrammarSequenceMatchedFeatures", 0)
+        stats["promotableLedgerMatchedFeatures"] += overlapStats.get("pathGrammarLedgerMatchedFeatures", 0)
+        stats["promotablePromotionMilli"] += int(promotion * 1000)
+        stats["promotableScoreMilli"] += int(score * 1000)
+
+    limited = Counter(dict(scores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)))
+    stats["promotableRouteRows"] = len(limited)
+    TARGET_MEMBER_PROMOTABLE_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberPromotableRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberPromotableScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_PROMOTABLE_ROUTE_LIMIT))
+
+
+def targetMemberSlotResidualFeatureGain(feature: str) -> float:
+    if feature.startswith(("pg:tled:", "pg:sled:")):
+        return 1.24
+    if feature.startswith(("pg:path:", "pg:seq:")):
+        return 1.18
+    if feature.startswith("pg:core:"):
+        return 1.04
+    if feature.startswith(("pg:owner:", "pg:prof:")):
+        return 0.86
+    if feature.startswith("pg:rolepair:"):
+        return 0.58
+    return 0.72
+
+
+def targetMemberSlotResidualSlotKey(feature: str) -> tuple[str, float] | None:
+    if feature.startswith("pg:core:"):
+        return feature, 1.22
+    if feature.startswith("pg:path:"):
+        return feature, 1.14
+    if feature.startswith("pg:seq:"):
+        return feature, 1.18
+    if feature.startswith("pg:tled:"):
+        return feature, 1.16
+    if feature.startswith("pg:sled:"):
+        return feature, 0.86
+    if feature.startswith("pg:owner:"):
+        return feature, 0.74
+    if feature.startswith("pg:prof:"):
+        return feature, 0.66
+    if feature.startswith("pg:rolepair:"):
+        return feature, 0.54
+    return None
+
+
+def targetMemberSlotResidualSlotKeys(signature: Counter[str]) -> tuple[tuple[str, float], ...]:
+    ranked: list[tuple[float, str, float]] = []
+    for feature, weight in signature.items():
+        slot = targetMemberSlotResidualSlotKey(feature)
+        if slot is None:
+            continue
+        slotKey, slotGain = slot
+        value = max(0.0, float(weight)) * slotGain
+        if value <= 0.0:
+            continue
+        ranked.append((value, slotKey, slotGain))
+    ranked.sort(reverse=True)
+    selected: Counter[str] = Counter()
+    for value, slotKey, _slotGain in ranked[: TARGET_MEMBER_SLOT_RESIDUAL_SLOT_KEY_LIMIT * 2]:
+        selected[slotKey] = max(selected.get(slotKey, 0.0), value)
+        if len(selected) >= TARGET_MEMBER_SLOT_RESIDUAL_SLOT_KEY_LIMIT:
+            break
+    return tuple(selected.most_common(TARGET_MEMBER_SLOT_RESIDUAL_SLOT_KEY_LIMIT))
+
+
+def targetMemberSlotResidualBuildIndex(
+    model: Model,
+) -> tuple[dict[str, tuple[tuple[str, float], ...]], dict[str, tuple[tuple[str, float], ...]], Counter[str]]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_SLOT_RESIDUAL_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    targetSignatures, _contextSignatures, _featureDf, _postings, promotionScores, promoStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    rawPostings: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    surfaceSlots: dict[str, tuple[tuple[str, float], ...]] = {}
+    stats: Counter[str] = Counter(promoStats)
+    for surface, signature in targetSignatures.items():
+        slots = targetMemberSlotResidualSlotKeys(signature)
+        if not slots:
+            stats["slotResidualEmptySlotSurfaces"] += 1
+            continue
+        surfaceSlots[surface] = slots
+        promotion = max(0.0, float(promotionScores.get(surface, 0.0)))
+        promotionMass = 1.0 + min(0.44, promotion * 0.18)
+        for slotKey, slotWeight in slots:
+            rawPostings[slotKey].append((surface, float(slotWeight) * promotionMass))
+            stats["slotResidualRawSlotRows"] += 1
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for slotKey, rows in rawPostings.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[slotKey] = tuple(rows[:TARGET_MEMBER_SLOT_RESIDUAL_SLOT_POSTING_LIMIT])
+    stats["slotResidualTargetSurfaces"] = len(surfaceSlots)
+    stats["slotResidualSlotKeys"] = len(postings)
+    stats["slotResidualSlotLinks"] = sum(len(rows) for rows in postings.values())
+    result = (postings, surfaceSlots, Counter(stats))
+    TARGET_MEMBER_SLOT_RESIDUAL_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberSlotResidualQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], tuple[tuple[str, float], ...], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_SLOT_RESIDUAL_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, slots, stats = cached
+        return Counter(signature), tuple(slots), Counter(stats)
+
+    targetSignatures, _contextSignatures, featureDf, _postings, _promotionScores, indexStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberPromotableQuerySignature(source, relations, model)
+    targetCount = max(1, len(targetSignatures))
+    limited = targetMemberPromotableLimitSignature(
+        querySignature,
+        featureDf,
+        targetCount,
+        TARGET_MEMBER_SLOT_RESIDUAL_QUERY_FEATURE_LIMIT,
+    )
+    slots = targetMemberSlotResidualSlotKeys(limited)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats["slotResidualQueryFeatures"] = len(limited)
+    stats["slotResidualQuerySlots"] = len(slots)
+    TARGET_MEMBER_SLOT_RESIDUAL_QUERY_CACHE[cacheKey] = (Counter(limited), tuple(slots), Counter(stats))
+    return limited, slots, stats
+
+
+def targetMemberSlotResidualColdTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    targetSignatures: dict[str, Counter[str]],
+    contextSignatures: dict[str, Counter[str]],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    candidate = normStem(candidate)
+    stats: Counter[str] = Counter()
+    if not candidate or not isContentStem(candidate):
+        return Counter(), stats
+    allowed, promotion, contextPressure, evidenceStats = targetMemberPromotableSurfaceAllowed(candidate, model)
+    stats.update(evidenceStats)
+    if not allowed:
+        stats["slotResidualColdTargetRejected"] += 1
+        return Counter(), stats
+
+    signature: Counter[str] = Counter()
+    relationCandidates = tuple(
+        dict.fromkeys((*(relations or tuple()), *(relation for relation, _terms in RELATIONS), ""))
+    )
+    for relationRank, relation in enumerate(relationCandidates, start=1):
+        relationMass = 1.0 if relation in relations else 0.32 / math.sqrt(relationRank)
+        for traceRank, trace in enumerate(
+            model.relationPathLocalTargetTraces.get((candidate, relation), ())[
+                :TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT
+            ],
+            start=1,
+        ):
+            features = targetMemberPathGrammarTraceFeatures(trace)
+            for feature, featureWeight in features.items():
+                signature[feature] += float(featureWeight) * relationMass * 0.72 / math.sqrt(traceRank)
+            stats["slotResidualColdTargetIncomingTraceRows"] += 1
+        for traceRank, trace in enumerate(
+            model.relationPathLocalSourceTraces.get((candidate, relation), ())[
+                :TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT
+            ],
+            start=1,
+        ):
+            features = targetMemberPathGrammarTraceFeatures(trace)
+            for feature, featureWeight in features.items():
+                signature[feature] += float(featureWeight) * relationMass * 0.44 / math.sqrt(traceRank)
+            stats["slotResidualColdTargetSourceTraceRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(candidate, model)[:TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == candidate or not isContentStem(fragment):
+            continue
+        positionMass = 0.88 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass / math.sqrt(fragmentRank)
+        if fragmentScale <= 0.0:
+            continue
+        fragmentTarget = targetSignatures.get(fragment)
+        if fragmentTarget:
+            for feature, featureWeight in fragmentTarget.most_common(TARGET_MEMBER_SLOT_RESIDUAL_TARGET_FEATURE_LIMIT):
+                signature[feature] += fragmentScale * float(featureWeight) * 0.58
+            stats["slotResidualColdTargetFragmentTargetRows"] += 1
+        fragmentContext = contextSignatures.get(fragment)
+        if fragmentContext:
+            for feature, featureWeight in fragmentContext.most_common(TARGET_MEMBER_PROMOTABLE_CONTEXT_FEATURE_LIMIT):
+                signature[feature] += fragmentScale * float(featureWeight) * 0.18
+            stats["slotResidualColdTargetFragmentContextRows"] += 1
+        for relationRank, relation in enumerate(relationCandidates, start=1):
+            relationMass = 1.0 if relation in relations else 0.28 / math.sqrt(relationRank)
+            for traceRank, trace in enumerate(
+                model.relationPathLocalTargetTraces.get((fragment, relation), ())[
+                    : max(4, TARGET_MEMBER_PATH_LOCAL_TRACE_TARGET_LIMIT // 3)
+                ],
+                start=1,
+            ):
+                features = targetMemberPathGrammarTraceFeatures(trace)
+                for feature, featureWeight in features.items():
+                    signature[feature] += (
+                        fragmentScale * relationMass * float(featureWeight) * 0.30 / math.sqrt(traceRank)
+                    )
+                stats["slotResidualColdTargetFragmentTraceRows"] += 1
+    if signature:
+        promotionMass = 1.0 + min(0.54, max(0.0, promotion) * 0.18)
+        contextPenalty = 1.0 + min(0.34, max(0.0, contextPressure) * 0.08)
+        for feature in tuple(signature):
+            signature[feature] = signature[feature] * promotionMass / contextPenalty
+        stats["slotResidualColdTargetFeatures"] = len(signature)
+    return signature, stats
+
+
+def targetMemberSlotResidualTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], tuple[tuple[str, float], ...], Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_SLOT_RESIDUAL_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, slots, stats = cached
+        return Counter(signature), tuple(slots), Counter(stats)
+
+    targetSignatures, contextSignatures, featureDf, _postings, _promotionScores, indexStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    targetCount = max(1, len(targetSignatures))
+    raw = Counter(targetSignatures.get(candidate, Counter()))
+    stats: Counter[str] = Counter(indexStats)
+    if not raw:
+        coldRaw, coldStats = targetMemberSlotResidualColdTargetSignature(
+            candidate,
+            relations,
+            targetSignatures,
+            contextSignatures,
+            model,
+        )
+        if coldRaw:
+            raw.update(coldRaw)
+            stats["slotResidualColdTargetApplied"] += 1
+        stats.update(coldStats)
+    limited = targetMemberPromotableLimitSignature(
+        raw,
+        featureDf,
+        targetCount,
+        TARGET_MEMBER_SLOT_RESIDUAL_TARGET_FEATURE_LIMIT,
+    )
+    slots = targetMemberSlotResidualSlotKeys(limited)
+    stats["slotResidualTargetFeatures"] = len(limited)
+    stats["slotResidualTargetSlots"] = len(slots)
+    TARGET_MEMBER_SLOT_RESIDUAL_TARGET_CACHE[cacheKey] = (Counter(limited), tuple(slots), Counter(stats))
+    return limited, slots, stats
+
+
+def targetMemberSlotResidualSurfaceBridgeSupport(
+    source: str, candidate: str, model: Model
+) -> tuple[float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate)
+    cached = TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CACHE.get(cacheKey)
+    if cached is not None:
+        support, stats = cached
+        return support, Counter(stats)
+    stats: Counter[str] = Counter()
+    if not source or not candidate or source == candidate:
+        return 0.0, stats
+    sourceGrams = compoundGrams(source)
+    candidateGrams = compoundGrams(candidate)
+    shared = sourceGrams & candidateGrams
+    if not shared:
+        TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CACHE[cacheKey] = (0.0, Counter(stats))
+        return 0.0, stats
+    totalSurfaces = max(1, len(model.surfaceDf))
+    specificityMass = 0.0
+    for gram in shared:
+        df = max(1, len(model.compoundGramPostings.get(gram, ())))
+        specificityMass += math.log1p(totalSurfaces / df) / max(1e-9, math.log1p(totalSurfaces))
+    specificity = specificityMass / max(1, len(shared))
+    similarity = len(shared) / math.sqrt(max(1, len(sourceGrams)) * max(1, len(candidateGrams)))
+    suffixSize = longestCommonSuffixSize(source, candidate)
+    suffixMass = min(0.42, suffixSize * 0.075)
+    nonSuffix = nonSuffixCompoundOverlap(source, candidate)
+    profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+    hubPenalty = 1.0 + min(0.36, profile.hubness * 0.18)
+    support = (similarity * (0.62 + specificity) + nonSuffix * 0.34 + suffixMass) / hubPenalty
+    stats["slotResidualSurfaceBridgeSharedGrams"] = len(shared)
+    stats["slotResidualSurfaceBridgeSpecificityMilli"] = int(specificity * 1000)
+    stats["slotResidualSurfaceBridgeSimilarityMilli"] = int(similarity * 1000)
+    stats["slotResidualSurfaceBridgeNonSuffixMilli"] = int(nonSuffix * 1000)
+    stats["slotResidualSurfaceBridgeSuffix"] = suffixSize
+    stats["slotResidualSurfaceBridgeMilli"] = int(max(0.0, support) * 1000)
+    TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CACHE[cacheKey] = (max(0.0, support), Counter(stats))
+    return max(0.0, support), stats
+
+
+def targetMemberSlotResidualFragmentSupport(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate, tuple(relations))
+    cached = TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_SUPPORT_CACHE.get(cacheKey)
+    if cached is not None:
+        support, stats = cached
+        return support, Counter(stats)
+
+    stats: Counter[str] = Counter()
+    sourceWeights: Counter[str] = Counter()
+    if source and isContentStem(source):
+        sourceWeights[source] += 1.0
+    for rank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionMass = 0.94 if positionKind in {"edge", "prefix", "suffix"} else 0.58
+        sourceWeights[fragment] += max(0.0, float(fragmentWeight)) * positionMass / math.sqrt(rank)
+        stats["slotResidualFragmentRows"] += 1
+    for rank, (fragment, relation, positionKind, _sourceRole, _expectedTargetRole, pathWeight) in enumerate(
+        targetMemberMutualProofSourcePaths(source, relations, model)[:TARGET_MEMBER_MUTUAL_PROOF_SOURCE_PATH_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment):
+            continue
+        positionMass = 1.0 if positionKind in {"direct", "edge", "prefix", "suffix"} else 0.62
+        relationMass = 1.0 if relation in relations else 0.48
+        sourceWeights[fragment] += max(0.0, float(pathWeight)) * positionMass * relationMass / math.sqrt(rank)
+        stats["slotResidualSourcePathRows"] += 1
+
+    relationCandidates = tuple(
+        dict.fromkeys((*(relations or tuple()), *(relation for relation, _terms in RELATIONS), ""))
+    )
+    support = 0.0
+    for fragment, sourceWeight in sourceWeights.most_common(TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT):
+        if sourceWeight <= 0.0:
+            continue
+        for relationRank, relation in enumerate(relationCandidates, start=1):
+            relationMass = 1.0 if relation in relations else 0.36 / math.sqrt(relationRank)
+            rows = model.relationBoundRolePairPostings.get((fragment, relation), tuple())[
+                :TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_TARGET_LIMIT
+            ]
+            for targetRank, (targetSurface, targetScore) in enumerate(rows, start=1):
+                targetSurface = normStem(targetSurface)
+                if targetSurface != candidate:
+                    continue
+                support += (
+                    max(0.0, float(sourceWeight))
+                    * relationMass
+                    * math.log1p(max(0.0, float(targetScore)))
+                    / math.sqrt(targetRank)
+                )
+                stats["slotResidualFragmentTargetHits"] += 1
+                if fragment == source:
+                    stats["slotResidualDirectSourceHits"] += 1
+                if relation not in relations:
+                    stats["slotResidualFragmentBackoffHits"] += 1
+    stats["slotResidualFragmentSupportMilli"] = int(max(0.0, support) * 1000)
+    TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_SUPPORT_CACHE[cacheKey] = (max(0.0, support), Counter(stats))
+    return max(0.0, support), stats
+
+
+def targetMemberSlotResidualCohort(
+    querySlots: tuple[tuple[str, float], ...],
+    targetSlots: tuple[tuple[str, float], ...],
+    candidate: str,
+    slotPostings: dict[str, tuple[tuple[str, float], ...]],
+) -> tuple[tuple[str, ...], float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    querySlotWeights = Counter(dict(querySlots))
+    targetSlotWeights = Counter(dict(targetSlots))
+    sharedSlots = tuple(slot for slot in targetSlotWeights if querySlotWeights.get(slot, 0.0) > 0.0)
+    if not sharedSlots:
+        stats["slotResidualNoSharedSlots"] += 1
+        return tuple(), 0.0, stats
+    queryNorm = math.sqrt(sum(float(weight) ** 2 for weight in querySlotWeights.values()))
+    targetNorm = math.sqrt(sum(float(weight) ** 2 for weight in targetSlotWeights.values()))
+    slotAgreement = 0.0
+    cohortScores: Counter[str] = Counter()
+    for slot in sharedSlots:
+        queryWeight = max(0.0, float(querySlotWeights.get(slot, 0.0)))
+        targetWeight = max(0.0, float(targetSlotWeights.get(slot, 0.0)))
+        slotAgreement += math.sqrt(queryWeight * targetWeight)
+        for peer, postingWeight in slotPostings.get(slot, tuple()):
+            peer = normStem(peer)
+            if not peer or peer == candidate:
+                continue
+            cohortScores[peer] += math.sqrt(queryWeight * max(0.0, float(postingWeight)))
+            stats["slotResidualCohortPostingRows"] += 1
+    slotAgreement = slotAgreement / max(1e-9, math.sqrt(queryNorm * targetNorm))
+    cohort = tuple(peer for peer, _score in cohortScores.most_common(TARGET_MEMBER_SLOT_RESIDUAL_COHORT_LIMIT))
+    stats["slotResidualSharedSlots"] = len(sharedSlots)
+    stats["slotResidualCohortRows"] = len(cohort)
+    stats["slotResidualSlotAgreementMilli"] = int(max(0.0, slotAgreement) * 1000)
+    return cohort, max(0.0, slotAgreement), stats
+
+
+def targetMemberSlotResidualPairProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    targetCount: int,
+    cohortFeatureDf: Counter[str],
+    cohortSize: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effectiveWeight(feature: str, weight: float) -> float:
+        commonRatio = max(0.0, float(cohortFeatureDf.get(feature, 0))) / max(1.0, float(cohortSize))
+        residual = max(TARGET_MEMBER_SLOT_RESIDUAL_LOW_SLOT_FACTOR, (1.0 - commonRatio) ** 0.70)
+        if commonRatio >= TARGET_MEMBER_SLOT_RESIDUAL_COMMON_RATIO:
+            residual *= 0.78
+        return (
+            max(0.0, float(weight))
+            * targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)
+            * targetMemberSlotResidualFeatureGain(feature)
+            * residual
+        )
+
+    queryNorm = math.sqrt(sum(effectiveWeight(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effectiveWeight(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    raw = 0.0
+    matched = 0
+    residualMatched = 0
+    commonMatched = 0
+    sequenceMatched = 0
+    ledgerMatched = 0
+    idfMass = 0.0
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        commonRatio = max(0.0, float(cohortFeatureDf.get(feature, 0))) / max(1.0, float(cohortSize))
+        leftEffective = effectiveWeight(feature, float(leftWeight))
+        rightEffective = effectiveWeight(feature, float(rightWeight))
+        raw += leftEffective * rightEffective
+        idfMass += targetMemberPathGrammarFeatureIdf(feature, featureDf, targetCount)
+        matched += 1
+        if commonRatio < TARGET_MEMBER_SLOT_RESIDUAL_COMMON_RATIO:
+            residualMatched += 1
+        else:
+            commonMatched += 1
+        if feature.startswith(("pg:seq:", "pg:path:")):
+            sequenceMatched += 1
+        if feature.startswith(("pg:tled:", "pg:sled:")):
+            ledgerMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    meanIdf = idfMass / matched
+    residualMass = (
+        0.72 + min(0.42, residualMatched * 0.045) + min(0.28, sequenceMatched * 0.055 + ledgerMatched * 0.065)
+    )
+    if residualMatched <= 0:
+        residualMass *= TARGET_MEMBER_SLOT_RESIDUAL_LOW_SLOT_FACTOR
+    proof *= residualMass
+    stats["slotResidualMatchedFeatures"] = matched
+    stats["slotResidualResidualMatchedFeatures"] = residualMatched
+    stats["slotResidualCommonMatchedFeatures"] = commonMatched
+    stats["slotResidualSequenceMatchedFeatures"] = sequenceMatched
+    stats["slotResidualLedgerMatchedFeatures"] = ledgerMatched
+    stats["slotResidualMeanIdfMilli"] = int(meanIdf * 1000)
+    stats["slotResidualProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberSlotResidualScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_SLOT_RESIDUAL_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    targetSignatures, _contextSignatures, featureDf, _postings, promotionScores, indexStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    slotPostings, _surfaceSlots, slotIndexStats = targetMemberSlotResidualBuildIndex(model)
+    promotableScores, promotableStats = targetMemberPromotableScores(source, relations, model)
+    querySignature, querySlots, queryStats = targetMemberSlotResidualQuerySignature(source, relations, model)
+    targetCount = max(1, len(targetSignatures))
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(slotIndexStats)
+    stats.update(promotableStats)
+    stats.update(queryStats)
+    pool: Counter[str] = Counter()
+    for rank, (candidate, score) in enumerate(
+        promotableScores.most_common(TARGET_MEMBER_SLOT_RESIDUAL_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == source or not isContentStem(candidate):
+            continue
+        pool[candidate] += math.log1p(max(0.0, float(score))) / math.sqrt(rank)
+    pairSeeds, pairStats = bidirectionalPairCandidateSeeds(source, relations, model)
+    stats["slotResidualPairSeedRows"] += pairStats.get("candidateRows", 0)
+    stats["slotResidualPairSeedRawRows"] += pairStats.get("candidateRawRows", 0)
+    for rank, (candidate, score) in enumerate(
+        pairSeeds.most_common(TARGET_MEMBER_SLOT_RESIDUAL_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == source or not isContentStem(candidate):
+            continue
+        if candidate not in targetSignatures:
+            allowed, _promotion, _context, _evidenceStats = targetMemberPromotableSurfaceAllowed(candidate, model)
+            if not allowed:
+                continue
+        pool[candidate] += math.log1p(max(0.0, float(score))) * 0.74 / math.sqrt(rank)
+        stats["slotResidualPairSeedAcceptedRows"] += 1
+    bridgeCandidates: Counter[str] = Counter()
+    for gram in compoundGrams(source):
+        for candidate in model.compoundGramPostings.get(gram, ())[
+            :TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_POSTING_LIMIT
+        ]:
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            bridgeSupport, bridgeStats = targetMemberSlotResidualSurfaceBridgeSupport(source, candidate, model)
+            if bridgeSupport <= 0.0:
+                continue
+            if candidate not in targetSignatures:
+                allowed, _promotion, _context, _evidenceStats = targetMemberPromotableSurfaceAllowed(candidate, model)
+                if not allowed:
+                    continue
+            bridgeCandidates[candidate] = max(bridgeCandidates.get(candidate, 0.0), bridgeSupport)
+            stats["slotResidualSurfaceBridgePostingRows"] += 1
+            stats["slotResidualSurfaceBridgeSharedGrams"] += bridgeStats.get("slotResidualSurfaceBridgeSharedGrams", 0)
+    for rank, (candidate, bridgeSupport) in enumerate(
+        bridgeCandidates.most_common(TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        pool[candidate] += max(0.0, float(bridgeSupport)) * 0.56 / math.sqrt(rank)
+        stats["slotResidualSurfaceBridgeCandidateRows"] += 1
+    for slotKey, querySlotWeight in querySlots:
+        for rank, (candidate, slotWeight) in enumerate(
+            slotPostings.get(slotKey, tuple())[:TARGET_MEMBER_SLOT_RESIDUAL_SLOT_POSTING_LIMIT],
+            start=1,
+        ):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            pool[candidate] += math.sqrt(max(0.0, float(querySlotWeight)) * max(0.0, float(slotWeight))) / math.sqrt(
+                rank
+            )
+            stats["slotResidualPostingRows"] += 1
+    stats["slotResidualPoolRows"] = len(pool)
+    if not querySignature or not querySlots or not pool:
+        stats["slotResidualEmptyQueryOrPool"] += 1
+        TARGET_MEMBER_SLOT_RESIDUAL_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    scores: Counter[str] = Counter()
+    for rank, (candidate, seedScore) in enumerate(
+        pool.most_common(TARGET_MEMBER_SLOT_RESIDUAL_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidateSignature, targetSlots, targetStats = targetMemberSlotResidualTargetSignature(
+            candidate, relations, model
+        )
+        if not candidateSignature or not targetSlots:
+            stats["slotResidualEmptyTargetRows"] += 1
+            continue
+        cohort, slotAgreement, cohortStats = targetMemberSlotResidualCohort(
+            querySlots,
+            targetSlots,
+            candidate,
+            slotPostings,
+        )
+        stats.update(cohortStats)
+        cohortFeatureDf: Counter[str] = Counter()
+        cohortMembers = (candidate, *cohort)
+        for peer in cohortMembers:
+            peerSignature = candidateSignature if peer == candidate else targetSignatures.get(peer, Counter())
+            for feature in peerSignature:
+                cohortFeatureDf[feature] += 1
+        proof, proofStats = targetMemberSlotResidualPairProof(
+            querySignature,
+            candidateSignature,
+            featureDf,
+            targetCount,
+            cohortFeatureDf,
+            max(1, len(cohortMembers)),
+        )
+        stats.update(proofStats)
+        if proof <= 0.0 or proofStats.get("slotResidualMatchedFeatures", 0) <= 0:
+            stats["slotResidualZeroProofRows"] += 1
+            continue
+        peerProof = 0.0
+        for peer in cohort[:TARGET_MEMBER_SLOT_RESIDUAL_COHORT_LIMIT]:
+            peerSignature = targetSignatures.get(peer, Counter())
+            if not peerSignature:
+                continue
+            peerCandidateProof, _peerStats = targetMemberSlotResidualPairProof(
+                querySignature,
+                peerSignature,
+                featureDf,
+                targetCount,
+                cohortFeatureDf,
+                max(1, len(cohortMembers)),
+            )
+            peerProof = max(peerProof, peerCandidateProof)
+            stats["slotResidualPeerProofRows"] += 1
+        residualMargin = proof - peerProof
+        fragmentSupport, fragmentStats = targetMemberSlotResidualFragmentSupport(source, candidate, relations, model)
+        stats.update(fragmentStats)
+        surfaceBridgeSupport, surfaceBridgeStats = targetMemberSlotResidualSurfaceBridgeSupport(
+            source, candidate, model
+        )
+        stats.update(surfaceBridgeStats)
+        if proof < TARGET_MEMBER_SLOT_RESIDUAL_MIN_PROOF and fragmentSupport <= 0.0 and surfaceBridgeSupport <= 0.0:
+            stats["slotResidualBelowProofRows"] += 1
+            continue
+        promotion = max(0.0, float(promotionScores.get(candidate, 0.0)))
+        profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+        roleCompatibility, roleStats = targetMemberTraceAlignmentRoleCompatibility(source, candidate, relations, model)
+        stats.update(roleStats)
+        seedMass = math.log1p(max(0.0, float(seedScore)) + fragmentSupport * 0.22 + surfaceBridgeSupport * 0.34)
+        slotMass = 0.74 + min(0.72, slotAgreement * 0.62)
+        fragmentMass = 1.0 + min(
+            1.20, math.log1p(max(0.0, fragmentSupport)) * TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_GAIN
+        )
+        bridgeMass = 1.0 + min(0.82, surfaceBridgeSupport * TARGET_MEMBER_SLOT_RESIDUAL_SURFACE_BRIDGE_GAIN)
+        bridgeSpecificity = surfaceBridgeStats.get("slotResidualSurfaceBridgeSpecificityMilli", 0) / 1000.0
+        bridgeNonSuffix = surfaceBridgeStats.get("slotResidualSurfaceBridgeNonSuffixMilli", 0) / 1000.0
+        bridgeSuffix = surfaceBridgeStats.get("slotResidualSurfaceBridgeSuffix", 0)
+        coldTarget = targetStats.get("slotResidualColdTargetApplied", 0) > 0
+        anchorMass = 1.0
+        if fragmentSupport <= 0.0 and surfaceBridgeSupport <= 0.0 and residualMargin < 0.0:
+            anchorMass *= 0.34
+            stats["slotResidualAnchorlessPenaltyRows"] += 1
+        if surfaceBridgeSupport > 0.0:
+            bridgeQuality = (
+                bridgeSpecificity + min(0.44, bridgeNonSuffix * 0.70) + min(0.28, max(0, bridgeSuffix - 2) * 0.10)
+            )
+            anchorMass *= 1.0 + min(1.55, surfaceBridgeSupport * (0.82 + bridgeQuality))
+            stats["slotResidualSurfaceBridgeRows"] += 1
+        if coldTarget and surfaceBridgeSupport > 0.0:
+            coldQuality = bridgeSpecificity + min(0.60, bridgeNonSuffix) + min(0.38, max(0, bridgeSuffix - 2) * 0.14)
+            anchorMass *= 1.0 + min(2.20, surfaceBridgeSupport * (1.05 + coldQuality))
+            stats["slotResidualColdBridgeRows"] += 1
+        marginMass = 1.0 + max(0.0, residualMargin) * TARGET_MEMBER_SLOT_RESIDUAL_MARGIN_GAIN
+        if residualMargin < 0.0:
+            marginMass *= TARGET_MEMBER_SLOT_RESIDUAL_NEGATIVE_FACTOR
+        promotionMass = 1.0 + min(0.48, promotion * TARGET_MEMBER_PROMOTABLE_PROMOTION_GAIN)
+        residualMass = (
+            1.0
+            + min(0.46, proofStats.get("slotResidualResidualMatchedFeatures", 0) * 0.045)
+            + min(0.30, proofStats.get("slotResidualSequenceMatchedFeatures", 0) * 0.060)
+            + min(0.28, proofStats.get("slotResidualLedgerMatchedFeatures", 0) * 0.070)
+        )
+        hubPenalty = 1.0 + min(0.26, profile.hubness * 0.16)
+        rankMass = 1.0 / math.sqrt(1.0 + (rank - 1) * 0.06)
+        score = (
+            seedMass
+            * proof
+            * slotMass
+            * fragmentMass
+            * bridgeMass
+            * anchorMass
+            * marginMass
+            * promotionMass
+            * residualMass
+            * max(0.20, roleCompatibility)
+            * rankMass
+            / hubPenalty
+        )
+        if score <= 0.0:
+            continue
+        scores[candidate] += score
+        stats["slotResidualScored"] += 1
+        stats["slotResidualTargetFeatures"] += targetStats.get("slotResidualTargetFeatures", 0)
+        stats["slotResidualMatchedFeatures"] += proofStats.get("slotResidualMatchedFeatures", 0)
+        stats["slotResidualResidualMatchedFeatures"] += proofStats.get("slotResidualResidualMatchedFeatures", 0)
+        stats["slotResidualCommonMatchedFeatures"] += proofStats.get("slotResidualCommonMatchedFeatures", 0)
+        stats["slotResidualSequenceMatchedFeatures"] += proofStats.get("slotResidualSequenceMatchedFeatures", 0)
+        stats["slotResidualLedgerMatchedFeatures"] += proofStats.get("slotResidualLedgerMatchedFeatures", 0)
+        stats["slotResidualPositiveMargins"] += int(residualMargin > 0.0)
+        stats["slotResidualNegativeMargins"] += int(residualMargin < 0.0)
+        stats["slotResidualProofMilli"] += int(proof * 1000)
+        stats["slotResidualPeerProofMilli"] += int(peerProof * 1000)
+        stats["slotResidualMarginMilli"] += int(residualMargin * 1000)
+        stats["slotResidualFragmentSupportMilli"] += int(fragmentSupport * 1000)
+        stats["slotResidualSurfaceBridgeMilli"] += int(surfaceBridgeSupport * 1000)
+        stats["slotResidualAnchorMassMilli"] += int(anchorMass * 1000)
+        stats["slotResidualScoreMilli"] += int(score * 1000)
+
+    limited = Counter(dict(scores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)))
+    stats["slotResidualRouteRows"] = len(limited)
+    TARGET_MEMBER_SLOT_RESIDUAL_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberSlotResidualRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberSlotResidualScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_SLOT_RESIDUAL_ROUTE_LIMIT))
+
+
+def targetMemberAccountAxisBucket(value: float) -> str:
+    return targetMemberMutualProofBucket(value, (0.08, 0.18, 0.34, 0.55, 0.78))
+
+
+def targetMemberAccountAxisRowBucket(value: int) -> str:
+    if value <= 0:
+        return "z0"
+    if value <= 2:
+        return "z1"
+    if value <= 6:
+        return "z2"
+    if value <= 16:
+        return "z3"
+    return "z4"
+
+
+def targetMemberAccountAxisFeatureGain(feature: str) -> float:
+    if feature.startswith("acct:ledger:"):
+        return 1.30
+    if feature.startswith(("acct:role:", "acct:rel:", "acct:profile:")):
+        return 1.12
+    if feature.startswith(("acct:struct:value", "acct:axis:value", "acct:axis:artifact", "acct:axis:owner")):
+        return 1.18
+    if feature.startswith(("acct:targetRows:", "acct:boundRows:", "acct:pathTargetRows:")):
+        return 1.08
+    if feature.startswith("acct:path:"):
+        return 0.92
+    return 1.0
+
+
+def targetMemberAccountAxisAddSurfaceAxes(
+    signature: Counter[str],
+    surface: str,
+    relations: tuple[str, ...],
+    model: Model,
+    scale: float,
+    role: str,
+) -> Counter[str]:
+    surface = normStem(surface)
+    if not surface or not isContentStem(surface) or scale <= 0.0:
+        return signature
+    allowed, promotion, context, evidenceStats = targetMemberPromotableSurfaceAllowed(surface, model)
+    targetRole = relationSlotSubstitutionTargetRole(surface, model)
+    profile = inferredOwnerRoleSpecificityProfile(surface, model)
+    valueShare = evidenceStats.get("promotableValueShareMilli", 0) / 1000.0
+    artifactShare = evidenceStats.get("promotableArtifactShareMilli", 0) / 1000.0
+    ownerShare = evidenceStats.get("promotableOwnerShareMilli", 0) / 1000.0
+    relationShare = evidenceStats.get("promotableRelationShareMilli", 0) / 1000.0
+    boundRows = int(evidenceStats.get("promotableBoundRows", 0))
+    pathTargetRows = int(evidenceStats.get("promotablePathTargetRows", 0))
+    surfaceKeyRows = int(evidenceStats.get("promotableSurfaceKeyRows", 0))
+
+    signature[f"acct:role:{targetRole}"] += scale * 0.96
+    signature[f"acct:profile:role:{profile.role}"] += scale * 0.74
+    signature[f"acct:profile:spec:{targetMemberAccountAxisBucket(profile.specificity)}"] += scale * 0.54
+    signature[f"acct:profile:hub:{targetMemberAccountAxisBucket(profile.hubness)}"] += scale * 0.34
+    signature[f"acct:profile:lane:{targetMemberAccountAxisBucket(profile.laneEntropy)}"] += scale * 0.28
+    signature[f"acct:axis:value:{targetMemberAccountAxisBucket(valueShare)}"] += scale * (0.54 + valueShare * 0.72)
+    signature[f"acct:axis:artifact:{targetMemberAccountAxisBucket(artifactShare)}"] += scale * (
+        0.42 + artifactShare * 0.56
+    )
+    signature[f"acct:axis:owner:{targetMemberAccountAxisBucket(ownerShare)}"] += scale * (0.42 + ownerShare * 0.54)
+    signature[f"acct:axis:relation:{targetMemberAccountAxisBucket(relationShare)}"] += scale * (
+        0.34 + relationShare * 0.44
+    )
+    signature[f"acct:boundRows:{targetMemberAccountAxisRowBucket(boundRows)}"] += scale * (
+        0.28 + min(0.54, math.log1p(boundRows) * 0.12)
+    )
+    signature[f"acct:pathTargetRows:{targetMemberAccountAxisRowBucket(pathTargetRows)}"] += scale * (
+        0.28 + min(0.50, math.log1p(pathTargetRows) * 0.12)
+    )
+    signature[f"acct:surfaceKeyRows:{targetMemberAccountAxisRowBucket(surfaceKeyRows)}"] += scale * 0.26
+    if valueShare > 0.0:
+        signature["acct:struct:value-bound"] += scale * min(1.0, valueShare * 1.20)
+    if artifactShare > 0.0 or ownerShare > 0.0:
+        signature["acct:struct:table-owner-bound"] += scale * min(1.0, artifactShare + ownerShare)
+    if allowed:
+        signature["acct:struct:promotable"] += scale * min(1.0, 0.38 + promotion * 0.22)
+    elif context > promotion:
+        signature["acct:struct:context-pressure"] += scale * min(0.62, (context - promotion) * 0.18)
+
+    ledgerSketch = pairLocalLedgerSketchForSurface(surface, relations, model, role)
+    for ledgerRank, (atom, weight) in enumerate(ledgerSketch.most_common(18), start=1):
+        if weight <= 0.0:
+            continue
+        signature[f"acct:ledger:{atom}"] += scale * min(1.8, math.log1p(float(weight))) / math.sqrt(ledgerRank)
+
+    for relation in relations or ("",):
+        relationKey = relation or "any"
+        relationRows = (
+            len(model.relationPathLocalTargetTraces.get((surface, relation), ()))
+            + len(model.relationBoundPostings.get((surface, relation), ()))
+            + len(model.relationFramePostings.get((surface, relation), ()))
+        )
+        if relationRows > 0:
+            signature[f"acct:rel:{relationKey}"] += scale * (0.46 + min(0.72, math.log1p(relationRows) * 0.18))
+            signature[f"acct:relrole:{relationKey}:{targetRole}"] += scale * 0.52
+    return signature
+
+
+def targetMemberAccountAxisQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_AXIS_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    paths = targetMemberMutualProofSourcePaths(source, relations, model)
+    if not paths:
+        fallbackRole = relationSlotSubstitutionTargetRole(source, model)
+        paths = tuple(
+            (source, relation, "direct", fallbackRole, fallbackRole, 0.62) for relation in (relations or ("",))
+        )
+
+    targetMemberAccountAxisAddSurfaceAxes(signature, source, relations, model, 0.72, "source")
+    for pathRank, (fragment, relation, positionKind, sourceRole, expectedTargetRole, pathWeight) in enumerate(
+        paths[:TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_SEED_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment) or pathWeight <= 0.0:
+            continue
+        relationKey = relation or "any"
+        pathScale = max(0.0, float(pathWeight)) / math.sqrt(pathRank)
+        if positionKind == "inner":
+            pathScale *= 0.80
+        elif positionKind == "proxy":
+            pathScale *= 0.62
+        signature[f"acct:role:{expectedTargetRole}"] += pathScale * 0.92
+        signature[f"acct:sourceRole:{sourceRole}"] += pathScale * 0.34
+        signature[f"acct:rel:{relationKey}"] += pathScale * 0.78
+        signature[f"acct:relrole:{relationKey}:{expectedTargetRole}"] += pathScale * 0.64
+        signature[f"acct:path:{positionKind}"] += pathScale * 0.38
+        targetMemberAccountAxisAddSurfaceAxes(
+            signature,
+            fragment,
+            (relation,) if relation else relations,
+            model,
+            pathScale * 0.46,
+            "source",
+        )
+        stats["accountAxisQueryPathRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionMass = 0.88 if positionKind in {"edge", "prefix", "suffix"} else 0.52
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass / math.sqrt(fragmentRank)
+        if fragmentScale <= 0.0:
+            continue
+        targetMemberAccountAxisAddSurfaceAxes(signature, fragment, relations, model, fragmentScale * 0.32, "source")
+        signature[f"acct:path:{positionKind}"] += fragmentScale * 0.24
+        stats["accountAxisQueryFragmentRows"] += 1
+
+    limited = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_AXIS_QUERY_FEATURE_LIMIT)))
+    stats["accountAxisQueryFeatures"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_AXIS_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountAxisTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_AXIS_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    if not candidate or not isContentStem(candidate):
+        TARGET_MEMBER_ACCOUNT_AXIS_TARGET_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    targetMemberAccountAxisAddSurfaceAxes(signature, candidate, relations, model, 1.0, "target")
+    role = relationSlotSubstitutionTargetRole(candidate, model)
+    reverseRelations: Counter[str] = Counter()
+    for (
+        reverseSource,
+        reverseRelation,
+        _reverseTarget,
+        reverseScore,
+        _sourceRole,
+        targetRole,
+    ) in targetMemberMutualProofReverseRows(candidate, relations, model)[:TARGET_MEMBER_MUTUAL_PROOF_REVERSE_ROW_LIMIT]:
+        if reverseScore <= 0.0:
+            continue
+        relationKey = reverseRelation or "any"
+        rowScale = math.log1p(max(0.0, float(reverseScore)))
+        reverseRelations[relationKey] += rowScale
+        signature[f"acct:rel:{relationKey}"] += rowScale * 0.42
+        signature[f"acct:relrole:{relationKey}:{targetRole or role}"] += rowScale * 0.38
+        stats["accountAxisTargetReverseRows"] += 1
+    for relationKey, relationWeight in reverseRelations.most_common(6):
+        signature[f"acct:targetRows:{relationKey}:{targetMemberAccountAxisRowBucket(int(relationWeight * 3))}"] += min(
+            1.0, float(relationWeight) * 0.22
+        )
+
+    targetSig, _targetSlots, targetStats = targetMemberSlotResidualTargetSignature(candidate, relations, model)
+    if targetSig:
+        for feature, weight in targetSig.most_common(18):
+            if feature.startswith(("pg:tled:", "pg:sled:")):
+                signature[f"acct:grammar-ledger:{stableHash(feature, 20)}"] += min(1.2, math.log1p(float(weight)))
+            elif feature.startswith(("pg:rolepair:", "pg:core:")):
+                signature[f"acct:grammar-role:{stableHash(feature, 18)}"] += min(0.78, math.log1p(float(weight)) * 0.52)
+        stats["accountAxisTargetGrammarFeatures"] += min(18, len(targetSig))
+        stats["accountAxisTargetColdApplied"] += targetStats.get("slotResidualColdTargetApplied", 0)
+
+    limited = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_AXIS_TARGET_FEATURE_LIMIT)))
+    stats["accountAxisTargetFeatures"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_AXIS_TARGET_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountAxisBuildIndex(
+    model: Model,
+) -> tuple[
+    dict[str, Counter[str]],
+    Counter[str],
+    dict[str, tuple[tuple[str, float], ...]],
+    Counter[str],
+]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_ACCOUNT_AXIS_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    targetSignatures, _contextSignatures, _featureDf, _postings, promotionScores, promotableStats = (
+        targetMemberPromotableBuildIndex(model)
+    )
+    candidateSeeds: Counter[str] = Counter()
+    for surface, score in promotionScores.items():
+        candidateSeeds[normStem(surface)] += max(0.0, float(score)) + 1.0
+    for (_sourceSurface, _relation), targets in model.relationBoundRolePairPostings.items():
+        for targetSurface, score in targets:
+            targetSurface = normStem(targetSurface)
+            if not targetSurface or not isContentStem(targetSurface):
+                continue
+            candidateSeeds[targetSurface] += math.log1p(max(0.0, float(score))) * 0.52
+    for (targetSurface, _relation), traces in model.relationPathLocalTargetTraces.items():
+        targetSurface = normStem(targetSurface)
+        if not targetSurface or not isContentStem(targetSurface):
+            continue
+        candidateSeeds[targetSurface] += min(2.4, math.log1p(len(traces))) * 0.74
+    for surface, count in model.independentSurfaceDf.most_common(TARGET_MEMBER_ACCOUNT_AXIS_INDEX_SURFACE_LIMIT * 3):
+        surface = normStem(surface)
+        if not surface or not isContentStem(surface):
+            continue
+        laneSentence, laneArtifact, laneOwner = surfaceLaneProfile(surface, model)
+        laneMass = laneArtifact * 0.46 + laneOwner * 0.52 + max(0.0, 1.0 - laneSentence) * 0.18
+        role = relationSlotSubstitutionTargetRole(surface, model)
+        roleMass = 0.34 if role in {"owner", "metric"} else 0.16 if role == "mixed" else 0.0
+        candidateSeeds[surface] += math.log1p(max(0, int(count))) * (0.10 + laneMass + roleMass)
+
+    stats: Counter[str] = Counter(promotableStats)
+    targetAxisSignatures: dict[str, Counter[str]] = {}
+    featureDf: Counter[str] = Counter()
+    postingRaw: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    allRelations = tuple(relation for relation, _terms in RELATIONS)
+    for surface, _seed in candidateSeeds.most_common(TARGET_MEMBER_ACCOUNT_AXIS_INDEX_SURFACE_LIMIT):
+        surface = normStem(surface)
+        if not surface or not isContentStem(surface):
+            continue
+        if surface not in targetSignatures:
+            allowed, _promotion, _context, _evidenceStats = targetMemberPromotableSurfaceAllowed(surface, model)
+            hasTargetTrace = any(
+                model.relationPathLocalTargetTraces.get((surface, relation)) for relation, _terms in RELATIONS
+            )
+            if not allowed and not hasTargetTrace:
+                stats["accountAxisIndexWeakSurfaceSkips"] += 1
+                continue
+        signature, targetStats = targetMemberAccountAxisTargetSignature(surface, allRelations, model)
+        if not signature:
+            stats["accountAxisIndexEmptyTargetSkips"] += 1
+            continue
+        targetAxisSignatures[surface] = signature
+        stats["accountAxisIndexTargetFeatures"] += targetStats.get("accountAxisTargetFeatures", 0)
+        for feature, weight in signature.items():
+            featureDf[feature] += 1
+            postingRaw[feature].append((surface, float(weight)))
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRaw.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_ACCOUNT_AXIS_POSTING_LIMIT])
+    stats["accountAxisIndexSurfaces"] = len(targetAxisSignatures)
+    stats["accountAxisIndexFeatureDfKeys"] = len(featureDf)
+    stats["accountAxisIndexPostingKeys"] = len(postings)
+    stats["accountAxisIndexPostingLinks"] = sum(len(rows) for rows in postings.values())
+    result = (targetAxisSignatures, featureDf, postings, Counter(stats))
+    TARGET_MEMBER_ACCOUNT_AXIS_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberAccountAxisFamily(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, ...], Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_CACHE.get(cacheKey)
+    if cached is not None:
+        rows, stats = cached
+        return tuple(rows), Counter(stats)
+
+    stats: Counter[str] = Counter()
+    members: list[str] = []
+    seen = {source, ""}
+
+    def addMember(surface: str, reason: str) -> None:
+        member = normStem(surface)
+        if not member or member in seen or not isContentStem(member):
+            return
+        allowed, _promotion, _context, _evidenceStats = targetMemberPromotableSurfaceAllowed(member, model)
+        if not allowed and member != candidate:
+            targetSignature, _targetStats = targetMemberAccountAxisTargetSignature(member, relations, model)
+            if not targetSignature:
+                return
+        seen.add(member)
+        members.append(member)
+        stats[f"accountAxisFamily:{reason}"] += 1
+
+    addMember(candidate, "self")
+    for targetSurface, _targetWeight in targetMemberMutualProofTargetSurfaces(candidate, model)[
+        :TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT
+    ]:
+        addMember(targetSurface, "mutualTarget")
+        if len(members) >= TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+            break
+    if len(members) < TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+        for peer in targetMemberRelationFramePeers(candidate, source, model)[
+            :TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT
+        ]:
+            addMember(peer, "framePeer")
+            if len(members) >= TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+                break
+    if len(members) < TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+        label = contrastSemanticUnitLabelForSurface(candidate, model)
+        for member in model.contrastSemanticUnitMembers.get(label, tuple())[
+            :TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT
+        ]:
+            addMember(member, "semanticMember")
+            if len(members) >= TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+                break
+    if len(members) < TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+        for gram in compoundGrams(candidate):
+            for member in model.compoundGramPostings.get(gram, ())[:TARGET_MEMBER_ACCOUNT_AXIS_COMPOUND_MEMBER_LIMIT]:
+                addMember(member, "compoundFamily")
+                if len(members) >= TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+                    break
+            if len(members) >= TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT:
+                break
+
+    selected = tuple(members[:TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_MEMBER_LIMIT])
+    stats["accountAxisFamilyRows"] = len(selected)
+    TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_CACHE[cacheKey] = (selected, Counter(stats))
+    return selected, stats
+
+
+def targetMemberAccountAxisWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    familyFeatureDf: Counter[str],
+    familySize: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(familyFeatureDf.get(feature, 1)))
+        idf = math.log1p((familySize + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.18, idf) * targetMemberAccountAxisFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+
+    raw = 0.0
+    matched = 0
+    ledgerMatched = 0
+    relationMatched = 0
+    roleMatched = 0
+    structMatched = 0
+    idfMass = 0.0
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        leftEffective = effective(feature, float(leftWeight))
+        rightEffective = effective(feature, float(rightWeight))
+        raw += leftEffective * rightEffective
+        matched += 1
+        df = max(1.0, float(familyFeatureDf.get(feature, 1)))
+        idfMass += math.log1p((familySize + 1.0) / (df + 0.5))
+        if feature.startswith(("acct:ledger:", "acct:grammar-ledger:")):
+            ledgerMatched += 1
+        if feature.startswith(("acct:rel:", "acct:relrole:")):
+            relationMatched += 1
+        if feature.startswith(("acct:role:", "acct:profile:")):
+            roleMatched += 1
+        if feature.startswith(("acct:struct:", "acct:axis:", "acct:boundRows:", "acct:pathTargetRows:")):
+            structMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    axisMass = (
+        1.0
+        + min(0.46, ledgerMatched * TARGET_MEMBER_ACCOUNT_AXIS_LEDGER_GAIN)
+        + min(0.34, structMatched * TARGET_MEMBER_ACCOUNT_AXIS_STRUCT_GAIN)
+        + min(0.28, relationMatched * 0.070)
+        + min(0.24, roleMatched * 0.055)
+    )
+    proof *= axisMass
+    stats["accountAxisMatchedFeatures"] = matched
+    stats["accountAxisLedgerMatchedFeatures"] = ledgerMatched
+    stats["accountAxisRelationMatchedFeatures"] = relationMatched
+    stats["accountAxisRoleMatchedFeatures"] = roleMatched
+    stats["accountAxisStructMatchedFeatures"] = structMatched
+    stats["accountAxisMeanIdfMilli"] = int(idfMass / max(1, matched) * 1000)
+    stats["accountAxisProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberAccountAxisProof(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_AXIS_PROOF_CACHE.get(cacheKey)
+    if cached is not None:
+        proof, stats = cached
+        return proof, Counter(stats)
+    querySignature, queryStats = targetMemberAccountAxisQuerySignature(source, relations, model)
+    family, familyStats = targetMemberAccountAxisFamily(source, candidate, relations, model)
+    targetSignatures: dict[str, Counter[str]] = {}
+    familyFeatureDf: Counter[str] = Counter()
+    for member in family or (candidate,):
+        signature, _targetStats = targetMemberAccountAxisTargetSignature(member, relations, model)
+        if not signature:
+            continue
+        targetSignatures[member] = signature
+        for feature in signature:
+            familyFeatureDf[feature] += 1
+    targetSignature = targetSignatures.get(candidate, Counter())
+    proof, proofStats = targetMemberAccountAxisWeightedProof(
+        querySignature,
+        targetSignature,
+        familyFeatureDf,
+        max(1, len(targetSignatures)),
+    )
+    stats = Counter(queryStats)
+    stats.update(familyStats)
+    stats.update(proofStats)
+    stats["accountAxisFamilySignatureRows"] = len(targetSignatures)
+    TARGET_MEMBER_ACCOUNT_AXIS_PROOF_CACHE[cacheKey] = (max(0.0, proof), Counter(stats))
+    return max(0.0, proof), stats
+
+
+def targetMemberAccountAxisScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_AXIS_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    stats: Counter[str] = Counter()
+    slotScores, slotStats = targetMemberSlotResidualScores(source, relations, model)
+    promoScores, promoStats = targetMemberPromotableScores(source, relations, model)
+    pairSeeds, pairStats = bidirectionalPairCandidateSeeds(source, relations, model)
+    substitutionScores, substitutionStats = relationSlotSubstitutionScores(source, relations, model)
+    targetAxisSignatures, accountFeatureDf, accountPostings, accountIndexStats = targetMemberAccountAxisBuildIndex(
+        model
+    )
+    querySignature, queryStats = targetMemberAccountAxisQuerySignature(source, relations, model)
+    stats.update(slotStats)
+    stats.update(accountIndexStats)
+    stats.update(queryStats)
+    stats["accountAxisSlotRows"] += slotStats.get("slotResidualRouteRows", 0)
+    stats["accountAxisPromotableRows"] += promoStats.get("promotableRouteRows", 0)
+    stats["accountAxisPairSeedRows"] += pairStats.get("candidateRows", 0)
+    stats["accountAxisSubstitutionRows"] += substitutionStats.get("scored", 0)
+    seedPool: Counter[str] = Counter()
+
+    def addSeedRows(rows: Counter[str], weight: float, reason: str) -> None:
+        for rank, (candidate, score) in enumerate(
+            rows.most_common(TARGET_MEMBER_ACCOUNT_AXIS_FAMILY_SEED_LIMIT), start=1
+        ):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            seedPool[candidate] += math.log1p(max(0.0, float(score))) * weight / math.sqrt(rank)
+            stats[f"accountAxisSeed:{reason}"] += 1
+
+    addSeedRows(slotScores, 1.00, "slotResidual")
+    addSeedRows(promoScores, 0.58, "promotable")
+    addSeedRows(pairSeeds, 0.62, "pair")
+    addSeedRows(substitutionScores, 0.46, "substitution")
+    totalAxisTargets = max(1, len(targetAxisSignatures))
+    for feature, queryWeight in querySignature.most_common(TARGET_MEMBER_ACCOUNT_AXIS_QUERY_FEATURE_LIMIT):
+        rows = accountPostings.get(feature, tuple())
+        if not rows:
+            continue
+        featureDf = max(1, int(accountFeatureDf.get(feature, 1)))
+        idf = math.log1p((totalAxisTargets + 1.0) / (featureDf + 0.5))
+        for rank, (candidate, targetWeight) in enumerate(rows[:TARGET_MEMBER_ACCOUNT_AXIS_POSTING_LIMIT], start=1):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.18, idf)
+                * targetMemberAccountAxisFeatureGain(feature)
+                * 0.34
+                / math.sqrt(rank)
+            )
+            stats["accountAxisPostingRows"] += 1
+        stats["accountAxisMatchedPostingKeys"] += 1
+    for gram in compoundGrams(source):
+        for rank, candidate in enumerate(
+            model.compoundGramPostings.get(gram, ())[:TARGET_MEMBER_ACCOUNT_AXIS_COMPOUND_MEMBER_LIMIT],
+            start=1,
+        ):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or not isContentStem(candidate):
+                continue
+            seedPool[candidate] += 0.18 / math.sqrt(rank)
+            stats["accountAxisSeed:sourceCompoundFamily"] += 1
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model)[
+        :TARGET_MEMBER_SLOT_RESIDUAL_FRAGMENT_LIMIT
+    ]:
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment):
+            continue
+        positionMass = 0.86 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        for relation in relations or ("",):
+            for rank, (targetSurface, targetScore) in enumerate(
+                model.relationBoundRolePairPostings.get((fragment, relation), ())[
+                    :TARGET_MEMBER_ACCOUNT_AXIS_COMPOUND_MEMBER_LIMIT
+                ],
+                start=1,
+            ):
+                targetSurface = normStem(targetSurface)
+                if not targetSurface or targetSurface == source or not isContentStem(targetSurface):
+                    continue
+                seedPool[targetSurface] += (
+                    max(0.0, float(fragmentWeight))
+                    * positionMass
+                    * math.log1p(max(0.0, float(targetScore)))
+                    * 0.28
+                    / math.sqrt(rank)
+                )
+                stats["accountAxisSeed:fragmentTarget"] += 1
+    if not seedPool:
+        TARGET_MEMBER_ACCOUNT_AXIS_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    rerankedSeedPool: Counter[str] = Counter()
+    for rerank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_ACCOUNT_AXIS_SEED_RERANK_LIMIT),
+        start=1,
+    ):
+        targetSignature, targetStats = targetMemberAccountAxisTargetSignature(candidate, relations, model)
+        if not targetSignature:
+            continue
+        seedProof, seedProofStats = targetMemberAccountAxisWeightedProof(
+            querySignature,
+            targetSignature,
+            accountFeatureDf,
+            totalAxisTargets,
+        )
+        if seedProof <= 0.0:
+            continue
+        rerankedSeedPool[candidate] = (
+            math.log1p(max(0.0, float(seedScore))) * 0.24
+            + seedProof * (1.0 + min(0.42, seedProofStats.get("accountAxisLedgerMatchedFeatures", 0) * 0.050))
+        ) / math.sqrt(1.0 + (rerank - 1) * 0.012)
+        stats["accountAxisSeedRerankRows"] += 1
+        stats["accountAxisSeedRerankProofMilli"] += int(seedProof * 1000)
+        stats["accountAxisSeedRerankMatchedFeatures"] += seedProofStats.get("accountAxisMatchedFeatures", 0)
+        stats["accountAxisSeedRerankLedgerFeatures"] += seedProofStats.get("accountAxisLedgerMatchedFeatures", 0)
+        stats["accountAxisSeedRerankTargetFeatures"] += targetStats.get("accountAxisTargetFeatures", 0)
+    if rerankedSeedPool:
+        seedPool = rerankedSeedPool
+    stats["accountAxisSeedPoolRows"] = len(seedPool)
+
+    output: Counter[str] = Counter()
+    processedFamilies = 0
+    for seedRank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_ACCOUNT_AXIS_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        family, familyStats = targetMemberAccountAxisFamily(source, candidate, relations, model)
+        stats.update(familyStats)
+        if not family:
+            continue
+        processedFamilies += 1
+        memberProofs: list[tuple[float, str, Counter[str]]] = []
+        for member in family:
+            proof, proofStats = targetMemberAccountAxisProof(source, member, relations, model)
+            if proof <= 0.0:
+                continue
+            memberProofs.append((proof, member, proofStats))
+        if not memberProofs:
+            stats["accountAxisEmptyProofFamilyRows"] += 1
+            continue
+        memberProofs.sort(reverse=True)
+        bestProof, bestMember, bestStats = memberProofs[0]
+        peerProof = memberProofs[1][0] if len(memberProofs) > 1 else 0.0
+        margin = bestProof - peerProof
+        stats.update(bestStats)
+        stats["accountAxisProofRows"] += len(memberProofs)
+        stats["accountAxisPeerRows"] += max(0, len(memberProofs) - 1)
+        stats["accountAxisPositiveMargins"] += int(margin > 0.0)
+        stats["accountAxisNegativeMargins"] += int(margin < 0.0)
+        stats["accountAxisMarginMilli"] += int(margin * 1000)
+        if bestProof < TARGET_MEMBER_ACCOUNT_AXIS_MIN_PROOF and margin < TARGET_MEMBER_ACCOUNT_AXIS_MIN_MARGIN:
+            stats["accountAxisBelowProofRows"] += 1
+            continue
+        memberSeed = max(seedPool.get(bestMember, 0.0), float(seedScore) * 0.58)
+        allowed, promotion, context, _evidenceStats = targetMemberPromotableSurfaceAllowed(bestMember, model)
+        profile = inferredOwnerRoleSpecificityProfile(bestMember, model)
+        marginMass = 1.0 + max(0.0, margin) * TARGET_MEMBER_ACCOUNT_AXIS_MARGIN_GAIN
+        if margin < 0.0:
+            marginMass *= TARGET_MEMBER_ACCOUNT_AXIS_NEGATIVE_FACTOR
+        promotionMass = 1.0 + min(0.52, max(0.0, promotion) * 0.18)
+        if not allowed and context > promotion:
+            promotionMass *= 0.72
+            stats["accountAxisContextRepresentativeRows"] += 1
+        hubPenalty = 1.0 + min(0.24, profile.hubness * 0.14)
+        rankMass = 1.0 / math.sqrt(1.0 + (seedRank - 1) * 0.045)
+        score = math.log1p(max(0.0, memberSeed)) * bestProof * marginMass * promotionMass * rankMass / hubPenalty
+        if score <= TARGET_MEMBER_ACCOUNT_AXIS_ROUTE_FLOOR:
+            stats["accountAxisLowScoreRows"] += 1
+            continue
+        output[bestMember] = max(output.get(bestMember, 0.0), score)
+        stats["accountAxisScored"] += 1
+        stats["accountAxisScoreMilli"] += int(score * 1000)
+        if bestMember == candidate:
+            stats["accountAxisSelfRepresentativeRows"] += 1
+        else:
+            stats["accountAxisSiblingRepresentativeRows"] += 1
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)))
+    stats["accountAxisProcessedFamilies"] = processedFamilies
+    stats["accountAxisRouteRows"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_AXIS_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountAxisRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberAccountAxisScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_ACCOUNT_AXIS_ROUTE_LIMIT))
+
+
+def targetMemberAccountRegistryDistanceBucket(distance: int | None) -> str:
+    if distance is None:
+        return "none"
+    if distance <= 1:
+        return "touch"
+    if distance <= 3:
+        return "near"
+    if distance <= 7:
+        return "row"
+    return "far"
+
+
+def targetMemberAccountRegistryRowBucket(value: int) -> str:
+    if value <= 0:
+        return "z0"
+    if value <= 2:
+        return "z1"
+    if value <= 8:
+        return "z2"
+    if value <= 24:
+        return "z3"
+    return "z4"
+
+
+def targetMemberAccountRegistryFeatureGain(feature: str) -> float:
+    if feature.startswith(("areg:row:value:", "areg:relation:valueSide:", "areg:ledger:", "acct:ledger:")):
+        return 1.30
+    if feature.startswith(("areg:rel:", "areg:relrole:", "acct:rel:", "acct:relrole:")):
+        return 1.18
+    if feature.startswith(("areg:role:", "acct:role:", "acct:profile:")):
+        return 1.10
+    if feature.startswith(("areg:ctx:", "areg:neighbor:")):
+        return 0.88
+    if feature.startswith(("areg:quality:", "acct:axis:", "acct:struct:")):
+        return 0.94
+    return 1.0
+
+
+def targetMemberAccountRegistryRelationRows(cache: Cache, position: int) -> tuple[tuple[str, int, str], ...]:
+    rows: list[tuple[str, int, str]] = []
+    for relationPos in cache.relationPositions or []:
+        if relationPos < 0 or relationPos >= len(cache.stems):
+            continue
+        distance = abs(relationPos - position)
+        if distance > TARGET_MEMBER_FRAME_RELATION_WINDOW:
+            continue
+        side = "left" if relationPos < position else "right" if relationPos > position else "self"
+        for relation in horizonMaskedRelationNames(cache.stems[relationPos]):
+            rows.append((relation, distance, side))
+    rows.sort(key=lambda row: (row[1], row[0], row[2]))
+    return tuple(rows[:6])
+
+
+def targetMemberAccountRegistryMentionSignature(
+    surface: str,
+    model: Model,
+    rowLimit: int = TARGET_MEMBER_ACCOUNT_REGISTRY_OCCURRENCE_LIMIT,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    stats: Counter[str] = Counter()
+    signature: Counter[str] = Counter()
+    if not surface or not isContentStem(surface):
+        return signature, 0.0, stats
+
+    rows = model.queryLocalFrameOccurrenceIndex.get(surface, ())[:rowLimit]
+    if not rows:
+        stats["accountRegistryNoOccurrenceRows"] += 1
+    directRows = 0
+    bridgeRows = 0
+    valueRows = 0
+    relationRows = 0
+    artifactRows = 0
+    ownerRows = 0
+    relationMass: Counter[str] = Counter()
+    neighborMass: Counter[str] = Counter()
+    laneMass: Counter[str] = Counter()
+    valueBucketMass: Counter[str] = Counter()
+
+    for rowRank, (unitId, position, marker) in enumerate(rows, start=1):
+        if unitId < 0 or unitId >= len(model.caches):
+            continue
+        cache = model.caches[unitId]
+        if position < 0 or position >= len(cache.stems):
+            continue
+        lane = cache.lanes[position] if cache.lanes and position < len(cache.lanes) else "sentence"
+        laneMass[lane] += 1
+        artifactRows += int(lane == "artifact")
+        ownerRows += int(lane == "owner")
+        if marker == "~":
+            bridgeRows += 1
+        else:
+            directRows += 1
+
+        valueDistance = nearestTokenDistance(position, cache.valuePositions or [])
+        valueBucket = targetMemberAccountRegistryDistanceBucket(valueDistance)
+        valueBucketMass[valueBucket] += 1
+        if valueBucket in {"touch", "near", "row"}:
+            valueRows += 1
+        relationRowsLocal = targetMemberAccountRegistryRelationRows(cache, position)
+        relationRows += len(relationRowsLocal)
+        rowScale = 1.0 / math.sqrt(rowRank)
+        signature[f"areg:row:lane:{lane}"] += rowScale * 0.58
+        signature[f"areg:row:value:{valueBucket}"] += rowScale * (0.54 if valueBucket != "none" else 0.18)
+        signature[f"areg:row:marker:{'bridge' if marker == '~' else 'direct'}"] += rowScale * 0.34
+        if valueDistance is not None:
+            side = "left" if any(valuePos < position for valuePos in (cache.valuePositions or [])) else "right"
+            signature[f"areg:relation:valueSide:{side}:{valueBucket}"] += rowScale * 0.28
+        for relation, distance, side in relationRowsLocal:
+            distanceBucket = targetMemberAccountRegistryDistanceBucket(distance)
+            relationMass[relation] += rowScale
+            signature[f"areg:rel:{relation}"] += rowScale * 0.66
+            signature[f"areg:relpos:{relation}:{side}:{distanceBucket}"] += rowScale * 0.48
+        left = max(0, position - 4)
+        right = min(len(cache.stems), position + 5)
+        for neighborPos in range(left, right):
+            if neighborPos == position:
+                continue
+            neighbor = normStem(cache.stems[neighborPos])
+            if not neighbor or neighbor == surface or not isContentStem(neighbor) or relationTokenLike(neighbor):
+                continue
+            if valueTokenLike(neighbor, cache.markers[neighborPos] if neighborPos < len(cache.markers) else ""):
+                continue
+            side = "L" if neighborPos < position else "R"
+            distance = abs(neighborPos - position)
+            weight = rowScale / (1.0 + distance * 0.28)
+            neighborMass[neighbor] += weight
+            signature[f"areg:neighbor:{side}:{targetMemberAccountRegistryDistanceBucket(distance)}"] += weight * 0.26
+
+    for relation, weight in relationMass.most_common(5):
+        role = relationSlotSubstitutionTargetRole(surface, model)
+        signature[f"areg:relrole:{relation}:{role}"] += min(1.4, float(weight)) * 0.54
+    for neighbor, weight in neighborMass.most_common(16):
+        signature[f"areg:ctx:{stableHash(neighbor, 14)}"] += min(1.0, float(weight)) * 0.42
+
+    role = relationSlotSubstitutionTargetRole(surface, model)
+    profile = inferredOwnerRoleSpecificityProfile(surface, model)
+    signature[f"areg:role:{role}"] += 0.84
+    signature[f"areg:profile:role:{profile.role}"] += 0.54
+    signature[f"areg:profile:spec:{targetMemberAccountAxisBucket(profile.specificity)}"] += 0.34
+    signature[f"areg:profile:hub:{targetMemberAccountAxisBucket(profile.hubness)}"] += 0.22
+    signature[f"areg:rows:direct:{targetMemberAccountRegistryRowBucket(directRows)}"] += 0.40
+    signature[f"areg:rows:value:{targetMemberAccountRegistryRowBucket(valueRows)}"] += 0.52
+    signature[f"areg:rows:relation:{targetMemberAccountRegistryRowBucket(relationRows)}"] += 0.44
+    for lane, count in laneMass.most_common(3):
+        signature[f"areg:laneMix:{lane}:{targetMemberAccountRegistryRowBucket(int(count))}"] += 0.18
+    for valueBucket, count in valueBucketMass.most_common(3):
+        signature[f"areg:valueMix:{valueBucket}:{targetMemberAccountRegistryRowBucket(int(count))}"] += 0.18
+
+    for relation in tuple(relationMass)[:5] or tuple(relations for relations, _terms in RELATIONS):
+        ledgerSketch = relationSlotSubstitutionTargetLedgerSketch(surface, relation, model)
+        for ledgerRank, atom in enumerate(ledgerSketch[:10], start=1):
+            signature[f"areg:ledger:{atom}"] += 0.72 / math.sqrt(ledgerRank)
+
+    axisSignature, axisStats = targetMemberAccountAxisTargetSignature(
+        surface, tuple(relation for relation, _ in RELATIONS), model
+    )
+    for feature, weight in axisSignature.most_common(28):
+        signature[feature] += float(weight) * 0.36
+    stats["accountRegistryAxisFeatures"] += axisStats.get("accountAxisTargetFeatures", 0)
+
+    allowed, promotion, context, evidenceStats = targetMemberPromotableSurfaceAllowed(surface, model)
+    quality = (
+        math.log1p(directRows) * 0.12
+        + math.log1p(valueRows) * 0.78
+        + math.log1p(relationRows) * 0.18
+        + math.log1p(artifactRows) * 0.30
+        + math.log1p(ownerRows) * 0.34
+        + max(0.0, promotion) * 0.12
+        + profile.specificity * 0.42
+        - profile.hubness * 0.48
+        - max(0.0, context - promotion) * 0.10
+    )
+    if allowed:
+        quality += 0.18
+    if directRows <= 0:
+        quality *= 0.62
+    if len(surface) <= 3:
+        quality *= 0.78
+    stats.update(evidenceStats)
+    stats["accountRegistryOccurrenceRows"] = len(rows)
+    stats["accountRegistryDirectRows"] = directRows
+    stats["accountRegistryBridgeRows"] = bridgeRows
+    stats["accountRegistryValueRows"] = valueRows
+    stats["accountRegistryRelationRows"] = relationRows
+    stats["accountRegistryArtifactRows"] = artifactRows
+    stats["accountRegistryOwnerRows"] = ownerRows
+    stats["accountRegistryQualityMilli"] = int(max(0.0, quality) * 1000)
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberAccountRegistryFamilyKey(surface: str, model: Model) -> str:
+    surface = normStem(surface)
+    label = contrastSemanticUnitLabelForSurface(surface, model)
+    if label:
+        return f"csu:{label}"
+    role = relationSlotSubstitutionTargetRole(surface, model)
+    suffix = surface[-min(4, len(surface)) :] if surface else ""
+    return f"areg:{role}:{stableHash(suffix, 10)}"
+
+
+def targetMemberAccountRegistryBuildIndex(
+    model: Model,
+) -> tuple[
+    dict[str, Counter[str]],
+    Counter[str],
+    Counter[str],
+    dict[str, tuple[tuple[str, float], ...]],
+    dict[str, tuple[str, ...]],
+    Counter[str],
+]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_ACCOUNT_REGISTRY_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    signatures: dict[str, Counter[str]] = {}
+    qualityScores: Counter[str] = Counter()
+    featureDf: Counter[str] = Counter()
+    postingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    familyRaw: dict[str, list[tuple[float, str]]] = defaultdict(list)
+    stats: Counter[str] = Counter()
+    for surface, occurrenceRows in model.queryLocalFrameOccurrenceIndex.items():
+        surface = normStem(surface)
+        if not surface or not isContentStem(surface) or relationTokenLike(surface):
+            stats["accountRegistrySurfaceSkips"] += 1
+            continue
+        if surface in BRIDGE_SEED_STOP_STEMS or any(surface.endswith(suffix) for suffix in BRIDGE_SEED_STOP_SUFFIXES):
+            stats["accountRegistryStopSurfaceSkips"] += 1
+            continue
+        if valueTokenLike(surface, ""):
+            stats["accountRegistryValueSurfaceSkips"] += 1
+            continue
+        if model.independentSurfaceDf.get(surface, 0) <= 0:
+            stats["accountRegistryBridgeOnlySkips"] += 1
+            continue
+        signature, quality, mentionStats = targetMemberAccountRegistryMentionSignature(surface, model)
+        stats.update(mentionStats)
+        structuralRows = (
+            mentionStats.get("accountRegistryValueRows", 0)
+            + mentionStats.get("accountRegistryArtifactRows", 0)
+            + mentionStats.get("accountRegistryOwnerRows", 0)
+            + mentionStats.get("promotableBoundRows", 0)
+            + mentionStats.get("promotablePathTargetRows", 0)
+        )
+        targetRole = relationSlotSubstitutionTargetRole(surface, model)
+        profile = inferredOwnerRoleSpecificityProfile(surface, model)
+        allowed, promotion, context, _evidenceStats = targetMemberPromotableSurfaceAllowed(surface, model)
+        if allowed and promotion >= context:
+            quality += min(0.52, max(0.0, promotion) * 0.12 + 0.22)
+        if structuralRows <= 0 and targetRole not in {"owner", "artifact", "metric"} and not allowed:
+            stats["accountRegistryNoStructuralEvidenceSkips"] += 1
+            continue
+        if not allowed and profile.hubness >= 0.78 and profile.specificity < 0.45 and structuralRows <= 2:
+            stats["accountRegistryGenericHubSkips"] += 1
+            continue
+        if quality < TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_QUALITY:
+            stats["accountRegistryLowQualitySkips"] += 1
+            continue
+        selected = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_FEATURE_LIMIT)))
+        if not selected:
+            stats["accountRegistryEmptySignatureSkips"] += 1
+            continue
+        signatures[surface] = selected
+        qualityScores[surface] = quality
+        familyKey = targetMemberAccountRegistryFamilyKey(surface, model)
+        familyRaw[familyKey].append((quality, surface))
+        for feature, weight in selected.items():
+            featureDf[feature] += 1
+            postingRows[feature].append((surface, float(weight) * (1.0 + min(0.70, quality * 0.18))))
+        stats["accountRegistryAcceptedSurfaces"] += 1
+        stats["accountRegistryAcceptedOccurrences"] += len(occurrenceRows)
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT])
+
+    familyMembers: dict[str, tuple[str, ...]] = {}
+    for familyKey, rows in familyRaw.items():
+        rows.sort(reverse=True)
+        familyMembers[familyKey] = tuple(
+            surface for _quality, surface in rows[:TARGET_MEMBER_ACCOUNT_REGISTRY_FAMILY_LIMIT]
+        )
+
+    stats["accountRegistrySurfaces"] = len(signatures)
+    stats["accountRegistryFeatureDfKeys"] = len(featureDf)
+    stats["accountRegistryPostingKeys"] = len(postings)
+    stats["accountRegistryPostingLinks"] = sum(len(rows) for rows in postings.values())
+    stats["accountRegistryFamilies"] = len(familyMembers)
+    result = (signatures, qualityScores, featureDf, postings, familyMembers, Counter(stats))
+    TARGET_MEMBER_ACCOUNT_REGISTRY_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberAccountRegistryTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+    registrySignatures: dict[str, Counter[str]] | None = None,
+    qualityScores: Counter[str] | None = None,
+) -> tuple[Counter[str], float, Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, quality, stats = cached
+        return Counter(signature), float(quality), Counter(stats)
+    if registrySignatures is None or qualityScores is None:
+        registrySignatures, qualityScores, _featureDf, _postings, _familyMembers, _indexStats = (
+            targetMemberAccountRegistryBuildIndex(model)
+        )
+    stats: Counter[str] = Counter()
+    directSignature = registrySignatures.get(candidate)
+    if directSignature:
+        quality = max(0.0, float(qualityScores.get(candidate, 0.0)))
+        selected = Counter(dict(directSignature.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_FEATURE_LIMIT)))
+        stats["accountRegistryDirectTargetRows"] += 1
+        TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_CACHE[cacheKey] = (Counter(selected), quality, Counter(stats))
+        return selected, quality, stats
+
+    if not candidate or not isContentStem(candidate) or relationTokenLike(candidate) or valueTokenLike(candidate, ""):
+        TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_CACHE[cacheKey] = (Counter(), 0.0, Counter(stats))
+        return Counter(), 0.0, stats
+
+    signature: Counter[str] = Counter()
+    axisSignature, axisStats = targetMemberAccountAxisTargetSignature(candidate, relations, model)
+    for feature, weight in axisSignature.most_common(TARGET_MEMBER_ACCOUNT_AXIS_TARGET_FEATURE_LIMIT):
+        signature[feature] += float(weight) * 0.54
+    stats.update(axisStats)
+
+    fragmentQuality = 0.0
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(candidate, model)[:TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        fragmentSignature = registrySignatures.get(fragment)
+        if not fragment or not fragmentSignature or fragment == candidate:
+            continue
+        positionMass = 0.92 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass / math.sqrt(fragmentRank)
+        if fragmentScale <= 0.0:
+            continue
+        fragmentQuality += max(0.0, float(qualityScores.get(fragment, 0.0))) * fragmentScale
+        for feature, weight in fragmentSignature.most_common(64):
+            signature[feature] += float(weight) * fragmentScale * 0.36
+        signature[f"areg:coldFragment:{positionKind}"] += fragmentScale * 0.28
+        stats["accountRegistryColdFragmentRows"] += 1
+
+    role = relationSlotSubstitutionTargetRole(candidate, model)
+    profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+    signature[f"areg:role:{role}"] += 0.64
+    signature[f"areg:profile:role:{profile.role}"] += 0.40
+    signature[f"areg:profile:spec:{targetMemberAccountAxisBucket(profile.specificity)}"] += 0.26
+    for relation in relations or ("",):
+        relationKey = relation or "any"
+        signature[f"areg:relrole:{relationKey}:{role}"] += 0.38
+        for ledgerRank, atom in enumerate(
+            relationSlotSubstitutionTargetLedgerSketch(candidate, relation, model)[:8], start=1
+        ):
+            signature[f"areg:ledger:{atom}"] += 0.42 / math.sqrt(ledgerRank)
+
+    allowed, promotion, context, _evidenceStats = targetMemberPromotableSurfaceAllowed(candidate, model)
+    quality = (
+        max(0.0, fragmentQuality) * 0.24
+        + max(0.0, promotion) * 0.20
+        + profile.specificity * 0.28
+        - profile.hubness * 0.24
+        - max(0.0, context - promotion) * 0.08
+    )
+    if allowed:
+        quality += 0.22
+    if not signature or quality <= 0.0:
+        stats["accountRegistryEmptyColdTargetRows"] += 1
+        TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_CACHE[cacheKey] = (Counter(), 0.0, Counter(stats))
+        return Counter(), 0.0, stats
+    selected = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_FEATURE_LIMIT)))
+    stats["accountRegistryColdTargetFeatures"] = len(selected)
+    stats["accountRegistryColdTargetQualityMilli"] = int(max(0.0, quality) * 1000)
+    TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_CACHE[cacheKey] = (Counter(selected), max(0.0, quality), Counter(stats))
+    return selected, max(0.0, quality), stats
+
+
+def targetMemberAccountRegistryQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+
+    registrySignatures, _qualityScores, _featureDf, _postings, _familyMembers, indexStats = (
+        targetMemberAccountRegistryBuildIndex(model)
+    )
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    stats["accountRegistryQueryRegistrySurfaces"] = indexStats.get("accountRegistrySurfaces", 0)
+    directSignature = registrySignatures.get(source)
+    if directSignature:
+        for feature, weight in directSignature.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_TARGET_FEATURE_LIMIT):
+            signature[feature] += float(weight) * 0.72
+        stats["accountRegistryQueryDirectRows"] += 1
+
+    axisSignature, axisStats = targetMemberAccountAxisQuerySignature(source, relations, model)
+    for feature, weight in axisSignature.most_common(TARGET_MEMBER_ACCOUNT_AXIS_QUERY_FEATURE_LIMIT):
+        signature[feature] += float(weight) * 0.46
+    stats.update(axisStats)
+
+    for pathRank, (fragment, relation, positionKind, sourceRole, expectedTargetRole, pathWeight) in enumerate(
+        targetMemberMutualProofSourcePaths(source, relations, model)[:TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment) or pathWeight <= 0.0:
+            continue
+        relationKey = relation or "any"
+        pathScale = max(0.0, float(pathWeight)) / math.sqrt(pathRank)
+        if positionKind == "inner":
+            pathScale *= 0.72
+        elif positionKind == "proxy":
+            pathScale *= 0.56
+        signature[f"areg:role:{expectedTargetRole}"] += pathScale * 0.84
+        signature[f"areg:sourceRole:{sourceRole}"] += pathScale * 0.28
+        signature[f"areg:rel:{relationKey}"] += pathScale * 0.70
+        signature[f"areg:relrole:{relationKey}:{expectedTargetRole}"] += pathScale * 0.58
+        signature[f"areg:path:{positionKind}"] += pathScale * 0.30
+        fragmentSignature = registrySignatures.get(fragment)
+        if fragmentSignature:
+            for feature, weight in fragmentSignature.most_common(48):
+                signature[feature] += float(weight) * pathScale * 0.34
+            stats["accountRegistryQueryPathFragmentRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        fragmentSignature = registrySignatures.get(fragment)
+        if not fragmentSignature:
+            continue
+        positionMass = 0.90 if positionKind in {"edge", "prefix", "suffix"} else 0.50
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass / math.sqrt(fragmentRank)
+        for feature, weight in fragmentSignature.most_common(56):
+            signature[feature] += float(weight) * fragmentScale * 0.42
+        signature[f"areg:path:{positionKind}"] += fragmentScale * 0.26
+        stats["accountRegistryQueryColdFragmentRows"] += 1
+
+    limited = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_FEATURE_LIMIT)))
+    stats["accountRegistryQueryFeatures"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountRegistryWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    registrySize: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(featureDf.get(feature, 1)))
+        idf = math.log1p((registrySize + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.16, idf) * targetMemberAccountRegistryFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    raw = 0.0
+    matched = 0
+    valueMatched = 0
+    relationMatched = 0
+    roleMatched = 0
+    ledgerMatched = 0
+    contextMatched = 0
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        raw += effective(feature, float(leftWeight)) * effective(feature, float(rightWeight))
+        matched += 1
+        if feature.startswith(("areg:row:value:", "areg:relation:valueSide:", "acct:axis:value")):
+            valueMatched += 1
+        if feature.startswith(("areg:rel:", "areg:relrole:", "acct:rel:", "acct:relrole:")):
+            relationMatched += 1
+        if feature.startswith(("areg:role:", "areg:profile:", "acct:role:", "acct:profile:")):
+            roleMatched += 1
+        if feature.startswith(("areg:ledger:", "acct:ledger:", "acct:grammar-ledger:")):
+            ledgerMatched += 1
+        if feature.startswith(("areg:ctx:", "areg:neighbor:")):
+            contextMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    proof *= (
+        1.0
+        + min(0.38, valueMatched * 0.090)
+        + min(0.34, relationMatched * 0.075)
+        + min(0.28, ledgerMatched * 0.070)
+        + min(0.20, roleMatched * 0.045)
+        + min(0.18, contextMatched * 0.035)
+    )
+    stats["accountRegistryMatchedFeatures"] = matched
+    stats["accountRegistryValueMatchedFeatures"] = valueMatched
+    stats["accountRegistryRelationMatchedFeatures"] = relationMatched
+    stats["accountRegistryRoleMatchedFeatures"] = roleMatched
+    stats["accountRegistryLedgerMatchedFeatures"] = ledgerMatched
+    stats["accountRegistryContextMatchedFeatures"] = contextMatched
+    stats["accountRegistryProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberAccountRegistryProof(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_REGISTRY_PROOF_CACHE.get(cacheKey)
+    if cached is not None:
+        proof, stats = cached
+        return proof, Counter(stats)
+    registrySignatures, _qualityScores, featureDf, _postings, _familyMembers, indexStats = (
+        targetMemberAccountRegistryBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberAccountRegistryQuerySignature(source, relations, model)
+    targetSignature, _targetQuality, targetStats = targetMemberAccountRegistryTargetSignature(
+        candidate,
+        relations,
+        model,
+        registrySignatures,
+        _qualityScores,
+    )
+    proof, proofStats = targetMemberAccountRegistryWeightedProof(
+        querySignature,
+        targetSignature,
+        featureDf,
+        max(1, len(registrySignatures)),
+    )
+    stats = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(targetStats)
+    stats.update(proofStats)
+    TARGET_MEMBER_ACCOUNT_REGISTRY_PROOF_CACHE[cacheKey] = (max(0.0, proof), Counter(stats))
+    return max(0.0, proof), stats
+
+
+def targetMemberAccountRegistryScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_REGISTRY_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    registrySignatures, qualityScores, featureDf, postings, familyMembers, indexStats = (
+        targetMemberAccountRegistryBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberAccountRegistryQuerySignature(source, relations, model)
+    slotScores, slotStats = targetMemberSlotResidualScores(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats["accountRegistrySlotRows"] += slotStats.get("slotResidualRouteRows", 0)
+    seedPool: Counter[str] = Counter()
+    registrySize = max(1, len(registrySignatures))
+    targetSignatureCache: dict[str, tuple[Counter[str], float, Counter[str]]] = {}
+
+    def candidateTargetSignature(candidate: str) -> tuple[Counter[str], float, Counter[str]]:
+        candidate = normStem(candidate)
+        cachedSignature = targetSignatureCache.get(candidate)
+        if cachedSignature is not None:
+            signature, quality, signatureStats = cachedSignature
+            return Counter(signature), float(quality), Counter(signatureStats)
+        signature, quality, signatureStats = targetMemberAccountRegistryTargetSignature(
+            candidate,
+            relations,
+            model,
+            registrySignatures,
+            qualityScores,
+        )
+        targetSignatureCache[candidate] = (Counter(signature), float(quality), Counter(signatureStats))
+        return signature, quality, signatureStats
+
+    for feature, queryWeight in querySignature.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_QUERY_FEATURE_LIMIT):
+        rows = postings.get(feature, tuple())
+        if not rows:
+            continue
+        df = max(1, int(featureDf.get(feature, 1)))
+        idf = math.log1p((registrySize + 1.0) / (df + 0.5))
+        for rank, (candidate, targetWeight) in enumerate(rows[:TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT], start=1):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or candidate not in registrySignatures:
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.16, idf)
+                * targetMemberAccountRegistryFeatureGain(feature)
+                / math.sqrt(rank)
+            )
+            stats["accountRegistryPostingRows"] += 1
+        stats["accountRegistryPostingMatchedKeys"] += 1
+
+    for rank, (candidate, score) in enumerate(
+        slotScores.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == source:
+            continue
+        candidateSignature, _candidateQuality, _candidateStats = candidateTargetSignature(candidate)
+        if not candidateSignature:
+            continue
+        seedPool[candidate] += (
+            math.log1p(max(0.0, float(score))) * TARGET_MEMBER_ACCOUNT_REGISTRY_SLOT_SEED_WEIGHT / math.sqrt(rank)
+        )
+        stats["accountRegistrySeed:slotResidual"] += 1
+
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model)[
+        :TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT
+    ]:
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment):
+            continue
+        positionMass = 0.92 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        for relation in relations or ("",):
+            for rank, (targetSurface, targetScore) in enumerate(
+                model.relationBoundRolePairPostings.get((fragment, relation), ())[
+                    :TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT
+                ],
+                start=1,
+            ):
+                targetSurface = normStem(targetSurface)
+                if not targetSurface or targetSurface == source:
+                    continue
+                targetSignature, _targetQuality, _targetStats = candidateTargetSignature(targetSurface)
+                if not targetSignature:
+                    continue
+                seedPool[targetSurface] += (
+                    max(0.0, float(fragmentWeight))
+                    * positionMass
+                    * math.log1p(max(0.0, float(targetScore)))
+                    * 0.44
+                    / math.sqrt(rank)
+                )
+                stats["accountRegistrySeed:fragmentBound"] += 1
+    for gram in compoundGrams(source):
+        for rank, candidate in enumerate(
+            model.compoundGramPostings.get(gram, ())[:TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT],
+            start=1,
+        ):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source:
+                continue
+            candidateSignature, _candidateQuality, _candidateStats = candidateTargetSignature(candidate)
+            if not candidateSignature:
+                continue
+            seedPool[candidate] += 0.22 / math.sqrt(rank)
+            stats["accountRegistrySeed:sourceCompoundCold"] += 1
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model)[
+        :TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT
+    ]:
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionMass = 0.94 if positionKind in {"edge", "prefix", "suffix"} else 0.56
+        for gram in compoundGrams(fragment):
+            for rank, candidate in enumerate(
+                model.compoundGramPostings.get(gram, ())[:TARGET_MEMBER_ACCOUNT_REGISTRY_POSTING_LIMIT],
+                start=1,
+            ):
+                candidate = normStem(candidate)
+                if not candidate or candidate == source or candidate == fragment:
+                    continue
+                candidateSignature, _candidateQuality, _candidateStats = candidateTargetSignature(candidate)
+                if not candidateSignature:
+                    continue
+                seedPool[candidate] += max(0.0, float(fragmentWeight)) * positionMass * 0.34 / math.sqrt(rank)
+                stats["accountRegistrySeed:fragmentCompoundCold"] += 1
+    sourceFragments: list[tuple[str, float]] = [(source, 0.64)]
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_ACCOUNT_REGISTRY_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionMass = 0.90 if positionKind in {"edge", "prefix", "suffix"} else 0.52
+        sourceFragments.append((fragment, max(0.0, float(fragmentWeight)) * positionMass / math.sqrt(fragmentRank)))
+    for scanRank, (candidate, count) in enumerate(
+        model.surfaceDf.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_SURFACE_SCAN_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == source or not isContentStem(candidate) or relationTokenLike(candidate):
+            continue
+        bestOverlap = 0.0
+        for fragment, fragmentWeight in sourceFragments:
+            if not fragment or fragment == candidate:
+                continue
+            if len(fragment) >= 2 and fragment in candidate:
+                overlap = min(0.86, 0.36 + 0.10 * len(fragment))
+            else:
+                overlap = nonSuffixCompoundOverlap(fragment, candidate)
+            bestOverlap = max(bestOverlap, overlap * max(0.0, float(fragmentWeight)))
+        if bestOverlap <= 0.0:
+            continue
+        candidateSignature, _candidateQuality, _candidateStats = candidateTargetSignature(candidate)
+        if not candidateSignature:
+            continue
+        seedPool[candidate] += (
+            bestOverlap * math.log1p(max(0, int(count))) * 0.16 / math.sqrt(1.0 + (scanRank - 1) * 0.004)
+        )
+        stats["accountRegistrySeed:surfaceFragmentScan"] += 1
+
+    stats["accountRegistrySeedPoolRows"] = len(seedPool)
+    if not seedPool:
+        TARGET_MEMBER_ACCOUNT_REGISTRY_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    rerankedSeedPool: Counter[str] = Counter()
+    for rerank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_SEED_RERANK_LIMIT),
+        start=1,
+    ):
+        candidateSignature, candidateQuality, candidateStats = candidateTargetSignature(candidate)
+        if not candidateSignature:
+            continue
+        seedProof, seedProofStats = targetMemberAccountRegistryWeightedProof(
+            querySignature,
+            candidateSignature,
+            featureDf,
+            registrySize,
+        )
+        axisProof, _axisStats = targetMemberAccountAxisProof(source, candidate, relations, model)
+        combinedProof = seedProof + axisProof * TARGET_MEMBER_ACCOUNT_REGISTRY_AXIS_PROOF_GAIN
+        if combinedProof <= 0.0:
+            continue
+        rerankedSeedPool[candidate] = (
+            math.log1p(max(0.0, float(seedScore))) * 0.18 + combinedProof + max(0.0, candidateQuality) * 0.045
+        ) / math.sqrt(1.0 + (rerank - 1) * 0.010)
+        stats["accountRegistrySeedRerankRows"] += 1
+        stats["accountRegistrySeedRerankProofMilli"] += int(seedProof * 1000)
+        stats["accountRegistrySeedRerankAxisMilli"] += int(axisProof * 1000)
+        stats["accountRegistrySeedRerankMatchedFeatures"] += seedProofStats.get("accountRegistryMatchedFeatures", 0)
+        stats["accountRegistrySeedRerankColdRows"] += int(
+            candidateStats.get("accountRegistryColdTargetFeatures", 0) > 0
+        )
+    if rerankedSeedPool:
+        seedPool = rerankedSeedPool
+    stats["accountRegistryRerankedSeedPoolRows"] = len(seedPool)
+
+    rawOutput: list[tuple[float, str, Counter[str]]] = []
+    for seedRank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        targetSignature, targetQuality, targetStats = candidateTargetSignature(candidate)
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberAccountRegistryWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            registrySize,
+        )
+        axisProof, axisStats = targetMemberAccountAxisProof(source, candidate, relations, model)
+        totalProof = proof + axisProof * TARGET_MEMBER_ACCOUNT_REGISTRY_AXIS_PROOF_GAIN
+        if totalProof < TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_PROOF:
+            stats["accountRegistryLowProofRows"] += 1
+            continue
+        familyKey = targetMemberAccountRegistryFamilyKey(candidate, model)
+        peerProofs: list[float] = []
+        for peer in familyMembers.get(familyKey, ())[:TARGET_MEMBER_ACCOUNT_REGISTRY_FAMILY_LIMIT]:
+            if peer == candidate or peer == source:
+                continue
+            peerSignature = registrySignatures.get(peer)
+            if not peerSignature:
+                continue
+            peerProof, _peerStats = targetMemberAccountRegistryWeightedProof(
+                querySignature,
+                peerSignature,
+                featureDf,
+                registrySize,
+            )
+            if peerProof > 0.0:
+                peerProofs.append(peerProof)
+        peerProofs.sort(reverse=True)
+        peerBest = peerProofs[0] if peerProofs else 0.0
+        margin = proof - peerBest
+        if margin < TARGET_MEMBER_ACCOUNT_REGISTRY_MIN_MARGIN:
+            stats["accountRegistryNegativeMarginRows"] += 1
+            totalProof *= 0.72
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+        qualityMass = 1.0 + min(0.74, quality * TARGET_MEMBER_ACCOUNT_REGISTRY_QUALITY_GAIN)
+        marginMass = 1.0 + max(0.0, margin) * TARGET_MEMBER_ACCOUNT_REGISTRY_MARGIN_GAIN
+        hubPenalty = 1.0 + min(0.34, profile.hubness * 0.18)
+        rankMass = 1.0 / math.sqrt(1.0 + (seedRank - 1) * 0.036)
+        score = math.log1p(max(0.0, float(seedScore))) * totalProof * qualityMass * marginMass * rankMass / hubPenalty
+        if score <= 0.0:
+            continue
+        rowStats = Counter(proofStats)
+        rowStats.update(axisStats)
+        rowStats.update(targetStats)
+        rowStats["accountRegistryQualityMilli"] += int(quality * 1000)
+        rowStats["accountRegistryAxisProofMilli"] += int(axisProof * 1000)
+        rowStats["accountRegistryMarginMilli"] += int(margin * 1000)
+        rawOutput.append((score, candidate, rowStats))
+        stats["accountRegistryScored"] += 1
+        stats["accountRegistryScoreMilli"] += int(score * 1000)
+        stats["accountRegistryProofMilli"] += proofStats.get("accountRegistryProofMilli", 0)
+        stats["accountRegistryAxisProofMilli"] += int(axisProof * 1000)
+        stats["accountRegistryMatchedFeatures"] += proofStats.get("accountRegistryMatchedFeatures", 0)
+        stats["accountRegistryValueMatchedFeatures"] += proofStats.get("accountRegistryValueMatchedFeatures", 0)
+        stats["accountRegistryRelationMatchedFeatures"] += proofStats.get("accountRegistryRelationMatchedFeatures", 0)
+        stats["accountRegistryLedgerMatchedFeatures"] += proofStats.get("accountRegistryLedgerMatchedFeatures", 0)
+        stats["accountRegistryPeerRows"] += len(peerProofs)
+        stats["accountRegistryColdTargetRows"] += targetStats.get("accountRegistryColdTargetFeatures", 0) > 0
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for score, candidate, _rowStats in rawOutput:
+        familyKey = targetMemberAccountRegistryFamilyKey(candidate, model)
+        previous = familyBest.get(familyKey)
+        if previous is None or score > previous[0]:
+            familyBest[familyKey] = (score, candidate)
+    output = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)))
+    stats["accountRegistryFamilyCollapsedRows"] = max(0, len(rawOutput) - len(limited))
+    stats["accountRegistryRouteRows"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_REGISTRY_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountRegistryRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberAccountRegistryScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_ACCOUNT_REGISTRY_ROUTE_LIMIT))
+
+
+def targetMemberStatementLedgerValueBucket(distance: int | None) -> str:
+    if distance is None:
+        return "none"
+    if distance <= 1:
+        return "touch"
+    if distance <= 3:
+        return "near"
+    if distance <= 7:
+        return "row"
+    if distance <= 14:
+        return "band"
+    return "far"
+
+
+def targetMemberStatementLedgerRowBucket(value: int) -> str:
+    if value <= 0:
+        return "z0"
+    if value <= 2:
+        return "z1"
+    if value <= 6:
+        return "z2"
+    if value <= 18:
+        return "z3"
+    return "z4"
+
+
+def targetMemberStatementLedgerAccountRole(surface: str) -> str:
+    surface = normStem(surface)
+    if not surface:
+        return "other"
+    if "대출" in surface and "채권" in surface:
+        return "loanReceivable"
+    if "매출" in surface and ("금액" in surface or surface.endswith("액") or "수익" in surface):
+        return "revenue"
+    if ("외상" in surface and "매출" in surface) or ("매출" in surface and "채권" in surface):
+        return "tradeReceivable"
+    if surface.endswith("매출금") or "미수" in surface:
+        return "tradeReceivable"
+    if "채권" in surface or "미수" in surface:
+        return "receivable"
+    if ("대손" in surface or "손실" in surface) and "충당" in surface:
+        return "lossAllowance"
+    if "복구" in surface and "충당" in surface:
+        return "restorationProvision"
+    if "충당" in surface:
+        return "provision"
+    if "배당" in surface:
+        return "dividend"
+    if "현금" in surface or "예금" in surface:
+        return "cash"
+    if "영업" in surface and ("이익" in surface or "손익" in surface):
+        return "operatingProfit"
+    if "당기순" in surface and ("이익" in surface or "손익" in surface):
+        return "netProfit"
+    if "재고" in surface:
+        return "inventory"
+    if "차입" in surface or "사채" in surface:
+        return "borrowing"
+    if "채무" in surface or "미지급" in surface:
+        return "payable"
+    if "자본" in surface:
+        return "equity"
+    if "부채" in surface:
+        return "liability"
+    if "자산" in surface:
+        return "asset"
+    return "other"
+
+
+def targetMemberStatementLedgerExpectedStatementRoles(
+    accountRole: str,
+    relations: tuple[str, ...],
+) -> tuple[str, ...]:
+    roles: list[str] = []
+    if accountRole in {
+        "tradeReceivable",
+        "loanReceivable",
+        "receivable",
+        "lossAllowance",
+        "restorationProvision",
+        "provision",
+        "cash",
+        "inventory",
+        "borrowing",
+        "payable",
+        "asset",
+        "liability",
+        "equity",
+        "dividend",
+    }:
+        roles.append("balanceSheet")
+    if accountRole in {"lossAllowance", "provision", "tradeReceivable", "receivable"}:
+        roles.append("allowanceNote")
+    if accountRole in {"revenue", "operatingProfit", "netProfit"}:
+        roles.append("incomeStatement")
+    if accountRole == "cash":
+        roles.append("cashFlow")
+    if accountRole == "dividend":
+        roles.append("cashFlow")
+    if "increase" in relations or "decrease" in relations:
+        roles.append("movement")
+    if not roles:
+        roles.append("unknown")
+    deduped: list[str] = []
+    for role in roles:
+        if role not in deduped:
+            deduped.append(role)
+    return tuple(deduped)
+
+
+def targetMemberStatementLedgerWindow(cache: Cache, position: int, radius: int = 180) -> str:
+    if cache.tokenStarts is None or not cache.tokenStarts or position >= len(cache.tokenStarts):
+        return cache.unit.text[: radius * 2]
+    start = cache.tokenStarts[position]
+    left = max(0, start - radius)
+    right = min(len(cache.unit.text), start + radius)
+    return cache.unit.text[left:right]
+
+
+def targetMemberStatementLedgerStatementRole(cache: Cache, position: int, surface: str = "") -> str:
+    surface = normStem(surface)
+    accountRole = targetMemberStatementLedgerAccountRole(surface)
+    window = targetMemberStatementLedgerWindow(cache, position)
+    text = f"{window} {surface}"
+    if "현금흐름" in text or "영업활동" in text or "투자활동" in text or "재무활동" in text:
+        return "cashFlow"
+    if (
+        "손익" in text
+        or "포괄손익" in text
+        or "영업이익" in text
+        or "영업손익" in text
+        or accountRole in {"revenue", "operatingProfit", "netProfit"}
+    ):
+        return "incomeStatement"
+    if "대손" in text or "손실충당" in text or "충당금" in text or "채권" in text:
+        return "allowanceNote" if accountRole in {"lossAllowance", "provision"} else "balanceSheet"
+    if (
+        "재무상태" in text
+        or "자산" in text
+        or "부채" in text
+        or "자본" in text
+        or accountRole
+        in {
+            "tradeReceivable",
+            "loanReceivable",
+            "receivable",
+            "cash",
+            "inventory",
+            "borrowing",
+            "payable",
+            "asset",
+            "liability",
+            "equity",
+        }
+    ):
+        return "balanceSheet"
+    if FRAME_FENCE_RE.search(window):
+        return "table"
+    return "unknown"
+
+
+def targetMemberStatementLedgerRoleCompatibility(queryRole: str, candidateRole: str) -> float:
+    if queryRole == candidateRole:
+        return 1.0
+    if queryRole == "other" or candidateRole == "other":
+        return 0.34
+    if "dividend" in {queryRole, candidateRole}:
+        return 0.18 if queryRole != candidateRole else 1.0
+    if {queryRole, candidateRole} <= {"tradeReceivable", "receivable"}:
+        return 0.84
+    if {queryRole, candidateRole} <= {"loanReceivable", "receivable"}:
+        return 0.58
+    if {queryRole, candidateRole} <= {"tradeReceivable", "loanReceivable", "receivable"}:
+        return 0.24
+    if {queryRole, candidateRole} <= {"lossAllowance", "provision"}:
+        return 0.72
+    if {queryRole, candidateRole} <= {"restorationProvision", "provision"}:
+        return 0.64
+    if {queryRole, candidateRole} <= {"lossAllowance", "restorationProvision", "provision"}:
+        return 0.26
+    if {queryRole, candidateRole} <= {"operatingProfit", "netProfit", "revenue"}:
+        return 0.42
+    if {queryRole, candidateRole} <= {"borrowing", "payable", "liability"}:
+        return 0.50
+    if {queryRole, candidateRole} <= {"cash", "asset"}:
+        return 0.54
+    if {queryRole, candidateRole} <= {"inventory", "asset"}:
+        return 0.48
+    return 0.30
+
+
+def targetMemberStatementLedgerFeatureGain(feature: str) -> float:
+    if feature.startswith(("sledger:stmtAcct:", "sledger:accountRole:", "sledger:roleCompat:")):
+        return 1.34
+    if feature.startswith(("sledger:value:", "sledger:valueSide:", "sledger:rowLineage:")):
+        return 1.25
+    if feature.startswith(("sledger:rel:", "sledger:relpos:", "sledger:relAcct:")):
+        return 1.18
+    if feature.startswith(("sledger:neighborRole:", "sledger:orderRole:")):
+        return 1.08
+    if feature.startswith(("sledger:areg:", "sledger:axis:")):
+        return 0.72
+    if feature.startswith(("sledger:ctx:", "sledger:coord:")):
+        return 0.84
+    return 1.0
+
+
+def targetMemberStatementLedgerFamilyKey(surface: str) -> str:
+    role = targetMemberStatementLedgerAccountRole(surface)
+    if role == "other":
+        return f"sledger:other:{stableHash(normStem(surface)[-4:], 10)}"
+    return f"sledger:{role}"
+
+
+def targetMemberStatementLedgerMentionSignature(
+    surface: str,
+    model: Model,
+    rowLimit: int = TARGET_MEMBER_STATEMENT_LEDGER_OCCURRENCE_LIMIT,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    stats: Counter[str] = Counter()
+    signature: Counter[str] = Counter()
+    if not surface or not isContentStem(surface) or relationTokenLike(surface) or valueTokenLike(surface, ""):
+        return signature, 0.0, stats
+    accountRole = targetMemberStatementLedgerAccountRole(surface)
+    rows = model.queryLocalFrameOccurrenceIndex.get(surface, ())[:rowLimit]
+    directRows = 0
+    bridgeRows = 0
+    valueRows = 0
+    relationRows = 0
+    statementRows = 0
+    laneRows: Counter[str] = Counter()
+    statementRowsByRole: Counter[str] = Counter()
+    relationRowsByName: Counter[str] = Counter()
+    neighborRoleRows: Counter[str] = Counter()
+
+    for rowRank, (unitId, position, marker) in enumerate(rows, start=1):
+        if unitId < 0 or unitId >= len(model.caches):
+            continue
+        cache = model.caches[unitId]
+        if position < 0 or position >= len(cache.stems):
+            continue
+        lane = cache.lanes[position] if cache.lanes and position < len(cache.lanes) else "sentence"
+        statementRole = targetMemberStatementLedgerStatementRole(cache, position, surface)
+        valueDistance = nearestTokenDistance(position, cache.valuePositions or [])
+        valueBucket = targetMemberStatementLedgerValueBucket(valueDistance)
+        valueSide = "none"
+        if valueDistance is not None:
+            leftDistance = min(
+                (position - valuePos for valuePos in cache.valuePositions or [] if valuePos < position), default=None
+            )
+            rightDistance = min(
+                (valuePos - position for valuePos in cache.valuePositions or [] if valuePos > position), default=None
+            )
+            if leftDistance is not None and (rightDistance is None or leftDistance <= rightDistance):
+                valueSide = "left"
+            elif rightDistance is not None:
+                valueSide = "right"
+        rowScale = 1.0 / math.sqrt(rowRank)
+        directRows += int(marker != "~")
+        bridgeRows += int(marker == "~")
+        laneRows[lane] += 1
+        statementRows += int(statementRole != "unknown")
+        statementRowsByRole[statementRole] += 1
+        valueRows += int(valueBucket in {"touch", "near", "row", "band"})
+        signature[f"sledger:accountRole:{accountRole}"] += rowScale * 1.24
+        signature[f"sledger:stmt:{statementRole}"] += rowScale * 0.88
+        signature[f"sledger:stmtAcct:{statementRole}:{accountRole}"] += rowScale * 1.36
+        signature[f"sledger:lane:{lane}"] += rowScale * 0.42
+        signature[f"sledger:value:{valueBucket}"] += rowScale * (0.74 if valueBucket != "none" else 0.18)
+        signature[f"sledger:valueSide:{valueSide}:{valueBucket}"] += rowScale * 0.48
+        signature[f"sledger:rowLineage:{statementRole}:{accountRole}:{valueBucket}"] += rowScale * 0.92
+        signature[f"sledger:marker:{'bridge' if marker == '~' else 'direct'}"] += rowScale * 0.24
+
+        relationRowsLocal = targetMemberAccountRegistryRelationRows(cache, position)
+        relationRows += len(relationRowsLocal)
+        for relation, distance, side in relationRowsLocal:
+            distanceBucket = targetMemberAccountRegistryDistanceBucket(distance)
+            relationRowsByName[relation] += 1
+            signature[f"sledger:rel:{relation}"] += rowScale * 0.68
+            signature[f"sledger:relpos:{relation}:{side}:{distanceBucket}"] += rowScale * 0.52
+            signature[f"sledger:relAcct:{relation}:{accountRole}"] += rowScale * 0.74
+
+        leftRole = "none"
+        rightRole = "none"
+        for side, step in (("L", -1), ("R", 1)):
+            index = position + step
+            walked = 0
+            while 0 <= index < len(cache.stems) and walked < 5:
+                neighbor = normStem(cache.stems[index])
+                if neighbor and neighbor != surface and isContentStem(neighbor) and not relationTokenLike(neighbor):
+                    neighborRole = targetMemberStatementLedgerAccountRole(neighbor)
+                    if neighborRole != "other":
+                        neighborRoleRows[f"{side}:{neighborRole}"] += 1
+                        signature[f"sledger:neighborRole:{side}:{neighborRole}"] += rowScale * 0.54 / (1.0 + walked)
+                        if side == "L":
+                            leftRole = neighborRole
+                        else:
+                            rightRole = neighborRole
+                        break
+                index += step
+                walked += 1
+        if leftRole != "none" or rightRole != "none":
+            signature[f"sledger:orderRole:{leftRole}>{accountRole}>{rightRole}"] += rowScale * 0.74
+
+    for statementRole, count in statementRowsByRole.most_common(3):
+        signature[f"sledger:stmtMix:{statementRole}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.30
+    for relation, count in relationRowsByName.most_common(4):
+        signature[f"sledger:relMix:{relation}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.22
+    for lane, count in laneRows.most_common(3):
+        signature[f"sledger:laneMix:{lane}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.18
+    for roleKey, count in neighborRoleRows.most_common(6):
+        signature[f"sledger:neighborMix:{roleKey}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.18
+
+    profile = inferredOwnerRoleSpecificityProfile(surface, model)
+    signature[f"sledger:profile:{profile.role}"] += 0.34
+    signature[f"sledger:profileSpec:{targetMemberAccountAxisBucket(profile.specificity)}"] += 0.24
+    signature[f"sledger:profileHub:{targetMemberAccountAxisBucket(profile.hubness)}"] += 0.16
+    for cell in coordCells(surface)[:4]:
+        signature[f"sledger:coord:{cell}"] += 0.08
+
+    roleMass = 0.0 if accountRole == "other" else 0.74
+    quality = (
+        math.log1p(directRows) * 0.16
+        + math.log1p(valueRows) * 0.62
+        + math.log1p(statementRows) * 0.42
+        + math.log1p(relationRows) * 0.16
+        + roleMass
+        + profile.specificity * 0.26
+        - profile.hubness * 0.36
+    )
+    if directRows <= 0:
+        quality *= 0.68
+    if len(surface) <= 3 and accountRole == "other":
+        quality *= 0.64
+    stats["statementLedgerOccurrenceRows"] = len(rows)
+    stats["statementLedgerDirectRows"] = directRows
+    stats["statementLedgerBridgeRows"] = bridgeRows
+    stats["statementLedgerValueRows"] = valueRows
+    stats["statementLedgerRelationRows"] = relationRows
+    stats["statementLedgerStatementRows"] = statementRows
+    stats["statementLedgerQualityMilli"] = int(max(0.0, quality) * 1000)
+    stats[f"statementLedgerAccountRole:{accountRole}"] += 1
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberStatementLedgerBuildIndex(
+    model: Model,
+) -> tuple[
+    dict[str, Counter[str]],
+    Counter[str],
+    Counter[str],
+    dict[str, tuple[tuple[str, float], ...]],
+    dict[tuple[str, str], tuple[tuple[str, float], ...]],
+    dict[str, tuple[str, ...]],
+    Counter[str],
+]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_STATEMENT_LEDGER_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    signatures: dict[str, Counter[str]] = {}
+    qualityScores: Counter[str] = Counter()
+    featureDf: Counter[str] = Counter()
+    postingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    rolePostingRows: dict[tuple[str, str], list[tuple[str, float]]] = defaultdict(list)
+    familyRaw: dict[str, list[tuple[float, str]]] = defaultdict(list)
+    stats: Counter[str] = Counter()
+
+    for surface in model.queryLocalFrameOccurrenceIndex:
+        surface = normStem(surface)
+        if not surface or not isContentStem(surface) or relationTokenLike(surface) or valueTokenLike(surface, ""):
+            stats["statementLedgerSurfaceSkips"] += 1
+            continue
+        if surface in BRIDGE_SEED_STOP_STEMS or any(surface.endswith(suffix) for suffix in BRIDGE_SEED_STOP_SUFFIXES):
+            stats["statementLedgerStopSurfaceSkips"] += 1
+            continue
+        if model.independentSurfaceDf.get(surface, 0) <= 0:
+            stats["statementLedgerBridgeOnlySkips"] += 1
+            continue
+        accountRole = targetMemberStatementLedgerAccountRole(surface)
+        signature, quality, mentionStats = targetMemberStatementLedgerMentionSignature(surface, model)
+        stats.update(mentionStats)
+        structuralRows = (
+            mentionStats.get("statementLedgerValueRows", 0)
+            + mentionStats.get("statementLedgerStatementRows", 0)
+            + mentionStats.get("statementLedgerRelationRows", 0)
+        )
+        if accountRole == "other" and structuralRows < 3:
+            stats["statementLedgerNoAccountRoleSkips"] += 1
+            continue
+        if quality < TARGET_MEMBER_STATEMENT_LEDGER_MIN_QUALITY:
+            stats["statementLedgerLowQualitySkips"] += 1
+            continue
+        selected = Counter(dict(signature.most_common(TARGET_MEMBER_STATEMENT_LEDGER_TARGET_FEATURE_LIMIT)))
+        if not selected:
+            stats["statementLedgerEmptySignatureSkips"] += 1
+            continue
+        signatures[surface] = selected
+        qualityScores[surface] = quality
+        familyKey = targetMemberStatementLedgerFamilyKey(surface)
+        familyRaw[familyKey].append((quality, surface))
+        for feature, weight in selected.items():
+            featureDf[feature] += 1
+            postingRows[feature].append((surface, float(weight) * (1.0 + min(0.55, quality * 0.14))))
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(accountRole, tuple()):
+            if statementRole == "unknown" and accountRole == "other":
+                continue
+            rolePostingRows[(statementRole, accountRole)].append((surface, quality + 0.18 * structuralRows))
+        stats["statementLedgerAcceptedSurfaces"] += 1
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_STATEMENT_LEDGER_POSTING_LIMIT])
+
+    rolePostings: dict[tuple[str, str], tuple[tuple[str, float], ...]] = {}
+    for roleKey, rows in rolePostingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        rolePostings[roleKey] = tuple(rows[:TARGET_MEMBER_STATEMENT_LEDGER_ROLE_POSTING_LIMIT])
+
+    familyMembers: dict[str, tuple[str, ...]] = {}
+    for familyKey, rows in familyRaw.items():
+        rows.sort(reverse=True)
+        familyMembers[familyKey] = tuple(
+            surface for _quality, surface in rows[:TARGET_MEMBER_STATEMENT_LEDGER_FAMILY_LIMIT]
+        )
+
+    stats["statementLedgerSurfaces"] = len(signatures)
+    stats["statementLedgerFeatureDfKeys"] = len(featureDf)
+    stats["statementLedgerPostingKeys"] = len(postings)
+    stats["statementLedgerPostingLinks"] = sum(len(rows) for rows in postings.values())
+    stats["statementLedgerRolePostingKeys"] = len(rolePostings)
+    stats["statementLedgerRolePostingLinks"] = sum(len(rows) for rows in rolePostings.values())
+    stats["statementLedgerFamilies"] = len(familyMembers)
+    result = (signatures, qualityScores, featureDf, postings, rolePostings, familyMembers, Counter(stats))
+    TARGET_MEMBER_STATEMENT_LEDGER_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberStatementLedgerAddRegistryBackoff(
+    signature: Counter[str],
+    registrySignature: Counter[str],
+    scale: float,
+    limit: int,
+) -> int:
+    added = 0
+    for feature, weight in registrySignature.most_common(limit):
+        signature[f"sledger:areg:{stableHash(feature, 14)}"] += float(weight) * scale
+        added += 1
+    return added
+
+
+def targetMemberStatementLedgerTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+    latticeSignatures: dict[str, Counter[str]] | None = None,
+    qualityScores: Counter[str] | None = None,
+) -> tuple[Counter[str], float, Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_STATEMENT_LEDGER_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, quality, stats = cached
+        return Counter(signature), float(quality), Counter(stats)
+    if latticeSignatures is None or qualityScores is None:
+        latticeSignatures, qualityScores, _featureDf, _postings, _rolePostings, _familyMembers, _indexStats = (
+            targetMemberStatementLedgerBuildIndex(model)
+        )
+    stats: Counter[str] = Counter()
+    directSignature = latticeSignatures.get(candidate)
+    if directSignature:
+        quality = float(qualityScores.get(candidate, 0.0))
+        selected = Counter(dict(directSignature.most_common(TARGET_MEMBER_STATEMENT_LEDGER_TARGET_FEATURE_LIMIT)))
+        stats["statementLedgerDirectTargetRows"] += 1
+        TARGET_MEMBER_STATEMENT_LEDGER_TARGET_CACHE[cacheKey] = (Counter(selected), quality, Counter(stats))
+        return selected, quality, stats
+    if not candidate or not isContentStem(candidate) or relationTokenLike(candidate) or valueTokenLike(candidate, ""):
+        TARGET_MEMBER_STATEMENT_LEDGER_TARGET_CACHE[cacheKey] = (Counter(), 0.0, Counter(stats))
+        return Counter(), 0.0, stats
+
+    accountRole = targetMemberStatementLedgerAccountRole(candidate)
+    signature: Counter[str] = Counter()
+    if accountRole != "other":
+        signature[f"sledger:accountRole:{accountRole}"] += 1.28
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(accountRole, relations):
+            signature[f"sledger:stmt:{statementRole}"] += 0.94
+            signature[f"sledger:stmtAcct:{statementRole}:{accountRole}"] += 1.42
+            signature[f"sledger:rowLineage:{statementRole}:{accountRole}:row"] += 0.44
+        for relation in relations:
+            signature[f"sledger:rel:{relation}"] += 0.42
+            signature[f"sledger:relAcct:{relation}:{accountRole}"] += 0.62
+        stats["statementLedgerColdRoleTargets"] += 1
+
+    fragmentQuality = 0.0
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(candidate, model)[:TARGET_MEMBER_STATEMENT_LEDGER_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragmentSignature = latticeSignatures.get(fragment)
+        if not fragmentSignature or fragment == candidate:
+            continue
+        fragmentRole = targetMemberStatementLedgerAccountRole(fragment)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(accountRole, fragmentRole)
+        positionMass = 0.88 if positionKind in {"edge", "prefix", "suffix"} else 0.52
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass * max(0.22, roleCompat) / math.sqrt(fragmentRank)
+        for feature, weight in fragmentSignature.most_common(48):
+            signature[feature] += float(weight) * fragmentScale * 0.44
+        fragmentQuality += fragmentScale
+        stats["statementLedgerColdTargetFragmentRows"] += 1
+
+    registrySignatures, registryQualityScores, _registryDf, _registryPostings, _registryFamilies, _registryStats = (
+        targetMemberAccountRegistryBuildIndex(model)
+    )
+    registrySignature, registryQuality, registryTargetStats = targetMemberAccountRegistryTargetSignature(
+        candidate,
+        relations,
+        model,
+        registrySignatures,
+        registryQualityScores,
+    )
+    stats.update(registryTargetStats)
+    stats["statementLedgerRegistryBackoffFeatures"] += targetMemberStatementLedgerAddRegistryBackoff(
+        signature,
+        registrySignature,
+        TARGET_MEMBER_STATEMENT_LEDGER_REGISTRY_GAIN,
+        48,
+    )
+
+    axisSignature, axisStats = targetMemberAccountAxisTargetSignature(candidate, relations, model)
+    stats.update(axisStats)
+    for feature, weight in axisSignature.most_common(36):
+        signature[f"sledger:axis:{stableHash(feature, 14)}"] += float(weight) * TARGET_MEMBER_STATEMENT_LEDGER_AXIS_GAIN
+
+    quality = (0.42 if accountRole != "other" else 0.0) + fragmentQuality * 0.34 + registryQuality * 0.10
+    selected = Counter(dict(signature.most_common(TARGET_MEMBER_STATEMENT_LEDGER_TARGET_FEATURE_LIMIT)))
+    if not selected:
+        TARGET_MEMBER_STATEMENT_LEDGER_TARGET_CACHE[cacheKey] = (Counter(), 0.0, Counter(stats))
+        return Counter(), 0.0, stats
+    stats["statementLedgerColdTargetFeatures"] = len(selected)
+    TARGET_MEMBER_STATEMENT_LEDGER_TARGET_CACHE[cacheKey] = (Counter(selected), max(0.0, quality), Counter(stats))
+    return selected, max(0.0, quality), stats
+
+
+def targetMemberStatementLedgerQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_STATEMENT_LEDGER_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+    latticeSignatures, _qualityScores, _featureDf, _postings, _rolePostings, _familyMembers, indexStats = (
+        targetMemberStatementLedgerBuildIndex(model)
+    )
+    stats: Counter[str] = Counter()
+    stats["statementLedgerSurfaces"] = indexStats.get("statementLedgerSurfaces", 0)
+    signature: Counter[str] = Counter()
+    directSignature = latticeSignatures.get(source)
+    if directSignature:
+        for feature, weight in directSignature.most_common(TARGET_MEMBER_STATEMENT_LEDGER_TARGET_FEATURE_LIMIT):
+            signature[feature] += float(weight)
+        stats["statementLedgerQueryDirectRows"] += 1
+
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    if sourceRole != "other":
+        signature[f"sledger:accountRole:{sourceRole}"] += 1.18
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations):
+            signature[f"sledger:stmt:{statementRole}"] += 0.86
+            signature[f"sledger:stmtAcct:{statementRole}:{sourceRole}"] += 1.30
+            signature[f"sledger:rowLineage:{statementRole}:{sourceRole}:row"] += 0.38
+        for relation in relations:
+            signature[f"sledger:rel:{relation}"] += 0.42
+            signature[f"sledger:relAcct:{relation}:{sourceRole}"] += 0.62
+        stats["statementLedgerQueryRoleRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_STATEMENT_LEDGER_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragmentSignature = latticeSignatures.get(fragment)
+        if not fragmentSignature or fragment == source:
+            continue
+        fragmentRole = targetMemberStatementLedgerAccountRole(fragment)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, fragmentRole)
+        positionMass = 0.90 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass * max(0.24, roleCompat) / math.sqrt(fragmentRank)
+        for feature, weight in fragmentSignature.most_common(56):
+            signature[feature] += float(weight) * fragmentScale * 0.42
+        signature[f"sledger:fragment:{positionKind}:{fragmentRole}"] += fragmentScale * 0.22
+        stats["statementLedgerQueryFragmentRows"] += 1
+
+    registryQuery, registryQueryStats = targetMemberAccountRegistryQuerySignature(source, relations, model)
+    stats.update(registryQueryStats)
+    stats["statementLedgerQueryRegistryFeatures"] += targetMemberStatementLedgerAddRegistryBackoff(
+        signature,
+        registryQuery,
+        TARGET_MEMBER_STATEMENT_LEDGER_REGISTRY_GAIN,
+        56,
+    )
+
+    limited = Counter(dict(signature.most_common(TARGET_MEMBER_STATEMENT_LEDGER_QUERY_FEATURE_LIMIT)))
+    stats["statementLedgerQueryFeatures"] = len(limited)
+    TARGET_MEMBER_STATEMENT_LEDGER_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberStatementLedgerWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    latticeSize: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(featureDf.get(feature, 1)))
+        idf = math.log1p((latticeSize + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.16, idf) * targetMemberStatementLedgerFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    raw = 0.0
+    matched = 0
+    roleMatched = 0
+    statementMatched = 0
+    valueMatched = 0
+    relationMatched = 0
+    orderMatched = 0
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        raw += effective(feature, float(leftWeight)) * effective(feature, float(rightWeight))
+        matched += 1
+        if feature.startswith(("sledger:accountRole:", "sledger:stmtAcct:", "sledger:roleCompat:")):
+            roleMatched += 1
+        if feature.startswith(("sledger:stmt:", "sledger:stmtMix:")):
+            statementMatched += 1
+        if feature.startswith(("sledger:value:", "sledger:valueSide:", "sledger:rowLineage:")):
+            valueMatched += 1
+        if feature.startswith(("sledger:rel:", "sledger:relpos:", "sledger:relAcct:")):
+            relationMatched += 1
+        if feature.startswith(("sledger:neighborRole:", "sledger:orderRole:", "sledger:neighborMix:")):
+            orderMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    proof *= (
+        1.0
+        + min(0.40, roleMatched * 0.095)
+        + min(0.32, statementMatched * 0.080)
+        + min(0.28, valueMatched * 0.070)
+        + min(0.24, relationMatched * 0.060)
+        + min(0.18, orderMatched * 0.045)
+    )
+    stats["statementLedgerMatchedFeatures"] = matched
+    stats["statementLedgerRoleMatchedFeatures"] = roleMatched
+    stats["statementLedgerStatementMatchedFeatures"] = statementMatched
+    stats["statementLedgerValueMatchedFeatures"] = valueMatched
+    stats["statementLedgerRelationMatchedFeatures"] = relationMatched
+    stats["statementLedgerOrderMatchedFeatures"] = orderMatched
+    stats["statementLedgerProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberStatementLedgerProof(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate, tuple(relations))
+    cached = TARGET_MEMBER_STATEMENT_LEDGER_PROOF_CACHE.get(cacheKey)
+    if cached is not None:
+        proof, stats = cached
+        return proof, Counter(stats)
+    latticeSignatures, qualityScores, featureDf, _postings, _rolePostings, _familyMembers, indexStats = (
+        targetMemberStatementLedgerBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberStatementLedgerQuerySignature(source, relations, model)
+    targetSignature, _targetQuality, targetStats = targetMemberStatementLedgerTargetSignature(
+        candidate,
+        relations,
+        model,
+        latticeSignatures,
+        qualityScores,
+    )
+    proof, proofStats = targetMemberStatementLedgerWeightedProof(
+        querySignature,
+        targetSignature,
+        featureDf,
+        max(1, len(latticeSignatures)),
+    )
+    stats = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(targetStats)
+    stats.update(proofStats)
+    TARGET_MEMBER_STATEMENT_LEDGER_PROOF_CACHE[cacheKey] = (max(0.0, proof), Counter(stats))
+    return max(0.0, proof), stats
+
+
+def targetMemberStatementLedgerScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_STATEMENT_LEDGER_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    latticeSignatures, qualityScores, featureDf, postings, rolePostings, familyMembers, indexStats = (
+        targetMemberStatementLedgerBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberStatementLedgerQuerySignature(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    latticeSize = max(1, len(latticeSignatures))
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    expectedStatements = targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations)
+    targetSignatureCache: dict[str, tuple[Counter[str], float, Counter[str]]] = {}
+
+    def candidateTargetSignature(candidate: str) -> tuple[Counter[str], float, Counter[str]]:
+        candidate = normStem(candidate)
+        cachedSignature = targetSignatureCache.get(candidate)
+        if cachedSignature is not None:
+            signature, quality, signatureStats = cachedSignature
+            return Counter(signature), float(quality), Counter(signatureStats)
+        signature, quality, signatureStats = targetMemberStatementLedgerTargetSignature(
+            candidate,
+            relations,
+            model,
+            latticeSignatures,
+            qualityScores,
+        )
+        targetSignatureCache[candidate] = (Counter(signature), float(quality), Counter(signatureStats))
+        return signature, quality, signatureStats
+
+    seedPool: Counter[str] = Counter()
+    for feature, queryWeight in querySignature.most_common(TARGET_MEMBER_STATEMENT_LEDGER_QUERY_FEATURE_LIMIT):
+        rows = postings.get(feature, tuple())
+        if not rows:
+            continue
+        df = max(1, int(featureDf.get(feature, 1)))
+        idf = math.log1p((latticeSize + 1.0) / (df + 0.5))
+        for rank, (candidate, targetWeight) in enumerate(rows[:TARGET_MEMBER_STATEMENT_LEDGER_POSTING_LIMIT], start=1):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source:
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.16, idf)
+                * targetMemberStatementLedgerFeatureGain(feature)
+                * max(0.22, roleCompat)
+                / math.sqrt(rank)
+            )
+            stats["statementLedgerPostingRows"] += 1
+        stats["statementLedgerPostingMatchedKeys"] += 1
+
+    if sourceRole != "other":
+        for statementRole in expectedStatements:
+            for rank, (candidate, roleScore) in enumerate(
+                rolePostings.get((statementRole, sourceRole), ())[:TARGET_MEMBER_STATEMENT_LEDGER_ROLE_POSTING_LIMIT],
+                start=1,
+            ):
+                candidate = normStem(candidate)
+                if not candidate or candidate == source:
+                    continue
+                seedPool[candidate] += math.log1p(max(0.0, float(roleScore))) * 1.12 / math.sqrt(rank)
+                stats["statementLedgerSeed:rolePosting"] += 1
+
+    seedFragments: list[tuple[str, float, str]] = [(source, 0.70, "direct")]
+    seedFragments.extend(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_STATEMENT_LEDGER_FRAGMENT_LIMIT]
+    )
+    for fragment, fragmentWeight, positionKind in seedFragments:
+        fragment = normStem(fragment)
+        if not fragment or not isContentStem(fragment):
+            continue
+        positionMass = 0.92 if positionKind in {"direct", "edge", "prefix", "suffix"} else 0.54
+        for gram in compoundGrams(fragment):
+            for rank, candidate in enumerate(
+                model.compoundGramPostings.get(gram, ())[:TARGET_MEMBER_STATEMENT_LEDGER_POSTING_LIMIT],
+                start=1,
+            ):
+                candidate = normStem(candidate)
+                if not candidate or candidate == source or candidate == fragment:
+                    continue
+                candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+                roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+                if roleCompat < 0.20 and candidate not in latticeSignatures:
+                    continue
+                candidateSignature, _candidateQuality, _candidateStats = candidateTargetSignature(candidate)
+                if not candidateSignature:
+                    continue
+                seedPool[candidate] += (
+                    max(0.0, float(fragmentWeight)) * positionMass * max(0.18, roleCompat) * 0.36 / math.sqrt(rank)
+                )
+                stats["statementLedgerSeed:compound"] += 1
+        fragmentRole = targetMemberStatementLedgerAccountRole(fragment)
+        if fragmentRole != "other":
+            for statementRole in targetMemberStatementLedgerExpectedStatementRoles(fragmentRole, relations):
+                for rank, (candidate, roleScore) in enumerate(
+                    rolePostings.get((statementRole, fragmentRole), ())[
+                        :TARGET_MEMBER_STATEMENT_LEDGER_ROLE_POSTING_LIMIT
+                    ],
+                    start=1,
+                ):
+                    candidate = normStem(candidate)
+                    if not candidate or candidate == source or candidate == fragment:
+                        continue
+                    candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+                    roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+                    seedPool[candidate] += (
+                        max(0.0, float(fragmentWeight))
+                        * positionMass
+                        * math.log1p(max(0.0, float(roleScore)))
+                        * max(0.20, roleCompat)
+                        * 0.46
+                        / math.sqrt(rank)
+                    )
+                    stats["statementLedgerSeed:fragmentRolePosting"] += 1
+
+    sourceFragmentOverlaps: list[tuple[str, float]] = [(source, 0.72)]
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model)[
+        :TARGET_MEMBER_STATEMENT_LEDGER_FRAGMENT_LIMIT
+    ]:
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionMass = 0.90 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        sourceFragmentOverlaps.append((fragment, max(0.0, float(fragmentWeight)) * positionMass))
+    for scanRank, (candidate, count) in enumerate(
+        model.surfaceDf.most_common(TARGET_MEMBER_STATEMENT_LEDGER_SURFACE_SCAN_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == source or not isContentStem(candidate) or relationTokenLike(candidate):
+            continue
+        if valueTokenLike(candidate, ""):
+            continue
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if roleCompat < 0.72:
+            continue
+        bestOverlap = 0.0
+        for fragment, fragmentWeight in sourceFragmentOverlaps:
+            if not fragment or fragment == candidate:
+                continue
+            if len(fragment) >= 3 and fragment in candidate:
+                overlap = min(0.82, 0.28 + 0.08 * len(fragment))
+            else:
+                overlap = nonSuffixCompoundOverlap(fragment, candidate)
+            bestOverlap = max(bestOverlap, overlap * max(0.0, float(fragmentWeight)))
+        if bestOverlap <= 0.0 and candidate not in latticeSignatures:
+            continue
+        candidateSignature, _candidateQuality, _candidateStats = candidateTargetSignature(candidate)
+        if not candidateSignature:
+            continue
+        seedPool[candidate] += (
+            max(bestOverlap, 0.10)
+            * roleCompat
+            * math.log1p(max(0, int(count)))
+            * 0.18
+            / math.sqrt(1.0 + (scanRank - 1) * 0.004)
+        )
+        stats["statementLedgerSeed:roleSurfaceScan"] += 1
+
+    stats["statementLedgerSeedPoolRows"] = len(seedPool)
+    if not seedPool:
+        TARGET_MEMBER_STATEMENT_LEDGER_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    rerankedSeedPool: Counter[str] = Counter()
+    for rerank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_STATEMENT_LEDGER_SEED_RERANK_LIMIT),
+        start=1,
+    ):
+        if candidate not in latticeSignatures and model.independentSurfaceDf.get(candidate, 0) <= 0:
+            stats["statementLedgerPseudoColdCandidateSkips"] += 1
+            continue
+        candidateSignature, candidateQuality, candidateStats = candidateTargetSignature(candidate)
+        if not candidateSignature:
+            continue
+        seedProof, seedProofStats = targetMemberStatementLedgerWeightedProof(
+            querySignature,
+            candidateSignature,
+            featureDf,
+            latticeSize,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if seedProof <= 0.0 and roleCompat < 0.72:
+            continue
+        rerankedSeedPool[candidate] = (
+            math.log1p(max(0.0, float(seedScore))) * 0.18
+            + seedProof * (0.72 + roleCompat * TARGET_MEMBER_STATEMENT_LEDGER_ROLE_COMPAT_GAIN)
+            + max(0.0, candidateQuality) * 0.045
+            + max(0.0, roleCompat - 0.50) * 0.16
+        ) / math.sqrt(1.0 + (rerank - 1) * 0.012)
+        stats["statementLedgerSeedRerankRows"] += 1
+        stats["statementLedgerSeedRerankProofMilli"] += int(seedProof * 1000)
+        stats["statementLedgerSeedRerankMatchedFeatures"] += seedProofStats.get("statementLedgerMatchedFeatures", 0)
+        stats["statementLedgerSeedRerankColdRows"] += int(
+            candidateStats.get("statementLedgerColdTargetFeatures", 0) > 0
+        )
+    if rerankedSeedPool:
+        seedPool = rerankedSeedPool
+    stats["statementLedgerRerankedSeedPoolRows"] = len(seedPool)
+
+    rawOutput: list[tuple[float, str, Counter[str]]] = []
+    for seedRank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_STATEMENT_LEDGER_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        if candidate not in latticeSignatures and model.independentSurfaceDf.get(candidate, 0) <= 0:
+            stats["statementLedgerPseudoColdCandidateSkips"] += 1
+            continue
+        targetSignature, targetQuality, targetStats = candidateTargetSignature(candidate)
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberStatementLedgerWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            latticeSize,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if proof < TARGET_MEMBER_STATEMENT_LEDGER_MIN_PROOF and roleCompat < 0.82:
+            stats["statementLedgerLowProofRows"] += 1
+            continue
+        familyKey = targetMemberStatementLedgerFamilyKey(candidate)
+        peerProofs: list[float] = []
+        for peer in familyMembers.get(familyKey, ())[:TARGET_MEMBER_STATEMENT_LEDGER_FAMILY_LIMIT]:
+            if peer == candidate or peer == source:
+                continue
+            peerSignature = latticeSignatures.get(peer)
+            if not peerSignature:
+                continue
+            peerProof, _peerStats = targetMemberStatementLedgerWeightedProof(
+                querySignature,
+                peerSignature,
+                featureDf,
+                latticeSize,
+            )
+            if peerProof > 0.0:
+                peerProofs.append(peerProof)
+        peerProofs.sort(reverse=True)
+        peerBest = peerProofs[0] if peerProofs else 0.0
+        margin = proof - peerBest
+        roleMass = 0.62 + max(0.0, roleCompat) * TARGET_MEMBER_STATEMENT_LEDGER_ROLE_COMPAT_GAIN
+        if margin < TARGET_MEMBER_STATEMENT_LEDGER_MIN_MARGIN:
+            roleMass *= 0.72
+            stats["statementLedgerNegativeMarginRows"] += 1
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+        qualityMass = 1.0 + min(0.60, quality * TARGET_MEMBER_STATEMENT_LEDGER_QUALITY_GAIN)
+        marginMass = 1.0 + max(0.0, margin) * TARGET_MEMBER_STATEMENT_LEDGER_MARGIN_GAIN
+        hubPenalty = 1.0 + min(0.34, profile.hubness * 0.18)
+        rankMass = 1.0 / math.sqrt(1.0 + (seedRank - 1) * 0.035)
+        score = math.log1p(max(0.0, float(seedScore))) * max(proof, 0.010) * roleMass * qualityMass * marginMass
+        score = score * rankMass / hubPenalty
+        if score <= 0.0:
+            continue
+        rowStats = Counter(proofStats)
+        rowStats.update(targetStats)
+        rowStats["statementLedgerQualityMilli"] += int(quality * 1000)
+        rowStats["statementLedgerRoleCompatMilli"] += int(roleCompat * 1000)
+        rowStats["statementLedgerMarginMilli"] += int(margin * 1000)
+        rawOutput.append((score, candidate, rowStats))
+        stats["statementLedgerScored"] += 1
+        stats["statementLedgerScoreMilli"] += int(score * 1000)
+        stats["statementLedgerProofMilli"] += proofStats.get("statementLedgerProofMilli", 0)
+        stats["statementLedgerMatchedFeatures"] += proofStats.get("statementLedgerMatchedFeatures", 0)
+        stats["statementLedgerRoleMatchedFeatures"] += proofStats.get("statementLedgerRoleMatchedFeatures", 0)
+        stats["statementLedgerStatementMatchedFeatures"] += proofStats.get("statementLedgerStatementMatchedFeatures", 0)
+        stats["statementLedgerValueMatchedFeatures"] += proofStats.get("statementLedgerValueMatchedFeatures", 0)
+        stats["statementLedgerRelationMatchedFeatures"] += proofStats.get("statementLedgerRelationMatchedFeatures", 0)
+        stats["statementLedgerOrderMatchedFeatures"] += proofStats.get("statementLedgerOrderMatchedFeatures", 0)
+        stats["statementLedgerPeerRows"] += len(peerProofs)
+        stats["statementLedgerColdTargetRows"] += int(targetStats.get("statementLedgerColdTargetFeatures", 0) > 0)
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for score, candidate, _rowStats in rawOutput:
+        familyKey = targetMemberStatementLedgerFamilyKey(candidate)
+        previous = familyBest.get(familyKey)
+        if previous is None or score > previous[0]:
+            familyBest[familyKey] = (score, candidate)
+    output = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT)))
+    stats["statementLedgerFamilyCollapsedRows"] = max(0, len(rawOutput) - len(limited))
+    stats["statementLedgerRouteRows"] = len(limited)
+    TARGET_MEMBER_STATEMENT_LEDGER_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberStatementLedgerRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberStatementLedgerScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_STATEMENT_LEDGER_ROUTE_LIMIT))
+
+
+def targetMemberAccountRowValueSide(cache: Cache, position: int) -> tuple[str, str]:
+    valuePositions = cache.valuePositions or []
+    valueDistance = nearestTokenDistance(position, valuePositions)
+    valueBucket = targetMemberStatementLedgerValueBucket(valueDistance)
+    if valueDistance is None:
+        return "none", valueBucket
+    leftDistance = min((position - valuePos for valuePos in valuePositions if valuePos < position), default=None)
+    rightDistance = min((valuePos - position for valuePos in valuePositions if valuePos > position), default=None)
+    if leftDistance is not None and (rightDistance is None or leftDistance <= rightDistance):
+        return "left", valueBucket
+    if rightDistance is not None:
+        return "right", valueBucket
+    return "same", valueBucket
+
+
+def targetMemberAccountRowLabelSpans(surface: str) -> tuple[str, ...]:
+    surface = normStem(surface)
+    spans: set[str] = set()
+    for size in range(2, min(5, len(surface)) + 1):
+        for index in range(0, len(surface) - size + 1):
+            span = surface[index : index + size]
+            if span and isContentStem(span) and not relationTokenLike(span) and not valueTokenLike(span, ""):
+                spans.add(span)
+    return tuple(sorted(spans, key=lambda span: (-len(span), span))[:18])
+
+
+def targetMemberAccountRowAliasKeys(surface: str) -> tuple[str, ...]:
+    surface = normStem(surface)
+    accountRole = targetMemberStatementLedgerAccountRole(surface)
+    if not surface or accountRole == "other":
+        return tuple()
+    keys: set[str] = {f"arow:aliasRole:{accountRole}"}
+    for span in targetMemberAccountRowLabelSpans(surface):
+        keys.add(f"arow:alias:{accountRole}:{span}")
+    for gram in compoundGrams(surface):
+        keys.add(f"arow:aliasCg:{accountRole}:{gram}")
+    return tuple(sorted(keys))
+
+
+def targetMemberAccountRowQueryAliasKeys(surface: str, model: Model) -> tuple[tuple[str, float], ...]:
+    surface = normStem(surface)
+    weighted: Counter[str] = Counter()
+    for key in targetMemberAccountRowAliasKeys(surface):
+        weighted[key] += 1.0
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(surface, model)[
+        :TARGET_MEMBER_ACCOUNT_ROW_FRAGMENT_LIMIT
+    ]:
+        fragment = normStem(fragment)
+        if not fragment or fragment == surface:
+            continue
+        positionMass = 0.94 if positionKind in {"edge", "prefix", "suffix"} else 0.58
+        for key in targetMemberAccountRowAliasKeys(fragment):
+            weighted[key] += max(0.0, float(fragmentWeight)) * positionMass
+    return tuple(weighted.most_common(48))
+
+
+def targetMemberAccountRowFeatureGain(feature: str) -> float:
+    if feature.startswith(("arow:stmtAcct:", "arow:accountRole:", "arow:aliasRole:")):
+        return 1.42
+    if feature.startswith(("arow:rowLineage:", "arow:value:", "arow:valueSide:", "arow:rowSlot:")):
+        return 1.30
+    if feature.startswith(("arow:alias:", "arow:span:", "arow:aliasCg:", "arow:cg:")):
+        return 1.14
+    if feature.startswith(("arow:rel:", "arow:relpos:", "arow:relAcct:")):
+        return 1.12
+    if feature.startswith(("arow:neighborRole:", "arow:orderRole:", "arow:neighborMix:")):
+        return 1.06
+    if feature.startswith(("arow:sledger:", "arow:areg:", "arow:coord:")):
+        return 0.72
+    return 1.0
+
+
+def targetMemberAccountRowFamilyKey(surface: str) -> str:
+    role = targetMemberStatementLedgerAccountRole(surface)
+    if role == "other":
+        return f"arow:other:{stableHash(normStem(surface)[-4:], 10)}"
+    return f"arow:{role}"
+
+
+def targetMemberAccountRowMentionSignature(
+    surface: str,
+    model: Model,
+    rowLimit: int = TARGET_MEMBER_ACCOUNT_ROW_OCCURRENCE_LIMIT,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    stats: Counter[str] = Counter()
+    signature: Counter[str] = Counter()
+    if not surface or not isContentStem(surface) or relationTokenLike(surface) or valueTokenLike(surface, ""):
+        return signature, 0.0, stats
+    accountRole = targetMemberStatementLedgerAccountRole(surface)
+    if accountRole == "other":
+        return signature, 0.0, stats
+    rows = model.queryLocalFrameOccurrenceIndex.get(surface, ())[:rowLimit]
+    directRows = 0
+    bridgeRows = 0
+    valueRows = 0
+    relationRows = 0
+    statementRows = 0
+    rowObjectRows = 0
+    laneRows: Counter[str] = Counter()
+    statementRowsByRole: Counter[str] = Counter()
+    relationRowsByName: Counter[str] = Counter()
+    neighborRoleRows: Counter[str] = Counter()
+
+    for rowRank, (unitId, position, marker) in enumerate(rows, start=1):
+        if unitId < 0 or unitId >= len(model.caches):
+            continue
+        cache = model.caches[unitId]
+        if position < 0 or position >= len(cache.stems):
+            continue
+        lane = cache.lanes[position] if cache.lanes and position < len(cache.lanes) else "sentence"
+        statementRole = targetMemberStatementLedgerStatementRole(cache, position, surface)
+        valueSide, valueBucket = targetMemberAccountRowValueSide(cache, position)
+        rowScale = 1.0 / math.sqrt(rowRank)
+        directRows += int(marker != "~")
+        bridgeRows += int(marker == "~")
+        laneRows[lane] += 1
+        statementRows += int(statementRole != "unknown")
+        statementRowsByRole[statementRole] += 1
+        valueRows += int(valueBucket in {"touch", "near", "row", "band"})
+        rowObjectRows += int(statementRole != "unknown" or valueBucket != "none")
+
+        signature[f"arow:accountRole:{accountRole}"] += rowScale * 1.38
+        signature[f"arow:stmt:{statementRole}"] += rowScale * 0.94
+        signature[f"arow:stmtAcct:{statementRole}:{accountRole}"] += rowScale * 1.54
+        signature[f"arow:lane:{lane}"] += rowScale * 0.32
+        signature[f"arow:value:{valueBucket}"] += rowScale * (0.82 if valueBucket != "none" else 0.14)
+        signature[f"arow:valueSide:{valueSide}:{valueBucket}"] += rowScale * 0.58
+        signature[f"arow:rowLineage:{statementRole}:{accountRole}:{valueBucket}"] += rowScale * 1.08
+        signature[f"arow:rowSlot:{statementRole}:{accountRole}:{lane}:{valueBucket}"] += rowScale * 0.72
+        signature[f"arow:marker:{'bridge' if marker == '~' else 'direct'}"] += rowScale * 0.18
+
+        relationRowsLocal = targetMemberAccountRegistryRelationRows(cache, position)
+        relationRows += len(relationRowsLocal)
+        for relation, distance, side in relationRowsLocal:
+            distanceBucket = targetMemberAccountRegistryDistanceBucket(distance)
+            relationRowsByName[relation] += 1
+            signature[f"arow:rel:{relation}"] += rowScale * 0.62
+            signature[f"arow:relpos:{relation}:{side}:{distanceBucket}"] += rowScale * 0.50
+            signature[f"arow:relAcct:{relation}:{accountRole}"] += rowScale * 0.74
+
+        leftRole = "none"
+        rightRole = "none"
+        for side, step in (("L", -1), ("R", 1)):
+            index = position + step
+            walked = 0
+            while 0 <= index < len(cache.stems) and walked < 7:
+                neighbor = normStem(cache.stems[index])
+                if neighbor and neighbor != surface and isContentStem(neighbor) and not relationTokenLike(neighbor):
+                    neighborRole = targetMemberStatementLedgerAccountRole(neighbor)
+                    if neighborRole != "other":
+                        neighborRoleRows[f"{side}:{neighborRole}"] += 1
+                        signature[f"arow:neighborRole:{side}:{neighborRole}"] += rowScale * 0.52 / (1.0 + walked)
+                        if side == "L":
+                            leftRole = neighborRole
+                        else:
+                            rightRole = neighborRole
+                        break
+                index += step
+                walked += 1
+        if leftRole != "none" or rightRole != "none":
+            signature[f"arow:orderRole:{leftRole}>{accountRole}>{rightRole}"] += rowScale * 0.72
+
+    for span in targetMemberAccountRowLabelSpans(surface):
+        signature[f"arow:span:{accountRole}:{span}"] += 0.34
+    for gram in tuple(compoundGrams(surface))[:18]:
+        signature[f"arow:cg:{accountRole}:{gram}"] += 0.18
+    for aliasKey in targetMemberAccountRowAliasKeys(surface):
+        if aliasKey.startswith("arow:aliasRole:"):
+            signature[aliasKey] += 0.52
+
+    for statementRole, count in statementRowsByRole.most_common(3):
+        signature[f"arow:stmtMix:{statementRole}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.34
+    for relation, count in relationRowsByName.most_common(4):
+        signature[f"arow:relMix:{relation}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.20
+    for lane, count in laneRows.most_common(3):
+        signature[f"arow:laneMix:{lane}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.16
+    for roleKey, count in neighborRoleRows.most_common(6):
+        signature[f"arow:neighborMix:{roleKey}:{targetMemberStatementLedgerRowBucket(int(count))}"] += 0.16
+
+    profile = inferredOwnerRoleSpecificityProfile(surface, model)
+    signature[f"arow:profile:{profile.role}"] += 0.24
+    signature[f"arow:profileSpec:{targetMemberAccountAxisBucket(profile.specificity)}"] += 0.18
+    signature[f"arow:profileHub:{targetMemberAccountAxisBucket(profile.hubness)}"] += 0.10
+    for cell in coordCells(surface)[:3]:
+        signature[f"arow:coord:{cell}"] += 0.06
+
+    quality = (
+        math.log1p(directRows) * 0.20
+        + math.log1p(valueRows) * 0.66
+        + math.log1p(statementRows) * 0.48
+        + math.log1p(relationRows) * 0.14
+        + math.log1p(rowObjectRows) * 0.34
+        + 0.92
+        + profile.specificity * 0.22
+        - profile.hubness * 0.26
+    )
+    if directRows <= 0:
+        quality *= 0.62
+    if rowObjectRows <= 0:
+        quality *= 0.56
+    stats["accountRowOccurrenceRows"] = len(rows)
+    stats["accountRowDirectRows"] = directRows
+    stats["accountRowBridgeRows"] = bridgeRows
+    stats["accountRowValueRows"] = valueRows
+    stats["accountRowRelationRows"] = relationRows
+    stats["accountRowStatementRows"] = statementRows
+    stats["accountRowObjectRows"] = rowObjectRows
+    stats["accountRowQualityMilli"] = int(max(0.0, quality) * 1000)
+    stats[f"accountRowRole:{accountRole}"] += 1
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberAccountRowBuildIndex(
+    model: Model,
+) -> tuple[
+    dict[str, Counter[str]],
+    Counter[str],
+    Counter[str],
+    dict[str, tuple[tuple[str, float], ...]],
+    dict[tuple[str, str], tuple[tuple[str, float], ...]],
+    dict[str, tuple[tuple[str, float], ...]],
+    dict[str, tuple[str, ...]],
+    Counter[str],
+]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_ACCOUNT_ROW_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+
+    signatures: dict[str, Counter[str]] = {}
+    qualityScores: Counter[str] = Counter()
+    featureDf: Counter[str] = Counter()
+    postingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    rolePostingRows: dict[tuple[str, str], list[tuple[str, float]]] = defaultdict(list)
+    aliasPostingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    familyRaw: dict[str, list[tuple[float, str]]] = defaultdict(list)
+    stats: Counter[str] = Counter()
+
+    for surface in model.queryLocalFrameOccurrenceIndex:
+        surface = normStem(surface)
+        if not surface or not isContentStem(surface) or relationTokenLike(surface) or valueTokenLike(surface, ""):
+            stats["accountRowSurfaceSkips"] += 1
+            continue
+        if surface in BRIDGE_SEED_STOP_STEMS or any(surface.endswith(suffix) for suffix in BRIDGE_SEED_STOP_SUFFIXES):
+            stats["accountRowStopSurfaceSkips"] += 1
+            continue
+        if model.independentSurfaceDf.get(surface, 0) <= 0:
+            stats["accountRowBridgeOnlySkips"] += 1
+            continue
+        accountRole = targetMemberStatementLedgerAccountRole(surface)
+        if accountRole == "other":
+            stats["accountRowNoAccountRoleSkips"] += 1
+            continue
+        signature, quality, mentionStats = targetMemberAccountRowMentionSignature(surface, model)
+        stats.update(mentionStats)
+        structuralRows = (
+            mentionStats.get("accountRowValueRows", 0)
+            + mentionStats.get("accountRowStatementRows", 0)
+            + mentionStats.get("accountRowRelationRows", 0)
+            + mentionStats.get("accountRowObjectRows", 0)
+        )
+        if structuralRows <= 0:
+            stats["accountRowNoStructuralRowsSkips"] += 1
+            continue
+        if quality < TARGET_MEMBER_ACCOUNT_ROW_MIN_QUALITY:
+            stats["accountRowLowQualitySkips"] += 1
+            continue
+        selected = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_ROW_TARGET_FEATURE_LIMIT)))
+        if not selected:
+            stats["accountRowEmptySignatureSkips"] += 1
+            continue
+        signatures[surface] = selected
+        qualityScores[surface] = quality
+        familyKey = targetMemberAccountRowFamilyKey(surface)
+        familyRaw[familyKey].append((quality, surface))
+        rowPrior = 1.0 + min(0.68, quality * 0.16) + min(0.32, math.log1p(structuralRows) * 0.08)
+        for feature, weight in selected.items():
+            featureDf[feature] += 1
+            postingRows[feature].append((surface, float(weight) * rowPrior))
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(accountRole, tuple()):
+            rolePostingRows[(statementRole, accountRole)].append((surface, quality + 0.22 * structuralRows))
+        for aliasKey in targetMemberAccountRowAliasKeys(surface):
+            aliasPostingRows[aliasKey].append((surface, quality + 0.18 * structuralRows))
+        stats["accountRowAcceptedSurfaces"] += 1
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_ACCOUNT_ROW_POSTING_LIMIT])
+
+    rolePostings: dict[tuple[str, str], tuple[tuple[str, float], ...]] = {}
+    for roleKey, rows in rolePostingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        rolePostings[roleKey] = tuple(rows[:TARGET_MEMBER_ACCOUNT_ROW_ROLE_POSTING_LIMIT])
+
+    aliasPostings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for aliasKey, rows in aliasPostingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        aliasPostings[aliasKey] = tuple(rows[:TARGET_MEMBER_ACCOUNT_ROW_ALIAS_POSTING_LIMIT])
+
+    familyMembers: dict[str, tuple[str, ...]] = {}
+    for familyKey, rows in familyRaw.items():
+        rows.sort(reverse=True)
+        familyMembers[familyKey] = tuple(surface for _quality, surface in rows[:TARGET_MEMBER_ACCOUNT_ROW_FAMILY_LIMIT])
+
+    stats["accountRowSurfaces"] = len(signatures)
+    stats["accountRowFeatureDfKeys"] = len(featureDf)
+    stats["accountRowPostingKeys"] = len(postings)
+    stats["accountRowPostingLinks"] = sum(len(rows) for rows in postings.values())
+    stats["accountRowRolePostingKeys"] = len(rolePostings)
+    stats["accountRowRolePostingLinks"] = sum(len(rows) for rows in rolePostings.values())
+    stats["accountRowAliasPostingKeys"] = len(aliasPostings)
+    stats["accountRowAliasPostingLinks"] = sum(len(rows) for rows in aliasPostings.values())
+    stats["accountRowFamilies"] = len(familyMembers)
+    result = (
+        signatures,
+        qualityScores,
+        featureDf,
+        postings,
+        rolePostings,
+        aliasPostings,
+        familyMembers,
+        Counter(stats),
+    )
+    TARGET_MEMBER_ACCOUNT_ROW_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberAccountRowAddBackoff(
+    signature: Counter[str],
+    sourceSignature: Counter[str],
+    prefix: str,
+    scale: float,
+    limit: int,
+) -> int:
+    added = 0
+    for feature, weight in sourceSignature.most_common(limit):
+        signature[f"{prefix}:{stableHash(feature, 14)}"] += float(weight) * scale
+        added += 1
+    return added
+
+
+def targetMemberAccountRowTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+    rowSignatures: dict[str, Counter[str]] | None = None,
+    qualityScores: Counter[str] | None = None,
+) -> tuple[Counter[str], float, Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_ROW_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, quality, stats = cached
+        return Counter(signature), float(quality), Counter(stats)
+    if rowSignatures is None or qualityScores is None:
+        rowSignatures, qualityScores, _df, _postings, _rolePostings, _aliasPostings, _families, _indexStats = (
+            targetMemberAccountRowBuildIndex(model)
+        )
+    stats: Counter[str] = Counter()
+    directSignature = rowSignatures.get(candidate)
+    if directSignature:
+        quality = float(qualityScores.get(candidate, 0.0))
+        selected = Counter(dict(directSignature.most_common(TARGET_MEMBER_ACCOUNT_ROW_TARGET_FEATURE_LIMIT)))
+        stats["accountRowDirectTargetRows"] += 1
+        TARGET_MEMBER_ACCOUNT_ROW_TARGET_CACHE[cacheKey] = (Counter(selected), quality, Counter(stats))
+        return selected, quality, stats
+    if not candidate or not isContentStem(candidate) or relationTokenLike(candidate) or valueTokenLike(candidate, ""):
+        TARGET_MEMBER_ACCOUNT_ROW_TARGET_CACHE[cacheKey] = (Counter(), 0.0, Counter(stats))
+        return Counter(), 0.0, stats
+
+    accountRole = targetMemberStatementLedgerAccountRole(candidate)
+    signature: Counter[str] = Counter()
+    if accountRole != "other":
+        signature[f"arow:accountRole:{accountRole}"] += 1.28
+        signature[f"arow:aliasRole:{accountRole}"] += 0.42
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(accountRole, relations):
+            signature[f"arow:stmt:{statementRole}"] += 0.92
+            signature[f"arow:stmtAcct:{statementRole}:{accountRole}"] += 1.44
+            signature[f"arow:rowLineage:{statementRole}:{accountRole}:row"] += 0.54
+        for relation in relations:
+            signature[f"arow:rel:{relation}"] += 0.36
+            signature[f"arow:relAcct:{relation}:{accountRole}"] += 0.54
+        for span in targetMemberAccountRowLabelSpans(candidate):
+            signature[f"arow:span:{accountRole}:{span}"] += 0.22
+        stats["accountRowColdRoleTargets"] += 1
+
+    fragmentQuality = 0.0
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(candidate, model)[:TARGET_MEMBER_ACCOUNT_ROW_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragmentSignature = rowSignatures.get(fragment)
+        if not fragmentSignature or fragment == candidate:
+            continue
+        fragmentRole = targetMemberStatementLedgerAccountRole(fragment)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(accountRole, fragmentRole)
+        positionMass = 0.90 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass * max(0.20, roleCompat) / math.sqrt(fragmentRank)
+        for feature, weight in fragmentSignature.most_common(56):
+            signature[feature] += float(weight) * fragmentScale * 0.40
+        fragmentQuality += fragmentScale
+        stats["accountRowColdFragmentRows"] += 1
+
+    ledgerSignatures, ledgerQualityScores, _ledgerDf, _postings, _rolePostings, _familyMembers, _ledgerStats = (
+        targetMemberStatementLedgerBuildIndex(model)
+    )
+    ledgerSignature, ledgerQuality, ledgerStats = targetMemberStatementLedgerTargetSignature(
+        candidate,
+        relations,
+        model,
+        ledgerSignatures,
+        ledgerQualityScores,
+    )
+    stats.update(ledgerStats)
+    stats["accountRowLedgerBackoffFeatures"] += targetMemberAccountRowAddBackoff(
+        signature,
+        ledgerSignature,
+        "arow:sledger",
+        TARGET_MEMBER_ACCOUNT_ROW_LEDGER_GAIN,
+        54,
+    )
+
+    registrySignatures, registryQualityScores, _registryDf, _registryPostings, _registryFamilies, _registryStats = (
+        targetMemberAccountRegistryBuildIndex(model)
+    )
+    registrySignature, registryQuality, registryTargetStats = targetMemberAccountRegistryTargetSignature(
+        candidate,
+        relations,
+        model,
+        registrySignatures,
+        registryQualityScores,
+    )
+    stats.update(registryTargetStats)
+    stats["accountRowRegistryBackoffFeatures"] += targetMemberAccountRowAddBackoff(
+        signature,
+        registrySignature,
+        "arow:areg",
+        TARGET_MEMBER_ACCOUNT_ROW_REGISTRY_GAIN,
+        42,
+    )
+
+    quality = (
+        (0.48 if accountRole != "other" else 0.0)
+        + fragmentQuality * 0.30
+        + ledgerQuality * 0.10
+        + registryQuality * 0.08
+    )
+    selected = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_ROW_TARGET_FEATURE_LIMIT)))
+    if not selected:
+        TARGET_MEMBER_ACCOUNT_ROW_TARGET_CACHE[cacheKey] = (Counter(), 0.0, Counter(stats))
+        return Counter(), 0.0, stats
+    stats["accountRowColdTargetFeatures"] = len(selected)
+    TARGET_MEMBER_ACCOUNT_ROW_TARGET_CACHE[cacheKey] = (Counter(selected), max(0.0, quality), Counter(stats))
+    return selected, max(0.0, quality), stats
+
+
+def targetMemberAccountRowQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_ROW_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+    rowSignatures, _qualityScores, _df, _postings, _rolePostings, _aliasPostings, _families, indexStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    stats: Counter[str] = Counter()
+    stats["accountRowSurfaces"] = indexStats.get("accountRowSurfaces", 0)
+    signature: Counter[str] = Counter()
+    directSignature = rowSignatures.get(source)
+    if directSignature:
+        for feature, weight in directSignature.most_common(TARGET_MEMBER_ACCOUNT_ROW_TARGET_FEATURE_LIMIT):
+            signature[feature] += float(weight)
+        stats["accountRowQueryDirectRows"] += 1
+
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    if sourceRole != "other":
+        signature[f"arow:accountRole:{sourceRole}"] += 1.22
+        signature[f"arow:aliasRole:{sourceRole}"] += 0.48
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations):
+            signature[f"arow:stmt:{statementRole}"] += 0.88
+            signature[f"arow:stmtAcct:{statementRole}:{sourceRole}"] += 1.36
+            signature[f"arow:rowLineage:{statementRole}:{sourceRole}:row"] += 0.48
+        for relation in relations:
+            signature[f"arow:rel:{relation}"] += 0.36
+            signature[f"arow:relAcct:{relation}:{sourceRole}"] += 0.54
+        for span in targetMemberAccountRowLabelSpans(source):
+            signature[f"arow:span:{sourceRole}:{span}"] += 0.24
+        stats["accountRowQueryRoleRows"] += 1
+
+    for fragmentRank, (fragment, fragmentWeight, positionKind) in enumerate(
+        compositionalColdStartFragmentCandidates(source, model)[:TARGET_MEMBER_ACCOUNT_ROW_FRAGMENT_LIMIT],
+        start=1,
+    ):
+        fragmentSignature = rowSignatures.get(fragment)
+        if not fragmentSignature or fragment == source:
+            continue
+        fragmentRole = targetMemberStatementLedgerAccountRole(fragment)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, fragmentRole)
+        positionMass = 0.92 if positionKind in {"edge", "prefix", "suffix"} else 0.56
+        fragmentScale = max(0.0, float(fragmentWeight)) * positionMass * max(0.22, roleCompat) / math.sqrt(fragmentRank)
+        for feature, weight in fragmentSignature.most_common(64):
+            signature[feature] += float(weight) * fragmentScale * 0.42
+        signature[f"arow:fragment:{positionKind}:{fragmentRole}"] += fragmentScale * 0.18
+        stats["accountRowQueryFragmentRows"] += 1
+
+    ledgerQuery, ledgerQueryStats = targetMemberStatementLedgerQuerySignature(source, relations, model)
+    stats.update(ledgerQueryStats)
+    stats["accountRowQueryLedgerBackoffFeatures"] += targetMemberAccountRowAddBackoff(
+        signature,
+        ledgerQuery,
+        "arow:sledger",
+        TARGET_MEMBER_ACCOUNT_ROW_LEDGER_GAIN,
+        64,
+    )
+
+    limited = Counter(dict(signature.most_common(TARGET_MEMBER_ACCOUNT_ROW_QUERY_FEATURE_LIMIT)))
+    stats["accountRowQueryFeatures"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_ROW_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountRowWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    rowCount: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(featureDf.get(feature, 1)))
+        idf = math.log1p((rowCount + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.16, idf) * targetMemberAccountRowFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    raw = 0.0
+    matched = 0
+    roleMatched = 0
+    statementMatched = 0
+    valueMatched = 0
+    relationMatched = 0
+    orderMatched = 0
+    labelMatched = 0
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        raw += effective(feature, float(leftWeight)) * effective(feature, float(rightWeight))
+        matched += 1
+        if feature.startswith(("arow:accountRole:", "arow:stmtAcct:", "arow:aliasRole:")):
+            roleMatched += 1
+        if feature.startswith(("arow:stmt:", "arow:stmtMix:")):
+            statementMatched += 1
+        if feature.startswith(("arow:value:", "arow:valueSide:", "arow:rowLineage:", "arow:rowSlot:")):
+            valueMatched += 1
+        if feature.startswith(("arow:rel:", "arow:relpos:", "arow:relAcct:")):
+            relationMatched += 1
+        if feature.startswith(("arow:neighborRole:", "arow:orderRole:", "arow:neighborMix:")):
+            orderMatched += 1
+        if feature.startswith(("arow:span:", "arow:cg:", "arow:alias:")):
+            labelMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    proof *= (
+        1.0
+        + min(0.46, roleMatched * 0.105)
+        + min(0.34, statementMatched * 0.080)
+        + min(0.34, valueMatched * 0.080)
+        + min(0.24, relationMatched * 0.058)
+        + min(0.18, orderMatched * 0.044)
+        + min(0.26, labelMatched * 0.052)
+    )
+    stats["accountRowMatchedFeatures"] = matched
+    stats["accountRowRoleMatchedFeatures"] = roleMatched
+    stats["accountRowStatementMatchedFeatures"] = statementMatched
+    stats["accountRowValueMatchedFeatures"] = valueMatched
+    stats["accountRowRelationMatchedFeatures"] = relationMatched
+    stats["accountRowOrderMatchedFeatures"] = orderMatched
+    stats["accountRowLabelMatchedFeatures"] = labelMatched
+    stats["accountRowProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberAccountRowLabelRepresentativeMass(source: str, candidate: str) -> float:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    if not source or not candidate:
+        return 1.0
+    bestSpan = ""
+    bestIndex = -1
+    for span in targetMemberAccountRowLabelSpans(source):
+        index = candidate.find(span)
+        if index < 0:
+            continue
+        if len(span) > len(bestSpan) or (len(span) == len(bestSpan) and (bestIndex < 0 or index < bestIndex)):
+            bestSpan = span
+            bestIndex = index
+    if not bestSpan:
+        return 0.72
+    overlap = len(bestSpan) / math.sqrt(max(1, len(source) * len(candidate)))
+    mass = 1.0 + min(0.26, overlap * 0.42)
+    prefix = candidate[:bestIndex] if bestIndex > 0 else ""
+    suffix = candidate[bestIndex + len(bestSpan) :]
+    if source in candidate or candidate in source:
+        mass *= 1.12
+    if len(bestSpan) <= 2 and prefix and prefix not in source:
+        mass /= 1.0 + min(2.4, len(prefix) * 0.86)
+    if len(bestSpan) <= 2 and len(candidate) > len(source) and suffix and suffix not in source:
+        mass /= 1.0 + min(0.9, (len(candidate) - len(source)) * 0.18)
+    if len(bestSpan) >= max(3, len(source) - 1):
+        mass *= 1.08
+    return max(0.18, min(1.36, mass))
+
+
+def targetMemberAccountRowProof(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    cacheKey = (id(model), source, candidate, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_ROW_PROOF_CACHE.get(cacheKey)
+    if cached is not None:
+        proof, stats = cached
+        return proof, Counter(stats)
+    rowSignatures, qualityScores, featureDf, _postings, _rolePostings, _aliasPostings, _families, indexStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberAccountRowQuerySignature(source, relations, model)
+    targetSignature, _targetQuality, targetStats = targetMemberAccountRowTargetSignature(
+        candidate,
+        relations,
+        model,
+        rowSignatures,
+        qualityScores,
+    )
+    proof, proofStats = targetMemberAccountRowWeightedProof(
+        querySignature,
+        targetSignature,
+        featureDf,
+        max(1, len(rowSignatures)),
+    )
+    stats = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(targetStats)
+    stats.update(proofStats)
+    TARGET_MEMBER_ACCOUNT_ROW_PROOF_CACHE[cacheKey] = (max(0.0, proof), Counter(stats))
+    return max(0.0, proof), stats
+
+
+def targetMemberAccountRowScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_ACCOUNT_ROW_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    rowSignatures, qualityScores, featureDf, postings, rolePostings, aliasPostings, familyMembers, indexStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberAccountRowQuerySignature(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    rowCount = max(1, len(rowSignatures))
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    expectedStatements = targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations)
+    targetSignatureCache: dict[str, tuple[Counter[str], float, Counter[str]]] = {}
+
+    def candidateTargetSignature(candidate: str) -> tuple[Counter[str], float, Counter[str]]:
+        candidate = normStem(candidate)
+        cachedSignature = targetSignatureCache.get(candidate)
+        if cachedSignature is not None:
+            signature, quality, signatureStats = cachedSignature
+            return Counter(signature), float(quality), Counter(signatureStats)
+        signature, quality, signatureStats = targetMemberAccountRowTargetSignature(
+            candidate,
+            relations,
+            model,
+            rowSignatures,
+            qualityScores,
+        )
+        targetSignatureCache[candidate] = (Counter(signature), float(quality), Counter(signatureStats))
+        return signature, quality, signatureStats
+
+    seedPool: Counter[str] = Counter()
+    for feature, queryWeight in querySignature.most_common(TARGET_MEMBER_ACCOUNT_ROW_QUERY_FEATURE_LIMIT):
+        rows = postings.get(feature, tuple())
+        if not rows:
+            continue
+        df = max(1, int(featureDf.get(feature, 1)))
+        idf = math.log1p((rowCount + 1.0) / (df + 0.5))
+        for rank, (candidate, targetWeight) in enumerate(rows[:TARGET_MEMBER_ACCOUNT_ROW_POSTING_LIMIT], start=1):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source:
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            if roleCompat < 0.18:
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.16, idf)
+                * targetMemberAccountRowFeatureGain(feature)
+                * max(0.18, roleCompat)
+                / math.sqrt(rank)
+            )
+            stats["accountRowPostingRows"] += 1
+        stats["accountRowPostingMatchedKeys"] += 1
+
+    if sourceRole != "other":
+        for statementRole in expectedStatements:
+            for rank, (candidate, roleScore) in enumerate(
+                rolePostings.get((statementRole, sourceRole), ())[:TARGET_MEMBER_ACCOUNT_ROW_ROLE_POSTING_LIMIT],
+                start=1,
+            ):
+                candidate = normStem(candidate)
+                if not candidate or candidate == source:
+                    continue
+                seedPool[candidate] += math.log1p(max(0.0, float(roleScore))) * 1.08 / math.sqrt(rank)
+                stats["accountRowSeed:rolePosting"] += 1
+
+    for aliasKey, aliasWeight in targetMemberAccountRowQueryAliasKeys(source, model):
+        rows = aliasPostings.get(aliasKey, tuple())
+        if not rows:
+            continue
+        for rank, (candidate, aliasScore) in enumerate(rows[:TARGET_MEMBER_ACCOUNT_ROW_ALIAS_POSTING_LIMIT], start=1):
+            candidate = normStem(candidate)
+            if not candidate or candidate == source:
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            if roleCompat < 0.58:
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(aliasWeight))
+                * math.log1p(max(0.0, float(aliasScore)))
+                * max(0.34, roleCompat)
+                * TARGET_MEMBER_ACCOUNT_ROW_ALIAS_GAIN
+                / math.sqrt(rank)
+            )
+            stats["accountRowSeed:aliasPosting"] += 1
+
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model)[
+        :TARGET_MEMBER_ACCOUNT_ROW_FRAGMENT_LIMIT
+    ]:
+        fragment = normStem(fragment)
+        if not fragment or fragment == source:
+            continue
+        fragmentRole = targetMemberStatementLedgerAccountRole(fragment)
+        if fragmentRole == "other":
+            continue
+        positionMass = 0.90 if positionKind in {"edge", "prefix", "suffix"} else 0.54
+        for statementRole in targetMemberStatementLedgerExpectedStatementRoles(fragmentRole, relations):
+            for rank, (candidate, roleScore) in enumerate(
+                rolePostings.get((statementRole, fragmentRole), ())[:TARGET_MEMBER_ACCOUNT_ROW_ROLE_POSTING_LIMIT],
+                start=1,
+            ):
+                candidate = normStem(candidate)
+                if not candidate or candidate == source or candidate == fragment:
+                    continue
+                candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+                roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+                if roleCompat < 0.22:
+                    continue
+                seedPool[candidate] += (
+                    max(0.0, float(fragmentWeight))
+                    * positionMass
+                    * math.log1p(max(0.0, float(roleScore)))
+                    * max(0.18, roleCompat)
+                    * 0.42
+                    / math.sqrt(rank)
+                )
+                stats["accountRowSeed:fragmentRolePosting"] += 1
+
+    stats["accountRowSeedPoolRows"] = len(seedPool)
+    if not seedPool:
+        TARGET_MEMBER_ACCOUNT_ROW_SCORE_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+
+    rerankedSeedPool: Counter[str] = Counter()
+    for rerank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_ACCOUNT_ROW_SEED_RERANK_LIMIT),
+        start=1,
+    ):
+        if candidate not in rowSignatures and model.independentSurfaceDf.get(candidate, 0) <= 0:
+            stats["accountRowPseudoColdCandidateSkips"] += 1
+            continue
+        candidateSignature, candidateQuality, candidateStats = candidateTargetSignature(candidate)
+        if not candidateSignature:
+            continue
+        seedProof, seedProofStats = targetMemberAccountRowWeightedProof(
+            querySignature,
+            candidateSignature,
+            featureDf,
+            rowCount,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if seedProof <= 0.0 and roleCompat < 0.72:
+            continue
+        rerankedSeedPool[candidate] = (
+            math.log1p(max(0.0, float(seedScore))) * 0.22
+            + seedProof * (0.82 + roleCompat * TARGET_MEMBER_ACCOUNT_ROW_ROLE_COMPAT_GAIN)
+            + max(0.0, candidateQuality) * 0.050
+            + max(0.0, roleCompat - 0.50) * 0.20
+        ) / math.sqrt(1.0 + (rerank - 1) * 0.010)
+        stats["accountRowSeedRerankRows"] += 1
+        stats["accountRowSeedRerankProofMilli"] += int(seedProof * 1000)
+        stats["accountRowSeedRerankMatchedFeatures"] += seedProofStats.get("accountRowMatchedFeatures", 0)
+        stats["accountRowSeedRerankColdRows"] += int(candidateStats.get("accountRowColdTargetFeatures", 0) > 0)
+    if rerankedSeedPool:
+        seedPool = rerankedSeedPool
+    stats["accountRowRerankedSeedPoolRows"] = len(seedPool)
+
+    rawOutput: list[tuple[float, str, Counter[str]]] = []
+    for seedRank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_ACCOUNT_ROW_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        if candidate not in rowSignatures and model.independentSurfaceDf.get(candidate, 0) <= 0:
+            stats["accountRowPseudoColdCandidateSkips"] += 1
+            continue
+        targetSignature, targetQuality, targetStats = candidateTargetSignature(candidate)
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberAccountRowWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            rowCount,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if proof < TARGET_MEMBER_ACCOUNT_ROW_MIN_PROOF and roleCompat < 0.82:
+            stats["accountRowLowProofRows"] += 1
+            continue
+        if candidateRole != sourceRole and roleCompat < 0.60 and proof < 0.060:
+            stats["accountRowCrossRoleWeakRows"] += 1
+            continue
+        familyKey = targetMemberAccountRowFamilyKey(candidate)
+        peerProofs: list[float] = []
+        for peer in familyMembers.get(familyKey, ())[:TARGET_MEMBER_ACCOUNT_ROW_FAMILY_LIMIT]:
+            if peer == candidate or peer == source:
+                continue
+            peerSignature = rowSignatures.get(peer)
+            if not peerSignature:
+                continue
+            peerProof, _peerStats = targetMemberAccountRowWeightedProof(
+                querySignature,
+                peerSignature,
+                featureDf,
+                rowCount,
+            )
+            if peerProof > 0.0:
+                peerProofs.append(peerProof)
+        peerProofs.sort(reverse=True)
+        peerBest = peerProofs[0] if peerProofs else 0.0
+        margin = proof - peerBest
+        roleMass = 0.68 + max(0.0, roleCompat) * TARGET_MEMBER_ACCOUNT_ROW_ROLE_COMPAT_GAIN
+        if margin < TARGET_MEMBER_ACCOUNT_ROW_MIN_MARGIN:
+            roleMass *= 0.78
+            stats["accountRowNegativeMarginRows"] += 1
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        profile = inferredOwnerRoleSpecificityProfile(candidate, model)
+        qualityMass = 1.0 + min(0.70, quality * TARGET_MEMBER_ACCOUNT_ROW_QUALITY_GAIN)
+        marginMass = 1.0 + max(0.0, margin) * TARGET_MEMBER_ACCOUNT_ROW_MARGIN_GAIN
+        hubPenalty = 1.0 + min(0.30, profile.hubness * 0.16)
+        rankMass = 1.0 / math.sqrt(1.0 + (seedRank - 1) * 0.026)
+        score = (
+            math.log1p(max(0.0, float(seedScore)))
+            * max(proof, 0.012)
+            * roleMass
+            * qualityMass
+            * marginMass
+            * rankMass
+            / hubPenalty
+        )
+        if score <= 0.0:
+            continue
+        rowStats = Counter(proofStats)
+        rowStats.update(targetStats)
+        rowStats["accountRowQualityMilli"] += int(quality * 1000)
+        rowStats["accountRowRoleCompatMilli"] += int(roleCompat * 1000)
+        rowStats["accountRowMarginMilli"] += int(margin * 1000)
+        rawOutput.append((score, candidate, rowStats))
+        stats["accountRowScored"] += 1
+        stats["accountRowScoreMilli"] += int(score * 1000)
+        stats["accountRowProofMilli"] += proofStats.get("accountRowProofMilli", 0)
+        stats["accountRowMatchedFeatures"] += proofStats.get("accountRowMatchedFeatures", 0)
+        stats["accountRowRoleMatchedFeatures"] += proofStats.get("accountRowRoleMatchedFeatures", 0)
+        stats["accountRowStatementMatchedFeatures"] += proofStats.get("accountRowStatementMatchedFeatures", 0)
+        stats["accountRowValueMatchedFeatures"] += proofStats.get("accountRowValueMatchedFeatures", 0)
+        stats["accountRowRelationMatchedFeatures"] += proofStats.get("accountRowRelationMatchedFeatures", 0)
+        stats["accountRowOrderMatchedFeatures"] += proofStats.get("accountRowOrderMatchedFeatures", 0)
+        stats["accountRowLabelMatchedFeatures"] += proofStats.get("accountRowLabelMatchedFeatures", 0)
+        stats["accountRowPeerRows"] += len(peerProofs)
+        stats["accountRowColdTargetRows"] += int(targetStats.get("accountRowColdTargetFeatures", 0) > 0)
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for score, candidate, _rowStats in rawOutput:
+        familyKey = targetMemberAccountRowFamilyKey(candidate)
+        representativeMass = targetMemberAccountRowLabelRepresentativeMass(source, candidate)
+        familyScore = score * representativeMass
+        previous = familyBest.get(familyKey)
+        if previous is None or familyScore > previous[0]:
+            familyBest[familyKey] = (familyScore, candidate)
+    output = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_ACCOUNT_ROW_ROUTE_LIMIT)))
+    stats["accountRowFamilyCollapsedRows"] = max(0, len(rawOutput) - len(limited))
+    stats["accountRowRouteRows"] = len(limited)
+    TARGET_MEMBER_ACCOUNT_ROW_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberAccountRowRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberAccountRowScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_ACCOUNT_ROW_ROUTE_LIMIT))
+
+
+def targetMemberLatentAccountRowRoleGroup(accountRole: str) -> str:
+    if accountRole in {"tradeReceivable", "loanReceivable", "receivable"}:
+        return "receivable"
+    if accountRole in {"lossAllowance", "restorationProvision", "provision"}:
+        return "provision"
+    if accountRole in {"revenue", "operatingProfit", "netProfit"}:
+        return "performance"
+    if accountRole in {"cash", "inventory", "asset"}:
+        return "asset"
+    if accountRole in {"borrowing", "payable", "liability"}:
+        return "liability"
+    if accountRole in {"dividend"}:
+        return "distribution"
+    return accountRole or "other"
+
+
+def targetMemberLatentAccountRowRoleDepth(accountRole: str) -> int:
+    if accountRole in {
+        "tradeReceivable",
+        "loanReceivable",
+        "lossAllowance",
+        "restorationProvision",
+        "operatingProfit",
+        "netProfit",
+        "cash",
+        "inventory",
+        "borrowing",
+        "payable",
+        "dividend",
+    }:
+        return 2
+    if accountRole in {"receivable", "provision", "revenue", "asset", "liability", "equity"}:
+        return 1
+    return 0
+
+
+def targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole: str, candidateRole: str) -> float:
+    roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+    if sourceRole == candidateRole:
+        return 1.0
+    if "other" in {sourceRole, candidateRole}:
+        return roleCompat
+    sourceGroup = targetMemberLatentAccountRowRoleGroup(sourceRole)
+    candidateGroup = targetMemberLatentAccountRowRoleGroup(candidateRole)
+    if sourceGroup != candidateGroup:
+        return roleCompat
+    if roleCompat >= 0.50:
+        return max(roleCompat, 0.62)
+    return max(roleCompat, 0.42)
+
+
+def targetMemberLatentAccountRowRoleSpecificityMass(sourceRole: str, candidateRole: str) -> float:
+    if sourceRole == "other" or candidateRole == "other":
+        return 0.86
+    roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+    if sourceRole == candidateRole:
+        return 1.0 + TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROLE_SPECIFIC_GAIN
+    sourceGroup = targetMemberLatentAccountRowRoleGroup(sourceRole)
+    candidateGroup = targetMemberLatentAccountRowRoleGroup(candidateRole)
+    if sourceGroup != candidateGroup:
+        return max(0.18, 0.34 + roleCompat * 0.34)
+    sourceDepth = targetMemberLatentAccountRowRoleDepth(sourceRole)
+    candidateDepth = targetMemberLatentAccountRowRoleDepth(candidateRole)
+    if roleCompat < 0.50:
+        return max(0.22, 0.28 + roleCompat * 0.30)
+    if candidateDepth < sourceDepth:
+        return max(0.34, 0.44 + roleCompat * 0.32)
+    if candidateDepth > sourceDepth:
+        return max(0.44, 0.52 + roleCompat * 0.30)
+    return max(0.46, 0.58 + roleCompat * 0.34)
+
+
+def targetMemberLatentAccountRowSuffixSpans(surface: str) -> tuple[str, ...]:
+    surface = normStem(surface)
+    suffixes: list[str] = []
+    for size in range(2, min(5, len(surface)) + 1):
+        suffix = surface[-size:]
+        if not suffix or suffix == surface:
+            continue
+        if not isContentStem(suffix) or relationTokenLike(suffix) or valueTokenLike(suffix, ""):
+            continue
+        suffixes.append(suffix)
+    return tuple(dict.fromkeys(suffixes))
+
+
+def targetMemberLatentAccountRowRoleSuffixes(sourceRole: str, model: Model) -> tuple[tuple[str, float, str], ...]:
+    sourceRole = sourceRole or "other"
+    cacheKey = (id(model), sourceRole)
+    cached = TARGET_MEMBER_LATENT_ACCOUNT_ROW_SUFFIX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+    rowSignatures, qualityScores, _featureDf, _postings, _rolePostings, _aliasPostings, _families, _indexStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    suffixScores: Counter[str] = Counter()
+    suffixRoles: dict[str, Counter[str]] = defaultdict(Counter)
+    for rank, (surface, quality) in enumerate(qualityScores.most_common(), start=1):
+        surface = normStem(surface)
+        labelRole = targetMemberStatementLedgerAccountRole(surface)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, labelRole)
+        groupCompat = targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole, labelRole)
+        carrierCompat = max(roleCompat, groupCompat)
+        if carrierCompat < 0.40:
+            continue
+        if surface not in rowSignatures:
+            continue
+        for suffix in targetMemberLatentAccountRowSuffixSpans(surface):
+            suffixRole = targetMemberStatementLedgerAccountRole(suffix)
+            suffixCompat = max(
+                targetMemberStatementLedgerRoleCompatibility(sourceRole, suffixRole),
+                targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole, suffixRole),
+            )
+            if suffixRole != "other" and suffixCompat < 0.34:
+                continue
+            lengthMass = 1.0 / (1.0 + max(0, len(suffix) - 2) * 0.18)
+            roleMass = carrierCompat * (1.10 if suffixRole != "other" else 0.84)
+            rowMass = math.log1p(max(0.0, float(quality))) / math.sqrt(rank)
+            suffixScores[suffix] += max(0.0, rowMass * roleMass * lengthMass)
+            suffixRoles[suffix][labelRole] += max(0.0, roleMass)
+    rows: list[tuple[str, float, str]] = []
+    for suffix, score in suffixScores.most_common(TARGET_MEMBER_LATENT_ACCOUNT_ROW_SUFFIX_LIMIT):
+        carrierRole = suffixRoles.get(suffix, Counter()).most_common(1)
+        rows.append((suffix, float(score), carrierRole[0][0] if carrierRole else "other"))
+    result = tuple(rows)
+    TARGET_MEMBER_LATENT_ACCOUNT_ROW_SUFFIX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberLatentAccountRowHeadCandidates(source: str, model: Model) -> tuple[tuple[str, float, str], ...]:
+    source = normStem(source)
+    cacheKey = (id(model), source)
+    cached = TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+    if not source:
+        TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_CACHE[cacheKey] = tuple()
+        return tuple()
+    scored: dict[str, tuple[float, str]] = {}
+
+    def addHead(head: str, positionKind: str, rawWeight: float) -> None:
+        head = normStem(head)
+        if not head or head == source:
+            return
+        if not isContentStem(head) or relationTokenLike(head) or valueTokenLike(head, ""):
+            return
+        independent = model.independentSurfaceDf.get(head, 0)
+        surfaceRows = model.surfaceDf.get(head, 0)
+        bridgeRows = model.bridgeSurfaceDf.get(head, 0)
+        occurrenceRows = len(model.queryLocalFrameOccurrenceIndex.get(head, ()))
+        evidenceRows = independent * 2.0 + surfaceRows + bridgeRows * 0.45 + occurrenceRows * 0.35
+        if evidenceRows <= 0.0:
+            evidenceMass = 0.18
+        else:
+            evidenceMass = 1.0 + min(1.8, math.log1p(evidenceRows) / 3.4)
+        positionMass = 1.12 if positionKind in {"edge", "prefix", "suffix"} else 0.84
+        sizeMass = (len(head) / max(1, len(source))) ** 0.72
+        role = targetMemberStatementLedgerAccountRole(head)
+        roleMass = 1.08 if role != "other" else 0.92
+        score = max(0.0, float(rawWeight)) * evidenceMass * positionMass * sizeMass * roleMass
+        current = scored.get(head)
+        if current is None or score > current[0]:
+            scored[head] = (score, positionKind)
+
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model):
+        addHead(fragment, positionKind, fragmentWeight)
+    for span in targetMemberAccountRowLabelSpans(source):
+        start = source.find(span)
+        if start < 0:
+            continue
+        end = start + len(span)
+        positionKind = "edge" if start == 0 or end == len(source) else "inner"
+        addHead(span, positionKind, 0.72 + len(span) / max(1, len(source)))
+        for cut in ("금", "액", "손익"):
+            if span.endswith(cut) and len(span) > len(cut) + 1:
+                addHead(span[: -len(cut)], positionKind, 0.52 + len(span) / max(1, len(source)))
+    ordered = sorted(
+        ((head, score, positionKind) for head, (score, positionKind) in scored.items()),
+        key=lambda row: (row[1], len(row[0])),
+        reverse=True,
+    )
+    result = tuple(ordered[:TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_LIMIT])
+    TARGET_MEMBER_LATENT_ACCOUNT_ROW_HEAD_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberLatentAccountRowSyntheticCandidates(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_CACHE.get(cacheKey)
+    if cached is not None:
+        candidates, stats = cached
+        return Counter(candidates), Counter(stats)
+    stats: Counter[str] = Counter()
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    if sourceRole == "other":
+        TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+    suffixes = targetMemberLatentAccountRowRoleSuffixes(sourceRole, model)
+    heads = targetMemberLatentAccountRowHeadCandidates(source, model)
+    candidates: Counter[str] = Counter()
+    for headRank, (head, headScore, positionKind) in enumerate(heads, start=1):
+        for suffixRank, (suffix, suffixScore, carrierRole) in enumerate(suffixes, start=1):
+            if not head or not suffix:
+                continue
+            if head.endswith(suffix):
+                candidate = head
+            else:
+                candidate = f"{head}{suffix}"
+            candidate = normStem(candidate)
+            if not candidate or candidate == source or candidate == head:
+                continue
+            if len(candidate) > max(len(source) + 5, 12):
+                stats["latentAccountRowLongCandidateSkips"] += 1
+                continue
+            if not isContentStem(candidate) or relationTokenLike(candidate) or valueTokenLike(candidate, ""):
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            if candidateRole == "other":
+                stats["latentAccountRowNoRoleCandidateSkips"] += 1
+                continue
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            groupCompat = targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole, candidateRole)
+            if max(roleCompat, groupCompat) < 0.58:
+                stats["latentAccountRowWeakRoleCandidateSkips"] += 1
+                continue
+            carrierCompat = targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole, carrierRole)
+            if carrierCompat < 0.34:
+                stats["latentAccountRowWeakCarrierSkips"] += 1
+                continue
+            positionMass = 1.12 if positionKind in {"edge", "prefix", "suffix"} else 0.82
+            rankMass = 1.0 / math.sqrt(headRank * suffixRank)
+            seed = (
+                max(0.0, float(headScore))
+                * math.log1p(max(0.0, float(suffixScore)))
+                * max(roleCompat, groupCompat)
+                * max(0.42, carrierCompat)
+                * positionMass
+                * rankMass
+            )
+            if seed < TARGET_MEMBER_LATENT_ACCOUNT_ROW_MIN_SYNTHETIC_SCORE:
+                continue
+            candidates[candidate] += seed
+            stats["latentAccountRowSyntheticRows"] += 1
+            stats[f"latentAccountRowSyntheticRole:{candidateRole}"] += 1
+    limited = Counter(dict(candidates.most_common(TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_LIMIT)))
+    stats["latentAccountRowSyntheticCandidates"] = len(limited)
+    TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberLatentAccountRowScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_LATENT_ACCOUNT_ROW_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+
+    rowSignatures, qualityScores, featureDf, _postings, _rolePostings, _aliasPostings, _families, indexStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberAccountRowQuerySignature(source, relations, model)
+    baseScores, baseStats = targetMemberAccountRowScores(source, relations, model)
+    syntheticCandidates, syntheticStats = targetMemberLatentAccountRowSyntheticCandidates(source, relations, model)
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(baseStats)
+    stats.update(syntheticStats)
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    rowCount = max(1, len(rowSignatures))
+    merged: Counter[str] = Counter()
+
+    for candidate, baseScore in baseScores.items():
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        merged[candidate] += max(0.0, float(baseScore)) * roleMass
+        stats["latentAccountRowBaseRows"] += 1
+
+    for seedRank, (candidate, seedScore) in enumerate(
+        syntheticCandidates.most_common(TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_LIMIT),
+        start=1,
+    ):
+        targetSignature, targetQuality, targetStats = targetMemberAccountRowTargetSignature(
+            candidate,
+            relations,
+            model,
+            rowSignatures,
+            qualityScores,
+        )
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberAccountRowWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            rowCount,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if proof < TARGET_MEMBER_ACCOUNT_ROW_MIN_PROOF and roleCompat < 0.82:
+            stats["latentAccountRowLowProofRows"] += 1
+            continue
+        if candidateRole != sourceRole and roleCompat < 0.60 and proof < 0.060:
+            stats["latentAccountRowCrossRoleWeakRows"] += 1
+            continue
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        observedMass = 1.0 if candidate in rowSignatures else 1.18
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        qualityMass = 1.0 + min(0.42, quality * 0.16)
+        rankMass = 1.0 / math.sqrt(1.0 + (seedRank - 1) * 0.018)
+        score = (
+            math.log1p(max(0.0, float(seedScore)))
+            * max(proof, 0.014)
+            * roleMass
+            * observedMass
+            * qualityMass
+            * TARGET_MEMBER_LATENT_ACCOUNT_ROW_SYNTHETIC_GAIN
+            * rankMass
+        )
+        if score <= 0.0:
+            continue
+        merged[candidate] += score
+        stats.update(targetStats)
+        stats["latentAccountRowSyntheticScored"] += 1
+        stats["latentAccountRowSyntheticScoreMilli"] += int(score * 1000)
+        stats["latentAccountRowSyntheticProofMilli"] += proofStats.get("accountRowProofMilli", 0)
+        stats["latentAccountRowSyntheticMatchedFeatures"] += proofStats.get("accountRowMatchedFeatures", 0)
+        stats["latentAccountRowSyntheticAbsentRows"] += int(candidate not in rowSignatures)
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for candidate, score in merged.items():
+        if not candidate or candidate == source:
+            continue
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        representativeMass = targetMemberAccountRowLabelRepresentativeMass(source, candidate)
+        familyScore = max(0.0, float(score)) * representativeMass * math.sqrt(max(0.18, roleMass))
+        familyKey = targetMemberAccountRowFamilyKey(candidate)
+        previous = familyBest.get(familyKey)
+        if previous is None or familyScore > previous[0]:
+            familyBest[familyKey] = (familyScore, candidate)
+
+    output = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROUTE_LIMIT)))
+    stats["latentAccountRowMergedRows"] = len(merged)
+    stats["latentAccountRowRouteRows"] = len(limited)
+    TARGET_MEMBER_LATENT_ACCOUNT_ROW_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberLatentAccountRowRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberLatentAccountRowScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_LATENT_ACCOUNT_ROW_ROUTE_LIMIT))
+
+
+@dataclass(frozen=True)
+class TargetMemberObjectAccountRowObject:
+    label: str
+    accountRole: str
+    statementRole: str
+    valueSlot: str
+    modifier: str
+    head: str
+    suffix: str
+    carrierRole: str
+    neighborSeq: str
+
+
+def targetMemberObjectAccountRowSourceValueSlot(sourceRole: str, relations: tuple[str, ...]) -> str:
+    statements = targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations)
+    if sourceRole in {"tradeReceivable", "loanReceivable", "receivable", "cash", "inventory"}:
+        return "row"
+    if sourceRole in {"lossAllowance", "provision", "restorationProvision"}:
+        return "allowance"
+    if sourceRole in {"operatingProfit", "netProfit", "revenue"}:
+        return "income"
+    if "cashFlow" in statements:
+        return "flow"
+    return "unknown"
+
+
+def targetMemberObjectAccountRowNeighborSeq(accountRole: str) -> str:
+    group = targetMemberLatentAccountRowRoleGroup(accountRole)
+    if group == "receivable":
+        return "asset>receivable>allowance"
+    if group == "provision":
+        return "receivable>allowance>expense"
+    if group == "performance":
+        return "revenue>profit>net"
+    if group == "asset":
+        return "current>asset>cash"
+    if group == "liability":
+        return "liability>debt>payable"
+    return f"generic>{group}"
+
+
+def targetMemberObjectAccountRowHeadCandidates(
+    source: str,
+    model: Model,
+) -> tuple[tuple[str, float, str, str, str], ...]:
+    source = normStem(source)
+    cacheKey = (id(model), source)
+    cached = TARGET_MEMBER_OBJECT_ACCOUNT_ROW_HEAD_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    rows: dict[str, tuple[float, str, str, str]] = {}
+
+    def addHead(head: str, rawScore: float, positionKind: str) -> None:
+        head = normStem(head)
+        if not head or head == source:
+            return
+        start = source.find(head)
+        if start < 0:
+            return
+        end = start + len(head)
+        if not isContentStem(head) or relationTokenLike(head) or valueTokenLike(head, ""):
+            return
+        independent = model.independentSurfaceDf.get(head, 0)
+        surfaceRows = model.surfaceDf.get(head, 0)
+        bridgeRows = model.bridgeSurfaceDf.get(head, 0)
+        occurrenceRows = len(model.queryLocalFrameOccurrenceIndex.get(head, ()))
+        evidenceRows = independent * 2.0 + surfaceRows + bridgeRows * 0.45 + occurrenceRows * 0.35
+        if evidenceRows <= 0:
+            return
+        headRole = targetMemberStatementLedgerAccountRole(head)
+        roleCompat = targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole, headRole)
+        prefix = source[:start]
+        suffix = source[end:]
+        boundaryMass = 1.20 if start == 0 or end == len(source) else 1.0
+        if prefix and len(prefix) <= 2:
+            boundaryMass *= 1.08
+        if suffix and len(suffix) <= 2:
+            boundaryMass *= 1.08
+        if headRole != "other":
+            boundaryMass *= 1.04 + roleCompat * 0.10
+        evidenceMass = 1.0 + min(1.6, math.log1p(evidenceRows) / 3.2)
+        sizeMass = (len(head) / max(1, len(source))) ** 0.62
+        score = max(0.0, float(rawScore)) * evidenceMass * boundaryMass * sizeMass
+        current = rows.get(head)
+        if current is None or score > current[0]:
+            rows[head] = (score, positionKind, prefix, suffix)
+
+    for fragment, fragmentWeight, positionKind in compositionalColdStartFragmentCandidates(source, model):
+        addHead(fragment, fragmentWeight, positionKind)
+    for span in targetMemberAccountRowLabelSpans(source):
+        start = source.find(span)
+        if start < 0:
+            continue
+        end = start + len(span)
+        positionKind = "edge" if start == 0 or end == len(source) else "inner"
+        addHead(span, 0.72 + len(span) / max(1, len(source)), positionKind)
+        for removableTail in ("금", "액", "손익"):
+            if span.endswith(removableTail) and len(span) > len(removableTail) + 1:
+                addHead(span[: -len(removableTail)], 0.56 + len(span) / max(1, len(source)), positionKind)
+
+    ordered = sorted(
+        ((head, score, positionKind, prefix, tail) for head, (score, positionKind, prefix, tail) in rows.items()),
+        key=lambda row: (row[1], len(row[0])),
+        reverse=True,
+    )
+    result = tuple(ordered[:TARGET_MEMBER_OBJECT_ACCOUNT_ROW_HEAD_LIMIT])
+    TARGET_MEMBER_OBJECT_ACCOUNT_ROW_HEAD_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberObjectAccountRowRenderLabel(
+    sourceRole: str,
+    head: str,
+    suffix: str,
+) -> tuple[str, str]:
+    head = normStem(head)
+    suffix = normStem(suffix)
+    if not head or not suffix:
+        return "", "empty"
+    if head.endswith(suffix):
+        label = head
+    else:
+        label = f"{head}{suffix}"
+    label = normStem(label)
+    role = targetMemberStatementLedgerAccountRole(label)
+    if role == sourceRole:
+        return label, "exactRole"
+    if targetMemberLatentAccountRowRoleGroup(role) == targetMemberLatentAccountRowRoleGroup(sourceRole):
+        return label, "groupRole"
+    return "", "roleMismatch"
+
+
+def targetMemberObjectAccountRowSyntheticObjects(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_CACHE.get(cacheKey)
+    if cached is not None:
+        objects, stats = cached
+        return Counter(objects), Counter(stats)
+    stats: Counter[str] = Counter()
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    if sourceRole == "other":
+        TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+    statements = targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations)
+    statementRole = statements[0] if statements else "unknown"
+    valueSlot = targetMemberObjectAccountRowSourceValueSlot(sourceRole, relations)
+    neighborSeq = targetMemberObjectAccountRowNeighborSeq(sourceRole)
+    heads = targetMemberObjectAccountRowHeadCandidates(source, model)
+    suffixes = targetMemberLatentAccountRowRoleSuffixes(sourceRole, model)
+    output: Counter[str] = Counter()
+
+    for headRank, (head, headScore, positionKind, prefix, tail) in enumerate(heads, start=1):
+        for suffixRank, (suffix, suffixScore, carrierRole) in enumerate(suffixes, start=1):
+            label, renderMode = targetMemberObjectAccountRowRenderLabel(sourceRole, head, suffix)
+            if not label or label == source:
+                continue
+            labelRole = targetMemberStatementLedgerAccountRole(label)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, labelRole)
+            if labelRole != sourceRole and roleCompat < 0.74:
+                stats["objectAccountRowGroupOnlySkips"] += 1
+                continue
+            modifier = prefix if prefix and prefix not in head else ""
+            rowObject = TargetMemberObjectAccountRowObject(
+                label=label,
+                accountRole=labelRole,
+                statementRole=statementRole,
+                valueSlot=valueSlot,
+                modifier=modifier,
+                head=head,
+                suffix=suffix,
+                carrierRole=carrierRole,
+                neighborSeq=neighborSeq,
+            )
+            carrierCompat = targetMemberLatentAccountRowRoleGroupCompatibility(sourceRole, carrierRole)
+            positionMass = 1.12 if positionKind in {"edge", "prefix", "suffix"} else 0.92
+            modifierMass = 1.0
+            if modifier and labelRole != sourceRole:
+                modifierMass *= 0.56
+            if tail and len(tail) <= 2:
+                modifierMass *= 1.06
+            objectSlotMass = (
+                1.0
+                + 0.18 * int(rowObject.statementRole != "unknown")
+                + 0.18 * int(rowObject.valueSlot != "unknown")
+                + 0.12 * int(rowObject.neighborSeq != "")
+            )
+            rankMass = 1.0 / math.sqrt(headRank * suffixRank)
+            score = (
+                max(0.0, float(headScore))
+                * math.log1p(max(0.0, float(suffixScore)))
+                * max(0.36, carrierCompat)
+                * max(0.44, roleCompat)
+                * positionMass
+                * modifierMass
+                * objectSlotMass
+                * rankMass
+            )
+            if score < TARGET_MEMBER_OBJECT_ACCOUNT_ROW_MIN_OBJECT_SCORE:
+                continue
+            output[label] += score
+            stats["objectAccountRowObjects"] += 1
+            stats[f"objectAccountRowRender:{renderMode}"] += 1
+            stats[f"objectAccountRowRole:{labelRole}"] += 1
+
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_OBJECT_ACCOUNT_ROW_OBJECT_LIMIT)))
+    stats["objectAccountRowObjectLabels"] = len(limited)
+    TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberObjectAccountRowScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+    rowSignatures, qualityScores, featureDf, _postings, _rolePostings, _aliasPostings, _families, indexStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    querySignature, queryStats = targetMemberAccountRowQuerySignature(source, relations, model)
+    baseScores, baseStats = targetMemberAccountRowScores(source, relations, model)
+    objectCandidates, objectStats = targetMemberObjectAccountRowSyntheticObjects(source, relations, model)
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    rowCount = max(1, len(rowSignatures))
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(baseStats)
+    stats.update(objectStats)
+    merged: Counter[str] = Counter()
+
+    for candidate, baseScore in baseScores.items():
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        merged[candidate] += max(0.0, float(baseScore)) * roleMass
+        stats["objectAccountRowBaseRows"] += 1
+
+    for rank, (candidate, objectScore) in enumerate(
+        objectCandidates.most_common(TARGET_MEMBER_OBJECT_ACCOUNT_ROW_OBJECT_LIMIT),
+        start=1,
+    ):
+        targetSignature, targetQuality, targetStats = targetMemberAccountRowTargetSignature(
+            candidate,
+            relations,
+            model,
+            rowSignatures,
+            qualityScores,
+        )
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberAccountRowWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            rowCount,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if proof < TARGET_MEMBER_ACCOUNT_ROW_MIN_PROOF and roleCompat < 0.82:
+            stats["objectAccountRowLowProofRows"] += 1
+            continue
+        if candidateRole != sourceRole and roleCompat < 0.72:
+            stats["objectAccountRowWeakRoleRows"] += 1
+            continue
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        qualityMass = 1.0 + min(0.38, quality * 0.14)
+        rankMass = 1.0 / math.sqrt(1.0 + (rank - 1) * 0.020)
+        score = (
+            math.log1p(max(0.0, float(objectScore)))
+            * max(proof, 0.014)
+            * roleMass
+            * qualityMass
+            * TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SYNTHETIC_GAIN
+            * rankMass
+        )
+        if score <= 0.0:
+            continue
+        merged[candidate] += score
+        stats.update(targetStats)
+        stats["objectAccountRowSyntheticScored"] += 1
+        stats["objectAccountRowSyntheticAbsentRows"] += int(candidate not in rowSignatures)
+        stats["objectAccountRowSyntheticScoreMilli"] += int(score * 1000)
+        stats["objectAccountRowSyntheticProofMilli"] += proofStats.get("accountRowProofMilli", 0)
+        stats["objectAccountRowSyntheticMatchedFeatures"] += proofStats.get("accountRowMatchedFeatures", 0)
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for candidate, score in merged.items():
+        if not candidate or candidate == source:
+            continue
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        representativeMass = targetMemberAccountRowLabelRepresentativeMass(source, candidate)
+        familyScore = max(0.0, float(score)) * representativeMass * math.sqrt(max(0.18, roleMass))
+        familyKey = targetMemberAccountRowFamilyKey(candidate)
+        previous = familyBest.get(familyKey)
+        if previous is None or familyScore > previous[0]:
+            familyBest[familyKey] = (familyScore, candidate)
+
+    output = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(output.most_common(TARGET_MEMBER_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT)))
+    stats["objectAccountRowMergedRows"] = len(merged)
+    stats["objectAccountRowRouteRows"] = len(limited)
+    TARGET_MEMBER_OBJECT_ACCOUNT_ROW_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberObjectAccountRowRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberObjectAccountRowScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT))
+
+
+def targetMemberCorpusObjectAccountRowFeatureGain(feature: str) -> float:
+    if feature.startswith(("obj:role:", "obj:stmtRole:", "obj:roleStmt:", "obj:valueRole:")):
+        return 1.42
+    if feature.startswith(("obj:headSuffix:", "obj:head:", "obj:suffix:")):
+        return 1.24
+    if feature.startswith(("obj:valueSlot:", "obj:relationSlot:", "obj:neighborSeq:")):
+        return 1.16
+    if feature.startswith(("obj:modifier:", "obj:modifierBucket:")):
+        return 0.84
+    return 1.0
+
+
+def targetMemberCorpusObjectAccountRowLabelParts(
+    surface: str,
+    model: Model,
+) -> tuple[str, str, str]:
+    surface = normStem(surface)
+    if not surface:
+        return "", "", ""
+    role = targetMemberStatementLedgerAccountRole(surface)
+    bestSuffix = ""
+    bestScore = -1.0
+    for suffix in targetMemberLatentAccountRowSuffixSpans(surface):
+        suffixRole = targetMemberStatementLedgerAccountRole(suffix)
+        roleCompat = max(
+            targetMemberStatementLedgerRoleCompatibility(role, suffixRole),
+            targetMemberLatentAccountRowRoleGroupCompatibility(role, suffixRole),
+        )
+        if suffixRole == "other":
+            roleCompat *= 0.72
+        score = roleCompat + 1.0 / max(2, len(suffix))
+        if score > bestScore:
+            bestSuffix = suffix
+            bestScore = score
+    if not bestSuffix:
+        return surface, "", ""
+    prefix = surface[: -len(bestSuffix)] if surface.endswith(bestSuffix) else surface
+    head = prefix
+    modifier = ""
+    bestHead = ""
+    bestHeadScore = 0.0
+    for span in targetMemberAccountRowLabelSpans(prefix):
+        if span == prefix:
+            continue
+        rows = (
+            model.independentSurfaceDf.get(span, 0) * 2.0
+            + model.surfaceDf.get(span, 0)
+            + len(model.queryLocalFrameOccurrenceIndex.get(span, ())) * 0.25
+        )
+        if rows <= 0.0:
+            continue
+        score = math.log1p(rows) * len(span)
+        if score > bestHeadScore:
+            bestHead = span
+            bestHeadScore = score
+    if bestHead and bestHead in prefix:
+        head = bestHead
+        modifier = prefix.replace(bestHead, "", 1)
+    return normStem(head), normStem(bestSuffix), normStem(modifier)
+
+
+def targetMemberCorpusObjectAccountRowValueSlot(valueBucket: str) -> str:
+    if valueBucket in {"touch", "near", "row", "band"}:
+        return "row"
+    if valueBucket in {"far"}:
+        return "far"
+    return "none"
+
+
+def targetMemberCorpusObjectAccountRowObservedSignature(
+    surface: str,
+    relations: tuple[str, ...],
+    model: Model,
+    rowLimit: int = TARGET_MEMBER_ACCOUNT_ROW_OCCURRENCE_LIMIT,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    stats: Counter[str] = Counter()
+    signature: Counter[str] = Counter()
+    if not surface:
+        return signature, 0.0, stats
+    role = targetMemberStatementLedgerAccountRole(surface)
+    if role == "other":
+        return signature, 0.0, stats
+    head, suffix, modifier = targetMemberCorpusObjectAccountRowLabelParts(surface, model)
+    rows = model.queryLocalFrameOccurrenceIndex.get(surface, ())[:rowLimit]
+    statementRows: Counter[str] = Counter()
+    valueRows: Counter[str] = Counter()
+    relationRows: Counter[str] = Counter()
+    neighborRows: Counter[str] = Counter()
+    objectRows = 0
+
+    for rowRank, (unitId, position, marker) in enumerate(rows, start=1):
+        if unitId < 0 or unitId >= len(model.caches):
+            continue
+        cache = model.caches[unitId]
+        if position < 0 or position >= len(cache.stems):
+            continue
+        rowScale = 1.0 / math.sqrt(rowRank)
+        statementRole = targetMemberStatementLedgerStatementRole(cache, position, surface)
+        _valueSide, valueBucket = targetMemberAccountRowValueSide(cache, position)
+        valueSlot = targetMemberCorpusObjectAccountRowValueSlot(valueBucket)
+        statementRows[statementRole] += 1
+        valueRows[valueSlot] += 1
+        objectRows += int(statementRole != "unknown" or valueSlot != "none")
+        signature[f"obj:role:{role}"] += rowScale * 1.48
+        signature[f"obj:stmtRole:{statementRole}"] += rowScale * 0.88
+        signature[f"obj:roleStmt:{role}:{statementRole}"] += rowScale * 1.34
+        signature[f"obj:valueSlot:{valueSlot}"] += rowScale * 0.82
+        signature[f"obj:valueRole:{role}:{valueSlot}"] += rowScale * 1.18
+        relationRowsLocal = targetMemberAccountRegistryRelationRows(cache, position)
+        if relationRowsLocal:
+            for relation, _distance, _side in relationRowsLocal:
+                relationRows[relation] += 1
+                signature[f"obj:relationSlot:{relation}:{role}"] += rowScale * 0.64
+        leftRole = "none"
+        rightRole = "none"
+        for side, step in (("L", -1), ("R", 1)):
+            index = position + step
+            walked = 0
+            while 0 <= index < len(cache.stems) and walked < 7:
+                stem = normStem(cache.stems[index])
+                if stem and stem != surface and isContentStem(stem) and not relationTokenLike(stem):
+                    neighborRole = targetMemberStatementLedgerAccountRole(stem)
+                    if neighborRole != "other":
+                        neighborRows[f"{side}:{neighborRole}"] += 1
+                        if side == "L":
+                            leftRole = neighborRole
+                        else:
+                            rightRole = neighborRole
+                        break
+                index += step
+                walked += 1
+        if leftRole != "none" or rightRole != "none":
+            signature[f"obj:neighborSeq:{leftRole}>{role}>{rightRole}"] += rowScale * 0.72
+
+    statementRole = statementRows.most_common(1)[0][0] if statementRows else "unknown"
+    valueSlot = (
+        valueRows.most_common(1)[0][0] if valueRows else targetMemberObjectAccountRowSourceValueSlot(role, relations)
+    )
+    neighborSeq = targetMemberObjectAccountRowNeighborSeq(role)
+    signature[f"obj:role:{role}"] += 1.18
+    signature[f"obj:stmtRole:{statementRole}"] += 0.78
+    signature[f"obj:roleStmt:{role}:{statementRole}"] += 1.12
+    signature[f"obj:valueSlot:{valueSlot}"] += 0.66
+    signature[f"obj:valueRole:{role}:{valueSlot}"] += 0.92
+    signature[f"obj:neighborSeq:{neighborSeq}"] += 0.52
+    if head:
+        signature[f"obj:head:{role}:{head}"] += 1.08
+    if suffix:
+        signature[f"obj:suffix:{role}:{suffix}"] += 1.12
+    if head and suffix:
+        signature[f"obj:headSuffix:{role}:{head}:{suffix}"] += 1.32
+    if modifier:
+        signature[f"obj:modifier:{role}:{stableHash(modifier, 12)}"] += 0.28
+        signature[f"obj:modifierBucket:{role}:{min(4, len(modifier))}"] += 0.20
+    for relation in relations:
+        signature[f"obj:relationSlot:{relation}:{role}"] += 0.22
+    quality = (
+        0.72
+        + math.log1p(objectRows) * 0.34
+        + math.log1p(sum(statementRows.values())) * 0.18
+        + math.log1p(sum(valueRows.values())) * 0.18
+        + math.log1p(sum(relationRows.values())) * 0.08
+        + (0.16 if head else 0.0)
+        + (0.20 if suffix else 0.0)
+    )
+    selected = Counter(dict(signature.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_FEATURE_LIMIT)))
+    stats["corpusObjectAccountRowFeatures"] = len(selected)
+    stats["corpusObjectAccountRowRows"] = len(rows)
+    stats["corpusObjectAccountRowObjectRows"] = objectRows
+    stats["corpusObjectAccountRowQualityMilli"] = int(max(0.0, quality) * 1000)
+    return selected, max(0.0, quality), stats
+
+
+def targetMemberCorpusObjectAccountRowBuildIndex(
+    model: Model,
+) -> tuple[dict[str, Counter[str]], Counter[str], Counter[str], dict[str, tuple[tuple[str, float], ...]], Counter[str]]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+    rowSignatures, qualityScores, _featureDf, _postings, _rolePostings, _aliasPostings, _families, rowStats = (
+        targetMemberAccountRowBuildIndex(model)
+    )
+    signatures: dict[str, Counter[str]] = {}
+    quality: Counter[str] = Counter()
+    featureDf: Counter[str] = Counter()
+    postingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    stats: Counter[str] = Counter(rowStats)
+    allRelations = tuple(relation for relation, _terms in RELATIONS)
+    for surface, rowQuality in qualityScores.most_common():
+        if surface not in rowSignatures:
+            continue
+        signature, objectQuality, objectStats = targetMemberCorpusObjectAccountRowObservedSignature(
+            surface,
+            allRelations,
+            model,
+        )
+        stats.update(objectStats)
+        if not signature:
+            continue
+        signatures[surface] = signature
+        quality[surface] = max(float(rowQuality), float(objectQuality))
+        rowPrior = 1.0 + min(0.64, float(objectQuality) * 0.12)
+        for feature, weight in signature.items():
+            featureDf[feature] += 1
+            postingRows[feature].append((surface, float(weight) * rowPrior))
+        stats["corpusObjectAccountRowAccepted"] += 1
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_POSTING_LIMIT])
+    stats["corpusObjectAccountRowSurfaces"] = len(signatures)
+    stats["corpusObjectAccountRowFeatureDfKeys"] = len(featureDf)
+    stats["corpusObjectAccountRowPostingKeys"] = len(postings)
+    stats["corpusObjectAccountRowPostingLinks"] = sum(len(rows) for rows in postings.values())
+    result = (signatures, quality, featureDf, postings, Counter(stats))
+    TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberCorpusObjectAccountRowSyntheticSignature(
+    source: str,
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], float, Counter[str]]:
+    source = normStem(source)
+    candidate = normStem(candidate)
+    stats: Counter[str] = Counter()
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+    if not candidate or candidateRole == "other":
+        return Counter(), 0.0, stats
+    head, suffix, modifier = targetMemberCorpusObjectAccountRowLabelParts(candidate, model)
+    statementRoles = targetMemberStatementLedgerExpectedStatementRoles(candidateRole, relations)
+    statementRole = statementRoles[0] if statementRoles else "unknown"
+    valueSlot = targetMemberObjectAccountRowSourceValueSlot(candidateRole, relations)
+    neighborSeq = targetMemberObjectAccountRowNeighborSeq(candidateRole)
+    signature: Counter[str] = Counter()
+    signature[f"obj:role:{candidateRole}"] += 1.38
+    signature[f"obj:stmtRole:{statementRole}"] += 0.84
+    signature[f"obj:roleStmt:{candidateRole}:{statementRole}"] += 1.26
+    signature[f"obj:valueSlot:{valueSlot}"] += 0.72
+    signature[f"obj:valueRole:{candidateRole}:{valueSlot}"] += 1.02
+    signature[f"obj:neighborSeq:{neighborSeq}"] += 0.58
+    if head:
+        signature[f"obj:head:{candidateRole}:{head}"] += 1.16
+    if suffix:
+        signature[f"obj:suffix:{candidateRole}:{suffix}"] += 1.18
+    if head and suffix:
+        signature[f"obj:headSuffix:{candidateRole}:{head}:{suffix}"] += 1.46
+    if modifier:
+        signature[f"obj:modifier:{candidateRole}:{stableHash(modifier, 12)}"] += 0.22
+        signature[f"obj:modifierBucket:{candidateRole}:{min(4, len(modifier))}"] += 0.16
+    for relation in relations:
+        signature[f"obj:relationSlot:{relation}:{candidateRole}"] += 0.24
+    roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+    quality = 0.58 + roleCompat * 0.34 + (0.18 if head else 0.0) + (0.22 if suffix else 0.0)
+    selected = Counter(dict(signature.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_FEATURE_LIMIT)))
+    stats["corpusObjectAccountRowSyntheticFeatures"] = len(selected)
+    return selected, max(0.0, quality), stats
+
+
+def targetMemberCorpusObjectAccountRowTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], float, Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, quality, stats = cached
+        return Counter(signature), float(quality), Counter(stats)
+    objectSignatures, objectQuality, _featureDf, _postings, indexStats = targetMemberCorpusObjectAccountRowBuildIndex(
+        model
+    )
+    stats = Counter(indexStats)
+    direct = objectSignatures.get(candidate)
+    if direct:
+        selected = Counter(dict(direct.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_FEATURE_LIMIT)))
+        quality = float(objectQuality.get(candidate, 0.0))
+        stats["corpusObjectAccountRowDirectTarget"] += 1
+        TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_TARGET_CACHE[cacheKey] = (Counter(selected), quality, Counter(stats))
+        return selected, quality, stats
+    signature, quality, synthStats = targetMemberCorpusObjectAccountRowSyntheticSignature(
+        candidate,
+        candidate,
+        relations,
+        model,
+    )
+    stats.update(synthStats)
+    stats["corpusObjectAccountRowSyntheticTarget"] += int(bool(signature))
+    TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_TARGET_CACHE[cacheKey] = (Counter(signature), quality, Counter(stats))
+    return signature, quality, stats
+
+
+def targetMemberCorpusObjectAccountRowQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+    stats: Counter[str] = Counter()
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    if sourceRole == "other":
+        TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_QUERY_CACHE[cacheKey] = (Counter(), Counter(stats))
+        return Counter(), stats
+    signature: Counter[str] = Counter()
+    statementRoles = targetMemberStatementLedgerExpectedStatementRoles(sourceRole, relations)
+    valueSlot = targetMemberObjectAccountRowSourceValueSlot(sourceRole, relations)
+    neighborSeq = targetMemberObjectAccountRowNeighborSeq(sourceRole)
+    for statementRole in statementRoles:
+        signature[f"obj:role:{sourceRole}"] += 1.28
+        signature[f"obj:stmtRole:{statementRole}"] += 0.78
+        signature[f"obj:roleStmt:{sourceRole}:{statementRole}"] += 1.18
+    signature[f"obj:valueSlot:{valueSlot}"] += 0.70
+    signature[f"obj:valueRole:{sourceRole}:{valueSlot}"] += 0.98
+    signature[f"obj:neighborSeq:{neighborSeq}"] += 0.54
+    for head, headScore, _positionKind, _prefix, _tail in targetMemberObjectAccountRowHeadCandidates(source, model):
+        signature[f"obj:head:{sourceRole}:{head}"] += max(0.0, float(headScore)) * 0.54
+    for suffix, suffixScore, _carrierRole in targetMemberLatentAccountRowRoleSuffixes(sourceRole, model):
+        signature[f"obj:suffix:{sourceRole}:{suffix}"] += math.log1p(max(0.0, float(suffixScore))) * 0.48
+    for relation in relations:
+        signature[f"obj:relationSlot:{relation}:{sourceRole}"] += 0.22
+    limited = Counter(dict(signature.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_FEATURE_LIMIT)))
+    stats["corpusObjectAccountRowQueryFeatures"] = len(limited)
+    TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_QUERY_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberCorpusObjectAccountRowWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    objectCount: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(featureDf.get(feature, 1)))
+        idf = math.log1p((objectCount + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.16, idf) * targetMemberCorpusObjectAccountRowFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    raw = 0.0
+    matched = 0
+    roleMatched = 0
+    morphologyMatched = 0
+    slotMatched = 0
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        raw += effective(feature, float(leftWeight)) * effective(feature, float(rightWeight))
+        matched += 1
+        if feature.startswith(("obj:role:", "obj:stmtRole:", "obj:roleStmt:", "obj:valueRole:")):
+            roleMatched += 1
+        if feature.startswith(("obj:head:", "obj:suffix:", "obj:headSuffix:", "obj:modifier")):
+            morphologyMatched += 1
+        if feature.startswith(("obj:valueSlot:", "obj:relationSlot:", "obj:neighborSeq:")):
+            slotMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    proof *= 1.0 + min(0.42, roleMatched * 0.11) + min(0.30, morphologyMatched * 0.075) + min(0.24, slotMatched * 0.060)
+    stats["corpusObjectAccountRowMatchedFeatures"] = matched
+    stats["corpusObjectAccountRowRoleMatchedFeatures"] = roleMatched
+    stats["corpusObjectAccountRowMorphologyMatchedFeatures"] = morphologyMatched
+    stats["corpusObjectAccountRowSlotMatchedFeatures"] = slotMatched
+    stats["corpusObjectAccountRowProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberCorpusObjectAccountRowScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+    objectSignatures, objectQuality, featureDf, postings, indexStats = targetMemberCorpusObjectAccountRowBuildIndex(
+        model
+    )
+    querySignature, queryStats = targetMemberCorpusObjectAccountRowQuerySignature(source, relations, model)
+    baseScores, baseStats = targetMemberObjectAccountRowScores(source, relations, model)
+    objectCandidates, objectStats = targetMemberObjectAccountRowSyntheticObjects(source, relations, model)
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    objectCount = max(1, len(objectSignatures))
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(baseStats)
+    stats.update(objectStats)
+    seedPool: Counter[str] = Counter()
+
+    for candidate, baseScore in baseScores.items():
+        seedPool[candidate] += max(0.0, float(baseScore)) * 0.84
+        stats["corpusObjectAccountRowSeed:base"] += 1
+    for candidate, objectScore in objectCandidates.items():
+        seedPool[candidate] += max(0.0, float(objectScore)) * 1.12
+        stats["corpusObjectAccountRowSeed:syntheticObject"] += 1
+    for feature, queryWeight in querySignature.items():
+        rows = postings.get(feature, tuple())
+        if not rows:
+            continue
+        df = max(1, int(featureDf.get(feature, 1)))
+        idf = math.log1p((objectCount + 1.0) / (df + 0.5))
+        for rank, (candidate, targetWeight) in enumerate(
+            rows[:TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_POSTING_LIMIT],
+            start=1,
+        ):
+            if candidate == source:
+                stats["corpusObjectAccountRowSourceSelfSkips"] += 1
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            if roleCompat < 0.22:
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.18, idf)
+                * max(0.18, roleCompat)
+                * targetMemberCorpusObjectAccountRowFeatureGain(feature)
+                / math.sqrt(rank)
+            )
+            stats["corpusObjectAccountRowPostingRows"] += 1
+
+    output: Counter[str] = Counter()
+    for rank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        if candidate == source:
+            stats["corpusObjectAccountRowSourceSelfSkips"] += 1
+            continue
+        targetSignature, targetQuality, targetStats = targetMemberCorpusObjectAccountRowTargetSignature(
+            candidate,
+            relations,
+            model,
+        )
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberCorpusObjectAccountRowWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            objectCount,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if proof <= 0.0 and roleCompat < 0.82:
+            continue
+        if candidateRole != sourceRole and roleCompat < 0.60 and proof < 0.060:
+            stats["corpusObjectAccountRowCrossRoleWeakRows"] += 1
+            continue
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        quality = max(0.0, float(objectQuality.get(candidate, targetQuality)))
+        supportMass = 1.0 + min(0.60, proof * TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_SUPPORT_GAIN)
+        rankMass = 1.0 / math.sqrt(1.0 + (rank - 1) * 0.020)
+        score = (
+            math.log1p(max(0.0, float(seedScore)))
+            * max(proof, 0.012)
+            * roleMass
+            * supportMass
+            * (1.0 + min(0.36, quality * 0.12))
+            * TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_OBJECT_GAIN
+            * rankMass
+        )
+        if score <= 0.0:
+            continue
+        output[candidate] += score
+        stats.update(targetStats)
+        stats["corpusObjectAccountRowScored"] += 1
+        stats["corpusObjectAccountRowScoreMilli"] += int(score * 1000)
+        stats["corpusObjectAccountRowProofMilli"] += proofStats.get("corpusObjectAccountRowProofMilli", 0)
+        stats["corpusObjectAccountRowMatchedFeatures"] += proofStats.get("corpusObjectAccountRowMatchedFeatures", 0)
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for candidate, score in output.items():
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(
+            sourceRole, targetMemberStatementLedgerAccountRole(candidate)
+        )
+        representativeMass = targetMemberAccountRowLabelRepresentativeMass(source, candidate)
+        familyScore = max(0.0, float(score)) * representativeMass * math.sqrt(max(0.18, roleMass))
+        familyKey = targetMemberAccountRowFamilyKey(candidate)
+        previous = familyBest.get(familyKey)
+        if previous is None or familyScore > previous[0]:
+            familyBest[familyKey] = (familyScore, candidate)
+    limited = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(limited.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT)))
+    stats["corpusObjectAccountRowSeedPoolRows"] = len(seedPool)
+    stats["corpusObjectAccountRowRouteRows"] = len(limited)
+    TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberCorpusObjectAccountRowRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberCorpusObjectAccountRowScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_CORPUS_OBJECT_ACCOUNT_ROW_ROUTE_LIMIT))
+
+
+def targetMemberTypedExperienceObjectFeatureGain(feature: str) -> float:
+    if feature.startswith("txp:type:"):
+        return 0.42
+    if ":accountRow:" in feature:
+        base = 1.08
+    elif ":relationEvent:" in feature:
+        base = 0.78
+    elif ":relationSlot:" in feature:
+        base = 0.74
+    elif ":occurrence:" in feature:
+        base = 0.68
+    else:
+        base = 0.56
+    if "roleStmt:" in feature or "headSuffix:" in feature:
+        base *= 1.32
+    elif "role:" in feature or "valueRole:" in feature:
+        base *= 1.18
+    elif "head:" in feature or "suffix:" in feature:
+        base *= 1.14
+    elif "relation:" in feature or "relationSlot:" in feature:
+        base *= 1.08
+    elif "eventAtom:" in feature or "slotKey:" in feature:
+        base *= 0.88
+    return base
+
+
+def targetMemberTypedExperienceObjectSharedFeature(feature: str) -> str | None:
+    if feature.startswith("obj:role:"):
+        return "txp:shared:" + feature
+    if feature.startswith("obj:stmtRole:"):
+        return "txp:shared:" + feature
+    if feature.startswith("obj:roleStmt:"):
+        return "txp:shared:" + feature
+    if feature.startswith("obj:valueSlot:"):
+        return "txp:shared:" + feature
+    if feature.startswith("obj:valueRole:"):
+        return "txp:shared:" + feature
+    if feature.startswith("obj:relationSlot:"):
+        return "txp:shared:" + feature
+    if feature.startswith("obj:neighborSeq:"):
+        return "txp:shared:" + feature
+    return None
+
+
+def targetMemberTypedExperienceObjectAddAccountRow(
+    signature: Counter[str],
+    source: Counter[str],
+    scale: float,
+) -> None:
+    if not source or scale <= 0.0:
+        return
+    signature["txp:type:accountRow"] += 0.72 * scale
+    for feature, weight in source.items():
+        if weight <= 0.0:
+            continue
+        value = float(weight) * scale
+        signature[f"txp:accountRow:{feature}"] += value
+        shared = targetMemberTypedExperienceObjectSharedFeature(feature)
+        if shared:
+            signature[shared] += value * 0.58
+
+
+def targetMemberTypedExperienceObjectNeighborSeq(cache: Cache, position: int) -> str:
+    center = normStem(cache.stems[position]) if 0 <= position < len(cache.stems) else ""
+    centerRole = targetMemberStatementLedgerAccountRole(center)
+    leftRole = "none"
+    rightRole = "none"
+    for step, side in ((-1, "L"), (1, "R")):
+        index = position + step
+        walked = 0
+        while 0 <= index < len(cache.stems) and walked < 6:
+            stem = normStem(cache.stems[index])
+            marker = cache.markers[index] if index < len(cache.markers) else ""
+            if isContentStem(stem) and not relationTokenLike(stem) and not valueTokenLike(stem, marker):
+                role = targetMemberStatementLedgerAccountRole(stem)
+                if side == "L":
+                    leftRole = role
+                else:
+                    rightRole = role
+                break
+            index += step
+            walked += 1
+    return f"{leftRole}>{centerRole}>{rightRole}"
+
+
+def targetMemberTypedExperienceObjectRelationNames(cache: Cache, position: int, radius: int = 9) -> tuple[str, ...]:
+    relations: Counter[str] = Counter()
+    for relationPosition in cache.relationPositions or []:
+        if relationPosition < 0 or relationPosition >= len(cache.stems):
+            continue
+        distance = abs(relationPosition - position)
+        if distance > radius:
+            continue
+        distanceWeight = 1.0 / (1.0 + distance * 0.24)
+        for relation in horizonMaskedRelationNames(cache.stems[relationPosition]):
+            relations[relation] += distanceWeight
+    return tuple(relation for relation, _weight in relations.most_common(3))
+
+
+def targetMemberTypedExperienceObjectValueSlot(cache: Cache, position: int) -> str:
+    valueDistance = min((abs(valuePosition - position) for valuePosition in cache.valuePositions or ()), default=None)
+    return targetMemberCorpusObjectAccountRowValueSlot(targetMemberStatementLedgerValueBucket(valueDistance))
+
+
+def targetMemberTypedExperienceObjectOccurrenceSignature(
+    surface: str,
+    model: Model,
+    scale: float = 1.0,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    if not surface or not isContentStem(surface):
+        return signature, 0.0, stats
+    role = targetMemberStatementLedgerAccountRole(surface)
+    rows = model.queryLocalFrameOccurrenceIndex.get(surface, ())[
+        :TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_OCCURRENCE_LIMIT
+    ]
+    if not rows:
+        return signature, 0.0, stats
+    laneRows: Counter[str] = Counter()
+    statementRows: Counter[str] = Counter()
+    valueRows: Counter[str] = Counter()
+    relationRows: Counter[str] = Counter()
+    neighborRows: Counter[str] = Counter()
+    inspected = 0
+    for unitId, position, _marker in rows:
+        if unitId < 0 or unitId >= len(model.caches):
+            continue
+        cache = model.caches[unitId]
+        if position < 0 or position >= len(cache.stems):
+            continue
+        lane = cache.lanes[position] if cache.lanes and position < len(cache.lanes) else "sentence"
+        statementRole = targetMemberStatementLedgerStatementRole(cache, position, surface)
+        valueSlot = targetMemberTypedExperienceObjectValueSlot(cache, position)
+        neighborSeq = targetMemberTypedExperienceObjectNeighborSeq(cache, position)
+        rowWeight = scale / math.sqrt(1.0 + inspected)
+        laneRows[lane] += rowWeight
+        statementRows[statementRole] += rowWeight
+        valueRows[valueSlot] += rowWeight
+        neighborRows[neighborSeq] += rowWeight
+        for relation in targetMemberTypedExperienceObjectRelationNames(cache, position):
+            relationRows[relation] += rowWeight
+        inspected += 1
+    if inspected <= 0:
+        return signature, 0.0, stats
+    signature["txp:type:occurrence"] += 0.46 * scale
+    signature[f"txp:occurrence:role:{role}"] += 0.72 * scale
+    signature[f"txp:shared:obj:role:{role}"] += 0.52 * scale
+    for lane, weight in laneRows.most_common(3):
+        signature[f"txp:occurrence:lane:{lane}"] += float(weight) * 0.44
+    for statementRole, weight in statementRows.most_common(3):
+        signature[f"txp:occurrence:stmtRole:{statementRole}"] += float(weight) * 0.54
+        signature[f"txp:shared:obj:stmtRole:{statementRole}"] += float(weight) * 0.36
+        signature[f"txp:shared:obj:roleStmt:{role}:{statementRole}"] += float(weight) * 0.44
+    for valueSlot, weight in valueRows.most_common(3):
+        signature[f"txp:occurrence:valueSlot:{valueSlot}"] += float(weight) * 0.50
+        signature[f"txp:shared:obj:valueSlot:{valueSlot}"] += float(weight) * 0.32
+    for relation, weight in relationRows.most_common(4):
+        signature[f"txp:occurrence:relation:{relation}:{role}"] += float(weight) * 0.58
+        signature[f"txp:shared:obj:relationSlot:{relation}:{role}"] += float(weight) * 0.30
+    for neighborSeq, weight in neighborRows.most_common(3):
+        signature[f"txp:occurrence:neighborSeq:{stableHash(neighborSeq, 14)}"] += float(weight) * 0.46
+        signature[f"txp:shared:obj:neighborSeq:{neighborSeq}"] += float(weight) * 0.26
+    quality = math.log1p(inspected) * 0.34 + sum(statementRows.values()) * 0.03 + sum(relationRows.values()) * 0.04
+    stats["typedExperienceOccurrenceRows"] = inspected
+    stats["typedExperienceOccurrenceFeatures"] = len(signature)
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberTypedExperienceObjectRelationEventSignature(
+    surface: str,
+    relations: tuple[str, ...],
+    model: Model,
+    *,
+    sourceMode: bool,
+    scale: float = 1.0,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    if not surface or not isContentStem(surface):
+        return signature, 0.0, stats
+    role = targetMemberStatementLedgerAccountRole(surface)
+    relationSet = tuple(relations) if relations else tuple(relation for relation, _terms in RELATIONS)
+    fields = model.relationPathEventSourceSignatures if sourceMode else model.relationPathEventTargetSignatures
+    fieldRows = 0
+    atomRows = 0
+    for relation in relationSet:
+        field = fields.get((surface, relation), Counter())
+        if not field:
+            continue
+        fieldRows += 1
+        signature["txp:type:relationEvent"] += 0.52 * scale
+        signature[f"txp:relationEvent:relation:{relation}"] += 0.74 * scale
+        signature[f"txp:relationEvent:role:{role}:relation:{relation}"] += 0.82 * scale
+        signature[f"txp:shared:obj:relationSlot:{relation}:{role}"] += 0.42 * scale
+        for atom, atomWeight in field.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_EVENT_ATOM_LIMIT):
+            if atomWeight <= 0.0:
+                continue
+            atomRows += 1
+            signature[f"txp:relationEvent:eventAtom:{stableHash(atom, 18)}"] += (
+                math.log1p(float(atomWeight)) * 0.32 * scale
+            )
+    quality = math.log1p(fieldRows) * 0.44 + math.log1p(atomRows) * 0.16
+    stats["typedExperienceRelationEventFields"] = fieldRows
+    stats["typedExperienceRelationEventAtoms"] = atomRows
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberTypedExperienceObjectRelationSlotSignature(
+    surface: str,
+    model: Model,
+    scale: float = 1.0,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    rows = model.relationSlotSubstitutionSurfaceKeys.get(surface, ())[
+        :TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_EVENT_ATOM_LIMIT
+    ]
+    if not rows:
+        return signature, 0.0, stats
+    role = targetMemberStatementLedgerAccountRole(surface)
+    signature["txp:type:relationSlot"] += 0.48 * scale
+    signature[f"txp:relationSlot:role:{role}"] += 0.58 * scale
+    for key, weight in rows:
+        if weight <= 0.0:
+            continue
+        signature[f"txp:relationSlot:slotKey:{stableHash(key, 18)}"] += math.log1p(float(weight)) * 0.34 * scale
+        parts = key.split(":")
+        if len(parts) > 1 and parts[0] == "rss":
+            relation = parts[1]
+            signature[f"txp:relationSlot:relation:{relation}:{role}"] += 0.26 * scale
+            signature[f"txp:shared:obj:relationSlot:{relation}:{role}"] += 0.18 * scale
+    quality = math.log1p(len(rows)) * 0.32
+    stats["typedExperienceRelationSlotRows"] = len(rows)
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberTypedExperienceObjectHeadSuffixSignature(
+    surface: str, model: Model, scale: float = 1.0
+) -> Counter[str]:
+    surface = normStem(surface)
+    signature: Counter[str] = Counter()
+    if not surface:
+        return signature
+    role = targetMemberStatementLedgerAccountRole(surface)
+    head, suffix, modifier = targetMemberCorpusObjectAccountRowLabelParts(surface, model)
+    if head:
+        signature[f"txp:shared:obj:head:{role}:{head}"] += 0.42 * scale
+    if suffix:
+        signature[f"txp:shared:obj:suffix:{role}:{suffix}"] += 0.46 * scale
+    if head and suffix:
+        signature[f"txp:shared:obj:headSuffix:{role}:{head}:{suffix}"] += 0.54 * scale
+    if modifier:
+        signature[f"txp:shared:obj:modifierBucket:{role}:{min(4, len(modifier))}"] += 0.16 * scale
+    return signature
+
+
+def targetMemberTypedExperienceObjectComposeSignature(
+    surface: str,
+    relations: tuple[str, ...],
+    model: Model,
+    *,
+    queryMode: bool,
+    scale: float = 1.0,
+) -> tuple[Counter[str], float, Counter[str]]:
+    surface = normStem(surface)
+    signature: Counter[str] = Counter()
+    stats: Counter[str] = Counter()
+    quality = 0.0
+    if queryMode:
+        accountRowSignature, accountRowStats = targetMemberCorpusObjectAccountRowQuerySignature(
+            surface, relations, model
+        )
+        stats.update(accountRowStats)
+        accountRowQuality = 0.34 if accountRowSignature else 0.0
+    else:
+        accountRowSignature, accountRowQuality, accountRowStats = targetMemberCorpusObjectAccountRowTargetSignature(
+            surface,
+            relations,
+            model,
+        )
+        stats.update(accountRowStats)
+    if accountRowSignature:
+        targetMemberTypedExperienceObjectAddAccountRow(signature, accountRowSignature, 1.0 * scale)
+        quality += float(accountRowQuality) * 0.58
+    occurrenceSignature, occurrenceQuality, occurrenceStats = targetMemberTypedExperienceObjectOccurrenceSignature(
+        surface,
+        model,
+        scale=0.86 * scale,
+    )
+    signature.update(occurrenceSignature)
+    stats.update(occurrenceStats)
+    quality += occurrenceQuality * 0.62
+    relationSignature, relationQuality, relationStats = targetMemberTypedExperienceObjectRelationEventSignature(
+        surface,
+        relations,
+        model,
+        sourceMode=queryMode,
+        scale=0.74 * scale,
+    )
+    signature.update(relationSignature)
+    stats.update(relationStats)
+    quality += relationQuality * 0.52
+    slotSignature, slotQuality, slotStats = targetMemberTypedExperienceObjectRelationSlotSignature(
+        surface,
+        model,
+        scale=0.68 * scale,
+    )
+    signature.update(slotSignature)
+    stats.update(slotStats)
+    quality += slotQuality * 0.42
+    signature.update(targetMemberTypedExperienceObjectHeadSuffixSignature(surface, model, scale=0.54 * scale))
+    stats["typedExperienceObjectRawFeatures"] += len(signature)
+    return signature, max(0.0, quality), stats
+
+
+def targetMemberTypedExperienceObjectBuildIndex(
+    model: Model,
+) -> tuple[dict[str, Counter[str]], Counter[str], Counter[str], dict[str, tuple[tuple[str, float], ...]], Counter[str]]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+    signatures: dict[str, Counter[str]] = {}
+    quality: Counter[str] = Counter()
+    featureDf: Counter[str] = Counter()
+    postingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    stats: Counter[str] = Counter()
+    allRelations = tuple(relation for relation, _terms in RELATIONS)
+    accountRowSignatures, _accountRowQuality, _accountRowDf, _accountRowPostings, accountRowStats = (
+        targetMemberCorpusObjectAccountRowBuildIndex(model)
+    )
+    stats.update(accountRowStats)
+    candidates: set[str] = set(accountRowSignatures)
+    for surface, _df in model.surfaceDf.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SURFACE_SCAN_LIMIT):
+        surface = normStem(surface)
+        if not surface or not isContentStem(surface) or relationTokenLike(surface):
+            continue
+        candidates.add(surface)
+    for surface in model.queryLocalFrameOccurrenceIndex:
+        if len(candidates) >= TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SURFACE_SCAN_LIMIT + len(accountRowSignatures):
+            break
+        surface = normStem(surface)
+        if surface and isContentStem(surface) and not relationTokenLike(surface):
+            candidates.add(surface)
+    for surface, _relation in model.relationPathEventTargetSignatures:
+        if surface and isContentStem(surface):
+            candidates.add(surface)
+    for surface in model.relationSlotSubstitutionSurfaceKeys:
+        if surface and isContentStem(surface):
+            candidates.add(surface)
+
+    for surface in sorted(candidates):
+        signature, objectQuality, objectStats = targetMemberTypedExperienceObjectComposeSignature(
+            surface,
+            allRelations,
+            model,
+            queryMode=False,
+        )
+        stats.update(objectStats)
+        if not signature:
+            continue
+        selected = Counter(dict(signature.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_FEATURE_LIMIT)))
+        if not selected:
+            continue
+        role = targetMemberStatementLedgerAccountRole(surface)
+        roleQuality = 0.24 if role != "other" else 0.0
+        quality[surface] = max(0.0, float(objectQuality) + roleQuality)
+        signatures[surface] = selected
+        rowPrior = 1.0 + min(0.72, quality[surface] * 0.10)
+        for feature, weight in selected.items():
+            featureDf[feature] += 1
+            postingRows[feature].append((surface, float(weight) * rowPrior))
+        stats["typedExperienceObjectAccepted"] += 1
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_POSTING_LIMIT])
+    stats["typedExperienceObjectSurfaces"] = len(signatures)
+    stats["typedExperienceObjectFeatureDfKeys"] = len(featureDf)
+    stats["typedExperienceObjectPostingKeys"] = len(postings)
+    stats["typedExperienceObjectPostingLinks"] = sum(len(rows) for rows in postings.values())
+    result = (signatures, quality, featureDf, postings, Counter(stats))
+    TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberTypedExperienceObjectSourceFragments(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    source = normStem(source)
+    fragments: Counter[str] = Counter()
+    for fragment, fragmentWeight, kind in compositionalColdStartFragmentCandidates(source, model)[:16]:
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        kindWeight = 0.86 if kind in {"edge", "direct"} else 0.58
+        fragments[fragment] += max(0.0, float(fragmentWeight)) * kindWeight
+    for rank, (fragment, relation, positionKind, _sourceRole, _expectedTargetRole, pathWeight) in enumerate(
+        targetMemberMutualProofSourcePaths(source, relations, model),
+        start=1,
+    ):
+        fragment = normStem(fragment)
+        if not fragment or fragment == source or not isContentStem(fragment):
+            continue
+        positionWeight = 0.94 if positionKind in {"direct", "edge", "prefix", "suffix"} else 0.54
+        relationWeight = 1.0 if relation in relations else 0.70
+        fragments[fragment] += max(0.0, float(pathWeight)) * positionWeight * relationWeight / math.sqrt(rank)
+    return tuple(fragments.most_common(12))
+
+
+def targetMemberTypedExperienceObjectQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, stats = cached
+        return Counter(signature), Counter(stats)
+    signature, quality, stats = targetMemberTypedExperienceObjectComposeSignature(
+        source,
+        relations,
+        model,
+        queryMode=True,
+    )
+    stats["typedExperienceObjectQueryBaseQualityMilli"] = int(quality * 1000)
+    for rank, (fragment, fragmentWeight) in enumerate(
+        targetMemberTypedExperienceObjectSourceFragments(source, relations, model),
+        start=1,
+    ):
+        fragmentSignature, fragmentQuality, fragmentStats = targetMemberTypedExperienceObjectComposeSignature(
+            fragment,
+            relations,
+            model,
+            queryMode=True,
+            scale=max(0.0, float(fragmentWeight)) / math.sqrt(rank) * 0.62,
+        )
+        signature.update(fragmentSignature)
+        stats.update(fragmentStats)
+        stats["typedExperienceObjectQueryFragmentRows"] += 1
+        stats["typedExperienceObjectQueryFragmentQualityMilli"] += int(fragmentQuality * 1000)
+    selected = Counter(dict(signature.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_FEATURE_LIMIT)))
+    stats["typedExperienceObjectQueryFeatures"] = len(selected)
+    TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_QUERY_CACHE[cacheKey] = (Counter(selected), Counter(stats))
+    return selected, stats
+
+
+def targetMemberTypedExperienceObjectTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], float, Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        signature, quality, stats = cached
+        return Counter(signature), float(quality), Counter(stats)
+    signatures, qualityScores, _featureDf, _postings, indexStats = targetMemberTypedExperienceObjectBuildIndex(model)
+    stats = Counter(indexStats)
+    direct = signatures.get(candidate)
+    if direct:
+        selected = Counter(dict(direct.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_FEATURE_LIMIT)))
+        quality = float(qualityScores.get(candidate, 0.0))
+        stats["typedExperienceObjectDirectTarget"] += 1
+        TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_TARGET_CACHE[cacheKey] = (Counter(selected), quality, Counter(stats))
+        return selected, quality, stats
+    synthetic, syntheticQuality, syntheticStats = targetMemberTypedExperienceObjectComposeSignature(
+        candidate,
+        relations,
+        model,
+        queryMode=False,
+    )
+    stats.update(syntheticStats)
+    selected = Counter(dict(synthetic.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_FEATURE_LIMIT)))
+    stats["typedExperienceObjectSyntheticTarget"] += int(bool(selected))
+    TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_TARGET_CACHE[cacheKey] = (
+        Counter(selected),
+        float(syntheticQuality),
+        Counter(stats),
+    )
+    return selected, float(syntheticQuality), stats
+
+
+def targetMemberTypedExperienceObjectWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    objectCount: int,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(featureDf.get(feature, 1)))
+        idf = math.log1p((objectCount + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.14, idf) * targetMemberTypedExperienceObjectFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    raw = 0.0
+    matched = 0
+    typeMatched = 0
+    sharedMatched = 0
+    relationMatched = 0
+    objectMatched = 0
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        raw += effective(feature, float(leftWeight)) * effective(feature, float(rightWeight))
+        matched += 1
+        if feature.startswith("txp:type:"):
+            typeMatched += 1
+        if feature.startswith("txp:shared:"):
+            sharedMatched += 1
+        if "relation" in feature or "eventAtom" in feature or "slotKey" in feature:
+            relationMatched += 1
+        if ":accountRow:" in feature:
+            objectMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    proof *= (
+        1.0
+        + min(0.30, sharedMatched * 0.050)
+        + min(0.20, typeMatched * 0.060)
+        + min(0.22, relationMatched * 0.040)
+        + min(0.24, objectMatched * 0.045)
+    )
+    stats["typedExperienceObjectMatchedFeatures"] = matched
+    stats["typedExperienceObjectTypeMatchedFeatures"] = typeMatched
+    stats["typedExperienceObjectSharedMatchedFeatures"] = sharedMatched
+    stats["typedExperienceObjectRelationMatchedFeatures"] = relationMatched
+    stats["typedExperienceObjectAccountRowMatchedFeatures"] = objectMatched
+    stats["typedExperienceObjectProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberTypedExperienceObjectScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+    signatures, qualityScores, featureDf, postings, indexStats = targetMemberTypedExperienceObjectBuildIndex(model)
+    querySignature, queryStats = targetMemberTypedExperienceObjectQuerySignature(source, relations, model)
+    baseScores, baseStats = targetMemberCorpusObjectAccountRowScores(source, relations, model)
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    objectCount = max(1, len(signatures))
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(baseStats)
+    seedPool: Counter[str] = Counter()
+    for candidate, baseScore in baseScores.items():
+        if candidate == source:
+            stats["typedExperienceObjectSourceSelfSkips"] += 1
+            continue
+        seedPool[candidate] += max(0.0, float(baseScore)) * TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_BASE_GAIN
+        stats["typedExperienceObjectSeed:corpusAccountRow"] += 1
+    for feature, queryWeight in querySignature.items():
+        rows = postings.get(feature, tuple())
+        if not rows:
+            continue
+        df = max(1, int(featureDf.get(feature, 1)))
+        idf = math.log1p((objectCount + 1.0) / (df + 0.5))
+        gain = targetMemberTypedExperienceObjectFeatureGain(feature)
+        for rank, (candidate, targetWeight) in enumerate(
+            rows[:TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_POSTING_LIMIT],
+            start=1,
+        ):
+            if candidate == source:
+                stats["typedExperienceObjectSourceSelfSkips"] += 1
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            if sourceRole != "other" and candidateRole != "other" and roleCompat < 0.20:
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.16, idf)
+                * max(0.16, roleCompat if candidateRole != "other" else 0.42)
+                * gain
+                / math.sqrt(rank)
+            )
+            stats["typedExperienceObjectPostingRows"] += 1
+
+    output: Counter[str] = Counter()
+    for rank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        if candidate == source:
+            stats["typedExperienceObjectSourceSelfSkips"] += 1
+            continue
+        targetSignature, targetQuality, targetStats = targetMemberTypedExperienceObjectTargetSignature(
+            candidate,
+            relations,
+            model,
+        )
+        if not targetSignature:
+            continue
+        proof, proofStats = targetMemberTypedExperienceObjectWeightedProof(
+            querySignature,
+            targetSignature,
+            featureDf,
+            objectCount,
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if proof <= 0.0 and roleCompat < 0.82:
+            continue
+        if sourceRole != "other" and candidateRole != "other" and roleCompat < 0.55 and proof < 0.052:
+            stats["typedExperienceObjectCrossRoleWeakRows"] += 1
+            continue
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        supportMass = 1.0 + min(0.72, proof * TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SUPPORT_GAIN)
+        basePrior = math.log1p(max(0.0, float(baseScores.get(candidate, 0.0)))) * 0.20
+        score = (
+            (math.log1p(max(0.0, float(seedScore))) + basePrior)
+            * max(proof, 0.010)
+            * max(0.34, roleMass if candidateRole != "other" else 0.56)
+            * supportMass
+            * (1.0 + min(0.34, quality * 0.10))
+            * TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_GAIN
+            / math.sqrt(1.0 + (rank - 1) * 0.018)
+        )
+        if score <= 0.0:
+            continue
+        output[candidate] += score
+        stats.update(targetStats)
+        stats["typedExperienceObjectScored"] += 1
+        stats["typedExperienceObjectScoreMilli"] += int(score * 1000)
+        stats["typedExperienceObjectProofMilli"] += proofStats.get("typedExperienceObjectProofMilli", 0)
+        stats["typedExperienceObjectMatchedFeatures"] += proofStats.get("typedExperienceObjectMatchedFeatures", 0)
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for candidate, score in output.items():
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        if candidateRole == "other":
+            familyKey = f"typed:{stableHash(candidate, 12)}"
+            representativeMass = 1.0
+        else:
+            familyKey = targetMemberAccountRowFamilyKey(candidate)
+            representativeMass = targetMemberAccountRowLabelRepresentativeMass(source, candidate)
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        familyScore = max(0.0, float(score)) * representativeMass * math.sqrt(max(0.18, roleMass))
+        previous = familyBest.get(familyKey)
+        if previous is None or familyScore > previous[0]:
+            familyBest[familyKey] = (familyScore, candidate)
+    limited = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(limited.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_ROUTE_LIMIT)))
+    stats["typedExperienceObjectSeedPoolRows"] = len(seedPool)
+    stats["typedExperienceObjectRouteRows"] = len(limited)
+    TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberTypedExperienceObjectRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberTypedExperienceObjectScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_TYPED_EXPERIENCE_OBJECT_ROUTE_LIMIT))
+
+
+def targetMemberTargetContextObjectTargetFeature(feature: str) -> bool:
+    if feature.startswith("txp:type:accountRow"):
+        return True
+    if feature.startswith("txp:accountRow:"):
+        return True
+    if feature.startswith("txp:shared:obj:role:"):
+        return True
+    if feature.startswith("txp:shared:obj:stmtRole:"):
+        return True
+    if feature.startswith("txp:shared:obj:roleStmt:"):
+        return True
+    if feature.startswith("txp:shared:obj:valueSlot:"):
+        return True
+    if feature.startswith("txp:shared:obj:valueRole:"):
+        return True
+    if feature.startswith("txp:shared:obj:head:"):
+        return True
+    if feature.startswith("txp:shared:obj:suffix:"):
+        return True
+    if feature.startswith("txp:shared:obj:headSuffix:"):
+        return True
+    if feature.startswith("txp:shared:obj:modifierBucket:"):
+        return True
+    if feature.startswith("txp:shared:obj:neighborSeq:"):
+        return True
+    if feature.startswith("txp:occurrence:stmtRole:"):
+        return True
+    if feature.startswith("txp:occurrence:valueSlot:"):
+        return True
+    return False
+
+
+def targetMemberTargetContextObjectContextFeature(feature: str) -> bool:
+    if targetMemberTargetContextObjectTargetFeature(feature):
+        return False
+    if feature.startswith("txp:type:"):
+        return True
+    if feature.startswith("txp:occurrence:"):
+        return True
+    if feature.startswith("txp:relationEvent:"):
+        return True
+    if feature.startswith("txp:relationSlot:"):
+        return True
+    if feature.startswith("txp:shared:obj:relationSlot:"):
+        return True
+    return False
+
+
+def targetMemberTargetContextObjectPromotable(surface: str, model: Model) -> bool:
+    surface = normStem(surface)
+    if not surface or not isContentStem(surface) or relationTokenLike(surface):
+        return False
+    accountRows, _quality, _featureDf, _postings, _stats = targetMemberCorpusObjectAccountRowBuildIndex(model)
+    if surface in accountRows:
+        return True
+    role = targetMemberStatementLedgerAccountRole(surface)
+    if role == "other":
+        return False
+    if model.independentSurfaceDf.get(surface, 0) <= 0 and surface not in model.queryLocalFrameOccurrenceIndex:
+        return False
+    if len(surface) <= 1:
+        return False
+    return True
+
+
+def targetMemberTargetContextObjectSyntheticPromotable(
+    surface: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> bool:
+    surface = normStem(surface)
+    if targetMemberTargetContextObjectPromotable(surface, model):
+        return True
+    if not surface or not isContentStem(surface) or relationTokenLike(surface):
+        return False
+    if targetMemberStatementLedgerAccountRole(surface) == "other":
+        return False
+    signature, _quality, _stats = targetMemberCorpusObjectAccountRowTargetSignature(surface, relations, model)
+    return bool(signature)
+
+
+def targetMemberTargetContextObjectSplitSignature(
+    surface: str,
+    relations: tuple[str, ...],
+    model: Model,
+    *,
+    queryMode: bool,
+    scale: float = 1.0,
+) -> tuple[Counter[str], Counter[str], float, Counter[str]]:
+    fullSignature, quality, stats = targetMemberTypedExperienceObjectComposeSignature(
+        surface,
+        relations,
+        model,
+        queryMode=queryMode,
+        scale=scale,
+    )
+    target: Counter[str] = Counter()
+    context: Counter[str] = Counter()
+    for feature, weight in fullSignature.items():
+        if weight <= 0.0:
+            continue
+        if targetMemberTargetContextObjectTargetFeature(feature):
+            target[feature] += float(weight)
+        elif targetMemberTargetContextObjectContextFeature(feature):
+            context[feature] += float(weight)
+    stats["targetContextObjectTargetFeatures"] += len(target)
+    stats["targetContextObjectContextFeatures"] += len(context)
+    return target, context, quality, stats
+
+
+def targetMemberTargetContextObjectBuildIndex(
+    model: Model,
+) -> tuple[
+    dict[str, Counter[str]],
+    dict[str, Counter[str]],
+    Counter[str],
+    Counter[str],
+    dict[str, tuple[tuple[str, float], ...]],
+    Counter[str],
+]:
+    cacheKey = id(model)
+    cached = TARGET_MEMBER_TARGET_CONTEXT_OBJECT_INDEX_CACHE.get(cacheKey)
+    if cached is not None:
+        return cached
+    targetSignatures: dict[str, Counter[str]] = {}
+    contextSignatures: dict[str, Counter[str]] = {}
+    quality: Counter[str] = Counter()
+    featureDf: Counter[str] = Counter()
+    postingRows: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    stats: Counter[str] = Counter()
+    allRelations = tuple(relation for relation, _terms in RELATIONS)
+    accountRows, _accountQuality, _accountDf, _accountPostings, accountStats = (
+        targetMemberCorpusObjectAccountRowBuildIndex(model)
+    )
+    stats.update(accountStats)
+    candidates: set[str] = set(accountRows)
+    for surface, _df in model.surfaceDf.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SURFACE_SCAN_LIMIT):
+        surface = normStem(surface)
+        if targetMemberTargetContextObjectPromotable(surface, model):
+            candidates.add(surface)
+    for surface in model.queryLocalFrameOccurrenceIndex:
+        if len(candidates) >= TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SURFACE_SCAN_LIMIT + len(accountRows):
+            break
+        surface = normStem(surface)
+        if targetMemberTargetContextObjectPromotable(surface, model):
+            candidates.add(surface)
+
+    for surface in sorted(candidates):
+        targetSignature, contextSignature, objectQuality, objectStats = targetMemberTargetContextObjectSplitSignature(
+            surface,
+            allRelations,
+            model,
+            queryMode=False,
+        )
+        stats.update(objectStats)
+        if not targetSignature:
+            stats["targetContextObjectTargetRejected"] += 1
+            continue
+        selectedTarget = Counter(
+            dict(targetSignature.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_FEATURE_LIMIT))
+        )
+        selectedContext = Counter(
+            dict(contextSignature.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_FEATURE_LIMIT))
+        )
+        if not selectedTarget:
+            continue
+        role = targetMemberStatementLedgerAccountRole(surface)
+        roleQuality = 0.30 if role != "other" else 0.0
+        quality[surface] = max(0.0, float(objectQuality) + roleQuality)
+        targetSignatures[surface] = selectedTarget
+        contextSignatures[surface] = selectedContext
+        rowPrior = 1.0 + min(0.70, quality[surface] * 0.10)
+        for feature, weight in selectedTarget.items():
+            featureDf[feature] += 1
+            postingRows[feature].append((surface, float(weight) * rowPrior))
+        stats["targetContextObjectAcceptedTargets"] += 1
+
+    postings: dict[str, tuple[tuple[str, float], ...]] = {}
+    for feature, rows in postingRows.items():
+        rows.sort(key=lambda row: row[1], reverse=True)
+        postings[feature] = tuple(rows[:TARGET_MEMBER_TARGET_CONTEXT_OBJECT_POSTING_LIMIT])
+    stats["targetContextObjectSurfaces"] = len(targetSignatures)
+    stats["targetContextObjectContextSurfaces"] = sum(1 for sig in contextSignatures.values() if sig)
+    stats["targetContextObjectFeatureDfKeys"] = len(featureDf)
+    stats["targetContextObjectPostingKeys"] = len(postings)
+    stats["targetContextObjectPostingLinks"] = sum(len(rows) for rows in postings.values())
+    result = (targetSignatures, contextSignatures, quality, featureDf, postings, Counter(stats))
+    TARGET_MEMBER_TARGET_CONTEXT_OBJECT_INDEX_CACHE[cacheKey] = result
+    return result
+
+
+def targetMemberTargetContextObjectQuerySignature(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_TARGET_CONTEXT_OBJECT_QUERY_CACHE.get(cacheKey)
+    if cached is not None:
+        target, context, stats = cached
+        return Counter(target), Counter(context), Counter(stats)
+    targetSignature, contextSignature, quality, stats = targetMemberTargetContextObjectSplitSignature(
+        source,
+        relations,
+        model,
+        queryMode=True,
+    )
+    stats["targetContextObjectQueryBaseQualityMilli"] = int(quality * 1000)
+    for rank, (fragment, fragmentWeight) in enumerate(
+        targetMemberTypedExperienceObjectSourceFragments(source, relations, model),
+        start=1,
+    ):
+        fragmentTarget, fragmentContext, fragmentQuality, fragmentStats = targetMemberTargetContextObjectSplitSignature(
+            fragment,
+            relations,
+            model,
+            queryMode=True,
+            scale=max(0.0, float(fragmentWeight)) / math.sqrt(rank) * 0.62,
+        )
+        targetSignature.update(fragmentTarget)
+        contextSignature.update(fragmentContext)
+        stats.update(fragmentStats)
+        stats["targetContextObjectQueryFragmentRows"] += 1
+        stats["targetContextObjectQueryFragmentQualityMilli"] += int(fragmentQuality * 1000)
+    selectedTarget = Counter(
+        dict(targetSignature.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_FEATURE_LIMIT))
+    )
+    selectedContext = Counter(
+        dict(contextSignature.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_FEATURE_LIMIT))
+    )
+    stats["targetContextObjectQueryTargetFeatures"] = len(selectedTarget)
+    stats["targetContextObjectQueryContextFeatures"] = len(selectedContext)
+    TARGET_MEMBER_TARGET_CONTEXT_OBJECT_QUERY_CACHE[cacheKey] = (
+        Counter(selectedTarget),
+        Counter(selectedContext),
+        Counter(stats),
+    )
+    return selectedTarget, selectedContext, stats
+
+
+def targetMemberTargetContextObjectTargetSignature(
+    candidate: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str], float, Counter[str]]:
+    candidate = normStem(candidate)
+    cacheKey = (id(model), candidate, tuple(relations))
+    cached = TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_CACHE.get(cacheKey)
+    if cached is not None:
+        target, context, quality, stats = cached
+        return Counter(target), Counter(context), float(quality), Counter(stats)
+    targetSignatures, contextSignatures, qualityScores, _featureDf, _postings, indexStats = (
+        targetMemberTargetContextObjectBuildIndex(model)
+    )
+    stats = Counter(indexStats)
+    target = targetSignatures.get(candidate)
+    if target:
+        context = contextSignatures.get(candidate, Counter())
+        quality = float(qualityScores.get(candidate, 0.0))
+        stats["targetContextObjectDirectTarget"] += 1
+        TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_CACHE[cacheKey] = (
+            Counter(target),
+            Counter(context),
+            quality,
+            Counter(stats),
+        )
+        return Counter(target), Counter(context), quality, stats
+    if not targetMemberTargetContextObjectSyntheticPromotable(candidate, relations, model):
+        TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_CACHE[cacheKey] = (Counter(), Counter(), 0.0, Counter(stats))
+        return Counter(), Counter(), 0.0, stats
+    target, context, quality, splitStats = targetMemberTargetContextObjectSplitSignature(
+        candidate,
+        relations,
+        model,
+        queryMode=False,
+    )
+    stats.update(splitStats)
+    selectedTarget = Counter(dict(target.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_FEATURE_LIMIT)))
+    selectedContext = Counter(dict(context.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_FEATURE_LIMIT)))
+    stats["targetContextObjectSyntheticTarget"] += int(bool(selectedTarget))
+    TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_CACHE[cacheKey] = (
+        Counter(selectedTarget),
+        Counter(selectedContext),
+        float(quality),
+        Counter(stats),
+    )
+    return selectedTarget, selectedContext, float(quality), stats
+
+
+def targetMemberTargetContextObjectWeightedProof(
+    querySignature: Counter[str],
+    targetSignature: Counter[str],
+    featureDf: Counter[str],
+    objectCount: int,
+    *,
+    proofKind: str,
+) -> tuple[float, Counter[str]]:
+    stats: Counter[str] = Counter()
+    if not querySignature or not targetSignature:
+        return 0.0, stats
+
+    def effective(feature: str, weight: float) -> float:
+        df = max(1.0, float(featureDf.get(feature, 1)))
+        idf = math.log1p((objectCount + 1.0) / (df + 0.5))
+        return max(0.0, float(weight)) * max(0.14, idf) * targetMemberTypedExperienceObjectFeatureGain(feature)
+
+    queryNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in querySignature.items()))
+    targetNorm = math.sqrt(sum(effective(feature, weight) ** 2 for feature, weight in targetSignature.items()))
+    if queryNorm <= 0.0 or targetNorm <= 0.0:
+        return 0.0, stats
+    raw = 0.0
+    matched = 0
+    sharedMatched = 0
+    accountMatched = 0
+    relationMatched = 0
+    left, right = (querySignature, targetSignature)
+    if len(left) > len(right):
+        left, right = right, left
+    for feature, leftWeight in left.items():
+        rightWeight = right.get(feature, 0.0)
+        if rightWeight <= 0.0:
+            continue
+        raw += effective(feature, float(leftWeight)) * effective(feature, float(rightWeight))
+        matched += 1
+        if feature.startswith("txp:shared:"):
+            sharedMatched += 1
+        if ":accountRow:" in feature:
+            accountMatched += 1
+        if "relation" in feature or "eventAtom" in feature or "slotKey" in feature:
+            relationMatched += 1
+    if matched <= 0:
+        return 0.0, stats
+    proof = raw / max(1e-9, queryNorm * targetNorm)
+    proof *= 1.0 + min(0.34, sharedMatched * 0.055) + min(0.28, accountMatched * 0.050)
+    if proofKind == "context":
+        proof *= 1.0 + min(0.26, relationMatched * 0.045)
+    stats[f"targetContextObject{proofKind}MatchedFeatures"] = matched
+    stats[f"targetContextObject{proofKind}SharedMatchedFeatures"] = sharedMatched
+    stats[f"targetContextObject{proofKind}AccountMatchedFeatures"] = accountMatched
+    stats[f"targetContextObject{proofKind}RelationMatchedFeatures"] = relationMatched
+    stats[f"targetContextObject{proofKind}ProofMilli"] = int(max(0.0, proof) * 1000)
+    return max(0.0, proof), stats
+
+
+def targetMemberTargetContextObjectScores(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[Counter[str], Counter[str]]:
+    source = normStem(source)
+    cacheKey = (id(model), source, tuple(relations))
+    cached = TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SCORE_CACHE.get(cacheKey)
+    if cached is not None:
+        scores, stats = cached
+        return Counter(scores), Counter(stats)
+    targetSignatures, _contextSignatures, qualityScores, featureDf, postings, indexStats = (
+        targetMemberTargetContextObjectBuildIndex(model)
+    )
+    queryTarget, queryContext, queryStats = targetMemberTargetContextObjectQuerySignature(source, relations, model)
+    baseScores, baseStats = targetMemberCorpusObjectAccountRowScores(source, relations, model)
+    sourceRole = targetMemberStatementLedgerAccountRole(source)
+    objectCount = max(1, len(targetSignatures))
+    stats: Counter[str] = Counter(indexStats)
+    stats.update(queryStats)
+    stats.update(baseStats)
+    seedPool: Counter[str] = Counter()
+    for candidate, baseScore in baseScores.items():
+        if candidate == source:
+            stats["targetContextObjectSourceSelfSkips"] += 1
+            continue
+        if not targetMemberTargetContextObjectSyntheticPromotable(candidate, relations, model):
+            continue
+        seedPool[candidate] += max(0.0, float(baseScore)) * TARGET_MEMBER_TARGET_CONTEXT_OBJECT_BASE_GAIN
+        stats["targetContextObjectSeed:corpusAccountRow"] += 1
+    for feature, queryWeight in queryTarget.items():
+        rows = postings.get(feature, tuple())
+        if not rows:
+            continue
+        df = max(1, int(featureDf.get(feature, 1)))
+        idf = math.log1p((objectCount + 1.0) / (df + 0.5))
+        gain = targetMemberTypedExperienceObjectFeatureGain(feature)
+        for rank, (candidate, targetWeight) in enumerate(
+            rows[:TARGET_MEMBER_TARGET_CONTEXT_OBJECT_POSTING_LIMIT],
+            start=1,
+        ):
+            if candidate == source:
+                stats["targetContextObjectSourceSelfSkips"] += 1
+                continue
+            candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+            roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+            if sourceRole != "other" and candidateRole != "other" and roleCompat < 0.22:
+                continue
+            seedPool[candidate] += (
+                max(0.0, float(queryWeight))
+                * math.log1p(max(0.0, float(targetWeight)))
+                * max(0.16, idf)
+                * max(0.18, roleCompat if candidateRole != "other" else 0.40)
+                * gain
+                / math.sqrt(rank)
+            )
+            stats["targetContextObjectPostingRows"] += 1
+
+    output: Counter[str] = Counter()
+    for rank, (candidate, seedScore) in enumerate(
+        seedPool.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        if candidate == source:
+            stats["targetContextObjectSourceSelfSkips"] += 1
+            continue
+        targetSignature, contextSignature, targetQuality, targetStats = targetMemberTargetContextObjectTargetSignature(
+            candidate,
+            relations,
+            model,
+        )
+        if not targetSignature:
+            continue
+        targetProof, targetProofStats = targetMemberTargetContextObjectWeightedProof(
+            queryTarget,
+            targetSignature,
+            featureDf,
+            objectCount,
+            proofKind="Target",
+        )
+        contextProof, contextProofStats = targetMemberTargetContextObjectWeightedProof(
+            queryContext,
+            contextSignature,
+            featureDf,
+            objectCount,
+            proofKind="Context",
+        )
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        roleCompat = targetMemberStatementLedgerRoleCompatibility(sourceRole, candidateRole)
+        if targetProof <= 0.0 and contextProof < 0.080:
+            continue
+        if sourceRole != "other" and candidateRole != "other" and roleCompat < 0.58 and targetProof < 0.055:
+            stats["targetContextObjectCrossRoleWeakRows"] += 1
+            continue
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        if sourceRole != candidateRole and roleMass < 0.82 and targetProof < 0.105:
+            stats["targetContextObjectSiblingResidualRows"] += 1
+            continue
+        quality = max(0.0, float(qualityScores.get(candidate, targetQuality)))
+        contextMass = 1.0 + min(0.54, contextProof * TARGET_MEMBER_TARGET_CONTEXT_OBJECT_CONTEXT_GAIN)
+        basePrior = math.log1p(max(0.0, float(baseScores.get(candidate, 0.0)))) * 0.24
+        score = (
+            (math.log1p(max(0.0, float(seedScore))) + basePrior)
+            * max(targetProof, 0.012)
+            * contextMass
+            * max(0.32, roleMass if candidateRole != "other" else 0.52)
+            * (1.0 + min(0.32, quality * 0.09))
+            * TARGET_MEMBER_TARGET_CONTEXT_OBJECT_TARGET_GAIN
+            / math.sqrt(1.0 + (rank - 1) * 0.018)
+        )
+        if score <= 0.0:
+            continue
+        output[candidate] += score
+        stats.update(targetStats)
+        stats.update(targetProofStats)
+        stats.update(contextProofStats)
+        stats["targetContextObjectScored"] += 1
+        stats["targetContextObjectScoreMilli"] += int(score * 1000)
+        stats["targetContextObjectTargetProofMilli"] += targetProofStats.get(
+            "targetContextObjectTargetProofMilli",
+            0,
+        )
+        stats["targetContextObjectContextProofMilli"] += contextProofStats.get(
+            "targetContextObjectContextProofMilli",
+            0,
+        )
+
+    familyBest: dict[str, tuple[float, str]] = {}
+    for candidate, score in output.items():
+        candidateRole = targetMemberStatementLedgerAccountRole(candidate)
+        familyKey = (
+            targetMemberAccountRowFamilyKey(candidate)
+            if candidateRole != "other"
+            else f"targetContext:{stableHash(candidate, 12)}"
+        )
+        representativeMass = (
+            targetMemberAccountRowLabelRepresentativeMass(source, candidate) if candidateRole != "other" else 1.0
+        )
+        roleMass = targetMemberLatentAccountRowRoleSpecificityMass(sourceRole, candidateRole)
+        familyScore = max(0.0, float(score)) * representativeMass * math.sqrt(max(0.18, roleMass))
+        previous = familyBest.get(familyKey)
+        if previous is None or familyScore > previous[0]:
+            familyBest[familyKey] = (familyScore, candidate)
+    limited = Counter({candidate: score for score, candidate in familyBest.values()})
+    limited = Counter(dict(limited.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_ROUTE_LIMIT)))
+    stats["targetContextObjectSeedPoolRows"] = len(seedPool)
+    stats["targetContextObjectRouteRows"] = len(limited)
+    TARGET_MEMBER_TARGET_CONTEXT_OBJECT_SCORE_CACHE[cacheKey] = (Counter(limited), Counter(stats))
+    return limited, stats
+
+
+def targetMemberTargetContextObjectRoute(
+    source: str,
+    relations: tuple[str, ...],
+    model: Model,
+) -> tuple[tuple[str, float], ...]:
+    scores, _stats = targetMemberTargetContextObjectScores(source, relations, model)
+    return tuple(scores.most_common(TARGET_MEMBER_TARGET_CONTEXT_OBJECT_ROUTE_LIMIT))
+
+
 def targetMemberTraceAlignmentExpectedRoles(
     source: str,
     relations: tuple[str, ...],
@@ -12684,6 +21272,111 @@ def targetMemberRelationFrameCandidateSeeds(
     stats["pathLocalAcceptedTracePairs"] += pathLocalStats.get("pathLocalAcceptedTracePairs", 0)
     stats["pathLocalProofMilli"] += pathLocalStats.get("pathLocalProofMilli", 0)
     stats["pathLocalTargetTraceRows"] += pathLocalStats.get("pathLocalTargetTraceRows", 0)
+    pathGrammarScores, pathGrammarStats = targetMemberPathGrammarScores(surface, relations, model)
+    for rank, (candidate, score) in enumerate(
+        pathGrammarScores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == normStem(surface) or not isContentStem(candidate):
+            continue
+        seeds[candidate] += (
+            math.log1p(max(0.0, float(score))) * TARGET_MEMBER_PATH_GRAMMAR_SEED_WEIGHT / math.sqrt(rank)
+        )
+        stats["source:pathGrammar"] += 1
+    stats["pathGrammarQueryFeatures"] += pathGrammarStats.get("pathGrammarQueryFeatures", 0)
+    stats["pathGrammarPoolRows"] += pathGrammarStats.get("pathGrammarPoolRows", 0)
+    stats["pathGrammarPostingRows"] += pathGrammarStats.get("pathGrammarPostingRows", 0)
+    stats["pathGrammarScored"] += pathGrammarStats.get("pathGrammarScored", 0)
+    stats["pathGrammarRouteRows"] += pathGrammarStats.get("pathGrammarRouteRows", 0)
+    stats["pathGrammarMatchedFeatures"] += pathGrammarStats.get("pathGrammarMatchedFeatures", 0)
+    stats["pathGrammarCoreMatchedFeatures"] += pathGrammarStats.get("pathGrammarCoreMatchedFeatures", 0)
+    stats["pathGrammarSequenceMatchedFeatures"] += pathGrammarStats.get("pathGrammarSequenceMatchedFeatures", 0)
+    stats["pathGrammarLedgerMatchedFeatures"] += pathGrammarStats.get("pathGrammarLedgerMatchedFeatures", 0)
+    stats["pathGrammarMeanIdfMilli"] += pathGrammarStats.get("pathGrammarMeanIdfMilli", 0)
+    stats["pathGrammarScoreMilli"] += pathGrammarStats.get("pathGrammarScoreMilli", 0)
+    promotableScores, promotableStats = targetMemberPromotableScores(surface, relations, model)
+    for rank, (candidate, score) in enumerate(
+        promotableScores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == normStem(surface) or not isContentStem(candidate):
+            continue
+        seeds[candidate] += math.log1p(max(0.0, float(score))) * TARGET_MEMBER_PROMOTABLE_SEED_WEIGHT / math.sqrt(rank)
+        stats["source:promotableTarget"] += 1
+    stats["promotableQueryFeatures"] += promotableStats.get("promotableQueryFeatures", 0)
+    stats["promotablePoolRows"] += promotableStats.get("promotablePoolRows", 0)
+    stats["promotablePostingRows"] += promotableStats.get("promotablePostingRows", 0)
+    stats["promotableScored"] += promotableStats.get("promotableScored", 0)
+    stats["promotableRouteRows"] += promotableStats.get("promotableRouteRows", 0)
+    stats["promotableMatchedFeatures"] += promotableStats.get("promotableMatchedFeatures", 0)
+    stats["promotableCoreMatchedFeatures"] += promotableStats.get("promotableCoreMatchedFeatures", 0)
+    stats["promotableSequenceMatchedFeatures"] += promotableStats.get("promotableSequenceMatchedFeatures", 0)
+    stats["promotableLedgerMatchedFeatures"] += promotableStats.get("promotableLedgerMatchedFeatures", 0)
+    stats["promotablePromotionMilli"] += promotableStats.get("promotablePromotionMilli", 0)
+    stats["promotableScoreMilli"] += promotableStats.get("promotableScoreMilli", 0)
+    slotResidualScores, slotResidualStats = targetMemberSlotResidualScores(surface, relations, model)
+    for rank, (candidate, score) in enumerate(
+        slotResidualScores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == normStem(surface) or not isContentStem(candidate):
+            continue
+        seeds[candidate] += (
+            math.log1p(max(0.0, float(score))) * TARGET_MEMBER_SLOT_RESIDUAL_SEED_WEIGHT / math.sqrt(rank)
+        )
+        stats["source:slotResidual"] += 1
+    stats["slotResidualQueryFeatures"] += slotResidualStats.get("slotResidualQueryFeatures", 0)
+    stats["slotResidualQuerySlots"] += slotResidualStats.get("slotResidualQuerySlots", 0)
+    stats["slotResidualPoolRows"] += slotResidualStats.get("slotResidualPoolRows", 0)
+    stats["slotResidualPostingRows"] += slotResidualStats.get("slotResidualPostingRows", 0)
+    stats["slotResidualCohortRows"] += slotResidualStats.get("slotResidualCohortRows", 0)
+    stats["slotResidualScored"] += slotResidualStats.get("slotResidualScored", 0)
+    stats["slotResidualRouteRows"] += slotResidualStats.get("slotResidualRouteRows", 0)
+    stats["slotResidualMatchedFeatures"] += slotResidualStats.get("slotResidualMatchedFeatures", 0)
+    stats["slotResidualResidualMatchedFeatures"] += slotResidualStats.get("slotResidualResidualMatchedFeatures", 0)
+    stats["slotResidualCommonMatchedFeatures"] += slotResidualStats.get("slotResidualCommonMatchedFeatures", 0)
+    stats["slotResidualSequenceMatchedFeatures"] += slotResidualStats.get("slotResidualSequenceMatchedFeatures", 0)
+    stats["slotResidualLedgerMatchedFeatures"] += slotResidualStats.get("slotResidualLedgerMatchedFeatures", 0)
+    stats["slotResidualPositiveMargins"] += slotResidualStats.get("slotResidualPositiveMargins", 0)
+    stats["slotResidualNegativeMargins"] += slotResidualStats.get("slotResidualNegativeMargins", 0)
+    stats["slotResidualProofMilli"] += slotResidualStats.get("slotResidualProofMilli", 0)
+    stats["slotResidualPeerProofMilli"] += slotResidualStats.get("slotResidualPeerProofMilli", 0)
+    stats["slotResidualMarginMilli"] += slotResidualStats.get("slotResidualMarginMilli", 0)
+    stats["slotResidualFragmentSupportMilli"] += slotResidualStats.get("slotResidualFragmentSupportMilli", 0)
+    stats["slotResidualScoreMilli"] += slotResidualStats.get("slotResidualScoreMilli", 0)
+    accountAxisScores, accountAxisStats = targetMemberAccountAxisScores(surface, relations, model)
+    for rank, (candidate, score) in enumerate(
+        accountAxisScores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT),
+        start=1,
+    ):
+        candidate = normStem(candidate)
+        if not candidate or candidate == normStem(surface) or not isContentStem(candidate):
+            continue
+        seeds[candidate] += (
+            math.log1p(max(0.0, float(score))) * TARGET_MEMBER_ACCOUNT_AXIS_SEED_WEIGHT / math.sqrt(rank)
+        )
+        stats["source:accountAxis"] += 1
+    stats["accountAxisQueryFeatures"] += accountAxisStats.get("accountAxisQueryFeatures", 0)
+    stats["accountAxisSeedPoolRows"] += accountAxisStats.get("accountAxisSeedPoolRows", 0)
+    stats["accountAxisProcessedFamilies"] += accountAxisStats.get("accountAxisProcessedFamilies", 0)
+    stats["accountAxisFamilyRows"] += accountAxisStats.get("accountAxisFamilyRows", 0)
+    stats["accountAxisProofRows"] += accountAxisStats.get("accountAxisProofRows", 0)
+    stats["accountAxisPeerRows"] += accountAxisStats.get("accountAxisPeerRows", 0)
+    stats["accountAxisMatchedFeatures"] += accountAxisStats.get("accountAxisMatchedFeatures", 0)
+    stats["accountAxisLedgerMatchedFeatures"] += accountAxisStats.get("accountAxisLedgerMatchedFeatures", 0)
+    stats["accountAxisRelationMatchedFeatures"] += accountAxisStats.get("accountAxisRelationMatchedFeatures", 0)
+    stats["accountAxisRoleMatchedFeatures"] += accountAxisStats.get("accountAxisRoleMatchedFeatures", 0)
+    stats["accountAxisStructMatchedFeatures"] += accountAxisStats.get("accountAxisStructMatchedFeatures", 0)
+    stats["accountAxisPositiveMargins"] += accountAxisStats.get("accountAxisPositiveMargins", 0)
+    stats["accountAxisNegativeMargins"] += accountAxisStats.get("accountAxisNegativeMargins", 0)
+    stats["accountAxisProofMilli"] += accountAxisStats.get("accountAxisProofMilli", 0)
+    stats["accountAxisMarginMilli"] += accountAxisStats.get("accountAxisMarginMilli", 0)
+    stats["accountAxisScoreMilli"] += accountAxisStats.get("accountAxisScoreMilli", 0)
+    stats["accountAxisScored"] += accountAxisStats.get("accountAxisScored", 0)
+    stats["accountAxisRouteRows"] += accountAxisStats.get("accountAxisRouteRows", 0)
     traceAlignScores, traceAlignStats = targetMemberTraceAlignmentScores(surface, relations, model)
     for rank, (candidate, score) in enumerate(
         traceAlignScores.most_common(TARGET_MEMBER_FRAME_CANDIDATE_LIMIT), start=1
@@ -17762,6 +26455,564 @@ def main() -> None:
             f"targetTraces={localStats.get('pathLocalTargetTraceRows', 0)} proofMilli={localStats.get('pathLocalProofMilli', 0)} "
             f"forbiddenRank={rank if rank is not None else 'NA'} badTop1={topForbidden} top={previewMaskedFrame(rows)}"
         )
+    targetMemberPathGrammarProbeTop1 = 0
+    targetMemberPathGrammarProbeTop5 = 0
+    targetMemberPathGrammarProbeBadTop1 = 0
+    targetMemberPathGrammarProbeBadTop5 = 0
+    targetMemberPathGrammarQueryFeatures = 0
+    targetMemberPathGrammarPoolRows = 0
+    targetMemberPathGrammarPostingRows = 0
+    targetMemberPathGrammarScored = 0
+    targetMemberPathGrammarRouteRows = 0
+    targetMemberPathGrammarMatchedFeatures = 0
+    targetMemberPathGrammarCoreMatchedFeatures = 0
+    targetMemberPathGrammarSequenceMatchedFeatures = 0
+    targetMemberPathGrammarLedgerMatchedFeatures = 0
+    targetMemberPathGrammarMeanIdfMilli = 0
+    targetMemberPathGrammarScoreMilli = 0
+    print("[targetMemberPathGrammarProbes:positive]")
+    for surface, expected in POSITIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberPathGrammarRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, expected)
+        _, grammarStats = targetMemberPathGrammarScores(surface, relations, model)
+        targetMemberPathGrammarProbeTop1 += int(rank == 1)
+        targetMemberPathGrammarProbeTop5 += int(rank is not None and rank <= 5)
+        targetMemberPathGrammarQueryFeatures += grammarStats.get("pathGrammarQueryFeatures", 0)
+        targetMemberPathGrammarPoolRows += grammarStats.get("pathGrammarPoolRows", 0)
+        targetMemberPathGrammarPostingRows += grammarStats.get("pathGrammarPostingRows", 0)
+        targetMemberPathGrammarScored += grammarStats.get("pathGrammarScored", 0)
+        targetMemberPathGrammarRouteRows += grammarStats.get("pathGrammarRouteRows", 0)
+        targetMemberPathGrammarMatchedFeatures += grammarStats.get("pathGrammarMatchedFeatures", 0)
+        targetMemberPathGrammarCoreMatchedFeatures += grammarStats.get("pathGrammarCoreMatchedFeatures", 0)
+        targetMemberPathGrammarSequenceMatchedFeatures += grammarStats.get("pathGrammarSequenceMatchedFeatures", 0)
+        targetMemberPathGrammarLedgerMatchedFeatures += grammarStats.get("pathGrammarLedgerMatchedFeatures", 0)
+        targetMemberPathGrammarMeanIdfMilli += grammarStats.get("pathGrammarMeanIdfMilli", 0)
+        targetMemberPathGrammarScoreMilli += grammarStats.get("pathGrammarScoreMilli", 0)
+        print(
+            f"  {surface}->{expected} relations={','.join(relations)} "
+            f"queryFeatures={grammarStats.get('pathGrammarQueryFeatures', 0)} pool={grammarStats.get('pathGrammarPoolRows', 0)} "
+            f"postings={grammarStats.get('pathGrammarPostingRows', 0)} scored={grammarStats.get('pathGrammarScored', 0)} "
+            f"routeRows={grammarStats.get('pathGrammarRouteRows', 0)} matched={grammarStats.get('pathGrammarMatchedFeatures', 0)} "
+            f"core={grammarStats.get('pathGrammarCoreMatchedFeatures', 0)} seq={grammarStats.get('pathGrammarSequenceMatchedFeatures', 0)} "
+            f"ledger={grammarStats.get('pathGrammarLedgerMatchedFeatures', 0)} idfMilli={grammarStats.get('pathGrammarMeanIdfMilli', 0)} "
+            f"scoreMilli={grammarStats.get('pathGrammarScoreMilli', 0)} rank={rank if rank is not None else 'NA'} "
+            f"top={previewMaskedFrame(rows)}"
+        )
+    print("[targetMemberPathGrammarProbes:negative]")
+    for surface, forbidden in NEGATIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberPathGrammarRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, forbidden)
+        topForbidden = bool(rows and rows[0][0] == forbidden)
+        _, grammarStats = targetMemberPathGrammarScores(surface, relations, model)
+        targetMemberPathGrammarProbeBadTop1 += int(topForbidden)
+        targetMemberPathGrammarProbeBadTop5 += int(rank is not None and rank <= 5)
+        targetMemberPathGrammarQueryFeatures += grammarStats.get("pathGrammarQueryFeatures", 0)
+        targetMemberPathGrammarPoolRows += grammarStats.get("pathGrammarPoolRows", 0)
+        targetMemberPathGrammarPostingRows += grammarStats.get("pathGrammarPostingRows", 0)
+        targetMemberPathGrammarScored += grammarStats.get("pathGrammarScored", 0)
+        targetMemberPathGrammarRouteRows += grammarStats.get("pathGrammarRouteRows", 0)
+        targetMemberPathGrammarMatchedFeatures += grammarStats.get("pathGrammarMatchedFeatures", 0)
+        targetMemberPathGrammarCoreMatchedFeatures += grammarStats.get("pathGrammarCoreMatchedFeatures", 0)
+        targetMemberPathGrammarSequenceMatchedFeatures += grammarStats.get("pathGrammarSequenceMatchedFeatures", 0)
+        targetMemberPathGrammarLedgerMatchedFeatures += grammarStats.get("pathGrammarLedgerMatchedFeatures", 0)
+        targetMemberPathGrammarMeanIdfMilli += grammarStats.get("pathGrammarMeanIdfMilli", 0)
+        targetMemberPathGrammarScoreMilli += grammarStats.get("pathGrammarScoreMilli", 0)
+        print(
+            f"  {surface}-/->{forbidden} relations={','.join(relations)} "
+            f"queryFeatures={grammarStats.get('pathGrammarQueryFeatures', 0)} pool={grammarStats.get('pathGrammarPoolRows', 0)} "
+            f"postings={grammarStats.get('pathGrammarPostingRows', 0)} scored={grammarStats.get('pathGrammarScored', 0)} "
+            f"routeRows={grammarStats.get('pathGrammarRouteRows', 0)} matched={grammarStats.get('pathGrammarMatchedFeatures', 0)} "
+            f"core={grammarStats.get('pathGrammarCoreMatchedFeatures', 0)} seq={grammarStats.get('pathGrammarSequenceMatchedFeatures', 0)} "
+            f"ledger={grammarStats.get('pathGrammarLedgerMatchedFeatures', 0)} idfMilli={grammarStats.get('pathGrammarMeanIdfMilli', 0)} "
+            f"scoreMilli={grammarStats.get('pathGrammarScoreMilli', 0)} forbiddenRank={rank if rank is not None else 'NA'} "
+            f"badTop1={topForbidden} top={previewMaskedFrame(rows)}"
+        )
+    targetMemberPromotableProbeTop1 = 0
+    targetMemberPromotableProbeTop5 = 0
+    targetMemberPromotableProbeBadTop1 = 0
+    targetMemberPromotableProbeBadTop5 = 0
+    targetMemberPromotableQueryFeatures = 0
+    targetMemberPromotablePoolRows = 0
+    targetMemberPromotablePostingRows = 0
+    targetMemberPromotableScored = 0
+    targetMemberPromotableRouteRows = 0
+    targetMemberPromotableMatchedFeatures = 0
+    targetMemberPromotableCoreMatchedFeatures = 0
+    targetMemberPromotableSequenceMatchedFeatures = 0
+    targetMemberPromotableLedgerMatchedFeatures = 0
+    targetMemberPromotablePromotionMilli = 0
+    targetMemberPromotableScoreMilli = 0
+    print("[targetMemberPromotableProbes:positive]")
+    for surface, expected in POSITIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberPromotableRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, expected)
+        _, promoStats = targetMemberPromotableScores(surface, relations, model)
+        allowed, promotion, context, evidenceStats = targetMemberPromotableSurfaceAllowed(expected, model)
+        targetMemberPromotableProbeTop1 += int(rank == 1)
+        targetMemberPromotableProbeTop5 += int(rank is not None and rank <= 5)
+        targetMemberPromotableQueryFeatures += promoStats.get("promotableQueryFeatures", 0)
+        targetMemberPromotablePoolRows += promoStats.get("promotablePoolRows", 0)
+        targetMemberPromotablePostingRows += promoStats.get("promotablePostingRows", 0)
+        targetMemberPromotableScored += promoStats.get("promotableScored", 0)
+        targetMemberPromotableRouteRows += promoStats.get("promotableRouteRows", 0)
+        targetMemberPromotableMatchedFeatures += promoStats.get("promotableMatchedFeatures", 0)
+        targetMemberPromotableCoreMatchedFeatures += promoStats.get("promotableCoreMatchedFeatures", 0)
+        targetMemberPromotableSequenceMatchedFeatures += promoStats.get("promotableSequenceMatchedFeatures", 0)
+        targetMemberPromotableLedgerMatchedFeatures += promoStats.get("promotableLedgerMatchedFeatures", 0)
+        targetMemberPromotablePromotionMilli += promoStats.get("promotablePromotionMilli", 0)
+        targetMemberPromotableScoreMilli += promoStats.get("promotableScoreMilli", 0)
+        print(
+            f"  {surface}->{expected} relations={','.join(relations)} "
+            f"expectedPromote={promotion:.3f}/{context:.3f}/allowed{int(allowed)} "
+            f"expectedOcc={evidenceStats.get('promotableOccurrenceRows', 0)} "
+            f"queryFeatures={promoStats.get('promotableQueryFeatures', 0)} pool={promoStats.get('promotablePoolRows', 0)} "
+            f"postings={promoStats.get('promotablePostingRows', 0)} scored={promoStats.get('promotableScored', 0)} "
+            f"routeRows={promoStats.get('promotableRouteRows', 0)} matched={promoStats.get('promotableMatchedFeatures', 0)} "
+            f"core={promoStats.get('promotableCoreMatchedFeatures', 0)} seq={promoStats.get('promotableSequenceMatchedFeatures', 0)} "
+            f"ledger={promoStats.get('promotableLedgerMatchedFeatures', 0)} promoMilli={promoStats.get('promotablePromotionMilli', 0)} "
+            f"scoreMilli={promoStats.get('promotableScoreMilli', 0)} rank={rank if rank is not None else 'NA'} "
+            f"top={previewMaskedFrame(rows)}"
+        )
+    print("[targetMemberPromotableProbes:negative]")
+    for surface, forbidden in NEGATIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberPromotableRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, forbidden)
+        topForbidden = bool(rows and rows[0][0] == forbidden)
+        _, promoStats = targetMemberPromotableScores(surface, relations, model)
+        allowed, promotion, context, evidenceStats = targetMemberPromotableSurfaceAllowed(forbidden, model)
+        targetMemberPromotableProbeBadTop1 += int(topForbidden)
+        targetMemberPromotableProbeBadTop5 += int(rank is not None and rank <= 5)
+        targetMemberPromotableQueryFeatures += promoStats.get("promotableQueryFeatures", 0)
+        targetMemberPromotablePoolRows += promoStats.get("promotablePoolRows", 0)
+        targetMemberPromotablePostingRows += promoStats.get("promotablePostingRows", 0)
+        targetMemberPromotableScored += promoStats.get("promotableScored", 0)
+        targetMemberPromotableRouteRows += promoStats.get("promotableRouteRows", 0)
+        targetMemberPromotableMatchedFeatures += promoStats.get("promotableMatchedFeatures", 0)
+        targetMemberPromotableCoreMatchedFeatures += promoStats.get("promotableCoreMatchedFeatures", 0)
+        targetMemberPromotableSequenceMatchedFeatures += promoStats.get("promotableSequenceMatchedFeatures", 0)
+        targetMemberPromotableLedgerMatchedFeatures += promoStats.get("promotableLedgerMatchedFeatures", 0)
+        targetMemberPromotablePromotionMilli += promoStats.get("promotablePromotionMilli", 0)
+        targetMemberPromotableScoreMilli += promoStats.get("promotableScoreMilli", 0)
+        print(
+            f"  {surface}-/->{forbidden} relations={','.join(relations)} "
+            f"forbiddenPromote={promotion:.3f}/{context:.3f}/allowed{int(allowed)} "
+            f"forbiddenOcc={evidenceStats.get('promotableOccurrenceRows', 0)} "
+            f"queryFeatures={promoStats.get('promotableQueryFeatures', 0)} pool={promoStats.get('promotablePoolRows', 0)} "
+            f"postings={promoStats.get('promotablePostingRows', 0)} scored={promoStats.get('promotableScored', 0)} "
+            f"routeRows={promoStats.get('promotableRouteRows', 0)} matched={promoStats.get('promotableMatchedFeatures', 0)} "
+            f"core={promoStats.get('promotableCoreMatchedFeatures', 0)} seq={promoStats.get('promotableSequenceMatchedFeatures', 0)} "
+            f"ledger={promoStats.get('promotableLedgerMatchedFeatures', 0)} promoMilli={promoStats.get('promotablePromotionMilli', 0)} "
+            f"scoreMilli={promoStats.get('promotableScoreMilli', 0)} forbiddenRank={rank if rank is not None else 'NA'} "
+            f"badTop1={topForbidden} top={previewMaskedFrame(rows)}"
+        )
+    targetMemberSlotResidualProbeTop1 = 0
+    targetMemberSlotResidualProbeTop5 = 0
+    targetMemberSlotResidualProbeBadTop1 = 0
+    targetMemberSlotResidualProbeBadTop5 = 0
+    targetMemberSlotResidualQueryFeatures = 0
+    targetMemberSlotResidualQuerySlots = 0
+    targetMemberSlotResidualPoolRows = 0
+    targetMemberSlotResidualPostingRows = 0
+    targetMemberSlotResidualCohortRows = 0
+    targetMemberSlotResidualScored = 0
+    targetMemberSlotResidualRouteRows = 0
+    targetMemberSlotResidualMatchedFeatures = 0
+    targetMemberSlotResidualResidualMatchedFeatures = 0
+    targetMemberSlotResidualCommonMatchedFeatures = 0
+    targetMemberSlotResidualSequenceMatchedFeatures = 0
+    targetMemberSlotResidualLedgerMatchedFeatures = 0
+    targetMemberSlotResidualPositiveMargins = 0
+    targetMemberSlotResidualNegativeMargins = 0
+    targetMemberSlotResidualProofMilli = 0
+    targetMemberSlotResidualPeerProofMilli = 0
+    targetMemberSlotResidualMarginMilli = 0
+    targetMemberSlotResidualFragmentSupportMilli = 0
+    targetMemberSlotResidualScoreMilli = 0
+    print("[targetMemberSlotResidualProbes:positive]")
+    for surface, expected in POSITIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberSlotResidualRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, expected)
+        _, slotStats = targetMemberSlotResidualScores(surface, relations, model)
+        targetMemberSlotResidualProbeTop1 += int(rank == 1)
+        targetMemberSlotResidualProbeTop5 += int(rank is not None and rank <= 5)
+        targetMemberSlotResidualQueryFeatures += slotStats.get("slotResidualQueryFeatures", 0)
+        targetMemberSlotResidualQuerySlots += slotStats.get("slotResidualQuerySlots", 0)
+        targetMemberSlotResidualPoolRows += slotStats.get("slotResidualPoolRows", 0)
+        targetMemberSlotResidualPostingRows += slotStats.get("slotResidualPostingRows", 0)
+        targetMemberSlotResidualCohortRows += slotStats.get("slotResidualCohortRows", 0)
+        targetMemberSlotResidualScored += slotStats.get("slotResidualScored", 0)
+        targetMemberSlotResidualRouteRows += slotStats.get("slotResidualRouteRows", 0)
+        targetMemberSlotResidualMatchedFeatures += slotStats.get("slotResidualMatchedFeatures", 0)
+        targetMemberSlotResidualResidualMatchedFeatures += slotStats.get("slotResidualResidualMatchedFeatures", 0)
+        targetMemberSlotResidualCommonMatchedFeatures += slotStats.get("slotResidualCommonMatchedFeatures", 0)
+        targetMemberSlotResidualSequenceMatchedFeatures += slotStats.get("slotResidualSequenceMatchedFeatures", 0)
+        targetMemberSlotResidualLedgerMatchedFeatures += slotStats.get("slotResidualLedgerMatchedFeatures", 0)
+        targetMemberSlotResidualPositiveMargins += slotStats.get("slotResidualPositiveMargins", 0)
+        targetMemberSlotResidualNegativeMargins += slotStats.get("slotResidualNegativeMargins", 0)
+        targetMemberSlotResidualProofMilli += slotStats.get("slotResidualProofMilli", 0)
+        targetMemberSlotResidualPeerProofMilli += slotStats.get("slotResidualPeerProofMilli", 0)
+        targetMemberSlotResidualMarginMilli += slotStats.get("slotResidualMarginMilli", 0)
+        targetMemberSlotResidualFragmentSupportMilli += slotStats.get("slotResidualFragmentSupportMilli", 0)
+        targetMemberSlotResidualScoreMilli += slotStats.get("slotResidualScoreMilli", 0)
+        print(
+            f"  {surface}->{expected} relations={','.join(relations)} "
+            f"queryFeatures={slotStats.get('slotResidualQueryFeatures', 0)} slots={slotStats.get('slotResidualQuerySlots', 0)} "
+            f"pool={slotStats.get('slotResidualPoolRows', 0)} postings={slotStats.get('slotResidualPostingRows', 0)} "
+            f"cohortRows={slotStats.get('slotResidualCohortRows', 0)} scored={slotStats.get('slotResidualScored', 0)} "
+            f"routeRows={slotStats.get('slotResidualRouteRows', 0)} matched={slotStats.get('slotResidualMatchedFeatures', 0)} "
+            f"resid={slotStats.get('slotResidualResidualMatchedFeatures', 0)} common={slotStats.get('slotResidualCommonMatchedFeatures', 0)} "
+            f"seq={slotStats.get('slotResidualSequenceMatchedFeatures', 0)} ledger={slotStats.get('slotResidualLedgerMatchedFeatures', 0)} "
+            f"posMargin={slotStats.get('slotResidualPositiveMargins', 0)} negMargin={slotStats.get('slotResidualNegativeMargins', 0)} "
+            f"proofMilli={slotStats.get('slotResidualProofMilli', 0)} peerMilli={slotStats.get('slotResidualPeerProofMilli', 0)} "
+            f"marginMilli={slotStats.get('slotResidualMarginMilli', 0)} fragMilli={slotStats.get('slotResidualFragmentSupportMilli', 0)} "
+            f"scoreMilli={slotStats.get('slotResidualScoreMilli', 0)} rank={rank if rank is not None else 'NA'} "
+            f"top={previewMaskedFrame(rows)}"
+        )
+    print("[targetMemberSlotResidualProbes:negative]")
+    for surface, forbidden in NEGATIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberSlotResidualRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, forbidden)
+        topForbidden = bool(rows and rows[0][0] == forbidden)
+        _, slotStats = targetMemberSlotResidualScores(surface, relations, model)
+        targetMemberSlotResidualProbeBadTop1 += int(topForbidden)
+        targetMemberSlotResidualProbeBadTop5 += int(rank is not None and rank <= 5)
+        targetMemberSlotResidualQueryFeatures += slotStats.get("slotResidualQueryFeatures", 0)
+        targetMemberSlotResidualQuerySlots += slotStats.get("slotResidualQuerySlots", 0)
+        targetMemberSlotResidualPoolRows += slotStats.get("slotResidualPoolRows", 0)
+        targetMemberSlotResidualPostingRows += slotStats.get("slotResidualPostingRows", 0)
+        targetMemberSlotResidualCohortRows += slotStats.get("slotResidualCohortRows", 0)
+        targetMemberSlotResidualScored += slotStats.get("slotResidualScored", 0)
+        targetMemberSlotResidualRouteRows += slotStats.get("slotResidualRouteRows", 0)
+        targetMemberSlotResidualMatchedFeatures += slotStats.get("slotResidualMatchedFeatures", 0)
+        targetMemberSlotResidualResidualMatchedFeatures += slotStats.get("slotResidualResidualMatchedFeatures", 0)
+        targetMemberSlotResidualCommonMatchedFeatures += slotStats.get("slotResidualCommonMatchedFeatures", 0)
+        targetMemberSlotResidualSequenceMatchedFeatures += slotStats.get("slotResidualSequenceMatchedFeatures", 0)
+        targetMemberSlotResidualLedgerMatchedFeatures += slotStats.get("slotResidualLedgerMatchedFeatures", 0)
+        targetMemberSlotResidualPositiveMargins += slotStats.get("slotResidualPositiveMargins", 0)
+        targetMemberSlotResidualNegativeMargins += slotStats.get("slotResidualNegativeMargins", 0)
+        targetMemberSlotResidualProofMilli += slotStats.get("slotResidualProofMilli", 0)
+        targetMemberSlotResidualPeerProofMilli += slotStats.get("slotResidualPeerProofMilli", 0)
+        targetMemberSlotResidualMarginMilli += slotStats.get("slotResidualMarginMilli", 0)
+        targetMemberSlotResidualFragmentSupportMilli += slotStats.get("slotResidualFragmentSupportMilli", 0)
+        targetMemberSlotResidualScoreMilli += slotStats.get("slotResidualScoreMilli", 0)
+        print(
+            f"  {surface}-/->{forbidden} relations={','.join(relations)} "
+            f"queryFeatures={slotStats.get('slotResidualQueryFeatures', 0)} slots={slotStats.get('slotResidualQuerySlots', 0)} "
+            f"pool={slotStats.get('slotResidualPoolRows', 0)} postings={slotStats.get('slotResidualPostingRows', 0)} "
+            f"cohortRows={slotStats.get('slotResidualCohortRows', 0)} scored={slotStats.get('slotResidualScored', 0)} "
+            f"routeRows={slotStats.get('slotResidualRouteRows', 0)} matched={slotStats.get('slotResidualMatchedFeatures', 0)} "
+            f"resid={slotStats.get('slotResidualResidualMatchedFeatures', 0)} common={slotStats.get('slotResidualCommonMatchedFeatures', 0)} "
+            f"seq={slotStats.get('slotResidualSequenceMatchedFeatures', 0)} ledger={slotStats.get('slotResidualLedgerMatchedFeatures', 0)} "
+            f"posMargin={slotStats.get('slotResidualPositiveMargins', 0)} negMargin={slotStats.get('slotResidualNegativeMargins', 0)} "
+            f"proofMilli={slotStats.get('slotResidualProofMilli', 0)} peerMilli={slotStats.get('slotResidualPeerProofMilli', 0)} "
+            f"marginMilli={slotStats.get('slotResidualMarginMilli', 0)} fragMilli={slotStats.get('slotResidualFragmentSupportMilli', 0)} "
+            f"scoreMilli={slotStats.get('slotResidualScoreMilli', 0)} forbiddenRank={rank if rank is not None else 'NA'} "
+            f"badTop1={topForbidden} top={previewMaskedFrame(rows)}"
+        )
+    targetMemberAccountAxisProbeTop1 = 0
+    targetMemberAccountAxisProbeTop5 = 0
+    targetMemberAccountAxisProbeBadTop1 = 0
+    targetMemberAccountAxisProbeBadTop5 = 0
+    targetMemberAccountAxisQueryFeatures = 0
+    targetMemberAccountAxisSeedPoolRows = 0
+    targetMemberAccountAxisProcessedFamilies = 0
+    targetMemberAccountAxisFamilyRows = 0
+    targetMemberAccountAxisProofRows = 0
+    targetMemberAccountAxisPeerRows = 0
+    targetMemberAccountAxisMatchedFeatures = 0
+    targetMemberAccountAxisLedgerMatchedFeatures = 0
+    targetMemberAccountAxisRelationMatchedFeatures = 0
+    targetMemberAccountAxisRoleMatchedFeatures = 0
+    targetMemberAccountAxisStructMatchedFeatures = 0
+    targetMemberAccountAxisPositiveMargins = 0
+    targetMemberAccountAxisNegativeMargins = 0
+    targetMemberAccountAxisProofMilli = 0
+    targetMemberAccountAxisMarginMilli = 0
+    targetMemberAccountAxisScoreMilli = 0
+    targetMemberAccountAxisScored = 0
+    targetMemberAccountAxisRouteRows = 0
+    print("[targetMemberAccountAxisProbes:positive]")
+    for surface, expected in POSITIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberAccountAxisRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, expected)
+        _, accountStats = targetMemberAccountAxisScores(surface, relations, model)
+        targetMemberAccountAxisProbeTop1 += int(rank == 1)
+        targetMemberAccountAxisProbeTop5 += int(rank is not None and rank <= 5)
+        targetMemberAccountAxisQueryFeatures += accountStats.get("accountAxisQueryFeatures", 0)
+        targetMemberAccountAxisSeedPoolRows += accountStats.get("accountAxisSeedPoolRows", 0)
+        targetMemberAccountAxisProcessedFamilies += accountStats.get("accountAxisProcessedFamilies", 0)
+        targetMemberAccountAxisFamilyRows += accountStats.get("accountAxisFamilyRows", 0)
+        targetMemberAccountAxisProofRows += accountStats.get("accountAxisProofRows", 0)
+        targetMemberAccountAxisPeerRows += accountStats.get("accountAxisPeerRows", 0)
+        targetMemberAccountAxisMatchedFeatures += accountStats.get("accountAxisMatchedFeatures", 0)
+        targetMemberAccountAxisLedgerMatchedFeatures += accountStats.get("accountAxisLedgerMatchedFeatures", 0)
+        targetMemberAccountAxisRelationMatchedFeatures += accountStats.get("accountAxisRelationMatchedFeatures", 0)
+        targetMemberAccountAxisRoleMatchedFeatures += accountStats.get("accountAxisRoleMatchedFeatures", 0)
+        targetMemberAccountAxisStructMatchedFeatures += accountStats.get("accountAxisStructMatchedFeatures", 0)
+        targetMemberAccountAxisPositiveMargins += accountStats.get("accountAxisPositiveMargins", 0)
+        targetMemberAccountAxisNegativeMargins += accountStats.get("accountAxisNegativeMargins", 0)
+        targetMemberAccountAxisProofMilli += accountStats.get("accountAxisProofMilli", 0)
+        targetMemberAccountAxisMarginMilli += accountStats.get("accountAxisMarginMilli", 0)
+        targetMemberAccountAxisScoreMilli += accountStats.get("accountAxisScoreMilli", 0)
+        targetMemberAccountAxisScored += accountStats.get("accountAxisScored", 0)
+        targetMemberAccountAxisRouteRows += accountStats.get("accountAxisRouteRows", 0)
+        print(
+            f"  {surface}->{expected} relations={','.join(relations)} "
+            f"queryFeatures={accountStats.get('accountAxisQueryFeatures', 0)} seedPool={accountStats.get('accountAxisSeedPoolRows', 0)} "
+            f"families={accountStats.get('accountAxisProcessedFamilies', 0)} familyRows={accountStats.get('accountAxisFamilyRows', 0)} "
+            f"proofRows={accountStats.get('accountAxisProofRows', 0)} peers={accountStats.get('accountAxisPeerRows', 0)} "
+            f"matched={accountStats.get('accountAxisMatchedFeatures', 0)} ledger={accountStats.get('accountAxisLedgerMatchedFeatures', 0)} "
+            f"rel={accountStats.get('accountAxisRelationMatchedFeatures', 0)} role={accountStats.get('accountAxisRoleMatchedFeatures', 0)} "
+            f"struct={accountStats.get('accountAxisStructMatchedFeatures', 0)} posMargin={accountStats.get('accountAxisPositiveMargins', 0)} "
+            f"negMargin={accountStats.get('accountAxisNegativeMargins', 0)} proofMilli={accountStats.get('accountAxisProofMilli', 0)} "
+            f"marginMilli={accountStats.get('accountAxisMarginMilli', 0)} scoreMilli={accountStats.get('accountAxisScoreMilli', 0)} "
+            f"scored={accountStats.get('accountAxisScored', 0)} routeRows={accountStats.get('accountAxisRouteRows', 0)} "
+            f"rank={rank if rank is not None else 'NA'} top={previewMaskedFrame(rows)}"
+        )
+    print("[targetMemberAccountAxisProbes:negative]")
+    for surface, forbidden in NEGATIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberAccountAxisRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, forbidden)
+        topForbidden = bool(rows and rows[0][0] == forbidden)
+        _, accountStats = targetMemberAccountAxisScores(surface, relations, model)
+        targetMemberAccountAxisProbeBadTop1 += int(topForbidden)
+        targetMemberAccountAxisProbeBadTop5 += int(rank is not None and rank <= 5)
+        targetMemberAccountAxisQueryFeatures += accountStats.get("accountAxisQueryFeatures", 0)
+        targetMemberAccountAxisSeedPoolRows += accountStats.get("accountAxisSeedPoolRows", 0)
+        targetMemberAccountAxisProcessedFamilies += accountStats.get("accountAxisProcessedFamilies", 0)
+        targetMemberAccountAxisFamilyRows += accountStats.get("accountAxisFamilyRows", 0)
+        targetMemberAccountAxisProofRows += accountStats.get("accountAxisProofRows", 0)
+        targetMemberAccountAxisPeerRows += accountStats.get("accountAxisPeerRows", 0)
+        targetMemberAccountAxisMatchedFeatures += accountStats.get("accountAxisMatchedFeatures", 0)
+        targetMemberAccountAxisLedgerMatchedFeatures += accountStats.get("accountAxisLedgerMatchedFeatures", 0)
+        targetMemberAccountAxisRelationMatchedFeatures += accountStats.get("accountAxisRelationMatchedFeatures", 0)
+        targetMemberAccountAxisRoleMatchedFeatures += accountStats.get("accountAxisRoleMatchedFeatures", 0)
+        targetMemberAccountAxisStructMatchedFeatures += accountStats.get("accountAxisStructMatchedFeatures", 0)
+        targetMemberAccountAxisPositiveMargins += accountStats.get("accountAxisPositiveMargins", 0)
+        targetMemberAccountAxisNegativeMargins += accountStats.get("accountAxisNegativeMargins", 0)
+        targetMemberAccountAxisProofMilli += accountStats.get("accountAxisProofMilli", 0)
+        targetMemberAccountAxisMarginMilli += accountStats.get("accountAxisMarginMilli", 0)
+        targetMemberAccountAxisScoreMilli += accountStats.get("accountAxisScoreMilli", 0)
+        targetMemberAccountAxisScored += accountStats.get("accountAxisScored", 0)
+        targetMemberAccountAxisRouteRows += accountStats.get("accountAxisRouteRows", 0)
+        print(
+            f"  {surface}-/->{forbidden} relations={','.join(relations)} "
+            f"queryFeatures={accountStats.get('accountAxisQueryFeatures', 0)} seedPool={accountStats.get('accountAxisSeedPoolRows', 0)} "
+            f"families={accountStats.get('accountAxisProcessedFamilies', 0)} familyRows={accountStats.get('accountAxisFamilyRows', 0)} "
+            f"proofRows={accountStats.get('accountAxisProofRows', 0)} peers={accountStats.get('accountAxisPeerRows', 0)} "
+            f"matched={accountStats.get('accountAxisMatchedFeatures', 0)} ledger={accountStats.get('accountAxisLedgerMatchedFeatures', 0)} "
+            f"rel={accountStats.get('accountAxisRelationMatchedFeatures', 0)} role={accountStats.get('accountAxisRoleMatchedFeatures', 0)} "
+            f"struct={accountStats.get('accountAxisStructMatchedFeatures', 0)} posMargin={accountStats.get('accountAxisPositiveMargins', 0)} "
+            f"negMargin={accountStats.get('accountAxisNegativeMargins', 0)} proofMilli={accountStats.get('accountAxisProofMilli', 0)} "
+            f"marginMilli={accountStats.get('accountAxisMarginMilli', 0)} scoreMilli={accountStats.get('accountAxisScoreMilli', 0)} "
+            f"scored={accountStats.get('accountAxisScored', 0)} routeRows={accountStats.get('accountAxisRouteRows', 0)} "
+            f"forbiddenRank={rank if rank is not None else 'NA'} badTop1={topForbidden} top={previewMaskedFrame(rows)}"
+        )
+    targetMemberAccountRegistryProbeTop1 = 0
+    targetMemberAccountRegistryProbeTop5 = 0
+    targetMemberAccountRegistryProbeBadTop1 = 0
+    targetMemberAccountRegistryProbeBadTop5 = 0
+    targetMemberAccountRegistrySurfaces = 0
+    targetMemberAccountRegistryFamilies = 0
+    targetMemberAccountRegistryQueryFeatures = 0
+    targetMemberAccountRegistrySeedPoolRows = 0
+    targetMemberAccountRegistryScored = 0
+    targetMemberAccountRegistryRouteRows = 0
+    targetMemberAccountRegistryMatchedFeatures = 0
+    targetMemberAccountRegistryValueMatchedFeatures = 0
+    targetMemberAccountRegistryRelationMatchedFeatures = 0
+    targetMemberAccountRegistryLedgerMatchedFeatures = 0
+    targetMemberAccountRegistryProofMilli = 0
+    targetMemberAccountRegistryAxisProofMilli = 0
+    targetMemberAccountRegistryScoreMilli = 0
+    targetMemberAccountRegistryPeerRows = 0
+    print("[targetMemberAccountRegistryProbes:positive]")
+    for surface, expected in POSITIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberAccountRegistryRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, expected)
+        _, registryStats = targetMemberAccountRegistryScores(surface, relations, model)
+        targetMemberAccountRegistryProbeTop1 += int(rank == 1)
+        targetMemberAccountRegistryProbeTop5 += int(rank is not None and rank <= 5)
+        targetMemberAccountRegistrySurfaces += registryStats.get("accountRegistrySurfaces", 0)
+        targetMemberAccountRegistryFamilies += registryStats.get("accountRegistryFamilies", 0)
+        targetMemberAccountRegistryQueryFeatures += registryStats.get("accountRegistryQueryFeatures", 0)
+        targetMemberAccountRegistrySeedPoolRows += registryStats.get("accountRegistrySeedPoolRows", 0)
+        targetMemberAccountRegistryScored += registryStats.get("accountRegistryScored", 0)
+        targetMemberAccountRegistryRouteRows += registryStats.get("accountRegistryRouteRows", 0)
+        targetMemberAccountRegistryMatchedFeatures += registryStats.get("accountRegistryMatchedFeatures", 0)
+        targetMemberAccountRegistryValueMatchedFeatures += registryStats.get("accountRegistryValueMatchedFeatures", 0)
+        targetMemberAccountRegistryRelationMatchedFeatures += registryStats.get(
+            "accountRegistryRelationMatchedFeatures", 0
+        )
+        targetMemberAccountRegistryLedgerMatchedFeatures += registryStats.get("accountRegistryLedgerMatchedFeatures", 0)
+        targetMemberAccountRegistryProofMilli += registryStats.get("accountRegistryProofMilli", 0)
+        targetMemberAccountRegistryAxisProofMilli += registryStats.get("accountRegistryAxisProofMilli", 0)
+        targetMemberAccountRegistryScoreMilli += registryStats.get("accountRegistryScoreMilli", 0)
+        targetMemberAccountRegistryPeerRows += registryStats.get("accountRegistryPeerRows", 0)
+        expectedProof, expectedProofStats = targetMemberAccountRegistryProof(surface, expected, relations, model)
+        print(
+            f"  {surface}->{expected} relations={','.join(relations)} "
+            f"registry={registryStats.get('accountRegistrySurfaces', 0)} families={registryStats.get('accountRegistryFamilies', 0)} "
+            f"queryFeatures={registryStats.get('accountRegistryQueryFeatures', 0)} seedPool={registryStats.get('accountRegistrySeedPoolRows', 0)} "
+            f"scored={registryStats.get('accountRegistryScored', 0)} routeRows={registryStats.get('accountRegistryRouteRows', 0)} "
+            f"matched={registryStats.get('accountRegistryMatchedFeatures', 0)} value={registryStats.get('accountRegistryValueMatchedFeatures', 0)} "
+            f"rel={registryStats.get('accountRegistryRelationMatchedFeatures', 0)} ledger={registryStats.get('accountRegistryLedgerMatchedFeatures', 0)} "
+            f"proofMilli={registryStats.get('accountRegistryProofMilli', 0)} axisMilli={registryStats.get('accountRegistryAxisProofMilli', 0)} "
+            f"scoreMilli={registryStats.get('accountRegistryScoreMilli', 0)} expectedProof={expectedProof:.4f}/"
+            f"{expectedProofStats.get('accountRegistryMatchedFeatures', 0)} "
+            f"rank={rank if rank is not None else 'NA'} top={previewMaskedFrame(rows)}"
+        )
+    print("[targetMemberAccountRegistryProbes:negative]")
+    for surface, forbidden in NEGATIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberAccountRegistryRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, forbidden)
+        topForbidden = bool(rows and rows[0][0] == forbidden)
+        _, registryStats = targetMemberAccountRegistryScores(surface, relations, model)
+        targetMemberAccountRegistryProbeBadTop1 += int(topForbidden)
+        targetMemberAccountRegistryProbeBadTop5 += int(rank is not None and rank <= 5)
+        targetMemberAccountRegistrySurfaces += registryStats.get("accountRegistrySurfaces", 0)
+        targetMemberAccountRegistryFamilies += registryStats.get("accountRegistryFamilies", 0)
+        targetMemberAccountRegistryQueryFeatures += registryStats.get("accountRegistryQueryFeatures", 0)
+        targetMemberAccountRegistrySeedPoolRows += registryStats.get("accountRegistrySeedPoolRows", 0)
+        targetMemberAccountRegistryScored += registryStats.get("accountRegistryScored", 0)
+        targetMemberAccountRegistryRouteRows += registryStats.get("accountRegistryRouteRows", 0)
+        targetMemberAccountRegistryMatchedFeatures += registryStats.get("accountRegistryMatchedFeatures", 0)
+        targetMemberAccountRegistryValueMatchedFeatures += registryStats.get("accountRegistryValueMatchedFeatures", 0)
+        targetMemberAccountRegistryRelationMatchedFeatures += registryStats.get(
+            "accountRegistryRelationMatchedFeatures", 0
+        )
+        targetMemberAccountRegistryLedgerMatchedFeatures += registryStats.get("accountRegistryLedgerMatchedFeatures", 0)
+        targetMemberAccountRegistryProofMilli += registryStats.get("accountRegistryProofMilli", 0)
+        targetMemberAccountRegistryAxisProofMilli += registryStats.get("accountRegistryAxisProofMilli", 0)
+        targetMemberAccountRegistryScoreMilli += registryStats.get("accountRegistryScoreMilli", 0)
+        targetMemberAccountRegistryPeerRows += registryStats.get("accountRegistryPeerRows", 0)
+        forbiddenProof, forbiddenProofStats = targetMemberAccountRegistryProof(surface, forbidden, relations, model)
+        print(
+            f"  {surface}-/->{forbidden} relations={','.join(relations)} "
+            f"registry={registryStats.get('accountRegistrySurfaces', 0)} families={registryStats.get('accountRegistryFamilies', 0)} "
+            f"queryFeatures={registryStats.get('accountRegistryQueryFeatures', 0)} seedPool={registryStats.get('accountRegistrySeedPoolRows', 0)} "
+            f"scored={registryStats.get('accountRegistryScored', 0)} routeRows={registryStats.get('accountRegistryRouteRows', 0)} "
+            f"matched={registryStats.get('accountRegistryMatchedFeatures', 0)} value={registryStats.get('accountRegistryValueMatchedFeatures', 0)} "
+            f"rel={registryStats.get('accountRegistryRelationMatchedFeatures', 0)} ledger={registryStats.get('accountRegistryLedgerMatchedFeatures', 0)} "
+            f"proofMilli={registryStats.get('accountRegistryProofMilli', 0)} axisMilli={registryStats.get('accountRegistryAxisProofMilli', 0)} "
+            f"scoreMilli={registryStats.get('accountRegistryScoreMilli', 0)} forbiddenProof={forbiddenProof:.4f}/"
+            f"{forbiddenProofStats.get('accountRegistryMatchedFeatures', 0)} "
+            f"forbiddenRank={rank if rank is not None else 'NA'} badTop1={topForbidden} top={previewMaskedFrame(rows)}"
+        )
+    targetMemberStatementLedgerProbeTop1 = 0
+    targetMemberStatementLedgerProbeTop5 = 0
+    targetMemberStatementLedgerProbeBadTop1 = 0
+    targetMemberStatementLedgerProbeBadTop5 = 0
+    targetMemberStatementLedgerSurfaces = 0
+    targetMemberStatementLedgerFamilies = 0
+    targetMemberStatementLedgerQueryFeatures = 0
+    targetMemberStatementLedgerSeedPoolRows = 0
+    targetMemberStatementLedgerScored = 0
+    targetMemberStatementLedgerRouteRows = 0
+    targetMemberStatementLedgerMatchedFeatures = 0
+    targetMemberStatementLedgerRoleMatchedFeatures = 0
+    targetMemberStatementLedgerStatementMatchedFeatures = 0
+    targetMemberStatementLedgerValueMatchedFeatures = 0
+    targetMemberStatementLedgerRelationMatchedFeatures = 0
+    targetMemberStatementLedgerOrderMatchedFeatures = 0
+    targetMemberStatementLedgerProofMilli = 0
+    targetMemberStatementLedgerScoreMilli = 0
+    targetMemberStatementLedgerPeerRows = 0
+    print("[targetMemberStatementLedgerProbes:positive]")
+    for surface, expected in POSITIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberStatementLedgerRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, expected)
+        _, ledgerStats = targetMemberStatementLedgerScores(surface, relations, model)
+        targetMemberStatementLedgerProbeTop1 += int(rank == 1)
+        targetMemberStatementLedgerProbeTop5 += int(rank is not None and rank <= 5)
+        targetMemberStatementLedgerSurfaces += ledgerStats.get("statementLedgerSurfaces", 0)
+        targetMemberStatementLedgerFamilies += ledgerStats.get("statementLedgerFamilies", 0)
+        targetMemberStatementLedgerQueryFeatures += ledgerStats.get("statementLedgerQueryFeatures", 0)
+        targetMemberStatementLedgerSeedPoolRows += ledgerStats.get("statementLedgerSeedPoolRows", 0)
+        targetMemberStatementLedgerScored += ledgerStats.get("statementLedgerScored", 0)
+        targetMemberStatementLedgerRouteRows += ledgerStats.get("statementLedgerRouteRows", 0)
+        targetMemberStatementLedgerMatchedFeatures += ledgerStats.get("statementLedgerMatchedFeatures", 0)
+        targetMemberStatementLedgerRoleMatchedFeatures += ledgerStats.get("statementLedgerRoleMatchedFeatures", 0)
+        targetMemberStatementLedgerStatementMatchedFeatures += ledgerStats.get(
+            "statementLedgerStatementMatchedFeatures", 0
+        )
+        targetMemberStatementLedgerValueMatchedFeatures += ledgerStats.get("statementLedgerValueMatchedFeatures", 0)
+        targetMemberStatementLedgerRelationMatchedFeatures += ledgerStats.get(
+            "statementLedgerRelationMatchedFeatures", 0
+        )
+        targetMemberStatementLedgerOrderMatchedFeatures += ledgerStats.get("statementLedgerOrderMatchedFeatures", 0)
+        targetMemberStatementLedgerProofMilli += ledgerStats.get("statementLedgerProofMilli", 0)
+        targetMemberStatementLedgerScoreMilli += ledgerStats.get("statementLedgerScoreMilli", 0)
+        targetMemberStatementLedgerPeerRows += ledgerStats.get("statementLedgerPeerRows", 0)
+        expectedProof, expectedProofStats = targetMemberStatementLedgerProof(surface, expected, relations, model)
+        print(
+            f"  {surface}->{expected} relations={','.join(relations)} "
+            f"sourceRole={targetMemberStatementLedgerAccountRole(surface)} expectedRole={targetMemberStatementLedgerAccountRole(expected)} "
+            f"lattice={ledgerStats.get('statementLedgerSurfaces', 0)} families={ledgerStats.get('statementLedgerFamilies', 0)} "
+            f"queryFeatures={ledgerStats.get('statementLedgerQueryFeatures', 0)} seedPool={ledgerStats.get('statementLedgerSeedPoolRows', 0)} "
+            f"reranked={ledgerStats.get('statementLedgerRerankedSeedPoolRows', 0)} scored={ledgerStats.get('statementLedgerScored', 0)} "
+            f"routeRows={ledgerStats.get('statementLedgerRouteRows', 0)} matched={ledgerStats.get('statementLedgerMatchedFeatures', 0)} "
+            f"role={ledgerStats.get('statementLedgerRoleMatchedFeatures', 0)} stmt={ledgerStats.get('statementLedgerStatementMatchedFeatures', 0)} "
+            f"value={ledgerStats.get('statementLedgerValueMatchedFeatures', 0)} rel={ledgerStats.get('statementLedgerRelationMatchedFeatures', 0)} "
+            f"order={ledgerStats.get('statementLedgerOrderMatchedFeatures', 0)} proofMilli={ledgerStats.get('statementLedgerProofMilli', 0)} "
+            f"scoreMilli={ledgerStats.get('statementLedgerScoreMilli', 0)} expectedProof={expectedProof:.4f}/"
+            f"{expectedProofStats.get('statementLedgerMatchedFeatures', 0)} "
+            f"rank={rank if rank is not None else 'NA'} top={previewMaskedFrame(rows)}"
+        )
+    print("[targetMemberStatementLedgerProbes:negative]")
+    for surface, forbidden in NEGATIVE_PROBES:
+        relations = relationProbesForSurface(surface)
+        rows = targetMemberStatementLedgerRoute(surface, relations, model)
+        rank = maskedFrameRank(rows, forbidden)
+        topForbidden = bool(rows and rows[0][0] == forbidden)
+        _, ledgerStats = targetMemberStatementLedgerScores(surface, relations, model)
+        targetMemberStatementLedgerProbeBadTop1 += int(topForbidden)
+        targetMemberStatementLedgerProbeBadTop5 += int(rank is not None and rank <= 5)
+        targetMemberStatementLedgerSurfaces += ledgerStats.get("statementLedgerSurfaces", 0)
+        targetMemberStatementLedgerFamilies += ledgerStats.get("statementLedgerFamilies", 0)
+        targetMemberStatementLedgerQueryFeatures += ledgerStats.get("statementLedgerQueryFeatures", 0)
+        targetMemberStatementLedgerSeedPoolRows += ledgerStats.get("statementLedgerSeedPoolRows", 0)
+        targetMemberStatementLedgerScored += ledgerStats.get("statementLedgerScored", 0)
+        targetMemberStatementLedgerRouteRows += ledgerStats.get("statementLedgerRouteRows", 0)
+        targetMemberStatementLedgerMatchedFeatures += ledgerStats.get("statementLedgerMatchedFeatures", 0)
+        targetMemberStatementLedgerRoleMatchedFeatures += ledgerStats.get("statementLedgerRoleMatchedFeatures", 0)
+        targetMemberStatementLedgerStatementMatchedFeatures += ledgerStats.get(
+            "statementLedgerStatementMatchedFeatures", 0
+        )
+        targetMemberStatementLedgerValueMatchedFeatures += ledgerStats.get("statementLedgerValueMatchedFeatures", 0)
+        targetMemberStatementLedgerRelationMatchedFeatures += ledgerStats.get(
+            "statementLedgerRelationMatchedFeatures", 0
+        )
+        targetMemberStatementLedgerOrderMatchedFeatures += ledgerStats.get("statementLedgerOrderMatchedFeatures", 0)
+        targetMemberStatementLedgerProofMilli += ledgerStats.get("statementLedgerProofMilli", 0)
+        targetMemberStatementLedgerScoreMilli += ledgerStats.get("statementLedgerScoreMilli", 0)
+        targetMemberStatementLedgerPeerRows += ledgerStats.get("statementLedgerPeerRows", 0)
+        forbiddenProof, forbiddenProofStats = targetMemberStatementLedgerProof(surface, forbidden, relations, model)
+        print(
+            f"  {surface}-/->{forbidden} relations={','.join(relations)} "
+            f"sourceRole={targetMemberStatementLedgerAccountRole(surface)} forbiddenRole={targetMemberStatementLedgerAccountRole(forbidden)} "
+            f"lattice={ledgerStats.get('statementLedgerSurfaces', 0)} families={ledgerStats.get('statementLedgerFamilies', 0)} "
+            f"queryFeatures={ledgerStats.get('statementLedgerQueryFeatures', 0)} seedPool={ledgerStats.get('statementLedgerSeedPoolRows', 0)} "
+            f"reranked={ledgerStats.get('statementLedgerRerankedSeedPoolRows', 0)} scored={ledgerStats.get('statementLedgerScored', 0)} "
+            f"routeRows={ledgerStats.get('statementLedgerRouteRows', 0)} matched={ledgerStats.get('statementLedgerMatchedFeatures', 0)} "
+            f"role={ledgerStats.get('statementLedgerRoleMatchedFeatures', 0)} stmt={ledgerStats.get('statementLedgerStatementMatchedFeatures', 0)} "
+            f"value={ledgerStats.get('statementLedgerValueMatchedFeatures', 0)} rel={ledgerStats.get('statementLedgerRelationMatchedFeatures', 0)} "
+            f"order={ledgerStats.get('statementLedgerOrderMatchedFeatures', 0)} proofMilli={ledgerStats.get('statementLedgerProofMilli', 0)} "
+            f"scoreMilli={ledgerStats.get('statementLedgerScoreMilli', 0)} forbiddenProof={forbiddenProof:.4f}/"
+            f"{forbiddenProofStats.get('statementLedgerMatchedFeatures', 0)} "
+            f"forbiddenRank={rank if rank is not None else 'NA'} badTop1={topForbidden} top={previewMaskedFrame(rows)}"
+        )
     targetMemberTraceAlignProbeTop1 = 0
     targetMemberTraceAlignProbeTop5 = 0
     targetMemberTraceAlignProbeBadTop1 = 0
@@ -17879,6 +27130,40 @@ def main() -> None:
     targetMemberFramePathLocalAcceptedTracePairs = 0
     targetMemberFramePathLocalProofMilli = 0
     targetMemberFramePathLocalAcceptedRows = 0
+    targetMemberFramePathGrammarQueryFeatures = 0
+    targetMemberFramePathGrammarPoolRows = 0
+    targetMemberFramePathGrammarScored = 0
+    targetMemberFramePathGrammarRouteRows = 0
+    targetMemberFramePathGrammarMatchedFeatures = 0
+    targetMemberFramePathGrammarCoreMatchedFeatures = 0
+    targetMemberFramePathGrammarSequenceMatchedFeatures = 0
+    targetMemberFramePathGrammarLedgerMatchedFeatures = 0
+    targetMemberFramePathGrammarMeanIdfMilli = 0
+    targetMemberFramePathGrammarScoreMilli = 0
+    targetMemberFramePromotableQueryFeatures = 0
+    targetMemberFramePromotablePoolRows = 0
+    targetMemberFramePromotableScored = 0
+    targetMemberFramePromotableRouteRows = 0
+    targetMemberFramePromotableMatchedFeatures = 0
+    targetMemberFramePromotableCoreMatchedFeatures = 0
+    targetMemberFramePromotableSequenceMatchedFeatures = 0
+    targetMemberFramePromotableLedgerMatchedFeatures = 0
+    targetMemberFramePromotablePromotionMilli = 0
+    targetMemberFramePromotableScoreMilli = 0
+    targetMemberFrameSlotResidualQueryFeatures = 0
+    targetMemberFrameSlotResidualQuerySlots = 0
+    targetMemberFrameSlotResidualPoolRows = 0
+    targetMemberFrameSlotResidualScored = 0
+    targetMemberFrameSlotResidualRouteRows = 0
+    targetMemberFrameSlotResidualMatchedFeatures = 0
+    targetMemberFrameSlotResidualResidualMatchedFeatures = 0
+    targetMemberFrameSlotResidualCommonMatchedFeatures = 0
+    targetMemberFrameSlotResidualPositiveMargins = 0
+    targetMemberFrameSlotResidualNegativeMargins = 0
+    targetMemberFrameSlotResidualProofMilli = 0
+    targetMemberFrameSlotResidualMarginMilli = 0
+    targetMemberFrameSlotResidualFragmentSupportMilli = 0
+    targetMemberFrameSlotResidualScoreMilli = 0
     targetMemberFrameTraceAlignPoolRows = 0
     targetMemberFrameTraceAlignScored = 0
     targetMemberFrameTraceAlignRouteRows = 0
@@ -18128,6 +27413,40 @@ def main() -> None:
         targetMemberFramePathLocalAcceptedTracePairs += frameStats.get("pathLocalAcceptedTracePairs", 0)
         targetMemberFramePathLocalProofMilli += frameStats.get("pathLocalProofMilli", 0)
         targetMemberFramePathLocalAcceptedRows += frameStats.get("pathLocalAcceptedRows", 0)
+        targetMemberFramePathGrammarQueryFeatures += frameStats.get("pathGrammarQueryFeatures", 0)
+        targetMemberFramePathGrammarPoolRows += frameStats.get("pathGrammarPoolRows", 0)
+        targetMemberFramePathGrammarScored += frameStats.get("pathGrammarScored", 0)
+        targetMemberFramePathGrammarRouteRows += frameStats.get("pathGrammarRouteRows", 0)
+        targetMemberFramePathGrammarMatchedFeatures += frameStats.get("pathGrammarMatchedFeatures", 0)
+        targetMemberFramePathGrammarCoreMatchedFeatures += frameStats.get("pathGrammarCoreMatchedFeatures", 0)
+        targetMemberFramePathGrammarSequenceMatchedFeatures += frameStats.get("pathGrammarSequenceMatchedFeatures", 0)
+        targetMemberFramePathGrammarLedgerMatchedFeatures += frameStats.get("pathGrammarLedgerMatchedFeatures", 0)
+        targetMemberFramePathGrammarMeanIdfMilli += frameStats.get("pathGrammarMeanIdfMilli", 0)
+        targetMemberFramePathGrammarScoreMilli += frameStats.get("pathGrammarScoreMilli", 0)
+        targetMemberFramePromotableQueryFeatures += frameStats.get("promotableQueryFeatures", 0)
+        targetMemberFramePromotablePoolRows += frameStats.get("promotablePoolRows", 0)
+        targetMemberFramePromotableScored += frameStats.get("promotableScored", 0)
+        targetMemberFramePromotableRouteRows += frameStats.get("promotableRouteRows", 0)
+        targetMemberFramePromotableMatchedFeatures += frameStats.get("promotableMatchedFeatures", 0)
+        targetMemberFramePromotableCoreMatchedFeatures += frameStats.get("promotableCoreMatchedFeatures", 0)
+        targetMemberFramePromotableSequenceMatchedFeatures += frameStats.get("promotableSequenceMatchedFeatures", 0)
+        targetMemberFramePromotableLedgerMatchedFeatures += frameStats.get("promotableLedgerMatchedFeatures", 0)
+        targetMemberFramePromotablePromotionMilli += frameStats.get("promotablePromotionMilli", 0)
+        targetMemberFramePromotableScoreMilli += frameStats.get("promotableScoreMilli", 0)
+        targetMemberFrameSlotResidualQueryFeatures += frameStats.get("slotResidualQueryFeatures", 0)
+        targetMemberFrameSlotResidualQuerySlots += frameStats.get("slotResidualQuerySlots", 0)
+        targetMemberFrameSlotResidualPoolRows += frameStats.get("slotResidualPoolRows", 0)
+        targetMemberFrameSlotResidualScored += frameStats.get("slotResidualScored", 0)
+        targetMemberFrameSlotResidualRouteRows += frameStats.get("slotResidualRouteRows", 0)
+        targetMemberFrameSlotResidualMatchedFeatures += frameStats.get("slotResidualMatchedFeatures", 0)
+        targetMemberFrameSlotResidualResidualMatchedFeatures += frameStats.get("slotResidualResidualMatchedFeatures", 0)
+        targetMemberFrameSlotResidualCommonMatchedFeatures += frameStats.get("slotResidualCommonMatchedFeatures", 0)
+        targetMemberFrameSlotResidualPositiveMargins += frameStats.get("slotResidualPositiveMargins", 0)
+        targetMemberFrameSlotResidualNegativeMargins += frameStats.get("slotResidualNegativeMargins", 0)
+        targetMemberFrameSlotResidualProofMilli += frameStats.get("slotResidualProofMilli", 0)
+        targetMemberFrameSlotResidualMarginMilli += frameStats.get("slotResidualMarginMilli", 0)
+        targetMemberFrameSlotResidualFragmentSupportMilli += frameStats.get("slotResidualFragmentSupportMilli", 0)
+        targetMemberFrameSlotResidualScoreMilli += frameStats.get("slotResidualScoreMilli", 0)
         targetMemberFrameTraceAlignPoolRows += frameStats.get("traceAlignPoolRows", 0)
         targetMemberFrameTraceAlignScored += frameStats.get("traceAlignScored", 0)
         targetMemberFrameTraceAlignRouteRows += frameStats.get("traceAlignRouteRows", 0)
@@ -18418,6 +27737,40 @@ def main() -> None:
         targetMemberFramePathLocalAcceptedTracePairs += frameStats.get("pathLocalAcceptedTracePairs", 0)
         targetMemberFramePathLocalProofMilli += frameStats.get("pathLocalProofMilli", 0)
         targetMemberFramePathLocalAcceptedRows += frameStats.get("pathLocalAcceptedRows", 0)
+        targetMemberFramePathGrammarQueryFeatures += frameStats.get("pathGrammarQueryFeatures", 0)
+        targetMemberFramePathGrammarPoolRows += frameStats.get("pathGrammarPoolRows", 0)
+        targetMemberFramePathGrammarScored += frameStats.get("pathGrammarScored", 0)
+        targetMemberFramePathGrammarRouteRows += frameStats.get("pathGrammarRouteRows", 0)
+        targetMemberFramePathGrammarMatchedFeatures += frameStats.get("pathGrammarMatchedFeatures", 0)
+        targetMemberFramePathGrammarCoreMatchedFeatures += frameStats.get("pathGrammarCoreMatchedFeatures", 0)
+        targetMemberFramePathGrammarSequenceMatchedFeatures += frameStats.get("pathGrammarSequenceMatchedFeatures", 0)
+        targetMemberFramePathGrammarLedgerMatchedFeatures += frameStats.get("pathGrammarLedgerMatchedFeatures", 0)
+        targetMemberFramePathGrammarMeanIdfMilli += frameStats.get("pathGrammarMeanIdfMilli", 0)
+        targetMemberFramePathGrammarScoreMilli += frameStats.get("pathGrammarScoreMilli", 0)
+        targetMemberFramePromotableQueryFeatures += frameStats.get("promotableQueryFeatures", 0)
+        targetMemberFramePromotablePoolRows += frameStats.get("promotablePoolRows", 0)
+        targetMemberFramePromotableScored += frameStats.get("promotableScored", 0)
+        targetMemberFramePromotableRouteRows += frameStats.get("promotableRouteRows", 0)
+        targetMemberFramePromotableMatchedFeatures += frameStats.get("promotableMatchedFeatures", 0)
+        targetMemberFramePromotableCoreMatchedFeatures += frameStats.get("promotableCoreMatchedFeatures", 0)
+        targetMemberFramePromotableSequenceMatchedFeatures += frameStats.get("promotableSequenceMatchedFeatures", 0)
+        targetMemberFramePromotableLedgerMatchedFeatures += frameStats.get("promotableLedgerMatchedFeatures", 0)
+        targetMemberFramePromotablePromotionMilli += frameStats.get("promotablePromotionMilli", 0)
+        targetMemberFramePromotableScoreMilli += frameStats.get("promotableScoreMilli", 0)
+        targetMemberFrameSlotResidualQueryFeatures += frameStats.get("slotResidualQueryFeatures", 0)
+        targetMemberFrameSlotResidualQuerySlots += frameStats.get("slotResidualQuerySlots", 0)
+        targetMemberFrameSlotResidualPoolRows += frameStats.get("slotResidualPoolRows", 0)
+        targetMemberFrameSlotResidualScored += frameStats.get("slotResidualScored", 0)
+        targetMemberFrameSlotResidualRouteRows += frameStats.get("slotResidualRouteRows", 0)
+        targetMemberFrameSlotResidualMatchedFeatures += frameStats.get("slotResidualMatchedFeatures", 0)
+        targetMemberFrameSlotResidualResidualMatchedFeatures += frameStats.get("slotResidualResidualMatchedFeatures", 0)
+        targetMemberFrameSlotResidualCommonMatchedFeatures += frameStats.get("slotResidualCommonMatchedFeatures", 0)
+        targetMemberFrameSlotResidualPositiveMargins += frameStats.get("slotResidualPositiveMargins", 0)
+        targetMemberFrameSlotResidualNegativeMargins += frameStats.get("slotResidualNegativeMargins", 0)
+        targetMemberFrameSlotResidualProofMilli += frameStats.get("slotResidualProofMilli", 0)
+        targetMemberFrameSlotResidualMarginMilli += frameStats.get("slotResidualMarginMilli", 0)
+        targetMemberFrameSlotResidualFragmentSupportMilli += frameStats.get("slotResidualFragmentSupportMilli", 0)
+        targetMemberFrameSlotResidualScoreMilli += frameStats.get("slotResidualScoreMilli", 0)
         targetMemberFrameTraceAlignPoolRows += frameStats.get("traceAlignPoolRows", 0)
         targetMemberFrameTraceAlignScored += frameStats.get("traceAlignScored", 0)
         targetMemberFrameTraceAlignRouteRows += frameStats.get("traceAlignRouteRows", 0)
@@ -18943,6 +28296,118 @@ def main() -> None:
         f"targetMemberPathLocalAcceptedTracePairs={targetMemberPathLocalAcceptedTracePairs} "
         f"targetMemberPathLocalTargetTraceRows={targetMemberPathLocalTargetTraceRows} "
         f"targetMemberPathLocalProofMilli={targetMemberPathLocalProofMilli} "
+        f"targetMemberPathGrammarProbeTop1={targetMemberPathGrammarProbeTop1}/{len(POSITIVE_PROBES)} "
+        f"targetMemberPathGrammarProbeTop5={targetMemberPathGrammarProbeTop5}/{len(POSITIVE_PROBES)} "
+        f"targetMemberPathGrammarProbeBadTop1={targetMemberPathGrammarProbeBadTop1}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberPathGrammarProbeBadTop5={targetMemberPathGrammarProbeBadTop5}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberPathGrammarQueryFeatures={targetMemberPathGrammarQueryFeatures} "
+        f"targetMemberPathGrammarPoolRows={targetMemberPathGrammarPoolRows} "
+        f"targetMemberPathGrammarPostingRows={targetMemberPathGrammarPostingRows} "
+        f"targetMemberPathGrammarScored={targetMemberPathGrammarScored} "
+        f"targetMemberPathGrammarRouteRows={targetMemberPathGrammarRouteRows} "
+        f"targetMemberPathGrammarMatchedFeatures={targetMemberPathGrammarMatchedFeatures} "
+        f"targetMemberPathGrammarCoreMatchedFeatures={targetMemberPathGrammarCoreMatchedFeatures} "
+        f"targetMemberPathGrammarSequenceMatchedFeatures={targetMemberPathGrammarSequenceMatchedFeatures} "
+        f"targetMemberPathGrammarLedgerMatchedFeatures={targetMemberPathGrammarLedgerMatchedFeatures} "
+        f"targetMemberPathGrammarMeanIdfMilli={targetMemberPathGrammarMeanIdfMilli} "
+        f"targetMemberPathGrammarScoreMilli={targetMemberPathGrammarScoreMilli} "
+        f"targetMemberPromotableProbeTop1={targetMemberPromotableProbeTop1}/{len(POSITIVE_PROBES)} "
+        f"targetMemberPromotableProbeTop5={targetMemberPromotableProbeTop5}/{len(POSITIVE_PROBES)} "
+        f"targetMemberPromotableProbeBadTop1={targetMemberPromotableProbeBadTop1}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberPromotableProbeBadTop5={targetMemberPromotableProbeBadTop5}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberPromotableQueryFeatures={targetMemberPromotableQueryFeatures} "
+        f"targetMemberPromotablePoolRows={targetMemberPromotablePoolRows} "
+        f"targetMemberPromotablePostingRows={targetMemberPromotablePostingRows} "
+        f"targetMemberPromotableScored={targetMemberPromotableScored} "
+        f"targetMemberPromotableRouteRows={targetMemberPromotableRouteRows} "
+        f"targetMemberPromotableMatchedFeatures={targetMemberPromotableMatchedFeatures} "
+        f"targetMemberPromotableCoreMatchedFeatures={targetMemberPromotableCoreMatchedFeatures} "
+        f"targetMemberPromotableSequenceMatchedFeatures={targetMemberPromotableSequenceMatchedFeatures} "
+        f"targetMemberPromotableLedgerMatchedFeatures={targetMemberPromotableLedgerMatchedFeatures} "
+        f"targetMemberPromotablePromotionMilli={targetMemberPromotablePromotionMilli} "
+        f"targetMemberPromotableScoreMilli={targetMemberPromotableScoreMilli} "
+        f"targetMemberSlotResidualProbeTop1={targetMemberSlotResidualProbeTop1}/{len(POSITIVE_PROBES)} "
+        f"targetMemberSlotResidualProbeTop5={targetMemberSlotResidualProbeTop5}/{len(POSITIVE_PROBES)} "
+        f"targetMemberSlotResidualProbeBadTop1={targetMemberSlotResidualProbeBadTop1}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberSlotResidualProbeBadTop5={targetMemberSlotResidualProbeBadTop5}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberSlotResidualQueryFeatures={targetMemberSlotResidualQueryFeatures} "
+        f"targetMemberSlotResidualQuerySlots={targetMemberSlotResidualQuerySlots} "
+        f"targetMemberSlotResidualPoolRows={targetMemberSlotResidualPoolRows} "
+        f"targetMemberSlotResidualPostingRows={targetMemberSlotResidualPostingRows} "
+        f"targetMemberSlotResidualCohortRows={targetMemberSlotResidualCohortRows} "
+        f"targetMemberSlotResidualScored={targetMemberSlotResidualScored} "
+        f"targetMemberSlotResidualRouteRows={targetMemberSlotResidualRouteRows} "
+        f"targetMemberSlotResidualMatchedFeatures={targetMemberSlotResidualMatchedFeatures} "
+        f"targetMemberSlotResidualResidualMatchedFeatures={targetMemberSlotResidualResidualMatchedFeatures} "
+        f"targetMemberSlotResidualCommonMatchedFeatures={targetMemberSlotResidualCommonMatchedFeatures} "
+        f"targetMemberSlotResidualSequenceMatchedFeatures={targetMemberSlotResidualSequenceMatchedFeatures} "
+        f"targetMemberSlotResidualLedgerMatchedFeatures={targetMemberSlotResidualLedgerMatchedFeatures} "
+        f"targetMemberSlotResidualPositiveMargins={targetMemberSlotResidualPositiveMargins} "
+        f"targetMemberSlotResidualNegativeMargins={targetMemberSlotResidualNegativeMargins} "
+        f"targetMemberSlotResidualProofMilli={targetMemberSlotResidualProofMilli} "
+        f"targetMemberSlotResidualPeerProofMilli={targetMemberSlotResidualPeerProofMilli} "
+        f"targetMemberSlotResidualMarginMilli={targetMemberSlotResidualMarginMilli} "
+        f"targetMemberSlotResidualFragmentSupportMilli={targetMemberSlotResidualFragmentSupportMilli} "
+        f"targetMemberSlotResidualScoreMilli={targetMemberSlotResidualScoreMilli} "
+        f"targetMemberAccountAxisProbeTop1={targetMemberAccountAxisProbeTop1}/{len(POSITIVE_PROBES)} "
+        f"targetMemberAccountAxisProbeTop5={targetMemberAccountAxisProbeTop5}/{len(POSITIVE_PROBES)} "
+        f"targetMemberAccountAxisProbeBadTop1={targetMemberAccountAxisProbeBadTop1}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberAccountAxisProbeBadTop5={targetMemberAccountAxisProbeBadTop5}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberAccountAxisQueryFeatures={targetMemberAccountAxisQueryFeatures} "
+        f"targetMemberAccountAxisSeedPoolRows={targetMemberAccountAxisSeedPoolRows} "
+        f"targetMemberAccountAxisProcessedFamilies={targetMemberAccountAxisProcessedFamilies} "
+        f"targetMemberAccountAxisFamilyRows={targetMemberAccountAxisFamilyRows} "
+        f"targetMemberAccountAxisProofRows={targetMemberAccountAxisProofRows} "
+        f"targetMemberAccountAxisPeerRows={targetMemberAccountAxisPeerRows} "
+        f"targetMemberAccountAxisMatchedFeatures={targetMemberAccountAxisMatchedFeatures} "
+        f"targetMemberAccountAxisLedgerMatchedFeatures={targetMemberAccountAxisLedgerMatchedFeatures} "
+        f"targetMemberAccountAxisRelationMatchedFeatures={targetMemberAccountAxisRelationMatchedFeatures} "
+        f"targetMemberAccountAxisRoleMatchedFeatures={targetMemberAccountAxisRoleMatchedFeatures} "
+        f"targetMemberAccountAxisStructMatchedFeatures={targetMemberAccountAxisStructMatchedFeatures} "
+        f"targetMemberAccountAxisPositiveMargins={targetMemberAccountAxisPositiveMargins} "
+        f"targetMemberAccountAxisNegativeMargins={targetMemberAccountAxisNegativeMargins} "
+        f"targetMemberAccountAxisProofMilli={targetMemberAccountAxisProofMilli} "
+        f"targetMemberAccountAxisMarginMilli={targetMemberAccountAxisMarginMilli} "
+        f"targetMemberAccountAxisScoreMilli={targetMemberAccountAxisScoreMilli} "
+        f"targetMemberAccountAxisScored={targetMemberAccountAxisScored} "
+        f"targetMemberAccountAxisRouteRows={targetMemberAccountAxisRouteRows} "
+        f"targetMemberAccountRegistryProbeTop1={targetMemberAccountRegistryProbeTop1}/{len(POSITIVE_PROBES)} "
+        f"targetMemberAccountRegistryProbeTop5={targetMemberAccountRegistryProbeTop5}/{len(POSITIVE_PROBES)} "
+        f"targetMemberAccountRegistryProbeBadTop1={targetMemberAccountRegistryProbeBadTop1}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberAccountRegistryProbeBadTop5={targetMemberAccountRegistryProbeBadTop5}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberAccountRegistrySurfaces={targetMemberAccountRegistrySurfaces} "
+        f"targetMemberAccountRegistryFamilies={targetMemberAccountRegistryFamilies} "
+        f"targetMemberAccountRegistryQueryFeatures={targetMemberAccountRegistryQueryFeatures} "
+        f"targetMemberAccountRegistrySeedPoolRows={targetMemberAccountRegistrySeedPoolRows} "
+        f"targetMemberAccountRegistryScored={targetMemberAccountRegistryScored} "
+        f"targetMemberAccountRegistryRouteRows={targetMemberAccountRegistryRouteRows} "
+        f"targetMemberAccountRegistryMatchedFeatures={targetMemberAccountRegistryMatchedFeatures} "
+        f"targetMemberAccountRegistryValueMatchedFeatures={targetMemberAccountRegistryValueMatchedFeatures} "
+        f"targetMemberAccountRegistryRelationMatchedFeatures={targetMemberAccountRegistryRelationMatchedFeatures} "
+        f"targetMemberAccountRegistryLedgerMatchedFeatures={targetMemberAccountRegistryLedgerMatchedFeatures} "
+        f"targetMemberAccountRegistryProofMilli={targetMemberAccountRegistryProofMilli} "
+        f"targetMemberAccountRegistryAxisProofMilli={targetMemberAccountRegistryAxisProofMilli} "
+        f"targetMemberAccountRegistryScoreMilli={targetMemberAccountRegistryScoreMilli} "
+        f"targetMemberAccountRegistryPeerRows={targetMemberAccountRegistryPeerRows} "
+        f"targetMemberStatementLedgerProbeTop1={targetMemberStatementLedgerProbeTop1}/{len(POSITIVE_PROBES)} "
+        f"targetMemberStatementLedgerProbeTop5={targetMemberStatementLedgerProbeTop5}/{len(POSITIVE_PROBES)} "
+        f"targetMemberStatementLedgerProbeBadTop1={targetMemberStatementLedgerProbeBadTop1}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberStatementLedgerProbeBadTop5={targetMemberStatementLedgerProbeBadTop5}/{len(NEGATIVE_PROBES)} "
+        f"targetMemberStatementLedgerSurfaces={targetMemberStatementLedgerSurfaces} "
+        f"targetMemberStatementLedgerFamilies={targetMemberStatementLedgerFamilies} "
+        f"targetMemberStatementLedgerQueryFeatures={targetMemberStatementLedgerQueryFeatures} "
+        f"targetMemberStatementLedgerSeedPoolRows={targetMemberStatementLedgerSeedPoolRows} "
+        f"targetMemberStatementLedgerScored={targetMemberStatementLedgerScored} "
+        f"targetMemberStatementLedgerRouteRows={targetMemberStatementLedgerRouteRows} "
+        f"targetMemberStatementLedgerMatchedFeatures={targetMemberStatementLedgerMatchedFeatures} "
+        f"targetMemberStatementLedgerRoleMatchedFeatures={targetMemberStatementLedgerRoleMatchedFeatures} "
+        f"targetMemberStatementLedgerStatementMatchedFeatures={targetMemberStatementLedgerStatementMatchedFeatures} "
+        f"targetMemberStatementLedgerValueMatchedFeatures={targetMemberStatementLedgerValueMatchedFeatures} "
+        f"targetMemberStatementLedgerRelationMatchedFeatures={targetMemberStatementLedgerRelationMatchedFeatures} "
+        f"targetMemberStatementLedgerOrderMatchedFeatures={targetMemberStatementLedgerOrderMatchedFeatures} "
+        f"targetMemberStatementLedgerProofMilli={targetMemberStatementLedgerProofMilli} "
+        f"targetMemberStatementLedgerScoreMilli={targetMemberStatementLedgerScoreMilli} "
+        f"targetMemberStatementLedgerPeerRows={targetMemberStatementLedgerPeerRows} "
         f"targetMemberTraceAlignProbeTop1={targetMemberTraceAlignProbeTop1}/{len(POSITIVE_PROBES)} "
         f"targetMemberTraceAlignProbeTop5={targetMemberTraceAlignProbeTop5}/{len(POSITIVE_PROBES)} "
         f"targetMemberTraceAlignProbeBadTop1={targetMemberTraceAlignProbeBadTop1}/{len(NEGATIVE_PROBES)} "
@@ -19003,6 +28468,40 @@ def main() -> None:
         f"targetMemberFramePathLocalAcceptedTracePairs={targetMemberFramePathLocalAcceptedTracePairs} "
         f"targetMemberFramePathLocalProofMilli={targetMemberFramePathLocalProofMilli} "
         f"targetMemberFramePathLocalAcceptedRows={targetMemberFramePathLocalAcceptedRows} "
+        f"targetMemberFramePathGrammarQueryFeatures={targetMemberFramePathGrammarQueryFeatures} "
+        f"targetMemberFramePathGrammarPoolRows={targetMemberFramePathGrammarPoolRows} "
+        f"targetMemberFramePathGrammarScored={targetMemberFramePathGrammarScored} "
+        f"targetMemberFramePathGrammarRouteRows={targetMemberFramePathGrammarRouteRows} "
+        f"targetMemberFramePathGrammarMatchedFeatures={targetMemberFramePathGrammarMatchedFeatures} "
+        f"targetMemberFramePathGrammarCoreMatchedFeatures={targetMemberFramePathGrammarCoreMatchedFeatures} "
+        f"targetMemberFramePathGrammarSequenceMatchedFeatures={targetMemberFramePathGrammarSequenceMatchedFeatures} "
+        f"targetMemberFramePathGrammarLedgerMatchedFeatures={targetMemberFramePathGrammarLedgerMatchedFeatures} "
+        f"targetMemberFramePathGrammarMeanIdfMilli={targetMemberFramePathGrammarMeanIdfMilli} "
+        f"targetMemberFramePathGrammarScoreMilli={targetMemberFramePathGrammarScoreMilli} "
+        f"targetMemberFramePromotableQueryFeatures={targetMemberFramePromotableQueryFeatures} "
+        f"targetMemberFramePromotablePoolRows={targetMemberFramePromotablePoolRows} "
+        f"targetMemberFramePromotableScored={targetMemberFramePromotableScored} "
+        f"targetMemberFramePromotableRouteRows={targetMemberFramePromotableRouteRows} "
+        f"targetMemberFramePromotableMatchedFeatures={targetMemberFramePromotableMatchedFeatures} "
+        f"targetMemberFramePromotableCoreMatchedFeatures={targetMemberFramePromotableCoreMatchedFeatures} "
+        f"targetMemberFramePromotableSequenceMatchedFeatures={targetMemberFramePromotableSequenceMatchedFeatures} "
+        f"targetMemberFramePromotableLedgerMatchedFeatures={targetMemberFramePromotableLedgerMatchedFeatures} "
+        f"targetMemberFramePromotablePromotionMilli={targetMemberFramePromotablePromotionMilli} "
+        f"targetMemberFramePromotableScoreMilli={targetMemberFramePromotableScoreMilli} "
+        f"targetMemberFrameSlotResidualQueryFeatures={targetMemberFrameSlotResidualQueryFeatures} "
+        f"targetMemberFrameSlotResidualQuerySlots={targetMemberFrameSlotResidualQuerySlots} "
+        f"targetMemberFrameSlotResidualPoolRows={targetMemberFrameSlotResidualPoolRows} "
+        f"targetMemberFrameSlotResidualScored={targetMemberFrameSlotResidualScored} "
+        f"targetMemberFrameSlotResidualRouteRows={targetMemberFrameSlotResidualRouteRows} "
+        f"targetMemberFrameSlotResidualMatchedFeatures={targetMemberFrameSlotResidualMatchedFeatures} "
+        f"targetMemberFrameSlotResidualResidualMatchedFeatures={targetMemberFrameSlotResidualResidualMatchedFeatures} "
+        f"targetMemberFrameSlotResidualCommonMatchedFeatures={targetMemberFrameSlotResidualCommonMatchedFeatures} "
+        f"targetMemberFrameSlotResidualPositiveMargins={targetMemberFrameSlotResidualPositiveMargins} "
+        f"targetMemberFrameSlotResidualNegativeMargins={targetMemberFrameSlotResidualNegativeMargins} "
+        f"targetMemberFrameSlotResidualProofMilli={targetMemberFrameSlotResidualProofMilli} "
+        f"targetMemberFrameSlotResidualMarginMilli={targetMemberFrameSlotResidualMarginMilli} "
+        f"targetMemberFrameSlotResidualFragmentSupportMilli={targetMemberFrameSlotResidualFragmentSupportMilli} "
+        f"targetMemberFrameSlotResidualScoreMilli={targetMemberFrameSlotResidualScoreMilli} "
         f"targetMemberFrameTraceAlignPoolRows={targetMemberFrameTraceAlignPoolRows} "
         f"targetMemberFrameTraceAlignScored={targetMemberFrameTraceAlignScored} "
         f"targetMemberFrameTraceAlignRouteRows={targetMemberFrameTraceAlignRouteRows} "
