@@ -167,8 +167,9 @@ panel.parquet → `build/cell.buildPanelCells`(lxml) → panelCell → `cell.rea
   이후 셀=당기/전기/전전기 금액, `_parseAmount`/`_detectUnit` — docs/finance 로직 참고 재구현). 한 보고서가
   당기/전기/전전기 3년 운반.
 - **항목명 통합** — `readStatement` 가 XBRL `label`("매출액 (주30)")과 옛 항목명("매출액")을 `_normalizeLabel`
-  ((주N) strip)로 매칭 → 전 기간 연속(2011~). 정밀 최근 + 과거 한 줄. 개명 항목("수익(매출액)"→"매출액")은
-  별 행(숨김 0, 금액 stitch 는 후속). 겹치는 해는 최신 filing(=XBRL) 우선.
+  ((주N) strip)로 매칭 → 전 기간 연속(2011~). 정밀 최근 + 과거 한 줄. **개명 항목**("수익(매출액)"→"매출액")은
+  `_stitchRecentName` 이 **금액 겹침**(연속 보고서 당기/전기 겹친 해의 동일 금액)으로 묶어 **최근 이름** 기준
+  한 줄(식별력 있는 큰 금액=콤마만 링크, over-merge 회피). 겹치는 해는 최신 filing(=XBRL) 우선.
 - **freq = 입도** (소스 스위치 아님) — `year`(연)/`quarter`(분기)/`ytd`(누적), native·finance 둘 다. native
   XBRL 은 ctxMode 토큰 선택, 옛은 사업보고서(Y)/분기(A). `readCellWide`(acode 정밀 차원 view)는 XBRL 전용 유지.
 - **저장 원칙 적용** — 파싱(ctxYear/ctxFlow/ctxQuarter/ctxMode/axisPath/valueRaw)은 순수 규칙이라 build,

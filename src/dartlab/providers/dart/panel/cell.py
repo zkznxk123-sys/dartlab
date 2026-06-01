@@ -215,6 +215,50 @@ def _normalizeLabel(col: pl.Expr) -> pl.Expr:
     return col.str.replace_all(_NOTE_PAT, "").str.replace_all(r"\s+", "")
 
 
+def _find(parent: dict, x: str) -> str:
+    """union-find root (경로 압축)."""
+    parent.setdefault(x, x)
+    r = x
+    while parent[r] != r:
+        r = parent[r]
+    while parent[x] != r:
+        parent[x], x = r, parent[x]
+    return r
+
+
+def _stitchRecentName(df: pl.DataFrame) -> pl.DataFrame:
+    """개명 항목 통합 — 금액 겹침으로 같은 라인 묶어 **최신 filing 이름**(최근 기준) 부여.
+
+    연속 보고서가 당기/전기/전전기로 연도 겹침 → 개명 전후 같은 라인은 **겹친 해의 금액이 같다**.
+    그 금액 동치((ctxYear, valueRaw) 공유)로 `_name` 동치류를 만들고, 각 류 canonical = 최신
+    rceptNo 의 `_name`. 식별력 있는 큰 금액(콤마 보유)만 링크 근거 — 0/소액 우연일치 over-merge 회피.
+
+    Args:
+        df: ``_name``/``ctxYear``/``valueRaw``/``rceptNo`` 보유 cell DataFrame.
+
+    Returns:
+        ``_name`` 을 canonical(최근 이름)로 치환한 DataFrame.
+    """
+    sig = df.filter(pl.col("valueRaw").str.contains(",", literal=True)).select("_name", "ctxYear", "valueRaw")
+    parent: dict[str, str] = {}
+    groups: dict[tuple, list[str]] = {}
+    for name, yr, val in sig.iter_rows():
+        groups.setdefault((yr, val), []).append(name)
+    for names in groups.values():
+        for n in names[1:]:
+            parent[_find(parent, n)] = _find(parent, names[0])
+    recency: dict[str, str] = dict(df.group_by("_name").agg(pl.col("rceptNo").max().alias("r")).iter_rows())
+    comp: dict[str, list[str]] = {}
+    for name in recency:
+        comp.setdefault(_find(parent, name), []).append(name)
+    nameToCanon: dict[str, str] = {}
+    for members in comp.values():
+        best = max(members, key=lambda n: recency.get(n) or "")  # 최신 filing 이름
+        for m in members:
+            nameToCanon[m] = best
+    return df.with_columns(pl.col("_name").replace(nameToCanon).alias("_name"))
+
+
 def readStatement(
     code: str,
     *,
@@ -263,7 +307,7 @@ def readStatement(
         - ``c.panel("is")`` 소문자 호출 → 본 함수. 대문자 IS 는 finance(파사드).
 
     AIContext:
-        - 상태 없는 read. valueRaw 그대로. 항목명 다르면 별 행(숨김 0).
+        - 상태 없는 read. valueRaw 그대로. 개명 항목은 금액 겹침으로 최근 이름 통합(_stitchRecentName).
 
     When:
         - native 재무제표를 전 기간 연속으로 볼 때.
@@ -273,7 +317,7 @@ def readStatement(
 
     LLM Specifications:
         AntiPatterns:
-            - lxml import 금지(R2). 항목명 매칭 실패를 숨기지 말 것(별 행).
+            - lxml import 금지(R2). over-merge 회피 — 식별력 있는 큰 금액(콤마)만 stitch 링크.
         OutputSchema:
             - ``pl.DataFrame | None`` (항목명×period).
         Prerequisites:
@@ -311,6 +355,7 @@ def readStatement(
         _normalizeLabel(pl.col("label")).alias("_name"),
         _periodLabelExpr(freq).alias("_period"),
     ).sort("rceptNo", descending=True)  # 최신 filing(=XBRL) 우선
+    df = _stitchRecentName(df)  # 개명 항목 → 금액 겹침으로 최근 이름 통합
     deduped = df.unique(subset=["_name", "_period"], keep="first", maintain_order=True)
     meta = df.group_by("_name", maintain_order=True).agg(
         pl.col("label").first().alias("label"),  # 최신 filing 표시명

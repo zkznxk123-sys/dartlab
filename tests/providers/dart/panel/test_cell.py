@@ -207,3 +207,36 @@ def test_read_statement_old_acode_none(statementEnv) -> None:
 
     w = readStatement("ST01", statement="IS2", freq="year")
     assert "2015" in w.columns  # acode=None 옛 셀이 과거 열 제공
+
+
+@pytest.fixture
+def renameEnv(tmp_path, monkeypatch):
+    """개명 stitch — 최근 '매출액'(2023/2022) + 옛 '수익(매출액)'(2022/2021), 2022 금액 겹침."""
+    import dartlab.config as cfg
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    out = tmp_path / "dart" / "panelCell" / "RN01"
+    out.mkdir(parents=True)
+    rows = [
+        # 최신 filing(높은 rceptNo) '매출액' — 2023/2022
+        {**_oldRow("2023Q4", "매출액 (주30)", 2023, "10,000"), "rceptNo": "20240301000000"},
+        {**_oldRow("2023Q4", "매출액 (주30)", 2022, "9,000"), "rceptNo": "20240301000000"},
+        # 옛 filing(낮은 rceptNo) '수익(매출액)' — 2022(겹침)/2021
+        {**_oldRow("2022Q4", "수익(매출액)", 2022, "9,000"), "rceptNo": "20230301000000"},
+        {**_oldRow("2022Q4", "수익(매출액)", 2021, "8,000"), "rceptNo": "20230301000000"},
+    ]
+    df = pl.DataFrame(rows, schema=CELL_SCHEMA)
+    for fp in df["filingPeriod"].unique():
+        df.filter(pl.col("filingPeriod") == fp).write_parquet(str(out / f"{fp}.parquet"))
+    return tmp_path
+
+
+def test_read_statement_rename_stitch(renameEnv) -> None:
+    """개명 항목 → 금액 겹침(2022)으로 한 줄, **최근 이름**('매출액') 기준."""
+    from dartlab.providers.dart.panel.cell import readStatement
+
+    w = readStatement("RN01", statement="IS2", freq="year")
+    assert w.height == 1, "개명 전후가 한 행으로 통합 (수익(매출액) 별 행 아님)"
+    assert w["account"][0] == "매출액"  # 최근 이름 기준
+    row = w.row(0, named=True)
+    assert row["2023"] == "10,000" and row["2022"] == "9,000" and row["2021"] == "8,000"  # 전 기간 연속
