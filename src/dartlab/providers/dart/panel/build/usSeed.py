@@ -1,4 +1,4 @@
-"""panel disclosureKey bridge SSOT (L0) — US↔KR cross-market overlay.
+"""panel US cross-market overlay seed (build-side, dormant) — us-gaap ↔ KR disclosureKey.
 
 EDGAR us-gaap TextBlock concept ↔ universal disclosureKey(snakeId). **KR within-market 정렬은
 core.panel.canonicalKey(native ACLASS scope-strip)가 대체** — 본 bridge 는 이제 두 택소노미
@@ -366,6 +366,4 @@ def writeBridge(df: pl.DataFrame, *, invalidate: bool = True) -> None:
     bridgePath.parent.mkdir(parents=True, exist_ok=True)
     df.select(list(BRIDGE_SCHEMA.keys())).write_parquet(str(bridgePath))
     if invalidate:
-        from .canonical import invalidateCache
-
-        invalidateCache()
+        loadBridge.cache_clear()

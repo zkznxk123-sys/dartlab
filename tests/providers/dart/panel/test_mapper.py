@@ -1,7 +1,7 @@
-"""core/panel canonical mirror — rawId→disclosureKey resolve (데이터 경량).
+"""panel mapper — canonicalKey scope-strip + rowIdentity + resolveBatch (순수 규칙).
 
-``core/panel/canonical.py`` 의 ``resolveDisclosureKey``(단건)/``resolveBatch``(컬럼 부착).
-bridge lookup 기반 — 미등록 rawId 는 None, empty df 는 passthrough.
+``mapper.py`` 의 ``canonicalKey``/``canonicalKeyExpr``(정렬키), ``rowIdentity``/``rowIdentityExpr``
+(spine·diff 행 식별), ``resolveBatch``(native canonicalKey 부착). bridge lookup 0 — 정부 코드 SSOT.
 """
 
 from __future__ import annotations
@@ -9,28 +9,66 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from dartlab.providers.dart.panel.mapper import canonicalKey, canonicalKeyExpr, resolveBatch, resolveDisclosureKey
+from dartlab.providers.dart.panel.mapper import (
+    canonicalKey,
+    canonicalKeyExpr,
+    resolveBatch,
+    rowIdentity,
+    rowIdentityExpr,
+)
 
 pytestmark = pytest.mark.unit
 
 
-def test_resolve_disclosure_key_unknown_none() -> None:
-    """미등록 rawId → None (bridge 비어도 안전)."""
-    assert resolveDisclosureKey("__nonexistent_rawid__", "kr") is None
-
-
 def test_resolve_batch_adds_disclosure_key_column() -> None:
-    """xbrlClass 컬럼 df → disclosureKey 컬럼 부착."""
+    """xbrlClass 컬럼 df → disclosureKey(=canonicalKey) 컬럼 부착."""
     df = pl.DataFrame({"xbrlClass": ["BS_C", None]})
     out = resolveBatch(df, marketNs="kr")
     assert "disclosureKey" in out.columns
     assert out.height == 2
+    assert out["disclosureKey"].to_list() == ["BS", None]
 
 
 def test_resolve_batch_empty_passthrough() -> None:
-    """빈 df 는 그대로 (lookup 0)."""
+    """빈 df 는 그대로 (변환 0)."""
     empty = pl.DataFrame({"xbrlClass": []}, schema={"xbrlClass": pl.Utf8})
     assert resolveBatch(empty, marketNs="kr").height == 0
+
+
+def test_resolve_batch_default_market() -> None:
+    """marketNs 기본값 'kr' — 인자 없이 호출 가능 (canonicalKey 시장 무관)."""
+    df = pl.DataFrame({"xbrlClass": ["NT_C_D826380"]})
+    assert resolveBatch(df)["disclosureKey"].to_list() == ["NT_D826380"]
+
+
+# ── rowIdentity — spine·diff 행 식별 SSOT (keyed=disclosureKey / narrative=NARR::) ──
+
+
+def test_row_identity_keyed_is_disclosure_key() -> None:
+    """disclosureKey 있는 행 → disclosureKey 자체가 identity (era-stable)."""
+    assert rowIdentity("NT_D826380", "III. 재무에 관한 사항", "3. 연결재무제표 주석") == "NT_D826380"
+
+
+def test_row_identity_narrative_uses_chapter_section() -> None:
+    """disclosureKey 부재 행 → NARR::chapter␟section (정부 양식 제목 안정)."""
+    assert rowIdentity(None, "I. 회사의 개요", "1. 회사의 개요") == "NARR::I. 회사의 개요␟1. 회사의 개요"
+    assert rowIdentity("", "I", "1") == "NARR::I␟1"
+
+
+def test_row_identity_expr_matches_scalar() -> None:
+    """rowIdentityExpr(polars) ≡ rowIdentity(scalar) — 규칙 분기 0 (단일 SSOT)."""
+    df = pl.DataFrame(
+        {
+            "disclosureKey": ["BS", None, "NT_D826380", ""],
+            "chapter": ["c", "I. 회사의 개요", "III", "X"],
+            "sectionLeaf": ["s", "1. 회사의 개요", "3.주석", "y"],
+        }
+    )
+    exprOut = df.select(rowIdentityExpr())["_rowIdentity"].to_list()
+    scalarOut = [
+        rowIdentity(k, c, s) for k, c, s in zip(df["disclosureKey"], df["chapter"], df["sectionLeaf"], strict=True)
+    ]
+    assert exprOut == scalarOut
 
 
 # ── canonicalKey scope-strip 순수함수 (단일 SSOT 정렬키) ──

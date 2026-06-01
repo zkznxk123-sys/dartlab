@@ -335,8 +335,8 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
 
         if "disclosureKey" in df.columns:
             df = df.drop("disclosureKey")
-        # KR within = native canonicalKey (옛 artifact·미빌드 fallback). US = bridge overlay.
-        df = resolveBatch(df, marketNs=marketNs, useCanonical=(marketNs == "kr"))
+        # native canonicalKey (옛 artifact·미빌드 fallback — build 가 채우면 미도달).
+        df = resolveBatch(df, marketNs=marketNs)
     return df
 
 
