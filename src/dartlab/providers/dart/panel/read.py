@@ -166,6 +166,20 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
     sections ``_ensureFromHf`` 미러. 로컬 우선 — 디렉터리 있으면 즉시 반환. offline/
     ``DARTLAB_NO_HF_DOWNLOAD=1`` skip. 실패는 graceful(빈 결과). KR 전용(US 후속).
     native is/bs/cf/ratios(셀)도 이 한 artifact 에서 파생되므로 panel.parquet 만 받으면 충분.
+
+    Args:
+        code: 종목코드 (KR 6자리).
+        marketNs: 시장 namespace. ``"kr"`` 만 다운로드 시도 (그 외 즉시 반환, US 후속).
+
+    Returns:
+        None — 부작용으로 ``data/{dart}/panel/{code}/`` 를 채운다. 이미 있으면 무동작.
+
+    Example:
+        >>> ensurePanelFromHf("005930")  # doctest: +SKIP
+        # data/dart/panel/005930/ 부재 시 HF 에서 그 종목 parquet 만 lazy 다운로드.
+
+    Raises:
+        없음 — 모든 예외를 graceful 흡수 (다운로드 실패는 빈 결과로 저하).
     """
     import os as _os
 

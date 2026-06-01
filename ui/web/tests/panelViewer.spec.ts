@@ -103,7 +103,8 @@ test.describe('Panel viewer e2e', () => {
 		await page.goto(`/analysis/${STOCK}/viewer?period=quarterly`);
 		await page.getByRole('button', { name: '2. 회사의 연혁' }).click();
 		await page.waitForURL(/section=/, { timeout: 10_000 });
-		expect(decodeURIComponent(page.url())).toContain('2. 회사의 연혁');
+		// URLSearchParams 는 공백을 '+' 로 인코딩 — decode 전에 '+' → ' ' 복원.
+		expect(decodeURIComponent(page.url().replace(/\+/g, ' '))).toContain('2. 회사의 연혁');
 	});
 
 	test('grid — raw XML 표가 DOM table 로 sanitize 렌더', async ({ page }) => {

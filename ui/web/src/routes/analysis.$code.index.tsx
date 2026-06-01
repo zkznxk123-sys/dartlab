@@ -110,7 +110,7 @@ function AnalysisHub() {
 							navigate({
 								to: '/analysis/$code/viewer',
 								params: { code },
-								search: { period, topic: undefined, windowEnd: undefined },
+								search: { period, section: undefined, windowEnd: undefined },
 							})
 						}
 					/>
