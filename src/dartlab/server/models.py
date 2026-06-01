@@ -142,36 +142,45 @@ class ChannelConnectRequest(BaseModel):
 # --- Viewer 응답 스키마 ---
 
 
-class TocTopic(BaseModel):
-    """뷰어 목차의 개별 topic 항목.
+class TocBlock(BaseModel):
+    """뷰어 목차 절(section) 안의 블록 — blockLeaf 단위 (표/주석 소제목, scroll anchor)."""
 
-    chapter III 의 ``consolidatedNotes`` / ``financialNotes`` / ``financialStatements``
-    은 folder leaf 로, 31 개 sub-section / 5 표 가 ``children`` 으로 둥지.
-    folder leaf 도 ``topic`` 키 (예 ``"financialNotes"``) 가 있어 직접 클릭 가능
-    (parent 본문 residual = splitter 가 N 못 잡은 0.07% row).
+    blockLeaf: str
+    rowCount: int
+
+
+class TocSection(BaseModel):
+    """뷰어 목차의 절(section) 항목 — panel ``sectionLeaf`` 단위 (옛 topic).
+
+    panel 이 정부 표준 서식(SPINE)으로 이미 정렬·라벨링하므로 ``sectionLeaf`` 가
+    그대로 표시 라벨이자 클릭 단위다. ``sectionKey`` = ``"{chapter}␟{sectionLeaf}"``
+    로 동명 sectionLeaf 의 chapter 간 충돌을 막는다. ``blocks`` 는 절 안의 blockLeaf
+    목록 (frontend scroll anchor + 대용량 분기 rowCount).
     """
 
-    topic: str
-    label: str
-    textCount: int
-    tableCount: int
-    hasChanges: bool = False
-    children: list["TocTopic"] = []
+    sectionLeaf: str
+    sectionKey: str
+    rowCount: int
+    blocks: list[TocBlock] = []
 
 
 class TocChapter(BaseModel):
-    """뷰어 목차의 장(chapter) 그룹."""
+    """뷰어 목차의 장(chapter) 그룹 — panel ``chapter`` 단위 (정부 라벨 그대로)."""
 
     chapter: str
-    topics: list[TocTopic]
+    sections: list[TocSection]
 
 
 class TocResponse(BaseModel):
-    """뷰어 목차 전체 응답."""
+    """뷰어 목차 전체 응답.
+
+    ``periods`` 는 panel 의 전체 기간 축 (최신좌측) — frontend timeline 의 SSOT.
+    """
 
     stockCode: str
     corpName: str
     chapters: list[TocChapter]
+    periods: list[str] = []
 
 
 # --- Room 협업 세션 ---

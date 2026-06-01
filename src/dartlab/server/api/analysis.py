@@ -8,7 +8,6 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 
 from ..services.companyApi import (
-    buildDiffSummary,
     getCompany,
     safeTopicLabel,
 )
@@ -63,21 +62,6 @@ def apiCompanyDiffMatrix(
         "matrix": matrixData,
         "heatmap": heatmap,
     }
-
-
-@router.get("/api/company/{code}/diff/{topic}/summary")
-def apiCompanyDiffTopicSummary(code: str, topic: str):
-    """뷰어용 diff 요약 — changeRate + 최신 변경의 added/removed 미리보기."""
-    try:
-        c = getCompany(code)
-        result = buildDiffSummary(c, topic)
-        if result is None:
-            raise HTTPException(status_code=404, detail="sections 없음")
-        return result
-    except HTTPException:
-        raise
-    except HANDLED_API_ERRORS as e:
-        raise HTTPException(status_code=404, detail=guideDetail(e))
 
 
 @router.get("/api/company/{code}/diff/{topic}")

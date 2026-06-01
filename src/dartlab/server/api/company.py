@@ -13,12 +13,11 @@ _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 from ..services.aiAnalysis import streamTopicSummary
 from ..services.companyApi import (
-    buildDiffSummary,
+    buildPanelGrid,
     buildToc,
-    buildViewer,
-    filterBlocksByPeriod,
     getCompany,
     safeTopicLabel,
+    splitSectionKey,
 )
 from .common import (
     HANDLED_API_ERRORS,
@@ -435,178 +434,96 @@ def apiCompanySectionsRaw(
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
-@router.get("/api/company/{code}/init")
+@router.get("/api/company/{code}/panel/init")
 def apiCompanyInit(
     code: str,
     request: Request,
-    compact: bool = Query(True, description="viewer 부분에 compact 적용 (default True)"),
-    limit: int = Query(60, ge=0, le=500, description="compact viewer sections 최대 개수"),
-    withDiff: bool = Query(False, description="diff 요약 포함 여부 (default False — 초기 로드 가속)"),
     response: Response = None,
 ):
-    """SPA 초기 로드용 번들 — toc + 첫 topic viewer + (옵션) diff 요약."""
+    """SPA 초기 로드 번들 — panel toc + 첫 절(sectionLeaf) full-period grid.
+
+    grid 는 전체 기간 (frontend 가 window slice + 인접셀 diff 수행) — 백엔드 계산 0.
+    """
     try:
         company = getCompany(code)
         toc_data = buildToc(company)
 
-        first_topic: str | None = None
         first_chapter: str | None = None
+        first_section_key: str | None = None
+        first_section: str | None = None
         chapters = toc_data.get("chapters", [])
         if chapters:
-            topics = chapters[0].get("topics", [])
-            if topics:
-                first_topic = topics[0]["topic"]
+            sections = chapters[0].get("sections", [])
+            if sections:
                 first_chapter = chapters[0]["chapter"]
+                first_section = sections[0]["sectionLeaf"]
+                first_section_key = sections[0]["sectionKey"]
 
-        viewer_data = None
-        diff_data = None
-        if first_topic:
-            viewer_data = buildViewer(company, first_topic, compact=compact, limit=limit)
-            if withDiff:
-                diff_data = buildDiffSummary(company, first_topic)
+        grid = None
+        if first_section:
+            grid = buildPanelGrid(company, chapter=first_chapter, section=first_section)
 
         result = {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
             "toc": toc_data,
-            "firstTopic": first_topic,
             "firstChapter": first_chapter,
-            "viewer": viewer_data,
-            "diffSummary": diff_data,
+            "firstSectionKey": first_section_key,
+            "grid": grid,
         }
         return etagResponse(request, response, result, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
-@router.get("/api/company/{code}/toc")
+@router.get("/api/company/{code}/panel/toc")
 def apiCompanyToc(
     code: str,
     request: Request,
-    meta: bool = Query(True, description="True (default) — hasChanges 계산 skip 으로 경량 응답"),
     response: Response = None,
 ):
-    """목차(TOC) — chapter/topic 트리 구조.
+    """목차(TOC) — panel 의 chapter > sectionLeaf > blockLeaf 트리.
 
-    `meta=true` (default) 면 hasChanges (period 간 sections 비교) skip 한 경량
-    응답. 대시보드 사이드바 진입은 트리 구조 + 카운트만 필요. frontend 가
-    변경 표시 필요 시 `meta=false` 명시.
+    panel 이 SPINE 정렬·라벨링 SSOT 이므로 재정렬 0. diff(hasChanges)는 frontend
+    인접셀 비교로 이전 — 백엔드 계산 없음.
     """
     try:
         company = getCompany(code)
-        data = buildToc(company, metaOnly=meta)
+        data = buildToc(company)
         return etagResponse(request, response, data, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
-@router.get("/api/company/{code}/viewer/{topic}")
-def apiCompanyViewerTopic(
+@router.get("/api/company/{code}/panel")
+def apiCompanyPanel(
     code: str,
-    topic: str,
     request: Request,
-    period: str | None = Query(None, description="특정 기간만 반환 (타임라인 클릭 최적화)"),
-    periods: str | None = Query(
-        None,
-        description="comma-separated 다중 기간 — 한 호출로 window 5 period 통합 (viewer 의 4 fanout 회피).",
+    section: str | None = Query(
+        None, description="sectionKey ({chapter}␟{sectionLeaf}) — 한 절 grid. 생략 시 전체 격자."
     ),
-    compact: bool = Query(True, description="UI 가 안 쓰는 views/timeline/blocks 제거. payload 80%+ 감소"),
-    limit: int = Query(60, ge=0, le=500, description="compact 모드에서 sections 최대 개수 (0=무제한)"),
+    periods: str | None = Query(
+        None, description="comma-separated 표시 기간 (최신좌측). 생략 시 전체 기간 (full-period)."
+    ),
     response: Response = None,
 ):
-    """단일 topic의 viewer 데이터 — sections 블록 + 텍스트 문서.
+    """panel 의 한 절(section) grid — 항목 × 기간 wide (viewer 본문).
 
-    period: 단일 기간 (타임라인 클릭).
-    periods: comma-separated 다중 기간 — byPeriod dict 형태로 한 호출 반환. viewer
-    가 windowPeriods (보통 5 개) 를 한 번에 받기 위한 경로. period 와 동시 지정 시
-    periods 가 우선.
+    section: sectionKey ({chapter}␟{sectionLeaf}). 생략 시 전체 격자.
+    periods: 표시 window (예 "2026Q1,2025Q4,2025Q3"). 생략 시 전체 기간.
+    diff/timeline 은 frontend (인접셀 비교 + window slice) — 백엔드 계산 0.
     """
     try:
         company = getCompany(code)
-
-        # 다중 period 모드 — 한 호출로 window 응답.
-        if periods is not None:
-            from dartlab.providers.dart.docs.viewer import (
-                serializeViewerTextDocument,
-                viewerBlocks,
-                viewerTextDocument,
-            )
-
-            from ..services.companyApi import (
-                _compactTextDocument,
-                _dartUrlForPeriod,
-                _topicDartLabel,
-            )
-
-            periodList = [p.strip() for p in periods.split(",") if p.strip()]
-            if not hasattr(company, "_viewer_cache"):
-                company._viewer_cache = {}
-            if topic in company._viewer_cache:
-                allBlocks = company._viewer_cache[topic]
-            else:
-                allBlocks = viewerBlocks(company, topic)
-                company._viewer_cache[topic] = allBlocks
-            byPeriod: dict[str, Any] = {}
-            for p in periodList:
-                blocks = filterBlocksByPeriod(allBlocks, p)
-                textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
-                if compact:
-                    textDoc = _compactTextDocument(textDoc, limit=limit)
-                byPeriod[p] = {
-                    "period": p,
-                    "dartUrl": _dartUrlForPeriod(company, p),
-                    "textDocument": textDoc,
-                }
-            data = {
-                "stockCode": company.stockCode,
-                "corpName": company.corpName,
-                "topic": topic,
-                "topicLabel": _topicDartLabel(topic, safeTopicLabel(company, topic)),
-                "periods": periodList,
-                "compact": compact,
-                "byPeriod": byPeriod,
-            }
-            return etagResponse(request, response, data, maxAge=120, swr=600)
-
-        if period is not None:
-            from dartlab.providers.dart.docs.viewer import (
-                serializeViewerBlock,
-                serializeViewerTextDocument,
-                viewerBlocks,
-                viewerTextDocument,
-            )
-
-            from ..services.companyApi import (
-                _compactTextDocument,
-                _dartUrlForPeriod,
-                _topicDartLabel,
-            )
-
-            if not hasattr(company, "_viewer_cache"):
-                company._viewer_cache = {}
-            if topic in company._viewer_cache:
-                blocks = company._viewer_cache[topic]
-            else:
-                blocks = viewerBlocks(company, topic)
-                company._viewer_cache[topic] = blocks
-            blocks = filterBlocksByPeriod(blocks, period)
-            textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
-            if compact:
-                textDoc = _compactTextDocument(textDoc, limit=limit)
-            data = {
-                "stockCode": company.stockCode,
-                "corpName": company.corpName,
-                "topic": topic,
-                "topicLabel": _topicDartLabel(topic, safeTopicLabel(company, topic)),
-                "period": period,
-                "compact": compact,
-                "dartUrl": _dartUrlForPeriod(company, period),
-                "blocks": [] if compact else [serializeViewerBlock(block) for block in blocks],
-                "textDocument": textDoc,
-            }
-        else:
-            data = buildViewer(company, topic, compact=compact, limit=limit)
-
+        chapter = None
+        section_leaf = None
+        if section:
+            chapter, section_leaf = splitSectionKey(section)
+        window_periods = None
+        if periods:
+            wp = tuple(p.strip() for p in periods.split(",") if p.strip())
+            window_periods = wp or None
+        data = buildPanelGrid(company, chapter=chapter, section=section_leaf, windowPeriods=window_periods)
         return etagResponse(request, response, data, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
@@ -642,35 +559,6 @@ def apiViewerDoc(
         doc["corpName"] = company.corpName
         doc["topicLabel"] = safeTopicLabel(company, topic)
         return etagResponse(request, response, doc, maxAge=120, swr=600)
-    except HANDLED_API_ERRORS as exc:
-        raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
-
-
-@router.post("/api/company/{code}/viewer/batch")
-async def apiCompanyViewerBatch(code: str, request: Request, response: Response):
-    """여러 topic의 viewer 데이터를 한 번에 반환 — chapter 확장 시 N+1 제거.
-
-    body 에 `compact: true` (default) + `limit: int` (default 60) 허용.
-    """
-    body = await request.json()
-    topics = body.get("topics", [])
-    compact = bool(body.get("compact", True))
-    limit = int(body.get("limit", 60))
-    if not topics or not isinstance(topics, list):
-        raise HTTPException(status_code=400, detail="topics 배열 필요")
-    topics = topics[:20]  # 최대 20개 제한
-
-    try:
-        company = getCompany(code)
-        results = {}
-        for topic in topics:
-            if not isinstance(topic, str):
-                continue
-            try:
-                results[topic] = buildViewer(company, topic, compact=compact, limit=limit)
-            except HANDLED_API_ERRORS:
-                results[topic] = None
-        return etagResponse(request, response, {"results": results}, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
