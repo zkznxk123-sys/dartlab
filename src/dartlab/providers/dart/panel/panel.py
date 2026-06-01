@@ -5,10 +5,10 @@ DataFrame 이 된다 (행 = 공시 항목, 열 = period, cell = 본문). ``Panel
 subclass — polars 연산(filter/shape/select…)을 그대로 받는다. ``panel("재고")`` callable 로
 섹션명·canonicalKey 매칭 행을 검색한다.
 
-성능·메모리: 로컬 artifact read only (network·lxml import 0, R2). ``tag=False``(기본) 면 build 가
-저장한 raw XML 을 pivot·정렬 후 wide 셀에 1회 strip → plain wide(raw 의 ~22%, 표시·메모리 경량, 2.8x).
-``tag=True`` 면 원본 XML 무손실(R4). 상태 없는 read — ``c.panel`` 매 접근 새 인스턴스(누적 0,
-Polars Rust heap OOM 가드). 대형 종목은 ``periods=`` 로 파일 prune.
+성능·메모리: 로컬 artifact read only (network·lxml import 0, R2). ``tag=True``(기본) 면 build 가
+저장한 원본 XML 무손실(R4) — 정부 native 태그(ACODE/ACONTEXT) 보존, AI 이해·strip 생략으로 콜드 경량.
+``tag=False`` 면 wide 셀 1회 strip → plain wide(raw 의 ~22%, 사람 표시용 경량). 상태 없는 read —
+``c.panel`` 매 접근 새 인스턴스(누적 0, Polars Rust heap OOM 가드). 대형 종목은 ``periods=`` 로 파일 prune.
 
 LLM Specifications:
     AntiPatterns:
@@ -34,6 +34,11 @@ from __future__ import annotations
 import polars as pl
 
 from . import read as _read
+from .period import isPeriodColumn as _isPeriodColumn
+
+# 재무 5표 topic → 셀 artifact statement(canonicalKey). freq 호출 시 native 셀 위임 매핑.
+# SCE(자본변동표)=EF, CIS(포괄손익)=IS3 — ACLASS 실측 (EF_C/IS_C3).
+_FIVE_STMT: dict[str, str] = {"IS": "IS2", "CIS": "IS3", "CF": "CF", "BS": "BS", "SCE": "EF"}
 
 
 class Panel(pl.DataFrame):
@@ -43,7 +48,7 @@ class Panel(pl.DataFrame):
         code: 종목코드 (KR 6자리) 또는 CIK/ticker (US).
         marketNs: 시장 namespace ("kr" / "us", 기본 "kr").
         periods: 특정 period 만 (파일 prune, 대형 종목 메모리 핸들). None = 전체.
-        tag: False(기본) 면 본문 태그 strip(plain), True 면 원본 XML 무손실(raw).
+        tag: True(기본) 면 원본 XML 무손실(raw, 정부 native 태그 보존), False 면 본문 태그 strip(plain).
 
     Returns:
         ``Panel`` 인스턴스 = wide pl.DataFrame (행 = 공시 항목, 열 = period). artifact 없으면 빈.
@@ -56,8 +61,9 @@ class Panel(pl.DataFrame):
         >>> p = Panel("005930")              # doctest: +SKIP
         >>> p.shape                          # doctest: +SKIP
         (25, 47)
-        >>> inv = p("재고")                  # doctest: +SKIP  — 섹션명/canonicalKey 행
-        >>> raw = p("재고", tag=True)        # doctest: +SKIP  — 원본 XML
+        >>> inv = p("재고")                  # doctest: +SKIP  — 섹션명/canonicalKey 행 (raw 기본)
+        >>> plain = p("재고", tag=False)     # doctest: +SKIP  — 태그 strip plain
+        >>> hits = p.search("반도체")        # doctest: +SKIP  — 본문 전체검색
 
     SeeAlso:
         - ``read.readWide`` — wide 수평화 구현.
@@ -105,7 +111,7 @@ class Panel(pl.DataFrame):
         *,
         marketNs: str = "kr",
         periods: list[str] | None = None,
-        tag: bool = False,
+        tag: bool = True,
     ) -> None:
         """code → wide read 후 pl.DataFrame 초기화 + 검색용 메타 보관.
 
@@ -164,11 +170,12 @@ class Panel(pl.DataFrame):
 
     def __call__(
         self,
-        key: str,
+        key: str | None = None,
         *,
         source: str = "auto",
         tag: bool | None = None,
         periods: list[str] | None = None,
+        freq: str | None = None,
     ) -> pl.DataFrame | None:
         """섹션 행 검색 + 강한 소스(finance/report) 주입 — facade 진입점.
 
@@ -178,13 +185,17 @@ class Panel(pl.DataFrame):
         ``Company.panel`` facade 가 set — standalone ``Panel(code)`` 는 주입 없어 항상 raw 검색.
 
         Args:
-            key: canonicalKey("NT_D826380"/"BS") 또는 한글 섹션명("재고"), 또는 강한 소스 topic("IS").
+            key: None(기본) 면 전체 격자(tag/periods override 시 재read, 아니면 self). canonicalKey
+                ("NT_D826380"/"BS") 또는 한글 섹션명("재고"), 또는 강한 소스 topic("IS").
             source: "auto"(기본, 강한 소스는 show 주입) / "raw"(강제 raw 공시) / "finance"/"report"(강제 주입).
             tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override). raw 검색만 적용.
             periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read. raw 검색만 적용.
+            freq: None(기본) 면 blob 경로(wide 불가침). "year"/"quarter"/"ytd" + 5표 topic(IS/BS/CF/
+                CIS/SCE) 면 native 셀 세분화(readCellWide) 위임 — 정부 토큰(dFY/eFY/TQQ/TQA) 선택.
 
         Returns:
-            매칭 행 wide DataFrame (period 가로 정렬) 또는 None (빈 key / 매칭 0 / artifact 없음).
+            매칭 행 wide DataFrame (period 가로 정렬), key 없으면 전체 격자, freq 면 acode×period 셀
+            wide. 또는 None (매칭 0 / artifact 없음).
 
         Raises:
             없음.
@@ -232,6 +243,21 @@ class Panel(pl.DataFrame):
             TargetMarkets:
                 - KR + US.
         """
+        code = getattr(self, "_code", None)
+        # freq + 5표 topic → 셀 세분화(native XBRL) 위임 (Phase 2). freq 없으면 blob 경로(wide 불가침).
+        if freq is not None and key is not None and key in _FIVE_STMT and code is not None:
+            from . import cell as _cell
+
+            return _cell.readCellWide(
+                code, statement=_FIVE_STMT[key], freq=freq, marketNs=self._marketNs, periods=periods or self._periods
+            )
+        effTag = self._tag if tag is None else tag
+        # key 미전달(None): tag/periods override 면 전체 격자 재read, 아니면 self (이미 격자).
+        if key is None:
+            if code is not None and ((tag is not None and effTag != self._tag) or periods is not None):
+                return _read.readWide(code, marketNs=self._marketNs, periods=periods or self._periods, tag=effTag)
+            return self
+        # 명시 빈 key("") → None (하위호환).
         if not key:
             return None
         # 강한 소스(finance/report/notes) 주입 — facade(Company.panel)가 _showFn/_strongFn 주입 시.
@@ -241,8 +267,6 @@ class Panel(pl.DataFrame):
             strongFn = getattr(self, "_strongFn", None)
             if showFn is not None and (source in ("finance", "report") or (strongFn is not None and strongFn(key))):
                 return showFn(key)
-        effTag = self._tag if tag is None else tag
-        code = getattr(self, "_code", None)
         # tag/periods override + code 보유(fresh 인스턴스) 시 재read, 그 외 self 필터.
         if code is not None and ((tag is not None and effTag != self._tag) or periods is not None):
             board: pl.DataFrame | None = _read.readWide(
@@ -261,3 +285,94 @@ class Panel(pl.DataFrame):
             mask = mask | (colExpr == key) | colExpr.str.contains(key, literal=True)
         out = board.filter(mask)
         return out if not out.is_empty() else None
+
+    def search(
+        self,
+        term: str,
+        *,
+        tag: bool | None = None,
+        periods: list[str] | None = None,
+        limit: int | None = None,
+    ) -> pl.DataFrame | None:
+        """본문 전체검색 — period 열 어디든 term 이 나오는 행 반환 (행이름 검색과 분리).
+
+        ``__call__`` 은 왼쪽 이름표(disclosureKey/sectionLeaf/blockLeaf)로 *아는 행을 고르고*,
+        ``search`` 는 *모르는 글자를 본문 셀에서 찾는다* — 의도가 달라 별 메서드. period 값 열
+        전체에 substring 매칭(literal). 기본은 self(이미 wide) in-memory 필터, tag/periods override
+        시만 readWide 재호출 (raw 기본이면 태그 포함 매칭, plain 이면 텍스트만).
+
+        Args:
+            term: 찾을 substring (literal, 정규식 아님).
+            tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read.
+            periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read.
+            limit: None(기본) 면 전체 매칭, 정수면 상위 N 행만 (head).
+
+        Returns:
+            매칭 행 wide DataFrame, 또는 None (빈 term / 매칭 0 / artifact 없음).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> p = Panel("005930")               # doctest: +SKIP
+            >>> p.search("반도체")                # doctest: +SKIP  — 본문에 '반도체' 나오는 행
+
+        SeeAlso:
+            - ``__call__`` — 이름표 행 선택 (아는 행).
+            - ``period.isPeriodColumn`` — period 열 판별.
+
+        Requires:
+            - polars. panel artifact (override 시) 또는 self.
+
+        Capabilities:
+            - 행이름이 아닌 본문 내용으로 행 발견 — period 열 전체 substring 스캔.
+
+        Guide:
+            - ``p.search("키워드")`` — 어느 섹션인지 몰라도 본문으로 찾기.
+
+        AIContext:
+            - 기본 self in-memory 필터(즉시). contentRaw 는 외부 untrusted.
+
+        When:
+            - 행이름을 모르고 본문 텍스트로 공시 행을 찾을 때.
+
+        How:
+            - period 열 OR ``str.contains(term, literal=True)`` 필터.
+
+        LLM Specifications:
+            AntiPatterns:
+                - index 컬럼(이름표) 검색 금지 — 그건 ``__call__``. search 는 period 값 열만.
+                - 빈 term 에 전체 반환 금지 — None.
+            OutputSchema:
+                - ``pl.DataFrame | None`` (매칭 행).
+            Prerequisites:
+                - panel artifact 또는 self.
+            Freshness:
+                - override 시 재read, 아니면 self 스냅샷.
+            Dataflow:
+                - term → period 열 substring OR 필터.
+            TargetMarkets:
+                - KR + US.
+        """
+        if not term:
+            return None
+        effTag = self._tag if tag is None else tag
+        code = getattr(self, "_code", None)
+        if code is not None and ((tag is not None and effTag != self._tag) or periods is not None):
+            board: pl.DataFrame | None = _read.readWide(
+                code, marketNs=self._marketNs, periods=periods or self._periods, tag=effTag
+            )
+        else:
+            board = self
+        if board is None or board.is_empty():
+            return None
+        periodCols = [c for c in board.columns if _isPeriodColumn(c)]
+        if not periodCols:
+            return None
+        mask = pl.lit(False)
+        for c in periodCols:
+            mask = mask | pl.col(c).cast(pl.Utf8).str.contains(term, literal=True)
+        out = board.filter(mask.fill_null(False))
+        if out.is_empty():
+            return None
+        return out.head(limit) if limit is not None else out
