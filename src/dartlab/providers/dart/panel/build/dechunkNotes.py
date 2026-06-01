@@ -57,14 +57,29 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     """
     if df.is_empty() or "sectionLeaf" not in df.columns or "contentRaw" not in df.columns:
         return df
-    chunkMask = (pl.col("sectionLeaf") == "주석") & pl.col("disclosureKey").is_null()
+    # 미분해 덩어리 = disclosureKey 없는 주석 섹션. 옛 보고서는 sectionLeaf="주석"(첨부),
+    # 2023 분기는 sectionLeaf="3. 연결재무제표 주석"/"5. 재무제표 주석"(본문) — 둘 다 "주석" 포함.
+    chunkMask = pl.col("disclosureKey").is_null() & pl.col("sectionLeaf").str.contains("주석")
     chunks = df.filter(chunkMask)
     if chunks.is_empty():
         return df
 
+    # 이미 itemized native NT_* 가 있는 scope 의 덩어리는 중복 → 건너뜀. 전환연도(2023)는 본문
+    # 구체화 NT_*(xbrlClass NT_C_/NT_S_)와 (첨부)덩어리가 공존 → native 우선, 덩어리 이중수록 차단.
+    nativeScopes: set[str] = set()
+    if "xbrlClass" in df.columns:
+        native = df.filter(pl.col("disclosureKey").str.starts_with("NT_") & pl.col("xbrlClass").is_not_null())
+        for xc in native["xbrlClass"].to_list():
+            nativeScopes.add("standalone" if "_S" in (xc or "")[:5] else "consolidated")
+
     newRows: list[dict] = []
     for row in chunks.iter_rows(named=True):
-        scope = "consolidated" if "연결" in _norm(row.get("chapter")) else "standalone"
+        # scope = era-stable "연결" 마커. 옛 era 는 chapter("(첨부)연결재무제표")에, 분기는
+        # sectionLeaf("3. 연결재무제표 주석")에 신호가 있어 둘을 합쳐 본다.
+        ctx = _norm(row.get("chapter")) + _norm(row.get("sectionLeaf"))
+        scope = "consolidated" if "연결" in ctx else "standalone"
+        if scope in nativeScopes:
+            continue  # 같은 scope 의 itemized native 존재 → 덩어리 분해 생략(중복 방지)
         cr = row.get("contentRaw") or ""
         # 택소노미 매칭 헤더만 경계 — (pos, 제목, NT_*). 본문 중간 숫자열은 매칭 0 이라 경계 안 됨.
         marks: list[tuple[int, str, str]] = []
@@ -76,7 +91,7 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
         best: dict[str, dict] = {}
         for i, (pos, title, key) in enumerate(marks):
             end = marks[i + 1][0] if i + 1 < len(marks) else len(cr)
-            seg = cr[pos:end]
+            seg = cr[pos:end].lstrip("> \n\t")  # 헤더 경계 앵커('>')·여백 제거
             prev = best.get(key)
             if prev is not None and len(prev["contentRaw"]) >= len(seg):
                 continue  # TOC 등 짧은 중복 — 본문 섹션(최장) 우선

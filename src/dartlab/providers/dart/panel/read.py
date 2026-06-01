@@ -341,6 +341,21 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
         else pl.col("disclosureKey")
     )
     df = df.with_columns(anchorExpr.alias("_anchorKey"))
+    # scope era-안정화 — 옛 보고서는 xbrlClass=None 이라 scopeExpr 이 별도 주석을 consolidated(기본)로
+    # 흔들어 같은 canonicalKey 가 era 별로 쪼개진다. xbrlClass(_S definitive)를 가진 최신 era 의 scope 를
+    # 같은 _anchorKey 전 era 에 전파(라벨 anchorLatest 와 동일 원리). xbrlClass 부재 키는 raw 유지.
+    if "xbrlClass" in df.columns:
+        anchorScope = (
+            df.filter(pl.col("_anchorKey").is_not_null() & pl.col("xbrlClass").is_not_null())
+            .sort("period")
+            .group_by("_anchorKey", maintain_order=True)
+            .agg(pl.col("scope").last().alias("_anchorScope"))
+        )
+        df = (
+            df.join(anchorScope, on="_anchorKey", how="left")
+            .with_columns(pl.coalesce([pl.col("_anchorScope"), pl.col("scope")]).alias("scope"))
+            .drop("_anchorScope")
+        )
     keyed = df.filter(pl.col("_anchorKey").is_not_null())
     if keyed.is_empty():
         return df.drop("_anchorKey")
