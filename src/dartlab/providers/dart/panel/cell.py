@@ -318,7 +318,7 @@ def readStatement(
     code: str,
     *,
     statement: str,
-    freq: str = "year",
+    freq: str = "quarter",
     scope: str | None = None,
     marketNs: str = "kr",
     periods: list[str] | None = None,
@@ -333,7 +333,7 @@ def readStatement(
     Args:
         code: 종목코드.
         statement: 논리 키 — "is"(손익)/"bs"(재무상태)/"cf"(현금흐름)/"cis"(포괄손익)/"sce"(자본변동).
-        freq: "year"(연간) / "quarter"(분기) / "ytd"(누적). 기본 year.
+        freq: "year"(연간) / "quarter"(분기) / "ytd"(누적). 기본 quarter (raw 격자와 동일 입도).
         scope: None(기본)=연결→별도 자동 / "consolidated" / "standalone" 강제.
         marketNs: 시장 namespace.
         periods: 특정 filing period parquet 만 (prune). None=전체.
@@ -534,7 +534,7 @@ def _ratiosToWide(rs, years: list[str]) -> pl.DataFrame | None:
 def readRatios(
     code: str,
     *,
-    freq: str = "year",
+    freq: str = "quarter",
     scope: str | None = None,
     marketNs: str = "kr",
     periods: list[str] | None = None,
@@ -547,7 +547,7 @@ def readRatios(
 
     Args:
         code: 종목코드.
-        freq: "year"(연, yoyLag=1) / "quarter"(분기, yoyLag=4) / "ytd"(누적). 기본 year.
+        freq: "year"(연, yoyLag=1) / "quarter"(분기, yoyLag=4) / "ytd"(누적). 기본 quarter (raw 격자와 동일 입도).
         scope: "consolidated" / "standalone". 기본 consolidated.
         marketNs: 시장 namespace.
         periods: 특정 filing period parquet 만 (prune). None=전체.

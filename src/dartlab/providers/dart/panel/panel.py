@@ -259,14 +259,15 @@ class Panel(pl.DataFrame):
         if not key:
             return None
         # native 재무제표 (소문자 논리 키 is/bs/cf/cis/sce) → panel 자급 statement(XBRL+옛 통합, docs 0).
-        # 논리 키→물리 해소는 cell.STATEMENT_VARIANTS. freq=입도(year/quarter/ytd), 기본 year. 소스 스위치 아님.
+        # 논리 키→물리 해소는 cell.STATEMENT_VARIANTS. freq=입도(year/quarter/ytd), 기본 quarter
+        # (raw 격자·readCellWide 와 동일 입도 — panel 정체성=깊은 분기 시계열). 소스 스위치 아님.
         if key in _NATIVE_KEYS and code is not None:
             from . import cell as _cell
 
             return _cell.readStatement(
                 code,
                 statement=key,
-                freq=freq or "year",
+                freq=freq or "quarter",
                 marketNs=self._marketNs,
                 periods=periods or self._periods,
             )
@@ -277,7 +278,7 @@ class Panel(pl.DataFrame):
 
             return _cell.readRatios(
                 code,
-                freq=freq or "year",
+                freq=freq or "quarter",
                 marketNs=self._marketNs,
                 periods=periods or self._periods,
             )
