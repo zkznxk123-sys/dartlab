@@ -51,9 +51,13 @@ def _censusOne(code: str) -> dict:
     if not (set(rec["statements"]) & incomeStmts):
         rec["issues"].append("no_income_statement")  # 손익(IS1/2/3) 자체 부재 (구조화 재무 없음)
     # 비율·손익 — 연간 우선, 없으면 분기(신규 상장 등 연간 미신고 회사). 둘 다 0 이면 결손.
-    ratios = readRatios(code, freq="year") or readRatios(code, freq="quarter")
+    ratios = readRatios(code, freq="year")
+    if ratios is None or ratios.is_empty():
+        ratios = readRatios(code, freq="quarter")
     rec["ratioRows"] = 0 if ratios is None else ratios.height
-    isw = readStatement(code, statement="IS2", freq="year") or readStatement(code, statement="IS2", freq="quarter")
+    isw = readStatement(code, statement="IS2", freq="year")
+    if isw is None or isw.is_empty():
+        isw = readStatement(code, statement="IS2", freq="quarter")
     rec["hasIncome"] = isw is not None and isw.height > 0
     if not rec["hasIncome"] and (set(rec["statements"]) & incomeStmts):
         rec["issues"].append("income_unreadable")  # 손익 셀은 있는데 read 실패 (진짜 버그 신호)
