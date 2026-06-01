@@ -73,5 +73,26 @@ def _(c):
     return
 
 
+@app.cell
+def _(c):
+    # panel — 정부 XBRL 분류(canonicalKey) 기준 항목 × 기간 수평화 (잡는 순간 pl.DataFrame)
+    c.panel
+    return
+
+
+@app.cell
+def _(c):
+    # 섹션 행 검색 — raw 공시 (한글명/canonicalKey)
+    c.panel("재고")
+    return
+
+
+@app.cell
+def _(c):
+    # 강한 소스 — finance 주입 (= c.show("IS"))
+    c.panel("IS")
+    return
+
+
 if __name__ == "__main__":
     app.run()
