@@ -302,3 +302,79 @@ export function fetchTabLayout(
 	if (layoutOnly) qs.set('layoutOnly', 'true');
 	return fetchJson<TabLayoutResponse>(`/api/viz/layout/${tab}/${stockCode}?${qs}`);
 }
+
+// ── 공시뷰어 panel grid (panel SSOT — 항목 × 기간 wide) ──
+// 서버는 panel wide 를 JSON 직렬화만(pass-through), 프론트가 격자를 직접 렌더.
+// diff/timeline/캡션은 순수 UI (인접 period 셀 비교 + window slice).
+
+export interface PanelTocBlock {
+	blockLeaf: string;
+	rowCount: number;
+}
+
+export interface PanelTocSection {
+	sectionLeaf: string;
+	sectionKey: string; // `${chapter}␟${sectionLeaf}` — 동명 sectionLeaf 충돌 방지
+	rowCount: number;
+	blocks: PanelTocBlock[];
+}
+
+export interface PanelTocChapter {
+	chapter: string;
+	sections: PanelTocSection[];
+}
+
+export interface PanelTocResponse {
+	stockCode: string;
+	corpName: string;
+	chapters: PanelTocChapter[];
+	periods: string[]; // 전체 기간 축 (최신좌측) — timeline SSOT
+}
+
+export interface PanelRow {
+	chapter: string;
+	sectionLeaf: string;
+	blockLeaf: string;
+	disclosureKey: string | null; // null = narrative 행
+	scope: string | null;
+	blockType: 'text' | 'table';
+	cells: Record<string, string>; // period → 셀 본문 (raw DART XML, tag=True)
+}
+
+export interface PanelGridResponse {
+	stockCode: string;
+	corpName: string;
+	chapter: string | null;
+	sectionLeaf: string | null;
+	sectionKey: string;
+	periods: string[];
+	rows: PanelRow[];
+	dartUrlByPeriod?: Record<string, string | null>;
+}
+
+export interface PanelInitResponse {
+	stockCode: string;
+	corpName: string;
+	toc: PanelTocResponse;
+	firstChapter: string | null;
+	firstSectionKey: string | null;
+	grid: PanelGridResponse | null;
+}
+
+export function fetchPanelInit(stockCode: string): Promise<PanelInitResponse> {
+	return fetchJson<PanelInitResponse>(`/api/company/${stockCode}/panel/init`);
+}
+
+export function fetchPanelToc(stockCode: string): Promise<PanelTocResponse> {
+	return fetchJson<PanelTocResponse>(`/api/company/${stockCode}/panel/toc`);
+}
+
+export function fetchPanelGrid(
+	stockCode: string,
+	sectionKey: string,
+	periods?: string[],
+): Promise<PanelGridResponse> {
+	const qs = new URLSearchParams({ section: sectionKey });
+	if (periods?.length) qs.set('periods', periods.join(','));
+	return fetchJson<PanelGridResponse>(`/api/company/${stockCode}/panel?${qs}`);
+}

@@ -873,25 +873,26 @@ class TestCompanyAPIExtended:
 
     @requires_samsung_any
     def test_company_toc(self, client):
-        """GET /api/company/{code}/toc — 목차."""
-        resp = client.get(f"/api/company/{SAMSUNG}/toc")
+        """GET /api/company/{code}/panel/toc — panel 목차 (chapter > sectionLeaf)."""
+        resp = client.get(f"/api/company/{SAMSUNG}/panel/toc")
         assert resp.status_code == 200
         data = resp.json()
         assert "chapters" in data
+        assert "periods" in data
 
     def test_company_toc_not_found(self, client):
-        resp = client.get("/api/company/999999/toc")
+        resp = client.get("/api/company/999999/panel/toc")
         assert resp.status_code == 404
 
     @requires_samsung_any
     def test_company_init(self, client):
-        """GET /api/company/{code}/init — 초기화 번들."""
-        resp = client.get(f"/api/company/{SAMSUNG}/init")
+        """GET /api/company/{code}/panel/init — 초기화 번들 (toc + 첫 절 grid)."""
+        resp = client.get(f"/api/company/{SAMSUNG}/panel/init")
         assert resp.status_code == 200
         data = resp.json()
         assert data["stockCode"] == SAMSUNG
         assert "toc" in data
-        assert "firstTopic" in data
+        assert "firstSectionKey" in data
 
     @pytest.mark.skipif(not _has_samsung_finance, reason="삼성전자 finance 데이터 없음")
     def test_company_insights(self, client):
@@ -926,7 +927,11 @@ class TestCompanyAPIExtended:
         assert resp.status_code in (200, 404)
 
     @requires_samsung_any
-    def test_company_viewer_topic(self, client):
-        """GET /api/company/{code}/viewer/{topic} — 뷰어 데이터."""
-        resp = client.get(f"/api/company/{SAMSUNG}/viewer/companyOverview")
+    def test_company_panel(self, client):
+        """GET /api/company/{code}/panel — panel grid (전체 격자)."""
+        resp = client.get(f"/api/company/{SAMSUNG}/panel")
         assert resp.status_code in (200, 404)
+        if resp.status_code == 200:
+            data = resp.json()
+            assert "rows" in data
+            assert "periods" in data

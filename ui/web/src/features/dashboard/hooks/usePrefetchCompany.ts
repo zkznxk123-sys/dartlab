@@ -13,7 +13,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import { fetchCompanyMeta, fetchTabLayout, type PeriodKind } from '../api/client';
+import { fetchCompanyMeta, fetchPanelInit, fetchTabLayout, type PeriodKind } from '../api/client';
 import { dashKeys } from '../api/queryKeys';
 import { useDashboardMode, type DashboardMode } from '../store/dashboardMode';
 
@@ -66,17 +66,8 @@ class IdleQueue {
 
 const idleQueue = new IdleQueue(2);
 
-interface ViewerInitResponse {
-	stockCode: string;
-	corpName: string;
-	toc: unknown;
-	firstTopic: string | null;
-	firstChapter: string | null;
-	viewer: unknown;
-}
-
-function viewerInitKey(stockCode: string) {
-	return ['viewer', 'init', stockCode] as const;
+function panelInitKey(stockCode: string) {
+	return ['panel', 'init', stockCode] as const;
 }
 
 export interface PrefetchOptions {
@@ -110,12 +101,8 @@ export function usePrefetchCompany() {
 				priority === 'viewer'
 					? () =>
 							queryClient.prefetchQuery({
-								queryKey: viewerInitKey(stockCode),
-								queryFn: async () => {
-									const r = await fetch(`/api/company/${stockCode}/init?compact=true&limit=60`);
-									if (!r.ok) throw new Error(`HTTP ${r.status}`);
-									return (await r.json()) as ViewerInitResponse;
-								},
+								queryKey: panelInitKey(stockCode),
+								queryFn: () => fetchPanelInit(stockCode),
 								staleTime: 5 * 60_000,
 							})
 					: () =>
@@ -137,12 +124,8 @@ export function usePrefetchCompany() {
 			});
 		const viewerTask: Task = () =>
 			queryClient.prefetchQuery({
-				queryKey: viewerInitKey(stockCode),
-				queryFn: async () => {
-					const r = await fetch(`/api/company/${stockCode}/init?compact=true&limit=60`);
-					if (!r.ok) throw new Error(`HTTP ${r.status}`);
-					return (await r.json()) as ViewerInitResponse;
-				},
+				queryKey: panelInitKey(stockCode),
+				queryFn: () => fetchPanelInit(stockCode),
 				staleTime: 5 * 60_000,
 			});
 
