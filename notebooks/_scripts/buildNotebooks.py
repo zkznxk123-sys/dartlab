@@ -10,23 +10,21 @@ ROOT = Path("notebooks")
 
 NOTEBOOKS = {
     "01_company": [
-        ("md", "# Company\n\nsections 사상 — `topic × period` 으로 모든 공시/재무 데이터에 단일 진입점."),
+        ("md", "# Company\n\npanel 사상 — `c.panel` 을 잡는 순간 항목×기간 격자. 모든 공시/재무에 단일 표면."),
         ("code", "%pip install -q dartlab"),
         ("code", 'import dartlab\nc = dartlab.Company("005930")\nc.corpName'),
-        ("md", "## 단일 진입점 — show / select"),
-        ("code", "# 사용 가능한 topic 목록\nc.topics"),
-        ("code", '# 손익계산서 (분기)\nc.show("IS")'),
-        ("code", '# 연간 합산\nc.show("IS", freq="Y")'),
-        ("code", '# 행 필터\nc.select("IS", ["매출액", "영업이익", "당기순이익"])'),
-        ("code", '# 주석 — 재고자산\nc.show("inventory")'),
-        ("code", '# 정형 공시 — 배당\nc.show("dividend")'),
-        ("md", "## sections / facts / trace"),
-        ("code", "c.sections.head(20)"),
-        ("code", "c.facts.head(20)"),
-        ("code", 'c.trace("BS")'),
-        ("md", "## 공시 / 변화"),
+        ("md", "## 격자 + 행 검색"),
+        ("code", "# 전체 공시 수평화 격자 (항목 × 기간)\nc.panel()"),
+        ("code", '# 항목명 행 검색 (raw 공시)\nc.panel("매출")'),
+        ("md", "## native 재무제표 (소문자) / finance (대문자)"),
+        ("code", '# native 손익 — 사업보고서 항목 그대로, XBRL+옛 통합 (2013~)\nc.panel("is", freq="year")'),
+        ("code", '# finance 손익 — XBRL 정규화 숫자\nc.panel("IS", freq="year")'),
+        ("md", "## native 재무비율 (소문자) / finance 비율 (대문자)"),
+        ("code", '# native 비율 — 5표 항목으로 계산 (깊은 history)\nc.panel("ratios")'),
+        ("code", '# finance 비율\nc.panel("RATIOS")'),
+        ("md", "## 공시 / 본문 검색"),
         ("code", "c.filings().head(10)"),
-        ("code", "c.diff()"),
+        ("code", '# 본문 전체 검색\nc.panel.search("재고")'),
     ],
     "02_gather": [
         ("md", "# Gather\n\n외부 시장 데이터 수집 — 주가/매크로/뉴스/수급."),
@@ -184,15 +182,23 @@ def write_marimo(name: str, cells) -> None:
         "",
     ]
 
+    # 마리모는 설명을 주석으로 (mo.md 셀 대신) — 다음 code 셀 위에 모아 단다.
+    pending_comments: list[str] = []
+
+    def _comment_lines(md: str) -> list[str]:
+        out: list[str] = []
+        for raw in md.split("\n"):
+            s = raw.rstrip()
+            if not s:
+                out.append("#")
+            else:
+                s = s.lstrip("#").strip()  # md 헤더 마커(#) 제거 → 깔끔한 주석
+                out.append(f"# {s}" if s else "#")
+        return out
+
     for kind, content in cells:
         if kind == "md":
-            lines.append("")
-            lines.append("@app.cell(hide_code=True)")
-            lines.append("def _():")
-            lines.append("    import marimo as mo")
-            md = content.replace('"', '\\"')
-            lines.append(f'    mo.md("""{md}""")')
-            lines.append("    return")
+            pending_comments.extend(_comment_lines(content))
             continue
 
         if content.strip().startswith("%pip install"):
@@ -209,6 +215,9 @@ def write_marimo(name: str, cells) -> None:
             params.append("c")
 
         lines.append("")
+        if pending_comments:  # 셀 위에 설명 주석
+            lines.extend(pending_comments)
+            pending_comments = []
         lines.append("@app.cell")
         if params:
             lines.append(f"def _({', '.join(params)}):")
@@ -230,6 +239,9 @@ def write_marimo(name: str, cells) -> None:
         else:
             lines.append("    return")
 
+    if pending_comments:  # 끝에 남은 설명 주석 (뒤 code 셀 없음)
+        lines.append("")
+        lines.extend(pending_comments)
     lines.extend(["", "", 'if __name__ == "__main__":', "    app.run()", ""])
     p = ROOT / "marimo" / f"{name}.py"
     p.write_text("\n".join(lines), encoding="utf-8")

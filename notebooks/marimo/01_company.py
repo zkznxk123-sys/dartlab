@@ -5,63 +5,78 @@
 
 import marimo
 
-__generated_with = "0.23.8"
-app = marimo.App(width="full")
+__generated_with = "0.22.0"
+app = marimo.App(width="medium")
 
 
+# Company
+#
+# panel 사상 — `c.panel` 을 잡는 순간 항목×기간 격자. 모든 공시/재무에 단일 표면.
 @app.cell
 def _():
-    # Company facade — 종목코드 하나로 공시·재무·정형 데이터에 단일 진입점
     import dartlab
+
     c = dartlab.Company("005930")
     c.corpName
-    return (c,)
+    return (dartlab, c)
+
+
+# 격자 + 행 검색
+@app.cell
+def _(c):
+    # 전체 공시 수평화 격자 (항목 × 기간)
+    c.panel()
+    return
 
 
 @app.cell
 def _(c):
-    # filings — 모든 보고서 (DART 뷰어 URL 포함)
+    # 항목명 행 검색 (raw 공시)
+    c.panel("매출")
+    return
+
+
+# native 재무제표 (소문자) / finance (대문자)
+@app.cell
+def _(c):
+    # native 손익 — 사업보고서 항목 그대로, XBRL+옛 통합 (2013~)
+    c.panel("is", freq="year")
+    return
+
+
+@app.cell
+def _(c):
+    # finance 손익 — XBRL 정규화 숫자
+    c.panel("IS", freq="year")
+    return
+
+
+# native 재무비율 (소문자) / finance 비율 (대문자)
+@app.cell
+def _(c):
+    # native 비율 — 5표 항목으로 계산 (깊은 history)
+    c.panel("ratios")
+    return
+
+
+@app.cell
+def _(c):
+    # finance 비율
+    c.panel("RATIOS")
+    return
+
+
+# 공시 / 본문 검색
+@app.cell
+def _(c):
     c.filings().head(10)
     return
 
 
 @app.cell
 def _(c):
-    # panel — 정부 XBRL 분류(canonicalKey) 기준 항목 × 기간 수평화 (잡는 순간 pl.DataFrame)
-    c.panel(tag=False)
-    return
-
-
-@app.cell
-def _(c):
-    # 섹션 행 검색 — raw 공시 (한글명/canonicalKey)
-    c.panel("매출",tag=False)
-    return
-
-
-@app.cell
-def _(c):
-    c.panel("BS")
-    return
-
-
-@app.cell
-def _(c):
-    c.panel("IS")
-    return
-
-
-@app.cell
-def _(c):
-    # 정량 finance is 데이터
-    c.panel("IS",freq='year')
-    return
-
-
-@app.cell
-def _(c):
-    # 사업보고서상의 is 
-    c.panel("is",freq='year')
+    # 본문 전체 검색
+    c.panel.search("재고")
     return
 
 
