@@ -133,6 +133,8 @@ panel artifact(`{code}/{period}.parquet`)에 **굽는 것**과 **read 가 매번
 | `disclosureKey`(=canonicalKey)·`xbrlClass`·`blockOrder`·`atocId` 등 | ✅ build | walker 가 뽑은 원본 속성 + `canonicalKey` **순수함수 규칙** (read fallback 보유 → 규칙 변경 시 재빌드 전에도 동작) |
 | `scope` (연결/별도) | ❌ read 파생 | `scopeExpr(xbrlClass)` 판정 — **규칙이 바뀔 수 있음** → 안 구움, read 가 계산 |
 | 행 순서·계층 (spine) | ❌ read 정렬 | 전역 spine `(chapterRank, spineOrder)` — corpus 확대·정부 양식 변경 시 재산정 → artifact 불변, spineData.py 만 재생성 |
+| 옛 주석 분해(de-chunk NT_*) | ✅ build | `dechunkNotes` 가 통짜 덩어리를 `noteTaxonomy` 뼈대로 항목 분할 — **spine 과 달리 build-baked**(행을 물리 분할) → 뼈대 재생성 시 전수 재빌드 필요 |
+| 본문+첨부 중복 제거 (dedup) | ❌ read 정렬 | `dedupKeyed` 가 read 시 `(key,scope,period)` 1개 — build 는 분류만(중복 emit), dedup 은 READ 단일책임 |
 | plain (태그 strip) | ❌ read strip | raw 의 파생 표현 — strip 규칙 변경 가능 + 같은 정보 이중저장([[feedback_no_content_plain_precompute]]) → 안 구움 |
 
 **원칙**: 파생물·정렬·표현·판정은 **굽지(build) 도, 즉시 다 계산(eager)도 강제하지 않는다.** 굽으면
@@ -203,6 +205,30 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
 - **정직성** — 밸류에이션(PER/PBR)은 price 미보유로 제외(statement-only: 수익성/안정성/효율성/현금흐름/복합/
   성장). 매핑 갭은 그 비율만 해당 period None(숨김 0) — 갭은 core `accountMappings.json` 보강(panel-local 0).
 
+### 주석 수평화 (de-chunk + noteTaxonomy + dedup) — 옛 통짜 주석을 표준 항목으로
+
+2023+ 보고서는 주석이 항목별 `NT_*` 행(XBRL 태깅)으로 들어오나, 그 이전은 **disclosureKey 없는 통짜
+덩어리**라 era 경계에서 수평화가 끊긴다. 세 부분이 이를 잇는다 — **책임 분리**:
+
+- **BUILD 분류 — `build/dechunkNotes.py`**: 재무제표 노트 영역 gate(`sectionLeaf 주석` OR `ctx 재무제표`, 사업
+  보고서 TOC·배당·MD&A 제외)로 통짜 덩어리만 골라, 본문 `N. 제목` 헤더(**번호 단조증가** 가드로 표·목록 항목
+  오인 차단)를 뼈대로 매칭 → 표준 `NT_*` 부여. 노트 앞 preamble(재무제표 본표)은 원 블록 보존. **dedup 안 함**
+  (매칭 노트 전부 emit). 임계 없음 — 1개라도 매칭되면 itemize.
+- **뼈대 — `build/noteTaxonomy.py`(생성기) → `noteTaxonomyData.py`(생성물, git 추적)**: 전 corpus 2023+
+  XBRL 행에서 `(scope, 정규화제목) → dominant NT_ 코드` 학습. 한 제목이 여러 코드로 갈리는 추상 제목('회계정책'
+  류)은 `dominanceRatio`(기본 0.8) 미달로 **제외**(false-merge 회피, 미매칭→narrative 유지). `spineData` 패턴
+  (순수 .py, 사람 미수정). `_norm`(제목 정규화)은 dechunkNotes 가 import — 생성/조회 키 SSOT 일치.
+- **READ 정렬 — `mapper.dedupKeyed`**: 같은 노트가 본문("III.재무")·첨부("(첨부)재무제표") 중복 수록되면
+  `readWide` 가 `(disclosureKey, scope, period)` 당 1개(xbrlClass native 우선)로 — **dedup 은 READ 한 곳**.
+
+**재생성 cadence(중요)** — `noteTaxonomy` 는 **build 시점에 행을 물리 분할(baked)**: spine(read 정렬)과 달리
+뼈대 변경 시 **전수 재빌드 필수**. 운영자가 새 회사/양식연도로 정밀화하려면 `--noteTaxonomy`(노브
+`--minFreq`/`--dominanceRatio`) 재생성 → 전수 `--all` 재빌드(~135분) → census 검증. 빈번 갱신 대상 아님.
+
+**모니터링** — `tests/audit/panelHorizonCensus.py`: `grid_duplicated`(증식)·`content_dropped`(char-parity)·
+`note_discontinuous`(과거연간 NT_ 0). 단 `note_discontinuous` 는 *비표준 주석 회사*(genuine narrative)도
+깃발하니 버그 vs 정상 수동 판별 필요(택소노미 미등재=정상).
+
 ```
 DART zip / DART API ──build(providers/dart/panel/build)─→ {code}/{period}.parquet (14-col)
                                                               │
@@ -251,6 +277,10 @@ python .github/scripts/sync/onlinePanel.py --changed                      # docs
 
 # 정부 서식 뼈대(spine) 생성 — 기준 종목 최신 사업보고서 문서순서·트리 → spine/spineData.py (git 추적)
 python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes 005930,000660
+
+# 주석 뼈대(noteTaxonomy) 생성 — 전 corpus 2023+ XBRL 학습 → build/noteTaxonomyData.py (git 추적).
+# build-baked(spine 과 달리 read 정렬 아님) → 재생성 후 전수 --all 재빌드 필수. 노브 --minFreq/--dominanceRatio.
+python -X utf8 -m dartlab.providers.dart.panel.build --noteTaxonomy
 ```
 
 ## 호출 동작
