@@ -119,15 +119,37 @@ def _uploadHf(category: str) -> None:
         print("[uploadData] HuggingFace 증분 업로드 완료")
         return
 
-    # fallback: 전체 폴더 업로드. nested category 는 rglob (디렉터리 안 nested 파일 포함).
+    # fallback: 전체 폴더 업로드.
     if isNested:
-        files = list(localDir.rglob("*.parquet")) + list(localDir.rglob("*.arrow"))
-    else:
-        files = list(localDir.glob("*.parquet")) + list(localDir.glob("*.arrow"))
+        # nested 대용량(panel ~92k 파일)은 upload_folder 가 한 commit 에 다 담아 실패한다(HF 경고).
+        # upload_large_folder = resumable·병렬·부분실패 자동 재시도. path_in_repo 미지원이라 folder_path 를
+        # 데이터 base 로 두고 allow_patterns 로 dirPath 접두(예 "dart/panel/**") 보존. 자체 retry 라 retryHfCall 불필요.
+        base = Path(os.environ.get("DARTLAB_DATA_DIR", os.path.join(os.getcwd(), "data")))
+        nFiles = len(list(localDir.rglob("*.parquet"))) + len(list(localDir.rglob("*.arrow")))
+        if nFiles == 0:
+            print(f"[uploadData] {localDir}에 업로드할 파일 없음")
+            return
+        # num_workers 낮춤 — HF 무료 티어 1000 req/5min. nested LFS 파일이 많으면(panel 92k) 기본 병렬이
+        # 429 폭주. workers 2 + upload_large_folder 자체 backoff·resumable 로 한도 내 점진 업로드.
+        nWorkers = int(os.environ.get("HF_UPLOAD_WORKERS", "2"))
+        print(
+            f"[uploadData] HuggingFace 대용량 업로드: {nFiles}개 파일 {dirPath}/** → {HF_REPO} "
+            f"(upload_large_folder, workers={nWorkers})"
+        )
+        api.upload_large_folder(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            folder_path=str(base),
+            allow_patterns=[f"{dirPath}/**"],
+            num_workers=nWorkers,
+        )
+        print("[uploadData] HuggingFace 업로드 완료")
+        return
+
+    files = list(localDir.glob("*.parquet")) + list(localDir.glob("*.arrow"))
     if not files:
         print(f"[uploadData] {localDir}에 업로드할 파일 없음")
         return
-
     print(f"[uploadData] HuggingFace 전체 업로드: {len(files)}개 파일 → {HF_REPO}/{dirPath}/")
     retryHfCall(
         api.upload_folder,
