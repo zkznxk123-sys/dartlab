@@ -59,6 +59,38 @@ const GRID = {
 	dartUrlByPeriod: { '2026Q1': 'https://dart.fss.or.kr/x', '2025Q4': null, '2025Q3': null },
 };
 
+// 다항목 절 (주석류) — distinct 라벨 ≥ 2 → 좌측 항목 레일 노출 대상.
+const NOTES_KEY = 'III. 재무에 관한 사항␟2. 연결재무제표';
+const GRID_NOTES = {
+	stockCode: STOCK,
+	corpName: '삼성전자',
+	chapter: 'III. 재무에 관한 사항',
+	sectionLeaf: '2. 연결재무제표',
+	sectionKey: NOTES_KEY,
+	periods: ['2026Q1', '2025Q4', '2025Q3', '2024Q4'],
+	rows: [
+		{
+			chapter: 'III. 재무에 관한 사항',
+			sectionLeaf: '2. 연결재무제표',
+			blockLeaf: '재고자산',
+			disclosureKey: 'INV',
+			scope: 'consolidated',
+			blockType: 'table',
+			cells: { '2026Q1': '<TABLE><TR><TE>재고 100</TE></TR></TABLE>', '2025Q4': '<TABLE><TR><TE>재고 90</TE></TR></TABLE>' },
+		},
+		{
+			chapter: 'III. 재무에 관한 사항',
+			sectionLeaf: '2. 연결재무제표',
+			blockLeaf: '매출채권',
+			disclosureKey: 'AR',
+			scope: 'consolidated',
+			blockType: 'table',
+			cells: { '2026Q1': '<TABLE><TR><TE>채권 200</TE></TR></TABLE>', '2025Q4': '<TABLE><TR><TE>채권 180</TE></TR></TABLE>' },
+		},
+	],
+	dartUrlByPeriod: { '2026Q1': null, '2025Q4': null, '2025Q3': null },
+};
+
 const INIT = {
 	stockCode: STOCK,
 	corpName: '삼성전자',
@@ -83,7 +115,9 @@ test.describe('Panel viewer e2e', () => {
 			if (url.includes('/panel/toc')) return route.fulfill(json(TOC));
 			if (/\/panel(\?|$)/.test(url)) {
 				gridCalls += 1;
-				return route.fulfill(json(GRID));
+				// section 이 연결재무제표(다항목)면 NOTES grid, 아니면 기본 회사의 개요 grid.
+				const decoded = decodeURIComponent(url.replace(/\+/g, ' '));
+				return route.fulfill(json(decoded.includes('연결재무제표') ? GRID_NOTES : GRID));
 			}
 			if (url.includes('/meta') || url.toLowerCase().includes('meta')) {
 				return route.fulfill(json({ stockCode: STOCK, corpName: '삼성전자', market: 'KR', sector: '', products: [], blogPosts: [] }));
@@ -138,13 +172,16 @@ test.describe('Panel viewer e2e', () => {
 		await expect(page.locator('main .font-mono.text-xs.font-semibold')).toHaveCount(6, { timeout: 10_000 });
 	});
 
-	test('항목 레이블 좌측 레일 — blockLeaf 가 sticky 레일에 노출', async ({ page }) => {
+	test('항목 레일 — 서술형 절은 생략, 다항목 절(distinct≥2)만 노출', async ({ page }) => {
 		await page.goto(`/analysis/${STOCK}/viewer?period=quarterly`);
 		await expect(page.getByText('2026Q1', { exact: true }).first()).toBeVisible({ timeout: 10_000 });
-		// 레일 코너 헤더 '항목' (툴바의 '항목 N · 전체 기간' 과 구분 위해 exact)
-		await expect(page.getByText('항목', { exact: true })).toBeVisible();
-		// blockLeaf '연혁표' 가 본문 좌측 레일에 (TOC chip 은 aside 라 main 으로 스코프)
-		await expect(page.locator('main').getByText('연혁표', { exact: true })).toBeVisible();
+		// 회사의 개요 = 서술형(라벨 0~1) → 항목 레일 코너 헤더 없음 (빈 거터 회피)
+		await expect(page.getByText('항목', { exact: true })).toHaveCount(0);
+		// 다항목 절(연결재무제표: 재고자산·매출채권) 로 전환 → 레일 노출
+		await page.getByRole('button', { name: '2. 연결재무제표' }).click();
+		await expect(page.getByText('항목', { exact: true })).toBeVisible({ timeout: 10_000 });
+		await expect(page.locator('main').getByText('재고자산', { exact: true })).toBeVisible();
+		await expect(page.locator('main').getByText('매출채권', { exact: true })).toBeVisible();
 	});
 
 	test('diff 배지 — 변경 인접 period 에 "변경 포함"', async ({ page }) => {

@@ -373,8 +373,10 @@ function hasVisibleContent(row: PanelRow, windowPeriods: string[]): boolean {
 	return false;
 }
 
+// 레일 라벨 = 사용자가 탐색하는 항목 축 = blockLeaf (TOC chip 과 동일). disclosureKey 는
+// 내부 정합용 코드라 라벨로 쓰지 않는다 — 서술형 절(회사의 개요)이 빈 거터를 갖던 원인.
 function rowLabel(r: PanelRow): string {
-	return r.blockLeaf || r.disclosureKey || '';
+	return r.blockLeaf || '';
 }
 
 interface PanelMatrixProps {
@@ -399,8 +401,10 @@ function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changed
 			</div>
 		);
 	}
-	// 항목 레이블이 하나라도 있으면 좌측 레일 표시 (주석 등). 재무제표처럼 전부 빈 경우는 생략.
-	const hasLabel = visible.some((r) => rowLabel(r));
+	// 좌측 항목 레일은 "여러 항목을 구분"할 때만 의미가 있다. 서술형 절(회사의 개요 등)처럼
+	// 서로 다른 라벨이 0~1 개면 빈 거터로 읽기 폭만 잡아먹으므로 생략 — distinct 라벨 ≥ 2 일 때만.
+	const distinctLabels = new Set(visible.map(rowLabel).filter(Boolean));
+	const hasLabel = distinctLabels.size >= 2;
 	const labelTrack = hasLabel ? 'minmax(120px, 200px) ' : '';
 	const template = `${labelTrack}repeat(${windowPeriods.length}, minmax(260px, 1fr))`;
 
