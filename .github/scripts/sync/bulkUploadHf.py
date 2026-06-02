@@ -9,29 +9,62 @@
 """
 
 import argparse
+import json
 import sys
 import time
 from pathlib import Path
 
 from huggingface_hub import CommitOperationAdd, HfApi
 
-REPO = "eddmpython/dartlab-data"
-BATCH_SIZE = 100
-MAX_RETRIES = 3
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # _hfRetry (scripts/) import 경로
+from _hfRetry import retryHfCall  # noqa: E402 — 429/503/504 에 "retry in X min" 파싱해 윈도우만큼 대기(공용 SSOT)
+
+from dartlab.core.dataConfig import repoFor  # noqa: E402 — 카테고리별 전용 repo 라우팅(미등록은 기본 repo)
+
+REPO = "eddmpython/dartlab-data"  # 기본/fallback (repoFor 가 미등록 카테고리에 반환하는 값과 동일)
+BATCH_SIZE = 300  # 큰 배치 = 적은 commit = rate-limit 압력 감소 (HF 무료 1000 req/5min)
+_INTER_BATCH_SLEEP = 3  # 배치 간 선제 페이싱(초)
+
+
+def _existingCachePath(category: str) -> Path:
+    """원격 기존-파일 목록의 로컬 영속 캐시 경로 (dist/, gitignored)."""
+    return Path(f"dist/hfExisting_{category}.json")
+
+
+def _loadExistingCache(category: str) -> set:
+    """로컬 캐시 로드 — list_repo_tree 가 429 로 실패해도 진행 상태를 잃지 않는 resumability 정본."""
+    p = _existingCachePath(category)
+    if p.exists():
+        try:
+            return set(json.loads(p.read_text(encoding="utf-8")))
+        except Exception:  # noqa: BLE001 — 캐시 손상 시 빈 set 으로 복구
+            return set()
+    return set()
+
+
+def _saveExistingCache(category: str, existing: set) -> None:
+    """업로드 진행분을 즉시 영속화 — 배치 성공마다 호출해 중단·재실행에 강건."""
+    p = _existingCachePath(category)
+    p.parent.mkdir(exist_ok=True)
+    p.write_text(json.dumps(sorted(existing)), encoding="utf-8")
+
 
 CATEGORY_DIR = {
     "docs": "dart/docs",
     "finance": "dart/finance",
     "report": "dart/report",
+    "panel": "dart/panel",
     "krxPricesV2": "krx/prices/v2",
     "newsHeadlines": "news/headlines",
     "newsEnriched": "news/enriched",
     "newsGdelt": "news/gdelt",
 }
 
-# nested=True 카테고리는 sub-dir (예: news/headlines/{market}/) 까지 rglob 으로 수집,
+# nested=True 카테고리는 sub-dir (예: news/headlines/{market}/ · dart/panel/{code}/) 까지 rglob 으로 수집,
 # HF path_in_repo 도 dirPath + relpath 형태로 유지. nested=False 는 flat dirPath/*.parquet.
-NESTED_CATEGORIES = {"newsHeadlines", "newsEnriched", "newsGdelt"}
+# panel: period-sharded {code}/{period}.parquet ~92k 파일 — list_repo_tree 로 미업로드만 골라 resumable·
+# 배치 재시도(실패 배치 건너뜀, 재실행시 이어감)로 한도 내 점진 업로드(uploadData 의 one-shot upload_large_folder 대체).
+NESTED_CATEGORIES = {"newsHeadlines", "newsEnriched", "newsGdelt", "panel"}
 
 
 def main():
@@ -62,18 +95,38 @@ def main():
 
     api = HfApi(token=token)
     nested = category in NESTED_CATEGORIES
+    repo = repoFor(category)  # 전용 repo 분리 카테고리면 그쪽, 아니면 기본 REPO
 
-    # 이미 올라간 파일 확인 — nested 면 recursive, flat 이면 surface 만.
-    try:
-        existing = set()
-        for f in api.list_repo_tree(REPO, path_in_repo=dirPath, repo_type="dataset", recursive=nested):
-            # nested: 'news/headlines/KR/2026-05-28.parquet' → 'KR/2026-05-28.parquet' relpath
+    # 이미 올라간 파일 확인 — nested 면 recursive, flat 이면 surface 만. retryHfCall 로 감싸 rate-limit 에도
+    # 목록을 확보(resumability 핵심 — 목록 실패하면 매 패스가 전체 재업로드라 수렴 안 됨).
+    def _collectExisting() -> set:
+        s = set()
+        for f in api.list_repo_tree(repo, path_in_repo=dirPath, repo_type="dataset", recursive=nested):
+            # list_repo_tree 는 RepoFile + RepoFolder 둘 다 yield. RepoFolder 엔 rfilename 없음
+            # (AttributeError → 과거 resumability 무력화 근본버그). 둘 다 가진 .path 사용 + .parquet 만.
+            rf = f.path
+            if not rf.endswith(".parquet"):
+                continue  # 폴더/비-parquet 제외
+            # nested: 'dart/panel/000010/2025Q4.parquet' → '000010/2025Q4.parquet' relpath
             # flat: 'dart/docs/foo.parquet' → 'foo.parquet'
-            relpath = f.rfilename[len(dirPath) + 1 :] if f.rfilename.startswith(dirPath + "/") else f.rfilename
-            existing.add(relpath)
-        print(f"이미 업로드: {len(existing)}개")
-    except Exception:
-        existing = set()
+            relpath = rf[len(dirPath) + 1 :] if rf.startswith(dirPath + "/") else rf
+            s.add(relpath)
+        return s
+
+    # 로컬 캐시 = resumability 정본. 원격 목록은 갱신용(성공 시 병합). list_repo_tree 가 92k 파일 페이지네이션
+    # 중 429 로 실패해도 캐시로 진행 → 매 패스 26배치 헛검사·재업로드 없이 신규 프런티어 직행.
+    existing = _loadExistingCache(category)
+    if existing:
+        print(f"로컬 캐시 기존: {len(existing)}개")
+    try:
+        remote = retryHfCall(_collectExisting)
+        before = len(existing)
+        existing |= remote
+        if len(existing) != before or not _existingCachePath(category).exists():
+            _saveExistingCache(category, existing)
+        print(f"원격 목록 병합: 총 {len(existing)}개 (신규 +{len(existing) - before})")
+    except Exception as e:  # noqa: BLE001 — 원격 실패해도 로컬 캐시로 진행(수렴 보장)
+        print(f"원격 목록 조회 실패 — 로컬 캐시 {len(existing)}개로 진행: {e}")
 
     allFiles = sorted(localDir.rglob("*.parquet") if nested else localDir.glob("*.parquet"))
 
@@ -106,25 +159,24 @@ def main():
         operations = [
             CommitOperationAdd(path_in_repo=f"{dirPath}/{_relpath(f)}", path_or_fileobj=str(f)) for f in batch
         ]
+        try:
+            # retryHfCall: 429/503/504 에 "retry in X min" 파싱해 윈도우만큼 대기 → 한도 내 점진(15s 고정보다 정확).
+            retryHfCall(
+                api.create_commit,
+                repo_id=repo,
+                repo_type="dataset",
+                operations=operations,
+                commit_message=f"{category} {batchNum}/{totalBatches} ({len(batch)} files)",
+            )
+            print(f"  batch {batchNum} 완료")
+            # 성공분 즉시 캐시 영속화 — 다음 패스/재실행은 이 배치를 건너뛰고 프런티어 직행.
+            existing |= {_relpath(f) for f in batch}
+            _saveExistingCache(category, existing)
+        except Exception as e:  # noqa: BLE001 — 실패 배치는 건너뛰고 진행, 재실행시 미업로드로 재시도(resumable)
+            print(f"  batch {batchNum} 실패(건너뜀, 재실행시 재시도): {e}")
+        time.sleep(_INTER_BATCH_SLEEP)  # 한도 선제 페이싱
 
-        for attempt in range(MAX_RETRIES):
-            try:
-                api.create_commit(
-                    repo_id=REPO,
-                    repo_type="dataset",
-                    operations=operations,
-                    commit_message=f"{category} {batchNum}/{totalBatches} ({len(batch)} files)",
-                )
-                print(f"  batch {batchNum} 완료")
-                break
-            except Exception as e:
-                print(f"  attempt {attempt + 1} 실패: {e}")
-                if attempt < MAX_RETRIES - 1:
-                    time.sleep(15)
-                else:
-                    print(f"  batch {batchNum} 최종 실패, 건너뜀")
-
-    print(f"{category} 업로드 완료")
+    print(f"{category} 업로드 완료 (미완분은 재실행시 이어감)")
 
 
 if __name__ == "__main__":

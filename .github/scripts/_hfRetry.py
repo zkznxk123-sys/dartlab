@@ -23,6 +23,26 @@ _BACKOFF_SECONDS_FALLBACK = (60, 300, 900, 1200)  # 60s + 5m + 15m + 20m = 41m
 _MAX_SINGLE_WAIT = 1800  # 한 번 backoff 최대 30분
 _RETRY_MIN_RE = re.compile(r"retry this action in (\d+)\s*minutes?", re.IGNORECASE)
 _RETRY_SEC_RE = re.compile(r"retry this action in (\d+)\s*seconds?", re.IGNORECASE)
+# LFS 멀티스레드 업로드(_upload_lfs_files)는 transient(429/S3/네트워크) 실패를 RuntimeError
+# "Error while uploading 'X' to the Hub." 로 감싼다 — HfHubHTTPError 가 아니라 과거 재시도 0번이었다.
+# 실제 원인은 __cause__ 또는 메시지로 식별해 동일 백오프로 재시도(create_commit 대량 LFS 배치 강건화).
+_TRANSIENT_MSG_RE = re.compile(
+    r"error while uploading|timed out|timeout|connection|temporarily|throttl|rate.?limit|too many requests",
+    re.IGNORECASE,
+)
+
+
+def _isRetryable(exc: Exception) -> bool:
+    """transient(재시도 가치) 여부 — 직접 429/503/504, 또는 LFS 래핑 RuntimeError(원인 429·메시지 transient)."""
+    from huggingface_hub.errors import HfHubHTTPError
+
+    if isinstance(exc, HfHubHTTPError):
+        return getattr(getattr(exc, "response", None), "status_code", None) in _RETRYABLE_STATUS
+    cause = getattr(exc, "__cause__", None)
+    if isinstance(cause, HfHubHTTPError):
+        if getattr(getattr(cause, "response", None), "status_code", None) in _RETRYABLE_STATUS:
+            return True
+    return bool(_TRANSIENT_MSG_RE.search(str(exc)))
 
 
 def parseRetryWait(exc: Exception, attempt: int) -> int:
@@ -61,9 +81,11 @@ def parseRetryWait(exc: Exception, attempt: int) -> int:
 
 
 def retryHfCall(fn: Callable[..., Any], *args, **kwargs) -> Any:
-    """HF API 호출을 429/503/504 백오프로 감싼다.
+    """HF API 호출을 transient 백오프로 감싼다.
 
-    HfHubHTTPError 이면서 status 가 retryable 일 때만 재시도. 그 외는 즉시 raise.
+    재시도 대상: (1) HfHubHTTPError 429/503/504, (2) LFS 업로드 래핑
+    RuntimeError("Error while uploading ...") 처럼 원인이 429 이거나 메시지가
+    transient 인 경우. 그 외(인증·400 등 fatal)는 즉시 raise.
 
     Parameters
     ----------
@@ -75,19 +97,17 @@ def retryHfCall(fn: Callable[..., Any], *args, **kwargs) -> Any:
     Any
         fn 의 정상 반환값.
     """
-    from huggingface_hub.errors import HfHubHTTPError
-
     attempts = len(_BACKOFF_SECONDS_FALLBACK) + 1
     for attempt in range(attempts):
         try:
             return fn(*args, **kwargs)
-        except HfHubHTTPError as exc:
-            status = getattr(getattr(exc, "response", None), "status_code", None)
-            if status not in _RETRYABLE_STATUS or attempt == attempts - 1:
+        except Exception as exc:  # noqa: BLE001 — _isRetryable 가 transient 만 선별, 나머지 즉시 raise
+            if not _isRetryable(exc) or attempt == attempts - 1:
                 raise
             wait = parseRetryWait(exc, attempt)
+            label = getattr(getattr(exc, "response", None), "status_code", None) or type(exc).__name__
             print(
-                f"[hfRetry] HF {status} on {fn.__name__} — {wait}s 후 재시도 ({attempt + 1}/{attempts - 1})",
+                f"[hfRetry] HF {label} on {fn.__name__} — {wait}s 후 재시도 ({attempt + 1}/{attempts - 1})",
                 flush=True,
             )
             time.sleep(wait)

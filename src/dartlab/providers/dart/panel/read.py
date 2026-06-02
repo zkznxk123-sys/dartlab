@@ -197,10 +197,10 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
     try:
         from huggingface_hub import snapshot_download
 
-        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+        from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
         snapshot_download(
-            repo_id=HF_REPO,
+            repo_id=repoFor("panel"),
             repo_type="dataset",
             allow_patterns=[f"{DATA_RELEASES['panel']['dir']}/{code}/*.parquet"],
             local_dir=str(Path(_cfg.dataDir)),
@@ -361,8 +361,14 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
     keyed = df.filter(pl.col("_anchorKey").is_not_null())
     if keyed.is_empty():
         return df.drop("_anchorKey")
+    # 라벨 source 선택 — 최신 period 우선, 단 같은 period 에 canonical(III)·물리첨부((첨부)*)가 공존하면
+    # canonical 을 집어야 한다. (첨부)연결재무제표/(첨부)재무제표는 최신 XBRL 뼈대가 아닌 물리 복제 —
+    # period asc + 첨부 먼저(canonical 마지막) 정렬 → .last() 가 항상 canonical 라벨(III)을 채택.
+    # (이게 없으면 연간보고서의 III↔첨부 중복에서 .last() 가 첨부를 집어 (첨부) chapter 가 혼재 잔존.)
+    _attach = pl.col("chapter").cast(pl.Utf8).str.contains("(첨부)", literal=True).fill_null(False)
     latest = (
-        keyed.sort("period")
+        keyed.with_columns(_attach.alias("_attach"))
+        .sort(["period", "_attach"], descending=[False, True])
         .group_by(["_anchorKey", "scope"], maintain_order=True)
         .agg(
             pl.col("chapter").last().alias("_chapterL"),
@@ -474,16 +480,24 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
     isNote = pl.col("sectionLeaf").cast(pl.Utf8).str.contains("주석").fill_null(False)
     tmp = df.with_columns(scope.alias("_alignScope"), normTitle.alias("_alignTitle"), isNote.alias("_isNote"))
 
-    # 1차 = 회사 자기 native NT_ 주석행 ((scope, 정규화제목) → NT_, 회사 표준·NT_C_U 회사코드 포함 → 우선).
-    own = (
-        tmp.filter(
-            pl.col("disclosureKey").cast(pl.Utf8).str.starts_with("NT_") & (pl.col("_alignTitle").str.len_chars() > 1)
-        )
+    notesOwn = tmp.filter(
+        pl.col("disclosureKey").cast(pl.Utf8).str.starts_with("NT_") & (pl.col("_alignTitle").str.len_chars() > 1)
+    )
+    # 표준 뼈대 = 회사 자기 NT_D(표준 인라인 XBRL, 최신 뼈대) — NT_C_U/NT_S_U(회사고유 첨부코드) 제외.
+    # (scope, 정규화제목) → 표준키. 같은 주석이 III(NT_D)·(첨부)(NT_C_U)·옛 split(null)로 갈려도 이 표준키로 통일.
+    ownStd = (
+        notesOwn.filter(~pl.col("disclosureKey").cast(pl.Utf8).str.contains("_U", literal=True))
         .select(["_alignScope", "_alignTitle", "disclosureKey"])
+        .unique(subset=["_alignScope", "_alignTitle"], keep="first")
+        .rename({"disclosureKey": "_stdKey"})
+    )
+    # 자기 native 전체(U 포함) — 표준짝 없는 null-key 주석행의 fallback.
+    own = (
+        notesOwn.select(["_alignScope", "_alignTitle", "disclosureKey"])
         .unique(subset=["_alignScope", "_alignTitle"], keep="first")
         .rename({"disclosureKey": "_ownKey"})
     )
-    # 2차 = 전역 taxonomy (cross-company 학습 표준 NT_D) — 자기 XBRL 노트 0 회사가 남의 표준코드를 받는다.
+    # 전역 taxonomy (cross-company 학습 표준 NT_D) — 자기 XBRL 노트 0 회사가 남의 표준코드를 받는다.
     from .build.noteTaxonomyData import NOTE_TAXONOMY
 
     glob = pl.DataFrame(
@@ -493,12 +507,17 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
             "_globKey": list(NOTE_TAXONOMY.values()),
         }
     )
-    # 주석영역(_isNote) null-key 행만 채움 — 자기 뼈대 우선, 없으면 전역 표준. 비-주석 narrative 는 불변.
+    # 주석영역(_isNote)은 (scope,정규화제목) 표준 뼈대로 **통일** — III(NT_D)·(첨부)(NT_C_U)·옛 split(null)
+    # 변종을 하나의 표준 NT_D 로 흡수(anchorLatest 가 그 표준키로 III chapter 에 접음). 표준짝 없는 기존 키
+    # (비-주석, 또는 표준화 불가 U-only 주석)는 보존. null-key 표준무 주석은 native(U 포함)→전역 순 fallback.
     return (
-        tmp.join(own, on=["_alignScope", "_alignTitle"], how="left")
+        tmp.join(ownStd, on=["_alignScope", "_alignTitle"], how="left")
+        .join(own, on=["_alignScope", "_alignTitle"], how="left")
         .join(glob, on=["_alignScope", "_alignTitle"], how="left")
         .with_columns(
-            pl.when(pl.col("disclosureKey").is_not_null())
+            pl.when(pl.col("_isNote") & pl.col("_stdKey").is_not_null())
+            .then(pl.col("_stdKey"))
+            .when(pl.col("disclosureKey").is_not_null())
             .then(pl.col("disclosureKey"))
             .when(pl.col("_isNote") & pl.col("_ownKey").is_not_null())
             .then(pl.col("_ownKey"))
@@ -507,7 +526,7 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
             .otherwise(pl.col("disclosureKey"))
             .alias("disclosureKey")
         )
-        .drop(["_alignScope", "_alignTitle", "_isNote", "_ownKey", "_globKey"])
+        .drop(["_alignScope", "_alignTitle", "_isNote", "_stdKey", "_ownKey", "_globKey"])
     )
 
 

@@ -61,6 +61,26 @@ from _hfRetry import retryHfCall  # noqa: E402
 
 _BATCH_INTERVAL_SECONDS = 10
 
+# HF 는 repo 당 파일수가 많아지면(권장 ~10 만/repo) tree 열거가 느려지고 429 가 잦아진다.
+# nested 카테고리(panel ~9 만·gdelt ~6 만)가 이 임계에 접근하면 전용 repo 분리(repoFor)를
+# 앞당기라는 선제 경고. 빌드는 막지 않음(경고만) — 분리는 운영자 트리거.
+_FILECOUNT_WARN = int(os.environ.get("DARTLAB_HF_FILECOUNT_WARN", "80000"))
+
+
+def _monitorFileCount(localDir: Path, category: str, repo: str) -> int:
+    """nested 카테고리 로컬 parquet 파일수를 세어 HF repo 파일수 벽 임박 시 경고.
+
+    파일수 ≈ 해당 repo 의 누적 파일수 추세. _FILECOUNT_WARN(기본 8 만) 초과 시 전용 repo
+    분리(dataConfig repoFor + 데이터 이전)를 권고하는 경고를 출력한다. 반환은 파일수.
+    """
+    n = len(list(localDir.rglob("*.parquet")))
+    if n >= _FILECOUNT_WARN:
+        print(
+            f"[uploadData] ⚠ 파일수 경고 — {category} {n:,}개 파일 (repo={repo}, 경고임계 {_FILECOUNT_WARN:,}). "
+            f"HF repo 당 ~10 만 파일 권장 한계 접근 → 전용 repo 분리(DATA_RELEASES['{category}']['repo']) 검토."
+        )
+    return n
+
 
 def _uploadHf(category: str) -> None:
     """HuggingFace에 변경 파일만 업로드 (fallback: 전체 폴더)."""
@@ -71,14 +91,17 @@ def _uploadHf(category: str) -> None:
 
     from huggingface_hub import CommitOperationAdd, HfApi
 
-    from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
     api = HfApi(token=token)
     dirPath = DATA_RELEASES[category]["dir"]
+    repo = repoFor(category)  # 전용 repo 분리 카테고리(panel/news 이전 후)면 그쪽, 아니면 기본
     localDir = _dataDir(category)
 
     changed = _changedFiles(localDir, category=category)
     isNested = bool(DATA_RELEASES[category].get("nested"))
+    if isNested:
+        _monitorFileCount(localDir, category, repo)
 
     # changed.txt가 있고 변경 없음 → 스킵
     if changed is not None and len(changed) == 0:
@@ -108,7 +131,7 @@ def _uploadHf(category: str) -> None:
             totalBatches = (len(changed) + batchSize - 1) // batchSize
             retryHfCall(
                 api.create_commit,
-                repo_id=HF_REPO,
+                repo_id=repo,
                 repo_type="dataset",
                 operations=operations,
                 commit_message=f"sync {category}: {len(batch)} files ({batchNum}/{totalBatches})",
@@ -133,11 +156,11 @@ def _uploadHf(category: str) -> None:
         # 429 폭주. workers 2 + upload_large_folder 자체 backoff·resumable 로 한도 내 점진 업로드.
         nWorkers = int(os.environ.get("HF_UPLOAD_WORKERS", "2"))
         print(
-            f"[uploadData] HuggingFace 대용량 업로드: {nFiles}개 파일 {dirPath}/** → {HF_REPO} "
+            f"[uploadData] HuggingFace 대용량 업로드: {nFiles}개 파일 {dirPath}/** → {repo} "
             f"(upload_large_folder, workers={nWorkers})"
         )
         api.upload_large_folder(
-            repo_id=HF_REPO,
+            repo_id=repo,
             repo_type="dataset",
             folder_path=str(base),
             allow_patterns=[f"{dirPath}/**"],
@@ -150,10 +173,10 @@ def _uploadHf(category: str) -> None:
     if not files:
         print(f"[uploadData] {localDir}에 업로드할 파일 없음")
         return
-    print(f"[uploadData] HuggingFace 전체 업로드: {len(files)}개 파일 → {HF_REPO}/{dirPath}/")
+    print(f"[uploadData] HuggingFace 전체 업로드: {len(files)}개 파일 → {repo}/{dirPath}/")
     retryHfCall(
         api.upload_folder,
-        repo_id=HF_REPO,
+        repo_id=repo,
         repo_type="dataset",
         folder_path=str(localDir),
         path_in_repo=dirPath,

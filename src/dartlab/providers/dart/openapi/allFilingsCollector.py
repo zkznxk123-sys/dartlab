@@ -611,7 +611,7 @@ def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None
 
     from huggingface_hub import HfApi
 
-    from dartlab.core.dataConfig import HF_REPO
+    from dartlab.core.dataConfig import repoFor
 
     relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
     api = HfApi(token=hfToken)
@@ -622,7 +622,7 @@ def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None
             api.upload_file(
                 path_or_fileobj=str(f),
                 path_in_repo=dst,
-                repo_id=HF_REPO,
+                repo_id=repoFor(_ALLFILINGS_DIR_KEY),
                 repo_type="dataset",
             )
             ok += 1
@@ -668,12 +668,12 @@ def _ensureFromHf(period: str | None = None) -> bool:
     try:
         from huggingface_hub import snapshot_download
 
-        from dartlab.core.dataConfig import HF_REPO
+        from dartlab.core.dataConfig import repoFor
 
         relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
         pattern = f"{relDir}/{period}.parquet" if period else f"{relDir}/*.parquet"
         snapshot_download(
-            repo_id=HF_REPO,
+            repo_id=repoFor(_ALLFILINGS_DIR_KEY),
             repo_type="dataset",
             allow_patterns=[pattern],
             local_dir=str(Path(_cfg.dataDir)),

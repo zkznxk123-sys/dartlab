@@ -155,11 +155,11 @@ def _ensureFromHf(stockCode: str) -> bool:
     try:
         from huggingface_hub import snapshot_download
 
-        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+        from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
         sectionsDirRel = DATA_RELEASES["sections"]["dir"]
         snapshot_download(
-            repo_id=HF_REPO,
+            repo_id=repoFor("sections"),
             repo_type="dataset",
             allow_patterns=[f"{sectionsDirRel}/{stockCode}/*.parquet"],
             local_dir=str(Path(_cfg.dataDir)),

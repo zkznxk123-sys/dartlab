@@ -193,6 +193,40 @@ DATA_RELEASES: dict[str, dict] = {
 }
 
 
+def repoFor(category: str) -> str:
+    """카테고리별 HuggingFace repo id — 전용 repo 가 지정됐으면 그것, 아니면 기본 HF_REPO.
+
+    Capabilities:
+        무거운 nested 카테고리(panel ~9 만 파일 · gdelt ~6 만)를 전용 repo 로 분리해 per-repo
+        파일수 한계(~10 만/repo)·tree 열거 429 를 회피하기 위한 라우팅 단일 진입점.
+    AIContext:
+        업로드(uploadData/bulkUploadHf)·다운로드(dataLoader/ensure*FromHf) 양쪽이 repo_id 를
+        하드코딩하는 대신 본 함수로 해석 → 전용 repo 전환이 dataConfig 한 곳에서 끝난다.
+    Guide:
+        데이터 이전(운영자 트리거) 전까지는 어떤 카테고리도 `repo` 필드를 두지 않아 전부 기본
+        repo 를 공유 → 동작 무변경. 이전 완료 후 해당 카테고리에 `"repo": "..."` 한 줄 추가.
+    When:
+        HF 업로드/다운로드 대상 repo 를 결정할 때.
+    How:
+        DATA_RELEASES[category].get("repo") 가 truthy 면 그 값, 아니면 HF_REPO.
+    Requires:
+        없음 — 미등록 category 도 HF_REPO 로 graceful.
+    Raises:
+        없음.
+    Args:
+        category: DATA_RELEASES 카테고리 키 (미등록이어도 HF_REPO 반환).
+    Returns:
+        해당 카테고리 데이터가 사는 HuggingFace dataset repo id.
+    Example:
+        >>> repoFor("contentIndex")
+        'eddmpython/dartlab-data'
+    SeeAlso:
+        DATA_RELEASES: 카테고리별 `repo`(선택)·`dir`·공개 여부.
+        hfBaseUrl: repoFor 를 사용해 resolve URL 을 만든다.
+    """
+    return DATA_RELEASES.get(category, {}).get("repo") or HF_REPO
+
+
 def hfBaseUrl(category: str = "docs") -> str:
     """HuggingFace 데이터셋 base URL.
 
@@ -205,7 +239,7 @@ def hfBaseUrl(category: str = "docs") -> str:
     When:
         dataLoader가 원격 parquet, zip, json 경로의 base URL을 만들 때 호출한다.
     How:
-        HF_BASE_URL 뒤에 DATA_RELEASES[category]["dir"] 값을 붙여 반환한다.
+        repoFor(category) 로 repo 를 해석해 resolve base 를 만들고 DATA_RELEASES[category]["dir"] 를 붙인다.
     Requires:
         category가 DATA_RELEASES에 등록되어 있어야 한다.
     Raises:
@@ -222,4 +256,4 @@ def hfBaseUrl(category: str = "docs") -> str:
         dartlab.core.dataLoader.download: 반환 URL을 실제 다운로드에 사용한다.
     """
     dirPath = DATA_RELEASES[category]["dir"]
-    return f"{HF_BASE_URL}/{dirPath}"
+    return f"https://huggingface.co/datasets/{repoFor(category)}/resolve/main/{dirPath}"

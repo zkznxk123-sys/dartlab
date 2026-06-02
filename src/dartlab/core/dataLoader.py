@@ -11,8 +11,8 @@ import polars as pl
 
 from dartlab.core.dataConfig import (
     DATA_RELEASES,
-    HF_REPO,
     hfBaseUrl,
+    repoFor,
 )
 
 _IS_PYODIDE = sys.platform == "emscripten"
@@ -742,13 +742,14 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
     dataDir.mkdir(parents=True, exist_ok=True)
     label = DATA_RELEASES[category]["label"]
     hfDir = DATA_RELEASES[category]["dir"]
+    repo = repoFor(category)  # 전용 repo 가 지정된 카테고리면 그쪽, 아니면 기본 HF_REPO
 
     from dartlab.core.logger import getLogger
     from dartlab.core.messaging import emit
 
     _log = getLogger(__name__)
-    emit("download_all:hf_start", label=label, repo=HF_REPO, dir=hfDir)
-    _log.info("[cyan]⬇ HF[/] %s (%s/%s)", label, HF_REPO, hfDir)
+    emit("download_all:hf_start", label=label, repo=repo, dir=hfDir)
+    _log.info("[cyan]⬇ HF[/] %s (%s/%s)", label, repo, hfDir)
 
     # rate limit 방지: 동시 다운로드 workers를 보수적으로 설정
     if "HF_HUB_DOWNLOAD_WORKERS" not in os.environ:
@@ -767,7 +768,7 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
             isNested = DATA_RELEASES[category].get("nested", False) or category == "scan"
             pattern = [f"{hfDir}/*.parquet", f"{hfDir}/**/*.parquet"] if isNested else f"{hfDir}/*.parquet"
             snapshot_download(
-                repo_id=HF_REPO,
+                repo_id=repo,
                 repo_type="dataset",
                 local_dir=str(localDir),
                 allow_patterns=pattern,
