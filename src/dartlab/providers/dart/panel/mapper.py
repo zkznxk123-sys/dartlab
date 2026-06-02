@@ -36,6 +36,23 @@ _NT_RE = re.compile(r"^NT_[CS]_(D\d+)$")  # NT_C_D826380 → D826380
 _IS_RE = re.compile(r"^IS(?:_[CS])?(\d)$")  # IS_C2 / IS_S2 / 옛 IS2 → 2
 _FS_RE = re.compile(r"^(BS|CF|EF)(?:_[CS])?$")  # BS / BS_C / BS_S → BS
 
+# 주석 제목/맥락 정규화 패턴 (괄호·middle dot·공백 제거) — build 헤더 검출(dechunkNotes)과 read 정렬
+# (alignNotes)이 **같은 키**를 만들어야 정합되므로 단일 SSOT. 분산 정의 시 한쪽만 바뀌면 silent miss.
+NOTE_TITLE_NORM_PATTERN = r"[()·\s]"
+_NOTE_TITLE_NORM_RE = re.compile(NOTE_TITLE_NORM_PATTERN)
+
+
+def normalizeTitle(s: str | None) -> str:
+    """주석 제목 정규화 (괄호·middle dot·공백 제거) — build 검출·read 정렬 동일 키 SSOT.
+
+    Args:
+        s: 원 제목/맥락 문자열 (None 허용).
+
+    Returns:
+        ``()`` ``·`` 공백을 제거한 정규화 문자열 (None → "").
+    """
+    return _NOTE_TITLE_NORM_RE.sub("", s or "")
+
 
 def canonicalKey(xbrlClass: str | None) -> str | None:
     """raw ACLASS(xbrlClass) → scope-정규화 canonical 정렬키 (순수함수, 테이블 0).

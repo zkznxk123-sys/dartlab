@@ -31,7 +31,6 @@ LLM Specifications:
 from __future__ import annotations
 
 import logging
-import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -39,14 +38,11 @@ import polars as pl
 
 import dartlab.config as _cfg
 
+from ..mapper import normalizeTitle as _norm  # 제목 정규화 단일 SSOT (build 검출·read 정렬 공유)
+
 _log = logging.getLogger(__name__)
-_NORM_RE = re.compile(r"[()·\s]")  # dechunkNotes._norm 과 동일 정규화
 _STD_RE = r"^NT_D\d+$"  # 정부표준 scope-strip 코드만 (회사확장 NT_C_U*/DI*/DS* 노이즈 제외)
 _DEFAULT_MODULE = Path(__file__).resolve().parent / "noteTaxonomyData.py"
-
-
-def _norm(s: str | None) -> str:
-    return _NORM_RE.sub("", s or "")
 
 
 def buildNoteTaxonomy(

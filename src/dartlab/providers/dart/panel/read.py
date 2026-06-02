@@ -387,10 +387,6 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
     ).drop(["_chapterL", "_sectionLeafL", "_blockLeafL", "_anchorKey"])
 
 
-# 제목 정규화 — dechunkNotes._norm 과 동일 규칙(괄호·middle dot·공백 제거). 뼈대 매칭 키 SSOT.
-_NOTE_NORM_RE = r"[()·\s]"
-
-
 def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
     """옛 split 주석행(blockLeaf=제목, disclosureKey=null)을 회사 최근 XBRL 뼈대(scope,제목)→NT_ 에 정렬.
 
@@ -470,7 +466,9 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
         .then(pl.lit("consolidated"))
         .otherwise(pl.lit("standalone"))
     )
-    normTitle = bareTitle.str.replace_all(_NOTE_NORM_RE, "")
+    from .mapper import NOTE_TITLE_NORM_PATTERN
+
+    normTitle = bareTitle.str.replace_all(NOTE_TITLE_NORM_PATTERN, "")
     tmp = df.with_columns(scope.alias("_alignScope"), normTitle.alias("_alignTitle"))
     # 뼈대 = 회사 자기 native NT_ 주석행 ((scope, 정규화제목) → NT_ 코드, 회사 표준이라 1:1).
     skeleton = (

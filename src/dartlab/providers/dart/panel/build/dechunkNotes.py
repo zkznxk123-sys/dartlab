@@ -40,7 +40,8 @@ from collections import defaultdict
 
 import polars as pl
 
-from .noteTaxonomy import _norm  # 제목 정규화 SSOT — 생성기와 동일해야 키 매칭(복제 시 silent miss)
+from ..mapper import NOTE_TITLE_NORM_PATTERN  # 제목/맥락 정규화 패턴 단일 SSOT (build 검출·read 정렬 공유)
+from ..mapper import normalizeTitle as _norm
 from .noteTaxonomyData import NOTE_TAXONOMY
 
 # "N. 제목" 노트 헤더 후보 — 번호.만 매칭하고 제목은 **소비 안 함**(lookahead). `.{0,40}` 으로 제목을 삼키면
@@ -134,7 +135,9 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     # 옛 "(첨부)재무제표" mega-block·최근 "N.연결재무제표 주석"·mis-chapter("II.사업의내용/3.연결재무제표 주석",
     # READ anchorLatest 가 재-chapter)는 포착하되, "III.재무에관한사항" 챕터 하위 비-노트 절(배당·MD&A·주주)과
     # 사업보고서 TOC 는 제외 — chapter "재무에관한"으로 넓히면 그 절들이 새어들어 phantom 노트 발생(실측 FP).
-    _ctxNorm = (pl.col("chapter").fill_null("") + pl.col("sectionLeaf").fill_null("")).str.replace_all(r"[()·\s]", "")
+    _ctxNorm = (pl.col("chapter").fill_null("") + pl.col("sectionLeaf").fill_null("")).str.replace_all(
+        NOTE_TITLE_NORM_PATTERN, ""
+    )
     chunkMask = pl.col("disclosureKey").is_null() & (
         _ctxNorm.str.contains("재무제표") | pl.col("sectionLeaf").fill_null("").str.contains("주석")
     )
