@@ -211,9 +211,12 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
 덩어리**라 era 경계에서 수평화가 끊긴다. 세 부분이 이를 잇는다 — **책임 분리**:
 
 - **BUILD 분류 — `build/dechunkNotes.py`**: 재무제표 노트 영역 gate(`sectionLeaf 주석` OR `ctx 재무제표`, 사업
-  보고서 TOC·배당·MD&A 제외)로 통짜 덩어리만 골라, 본문 `N. 제목` 헤더(**번호 단조증가** 가드로 표·목록 항목
-  오인 차단)를 뼈대로 매칭 → 표준 `NT_*` 부여. 노트 앞 preamble(재무제표 본표)은 원 블록 보존. **dedup 안 함**
-  (매칭 노트 전부 emit). 임계 없음 — 1개라도 매칭되면 itemize.
+  보고서 TOC·배당·MD&A 제외)로 통짜 덩어리만 골라, 본문 `N. 제목` 헤더를 **통합 검출**(`_detectHeaders`)로 뼈대
+  매칭 → 표준 `NT_*` 부여. 검출은 delimited(`<SPAN>1. 재고자산</SPAN>`)·옛 concatenated(`…비츠로시스1. 일반사항</P>`
+  제목이 산문·본문에 붙음, 전 종목 68%) 양 포맷을 한 패턴(`_NUMDOT`)으로 후보화하고 **뼈대 최장 prefix-match +
+  표셀 가드(`_inTableCell`, 전 corpus 유일 오탐=표셀 7.3% 차단) + 번호 단조증가** 로 진짜 헤더만 가린다(2자 제목은
+  비-한글 경계일 때만). 노트 앞 preamble(재무제표 본표)은 원 블록 보존. **dedup 안 함**(매칭 노트 전부 emit).
+  임계 없음 — 1개라도 매칭되면 itemize.
 - **뼈대 — `build/noteTaxonomy.py`(생성기) → `noteTaxonomyData.py`(생성물, git 추적)**: 전 corpus 2023+
   XBRL 행에서 `(scope, 정규화제목) → dominant NT_ 코드` 학습. 한 제목이 여러 코드로 갈리는 추상 제목('회계정책'
   류)은 `dominanceRatio`(기본 0.8) 미달로 **제외**(false-merge 회피, 미매칭→narrative 유지). `spineData` 패턴

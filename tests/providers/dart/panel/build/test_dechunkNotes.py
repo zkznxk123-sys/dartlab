@@ -1,7 +1,8 @@
 """panel build dechunkNotes — 미분해 주석 블록 → 항목별 NT_* sub-note 분류 (구조무관, preamble 무손실).
 
-``dechunkNotes`` 가 disclosureKey-null 주석 블록을 본문 "N. 제목" 헤더(택소노미 매칭 ≥ _MIN_HEADERS)로
-감지·분할하고, 노트 앞 preamble(재무제표 본표)을 원 블록에 보존하는지 검증. 합성 입력(데이터 0).
+``dechunkNotes`` 가 disclosureKey-null 주석 블록을 본문 "N. 제목" 헤더(통합 검출 — taxonomy 최장 prefix-match
++ 표셀 가드 + monotonic)로 감지·분할하고, 노트 앞 preamble(재무제표 본표)을 원 블록에 보존하는지 검증.
+delimited/concatenated 양 포맷 + TD phantom 가드 + longest-prefix 포함. 합성 입력(데이터 0).
 """
 
 from __future__ import annotations
@@ -100,6 +101,37 @@ def test_dechunk_empty_passthrough() -> None:
     assert dechunkNotes(empty).height == 0
     plain = pl.DataFrame([_row(disclosureKey="BS", chapter="x", contentRaw="표")], schema=PANEL_SCHEMA)
     assert dechunkNotes(plain).height == 1
+
+
+def test_dechunk_concatenated_header() -> None:
+    """옛 concatenated 포맷 — 번호.제목이 앞 산문에 붙고 제목이 본문으로 이어짐(태그경계 0) → 표준 NT_ 분해."""
+    # delimited `>`/`[:<]` 경계 없이 헤더가 산문에 직접 붙음(`…입니다.2. 중요한 회계정책…`) — 현 delimited regex 로는 0.
+    body = "당기말 자본금은 6,176,250,000원입니다.2. 중요한 회계정책 회사의 재무제표는 다음과 같다3. 영업부문당사는 단일부문으로 구성"
+    df = pl.DataFrame([_row(chapter="(첨부)연결재무제표", sectionLeaf="주석", contentRaw=body)], schema=PANEL_SCHEMA)
+    out = dechunkNotes(df)
+    keys = out.filter(pl.col("disclosureKey").str.starts_with("NT_"))["disclosureKey"].to_list()
+    assert NOTE_TAXONOMY["consolidated|중요한회계정책"] in keys  # 산문에 붙은 헤더 분해
+    assert NOTE_TAXONOMY["consolidated|영업부문"] in keys  # 제목이 본문으로 이어져도 prefix-match
+
+
+def test_dechunk_td_cell_guard() -> None:
+    """표 셀(<TD>…</TD>) 내 노트유사 번호제목은 헤더 아님 — phantom 0 (전 corpus 유일 오탐 클래스 가드)."""
+    body = "<SPAN>1. 재고자산</SPAN>재고본문 <TD>2. 차입금</TD> 표안항목 <SPAN>3. 사채</SPAN>사채본문"
+    df = pl.DataFrame([_row(chapter="(첨부)연결재무제표", sectionLeaf="주석", contentRaw=body)], schema=PANEL_SCHEMA)
+    out = dechunkNotes(df)
+    blocks = out.filter(pl.col("disclosureKey").str.starts_with("NT_"))["blockLeaf"].to_list()
+    assert "차입금" not in blocks  # 표 셀 → 거부 (phantom 0)
+    assert "재고자산" in blocks and "사채" in blocks  # 셀 밖 진짜 헤더는 분해
+
+
+def test_dechunk_longest_prefix() -> None:
+    """후보 본문에 최장 등재 제목 우선 — 짧은 prefix('유형자산') 오선택 안 함."""
+    body = "<SPAN>1. 유형자산및무형자산</SPAN>처분 내역은 다음과 같습니다"
+    df = pl.DataFrame([_row(chapter="(첨부)연결재무제표", sectionLeaf="주석", contentRaw=body)], schema=PANEL_SCHEMA)
+    out = dechunkNotes(df)
+    nt = out.filter(pl.col("disclosureKey").str.starts_with("NT_"))
+    assert nt.height >= 1
+    assert "유형자산및무형자산" in nt["blockLeaf"].to_list()  # 최장 제목 (not "유형자산")
 
 
 def test_dechunk_emits_all_dedup_is_read() -> None:
