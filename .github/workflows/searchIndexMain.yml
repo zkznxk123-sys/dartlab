@@ -56,8 +56,8 @@ jobs:
           import time
           from huggingface_hub import snapshot_download
           from huggingface_hub.errors import HfHubHTTPError
-          # panel 은 nested ({code}/*.parquet) → 재귀 패턴. docs/allFilings 는 flat.
-          for folder, pat in [('dart/docs', 'dart/docs/*'), ('dart/allFilings', 'dart/allFilings/*'), ('dart/panel', 'dart/panel/**')]:
+          # panel·news 는 nested → 재귀 패턴. docs/allFilings 는 flat. news 는 additive(부재 허용).
+          for folder, pat in [('dart/docs', 'dart/docs/*'), ('dart/allFilings', 'dart/allFilings/*'), ('dart/panel', 'dart/panel/**'), ('news/headlines', 'news/headlines/**')]:
               for t in range(6):
                   try:
                       snapshot_download(repo_id='eddmpython/dartlab-data', repo_type='dataset', allow_patterns=pat, local_dir='data', max_workers=4)
@@ -72,7 +72,8 @@ jobs:
             af=$(find data/dart/allFilings -name '*.parquet' 2>/dev/null | wc -l)
             pn=$(find data/dart/panel -name '*.parquet' 2>/dev/null | wc -l)
             dc=$(find data/dart/docs -name '*.parquet' 2>/dev/null | wc -l)
-            echo "pull 검증: docs=$dc allFilings=$af panel=$pn"
+            nh=$(find data/news/headlines -name '*.parquet' 2>/dev/null | wc -l)
+            echo "pull 검증: docs=$dc allFilings=$af panel=$pn news=$nh (news additive)"
             if [ "$af" -gt 0 ] && [ "$pn" -gt 0 ] && [ "$dc" -gt 0 ]; then ok=1; break; fi
             echo "pull attempt $attempt 미완(빈 폴더) — 120s 후 재시도"; sleep 120
           done

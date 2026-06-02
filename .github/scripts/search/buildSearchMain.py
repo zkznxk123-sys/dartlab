@@ -23,11 +23,11 @@ from _hfRetry import retryHfCall  # noqa: E402
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
 
-    print("[main] content 인덱스 풀리빌드 시작 (allFilings + docs + panel 롤업)")
+    print("[main] content 인덱스 풀리빌드 시작 (allFilings + docs + panel 롤업 + 뉴스)")
     from dartlab.providers.dart.search import buildGateRef, buildMeaningGraph, rebuildContent
 
     t0 = time.perf_counter()
-    nDocs = rebuildContent(includePanel=True, showProgress=True)
+    nDocs = rebuildContent(includePanel=True, includeNews=True, showProgress=True)
     elapsed = time.perf_counter() - t0
     print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
 
