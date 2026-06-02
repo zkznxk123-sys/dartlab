@@ -25,8 +25,8 @@ import {
 	usePriceEvents,
 } from '../api/priceEvents';
 
-const SOURCE_COLOR: Record<'disclosure' | 'news_rss' | 'news_gdelt', string> = {
-	disclosure: '#3b82f6', // 청 (공시)
+const SOURCE_COLOR: Record<'disclosures' | 'news_rss' | 'news_gdelt', string> = {
+	disclosures: '#3b82f6', // 청 (공시)
 	news_rss: '#f97316', // 주황 (RSS)
 	news_gdelt: '#a855f7', // 보라 (GDELT)
 };
@@ -142,8 +142,8 @@ export function PriceEventChart({
 				const px = xAxis.timeToCoordinate(ts);
 				if (px == null) return;
 
-				const kinds: Array<'disclosure' | 'news_rss' | 'news_gdelt'> = [
-					'disclosure',
+				const kinds: Array<'disclosures' | 'news_rss' | 'news_gdelt'> = [
+					'disclosures',
 					'news_rss',
 					'news_gdelt',
 				];
@@ -188,7 +188,7 @@ export function PriceEventChart({
 		};
 
 		renderMarkers();
-		const unsub = chart.timeScale().subscribeVisibleTimeRangeChange(renderMarkers);
+		chart.timeScale().subscribeVisibleTimeRangeChange(renderMarkers);
 
 		const onResize = () => {
 			chart.applyOptions({ width: container.clientWidth });
@@ -198,7 +198,7 @@ export function PriceEventChart({
 
 		return () => {
 			window.removeEventListener('resize', onResize);
-			unsub?.();
+			chart.timeScale().unsubscribeVisibleTimeRangeChange(renderMarkers);
 			overlay.remove();
 			chart.remove();
 			chartRef.current = null;
@@ -228,7 +228,7 @@ export function PriceEventChart({
 				</SheetContent>
 			</Sheet>
 			<div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
-				<LegendDot color={SOURCE_COLOR.disclosure} label="공시" />
+				<LegendDot color={SOURCE_COLOR.disclosures} label="공시" />
 				<LegendDot color={SOURCE_COLOR.news_rss} label="RSS" />
 				<LegendDot color={SOURCE_COLOR.news_gdelt} label="GDELT" />
 				{showShocks && <span>· 깃발 = |AR|&gt;3σ shock</span>}
