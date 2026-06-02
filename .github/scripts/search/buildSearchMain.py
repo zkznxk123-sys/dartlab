@@ -23,13 +23,19 @@ from _hfRetry import retryHfCall  # noqa: E402
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
 
-    print("[main] content 인덱스 풀리빌드 시작")
-    from dartlab.core.search import rebuildContent
+    print("[main] content 인덱스 풀리빌드 시작 (allFilings + docs + panel 롤업)")
+    from dartlab.providers.dart.search import buildGateRef, buildMeaningGraph, rebuildContent
 
     t0 = time.perf_counter()
-    nDocs = rebuildContent(showProgress=True)
+    nDocs = rebuildContent(includePanel=True, showProgress=True)
     elapsed = time.perf_counter() - t0
     print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
+
+    # 의미검색 artifact — type→본문 경험그래프 + gate 기준값 (scope=auto gated fusion 엔진)
+    print("[main] meaning.json + gateRef.json 빌드")
+    nNodes = buildMeaningGraph(showProgress=True)
+    ref = buildGateRef(showProgress=True)
+    print(f"[main] meaning feature {nNodes:,} 노드, gateRef={ref:.2f}")
 
     if nDocs == 0:
         print("[main] 빌드된 문서 없음")
@@ -42,10 +48,17 @@ def main() -> int:
     print("[main] HF 업로드")
     from huggingface_hub import HfApi
 
-    from dartlab.core.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
     outDir = _contentIndexDir()
-    files = ["main.npz", "main_stems.json", "main_meta.parquet", "main_info.json"]
+    files = [
+        "main.npz",
+        "main_stems.json",
+        "main_meta.parquet",
+        "main_info.json",
+        "meaning.json",
+        "gateRef.json",
+    ]
     api = HfApi(token=hfToken)
 
     for f in files:

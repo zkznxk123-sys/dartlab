@@ -32,6 +32,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # docs(8GB)+allFilings(1.3GB)+panel(16GB) ≈ 25GB → 기본 러너 디스크(~14GB) 초과. 선제 확보(~25GB).
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          df -h /
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
@@ -45,11 +51,12 @@ jobs:
         run: |
           uv run python -c "
           from huggingface_hub import snapshot_download
-          for folder in ['dart/docs', 'dart/allFilings']:
+          # panel 은 nested ({code}/*.parquet) → 재귀 패턴. docs/allFilings 는 flat.
+          for folder, pat in [('dart/docs', 'dart/docs/*'), ('dart/allFilings', 'dart/allFilings/*'), ('dart/panel', 'dart/panel/**')]:
               snapshot_download(
                   repo_id='eddmpython/dartlab-data',
                   repo_type='dataset',
-                  allow_patterns=f'{folder}/*',
+                  allow_patterns=pat,
                   local_dir='data',
               )
               print(f'pulled {folder}')
