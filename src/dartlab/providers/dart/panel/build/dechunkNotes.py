@@ -9,7 +9,8 @@ disclosureKey 없는 **통짜 블록**으로 들어간다. 그 블록 구조가 
 선제한해 사업보고서 TOC 오염을 차단하고, 그 안의 ``N. 제목`` 헤더를 **dominant-only 뼈대**
 (``noteTaxonomyData`` — 전 corpus XBRL 학습, 모호제목 제외)로 매칭한다. 매칭된 노트만 표준 ``NT_*`` 코드로
 분해해 최근 NT_* 행과 **같은 disclosureKey** 로 정합(임계 없음 — 1개라도 매칭되면 itemize), 미매칭/모호 제목은
-narrative 유지. 노트 앞 **preamble(재무제표 본표 등)은 원 블록에 보존**(byte 무손실 partition). 표준 NT_* 는
+narrative 유지. 노트 앞 **preamble(재무제표 본표 등)은 원 블록에 보존**(content 무손실 — 슬라이스 경계
+공백·`>`만 lstrip, 누락 byte 는 전부 비-content). 표준 NT_* 는
 회사 무관(재고자산 연결=NT_D826380·별도=NT_D826385).
 
 LLM Specifications:
@@ -59,7 +60,7 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
 
     Returns:
         동일 schema DataFrame — 노트 블록이 [preamble 행(재무제표 본표 등) + 항목별 NT_* sub-note 행]으로
-        분할. 노트 블록 없으면 입력 그대로. preamble + sub-note = 원 블록(byte 무손실 partition).
+        분할. 노트 블록 없으면 입력 그대로. preamble + sub-note = 원 블록(content 무손실, 경계 공백만 strip).
     """
     if df.is_empty() or "contentRaw" not in df.columns or "sectionLeaf" not in df.columns:
         return df
