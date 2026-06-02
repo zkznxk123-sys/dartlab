@@ -23,7 +23,6 @@ import {
 	fetchPanelGrid,
 	fetchPanelInit,
 	fetchPanelToc,
-	type PanelGridResponse,
 	type PanelRow,
 	type PanelTocResponse,
 } from '@/features/dashboard/api/client';
@@ -469,7 +468,11 @@ function ViewerTab() {
 		if (!initBundle) return;
 		queryClient.setQueryData(['panel', 'toc', code], initBundle.toc);
 		if (initBundle.firstSectionKey && initBundle.grid) {
-			queryClient.setQueryData(['panel', 'section', code, initBundle.firstSectionKey], initBundle.grid);
+			// seed 키는 grid 쿼리 키와 동일해야 적중 (periods 포함) — init.grid 가 최신 window.
+			queryClient.setQueryData(
+				['panel', 'section', code, initBundle.firstSectionKey, (initBundle.grid.periods ?? []).join(',')],
+				initBundle.grid,
+			);
 		}
 	}, [initBundle, code, queryClient]);
 
@@ -504,26 +507,29 @@ function ViewerTab() {
 		}
 	}, [section, firstSectionKey, code, navigate]);
 
-	// full-period grid 1회 — window slice / diff 는 프론트 (추가 fetch 0).
-	const gridSeed =
-		!section && initBundle?.grid && initBundle.firstSectionKey === activeSectionKey ? initBundle.grid : undefined;
-	const { data: gridFetched } = useQuery({
-		queryKey: ['panel', 'section', code, activeSectionKey],
-		queryFn: () => fetchPanelGrid(code, activeSectionKey as string),
-		enabled: !!activeSectionKey && !gridSeed,
-		staleTime: 60_000,
-	});
-	const grid: PanelGridResponse | undefined = gridFetched ?? gridSeed;
-
 	// 전체 기간 축 — toc.periods (panel 이 최신좌측 정렬, timeline SSOT).
 	const allPeriods = useMemo<string[]>(() => toc?.periods ?? [], [toc]);
 
 	const effectiveWindowEnd = windowEnd && allPeriods.includes(windowEnd) ? windowEnd : allPeriods[0];
 	const windowEndIdx = effectiveWindowEnd ? allPeriods.indexOf(effectiveWindowEnd) : -1;
+	// 표시 3 기간. fetchPeriods = +1 (직전 인접셀 diff 용). full-period(수MB) 대신 window 만 fetch.
 	const windowPeriods = useMemo<string[]>(() => {
 		if (windowEndIdx < 0) return [];
 		return allPeriods.slice(windowEndIdx, windowEndIdx + WINDOW_SIZE);
 	}, [allPeriods, windowEndIdx]);
+	const fetchPeriods = useMemo<string[]>(() => {
+		if (windowEndIdx < 0) return [];
+		return allPeriods.slice(windowEndIdx, windowEndIdx + WINDOW_SIZE + 1);
+	}, [allPeriods, windowEndIdx]);
+
+	// window 단위 grid fetch — windowEnd 이동 시 fetchPeriods 가 바뀌어 재fetch. 초기
+	// (windowEnd 없음)는 /panel/init 이 동봉한 최신 window grid 를 seed 로 재사용 (fetch 0).
+	const { data: grid } = useQuery({
+		queryKey: ['panel', 'section', code, activeSectionKey, fetchPeriods.join(',')],
+		queryFn: () => fetchPanelGrid(code, activeSectionKey as string, fetchPeriods),
+		enabled: !!activeSectionKey && fetchPeriods.length > 0,
+		staleTime: 60_000,
+	});
 
 	const setWindowEnd = (next: string | undefined) => {
 		navigate({
@@ -555,9 +561,9 @@ function ViewerTab() {
 	// 헤더 시간축 — 인접 period 셀이 다른 row 가 하나라도 있으면 변경 표시 (프론트 계산).
 	const changedSet = useMemo(() => {
 		const s = new Set<string>();
-		for (let i = 0; i < allPeriods.length - 1; i++) {
-			const cur = allPeriods[i];
-			const prev = allPeriods[i + 1];
+		for (let i = 0; i < fetchPeriods.length - 1; i++) {
+			const cur = fetchPeriods[i];
+			const prev = fetchPeriods[i + 1];
 			for (const r of rows) {
 				if ((r.cells[cur] ?? '').trim() !== (r.cells[prev] ?? '').trim()) {
 					s.add(cur);
@@ -566,7 +572,7 @@ function ViewerTab() {
 			}
 		}
 		return s;
-	}, [rows, allPeriods]);
+	}, [rows, fetchPeriods]);
 
 	const sectionLabel = grid?.sectionLeaf ?? activeSectionKey?.split(SECTION_KEY_SEP).pop() ?? '';
 	const corpName = grid?.corpName ?? toc?.corpName ?? '';
@@ -672,7 +678,7 @@ function ViewerTab() {
 								})}
 							</div>
 							<div className="px-3 py-3">
-								<SsotRowsView rows={rows} windowPeriods={windowPeriods} allPeriods={allPeriods} />
+								<SsotRowsView rows={rows} windowPeriods={windowPeriods} allPeriods={fetchPeriods} />
 							</div>
 						</div>
 					</>

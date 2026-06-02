@@ -461,7 +461,9 @@ def apiCompanyInit(
 
         grid = None
         if first_section:
-            grid = buildPanelGrid(company, chapter=first_chapter, section=first_section)
+            # window 3 표시 + 직전 1 (프론트 인접셀 diff 용) = 4 기간. full-period(수MB) 회피.
+            window = tuple(toc_data.get("periods", [])[:4]) or None
+            grid = buildPanelGrid(company, chapter=first_chapter, section=first_section, windowPeriods=window)
 
         result = {
             "stockCode": company.stockCode,
