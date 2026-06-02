@@ -80,7 +80,21 @@ _HANGUL_RE = re.compile(r"[가-힣]+")
 
 
 def reportNmCore(reportNm: str) -> set[str]:
-    """report_nm → 의미 핵심 토큰 집합 (build 시 경험그래프 키 추출용). [...] 접두 제거 + 괄호 우선 + stopword."""
+    """report_nm → 의미 핵심 토큰 집합 (build 시 경험그래프 키 추출용). [...] 접두 제거 + 괄호 우선 + stopword.
+
+    Args:
+        reportNm: 공시 보고서명 (report_nm).
+
+    Returns:
+        set[str] — 2~14 자 한글 핵심 토큰 (generic stopword 제외).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> "현금배당" in reportNmCore("[기재정정]주요사항보고서(현금배당)")
+        True
+    """
     raw = _BRACKET_PREFIX_RE.sub("", (reportNm or "").strip()).strip()
     parens = _PAREN_RE.findall(raw)
     pool = " ".join(parens) if parens else _PAREN_RE.sub(" ", raw)
@@ -92,7 +106,21 @@ def reportNmCore(reportNm: str) -> set[str]:
 
 
 def coreFeatureWeights(tokens) -> dict[str, float]:
-    """질의/제목 토큰 → char 특징(tok/prefix/suffix/ngram) 가중치 — 경험그래프 키. (V237 이식)"""
+    """질의/제목 토큰 → char 특징(tok/prefix/suffix/ngram) 가중치 — 경험그래프 키. (V237 이식)
+
+    Args:
+        tokens: 토큰 iterable (한글 핵심어).
+
+    Returns:
+        dict[str, float] — feature 키(tok:/pre/suf/ng) → 가중치.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> "tok:매출" in coreFeatureWeights(["매출"])
+        True
+    """
     feats: dict[str, float] = defaultdict(float)
     for token in tokens:
         if not token:
@@ -113,7 +141,20 @@ def coreFeatureWeights(tokens) -> dict[str, float]:
 
 
 def loadMeaningGraph(inDir: Path | None = None) -> dict[str, dict[str, float]] | None:
-    """meaning.json (coreFeature→{bodyStem:weight}) 로드. 없으면 None (bm25 단독 degrade)."""
+    """meaning.json (coreFeature→{bodyStem:weight}) 로드. 없으면 None (bm25 단독 degrade).
+
+    Args:
+        inDir: 인덱스 디렉토리. None 이면 기본 contentIndex 경로.
+
+    Returns:
+        dict[str, dict[str, float]] 또는 None — 경험그래프 (부재·파손 시 None).
+
+    Raises:
+        없음 (OSError/JSONDecodeError 는 None 으로 흡수).
+
+    Example:
+        >>> g = loadMeaningGraph()  # doctest: +SKIP
+    """
     path = (inDir or _contentIndexDir()) / "meaning.json"
     if not path.exists():
         return None
@@ -124,7 +165,21 @@ def loadMeaningGraph(inDir: Path | None = None) -> dict[str, dict[str, float]] |
 
 
 def loadGateRef(inDir: Path | None = None) -> dict[str, float]:
-    """gateRef.json 로드. 없으면 균등(ref<=0 → g=0.5)."""
+    """gateRef.json 로드. 없으면 균등(ref<=0 → g=0.5).
+
+    Args:
+        inDir: 인덱스 디렉토리. None 이면 기본 contentIndex 경로.
+
+    Returns:
+        dict[str, float] — {ref, gmin, gmax, gateX}. 부재 시 ref=0(균등).
+
+    Raises:
+        없음 (예외는 기본값으로 흡수).
+
+    Example:
+        >>> loadGateRef().keys() >= {"ref"}  # doctest: +SKIP
+        True
+    """
     path = (inDir or _contentIndexDir()) / "gateRef.json"
     if not path.exists():
         return {"ref": 0.0, "gmin": GMIN, "gmax": GMAX, "gateX": GATE_X}
@@ -141,7 +196,23 @@ def loadGateRef(inDir: Path | None = None) -> dict[str, float]:
 
 
 def expandMeaning(queryTokens: list[str], graph: dict, *, topN: int = EXPAND_TOPN) -> dict[str, float]:
-    """질의 토큰 → 경험그래프 확장 → 의미 프로필 {bodyStem: weight}. (V237 expandTitle 이식)"""
+    """질의 토큰 → 경험그래프 확장 → 의미 프로필 {bodyStem: weight}. (V237 expandTitle 이식)
+
+    Args:
+        queryTokens: 질의 핵심 토큰 리스트.
+        graph: 경험그래프(loadMeaningGraph 반환). falsy 면 빈 dict.
+        topN: 프로필 상위 N 본문 stem.
+
+    Returns:
+        dict[str, float] — bodyStem → 누적 가중치 (상위 topN).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> expandMeaning(["매출"], {"tok:매출": {"채권": 1.0}})
+        {'채권': 1.0}
+    """
     if not graph:
         return {}
     prof: dict[str, float] = defaultdict(float)
@@ -152,7 +223,22 @@ def expandMeaning(queryTokens: list[str], graph: dict, *, topN: int = EXPAND_TOP
 
 
 def gateWeight(top1: float, gref: dict) -> float:
-    """bm25 top1 신뢰도 → 의미가중 g. bm25 약할수록(top1 낮을수록) g↑. (V237 gateW 이식)"""
+    """bm25 top1 신뢰도 → 의미가중 g. bm25 약할수록(top1 낮을수록) g↑. (V237 gateW 이식)
+
+    Args:
+        top1: 질의의 bm25 최고 점수 (신뢰도 신호).
+        gref: gateRef dict ({ref, gmin, gmax, gateX}).
+
+    Returns:
+        float — 의미가중 g ∈ [gmin, gmax]. ref<=0 이면 (gmin+gmax)/2.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> 0.2 <= gateWeight(0.0, {"ref": 0}) <= 0.85
+        True
+    """
     ref = gref.get("ref", 0.0)
     gmin, gmax, gx = gref.get("gmin", GMIN), gref.get("gmax", GMAX), gref.get("gateX", GATE_X)
     if ref <= 0:
@@ -210,6 +296,12 @@ def searchSemantic(
 
     Returns:
         pl.DataFrame — searchContent 와 동일 스키마 + score/segment/dartUrl. 인덱스 부재 시 info 컬럼.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> searchSemantic("유상증자", limit=5)  # doctest: +SKIP
     """
     tokens = tokenizeWord(query)
     if not tokens:

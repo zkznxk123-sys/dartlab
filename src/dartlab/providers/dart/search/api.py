@@ -265,6 +265,9 @@ def buildMeaningGraph(**kwargs) -> int:
 
     Raises:
         없음.
+
+    Example:
+        >>> # buildMeaningGraph()
     """
     from dartlab.providers.dart.search.fieldIndexRebuild import buildMeaningGraph as _build
 
@@ -282,6 +285,9 @@ def buildGateRef(**kwargs) -> float:
 
     Raises:
         없음.
+
+    Example:
+        >>> # buildGateRef()
     """
     from dartlab.providers.dart.search.fieldIndexRebuild import buildGateRef as _build
 

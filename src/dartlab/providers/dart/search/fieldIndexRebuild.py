@@ -73,6 +73,12 @@ def rebuildMain(
 
     Returns:
         int — 인덱스 빌드 건수.
+
+    Raises:
+        없음 (파일별 read 오류는 skip).
+
+    Example:
+        >>> rebuildMain(includePanel=True)  # doctest: +SKIP
     """
     import gc
 
@@ -337,7 +343,19 @@ def buildMeaningGraph(*, contentLimit: int | None = None, showProgress: bool = T
     """type(report_nm)→본문 경험그래프 build → meaning.json 저장. allFilings 스트리밍 (SPPMI top-K).
 
     의미검색(scope=auto) 확장 엔진의 artifact. 키워드가 못 잡는 동의·관련 공시 회복용.
-    반환: 그래프 feature 노드 수.
+
+    Args:
+        contentLimit: 본문 토큰화 최대 문자 수. None 이면 CONTENT_LIMIT.
+        showProgress: True 면 progress 로그.
+
+    Returns:
+        int — 그래프 feature 노드 수.
+
+    Raises:
+        없음 (파일별 read 오류는 skip).
+
+    Example:
+        >>> buildMeaningGraph()  # doctest: +SKIP
     """
     import gc
     import os
@@ -416,7 +434,20 @@ def buildMeaningGraph(*, contentLimit: int | None = None, showProgress: bool = T
 def buildGateRef(*, sampleN: int = 2000, showProgress: bool = True) -> float:
     """gate 기준값(코퍼스 median bm25 top1) → gateRef.json. 색인 규모 적응(V238 보강).
 
-    main 세그먼트의 self-query(report_nm core) bm25 top1 분포 중앙값. 없으면 ref=0(균등).
+    main 세그먼트의 self-query(report_nm core) bm25 top1 분포 중앙값.
+
+    Args:
+        sampleN: top1 분포 샘플 질의 수.
+        showProgress: True 면 progress 로그.
+
+    Returns:
+        float — ref (median bm25 top1). main 세그먼트 부재 시 0.0(균등).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildGateRef()  # doctest: +SKIP
     """
     from dartlab.providers.dart.search import semantic as _sem
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, _scoreBM25, loadSegment, tokenizeWord
