@@ -137,38 +137,17 @@ def _searchContent(query, *, corpCode, stockCode, limit):
 
 
 def _searchAuto(query, *, corpCode, stockCode, limit):
-    """auto 모드 — 쿼리 유형 자동 판별 후 맞는 엔진 선택."""
-    titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit * 2)
-    contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit * 2)
+    """auto 모드 — 의미 검색(bm25 + type→본문 경험확장 gated fusion).
 
-    tValid = titleHits is not None and titleHits.height > 0 and "info" not in titleHits.columns
-    cValid = contentHits is not None and contentHits.height > 0 and "info" not in contentHits.columns
+    실험 V233~V240 확정 recipe. 키워드가 못 잡는 동의·관련 공시를 경험확장으로 회복하되 bm25 신뢰도
+    높은 질의는 키워드 신뢰(gated). meaning.json 미빌드 시 bm25 단독으로 graceful degrade.
+    """
+    from dartlab.providers.dart.search.semantic import searchSemantic
 
-    if not tValid and not cValid:
-        return titleHits if titleHits is not None else contentHits
-    if not cValid:
-        return titleHits.head(limit)
-    if not tValid:
-        return contentHits.head(limit)
-
-    queryNorm = query.strip()
-    titleStrict = titleHits.filter(pl.col("report_nm").str.contains(queryNorm, literal=True))
-    titleStrictCount = titleStrict.height
-
-    commonCols = [c for c in titleHits.columns if c in contentHits.columns]
-
-    if titleStrictCount >= limit:
-        return titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope")).head(limit)
-
-    tagged_title = titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope"))
-    tagged_content = contentHits.select(commonCols).with_columns(pl.lit("content").alias("scope"))
-    if "rcept_no" in commonCols and titleStrictCount > 0:
-        usedRcepts = set(titleStrict["rcept_no"].to_list())
-        tagged_content = tagged_content.filter(~pl.col("rcept_no").is_in(list(usedRcepts)))
-
-    needed = max(limit - titleStrictCount, 0)
-    result = pl.concat([tagged_title, tagged_content.head(needed)])
-    return result.head(limit)
+    result = searchSemantic(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+    if result.height > 0 and "info" not in result.columns and "scope" not in result.columns:
+        result = result.with_columns(pl.lit("auto").alias("scope"))
+    return result
 
 
 def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
@@ -273,6 +252,40 @@ def rebuildContentDelta(**kwargs) -> int:
     from dartlab.providers.dart.search.fieldIndex import rebuildDelta
 
     return rebuildDelta(**kwargs)
+
+
+def buildMeaningGraph(**kwargs) -> int:
+    """의미검색(scope=auto) 경험그래프 meaning.json build — allFilings type(report_nm)→본문 SPPMI.
+
+    Args:
+        **kwargs: fieldIndexRebuild.buildMeaningGraph 로 forward.
+
+    Returns:
+        int — 그래프 feature 노드 수.
+
+    Raises:
+        없음.
+    """
+    from dartlab.providers.dart.search.fieldIndexRebuild import buildMeaningGraph as _build
+
+    return _build(**kwargs)
+
+
+def buildGateRef(**kwargs) -> float:
+    """의미검색 gate 기준값 gateRef.json build — 코퍼스 median bm25 top1 (규모 적응).
+
+    Args:
+        **kwargs: fieldIndexRebuild.buildGateRef 로 forward.
+
+    Returns:
+        float — ref (median bm25 top1).
+
+    Raises:
+        없음.
+    """
+    from dartlab.providers.dart.search.fieldIndexRebuild import buildGateRef as _build
+
+    return _build(**kwargs)
 
 
 def collectMeta(startDate: str, endDate: str, **kwargs) -> int:

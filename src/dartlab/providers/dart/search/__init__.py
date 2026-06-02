@@ -2,7 +2,9 @@
 
 from dartlab.providers.dart.search.api import (
     SEARCH_SCOPES,
+    buildGateRef,
     buildIndex,
+    buildMeaningGraph,
     collectMeta,
     dna,
     fillContent,
@@ -21,7 +23,9 @@ from dartlab.providers.dart.search.api import (
 
 __all__ = [
     "SEARCH_SCOPES",
+    "buildGateRef",
     "buildIndex",
+    "buildMeaningGraph",
     "collectMeta",
     "dna",
     "fillContent",

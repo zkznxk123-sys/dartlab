@@ -27,11 +27,11 @@
 
 from __future__ import annotations
 
+import array
 import json
 import math
 import re
 import time
-from collections import defaultdict
 from pathlib import Path
 
 from dartlab.core.logger import getLogger
@@ -84,15 +84,22 @@ def tokenizeWord(text: str) -> list[str]:
 
 
 class _IncrementalBuilder:
-    """문서 단위로 점진적 토큰 축적 후 CSR로 finalize."""
+    """문서 단위로 점진적 토큰 축적 후 CSR로 finalize.
+
+    posting 누적을 ``array.array('i')`` 3열(stemId/docId/tf, 각 4 byte)로 — dict-of-list-of-tuple
+    (posting 당 ~56 byte) 대비 ~7x 메모리 절감. 풀 색인(수억 posting) OOM 회피. finalize 에서
+    stemId 기준 stable argsort → bincount cumsum 으로 CSR offsets 구성.
+    """
 
     def __init__(self):
         self.stemToId: dict[str, int] = {}
-        self.postings: dict[int, list[tuple[int, int]]] = defaultdict(list)
-        self.docLengths: list[int] = []
+        self._pSid = array.array("i")  # posting별 stem id
+        self._pDid = array.array("i")  # posting별 doc id
+        self._pTf = array.array("i")  # posting별 term freq
+        self._docLengths = array.array("i")
 
     def addDoc(self, text: str) -> None:
-        """document 1 개 추가 — 토크나이즈 + stem→id 매핑 + posting list 누적.
+        """document 1 개 추가 — 토크나이즈 + stem→id 매핑 + posting 3열 누적.
 
         Args:
             text: document 본문 (빈 문자열 = 길이 0 doc 으로 기록).
@@ -106,28 +113,32 @@ class _IncrementalBuilder:
         Example:
             >>> builder.addDoc("배당에 관한 사항")  # doctest: +SKIP
         """
-        docId = len(self.docLengths)
+        docId = len(self._docLengths)
         if not text:
-            self.docLengths.append(0)
+            self._docLengths.append(0)
             return
         toks = tokenizeWord(text)
-        self.docLengths.append(len(toks))
-        tf: dict[int, int] = defaultdict(int)
+        self._docLengths.append(len(toks))
+        tf: dict[int, int] = {}
+        getSid = self.stemToId.get
         for t in toks:
-            sid = self.stemToId.get(t)
+            sid = getSid(t)
             if sid is None:
                 sid = len(self.stemToId)
                 self.stemToId[t] = sid
-            tf[sid] += 1
+            tf[sid] = tf.get(sid, 0) + 1
+        apS, apD, apT = self._pSid.append, self._pDid.append, self._pTf.append
         for sid, c in tf.items():
-            self.postings[sid].append((docId, c))
+            apS(sid)
+            apD(docId)
+            apT(c)
 
     def finalize(self) -> dict:
-        """누적된 postings/docLengths → 인덱스 dict 직렬화 — BM25 검색 준비 완료 상태.
+        """누적된 posting 3열/docLengths → CSR 인덱스 dict — BM25 검색 준비 완료 상태.
 
         Returns:
-            ``{"offsets": np.ndarray, "docIds": np.ndarray, "freqs": np.ndarray,
-            "docLengths": np.ndarray, "stemToId": dict, "avgDocLen": float, ...}``.
+            ``{"stemDict": dict, "offsets": np.ndarray, "docIds": np.ndarray,
+            "termFreqs": np.ndarray, "docLengths": np.ndarray, "avgDocLength": float, "nDocs": int}``.
 
         Raises:
             없음.
@@ -135,31 +146,35 @@ class _IncrementalBuilder:
         Example:
             >>> idx = builder.finalize()  # doctest: +SKIP
         """
-        n = len(self.docLengths)
+        nDocs = len(self._docLengths)
         nStems = len(self.stemToId)
+        sids = np.frombuffer(self._pSid, dtype=np.int32)
+        dids = np.frombuffer(self._pDid, dtype=np.int32)
+        tfs = np.frombuffer(self._pTf, dtype=np.int32)
         offsets = np.zeros(nStems + 1, dtype=np.int64)
-        for sid in range(nStems):
-            offsets[sid + 1] = offsets[sid] + len(self.postings[sid])
-        nP = int(offsets[-1])
-        docIds = np.zeros(nP, dtype=np.int32)
-        termFreqs = np.zeros(nP, dtype=np.int32)
-        for sid in range(nStems):
-            s = offsets[sid]
-            for i, (d, c) in enumerate(self.postings[sid]):
-                docIds[s + i] = d
-                termFreqs[s + i] = c
-        docLengths = np.array(self.docLengths, dtype=np.int32)
-        # 메모리 해제
-        self.postings.clear()
-        self.docLengths = []
+        if sids.size:
+            order = np.argsort(sids, kind="stable")  # stemId 기준 그룹화
+            docIds = np.ascontiguousarray(dids[order])
+            termFreqs = np.ascontiguousarray(tfs[order])
+            counts = np.bincount(sids, minlength=nStems)
+            np.cumsum(counts, out=offsets[1:])
+            del order, counts
+        else:
+            docIds = np.zeros(0, dtype=np.int32)
+            termFreqs = np.zeros(0, dtype=np.int32)
+        docLengths = np.frombuffer(self._docLengths, dtype=np.int32).copy()
+        # 메모리 해제 (array.array 버퍼 + frombuffer view 참조 해제)
+        del sids, dids, tfs
+        self._pSid = self._pDid = self._pTf = array.array("i")
+        self._docLengths = array.array("i")
         return {
             "stemDict": self.stemToId,
             "offsets": offsets,
             "docIds": docIds,
             "termFreqs": termFreqs,
             "docLengths": docLengths,
-            "avgDocLength": float(docLengths.mean()) if n > 0 else 0.0,
-            "nDocs": n,
+            "avgDocLength": float(docLengths.mean()) if nDocs > 0 else 0.0,
+            "nDocs": nDocs,
         }
 
 
