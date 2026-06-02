@@ -1,34 +1,34 @@
-"""미분해 주석 덩어리 → 항목별 sub-note 분해 (build, 수평화 정합, 무손실).
+"""미분해 주석 덩어리 → 항목별 제목 행으로 **분류**(build, 헤딩 분할만 — NT_ 정렬은 READ).
 
-2023+ 보고서는 주석이 항목별 ``NT_*`` 행으로 구체화되나, 그 이전(또는 비표준 회사)은 주석이
-disclosureKey 없는 **통짜 블록**으로 들어간다. 그 블록 구조가 연도·회사마다 다르다:
+2023+ 보고서는 주석이 항목별 ``NT_*`` 행(XBRL 태깅, native disclosureKey)으로 구체화되나, 그 이전(또는
+비표준 회사)은 주석이 disclosureKey 없는 **통짜 블록**으로 들어간다. 그 블록 구조가 연도·회사마다 다르다:
     - 별도 "주석" 섹션 (sectionLeaf="주석" / "3. 연결재무제표 주석")
     - statement+주석 합본 mega-block (sectionLeaf="(첨부)재무제표" / "2. 연결재무제표" — "주석" 없음)
 
-본 모듈은 **재무제표 영역 gate**(chapter/sectionLeaf 의 "재무제표"·"주석")로 노트 블록을 선제한해 사업보고서
-TOC 오염을 차단하고, 그 안의 ``N. 제목`` 헤더를 **통합 검출**(``_detectHeaders``)한다 — delimited
-(`<SPAN>1. 재고자산</SPAN>`)와 옛 concatenated(`…주식회사 비츠로시스1. 일반사항</P>` — 제목이 산문·본문에
-붙음) 양 포맷을 ``_NUMDOT`` 한 패턴으로 후보화하고, **dominant-only 뼈대**(``noteTaxonomyData`` — 전 corpus
-XBRL 학습, 모호제목 제외) **최장 prefix-match** + **표셀 가드**(``_inTableCell``) + **번호 monotonic** 4중으로
-진짜 헤더만 가린다(전 corpus 유일 오탐 = 표셀 7.3%, 가드 제거). 매칭된 노트만 표준 ``NT_*`` 코드로 분해해 최근
-NT_* 행과 **같은 disclosureKey** 로 정합(임계 없음 — 1개라도 매칭되면 itemize), 미매칭/모호 제목은 narrative
-유지. 노트 앞 **preamble(재무제표 본표 등)은 원 블록에 보존**(content 무손실 — 슬라이스 경계 공백·`>`만 lstrip,
-누락 byte 는 전부 비-content). 표준 NT_* 는 회사 무관(재고자산 연결=NT_D826380·별도=NT_D826385).
+**책임 = 분류(헤딩 분할)만.** 본 모듈은 **재무제표 영역 gate**(chapter/sectionLeaf 의 "재무제표"·"주석")로 노트
+블록을 선제한해 사업보고서 TOC 오염을 차단하고, 그 안의 ``N. 제목`` 헤더를 **통합 검출**(``_detectHeaders``)한다
+— delimited(`<SPAN>1. 재고자산</SPAN>`)와 옛 concatenated(`…비츠로시스1. 일반사항</P>` — 제목이 산문·본문에
+붙음) 양 포맷을 ``_NUMDOT`` 한 패턴으로 후보화하고, **뼈대 사전**(``noteTaxonomyData`` — 전 corpus XBRL 학습,
+모호제목 제외) **최장 prefix-match** + **표셀 가드** + **번호 monotonic** 으로 진짜 헤더만 가려 노트 1개당 한 행으로
+쪼갠다(``blockLeaf``=제목). **disclosureKey 는 null 로 둔다 — NT_ 정체성 부여(수평화 정렬)는 READ
+(``read.alignNotes``)가 회사 최근 XBRL 뼈대로 read-time 처리**(taxonomy·정렬 개선이 재빌드 무관 = 빌드 동결).
+헤딩 분할이 잘못됐을 때만 재빌드. 노트 앞 **preamble(재무제표 본표 등)은 원 블록에 보존**(content 무손실 —
+preamble + Σ제목행 = 원 블록 byte-exact, slice 경계 strip 0).
 
 LLM Specifications:
     AntiPatterns:
-        - rowIdentity/spine 규칙 변경 금지 — 표준 NT_* 부여로 기존 keyed identity 가 자동 정렬.
-        - 택소노미 미매칭 헤더 추정 매핑 금지 — 매칭된 항목만 sub-note 화.
+        - BUILD 에서 NT_ 코드 베이킹 금지 — 정렬은 READ(재빌드 분리). BUILD 는 제목 분할만.
+        - 택소노미 미매칭 헤더 추정 매핑 금지 — 매칭된 항목만 분할.
         - 노트 앞 preamble 드롭 금지 — mega-block 은 preamble 이 재무제표 본표라 손실되면 안 됨(원 행 보존).
         - 메인 14-col 격자 컬럼 schema 변경 금지 — 행 분할만.
     OutputSchema:
-        - ``dechunkNotes(df) -> pl.DataFrame`` (동일 schema; 노트 블록 → preamble 행 + 항목별 sub-note 행).
+        - ``dechunkNotes(df) -> pl.DataFrame`` (동일 schema; 노트 블록 → preamble 행 + 제목별 null-key 행).
     Prerequisites:
-        - horizontalize 후 14-col DataFrame. noteTaxonomyData.NOTE_TAXONOMY.
+        - horizontalize 후 14-col DataFrame. noteTaxonomyData.NOTE_TAXONOMY(헤더 검출용).
     Freshness:
-        - build 단계 (panel.parquet 생산 시 1회).
+        - build 단계 (헤딩 분할 — 검출 규칙 변경 시에만 재빌드).
     Dataflow:
-        - horizontalize → resolveBatch → dechunkNotes → write.
+        - horizontalize → resolveBatch(native NT_) → dechunkNotes(제목 분할) → write. 정렬은 read.alignNotes.
     TargetMarkets:
         - KR (DART).
 """
@@ -118,14 +118,14 @@ def _detectHeaders(cr: str, scope: str) -> list[tuple[int, str, str]]:
 
 
 def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
-    """미분해 주석 블록을 N.제목 헤더로 분해 → preamble 보존 + 표준 NT_* sub-note 행.
+    """미분해 주석 블록을 N.제목 헤더로 **분할**(제목 행, null key) — NT_ 정렬은 READ(alignNotes).
 
     Args:
         df: horizontalize+resolveBatch 후 14-col panel DataFrame (한 period).
 
     Returns:
-        동일 schema DataFrame — 노트 블록이 [preamble 행(재무제표 본표 등) + 항목별 NT_* sub-note 행]으로
-        분할. 노트 블록 없으면 입력 그대로. preamble + sub-note = 원 블록(content 무손실, 경계 공백만 strip).
+        동일 schema DataFrame — 노트 블록이 [preamble 행(재무제표 본표 등) + 제목별 행(blockLeaf=제목,
+        disclosureKey=null)]으로 분할. 노트 블록 없으면 입력 그대로. preamble + Σ제목행 = 원 블록(byte-exact 무손실).
     """
     if df.is_empty() or "contentRaw" not in df.columns or "sectionLeaf" not in df.columns:
         return df
@@ -163,14 +163,17 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
             pre = dict(row)
             pre["contentRaw"] = preamble
             kept.append(pre)
-        # 매칭헤더 i → 다음 매칭헤더 사이 = 노트 1개(헤더+본문+테이블). 모두 emit, dedup 은 READ.
-        for i, (pos, title, key) in enumerate(marks):
+        # 매칭헤더 i → 다음 매칭헤더 사이 = 노트 1개(헤더+본문+테이블). 제목만 박고 disclosureKey 는 null —
+        # NT_ 정체성 부여(뼈대 정렬)는 READ(alignNotes)가 회사 최근 XBRL 뼈대로 read-time 처리(재빌드 무관).
+        # pos 는 번호('N.') 위치라 cr[pos:end] 는 byte-exact(preamble + Σsub = 원 cr, 무손실). scope 는
+        # sectionLeaf(_NOTE_SECTION 의 '연결' 마커)로 READ 가 복원.
+        for i, (pos, title, _key) in enumerate(marks):
             end = marks[i + 1][0] if i + 1 < len(marks) else len(cr)
             nr = dict(row)
-            nr["disclosureKey"] = key
+            nr["disclosureKey"] = None
             nr["blockLeaf"] = title
             nr["sectionLeaf"] = _NOTE_SECTION[scope]
-            nr["contentRaw"] = cr[pos:end].lstrip("> \n\t")  # 헤더 경계 앵커('>')·여백 제거
+            nr["contentRaw"] = cr[pos:end]
             subNotes.append(nr)
 
     if not changed:

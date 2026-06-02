@@ -4,10 +4,12 @@
 columnar projection 만 — BUILD(build/) 와 물리 분리, lxml/zipfile import 0 (R2, 콜드 <1s).
 period 파일 prune(``periods`` 인자)으로 대형 종목 메모리 핸들.
 
-수평화 3 단계:
-    1. ``readLong`` — period 파일 read + disclosureKey 보장(build 가 채움, 옛 artifact 만 fallback).
-    2. ``anchorLatest`` — (disclosureKey, scope) 앵커로 era drift(BS→BS_C) 흡수 → 한 행 정렬.
-    3. ``readWide`` — blockOrder 순 contentRaw join collapse → period 축 pivot → spine 정렬.
+수평화 4 단계:
+    1. ``readLong`` — period 파일 read + disclosureKey 보장(build native 채움, 옛 artifact 만 fallback).
+    2. ``alignNotes`` — 옛 split 주석행(null key, BUILD 가 제목만 분할)을 회사 최근 XBRL 뼈대(scope,제목)→NT_
+       에 read-time 정렬. 정렬·뼈대 개선이 **재빌드 무관**(빌드는 분할만 동결).
+    3. ``anchorLatest`` — (disclosureKey, scope) 앵커로 era drift(BS→BS_C) 흡수 → 한 행 정렬.
+    4. ``readWide`` — dedupKeyed → blockOrder 순 contentRaw join collapse → period 축 pivot → spine 정렬.
        ``tag=False`` 면 정렬된 wide 의 period 셀에 태그 1회 strip(plain) — 큰 셀 1회가 fragment
        수천개 strip 보다 2.8x 빠름(byte-identical 실측).
 
@@ -385,6 +387,114 @@ def anchorLatest(df: pl.DataFrame) -> pl.DataFrame:
     ).drop(["_chapterL", "_sectionLeafL", "_blockLeafL", "_anchorKey"])
 
 
+# 제목 정규화 — dechunkNotes._norm 과 동일 규칙(괄호·middle dot·공백 제거). 뼈대 매칭 키 SSOT.
+_NOTE_NORM_RE = r"[()·\s]"
+
+
+def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
+    """옛 split 주석행(blockLeaf=제목, disclosureKey=null)을 회사 최근 XBRL 뼈대(scope,제목)→NT_ 에 정렬.
+
+    BUILD(``dechunkNotes``)는 옛 통짜 주석을 ``N.제목`` 헤더로 쪼개 제목만 박고 disclosureKey 는 null 로 둔다
+    (NT_ 미부여). 본 함수가 read-time 에 **회사 자기 native NT_ 주석행**((scope, 정규화제목)→NT_ 코드)을 뼈대로,
+    같은 (scope, 정규화제목) 의 null-key 주석행에 그 NT_ 를 부여 → 최근 XBRL 과 같은 identity 로 수평화 정렬.
+    뼈대에 없는 제목은 null 유지(narrative) → 산문 오분할도 가짜 NT_ 를 받지 않는다(뼈대 중복 0). 정렬 규칙·뼈대
+    개선이 **재빌드 무관**(read-time) — 빌드는 분할만 동결. scope 는 native·split 공통으로 chapter/sectionLeaf 의
+    "연결" 마커에서 도출(옛 노트는 xbrlClass null 이라 scopeExpr 가 consolidated 로 흔들리므로 라벨 기반).
+
+    Args:
+        df: ``readLong`` long DataFrame (disclosureKey/blockLeaf/chapter/sectionLeaf 컬럼). 전 period 권장
+            (뼈대는 최근 native 주석 — period subset 이면 뼈대 부재 가능).
+
+    Returns:
+        null-key 주석행이 뼈대 매칭 시 native NT_ 로 채워진 동일 schema DataFrame. 뼈대 부재/매칭 0 이면 원본.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> aligned = alignNotes(longDf)  # doctest: +SKIP
+
+    SeeAlso:
+        - ``build.dechunkNotes`` — 옛 주석을 제목 행으로 분할(null key) — 본 함수가 정렬.
+        - ``anchorLatest`` — 정렬 후 era drift 흡수.
+        - ``mapper.dedupKeyed`` — 정렬로 native 와 같은 키가 된 행의 중복 축약.
+
+    Requires:
+        - polars. (데이터 파일 의존 0 — 같은 df 안의 native 행이 뼈대)
+
+    Capabilities:
+        - 옛 주석을 회사 최근 XBRL 뼈대에 read-time 정렬 — 정렬 개선이 재빌드 무관(빌드 동결).
+
+    Guide:
+        - ``readWide`` 가 anchorLatest 직전 호출. 직접 호출 가능.
+
+    AIContext:
+        - 회사 자기 native 주석이 뼈대(cross-company 아님) — "최근껄로" 정렬, 뼈대 없는 제목은 narrative.
+
+    When:
+        - 옛 split 주석행에 최근 XBRL identity 를 부여해 수평화 정렬할 때.
+
+    How:
+        - native NT_ 행 (scope, 정규화제목)→NT_ 뼈대 build → null-key 주석행 left join → 매칭 시 disclosureKey 채움.
+
+    LLM Specifications:
+        AntiPatterns:
+            - cross-company 전역 taxonomy 로 무조건 정렬 금지 — 회사 자기 최근 뼈대 우선(가짜 NT_ 차단).
+            - 뼈대 부재 회사에 임의 키 부여 금지 — null 유지(narrative, content 보존).
+        OutputSchema:
+            - ``alignNotes(df) -> pl.DataFrame`` (null-key 주석행 → 뼈대 매칭 시 NT_).
+        Prerequisites:
+            - disclosureKey/blockLeaf/chapter/sectionLeaf 컬럼.
+        Freshness:
+            - read 파생 — 매 호출(재빌드 무관).
+        Dataflow:
+            - native NT_ → (scope,제목) 뼈대 → null-key 주석행 join → disclosureKey 채움.
+        TargetMarkets:
+            - KR (DART).
+    """
+    if df.is_empty() or "disclosureKey" not in df.columns or "blockLeaf" not in df.columns:
+        return df
+    # native 주석 blockLeaf 는 scope 접미사(" - 연결"/" - 별도")를 단다(예 "재고자산 - 별도"). 옛 split 은 bare 제목.
+    # 뼈대·옛행을 같은 키로 맞추려면 (1) 접미사 분리해 bare 제목 정규화, (2) scope = 접미사(native) 또는
+    # chapter/sectionLeaf "연결" 마커(옛행, 접미사 없음). 같은 (scope, bare제목) 이 옛↔native 정합.
+    bl = pl.col("blockLeaf").fill_null("")
+    sufScope = bl.str.extract(r"[-–―]\s*(연결|별도)\s*$", 1)  # native 접미사 scope ("연결"/"별도"/null)
+    bareTitle = bl.str.replace(r"\s*[-–―]\s*(연결|별도)\s*$", "")  # 접미사 제거 bare 제목
+    secMark = pl.col("chapter").fill_null("") + pl.col("sectionLeaf").fill_null("")
+    scope = (
+        pl.when(sufScope == "연결")
+        .then(pl.lit("consolidated"))
+        .when(sufScope == "별도")
+        .then(pl.lit("standalone"))
+        .when(secMark.str.contains("연결", literal=True))
+        .then(pl.lit("consolidated"))
+        .otherwise(pl.lit("standalone"))
+    )
+    normTitle = bareTitle.str.replace_all(_NOTE_NORM_RE, "")
+    tmp = df.with_columns(scope.alias("_alignScope"), normTitle.alias("_alignTitle"))
+    # 뼈대 = 회사 자기 native NT_ 주석행 ((scope, 정규화제목) → NT_ 코드, 회사 표준이라 1:1).
+    skeleton = (
+        tmp.filter(
+            pl.col("disclosureKey").cast(pl.Utf8).str.starts_with("NT_") & (pl.col("_alignTitle").str.len_chars() > 1)
+        )
+        .select(["_alignScope", "_alignTitle", "disclosureKey"])
+        .unique(subset=["_alignScope", "_alignTitle"], keep="first")
+        .rename({"disclosureKey": "_skelKey"})
+    )
+    if skeleton.is_empty():
+        return df  # 회사 native 주석 0 — 뼈대 없음, 정렬 불가(narrative 유지)
+    return (
+        tmp.join(skeleton, on=["_alignScope", "_alignTitle"], how="left")
+        .with_columns(
+            pl.when(pl.col("disclosureKey").is_null() & pl.col("_skelKey").is_not_null())
+            .then(pl.col("_skelKey"))
+            .otherwise(pl.col("disclosureKey"))
+            .alias("disclosureKey")
+        )
+        .drop(["_alignScope", "_alignTitle", "_skelKey"])
+    )
+
+
 def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = None) -> pl.DataFrame | None:
     """panel long format read + disclosureKey 보장 (period 파일 prune).
 
@@ -512,7 +622,7 @@ def readWide(
         - 한 회사 다기간을 항목 × period 로 수평화할 때.
 
     How:
-        - readLong → anchorLatest → group collapse(raw join) → period pivot → spine 정렬 → (tag=False) wide strip.
+        - readLong → alignNotes(뼈대 정렬) → anchorLatest → dedupKeyed → collapse → pivot → spine → (tag=False) strip.
 
     LLM Specifications:
         AntiPatterns:
@@ -526,7 +636,7 @@ def readWide(
         Freshness:
             - 매 호출.
         Dataflow:
-            - readLong → anchorLatest → collapse(raw join) → pivot → spine 정렬 → (tag=False) wide strip.
+            - readLong → alignNotes → anchorLatest → dedupKeyed → collapse → pivot → spine → (tag=False) strip.
         TargetMarkets:
             - KR + US.
     """
@@ -535,6 +645,7 @@ def readWide(
     long = readLong(code, marketNs=marketNs, periods=periods)
     if long is None or long.is_empty() or "contentRaw" not in long.columns:
         return None
+    long = alignNotes(long)  # 옛 split 주석행(null key) → 회사 최근 XBRL 뼈대 NT_ 정렬 (read-time, 재빌드 무관)
     long = anchorLatest(long)
     long = dedupKeyed(long)  # 본문+첨부 중복 keyed 행 → (key,scope,period) 당 1개 (collapse 증식 차단)
     indexCols = [c for c in _INDEX_COLS if c in long.columns]

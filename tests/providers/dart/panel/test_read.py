@@ -142,3 +142,97 @@ def test_order_by_spine_unranked_rows_last() -> None:
     out = orderBySpine(wide, ["chapter", "sectionLeaf", "disclosureKey"])
     # 등재된 narrative(1.회사의 개요)가 미등재(__unranked__)보다 먼저.
     assert out["disclosureKey"].to_list()[-1] == "__NOT_IN_SPINE__"
+
+
+def _noteRow(**kw) -> dict:
+    """alignNotes 테스트용 최소 행 (chapter/sectionLeaf/blockLeaf/disclosureKey/period)."""
+    base = {"chapter": None, "sectionLeaf": None, "blockLeaf": None, "disclosureKey": None, "period": "2020Q4"}
+    base.update(kw)
+    return base
+
+
+def test_align_notes_skeleton_match() -> None:
+    """옛 split 주석행(null key, blockLeaf=제목)이 회사 native 뼈대(scope,제목)→NT_ 에 정렬."""
+    from dartlab.providers.dart.panel.read import alignNotes
+
+    df = pl.DataFrame(
+        [
+            # 최근 native 뼈대 (연결 재고자산 → NT_D826380)
+            _noteRow(
+                chapter="III. 재무에 관한 사항",
+                sectionLeaf="3. 연결재무제표 주석",
+                blockLeaf="재고자산",
+                disclosureKey="NT_D826380",
+                period="2025Q4",
+            ),
+            # 옛 split 주석행 (같은 제목, null key)
+            _noteRow(
+                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="재고자산", period="2020Q4"
+            ),
+        ]
+    )
+    out = alignNotes(df)
+    aligned = out.filter(pl.col("period") == "2020Q4")
+    assert aligned["disclosureKey"].to_list() == ["NT_D826380"]  # 옛 행이 최근 뼈대로 정렬
+
+
+def test_align_notes_unmatched_stays_narrative() -> None:
+    """뼈대에 없는 제목(산문 오분할 등)은 null 유지 — 가짜 NT_ 0, 뼈대 중복 0."""
+    from dartlab.providers.dart.panel.read import alignNotes
+
+    df = pl.DataFrame(
+        [
+            _noteRow(
+                chapter="III. 재무에 관한 사항",
+                sectionLeaf="3. 연결재무제표 주석",
+                blockLeaf="재고자산",
+                disclosureKey="NT_D826380",
+                period="2025Q4",
+            ),
+            _noteRow(
+                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="법인세", period="2020Q4"
+            ),
+        ]
+    )
+    out = alignNotes(df)
+    assert out.filter(pl.col("blockLeaf") == "법인세")["disclosureKey"].to_list() == [None]  # narrative 유지
+
+
+def test_align_notes_scope_from_section_marker() -> None:
+    """scope = chapter+sectionLeaf '연결' 마커 — 별도 뼈대는 연결 split 행에 안 새어듦."""
+    from dartlab.providers.dart.panel.read import alignNotes
+
+    df = pl.DataFrame(
+        [
+            # 별도 뼈대 (재고자산 별도 → NT_D826385)
+            _noteRow(
+                chapter="(첨부)재무제표",
+                sectionLeaf="5. 재무제표 주석",
+                blockLeaf="재고자산",
+                disclosureKey="NT_D826385",
+                period="2025Q4",
+            ),
+            # 연결 split 행 (연결 마커) — 별도 뼈대와 scope 달라 매칭 안 됨
+            _noteRow(
+                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="재고자산", period="2020Q4"
+            ),
+        ]
+    )
+    out = alignNotes(df)
+    consol = out.filter((pl.col("period") == "2020Q4"))
+    assert consol["disclosureKey"].to_list() == [None]  # 별도 뼈대는 연결에 안 새어듦(scope 분리)
+
+
+def test_align_notes_passthrough_no_skeleton() -> None:
+    """회사 native 주석 0(뼈대 없음) → 정렬 불가, 원본 그대로."""
+    from dartlab.providers.dart.panel.read import alignNotes
+
+    df = pl.DataFrame(
+        [
+            _noteRow(
+                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="재고자산", period="2020Q4"
+            )
+        ]
+    )
+    out = alignNotes(df)
+    assert out["disclosureKey"].to_list() == [None]  # 뼈대 부재 → null 유지

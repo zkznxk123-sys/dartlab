@@ -133,7 +133,8 @@ panel artifact(`{code}/{period}.parquet`)에 **굽는 것**과 **read 가 매번
 | `disclosureKey`(=canonicalKey)·`xbrlClass`·`blockOrder`·`atocId` 등 | ✅ build | walker 가 뽑은 원본 속성 + `canonicalKey` **순수함수 규칙** (read fallback 보유 → 규칙 변경 시 재빌드 전에도 동작) |
 | `scope` (연결/별도) | ❌ read 파생 | `scopeExpr(xbrlClass)` 판정 — **규칙이 바뀔 수 있음** → 안 구움, read 가 계산 |
 | 행 순서·계층 (spine) | ❌ read 정렬 | 전역 spine `(chapterRank, spineOrder)` — corpus 확대·정부 양식 변경 시 재산정 → artifact 불변, spineData.py 만 재생성 |
-| 옛 주석 분해(de-chunk NT_*) | ✅ build | `dechunkNotes` 가 통짜 덩어리를 `noteTaxonomy` 뼈대로 항목 분할 — **spine 과 달리 build-baked**(행을 물리 분할) → 뼈대 재생성 시 전수 재빌드 필요 |
+| 옛 주석 **분할** (de-chunk 제목 행) | ✅ build | `dechunkNotes` 가 통짜 덩어리를 `N.제목` 헤더로 물리 분할(blockLeaf=제목, **disclosureKey=null**) — 헤더 검출 규칙 변경 시에만 재빌드 |
+| 옛 주석 **정렬** (NT_ 부여) | ❌ read 정렬 | `alignNotes` 가 read 시 옛 제목 행을 회사 최근 XBRL 뼈대(scope,제목)→NT_ 에 매칭 — **정렬·뼈대 개선이 재빌드 무관**, 뼈대 없는 제목은 narrative |
 | 본문+첨부 중복 제거 (dedup) | ❌ read 정렬 | `dedupKeyed` 가 read 시 `(key,scope,period)` 1개 — build 는 분류만(중복 emit), dedup 은 READ 단일책임 |
 | plain (태그 strip) | ❌ read strip | raw 의 파생 표현 — strip 규칙 변경 가능 + 같은 정보 이중저장([[feedback_no_content_plain_precompute]]) → 안 구움 |
 
@@ -205,28 +206,32 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
 - **정직성** — 밸류에이션(PER/PBR)은 price 미보유로 제외(statement-only: 수익성/안정성/효율성/현금흐름/복합/
   성장). 매핑 갭은 그 비율만 해당 period None(숨김 0) — 갭은 core `accountMappings.json` 보강(panel-local 0).
 
-### 주석 수평화 (de-chunk + noteTaxonomy + dedup) — 옛 통짜 주석을 표준 항목으로
+### 주석 수평화 (de-chunk 분할 + alignNotes 정렬) — 옛 통짜 주석을 최근 XBRL 뼈대로
 
-2023+ 보고서는 주석이 항목별 `NT_*` 행(XBRL 태깅)으로 들어오나, 그 이전은 **disclosureKey 없는 통짜
-덩어리**라 era 경계에서 수평화가 끊긴다. 세 부분이 이를 잇는다 — **책임 분리**:
+2023+ 보고서는 주석이 항목별 `NT_*` 행(XBRL 태깅, native disclosureKey)으로 들어오나, 그 이전은 **disclosureKey
+없는 통짜 덩어리**라 era 경계에서 수평화가 끊긴다. **책임 분리 = BUILD 분할(동결) / READ 정렬(동적)** — 정렬·뼈대
+개선이 재빌드를 부르지 않게 한다(빌드는 헤딩 분류가 틀렸을 때만 재빌드).
 
-- **BUILD 분류 — `build/dechunkNotes.py`**: 재무제표 노트 영역 gate(`sectionLeaf 주석` OR `ctx 재무제표`, 사업
-  보고서 TOC·배당·MD&A 제외)로 통짜 덩어리만 골라, 본문 `N. 제목` 헤더를 **통합 검출**(`_detectHeaders`)로 뼈대
-  매칭 → 표준 `NT_*` 부여. 검출은 delimited(`<SPAN>1. 재고자산</SPAN>`)·옛 concatenated(`…비츠로시스1. 일반사항</P>`
-  제목이 산문·본문에 붙음, 전 종목 68%) 양 포맷을 한 패턴(`_NUMDOT`)으로 후보화하고 **뼈대 최장 prefix-match +
-  표셀 가드(`_inTableCell`, 전 corpus 유일 오탐=표셀 7.3% 차단) + 번호 단조증가** 로 진짜 헤더만 가린다(2자 제목은
-  비-한글 경계일 때만). 노트 앞 preamble(재무제표 본표)은 원 블록 보존. **dedup 안 함**(매칭 노트 전부 emit).
-  임계 없음 — 1개라도 매칭되면 itemize.
-- **뼈대 — `build/noteTaxonomy.py`(생성기) → `noteTaxonomyData.py`(생성물, git 추적)**: 전 corpus 2023+
-  XBRL 행에서 `(scope, 정규화제목) → dominant NT_ 코드` 학습. 한 제목이 여러 코드로 갈리는 추상 제목('회계정책'
-  류)은 `dominanceRatio`(기본 0.8) 미달로 **제외**(false-merge 회피, 미매칭→narrative 유지). `spineData` 패턴
-  (순수 .py, 사람 미수정). `_norm`(제목 정규화)은 dechunkNotes 가 import — 생성/조회 키 SSOT 일치.
-- **READ 정렬 — `mapper.dedupKeyed`**: 같은 노트가 본문("III.재무")·첨부("(첨부)재무제표") 중복 수록되면
-  `readWide` 가 `(disclosureKey, scope, period)` 당 1개(xbrlClass native 우선)로 — **dedup 은 READ 한 곳**.
+- **BUILD 분할 — `build/dechunkNotes.py`**: 재무제표 노트 영역 gate(`sectionLeaf 주석` OR `ctx 재무제표`, 사업
+  보고서 TOC·배당·MD&A 제외)로 통짜 덩어리만 골라, 본문 `N. 제목` 헤더를 **통합 검출**(`_detectHeaders`)로 노트 1개당
+  한 행(`blockLeaf`=제목)으로 **쪼갠다 — `disclosureKey` 는 null**(NT_ 부여 안 함). 검출은 delimited
+  (`<SPAN>1. 재고자산</SPAN>`)·옛 concatenated(`…비츠로시스1. 일반사항</P>` 제목이 산문·본문에 붙음, 전 종목 68%)
+  양 포맷을 한 패턴(`_NUMDOT`)으로 후보화하고 **뼈대 사전 최장 prefix-match + 표셀 가드(`_inTableCell`, 전 corpus
+  유일 오탐=표셀 7.3% 차단) + 번호 단조증가** 로 진짜 헤더만 가린다(2자 제목은 비-한글 경계일 때만). preamble(재무제표
+  본표)은 원 블록 보존. **preamble + Σ제목행 = 원 블록 byte-exact**(무손실).
+- **검출 뼈대 사전 — `build/noteTaxonomy.py`(생성기) → `noteTaxonomyData.py`(생성물, git 추적)**: 전 corpus
+  2023+ XBRL 에서 `(scope, 정규화제목)` dominant 제목 학습 — `_detectHeaders` 가 "진짜 노트 제목인가" 판정에만 쓴다
+  (코드 부여 아님). 모호 제목(`dominanceRatio` 미달)은 제외(미매칭→narrative). `_norm`(제목 정규화) SSOT 공유.
+- **READ 정렬 — `read.alignNotes`(신규)**: 옛 split 주석행(null key)을 **회사 자기 최근 XBRL 뼈대**((scope,
+  정규화제목)→native NT_, 제목 접미사 " - 연결/별도" 분리)에 매칭해 같은 identity 부여 → 최근과 수평 정렬. **뼈대에 없는
+  제목은 null 유지(narrative)** — 산문 오분할·미공시도 가짜 NT_ 안 받음(뼈대 중복 0). `readWide` 가 `readLong` 직후
+  ·anchorLatest 직전 호출. 정렬 규칙·뼈대 개선이 **재빌드 무관**(read-time).
+- **READ 중복 축약 — `mapper.dedupKeyed`**: 본문("III.재무")·첨부("(첨부)재무제표") 중복 수록된 같은 NT_ 를
+  `(disclosureKey, scope, period)` 당 1개(xbrlClass native 우선)로 — dedup 도 READ 한 곳.
 
-**재생성 cadence(중요)** — `noteTaxonomy` 는 **build 시점에 행을 물리 분할(baked)**: spine(read 정렬)과 달리
-뼈대 변경 시 **전수 재빌드 필수**. 운영자가 새 회사/양식연도로 정밀화하려면 `--noteTaxonomy`(노브
-`--minFreq`/`--dominanceRatio`) 재생성 → 전수 `--all` 재빌드(~135분) → census 검증. 빈번 갱신 대상 아님.
+**재빌드 cadence(중요)** — de-chunk 는 **분할만 baked**(헤딩 분류). **정렬(NT_ 부여)·뼈대는 READ(`alignNotes`)라
+재빌드 무관** — taxonomy 정밀화·정렬 규칙 개선은 read-time 즉시 반영. **전수 `--all` 재빌드는 헤더 검출 규칙
+(`_detectHeaders`) 자체가 바뀔 때만**(~135분). 새 증분 회사는 `--changed` 로 그 회사만 빌드(전수 아님).
 
 **모니터링** — `tests/audit/panelHorizonCensus.py`: `grid_duplicated`(증식)·`content_dropped`(char-parity)·
 `note_discontinuous`(과거연간 NT_ 0). 단 `note_discontinuous` 는 *비표준 주석 회사*(genuine narrative)도
