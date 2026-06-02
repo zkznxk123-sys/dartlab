@@ -135,6 +135,8 @@ recent = c.liveFilings()        # 라이브
 
 `scope="both"`: title(ngram) + content(bm25) 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 title·content 단순합산은 품질 저하). auto 의 gated fusion 은 이와 다른 메커니즘(content+의미확장).
 
+`scope="news"`: gather 뉴스 헤드라인(`news/headlines`)만 검색(공시 제외). 뉴스는 `rcept_no` 없음 → `news:`+url해시로 식별, `dartUrl` = 기사 url. corp 지정 시 0 건(뉴스는 종목 매핑 없음 — title 매칭만). allFilings+panel+뉴스가 한 인덱스에 통합되어 `includeNews=True` 빌드 시 auto 결과에도 자연 노출.
+
 `corp` 는 종목코드 ("005930") 또는 회사명 ("삼성전자"), `start`/`end` 는 YYYYMMDD, `topK` 기본 10.
 
 ## 호출 패턴 4 종
@@ -170,6 +172,17 @@ dartlab.search("유상증자")
 3. 0 건 또는 stale 의심 시 → `Company.disclosure()` 또는 `scan` 으로 즉시 fallback (round 반복 X).
 4. 매칭 공시의 본문 분석은 `Company(code).readFiling(rcept_no)` — 외부 본문 가드 적용.
 
+## 라이브러리 배포 / 사용자 계약 (pip install dartlab)
+
+검색 인덱스는 wheel 에 포함되지 않고 **런타임 HF lazy pull**(`eddmpython/dartlab-data` → `dart/contentIndex/`).
+
+- **첫 검색 자동 fetch**: `dartlab.search()` 첫 호출 시 로컬 인덱스 부재면 HF 에서 자동 다운로드(세션 1회, graceful). 로컬 있으면 no-op.
+- **사전 워밍**: `dartlab.providers.dart.search.prefetch()` — cold start 완화용 선다운로드.
+- **신선도 조회**: `indexInfo()` → `{available, dataAsOf(빌드시점), nDocs, hasMeaning, hasDelta}`. evidence 의 `dataAsOf` 실 공급원.
+- **offline/제약 환경**: `DARTLAB_NO_HF_DOWNLOAD=1` 이면 다운로드 skip → 로컬 인덱스 없으면 빈 결과(info 안내). CI/notebook 권장.
+- **크기·부담**: contentIndex(main.npz + meta + meaning.json + gateRef) 첫 다운로드 수백 MB~1GB. (향후 배포 강화: 최근·주요종목 경량 tier + full 옵트인 — `rebuildMain(tier=)` 확장 여지. 현 단계는 lazy full pull.)
+- **신선도 한계**: 월간(main) + 일간(delta) 빌드 → 최근 며칠 stale 가능. 최신은 `Company.liveFilings()` 병행.
+
 ## 기본 검증
 
-`dartlab.search()` 시그니처 (query · corp · start · end · scope · topK) 가 변경되거나 인덱스 빌드 워크플로우 (`stemIndex` · `contentIndex`) 가 바뀌면 본 skill 갱신.
+`dartlab.search()` 시그니처 (query · corp · start · end · scope · topK) 가 변경되거나 인덱스 빌드 워크플로우 (`stemIndex` · `contentIndex`) 가 바뀌면 본 skill 갱신. scope 5 종(auto/title/content/both/news) + `prefetch`/`indexInfo` public 표면.
