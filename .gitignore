@@ -43,6 +43,9 @@ TODO.md
 # /data/ 가 이미 모두 무시하지만 명시 라인으로 의도 강조 + 미래 docs.parquet 만 별도
 # tracking 결정 시에도 zip 은 영구 차단 강제.
 /data/dart/original/
+# 공시 오리지널 통일 백업 store (gather.original) — DART(정기+비정기)·EDGAR 전 form 가공 0 원본.
+# 로컬 백업 전용·HF 미공개(publish-ready-gated). /data/ 가 이미 무시하지만 의도 강조 명시 라인.
+/data/original/
 
 # Backup (파일 삭제 대신 이동) — repo-root 만. src/dartlab 내부의 _backup/
 # (예: providers/dart/finance/mapperData/_backup/) 은 번들 리소스이므로 제외하면 안 됨.

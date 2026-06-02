@@ -57,7 +57,15 @@ testUniverse:
 **1.3 zip 비공개 (사용자 결정 2026-05-21)**
 - zip 은 docs.parquet 와 중복 정보 → HF 미공개.
 - `.gitignore` + HF upload guard + GitHub Actions artifact path 3 층 가드.
-- 안정화 후 zip 단계 폐기 옵션 (memory streaming 으로 즉시 파싱).
+
+**1.4 원본 영구 백업 전환 (사용자 결정 2026-06-03)**
+- 2026-05-21 의 "안정화 후 zip 단계 폐기" 옵션은 **철회** — 원본은 가공 0 ground truth 로
+  **영구 보관**(parquet 운영 방향 변경 시 재파생 테스트). "비공개" 는 유지(publish-ready-gated).
+- 통일 백업 store `data/original/` 신설 — DART(정기 `dart/docs/` + 비정기 `dart/allFilings/`) +
+  EDGAR(`edgar/{cik}/{accession}.txt` full submission, 전 form). 수집기 = `gather.original`
+  (gather 자체포함, `gather ↛ providers` 준수). `allFilingsCollector`(parquet content_raw)와 공존.
+- 본 docs 파이프라인의 정기 zip(`data/dart/original/docs/`)을 `data/original/dart/docs/`로
+  통일 이전하는 것은 providers/panel 영역 별도 follow-up.
 
 ## §2 — schema 비교
 
@@ -143,8 +151,8 @@ bash tests/test-lock.sh tests/sections/test_zipDocsCollector.py -v
 
 ## §7 — zip 비공개 강제 (3 층 가드)
 
-1. `.gitignore` — `data/dart/original/` 라인
-2. HF upload script (`.github/scripts/sync/bulkUploadHf.py`) — `original/` 경로 explicit skip
+1. `.gitignore` — `data/dart/original/` + `data/original/` 라인
+2. HF upload script (`.github/scripts/sync/bulkUploadHf.py`) — `original` category explicit 거부 (`/data/original/` 도 `DATA_RELEASES` 미등록이라 업로드 경로 진입 0)
 3. GitHub Actions artifact upload path — `data/dart/docs/` 만
 
 ## §8 — 호출 cookbook

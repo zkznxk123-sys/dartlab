@@ -46,7 +46,10 @@ linkedSkills:
 
 ```
 L0: raw source
-   DART zip (data/dart/original/, 로컬 임시, .gitignore)
+   DART zip (data/dart/original/, 로컬 임시, .gitignore) — 정기보고서 panel/sections 입력
+   원본 백업 store (data/original/, gather.original, 로컬 백업·HF 미공개·.gitignore)
+     dart/docs/{code}/{rcept}.zip (정기) · dart/allFilings/{code}/{rcept}.zip (비정기)
+     edgar/{cik}/{accession}.txt (전 form full submission) — 가공 0 ground truth
    EDGAR XBRL (HF dataset eddmpython/dartlab-data/edgar/)
    KRX OpenAPI (HF dataset eddmpython/dartlab-data/krx/)
    ↓
