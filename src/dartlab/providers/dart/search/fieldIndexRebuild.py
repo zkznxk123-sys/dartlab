@@ -7,6 +7,7 @@ caller compat — fieldIndex.py 가 re-export.
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import math
@@ -50,8 +51,10 @@ def rebuildMain(
     includeAllFilings: bool = True,
     includeDocs: bool = True,
     includePanel: bool = False,
+    includeNews: bool = False,
     contentLimit: int | None = None,
     panelLimit: int = 4000,
+    newsLimit: int = 800,
     showProgress: bool = True,
 ) -> int:
     """main 세그먼트 풀리빌드 — docs + allFilings (+ panel filing 롤업).
@@ -144,6 +147,7 @@ def rebuildMain(
                     "section_title": row.get("section_title") or "",
                     "text": content[:500],
                     "source": source,
+                    "url": "",  # 공시는 빈값 — dartUrl 은 rcept_no 로 조합
                 }
             )
             added += 1
@@ -155,6 +159,9 @@ def rebuildMain(
         totalDocs += _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress)
         if showProgress:
             _log.info(f"[main] panel 롤업 완료: {len(panelRcepts):,} filing, {time.perf_counter() - t0:.0f}초")
+
+    if includeNews:
+        totalDocs += _feedNews(builder, metaRecs, newsLimit, showProgress)
 
     if includeAllFilings:
         import os
@@ -327,6 +334,7 @@ def _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showPro
                     "section_title": row.get("leaf") or "",
                     "text": text[:500],
                     "source": "panel",
+                    "url": "",
                 }
             )
             panelRcepts.add(rn)
@@ -336,6 +344,101 @@ def _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showPro
             gc.collect()
             if showProgress:
                 _log.info(f"  panel {ci + 1}/{len(codeDirs)}: {added:,} filing")
+    return added
+
+
+def _newsHeadlinesDir():
+    from dartlab.core.dataLoader import _getDataRoot
+
+    return _getDataRoot() / "news" / "headlines"
+
+
+def _newsKey(url: str, date: str) -> tuple[str, int]:
+    """뉴스 dedup 키 — url sha1 로 (rcept_no, section_order) 슬롯 점유.
+
+    DART rcept_no 는 14 자리 숫자라 ``news:`` 접두 문자열과 절대 겹치지 않음 → 공시-뉴스 dedup 분리.
+
+    Args:
+        url: 기사 url.
+        date: 기사 날짜(미사용, 시그니처 호환).
+
+    Returns:
+        tuple[str, int] — (``"news:"+sha1(url)[:16]``, 0).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _newsKey("http://x", "2026-05-28")[0].startswith("news:")
+        True
+    """
+    h = hashlib.sha1((url or "").encode("utf-8")).hexdigest()[:16]
+    return (f"news:{h}", 0)
+
+
+def _feedNews(builder, metaRecs, newsLimit, showProgress) -> int:
+    """뉴스 헤드라인(news/headlines/**/*.parquet)을 검색 인덱스에 추가 — source='news'.
+
+    본문 = title + query(시장 맥락어, BM25 recall 보강). rcept_no 슬롯은 _newsKey(url) 로 점유,
+    dartUrl 은 기사 url(_resolveResultUrl 분기). 뉴스 parquet 부재 시 0 반환(graceful).
+
+    Args:
+        builder: _IncrementalBuilder 인스턴스.
+        metaRecs: meta dict 누적 리스트(공시와 동일 11 키 emit).
+        newsLimit: 뉴스 본문 최대 문자 수.
+        showProgress: True 면 progress 로그.
+
+    Returns:
+        int — 추가된 뉴스 doc 수.
+
+    Raises:
+        없음 (파일별 read 오류는 skip).
+
+    Example:
+        >>> _feedNews(builder, [], 800, False)  # doctest: +SKIP
+    """
+    import gc
+
+    base = _newsHeadlinesDir()
+    if not base.exists():
+        if showProgress:
+            _log.info("[main] news/headlines 없음 — 뉴스 skip")
+        return 0
+    files = sorted(base.rglob("*.parquet"))
+    added = 0
+    for i, f in enumerate(files):
+        try:
+            df = pl.read_parquet(f, columns=["title", "query", "url", "date", "source"])
+        except (pl.exceptions.PolarsError, OSError):
+            continue
+        for row in df.iter_rows(named=True):
+            title = (row.get("title") or "").strip()
+            if not title:
+                continue
+            text = f"{title} {(row.get('query') or '').strip()}".strip()[:newsLimit]
+            builder.addDoc(text)
+            rn, so = _newsKey(row.get("url") or "", str(row.get("date") or ""))
+            metaRecs.append(
+                {
+                    "rcept_no": rn,
+                    "section_order": so,
+                    "corp_code": "",
+                    "corp_name": "",
+                    "stock_code": "",
+                    "rcept_dt": str(row.get("date") or "").replace("-", ""),
+                    "report_nm": "",
+                    "section_title": row.get("source") or "",
+                    "text": title[:500],
+                    "source": "news",
+                    "url": row.get("url") or "",
+                }
+            )
+            added += 1
+        del df
+        if (i + 1) % 50 == 0:
+            gc.collect()
+    if showProgress:
+        _log.info(f"[main] 뉴스 {added:,} 헤드라인 색인")
     return added
 
 

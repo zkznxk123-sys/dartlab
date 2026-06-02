@@ -26,6 +26,7 @@ from dartlab.core.logger import getLogger
 from dartlab.providers.dart.search.fieldIndex import (
     _contentIndexDir,
     _getSegments,
+    _resolveResultUrl,
     _scoreBM25,
     tokenizeWord,
 )
@@ -356,6 +357,4 @@ def searchSemantic(
         df = df.filter(pl.col("corp_code") == corpCode)
     if stockCode:
         df = df.filter(pl.col("stock_code") == stockCode)
-    if df.height > 0:
-        df = df.with_columns(("https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + pl.col("rcept_no")).alias("dartUrl"))
-    return df.head(limit)
+    return _resolveResultUrl(df).head(limit)

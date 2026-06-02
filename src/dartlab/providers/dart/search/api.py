@@ -18,7 +18,7 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-SEARCH_SCOPES: tuple[str, ...] = ("auto", "title", "content", "both")
+SEARCH_SCOPES: tuple[str, ...] = ("auto", "title", "content", "both", "news")
 
 
 def search(
@@ -93,8 +93,8 @@ def search(
             }
         )
 
-    if scope not in ("auto", "title", "content", "both"):
-        raise ValueError(f"scope는 'auto', 'title', 'content', 'both' 중 하나. 받은 값: {scope!r}")
+    if scope not in SEARCH_SCOPES:
+        raise ValueError(f"scope는 {SEARCH_SCOPES} 중 하나. 받은 값: {scope!r}")
 
     corpCode, stockCode = _resolveCorp(corp)
 
@@ -102,6 +102,8 @@ def search(
         result = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "content":
         result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+    elif scope == "news":
+        result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "auto":
         result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     else:  # both
@@ -134,6 +136,16 @@ def _searchContent(query, *, corpCode, stockCode, limit):
     from dartlab.providers.dart.search.fieldIndex import searchContent
 
     return searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+
+
+def _searchNews(query, *, corpCode, stockCode, limit):
+    """뉴스 전용 — content 인덱스에서 source='news' 행만. corp 지정 시 0 건(뉴스 corp 매핑 없음)."""
+    from dartlab.providers.dart.search.fieldIndex import searchContent
+
+    df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit * 4)
+    if df is None or df.height == 0 or "source" not in df.columns:
+        return df
+    return df.filter(pl.col("source") == "news").head(limit)
 
 
 def _searchAuto(query, *, corpCode, stockCode, limit):

@@ -232,6 +232,7 @@ def buildContentSegment(
                 "section_title": row.get("section_title") or "",
                 "text": content[:500],  # 스니펫용
                 "source": row.get("source") or "",
+                "url": row.get("url") or "",  # 뉴스 기사 url (비뉴스는 "")
             }
         )
 
@@ -385,6 +386,34 @@ def clearCache() -> None:
     _segments = None
 
 
+def _resolveResultUrl(df: pl.DataFrame) -> pl.DataFrame:
+    """결과 DataFrame 에 dartUrl 컬럼 부여 — source 분기.
+
+    뉴스(source="news")는 기사 url 그대로, 그 외(공시)는 DART 뷰어 URL(rcpNo) 조합.
+
+    Args:
+        df: 검색 결과 DataFrame (rcept_no/source/url 컬럼 보유).
+
+    Returns:
+        pl.DataFrame — dartUrl 컬럼 추가본. 빈 df 면 그대로.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _resolveResultUrl(pl.DataFrame())  # doctest: +SKIP
+    """
+    if df.height == 0:
+        return df
+    hasUrl = "url" in df.columns
+    dartBase = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + pl.col("rcept_no")
+    if hasUrl and "source" in df.columns:
+        return df.with_columns(
+            pl.when(pl.col("source") == "news").then(pl.col("url")).otherwise(dartBase).alias("dartUrl")
+        )
+    return df.with_columns(dartBase.alias("dartUrl"))
+
+
 def searchContent(
     query: str,
     *,
@@ -468,12 +497,7 @@ def searchContent(
     if stockCode:
         df = df.filter(pl.col("stock_code") == stockCode)
 
-    # dartUrl 추가
-    if df.height > 0:
-        df = df.with_columns(
-            ("https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + pl.col("rcept_no")).alias("dartUrl"),
-        )
-
+    df = _resolveResultUrl(df)
     return df.head(limit)
 
 
