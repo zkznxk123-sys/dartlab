@@ -24,6 +24,7 @@ import polars as pl
 
 from dartlab.core.logger import getLogger
 from dartlab.providers.dart.search.fieldIndex import (
+    _activeIndexDir,
     _contentIndexDir,
     _getSegments,
     _resolveResultUrl,
@@ -314,8 +315,9 @@ def searchSemantic(
             {"info": ["content 인덱스가 없습니다. dartlab.providers.dart.search.rebuildContent() 실행 필요."]}
         )
 
-    graph = loadMeaningGraph()
-    gref = loadGateRef()
+    activeDir = _activeIndexDir()  # flat(legacy/full) 또는 tier(lite) — 세그먼트와 동일 위치에서 meaning/gateRef
+    graph = loadMeaningGraph(activeDir)
+    gref = loadGateRef(activeDir)
     profile = expandMeaning(tokens, graph) if graph else {}
 
     # 1) 세그먼트별 bm25/의미 점수 + gate top1(전 세그먼트 bm25 최대)

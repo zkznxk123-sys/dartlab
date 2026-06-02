@@ -55,11 +55,13 @@ def main() -> int:
         print("[main] HF_TOKEN 없음 — 업로드 스킵")
         return 0
 
-    print("[main] HF 업로드")
+    print("[main] HF 업로드 (full = flat)")
     from huggingface_hub import HfApi
 
+    from dartlab.core.dataConfig import repoFor
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
+    repo = repoFor("contentIndex")
     outDir = _contentIndexDir()
     files = [
         "main.npz",
@@ -81,21 +83,52 @@ def main() -> int:
             api.upload_file,
             path_or_fileobj=str(src),
             path_in_repo=dstPath,
-            repo_id="eddmpython/dartlab-data",
+            repo_id=repo,
             repo_type="dataset",
         )
         print(f"  [ok] {dstPath} ({src.stat().st_size / 1024 / 1024:.1f} MB)")
 
     # delta는 main에 흡수되었으므로 제거 (로컬). HF에서도 delete 시도.
     try:
-        api.delete_file(
-            path_in_repo="dart/contentIndex/delta.npz", repo_id="eddmpython/dartlab-data", repo_type="dataset"
-        )
+        api.delete_file(path_in_repo="dart/contentIndex/delta.npz", repo_id=repo, repo_type="dataset")
     except Exception:
         pass
 
+    # ── lite tier — pip 사용자 기본 경량 배포(최근 N개월). full(flat)과 별 디렉터리라 공존. ──
+    # full 업로드를 막지 않는 best-effort: lite 빌드/업로드 실패해도 full 은 이미 배포됨.
+    _buildAndUploadLite(hfToken)
+
     print("[main] 완료")
     return 0
+
+
+def _buildAndUploadLite(hfToken: str) -> None:
+    """lite tier 빌드(최근 N개월 sinceDate 축소) + HF dart/contentIndex/lite/ 업로드.
+
+    환경 ``DARTLAB_LITE_MONTHS`` (기본 18) 만큼 최근 공시만 색인 → 사용자 첫 다운로드 경량.
+    퇴행 가드 — lite nDocs 가 너무 적으면(< DARTLAB_LITE_MIN_DOCS) 업로드 skip. full 배포엔 무영향.
+    """
+    from datetime import datetime, timedelta
+
+    months = int(os.environ.get("DARTLAB_LITE_MONTHS", "18"))
+    sinceDate = (datetime.now() - timedelta(days=int(months * 30.5))).strftime("%Y%m%d")
+    print(f"[lite] tier 빌드 시작 — sinceDate={sinceDate} (최근 {months}개월)")
+
+    from dartlab.providers.dart.search import buildGateRef, buildMeaningGraph
+    from dartlab.providers.dart.search.fieldIndex import clearCache
+    from dartlab.providers.dart.search.fieldIndexRebuild import pushContentIndex, rebuildMain
+
+    clearCache()
+    nLite = rebuildMain(includePanel=True, includeNews=True, tier="lite", sinceDate=sinceDate, showProgress=True)
+    buildMeaningGraph(tier="lite", showProgress=True)  # 그래프는 코퍼스 전역 — lite 디렉터리에 동거
+    buildGateRef(tier="lite", showProgress=True)
+    minLite = int(os.environ.get("DARTLAB_LITE_MIN_DOCS", "50000"))
+    if nLite < minLite:
+        print(f"[lite] ✗ nDocs {nLite:,} < {minLite:,} — lite 업로드 skip (full 은 이미 배포됨)")
+        return
+    print(f"[lite] {nLite:,} 문서 → HF dart/contentIndex/lite/ 업로드")
+    pushContentIndex(hfToken, tier="lite")
+    print("[lite] 완료")
 
 
 if __name__ == "__main__":

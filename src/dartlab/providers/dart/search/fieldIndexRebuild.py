@@ -55,6 +55,9 @@ def rebuildMain(
     contentLimit: int | None = None,
     panelLimit: int = 4000,
     newsLimit: int = 800,
+    tier: str = "full",
+    sinceDate: str | None = None,
+    whitelist: set[str] | list[str] | None = None,
     showProgress: bool = True,
 ) -> int:
     """main 세그먼트 풀리빌드 — docs + allFilings (+ panel filing 롤업).
@@ -66,12 +69,21 @@ def rebuildMain(
     1 문서로 추가하고, 같은 rceptNo 의 allFilings 원문은 skip (panel 본문 우선). 표시 메타(corp_name/
     report_nm/rcept_dt)는 allFilings 메타 dict 에서 채운다.
 
+    배포 tier — ``tier="full"`` 은 flat ``contentIndex/`` 에 전량(기존 동작). ``tier="lite"`` 는
+    ``contentIndex/lite/`` 에 ``sinceDate``(rcept_dt 하한)·``whitelist``(종목코드 한정)로 축소 색인
+    → pip 사용자 기본 다운로드(경량). 둘은 별 디렉터리라 공존(상호 무효화 0).
+
     Args:
         includeAllFilings: True 면 전체 공시 (수시 포함).
         includeDocs: True 면 docs sections 포함.
         includePanel: True 면 panel 정규화 본문을 filing 롤업으로 추가.
+        includeNews: True 면 뉴스 헤드라인 포함.
         contentLimit: allFilings/docs 본문 최대 문자 수.
         panelLimit: panel filing 롤업 본문 최대 문자 수.
+        newsLimit: 뉴스 본문 최대 문자 수.
+        tier: ``"full"`` (flat 전량) / ``"lite"`` (서브디렉터리 축소). 출력 경로 결정.
+        sinceDate: lite 색인 rcept_dt 하한 (YYYYMMDD). None 이면 무제한.
+        whitelist: lite 색인에 포함할 종목코드 집합. None 이면 전체.
         showProgress: True 면 progress 로그.
 
     Returns:
@@ -82,16 +94,22 @@ def rebuildMain(
 
     Example:
         >>> rebuildMain(includePanel=True)  # doctest: +SKIP
+        >>> rebuildMain(tier="lite", sinceDate="20241201", whitelist={"005930"})  # doctest: +SKIP
     """
     import gc
 
     from dartlab.providers.dart.openapi.allFilingsCollector import _META_SUFFIX, _allFilingsDir
     from dartlab.providers.dart.search.fieldIndex import (
         CONTENT_LIMIT,
+        _contentIndexDir,
         _IncrementalBuilder,
         clearCache,
         saveSegment,
     )
+
+    if whitelist is not None and not isinstance(whitelist, set):
+        whitelist = set(whitelist)
+    saveDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
 
     if contentLimit is None:
         contentLimit = CONTENT_LIMIT
@@ -129,6 +147,11 @@ def rebuildMain(
         for row in df.iter_rows(named=True):
             if skipRcepts and (row.get("rcept_no") or "") in skipRcepts:
                 continue
+            # lite tier 축소 — 종목 whitelist / rcept_dt 하한.
+            if whitelist is not None and (row.get("stock_code") or "") not in whitelist:
+                continue
+            if sinceDate and str(row.get("rcept_dt") or "") < sinceDate:
+                continue
             raw = row.get(contentColumn) or ""
             if contentColumn == "content_raw":
                 content = _stripTags(raw, limit=contentLimit)
@@ -156,18 +179,22 @@ def rebuildMain(
     t0 = time.perf_counter()
 
     if includePanel:
-        totalDocs += _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress)
+        totalDocs += _feedPanelRollup(
+            builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress, whitelist=whitelist, sinceDate=sinceDate
+        )
         if showProgress:
             _log.info(f"[main] panel 롤업 완료: {len(panelRcepts):,} filing, {time.perf_counter() - t0:.0f}초")
 
     if includeNews:
-        totalDocs += _feedNews(builder, metaRecs, newsLimit, showProgress)
+        totalDocs += _feedNews(builder, metaRecs, newsLimit, showProgress, sinceDate=sinceDate)
 
     if includeAllFilings:
         import os
 
-        outDir = _allFilingsDir()
-        files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
+        afDir = _allFilingsDir()
+        files = sorted(f for f in afDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
+        if sinceDate:  # lite — 일자 sharded(YYYYMMDD.parquet) 파일 레벨 하한 prune
+            files = [f for f in files if f.stem >= sinceDate]
         _afl = int(os.environ.get("DARTLAB_SEARCH_AF_FILES", "0"))  # 테스트용 제한(0=무제한)
         if _afl > 0:
             files = files[-_afl:]
@@ -214,13 +241,13 @@ def rebuildMain(
     del metaRecs
     gc.collect()
 
-    saveSegment(idx, meta, "main")
+    saveSegment(idx, meta, "main", saveDir)
     clearCache()
-    _clearDelta()
+    _clearDelta(saveDir)
 
     if showProgress:
         elapsed = time.perf_counter() - t0
-        _log.info(f"[main] 저장 완료. 총 {elapsed / 60:.1f}분, {idx['nDocs']:,} 문서.")
+        _log.info(f"[main] 저장 완료(tier={tier}, {saveDir.name}). 총 {elapsed / 60:.1f}분, {idx['nDocs']:,} 문서.")
 
     return idx["nDocs"]
 
@@ -262,11 +289,14 @@ def _panelDir():
     return _getDataRoot() / "dart" / "panel"
 
 
-def _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress) -> int:
+def _feedPanelRollup(
+    builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress, *, whitelist=None, sinceDate=None
+) -> int:
     """panel 정규화 본문을 filing(rceptNo) 단위 롤업해 빌더에 추가 — "완전한 DART 문서" 색인.
 
     종목별 parquet 스트리밍(read+del+gc) → rceptNo 별 contentRaw concat → get_text → addDoc 1 문서.
     표시 메타는 afMeta(allFilings) 에서 보강. 추가한 rceptNo 를 panelRcepts 에 기록(allFilings 패스 skip 용).
+    lite tier — whitelist(종목 한정)는 codeDir 단위, sinceDate(rcept_dt 하한)는 afMeta 기준 filing 단위.
     """
     import gc
     import os
@@ -278,6 +308,8 @@ def _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showPro
             _log.info("[main] panel 디렉토리 없음 — 롤업 skip")
         return 0
     codeDirs = sorted(d for d in base.iterdir() if d.is_dir())
+    if whitelist is not None:  # lite — 종목 한정
+        codeDirs = [d for d in codeDirs if d.name in whitelist]
     _codeLimit = int(os.environ.get("DARTLAB_SEARCH_PANEL_CODES", "0"))  # 테스트용 제한(0=무제한)
     if _codeLimit > 0:
         codeDirs = codeDirs[:_codeLimit]
@@ -315,13 +347,15 @@ def _feedPanelRollup(builder, metaRecs, afMeta, panelRcepts, panelLimit, showPro
             rn = row["rceptNo"]
             if not rn:
                 continue
+            m = afMeta.get(rn, {})
+            if sinceDate and str(m.get("rcept_dt", "")) < sinceDate:  # lite — rcept_dt 하한(addDoc 전 검사로 meta 정합)
+                continue
             parts = row["parts"] or []
             raw = " ".join(p for p in parts if p)[:rawCap]
             text = sp.sub(" ", tag.sub(" ", raw)).strip()[:panelLimit]
             if not text:
                 continue
             builder.addDoc(text)
-            m = afMeta.get(rn, {})
             metaRecs.append(
                 {
                     "rcept_no": rn,
@@ -376,7 +410,7 @@ def _newsKey(url: str, date: str) -> tuple[str, int]:
     return (f"news:{h}", 0)
 
 
-def _feedNews(builder, metaRecs, newsLimit, showProgress) -> int:
+def _feedNews(builder, metaRecs, newsLimit, showProgress, *, sinceDate=None) -> int:
     """뉴스 헤드라인(news/headlines/**/*.parquet)을 검색 인덱스에 추가 — source='news'.
 
     본문 = title + query(시장 맥락어, BM25 recall 보강). rcept_no 슬롯은 _newsKey(url) 로 점유,
@@ -415,6 +449,8 @@ def _feedNews(builder, metaRecs, newsLimit, showProgress) -> int:
             title = (row.get("title") or "").strip()
             if not title:
                 continue
+            if sinceDate and str(row.get("date") or "").replace("-", "") < sinceDate:  # lite — 날짜 하한
+                continue
             text = f"{title} {(row.get('query') or '').strip()}".strip()[:newsLimit]
             builder.addDoc(text)
             rn, so = _newsKey(row.get("url") or "", str(row.get("date") or ""))
@@ -442,13 +478,15 @@ def _feedNews(builder, metaRecs, newsLimit, showProgress) -> int:
     return added
 
 
-def buildMeaningGraph(*, contentLimit: int | None = None, showProgress: bool = True) -> int:
+def buildMeaningGraph(*, contentLimit: int | None = None, tier: str = "full", showProgress: bool = True) -> int:
     """type(report_nm)→본문 경험그래프 build → meaning.json 저장. allFilings 스트리밍 (SPPMI top-K).
 
     의미검색(scope=auto) 확장 엔진의 artifact. 키워드가 못 잡는 동의·관련 공시 회복용.
+    그래프는 코퍼스 전역(tier 무관)이지만 출력 위치는 tier 디렉터리에 둬 인덱스와 동거(활성 디렉터리 일치).
 
     Args:
         contentLimit: 본문 토큰화 최대 문자 수. None 이면 CONTENT_LIMIT.
+        tier: ``"full"`` (flat) / ``"lite"`` (서브디렉터리) — meaning.json 저장 위치.
         showProgress: True 면 progress 로그.
 
     Returns:
@@ -528,19 +566,21 @@ def buildMeaningGraph(*, contentLimit: int | None = None, showProgress: bool = T
                 w[b] = round(pmi * math.log(1.0 + n / bDf), 5)
         if w:
             graph[fkey] = dict(sorted(w.items(), key=lambda kv: kv[1], reverse=True)[:branch])
-    (_contentIndexDir() / "meaning.json").write_text(json.dumps(graph, ensure_ascii=False), encoding="utf-8")
+    outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
+    (outDir / "meaning.json").write_text(json.dumps(graph, ensure_ascii=False), encoding="utf-8")
     if showProgress:
-        _log.info(f"[meaning] {nDocs:,} 문서 → feature {len(graph):,} 노드 meaning.json 저장")
+        _log.info(f"[meaning] {nDocs:,} 문서 → feature {len(graph):,} 노드 meaning.json 저장(tier={tier})")
     return len(graph)
 
 
-def buildGateRef(*, sampleN: int = 2000, showProgress: bool = True) -> float:
+def buildGateRef(*, sampleN: int = 2000, tier: str = "full", showProgress: bool = True) -> float:
     """gate 기준값(코퍼스 median bm25 top1) → gateRef.json. 색인 규모 적응(V238 보강).
 
     main 세그먼트의 self-query(report_nm core) bm25 top1 분포 중앙값.
 
     Args:
         sampleN: top1 분포 샘플 질의 수.
+        tier: ``"full"`` (flat) / ``"lite"`` (서브디렉터리) — main 세그먼트 로드·gateRef 저장 위치.
         showProgress: True 면 progress 로그.
 
     Returns:
@@ -556,10 +596,11 @@ def buildGateRef(*, sampleN: int = 2000, showProgress: bool = True) -> float:
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, _scoreBM25, loadSegment, tokenizeWord
     from dartlab.providers.dart.search.semantic import reportNmCore
 
-    seg = loadSegment("main")
+    segDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
+    seg = loadSegment("main", segDir)
     out = {"ref": 0.0, "gmin": _sem.GMIN, "gmax": _sem.GMAX, "gateX": _sem.GATE_X}
     if seg is None:
-        (_contentIndexDir() / "gateRef.json").write_text(json.dumps(out), encoding="utf-8")
+        (segDir / "gateRef.json").write_text(json.dumps(out), encoding="utf-8")
         return 0.0
     idx, meta = seg
     top1s: list[float] = []
@@ -576,7 +617,7 @@ def buildGateRef(*, sampleN: int = 2000, showProgress: bool = True) -> float:
     if top1s:
         top1s.sort()
         out["ref"] = top1s[len(top1s) // 2]
-    (_contentIndexDir() / "gateRef.json").write_text(json.dumps(out), encoding="utf-8")
+    (segDir / "gateRef.json").write_text(json.dumps(out), encoding="utf-8")
     if showProgress:
         _log.info(f"[gateRef] n={len(top1s)} ref(median bm25 top1)={out['ref']:.2f}")
     return out["ref"]
@@ -653,11 +694,11 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     return idx["nDocs"]
 
 
-def _clearDelta() -> None:
-    """delta 세그먼트 파일 제거."""
+def _clearDelta(outDir: Path | None = None) -> None:
+    """delta 세그먼트 파일 제거 (지정 디렉터리, 기본 flat base)."""
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
-    outDir = _contentIndexDir()
+    outDir = outDir or _contentIndexDir()
     for name in ("delta.npz", "delta_stems.json", "delta_meta.parquet", "delta_info.json"):
         p = outDir / name
         if p.exists():
@@ -670,18 +711,21 @@ def _clearDelta() -> None:
 _HF_CONTENTINDEX_ATTEMPTED = False
 
 
-def ensureContentIndex() -> None:
+def ensureContentIndex(tier: str | None = None) -> None:
     """content 인덱스(main.*) 부재 시 HF lazy 다운로드 — 1회, graceful. (panel ensurePanelFromHf 미러)
 
-    pip 사용자 진입점: `dartlab.search()` 첫 호출 시 인덱스를 HF 에서 자동 fetch. 로컬 우선 —
-    main.npz 있으면 즉시 반환. `DARTLAB_NO_HF_DOWNLOAD=1` skip. 세션 1회만 시도(재검색 폭주 방지).
-    실패는 graceful(빈 결과). pyodide(huggingface_hub 부재)는 즉시 반환.
+    pip 사용자 진입점: `dartlab.search()` 첫 호출 시 인덱스를 HF 에서 자동 fetch. 배포 전략:
+    - flat ``contentIndex/main.npz`` 가 로컬에 있으면(기존 배포·dev) 즉시 반환(no-op).
+    - 없으면 tier(기본 lite, env ``DARTLAB_SEARCH_TIER``) 서브디렉터리를 HF 에서 pull
+      (``contentIndex/{tier}/*``) — 사용자 다운로드 부담 격감(최근·주요종목 경량).
+    - tier 가 아직 HF 에 미배포(전환기)면 flat ``contentIndex/*`` 로 fallback(기존 full 보호).
+    `DARTLAB_NO_HF_DOWNLOAD=1` skip. 세션 1회만 시도(재검색 폭주 방지). pyodide 는 즉시 반환.
 
     Args:
-        (없음).
+        tier: 받을 tier ("lite"/"full"). None 이면 env ``DARTLAB_SEARCH_TIER`` 또는 "lite".
 
     Returns:
-        None — 부작용으로 `data/dart/contentIndex/` 를 채운다. 이미 있으면 무동작.
+        None — 부작용으로 `data/dart/contentIndex/[{tier}/]` 를 채운다. 이미 있으면 무동작.
 
     Raises:
         없음 — 모든 예외 graceful 흡수.
@@ -694,22 +738,36 @@ def ensureContentIndex() -> None:
     global _HF_CONTENTINDEX_ATTEMPTED
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
-    if (_contentIndexDir() / "main.npz").exists():
-        return
+    base = _contentIndexDir()
+    if (base / "main.npz").exists():
+        return  # flat(legacy/full) 로컬 존재 — no-op
     if os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
         return
     if _HF_CONTENTINDEX_ATTEMPTED:
         return
     _HF_CONTENTINDEX_ATTEMPTED = True
+    tier = (tier or os.environ.get("DARTLAB_SEARCH_TIER") or "lite").strip()
     try:
         from huggingface_hub import snapshot_download
 
-        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+        from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
+        ciDir = DATA_RELEASES["contentIndex"]["dir"]
+        repo = repoFor("contentIndex")
+        # 1) tier 서브디렉터리 우선 pull (경량 배포).
         snapshot_download(
-            repo_id=HF_REPO,
+            repo_id=repo,
             repo_type="dataset",
-            allow_patterns=[f"{DATA_RELEASES['contentIndex']['dir']}/*"],
+            allow_patterns=[f"{ciDir}/{tier}/*"],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+        if (base / tier / "main.npz").exists():
+            return
+        # 2) 전환기 fallback — tier 미배포 시 flat(legacy full) pull (기존 사용자 동작 보호).
+        snapshot_download(
+            repo_id=repo,
+            repo_type="dataset",
+            allow_patterns=[f"{ciDir}/*"],
             local_dir=str(Path(_cfg.dataDir)),
         )
     except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
@@ -723,7 +781,9 @@ def indexInfo() -> dict:
         (없음).
 
     Returns:
-        dict — {available, dataAsOf, nDocs, hasMeaning, hasDelta}. 인덱스 부재 시 available=False.
+        dict — {available, dataAsOf, nDocs, hasMeaning, hasDelta, schemaVersion, compatible}.
+        인덱스 부재 시 available=False. ``schemaVersion`` = 받은 인덱스 포맷 버전(없으면 0=legacy),
+        ``compatible`` = 코드 INDEX_SCHEMA_VERSION 이상으로 읽을 수 있는지(인덱스 ver ≤ 코드 ver).
 
     Raises:
         없음.
@@ -731,10 +791,18 @@ def indexInfo() -> dict:
     Example:
         >>> indexInfo()  # doctest: +SKIP
     """
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndex import INDEX_SCHEMA_VERSION, _activeIndexDir
 
-    base = _contentIndexDir()
-    info: dict = {"available": False, "dataAsOf": None, "nDocs": 0, "hasMeaning": False, "hasDelta": False}
+    base = _activeIndexDir()  # 실제 로드되는 인덱스(flat/tier) 기준
+    info: dict = {
+        "available": False,
+        "dataAsOf": None,
+        "nDocs": 0,
+        "hasMeaning": False,
+        "hasDelta": False,
+        "schemaVersion": 0,
+        "compatible": True,
+    }
     mainInfo = base / "main_info.json"
     if mainInfo.exists():
         try:
@@ -742,30 +810,37 @@ def indexInfo() -> dict:
             info["available"] = True
             info["dataAsOf"] = d.get("builtAt")
             info["nDocs"] = int(d.get("nDocs", 0))
+            info["schemaVersion"] = int(d.get("schemaVersion", 0))  # 없으면 legacy(0)
         except (OSError, json.JSONDecodeError, ValueError):
             pass
+    # 받은 인덱스가 코드보다 신버전이면 비호환(라이브러리 업그레이드 필요). 동버전 이하는 읽기 가능.
+    info["compatible"] = info["schemaVersion"] <= INDEX_SCHEMA_VERSION
     info["hasMeaning"] = (base / "meaning.json").exists()
     info["hasDelta"] = (base / "delta.npz").exists()
     return info
 
 
-def pushContentIndex(token: str | None = None) -> None:
-    """content 인덱스 (main + delta) 를 HF에 업로드.
+def pushContentIndex(token: str | None = None, *, tier: str = "full") -> None:
+    """content 인덱스 (main + delta) 를 HF에 업로드 — tier 별 경로 + repoFor 라우팅.
 
     Args:
-        token: 인자.
+        token: HF write 토큰.
+        tier: ``"full"`` (flat ``dart/contentIndex/``) / ``"lite"`` (``dart/contentIndex/lite/``).
 
     Raises:
         없음.
 
     Example:
-        >>> pushContentIndex(...)
+        >>> pushContentIndex(tier="lite")  # doctest: +SKIP
     """
     from huggingface_hub import HfApi
 
+    from dartlab.core.dataConfig import repoFor
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
-    outDir = _contentIndexDir()
+    outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
+    ciDir = DATA_RELEASES["contentIndex"]["dir"]
+    repoPrefix = ciDir if tier == "full" else f"{ciDir}/{tier}"
     api = HfApi(token=token)
     names = [
         "main.npz",
@@ -785,36 +860,39 @@ def pushContentIndex(token: str | None = None) -> None:
             continue
         api.upload_file(
             path_or_fileobj=str(src),
-            path_in_repo=f"dart/contentIndex/{name}",
-            repo_id="eddmpython/dartlab-data",
+            path_in_repo=f"{repoPrefix}/{name}",
+            repo_id=repoFor("contentIndex"),
             repo_type="dataset",
         )
 
 
-def pullContentIndex() -> int:
-    """HF에서 content 인덱스 다운로드 (main + delta).
+def pullContentIndex(tier: str = "full") -> int:
+    """HF에서 content 인덱스 다운로드 (main + delta) — tier 별 경로 + repoFor 라우팅.
 
-    Returns
-    -------
-    int : 다운로드 성공한 파일 수.
+    Args:
+        tier: ``"full"`` (flat ``dart/contentIndex/``) / ``"lite"`` (``dart/contentIndex/lite/``).
+
+    Returns:
+        int — 다운로드 성공한 파일 수.
 
     Raises:
         없음.
 
     Example:
-        >>> pullContentIndex(...)
-
-    Returns:
-        int — 인덱스 빌드 건수.
+        >>> pullContentIndex(tier="lite")  # doctest: +SKIP
     """
     from huggingface_hub import hf_hub_download
 
+    from dartlab.core.dataConfig import repoFor
     from dartlab.core.dataLoader import _getDataRoot
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, clearCache
 
-    outDir = _contentIndexDir()
+    outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
     outDir.mkdir(parents=True, exist_ok=True)
     dataDir = _getDataRoot()  # dart/contentIndex/ 앞의 루트
+    ciDir = DATA_RELEASES["contentIndex"]["dir"]
+    repoPrefix = ciDir if tier == "full" else f"{ciDir}/{tier}"
+    repo = repoFor("contentIndex")
 
     names = [
         "main.npz",
@@ -829,13 +907,13 @@ def pullContentIndex() -> int:
         "gateRef.json",
     ]
     ok = 0
-    _log.info("[cyan]⬇ HF[/] contentIndex (%d 파일)", len(names))
+    _log.info("[cyan]⬇ HF[/] contentIndex (%d 파일, tier=%s)", len(names), tier)
     for name in names:
         try:
             hf_hub_download(
-                repo_id="eddmpython/dartlab-data",
+                repo_id=repo,
                 repo_type="dataset",
-                filename=f"dart/contentIndex/{name}",
+                filename=f"{repoPrefix}/{name}",
                 local_dir=str(dataDir),
             )
             ok += 1

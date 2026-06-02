@@ -1,12 +1,13 @@
 name: Search Index Main (monthly)
 
 # ──────────────────────────────────────────────────────────────
-# content 인덱스 main 세그먼트 풀리빌드 + HF 업로드.
+# content 인덱스 main 세그먼트 풀리빌드 + HF 업로드 (full + lite tier).
 #
 # 매월 1일 KST 05:00 실행 (또는 수동):
-#   1. 전체 docs + allFilings → main 세그먼트 풀리빌드 (약 18분)
-#   2. HF dart/contentIndex/main.* 업로드
-#   3. delta 파일 제거 (main에 흡수)
+#   1. 전체 docs + allFilings + panel + 뉴스 → full main 세그먼트 풀리빌드 (약 18분)
+#   2. HF dart/contentIndex/*  (full = flat) 업로드 + delta 제거 (main에 흡수)
+#   3. lite tier — 최근 N개월(DARTLAB_LITE_MONTHS, 기본 18) 축소 색인 → dart/contentIndex/lite/ 업로드
+#      (pip 사용자 기본 경량 배포; full 과 별 디렉터리라 공존. lite 빌드 실패해도 full 은 이미 배포됨)
 #
 # docs 데이터(8GB)를 HF에서 pull해야 하므로 오래 걸린다.
 # delta는 searchIndexDelta.yml (매일 04:00).

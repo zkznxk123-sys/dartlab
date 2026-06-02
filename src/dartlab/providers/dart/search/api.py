@@ -266,27 +266,27 @@ def rebuildContentDelta(**kwargs) -> int:
     return rebuildDelta(**kwargs)
 
 
-def prefetch() -> dict:
+def prefetch(tier: str | None = None) -> dict:
     """검색 인덱스를 HF 에서 미리 받아둔다(워밍) — 첫 검색 cold start 완화.
 
     `dartlab.search()` 는 첫 호출 시 자동 lazy pull 하지만, prefetch 로 사전 다운로드 가능.
     `DARTLAB_NO_HF_DOWNLOAD=1` 이면 skip. 받은 뒤 indexInfo 반환.
 
     Args:
-        (없음).
+        tier: 받을 tier ("lite"/"full"). None 이면 env ``DARTLAB_SEARCH_TIER`` 또는 "lite".
 
     Returns:
-        dict — indexInfo() 결과 (available/dataAsOf/nDocs/hasMeaning/hasDelta).
+        dict — indexInfo() 결과 (available/dataAsOf/nDocs/hasMeaning/hasDelta/schemaVersion/compatible).
 
     Raises:
         없음 (다운로드 실패는 graceful).
 
     Example:
-        >>> # dartlab.search.prefetch()  # 또는 prefetch()
+        >>> # dartlab.search.prefetch()  # 또는 prefetch(tier="full")
     """
     from dartlab.providers.dart.search.fieldIndexRebuild import ensureContentIndex, indexInfo
 
-    ensureContentIndex()
+    ensureContentIndex(tier=tier)
     return indexInfo()
 
 

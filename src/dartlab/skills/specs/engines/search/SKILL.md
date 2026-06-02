@@ -174,13 +174,15 @@ dartlab.search("유상증자")
 
 ## 라이브러리 배포 / 사용자 계약 (pip install dartlab)
 
-검색 인덱스는 wheel 에 포함되지 않고 **런타임 HF lazy pull**(`eddmpython/dartlab-data` → `dart/contentIndex/`).
+검색 인덱스는 wheel 에 포함되지 않고 **런타임 HF lazy pull**(`eddmpython/dartlab-data` → `dart/contentIndex/`). 데이터 누적에도 사용자 부담이 일정하도록 **tier + 캐시 + 버전 계약** 3 축으로 배포.
 
-- **첫 검색 자동 fetch**: `dartlab.search()` 첫 호출 시 로컬 인덱스 부재면 HF 에서 자동 다운로드(세션 1회, graceful). 로컬 있으면 no-op.
-- **사전 워밍**: `dartlab.providers.dart.search.prefetch()` — cold start 완화용 선다운로드.
-- **신선도 조회**: `indexInfo()` → `{available, dataAsOf(빌드시점), nDocs, hasMeaning, hasDelta}`. evidence 의 `dataAsOf` 실 공급원.
+- **저장면 ≠ 배포면**: HF 의 원천 raw(panel ~9 만·docs·allFilings·뉴스, 수십 GB)는 *빌드 입력*이고, 사용자가 받는 건 그로부터 파생된 작은 **검색 인덱스(contentIndex)** 한 줌. 검색 사용자는 raw 를 받지 않는다(단일 종목 분석만 `Company(code)` 가 per-code raw lazy pull).
+- **tier (경량/전량)**: `lite`(기본, 최근 ~18개월 축소, `dart/contentIndex/lite/`) / `full`(전량, flat `dart/contentIndex/`). 첫 검색은 lite 자동 pull → 빠른 시작. flat(기존 배포)이 로컬에 있으면 그대로 사용(무효화 0). `DARTLAB_SEARCH_TIER=full` 로 전량 선택. tier 미배포 전환기엔 flat 으로 자동 fallback.
+- **첫 검색 자동 fetch**: `dartlab.search()` 첫 호출 시 로컬 인덱스 부재면 tier(기본 lite)를 HF 에서 자동 다운로드(세션 1회, graceful). 로컬 있으면 no-op.
+- **사전 워밍**: `prefetch(tier="lite"|"full")` — cold start 완화용 선다운로드.
+- **캐시 위치**: pip 설치 사용자는 쓰기 가능한 사용자 캐시(`~/.cache/dartlab` 류, 플랫폼별)에 저장. dev 체크아웃·`DARTLAB_DATA_DIR`·`.dartlab.yml` 은 그 경로 우선.
+- **신선도·버전 조회**: `indexInfo()` → `{available, dataAsOf(빌드시점), nDocs, hasMeaning, hasDelta, schemaVersion, compatible}`. `compatible=False` 면 받은 인덱스가 라이브러리보다 신버전 → `pip install -U dartlab` 안내(best-effort 로드). evidence 의 `dataAsOf` 실 공급원.
 - **offline/제약 환경**: `DARTLAB_NO_HF_DOWNLOAD=1` 이면 다운로드 skip → 로컬 인덱스 없으면 빈 결과(info 안내). CI/notebook 권장.
-- **크기·부담**: contentIndex(main.npz + meta + meaning.json + gateRef) 첫 다운로드 수백 MB~1GB. (향후 배포 강화: 최근·주요종목 경량 tier + full 옵트인 — `rebuildMain(tier=)` 확장 여지. 현 단계는 lazy full pull.)
 - **신선도 한계**: 월간(main) + 일간(delta) 빌드 → 최근 며칠 stale 가능. 최신은 `Company.liveFilings()` 병행.
 
 ## 기본 검증

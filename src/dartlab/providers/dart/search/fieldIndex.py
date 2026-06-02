@@ -46,14 +46,45 @@ import polars as pl
 
 CONTENT_LIMIT = 1500  # section_content 인덱싱 최대 글자 수
 
+# 인덱스 직렬화 포맷 버전 — 코드(라이브러리)와 HF 인덱스의 호환 계약.
+# bump 규칙: npz 키 구성·meaning.json/gateRef 포맷·meta 스키마가 비호환 변경될 때 +1.
+# 사용자가 받은 인덱스 schemaVersion > 코드면 best-effort(경고), < 면 재pull 안내(indexInfo.compatible).
+INDEX_SCHEMA_VERSION = 1
+
 _WORD_RE = re.compile(r"[가-힣a-zA-Z0-9]+")
 
 
-def _contentIndexDir() -> Path:
+def _contentIndexDir(tier: str | None = None) -> Path:
+    """content 인덱스 디렉터리. tier 없으면 flat base(legacy/full 배포 위치), 있으면 base/{tier}.
+
+    하위호환 — tier=None 은 기존 배포 위치 ``data/dart/contentIndex/`` 그대로(모든 기존 호출자
+    무영향). lite tier 는 ``data/dart/contentIndex/lite/`` 서브디렉터리에 격리.
+    """
     from dartlab.core.dataLoader import _getDataRoot
 
     base = _getDataRoot() / "dart" / "contentIndex"
+    if tier:
+        base = base / tier
     base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def _activeIndexDir() -> Path:
+    """런타임 검색이 읽을 *유효* 인덱스 디렉터리 — flat 우선, 없으면 tier(기본 lite).
+
+    1) flat ``contentIndex/main.npz`` 존재 → flat(기존 배포·dev). 기존 동작 100% 보존.
+    2) 없으면 tier = env ``DARTLAB_SEARCH_TIER`` 또는 ``lite`` → ``contentIndex/{tier}/``.
+    둘 다 없으면 flat(빈 디렉터리 → graceful 빈 결과).
+    """
+    import os
+
+    base = _contentIndexDir()
+    if (base / "main.npz").exists():
+        return base
+    tier = (os.environ.get("DARTLAB_SEARCH_TIER") or "lite").strip()
+    tierDir = base / tier
+    if (tierDir / "main.npz").exists():
+        return tierDir
     return base
 
 
@@ -288,6 +319,7 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
                 "nDocs": idx["nDocs"],
                 "avgDocLength": idx["avgDocLength"],
                 "builtAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "schemaVersion": INDEX_SCHEMA_VERSION,
             }
         ),
         encoding="utf-8",
@@ -365,12 +397,22 @@ def _getSegments() -> dict[str, tuple[dict, pl.DataFrame]]:
     if _segments is not None:
         return _segments
     # pip 사용자 진입: 로컬 인덱스 부재 시 HF lazy pull (1회, graceful). 로컬 있으면 no-op.
-    from dartlab.providers.dart.search.fieldIndexRebuild import ensureContentIndex
+    from dartlab.providers.dart.search.fieldIndexRebuild import ensureContentIndex, indexInfo
 
     ensureContentIndex()
+    # 버전 계약 — 받은 인덱스가 코드보다 신버전이면 best-effort 로 읽되 1회 경고(라이브러리 업그레이드 안내).
+    _info = indexInfo()
+    if _info.get("available") and not _info.get("compatible", True):
+        _log.warning(
+            "검색 인덱스 schemaVersion=%s 가 라이브러리(%s)보다 신버전 — best-effort 로드. "
+            "`pip install -U dartlab` 권장.",
+            _info.get("schemaVersion"),
+            INDEX_SCHEMA_VERSION,
+        )
+    inDir = _activeIndexDir()  # flat(legacy/full) 우선, 없으면 tier(기본 lite)
     out = {}
     for name in ("main", "delta"):
-        seg = loadSegment(name)
+        seg = loadSegment(name, inDir)
         if seg is not None:
             out[name] = seg
     _segments = out
