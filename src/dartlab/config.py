@@ -21,14 +21,44 @@
 """
 
 import os
+import sys
 from pathlib import Path
 
 verbose: bool = True
 askLog: bool = False
 
-_DEFAULT_DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
-dataDir: str = os.environ.get("DARTLAB_DATA_DIR", str(_DEFAULT_DATA_DIR))
+def _userCacheDir() -> Path:
+    """플랫폼별 사용자 캐시 디렉터리 (쓰기 가능) — pip 설치 사용자의 데이터 저장 위치.
+
+    Windows %LOCALAPPDATA% / macOS ~/Library/Caches / 기타 $XDG_CACHE_HOME(또는 ~/.cache)
+    아래 ``dartlab/``. platformdirs 의존 없이 stdlib 만으로 관례 경로 해석.
+    """
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
+        return Path(base) / "dartlab" / "Cache"
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Caches" / "dartlab"
+    return Path(os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")) / "dartlab"
+
+
+def _resolveDefaultDataDir() -> str:
+    """기본 데이터 디렉터리 — dev 체크아웃은 repo ``data/``, pip 설치형은 사용자 캐시.
+
+    repo ``data/`` 기본값은 site-packages 설치 사용자에겐 쓰기 불가(부모가 readonly)라 깨진다.
+    dev 소스 트리(repo ``data/`` 또는 ``pyproject.toml`` 존재)는 기존 동작 그대로 repo ``data/`` 를
+    쓰고, 설치형만 ``~/.cache/dartlab`` 류 쓰기 가능 경로로 fallback. env/.dartlab.yml 우선은 불변.
+    """
+    repoRoot = Path(__file__).resolve().parents[2]
+    repoData = repoRoot / "data"
+    if repoData.exists() or (repoRoot / "pyproject.toml").exists():
+        return str(repoData)
+    return str(_userCacheDir())
+
+
+_DEFAULT_DATA_DIR = Path(_resolveDefaultDataDir())
+
+dataDir: str = os.environ.get("DARTLAB_DATA_DIR") or str(_DEFAULT_DATA_DIR)
 
 # ── 프로젝트 설정 ──
 
