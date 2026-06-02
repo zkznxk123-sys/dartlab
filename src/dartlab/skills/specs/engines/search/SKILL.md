@@ -1,11 +1,11 @@
 ---
 id: engines.search
-title: Search (공시 본문/제목 검색, BETA)
+title: Search (공시 의미·본문·제목 검색)
 kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Search 는 DART 공시의 *제목* (report_nm + section_title) 또는 *본문* (section_content) 을 로컬 인덱스로 검색한다. **BETA — 인덱스 신선도 부족, AI 사용 비권장**. 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '제목 매칭', '본문 BM25', 'search'.
+purpose: Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope="auto"(기본)는 *의미 검색* — bm25 키워드 + type(report_nm)→본문 경험확장 gated fusion 으로 키워드가 못 잡는 동의·관련 공시까지 회수(임베딩·GPU 0). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '의미 검색', '제목 매칭', '본문 BM25', 'search'.
 whenToUse:
   - search
   - 공시 검색
@@ -87,7 +87,7 @@ testUniverse:
 
 ## 엔진 역할
 
-`search` 는 DART 공시의 제목/본문을 로컬 인덱스로 검색하는 BETA 엔진이다. 외부 모델/서버 불필요 — 로컬 numpy 역인덱스만으로 동작. **AI 사용은 비권장** — 매일 자동 증분이 미완성이라 최근 N 일 데이터 누락 가능.
+`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 "완전한 문서" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — numpy 역인덱스 + 경험그래프(meaning.json)만으로 의미 검색. scope="auto" 가 키워드(bm25)와 의미확장을 신뢰도 gated 융합해, 단어가 달라도 같은 의미의 공시를 회수한다. 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.
 
 단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — "어떤 회사가 유상증자했나" 같은 질문 한정.
 
@@ -127,13 +127,13 @@ recent = c.liveFilings()        # 라이브
 
 ## 호출 동작
 
-`scope="title"` (기본 — auto 가 제목형으로 판단 시): `report_nm + section_title` ngram 검색. 제목형 쿼리 ("유상증자" · "대표이사 변경") 전용. 95% precision · 1ms.
+`scope="auto"` (기본): **의미 검색** — bm25(본문 키워드) + type(report_nm)→본문 경험확장(meaning.json)을 bm25-신뢰도 gated fusion(naive sum 아님; 키워드 강하면 키워드 신뢰, 약하면 의미가중↑). 키워드가 못 잡는 동의·관련 공시 회수. 실색인 벤치: auto MRR 0.95 ≫ bm25 0.77, 키워드 사각 회복 92%, harm 0.7%. meaning.json 미빌드 시 bm25 단독으로 graceful degrade. (인덱스 빌드: 월간 `searchIndexMain`.)
 
-`scope="content"`: `section_content` 본문 BM25 검색. 개념/내용형 쿼리 ("반도체 HBM 투자" · "환율 변동 리스크") 전용.
+`scope="content"`: `section_content` 본문 BM25 단독 (의미확장 없이 순수 키워드). 디버그/비교용.
 
-`scope="auto"`: 쿼리 길이/단어 수로 title/content 자동 분기.
+`scope="title"`: `report_nm + section_title` ngram 검색. 제목형 쿼리 전용. ~1ms.
 
-`scope="both"`: 두 엔진 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 합산은 품질 저하).
+`scope="both"`: title(ngram) + content(bm25) 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 title·content 단순합산은 품질 저하). auto 의 gated fusion 은 이와 다른 메커니즘(content+의미확장).
 
 `corp` 는 종목코드 ("005930") 또는 회사명 ("삼성전자"), `start`/`end` 는 YYYYMMDD, `topK` 기본 10.
 
