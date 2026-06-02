@@ -329,7 +329,16 @@ function CellContent({ value }: { value: string }) {
 
 // 인라인 태그 strip (텍스트 조각의 caption/unit 패턴 매칭용).
 function stripInlineTags(s: string): string {
-	return s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+	// 블록 태그(<P>/<div>/<title>/<br>)는 줄바꿈으로 보존, 인라인 태그만 공백 제거.
+	// (normalizeDartXml 가 <P>→<div> 변환 후이므로 닫는 div/p/title 을 개행으로.)
+	return s
+		.replace(/<\s*br\s*\/?>/gi, '\n')
+		.replace(/<\/\s*(p|div|title|li|tr)\s*>/gi, '\n')
+		.replace(/<[^>]+>/g, ' ')
+		.replace(/[^\S\n]+/g, ' ')
+		.replace(/[ \t]*\n[ \t]*/g, '\n')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
 }
 
 // ── diff (프론트 인접셀 비교) ──
