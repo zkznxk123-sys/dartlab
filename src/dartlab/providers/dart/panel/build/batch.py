@@ -224,6 +224,9 @@ def _main() -> None:
     ap.add_argument("--out", type=str, default="data/dart/panel", help="출력 base dir")
     ap.add_argument("--all", action="store_true", help="전종목 빌드 (multiprocessing)")
     ap.add_argument("--spine", action="store_true", help="정부 서식 뼈대(spineData.py) 생성 — 기준 종목 1개")
+    ap.add_argument(
+        "--noteTaxonomy", action="store_true", help="주석 뼈대(noteTaxonomyData.py) 생성 — 전 corpus XBRL 학습"
+    )
     ap.add_argument("--workers", type=int, default=8, help="Pool workers (OOM 가드: polars 힙 200~500MB/종목, ≤4 권장)")
     args = ap.parse_args()
 
@@ -240,6 +243,13 @@ def _main() -> None:
         codes = [c.strip() for c in args.codes.split(",") if c.strip()]
         stats = buildSpine(codes[0] if codes else "005930", refDf=refDf, verbose=True)
         _log.info("=== spine 완료: code=%d, rows=%d ===", stats["code"], stats["rows"])
+        return
+
+    if args.noteTaxonomy:
+        from .noteTaxonomy import buildAndWrite
+
+        stats = buildAndWrite(verbose=True)
+        _log.info("=== noteTaxonomy 완료: entries=%d ===", stats["entries"])
         return
 
     if args.all:
