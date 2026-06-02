@@ -15,8 +15,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import DOMPurify from 'dompurify';
-import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { ChevronLeft, ChevronRight, Columns3, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
+import { Fragment, useEffect, useMemo, useState, type ReactElement } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -44,7 +44,8 @@ export const Route = createFileRoute('/analysis/$code/viewer')({
 	}),
 });
 
-const WINDOW_SIZE = 3;
+const DEFAULT_COLS = 3; // 표시 기간 컬럼 수 기본값 (사용자가 3/6/9 로 가로 폭 확장)
+const COL_CHOICES = [3, 6, 9] as const;
 const SECTION_KEY_SEP = '␟';
 
 // ── panel 셀 렌더 (raw DART XML → sanitize) ──
@@ -97,7 +98,10 @@ function HtmlTable({ html, caption, unit }: { html: string; caption?: string; un
 					{unit && <div className="text-muted-foreground">{unit}</div>}
 				</div>
 			)}
-			<div className="dartlab-html-table overflow-x-auto" dangerouslySetInnerHTML={{ __html: cleanHtml }} />
+			<div
+				className="dartlab-html-table overflow-x-auto [&_td]:[font-variant-numeric:tabular-nums] [&_th]:[font-variant-numeric:tabular-nums]"
+				dangerouslySetInnerHTML={{ __html: cleanHtml }}
+			/>
 		</div>
 	);
 }
@@ -369,11 +373,25 @@ function hasVisibleContent(row: PanelRow, windowPeriods: string[]): boolean {
 	return false;
 }
 
-// panel grid — row × period. window 기준 filter + 인접셀 diff 배지.
-function SsotRowsView({ rows, windowPeriods, allPeriods }: { rows: PanelRow[]; windowPeriods: string[]; allPeriods: string[] }) {
-	if (rows.length === 0) return null;
-	const periodsToShow = windowPeriods.length > 0 ? windowPeriods : Object.keys(rows[0]?.cells ?? {}).slice(0, WINDOW_SIZE);
-	const visible = rows.filter((r) => hasVisibleContent(r, periodsToShow));
+function rowLabel(r: PanelRow): string {
+	return r.blockLeaf || r.disclosureKey || '';
+}
+
+interface PanelMatrixProps {
+	rows: PanelRow[];
+	windowPeriods: string[];
+	allPeriods: string[]; // diff 용 (인접셀 prev 조회) — fetchPeriods (window+1)
+	dartUrlByPeriod: Record<string, string | null>;
+	changedSet: Set<string>;
+}
+
+// 수평화 매트릭스 — 한 절 전체를 양축 고정 격자로. 행=panel 항목(truth, 재조인 0),
+// 열=기간. 상단 기간 헤더 sticky(top), 좌측 항목 레이블 sticky(left), 기간 컬럼이
+// 전 항목에 걸쳐 일직선. 가로 스크롤로 더 많은 기간을 펼친다 (수평화의 극치).
+// 셀은 원본 그대로(CellContent) — 합치거나 재계산하지 않는다.
+function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changedSet }: PanelMatrixProps) {
+	const visible = useMemo(() => rows.filter((r) => hasVisibleContent(r, windowPeriods)), [rows, windowPeriods]);
+	if (windowPeriods.length === 0) return null;
 	if (visible.length === 0) {
 		return (
 			<div className="py-6 text-center text-xs text-muted-foreground">
@@ -381,27 +399,76 @@ function SsotRowsView({ rows, windowPeriods, allPeriods }: { rows: PanelRow[]; w
 			</div>
 		);
 	}
+	// 항목 레이블이 하나라도 있으면 좌측 레일 표시 (주석 등). 재무제표처럼 전부 빈 경우는 생략.
+	const hasLabel = visible.some((r) => rowLabel(r));
+	const labelTrack = hasLabel ? 'minmax(120px, 200px) ' : '';
+	const template = `${labelTrack}repeat(${windowPeriods.length}, minmax(260px, 1fr))`;
+
 	return (
-		<div className="space-y-3">
-			{visible.map((r) => (
-				<div key={rowKey(r)} data-block={r.blockLeaf || undefined} className="grid gap-3 scroll-mt-2" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
-					{periodsToShow.map((p) => {
-						const st = cellStatus(r, p, allPeriods);
-						return (
-							<div
-								key={p}
-								className={cn(
-									'min-w-0 rounded p-1',
-									st === 'changed' && 'ring-1 ring-[var(--chart-2)]/40',
-									st === 'new' && 'ring-1 ring-accent-foreground/40',
-								)}
-							>
-								<CellContent value={r.cells?.[p] ?? ''} />
+		<div className="h-full overflow-auto tiny-scroll">
+			<div className="grid items-stretch" style={{ gridTemplateColumns: template }}>
+				{/* ── 헤더 행 (sticky top) ── */}
+				{hasLabel && (
+					<div className="sticky left-0 top-0 z-30 border-b border-r bg-background px-2 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+						항목
+					</div>
+				)}
+				{windowPeriods.map((p) => {
+					const url = dartUrlByPeriod[p];
+					return (
+						<div key={`h-${p}`} className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b bg-background px-2 py-2">
+							<div>
+								<div className="font-mono text-xs font-semibold">{p}</div>
+								<div className="text-[10px] text-muted-foreground">{changedSet.has(p) ? '변경 포함' : '동일'}</div>
 							</div>
-						);
-					})}
-				</div>
-			))}
+							{url && (
+								<a
+									href={url}
+									target="_blank"
+									rel="noreferrer noopener"
+									title={`${p} 시점 DART 원본`}
+									className="inline-flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent"
+								>
+									<ExternalLink className="size-2.5" /> 원본
+								</a>
+							)}
+						</div>
+					);
+				})}
+
+				{/* ── 본문 행 (항목 × 기간) ── */}
+				{visible.map((r) => {
+					const label = rowLabel(r);
+					return (
+						<Fragment key={rowKey(r)}>
+							{hasLabel && (
+								<div
+									className="sticky left-0 z-10 border-b border-r bg-card/70 px-2 py-2 text-[11px] font-medium text-foreground backdrop-blur-sm"
+									title={label}
+								>
+									<div className="line-clamp-6 break-words">{label}</div>
+								</div>
+							)}
+							{windowPeriods.map((p) => {
+								const st = cellStatus(r, p, allPeriods);
+								return (
+									<div
+										key={p}
+										data-block={r.blockLeaf || undefined}
+										className={cn(
+											'min-w-0 border-b px-2 py-2',
+											st === 'changed' && 'bg-[var(--chart-2)]/5',
+											st === 'new' && 'bg-accent/20',
+										)}
+									>
+										<CellContent value={r.cells?.[p] ?? ''} />
+									</div>
+								);
+							})}
+						</Fragment>
+					);
+				})}
+			</div>
 		</div>
 	);
 }
@@ -549,20 +616,23 @@ function ViewerTab() {
 		}
 	}, [section, firstSectionKey, code, navigate]);
 
+	// 표시 기간 컬럼 수 — 사용자가 3/6/9 로 가로 폭 확장 (수평화 정도 조절).
+	const [cols, setCols] = useState<number>(DEFAULT_COLS);
+
 	// 전체 기간 축 — toc.periods (panel 이 최신좌측 정렬, timeline SSOT).
 	const allPeriods = useMemo<string[]>(() => toc?.periods ?? [], [toc]);
 
 	const effectiveWindowEnd = windowEnd && allPeriods.includes(windowEnd) ? windowEnd : allPeriods[0];
 	const windowEndIdx = effectiveWindowEnd ? allPeriods.indexOf(effectiveWindowEnd) : -1;
-	// 표시 3 기간. fetchPeriods = +1 (직전 인접셀 diff 용). full-period(수MB) 대신 window 만 fetch.
+	// 표시 cols 기간. fetchPeriods = +1 (직전 인접셀 diff 용). full-period(수MB) 대신 window 만 fetch.
 	const windowPeriods = useMemo<string[]>(() => {
 		if (windowEndIdx < 0) return [];
-		return allPeriods.slice(windowEndIdx, windowEndIdx + WINDOW_SIZE);
-	}, [allPeriods, windowEndIdx]);
+		return allPeriods.slice(windowEndIdx, windowEndIdx + cols);
+	}, [allPeriods, windowEndIdx, cols]);
 	const fetchPeriods = useMemo<string[]>(() => {
 		if (windowEndIdx < 0) return [];
-		return allPeriods.slice(windowEndIdx, windowEndIdx + WINDOW_SIZE + 1);
-	}, [allPeriods, windowEndIdx]);
+		return allPeriods.slice(windowEndIdx, windowEndIdx + cols + 1);
+	}, [allPeriods, windowEndIdx, cols]);
 
 	// window 단위 grid fetch — windowEnd 이동 시 fetchPeriods 가 바뀌어 재fetch. 초기
 	// (windowEnd 없음)는 /panel/init 이 동봉한 최신 window grid 를 seed 로 재사용 (fetch 0).
@@ -667,6 +737,22 @@ function ViewerTab() {
 										<div className="text-[11px] text-muted-foreground">
 											항목 {rows.length} · 전체 기간 {allPeriods.length}
 										</div>
+										<div className="flex items-center gap-1 rounded border p-0.5" title="동시 표시 기간 수 (가로 폭)">
+											<Columns3 className="ml-1 size-3 text-muted-foreground" />
+											{COL_CHOICES.map((n) => (
+												<button
+													key={n}
+													type="button"
+													onClick={() => setCols(n)}
+													className={cn(
+														'rounded px-1.5 py-0.5 font-mono text-[11px] transition-colors',
+														cols === n ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50',
+													)}
+												>
+													{n}
+												</button>
+											))}
+										</div>
 										<button
 											type="button"
 											onClick={() => setIsFullscreen((v) => !v)}
@@ -692,37 +778,14 @@ function ViewerTab() {
 							</header>
 						</div>
 
-						<div className="min-h-0 flex-1 overflow-y-auto tiny-scroll">
-							<div
-								className="sticky top-0 z-10 grid gap-3 border-b bg-background px-3 py-2"
-								style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
-							>
-								{windowPeriods.map((p) => {
-									const url = dartUrlByPeriod[p];
-									return (
-										<div key={p} className="flex items-center justify-between gap-2 px-2">
-											<div>
-												<div className="font-mono text-xs font-semibold">{p}</div>
-												<div className="text-[10px] text-muted-foreground">{changedSet.has(p) ? '변경 포함' : '동일'}</div>
-											</div>
-											{url && (
-												<a
-													href={url}
-													target="_blank"
-													rel="noreferrer noopener"
-													title={`${p} 시점 DART 원본`}
-													className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent"
-												>
-													<ExternalLink className="size-2.5" /> 원본
-												</a>
-											)}
-										</div>
-									);
-								})}
-							</div>
-							<div className="px-3 py-3">
-								<SsotRowsView rows={rows} windowPeriods={windowPeriods} allPeriods={fetchPeriods} />
-							</div>
+						<div className="min-h-0 flex-1">
+							<PanelMatrix
+								rows={rows}
+								windowPeriods={windowPeriods}
+								allPeriods={fetchPeriods}
+								dartUrlByPeriod={dartUrlByPeriod}
+								changedSet={changedSet}
+							/>
 						</div>
 					</>
 				)}

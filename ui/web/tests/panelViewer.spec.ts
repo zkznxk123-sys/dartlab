@@ -25,7 +25,8 @@ const TOC = {
 			sections: [{ sectionLeaf: '2. 연결재무제표', sectionKey: 'III. 재무에 관한 사항␟2. 연결재무제표', rowCount: 1, blocks: [{ blockLeaf: '연결 재무상태표', rowCount: 1 }] }],
 		},
 	],
-	periods: ['2026Q1', '2025Q4', '2025Q3', '2024Q4'],
+	// 9 기간 — cols(3/6/9) 가로폭 확장 검증용. 앞 4 개는 GRID.periods 와 일치해야 init seed 적중.
+	periods: ['2026Q1', '2025Q4', '2025Q3', '2024Q4', '2024Q3', '2024Q2', '2024Q1', '2023Q4', '2023Q3'],
 };
 
 const GRID = {
@@ -116,15 +117,34 @@ test.describe('Panel viewer e2e', () => {
 		await expect(page.getByText('연혁 데이터').first()).toBeVisible();
 	});
 
-	test('timeline 이동 → ?windowEnd= 갱신 + grid 추가 fetch 0', async ({ page }) => {
+	test('timeline 이동 → ?windowEnd= 갱신 + window grid 1회 refetch', async ({ page }) => {
 		await page.goto(`/analysis/${STOCK}/viewer?period=quarterly`);
 		await expect(page.getByText('2026Q1', { exact: true }).first()).toBeVisible({ timeout: 10_000 });
 		const before = gridCalls;
 		// ChevronRight (더 과거로) — window 이동
 		await page.getByTitle('더 과거로').click();
 		await page.waitForURL(/windowEnd=/, { timeout: 10_000 });
-		// full-period grid 는 1회 fetch (또는 seed) — timeline 이동은 추가 fetch 0.
-		expect(gridCalls).toBe(before);
+		// window-scoped fetch: 이동 시 새 window(±1) 만 1 회 재요청 (full-period 덤프 회피 — 성능 정공).
+		expect(gridCalls).toBe(before + 1);
+	});
+
+	test('cols 6 클릭 → 기간 컬럼 6 개로 가로폭 확장 (수평화)', async ({ page }) => {
+		await page.goto(`/analysis/${STOCK}/viewer?period=quarterly`);
+		await expect(page.getByText('2026Q1', { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+		// 기본 3 컬럼
+		await expect(page.locator('main .font-mono.text-xs.font-semibold')).toHaveCount(3);
+		await page.getByRole('button', { name: /^6$/ }).click();
+		// 6 기간 헤더 (panel 이 9 기간 제공 → 6 노출)
+		await expect(page.locator('main .font-mono.text-xs.font-semibold')).toHaveCount(6, { timeout: 10_000 });
+	});
+
+	test('항목 레이블 좌측 레일 — blockLeaf 가 sticky 레일에 노출', async ({ page }) => {
+		await page.goto(`/analysis/${STOCK}/viewer?period=quarterly`);
+		await expect(page.getByText('2026Q1', { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+		// 레일 코너 헤더 '항목' (툴바의 '항목 N · 전체 기간' 과 구분 위해 exact)
+		await expect(page.getByText('항목', { exact: true })).toBeVisible();
+		// blockLeaf '연혁표' 가 본문 좌측 레일에 (TOC chip 은 aside 라 main 으로 스코프)
+		await expect(page.locator('main').getByText('연혁표', { exact: true })).toBeVisible();
 	});
 
 	test('diff 배지 — 변경 인접 period 에 "변경 포함"', async ({ page }) => {
