@@ -48,16 +48,9 @@ TODO.md
 # (예: providers/dart/finance/mapperData/_backup/) 은 번들 리소스이므로 제외하면 안 됨.
 /_backup/
 
-# tests/_attempts/ 시도 산출물 데이터 — 코드·README·JSON 결과는 commit 대상이지만
-# parquet/xml 산출물 데이터는 부피 (수십~수백 MB) + 재생성 가능이라 추적 X.
-tests/_attempts/*.parquet
-tests/_attempts/*.xml
-tests/_attempts/docs_backup_v6/
-tests/_attempts/xml_docs_v6/
-tests/_attempts/xml_extract/
-# aiAudit/ 는 dir 자체 + 안 contents 모두 무시 — AI audit probe 시도 (snake_case 파일명
-# 다수라 camelCase lint 충돌, 인큐베이션 격리)
-tests/_attempts/aiAudit/**
+# tests/_attempts/ 는 스크래치 실험 인큐베이터 — 게이트 아님 (tests/run.py --ignore=tests/_attempts).
+# 코드·데이터 전부 추적 제외 (로컬 전용). 검증된 산출물은 memory + src/ 로 졸업시킨다.
+tests/_attempts/
 
 # Node modules (all locations)
 node_modules/
