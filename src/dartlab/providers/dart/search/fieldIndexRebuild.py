@@ -667,6 +667,88 @@ def _clearDelta() -> None:
 # ── HF 동기화 ──
 
 
+_HF_CONTENTINDEX_ATTEMPTED = False
+
+
+def ensureContentIndex() -> None:
+    """content 인덱스(main.*) 부재 시 HF lazy 다운로드 — 1회, graceful. (panel ensurePanelFromHf 미러)
+
+    pip 사용자 진입점: `dartlab.search()` 첫 호출 시 인덱스를 HF 에서 자동 fetch. 로컬 우선 —
+    main.npz 있으면 즉시 반환. `DARTLAB_NO_HF_DOWNLOAD=1` skip. 세션 1회만 시도(재검색 폭주 방지).
+    실패는 graceful(빈 결과). pyodide(huggingface_hub 부재)는 즉시 반환.
+
+    Args:
+        (없음).
+
+    Returns:
+        None — 부작용으로 `data/dart/contentIndex/` 를 채운다. 이미 있으면 무동작.
+
+    Raises:
+        없음 — 모든 예외 graceful 흡수.
+
+    Example:
+        >>> ensureContentIndex()  # doctest: +SKIP
+    """
+    import os
+
+    global _HF_CONTENTINDEX_ATTEMPTED
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+
+    if (_contentIndexDir() / "main.npz").exists():
+        return
+    if os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
+        return
+    if _HF_CONTENTINDEX_ATTEMPTED:
+        return
+    _HF_CONTENTINDEX_ATTEMPTED = True
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=[f"{DATA_RELEASES['contentIndex']['dir']}/*"],
+            local_dir=str(Path(_cfg.dataDir)),
+        )
+    except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
+        pass
+
+
+def indexInfo() -> dict:
+    """검색 인덱스 메타(dataAsOf/nDocs/의미확장 가용) 반환 — freshness 노출용.
+
+    Args:
+        (없음).
+
+    Returns:
+        dict — {available, dataAsOf, nDocs, hasMeaning, hasDelta}. 인덱스 부재 시 available=False.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> indexInfo()  # doctest: +SKIP
+    """
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+
+    base = _contentIndexDir()
+    info: dict = {"available": False, "dataAsOf": None, "nDocs": 0, "hasMeaning": False, "hasDelta": False}
+    mainInfo = base / "main_info.json"
+    if mainInfo.exists():
+        try:
+            d = json.loads(mainInfo.read_text(encoding="utf-8"))
+            info["available"] = True
+            info["dataAsOf"] = d.get("builtAt")
+            info["nDocs"] = int(d.get("nDocs", 0))
+        except (OSError, json.JSONDecodeError, ValueError):
+            pass
+    info["hasMeaning"] = (base / "meaning.json").exists()
+    info["hasDelta"] = (base / "delta.npz").exists()
+    return info
+
+
 def pushContentIndex(token: str | None = None) -> None:
     """content 인덱스 (main + delta) 를 HF에 업로드.
 

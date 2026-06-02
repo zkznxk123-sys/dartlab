@@ -139,6 +139,11 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "Ngram+Synonym 통합 검색 인덱스",
         "public": False,
     },
+    "contentIndex": {
+        "dir": "dart/contentIndex",
+        "label": "의미검색 content 인덱스 (BM25 CSR + 경험그래프 meaning.json + gateRef) — 런타임 lazy pull",
+        "public": True,
+    },
     "edinetDocs": {
         "dir": "edinet/docs",
         "label": "EDINET 공시 문서 데이터 (일본)",

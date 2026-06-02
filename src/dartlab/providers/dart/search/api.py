@@ -266,6 +266,50 @@ def rebuildContentDelta(**kwargs) -> int:
     return rebuildDelta(**kwargs)
 
 
+def prefetch() -> dict:
+    """검색 인덱스를 HF 에서 미리 받아둔다(워밍) — 첫 검색 cold start 완화.
+
+    `dartlab.search()` 는 첫 호출 시 자동 lazy pull 하지만, prefetch 로 사전 다운로드 가능.
+    `DARTLAB_NO_HF_DOWNLOAD=1` 이면 skip. 받은 뒤 indexInfo 반환.
+
+    Args:
+        (없음).
+
+    Returns:
+        dict — indexInfo() 결과 (available/dataAsOf/nDocs/hasMeaning/hasDelta).
+
+    Raises:
+        없음 (다운로드 실패는 graceful).
+
+    Example:
+        >>> # dartlab.search.prefetch()  # 또는 prefetch()
+    """
+    from dartlab.providers.dart.search.fieldIndexRebuild import ensureContentIndex, indexInfo
+
+    ensureContentIndex()
+    return indexInfo()
+
+
+def indexInfo() -> dict:
+    """검색 인덱스 메타(dataAsOf/nDocs/의미확장 가용) 조회 — 신선도 확인.
+
+    Args:
+        (없음).
+
+    Returns:
+        dict — {available, dataAsOf, nDocs, hasMeaning, hasDelta}.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> # indexInfo()
+    """
+    from dartlab.providers.dart.search.fieldIndexRebuild import indexInfo as _info
+
+    return _info()
+
+
 def buildMeaningGraph(**kwargs) -> int:
     """의미검색(scope=auto) 경험그래프 meaning.json build — allFilings type(report_nm)→본문 SPPMI.
 

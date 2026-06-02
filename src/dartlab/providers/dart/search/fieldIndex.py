@@ -364,6 +364,10 @@ def _getSegments() -> dict[str, tuple[dict, pl.DataFrame]]:
     global _segments
     if _segments is not None:
         return _segments
+    # pip 사용자 진입: 로컬 인덱스 부재 시 HF lazy pull (1회, graceful). 로컬 있으면 no-op.
+    from dartlab.providers.dart.search.fieldIndexRebuild import ensureContentIndex
+
+    ensureContentIndex()
     out = {}
     for name in ("main", "delta"):
         seg = loadSegment(name)
