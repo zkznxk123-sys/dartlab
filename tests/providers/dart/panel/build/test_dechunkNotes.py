@@ -63,6 +63,17 @@ def test_dechunk_non_note_block_untouched() -> None:
     assert out.filter(pl.col("disclosureKey").str.starts_with("NT_")).height == 0
 
 
+def test_dechunk_monotonic_guard_rejects_table_item() -> None:
+    """노트 본문 내 표/목록 항목(번호 역행)은 헤더로 오인 안 함 — phantom 차단."""
+    # 진짜 노트 #14 차입금, 그 본문 안에 표셀 '>3. 배당금<'(번호 역행) → 배당금 phantom 미생성.
+    body = "<SPAN>14. 차입금</SPAN>차입 내역 표 <TD>3. 배당금</TD> 표 안 항목<SPAN>15. 사채</SPAN>사채 본문"
+    df = pl.DataFrame([_row(chapter="(첨부)연결재무제표", sectionLeaf="주석", contentRaw=body)], schema=PANEL_SCHEMA)
+    out = dechunkNotes(df)
+    blocks = out.filter(pl.col("disclosureKey").str.starts_with("NT_"))["blockLeaf"].to_list()
+    assert "배당금" not in blocks  # 번호 역행(3<14) → 표셀, 헤더 아님
+    assert "차입금" in blocks and "사채" in blocks  # 진짜 노트(단조 14→15)는 itemize
+
+
 def test_dechunk_unmatched_title_narrative() -> None:
     """재무제표 영역이라도 뼈대 미등재(모호/비표준) 제목은 narrative 유지 — 추정 0."""
     body = "<SPAN>1. 가공의비표준노트제목</SPAN>본문<SPAN>2. 또다른가공제목</SPAN>본문"

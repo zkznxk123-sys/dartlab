@@ -68,14 +68,13 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     if df.is_empty() or "contentRaw" not in df.columns or "sectionLeaf" not in df.columns:
         return df
 
-    # 재무제표 영역 gate — disclosureKey-null + (chapter/sectionLeaf 에 "재무제표" OR chapter 에 "재무에관한").
-    # 옛 "(첨부)재무제표" mega-block·최근 "III.재무에관한사항/N.연결재무제표 주석"·mis-chapter("II.사업의내용/
-    # 3.연결재무제표 주석", READ anchorLatest 가 재-chapter)까지 포착하되, 사업보고서 TOC(회사개요·사업내용·
-    # 임원보수)와 일반 "주석" footnote 는 제외 → 거짓 헤더 오염을 split 이전에 차단(실측 노트블록 223·오염 0).
+    # 재무제표 노트 영역 gate — disclosureKey-null + (chapter/sectionLeaf 에 "재무제표" OR sectionLeaf 에 "주석").
+    # 옛 "(첨부)재무제표" mega-block·최근 "N.연결재무제표 주석"·mis-chapter("II.사업의내용/3.연결재무제표 주석",
+    # READ anchorLatest 가 재-chapter)는 포착하되, "III.재무에관한사항" 챕터 하위 비-노트 절(배당·MD&A·주주)과
+    # 사업보고서 TOC 는 제외 — chapter "재무에관한"으로 넓히면 그 절들이 새어들어 phantom 노트 발생(실측 FP).
     _ctxNorm = (pl.col("chapter").fill_null("") + pl.col("sectionLeaf").fill_null("")).str.replace_all(r"[()·\s]", "")
-    _chapNorm = pl.col("chapter").fill_null("").str.replace_all(r"[()·\s]", "")
     chunkMask = pl.col("disclosureKey").is_null() & (
-        _ctxNorm.str.contains("재무제표") | _chapNorm.str.contains("재무에관한")
+        _ctxNorm.str.contains("재무제표") | pl.col("sectionLeaf").fill_null("").str.contains("주석")
     )
     candidates = df.filter(chunkMask)
     if candidates.is_empty():
@@ -89,12 +88,18 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     for row in candidates.iter_rows(named=True):
         scope = _scopeOf(row)
         cr = row.get("contentRaw") or ""
+        # 노트 헤더는 1,2,…N 단조증가. 번호가 역행하면 노트 본문 내 표/목록 항목('<TD>3.배당금</TD>')을
+        # 헤더로 오인한 것(phantom) → 거부. 매칭 헤더만 마크하고 번호 단조성으로 표·리스트 항목 차단.
         marks: list[tuple[int, str, str]] = []
+        lastNum = 0
         for m in _HEADER_RE.finditer(cr):
-            # dominant-only 뼈대 lookup — 미등재(모호·미학습) 제목은 매칭 0 → narrative 유지(추정 0).
-            key = NOTE_TAXONOMY.get(f"{scope}|{_norm(m.group(2))}")
+            num = int(m.group(1))
+            if num <= lastNum:
+                continue  # 번호 역행 = 표/목록 항목, 헤더 아님
+            key = NOTE_TAXONOMY.get(f"{scope}|{_norm(m.group(2))}")  # dominant-only 뼈대(미등재→narrative)
             if key:
                 marks.append((m.start(), m.group(2).strip(), key))
+                lastNum = num
         if not marks:
             kept.append(row)  # 매칭 노트 0 (비표준 주석) — 원 블록 보존. 임계 없음.
             continue
