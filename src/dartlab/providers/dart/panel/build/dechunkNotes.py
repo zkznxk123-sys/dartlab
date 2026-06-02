@@ -5,10 +5,12 @@ disclosureKey 없는 **통짜 블록**으로 들어간다. 그 블록 구조가 
     - 별도 "주석" 섹션 (sectionLeaf="주석" / "3. 연결재무제표 주석")
     - statement+주석 합본 mega-block (sectionLeaf="(첨부)재무제표" / "2. 연결재무제표" — "주석" 없음)
 
-본 모듈은 sectionLeaf 문자열이 아니라 **본문의 ``N. 제목`` 노트 헤더**(택소노미 매칭 ≥ ``_MIN_HEADERS``)
-로 노트 블록을 구조 무관 감지한다. 각 노트를 표준 ``NT_*`` 코드(``noteTaxonomyData``)로 분해해 최근
-NT_* 행과 **같은 disclosureKey** 로 정합하고, 노트 앞 **preamble(재무제표 본표 등)은 원 블록에 보존**
-(byte 무손실 partition). 표준 NT_* 는 회사 무관(재고자산 연결=NT_D826380·별도=NT_D826385).
+본 모듈은 **재무제표 영역 gate**(chapter/sectionLeaf 의 "재무제표"·chapter 의 "재무에관한")로 노트 블록을
+선제한해 사업보고서 TOC 오염을 차단하고, 그 안의 ``N. 제목`` 헤더를 **dominant-only 뼈대**
+(``noteTaxonomyData`` — 전 corpus XBRL 학습, 모호제목 제외)로 매칭한다. 매칭된 노트만 표준 ``NT_*`` 코드로
+분해해 최근 NT_* 행과 **같은 disclosureKey** 로 정합(임계 없음 — 1개라도 매칭되면 itemize), 미매칭/모호 제목은
+narrative 유지. 노트 앞 **preamble(재무제표 본표 등)은 원 블록에 보존**(byte 무손실 partition). 표준 NT_* 는
+회사 무관(재고자산 연결=NT_D826380·별도=NT_D826385).
 
 LLM Specifications:
     AntiPatterns:
@@ -42,8 +44,6 @@ _NORM_RE = re.compile(r"[()·\s]")
 _HEADER_RE = re.compile(r">\s*(\d{1,2})\.\s*([가-힣A-Za-z][^<:]{0,23}?)\s*[:<]")
 # 분해된 sub-note 의 표시용 section (최근 itemized 구조와 동일 라벨).
 _NOTE_SECTION = {"consolidated": "3. 연결재무제표 주석", "standalone": "5. 재무제표 주석"}
-# 노트 블록 판정 최소 매칭 헤더 수 — 본문이 우연히 노트 제목을 언급한 블록(매칭 0~2) 오탐 차단.
-_MIN_HEADERS = 3
 
 
 def _norm(s: str | None) -> str:
@@ -76,8 +76,16 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
         for xc in native["xbrlClass"].to_list():
             nativeScopes.add("standalone" if "_S" in (xc or "")[:5] else "consolidated")
 
-    nullMask = pl.col("disclosureKey").is_null()
-    candidates = df.filter(nullMask)
+    # 재무제표 영역 gate — disclosureKey-null + (chapter/sectionLeaf 에 "재무제표" OR chapter 에 "재무에관한").
+    # 옛 "(첨부)재무제표" mega-block·최근 "III.재무에관한사항/N.연결재무제표 주석"·mis-chapter("II.사업의내용/
+    # 3.연결재무제표 주석", READ anchorLatest 가 재-chapter)까지 포착하되, 사업보고서 TOC(회사개요·사업내용·
+    # 임원보수)와 일반 "주석" footnote 는 제외 → 거짓 헤더 오염을 split 이전에 차단(실측 노트블록 223·오염 0).
+    _ctxNorm = (pl.col("chapter").fill_null("") + pl.col("sectionLeaf").fill_null("")).str.replace_all(r"[()·\s]", "")
+    _chapNorm = pl.col("chapter").fill_null("").str.replace_all(r"[()·\s]", "")
+    chunkMask = pl.col("disclosureKey").is_null() & (
+        _ctxNorm.str.contains("재무제표") | _chapNorm.str.contains("재무에관한")
+    )
+    candidates = df.filter(chunkMask)
     if candidates.is_empty():
         return df
 
@@ -93,11 +101,13 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
         marks: list[tuple[int, str, str]] = []
         if scope not in nativeScopes:
             for m in _HEADER_RE.finditer(cr):
+                # dominant-only 뼈대 lookup — 미등재(모호·미학습) 제목은 매칭 0 → narrative 유지(추정 0).
                 key = NOTE_TAXONOMY.get(f"{scope}|{_norm(m.group(2))}")
-                if key:  # 미등재 항목은 추정 매핑 안 함
+                if key:
                     marks.append((m.start(), m.group(2).strip(), key))
-        if len(marks) < _MIN_HEADERS:
-            kept.append(row)  # 노트 블록 아님(또는 native 존재) — 원본 보존
+        if not marks:
+            # 매칭 노트 0 (비표준 주석·native 존재) — 원 블록 보존. 임계 없음: 1개라도 매칭되면 itemize.
+            kept.append(row)
             continue
         changed = True
         # 노트 앞 preamble(재무제표 본표·섹션 헤더)은 원 블록에 보존 — 비어있지 않으면 행 유지.
@@ -122,7 +132,7 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
 
     if not changed:
         return df
-    nonCand = df.filter(~nullMask)
+    nonCand = df.filter(~chunkMask)  # keyed 행 + 비-주석 null 블록(TOC) — 전부 불변 통과
     parts = [nonCand]
     if kept:
         parts.append(pl.DataFrame(kept, schema=df.schema))

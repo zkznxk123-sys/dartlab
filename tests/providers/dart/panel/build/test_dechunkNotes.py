@@ -30,13 +30,8 @@ _BORROW = NOTE_TAXONOMY.get("consolidated|차입금")
 
 
 def test_dechunk_splits_chunk_into_nt_rows() -> None:
-    """주석 덩어리(헤더 ≥3) → 항목별 NT_* sub-note 행 분할."""
-    body = (
-        "<P>전문</P>"
-        "<SPAN>1. 재고자산</SPAN>재고 본문 테이블"
-        "<SPAN>2. 차입금</SPAN>차입 본문 테이블"
-        "<SPAN>3. 일반적 사항</SPAN>일반 본문"
-    )
+    """재무제표 영역 덩어리 → 매칭 항목별 NT_* sub-note 분할 (임계 없음)."""
+    body = "<P>전문</P><SPAN>1. 재고자산</SPAN>재고 본문<SPAN>2. 차입금</SPAN>차입 본문"
     df = pl.DataFrame(
         [_row(chapter="(첨부)연결재무제표", sectionLeaf="주석", contentRaw=body)],
         schema=PANEL_SCHEMA,
@@ -44,7 +39,7 @@ def test_dechunk_splits_chunk_into_nt_rows() -> None:
     out = dechunkNotes(df)
     nt = out.filter(pl.col("disclosureKey").str.starts_with("NT_"))
     assert _INV in nt["disclosureKey"].to_list()  # 재고자산 항목화
-    assert nt.height >= 3  # 최소 3개 노트 분할
+    assert nt.height >= 2  # 매칭 노트만큼 (임계 없음)
 
 
 def test_dechunk_preserves_preamble() -> None:
@@ -57,15 +52,24 @@ def test_dechunk_preserves_preamble() -> None:
     assert any("재무제표 본표 전문" in (c or "") for c in pre["contentRaw"].to_list())
 
 
-def test_dechunk_below_min_headers_untouched() -> None:
-    """매칭 헤더 < _MIN_HEADERS(3) 면 노트 블록 아님 — 원본 보존(오탐 차단)."""
-    body = "<P>사업 개요에서 재고자산을 언급</P><SPAN>1. 재고자산</SPAN>한 항목뿐"
+def test_dechunk_non_note_block_untouched() -> None:
+    """재무제표 영역 gate 밖(사업보고서 TOC)은 헤더가 매칭돼도 미처리 — 오염 차단."""
+    body = "<P>사업 개요</P><SPAN>1. 재고자산</SPAN>본문<SPAN>2. 차입금</SPAN>본문<SPAN>3. 사채</SPAN>본문"
     df = pl.DataFrame(
-        [_row(chapter="II. 사업의 내용", sectionLeaf="1. 사업의 내용", contentRaw=body)], schema=PANEL_SCHEMA
+        [_row(chapter="II. 사업의 내용", sectionLeaf="1. 사업의 개요", contentRaw=body)], schema=PANEL_SCHEMA
     )
     out = dechunkNotes(df)
-    assert out.height == 1
+    assert out.height == 1  # gate 제외 → 원본 보존
     assert out.filter(pl.col("disclosureKey").str.starts_with("NT_")).height == 0
+
+
+def test_dechunk_unmatched_title_narrative() -> None:
+    """재무제표 영역이라도 뼈대 미등재(모호/비표준) 제목은 narrative 유지 — 추정 0."""
+    body = "<SPAN>1. 가공의비표준노트제목</SPAN>본문<SPAN>2. 또다른가공제목</SPAN>본문"
+    df = pl.DataFrame([_row(chapter="(첨부)연결재무제표", sectionLeaf="주석", contentRaw=body)], schema=PANEL_SCHEMA)
+    out = dechunkNotes(df)
+    assert out.filter(pl.col("disclosureKey").str.starts_with("NT_")).height == 0  # 미매칭 → NT_ 0
+    assert out.filter(pl.col("disclosureKey").is_null()).height == 1  # 덩어리 원본 보존
 
 
 def test_dechunk_scope_from_consolidated_marker() -> None:
