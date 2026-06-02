@@ -21,7 +21,14 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "tests"))
 
-from run import GATES, REALDATA_SHARDS  # noqa: E402
+from run import (  # noqa: E402
+    DOC_TARGETS,
+    GATES,
+    GATES_BLOCK_END,
+    GATES_BLOCK_START,
+    REALDATA_SHARDS,
+    renderGatesBlock,
+)
 
 WORKFLOWS = REPO_ROOT / ".github" / "workflows"
 
@@ -135,3 +142,24 @@ def test_tierDistributionFrozen():
 
     c = Counter(g.tier for g in GATES.values())
     assert dict(c) == {"fast": 17, "full": 6, "nightly": 11}, f"tier 분포 변경: {dict(c)}"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("rel", DOC_TARGETS)
+def test_docsGatesBlockInSync(rel):
+    """사람용 문서의 gates:auto 블록 == GATES 렌더 (드리프트 차단).
+
+    27↔34 류 "문서가 게이트 개수를 손으로 베껴 적어 어긋남" 회귀를 영구 차단.
+    out of sync 시: `uv run python -X utf8 tests/run.py docs --write`.
+    """
+    path = REPO_ROOT / rel
+    if not path.exists():
+        pytest.skip(f"{rel} 미존재 (PR 머지 전 단계)")
+    text = path.read_text(encoding="utf-8")
+    start = text.find(GATES_BLOCK_START)
+    end = text.find(GATES_BLOCK_END)
+    assert start != -1 and end != -1 and start < end, (
+        f"{rel}: gates:auto 마커 쌍 없음 — 마커 삽입 후 `tests/run.py docs --write`"
+    )
+    inner = text[start + len(GATES_BLOCK_START) : end].strip("\n")
+    assert inner == renderGatesBlock(), f"{rel}: gates:auto 블록이 GATES 와 어긋남 — `tests/run.py docs --write` 실행"

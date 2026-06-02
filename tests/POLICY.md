@@ -130,10 +130,10 @@ tests/
 
 ⛔ **`pytest tests/ -v` 전체 직접 실행 금지** — Polars 네이티브 메모리 (≈ 200~500MB / Company) 가 누적되면 OOM.
 
-**모든 CI 게이트 (27 개) 는 [tests/run.py](run.py) 의 `GATES` dict 가 SSOT**. CI YAML 은 matrix 디스패치만. 로컬도 CI 와 *바이트 단위 동일* 명령으로 실행.
+**모든 CI 게이트는 [tests/run.py](run.py) 의 `GATES` dict 가 SSOT**. CI YAML 은 matrix 디스패치만. 로컬도 CI 와 *바이트 단위 동일* 명령으로 실행. 게이트 개수·tier 분포는 [tests/audit/test_runEntrypoint.py](audit/test_runEntrypoint.py) 가 동결 — 현재값은 §4 자동 표 또는 `tests/run.py list`.
 
 ```powershell
-# Push 전 검증 — ci-fast 의 blocking 게이트 전체 (12 종)
+# Push 전 검증 — ci-fast 의 차단 게이트(fast·blocking) 전체
 uv run python -X utf8 tests/run.py preflight
 
 # 단일 게이트 — CI matrix 가 호출하는 것과 동일
@@ -145,8 +145,9 @@ uv run python -X utf8 tests/run.py gate snapshot-regression --dry-run   # 명령
 uv run python -X utf8 tests/run.py tier fast --blocking-only
 
 # 정보
-uv run python -X utf8 tests/run.py list           # 27 게이트 표
+uv run python -X utf8 tests/run.py list           # 전체 게이트 표
 uv run python -X utf8 tests/run.py audit-self     # dict 무결성
+uv run python -X utf8 tests/run.py docs --write   # 본 문서 게이트 표 GATES 와 동기화
 
 # pytest 직접 호출 (단일 파일·폴더 한정 — 본인이 OOM 안전 보장)
 $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_output_snapshots.py -v
@@ -156,7 +157,7 @@ $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_out
 
 **신규 게이트 추가**: `tests/run.py` 의 `GATES` dict 항목 + `.github/workflows/ci-{fast,full,nightly}.yml` 의 `matrix.include` 항목 양쪽을 한 PR 에서 동시 추가. 한쪽만 추가하면 [tests/audit/test_runEntrypoint.py](audit/test_runEntrypoint.py) 가 fail.
 
-**git push 자동 검증 (선택)**: `bash tests/installHooks.sh` 한 번 실행하면 `core.hooksPath = tests/hooks` 설정. 이후 `git push` 마다 [tests/hooks/pre-push](hooks/pre-push) 가 `tests/run.py preflight` 자동 호출 → 차단 12 게이트 통과 못 하면 push 중단. 일회 우회: `DARTLAB_SKIP_PREPUSH=1 git push`. 비활성화: `git config --unset core.hooksPath`.
+**git push 자동 검증 (선택)**: `bash tests/installHooks.sh` 한 번 실행하면 `core.hooksPath = tests/hooks` 설정. 이후 `git push` 마다 [tests/hooks/pre-push](hooks/pre-push) 가 `tests/run.py preflight` 자동 호출 → fast 차단 게이트 통과 못 하면 push 중단. 일회 우회: `DARTLAB_SKIP_PREPUSH=1 git push`. 비활성화: `git config --unset core.hooksPath`.
 
 ---
 
@@ -168,9 +169,66 @@ $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_out
 | **Full** | `.github/workflows/ci-full.yml` | master push | ≤ 10 분 | `integration` + `metamorphic` + 부분 mutation |
 | **Nightly** | `.github/workflows/ci-nightly.yml` | cron 15:00 UTC | ≤ 45 분 | `realData` + `heavy` + AI eval + full mutation |
 
-**Fast 16 게이트** (modify `tests/run.py` GATES dict → 본 표가 자동으로 진실): format · lint · architecture-l0-l15 · typecheck · smoke · test-fast · wheel-smoke · quality-gate · security · deps-check · notebooks · snapshot-regression · schema-drift · eval-rule · mutation-smoke · test-coverage-gate. 이 중 blocking=False (PR 차단 안 함) 4 종 = typecheck · quality-gate · security · deps-check.
+### 파이프라인 흐름 — 로컬 → Fast → Full → Nightly → Release
 
-PR 머지 차단 fail gate: Fast 6 + snapshot + schema. baseline 회귀 (Guard Index `strict --scope l0-l15`) 는 별도 차단.
+```
+로컬 preflight (fast·blocking)  ──통과만──▶  git push (master)
+                                                │
+                                        CI Fast (PR+push, ≤3분)
+                                        ├─ fail ─▶ 작성자 수정 후 재push (loop back)
+                                        └─ pass ─▶ CI Full (master push, ≤10분)
+                                                        ├─ fail ─▶ 작성자 수정
+                                                        └─ pass ─▶ Nightly 큐 (cron 15:00 UTC, ≤45분)
+                                                                        ├─ fail ─▶ 알람 + 분석 (§15 플레이북)
+                                                                        └─ pass ─▶ Release 준비 (release_gate)
+```
+
+### 전체 게이트 표 (자동 생성 — 손으로 적지 않음)
+
+`tests/run.py` 의 `GATES` dict 가 SSOT. 아래 블록은 `uv run python -X utf8 tests/run.py docs --write` 가 렌더하며, 어긋나면 [tests/audit/test_runEntrypoint.py](audit/test_runEntrypoint.py)`::test_docsGatesBlockInSync` 가 CI Fast 에서 차단한다 (27↔34 류 드리프트 영구 0).
+
+<!-- gates:auto:start — `tests/run.py docs --write` 가 생성. 손으로 편집 금지 -->
+**합계 34 게이트 — fast 17 · full 6 · nightly 11. push 전 `preflight` 차단 게이트(fast·blocking) 13.**
+
+| 게이트 | tier | 차단 | matrix | timeout |
+|---|---|---|---|---|
+| `format` | fast | ✅ | - | 20m |
+| `lint` | fast | ✅ | - | 20m |
+| `architecture-l0-l15` | fast | ✅ | - | 20m |
+| `typecheck` | fast | — | - | 20m |
+| `smoke` | fast | ✅ | - | 20m |
+| `test-fast` | fast | ✅ | - | 20m |
+| `wheel-smoke` | fast | ✅ | - | 20m |
+| `quality-gate` | fast | — | - | 20m |
+| `security` | fast | — | - | 20m |
+| `deps-check` | fast | — | - | 20m |
+| `notebooks` | fast | ✅ | - | 20m |
+| `snapshot-regression` | fast | ✅ | - | 5m |
+| `schema-drift` | fast | ✅ | - | 5m |
+| `eval-rule` | fast | ✅ | - | 5m |
+| `eval-full` | nightly | — | - | 30m |
+| `mutation-smoke` | fast | ✅ | - | 5m |
+| `test-coverage-gate` | fast | ✅ | - | 5m |
+| `test-full` | full | ✅ | python | 20m |
+| `fixture-integration` | full | ✅ | - | 15m |
+| `cross-os-smoke` | full | ✅ | os | 20m |
+| `product-smoke-wheel` | full | ✅ | - | 30m |
+| `realdata-plan` | full | — | - | 20m |
+| `realdata-suite` | full | ✅ | test | 30m |
+| `guard-full-census` | nightly | ✅ | - | 15m |
+| `realdata-suite-full` | nightly | ✅ | test | 30m |
+| `external-venv-smoke` | nightly | ✅ | - | 45m |
+| `freshInstall` | nightly | ✅ | - | 30m |
+| `mutation-testing` | nightly | — | - | 90m |
+| `sections-parity-fast` | fast | ✅ | - | 5m |
+| `sections-parity-bulk` | nightly | ✅ | - | 60m |
+| `sections-loss` | nightly | — | - | 10m |
+| `sections-memory` | nightly | — | - | 15m |
+| `benchmark-weekly` | nightly | — | - | 30m |
+| `sections-precision` | nightly | — | - | 15m |
+<!-- gates:auto:end -->
+
+**차단(✅) = PR 머지 fail gate, `차단=—` = blocking=False (리포트만, push 가능)**. baseline 회귀 (Guard Index `strict --scope l0-l15`) 는 본 표와 별개로 차단.
 
 ---
 

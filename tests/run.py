@@ -1,16 +1,20 @@
-"""dartlab CI 단일 진입점 — 로컬·CI 가 동일 명령으로 27 게이트 실행.
+"""dartlab CI 단일 진입점 — 로컬·CI 가 동일 명령으로 전체 게이트 실행.
 
-본 파일은 ci-fast (16) + ci-full (6) + ci-nightly (5) = 27 게이트의 SSOT.
+본 파일은 ci-fast + ci-full + ci-nightly 게이트의 SSOT (`GATES` dict).
 .github/workflows/ci-*.yml 은 matrix 디스패치만 담당하고, 실제 deps·env·cmd 는
 모두 GATES dict 에서 가져온다. dict ↔ matrix drift 는 tests/audit/
-test_runEntrypoint.py 가 차단한다.
+test_runEntrypoint.py 가 차단하고, 게이트 개수·tier 분포도 같은 파일이 동결한다.
+사람용 문서(POLICY.md·ci-fast-local skill)의 게이트 표는 손으로 적지 않고
+`tests/run.py docs --write` 가 GATES 에서 렌더한 `gates:auto` 블록으로 채운다 —
+숫자를 베껴 적던 27↔34 류 드리프트를 구조적으로 0 으로 만든다.
 
 # Capabilities
 1. `gate <name>` — 단일 게이트 실행 (CI matrix 호출용)
 2. `tier <fast|full|nightly>` — 한 tier 의 blocking 게이트 전체
 3. `preflight` — tier fast 의 blocking 만 (push 전 검증)
-4. `list` — 27 게이트 표 출력
+4. `list` — 전체 게이트 표 출력
 5. `audit-self` — GATES 무결성 점검 (dup name · 미정의 tier · 모순)
+6. `docs [--write]` — 사람용 문서의 게이트 표를 GATES 에서 렌더·동기화 (가드: test_runEntrypoint)
 
 # Args
 서브명령마다 다름. `gate` 는 `--dry-run` 으로 명령 문자열만 출력 (실행 안 함).
@@ -104,11 +108,12 @@ REALDATA_SHARDS = (
 
 
 # ──────────────────────────────────────────────────────────────────────────
-# GATES — 27 항목. ci-*.yml matrix.gate 와 1:1 (test_runEntrypoint.py 검증).
+# GATES — ci-*.yml matrix.gate 와 1:1. 개수·tier 분포·YAML 일치는 모두
+# test_runEntrypoint.py 가 동결한다 (의도 없는 추가/삭제·드리프트 차단).
 # ──────────────────────────────────────────────────────────────────────────
 
 GATES: dict[str, Gate] = {
-    # ─ Tier 1 — Fast (16) ─────────────────────────────────────────────────
+    # ─ Tier 1 — Fast ──────────────────────────────────────────────────────
     "format": Gate(
         name="format",
         tier="fast",
@@ -283,7 +288,7 @@ GATES: dict[str, Gate] = {
         cmd=("python -X utf8 tests/audit/testCoverageGate.py --diff origin/master --fail-on-missing --limit 30"),
         timeout_minutes=5,
     ),
-    # ─ Tier 2 — Full (6) ──────────────────────────────────────────────────
+    # ─ Tier 2 — Full ──────────────────────────────────────────────────────
     "test-full": Gate(
         name="test-full",
         tier="full",
@@ -387,7 +392,7 @@ GATES: dict[str, Gate] = {
         cmd="bash tests/test-realdata.sh tests/realData/{test_file} -v --tb=short",
         timeout_minutes=30,
     ),
-    # ─ Tier 3 — Nightly (5) ───────────────────────────────────────────────
+    # ─ Tier 3 — Nightly ───────────────────────────────────────────────────
     "guard-full-census": Gate(
         name="guard-full-census",
         tier="nightly",
@@ -619,7 +624,7 @@ def runTier(tier: Tier, *, blocking_only: bool, dry_run: bool) -> int:
 
 
 def cmdList() -> int:
-    """27 게이트 표 출력."""
+    """전체 게이트 표 출력."""
     print(f"{'name':<26} {'tier':<8} {'block':<6} {'matrix':<8} {'runner'}")
     print("─" * 70)
     for gate in GATES.values():
@@ -661,6 +666,86 @@ def cmdAuditSelf() -> int:
 
 
 # ──────────────────────────────────────────────────────────────────────────
+# 사람용 문서 동기화 — GATES → gates:auto 블록 (드리프트 0)
+# ──────────────────────────────────────────────────────────────────────────
+
+# 사람용 문서가 호스팅하는 자동 블록 경계. 본 마커 쌍 사이는 손으로 적지 않고
+# `tests/run.py docs --write` 가 GATES 에서 렌더한 표로 덮어쓴다.
+GATES_BLOCK_START = "<!-- gates:auto:start — `tests/run.py docs --write` 가 생성. 손으로 편집 금지 -->"
+GATES_BLOCK_END = "<!-- gates:auto:end -->"
+
+# 자동 블록을 품는 문서 (REPO_ROOT 기준 상대경로). 새 문서 추가 시 한 줄 + 마커 삽입.
+DOC_TARGETS: tuple[str, ...] = (
+    "tests/POLICY.md",
+    ".claude/skills/ci-fast-local/SKILL.md",
+)
+
+
+def renderGatesBlock() -> str:
+    """GATES → 마크다운 게이트 표 (결정적). 문서 gates:auto 블록 내용 SSOT.
+
+    test_runEntrypoint.py 가 각 DOC_TARGETS 의 블록이 본 렌더와 바이트 동일한지
+    검사한다. 출력은 GATES insertion order 유지 → 안정적 diff.
+    """
+    fast = [g for g in GATES.values() if g.tier == "fast"]
+    full = [g for g in GATES.values() if g.tier == "full"]
+    nightly = [g for g in GATES.values() if g.tier == "nightly"]
+    fastBlocking = sum(1 for g in fast if g.blocking)
+    lines = [
+        f"**합계 {len(GATES)} 게이트 — fast {len(fast)} · full {len(full)} · nightly {len(nightly)}. "
+        f"push 전 `preflight` 차단 게이트(fast·blocking) {fastBlocking}.**",
+        "",
+        "| 게이트 | tier | 차단 | matrix | timeout |",
+        "|---|---|---|---|---|",
+    ]
+    for g in GATES.values():
+        lines.append(
+            f"| `{g.name}` | {g.tier} | {'✅' if g.blocking else '—'} "
+            f"| {g.matrix_param or '-'} | {g.timeout_minutes}m |"
+        )
+    return "\n".join(lines)
+
+
+def _syncDocBlock(text: str, block: str) -> tuple[str, bool]:
+    """문서 text 의 gates:auto 블록을 block 으로 교체. (새 text, 마커 존재 여부)."""
+    start = text.find(GATES_BLOCK_START)
+    end = text.find(GATES_BLOCK_END)
+    if start == -1 or end == -1 or end < start:
+        return text, False
+    new_text = text[:start] + GATES_BLOCK_START + "\n" + block + "\n" + text[end:]
+    return new_text, True
+
+
+def cmdDocs(*, write: bool) -> int:
+    """DOC_TARGETS 의 gates:auto 블록을 GATES 렌더와 동기화(--write) 또는 검사."""
+    block = renderGatesBlock()
+    drift: list[str] = []
+    for rel in DOC_TARGETS:
+        path = REPO_ROOT / rel
+        if not path.exists():
+            print(f"[docs] {rel}: 파일 없음", file=sys.stderr)
+            drift.append(rel)
+            continue
+        text = path.read_text(encoding="utf-8")
+        new_text, found = _syncDocBlock(text, block)
+        if not found:
+            print(f"[docs] {rel}: gates:auto 마커 쌍 없음 — 마커 삽입 필요", file=sys.stderr)
+            drift.append(rel)
+            continue
+        if new_text == text:
+            print(f"[docs] {rel}: in sync")
+        elif write:
+            path.write_text(new_text, encoding="utf-8")
+            print(f"[docs] {rel}: 갱신")
+        else:
+            print(f"[docs] {rel}: OUT OF SYNC — `tests/run.py docs --write` 필요", file=sys.stderr)
+            drift.append(rel)
+    if write:
+        return 0
+    return 1 if drift else 0
+
+
+# ──────────────────────────────────────────────────────────────────────────
 # CLI
 # ──────────────────────────────────────────────────────────────────────────
 
@@ -682,8 +767,10 @@ def main(argv: list[str] | None = None) -> int:
     p_tier.add_argument("--dry-run", action="store_true")
 
     sub.add_parser("preflight", help="tier fast 의 blocking 만 (push 전 검증)")
-    sub.add_parser("list", help="27 게이트 표")
+    sub.add_parser("list", help="전체 게이트 표")
     sub.add_parser("audit-self", help="GATES 무결성 점검")
+    p_docs = sub.add_parser("docs", help="사람용 문서 게이트 표 동기화/검사")
+    p_docs.add_argument("--write", action="store_true", help="문서에 렌더 블록 덮어쓰기 (없으면 검사만)")
 
     args = parser.parse_args(argv)
 
@@ -698,6 +785,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmdList()
     if args.command == "audit-self":
         return cmdAuditSelf()
+    if args.command == "docs":
+        return cmdDocs(write=args.write)
     return 2
 
 
