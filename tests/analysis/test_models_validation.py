@@ -15,7 +15,7 @@ from dartlab.server.models import (
     HistoryMeta,
     TocChapter,
     TocResponse,
-    TocTopic,
+    TocSection,
     ViewContext,
     ViewContextCompany,
 )
@@ -132,9 +132,9 @@ class TestDartKeyUpdateRequest:
 
 
 class TestTocModels:
-    def test_toc_topic(self):
-        t = TocTopic(topic="BS", label="재무상태표", textCount=5, tableCount=3)
-        assert t.hasChanges is False
+    def test_toc_section(self):
+        s = TocSection(sectionLeaf="2. 연결재무제표", sectionKey="III. 재무에 관한 사항␟2. 연결재무제표", rowCount=5)
+        assert s.blocks == []
 
     def test_toc_response(self):
         resp = TocResponse(
@@ -142,10 +142,16 @@ class TestTocModels:
             corpName="삼성전자",
             chapters=[
                 TocChapter(
-                    chapter="I",
-                    topics=[TocTopic(topic="BS", label="재무상태표", textCount=5, tableCount=3)],
+                    chapter="I. 회사의 개요",
+                    sections=[
+                        TocSection(
+                            sectionLeaf="1. 회사의 개요",
+                            sectionKey="I. 회사의 개요␟1. 회사의 개요",
+                            rowCount=5,
+                        )
+                    ],
                 )
             ],
         )
         assert len(resp.chapters) == 1
-        assert resp.chapters[0].topics[0].topic == "BS"
+        assert resp.chapters[0].sections[0].sectionLeaf == "1. 회사의 개요"
