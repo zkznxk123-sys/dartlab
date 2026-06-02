@@ -507,11 +507,13 @@ def apiCompanyPanel(
     periods: str | None = Query(
         None, description="comma-separated 표시 기간 (최신좌측). 생략 시 전체 기간 (full-period)."
     ),
+    block: str | None = Query(None, description="blockLeaf — 그 항목 행만 (주석 등 세분 단위). 생략 시 절 전체."),
     response: Response = None,
 ):
-    """panel 의 한 절(section) grid — 항목 × 기간 wide (viewer 본문).
+    """panel 의 한 절(section)/항목(block) grid — 항목 × 기간 wide (viewer 본문).
 
     section: sectionKey ({chapter}␟{sectionLeaf}). 생략 시 전체 격자.
+    block: blockLeaf — 주석처럼 세분된 한 항목만 (뭉텅이 스크롤 대신 항목 단위 수평 격자).
     periods: 표시 window (예 "2026Q1,2025Q4,2025Q3"). 생략 시 전체 기간.
     diff/timeline 은 frontend (인접셀 비교 + window slice) — 백엔드 계산 0.
     """
@@ -525,7 +527,7 @@ def apiCompanyPanel(
         if periods:
             wp = tuple(p.strip() for p in periods.split(",") if p.strip())
             window_periods = wp or None
-        data = buildPanelGrid(company, chapter=chapter, section=section_leaf, windowPeriods=window_periods)
+        data = buildPanelGrid(company, chapter=chapter, section=section_leaf, block=block, windowPeriods=window_periods)
         return etagResponse(request, response, data, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc

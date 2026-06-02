@@ -246,6 +246,7 @@ def buildPanelGrid(
     *,
     chapter: str | None = None,
     section: str | None = None,
+    block: str | None = None,
     windowPeriods: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """panel wide 의 한 절(section) 격자 — viewer 본문 (buildViewer 대체).
@@ -279,6 +280,8 @@ def buildPanelGrid(
         cond = pl.col("sectionLeaf") == section
         if chapter is not None and "chapter" in wide.columns:
             cond = cond & (pl.col("chapter") == chapter)
+        if block is not None and "blockLeaf" in wide.columns:
+            cond = cond & (pl.col("blockLeaf") == block)
         wide = wide.filter(cond)
 
     periodCols = _periodColumns(wide)

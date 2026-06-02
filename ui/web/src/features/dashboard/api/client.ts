@@ -373,8 +373,10 @@ export function fetchPanelGrid(
 	stockCode: string,
 	sectionKey: string,
 	periods?: string[],
+	block?: string,
 ): Promise<PanelGridResponse> {
 	const qs = new URLSearchParams({ section: sectionKey });
 	if (periods?.length) qs.set('periods', periods.join(','));
+	if (block) qs.set('block', block);
 	return fetchJson<PanelGridResponse>(`/api/company/${stockCode}/panel?${qs}`);
 }

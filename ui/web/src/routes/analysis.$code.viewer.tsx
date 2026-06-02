@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 
 interface ViewerSearch {
 	section?: string; // sectionKey ({chapter}␟{sectionLeaf}) — 옛 ?topic= 대체
+	block?: string; // blockLeaf — 주석 등 세분 항목 단위 (그 항목만 수평 격자)
 	windowEnd?: string;
 }
 
@@ -38,6 +39,7 @@ export const Route = createFileRoute('/analysis/$code/viewer')({
 	component: ViewerTab,
 	validateSearch: (s: Record<string, unknown>): ViewerSearch => ({
 		section: typeof s.section === 'string' && s.section ? s.section : undefined,
+		block: typeof s.block === 'string' && s.block ? s.block : undefined,
 		windowEnd: typeof s.windowEnd === 'string' && s.windowEnd ? s.windowEnd : undefined,
 	}),
 });
@@ -409,26 +411,24 @@ function SsotRowsView({ rows, windowPeriods, allPeriods }: { rows: PanelRow[]; w
 interface PanelTocTreeProps {
 	toc: PanelTocResponse;
 	activeSectionKey: string | undefined;
+	activeBlock: string | undefined;
 	code: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	navigate: any;
 }
-function PanelTocTree({ toc, activeSectionKey, code, navigate }: PanelTocTreeProps) {
-	const goTo = (sectionKey: string) =>
+function PanelTocTree({ toc, activeSectionKey, activeBlock, code, navigate }: PanelTocTreeProps) {
+	// sectionLeaf 클릭 = 절 전체, blockLeaf 클릭 = 그 항목만 (block). 둘 다 windowEnd 리셋.
+	const go = (sectionKey: string, blockLeaf?: string) =>
 		navigate({
 			to: '/analysis/$code/viewer',
 			params: { code },
 			search: (prev: { period?: string }) => ({
 				period: prev?.period ?? 'quarterly',
 				section: sectionKey,
+				block: blockLeaf,
 				windowEnd: undefined,
 			}),
 		});
-	// blockLeaf 클릭 → 본문의 해당 행(data-block)으로 scroll (panel 은 주석을 blockLeaf 로 세분).
-	const scrollToBlock = (blockLeaf: string) => {
-		const sel = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(blockLeaf) : blockLeaf;
-		document.querySelector(`[data-block="${sel}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-	};
 	return (
 		<nav className="space-y-2">
 			{toc.chapters?.map((ch) => (
@@ -437,32 +437,44 @@ function PanelTocTree({ toc, activeSectionKey, code, navigate }: PanelTocTreePro
 					<div className="space-y-0.5">
 						{ch.sections?.map((sec) => {
 							const isActive = sec.sectionKey === activeSectionKey;
+							// 주석처럼 세분 항목(blockLeaf)이 있는 절은 미리 펼쳐 분할 네비 (뭉텅이 스크롤 대신).
+							const expanded = (isActive || sec.sectionLeaf.includes('주석')) && sec.blocks.length > 0;
 							return (
 								<div key={sec.sectionKey}>
 									<button
 										type="button"
-										onClick={() => goTo(sec.sectionKey)}
+										onClick={() => go(sec.sectionKey)}
 										className={cn(
 											'flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs transition-colors',
-											isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50',
+											isActive && !activeBlock
+												? 'bg-accent text-accent-foreground'
+												: 'text-muted-foreground hover:bg-accent/50',
 										)}
 									>
-										<ChevronRight className="size-3 shrink-0 opacity-50" />
+										<ChevronRight className={cn('size-3 shrink-0 opacity-50 transition-transform', expanded && 'rotate-90')} />
 										<span className="truncate">{sec.sectionLeaf}</span>
 									</button>
-									{isActive && sec.blocks.length > 0 && (
+									{expanded && (
 										<div className="ml-3 mt-0.5 space-y-px border-l border-border/40 pl-2">
-											{sec.blocks.map((b) => (
-												<button
-													key={b.blockLeaf}
-													type="button"
-													onClick={() => scrollToBlock(b.blockLeaf)}
-													title={b.blockLeaf}
-													className="block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] text-muted-foreground/70 transition-colors hover:bg-accent/40 hover:text-foreground"
-												>
-													{b.blockLeaf}
-												</button>
-											))}
+											{sec.blocks.map((b, i) => {
+												const blockActive = isActive && activeBlock === b.blockLeaf;
+												return (
+													<button
+														key={b.blockLeaf}
+														type="button"
+														onClick={() => go(sec.sectionKey, b.blockLeaf)}
+														title={b.blockLeaf}
+														className={cn(
+															'block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] transition-colors',
+															blockActive
+																? 'bg-accent/70 font-medium text-accent-foreground'
+																: 'text-muted-foreground/70 hover:bg-accent/40 hover:text-foreground',
+														)}
+													>
+														{i + 1}. {b.blockLeaf}
+													</button>
+												);
+											})}
 										</div>
 									)}
 								</div>
@@ -477,7 +489,7 @@ function PanelTocTree({ toc, activeSectionKey, code, navigate }: PanelTocTreePro
 
 function ViewerTab() {
 	const { code } = Route.useParams();
-	const { section, windowEnd } = Route.useSearch();
+	const { section, block, windowEnd } = Route.useSearch();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const setLastMode = useDashboardMode((s) => s.setLastMode);
@@ -500,7 +512,7 @@ function ViewerTab() {
 		if (initBundle.firstSectionKey && initBundle.grid) {
 			// seed 키는 grid 쿼리 키와 동일해야 적중 (periods 포함) — init.grid 가 최신 window.
 			queryClient.setQueryData(
-				['panel', 'section', code, initBundle.firstSectionKey, (initBundle.grid.periods ?? []).join(',')],
+				['panel', 'section', code, initBundle.firstSectionKey, '', (initBundle.grid.periods ?? []).join(',')],
 				initBundle.grid,
 			);
 		}
@@ -555,8 +567,8 @@ function ViewerTab() {
 	// window 단위 grid fetch — windowEnd 이동 시 fetchPeriods 가 바뀌어 재fetch. 초기
 	// (windowEnd 없음)는 /panel/init 이 동봉한 최신 window grid 를 seed 로 재사용 (fetch 0).
 	const { data: grid } = useQuery({
-		queryKey: ['panel', 'section', code, activeSectionKey, fetchPeriods.join(',')],
-		queryFn: () => fetchPanelGrid(code, activeSectionKey as string, fetchPeriods),
+		queryKey: ['panel', 'section', code, activeSectionKey, block ?? '', fetchPeriods.join(',')],
+		queryFn: () => fetchPanelGrid(code, activeSectionKey as string, fetchPeriods, block),
 		enabled: !!activeSectionKey && fetchPeriods.length > 0,
 		staleTime: 60_000,
 	});
@@ -568,6 +580,7 @@ function ViewerTab() {
 			search: (prev) => ({
 				period: prev?.period ?? 'quarterly',
 				section: activeSectionKey,
+				block: block,
 				windowEnd: next,
 			}),
 			replace: false,
@@ -604,7 +617,7 @@ function ViewerTab() {
 		return s;
 	}, [rows, fetchPeriods]);
 
-	const sectionLabel = grid?.sectionLeaf ?? activeSectionKey?.split(SECTION_KEY_SEP).pop() ?? '';
+	const sectionLabel = block ?? grid?.sectionLeaf ?? activeSectionKey?.split(SECTION_KEY_SEP).pop() ?? '';
 	const corpName = grid?.corpName ?? toc?.corpName ?? '';
 
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -625,7 +638,7 @@ function ViewerTab() {
 						<Loader2 className="size-3 animate-spin" /> 목차 로드 중…
 					</div>
 				) : toc ? (
-					<PanelTocTree toc={toc} activeSectionKey={activeSectionKey} code={code} navigate={navigate} />
+					<PanelTocTree toc={toc} activeSectionKey={activeSectionKey} activeBlock={block} code={code} navigate={navigate} />
 				) : null}
 			</aside>
 
