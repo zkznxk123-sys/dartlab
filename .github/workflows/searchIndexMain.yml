@@ -52,7 +52,7 @@ jobs:
           # HF 429(1000 req/5분 쿼터) 흡수 — 폴더별 backoff 재시도. panel(91941 파일) 열거가 쿼터 부담.
           ok=0
           for attempt in 1 2 3 4 5; do
-            if uv run python -c "
+            uv run python -c "
           import time
           from huggingface_hub import snapshot_download
           from huggingface_hub.errors import HfHubHTTPError
@@ -67,8 +67,14 @@ jobs:
                           print(f'{folder} 429 — backoff {(t + 1) * 60}s'); time.sleep((t + 1) * 60)
                       else:
                           raise
-          "; then ok=1; break; fi
-            echo "pull attempt $attempt 실패 — 120s 후 재시도"; sleep 120
+          " || true
+            # 검증 — 429 가 예외 없이 빈 local_dir 을 반환하는 silent-empty 차단. 폴더별 파일수 확인.
+            af=$(find data/dart/allFilings -name '*.parquet' 2>/dev/null | wc -l)
+            pn=$(find data/dart/panel -name '*.parquet' 2>/dev/null | wc -l)
+            dc=$(find data/dart/docs -name '*.parquet' 2>/dev/null | wc -l)
+            echo "pull 검증: docs=$dc allFilings=$af panel=$pn"
+            if [ "$af" -gt 0 ] && [ "$pn" -gt 0 ] && [ "$dc" -gt 0 ]; then ok=1; break; fi
+            echo "pull attempt $attempt 미완(빈 폴더) — 120s 후 재시도"; sleep 120
           done
           [ "$ok" = "1" ]
         env:

@@ -41,6 +41,16 @@ def main() -> int:
         print("[main] 빌드된 문서 없음")
         return 1
 
+    # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 allFilings/meaning 이 0 이 된다.
+    # 이 상태로 업로드하면 프로덕션 인덱스를 docs-only/빈-의미로 *덮어쓰는 퇴행*. 업로드 중단.
+    minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "500000"))
+    if nNodes == 0 or nDocs < minDocs:
+        print(
+            f"[main] ✗ 퇴행 가드 발동 — meaning {nNodes} 노드 / {nDocs:,} 문서(< {minDocs:,}). "
+            f"allFilings/panel pull 누락 의심 → 업로드 중단(프로덕션 보호)."
+        )
+        return 1
+
     if not hfToken:
         print("[main] HF_TOKEN 없음 — 업로드 스킵")
         return 0
