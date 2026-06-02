@@ -186,6 +186,33 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
     ).model_dump()
 
 
+_DART_VIEWER = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo={}"
+
+
+def _panelDartUrls(company: Company, periodCols: list[str], periods: list[str] | None) -> dict[str, str | None]:
+    """period → DART 뷰어 URL — panel artifact 의 rceptNo 로 생성 (docs 미로드).
+
+    옛 ``_dartUrlForPeriod`` 는 ``filings()`` → docs(2GB) 를 로드해 panel 엔드포인트에서
+    GC 폭발·지연을 유발했다. panel ``readLong`` 의 ``rceptNo`` 로 대체 — panel 자급(docs 0),
+    window prune 로 가벼움.
+    """
+    import polars as pl
+
+    from dartlab.providers.dart.panel.read import readLong
+
+    out: dict[str, str | None] = {p: None for p in periodCols}
+    ns = "us" if getattr(company, "market", "") == "US" else "kr"
+    long = readLong(company.stockCode, marketNs=ns, periods=periods)
+    if long is None or "rceptNo" not in long.columns or "period" not in long.columns:
+        return out
+    rcpt = long.filter(pl.col("rceptNo").is_not_null()).group_by("period").agg(pl.col("rceptNo").first())
+    for r in rcpt.iter_rows(named=True):
+        p, no = r.get("period"), r.get("rceptNo")
+        if p in out and no:
+            out[p] = _DART_VIEWER.format(no)
+    return out
+
+
 def serializePanelRows(wide, periodCols: list[str]) -> list[dict[str, Any]]:
     """panel wide → row dict 배열 (서버 직렬화 — 표현 변환 0, pass-through).
 
@@ -256,7 +283,7 @@ def buildPanelGrid(
 
     periodCols = _periodColumns(wide)
     rows = serializePanelRows(wide, periodCols)
-    dartUrlByPeriod = {p: _dartUrlForPeriod(company, p) for p in periodCols}
+    dartUrlByPeriod = _panelDartUrls(company, periodCols, periodsArg)
     return {
         **base,
         "periods": periodCols,
