@@ -36,18 +36,14 @@ import re
 
 import polars as pl
 
+from .noteTaxonomy import _norm  # 제목 정규화 SSOT — 생성기와 동일해야 키 매칭(복제 시 silent miss)
 from .noteTaxonomyData import NOTE_TAXONOMY
 
-_NORM_RE = re.compile(r"[()·\s]")
 # "N. 제목" 노트 헤더 — 태그 무관(SPAN/P/B), 콜론 허용, 태그경계(`>`) 앵커로 본문 중간
 # 숫자열 오탐 차단. 연도별 포맷차(2015 `<SPAN>N.제목</SPAN>` · 2022 `>N.제목:`)를 한 패턴으로 흡수.
 _HEADER_RE = re.compile(r">\s*(\d{1,2})\.\s*([가-힣A-Za-z][^<:]{0,23}?)\s*[:<]")
 # 분해된 sub-note 의 표시용 section (최근 itemized 구조와 동일 라벨).
 _NOTE_SECTION = {"consolidated": "3. 연결재무제표 주석", "standalone": "5. 재무제표 주석"}
-
-
-def _norm(s: str | None) -> str:
-    return _NORM_RE.sub("", s or "")
 
 
 def _scopeOf(row: dict) -> str:

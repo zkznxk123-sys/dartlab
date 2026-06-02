@@ -227,6 +227,10 @@ def _main() -> None:
     ap.add_argument(
         "--noteTaxonomy", action="store_true", help="주석 뼈대(noteTaxonomyData.py) 생성 — 전 corpus XBRL 학습"
     )
+    ap.add_argument("--minFreq", type=int, default=3, help="noteTaxonomy 제목 총빈도 하한 (노이즈 컷)")
+    ap.add_argument(
+        "--dominanceRatio", type=float, default=0.8, help="noteTaxonomy 최빈코드 지배비율 하한 (모호제목 제외)"
+    )
     ap.add_argument("--workers", type=int, default=8, help="Pool workers (OOM 가드: polars 힙 200~500MB/종목, ≤4 권장)")
     args = ap.parse_args()
 
@@ -248,8 +252,13 @@ def _main() -> None:
     if args.noteTaxonomy:
         from .noteTaxonomy import buildAndWrite
 
-        stats = buildAndWrite(verbose=True)
-        _log.info("=== noteTaxonomy 완료: entries=%d ===", stats["entries"])
+        stats = buildAndWrite(verbose=True, minFreq=args.minFreq, dominanceRatio=args.dominanceRatio)
+        _log.info(
+            "=== noteTaxonomy 완료: entries=%d (minFreq=%d, dominanceRatio=%.2f) ===",
+            stats["entries"],
+            args.minFreq,
+            args.dominanceRatio,
+        )
         return
 
     if args.all:
