@@ -68,14 +68,6 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     if df.is_empty() or "contentRaw" not in df.columns or "sectionLeaf" not in df.columns:
         return df
 
-    # 이미 itemized native NT_*(xbrlClass NT_C_/NT_S_) 가 있는 scope 는 그 블록을 건드리지 않는다
-    # — 전환연도(본문 NT_* + (첨부)덩어리 공존) 이중수록 차단.
-    nativeScopes: set[str] = set()
-    if "xbrlClass" in df.columns:
-        native = df.filter(pl.col("disclosureKey").str.starts_with("NT_") & pl.col("xbrlClass").is_not_null())
-        for xc in native["xbrlClass"].to_list():
-            nativeScopes.add("standalone" if "_S" in (xc or "")[:5] else "consolidated")
-
     # 재무제표 영역 gate — disclosureKey-null + (chapter/sectionLeaf 에 "재무제표" OR chapter 에 "재무에관한").
     # 옛 "(첨부)재무제표" mega-block·최근 "III.재무에관한사항/N.연결재무제표 주석"·mis-chapter("II.사업의내용/
     # 3.연결재무제표 주석", READ anchorLatest 가 재-chapter)까지 포착하되, 사업보고서 TOC(회사개요·사업내용·
@@ -89,25 +81,22 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     if candidates.is_empty():
         return df
 
-    kept: list[dict] = []  # disclosureKey-null 후보 행 (노트블록은 preamble 로 치환, 그 외 원본)
-    # df-level dedup — 같은 표준 NT_* 가 본문("III.재무")·첨부("(첨부)재무제표") 여러 블록에 중복
-    # 수록되므로, disclosureKey 당 **최장 본문 1개**만 채택. 안 하면 READ collapse 가 같은 노트를
-    # join 해 셀 content 가 2~3배 증식한다(연결/별도는 NT_ D-code 가 달라 자동 분리).
-    best: dict[str, dict] = {}
+    # 순수 분류만 — gate→split→match→preamble. 본문+첨부·전환연도 중복 제거는 READ(dedupKeyed)가
+    # (key,scope,period)로 일괄(xbrlClass native 우선) → BUILD 는 dedup 안 함(책임 분리, 덕지덕지 0).
+    kept: list[dict] = []  # 노트 블록은 preamble 행, 매칭 0 블록은 원본
+    subNotes: list[dict] = []
     changed = False
     for row in candidates.iter_rows(named=True):
         scope = _scopeOf(row)
         cr = row.get("contentRaw") or ""
         marks: list[tuple[int, str, str]] = []
-        if scope not in nativeScopes:
-            for m in _HEADER_RE.finditer(cr):
-                # dominant-only 뼈대 lookup — 미등재(모호·미학습) 제목은 매칭 0 → narrative 유지(추정 0).
-                key = NOTE_TAXONOMY.get(f"{scope}|{_norm(m.group(2))}")
-                if key:
-                    marks.append((m.start(), m.group(2).strip(), key))
+        for m in _HEADER_RE.finditer(cr):
+            # dominant-only 뼈대 lookup — 미등재(모호·미학습) 제목은 매칭 0 → narrative 유지(추정 0).
+            key = NOTE_TAXONOMY.get(f"{scope}|{_norm(m.group(2))}")
+            if key:
+                marks.append((m.start(), m.group(2).strip(), key))
         if not marks:
-            # 매칭 노트 0 (비표준 주석·native 존재) — 원 블록 보존. 임계 없음: 1개라도 매칭되면 itemize.
-            kept.append(row)
+            kept.append(row)  # 매칭 노트 0 (비표준 주석) — 원 블록 보존. 임계 없음.
             continue
         changed = True
         # 노트 앞 preamble(재무제표 본표·섹션 헤더)은 원 블록에 보존 — 비어있지 않으면 행 유지.
@@ -116,19 +105,15 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
             pre = dict(row)
             pre["contentRaw"] = preamble
             kept.append(pre)
-        # 매칭헤더 i → 다음 매칭헤더 사이 = 노트 1개(헤더+본문+테이블).
+        # 매칭헤더 i → 다음 매칭헤더 사이 = 노트 1개(헤더+본문+테이블). 모두 emit, dedup 은 READ.
         for i, (pos, title, key) in enumerate(marks):
             end = marks[i + 1][0] if i + 1 < len(marks) else len(cr)
-            seg = cr[pos:end].lstrip("> \n\t")  # 헤더 경계 앵커('>')·여백 제거
-            prev = best.get(key)
-            if prev is not None and len(prev["contentRaw"]) >= len(seg):
-                continue  # 다른 블록/ TOC 의 짧은 중복 — 최장 본문 우선
             nr = dict(row)
             nr["disclosureKey"] = key
             nr["blockLeaf"] = title
             nr["sectionLeaf"] = _NOTE_SECTION[scope]
-            nr["contentRaw"] = seg
-            best[key] = nr
+            nr["contentRaw"] = cr[pos:end].lstrip("> \n\t")  # 헤더 경계 앵커('>')·여백 제거
+            subNotes.append(nr)
 
     if not changed:
         return df
@@ -136,6 +121,6 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     parts = [nonCand]
     if kept:
         parts.append(pl.DataFrame(kept, schema=df.schema))
-    if best:
-        parts.append(pl.DataFrame(list(best.values()), schema=df.schema))
+    if subNotes:
+        parts.append(pl.DataFrame(subNotes, schema=df.schema))
     return pl.concat(parts, how="vertical")

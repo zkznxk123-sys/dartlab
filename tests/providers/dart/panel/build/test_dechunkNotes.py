@@ -91,8 +91,8 @@ def test_dechunk_empty_passthrough() -> None:
     assert dechunkNotes(plain).height == 1
 
 
-def test_dechunk_skips_native_scope() -> None:
-    """이미 itemized native NT_*(xbrlClass NT_C_) 가 있는 scope 덩어리는 분해 생략(이중수록 차단)."""
+def test_dechunk_emits_all_dedup_is_read() -> None:
+    """BUILD 는 dedup 안 함 — native 와 (첨부)덩어리 공존 시 둘 다 emit, 중복 제거는 READ(dedupKeyed)."""
     body = "<SPAN>1. 재고자산</SPAN>a<SPAN>2. 차입금</SPAN>b<SPAN>3. 사채</SPAN>c"
     df = pl.DataFrame(
         [
@@ -102,5 +102,7 @@ def test_dechunk_skips_native_scope() -> None:
         schema=PANEL_SCHEMA,
     )
     out = dechunkNotes(df)
-    # 연결 scope native 존재 → (첨부) 덩어리 분해 안 함 → 덩어리 원본 보존, 새 NT_ 행 미생성
-    assert out.filter(pl.col("disclosureKey").is_null() & pl.col("sectionLeaf").eq("주석")).height == 1
+    # native(_INV) + 분해된 _INV 둘 다 존재 (BUILD dedup 안 함) → READ 가 xbrlClass 우선 dedup.
+    inv = out.filter(pl.col("disclosureKey") == _INV)
+    assert inv.height == 2  # native 1 + 분해 1
+    assert "NT_C_D826380" in inv["xbrlClass"].to_list()  # native 보존
