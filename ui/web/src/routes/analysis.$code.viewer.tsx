@@ -373,7 +373,7 @@ function SsotRowsView({ rows, windowPeriods, allPeriods }: { rows: PanelRow[]; w
 	return (
 		<div className="space-y-3">
 			{visible.map((r) => (
-				<div key={rowKey(r)} className="grid gap-3" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
+				<div key={rowKey(r)} data-block={r.blockLeaf || undefined} className="grid gap-3 scroll-mt-2" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
 					{periodsToShow.map((p) => {
 						const st = cellStatus(r, p, allPeriods);
 						return (
@@ -415,6 +415,11 @@ function PanelTocTree({ toc, activeSectionKey, code, navigate }: PanelTocTreePro
 				windowEnd: undefined,
 			}),
 		});
+	// blockLeaf 클릭 → 본문의 해당 행(data-block)으로 scroll (panel 은 주석을 blockLeaf 로 세분).
+	const scrollToBlock = (blockLeaf: string) => {
+		const sel = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(blockLeaf) : blockLeaf;
+		document.querySelector(`[data-block="${sel}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	};
 	return (
 		<nav className="space-y-2">
 			{toc.chapters?.map((ch) => (
@@ -424,18 +429,34 @@ function PanelTocTree({ toc, activeSectionKey, code, navigate }: PanelTocTreePro
 						{ch.sections?.map((sec) => {
 							const isActive = sec.sectionKey === activeSectionKey;
 							return (
-								<button
-									key={sec.sectionKey}
-									type="button"
-									onClick={() => goTo(sec.sectionKey)}
-									className={cn(
-										'flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs transition-colors',
-										isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50',
+								<div key={sec.sectionKey}>
+									<button
+										type="button"
+										onClick={() => goTo(sec.sectionKey)}
+										className={cn(
+											'flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs transition-colors',
+											isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50',
+										)}
+									>
+										<ChevronRight className="size-3 shrink-0 opacity-50" />
+										<span className="truncate">{sec.sectionLeaf}</span>
+									</button>
+									{isActive && sec.blocks.length > 0 && (
+										<div className="ml-3 mt-0.5 space-y-px border-l border-border/40 pl-2">
+											{sec.blocks.map((b) => (
+												<button
+													key={b.blockLeaf}
+													type="button"
+													onClick={() => scrollToBlock(b.blockLeaf)}
+													title={b.blockLeaf}
+													className="block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] text-muted-foreground/70 transition-colors hover:bg-accent/40 hover:text-foreground"
+												>
+													{b.blockLeaf}
+												</button>
+											))}
+										</div>
 									)}
-								>
-									<ChevronRight className="size-3 shrink-0 opacity-50" />
-									<span className="truncate">{sec.sectionLeaf}</span>
-								</button>
+								</div>
 							);
 						})}
 					</div>
