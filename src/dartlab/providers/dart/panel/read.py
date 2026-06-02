@@ -391,11 +391,13 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
     """옛 split 주석행(blockLeaf=제목, disclosureKey=null)을 회사 최근 XBRL 뼈대(scope,제목)→NT_ 에 정렬.
 
     BUILD(``dechunkNotes``)는 옛 통짜 주석을 ``N.제목`` 헤더로 쪼개 제목만 박고 disclosureKey 는 null 로 둔다
-    (NT_ 미부여). 본 함수가 read-time 에 **회사 자기 native NT_ 주석행**((scope, 정규화제목)→NT_ 코드)을 뼈대로,
-    같은 (scope, 정규화제목) 의 null-key 주석행에 그 NT_ 를 부여 → 최근 XBRL 과 같은 identity 로 수평화 정렬.
-    뼈대에 없는 제목은 null 유지(narrative) → 산문 오분할도 가짜 NT_ 를 받지 않는다(뼈대 중복 0). 정렬 규칙·뼈대
-    개선이 **재빌드 무관**(read-time) — 빌드는 분할만 동결. scope 는 native·split 공통으로 chapter/sectionLeaf 의
-    "연결" 마커에서 도출(옛 노트는 xbrlClass null 이라 scopeExpr 가 consolidated 로 흔들리므로 라벨 기반).
+    (NT_ 미부여). 본 함수가 read-time 에 null-key 주석행((scope, 정규화제목))에 NT_ 를 **2단 뼈대**로 부여한다 —
+    **(1) 회사 자기 native NT_ 주석행**(회사 표준·NT_C_U 회사코드 포함, 우선), **(2) 전역 taxonomy**
+    (``noteTaxonomyData`` — cross-company 학습 표준 NT_D, 자기 XBRL 노트 0 회사가 남의 표준코드를 받음, fallback).
+    둘 다 같은 표준 코드라 native 와 dedupKeyed 로 병합(뼈대 중복 0). 주석영역(sectionLeaf "주석") 행만 채우고
+    어느 뼈대에도 없는 제목·비-주석 narrative 는 null 유지. 정렬 규칙·뼈대 개선이 **재빌드 무관**(read-time) —
+    빌드는 분할만 동결. scope 는 native·split 공통으로 chapter/sectionLeaf 의 "연결" 마커(옛 노트는 xbrlClass null
+    이라 scopeExpr 가 흔들림) + native 제목 접미사(" - 연결/별도")에서 도출.
 
     Args:
         df: ``readLong`` long DataFrame (disclosureKey/blockLeaf/chapter/sectionLeaf 컬럼). 전 period 권장
@@ -435,8 +437,8 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
 
     LLM Specifications:
         AntiPatterns:
-            - cross-company 전역 taxonomy 로 무조건 정렬 금지 — 회사 자기 최근 뼈대 우선(가짜 NT_ 차단).
-            - 뼈대 부재 회사에 임의 키 부여 금지 — null 유지(narrative, content 보존).
+            - 전역 taxonomy 를 회사 자기 native 보다 우선 금지 — own-skeleton 우선, 전역은 주석영역 fallback.
+            - 비-주석 narrative 행에 키 부여 금지 — 주석영역(_isNote)만 채움(오정렬 차단).
         OutputSchema:
             - ``alignNotes(df) -> pl.DataFrame`` (null-key 주석행 → 뼈대 매칭 시 NT_).
         Prerequisites:
@@ -469,27 +471,43 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
     from .mapper import NOTE_TITLE_NORM_PATTERN
 
     normTitle = bareTitle.str.replace_all(NOTE_TITLE_NORM_PATTERN, "")
-    tmp = df.with_columns(scope.alias("_alignScope"), normTitle.alias("_alignTitle"))
-    # 뼈대 = 회사 자기 native NT_ 주석행 ((scope, 정규화제목) → NT_ 코드, 회사 표준이라 1:1).
-    skeleton = (
+    isNote = pl.col("sectionLeaf").cast(pl.Utf8).str.contains("주석").fill_null(False)
+    tmp = df.with_columns(scope.alias("_alignScope"), normTitle.alias("_alignTitle"), isNote.alias("_isNote"))
+
+    # 1차 = 회사 자기 native NT_ 주석행 ((scope, 정규화제목) → NT_, 회사 표준·NT_C_U 회사코드 포함 → 우선).
+    own = (
         tmp.filter(
             pl.col("disclosureKey").cast(pl.Utf8).str.starts_with("NT_") & (pl.col("_alignTitle").str.len_chars() > 1)
         )
         .select(["_alignScope", "_alignTitle", "disclosureKey"])
         .unique(subset=["_alignScope", "_alignTitle"], keep="first")
-        .rename({"disclosureKey": "_skelKey"})
+        .rename({"disclosureKey": "_ownKey"})
     )
-    if skeleton.is_empty():
-        return df  # 회사 native 주석 0 — 뼈대 없음, 정렬 불가(narrative 유지)
+    # 2차 = 전역 taxonomy (cross-company 학습 표준 NT_D) — 자기 XBRL 노트 0 회사가 남의 표준코드를 받는다.
+    from .build.noteTaxonomyData import NOTE_TAXONOMY
+
+    glob = pl.DataFrame(
+        {
+            "_alignScope": [k.split("|", 1)[0] for k in NOTE_TAXONOMY],
+            "_alignTitle": [k.split("|", 1)[1] for k in NOTE_TAXONOMY],
+            "_globKey": list(NOTE_TAXONOMY.values()),
+        }
+    )
+    # 주석영역(_isNote) null-key 행만 채움 — 자기 뼈대 우선, 없으면 전역 표준. 비-주석 narrative 는 불변.
     return (
-        tmp.join(skeleton, on=["_alignScope", "_alignTitle"], how="left")
+        tmp.join(own, on=["_alignScope", "_alignTitle"], how="left")
+        .join(glob, on=["_alignScope", "_alignTitle"], how="left")
         .with_columns(
-            pl.when(pl.col("disclosureKey").is_null() & pl.col("_skelKey").is_not_null())
-            .then(pl.col("_skelKey"))
+            pl.when(pl.col("disclosureKey").is_not_null())
+            .then(pl.col("disclosureKey"))
+            .when(pl.col("_isNote") & pl.col("_ownKey").is_not_null())
+            .then(pl.col("_ownKey"))
+            .when(pl.col("_isNote") & pl.col("_globKey").is_not_null())
+            .then(pl.col("_globKey"))
             .otherwise(pl.col("disclosureKey"))
             .alias("disclosureKey")
         )
-        .drop(["_alignScope", "_alignTitle", "_skelKey"])
+        .drop(["_alignScope", "_alignTitle", "_isNote", "_ownKey", "_globKey"])
     )
 
 

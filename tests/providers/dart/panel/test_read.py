@@ -177,7 +177,7 @@ def test_align_notes_skeleton_match() -> None:
 
 
 def test_align_notes_unmatched_stays_narrative() -> None:
-    """뼈대에 없는 제목(산문 오분할 등)은 null 유지 — 가짜 NT_ 0, 뼈대 중복 0."""
+    """어느 뼈대(자기·전역)에도 없는 제목은 null 유지 — 가짜 NT_ 0."""
     from dartlab.providers.dart.panel.read import alignNotes
 
     df = pl.DataFrame(
@@ -189,22 +189,42 @@ def test_align_notes_unmatched_stays_narrative() -> None:
                 disclosureKey="NT_D826380",
                 period="2025Q4",
             ),
+            # 전역 taxonomy 에도 없는 가공 제목 → 정렬 안 됨(narrative)
             _noteRow(
-                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="법인세", period="2020Q4"
+                chapter="(첨부)연결재무제표",
+                sectionLeaf="3. 연결재무제표 주석",
+                blockLeaf="가공의비표준제목xyz",
+                period="2020Q4",
             ),
         ]
     )
     out = alignNotes(df)
-    assert out.filter(pl.col("blockLeaf") == "법인세")["disclosureKey"].to_list() == [None]  # narrative 유지
+    assert out.filter(pl.col("blockLeaf") == "가공의비표준제목xyz")["disclosureKey"].to_list() == [None]
 
 
-def test_align_notes_scope_from_section_marker() -> None:
-    """scope = chapter+sectionLeaf '연결' 마커 — 별도 뼈대는 연결 split 행에 안 새어듦."""
+def test_align_notes_global_fallback_no_own_skeleton() -> None:
+    """회사 자기 native 노트 0(뼈대 없음)이라도 표준 제목은 전역 taxonomy 로 정렬 — cross-company 흡수."""
     from dartlab.providers.dart.panel.read import alignNotes
 
     df = pl.DataFrame(
         [
-            # 별도 뼈대 (재고자산 별도 → NT_D826385)
+            # native NT_ 0 — 옛 split 표준 제목만
+            _noteRow(
+                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="재고자산", period="2020Q4"
+            )
+        ]
+    )
+    out = alignNotes(df)
+    assert out["disclosureKey"].to_list() == ["NT_D826380"]  # 전역 표준(연결 재고자산)으로 정렬
+
+
+def test_align_notes_scope_separation() -> None:
+    """scope 분리 — 연결 split 행은 별도 native(826385)가 아니라 연결 표준(826380)으로 정렬."""
+    from dartlab.providers.dart.panel.read import alignNotes
+
+    df = pl.DataFrame(
+        [
+            # 별도 native 뼈대 (재고자산 별도 → NT_D826385)
             _noteRow(
                 chapter="(첨부)재무제표",
                 sectionLeaf="5. 재무제표 주석",
@@ -212,27 +232,28 @@ def test_align_notes_scope_from_section_marker() -> None:
                 disclosureKey="NT_D826385",
                 period="2025Q4",
             ),
-            # 연결 split 행 (연결 마커) — 별도 뼈대와 scope 달라 매칭 안 됨
+            # 연결 split 행 (연결 마커) — 별도 native 와 scope 달라 그 코드 안 받고, 전역 연결 표준(826380) 받음
             _noteRow(
                 chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="재고자산", period="2020Q4"
             ),
         ]
     )
     out = alignNotes(df)
-    consol = out.filter((pl.col("period") == "2020Q4"))
-    assert consol["disclosureKey"].to_list() == [None]  # 별도 뼈대는 연결에 안 새어듦(scope 분리)
+    consol = out.filter(pl.col("period") == "2020Q4")
+    assert consol["disclosureKey"].to_list() == ["NT_D826380"]  # 별도(826385) 아님 — scope 분리 + 전역 연결 표준
 
 
-def test_align_notes_passthrough_no_skeleton() -> None:
-    """회사 native 주석 0(뼈대 없음) → 정렬 불가, 원본 그대로."""
+def test_align_notes_non_note_region_untouched() -> None:
+    """비-주석 narrative 행(sectionLeaf 에 '주석' 없음)은 표준 제목이어도 정렬 안 함 — 오정렬 차단."""
     from dartlab.providers.dart.panel.read import alignNotes
 
     df = pl.DataFrame(
         [
+            # 사업의 내용 같은 비-주석 영역에 '재고자산' 제목 — 전역에 있어도 안 채움
             _noteRow(
-                chapter="(첨부)연결재무제표", sectionLeaf="3. 연결재무제표 주석", blockLeaf="재고자산", period="2020Q4"
+                chapter="II. 사업의 내용", sectionLeaf="3. 원재료 및 생산설비", blockLeaf="재고자산", period="2020Q4"
             )
         ]
     )
     out = alignNotes(df)
-    assert out["disclosureKey"].to_list() == [None]  # 뼈대 부재 → null 유지
+    assert out["disclosureKey"].to_list() == [None]  # 주석영역 아님 → null 유지

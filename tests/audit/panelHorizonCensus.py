@@ -72,7 +72,7 @@ def _censusOne(code: str) -> dict:
     long = R.readLong(code)
     baseChars: dict[str, int] = {}
     if long is not None and not long.is_empty():
-        long = dedupKeyed(R.anchorLatest(long))
+        long = dedupKeyed(R.anchorLatest(R.alignNotes(long)))  # readWide 와 동일 파이프라인(NT_ 정렬 포함)
         for r in (
             long.group_by("period")
             .agg(pl.col("contentRaw").str.len_chars().fill_null(0).sum().alias("c"))
@@ -90,20 +90,19 @@ def _censusOne(code: str) -> dict:
             if len(sample) < 3:
                 sample.append(f"{p}:deduped={bc} grid={gc}")
 
-    # 주석 연속성 + 잔여 미분해 덩어리 (parquet 기준)
-    for f in files:
-        period = f.stem
+    # 주석 연속성 + 잔여 narrative — NT_ 부여는 READ(alignNotes)이므로 raw parquet 아닌 **정렬된 grid** 기준.
+    ntGrid = grid.filter(pl.col("disclosureKey").cast(pl.Utf8).str.starts_with("NT_"))
+    rec["residualChunks"] = grid.filter(
+        pl.col("disclosureKey").is_null() & pl.col("sectionLeaf").cast(pl.Utf8).str.contains("주석").fill_null(False)
+    ).height
+    for p in pcols:
         try:
-            year = int(period[:4])
+            year = int(p[:4])
         except ValueError:
             continue
-        df = pl.read_parquet(str(f), columns=["disclosureKey", "sectionLeaf"])
-        rec["residualChunks"] += df.filter(
-            pl.col("disclosureKey").is_null() & pl.col("sectionLeaf").str.contains("주석")
-        ).height
-        if year < 2023 and period.endswith("Q4"):
+        if year < 2023 and p.endswith("Q4"):
             rec["annualPre2023"] += 1
-            if df.filter(pl.col("disclosureKey").str.starts_with("NT_")).height > 0:
+            if not ntGrid.is_empty() and any(v for v in ntGrid[p].to_list()):
                 rec["ntPeriodsPre2023"] += 1
 
     if rec["charDrop"] != 0:
