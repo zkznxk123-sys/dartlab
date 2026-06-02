@@ -122,11 +122,26 @@ def _buildAndUploadLite(hfToken: str) -> None:
     nLite = rebuildMain(includePanel=True, includeNews=True, tier="lite", sinceDate=sinceDate, showProgress=True)
     buildMeaningGraph(tier="lite", showProgress=True)  # 그래프는 코퍼스 전역 — lite 디렉터리에 동거
     buildGateRef(tier="lite", showProgress=True)
+
+    # 산출물 실측 크기 — '사용자 첫 다운로드 경량' 가치제안을 숫자로 검증(가정 금지).
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+
+    liteDir = _contentIndexDir("lite")
+    liteBytes = sum(p.stat().st_size for p in liteDir.glob("*") if p.is_file())
+    liteMb = liteBytes / 1024 / 1024
+    print(f"[lite] 산출물 {liteMb:.1f} MB ({nLite:,} 문서)")
+    maxMb = float(os.environ.get("DARTLAB_LITE_MAX_MB", "300"))
+    if liteMb > maxMb:
+        print(
+            f"[lite] ⚠ 크기 경고 — {liteMb:.0f} MB > {maxMb:.0f} MB. lite 의 '경량' 가치가 약화 — "
+            f"DARTLAB_LITE_MONTHS 축소 또는 종목 whitelist(시총 상위) 도입 검토."
+        )
+
     minLite = int(os.environ.get("DARTLAB_LITE_MIN_DOCS", "50000"))
     if nLite < minLite:
         print(f"[lite] ✗ nDocs {nLite:,} < {minLite:,} — lite 업로드 skip (full 은 이미 배포됨)")
         return
-    print(f"[lite] {nLite:,} 문서 → HF dart/contentIndex/lite/ 업로드")
+    print(f"[lite] {nLite:,} 문서 / {liteMb:.1f} MB → HF dart/contentIndex/lite/ 업로드")
     pushContentIndex(hfToken, tier="lite")
     print("[lite] 완료")
 

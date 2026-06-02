@@ -10,6 +10,7 @@
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -129,6 +130,15 @@ def main():
         print(f"원격 목록 조회 실패 — 로컬 캐시 {len(existing)}개로 진행: {e}")
 
     allFiles = sorted(localDir.rglob("*.parquet") if nested else localDir.glob("*.parquet"))
+
+    # 파일수 벽 경고 — 실제 대용량(panel 9.2만·gdelt) 업로드는 이 경로로 오므로 여기서도 감시.
+    # uploadData._monitorFileCount 는 sync 증분 경로 전용이라 bulk 마이그레이션 경로(panel)를 못 본다.
+    _warn = int(os.environ.get("DARTLAB_HF_FILECOUNT_WARN", "80000"))
+    if len(allFiles) >= _warn:
+        print(
+            f"⚠ 파일수 경고 — {category} {len(allFiles):,}개 파일 (repo={repo}, 경고임계 {_warn:,}). "
+            f"HF repo 당 ~10만 파일 권장 한계 접근 → 전용 repo 분리(DATA_RELEASES['{category}']['repo']) 검토."
+        )
 
     def _relpath(p: Path) -> str:
         return str(p.relative_to(localDir)).replace("\\", "/") if nested else p.name

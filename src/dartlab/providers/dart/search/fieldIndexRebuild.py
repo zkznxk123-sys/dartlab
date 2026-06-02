@@ -147,10 +147,15 @@ def rebuildMain(
         for row in df.iter_rows(named=True):
             if skipRcepts and (row.get("rcept_no") or "") in skipRcepts:
                 continue
+            # 컬럼키 정규화 — allFilings 는 rcept_dt/report_nm, docs(flat sections)는 rcept_date/report_type.
+            # 두 소스가 같은 feedDf 를 쓰므로 coalesce 안 하면 docs 메타가 통째 공백 → 날짜필터·lite sinceDate 에서
+            # docs 전량 침묵 탈락. (실측: data/dart/docs/*.parquet 는 rcept_date·report_type 컬럼.)
+            rdt = str(row.get("rcept_dt") or row.get("rcept_date") or "")
+            rnm = row.get("report_nm") or row.get("report_type") or ""
             # lite tier 축소 — 종목 whitelist / rcept_dt 하한.
             if whitelist is not None and (row.get("stock_code") or "") not in whitelist:
                 continue
-            if sinceDate and str(row.get("rcept_dt") or "") < sinceDate:
+            if sinceDate and rdt < sinceDate:
                 continue
             raw = row.get(contentColumn) or ""
             if contentColumn == "content_raw":
@@ -165,8 +170,8 @@ def rebuildMain(
                     "corp_code": row.get("corp_code") or "",
                     "corp_name": row.get("corp_name") or "",
                     "stock_code": row.get("stock_code") or "",
-                    "rcept_dt": str(row.get("rcept_dt") or ""),
-                    "report_nm": row.get("report_nm") or "",
+                    "rcept_dt": rdt,
+                    "report_nm": rnm,
                     "section_title": row.get("section_title") or "",
                     "text": content[:500],
                     "source": source,
@@ -815,7 +820,16 @@ def indexInfo() -> dict:
             pass
     # 받은 인덱스가 코드보다 신버전이면 비호환(라이브러리 업그레이드 필요). 동버전 이하는 읽기 가능.
     info["compatible"] = info["schemaVersion"] <= INDEX_SCHEMA_VERSION
-    info["hasMeaning"] = (base / "meaning.json").exists()
+    # hasMeaning 은 파일 *존재* 가 아니라 *비어있지 않음* — 429 사고로 meaning.json={} (0 노드) 가 업로드되면
+    # 의미확장이 죽은 bm25-only degraded 인데 파일은 존재. 존재만 보면 degraded 를 healthy 로 거짓보고한다.
+    meaningPath = base / "meaning.json"
+    hasMeaning = False
+    if meaningPath.exists():
+        try:
+            hasMeaning = bool(json.loads(meaningPath.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError, ValueError):
+            hasMeaning = False
+    info["hasMeaning"] = hasMeaning
     info["hasDelta"] = (base / "delta.npz").exists()
     return info
 

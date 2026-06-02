@@ -111,3 +111,82 @@ def test_index_info_schema_version(synthRoot):
     assert info["schemaVersion"] == FI.INDEX_SCHEMA_VERSION
     assert info["compatible"] is True
     assert info["nDocs"] == 2
+
+
+def _mkDocs(root):
+    """flat docs parquet 합성 — 실제 스키마(rcept_date/report_type, rcept_dt 아님)."""
+    import polars as pl
+
+    docsDir = root / "dart" / "docs"
+    docsDir.mkdir(parents=True, exist_ok=True)
+    pl.DataFrame(
+        [
+            {
+                "corp_code": "",
+                "corp_name": "삼성",
+                "stock_code": "005930",
+                "rcept_date": "20240115",
+                "rcept_no": "20240115000001",
+                "report_type": "사업보고서",
+                "section_order": 0,
+                "section_title": "사업의 개요",
+                "section_content": "반도체 메모리 사업 매출 성장",
+            },
+            {
+                "corp_code": "",
+                "corp_name": "하이닉스",
+                "stock_code": "000660",
+                "rcept_date": "20250320",
+                "rcept_no": "20250320000002",
+                "report_type": "분기보고서",
+                "section_order": 0,
+                "section_title": "재무제표",
+                "section_content": "영업이익 흑자전환 HBM 수요",
+            },
+        ]
+    ).write_parquet(docsDir / "synthetic.parquet")
+
+
+def test_docs_meta_columnkey_coalesce(synthRoot):
+    """docs(rcept_date/report_type) 컬럼키가 rcept_dt/report_nm 으로 정규화돼 메타가 채워진다(공백 아님)."""
+    import polars as pl
+
+    from dartlab.providers.dart.search import fieldIndex as FI
+    from dartlab.providers.dart.search import fieldIndexRebuild as FIR
+
+    _mkDocs(synthRoot)
+    n = FIR.rebuildMain(includeAllFilings=False, includeDocs=True, tier="full", showProgress=False)
+    assert n == 2
+    meta = pl.read_parquet(FI._contentIndexDir() / "main_meta.parquet")
+    # 컬럼키 버그면 rcept_dt/report_nm 가 전부 "" — coalesce 후 실제 날짜·유형이 채워져야 한다.
+    assert set(meta["rcept_dt"].to_list()) == {"20240115", "20250320"}
+    assert "사업보고서" in meta["report_nm"].to_list()
+
+
+def test_lite_sincedate_keeps_recent_docs(synthRoot):
+    """lite sinceDate 가 docs 를 전량 탈락시키지 않고 최근 docs 만 보존(컬럼키 버그 회귀 가드)."""
+    from dartlab.providers.dart.search import fieldIndex as FI
+    from dartlab.providers.dart.search import fieldIndexRebuild as FIR
+
+    _mkDocs(synthRoot)
+    n = FIR.rebuildMain(
+        includeAllFilings=False, includeDocs=True, tier="lite", sinceDate="20250101", showProgress=False
+    )
+    # 20240115 제외, 20250320 보존 = 1 (버그 시 0 = docs 전량 탈락)
+    assert n == 1
+    assert (FI._contentIndexDir("lite") / "main.npz").exists()
+
+
+def test_index_info_hasmeaning_nonempty(synthRoot):
+    """meaning.json={} (degraded) 면 hasMeaning=False — 파일 존재만으로 healthy 거짓보고 금지."""
+    from dartlab.providers.dart.search import fieldIndex as FI
+    from dartlab.providers.dart.search import fieldIndexRebuild as FIR
+
+    base = FI._contentIndexDir()
+    (base / "main_info.json").write_text(
+        '{"nDocs": 10, "avgDocLength": 5.0, "builtAt": "2026-06-02", "schemaVersion": 1}', encoding="utf-8"
+    )
+    (base / "meaning.json").write_text("{}", encoding="utf-8")  # degraded — 0 노드
+    assert FIR.indexInfo()["hasMeaning"] is False
+    (base / "meaning.json").write_text('{"유상증자결정": {"신주": 1.2}}', encoding="utf-8")
+    assert FIR.indexInfo()["hasMeaning"] is True

@@ -50,7 +50,8 @@ def test_index_info_present(tmp_path, monkeypatch):
     (tmp_path / "main_info.json").write_text(
         json.dumps({"nDocs": 17438, "avgDocLength": 120.0, "builtAt": "2026-06-02T05:00:00"}), encoding="utf-8"
     )
-    (tmp_path / "meaning.json").write_text("{}", encoding="utf-8")
+    # 비어있지 않은 meaning.json(실 노드) — hasMeaning 은 *존재* 가 아니라 *비어있지 않음* 을 본다(degraded 거짓보고 차단).
+    (tmp_path / "meaning.json").write_text('{"유상증자결정": {"신주": 1.2}}', encoding="utf-8")
     info = fir.indexInfo()
     assert info["available"] is True
     assert info["dataAsOf"] == "2026-06-02T05:00:00"
