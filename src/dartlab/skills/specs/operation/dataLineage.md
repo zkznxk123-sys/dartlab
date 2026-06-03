@@ -74,6 +74,12 @@ L3: axis / recipe
 > 트리거해야 하면 core DIP seam(`core.dartClient`/`edgarClient` 등) 으로 위임한다. 상세
 > [operation.architecture](dartlab://skills/operation.architecture) L1 표 + `test_providers_no_network`.
 
+> **수집 오케스트레이션 SSOT = `dartlab.pipeline`** (L4 sink). fetch(gather)→build(providers)
+> →upload(HF) 조합을 in-library 로 모아 로컬 `dartlab sync [stage]` 와 CI
+> `python -m dartlab.pipeline <stage>` 가 동일 진입점을 호출한다. category→stage 레지스트리
+> (finance/report/docs/sections/panel/krx/macro/news/edgar…). panel→HF 는 refDf 부재 시
+> design-in graceful skip(게이트 없음). 옛 `.github/scripts/sync/*` 는 점진 흡수.
+
 ## 매핑 표
 
 | source | provider | parquet | axis 영향 |
