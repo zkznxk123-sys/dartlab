@@ -12,7 +12,6 @@ LLM Specifications:
         - scale/sign 미적용 raw 텍스트 저장 금지 — valueRaw 는 해소 numeric 문자열(companyfacts val 동치).
     OutputSchema:
         - ``EDGAR_CELL_SCHEMA: dict[str, pl.DataType]`` 14 col.
-        - ``CELL_PIVOT_INDEX: list[str]`` (statement, concept, axisPath, scope).
     Prerequisites:
         - polars.
     Freshness:
@@ -44,6 +43,3 @@ EDGAR_CELL_SCHEMA: dict[str, pl.DataType] = {
     "valueRaw": pl.Utf8,  # 해소 numeric 문자열 (scale·sign 적용; nil → "")
     "cellOrder": pl.UInt32,  # presentation arc 순서 (문서 표시순)
 }
-
-# 셀 pivot 행 identity (DART CELL_PIVOT_INDEX 동형 — acode→concept).
-CELL_PIVOT_INDEX: list[str] = ["statement", "concept", "axisPath", "scope"]

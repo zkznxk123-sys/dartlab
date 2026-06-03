@@ -2,7 +2,7 @@
 
 DART 의 ACLASS(정부 발행 Link Role, 재무제표 구조 identity)의 EDGAR 미러. EDGAR 는 presentation
 linkbase 의 ``<presentationLink xlink:role="…role URI…">`` 이 재무제표를 정의 — role URI 가 어떤
-statement(BS/IS/CF)인지, 그 안 concept 순서·계층, preferredLabel 을 담는다. ``parsePresentation`` 이
+statement(BS/IS/CF)인지, 그 안 concept 순서·계층을 담는다. ``parsePresentation`` 이
 role→ordered concepts 를, ``parseLabels`` 가 concept→라벨을 추출. 둘 다 ``.txt`` 안 EX-101 블록에서
 자급(전 history, 네트워크 0).
 
@@ -11,7 +11,7 @@ LLM Specifications:
         - lxml 네임스페이스 가정 금지 — link:/default prefix 양쪽 regex 흡수.
         - arc order 무시 금지 — presentationArc order 로 concept 표시순(cellOrder) 결정.
     OutputSchema:
-        - ``parsePresentation(xml) -> dict[str, list[dict]]`` (roleURI → [{conceptKey, concept, ns, order, preferredLabel}]).
+        - ``parsePresentation(xml) -> dict[str, list[dict]]`` (roleURI → [{conceptKey, concept, order}]).
         - ``parseLabels(xml) -> dict[str, str]`` (conceptKey → 대표 라벨).
     Prerequisites:
         - 없음 (순수 regex 파싱).
@@ -54,18 +54,17 @@ def _fragmentToConcept(fragment: str) -> tuple[str, str]:
 
 
 def parsePresentation(xml: str) -> dict[str, list[dict]]:
-    """EX-101.PRE → ``roleURI → [{conceptKey, concept, ns, order, preferredLabel}]`` (표시순).
+    """EX-101.PRE → ``roleURI → [{conceptKey, concept, order}]`` (표시순).
 
-    각 ``<presentationLink role=URI>`` 의 loc(label→concept) + presentationArc(from/to/order/
-    preferredLabel)를 엮어 role 별 concept 순서 리스트 산출. role URI 가 statement 식별(mapper.
-    roleToStatement), order 가 cellOrder.
+    각 ``<presentationLink role=URI>`` 의 loc(label→concept) + presentationArc(from/to/order)를 엮어
+    role 별 concept 순서 리스트 산출. role URI 가 statement 식별(mapper.roleToStatement), order 가 cellOrder.
 
     Args:
         xml: EX-101.PRE presentation linkbase XML.
 
     Returns:
-        dict — ``roleURI → [{"conceptKey": "us-gaap:Assets", "concept": "Assets", "ns": "us-gaap",
-        "order": float, "preferredLabel": str|None}]`` (order 정렬).
+        dict — ``roleURI → [{"conceptKey": "us-gaap:Assets", "concept": "Assets", "order": float}]``
+        (order 정렬).
 
     Raises:
         없음 — 빈/파싱불가 role 은 skip.
@@ -134,15 +133,7 @@ def parsePresentation(xml: str) -> dict[str, list[dict]]:
                 order = float(orderStr) if orderStr else 0.0
             except ValueError:
                 order = 0.0
-            entries.append(
-                {
-                    "conceptKey": conceptKey,
-                    "concept": local,
-                    "ns": ns,
-                    "order": order,
-                    "preferredLabel": _arcAttr(attrs, "preferredLabel"),
-                }
-            )
+            entries.append({"conceptKey": conceptKey, "concept": local, "order": order})
         if entries:
             entries.sort(key=lambda e: e["order"])
             roles.setdefault(roleUri, []).extend(entries)

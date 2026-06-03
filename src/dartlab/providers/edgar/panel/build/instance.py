@@ -3,7 +3,7 @@
 DART 의 ``<TE ACODE ACONTEXT>`` 셀 추출 + ACONTEXT 디코드의 EDGAR 미러. 단 EDGAR 는 fact 가
 ``<ix:nonFraction name=us-gaap:X contextRef=…>`` 로 표시되고 기간·차원은 문서-전역 ``<xbrli:context>``
 간접참조 → fact 추출 + context 해소를 **분리**한다. ``extractFacts`` = 본문 inline fact(concept·value·
-contextRef·htmlPos), ``extractContexts`` = contextRef → (instant|start/end, dimension members).
+contextRef), ``extractContexts`` = contextRef → (instant|start/end, dimension members).
 
 LLM Specifications:
     AntiPatterns:
@@ -11,7 +11,7 @@ LLM Specifications:
         - nil fact 를 0 으로 금지 — "" (미공시).
         - context member 누락 금지 — explicitMember dimension→member 전부 수집(axisPath truth).
     OutputSchema:
-        - ``extractFacts(html) -> list[dict]`` (concept/namespace/contextRef/unitRef/valueRaw/factType/htmlPos).
+        - ``extractFacts(html) -> list[dict]`` (concept/namespace/contextRef/unitRef/valueRaw/factType).
         - ``extractContexts(html) -> dict[str, dict]`` (ref → {instant|start/end, members}).
     Prerequisites:
         - 없음 (순수 regex 파싱).
@@ -85,17 +85,16 @@ def _resolveValue(inner: str, *, sign: str | None, scale: str | None, nil: bool)
 
 
 def extractFacts(html: str) -> list[dict]:
-    """primary HTML → inline fact list (concept·contextRef·해소 valueRaw·htmlPos).
+    """primary HTML → inline fact list (concept·contextRef·해소 valueRaw).
 
     ``<ix:nonFraction>``(numeric) / ``<ix:nonNumeric>``(text) 전부 수집. concept 는 ``name`` 속성
-    (예 "us-gaap:Revenues" → namespace="us-gaap", concept="Revenues"). htmlPos = HTML 내 match 시작
-    위치(walker 가 표 블록에 fact 귀속할 때 사용).
+    (예 "us-gaap:Revenues" → namespace="us-gaap", concept="Revenues").
 
     Args:
         html: primary iXBRL HTML.
 
     Returns:
-        list[dict] — ``{concept, namespace, contextRef, unitRef, valueRaw, factType, htmlPos}``.
+        list[dict] — ``{concept, namespace, contextRef, unitRef, valueRaw, factType}``.
 
     Raises:
         없음.
@@ -161,7 +160,6 @@ def extractFacts(html: str) -> list[dict]:
                 "unitRef": _attr(attrs, "unitRef") or _attr(attrs, "unitref"),
                 "valueRaw": _resolveValue(inner, sign=_attr(attrs, "sign"), scale=_attr(attrs, "scale"), nil=nil),
                 "factType": "numeric" if kind == "fraction" else "text",
-                "htmlPos": m.start(),
             }
         )
     return facts
@@ -180,7 +178,7 @@ def extractInstanceFacts(insXml: str) -> list[dict]:
 
     Returns:
         list[dict] — ``extractFacts`` 와 동일 schema (concept/namespace/contextRef/unitRef/valueRaw/
-        factType/htmlPos). numeric 만 (재무 셀). 빈 INS → [].
+        factType). numeric 만 (재무 셀). 빈 INS → [].
 
     Raises:
         없음.
@@ -218,7 +216,6 @@ def extractInstanceFacts(insXml: str) -> list[dict]:
                 "unitRef": _attr(attrs, "unitRef") or _attr(attrs, "unitref"),
                 "valueRaw": value,
                 "factType": "numeric",
-                "htmlPos": m.start(),
             }
         )
     return facts
