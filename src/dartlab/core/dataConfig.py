@@ -87,6 +87,15 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "nested": True,
     },
+    "edgarPanel": {
+        # EDGAR panel(공시 수평화) SSOT artifact — DART panel 미러.
+        # flat: data/edgar/panel/{ticker}.parquet (회사당 1파일, HF 폭발 회피 — DART flat 정책 미러).
+        # providers.edgar.panel.build 가 gather sections → cross-market 16-col remap 생산,
+        # providers.dart.panel 이 read_parquet (marketNs="us"). nested=False (flat 1파일).
+        "dir": "edgar/panel",
+        "label": "SEC EDGAR 공시 panel 수평화 artifact (회사당 flat, cross-market 16-col)",
+        "public": True,
+    },
     "edgar": {
         "dir": "edgar/finance",
         "label": "SEC EDGAR 재무 데이터 (companyfacts.zip 벌크 파생)",

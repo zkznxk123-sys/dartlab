@@ -36,6 +36,8 @@ _CATEGORY_MAP = {
     # plan delegated-prancing-tower PR-E3 — period-sharded sections SSOT artifact.
     # nested=True (data/edgar/sections/{ticker}/{period}.parquet) — rglob 자동 처리.
     "sections": "edgarSections",
+    # EDGAR panel(공시 수평화) artifact — DART panel 미러. flat (data/edgar/panel/{ticker}.parquet).
+    "panel": "edgarPanel",
 }
 
 # 업로드 명시 차단 목록 (원본이 SEC 벌크, HF 미러링 정책상 제외)

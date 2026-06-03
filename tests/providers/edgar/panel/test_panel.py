@@ -95,6 +95,25 @@ def test_panel_us_scope_consolidated(_builtPanel) -> None:
     assert set(p["scope"].unique()) == {"consolidated"}
 
 
+def test_panel_us_ticker_case_insensitive(_builtPanel) -> None:
+    """Panel("testx", marketNs="us") 소문자도 TESTX artifact 해석 (EDGAR ticker 대소문자 무관)."""
+    from dartlab.providers.dart.panel import Panel
+
+    p = Panel("testx", marketNs="us")  # 소문자 입력
+    assert not p.is_empty(), "소문자 ticker 가 대문자 artifact 해석 실패"
+
+
+def test_edgar_panel_distribution_config() -> None:
+    """edgarPanel DATA_RELEASES 엔트리 + deploy _CATEGORY_MAP 배선 (HF 배포 경로)."""
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+    from dartlab.providers.edgar.openapi.deploy import _CATEGORY_MAP
+
+    assert "edgarPanel" in DATA_RELEASES
+    assert DATA_RELEASES["edgarPanel"]["dir"] == "edgar/panel"
+    assert _CATEGORY_MAP["panel"] == "edgarPanel"
+    assert repoFor("edgarPanel")  # truthy (기본 HF_REPO)
+
+
 def test_is_strong_topic_edgar() -> None:
     """EDGAR isStrongTopic — finance(대소문자) 강함, item 섹션명/자유 텍스트는 raw 보드 (데이터 0)."""
     from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic

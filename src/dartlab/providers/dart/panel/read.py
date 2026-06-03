@@ -168,45 +168,48 @@ _HF_PANEL_ATTEMPTED: set[str] = set()
 def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
     """panel.parquet 부재 시 HF lazy 다운로드 — 한 종목만, 1회 시도 (단일 artifact 자동로드).
 
-    sections ``_ensureFromHf`` 미러. 로컬 우선 — 디렉터리 있으면 즉시 반환. offline/
-    ``DARTLAB_NO_HF_DOWNLOAD=1`` skip. 실패는 graceful(빈 결과). KR 전용(US 후속).
+    sections ``_ensureFromHf`` 미러. 로컬 우선 — 파일 있으면 즉시 반환. offline/
+    ``DARTLAB_NO_HF_DOWNLOAD=1`` skip. 실패는 graceful(빈 결과). KR(panel) + US(edgarPanel) 둘 다.
     native is/bs/cf/ratios(셀)도 이 한 artifact 에서 파생되므로 panel.parquet 만 받으면 충분.
 
     Args:
-        code: 종목코드 (KR 6자리).
-        marketNs: 시장 namespace. ``"kr"`` 만 다운로드 시도 (그 외 즉시 반환, US 후속).
+        code: 종목코드 (KR 6자리) 또는 ticker (US — 대소문자 무관, 내부 upper 정규화).
+        marketNs: 시장 namespace. ``"kr"`` → panel repo, ``"us"`` → edgarPanel repo. 그 외 즉시 반환.
 
     Returns:
-        None — 부작용으로 ``data/{dart}/panel/{code}/`` 를 채운다. 이미 있으면 무동작.
+        None — 부작용으로 ``data/{dart|edgar}/panel/{code}.parquet`` 를 채운다. 이미 있으면 무동작.
 
     Example:
-        >>> ensurePanelFromHf("005930")  # doctest: +SKIP
-        # data/dart/panel/005930/ 부재 시 HF 에서 그 종목 parquet 만 lazy 다운로드.
+        >>> ensurePanelFromHf("005930")              # doctest: +SKIP — KR (dart/panel)
+        >>> ensurePanelFromHf("AAPL", marketNs="us") # doctest: +SKIP — US (edgar/panel)
 
     Raises:
         없음 — 모든 예외를 graceful 흡수 (다운로드 실패는 빈 결과로 저하).
     """
     import os as _os
 
-    if marketNs != "kr":
+    if marketNs not in ("kr", "us"):
         return
+    code = code.upper() if marketNs == "us" else code  # EDGAR ticker 대소문자 무관 (build 가 upper 저장)
     _d = _panelDir(code, marketNs)
     if (_d.parent / f"{code}.parquet").exists() or _d.exists():  # flat 파일 또는 옛 폴더(하위호환)
         return
     if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
         return
-    if code in _HF_PANEL_ATTEMPTED:
+    attemptKey = f"{marketNs}:{code}"
+    if attemptKey in _HF_PANEL_ATTEMPTED:
         return
-    _HF_PANEL_ATTEMPTED.add(code)
+    _HF_PANEL_ATTEMPTED.add(attemptKey)
     try:
         from huggingface_hub import snapshot_download
 
         from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
+        category = "panel" if marketNs == "kr" else "edgarPanel"
         snapshot_download(
-            repo_id=repoFor("panel"),
+            repo_id=repoFor(category),
             repo_type="dataset",
-            allow_patterns=[f"{DATA_RELEASES['panel']['dir']}/{code}.parquet"],  # flat 회사당 1파일
+            allow_patterns=[f"{DATA_RELEASES[category]['dir']}/{code}.parquet"],  # flat 회사당 1파일
             local_dir=str(Path(_cfg.dataDir)),
         )
     except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
@@ -587,9 +590,10 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
         TargetMarkets:
             - KR + US.
     """
+    code = code.upper() if marketNs == "us" else code  # EDGAR ticker 대소문자 무관 (build 가 upper 저장)
     ensurePanelFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선, 단일 자동로드)
     d = _panelDir(code, marketNs)
-    flat = d.parent / f"{code}.parquet"  # flat: data/dart/panel/{code}.parquet (회사당 1파일, HF 폭발 회피)
+    flat = d.parent / f"{code}.parquet"  # flat: data/{dart|edgar}/panel/{code}.parquet (회사당 1파일)
     try:
         if flat.exists():
             df = pl.read_parquet(str(flat))

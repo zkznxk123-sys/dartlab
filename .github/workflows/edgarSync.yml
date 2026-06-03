@@ -83,6 +83,14 @@ jobs:
           key: dartlab-edgar-sections-${{ github.run_id }}
           restore-keys: dartlab-edgar-sections-
 
+      # EDGAR panel artifact cache — sections → 16-col remap 산출물 (DART panel 미러).
+      - name: Restore EDGAR panel cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/edgar/panel
+          key: dartlab-edgar-panel-${{ github.run_id }}
+          restore-keys: dartlab-edgar-panel-
+
       # ── 1. daily 벌크: companyfacts.zip → {cik}.parquet ──
       - name: Download + convert companyfacts.zip (daily bulk)
         run: |
@@ -149,6 +157,16 @@ jobs:
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
 
+      # ── 3.5. panel artifact — gather sections → cross-market 16-col remap (weekly) ──
+      # sections 수집(step 3) 직후 그 산출물을 panel artifact 로 remap (offline, network 0).
+      # DART panel 미러 — providers.dart.panel 이 marketNs="us" 로 read.
+      - name: Build EDGAR panel (sections → 16-col, weekly full sync only)
+        if: ${{ github.event.schedule == '0 3 * * 0' || github.event.inputs.collectDocs == 'true' }}
+        run: |
+          uv run python -X utf8 .github/scripts/sync/buildEdgarPanel.py --all --overwrite
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/data
+
       # ── 4. scan 프리빌드 ──
       - name: Build EDGAR scan prebuild
         run: |
@@ -175,6 +193,8 @@ jobs:
               # data/edgar/sections/{ticker}/{period}.parquet 동시 emit. PR-E7 안전
               # 게이트 통과 후 docs 카테고리 폐기 예정.
               cats.append('sections')
+              # EDGAR panel(공시 수평화) artifact — sections → 16-col remap (DART panel 미러).
+              cats.append('panel')
           result = deployEdgarToHF(categories=cats)
           print(result)
           "
@@ -217,6 +237,13 @@ jobs:
         with:
           path: data/edgar/sections
           key: dartlab-edgar-sections-${{ github.run_id }}
+
+      - name: Save EDGAR panel cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/edgar/panel
+          key: dartlab-edgar-panel-${{ github.run_id }}
 
       - name: Summary
         if: always()
