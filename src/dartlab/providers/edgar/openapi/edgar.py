@@ -7,16 +7,18 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.core.edgarClient import EdgarClient
-from dartlab.providers.edgar.openapi.facts import (
+from dartlab.core.edgarClient import (
+    EdgarClient,
+    filingsFrame,
     getCompanyConceptJson,
     getCompanyFactsJson,
     getFrameJson,
+    getSubmissionsJson,
+    resolveIssuer,
+    searchIssuers,
 )
-from dartlab.providers.edgar.openapi.identity import resolveIssuer, searchIssuers
 from dartlab.providers.edgar.openapi.saver import saveDocs as _saveDocs
 from dartlab.providers.edgar.openapi.saver import saveFinance as _saveFinance
-from dartlab.providers.edgar.openapi.submissions import filingsFrame, getSubmissionsJson
 
 
 class OpenEdgar:

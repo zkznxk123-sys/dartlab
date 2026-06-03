@@ -25,14 +25,14 @@ from pathlib import Path
 import httpx
 import polars as pl
 
+from dartlab.core.edgarClient import (
+    EDGAR_COMPANYFACTS_SCHEMA,
+    companyFactsToRows,
+)
 from dartlab.providers.edgar.bulk.freshness import (
     isBulkFresh,
     readSavedEtag,
     touchBulkFreshness,
-)
-from dartlab.providers.edgar.openapi.facts import (
-    EDGAR_COMPANYFACTS_SCHEMA,
-    companyFactsToRows,
 )
 
 _log = logging.getLogger(__name__)

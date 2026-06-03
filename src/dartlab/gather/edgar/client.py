@@ -166,11 +166,18 @@ class EdgarClient:
 
 
 class _EdgarFetchProvider:
-    """core.edgarClient.EdgarFetchProvider 구현 — gather 가 SEC fetch 전담."""
+    """core.edgarClient.EdgarFetchProvider 구현 — gather 가 SEC fetch+normalize 전담."""
 
     def makeClient(self, **kwargs):
         """SEC HTTP 클라이언트 인스턴스 생성."""
         return EdgarClient(**kwargs)
+
+    def call(self, module, func, *args, **kwargs):
+        """gather/edgar.<module>.<func> 위임 — providers 소비자 seam."""
+        import importlib
+
+        m = importlib.import_module(f"dartlab.gather.edgar.{module}")
+        return getattr(m, func)(*args, **kwargs)
 
 
 registerEdgarFetchProvider(_EdgarFetchProvider())

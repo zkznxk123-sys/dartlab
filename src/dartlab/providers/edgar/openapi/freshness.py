@@ -233,7 +233,7 @@ def checkEdgarFreshness(ticker: str, *, forceCheck: bool = False) -> EdgarFreshn
     localAccessions, localLatest = _loadLocalAccessionNos(normalized)
 
     try:
-        from dartlab.providers.edgar.openapi.submissions import (
+        from dartlab.core.edgarClient import (
             findRegularFilings,
             getSubmissionsJson,
         )

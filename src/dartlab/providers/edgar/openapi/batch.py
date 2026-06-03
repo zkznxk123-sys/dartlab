@@ -118,7 +118,7 @@ async def _collectEdgarFinance(
     onPeriod=None,
 ) -> int:
     """companyfacts API → parquet 저장. 반환: 행 수."""
-    from dartlab.providers.edgar.openapi.facts import companyFactsToRows
+    from dartlab.core.edgarClient import companyFactsToRows
 
     if not cik:
         return 0

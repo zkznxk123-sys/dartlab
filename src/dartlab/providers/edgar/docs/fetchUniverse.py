@@ -245,7 +245,7 @@ def _appendJsonl(path: Path, record: dict[str, object]) -> None:
 
 
 def _resolveTickerMeta(ticker: str) -> dict[str, str]:
-    from dartlab.providers.edgar.openapi.identity import resolveIssuer
+    from dartlab.core.edgarClient import resolveIssuer
 
     info = resolveIssuer(str(ticker).upper())
     return {
@@ -256,19 +256,19 @@ def _resolveTickerMeta(ticker: str) -> dict[str, str]:
 
 
 def _getSubmissions(cik: str) -> dict:
-    from dartlab.providers.edgar.openapi.submissions import getSubmissionsJson
+    from dartlab.core.edgarClient import getSubmissionsJson
 
     return getSubmissionsJson(cik)
 
 
 def _mergeFilingArrays(submissions: dict, sinceYear: int) -> dict:
-    from dartlab.providers.edgar.openapi.submissions import mergeSubmissionFilings
+    from dartlab.core.edgarClient import mergeSubmissionFilings
 
     return mergeSubmissionFilings(submissions, sinceYear=sinceYear)
 
 
 def _findFilings(submissions: dict, sinceYear: int) -> list[dict]:
-    from dartlab.providers.edgar.openapi.submissions import findRegularFilings
+    from dartlab.core.edgarClient import findRegularFilings
 
     rows = findRegularFilings(submissions, sinceYear=sinceYear)
     converted: list[dict] = []

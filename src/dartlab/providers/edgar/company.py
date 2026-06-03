@@ -27,6 +27,7 @@ _log = getLogger(__name__)
 
 import polars as pl
 
+from dartlab.core.edgarClient import SUPPORTED_REGULAR_FORMS
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers._common.filingHelpers import (
     filingRecord,
@@ -37,7 +38,6 @@ from dartlab.providers._common.filingHelpers import (
 from dartlab.providers.edgar.accessor.docsAccessor import _DocsAccessor
 from dartlab.providers.edgar.accessor.financeAccessor import _FinanceAccessor
 from dartlab.providers.edgar.accessor.profileAccessor import _ProfileAccessor
-from dartlab.providers.edgar.openapi.submissions import SUPPORTED_REGULAR_FORMS
 
 _PERIOD_COLUMN_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
@@ -678,7 +678,7 @@ class Company:
             - polars
             - dartlab.core.memory.BoundedCache (30 entry cap)
             - dartlab.providers.edgar.accessor.* (Docs/Finance/Profile)
-            - dartlab.providers.edgar.openapi.identity (lazy SEC API fallback)
+            - dartlab.core.edgarClient (lazy SEC API fallback)
 
         Capabilities:
             - 단일 미국 상장사 facade 진입점 — docs/finance/profile 통합 access.
@@ -776,7 +776,7 @@ class Company:
             pass
 
         try:
-            from dartlab.providers.edgar.openapi.identity import resolveIssuer
+            from dartlab.core.edgarClient import resolveIssuer
 
             return resolveIssuer(tickerUpper)
         except ValueError:

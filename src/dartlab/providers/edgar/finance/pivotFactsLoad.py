@@ -101,7 +101,7 @@ def _autoDownloadEdgarFinance(cik: str, dest: Path) -> Optional[Path]:
 
     emit("edgar:sec_download", cik=cik)
     try:
-        from dartlab.providers.edgar.openapi.facts import (
+        from dartlab.core.edgarClient import (
             companyFactsToRows,
             getCompanyFactsJson,
         )

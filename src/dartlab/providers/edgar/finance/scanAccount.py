@@ -43,7 +43,7 @@ def _buildEdgarTagKeys(dartSnakeId: str) -> set[str]:
 def _joinCorpName(df: pl.DataFrame) -> pl.DataFrame:
     """ticker에 회사명(corpName) 매핑."""
     try:
-        from dartlab.providers.edgar.openapi.identity import loadTickers
+        from dartlab.core.edgarClient import loadTickers
 
         tickers = loadTickers().select(
             pl.col("ticker").alias("stockCode"),
@@ -218,7 +218,7 @@ def scanAccount(
 
     # CIK → ticker 매핑
     try:
-        from dartlab.providers.edgar.openapi.identity import loadTickers
+        from dartlab.core.edgarClient import loadTickers
 
         tickerDf = loadTickers()
         cikToTicker = dict(
