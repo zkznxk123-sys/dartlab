@@ -291,6 +291,9 @@ raw = p("재고", tag=True)           # 원본 XML 보존 (기본은 plain)
 
 # 3. 대형 종목 메모리 핸들 — period 파일 prune
 p2 = Panel("005930", periods=["2025Q4", "2026Q1"])
+
+# 4. 사용법 가이드 — 호출 패턴 (전역 dartlab.help=발견과 구분, 상세는 skills.describe)
+print(Panel.guide())                # 또는 c.panel.guide() — wide·섹션검색·native/finance·freq·tag 패턴
 ```
 
 ```python
