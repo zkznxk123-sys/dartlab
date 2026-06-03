@@ -32,6 +32,13 @@ import polars as pl
 from dartlab import config as _dartlabConfig
 from dartlab.core.dartClient import DartClient
 from dartlab.core.dataConfig import DATA_RELEASES
+from dartlab.providers.dart.build.saver import (
+    enrichFinance,
+    enrichReport,
+)
+from dartlab.providers.dart.build.saver import (
+    save as _saveFile,
+)
 
 # ── 내부 상수 ──────────────────────────────────────────────
 from dartlab.providers.dart.openapi.constants import (
@@ -52,13 +59,6 @@ from dartlab.providers.dart.openapi.disclosure import (
     _resolveCorpCode,
     companyInfo,
     listFilings,
-)
-from dartlab.providers.dart.openapi.saver import (
-    enrichFinance,
-    enrichReport,
-)
-from dartlab.providers.dart.openapi.saver import (
-    save as _saveFile,
 )
 
 # 사업보고서 주요정보 29개 + 주요사항보고 27개 = 56개 카테고리

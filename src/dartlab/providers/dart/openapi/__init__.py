@@ -13,15 +13,23 @@ s.shares()                              # 지분공시
 s.saveFinance("재무.csv", 2020, kr=True) # 한글 컬럼 저장
 호환 alias:
     from dartlab import Dart
+
+NOTE: Dart/OpenDart 파사드·ZipDocsCollector·korColumns 는 lazy ``__getattr__`` 노출 —
+build(``build.saver``→``openapi.constants``) ↔ facade 순환 import 회피. DartClient·키·
+DartApiError 는 gather fetch 전담(core.dartClient seam). zip 병렬 fetch 는 gather.dart.document.
 """
 
-# DartClient·키·DartApiError 는 gather 가 fetch 전담 (ETL Extract) — core.dartClient seam 경유.
-# DartKeyProvider(CredentialProvider) 등록은 core.credentials 가 gather.dart.keys 발견으로 트리거.
-# zip 병렬 fetch(streamZipBytes 등)는 gather.dart.document 로 이관 (ETL Extract).
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+# core 재노출(경량) — gather 가 fetch 전담, providers 소비자 호환용 seam.
 from dartlab.core.dartClient import DartApiError, DartClient
-from dartlab.providers.dart.openapi.dart import Dart, DartCompany, OpenDart, OpenDartCompany
-from dartlab.providers.dart.openapi.saver import korColumns
-from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+
+if TYPE_CHECKING:
+    from dartlab.providers.dart.build.saver import korColumns
+    from dartlab.providers.dart.openapi.dart import Dart, DartCompany, OpenDart, OpenDartCompany
+    from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
 
 __all__ = [
     "OpenDart",
@@ -34,7 +42,21 @@ __all__ = [
     "korColumns",
 ]
 
-# Sections batch build — ProcessPool 병렬 + 디스크 캐시 (Phase 3 옵션 3).
-# 본진 API 격상 (커밋 후) 후 사용:
-#   from dartlab.providers.dart.docs.sections.diskCache import buildBatchParallel
-#   results = buildBatchParallel(["005930", "035720", ...])
+_LAZY: dict[str, str] = {
+    "OpenDart": "dartlab.providers.dart.openapi.dart",
+    "OpenDartCompany": "dartlab.providers.dart.openapi.dart",
+    "Dart": "dartlab.providers.dart.openapi.dart",
+    "DartCompany": "dartlab.providers.dart.openapi.dart",
+    "ZipDocsCollector": "dartlab.providers.dart.openapi.zipCollector",
+    "korColumns": "dartlab.providers.dart.build.saver",
+}
+
+
+def __getattr__(name: str):
+    """lazy re-export — facade/collector/korColumns 를 접근 시점에만 import (순환 회피)."""
+    import importlib
+
+    modPath = _LAZY.get(name)
+    if modPath is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    return getattr(importlib.import_module(modPath), name)

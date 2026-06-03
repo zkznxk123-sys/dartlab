@@ -40,13 +40,13 @@ async def _collectFinance(
             지정하면 88분기 차집합 우회. 누락 검사도 이 리스트로만 한정.
             None이면 기존 _buildAllPeriods 88분기 전체 + 차집합 (heavy fallback).
     """
+    from dartlab.providers.dart.build.saver import enrichFinance, save, saveReplacingByKeys
     from dartlab.providers.dart.openapi.batch import (
         _CODE_TO_QUARTER,
         _buildAllPeriods,
         _dataPath,
         _existingFinancePeriods,
     )
-    from dartlab.providers.dart.openapi.saver import enrichFinance, save, saveReplacingByKeys
 
     path = _dataPath("finance", stockCode)
 
@@ -126,6 +126,7 @@ async def _collectReport(
         targetPeriods: list.json에서 발견한 정확한 (bsns_year, reprt_code).
             지정하면 88분기 차집합 우회.
     """
+    from dartlab.providers.dart.build.saver import enrichReport, save, saveReplacingByKeys
     from dartlab.providers.dart.openapi.batch import (
         _CODE_TO_QUARTER_KR,
         _KR_TO_ENG_API_TYPE,
@@ -135,7 +136,6 @@ async def _collectReport(
         _dataPath,
         _existingReportPeriods,
     )
-    from dartlab.providers.dart.openapi.saver import enrichReport, save, saveReplacingByKeys
 
     path = _dataPath("report", stockCode)
     allPeriods = list(targetPeriods) if targetPeriods is not None else _buildAllPeriods()
@@ -372,7 +372,7 @@ async def _collectDocs(
         return 0
 
     # 3. parquet 저장 (Phase A — writeParquetSorted 가 row group sort + statistics 적용)
-    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+    from dartlab.providers.dart.build.saver import writeParquetSorted
 
     newDf = pl.DataFrame(allSections)
     if parquetPath.exists():

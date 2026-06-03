@@ -27,13 +27,13 @@ from lxml import etree
 import dartlab.config as _cfg
 from dartlab.core.dartClient import DartClient
 from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
-from dartlab.providers.dart.openapi.disclosure import listFilings
-from dartlab.providers.dart.openapi.zipDocsXml import (
+from dartlab.providers.dart.build.sections import (
     MAX_CELL_BYTES,
     parseSectionsByTitle,
     splitLargeContent,
 )
+from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
+from dartlab.providers.dart.openapi.disclosure import listFilings
 
 # DART 원본 zip 디렉토리. CLAUDE.md "DART 원본 zip 비공개" — 로컬 임시 보관 전용.
 _ORIGINAL_DOCS_DIR_NAME = "original/dart/docs"
@@ -249,7 +249,7 @@ def _parseSections(xmlContent: str) -> list[dict]:
     회귀 보장: 기존 schema 호환 (``order``/``title``/``content``) + 추가 컬럼
     ``atocid``/``assocnote`` (sections layer 가 활용 가능).
     """
-    from dartlab.providers.dart.openapi.zipDocsXml import parseSectionsByTitle
+    from dartlab.providers.dart.build.sections import parseSectionsByTitle
 
     return parseSectionsByTitle(xmlContent)
 
@@ -554,7 +554,7 @@ class ZipDocsCollector:
             return 0
 
         # parquet 저장 (기존 파일 있으면 누적, Phase A — sort + row_group_size 적용)
-        from dartlab.providers.dart.openapi.saver import writeParquetSorted
+        from dartlab.providers.dart.build.saver import writeParquetSorted
 
         newDf = pl.DataFrame(allSections)
 

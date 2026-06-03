@@ -154,7 +154,7 @@ class DocsCollector:
 
     def _appendSections(self, newSections: list[dict]) -> int:
         """새 섹션을 parquet 에 추가 (원자적 교체, Phase A — sort + row_group_size 적용)."""
-        from dartlab.providers.dart.openapi.saver import writeParquetSorted
+        from dartlab.providers.dart.build.saver import writeParquetSorted
 
         newDf = pl.DataFrame(newSections)
 

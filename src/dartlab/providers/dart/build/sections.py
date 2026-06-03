@@ -17,7 +17,7 @@ hierarchy (AASSOCNOTE / ATOCID) 보존.
   violations, sectionsRawCompare spurious 6 → 0.
 
 호출:
-    >>> from dartlab.providers.dart.openapi.zipDocsXml import parseSectionsByTitle
+    >>> from dartlab.providers.dart.build.sections import parseSectionsByTitle
     >>> sections = parseSectionsByTitle(xmlContent)
     >>> sections[0]
     {'order': 0, 'title': '사 업 보 고 서', 'content': '...', 'atocid': '402', 'assocnote': 'COVER'}

@@ -545,7 +545,7 @@ async def _collectDocsDirect(
         _appendDocsFailures(dataDir, failEntries)
 
     # 종목별 parquet 저장 (Phase A — writeParquetSorted 가 sort + row_group_size 적용)
-    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+    from dartlab.providers.dart.build.saver import writeParquetSorted
 
     results: dict[str, int] = {}
     for sc, sections in stockSections.items():

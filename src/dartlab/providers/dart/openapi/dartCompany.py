@@ -14,6 +14,13 @@ from typing import Literal
 import polars as pl
 
 from dartlab import config as _dartlabConfig
+from dartlab.providers.dart.build.saver import (
+    enrichFinance,
+    enrichReport,
+)
+from dartlab.providers.dart.build.saver import (
+    save as _saveFile,
+)
 from dartlab.providers.dart.openapi.constants import (
     QUARTER_TO_CODE as _QUARTER_TO_CODE,
 )
@@ -25,13 +32,6 @@ from dartlab.providers.dart.openapi.dart import (
 )
 from dartlab.providers.dart.openapi.dartHelpers import _dataPath
 from dartlab.providers.dart.openapi.disclosure import _resolveCorpCode
-from dartlab.providers.dart.openapi.saver import (
-    enrichFinance,
-    enrichReport,
-)
-from dartlab.providers.dart.openapi.saver import (
-    save as _saveFile,
-)
 
 # ── DartCompany — 회사 프록시 ──────────────────────────────
 
