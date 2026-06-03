@@ -199,3 +199,38 @@ def searchIssuers(*args: Any, **kwargs: Any) -> Any:
 def iterIssuers(*args: Any, **kwargs: Any) -> Any:
     """issuer 검색 iterator — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> list(iterIssuers("apple"))  # doctest: +SKIP"""
     return _call("identity", "iterIssuers", *args, **kwargs)
+
+
+def fetchEdgarDocs(*args: Any, **kwargs: Any) -> Any:
+    """EDGAR 공시 HTML fetch+파싱 → docs parquet — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: ValueError/httpx. Example: >>> fetchEdgarDocs("AAPL", path)  # doctest: +SKIP"""
+    return _call("docs.fetch", "fetchEdgarDocs", *args, **kwargs)
+
+
+def htmlToText(*args: Any, **kwargs: Any) -> Any:
+    """filing HTML → text normalize — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> htmlToText(html)  # doctest: +SKIP"""
+    return _call("docs.fetchHtmlParse", "_htmlToText", *args, **kwargs)
+
+
+def saveDocs(*args: Any, **kwargs: Any) -> Any:
+    """EDGAR docs fetch+검증+저장 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx/OSError. Example: >>> saveDocs("AAPL")  # doctest: +SKIP"""
+    return _call("saver", "saveDocs", *args, **kwargs)
+
+
+def saveFinance(*args: Any, **kwargs: Any) -> Any:
+    """EDGAR companyfacts fetch+normalize+저장 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx/OSError. Example: >>> saveFinance("0000320193")  # doctest: +SKIP"""
+    return _call("saver", "saveFinance", *args, **kwargs)
+
+
+def downloadCompanyfactsBulk(*args: Any, **kwargs: Any) -> Any:
+    """SEC companyfacts.zip bulk download — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx/OSError. Example: >>> downloadCompanyfactsBulk()  # doctest: +SKIP"""
+    return _call("bulk", "downloadCompanyfactsBulk", *args, **kwargs)
+
+
+def extractCompanyfactsZip(*args: Any, **kwargs: Any) -> Any:
+    """companyfacts.zip stream → (cik, json) — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> extractCompanyfactsZip(path)  # doctest: +SKIP"""
+    return _call("bulk", "extractCompanyfactsZip", *args, **kwargs)
+
+
+def ensureFinanceParquet(*args: Any, **kwargs: Any) -> Any:
+    """EDGAR finance parquet 보장(bulk) — gather/edgar 위임. Requires: gather.edgar. Raises: OSError. Example: >>> ensureFinanceParquet("0000320193")  # doctest: +SKIP"""
+    return _call("bulk", "ensureFinanceParquet", *args, **kwargs)

@@ -412,7 +412,7 @@ def collectEdgarMissing(
         TargetMarkets:
             - US (SEC EDGAR) freshness.
     """
-    from dartlab.providers.edgar.openapi.batch import batchCollectEdgar
+    from dartlab.gather.edgar.batch import batchCollectEdgar
 
     cats = categories or ["finance", "docs"]
     results = batchCollectEdgar(

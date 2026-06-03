@@ -218,7 +218,7 @@ def buildEdgarSectionsForTicker(
         >>> buildEdgarSectionsForTicker("AAPL", incremental=True)  # doctest: +SKIP
     """
     from dartlab.core.dataLoader import _getDataRoot
-    from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
+    from dartlab.gather.edgar.docs.fetch import fetchEdgarDocs
 
     docsDir = _getDataRoot() / "edgar" / "docs"
     docsDir.mkdir(parents=True, exist_ok=True)

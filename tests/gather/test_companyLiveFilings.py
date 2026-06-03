@@ -77,7 +77,7 @@ class TestDartCompanyLiveFilings:
 
 class TestEdgarCompanyLiveFilings:
     def test_html_to_text_removes_hidden_inline_xbrl_noise(self):
-        from dartlab.providers.edgar.docs.fetch import _htmlToText
+        from dartlab.gather.edgar.docs.fetch import _htmlToText
 
         html = """
         <html>
@@ -133,7 +133,7 @@ class TestEdgarCompanyLiveFilings:
                 assert ticker == "AAPL"
                 return FakeOpenEdgarCompany()
 
-        monkeypatch.setattr("dartlab.providers.edgar.openapi.edgar.OpenEdgar", FakeOpenEdgar)
+        monkeypatch.setattr("dartlab.gather.edgar.edgar.OpenEdgar", FakeOpenEdgar)
 
         company = EdgarCompany.__new__(EdgarCompany)
         company.ticker = "AAPL"
@@ -158,11 +158,11 @@ class TestEdgarCompanyLiveFilings:
         from dartlab.providers.edgar.company import Company as EdgarCompany
 
         monkeypatch.setattr(
-            "dartlab.providers.edgar.docs.fetch._downloadFilingSource",
+            "dartlab.gather.edgar.docs.fetch._downloadFilingSource",
             lambda filing: "<html><body>Quarterly filing body</body></html>",
         )
         monkeypatch.setattr(
-            "dartlab.providers.edgar.docs.fetch._htmlToText",
+            "dartlab.gather.edgar.docs.fetch._htmlToText",
             lambda raw: "Quarterly filing body",
         )
 

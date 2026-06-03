@@ -136,7 +136,7 @@ def test_openedgar_raw_wrappers_and_filings(monkeypatch):
 
 def test_openedgar_company_proxy(monkeypatch):
     from dartlab import OpenEdgar
-    from dartlab.providers.edgar.openapi.edgar import OpenEdgarCompany
+    from dartlab.gather.edgar.edgar import OpenEdgarCompany
 
     monkeypatch.setattr("dartlab.core.edgarClient.loadTickers", lambda *args, **kwargs: _ticker_df())
     monkeypatch.setattr(
@@ -159,10 +159,8 @@ def test_saveDocs_writes_sections_compatible_parquet(monkeypatch, tmp_path):
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
     monkeypatch.setattr("dartlab.core.edgarClient.loadTickers", lambda *args, **kwargs: _ticker_df())
-    monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df()
-    )
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
 
     def fakeFetchEdgarDocs(ticker: str, outPath: Path, *, sinceYear: int = 2009, **kwargs) -> Path:
         df = pl.DataFrame(
@@ -189,7 +187,7 @@ def test_saveDocs_writes_sections_compatible_parquet(monkeypatch, tmp_path):
         df.write_parquet(outPath)
         return outPath
 
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.fetchEdgarDocs", fakeFetchEdgarDocs)
+    monkeypatch.setattr("dartlab.gather.edgar.saver.fetchEdgarDocs", fakeFetchEdgarDocs)
 
     company = OpenEdgar()("AAPL")
     path = company.saveDocs()
@@ -206,10 +204,8 @@ def test_saveFinance_writes_companyfacts_parquet_compatible_with_pivot(monkeypat
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
     monkeypatch.setattr("dartlab.core.edgarClient.loadTickers", lambda *args, **kwargs: _ticker_df())
-    monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df()
-    )
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
 
     def fakeGetJson(self, url: str):
         if url.endswith("/api/xbrl/companyfacts/CIK0000320193.json"):
@@ -261,7 +257,7 @@ def test_companyFactsToRows_matches_existing_finance_schema():
 
 def test_saveDocs_schema_mismatch_preserves_existing_file(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.providers.edgar.openapi.saver import saveDocs
+    from dartlab.gather.edgar.saver import saveDocs
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -289,16 +285,14 @@ def test_saveDocs_schema_mismatch_preserves_existing_file(monkeypatch, tmp_path)
 
     monkeypatch.setattr(config, "dataDir", str(dataRoot))
     monkeypatch.setattr("dartlab.core.edgarClient.loadTickers", lambda *args, **kwargs: _ticker_df())
-    monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df()
-    )
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
 
     def badFetch(ticker: str, outPath: Path, *, sinceYear: int = 2009, **kwargs) -> Path:
         pl.DataFrame({"ticker": [ticker], "bad": ["value"]}).write_parquet(outPath)
         return outPath
 
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.fetchEdgarDocs", badFetch)
+    monkeypatch.setattr("dartlab.gather.edgar.saver.fetchEdgarDocs", badFetch)
 
     with pytest.raises(ValueError, match="schema mismatch"):
         saveDocs("AAPL")
@@ -309,7 +303,7 @@ def test_saveDocs_schema_mismatch_preserves_existing_file(monkeypatch, tmp_path)
 
 def test_saveFinance_smoke_failure_preserves_existing_file(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.providers.edgar.openapi.saver import saveFinance
+    from dartlab.gather.edgar.saver import saveFinance
 
     dataRoot = tmp_path / "data"
     financeDir = dataRoot / "edgar" / "finance"
@@ -355,10 +349,8 @@ def test_saveFinance_smoke_failure_preserves_existing_file(monkeypatch, tmp_path
 
     monkeypatch.setattr(config, "dataDir", str(dataRoot))
     monkeypatch.setattr("dartlab.core.edgarClient.loadTickers", lambda *args, **kwargs: _ticker_df())
-    monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df()
-    )
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadEdgarListedUniverse", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
     monkeypatch.setattr(
         "dartlab.core.edgarClient.EdgarClient.getJson",
         lambda self, url: _companyfacts_payload(),
@@ -374,7 +366,7 @@ def test_saveFinance_smoke_failure_preserves_existing_file(monkeypatch, tmp_path
 
 def test_api_saved_data_is_immediately_usable_by_company(monkeypatch, tmp_path):
     from dartlab import Company, OpenEdgar, config
-    from dartlab.providers.edgar.openapi.saver import verifyOpenEdgarSaveCompatibility
+    from dartlab.gather.edgar.saver import verifyOpenEdgarSaveCompatibility
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
 
@@ -415,13 +407,13 @@ def test_company_resolveTickerRow_falls_back_to_listed_universe(monkeypatch, tmp
 
 def test_ensureIdentityCaches_allows_missing_listed_universe(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.providers.edgar.openapi.saver import _ensureIdentityCaches
+    from dartlab.gather.edgar.saver import _ensureIdentityCaches
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
     monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.saver.loadEdgarListedUniverse",
+        "dartlab.gather.edgar.saver.loadEdgarListedUniverse",
         lambda *args, **kwargs: (_ for _ in ()).throw(FileNotFoundError("missing listed")),
     )
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
+    monkeypatch.setattr("dartlab.gather.edgar.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
 
     _ensureIdentityCaches()

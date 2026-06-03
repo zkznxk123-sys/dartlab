@@ -2448,7 +2448,7 @@ class Company:
         import polars as _pl
 
         from dartlab.core.edgarClient import EdgarClient
-        from dartlab.providers.edgar.openapi.saver import saveFinance
+        from dartlab.gather.edgar.saver import saveFinance
 
         cik = str(self.cik).zfill(10)
         client = EdgarClient()
@@ -2615,7 +2615,7 @@ class Company:
             return self._cache[cacheKey]
 
         from dartlab.core.messaging import progress
-        from dartlab.providers.edgar.openapi.edgar import OpenEdgar
+        from dartlab.gather.edgar.edgar import OpenEdgar
 
         progress(
             f"{self.corpName} 최신 공시 목록 조회 중... "
@@ -2784,7 +2784,7 @@ class Company:
             raise ValueError("EDGAR filing 읽기에는 filing URL 또는 accessionNo가 필요합니다.")
 
         from dartlab.core.messaging import progress
-        from dartlab.providers.edgar.docs.fetch import _downloadFilingSource, _htmlToText
+        from dartlab.gather.edgar.docs.fetch import _downloadFilingSource, _htmlToText
 
         progress(f"{self.corpName} 공시 원문 다운로드 중... ({accessionNo or Path(docUrl).name})")
         filingPayload = {

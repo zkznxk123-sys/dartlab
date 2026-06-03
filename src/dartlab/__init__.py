@@ -67,7 +67,7 @@ if not _IS_PYODIDE:
             "getKindList": ("dartlab.gather.krx.listing", "getKindList"),
             "listing": ("dartlab._listingDispatch", "listing"),
             "OpenDart": ("dartlab.gather.dart.dart", "OpenDart"),
-            "OpenEdgar": ("dartlab.providers.edgar.openapi.edgar", "OpenEdgar"),
+            "OpenEdgar": ("dartlab.gather.edgar.edgar", "OpenEdgar"),
             "Story": ("dartlab.story", "Story"),
             "_DartEngineCompany": ("dartlab.providers.dart.company", "Company"),
         }

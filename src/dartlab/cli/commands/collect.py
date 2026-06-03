@@ -325,7 +325,7 @@ def _runScan(console, args) -> int:
 
 def _runEdgar(console, args) -> int:
     """EDGAR 데이터 수집 — 배치 병렬 + 카테고리 선택."""
-    from dartlab.providers.edgar.openapi.batch import (
+    from dartlab.gather.edgar.batch import (
         batchCollectEdgar,
         batchCollectEdgarAll,
     )

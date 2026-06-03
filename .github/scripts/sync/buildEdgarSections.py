@@ -79,7 +79,7 @@ def _runBatch(
         ``{"processed": N, "skipped": M, "failed": K, "totalPeriods": P, "totalRows": R}``.
     """
     from dartlab.core.dataLoader import _getDataRoot
-    from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
+    from dartlab.gather.edgar.docs.fetch import fetchEdgarDocs
     from dartlab.providers.edgar.docs.sections.sectionsStorage import (
         hasSectionsArtifact,
     )

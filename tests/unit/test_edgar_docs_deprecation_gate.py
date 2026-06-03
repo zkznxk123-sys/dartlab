@@ -15,7 +15,7 @@ from __future__ import annotations
 import inspect
 import os
 
-from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
+from dartlab.gather.edgar.docs.fetch import fetchEdgarDocs
 from dartlab.providers.edgar.openapi.deploy import deployEdgarToHF
 
 

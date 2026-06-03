@@ -141,7 +141,7 @@ def getLatestRegularEdgarFiling(stockCode: str, *, sinceYear: int) -> dict[str, 
     Example:
         >>> getLatestRegularEdgarFiling("AAPL", sinceYear=2024)
     """
-    from dartlab.providers.edgar.docs.fetch import _findFilings, _getSubmissions, _resolveTickerMeta
+    from dartlab.gather.edgar.docs.fetch import _findFilings, _getSubmissions, _resolveTickerMeta
 
     meta = _resolveTickerMeta(stockCode.upper())
     submissions = _getSubmissions(meta["cik"])
@@ -260,7 +260,7 @@ def rebuildEdgarDocs(stockCode: str, path: Path, *, sinceYear: int, sourceMode: 
     Example:
         >>> rebuildEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"), sinceYear=2009, sourceMode="sec_api")
     """
-    from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
+    from dartlab.gather.edgar.docs.fetch import fetchEdgarDocs
 
     try:
         _callFetchEdgarDocs(
@@ -299,7 +299,7 @@ def incrementalUpdateEdgarDocs(
         >>> incrementalUpdateEdgarDocs("AAPL", Path("..."), sinceYear=2009, latestRemote=remote)
     """
     from dartlab.core.messaging import emit
-    from dartlab.providers.edgar.docs.fetch import (
+    from dartlab.gather.edgar.docs.fetch import (
         FILING_TIMEOUT_SECONDS,
         _collectFilingRows,
         _findFilings,
