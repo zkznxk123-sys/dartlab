@@ -3019,14 +3019,20 @@ class Company:
             TargetMarkets:
                 - US (EDGAR).
         """
+        import functools
+
         from dartlab.providers.dart.panel import Panel as _Panel
         from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
+        from dartlab.providers.edgar.panel import cellRead as _cellRead
 
         p = _Panel(self.ticker, marketNs="us")
-        # facade 주입 — c.panel("IS") 강한 소스는 show(companyfacts) 위임, 그 외 raw 공시 행 검색.
-        # panel 패키지는 finance 를 import 안 함 — 주입된 callable 만 호출(layer 격리, cycle 0).
+        # facade 주입 (DI, cycle 0) — panel 패키지는 finance/cellRead 를 import 안 하고 주입된 callable 만 호출.
+        #   _showFn   : 대문자 IS/BS/CF/RATIOS = finance(companyfacts) 위임 (c.show).
+        #   _strongFn : finance 강한 소스 판정(isStrongTopic).
+        #   _nativeFn : 소문자 is/bs/cf/cis/sce/ratios = 필링 inline/INS XBRL 셀(panelCell) — DART native 대칭.
         p._showFn = self.show
         p._strongFn = isStrongTopic
+        p._nativeFn = functools.partial(_cellRead.readNative, self.ticker)
         return p
 
     def _showImpl(

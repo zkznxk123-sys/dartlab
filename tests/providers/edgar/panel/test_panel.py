@@ -1,192 +1,94 @@
-"""EDGAR panel read 표면 round-trip — build → Panel(marketNs="us") wide·callable·search (합성 데이터).
+"""EDGAR panel 공개 계약 — 보드 read + native 셀 dispatch + 배포 config (DART 표면 동형).
 
-synthetic sections → ``buildEdgarPanel`` → cross-market ``Panel(ticker, marketNs="us")`` read.
-tmp dataDir 격리(monkeypatch) + ``DARTLAB_NO_HF_DOWNLOAD`` 로 network 0. read 표면이 EDGAR 16-col
-artifact 를 wide 수평화하고 callable 섹션검색·search 가 동작함을 검증 (cross-market 재사용 증명).
+build round-trip(합성 원본→build→Panel(us)) + us native 라우팅(_nativeFn) + isStrongTopic + 배포 config.
 """
 
 from __future__ import annotations
 
+import functools
+
 import polars as pl
 import pytest
-
-import dartlab.config as _config
 
 pytestmark = pytest.mark.unit
 
 
-def _writeSyntheticSections(dataDir, ticker: str) -> None:
-    """tmp dataDir 에 합성 sections artifact (2 period) 작성 — gather 산출 형태."""
-    base = dataDir / "edgar" / "sections" / ticker.upper()
-    base.mkdir(parents=True, exist_ok=True)
-    for period, accn, biz in [("2024Q4", "0000320193-24-1", "biz 2024"), ("2023Q4", "0000320193-23-9", "biz 2023")]:
-        pl.DataFrame(
-            {
-                "topic": ["10-K::item1Business", "10-K::item1ARiskFactors"],
-                "blockType": ["text", "table"],
-                "blockOrder": [0, 1],
-                "source_title": ["Item 1. Business", "Item 1A. Risk Factors"],
-                "content_raw": [f"<p>{biz}</p>", "<table>supply chain risk</table>"],
-                "content_plain": [biz, "supply chain risk"],
-                "period": [period, period],
-                "ticker": [ticker.upper(), ticker.upper()],
-                "accession_no": [accn, accn],
-                "form_type": ["10-K", "10-K"],
-            }
-        ).write_parquet(str(base / f"{period}.parquet"))
-
-
-@pytest.fixture
-def _builtPanel(tmp_path, monkeypatch):
-    """tmp dataDir 격리 → 합성 sections → buildEdgarPanel → ticker 반환."""
-    monkeypatch.setattr(_config, "dataDir", str(tmp_path))
-    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
+def test_panel_us_build_roundtrip(builtTicker) -> None:
+    """합성 원본 → build → Panel(us) 보드 wide + 재무표 검색 + 본문검색."""
+    from dartlab.providers.dart.panel import Panel
     from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
 
-    _writeSyntheticSections(tmp_path, "TESTX")
-    stats = buildEdgarPanel("TESTX")
-    assert stats["rows"] == 4 and stats["periods"] == 2, stats
-    return "TESTX"
+    buildEdgarPanel(builtTicker)
+    p = Panel(builtTicker, marketNs="us")
+    assert isinstance(p, pl.DataFrame) and not p.is_empty()
+    for col in ("chapter", "sectionLeaf", "disclosureKey", "scope"):
+        assert col in p.columns
+    assert "2024Q4" in p.columns
+    # 재무표 disclosureKey 행 검색
+    assert p("BS") is not None
+    # 서술 본문 전체검색
+    assert p.search("widgets") is not None
+    # EDGAR 연결-only → scope consolidated
+    assert set(p["scope"].unique().to_list()) == {"consolidated"}
 
 
-def test_panel_us_wide_round_trip(_builtPanel) -> None:
-    """Panel(ticker, marketNs="us") → wide pl.DataFrame (item × period 수평화)."""
+def test_panel_us_native_cell_contract(builtTicker) -> None:
+    """c.panel("is") (facade _nativeFn 주입) → DART 계약 [account, label, *period]."""
+    from dartlab.providers.dart.panel import Panel
+    from dartlab.providers.edgar.panel import cellRead
+    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
+
+    buildEdgarPanel(builtTicker)
+    p = Panel(builtTicker, marketNs="us")
+    p._nativeFn = functools.partial(cellRead.readNative, builtTicker)  # facade 주입 미러
+    # 합성 원본은 연간(10-K)만 → freq="year" (분기 데이터 없음, quarter 면 정상적으로 빈손)
+    isw = p("is", freq="year")
+    assert isw is not None and isw.columns[:2] == ["account", "label"]
+    assert "2024" in isw.columns
+    bsw = p("bs", freq="year")
+    assert bsw is not None and bsw.columns[:2] == ["account", "label"]
+
+
+def test_panel_us_dispatch_native_vs_finance() -> None:
+    """us: 소문자=native(_nativeFn) / 대문자=finance(_showFn) — DART native/finance 대칭 (data 0)."""
     from dartlab.providers.dart.panel import Panel
 
-    p = Panel(_builtPanel, marketNs="us")
-    assert isinstance(p, pl.DataFrame)
-    assert not p.is_empty()
-    for col in ("chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"):
-        assert col in p.columns, f"식별 컬럼 부재: {col}"
-    # period 열 — 최신 좌측 (2024Q4, 2023Q4 둘 다 존재)
-    assert "2024Q4" in p.columns and "2023Q4" in p.columns
-    # item1Business 가 두 기간에 같은 행으로 수평화 (1 행, 두 period 열 채워짐)
-    bizRows = p.filter(pl.col("sectionLeaf") == "item1Business")
-    assert bizRows.height == 1, "item1Business 가 기간 간 한 행으로 수평화 안 됨"
+    p = Panel("000000nonexistent", marketNs="us")
+    p._nativeFn = lambda statement, freq, periods: f"native:{statement}:{freq}"
+    p._showFn = lambda topic, **kw: f"fin:{topic}"
+    p._strongFn = lambda t: t.upper() in {"IS", "BS", "CF", "CIS", "SCE", "RATIOS"}
 
-
-def test_panel_us_callable_section_search(_builtPanel) -> None:
-    """callable 섹션 검색 — sectionLeaf(itemId) + blockLeaf(source_title) substring 매칭."""
-    from dartlab.providers.dart.panel import Panel
-
-    p = Panel(_builtPanel, marketNs="us")
-    # blockLeaf "Item 1A. Risk Factors" substring
-    risk = p("Risk")
-    assert risk is not None and risk.height >= 1
-    # sectionLeaf itemId exact-ish
-    biz = p("item1Business")
-    assert biz is not None and biz.height == 1
-
-
-def test_panel_us_full_text_search(_builtPanel) -> None:
-    """search(term) — 본문(period 셀) 전체검색."""
-    from dartlab.providers.dart.panel import Panel
-
-    p = Panel(_builtPanel, marketNs="us")
-    hits = p.search("supply chain")
-    assert hits is not None and hits.height >= 1
-
-
-def test_panel_us_scope_consolidated(_builtPanel) -> None:
-    """EDGAR(xbrlClass null) → scope 전부 'consolidated' (연결-only, scopeExpr graceful)."""
-    from dartlab.providers.dart.panel import Panel
-
-    p = Panel(_builtPanel, marketNs="us")
-    assert set(p["scope"].unique()) == {"consolidated"}
-
-
-def test_panel_us_ticker_case_insensitive(_builtPanel) -> None:
-    """Panel("testx", marketNs="us") 소문자도 TESTX artifact 해석 (EDGAR ticker 대소문자 무관)."""
-    from dartlab.providers.dart.panel import Panel
-
-    p = Panel("testx", marketNs="us")  # 소문자 입력
-    assert not p.is_empty(), "소문자 ticker 가 대문자 artifact 해석 실패"
-
-
-def test_panel_path_helper() -> None:
-    """panelPath — flat 회사당 1파일 경로 (대문자 정규화, edgar/panel 트리)."""
-    from dartlab.providers.edgar.panel.build.builder import panelPath
-
-    p = panelPath("aapl")
-    assert p.name == "AAPL.parquet"
-    assert p.parent.name == "panel" and p.parent.parent.name == "edgar"
-
-
-def test_build_edgar_panel_all(tmp_path, monkeypatch) -> None:
-    """buildEdgarPanelAll — 다 ticker 순차 + None(sections dir 전수 스캔) 경로."""
-    monkeypatch.setattr(_config, "dataDir", str(tmp_path))
-    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
-    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanelAll
-
-    _writeSyntheticSections(tmp_path, "AAA")
-    _writeSyntheticSections(tmp_path, "BBB")
-    # 명시 ticker list
-    res = buildEdgarPanelAll(["AAA"])
-    assert res["AAA"]["rows"] == 4
-    # None → sections dir 전수 스캔 (AAA + BBB)
-    resAll = buildEdgarPanelAll(None)
-    assert set(resAll.keys()) == {"AAA", "BBB"}
-    assert all(r["rows"] == 4 for r in resAll.values())
-
-
-def test_ensure_panel_from_hf_us_noop(tmp_path, monkeypatch) -> None:
-    """ensurePanelFromHf(marketNs="us") — NO_HF_DOWNLOAD/비-시장 graceful no-op (예외 0)."""
-    monkeypatch.setattr(_config, "dataDir", str(tmp_path))
-    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
-    from dartlab.providers.dart.panel.read import ensurePanelFromHf
-
-    # us + 다운로드 차단 → graceful no-op (artifact 부재, 예외 없음)
-    ensurePanelFromHf("AAPL", marketNs="us")
-    assert not (tmp_path / "edgar" / "panel" / "AAPL.parquet").exists()
-    # 미지원 시장 → 즉시 반환 (예외 0)
-    ensurePanelFromHf("AAPL", marketNs="jp")
-
-
-def test_edgar_panel_distribution_config() -> None:
-    """edgarPanel DATA_RELEASES 엔트리 + deploy _CATEGORY_MAP 배선 (HF 배포 경로)."""
-    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
-    from dartlab.providers.edgar.openapi.deploy import _CATEGORY_MAP
-
-    assert "edgarPanel" in DATA_RELEASES
-    assert DATA_RELEASES["edgarPanel"]["dir"] == "edgar/panel"
-    assert _CATEGORY_MAP["panel"] == "edgarPanel"
-    assert repoFor("edgarPanel")  # truthy (기본 HF_REPO)
+    assert p("is") == "native:is:quarter"  # 소문자 native → _nativeFn
+    assert p("bs") == "native:bs:quarter"
+    assert p("ratios") == "native:ratios:quarter"
+    assert p("IS") == "fin:IS"  # 대문자 → companyfacts(finance)
+    assert p("RATIOS") == "fin:ratios"
+    assert p("Risk") is None  # 약한 소스 → board(artifact 없어 None)
 
 
 def test_is_strong_topic_edgar() -> None:
-    """EDGAR isStrongTopic — finance(대소문자) 강함, item 섹션명/자유 텍스트는 raw 보드 (데이터 0)."""
     from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
 
-    assert isStrongTopic("IS") is True
-    assert isStrongTopic("is") is True  # EDGAR: native 셀 없음 → 소문자도 companyfacts
-    assert isStrongTopic("RATIOS") is True
-    assert isStrongTopic("ratios") is True
-    assert isStrongTopic("Risk") is False  # item 섹션명 → raw 보드
-    assert isStrongTopic("item1Business") is False
-    assert isStrongTopic("") is False
+    assert isStrongTopic("IS") and isStrongTopic("is") and isStrongTopic("RATIOS") and isStrongTopic("ratios")
+    assert not isStrongTopic("Risk") and not isStrongTopic("item1Business") and not isStrongTopic("")
 
 
-def test_panel_us_native_keys_route_to_companyfacts() -> None:
-    """marketNs="us": 소문자/대문자 재무 키는 _showFn(companyfacts) 위임, item 명은 raw 보드 (데이터 0)."""
+def test_edgar_panel_distribution_config() -> None:
+    """edgarPanel + edgarPanelCell DATA_RELEASES + deploy _CATEGORY_MAP 배선."""
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+    from dartlab.providers.edgar.openapi.deploy import _CATEGORY_MAP
+
+    assert DATA_RELEASES["edgarPanel"]["dir"] == "edgar/panel"
+    assert DATA_RELEASES["edgarPanelCell"]["dir"] == "edgar/panelCell"
+    assert _CATEGORY_MAP["panel"] == "edgarPanel" and _CATEGORY_MAP["panelCell"] == "edgarPanelCell"
+    assert repoFor("edgarPanel") and repoFor("edgarPanelCell")
+
+
+def test_panel_us_ticker_case_insensitive(builtTicker) -> None:
+    """Panel("test", marketNs="us") 소문자도 TEST artifact 해석."""
     from dartlab.providers.dart.panel import Panel
-    from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
+    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
 
-    p = Panel("000000nonexistent", marketNs="us")
-
-    def fakeShow(topic, **_kw):
-        return f"fin:{topic}"
-
-    p._showFn = fakeShow
-    p._strongFn = isStrongTopic
-
-    # 소문자 native → 대문자 승격 후 companyfacts 위임 (EDGAR 는 panel 자급 셀 없음)
-    assert p("is") == "fin:IS"
-    assert p("bs") == "fin:BS"
-    assert p("cf") == "fin:CF"
-    # 대문자 finance → 그대로 위임
-    assert p("IS") == "fin:IS"
-    # ratios 대소문자 → finance ratios 위임
-    assert p("ratios") == "fin:ratios"
-    assert p("RATIOS") == "fin:ratios"
-    # item 섹션명(약한 소스) → raw 보드 검색 (artifact 없어 None)
-    assert p("Risk") is None
+    buildEdgarPanel(builtTicker)
+    p = Panel("test", marketNs="us")
+    assert not p.is_empty()

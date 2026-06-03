@@ -205,11 +205,18 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
 
         from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
-        category = "panel" if marketNs == "kr" else "edgarPanel"
+        if marketNs == "kr":
+            category = "panel"
+            patterns = [f"{DATA_RELEASES['panel']['dir']}/{code}.parquet"]
+        else:  # us — 보드 + 셀(panelCell) 동반 다운로드 (c.panel("is") 셀 read 동반)
+            category = "edgarPanel"
+            patterns = [f"{DATA_RELEASES['edgarPanel']['dir']}/{code}.parquet"]
+            if "edgarPanelCell" in DATA_RELEASES:
+                patterns.append(f"{DATA_RELEASES['edgarPanelCell']['dir']}/{code}.parquet")
         snapshot_download(
             repo_id=repoFor(category),
             repo_type="dataset",
-            allow_patterns=[f"{DATA_RELEASES[category]['dir']}/{code}.parquet"],  # flat 회사당 1파일
+            allow_patterns=patterns,  # flat 회사당 1파일 (us 는 보드+셀)
             local_dir=str(Path(_cfg.dataDir)),
         )
     except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
