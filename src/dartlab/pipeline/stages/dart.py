@@ -191,8 +191,21 @@ def runDartPanel(
         >>> runDartPanel(mode="online", upload=False)  # doctest: +SKIP
         StageResult(category='panel', skipped=True)
     """
-    script = ".github/scripts/sync/onlinePanel.py" if mode == "online" else ".github/scripts/sync/buildPanel.py"
-    rc = runScript(script)
+    # online 은 refScan 안 함 — panelXbrlRef(build-input) 선존 필요. 부재 시 graceful skip
+    # (운영자가 refScan 1회로 생성하면 이후 자동 수집). 게이트 없이 안전 un-gate 의 핵심.
+    if mode == "online":
+        from dartlab.providers.dart.panel.build import panelXbrlRefPath
+
+        if not panelXbrlRefPath().exists():
+            print("[pipeline] panel: panelXbrlRef 부재 → graceful skip (refScan 1회 선행 필요)", flush=True)
+            res = StageResult(category="panel")
+            res.skipped = True
+            return res
+
+    if mode == "online":
+        rc = runScript(".github/scripts/sync/onlinePanel.py", "--changed", env={"PANEL_WORKERS": "4"})
+    else:
+        rc = runScript(".github/scripts/sync/buildPanel.py")
     res = _result("panel", rc, "panel")
     if rc == 0 and not readChanged("panel"):
         res.skipped = True

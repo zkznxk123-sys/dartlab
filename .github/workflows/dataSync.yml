@@ -256,29 +256,17 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: sections
 
-      # plan snazzy-wibbling-origami P6 — online 1패스 panel (디스크 zip 0): docs.parquet rcept
-      # → DART API 메모리 fetch → buildPanelFromStream → 14-col parquet (buildPanel.py 로컬 zip
-      # 트랙 A의 online 트랙 B). online 은 refScan 안 함 — panelXbrlRef(build-input) 선존 필요.
-      # 활성 조건(운영자): repo variable PANEL_ONLINE_ENABLED=1 + DART_API_KEYS secret +
-      # data/dart/panelXbrlRef.parquet 존재(refScan 1회). 미설정 시 아래 3 스텝 자동 skip (design-in).
-      - name: Build panel online (1-pass, no disk zip)
-        if: vars.PANEL_ONLINE_ENABLED == '1' && hashFiles('dist/changed_docs.txt') != ''
-        run: |
-          if [ -s dist/changed_docs.txt ]; then
-            uv run python -X utf8 .github/scripts/sync/onlinePanel.py --changed
-          fi
+      # online 1패스 panel (디스크 zip 0): docs.parquet rcept → DART API 메모리 fetch →
+      # buildPanelFromStream → 14-col parquet + HF push. 통합 진입점(dartlab.pipeline) 경유 —
+      # build+upload 내부 수행. PANEL_ONLINE_ENABLED 게이트 제거: panelXbrlRef(refScan 1회
+      # build-input) 부재 시 stage 가 design-in graceful skip(rc=0)이라 게이트 불필요.
+      - name: Build + upload panel (online 1-pass → HF)
+        if: hashFiles('dist/changed_docs.txt') != ''
+        run: uv run python -X utf8 -m dartlab.pipeline panel --mode online
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          PANEL_WORKERS: "4"
-
-      - name: Upload panel to HuggingFace
-        if: vars.PANEL_ONLINE_ENABLED == '1' && hashFiles('dist/changed_panel.txt') != ''
-        run: uv run python .github/scripts/sync/uploadData.py --target hf
-        env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          SYNC_CATEGORY: panel
-        # native is/bs/cf/ratios 는 사용자 환경에서 panel.parquet contentRaw 를 read-time 분해 —
-        # 별 panelCell artifact 0 (단일 artifact). 업로드는 panel 하나면 충분.
+          PANEL_WORKERS: "4"
 
       # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 

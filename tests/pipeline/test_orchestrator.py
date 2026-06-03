@@ -63,11 +63,30 @@ def test_run_pipeline_isolation(monkeypatch):
     assert results["report"].report.fail == 1 and "boom" in results["report"].report.failures[0]
 
 
-def test_panel_graceful_skip(monkeypatch):
-    """panel — refDf 부재(changed 0)면 skipped=True."""
+def test_panel_graceful_skip_missing_refdf(monkeypatch):
+    """panel online — panelXbrlRef 부재 시 onlinePanel 실행 없이 graceful skip(un-gate 안전 핵심)."""
     import dartlab.pipeline.stages.dart as dart
+    import dartlab.providers.dart.panel.build as panelBuild
 
+    ran = {"n": 0}
+    monkeypatch.setattr(dart, "runScript", lambda *a, **k: ran.__setitem__("n", ran["n"] + 1) or 0)
+    monkeypatch.setattr(
+        panelBuild, "panelXbrlRefPath", lambda: __import__("pathlib").Path("/no/such/panelXbrlRef.parquet")
+    )
+    res = dart.runDartPanel(category="panel", mode="online", upload=False)
+    assert res.skipped is True
+    assert ran["n"] == 0  # refDf 부재 → onlinePanel 미실행
+
+
+def test_panel_runs_when_refdf_present(monkeypatch, tmp_path):
+    """panel online — refDf 존재 시 onlinePanel 실행 + changed 0 이면 skip."""
+    import dartlab.pipeline.stages.dart as dart
+    import dartlab.providers.dart.panel.build as panelBuild
+
+    ref = tmp_path / "panelXbrlRef.parquet"
+    ref.write_bytes(b"x")
+    monkeypatch.setattr(panelBuild, "panelXbrlRefPath", lambda: ref)
     monkeypatch.setattr(dart, "runScript", lambda *a, **k: 0)
     monkeypatch.setattr(dart, "readChanged", lambda c: [])
     res = dart.runDartPanel(category="panel", mode="online", upload=False)
-    assert res.skipped is True
+    assert res.report.err == 0
