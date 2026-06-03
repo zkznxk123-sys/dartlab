@@ -309,7 +309,13 @@ def loadData(
 
         if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() not in ("1", "true", "True"):
             checkMemoryAndGc(f"loadData({stockCode},docs)")
-            return _loadDocsFromSections(stockCode, columns=columns, sinceYear=sinceYear, predicate=predicate)
+            # docs↔sections 합성은 providers 도메인 책임 — LoaderProvider DIP 디스패치.
+            from dartlab.core.loaders import getLoader
+
+            loader = getLoader("docs")
+            if loader is None or not hasattr(loader, "load"):
+                return pl.DataFrame()
+            return loader.load(stockCode, columns=columns, sinceYear=sinceYear, predicate=predicate)
 
     dataDir = _dataDir(category)
     path = dataDir / f"{stockCode}.parquet"
@@ -420,253 +426,19 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
         return
 
     if not path.exists():
-        # plan snazzy-wibbling-origami PR-4b — docs 카테고리 사용자 측 폐기 path.
-        # sections artifact 가 있고 빌더 모드 아니면 docs.parquet 합성 fallback —
-        # HF docs.parquet 다운로드 회피, 사용자 측 docs 카테고리 의존 0.
-        # 빌더 (sectionsBuilder) 는 DARTLAB_BUILDER_MODE env 로 합성 path 우회 —
-        # 자기 자신 input 으로 재귀하면 무한 루프.
-        if category == "docs" and _trySynthesizeDocsFromSections(stockCode, path):
-            return
+        # docs 합성은 providers 도메인 책임 — LoaderProvider DIP 로 synthesizeToPath 위임.
+        # 합성 실패(빌더 모드·artifact 부재) 시 HF docs.parquet 다운로드 fallback (core 원시기능).
+        if category == "docs":
+            from dartlab.core.loaders import getLoader
+
+            loader = getLoader("docs")
+            if loader is not None and hasattr(loader, "synthesizeToPath") and loader.synthesizeToPath(stockCode, path):
+                return
         _downloadFromHf(stockCode, path, category)
         return
 
     if shouldRefresh:
         _refreshFromHf(stockCode, path, category)
-
-
-def _docsReportTypeExpr() -> pl.Expr:
-    """period (YYYYQn) → 옛 docs.parquet report_type 문자열 합성.
-
-    selectReport 호환 — annual=사업보고서, semi=반기보고서, Q1/Q3=분기보고서 (월 .03/.09).
-    """
-    year = pl.col("period").str.slice(0, 4)
-    q = pl.col("period").str.slice(4)
-    return (
-        pl.when(q == "Q1")
-        .then(pl.format("분기보고서 ({}.03)", year))
-        .when(q == "Q2")
-        .then(pl.format("반기보고서 ({}.06)", year))
-        .when(q == "Q3")
-        .then(pl.format("분기보고서 ({}.09)", year))
-        .otherwise(pl.format("사업보고서 ({}.12)", year))
-        .alias("report_type")
-    )
-
-
-def _loadDocsFromSections(
-    stockCode: str,
-    *,
-    columns: list[str] | None = None,
-    sinceYear: int | None = None,
-    predicate: "pl.Expr | None" = None,
-) -> pl.DataFrame:
-    """신규 sections artifact → 옛 docs.parquet 호환 (section-granular) DataFrame.
-
-    plan snazzy-wibbling-origami Phase 2 — docs.parquet 폐기 어댑터. 옛 flat
-    docs.parquet (mapper 산출) 을 read 하지 않고, 신규 element-granular artifact
-    (``data/dart/docs/{code}/{period}.parquet``) 를 ``(period, chapter, sectionLeaf)``
-    로 group + ``contentRaw`` concat 해 section-granular row 로 재구성한다.
-
-    section content/table parity 실측 ~100% (005930 임원현황 101612→101629, 배당
-    table 11→11). finance 파서 40+ + ``selectReport`` 가 의존하는 schema 재현:
-    section_content / section_title / report_type / year / rcept_no + 메타.
-
-    section_content_mixed 는 *생성 안 함* — 어떤 finance 파서도 미소비 (옛 빌더
-    zipCollector 사전 계산 잔재). content_plain 류 derive 0 (사용자 요구 #6).
-
-    Args:
-        stockCode: 종목코드.
-        columns: select 할 컬럼 list. None = 전체.
-        sinceYear: year >= sinceYear 필터.
-        predicate: polars 필터 expression.
-
-    Returns:
-        옛 docs.parquet 호환 DataFrame (빈 artifact 시 빈 DataFrame).
-    """
-    # sections→docs 합성은 본래 providers 책임 (PR-4b 이행 단계라 core docs 로더에 잔존).
-    # 정적 ``from dartlab.providers import`` 은 단방향 import 위반 → importlib 런타임 dispatch
-    # (modulePath 는 문자열 데이터, 정적 의존 0). 본격 이관(providers 측 합성)은 후속.
-    import importlib
-
-    _ss = importlib.import_module("dartlab.providers.dart.docs.sections.sectionsStorage")
-    _ensureFromHf = _ss._ensureFromHf
-    hasSectionsArtifact = _ss.hasSectionsArtifact
-    sectionsDir = _ss.sectionsDir
-
-    if not hasSectionsArtifact(stockCode):
-        _ensureFromHf(stockCode)
-    d = sectionsDir(stockCode)
-    files = sorted(d.glob("*.parquet")) if d.exists() else []
-    if not files:
-        return pl.DataFrame()
-
-    # 메모리 가드 — section_content (raw XML concat) 가 비싼 컬럼. caller 가 명시적으로
-    # 요청 안 하면 (예: corp_name 만) concat skip → +수백MB 회피. 신규 artifact 의 필요
-    # 컬럼만 lazy projection + sinceYear lazy 필터로 element row scan 량 축소 + streaming.
-    needContent = columns is None or "section_content" in columns
-    srcCols = ["period", "chapter", "sectionLeaf", "blockOrder", "rceptNo", "atocId", "aassocnote"]
-    if needContent:
-        srcCols.append("contentRaw")
-    lf = pl.scan_parquet([str(f) for f in files]).select(srcCols)
-    if sinceYear is not None:
-        lf = lf.filter(pl.col("period").str.slice(0, 4).cast(pl.Int32, strict=False) >= sinceYear)
-
-    aggs = [
-        pl.col("blockOrder").min().alias("_minOrder"),
-        pl.col("rceptNo").first().alias("rcept_no"),
-        pl.col("atocId").first().alias("atocid"),
-        pl.col("aassocnote").first().alias("assocnote"),
-    ]
-    if needContent:
-        aggs.insert(0, pl.col("contentRaw").str.join("").alias("section_content"))
-    grouped = (
-        lf.sort("blockOrder")
-        .group_by(["period", "chapter", "sectionLeaf"], maintain_order=True)
-        .agg(aggs)
-        .collect(engine="streaming")
-    )
-    if grouped.is_empty():
-        return pl.DataFrame()
-
-    # 옛 docs.parquet schema 재현 (section_content_mixed 제외).
-    corpName = None
-    try:
-        from dartlab.core.listingResolver import getListingResolver
-
-        resolver = getListingResolver()
-        if resolver is not None:
-            corpName = resolver.codeToName(stockCode)
-    except Exception:  # noqa: BLE001 — 이름 조회 실패는 비치명 (corp_name null fallback)
-        corpName = None
-
-    df = grouped.with_columns(
-        pl.col("period").str.slice(0, 4).alias("year"),
-        _docsReportTypeExpr(),
-        pl.coalesce([pl.col("sectionLeaf"), pl.col("chapter")]).alias("section_title"),
-        pl.col("_minOrder").rank("ordinal").over("period").cast(pl.Int64).alias("section_order"),
-        pl.lit(stockCode).alias("stock_code"),
-        pl.lit(corpName).cast(pl.Utf8).alias("corp_name"),
-        pl.col("rcept_no").str.slice(0, 8).alias("rcept_date"),
-        pl.format("https://dart.fss.or.kr/dsaf001/main.do?rcpNo={}", pl.col("rcept_no")).alias("section_url"),
-    ).drop("_minOrder")
-
-    if predicate is not None:
-        df = df.filter(predicate)
-    if columns:
-        available = [c for c in columns if c in df.columns]
-        if available:
-            df = df.select(available)
-    return _normalizeLoadedFrame(df, "docs")
-
-
-def _trySynthesizeDocsFromSections(stockCode: str, dest: Path) -> bool:
-    """sections artifact 가 있으면 docs.parquet 호환 schema 로 합성 저장 (1 회).
-
-    plan snazzy-wibbling-origami PR-4b — 사용자 측 docs.parquet 폐기 path. 빌더 측
-    zip → docs.parquet 양식 호환 (section_title/section_content/year/reportKind 컬럼)
-    로 변환하여 dest 에 저장. 호출자 (loadData) 의 후속 path (mmap/predicate 등) 와
-    schema 호환 — D.1 분석 모듈 95+ caller 무변경 동작.
-
-    빌더 모드 (sectionsBuilder 가 호출 흐름 안에) 는 무한 루프 방지 위해 우회. env
-    ``DARTLAB_BUILDER_MODE=1`` 또는 docs.parquet 이 sectionsBuilder context 의 source
-    of truth 일 때 본 합성 skip.
-
-    Args:
-        stockCode: 종목코드.
-        dest: docs.parquet 저장 경로.
-
-    Returns:
-        bool — 합성 성공 시 True, sections artifact 부재 또는 빌더 모드 시 False.
-    """
-    import os as _os
-
-    if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() in ("1", "true", "True"):
-        return False
-    # sections→docs 합성 (PR-4b) — 단방향 import 보존 위해 importlib 런타임 dispatch.
-    import importlib
-
-    try:
-        _ss = importlib.import_module("dartlab.providers.dart.docs.sections.sectionsStorage")
-    except ImportError:
-        return False
-    _ensureFromHf = _ss._ensureFromHf
-    hasSectionsArtifact = _ss.hasSectionsArtifact
-    loadSectionsIndex = _ss.loadSectionsIndex
-    loadSectionsLong = _ss.loadSectionsLong
-    loadSectionsRawXml = _ss.loadSectionsRawXml
-    # sections artifact 부재 시 HF lazy download 시도 — 한 종목 디렉터리만 (~수 MB).
-    if not hasSectionsArtifact(stockCode):
-        if not _ensureFromHf(stockCode):
-            return False
-    # _raw.parquet 우선 — 사용자 비전 100% (raw XML 모든 태그 보존). 신 schema 종목 보유,
-    # 옛 종목 부재 시 long fallback (mixed → section_content alias, lossy).
-    rawXml = loadSectionsRawXml(stockCode)
-    if rawXml is not None and not rawXml.is_empty():
-        try:
-            year = pl.col("period").str.slice(0, 4)
-            suffix = pl.col("period").str.slice(4)
-            synthesized = rawXml.with_columns(year.alias("year"), suffix.alias("report_kind"))
-            index = loadSectionsIndex(stockCode)
-            if index is not None and not index.is_empty():
-                # _raw 가 이미 rcept_no 보유 — _index 의 rcept_no 제외 (중복 차단).
-                indexCols = [c for c in index.columns if c not in ("period", "rcept_no")]
-                if indexCols:
-                    synthesized = synthesized.join(
-                        index.select(["period"] + indexCols).unique(subset=["period"]),
-                        on="period",
-                        how="left",
-                    )
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            synthesized.write_parquet(dest, compression="snappy")
-            from dartlab.core.logger import getLogger
-
-            _log = getLogger(__name__)
-            _log.info(
-                "docs.parquet 합성 (%s, _raw.parquet → %d rows): %s",
-                stockCode,
-                synthesized.height,
-                dest.name,
-            )
-            return True
-        except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):
-            pass  # fallback to long-based synthesis below
-    # 옛 schema fallback — long format (mixed → section_content alias, raw XML lossy).
-    long = loadSectionsLong(stockCode, columns=None)
-    if long is None or long.is_empty():
-        return False
-    try:
-        # period (YYYY 또는 YYYYQn) → year + reportKind 분리. sections 가 annual 을 YYYYQ4
-        # 양식으로 emit (sectionsBuilder)
-        year = pl.col("period").str.slice(0, 4)
-        suffix = pl.col("period").str.slice(4)
-        plainCol = "content_plain" if "content_plain" in long.columns else "content"
-        synthesized = long.with_columns(
-            year.alias("year"),
-            suffix.alias("report_kind"),
-            pl.col(plainCol).alias("section_content"),
-            pl.col("topic").alias("section_title"),
-        )
-        # _index.parquet 의 메타 (rcept_no/rcept_dt/doc_url/corp_name/atocid) join — period
-        # 기준. 옛 종목 (index 부재) 은 메타 컬럼 부재 → 호출자 메타 의존 path 만 실패.
-        index = loadSectionsIndex(stockCode)
-        if index is not None and not index.is_empty():
-            indexCols = [c for c in index.columns if c != "period"]
-            synthesized = synthesized.join(index.select(["period"] + indexCols), on="period", how="left")
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        synthesized.write_parquet(dest, compression="snappy")
-        from dartlab.core.logger import getLogger
-
-        _log = getLogger(__name__)
-        _log.info(
-            "docs.parquet 합성 (%s, sections artifact → %d rows, index=%s): %s",
-            stockCode,
-            synthesized.height,
-            index is not None,
-            dest.name,
-        )
-        return True
-    except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):
-        return False
 
 
 def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:

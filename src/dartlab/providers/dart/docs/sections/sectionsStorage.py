@@ -317,8 +317,8 @@ def loadSectionsWide(
 def loadSectionsRawXml(stockCode: str) -> pl.DataFrame | None:
     """sections artifact 를 docs.parquet 합성용 row-major DataFrame 으로 read.
 
-    dataLoader._trySynthesizeDocsFromSections (plan snazzy-wibbling-origami PR-4b) 가
-    docs.parquet 부재 시 본 함수 → year/report_kind 부착 → docs.parquet 양식 저장.
+    loader.DartDocsLoader.synthesizeToPath (옛 dataLoader._trySynthesizeDocsFromSections,
+    PR-4b) 가 docs.parquet 부재 시 본 함수 → year/report_kind 부착 → docs.parquet 양식 저장.
 
     schema 변환 — sectionsNew (chapter/sectionLeaf/blockLeaf/contentRaw/blockOrder/
     xbrlClass/disclosureKey/period/corp/rceptNo) → docs.parquet 호환 (topic/
@@ -359,7 +359,7 @@ def loadSectionsRawXml(stockCode: str) -> pl.DataFrame | None:
 def loadSectionsIndex(stockCode: str) -> pl.DataFrame | None:
     """sections artifact 의 period 별 메타 (rcept_no/corp_name/...) index.
 
-    dataLoader._trySynthesizeDocsFromSections 가 본 함수 → period 별 unique 메타를
+    loader.DartDocsLoader.synthesizeToPath 가 본 함수 → period 별 unique 메타를
     rawXml 결과에 join. 옛 _index.parquet 폐기 (plan snazzy-wibbling-origami) —
     sectionsNew artifact 의 행별 메타 컬럼에서 직접 추출.
 
