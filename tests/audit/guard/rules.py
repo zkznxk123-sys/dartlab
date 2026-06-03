@@ -122,6 +122,7 @@ FROZEN_PROVIDER_COMPANY_SURFACE = {
         "network",
         "news",
         "notes",
+        "panel",
         "priority",
         "quant",
         "rank",

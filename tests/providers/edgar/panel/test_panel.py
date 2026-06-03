@@ -103,6 +103,45 @@ def test_panel_us_ticker_case_insensitive(_builtPanel) -> None:
     assert not p.is_empty(), "소문자 ticker 가 대문자 artifact 해석 실패"
 
 
+def test_panel_path_helper() -> None:
+    """panelPath — flat 회사당 1파일 경로 (대문자 정규화, edgar/panel 트리)."""
+    from dartlab.providers.edgar.panel.build.builder import panelPath
+
+    p = panelPath("aapl")
+    assert p.name == "AAPL.parquet"
+    assert p.parent.name == "panel" and p.parent.parent.name == "edgar"
+
+
+def test_build_edgar_panel_all(tmp_path, monkeypatch) -> None:
+    """buildEdgarPanelAll — 다 ticker 순차 + None(sections dir 전수 스캔) 경로."""
+    monkeypatch.setattr(_config, "dataDir", str(tmp_path))
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
+    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanelAll
+
+    _writeSyntheticSections(tmp_path, "AAA")
+    _writeSyntheticSections(tmp_path, "BBB")
+    # 명시 ticker list
+    res = buildEdgarPanelAll(["AAA"])
+    assert res["AAA"]["rows"] == 4
+    # None → sections dir 전수 스캔 (AAA + BBB)
+    resAll = buildEdgarPanelAll(None)
+    assert set(resAll.keys()) == {"AAA", "BBB"}
+    assert all(r["rows"] == 4 for r in resAll.values())
+
+
+def test_ensure_panel_from_hf_us_noop(tmp_path, monkeypatch) -> None:
+    """ensurePanelFromHf(marketNs="us") — NO_HF_DOWNLOAD/비-시장 graceful no-op (예외 0)."""
+    monkeypatch.setattr(_config, "dataDir", str(tmp_path))
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
+    from dartlab.providers.dart.panel.read import ensurePanelFromHf
+
+    # us + 다운로드 차단 → graceful no-op (artifact 부재, 예외 없음)
+    ensurePanelFromHf("AAPL", marketNs="us")
+    assert not (tmp_path / "edgar" / "panel" / "AAPL.parquet").exists()
+    # 미지원 시장 → 즉시 반환 (예외 0)
+    ensurePanelFromHf("AAPL", marketNs="jp")
+
+
 def test_edgar_panel_distribution_config() -> None:
     """edgarPanel DATA_RELEASES 엔트리 + deploy _CATEGORY_MAP 배선 (HF 배포 경로)."""
     from dartlab.core.dataConfig import DATA_RELEASES, repoFor
