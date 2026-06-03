@@ -1,27 +1,31 @@
-"""EDGAR panel build (gather sections → cross-market 16-col 미러 artifact).
+"""EDGAR panel build — raw SEC `.txt` 직접 파싱 → 16-col 보드 + EDGAR_CELL 셀 (자급, DART 미러).
 
-DART ``panel.build`` 의 EDGAR analog 이나 XML 파싱 0 — gather 가 이미 itemize 한 sections
-(``data/edgar/sections/{ticker}/``)를 ``providers.dart.panel.schema.PANEL_SCHEMA`` 16-col flat
-artifact (``data/edgar/panel/{ticker}.parquet``)로 컬럼 remap 한다. read 표면은 cross-market
-``providers.dart.panel`` Panel/read (``marketNs="us"``) 를 무변경 재사용.
+gather 원본 ``data/original/edgar/docs/{cik}/{accession}.txt`` 를 자급 파싱(sections/gather/meta 의존 0):
+submission(SGML) → instance(inline facts+context) → linkbase(EX-101.PRE/LAB) → walker(보드, 재무표
+disclosureKey 앵커링) + cell(계정×기간 셀). read 표면은 ``providers.dart.panel`` (marketNs="us") 재사용.
 
 공개 표면:
-    - ``buildEdgarPanel(ticker)`` — 1 ticker sections → panel artifact.
-    - ``buildEdgarPanelAll(tickers)`` — 순차 fan-out (OOM 가드).
-    - ``sectionsToPanel(long)`` — 순수 remap (테스트 가능).
-    - ``parseTopic(topic)`` — topic → (form, itemId, sectionPath) 순수 규칙.
+    - ``buildEdgarPanel(ticker)`` / ``buildEdgarPanelAll(tickers)`` — artifact 생산 (운영자/CI).
+    - ``filingToBoardAndCells(txtPath, *, ticker)`` — 1 필링 → (보드 rows, 셀 rows) (순수, 테스트).
+    - ``panelPath(ticker)`` / ``panelCellPath(ticker)`` — artifact 경로.
 """
 
 from __future__ import annotations
 
-from .builder import buildEdgarPanel, buildEdgarPanelAll, panelPath, sectionsToPanel
-from .topicMap import itemIdExpr, parseTopic
+from .builder import (
+    buildEdgarPanel,
+    buildEdgarPanelAll,
+    filingToBoardAndCells,
+    panelCellPath,
+    panelPath,
+    resolveCikForTicker,
+)
 
 __all__ = [
     "buildEdgarPanel",
     "buildEdgarPanelAll",
-    "sectionsToPanel",
+    "filingToBoardAndCells",
     "panelPath",
-    "parseTopic",
-    "itemIdExpr",
+    "panelCellPath",
+    "resolveCikForTicker",
 ]

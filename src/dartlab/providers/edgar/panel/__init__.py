@@ -1,16 +1,21 @@
-"""EDGAR panel (공시 수평화) — cross-market read 표면 재사용 + EDGAR build (marketNs="us").
+"""EDGAR panel (공시 수평화) — DART-panel급 XBRL 보드 + 셀 (raw `.txt` 자급 파싱, marketNs="us").
 
-**read 표면**은 ``providers.dart.panel`` 의 ``Panel`` 을 그대로 재사용한다 (``PANEL_SCHEMA`` 16-col
-cross-market 계약, 값만 us-gaap — schema.py 가 명시 endorse). ``Panel(ticker, marketNs="us")`` 로
-``data/edgar/panel/{ticker}.parquet`` 를 wide 수평화. read.py/mapper.py/canonical/ 복제 0(DRY).
+DART panel 의 2층을 필링 inline us-gaap XBRL 로 재현:
+- **보드** (16-col ``PANEL_SCHEMA``) — 재무제표를 presentation role→정규 statement key(BS/IS/CF/CIS/EF)로
+  disclosureKey 앵커링, 서술 Item 은 narrative. ``Panel(ticker, marketNs="us")`` / ``c.panel`` (DART read
+  표면 재사용, ``data/edgar/panel/{ticker}.parquet``).
+- **native 셀** (``EDGAR_CELL_SCHEMA``) — 필링 inline(ix:)/INS(native) XBRL fact×context×role 분해 →
+  계정×기간. ``c.panel("is"/"bs"/"cf"/"cis"/"sce"/"ratios")`` (``cellRead``, ``data/edgar/panelCell/{ticker}
+  .parquet``) = DART native(소문자) 대칭. 대문자 ``c.panel("IS")`` = companyfacts(finance facade) 대칭.
 
-**build** (``build/``)는 EDGAR 전용 — gather 가 이미 itemize 한 sections
-(``data/edgar/sections/{ticker}/``)를 16-col flat artifact 로 컬럼 remap (XML 파싱 0). DART
-build(walker/refScan/dechunkNotes) 와 달리 gather 가 추출 완료라 remap 만.
+**build** (``build/``)는 gather 원본 ``data/original/edgar/docs/{cik}/*.txt`` (SEC full-submission)를
+**자급 파싱** — submission(SGML)→instance(facts+context)→linkbase(EX-101.PRE/LAB)→walker(보드)+cell(셀).
+sections/gather/meta 의존 0(폐기-무관), 전 history. DART buildPanel(zip 파싱)의 EDGAR 미러.
 
 공개표면 (deep leaf import 금지, R6):
-    - ``Panel`` (``Panel(ticker, marketNs="us")``) — 한 회사 공시 수평화 보드 (read).
-    - ``build`` subpackage — ``buildEdgarPanel(ticker)`` 등 (운영자/CI artifact 생산).
+    - ``Panel`` (``Panel(ticker, marketNs="us")``) — 보드 read (DART 표면 재사용).
+    - ``cellRead`` — native 셀 read (``readNative``; c.panel 소문자 위임, facade _nativeFn 주입).
+    - ``build`` subpackage — ``buildEdgarPanel(ticker)`` (운영자/CI artifact 생산).
 """
 
 from dartlab.providers.dart.panel import Panel
