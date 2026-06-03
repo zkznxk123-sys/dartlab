@@ -73,8 +73,6 @@ _MAX_RETRIES = 3
 _EDGAR_UNIVERSE_TTL_HOURS = 24
 _DART_FRESHNESS_TTL_HOURS = 12  # 일일 HF 수집 주기(03:00 KST)에 맞춰 12h — 최대 stale 윈도우 반감
 _KRX_FRESHNESS_TTL_HOURS = 1  # 장마감 후 일별 갱신 데이터라 stale 허용폭을 짧게 둔다
-_SEC_HEADERS = {"User-Agent": "DartLab eddmpython@gmail.com"}
-_LISTED_EXCHANGES = {"Nasdaq", "NYSE", "CBOE"}
 
 PERIOD_KINDS = {
     "y": ["annual"],
@@ -608,9 +606,6 @@ def download(stockCode: str) -> None:
 
 DART_VIEWER = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo="
 
-EDGAR_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
-EDGAR_LISTED_UNIVERSE_URL = "https://www.sec.gov/files/company_tickers_exchange.json"
-
 
 def buildIndex(category: str = "docs") -> pl.DataFrame:
     """로컬 parquet 전체를 스캔해서 종목 인덱스 생성.
@@ -663,17 +658,14 @@ def buildIndex(category: str = "docs") -> pl.DataFrame:
 
 
 def updateEdgarListedUniverse(*, force: bool = False) -> Path:
-    """SEC exchange ticker 원본으로 listed universe 캐시 갱신."""
-    from dartlab.core.dataLoaderUniverse import updateEdgarListedUniverse as _impl
+    """SEC exchange ticker 원본으로 listed universe 캐시 갱신 — fetch 는 gather 위임.
 
-    return _impl(
-        force=force,
-        dataRoot=_getDataRoot(),
-        ttlHours=_EDGAR_UNIVERSE_TTL_HOURS,
-        listedUniverseUrl=EDGAR_LISTED_UNIVERSE_URL,
-        fetchJson=_fetchJson,
-        isLocalCacheExpired=_isLocalCacheExpired,
-    )
+    수집 일원화: SEC ``company_tickers_exchange.json`` Extract 는 gather/edgar/universe
+    가 전담. core 는 갱신 트리거 + 캐시 parquet read(``loadEdgarListedUniverse``)만.
+    """
+    from dartlab.core.edgarClient import updateListedUniverse
+
+    return updateListedUniverse(force=force)
 
 
 def loadEdgarListedUniverse(*, forceUpdate: bool = False) -> pl.DataFrame:
@@ -758,13 +750,6 @@ def _isLocalCacheExpired(path: Path, ttlHours: int) -> bool:
         return True
     ageSeconds = time.time() - path.stat().st_mtime
     return ageSeconds > ttlHours * 3600
-
-
-def _fetchJson(url: str) -> dict:
-    with _socketTimeout():
-        request = Request(url, headers=_SEC_HEADERS)
-        with urlopen(request) as resp:
-            return json.loads(resp.read())
 
 
 # ── 메모리 최적화 + docs 표준화 ────────────────────────────────────

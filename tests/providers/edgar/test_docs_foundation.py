@@ -1174,8 +1174,12 @@ def test_updateEdgarListedUniverse_writes_cache(monkeypatch, tmp_path):
         ]
     }
 
+    # 수집 일원화: universe fetch 는 gather/edgar/universe 로 이관 (core 는 delegate).
+    # gather.edgar 는 GatherEntry 파사드로 shadow 되어 문자열 monkeypatch 불가 — 모듈 객체로 setattr.
+    from dartlab.gather.edgar import universe as _universe
+
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
-    monkeypatch.setattr("dartlab.core.dataLoader._fetchJson", lambda url: payload)
+    monkeypatch.setattr(_universe, "_fetchJson", lambda url: payload)
 
     path = updateEdgarListedUniverse(force=True)
     df = loadEdgarListedUniverse()
@@ -1192,7 +1196,9 @@ def test_updateEdgarListedUniverse_writes_cache(monkeypatch, tmp_path):
 def test_fetchJson_uses_sec_user_agent(monkeypatch):
     import json
 
-    from dartlab.core.dataLoader import _fetchJson
+    # 수집 일원화: SEC fetch 헬퍼는 gather/edgar/universe 로 이관.
+    # gather.edgar 는 GatherEntry 파사드로 shadow 되어 문자열 monkeypatch 불가 — 모듈 객체로 setattr.
+    from dartlab.gather.edgar import universe as _universe
 
     class FakeResponse:
         def __enter__(self):
@@ -1208,9 +1214,9 @@ def test_fetchJson_uses_sec_user_agent(monkeypatch):
         assert request.headers["User-agent"] == "DartLab eddmpython@gmail.com"
         return FakeResponse()
 
-    monkeypatch.setattr("dartlab.core.dataLoader.urlopen", fakeUrlopen)
+    monkeypatch.setattr(_universe, "urlopen", fakeUrlopen)
 
-    payload = _fetchJson("https://example.com/test.json")
+    payload = _universe._fetchJson("https://example.com/test.json")
 
     assert payload == {"ok": True}
 

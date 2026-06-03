@@ -249,3 +249,8 @@ def downloadQuarterlyDataset(*args: Any, **kwargs: Any) -> Any:
 def discoverLatestQuarter(*args: Any, **kwargs: Any) -> Any:
     """SEC 공개 최신 분기 HEAD 탐색 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: 없음. Example: >>> discoverLatestQuarter()  # doctest: +SKIP"""
     return _call("datasetBulk", "discoverLatestQuarter", *args, **kwargs)
+
+
+def updateListedUniverse(*args: Any, **kwargs: Any) -> Any:
+    """SEC listed universe(company_tickers_exchange) fetch+캐시 갱신 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: URLError. Example: >>> updateListedUniverse(force=True)  # doctest: +SKIP"""
+    return _call("universe", "updateListedUniverse", *args, **kwargs)
