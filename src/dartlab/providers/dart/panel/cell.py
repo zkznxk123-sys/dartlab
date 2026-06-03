@@ -103,15 +103,23 @@ def _cellsFromPanel(code: str, marketNs: str = "kr", periods: list[str] | None =
 
     _read.ensurePanelFromHf(code, marketNs)
     panelDir = _read._panelDir(code, marketNs)
-    files = sorted(panelDir.glob("*.parquet")) if panelDir.exists() else []
-    if periods is not None:
-        keep = set(periods)
-        files = [f for f in files if f.stem in keep]
-    if not files:
+    flat = panelDir.parent / f"{code}.parquet"  # flat: data/dart/panel/{code}.parquet (회사당 1파일)
+    cols = ["disclosureKey", "xbrlClass", "contentRaw", "period", "rceptNo"]
+    frames: list[pl.DataFrame] = []
+    if flat.exists():
+        df = pl.read_parquet(str(flat), columns=cols)
+        if periods is not None:
+            df = df.filter(pl.col("period").is_in(list(periods)))  # 1파일 → 행 필터
+        frames = [df]
+    elif panelDir.exists():  # 하위호환 — 옛 period-shard 폴더
+        files = sorted(panelDir.glob("*.parquet"))
+        if periods is not None:
+            files = [f for f in files if f.stem in set(periods)]
+        frames = [pl.read_parquet(str(f), columns=cols) for f in files]
+    if not frames:
         return None
     rows: list[dict] = []
-    for fp in files:
-        df = pl.read_parquet(str(fp), columns=["disclosureKey", "xbrlClass", "contentRaw", "period", "rceptNo"])
+    for df in frames:
         stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
         for row in stmt.iter_rows(named=True):
             scope2 = "standalone" if "_S" in (row["xbrlClass"] or "") else "consolidated"
