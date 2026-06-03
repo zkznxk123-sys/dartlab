@@ -17,15 +17,8 @@ s.saveFinance("재무.csv", 2020, kr=True) # 한글 컬럼 저장
 
 # DartClient·키·DartApiError 는 gather 가 fetch 전담 (ETL Extract) — core.dartClient seam 경유.
 # DartKeyProvider(CredentialProvider) 등록은 core.credentials 가 gather.dart.keys 발견으로 트리거.
+# zip 병렬 fetch(streamZipBytes 등)는 gather.dart.document 로 이관 (ETL Extract).
 from dartlab.core.dartClient import DartApiError, DartClient
-from dartlab.providers.dart.openapi.bulkZipFetcher import (
-    FetchStats,
-    buildTargetsFromDocsParquet,
-    collectAllOriginalZips,
-    fetchZipsParallel,
-    safeWriteBytes,
-    streamZipBytes,
-)
 from dartlab.providers.dart.openapi.dart import Dart, DartCompany, OpenDart, OpenDartCompany
 from dartlab.providers.dart.openapi.saver import korColumns
 from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
@@ -38,12 +31,6 @@ __all__ = [
     "DartClient",
     "DartApiError",
     "ZipDocsCollector",
-    "FetchStats",
-    "buildTargetsFromDocsParquet",
-    "collectAllOriginalZips",
-    "fetchZipsParallel",
-    "safeWriteBytes",
-    "streamZipBytes",
     "korColumns",
 ]
 

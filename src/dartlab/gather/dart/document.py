@@ -12,13 +12,13 @@ DartClient 의 _KeySlot 풀이 키별 throttle + 020 cooldown 자동 마이그�
 
 호출 예:
     # 저수준 — (code, rceptNo) 페어 직접 지정
-    from dartlab.providers.dart.openapi import DartClient, fetchZipsParallel
+    from dartlab.gather.dart.document import fetchZipsParallel
     client = DartClient()
     stats = fetchZipsParallel(client, [("005930", "20240514001234"), ...],
                               outDir=Path("data/original/dart/docs"))
 
     # 고수준 — 전체 종목 일괄 (docs.parquet 의 rcept 자동 수집)
-    from dartlab.providers.dart.openapi import collectAllOriginalZips
+    from dartlab.gather.dart.document import collectAllOriginalZips
     stats = collectAllOriginalZips()   # data/dart/docs/*.parquet 모든 종목
     stats = collectAllOriginalZips(codes=["005930", "000660"])  # 일부
 """
@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import dartlab.config as _cfg
-from dartlab.core.dartClient import DartClient
+from dartlab.gather.dart.client import DartClient
 
 _MIN_VALID_BYTES = 1000
 _DOCS_DIR_REL = "dart/docs"

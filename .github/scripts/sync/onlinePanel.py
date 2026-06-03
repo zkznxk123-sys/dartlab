@@ -84,11 +84,8 @@ def main() -> int:
 
     import polars as pl
 
-    from dartlab.providers.dart.openapi import (
-        DartClient,
-        buildTargetsFromDocsParquet,
-        streamZipBytes,
-    )
+    from dartlab.gather.dart.client import DartClient
+    from dartlab.gather.dart.document import buildTargetsFromDocsParquet, streamZipBytes
     from dartlab.providers.dart.panel.build import buildPanelFromStream, panelXbrlRefPath
 
     refPath = panelXbrlRefPath()
