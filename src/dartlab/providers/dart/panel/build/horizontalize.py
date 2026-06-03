@@ -100,6 +100,7 @@ def horizontalize(df: pl.DataFrame) -> pl.DataFrame:
         .group_by(["chapter", "_gkey"], maintain_order=True)
         .agg(
             pl.col("sectionLeaf").first(),
+            pl.col("sectionPath").first(),  # SECTION-N 전 깊이 보존 (그룹 대표)
             pl.col("blockLeaf").first(),
             pl.col("xbrlClass").first(),
             pl.col("xbrlMatched").first(),

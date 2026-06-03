@@ -25,9 +25,10 @@ LLM Specifications:
         - 같은 element 를 walker 이중 호출로 emit 중복 금지.
         - SECTION-N stack 추적 시 ancestor 만 사용 — descendant 검사 금지.
     OutputSchema:
-        - ``walkSections(root, era, refDf) -> iter[dict]`` 10 col row.
-        - cols: chapter / sectionLeaf / blockLeaf / xbrlClass / xbrlMatched /
+        - ``walkSections(root, era, refDf) -> iter[dict]`` 11 col row.
+        - cols: chapter / sectionLeaf / sectionPath / blockLeaf / xbrlClass / xbrlMatched /
                 xbrlMatchScore / atocId / aassocnote / contentRaw / blockOrder.
+        - contentSig 은 walker 아님 — horizontalize 병합 후 최종 contentRaw 에 builder 가 계산(병합 지문).
     Prerequisites:
         - lxml etree root. refDf (v1/v1.5 fuzzy match 용).
     Freshness:
@@ -56,6 +57,7 @@ from .refScan.titleNormalizer import (
 )
 
 _MULTISPACE_RE = re.compile(r"\s+")
+_SECTION_SEP = "␟"  # SECTION-N 전 깊이 join 구분자 (mapper._NARR_SEP 과 동일)
 
 
 def detectSchemaEra(root) -> str:
@@ -341,6 +343,8 @@ def walkSections(
 
         chapter = chapterStack[0] if chapterStack else ""
         sectionLeaf = chapterStack[-1] if chapterStack else ""
+        # SECTION-N 전 깊이 보존 (flatten 으로 잃는 계층 truth — 챕터붕괴 복원의 근거).
+        sectionPath = _SECTION_SEP.join(chapterStack)
 
         try:
             contentRaw = etree.tostring(el, encoding="unicode")
@@ -352,6 +356,7 @@ def walkSections(
         yield {
             "chapter": chapter,
             "sectionLeaf": sectionLeaf,
+            "sectionPath": sectionPath,
             "blockLeaf": blockLeaf,
             "xbrlClass": xbrlClass,
             "xbrlMatched": xbrlMatched,

@@ -1,21 +1,24 @@
-"""panel artifact schema — cross-market 계약 SSOT (L0, 14-col 동결).
+"""panel artifact schema — cross-market 계약 SSOT (L0, 16-col 동결).
 
-모든 시장(dart/edgar/edinet)의 BUILD 가 **동일한 14-col schema** 를 산출한다.
+모든 시장(dart/edgar/edinet)의 BUILD 가 **동일한 16-col schema** 를 산출한다.
 panel reader(`providers/dart/panel`)·facade 는 이 schema 만 안다 → EDGAR build 가
 us-gaap 에서 같은 14-col 을 내면 reader/facade 무변경 동작 (다시장 깨끗함의 토대).
 
-수평화 2-레벨을 담는 그릇:
+수평화 그릇:
     - L1 (수평화 축) = ``xbrlClass``(ACLASS raw) / ``disclosureKey``(native canonicalKey, scope-strip).
-    - L2 (하부) = ``sectionLeaf``(heading) + ``contentRaw``(body, 태그 무손실).
-    - 행 = (disclosureKey, scope) 단일 앵커 × 열 = period.
+    - 구조 truth = ``chapter`` + ``sectionLeaf`` + ``sectionPath``(SECTION-N 전 깊이 — flatten 으로 잃는 계층).
+    - 본문 = ``contentRaw``(태그 무손실) + ``contentSig``(내용 SimHash — 서사구조 수평화 정렬 앵커).
+    - 행 = (disclosureKey, scope) 단일 앵커 × 열 = period (재무제표); 서사는 ``contentSig`` 매치로 정렬.
 
 LLM Specifications:
     AntiPatterns:
-        - 시장별로 컬럼 추가/이름 다르게 금지 — 14-col 동결, 시장차이는 값으로.
-        - content_plain/mixed/stripped 류 사전 파생 컬럼 추가 금지 (태그 무손실 단일).
-        - ``scope`` 를 저장 컬럼으로 추가 금지 — read 시점 xbrlClass 파생 (anchor.scopeExpr).
+        - 시장별로 컬럼 추가/이름 다르게 금지 — 16-col 동결, 시장차이는 값으로.
+        - content_plain/mixed/stripped 류 *표시용* 파생 컬럼 추가 금지 (태그 무손실 contentRaw 단일). 단
+          ``contentSig`` 은 표시물이 아니라 *정렬 인덱스*(per-leaf 결정론 해시)라 예외 — BUILD bake.
+        - ``scope`` 를 저장 컬럼으로 추가 금지 — read 시점 xbrlClass 파생 (anchor.scopeExpr). ``leafType``(text/table)도
+          read 파생(contentRaw 의 TABLE 마커) — bake 안 함.
     OutputSchema:
-        - ``PANEL_SCHEMA: dict[str, pl.DataType]`` 14 col.
+        - ``PANEL_SCHEMA: dict[str, pl.DataType]`` 16 col.
         - ``PIVOT_INDEX: list[str]`` — 회사내 다기간 + 회사간 정렬 키.
     Prerequisites:
         - polars.
@@ -31,10 +34,11 @@ from __future__ import annotations
 
 import polars as pl
 
-# 14-col panel artifact schema (cross-market 동결).
+# 16-col panel artifact schema (cross-market 동결).
 PANEL_SCHEMA: dict[str, pl.DataType] = {
     "chapter": pl.Utf8,  # SECTION-1 대분류 (I~XII; EDGAR Part/Item)
     "sectionLeaf": pl.Utf8,  # 절 이름 (SECTION-N TITLE 원본 보존)
+    "sectionPath": pl.Utf8,  # SECTION-N 전 깊이 "␟" join — flatten 으로 잃는 계층 truth (read 파생 불가, bake 필수)
     "blockLeaf": pl.Utf8,  # 블록 소제목 (TABLE-GROUP TITLE)
     "xbrlClass": pl.Utf8,  # ACLASS 직접 (BS_C/IS_C2/CF_C/EF_C/NT_C_D######, +_S 별도)
     "xbrlMatched": pl.Boolean,  # ACLASS exact(True) vs fuzzy(False)
@@ -43,6 +47,7 @@ PANEL_SCHEMA: dict[str, pl.DataType] = {
     "aassocnote": pl.Utf8,  # provenance
     "blockOrder": pl.UInt32,  # 문서 순서
     "contentRaw": pl.Utf8,  # 태그 무손실 raw XML (etree.tostring 그대로) — 단일 본문 컬럼
+    "contentSig": pl.UInt64,  # leaf 내용 SimHash (태그·숫자 제거 지문) — READ 수평화 정렬 앵커 (build/signature.simhash)
     "period": pl.Utf8,  # YYYYQn (결산월 무관 calendar quarter)
     "corp": pl.Utf8,  # 종목코드
     "rceptNo": pl.Utf8,  # 접수번호 provenance

@@ -25,7 +25,7 @@ LLM Specifications:
         - ``buildSpine(code, *, outModulePath, refDf) -> dict`` (생성 통계).
         - 부수효과: ``spine/spineData.py`` (SPINE_ROWS tuple).
     Prerequisites:
-        - data/dart/original/docs/{code}/*.zip 로컬. lxml.
+        - data/original/dart/docs/{code}/*.zip 로컬. lxml.
     Freshness:
         - 기준 종목 재빌드·정부 양식 변경 시 재생성.
     Dataflow:
@@ -73,7 +73,7 @@ def _latestAnnualBundle(
     Raises:
         없음 — zip read 실패는 skip.
     """
-    zipDir = Path(_cfg.dataDir) / "dart" / "original" / "docs" / code
+    zipDir = Path(_cfg.dataDir) / "original" / "dart" / "docs" / code
     if not zipDir.exists():
         return None
     best: tuple[str, list[dict], list[str]] | None = None
@@ -147,7 +147,8 @@ def _companySpine(
     _period, rows, xmls = bundle
     if not rows:
         return None
-    df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
+    # spine 순서만 계산 — contentSig 불필요(parquet write 안 함). 15-col 로 구성(walker rows 에 contentSig 없음).
+    df = pl.DataFrame(rows, schema={k: v for k, v in PANEL_SCHEMA.items() if k != "contentSig"})
     df = horizontalize(df)
     df = resolveBatch(df)  # disclosureKey 부착
     if df.is_empty():
@@ -245,7 +246,7 @@ def buildSpine(
         - ``mapper.rowIdentity`` — 행 identity SSOT.
 
     Requires:
-        - data/dart/original/docs/{code}/*.zip. lxml. polars.
+        - data/original/dart/docs/{code}/*.zip. lxml. polars.
 
     Capabilities:
         - 한 회사 정부 문서순서·계층을 panel 행 뼈대(순수 코드)로 1회 굽는다 — read 재발견 0.

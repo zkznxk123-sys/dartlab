@@ -16,7 +16,7 @@ LLM Specifications:
         - ``buildPanel(code) -> dict[period, rowCount]``.
         - 출력: ``data/dart/panel/{code}/{period}.parquet`` (14-col).
     Prerequisites:
-        - data/dart/original/docs/{code}/*.zip (로컬).
+        - data/original/dart/docs/{code}/*.zip (로컬).
         - refDf (panelXbrlRef.parquet 또는 5 baseline scan).
     Freshness:
         - ref table 갱신 후 옛 양식 매핑 재빌드 가능.
@@ -47,6 +47,7 @@ from ..schema import PANEL_SCHEMA
 from .dechunkNotes import dechunkNotes
 from .horizontalize import horizontalize
 from .refScan import scanRefBaseline
+from .signature import simhash
 from .walker import detectSchemaEra, walkSections
 
 _log = logging.getLogger(__name__)
@@ -151,7 +152,7 @@ def _readZip(zp: Path) -> tuple[str | None, list[str]]:
         없음 — BadZipFile/OSError/KeyError 흡수.
 
     Example:
-        >>> _readZip(Path("data/dart/original/docs/005930/...zip"))  # doctest: +SKIP
+        >>> _readZip(Path("data/original/dart/docs/005930/...zip"))  # doctest: +SKIP
     """
     m = _RCEPT_RE.match(zp.name)
     rcept = m.group(1) if m else zp.stem
@@ -350,11 +351,14 @@ def _writePeriodShards(
     for period, rows in periodRows.items():
         if not rows:
             continue
-        df = pl.DataFrame(rows, schema=PANEL_SCHEMA)
+        # 빌드 입력 = 15-col (contentSig 제외 — horizontalize 병합 + dechunkNotes 분해 후 최종 contentRaw 에 계산).
+        df = pl.DataFrame(rows, schema={k: v for k, v in PANEL_SCHEMA.items() if k != "contentSig"})
         df = horizontalize(df)
         df = resolveBatch(df, marketNs="kr")  # KR within = native canonicalKey
         df = dechunkNotes(df)  # 미분해 주석 블록 → 항목별 NT_* sub-note (구조무관 분류). 본문+첨부 중복
         # 제거(dedupKeyed)는 BUILD 아님 — READ 정렬(readWide)에서 read-time 처리(재빌드 무관).
+        # contentSig = 병합·분해 완료된 최종 leaf contentRaw 의 SimHash (READ 서사구조 수평화 정렬 앵커, per-leaf 결정론).
+        df = df.with_columns(pl.col("contentRaw").map_elements(simhash, return_dtype=pl.UInt64).alias("contentSig"))
         df = df.select(list(PANEL_SCHEMA.keys()))
         outPath = outDir / f"{period}.parquet"
         if outPath.exists() and not overwrite:
@@ -401,7 +405,7 @@ def buildPanel(
         - ``..mapper.resolveBatch`` — disclosureKey(=native canonicalKey) 부착.
 
     Requires:
-        - data/dart/original/docs/{code}/*.zip. polars. lxml.
+        - data/original/dart/docs/{code}/*.zip. polars. lxml.
 
     Capabilities:
         - 한 종목의 전 기간 공시를 14-col panel artifact 로 — 손실0/dup0/태그무손실.
@@ -449,7 +453,7 @@ def buildPanel(
     if _existing is None:
         setGlobalRefTokens(precomputeRefTokens(refDf))
 
-    zipDir = Path(_cfg.dataDir) / "dart" / "original" / "docs" / code
+    zipDir = Path(_cfg.dataDir) / "original" / "dart" / "docs" / code
     if not zipDir.exists():
         _log.warning("zip dir 없음: %s", zipDir)
         return {}
@@ -480,7 +484,7 @@ def buildPanelFromStream(
     ``buildPanel`` 의 메모리 쌍둥이 — 로컬 zip 대신 DART API 가 흘리는 zip bytes 를 받아 동일
     코어(``_readZipBytes`` → ``_xmlsToPeriodRows`` → ``_writePeriodShards``)로 14-col artifact
     생산. 산출물은 ``buildPanel`` 과 바이트 동형(같은 walker/horizontalize/resolveBatch/zstd),
-    입력원만 stream. ``data/dart/original/docs`` 에 zip 을 만들지 않음 → refScan 불가라 refDf 필수
+    입력원만 stream. ``data/original/dart/docs`` 에 zip 을 만들지 않음 → refScan 불가라 refDf 필수
     (online 은 HF seed ``panelXbrlRef.parquet`` 를 강제 주입, 자동 scanRefBaseline 금지).
 
     Args:
@@ -532,7 +536,7 @@ def buildPanelFromStream(
         AntiPatterns:
             - refDf None 시 scanRefBaseline 자동 호출 금지 — online 엔 zip 없음(ValueError).
             - 전 종목 stream 한 번에 모으기 금지 — 종목 단위 호출(bytes 메모리 폭주 가드).
-            - zip 디스크 저장 금지 — 메모리 1패스 (data/dart/original/docs 안 만듦).
+            - zip 디스크 저장 금지 — 메모리 1패스 (data/original/dart/docs 안 만듦).
         OutputSchema:
             - ``dict[str, int]`` + 부수효과 data/dart/panel/{code}/{period}.parquet.
         Prerequisites:
