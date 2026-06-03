@@ -49,24 +49,15 @@ jobs:
           key: dartlab-macro-${{ github.run_id }}
           restore-keys: dartlab-macro-
 
-      - name: Build FRED/ECOS parquet + push to HF
+      # 통합 진입점(dartlab.pipeline) — macro stage 가 buildMacroData(--source --push) +
+      # buildMacroCycle(--push) 를 동형 호출. source 는 MACRO_SOURCE env 로 전달.
+      - name: Build macro (FRED/ECOS + cycle) → HF
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          SOURCE="${{ github.event.inputs.source || 'all' }}"
-          uv run python -X utf8 .github/scripts/sync/buildMacroData.py \
-            --source "$SOURCE" \
-            --push
-
-      - name: Build macro cycle JSON (KR/US phase) + push to HF
-        env:
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          uv run python -X utf8 .github/scripts/sync/buildMacroCycle.py --push
+          MACRO_SOURCE: ${{ github.event.inputs.source || 'all' }}
+        run: uv run python -X utf8 -m dartlab.pipeline macro
 
       - name: Save macro parquet cache
         uses: actions/cache/save@v5

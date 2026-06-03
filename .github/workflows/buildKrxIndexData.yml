@@ -54,23 +54,16 @@ jobs:
           key: dartlab-krx-indices-${{ github.run_id }}
           restore-keys: dartlab-krx-indices-
 
+      # 통합 진입점(dartlab.pipeline) — krxIndex stage 가 buildKrxIndexData.py --mode <…>
+      # [--start --end] --push 를 동형 호출. mode/start/end 는 KRX_* env 로 전달.
       - name: Build KRX index raw parquet + push to HF
         env:
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          MODE="${{ github.event.inputs.mode || 'incremental' }}"
-          if [ "$MODE" = "backfill" ]; then
-            uv run python -X utf8 .github/scripts/sync/buildKrxIndexData.py \
-              --mode backfill \
-              --start "${{ github.event.inputs.start }}" \
-              --end "${{ github.event.inputs.end }}" \
-              --push
-          else
-            uv run python -X utf8 .github/scripts/sync/buildKrxIndexData.py \
-              --mode incremental \
-              --push
-          fi
+          KRX_MODE: ${{ github.event.inputs.mode || 'incremental' }}
+          KRX_START: ${{ github.event.inputs.start }}
+          KRX_END: ${{ github.event.inputs.end }}
+        run: uv run python -X utf8 -m dartlab.pipeline krxIndex
 
       - name: Save KRX index parquet cache
         uses: actions/cache/save@v5

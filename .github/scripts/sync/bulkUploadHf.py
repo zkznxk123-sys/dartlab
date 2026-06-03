@@ -87,13 +87,10 @@ def main():
     dirPath = CATEGORY_DIR[category]
     localDir = Path(f"data/{dirPath}")
 
-    token = None
-    for line in open(".env", encoding="utf-8"):
-        line = line.strip()
-        if line.startswith("HF_TOKEN="):
-            token = line.split("=", 1)[1].strip()
-            break
+    # 토큰 일원화 — env > .env (옛 .env-only 는 env 만 있는 CI/파이프라인에서 FileNotFoundError).
+    from dartlab.pipeline.hfUpload import _resolveHfToken
 
+    token = _resolveHfToken()
     api = HfApi(token=token)
     nested = category in NESTED_CATEGORIES
     repo = repoFor(category)  # 전용 repo 분리 카테고리면 그쪽, 아니면 기본 REPO
