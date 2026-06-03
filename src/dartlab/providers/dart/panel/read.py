@@ -26,7 +26,7 @@ LLM Specifications:
         - ``readWide(code, *, marketNs, periods, tag) -> pl.DataFrame | None`` (index + period 열).
         - ``scopeExpr(col) -> pl.Expr`` / ``anchorLatest(df) -> pl.DataFrame``.
     Prerequisites:
-        - polars. data/{dart|edgar}/panel/{code}/*.parquet (build 결과).
+        - polars. data/{dart|edgar}/panel/{code}.parquet (build 결과).
     Freshness:
         - 매 호출 read (artifact 변경 즉시 반영, 캐시 0 — 누적 0).
     Dataflow:

@@ -20,7 +20,7 @@ LLM Specifications:
         - ``Panel(code, *, marketNs, periods, tag)`` → pl.DataFrame subclass (wide).
         - ``Panel(code)(key, *, tag, periods) -> pl.DataFrame | None`` (매칭 행).
     Prerequisites:
-        - data/{dart|edgar}/panel/{code}/*.parquet (build 결과).
+        - data/{dart|edgar}/panel/{code}.parquet (build 결과).
     Freshness:
         - 매 생성 read (artifact 변경 즉시 반영).
     Dataflow:
@@ -169,6 +169,75 @@ class Panel(pl.DataFrame):
         self._marketNs = marketNs
         self._periods = periods
         self._tag = tag
+
+    @staticmethod
+    def guide() -> str:
+        """panel 사용법 가이드 — 호출 패턴을 한눈에 (전역 ``dartlab.help`` =발견과 구분된 per-engine 사용법).
+
+        ``Panel.guide()`` 또는 ``c.panel.guide()`` 로 호출. 잡는 순간 wide·callable 섹션검색·native(소문자)
+        vs finance(대문자) 소스·freq 입도·tag 의 핵심 패턴을 문자열로 반환(print 해서 본다). 상세 스펙은
+        ``dartlab.skills.describe("engines.panel")``.
+
+        Args:
+            없음.
+
+        Returns:
+            사용법 가이드 문자열 (호출 패턴 + 소스 대소문자 규칙 + freq/tag).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> from dartlab.providers.dart.panel import Panel
+            >>> print(Panel.guide())  # doctest: +SKIP
+            panel 사용법 ...
+
+        SeeAlso:
+            - ``dartlab.help`` — 전역 API 발견(자연어 query).
+            - ``dartlab.skills.describe`` — engines.panel 전체 스펙.
+            - ``__call__`` — 섹션 검색·소스 주입 본체.
+
+        Requires:
+            - 없음 (순수 문자열).
+
+        Capabilities:
+            - 처음 쓰는 사용자·LLM 이 panel 호출 패턴(wide·섹션검색·native/finance·freq·tag)을 즉시 파악.
+
+        Guide:
+            - 막히면 ``Panel.guide()`` → 패턴 확인 후 ``c.panel(...)``. 더 깊은 스펙은 skills.describe.
+
+        AIContext:
+            - 순수 문자열 상수 — 부작용·네트워크 0. 호출 패턴 SSOT 는 본 문자열 + engines.panel 스펙.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 전역 ``help`` 와 혼동 금지 — help=발견(검색), guide=사용법(패턴).
+            OutputSchema:
+                - ``str`` (사용법 가이드).
+            Prerequisites:
+                - 없음.
+            Freshness:
+                - 정적 — 호출 표면 변경 시 본 문자열 갱신.
+            Dataflow:
+                - () → 사용법 문자열.
+            TargetMarkets:
+                - KR + US.
+        """
+        return (
+            "panel 사용법 (Panel(code) / c.panel):\n"
+            "  • c.panel                      잡는 순간 wide (행=공시항목, 열=period). polars 연산 그대로\n"
+            '  • c.panel("재고")              섹션명/canonicalKey 행 검색 (한글 substring 또는 NT_D826380)\n'
+            '  • c.panel.search("반도체")      본문 전체검색 (이름표 아닌 내용)\n'
+            "  • 소스 = 대소문자:\n"
+            '      소문자 native(자급)  c.panel("is"/"bs"/"cf"/"cis"/"sce", freq="year")  재무제표 항목×기간\n'
+            '                           c.panel("ratios")                                  재무비율(자급)\n'
+            '      대문자 finance(파사드) c.panel("IS"/"BS"/"CF"/"RATIOS")                  강한 정규화 숫자(deep)\n'
+            '                           c.panel("dividend")                                정형공시(report 주입)\n'
+            '  • freq = 입도            "year"(연)/"quarter"(분기)/"ytd"(누적) — 소스 스위치 아님\n'
+            "  • tag = False            plain(태그 strip) / 기본 True = raw 원본 XML\n"
+            "  • periods=[...]          대형 종목 메모리 prune\n"
+            '  상세 스펙: dartlab.skills.describe("engines.panel")'
+        )
 
     def __call__(
         self,

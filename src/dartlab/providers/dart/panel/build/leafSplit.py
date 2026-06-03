@@ -45,6 +45,19 @@ def splitOrdered(content_raw: str) -> list[dict]:
     **outermost 표 경계**(깊이 인식)로 분할 — nested 표는 바깥 하나로 묶어 경계 깨짐 없음. part 들을 순서대로
     이으면 byte-identical(span 들이 전체를 타일링). 공백-only 텍스트(표 사이)는 인접 표에 흡수(노이즈 행 0).
     실질 텍스트만 별도 text part. 표 0개/빈 입력은 text 1개.
+
+    Args:
+        content_raw: leaf 의 원본 XML 문자열 (None 허용 → "").
+
+    Returns:
+        문서순서 ``[{"leafType": "text"|"table", "contentRaw": str}]`` — part 이으면 원본 byte-identical.
+
+    Raises:
+        없음 — None/빈 입력은 빈 text 1개.
+
+    Example:
+        >>> [p["leafType"] for p in splitOrdered("pre<TABLE>a</TABLE>post")]
+        ['text', 'table', 'text']
     """
     cr = content_raw or ""
     raw: list[tuple[str, str]] = []  # (leafType, contentRaw) — 흡수 전
@@ -71,6 +84,21 @@ def splitLeafTypes(df: pl.DataFrame) -> pl.DataFrame:
 
     BUILD 의 마지막 단계 (horizontalize 병합 + dechunkNotes 분해 후). contentRaw 를 part 로 교체하고
     leafType 을 채운다. 나머지 컬럼 상속. 빈 df 는 그대로.
+
+    Args:
+        df: 분할 전 DataFrame (``contentRaw`` 컬럼 보유, leafType 미부여).
+
+    Returns:
+        각 leaf 가 text/table part 행으로 explode 된 DataFrame (+``leafType``, contentRaw 대체). 무손실.
+        빈/``contentRaw`` 부재 df 는 그대로.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> out = splitLeafTypes(df)  # doctest: +SKIP
+        >>> set(out["leafType"].unique()) <= {"text", "table"}  # doctest: +SKIP
+        True
     """
     if df.is_empty() or "contentRaw" not in df.columns:
         return df

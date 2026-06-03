@@ -17,7 +17,7 @@ LLM Specifications:
     OutputSchema:
         - ``readCellWide(code,*,statement,freq,scope,...) -> pl.DataFrame | None`` (acode×period wide).
     Prerequisites:
-        - data/dart/panel/{code}/*.parquet 의 5표 contentRaw (별 panelCell 0).
+        - data/dart/panel/{code}.parquet 의 5표 contentRaw (별 panelCell 0).
     Freshness:
         - 매 read (artifact 변경 즉시).
     Dataflow:
@@ -202,7 +202,7 @@ def readCellWide(
         - ``readStatement`` — 항목명 statement view(`c.panel("is")`). 본 함수는 acode 정밀 차원 view(직접 호출).
 
     Requires:
-        - polars. data/dart/panel/{code}/*.parquet (5표 contentRaw).
+        - polars. data/dart/panel/{code}.parquet (5표 contentRaw).
 
     Capabilities:
         - 정부 native XBRL 셀을 freq 토큰 선택만으로 acode×period 격자 — 추측·산수 0, 깊이는 axisPath 행.
@@ -362,7 +362,7 @@ def readStatement(
         - ``panel.Panel.__call__`` — ``c.panel("is", freq=)`` 진입점.
 
     Requires:
-        - polars. data/dart/panel/{code}/*.parquet (5표 contentRaw).
+        - polars. data/dart/panel/{code}.parquet (5표 contentRaw).
 
     Capabilities:
         - native 재무제표를 XBRL 경계(2022) 넘어 항목명 매칭으로 과거 연장 — docs.parquet 0.
@@ -575,7 +575,7 @@ def readRatios(
         - ``core.ratioCategories.RATIO_FIELD_LABELS`` — 비율 한글 라벨 SSOT.
 
     Requires:
-        - polars. data/dart/panel/{code}/*.parquet. core(L0) 공식·매핑.
+        - polars. data/dart/panel/{code}.parquet. core(L0) 공식·매핑.
 
     Capabilities:
         - native 재무제표 항목만으로 재무비율 — 외부 price 0 → 밸류에이션 제외 statement-only.

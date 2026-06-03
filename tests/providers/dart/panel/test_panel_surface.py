@@ -125,3 +125,14 @@ def test_ratios_uppercase_finance() -> None:
     out = p("RATIOS")
     assert seen.get("key") == "ratios"  # 대문자 → 소문자 finance topic
     assert out is not None
+
+
+def test_guide_usage_string() -> None:
+    """Panel.guide() / 인스턴스.guide() — 호출 패턴 사용법 문자열 (전역 help=발견과 구분)."""
+    from dartlab.providers.dart.panel import Panel
+
+    g = Panel.guide()
+    assert isinstance(g, str) and len(g) > 50
+    for token in ("c.panel", "native", "finance", "freq", "tag"):
+        assert token in g, f"가이드에 {token} 누락"
+    assert Panel("005930fake").guide() == g  # staticmethod — 인스턴스 호출도 동일

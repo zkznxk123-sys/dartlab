@@ -19,7 +19,7 @@ LLM Specifications:
         - ``buildNoteTaxonomy(*, panelBaseDir, minFreq, dominanceRatio) -> dict[str, str]``.
         - ``renderModule(taxonomy) -> str`` / ``buildAndWrite(*, outModulePath, ...) -> dict``.
     Prerequisites:
-        - data/dart/panel/{code}/202[3-9]*.parquet (XBRL itemized 주석행). polars.
+        - data/dart/panel/{code}.parquet (period>=2023 필터) (XBRL itemized 주석행). polars.
     Freshness:
         - corpus 확대·정밀화 시 재생성 + 전수 재빌드.
     Dataflow:
@@ -59,25 +59,25 @@ def buildNoteTaxonomy(
         ``{"scope|정규화제목": "NT_D######"}`` (정렬). 모호·희소 제목 미포함.
     """
     base = Path(panelBaseDir) if panelBaseDir else Path(_cfg.dataDir) / "dart" / "panel"
-    codes = sorted(d.name for d in base.iterdir() if d.is_dir() and d.name != "spine")
+    files = sorted(base.glob("*.parquet"))  # flat: {code}.parquet (회사당 1파일, 전 period)
     agg: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    for code in codes:
-        for f in sorted((base / code).glob("202[3-9]*.parquet")):
-            try:
-                df = pl.read_parquet(str(f), columns=["disclosureKey", "xbrlClass", "blockLeaf"])
-            except (OSError, pl.exceptions.PolarsError):
+    for f in files:
+        try:
+            df = pl.read_parquet(str(f), columns=["disclosureKey", "xbrlClass", "blockLeaf", "period"])
+        except (OSError, pl.exceptions.PolarsError):
+            continue
+        nt = df.filter(
+            (pl.col("period") >= "2023")  # XBRL itemized 주석은 2023+ (옛 period-shard 202* glob 대체)
+            & pl.col("disclosureKey").str.contains(_STD_RE)
+            & pl.col("xbrlClass").is_not_null()
+            & pl.col("blockLeaf").is_not_null()
+        )
+        for r in nt.iter_rows(named=True):
+            t = _norm(r["blockLeaf"])
+            if not (2 <= len(t) <= 20):
                 continue
-            nt = df.filter(
-                pl.col("disclosureKey").str.contains(_STD_RE)
-                & pl.col("xbrlClass").is_not_null()
-                & pl.col("blockLeaf").is_not_null()
-            )
-            for r in nt.iter_rows(named=True):
-                t = _norm(r["blockLeaf"])
-                if not (2 <= len(t) <= 20):
-                    continue
-                scope = "standalone" if "_S" in (r["xbrlClass"] or "")[:5] else "consolidated"
-                agg[f"{scope}|{t}"][r["disclosureKey"]] += 1
+            scope = "standalone" if "_S" in (r["xbrlClass"] or "")[:5] else "consolidated"
+            agg[f"{scope}|{t}"][r["disclosureKey"]] += 1
 
     taxonomy: dict[str, str] = {}
     for key, counter in agg.items():
