@@ -59,6 +59,7 @@ PRIMARY_PACKAGES: tuple[str, ...] = (
     "providers",
     "channel",
     "cli",
+    "pipeline",
     "skills",
     "ui",
 )

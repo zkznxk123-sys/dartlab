@@ -29,7 +29,8 @@ LAYER_OF: dict[str, float] = {
 }
 # sink 헬퍼 — CLAUDE.md "표현/전송 헬퍼: 모든 계층 결과를 다른 매체로". 호출 방향 룰 예외.
 # 어디서도 import 가능 (L0~L3 → viz/cli/server/channel OK). 단 sink 끼리 cross 는 별 룰 미적용.
-SINK_HELPERS = {"viz", "cli", "server", "channel"}
+# pipeline = 수집 오케스트레이션 sink (gather fetch + providers build 합법 조합, 패키지밖 sync 정공 대체).
+SINK_HELPERS = {"viz", "cli", "server", "channel", "pipeline"}
 STRICT_L0_L15 = {
     "core",
     "gather",
