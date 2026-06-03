@@ -282,6 +282,7 @@ ITEM_NAMES_10K: dict[str, str] = {
     "13": "Certain Relationships and Related Transactions",
     "14": "Principal Accountant Fees and Services",
     "15": "Exhibits, Financial Statement Schedules",
+    "16": "Form 10-K Summary",
 }
 ITEM_NAMES_10Q: dict[str, str] = {
     "1": "Financial Statements",
@@ -322,8 +323,23 @@ def canonicalItem(form: str, rawTitle: str) -> tuple[str, str]:
     if m:
         num = m.group(1).upper()
         catalog = ITEM_NAMES_10Q if form == "10-Q" else ITEM_NAMES_10K
-        name = catalog.get(num) or m.group(2).strip().title() or num
+        # 카탈로그 우선(클린 표준명). 미등재만 캡처 텍스트 — 첫 문장/단어 몇개로 trim(TOC·페이지번호 노이즈 차단).
+        name = catalog.get(num) or _trimItemName(m.group(2)) or num
         sectionLeaf = f"Item {num}. {name}"
     else:
         sectionLeaf = re.sub(r"\s+", " ", title)[:120] or "Document"
     return sectionLeaf, f"{form}␟{sectionLeaf}"
+
+
+def _trimItemName(raw: str) -> str:
+    """미등재 item 의 캡처 제목 정리 — 첫 마침표 전 + 최대 6단어(TOC·페이지번호 꼬리 제거)."""
+    clean = re.sub(r"\s+", " ", (raw or "").strip())
+    clean = clean.split(".", 1)[0]  # 첫 문장
+    words = clean.split()
+    # 숫자(페이지번호) 시작 단어부터 잘라냄
+    cut: list[str] = []
+    for w in words[:6]:
+        if w.isdigit():
+            break
+        cut.append(w)
+    return " ".join(cut).title()

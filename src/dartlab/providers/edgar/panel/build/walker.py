@@ -156,27 +156,38 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
     tableDepth = 0
     textBuf: list[str] = []
 
+    def _emitText(content: str, sectionLeaf: str, blockLeaf: str) -> None:
+        if content.strip():
+            blocks.append(
+                {
+                    "leafType": "text",
+                    "contentRaw": content.strip(),
+                    "sectionLeaf": sectionLeaf,
+                    "blockLeaf": blockLeaf,
+                    "_cov": {},
+                }
+            )
+
     def _flushText() -> None:
         nonlocal curItem
         if not textBuf:
             return
-        chunk = " ".join(textBuf)  # 공백 join — 텍스트노드 경계 보존(word boundary, Item 헤딩 검출 정합)
+        plain = _blockText(" ".join(textBuf))  # 공백 join — 텍스트노드 경계 보존(word boundary)
         textBuf.clear()
-        plain = _blockText(chunk)
         if not plain:
             return
-        m = _ITEM_HEAD_RE.search(plain[:300])  # 블록 앞 300자 안 Item 헤딩(metadata 텍스트 선행 흡수)
-        if m:
-            curItem, _ = canonicalItem(formType, plain[m.start() : m.start() + 100])
-        blocks.append(
-            {
-                "leafType": "text",
-                "contentRaw": chunk,
-                "sectionLeaf": curItem or formType,
-                "blockLeaf": (m.group(0).strip()[:80] if m else ""),
-                "_cov": {},
-            }
-        )
+        # 블록 안 **모든** Item 헤딩으로 분할 — 한 블록에 다수 item 이 뭉치지 않게(섹션검색 c.panel("Risk") 정합).
+        heads = list(_ITEM_HEAD_RE.finditer(plain))
+        if not heads:
+            _emitText(plain, curItem or formType, "")
+            return
+        if heads[0].start() > 0:  # preamble (첫 헤딩 앞) — 현재 item 귀속
+            _emitText(plain[: heads[0].start()], curItem or formType, "")
+        for i, h in enumerate(heads):
+            end = heads[i + 1].start() if i + 1 < len(heads) else len(plain)
+            leaf, _ = canonicalItem(formType, plain[h.start() : h.start() + 100])
+            curItem = leaf
+            _emitText(plain[h.start() : end], leaf, leaf)
 
     for event, el in etree.iterwalk(body, events=("start", "end")):
         tag = (el.tag if isinstance(el.tag, str) else "").lower()
