@@ -22,8 +22,8 @@ from pathlib import Path
 import httpx
 import polars as pl
 
+from dartlab.core.edgarClient import DEFAULT_BASE_URL, EdgarApiError
 from dartlab.providers.edgar.openapi.asyncClient import AsyncEdgarClient
-from dartlab.providers.edgar.openapi.client import DEFAULT_BASE_URL, EdgarApiError
 
 _log = logging.getLogger(__name__)
 

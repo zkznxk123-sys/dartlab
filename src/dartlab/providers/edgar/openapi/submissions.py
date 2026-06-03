@@ -8,7 +8,7 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.providers.edgar.openapi.client import DEFAULT_BASE_URL, EdgarClient
+from dartlab.core.edgarClient import DEFAULT_BASE_URL, EdgarClient
 
 SUPPORTED_REGULAR_FORMS = ("10-K", "10-Q", "20-F", "40-F")
 
@@ -225,7 +225,7 @@ def findRegularFilings(
 
     Requires:
         - datetime / date
-        - dartlab.providers.edgar.openapi.client (``EdgarClient``)
+        - dartlab.core.edgarClient (``EdgarClient``)
         - SEC EDGAR API ``data.sec.gov/submissions/CIK*.json``.
 
     Capabilities:

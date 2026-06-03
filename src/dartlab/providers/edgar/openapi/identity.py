@@ -8,7 +8,7 @@ from typing import Any
 import polars as pl
 
 from dartlab.core.dataLoader import loadEdgarListedUniverse
-from dartlab.providers.edgar.openapi.client import DEFAULT_SEC_URL, EdgarClient
+from dartlab.core.edgarClient import DEFAULT_SEC_URL, EdgarClient
 
 _TICKERS_URL = f"{DEFAULT_SEC_URL}/files/company_tickers.json"
 

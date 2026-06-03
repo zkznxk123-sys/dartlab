@@ -7,7 +7,7 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.providers.edgar.openapi.client import DEFAULT_BASE_URL, EdgarClient
+from dartlab.core.edgarClient import DEFAULT_BASE_URL, EdgarClient
 
 EDGAR_COMPANYFACTS_SCHEMA = {
     "cik": pl.Utf8,
@@ -68,7 +68,7 @@ def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str
         - ``providers.edgar.finance.xbrlConcepts.normalizeConcept`` — concept 정규화 후속.
 
     Requires:
-        - dartlab.providers.edgar.openapi.client (``EdgarClient``)
+        - dartlab.core.edgarClient (``EdgarClient``)
         - datetime / polars (downstream 정규화)
         - SEC EDGAR public API 접근 (User-Agent header 필수).
 

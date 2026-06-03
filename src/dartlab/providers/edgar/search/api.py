@@ -22,7 +22,7 @@ _USER_AGENT_FALLBACK = "DartLab dartlab@dartlab.dev"
 def _userAgent() -> str:
     """SEC fair-use 강행 — User-Agent 필수 (이름 + email)."""
     try:
-        from dartlab.providers.edgar.openapi.client import DEFAULT_USER_AGENT
+        from dartlab.core.edgarClient import DEFAULT_USER_AGENT
 
         return DEFAULT_USER_AGENT
     except ImportError:

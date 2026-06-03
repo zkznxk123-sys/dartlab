@@ -7,7 +7,7 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.providers.edgar.openapi.client import EdgarClient
+from dartlab.core.edgarClient import EdgarClient
 from dartlab.providers.edgar.openapi.facts import (
     getCompanyConceptJson,
     getCompanyFactsJson,

@@ -11,7 +11,7 @@ from typing import Any
 
 import httpx
 
-from dartlab.providers.edgar.openapi.client import (
+from dartlab.core.edgarClient import (
     DEFAULT_USER_AGENT,
     EdgarApiError,
 )

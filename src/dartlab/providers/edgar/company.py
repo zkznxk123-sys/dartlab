@@ -2447,7 +2447,7 @@ class Company:
         """
         import polars as _pl
 
-        from dartlab.providers.edgar.openapi.client import EdgarClient
+        from dartlab.core.edgarClient import EdgarClient
         from dartlab.providers.edgar.openapi.saver import saveFinance
 
         cik = str(self.cik).zfill(10)

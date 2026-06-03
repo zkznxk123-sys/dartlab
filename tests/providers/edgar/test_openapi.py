@@ -118,7 +118,7 @@ def test_openedgar_raw_wrappers_and_filings(monkeypatch):
             return {"taxonomy": "us-gaap", "tag": "Assets", "unit": "USD", "ccp": "CY2024Q4I"}
         raise AssertionError(url)
 
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.client.EdgarClient.getJson", fakeGetJson)
+    monkeypatch.setattr("dartlab.core.edgarClient.EdgarClient.getJson", fakeGetJson)
 
     e = OpenEdgar()
     raw = e.submissionsJson("aapl")
@@ -140,7 +140,7 @@ def test_openedgar_company_proxy(monkeypatch):
 
     monkeypatch.setattr("dartlab.providers.edgar.openapi.identity.loadTickers", lambda *args, **kwargs: _ticker_df())
     monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.client.EdgarClient.getJson",
+        "dartlab.core.edgarClient.EdgarClient.getJson",
         lambda self, url: _submissions_payload()
         if "submissions/CIK0000320193.json" in url
         else _companyfacts_payload(),
@@ -216,7 +216,7 @@ def test_saveFinance_writes_companyfacts_parquet_compatible_with_pivot(monkeypat
             return _companyfacts_payload()
         raise AssertionError(url)
 
-    monkeypatch.setattr("dartlab.providers.edgar.openapi.client.EdgarClient.getJson", fakeGetJson)
+    monkeypatch.setattr("dartlab.core.edgarClient.EdgarClient.getJson", fakeGetJson)
 
     company = OpenEdgar()("AAPL")
     path = company.saveFinance()
@@ -360,7 +360,7 @@ def test_saveFinance_smoke_failure_preserves_existing_file(monkeypatch, tmp_path
     )
     monkeypatch.setattr("dartlab.providers.edgar.openapi.saver.loadTickers", lambda *args, **kwargs: _ticker_df())
     monkeypatch.setattr(
-        "dartlab.providers.edgar.openapi.client.EdgarClient.getJson",
+        "dartlab.core.edgarClient.EdgarClient.getJson",
         lambda self, url: _companyfacts_payload(),
     )
     monkeypatch.setattr("dartlab.providers.edgar.finance.pivot.buildTimeseries", lambda *args, **kwargs: None)

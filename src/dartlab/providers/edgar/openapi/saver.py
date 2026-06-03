@@ -11,9 +11,9 @@ import polars as pl
 from dartlab import config as _dartlabConfig
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.dataLoader import loadEdgarListedUniverse
+from dartlab.core.edgarClient import EdgarClient
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
-from dartlab.providers.edgar.openapi.client import EdgarClient
 from dartlab.providers.edgar.openapi.facts import (
     EDGAR_COMPANYFACTS_SCHEMA,
     companyFactsToRows,
