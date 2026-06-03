@@ -106,7 +106,7 @@ def buildPanelAll(
     Args:
         refPath: panelXbrlRef ref parquet.
         outBaseDir: 출력 base dir.
-        codes: 종목 list. None = ``data/dart/original/docs/`` 의 모든 종목.
+        codes: 종목 list. None = ``data/original/dart/docs/`` 의 모든 종목.
         numWorkers: Pool workers (IO heavy, 기본 8).
         progressEvery: 진행 로그 빈도.
         verbose: 진행 로그.
@@ -125,7 +125,7 @@ def buildPanelAll(
         - ``builder.buildPanelBaseline`` — 5 baseline 검증.
 
     Requires:
-        - data/dart/original/docs/{code}/*.zip 전종목. multiprocessing.
+        - data/original/dart/docs/{code}/*.zip 전종목. multiprocessing.
 
     Capabilities:
         - 전종목(~2,900) panel artifact 일괄 생산 (8코어 ~2.6h).
@@ -158,7 +158,7 @@ def buildPanelAll(
             - KR (DART).
     """
     if codes is None:
-        baseDir = Path(_cfg.dataDir) / "dart" / "original" / "docs"
+        baseDir = Path(_cfg.dataDir) / "original" / "dart" / "docs"
         codes = sorted([d.name for d in baseDir.iterdir() if d.is_dir()])
 
     if verbose:

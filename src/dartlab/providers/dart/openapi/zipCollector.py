@@ -36,7 +36,7 @@ from dartlab.providers.dart.openapi.zipDocsXml import (
 )
 
 # DART 원본 zip 디렉토리. CLAUDE.md "DART 원본 zip 비공개" — 로컬 임시 보관 전용.
-_ORIGINAL_DOCS_DIR_NAME = "dart/original/docs"
+_ORIGINAL_DOCS_DIR_NAME = "original/dart/docs"
 
 # rebuildFromZips streaming parquet schema — regular string (large_string 회피).
 # cell split (MAX_CELL_BYTES=1MB) 으로 pa.string() 32-bit offset 안전.
@@ -578,7 +578,7 @@ class ZipDocsCollector:
         return savedCount
 
     def rebuildFromZips(self, *, srcDir: Path | None = None, outPath: Path | None = None) -> int:
-        """``data/dart/original/docs/{code}/*.zip`` 로컬 zip 만으로 parquet 풀 재빌드.
+        """``data/original/dart/docs/{code}/*.zip`` 로컬 zip 만으로 parquet 풀 재빌드.
 
         API 호출 0. streaming pyarrow ParquetWriter + cell split (``MAX_CELL_BYTES``) +
         regular string schema. zip = SSOT, parquet = derived 원칙 — zip 만 있으면
@@ -594,7 +594,7 @@ class ZipDocsCollector:
           기존 parquet 의 meta 만 scan + select (큰 본문 안 읽음).
 
         Args:
-            srcDir: 종목 zip 디렉토리. 기본 ``data/dart/original/docs/{code}/``.
+            srcDir: 종목 zip 디렉토리. 기본 ``data/original/dart/docs/{code}/``.
             outPath: 출력 parquet 경로. 기본 ``data/dart/docs/{code}.parquet``.
 
         Returns:

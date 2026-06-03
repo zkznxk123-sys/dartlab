@@ -133,7 +133,7 @@ def test_parseSectionsByTitle_span_bold_markdown_heading():
 
 
 @pytest.mark.skipif(
-    not Path("data/dart/original/docs/005930").exists(),
+    not Path("data/original/dart/docs/005930").exists(),
     reason="local zip cache required",
 )
 def test_rebuildFromZips_005930_smoke(tmp_path):

@@ -20,7 +20,7 @@ def _noRefreshEnv() -> bool:
 
 
 def _hasLocalDocsZips(path: Path) -> bool:
-    """``docs`` 카테고리 path 에 한해, 로컬 ``data/dart/original/docs/{code}/`` zip 디렉토리가
+    """``docs`` 카테고리 path 에 한해, 로컬 ``data/original/dart/docs/{code}/`` zip 디렉토리가
     1 개 이상 zip 을 보유하면 True.
 
     zip = SSOT, parquet = derived (zipCollector docstring). zip 가 있는데 HF 본문으로
@@ -32,7 +32,8 @@ def _hasLocalDocsZips(path: Path) -> bool:
         if path.parent.name != "docs":
             return False
         code = path.stem
-        zipDir = path.parent.parent / "original" / "docs" / code
+        # path = data/dart/docs/{code}.parquet → parent×3 = data → original/dart/docs/{code}
+        zipDir = path.parent.parent.parent / "original" / "dart" / "docs" / code
         if not zipDir.is_dir():
             return False
         for _ in zipDir.glob("*.zip"):

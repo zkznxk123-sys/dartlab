@@ -15,7 +15,7 @@ LLM Specifications:
         - ``scanZipFiles(paths) -> pl.DataFrame`` 11 col Layer 1 schema.
         - ``scanRefBaseline(codes) -> pl.DataFrame`` 5 baseline + 전 기간.
     Prerequisites:
-        - ``data/dart/original/docs/{code}/*.zip`` 로컬.
+        - ``data/original/dart/docs/{code}/*.zip`` 로컬.
         - polars, lxml.
     Freshness:
         - 분기 cron — mtime > sinceDate 만 처리하는 increment 변형.
@@ -159,7 +159,7 @@ def scanZipFiles(
     LLM Specifications:
         AntiPatterns:
             - corp 추출 시 zipPath.parent.name 가정 — 호출자가 표준 구조
-              유지 책임 (data/dart/original/docs/{code}/{rcept_no}.zip).
+              유지 책임 (data/original/dart/docs/{code}/{rcept_no}.zip).
             - period 추출은 baseline 에서 NULL — rcept_no → period 매핑은
               docs.parquet 또는 별 lookup 필요.
         OutputSchema:
@@ -183,7 +183,7 @@ def scanZipFiles(
     failed = 0
     for zp in zipPaths:
         zp = Path(zp)
-        corp = zp.parent.name  # data/dart/original/docs/{code}/...
+        corp = zp.parent.name  # data/original/dart/docs/{code}/...
         rcept = _rceptFromZip(zp) or zp.stem
         xml = _readXml(zp)
         if not xml:
@@ -287,7 +287,7 @@ def scanAllZips(
     """전종목 zip → Layer 1 ref table (multiprocessing).
 
     Capabilities:
-        ``data/dart/original/docs/`` 전 zip 을 multiprocessing 으로 scanZipFiles 병렬 처리 →
+        ``data/original/dart/docs/`` 전 zip 을 multiprocessing 으로 scanZipFiles 병렬 처리 →
         Layer 1 panelXbrlRef table (corpCount desc 정렬).
 
     AIContext:
@@ -303,7 +303,7 @@ def scanAllZips(
         baseDir glob → multiprocessing.Pool.imap → scanZipFiles → 집계 → DataFrame.
 
     Args:
-        baseDir: ``data/dart/original/docs/`` 경로. None = config default.
+        baseDir: ``data/original/dart/docs/`` 경로. None = config default.
         minCorpCount: SSOT 입성 minimum corpCount. 기본 3.
         numWorkers: multiprocessing.Pool workers. 기본 8.
         progressEvery: 진행 로그 빈도.
@@ -322,7 +322,7 @@ def scanAllZips(
         True
 
     Requires:
-        ``data/dart/original/docs/{code}/*.zip`` 전종목 + multiprocessing 가용.
+        ``data/original/dart/docs/{code}/*.zip`` 전종목 + multiprocessing 가용.
 
     SeeAlso:
         ``scanZipFiles`` — 단일 batch 스캔 로직. ``scanRefBaseline`` — 5 종목 검증 버전.
@@ -334,12 +334,12 @@ def scanAllZips(
         OutputSchema:
             - polars DataFrame, 11 col, corpCount desc 정렬.
         Prerequisites:
-            - data/dart/original/docs/{code}/*.zip 로컬 (~30 GB).
+            - data/original/dart/docs/{code}/*.zip 로컬 (~30 GB).
         Freshness:
             - 분기 incremental rebuild — mtime > sinceDate 만 필터링.
     """
     if baseDir is None:
-        baseDir = Path(_cfg.dataDir) / "dart" / "original" / "docs"
+        baseDir = Path(_cfg.dataDir) / "original" / "dart" / "docs"
     baseDir = Path(baseDir)
     if not baseDir.exists():
         _log.error("baseDir 없음: %s", baseDir)
@@ -464,7 +464,7 @@ def scanRefBaseline(
         Layer 1 schema DataFrame. 5 baseline 의 모든 ACLASS entry.
 
     Requires:
-        ``data/dart/original/docs/{code}/*.zip`` 존재.
+        ``data/original/dart/docs/{code}/*.zip`` 존재.
 
     Raises:
         없음 — 종목 디렉터리 부재 시 경고 로그 후 skip.
@@ -485,7 +485,7 @@ def scanRefBaseline(
     """
     if codes is None:
         codes = ["005930", "005380", "035720", "207940", "000660"]
-    baseDir = Path(_cfg.dataDir) / "dart" / "original" / "docs"
+    baseDir = Path(_cfg.dataDir) / "original" / "dart" / "docs"
     allZips: list[Path] = []
     for code in codes:
         codeDir = baseDir / code

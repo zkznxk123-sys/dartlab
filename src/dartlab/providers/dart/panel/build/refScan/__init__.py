@@ -15,7 +15,7 @@ LLM Specifications:
           rawTitleVariants / parentRawId / taxonomyVersion / firstSeenPeriod /
           lastSeenPeriod / corpCount / periodCount / occurrenceCount / marketNs.
     Prerequisites:
-        - ``data/dart/original/docs/{code}/*.zip`` 로컬.
+        - ``data/original/dart/docs/{code}/*.zip`` 로컬.
     Freshness:
         - 분기 incremental rebuild — 신규 zip 만 스캔 후 ref table merge.
     Dataflow:

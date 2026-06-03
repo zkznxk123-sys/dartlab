@@ -21,7 +21,7 @@ inputs:
   - 검증 범위 (sectionsRawCompare / sectionsParity)
 outputs:
   - data/dart/docs/{code}.parquet (공개 SSOT)
-  - data/dart/original/docs/{code}/{rcept_no}.zip (로컬 임시, HF 미공개)
+  - data/original/dart/docs/{code}/{rcept_no}.zip (로컬 임시, HF 미공개)
   - sections layer 입력 (기존 schema 호환 + atocid/assocnote 신규)
 runtimeCompatibility:
   server:
@@ -43,7 +43,7 @@ testUniverse:
 ## §1 — 정공법 원칙
 
 **1.1 원본 = SSOT, parquet = derived**
-- `data/dart/original/docs/{code}/{rcept_no}.zip` 은 DART 의 *불변 원본*. 재빌드 시언제든 복원 가능.
+- `data/original/dart/docs/{code}/{rcept_no}.zip` 은 DART 의 *불변 원본*. 재빌드 시언제든 복원 가능.
 - `data/dart/docs/{code}.parquet` 은 *derived* — zip 으로부터 언제든 재빌드.
 
 **1.2 XML 원본 직접 사용**
@@ -62,10 +62,10 @@ testUniverse:
 - 2026-05-21 의 "안정화 후 zip 단계 폐기" 옵션은 **철회** — 원본은 가공 0 ground truth 로
   **영구 보관**(parquet 운영 방향 변경 시 재파생 테스트). "비공개" 는 유지(publish-ready-gated).
 - 통일 백업 store `data/original/` 신설 — DART(정기 `dart/docs/` + 비정기 `dart/allFilings/`) +
-  EDGAR(`edgar/{cik}/{accession}.txt` full submission, 전 form). 수집기 = `gather.original`
+  EDGAR(`edgar/docs/{cik}/{accession}.txt` full submission, 전 form). 수집기 = `gather.original`
   (gather 자체포함, `gather ↛ providers` 준수). `allFilingsCollector`(parquet content_raw)와 공존.
-- 본 docs 파이프라인의 정기 zip(`data/dart/original/docs/`)을 `data/original/dart/docs/`로
-  통일 이전하는 것은 providers/panel 영역 별도 follow-up.
+- 본 docs 파이프라인의 정기 zip 보관 위치도 `data/original/dart/docs/`로 통일 이전 완료 —
+  panel/sections/refScan/freshness 경로 rewire 동반(옛 `dart/original/docs` 폐기).
 
 ## §2 — schema 비교
 
@@ -109,7 +109,7 @@ optional 활용 — 호출자 영향 0.
 2. 기존 parquet 의 `rcept_no` 이미 있으면 skip
 3. 신규 rcept_no 만:
    - `document.xml` API → zip bytes
-   - `data/dart/original/docs/{code}/{rcept_no}.zip` 저장 (이미 있으면 skip)
+   - `data/original/dart/docs/{code}/{rcept_no}.zip` 저장 (이미 있으면 skip)
    - XML parse → `<TITLE>` 별 row list
    - 기존 parquet 에 append (`writeParquetSorted` 사용)
 4. rebuildFromZips: 저장된 모든 zip 재파싱 → parquet 풀 재빌드 (debug 시)
@@ -195,7 +195,7 @@ docs.parquet 완벽 판단 (sectionsRawCompare spurious=0 종목 비율 ≥ 95%)
   TBODY/THEAD/TFOOT 안 TR 만 + cell 도 직속 자식 only.
 
 **streaming 빌더 (`ZipDocsCollector.rebuildFromZips`):**
-- `data/dart/original/docs/{code}/*.zip` 로컬 zip 만으로 streaming pyarrow ParquetWriter
+- `data/original/dart/docs/{code}/*.zip` 로컬 zip 만으로 streaming pyarrow ParquetWriter
   풀 재빌드. API 호출 0. rcept 단위 row group append → 메모리 누적 0.
 - cell split (`MAX_CELL_BYTES=1MB` paragraph 단위) + regular `pa.string()` schema —
   polars `iter_rows` PyObject panic + 32-bit offset 회귀 차단.

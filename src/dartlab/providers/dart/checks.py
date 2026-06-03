@@ -153,7 +153,7 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
     환경변수 ``DARTLAB_NO_REFRESH=1`` 시 freshness check 전체 우회 — 로컬 zip 재빌드
     parquet 을 HF 의 옛 본문으로 덮어쓰지 않도록. 로컬 작업 / 디버그 / 정밀 회귀 검증 시.
 
-    추가 가드 — ``data/dart/original/docs/{stockCode}/`` 에 zip 1 개 이상 존재 시 우회
+    추가 가드 — ``data/original/dart/docs/{stockCode}/`` 에 zip 1 개 이상 존재 시 우회
     (env 와 무관). zip = SSOT, parquet = derived (zipCollector docstring) 정책 — 운영자
     가 직접 rebuildFromZips 한 HTML 보유 parquet 가 L1 HF download 로 덮어쓰이지 않도록.
     """
@@ -170,7 +170,7 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
         return None
 
     if category == "docs":
-        zipDir = path.parent.parent / "original" / "docs" / stockCode
+        zipDir = path.parent.parent.parent / "original" / "dart" / "docs" / stockCode
         if zipDir.is_dir() and any(zipDir.glob("*.zip")):
             return None
 

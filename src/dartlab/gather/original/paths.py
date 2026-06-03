@@ -7,7 +7,7 @@
 
     data/original/dart/docs/{stock_code}/{rcept_no}.zip        # 정기보고서
     data/original/dart/allFilings/{stock_code}/{rcept_no}.zip  # 비정기
-    data/original/edgar/{cik}/{accession_no}.txt               # 전 form full submission
+    data/original/edgar/docs/{cik}/{accession_no}.txt          # 전 form full submission
 
 gated — ``DATA_RELEASES`` 미등록 + ``.gitignore`` + ``bulkUploadHf`` "original" 거부로
 HF 업로드 경로 진입 0. 공개 전환은 운영자 명시 결정 시 별도.
@@ -171,23 +171,24 @@ def dartFilingsDir(stockCode: str) -> Path:
 
 
 def edgarDir(cik: str) -> Path:
-    """EDGAR full submission 원본 디렉토리 — ``original/edgar/{cik}/``.
+    """EDGAR full submission 원본 디렉토리 — ``original/edgar/docs/{cik}/``.
 
     Capabilities:
-        - 한 발행자(CIK)의 전 form full submission ``.txt`` 보관 디렉토리 해석.
+        - 한 발행자(CIK)의 전 form full submission ``.txt`` 보관 디렉토리 해석. ``docs/``
+          한 단계를 둬서 향후 다른 EDGAR 원본 종류(예: XBRL 벌크)를 ``edgar/`` 밑에 형제로 추가 가능.
 
     Args:
         cik: SEC CIK. zero-padding 무관(내부에서 10자리 정규화).
 
     Returns:
-        Path — ``{dataDir}/original/edgar/{cik10}``. 생성은 호출자 책임.
+        Path — ``{dataDir}/original/edgar/docs/{cik10}``. 생성은 호출자 책임.
 
     Raises:
         없음.
 
     Example:
         >>> edgarDir("320193").parts[-2:]
-        ('edgar', '0000320193')
+        ('docs', '0000320193')
 
     Guide:
         - accession 별 파일명은 ``{accession_no}.txt`` (full submission, SGML 전체).
@@ -215,4 +216,4 @@ def edgarDir(cik: str) -> Path:
         TargetMarkets:
             - US(SEC EDGAR) 전 form.
     """
-    return originalRoot() / "edgar" / str(cik).strip().zfill(10)
+    return originalRoot() / "edgar" / "docs" / str(cik).strip().zfill(10)

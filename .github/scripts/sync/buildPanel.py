@@ -1,6 +1,6 @@
 """sync stage 의 panel(공시 수평화) artifact 빌더 CLI entry.
 
-plan snazzy-wibbling-origami P6. 로컬 DART zip(``data/dart/original/docs/{code}``)으로부터
+plan snazzy-wibbling-origami P6. 로컬 DART zip(``data/original/dart/docs/{code}``)으로부터
 period-sharded panel artifact(14-col) + slim ``_index.parquet`` 를 빌드해 HF push 를 준비한다.
 일일 sync 흐름:
 
@@ -46,8 +46,8 @@ def _resolveChangedCodes() -> list[str]:
 
 
 def _resolveAllCodes(dataDir: str) -> list[str]:
-    """data/dart/original/docs/{code} 의 모든 종목코드 (panel zip 원본 디렉터리)."""
-    zipBase = Path(dataDir) / "dart" / "original" / "docs"
+    """data/original/dart/docs/{code} 의 모든 종목코드 (panel zip 원본 디렉터리)."""
+    zipBase = Path(dataDir) / "original" / "dart" / "docs"
     if not zipBase.exists():
         return []
     return sorted(d.name for d in zipBase.iterdir() if d.is_dir() and d.name.isdigit() and len(d.name) == 6)
@@ -79,7 +79,7 @@ def _writeChangedPanel(codes: list[str], dataDir: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="panel SSOT artifact 빌더")
     parser.add_argument("--codes", help="쉼표 구분 종목 코드 list (예: 005930,000660)")
-    parser.add_argument("--all", action="store_true", help="data/dart/original/docs/ 의 모든 종목 빌드")
+    parser.add_argument("--all", action="store_true", help="data/original/dart/docs/ 의 모든 종목 빌드")
     parser.add_argument("--changed", action="store_true", help="dist/changed_docs.txt 또는 dist/changed.txt 기반")
     args = parser.parse_args()
 

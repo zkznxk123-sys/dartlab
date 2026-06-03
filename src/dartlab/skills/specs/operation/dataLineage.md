@@ -46,10 +46,9 @@ linkedSkills:
 
 ```
 L0: raw source
-   DART zip (data/dart/original/, 로컬 임시, .gitignore) — 정기보고서 panel/sections 입력
-   원본 백업 store (data/original/, gather.original, 로컬 백업·HF 미공개·.gitignore)
-     dart/docs/{code}/{rcept}.zip (정기) · dart/allFilings/{code}/{rcept}.zip (비정기)
-     edgar/{cik}/{accession}.txt (전 form full submission) — 가공 0 ground truth
+   원본 백업 store (data/original/, gather.original, 로컬 백업·HF 미공개·.gitignore) — 가공 0 ground truth
+     dart/docs/{code}/{rcept}.zip (정기, panel/sections/refScan 입력) · dart/allFilings/{code}/{rcept}.zip (비정기)
+     edgar/docs/{cik}/{accession}.txt (전 form full submission)
    EDGAR XBRL (HF dataset eddmpython/dartlab-data/edgar/)
    KRX OpenAPI (HF dataset eddmpython/dartlab-data/krx/)
    ↓
@@ -84,7 +83,7 @@ L3: axis / recipe
 
 ```
 (A) 로컬 zip 트랙 — 전수·재빌드 (양식 era 변경·택소노미 갱신 시 SSOT)
-    DART API → data/dart/original/docs/{code}/*.zip (로컬 전용·HF skip)
+    DART API → data/original/dart/docs/{code}/*.zip (로컬 전용·HF skip)
              → buildPanel(gather, lxml/zip) → data/dart/panel/{code}/{period}.parquet
 
 (B) online 1패스 트랙 — 증분·신규분기 (디스크 zip 0)
