@@ -15,7 +15,7 @@ s.saveFinance("재무.csv", 2020, kr=True) # 한글 컬럼 저장
     from dartlab import Dart
 
 NOTE: Dart/OpenDart 파사드·ZipDocsCollector·korColumns 는 lazy ``__getattr__`` 노출 —
-build(``build.saver``→``openapi.constants``) ↔ facade 순환 import 회피. DartClient·키·
+build(``build.saver``→``core.dartConstants``) ↔ facade 순환 import 회피. DartClient·키·
 DartApiError 는 gather fetch 전담(core.dartClient seam). zip 병렬 fetch 는 gather.dart.document.
 """
 

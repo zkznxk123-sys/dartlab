@@ -31,6 +31,15 @@ import polars as pl
 
 from dartlab import config as _dartlabConfig
 from dartlab.core.dartClient import DartClient
+
+# ── 내부 상수 ──────────────────────────────────────────────
+from dartlab.core.dartConstants import (
+    CODE_TO_LABEL as _CODE_TO_LABEL,
+)
+from dartlab.core.dartConstants import (
+    QUARTER_TO_CODE as _QUARTER_TO_CODE,
+)
+from dartlab.core.dartDateUtil import defaultEnd, defaultStart, parseDate
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.providers.dart.build.saver import (
     enrichFinance,
@@ -39,20 +48,11 @@ from dartlab.providers.dart.build.saver import (
 from dartlab.providers.dart.build.saver import (
     save as _saveFile,
 )
-
-# ── 내부 상수 ──────────────────────────────────────────────
-from dartlab.providers.dart.openapi.constants import (
-    CODE_TO_LABEL as _CODE_TO_LABEL,
-)
-from dartlab.providers.dart.openapi.constants import (
-    QUARTER_TO_CODE as _QUARTER_TO_CODE,
-)
 from dartlab.providers.dart.openapi.corpCode import (
     findCorpCode,
     loadCorpCodes,
     searchCompanies,
 )
-from dartlab.providers.dart.openapi.dateUtil import defaultEnd, defaultStart, parseDate
 from dartlab.providers.dart.openapi.disclosure import (
     CORP_CLASS,
     FILING_TYPES,

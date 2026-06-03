@@ -11,13 +11,13 @@ import polars as pl
 
 from dartlab import config as _dartlabConfig
 from dartlab.core.dartClient import DartClient
-from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import (
     CODE_TO_LABEL as _CODE_TO_LABEL,
 )
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import (
     QUARTER_TO_CODE as _QUARTER_TO_CODE,
 )
+from dartlab.core.dataConfig import DATA_RELEASES
 
 
 def _dataPath(category: str, stockCode: str) -> Path:

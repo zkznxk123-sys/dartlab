@@ -12,10 +12,10 @@ from pathlib import Path
 import polars as pl
 
 # ── 매핑 테이블 ────────────────────────────────────────────
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import (
     CODE_TO_QUARTER_KR as _REPRT_NM,
 )
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import (
     KR_TO_API_TYPE as _KR_TO_API_TYPE,
 )
 

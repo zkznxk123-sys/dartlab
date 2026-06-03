@@ -87,13 +87,13 @@ def _checkFinanceReportFreshness(stockCode: str) -> tuple[list[str], list[str]]:
     Returns (financeMissing, reportMissing) — 누락된 기간 라벨 리스트.
     예: ["2025Q4", "2025Q3"]
     """
+    from dartlab.core.dartConstants import CODE_TO_QUARTER
     from dartlab.providers.dart.openapi.batch import (
         _buildAllPeriods,
         _dataPath,
         _existingFinancePeriods,
         _existingReportPeriods,
     )
-    from dartlab.providers.dart.openapi.constants import CODE_TO_QUARTER
 
     now = datetime.now()
     currentYear = now.year
@@ -130,7 +130,7 @@ def _checkFinanceReportFreshness(stockCode: str) -> tuple[list[str], list[str]]:
             financeMissing.append(f"{y}{q}")
 
     # report
-    from dartlab.providers.dart.openapi.constants import CODE_TO_QUARTER_KR
+    from dartlab.core.dartConstants import CODE_TO_QUARTER_KR
 
     reportPath = _dataPath("report", stockCode)
     existingRep = _existingReportPeriods(reportPath)

@@ -14,15 +14,15 @@ from typing import Literal
 import polars as pl
 
 from dartlab import config as _dartlabConfig
+from dartlab.core.dartConstants import (
+    QUARTER_TO_CODE as _QUARTER_TO_CODE,
+)
 from dartlab.providers.dart.build.saver import (
     enrichFinance,
     enrichReport,
 )
 from dartlab.providers.dart.build.saver import (
     save as _saveFile,
-)
-from dartlab.providers.dart.openapi.constants import (
-    QUARTER_TO_CODE as _QUARTER_TO_CODE,
 )
 from dartlab.providers.dart.openapi.corpCode import loadCorpCodes
 from dartlab.providers.dart.openapi.dart import (

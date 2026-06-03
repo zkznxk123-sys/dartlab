@@ -42,14 +42,14 @@ _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 # ── 상수 ──
 
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import (
     CODE_TO_QUARTER as _CODE_TO_QUARTER,
 )
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import (
     CODE_TO_QUARTER_KR as _CODE_TO_QUARTER_KR,
 )
-from dartlab.providers.dart.openapi.constants import KR_TO_API_TYPE as _KR_TO_ENG_API_TYPE
-from dartlab.providers.dart.openapi.constants import (
+from dartlab.core.dartConstants import KR_TO_API_TYPE as _KR_TO_ENG_API_TYPE
+from dartlab.core.dartConstants import (
     QUARTER_TO_CODE as _QUARTER_TO_CODE,
 )
 
