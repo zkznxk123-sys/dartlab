@@ -79,7 +79,7 @@ procedure:
   - freq 는 입도(year/quarter/ytd), 소스 스위치 아님 — native·finance 둘 다 받음. finance 는 Y/Q/YTD 로 매핑.
   - report(dividend 등) 정형공시도 facade `c.panel("dividend")` 가 주입. raw 공시 강제는 `source="raw"`.
   - 빌드는 운영자/CI — 로컬 zip `python -m dartlab.providers.dart.panel.build`, 셀은 `--cells`, 또는 online `.github/scripts/sync/onlinePanel.py`.
-  - US(EDGAR)는 같은 read 표면 — `Panel(ticker, marketNs="us")` / `Company(ticker).panel`. 빌드는 gather sections remap `python -m dartlab.providers.edgar.panel.build --tickers AAPL` (XML 파싱 0). native 재무는 companyfacts(`c.panel("IS")` 위임).
+  - US(EDGAR)는 같은 read 표면 — `Panel(ticker, marketNs="us")` / `Company(ticker).panel`. 빌드는 raw 원본 `.txt` 자급 XBRL 파싱 `python -m dartlab.providers.edgar.panel.build --tickers AAPL` (재무표 role→disclosureKey 앵커링 + 셀 분해). native 셀 소문자 `c.panel("is")`(필링 XBRL) / 대문자 `c.panel("IS")`(companyfacts).
 linkedSkills:
   - engines.company
   - engines.data
@@ -274,40 +274,40 @@ DART zip / DART API ──build(providers/dart/panel/build)─→ {code}.parquet
                           Panel(code) / c.panel  (read, plain 콜드 ~0.35s, pl.DataFrame subclass)
 ```
 
-### EDGAR (US) 미러 — 같은 read 표면, gather sections build (XML 파싱 0)
+### EDGAR (US) 미러 — raw `.txt` 자급 XBRL 파싱 (DART panel급 보드 + 셀)
 
-`PANEL_SCHEMA`(16-col)는 **cross-market 동결 계약**이라 EDGAR 도 같은 16-col artifact 를 내면 read
-표면(`Panel`·`read`·`mapper`·`canonical`·`spine`)을 **무변경 재사용**한다 (read.py/mapper.py 복제 0).
-`Panel(ticker, marketNs="us")` / `Company(ticker).panel` 이 `data/edgar/panel/{ticker}.parquet` 를
-wide 수평화 — DART 와 동일하게 callable 섹션검색·`.search`·`.guide`·tag·periods 동작.
+DART panel 의 2층(XBRL 앵커 보드 + 셀 분해)을 EDGAR 도 **필링 원본 inline us-gaap XBRL** 로 재현한다.
+입력은 gather 가 원본 그대로 저장한 `data/original/edgar/docs/{cik}/{accession}.txt` (SEC full-submission)
+— DART 가 `data/original/dart/docs/{code}/*.zip` 을 자급 파싱하는 것의 EDGAR 미러. read 표면(`Panel`·
+`read`·`mapper`·`canonical`·`spine`)은 `marketNs="us"` 로 무변경 재사용(16-col `PANEL_SCHEMA` 동결 계약).
 
-- **build = gather sections remap (DART 와 다름)** — DART 는 zip XML 을 walker/refScan/dechunkNotes 로
-  파싱하지만, EDGAR 는 **gather 엔진이 이미 itemize** 한 `data/edgar/sections/{ticker}/{period}.parquet`
-  (topic="10-K::item1Business"·blockType·blockOrder·content_raw/plain)를 `providers/edgar/panel/build`
-  가 16-col 으로 **컬럼 remap** 만 한다 (XML 파싱 0). 매핑: chapter=form_type · sectionLeaf=topic itemId ·
-  sectionPath=topic · leafType=blockType(heading→text) · blockLeaf=source_title · contentRaw=content_raw
-  (빈셀=OOM 가드 → content_plain) · corp=ticker · rceptNo=accession_no · disclosureKey/xbrlClass=null.
-- **section 블록 = narrative** — EDGAR 10-K/10-Q item 텍스트·표는 ACLASS 없는 narrative 라
-  `disclosureKey`=null, rowIdentity=`NARR::{form}␟{itemId}` 가 기간 가로질러 안정(item 수평화 키).
-  DART 전용 read 변환은 graceful: `scopeExpr`(null→consolidated, EDGAR 연결-only 정답) · `alignNotes`
-  (no-op) · `canonicalChapterExpr`(미매칭 passthrough) · `orderBySpine`(SPINE 미등재 → `_skel` 최신
-  filing 문서순서 정렬).
-- **native 재무제표 = companyfacts (DART cell.py 미러 아님)** — EDGAR 는 native panel 셀 소스가 없고
-  companyfacts 가 단일 강한 재무 소스라, `c.panel("IS")`·소문자 `c.panel("is")` 모두 `c.show`(companyfacts,
-  `EdgarMapper`)로 위임(`isStrongTopic`). item 섹션명(`c.panel("Risk")`)은 raw 보드 검색.
-- **배포** — `data/edgar/panel/{ticker}.parquet` flat (회사당 1파일). HF `edgarPanel` 카테고리
-  (`deployEdgarToHF`), read 부재 시 `ensurePanelFromHf(marketNs="us")` lazy 다운로드. sync 는
-  weekly `buildEdgarPanel.py` (sections 수집 직후 remap).
+- **build = raw `.txt` 자급 파싱 (`providers/edgar/panel/build`, sections/gather/meta 의존 0)** —
+  `submission`(SGML→header+primary HTML+EX-101.PRE/LAB) → `instance`(inline ix:/native INS facts +
+  `<xbrli:context>` 해소) → `linkbase`(presentation role→concept 순서) → `walker`(보드)+`cell`(셀).
+- **보드 = XBRL 앵커링** — 재무제표 본표는 presentation **role URI → 정규 statement key**(BS/IS/CF/CIS/EF,
+  `mapper.roleToStatement`)로 `disclosureKey` 앵커링(statement 당 커버리지 최대 표 1개 — DART ACLASS 의
+  EDGAR 미러). 서술 Item 은 narrative(null, rowIdentity=`NARR::{form}␟Item`). DART read 변환 graceful:
+  `scopeExpr`(null→consolidated, 연결-only 정답)·`canonicalChapterExpr`(passthrough)·`orderBySpine`(_skel).
+- **native 셀 = 필링 XBRL 분해** — inline(ix:, ≈2021+)/native(EX-101.INS, ≈2012~2020) fact × context ×
+  role → 계정×기간 셀(`data/edgar/panelCell/{ticker}.parquet`, `EDGAR_CELL_SCHEMA`). context 날짜→
+  (ctxYear/quarter/mode Y·A·Q·P — DART ACONTEXT 토큰의 실날짜 미러), member→axisPath. **소문자
+  `c.panel("is"/"bs"/"cf"/"cis"/"sce"/"ratios")` = 이 필링 셀**(`cellRead.readNative`, deep history) /
+  **대문자 `c.panel("IS")` = companyfacts**(finance facade) — DART native/finance 대칭. cell 은 contextRef
+  가 문서-전역 간접참조라 build-time 해소(DART 는 ACONTEXT 자급 read-time, 정당한 발산) → 별도 artifact.
+- **era** — inline(≈2021+)/separate-instance(≈2012~2020, EX-101.INS) 양쪽 셀 분해, pre-XBRL(≈2009~2011)은
+  서술 보드만(DART era v1 미러).
+- **배포** — `edgar/panel/{ticker}.parquet`(보드) + `edgar/panelCell/{ticker}.parquet`(셀) flat. HF
+  `edgarPanel`·`edgarPanelCell` 카테고리(`deployEdgarToHF`), read 부재 시 `ensurePanelFromHf(marketNs="us")`
+  보드+셀 lazy 다운로드. sync 는 weekly `buildEdgarPanel.py` (원본 archive 선행).
 
 ```
-SEC filings ──gather(edgar/docs)──→ edgar/sections/{ticker}/{period}.parquet (itemize)
-                                          │
-                                          │ providers/edgar/panel/build (16-col remap, XML 0)
-                                          ↓
-                                    edgar/panel/{ticker}.parquet (flat, 16-col)
-                                          │
-                                          ↓
-              Panel(ticker, marketNs="us") / c.panel  (DART 와 동일 cross-market read 표면)
+SEC full-submission .txt (data/original/edgar/docs/{cik}/*.txt)
+  │ submission(SGML) → instance(facts+context) + linkbase(PRE/LAB)
+  ├─ walker → 보드 16-col (재무표 role→disclosureKey 앵커링, 서술 narrative)
+  └─ cell   → 셀 EDGAR_CELL (fact×context×role 계정×기간)
+  ↓                                            ↓
+edgar/panel/{ticker}.parquet            edgar/panelCell/{ticker}.parquet
+  │ Panel(ticker, marketNs="us")/c.panel        │ c.panel("is") (cellRead, DART 계약 동형)
 ```
 
 ## 공개 호출 방식
@@ -359,10 +359,10 @@ python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes 005930,0006
 # build-baked(spine 과 달리 read 정렬 아님) → 재생성 후 전수 --all 재빌드 필수. 노브 --minFreq/--dominanceRatio.
 python -X utf8 -m dartlab.providers.dart.panel.build --noteTaxonomy
 
-# EDGAR (US) 빌드 — gather sections → cross-market 16-col remap (XML 파싱 0, offline)
+# EDGAR (US) 빌드 — raw 원본 .txt 자급 XBRL 파싱 → 보드 + 셀 (offline, sections 의존 0)
 python -X utf8 -m dartlab.providers.edgar.panel.build --tickers AAPL,MSFT
-python -X utf8 -m dartlab.providers.edgar.panel.build --all                # data/edgar/sections/ 전수
-python .github/scripts/sync/buildEdgarPanel.py --all --overwrite           # sync(weekly) 재빌드
+python -X utf8 -m dartlab.providers.edgar.panel.build --all                # data/original/edgar/docs/ 전수
+python .github/scripts/sync/buildEdgarPanel.py --all --overwrite           # sync(weekly, 원본 archive 선행)
 ```
 
 ## 호출 동작
@@ -432,8 +432,9 @@ canonicalKey scope-strip·rowIdentity 는 `tests/providers/dart/panel/test_mappe
 `tests/panel/test_build_lossless.py`, Panel subclass·callable·tag 는 `test_panel.py` +
 `tests/panel/test_panel_intra.py`(requires_data), 자급 격리·import 분리(R1·R2)는
 `tests/architecture/test_panel_layer.py` · `test_panel_no_network_lxml.py` 가 강제. 실패는 None /
-빈 DataFrame (예외 없음). EDGAR(US) 미러 — sections→16-col remap·Panel(us) round-trip·native
-companyfacts 위임·case 무관 해석은 `tests/providers/edgar/panel/`(test_builder·test_topicMap·test_panel).
+빈 DataFrame (예외 없음). EDGAR(US) 미러 — raw `.txt` 자급 파싱(submission/instance/linkbase/walker/cell/
+mapper)·role→disclosureKey 앵커링·셀 분해·Panel(us) 보드·`c.panel("is")` 셀 계약은
+`tests/providers/edgar/panel/`(test_submission·instance·linkbase·walker·mapper·cell·builder·cellRead·panel).
 
 > Skill OS JSON index(`src/dartlab/skills/*.json`)는 **운영자 수동 동기화** — 본 spec 변경 시
 > 자동 생성 금지(CLAUDE.md "자동 빌드 도구 금지").

@@ -83,13 +83,28 @@ jobs:
           key: dartlab-edgar-sections-${{ github.run_id }}
           restore-keys: dartlab-edgar-sections-
 
-      # EDGAR panel artifact cache — sections → 16-col remap 산출물 (DART panel 미러).
+      # EDGAR raw 원본 .txt cache — panel build 입력 (data/original/edgar/docs). 증분 archive.
+      - name: Restore EDGAR originals cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/original/edgar/docs
+          key: dartlab-edgar-originals-${{ github.run_id }}
+          restore-keys: dartlab-edgar-originals-
+
+      # EDGAR panel 보드 + 셀 cache — raw .txt 자급 파싱 산출물.
       - name: Restore EDGAR panel cache
         uses: actions/cache/restore@v5
         with:
           path: data/edgar/panel
           key: dartlab-edgar-panel-${{ github.run_id }}
           restore-keys: dartlab-edgar-panel-
+
+      - name: Restore EDGAR panelCell cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/edgar/panelCell
+          key: dartlab-edgar-panelcell-${{ github.run_id }}
+          restore-keys: dartlab-edgar-panelcell-
 
       # ── 1. daily 벌크: companyfacts.zip → {cik}.parquet ──
       - name: Download + convert companyfacts.zip (daily bulk)
@@ -157,12 +172,21 @@ jobs:
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
 
-      # ── 3.5. panel artifact — gather sections → cross-market 16-col remap (weekly) ──
-      # sections 수집(step 3) 직후 그 산출물을 panel artifact 로 remap (offline, network 0).
-      # DART panel 미러 — providers.dart.panel 이 marketNs="us" 로 read.
-      - name: Build EDGAR panel (sections → 16-col, weekly full sync only)
+      # ── 3.5. panel — raw 원본 .txt 아카이브 → 자급 XBRL 파싱(보드+셀) (weekly) ──
+      # DART panel 이 zip 자급 파싱하듯, EDGAR 도 SEC full-submission .txt(data/original/edgar/docs/)를
+      # 직접 파싱. 원본 archive(SP500 universe, 증분) 선행 → buildEdgarPanel(보드+셀). sections 의존 0.
+      # 시작 universe = SP500 (운영자가 확장). 원본은 거대(.txt 수~수십MB)라 증분 + cache.
+      - name: Archive EDGAR originals + build panel (weekly full sync only)
         if: ${{ github.event.schedule == '0 3 * * 0' || github.event.inputs.collectDocs == 'true' }}
         run: |
+          uv run python -X utf8 -c "
+          from dartlab.core.dataLoader import loadEdgarTargetUniverse
+          from dartlab.gather.original.edgar.collect import archiveEdgarOriginals
+          u = loadEdgarTargetUniverse('sp500')
+          tickers = u['ticker'].to_list() if u is not None else []
+          if tickers:
+              archiveEdgarOriginals(tickers, forms=['10-K','10-Q','20-F','40-F'], sinceYear=2012, showProgress=False)
+          "
           uv run python -X utf8 .github/scripts/sync/buildEdgarPanel.py --all --overwrite
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
@@ -193,8 +217,9 @@ jobs:
               # data/edgar/sections/{ticker}/{period}.parquet 동시 emit. PR-E7 안전
               # 게이트 통과 후 docs 카테고리 폐기 예정.
               cats.append('sections')
-              # EDGAR panel(공시 수평화) artifact — sections → 16-col remap (DART panel 미러).
+              # EDGAR panel(공시 수평화) — raw .txt 자급 파싱 보드(panel) + native 셀(panelCell).
               cats.append('panel')
+              cats.append('panelCell')
           result = deployEdgarToHF(categories=cats)
           print(result)
           "
@@ -238,12 +263,26 @@ jobs:
           path: data/edgar/sections
           key: dartlab-edgar-sections-${{ github.run_id }}
 
+      - name: Save EDGAR originals cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/original/edgar/docs
+          key: dartlab-edgar-originals-${{ github.run_id }}
+
       - name: Save EDGAR panel cache
         uses: actions/cache/save@v5
         if: always()
         with:
           path: data/edgar/panel
           key: dartlab-edgar-panel-${{ github.run_id }}
+
+      - name: Save EDGAR panelCell cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/edgar/panelCell
+          key: dartlab-edgar-panelcell-${{ github.run_id }}
 
       - name: Summary
         if: always()
