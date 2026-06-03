@@ -327,30 +327,35 @@ class Panel(pl.DataFrame):
         # 명시 빈 key("") → None (하위호환).
         if not key:
             return None
-        # native 재무제표 (소문자 논리 키 is/bs/cf/cis/sce) → panel 자급 statement(XBRL+옛 통합, docs 0).
-        # 논리 키→물리 해소는 cell.STATEMENT_VARIANTS. freq=입도(year/quarter/ytd), 기본 quarter
-        # (raw 격자·readCellWide 와 동일 입도 — panel 정체성=깊은 분기 시계열). 소스 스위치 아님.
-        if key in _NATIVE_KEYS and code is not None:
-            from . import cell as _cell
+        # native 재무제표 (소문자 논리 키 is/bs/cf/cis/sce). **DART(kr)**: panel.parquet 셀 분해 자급
+        # (XBRL+옛 통합, docs 0) — 논리 키→물리 해소는 cell.STATEMENT_VARIANTS. **EDGAR(us)**: panel 셀
+        # 별도 소스 없음(section 블록은 narrative) — companyfacts 가 단일 강한 재무 소스라 소문자 키를
+        # 대문자로 승격해 아래 strong 블록(_showFn=c.show)에 위임(market 차이 = 소스 구조 차이).
+        # freq=입도(year/quarter/ytd), 기본 quarter (raw 격자·readCellWide 와 동일 입도). 소스 스위치 아님.
+        if self._marketNs == "kr":
+            if key in _NATIVE_KEYS and code is not None:
+                from . import cell as _cell
 
-            return _cell.readStatement(
-                code,
-                statement=key,
-                freq=freq or "quarter",
-                marketNs=self._marketNs,
-                periods=periods or self._periods,
-            )
-        # native 재무비율 (소문자 ratios) → panel 자급 (BS/IS/CF native 항목 → core 공식, docs 0).
+                return _cell.readStatement(
+                    code,
+                    statement=key,
+                    freq=freq or "quarter",
+                    marketNs=self._marketNs,
+                    periods=periods or self._periods,
+                )
+            # native 재무비율 (소문자 ratios) → panel 자급 (BS/IS/CF native 항목 → core 공식, docs 0).
+            if key == "ratios" and code is not None:
+                from . import cell as _cell
+
+                return _cell.readRatios(
+                    code,
+                    freq=freq or "quarter",
+                    marketNs=self._marketNs,
+                    periods=periods or self._periods,
+                )
+        elif key in _NATIVE_KEYS:
+            key = key.upper()  # us: 소문자 native → 대문자(strong 블록 _showFn companyfacts 위임)
         # 대문자 RATIOS → finance topic 으로 치환해 아래 strong 블록(파사드 _showFn) 위임. is/IS 와 대칭.
-        if key == "ratios" and code is not None:
-            from . import cell as _cell
-
-            return _cell.readRatios(
-                code,
-                freq=freq or "quarter",
-                marketNs=self._marketNs,
-                periods=periods or self._periods,
-            )
         if key == "RATIOS":
             key = "ratios"
         # 강한 소스(finance/report, 대문자 5표 IS/BS/CF/CIS/SCE 포함) 주입 — facade(Company.panel) _showFn.

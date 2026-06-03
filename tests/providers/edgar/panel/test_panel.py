@@ -93,3 +93,42 @@ def test_panel_us_scope_consolidated(_builtPanel) -> None:
 
     p = Panel(_builtPanel, marketNs="us")
     assert set(p["scope"].unique()) == {"consolidated"}
+
+
+def test_is_strong_topic_edgar() -> None:
+    """EDGAR isStrongTopic — finance(대소문자) 강함, item 섹션명/자유 텍스트는 raw 보드 (데이터 0)."""
+    from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
+
+    assert isStrongTopic("IS") is True
+    assert isStrongTopic("is") is True  # EDGAR: native 셀 없음 → 소문자도 companyfacts
+    assert isStrongTopic("RATIOS") is True
+    assert isStrongTopic("ratios") is True
+    assert isStrongTopic("Risk") is False  # item 섹션명 → raw 보드
+    assert isStrongTopic("item1Business") is False
+    assert isStrongTopic("") is False
+
+
+def test_panel_us_native_keys_route_to_companyfacts() -> None:
+    """marketNs="us": 소문자/대문자 재무 키는 _showFn(companyfacts) 위임, item 명은 raw 보드 (데이터 0)."""
+    from dartlab.providers.dart.panel import Panel
+    from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
+
+    p = Panel("000000nonexistent", marketNs="us")
+
+    def fakeShow(topic, **_kw):
+        return f"fin:{topic}"
+
+    p._showFn = fakeShow
+    p._strongFn = isStrongTopic
+
+    # 소문자 native → 대문자 승격 후 companyfacts 위임 (EDGAR 는 panel 자급 셀 없음)
+    assert p("is") == "fin:IS"
+    assert p("bs") == "fin:BS"
+    assert p("cf") == "fin:CF"
+    # 대문자 finance → 그대로 위임
+    assert p("IS") == "fin:IS"
+    # ratios 대소문자 → finance ratios 위임
+    assert p("ratios") == "fin:ratios"
+    assert p("RATIOS") == "fin:ratios"
+    # item 섹션명(약한 소스) → raw 보드 검색 (artifact 없어 None)
+    assert p("Risk") is None

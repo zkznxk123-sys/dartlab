@@ -578,6 +578,72 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
 
 _SHOW_FINANCE_TOPICS = frozenset({"IS", "BS", "CF", "CIS", "SCE", "ratios"})
 
+_STRONG_FINANCE_UPPER = frozenset({"IS", "BS", "CF", "CIS", "SCE", "RATIOS"})
+
+
+def isStrongTopic(topic: str) -> bool:
+    """topic 이 finance 강한 소스(companyfacts)인지 — ``c.panel`` facade 라우팅 SSOT.
+
+    EDGAR 는 DART 와 달리 native panel cell 별도 소스가 없다 — companyfacts 가 단일 강한 재무 소스다.
+    IS/BS/CF/CIS/SCE/ratios(+대소문자)면 ``c.show``(companyfacts)로 위임(True), 그 외(item 섹션명·
+    자유 텍스트)는 raw panel 보드 행 검색(False). ``providers.dart.builder.dataDispatcher.isStrongTopic``
+    의 EDGAR analog — panel facade 가 본 판정을 ``_strongFn`` 주입으로 받아 라우팅한다.
+
+    Args:
+        topic: 토픽 이름 (IS/BS/CF/CIS/SCE/ratios 또는 item 섹션명/자유 텍스트).
+
+    Returns:
+        True 면 finance 강한 소스(c.show 위임), False 면 raw 공시 보드 검색.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isStrongTopic("IS"), isStrongTopic("is"), isStrongTopic("RATIOS")
+        (True, True, True)
+        >>> isStrongTopic("Risk"), isStrongTopic("item1Business"), isStrongTopic("")
+        (False, False, False)
+
+    SeeAlso:
+        - ``showImpl`` — 강한 소스 실제 dispatch (finance/sections).
+        - ``providers.dart.panel.Panel.__call__`` — 본 판정을 facade 주입으로 받아 라우팅.
+
+    Requires:
+        - 없음 (순수 문자열 판정).
+
+    Capabilities:
+        - panel facade 의 finance(companyfacts) vs raw 보드 검색 분류 SSOT (EDGAR 단일 재무 소스).
+
+    Guide:
+        - ``Company.panel`` 이 ``p._strongFn = isStrongTopic`` 주입. 직접 호출 안전(순수).
+
+    AIContext:
+        - EDGAR 는 native panel 셀 없음 — 소문자 is/bs/cf 도 companyfacts(강함)로 본다(DART 와 차이).
+
+    When:
+        - panel ``c.panel(key)`` 가 finance 위임 vs 보드 검색을 가를 때.
+
+    How:
+        - topic ∈ _SHOW_FINANCE_TOPICS 또는 upper ∈ {IS,BS,CF,CIS,SCE,RATIOS} → True.
+
+    LLM Specifications:
+        AntiPatterns:
+            - item 섹션명/자유 텍스트를 강함으로 분류 금지 — 보드(False)에서 검색.
+        OutputSchema:
+            - ``bool``.
+        Prerequisites:
+            - 없음.
+        Freshness:
+            - 순수 판정.
+        Dataflow:
+            - topic → finance set 매칭 → bool.
+        TargetMarkets:
+            - US (EDGAR).
+    """
+    if not topic:
+        return False
+    return topic in _SHOW_FINANCE_TOPICS or topic.upper() in _STRONG_FINANCE_UPPER
+
 
 def showImpl(
     company: Company,

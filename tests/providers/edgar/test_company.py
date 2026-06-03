@@ -40,6 +40,13 @@ def test_can_handle_callable() -> None:
     assert hasattr(Company, "canHandle")
 
 
+def test_panel_property_exists() -> None:
+    """panel property smoke — DART c.panel 의 EDGAR 미러 진입점."""
+    from dartlab.providers.edgar.company import Company
+
+    assert isinstance(getattr(Company, "panel", None), property)
+
+
 def test_capital_callable() -> None:
     """capital() callable smoke."""
     from dartlab.providers.edgar.company import Company

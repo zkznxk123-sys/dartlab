@@ -2952,6 +2952,83 @@ class Company:
             self._cache["_showAccessor"] = CallableAccessor(self._showImpl, name="show")
         return self._cache["_showAccessor"]
 
+    @property
+    def panel(self):
+        """공시 수평화 보드 — 잡는 순간 item × 기간 wide DataFrame (EDGAR panel, marketNs="us").
+
+        DART ``c.panel`` 의 EDGAR 미러. SEC 10-K/10-Q/20-F 의 item(섹션·표·서술)을 cross-market
+        ``PANEL_SCHEMA`` 위에서 항목 × 기간 wide 로 수평화한 보드 (``providers.dart.panel`` 의 ``Panel``
+        을 ``marketNs="us"`` 로 재사용 — read 표면 복제 0). artifact 는 ``edgar.panel.build`` 가 gather
+        sections 에서 생산(``data/edgar/panel/{ticker}.parquet``). ``c.panel`` 자체가 ``pl.DataFrame``
+        (Panel subclass) — shape/filter 등 polars 연산 그대로. ``c.panel("Risk")`` 로 섹션 행 검색,
+        ``c.panel("IS")`` 같은 강한 소스는 companyfacts(``c.show``)로 위임 — EDGAR 는 native panel 셀
+        별도 소스가 없어 소문자 ``c.panel("is")`` 도 companyfacts(강함)로 위임.
+
+        Args:
+            없음 (property — self.ticker 사용).
+
+        Returns:
+            ``Panel`` 인스턴스(= wide ``pl.DataFrame``). ``c.panel`` 자체가 wide, ``c.panel(key)`` 로
+            섹션 검색 / 강한 소스(companyfacts) 주입.
+
+        Raises:
+            없음 — artifact 부재 시 빈 DataFrame.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.panel.shape                          # wide (item × period) — DataFrame 그대로  # doctest: +SKIP
+            >>> c.panel("Risk")                        # 섹션명/itemId 행 (raw 공시)  # doctest: +SKIP
+            >>> c.panel("IS")                          # 강한 소스 — companyfacts 위임 (c.show("IS"))  # doctest: +SKIP
+            >>> c.panel.search("supply chain")         # 본문 전체검색  # doctest: +SKIP
+
+        SeeAlso:
+            - ``providers.dart.panel.Panel`` — 반환 본체 (pl.DataFrame subclass + __call__, cross-market).
+            - ``providers.edgar.panel.build`` — gather sections → 16-col artifact 생산.
+            - ``show`` — 강한 소스(companyfacts finance) dispatch — c.panel 이 주입 재사용.
+
+        Requires:
+            - data/edgar/panel/{ticker}.parquet (사전빌드 artifact, edgar.panel.build).
+
+        Capabilities:
+            - 한 회사 공시를 item × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.
+
+        Guide:
+            - ``c.panel`` 잡으면 wide. ``c.panel("Risk")`` 섹션 검색. 재무는 ``c.panel("IS")`` (companyfacts).
+
+        AIContext:
+            - 상태 없는 lazy read — 매 접근 새 Panel (누적 0). contentRaw 는 외부 untrusted.
+
+        When:
+            - 한 회사의 공시 수평화 보드가 EDGAR Company 흐름에서 필요할 때.
+
+        How:
+            - self.ticker → Panel(ticker, marketNs="us") + _showFn(=show)/_strongFn(=isStrongTopic) 주입.
+
+        LLM Specifications:
+            AntiPatterns:
+                - c.panel 결과 캐싱 강제 금지 — 상태 없는 lazy(누적 0).
+                - native is/bs/cf 를 panel 자급 셀로 기대 금지 — EDGAR 는 companyfacts 위임(DART 와 차이).
+            OutputSchema:
+                - ``Panel`` (wide DataFrame subclass + callable 검색).
+            Prerequisites:
+                - edgar panel artifact.
+            Freshness:
+                - 매 접근 read.
+            Dataflow:
+                - self.ticker → Panel(wide, us) + _showFn/_strongFn 주입.
+            TargetMarkets:
+                - US (EDGAR).
+        """
+        from dartlab.providers.dart.panel import Panel as _Panel
+        from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
+
+        p = _Panel(self.ticker, marketNs="us")
+        # facade 주입 — c.panel("IS") 강한 소스는 show(companyfacts) 위임, 그 외 raw 공시 행 검색.
+        # panel 패키지는 finance 를 import 안 함 — 주입된 callable 만 호출(layer 격리, cycle 0).
+        p._showFn = self.show
+        p._strongFn = isStrongTopic
+        return p
+
     def _showImpl(
         self,
         topic: str,
