@@ -48,7 +48,6 @@ from dartlab.scan.builders.kr.common import mergeBatchFiles as _mergeBatchFiles
 from dartlab.scan.builders.kr.common import reportDir as _reportDir
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
-from dartlab.scan.builders.kr.docs.changes import _buildRawChanges as _buildRawChanges
 from dartlab.scan.builders.kr.docs.changes import buildChanges as buildChanges
 from dartlab.scan.builders.kr.financeBuild import _loadAccountMap as _loadAccountMap
 from dartlab.scan.builders.kr.financeBuild import _sanityCheckCalendarYears as _sanityCheckCalendarYears
@@ -162,7 +161,6 @@ __all__ = [
     "SCAN_API_TYPES",
     "_BATCH",
     "_FISCAL_Q_MAP",
-    "_buildRawChanges",
     "_buildSharesOutstandingSafe",
     "_calendarizeFiscalColumns",
     "_estimateFiscalMonthFromAnnualFiling",
