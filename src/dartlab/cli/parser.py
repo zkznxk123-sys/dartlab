@@ -25,6 +25,7 @@ COMMAND_SPECS = (
     CommandSpec("story", "dartlab.cli.commands.story", "기업 분석 스토리 (사람이 읽는 보고서)"),
     # 수집/갱신
     CommandSpec("collect", "dartlab.cli.commands.collect", "DART/EDGAR 데이터 수집"),
+    CommandSpec("sync", "dartlab.cli.commands.sync", "수집 파이프라인 실행 (로컬/CI 단일 SSOT)"),
     CommandSpec("update", "dartlab.cli.commands.update", "로컬 데이터를 HuggingFace 최신으로 갱신"),
     # 서버 / 설정
     CommandSpec("ai", "dartlab.cli.commands.ai", "분석 웹 인터페이스 실행"),
