@@ -105,10 +105,10 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Sync recent (finance + report)
-        # -u + PYTHONUNBUFFERED=1: stdout 라인 버퍼링 차단 — 90 분 timeout cancel 시
-        # 어디서 멈췄는지 실시간 가시화. 이전 cancel run 84 분 동안 stdout 0 줄 =
-        # buffered 패턴 (정상 종료 시에만 flush). 진척 진단 불가 사고 차단.
-        run: uv run python -X utf8 -u .github/scripts/sync/syncRecent.py
+        # 통합 진입점(dartlab.pipeline) — dart stage 가 syncRecent 를 SYNC_CATEGORIES env
+        # (finance,report)로 동형 호출. --no-upload: 업로드는 아래 per-category uploadData
+        # 스텝이 담당(syncRecent 내부 checkpoint 업로드는 보존). PYTHONUNBUFFERED=1 로 버퍼링 차단.
+        run: uv run python -X utf8 -m dartlab.pipeline finance --no-upload
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}  # checkpoint subprocess (uploadData.py) 가 필요
@@ -212,10 +212,12 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Sync recent (docs)
-        run: uv run python -X utf8 -u .github/scripts/sync/syncRecent.py
+        # 통합 진입점 — dart stage 가 syncRecent 를 SYNC_CATEGORIES=docs env 로 동형 호출.
+        # --no-upload: 업로드는 아래 uploadData(docs) 스텝(syncRecent checkpoint 업로드 보존).
+        run: uv run python -X utf8 -m dartlab.pipeline docs --no-upload
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # checkpoint subprocess (uploadData.py) 가 필요
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # syncRecent checkpoint subprocess (uploadData.py) 가 필요
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: docs
           SYNC_STATE_SCOPE: docs

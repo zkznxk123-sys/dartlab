@@ -110,3 +110,15 @@ def test_edgar_bulk_quarterly(monkeypatch):
     # 4분기 중 (2023,4) 보유 → 3개만 convert
     assert seen["convertQ"] == [(2024, 2), (2024, 1), (2023, 3)]
     assert res.report.ok == 2 and res.report.err == 0
+
+
+def test_dart_recent_respects_sync_categories_env(monkeypatch):
+    """dart recent — SYNC_CATEGORIES env(다중) 우선, 없으면 category 단일."""
+    mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.dart")
+    monkeypatch.setattr(mod, "readChanged", lambda c: [])
+    monkeypatch.setenv("SYNC_CATEGORIES", "finance,report")
+    mod.runDartRecent(category="finance", upload=False)
+    assert calls[-1][1]["env"] == {"SYNC_CATEGORIES": "finance,report"}
+    monkeypatch.delenv("SYNC_CATEGORIES", raising=False)
+    mod.runDartRecent(category="docs", upload=False)
+    assert calls[-1][1]["env"] == {"SYNC_CATEGORIES": "docs"}

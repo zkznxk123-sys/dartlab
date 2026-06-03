@@ -7,6 +7,8 @@ onlinePanel/buildPanel)를 ``runScript`` 로 동형 호출 + ``uploadCategoryToH
 
 from __future__ import annotations
 
+import os
+
 from dartlab.pipeline.changed import readChanged
 from dartlab.pipeline.hfUpload import uploadCategoryToHf
 from dartlab.pipeline.stages._runner import runScript
@@ -64,7 +66,9 @@ def runDartRecent(
         >>> runDartRecent(category="finance", upload=False)  # doctest: +SKIP
         StageResult(category='finance', ...)
     """
-    rc = runScript(".github/scripts/sync/syncRecent.py", env={"SYNC_CATEGORIES": category})
+    # SYNC_CATEGORIES env 가 있으면 그것(워크플로 finance,report 다중)을, 없으면 category 단일.
+    syncCats = os.environ.get("SYNC_CATEGORIES", category)
+    rc = runScript(".github/scripts/sync/syncRecent.py", env={"SYNC_CATEGORIES": syncCats})
     return _upload(_result(category, rc, "syncRecent"), category, upload, token)
 
 
