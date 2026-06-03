@@ -2,21 +2,21 @@
 
 모든 시장(dart/edgar/edinet)의 BUILD 가 **동일한 16-col schema** 를 산출한다.
 panel reader(`providers/dart/panel`)·facade 는 이 schema 만 안다 → EDGAR build 가
-us-gaap 에서 같은 14-col 을 내면 reader/facade 무변경 동작 (다시장 깨끗함의 토대).
+us-gaap 에서 같은 16-col 을 내면 reader/facade 무변경 동작 (다시장 깨끗함의 토대).
 
 수평화 그릇:
     - L1 (수평화 축) = ``xbrlClass``(ACLASS raw) / ``disclosureKey``(native canonicalKey, scope-strip).
     - 구조 truth = ``chapter`` + ``sectionLeaf`` + ``sectionPath``(SECTION-N 전 깊이 — flatten 으로 잃는 계층).
-    - 본문 = ``contentRaw``(태그 무손실) + ``contentSig``(내용 SimHash — 서사구조 수평화 정렬 앵커).
-    - 행 = (disclosureKey, scope) 단일 앵커 × 열 = period (재무제표); 서사는 ``contentSig`` 매치로 정렬.
+    - 본문 = ``contentRaw``(태그 무손실) + ``leafType``(text/table 결정론 경계 — 표↔표 정렬).
+    - 행 = (disclosureKey, scope) 단일 앵커 × 열 = period (재무제표); 서사는 canonical TOC 위치로 정렬.
 
 LLM Specifications:
     AntiPatterns:
         - 시장별로 컬럼 추가/이름 다르게 금지 — 16-col 동결, 시장차이는 값으로.
-        - content_plain/mixed/stripped 류 *표시용* 파생 컬럼 추가 금지 (태그 무손실 contentRaw 단일). 단
-          ``contentSig`` 은 표시물이 아니라 *정렬 인덱스*(per-leaf 결정론 해시)라 예외 — BUILD bake.
-        - ``scope`` 를 저장 컬럼으로 추가 금지 — read 시점 xbrlClass 파생 (anchor.scopeExpr). ``leafType``(text/table)도
-          read 파생(contentRaw 의 TABLE 마커) — bake 안 함.
+        - content_plain/mixed/stripped 류 *표시용* 파생 컬럼 추가 금지 (태그 무손실 contentRaw 단일).
+        - 정렬용 해시(contentSig 류) bake 금지 — narrative 정렬축은 canonical TOC 위치(section-identity)지
+          내용해시가 아니다(boilerplate 오병합). 필요 시 contentRaw 에서 read-time 재계산(speculative bake 0).
+        - ``scope`` 를 저장 컬럼으로 추가 금지 — read 시점 xbrlClass 파생 (anchor.scopeExpr). ``leafType``(text/table)은 결정론 경계라 BUILD 가 text/table 별도 행으로 분리하며 bake — 정렬을 같은 타입끼리(표↔표) 하기 위함.
     OutputSchema:
         - ``PANEL_SCHEMA: dict[str, pl.DataType]`` 16 col.
         - ``PIVOT_INDEX: list[str]`` — 회사내 다기간 + 회사간 정렬 키.
@@ -25,7 +25,7 @@ LLM Specifications:
     Freshness:
         - schema 변경 시 build·reader·전 시장 동시 정합 필요 (계약 SSOT).
     Dataflow:
-        - gather build(write) → 14-col parquet → providers reader(read) 가 본 schema 만 의존.
+        - gather build(write) → 16-col parquet → providers reader(read) 가 본 schema 만 의존.
     TargetMarkets:
         - KR + US + JP 공통 계약.
 """
@@ -39,6 +39,7 @@ PANEL_SCHEMA: dict[str, pl.DataType] = {
     "chapter": pl.Utf8,  # SECTION-1 대분류 (I~XII; EDGAR Part/Item)
     "sectionLeaf": pl.Utf8,  # 절 이름 (SECTION-N TITLE 원본 보존)
     "sectionPath": pl.Utf8,  # SECTION-N 전 깊이 "␟" join — flatten 으로 잃는 계층 truth (read 파생 불가, bake 필수)
+    "leafType": pl.Utf8,  # "text" | "table" — 결정론 경계(<TABLE> 유무). BUILD 분리 → 정렬은 같은 타입끼리(표↔표)
     "blockLeaf": pl.Utf8,  # 블록 소제목 (TABLE-GROUP TITLE)
     "xbrlClass": pl.Utf8,  # ACLASS 직접 (BS_C/IS_C2/CF_C/EF_C/NT_C_D######, +_S 별도)
     "xbrlMatched": pl.Boolean,  # ACLASS exact(True) vs fuzzy(False)
@@ -47,7 +48,6 @@ PANEL_SCHEMA: dict[str, pl.DataType] = {
     "aassocnote": pl.Utf8,  # provenance
     "blockOrder": pl.UInt32,  # 문서 순서
     "contentRaw": pl.Utf8,  # 태그 무손실 raw XML (etree.tostring 그대로) — 단일 본문 컬럼
-    "contentSig": pl.UInt64,  # leaf 내용 SimHash (태그·숫자 제거 지문) — READ 수평화 정렬 앵커 (build/signature.simhash)
     "period": pl.Utf8,  # YYYYQn (결산월 무관 calendar quarter)
     "corp": pl.Utf8,  # 종목코드
     "rceptNo": pl.Utf8,  # 접수번호 provenance
@@ -58,5 +58,5 @@ PANEL_SCHEMA: dict[str, pl.DataType] = {
 # 최신기준 수평화(요구 #7): keyed 행은 (disclosureKey, scope) 단일 앵커 — era 마다
 # 흔들리는 xbrlClass 대신 scope(연결/별도, xbrlClass 파생)로 대체해 BS↔BS_C drift 흡수.
 # chapter/sectionLeaf/blockLeaf 는 anchorLatest 가 최신값으로 통일 → 표시 라벨 겸 정렬 안정.
-# scope = anchor.scopeExpr(xbrlClass) 런타임 파생 (저장 14-col 불변).
+# scope = anchor.scopeExpr(xbrlClass) 런타임 파생 (저장 16-col 불변).
 PIVOT_INDEX: list[str] = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"]

@@ -32,7 +32,7 @@ import polars as pl
 
 import dartlab.config as _cfg
 
-from .builder import buildPanel, buildPanelBaseline
+from .builder import buildPanel, buildPanelBaseline, panelXbrlRefPath
 
 _log = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ def _buildOne(args: tuple[str, str, str]) -> tuple[str, int, int, float]:
 
 def buildPanelAll(
     *,
-    refPath: str | Path = "data/dart/panelXbrlRef.parquet",
+    refPath: str | Path | None = None,  # None = 패키지 동봉 panelXbrlRefPath() (data/ 아님)
     outBaseDir: str | Path = "data/dart/panel",
     codes: list[str] | None = None,
     numWorkers: int = 8,
@@ -164,7 +164,7 @@ def buildPanelAll(
     if verbose:
         _log.info("buildPanelAll: %d 종목, %d workers", len(codes), numWorkers)
 
-    refPathStr = str(refPath)
+    refPathStr = str(refPath if refPath is not None else panelXbrlRefPath())  # 패키지 동봉 ref (data/ 아님)
     outBaseStr = str(outBaseDir)
     Path(outBaseStr).mkdir(parents=True, exist_ok=True)
 
@@ -220,7 +220,7 @@ def _main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     ap = argparse.ArgumentParser(description="panel artifact 빌드")
     ap.add_argument("--codes", type=str, default="", help="콤마구분 종목코드. 빈값=5 baseline")
-    ap.add_argument("--ref", type=str, default="data/dart/panelXbrlRef.parquet", help="ref parquet")
+    ap.add_argument("--ref", type=str, default=str(panelXbrlRefPath()), help="ref parquet (기본=패키지 동봉)")
     ap.add_argument("--out", type=str, default="data/dart/panel", help="출력 base dir")
     ap.add_argument("--all", action="store_true", help="전종목 빌드 (multiprocessing)")
     ap.add_argument("--spine", action="store_true", help="정부 서식 뼈대(spineData.py) 생성 — 기준 종목 1개")

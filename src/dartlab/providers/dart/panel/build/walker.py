@@ -28,7 +28,7 @@ LLM Specifications:
         - ``walkSections(root, era, refDf) -> iter[dict]`` 11 col row.
         - cols: chapter / sectionLeaf / sectionPath / blockLeaf / xbrlClass / xbrlMatched /
                 xbrlMatchScore / atocId / aassocnote / contentRaw / blockOrder.
-        - contentSig 은 walker 아님 — horizontalize 병합 후 최종 contentRaw 에 builder 가 계산(병합 지문).
+        - leafType 은 walker 아님 — horizontalize 병합·dechunk 후 builder 의 splitLeafTypes 가 분할/부여.
     Prerequisites:
         - lxml etree root. refDf (v1/v1.5 fuzzy match 용).
     Freshness:

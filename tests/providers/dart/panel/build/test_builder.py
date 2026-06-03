@@ -22,12 +22,14 @@ def test_prev_year() -> None:
 
 
 def test_panel_xbrl_ref_path() -> None:
-    """panelXbrlRefPath: ref truth 단일 경로 — data/dart/panelXbrlRef.parquet."""
+    """panelXbrlRefPath: ref truth 단일 경로 — 패키지 동봉 build/refScan/panelXbrlRef.parquet (data/ 아님)."""
     from dartlab.providers.dart.panel.build.builder import panelXbrlRefPath
 
     p = panelXbrlRefPath()
     assert p.name == "panelXbrlRef.parquet"
-    assert p.as_posix().endswith("dart/panelXbrlRef.parquet")
+    # 패키지 동봉(git 추적·wheel) — data/ 가 아니라 build/refScan/ 아래 (코드와 함께 버전·공유).
+    assert p.as_posix().endswith("panel/build/refScan/panelXbrlRef.parquet")
+    assert p.exists(), "패키지 동봉 ref parquet 부재"
 
 
 def test_build_callables_public() -> None:

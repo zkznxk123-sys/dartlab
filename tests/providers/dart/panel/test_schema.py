@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_panel_schema_16_col_contract() -> None:
-    """PANEL_SCHEMA 는 16-col 동결 — 핵심 컬럼 존재 + 타입 (+sectionPath, +contentSig)."""
+    """PANEL_SCHEMA 는 16-col 동결 — 핵심 컬럼 존재 + 타입 (+sectionPath, +leafType)."""
     from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
 
     assert len(PANEL_SCHEMA) == 16, f"16-col 동결 위반: {len(PANEL_SCHEMA)}"
@@ -23,10 +23,11 @@ def test_panel_schema_16_col_contract() -> None:
     assert PANEL_SCHEMA["contentRaw"] == pl.Utf8
     assert "content_plain" not in PANEL_SCHEMA
     assert "scope" not in PANEL_SCHEMA  # scope 는 read 파생 (저장 안 함).
-    assert "leafType" not in PANEL_SCHEMA  # leafType 도 read 파생 (contentRaw TABLE 마커).
-    # 신규: sectionPath(lost-by-flatten 계층 truth, bake) + contentSig(내용 SimHash 정렬 앵커, bake).
+    # 정렬용 해시(contentSig 류) bake 금지 — narrative 정렬축은 canonical TOC 위치(section-identity).
+    assert "contentSig" not in PANEL_SCHEMA
+    # sectionPath(lost-by-flatten 계층 truth, bake) + leafType(text/table 결정론 경계, BUILD 분할).
     assert PANEL_SCHEMA["sectionPath"] == pl.Utf8
-    assert PANEL_SCHEMA["contentSig"] == pl.UInt64
+    assert PANEL_SCHEMA["leafType"] == pl.Utf8
 
 
 def test_pivot_index_members() -> None:

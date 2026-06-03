@@ -147,8 +147,8 @@ def _companySpine(
     _period, rows, xmls = bundle
     if not rows:
         return None
-    # spine 순서만 계산 — contentSig 불필요(parquet write 안 함). 15-col 로 구성(walker rows 에 contentSig 없음).
-    df = pl.DataFrame(rows, schema={k: v for k, v in PANEL_SCHEMA.items() if k != "contentSig"})
+    # spine 순서만 계산 — leafType 불필요(parquet write 안 함). walker rows 에 맞춰 제외.
+    df = pl.DataFrame(rows, schema={k: v for k, v in PANEL_SCHEMA.items() if k != "leafType"})
     df = horizontalize(df)
     df = resolveBatch(df)  # disclosureKey 부착
     if df.is_empty():

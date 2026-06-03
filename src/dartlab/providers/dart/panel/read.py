@@ -4,14 +4,16 @@
 columnar projection 만 — BUILD(build/) 와 물리 분리, lxml/zipfile import 0 (R2, 콜드 <1s).
 period 파일 prune(``periods`` 인자)으로 대형 종목 메모리 핸들.
 
-수평화 4 단계:
-    1. ``readLong`` — period 파일 read + disclosureKey 보장(build native 채움, 옛 artifact 만 fallback).
+수평화 단계:
+    1. ``readLong`` — flat 파일 read + disclosureKey 보장(build native 채움, 옛 artifact 만 fallback).
     2. ``alignNotes`` — 옛 split 주석행(null key, BUILD 가 제목만 분할)을 회사 최근 XBRL 뼈대(scope,제목)→NT_
        에 read-time 정렬. 정렬·뼈대 개선이 **재빌드 무관**(빌드는 분할만 동결).
     3. ``anchorLatest`` — (disclosureKey, scope) 앵커로 era drift(BS→BS_C) 흡수 → 한 행 정렬.
-    4. ``readWide`` — dedupKeyed → blockOrder 순 contentRaw join collapse → period 축 pivot → spine 정렬.
-       ``tag=False`` 면 정렬된 wide 의 period 셀에 태그 1회 strip(plain) — 큰 셀 1회가 fragment
-       수천개 strip 보다 2.8x 빠름(byte-identical 실측).
+    4. ``dedupKeyed`` — 본문+첨부 중복 keyed 행을 (key,scope,leafType,period) 당 1개 (collapse 증식 차단).
+    5. ``canonicalChapterExpr`` — 회사 드리프트 챕터((첨부)재무제표 등)를 정부표준 14 노드로 흡수((첨부)→III).
+    6. ``readWide`` — (canonicalChapter, sectionLeaf, blockLeaf, leafType, key, scope) collapse → period 축
+       pivot → canonical rank 정렬. leafType 으로 표↔표·텍스트↔텍스트 분리. ``tag=False`` 면 정렬된 wide 셀에
+       태그 1회 strip(plain) — 큰 셀 1회가 fragment 수천개 strip 보다 2.8x 빠름(byte-identical 실측).
 
 LLM Specifications:
     AntiPatterns:
@@ -46,8 +48,9 @@ from .period import sortPeriods
 
 _log = logging.getLogger(__name__)
 
-# pivot row identity (회사내 다기간 정렬 키). scope = read 파생(scopeExpr).
-_INDEX_COLS = ["chapter", "sectionLeaf", "blockLeaf", "disclosureKey", "scope"]
+# pivot row identity (회사내 다기간 정렬 키). scope = read 파생(scopeExpr). chapter 는 readWide 가
+# canonicalChapterExpr 로 접은 canonical 라벨((첨부)→III). leafType = text/table 분리(표↔표 정렬).
+_INDEX_COLS = ["chapter", "sectionLeaf", "blockLeaf", "leafType", "disclosureKey", "scope"]
 
 # 태그 strip — 순수 polars regex (lxml 0, R2).
 _TAG_RE = r"<[^>]+>"
@@ -187,7 +190,8 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
 
     if marketNs != "kr":
         return
-    if _panelDir(code, marketNs).exists():
+    _d = _panelDir(code, marketNs)
+    if (_d.parent / f"{code}.parquet").exists() or _d.exists():  # flat 파일 또는 옛 폴더(하위호환)
         return
     if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
         return
@@ -202,7 +206,7 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
         snapshot_download(
             repo_id=repoFor("panel"),
             repo_type="dataset",
-            allow_patterns=[f"{DATA_RELEASES['panel']['dir']}/{code}/*.parquet"],
+            allow_patterns=[f"{DATA_RELEASES['panel']['dir']}/{code}.parquet"],  # flat 회사당 1파일
             local_dir=str(Path(_cfg.dataDir)),
         )
     except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
@@ -585,15 +589,21 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
     """
     ensurePanelFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선, 단일 자동로드)
     d = _panelDir(code, marketNs)
-    if not d.exists():
-        return None
-    files = sorted(d.glob("*.parquet"))
-    if periods:
-        files = [f for f in files if f.stem in set(periods)]
-    if not files:
-        return None
+    flat = d.parent / f"{code}.parquet"  # flat: data/dart/panel/{code}.parquet (회사당 1파일, HF 폭발 회피)
     try:
-        df = pl.read_parquet([str(f) for f in files])
+        if flat.exists():
+            df = pl.read_parquet(str(flat))
+            if periods:
+                df = df.filter(pl.col("period").is_in(list(periods)))  # 1파일 → 행 필터(파일 prune 대체)
+        elif d.exists():  # 하위호환 — 옛 period-shard 폴더
+            files = sorted(d.glob("*.parquet"))
+            if periods:
+                files = [f for f in files if f.stem in set(periods)]
+            if not files:
+                return None
+            df = pl.read_parquet([str(f) for f in files])
+        else:
+            return None
     except (pl.exceptions.PolarsError, OSError) as exc:
         _log.warning("panel read 실패 %s: %s", code, exc)
         return None
@@ -657,12 +667,13 @@ def readWide(
         - 한 회사 다기간을 항목 × period 로 수평화할 때.
 
     How:
-        - readLong → alignNotes(뼈대 정렬) → anchorLatest → dedupKeyed → collapse → pivot → spine → (tag=False) strip.
+        - readLong → alignNotes → anchorLatest → dedupKeyed → canonicalChapter → collapse → pivot → canonical rank.
 
     LLM Specifications:
         AntiPatterns:
             - contentRaw 다중블록 first 금지 — blockOrder 순 join(무손실).
             - xbrlClass pivot index 금지 — scope 대체.
+            - 챕터 임의 재구성 금지 — canonical 14 노드 bounded 매핑((첨부)→III).
             - collapse(long fragment) 단계 strip 금지 — pivot·정렬 후 wide 셀 1회(2.8x).
         OutputSchema:
             - ``pl.DataFrame | None`` (index cols + period 열).
@@ -671,7 +682,7 @@ def readWide(
         Freshness:
             - 매 호출.
         Dataflow:
-            - readLong → alignNotes → anchorLatest → dedupKeyed → collapse → pivot → spine → (tag=False) strip.
+            - readLong → alignNotes → anchorLatest → dedupKeyed → canonicalChapter → collapse → pivot → canonical rank.
         TargetMarkets:
             - KR + US.
     """
@@ -682,8 +693,29 @@ def readWide(
         return None
     long = alignNotes(long)  # 옛 split 주석행(null key) → 회사 최근 XBRL 뼈대 NT_ 정렬 (read-time, 재빌드 무관)
     long = anchorLatest(long)
-    long = dedupKeyed(long)  # 본문+첨부 중복 keyed 행 → (key,scope,period) 당 1개 (collapse 증식 차단)
+    long = dedupKeyed(long)  # 본문+첨부 중복 keyed 행 → (key,scope,leafType,period) 당 1개 (collapse 증식 차단)
+    # canonical L1 챕터 복원·접기 — sectionPath 깊은 canonical 원소로 **붕괴된 chapter 복원**(DART era 가 III~XII
+    # 를 II 아래 mis-nesting → walker chapter 붕괴) + (첨부)→III 흡수. 회사간 비교축. READ 파생(재빌드 무관).
+    from .canonical import canonicalChapterExpr
+
+    if "chapter" in long.columns:
+        pathCol = "sectionPath" if "sectionPath" in long.columns else "chapter"
+        long = long.with_columns(canonicalChapterExpr("chapter", pathCol).alias("chapter"))
+    # narrative leaf 순번(leafSeq) — **sectionLeaf 단위** blockOrder 순 ordinal. 각 leaf(text-run·표)가 별도
+    # 비교단위(행)가 되어 표↔표가 한 셀에 안 뭉친다(101개→개별, 재뭉침 0). 섹션 내로 위치정렬 제한.
+    # ※ 직접확인 결론(7사): narrative 표 정렬은 천장이 낮다 — 표가 대부분 1회성+구조진화라 위치정렬(38%)·
+    #   구조지문정렬(재뭉침+fill 2.2) 둘 다 못 맞춤. 위치정렬이 재뭉침 0 이라 그나마 정직. keyed 는 disclosureKey 식별 → seq=0.
+    if "blockOrder" in long.columns:
+        seq = (
+            pl.when(pl.col("disclosureKey").is_null())
+            .then(pl.col("blockOrder").rank("ordinal").over(["chapter", "sectionLeaf", "leafType", "period"]))
+            .otherwise(0)
+            .cast(pl.Int64)
+        )
+        long = long.with_columns(seq.alias("leafSeq"))
     indexCols = [c for c in _INDEX_COLS if c in long.columns]
+    if "leafSeq" in long.columns:
+        indexCols = [*indexCols, "leafSeq"]
     if not indexCols or "period" not in long.columns:
         return None
     # collapse 는 항상 raw join (태그 무손실). strip(tag=False)은 pivot·정렬 후 wide 셀에 1회
@@ -694,9 +726,25 @@ def readWide(
         collapsed = (
             long.sort("blockOrder")
             .group_by([*indexCols, "period"], maintain_order=True)
-            .agg(joined.alias("contentRaw"))
+            .agg(joined.alias("contentRaw"), pl.col("blockOrder").min().alias("_bo"))
         )
-        wide = collapsed.pivot(values="contentRaw", index=indexCols, on="period", aggregate_function="first")
+        # skeleton 표시순서 = **최신 *연간*(Q4) 보고서의 blockOrder**(뼈대 기준). 분기보고서(Q1~Q3)는 구조가
+        # 빈약(사업의 내용 등 생략)이라 절대 최신 분기를 기준 삼으면 narrative leaf 가 거기 없어 muddle — 전체구조를
+        # 가진 최신 사업보고서(Q4)가 뼈대. Q4 부재 시 절대 최신. 최신 뼈대에 없는 과거전용 leaf 는 _skel null →
+        # 뒤로(_skelOld 차순서). "최신 뼈대 기준, 과거 흡수" 구현.
+        allP = collapsed.select(pl.col("period").unique()).to_series().to_list()
+        q4 = [p for p in allP if p.endswith("Q4")]
+        latestP = max(q4) if q4 else max(allP)
+        skelOrder = collapsed.filter(pl.col("period") == latestP).select([*indexCols, pl.col("_bo").alias("_skel")])
+        skelOld = (
+            collapsed.sort("period")
+            .group_by(indexCols, maintain_order=True)
+            .agg(pl.col("_bo").last().alias("_skelOld"))
+        )
+        wide = collapsed.drop("_bo").pivot(
+            values="contentRaw", index=indexCols, on="period", aggregate_function="first"
+        )
+        wide = wide.join(skelOrder, on=indexCols, how="left").join(skelOld, on=indexCols, how="left")
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
         _log.warning("panel pivot 실패 %s: %s", code, exc)
         return None
@@ -765,18 +813,25 @@ def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:
         TargetMarkets:
             - KR + US 공통.
     """
+    from .canonical import canonicalRankExpr
     from .mapper import rowIdentityExpr
     from .spine import SPINE
 
-    periodCols = sortPeriods([c for c in wide.columns if c not in indexCols])
-    orderedCols = [*indexCols, *reversed(periodCols)]  # period 최신순(좌측)
-    if not SPINE or "chapter" not in wide.columns or "sectionLeaf" not in wide.columns:
-        return wide.select(orderedCols)
-    chapterRank = {k: v[2] for k, v in SPINE.items()}
-    spineOrder = {k: v[0] for k, v in SPINE.items()}
-    ranked = wide.with_columns(rowIdentityExpr())
+    helperCols = {"_skel", "_skelOld", "leafSeq", "_canonRank", "_spOrder", "_rowIdentity"}
+    periodCols = sortPeriods([c for c in wide.columns if c not in indexCols and c not in helperCols])
+    orderedCols = [*indexCols, *reversed(periodCols)]  # period 최신순(좌측), 헬퍼(_skel 등)는 제외
+    if "chapter" not in wide.columns or "sectionLeaf" not in wide.columns:
+        return wide.select([c for c in orderedCols if c in wide.columns])
+    # 정렬키 = (1) canonical 14 노드 chapter rank ((첨부)→III 가 III 로 모임), (2) spine 정부 문서순서(keyed
+    # 재무항목·section 단위 — rowIdentity 매칭, 검증된 정부순서), (3) 최신 뼈대 위치 _skel(섹션 내 per-leaf
+    # 문서순서 — 표/텍스트 interleave), (4) leafSeq 동률 tiebreak. 미등재는 nulls_last(챕터 말미).
+    spineOrder = {k: v[0] for k, v in SPINE.items()} if SPINE else {}
+    ranked = wide.with_columns(canonicalRankExpr("chapter"), rowIdentityExpr())
     ranked = ranked.with_columns(
-        pl.col("_rowIdentity").replace_strict(chapterRank, default=None, return_dtype=pl.Int64).alias("_chRank"),
-        pl.col("_rowIdentity").replace_strict(spineOrder, default=None, return_dtype=pl.Int64).alias("_spOrder"),
+        pl.col("_rowIdentity").replace_strict(spineOrder, default=None, return_dtype=pl.Int64).alias("_spOrder")
     )
-    return ranked.sort(["_chRank", "_spOrder"], nulls_last=True).select(orderedCols)
+    sortKeys = ["_canonRank", "_spOrder"]
+    for c in ("_skel", "_skelOld", "leafSeq"):
+        if c in wide.columns:
+            sortKeys.append(c)
+    return ranked.sort(sortKeys, nulls_last=True).select(orderedCols)

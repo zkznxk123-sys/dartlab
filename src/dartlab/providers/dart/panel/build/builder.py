@@ -1,28 +1,31 @@
-"""panel artifact builder entry — 종목별 zip → period sharded parquet.
+"""panel artifact builder entry — 종목별 zip → 회사당 flat 단일 parquet.
 
 zip → XML → walker(손실0/dup0) → horizontalize(무손실 concat) → disclosureKey 부착
-(BUILD) → period 별 group → ``data/dart/panel/{code}/{period}.parquet`` (panel SSOT).
+→ splitLeafTypes(text/table) (BUILD) → 전 period concat → ``data/dart/panel/{code}.parquet``
+(17-col, flat 단일파일 — HF 파일폭발 회피). long 포맷(재료); 수평화·격자는 READ.
 
-period 는 표지 사업연도 종료일 → ``..period.periodFromEnd`` (결산월 무관 12월결산화).
+period 는 표지 사업연도 종료일 → ``..period.periodFromEnd`` (결산월 무관 12월결산화). 전 XML 중
+명시 사업연도 표지를 가진 본문 우선(``_resolvePeriod``) — 첫 sorted XML 첨부 오귀속 가드.
 XML 표지 파싱(lxml)은 본 build 층 책임 — core 는 (year, month) 순수 변환만(R2).
 
 LLM Specifications:
     AntiPatterns:
         - 한 종목 빌드 중 다른 종목 zip read 금지 — strict per-corp.
         - period 매핑 시 rcept_no 직접 사용 금지 — 표지 사업연도 종료일 기준.
-        - 옛 docs.parquet schema 호환 금지 — 신 14-col PANEL_SCHEMA 단독.
+        - 옛 docs.parquet schema 호환 금지 — 신 17-col PANEL_SCHEMA 단독.
         - contentRaw 태그 strip 금지 — etree.tostring 원본(R4).
+        - 회사당 폴더/{period}.parquet 분할 금지 — flat 단일파일 (증분은 period upsert).
     OutputSchema:
         - ``buildPanel(code) -> dict[period, rowCount]``.
-        - 출력: ``data/dart/panel/{code}/{period}.parquet`` (14-col).
+        - 출력: ``data/dart/panel/{code}.parquet`` (17-col, flat).
     Prerequisites:
         - data/original/dart/docs/{code}/*.zip (로컬).
         - refDf (panelXbrlRef.parquet 또는 5 baseline scan).
     Freshness:
-        - ref table 갱신 후 옛 양식 매핑 재빌드 가능.
+        - ref table 갱신 후 옛 양식 매핑 재빌드 가능. 증분 online 은 period upsert.
     Dataflow:
         - zip → XML → walker → horizontalize → resolveBatch(disclosureKey) →
-          period group → parquet write.
+          splitLeafTypes → 전 period concat → flat parquet write.
     TargetMarkets:
         - KR (DART).
 """
@@ -46,8 +49,8 @@ from ..period import periodFromEnd
 from ..schema import PANEL_SCHEMA
 from .dechunkNotes import dechunkNotes
 from .horizontalize import horizontalize
+from .leafSplit import splitLeafTypes
 from .refScan import scanRefBaseline
-from .signature import simhash
 from .walker import detectSchemaEra, walkSections
 
 _log = logging.getLogger(__name__)
@@ -101,7 +104,8 @@ def panelXbrlRefPath() -> "Path":
         TargetMarkets:
             - KR (DART).
     """
-    return Path(_cfg.dataDir) / "dart" / "panelXbrlRef.parquet"
+    # 패키지 동봉(git 추적·wheel) — data/ 가 아님. 뼈대는 코드와 함께 버전·공유 (data/ 는 gitignore).
+    return Path(__file__).resolve().parent / "refScan" / "panelXbrlRef.parquet"
 
 
 # 표지 "사업연도 YYYY년 MM월 DD일 부터 YYYY년 MM월 DD일 까지" — 종료(year, month) 추출.
@@ -267,6 +271,37 @@ def _prevYear(year: str) -> str:
         return year
 
 
+def _resolvePeriod(roots: list, rceptNo: str) -> str:
+    """zip 의 전 XML root 중 **명시 사업연도 표지를 가진 본문 우선**으로 period 1회 결정.
+
+    sorted XML 의 첫 XML 은 첨부(감사보고서·내부회계 등, 표지 없음)일 수 있어 ACODE 휴리스틱으로
+    분기 오귀속 위험. 따라서 전 root 를 훑어 ``_FISCAL_PERIOD_RE`` 명시 매치(보통 본문 표지)를 1순위로,
+    없을 때만 첫 root 의 ACODE+접수월 fallback(``_periodFromXml``).
+
+    Args:
+        roots: 파싱 성공 lxml root list (≥1).
+        rceptNo: 접수번호 (fallback 연·월).
+
+    Returns:
+        "YYYYQn" period 키.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _resolvePeriod([bodyRoot, attachRoot], "20240514000001")  # doctest: +SKIP
+    """
+    for root in roots:
+        try:
+            bodyText = "".join(root.itertext())[:5000]
+        except (TypeError, AttributeError):
+            continue
+        m = _FISCAL_PERIOD_RE.search(bodyText)
+        if m:
+            return periodFromEnd(int(m.group(1)), int(m.group(2)))
+    return _periodFromXml(roots[0], rceptNo)  # 표지 없음 → 첫 root ACODE fallback
+
+
 def _xmlsToPeriodRows(
     xmls: list[str],
     rcept: str,
@@ -276,9 +311,9 @@ def _xmlsToPeriodRows(
 ) -> dict[str, list[dict]]:
     """한 zip(rcept)의 XML 문자열 list → {period: [row]} (zip/bytes/online 공통 walker 코어).
 
-    period 는 첫 파싱 성공 XML 의 표지 사업연도 종료일로 1회 결정 → 같은 zip 의 모든 XML row 에
-    동일 부착(1 zip = 1 rcept = 1 report = 1 period). walker(손실0/dup0) row 에 period/corp/
-    rceptNo/disclosureKey(None) 부착. buildPanel(disk)·buildPanelFromStream(online) 둘 다 호출.
+    period 는 전 XML 중 명시 사업연도 표지를 가진 본문 우선(``_resolvePeriod``)으로 1회 결정 → 같은 zip
+    의 모든 XML row 에 동일 부착(1 zip = 1 rcept = 1 report = 1 period). walker(손실0/dup0) row 에
+    period/corp/rceptNo/disclosureKey(None) 부착. buildPanel(disk)·buildPanelFromStream(online) 둘 다 호출.
 
     Args:
         xmls: 한 zip 의 decoded XML 문자열 list.
@@ -297,18 +332,20 @@ def _xmlsToPeriodRows(
         >>> _xmlsToPeriodRows(xmls, "20240514000001", "005930", ref, 0.70)  # doctest: +SKIP
     """
     parser = etree.XMLParser(recover=True, huge_tree=True)
-    periodRows: dict[str, list[dict]] = {}
-    period: str | None = None
+    roots = []
     for xml in xmls:
         try:
             root = etree.fromstring(xml.encode("utf-8"), parser)
         except (etree.XMLSyntaxError, ValueError):
             continue
-        if root is None:
-            continue
+        if root is not None:
+            roots.append(root)
+    if not roots:
+        return {}
+    period = _resolvePeriod(roots, rcept)  # 본문 표지 우선 (첫 sorted XML 첨부 오귀속 가드)
+    periodRows: dict[str, list[dict]] = {}
+    for root in roots:
         era = detectSchemaEra(root)
-        if period is None:
-            period = _periodFromXml(root, rcept)
         for row in walkSections(root, era, refDf, matchThreshold=matchThreshold):
             row["period"] = period
             row["corp"] = code
@@ -318,55 +355,79 @@ def _xmlsToPeriodRows(
     return periodRows
 
 
-def _writePeriodShards(
+def _writeCompanyFile(
     periodRows: dict[str, list[dict]],
     *,
     code: str,
-    outDir: Path,
+    outBaseDir: Path,
     overwrite: bool,
+    merge: bool,
     verbose: bool,
 ) -> dict[str, int]:
-    """{period: [row]} → period 별 14-col parquet write (disk/online 공통 write 코어).
+    """{period: [row]} → 회사당 단일 17-col parquet write (flat: ``data/dart/panel/{code}.parquet``).
 
-    horizontalize(무손실 concat) → resolveBatch(disclosureKey 부착) → 14-col select → zstd write.
-    buildPanel·buildPanelFromStream 의 동일 write 단계.
+    HF 파일폭발 회피(92k→~3k 파일) + read 1 open. 포맷은 long(재료) — 수평화는 READ(뼈대변경 재빌드 0).
+    각 period 를 horizontalize→resolveBatch→dechunkNotes→splitLeafTypes(text/table) 처리 후
+    전 period concat. **merge** 분기: full rebuild(buildPanel)는 clean overwrite, 증분(buildPanelFromStream)은
+    기존 파일을 읽어 **이번에 빌드한 period 만 교체**하고 나머지 period 보존(flat 단일파일이라 통째 덮으면
+    기존 분기 소실 — period 단위 upsert 로 가드).
 
     Args:
         periodRows: ``{period: [row dict]}`` 누적 결과.
         code: 종목코드 (로그용).
-        outDir: ``data/dart/panel/{code}`` 출력 디렉터리 (caller 가 mkdir).
-        overwrite: 기존 period parquet overwrite 여부.
+        outBaseDir: ``data/dart/panel`` 출력 base dir (caller 가 mkdir).
+        overwrite: 기존 파일 overwrite 여부 (merge=False 시만 의미 — 존재+not overwrite 면 skip).
+        merge: True 면 기존 파일 read 후 이번 period 만 교체(증분 upsert). False 면 통째 write.
         verbose: 진행 로그.
 
     Returns:
-        ``{period: rowCount}`` write 결과.
+        ``{period: rowCount}`` 이번에 write 한 period 의 row 수.
 
     Raises:
         없음.
 
     Example:
-        >>> _writePeriodShards(rows, code="005930", outDir=p, overwrite=True, verbose=False)  # doctest: +SKIP
+        >>> _writeCompanyFile(rows, code="005930", outBaseDir=p, overwrite=True, merge=False, verbose=False)  # doctest: +SKIP
     """
+    parts: list[pl.DataFrame] = []
     result: dict[str, int] = {}
     for period, rows in periodRows.items():
         if not rows:
             continue
-        # 빌드 입력 = 15-col (contentSig 제외 — horizontalize 병합 + dechunkNotes 분해 후 최종 contentRaw 에 계산).
-        df = pl.DataFrame(rows, schema={k: v for k, v in PANEL_SCHEMA.items() if k != "contentSig"})
+        # 빌드 입력 = 15-col (leafType 제외 — 병합·분해 후 leafSplit 가 부여).
+        df = pl.DataFrame(rows, schema={k: v for k, v in PANEL_SCHEMA.items() if k != "leafType"})
         df = horizontalize(df)
         df = resolveBatch(df, marketNs="kr")  # KR within = native canonicalKey
         df = dechunkNotes(df)  # 미분해 주석 블록 → 항목별 NT_* sub-note (구조무관 분류). 본문+첨부 중복
         # 제거(dedupKeyed)는 BUILD 아님 — READ 정렬(readWide)에서 read-time 처리(재빌드 무관).
-        # contentSig = 병합·분해 완료된 최종 leaf contentRaw 의 SimHash (READ 서사구조 수평화 정렬 앵커, per-leaf 결정론).
-        df = df.with_columns(pl.col("contentRaw").map_elements(simhash, return_dtype=pl.UInt64).alias("contentSig"))
+        # text/table 분리(확실한 결정론 경계, 무손실) + leafType — 정렬을 같은 타입끼리(표↔표).
+        df = splitLeafTypes(df)
         df = df.select(list(PANEL_SCHEMA.keys()))
-        outPath = outDir / f"{period}.parquet"
-        if outPath.exists() and not overwrite:
-            continue
-        df.write_parquet(str(outPath), compression="zstd")
+        # 순서 보존: horizontalize 가 narrative 섹션을 1행(min blockOrder)으로 병합해 split leaf 들이 같은
+        # blockOrder 를 상속(순서 소실) → split 후 문서순서(현 행순서, char-parity 0 입증)를 distinct
+        # blockOrder 로 재부여. 각 leaf 가 뼈대 위치를 가짐(표↔표·경계 자른 뒤 위치 보존).
+        df = df.with_columns(pl.int_range(pl.len(), dtype=pl.UInt32).alias("blockOrder"))
+        parts.append(df)
         result[period] = df.height
-        if verbose:
-            _log.info("  %s %s: %d row", code, period, df.height)
+    if not parts:
+        return {}
+    outPath = outBaseDir / f"{code}.parquet"
+    if outPath.exists() and not overwrite and not merge:
+        return result
+    outBaseDir.mkdir(parents=True, exist_ok=True)
+    full = pl.concat(parts, how="vertical")
+    if merge and outPath.exists():
+        # 증분 upsert: 기존에서 이번 빌드 period 제거 후 신규로 교체 (나머지 period 보존).
+        existing = pl.read_parquet(str(outPath))
+        kept = existing.filter(~pl.col("period").is_in(list(result.keys())))
+        full = pl.concat([kept, full], how="vertical")
+    # 문서순서를 명시 _ord 로 박아 정렬 — blockOrder 는 한 period 내 여러 XML(본문+첨부)서 충돌해
+    # leaf 고유키 아님(part 순서를 sort 안정성에 못 맡김). period 별 rows 는 concat 시 이미 문서순서로
+    # 인접하므로 global _ord 는 period 내 단조 = 문서순서 → (period,_ord) 고유키로 결정론 정렬.
+    full = full.with_row_index("_ord").sort("period", "_ord").drop("_ord")
+    full.write_parquet(str(outPath), compression="zstd")
+    if verbose:
+        _log.info("  %s: %d period, %d row → %s", code, len(result), full.height, outPath.name)
     return result
 
 
@@ -379,7 +440,7 @@ def buildPanel(
     overwrite: bool = True,
     verbose: bool = False,
 ) -> dict[str, int]:
-    """종목별 panel artifact 빌드 — zip → period sharded 14-col parquet.
+    """종목별 panel artifact 빌드 — zip → 회사당 flat 17-col parquet (full rebuild, clean overwrite).
 
     Args:
         code: 종목코드 (예: "005930").
@@ -408,7 +469,7 @@ def buildPanel(
         - data/original/dart/docs/{code}/*.zip. polars. lxml.
 
     Capabilities:
-        - 한 종목의 전 기간 공시를 14-col panel artifact 로 — 손실0/dup0/태그무손실.
+        - 한 종목의 전 기간 공시를 17-col flat panel artifact 로 — 손실0/dup0/태그무손실.
 
     Guide:
         - 운영자/CI build-time 호출. runtime read 는 providers/dart/panel.
@@ -424,24 +485,22 @@ def buildPanel(
 
     LLM Specifications:
         AntiPatterns:
-            - period 별 parquet 외 단일 flat parquet 금지 — nested {code}/{period}.
+            - 회사당 폴더/{period}.parquet 분할 금지 — flat 단일 {code}.parquet.
             - contentRaw 태그 strip 금지 (R4).
         OutputSchema:
-            - ``dict[str, int]`` + 부수효과 data/dart/panel/{code}/{period}.parquet.
+            - ``dict[str, int]`` + 부수효과 data/dart/panel/{code}.parquet (17-col flat).
         Prerequisites:
             - 로컬 zip + refDf (또는 baseline scan).
         Freshness:
             - ref/zip 갱신 시 재빌드.
         Dataflow:
-            - zip → walker → horizontalize → resolveBatch → period group → write.
+            - zip → walker → horizontalize → resolveBatch → splitLeafTypes → concat → write.
         TargetMarkets:
             - KR (DART).
     """
     if outBaseDir is None:
         outBaseDir = Path(_cfg.dataDir) / "dart" / "panel"
-    outBaseDir = Path(outBaseDir)
-    outDir = outBaseDir / code
-    outDir.mkdir(parents=True, exist_ok=True)
+    outBaseDir = Path(outBaseDir)  # flat: data/dart/panel/{code}.parquet (per-company 폴더 없음)
 
     if refDf is None:
         refDf = scanRefBaseline(minCorpCount=1)
@@ -466,7 +525,10 @@ def buildPanel(
         for period, rows in _xmlsToPeriodRows(xmls, rcept, code, refDf, matchThreshold).items():
             periodRows.setdefault(period, []).extend(rows)
 
-    return _writePeriodShards(periodRows, code=code, outDir=outDir, overwrite=overwrite, verbose=verbose)
+    # full rebuild — 전 zip 처리라 모든 period 보유 → clean overwrite (merge=False).
+    return _writeCompanyFile(
+        periodRows, code=code, outBaseDir=outBaseDir, overwrite=overwrite, merge=False, verbose=verbose
+    )
 
 
 def buildPanelFromStream(
@@ -479,13 +541,14 @@ def buildPanelFromStream(
     overwrite: bool = True,
     verbose: bool = False,
 ) -> dict[str, int]:
-    """online 1패스 — (rcept, zipBytes) 스트림 → period sharded 14-col parquet. 디스크 zip 0.
+    """online 1패스 — (rcept, zipBytes) 스트림 → flat 17-col parquet (period upsert). 디스크 zip 0.
 
     ``buildPanel`` 의 메모리 쌍둥이 — 로컬 zip 대신 DART API 가 흘리는 zip bytes 를 받아 동일
-    코어(``_readZipBytes`` → ``_xmlsToPeriodRows`` → ``_writePeriodShards``)로 14-col artifact
-    생산. 산출물은 ``buildPanel`` 과 바이트 동형(같은 walker/horizontalize/resolveBatch/zstd),
-    입력원만 stream. ``data/original/dart/docs`` 에 zip 을 만들지 않음 → refScan 불가라 refDf 필수
-    (online 은 HF seed ``panelXbrlRef.parquet`` 를 강제 주입, 자동 scanRefBaseline 금지).
+    코어(``_readZipBytes`` → ``_xmlsToPeriodRows`` → ``_writeCompanyFile``)로 17-col artifact
+    생산. 산출물은 ``buildPanel`` 과 row 동형(같은 walker/horizontalize/resolveBatch/splitLeafTypes/zstd),
+    입력원만 stream. **증분**이라 ``_writeCompanyFile(merge=True)`` — 기존 {code}.parquet 을 읽어 이번
+    분기 period 만 교체(나머지 보존, flat 단일파일 소실 가드). ``data/original/dart/docs`` 에 zip 을 만들지
+    않음 → refScan 불가라 refDf 필수 (online 은 HF seed ``panelXbrlRef.parquet`` 강제 주입, 자동 scan 금지).
 
     Args:
         code: 종목코드 (예 "005930").
@@ -510,7 +573,7 @@ def buildPanelFromStream(
 
     SeeAlso:
         - ``buildPanel`` — 로컬 zip(A) 디스크 트랙 쌍둥이.
-        - ``_readZipBytes`` / ``_xmlsToPeriodRows`` / ``_writePeriodShards`` — 공유 코어.
+        - ``_readZipBytes`` / ``_xmlsToPeriodRows`` / ``_writeCompanyFile`` — 공유 코어.
         - ``providers.dart.openapi.streamZipBytes`` — (rcept, bytes) 스트림 생산.
 
     Requires:
@@ -537,14 +600,15 @@ def buildPanelFromStream(
             - refDf None 시 scanRefBaseline 자동 호출 금지 — online 엔 zip 없음(ValueError).
             - 전 종목 stream 한 번에 모으기 금지 — 종목 단위 호출(bytes 메모리 폭주 가드).
             - zip 디스크 저장 금지 — 메모리 1패스 (data/original/dart/docs 안 만듦).
+            - 증분 시 통째 overwrite 금지 — period upsert(merge=True) 로 기존 분기 보존.
         OutputSchema:
-            - ``dict[str, int]`` + 부수효과 data/dart/panel/{code}/{period}.parquet.
+            - ``dict[str, int]`` + 부수효과 data/dart/panel/{code}.parquet (17-col flat, period upsert).
         Prerequisites:
             - refDf (HF seed). docStream (providers streamZipBytes).
         Freshness:
             - 분기 incremental — 신규 rcept 만.
         Dataflow:
-            - docStream → _readZipBytes → _xmlsToPeriodRows → _writePeriodShards → parquet.
+            - docStream → _readZipBytes → _xmlsToPeriodRows → _writeCompanyFile(merge) → parquet.
         TargetMarkets:
             - KR (DART).
     """
@@ -555,8 +619,7 @@ def buildPanelFromStream(
 
     if outBaseDir is None:
         outBaseDir = Path(_cfg.dataDir) / "dart" / "panel"
-    outDir = Path(outBaseDir) / code
-    outDir.mkdir(parents=True, exist_ok=True)
+    outBaseDir = Path(outBaseDir)  # flat: {code}.parquet
 
     # 가속: refMatcher token set pre-compute (worker init 후 이미 done 이면 skip).
     from .refScan.refMatcher import _REF_TOKENS as _existing
@@ -573,7 +636,10 @@ def buildPanelFromStream(
         for period, rows in _xmlsToPeriodRows(xmls, r2, code, refDf, matchThreshold).items():
             periodRows.setdefault(period, []).extend(rows)
 
-    return _writePeriodShards(periodRows, code=code, outDir=outDir, overwrite=overwrite, verbose=verbose)
+    # 증분 online — stream 은 신규 분기만 → 기존 파일 read 후 이번 period 만 교체 (merge=True).
+    return _writeCompanyFile(
+        periodRows, code=code, outBaseDir=outBaseDir, overwrite=overwrite, merge=True, verbose=verbose
+    )
 
 
 def buildPanelBaseline(

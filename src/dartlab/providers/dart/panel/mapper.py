@@ -441,7 +441,13 @@ def dedupKeyed(df: pl.DataFrame) -> pl.DataFrame:
     if df.is_empty() or "disclosureKey" not in df.columns or "scope" not in df.columns:
         return df
     keyedMask = pl.col("disclosureKey").is_not_null()
-    subset = ["disclosureKey", "scope"] + (["period"] if "period" in df.columns else [])
+    # leafType(text/table)을 subset 에 포함 — 같은 key 의 텍스트 설명 + 표가 둘 다 살아남는다(표↔표 정렬).
+    # 빠지면 "structured>최장" 1개만 남아 같은 주석의 text part 가 소실(defect C).
+    subset = (
+        ["disclosureKey", "scope"]
+        + (["leafType"] if "leafType" in df.columns else [])
+        + (["period"] if "period" in df.columns else [])
+    )
     keyed = df.filter(keyedMask)
     if keyed.height == keyed.select(subset).unique().height:
         return df  # 중복 없음 — 원본 그대로

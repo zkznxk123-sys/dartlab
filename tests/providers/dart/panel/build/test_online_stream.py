@@ -1,9 +1,10 @@
 """panel online 1패스 동등성 (P6 design-in) — plan snazzy-wibbling-origami.
 
 build core 입력원-중립 리팩터(P2) 검증: 같은 zip 입력을 (A) 디스크 경로 ``buildPanel`` 과
-(B) 메모리 bytes 스트림 ``buildPanelFromStream`` 으로 빌드하면 **period 별 14-col parquet 가
-바이트 동형**이어야 한다. 둘 다 동일 코어(``_xmlsToPeriodRows`` → ``_writePeriodShards``)를 거치고
-입력원만 zip(Path) vs zip(bytes) 로 다르다 — 동등성이 곧 online 트랙의 무손실 보장.
+(B) 메모리 bytes 스트림 ``buildPanelFromStream`` 으로 빌드하면 **회사당 flat 17-col parquet 가
+row 동형**이어야 한다. 둘 다 동일 코어(``_xmlsToPeriodRows`` → ``_writeCompanyFile``)를 거치고
+입력원만 zip(Path) vs zip(bytes) 로 다르다 — 동등성이 곧 online 트랙의 무손실 보장. (빈 tmp dir 라
+disk=merge False·stream=merge True 모두 clean write → 동등.)
 
 heavy + requires_data — 로컬 zip(``data/original/dart/docs/{code}``, local-only) 있어야 실행,
 없으면 skip (CI 는 zip 미보유 → skip). 한 종목 2회 빌드라 무겁다 → test-lock.sh 단독, preflight 제외.
@@ -17,12 +18,13 @@ import polars as pl
 import pytest
 
 import dartlab.config as _cfg
+from dartlab.providers.dart.panel.build.builder import panelXbrlRefPath
 
 pytestmark = [pytest.mark.requires_data, pytest.mark.heavy]
 
 _BASE = "005930"
 _ZIP_DIR = Path(_cfg.dataDir) / "original" / "dart" / "docs"
-_REF_PATH = Path(_cfg.dataDir) / "dart" / "panelXbrlRef.parquet"
+_REF_PATH = panelXbrlRefPath()  # 패키지 동봉 (data/dart/panelXbrlRef.parquet 은 폐기)
 
 
 def _hasZips(code: str) -> bool:
@@ -43,7 +45,7 @@ def _loadRef() -> pl.DataFrame:
 
 @requires_zips
 def test_disk_and_stream_builds_are_identical(tmp_path: Path) -> None:
-    """buildPanel(zip 디스크) ≡ buildPanelFromStream(zip bytes) — period 별 parquet 바이트 동형."""
+    """buildPanel(zip 디스크) ≡ buildPanelFromStream(zip bytes) — 회사당 flat parquet row 동형."""
     from dartlab.providers.dart.panel.build import buildPanel, buildPanelFromStream
 
     ref = _loadRef()
@@ -60,14 +62,15 @@ def test_disk_and_stream_builds_are_identical(tmp_path: Path) -> None:
 
     assert diskRes == streamRes, f"period→rowCount 불일치: disk {diskRes} vs stream {streamRes}"
 
-    diskFiles = sorted((diskBase / _BASE).glob("*.parquet"))
-    assert diskFiles, "disk 빌드 산출 0"
-    for pA in diskFiles:
-        pB = streamBase / _BASE / pA.name
-        assert pB.exists(), f"stream 빌드에 {pA.name} 없음"
-        dfA = pl.read_parquet(pA).sort(["rceptNo", "blockOrder"])
-        dfB = pl.read_parquet(pB).sort(["rceptNo", "blockOrder"])
-        assert dfA.equals(dfB), f"{pA.name} contentRaw/14-col 불일치 — 입력원별 산출 drift"
+    # flat: 회사당 단일 {code}.parquet (per-period 폴더 아님). 정렬 후 row 동형 비교.
+    pA = diskBase / f"{_BASE}.parquet"
+    pB = streamBase / f"{_BASE}.parquet"
+    assert pA.exists(), "disk 빌드 산출 0"
+    assert pB.exists(), "stream 빌드 산출 0"
+    sortKeys = ["period", "rceptNo", "blockOrder", "leafType", "contentRaw"]
+    dfA = pl.read_parquet(pA).sort(sortKeys)
+    dfB = pl.read_parquet(pB).sort(sortKeys)
+    assert dfA.equals(dfB), f"{_BASE}.parquet contentRaw/16-col 불일치 — 입력원별 산출 drift"
 
 
 @requires_zips
