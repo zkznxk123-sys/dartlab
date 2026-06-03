@@ -81,3 +81,32 @@ def test_news_no_upload(monkeypatch):
     mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.news")
     mod.runNewsHeadlines(upload=False)
     assert all("bulkUploadHf" not in c[0][0] for c in calls)
+
+
+def test_edgar_four_quarters():
+    """edgar 4분기 wrap — 분기 경계 음수 보정."""
+    from dartlab.pipeline.stages.edgar import _fourQuarters
+
+    assert _fourQuarters(2024, 2) == [(2024, 2), (2024, 1), (2023, 4), (2023, 3)]
+
+
+def test_edgar_bulk_quarterly(monkeypatch):
+    """edgar — companyfacts bulk + 4분기 download/convert 호출(누락분만)."""
+    import dartlab.providers.edgar.bulk as bulk
+
+    seen = {"convertQ": []}
+    monkeypatch.setattr(bulk, "downloadCompanyfactsBulk", lambda **k: "/cf.zip")
+    monkeypatch.setattr(bulk, "convertBulkToParquets", lambda **k: {"ok": 1})
+    monkeypatch.setattr(bulk, "discoverLatestQuarter", lambda: (2024, 2))
+    monkeypatch.setattr(bulk, "listLocalQuarters", lambda **k: [(2023, 4)])  # 1개 보유
+    monkeypatch.setattr(bulk, "downloadQuarterlyDataset", lambda y, q, **k: f"/{y}Q{q}.zip")
+    monkeypatch.setattr(
+        bulk, "convertQuarterlyToParquets", lambda y, q, **k: seen["convertQ"].append((y, q)) or {"sub": 1}
+    )
+
+    from dartlab.pipeline.stages.edgar import runEdgar
+
+    res = runEdgar()
+    # 4분기 중 (2023,4) 보유 → 3개만 convert
+    assert seen["convertQ"] == [(2024, 2), (2024, 1), (2023, 3)]
+    assert res.report.ok == 2 and res.report.err == 0

@@ -106,63 +106,15 @@ jobs:
           key: dartlab-edgar-panelcell-${{ github.run_id }}
           restore-keys: dartlab-edgar-panelcell-
 
-      # ── 1. daily 벌크: companyfacts.zip → {cik}.parquet ──
-      - name: Download + convert companyfacts.zip (daily bulk)
-        run: |
-          uv run python -X utf8 -c "
-          import os
-          from dartlab.providers.edgar.bulk import (
-              downloadCompanyfactsBulk,
-              convertBulkToParquets,
-          )
-          force = '${{ github.event.inputs.forceCompanyfacts }}' == 'true'
-          zipPath = downloadCompanyfactsBulk(force=force, progress=False)
-          print(f'zip: {zipPath}')
-          result = convertBulkToParquets(zipPath=zipPath, progress=False)
-          print(f'convert: {result}')
-          "
+      # ── 1+2. daily 벌크(companyfacts.zip) + 분기 벌크(sub/pre/tag, 최신 4분기) ──
+      # 통합 진입점(dartlab.pipeline) — edgar stage 가 두 inline 스텝을 byte 동형 호출.
+      # force 플래그는 EDGAR_FORCE_* env 로 전달.
+      - name: Download + convert EDGAR bulk (companyfacts + quarterly)
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
-
-      # ── 2. 분기 벌크: 새로운 분기 자동 감지 + 최신 4개 분기 동기화 ──
-      - name: Discover + download quarterly datasets (sub/pre/tag)
-        run: |
-          uv run python -X utf8 -c "
-          from dartlab.providers.edgar.bulk import (
-              discoverLatestQuarter,
-              downloadQuarterlyDataset,
-              convertQuarterlyToParquets,
-              listLocalQuarters,
-          )
-          force = '${{ github.event.inputs.forceQuarterly }}' == 'true'
-          latest = discoverLatestQuarter()
-          if latest is None:
-              print('SEC 분기 벌크 감지 실패 — 스킵')
-              raise SystemExit(0)
-          year, quarter = latest
-          # 최신 4개 분기 확보
-          targets = []
-          for i in range(4):
-              q = quarter - i
-              y = year
-              while q <= 0:
-                  q += 4
-                  y -= 1
-              targets.append((y, q))
-          have = set(listLocalQuarters(kind='sub'))
-          for y, q in targets:
-              if not force and (y, q) in have:
-                  print(f'{y}Q{q} 로컬 보유 — 스킵')
-                  continue
-              zipPath = downloadQuarterlyDataset(y, q, force=force)
-              if zipPath is None:
-                  print(f'{y}Q{q} 다운로드 실패')
-                  continue
-              out = convertQuarterlyToParquets(y, q, zipPath=zipPath)
-              print(f'{y}Q{q}: {list(out.keys())}')
-          "
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/data
+          EDGAR_FORCE_COMPANYFACTS: ${{ github.event.inputs.forceCompanyfacts }}
+          EDGAR_FORCE_QUARTERLY: ${{ github.event.inputs.forceQuarterly }}
+        run: uv run python -X utf8 -m dartlab.pipeline edgar
 
       # ── 3. docs (10-K/10-Q HTML) — 선택, 일요일 전체 정산 때만 ──
       - name: Collect EDGAR docs (optional, weekly full sync only)
