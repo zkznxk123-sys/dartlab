@@ -34,6 +34,13 @@ from dartlab.providers.edgar.docs.sections.sectionsStorage import (
 
 _log = logging.getLogger(__name__)
 
+# content_raw 는 filing-level(전 block row 가 동일한 *전체 HTML* 공유). row 수만큼 중복
+# 적재되어 거대 filing(예: 20-F 6.4MB × 4540 block ≈ 29GB)에서 polars Utf8 materialize
+# 가 메모리 폭증·OOM-hang. 누적 content_raw bytes 가 본 가드를 넘으면 content_raw 를 비운다
+# (분석용 content_plain 은 무손상; raw HTML 은 data/original 아카이브로 복구 가능).
+# parquet dict-encoding 은 *disk* 만 dedup — in-memory 폭증은 별개 문제.
+_CONTENT_RAW_MEM_CAP = 2_000_000_000  # 2GB
+
 
 # sections artifact schema — pl.DataFrame 생성 시 명시. EDGAR filing meta 가 부재할
 # 수 있어 nullable 양식 (Date / null) 강제.
@@ -125,7 +132,28 @@ def emitPeriodArtifacts(ticker: str, allRows: list[dict]) -> dict[str, int]:
     """
     if not allRows:
         return {"periodsWritten": 0, "totalRows": 0}
-    df = pl.DataFrame(allRows, schema={k: v for k, v in _SECTIONS_SCHEMA.items() if k in allRows[0]})
+    # 컬럼 단위 구성 — list-of-dict row-wise(pl.DataFrame(allRows, ...))는 polars
+    # _sequence_of_dict_to_pydf 가 행마다 추론해 대형 입력(20-F 등 다수 row)에서 느림.
+    # dict-of-list + 명시 schema 는 컬럼 직접 구성(빠른 경로).
+    keys = [k for k in _SECTIONS_SCHEMA if k in allRows[0]]
+    cols = {k: [r.get(k) for r in allRows] for k in keys}
+    # content_raw(filing-level) in-memory 폭증 가드 — _CONTENT_RAW_MEM_CAP 참고.
+    rawCol = cols.get("content_raw")
+    if rawCol:
+        rawBytes = 0
+        for s in rawCol:
+            rawBytes += len(s) if s else 0
+            if rawBytes > _CONTENT_RAW_MEM_CAP:
+                break
+        if rawBytes > _CONTENT_RAW_MEM_CAP:
+            _log.warning(
+                "%s sections content_raw ~%.1fGB > %.1fGB cap — content_raw 생략(메모리 가드, content_plain 유지)",
+                ticker,
+                rawBytes / 1e9,
+                _CONTENT_RAW_MEM_CAP / 1e9,
+            )
+            cols["content_raw"] = [""] * len(allRows)
+    df = pl.DataFrame(cols, schema={k: _SECTIONS_SCHEMA[k] for k in keys})
     outDir = sectionsDir(ticker)
     outDir.mkdir(parents=True, exist_ok=True)
     periods = df["period"].drop_nulls().unique().to_list()
