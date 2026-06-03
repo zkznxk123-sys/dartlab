@@ -27,10 +27,12 @@ outputs:
   - finance DataFrame (XBRL → Polars)
   - filing list
   - filing 본문 (readFiling)
+  - 공시 수평화 보드 (c.panel — item × 기간 wide, engines.panel US 미러)
   - DartCompany 동등 인터페이스
 capabilityRefs:
   - Company
   - Company.show
+  - Company.panel
   - Company.liveFilings
   - Company.readFiling
   - Company.disclosure
@@ -40,6 +42,7 @@ knowledgeRefs:
   - engines.company
   - engines.gather
   - engines.scan
+  - engines.panel
 sourceRefs:
   - dartlab://skills/engines.edgar
 requiredEvidence:
@@ -126,6 +129,12 @@ ratios = c.show("ratios")
 filings = c.liveFilings()                  # 최근 라이브 공시 (SEC API)
 disclosure = c.disclosure()                # 전체 시계열
 body = c.readFiling(filings[0]["accession"])
+
+# 3.5. 공시 수평화 보드 — engines.panel 의 US 미러 (DART c.panel 과 동일 표면)
+c.panel                                    # item × 기간 wide (pl.DataFrame) — 잡는 순간 보드
+c.panel("Risk")                            # 섹션 행 검색 (10-K item 본문)
+c.panel("IS")                              # 강한 소스 — companyfacts 위임 (= c.show("IS"))
+c.panel.search("supply chain")             # 본문 전체검색
 
 # 4. 보조 엔진도 동일 (US 자동)
 analysis = c.analysis("financial", "수익성")
