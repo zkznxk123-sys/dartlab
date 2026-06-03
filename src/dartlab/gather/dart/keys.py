@@ -534,7 +534,7 @@ def validateDartApiKey(key: str) -> dict[str, Any]:
         TargetMarkets:
             - KR (DART) — API 키 관리.
     """
-    from dartlab.providers.dart.openapi.client import DartClient
+    from dartlab.gather.dart.client import DartClient
 
     today = datetime.now().strftime("%Y%m%d")
     client = DartClient(apiKey=key)

@@ -86,7 +86,7 @@ _PROVIDERS: dict[str, CredentialProvider] = {}
 # core 가 providers 직접 import 하지 않고 plugin 패턴으로 위치를 식별만.
 # 새 provider 추가 시 path 만 add (FastAPI startup tasks 와 동등 패턴).
 _KNOWN_PROVIDER_MODULES: tuple[str, ...] = (
-    "dartlab.providers.dart.openapi.dartKey",  # DartKeyProvider
+    "dartlab.gather.dart.keys",  # DartKeyProvider (DART fetch 는 gather 전담)
 )
 
 _DISCOVERED = False

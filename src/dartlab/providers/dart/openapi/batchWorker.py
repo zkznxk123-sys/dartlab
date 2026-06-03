@@ -29,7 +29,7 @@ from dartlab.providers.dart.openapi.batchCollectors import (
 
 def _resolveCorpCode(stockCode: str) -> tuple[str, str]:
     """종목코드 → (corpCode, corpName)."""
-    from dartlab.providers.dart.openapi.client import DartClient
+    from dartlab.core.dartClient import DartClient
     from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
 
     client = DartClient()

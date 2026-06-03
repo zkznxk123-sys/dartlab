@@ -61,7 +61,7 @@ def _ensureData(stockCode: str, category: str) -> bool:
         pass
 
     # 3단계: DART API 키 있으면 직접 수집 (단일 종목 직접 호출, 배치 오버헤드 불필요)
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey, resolveDartKeys
+    from dartlab.core.dartClient import hasDartApiKey, resolveDartKeys
 
     hasKey = hasDartApiKey()
     if hasKey:
@@ -196,7 +196,7 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
             emit("hint:stale", stockCode=stockCode, ageStr=f"{ageDays:.0f}일")
 
     # L3: DART API 직접 조회 — 새 공시가 있는지 rcept_no 비교
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
+    from dartlab.core.dartClient import hasDartApiKey
 
     if not hasDartApiKey():
         return None

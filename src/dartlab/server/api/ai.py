@@ -57,7 +57,7 @@ build_ollama_detail = buildOllamaDetail
 
 
 def _buildOpenDartStatus() -> dict[str, Any]:
-    from dartlab.providers.dart.openapi.dartKey import getDartKeyStatus
+    from dartlab.gather.dart.keys import getDartKeyStatus
 
     return getDartKeyStatus().toDict()
 
@@ -270,7 +270,7 @@ def apiAiProfileSecret(req: AiSecretUpdateRequest):
 @router.post("/api/openapi/dart-key/validate")
 def apiValidateDartKey(req: DartKeyUpdateRequest):
     """OpenDART API 키 유효성만 검증한다."""
-    from dartlab.providers.dart.openapi.dartKey import validateDartApiKey
+    from dartlab.gather.dart.keys import validateDartApiKey
 
     apiKey = (req.apiKey or "").strip()
     if not apiKey:
@@ -287,7 +287,7 @@ def apiValidateDartKey(req: DartKeyUpdateRequest):
 @router.put("/api/openapi/dart-key")
 def apiSaveDartKey(req: DartKeyUpdateRequest):
     """프로젝트 .env에 OpenDART API 키를 저장한다."""
-    from dartlab.providers.dart.openapi.dartKey import saveDartKeyToDotenv
+    from dartlab.gather.dart.keys import saveDartKeyToDotenv
 
     apiKey = (req.apiKey or "").strip()
     if not apiKey:
@@ -302,7 +302,7 @@ def apiSaveDartKey(req: DartKeyUpdateRequest):
 @router.delete("/api/openapi/dart-key")
 def apiDeleteDartKey():
     """프로젝트 .env의 OpenDART API 키를 제거한다."""
-    from dartlab.providers.dart.openapi.dartKey import clearDartKeyFromDotenv
+    from dartlab.gather.dart.keys import clearDartKeyFromDotenv
 
     try:
         env_path = clearDartKeyFromDotenv()

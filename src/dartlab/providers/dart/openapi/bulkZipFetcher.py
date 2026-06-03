@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import dartlab.config as _cfg
-from dartlab.providers.dart.openapi.client import DartClient
+from dartlab.core.dartClient import DartClient
 
 _MIN_VALID_BYTES = 1000
 _DOCS_DIR_REL = "dart/docs"

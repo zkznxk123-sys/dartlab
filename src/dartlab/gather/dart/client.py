@@ -16,7 +16,8 @@ from typing import Any
 import httpx
 import polars as pl
 
-from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
+from dartlab.core.dartClient import DartApiError, registerDartFetchProvider
+from dartlab.gather.dart.keys import resolveDartKeys
 
 BASE_URL = "https://opendart.fss.or.kr/api"
 
@@ -45,15 +46,6 @@ _ERROR_MESSAGES: dict[str, str] = {
     "800": "시스템 점검 중",
     "900": "정의되지 않은 오류",
 }
-
-
-class DartApiError(Exception):
-    """OpenDART API 에러."""
-
-    def __init__(self, status: str, message: str):
-        self.status = status
-        self.message = message
-        super().__init__(f"[{status}] {message}")
 
 
 class DartClient:
@@ -508,3 +500,28 @@ class DartClient:
         if not allRows:
             return pl.DataFrame()
         return pl.DataFrame(allRows)
+
+
+# ── DartFetchProvider 구현 + register (정공법 B — DIP) ─────────────
+# providers build/read 가 core.dartClient seam 으로 client·키를 얻는다 (providers↛gather).
+
+
+class _DartFetchProvider:
+    """core.dartClient.DartFetchProvider 구현 — gather 가 DART fetch 전담."""
+
+    def makeClient(self, apiKey=None, apiKeys=None, requestsPerMinute=580):
+        """멀티 키 DartClient 인스턴스 생성."""
+        return DartClient(apiKey=apiKey, apiKeys=apiKeys, requestsPerMinute=requestsPerMinute)
+
+    def resolveKeys(self, apiKey=None, apiKeys=None):
+        """DART API 키 list resolve."""
+        return resolveDartKeys(apiKey=apiKey, apiKeys=apiKeys)
+
+    def hasKey(self):
+        """DART API 키 설정 여부."""
+        from dartlab.gather.dart.keys import hasDartApiKey
+
+        return hasDartApiKey()
+
+
+registerDartFetchProvider(_DartFetchProvider())

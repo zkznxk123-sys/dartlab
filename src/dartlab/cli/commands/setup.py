@@ -314,7 +314,7 @@ def _setupCustom() -> None:
 
 def _setupDartKey() -> int:
     """DART OpenAPI 키 설정 — 대화형 입력 → .env 저장."""
-    from dartlab.providers.dart.openapi.client import hasDartApiKey
+    from dartlab.core.dartClient import hasDartApiKey
 
     print("\n[ DART OpenAPI 키 설정 ]\n")
     print("  DART 전자공시 데이터를 직접 수집하려면 OpenAPI 키가 필요합니다.")
@@ -354,6 +354,6 @@ def _setupDartKey() -> int:
 
 def _saveDartKeyToDotenv(key: str) -> None:
     """프로젝트 루트의 .env에 DART_API_KEY 추가/갱신."""
-    from dartlab.providers.dart.openapi.dartKey import saveDartKeyToDotenv
+    from dartlab.gather.dart.keys import saveDartKeyToDotenv
 
     saveDartKeyToDotenv(key)

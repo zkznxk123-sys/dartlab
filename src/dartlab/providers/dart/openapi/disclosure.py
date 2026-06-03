@@ -11,7 +11,7 @@ from typing import Literal
 
 import polars as pl
 
-from dartlab.providers.dart.openapi.client import DartClient
+from dartlab.core.dartClient import DartClient
 from dartlab.providers.dart.openapi.corpCode import findCorpCode
 
 # 공시유형 코드

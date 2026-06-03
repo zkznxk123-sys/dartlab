@@ -560,7 +560,7 @@ def buildReadFiling(
     from dartlab.core.messaging import progress
 
     if sections:
-        from dartlab.providers.dart.openapi.client import DartClient
+        from dartlab.core.dartClient import DartClient
         from dartlab.providers.dart.openapi.zipCollector import _collectOneZip
 
         progress(f"{company.corpName} 공시 ZIP 다운로드 중... ({rceptNo})")

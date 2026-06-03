@@ -618,8 +618,8 @@ def _runAuto(console, args) -> int:
 
 
 def _runBatch(console, args) -> int:
+    from dartlab.gather.dart.keys import resolveDartKeys
     from dartlab.providers.dart.openapi.batch import batchCollect, batchCollectAll
-    from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
 
     keys = resolveDartKeys()
     if not keys:
@@ -649,7 +649,7 @@ def _runBatch(console, args) -> int:
 
 
 def _runCheck(console, args) -> int:
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
+    from dartlab.gather.dart.keys import hasDartApiKey
     from dartlab.providers.dart.openapi.freshness import (
         checkFreshness,
         scanMarketFreshness,
@@ -699,7 +699,7 @@ def _runCheck(console, args) -> int:
 
 
 def _runIncremental(console, args) -> int:
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
+    from dartlab.gather.dart.keys import hasDartApiKey
     from dartlab.providers.dart.openapi.freshness import (
         checkFreshness,
         collectMissing,

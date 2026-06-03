@@ -11,9 +11,9 @@ from pathlib import Path
 import polars as pl
 
 import dartlab.config as _cfg
+from dartlab.core.dartClient import DartClient
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.logger import getLogger
-from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.corpCode import loadCorpCodes
 
 _log = getLogger(__name__)

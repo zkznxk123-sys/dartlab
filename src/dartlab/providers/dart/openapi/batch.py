@@ -27,7 +27,7 @@ _log = getLogger(__name__)
 import httpx
 import polars as pl
 
-from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
+from dartlab.core.dartClient import resolveDartKeys
 
 BASE_URL = "https://opendart.fss.or.kr/api"
 _CLIENT_TIMEOUT = httpx.Timeout(60.0, connect=10.0, read=60.0, write=30.0, pool=10.0)
@@ -393,7 +393,7 @@ def _runAsync(coro):
 
 def _resolveCorpMap(stockCodes: list[str]) -> dict[str, tuple[str, str]]:
     """종목코드 목록 → {stockCode: (corpCode, corpName)} 맵."""
-    from dartlab.providers.dart.openapi.client import DartClient
+    from dartlab.core.dartClient import DartClient
     from dartlab.providers.dart.openapi.corpCode import loadCorpCodes
 
     client = DartClient()

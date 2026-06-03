@@ -25,8 +25,8 @@ from bs4 import BeautifulSoup
 from lxml import etree
 
 import dartlab.config as _cfg
+from dartlab.core.dartClient import DartClient
 from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
 from dartlab.providers.dart.openapi.disclosure import listFilings
 from dartlab.providers.dart.openapi.zipDocsXml import (

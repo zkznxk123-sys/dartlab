@@ -15,7 +15,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.providers.dart.openapi.client import DartClient
+from dartlab.core.dartClient import DartClient
 
 # 캐시 경로: ~/.dartlab/corpCode.parquet
 _CACHE_DIR = Path.home() / ".dartlab"

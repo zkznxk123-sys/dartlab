@@ -10,8 +10,8 @@ from pathlib import Path
 import polars as pl
 
 from dartlab import config as _dartlabConfig
+from dartlab.core.dartClient import DartClient
 from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.constants import (
     CODE_TO_LABEL as _CODE_TO_LABEL,
 )

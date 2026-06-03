@@ -203,8 +203,8 @@ def checkFreshness(
         TargetMarkets:
             - KR (DART) freshness.
     """
+    from dartlab.core.dartClient import hasDartApiKey
     from dartlab.core.messaging import emit
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 
     # TTL 게이트
     if not forceCheck and not _isFreshnessCheckExpired(stockCode, ttlHours=ttlHours):
@@ -225,8 +225,7 @@ def checkFreshness(
         return result
 
     # DART API 조회 — 로컬 최신일 이후 정기공시만
-    from dartlab.providers.dart.openapi.client import DartClient
-    from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
+    from dartlab.core.dartClient import DartClient, resolveDartKeys
     from dartlab.providers.dart.openapi.disclosure import listFilings
 
     keys = resolveDartKeys()
@@ -350,10 +349,9 @@ def scanMarketFreshness(
         TargetMarkets:
             - KR (DART) freshness.
     """
+    from dartlab.core.dartClient import DartClient, hasDartApiKey, resolveDartKeys
     from dartlab.core.dataLoader import _dataDir
     from dartlab.core.messaging import emit
-    from dartlab.providers.dart.openapi.client import DartClient
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey, resolveDartKeys
     from dartlab.providers.dart.openapi.disclosure import listFilings
 
     if not hasDartApiKey():
@@ -493,7 +491,7 @@ def collectMissing(
         TargetMarkets:
             - KR (DART) freshness.
     """
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
+    from dartlab.core.dartClient import hasDartApiKey
 
     if not hasDartApiKey():
         from dartlab.core.messaging import emit
