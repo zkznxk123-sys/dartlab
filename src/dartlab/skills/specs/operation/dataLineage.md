@@ -67,6 +67,13 @@ L3: axis / recipe
    recipes.* (220+ recipe)
 ```
 
+> **L1 = ETL 스테이지 분할** (수집 일원화). raw source → parquet 사이의 L1 은 두 책임으로
+> 갈린다 — **gather = Extract** (DART/EDGAR 네트워크 fetch → raw zip/json/bytes; client·키풀·
+> submissions/facts/docs/bulk/universe/FTS 전담), **providers = Transform+Load** (raw → parquet
+> build + parquet → DataFrame read; HTTP 클라이언트 import 0). providers build 가 fetch 를
+> 트리거해야 하면 core DIP seam(`core.dartClient`/`edgarClient` 등) 으로 위임한다. 상세
+> [operation.architecture](dartlab://skills/operation.architecture) L1 표 + `test_providers_no_network`.
+
 ## 매핑 표
 
 | source | provider | parquet | axis 영향 |
