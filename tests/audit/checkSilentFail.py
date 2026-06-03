@@ -57,6 +57,8 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "providers/mappers/scanner.py",
         "providers/edgar/openapi/batch.py",
         "providers/edgar/docs/notesParsers.py",
+        # tickers.parquet 옵셔널 universe 로더 — 없으면 빈 universe(빌드 대상 0)가 정상(loud-fail 부적합).
+        "providers/edgar/panel/build/builder.py",
         "providers/edgar/report/employee.py",
         "scan/watch/scanner.py",
         # gather 도메인 — 외부 API 응답 (네트워크 실패 시 빈 결과가 정상)
