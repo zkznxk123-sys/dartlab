@@ -51,12 +51,40 @@ _CONTENT_RAW_MEM_CAP = 1_500_000_000
 
 
 def panelPath(ticker: str) -> Path:
-    """보드 artifact 경로 — ``data/edgar/panel/{TICKER}.parquet`` (read 표면 marketNs="us" 경로)."""
+    """보드 artifact 경로 — ``data/edgar/panel/{TICKER}.parquet`` (read 표면 marketNs="us" 경로).
+
+    Args:
+        ticker: US ticker (대소문자 무관, ``upper()`` 정규화).
+
+    Returns:
+        ``data/edgar/panel/{TICKER}.parquet`` Path (``read._panelDir(code,"us").parent`` 와 동일).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> panelPath("aapl").name
+        'AAPL.parquet'
+    """
     return Path(_cfg.dataDir) / _PANEL_REL / f"{ticker.upper()}.parquet"
 
 
 def panelCellPath(ticker: str) -> Path:
-    """셀 artifact 경로 — ``data/edgar/panelCell/{TICKER}.parquet`` (cellRead 경로)."""
+    """셀 artifact 경로 — ``data/edgar/panelCell/{TICKER}.parquet`` (cellRead 경로).
+
+    Args:
+        ticker: US ticker (대소문자 무관, ``upper()`` 정규화).
+
+    Returns:
+        ``data/edgar/panelCell/{TICKER}.parquet`` Path.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> panelCellPath("aapl").name
+        'AAPL.parquet'
+    """
     return Path(_cfg.dataDir) / _CELL_REL / f"{ticker.upper()}.parquet"
 
 

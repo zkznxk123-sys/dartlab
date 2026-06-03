@@ -51,3 +51,14 @@ def test_resolve_cik(builtTicker) -> None:
     assert resolveCikForTicker("TEST") == "0000012345"
     assert resolveCikForTicker("test") == "0000012345"  # 대소문자 무관
     assert resolveCikForTicker("NOPE") is None
+
+
+def test_build_edgar_panel_all(builtTicker) -> None:
+    """buildEdgarPanelAll — 명시 ticker list + None(원본 docs dir 전수 cik→ticker 역해소)."""
+    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanelAll
+
+    res = buildEdgarPanelAll(["TEST"])
+    assert res["TEST"]["rows"] > 0 and res["TEST"]["cells"] > 0
+    # None → data/original/edgar/docs/ 전수 (TEST 의 cik 폴더 역해소)
+    resAll = buildEdgarPanelAll(None)
+    assert "TEST" in resAll and resAll["TEST"]["rows"] > 0
