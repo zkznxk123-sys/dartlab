@@ -31,6 +31,8 @@ _RAW_ALLOWED_PREFIXES: tuple[str, ...] = (
     "providers/dart/parse/",  # htmlTableParser / tableHorizontalizer (raw HTML 직접 파싱)
     "providers/dart/company.py",  # Company surface (method 정의)
     "providers/edgar/",  # EDGAR sections (별도 SSOT, EDGAR own content_raw schema)
+    # 수집 일원화: allFilings raw 본문 *생산* 콜렉터 → gather (구 providers/dart/openapi).
+    "gather/dart/allFilingsCollector",  # content_raw 컬럼 생성(저장) — raw producer
 )
 
 # content_table_struct / sectionsTables() — finance 표 파서 전용.
@@ -45,7 +47,10 @@ _TABLES_ALLOWED_PREFIXES: tuple[str, ...] = (
 
 # xmlChunkToMixed — build-time 전용. analysis 런타임 path 호출 0.
 _MIXED_ALLOWED_PREFIXES: tuple[str, ...] = (
-    "providers/dart/openapi/zipCollector",  # zip ingest 시점 사전 계산
+    # 수집 일원화(L1 ETL 재정의): zip ingest fetch 는 gather, build seam·변환은 core/providers.
+    "gather/dart/zipCollector",  # zip ingest 시점 사전 계산 (구 providers/dart/openapi/zipCollector)
+    "core/dartBuild",  # DartBuildProvider DIP seam delegate (build 위임)
+    "providers/dart/build/",  # DartBuildProvider 구현 (raw→parquet build)
     "providers/dart/docs/sections/sectionsBuilder",  # sections artifact 빌더
     "providers/dart/docs/sections/xmlAdapter",  # 정의 위치
     "providers/dart/docs/sections/periodIter",  # legacy fallback (artifact 부재 환경)
