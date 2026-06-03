@@ -33,6 +33,20 @@ def test_comprehensive_income_before_income() -> None:
     assert roleToStatement("http://x/role/StatementOfComprehensiveIncome") == "CIS"
 
 
+def test_role_short_names_and_ifrs() -> None:
+    """Statement prefix 없는 짧은 이름 + IFRS role 흡수 (BalanceSheet/CashFlows/ProfitOrLoss)."""
+    from dartlab.providers.edgar.panel.build.mapper import roleToStatement
+
+    assert roleToStatement("http://x/role/BalanceSheet") == "BS"
+    assert roleToStatement("http://x/role/CashFlows") == "CF"
+    assert roleToStatement("http://x/role/IncomeStatement") == "IS"
+    assert roleToStatement("http://x/role/StatementOfProfitOrLoss") == "IS"  # IFRS
+    assert roleToStatement("http://x/role/StatementOfFinancialPosition") == "BS"  # IFRS
+    # 주석·디테일·괄호표는 짧은 이름이어도 배제(BalanceSheet 포함해도)
+    assert roleToStatement("http://x/role/DisclosureBalanceSheetDetails") is None
+    assert roleToStatement("http://x/role/BalanceSheetParenthetical") is None
+
+
 def test_context_to_cell_instant_year_vs_interim() -> None:
     from dartlab.providers.edgar.panel.build.mapper import contextToCell
 
@@ -93,6 +107,9 @@ def test_period_from_report_no_hyphen() -> None:
     assert periodFromReport("10-K", date(2024, 12, 31)) == "2024Q4"
     assert periodFromReport("10-K", date(2025, 5, 31)) == "2025Q2"  # May-end → Q2 (calendar)
     assert periodFromReport("10-K", None) is None
+    # 10-Q (분기보고) — period-of-report 분기말 → 해당 calendar Qn
+    assert periodFromReport("10-Q", date(2024, 9, 30)) == "2024Q3"
+    assert periodFromReport("10-Q", date(2024, 6, 30)) == "2024Q2"
 
 
 def test_canonical_item() -> None:

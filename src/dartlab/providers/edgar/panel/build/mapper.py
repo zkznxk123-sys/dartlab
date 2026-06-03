@@ -35,21 +35,40 @@ from datetime import date
 from dartlab.core.utils.period import calendarQuarterFromEnd
 
 # presentation role → statement (검사 순서 중요: CIS·EF 를 IS 보다 먼저).
-# role URI 마지막 세그먼트(예 "StatementConsolidatedBalanceSheets")에 패턴 매칭.
+# role URI 마지막 세그먼트에 패턴 매칭. us-gaap("StatementsOfIncome")·IFRS("StatementOfProfitOrLoss")·
+# 짧은 이름("BalanceSheet"/"CashFlows", Statement prefix 없음) 모두 흡수.
 _ROLE_RULES: tuple[tuple[str, str], ...] = (
-    ("parenthetic", ""),  # parenthetical = 본표 아님 → skip (빈 statement)
     ("comprehensiveincome", "CIS"),
     ("comprehensiveloss", "CIS"),
     ("stockholdersequity", "EF"),
     ("shareholdersequity", "EF"),
     ("changesinequity", "EF"),
+    ("changesinshareholders", "EF"),
     ("cashflow", "CF"),
     ("balancesheet", "BS"),
-    ("financialposition", "BS"),
+    ("financialposition", "BS"),  # IFRS
     ("statementsofoperations", "IS"),
+    ("statementofoperations", "IS"),
     ("statementsofincome", "IS"),
+    ("statementofincome", "IS"),
+    ("incomestatement", "IS"),
+    ("profitorloss", "IS"),  # IFRS
     ("incomeloss", "IS"),
     ("resultsofoperations", "IS"),
+)
+# 본표 아님(주석·디테일·표지·괄호표) — 패턴 매칭 전 배제. 짧은 statement 이름("BalanceSheet")을
+# 살리려 "statement" prefix 요구는 버리고, 비-본표를 명시 배제(disclosure/detail/parenthetical 등).
+_ROLE_REJECT: tuple[str, ...] = (
+    "disclosure",
+    "parenthetic",
+    "detail",
+    "policies",
+    "policy",
+    "schedule",
+    "cover",
+    "document",
+    "highlight",
+    "tables",
 )
 _NONNUM_RE = re.compile(r"[^a-z0-9]")
 
@@ -92,13 +111,14 @@ def roleToStatement(roleUri: str) -> str | None:
         - cell/builder 가 호출. 순수.
 
     AIContext:
-        - "Statement" 계열만 본표. Disclosure=주석(None→narrative).
+        - 비-본표(disclosure/detail/parenthetical/cover) 배제 후 패턴 매칭 — 짧은 이름(BalanceSheet)·
+          IFRS(ProfitOrLoss/FinancialPosition)·us-gaap 모두 흡수. "Statement" prefix 요구 안 함.
 
     When:
         - 재무표 concept 의 statement 귀속·disclosureKey 산출.
 
     How:
-        - 마지막 세그먼트 정규화 → _ROLE_RULES 순서 첫 매치.
+        - 마지막 세그먼트 정규화 → _ROLE_REJECT 배제 → _ROLE_RULES 순서 첫 매치.
 
     LLM Specifications:
         AntiPatterns:
@@ -118,11 +138,11 @@ def roleToStatement(roleUri: str) -> str | None:
         return None
     seg = roleUri.rstrip("/").rsplit("/", 1)[-1]
     norm = _NONNUM_RE.sub("", seg.lower())
-    if "statement" not in norm and "financialposition" not in norm:
-        return None  # Disclosure/Cover/Document 등 = 서술
+    if any(r in norm for r in _ROLE_REJECT):
+        return None  # 주석·디테일·표지·괄호표 = 본표 아님(서술)
     for pat, stmt in _ROLE_RULES:
         if pat in norm:
-            return stmt or None
+            return stmt
     return None
 
 
