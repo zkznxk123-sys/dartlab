@@ -239,3 +239,13 @@ def ensureFinanceParquet(*args: Any, **kwargs: Any) -> Any:
 def convertBulkToParquets(*args: Any, **kwargs: Any) -> Any:
     """companyfacts.zip → per-CIK parquet 변환(bulk) — gather/edgar 위임. Requires: gather.edgar. Raises: OSError. Example: >>> convertBulkToParquets()  # doctest: +SKIP"""
     return _call("bulk", "convertBulkToParquets", *args, **kwargs)
+
+
+def downloadQuarterlyDataset(*args: Any, **kwargs: Any) -> Any:
+    """SEC 분기 financial-statement-data-sets zip download — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx/OSError. Example: >>> downloadQuarterlyDataset(2024, 3)  # doctest: +SKIP"""
+    return _call("datasetBulk", "downloadQuarterlyDataset", *args, **kwargs)
+
+
+def discoverLatestQuarter(*args: Any, **kwargs: Any) -> Any:
+    """SEC 공개 최신 분기 HEAD 탐색 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: 없음. Example: >>> discoverLatestQuarter()  # doctest: +SKIP"""
+    return _call("datasetBulk", "discoverLatestQuarter", *args, **kwargs)

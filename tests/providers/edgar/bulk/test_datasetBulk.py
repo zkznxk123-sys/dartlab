@@ -20,15 +20,15 @@ def test_convert_quarterly_to_parquets_callable() -> None:
 
 
 def test_discover_latest_quarter_callable() -> None:
-    """discoverLatestQuarter() callable smoke."""
-    from dartlab.providers.edgar.bulk.datasetBulk import discoverLatestQuarter
+    """discoverLatestQuarter() callable smoke — fetch 는 gather/edgar 로 이관(수집 일원화)."""
+    from dartlab.gather.edgar.datasetBulk import discoverLatestQuarter
 
     assert callable(discoverLatestQuarter)
 
 
 def test_download_quarterly_dataset_callable() -> None:
-    """downloadQuarterlyDataset() callable smoke."""
-    from dartlab.providers.edgar.bulk.datasetBulk import downloadQuarterlyDataset
+    """downloadQuarterlyDataset() callable smoke — fetch 는 gather/edgar 로 이관(수집 일원화)."""
+    from dartlab.gather.edgar.datasetBulk import downloadQuarterlyDataset
 
     assert callable(downloadQuarterlyDataset)
 

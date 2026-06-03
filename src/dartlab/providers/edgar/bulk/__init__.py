@@ -17,15 +17,15 @@ from dartlab.core.edgarBulkFreshness import (
 )
 from dartlab.core.edgarClient import (
     convertBulkToParquets,
+    discoverLatestQuarter,
     downloadCompanyfactsBulk,
+    downloadQuarterlyDataset,
     ensureFinanceParquet,
     extractCompanyfactsZip,
 )
 from dartlab.providers.edgar.bulk.datasetBulk import (
     DATASET_FILES,
     convertQuarterlyToParquets,
-    discoverLatestQuarter,
-    downloadQuarterlyDataset,
     listLocalQuarters,
 )
 from dartlab.providers.edgar.bulk.loader import EdgarBulkLoader, registerEdgarBulkLoader

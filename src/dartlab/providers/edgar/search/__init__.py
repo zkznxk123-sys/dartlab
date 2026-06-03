@@ -10,13 +10,38 @@ Implementation status
     LATEST/search-index``). dart 측처럼 자체 인덱스 빌드 불필요.
   - thin wrapper — SEC API 호출 + 응답 dataframe 정규화. dart 와 LOC 평형 X.
 
-공개 surface (api.py)
----------------------
+공개 surface
+------------
 - ``search(query, ...)`` — 단발 검색 (limit ≤ pageSize 결과 반환).
 - ``fetchHits(query, ...)`` — fetch-prefix alias (룰 8 limit + 룰 10 iter pair).
 - ``iterHits(query, ..., pageSize, maxPages)`` — streaming page generator.
+
+NOTE: SEC efts.sec.gov fetch 본체는 gather/edgar/search 로 이관(수집 일원화) —
+본 패키지는 lazy ``__getattr__`` re-export shim(providers↛gather module-level 회피).
+공개명 ``dartlab.providers.edgar.search.{search,fetchHits,iterHits}`` 보존.
 """
 
-from dartlab.providers.edgar.search.api import fetchHits, iterHits, search
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from dartlab.gather.edgar.search import fetchHits, iterHits, search
 
 __all__ = ["search", "fetchHits", "iterHits"]
+
+_LAZY = {
+    "search": "dartlab.gather.edgar.search",
+    "fetchHits": "dartlab.gather.edgar.search",
+    "iterHits": "dartlab.gather.edgar.search",
+}
+
+
+def __getattr__(name: str):
+    """lazy re-export — SEC FTS fetch 를 접근 시점에만 gather 에서 import."""
+    import importlib
+
+    modPath = _LAZY.get(name)
+    if modPath is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    return getattr(importlib.import_module(modPath), name)
