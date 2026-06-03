@@ -2447,8 +2447,7 @@ class Company:
         """
         import polars as _pl
 
-        from dartlab.core.edgarClient import EdgarClient
-        from dartlab.gather.edgar.saver import saveFinance
+        from dartlab.core.edgarClient import EdgarClient, saveFinance
 
         cik = str(self.cik).zfill(10)
         client = EdgarClient()
@@ -2614,14 +2613,14 @@ class Company:
         if cacheKey in self._cache:
             return self._cache[cacheKey]
 
+        from dartlab.core.edgarClient import openEdgar
         from dartlab.core.messaging import progress
-        from dartlab.gather.edgar.edgar import OpenEdgar
 
         progress(
             f"{self.corpName} 최신 공시 목록 조회 중... "
             f"(SEC EDGAR, {startDate}~{endDate}, forms={','.join(normalizedForms)})"
         )
-        df = OpenEdgar()(self.ticker).filings(
+        df = openEdgar()(self.ticker).filings(
             forms=list(normalizedForms),
             since=startDate,
             until=endDate,
@@ -2783,8 +2782,9 @@ class Company:
         if not docUrl:
             raise ValueError("EDGAR filing 읽기에는 filing URL 또는 accessionNo가 필요합니다.")
 
+        from dartlab.core.edgarClient import downloadFilingSource as _downloadFilingSource
+        from dartlab.core.edgarClient import htmlToText as _htmlToText
         from dartlab.core.messaging import progress
-        from dartlab.gather.edgar.docs.fetch import _downloadFilingSource, _htmlToText
 
         progress(f"{self.corpName} 공시 원문 다운로드 중... ({accessionNo or Path(docUrl).name})")
         filingPayload = {

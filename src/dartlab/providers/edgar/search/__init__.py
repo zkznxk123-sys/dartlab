@@ -23,10 +23,8 @@ NOTE: SEC efts.sec.gov fetch 본체는 gather/edgar/search 로 이관(수집 일
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from dartlab.gather.edgar.search import fetchHits, iterHits, search
+# NOTE: search/fetchHits/iterHits 는 아래 ``__getattr__`` 로 런타임 lazy 재노출
+# (``_LAZY`` 문자열 importlib) — providers↛gather 단방향 유지 위해 static import 는 두지 않는다.
 
 __all__ = ["search", "fetchHits", "iterHits"]
 

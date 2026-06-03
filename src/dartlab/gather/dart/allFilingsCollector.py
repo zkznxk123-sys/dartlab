@@ -48,6 +48,12 @@ _ALLFILINGS_DIR_KEY = "allFilings"
 _META_SUFFIX = "_meta"  # 목록만: 20260327_meta.parquet
 # 원문포함: 20260327.parquet
 
+
+def metaSuffix() -> str:
+    """allFilings 메타 parquet 파일 suffix(``_meta``) — providers 소비자가 core.dartClient seam 으로 접근."""
+    return _META_SUFFIX
+
+
 # 정기공시 (사업/분기/반기보고서) 는 `data/dart/docs/` 가 owner — allFilings 본문 수집에서 스킵.
 # 89% 가 docs/ 와 중복 (2026-05 검증). 부피 큰 공시 본문 중복 호출 차단.
 _PERIODIC_REPORT_PATTERNS: tuple[str, ...] = ("사업보고서", "분기보고서", "반기보고서")

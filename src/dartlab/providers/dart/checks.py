@@ -72,18 +72,18 @@ def _ensureData(stockCode: str, category: str) -> bool:
             emit("collect:start", stockCode=stockCode, label=label, keyCount=len(keys), mode=mode)
             try:
                 if category == "docs":
-                    from dartlab.gather.dart.zipCollector import ZipDocsCollector
+                    from dartlab.core.dartClient import zipDocsCollector
 
-                    collected = ZipDocsCollector(stockCode).collect() > 0
+                    collected = zipDocsCollector(stockCode).collect() > 0
                 elif category == "finance":
-                    from dartlab.gather.dart.dart import Dart
+                    from dartlab.core.dartClient import dartCollector
 
-                    Dart()(stockCode).saveFinance(2016)
+                    dartCollector()(stockCode).saveFinance(2016)
                     collected = True
                 elif category == "report":
-                    from dartlab.gather.dart.dart import Dart
+                    from dartlab.core.dartClient import dartCollector
 
-                    Dart()(stockCode).saveReport(2016)
+                    dartCollector()(stockCode).saveReport(2016)
                     collected = True
             except (ValueError, KeyError, RuntimeError, OSError):
                 collected = False
@@ -201,7 +201,7 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
     if not hasDartApiKey():
         return None
 
-    from dartlab.gather.dart.freshness import checkFreshness
+    from dartlab.core.dartClient import checkFreshness
 
     try:
         result = checkFreshness(stockCode)

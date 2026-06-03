@@ -9,12 +9,10 @@ lazy ``__getattr__`` re-export(providers↛gather module-level 회피). sections
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from dartlab.providers.edgar.docs.sections import sections
 
-if TYPE_CHECKING:
-    from dartlab.gather.edgar.docs.fetch import downloadListedEdgarDocs, fetchEdgarDocs
+# NOTE: fetchEdgarDocs/downloadListedEdgarDocs 는 아래 ``__getattr__`` 로 런타임 lazy 재노출
+# (``_LAZY`` 문자열 importlib) — providers↛gather 단방향 유지 위해 static import 는 두지 않는다.
 
 __all__ = ["fetchEdgarDocs", "downloadListedEdgarDocs", "sections"]
 

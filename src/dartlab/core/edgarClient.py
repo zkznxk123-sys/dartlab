@@ -254,3 +254,48 @@ def discoverLatestQuarter(*args: Any, **kwargs: Any) -> Any:
 def updateListedUniverse(*args: Any, **kwargs: Any) -> Any:
     """SEC listed universe(company_tickers_exchange) fetch+캐시 갱신 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: URLError. Example: >>> updateListedUniverse(force=True)  # doctest: +SKIP"""
     return _call("universe", "updateListedUniverse", *args, **kwargs)
+
+
+def openEdgar(*args: Any, **kwargs: Any) -> Any:
+    """OpenEdgar 파사드 인스턴스 생성 — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> openEdgar()("AAPL").filings()  # doctest: +SKIP"""
+    return _call("edgar", "OpenEdgar", *args, **kwargs)
+
+
+def downloadFilingSource(*args: Any, **kwargs: Any) -> Any:
+    """단일 공시 원문 source 다운로드 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx. Example: >>> downloadFilingSource(url)  # doctest: +SKIP"""
+    return _call("docs.fetch", "_downloadFilingSource", *args, **kwargs)
+
+
+def findFilings(*args: Any, **kwargs: Any) -> Any:
+    """submissions → 정기공시 filing 추출 — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> findFilings(sub, sinceYear=2024)  # doctest: +SKIP"""
+    return _call("docs.fetch", "_findFilings", *args, **kwargs)
+
+
+def getSubmissions(*args: Any, **kwargs: Any) -> Any:
+    """submissions JSON fetch(docs flow) — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx. Example: >>> getSubmissions(cik)  # doctest: +SKIP"""
+    return _call("docs.fetch", "_getSubmissions", *args, **kwargs)
+
+
+def resolveTickerMeta(*args: Any, **kwargs: Any) -> Any:
+    """ticker → cik/이름 메타 resolve(docs flow) — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> resolveTickerMeta("AAPL")  # doctest: +SKIP"""
+    return _call("docs.fetch", "_resolveTickerMeta", *args, **kwargs)
+
+
+def collectFilingRows(*args: Any, **kwargs: Any) -> Any:
+    """공시 목록 → docs row 수집 — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx. Example: >>> collectFilingRows(filings)  # doctest: +SKIP"""
+    return _call("docs.fetch", "_collectFilingRows", *args, **kwargs)
+
+
+def makeProgress(*args: Any, **kwargs: Any) -> Any:
+    """docs fetch 진행 콜백 생성 — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> makeProgress(total)  # doctest: +SKIP"""
+    return _call("docs.fetch", "_makeProgress", *args, **kwargs)
+
+
+def filingTimeoutSeconds(*args: Any, **kwargs: Any) -> Any:
+    """공시 fetch 타임아웃(초) 상수 — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> filingTimeoutSeconds()  # doctest: +SKIP"""
+    return _call("docs.fetch", "filingTimeoutSeconds", *args, **kwargs)
+
+
+def batchCollectEdgar(*args: Any, **kwargs: Any) -> Any:
+    """EDGAR 티커 배치 수집(finance/docs) — gather/edgar 위임. Requires: gather.edgar + 인터넷. Raises: httpx. Example: >>> batchCollectEdgar(["AAPL"], categories=["finance"])  # doctest: +SKIP"""
+    return _call("batch", "batchCollectEdgar", *args, **kwargs)

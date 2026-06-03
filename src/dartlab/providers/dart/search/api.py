@@ -367,7 +367,7 @@ def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
     Raises:
         없음.
     """
-    from dartlab.gather.dart.allFilingsCollector import collectMetaRange
+    from dartlab.core.dartClient import collectMetaRange
 
     return collectMetaRange(startDate, endDate, **kwargs)
 
@@ -389,12 +389,8 @@ def fillContent(period: str | None = None, **kwargs):
     Raises:
         없음.
     """
-    from dartlab.gather.dart.allFilingsCollector import (
-        fillContent as _fill,
-    )
-    from dartlab.gather.dart.allFilingsCollector import (
-        fillContentAll as _fillAll,
-    )
+    from dartlab.core.dartClient import fillContent as _fill
+    from dartlab.core.dartClient import fillContentAll as _fillAll
 
     if period:
         return _fill(period, **kwargs)
@@ -418,7 +414,7 @@ def stats() -> dict:
     Raises:
         없음.
     """
-    from dartlab.gather.dart.allFilingsCollector import stats as collectorStats
+    from dartlab.core.dartClient import collectorStats
     from dartlab.providers.dart.search.ngramIndex import ngramStats
 
     result = collectorStats()

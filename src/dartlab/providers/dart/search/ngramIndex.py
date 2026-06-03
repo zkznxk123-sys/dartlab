@@ -180,8 +180,10 @@ def buildNgramIndex(
 
     # ── Phase 1: allFilings 로드 ──
     if parquetPaths is None:
-        from dartlab.gather.dart.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+        from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
+        from dartlab.core.dartClient import allFilingsMetaSuffix
 
+        _META_SUFFIX = allFilingsMetaSuffix()
         outDir = _allFilingsDir()
         parquetPaths = sorted(str(f) for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
 

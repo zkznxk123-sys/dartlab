@@ -46,6 +46,10 @@ class DartFetchProvider(Protocol):
         """DART API 키 설정 여부."""
         ...
 
+    def call(self, module: str, func: str, *args: Any, **kwargs: Any) -> Any:
+        """gather/dart.<module>.<func> 위임 호출 (fetch orchestration 출력)."""
+        ...
+
 
 _PROVIDER: DartFetchProvider | None = None
 
@@ -123,3 +127,77 @@ def hasDartApiKey() -> bool:
         >>> hasDartApiKey()  # doctest: +SKIP
     """
     return _provider().hasKey()
+
+
+# ── gather/dart fetch orchestration 위임 delegate (providers 소비자 호환 seam) ──
+# 소비자(providers build/read)는 import 경로만 본 모듈로 교체. 실제 구현은 gather/dart 서브모듈.
+# providers↛gather 단방향 유지 — providers 는 core.dartClient 만 import.
+
+
+def _call(module: str, func: str, *args: Any, **kwargs: Any) -> Any:
+    return _provider().call(module, func, *args, **kwargs)
+
+
+def dartCollector(*args: Any, **kwargs: Any) -> Any:
+    """Dart 파사드 인스턴스 생성 — gather/dart 위임. Requires: gather.dart + DART_API_KEY. Raises: ValueError. Example: >>> dartCollector()("005930")  # doctest: +SKIP"""
+    return _call("dart", "Dart", *args, **kwargs)
+
+
+def openDart(*args: Any, **kwargs: Any) -> Any:
+    """OpenDart 파사드 인스턴스 생성 — gather/dart 위임. Requires: gather.dart + DART_API_KEY. Raises: ValueError. Example: >>> openDart().filings("005930")  # doctest: +SKIP"""
+    return _call("dart", "OpenDart", *args, **kwargs)
+
+
+def zipDocsCollector(*args: Any, **kwargs: Any) -> Any:
+    """ZipDocsCollector 인스턴스 생성 — gather/dart 위임. Requires: gather.dart + DART_API_KEY. Raises: ValueError. Example: >>> zipDocsCollector("005930").collect()  # doctest: +SKIP"""
+    return _call("zipCollector", "ZipDocsCollector", *args, **kwargs)
+
+
+def collectOneZip(*args: Any, **kwargs: Any) -> Any:
+    """단일 공시 ZIP 다운로드+파싱 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx/ValueError. Example: >>> collectOneZip(client, rceptNo)  # doctest: +SKIP"""
+    return _call("zipCollector", "_collectOneZip", *args, **kwargs)
+
+
+def dartHtmlToText(*args: Any, **kwargs: Any) -> Any:
+    """DART 공시 HTML → text normalize — gather/dart 위임. Requires: gather.dart. Raises: 없음. Example: >>> dartHtmlToText(html)  # doctest: +SKIP"""
+    return _call("collector", "_htmlToText", *args, **kwargs)
+
+
+def collectMissing(*args: Any, **kwargs: Any) -> Any:
+    """누락 카테고리 수집 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx. Example: >>> collectMissing("005930", categories=["finance"])  # doctest: +SKIP"""
+    return _call("freshness", "collectMissing", *args, **kwargs)
+
+
+def checkFreshness(*args: Any, **kwargs: Any) -> Any:
+    """수집 신선도 점검 — gather/dart 위임. Requires: gather.dart. Raises: 없음. Example: >>> checkFreshness("005930")  # doctest: +SKIP"""
+    return _call("freshness", "checkFreshness", *args, **kwargs)
+
+
+def collectMetaRange(*args: Any, **kwargs: Any) -> Any:
+    """공시 메타(전체목록) 범위 수집 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx. Example: >>> collectMetaRange("20240101", "20240131")  # doctest: +SKIP"""
+    return _call("allFilingsCollector", "collectMetaRange", *args, **kwargs)
+
+
+def fillContent(*args: Any, **kwargs: Any) -> Any:
+    """공시 원문(section_content) 채우기 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx. Example: >>> fillContent("202401")  # doctest: +SKIP"""
+    return _call("allFilingsCollector", "fillContent", *args, **kwargs)
+
+
+def fillContentAll(*args: Any, **kwargs: Any) -> Any:
+    """공시 원문 전체 채우기 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx. Example: >>> fillContentAll()  # doctest: +SKIP"""
+    return _call("allFilingsCollector", "fillContentAll", *args, **kwargs)
+
+
+def allFilingsDir(*args: Any, **kwargs: Any) -> Any:
+    """allFilings 메타 parquet 저장 디렉토리 — gather/dart 위임. Requires: gather.dart. Raises: 없음. Example: >>> allFilingsDir()  # doctest: +SKIP"""
+    return _call("allFilingsCollector", "_allFilingsDir", *args, **kwargs)
+
+
+def allFilingsMetaSuffix(*args: Any, **kwargs: Any) -> Any:
+    """allFilings 메타 parquet 파일 suffix(``_meta``) — gather/dart 위임. Requires: gather.dart. Raises: 없음. Example: >>> allFilingsMetaSuffix()  # doctest: +SKIP"""
+    return _call("allFilingsCollector", "metaSuffix", *args, **kwargs)
+
+
+def collectorStats(*args: Any, **kwargs: Any) -> Any:
+    """allFilings 수집 통계 — gather/dart 위임. Requires: gather.dart. Raises: 없음. Example: >>> collectorStats()  # doctest: +SKIP"""
+    return _call("allFilingsCollector", "stats", *args, **kwargs)

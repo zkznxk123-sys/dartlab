@@ -37,6 +37,12 @@ from dartlab.gather.edgar.docs._const import (  # noqa: E402,F401
 FILING_TIMEOUT_SECONDS = 45
 BATCH_SIZE = 25
 
+
+def filingTimeoutSeconds() -> int:
+    """공시 fetch 타임아웃(초) — providers 소비자가 core.edgarClient seam 으로 접근."""
+    return FILING_TIMEOUT_SECONDS
+
+
 _ITEM_HEADER_RE = re.compile(r"Item\s+\d+[A-K]?\.\s*\S", re.IGNORECASE)
 _ITEM_HEADER_EXACT_RE = re.compile(r"Item\s+\d+[A-K]?\.\s*$", re.IGNORECASE)
 _IX_DECOMPOSE_RE = re.compile(r"^(ix:header|ix:hidden|ix:references|ix:resources|xbrli:|dei:|link:)")
@@ -349,10 +355,7 @@ def fetchEdgarDocs(
     # 보존 (warning + 진행). PR-E7 안전 게이트 통과 전까지 옛 path 단독으로 fallback 가능.
     if sectionRows:
         try:
-            from dartlab.providers.edgar.docs.sections.sectionsBuilder import (
-                emitIndexArtifact,
-                emitPeriodArtifacts,
-            )
+            from dartlab.core.edgarBuild import emitIndexArtifact, emitPeriodArtifacts
 
             secResult = emitPeriodArtifacts(ticker, sectionRows)
             emitIndexArtifact(ticker, filingIndex)
@@ -541,9 +544,7 @@ def _collectFilingRows(
 
         # PR-E2 dual-write — sections artifact 신 path 동시 누적.
         if sectionRows is not None and html is not None and items:
-            from dartlab.providers.edgar.docs.sections.sectionsBuilder import (
-                buildSectionRowsFromFiling,
-            )
+            from dartlab.core.edgarBuild import buildSectionRowsFromFiling
 
             sectionMeta = {
                 "ticker": ticker,

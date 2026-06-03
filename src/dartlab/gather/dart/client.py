@@ -523,5 +523,28 @@ class _DartFetchProvider:
 
         return hasDartApiKey()
 
+    def call(self, module, func, *args, **kwargs):
+        """gather/dart.<module>.<func> 위임 호출 (fetch orchestration — providers seam).
+
+        Args:
+            module: gather/dart 하위 모듈명 (예 "dart", "allFilingsCollector").
+            func: 모듈 내 함수/심볼명.
+            *args: 위임 함수로 forward.
+            **kwargs: 위임 함수로 forward.
+
+        Returns:
+            위임 함수의 반환값 (fetch orchestration 출력).
+
+        Raises:
+            ImportError: module 미존재. AttributeError: func 미존재.
+
+        Example:
+            >>> _DartFetchProvider().call("allFilingsCollector", "metaSuffix")  # doctest: +SKIP
+        """
+        import importlib
+
+        mod = importlib.import_module(f"dartlab.gather.dart.{module}")
+        return getattr(mod, func)(*args, **kwargs)
+
 
 registerDartFetchProvider(_DartFetchProvider())

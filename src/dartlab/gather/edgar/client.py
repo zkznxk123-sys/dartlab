@@ -173,7 +173,23 @@ class _EdgarFetchProvider:
         return EdgarClient(**kwargs)
 
     def call(self, module, func, *args, **kwargs):
-        """gather/edgar.<module>.<func> 위임 — providers 소비자 seam."""
+        """gather/edgar.<module>.<func> 위임 호출 — providers 소비자 seam.
+
+        Args:
+            module: gather/edgar 하위 모듈명 (예 "docs.fetch", "facts").
+            func: 모듈 내 함수/심볼명.
+            *args: 위임 함수로 forward.
+            **kwargs: 위임 함수로 forward.
+
+        Returns:
+            위임 함수의 반환값 (fetch+normalize 출력).
+
+        Raises:
+            ImportError: module 미존재. AttributeError: func 미존재.
+
+        Example:
+            >>> _EdgarFetchProvider().call("facts", "getCompanyFactsJson", "0000320193")  # doctest: +SKIP
+        """
         import importlib
 
         m = importlib.import_module(f"dartlab.gather.edgar.{module}")

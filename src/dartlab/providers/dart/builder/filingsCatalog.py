@@ -197,7 +197,7 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
     Raises:
         없음.
     """
-    from dartlab.gather.dart.freshness import collectMissing
+    from dartlab.core.dartClient import collectMissing
 
     return collectMissing(company.stockCode, categories=categories)
 
@@ -282,9 +282,9 @@ def buildDisclosure(
     Raises:
         없음.
     """
-    from dartlab.gather.dart.dart import Dart
+    from dartlab.core.dartClient import dartCollector
 
-    d = Dart()
+    d = dartCollector()
     s = d(company.stockCode)
     df = s.filings(start, end, type=type, final=finalOnly)
     if df.is_empty():
@@ -388,11 +388,11 @@ def buildLiveFilings(
     if cacheKey in company._cache:
         return company._cache[cacheKey]
 
+    from dartlab.core.dartClient import openDart
     from dartlab.core.messaging import progress
-    from dartlab.gather.dart.dart import OpenDart
 
     progress(f"{company.corpName} 최신 공시 목록 조회 중... (OpenDART, {startDate}~{endDate})")
-    df = OpenDart().filings(
+    df = openDart().filings(
         company.stockCode,
         startDate,
         endDate,
@@ -560,12 +560,11 @@ def buildReadFiling(
     from dartlab.core.messaging import progress
 
     if sections:
-        from dartlab.core.dartClient import DartClient
-        from dartlab.gather.dart.zipCollector import _collectOneZip
+        from dartlab.core.dartClient import DartClient, collectOneZip
 
         progress(f"{company.corpName} 공시 ZIP 다운로드 중... ({rceptNo})")
         client = DartClient()
-        parsed = _collectOneZip(client, rceptNo)
+        parsed = collectOneZip(client, rceptNo)
         return {
             "docId": rceptNo,
             "market": "KR",
@@ -575,10 +574,10 @@ def buildReadFiling(
             "sections": parsed or [],
         }
 
-    from dartlab.gather.dart.dart import OpenDart
+    from dartlab.core.dartClient import openDart
 
     progress(f"{company.corpName} 공시 원문 다운로드 중... ({rceptNo})")
-    rawText = OpenDart().documentText(rceptNo)
+    rawText = openDart().documentText(rceptNo)
     progress(f"{company.corpName} 공시 원문 정리 중... ({rceptNo})")
     normalizedText = _normalizeDocumentText(rawText)
     textPreview, truncated = truncateText(normalizedText, maxChars=maxChars)
@@ -599,9 +598,9 @@ def _normalizeDocumentText(rawText: str) -> str:
     if "<" not in rawText or ">" not in rawText:
         return rawText
     try:
-        from dartlab.gather.dart.collector import _htmlToText
+        from dartlab.core.dartClient import dartHtmlToText
 
-        normalized = _htmlToText(rawText)
+        normalized = dartHtmlToText(rawText)
     except (ImportError, ValueError, AttributeError):
         # HTML 파서 실패 (malformed input 등) — raw text 반환.
         normalized = ""

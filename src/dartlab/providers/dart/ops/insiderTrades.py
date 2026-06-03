@@ -26,9 +26,9 @@ log = logging.getLogger(__name__)
 def _getDart():
     """Dart OpenAPI 클라이언트 lazy 생성. API 키 미설정 시 None."""
     try:
-        from dartlab.gather.dart.dart import Dart
+        from dartlab.core.dartClient import dartCollector
 
-        return Dart()
+        return dartCollector()
     except (ImportError, ValueError, OSError) as exc:
         log.debug("DART API 사용 불가: %s", exc)
         return None

@@ -21,15 +21,11 @@ DartApiError 는 gather fetch 전담(core.dartClient seam). zip 병렬 fetch 는
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 # core 재노출(경량) — gather 가 fetch 전담, providers 소비자 호환용 seam.
 from dartlab.core.dartClient import DartApiError, DartClient
 
-if TYPE_CHECKING:
-    from dartlab.gather.dart.dart import Dart, DartCompany, OpenDart, OpenDartCompany
-    from dartlab.gather.dart.zipCollector import ZipDocsCollector
-    from dartlab.providers.dart.build.saver import korColumns
+# NOTE: Dart/OpenDart/ZipDocsCollector/korColumns 는 아래 ``__getattr__`` 로 런타임 lazy 재노출
+# (``_LAZY`` 문자열 importlib) — providers↛gather 단방향 유지 위해 static import 는 두지 않는다.
 
 __all__ = [
     "OpenDart",

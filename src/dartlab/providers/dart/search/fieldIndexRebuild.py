@@ -98,7 +98,10 @@ def rebuildMain(
     """
     import gc
 
-    from dartlab.gather.dart.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+    from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
+    from dartlab.core.dartClient import allFilingsMetaSuffix
+
+    _META_SUFFIX = allFilingsMetaSuffix()
     from dartlab.providers.dart.search.fieldIndex import (
         CONTENT_LIMIT,
         _contentIndexDir,
@@ -262,7 +265,10 @@ def _buildAfMeta(*, showProgress: bool = True) -> dict[str, dict]:
 
     panel 롤업 문서의 표시 메타 보강용. content_raw 미로드라 빠르다.
     """
-    from dartlab.gather.dart.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+    from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
+    from dartlab.core.dartClient import allFilingsMetaSuffix
+
+    _META_SUFFIX = allFilingsMetaSuffix()
 
     cols = ["rcept_no", "corp_code", "corp_name", "stock_code", "rcept_dt", "report_nm"]
     out: dict[str, dict] = {}
@@ -508,7 +514,10 @@ def buildMeaningGraph(*, contentLimit: int | None = None, tier: str = "full", sh
     import re
     from collections import Counter
 
-    from dartlab.gather.dart.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+    from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
+    from dartlab.core.dartClient import allFilingsMetaSuffix
+
+    _META_SUFFIX = allFilingsMetaSuffix()
     from dartlab.providers.dart.search.fieldIndex import CONTENT_LIMIT, _contentIndexDir, tokenizeWord
     from dartlab.providers.dart.search.semantic import coreFeatureWeights, reportNmCore
 
@@ -654,7 +663,10 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     """
     from datetime import datetime, timedelta
 
-    from dartlab.gather.dart.allFilingsCollector import _META_SUFFIX, _allFilingsDir
+    from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
+    from dartlab.core.dartClient import allFilingsMetaSuffix
+
+    _META_SUFFIX = allFilingsMetaSuffix()
     from dartlab.providers.dart.search.fieldIndex import (
         CONTENT_LIMIT,
         buildContentSegment,

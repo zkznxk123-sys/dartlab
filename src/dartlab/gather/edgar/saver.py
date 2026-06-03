@@ -106,7 +106,7 @@ def _replaceWithValidation(
 
 
 def _validateSavedDocsParquet(path: Path, ticker: str) -> None:
-    from dartlab.providers.edgar.docs.sections.pipeline import sections
+    from dartlab.core.edgarBuild import sections
 
     df = pl.read_parquet(path)
     _validateSchema(df, EDGAR_DOCS_SCHEMA, label="edgarDocs")
@@ -117,7 +117,7 @@ def _validateSavedDocsParquet(path: Path, ticker: str) -> None:
 
 
 def _validateSavedFinanceParquet(path: Path, cik: str) -> None:
-    from dartlab.providers.edgar.finance.pivot import buildTimeseries
+    from dartlab.core.edgarBuild import buildTimeseries
 
     df = pl.read_parquet(path)
     _validateSchema(df, EDGAR_COMPANYFACTS_SCHEMA, label="edgarFinance")
@@ -177,9 +177,9 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
         TargetMarkets:
             - US (SEC EDGAR) saver.
     """
-    from dartlab.providers.edgar.company import Company
+    from dartlab.core.edgarBuild import edgarCompany
 
-    company = Company(ticker)
+    company = edgarCompany(ticker)
     docsSections = company._docs.sections
     financeBs = company._finance.BS
     indexDf = company.index

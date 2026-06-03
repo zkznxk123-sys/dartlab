@@ -122,6 +122,16 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "ai/memory/dialectic/feedbackSignals.py",
         "ai/memory/dialectic/userProfile.py",
         "ai/memory/sessionIndex/search.py",
+        # gather 증분 수집 상태 — 기존 parquet 에서 "이미 수집된 period/accession" 세트 추출.
+        # 첫 실행(파일 부재) = "아직 0건 수집" = 빈 세트 정상(loud-fail 시 전종목 batch 깨짐).
+        "gather/dart/batch.py",
+        "gather/edgar/batch.py",
+        # DART API 키 .env 파서 — env var 가 1차 소스, .env 부재 = 멀티키 0 = 빈 list 정상.
+        "gather/dart/keys.py",
+        "gather/original/dart/keys.py",
+        # pipeline changed 매니페스트 / hash 스냅샷 — 옵셔널 산출물. 부재 = "변경 없음"/"첫 실행" 정상.
+        "pipeline/changed.py",
+        "pipeline/hashing.py",
     }
 )
 
