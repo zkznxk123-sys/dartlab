@@ -56,7 +56,7 @@ def main() -> int:
         from datetime import datetime as _dt
         from datetime import timedelta as _td
 
-        from dartlab.providers.dart.openapi.allFilingsCollector import pushAllFilings
+        from dartlab.gather.dart.allFilingsCollector import pushAllFilings
 
         # lookback 기간의 일자만 — 옛 immutable parquet 재업로드 비용 회피.
         _today = _dt.now()

@@ -1,5 +1,8 @@
 """OpenDART 공통 상수 — 분기 코드, 카테고리 매핑."""
 
+# sections 셀(테이블/문단) 최대 byte — build(parse) + gather(zipCollector) 공유 한도.
+MAX_CELL_BYTES = 1_000_000
+
 # 분기 → DART API 보고서 코드
 QUARTER_TO_CODE: dict[str, str] = {
     "Q1": "11013",

@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 def _getDart():
     """Dart OpenAPI 클라이언트 lazy 생성. API 키 미설정 시 None."""
     try:
-        from dartlab.providers.dart.openapi.dart import Dart
+        from dartlab.gather.dart.dart import Dart
 
         return Dart()
     except (ImportError, ValueError, OSError) as exc:
@@ -69,7 +69,7 @@ async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) ->
     SeeAlso:
         - ``iterInsiderTradingRaw`` — async iterator pair (룰 10).
         - ``fetchMajorShareholdersRaw`` — 5% 이상 대량보유 별도 endpoint.
-        - ``dartlab.providers.dart.openapi.dart.Dart.executiveShares`` — 본 함수가 호출하는 raw client.
+        - ``dartlab.gather.dart.dart.Dart.executiveShares`` — 본 함수가 호출하는 raw client.
 
     Requires:
         - DART OpenAPI API key (환경변수 또는 ``dartKey`` registry).
@@ -166,7 +166,7 @@ async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None)
     SeeAlso:
         - ``iterMajorShareholdersRaw`` — async iterator pair (룰 10).
         - ``fetchInsiderTradingRaw`` — 임원 거래 별도 endpoint (elestock).
-        - ``dartlab.providers.dart.openapi.dart.Dart.majorShareholders``.
+        - ``dartlab.gather.dart.dart.Dart.majorShareholders``.
 
     Requires:
         - DART OpenAPI API key.

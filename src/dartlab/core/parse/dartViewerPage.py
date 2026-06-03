@@ -250,7 +250,7 @@ def parseSubDocs(content: str, rcpNo: str) -> list[dict]:
         - ``title`` 은 한국어 (예 "I. 회사의 개요").
 
     SeeAlso:
-        - ``dartlab.providers.dart.openapi.collector.DocsCollector`` — 본 함수의 caller.
+        - ``dartlab.gather.dart.collector.DocsCollector`` — 본 함수의 caller.
         - ``htmlToText`` — sub-doc HTML 내용 추출.
 
     Requires:

@@ -570,7 +570,7 @@ def _loadEdgarTickers(tier: str) -> list[str] | None:
 
 
 def _runStats(console) -> int:
-    from dartlab.providers.dart.openapi.collector import collectionStats
+    from dartlab.gather.dart.collector import collectionStats
 
     stats = collectionStats()
     console.print(f"전체 상장: {stats['totalListed']}")
@@ -580,7 +580,7 @@ def _runStats(console) -> int:
 
 
 def _runUncollected(console, limit: int) -> int:
-    from dartlab.providers.dart.openapi.collector import listUncollectedKind
+    from dartlab.gather.dart.collector import listUncollectedKind
 
     stocks = listUncollectedKind()
     showing = min(limit, len(stocks))
@@ -591,8 +591,8 @@ def _runUncollected(console, limit: int) -> int:
 
 
 def _runAuto(console, args) -> int:
-    from dartlab.providers.dart.openapi.batch import batchCollect
-    from dartlab.providers.dart.openapi.collector import listUncollectedKind
+    from dartlab.gather.dart.batch import batchCollect
+    from dartlab.gather.dart.collector import listUncollectedKind
 
     stocks = listUncollectedKind(limit=args.limit)
 
@@ -618,8 +618,8 @@ def _runAuto(console, args) -> int:
 
 
 def _runBatch(console, args) -> int:
+    from dartlab.gather.dart.batch import batchCollect, batchCollectAll
     from dartlab.gather.dart.keys import resolveDartKeys
-    from dartlab.providers.dart.openapi.batch import batchCollect, batchCollectAll
 
     keys = resolveDartKeys()
     if not keys:
@@ -649,11 +649,11 @@ def _runBatch(console, args) -> int:
 
 
 def _runCheck(console, args) -> int:
-    from dartlab.gather.dart.keys import hasDartApiKey
-    from dartlab.providers.dart.openapi.freshness import (
+    from dartlab.gather.dart.freshness import (
         checkFreshness,
         scanMarketFreshness,
     )
+    from dartlab.gather.dart.keys import hasDartApiKey
 
     if not hasDartApiKey():
         console.print("[red]DART API 키가 필요합니다: dartlab setup dart-key[/]")
@@ -699,12 +699,12 @@ def _runCheck(console, args) -> int:
 
 
 def _runIncremental(console, args) -> int:
-    from dartlab.gather.dart.keys import hasDartApiKey
-    from dartlab.providers.dart.openapi.freshness import (
+    from dartlab.gather.dart.freshness import (
         checkFreshness,
         collectMissing,
         scanMarketFreshness,
     )
+    from dartlab.gather.dart.keys import hasDartApiKey
 
     if not hasDartApiKey():
         console.print("[red]DART API 키가 필요합니다: dartlab setup dart-key[/]")
@@ -750,7 +750,7 @@ def _runCollect(console, args) -> int:
 
         # docs 수집
         if "docs" in cats:
-            from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+            from dartlab.gather.dart.zipCollector import ZipDocsCollector
 
             try:
                 collector = ZipDocsCollector(code)
@@ -766,7 +766,7 @@ def _runCollect(console, args) -> int:
         # finance/report 증분 수집
         frCats = [c for c in cats if c in ("finance", "report")]
         if frCats:
-            from dartlab.providers.dart.openapi.batch import batchCollect
+            from dartlab.gather.dart.batch import batchCollect
 
             console.print(f"\n[bold]{', '.join(frCats)}[/] 증분 수집 중...")
             counts = batchCollect([code], categories=frCats, incremental=True)
@@ -777,7 +777,7 @@ def _runCollect(console, args) -> int:
         summary = " / ".join(f"{k}: {v}" for k, v in result.items())
         console.print(f"\n[bold green]완료[/]: {summary}")
     else:
-        from dartlab.providers.dart.openapi.batch import batchCollect
+        from dartlab.gather.dart.batch import batchCollect
 
         results = batchCollect(codes, categories=cats)
         total = len(results)

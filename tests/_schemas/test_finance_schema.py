@@ -85,7 +85,7 @@ def test_maybeValidateFinance_envGateOff_noOp() -> None:
     """DARTLAB_VALIDATE_SCHEMA 미설정 시 _maybeValidateFinance 는 no-op (production default)."""
     import os
 
-    from dartlab.providers.dart.openapi.dart import _maybeValidateFinance
+    from dartlab.gather.dart.dart import _maybeValidateFinance
 
     os.environ.pop("DARTLAB_VALIDATE_SCHEMA", None)
     # 잘못된 데이터를 줘도 no-op → 예외 없어야 함.
@@ -98,11 +98,11 @@ def test_maybeValidateFinance_envGateOn_logsWarning(caplog) -> None:
     import logging
     import os
 
-    from dartlab.providers.dart.openapi.dart import _maybeValidateFinance
+    from dartlab.gather.dart.dart import _maybeValidateFinance
 
     os.environ["DARTLAB_VALIDATE_SCHEMA"] = "1"
     try:
-        with caplog.at_level(logging.WARNING, logger="dartlab.providers.dart.openapi.dart"):
+        with caplog.at_level(logging.WARNING, logger="dartlab.gather.dart.dart"):
             bad = pl.DataFrame({"not_a_column": ["x"]})
             _maybeValidateFinance(bad)  # 위반이지만 raise 안 함
         assert any("drift" in r.getMessage().lower() for r in caplog.records)
@@ -114,7 +114,7 @@ def test_maybeValidateFinance_envGateOn_emptyFrame_noOp() -> None:
     """빈 frame 은 validate 건너뜀 (Dart.finance 가 종종 빈 DataFrame 반환)."""
     import os
 
-    from dartlab.providers.dart.openapi.dart import _maybeValidateFinance
+    from dartlab.gather.dart.dart import _maybeValidateFinance
 
     os.environ["DARTLAB_VALIDATE_SCHEMA"] = "1"
     try:

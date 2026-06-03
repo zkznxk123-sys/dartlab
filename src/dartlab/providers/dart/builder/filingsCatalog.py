@@ -168,10 +168,10 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
         - ``buildFilings`` — 갱신 후 결과 조회.
         - ``buildDisclosure`` — 갱신 없이 OpenDART 직접 호출.
         - ``Company.update`` — 본 함수의 facade.
-        - ``dartlab.providers.dart.openapi.freshness.collectMissing`` — 본 함수 본체.
+        - ``dartlab.gather.dart.freshness.collectMissing`` — 본 함수 본체.
 
     Requires:
-        - dartlab.providers.dart.openapi.freshness — collectMissing.
+        - dartlab.gather.dart.freshness — collectMissing.
         - DART_API_KEY 환경변수.
 
     AIContext:
@@ -197,7 +197,7 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
     Raises:
         없음.
     """
-    from dartlab.providers.dart.openapi.freshness import collectMissing
+    from dartlab.gather.dart.freshness import collectMissing
 
     return collectMissing(company.stockCode, categories=categories)
 
@@ -253,7 +253,7 @@ def buildDisclosure(
 
     Requires:
         - polars — DataFrame.
-        - dartlab.providers.dart.openapi.dart — Dart 클라이언트.
+        - dartlab.gather.dart.dart — Dart 클라이언트.
         - DART_API_KEY 환경변수.
         - dartlab.providers._common.filingHelpers — filterFilingsByKeyword.
 
@@ -282,7 +282,7 @@ def buildDisclosure(
     Raises:
         없음.
     """
-    from dartlab.providers.dart.openapi.dart import Dart
+    from dartlab.gather.dart.dart import Dart
 
     d = Dart()
     s = d(company.stockCode)
@@ -345,12 +345,12 @@ def buildLiveFilings(
     SeeAlso:
         - ``buildFilings`` / ``buildDisclosure`` — 다른 schema 의 동등 함수.
         - ``Company.liveFilings`` — 본 함수의 facade.
-        - ``dartlab.providers.dart.openapi.dart.OpenDart`` — 본 함수 본체.
+        - ``dartlab.gather.dart.dart.OpenDart`` — 본 함수 본체.
         - ``dartlab.providers._common.filingHelpers.resolveDateWindow`` — 날짜 윈도우 정규화.
 
     Requires:
         - polars — DataFrame.
-        - dartlab.providers.dart.openapi.dart — OpenDart.
+        - dartlab.gather.dart.dart — OpenDart.
         - dartlab.providers._common.filingHelpers — filterFilingsByKeyword + resolveDateWindow.
         - dartlab.core.dataLoader — DART_VIEWER 상수.
         - dartlab.core.messaging — progress (사용자 알림).
@@ -389,7 +389,7 @@ def buildLiveFilings(
         return company._cache[cacheKey]
 
     from dartlab.core.messaging import progress
-    from dartlab.providers.dart.openapi.dart import OpenDart
+    from dartlab.gather.dart.dart import OpenDart
 
     progress(f"{company.corpName} 최신 공시 목록 조회 중... (OpenDART, {startDate}~{endDate})")
     df = OpenDart().filings(
@@ -561,7 +561,7 @@ def buildReadFiling(
 
     if sections:
         from dartlab.core.dartClient import DartClient
-        from dartlab.providers.dart.openapi.zipCollector import _collectOneZip
+        from dartlab.gather.dart.zipCollector import _collectOneZip
 
         progress(f"{company.corpName} 공시 ZIP 다운로드 중... ({rceptNo})")
         client = DartClient()
@@ -575,7 +575,7 @@ def buildReadFiling(
             "sections": parsed or [],
         }
 
-    from dartlab.providers.dart.openapi.dart import OpenDart
+    from dartlab.gather.dart.dart import OpenDart
 
     progress(f"{company.corpName} 공시 원문 다운로드 중... ({rceptNo})")
     rawText = OpenDart().documentText(rceptNo)
@@ -599,7 +599,7 @@ def _normalizeDocumentText(rawText: str) -> str:
     if "<" not in rawText or ">" not in rawText:
         return rawText
     try:
-        from dartlab.providers.dart.openapi.collector import _htmlToText
+        from dartlab.gather.dart.collector import _htmlToText
 
         normalized = _htmlToText(rawText)
     except (ImportError, ValueError, AttributeError):

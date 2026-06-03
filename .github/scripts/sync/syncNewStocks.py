@@ -103,7 +103,7 @@ def _changedFiles(category: str, dataDir: Path, before: dict[str, str]) -> tuple
 
 
 def _collectCategory(category: str, codes: list[str]) -> dict[str, dict[str, int]]:
-    from dartlab.providers.dart.openapi.batch import batchCollect
+    from dartlab.gather.dart.batch import batchCollect
 
     maxWorkersRaw = os.environ.get("NEW_STOCK_MAX_WORKERS", "").strip()
     maxWorkers = int(maxWorkersRaw) if maxWorkersRaw else None

@@ -237,8 +237,8 @@ def _discoverNewFilings(keys: str, lookbackDays: int, dataDir: str) -> tuple[set
     import polars as pl
 
     from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.gather.dart.disclosure import listFilings
     from dartlab.providers.dart.openapi.client import DartApiError, DartClient
-    from dartlab.providers.dart.openapi.disclosure import listFilings
 
     end = datetime.now()
     start = end - timedelta(days=lookbackDays)
@@ -393,8 +393,8 @@ async def _collectDocsDirect(
     import polars as pl
 
     from dartlab.core.dataConfig import DATA_RELEASES
-    from dartlab.providers.dart.openapi.batch import AsyncDartClient
-    from dartlab.providers.dart.openapi.zipCollector import _parseSections
+    from dartlab.gather.dart.batch import AsyncDartClient
+    from dartlab.gather.dart.zipCollector import _parseSections
 
     docsDir = Path(dataDir) / DATA_RELEASES["docs"]["dir"]
     docsDir.mkdir(parents=True, exist_ok=True)
@@ -800,7 +800,7 @@ def main():
 
     nonDocsCats = [c for c in categories if c != "docs"]
     if nonDocsCats:
-        from dartlab.providers.dart.openapi.batch import batchCollect
+        from dartlab.gather.dart.batch import batchCollect
 
         maxWorkers = _syncMaxWorkers()
         checkpointEvery = _syncCheckpointEvery()

@@ -288,11 +288,10 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
     return sections
 
 
-# 한 row 의 section_content 최대 size. 초과 시 markdown paragraph (\n\n) 또는 line
-# 단위 split → multiple row 분할. 회귀 차단: polars row_tuples 의 PyObject 변환이
-# 4MB+ string 에서 panic. 1MB 안전선 채택 (sections chunker MAX_CHUNK_CHARS 4KB 보다
-# 크지만 polars 안전선 + pa.string() 32-bit offset 의 column total 한도 회피).
-MAX_CELL_BYTES = 1_000_000
+# 한 row 의 section_content 최대 size — build(parse)·gather(zipCollector) 공유 한도.
+# core.dartConstants 정본 (회귀 차단: polars row_tuples PyObject 변환이 4MB+ panic.
+# 1MB 안전선 + pa.string() 32-bit offset column total 한도 회피).
+from dartlab.core.dartConstants import MAX_CELL_BYTES  # noqa: E402
 
 
 def splitLargeContent(text: str, maxBytes: int = MAX_CELL_BYTES) -> list[str]:

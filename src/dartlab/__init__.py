@@ -66,7 +66,7 @@ if not _IS_PYODIDE:
             "fuzzySearch": ("dartlab.gather.krx.listing", "fuzzySearch"),
             "getKindList": ("dartlab.gather.krx.listing", "getKindList"),
             "listing": ("dartlab._listingDispatch", "listing"),
-            "OpenDart": ("dartlab.providers.dart.openapi.dart", "OpenDart"),
+            "OpenDart": ("dartlab.gather.dart.dart", "OpenDart"),
             "OpenEdgar": ("dartlab.providers.edgar.openapi.edgar", "OpenEdgar"),
             "Story": ("dartlab.story", "Story"),
             "_DartEngineCompany": ("dartlab.providers.dart.company", "Company"),
@@ -402,7 +402,7 @@ def collect(
         dartlab.collect("005930")                              # 삼성전자 전체
         dartlab.collect("005930", "000660", categories=["finance"])  # 재무만
     """
-    from dartlab.providers.dart.openapi.batch import batchCollect
+    from dartlab.gather.dart.batch import batchCollect
 
     return batchCollect(list(codes), categories=categories, incremental=incremental)
 
@@ -450,7 +450,7 @@ def collectAll(
         dartlab.collectAll(categories=["finance"])    # 재무만
         dartlab.collectAll(mode="all")                # 기수집 포함 전체
     """
-    from dartlab.providers.dart.openapi.batch import batchCollectAll
+    from dartlab.gather.dart.batch import batchCollectAll
 
     return batchCollectAll(
         categories=categories,
@@ -539,7 +539,7 @@ def checkFreshness(stockCode: str, *, forceCheck: bool = False):
         result.isFresh       # True/False
         result.missingCount  # 누락 공시 수
     """
-    from dartlab.providers.dart.openapi.freshness import (
+    from dartlab.gather.dart.freshness import (
         checkFreshness as _check,
     )
 

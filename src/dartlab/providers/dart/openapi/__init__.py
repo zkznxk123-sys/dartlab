@@ -27,9 +27,9 @@ from typing import TYPE_CHECKING
 from dartlab.core.dartClient import DartApiError, DartClient
 
 if TYPE_CHECKING:
+    from dartlab.gather.dart.dart import Dart, DartCompany, OpenDart, OpenDartCompany
+    from dartlab.gather.dart.zipCollector import ZipDocsCollector
     from dartlab.providers.dart.build.saver import korColumns
-    from dartlab.providers.dart.openapi.dart import Dart, DartCompany, OpenDart, OpenDartCompany
-    from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
 
 __all__ = [
     "OpenDart",
@@ -43,11 +43,11 @@ __all__ = [
 ]
 
 _LAZY: dict[str, str] = {
-    "OpenDart": "dartlab.providers.dart.openapi.dart",
-    "OpenDartCompany": "dartlab.providers.dart.openapi.dart",
-    "Dart": "dartlab.providers.dart.openapi.dart",
-    "DartCompany": "dartlab.providers.dart.openapi.dart",
-    "ZipDocsCollector": "dartlab.providers.dart.openapi.zipCollector",
+    "OpenDart": "dartlab.gather.dart.dart",
+    "OpenDartCompany": "dartlab.gather.dart.dart",
+    "Dart": "dartlab.gather.dart.dart",
+    "DartCompany": "dartlab.gather.dart.dart",
+    "ZipDocsCollector": "dartlab.gather.dart.zipCollector",
     "korColumns": "dartlab.providers.dart.build.saver",
 }
 

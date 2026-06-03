@@ -137,7 +137,7 @@ def test_parseSectionsByTitle_span_bold_markdown_heading():
     reason="local zip cache required",
 )
 def test_rebuildFromZips_005930_smoke(tmp_path):
-    from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+    from dartlab.gather.dart.zipCollector import ZipDocsCollector
 
     collector = ZipDocsCollector("005930", corpCode="00126380", corpName="삼성전자")
     out = tmp_path / "005930.parquet"

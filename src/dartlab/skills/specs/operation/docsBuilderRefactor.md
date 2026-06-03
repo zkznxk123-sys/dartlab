@@ -159,7 +159,7 @@ bash tests/test-lock.sh tests/sections/test_zipDocsCollector.py -v
 
 **8.1 단일 종목 수집 (사용자):**
 ```python
-from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+from dartlab.gather.dart.zipCollector import ZipDocsCollector
 c = ZipDocsCollector("005930")
 c.collect(includeQuarterly=True)
 ```

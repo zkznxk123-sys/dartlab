@@ -30,7 +30,7 @@ class TestDartCompanyLiveFilings:
                     }
                 )
 
-        monkeypatch.setattr("dartlab.providers.dart.openapi.dart.OpenDart", FakeOpenDart)
+        monkeypatch.setattr("dartlab.gather.dart.dart.OpenDart", FakeOpenDart)
 
         company = DartCompany.__new__(DartCompany)
         company.stockCode = "005930"
@@ -58,7 +58,7 @@ class TestDartCompanyLiveFilings:
                 assert rceptNo == "20240312000736"
                 return "<html><body>단일판매공급계약 본문 " + ("추가 내용 " * 10) + "</body></html>"
 
-        monkeypatch.setattr("dartlab.providers.dart.openapi.dart.OpenDart", FakeOpenDart)
+        monkeypatch.setattr("dartlab.gather.dart.dart.OpenDart", FakeOpenDart)
 
         company = DartCompany.__new__(DartCompany)
         company.stockCode = "005930"

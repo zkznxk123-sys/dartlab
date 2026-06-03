@@ -1,0 +1,130 @@
+[
+  {
+    "scenario": "public.access.all",
+    "ok": true,
+    "package": {
+      "version": "0.10.3",
+      "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
+    },
+    "details": {
+      "type": "public-access",
+      "height": 37,
+      "symbols": [
+        "dartlab.Company",
+        "dartlab.Fred",
+        "dartlab.OpenDart",
+        "dartlab.OpenEdgar",
+        "dartlab.Story",
+        "dartlab.SelectResult",
+        "dartlab.ChartResult",
+        "dartlab.analysis",
+        "dartlab.ask",
+        "dartlab.capabilities"
+      ]
+    },
+    "elapsedSec": 0.969,
+    "rssBeforeMb": 23.7,
+    "rssAfterMb": 81.7,
+    "rssDeltaMb": 58.1,
+    "rssPeakMb": 81.7,
+    "returnCode": 0,
+    "budget": {
+      "maxElapsedSec": 20.0,
+      "maxRssDeltaMb": 350.0,
+      "maxRssPeakMb": 900.0
+    },
+    "dataMode": "empty",
+    "cwdMode": "temp",
+    "importMode": "source"
+  },
+  {
+    "scenario": "capabilities.index",
+    "ok": true,
+    "package": {
+      "version": "0.10.3",
+      "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
+    },
+    "details": {
+      "type": "dict",
+      "height": 132,
+      "width": null,
+      "columns": []
+    },
+    "elapsedSec": 0.656,
+    "rssBeforeMb": 23.7,
+    "rssAfterMb": 71.4,
+    "rssDeltaMb": 47.7,
+    "rssPeakMb": 71.4,
+    "returnCode": 0,
+    "budget": {
+      "maxElapsedSec": 20.0,
+      "maxRssDeltaMb": 400.0,
+      "maxRssPeakMb": 1000.0
+    },
+    "dataMode": "empty",
+    "cwdMode": "temp",
+    "importMode": "source"
+  },
+  {
+    "scenario": "scan.guide",
+    "ok": true,
+    "package": {
+      "version": "0.10.3",
+      "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
+    },
+    "details": {
+      "type": "DataFrame",
+      "height": 21,
+      "width": 6,
+      "columns": [
+        "axis",
+        "label",
+        "group",
+        "description",
+        "example",
+        "apiKey"
+      ]
+    },
+    "elapsedSec": 0.797,
+    "rssBeforeMb": 23.8,
+    "rssAfterMb": 75.7,
+    "rssDeltaMb": 52.0,
+    "rssPeakMb": 75.7,
+    "returnCode": 0,
+    "budget": {
+      "maxElapsedSec": 20.0,
+      "maxRssDeltaMb": 500.0,
+      "maxRssPeakMb": 1200.0
+    },
+    "dataMode": "empty",
+    "cwdMode": "temp",
+    "importMode": "source"
+  },
+  {
+    "scenario": "company.create",
+    "ok": true,
+    "package": {
+      "version": "0.10.3",
+      "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
+    },
+    "details": {
+      "type": "Company",
+      "height": 1
+    },
+    "elapsedSec": 5.265,
+    "rssBeforeMb": 23.7,
+    "rssAfterMb": 125.2,
+    "rssDeltaMb": 101.6,
+    "rssPeakMb": 125.2,
+    "returnCode": 0,
+    "stderrTail": "[dartlab] 005930 (DART 공시 문서 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] 005930 (재무 숫자 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] ✓ 재무 숫자 데이터 다운로드 완료 (293KB)\nmessage_emit\n[dartlab] 005930 (정기보고서 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] ✓ 정기보고서 데이터 다운로드 완료 (224KB)\nmessage_emit\n[dartlab] ✓ DART 공시 문서 데이터 다운로드 완료 (41.0MB)\nmessage_emit\n[dartlab] KRX KIND 상장법인 목록 다운로드 중...\nmessage_emit\n[dartlab] 2664개 종목 로드 완료\nmessage_emit\nCompany('005930') 준비 완료 (4.1s)\n",
+    "budget": {
+      "maxElapsedSec": 30.0,
+      "maxRssDeltaMb": 700.0,
+      "maxRssPeakMb": 1500.0
+    },
+    "dataMode": "empty",
+    "cwdMode": "temp",
+    "importMode": "source"
+  }
+]

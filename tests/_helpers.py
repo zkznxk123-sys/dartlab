@@ -156,7 +156,7 @@ def buildVcr(
         >>> _vcr = buildVcr('tests/_cassettes/dart')
         >>> @_vcr.use_cassette('corpCode.yaml')
         ... def test_corpCode_replay():
-        ...     from dartlab.providers.dart.openapi.corpCode import fetchCorpCode
+        ...     from dartlab.gather.dart.corpCode import fetchCorpCode
         ...     df = fetchCorpCode()
         ...     assert df.height > 0
     Guide:

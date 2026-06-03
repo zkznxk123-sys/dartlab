@@ -1,7 +1,7 @@
-"""gather DART 도메인 — viewer 무인증 단건 fetch + OpenDART fetch client·키.
+"""gather DART 도메인 — viewer 무인증 단건 fetch + OpenDART fetch client·키·콜렉터.
 
 ecos/, fred/ 와 동일 패턴의 외부 데이터 SSOT 서브엔진. providers/dart (build/read)
-와 분리 — DART 의 모든 network fetch(client·키·viewer)를 gather 가 전담(ETL Extract).
+와 분리 — DART 의 모든 network fetch(client·키·viewer·콜렉터)를 gather 가 전담(ETL Extract).
 
 호출 패턴::
 
@@ -11,9 +11,9 @@ ecos/, fred/ 와 동일 패턴의 외부 데이터 SSOT 서브엔진. providers/
 untrusted 본문:
     viewer 본문은 외부 1차 출처지만 호출자가 외부 untrusted 마커로 감싸는 책임.
 
-NOTE: facade/viewer/types 는 lazy ``__getattr__`` 노출 — ``keys``/``client``
-(CredentialProvider·DartFetchProvider DIP 등록 트리거) import 시 무거운 viewer 로딩 +
-순환 import 회피. ``client``/``keys`` 는 서브모듈로 직접 import 한다.
+NOTE: facade/viewer/types 는 lazy ``__getattr__`` 노출 — client/keys/콜렉터 서브모듈
+import 시 무거운 viewer 로딩 + 순환 import(facade↔infra↔core.parse) 회피. client/keys/
+콜렉터(zipCollector/allFilingsCollector/batch 등)는 서브모듈로 직접 import 한다.
 """
 
 from __future__ import annotations

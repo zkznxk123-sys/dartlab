@@ -204,7 +204,7 @@ def test_collectFinance_targetPeriods_skips_88_diff():
     """
     import inspect
 
-    from dartlab.providers.dart.openapi.batch import _collectFinance, _collectReport, _workerLoop, batchCollect
+    from dartlab.gather.dart.batch import _collectFinance, _collectReport, _workerLoop, batchCollect
 
     # 새 인자 등록 검증
     sig_finance = inspect.signature(_collectFinance)
@@ -244,7 +244,7 @@ def test_buildAllPeriods_newest_first():
     """
     from datetime import datetime
 
-    from dartlab.providers.dart.openapi.batch import _buildAllPeriods
+    from dartlab.gather.dart.batch import _buildAllPeriods
 
     periods = _buildAllPeriods()
     currentYear = datetime.now().year

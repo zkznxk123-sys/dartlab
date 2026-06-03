@@ -30,9 +30,9 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.core.dataLoader import _dataDir
+from dartlab.gather.dart.corpCode import loadCorpCodes
+from dartlab.gather.dart.disclosure import companyInfo
 from dartlab.providers.dart.openapi.client import DartClient
-from dartlab.providers.dart.openapi.corpCode import loadCorpCodes
-from dartlab.providers.dart.openapi.disclosure import companyInfo
 
 
 def _resolveApiKey() -> str:
