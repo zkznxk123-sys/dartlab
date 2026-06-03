@@ -33,7 +33,7 @@ _QUARTER_PARQUET_RE = re.compile(r"^(\d{4})Q([1-4])\.parquet$")
 import httpx
 import polars as pl
 
-from dartlab.providers.edgar.bulk.freshness import (
+from dartlab.core.edgarBulkFreshness import (
     isBulkFresh,
     readSavedEtag,
     touchBulkFreshness,

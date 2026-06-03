@@ -7,7 +7,15 @@ dartlab의 EDGAR finance primary 소스는 SEC 벌크다:
 상세: ``engines.edgar``.
 """
 
-from dartlab.providers.edgar.bulk.companyfactsBulk import (
+from dartlab.core.edgarBulkFreshness import (
+    BulkFreshness,
+    inspectBulkFreshness,
+    invalidateBulkFreshness,
+    isBulkFresh,
+    readSavedEtag,
+    touchBulkFreshness,
+)
+from dartlab.core.edgarClient import (
     convertBulkToParquets,
     downloadCompanyfactsBulk,
     ensureFinanceParquet,
@@ -19,14 +27,6 @@ from dartlab.providers.edgar.bulk.datasetBulk import (
     discoverLatestQuarter,
     downloadQuarterlyDataset,
     listLocalQuarters,
-)
-from dartlab.providers.edgar.bulk.freshness import (
-    BulkFreshness,
-    inspectBulkFreshness,
-    invalidateBulkFreshness,
-    isBulkFresh,
-    readSavedEtag,
-    touchBulkFreshness,
 )
 from dartlab.providers.edgar.bulk.loader import EdgarBulkLoader, registerEdgarBulkLoader
 

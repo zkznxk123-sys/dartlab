@@ -234,3 +234,8 @@ def extractCompanyfactsZip(*args: Any, **kwargs: Any) -> Any:
 def ensureFinanceParquet(*args: Any, **kwargs: Any) -> Any:
     """EDGAR finance parquet 보장(bulk) — gather/edgar 위임. Requires: gather.edgar. Raises: OSError. Example: >>> ensureFinanceParquet("0000320193")  # doctest: +SKIP"""
     return _call("bulk", "ensureFinanceParquet", *args, **kwargs)
+
+
+def convertBulkToParquets(*args: Any, **kwargs: Any) -> Any:
+    """companyfacts.zip → per-CIK parquet 변환(bulk) — gather/edgar 위임. Requires: gather.edgar. Raises: OSError. Example: >>> convertBulkToParquets()  # doctest: +SKIP"""
+    return _call("bulk", "convertBulkToParquets", *args, **kwargs)

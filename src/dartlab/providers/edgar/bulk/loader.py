@@ -6,7 +6,7 @@ import 시점에 registerLoader 호출하여 자동 등록.
 
 from __future__ import annotations
 
-from dartlab.providers.edgar.bulk.companyfactsBulk import ensureFinanceParquet
+from dartlab.core.edgarClient import ensureFinanceParquet
 
 
 class EdgarBulkLoader:
