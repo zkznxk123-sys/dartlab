@@ -50,6 +50,15 @@ def normalizeTitle(s: str | None) -> str:
 
     Returns:
         ``()`` ``·`` 공백을 제거한 정규화 문자열 (None → "").
+
+    Raises:
+        없음 — None 은 "" 로 흡수.
+
+    Example:
+        >>> normalizeTitle("1. 재고자산 (주30)")
+        '1.재고자산주30'
+        >>> normalizeTitle(None)
+        ''
     """
     return _NOTE_TITLE_NORM_RE.sub("", s or "")
 
@@ -437,6 +446,14 @@ def dedupKeyed(df: pl.DataFrame) -> pl.DataFrame:
 
     Returns:
         keyed 중복이 제거된 동일 schema DataFrame. scope 컬럼 부재/중복 없음이면 입력 그대로.
+
+    Raises:
+        없음 — 빈/필수컬럼 부재/중복 없음은 입력 그대로 반환.
+
+    Example:
+        >>> deduped = dedupKeyed(anchoredDf)  # doctest: +SKIP
+        >>> deduped.filter(pl.col("disclosureKey") == "BS_C").height  # (key,scope,leafType,period) 당 1  # doctest: +SKIP
+        1
     """
     if df.is_empty() or "disclosureKey" not in df.columns or "scope" not in df.columns:
         return df

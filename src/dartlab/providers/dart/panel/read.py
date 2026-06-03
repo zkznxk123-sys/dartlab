@@ -701,10 +701,10 @@ def readWide(
     if "chapter" in long.columns:
         pathCol = "sectionPath" if "sectionPath" in long.columns else "chapter"
         long = long.with_columns(canonicalChapterExpr("chapter", pathCol).alias("chapter"))
-    # narrative leaf 순번(leafSeq) — **sectionLeaf 단위** blockOrder 순 ordinal. 각 leaf(text-run·표)가 별도
-    # 비교단위(행)가 되어 표↔표가 한 셀에 안 뭉친다(101개→개별, 재뭉침 0). 섹션 내로 위치정렬 제한.
-    # ※ 직접확인 결론(7사): narrative 표 정렬은 천장이 낮다 — 표가 대부분 1회성+구조진화라 위치정렬(38%)·
-    #   구조지문정렬(재뭉침+fill 2.2) 둘 다 못 맞춤. 위치정렬이 재뭉침 0 이라 그나마 정직. keyed 는 disclosureKey 식별 → seq=0.
+    # narrative 수평화 — 과거 뭉태기 leaf 를 **섹션 내 문서위치**로 정렬(leafSeq). 각 leaf(표·텍스트)가 별도
+    # 행이라 표↔표 안 뭉침(재뭉침 0). 같은 섹션의 같은 위치 표가 기간 간 한 행(매출실적 등 안정위치 표는 정렬).
+    # 위치정렬은 안정위치 표엔 효과적이나 삽입 누적 시 drift — 표구조-aware fuzzy 정렬은 후속 정공(operation.architecture).
+    # keyed(재무제표)는 disclosureKey 가 식별 → seq=0(불변).
     if "blockOrder" in long.columns:
         seq = (
             pl.when(pl.col("disclosureKey").is_null())

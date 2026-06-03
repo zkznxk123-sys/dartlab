@@ -87,8 +87,11 @@ def _buildOne(args: tuple[str, str, str]) -> tuple[str, int, int, float]:
             ref = pl.read_parquet(refPath)
         result = buildPanel(code, refDf=ref, outBaseDir=Path(outBaseDir), overwrite=True, verbose=False)
         return (code, len(result), sum(result.values()), time.perf_counter() - t0)
-    except (OSError, ValueError, RuntimeError, pl.exceptions.PolarsError) as exc:
-        _log.warning("buildPanel 실패 %s: %s", code, exc)
+    except (OSError, ValueError, RuntimeError, MemoryError, pl.exceptions.PolarsError) as exc:
+        # MemoryError 포함 — 거대 회사(금융지주 등 대용량 XML)가 worker 를 죽여 전체 Pool 을 깨지 않게 흡수.
+        # 실패(failed) 로 기록 → resumable 재실행(skipExisting)이 메모리 여유 시 재시도. maxtasksperchild 가
+        # 누적 힙을 주기 방출하므로 후속 종목은 정상 진행.
+        _log.warning("buildPanel 실패 %s: %s", code, type(exc).__name__)
         return (code, 0, 0, time.perf_counter() - t0)
 
 
@@ -98,6 +101,7 @@ def buildPanelAll(
     outBaseDir: str | Path = "data/dart/panel",
     codes: list[str] | None = None,
     numWorkers: int = 8,
+    skipExisting: bool = True,  # resumable — 이미 빌드된 {code}.parquet 건너뜀 (크래시 후 재실행 이어감)
     progressEvery: int = 50,
     verbose: bool = True,
 ) -> dict[str, tuple[int, int]]:
@@ -161,12 +165,18 @@ def buildPanelAll(
         baseDir = Path(_cfg.dataDir) / "original" / "dart" / "docs"
         codes = sorted([d.name for d in baseDir.iterdir() if d.is_dir()])
 
-    if verbose:
-        _log.info("buildPanelAll: %d 종목, %d workers", len(codes), numWorkers)
-
     refPathStr = str(refPath if refPath is not None else panelXbrlRefPath())  # 패키지 동봉 ref (data/ 아님)
     outBaseStr = str(outBaseDir)
     Path(outBaseStr).mkdir(parents=True, exist_ok=True)
+
+    if skipExisting:  # resumable — 이미 빌드 산출 있는 종목 제외 (크래시·중단 후 재실행이 이어감)
+        total = len(codes)
+        codes = [c for c in codes if not (Path(outBaseStr) / f"{c}.parquet").exists()]
+        if verbose:
+            _log.info("buildPanelAll: skipExisting — %d/%d 잔여 (%d 이미 빌드)", len(codes), total, total - len(codes))
+
+    if verbose:
+        _log.info("buildPanelAll: %d 종목, %d workers", len(codes), numWorkers)
 
     args = [(c, refPathStr, outBaseStr) for c in codes]
     result: dict[str, tuple[int, int]] = {}
@@ -174,7 +184,10 @@ def buildPanelAll(
     failed = 0
     totalRows = 0
     t0 = time.perf_counter()
-    with mp.Pool(processes=numWorkers, initializer=_initWorker, initargs=(refPathStr,)) as pool:
+    # maxtasksperchild — worker 를 N 종목마다 재시작해 Polars Rust 힙 누적(gc.collect 회수 0, OOM 가드) 방출.
+    # ref token pre-compute 재로드(~1s)는 종목 8개당 1회라 무시 가능. 전수(2928) 빌드 메모리 안전 필수
+    # (free RAM 15GB 환경: workers 2 + per-child 8 권장 — 거대 금융지주 XML spike OOM 회피).
+    with mp.Pool(processes=numWorkers, initializer=_initWorker, initargs=(refPathStr,), maxtasksperchild=8) as pool:
         for code, pcount, rowCount, _elapsed in pool.imap_unordered(_buildOne, args, chunksize=4):
             result[code] = (pcount, rowCount)
             processed += 1
@@ -232,6 +245,7 @@ def _main() -> None:
         "--dominanceRatio", type=float, default=0.8, help="noteTaxonomy 최빈코드 지배비율 하한 (모호제목 제외)"
     )
     ap.add_argument("--workers", type=int, default=8, help="Pool workers (OOM 가드: polars 힙 200~500MB/종목, ≤4 권장)")
+    ap.add_argument("--rebuild", action="store_true", help="--all 시 이미 빌드된 종목도 재빌드 (기본=resumable skip)")
     args = ap.parse_args()
 
     refDf: pl.DataFrame | None = None
@@ -262,7 +276,7 @@ def _main() -> None:
         return
 
     if args.all:
-        buildPanelAll(refPath=args.ref, outBaseDir=args.out, numWorkers=args.workers)
+        buildPanelAll(refPath=args.ref, outBaseDir=args.out, numWorkers=args.workers, skipExisting=not args.rebuild)
         return
 
     codes = [c.strip() for c in args.codes.split(",") if c.strip()] or None
