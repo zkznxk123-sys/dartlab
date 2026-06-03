@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from dartlab.pipeline.changed import changedPath, readChanged, writeChanged
 from dartlab.pipeline.hashing import diffChanged, fileHash, snapshotHashes
+from dartlab.pipeline.hfUpload import uploadCategoryToHf
+from dartlab.pipeline.seed import seedCategoriesFromHf
 from dartlab.pipeline.types import PipelineMode, StageReport, StageResult, StageSpec
 
 __all__ = [
@@ -30,4 +32,6 @@ __all__ = [
     "fileHash",
     "snapshotHashes",
     "diffChanged",
+    "uploadCategoryToHf",
+    "seedCategoriesFromHf",
 ]
