@@ -193,47 +193,23 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
         if edgarDf is not None:
             return edgarDf
 
-    # plan snazzy-wibbling-origami PR-4a-ii — DART sections artifact 우선 + 옛 호환 schema 변환.
-    # 옛 docs.parquet (long: year/section_title/section_content) 와 동일 schema 노출 →
-    # 호출자 (sentiment/risk/changes/disclosureDiff/edges 등 D.1 10 모듈) 0 변경.
-    # docs.parquet 폐기 (PR-4b) 후에도 sections artifact 만으로 동일 분석 가능.
-    from dartlab.providers.dart.docs.sections.sectionsStorage import (
-        hasSectionsArtifact,
-        loadSectionsLong,
-    )
+    # docs.parquet/sections artifact 농장 은퇴 → L1.5 frame.sections SSOT(panel 섹션 본문).
+    # 옛 docs.parquet (long: year/section_title/section_content) 호환 schema 노출 →
+    # 호출자 (sentiment/risk/changes/disclosureDiff 등 D.1 모듈) 0 변경.
+    from dartlab.frame.sections import sectionTexts
 
-    if hasSectionsArtifact(stockCode):
-        long = loadSectionsLong(stockCode, columns=None)
-        if long is not None and not long.is_empty():
-            # period (예 "2025Q1" / "2025Q4" annual) → year (4 자리) + report_kind 분리.
-            # sections artifact 는 annual 을 "YYYYQ4" 양식으로 emit.
-            try:
-                exprs = [
-                    pl.col("period").str.slice(0, 4).alias("year"),
-                    pl.col("period").str.slice(4).alias("report_kind"),
-                ]
-                # ed598c7bd schema = section_content / section_title 직접 보유 → alias 불필요.
-                # 옛 옛 schema (content_plain / content / topic) 만 alias.
-                if "section_content" not in long.columns:
-                    if "content_plain" in long.columns:
-                        exprs.append(pl.col("content_plain").alias("section_content"))
-                    elif "content" in long.columns:
-                        exprs.append(pl.col("content").alias("section_content"))
-                if "section_title" not in long.columns and "topic" in long.columns:
-                    exprs.append(pl.col("topic").alias("section_title"))
-                return long.with_columns(exprs)
-            except (pl.exceptions.ComputeError, pl.exceptions.SchemaError) as exc:
-                log.warning("sections artifact → docs 호환 schema 변환 실패 (%s): %s", stockCode, exc)
-                # fallback path 로 진행
-
-    # 옛 docs.parquet 직접 read (artifact 부재 시 또는 변환 실패).
-    root = _scanDataRoot()
-    path = root / "dart" / "docs" / f"{stockCode}.parquet"
-    if not path.exists():
-        log.warning("docs parquet 없음: %s", path)
+    long = sectionTexts(stockCode)
+    if long is None or long.is_empty():
+        log.warning("panel 섹션 본문 없음: %s", stockCode)
         return None
-
-    return pl.read_parquet(path)
+    # panel period (예 "2025Q1" / "2025Q4") → year(4 자리) + report_kind 분리,
+    # sectionLeaf → section_title, contentRaw → section_content (옛 docs 호환).
+    return long.with_columns(
+        pl.col("period").str.slice(0, 4).alias("year"),
+        pl.col("period").str.slice(4).alias("report_kind"),
+        pl.col("sectionLeaf").alias("section_title"),
+        pl.col("contentRaw").alias("section_content"),
+    )
 
 
 def _looksLikeEdgarTicker(stockCode: str) -> bool:
