@@ -7,7 +7,6 @@
 
 import { canonicalChapter, canonicalRank } from './canonical';
 import { marketForCode, viewerUrl } from './dartUrl';
-import { sectionKeyFor } from './sectionKey';
 import type { PanelBundle, PanelRow, PanelTocBlock, PanelTocChapter, PanelTocResponse, PanelTocSection } from './types';
 
 // panel parquet 한 leaf 행 (필요 컬럼). 브라우저 read 컬럼 목록은 panelLoad.READ_COLUMNS.
@@ -36,6 +35,7 @@ function sortPeriodsDesc(periods: string[]): string[] {
 }
 
 const SEP = '␟'; // ␟
+const sectionKeyFor = (chapter: string, sectionLeaf: string): string => `${chapter}${SEP}${sectionLeaf}`;
 
 // ── alignNotes: 옛 split 주석행(null key) → (scope,정규화제목) 표준 NT_ 정렬 (회사 own 뼈대 우선, 전역 fallback) ──
 const NOTE_TITLE_NORM = /[()·\s]/g; // Python NOTE_TITLE_NORM_PATTERN

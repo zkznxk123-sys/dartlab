@@ -3,18 +3,7 @@
 
 import type { PanelRow } from './types';
 
-export const SECTION_KEY_SEP = '␟';
-
-// 인접 period 셀 비교 → 같음/변경/신규. allPeriods 는 fetch window(+1) 로 직전 period 조회.
-export function cellStatus(row: PanelRow, period: string, allPeriods: string[]): 'new' | 'changed' | 'same' {
-	const cur = (row.cells[period] ?? '').trim();
-	if (!cur) return 'same';
-	const idx = allPeriods.indexOf(period);
-	const prevP = idx >= 0 ? allPeriods[idx + 1] : undefined;
-	const prev = prevP ? (row.cells[prevP] ?? '').trim() : '';
-	if (!prev) return 'new';
-	return cur !== prev ? 'changed' : 'same';
-}
+const SECTION_KEY_SEP = '␟';
 
 // 행 유니크 키 — disclosureKey(구조화) 또는 NARR:: 식별(서술). Python rowIdentity 와 동일 식별축.
 export function rowKey(r: PanelRow): string {

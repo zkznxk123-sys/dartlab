@@ -2,7 +2,7 @@
 // panel 셀 = raw DART XML (무손실, 대문자 정부 태그). 브라우저 렌더 위해 표준 html 로 정규화 + sanitize.
 
 // ── DART 대문자 XML → 표준 html 태그 맵 ──
-export const DART_TAG_MAP: Record<string, string> = {
+const DART_TAG_MAP: Record<string, string> = {
 	'TABLE-GROUP': 'div',
 	TABLE: 'table',
 	THEAD: 'thead',
@@ -63,8 +63,8 @@ export function splitHtmlAndText(value: string): Array<['html' | 'text', string]
 	return out;
 }
 
-export const PERIOD_LABEL_RE = /^(?:당기|전기|당기말|전기말|당분기|전분기|당반기|전반기|당기누적|전기누적|3개월|누적|보고기간말)$/;
-export const UNIT_RE = /\(?\s*단위\s*[:：]?\s*[^)]+\)?/;
+const PERIOD_LABEL_RE = /^(?:당기|전기|당기말|전기말|당분기|전분기|당반기|전반기|당기누적|전기누적|3개월|누적|보고기간말)$/;
+const UNIT_RE = /\(?\s*단위\s*[:：]?\s*[^)]+\)?/;
 const PERIOD_DATE_RE = /^제\s*\d+\s*기/;
 
 // HTML <table> 직전 paragraph 가 (단위 …)/회기일자/period label 패턴이면 표 caption/unit 흡수.
@@ -101,94 +101,4 @@ export function stripInlineTags(s: string): string {
 		.replace(/[ \t]*\n[ \t]*/g, '\n')
 		.replace(/\n{3,}/g, '\n\n')
 		.trim();
-}
-
-// ── markdown sub-table 파서 (옛 셀 호환 — panel raw XML 엔 드묾) ──
-
-export interface MarkdownSubTable {
-	caption?: string;
-	unit?: string;
-	rows: string[][];
-}
-
-function parseRawCells(line: string): string[] {
-	return line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
-}
-
-export function parseMarkdownSubTables(md: string): MarkdownSubTable[] {
-	const lines = md.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('|'));
-	const blocks: MarkdownSubTable[] = [];
-	let cur: { rows: string[][] } = { rows: [] };
-	const isSep = (cells: string[]) => cells.length > 0 && cells.every((c) => /^[:\-\s]*$/.test(c));
-	const isAllEmpty = (cells: string[]) => cells.every((c) => c === '');
-	const flush = () => {
-		if (cur.rows.length === 0) return;
-		blocks.push({ rows: cur.rows });
-		cur = { rows: [] };
-	};
-	for (const line of lines) {
-		const cells = parseRawCells(line);
-		if (isAllEmpty(cells)) {
-			flush();
-			continue;
-		}
-		if (isSep(cells)) continue;
-		cur.rows.push(cells);
-	}
-	flush();
-	return blocks;
-}
-
-export function refineSubTable(block: MarkdownSubTable): MarkdownSubTable {
-	const rows = [...block.rows];
-	let caption = block.caption;
-	let unit = block.unit;
-	const consume = (): boolean => {
-		if (rows.length === 0) return false;
-		const first = rows[0];
-		const nonEmpty = first.filter((c) => c !== '');
-		if (nonEmpty.length === 0) {
-			rows.shift();
-			return true;
-		}
-		const looksLikeHeading = (s: string): boolean => {
-			if (s.length === 0 || s.length > 25) return false;
-			if (/[\d,]/.test(s)) return false;
-			return /[가-힣]/.test(s);
-		};
-		if (nonEmpty.length === 1) {
-			const v = nonEmpty[0];
-			if (PERIOD_LABEL_RE.test(v) || /(에 대한 공시|세부내역|변동내역|내역)$/.test(v) || looksLikeHeading(v)) {
-				caption = caption ? `${caption} · ${v}` : v;
-				rows.shift();
-				return true;
-			}
-		}
-		if (nonEmpty.length === 2) {
-			const [a, b] = nonEmpty;
-			if (PERIOD_LABEL_RE.test(a) && UNIT_RE.test(b)) {
-				caption = caption ? `${caption} · ${a}` : a;
-				unit = unit || b.replace(/^\(|\)$/g, '');
-				rows.shift();
-				return true;
-			}
-			if (UNIT_RE.test(a) && (!b || PERIOD_LABEL_RE.test(b))) {
-				unit = unit || a.replace(/^\(|\)$/g, '');
-				if (b) caption = caption ? `${caption} · ${b}` : b;
-				rows.shift();
-				return true;
-			}
-		}
-		if (nonEmpty.length === 1 && UNIT_RE.test(nonEmpty[0])) {
-			unit = unit || nonEmpty[0].replace(/^\(|\)$/g, '');
-			rows.shift();
-			return true;
-		}
-		return false;
-	};
-	let safety = 4;
-	while (safety-- > 0 && consume()) {
-		/* loop */
-	}
-	return { caption, unit, rows };
 }
