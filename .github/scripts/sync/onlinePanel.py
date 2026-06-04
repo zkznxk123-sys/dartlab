@@ -85,7 +85,7 @@ def main() -> int:
     import polars as pl
 
     from dartlab.gather.dart.client import DartClient
-    from dartlab.gather.dart.document import buildTargetsFromDocsParquet, streamZipBytes
+    from dartlab.gather.dart.document import buildTargetsFromFilingList, streamZipBytes
     from dartlab.providers.dart.panel.build import buildPanelFromStream, panelXbrlRefPath
 
     refPath = panelXbrlRefPath()
@@ -100,7 +100,7 @@ def main() -> int:
     totalRows = 0
     print(f"[onlinePanel] 대상 {len(codes)} 종목 — fetch workers={workers} (디스크 zip 0)")
     for code in codes:
-        targets = buildTargetsFromDocsParquet(codes=[code])  # docs.parquet rcept (per-corp)
+        targets = buildTargetsFromFilingList(client, [code])  # 공시목록 API rcept (per-corp, docs.parquet 무관)
         if not targets:
             continue
         # 종목 단위 stream — bytes 메모리 bound (Q4 대형 zip 폭주 가드).

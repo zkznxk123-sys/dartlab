@@ -2,7 +2,7 @@
 
 옛 위치: providers/dart/openapi/bulkZipFetcher.py (수집 일원화 — fetch 는 gather 전담).
 streamZipBytes/fetchZipsParallel 는 DartClient + 네트워크가 필요하므로 import + 순수
-헬퍼(FetchStats·safeWriteBytes·buildTargetsFromDocsParquet)만 검증한다.
+헬퍼(FetchStats·safeWriteBytes·buildTargetsFromFilingList)만 검증한다.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ def test_imports() -> None:
     """공개 fetch 표면 import smoke (실 네트워크 0)."""
     from dartlab.gather.dart.document import (  # noqa: F401
         FetchStats,
-        buildTargetsFromDocsParquet,
+        buildTargetsFromFilingList,
         collectAllOriginalZips,
         fetchZipsParallel,
         safeWriteBytes,
@@ -51,9 +51,10 @@ def test_safe_write_bytes_atomic(tmp_path: Path) -> None:
     assert not (dest.parent / "rcept.zip.tmp").exists()
 
 
-def test_build_targets_missing_dir_empty(tmp_path: Path) -> None:
-    """buildTargetsFromDocsParquet — docs parquet 부재 시 빈 list (네트워크 0)."""
-    from dartlab.gather.dart.document import buildTargetsFromDocsParquet
+def test_build_targets_empty_codes_no_network() -> None:
+    """buildTargetsFromFilingList — 빈 codes 면 빈 list (listFilings 미호출, 네트워크 0)."""
+    from dartlab.gather.dart.document import buildTargetsFromFilingList
 
-    out = buildTargetsFromDocsParquet(codes=["005930"], docsDir=tmp_path / "nope")
+    # client=None 이어도 빈 codes 는 루프 0 회 → listFilings 호출 없이 빈 list.
+    out = buildTargetsFromFilingList(None, [])  # type: ignore[arg-type]
     assert out == []
