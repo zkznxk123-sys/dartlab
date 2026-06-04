@@ -14,7 +14,7 @@ whenToUse:
   - 매출 CFO 매출채권 trace
   - snakeId coverage
 inputs:
-  - Company.show BS IS CF
+  - Company.panel BS IS CF
 outputs:
   - metric to source row mapping
   - missing metric list
@@ -90,9 +90,9 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 

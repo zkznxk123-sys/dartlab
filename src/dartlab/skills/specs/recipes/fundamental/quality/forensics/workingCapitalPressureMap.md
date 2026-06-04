@@ -15,7 +15,7 @@ whenToUse:
   - 재고 매출 gap
   - 매입채무 회전
 inputs:
-  - Company.show BS IS
+  - Company.panel BS IS
 outputs:
   - DSO DIO DPO CCC
   - inventory growth minus revenue growth
@@ -91,9 +91,9 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 

@@ -16,7 +16,7 @@ whenToUse:
   - 원표와 공시만으로 깊이 분석
 inputs:
   - 기업 코드 또는 ticker
-  - Company.show 원표
+  - Company.panel 원표
   - section text
   - disclosure events
   - optional scan primitive rows
@@ -107,7 +107,7 @@ examples:
   - L1.5 회계 포렌식 전체 실행
 audiences:
   llm: 이 스킬은 L2 금지 조건이 핵심이다. capabilityRefs는 EngineCall로 우선 호출하고, 공개 호출 블록은 L1.5 memo builder용 RunPython fallback으로만 실행한다.
-  agent: ReadSkill 결과에서 이 스킬이 상위에 오면 Company.show, disclosure, scan primitive를 EngineCall로 실행하고 L2 capability를 쓰지 않는다. helper 결합이 필요할 때만 RunPython fallback을 쓴다.
+  agent: ReadSkill 결과에서 이 스킬이 상위에 오면 Company.panel, disclosure, scan primitive를 EngineCall로 실행하고 L2 capability를 쓰지 않는다. helper 결합이 필요할 때만 RunPython fallback을 쓴다.
   human: 깊은 분석처럼 보이는 결론보다, 어떤 원표와 공시 증거가 어떤 엔진 후보를 만들었는지 확인하는 절차다.
 humanIntro: "deepDive는 포렌식 팩의 실제 사용 경로다. 여러 세부 ledger를 하나로 묶되, 결론은 항상 반증 조건과 함께 남긴다. 나중에 일부 신호가 L2 엔진으로 승격돼도 이 스킬은 원표 검산 절차로 계속 사용된다."
 lastUpdated: "2026-05-17"
@@ -116,7 +116,7 @@ validatedAt: '2026-05-27'
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다.
 
 ```python
 import dartlab
@@ -127,16 +127,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 

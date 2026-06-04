@@ -15,7 +15,7 @@ whenToUse:
   - 유상증자 전환사채 재무 압력
 inputs:
   - Company.disclosure rows
-  - Company.show BS IS CF
+  - Company.panel BS IS CF
 outputs:
   - event match rows
   - matched signal
@@ -91,9 +91,9 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
@@ -127,7 +127,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-Company.disclosure의 report name/date와 Company.show 원표 최신 회계기간을 함께 둔다.
+Company.disclosure의 report name/date와 Company.panel 원표 최신 회계기간을 함께 둔다.
 
 ### 3. 메커니즘 분석
 

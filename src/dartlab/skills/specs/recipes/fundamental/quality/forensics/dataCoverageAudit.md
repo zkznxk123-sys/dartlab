@@ -7,14 +7,14 @@ scope: builtin
 status: curated
 graphTier: L1.5
 cluster: incubator.forensics
-purpose: 포렌식 분석 전에 Company.show 원표와 L1.5 helper가 실제로 어떤 기간·계정 coverage를 갖는지 확인해 결손을 0으로 채우는 회귀를 막는다. 트리거 — '포렌식 데이터 coverage', '원표 결손 점검'.
+purpose: 포렌식 분석 전에 Company.panel 원표와 L1.5 helper가 실제로 어떤 기간·계정 coverage를 갖는지 확인해 결손을 0으로 채우는 회귀를 막는다. 트리거 — '포렌식 데이터 coverage', '원표 결손 점검'.
 whenToUse:
   - 포렌식 데이터 coverage
   - 원표 결손 점검
   - BS IS CF 가용성
   - L1.5 helper 입력 검산
 inputs:
-  - Company.show BS IS CF
+  - Company.panel BS IS CF
 outputs:
   - coverage table
   - latest period
@@ -91,9 +91,9 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
@@ -120,7 +120,7 @@ coverage가 충분하면 `usable`, 핵심 원표 일부가 없으면 `usableWith
 
 ### 2. 핵심 근거 수집
 
-`Company.show("IS"|"BS"|"CF")` 반환 DataFrame의 row 수, 기간 컬럼 수, 최신 period, 표준 metric 매핑 수를 모은다.
+`Company.panel("IS"|"BS"|"CF")` 반환 DataFrame의 row 수, 기간 컬럼 수, 최신 period, 표준 metric 매핑 수를 모은다.
 
 ### 3. 메커니즘 분석
 

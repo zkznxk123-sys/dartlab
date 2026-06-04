@@ -15,7 +15,7 @@ whenToUse:
   - CFO 순이익 괴리
   - 매출 신뢰도 원표 검증
 inputs:
-  - Company.show IS BS CF
+  - Company.panel IS BS CF
 outputs:
   - revenue growth
   - receivable growth
@@ -91,9 +91,9 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 

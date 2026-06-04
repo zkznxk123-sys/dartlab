@@ -24,9 +24,9 @@ linkedSkills:
   - recipes.fundamental.quality.forensics.eventToStatementMatcher
   - engines.company
 inputs:
-  - Company.show 감사인 / 감사보수 / 사업보고서 감사관련 섹션
+  - Company.panel 감사인 / 감사보수 / 사업보고서 감사관련 섹션
   - Company.disclosure (감사인 변경·감사의견·정정)
-  - Company.show notes 감사보고서 (의견·강조사항·핵심감사사항)
+  - Company.panel notes 감사보고서 (의견·강조사항·핵심감사사항)
   - scan disclosureRisk / governance (감사인 횡단)
 outputs:
   - 감사인 변경 시계열 ledger
@@ -109,7 +109,7 @@ visualRefs:
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 감사인 독립성 — 주석 패턴.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 감사인 독립성 — 주석 패턴.
 
 ```python
 import dartlab
@@ -121,16 +121,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -299,7 +299,7 @@ graph LR
 
 1. `ReadSkill` 에서 감사인·감사의견 질문이면 본 recipe 선정.
 2. target stockCode 확인.
-3. `Company.show("감사인")` 또는 사업보고서 감사 섹션 fetch.
+3. `Company.panel("감사인")` 또는 사업보고서 감사 섹션 fetch.
 4. `Company.disclosure("감사인")` 변경 timestamp + 사유.
 5. `Company.disclosure("감사의견")` 의견·강조사항·KAM.
 6. `scan("disclosureRisk")` 횡단 비교.

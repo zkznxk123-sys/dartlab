@@ -132,7 +132,7 @@ prebuilt scan 기준일, 결손값, 축별 score 정의가 다르다. 후보 row
 
 ### 5. 후속 모니터링
 
-상위 후보는 `deepDive`를 통해 Company.show 원표 기반으로 다시 실행한다.
+상위 후보는 `deepDive`를 통해 Company.panel 원표 기반으로 다시 실행한다.
 
 ## 대표 반환 형태
 

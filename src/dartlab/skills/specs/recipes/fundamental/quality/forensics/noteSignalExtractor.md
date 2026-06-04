@@ -15,7 +15,7 @@ whenToUse:
   - 특수관계자 거래 신호
   - 계속기업 키워드
 inputs:
-  - Company.show section topics
+  - Company.panel section topics
   - filing section text
 outputs:
   - note signal rows
@@ -92,16 +92,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
