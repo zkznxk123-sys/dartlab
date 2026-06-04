@@ -132,7 +132,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "RunPython": ToolSpec(
         "RunPython",
-        "**EngineCall 결과 후처리·다단 조합 전용**. Polars group_by / sort / 시계열 / 여러 회사 비교처럼 단일 capability 로 못 푸는 가공일 때만. **dartlab API 를 여기서 1 회 호출하는 패턴 절대 금지** — `dartlab.scan(...)` / `Company('xxx').show(...)` 같은 단일 호출은 EngineCall 의 일이다. 결과는 emit_result(table=..., values=..., date=...) keyword 형식 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: dartlab, pl(polars), normalizeColumn, columnsFor, availableTopics.",
+        "**EngineCall 결과 후처리·다단 조합 전용**. Polars group_by / sort / 시계열 / 여러 회사 비교처럼 단일 capability 로 못 푸는 가공일 때만. **dartlab API 를 여기서 1 회 호출하는 패턴 절대 금지** — `dartlab.scan(...)` / `Company('xxx').panel(...)` 같은 단일 호출은 EngineCall 의 일이다. 결과는 emit_result(table=..., values=..., date=...) keyword 형식 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: dartlab, pl(polars), normalizeColumn, columnsFor, availableTopics.",
         {
             "type": "object",
             "properties": {"code": {"type": "string"}, "runId": {"type": "string"}},

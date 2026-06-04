@@ -98,7 +98,7 @@ def _normalizeArgsDict(plan: dict[str, Any]) -> None:
 
 def _apiRef(plan: dict[str, Any]) -> str:
     raw = str(plan.get("apiRef") or "").strip()
-    # 방어적 파서 — 모델이 'Company.show TSLA IS freq=Q' 처럼 인자까지 apiRef 에 합쳐
+    # 방어적 파서 — 모델이 'Company.panel TSLA IS freq=Q' 처럼 인자까지 apiRef 에 합쳐
     # 보내는 회귀 케이스. 첫 토큰을 apiRef 로, 나머지는 args/kwargs 로 흡수.
     if raw and " " in raw:
         parts = raw.split()

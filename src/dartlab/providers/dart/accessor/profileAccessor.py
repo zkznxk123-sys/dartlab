@@ -422,7 +422,7 @@ class _ProfileAccessor:
             - warnings (stdlib).
 
         AIContext:
-            AI 가 본 함수 호출 X. 발견 시 c.show 로 migrate.
+            AI 가 본 함수 호출 X. 발견 시 c.panel 로 migrate.
 
         LLM Specifications:
             AntiPatterns:

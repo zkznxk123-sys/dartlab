@@ -826,7 +826,7 @@ class Company:
 
         AIContext:
             Ask Workbench Company facade — LLM 이 첫 호출하는 KR provider 엔트리.
-            ``co.show(topic)`` / ``co.search(query)`` 등 모든 후속 호출의 self.
+            ``co.panel(topic)`` / ``co.search(query)`` 등 모든 후속 호출의 self.
 
         LLM Specifications:
             AntiPatterns:
@@ -1997,7 +1997,7 @@ class Company:
         return financeStmt(self, sjDiv, freq=freq, scope=scope)
 
     # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
-    # 사용자는 c.panel("IS") / c.show.IS() / c.panel("IS", freq="Y", scope="separate") 사용.
+    # 사용자는 c.panel("IS") / c.panel("IS", freq="Y", scope="separate") 사용.
 
     @property
     def sections(self) -> pl.DataFrame | None:
@@ -2146,7 +2146,7 @@ class Company:
             - 한 회사 공시를 항목 × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.
 
         Guide:
-            - `c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel.show(key)`. 회사간은 모듈
+            - `c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel(key)`. 회사간은 모듈
               레벨 `crossCompany` (회사 단위 facade 밖).
 
         AIContext:

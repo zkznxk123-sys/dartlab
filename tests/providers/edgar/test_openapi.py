@@ -387,7 +387,7 @@ def test_api_saved_data_is_immediately_usable_by_company(monkeypatch, tmp_path):
     assert verified["sampleDocTrace"]["primarySource"] == "docs"
     assert verified["bsTrace"]["primarySource"] == "finance"
     assert company.trace("10-K::item1Business")["primarySource"] == "docs"
-    assert company.show("BS") is not None
+    assert company.panel("BS") is not None
 
 
 def test_company_resolveTickerRow_falls_back_to_listed_universe(monkeypatch, tmp_path):

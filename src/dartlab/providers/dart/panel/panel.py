@@ -254,7 +254,7 @@ class Panel(pl.DataFrame):
         """섹션 행 검색 + 강한 소스(finance/report) 주입 — facade 진입점.
 
         ``source="auto"``(기본): 강한 소스 topic(BS/IS/CF/ratios/inventory/dividend…)은 facade 가
-        주입한 ``c.show`` 로 위임(finance/report 가 raw 공시보다 강함). canonicalKey·한글 섹션명은
+        주입한 ``_showFn``(내부 _showImpl) 로 위임(finance/report 가 raw 공시보다 강함). canonicalKey·한글 섹션명은
         raw 공시(panel) 행 검색. ``source="raw"`` 면 강제로 raw 공시만. 주입(``_showFn``/``_strongFn``)은
         ``Company.panel`` facade 가 set — standalone ``Panel(code)`` 는 주입 없어 항상 raw 검색.
 

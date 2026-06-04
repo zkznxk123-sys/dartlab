@@ -1283,7 +1283,7 @@ class TestEdgarCompanyInterface:
 
         c = Company("AAPL")
         for stmt in ("BS", "IS", "CF"):
-            df = c.show(stmt)
+            df = c.panel(stmt)
             assert isinstance(df, pl.DataFrame)
             assert df.height > 0
 
@@ -1292,12 +1292,12 @@ class TestEdgarCompanyInterface:
 
         c = Company("AAPL")
         # ratios는 블록 1개 → auto unwrap으로 바로 데이터 반환 (DART 정합)
-        df = c.show("ratios")
+        df = c.panel("ratios")
         assert isinstance(df, pl.DataFrame)
         assert "분류" in df.columns
         assert "항목" in df.columns
-        # block=0 명시도 동일 결과
-        df2 = c.show("ratios", 0)
+        # 재호출도 동일 결과 (panel 은 단일 블록 finance auto-unwrap)
+        df2 = c.panel("ratios")
         assert isinstance(df2, pl.DataFrame)
         assert "분류" in df2.columns
 
@@ -1305,14 +1305,14 @@ class TestEdgarCompanyInterface:
         from dartlab.providers.edgar.company import Company
 
         c = Company("AAPL")
-        biz = c.show("10-K::item1Business")
+        biz = c.panel("10-K::item1Business")
         assert biz is None or isinstance(biz, pl.DataFrame)
 
     def test_show_nonexistent_topic_returns_none(self):
         from dartlab.providers.edgar.company import Company
 
         c = Company("AAPL")
-        assert c.show("completelyFakeTopic") is None
+        assert c.panel("completelyFakeTopic") is None
 
     def test_trace_finance_topic(self):
         from dartlab.providers.edgar.company import Company
@@ -1362,7 +1362,7 @@ class TestEdgarCompanyInterface:
         from dartlab.providers.edgar.company import Company
 
         c = Company("AAPL")
-        df = c.show("BS", 0, period="2024")
+        df = c.panel("BS", period="2024")
         assert isinstance(df, pl.DataFrame)
         assert "2024" in df.columns
 

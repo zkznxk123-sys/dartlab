@@ -720,7 +720,7 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
         - scope → scopeKey: consolidated→CFS / separate→OFS.
         - 시그니처 검증 — freq/scope 허용 값 외 → ValueError.
         - ``_hasFinance=False`` → None (silent).
-        - 사용자 직접 호출 X (api-contract). c.show / c.select / analysis 모듈만 사용.
+        - 사용자 직접 호출 X (api-contract). c.panel / c.select / analysis 모듈만 사용.
 
     Args:
         company: Company 인스턴스.
@@ -740,8 +740,8 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
         >>> # periods  # ["2024", "2023", ...]
 
     Guide:
-        - "사용자는 직접 호출 X" — c.show / c.select / analysis 모듈만.
-        - "DataFrame 형태 필요" → ``financeStmt`` 또는 ``c.show``.
+        - "사용자는 직접 호출 X" — c.panel / c.select / analysis 모듈만.
+        - "DataFrame 형태 필요" → ``financeStmt`` 또는 ``c.panel``.
         - "ratios 계산 input" → 본 함수 → ``calcRatioSeries``.
 
     SeeAlso:
