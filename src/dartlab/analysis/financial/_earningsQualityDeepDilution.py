@@ -261,7 +261,17 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
 
     audit_flags: list[dict] = []
     try:
-        audit_df = company.show("auditOpinion")
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionRows
+
+        _code = getattr(company, "stockCode", None)
+        _r = (
+            (sectionRows(_code, sectionPattern="감사의견") or sectionRows(_code, sectionPattern="감사보고서"))
+            if _code
+            else []
+        )
+        audit_df = pl.DataFrame(_r) if _r else None
         if audit_df is not None and hasattr(audit_df, "to_dicts"):
             seen: set = set()
             for row in audit_df.to_dicts():

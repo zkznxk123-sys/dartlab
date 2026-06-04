@@ -194,9 +194,14 @@ def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | N
     """
     import re
 
-    from dartlab.core.utils.helpers import parseNumStr
+    import polars as pl
 
-    result = company.show("investmentInOtherDetail")
+    from dartlab.core.utils.helpers import parseNumStr
+    from dartlab.providers.dart.sections import sectionRows
+
+    _code = getattr(company, "stockCode", None)
+    _r = (sectionRows(_code, sectionPattern="타법인") or sectionRows(_code, sectionPattern="출자")) if _code else []
+    result = pl.DataFrame(_r) if _r else None
     if result is None:
         return None
 

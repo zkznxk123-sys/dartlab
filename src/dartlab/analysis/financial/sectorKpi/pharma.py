@@ -67,18 +67,17 @@ def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
 
     # ── 파이프라인 단계별 감지 (사업개요/연구개발 텍스트) ──
     try:
-        topics = ["사업의내용", "연구개발활동", "사업개요"]
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionTexts
+
+        # show 은퇴 → 공통파서 panel 본문(사업의 내용/연구개발/사업 개요 섹션) 텍스트
+        _code = getattr(company, "stockCode", None)
+        _texts = sectionTexts(_code) if _code else None
         text = ""
-        for topic in topics:
-            try:
-                df = company.show(topic)
-                if df is not None:
-                    if hasattr(df, "to_dicts"):
-                        text += " ".join(str(r) for r in df.to_dicts())
-                    else:
-                        text += str(df)
-            except (AttributeError, ValueError, KeyError):
-                continue
+        if _texts is not None and not _texts.is_empty():
+            _sub = _texts.filter(pl.col("sectionLeaf").str.contains("사업의 내용|연구개발|사업의 개요"))
+            text = " ".join(c for c in _sub["contentRaw"].to_list() if c)
 
         if text:
             stages: dict[str, int] = {}

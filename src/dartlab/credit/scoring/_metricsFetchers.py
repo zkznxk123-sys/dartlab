@@ -55,10 +55,15 @@ def _fetchSegmentComposition(company) -> dict | None:
     최신 연도 컬럼 하나만 사용하여 연도별 부문명 변경(IM→DX 등) 중복 방지.
     """
     try:
-        try:
-            df = company.show("segments")
-        except (AttributeError, ValueError):
-            df = None
+        # show 은퇴 → 공통파서 panel 부문 표 (헤더키 행). 옛 부문×year pivot 과 구조 달라
+        # year 컬럼 없으면 아래 yearCols 로직이 graceful None.
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionRows
+
+        _code = getattr(company, "stockCode", None)
+        _r = sectionRows(_code, sectionPattern="부문") if _code else []
+        df = pl.DataFrame(_r) if _r else None
         if df is None or not hasattr(df, "columns"):
             return None
 

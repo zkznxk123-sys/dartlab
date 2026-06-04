@@ -87,8 +87,14 @@ def calcSotpNav(
     listed = 0
     unlisted = 0
     try:
-        inv = company.show("investedCompany")
-        if hasattr(inv, "iter_rows"):
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionRows
+
+        _code = getattr(company, "stockCode", None)
+        _r = (sectionRows(_code, sectionPattern="타법인") or sectionRows(_code, sectionPattern="출자")) if _code else []
+        inv = pl.DataFrame(_r) if _r else None
+        if inv is not None and hasattr(inv, "iter_rows"):
             for row in inv.iter_rows(named=True):
                 name = row.get("법인명") or ""
                 ratio_raw = row.get("기말잔액(지분율)") or ""

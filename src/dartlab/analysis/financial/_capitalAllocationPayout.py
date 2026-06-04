@@ -404,7 +404,13 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
     AIContext:
         "자사주 매입 현황" 답변 시 acquired + retired 인용.
     """
-    result = company.show("treasuryStock")
+    import polars as pl
+
+    from dartlab.providers.dart.sections import sectionRows
+
+    _code = getattr(company, "stockCode", None)
+    _r = sectionRows(_code, sectionPattern="자기주식") if _code else []
+    result = pl.DataFrame(_r) if _r else None
 
     # EDGAR fallback: XBRL companyfacts에서 자사주 데이터 추출
     market = getattr(company, "market", "KR")
