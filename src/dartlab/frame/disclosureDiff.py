@@ -1,80 +1,63 @@
-"""disclosureDiff — DART 공시 본문 시계열 sentence-level diff.
+"""disclosureDiff — DART 공시 본문 시계열 sentence-level diff (panel SSOT).
 
-같은 회사의 두 보고서 (예: 2024.09 분기보고서 vs 2025.09 분기보고서) 의
-section_title 매칭 후 section_content 의 unified diff 를 산출한다. 외부 LLM
-은 PDF/HTML 단발 만 보고 동일 회사 시계열 비교를 하지 않는다 — 본 모듈은
-dartlab 의 DART 공시 시계열 parquet 자산 (gather.dartDoc 산출물) 위에서만
-성립하는 *시계열 diff* 의 가공 표면이다.
+같은 회사의 두 period (예: 2024Q3 vs 2025Q3) 의 sectionLeaf 매칭 후 contentRaw 의
+unified diff 를 산출한다. 외부 LLM 은 PDF/HTML 단발만 보고 동일 회사 시계열 비교를
+하지 않는다 — 본 모듈은 dartlab 의 panel 자산(``providers.dart.panel`` 수평화 본문)
+위에서만 성립하는 *시계열 diff* 의 L1.5 가공 SSOT 다.
 
-L1.5 frame 책임 — raw 결합 → 분석 ready. 의미 분류 (가이던스 방향·리스크
-추가·회계정책 변경) 는 본 모듈에 박지 않는다. AI 도구 (compareDisclosure)
-또는 L2 분석엔진이 본 diff 결과 위에서 분류한다.
+L1.5 frame 책임 — raw(panel) 결합 → 분석 ready. 의미 분류(가이던스 방향·리스크
+추가·회계정책 변경)는 본 모듈에 박지 않는다. AI 도구(compareDisclosure) 또는 L2
+분석엔진(analysis disclosureDelta·scan watch)이 본 diff 결과 위에서 분류한다.
+
+docs.parquet 은퇴(2026-06) — 입력원을 docs.parquet(section_title/section_content)에서
+panel(sectionLeaf/contentRaw/period)로 전환. 농장 0, panel contentRaw 위 단일 SSOT.
 """
 
 from __future__ import annotations
 
 import difflib
-from pathlib import Path
 
 import polars as pl
 
-_FIXTURE_DIR = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "dart" / "docs"
-
 
 def diffDisclosure(
-    stockCode: str,
+    code: str,
     periodA: str,
     periodB: str,
     *,
-    fixturePath: Path | None = None,
     maxSampleLines: int = 5,
+    longDf: pl.DataFrame | None = None,
 ) -> pl.DataFrame:
-    """두 보고서의 동일 section_title 별 sentence-level diff.
+    """두 period 의 동일 sectionLeaf 별 sentence-level diff (panel 본문).
 
-    Parameters
-    ----------
-    stockCode : str
-        6 자리 종목코드 (예: ``"005930"``).
-    periodA : str
-        N-1 기 report_type 표기 (예: ``"분기보고서 (2024.09)"``) 또는 안쪽
-        분기 표기 (``"2024.09"``) — 후자는 분기보고서 / 반기보고서 / 사업
-        보고서 자동 매칭.
-    periodB : str
-        N 기 report_type. periodA 와 같은 양식.
-    fixturePath : Path | None
-        테스트용 override. 기본은 ``tests/fixtures/dart/docs/{stockCode}.parquet``.
-    maxSampleLines : int
-        section 별 added/removed sample line 최대 수 (기본 5).
+    Args:
+        code: 6 자리 종목코드 (예: ``"005930"``).
+        periodA: N-1 기 panel period (예: ``"2024Q3"``).
+        periodB: N 기 panel period (예: ``"2025Q3"``).
+        maxSampleLines: section 별 added/removed sample line 최대 수 (기본 5).
+        longDf: panel long override (테스트용). None 이면 ``panel.read.readLong`` 호출.
 
-    Returns
-    -------
-    pl.DataFrame
-        sectionOrder · section_title · addedLineCount · removedLineCount ·
-        intensityScore (added+removed) · addedSampleLines · removedSampleLines.
-        intensityScore 내림차순 정렬 — 가장 큰 변화 섹션이 먼저.
+    Returns:
+        pl.DataFrame — sectionOrder · sectionTitle · addedLineCount · removedLineCount ·
+        intensityScore(added+removed) · addedSampleLines · removedSampleLines.
+        intensityScore 내림차순(가장 큰 변화 섹션이 먼저). diff 0 이면 빈 프레임.
 
-    Raises
-    ------
-    FileNotFoundError
-        ``{stockCode}.parquet`` 없음.
-    ValueError
-        periodA 또는 periodB 매칭 보고서 없음 — 가용 보고서 enum 노출.
+    Raises:
+        ValueError: periodA 또는 periodB 의 본문 행 0 — 가용 period enum 노출.
+
+    Example:
+        >>> diffDisclosure("005930", "2024Q3", "2025Q3")  # doctest: +SKIP
     """
-    docsPath = (fixturePath or _FIXTURE_DIR) / f"{stockCode}.parquet"
-    if not docsPath.exists():
-        raise FileNotFoundError(f"공시 본문 parquet 없음: {docsPath}")
-    df = pl.read_parquet(docsPath)
-    aFrame = _selectReport(df, periodA, "periodA")
-    bFrame = _selectReport(df, periodB, "periodB")
+    df = longDf
+    if df is None:
+        from dartlab.providers.dart.panel.read import readLong
 
-    sectionsA = {
-        row["section_title"]: (row["section_order"], row["section_content"] or "")
-        for row in aFrame.iter_rows(named=True)
-    }
-    sectionsB = {
-        row["section_title"]: (row["section_order"], row["section_content"] or "")
-        for row in bFrame.iter_rows(named=True)
-    }
+        df = readLong(code, periods=[periodA, periodB])
+    if df is None or df.is_empty():
+        raise ValueError(f"panel 본문 없음: code={code}")
+
+    sectionsA = _sectionsForPeriod(df, periodA, "periodA")
+    sectionsB = _sectionsForPeriod(df, periodB, "periodB")
     common = sorted(set(sectionsA) & set(sectionsB), key=lambda s: sectionsB[s][0])
 
     rows: list[dict] = []
@@ -124,21 +107,27 @@ def diffDisclosure(
     return pl.DataFrame(rows).sort("intensityScore", descending=True)
 
 
-def _selectReport(df: pl.DataFrame, period: str, label: str) -> pl.DataFrame:
-    """``report_type`` 정확 매칭 또는 분기 표기 (예: ``"2024.09"``) 매칭."""
-    direct = df.filter(pl.col("report_type") == period)
-    if direct.height:
-        return direct.sort("section_order")
-    contains = df.filter(pl.col("report_type").str.contains(period, literal=True))
-    if contains.height:
-        types = contains["report_type"].unique().to_list()
-        if len(types) > 1:
-            raise ValueError(
-                f"{label}='{period}' 가 {len(types)} 개 보고서에 매칭: {types}. 정확 표기 (예: '분기보고서 (2024.09)') 사용."
-            )
-        return contains.sort("section_order")
-    available = sorted(df["report_type"].unique().to_list())
-    raise ValueError(f"{label}='{period}' 매칭 보고서 없음. 가용: {available}")
+def _sectionsForPeriod(df: pl.DataFrame, period: str, label: str) -> dict[str, tuple[int, str]]:
+    """panel long → ``{sectionLeaf: (sortOrder, 본문)}`` (한 period, 블록 contentRaw 결합)."""
+    sub = df.filter(pl.col("period") == period)
+    if sub.is_empty():
+        available = sorted(df["period"].unique().to_list())
+        raise ValueError(f"{label}='{period}' 매칭 본문 없음. 가용: {available}")
+    orderCol = "blockOrder" if "blockOrder" in sub.columns else None
+    out: dict[str, tuple[int, list[str]]] = {}
+    order = 0
+    for row in sub.iter_rows(named=True):
+        title = row.get("sectionLeaf") or ""
+        if not title:
+            continue
+        content = row.get("contentRaw") or ""
+        ordVal = row.get(orderCol) if orderCol else None
+        ordInt = int(ordVal) if ordVal is not None else order
+        if title not in out:
+            out[title] = (ordInt, [])
+        out[title][1].append(content)
+        order += 1
+    return {title: (ordInt, "\n".join(parts)) for title, (ordInt, parts) in out.items()}
 
 
 __all__ = ["diffDisclosure"]
