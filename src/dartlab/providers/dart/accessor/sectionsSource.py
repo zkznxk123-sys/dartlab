@@ -44,7 +44,10 @@ class _SectionsSource:
             >>> c._docs.sections.raw.head()
 
         """
-        return self._company._getPrimary("sections")
+        # docs.parquet 농장 은퇴 → providers.dart.sections(panel 섹션 wide) SSOT.
+        from dartlab.providers.dart.sections import sectionsWide
+
+        return sectionsWide(self._company.stockCode)
 
     @property
     def frame(self) -> pl.DataFrame | None:
@@ -78,7 +81,16 @@ class _SectionsSource:
             >>> c._docs.sections.forTopics({"BS", "IS"})
 
         """
-        return self._company._getPrimary("sections", topics=frozenset(topics))
+        # docs.parquet 농장 은퇴 → providers.dart.sections + sectionTopic 분류기로 topic 필터.
+        from dartlab.providers.dart.sections import sectionsWide
+        from dartlab.providers.dart.sectionTopic import mapSectionTitle
+
+        wide = sectionsWide(self._company.stockCode)
+        if wide is None or wide.is_empty():
+            return None
+        return wide.filter(
+            pl.col("sectionLeaf").fill_null("").map_elements(mapSectionTitle, return_dtype=pl.Utf8).is_in(list(topics))
+        )
 
     def topics(self) -> list[str]:
         """sections 의 전체 topic 목록.
