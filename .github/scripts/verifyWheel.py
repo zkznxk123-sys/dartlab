@@ -45,8 +45,8 @@ _REQUIRED_BUNDLE_FILES = [
     "dartlab/reference/data/dalioDetailCases.json",
     "dartlab/reference/data/damodaranDefaults.json",
     "dartlab/reference/data/rrCrises800y.json",
-    # DART sections runtime (docs 농장 은퇴 — sectionMappings 만 sectionTopicData survivor 로 잔존)
-    "dartlab/providers/dart/sectionTopicData/sectionMappings.json",
+    # DART sections runtime (docs 농장 은퇴 — sectionMappings 는 sectionTopic 옆 provider 루트로 이전)
+    "dartlab/providers/dart/sectionMappings.json",
     # EDGAR sections
     "dartlab/providers/edgar/docs/sections/mapperData/sectionMappings.json",
     # EDINET sections
