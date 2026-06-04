@@ -240,23 +240,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: docs
 
-      # plan snazzy-wibbling-origami PR-4b — sections SSOT artifact 빌드 + HF push.
-      # 변경 종목 (dist/changed_docs.txt) 만 buildSections — 종목당 ~18s, 일반 일일 sync
-      # 의 changed docs 수가 적어 부담 ↓ (수 종목). buildSections 가 dist/changed_sections.txt
-      # 작성 → uploadData 가 sections category nested 양식으로 HF push.
-      - name: Build sections artifact from changed docs
-        if: hashFiles('dist/changed_docs.txt') != ''
-        run: |
-          if [ -s dist/changed_docs.txt ]; then
-            uv run python -X utf8 .github/scripts/sync/buildSections.py
-          fi
-
-      - name: Upload sections to HuggingFace
-        if: hashFiles('dist/changed_sections.txt') != ''
-        run: uv run python .github/scripts/sync/uploadData.py --target hf
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          SYNC_CATEGORY: sections
+      # docs 농장 은퇴 — sections SSOT artifact 빌드/업로드 스텝 제거(buildSections farm 삭제).
+      # HF 기존 sections 데이터는 보존(삭제하지 않음). panel 이 공시 수평화 단일 표면.
 
       # online 1패스 panel (디스크 zip 0): docs.parquet rcept → DART API 메모리 fetch →
       # buildPanelFromStream → 14-col parquet + HF push. 통합 진입점(dartlab.pipeline) 경유 —

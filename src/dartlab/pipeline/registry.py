@@ -10,7 +10,8 @@ from __future__ import annotations
 from dartlab.pipeline.types import StageSpec
 
 # recent set — `dartlab sync`(인자 없음) 기본 수집 카테고리.
-RECENT_SET: tuple[str, ...] = ("finance", "report", "docs", "sections", "panel")
+# docs 농장 은퇴 — sections artifact 빌드 stage 제거(farm sectionsBuilder 삭제). docs 수집은 유지(HF 보존).
+RECENT_SET: tuple[str, ...] = ("finance", "report", "docs", "panel")
 
 
 def buildRegistry() -> dict[str, StageSpec]:
@@ -39,7 +40,6 @@ def buildRegistry() -> dict[str, StageSpec]:
             uploadCategories=("finance", "report", "docs"),
             label="DART 신규상장 부트스트랩",
         ),
-        StageSpec("sections", run=dart.runDartSections, uploadCategories=("sections",), label="DART sections artifact"),
         StageSpec("panel", run=dart.runDartPanel, uploadCategories=("panel",), label="DART panel 수평화"),
         StageSpec("krx", run=krx.runKrx, uploadCategories=("krxPrices",), label="KRX 일별 가격"),
         StageSpec("krxIndex", run=krx.runKrxIndex, uploadCategories=("krxIndices",), label="KRX 지수"),

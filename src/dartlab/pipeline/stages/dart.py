@@ -134,37 +134,6 @@ def runDartNewStocks(
     return _upload(_result(category, rc, "syncNewStocks"), category, upload, token)
 
 
-def runDartSections(
-    *,
-    category: str = "sections",
-    mode: PipelineMode = "changed",
-    codes: list[str] | None = None,
-    upload: bool = True,
-    token: str | None = None,
-) -> StageResult:
-    """DART sections artifact 빌드 — buildSections 동형 + HF 업로드.
-
-    Args:
-        category: 미사용("sections" 고정).
-        mode: 미사용(changed 고정).
-        codes: 미사용.
-        upload: HF 업로드 여부.
-        token: HF 토큰.
-
-    Returns:
-        StageResult.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> runDartSections(upload=False)  # doctest: +SKIP
-        StageResult(category='sections', ...)
-    """
-    rc = runScript(".github/scripts/sync/buildSections.py")
-    return _upload(_result("sections", rc, "buildSections"), "sections", upload, token)
-
-
 def runDartPanel(
     *,
     category: str = "panel",
