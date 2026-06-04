@@ -2066,25 +2066,19 @@ class Company:
 
         return sectionsWide(self.stockCode)
 
+    # docs profile 농장(docsProfileBuilder) 은퇴 — chapter/label 메타는 panel section 카탈로그가 표면.
+    # 하위호환 graceful stub: profileTable=None, chapterMap={}, chapter="", label=topic 그대로.
     def _profileTable(self) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.docsProfileBuilder import profileTable
-
-        return profileTable(self)
+        return None
 
     def _chapterMap(self) -> dict[str, str]:
-        from dartlab.providers.dart.builder.docsProfileBuilder import chapterMap
-
-        return chapterMap(self)
+        return {}
 
     def _chapterForTopic(self, topic: str) -> str:
-        from dartlab.providers.dart.builder.docsProfileBuilder import chapterForTopic
-
-        return chapterForTopic(self, topic)
+        return ""
 
     def _topicLabel(self, topic: str) -> str:
-        from dartlab.providers.dart.builder.docsProfileBuilder import topicLabel
-
-        return topicLabel(self, topic)
+        return topic
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""
@@ -3895,9 +3889,29 @@ class Company:
                 }
             )
 
-        rows.extend(self._indexFinanceRows())
-        rows.extend(self._indexDocsRows())
-        rows.extend(self._indexReportRows(existingTopics={r["topic"] for r in rows}))
+        # docs 농장(docsIndexBuilder) 은퇴 — survivor c.topics(finance+panel section 카탈로그)에서 index 행 유도.
+        seenTopics = {r["topic"] for r in rows}
+        topicsDf = self.topics
+        if topicsDf is not None and not topicsDf.is_empty():
+            for tr in topicsDf.iter_rows(named=True):
+                topic = tr.get("topic")
+                if not isinstance(topic, str) or topic in seenTopics:
+                    continue
+                seenTopics.add(topic)
+                isFinance = tr.get("source") == "finance"
+                rows.append(
+                    {
+                        "chapter": str(tr.get("chapter") or ""),
+                        "topic": topic,
+                        "label": topic,
+                        "kind": "statement" if isFinance else "section",
+                        "source": str(tr.get("source") or ""),
+                        "periods": str(tr.get("periods") or "-"),
+                        "shape": "-",
+                        "preview": "",
+                        "_sortKey": (int(tr.get("order") or 99), 0),
+                    }
+                )
 
         rows.sort(key=lambda r: r.get("_sortKey", (99, 999)))
         for r in rows:
@@ -3921,21 +3935,6 @@ class Company:
         )
         self._cache[cacheKey] = df
         return df
-
-    def _indexFinanceRows(self) -> list[dict[str, Any]]:
-        from dartlab.providers.dart.builder.docsIndexBuilder import indexFinanceRows
-
-        return indexFinanceRows(self)
-
-    def _indexDocsRows(self) -> list[dict[str, Any]]:
-        from dartlab.providers.dart.builder.docsIndexBuilder import indexDocsRows
-
-        return indexDocsRows(self)
-
-    def _indexReportRows(self, *, existingTopics: set[str] | None = None) -> list[dict[str, Any]]:
-        from dartlab.providers.dart.builder.docsIndexBuilder import indexReportRows
-
-        return indexReportRows(self, existingTopics=existingTopics)
 
     @property
     def facts(self) -> pl.DataFrame | None:
