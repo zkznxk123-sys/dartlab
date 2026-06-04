@@ -299,7 +299,7 @@ def createSimulation(
 
     # 과거 비율 + 기준연도 비율
     ratios = extractHistoricalRatios(series)
-    isDf = company.show("IS")
+    isDf = company.panel("is")  # show 은퇴 → panel native IS
 
     rev_base = sum(_quarterlyValues(isDf, "sales", baseYear))
     gp_base = sum(_quarterlyValues(isDf, "gross_profit", baseYear))

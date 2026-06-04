@@ -367,9 +367,9 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
 
     calcMultipleBand = importlib.import_module("dartlab.macro.cycles.macroCycle").calcMultipleBand
 
-    # ratioSeries에서 PER/PBR 과거 시계열 추출
+    # ratioSeries에서 PER/PBR 과거 시계열 추출 (show 은퇴 → panel native ratios)
     try:
-        ratios = company.show("ratios")
+        ratios = company.panel("ratios")
         if ratios is None:
             return None
     except (AttributeError, TypeError):
