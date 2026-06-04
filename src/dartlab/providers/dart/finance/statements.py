@@ -360,7 +360,6 @@ def statements(
         - ``extractContent`` / ``splitStatements`` — 파이프 단계.
         - ``dartlab.providers._common.tableParser.extractAccounts`` — 항목/금액 파싱.
         - ``dartlab.providers._common.reportSelector.selectReport`` — 정기보고서 선택.
-        - ``dartlab.providers.dart.docs.finance.dividend.dividend`` — 같은 패턴 (배당 시계열).
 
     Requires:
         - polars — DataFrame.

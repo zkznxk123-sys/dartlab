@@ -110,7 +110,7 @@ def buildDocsIndex(
     AIContext:
         ``Scan.docsSections(market, sections, ...)`` 의 1 차 source. 사용자가 "이 섹션 가진
         회사 어디?" · "사외이사 정보 들어간 사업보고서 N건" 류 cross-company 질문 시 본 인덱스
-        경유. 본문은 별도 `dartlab.providers.dart.docs.section` 호출로 필요시에만 fetch.
+        경유. 본문은 별도 `c.panel`(공시 수평화 보드) 회사 단위 회수로 필요시에만 fetch.
 
     Guide:
         - 출력 경로 default 는 dart-specific. EDGAR/EDINET 는 `buildEdgarDocsIndex` ·
