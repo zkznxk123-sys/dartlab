@@ -207,7 +207,7 @@ class TestCalcDisclosureDelta:
         mock_diff = MagicMock()
         mock_diff.changeRate = 25.0
         mock_diff.topicChanges = []
-        mock_company._docs.diff = lambda: mock_diff
+        mock_company.diff = lambda: mock_diff
 
         result = calcDisclosureDelta(mock_company)
         assert isinstance(result, dict)
@@ -217,7 +217,7 @@ class TestCalcDisclosureDelta:
         assert "signalStrength" in result
 
         # 복원
-        mock_company._docs.diff = lambda: None
+        mock_company.diff = lambda: None
 
     def test_returns_none_on_empty(self, empty_mock_company):
         _clear_cache(empty_mock_company)
@@ -628,40 +628,40 @@ class TestDisclosureDeltaScenarios:
         _clear_cache(mock_company)
         from dartlab.analysis.financial.predictionSignals import calcDisclosureDelta
 
-        mock_company._docs.diff = lambda: self._make_mock_diff(70, riskRate=65)
+        mock_company.diff = lambda: self._make_mock_diff(70, riskRate=65)
         result = calcDisclosureDelta(mock_company)
         assert result is not None
         assert result["signalDirection"] == "negative"
         assert result["signalStrength"] == "strong"
-        mock_company._docs.diff = lambda: None
+        mock_company.diff = lambda: None
 
     def test_moderate_risk(self, mock_company):
         _clear_cache(mock_company)
         from dartlab.analysis.financial.predictionSignals import calcDisclosureDelta
 
-        mock_company._docs.diff = lambda: self._make_mock_diff(40, riskRate=35)
+        mock_company.diff = lambda: self._make_mock_diff(40, riskRate=35)
         result = calcDisclosureDelta(mock_company)
         assert result is not None
         assert result["signalDirection"] == "negative"
         assert result["signalStrength"] == "moderate"
-        mock_company._docs.diff = lambda: None
+        mock_company.diff = lambda: None
 
     def test_low_change_neutral(self, mock_company):
         _clear_cache(mock_company)
         from dartlab.analysis.financial.predictionSignals import calcDisclosureDelta
 
-        mock_company._docs.diff = lambda: self._make_mock_diff(5)
+        mock_company.diff = lambda: self._make_mock_diff(5)
         result = calcDisclosureDelta(mock_company)
         assert result is not None
         assert result["signalDirection"] == "neutral"
-        mock_company._docs.diff = lambda: None
+        mock_company.diff = lambda: None
 
     def test_business_change_positive(self, mock_company):
         _clear_cache(mock_company)
         from dartlab.analysis.financial.predictionSignals import calcDisclosureDelta
 
-        mock_company._docs.diff = lambda: self._make_mock_diff(50, riskRate=10, businessRate=50)
+        mock_company.diff = lambda: self._make_mock_diff(50, riskRate=10, businessRate=50)
         result = calcDisclosureDelta(mock_company)
         assert result is not None
         assert result["signalDirection"] == "positive"
-        mock_company._docs.diff = lambda: None
+        mock_company.diff = lambda: None
