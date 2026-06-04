@@ -76,13 +76,13 @@ def _safe(fn, default=None):
 def _companyMetrics(company: Any) -> dict[str, Any]:
     """단일 Company → 비교용 metric dict.
 
-    IS/BS 각각 1 회 show 호출. _METRIC_TO_SNAKE 매핑으로 실제 snakeId 추출.
+    IS/BS 각각 1 회 panel 호출. _METRIC_TO_SNAKE 매핑으로 실제 snakeId 추출.
     """
     metrics: dict[str, Any] = {}
     if company is None:
         return metrics
-    is_df = _safe(lambda: company.show("IS"))
-    bs_df = _safe(lambda: company.show("BS"))
+    is_df = _safe(lambda: company.panel("IS"))
+    bs_df = _safe(lambda: company.panel("BS"))
     is_metrics = ("revenue", "operatingProfit", "netIncome")
     bs_metrics = ("totalAssets", "totalEquity", "totalLiabilities")
     for key in is_metrics:

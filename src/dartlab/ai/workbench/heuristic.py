@@ -308,11 +308,11 @@ def _forensicsMemo(args: dict[str, Any]) -> ToolResult:
 def _safeShow(company: Any, topic: str, *, pl: Any) -> Any:
     try:
         with _quietForensicsExecution():
-            table = company.show(topic, freq="Y")
+            table = company.panel(topic, freq="year")
     except TypeError:
         try:
             with _quietForensicsExecution():
-                table = company.show(topic)
+                table = company.panel(topic)
         except Exception:  # noqa: BLE001
             return pl.DataFrame()
     except Exception:  # noqa: BLE001
@@ -323,7 +323,7 @@ def _safeShow(company: Any, topic: str, *, pl: Any) -> Any:
 def _safeTopicText(company: Any, topic: str) -> str:
     try:
         with _quietForensicsExecution():
-            value = company.show(topic)
+            value = company.panel(topic)
     except Exception:  # noqa: BLE001
         return ""
     return "" if value is None else str(value)

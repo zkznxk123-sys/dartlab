@@ -299,7 +299,7 @@ def _resolveData(c: Company, moduleName: str) -> pl.DataFrame | None:
     if moduleName == "ratios":
         return None
     try:
-        data = c.show(moduleName)
+        data = c.panel(moduleName)
     except (KeyError, ValueError, TypeError):
         return None
     if isinstance(data, pl.DataFrame) and data.height > 0:

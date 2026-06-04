@@ -211,15 +211,15 @@ def _resolveTopic(plan: dict[str, Any]) -> str:
 
 
 def _fetchTableWithAutoGather(company: Any, topic: str) -> tuple[pl.DataFrame | None, bool]:
-    """company.show(topic) + 빈 결과 시 자동 update 1회 재시도. (table, autoGatherUsed) 반환."""
+    """company.panel(topic) + 빈 결과 시 자동 update 1회 재시도. (table, autoGatherUsed) 반환."""
     with _quietExecutionNoise():
-        table = company.show(topic)
+        table = company.panel(topic)
     if isinstance(table, pl.DataFrame) and table.height > 0:
         return table, False
     if not _AUTO_GATHER_ENABLED or not _tryAutoUpdate(company, "finance"):
         return table, False
     with _quietExecutionNoise():
-        table = company.show(topic)
+        table = company.panel(topic)
     return table, True
 
 

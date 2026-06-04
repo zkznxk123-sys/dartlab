@@ -76,8 +76,8 @@ def _resolveDataset(target: str) -> tuple[Any, str]:
         from dartlab.company import Company
 
         c = Company(code)
-        df = c.show(topic or "BS")
-        return df, f"Company({code}).show({topic or 'BS'})"
+        df = c.panel(topic or "BS")
+        return df, f"Company({code}).panel({topic or 'BS'})"
     if target.startswith("scan:"):
         axis = target.split(":", 1)[1]
         from dartlab.scan import Scan

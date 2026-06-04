@@ -231,33 +231,28 @@ def _fetchDisclosureRisk(company) -> dict | None:
 def _fetchAuditOpinion(company) -> str | None:
     """감사의견 추출 — 적정/한정/부적정/의견거절.
 
-    [성능] show("audit") 직접 파싱이 0.04s 수준이므로 1순위로 사용.
+    [성능] panel 공통파서 감사 섹션 텍스트 스캔이 단일 종목만 처리해 빠르므로 1순위.
     company.governance() 호출은 전종목 scan(12s+)을 트리거하므로 마지막 fallback으로만.
     """
-    # 1순위: docs 원문 직접 파싱 (0.04~1s, 단일 종목만 처리)
+    # 1순위: panel 공통파서 — 감사보고서/감사의견 섹션 텍스트 키워드 스캔 (단일 종목, 빠름)
     try:
-        show = getattr(company, "show", None)
-        if show is not None:
-            idx = show("audit")
-            if idx is not None and hasattr(idx, "to_dicts"):
-                blocks = idx.to_dicts()
-                for b in blocks:
-                    blk = b.get("block")
-                    data = show("audit", block=blk, period="latest")
-                    if data is None:
-                        continue
-                    if hasattr(data, "to_dicts"):
-                        for row in data.to_dicts():
-                            for v in row.values():
-                                if not isinstance(v, str):
-                                    continue
-                                if "부적정" in v:
-                                    return "부적정"
-                                if "의견거절" in v:
-                                    return "의견거절"
-                                if "한정" in v and "한정" not in ("한정되지", "한정하지"):
-                                    return "한정"
-                # 명시적 위반 키워드 없으면 적정
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionTexts
+
+        _code = getattr(company, "stockCode", None)
+        _texts = sectionTexts(_code) if _code else None
+        if _texts is not None and not _texts.is_empty():
+            _sub = _texts.filter(pl.col("sectionLeaf").str.contains("감사의견|감사보고서|외부감사"))
+            text = " ".join(c for c in _sub["contentRaw"].to_list() if c)
+            if text:
+                if "부적정" in text:
+                    return "부적정"
+                if "의견거절" in text:
+                    return "의견거절"
+                if "한정의견" in text or "한정 의견" in text:
+                    return "한정"
+                # 감사 섹션이 존재하고 명시적 위반 키워드 없으면 적정
                 return "적정"
     except (AttributeError, ValueError, KeyError, TypeError):
         pass
