@@ -32,20 +32,45 @@ def _snakeAlias() -> dict[str, str]:
     return SNAKEID_ALIASES
 
 
+def _deriveEdgarIndexes(accounts: list, learnedTags: dict) -> tuple[dict, dict]:
+    """accounts + learnedTags(소스) → tagMap·stmtTagMap(파생).
+
+    EdgarMapper._loadData 와 동일 규칙 — commonTags 가 learnedTags 를 덮어씀.
+    이 파생이 owner edgar 모듈이 따라야 할 spec.
+    """
+    stmtTagMap: dict[str, dict[str, str]] = {}
+    commonTagMap: dict[str, str] = {}
+    for acct in accounts:
+        sid = acct["snakeId"]
+        stmt = acct["stmt"]
+        for tag in acct.get("commonTags", []):
+            tl = tag.lower()
+            commonTagMap[tl] = sid
+            stmtTagMap.setdefault(tl, {})[stmt] = sid
+    tagMap: dict[str, str] = {}
+    for tag, sid in learnedTags.items():
+        tagMap[tag.lower()] = sid
+    for tag, sid in commonTagMap.items():
+        tagMap[tag] = sid
+    return tagMap, stmtTagMap
+
+
 def _edgarSSOT() -> dict:
-    """EDGAR tag SSOT — JSON ``edgar`` 우선, 없으면 EdgarMapper 내부."""
+    """EDGAR tag SSOT — JSON ``edgar`` 소스에서 인덱스 파생, 없으면 EdgarMapper 내부."""
     from dartlab.core.utils.labels import _loadAccountMappings
-    from dartlab.providers.edgar.finance.mapper import STMT_OVERRIDES, EdgarMapper
 
     data = _loadAccountMappings()
     edgar = data.get("edgar")
-    if edgar and "tagMap" in edgar:
+    if edgar and "accounts" in edgar and "learnedTags" in edgar:
+        tagMap, stmtTagMap = _deriveEdgarIndexes(edgar["accounts"], edgar["learnedTags"])
         return {
             "accounts": edgar["accounts"],
-            "tagMap": edgar["tagMap"],
-            "stmtTagMap": edgar["stmtTagMap"],
+            "tagMap": tagMap,
+            "stmtTagMap": stmtTagMap,
             "stmtOverrides": edgar["stmtOverrides"],
         }
+    from dartlab.providers.edgar.finance.mapper import STMT_OVERRIDES, EdgarMapper
+
     EdgarMapper._ensureLoaded()
     return {
         "accounts": EdgarMapper._accounts,
