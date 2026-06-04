@@ -37,7 +37,7 @@ expectedNovelty:
   - l15GapLedger
 forbidden:
   - c.analysis, c.quant, c.credit, c.industry, c.story, dartlab.macro 호출 금지.
-  - Company.show("PRICE")를 가격 SSOT로 쓰지 않는다.
+  - Company.panel("PRICE")를 가격 SSOT로 쓰지 않는다.
   - 누락 데이터를 0으로 채우지 않는다.
 failureModes:
   - DART와 EDGAR의 topic alias 차이를 coverage 부족이 아니라 사업 변화로 오판
@@ -105,9 +105,9 @@ def _loadReference(name):
 
 def _safeShow(topic):
     try:
-        table = c.show(topic, freq="Y")
+        table = c.panel(topic, freq="Y")
     except TypeError:
-        table = c.show(topic)
+        table = c.panel(topic)
     except Exception:
         return pl.DataFrame()
     return table if isinstance(table, pl.DataFrame) else pl.DataFrame()
@@ -214,7 +214,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-`Company.show("IS"|"BS"|"CF"|"ratios"|"segments")`, `dartlab.gather("price")`, `reference/data/damodaranDefaults.json`, `reference/data/damodaranIndustryDefaults.json`를 확인한다.
+`Company.panel("IS"|"BS"|"CF"|"ratios"|"segments")`, `dartlab.gather("price")`, `reference/data/damodaranDefaults.json`, `reference/data/damodaranIndustryDefaults.json`를 확인한다.
 
 ### 3. 메커니즘 분석
 

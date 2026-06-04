@@ -100,9 +100,9 @@ company_name = getattr(c, "corpName", getattr(c, "companyName", target))
 
 def _safeShow(topic):
     try:
-        table = c.show(topic, freq="Y")
+        table = c.panel(topic, freq="Y")
     except TypeError:
-        table = c.show(topic)
+        table = c.panel(topic)
     except Exception:
         return pl.DataFrame()
     return table if isinstance(table, pl.DataFrame) else pl.DataFrame()
@@ -143,7 +143,7 @@ valuation에 투입된 핵심 계정이 어떤 `snakeId`에서 왔는지 최신 
 
 ### 2. 핵심 근거 수집
 
-`Company.show("IS"|"BS"|"CF", freq="Y")`로 들어온 표의 계정 매칭 결과를 사용한다. 매출, EBIT, 세금, CFO, capex, 감가상각, 현금, 부채, 자본, 운전자본을 최소 감시 계정으로 둔다.
+`Company.panel("IS"|"BS"|"CF", freq="Y")`로 들어온 표의 계정 매칭 결과를 사용한다. 매출, EBIT, 세금, CFO, capex, 감가상각, 현금, 부채, 자본, 운전자본을 최소 감시 계정으로 둔다.
 
 ### 3. 메커니즘 분석
 

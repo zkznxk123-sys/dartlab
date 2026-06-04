@@ -95,9 +95,9 @@ def _loadReference(name):
 
 def _safeShow(topic):
     try:
-        table = c.show(topic, freq="Y")
+        table = c.panel(topic, freq="Y")
     except TypeError:
-        table = c.show(topic)
+        table = c.panel(topic)
     except Exception:
         return pl.DataFrame()
     return table if isinstance(table, pl.DataFrame) else pl.DataFrame()
@@ -136,7 +136,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-`Company.show` 재무 3표와 segment topic 또는 frame segment table의 필요성을 함께 남긴다.
+`Company.panel` 재무 3표와 segment topic 또는 frame segment table의 필요성을 함께 남긴다.
 
 ### 3. 메커니즘 분석
 

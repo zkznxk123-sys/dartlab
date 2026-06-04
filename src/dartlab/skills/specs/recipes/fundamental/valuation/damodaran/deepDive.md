@@ -108,7 +108,7 @@ validatedAt: '2026-05-27'
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `gather.price`, reference lookup, 하위 Damodaran recipe 실행처럼 engine/capability surface 가 있는 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 같은 입력을 `buildDamodaranMemo` 로 묶는 **RunPython fallback** 절차다.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `gather.price`, reference lookup, 하위 Damodaran recipe 실행처럼 engine/capability surface 가 있는 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 같은 입력을 `buildDamodaranMemo` 로 묶는 **RunPython fallback** 절차다.
 
 ```python
 import dartlab
@@ -132,9 +132,9 @@ def _loadReference(name):
 
 def _safeShow(topic):
     try:
-        table = c.show(topic, freq="Y")
+        table = c.panel(topic, freq="Y")
     except TypeError:
-        table = c.show(topic)
+        table = c.panel(topic)
     except Exception:
         return pl.DataFrame()
     return table if isinstance(table, pl.DataFrame) else pl.DataFrame()

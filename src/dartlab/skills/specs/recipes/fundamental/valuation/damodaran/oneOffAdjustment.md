@@ -95,9 +95,9 @@ def _loadReference(name):
 
 def _safeShow(topic):
     try:
-        table = c.show(topic, freq="Y")
+        table = c.panel(topic, freq="Y")
     except TypeError:
-        table = c.show(topic)
+        table = c.panel(topic)
     except Exception:
         return pl.DataFrame()
     return table if isinstance(table, pl.DataFrame) else pl.DataFrame()
@@ -136,7 +136,7 @@ one-off 후보 line item을 찾고 정규화 후보로 표시한다.
 
 ### 2. 핵심 근거 수집
 
-`Company.show("IS"|"CF")` line item의 snakeId와 항목명을 검색한다.
+`Company.panel("IS"|"CF")` line item의 snakeId와 항목명을 검색한다.
 
 ### 3. 메커니즘 분석
 
