@@ -26,7 +26,7 @@ def readCapability(query: str, *, limit: int = 8) -> ToolResult:
                 id=f"api:{apiRef}",
                 kind="apiRef",
                 title=apiRef,
-                source="dartlab.reference.capability._generated.CAPABILITIES",
+                source="dartlab.reference.capability.loadCapabilities",
                 payload=payload,
             )
         )

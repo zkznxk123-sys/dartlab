@@ -1,39 +1,21 @@
-"""런타임 capability 카탈로그 생성 — 엔진 docstring/registry → reference/capability 산출물 2종.
+"""capability 카탈로그 라이브 빌더 — 엔진 docstring/registry introspect → 런타임 dict.
 
-dartlab.core.registry + 엔진 docstring(9 섹션) + axis registry 를 introspect 해 런타임
-카탈로그를 생성한다. 사람/크롤러용 문서 surface (CAPABILITIES.md · llms.txt · reference.md) 는
-더 이상 생성하지 않는다 — 런타임 무소비라 폐기 (llms.txt 는 landing 정적 SEO 로 동결).
+``loadCapabilities()`` 가 스킬엔진(EngineCall · ReadCapability · 검색) 첫 조회 시 docstring 소스에서
+1 회 빌드(프로세스 캐시)한다. **사본(생성 파일) 없음** — docstring 이 유일 진실
+(operation.code §"CAPABILITIES 단일 진실의 원천"), drift 표면 0. cold ~0.5s · warm ~18ms.
 
-생성 산출물 (둘 다 load-bearing, 직접 수정 금지):
-- src/dartlab/reference/capability/_generated.py — 런타임 CAPABILITIES 카탈로그
-  (EngineCall · ReadCapability · ReadSkill · server 가 소비하는 경량 인덱스)
-- src/dartlab/reference/capability/_generated_analysis_graph.py — analysisGraph 가 import
-
-docstring/capability 변경 시 운영자가 수동 재생성 (자동 CI 실행은 안 함 — write 는 사람이):
-    uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py
-
-CI 는 ``--check`` 로 **자동 확인**만 한다 (재생성-비교, write 없음). 소스 docstring 을 바꾸고
-카탈로그를 재생성 안 하면 drift 로 fail → 소스=카탈로그 동기를 영구 강제:
-    uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py --check
+산출 (라이브, 캐시):
+- ``loadCapabilities() -> CAPABILITIES`` (EngineCall · ReadCapability · ReadSkill · search · server 소비)
+- ``loadAnalysisGraph() -> ANALYSIS_GRAPH`` (analysisGraph 소비)
 """
 
 from __future__ import annotations
 
-import ast
 import inspect
 import json
 import re
-import subprocess
-import sys
-from pathlib import Path
+from functools import lru_cache
 from typing import Any
-
-# reference/capability/generateSpec.py → capability → reference → dartlab → src → repo root (5)
-ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
-SRC = ROOT / "src"
-sys.path.insert(0, str(SRC))
-
-from dartlab.core.registry import getCategories, getEntries  # noqa: E402
 
 # ─── 유틸 ───────────────────────────────────────────────────────
 
@@ -288,49 +270,36 @@ def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
 # ─── 런타임 capability 카탈로그 생성 ──────────────────────────
 
 
-def _parseAxisRegistry(
-    entries: dict[str, dict[str, str]], path: Path, *, prefix: str, registryName: str = "_AXIS_REGISTRY"
-) -> None:
-    """엔진의 axis registry dict 를 AST 로 읽어 `{prefix}.{axis}` 로 entries 에 주입.
+# scan/macro/gather 라이브 축 레지스트리 — 모듈 이동 추종 (AST-소스 의존 0, install-robust).
+_AXIS_REGISTRIES: tuple[tuple[str, str, str], ...] = (
+    ("scan", "dartlab.scan.router", "_AXIS_REGISTRY"),
+    ("macro", "dartlab.macro", "_AXIS_REGISTRY"),
+    ("gather", "dartlab.gather.entry.dispatch", "AXIS_REGISTRY"),
+)
 
-    Assign + AnnAssign(`{registryName}: dict[...] = {...}`) 둘 다 지원.
-    각 axis 의 keyword 중 label/description 을 summary/capabilities 로 매핑.
 
-    registryName 기본값은 `_AXIS_REGISTRY` (scan/macro). gather 는 G+ P-Q1
-    이후 `AXIS_REGISTRY` (public) 사용.
+def _injectAxisRegistriesLive(entries: dict[str, dict[str, Any]]) -> None:
+    """scan/macro/gather 축 레지스트리를 라이브 객체에서 직접 주입.
+
+    레지스트리 dict 의 각 entry(``label``/``description`` 속성) → ``{prefix}.{axis}`` key.
+    소스파일 AST 파싱 0 — 레지스트리가 모듈 이동해도, 설치 패키지에서도 동작 (옛 AST 방식은
+    ``_AXIS_REGISTRY`` 가 ``scan/__init__``→``scan/router`` 로 옮겨가며 scan 축을 누락했다).
     """
-    if not path.exists():
-        return
-    try:
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-    except (SyntaxError, OSError):
-        return
+    import importlib as _il
 
-    for node in ast.walk(tree):
-        dictNode = None
-        if isinstance(node, ast.Assign):
-            for tgt in node.targets:
-                if isinstance(tgt, ast.Name) and tgt.id == registryName:
-                    dictNode = node.value
-                    break
-        elif isinstance(node, ast.AnnAssign):
-            tgt = node.target
-            if isinstance(tgt, ast.Name) and tgt.id == registryName:
-                dictNode = node.value
-        if not isinstance(dictNode, ast.Dict):
+    for prefix, modPath, attr in _AXIS_REGISTRIES:
+        try:
+            registry = getattr(_il.import_module(modPath), attr, None)
+        except ImportError:
             continue
-        for k, v in zip(dictNode.keys, dictNode.values):
-            if not isinstance(k, ast.Constant) or not isinstance(v, ast.Call):
-                continue
-            axisName = str(k.value)
-            axisEntry: dict[str, str] = {"kind": f"{prefix}_axis"}
-            for kw in v.keywords:
-                if not isinstance(kw.value, ast.Constant):
-                    continue
-                if kw.arg == "label":
-                    axisEntry["summary"] = str(kw.value.value)
-                elif kw.arg == "description":
-                    axisEntry["capabilities"] = str(kw.value.value)
+        if not isinstance(registry, dict):
+            continue
+        for axisName, entry in registry.items():
+            axisEntry: dict[str, Any] = {"kind": f"{prefix}_axis"}
+            if label := getattr(entry, "label", None):
+                axisEntry["summary"] = str(label)
+            if description := getattr(entry, "description", None):
+                axisEntry["capabilities"] = str(description)
             entries[f"{prefix}.{axisName}"] = axisEntry
 
 
@@ -618,37 +587,12 @@ def _mergeQuestionTriggers(left: dict[str, Any], right: dict[str, Any]) -> dict[
     return merged
 
 
-def _generateAnalysisGraphPy(entries: dict[str, dict[str, Any]]) -> str:
-    graphJson = json.dumps(_buildAnalysisGraph(entries), ensure_ascii=False, indent=4, sort_keys=True)
-    return (
-        '"""Analysis Graph generated from CAPABILITIES.\n'
-        "\n"
-        "수정하지 마세요. src/dartlab/reference/capability/generateSpec.py 를 실행하세요.\n"
-        '"""\n'
-        "\n"
-        "import json\n"
-        "\n"
-        "ANALYSIS_GRAPH: dict = json.loads(\n"
-        "    r'''\n"
-        f"{graphJson}\n"
-        "'''\n"
-        ")\n"
-    )
+def buildCapabilities() -> dict[str, Any]:
+    """런타임 capabilities 카탈로그 dict 를 docstring 소스에서 라이브 빌드.
 
-
-def _capabilitiesEntriesFromGeneratedPy(content: str) -> dict[str, dict[str, Any]]:
-    """_generateCapabilitiesPy 출력 문자열에서 CAPABILITIES JSON payload를 복원."""
-    marker = "r'''\n"
-    start = content.index(marker) + len(marker)
-    end = content.index("\n'''", start)
-    parsed = json.loads(content[start:end])
-    return parsed if isinstance(parsed, dict) else {}
-
-
-def _generateCapabilitiesPy() -> str:
-    """런타임 capabilities 카탈로그 Python 파일 생성.
-
-    __all__ 함수 + Company 메서드 + Scan 축 + Gather 축을 하나의 dict로.
+    ``__all__`` 함수 + Company 메서드 + scan/macro/gather 축 레지스트리를 하나의 dict 로.
+    사본(``_generated.py``) 없이 매 프로세스 첫 조회 시 1 회 빌드(loader 가 캐시) — docstring 이
+    유일 진실(operation.code §"CAPABILITIES 단일 진실의 원천"), drift 표면 0.
     """
     import dartlab
     from dartlab.providers.dart.company import Company as DartCompany
@@ -753,137 +697,26 @@ def _generateCapabilitiesPy() -> str:
         _applyAiContract(entry, sections)
         entries[f"Company.{memberName}"] = entry
 
-    # 3~6) 각 엔진의 _AXIS_REGISTRY AST 파싱 — scan/macro/gather 통합
-    # Assign + AnnAssign 양쪽 지원 (type annotation 있는 선언도 처리)
-    _parseAxisRegistry(entries, SRC / "dartlab" / "scan" / "__init__.py", prefix="scan")
-    _parseAxisRegistry(entries, SRC / "dartlab" / "macro" / "__init__.py", prefix="macro")
-    _parseAxisRegistry(
-        entries,
-        SRC / "dartlab" / "gather" / "entry" / "dispatch.py",
-        prefix="gather",
-        registryName="AXIS_REGISTRY",
-    )
+    # 3~6) scan/macro/gather 축 레지스트리 — 라이브 객체 introspection (install-robust,
+    # AST-소스파싱 X). 레지스트리가 모듈 이동해도 추종한다 (옛 AST 는 _AXIS_REGISTRY 가
+    # scan/__init__→router 로 이동하며 scan 19 축을 조용히 누락하던 버그).
+    _injectAxisRegistriesLive(entries)
 
     _applyAiContractMetadata(entries)
-    dictJson = json.dumps(entries, ensure_ascii=False, indent=4, sort_keys=True)
-
-    return (
-        '"""런타임 capabilities 카탈로그 (자동 생성).\n'
-        "\n"
-        "이 파일은 src/dartlab/reference/capability/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
-        '"""\n'
-        "\n"
-        "import json\n"
-        "\n"
-        "CAPABILITIES: dict[str, dict] = json.loads(\n"
-        "    r'''\n"
-        f"{dictJson}\n"
-        "'''\n"
-        ")\n"
-    )
+    return entries
 
 
-# ─── API Reference 자동 생성 (JSON + MD) ─────────────────────
+@lru_cache(maxsize=1)
+def loadCapabilities() -> dict[str, Any]:
+    """capability 카탈로그 — docstring 소스에서 라이브 빌드 (프로세스당 1 회 캐시).
 
-
-# ─── Surface 8: MCP Tools auto-generation ─────────────────────
-
-
-# ─── main ───────────────────────────────────────────────────────
-
-
-def _checkInSync(capabilitiesPy: str, analysisGraphPy: str) -> int:
-    """재생성 결과를 디스크 카탈로그와 비교 — 자동 확인 게이트 (write 없음).
-
-    소스 docstring/registry 에서 방금 재생성한 payload(dict) 를 디스크 ``_generated`` 모듈이
-    import 한 ``CAPABILITIES``/``ANALYSIS_GRAPH`` dict 와 비교한다. 파싱된 dict 비교라 ruff
-    포맷·따옴표 스타일·키 순서와 무관. 어긋나면(소스 변경 후 미재생성) exit 1 로 CI 차단.
-
-    Returns:
-        0 = in-sync, 1 = drift(또는 카탈로그 부재/손상).
+    스킬엔진(EngineCall/ReadCapability/검색)이 처음 조회할 때 1 회 빌드하고 캐시한다.
+    사본(``_generated.py``) 없음 → drift 불가, 항상 현재 docstring 진실. cold ~0.5s, warm ~18ms.
     """
-    freshCaps = _capabilitiesEntriesFromGeneratedPy(capabilitiesPy)
-    freshGraph = _capabilitiesEntriesFromGeneratedPy(analysisGraphPy)
-    drift: list[str] = []
-    try:
-        from dartlab.reference.capability._generated import CAPABILITIES as diskCaps
-
-        if diskCaps != freshCaps:
-            drift.append("_generated.py (CAPABILITIES)")
-    except Exception as exc:  # noqa: BLE001 — 부재/손상 모두 drift 로 취급
-        drift.append(f"_generated.py 로드 실패: {type(exc).__name__}")
-    try:
-        from dartlab.reference.capability._generated_analysis_graph import ANALYSIS_GRAPH as diskGraph
-
-        if diskGraph != freshGraph:
-            drift.append("_generated_analysis_graph.py (ANALYSIS_GRAPH)")
-    except Exception as exc:  # noqa: BLE001
-        drift.append(f"_generated_analysis_graph.py 로드 실패: {type(exc).__name__}")
-
-    if drift:
-        print("[generateSpec --check] DRIFT — 카탈로그가 소스 docstring 과 어긋남:", file=sys.stderr)
-        for d in drift:
-            print(f"  - {d}", file=sys.stderr)
-        print(
-            "  → 재생성: uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py",
-            file=sys.stderr,
-        )
-        return 1
-    print("[generateSpec --check] in-sync ✓ — 소스 docstring = _generated 카탈로그")
-    return 0
+    return buildCapabilities()
 
 
-def main(argv: "list[str] | None" = None) -> int:
-    """카탈로그 생성(기본) 또는 ``--check`` 자동 확인.
-
-    - 인자 없음: ``_generated.py`` + ``_generated_analysis_graph.py`` 재생성 + ruff 포맷.
-    - ``--check``: write 없이 재생성-비교만. drift 시 exit 1 (CI 게이트).
-    """
-    import argparse
-
-    parser = argparse.ArgumentParser(description="런타임 capability 카탈로그 생성 또는 --check 자동 확인.")
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="재생성-비교 검증만 (write 없음). 소스 docstring 과 _generated 가 어긋나면 exit 1.",
-    )
-    args = parser.parse_args(argv)
-
-    capabilitiesPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated.py"
-    analysisGraphPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated_analysis_graph.py"
-
-    capabilitiesPy = _generateCapabilitiesPy()
-    capabilityEntries = _capabilitiesEntriesFromGeneratedPy(capabilitiesPy)
-    analysisGraphPy = _generateAnalysisGraphPy(capabilityEntries)
-
-    if args.check:
-        return _checkInSync(capabilitiesPy, analysisGraphPy)
-
-    capabilitiesPyPath.write_text(capabilitiesPy, encoding="utf-8")
-    print(f"  _generated.py ({len(capabilitiesPy):,} chars) -> {capabilitiesPyPath}")
-    analysisGraphPyPath.write_text(analysisGraphPy, encoding="utf-8")
-    print(f"  _generated_analysis_graph.py ({len(analysisGraphPy):,} chars) -> {analysisGraphPyPath}")
-
-    # 0.10 BREAKING — MCP 33 generated 도구가 폐기되어 _generated_tools.py 산출은 더 이상 만들지 않는다.
-    # MCP 표면은 dartlab.ai.tools.registry SSOT (canonical 6 + ask) 만. mcp/__init__.py 가
-    # registry 위에서 advertise.
-
-    # 생성된 파이썬 파일은 raw 출력이므로 CI `ruff format --check` 통과를 위해 재포맷.
-    for pyPath in (capabilitiesPyPath, analysisGraphPyPath):
-        subprocess.run(
-            ["uv", "run", "ruff", "format", str(pyPath)],
-            check=False,
-            cwd=ROOT,
-        )
-        subprocess.run(
-            ["uv", "run", "ruff", "check", "--fix", str(pyPath)],
-            check=False,
-            cwd=ROOT,
-        )
-
-    print("\n  완료.")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+@lru_cache(maxsize=1)
+def loadAnalysisGraph() -> dict[str, Any]:
+    """analysisGraph — capability 카탈로그에서 라이브 컴파일 (프로세스당 1 회 캐시)."""
+    return _buildAnalysisGraph(loadCapabilities())

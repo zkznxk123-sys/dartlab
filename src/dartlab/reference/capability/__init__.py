@@ -9,12 +9,21 @@ Submodules
 - ``registry`` — ``CapabilityKind`` / ``CapabilitySpec`` / ``CapabilityRegistry``
   / ``build_capability_summary`` / ``ANALYSIS_CONTRACTS`` (런타임 등록 SSOT).
 - ``search``   — ``searchCapabilities`` / ``formatSearchResults`` (자연어 검색).
-- ``analysisGraph`` — graph loader / queries (``loadAnalysisGraph`` 등).
-- ``_generated`` — ``CAPABILITIES`` 카탈로그 dict (자동 생성, 직접 수정 금지).
-- ``_generated_analysis_graph`` — ``ANALYSIS_GRAPH`` (자동 생성).
+- ``analysisGraph`` — graph queries (``loadAnalysisGraph`` 결과 위에서 동작).
+- ``generateSpec`` — ``loadCapabilities()`` / ``loadAnalysisGraph()`` 라이브 빌더.
+  docstring 소스에서 첫 조회 시 1 회 빌드(캐시) — 생성 사본 파일 없음, drift 표면 0.
 
+카탈로그 SSOT = 엔진 docstring (operation.code §"CAPABILITIES 단일 진실의 원천").
 공개 함수 ``dartlab.capabilities()`` (복수, root) 와는 이름이 분리돼 있어
 충돌 없음 — 본 패키지는 단수 ``capability`` (서브패키지).
 """
 
 from __future__ import annotations
+
+from dartlab.reference.capability.generateSpec import (
+    buildCapabilities,
+    loadAnalysisGraph,
+    loadCapabilities,
+)
+
+__all__ = ["loadCapabilities", "loadAnalysisGraph", "buildCapabilities"]

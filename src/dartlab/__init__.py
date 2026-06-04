@@ -1038,7 +1038,9 @@ def capabilities(key: str | None = None, *, search: str | None = None) -> dict |
         results = searchCapabilities(search)
         return {key: entry for key, entry, _score in results}
 
-    from dartlab.reference.capability._generated import CAPABILITIES
+    from dartlab.reference.capability import loadCapabilities
+
+    CAPABILITIES = loadCapabilities()
 
     if key is None:
         return {k: v.get("summary", "") for k, v in CAPABILITIES.items()}

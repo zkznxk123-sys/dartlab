@@ -44,7 +44,9 @@ def _inlineCapabilities(capabilityRefs: list[str], *, isTopRank: bool) -> dict[s
     if not capabilityRefs:
         return {}
     try:
-        from dartlab.reference.capability._generated import CAPABILITIES
+        from dartlab.reference.capability import loadCapabilities
+
+        CAPABILITIES = loadCapabilities()
     except Exception:  # noqa: BLE001
         return {}
     field_caps = _CAP_FIELD_CAPS if isTopRank else _CAP_FIELD_CAPS_OTHERS

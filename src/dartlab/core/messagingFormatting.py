@@ -83,7 +83,7 @@ def suggest(funcName: str) -> str | None:
     When:
         메시징 레이어가 함수별 도움말이나 대체 호출 안내를 제안할 때.
     How:
-        ``dartlab.reference.capability._generated``를 lazy import하고 CAPABILITIES dict를 조회한다.
+        ``dartlab.reference.capability.loadCapabilities()`` 로 라이브 카탈로그 dict 를 조회한다.
 
     Args:
         funcName: Name such as ``"valuation"``, ``"Company.BS"``, or ``"scan.governance"``.
@@ -100,13 +100,13 @@ def suggest(funcName: str) -> str | None:
         >>> suggest("__missing__") is None
         True
     SeeAlso:
-        dartlab.reference.capability._generated: capability metadata source.
+        dartlab.reference.capability.loadCapabilities: 라이브 capability 카탈로그 source.
         formatMessage: catalog message formatting.
     """
     try:
-        import importlib
+        from dartlab.reference.capability import loadCapabilities
 
-        capabilities = importlib.import_module("dartlab.reference.capability._generated").CAPABILITIES
+        capabilities = loadCapabilities()
     except ImportError:
         return None
 

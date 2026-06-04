@@ -116,8 +116,8 @@ uv run python -X utf8 -c "import dartlab; print(dartlab.industry())"
 # 3. 신규 종목 매핑
 uv run python -X utf8 -c "import dartlab; print(dartlab.Company('신규코드').industry())"
 
-# 4. 6 JSON 동기화 (운영자 수동 — feedback_no_skill_json_auto_build)
-uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py
+# 4. capability 카탈로그는 docstring 라이브 빌드 — 재생성 단계 없음 (loadCapabilities 자동 반영).
+#    (Skill OS 6 JSON 동기화가 필요하면 그건 별도 generateSkills — feedback_no_skill_json_auto_build)
 ```
 
 ## 대표 반환 형태

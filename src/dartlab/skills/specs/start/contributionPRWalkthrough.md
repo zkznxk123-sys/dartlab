@@ -59,7 +59,7 @@ skill-os-add (`.claude/skills/skill-os-add/SKILL.md`) 4 단계 강행:
 - `lintSkill` 강제 섹션 충족
 - `capabilityRefs` 명시
 - `readSkill/describeSkill` 검색 가능
-- `generateSpec.py` 산출물 동기화
+- Skill OS 6 JSON 동기화 (capability 카탈로그는 docstring 라이브 빌드라 재생성 무관)
 
 ### 3. 변경 단위 commit
 

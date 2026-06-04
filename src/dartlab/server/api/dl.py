@@ -46,7 +46,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 import dartlab
-from dartlab.reference.capability._generated import CAPABILITIES
+from dartlab.reference.capability import loadCapabilities
+
+CAPABILITIES = loadCapabilities()
 
 router = APIRouter(prefix="/api/dl", tags=["dl"])
 

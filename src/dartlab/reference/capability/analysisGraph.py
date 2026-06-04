@@ -97,11 +97,11 @@ def graphStatus() -> dict[str, Any]:
 
 
 def loadAnalysisGraph() -> dict[str, Any]:
-    """Return generated Analysis Graph payload."""
+    """Analysis Graph payload — capability 카탈로그에서 라이브 컴파일 (사본 없음)."""
     try:
-        from dartlab.reference.capability._generated_analysis_graph import ANALYSIS_GRAPH
+        from dartlab.reference.capability.generateSpec import loadAnalysisGraph as _liveGraph
 
-        return ANALYSIS_GRAPH
+        return _liveGraph()
     except Exception:
         return {
             "graphVersion": 0,

@@ -140,9 +140,9 @@ def _looksLikeStockOrTicker(token: str) -> bool:
 
 
 def _capabilityExists(apiRef: str) -> bool:
-    from dartlab.reference.capability._generated import CAPABILITIES
+    from dartlab.reference.capability import loadCapabilities
 
-    return apiRef in CAPABILITIES
+    return apiRef in loadCapabilities()
 
 
 def _aliasToCanonical(apiRef: str, plan: dict[str, Any]) -> str:
@@ -152,8 +152,9 @@ def _aliasToCanonical(apiRef: str, plan: dict[str, Any]) -> str:
     - `dartlab.capabilities` → `capabilities`
     - `dartlab.<name>` (capabilities 에 있으면 `<name>`)
     """
-    from dartlab.reference.capability._generated import CAPABILITIES
+    from dartlab.reference.capability import loadCapabilities
 
+    CAPABILITIES = loadCapabilities()
     if apiRef == "dartlab.scan":
         return "scan"
     if apiRef.startswith("scan.") and apiRef not in CAPABILITIES:
