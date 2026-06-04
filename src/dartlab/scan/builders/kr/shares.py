@@ -18,10 +18,10 @@ Guide:
     scan prebuild, not a full domain tree.
 
 SeeAlso:
-    ``core.buildScan`` and ``providers.dart.docs.finance.shareCapital``.
+    ``core.buildScan`` and ``frame.sections.sectionTables`` (panel 주식의 총수 표).
 
 Requires:
-    DART share-capital source data when available.
+    panel artifact (frame.sections SSOT, docs.parquet 은퇴).
 
 AIContext:
     Keeps optional share-count failure from corrupting or blocking core scan sources.
@@ -39,8 +39,155 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from dartlab.scan.builders.kr.common import panelDir as _panelDir
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
+
+_SHARES_PATTERN = "주식의 총수"
+_OUTPUT_COLUMNS = [
+    "stock_code",
+    "corp_name",
+    "year",
+    "rcept_date",
+    "rcept_no",
+    "report_type",
+    "authorizedShares",
+    "issuedShares",
+    "retiredShares",
+    "outstandingShares",
+    "treasuryShares",
+    "floatingShares",
+    "treasuryRatio",
+    "preferredIssued",
+    "preferredOutstanding",
+    "preferredTreasury",
+    "preferredFloating",
+    "source",
+]
+
+
+def _numShares(cell: str | None) -> int | None:
+    """주식수 셀(콤마 포함) → int. '-'·빈칸·비숫자는 None."""
+    s = (cell or "").replace(",", "").strip()
+    return int(s) if s.isdigit() else None
+
+
+def _parseSharesTable(tables: list[list[list[str]]]) -> dict | None:
+    """frame.sectionTables('주식의 총수') 표 행 → 발행/자기/유통 주식수 (L1.5 frame XML 표).
+
+    표 컬럼: [label, 보통주, 우선주, 합계]. Ⅰ발행할~Ⅵ유통 행 라벨 매칭.
+    """
+    for t in tables:
+        labels = "".join(row[0] for row in t if row).replace(" ", "")
+        if "발행주식의총수" not in labels and "유통주식수" not in labels:
+            continue
+        out: dict = {}
+        for row in t:
+            if not row:
+                continue
+            label = row[0].replace(" ", "")
+            pref = _numShares(row[2]) if len(row) > 2 else None
+            total = _numShares(row[3]) if len(row) > 3 else None
+            if "발행할주식의총수" in label:
+                out["authorizedShares"] = total
+            elif "현재까지발행한주식" in label:
+                out["issuedShares"] = total
+                out["preferredIssued"] = pref
+            elif "현재까지감소한주식" in label:
+                out["retiredShares"] = total
+            elif "발행주식의총수" in label:
+                out["outstandingShares"] = total
+                out["preferredOutstanding"] = pref
+            elif "자기주식수" in label:
+                out["treasuryShares"] = total
+                out["preferredTreasury"] = pref
+            elif "유통주식수" in label:
+                out["floatingShares"] = total
+                out["preferredFloating"] = pref
+        if out.get("outstandingShares") or out.get("issuedShares"):
+            o = out.get("outstandingShares")
+            tr = out.get("treasuryShares")
+            out["treasuryRatio"] = (tr / o) if (tr and o) else None
+            return out
+    return None
+
+
+def buildSharesOutstandingScan(*, write: bool = True, outputPath: "str | Path | None" = None) -> "object":
+    """전 종목 panel 발행주식수 scan (L1.5 frame.sectionTables SSOT, docs.parquet 은퇴).
+
+    Args:
+        write: True면 ``sharesOutstanding.parquet`` 저장.
+        outputPath: 출력 경로. None이면 ``data/dart/scan/sharesOutstanding.parquet``.
+
+    Returns:
+        발행주식수 DataFrame (stock_code × period, rcept_date desc).
+
+    Raises:
+        FileNotFoundError: panel 디렉토리 부재.
+        RuntimeError: 추출 결과 0 건.
+
+    Example:
+        >>> buildSharesOutstandingScan(write=False)  # doctest: +SKIP
+    """
+    import polars as pl
+
+    from dartlab.core.listingResolver import getListingResolver
+    from dartlab.frame.sections import sectionTables, sectionTexts
+
+    panelRoot = _panelDir()
+    if not panelRoot.exists():
+        raise FileNotFoundError(f"panel 디렉토리 없음: {panelRoot}")
+    codes = sorted(p.stem for p in panelRoot.glob("*.parquet"))
+    resolver = getListingResolver()
+    records: list[dict] = []
+    for code in codes:
+        texts = sectionTexts(code)
+        if texts is None or texts.is_empty():
+            continue
+        sub = texts.filter(pl.col("sectionLeaf").str.contains(_SHARES_PATTERN))
+        if sub.is_empty():
+            continue
+        corpName = (resolver.codeToName(code) if resolver else None) or ""
+        periodMap = dict(zip(sub["period"].to_list(), sub["rceptNo"].to_list(), strict=False))
+        for period, rcept in periodMap.items():
+            parsed = _parseSharesTable(sectionTables(code, sectionPattern=_SHARES_PATTERN, period=period))
+            if parsed is None:
+                continue
+            year = int(period[:4]) if period[:4].isdigit() else None
+            reportType = "annual" if period.endswith("Q4") else period[4:]
+            records.append(
+                {
+                    "stock_code": code,
+                    "corp_name": corpName,
+                    "year": year,
+                    "rcept_date": (rcept or "")[:8],
+                    "rcept_no": rcept,
+                    "report_type": reportType,
+                    "authorizedShares": parsed.get("authorizedShares"),
+                    "issuedShares": parsed.get("issuedShares"),
+                    "retiredShares": parsed.get("retiredShares"),
+                    "outstandingShares": parsed.get("outstandingShares"),
+                    "treasuryShares": parsed.get("treasuryShares"),
+                    "floatingShares": parsed.get("floatingShares"),
+                    "treasuryRatio": parsed.get("treasuryRatio"),
+                    "preferredIssued": parsed.get("preferredIssued"),
+                    "preferredOutstanding": parsed.get("preferredOutstanding"),
+                    "preferredTreasury": parsed.get("preferredTreasury"),
+                    "preferredFloating": parsed.get("preferredFloating"),
+                    "source": "panel_frame",
+                }
+            )
+    if not records:
+        raise RuntimeError("발행주식수 추출 결과 0 건")
+    out = pl.DataFrame(records, schema_overrides={"rcept_date": pl.Utf8}).select(_OUTPUT_COLUMNS)
+    out = out.sort(["stock_code", "rcept_date"], descending=[False, True])
+    if write:
+        if outputPath is None:
+            outputPath = _scanDir() / "sharesOutstanding.parquet"
+        outputPath = Path(outputPath)
+        outputPath.parent.mkdir(parents=True, exist_ok=True)
+        out.write_parquet(str(outputPath), compression="zstd")
+    return out
 
 
 def buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
@@ -79,23 +226,20 @@ def buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
         ``buildScan`` 마지막 단계에서 호출된다.
 
     How:
-        provider builder 를 지연 import 해 실행하고, 알려진 런타임/파일 오류는 None 으로 변환한다.
+        frame 기반 ``buildSharesOutstandingScan`` 을 실행하고, 알려진 런타임/파일 오류는 None 으로 변환한다.
 
     Requires:
-        ``dartlab.providers.dart.docs.finance.shareCapital.buildSharesOutstandingScan``.
+        ``buildSharesOutstandingScan`` (frame.sections SSOT, panel 주식의 총수 표).
 
     SeeAlso:
         ``dartlab.scan.builders.kr.core.buildScan``.
     """
     try:
-        from dartlab.providers.dart.docs.finance.shareCapital import buildSharesOutstandingScan
-
         if verbose:
-            _say("[shares] 발행주식수 풀 빌드 시작")
+            _say("[shares] 발행주식수 풀 빌드 시작 (frame.sections SSOT)")
         df = buildSharesOutstandingScan()
         if verbose:
-            stockCol = "stock_code" if "stock_code" in df.columns else "stockCode"
-            _say(f"[shares] 완료: rows={df.height} stocks={df[stockCol].n_unique()}")
+            _say(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")
         return _scanDir() / "sharesOutstanding.parquet"
     except (FileNotFoundError, RuntimeError, OSError, ValueError) as exc:
         if verbose:
