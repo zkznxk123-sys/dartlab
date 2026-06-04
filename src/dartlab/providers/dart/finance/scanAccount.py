@@ -16,11 +16,11 @@ from pathlib import Path
 
 import polars as pl
 
+from dartlab.core.accounts.data import loadAccounts
 from dartlab.core.memory import withMemoryBudget
 from dartlab.providers.dart.finance.mapper import (
     ACCOUNT_NAME_SYNONYMS,
     ID_SYNONYMS,
-    AccountMapper,
 )
 
 _log = logging.getLogger(__name__)
@@ -74,8 +74,7 @@ def _parseAmount(val: str | None) -> float | None:
 
 def _buildFastKeys(snakeId: str) -> set[str]:
     """snakeId에 매핑되는 모든 원본 키를 사전 수집 (O(1) set lookup)."""
-    mapper = AccountMapper.get()
-    mappings = mapper._mappings or {}
+    mappings = loadAccounts().get("mappings", {})
 
     directKeys: set[str] = set()
     for key, sid in mappings.items():
@@ -118,21 +117,21 @@ def _resolveSnakeId(nameOrId: str) -> str:
     if nameOrId.isascii() and "_" in nameOrId:
         return nameOrId
 
-    # mapper로 한글 → snakeId 변환
-    mapper = AccountMapper.get()
+    # SSOT mappings 로 한글 → snakeId 변환
+    mappings = loadAccounts().get("mappings", {})
     # 한글명 우선
     normalizedNm = ACCOUNT_NAME_SYNONYMS.get(nameOrId, nameOrId)
-    if normalizedNm in (mapper._mappings or {}):
-        return mapper._mappings[normalizedNm]
+    if normalizedNm in mappings:
+        return mappings[normalizedNm]
     # 공백 제거 후 재시도
     noSpace = normalizedNm.replace(" ", "")
-    if noSpace in (mapper._mappings or {}):
-        return mapper._mappings[noSpace]
+    if noSpace in mappings:
+        return mappings[noSpace]
     # 영문 ID로도 시도
     stripped = nameOrId.lower().replace("-", "").replace(" ", "")
     normalizedId = ID_SYNONYMS.get(stripped, stripped)
-    if normalizedId in (mapper._mappings or {}):
-        return mapper._mappings[normalizedId]
+    if normalizedId in mappings:
+        return mappings[normalizedId]
 
     # 변환 실패 시 원본 반환 (이후 _resolveSjDiv에서 에러)
     return nameOrId
@@ -653,10 +652,10 @@ def scanAccountList() -> list[dict[str, str]]:
     data = _ensureLoaded()
 
     # 한글명 역매핑: snakeId → 한글 항목
-    mapper = AccountMapper.get()
+    mappings = loadAccounts().get("mappings", {})
     idToKr: dict[str, str] = {}
-    if mapper._mappings:
-        for krName, snakeId in mapper._mappings.items():
+    if mappings:
+        for krName, snakeId in mappings.items():
             if not krName.isascii() and snakeId not in idToKr:
                 idToKr[snakeId] = krName
 
