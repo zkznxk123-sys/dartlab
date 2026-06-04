@@ -35,16 +35,24 @@
 		if (!FREQ_BY_KIND[k].includes(freq)) freq = FREQ_BY_KIND[k][0]; // 가용 빈도 보정
 	}
 
-	// open + 선택 조합 → DuckDB 로드 (조합별 1회 캐시).
+	// open + 선택 조합 → DuckDB 로드 (조합별 1회 캐시). lastKey(비반응)로 동일 조합 effect 재실행 차단(루프 가드),
+	// 캐시 히트는 로컬 cached 로(쓴 state 를 다시 읽지 않음 — self-dependency 루프 회피).
 	const cache = new Map<string, FinanceStatement | null>();
+	let lastKey = '';
 	$effect(() => {
-		if (!open) return;
+		if (!open) {
+			lastKey = '';
+			return;
+		}
 		const m = market, c = code, k = kind, f = freq, s = scope;
 		const key = `${m}:${c}:${k}:${f}:${s}`;
+		if (key === lastKey) return; // 같은 조합 재실행 차단
+		lastKey = key;
 		if (cache.has(key)) {
-			statement = cache.get(key) ?? null;
+			const cached = cache.get(key) ?? null;
+			statement = cached;
+			errorMsg = cached === null ? usOrDeviceMsg(m) : null;
 			loading = false;
-			errorMsg = statement === null ? usOrDeviceMsg(m) : null;
 			return;
 		}
 		loading = true;
