@@ -392,28 +392,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "str | None — 회사명. 못 찾으면 None.\n\nRaises:\n없음.",
         "summary": "종목코드 → 회사명 변환."
     },
-    "Company.contextSlices": {
-        "aicontext": "ask()/chat()의 시스템 프롬프트에 직접 주입되는 데이터\nLLM이 소비하는 최종 형태의 컨텍스트",
-        "capabilities": "retrievalBlocks를 LLM 컨텍스트 윈도우에 맞게 슬라이싱\n토큰 예산 내에서 최대한 많은 관련 정보를 담는 압축 포맷\ntopic/period 기준 우선순위 정렬",
-        "example": "c = Company(\"005930\")\nc.contextSlices            # LLM용 context 슬라이스\n\nRaises:\n없음.",
-        "guide": "\"LLM에 들어가는 컨텍스트\" → c.contextSlices\n\"AI가 보는 데이터\" → c.contextSlices",
-        "kind": "property",
-        "llmSpecs": {
-            "antiPatterns": [
-                "슬라이스 그대로 컨텍스트 → 토큰 부담. topic 필터링.",
-                "슬라이스 ID 의 안정성 가정 X — sections 갱신 시 재산정."
-            ],
-            "dataflow": "docs.sections → docs.contextSlices accessor → 본 property.",
-            "freshness": "sections 갱신 시점.",
-            "outputSchema": "pl.DataFrame [sliceId, topic, period, content, tokenCount] 또는 None.",
-            "prerequisites": "docs.sections + slicer (LLM context budget).",
-            "targetMarkets": "KR (DART 정기보고서 RAG)."
-        },
-        "requires": "데이터: docs (자동 다운로드)",
-        "returns": "pl.DataFrame | None -- 슬라이싱된 context 블록. docs 없으면 None.",
-        "seeAlso": "retrievalBlocks: 슬라이싱 전 전체 retrieval 블록\nask: contextSlices를 내부적으로 소비하는 AI 질문 인터페이스",
-        "summary": "LLM 투입용 context slice DataFrame."
-    },
     "Company.credit": {
         "args": "axis: 축 이름 (\"채무상환\", \"자본구조\" 등). None이면 등급 종합.\ndetail: True이면 7축 상세 + 지표 시계열 포함.\nbasePeriod: 분석 기준 기간. None이면 최신.\noverrides: AI/사용자가 엔진 계산 가정을 직접 교체하는 dict.\n키: debtRatio, interestCoverage, currentRatio, quickRatio, ocfToDebt,\nfcfToDebt, scenarioStress. 상세: core/overrides.py.",
         "example": "c.credit()              # → {\"grade\": \"dCR-AA\", \"score\": 6.6, ...}\nc.credit(\"채무상환\")     # → {\"axis\": \"채무상환능력\", \"score\": 2.7, ...}\nc.credit(detail=True)   # → 7축 상세 + metricsHistory\nc.credit(overrides={\"debtRatio\": 150, \"interestCoverage\": 2.5})  # 스트레스 시나리오",
@@ -554,35 +532,16 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "직책 정규화 없이 회사 간 비교 (대표이사 vs 부회장 vs 사장 의미 차이)"
             ],
             "freshness": "정기보고서 마감 후 30~45 일.",
-            "outputSchema": [
-                "payByType : DataFrame [구분, 급여, 상여, 주식매수선택권행사이익, 기타근로소득, 퇴직소득, 기타]",
-                "topPay : DataFrame [성명, 직위, 보수총액, 산정기준]"
-            ],
-            "prerequisites": "사업보고서 박힘 (자동 다운로드)",
+            "outputSchema": "pl.DataFrame | None — panel native 임원보수 섹션 행(텍스트, 구조화 드롭).",
+            "prerequisites": "panel artifact 박힘",
             "targetMarkets": [
                 "KR (DART · 자본시장법 §159)",
                 "Raises:",
                 "없음."
             ]
         },
-        "requires": "DART 사업보고서 본문 (executivePay 섹션 자동 파싱).",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "",
-                "name": "payByType",
-                "type": "[구분, 급여, 상여, 주식매수선택권 행사이익, 기타근로소득, 퇴직소득, 기타]",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "",
-                "name": "topPay",
-                "type": "[성명, 직위, 보수총액, 근로소득, 퇴직소득, 기타, 산정기준 narrative]",
-                "unit": null
-            }
-        ],
-        "returns": "ExecutivePayResult 또는 None — payByType DataFrame + topPay DataFrame 보유.\npayByType: [구분, 급여, 상여, 주식매수선택권 행사이익, 기타근로소득, 퇴직소득, 기타]\ntopPay: [성명, 직위, 보수총액, 근로소득, 퇴직소득, 기타, 산정기준 narrative]",
+        "requires": "panel artifact (임원보수 섹션 contentRaw).",
+        "returns": "pl.DataFrame 또는 None — panel native 임원보수 섹션 행(항목 × period).\n구조화 payByType/topPay(개인별 시계열)는 농장 은퇴로 드롭 — 본문 텍스트만.",
         "seeAlso": "governance: 이사회 구성 + 사외이사 비율\nrelatedPartyTx: 관계자 거래 (executive 와 회사 사이 거래)",
         "summary": "임원 보수 ≥ 5억 원 individual 공개 (자본시장법 §159, 2013-11-29 시행)."
     },
@@ -1171,7 +1130,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "aicontext": "footnote-grade Q&A 의 raw 데이터 (Bloomberg/FactSet 미보유 영역)\n\"LG energy 의 리스 약정 중 중국 비중\" 같은 질문은 본 method 의 답 source\n주석 양식이 분기별로 미세 변경 — narrative 비교 시 변경 가능성 인지",
         "args": "keyword: 주석 키워드 (NOTES_KEYWORDS 23 종 중 하나 — 리스 · 우발채무 · 퇴직급여 · 파생 등)\nperiod: \"y\" 연간 · \"q\" 분기 · \"h\" 반기 (default \"y\").",
         "capabilities": "K-IFRS 주석 표 본문 파싱 (NOTES_KEYWORDS 23 종 — 리스/우발/퇴직/파생/금융자산 등)\n연간/분기/반기 분기\n최근 5 년 historical panel\naudit-grade citation 의 핵심 evidence layer",
-        "example": "c = Company(\"005930\")\nlease = c.notesDetail(\"리스\")           # 리스 약정 5 년 panel\ncontingent = c.notesDetail(\"우발\", \"y\") # 우발채무 연간",
+        "example": "c = Company(\"005930\")\nlease = c.notesDetail(\"리스\")           # 리스 약정 native 주석 wide\ncontingent = c.notesDetail(\"우발\", \"y\") # 우발채무 주석 행",
         "guide": "\"삼성전자 리스 약정\" → c.notesDetail(\"리스\")\n\"셀트리온 우발채무\" → c.notesDetail(\"우발\")\n\"LG화학 퇴직급여 가정\" → c.notesDetail(\"퇴직급여\")\n\"현대차 파생금융상품\" → c.notesDetail(\"파생\")",
         "kind": "method",
         "llmSpecs": {
@@ -1181,14 +1140,10 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "5 년 panel 전체 dump (답변 본문 상위 3~5 년만 인용)"
             ],
             "freshness": "정기보고서 마감 후 30~45 일.",
-            "outputSchema": [
-                "corpName : str",
-                "tables : dict[키워드, list[NotesPeriod]]",
-                "NotesPeriod : [year, kind, items, unit]"
-            ],
+            "outputSchema": "pl.DataFrame | None — panel native 주석 wide (항목 × period).",
             "prerequisites": [
-                "정기보고서 박힘 (자동 다운로드)",
-                "keyword 가 NOTES_KEYWORDS 박힘"
+                "panel artifact 박힘 (online/bulk 빌드)",
+                "keyword 가 주석 제목/disclosureKey 에 매칭"
             ],
             "targetMarkets": [
                 "KR (K-IFRS 1701/1019/1024)",
@@ -1196,10 +1151,33 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "없음."
             ]
         },
-        "requires": "DART 정기보고서 docs (주석 본문 자동 파싱).",
-        "returns": "NotesDetailResult 또는 None — corpName + tables (keyword 별 NotesPeriod list) 보유.",
+        "requires": "panel artifact (정부 native NT_ 주석 정렬 — ``read.alignNotes``).",
+        "returns": "pl.DataFrame 또는 None — panel native 주석 행(항목 × period wide).\nkeyword 가 disclosureKey/sectionLeaf/blockLeaf 에 매칭되는 주석 블록.",
         "seeAlso": "audit: 감사보고서 (KAM 와 주석은 보완)\ngovernance: 지배구조 본문",
         "summary": "K-IFRS 주석 세부항목 (리스 약정 · 우발채무 · 퇴직급여 가정 · 파생 등) 추출."
+    },
+    "Company.panel": {
+        "aicontext": "상태 없는 lazy read — 매 접근 새 Panel (누적 0). contentRaw 는 외부 untrusted.\n\nWhen:\n한 회사의 공시 수평화 보드가 Company 흐름에서 필요할 때.\n\nHow:\nself.stockCode → Panel(stockCode, marketNs=\"kr\") lazy 인스턴스.",
+        "args": "없음 (property — self.stockCode 사용).",
+        "capabilities": "한 회사 공시를 항목 × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.",
+        "example": ">>> c = Company(\"005930\")\n>>> c.panel.shape                          # wide (항목 × period) — DataFrame 그대로\n>>> c.panel(\"재고\")                        # 섹션명/canonicalKey 행 (raw 공시)\n>>> c.panel(\"재고\", tag=True)              # 원본 XML 행\n>>> c.panel(\"IS\")                          # 강한 소스 — finance 주입 (show 위임)\n>>> c.panel(\"재고\", source=\"raw\")          # 강제 raw 공시",
+        "guide": "`c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel.show(key)`. 회사간은 모듈\n레벨 `crossCompany` (회사 단위 facade 밖).",
+        "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "c.panel 결과 캐싱 강제 금지 — 상태 없는 lazy(누적 0).",
+                "canonicalKey 추측 금지 — board 로 확인 후 show."
+            ],
+            "dataflow": "self.stockCode → Panel(wide) + _showFn/_strongFn 주입.",
+            "freshness": "매 접근 read.",
+            "outputSchema": "``Panel`` (board/show/wide/long/periods 메서드).",
+            "prerequisites": "panel artifact.",
+            "targetMarkets": "KR (DART). US 는 marketNs=\"us\" (EDGAR panel, 후속)."
+        },
+        "requires": "data/dart/panel/{code}/*.parquet (사전빌드 artifact).",
+        "returns": "``Panel`` 인스턴스(= wide ``pl.DataFrame``). ``c.panel`` 자체가 wide, ``c.panel(key)`` 로\n섹션 검색 / 강한 소스 주입.\n\nRaises:\n없음 — artifact 부재 시 빈 DataFrame.",
+        "seeAlso": "``providers.dart.panel.Panel`` — 반환 본체 (pl.DataFrame subclass + __call__).\n``show`` — 강한 소스(finance/report/notes) dispatch — c.panel 이 주입 재사용.",
+        "summary": "공시 수평화 보드 — 잡는 순간 항목 × 기간 wide DataFrame (panel 엔진)."
     },
     "Company.priority": {
         "example": ">>> Company(\"005930\").priority()",
@@ -1400,37 +1378,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "``codeName`` — 반대 (code → name).\n``nameToCode`` — module-level 등가.",
         "summary": "종목코드 또는 회사명 → 종목코드 변환."
     },
-    "Company.retrievalBlocks": {
-        "aicontext": "ask()/chat()에서 원문 기반 답변 생성 시 소스로 사용\nretrieval 기반 컨텍스트 주입의 원천 데이터",
-        "capabilities": "docs 원문을 markdown 형태 그대로 보존한 검색용 블록\n각 블록은 topic/subtopic/period 단위로 분할\nRAG, 벡터 검색, 원문 참조에 최적화된 포맷",
-        "example": "c = Company(\"005930\")\nc.retrievalBlocks          # 전체 retrieval 블록\n\nRaises:\n없음.",
-        "guide": "\"원문 검색용 블록\" → c.retrievalBlocks\n\"RAG용 데이터\" → c.retrievalBlocks",
-        "kind": "property",
-        "llmSpecs": {
-            "antiPatterns": [
-                "block_id 의 안정성 가정 X — sections 갱신 시 재산정.",
-                "본 블록 벡터 임베딩 사전 계산 가정 X — 별도 처리."
-            ],
-            "dataflow": "docs.sections → 청킹 → 본 property.",
-            "freshness": "sections 갱신 시점.",
-            "outputSchema": "pl.DataFrame [topic, subtopic, period, content] 또는 None.",
-            "prerequisites": "docs.sections.",
-            "targetMarkets": "KR (DART 정기보고서 RAG)."
-        },
-        "requires": "데이터: docs (자동 다운로드)",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "",
-                "name": "pl.DataFrame | None -- 컬럼",
-                "type": "topic, subtopic, period, content 등. docs 없으면 None.",
-                "unit": null
-            }
-        ],
-        "returns": "pl.DataFrame | None -- 컬럼: topic, subtopic, period, content 등. docs 없으면 None.",
-        "seeAlso": "contextSlices: retrievalBlocks를 LLM 윈도우에 맞게 슬라이싱한 결과\nsections: 구조화된 데이터 지도 (retrievalBlocks의 원본)",
-        "summary": "원문 markdown 보존 retrieval block DataFrame."
-    },
     "Company.search": {
         "args": "keyword: 검색어 (부분 일치).\nlimit: 최대 행 수. None 이면 무제한.",
         "example": ">>> Company.search(\"삼성\", limit=10)\n\nRaises:\n없음.",
@@ -1472,40 +1419,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "pl.DataFrame — chapter | topic | period | source | ... 또는 None.",
         "seeAlso": "topics: sections 기반 topic 요약 (더 간결)\nshow: 특정 topic 데이터 조회\nindex: 전체 구조 메타데이터 목차",
         "summary": "sections — docs + finance + report 통합 지도."
-    },
-    "Company.sectionsAs": {
-        "args": "stripTags: True 면 plain text, False 면 mixed 양식.",
-        "example": "c = Company(\"005930\")\nc.sectionsAs(stripTags=True)   # show / agent 양식 (plain text) — c.sections 와 동일\nc.sectionsAs(stripTags=False)  # viewer 양식 (HTML <table>) — c.sectionsRaw() 와 동일",
-        "kind": "method",
-        "returns": "pl.DataFrame — sections wide DataFrame (cell value 만 stripTags 적용). None.\n\nRaises:\n없음.",
-        "summary": "sections wide DataFrame — stripTags 파라미터로 cell value 양식 선택."
-    },
-    "Company.sectionsLazy": {
-        "args": "periods: 특정 period 만 scan. None = 전체.",
-        "example": "c = Company(\"005930\")\nlf = c.sectionsLazy()\ndf = lf.select([\"topic\", \"period\", \"content_plain\"]).filter(\npl.col(\"period\").str.starts_with(\"2025\")\n).collect()",
-        "kind": "method",
-        "returns": "``pl.LazyFrame`` — sections artifact long format. 부재 시 None.",
-        "summary": "sections artifact LazyFrame — 메모리 한 자리 MB 달성 path."
-    },
-    "Company.sectionsLong": {
-        "args": "columns: select 할 컬럼 list. None = 전체. polars columnar projection 으로\ncontent 컬럼 미선택 시 페이지 fault 0 (메모리 절약).\nperiods: 특정 period 만 read. None = 전체.",
-        "example": "c = Company(\"005930\")\n# plain text only — content 컬럼만 mmap\ndf = c.sectionsLong(columns=[\"topic\", \"period\", \"content\"])\n# 특정 period 만\ndf = c.sectionsLong(periods=[\"2025\", \"2025Q3\"])",
-        "kind": "method",
-        "returns": "long format DataFrame — meta cols + ``period`` + ``content``. artifact\n부재 시 fallback wide → long 변환. None.\n\nRaises:\n없음.",
-        "summary": "sections artifact long format read — period-sharded mmap parquet 직접 노출."
-    },
-    "Company.sectionsRaw": {
-        "example": "c = Company(\"005930\")\nwide = c.sectionsRaw()  # viewer 사용 의도 명시",
-        "kind": "method",
-        "returns": "pl.DataFrame — sections wide. cell 양식 = mixed (HTML ``<table rowspan colspan align>``\n+ markdown heading + plain text). None — artifact + fallback 모두 부재 시.\n\nRaises:\n없음.",
-        "summary": "sections artifact mixed (모든 태그 + ALIGN/VALIGN 보존) wide DataFrame — viewer 전용."
-    },
-    "Company.sectionsTables": {
-        "args": "periods: 특정 period 만. None = 전체.",
-        "example": "c = Company(\"005930\")\ntables = c.sectionsTables(periods=[\"2025\"])\n# tableHorizontalizer 등 HTML 표 파서가 content_table_struct 컬럼 직접 입력",
-        "kind": "method",
-        "returns": "long DataFrame — meta cols + ``period`` + ``content_table_struct``. None.\ncontent_table_struct 가 빈 문자열인 row (표 없는 paragraph block) 포함.\n\nRaises:\n없음.",
-        "summary": "sections artifact ``content_table_struct`` 컬럼만 read — HTML 표 구조 SSOT."
     },
     "Company.sector": {
         "aicontext": "섹터 분류 결과로 동종업계 비교, 섹터 파라미터 자동 선택\nanalysis/valuation에서 섹터별 벤치마크 기준으로 활용",
@@ -1557,104 +1470,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "``CallableAccessor`` — call/attr form 둘 다 ``_selectImpl`` 호출. ``SelectResult``\n반환 (filtered DataFrame + meta). 상세는 ``_selectImpl`` docstring.",
         "seeAlso": "``_selectImpl`` — 실제 필터 구현.\n``show`` — 본 함수의 입력 source.\n``dartlab.frame.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.",
         "summary": "``show()`` 결과에서 행/열 필터 — dual access proxy."
-    },
-    "Company.show": {
-        "aicontext": "120+ topic 단일 접근점 — LLM 이 데이터 조회 핵심 도구\nfinance topic 은 freq/scope 토글로 분기/연간/연결/별도 자유 전환",
-        "args": "topic: topic 이름. ``\"BS\"`` ``\"IS\"`` ``\"CF\"`` ``\"CIS\"`` ``\"SCE\"`` ``\"ratios\"``\n같은 finance topic 또는 ``\"dividend\"`` ``\"companyOverview\"`` 같은 docs/report\ntopic. 주요주주/최대주주 topic은 ``\"majorHolder\"`` 이며\n``\"majorShareholder\"`` 가 아니다. 전체 목록은 ``c.topics``.\nblock: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).\nperiod: 단일 기간 필터 (``\"2023\"``, ``\"2024Q2\"``) 또는 리스트 (세로 비교 뷰).\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간 strict 합) /\n``\"YTD\"`` (year-to-date 누적). pandas 관용 코드. **finance topic 한정**.\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).\n**finance topic 한정**.\nraw: True 면 원본 그대로 (정제 없이).",
-        "capabilities": "120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)\n기간 / 주기 / 범위 / 블록 / 세로뷰 모두 파라미터 토글\ndocs / finance / report 3 source 자동 통합",
-        "example": "c = dartlab.Company(\"005930\")\nc.show(\"IS\")                              # 분기 연결 (기본)\nc.show(\"IS\", freq=\"Y\")                    # 연간 연결\nc.show(\"IS\", scope=\"separate\")            # 분기 별도\nc.show(\"IS\", freq=\"Y\", scope=\"separate\")  # 연간 별도\nc.show(\"IS\", period=\"2023\")               # 2023년 필터\nc.show(\"dividend\")                        # 배당\nc.show(\"majorHolder\")                     # 주요주주/최대주주",
-        "guide": "\"분기 손익\" → ``c.show(\"IS\")``\n\"연간 손익\" → ``c.show(\"IS\", freq=\"Y\")``\n\"별도 재무상태표\" → ``c.show(\"BS\", scope=\"separate\")``\n\"2023년 손익\" → ``c.show(\"IS\", period=\"2023\")``\n\"배당 정보\" → ``c.show(\"dividend\")``\n\"주요주주/최대주주\" → ``c.show(\"majorHolder\")``",
-        "kind": "property",
-        "llmSpecs": {
-            "antiPatterns": [
-                "분기 컬럼명을 \"Q4_2025\" 로 추측 (실제는 \"2025Q4\")",
-                "freq=\"M\" 같은 미지원 값 (Q/Y/YTD 만)",
-                "finance topic 에 raw=True 후 비율 계산 (정제 단계 누락)"
-            ],
-            "freshness": "분기 마감 후 45일 (DART 공시 마감일). c.update() 로 증분 갱신.",
-            "outputSchema": [
-                "snakeId : str — 영문 snake_case 계정 식별자 (finance 한정)",
-                "항목 : str — 한글 계정명",
-                "2025Q4, 2025Q3, ... : float — 분기 값 (원 단위, freq=\"Q\" 기본)",
-                "2025, 2024, ... : float — 연간 합산 (원 단위, freq=\"Y\")"
-            ]
-        },
-        "requires": "데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "계정 식별자 (영문 snake_case)",
-                "name": "snakeId",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "계정명 (한글)",
-                "name": "항목",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "분기별 값 (원 단위, freq=\"Q\" 기본)",
-                "name": "2025Q4, 2025Q3, ...",
-                "type": "float",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "연간 합산 값 (원 단위, freq=\"Y\")",
-                "name": "2025, 2024, ...",
-                "type": "float",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "비율명",
-                "name": "항목",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "비율값 (%, 배)",
-                "name": "2025Q4, 2025Q3, ...",
-                "type": "float",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "세부 항목명",
-                "name": "항목",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "금액 (원 단위)",
-                "name": "당기, 전기 또는 연도 컬럼",
-                "type": "float",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "블록 번호",
-                "name": "block",
-                "type": "int",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "블록 제목",
-                "name": "title",
-                "type": "str",
-                "unit": null
-            }
-        ],
-        "returns": "pl.DataFrame | None\nfinance topic (IS/BS/CF/CIS/SCE):\nsnakeId : str — 계정 식별자 (영문 snake_case)\n항목 : str — 계정명 (한글)\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위, freq=\"Q\" 기본)\n2025, 2024, ... : float — 연간 합산 값 (원 단위, freq=\"Y\")\nratios topic:\n항목 : str — 비율명\n2025Q4, 2025Q3, ... : float — 비율값 (%, 배)\nnotes topic (inventory, borrowings 등):\n항목 : str — 세부 항목명\n당기, 전기 또는 연도 컬럼 : float — 금액 (원 단위)\ndocs/report topic (dividend, employee 등):\ntopic별 컬럼 구조 — c.show(topic) 실행으로 확인\n블록 미지정 + 멀티블록 topic:\nblock : int — 블록 번호\ntitle : str — 블록 제목\n데이터 없으면 None.",
-        "seeAlso": "select: show() 결과에서 행/열 필터 + 차트\ntrace: 데이터 출처 추적\ntopics: 사용 가능한 topic 전체 목록",
-        "summary": "topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출)."
     },
     "Company.sources": {
         "aicontext": "데이터 가용성 사전 점검 — 분석 가능 범위 판단의 기초",
