@@ -7,14 +7,30 @@
 	let {
 		rows,
 		periods,
-		dartUrlByPeriod
-	}: { rows: PanelRow[]; periods: string[]; dartUrlByPeriod: Record<string, string | null> } = $props();
+		dartUrlByPeriod,
+		glow = null
+	}: {
+		rows: PanelRow[];
+		periods: string[];
+		dartUrlByPeriod: Record<string, string | null>;
+		glow?: { rowIndex: number; period: string } | null;
+	} = $props();
 
 	// 섹션 내 build-order 인덱스 보존 — 행 식별(disclosureKey/NARR)은 leafSeq 미포함이라 EDGAR 동명 narrative
 	// 행이 충돌(each_key_duplicate). 별개 행이므로 둘 다 표시하되 DOM 키는 안정·유일한 원본 인덱스로.
 	const visible = $derived(rows.map((r, i) => ({ r, i })).filter(({ r }) => hasVisibleContent(r, periods)));
 	// 항목 라벨 열 없음 — 셀 본문(표 제목 내장)이 자기 식별. 격자는 기간 열만.
 	const template = $derived(`repeat(${periods.length}, minmax(260px, 1fr))`);
+
+	// 검색 점프 셀 글로우 → 화면 중앙으로 스크롤(렌더 후).
+	$effect(() => {
+		const g = glow;
+		if (!g) return;
+		queueMicrotask(() => {
+			const el = document.querySelector(`[data-cell="${g.rowIndex}|${CSS.escape(g.period)}"]`);
+			el?.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+		});
+	});
 </script>
 
 {#if periods.length === 0}
@@ -39,7 +55,7 @@
 			<!-- 본문 -->
 			{#each visible as { r, i } (i)}
 				{#each periods as p (p)}
-					<div class="cell body-cell">
+					<div class="cell body-cell" class:glow={glow && glow.rowIndex === i && glow.period === p} data-cell={`${i}|${p}`}>
 						<CellContent value={r.cells?.[p] ?? ''} />
 					</div>
 				{/each}
@@ -106,5 +122,18 @@
 	}
 	.body-cell {
 		color: #cbd5e1;
+	}
+	.body-cell.glow {
+		animation: cellglow 2.2s ease-out;
+	}
+	@keyframes cellglow {
+		0% {
+			box-shadow: inset 0 0 0 2px #fb923c;
+			background: rgba(251, 146, 60, 0.18);
+		}
+		100% {
+			box-shadow: inset 0 0 0 0 transparent;
+			background: transparent;
+		}
 	}
 </style>
