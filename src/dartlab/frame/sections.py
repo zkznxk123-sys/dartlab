@@ -155,4 +155,4 @@ def parseXmlTables(content: str) -> list[list[list[str]]]:
     return tables
 
 
-__all__ = ["sectionTexts", "sectionTables", "parseXmlTables"]
+__all__ = ["sectionTexts", "sectionsWide", "sectionTables", "parseXmlTables"]

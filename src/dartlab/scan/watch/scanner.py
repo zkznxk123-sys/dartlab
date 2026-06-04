@@ -170,7 +170,11 @@ def scanCompany(
         >>> result = scanCompany(c, topic="riskManagement")
         >>> result.topScore if result else "no diff"
     """
-    docs_sections = getattr(getattr(company, "docs", None), "sections", None)
+    # docs.parquet 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션 topic×period) SSOT.
+    from dartlab.frame.sections import sectionsWide
+
+    stockCode = getattr(company, "stockCode", "")
+    docs_sections = sectionsWide(stockCode) if stockCode else None
     if docs_sections is None:
         return None
 
@@ -185,7 +189,6 @@ def scanCompany(
 
     scored = scoreChanges(diffResult, sections=docs_sections)
 
-    stockCode = getattr(company, "stockCode", "")
     corpName = getattr(company, "corpName", None)
 
     return ScanResult(
@@ -197,7 +200,7 @@ def scanCompany(
 
 
 def _listLocalDocs() -> list[str]:
-    """로컬에 다운로드된 docs parquet 종목코드 목록.
+    """로컬 panel parquet 종목코드 목록 (docs.parquet 은퇴 → panel SSOT).
 
     Returns
     -------
@@ -207,10 +210,10 @@ def _listLocalDocs() -> list[str]:
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _getDataRoot
 
-    docs_dir = _getDataRoot() / DATA_RELEASES["docs"]["dir"]
-    if not docs_dir.exists():
+    panel_dir = _getDataRoot() / DATA_RELEASES["panel"]["dir"]
+    if not panel_dir.exists():
         return []
-    return sorted(p.stem for p in docs_dir.glob("*.parquet"))
+    return sorted(p.stem for p in panel_dir.glob("*.parquet"))
 
 
 def scanMarket(
