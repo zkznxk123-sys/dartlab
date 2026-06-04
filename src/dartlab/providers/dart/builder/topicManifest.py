@@ -54,7 +54,7 @@ def buildTopicManifest(*, stockCode: str, hasDocs: bool, cache: Any, emptyDf: pl
     from dartlab.providers._common.reportSelector import selectReport
     from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
     from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
-    from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, periodOrderValue
+    from dartlab.providers.dart.sectionPeriod import REPORT_KINDS, periodOrderValue
     from dartlab.providers.dart.sectionTopic import mapSectionTitle
 
     years = sorted({str(year) for year in raw["year"].drop_nulls().to_list()}, reverse=True)

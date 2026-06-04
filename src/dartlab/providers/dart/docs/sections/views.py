@@ -8,7 +8,7 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.providers.dart.docs.sections.pipeline import iterPeriodSubsets
-from dartlab.providers.dart.docs.sections.sectionsBase import (
+from dartlab.providers.dart.sectionPeriod import (
     periodOrderValue,
     sortPeriods,
 )

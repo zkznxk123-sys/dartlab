@@ -29,7 +29,7 @@ from dartlab.providers.dart.docs.sections.analysis import (
     semanticRegistry,
     structureRegistry,
 )
-from dartlab.providers.dart.docs.sections.sectionsBase import periodOrderValue, sortPeriods
+from dartlab.providers.dart.sectionPeriod import periodOrderValue, sortPeriods
 
 
 def structureEvents(

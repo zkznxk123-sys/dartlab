@@ -131,12 +131,12 @@ class SectionsAnalyzer:
             return empty
 
         from dartlab.providers._common.reportSelector import selectReport
-        from dartlab.providers.dart.docs.sections.sectionsBase import (
+        from dartlab.providers.dart.docs.sections.views import splitMarkdownBlocks
+        from dartlab.providers.dart.sectionPeriod import (
             REPORT_KINDS,
             detectContentCol,
             periodOrderValue,
         )
-        from dartlab.providers.dart.docs.sections.views import splitMarkdownBlocks
         from dartlab.providers.dart.sectionTopic import mapSectionTitle
 
         contentCol = detectContentCol(raw)

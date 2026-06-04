@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sections.sectionsBase import basePath
+from dartlab.providers.dart.sectionPeriod import basePath
 from dartlab.providers.dart.sectionTopic import stripSectionPrefix
 
 

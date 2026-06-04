@@ -17,14 +17,6 @@ from dartlab.providers.dart.docs.sections.extractors import (
     topicSubtables,
 )
 from dartlab.providers.dart.docs.sections.pipeline import sections
-from dartlab.providers.dart.docs.sections.sectionsBase import (
-    displayPeriod,
-    formatPeriodRange,
-    periodColumns,
-    rawPeriod,
-    reorderPeriodColumns,
-    sortPeriods,
-)
 from dartlab.providers.dart.docs.sections.types import (
     SectionChunk,
     SectionResult,
@@ -35,6 +27,14 @@ from dartlab.providers.dart.docs.sections.views import (
     buildMarkdownWide,
     contextSlices,
     retrievalBlocks,
+)
+from dartlab.providers.dart.sectionPeriod import (
+    displayPeriod,
+    formatPeriodRange,
+    periodColumns,
+    rawPeriod,
+    reorderPeriodColumns,
+    sortPeriods,
 )
 
 __all__ = [

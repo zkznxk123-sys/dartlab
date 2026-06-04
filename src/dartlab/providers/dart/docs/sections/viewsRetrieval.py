@@ -9,7 +9,7 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.providers.dart.docs.sections.pipeline import iterPeriodSubsets
-from dartlab.providers.dart.docs.sections.sectionsBase import periodOrderValue
+from dartlab.providers.dart.sectionPeriod import periodOrderValue
 from dartlab.providers.dart.sectionTopic import mapSectionTitle
 
 _BOILERPLATE_SET = [
