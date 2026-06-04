@@ -33,6 +33,36 @@ def test_comprehensive_income_before_income() -> None:
     assert roleToStatement("http://x/role/StatementOfComprehensiveIncome") == "CIS"
 
 
+def test_edgar_section_status_catalog_gate() -> None:
+    """edgarSectionStatus — 카탈로그 표준명 정확 일치 게이트 (오검출 Item·표지·prose tail → junk)."""
+    from dartlab.providers.edgar.panel.build.mapper import edgarSectionStatus
+
+    # navi — 표준 카탈로그명 정확 일치
+    assert edgarSectionStatus("10-K", "Item 1. Business") == "navi"
+    assert edgarSectionStatus("10-K", "Item 1A. Risk Factors") == "navi"
+    assert edgarSectionStatus("10-K", "Item 7. Management's Discussion and Analysis") == "navi"
+    assert edgarSectionStatus("10-Q", "Item 1. Financial Statements") == "navi"
+    # stmt — 재무제표 terse 키 (relabel 대상)
+    assert edgarSectionStatus("10-K", "BS") == "stmt"
+    assert edgarSectionStatus("10-K", "IS") == "stmt"
+    # junk — 표지(==form) / 카탈로그 밖 번호 / prose tail / 폼에 없는 Item
+    assert edgarSectionStatus("10-K", "10-K") == "junk"  # front-matter 표지
+    assert edgarSectionStatus("10-K", "Item 405. Of Regulation S-K (§229") == "junk"  # Reg S-K 조문번호
+    assert edgarSectionStatus("10-Q", "Item 8. Of Our Annual Report On Form") == "junk"  # 10-Q 엔 Item 8 없음
+    assert edgarSectionStatus("10-K", "Item 1A. Risk Factors You Should Carefully Consider") == "junk"  # prose tail
+    assert edgarSectionStatus("10-K", "Cover Page Boilerplate") == "junk"  # Item 형식 아님
+
+
+def test_edgar_section_status_unknown_form_keeps_all() -> None:
+    """카탈로그 없는 폼(20-F 등)은 과잉필터 회피 — Item 형식이면 전부 navi (honest)."""
+    from dartlab.providers.edgar.panel.build.mapper import edgarSectionStatus
+
+    assert edgarSectionStatus("20-F", "Item 16A. Audit Committee Financial Expert") == "navi"
+    assert edgarSectionStatus("20-F", "Item 8. Financial Information") == "navi"
+    assert edgarSectionStatus("20-F", "20-F") == "junk"  # 표지는 폼 무관 junk
+    assert edgarSectionStatus("20-F", "BS") == "stmt"  # 재무키는 폼 무관 stmt
+
+
 def test_role_short_names_and_ifrs() -> None:
     """Statement prefix 없는 짧은 이름 + IFRS role 흡수 (BalanceSheet/CashFlows/ProfitOrLoss)."""
     from dartlab.providers.edgar.panel.build.mapper import roleToStatement

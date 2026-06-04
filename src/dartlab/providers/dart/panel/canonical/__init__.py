@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from .canonicalData import CANONICAL_L1
+from .canonicalData import CANONICAL_L1, CERT_NODE_IDS, REPORT_CHAPTER_LABELS
 
 # canonical 라벨 → 정부 문서순서(rank). list 순서 = rank.
 CANONICAL_RANK: dict[str, int] = {label: i for i, (_nid, label, _kw) in enumerate(CANONICAL_L1)}
@@ -161,4 +161,11 @@ def canonicalRankExpr(col: str = "chapter") -> pl.Expr:
     return pl.col(col).replace_strict(CANONICAL_RANK, default=None, return_dtype=pl.Int64).alias("_canonRank")
 
 
-__all__ = ["CANONICAL_L1", "CANONICAL_RANK", "canonicalChapterExpr", "canonicalRankExpr"]
+__all__ = [
+    "CANONICAL_L1",
+    "CANONICAL_RANK",
+    "CERT_NODE_IDS",
+    "REPORT_CHAPTER_LABELS",
+    "canonicalChapterExpr",
+    "canonicalRankExpr",
+]

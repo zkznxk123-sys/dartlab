@@ -12,7 +12,8 @@ export const CANONICAL_L1: readonly CanonNode[] = [
 	['cover', '【 대표이사 등의 확인 】', ['대표이사']],
 	['L1_company', 'I. 회사의 개요', ['회사의개요', '회사개요']],
 	['L2_business', 'II. 사업의 내용', ['사업의내용']],
-	['L3_finance', 'III. 재무에 관한 사항', ['재무에관한사항', '첨부재무제표', '첨부연결재무제표', '재무제표', '요약재무']],
+	// III 정부표준 하위 절 전부 — 배당·증권발행은 옛 era 가 III 모챕터 없이 top-level 로 실어 챕터로 새던 것(흡수).
+	['L3_finance', 'III. 재무에 관한 사항', ['재무에관한사항', '첨부재무제표', '첨부연결재무제표', '재무제표', '요약재무', '배당에관한사항', '증권의발행']],
 	['L4_mda', 'IV. 이사의 경영진단 및 분석의견', ['경영진단', '분석의견']],
 	['L5_audit', 'V. 회계감사인의 감사의견 등', ['감사의견', '감사보고서', '내부회계관리', '외부감사']],
 	['L6_board', 'VI. 이사회 등 회사의 기관에 관한 사항', ['이사회', '회사의기관']],
@@ -29,6 +30,19 @@ export const CANONICAL_L1: readonly CanonNode[] = [
 export const CANONICAL_RANK: Record<string, number> = Object.fromEntries(
 	CANONICAL_L1.map(([, label], i) => [label, i])
 );
+
+// 표지·서명 확인서 노드 — 보고서 본문 아닌 인증 페이지(cover=.jpg 서명, expert="해당사항 없음"). navigable TOC
+// 제외하되 panel 데이터엔 보존. canonicalData.CERT_NODE_IDS 1:1.
+const CERT_NODE_IDS = new Set(['cover', 'expert']);
+// navigable 보고서 챕터(I~XII) 라벨 화이트리스트 — cert 제외. buildToc 가 이 집합으로 TOC 챕터를 거른다
+// (표지/확인서·front-matter('')·미분류 stray 비노출). canonicalData.REPORT_CHAPTER_LABELS 1:1.
+export const REPORT_CHAPTER_LABELS = new Set(
+	CANONICAL_L1.filter(([id]) => !CERT_NODE_IDS.has(id)).map(([, label]) => label)
+);
+// chapter 가 navigable 보고서 챕터(DART I~XII)인가. EDGAR(form 챕터)는 buildToc 가 market-aware 로 별도 판정.
+export function isReportChapter(chapter: string | null | undefined): boolean {
+	return chapter != null && REPORT_CHAPTER_LABELS.has(chapter);
+}
 
 const SECTION_SEP = '␟'; // SECTION-N 경로 구분자 (walker._SECTION_SEP 동일)
 const ROMAN_RE = /^\s*[IVXLCDM]+\s*\.\s*/; // 로마숫자 머리 ("III. ")

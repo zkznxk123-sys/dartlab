@@ -19,7 +19,10 @@ CANONICAL_L1: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     (
         "L3_finance",
         "III. 재무에 관한 사항",
-        ("재무에관한사항", "첨부재무제표", "첨부연결재무제표", "재무제표", "요약재무"),
+        # III 정부표준 하위 절(요약재무·연결/별도 재무제표·주석·배당·증권발행·기타재무) 전부 포함 — 옛 era 가
+        # 6.배당·7.증권발행을 III 모(母)챕터 없이 top-level 로 실으면(sectionPath 에 III 원소 0) chapter 로 새던
+        # 것을, 표준 절 제목 키워드로 III 흡수(L5 가 감사보고서/내부회계관리 하위 절을 키워드로 두는 것과 동형).
+        ("재무에관한사항", "첨부재무제표", "첨부연결재무제표", "재무제표", "요약재무", "배당에관한사항", "증권의발행"),
     ),
     ("L4_mda", "IV. 이사의 경영진단 및 분석의견", ("경영진단", "분석의견")),
     ("L5_audit", "V. 회계감사인의 감사의견 등", ("감사의견", "감사보고서", "내부회계관리", "외부감사")),
@@ -32,3 +35,13 @@ CANONICAL_L1: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ("L12_detail", "XII. 상세표", ("상세표",)),
     ("expert", "【 전문가의 확인 】", ("전문가",)),
 )
+
+# 표지·서명 확인서 노드 — 보고서 *본문* 아닌 인증 페이지. cover=대표이사 등의 확인(.jpg 서명 스캔만),
+# expert=전문가의 확인("해당사항 없음" 보일러플레이트). navigable TOC 에서 제외(아래 REPORT_CHAPTER_LABELS)
+# 하되 panel 데이터(wide)엔 보존(완전성 — 인증서 자체를 보려는 소비자 위해). nodeId 파생(키워드·라벨 무관).
+CERT_NODE_IDS: frozenset[str] = frozenset({"cover", "expert"})
+
+# navigable 보고서 챕터(I~XII) 라벨 화이트리스트 — cert 노드(cover/expert) 제외. buildToc(서버 companyApi +
+# 뷰어 panelWide 공통)가 이 집합으로 TOC 챕터를 거른다 → 표지/확인서·front-matter('')·미분류 stray 비노출.
+# CANONICAL_L1 파생 SSOT (startsWith('【')·canonRank-범위 휴리스틱 대체). EDGAR(form 챕터)는 market-aware 분기.
+REPORT_CHAPTER_LABELS: tuple[str, ...] = tuple(label for nid, label, _kw in CANONICAL_L1 if nid not in CERT_NODE_IDS)

@@ -460,3 +460,75 @@ def _trimItemName(raw: str) -> str:
             break
         cut.append(w)
     return " ".join(cut).title()
+
+
+# 재무제표 terse 키 → 사람 라벨 (TOC 표시용). sectionKey·panel 데이터는 BS/IS 보존(라벨만 표시 변환).
+STMT_LABELS: dict[str, str] = {
+    "BS": "Balance Sheet",
+    "IS": "Income Statement",
+    "CF": "Cash Flow Statement",
+    "CIS": "Comprehensive Income",
+    "EF": "Stockholders' Equity",
+}
+
+
+def edgarSectionStatus(form: str, sectionLeaf: str) -> str:
+    """EDGAR sectionLeaf 의 TOC navigability — ``"navi"`` / ``"stmt"`` / ``"junk"``.
+
+    walker 의 ``_ITEM_HEAD_RE`` 는 prose 상호참조("as defined in Item 405 of Regulation S-K")·표지 보일러플레이트를
+    Item 헤딩으로 **오검출**해 진짜 Item 본문을 가짜 섹션으로 흘린다(실측 한 junk 가 790KB~3.2MB 본문 swallow).
+    빈 행이 아니라 실본문을 담아 빈셀 skip 으로 못 걸러지므로 TOC navigability 를 명시 판정한다.
+
+    **단일 게이트 = 카탈로그 표준명 정확 일치** (``catalog[num] == tail``). ``canonicalItem`` 이 진짜 헤딩엔 항상
+    카탈로그 표준명을 강제하므로, prose tail("Item 8. Of Our Annual Report")·카탈로그 밖 번호(405/601/103)·표지
+    (sectionLeaf==form)는 표준명과 불일치 → junk. 이 한 규칙이 (a) 카탈로그-밖 번호와 (b) 카탈로그-안 번호의 prose
+    변종을 동시에 잡는다(회사별 하드코딩 0). 카탈로그 없는 폼(20-F/40-F 등)은 과잉필터 회피로 전부 navi(honest) —
+    canonicalItem 이 비-10Q 에 10-K 카탈로그를 적용하므로 20-F 전용 Item(16A~16K 등)을 잘못 거르지 않게 보존.
+
+    한계(정직): ``ITEM_NAMES_10Q`` 는 Part I(Item 1~4)만 — 10-Q Part II(Item 5 기타정보·6 부속명세 등)는
+    카탈로그 miss 라 junk 로 빠진다(brief·"None" 보일러플레이트가 대부분, walker 가 Part 토큰 미추적). "확신오정렬
+    > 정렬실패" — prose junk 를 들이느니 brief Part II 를 빼는 게 안전. Part 추적은 walker 재빌드 사안(read 범위 밖).
+    Item 9C(외국관할 검사방해 공시)·20-F 전용 Item 도 카탈로그 보강 + 재빌드 전까진 동일(현 데이터는 _trimItemName
+    절단명이라 표준명 불일치). 재무 본질(Part I 재무제표·MD&A·재무키)은 전부 navi 보존.
+
+    Args:
+        form: 폼 종류 (chapter, "10-K"/"10-Q"/"20-F"…).
+        sectionLeaf: panel sectionLeaf ("Item 1A. Risk Factors" / "BS" / "10-K" 등).
+
+    Returns:
+        ``"navi"`` (유효 표준 Item) / ``"stmt"`` (재무제표 본표, STMT_LABELS relabel 대상) / ``"junk"`` (오검출·표지).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> edgarSectionStatus("10-K", "Item 1A. Risk Factors")
+        'navi'
+        >>> edgarSectionStatus("10-K", "Item 405. Of Regulation S-K (§229")
+        'junk'
+        >>> edgarSectionStatus("10-Q", "Item 8. Of Our Annual Report On Form")
+        'junk'
+        >>> edgarSectionStatus("10-K", "BS")
+        'stmt'
+        >>> edgarSectionStatus("10-K", "10-K")
+        'junk'
+        >>> edgarSectionStatus("20-F", "Item 16A. Audit Committee Financial Expert")
+        'navi'
+
+    SeeAlso:
+        - ``canonicalItem`` — 진짜 헤딩에 카탈로그 표준명 강제(본 게이트의 전제).
+        - ``server.services.companyApi.buildToc`` / ``landing panelWide.buildToc`` — 본 판정으로 TOC 거름.
+    """
+    if not sectionLeaf or sectionLeaf == form:
+        return "junk"  # 표지/front-matter (chapter==section 헤더)
+    if sectionLeaf in STMT_LABELS:
+        return "stmt"  # 재무제표 본표 (disclosureKey 앵커, 사람 라벨 relabel)
+    m = _ITEM_RE.match(sectionLeaf)
+    if not m:
+        return "junk"  # Item 형식 아닌 narrative (preamble 등)
+    num = m.group(1).upper()
+    tail = (m.group(2) or "").strip()
+    catalog = ITEM_NAMES_10Q if form == "10-Q" else ITEM_NAMES_10K if form == "10-K" else None
+    if catalog is None:
+        return "navi"  # 카탈로그 없는 폼(20-F 등) — 과잉필터 회피(honest)
+    return "navi" if catalog.get(num) == tail else "junk"  # 표준명 정확 일치만 navigable

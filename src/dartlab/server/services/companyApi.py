@@ -151,16 +151,38 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
         pl.col("blockLeaf").fill_null(""),
     )
 
+    # market-aware 챕터/섹션 거름 (panel 데이터엔 전부 보존, TOC 만 navigable 화이트리스트). DART: navigable
+    # 보고서 챕터(I~XII) = REPORT_CHAPTER_LABELS — 표지/확인서(cover/expert)·front-matter('')·미분류 stray 제외.
+    # EDGAR: form 챕터 전부 + edgarSectionStatus 로 오검출 Item(405/prose tail)·표지 제외, 재무제표 terse 키
+    # (BS/IS…)는 사람 라벨 relabel(sectionKey 는 raw 보존 → grid lookup parity).
+    from dartlab.providers.dart.panel.canonical import REPORT_CHAPTER_LABELS
+
+    isUs = getattr(company, "market", "") == "US"
+    edgarStatus = stmtLabels = None
+    if isUs:
+        from dartlab.providers.edgar.panel.build.mapper import STMT_LABELS, edgarSectionStatus
+
+        edgarStatus, stmtLabels = edgarSectionStatus, STMT_LABELS
+
     chapters: list[TocChapter] = []
     for chapter in idx["chapter"].unique(maintain_order=True).to_list():
         if not chapter:
             continue
+        if not isUs and chapter not in REPORT_CHAPTER_LABELS:
+            continue  # DART: 표지/확인서·front-matter·stray 제외 (form 챕터인 EDGAR 는 통과)
         chFrame = idx.filter(pl.col("chapter") == chapter)
         sections: list[TocSection] = []
         headerSection: TocSection | None = None  # sectionLeaf==chapter(절 헤더) — 실제 절 없을 때만 노출
         for sectionLeaf in chFrame["sectionLeaf"].unique(maintain_order=True).to_list():
             if not sectionLeaf:
                 continue  # 빈 절 제외
+            displayLeaf = sectionLeaf
+            if isUs:
+                status = edgarStatus(chapter, sectionLeaf)
+                if status == "junk":
+                    continue  # 오검출 Item·표지 제외 (panel 데이터엔 보존)
+                if status == "stmt":
+                    displayLeaf = stmtLabels.get(sectionLeaf, sectionLeaf)  # BS → "Balance Sheet"
             secFrame = chFrame.filter(pl.col("sectionLeaf") == sectionLeaf)
             blocks: list[TocBlock] = []
             for blockLeaf in secFrame["blockLeaf"].unique(maintain_order=True).to_list():
@@ -169,7 +191,7 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
                 cnt = secFrame.filter(pl.col("blockLeaf") == blockLeaf).height
                 blocks.append(TocBlock(blockLeaf=blockLeaf, rowCount=int(cnt)))
             sec = TocSection(
-                sectionLeaf=sectionLeaf,
+                sectionLeaf=displayLeaf,  # 표시 라벨(EDGAR 재무키 relabel). sectionKey 는 raw 보존.
                 sectionKey=sectionKeyFor(chapter, sectionLeaf),
                 rowCount=int(secFrame.height),
                 blocks=blocks,
@@ -178,6 +200,8 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
                 headerSection = sec  # 절 헤더 — 다른 절 있으면 제외, 없으면(VII.주주 등) 본문 노출
             else:
                 sections.append(sec)
+        # 절 헤더 fallback — 실 절 없고 헤더만(VII.주주처럼 본문이 ==chapter 아래뿐). chapter 는 이미
+        # REPORT_CHAPTER_LABELS 통과분(표지/확인서 아님). EDGAR 는 ==form 이 junk 라 headerSection 미설정.
         if not sections and headerSection is not None:
             sections = [headerSection]
         if sections:

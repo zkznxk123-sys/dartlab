@@ -55,6 +55,33 @@ def test_canonical_chapter_audit_and_preserve() -> None:
     assert out[2] is None
 
 
+def test_canonical_chapter_absorbs_dividend_and_securities() -> None:
+    """배당/증권발행 표준 III 하위 절이 top-level(모챕터 없음)로 드리프트 시 → III 흡수 (stray 챕터 0).
+
+    옛 era 는 '6. 배당에 관한 사항'·'7. 증권의 발행을 통한 자금조달에 관한 사항'을 III 모챕터 없이
+    top-level 로 실어(sectionPath 에 III 원소 0) chapter 로 샌다. L3 표준 절 키워드(배당에관한사항·증권의발행)로 흡수.
+    """
+    from dartlab.providers.dart.panel.canonical import canonicalChapterExpr
+
+    ch = ["6. 배당에 관한 사항", "7. 증권의 발행을 통한 자금조달에 관한 사항", "8. 기타 재무에 관한 사항"]
+    df = pl.DataFrame({"chapter": ch, "sectionPath": ch})  # top-level → sectionPath = chapter (III 원소 없음)
+    out = df.select(canonicalChapterExpr())["canonicalChapter"].to_list()
+    assert out == ["III. 재무에 관한 사항"] * 3  # 셋 다 III 흡수 (stray 챕터로 새지 않음)
+
+
+def test_report_chapter_labels_exclude_certs() -> None:
+    """REPORT_CHAPTER_LABELS = navigable 보고서 챕터(I~XII) — cert 노드(cover/expert) 제외, I~XII 전부 포함."""
+    from dartlab.providers.dart.panel.canonical import CERT_NODE_IDS, REPORT_CHAPTER_LABELS
+
+    assert CERT_NODE_IDS == frozenset({"cover", "expert"})
+    assert "【 대표이사 등의 확인 】" not in REPORT_CHAPTER_LABELS  # cover 제외
+    assert "【 전문가의 확인 】" not in REPORT_CHAPTER_LABELS  # expert 제외
+    assert "I. 회사의 개요" in REPORT_CHAPTER_LABELS
+    assert "III. 재무에 관한 사항" in REPORT_CHAPTER_LABELS
+    assert "XII. 상세표" in REPORT_CHAPTER_LABELS
+    assert len(REPORT_CHAPTER_LABELS) == 12  # I~XII (14 - cover - expert)
+
+
 def test_canonical_rank_government_order() -> None:
     """canonicalRankExpr — canonical 라벨 → 정부 문서순서, 미등재는 null (nulls_last)."""
     from dartlab.providers.dart.panel.canonical import CANONICAL_RANK, canonicalRankExpr
