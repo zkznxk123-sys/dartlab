@@ -413,16 +413,16 @@ def apiCompanySectionsRaw(
     """
     try:
         company = getCompany(code)
-        from dartlab.providers.dart.docs.sections.sectionsStorage import loadSectionsRawXml
-
+        # docs sections artifact 은퇴 → panel raw 공시 보드(tag=True, 원본 XML 태그 보존).
         periods_filter = [period] if period else None
-        df = loadSectionsRawXml(company.stockCode, periods=periods_filter)
-        if df is None:
-            raise HTTPException(status_code=404, detail=f"raw XML artifact 부재 (code={code})")
+        df = company.panel(tag=True, periods=periods_filter)
+        if df is None or df.is_empty():
+            raise HTTPException(status_code=404, detail=f"panel raw 공시 부재 (code={code})")
         if sectionTitle:
             import polars as pl
 
-            df = df.filter(pl.col("section_title") == sectionTitle)
+            col = "sectionLeaf" if "sectionLeaf" in df.columns else "section_title"
+            df = df.filter(pl.col(col) == sectionTitle)
         data = {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
