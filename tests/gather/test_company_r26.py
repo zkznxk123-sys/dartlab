@@ -18,18 +18,16 @@ pytestmark = pytest.mark.unit
 
 
 def test_dart_company_show_has_explicit_error_path():
-    """R26-1: DART company show dispatch 가 미등록 topic 을 warning 으로 surface.
+    """R26-1: 미등록 topic 을 silent None 대신 warning 으로 surface.
 
-    Stage 2-4c (2026-04-26): _showSectionsTopic / _warnUnknownTopic 본체가
-    _showDispatch.py / _showSelectUtils.py 모듈로 이전. facade 는 thin delegate.
-    silent None 대신 warnings.warn 으로 사용자 안내.
+    공개 show + docs 농장 은퇴 후 sections dispatch(showSectionsTopic)는 제거됨 —
+    미등록 topic 경고는 생존 ``warnUnknownTopic`` 이 담당(facade 폴백 안내).
     """
     import inspect
 
-    from dartlab.providers.dart.builder.dataDispatcher import showSectionsTopic
     from dartlab.providers.dart.builder.dataShapeUtils import warnUnknownTopic
 
-    src = inspect.getsource(showSectionsTopic) + inspect.getsource(warnUnknownTopic)
+    src = inspect.getsource(warnUnknownTopic)
     assert "warnings.warn" in src
     assert "찾을 수 없" in src
 

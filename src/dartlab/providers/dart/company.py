@@ -2080,12 +2080,6 @@ class Company:
     def _topicLabel(self, topic: str) -> str:
         return topic
 
-    def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
-        """topic의 블록 목차 DataFrame."""
-        from dartlab.providers._common.show import buildBlockIndex
-
-        return buildBlockIndex(topicRows)
-
     def _showFinanceTopic(
         self,
         topic: str,
@@ -2107,48 +2101,6 @@ class Company:
         from dartlab.providers.dart.builder.dataDispatcher import showReportTopic
 
         return showReportTopic(self, topic, period=period, raw=raw)
-
-    def _showSegmentsSub(self, sub: str) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import showSegmentsSub
-
-        return showSegmentsSub(self, sub)
-
-    def _showDirectTopic(self, topic: str, *, period: str | None = None, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import showDirectTopic
-
-        return showDirectTopic(self, topic, period=period, raw=raw)
-
-    def _showSectionBlock(
-        self,
-        topicFrame: pl.DataFrame,
-        *,
-        block: int | None = None,
-        period: str | None = None,
-    ) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import showSectionBlock
-
-        return showSectionBlock(self, topicFrame, block=block, period=period)
-
-    def _horizontalizeTableBlock(
-        self,
-        topicFrame: pl.DataFrame,
-        blockOrder: int,
-        periodCols: list[str],
-        period: str | None = None,
-    ) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import horizontalizeTableBlock
-
-        return horizontalizeTableBlock(self, topicFrame, blockOrder, periodCols, period)
-
-    def _reportFrame(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import reportFrame
-
-        return reportFrame(self, topic, raw=raw)
-
-    def _reportFrameInner(self, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import reportFrameInner
-
-        return reportFrameInner(self, apiType, topic, raw=raw)
 
     def _applyPeriodFilter(self, payload: Any, period: str | None) -> Any:
         from dartlab.providers.dart.builder.dataShapeUtils import applyPeriodFilter
@@ -2339,33 +2291,6 @@ class Company:
             return result
         return _filterPeriodColumnsByAsOf(result, asOf)
 
-    def _showFinanceStatement(
-        self,
-        topic: str,
-        block: int | None,
-        *,
-        period: str | None,
-        freq: str,
-        scope: str,
-    ) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import showFinanceStatement
-
-        return showFinanceStatement(self, topic, block, period=period, freq=freq, scope=scope)
-
-    def _showSectionsTopic(
-        self,
-        topic: str,
-        block: int | None,
-        *,
-        period: str | None,
-        raw: bool,
-        freq: str,
-        scope: str,
-    ) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.dataDispatcher import showSectionsTopic
-
-        return showSectionsTopic(self, topic, block, period=period, raw=raw, freq=freq, scope=scope)
-
     @staticmethod
     def _warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
         from dartlab.providers.dart.builder.dataShapeUtils import warnUnknownTopic
@@ -2385,33 +2310,6 @@ class Company:
         return cleanFinanceDataFrame(df, sjDiv)
 
     _FINANCE_TOPICS = frozenset({"BS", "IS", "CF", "CIS", "SCE"})
-
-    # ── docs multi-block select 지원 ──────────────────────────
-
-    def _buildDocsItemIndex(self, topic: str) -> dict[str, list[tuple[int, pl.DataFrame]]]:
-        from dartlab.providers.dart.builder.docsSelectMatcher import buildDocsItemIndex
-
-        return buildDocsItemIndex(self, topic)
-
-    def _selectFromDocsTopic(
-        self,
-        topic: str,
-        indList: list[str],
-        colList: list[str] | None,
-    ) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.docsSelectMatcher import selectFromDocsTopic
-
-        return selectFromDocsTopic(self, topic, indList, colList)
-
-    def _selectFromDocsTopicAll(
-        self,
-        topic: str,
-        indList: list[str] | None,
-        colList: list[str] | None,
-    ) -> pl.DataFrame | None:
-        from dartlab.providers.dart.builder.docsSelectMatcher import selectFromDocsTopicAll
-
-        return selectFromDocsTopicAll(self, topic, indList, colList)
 
     @property
     def select(self):
@@ -2528,18 +2426,8 @@ class Company:
                 "필터링할 항목을 1개 이상 전달하세요. 예: c.select('IS', ['매출액'])"
             )
 
-        # multi-block docs topic 감지 → 역인덱스 경로
-        isBlockIndex = (
-            isinstance(df, pl.DataFrame)
-            and "block" in df.columns
-            and "type" in df.columns
-            and "preview" in df.columns
-            and topic not in self._FINANCE_TOPICS
-        )
-        if isBlockIndex and (indList is not None or colList is not None):
-            filtered = self._selectFromDocsTopicAll(topic, indList, colList)
-        else:
-            filtered = selectFromShow(df, indList, colList)
+        # _showImpl 은 finance 통계표만 반환(공개 show + docs 농장 은퇴) — block-index docs 경로 소멸.
+        filtered = selectFromShow(df, indList, colList)
         if filtered is None:
             if not strict:
                 return None
