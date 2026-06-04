@@ -27,11 +27,17 @@ def buildRegistry() -> dict[str, StageSpec]:
         >>> "finance" in buildRegistry()
         True
     """
-    from dartlab.pipeline.stages import dart, edgar, krx, macro, news
+    from dartlab.pipeline.stages import allFilings, dart, edgar, krx, macro, news
 
     specs: list[StageSpec] = [
         StageSpec("finance", run=dart.runDartRecent, uploadCategories=("finance",), label="DART 재무 (증분)"),
         StageSpec("report", run=dart.runDartRecent, uploadCategories=("report",), label="DART 보고서 (증분)"),
+        StageSpec(
+            "allFilings",
+            run=allFilings.runAllFilings,
+            uploadCategories=("allFilings",),
+            label="DART 비정기 공시 월별 parquet (forward 7일 증분)",
+        ),
         StageSpec("docs", run=dart.runDartRecent, uploadCategories=("docs",), label="DART 공시문서 (증분)"),
         StageSpec("full", run=dart.runDartFull, uploadCategories=("finance", "report"), label="DART 88분기 전수"),
         StageSpec(
