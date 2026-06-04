@@ -385,7 +385,7 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
         자사주 분석 + AI buyback 답변.
 
     How:
-        company.show("treasuryStock") → DataFrame 총계 행 추출.
+        company.panel("treasuryStock") → DataFrame 총계 행 추출.
 
     Requires:
         DART treasuryStock 토픽 또는 EDGAR XBRL.

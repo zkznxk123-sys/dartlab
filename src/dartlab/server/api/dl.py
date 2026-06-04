@@ -16,7 +16,7 @@ Sig:
     POST /api/dl/call {apiRef, target?, args?, kwargs?}
 
 Args:
-    apiRef: str — "Company.show" / "Company.analysis" / "macro.rates" 등
+    apiRef: str — "Company.panel" / "Company.analysis" / "macro.rates" 등
     target: str | None — stockCode 등 1차 식별자
     args: list — positional args
     kwargs: dict — keyword args (axis / topic / period / ...)
@@ -54,7 +54,7 @@ router = APIRouter(prefix="/api/dl", tags=["dl"])
 class DlCallRequest(BaseModel):
     """Master dispatch payload — apiRef 기반 capability 호출."""
 
-    apiRef: str = Field(..., description="public capability reference (e.g. 'Company.show')")
+    apiRef: str = Field(..., description="public capability reference (e.g. 'Company.panel')")
     target: str | None = Field(None, description="primary identifier (e.g. stockCode '035720')")
     args: list[Any] = Field(default_factory=list)
     kwargs: dict[str, Any] = Field(default_factory=dict)

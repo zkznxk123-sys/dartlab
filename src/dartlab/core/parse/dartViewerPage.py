@@ -77,7 +77,7 @@ def tableToMarkdown(table) -> str:
         - re — pipe escape + whitespace 정규화.
 
     AIContext:
-        ``Company.show("BS")`` 의 본문 표 → markdown evidence 변환 시 background.
+        ``Company.panel("BS")`` 의 본문 표 → markdown evidence 변환 시 background.
         caller 는 빈 string 반환 시 "표 부재" 메시지 준비.
 
     LLM Specifications:

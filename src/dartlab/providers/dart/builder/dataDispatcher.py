@@ -45,7 +45,7 @@ def showFinanceTopic(
 ) -> pl.DataFrame | None:
     """finance source topic 의 실제 데이터 반환 (show 진입점).
 
-    ``c.show("IS", freq="Y", scope="separate")`` 같은 사용자 호출이 여기로 들어와서
+    ``c.panel("IS", freq="Y", scope="separate")`` 같은 사용자 호출이 여기로 들어와서
     freq/scope 에 따라 빌드.
 
     Args:
@@ -68,7 +68,7 @@ def showFinanceTopic(
         return company._applyPeriodFilter(company._buildRatios(), period)
     if topic == "ratioSeries":
         # dict 구조 — DataFrame 으로 변환 어려움. None 반환 + 사용자 안내.
-        # 사용자는 c.show("ratios") DataFrame 사용 권장.
+        # 사용자는 c.panel("ratios") DataFrame 사용 권장.
         return None
     if topic in {"BS", "IS", "CF", "CIS"}:
         df = company._financeOrDocsStatement(topic, freq=freq, scope=scope)

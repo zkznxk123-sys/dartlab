@@ -25,7 +25,7 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
         매출 시계열·productService 키워드 매칭·충당부채 PF 항목 카운트.
 
     Requires:
-        company.select("IS") + show("productService") + show("provisions") 가능.
+        company.select("IS") + panel("productService") + panel("provisions") 가능.
 
     Raises:
         없음. 내부 예외 (AttributeError·ValueError·TypeError·KeyError) try 흡수.

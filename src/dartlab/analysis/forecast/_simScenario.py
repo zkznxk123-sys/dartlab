@@ -84,7 +84,7 @@ def simulateScenario(
     Example:
         >>> from dartlab import Company
         >>> c = Company("005930")
-        >>> r = simulateScenario(c.show("timeseries"), "adverse", sectorKey="IT")
+        >>> r = simulateScenario(c.panel("timeseries"), "adverse", sectorKey="IT")
         >>> r.revenuePath, r.dcfValue
 
     Guide:

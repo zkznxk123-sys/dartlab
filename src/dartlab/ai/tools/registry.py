@@ -109,17 +109,17 @@ _SPECS: dict[str, ToolSpec] = {
     # ── 데이터 호출 — 실행 도구 ──
     "EngineCall": ToolSpec(
         "EngineCall",
-        "DartLab 공개 capability 1 회 호출 (Company.show, scan, ratio, macro 등). 정형 ref 반환. **dartlab 데이터는 무조건 이것 우선** — RunPython 으로 dartlab API 를 단일 호출하는 패턴 금지. RunPython 은 EngineCall 결과의 다단 결합·랭킹·Polars 가공이 필요할 때만. **args 는 항상 dict 로 필수** — `{}` 라도 명시 (인자 0 개 capability 일 때만 빈 dict).",
+        "DartLab 공개 capability 1 회 호출 (Company.panel, scan, ratio, macro 등). 정형 ref 반환. **dartlab 데이터는 무조건 이것 우선** — RunPython 으로 dartlab API 를 단일 호출하는 패턴 금지. RunPython 은 EngineCall 결과의 다단 결합·랭킹·Polars 가공이 필요할 때만. **args 는 항상 dict 로 필수** — `{}` 라도 명시 (인자 0 개 capability 일 때만 빈 dict).",
         {
             "type": "object",
             "properties": {
                 "apiRef": {
                     "type": "string",
-                    "description": "API 이름만. **인자는 절대 합쳐 쓰지 마라** (X: 'Company.show TSLA IS freq=Q'). 예: 'Company.show', 'scan', 'macro.kospi', 'dartlab.scan'",
+                    "description": "API 이름만. **인자는 절대 합쳐 쓰지 마라** (X: 'Company.panel TSLA IS freq=Q'). 예: 'Company.panel', 'scan', 'macro.kospi', 'dartlab.scan'",
                 },
                 "args": {
                     "type": "object",
-                    "description": "인자 dict — **항상 필수, 빈 dict {} 라도 명시**. Company.show → {'stockCode': '005930', 'topic': 'IS'} (stockCode 필수). scan → {'axis': 'growth'}. macro → {}. **stockCode·target·topic·axis 같은 키를 plan root 가 아닌 *args 안에* 넣어라**.",
+                    "description": "인자 dict — **항상 필수, 빈 dict {} 라도 명시**. Company.panel → {'stockCode': '005930', 'topic': 'IS'} (stockCode 필수). scan → {'axis': 'growth'}. macro → {}. **stockCode·target·topic·axis 같은 키를 plan root 가 아닌 *args 안에* 넣어라**.",
                     "additionalProperties": True,
                 },
             },
@@ -152,7 +152,7 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {
                 "target": {
                     "type": "string",
-                    "description": "예: 'Company.show:005930:BS', 'scan:profitability', 'macro', 'gather:price:005930'",
+                    "description": "예: 'Company.panel:005930:BS', 'scan:profitability', 'macro', 'gather:price:005930'",
                 },
                 "sampleRows": {"type": "integer"},
             },
@@ -311,7 +311,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "LookAheadGuard": ToolSpec(
         "LookAheadGuard",
-        "Company.show 의 asOf 강제 호출 — back-test/decision reflection 시 미래 데이터 누설 차단. asOf 누락 거부.",
+        "Company.panel 의 asOf 강제 호출 — back-test/decision reflection 시 미래 데이터 누설 차단. asOf 누락 거부.",
         {
             "type": "object",
             "properties": {
@@ -377,7 +377,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "CompileFinancialDashboard": ToolSpec(
         "CompileFinancialDashboard",
-        "단일 종목 한 화면 dashboard — growth/value/credit 3 template 자동 spec 생성. Company.show + _companyMetrics 재사용 + visualRef spec 박음. '대시보드', '한 화면 요약', '성장성 차트' 류 질문에 본 도구 1 회 호출.",
+        "단일 종목 한 화면 dashboard — growth/value/credit 3 template 자동 spec 생성. Company.panel + _companyMetrics 재사용 + visualRef spec 박음. '대시보드', '한 화면 요약', '성장성 차트' 류 질문에 본 도구 1 회 호출.",
         {
             "type": "object",
             "properties": {

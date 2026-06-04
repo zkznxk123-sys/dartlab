@@ -46,8 +46,8 @@ def Company(stockCode: str) -> CompanyProtocol:
         - canHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)
         - 새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가
         - 핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()
-        - 모든 데이터 접근은 ``c.show(topic)`` 으로 통합 — finance topic
-          (BS·IS·CF·CIS·SCE·ratios) 도 ``c.show("BS")`` · ``c.show("IS", freq="Y")``
+        - 모든 데이터 접근은 ``c.panel(topic)`` 으로 통합 — finance topic
+          (BS·IS·CF·CIS·SCE·ratios) 도 ``c.panel("BS")`` · ``c.panel("IS", freq="Y")``
           처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다
           (``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /
           c.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).
@@ -69,8 +69,8 @@ def Company(stockCode: str) -> CompanyProtocol:
           story 같은 응용 엔진으로 넘긴다.
         - Handoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,
           peer/rank/universe 비교가 필요하면 scan 으로 넘어간다.
-        - "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
-        - "사업 개요 보여줘" -> c.show("businessOverview")
+        - "삼성전자 재무제표" -> c = Company("005930"); c.panel("IS")
+        - "사업 개요 보여줘" -> c.panel("businessOverview")
         - "어떤 데이터 있어?" -> c.index 또는 c.topics
         - "출처 추적" -> c.trace("revenue")
         - "기간 변화" -> c.diff()
@@ -101,7 +101,7 @@ def Company(stockCode: str) -> CompanyProtocol:
         c.analysis("financial", "수익성") # 재무 분석
         c.credit()                        # 신용
         c.quant()                         # 주가
-        c.show("businessOverview")        # 원본 사업 개요
+        c.panel("businessOverview")        # 원본 사업 개요
 
         # 글로벌 (EDGAR 자동 라우팅)
         c = dartlab.Company("AAPL")

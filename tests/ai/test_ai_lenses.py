@@ -23,10 +23,10 @@ def test_each_lens_has_prompt_patch_and_hints():
         assert all(isinstance(hint, str) and hint for hint in lens.capabilityHints)
 
 
-def test_fundamental_lens_includes_company_show_hint():
+def test_fundamental_lens_includes_company_panel_hint():
     from dartlab.ai.lenses import FUNDAMENTAL_LENS
 
-    assert "Company.show" in FUNDAMENTAL_LENS.capabilityHints
+    assert "Company.panel" in FUNDAMENTAL_LENS.capabilityHints
 
 
 def test_macro_lens_includes_macro_capability_hints():

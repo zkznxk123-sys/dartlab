@@ -14,6 +14,6 @@ TECHNICAL_LENS = Lens(
         "Company.quant",
         "gather.price",
         "quant.factor",
-        "Company.show",
+        "Company.panel",
     ],
 )

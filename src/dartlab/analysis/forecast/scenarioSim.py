@@ -264,7 +264,7 @@ def createSimulation(
         buildProforma 3 회 (bull/base/bear) + 계절성 가중치로 분기 목표 분해.
 
     Requires:
-        company 의 _buildFinanceSeries / show("IS"). baseYear 데이터 있어야 함.
+        company 의 _buildFinanceSeries / panel("IS"). baseYear 데이터 있어야 함.
 
     Raises:
         ValueError : baseYear 데이터로 ProForma 생성 실패 시.

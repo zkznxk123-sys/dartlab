@@ -6,9 +6,9 @@
 
     c = Company("005930")         # 한국 (DART)
     c = Company("삼성전자")        # 한국 (회사명)
-    c.show("BS")                  # 재무상태표 DataFrame (분기 연결 기본)
-    c.show("IS", freq="Y")        # 손익계산서 (연간 합산)
-    c.show("ratios")              # 재무비율
+    c.panel("BS")                  # 재무상태표 DataFrame (분기 연결 기본)
+    c.panel("IS", freq="Y")        # 손익계산서 (연간 합산)
+    c.panel("ratios")              # 재무비율
     c.insights                    # 인사이트 등급
 """
 
@@ -344,7 +344,7 @@ def rebuildModuleRegistry() -> None:
           ``_ALL_PROPERTIES`` 3 캐시 invalidate. 다음 호출부터 새 module 인지.
 
     Guide:
-        - "새 플러그인 추가 후 즉시 인식" → 본 함수 호출 후 ``c.show(newTopic)``.
+        - "새 플러그인 추가 후 즉시 인식" → 본 함수 호출 후 ``c.panel(newTopic)``.
 
     AIContext:
         AI 가 새 module 추가 후 즉시 c.show 호출 시 본 함수 자동 호출 의무. 자동 dispatch 회로.
@@ -659,14 +659,14 @@ class Company:
 
         c = Company("005930")           # 삼성전자
         c.index                          # 전체 수평화 보드
-        c.show("BS")                     # 재무상태표
-        c.show("salesOrder")             # sections 기반 subtopic DataFrame
-        c.show("costByNature")           # sections/detailTopic 우선 + legacy fallback
+        c.panel("BS")                     # 재무상태표
+        c.panel("salesOrder")             # sections 기반 subtopic DataFrame
+        c.panel("costByNature")           # sections/detailTopic 우선 + legacy fallback
         c.trace("dividend")              # source provenance
-        c.show("CIS")                    # 포괄손익계산서
-        c.show("SCE")                    # 자본변동표
-        c.show("treasuryStock")          # 정형 공시
-        c.show("sections")              # docs source view
+        c.panel("CIS")                    # 포괄손익계산서
+        c.panel("SCE")                    # 자본변동표
+        c.panel("treasuryStock")          # 정형 공시
+        c.panel("sections")              # docs source view
 
     Notes
     -----
@@ -952,7 +952,7 @@ class Company:
 
         Example:
             with Company("005930") as c:
-                c.show("IS").head()
+                c.panel("IS").head()
 
         Returns:
             self.
@@ -1000,7 +1000,7 @@ class Company:
 
         Example:
             >>> c = Company("005930")
-            >>> c.show("IS")
+            >>> c.panel("IS")
             >>> n = c.cleanupCache()
             >>> print(f"evicted {n} entries")
 
@@ -1858,7 +1858,7 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - 분석 답변에 raw parquet 직접 인용 (show("BS") 등 가공본 우선)
+                - 분석 답변에 raw parquet 직접 인용 (panel("BS") 등 가공본 우선)
                 - 매 호출 reload (캐시 — 1 회면 충분)
             OutputSchema:
                 - XBRL 정규화 전 원본 — bsns_year / sj_div / account_id / amount 등
@@ -1932,7 +1932,7 @@ class Company:
         self._cache[cacheKey] = df
         return df
 
-    # c.notes property 제거 (Plan v10 P2) — 12 sub-property 모두 c.show("inventory") 등으로 통합.
+    # c.notes property 제거 (Plan v10 P2) — 12 sub-property 모두 c.panel("inventory") 등으로 통합.
     # Notes 클래스는 _notesAccessor (private) 로 유지, show() topic dispatch 가 호출.
 
     def _safePrimary(self, name: str) -> pl.DataFrame | None:
@@ -1997,7 +1997,7 @@ class Company:
         return financeStmt(self, sjDiv, freq=freq, scope=scope)
 
     # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
-    # 사용자는 c.show("IS") / c.show.IS() / c.show("IS", freq="Y", scope="separate") 사용.
+    # 사용자는 c.panel("IS") / c.show.IS() / c.panel("IS", freq="Y", scope="separate") 사용.
 
     @property
     def sections(self) -> pl.DataFrame | None:
@@ -2198,8 +2198,8 @@ class Company:
         """topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출).
 
         ``operation.apiContract`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
-        모든 topic 접근은 ``c.show(topic, ...)`` 로 통합한다.
-        ``c.show("BS")``, ``c.show("ratios")``, ``c.show("dividend")`` 등.
+        모든 topic 접근은 ``c.panel(topic, ...)`` 로 통합한다.
+        ``c.panel("BS")``, ``c.panel("ratios")``, ``c.panel("dividend")`` 등.
 
         Capabilities:
             - 120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)
@@ -2234,7 +2234,7 @@ class Company:
                 항목 : str — 세부 항목명
                 당기, 전기 또는 연도 컬럼 : float — 금액 (원 단위)
             docs/report topic (dividend, employee 등):
-                topic별 컬럼 구조 — c.show(topic) 실행으로 확인
+                topic별 컬럼 구조 — c.panel(topic) 실행으로 확인
             블록 미지정 + 멀티블록 topic:
                 block : int — 블록 번호
                 title : str — 블록 제목
@@ -2248,12 +2248,12 @@ class Company:
             - finance topic 은 freq/scope 토글로 분기/연간/연결/별도 자유 전환
 
         Guide:
-            - "분기 손익" → ``c.show("IS")``
-            - "연간 손익" → ``c.show("IS", freq="Y")``
-            - "별도 재무상태표" → ``c.show("BS", scope="separate")``
-            - "2023년 손익" → ``c.show("IS", period="2023")``
-            - "배당 정보" → ``c.show("dividend")``
-            - "주요주주/최대주주" → ``c.show("majorHolder")``
+            - "분기 손익" → ``c.panel("IS")``
+            - "연간 손익" → ``c.panel("IS", freq="Y")``
+            - "별도 재무상태표" → ``c.panel("BS", scope="separate")``
+            - "2023년 손익" → ``c.panel("IS", period="2023")``
+            - "배당 정보" → ``c.panel("dividend")``
+            - "주요주주/최대주주" → ``c.panel("majorHolder")``
 
         SeeAlso:
             - select: show() 결과에서 행/열 필터 + 차트
@@ -2263,13 +2263,13 @@ class Company:
         Example::
 
             c = dartlab.Company("005930")
-            c.show("IS")                              # 분기 연결 (기본)
-            c.show("IS", freq="Y")                    # 연간 연결
-            c.show("IS", scope="separate")            # 분기 별도
-            c.show("IS", freq="Y", scope="separate")  # 연간 별도
-            c.show("IS", period="2023")               # 2023년 필터
-            c.show("dividend")                        # 배당
-            c.show("majorHolder")                     # 주요주주/최대주주
+            c.panel("IS")                              # 분기 연결 (기본)
+            c.panel("IS", freq="Y")                    # 연간 연결
+            c.panel("IS", scope="separate")            # 분기 별도
+            c.panel("IS", freq="Y", scope="separate")  # 연간 별도
+            c.panel("IS", period="2023")               # 2023년 필터
+            c.panel("dividend")                        # 배당
+            c.panel("majorHolder")                     # 주요주주/최대주주
 
         LLM Specifications:
             AntiPatterns:
@@ -2366,7 +2366,7 @@ class Company:
     ):
         """show() 결과에서 행(indList) + 열(colList) 필터 — 내부 구현.
 
-        ``c.show()`` 와 동일한 freq/scope 파라미터를 받는다 (api-contract).
+        ``c.panel()`` 와 동일한 freq/scope 파라미터를 받는다 (api-contract).
 
         Args:
             topic: IS, BS, CF, CIS, SCE 또는 docs topic.
@@ -2410,7 +2410,7 @@ class Company:
             # show 가 정상 None 반환한 경우 (raw 모드 등) — ValueError 대신 명확한 안내
             raise ValueError(
                 f"'{topic}' topic 의 데이터를 가져올 수 없습니다. "
-                f"topic 이름을 확인하거나 c.show('{topic}') 로 직접 호출해보세요."
+                f"topic 이름을 확인하거나 c.panel('{topic}') 로 직접 호출해보세요."
             )
         if isinstance(indList, str):
             indList = [indList]
@@ -2444,7 +2444,7 @@ class Company:
             hint = f"\n  사용 가능한 행 일부: {', '.join(str(a) for a in available)}" if available else ""
             raise ValueError(
                 f"'{topic}' topic 에서 {ind_str} 를 찾을 수 없습니다.{hint}\n"
-                f"  c.show('{topic}') 로 전체 행을 확인하세요."
+                f"  c.panel('{topic}') 로 전체 행을 확인하세요."
             )
         return SelectResult(
             filtered,
@@ -3870,7 +3870,7 @@ class Company:
             ts = buildTimeseries(self.stockCode)
         except (OSError, ValueError, KeyError, RuntimeError, pl.exceptions.ComputeError) as e:  # noqa: BLE001
             # finance parquet 로딩/파싱 실패 → 이유 노출 후 docs fallback 허용.
-            # silent 실패 시 show("IS") 가 docs 기반으로 잘못된 결과 반환하는 사례 방지.
+            # silent 실패 시 panel("IS") 가 docs 기반으로 잘못된 결과 반환하는 사례 방지.
             # (IO / 형식 오류 / 컬럼 부재 / polars 변환 실패 — 다양한 정상 fallback 분기)
             import warnings
 
@@ -3947,7 +3947,7 @@ class Company:
     def _buildRatios(self) -> pl.DataFrame | None:
         """[INTERNAL] 재무비율 DataFrame 빌더.
 
-        사용자는 ``c.show("ratios")`` 호출. show() 가 finance topic dispatch 에서
+        사용자는 ``c.panel("ratios")`` 호출. show() 가 finance topic dispatch 에서
         이 빌더를 호출.
         """
         from dartlab.providers.dart.builder.financeStatementBuilder import buildRatios
@@ -3957,7 +3957,7 @@ class Company:
     def _buildFinanceSeries(self, *, freq: str = "Q", scope: str = "consolidated"):
         """[INTERNAL] finance series-tuple 빌더.
 
-        사용자는 직접 호출하지 않는다. 사용자 진입점은 ``c.show("IS", freq=, scope=)``
+        사용자는 직접 호출하지 않는다. 사용자 진입점은 ``c.panel("IS", freq=, scope=)``
         / ``c.select("IS", [...], freq=, scope=)`` 만이다 (api-contract).
 
         analysis / forecast / valuation / credit / story 등 calc 모듈이
@@ -3975,8 +3975,8 @@ class Company:
         return buildFinanceSeries(self, freq=freq, scope=scope)
 
     # c.SCE / c.sceMatrix / c.ratios / c.ratioSeries property 제거 (Plan v10 P1).
-    # 사용자는 c.show("SCE") / c.show("sceMatrix") / c.show("ratios") /
-    # c.show("ratioSeries") 사용. ratioSeries 는 dict 구조라 show 에서 dict topic 으로 처리.
+    # 사용자는 c.panel("SCE") / c.panel("sceMatrix") / c.panel("ratios") /
+    # c.panel("ratioSeries") 사용. ratioSeries 는 dict 구조라 show 에서 dict topic 으로 처리.
 
     # ── 섹터 분류 ──
 
@@ -4753,7 +4753,7 @@ class Company:
 
         SeeAlso:
             - governance: 이사회/감사위원 구성 (인력의 다른 관점)
-            - show: c.show("employee")로 docs 기반 직원 상세
+            - show: c.panel("employee")로 docs 기반 직원 상세
 
         LLM Specifications:
             AntiPatterns:
@@ -4814,12 +4814,12 @@ class Company:
             - 시장 횡단 비교로 상대적 환원 수준 판단
 
         Guide:
-            - "배당 정보" → c.capital() 또는 c.show("dividend")
+            - "배당 정보" → c.capital() 또는 c.panel("dividend")
             - "주주환원율은?" → c.capital()
             - "전체 상장사 배당 비교" → c.capital("all")
 
         SeeAlso:
-            - show: c.show("dividend")로 docs 기반 배당 상세
+            - show: c.panel("dividend")로 docs 기반 배당 상세
             - sceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)
             - debt: 부채 구조 (자본 정책의 다른 면)
 
@@ -4887,7 +4887,7 @@ class Company:
 
         Guide:
             - "부채 구조 분석" → c.debt()
-            - "부채비율은?" → c.debt() 또는 c.show("ratios")
+            - "부채비율은?" → c.debt() 또는 c.panel("ratios")
             - "전체 상장사 부채 비교" → c.debt("all")
 
         SeeAlso:

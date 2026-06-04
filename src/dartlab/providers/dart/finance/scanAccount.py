@@ -455,7 +455,7 @@ def scanAccount(
         snakeId: 계정 식별자 (영문 snake_case 또는 한글). ``scanAccountList()`` 목록.
         sjDiv: 재무제표 구분 ("IS"/"CIS"/"BS"/"CF"). None 이면 sortOrder.json 자동 판정.
         fsPref: 연결 우선 ("CFS") 또는 별도 ("OFS"). 연결 부재 시 별도 fallback.
-        freq: "Q" (분기 wide) 또는 "Y" (연간 wide). Company.show 의 freq 와 동치.
+        freq: "Q" (분기 wide) 또는 "Y" (연간 wide). Company.panel 의 freq 와 동치.
 
     Returns:
         pl.DataFrame — ``stockCode`` (str 6) + 가변 기간 컬럼 (float 원).

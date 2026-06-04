@@ -173,7 +173,7 @@ def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | N
         타법인 출자 규모를 본문 서술 그대로 발췌해야 할 때.
 
     How:
-        ``company.show("investmentInOtherDetail")`` 의 text 블록 preview 를
+        ``company.panel("investmentInOtherDetail")`` 의 text 블록 preview 를
         정규식 ``출자 금액 ... 조 ... 억`` 패턴 매칭.
 
     Requires:

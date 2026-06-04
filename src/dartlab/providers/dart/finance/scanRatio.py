@@ -111,7 +111,7 @@ def scanRatio(
         - 단일 축 한 번 돌리고 끝내지 말 것. "투자할만한 회사" 류는 ROE/operatingMargin/
           debtRatio/revenueGrowth 등 다축 join 후 교집합.
         - 지주사·금융업·라이센싱사는 operatingMargin 비정상치 (100 % 초과) 가능 — listing()
-          섹터 필터 또는 ``c.show("IS")`` 로 구조 확인.
+          섹터 필터 또는 ``c.panel("IS")`` 로 구조 확인.
 
     AIContext:
         scan 원자 primitive 2. 광역 발굴 질문에 ``scanAccount`` 와 자유 조합. 단일 종목

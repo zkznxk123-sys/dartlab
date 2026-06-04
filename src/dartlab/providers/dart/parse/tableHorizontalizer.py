@@ -492,7 +492,7 @@ def horizontalizeTableBlock(
         True
 
     Guide:
-        - "공시 표를 항목 × 기간 매트릭스로" → 본 함수가 본체 (Company.show("BS") 가 내부 사용).
+        - "공시 표를 항목 × 기간 매트릭스로" → 본 함수가 본체 (Company.panel("BS") 가 내부 사용).
         - 시계열 1 행 표 (history shape) 는 자동 거부 — caller 가 다른 파서 시도.
         - DataFrame 반환 시 캐스팅 ``.with_columns(pl.col("항목").cast(pl.Utf8))`` 권장.
 
@@ -507,7 +507,7 @@ def horizontalizeTableBlock(
         - re (모듈 상수 정규식).
 
     AIContext:
-        ``Company.show("IS")`` / ``c.show("BS")`` 가 내부 사용. evidence 로 반환 시
+        ``Company.panel("IS")`` / ``c.panel("BS")`` 가 내부 사용. evidence 로 반환 시
         ``항목`` 컬럼 + 가장 최근 period 컬럼 head 5 가 표준. None 반환 시 caller 는
         topic-level 패널 (sections row 자체) 로 fallback.
 
@@ -526,7 +526,7 @@ def horizontalizeTableBlock(
         Freshness:
             - pure function (DataFrame 변환만). 입력 freshness 에 의존.
         Dataflow:
-            - sections (provider builder) → topicFrame → 본 함수 → Company.show.
+            - sections (provider builder) → topicFrame → 본 함수 → Company.panel.
         TargetMarkets:
             - KR (DART 공시 표 markdown). EDGAR 10-K 표는 별도.
 

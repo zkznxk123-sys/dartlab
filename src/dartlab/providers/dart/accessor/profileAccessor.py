@@ -346,7 +346,7 @@ class _ProfileAccessor:
 
         Guide:
             - "이 회사 어떤 topic 분석 가능한가" → 본 함수.
-            - "topic 1 개 데이터 보기" → ``c.show(topic)``.
+            - "topic 1 개 데이터 보기" → ``c.panel(topic)``.
             - "출처 우선순위" → ``trace(topic)``.
 
         SeeAlso:
@@ -387,7 +387,7 @@ class _ProfileAccessor:
         return sorted(str(t) for t in topics if t is not None)
 
     def get(self, topic: str) -> Any:
-        """topic 데이터 조회 — DEPRECATED alias (``c.show(topic)`` 권장).
+        """topic 데이터 조회 — DEPRECATED alias (``c.panel(topic)`` 권장).
 
         Capabilities:
             - DeprecationWarning 항상 발생.
@@ -403,18 +403,18 @@ class _ProfileAccessor:
             pl.DataFrame | dict | None — topic 의 source 의존.
 
         Raises:
-            없음 (warnings.warn 만 발생). 신규 코드는 ``c.show(topic)`` 사용.
+            없음 (warnings.warn 만 발생). 신규 코드는 ``c.panel(topic)`` 사용.
 
         Example:
             >>> # c._profileAccessor.get("BS")  # DEPRECATED
-            >>> # c.show("BS")  # 권장
+            >>> # c.panel("BS")  # 권장
 
         Guide:
-            - 본 함수 사용 X → ``c.show(topic)`` 또는 ``c.select(topic, [...])``.
+            - 본 함수 사용 X → ``c.panel(topic)`` 또는 ``c.select(topic, [...])``.
             - profile 페이지의 raw access 가 필요하면 ``facts`` / ``sections`` 직접.
 
         SeeAlso:
-            - ``Company.show`` / ``Company.select`` — 권장 API.
+            - ``Company.panel`` / ``Company.select`` — 권장 API.
             - ``facts`` / ``sections`` — long/wide raw access.
 
         Requires:

@@ -249,8 +249,8 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
 class _ReportAccessor:
     """DART 정형공시 28 apiType 내부 accessor.
 
-    Company 의 ``_report`` 속성으로 내부 보관 (private). 사용자는 ``c.show("dividend")``
-    · ``c.show("treasuryStock")`` 등 공개 진입점을 사용한다 — ``c.report`` 직접 접근은
+    Company 의 ``_report`` 속성으로 내부 보관 (private). 사용자는 ``c.panel("dividend")``
+    · ``c.panel("treasuryStock")`` 등 공개 진입점을 사용한다 — ``c.report`` 직접 접근은
     Plan v10 에서 제거됐다.
 
     pivot 함수가 있는 5개(dividend, employee, majorHolder, executive, audit)는
@@ -418,7 +418,7 @@ class _ReportAccessor:
 
     @property
     def dividend(self):
-        """배당 시계열 — deprecated alias (``c.show("dividend")`` 권장).
+        """배당 시계열 — deprecated alias (``c.panel("dividend")`` 권장).
 
         Returns:
             DividendResult 또는 None.
@@ -427,17 +427,17 @@ class _ReportAccessor:
             DeprecationWarning: 호출 시 발생.
 
         Example:
-            >>> c.show("dividend")  # 권장
+            >>> c.panel("dividend")  # 권장
               내부 backing namespace.
         """
         import warnings
 
-        warnings.warn("report.dividend → show('dividend') 경로 권장", DeprecationWarning, stacklevel=2)
+        warnings.warn("report.dividend → panel('dividend') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._pivot("dividend")
 
     @property
     def employee(self):
-        """직원현황 시계열 — deprecated alias (``c.show("employee")`` 권장).
+        """직원현황 시계열 — deprecated alias (``c.panel("employee")`` 권장).
 
         Returns:
             EmployeeResult 또는 None.
@@ -446,17 +446,17 @@ class _ReportAccessor:
             DeprecationWarning: 호출 시 발생.
 
         Example:
-            >>> c.show("employee")
+            >>> c.panel("employee")
               내부 backing namespace.
         """
         import warnings
 
-        warnings.warn("report.employee → show('employee') 경로 권장", DeprecationWarning, stacklevel=2)
+        warnings.warn("report.employee → panel('employee') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._pivot("employee")
 
     @property
     def majorHolder(self):
-        """최대주주현황 시계열 — deprecated alias (``c.show("majorHolder")`` 권장).
+        """최대주주현황 시계열 — deprecated alias (``c.panel("majorHolder")`` 권장).
 
         Returns:
             MajorHolderResult 또는 None.
@@ -465,17 +465,17 @@ class _ReportAccessor:
             DeprecationWarning: 호출 시 발생.
 
         Example:
-            >>> c.show("majorHolder")
+            >>> c.panel("majorHolder")
               내부 backing namespace.
         """
         import warnings
 
-        warnings.warn("report.majorHolder → show('majorHolder') 경로 권장", DeprecationWarning, stacklevel=2)
+        warnings.warn("report.majorHolder → panel('majorHolder') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._pivot("majorHolder")
 
     @property
     def executive(self):
-        """임원현황 — deprecated alias (``c.show("executive")`` 권장).
+        """임원현황 — deprecated alias (``c.panel("executive")`` 권장).
 
         Returns:
             ExecutiveResult 또는 None.
@@ -484,17 +484,17 @@ class _ReportAccessor:
             DeprecationWarning: 호출 시 발생.
 
         Example:
-            >>> c.show("executive")
+            >>> c.panel("executive")
               내부 backing namespace.
         """
         import warnings
 
-        warnings.warn("report.executive → show('executive') 경로 권장", DeprecationWarning, stacklevel=2)
+        warnings.warn("report.executive → panel('executive') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._pivot("executive")
 
     @property
     def audit(self):
-        """감사의견 시계열 — deprecated alias (``c.show("audit")`` 권장).
+        """감사의견 시계열 — deprecated alias (``c.panel("audit")`` 권장).
 
         Returns:
             AuditResult 또는 None.
@@ -503,12 +503,12 @@ class _ReportAccessor:
             DeprecationWarning: 호출 시 발생.
 
         Example:
-            >>> c.show("audit")
+            >>> c.panel("audit")
               내부 backing namespace.
         """
         import warnings
 
-        warnings.warn("report.audit → show('audit') 경로 권장", DeprecationWarning, stacklevel=2)
+        warnings.warn("report.audit → panel('audit') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._pivot("audit")
 
     def __getattr__(self, name: str) -> Any:

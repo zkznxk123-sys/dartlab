@@ -127,6 +127,25 @@ def test_list_recent_filings_parse() -> None:
     assert r["txt_url"].endswith("edgar/data/320193/0000320193-26-000077.txt")
 
 
+def test_merge_keeping_schema_recasts_dtype_drift(tmp_path) -> None:
+    """_mergeKeepingSchema — 옛 parquet 의 dtype drift 를 schema 계약으로 재캐스트 + 기존 보존."""
+    from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
+    from dartlab.providers.edgar.panel.build.builder import _mergeKeepingSchema, _rowsToDf
+
+    base = {k: None for k in PANEL_SCHEMA}
+    old = {**base, "rceptNo": "OLD-1", "period": "2024Q4", "blockOrder": 5, "corp": "X"}
+    # 기존 parquet 에 dtype drift 주입(blockOrder UInt32 → Int64)
+    existing = _rowsToDf([old], PANEL_SCHEMA).with_columns(pl.col("blockOrder").cast(pl.Int64))
+    target = tmp_path / "X.parquet"
+    existing.write_parquet(str(target))
+
+    new = {**base, "rceptNo": "NEW-1", "period": "2025Q1", "blockOrder": 7, "corp": "X"}
+    merged = _mergeKeepingSchema(target, [new], PANEL_SCHEMA, {"NEW-1"})
+
+    assert merged.schema == PANEL_SCHEMA  # drift 가 계약 dtype 으로 복구
+    assert set(merged["rceptNo"].to_list()) == {"OLD-1", "NEW-1"}  # 기존 보존 + 신규
+
+
 def test_build_edgar_panel_all(builtTicker) -> None:
     """buildEdgarPanelAll — 명시 ticker list + None(원본 docs dir 전수 cik→ticker 역해소)."""
     from dartlab.providers.edgar.panel.build.builder import buildEdgarPanelAll

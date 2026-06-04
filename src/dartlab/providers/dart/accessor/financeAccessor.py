@@ -1,6 +1,6 @@
 """[INTERNAL] finance namespace accessor.
 
-이 accessor 는 사용자 진입점이 **아니다**. 사용자는 ``c.show("IS", freq=, scope=)``
+이 accessor 는 사용자 진입점이 **아니다**. 사용자는 ``c.panel("IS", freq=, scope=)``
 / ``c.select(...)`` 만 사용해야 한다 (api-contract).
 
 ``company.py`` 의 ``_showFinanceTopic`` / ``_buildFinanceSeries`` 같은 내부 함수가
@@ -40,7 +40,7 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.panel("BS"/"IS"/"CF"/"CIS")``.
                 - finance 부재 회사 → None.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -66,11 +66,11 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.BS  # 내부 — 사용자는 c.show("BS")
+            >>> c._finance.BS  # 내부 — 사용자는 c.panel("BS")
 
         LLM Specifications:
             AntiPatterns:
-                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.panel("BS"/"IS"/"CF"/"CIS")``.
                 - finance 부재 회사 → None.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -96,11 +96,11 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.IS  # 내부 — 사용자는 c.show("IS")
+            >>> c._finance.IS  # 내부 — 사용자는 c.panel("IS")
 
         LLM Specifications:
             AntiPatterns:
-                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.panel("BS"/"IS"/"CF"/"CIS")``.
                 - finance 부재 회사 → None.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -126,11 +126,11 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.CIS  # 내부 — 사용자는 c.show("CIS")
+            >>> c._finance.CIS  # 내부 — 사용자는 c.panel("CIS")
 
         LLM Specifications:
             AntiPatterns:
-                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.panel("BS"/"IS"/"CF"/"CIS")``.
                 - finance 부재 회사 → None.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -156,11 +156,11 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.CF  # 내부 — 사용자는 c.show("CF")
+            >>> c._finance.CF  # 내부 — 사용자는 c.panel("CF")
 
         LLM Specifications:
             AntiPatterns:
-                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.panel("BS"/"IS"/"CF"/"CIS")``.
                 - finance 부재 회사 → None.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -186,7 +186,7 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.ratios  # 내부 — 사용자는 c.show("ratios")
+            >>> c._finance.ratios  # 내부 — 사용자는 c.panel("ratios")
         """
         return self._company._getRatiosInternal("CFS")
 
@@ -201,7 +201,7 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.ratioSeries  # 내부 — 사용자는 c.show("ratioSeries")
+            >>> c._finance.ratioSeries  # 내부 — 사용자는 c.panel("ratioSeries")
         """
         return self._company._ratioSeries()
 
@@ -216,7 +216,7 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c._finance.SCE  # 내부 — 사용자는 c.show("SCE")
+            >>> c._finance.SCE  # 내부 — 사용자는 c.panel("SCE")
         """
         return self._company._sce()
 

@@ -1,6 +1,6 @@
 """DART Company finance 빌더 helpers. facade thin delegate.
 
-show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 진입점이 위임하는 backing 함수.
+panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 진입점이 위임하는 backing 함수.
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ def sceMatrix(company: Company):
         >>> sceMatrix(c)
 
     SeeAlso:
-        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``Company.panel`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
         - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
@@ -59,14 +59,14 @@ def sceMatrix(company: Company):
         - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - 본 모듈 직접 호출 X — Company.panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
             - finance 부재 → None.
         OutputSchema:
             - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
@@ -107,7 +107,7 @@ def sceSeriesAnnual(company: Company):
         >>> sceSeriesAnnual(c)
 
     SeeAlso:
-        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``Company.panel`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
         - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
@@ -118,14 +118,14 @@ def sceSeriesAnnual(company: Company):
         - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - 본 모듈 직접 호출 X — Company.panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
             - finance 부재 → None.
         OutputSchema:
             - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
@@ -170,13 +170,13 @@ def sce(company: Company) -> pl.DataFrame | None:
         >>> # df.select(["항목", "2024", "2023"])
 
     Guide:
-        - "삼성전자 자본 변동 (이익잉여금/자본금)" → ``c.show("SCE")`` → 본 함수.
-        - "BS 와 비교" → ``c.show("BS")`` 후 동일 연도 col 선택.
+        - "삼성전자 자본 변동 (이익잉여금/자본금)" → ``c.panel("SCE")`` → 본 함수.
+        - "BS 와 비교" → ``c.panel("BS")`` 후 동일 연도 col 선택.
 
     SeeAlso:
         - ``sceMatrix`` / ``sceSeriesAnnual`` — 본 함수의 raw input.
         - ``_sceToDataFrame`` (financeMappers) — 변환 단계.
-        - ``Company.show("SCE")`` — 사용자 entry.
+        - ``Company.panel("SCE")`` — 사용자 entry.
 
     Requires:
         - polars — DataFrame.
@@ -197,7 +197,7 @@ def sce(company: Company) -> pl.DataFrame | None:
         Freshness:
             - finance 수집 시점 + cache.
         Dataflow:
-            - finance → sceSeriesAnnual → 본 함수 → c.show("SCE").
+            - finance → sceSeriesAnnual → 본 함수 → c.panel("SCE").
         TargetMarkets:
             - KR (DART) 한정. EDGAR 의 statement of equity 는 별도.
 
@@ -241,7 +241,7 @@ def financeCisAnnual(company: Company):
         >>> financeCisAnnual(c)
 
     SeeAlso:
-        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``Company.panel`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
         - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
@@ -252,14 +252,14 @@ def financeCisAnnual(company: Company):
         - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - 본 모듈 직접 호출 X — Company.panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
             - finance 부재 → None.
         OutputSchema:
             - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
@@ -298,7 +298,7 @@ def financeCisQuarterly(company: Company):
         >>> financeCisQuarterly(c)
 
     SeeAlso:
-        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``Company.panel`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
         - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
@@ -309,14 +309,14 @@ def financeCisQuarterly(company: Company):
         - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - 본 모듈 직접 호출 X — Company.panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
             - finance 부재 → None.
         OutputSchema:
             - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
@@ -357,7 +357,7 @@ def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
         >>> aggregateCisAnnual(cis_quarterly_df)
 
     SeeAlso:
-        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``Company.panel`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
         - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
@@ -368,14 +368,14 @@ def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
         - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - 본 모듈 직접 호출 X — Company.panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
             - finance 부재 → None.
         OutputSchema:
             - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
@@ -428,7 +428,7 @@ def ratioSeries(company: Company):
         >>> ratioSeries(c)
 
     SeeAlso:
-        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``Company.panel`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
         - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
@@ -439,14 +439,14 @@ def ratioSeries(company: Company):
         - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - 본 모듈 직접 호출 X — Company.panel("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
             - finance 부재 → None.
         OutputSchema:
             - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
@@ -494,17 +494,17 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
         ratios 미수집.
 
     Example:
-        >>> # buildRatios(c)  # 내부 — 사용자는 c.show("ratios")
+        >>> # buildRatios(c)  # 내부 — 사용자는 c.panel("ratios")
 
     Guide:
-        - "사용자는 ``c.show('ratios')`` 호출" — 본 함수는 dispatch 내부.
-        - "분기별 ROE 추세" → c.show("ratios").filter(pl.col("항목")=="ROE").
+        - "사용자는 ``c.panel('ratios')`` 호출" — 본 함수는 dispatch 내부.
+        - "분기별 ROE 추세" → c.panel("ratios").filter(pl.col("항목")=="ROE").
         - "industryGroup override" → ``ratioSeries`` 에서 자동 적용 (본 함수 무관).
 
     SeeAlso:
         - ``ratioSeries`` — 본 함수의 (series, periods) source.
         - ``_ratioSeriesToDataFrame`` (financeMappers) — 본 함수 변환 단계.
-        - ``Company.show("ratios")`` — 사용자 entry.
+        - ``Company.panel("ratios")`` — 사용자 entry.
 
     Requires:
         - polars — DataFrame.
@@ -512,7 +512,7 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
         - dartlab.providers.dart.checks — _isPeriodColumn.
 
     AIContext:
-        AI 가 "삼성전자 ROE 추세" 류 질문 받으면 c.show("ratios") 호출 → 본 함수 dispatch.
+        AI 가 "삼성전자 ROE 추세" 류 질문 받으면 c.panel("ratios") 호출 → 본 함수 dispatch.
         결과 DataFrame 에서 항목 row + period 컬럼 lookup → 자연어 답변.
 
     LLM Specifications:
@@ -526,7 +526,7 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
         Freshness:
             - ratioSeries / finance 의존.
         Dataflow:
-            - finance → buildFinanceSeries → ratioSeries → 본 함수 → c.show("ratios").
+            - finance → buildFinanceSeries → ratioSeries → 본 함수 → c.panel("ratios").
         TargetMarkets:
             - KR (DART) 한정.
 
@@ -573,14 +573,14 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
         >>> # df.select(["항목", "2024", "2023"])
 
     Guide:
-        - "삼성전자 IS 연간" → ``c.show("IS", freq="Y")`` → ``financeStmt(c, "IS", freq="Y")``.
-        - "별도 BS 분기" → ``c.show("BS", scope="separate")``.
+        - "삼성전자 IS 연간" → ``c.panel("IS", freq="Y")`` → ``financeStmt(c, "IS", freq="Y")``.
+        - "별도 BS 분기" → ``c.panel("BS", scope="separate")``.
         - docs fallback 까지 → ``financeOrDocsStatement``.
 
     SeeAlso:
         - ``financeOrDocsStatement`` — 본 함수 None 시 docs fallback 까지 시도.
         - ``buildFinanceSeries`` — 본 함수의 (series, periods) source.
-        - ``Company.show("IS", freq=, scope=)`` — 사용자 entry.
+        - ``Company.panel("IS", freq=, scope=)`` — 사용자 entry.
         - ``dartlab.providers.dart.financeMappers._financeToDataFrame`` — 변환 단계.
 
     Requires:
@@ -588,7 +588,7 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
         - dartlab.providers.dart.financeMappers — _financeToDataFrame.
 
     AIContext:
-        Workbench 재무 토픽 가장 빈번한 backend. AI 가 c.show("IS") 호출 → 본 함수 → DataFrame.
+        Workbench 재무 토픽 가장 빈번한 backend. AI 가 c.panel("IS") 호출 → 본 함수 → DataFrame.
         None 반환 = finance parquet 미수집 → caller 는 docs fallback (``financeOrDocsStatement``)
         또는 미수집 안내.
 
@@ -654,13 +654,13 @@ def financeOrDocsStatement(
     Guide:
         - "finance / docs 어느 쪽이든" → 본 함수.
         - "finance only" → ``financeStmt``.
-        - "docs only" → ``c.show("statements")`` (Plan v10 단일 진입).
+        - "docs only" → ``c.panel("statements")`` (Plan v10 단일 진입).
 
     SeeAlso:
         - ``financeStmt`` — 본 함수의 1 차 시도.
         - ``financeCisQuarterly`` / ``aggregateCisAnnual`` — CIS 경로.
         - ``Company._callModule("statements")`` — docs fallback source.
-        - ``Company.show("IS")`` — 사용자 entry.
+        - ``Company.panel("IS")`` — 사용자 entry.
 
     Requires:
         - polars — DataFrame.

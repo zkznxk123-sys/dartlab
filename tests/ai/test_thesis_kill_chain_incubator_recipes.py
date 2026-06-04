@@ -77,7 +77,7 @@ def testThesisKillChainRecipeSpecsLoadAsObservedRecipes() -> None:
         assert spec.requiredEvidence
         assert spec.expectedOutputs
         assert set(spec.capabilityRefs) & {
-            "Company.show",
+            "Company.panel",
             "Company.disclosure",
             "Company.gather",
             "scan.market",

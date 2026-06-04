@@ -1,6 +1,6 @@
 """DART Company 의 show/select 보조 utility.
 
-Company.show / select 가 호출하는 stateless utility 헬퍼 — facade 의 책임 분산
+Company.panel / select 가 호출하는 stateless utility 헬퍼 — facade 의 책임 분산
 1차 (show/select 본체 분리는 Stage 2-4b 이후 단계).
 
 Module-level helpers:
@@ -41,7 +41,7 @@ def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
 
     SeeAlso:
         - ``dataDispatcher`` — 본 모듈 호출자.
-        - ``Company.show`` / ``Company.select`` — public surface.
+        - ``Company.panel`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
@@ -52,7 +52,7 @@ def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
           warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal show helper — AI 직접 호출 X.
@@ -112,7 +112,7 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
 
     SeeAlso:
         - ``dataDispatcher`` — 본 모듈 호출자.
-        - ``Company.show`` / ``Company.select`` — public surface.
+        - ``Company.panel`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
@@ -123,7 +123,7 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
           warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal show helper — AI 직접 호출 X.
@@ -167,7 +167,7 @@ def warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
 
     SeeAlso:
         - ``dataDispatcher`` — 본 모듈 호출자.
-        - ``Company.show`` / ``Company.select`` — public surface.
+        - ``Company.panel`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
@@ -178,7 +178,7 @@ def warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
           warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal show helper — AI 직접 호출 X.
@@ -236,7 +236,7 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
 
     SeeAlso:
         - ``dataDispatcher`` — 본 모듈 호출자.
-        - ``Company.show`` / ``Company.select`` — public surface.
+        - ``Company.panel`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
@@ -247,7 +247,7 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
           warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal show helper — AI 직접 호출 X.

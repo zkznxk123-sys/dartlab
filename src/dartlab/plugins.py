@@ -1,7 +1,7 @@
 """커뮤니티 플러그인 시스템 — 발견 + 등록.
 
 외부 패키지가 ``dartlab.plugins`` entry_point 그룹에 등록하면,
-dartlab 시작 시 자동 발견되어 Company.show(), AI tool, Server API에서 사용 가능.
+dartlab 시작 시 자동 발견되어 Company.panel(), AI tool, Server API에서 사용 가능.
 
 플러그인 개발::
 
@@ -61,7 +61,7 @@ class PluginContext:
     def addDataEntry(self, entry: Any, *, meta: PluginMeta) -> None:
         """DataEntry를 글로벌 레지스트리에 추가.
 
-        등록된 엔트리는 Company.show(), AI context, Server API에서 자동 사용 가능.
+        등록된 엔트리는 Company.panel(), AI context, Server API에서 자동 사용 가능.
         """
         from dartlab.core.registry import registerEntry
 

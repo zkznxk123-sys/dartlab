@@ -11,7 +11,7 @@ FUNDAMENTAL_LENS = Lens(
 - 회계 정책 변경·일회성·세제 영향은 별도 표기.
 """,
     capabilityHints=[
-        "Company.show",
+        "Company.panel",
         "Company.analysis",
         "Company.ratios",
         "Company.financials",

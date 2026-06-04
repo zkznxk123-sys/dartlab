@@ -1,6 +1,6 @@
 """공시뷰어 presentation layer.
 
-Company.show()와 프론트엔드 사이의 변환 레이어.
+Company.panel()와 프론트엔드 사이의 변환 레이어.
 sections 원본 데이터를 프론트엔드가 바로 렌더링할 수 있는 구조로 변환한다.
 
 핵심:

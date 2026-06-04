@@ -76,7 +76,7 @@ def compileFinancialDashboard(
     """종목 한 화면 dashboard — growth/value/credit 3 template.
 
     Capabilities:
-        Company.show 의 IS/BS 데이터 + ratio 계산 → template 별 dashboard spec
+        Company.panel 의 IS/BS 데이터 + ratio 계산 → template 별 dashboard spec
         + ref. compareCompanies._companyMetrics 재사용 (단일 종목 path).
 
     Parameters

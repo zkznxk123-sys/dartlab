@@ -25,7 +25,7 @@ def calcGamingKpis(company, *, basePeriod: str | None = None) -> dict | None:
         제품별 매출 share → 제곱합×10000 = HHI. >4000 고집중, >2500 중집중, 이하 분산.
 
     Requires:
-        company.show("productService") 또는 show("segments") rows 존재.
+        company.panel("productService") 또는 panel("segments") rows 존재.
 
     Raises:
         없음. AttributeError·ValueError·TypeError·KeyError try 흡수.

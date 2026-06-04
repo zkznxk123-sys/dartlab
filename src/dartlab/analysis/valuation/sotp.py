@@ -1,7 +1,7 @@
 """Sum-of-the-Parts NAV — Damodaran *Investment Valuation* Ch.16.
 
 지주사 (SK/LG/CJ 등) 전용:
-1. c.show("investedCompany") → 자회사 + 지분율 + 장부가
+1. c.panel("investedCompany") → 자회사 + 지분율 + 장부가
 2. 자회사 장부가액 합산 (보수적 근사 — 상장사 시가총액 반영은 별도 인프라 필요)
 3. + 모회사 별도 자산 (잉여현금 / 투자부동산)
 4. - 모회사 별도 부채
@@ -66,7 +66,7 @@ def calcSotpNav(
         calcSotpNav(company) 또는 holdingDiscount=0.5 강제.
 
     Requires:
-        company.show("investedCompany") + company.select("BS", ["자본총계"]).
+        company.panel("investedCompany") + company.select("BS", ["자본총계"]).
 
     Raises:
         없음 — 데이터 부족은 None.

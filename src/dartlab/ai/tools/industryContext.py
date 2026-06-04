@@ -1,7 +1,7 @@
 """산업 컨텍스트 badge — Track E (5 phase 라이프사이클 + 밸류체인 peers).
 
 Company.industry() (raw 산업 매핑) + industry.calcs.lifecycle (시계열 phase) 합성.
-LLM tool 이 아니라 engineCall.Company.show 응답에 자동 부착되는 헬퍼.
+LLM tool 이 아니라 engineCall.Company.panel 응답에 자동 부착되는 헬퍼.
 
 5 phase (UI 표시 SSOT — 플랜 결정 박음):
 - 도입: yoy >= 30% — 강한 형성기

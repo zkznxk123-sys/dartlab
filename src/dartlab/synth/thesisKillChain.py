@@ -159,8 +159,8 @@ def buildThesisKillChainMemo(
         "sources": [
             {
                 "id": "l1CompanyStatements",
-                "title": "Company.show raw statement tables",
-                "url": "dartlab://Company.show/BS-IS-CF",
+                "title": "Company.panel raw statement tables",
+                "url": "dartlab://Company.panel/BS-IS-CF",
             },
             {
                 "id": "l1CompanyGather",
@@ -678,7 +678,7 @@ def _premortemQualityGate(
             required="at least four L1/L1.5 evidence sets",
             evidence=f"okDatasets={len(ok_datasets)}/{len(coverage_rows)}",
             failure_mode="single-source premortem becomes narrative",
-            next_action="add Company.show, filing, gather, or scan rows",
+            next_action="add Company.panel, filing, gather, or scan rows",
         ),
         _qualityGateRow(
             "assumptionDepth",

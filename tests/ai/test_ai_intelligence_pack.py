@@ -10,10 +10,10 @@ pytestmark = pytest.mark.unit
 def test_read_capability_replaces_runtime_intelligence_pack():
     from dartlab.ai.tools.readCapability import readCapability
 
-    result = readCapability("재무상태표 Company show")
+    result = readCapability("재무상태표 Company panel")
 
     assert result.ok is True
-    assert any(ref.payload.get("apiRef") == "Company.show" for ref in result.refs)
+    assert any(ref.payload.get("apiRef") == "Company.panel" for ref in result.refs)
 
 
 def test_read_skill_replaces_runtime_pack_summary():

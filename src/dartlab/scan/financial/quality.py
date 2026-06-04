@@ -252,7 +252,7 @@ def scanQuality(*, verbose: bool = True) -> pl.DataFrame:
 
     AI 사용 가이드:
         - **KR 종목 컨텍스트에서만**. US/글로벌 종목은 지원하지 않는다.
-        - 전종목 횡단분석. 단일 종목 이익품질 조사에는 ``Company.show("CF")`` 사용.
+        - 전종목 횡단분석. 단일 종목 이익품질 조사에는 ``Company.panel("CF")`` 사용.
         - ``sortBy`` 로 정렬할 때는 **한글 컬럼명 그대로** 전달
           (예: ``"발생액비율"``, ``"CF/NI"``, ``"등급"``). ``"영업현금흐름/순이익"``, ``"earnings_quality"`` 같은 임의 이름 금지.
 

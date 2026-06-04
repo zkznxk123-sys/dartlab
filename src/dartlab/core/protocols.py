@@ -137,7 +137,7 @@ class RawProviderCompanyProtocol(Protocol):
 
         Example:
             with Company("005930") as c:
-                c.show("IS").head()
+                c.panel("IS").head()
 
         Returns:
             self.
@@ -295,7 +295,7 @@ class PublicCompanyFacadeProtocol(CompanyProtocol, Protocol):
 
     `dartlab.Company(...)` 와 provider Company 의 공개 호출 표면을 보존하기 위한
     Protocol 이다. 내부 의존 debt 는 Guard baseline 으로 추적하되, 사용자 호출 방식
-    (`c.show(...)`, `c.select(...)`, `c.analysis(...)` 등) 은 이 Protocol 을 기준으로
+    (`c.panel(...)`, `c.select(...)`, `c.analysis(...)` 등) 은 이 Protocol 을 기준으로
     깨지지 않게 유지한다.
     """
 
@@ -357,7 +357,7 @@ class DocsProtocol(Protocol):
 class FinanceProtocol(Protocol):
     """[INTERNAL] finance namespace — 사용자 진입점 아님.
 
-    Plan v10 P3a: 사용자는 ``c.show("IS", freq=, scope=)`` 만 사용한다.
+    Plan v10 P3a: 사용자는 ``c.panel("IS", freq=, scope=)`` 만 사용한다.
     이 protocol 은 내부 backend interface 로만 의미.
     """
 

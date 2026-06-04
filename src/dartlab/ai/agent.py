@@ -87,7 +87,7 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "CompileVisual",
     # finance-native primitive (Track C/G/H/I) — registry 등록만 됐다가 default 미노출
     # 이라 LLM 이 호출 못 했던 회귀. 2026-05-17 OAuth probe 에서 다중 종목 비교 시
-    # CompareCompanies 1 회 대신 Company.show 2 회 + RunPython 우회 (91s) 발견 후 합류.
+    # CompareCompanies 1 회 대신 Company.panel 2 회 + RunPython 우회 (91s) 발견 후 합류.
     "CompareCompanies",
     # 마스터 플랜 트랙 1 PR-1 — Damodaran DCF wrap (bear/base/bull 3 시나리오).
     # 직전 회귀: LLM 이 매번 RunPython 으로 ad-hoc DCF 코드 작성 → token 30% 낭비.
@@ -871,7 +871,7 @@ def _formatIntentProfileBlock(kwargs: dict[str, Any]) -> str:
     """workbench/targets._buildQuestionProfile 결과 → system prompt markdown 블록.
 
     질문 의도 추정으로 LLM 의 tool 선택 가이드 — 예: comparison=True 면 PeerCompareN
-    먼저, showTopic='IS' 면 EngineCall(Company.show, topic='IS') 우선 등.
+    먼저, showTopic='IS' 면 EngineCall(Company.panel, topic='IS') 우선 등.
     """
     # 질문은 caller (server/agent_gateway) 가 history 마지막 user msg 또는 kwargs.question
     # 으로 전달. 본 helper 는 정보 없으면 빈 문자열 반환 (안전).
@@ -901,7 +901,7 @@ def _formatIntentProfileBlock(kwargs: dict[str, Any]) -> str:
     if comparison:
         lines.append("- 비교형 질문 — `PeerCompareN` (N≥2) 또는 `CompareCompanies` (max 3) 우선.")
     if show_topic:
-        lines.append(f"- 추정 토픽: `{show_topic}` — `EngineCall(Company.show, topic='{show_topic}')` 우선.")
+        lines.append(f"- 추정 토픽: `{show_topic}` — `EngineCall(Company.panel, topic='{show_topic}')` 우선.")
     # 마스터 플랜 v2 트랙 6 PR-L2 — trigger 표 dynamic inline (system prompt 압축 대체).
     # 기존 §"분석 의도 → 금융 primitive 도구 매핑" 9 row 평면 표 (~1500 자) 가 매 turn
     # 송신 → trigger 매칭된 도구만 표시 (평균 1~2 row, ~150 자). 매 turn token ~290 절감.

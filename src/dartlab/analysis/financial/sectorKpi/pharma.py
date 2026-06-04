@@ -43,7 +43,7 @@ def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
         Preclinical 5% · Phase I 10% · Phase II 15% · Phase III 50% · Approved 90% POS 가중.
 
     Requires:
-        company.show("사업의내용"·"연구개발활동") 텍스트 + select("IS", ["sales", "research_and_development"]).
+        company.panel("사업의내용"·"연구개발활동") 텍스트 + select("IS", ["sales", "research_and_development"]).
 
     Raises:
         없음. AttributeError·ValueError·TypeError·KeyError try 흡수.

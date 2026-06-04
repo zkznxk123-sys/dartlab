@@ -341,7 +341,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
         ratios show → PER/PBR 시계열 → calcMultipleBand → zone 합성.
 
     Requires:
-        company.show("ratios") 반환 + PER/PBR 시계열.
+        company.panel("ratios") 반환 + PER/PBR 시계열.
 
     Raises:
         없음 (예외 시 None).

@@ -1,5 +1,5 @@
 """K-IFRS 주석 내부 dispatch — Plan v10 P2 에서 ``c.notes`` property 가 제거되어
-사용자 진입점은 ``c.show("inventory")`` · ``c.show("receivables")`` 등 통합.
+사용자 진입점은 ``c.panel("inventory")`` · ``c.panel("receivables")`` 등 통합.
 
 이 모듈은 show topic 매핑이 호출하는 내부 추출 함수들을 묶는다.
 
@@ -56,7 +56,7 @@ class Notes:
         - segments: 부문 × 연도 (부문명 열 + 연도별 매출 열)
         - costByNature: 비용항목 × 연도 시계열
 
-    show("financialNotes")와의 차이:
+    panel("financialNotes")와의 차이:
         - notes: 파싱된 정규화 DataFrame. AI/코드 분석용 최적.
         - show: 원문 마크다운. 사용자 원문 확인용.
     """
@@ -110,7 +110,7 @@ class Notes:
     def quarterly(self, name: str) -> pl.DataFrame | None:
         """분기 주석 데이터 반환 (내부 dispatch).
 
-        Company 의 ``_notesAccessor`` 가 호출. 사용자는 ``c.show("inventory")`` 처럼
+        Company 의 ``_notesAccessor`` 가 호출. 사용자는 ``c.panel("inventory")`` 처럼
         통합 진입점을 사용하고, 분기/연간 토글은 show 의 freq 파라미터로 제어한다.
 
         분기보고서(Q1/Q3) + 반기보고서 + 사업보고서 주석을 모두 파싱.
@@ -128,7 +128,7 @@ class Notes:
             pl.DataFrame 또는 None — 카테고리 결과.
 
         SeeAlso:
-            - ``c.show("inventory"/...)`` — public surface.
+            - ``c.panel("inventory"/...)`` — public surface.
 
         Requires:
             - dartlab
@@ -137,14 +137,14 @@ class Notes:
             - K-IFRS notes 카테고리 dispatch — registry 기반.
 
         Guide:
-            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+            - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
         AIContext:
             internal notes dispatch — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - 본 모듈 직접 호출 X — c.panel("inventory"/...) 위임.
                 - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -179,7 +179,7 @@ class Notes:
 
         LLM Specifications:
             AntiPatterns:
-                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - 본 모듈 직접 호출 X — c.panel("inventory"/...) 위임.
                 - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -211,7 +211,7 @@ class Notes:
 
         LLM Specifications:
             AntiPatterns:
-                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - 본 모듈 직접 호출 X — c.panel("inventory"/...) 위임.
                 - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
                 - pl.DataFrame 또는 None.
@@ -243,7 +243,7 @@ class Notes:
 
         LLM Specifications:
             AntiPatterns:
-                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - 본 모듈 직접 호출 X — c.panel("inventory"/...) 위임.
                 - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
                 - pl.DataFrame 또는 None.

@@ -256,7 +256,7 @@ class AccountMapper:
             - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+            - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
         AIContext:
             internal mapper — AI 직접 호출 X.
@@ -302,7 +302,7 @@ class AccountMapper:
             - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+            - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
         AIContext:
             internal mapper — AI 직접 호출 X.
@@ -416,16 +416,16 @@ class AccountMapper:
             - singleton AccountMapper.get() — JSON parse 1 회만.
 
         Guide:
-            - 사용자 API 는 ``c.show("IS")`` — 본 함수는 내부 정규화 단.
+            - 사용자 API 는 ``c.panel("IS")`` — 본 함수는 내부 정규화 단.
             - 신규 종목 미매핑 신호 시 ``accountMappings.json`` 에 한글명 추가.
             - 매핑 율 측정 = ``map() != None`` 비율 (현재 ~99.7%).
 
         AIContext:
-            internal mapper — AI 직접 호출 X. scanAccount/Company.show 내부 호출만.
+            internal mapper — AI 직접 호출 X. scanAccount/Company.panel 내부 호출만.
 
         LLM Specifications:
             AntiPatterns:
-                - 본 함수 직접 호출 X — ``c.show("IS")`` / ``scanAccount(...)`` 사용.
+                - 본 함수 직접 호출 X — ``c.panel("IS")`` / ``scanAccount(...)`` 사용.
                 - 미매핑 None 무시 → 데이터 손실. caller 가 None 카운트 모니터링 의무.
                 - 매핑 실패 시 정규식 1 개 추가 X — ``accountMappings.json`` 직접 갱신.
                 - 한 회사 미매핑 1 건 = 전 회사 영향 (singleton). 신중 추가.
@@ -544,7 +544,7 @@ class AccountMapper:
             - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+            - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
         AIContext:
             internal mapper — AI 직접 호출 X.

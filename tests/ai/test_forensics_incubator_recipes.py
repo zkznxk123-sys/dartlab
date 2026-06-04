@@ -79,7 +79,7 @@ def testForensicsRecipeSpecsLoadAsObservedRecipes() -> None:
         # registry 에 없는 axis 이므로 빈 상태가 합법적.
         if spec.capabilityRefs:
             assert set(spec.capabilityRefs) & {
-                "Company.show",
+                "Company.panel",
                 "Company.disclosure",
                 "Company.trace",
                 "scan.quality",

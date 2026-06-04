@@ -685,7 +685,7 @@ def plugins():
 
     SeeAlso:
         - reloadPlugins: 새 플러그인 설치 후 재스캔
-        - Company.show: 플러그인 topic 조회 (plugins가 제공한 topic 사용)
+        - Company.panel: 플러그인 topic 조회 (plugins가 제공한 topic 사용)
 
     Args:
         없음.
@@ -716,7 +716,7 @@ def reloadPlugins():
 
     AIContext:
         - pip install 후 세션 재시작 없이 플러그인 즉시 활성화
-        - 새로 인식된 topic이 Company.show()에서 바로 사용 가능
+        - 새로 인식된 topic이 Company.panel()에서 바로 사용 가능
 
     Guide:
         - "새 플러그인 설치했는데 안 보여" -> reloadPlugins()
@@ -724,7 +724,7 @@ def reloadPlugins():
 
     SeeAlso:
         - plugins: 현재 로드된 플러그인 확인 (reload 전후 비교)
-        - Company.show: 플러그인 topic 조회
+        - Company.panel: 플러그인 topic 조회
 
     Args:
         없음.
@@ -741,7 +741,7 @@ def reloadPlugins():
         dartlab.reloadPlugins()
 
         # 3. 즉시 사용
-        dartlab.Company("005930").show("esgScore")
+        dartlab.Company("005930").panel("esgScore")
     """
     from dartlab.plugins import rediscover
 

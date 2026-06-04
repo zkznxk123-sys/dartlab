@@ -1,4 +1,4 @@
-"""show() 공통 헬퍼. DART/EDGAR Company.show()에서 공유."""
+"""show() 공통 헬퍼. DART/EDGAR Company.panel()에서 공유."""
 
 from __future__ import annotations
 

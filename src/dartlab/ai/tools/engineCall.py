@@ -72,7 +72,7 @@ _RESERVED_PLAN_KEYS = frozenset({"apiRef", "engine", "method", "target", "stockC
 def _normalizeArgsDict(plan: dict[str, Any]) -> None:
     """ToolSpec schema 가 args 를 dict 로 정의 — 모델 양식 그대로 flatten.
 
-    LLM 표준 호출: `{"apiRef": "Company.show", "args": {"stockCode": "005930", "topic": "IS"}}`.
+    LLM 표준 호출: `{"apiRef": "Company.panel", "args": {"stockCode": "005930", "topic": "IS"}}`.
     이전 핸들러들은 `plan["args"]` 를 list 로 가정 (옛 형식) → dict 면 `list(dict)` 가 *키* 만
     뽑아 회귀 (`company_not_resolved`). dict 면 키들을 plan root 로 흡수 + args 를 빈 list 로.
 
@@ -172,7 +172,7 @@ def _aliasToCanonical(apiRef: str, plan: dict[str, Any]) -> str:
 
 
 def _companyShow(plan: dict[str, Any]) -> ToolResult:
-    """Company.show — 5 책임 분할 (topic 해결 / company 해결 / table fetch / refs / data)."""
+    """Company.panel — 5 책임 분할 (topic 해결 / company 해결 / table fetch / refs / data)."""
     target = str(plan.get("target") or plan.get("stockCode") or "").strip()
     topic = _resolveTopic(plan)
     if topic not in _STMT_LABELS:
@@ -183,7 +183,7 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         return ToolResult(
             False,
             "stockCode 누락 — EngineCall 호출 시 args dict 안에 stockCode 를 반드시 포함. 예: "
-            '{"apiRef":"Company.show","args":{"stockCode":"005930","topic":"IS"}} '
+            '{"apiRef":"Company.panel","args":{"stockCode":"005930","topic":"IS"}} '
             "(plan root 가 아닌 args 안에).",
             error="company_not_resolved",
         )
@@ -230,7 +230,7 @@ def _fetchTableWithAutoGather(company: Any, topic: str) -> tuple[pl.DataFrame | 
 def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[str, Any], company: Any) -> list[Ref]:
     """tableRef + valueRef × n + dateRef + (선택) creditRef. enrich closure 가 docRef + confidence + provenance 부착.
 
-    creditRef 신규 — dcrBadge.axes (7축 신용 점수) 가 Company.show 의 부수 data 라 옛 코드는
+    creditRef 신규 — dcrBadge.axes (7축 신용 점수) 가 Company.panel 의 부수 data 라 옛 코드는
     별도 ref 없이 data 만 노출. 답안 작성 시 "신용 7축" 류 질문에 IS tableRef 부적합 인용 회귀.
     creditRef 발행으로 시맨틱 정합 — `[evidenceRef:creditRef:credit:005930:dcr:axes]` 인용 가능.
     """

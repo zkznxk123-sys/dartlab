@@ -117,7 +117,7 @@ def peerCompareN(
 
     Guide
     -----
-        N=2 도 허용. 각 종목 _companyMetrics 호출 (Company.show 의 IS/BS 1 회씩).
+        N=2 도 허용. 각 종목 _companyMetrics 호출 (Company.panel 의 IS/BS 1 회씩).
         percentile rank 는 N 종목 *내부* — 외부 sector peer 자동 비교는 후속 PR.
 
     SeeAlso
@@ -128,7 +128,7 @@ def peerCompareN(
 
     Requires
     --------
-        DART/EDGAR 사전 다운로드 (자동). Company.show("IS"|"BS") 가 정상 동작.
+        DART/EDGAR 사전 다운로드 (자동). Company.panel("IS"|"BS") 가 정상 동작.
 
     AIContext
     ---------
@@ -143,7 +143,7 @@ def peerCompareN(
         OutputSchema:
             rows[i] = {stockCode, corpName, ...metrics, percentileRanks: {metric: 0.0~1.0}}.
         Prerequisites:
-            DART/EDGAR 사전 다운로드. Company.show 정상 동작.
+            DART/EDGAR 사전 다운로드. Company.panel 정상 동작.
         Freshness:
             분기 결산 발표 후 갱신.
         Dataflow:

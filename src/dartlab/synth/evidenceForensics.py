@@ -192,8 +192,8 @@ def buildEvidenceForensicsMemo(
         "sources": [
             {
                 "id": "l1CompanyStatements",
-                "title": "Company.show raw statement tables",
-                "url": "dartlab://Company.show/BS-IS-CF",
+                "title": "Company.panel raw statement tables",
+                "url": "dartlab://Company.panel/BS-IS-CF",
             },
             {
                 "id": "l15EvidenceForensics",

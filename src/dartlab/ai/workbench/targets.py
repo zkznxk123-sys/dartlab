@@ -129,13 +129,13 @@ def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
 
     if targets:
         company_ref = _firstCompanyRef(candidates)
-        if company_ref == "Company.show" or _skillRequiresTable(state.selectedSkillRefs):
+        if company_ref == "Company.panel" or _skillRequiresTable(state.selectedSkillRefs):
             return [
                 {
                     "tool": "EngineCall",
                     "args": {
                         "plan": {
-                            "apiRef": "Company.show",
+                            "apiRef": "Company.panel",
                             "target": target,
                             "topic": state.profile.get("showTopic") or "BS",
                             "question": state.question,
@@ -209,8 +209,8 @@ def _scanAxis(apiRef: str, skillRefs: list[Ref]) -> str:
 
 
 def _firstCompanyRef(candidates: list[str]) -> str | None:
-    if "Company.show" in candidates:
-        return "Company.show"
+    if "Company.panel" in candidates:
+        return "Company.panel"
     for apiRef in candidates:
         if apiRef.startswith("Company.") and apiRef not in {"Company", "Company.ask"}:
             return apiRef
@@ -371,7 +371,7 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
         except Exception:  # noqa: BLE001
             continue
         executable_refs = [ref for ref in (spec.capabilityRefs or []) if _isExecutableApiRef(str(ref))]
-        # Company.show / Company.analysis 같은 method-form 우선, 단순 'Company' 클래스명 후순위.
+        # Company.panel / Company.analysis 같은 method-form 우선, 단순 'Company' 클래스명 후순위.
         method_refs = [ref for ref in executable_refs if "." in str(ref)]
         capability_refs = method_refs or executable_refs
         if not capability_refs:

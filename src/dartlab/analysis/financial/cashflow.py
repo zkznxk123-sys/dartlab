@@ -117,7 +117,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
     capexRow = data.get("purchase_of_property_plant_and_equipment", {})
     intCapexRow = data.get("purchase_of_intangible_assets", {})
     # Note: SK하이닉스 2025Q4 같이 raw 데이터에 결손이면 None — calc 결과도 None.
-    # `c.show("CF")` 의 derived row (`financing_cashflow`) 는 별도 데이터 소스로,
+    # `c.panel("CF")` 의 derived row (`financing_cashflow`) 는 별도 데이터 소스로,
     # mergeAliasRows 가 양방향 머지 처리 (core/finance/labels.py).
 
     yCols = annualColsFromPeriods(allPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)

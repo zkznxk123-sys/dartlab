@@ -1,7 +1,7 @@
-"""LookAheadGuard — 시점 안전한 Company.show 호출 도구 (asOf 강제).
+"""LookAheadGuard — 시점 안전한 Company.panel 호출 도구 (asOf 강제).
 
 dartlab 분석 루프에서 *과거 시점 진단* (back-test, decision reflection) 시 미래 데이터
-누설 (look-ahead bias) 차단. Company.show 의 asOf= 파라미터를 *반드시* 명시하도록
+누설 (look-ahead bias) 차단. Company.panel 의 asOf= 파라미터를 *반드시* 명시하도록
 강제하는 tool. 같은 동작을 RunPython 안에서 호출 가능하지만 LLM 이 asOf 를 잊을 위험을
 표면화 강제로 방어.
 
@@ -97,7 +97,7 @@ def lookAheadGuard(
                 id=f"table:lookahead:{stockCode}:{topic}:{asOf}",
                 kind="tableRef",
                 title=f"{stockCode} {topic} (asOf={asOf})",
-                source="dartlab.providers.Company.show",
+                source="dartlab.providers.Company.panel",
                 payload={"rows": rows, "asOf": asOf, "topic": topic, "columns": columns},
             )
         )

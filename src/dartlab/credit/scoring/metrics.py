@@ -1,6 +1,6 @@
 """7축 신용분석 정량 지표 산출.
 
-모든 지표를 company.select() / company.notes / company.show()에서
+모든 지표를 company.select() / company.notes / company.panel()에서
 직접 산출한다. 다른 analysis calc 함수는 호출하지 않으며,
 공유 헬퍼만 ``analysis/financial/_helpers`` 에서 가져온다 (SSOT).
 """

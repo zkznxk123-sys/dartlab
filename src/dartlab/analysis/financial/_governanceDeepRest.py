@@ -223,7 +223,7 @@ def calcRelatedPartyIntensity(company, *, basePeriod: str | None = None) -> dict
       에서 원 단위로 환산 후 IS/BS 와 비율 계산.
     - 파서가 단위를 자동 감지하지 않으므로 공시 표 단위가 "천원"이나 "원"
       이면 비율이 과대/과소 추정된다. 1% 미만·10000% 초과 값은 단위 오류
-      가능성이 있으니 원본 (`c.show("relatedPartyTx")`) 확인 권장.
+      가능성이 있으니 원본 (`c.panel("relatedPartyTx")`) 확인 권장.
     - 매입 비율은 전사 매출 대비로 일관성 유지 (매출원가 분해가 기업별
       일정치 않아 비교 가능성 우선).
 

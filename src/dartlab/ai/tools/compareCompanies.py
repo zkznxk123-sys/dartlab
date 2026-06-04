@@ -33,7 +33,7 @@ _DEFAULT_METRICS = (
     "totalLiabilities",
 )
 
-# snakeId 별칭 — Company.show 의 실제 키. 사용자 친화 metric 키 ↔ snakeId 매핑.
+# snakeId 별칭 — Company.panel 의 실제 키. 사용자 친화 metric 키 ↔ snakeId 매핑.
 _METRIC_TO_SNAKE = {
     "revenue": "sales",
     "operatingProfit": "operating_profit",
@@ -45,7 +45,7 @@ _METRIC_TO_SNAKE = {
 
 
 def _latestValueFromShow(table: pl.DataFrame, snakeId: str) -> float | None:
-    """Company.show 결과에서 (snakeId, latest period) 셀 값."""
+    """Company.panel 결과에서 (snakeId, latest period) 셀 값."""
     if not isinstance(table, pl.DataFrame) or table.is_empty():
         return None
     if "snakeId" not in table.columns:

@@ -63,4 +63,4 @@ def _run(args) -> None:
         console.print(table)
         console.print()
 
-    console.print("[dim]사용법: c = dartlab.Company('005930'); c.show('모듈명')[/]")
+    console.print("[dim]사용법: c = dartlab.Company('005930'); c.panel('모듈명')[/]")

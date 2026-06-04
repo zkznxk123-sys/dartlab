@@ -2,7 +2,7 @@
 
 워크벤치 (engineCall) + run_python prelude 가 공유. 운영자/사용자가 자연어로 부른
 컬럼명 ("자산총계", "총자산", "asset_total") 을 dartlab Polars DataFrame 의 표준
-snake_id 로 정규화한다. show("BS")/show("IS")/show("CF")/show("CIS")/show("SCE") 의
+snake_id 로 정규화한다. panel("BS")/panel("IS")/panel("CF")/panel("CIS")/panel("SCE") 의
 컬럼 추측 실패를 줄이는 것이 목적.
 
 표준 5 topic — BS / IS / CF / CIS / SCE. 각 topic 별 (snake_id, korean_label,

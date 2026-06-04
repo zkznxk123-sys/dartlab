@@ -101,11 +101,11 @@ def test_readskill_capability_inline_graceful_for_unknown_ref() -> None:
 
 
 def test_readskill_capability_inline_known_ref_returns_fields() -> None:
-    """CAPABILITIES 에 등록된 ref (Company.show 등) 는 inline 시 핵심 필드 포함."""
+    """CAPABILITIES 에 등록된 ref (Company.panel 등) 는 inline 시 핵심 필드 포함."""
     from dartlab.ai.tools.readSkill import _inlineCapabilities
 
-    out = _inlineCapabilities(["Company.show"], isTopRank=True)
-    assert "Company.show" in out, "Company.show 가 CAPABILITIES 에 등록돼 있어야"
-    payload = out["Company.show"]
+    out = _inlineCapabilities(["Company.panel"], isTopRank=True)
+    assert "Company.panel" in out, "Company.panel 가 CAPABILITIES 에 등록돼 있어야"
+    payload = out["Company.panel"]
     # 핵심 필드 중 적어도 하나는 inline (전부 빈 capability 는 비현실적)
     assert any(k in payload for k in ("summary", "args", "guide", "example")), f"핵심 필드 0 — {list(payload.keys())}"

@@ -508,7 +508,7 @@ def _forensicsMarkdown(memo: dict[str, Any]) -> str:
         "",
         (
             f"판정은 **{decision}**입니다. 기준시점은 {memo.get('asOf')}이고, "
-            "L2 분석엔진 없이 Company.show 원표와 공시/섹션 텍스트만으로 검산했습니다."
+            "L2 분석엔진 없이 Company.panel 원표와 공시/섹션 텍스트만으로 검산했습니다."
         ),
         (
             f"위험 점수는 {headline.get('riskScore')}이고 열린 반증은 {len(open_falsifiers)}개입니다. "

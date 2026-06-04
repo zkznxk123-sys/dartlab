@@ -4,7 +4,7 @@
 것이 아니라 같은 진입점에서 두 가지 access form 을 모두 허용한다는 의미.
 pandas 가 ``df["col"]`` 와 ``df.col`` 둘 다 허용하는 것과 같다.
 
-dartlab 의 모든 사용자 진입점 (Company.show / select / analysis / credit / story,
+dartlab 의 모든 사용자 진입점 (Company.panel / select / analysis / credit / story,
 dartlab.scan / macro / quant / gather) 은 같은 패턴:
 
     엔진("축", ...)         # call form (canonical)
@@ -27,7 +27,7 @@ class CallableAccessor:
         >>> def myShow(topic, *, freq="Q"):
         ...     return f"{topic}/{freq}"
         >>> show = CallableAccessor(myShow)
-        >>> show("IS")
+        >>> panel("IS")
         'IS/Q'
         >>> show.IS()
         'IS/Q'

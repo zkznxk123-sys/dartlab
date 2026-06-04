@@ -1,6 +1,6 @@
 """재무 계정 합산 헬퍼 — snake_id 기반 finance dict 의 차입금/매출원가/판관비/법인세.
 
-`Company.show("BS")` 같은 finance dict 에서 분리 키 (예: ``shortterm_borrowings``,
+`Company.panel("BS")` 같은 finance dict 에서 분리 키 (예: ``shortterm_borrowings``,
 ``longterm_borrowings``) 우선 합산하고, 모두 결손이면 통합 키 (``borrowings``)
 fallback 한다. analysis/credit 엔진의 차입금·비용 분석이 공유.
 """

@@ -1,10 +1,10 @@
 """dCR 신용등급 badge 헬퍼 — Track G (Ask 모드 자율 등급 노출).
 
-Company.show 응답에 자동 부착되는 가벼운 badge dict 를 만든다. 외부 등급 (S&P/Moody's)
+Company.panel 응답에 자동 부착되는 가벼운 badge dict 를 만든다. 외부 등급 (S&P/Moody's)
 의존 없이 dartlab credit engine 의 self-rated dCR 등급을 답변 헤더 chip 으로 즉시 노출.
 
 부착 정책:
-- Company.show 호출 시 BS/IS/CF 와 무관하게 *1 회* 평가. 실패 (데이터 부족·금융사 fallback 부족)
+- Company.panel 호출 시 BS/IS/CF 와 무관하게 *1 회* 평가. 실패 (데이터 부족·금융사 fallback 부족)
   시 None 반환 — engineCall 은 그 경우 dcrBadge 키 생략.
 - 신뢰도: method="ratio" (deterministic financial ratios) → base 80. evaluateCompany 가 시계열·CHS·
   Notch 보정까지 계산하므로 단일 비율보다 충분.

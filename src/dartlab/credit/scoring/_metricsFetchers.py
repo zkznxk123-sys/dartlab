@@ -51,7 +51,7 @@ def _fetchProfile(company) -> dict | None:
 def _fetchSegmentComposition(company) -> dict | None:
     """부문별 매출/이익 구성 수집.
 
-    Plan v10 P2: c.notes 제거 → c.show("segments") 사용.
+    Plan v10 P2: c.notes 제거 → c.panel("segments") 사용.
     최신 연도 컬럼 하나만 사용하여 연도별 부문명 변경(IM→DX 등) 중복 방지.
     """
     try:

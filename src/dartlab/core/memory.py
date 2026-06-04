@@ -773,7 +773,7 @@ class OomTripwire:
 def profileCall(label: str, *, logEventFn: Callable[..., None] | None = None) -> Callable[[F], F]:
     """함수 호출의 *진입/이탈 RSS + 시간* 자동 측정 + logEvent 발급.
 
-    T1-1 logEvent (구조화 로그) 와 통합. 6 facade API (Company.show / scan.* /
+    T1-1 logEvent (구조화 로그) 와 통합. 6 facade API (Company.panel / scan.* /
     Story.compose / ask / EngineCall / MCP tool) 에 부착 → metrics workflow
     (T1-2) 가 grep 으로 P50/P95 latency + memory peak 추출.
 

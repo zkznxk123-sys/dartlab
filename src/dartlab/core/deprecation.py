@@ -50,7 +50,7 @@ def deprecated(
         alternative: 대체 API 안내 문자열.
 
     Example:
-        @deprecated("0.9.0", alternative="show('배당')")
+        @deprecated("0.9.0", alternative="panel('배당')")
         def dividend(self): ...
     """
 

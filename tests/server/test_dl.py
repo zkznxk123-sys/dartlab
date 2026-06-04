@@ -40,10 +40,10 @@ class TestDlCapabilities:
         assert isinstance(body["items"], list)
         assert all("apiRef" in item for item in body["items"])
 
-    def test_contains_company_show(self, client):
+    def test_contains_company_panel(self, client):
         resp = client.get("/api/dl/capabilities")
         refs = {item["apiRef"] for item in resp.json()["items"]}
-        assert "Company.show" in refs
+        assert "Company.panel" in refs
         assert "Company" in refs
 
     def test_contains_l2_engines(self, client):

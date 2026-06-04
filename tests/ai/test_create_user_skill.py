@@ -29,11 +29,11 @@ def test_create_user_skill_writes_local_skill_and_readskill_exposes_trust_tier(_
         {
             "title": "L15 local event watch",
             "purpose": "L1.5 원천 데이터로 이벤트 이상 징후를 추적한다.",
-            "capabilityRefs": ["Company.show"],
+            "capabilityRefs": ["Company.panel"],
             "toolRefs": ["RunPython"],
             "body": (
                 "## 절차\n\n"
-                "- `Company.show` 는 `EngineCall` 로 먼저 호출한다.\n"
+                "- `Company.panel` 는 `EngineCall` 로 먼저 호출한다.\n"
                 "- 여러 표를 합칠 때만 `RunPython fallback` 으로 정리한다.\n"
             ),
             "visualRefs": ["engines.viz.priceChart"],
@@ -79,7 +79,7 @@ def test_create_user_skill_defaults_body_with_runpython_fallback() -> None:
         {
             "title": "Default body event pack",
             "purpose": "기본 본문에도 EngineCall 우선과 RunPython fallback 을 넣는다.",
-            "capabilityRefs": ["Company.show"],
+            "capabilityRefs": ["Company.panel"],
             "toolRefs": ["RunPython"],
         },
     )
