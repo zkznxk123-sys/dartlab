@@ -34,7 +34,7 @@ outputs:
   - CAPEX·운전자본 후 free cash flow 계산
   - 인수가격 적정성 점수
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

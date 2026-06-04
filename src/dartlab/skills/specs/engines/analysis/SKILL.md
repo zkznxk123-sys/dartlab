@@ -47,7 +47,7 @@ outputs:
 capabilityRefs:
   - analysis
   - Company.analysis
-  - Company.show
+  - Company.panel
 knowledgeRefs:
   - start.dartlabSkillOs
   - engines.company

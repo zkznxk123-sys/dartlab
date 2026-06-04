@@ -37,7 +37,7 @@ outputs:
   - IFRS 도입 시점·소급 적용 효과 ledger
   - 정책 변경 의도 매트릭스 (실적 평탄화·이익 부풀리기·부채비율 개선·법규 준수)
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

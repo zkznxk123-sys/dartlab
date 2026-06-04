@@ -31,7 +31,7 @@ outputs:
 capabilityRefs:
   - Company
   - Company.analysis
-  - Company.show
+  - Company.panel
   - Company.credit
   - Company.quant
   - gather

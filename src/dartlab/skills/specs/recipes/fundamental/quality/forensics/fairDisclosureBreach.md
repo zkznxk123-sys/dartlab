@@ -36,7 +36,7 @@ outputs:
   - 공정공시 의무 vs 자율공시 분류
   - 외부 보도·애널리스트 보고서 timing 동행 (외부 ref)
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

@@ -18,7 +18,7 @@ inputs:
 outputs:
   - assumptionLedger table
 capabilityRefs:
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

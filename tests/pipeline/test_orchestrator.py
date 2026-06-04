@@ -12,7 +12,7 @@ def test_list_and_describe_stages():
     from dartlab.pipeline import describeStages, listStages
 
     stages = listStages()
-    assert {"finance", "report", "docs", "panel", "sections", "krx", "macro", "news", "edgar"} <= set(stages)
+    assert {"finance", "report", "docs", "panel", "krx", "macro", "news", "edgar"} <= set(stages)
     metas = describeStages()
     assert all({"category", "online", "uploadCategories", "label"} <= set(m) for m in metas)
 

@@ -31,7 +31,6 @@ outputs:
   - DartCompany 동등 인터페이스
 capabilityRefs:
   - Company
-  - Company.show
   - Company.panel
   - Company.liveFilings
   - Company.readFiling

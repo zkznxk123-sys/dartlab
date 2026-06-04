@@ -28,11 +28,9 @@ def _mock_company():
     c.corpName = "테스트기업"
     c.stockCode = "999999"
     c.index = {"종목코드": "999999", "회사명": "테스트기업"}
-    c.show.return_value = None
     c.trace.return_value = None
     c.topics = ["BS", "IS"]
-    c._docs.sections = None
-    c.sectionsAs.return_value = None
+    c.panel.return_value = None  # 공개 show + docs 농장 은퇴 → panel 표면. 빈 회사 → rc 0.
     c.facts = None
     c.BS = None
     c.IS = None

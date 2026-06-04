@@ -24,7 +24,7 @@ outputs:
   - scenario storyboard
   - premortem quality gate
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - Company.gather
   - scan.market

@@ -40,12 +40,16 @@ def test_panel_call_none_on_empty_or_blank_key() -> None:
 
 
 def test_is_strong_topic_classification() -> None:
-    """isStrongTopic SSOT — finance/report 강함, canonicalKey/한글 섹션명은 raw 공시."""
+    """isStrongTopic SSOT — finance 강함, 정형 비재무 docs 토픽·canonicalKey·한글 섹션명은 raw 공시.
+
+    공개 show + docs 농장 은퇴로 dividend 등 ~35 정형 비재무 토픽 registry 항목 제거(§영구소실)
+    → 강한 소스 아님(raw panel 검색). 강한 소스는 finance 통계표(BS/IS/CF/…)만 잔존.
+    """
     from dartlab.providers.dart.builder.dataDispatcher import isStrongTopic
 
     assert isStrongTopic("IS") is True  # finance
     assert isStrongTopic("BS") is True  # finance
-    assert isStrongTopic("dividend") is True  # report
+    assert isStrongTopic("dividend") is False  # 농장 은퇴 — report 항목 제거 → raw panel
     assert isStrongTopic("NT_D826380") is False  # canonicalKey → raw panel
     assert isStrongTopic("재고") is False  # 한글 섹션명 → raw panel
 

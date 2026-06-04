@@ -21,7 +21,7 @@ outputs:
   - counterEvidenceNeeded
   - status
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

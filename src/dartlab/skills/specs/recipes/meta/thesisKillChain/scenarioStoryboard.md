@@ -20,7 +20,7 @@ inputs:
 outputs:
   - scenarioStoryboard table
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.gather
 toolRefs:
   - EngineCall

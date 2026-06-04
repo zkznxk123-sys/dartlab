@@ -23,7 +23,7 @@ outputs:
   - promotionGate
   - keepAsSkillAfterPromotion
 capabilityRefs:
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

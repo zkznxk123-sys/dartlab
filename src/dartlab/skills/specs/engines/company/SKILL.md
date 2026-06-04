@@ -31,7 +31,7 @@ outputs:
   - evidence refs
 capabilityRefs:
   - Company
-  - Company.show
+  - Company.panel
   - Company.select
   - Company.trace
   - Company.analysis

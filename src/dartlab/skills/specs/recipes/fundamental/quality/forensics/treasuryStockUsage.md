@@ -35,7 +35,7 @@ outputs:
   - EPS·ROE 분모 효과 ledger
   - 동행 사건 timing (경영권 분쟁·합병·지주사 전환)
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

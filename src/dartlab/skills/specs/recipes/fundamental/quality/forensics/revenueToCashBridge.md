@@ -22,7 +22,7 @@ outputs:
   - CFO to net income
   - divergence status
 capabilityRefs:
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

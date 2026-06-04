@@ -36,7 +36,7 @@ outputs:
   - visual decision pack
   - premortem quality gate
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - Company.gather
   - scan.market

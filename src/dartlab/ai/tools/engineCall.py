@@ -248,7 +248,7 @@ def _buildShowRefs(stockCode: str, companyName: str, topic: str, summary: dict[s
         id=f"table:{stockCode}:{topic}:{latestPeriod}",
         kind="tableRef",
         title=f"{companyName or stockCode} {_STMT_LABELS[topic]} {latestPeriod}",
-        source=f"Company({stockCode}).show('{topic}')",
+        source=f"Company({stockCode}).panel('{topic}')",
         payload=enrich(summary),
     )
     refs: list[Ref] = [tableRef]

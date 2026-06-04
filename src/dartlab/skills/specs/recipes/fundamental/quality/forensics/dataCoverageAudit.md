@@ -20,7 +20,7 @@ outputs:
   - latest period
   - mapped metric count
 capabilityRefs:
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

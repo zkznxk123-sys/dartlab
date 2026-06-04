@@ -19,7 +19,7 @@ outputs:
   - metric to source row mapping
   - missing metric list
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.trace
 toolRefs:
   - EngineCall

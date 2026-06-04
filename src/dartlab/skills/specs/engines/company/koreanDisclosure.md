@@ -47,7 +47,7 @@ capabilityRefs:
   - Company.sections
   - Company.audit
   - Company.readFiling
-  - Company.show
+  - Company.panel
 knowledgeRefs:
   - engines.company
   - engines.company.disclosureEvent

@@ -30,7 +30,7 @@ outputs:
   - premortemQualityScore
   - qualityGateStatus
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - Company.gather
   - scan.market

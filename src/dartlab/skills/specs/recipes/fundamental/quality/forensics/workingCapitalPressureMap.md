@@ -21,7 +21,7 @@ outputs:
   - inventory growth minus revenue growth
   - pressure status
 capabilityRefs:
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

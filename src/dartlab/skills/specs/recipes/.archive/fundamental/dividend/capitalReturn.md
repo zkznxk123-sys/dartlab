@@ -18,7 +18,7 @@ outputs:
   - 지속 가능성
 capabilityRefs:
   - Company.analysis
-  - Company.show
+  - Company.panel
 toolRefs:
   - search_reference
   - EngineCall

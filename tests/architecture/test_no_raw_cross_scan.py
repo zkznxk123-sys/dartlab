@@ -115,7 +115,8 @@ def test_streaming_unsupported_annotated() -> None:
                     counts["over"] += 1
                 elif ": asof" in line:
                     counts["asof"] += 1
-    assert counts["pivot"] >= 11, f"pivot 마커 부족: {counts['pivot']}/11"
+    # docs 농장 은퇴로 pivot 호출부 2 곳(farm sections 빌더) 삭제 — 임계 11→9 하향.
+    assert counts["pivot"] >= 9, f"pivot 마커 부족: {counts['pivot']}/9"
     assert counts["over"] >= 12, f"over 마커 부족: {counts['over']}/12"
     assert counts["asof"] >= 4, f"asof 마커 부족: {counts['asof']}/4"
 

@@ -39,7 +39,7 @@ outputs:
   - 합병 후 영업권 손상 가능성 점수
   - 의무상환 일정 vs FCF 매칭
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

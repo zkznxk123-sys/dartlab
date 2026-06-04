@@ -24,7 +24,7 @@ outputs:
   - 인수 segment 영업이익 추세
   - 손상 위험 점수
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

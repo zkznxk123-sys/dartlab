@@ -33,7 +33,7 @@ outputs:
   - 차등의결권·황금주 활용 ledger
   - 지주사 전환 시 지배권 변화 ledger
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

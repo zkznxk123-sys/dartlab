@@ -35,7 +35,7 @@ outputs:
   - 감사의견 이력 (한정·부적정·강조사항·KAM)
   - 동행 사건 timing 매칭
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

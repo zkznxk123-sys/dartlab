@@ -28,7 +28,6 @@ outputs:
   - 또는 wide DataFrame (period × topic pivot)
 capabilityRefs:
   - Company.sections
-  - Company.sectionsAs
   - Company.readFiling
   - Company.disclosure
 knowledgeRefs:

@@ -21,7 +21,7 @@ outputs:
   - matched signal
   - statement period
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

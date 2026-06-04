@@ -35,7 +35,7 @@ outputs:
   - 스톡옵션 부여·행사 timing ledger
   - 사외이사 독립성 점수
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

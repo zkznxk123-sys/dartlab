@@ -22,7 +22,7 @@ outputs:
   - EDGAR 전용 메타 (cik · company_name · ticker · accession_no · form_type · filing_url)
 capabilityRefs:
   - Company.sections
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

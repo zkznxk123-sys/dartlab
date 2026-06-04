@@ -10,7 +10,7 @@ class _FakeCompany:
     stockCode = "005930"
     corpName = "삼성전자"
 
-    def show(self, statement: str):
+    def panel(self, statement: str):
         assert statement == "BS"
         return pl.DataFrame(
             {
@@ -37,7 +37,7 @@ class _FakePeerCompany:
     stockCode = "000660"
     corpName = "SK하이닉스"
 
-    def show(self, statement: str):
+    def panel(self, statement: str):
         assert statement == "BS"
         return pl.DataFrame(
             {

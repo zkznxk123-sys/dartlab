@@ -27,7 +27,7 @@ outputs:
   - runtime limits
 capabilityRefs:
   - Company
-  - Company.show
+  - Company.panel
   - Company.analysis
   - gather
   - scan

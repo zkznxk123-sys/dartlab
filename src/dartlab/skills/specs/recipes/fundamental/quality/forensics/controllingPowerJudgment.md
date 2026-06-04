@@ -38,7 +38,7 @@ outputs:
   - 방어권 vs 경영권 신호 점수
   - 지배력 변경 시점 추적
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

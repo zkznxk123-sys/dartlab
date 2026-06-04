@@ -32,7 +32,7 @@ outputs:
   - DART 정기보고서 docs rceptNo + section sourceRef
 capabilityRefs:
   - Company.notesDetail
-  - Company.show
+  - Company.panel
   - Company.disclosure
 knowledgeRefs:
   - engines.company

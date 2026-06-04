@@ -18,7 +18,7 @@ inputs:
 outputs:
   - propagationPath table
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - Company.gather
 toolRefs:

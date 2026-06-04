@@ -27,7 +27,7 @@ outputs:
 capabilityRefs:
   - Company.governance
   - Company.disclosure
-  - Company.show
+  - Company.panel
 knowledgeRefs:
   - engines.company
   - engines.company.koreanDisclosure

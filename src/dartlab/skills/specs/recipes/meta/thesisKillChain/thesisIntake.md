@@ -18,7 +18,7 @@ inputs:
 outputs:
   - thesisIntake table
 capabilityRefs:
-  - Company.show
+  - Company.panel
 toolRefs:
   - EngineCall
   - RunPython

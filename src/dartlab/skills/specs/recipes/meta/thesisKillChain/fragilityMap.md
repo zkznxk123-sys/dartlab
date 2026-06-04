@@ -18,7 +18,7 @@ inputs:
 outputs:
   - fragilityMap table
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.gather
 toolRefs:
   - EngineCall

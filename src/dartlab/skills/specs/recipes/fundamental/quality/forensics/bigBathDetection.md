@@ -36,7 +36,7 @@ outputs:
   - 빅 배스 신호 점수
   - 차기 분기 인위적 회복 패턴 ledger
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

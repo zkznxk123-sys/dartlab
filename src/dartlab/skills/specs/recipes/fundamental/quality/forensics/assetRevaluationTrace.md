@@ -37,7 +37,7 @@ outputs:
   - 재평가 의도 분류 (자본 보강·담보·부채비율 개선)
   - 감정평가 가정 (평가법인·평가일·방법) ledger
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

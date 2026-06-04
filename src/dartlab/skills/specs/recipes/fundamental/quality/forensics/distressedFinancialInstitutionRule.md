@@ -38,7 +38,7 @@ outputs:
   - 인수·매각 시 가격 적정성 (NAV·DCF) 비교
   - 헐값매각 가능성 점수
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

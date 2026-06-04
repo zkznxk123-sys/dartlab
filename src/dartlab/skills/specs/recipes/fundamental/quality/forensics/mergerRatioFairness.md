@@ -26,7 +26,7 @@ outputs:
   - 소수주주 이익 침해 가능성 신호
   - 외부평가 가정 (할인율·성장률) 확인 ledger
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

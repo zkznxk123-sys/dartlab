@@ -26,7 +26,7 @@ outputs:
   - falsifier ledger
   - engine candidate memo
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
 toolRefs:
   - EngineCall

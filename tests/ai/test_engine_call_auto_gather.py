@@ -11,7 +11,7 @@ from dartlab.ai.tools.engineCall import _companyShow
 
 
 class _MockCompany:
-    """show() 가 첫 호출은 빈, 두 번째 호출은 정상 DataFrame 반환."""
+    """panel() 가 첫 호출은 빈, 두 번째 호출은 정상 DataFrame 반환."""
 
     def __init__(self, *, second_call_rows: int = 1, update_returns: dict | None = None) -> None:
         self.corpName = "테스트 주식회사"
@@ -21,7 +21,7 @@ class _MockCompany:
         self._update_returns = update_returns if update_returns is not None else {"finance": 12}
         self.update_called = False
 
-    def show(self, topic: str) -> pl.DataFrame:
+    def panel(self, topic: str) -> pl.DataFrame:
         self._call_count += 1
         if self._call_count == 1:
             return pl.DataFrame({"snakeId": [], "항목": [], "2025Q4": []})
@@ -56,7 +56,7 @@ def test_auto_gather_skipped_when_first_call_succeeds() -> None:
     """첫 show() 가 정상 → update() 호출 X → autoGatherUsed=False."""
 
     class _StableCompany(_MockCompany):
-        def show(self, topic: str) -> pl.DataFrame:
+        def panel(self, topic: str) -> pl.DataFrame:
             self._call_count += 1
             return pl.DataFrame(
                 {

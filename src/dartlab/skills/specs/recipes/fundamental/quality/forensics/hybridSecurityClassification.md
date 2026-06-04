@@ -28,7 +28,7 @@ outputs:
   - 분류 의문 신호 점수
   - 자본 확충 vs 부채 차환 진단
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

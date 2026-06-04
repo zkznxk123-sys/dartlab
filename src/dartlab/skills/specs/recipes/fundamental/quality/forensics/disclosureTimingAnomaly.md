@@ -35,7 +35,7 @@ outputs:
   - 정정공시 / 늑장공시 신호 점수
   - 어닝 서프라이즈 game 신호 (실적 발표 직전 비공식 가이던스 빈도)
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:

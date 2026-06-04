@@ -18,7 +18,7 @@ inputs:
 outputs:
   - tripwireMonitor table
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.gather
 toolRefs:
   - EngineCall

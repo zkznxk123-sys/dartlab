@@ -13,7 +13,7 @@ whenToUse:
 capabilityRefs:
   - Company
   - Company.index
-  - Company.show
+  - Company.panel
   - Company.trace
   - gather
   - scan

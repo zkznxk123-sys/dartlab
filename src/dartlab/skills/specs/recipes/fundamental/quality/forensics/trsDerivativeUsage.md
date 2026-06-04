@@ -38,7 +38,7 @@ outputs:
   - 거래 상대방·구조 분석
   - 잠재 손실 위험 점수
 capabilityRefs:
-  - Company.show
+  - Company.panel
   - Company.disclosure
   - scan
 toolRefs:
