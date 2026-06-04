@@ -74,9 +74,20 @@ def sectionsWide(
     df = sectionTexts(code, periods=periods, marketNs=marketNs)
     if df is None or df.is_empty():
         return None
-    agg = df.group_by(["sectionLeaf", "period"]).agg(pl.col("contentRaw").str.join("\n").alias("content"))
-    wide = agg.pivot(values="content", index="sectionLeaf", on="period")
-    return wide.rename({"sectionLeaf": "topic"})
+    hasChapter = "chapter" in df.columns
+    idx = ["chapter", "sectionLeaf"] if hasChapter else ["sectionLeaf"]
+    # contentRaw 는 raw DART XML — wide 텍스트 뷰(diff/keyword/표시)는 태그 strip(plain).
+    # raw XML 표 추출은 sectionTables/parseXmlTables 가 별도 사용.
+    agg = df.group_by([*idx, "period"]).agg(
+        pl.col("contentRaw").str.join("\n").str.replace_all(r"<[^>]+>", " ").alias("content")
+    )
+    wide = agg.pivot(values="content", index=idx, on="period")
+    # topic = sectionLeaf 별칭 — sectionsDiff/keywordFrequency(topic 컬럼 기대) + dataDispatcher
+    # (chapter/sectionLeaf 기대) 양쪽 소비 정합. source 컬럼은 docs(섹션 본문) 표기.
+    return wide.with_columns(
+        pl.col("sectionLeaf").alias("topic"),
+        pl.lit("docs").alias("source"),
+    )
 
 
 def sectionTables(

@@ -2215,36 +2215,12 @@ class Company:
         Raises:
             없음.
         """
-        # plan snazzy-wibbling-origami SSOT — sections artifact (raw XML cell) + runtime strip.
-        # sectionsRaw 가 raw XML 그대로, sections 는 polars native regex strip 적용 (~0.3s).
-        # docs.parquet 완전 폐기 가능 — sections artifact 가 모든 정보 (raw + 메타) 보유.
-        from dartlab.providers.dart.docs.sections.sectionsStorage import (
-            _ensureFromHf,
-            hasSectionsArtifact,
-            loadSectionsWide,
-            stripTagsExpr,
-        )
+        # docs.parquet/sections artifact 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션
+        # topic×period) SSOT. chapter/sectionLeaf/topic/source + period 컬럼 — dataDispatcher
+        # (chapter/sectionLeaf) + diff/keywordTrend(topic) 양쪽 정합. sectionsWide 가 태그 strip.
+        from dartlab.frame.sections import sectionsWide
 
-        _ensureFromHf(self.stockCode)
-        if hasSectionsArtifact(self.stockCode):
-            wide = loadSectionsWide(self.stockCode)
-            if wide is not None and not wide.is_empty():
-                # period 컬럼들 (cell = raw XML) 일괄 strip — rust SIMD vectorize.
-                import re as _re
-
-                periodCols = [c for c in wide.columns if _re.fullmatch(r"\d{4}(?:Q[1-4])?", c)]
-                if periodCols:
-                    wide = wide.with_columns([stripTagsExpr(c) for c in periodCols])
-                return wide
-        # fallback — 옛 런타임 build (artifact 부재 환경, 옛 schema mixed).
-        from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
-
-        wide = buildSections(self)
-        if wide is None:
-            return None
-        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
-
-        return stripTagsFromSectionsDf(wide)
+        return sectionsWide(self.stockCode)
 
     def sectionsRaw(self) -> pl.DataFrame | None:
         """sections artifact mixed (모든 태그 + ALIGN/VALIGN 보존) wide DataFrame — viewer 전용.
