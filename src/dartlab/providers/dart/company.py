@@ -3184,6 +3184,8 @@ class Company:
         """
         if topic is not None:
             topic = _resolveTopic(topic)
+        # docs.parquet 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션 topic×period) SSOT.
+        from dartlab.frame.sections import sectionsWide
         from dartlab.providers._common.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
@@ -3191,7 +3193,7 @@ class Company:
             topicHistoryDataFrame,
         )
 
-        docsSections = self._docs.sections
+        docsSections = sectionsWide(self.stockCode)
         if docsSections is None:
             return None
         if topic is not None and fromPeriod is not None and toPeriod is not None:
@@ -3261,9 +3263,10 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 텍스트).
         """
+        from dartlab.frame.sections import sectionsWide
         from dartlab.providers._common.diff import keywordFrequency
 
-        docsSections = self._docs.sections
+        docsSections = sectionsWide(self.stockCode)
         if docsSections is None:
             return None
         kws = None
