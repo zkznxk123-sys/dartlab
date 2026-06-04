@@ -12,7 +12,7 @@ from dartlab.scan.builders.kr.common import BATCH_SIZE, mergeBatchFiles, panelDi
 
 
 def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | None:
-    """panel 섹션 본문 → section 단위 변화 감지 (L1.5 frame.sections SSOT).
+    """panel 섹션 본문 → section 단위 변화 감지 (providers.dart.sections SSOT).
 
     Parameters:
         stockCode: 종목코드.
@@ -43,7 +43,7 @@ def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | No
         sectionLeaf 기준 period shift 후 변경 row 만 추출해 표준 컬럼으로 select.
 
     Requires:
-        panel artifact (frame.sectionTexts: sectionLeaf · contentRaw · period).
+        panel artifact (providers.dart.sections.sectionTexts: sectionLeaf · contentRaw · period).
 
     SeeAlso:
         ``buildChanges`` · ``dartlab.providers.dart.sections.sectionTexts``.
@@ -170,7 +170,7 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
         Data Sync 직후 prebuild 단계 또는 로컬 raw docs 준비 이후.
 
     How:
-        panel parquet 순회 → ``_buildRawChanges``(frame.sections) → 200 단위 batch → final merge.
+        panel parquet 순회 → ``_buildRawChanges``(providers.dart.sections) → 200 단위 batch → final merge.
 
     Requires:
         로컬 ``data/dart/panel/{stockCode}.parquet``.

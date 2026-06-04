@@ -18,10 +18,10 @@ Guide:
     scan prebuild, not a full domain tree.
 
 SeeAlso:
-    ``core.buildScan`` and ``frame.sections.sectionTables`` (panel 주식의 총수 표).
+    ``core.buildScan`` and ``providers.dart.sections.sectionTables`` (panel 주식의 총수 표).
 
 Requires:
-    panel artifact (frame.sections SSOT, docs.parquet 은퇴).
+    panel artifact (providers.dart.sections SSOT, docs.parquet 은퇴).
 
 AIContext:
     Keeps optional share-count failure from corrupting or blocking core scan sources.
@@ -73,7 +73,7 @@ def _numShares(cell: str | None) -> int | None:
 
 
 def _parseSharesTable(tables: list[list[list[str]]]) -> dict | None:
-    """frame.sectionTables('주식의 총수') 표 행 → 발행/자기/유통 주식수 (L1.5 frame XML 표).
+    """providers.dart.sections.sectionTables('주식의 총수') 표 행 → 발행/자기/유통 주식수 (panel XML 표).
 
     표 컬럼: [label, 보통주, 우선주, 합계]. Ⅰ발행할~Ⅵ유통 행 라벨 매칭.
     """
@@ -113,7 +113,7 @@ def _parseSharesTable(tables: list[list[list[str]]]) -> dict | None:
 
 
 def buildSharesOutstandingScan(*, write: bool = True, outputPath: "str | Path | None" = None) -> "object":
-    """전 종목 panel 발행주식수 scan (L1.5 frame.sectionTables SSOT, docs.parquet 은퇴).
+    """전 종목 panel 발행주식수 scan (providers.dart.sections SSOT, docs.parquet 은퇴).
 
     Args:
         write: True면 ``sharesOutstanding.parquet`` 저장.
@@ -229,14 +229,14 @@ def buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
         frame 기반 ``buildSharesOutstandingScan`` 을 실행하고, 알려진 런타임/파일 오류는 None 으로 변환한다.
 
     Requires:
-        ``buildSharesOutstandingScan`` (frame.sections SSOT, panel 주식의 총수 표).
+        ``buildSharesOutstandingScan`` (providers.dart.sections SSOT, panel 주식의 총수 표).
 
     SeeAlso:
         ``dartlab.scan.builders.kr.core.buildScan``.
     """
     try:
         if verbose:
-            _say("[shares] 발행주식수 풀 빌드 시작 (frame.sections SSOT)")
+            _say("[shares] 발행주식수 풀 빌드 시작 (providers.dart.sections SSOT)")
         df = buildSharesOutstandingScan()
         if verbose:
             _say(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")

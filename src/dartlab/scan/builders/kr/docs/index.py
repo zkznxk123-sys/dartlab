@@ -139,7 +139,7 @@ def buildDocsIndex(
     from dartlab.core.listingResolver import getListingResolver
     from dartlab.providers.dart.sections import sectionTexts
 
-    # docs.parquet 농장 은퇴 → L1.5 frame.sections(panel 섹션) SSOT. docsDir override 는
+    # docs.parquet 농장 은퇴 → providers.dart.sections(panel 섹션) SSOT. docsDir override 는
     # 하위호환(미지정 시 panel dir glob 으로 종목 enum).
     panelRoot = Path(docsDir) if docsDir else Path(_dataDir("panel"))
     if not panelRoot.exists():
