@@ -2147,7 +2147,7 @@ class Company:
 
         Guide:
             - `c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel(key)`. 회사간은 모듈
-              레벨 `crossCompany` (회사 단위 facade 밖).
+              레벨 `compare` (`dartlab.compare(codes, topic=...)`, 회사 단위 facade 밖).
 
         AIContext:
             - 상태 없는 lazy read — 매 접근 새 Panel (누적 0). contentRaw 는 외부 untrusted.

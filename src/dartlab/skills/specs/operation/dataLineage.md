@@ -105,7 +105,7 @@ L3: axis / recipe
 
 공통: 정렬키 = core.panel.canonicalKey (native ACLASS scope-strip, 손 매핑 0)
       → buildIndex(_index.parquet) + buildLabel(_label.parquet) → HF push(SYNC_CATEGORY=panel)
-      → providers Panel/crossCompany read (scan_parquet, 콜드 <1s)
+      → providers Panel/compare read (scan_parquet, 콜드 <1s)
 ```
 
 > zip 원본은 local-only(HF skip, 3층 가드). online(B)은 zip 을 디스크에 만들지조차 않으므로

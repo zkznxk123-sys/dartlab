@@ -2721,7 +2721,7 @@
         "engines.gather",
         "engines.data"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`panel` 은 DART 공시 본문(재무제표·주석·서술)을 항목(행) × 기간(열) 2D 보드로 수평 정렬한다. 정렬키 = native ACLASS canonicalKey(정부 표준 Link Role scope-strip, BS_C→BS / NT_C_D826380→NT_D826380) — 손 매핑 농장 0. BUILD(gather, lxml/zip)·READ(providers, scan_parquet) 물리 분리로 콜드 <1s, 태그 무손실.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.providers.dart.panel import Panel, crossCompany\nPanel(\"005930\").board()                     # presence\nPanel(\"005930\").show(\"재고\")                 # 한글 라벨 또는 show(\"NT_D826380\", byLabel=False)\ncrossCompany(\"재고\")                          # 회사간\n```\n또는 `Company(\"005930\").panel`. 빌드 2-트랙 — 로컬 zip(buildPanel.py) / online 1패스(onlinePanel.py, 디스크 zip 0)."
+      "bodyPreview": "## 엔진 역할\n\n`panel` 은 DART 공시 본문(재무제표·주석·서술)을 항목(행) × 기간(열) 2D 보드로 수평 정렬한다. 정렬키 = native ACLASS canonicalKey(정부 표준 Link Role scope-strip, BS_C→BS / NT_C_D826380→NT_D826380) — 손 매핑 농장 0. BUILD(gather, lxml/zip)·READ(providers, scan_parquet) 물리 분리로 콜드 <1s, 태그 무손실.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.providers.dart.panel import Panel, compare\nPanel(\"005930\").board()                     # presence\nPanel(\"005930\").show(\"재고\")                 # 한글 라벨 또는 show(\"NT_D826380\", byLabel=False)\ncompare([\"005930\", \"000660\"], topic=\"재고\")  # 회사간 (또는 dartlab.compare)\n```\n또는 `Company(\"005930\").panel`. 빌드 2-트랙 — 로컬 zip(buildPanel.py) / online 1패스(onlinePanel.py, 디스크 zip 0)."
     }
   ]
 }
