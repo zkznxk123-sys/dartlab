@@ -193,7 +193,7 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
         if edgarDf is not None:
             return edgarDf
 
-    # docs.parquet/sections artifact 농장 은퇴 → L1.5 frame.sections SSOT(panel 섹션 본문).
+    # docs.parquet/sections artifact 농장 은퇴 → providers.dart.sections SSOT(panel 섹션 본문).
     # 옛 docs.parquet (long: year/section_title/section_content) 호환 schema 노출 →
     # 호출자 (sentiment/risk/changes/disclosureDiff 등 D.1 모듈) 0 변경.
     from dartlab.providers.dart.sections import sectionTexts

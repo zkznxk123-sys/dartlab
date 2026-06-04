@@ -17,7 +17,7 @@ from dartlab.core.memory import memoizedCalc
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
 
-# ── docs 농장 은퇴 → L1.5 frame.sections 기반 정성 표 재건 (드롭 아님, SSOT) ──
+# ── docs 농장 은퇴 → providers.dart.sections 기반 정성 표 재건 (드롭 아님, SSOT) ──
 
 _KRW_UNIT = {"백만원": 1_000_000, "백만": 1_000_000, "억원": 100_000_000, "억": 100_000_000, "천원": 1_000}
 
@@ -516,7 +516,7 @@ def _getDartStockCode(company) -> str | None:
 
 
 def _loadSanction(company):
-    """제재 현황 — L1.5 frame.sectionTables(panel '제재' 표) 재건. DART 외/데이터 없음 None."""
+    """제재 현황 — providers.dart.sections.sectionTables(panel '제재' 표) 재건. DART 외/데이터 없음 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
@@ -549,7 +549,7 @@ def _loadSanction(company):
 
 
 def _loadContingentLiability(company):
-    """우발부채/지급보증 — L1.5 frame.sectionTables(panel '우발부채' 표) 재건.
+    """우발부채/지급보증 — providers.dart.sections.sectionTables(panel '우발부채' 표) 재건.
 
     소송(lawsuitDf)은 별도 표 부재 시 빈 DF, 지급보증(guaranteeDf)은 표 금액 best-effort 합산.
     """
@@ -611,7 +611,7 @@ def _fetchLatestEquity(company, *, basePeriod: str | None = None) -> int | None:
 
 
 def _loadExecutiveDocs(company):
-    """임원 현황 — L1.5 frame.sectionTables(panel '임원' 표) 재건. 표 부재 None."""
+    """임원 현황 — providers.dart.sections.sectionTables(panel '임원' 표) 재건. 표 부재 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
@@ -640,7 +640,7 @@ CEO_TURNOVER_WINDOW_YEARS = 5
 
 
 def _loadRelatedPartyTx(company):
-    """특수관계자 거래 — L1.5 frame.sectionTables(panel '특수관계자' 표) 재건. 표 부재 None."""
+    """특수관계자 거래 — providers.dart.sections.sectionTables(panel '특수관계자' 표) 재건. 표 부재 None."""
     code = _getDartStockCode(company)
     if not code:
         return None

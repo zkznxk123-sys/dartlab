@@ -2059,7 +2059,7 @@ class Company:
         Raises:
             없음.
         """
-        # docs.parquet/sections artifact 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션
+        # docs.parquet/sections artifact 농장 은퇴 → providers.dart.sections.sectionsWide(panel 섹션
         # topic×period) SSOT. chapter/sectionLeaf/topic/source + period 컬럼 — dataDispatcher
         # (chapter/sectionLeaf) + diff/keywordTrend(topic) 양쪽 정합. sectionsWide 가 태그 strip.
         from dartlab.providers.dart.sections import sectionsWide
@@ -2634,7 +2634,7 @@ class Company:
         """
         if topic is not None:
             topic = _resolveTopic(topic)
-        # docs.parquet 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션 topic×period) SSOT.
+        # docs.parquet 농장 은퇴 → providers.dart.sections.sectionsWide(panel 섹션 topic×period) SSOT.
         from dartlab.providers._common.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,

@@ -286,7 +286,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     # 매칭할 상장사명 집합 (3글자 이상 — 노이즈 방지)
     targetNames = {name: code for name, code in n2c.items() if len(name) >= 3}
 
-    # docs.parquet 농장 은퇴 → L1.5 frame.sections SSOT(panel 섹션 본문) 소비.
+    # docs.parquet 농장 은퇴 → providers.dart.sections SSOT(panel 섹션 본문) 소비.
     from dartlab.providers.dart.sections import sectionTexts
 
     processed = 0
@@ -450,8 +450,8 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         "주요 원재료 공급사", "매입처 비중" 류 답변 데이터. ``amount`` 와 ``ratio`` 보유한 엣지만
         강한 단정 가능 — ``preciseEdgeCount`` 적은 회사는 "일부 거래만 공시" 단서 명시.
     """
-    # docs.parquet 농장 은퇴 → L1.5 frame.sections SSOT. panel contentRaw raw DART XML 표를
-    # frame.sectionTables(lxml)가 markdown extractTables 와 동일 shape(표×행×셀)로 추출 —
+    # docs.parquet 농장 은퇴 → providers.dart.sections SSOT. panel contentRaw raw DART XML 표를
+    # providers.dart.sections.sectionTables(lxml)가 markdown extractTables 와 동일 shape(표×행×셀)로 추출 —
     # 공급사명/매입액/비중 복원(드롭 0). period=None=전 기간(다운스트림 corp 명 dedup).
     from dartlab.providers.dart.sections import sectionTables
     from dartlab.providers.dart.tableRows import (

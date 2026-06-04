@@ -337,7 +337,7 @@ def calcDisclosureDeltaFlags(company, *, basePeriod: str | None = None) -> list[
 
 
 def _safeDiffResult(company):
-    """L1.5 frame.sectionsWide(panel 섹션)에서 DiffResult를 안전하게 얻는다.
+    """providers.dart.sections.sectionsWide(panel 섹션)에서 DiffResult를 안전하게 얻는다.
 
     docs.parquet 농장 은퇴 → panel 섹션 wide(topic×period) SSOT 경유. 결과를
     company._cache에 저장하여 4개 calc 함수가 공유.
