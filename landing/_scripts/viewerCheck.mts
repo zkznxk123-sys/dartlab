@@ -3,6 +3,7 @@
 // (전체 parity = data/dart/panel 로컬 필요, 별도 수동 — 본 스크립트는 결정론 순수함수만.)
 import { canonicalChapter, isReportChapter } from '../src/lib/viewer/canonical.ts';
 import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
+import { narrativeCore } from '../src/lib/viewer/panelWide.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 
 let fail = 0;
@@ -27,6 +28,13 @@ eq(isReportChapter('【 전문가의 확인 】'), false, 'isReport expert=false
 eq(isReportChapter('10-K'), false, 'isReport form=false');
 eq(isReportChapter('6. 배당에 관한 사항'), false, 'isReport stray=false');
 
+// narrativeCore — 번호·'등' strip + NOTE_TITLE_NORM 정규화 (Python read._narrativeCore 대조). era 변종이 같은 코어로.
+eq(narrativeCore('6. 배당에 관한 사항 등'), '배당에관한사항', 'core 배당 등');
+eq(narrativeCore('6. 배당에 관한 사항'), '배당에관한사항', 'core 배당');
+eq(narrativeCore('6. 기타 재무에 관한 사항'), '기타재무에관한사항', 'core 기타재무 옛번호');
+eq(narrativeCore('8. 기타 재무에 관한 사항'), '기타재무에관한사항', 'core 기타재무 현행');
+eq(narrativeCore('7-1. 증권의 발행을 통한 자금조달 실적'), '증권의발행을통한자금조달실적', 'core 7-1');
+
 // edgarSectionStatus — 카탈로그 표준명 정확일치 게이트 (Python mapper.edgarSectionStatus 대조).
 eq(edgarSectionStatus('10-K', 'Item 1. Business'), 'navi', 'edgar navi item1');
 eq(edgarSectionStatus('10-K', 'Item 1A. Risk Factors'), 'navi', 'edgar navi 1A');
@@ -43,5 +51,5 @@ eq(viewerUrl(marketForCode('005930'), '20260515002181'), 'https://dart.fss.or.kr
 eq(viewerUrl(marketForCode('AAPL'), '0000320193-25-000079'), 'https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/0000320193-25-000079-index.htm', 'US SEC');
 eq(viewerUrl('US', null), null, 'US null');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (25/25)' : `viewerCheck: ${fail} FAIL`);
+console.log(fail === 0 ? 'viewerCheck: ALL OK (30/30)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);

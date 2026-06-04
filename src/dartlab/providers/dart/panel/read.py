@@ -655,6 +655,133 @@ def absorbAttached(df: pl.DataFrame) -> pl.DataFrame:
     return df.with_columns(cols)
 
 
+# narrative 섹션 라벨을 SPINE(최신 필링 골격) 등재 라벨로 정규화 — era 라벨 변종 통일.
+_NARR_SEP = "␟"  # rowIdentity NARR::{chapter}␟{sectionLeaf} 와 동일 구분자
+_NARR_NUM_RE = r"^\s*\d+(-\d+)?\.?\s*"  # 선행 절 번호("6. "/"7-1. ")
+_NARR_ETC_RE = r"\s*등\s*$"  # 후행 "등"(era 표기 변종)
+_SPINE_NARR_MAP: dict[str, str] | None = None
+
+
+def _narrativeCore(leaf: str) -> str:
+    """섹션 라벨 → 제목 코어 (선행 번호·후행 '등' 제거 + NOTE_TITLE_NORM 정규화) — Python str 판.
+
+    ``_narrativeCoreExpr`` 의 scalar 짝(SPINE 룩업 dict 구축용). 둘이 byte-identical 코어를 내야 매칭 성립.
+    예) "6. 배당에 관한 사항 등" → "배당에관한사항", "8. 기타 재무에 관한 사항" → "기타재무에관한사항".
+    """
+    import re
+
+    from .mapper import NOTE_TITLE_NORM_PATTERN
+
+    s = re.sub(_NARR_NUM_RE, "", leaf or "")
+    s = s.strip()
+    s = re.sub(_NARR_ETC_RE, "", s)
+    return re.sub(NOTE_TITLE_NORM_PATTERN, "", s)
+
+
+def _narrativeCoreExpr(col: str = "sectionLeaf") -> pl.Expr:
+    """섹션 라벨 컬럼 → 제목 코어 Expr (``_narrativeCore`` 의 polars 짝). 번호·'등' strip + 정규화."""
+    from .mapper import NOTE_TITLE_NORM_PATTERN
+
+    return (
+        pl.col(col)
+        .fill_null("")
+        .str.replace(_NARR_NUM_RE, "")
+        .str.strip_chars()
+        .str.replace(_NARR_ETC_RE, "")
+        .str.replace_all(NOTE_TITLE_NORM_PATTERN, "")
+    )
+
+
+def _spineNarrativeMap() -> dict[str, str]:
+    """SPINE 의 narrative 라벨 → ``{f'{chapter}␟{코어}': 정식 sectionLeaf}`` 룩업 (module-level 1회 캐시).
+
+    SPINE 은 최신 Q4 사업보고서에서 구운 골격이라 등재 narrative 라벨 = "가장 최근 필링 구조(핵)".
+    같은 chapter·코어의 옛 era 변종을 이 정식 라벨로 통일하는 화이트리스트. 첫 등장 우선(SPINE=정부순서).
+    """
+    global _SPINE_NARR_MAP
+    if _SPINE_NARR_MAP is not None:
+        return _SPINE_NARR_MAP
+    from .spine import SPINE
+
+    m: dict[str, str] = {}
+    for ident in SPINE:
+        if not ident.startswith("NARR::"):
+            continue
+        chap, sep, leaf = ident[len("NARR::") :].partition(_NARR_SEP)
+        if not sep:
+            continue
+        m.setdefault(f"{chap}{_NARR_SEP}{_narrativeCore(leaf)}", leaf)
+    _SPINE_NARR_MAP = m
+    return m
+
+
+def anchorNarrativeToSpine(df: pl.DataFrame) -> pl.DataFrame:
+    """narrative 섹션 라벨을 SPINE(최신 필링 골격) 등재 라벨로 정규화 — era 변종을 "최신이 핵"으로 통일.
+
+    ``anchorLatest`` 가 keyed 행(disclosureKey 보유 재무제표)을 회사-자기 최신 period 라벨로 통일하지만,
+    narrative 섹션(배당·증권발행·기타재무 등, disclosureKey null)은 손대지 않아 era 별 라벨 변종이 별도 행으로
+    잔존한다 ("6. 배당에 관한 사항"(현행) vs "6. 배당에 관한 사항 등"(옛), "6. 기타 재무에 관한 사항"(옛 번호) vs
+    "8. 기타 재무에 관한 사항"(현행 번호)). 정부 서식 개정으로 라벨·번호가 드리프트한 것. 본 함수가 read-time 에
+    narrative ``sectionLeaf`` 를 **같은 chapter 의 SPINE 등재 라벨**(제목 코어 일치)로 덮어써 통일한다 — SPINE 이
+    최신 필링 골격이라 곧 운영자가 말한 "가장 최근 XBRL 이 핵". ``canonicalChapterExpr`` 이 chapter 를 14노드로
+    bounded 흡수하는 것과 동형(SPINE 화이트리스트 매칭만, 자유 fuzzy 0). 번호 드리프트(6→8)는 SPINE 라벨 전체를
+    채택하므로 자동 해소(_secNum 도 새 번호).
+
+    Args:
+        df: ``canonicalChapterExpr``·``absorbAttached`` 적용 후 long DataFrame (chapter/sectionLeaf/disclosureKey).
+
+    Returns:
+        narrative 행의 sectionLeaf 가 SPINE 등재 라벨로 통일된 동일 schema DataFrame. SPINE 비매칭·keyed 행은 원본.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> out = anchorNarrativeToSpine(longDf)  # doctest: +SKIP
+
+    SeeAlso:
+        - ``anchorLatest`` — keyed era drift 흡수(본 함수는 narrative 보완).
+        - ``spine.SPINE`` — 최신 필링 골격(핵) 출처.
+        - ``readWide`` — absorbAttached 직후·leafSeq 직전 호출.
+
+    Requires:
+        - polars. spine.SPINE. mapper.NOTE_TITLE_NORM_PATTERN.
+
+    Capabilities:
+        - 옛 era narrative 섹션 라벨을 최신 SPINE 골격으로 read-time 통일 — cross-era 한 행 수평화(재빌드 무관).
+
+    AIContext:
+        - SPINE 화이트리스트 bounded 매핑 — 코어 미등재는 분리 유지("확신오정렬 > 정렬실패"). keyed 행 불변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 자유 fuzzy(Levenshtein/Jaccard) 금지 — SPINE 등재 라벨 정확 코어 일치만(오병합 차단).
+            - keyed 행 라벨 변경 금지 — disclosureKey null(narrative)만(anchorLatest 결과 불변).
+            - chapter cross 매칭 금지 — 룩업 키에 chapter 포함(다른 챕터 같은 번호 분리).
+        OutputSchema:
+            - ``anchorNarrativeToSpine(df) -> pl.DataFrame`` (narrative sectionLeaf SPINE 통일).
+        Prerequisites:
+            - chapter/sectionLeaf/disclosureKey 컬럼. SPINE.
+        Freshness:
+            - read 파생 — 매 호출(재빌드 무관). SPINE 재생성 시 핵 갱신.
+        Dataflow:
+            - (chapter, 제목코어) → SPINE 라벨 룩업 → narrative 행 sectionLeaf 덮어쓰기.
+        TargetMarkets:
+            - KR (DART 정부 서식).
+    """
+    if df.is_empty() or "sectionLeaf" not in df.columns or "chapter" not in df.columns:
+        return df
+    spineMap = _spineNarrativeMap()
+    if not spineMap:
+        return df
+    key = pl.col("chapter").fill_null("") + pl.lit(_NARR_SEP) + _narrativeCoreExpr("sectionLeaf")
+    canon = key.replace_strict(spineMap, default=None, return_dtype=pl.Utf8)
+    isNarr = pl.col("disclosureKey").is_null() if "disclosureKey" in df.columns else pl.lit(True)
+    return df.with_columns(
+        pl.when(isNarr & canon.is_not_null()).then(canon).otherwise(pl.col("sectionLeaf")).alias("sectionLeaf")
+    )
+
+
 def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = None) -> pl.DataFrame | None:
     """panel long format read + disclosureKey 보장 (period 파일 prune).
 
@@ -841,6 +968,10 @@ def readWide(
     # (첨부) 물리 재무첨부((첨부)연결재무제표·(첨부)재무제표) → 정규 재무섹션(2.연결재무제표/4.재무제표 …)으로 흡수.
     # 옛 연차본 물리첨부(XBRL 태깅 0 → anchor 못 잡음)가 ghost 섹션·spine 부유로 남는 것을 read-time 정규화.
     long = absorbAttached(long)
+    # narrative 섹션 라벨을 SPINE(최신 필링 골격=핵) 등재 라벨로 정규화 — era 변종("6.배당" vs "6.배당 등",
+    # 옛 "6.기타재무" vs 현행 "8.기타재무") 통일. leafSeq·collapse·pivot 전이라 통일 라벨이 row identity 에
+    # 반영돼 한 행으로 모이고 orderBySpine 의 _spOrder 를 정상 획득(챕터 말미 부유 해소).
+    long = anchorNarrativeToSpine(long)
     # narrative 수평화 — 과거 뭉태기 leaf 를 **섹션 내 문서위치**로 정렬(leafSeq). 각 leaf(표·텍스트)가 별도
     # 행이라 표↔표 안 뭉침(재뭉침 0). 같은 섹션의 같은 위치 표가 기간 간 한 행(매출실적 등 안정위치 표는 정렬).
     # 위치정렬은 안정위치 표엔 효과적이나 삽입 누적 시 drift — 표구조-aware fuzzy 정렬은 후속 정공(operation.architecture).

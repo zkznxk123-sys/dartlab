@@ -27,6 +27,32 @@ def test_scope_expr_consolidated_standalone() -> None:
     ]
 
 
+def test_anchor_narrative_to_spine_unifies_era_variants() -> None:
+    """narrative era 변종 → SPINE(최신 골격=핵) 라벨 통일. 'X 등'·옛 번호 → 현행, keyed 불변.
+
+    SPINE 화이트리스트 bounded 매핑 (실 SPINE: '6. 배당에 관한 사항'·'8. 기타 재무에 관한 사항' 등재).
+    """
+    from dartlab.providers.dart.panel.read import anchorNarrativeToSpine
+
+    df = pl.DataFrame(
+        {
+            "chapter": ["III. 재무에 관한 사항"] * 4,
+            "sectionLeaf": [
+                "6. 배당에 관한 사항 등",  # 옛 '등' 변종
+                "6. 기타 재무에 관한 사항",  # 옛 번호 (현행 8)
+                "6. 배당에 관한 사항",  # 이미 현행
+                "6. 배당에 관한 사항 등",  # keyed (불변 확인)
+            ],
+            "disclosureKey": [None, None, None, "BS_C"],
+        }
+    )
+    out = anchorNarrativeToSpine(df)["sectionLeaf"].to_list()
+    assert out[0] == "6. 배당에 관한 사항"  # '등' 변종 → 현행 SPINE 라벨
+    assert out[1] == "8. 기타 재무에 관한 사항"  # 옛 번호 → 현행 번호 (SPINE 라벨 통째)
+    assert out[2] == "6. 배당에 관한 사항"  # 이미 현행 = 불변
+    assert out[3] == "6. 배당에 관한 사항 등"  # keyed = 불변 (anchorLatest 담당)
+
+
 def test_anchor_latest_propagates_latest_label() -> None:
     """(disclosureKey, scope) 그룹의 최신 period 라벨을 과거 기간에 덮어쓴다 (한 행 정렬)."""
     from dartlab.providers.dart.panel.read import anchorLatest
