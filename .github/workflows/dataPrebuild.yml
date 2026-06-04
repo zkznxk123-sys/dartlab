@@ -2,7 +2,9 @@ name: Data Prebuild (DART)
 
 # ──────────────────────────────────────────────────────────────
 # DART Data Sync 완료 후 자동 트리거.
-# scan 프리빌드(changes/finance/report) 생성 → HF 업로드.
+# scan 프리빌드(changes/finance/report/sharesOutstanding/docsIndex) 생성 → HF 업로드.
+# changes·sharesOutstanding·docsIndex 는 panel(공시 수평화) SSOT 를 읽으므로 panel 을 HF 에서 seed
+# (docs.parquet 농장 은퇴 — 더 이상 docs 를 읽지 않는다).
 #
 # EDGAR 프리빌드는 edgarSync.yml 이 전담 (end-to-end 벌크 → scan → HF).
 # 여기서는 **DART 전용**.
@@ -63,17 +65,11 @@ jobs:
           key: dartlab-data-report-prebuild-never-match
           restore-keys: dartlab-data-report-
 
-      - name: Restore docs cache
-        id: docs-cache
-        uses: actions/cache/restore@v5
-        with:
-          path: data/dart/docs
-          key: dartlab-data-docs-prebuild-never-match
-          restore-keys: dartlab-data-docs-
-
+      # docs(42.5GB) restore 제거 — docs.parquet 농장 은퇴 후 어떤 빌더도 docs 를 읽지 않는다.
+      # panel(11GB)은 Actions 캐시 10GB 한도 초과 → 캐시 대신 HF seed(_isFresh idempotent)로 충전.
       - name: Verify cache hits
         run: |
-          for cat in finance report docs; do
+          for cat in finance report; do
             cat_var="$(echo $cat | tr a-z A-Z)"
             var="${cat_var}_CACHE_MATCHED_KEY"
             # actions/cache/restore 는 matched key 를 outputs.cache-matched-key 로 노출
@@ -82,11 +78,11 @@ jobs:
         env:
           CACHE_MATCHED_FINANCE: ${{ steps.finance-cache.outputs.cache-matched-key }}
           CACHE_MATCHED_REPORT: ${{ steps.report-cache.outputs.cache-matched-key }}
-          CACHE_MATCHED_DOCS: ${{ steps.docs-cache.outputs.cache-matched-key }}
 
       # HF seed: cache miss/stale 대비 부족 parquet 을 HF 에서 채움 (idempotent).
+      # panel = changes/sharesOutstanding/docsIndex 빌더 입력 (회사 enum = 로컬 panel dir glob).
       - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report,docs
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report,panel
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 

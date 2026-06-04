@@ -203,7 +203,7 @@ class Scan:
             Freshness:
                 prebuild parquet 빌드 시점. 분기 마감 후 30~45 일.
             Dataflow:
-                scan(axis) → 후보 → Company(stockCode).analysis(...) 또는 .show(...)
+                scan(axis) → 후보 → Company(stockCode).analysis(...) 또는 .panel(...)
             TargetMarkets:
                 - KR (DART)
         """

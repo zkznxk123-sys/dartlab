@@ -3,8 +3,9 @@
 수집 완료 후 실행되어 scan 프리빌드 데이터를 생성하고 HuggingFace에 업로드.
 
 흐름:
-  1. 로컬 data/dart/{finance,report,docs} 캐시 확인
-  2. buildScan() 호출 → changes.parquet, finance.parquet, report/12개 apiType
+  1. 로컬 data/dart/{finance,report,panel} 캐시 확인
+     (changes/sharesOutstanding/docsIndex 는 panel 공시 수평화 SSOT 를 읽는다)
+  2. buildScan() 호출 → changes.parquet, finance.parquet, report/12개 apiType, sharesOutstanding.parquet
   3. HF upload_folder → dart/scan/
 
 환경변수:
@@ -23,11 +24,15 @@ from _hfRetry import retryHfCall  # noqa: E402
 
 
 def _checkDataReady(dataDir: str) -> dict[str, int]:
-    """finance/report/docs 캐시 존재 여부 확인. 카테고리별 파일 수 반환."""
+    """finance/report/panel 캐시 존재 여부 확인. 카테고리별 파일 수 반환.
+
+    docs 농장 은퇴 → changes/sharesOutstanding/docsIndex 빌더가 panel(공시 수평화) SSOT 를
+    읽으므로 panel 존재를 확인한다 (docs 아님).
+    """
     from dartlab.core.dataConfig import DATA_RELEASES
 
     counts = {}
-    for cat in ("finance", "report", "docs"):
+    for cat in ("finance", "report", "panel"):
         catDir = Path(dataDir) / DATA_RELEASES[cat]["dir"]
         n = len(list(catDir.glob("*.parquet"))) if catDir.exists() else 0
         counts[cat] = n
@@ -147,7 +152,7 @@ def main():
 
     # 1단계: 데이터 캐시 확인
     counts = _checkDataReady(dataDir)
-    print(f"[prebuild] 캐시: finance={counts['finance']} report={counts['report']} docs={counts['docs']}")
+    print(f"[prebuild] 캐시: finance={counts['finance']} report={counts['report']} panel={counts['panel']}")
 
     if all(v == 0 for v in counts.values()):
         print("[prebuild] 데이터 캐시 없음 → 프리빌드 건너뜀")
@@ -162,8 +167,8 @@ def main():
         elapsed = time.time() - start
         print(f"[prebuild] scan 빌드 완료: {elapsed:.0f}초")
 
-        # 2.5단계: docs 슬림 인덱스 (P3 — whimsical 흡수)
-        if counts.get("docs", 0) > 0:
+        # 2.5단계: docsIndex 슬림 인덱스 (panel 섹션 SSOT 에서 빌드, docs.parquet 농장 은퇴)
+        if counts.get("panel", 0) > 0:
             results["docsIndex"] = _buildDocsIndex(dataDir)
 
         # 2.6단계: 데이터 품질 검증
