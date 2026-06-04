@@ -3,7 +3,7 @@ id: operation.mappingRefresh
 title: accountMappings 보강 4 단계 파이프라인
 category: operation
 status: observed
-lastUpdated: 2026-05-18
+lastUpdated: 2026-06-05
 purpose: DART finance parquet 의 nonstd_ fallback (미커버 한글 계정명) 을 운영자가 수동으로 검토 후 standardAccounts.snakeId 와 짝지어 accountMappings.json 에 박는 4 단계 절차. 자동 학습/추론 아닌 *수동 박기 정공* 이며, 본 파이프라인은 후보 추출·검증·박기 작업을 효율화하는 도구.
 whenToUse:
   - "nonstd_ fallback 행이 finance 매핑 로그에 등장"
@@ -64,7 +64,70 @@ testUniverse:
 
 # mappingRefresh — accountMappings.json 보강 4 단계 파이프라인
 
-## 0. 핵심 원칙
+## 0. 통합 후 구조 + 향후 관리 (2026-06 — account SSOT 단일 소유)
+
+흩어져 있던 매핑 로직(5 in-code dict + EDGAR 별도 파일 + 34k JSON)이 **단일 SSOT
+파일 + 단일 소유 엔진**으로 통합됐다. 운영자는 이제 *한곳*에서 전 계정 매핑을 관리한다.
+
+### SSOT 단일 파일 — `src/dartlab/reference/data/accountMappings.json`
+
+| 구획 | 내용 | value |
+|---|---|---|
+| `standardAccounts` | snakeId 정의 (korName/category/type) | — |
+| `mappings` | 한글/영문 → snakeId 평면 사전 | snakeId |
+| `layers.idSynonym` | 영문 XBRL id → canonical id (옛 `ID_SYNONYMS`) | id |
+| `layers.nameSynonym` | 한글 → canonical 한글 (옛 `ACCOUNT_NAME_SYNONYMS`) | 한글 |
+| `layers.snakeAlias` | snakeId → snakeId (옛 `SNAKEID_ALIASES`, DART↔EDGAR) | snakeId |
+| `layers.labelEn` | snakeId → 영문 display (옛 `_EDGAR_LABELS`) | 영문 |
+| `layers.korSynonym` | 한글 줄임말 → snakeId (옛 `_KR_SYNONYMS`) | snakeId |
+| `edgar.accounts` | EDGAR commonTags + korName (옛 별도 standardAccounts.json) | — |
+| `edgar.learnedTags` | EDGAR tag → snakeId (옛 별도 learnedSynonyms.json) | snakeId |
+| `edgar.stmtOverrides` | `"tag\|stmt"` → snakeId (옛 in-code `STMT_OVERRIDES`) | snakeId |
+
+`_metadata` 에 **파생 카운트 박기 금지** — 실데이터와 drift 하는 stale 버그 근원
+(옛 `learnedSynonyms:31489` 는 실파일에 키도 없었음). 카운트는 loader/test 가 실측.
+
+### 단일 소유 엔진 — `src/dartlab/core/accounts/` (L0)
+
+| 모듈 | 책임 |
+|---|---|
+| `data` | SSOT 로더 `loadAccounts()` + 전 캐시 무효화 `release()` |
+| `normalize` | `AccountNormalizer` — DART 12 단계 fallback |
+| `edgar` | `EdgarTagMapper` — EDGAR tag→snakeId (소스에서 인덱스 파생) |
+| `labels` | `koreanLabels`/`englishLabels`/`reverseKoreanLabels` cascade |
+| `aliases` | `SNAKEID_ALIASES` (in-place 갱신, identity 보존) + `mergeAliasRows` |
+
+옛 `providers/dart/finance/mapper.py`·`core/utils/labels.py`·`providers/edgar/finance/mapper.py`
+는 *얇은 위임 facade* (전 심볼 re-export 보존). 새 코드는 `dartlab.core.accounts` 직접 import.
+
+### 새 매핑 추가 (학습) — 두 경로
+
+1. **CLI (권장)** — `mappingPromote.py --layer <name> apply`:
+   ```bash
+   uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer nameSynonym apply
+   ```
+   layer ∈ `mappings`(기본)/`idSynonym`/`nameSynonym`/`snakeAlias`/`labelEn`/`korSynonym`.
+   value=snakeId layer(mappings/snakeAlias/korSynonym)만 standardAccounts ghost check 적용.
+2. **직접 편집** — JSON 한 줄 추가 후 `from dartlab.core.accounts import release; release()`
+   (atomic write + single-line compact 보존 필수).
+
+### 드리프트 가드 (회귀 자동 차단)
+
+| 가드 | 위치 | 역할 |
+|---|---|---|
+| golden 동등성 | `tests/golden/accountMapper/test_ssot_equivalence_{dart,labels_edgar}.py` | 독립 reference 구현 vs production byte-identical (145,926 입력) |
+| 구조 sanity | `tests/golden/accountMapper/test_ssot_structure.py` | top-level 구획·layers shape·EDGAR 흡수·stale 카운트 재유입 차단 |
+| fallback 회귀 | `tests/providers/dart/finance/test_mapperFallbackVariants.py` | 12 단계 변형 흡수 (cycle 5/12/17 회귀) |
+
+매핑 추가/구조 변경 후 `bash tests/test-lock.sh tests/golden/accountMapper -m unit` 가 통과 게이트.
+
+### EDINET·SCE 제외 (별 type system)
+
+EDINET(`providers/edinet/finance/mapper.py`, 자체 taxonomy·반대 방향 dict)과 SCE
+(`providers/dart/finance/sceMapper*.py`, 2-tier cause/detail)는 본 SSOT 통합 대상 아님 —
+type space 가 달라 합치면 회귀. 각자 독립 유지.
+
+## 핵심 원칙
 
 mapper 의 34,000+ 매핑은 *모두 운영자가 미커버 한글명을 보고 직접
 `standardAccounts.snakeId` 와 짝지어 박은 결과*. 자동 학습/추론 아님.
@@ -523,12 +586,14 @@ snake_case 변환 박기 전 *한글명 의미 일치 가드* 필수.
 
 ## 13. 참조
 
-- `src/dartlab/providers/dart/finance/mapper.py::AccountMapper` — mapper
-  본진 (12 단계 fallback, 사전 hit 우선, 사전 변형 noSpace/noParen/noHyphen
-  역인덱스 + 액 suffix 흡수)
+- `src/dartlab/core/accounts/normalize.py::AccountNormalizer` — DART 12 단계
+  fallback **본체** (사전 hit 우선, noSpace/noParen/noHyphen 역인덱스 + 액 suffix).
+- `src/dartlab/core/accounts/{data,edgar,labels,aliases}.py` — SSOT 로더·EDGAR tag
+  매퍼·라벨 cascade·snakeAlias. account 정규화 단일 소유 엔진.
+- `src/dartlab/providers/dart/finance/mapper.py::AccountMapper` — 위임 facade
+  (옛 본진 → owner 위임, 전 심볼 re-export 하위 호환).
 - `src/dartlab/reference/mappers/accountMapper.py::AccountMapper` —
-  reference 래퍼. 본진 `map()` 위임 (`BaseMapper.lookup(key)` 인터페이스
-  어댑터). SSOT 단일화.
+  reference 래퍼. facade `map()` 위임 (`BaseMapper.lookup(key)` 어댑터).
 - `src/dartlab/providers/dart/finance/pivot.py::_pivotToSeries` — nonstd
   로그 출력 위치
 - `src/dartlab/reference/data/accountMappings.json` — prod 매핑 사전

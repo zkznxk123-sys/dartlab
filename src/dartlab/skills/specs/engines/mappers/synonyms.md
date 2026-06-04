@@ -5,7 +5,7 @@ category: engines
 kind: curated
 scope: builtin
 status: observed
-purpose: 동의어 매핑 SSOT — accountMappings.json 안 learnedSynonyms (31,489 DART) + EDGAR 자체 mapperData/learnedSynonyms.json (11,375 SEC GAAP) 두 provider 비대칭 구조 + 변형 정규화 룰 6 종 (한자/괄호/공백/하이픈/액suffix/jamo 분해) 단일 정의.
+purpose: 동의어 매핑 SSOT — accountMappings.json 단일 파일에 DART(mappings + layers) + EDGAR(edgar.learnedTags ~11,708) 통합 (2026-06 단일 소유, 옛 EDGAR 별도 파일 흡수) + 변형 정규화 룰 6 종 (한자/괄호/공백/하이픈/액suffix/jamo 분해). 구조·관리는 operation.mappingRefresh §0 정본.
 whenToUse:
   - synonyms
   - 동의어
@@ -40,9 +40,9 @@ linkedSkills:
 
 ## 엔진 역할
 
-`mappers` 엔진의 *동의어 데이터* SSOT sub-spec. accountMappings sub-spec 이 *전체 파일 구조* 라면 본 sub-spec 은 그 안 `learnedSynonyms` 섹션 + EDGAR 측 별도 파일 두 곳의 변형 정규화 룰 정의.
+`mappers` 엔진의 *동의어 데이터* SSOT sub-spec. accountMappings sub-spec 이 *전체 파일 구조* 라면 본 sub-spec 은 변형 정규화 룰 6 종 + DART/EDGAR 동의어 데이터 정의.
 
-핵심 사실: **DART/EDGAR 두 provider 비대칭** — DART 는 `reference/data/accountMappings.json` (통합 승격), EDGAR 는 자체 `providers/edgar/finance/mapperData/learnedSynonyms.json` 유지. 대칭 작업은 후속 트랙.
+핵심 사실 (2026-06 통합): **DART/EDGAR 동의어가 단일 파일 `reference/data/accountMappings.json` 로 통합**. DART 변형은 `mappings` + `layers.{idSynonym,nameSynonym}`, EDGAR tag 는 `edgar.learnedTags` + `edgar.accounts.commonTags`. 옛 EDGAR 별도 파일(`providers/edgar/finance/mapperData/`)은 흡수 후 제거됨. 단일 소유 엔진 = `core/accounts/`. 상세는 [operation.mappingRefresh](/skills/operation.mappingRefresh) §0.
 
 ## 공개 호출 방식
 
@@ -79,51 +79,46 @@ mapper.synonyms("operating_profit")
 - suffix: 0.85
 - jamo 1 자모: 0.70 (오타 의심 — 답변 시 명시)
 
-## DART 측 동의어 (learnedSynonyms 31,489)
+## DART 측 동의어 (mappings + layers)
 
-`src/dartlab/reference/data/accountMappings.json::learnedSynonyms` — flat dict:
+`src/dartlab/reference/data/accountMappings.json` 단일 파일:
+
+- `mappings` — 한글/영문 → snakeId 평면 사전 (~34,622). value 는 `standardAccounts` snakeId enum.
+- `layers.idSynonym` — 영문 XBRL id → canonical id (옛 in-code `ID_SYNONYMS`).
+- `layers.nameSynonym` — 한글 → canonical 한글 (옛 in-code `ACCOUNT_NAME_SYNONYMS`).
+- `layers.snakeAlias` — snakeId → snakeId (옛 `SNAKEID_ALIASES`, DART↔EDGAR 통합).
+
+갱신: `mappingPromote.py --layer <name> apply` 단일 진입점.
+
+## EDGAR 측 동의어 (edgar 구획 — 같은 SSOT)
+
+같은 `accountMappings.json` 의 `edgar` 구획 (2026-06 통합, 옛 별도 파일 흡수):
 
 ```json
-{
-  "총자산": "total_assets",
-  "Total Assets": "total_assets",
-  "자산 총계": "total_assets",
-  "資産總計": "total_assets",
-  ...
+"edgar": {
+  "accounts": [{"snakeId": "total_assets", "stmt": "BS", "commonTags": ["Assets", ...]}, ...],
+  "learnedTags": {"revenues": "sales", "operatingincomeloss": "operating_profit", ...},
+  "stmtOverrides": {"NetIncomeLoss|IS": "net_profit", "NetIncomeLoss|CF": "net_income_cf"}
 }
 ```
 
-- value 는 `standardAccounts` 의 snakeId 단일 enum.
-- 한 snakeId 당 평균 9.3 변형 (3,402 표준 × 9.3 = 31,489).
-- 갱신: `mappingPromote.py apply` 진입점만 (engines.mappers.accountMappings SSOT).
+- `edgar.learnedTags` — SEC GAAP tag(lower) → snakeId (~11,708). value 는 DART 와 같은 snakeId enum.
+- `edgar.accounts.commonTags` — 211 표준 계정의 대표 tag (commonTags 가 learnedTags 우선).
+- `edgar.stmtOverrides` — 같은 tag 가 stmt 따라 다른 snakeId (`"tag\|stmt"` 인코딩).
+- 소스만 저장, tagMap/stmtTagMap 인덱스는 `core/accounts/edgar.py` 가 로드 시 파생.
 
-## EDGAR 측 동의어 (11,375 SEC GAAP)
+## DART/EDGAR 통합 완료 (옛 비대칭 해소)
 
-`src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` — 별도 파일:
+| 항목 | 통합 후 (2026-06) |
+|---|---|
+| 파일 위치 | DART·EDGAR 모두 `reference/data/accountMappings.json` 단일 |
+| 진입점 | `mappingPromote.py --layer` (atomic write + single-line 보존) |
+| 매퍼 본체 | `core/accounts/` (DART `normalize` · EDGAR `edgar` · 라벨 `labels`) |
+| facade | `providers/{dart,edgar}/finance/mapper.py` (위임, 하위 호환 re-export) |
 
-```json
-{
-  "us-gaap:Assets": "total_assets",
-  "us-gaap:OperatingIncomeLoss": "operating_profit",
-  "us-gaap:Revenues": "sales",
-  ...
-}
-```
-
-- key 는 SEC GAAP namespace 태그 (us-gaap:* / dei:* / custom).
-- value 는 DART 와 같은 snakeId enum — 두 provider SSOT 동등.
-- 11,375 태그 = SEC GAAP 2024 분류 (운영자 수동 갱신).
-
-## 두 provider 비대칭 (정정 trace)
-
-| 항목 | DART | EDGAR |
-|---|---|---|
-| 파일 위치 | `reference/data/accountMappings.json` (통합 승격) | `providers/edgar/finance/mapperData/` (provider 격리) |
-| 진입점 | `mappingPromote.py apply` (atomic) | 직접 JSON 편집 (atomic write X) |
-| 갱신 빈도 | cycle 30~80 매핑 / 주 | SEC GAAP 분기 갱신 시 batch |
-| AccountMapper | `reference/mappers/accountMapper.py` | `providers/edgar/finance/mapper.py` 별도 |
-
-**대칭 작업 후속 트랙**: EDGAR mapperData 도 `reference/data/edgarMappings.json` 으로 통합 승격 + `mappingPromote.py edgar` 서브커맨드 추가. 본 sub-spec 갱신 시점 미정.
+옛 "EDGAR 별도 파일·대칭 작업 후속 트랙" 은 완료 — `providers/edgar/finance/mapperData/`
+2 파일 제거, `edgar` 구획으로 흡수. EDGAR learnedTags 추가는 직접 편집 + `release()`
+(현재 `mappingPromote --layer` 는 DART layers 6 종 대상; EDGAR 는 후속 layer 확장 후보).
 
 ## 대표 반환 형태
 

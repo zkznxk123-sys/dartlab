@@ -66,7 +66,7 @@ procedure:
   - RunPython prelude 의 `normalizeColumn(topic, hint)` 사용 — 한글/snake/alias → 표준 snake_id.
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
-  - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR).
+  - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` 단일 SSOT (DART mappings/layers + EDGAR edgar 구획 통합).
   - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `src/dartlab/skills/specs/operation/mappingRefresh.md` 4 단계 — 관측 ledger → `src/dartlab/reference/mapping/mappingLedgerCompact.py` → `src/dartlab/reference/mapping/mappingReview.py` confirm/reject/alias/defer → `src/dartlab/reference/mapping/mappingPromote.py` apply.
   - prod JSON 단독 권한 진입점은 `src/dartlab/reference/mapping/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
 linkedSkills:
@@ -166,13 +166,15 @@ columnsFor("BS")
 
 | 자산 | 경로 | 내용 | 갱신 방식 |
 |---|---|---|---|
-| DART 학습 매핑 | `src/dartlab/reference/data/accountMappings.json` | `standardAccounts: 3,402` / `learnedSynonyms: 31,489` / `merged: 34,171` / `_metadata.lastUpdate` | 사람 수동 편집 |
-| EDGAR 학습 동의어 | `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` | 11,375 SEC GAAP 태그 | 사람 수동 편집 |
+| 계정 매핑 SSOT (DART+EDGAR) | `src/dartlab/reference/data/accountMappings.json` | standardAccounts + mappings + layers(5) + edgar | `mappingPromote.py --layer` 또는 직접 편집 + `release()` |
+| 단일 소유 엔진 | `src/dartlab/core/accounts/` | data·normalize·edgar·labels·aliases (L0) | — |
 | Notes 구조 학습 | `src/dartlab/reference/data/notesStructure.json` | 2,700 종목 notes 항목 `{type, category, frequency}` | `scanAll()` 자동 갱신 |
-| 라벨 SSOT | `src/dartlab/core/utils/labels.py::_loadAccountMappings` | DART 학습 매핑 로더 | — |
-| 캐시 무효화 | `src/dartlab/providers/dart/finance/mapper.py::AccountMapper.release` | JSON 직접 편집 후 호출 | — |
+| 로더 | `src/dartlab/core/accounts/data.py::loadAccounts` (옛 `labels._loadAccountMappings` 위임) | SSOT 단일 로더 (lru_cache) | — |
+| 캐시 무효화 | `src/dartlab/core/accounts/data.py::release` (옛 `AccountMapper.release` 위임) | JSON 직접 편집 후 호출 | — |
 
-DART 측 mapper 데이터는 `reference/data/` 로 통합 승격 (`providers/dart/finance/mapperData/` 디렉토리 폐기). EDGAR 는 자체 `mapperData/` 보유 — 두 provider 패턴 비대칭 (대칭 작업은 후속 트랙).
+**2026-06 통합**: DART·EDGAR 매핑이 단일 파일 `accountMappings.json` + 단일 소유 엔진
+`core/accounts/` 로 통합 (옛 EDGAR 별도 `mapperData/` 흡수, 5 in-code dict 흡수). 옛
+mapper.py·labels.py 는 위임 facade. 구조·관리 정본은 [operation.mappingRefresh](/skills/operation.mappingRefresh) §0.
 
 ### 사이클 4 단계 — 운영자 트리거 발동 (cron 없음, 직접 박는 정공)
 

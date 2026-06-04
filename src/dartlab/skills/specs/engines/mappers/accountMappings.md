@@ -5,7 +5,7 @@ category: engines
 kind: curated
 scope: builtin
 status: observed
-purpose: DART 측 계정 매핑 SSOT — `src/dartlab/reference/data/accountMappings.json` 의 standardAccounts (3,402) + learnedSynonyms (31,489) + merged (34,171) 구조 정의 + 12 단계 fallback 룰 + atomic write 진입점 단일화 (mappingPromote.py).
+purpose: 계정 매핑 SSOT — `src/dartlab/reference/data/accountMappings.json` 단일 파일 (standardAccounts ~3,143 + mappings ~34,622 + layers 5 + edgar) 구조 정의 + 12 단계 fallback 룰 + atomic write 진입점 (mappingPromote.py --layer). 구조·관리 정본은 operation.mappingRefresh §0.
 whenToUse:
   - accountMappings
   - DART 계정 매핑
@@ -67,37 +67,35 @@ JSON 직접 편집 후 `AccountMapper.release()` 호출해야 cache 무효화 (l
 ```json
 {
   "_metadata": {
-    "lastUpdate": "2026-03-09",
-    "addedCount": 34171,
-    "promoteCommit": "abc1234"
+    "description": "...", "schemaVersion": 2,
+    "lastUpdate": "2026-06-05", "addedCount": 373, "promoteCommit": "e33ec2b8..."
   },
   "standardAccounts": {
-    "total_assets": {
-      "snakeId": "total_assets",
-      "korName": "자산총계",
-      "category": "asset",
-      "type": "total",
-      "topic": "BS"
-    },
+    "total_assets": {"korName": "자산총계", "category": "asset", "type": "total", "topic": "BS"},
     ...
   },
-  "learnedSynonyms": {
-    "총자산": "total_assets",
-    "Total Assets": "total_assets",
-    "자산 총계": "total_assets",
-    ...
+  "mappings": {"총자산": "total_assets", "Total Assets": "total_assets", ...},
+  "layers": {
+    "idSynonym":   {"SalesRevenue": "Revenue", ...},
+    "nameSynonym": {"영업수익": "매출액", ...},
+    "snakeAlias":  {"operating_income": "operating_profit", ...},
+    "labelEn":     {"sales": "Revenue", ...},
+    "korSynonym":  {"세전이익": "profit_before_tax", ...}
   },
-  "mappings": {
-    "<accountId>": "<snakeId>",
-    ...
+  "edgar": {
+    "accounts": [{"snakeId": "total_assets", "stmt": "BS", "commonTags": [...]}, ...],
+    "learnedTags": {"revenues": "sales", ...},
+    "stmtOverrides": {"NetIncomeLoss|IS": "net_profit", ...}
   }
 }
 ```
 
-- `standardAccounts` — 3,402 표준 계정 (snakeId 단일 SSOT, IFRS 분류).
-- `learnedSynonyms` — 31,489 한글/영문/한자 변형 (synonyms sub-spec SSOT).
-- `mappings` — accountId → snakeId 직접 lookup (12 단계 fallback 의 1 단계 hit).
-- `_metadata` — 갱신 추적 + promote commit 해시.
+- `standardAccounts` — ~3,143 표준 계정 (snakeId 단일 SSOT, IFRS 분류).
+- `mappings` — 한글/영문 → snakeId 평면 사전 (~34,622, 12 단계 fallback 1 단계 hit).
+- `layers` — stage 별 정규화 dict 5 종 (옛 in-code ID_SYNONYMS/ACCOUNT_NAME_SYNONYMS/
+  SNAKEID_ALIASES/_EDGAR_LABELS/_KR_SYNONYMS 흡수). 평면화 금지 — 단계 의미 보존.
+- `edgar` — EDGAR tag 매핑 소스 (옛 별도 mapperData 흡수). 인덱스는 consumer 파생.
+- `_metadata` — 갱신 추적. **파생 카운트 박기 금지** (drift stale 버그 근원).
 
 ## 12 단계 fallback 룰
 
@@ -149,9 +147,9 @@ AccountMapper.lookup("매출액")
 
 - `_metadata.lastUpdate` 날짜 ≤ 오늘 (역날짜 X).
 - `mappings` 의 모든 value 가 `standardAccounts` 의 snakeId.
-- `learnedSynonyms` 의 모든 value 가 `standardAccounts` 의 snakeId.
-- `AccountMapper.stats().totalEntries` ≥ 34,000.
-- coverage ≥ 0.99.
+- `layers.snakeAlias`/`korSynonym` 의 value 가 snakeId (id/name/labelEn layer 는 미적용).
+- `_metadata` 에 파생 카운트(standardAccounts/learnedSynonyms/merged) 부재 (drift 가드).
+- golden `test_ssot_equivalence_*` + `test_ssot_structure` 통과.
 
 ## 관련
 
