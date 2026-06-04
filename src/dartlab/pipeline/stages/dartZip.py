@@ -19,6 +19,53 @@ from pathlib import Path
 from dartlab.pipeline.types import PipelineMode, StageResult
 
 
+def _seedChangedFromHf(codes: list[str], *, token: str | None) -> int:
+    """변경 종목의 회사 tar 를 dartlab-dart-original 에서 받아 추출 — CI panel 빌드 전제.
+
+    CI 러너엔 회사 zip 이력이 없으므로 archive 직후 변경 종목의 전체 tar 를 HF 에서
+    내려받아 ``data/original/dart/docs/{code}/`` 에 풀어 ``buildPanelAll`` 이 완전 이력으로
+    빌드하게 한다. 방금 archive 된 신규 zip 은 보존(같은 이름=동일 내용). 신규 종목
+    (HF tar 미존재)은 archive 분만으로 빌드.
+
+    Args:
+        codes: 변경 종목코드 list.
+        token: HF 토큰.
+
+    Returns:
+        int — seed 한 종목 수.
+
+    Raises:
+        없음 (종목별 미존재는 skip).
+
+    Example:
+        >>> _seedChangedFromHf(["005930"], token=None)  # doctest: +SKIP
+    """
+    from huggingface_hub import hf_hub_download
+
+    import dartlab.config as cfg
+    from dartlab.core.dataConfig import repoFor
+    from dartlab.core.hfRetry import retryHfCall
+    from dartlab.pipeline.hfUpload import _resolveHfToken
+
+    base = Path(cfg.dataDir) / "original" / "dart" / "docs"
+    repo = repoFor("dartOriginal")
+    tok = _resolveHfToken(token)
+    n = 0
+    for code in codes:
+        try:
+            local = retryHfCall(
+                hf_hub_download, repo_id=repo, repo_type="dataset", filename=f"docs/{code}.tar", token=tok
+            )
+        except Exception:  # noqa: BLE001 — 신규 종목(HF 미존재) → seed 없이 archive 분만
+            continue
+        dest = base / code
+        dest.mkdir(parents=True, exist_ok=True)
+        with tarfile.open(local, "r") as tf:
+            tf.extractall(dest, filter="data")  # 평탄 zip 파일명만 — filter='data' 안전 추출
+        n += 1
+    return n
+
+
 def _bundleAndUpload(codes: list[str], *, token: str | None) -> int:
     """변경 종목의 zip 을 회사당 tar 로 묶어 dartlab-dart-original 에 증분 업로드.
 
@@ -120,6 +167,14 @@ def runDartZip(
 
     if not changed:
         return res
+
+    # 1.5 CI 전제: 변경 종목 전체 zip 이력을 HF 에서 seed (러너엔 이력 0)
+    if os.environ.get("DART_ZIP_SEED", "1") == "1":
+        try:
+            seeded = _seedChangedFromHf(changed, token=token)
+            print(f"[pipeline] dartZip seed: {seeded}/{len(changed)}종목 HF tar 추출", flush=True)
+        except Exception as exc:  # noqa: BLE001 — seed 실패는 빌드 진행(부분 이력)
+            res.report.failures.append(f"dartZip seed: {type(exc).__name__}: {exc}")
 
     # 2. panel 증분 재빌드 (변경 종목만, offline zip → flat {code}.parquet)
     try:

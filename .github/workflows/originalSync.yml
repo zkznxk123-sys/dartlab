@@ -1,0 +1,111 @@
+name: Original SSOT Sync
+
+# ──────────────────────────────────────────────────────────────
+# 원본=SSOT 3-job 자동화 (memory: project_original_ssot_strategy).
+#  ① dart-zip   : 정기보고서 원본 zip archive(증분) → 변경 종목 HF seed → panel 빌드
+#                 → dartOriginal(tar) + panel HF push.  (dartlab.pipeline dartZip)
+#  ② allfilings : 비정기 공시 월별 parquet forward 7일 증분.  (dartlab.pipeline allFilings)
+#  ③ edgar      : panel 빌드(증분, 기존 board skip) + deploy. 원본 archive 는
+#                 EDGAR_ARCHIVE=1 일 때만(무겁고 rate-limited — 주간/dispatch 권장).
+#
+# cron 0 2 UTC = KST 11:00 — kindlist(00:00) 후, edgarSync(04:30) 전 빈 창(race 회피).
+# per-job concurrency 로 기존 cron 과 path-family 격리:
+#   dart-zip → hf-dart-push(dataSync 와 직렬) · allfilings → hf-dart-allfilings-push(전용)
+#   edgar    → hf-edgar-push(edgarSync 와 직렬).
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      jobs:
+        description: 'all | dart-zip | allfilings | edgar'
+        default: 'all'
+        type: choice
+        options: [all, dart-zip, allfilings, edgar]
+      lookback_days:
+        description: 'archive/allFilings forward 윈도 (일)'
+        default: '7'
+        type: string
+      edgar_archive:
+        description: 'EDGAR 원본 archive 수행 (true=주간 풀빌드, false=기존 txt 빌드만)'
+        default: 'false'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  dart-zip:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'dart-zip' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    concurrency:
+      group: hf-dart-push
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Smoke import
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+      - name: DART 정기 zip archive + seed + panel 빌드 + HF
+        env:
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+          PANEL_WORKERS: '2'
+        run: uv run python -X utf8 -m dartlab.pipeline dartZip
+
+  allfilings:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    concurrency:
+      group: hf-dart-allfilings-push
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Smoke import
+        run: uv run python -c "import dartlab"
+      - name: allFilings forward 증분 + HF push
+        env:
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+        run: uv run python -X utf8 -m dartlab.pipeline allFilings
+
+  edgar:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'edgar' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    concurrency:
+      group: hf-edgar-push
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Smoke import
+        run: uv run python -c "import dartlab"
+      - name: EDGAR panel 빌드(증분) + deploy
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          EDGAR_ARCHIVE: ${{ github.event.inputs.edgar_archive == 'true' && '1' || '0' }}
+          EDGAR_SINCE_YEAR: '2015'
+        run: uv run python -X utf8 -m dartlab.pipeline edgarPanel
