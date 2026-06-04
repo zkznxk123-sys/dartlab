@@ -20,20 +20,8 @@ DATA_RELEASES: dict[str, dict] = {
         "public": True,
         "ipcMirror": True,
     },
-    "sections": {
-        # plan snazzy-wibbling-origami — sections SSOT 통합 artifact.
-        # 사용자 결정: 옛 docs.parquet 위치(폴더명 포함)를 신규 artifact 가 대체.
-        # nested: data/dart/docs/{code}/{period}.parquet (period-sharded).
-        #   옛 flat docs.parquet (data/dart/docs/{code}.parquet) 와 파일 vs 디렉터리로 공존.
-        #   옛 flat 파일은 사용자 명시 전 보존 — 코드는 신규 하위폴더만 read.
-        # sectionsBuilder.buildSectionsArtifact 가 1 회 영속화 + HF push.
-        # 런타임은 sectionsStorage.loadSectionsWide → mmap parquet → 콜드 1s 목표.
-        # nested=True 는 uploadData.py 가 rglob 으로 종목 디렉터리 안 파일 모두 업로드.
-        "dir": "dart/docs",
-        "label": "DART 공시 sections SSOT artifact (period-sharded)",
-        "public": True,
-        "nested": True,
-    },
+    # docs 농장 은퇴 — "sections" SSOT artifact category 제거(buildSections/sectionsStorage 삭제,
+    # sync/runtime 참조 0). HF 기존 sections 데이터는 보존(코드만 제거). panel 이 공시 수평화 표면.
     "panel": {
         # PRD jazzy-napping-seal — panel(공시 수평화) SSOT artifact (S5).
         # nested: data/dart/panel/{code}/{period}.parquet (period-sharded, 14-col) 단일.
