@@ -53,16 +53,18 @@ def downloadWithRetry(
 ) -> None:
     """URL → dest 다운로드. 실패 시 지수 backoff로 재시도한다."""
     dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(dest.suffix + ".tmp")
     lastErr = None
     for attempt in range(maxRetries):
         try:
             with socketTimeout():
-                urlretrieve(url, dest)
+                urlretrieve(url, tmp)  # tmp 로 받고 atomic rename — 중단 시 손상 dest 미생성
+            tmp.replace(dest)
             return
         except (URLError, socket.timeout, OSError) as exc:
             lastErr = exc
-            if dest.exists():
-                dest.unlink()
+            if tmp.exists():
+                tmp.unlink()
             if attempt < maxRetries - 1:
                 time.sleep(2 ** (attempt + 1))
     raise lastErr

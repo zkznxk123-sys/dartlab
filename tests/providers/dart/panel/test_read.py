@@ -295,3 +295,23 @@ def test_ensure_panel_from_hf_transient_vs_absent(monkeypatch, tmp_path) -> None
     R.ensurePanelFromHf("000660")  # 부재 마킹 → 2번째는 호출 안 됨
     assert calls["n"] == before + 1  # 1회만(부재 영구 마킹)
     assert "kr:000660" in R._HF_PANEL_ATTEMPTED
+
+
+def test_readlong_corrupt_parquet_recovers(monkeypatch, tmp_path) -> None:
+    """readLong — 손상 parquet → None + 손상파일 삭제 + 시도마킹 해제(다음 호출 재다운로드).
+
+    회귀 가드: 옛 코드는 손상 파일 + _HF_PANEL_ATTEMPTED 로 세션 내내 고정됐다.
+    """
+    import dartlab.config as cfg
+    from dartlab.providers.dart.panel import read as R
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setattr(R, "_HF_PANEL_ATTEMPTED", {"kr:005930"})
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")  # ensurePanelFromHf 다운로드 skip
+    flat = tmp_path / "dart" / "panel" / "005930.parquet"
+    flat.parent.mkdir(parents=True)
+    flat.write_bytes(b"not a parquet at all")  # 손상
+
+    assert R.readLong("005930") is None
+    assert not flat.exists()  # 손상 파일 삭제됨
+    assert "kr:005930" not in R._HF_PANEL_ATTEMPTED  # 마킹 해제 → 재다운로드 가능

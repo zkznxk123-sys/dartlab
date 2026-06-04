@@ -52,3 +52,23 @@ def test_update_builds_records_from_fetch(monkeypatch, tmp_path) -> None:
     assert df.height == 2
     assert df.filter(pl.col("ticker") == "AAPL")["is_exchange_listed"][0] is True
     assert df.filter(pl.col("ticker") == "OTCX")["is_otc"][0] is True
+
+
+def test_universe_stale_serve_on_fetch_failure(monkeypatch, tmp_path) -> None:
+    """TTL 만료 + SEC fetch 실패 + stale 캐시 존재 → crash 대신 stale path 반환."""
+    import polars as pl
+
+    from dartlab.gather.edgar import universe as U
+
+    path = tmp_path / "edgar" / "listedUniverse.parquet"
+    path.parent.mkdir(parents=True)
+    pl.DataFrame({"cik": ["0000000001"], "ticker": ["X"]}).write_parquet(path)
+
+    monkeypatch.setattr("dartlab.core.dataLoader._getDataRoot", lambda: tmp_path)
+    monkeypatch.setattr("dartlab.core.dataLoader._isLocalCacheExpired", lambda p, t: True)  # 만료 강제
+
+    def boom(url):
+        raise OSError("SEC down")
+
+    monkeypatch.setattr(U, "_fetchJson", boom)
+    assert U.updateListedUniverse() == path  # stale 서빙(crash 0)

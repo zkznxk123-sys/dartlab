@@ -76,7 +76,15 @@ def updateListedUniverse(*, force: bool = False) -> Path:
         return path
 
     emit("edgar:universe_update")
-    data = _fetchJson(EDGAR_LISTED_UNIVERSE_URL)
+    try:
+        data = _fetchJson(EDGAR_LISTED_UNIVERSE_URL)
+    except Exception as exc:  # noqa: BLE001 — fetch 실패: stale 캐시 있으면 서빙(crash 회피, 25h≈ok)
+        if path.exists():
+            import logging
+
+            logging.getLogger(__name__).warning("EDGAR universe fetch 실패 — stale 캐시 사용: %s", exc)
+            return path
+        raise  # 캐시 자체가 없으면(최초 호출) 전파
 
     records = []
     for row in data.get("data", []):

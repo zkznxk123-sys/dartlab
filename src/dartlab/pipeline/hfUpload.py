@@ -81,6 +81,7 @@ def uploadCategoryToHf(
     changedFiles: list[str] | None = None,
     dataDir: str | None = None,
     token: str | None = None,
+    fullUpload: bool = False,
 ) -> int:
     """category 의 parquet 을 HF 에 업로드 — 증분 우선, 없으면 전체 폴더.
 
@@ -172,6 +173,15 @@ def uploadCategoryToHf(
         nFiles = sum(1 for p in localDir.rglob("*") if p.is_file())
         if nFiles == 0:
             print(f"[hfUpload] {localDir} 업로드할 파일 없음", flush=True)
+            return 0
+        # 매니페스트 부재(rels None) + nested 전체 = 사고로 수만 파일 재업로드(429/비용) 위험.
+        # 의도적 full 은 fullUpload=True 또는 DARTLAB_HF_ALLOW_FULL=1 로 명시해야 진행.
+        if not fullUpload and os.environ.get("DARTLAB_HF_ALLOW_FULL") != "1":
+            print(
+                f"[hfUpload] ⚠ {category} 매니페스트 없음 + nested {nFiles}개 — 전체 재업로드 방지 skip "
+                f"(의도면 fullUpload=True 또는 DARTLAB_HF_ALLOW_FULL=1)",
+                flush=True,
+            )
             return 0
         nWorkers = int(os.environ.get("HF_UPLOAD_WORKERS", "2"))
         print(f"[hfUpload] {category} 대용량 업로드: {nFiles}개 {dirPath}/** → {repo} (workers={nWorkers})", flush=True)

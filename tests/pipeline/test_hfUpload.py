@@ -96,3 +96,34 @@ def monkeypatch_data(tmp_path):
 
     (tmp_path / DATA_RELEASES["finance"]["dir"]).mkdir(parents=True, exist_ok=True)
     os.environ["DARTLAB_DATA_DIR"] = str(tmp_path)
+
+
+def test_nested_full_upload_gated(monkeypatch, tmp_path) -> None:
+    """nested + 매니페스트 없음 + not fullUpload → 전체 재업로드 skip; fullUpload=True 면 진행."""
+    monkeypatch.chdir(tmp_path)  # dist/ 격리(매니페스트 부재 보장)
+    from dartlab.pipeline import hfUpload
+
+    monkeypatch.setattr(hfUpload, "_resolveHfToken", lambda token=None: "x")
+    monkeypatch.delenv("DARTLAB_HF_ALLOW_FULL", raising=False)
+    monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, *a, **k: fn(*a, **k))
+
+    d = tmp_path / "news" / "headlines" / "kr"
+    d.mkdir(parents=True)
+    (d / "2026-06-01.parquet").write_bytes(b"x")
+
+    called = {"n": 0}
+
+    class FakeApi:
+        def __init__(self, **k):
+            pass
+
+        def upload_large_folder(self, **k):
+            called["n"] += 1
+
+    monkeypatch.setattr("huggingface_hub.HfApi", FakeApi)
+
+    rc = hfUpload.uploadCategoryToHf("newsHeadlines", dataDir=str(tmp_path))
+    assert rc == 0 and called["n"] == 0  # gate → skip(사고 방지)
+
+    hfUpload.uploadCategoryToHf("newsHeadlines", dataDir=str(tmp_path), fullUpload=True)
+    assert called["n"] == 1  # 명시 fullUpload → 진행

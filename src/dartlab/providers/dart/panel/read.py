@@ -708,6 +708,13 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
         TargetMarkets:
             - KR + US.
     """
+    # 다회사 루프 OOM 가드 — panel 은 회사당 통째 read(Polars Rust 힙 누수). 로드 전 RSS 확인 + 임계 시 GC.
+    try:
+        from dartlab.core.memory import checkMemoryAndGc
+
+        checkMemoryAndGc(f"panel:{code}")
+    except Exception:  # noqa: BLE001 — 가드 자체 실패는 read 막지 않음
+        pass
     code = code.upper() if marketNs == "us" else code  # EDGAR ticker 대소문자 무관 (build 가 upper 저장)
     ensurePanelFromHf(code, marketNs)  # artifact 부재 시 HF lazy 다운로드 (로컬 우선, 단일 자동로드)
     d = _panelDir(code, marketNs)
@@ -727,7 +734,15 @@ def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = Non
         else:
             return None
     except (pl.exceptions.PolarsError, OSError) as exc:
-        _log.warning("panel read 실패 %s: %s", code, exc)
+        # 손상(부분 다운로드 등) 의심 — 손상 flat 삭제 + 시도마킹 해제해 다음 호출이 재다운로드.
+        # (옛 코드는 손상 파일 + _HF_PANEL_ATTEMPTED 로 세션 내내 고정됐다.)
+        _log.warning("panel read 실패 %s: %s — 손상 의심, 정리 후 재시도 가능", code, exc)
+        try:
+            if flat.exists():
+                flat.unlink()
+            _HF_PANEL_ATTEMPTED.discard(f"{marketNs}:{code}")
+        except OSError:
+            pass
         return None
     if df.is_empty():
         return None
