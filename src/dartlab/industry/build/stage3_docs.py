@@ -10,9 +10,6 @@ from __future__ import annotations
 
 import logging
 import re
-from pathlib import Path
-
-import polars as pl
 
 from dartlab.industry.taxonomy import getIndustry, matchStageByKeywords
 from dartlab.industry.types import IndustryNode
@@ -34,31 +31,20 @@ _TOPIC_WEIGHT: dict[str, float] = {
 }
 
 
-def _panelDir() -> Path:
-    """panel parquet 디렉토리 (docs.parquet 은퇴 → panel contentRaw 가 공시 본문 출처)."""
-    from dartlab.core.dataConfig import DATA_RELEASES
-    from dartlab.core.dataLoader import _getDataRoot
+def _extractTexts(code: str) -> dict[str, str]:
+    """한 종목 panel 섹션 본문에서 산업 관련 텍스트를 추출 (L1.5 frame SSOT 경유)."""
+    from dartlab.frame.sections import sectionTexts
 
-    return _getDataRoot() / DATA_RELEASES["panel"]["dir"]
-
-
-def _extractTexts(parquetPath: Path) -> dict[str, str]:
-    """하나의 panel parquet 에서 산업 관련 본문 텍스트를 추출 (sectionLeaf 제목 매칭)."""
-    try:
-        df = (
-            pl.scan_parquet(str(parquetPath))
-            .select(["sectionLeaf", "contentRaw"])
-            .filter(pl.col("contentRaw").is_not_null())
-            .filter(pl.col("contentRaw").str.len_chars() > 20)
-            .collect(engine="streaming")
-        )
-    except (pl.exceptions.PolarsError, OSError, FileNotFoundError):
+    df = sectionTexts(code)
+    if df is None or df.is_empty():
         return {}
 
     topicTexts: dict[str, list[str]] = {}
     for row in df.iter_rows(named=True):
         title = row.get("sectionLeaf") or ""
         content = row.get("contentRaw") or ""
+        if not content or len(content) <= 20:
+            continue
         for pattern, topic in _TITLE_PATTERNS:
             if pattern.search(title):
                 topicTexts.setdefault(topic, []).append(content)
@@ -117,22 +103,13 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
         AI 가 직접 호출하지 않는다 (배치). 답변에서 ``source=="docs"`` 노드는 "사업보고서 본문
         분석 결과" 단서 인용.
     """
-    panelDir = _panelDir()
-    if not panelDir.exists():
-        logger.warning("panel 디렉토리 없음: %s", panelDir)
-        return nodes
-
     # 종목코드별 노드 인덱스
     nodeMap: dict[str, list[IndustryNode]] = {}
     for node in nodes:
         nodeMap.setdefault(node.stockCode, []).append(node)
 
     for code, codeNodes in nodeMap.items():
-        pqPath = panelDir / f"{code}.parquet"
-        if not pqPath.exists():
-            continue
-
-        texts = _extractTexts(pqPath)
+        texts = _extractTexts(code)
         if not texts:
             continue
 

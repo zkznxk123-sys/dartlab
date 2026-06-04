@@ -13,8 +13,6 @@ from __future__ import annotations
 import logging
 import re
 
-import polars as pl
-
 from dartlab.industry.types import IndustryEdge, IndustryNode
 
 logger = logging.getLogger(__name__)
@@ -288,37 +286,20 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     # 매칭할 상장사명 집합 (3글자 이상 — 노이즈 방지)
     targetNames = {name: code for name, code in n2c.items() if len(name) >= 3}
 
-    try:
-        from dartlab.industry.build.stage3_docs import _panelDir
-
-        panelDir = _panelDir()
-        if not panelDir.exists():
-            return edges
-    except Exception:
-        return edges
+    # docs.parquet 농장 은퇴 → L1.5 frame.sections SSOT(panel 섹션 본문) 소비.
+    from dartlab.frame.sections import sectionTexts
 
     processed = 0
     for code, node in nodeIdx.items():
-        pqPath = panelDir / f"{code}.parquet"
-        if not pqPath.exists():
-            continue
-
-        try:
-            # docs.parquet 은퇴 → panel contentRaw(공시 본문). 제목 기반 관계 검출은 sectionLeaf
-            # 로 동작, corp 명 텍스트 추출도 본문에서 가능(부분 생존).
-            df = (
-                pl.scan_parquet(str(pqPath))
-                .select(["sectionLeaf", "contentRaw"])
-                .filter(pl.col("contentRaw").is_not_null())
-                .filter(pl.col("contentRaw").str.len_chars() > 20)
-                .collect(engine="streaming")
-            )
-        except (pl.exceptions.PolarsError, OSError):
+        df = sectionTexts(code)
+        if df is None or df.is_empty():
             continue
 
         for row in df.iter_rows(named=True):
             title = row.get("sectionLeaf") or ""
             content = row.get("contentRaw") or ""
+            if not content or len(content) <= 20:
+                continue
 
             isSupplier = bool(_SUPPLIER_TITLE.search(title))
             isCustomer = bool(_CUSTOMER_TITLE.search(title))
@@ -469,10 +450,12 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         "주요 원재료 공급사", "매입처 비중" 류 답변 데이터. ``amount`` 와 ``ratio`` 보유한 엣지만
         강한 단정 가능 — ``preciseEdgeCount`` 적은 회사는 "일부 거래만 공시" 단서 명시.
     """
-    from dartlab.industry.build.stage3_docs import _panelDir
+    # docs.parquet 농장 은퇴 → L1.5 frame.sections SSOT. panel contentRaw raw DART XML 표를
+    # frame.sectionTables(lxml)가 markdown extractTables 와 동일 shape(표×행×셀)로 추출 —
+    # 공급사명/매입액/비중 복원(드롭 0). period=None=전 기간(다운스트림 corp 명 dedup).
+    from dartlab.frame.sections import sectionTables
     from dartlab.industry.build.table_parser import (
         extractCorpNames,
-        extractTables,
         findTableByHeaders,
         normalizeCorpName,
         parseAmount,
@@ -487,43 +470,15 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     # 정규화된 회사명 → 종목코드 매핑 (㈜ 등 제거)
     n2cNorm = {normalizeCorpName(name): code for name, code in n2c.items() if len(name) >= 2}
 
-    panelDir = _panelDir()
-    if not panelDir.exists():
-        return edges
-
     processed = 0
     matched = 0
 
     for code, node in nodeIdx.items():
-        pqPath = panelDir / f"{code}.parquet"
-        if not pqPath.exists():
+        tables = sectionTables(code, sectionPattern="원재료")
+        if not tables:
             continue
-
-        try:
-            # docs.parquet 은퇴 → panel. 원재료 섹션, 최신 period(Q4=연간 우선) — panel 은
-            # report_type 없이 period 로 최신 판정. contentRaw 는 raw XML(markdown 테이블 아님)
-            # 이라 extractTables(파이프 테이블 전용) 결과 격하 — 금액 엣지는 부분/드롭.
-            df = (
-                pl.scan_parquet(str(pqPath))
-                .filter(pl.col("sectionLeaf").str.contains("원재료"))
-                .filter(pl.col("contentRaw").is_not_null())
-                .select(["sectionLeaf", "contentRaw", "period"])
-                .collect(engine="streaming")
-            )
-        except (pl.exceptions.PolarsError, OSError):
-            continue
-
-        if df.height == 0:
-            continue
-
-        # 최신 period 우선 (Q4 = 사업보고서 연간)
-        latest = df.sort("period", descending=True)
 
         processed += 1
-        row = latest.row(0, named=True)
-        content = row.get("contentRaw") or ""
-
-        tables = extractTables(content)
         found = findTableByHeaders(tables, ["매입처"])
         if not found:
             continue
