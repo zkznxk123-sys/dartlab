@@ -180,6 +180,12 @@ const config = {
 				if (stripped === '/favicon.ico') {
 					return;
 				}
+				// /skills/ 내부 spec 교차링크 — Skill OS spec 중 공개 페이지(index.json 등재)는 일부. 미등재 내부
+				// SSOT spec(operation.* 하위·engines/recipes 깊은 하위 등) 링크는 prerender 페이지가 없어 404 →
+				// 무시(공개 skill 은 entries 로 정상 prerender, 깊은 교차참조만 관용). 운영자 index.json 재생성 시 해소.
+				if (stripped.startsWith('/skills/')) {
+					return;
+				}
 				throw new Error(`${message} (linked from ${referrer})`);
 			}
 		},
