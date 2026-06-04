@@ -116,14 +116,13 @@ def uploadCategoryToHf(
     isNested = bool(DATA_RELEASES[category].get("nested"))
     api = HfApi(token=token)
 
-    # 변경 목록 해석: 인자 > changed_{cat}.txt > (옛 호환)flat changed.txt > 부재(None=전체 fallback)
-    flatChanged = Path("dist/changed.txt")
+    # 변경 목록 해석: 인자 > changed_{cat}.txt > 부재(None=전체 fallback).
+    # 옛 전역 dist/changed.txt fallback 제거 — 카테고리 무관이라 다른 stage 의 목록을 잘못 읽어
+    # 교차오염(엉뚱한 파일 업로드/0건). changed_{category}.txt 가 SSOT.
     if changedFiles is not None:
         rels: list[str] | None = list(changedFiles)
     elif changedPath(category).exists():
         rels = readChanged(category)
-    elif flatChanged.exists():
-        rels = [ln.strip() for ln in flatChanged.read_text(encoding="utf-8").splitlines() if ln.strip()]
     else:
         rels = None
 

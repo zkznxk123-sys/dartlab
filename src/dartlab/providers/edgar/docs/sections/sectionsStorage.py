@@ -196,13 +196,13 @@ def _ensureFromHf(ticker: str) -> bool:
     try:
         from huggingface_hub import snapshot_download
 
-        from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+        from dartlab.core.dataConfig import DATA_RELEASES, repoFor
 
         if "edgarSections" not in DATA_RELEASES:
             return False
         sectionsDirRel = DATA_RELEASES["edgarSections"]["dir"]
         snapshot_download(
-            repo_id=HF_REPO,
+            repo_id=repoFor("edgarSections"),  # 전용 repo 존중 (HF_REPO 하드코딩 시 전환 후 빈 결과)
             repo_type="dataset",
             allow_patterns=[f"{sectionsDirRel}/{tickerUpper}/*.parquet"],
             local_dir=str(Path(_cfg.dataDir)),

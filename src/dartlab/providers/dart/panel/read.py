@@ -854,6 +854,11 @@ def readWide(
         )
         long = long.with_columns(seq.alias("leafSeq"))
     indexCols = [c for c in _INDEX_COLS if c in long.columns]
+    missingIdx = [c for c in _INDEX_COLS if c not in long.columns]
+    if missingIdx:
+        # 옛 schema artifact — 인덱스 컬럼 누락 시 조용히 행이 collapse(다른 행이 한 행으로 병합,
+        # silent 오답)된다. 명시 경고로 관측화(forceUpdate 재다운로드 유도).
+        _log.warning("panel %s: 인덱스 컬럼 누락 %s — 옛 schema 의심, 행 collapse 가능", code, missingIdx)
     if "leafSeq" in long.columns:
         indexCols = [*indexCols, "leafSeq"]
     if not indexCols or "period" not in long.columns:
@@ -957,20 +962,23 @@ def orderBySpine(wide: pl.DataFrame, indexCols: list[str]) -> pl.DataFrame:
     from .mapper import rowIdentityExpr
     from .spine import SPINE
 
-    helperCols = {"_skel", "_skelOld", "leafSeq", "_canonRank", "_spOrder", "_rowIdentity"}
+    helperCols = {"_skel", "_skelOld", "leafSeq", "_canonRank", "_spOrder", "_rowIdentity", "_secNum", "_secSub"}
     periodCols = sortPeriods([c for c in wide.columns if c not in indexCols and c not in helperCols])
     orderedCols = [*indexCols, *reversed(periodCols)]  # period 최신순(좌측), 헬퍼(_skel 등)는 제외
     if "chapter" not in wide.columns or "sectionLeaf" not in wide.columns:
         return wide.select([c for c in orderedCols if c in wide.columns])
-    # 정렬키 = (1) canonical 14 노드 chapter rank ((첨부)→III 가 III 로 모임), (2) spine 정부 문서순서(keyed
-    # 재무항목·section 단위 — rowIdentity 매칭, 검증된 정부순서), (3) 최신 뼈대 위치 _skel(섹션 내 per-leaf
-    # 문서순서 — 표/텍스트 interleave), (4) leafSeq 동률 tiebreak. 미등재는 nulls_last(챕터 말미).
+    # 정렬키 = (1) canonical 14 노드 chapter rank ((첨부)→III 가 III 로 모임), (2) **섹션 번호**("2. …"→2,
+    # "7-1. …"→7,1) — 정부 서식의 절 번호가 챕터 내 1차 순서(흡수된 (첨부)·표지(COVER2 등)가 옛 spine 으로
+    # 섹션을 끌어오는 회귀 차단), (3) spine 정부 문서순서(같은 절 번호 내 leaf/era drift tiebreak), (4) 최신
+    # 뼈대 위치 _skel, (5) leafSeq. 번호 없는 헤더·표지는 nulls_last(절 뒤).
     spineOrder = {k: v[0] for k, v in SPINE.items()} if SPINE else {}
     ranked = wide.with_columns(canonicalRankExpr("chapter"), rowIdentityExpr())
     ranked = ranked.with_columns(
-        pl.col("_rowIdentity").replace_strict(spineOrder, default=None, return_dtype=pl.Int64).alias("_spOrder")
+        pl.col("_rowIdentity").replace_strict(spineOrder, default=None, return_dtype=pl.Int64).alias("_spOrder"),
+        pl.col("sectionLeaf").str.extract(r"^\s*(\d+)", 1).cast(pl.Int64).alias("_secNum"),
+        pl.col("sectionLeaf").str.extract(r"^\s*\d+\s*-\s*(\d+)", 1).cast(pl.Int64).fill_null(0).alias("_secSub"),
     )
-    sortKeys = ["_canonRank", "_spOrder"]
+    sortKeys = ["_canonRank", "_secNum", "_secSub", "_spOrder"]
     for c in ("_skel", "_skelOld", "leafSeq"):
         if c in wide.columns:
             sortKeys.append(c)
