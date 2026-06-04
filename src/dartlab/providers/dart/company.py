@@ -3829,9 +3829,34 @@ class Company:
         if cacheKey in self._cache:
             return self._cache[cacheKey]
 
-        docsManifest = self._docsTopicManifest()
-        rows = docsManifest.to_dicts() if not docsManifest.is_empty() else []
-        seen = {str(row["topic"]) for row in rows if isinstance(row.get("topic"), str)}
+        # docs topic 카탈로그 — survivor sectionsWide(panel 섹션) 에서 유도 (농장 topicManifest 은퇴).
+        sections = self.sections
+        rows: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        if sections is not None and not sections.is_empty():
+            topicCol = next((c for c in ("topic", "sectionLeaf") if c in sections.columns), None)
+            metaCols = {"chapter", "sectionLeaf", "blockLeaf", "topic", "source", "disclosureKey", "scope"}
+            periodCols = [c for c in sections.columns if c not in metaCols]
+            if topicCol is not None:
+                for row in sections.iter_rows(named=True):
+                    topic = row.get(topicCol)
+                    if not isinstance(topic, str) or not topic.strip() or topic in seen:
+                        continue
+                    seen.add(topic)
+                    nPeriods = sum(1 for pc in periodCols if row.get(pc) not in (None, ""))
+                    chapterRaw = str(row.get("chapter") or "").strip()
+                    chapter = chapterRaw.split(".", 1)[0].split()[0] if chapterRaw else ""
+                    rows.append(
+                        {
+                            "order": len(rows),
+                            "chapter": chapter,
+                            "topic": topic,
+                            "source": "docs",
+                            "blocks": 1,
+                            "periods": nPeriods,
+                            "latestPeriod": None,
+                        }
+                    )
 
         financeRows: list[dict[str, Any]] = []
         if self._hasFinanceParquet:
@@ -3859,13 +3884,23 @@ class Company:
 
         combined = rows + financeRows
         if not combined:
-            from dartlab.providers.dart.builder.docsSectionsAnalyzer import _emptyTopicManifest
-
-            result = _emptyTopicManifest()
+            result = pl.DataFrame(
+                schema={
+                    "order": pl.Int64,
+                    "chapter": pl.Utf8,
+                    "topic": pl.Utf8,
+                    "source": pl.Utf8,
+                    "blocks": pl.Int64,
+                    "periods": pl.Int64,
+                    "latestPeriod": pl.Utf8,
+                }
+            )
         else:
             result = (
                 pl.DataFrame(combined, strict=False)
-                .with_columns(pl.col("chapter").replace(_CHAPTER_ORDER).cast(pl.Int64).alias("_chapterOrder"))
+                .with_columns(
+                    pl.col("chapter").replace(_CHAPTER_ORDER).cast(pl.Int64, strict=False).alias("_chapterOrder")
+                )
                 .sort(["_chapterOrder", "order", "topic"])
                 .drop("_chapterOrder")
             )
