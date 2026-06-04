@@ -1,8 +1,10 @@
 """DART 재무공시 doc accessor 구현 — ``FinanceDocAccessor`` Protocol 등록.
 
 ``core/financeDocAccessor.py`` 의 Protocol 을 만족하는 DART 구체 구현. ``analysis/financial``
-이 stockCode → 단발 doc 호출하는 5 메서드 (sanction · contingentLiability · executive ·
-relatedPartyTx · pivotDividend) 를 위임.
+이 stockCode → 단발 호출하는 메서드 위임. **docs 농장 은퇴 (2026-06)**: sanction ·
+contingentLiability · executive · relatedPartyTx 4 개는 정부 native 태깅 없어 panel 재현
+불가 → None 반환(신호 드롭, consumer 전부 None 내성). report/finance 기반 메서드
+(pivotDividend · buildAnnual · buildTimeseries · accountLabels · exportModules) 는 생존.
 
 import 시점에 자동 register — analysis 가 ``getFinanceDocAccessor()`` 호출 시 provider 자동 로드.
 """
@@ -64,12 +66,9 @@ class DartFinanceDocAccessor:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        from dartlab.providers.dart.docs.finance.sanction import sanction
-
-        try:
-            return sanction(stockCode)
-        except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-            return None
+        # docs.finance.sanction 농장 은퇴 — 구조화 제재 데이터(sanctionDf)는 정부 native 태깅
+        # 없어 panel 재현 불가. 신호 드롭(consumer 전부 None 내성). 텍스트는 panel.search("제재").
+        return None
 
     def contingentLiability(self, stockCode: str) -> Any | None:
         """우발부채 doc 조회 — ``providers/dart/docs/finance/contingentLiability`` 위임.
@@ -118,12 +117,9 @@ class DartFinanceDocAccessor:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        from dartlab.providers.dart.docs.finance.contingentLiability import contingentLiability
-
-        try:
-            return contingentLiability(stockCode)
-        except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-            return None
+        # docs.finance.contingentLiability 농장 은퇴 — 구조화 우발부채 데이터 panel 재현 불가.
+        # 신호 드롭(consumer None 내성). 텍스트는 panel.search("우발부채").
+        return None
 
     def executive(self, stockCode: str) -> Any | None:
         """임원 보수/이력 doc 조회 — ``providers/dart/docs/finance/executive`` 위임.
@@ -172,12 +168,9 @@ class DartFinanceDocAccessor:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        from dartlab.providers.dart.docs.finance.executive import executive
-
-        try:
-            return executive(stockCode)
-        except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-            return None
+        # docs.finance.executive 농장 은퇴 — 개인별 임원 시계열 panel 재현 불가. 신호 드롭
+        # (consumer None 내성). 텍스트는 panel.search("임원").
+        return None
 
     def relatedPartyTx(self, stockCode: str) -> Any | None:
         """특수관계자 거래 doc 조회 — ``providers/dart/docs/finance/relatedPartyTx`` 위임.
@@ -226,12 +219,9 @@ class DartFinanceDocAccessor:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
-
-        try:
-            return relatedPartyTx(stockCode)
-        except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-            return None
+        # docs.finance.relatedPartyTx 농장 은퇴 — 구조화 거래(guaranteeDf/assetTxDf/revenueTxDf)
+        # panel 재현 불가. 신호 드롭(consumer None 내성). 텍스트는 panel.search("특수관계자").
+        return None
 
     def pivotDividend(self, stockCode: str) -> Any | None:
         """배당 pivot 조회 — ``providers/dart/report/pivot.pivotDividend`` 위임.

@@ -4977,9 +4977,11 @@ class Company:
         Raises:
             없음.
         """
-        from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx as _relatedPartyTx
-
-        return _relatedPartyTx(self.stockCode)
+        # docs.finance.relatedPartyTx(구조화 파싱) 은퇴 → panel native 특수관계자 섹션 텍스트.
+        # guaranteeDf/assetTxDf/revenueTxDf 구조화는 정부 native 태깅 없어 드롭 — 본문만.
+        p = self.panel
+        hit = p("특수관계자")
+        return hit if hit is not None else p.search("특수관계자")
 
     def notesDetail(self, keyword: str, period: str = "y"):
         """K-IFRS 주석 세부항목 (리스 약정 · 우발채무 · 퇴직급여 가정 · 파생 등) 추출.
