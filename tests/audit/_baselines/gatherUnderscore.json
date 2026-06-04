@@ -1,4 +1,6 @@
 {
   "_note": "P-트랙 P1 에서 도메인 명시 rename 시 축소",
-  "violations": []
+  "violations": [
+    "src/dartlab/gather/edgar/docs/_const.py"
+  ]
 }

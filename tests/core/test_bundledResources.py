@@ -50,7 +50,7 @@ _REQUIRED_FILES = [
     "providers/mappers/mapperData/notesStructure.json",
     "reference/data/labelSupplements.json",
     # sections runtime 의존 JSON
-    "providers/dart/sectionTopicData/sectionMappings.json",
+    "providers/dart/sectionMappings.json",
     # EDGAR sections
     "providers/edgar/docs/sections/mapperData/sectionMappings.json",
 ]
@@ -111,7 +111,7 @@ def test_accountMappings_hasKrFsKeys():
 
 def test_sectionMappings_isNonEmpty():
     """sections/mapperData/sectionMappings.json — section 제목 → topic 매핑."""
-    path = _PKG_ROOT / "providers/dart/sectionTopicData/sectionMappings.json"
+    path = _PKG_ROOT / "providers/dart/sectionMappings.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(data, dict)
     assert len(data) > 100, f"sectionMappings.json 항목 {len(data)}개 — 정상(500+) 대비 비정상"

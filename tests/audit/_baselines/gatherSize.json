@@ -10,6 +10,7 @@
     "src/dartlab/gather/accessors.py",
     "src/dartlab/gather/domains/naver.py",
     "src/dartlab/gather/ecos/catalog.py",
+    "src/dartlab/gather/edgar/docs/fetch.py",
     "src/dartlab/gather/entry/handlers.py",
     "src/dartlab/gather/types.py"
   ]

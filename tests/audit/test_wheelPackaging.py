@@ -136,7 +136,7 @@ def test_sectionMappings_inWheel(builtWheel: Path):
     with zipfile.ZipFile(builtWheel) as zf:
         names = zf.namelist()
     required = [
-        "dartlab/providers/dart/sectionTopicData/sectionMappings.json",
+        "dartlab/providers/dart/sectionMappings.json",
         "dartlab/providers/edgar/docs/sections/mapperData/sectionMappings.json",
         "dartlab/providers/edinet/docs/sections/mapperData/sectionMappings.json",
     ]

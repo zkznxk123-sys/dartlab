@@ -267,7 +267,7 @@ _PATTERN_MAPPINGS: tuple[tuple[re.Pattern[str], str], ...] = (
 
 
 def _mappingPath() -> Path:
-    return Path(__file__).resolve().parent / "sectionTopicData" / "sectionMappings.json"
+    return Path(__file__).resolve().parent / "sectionMappings.json"
 
 
 def stripSectionPrefix(title: str) -> str:
