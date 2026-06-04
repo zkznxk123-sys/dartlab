@@ -55,7 +55,7 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
     if not _capabilityExists(apiRef):
         return ToolResult(False, f"generated spec에 없는 API입니다: {apiRef}", error="unknown_api_ref")
 
-    if apiRef == "Company.show":
+    if apiRef == "Company.panel":
         return _companyShow(call_plan)
     if apiRef == "scan" or apiRef.startswith("scan."):
         if apiRef.startswith("scan.") and not call_plan.get("axis"):
@@ -154,6 +154,9 @@ def _aliasToCanonical(apiRef: str, plan: dict[str, Any]) -> str:
     """
     from dartlab.reference.capability._generated import CAPABILITIES
 
+    # 공개 show 은퇴 → panel 단일 표면. 옛 LLM 학습/캐시의 Company.show 호출을 back-compat 정규화.
+    if apiRef in ("Company.show", "company.show"):
+        return "Company.panel"
     if apiRef == "dartlab.scan":
         return "scan"
     if apiRef.startswith("scan.") and apiRef not in CAPABILITIES:
