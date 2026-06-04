@@ -113,8 +113,13 @@
 	.dartlab-html :global(th) {
 		border: 1px solid #1e2433;
 		padding: 3px 6px;
-		text-align: left;
 		vertical-align: top;
+	}
+	/* 원본 XML 이 숫자 셀에 ALIGN="RIGHT" 보유(실측 96/96) — author text-align 으로 덮어쓰지 않고 원본 align 존중
+	   (feedback_xml_native_truth). align 없는 셀만 기본 좌측(표제·텍스트). 숫자=우측은 원본이 이미 가진 정렬. */
+	.dartlab-html :global(td:not([align])),
+	.dartlab-html :global(th:not([align])) {
+		text-align: left;
 	}
 	.dartlab-html :global(th) {
 		background: rgba(15, 23, 42, 0.6);
