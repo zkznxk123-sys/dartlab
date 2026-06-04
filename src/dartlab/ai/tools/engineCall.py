@@ -173,7 +173,8 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
     target = str(plan.get("target") or plan.get("stockCode") or "").strip()
     topic = _resolveTopic(plan)
     if topic not in _STMT_LABELS:
-        return _genericCompanyMethod("show", target, [topic], {})
+        # 공개 show 은퇴 — docs/report 토픽은 panel facade 로 (finance/report 주입 + raw 검색).
+        return _genericCompanyMethod("panel", target, [topic], {})
     company = _resolveCompany(target or str(plan.get("question") or ""))
     if company is None:
         return ToolResult(
