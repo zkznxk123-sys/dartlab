@@ -4869,12 +4869,11 @@ class Company:
             없음 (self 바인딩).
 
         Returns:
-            ExecutivePayResult 또는 None — payByType DataFrame + topPay DataFrame 보유.
-            payByType: [구분, 급여, 상여, 주식매수선택권 행사이익, 기타근로소득, 퇴직소득, 기타]
-            topPay: [성명, 직위, 보수총액, 근로소득, 퇴직소득, 기타, 산정기준 narrative]
+            pl.DataFrame 또는 None — panel native 임원보수 섹션 행(항목 × period).
+            구조화 payByType/topPay(개인별 시계열)는 농장 은퇴로 드롭 — 본문 텍스트만.
 
         Requires:
-            DART 사업보고서 본문 (executivePay 섹션 자동 파싱).
+            panel artifact (임원보수 섹션 contentRaw).
 
         Example::
 
@@ -4903,10 +4902,9 @@ class Company:
                 - 산정기준 narrative 생략 후 보수 총액만 인용 (메커니즘 불명)
                 - 직책 정규화 없이 회사 간 비교 (대표이사 vs 부회장 vs 사장 의미 차이)
             OutputSchema:
-                - payByType : DataFrame [구분, 급여, 상여, 주식매수선택권행사이익, 기타근로소득, 퇴직소득, 기타]
-                - topPay : DataFrame [성명, 직위, 보수총액, 산정기준]
+                - pl.DataFrame | None — panel native 임원보수 섹션 행(텍스트, 구조화 드롭).
             Prerequisites:
-                - 사업보고서 박힘 (자동 다운로드)
+                - panel artifact 박힘
             Freshness:
                 정기보고서 마감 후 30~45 일.
             TargetMarkets:
@@ -4915,9 +4913,11 @@ class Company:
         Raises:
             없음.
         """
-        from dartlab.providers.dart.docs.finance.executivePay import executivePay as _executivePay
-
-        return _executivePay(self.stockCode)
+        # docs.finance.executivePay(개인별 구조화 파싱) 은퇴 → panel native 보수 섹션 텍스트.
+        # 개인별 시계열(payByType/topPay)은 정부 native 태깅 없어 복원 불가 — 섹션 본문만.
+        p = self.panel
+        hit = p("보수")
+        return hit if hit is not None else p.search("보수총액")
 
     def relatedPartyTx(self):
         """관계자 거래 (RPT) — 공정거래법 §26 chaebol disclosure 100억 원 threshold (2024-01-01 시행).
