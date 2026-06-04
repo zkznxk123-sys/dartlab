@@ -70,7 +70,20 @@ class EdgarTagMapper:
 
     @classmethod
     def release(cls) -> None:
-        """class-level 캐시 리셋 — 다음 호출에서 SSOT 재로드."""
+        """class-level 캐시 리셋 — 다음 호출에서 SSOT 재로드.
+
+        Args:
+            없음.
+
+        Returns:
+            None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarTagMapper.release()
+        """
         cls._accounts = None
         cls._tagMap = None
         cls._stmtTagMap = None

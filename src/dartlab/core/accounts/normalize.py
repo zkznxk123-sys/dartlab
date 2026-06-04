@@ -36,7 +36,21 @@ _KOR_TRIM_SUFFIXES = ("액", "등", "외")
 
 
 def stripPrefix(accountId: str) -> str:
-    """IFRS/dart prefix 제거 (``ifrs-full_Revenue`` → ``Revenue``)."""
+    """IFRS/dart prefix 제거 (``ifrs-full_Revenue`` → ``Revenue``).
+
+    Args:
+        accountId: XBRL account_id (prefix 포함 가능).
+
+    Returns:
+        prefix(ifrs-full_/ifrs_/dart_/ifrs-smes_) 제거된 id.
+
+    Raises:
+        없음 — 순수 문자열 변환.
+
+    Example:
+        >>> stripPrefix("ifrs-full_Revenue")
+        'Revenue'
+    """
     return _PREFIX_RE.sub("", accountId)
 
 
