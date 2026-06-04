@@ -11,7 +11,6 @@ from __future__ import annotations
 import logging
 
 from dartlab.analysis.financial._predictionUtils import _DIRECTION_SCORES, _bayesUpdate, _clamp
-from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.calc import safeDiv as _safe
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
@@ -628,8 +627,9 @@ def _getLinkedCompanies(company, stockCode: str) -> list[dict]:
             and stockCode.isdigit()
             and getattr(company, "currency", None) == "KRW"
         ):
-            accessor = getFinanceDocAccessor()
-            rpt = accessor.relatedPartyTx(stockCode) if accessor else None
+            from dartlab.analysis.financial.governance import _loadRelatedPartyTx
+
+            rpt = _loadRelatedPartyTx(company)
             if rpt and rpt.revenueTxDf is not None:
                 for row in rpt.revenueTxDf.iter_rows(named=True):
                     entity = row.get("entity", "")

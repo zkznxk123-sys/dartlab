@@ -10,10 +10,43 @@ DART 전용 섹션 기반 calc는 EDGAR Company에서 None을 반환한다 (SEC 
 
 from __future__ import annotations
 
-from dartlab.core.financeDocAccessor import getFinanceDocAccessor
+import re
+from types import SimpleNamespace
+
 from dartlab.core.memory import memoizedCalc
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
+
+# ── docs 농장 은퇴 → L1.5 frame.sections 기반 정성 표 재건 (드롭 아님, SSOT) ──
+
+_KRW_UNIT = {"백만원": 1_000_000, "백만": 1_000_000, "억원": 100_000_000, "억": 100_000_000, "천원": 1_000}
+
+
+def _parseKrwAmount(cell: str | None) -> int | None:
+    """제재/보증 금액 셀 → 원 단위 int. 외화(USD/UZS 등)·'-'·비숫자는 None."""
+    if not cell:
+        return None
+    s = cell.strip()
+    if s in ("-", ""):
+        return None
+    if re.search(r"[A-Za-z]", s):  # 외화 표기(USD/UZS/JPY ...) — FX 없이 환산 불가.
+        return None
+    for unit, mult in _KRW_UNIT.items():
+        if unit in s:
+            m = re.search(r"[\d,.]+", s)
+            if m:
+                try:
+                    return int(float(m.group().replace(",", "")) * mult)
+                except ValueError:
+                    return None
+    m = re.search(r"[\d,]+", s)  # 단위 표기 없으면 원 그대로.
+    if m:
+        try:
+            return int(m.group().replace(",", ""))
+        except ValueError:
+            return None
+    return None
+
 
 # ── 최대주주 지분 시계열 ──
 
@@ -483,21 +516,72 @@ def _getDartStockCode(company) -> str | None:
 
 
 def _loadSanction(company):
-    """sanction 파이프라인 호출. DART 외 or 데이터 없음 시 None."""
+    """제재 현황 — L1.5 frame.sectionTables(panel '제재' 표) 재건. DART 외/데이터 없음 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
-    accessor = getFinanceDocAccessor()
-    return accessor.sanction(code) if accessor else None
+    import polars as pl
+
+    from dartlab.frame.sections import sectionTables
+
+    rows: list[dict] = []
+    for t in sectionTables(code, sectionPattern="제재"):
+        header = "".join(t[0]) if t else ""
+        if "제재기관" not in header and "제재 기관" not in header:
+            continue
+        for r in t[1:]:
+            if len(r) < 4 or not re.match(r"\d{4}", r[0] or ""):
+                continue
+            rows.append(
+                {
+                    "year": int(r[0][:4]),
+                    "date": r[0],
+                    "agency": r[1] if len(r) > 1 else "",
+                    "subject": r[2] if len(r) > 2 else "",
+                    "action": r[3] if len(r) > 3 else "",
+                    "reason": r[5] if len(r) > 5 else "",
+                    "amountValue": _parseKrwAmount(r[4]) if len(r) > 4 else None,
+                }
+            )
+    if not rows:
+        return None
+    return SimpleNamespace(sanctionDf=pl.DataFrame(rows))
 
 
 def _loadContingentLiability(company):
-    """contingentLiability 파이프라인 호출."""
+    """우발부채/지급보증 — L1.5 frame.sectionTables(panel '우발부채' 표) 재건.
+
+    소송(lawsuitDf)은 별도 표 부재 시 빈 DF, 지급보증(guaranteeDf)은 표 금액 best-effort 합산.
+    """
     code = _getDartStockCode(company)
     if not code:
         return None
-    accessor = getFinanceDocAccessor()
-    return accessor.contingentLiability(code) if accessor else None
+    import polars as pl
+
+    from dartlab.frame.sections import sectionTables, sectionTexts
+
+    # 연도별 지급보증 총액 best-effort — '우발부채' 섹션 표 셀 중 원화 금액 합.
+    texts = sectionTexts(code)
+    guaranteeRows: list[dict] = []
+    if texts is not None and not texts.is_empty():
+        sub = texts.filter(pl.col("sectionLeaf").str.contains("우발"))
+        for period in {p for p in sub["period"].to_list()}:
+            if not (period[:4].isdigit()):
+                continue
+            total = 0
+            for t in sectionTables(code, sectionPattern="우발", period=period):
+                for r in t[1:]:
+                    for cell in r:
+                        amt = _parseKrwAmount(cell)
+                        if amt and amt > 1_000_000:  # 백만원 이상만(노이즈 컷)
+                            total += amt
+            if total > 0:
+                guaranteeRows.append({"year": int(period[:4]), "totalGuaranteeAmount": total})
+    guaranteeDf = pl.DataFrame(guaranteeRows) if guaranteeRows else None
+    lawsuitDf = None
+    if guaranteeDf is None and lawsuitDf is None:
+        return None
+    return SimpleNamespace(guaranteeDf=guaranteeDf, lawsuitDf=lawsuitDf)
 
 
 def _fetchLatestEquity(company, *, basePeriod: str | None = None) -> int | None:
@@ -527,12 +611,26 @@ def _fetchLatestEquity(company, *, basePeriod: str | None = None) -> int | None:
 
 
 def _loadExecutiveDocs(company):
-    """docs/finance/executive 파이프라인 호출 — 개인별 임원 시계열."""
+    """임원 현황 — L1.5 frame.sectionTables(panel '임원' 표) 재건. 표 부재 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
-    accessor = getFinanceDocAccessor()
-    return accessor.executive(code) if accessor else None
+    import polars as pl
+
+    from dartlab.frame.sections import sectionTables
+
+    rows: list[dict] = []
+    for t in sectionTables(code, sectionPattern="임원 및 직원"):
+        header = "".join(t[0]) if t else ""
+        if "성명" not in header and "직위" not in header and "직책" not in header:
+            continue
+        for r in t[1:]:
+            if not r or not r[0]:
+                continue
+            rows.append({"name": r[0], "cells": " ".join(r[1:])})
+    if not rows:
+        return None
+    return SimpleNamespace(executiveDf=pl.DataFrame(rows))
 
 
 # ── 대표이사 교체 ──
@@ -542,12 +640,23 @@ CEO_TURNOVER_WINDOW_YEARS = 5
 
 
 def _loadRelatedPartyTx(company):
-    """relatedPartyTx 파이프라인 호출. DART 외 or 데이터 없음 시 None."""
+    """특수관계자 거래 — L1.5 frame.sectionTables(panel '특수관계자' 표) 재건. 표 부재 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
-    accessor = getFinanceDocAccessor()
-    return accessor.relatedPartyTx(code) if accessor else None
+    import polars as pl
+
+    from dartlab.frame.sections import sectionTables
+
+    entities: list[dict] = []
+    for t in sectionTables(code, sectionPattern="특수관계자"):
+        for r in t[1:]:
+            ent = (r[0] or "").strip() if r else ""
+            if ent and ent not in ("기초", "기말", "소계", "합계", "구분"):
+                entities.append({"entity": ent})
+    if not entities:
+        return None
+    return SimpleNamespace(revenueTxDf=pl.DataFrame(entities), guaranteeDf=None)
 
 
 # ── 특수관계자 거래 집중도 ──
