@@ -50,7 +50,9 @@ def apiCompanyDiffMatrix(
     from dartlab.providers._common.diff import buildDiffMatrix, buildHeatmapSpec
 
     try:
-        sections = c._docs.sections.raw
+        sections = c.sections
+        if sections is None:
+            raise HTTPException(status_code=404, detail="sections 없음")
         matrixData = buildDiffMatrix(sections, textOnly=textOnly)
         heatmap = buildHeatmapSpec(matrixData, c.corpName, topN=topN)
     except HANDLED_API_ERRORS as e:
@@ -151,7 +153,9 @@ def apiCompanyBridge(
     )
 
     try:
-        sections = c._docs.sections.raw
+        sections = c.sections
+        if sections is None:
+            raise HTTPException(status_code=404, detail="sections 없음")
         periods = sorted(
             [col for col in sections.columns if _re.fullmatch(r"\d{4}(Q[1-4])?", col)],
             reverse=True,
@@ -207,7 +211,9 @@ def apiCompanyTopicsGraph(
     )
 
     try:
-        sections = c._docs.sections.raw
+        sections = c.sections
+        if sections is None:
+            raise HTTPException(status_code=404, detail="sections 없음")
         matrix = buildMentionMatrix(sections)
         analysis = analyzeGraph(matrix.get("adjacency", {}), threshold=threshold)
 

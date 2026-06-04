@@ -77,7 +77,9 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
         if corpName:
             parts["company"] = corpName
         try:
-            sections = company._docs.sections
+            # EDGAR(US) 는 docs accessor 보유; DART 는 농장 은퇴로 _docs 없음 → getattr 방어.
+            docsAccessor = getattr(company, "_docs", None)
+            sections = docsAccessor.sections if docsAccessor is not None else None
             if sections is not None:
                 import polars as pl
 

@@ -73,10 +73,10 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
         분기 공시 갱신 직후 텍스트 변화 모니터링.
 
     How:
-        company._docs.diff() 토픽 changeRate 를 가중 분류.
+        company.diff() 토픽 changeRate 를 가중 분류.
 
     Requires:
-        company._docs.diff() 가능 (텍스트 diff 캐시).
+        company.diff() 가능 (텍스트 diff 캐시).
 
     Raises:
         없음 — 데이터 부재 시 None.
@@ -92,7 +92,7 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
         리스크 토픽 변화율이 30% 이상이면 부정 신호로 인용.
     """
     try:
-        diffResult = company._docs.diff()
+        diffResult = company.diff()
     except (AttributeError, TypeError):
         return None
 

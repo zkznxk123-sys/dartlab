@@ -98,7 +98,6 @@ class _ProfileAccessor:
             - financeCisAnnual (CIS) → "finance" source, priority 300.
             - sceSeriesAnnual (SCE) → "finance" source, priority 300.
             - report 28 apiType → "report" source, priority 200.
-            - docs retrievalBlocks → "docs" source, priority 100, semanticTopic/detailTopic 자동 coalesce.
             - cacheKey = ``"_profileFacts"`` — 한 번 빌드 후 재사용.
 
         Returns:
@@ -274,52 +273,7 @@ class _ProfileAccessor:
                 if rows:
                     frames.append(pl.DataFrame(rows))
 
-        docsBlocks = self._company._docs.retrievalBlocks
-        if docsBlocks is not None and not docsBlocks.is_empty():
-            # topic = coalesce(detailTopic, semanticTopic, topic)
-            topicExpr = pl.col("topic")
-            if "semanticTopic" in docsBlocks.columns:
-                topicExpr = pl.coalesce(pl.col("semanticTopic"), topicExpr)
-            if "detailTopic" in docsBlocks.columns:
-                topicExpr = pl.coalesce(pl.col("detailTopic"), topicExpr)
-
-            valueKeyExpr = topicExpr.cast(pl.Utf8)
-            if "rawTitle" in docsBlocks.columns:
-                valueKeyExpr = pl.coalesce(pl.col("rawTitle"), valueKeyExpr)
-            if "blockLabel" in docsBlocks.columns:
-                valueKeyExpr = pl.coalesce(pl.col("blockLabel"), valueKeyExpr)
-
-            payloadExpr = pl.concat_str(
-                [pl.lit("docs:"), topicExpr.cast(pl.Utf8), pl.lit(":"), pl.col("period").cast(pl.Utf8)]
-            )
-            if "cellKey" in docsBlocks.columns:
-                payloadExpr = pl.coalesce(pl.col("cellKey"), payloadExpr)
-
-            docsDf = (
-                docsBlocks.filter(
-                    pl.col("period").is_not_null() & pl.col("blockText").is_not_null() & (pl.col("blockText") != "")
-                )
-                .with_columns(topicExpr.alias("_topic"))
-                .filter(pl.col("_topic").is_not_null())
-                .select(
-                    [
-                        pl.col("_topic").cast(pl.Utf8).alias("topic"),
-                        pl.col("period").cast(pl.Utf8).alias("period"),
-                        pl.lit("docs").alias("source"),
-                        (pl.col("blockType") if "blockType" in docsBlocks.columns else pl.lit("text")).alias(
-                            "valueType"
-                        ),
-                        valueKeyExpr.alias("valueKey"),
-                        pl.col("blockText").cast(pl.Utf8).alias("value"),
-                        payloadExpr.alias("payloadRef"),
-                        pl.lit(100).alias("priority"),
-                        pl.col("blockText").cast(pl.Utf8).str.slice(0, 400).alias("summary"),
-                    ]
-                )
-            )
-            if docsDf.height > 0:
-                frames.append(docsDf)
-
+        # docs retrievalBlocks(RAG accessor)는 docs 농장 은퇴로 소실 — facts 는 report/notes source 만.
         result = pl.concat(frames, how="vertical_relaxed") if frames else None
         self._company._cache[cacheKey] = result
         return result
@@ -531,11 +485,11 @@ class _ProfileAccessor:
         SeeAlso:
             - ``facts`` / ``sections`` — 본 함수의 source.
             - ``_sourcePriority`` (모듈 private) — whySelected 의 priority 로직.
-            - ``dartlab.providers.dart.docs.sections.rawPeriod`` — period 정규화.
+            - ``dartlab.providers.dart.sectionPeriod.rawPeriod`` — period 정규화.
 
         Requires:
             - polars — DataFrame group_by + filter.
-            - dartlab.providers.dart.docs.sections — rawPeriod.
+            - dartlab.providers.dart.sectionPeriod — rawPeriod.
 
         AIContext:
             AI 가 "이 값이 어디서 나온 거냐" 출처 질문 처리 시 entry. primarySource 만 사용자
@@ -564,7 +518,7 @@ class _ProfileAccessor:
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
         facts = self.facts
-        docsSections = self._company._docs.sections
+        docsSections = self._company.sections
 
         sources: list[dict[str, Any]] = []
 

@@ -545,7 +545,7 @@ def apiViewerDoc(
     """sections 기반 신구대조 뷰어 — viewer() dict 반환."""
     try:
         company = getCompany(code)
-        sec = company._docs.sections.raw
+        sec = company.sections
         if sec is None:
             raise HTTPException(status_code=404, detail="sections 없음")
 
