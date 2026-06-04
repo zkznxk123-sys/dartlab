@@ -1,4 +1,4 @@
-"""c.show() 라우팅 회귀 테스트 — Phase D 근본 수정 방어.
+"""c.panel() 라우팅 회귀 테스트 — Phase D 근본 수정 방어.
 
 ========================================
 이 파일이 잡는 버그 클래스 (2026-04-20~21 사고):
@@ -6,7 +6,7 @@
 `_showImpl` 가 "registry 에는 등록됐는데 sections DataFrame 에 없고, fallback
 _showDirectTopic 도 None 리턴" 상황에서 일괄 `ValueError: '...' 찾을 수 없습니다`
 를 raise 했다. 이로 인해 bond/business/fundraising/companyOverviewDetail 같은
-합법적으로 "데이터 없는" 회사에서도 `c.show("bond")` 가 크래시.
+합법적으로 "데이터 없는" 회사에서도 `c.panel("bond")` 가 크래시.
 
 Phase D 수정: registered-but-empty 는 None 리턴, truly-unknown 만 warn+None.
 

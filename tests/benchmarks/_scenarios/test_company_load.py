@@ -14,7 +14,7 @@ import pytest
 @pytest.mark.benchmark
 @pytest.mark.serial  # T3-3 — Company 인스턴스 + Polars 힙, 단일 worker 강행
 class TestCompanyLoad:
-    """Company.show 의 콜드/웜 latency baseline."""
+    """Company.panel 의 콜드/웜 latency baseline."""
 
     def test_company_load_cold(self, benchmark) -> None:
         """첫 호출 (cache miss) — 디스크 hit 1.0s/corp 목표."""
@@ -30,7 +30,7 @@ class TestCompanyLoad:
         benchmark(loadCompany)
 
     def test_company_show_is_warm(self, benchmark) -> None:
-        """warm cache 후 show('IS') P50 ≤ 0.1s 목표."""
+        """warm cache 후 panel('IS') P50 ≤ 0.1s 목표."""
 
         try:
             import dartlab

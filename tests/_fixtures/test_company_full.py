@@ -70,7 +70,7 @@ class TestFinanceAccess:
     def test_IS_returns_dataframe(self, samsung):
         import polars as pl
 
-        result = samsung.show("IS")
+        result = samsung.panel("IS")
         if result is not None:
             assert isinstance(result, pl.DataFrame)
             assert "항목" in result.columns
@@ -78,7 +78,7 @@ class TestFinanceAccess:
     def test_BS_returns_dataframe(self, samsung):
         import polars as pl
 
-        result = samsung.show("BS")
+        result = samsung.panel("BS")
         if result is not None:
             assert isinstance(result, pl.DataFrame)
             assert "항목" in result.columns
@@ -86,7 +86,7 @@ class TestFinanceAccess:
     def test_CF_may_be_none(self, samsung):
         import polars as pl
 
-        result = samsung.show("CF")
+        result = samsung.panel("CF")
         # fixture에 CF가 없을 수 있음
         assert result is None or isinstance(result, pl.DataFrame)
 
@@ -98,14 +98,14 @@ class TestShowSelect:
     def test_show_IS(self, samsung):
         import polars as pl
 
-        result = samsung.show("IS")
+        result = samsung.panel("IS")
         if result is not None:
             assert isinstance(result, pl.DataFrame)
 
     def test_show_BS(self, samsung):
         import polars as pl
 
-        result = samsung.show("BS")
+        result = samsung.panel("BS")
         if result is not None:
             assert isinstance(result, pl.DataFrame)
 
@@ -121,7 +121,7 @@ class TestShowSelect:
             assert hasattr(result, "df")
 
     def test_show_dividend(self, samsung):
-        result = samsung.show("dividend")
+        result = samsung.panel("dividend")
         # dividend 데이터가 없을 수 있음
         assert result is None or result is not None  # crash 없음 확인
 
@@ -133,16 +133,16 @@ class TestDerivedData:
     def test_ratios(self, samsung):
         import polars as pl
 
-        result = samsung.show("ratios")
+        result = samsung.panel("ratios")
         assert result is None or isinstance(result, pl.DataFrame)
 
     def test_annual_via_show(self, samsung):
-        # Plan v9: c.annual / c.timeseries 제거 → c.show("IS", freq="Y") 단일 진입점
-        df = samsung.show("IS", freq="Y")
+        # Plan v9: c.annual / c.timeseries 제거 → c.panel("IS", freq="Y") 단일 진입점
+        df = samsung.panel("IS", freq="Y")
         assert df is None or hasattr(df, "shape")
 
     def test_quarterly_via_show(self, samsung):
-        df = samsung.show("IS", freq="Q")
+        df = samsung.panel("IS", freq="Q")
         assert df is None or hasattr(df, "shape")
 
     def test_topics(self, samsung):

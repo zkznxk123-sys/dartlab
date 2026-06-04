@@ -1,12 +1,12 @@
 """R26 audit 회귀 테스트 — company show/select silent failure 차단.
 
-R26-1: c.show('없는토픽') silent None → ValueError
+R26-1: c.panel('없는토픽') silent None → ValueError
 R26-2: c.select('IS', ['없는계정']) silent None → ValueError
 R26-3: c.select('없는토픽', ['매출액']) silent None → ValueError (show 에서)
 R26-4: c.select('IS', []) silent None → ValueError
 
 Plan v9 dual access (P0.13): show/select 가 property → CallableAccessor 로 변경되어
-``inspect.getsource(Company.show)`` 가 property 객체를 받아 에러 발생.
+``inspect.getsource(Company.panel)`` 가 property 객체를 받아 에러 발생.
 대신 내부 구현 ``_showImpl`` / ``_selectImpl`` 의 source 를 검증한다.
 """
 

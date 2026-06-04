@@ -116,7 +116,7 @@ async def main():
                         "code": (
                             "import dartlab\n"
                             "c = dartlab.Company('005930')\n"
-                            "df = c.show('BS')\n"
+                            "df = c.panel('BS')\n"
                             "emit_result(values={'rows': df.height if df is not None else 0, 'columns': len(df.columns) if df is not None else 0})"
                         )
                     },

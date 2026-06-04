@@ -125,7 +125,7 @@ def test_lookahead_guard_dispatch_via_registry_uses_correct_executor():
 @pytest.mark.requires_data
 @pytest.mark.network
 def test_lookahead_guard_happy_path_real_company():
-    """happy path — 실제 dartlab.Company('005930').show('BS', asOf=...) 호출.
+    """happy path — 실제 dartlab.Company('005930').panel('BS', asOf=...) 호출.
 
     도그푸드 발견 회귀: tool 가 Company(stockCode, market=...) 으로 호출하면 TypeError —
     Company 는 market kwarg 미지원. unit 테스트가 거부 경로만 검증해서 못 잡았음.

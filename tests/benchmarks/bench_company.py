@@ -6,8 +6,8 @@
 측정 항목:
 - Company init (DART)
 - index 접근
-- show("BS")
-- show("companyOverview") — docs topic
+- panel("BS")
+- panel("companyOverview") — docs topic
 - diff()
 """
 
@@ -44,11 +44,11 @@ def main():
     t, _ = _median(lambda: c.index)
     print(f"  c.index                   : {t:.3f}s")
 
-    # 3. show("BS")
+    # 3. panel("BS")
     t, _ = _median(lambda: c.panel("BS"))
     print(f"  c.panel('BS')              : {t:.3f}s")
 
-    # 4. show("companyOverview")
+    # 4. panel("companyOverview")
     t, _ = _median(lambda: c.panel("companyOverview"))
     print(f"  c.panel('companyOverview') : {t:.3f}s")
 

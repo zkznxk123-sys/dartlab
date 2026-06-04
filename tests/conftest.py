@@ -374,8 +374,8 @@ class MockCompany:
             return _MockSelectResult(filtered, stmt)
         return _MockSelectResult(df, stmt)
 
-    def show(self, topic: str, block=None, *, period=None, raw=False):
-        """topic 데이터 반환 — IS/BS/CF는 합성 DataFrame."""
+    def panel(self, topic: str, block=None, *, period=None, raw=False):
+        """topic 데이터 반환(생존 panel 표면) — IS/BS/CF는 합성 DataFrame."""
         mapping = {"IS": self._is_df, "BS": self._bs_df, "CF": self._cf_df}
         return mapping.get(topic)
 
@@ -431,7 +431,7 @@ def empty_mock_company():
         def select(self, stmt, accounts=None, colList=None, *, strict=True, **kwargs):
             return None
 
-        def show(self, topic, block=None, *, period=None, raw=False):
+        def panel(self, topic, block=None, *, period=None, raw=False):
             return None
 
         @property

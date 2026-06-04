@@ -72,7 +72,7 @@ def test_no_violation_when_with_company_used():
     def update(codes):
         for code in codes:
             with Company(code) as c:
-                c.show("IS")
+                c.panel("IS")
     """
     violations = _runVisitor(src)
     assert violations == []

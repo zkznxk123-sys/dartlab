@@ -88,13 +88,13 @@ class TestFreshInstallSmoke:
         assert "topic" in sec.columns
 
     def test_showIS_coldCache(self, freshSectionsCache):
-        """c.show("IS") 가 cold cache 에서도 실제 값 반환."""
+        """c.panel("IS") 가 cold cache 에서도 실제 값 반환."""
         if not _has_data(SAMSUNG, "docs"):
             pytest.skip("삼성전자 docs 데이터 없음")
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        isDf = c.show("IS")
+        isDf = c.panel("IS")
         assert isDf is not None
         assert isinstance(isDf, pl.DataFrame)
         assert isDf.height > 0

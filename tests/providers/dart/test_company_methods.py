@@ -12,27 +12,27 @@ pytestmark = pytest.mark.unit
 
 
 # ══════════════════════════════════════
-# 1. show() — Company.show가 topic 데이터를 반환
+# 1. panel() — Company.panel가 topic 데이터를 반환
 # ══════════════════════════════════════
 
 
 class TestShow:
     def test_show_is_returns_dataframe(self, mock_company):
-        result = mock_company.show("IS")
+        result = mock_company.panel("IS")
         assert isinstance(result, pl.DataFrame)
         assert "항목" in result.columns
         assert "2024Q4" in result.columns
 
     def test_show_bs_returns_dataframe(self, mock_company):
-        result = mock_company.show("BS")
+        result = mock_company.panel("BS")
         assert isinstance(result, pl.DataFrame)
 
     def test_show_cf_returns_dataframe(self, mock_company):
-        result = mock_company.show("CF")
+        result = mock_company.panel("CF")
         assert isinstance(result, pl.DataFrame)
 
     def test_show_unknown_topic_returns_none(self, mock_company):
-        result = mock_company.show("nonexistent_topic")
+        result = mock_company.panel("nonexistent_topic")
         assert result is None
 
 
@@ -210,8 +210,8 @@ class TestAttributes:
     def test_sector_none(self, mock_company):
         assert mock_company.sector is None
 
-    # Plan v10: c.notes / c.IS / c.BS / c.CF property 제거 — c.show("inventory") 등 사용.
-    # Mock company 회귀는 test_fixture_company_full.py 에서 c.show() 형태로 검증.
+    # Plan v10: c.notes / c.IS / c.BS / c.CF property 제거 — c.panel("inventory") 등 사용.
+    # Mock company 회귀는 test_fixture_company_full.py 에서 c.panel() 형태로 검증.
 
     # Plan v9 P0.7: c.annual / c.cumulative property 제거 → c.timeseries(annual=True/cumulative=True)
     # 실제 데이터 회귀는 tests/test_fixture_company_full.py::test_annual 가 fixture 로 검증.
@@ -244,7 +244,7 @@ class TestEmptyMock:
         assert empty_mock_company.select("IS", ["매출액"]) is None
 
     def test_show_returns_none(self, empty_mock_company):
-        assert empty_mock_company.show("IS") is None
+        assert empty_mock_company.panel("IS") is None
 
     def test_gather_returns_none(self, empty_mock_company):
         assert empty_mock_company.gather("price") is None

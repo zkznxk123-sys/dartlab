@@ -1,4 +1,4 @@
-"""회귀 가드 — Company.show(asOf=) 가 미래 fiscal period 컬럼 drop.
+"""회귀 가드 — Company.panel(asOf=) 가 미래 fiscal period 컬럼 drop.
 
 Look-ahead bias 방지 — 백테스트 / 과거 시점 분석 재현 시 미래 정보 누설 차단.
 TauricResearch/TradingAgents stockstats_utils.filter_financials_by_date 패턴 차용.

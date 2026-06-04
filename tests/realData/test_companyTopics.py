@@ -1,7 +1,7 @@
 """Company.show(topic) 전수 스모크 — registry 등록된 모든 topic 을 iterate.
 
 core/registry 는 37개+ topic 을 자동 등록한다. 이 파일은 매 topic 을
-`c.show(topic)` 으로 호출해 크래시/silent-None 을 잡는다.
+`c.panel(topic)` 으로 호출해 크래시/silent-None 을 잡는다.
 
 과거 회귀: sections topic 이 silent None → c.sections .raw.columns 크래시.
 """
@@ -51,9 +51,9 @@ _SHOW_ROUTING_KNOWN_ISSUES: frozenset[str] = frozenset()
 @pytest.mark.integration
 @pytest.mark.parametrize("topic", ALL_TOPICS)
 def test_show_topicNoSilentFail(samsungRealData, topic):
-    """c.show(topic) 이 각 topic 에서 크래시하지 않고, None 은 허용 topic 에서만."""
+    """c.panel(topic) 이 각 topic 에서 크래시하지 않고, None 은 허용 topic 에서만."""
     try:
-        result = samsungRealData.show(topic)
+        result = samsungRealData.panel(topic)
     except NotImplementedError:
         pytest.skip(f"show({topic}) 미구현")
     except ValueError as e:

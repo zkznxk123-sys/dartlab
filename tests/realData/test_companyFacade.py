@@ -33,7 +33,7 @@ class TestCompanyFacade:
         assert "chapter" in sec.columns
 
     def test_show_IS_hasPeriodColumns(self, samsungRealData):
-        isDf = samsungRealData.show("IS")
+        isDf = samsungRealData.panel("IS")
         assert isDf is not None
         assert isinstance(isDf, pl.DataFrame)
         periodCols = [c for c in isDf.columns if len(c) >= 4 and c[:4].isdigit()]
@@ -44,12 +44,12 @@ class TestCompanyFacade:
         assert nonNull > 0, f"IS {latest} 전부 null — 데이터 빔"
 
     def test_show_BS_basic(self, samsungRealData):
-        bs = samsungRealData.show("BS")
+        bs = samsungRealData.panel("BS")
         assert bs is not None
         assert bs.height > 0
 
     def test_show_CF_basic(self, samsungRealData):
-        cf = samsungRealData.show("CF")
+        cf = samsungRealData.panel("CF")
         assert cf is not None
         assert cf.height > 0
 
