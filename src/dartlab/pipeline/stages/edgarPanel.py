@@ -13,7 +13,12 @@ raw 를 폐기하면 클린 러너에서 증분이 원천 불가했다(옛 daily
   ⑤ 변경 ticker 만 deploy → 받은 raw .txt 폐기.
 
 ``EDGAR_FULL_REBUILD=1`` 이면 전 universe archive+재빌드 부트스트랩(무겁다 — 디스크 floor 가드 +
-dispatch 전용). lookback 은 ``SYNC_LOOKBACK_DAYS``/``EDGAR_LOOKBACK`` env(기본 7).
+dispatch 전용). lookback 은 ``SYNC_LOOKBACK_DAYS``/``EDGAR_LOOKBACK`` env(기본 7). raw 폐기는
+``EDGAR_DISCARD_RAW``(기본 1, 로컬 보존 시 0).
+
+알려진 한계: 정정 보고서(``10-K/A`` 등 amended form)는 현재 discovery/parse 에서 제외 —
+원본 form 만 반영(staleness, 손상 X). 정정 supersede 는 dedup 키를 accession→period 로 바꾸는
+후속 작업 필요(regular form 은 period 가 고유라 안전하나 별도 검증 동반). → TODO.
 """
 
 from __future__ import annotations
@@ -34,11 +39,14 @@ def _recentDates(days: int) -> list[str]:
     return [(today - timedelta(days=i)).strftime("%Y%m%d") for i in range(days)]
 
 
-def _universeTickerByCik() -> dict[str, str]:
-    """상장 universe 의 ``{cik(10-pad): ticker}`` 맵 — daily-index cik 를 ticker 로 해소.
+def _universeTickerByCik() -> dict[str, list[str]]:
+    """상장 universe 의 ``{cik(10-pad): [ticker, ...]}`` 맵 — daily-index cik 를 ticker 로 해소.
+
+    한 CIK 가 여러 ticker(주식 클래스 GOOG/GOOGL, BRK.A/BRK.B 등)를 가지므로 **list** 로
+    모은다 — 단일 맵이면 한 클래스만 갱신되고 나머지는 영구 stale.
 
     Returns:
-        dict[str, str] — cik→ticker. universe 부재/컬럼 부재 시 빈 dict(honest skip).
+        dict[str, list[str]] — cik→ticker list. universe 부재/컬럼 부재 시 빈 dict(honest skip).
     """
     try:
         from dartlab.core.dataLoader import loadEdgarListedUniverse
@@ -48,10 +56,10 @@ def _universeTickerByCik() -> dict[str, str]:
         return {}
     if "cik" not in uni.columns or "ticker" not in uni.columns:
         return {}
-    out: dict[str, str] = {}
+    out: dict[str, list[str]] = {}
     for c, t in zip(uni["cik"].to_list(), uni["ticker"].to_list()):
         if t and c is not None:
-            out[str(c).strip().zfill(10)] = str(t).strip()
+            out.setdefault(str(c).strip().zfill(10), []).append(str(t).strip())
     return out
 
 
@@ -85,7 +93,9 @@ def _seedTickerPanel(ticker: str, *, token: str | None) -> bool | None:
         return False  # 신규 종목 — HF 미존재(404)
     except Exception:  # noqa: BLE001 — 일시 실패 → skip(다음 run)
         return None
-    try:  # panelCell 은 없을 수도(셀 0 종목) — best-effort
+    # panelCell: 404(셀 0 종목)는 정상이나 *일시 실패*는 unsafe — append 시 기존 셀
+    # 전체를 덮어쓰는 손실(board 와 동일 클래스)이라 None 으로 이번 run skip.
+    try:
         retryHfCall(
             hf_hub_download,
             repo_id=HF_REPO,
@@ -94,22 +104,16 @@ def _seedTickerPanel(ticker: str, *, token: str | None) -> bool | None:
             token=tok,
             local_dir=root,
         )
-    except Exception:  # noqa: BLE001
-        pass
+    except (EntryNotFoundError, RepositoryNotFoundError):
+        pass  # 셀 0 종목 — 정상
+    except Exception:  # noqa: BLE001 — 일시 실패 → 기존 셀 손실 방지 위해 이번 run skip
+        return None
     return True
-
-
-def _discardPaths(paths: list) -> None:
-    """raw .txt 폐기(전략) — append 직후 개별 unlink."""
-    for p in paths:
-        try:
-            Path(p).unlink(missing_ok=True)
-        except OSError:
-            pass
 
 
 def _runIncremental(res: StageResult, *, lookback: int, upload: bool, token: str | None) -> StageResult:
     """per-filing 증분: daily-index 발견 → 영향 ticker append/build → 변경분 deploy."""
+    import dartlab.config as cfg
     from dartlab.gather.original.edgar.collect import (
         archiveEdgarOriginals,
         fetchFilings,
@@ -123,6 +127,15 @@ def _runIncremental(res: StageResult, *, lookback: int, upload: bool, token: str
 
     dates = _recentDates(lookback)
 
+    # 0. builder cik 해소용 tickers.parquet 보장(클린 러너엔 부재 — 없으면 신규 종목 full-build 가
+    #    cik 미해소로 0행). loadTickers 가 SEC company_tickers.json(UA 설정)로 자체 생성.
+    try:
+        from dartlab.gather.edgar.identity import loadTickers
+
+        loadTickers(refresh=False)
+    except Exception as exc:  # noqa: BLE001 — 실패해도 진행(해소 안 되는 신규 종목만 skip)
+        res.report.failures.append(f"edgar tickers seed: {type(exc).__name__}: {exc}")
+
     # 1. 최근 공시 발견 (daily-index, 재무 폼만)
     try:
         rows = listRecentFilings(dates, forms=_REGULAR_FORMS)
@@ -132,61 +145,61 @@ def _runIncremental(res: StageResult, *, lookback: int, upload: bool, token: str
         print(f"[pipeline] edgarPanel listRecent 실패(격리): {exc}", flush=True)
         return res
 
-    # 2. cik → 상장 universe ticker 매핑 → 영향 ticker 그룹
+    # 2. cik → 상장 universe ticker(주식클래스 다중) 매핑 → CIK 그룹
     tickerByCik = _universeTickerByCik()
     if not tickerByCik:
-        res.report.ok = 1
-        res.report.failures.append("edgar universe 부재(tickers/universe) — 증분 skip")
-        print("[pipeline] edgarPanel: universe 부재 → skip", flush=True)
+        # universe 는 loadEdgarListedUniverse 가 SEC 에서 자체 fetch — 비면 SEC 차단/장애 등
+        # *진짜 실패*다. 조용한 ok(녹색) 가 아니라 err=1 로 CI 를 red 로(silent no-op 방지).
+        res.report.err = 1
+        res.report.failures.append("edgar universe 부재(listedUniverse SEC fetch 실패) — 증분 불가")
+        print("[pipeline] edgarPanel: universe 부재 → 실패(err)", flush=True)
         return res
-    byTicker: dict[str, list] = {}
+    byCik: dict[str, list] = {}
     for r in rows:
-        tk = tickerByCik.get(r["cik"])
-        if tk:
-            byTicker.setdefault(tk, []).append(r)
-    if not byTicker:
+        if r["cik"] in tickerByCik:
+            byCik.setdefault(r["cik"], []).append(r)
+    if not byCik:
         res.report.ok = 1
         print(f"[pipeline] edgarPanel: 최근 {lookback}일 universe 신규 재무공시 0", flush=True)
         return res
 
     sinceYear = int(os.environ.get("EDGAR_SINCE_YEAR") or "2015")
+    discardRaw = os.environ.get("EDGAR_DISCARD_RAW", "1") == "1"  # 로컬 dev 는 0 으로 보존 가능
     changed: list[str] = []
-    for ticker, trows in byTicker.items():
-        try:
-            seeded = _seedTickerPanel(ticker, token=token)
-            if seeded is None:
-                res.report.failures.append(f"edgar seed {ticker}: 일시 실패 skip(다음 run)")
+    for cik, crows in byCik.items():
+        for ticker in tickerByCik[cik]:  # 한 CIK 의 모든 ticker(공유 클래스 전부 갱신)
+            try:
+                seeded = _seedTickerPanel(ticker, token=token)
+                if seeded is None:
+                    res.report.failures.append(f"edgar seed {ticker}: 일시 실패 skip(다음 run)")
+                    continue
+                if seeded:  # 기존 종목 — 신규 accession 만 append
+                    existing = existingAccessions(ticker)
+                    newRows = [r for r in crows if r["accession_no"] not in existing]
+                    if not newRows:
+                        continue
+                    grouped = fetchFilings(newRows)
+                    paths = [p for ps in grouped.values() for p in ps]
+                    if not paths:
+                        continue
+                    stat = appendFilingsToPanel(ticker, paths, verbose=False)
+                    if stat["appended"]:
+                        changed.append(ticker)
+                else:  # 신규 종목 — 전체 history archive + 빌드
+                    archiveEdgarOriginals([ticker], forms=list(_REGULAR_FORMS), sinceYear=sinceYear, showProgress=False)
+                    stat = buildEdgarPanel(ticker, overwrite=True, verbose=False)
+                    if stat.get("rows"):
+                        changed.append(ticker)
+            except Exception as exc:  # noqa: BLE001 — ticker 단위 격리(1건 실패가 run 중단 X)
+                res.report.failures.append(f"edgar ticker {ticker}: {type(exc).__name__}: {exc}")
                 continue
-            if seeded:  # 기존 종목 — 신규 accession 만 append
-                existing = existingAccessions(ticker)
-                newRows = [r for r in trows if r["accession_no"] not in existing]
-                if not newRows:
-                    continue
-                grouped = fetchFilings(newRows)
-                paths = [p for ps in grouped.values() for p in ps]
-                if not paths:
-                    continue
-                stat = appendFilingsToPanel(ticker, paths, verbose=False)
-                _discardPaths(paths)  # raw 폐기
-                if stat["appended"]:
-                    changed.append(ticker)
-            else:  # 신규 종목 — 전체 history archive + 빌드
-                import dartlab.config as cfg
-
-                archiveEdgarOriginals([ticker], forms=list(_REGULAR_FORMS), sinceYear=sinceYear, showProgress=False)
-                stat = buildEdgarPanel(ticker, overwrite=True, verbose=False)
-                cikDir = Path(cfg.dataDir) / "original" / "edgar" / "docs" / trows[0]["cik"]
-                shutil.rmtree(cikDir, ignore_errors=True)  # raw 폐기
-                if stat.get("rows"):
-                    changed.append(ticker)
-        except Exception as exc:  # noqa: BLE001 — ticker 단위 격리(1건 실패가 run 중단 X)
-            res.report.failures.append(f"edgar ticker {ticker}: {type(exc).__name__}: {exc}")
-            continue
+        if discardRaw:  # 이 CIK 의 raw 폐기(모든 ticker 처리 후 1회 — 공유클래스 안전)
+            shutil.rmtree(Path(cfg.dataDir) / "original" / "edgar" / "docs" / cik, ignore_errors=True)
 
     res.rows = len(changed)
     res.changedFiles = [f"{t.upper()}.parquet" for t in changed]
     res.report.ok = 1
-    print(f"[pipeline] edgarPanel 증분: 영향 {len(byTicker)}종목 중 {len(changed)} 변경", flush=True)
+    print(f"[pipeline] edgarPanel 증분: 영향 CIK {len(byCik)} 중 {len(changed)} ticker 변경", flush=True)
 
     # 3. deploy(변경분만)
     if upload and changed:
@@ -260,7 +273,8 @@ def runEdgarPanel(
 
     Args:
         category: 미사용("edgarPanel" 고정).
-        mode: 미사용(env 로 분기).
+        mode: ``"full"``/``"backfill"`` 이면 전 universe 부트스트랩(``EDGAR_FULL_REBUILD=1`` 동치).
+            그 외(기본 incremental)는 per-filing 증분.
         codes: 미사용(daily-index 발견 기반).
         upload: HF deploy(edgarPanel/edgarPanelCell) 여부.
         token: HF 토큰.
@@ -276,7 +290,8 @@ def runEdgarPanel(
         StageResult(category='edgarPanel', ...)
     """
     res = StageResult(category="edgarPanel")
-    if os.environ.get("EDGAR_FULL_REBUILD") == "1":
+    fullRebuild = os.environ.get("EDGAR_FULL_REBUILD") == "1" or mode in ("full", "backfill")
+    if fullRebuild:
         return _runFullRebuild(res, upload=upload, token=token)
     lookback = int(os.environ.get("SYNC_LOOKBACK_DAYS") or os.environ.get("EDGAR_LOOKBACK") or "7")
     return _runIncremental(res, lookback=lookback, upload=upload, token=token)

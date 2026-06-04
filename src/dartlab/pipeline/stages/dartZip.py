@@ -71,8 +71,18 @@ def _seedChangedFromHf(codes: list[str], *, token: str | None) -> tuple[int, set
             continue
         dest = base / code
         dest.mkdir(parents=True, exist_ok=True)
-        with tarfile.open(local, "r") as tf:
-            tf.extractall(dest, filter="data")  # 평탄 zip 파일명만 — filter='data' 안전 추출
+        # 무결성 검증: 추출된 zip 수가 tar 멤버 수 이상이어야 *완전* 이력. tar 손상·부분 추출이면
+        # unsafe → 제외(부분 이력으로 빌드+재번들하면 정상 panel·원본 tar 를 잘라 덮어쓰는 컴파운딩
+        # truncation). 통과 시 local ⊇ tar 보장 → _bundleAndUpload 재번들은 항상 superset(축소 0).
+        try:
+            with tarfile.open(local, "r") as tf:
+                memberCount = sum(1 for m in tf.getmembers() if m.isfile())
+                tf.extractall(dest, filter="data")  # 평탄 zip 파일명만 — filter='data' 안전 추출
+            if len(list(dest.glob("*.zip"))) < memberCount:
+                raise OSError(f"부분 추출 {code}: zip < tar 멤버 {memberCount}")
+        except Exception as exc:  # noqa: BLE001 — tar 손상/부분추출 → unsafe(이번 run 제외, 다음 회복)
+            print(f"[pipeline] dartZip seed {code} 무결성 실패(제외): {exc}", flush=True)
+            continue
         n += 1
         safe.add(code)
     return n, safe

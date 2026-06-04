@@ -421,7 +421,10 @@ def _mergeKeepingSchema(target: Path, newRows: list[dict], schema: dict, accessi
         if c not in existing.columns:
             existing = existing.with_columns(pl.lit(None).alias(c))
     existing = existing.select(list(schema)).filter(~pl.col("rceptNo").is_in(list(accessions)))
-    return pl.concat([existing, newDf], how="vertical_relaxed")
+    merged = pl.concat([existing, newDf], how="vertical_relaxed")
+    # vertical_relaxed 는 *기존* dtype 으로 수렴 → 옛 parquet 의 dtype drift(Utf8/Int64 등)가
+    # 살아남아 schema 계약 위반. 병합 후 schema dtype 으로 강제 재캐스트(strict=False=실패시 null).
+    return merged.select([pl.col(c).cast(dt, strict=False) for c, dt in schema.items()])
 
 
 def _writeDf(df: pl.DataFrame, target: Path) -> int:
@@ -431,6 +434,17 @@ def _writeDf(df: pl.DataFrame, target: Path) -> int:
     df.write_parquet(str(tmp), compression="zstd")
     tmp.replace(target)
     return int(df.height)
+
+
+def _capContentRawDf(df: pl.DataFrame) -> pl.DataFrame:
+    """병합 board 의 누적 content_raw bytes 가 cap 초과면 비움(append 시 OOM 가드, df 버전)."""
+    if "contentRaw" not in df.columns:
+        return df
+    total = df.select(pl.col("contentRaw").str.len_bytes().sum()).item() or 0
+    if total > _CONTENT_RAW_MEM_CAP:
+        _log.warning("edgar append content_raw ~%.1fGB > cap — content_raw 비움", total / 1e9)
+        return df.with_columns(pl.lit("").alias("contentRaw"))
+    return df
 
 
 def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = False) -> dict[str, int]:
@@ -503,6 +517,7 @@ def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = F
     accessions = {r["rceptNo"] for r in newBoard}
 
     mergedBoard = _mergeKeepingSchema(panelPath(ticker), newBoard, PANEL_SCHEMA, accessions)
+    mergedBoard = _capContentRawDf(mergedBoard)  # 병합 후 누적 cap(existing+new 합산)
     nRows = _writeDf(mergedBoard, panelPath(ticker))
 
     nCells = 0

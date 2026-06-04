@@ -230,19 +230,23 @@ def listRecentFilings(
             continue
         for line in resp.text.splitlines():
             parts = line.split("|")
-            if len(parts) != 5:
+            # 우측 파싱 — 회사명(2번째 필드)에 '|' 가 있어도 안전(CIK|Company|Form|Date|Filename).
+            if len(parts) < 5:
                 continue  # 헤더/구분선
-            cik, _company, form, filed, filename = parts
+            cik, form, filed, filename = parts[0], parts[-3], parts[-2], parts[-1]
             form = form.strip().upper()
+            filename = filename.strip()
             if (formSet is not None and form not in formSet) or not filename.endswith(".txt"):
                 continue
+            if not cik.strip().isdigit():
+                continue  # 헤더 라벨 라인("CIK|Company|...") 방어
             rows.append(
                 {
                     "cik": cik.strip().zfill(10),
                     "form": form,
                     "filing_date": filed.strip(),
                     "accession_no": filename.rsplit("/", 1)[-1][:-4],
-                    "txt_url": f"{_ARCHIVES_ROOT}/{filename.strip()}",
+                    "txt_url": f"{_ARCHIVES_ROOT}/{filename}",
                 }
             )
     return rows
