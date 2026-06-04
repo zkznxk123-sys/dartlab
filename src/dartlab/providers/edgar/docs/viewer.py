@@ -21,19 +21,19 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.providers.dart.docs.viewer import (
+from dartlab.providers.dart.viewer import (
     ViewerBlock,
     _buildTextBlock,  # noqa: E402  (helper 재사용)
     _periodCols,
 )
-from dartlab.providers.dart.docs.viewer import (
+from dartlab.providers.dart.viewer import (
     viewerTextDocument as _dartViewerTextDocument,
 )
-from dartlab.providers.dart.docs.viewerSerialize import (
+from dartlab.providers.dart.viewerSerialize import (
     serializeViewerBlock,
     serializeViewerTextDocument,
 )
-from dartlab.providers.dart.docs.viewerTable import _buildTableBlock
+from dartlab.providers.dart.viewerTable import _buildTableBlock
 
 __all__ = [
     "ViewerBlock",

@@ -571,7 +571,7 @@ def apiViewerDoc(
 def apiCompanyShowAll(code: str, topic: str, raw: bool = Query(False)):
     """topic의 전 기간 viewer 블록 일괄 반환."""
     try:
-        from dartlab.providers.dart.docs.viewer import (
+        from dartlab.providers.dart.viewer import (
             serializeViewerBlock,
             serializeViewerTextDocument,
             viewerBlocks,
@@ -595,8 +595,8 @@ def apiCompanyShowAll(code: str, topic: str, raw: bool = Query(False)):
 async def apiParseRawTable(code: str, topic: str, blockIdx: int):
     """원문 테이블 블록을 구조화 DataFrame으로 파싱."""
     try:
-        from dartlab.providers.dart.docs.viewer import viewerBlocks
         from dartlab.providers.dart.tableAI import parseRawMarkdownBlock
+        from dartlab.providers.dart.viewer import viewerBlocks
 
         company = getCompany(code)
         blocks = viewerBlocks(company, topic)
