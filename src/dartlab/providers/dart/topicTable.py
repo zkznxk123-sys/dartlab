@@ -86,4 +86,20 @@ def topicTable(
     return df
 
 
+def __getattr__(name: str):
+    """레지스트리 디스패치 호환 — ``getattr(topicTable_module, topic)(code)`` → ``topicTable(code, topic)``.
+
+    ``_importAndCall(modulePath, funcName, code)`` 가 ``getattr(module, funcName)(code)`` 라,
+    DataEntry modulePath 를 ``providers.dart.topicTable`` 로만 바꾸면(funcName=topic) 본
+    ``__getattr__`` 가 각 topic 을 curry 한 callable 로 노출 → 35 파서 진입점이 한 곳으로.
+    """
+    if name in TOPIC_REGISTRY:
+
+        def _topicFn(stockCode: str, *, period: str | None = None, **_kw):
+            return topicTable(stockCode, name, period=period)
+
+        return _topicFn
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = ["topicTable", "TOPIC_REGISTRY"]
