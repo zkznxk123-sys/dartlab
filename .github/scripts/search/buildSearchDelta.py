@@ -50,22 +50,10 @@ def main() -> int:
     fillContent()
     print(f"  content 채우기 완료, {time.perf_counter() - t0:.0f}초")
 
-    # Phase 2.5: allFilings parquet HF 업로드 (lookback 기간 신규/정정/retry 반영)
-    if hfToken:
-        print("[delta] Phase 2.5: allFilings HF 업로드")
-        from datetime import datetime as _dt
-        from datetime import timedelta as _td
-
-        from dartlab.gather.dart.allFilingsCollector import pushAllFilings
-
-        # lookback 기간의 일자만 — 옛 immutable parquet 재업로드 비용 회피.
-        _today = _dt.now()
-        _lookbackDates = [(_today - _td(days=i)).strftime("%Y%m%d") for i in range(lookback)]
-        t0 = time.perf_counter()
-        nUp = pushAllFilings(_lookbackDates, token=hfToken)
-        print(f"  allFilings 업로드: {nUp} 파일, {time.perf_counter() - t0:.0f}초")
-    else:
-        print("[delta] Phase 2.5: HF_TOKEN 없음 — allFilings 업로드 skip")
+    # Phase 2.5 제거 — allFilings parquet HF 업로드 단일 소유자 = `dartlab.pipeline allFilings`
+    # (Job 2, originalSync.yml). 본 워크플로는 검색 delta 인덱스용 content 만 로컬 수집(Phase 1/2)
+    # 하고 HF push 는 하지 않는다. 옛 이중 push(여기 30일 + Job 2 7일 → 같은 dart/allFilings 경로)
+    # 가 동시각 commit 충돌(412)·중복 업로드를 유발했음 — 단일 소유로 일원화.
 
     # Phase 3: delta 인덱스 빌드
     print("[delta] Phase 3: content delta 세그먼트 빌드")

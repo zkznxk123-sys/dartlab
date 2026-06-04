@@ -79,6 +79,9 @@ def _migrateOne(src: Path, dst: Path | None, *, dry_run: bool) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()  # prebuild = offline only (로컬 parquet 읽기/쓰기뿐, 네트워크 0)
     parser = argparse.ArgumentParser(description="HF parquet bitemporal schema 1 회용 마이그레이션")
     parser.add_argument("--in-dir", type=Path, default=_DEFAULT_IN_DIR)
     parser.add_argument("--out-dir", type=Path, default=_DEFAULT_OUT_DIR)

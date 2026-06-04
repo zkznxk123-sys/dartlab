@@ -1,10 +1,12 @@
-"""allFilings stage — 비정기 공시 월별 parquet forward 증분 (recent N days).
+"""allFilings stage — 비정기 공시 **일별** parquet forward 증분 (recent N days).
 
 원본=SSOT 전략([[project_original_ssot_strategy]]): allFilings 는 원본 zip 보관 안 함 —
-``collectMetaRange``+``fillContent`` 로 일자별 parquet(``data/dart/allFilings/{date}.parquet``)
-만 유지. 정기보고서(사업/분기/반기)는 ``report_nm`` 으로 자동 제외 → docs(정기 zip) 와 중복 0.
-``pushAllFilings`` 가 자체 HF 업로드(``_meta`` 제외). lookback 일수는 ``SYNC_LOOKBACK_DAYS``
-env(기본 7) 또는 ``DART_ALLFILINGS_LOOKBACK``.
+``collectMetaRange``+``fillContent`` 로 **일자별** parquet(``data/dart/allFilings/{date}.parquet``,
+``{date}``=YYYYMMDD)만 유지. 일자가 immutable 키라 윈도가 월 경계를 넘어도 손상 0(각 날짜 독립
+파일). 정기보고서(사업/분기/반기)는 ``report_nm`` 으로 자동 제외 → docs(정기 zip) 와 중복 0.
+``pushAllFilings`` 가 자체 HF 업로드(``_meta`` 제외, dart/allFilings 단일 소유 = 본 stage —
+searchIndexDelta 의 옛 이중 push 제거됨). lookback 일수는 ``SYNC_LOOKBACK_DAYS`` env(기본 7)
+또는 ``DART_ALLFILINGS_LOOKBACK``.
 """
 
 from __future__ import annotations

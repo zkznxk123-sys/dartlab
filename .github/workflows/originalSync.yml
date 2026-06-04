@@ -5,13 +5,17 @@ name: Original SSOT Sync
 #  ① dart-zip   : 정기보고서 원본 zip archive(증분) → 변경 종목 HF seed → panel 빌드
 #                 → dartOriginal(tar) + panel HF push.  (dartlab.pipeline dartZip)
 #  ② allfilings : 비정기 공시 월별 parquet forward 7일 증분.  (dartlab.pipeline allFilings)
-#  ③ edgar      : panel 빌드(증분, 기존 board skip) + deploy. 원본 archive 는
-#                 EDGAR_ARCHIVE=1 일 때만(무겁고 rate-limited — 주간/dispatch 권장).
+#  ③ edgar      : panel per-filing 증분 — daily-index 로 신규 재무공시 발견 → 영향 ticker
+#                 기존 panel HF seed → 신규 accession 만 append → 변경분 deploy → raw 폐기.
+#                 EDGAR_FULL_REBUILD=1 일 때만 전 universe 부트스트랩(dispatch, 디스크 floor).
 #
 # cron 0 2 UTC = KST 11:00 — kindlist(00:00) 후, edgarSync(04:30) 전 빈 창(race 회피).
-# per-job concurrency 로 기존 cron 과 path-family 격리:
-#   dart-zip → hf-dart-push(dataSync 와 직렬) · allfilings → hf-dart-allfilings-push(전용)
-#   edgar    → hf-edgar-push(edgarSync 와 직렬).
+# per-job concurrency 로 기존 cron 과 HF-repo-family 직렬화(412 commit-conflict 회피):
+#   dart-zip · allfilings → hf-dart-push — 둘 다 메인 public repo(eddmpython/dartlab-data,
+#     panel·allFilings 동거)에 push 하므로 dataSync/dartNewStocks/dataPrebuild/valuationSnapshot
+#     과 같은 그룹으로 직렬화(cancel-in-progress:false = 큐잉). dartOriginal(private repo)은
+#     별 repo 라 무관하나 dart-zip 한 job 이 panel+original 둘 다 다뤄 자연 직렬.
+#   edgar → hf-edgar-push(edgarSync 와 직렬).
 # ──────────────────────────────────────────────────────────────
 
 on:
@@ -28,13 +32,13 @@ on:
         description: 'archive/allFilings forward 윈도 (일)'
         default: '7'
         type: string
-      edgar_archive:
-        description: 'EDGAR 원본 archive 수행 (true=주간 풀빌드, false=기존 txt 빌드만)'
+      edgar_full_rebuild:
+        description: 'EDGAR 전 universe 부트스트랩 재빌드 (true=무겁다·디스크 floor 가드, false=일간 per-filing 증분)'
         default: 'false'
         type: string
 
 permissions:
-  contents: write
+  contents: read  # HF push 만(HF_TOKEN) — git commit/release 없음. 최소권한.
 
 jobs:
   dart-zip:
@@ -67,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     concurrency:
-      group: hf-dart-allfilings-push
+      group: hf-dart-push  # 메인 public repo 동거 → dart-zip/dataSync 와 직렬(412 회피)
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
@@ -103,9 +107,13 @@ jobs:
         run: uv sync
       - name: Smoke import
         run: uv run python -c "import dartlab"
-      - name: EDGAR panel 빌드(증분) + deploy
+      - name: EDGAR panel per-filing 증분(daily-index 발견 → append) + deploy
+        # 일간 = per-filing 증분(raw 폐기 정합): daily-index 로 신규 재무공시 발견 → 영향 ticker
+        # 기존 panel HF seed → 신규 accession 만 fetch·append → 변경분 deploy → raw 폐기.
+        # EDGAR_FULL_REBUILD=1(dispatch)일 때만 전 universe 부트스트랩(무겁다, 디스크 floor 가드).
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          EDGAR_ARCHIVE: ${{ github.event.inputs.edgar_archive == 'true' && '1' || '0' }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+          EDGAR_FULL_REBUILD: ${{ github.event.inputs.edgar_full_rebuild == 'true' && '1' || '0' }}
           EDGAR_SINCE_YEAR: '2015'
         run: uv run python -X utf8 -m dartlab.pipeline edgarPanel

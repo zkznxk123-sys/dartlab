@@ -243,17 +243,11 @@ jobs:
       # docs 농장 은퇴 — sections SSOT artifact 빌드/업로드 스텝 제거(buildSections farm 삭제).
       # HF 기존 sections 데이터는 보존(삭제하지 않음). panel 이 공시 수평화 단일 표면.
 
-      # online 1패스 panel (디스크 zip 0): docs.parquet rcept → DART API 메모리 fetch →
-      # buildPanelFromStream → 14-col parquet + HF push. 통합 진입점(dartlab.pipeline) 경유 —
-      # build+upload 내부 수행. PANEL_ONLINE_ENABLED 게이트 제거: panelXbrlRef(refScan 1회
-      # build-input) 부재 시 stage 가 design-in graceful skip(rc=0)이라 게이트 불필요.
-      - name: Build + upload panel (online 1-pass → HF)
-        if: hashFiles('dist/changed_docs.txt') != ''
-        run: uv run python -X utf8 -m dartlab.pipeline panel --mode online
-        env:
-          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          PANEL_WORKERS: "4"
+      # panel 빌드+업로드 단일 소유자 = originalSync.yml `dart-zip`(Job 1, offline).
+      # 원본=SSOT 전략([[project_original_ssot_strategy]]): 정기 zip 보관 + 그 zip 으로 panel
+      # 빌드가 authoritative. 옛 online 1패스 panel(여기 06:00/18:00, buildPanelFromStream)을
+      # 제거 — dart-zip(02:00, buildPanelAll from zip)과 같은 dart/panel/{code}.parquet 을
+      # 이중 소유(빌더 발산 시 실행 순서로 산출물 flip)하던 것을 zip-SSOT 단일 소유로 정리.
 
       # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 
