@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib
+
 import polars as pl
 import pytest
 
@@ -30,7 +32,9 @@ class TestDartCompanyLiveFilings:
                     }
                 )
 
-        monkeypatch.setattr("dartlab.gather.dart.dart.OpenDart", FakeOpenDart)
+        # dartlab.gather.dart 속성은 GatherEntry 로 shadow 되어 monkeypatch dotted-path 해소가 깨진다
+        # → 실제 서브모듈을 importlib 로 얻어 patch(프로덕션도 importlib.import_module 로 접근).
+        monkeypatch.setattr(importlib.import_module("dartlab.gather.dart.dart"), "OpenDart", FakeOpenDart)
 
         company = DartCompany.__new__(DartCompany)
         company.stockCode = "005930"
@@ -58,7 +62,9 @@ class TestDartCompanyLiveFilings:
                 assert rceptNo == "20240312000736"
                 return "<html><body>단일판매공급계약 본문 " + ("추가 내용 " * 10) + "</body></html>"
 
-        monkeypatch.setattr("dartlab.gather.dart.dart.OpenDart", FakeOpenDart)
+        # dartlab.gather.dart 속성은 GatherEntry 로 shadow 되어 monkeypatch dotted-path 해소가 깨진다
+        # → 실제 서브모듈을 importlib 로 얻어 patch(프로덕션도 importlib.import_module 로 접근).
+        monkeypatch.setattr(importlib.import_module("dartlab.gather.dart.dart"), "OpenDart", FakeOpenDart)
 
         company = DartCompany.__new__(DartCompany)
         company.stockCode = "005930"
@@ -133,7 +139,7 @@ class TestEdgarCompanyLiveFilings:
                 assert ticker == "AAPL"
                 return FakeOpenEdgarCompany()
 
-        monkeypatch.setattr("dartlab.gather.edgar.edgar.OpenEdgar", FakeOpenEdgar)
+        monkeypatch.setattr(importlib.import_module("dartlab.gather.edgar.edgar"), "OpenEdgar", FakeOpenEdgar)
 
         company = EdgarCompany.__new__(EdgarCompany)
         company.ticker = "AAPL"
@@ -157,14 +163,13 @@ class TestEdgarCompanyLiveFilings:
     def test_read_filing_uses_url_and_text_fallback(self, monkeypatch):
         from dartlab.providers.edgar.company import Company as EdgarCompany
 
+        _fetchMod = importlib.import_module("dartlab.gather.edgar.docs.fetch")
         monkeypatch.setattr(
-            "dartlab.gather.edgar.docs.fetch._downloadFilingSource",
+            _fetchMod,
+            "_downloadFilingSource",
             lambda filing: "<html><body>Quarterly filing body</body></html>",
         )
-        monkeypatch.setattr(
-            "dartlab.gather.edgar.docs.fetch._htmlToText",
-            lambda raw: "Quarterly filing body",
-        )
+        monkeypatch.setattr(_fetchMod, "_htmlToText", lambda raw: "Quarterly filing body")
 
         company = EdgarCompany.__new__(EdgarCompany)
         company.ticker = "AAPL"

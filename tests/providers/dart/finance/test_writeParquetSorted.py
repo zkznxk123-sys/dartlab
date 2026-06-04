@@ -34,7 +34,7 @@ def _sampleFinanceDf() -> pl.DataFrame:
 
 def test_finance_path_applies_sort(tmp_path: Path) -> None:
     """``data/dart/finance/`` 경로면 sj_div 등 sort 키 적용."""
-    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+    from dartlab.providers.dart.build.saver import writeParquetSorted
 
     dest = tmp_path / "data" / "dart" / "finance" / "005930.parquet"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -50,7 +50,7 @@ def test_finance_path_applies_sort(tmp_path: Path) -> None:
 
 def test_non_dart_path_no_sort(tmp_path: Path) -> None:
     """카테고리 매칭 안 되는 경로 → 원본 순서 유지."""
-    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+    from dartlab.providers.dart.build.saver import writeParquetSorted
 
     dest = tmp_path / "misc" / "test.parquet"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -65,7 +65,7 @@ def test_non_dart_path_no_sort(tmp_path: Path) -> None:
 
 def test_row_group_size_and_statistics(tmp_path: Path) -> None:
     """row_group_size 와 statistics 가 적용 — predicate pushdown 전제."""
-    from dartlab.providers.dart.openapi.saver import _ROW_GROUP_SIZE, writeParquetSorted
+    from dartlab.providers.dart.build.saver import _ROW_GROUP_SIZE, writeParquetSorted
 
     dest = tmp_path / "data" / "dart" / "finance" / "005930.parquet"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -97,7 +97,7 @@ def test_row_group_size_and_statistics(tmp_path: Path) -> None:
 
 def test_atomic_write_no_tmp_left(tmp_path: Path) -> None:
     """원자적 write — tmp 파일이 dest 옆에 남지 않음."""
-    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+    from dartlab.providers.dart.build.saver import writeParquetSorted
 
     dest = tmp_path / "data" / "dart" / "finance" / "005930.parquet"
     dest.parent.mkdir(parents=True, exist_ok=True)

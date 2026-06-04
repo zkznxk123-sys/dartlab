@@ -674,25 +674,44 @@ def batchCollectAll(
 ) -> dict[str, dict[str, int]]:
     """전체 상장종목 배치 수집.
 
-    mode:
-      "new" — 파일 없는 종목만
-      "all" — 전체
+    Capabilities:
+        - 상장 universe(코넥스 제외) 전 종목을 카테고리별로 순회 수집한다. mode="new" 는 파일
+          없는 종목만, "all" 은 전체. incremental 은 종목별 부분 진행 재개를 허용한다.
 
     Args:
-        categories: 인자.
-        mode: 인자.
-        maxWorkers: 인자.
-        incremental: 인자.
-        showProgress: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> batchCollectAll(...)
+        categories: 수집 카테고리 list (None=기본 전체).
+        mode: "new"(파일 없는 종목만) 또는 "all"(전체).
+        maxWorkers: 동시 워커 수 (None=기본).
+        incremental: 종목별 증분 재개 여부.
+        showProgress: 진행 로그 출력.
 
     Returns:
         dict[str, dict[str, int]] — 종목 × 카테고리 별 수집 통계.
+
+    Raises:
+        없음 — 개별 종목 실패는 통계로 흡수.
+
+    Example:
+        >>> batchCollectAll(mode="new")  # doctest: +SKIP
+
+    Guide:
+        - 전 종목은 무겁다 — categories/mode 로 범위 조절. incremental=True 로 중단 후 재개.
+
+    SeeAlso:
+        - ``batchCollect`` — 단일 종목 배치.
+        - ``core.listingResolver.getListingResolver`` — universe 해소.
+
+    Requires:
+        - 인터넷 + DART API 키 + 쓰기 가능 ``data/``.
+
+    When:
+        - 운영자가 전 상장 universe 원본을 수집/백필할 때.
+
+    How:
+        - listingResolver universe(코넥스 제외) → 종목별 batchCollect → 통계 집계.
+
+    AIContext:
+        - 배치 수집 — 운영자/CLI 전용(무겁다). 분석 파이프라인에서 호출 금지.
     """
     from dartlab.core.listingResolver import getListingResolver
 

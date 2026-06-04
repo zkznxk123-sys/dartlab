@@ -510,7 +510,22 @@ class _DartFetchProvider:
     """core.dartClient.DartFetchProvider 구현 — gather 가 DART fetch 전담."""
 
     def makeClient(self, apiKey=None, apiKeys=None, requestsPerMinute=580):
-        """멀티 키 DartClient 인스턴스 생성."""
+        """멀티 키 DartClient 인스턴스 생성.
+
+        Args:
+            apiKey: 단일 DART API 키 (None=env/.env 해소).
+            apiKeys: 다중 키 list (rate-limit 분산).
+            requestsPerMinute: 분당 요청 상한 (키별).
+
+        Returns:
+            DartClient — 멀티 키 rate-limit HTTP 클라이언트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> _DartFetchProvider().makeClient()  # doctest: +SKIP
+        """
         return DartClient(apiKey=apiKey, apiKeys=apiKeys, requestsPerMinute=requestsPerMinute)
 
     def resolveKeys(self, apiKey=None, apiKeys=None):

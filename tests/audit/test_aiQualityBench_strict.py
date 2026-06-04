@@ -12,12 +12,13 @@ import pytest
 
 from dartlab.ai.contracts import TraceEvent
 
-# tests/_attempts 는 pytest collection 제외 — direct import path 추가
+# tests/_attempts 는 gitignore 스크래치 — CI 엔 부재(dd11d47b4 untrack). direct import path 추가 후
+# importorskip 로 가드: 로컬(존재)이면 실행, CI(부재)면 collection 단계서 skip(ImportError 방지).
 _ATTEMPTS = Path(__file__).resolve().parents[1] / "_attempts"
 if str(_ATTEMPTS.parent) not in sys.path:
     sys.path.insert(0, str(_ATTEMPTS.parent))
 
-from _attempts import aiQualityBench  # type: ignore  # noqa: E402
+aiQualityBench = pytest.importorskip("_attempts.aiQualityBench")
 
 pytestmark = pytest.mark.unit
 

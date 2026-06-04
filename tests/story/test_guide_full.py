@@ -139,7 +139,7 @@ class TestHints:
 
         steps = nextSteps(company)
         assert any("BS" in s for s in steps)
-        assert any("show" in s for s in steps)
+        assert any("panel" in s for s in steps)
 
     def test_next_steps_without_finance(self):
         from dartlab.core.messaging import nextSteps
@@ -151,7 +151,7 @@ class TestHints:
         steps = nextSteps(company)
         # No BS/IS/CF/ratios steps
         assert not any("c.BS" in s for s in steps)
-        assert any("show" in s for s in steps)
+        assert any("panel" in s for s in steps)
 
     def test_on_analysis_requested_with_axis(self):
         from dartlab.core.messaging import onAnalysisRequested

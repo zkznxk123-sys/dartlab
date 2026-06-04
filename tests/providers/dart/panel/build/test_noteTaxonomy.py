@@ -20,16 +20,21 @@ pytestmark = pytest.mark.unit
 def _writeCorpus(base, rows: list[tuple[str, str, str]], *, n: int = 1) -> None:
     """합성 panel 코퍼스 — rows=(disclosureKey, xbrlClass, blockLeaf), n 회사에 동일 분포 복제."""
     for i in range(n):
-        d = base / f"{i:06d}"
-        d.mkdir(parents=True, exist_ok=True)
+        # flat 경로 회귀(b633c4388) — {code}.parquet + period 컬럼(빌더가 period 필터)
         pl.DataFrame(
             {
                 "disclosureKey": [r[0] for r in rows],
                 "xbrlClass": [r[1] for r in rows],
                 "blockLeaf": [r[2] for r in rows],
+                "period": ["2024Q4"] * len(rows),
             },
-            schema={"disclosureKey": pl.Utf8, "xbrlClass": pl.Utf8, "blockLeaf": pl.Utf8},
-        ).write_parquet(str(d / "2024Q4.parquet"))
+            schema={
+                "disclosureKey": pl.Utf8,
+                "xbrlClass": pl.Utf8,
+                "blockLeaf": pl.Utf8,
+                "period": pl.Utf8,
+            },
+        ).write_parquet(str(base / f"{i:06d}.parquet"))
 
 
 def test_build_dominant_accepted(tmp_path) -> None:

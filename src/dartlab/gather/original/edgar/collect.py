@@ -179,6 +179,7 @@ def listRecentFilings(
     dates: list[str] | tuple[str, ...],
     *,
     forms: list[str] | tuple[str, ...] | None = None,
+    limit: int | None = None,
 ) -> list[dict[str, str]]:
     """SEC daily-index(master.idx)로 날짜들의 **전 발행자** 공시를 열거 — panel 증분 발견용.
 
@@ -191,6 +192,7 @@ def listRecentFilings(
     Args:
         dates: ``YYYYMMDD`` 일자 list(윈도). 순서 무관.
         forms: form 화이트리스트(예: ``["10-K","10-Q","20-F","40-F"]``). None 이면 전 form.
+        limit: 최대 반환 공시 수(None=무제한). 발견 순서대로 cap(샘플링·테스트용).
 
     Returns:
         list[dict] — 각 dict 키 ``cik``(10-pad) · ``form`` · ``filing_date`` ·
@@ -249,10 +251,12 @@ def listRecentFilings(
                     "txt_url": f"{_ARCHIVES_ROOT}/{filename}",
                 }
             )
+            if limit is not None and len(rows) >= limit:
+                return rows
     return rows
 
 
-def fetchFilings(rows: list[dict[str, str]]) -> dict[str, list]:
+def fetchFilings(rows: list[dict[str, str]], *, limit: int | None = None) -> dict[str, list]:
     """``listRecentFilings`` 행들의 full submission ``.txt`` 수집 — 기존 skip, CIK 별 그룹.
 
     Capabilities:
@@ -261,6 +265,7 @@ def fetchFilings(rows: list[dict[str, str]]) -> dict[str, list]:
 
     Args:
         rows: ``listRecentFilings`` 산출(또는 동형). ``cik``·``accession_no``·``txt_url`` 필요.
+        limit: 최대 수집 행 수(None=무제한). 앞에서부터 cap.
 
     Returns:
         dict[str, list[Path]] — ``{cik: [저장된 .txt Path, ...]}`` (skip 포함 = 존재하는 경로).
@@ -282,6 +287,8 @@ def fetchFilings(rows: list[dict[str, str]]) -> dict[str, list]:
         - panel 증분에서 발견된 신규 공시 본문을 append 직전 내려받을 때.
     """
     grouped: dict[str, list] = {}
+    if limit is not None:
+        rows = rows[:limit]
     for row in rows:
         cik = row["cik"]
         outDir = edgarDir(cik)

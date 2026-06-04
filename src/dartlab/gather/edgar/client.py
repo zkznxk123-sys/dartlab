@@ -169,7 +169,20 @@ class _EdgarFetchProvider:
     """core.edgarClient.EdgarFetchProvider 구현 — gather 가 SEC fetch+normalize 전담."""
 
     def makeClient(self, **kwargs):
-        """SEC HTTP 클라이언트 인스턴스 생성."""
+        """SEC HTTP 클라이언트 인스턴스 생성.
+
+        Args:
+            **kwargs: EdgarClient 생성자로 forward (userAgent·timeout 등).
+
+        Returns:
+            EdgarClient — SEC 요청용 HTTP 클라이언트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> _EdgarFetchProvider().makeClient()  # doctest: +SKIP
+        """
         return EdgarClient(**kwargs)
 
     def call(self, module, func, *args, **kwargs):

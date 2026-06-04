@@ -30,7 +30,12 @@ def _writeDay(root: Path, market: str, day: str, rows: list[dict]) -> None:
 def isolatedArchive(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """LOCAL_ROOT 를 tmp 로 격리 + lru_cache 초기화."""
     monkeypatch.setattr(newsHeadlines, "_LOCAL_ROOT", tmp_path)
+    monkeypatch.setattr(newsHeadlines, "_GDELT_ROOT", tmp_path)  # GDELT 백필 경로도 격리(실데이터 누수 차단)
+    # 로컬 부재 시 _loadDay/_loadGdeltDay 가 HF loadData 로 실데이터 auto-download → 격리 깨짐.
+    # loadData 를 None 으로 막아 로컬(tmp)만 보게 한다(완전 오프라인 단위 테스트).
+    monkeypatch.setattr("dartlab.core.dataLoader.loadData", lambda *a, **k: None)
     newsHeadlines._loadDay.cache_clear()
+    newsHeadlines._loadGdeltDay.cache_clear()
     return tmp_path
 
 
