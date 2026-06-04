@@ -41,7 +41,11 @@ def sectionTexts(
     df = readLong(code, marketNs=marketNs, periods=periods)
     if df is None or df.is_empty():
         return None
-    cols = [c for c in ("sectionLeaf", "contentRaw", "period", "chapter", "disclosureKey") if c in df.columns]
+    cols = [
+        c
+        for c in ("sectionLeaf", "contentRaw", "period", "chapter", "disclosureKey", "blockOrder", "rceptNo")
+        if c in df.columns
+    ]
     return df.select(cols)
 
 

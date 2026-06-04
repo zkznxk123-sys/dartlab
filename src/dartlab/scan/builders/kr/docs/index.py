@@ -136,74 +136,64 @@ def buildDocsIndex(
         - :data:`_OUTPUT_SCHEMA` — 컬럼 contract
     """
     from dartlab.core.dataLoader import _dataDir
+    from dartlab.core.listingResolver import getListingResolver
+    from dartlab.frame.sections import sectionTexts
 
-    docsRoot = Path(docsDir) if docsDir else Path(_dataDir("docs"))
-    if not docsRoot.exists():
-        raise FileNotFoundError(f"docs 디렉토리 부재: {docsRoot}")
+    # docs.parquet 농장 은퇴 → L1.5 frame.sections(panel 섹션) SSOT. docsDir override 는
+    # 하위호환(미지정 시 panel dir glob 으로 종목 enum).
+    panelRoot = Path(docsDir) if docsDir else Path(_dataDir("panel"))
+    if not panelRoot.exists():
+        raise FileNotFoundError(f"panel 디렉토리 부재: {panelRoot}")
 
-    parquetFiles = sorted(docsRoot.glob(_DEFAULT_DOCS_PATTERN))
-    if not parquetFiles:
-        raise FileNotFoundError(f"docs parquet 부재: {docsRoot}")
+    codes = sorted(p.stem for p in panelRoot.glob(_DEFAULT_DOCS_PATTERN))
+    if not codes:
+        raise FileNotFoundError(f"panel parquet 부재: {panelRoot}")
 
     if verbose:
-        log.info(
-            "[docsIndex] %d parquet 스캔 시작 (batchSize=%d, sinceYear=%d)", len(parquetFiles), batchSize, sinceYear
-        )
+        log.info("[docsIndex] %d 종목 스캔 시작 (batchSize=%d, sinceYear=%d)", len(codes), batchSize, sinceYear)
 
+    resolver = getListingResolver()
     t0 = time.time()
     chunks: list[pl.DataFrame] = []
     failedFiles = 0
     totalRows = 0
 
-    keepCols = [
-        "stock_code",
-        "corp_name",
-        "year",
-        "report_type",
-        "section_order",
-        "section_title",
-        "section_url",
-        "rcept_no",
-    ]
-
-    for batchIdx, batch in enumerate(_chunked(parquetFiles, batchSize)):
+    for batchIdx, batch in enumerate(_chunked(codes, batchSize)):
         batch_dfs: list[pl.DataFrame] = []
-        for pf in batch:
+        for code in batch:
             try:
-                lf = pl.scan_parquet(str(pf)).filter(pl.col("year") >= sinceYear)
-                # 본문 길이 + table 여부만 추출 → content drop
-                df = lf.select(
-                    keepCols
-                    + [
-                        pl.col("section_content").str.len_chars().cast(pl.UInt32).alias("contentLength"),
-                        pl.col("section_content").str.contains(r"\|").alias("hasTable"),
-                    ]
-                ).collect(engine="streaming")
+                src = sectionTexts(code)
             except (pl.exceptions.PolarsError, OSError):
                 failedFiles += 1
                 continue
+            if src is None or src.is_empty():
+                continue
+            corpName = (resolver.codeToName(code) if resolver else None) or ""
+            # panel period(YYYYQn) → year + reportType(Q4=annual). blockOrder=sectionOrder,
+            # rceptNo=docId. panel 은 section_url 없음(빈 문자열). hasTable=raw XML <TABLE>.
+            df = src.with_columns(
+                pl.col("period").str.slice(0, 4).cast(pl.Int32, strict=False).alias("year"),
+                pl.when(pl.col("period").str.slice(4) == "Q4")
+                .then(pl.lit("annual"))
+                .otherwise(pl.col("period").str.slice(4))
+                .alias("reportType"),
+            )
+            df = df.filter(pl.col("year") >= sinceYear)
             if df.is_empty():
                 continue
-            # 컬럼명 camelCase 정렬
-            df = df.rename(
-                {
-                    "stock_code": "stockCode",
-                    "corp_name": "corpName",
-                    "report_type": "reportType",
-                    "section_order": "sectionOrder",
-                    "section_title": "sectionTitle",
-                    "section_url": "sectionUrl",
-                    "rcept_no": "docId",
-                }
-            )
-            # year cast Int32
-            df = df.with_columns(pl.col("year").cast(pl.Int32))
-            # periodKey 생성
             df = df.with_columns(
+                pl.lit(code).alias("stockCode"),
+                pl.lit(corpName).alias("corpName"),
                 pl.when(pl.col("reportType") == "annual")
                 .then(pl.col("year").cast(pl.Utf8))
                 .otherwise(pl.col("year").cast(pl.Utf8) + pl.col("reportType"))
-                .alias("periodKey")
+                .alias("periodKey"),
+                pl.col("blockOrder").cast(pl.Int32).alias("sectionOrder"),
+                pl.col("sectionLeaf").alias("sectionTitle"),
+                pl.lit("").alias("sectionUrl"),
+                pl.col("contentRaw").str.len_chars().cast(pl.UInt32).alias("contentLength"),
+                pl.col("contentRaw").str.contains("<TABLE", literal=True).alias("hasTable"),
+                pl.col("rceptNo").alias("docId"),
             )
             df = df.select(list(_OUTPUT_SCHEMA.keys()))
             batch_dfs.append(df)
