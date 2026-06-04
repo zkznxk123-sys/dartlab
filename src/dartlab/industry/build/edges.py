@@ -267,7 +267,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         추출 → IndustryEdge 변환 → from+to+type 중복 제거.
 
     Requires:
-        - L1.5 frame: docs parquet 폴더 (`_docsDir()` 산출)
+        - providers.dart.sections: panel 섹션 본문 (`sectionTexts`)
         - reference: KindList (`_listingLookup`) — 상장사 code↔name 매핑
 
     See Also:
@@ -438,7 +438,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         정규화).
 
     Requires:
-        - L1.5 frame: docs parquet 폴더 + table_parser 헬퍼
+        - providers.dart.sections: panel 섹션 표 (`sectionTables`) + table_parser 헬퍼
         - reference: KindList (정규화된 회사명 매핑)
 
     See Also:
