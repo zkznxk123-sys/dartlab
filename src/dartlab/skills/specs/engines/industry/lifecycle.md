@@ -52,7 +52,7 @@ phases = dartlab.industry("semiconductor", lifecycle=True)
 
 # 2. 단일 종목 phase (자동 부착)
 c = dartlab.Company("005930")
-result = c.show("IS")
+result = c.panel("IS")
 result.data.industryBadge.phase   # "재도약"
 ```
 
@@ -67,7 +67,7 @@ result.data.industryBadge.phase   # "재도약"
    - **재도약** (resurgence): 쇠퇴 후 반등 (YoY < 0 직후 ≥ 10% 진입)
 3. 시계열 + 현재 phase 라벨 + confidence (sample size · 변동성 기반).
 
-`Company.show(...).data.industryBadge.phase` 는 자동 부착 — 별도 호출 불필요. 산업 단위 시계열은 명시 호출.
+`Company.panel(...).data.industryBadge.phase` 는 자동 부착 — 별도 호출 불필요. 산업 단위 시계열은 명시 호출.
 
 ## 대표 반환 형태
 
@@ -91,7 +91,7 @@ Company("005930").show("IS").data.industryBadge
 
 ## 기본 실행 순서
 
-1. **단일 종목 phase** — `Company.show("IS").data.industryBadge.phase` 그대로 인용 (자동 부착).
+1. **단일 종목 phase** — `Company.panel("IS").data.industryBadge.phase` 그대로 인용 (자동 부착).
 2. **산업 단위 phase 시계열** — `dartlab.industry(industryId, lifecycle=True)` 명시 호출.
 3. `phase` 답변에 `[conf:{confidence}]` 표기 (Vernon 3-phase 정의 기준 변동성).
 4. cross-industry phase 비교는 한계 명시 — 산업별 매출 단위·peer 수 차이.

@@ -339,7 +339,7 @@ import dartlab
 c = dartlab.Company("005930")
 c.panel                              # 동일 — 잡는 순간 wide pl.DataFrame
 c.panel("재고")                      # 섹션 행 (raw 공시)
-c.panel("IS")                        # 강한 소스 — finance 주입 (= c.show("IS"), 더 강한 정규화 숫자)
+c.panel("IS")                        # 강한 소스 — finance 주입 (XBRL 정규화 숫자)
 c.panel("dividend")                  # 강한 소스 — report 주입 (정형 공시)
 c.panel("IS", source="raw")          # raw 공시 강제 (오리지널)
 ```
@@ -398,7 +398,7 @@ Panel("005930")("재고")     # 또는 ("NT_D826380")
 ```
 
 ```text
-c.panel("IS")     # 강한 소스 — finance 주입 (c.show("IS") 와 동일)
+c.panel("IS")     # 강한 소스 — finance 주입 (XBRL 정규화 숫자)
 → pl.DataFrame  (snakeId · 항목 · 2026Q1 · 2025Q4 · ... — XBRL 정규화 숫자)
 ```
 

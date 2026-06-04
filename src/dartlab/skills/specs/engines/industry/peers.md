@@ -55,7 +55,7 @@ peer_codes = c.industry().peers
 # → ["000660", "042700", ...]  (같은 stage 종목코드)
 
 # 2. industryBadge (dict list, 자동 부착)
-result = c.show("IS")
+result = c.panel("IS")
 peer_dicts = result.data.industryBadge.peers
 # → [{"stockCode": "000660", "corpName": "SK하이닉스"}, ...]
 
@@ -67,7 +67,7 @@ peer_codes = nodes["종목코드"].to_list()
 ## 호출 동작
 
 1. `Company.industry()` → dict 반환의 `peers` 는 코드 list — 다른 엔진 호출 직접 사용.
-2. `Company.show(...).data.industryBadge.peers` → dict list — UI/문서 표시 (corpName 포함).
+2. `Company.panel(...).data.industryBadge.peers` → dict list — UI/문서 표시 (corpName 포함).
 3. 두 형식 SSOT 는 동일 매칭 — `nodes.json` 의 같은 stage 종목 (확률 0.5 이상 신뢰 매칭).
 4. peer 가 0 개면 산업·stage 분류 미등록 — 빈 list 반환 (None 아님). 추측 금지.
 

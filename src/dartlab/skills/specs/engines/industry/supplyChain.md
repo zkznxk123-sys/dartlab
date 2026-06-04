@@ -55,7 +55,7 @@ fab_only = dartlab.industry("semiconductor", stage="fab")
 
 # 3. 단일 종목 stage + stream (자동 부착)
 c = dartlab.Company("005930")
-badge = c.show("IS").data.industryBadge
+badge = c.panel("IS").data.industryBadge
 badge.stage      # "fab"
 badge.stream     # "midstream"
 ```

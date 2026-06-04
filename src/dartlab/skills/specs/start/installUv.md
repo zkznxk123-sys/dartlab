@@ -252,7 +252,7 @@ Colab 셀에서:
 
 import dartlab
 c = dartlab.Company("005930")
-c.show("BS")
+c.panel("BS")
 ```
 
 ---

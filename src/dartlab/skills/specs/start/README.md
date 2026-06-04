@@ -52,7 +52,7 @@ print(result)
 # 2) Python 직접 (3분, 코드)
 c = dartlab.Company("005930")
 print(c.corpName)        # "삼성전자"
-print(c.show("IS"))      # 손익계산서
+print(c.panel("IS"))      # 손익계산서
 
 # 3) CLI (2분, terminal)
 # $ dartlab help 외인

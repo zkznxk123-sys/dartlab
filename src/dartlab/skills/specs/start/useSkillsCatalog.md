@@ -162,7 +162,7 @@ skill 의 코드 예시를 그대로 실행한다 (또는 MCP tool 로 호출). 
 
 ## capability vs skill — 다른 결
 
-- **capability** = `Company.show` 같은 공개 함수 식별자 (코드 원천).
+- **capability** = `Company.panel` 같은 공개 함수 식별자 (코드 원천).
 - **skill** = 그 capability 를 어떤 절차로 쓰는지 + 입출력 + 검증 (사용 절차 SSOT).
 
 skill 본문은 capability 의 사용 설명. 세부 인자와 전체 반환 필드는 capability docstring 으로 검산한다 (skill 본문에 docstring 통째로 복사 금지 — SSOT 분리).

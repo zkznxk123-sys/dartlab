@@ -339,7 +339,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 - `tests/ai/test_ref_gate.py` — 숫자·날짜·랭킹 답 ref 없으면 GATE 차단. ref token 형식 `<refKind:id>` 단일
 - `tests/ai/test_providers.py` — 어댑터 schema 변환 단위 테스트
 - `tests/ai/test_outcome_log.py` — pending↔resolved 전환, idempotency, atomic temp+replace, asymmetric same/cross format, HTML separator 면역
-- `tests/ai/test_lookahead_filter.py` — `Company.show(asOf=...)` 가 미래 fiscal period / 가격 컬럼 drop
+- `tests/ai/test_lookahead_filter.py` — `Company.panel(asOf=...)` 가 미래 fiscal period / 가격 컬럼 drop
 - `tests/ai/test_runworkbench_dispatch.py` — chat-native LLM 의 `runWorkbench` tool 호출 시 workbench 5 패스 활성. mode != "analyze" AND tool 미호출 시 workbench 활성 0
 - `tests/ai/test_chat_native_harvest.py` — `agent.py` 종료 시 `decisions.jsonl` + `skill_stats.jsonl` + (stockCode 추출 시) `outcome_log` entry 작성
 - `tests/ai/test_provider_whitelist_single_source.py` — `_isLLMProvider` 가 `wired_provider_ids()` 만 사용. hardcoded provider set 0 건 (provider_catalog.py 외)

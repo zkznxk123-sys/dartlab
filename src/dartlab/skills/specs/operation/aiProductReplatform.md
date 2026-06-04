@@ -140,7 +140,7 @@ DartLab App
 ## Answer Quality Gate
 
 - 품질 판정은 “정상 종료”가 아니라 실제 답변 원문 기준으로 한다.
-- `삼성전자 재무제표 확인`은 `Company.show("BS")`, `Company.show("IS")`, `Company.show("CF")` 실행 결과를 사용하고, 핵심 계정은 조원/억원 포맷으로 보여준다.
+- `삼성전자 재무제표 확인`은 `Company.panel("BS")`, `Company.panel("IS")`, `Company.panel("CF")` 실행 결과를 사용하고, 핵심 계정은 조원/억원 포맷으로 보여준다.
 - `자산/부채/자본` 질문은 재무상태표 중심으로 답하고, 자산총계·부채총계·자본·부채/자본 비율 해석을 포함한다.
 - `A와 B 재무상태표 비교`는 두 회사를 모두 확정하고 같은 기준시점의 표와 핵심 차이를 함께 낸다.
 - `성장하는 회사`, `성장주`, `growth` 질문은 Skill OS 설명에서 멈추지 않고 `dartlab.scan("growth")`를 실행해 후보 evidence table을 낸다.

@@ -14,7 +14,7 @@ whenToUse:
 procedure:
   - 종목 코드 2 개 이상 결정 (한국 6 자리 또는 미국 ticker)
   - 토픽·기간 그리드 정의 (예 IS.revenue · 2024Q1~2024Q4)
-  - dartlab.scan 또는 Company.show 반복 호출로 raw 추출
+  - dartlab.scan 또는 Company.panel 반복 호출로 raw 추출
   - XBRL 표준 이름 매핑 적용 (provider canHandle 자동)
   - target × topic × period DataFrame 정규화
   - 결손은 NaN 으로 유지 (0 채움 금지)

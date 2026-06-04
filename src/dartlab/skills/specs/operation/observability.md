@@ -62,7 +62,7 @@ OpenTelemetry 호환 span 추가 가능 (server 측 한정):
 ```python
 from opentelemetry import trace
 tracer = trace.get_tracer("dartlab")
-with tracer.start_as_current_span("Company.show", attributes={"target": "005930"}):
+with tracer.start_as_current_span("Company.panel", attributes={"target": "005930"}):
     ...
 ```
 

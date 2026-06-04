@@ -134,7 +134,7 @@ custom = dartlab.scan("screen", spec={"filters": []})
 21 axis 횡단 스크리닝에서 다음 4 룰 강행 — 메모리 압박 + refs 0 회귀 차단.
 
 1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef="scan", args={"axis": "ratio", "metric": "roe"})` 양식. RunPython 으로 전 종목 parquet 직접 로드 금지 — Polars Rust 힙 누수 (Company 1 개 ≈ 200~500MB) 로 OOM 가능.
-2. **개별 종목 분석 질문에 scan 호출 금지** — "삼성전자 수익성" 처럼 단일 기업이면 `Company.show`/`Company.analysis` 사용. scan 은 *여러 종목 후보 찾기* 한정.
+2. **개별 종목 분석 질문에 scan 호출 금지** — "삼성전자 수익성" 처럼 단일 기업이면 `Company.panel`/`Company.analysis` 사용. scan 은 *여러 종목 후보 찾기* 한정.
 3. **scan 결과 후보 → 상위 N (보통 10~20) 만 다음 단계로 전달**. 전종목 결과 그대로 답변 본문 dump 금지.
 4. **본문 숫자에 `[datasetRef:...]` + `[tableRef:...]` inline 표기 필수** — 스캔 결과는 prebuild 시점 (asOf) 변동 큼.
 
@@ -247,7 +247,7 @@ agent (ai/mcp/server) 가 본 엔진을 호출할 때는 `EngineCall(apiRef="sca
 2. **scan 으로 횡단면 비교** — 같은 industryHint 안에서 `dartlab.scan(axis, universe={"industryHint": "반도체"})` 또는 결과 DataFrame 의 `industryName` 컬럼 필터.
 3. 답변에는 산업 라이프사이클 단계 + 공정/세부 분류 (전공정 FAB · 후공정 패키징 · 테스트 · 설계 · 소재 · 장비) 별 ranking 둘 다.
 
-단일 종목 답변에 부착되는 `industryBadge` (Company.show 응답) 는 같은 산업 종목 peers list 를 자동 포함 — 별도 industry 호출 없이 peer 후보 즉시 사용 가능.
+단일 종목 답변에 부착되는 `industryBadge` (Company.panel 응답) 는 같은 산업 종목 peers list 를 자동 포함 — 별도 industry 호출 없이 peer 후보 즉시 사용 가능.
 
 ## universe default
 

@@ -127,7 +127,7 @@ from dartlab.viz import emit_chart, emit_diagram
 import dartlab
 
 c = dartlab.Company("005930")
-ratios = c.show("ratios", freq="Q")
+ratios = c.panel("ratios", freq="Q")
 
 # 1. 시계열 line
 emit_chart({

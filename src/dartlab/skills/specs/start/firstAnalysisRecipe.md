@@ -98,7 +98,7 @@ dartlab 을 처음 만나는 사람·AI 가 **환경 준비 → walkthrough → 
 
 1. start.installUv — uv 로 dartlab 환경 준비. `uv add dartlab` 후 `Company("005930")` import 검증.
 2. start.quickStart — 8 단계 walkthrough 로 Company / sections / show / scan / ask 의 호출 흐름을 한 번에 통과.
-3. engines.company — 단일 기업 facade. `c.sections` · `c.show("BS")` · `c.trace("BS")` · `c.diff()` 로 회사 전체 지도와 source priority 이해.
+3. engines.company — 단일 기업 facade. `c.sections` · `c.panel("BS")` · `c.trace("BS")` · `c.diff()` 로 회사 전체 지도와 source priority 이해.
 4. engines.analysis — 22 분석 축 중 하나 선택 (`c.analysis("financial", "수익성")` 또는 `c.analysis("valuation", "가치평가")`).
 
 ## 단계별 핵심 호출
@@ -109,7 +109,7 @@ import dartlab
 # 단계 3 — 회사 facade
 c = dartlab.Company("005930")
 c.sections                       # topic × 기간 매트릭스
-c.show("BS")                     # 재무상태표 (source priority 적용)
+c.panel("BS")                     # 재무상태표 (source priority 적용)
 c.diff()                         # 어떤 topic 이 가장 변했나
 
 # 단계 4 — 분석 축
@@ -124,7 +124,7 @@ print(result)
 | 단계 | 검증 항목 |
 |---|---|
 | 1 | `uv run python -X utf8 -c "import dartlab; print(dartlab.__version__)"` 가 버전 출력 |
-| 2 | `c.show("IS")` 가 손익계산서 DataFrame 반환 |
+| 2 | `c.panel("IS")` 가 손익계산서 DataFrame 반환 |
 | 3 | `c.trace("BS")` 가 finance source 선택 확인 |
 | 4 | analysis 결과의 `tableRef` · `valueRef` · `dateRef` · `executionRef` 가 묶여 있음 |
 

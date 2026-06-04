@@ -37,7 +37,7 @@ procedure:
   - 3. Skills/ 문서 변경 기준을 확인한다.
   - '공개 API 메서드/함수/클래스 rename (예: `c.review()` → `c.story()`)'
   - '모듈 경로 이전 (예: `dartlab.engines.X` → `dartlab.providers.X`)'
-  - '폐기 (예: `c.docs.X` namespace → `c.show(topic)` 단일 진입)'
+  - '폐기 (예: `c.docs.X` namespace → `c.panel(topic)` 단일 진입)'
   - registry/dataclass 필드 rename, 변수/contextvar rename
 requiredEvidence:
   - skillRef
@@ -95,6 +95,6 @@ testUniverse:
 - 3. Skills/ 문서 변경 기준을 확인한다.
 - 공개 API 메서드/함수/클래스 rename (예: `c.review()` → `c.story()`)
 - 모듈 경로 이전 (예: `dartlab.engines.X` → `dartlab.providers.X`)
-- 폐기 (예: `c.docs.X` namespace → `c.show(topic)` 단일 진입)
+- 폐기 (예: `c.docs.X` namespace → `c.panel(topic)` 단일 진입)
 - registry/dataclass 필드 rename, 변수/contextvar rename
 
