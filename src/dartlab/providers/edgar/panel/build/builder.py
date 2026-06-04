@@ -374,6 +374,153 @@ def buildEdgarPanelAll(
     return out
 
 
+def existingAccessions(ticker: str) -> set[str]:
+    """기존 panel artifact 의 ``rceptNo``(=accession) 집합 — 증분 append 중복 판정용.
+
+    Args:
+        ticker: US ticker.
+
+    Returns:
+        set[str] — 기존 보드 parquet 의 accession 집합. 파일 부재/오류 시 빈 집합.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> existingAccessions("AAR")  # doctest: +SKIP
+        {'0001410578-25-001475', ...}
+    """
+    p = panelPath(ticker)
+    if not p.exists():
+        return set()
+    try:
+        df = pl.read_parquet(str(p), columns=["rceptNo"])
+    except (OSError, pl.exceptions.PolarsError):
+        return set()
+    return set(df["rceptNo"].cast(pl.Utf8).to_list())
+
+
+def _rowsToDf(rows: list[dict], schema: dict) -> pl.DataFrame:
+    """rows(dict list) → schema DataFrame (열 순서·타입 고정)."""
+    return pl.DataFrame({k: [r.get(k) for r in rows] for k in schema}, schema=schema)
+
+
+def _mergeKeepingSchema(target: Path, newRows: list[dict], schema: dict, accessions: set[str]) -> pl.DataFrame:
+    """기존 artifact 에서 ``accessions`` 행 제거 후 newRows append — schema 정렬 보존.
+
+    같은 accession(정정/재제출)은 기존 행 제거 후 재삽입(idempotent). 기존 부재면 newRows 만.
+    """
+    newDf = _rowsToDf(newRows, schema)
+    if not target.exists():
+        return newDf
+    try:
+        existing = pl.read_parquet(str(target))
+    except (OSError, pl.exceptions.PolarsError):
+        return newDf
+    for c in schema:  # schema 진화 대비 — 누락 컬럼 null 보강
+        if c not in existing.columns:
+            existing = existing.with_columns(pl.lit(None).alias(c))
+    existing = existing.select(list(schema)).filter(~pl.col("rceptNo").is_in(list(accessions)))
+    return pl.concat([existing, newDf], how="vertical_relaxed")
+
+
+def _writeDf(df: pl.DataFrame, target: Path) -> int:
+    """DataFrame → parquet atomic write(tmp→replace). 행 수 반환."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(".parquet.tmp")
+    df.write_parquet(str(tmp), compression="zstd")
+    tmp.replace(target)
+    return int(df.height)
+
+
+def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = False) -> dict[str, int]:
+    """신규 filing ``.txt`` 들을 기존 panel/panelCell 에 **append** (accession dedup, atomic).
+
+    Capabilities:
+        - 전체 history 재빌드 없이 신규 accession 의 보드/셀만 기존 artifact 에 병합한다
+          (per-filing 증분). 같은 accession 이 기존에 있으면 제거 후 재삽입(정정 idempotent).
+          기존 artifact 부재면 받은 filing 들만으로 생성. raw txt 폐기 전략과 정합 — 호출부가
+          신규 accession 의 .txt 만 받아 넘기면 되고 full 디스크 history 가 불필요.
+
+    Args:
+        ticker: US ticker.
+        txtPaths: 신규 filing full submission ``.txt`` 경로 list.
+        verbose: 진행 로그.
+
+    Returns:
+        ``{"rows","cells","appended"}`` — 병합 후 보드/셀 총행수 + append 한 accession 수.
+
+    Raises:
+        없음 — 파싱 실패 filing 은 흡수.
+
+    Example:
+        >>> appendFilingsToPanel("AAR", [Path(".../0001410578-25-001475.txt")])  # doctest: +SKIP
+        {'rows': 4220, 'cells': 12900, 'appended': 1}
+
+    SeeAlso:
+        - ``buildEdgarPanel`` — 단일 ticker 전체 빌드(부트스트랩/신규 종목).
+        - ``existingAccessions`` — append 전 중복 판정.
+        - ``gather.original.edgar.collect.listRecentFilings`` — 신규 발견.
+
+    Requires:
+        - polars. lxml. 신규 filing ``.txt``.
+
+    When:
+        - EDGAR panel 일간 증분: 기존 종목에 신규 공시 1+ 건 도착 시.
+
+    How:
+        - filingToBoardAndCells 누적 → 기존 parquet 에서 동일 accession 제거 후 concat → 2 parquet write.
+
+    AIContext:
+        - offline 자급(network 0). per-ticker 소량 메모리.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 신규 외 전 history .txt 를 넘기지 말 것 — 그건 buildEdgarPanel(overwrite) 영역.
+            - 동일 accession 중복 우려로 호출부에서 직접 dedup 하지 말 것 — 본 함수가 처리.
+        OutputSchema:
+            - ``dict[str, int]``.
+        Prerequisites:
+            - 신규 filing .txt + (선택)기존 artifact.
+        Freshness:
+            - 신규 공시 도착 시 append.
+        Dataflow:
+            - 신규 .txt → 보드/셀 → 기존 merge(dedup) → write.
+        TargetMarkets:
+            - US.
+    """
+    newBoard: list[dict] = []
+    newCells: list[dict] = []
+    for tp in txtPaths:
+        b, c = filingToBoardAndCells(tp, ticker=ticker)
+        if b:
+            newBoard.extend(b)
+            newCells.extend(c)
+    if not newBoard:
+        return {"rows": 0, "cells": 0, "appended": 0}
+
+    _applyContentRawCap(newBoard, ticker.upper())
+    accessions = {r["rceptNo"] for r in newBoard}
+
+    mergedBoard = _mergeKeepingSchema(panelPath(ticker), newBoard, PANEL_SCHEMA, accessions)
+    nRows = _writeDf(mergedBoard, panelPath(ticker))
+
+    nCells = 0
+    if newCells:
+        mergedCells = _mergeKeepingSchema(panelCellPath(ticker), newCells, EDGAR_CELL_SCHEMA, accessions)
+        nCells = _writeDf(mergedCells, panelCellPath(ticker))
+
+    if verbose:
+        _log.info(
+            "edgar panel append %s: +%d filings → %d board rows, %d cells",
+            ticker.upper(),
+            len(accessions),
+            nRows,
+            nCells,
+        )
+    return {"rows": nRows, "cells": nCells, "appended": len(accessions)}
+
+
 def _ciksToTickers(ciks: list[str]) -> list[str]:
     """cik list → ticker list (tickers.parquet 역해소, 미등재 skip)."""
     p = Path(_cfg.dataDir) / "edgar" / "tickers.parquet"

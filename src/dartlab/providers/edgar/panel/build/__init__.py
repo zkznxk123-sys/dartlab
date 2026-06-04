@@ -13,8 +13,10 @@ disclosureKey 앵커링) + cell(계정×기간 셀). read 표면은 ``providers.
 from __future__ import annotations
 
 from .builder import (
+    appendFilingsToPanel,
     buildEdgarPanel,
     buildEdgarPanelAll,
+    existingAccessions,
     filingToBoardAndCells,
     panelCellPath,
     panelPath,
@@ -22,8 +24,10 @@ from .builder import (
 )
 
 __all__ = [
+    "appendFilingsToPanel",
     "buildEdgarPanel",
     "buildEdgarPanelAll",
+    "existingAccessions",
     "filingToBoardAndCells",
     "panelPath",
     "panelCellPath",

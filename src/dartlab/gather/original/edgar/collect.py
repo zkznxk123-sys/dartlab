@@ -164,3 +164,138 @@ def archiveEdgarOriginals(
     if showProgress:
         _log.info("EDGAR 원본 수집 완료: %s", stats)
     return stats
+
+
+_DAILY_INDEX_BASE = "https://www.sec.gov/Archives/edgar/daily-index"
+_ARCHIVES_ROOT = "https://www.sec.gov/Archives"
+
+
+def _quarterOf(yyyymmdd: str) -> int:
+    """YYYYMMDD → 분기(1~4) — daily-index URL 의 QTR 세그먼트."""
+    return (int(yyyymmdd[4:6]) - 1) // 3 + 1
+
+
+def listRecentFilings(
+    dates: list[str] | tuple[str, ...],
+    *,
+    forms: list[str] | tuple[str, ...] | None = None,
+) -> list[dict[str, str]]:
+    """SEC daily-index(master.idx)로 날짜들의 **전 발행자** 공시를 열거 — panel 증분 발견용.
+
+    Capabilities:
+        - 발행자별 submissions 를 8천 번 호출하는 대신, 날짜당 ``master.{YYYYMMDD}.idx``
+          1 회로 그날 제출된 *모든* 공시(CIK·form·accession)를 받는다. ``forms`` 로 재무
+          폼만 거르면 EDGAR panel 증분의 "무엇이 새로 들어왔나"를 윈도 일수만큼의 요청으로
+          확정. 주말/휴장일(404)은 skip.
+
+    Args:
+        dates: ``YYYYMMDD`` 일자 list(윈도). 순서 무관.
+        forms: form 화이트리스트(예: ``["10-K","10-Q","20-F","40-F"]``). None 이면 전 form.
+
+    Returns:
+        list[dict] — 각 dict 키 ``cik``(10-pad) · ``form`` · ``filing_date`` ·
+        ``accession_no`` · ``txt_url``. 중복 없음(인덱스가 공시당 1행).
+
+    Raises:
+        없음 — 일자별 HTTP 실패는 경고 후 skip(부분 결과 반환).
+
+    Example:
+        >>> listRecentFilings(["20260603"], forms=["10-Q"])  # doctest: +SKIP
+        [{'cik': '0001000045', 'form': '10-Q', ...}]
+
+    SeeAlso:
+        - ``fetchFilings`` — 본 목록 중 신규 accession 의 .txt 수집.
+        - ``providers.edgar.panel.build.appendFilingsToPanel`` — 수집분 panel append.
+
+    Requires:
+        - 인터넷 + SEC User-Agent.
+
+    When:
+        - EDGAR panel 일간 증분: 최근 N일 신규 재무 공시 발견 단계.
+    """
+    formSet = {f.upper() for f in forms} if forms else None
+    rows: list[dict[str, str]] = []
+    for day in dates:
+        if len(day) != 8 or not day.isdigit():
+            continue
+        url = f"{_DAILY_INDEX_BASE}/{day[:4]}/QTR{_quarterOf(day)}/master.{day}.idx"
+        time.sleep(_REQUEST_INTERVAL)
+        try:
+            resp = httpx.get(url, headers=_HEADERS, timeout=60, follow_redirects=True)
+            if resp.status_code == 404:
+                continue  # 주말/휴장 — 인덱스 부재
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            _log.warning("daily-index %s 실패: %s", day, exc)
+            continue
+        for line in resp.text.splitlines():
+            parts = line.split("|")
+            if len(parts) != 5:
+                continue  # 헤더/구분선
+            cik, _company, form, filed, filename = parts
+            form = form.strip().upper()
+            if (formSet is not None and form not in formSet) or not filename.endswith(".txt"):
+                continue
+            rows.append(
+                {
+                    "cik": cik.strip().zfill(10),
+                    "form": form,
+                    "filing_date": filed.strip(),
+                    "accession_no": filename.rsplit("/", 1)[-1][:-4],
+                    "txt_url": f"{_ARCHIVES_ROOT}/{filename.strip()}",
+                }
+            )
+    return rows
+
+
+def fetchFilings(rows: list[dict[str, str]]) -> dict[str, list]:
+    """``listRecentFilings`` 행들의 full submission ``.txt`` 수집 — 기존 skip, CIK 별 그룹.
+
+    Capabilities:
+        - 신규 accession 의 ``.txt`` 만 ``data/original/edgar/docs/{cik}/{accession}.txt`` 로
+          atomic 저장(이미 있으면 skip). panel append 가 이 경로를 파싱 후 raw 를 폐기한다.
+
+    Args:
+        rows: ``listRecentFilings`` 산출(또는 동형). ``cik``·``accession_no``·``txt_url`` 필요.
+
+    Returns:
+        dict[str, list[Path]] — ``{cik: [저장된 .txt Path, ...]}`` (skip 포함 = 존재하는 경로).
+
+    Raises:
+        없음 — 개별 fetch/write 실패는 해당 행 skip.
+
+    Example:
+        >>> fetchFilings([{"cik": "0000320193", "accession_no": "x", "txt_url": "..."}])  # doctest: +SKIP
+        {'0000320193': [PosixPath('.../x.txt')]}
+
+    SeeAlso:
+        - ``listRecentFilings`` — 입력 행 산출.
+
+    Requires:
+        - 인터넷 + SEC User-Agent + 쓰기 가능 ``data/original/edgar/docs/``.
+
+    When:
+        - panel 증분에서 발견된 신규 공시 본문을 append 직전 내려받을 때.
+    """
+    grouped: dict[str, list] = {}
+    for row in rows:
+        cik = row["cik"]
+        outDir = edgarDir(cik)
+        outPath = outDir / f"{row['accession_no']}.txt"
+        if not outPath.exists():
+            content = _fetchTxt(row["txt_url"])
+            if content is None:
+                continue
+            outPath.parent.mkdir(parents=True, exist_ok=True)
+            tmp = outPath.with_suffix(f".txt.tmp.{os.getpid()}.{time.monotonic_ns()}")
+            try:
+                tmp.write_bytes(content)
+                os.replace(tmp, outPath)
+            except OSError:
+                try:
+                    tmp.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                continue
+        grouped.setdefault(cik, []).append(outPath)
+    return grouped
