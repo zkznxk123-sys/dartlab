@@ -1212,16 +1212,6 @@ class Company:
         return summaries
 
     @property
-    def _analyzer(self):
-        """sections 구조 분석기 (lazy)."""
-        cacheKey = "_sectionsAnalyzer"
-        if cacheKey not in self._cache:
-            from dartlab.providers.dart.builder.docsSectionsAnalyzer import SectionsAnalyzer
-
-            self._cache[cacheKey] = SectionsAnalyzer(self)
-        return self._cache[cacheKey]
-
-    @property
     def _hasFinance(self) -> bool:
         """finance 사용 가능 여부 — lazy check 포함."""
         self._ensureFinanceLoaded()
@@ -1553,18 +1543,6 @@ class Company:
         from dartlab.providers.dart.builder.filingsCatalog import buildUpdate
 
         return buildUpdate(self, categories=categories)
-
-    def _docsTopicManifest(self) -> pl.DataFrame:
-        """→ SectionsAnalyzer.topicManifest()."""
-        return self._analyzer.topicManifest()
-
-    def _docsSectionTopics(self) -> list[str]:
-        """→ SectionsAnalyzer.sectionTopics()."""
-        return self._analyzer.sectionTopics()
-
-    def _docsTopicOutline(self, topic: str | None = None) -> pl.DataFrame:
-        """→ SectionsAnalyzer.topicOutline()."""
-        return self._analyzer.topicOutline(topic=topic)
 
     def disclosure(
         self,
@@ -1956,114 +1934,6 @@ class Company:
 
     # c.notes property 제거 (Plan v10 P2) — 12 sub-property 모두 c.show("inventory") 등으로 통합.
     # Notes 클래스는 _notesAccessor (private) 로 유지, show() topic dispatch 가 호출.
-
-    def _docsSectionsFreq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsFreq()."""
-        return self._analyzer.sectionsFreq(freqScope, includeMixed=includeMixed)
-
-    def _docsSectionsOrdered(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsOrdered()."""
-        return self._analyzer.sectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
-
-    def _docsSectionsCoverage(
-        self, *, topic: str | None = None, recentFirst: bool = True, annualAsQ4: bool = True
-    ) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsCoverage()."""
-        return self._analyzer.sectionsCoverage(topic=topic, recentFirst=recentFirst, annualAsQ4=annualAsQ4)
-
-    def _docsSectionsSemanticRegistry(
-        self,
-        *,
-        topic: str | None = None,
-        freqScope: str = "all",
-        includeMixed: bool = True,
-        collisionsOnly: bool = False,
-    ) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsSemanticRegistry()."""
-        return self._analyzer.sectionsSemanticRegistry(
-            topic=topic, freqScope=freqScope, includeMixed=includeMixed, collisionsOnly=collisionsOnly
-        )
-
-    def _docsSectionsStructureRegistry(
-        self,
-        *,
-        topic: str | None = None,
-        freqScope: str = "all",
-        includeMixed: bool = True,
-        collisionsOnly: bool = False,
-        nodeType: str | None = None,
-    ) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsStructureRegistry()."""
-        return self._analyzer.sectionsStructureRegistry(
-            topic=topic,
-            freqScope=freqScope,
-            includeMixed=includeMixed,
-            collisionsOnly=collisionsOnly,
-            nodeType=nodeType,
-        )
-
-    def _docsSectionsStructureEvents(
-        self,
-        *,
-        topic: str | None = None,
-        freqScope: str = "all",
-        includeMixed: bool = True,
-        changedOnly: bool = True,
-        nodeType: str | None = None,
-    ) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsStructureEvents()."""
-        return self._analyzer.sectionsStructureEvents(
-            topic=topic,
-            freqScope=freqScope,
-            includeMixed=includeMixed,
-            changedOnly=changedOnly,
-            nodeType=nodeType,
-        )
-
-    def _docsSectionsStructureSummary(
-        self,
-        *,
-        topic: str | None = None,
-        freqScope: str = "all",
-        includeMixed: bool = True,
-        nodeType: str | None = None,
-    ) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsStructureSummary()."""
-        return self._analyzer.sectionsStructureSummary(
-            topic=topic, freqScope=freqScope, includeMixed=includeMixed, nodeType=nodeType
-        )
-
-    def _docsSectionsStructureChanges(
-        self,
-        *,
-        topic: str | None = None,
-        freqScope: str = "all",
-        includeMixed: bool = True,
-        nodeType: str | None = None,
-        latestOnly: bool = True,
-        changedOnly: bool = True,
-    ) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.sectionsStructureChanges()."""
-        return self._analyzer.sectionsStructureChanges(
-            topic=topic,
-            freqScope=freqScope,
-            includeMixed=includeMixed,
-            nodeType=nodeType,
-            latestOnly=latestOnly,
-            changedOnly=changedOnly,
-        )
-
-    def _topicSubtables(self, topic: str):
-        """→ SectionsAnalyzer.topicSubtables()."""
-        return self._analyzer.topicSubtables(topic)
-
-    def _sectionsSubtopicWide(self, topic: str) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.subtopicWide()."""
-        return self._analyzer.subtopicWide(topic)
-
-    def _sectionsSubtopicLong(self, topic: str) -> pl.DataFrame | None:
-        """→ SectionsAnalyzer.subtopicLong()."""
-        return self._analyzer.subtopicLong(topic)
 
     def _safePrimary(self, name: str) -> pl.DataFrame | None:
         try:
@@ -3748,30 +3618,10 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 표).
         """
-        result = self._topicSubtables(topic)
-        if result is None:
-            return None
-        from dartlab.providers.dart.docs.sections import parseSubtopicTable
-
-        parsed = parseSubtopicTable(result, subtopic, numeric=numeric)
-        if parsed is None:
-            return None
-        if period is not None and parsed.df is not None:
-            labelCol = (
-                "항목"
-                if "항목" in parsed.df.columns
-                else "항목"
-                if "항목" in parsed.df.columns
-                else parsed.df.columns[0]
-            )
-            periodCols = [c for c in parsed.df.columns if c != labelCol]
-            matchedCols = [c for c in periodCols if period in c]
-            if matchedCols:
-                from dataclasses import replace
-
-                filteredDf = parsed.df.select([labelCol, *matchedCols])
-                return replace(parsed, df=filteredDf)
-        return parsed
+        # docs subtopic markdown 표 농장 은퇴(§영구소실) — 정형 표는 panel/공통파서(sections.sectionTables)
+        # 또는 c.panel raw 공시 검색 사용. 본 API 는 None 반환.
+        _ = (topic, subtopic, numeric, period)
+        return None
 
     @property
     def topics(self) -> pl.DataFrame:
