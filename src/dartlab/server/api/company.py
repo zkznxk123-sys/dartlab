@@ -626,10 +626,8 @@ def apiCompanyShow(code: str, topic: str, block: int | None = Query(None), raw: 
     """topic payload 조회 — show(topic) API 대응."""
     try:
         company = getCompany(code)
-        if block is not None:
-            result = company.show(topic, block, period=None, raw=raw)
-        else:
-            result = company.show(topic)
+        # block(docs 블록 인덱스)은 panel 미지원 — 무시. raw→tag(원본 XML, raw 공시 검색 한정).
+        result = company.panel(topic, tag=raw)
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
@@ -670,7 +668,7 @@ async def apiCompanyTopicSummary(
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
     try:
-        overview = company.show(topic)
+        overview = company.panel(topic)
     except (AttributeError, KeyError, TypeError, ValueError):
         overview = None
     if overview is None:

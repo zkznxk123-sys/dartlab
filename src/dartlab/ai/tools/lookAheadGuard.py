@@ -27,14 +27,14 @@ def lookAheadGuard(
     freq: str = "Q",
     scope: str = "consolidated",
 ) -> ToolResult:
-    """Company(stockCode).show(topic, asOf=asOf, ...) 호출 + asOf 메타데이터 보고.
+    """Company(stockCode).panel(topic, asOf=asOf, ...) 호출 + asOf 메타데이터 보고.
 
     Args:
         stockCode: KR 6 자리 / US ticker.
         asOf: YYYY-MM-DD 또는 YYYYQn (예: "2024Q2"). *필수* — 누락 거부.
-        topic: BS/IS/CF/CIS/SCE/ratios/dividend/companyOverview 등.
+        topic: BS/IS/CF/CIS/SCE/ratios 등 finance topic.
         market: "KR" (DART) 또는 "US" (EDGAR).
-        block / period / freq / scope: Company.show 의 동일 인자.
+        period / freq / scope: Company.panel 의 동일 인자. block 은 panel 미지원(무시).
 
     Returns:
         ToolResult — refs 안에 tableRef + asOf 메타. 본 도구는 LLM 이 *시점 누설 없는*
@@ -57,15 +57,14 @@ def lookAheadGuard(
         from dartlab.company import Company
 
         kwargs = {"asOf": asOf, "freq": freq, "scope": scope}
-        if block is not None:
-            kwargs["block"] = block
         if period is not None:
             kwargs["period"] = period
+        # block(docs 블록 인덱스)은 panel 미지원 — finance asOf 가드는 block 불요(무시).
 
         # market 은 stockCode 형식 (KR 6 자리 vs US ticker) 으로 auto-detect.
         # tool 의 market arg 는 advisory — provider 가 자체 분기.
         company = Company(stockCode)
-        df = company.show(topic, **kwargs)
+        df = company.panel(topic, **kwargs)
     except Exception as exc:  # noqa: BLE001 — 외부 provider 모든 예외 포착
         return ToolResult(
             ok=False,

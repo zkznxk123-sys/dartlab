@@ -60,7 +60,7 @@ def _buildReport(company, name: str, code: str, include: set | None) -> str:
     if include is None or "overview" in include:
         parts.append("## 기업 개요\n")
         try:
-            overview = company.show("companyOverview")
+            overview = company.panel("companyOverview")
             if isinstance(overview, pl.DataFrame) and overview.height > 0:
                 for row in overview.iter_rows(named=True):
                     text = row.get("text") or row.get("content") or ""

@@ -80,5 +80,6 @@ def run(args) -> int:
     if period is not None and len(period) == 1:
         period = period[0]
 
-    result = company.show(args.topic, args.block, period=period, raw=args.raw)
+    # block(docs 블록 인덱스)은 panel 미지원 — 무시. raw→tag(원본 XML, raw 공시 검색 한정).
+    result = company.panel(args.topic, period=period, tag=args.raw)
     return _printResult(result, context=f"{company.corpName} {args.topic}")

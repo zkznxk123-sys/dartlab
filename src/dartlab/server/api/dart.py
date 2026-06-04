@@ -73,9 +73,9 @@ def dartFinance(
 
         c = dartlab.Company(corp)
         if freq == "Y":
-            df = c.show(statement, freq="Y")
+            df = c.panel(statement, freq="year")
         else:
-            df = c.show(statement)
+            df = c.panel(statement)
         return _dfToResponse(df)
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -93,9 +93,9 @@ def dartShow(
 
         c = dartlab.Company(corp)
         if period:
-            result = c.show(topic, period=period)
+            result = c.panel(topic, period=period)
         else:
-            result = c.show(topic)
+            result = c.panel(topic)
         if hasattr(result, "to_dicts"):
             return _dfToResponse(result)
         return {"data": str(result)[:5000]}
@@ -113,7 +113,7 @@ def dartReport(
         import dartlab
 
         c = dartlab.Company(corp)
-        df = c.show(category)
+        df = c.panel(category)
         if hasattr(df, "to_dicts"):
             return _dfToResponse(df)
         return {"data": str(df)[:5000]}
