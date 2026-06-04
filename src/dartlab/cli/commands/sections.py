@@ -21,7 +21,7 @@ def configureParser(subparsers) -> None:
 
 
 def run(args) -> int:
-    """docs.sections DataFrame을 콘솔에 출력한다."""
+    """panel 공시 수평화 보드를 콘솔에 출력한다 (docs 농장 은퇴 → c.panel)."""
     from dartlab.cli.services.output import getConsole, printDataframe
 
     dartlab = configureDartlab()
@@ -36,8 +36,8 @@ def run(args) -> int:
 
     console.print(f"\n  [bold]{company.corpName}[/] ({company.stockCode})\n")
 
-    # CLI 기본 — stripTags=True (콘솔 plain text). --raw 시 mixed (태그 보존).
-    sections = company.sectionsAs(stripTags=not args.raw)
+    # CLI 기본 — plain text(tag=False). --raw 시 원본 XML 태그 보존(tag=True).
+    sections = company.panel(tag=args.raw)
     if sections is None:
         console.print(f"[dim]{company.corpName} sections 데이터가 없습니다.[/]")
         return 0
