@@ -123,7 +123,7 @@ def notesByCategory(
 ) -> pl.DataFrame | None | dict[str, pl.DataFrame]:
     """카테고리별 구조화된 Notes DataFrame.
 
-    DART 의 ``c.show("inventory")`` · ``c.show("borrowings")`` 와 같은 카테고리 분해.
+    DART 의 ``c.panel("inventory")`` · ``c.panel("borrowings")`` 와 같은 카테고리 분해.
 
     Args:
         cik: SEC CIK 번호.

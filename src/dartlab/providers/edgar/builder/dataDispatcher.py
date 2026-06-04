@@ -4,7 +4,7 @@ Company facade 의 show 본체와 finance 빌더, period filter, preview helper 
 같이 옮긴다. Company facade 는 thin delegate.
 
 Module-level functions:
-    showImpl              — c.show(topic, ...) 사용자 진입점 본체
+    showImpl              — c.panel(topic, ...) 사용자 진입점 본체
     buildFinanceSeries    — finance series-tuple 빌더 (Q/Y/YTD)
     buildRatios           — 재무비율 DataFrame
     applyPeriodFilter     — period 필터 (Q4 fallback 포함)
@@ -40,7 +40,7 @@ def _isPeriodColumn(col: str) -> bool:
 def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "consolidated"):
     """[INTERNAL] EDGAR finance series-tuple 빌더.
 
-    사용자 진입점은 ``c.show("IS", freq=, scope=)`` 만이다 (api-contract).
+    사용자 진입점은 ``c.panel("IS", freq=, scope=)`` 만이다 (api-contract).
     EDGAR 는 ``scope="separate"`` 미지원 (SEC 는 연결만 보고).
     ``freq="YTD"`` 도 미지원 — annual 로 fallback.
 
@@ -59,7 +59,7 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
         >>> buildFinanceSeries(c, freq="Q")
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -67,10 +67,10 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -133,7 +133,7 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
         >>> buildRatios(c)
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -141,10 +141,10 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -199,7 +199,7 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
         >>> applyPeriodFilter(df, "2024")
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -207,10 +207,10 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -266,7 +266,7 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
         >>> transposeToVertical(df, ["2024", "2023"])
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -274,10 +274,10 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -318,7 +318,7 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
         >>> buildBlockIndex(sec.filter(pl.col("topic") == "10-K::item7Mdna"))
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -326,10 +326,10 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -373,7 +373,7 @@ def shapeStr(df: pl.DataFrame | None) -> str:
         >>> shapeStr(df)
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -381,10 +381,10 @@ def shapeStr(df: pl.DataFrame | None) -> str:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -425,7 +425,7 @@ def periodsStr(df: pl.DataFrame | None) -> str:
         >>> periodsStr(df)
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -433,10 +433,10 @@ def periodsStr(df: pl.DataFrame | None) -> str:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -480,7 +480,7 @@ def previewFinance(df: pl.DataFrame | None) -> str:
         >>> previewFinance(df)
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -488,10 +488,10 @@ def previewFinance(df: pl.DataFrame | None) -> str:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -533,7 +533,7 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
         >>> previewDocsCell(topicRows, ["2024", "2023"])
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -541,10 +541,10 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -674,7 +674,7 @@ def showImpl(
         >>> showImpl(c, "IS", freq="Y")
 
     SeeAlso:
-        - ``EdgarCompany.show`` — public surface.
+        - ``EdgarCompany.panel`` — public surface.
         - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
@@ -682,10 +682,10 @@ def showImpl(
         - polars
 
     Capabilities:
-        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
+        - EDGAR Company.panel dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel()`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal dispatcher — AI 직접 호출 X.
@@ -712,7 +712,7 @@ def showImpl(
 
     # period가 리스트면 세로 뷰
     if isinstance(period, list):
-        wide = company.show(topic, block)
+        wide = company._showImpl(topic, block)
         if wide is None or not isinstance(wide, pl.DataFrame):
             return None
         return transposeToVertical(wide, period)
@@ -728,7 +728,7 @@ def showImpl(
             df = company._finance._stmtDf(topic, freq=freq)
         return applyPeriodFilter(df, period) if df is not None else None
 
-    # Notes 12 항목 — DART show("inventory") 와 동일 패턴 (XBRL 수치 태그 기반)
+    # Notes 12 항목 — DART panel("inventory") 와 동일 패턴 (XBRL 수치 태그 기반)
     try:
         from dartlab.providers.edgar.docs.notesParsers import availableCategories
 
@@ -760,7 +760,7 @@ def showImpl(
     if block is None:
         blockIndex = buildBlockIndex(topicRows)
         if blockIndex.height == 1:
-            return company.show(topic, blockIndex["block"][0], period=period)
+            return company._showImpl(topic, blockIndex["block"][0], period=period)
         return blockIndex
 
     # 특정 block의 실제 데이터

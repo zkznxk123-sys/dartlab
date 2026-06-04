@@ -125,7 +125,6 @@ FROZEN_PROVIDER_COMPANY_SURFACE = {
         "sections",
         "sectionsRaw",
         "select",
-        "show",
         "sources",
         "stockCode",
         "story",

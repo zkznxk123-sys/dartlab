@@ -51,7 +51,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -59,7 +59,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -106,7 +106,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -114,7 +114,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -161,7 +161,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -169,7 +169,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -218,7 +218,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -226,7 +226,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -243,7 +243,7 @@ class _DocsAccessor:
         return notes(self._company.cik, query)
 
     def notesByCategory(self, category: str | None = None):
-        """카테고리별 구조화 Notes — DART ``c.show("inventory")`` 대응.
+        """카테고리별 구조화 Notes — DART ``c.panel("inventory")`` 대응.
 
         ``category=None`` 이면 데이터 있는 카테고리 dict 반환.
 
@@ -272,7 +272,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -280,7 +280,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -321,7 +321,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -329,7 +329,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -370,7 +370,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -378,7 +378,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -424,7 +424,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -432,7 +432,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -478,7 +478,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -486,7 +486,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:

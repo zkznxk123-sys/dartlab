@@ -191,13 +191,13 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
             else []
         )
     sampleDocTopic = str(docTopics[0]) if docTopics else None
-    sampleDocShow = company.show(sampleDocTopic) if sampleDocTopic else None
+    sampleDocShow = company.panel(sampleDocTopic) if sampleDocTopic else None
     sampleDocTrace = company.trace(sampleDocTopic) if sampleDocTopic else None
     bsTrace = company.trace("BS")
     return {
         "ticker": ticker.upper(),
         "corpName": company.corpName,
-        "hasTimeseries": company.show("IS") is not None,
+        "hasTimeseries": company.panel("IS") is not None,
         "docsSectionsShape": None if docsSections is None else docsSections.shape,
         "financeBsShape": None if financeBs is None else financeBs.shape,
         "indexShape": indexDf.shape,

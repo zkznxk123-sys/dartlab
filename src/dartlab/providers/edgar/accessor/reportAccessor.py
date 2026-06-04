@@ -54,7 +54,7 @@ class _ReportAccessor:
             AntiPatterns:
                 - apiType 추측 X — 14 종 _SUPPORTED 명시.
                 - report 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("dividend"/"treasuryStock"/...)``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel("dividend"/"treasuryStock"/...)``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -93,7 +93,7 @@ class _ReportAccessor:
               executive/majorHolder/...) 위임 dispatch. DART 28 apiType 와 인터페이스 통일.
 
         Guide:
-            - 사용자 API 는 ``c.show("dividend"/...)`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("dividend"/...)`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal report accessor — AI 가 직접 호출 X.
@@ -102,7 +102,7 @@ class _ReportAccessor:
             AntiPatterns:
                 - apiType 추측 X — 14 종 _SUPPORTED 명시.
                 - report 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("dividend"/"treasuryStock"/...)``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel("dividend"/"treasuryStock"/...)``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -148,7 +148,7 @@ class _ReportAccessor:
               executive/majorHolder/...) 위임 dispatch. DART 28 apiType 와 인터페이스 통일.
 
         Guide:
-            - 사용자 API 는 ``c.show("dividend"/...)`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("dividend"/...)`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal report accessor — AI 가 직접 호출 X.
@@ -157,7 +157,7 @@ class _ReportAccessor:
             AntiPatterns:
                 - apiType 추측 X — 14 종 _SUPPORTED 명시.
                 - report 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("dividend"/"treasuryStock"/...)``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel("dividend"/"treasuryStock"/...)``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -182,7 +182,7 @@ class _ReportAccessor:
         return result
 
     def __getattr__(self, name: str) -> pl.DataFrame | None:
-        """내부 attr 접근 — Company 의 ``_report`` 가 사용. 사용자는 ``c.show(name)``."""
+        """내부 attr 접근 — Company 의 ``_report`` 가 사용. 사용자는 ``c.panel(name)``."""
         if name.startswith("_"):
             raise AttributeError(name)
         if name in _SUPPORTED:
@@ -200,8 +200,8 @@ def _extractDividend(company: "Company") -> pl.DataFrame | None:
     """배당 데이터 — CF dividends_paid + IS DPS 시계열."""
     from dartlab.providers._common.show import isPeriodColumn, selectFromShow
 
-    cf = company.show("CF")
-    isDf = company.show("IS")
+    cf = company.panel("CF")
+    isDf = company.panel("IS")
     if cf is None:
         return None
 
@@ -226,7 +226,7 @@ def _extractTreasuryStock(company: "Company") -> pl.DataFrame | None:
     """자사주 데이터 — BS treasury_stock 시계열."""
     from dartlab.providers._common.show import isPeriodColumn, selectFromShow
 
-    bs = company.show("BS")
+    bs = company.panel("BS")
     if bs is None:
         return None
     ts = selectFromShow(bs, ["treasury_stock"])
