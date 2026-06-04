@@ -3,13 +3,14 @@
 	// 디자인 = scan 방식(flat #050811 · #1e2433 보더 · 오렌지 단일 액센트). 풀블리드(좌우 패딩 0 · 갭 0).
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
-	import { Maximize2, Minimize2, Columns3 } from 'lucide-svelte';
+	import { Maximize2, Minimize2, Columns3, MessageSquare } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
 	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
 	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
 	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
+	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import type { PanelBundle } from '$lib/viewer/types';
 
@@ -31,6 +32,7 @@
 	let windowEnd = $state(0); // periods 시작 인덱스 (0 = 최신, 좌측)
 	let cols = $state(3);
 	let isFullscreen = $state(false);
+	let discussOpen = $state(false);
 
 	// code 바뀌면(검색 이동) 재로드.
 	$effect(() => {
@@ -108,6 +110,9 @@
 		</div>
 		<div class="ph-right">
 			<CompanySearch />
+			<button type="button" class="fs-btn" onclick={() => (discussOpen = true)} title="공시 토론 (GitHub Discussions)">
+				<MessageSquare size={13} /> 토론
+			</button>
 			{#if bundle}
 				<span class="meta">항목 {rows.length} · 전체 기간 {periods.length}</span>
 				<div class="cols" title="동시 표시 기간 수 (가로 폭)">
@@ -157,6 +162,8 @@
 		</div>
 	{/if}
 </main>
+
+<GiscusPanel {code} {corpName} open={discussOpen} onclose={() => (discussOpen = false)} />
 
 <style>
 	.viewer-page {
