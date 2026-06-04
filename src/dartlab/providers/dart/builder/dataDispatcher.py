@@ -485,7 +485,7 @@ def showImpl(
     """
     from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
-    from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
+    from dartlab.providers.dart.notes import _NOTES_DISPATCH
 
     # Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance / notes / sections).
     topic = _resolveTopic(topic)
@@ -791,7 +791,7 @@ def isStrongTopic(topic: str) -> bool:
     """
     from dartlab.core.registry import getModuleEntries
     from dartlab.providers.dart.company import _resolveTopic
-    from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
+    from dartlab.providers.dart.notes import _NOTES_DISPATCH
 
     t = _resolveTopic(topic)
     if t in SHOW_FINANCE_TOPICS or t in _NOTES_DISPATCH:

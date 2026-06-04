@@ -270,7 +270,6 @@ from dartlab.providers.dart.checks import (
     _importAndCall,
     _shapeString,
 )
-from dartlab.providers.dart.docs.notes import Notes
 from dartlab.providers.dart.financeMappers import (
     _RATIO_TEMPLATE_FIELDS,
     _ratioArchetypeOverrideForIndustryGroup,
@@ -279,6 +278,7 @@ from dartlab.providers.dart.financeMappers import (
     _ratioTemplateKeyForIndustryGroup,
     _shouldFallbackToAnnualRatios,
 )
+from dartlab.providers.dart.notes import Notes
 
 # 플러그인 등록 후 재구축 가능하도록 lazy 초기화
 _MODULE_REGISTRY: list[tuple[str, str, str, Any]] | None = None

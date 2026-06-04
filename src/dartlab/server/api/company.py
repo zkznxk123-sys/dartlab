@@ -595,8 +595,8 @@ def apiCompanyShowAll(code: str, topic: str, raw: bool = Query(False)):
 async def apiParseRawTable(code: str, topic: str, blockIdx: int):
     """원문 테이블 블록을 구조화 DataFrame으로 파싱."""
     try:
-        from dartlab.providers.dart.docs.tableAI import parseRawMarkdownBlock
         from dartlab.providers.dart.docs.viewer import viewerBlocks
+        from dartlab.providers.dart.tableAI import parseRawMarkdownBlock
 
         company = getCompany(code)
         blocks = viewerBlocks(company, topic)

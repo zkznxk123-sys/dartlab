@@ -214,7 +214,7 @@ def chapterForTopic(company: Company, topic: str) -> str:
     if topic in cm:
         return cm[topic]
     if company._notesAccessor is not None:
-        from dartlab.providers.dart.docs.notes import _REGISTRY as _NOTES_REGISTRY
+        from dartlab.providers.dart.notes import _REGISTRY as _NOTES_REGISTRY
 
         if topic in _NOTES_REGISTRY:
             return "XI"
