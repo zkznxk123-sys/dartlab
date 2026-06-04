@@ -2,7 +2,9 @@
 
 전 종목 raw parquet 일괄 lazy scan 사고 (STATUS_STACK_BUFFER_OVERRUN) 재발 방지.
 
-fixture: tmp_path 의 합성 dart docs parquet 3 개 + scan/docsIndex.parquet 빌드.
+docs.parquet 농장 은퇴 후 buildDocsIndex 는 panel SSOT(``sectionTexts(code)``)에서 본문을
+회수한다. fixture 는 panel dir 의 종목 parquet(코드 enum 용)과 ``sectionTexts`` monkeypatch
+(본문 주입)로 합성 — 옛 docs.parquet 직접 작성 대체.
 """
 
 from __future__ import annotations
@@ -15,59 +17,49 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def _fakeDocsParquet(path: Path, stockCode: str, corpName: str, sections: list[dict]) -> None:
-    """합성 docs parquet 1 개 작성."""
-    rows = []
-    for i, sec in enumerate(sections):
-        rows.append(
-            {
-                "stock_code": stockCode,
-                "corp_name": corpName,
-                "year": sec.get("year", 2024),
-                "rcept_date": sec.get("rcept_date", "20240328"),
-                "rcept_no": sec.get("rcept_no", "20240328000001"),
-                "report_type": sec.get("report_type", "annual"),
-                "section_order": i,
-                "section_title": sec["section_title"],
-                "section_url": sec.get("section_url", "https://dart.fss.or.kr/example"),
-                "section_content": sec.get("section_content", ""),
-            }
-        )
-    pl.DataFrame(rows).write_parquet(str(path))
+# code → [(sectionLeaf, contentRaw), ...] — sectionTexts monkeypatch 가 반환할 합성 본문.
+_FIXTURE_SECTIONS: dict[str, list[tuple[str, str]]] = {
+    "005930": [
+        ("사업의 개요", "반도체와 모바일이 주력 사업이다. " * 30),
+        ("신용평가에 관한 사항", "Moody's Aa3, S&P A+ 등급. " * 20),
+    ],
+    "000660": [
+        ("신용평가에 관한 사항", ""),  # 헤더-only → contentLength 0
+        ("임원의 보수", "임원 평균 보수 5억원. " * 10),
+    ],
+    "035420": [
+        ("사업의 개요", "검색 엔진과 광고가 주력. <TABLE><TR><TD>영역</TD><TD>매출</TD></TR></TABLE>"),
+    ],
+}
 
 
 @pytest.fixture
-def docsFixture(tmp_path: Path) -> Path:
-    """3 회사 × 다양한 섹션 fixture."""
-    docsDir = tmp_path / "docs"
-    docsDir.mkdir()
-    _fakeDocsParquet(
-        docsDir / "005930.parquet",
-        "005930",
-        "삼성전자",
-        [
-            {"section_title": "사업의 개요", "section_content": "반도체와 모바일이 주력 사업이다. " * 30},
-            {"section_title": "신용평가에 관한 사항", "section_content": "Moody's Aa3, S&P A+ 등급. " * 20},
-        ],
-    )
-    _fakeDocsParquet(
-        docsDir / "000660.parquet",
-        "000660",
-        "SK하이닉스",
-        [
-            {"section_title": "신용평가에 관한 사항", "section_content": ""},  # 헤더-only
-            {"section_title": "임원의 보수", "section_content": "임원 평균 보수 5억원. " * 10},
-        ],
-    )
-    _fakeDocsParquet(
-        docsDir / "035420.parquet",
-        "035420",
-        "NAVER",
-        [
-            {"section_title": "사업의 개요", "section_content": "검색 엔진과 광고가 주력. | 영역 | 매출 |"},
-        ],
-    )
-    return docsDir
+def docsFixture(tmp_path: Path, monkeypatch) -> Path:
+    """3 회사 panel fixture — 종목 parquet(코드 enum) + sectionTexts 본문 주입."""
+    panelDir = tmp_path / "panel"
+    panelDir.mkdir()
+    for code in _FIXTURE_SECTIONS:
+        # 코드 enum 용 placeholder — buildDocsIndex 는 glob 으로 종목만 발견, 본문은 sectionTexts.
+        pl.DataFrame({"_": [1]}).write_parquet(str(panelDir / f"{code}.parquet"))
+
+    def _fakeSectionTexts(code: str, *args, **kwargs):
+        secs = _FIXTURE_SECTIONS.get(code)
+        if not secs:
+            return None
+        rows = [
+            {
+                "period": "2024Q4",
+                "sectionLeaf": title,
+                "contentRaw": content,
+                "blockOrder": i,
+                "rceptNo": "20240328000001",
+            }
+            for i, (title, content) in enumerate(secs)
+        ]
+        return pl.DataFrame(rows)
+
+    monkeypatch.setattr("dartlab.providers.dart.sections.sectionTexts", _fakeSectionTexts)
+    return panelDir
 
 
 # ─── buildDocsIndex ───────────────────────────────────────────────────
@@ -101,18 +93,19 @@ def test_buildDocsIndex_minimal_fixture(docsFixture: Path, tmp_path: Path) -> No
 
 
 def test_buildDocsIndex_no_content_column(docsFixture: Path, tmp_path: Path) -> None:
-    """산출 parquet 에 section_content 가 들어가지 않음 (회귀 가드)."""
+    """산출 parquet 에 본문 컬럼이 들어가지 않음 (회귀 가드)."""
     from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
     buildDocsIndex(docsDir=docsFixture, outputPath=outPath, sinceYear=2016)
     df = pl.read_parquet(str(outPath))
     assert "section_content" not in df.columns
+    assert "contentRaw" not in df.columns
     assert "content" not in df.columns
 
 
 def test_buildDocsIndex_content_length_zero_for_placeholder(docsFixture: Path, tmp_path: Path) -> None:
-    """헤더-only 섹션 (`section_content=""`) 은 contentLength=0."""
+    """헤더-only 섹션 (`contentRaw=""`) 은 contentLength=0."""
     from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
@@ -124,7 +117,7 @@ def test_buildDocsIndex_content_length_zero_for_placeholder(docsFixture: Path, t
 
 
 def test_buildDocsIndex_has_table_detection(docsFixture: Path, tmp_path: Path) -> None:
-    """본문에 `|` 포함 시 hasTable=True (markdown table 감지)."""
+    """본문에 `<TABLE` 포함 시 hasTable=True (raw XML 테이블 감지)."""
     from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
