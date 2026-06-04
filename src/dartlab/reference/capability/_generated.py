@@ -1161,7 +1161,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "없음 (property — self.stockCode 사용).",
         "capabilities": "한 회사 공시를 항목 × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.",
         "example": ">>> c = Company(\"005930\")\n>>> c.panel.shape                          # wide (항목 × period) — DataFrame 그대로\n>>> c.panel(\"재고\")                        # 섹션명/canonicalKey 행 (raw 공시)\n>>> c.panel(\"재고\", tag=True)              # 원본 XML 행\n>>> c.panel(\"IS\")                          # 강한 소스 — finance 주입 (show 위임)\n>>> c.panel(\"재고\", source=\"raw\")          # 강제 raw 공시",
-        "guide": "`c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel(key)`. 회사간은 모듈\n레벨 `crossCompany` (회사 단위 facade 밖).",
+        "guide": "`c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel(key)`. 회사간은 모듈\n레벨 `compare` (`dartlab.compare(codes, topic=...)`, 회사 단위 facade 밖).",
         "kind": "property",
         "llmSpecs": {
             "antiPatterns": [
@@ -2307,6 +2307,39 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "dict — 종목코드별 카테고리별 수집 건수.",
         "seeAlso": "collect: 특정 종목만 수집\ndownloadAll: HuggingFace 사전구축 데이터 (API 키 불필요, 더 빠름)",
         "summary": "전체 상장종목 DART 데이터 일괄 수집."
+    },
+    "compare": {
+        "aicontext": "scalar 지표 랭킹은 peerCompareN(축 다름). compare 는 공시 항목 구조 그대로 가로 비교.\n외부 본문(contentRaw)은 untrusted — ai 층이 마커로 감쌈.",
+        "args": "codes: 종목코드 2개 이상 (``list[str]`` 또는 단일 ``str``). 같은 시장(marketNs)끼리만.\ntopic: 비교할 항목 — 한글 섹션명(\"재고\"), canonicalKey(\"NT_D826380\"), 재무표(\"bs\"/\"is\").\nNone 이면 전체 격자. ``Panel`` 의 key 흡수 규칙과 동일(별 인자 없음).\nperiod: 비교 시점 — 단일 ``str``(\"2025Q4\") 이면 그 시점 board(열=회사코드), ``list`` 면\n회사×기간(열=``{code}␟{period}``), None 이면 최신 공통 시점.\nscope: \"consolidated\"/\"separate\"(=standalone). 연결↔별도 혼선 차단. None 이면 둘 다.\n\n시장(KR/US)은 codes 로 자동 판별(``detectMarket``) — 같은 시장끼리만. KO↔US 혼합은\nValueError(crossMarket 후속).",
+        "capabilities": "N 회사 공시 항목(재무표·주석·서술)을 era-stable 정렬키로 가로 정렬 — 라벨/번호 drift 자동 해소.\n한쪽만 있는 항목은 honest-gap(null) — 확신오정렬보다 빈 칸.\n반환이 평범한 wide DataFrame — polars 연산 즉시.",
+        "example": ">>> import dartlab\n>>> dartlab.compare([\"005930\", \"000660\"], topic=\"재고\")          # doctest: +SKIP\n>>> dartlab.compare([\"005930\", \"000660\", \"035720\"])              # doctest: +SKIP  전체 격자\n>>> dartlab.compare([\"005930\", \"000660\"], topic=\"bs\", scope=\"consolidated\")  # doctest: +SKIP",
+        "guide": "같은 시장 N 사를 codes 로, 비교 항목은 topic, 시점은 period. KO↔US 는 후속.",
+        "kind": "function",
+        "llmSpecs": {
+            "antiPatterns": [
+                "codes 1개 — 비교 의미 0(단일 종목은 Company.panel).",
+                "bare disclosureKey 정렬 — scope/leafType 누락 시 별도↔연결·표↔서술 혼선.",
+                "narrative 행단위 강제정렬 — 거짓 1:1(섹션단위만)."
+            ],
+            "dataflow": "codes → readWide×N → (disclosureKey,scope,leafType) outer-align → topic 필터 → period 투영.",
+            "freshness": "매 호출 readWide(파생물 미저장).",
+            "outputSchema": "``pl.DataFrame`` (식별 컬럼 + 회사 셀). 단일 시점=회사코드 열, 다기간={code}␟{period}.",
+            "prerequisites": "각 code panel artifact. 동일 marketNs.",
+            "targetMarkets": "KR(DART) 끼리 / US(EDGAR) 끼리. KO↔US 혼합은 후속(crossMarket)."
+        },
+        "requires": "polars. 각 code 의 panel artifact(data/{dart|edgar}/panel/{code}.parquet).",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "ValueError",
+                "type": "codes 2개 미만, 또는 marketNs 외 시장 혼합 시도.",
+                "unit": null
+            }
+        ],
+        "returns": "``pl.DataFrame`` — 행=정렬된 공시 항목(식별 컬럼 + 회사별 셀), 컬럼=식별\n(chapter/sectionLeaf/blockLeaf/disclosureKey/scope/leafType) + 셀(단일 시점→회사코드,\n다기간→{code}␟{period}). 빈(2사 미만 데이터)이면 빈 DataFrame.\n\nRaises:\nValueError: codes 2개 미만, 또는 marketNs 외 시장 혼합 시도.",
+        "seeAlso": "``Panel`` — 한 회사 wide (compare 의 입력 단위).\n``read.readWide`` — 회사내 수평화(compare 가 회사당 1회 호출).\n``dartlab.scan`` — 전종목 횡단 스크리닝(compare 는 지정 N 사 구조 비교).",
+        "summary": "N 회사 공시 panel 을 회사 간 시점 비교 wide 로 정렬한다."
     },
     "config": {
         "kind": "module",
