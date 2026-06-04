@@ -34,22 +34,22 @@ _TOPIC_WEIGHT: dict[str, float] = {
 }
 
 
-def _docsDir() -> Path:
-    """docs parquet 디렉토리."""
+def _panelDir() -> Path:
+    """panel parquet 디렉토리 (docs.parquet 은퇴 → panel contentRaw 가 공시 본문 출처)."""
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _getDataRoot
 
-    return _getDataRoot() / DATA_RELEASES["docs"]["dir"]
+    return _getDataRoot() / DATA_RELEASES["panel"]["dir"]
 
 
 def _extractTexts(parquetPath: Path) -> dict[str, str]:
-    """하나의 docs parquet에서 산업 관련 텍스트를 추출."""
+    """하나의 panel parquet 에서 산업 관련 본문 텍스트를 추출 (sectionLeaf 제목 매칭)."""
     try:
         df = (
             pl.scan_parquet(str(parquetPath))
-            .select(["section_title", "section_content"])
-            .filter(pl.col("section_content").is_not_null())
-            .filter(pl.col("section_content").str.len_chars() > 20)
+            .select(["sectionLeaf", "contentRaw"])
+            .filter(pl.col("contentRaw").is_not_null())
+            .filter(pl.col("contentRaw").str.len_chars() > 20)
             .collect(engine="streaming")
         )
     except (pl.exceptions.PolarsError, OSError, FileNotFoundError):
@@ -57,8 +57,8 @@ def _extractTexts(parquetPath: Path) -> dict[str, str]:
 
     topicTexts: dict[str, list[str]] = {}
     for row in df.iter_rows(named=True):
-        title = row.get("section_title") or ""
-        content = row.get("section_content") or ""
+        title = row.get("sectionLeaf") or ""
+        content = row.get("contentRaw") or ""
         for pattern, topic in _TITLE_PATTERNS:
             if pattern.search(title):
                 topicTexts.setdefault(topic, []).append(content)
@@ -117,9 +117,9 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
         AI 가 직접 호출하지 않는다 (배치). 답변에서 ``source=="docs"`` 노드는 "사업보고서 본문
         분석 결과" 단서 인용.
     """
-    docsDir = _docsDir()
-    if not docsDir.exists():
-        logger.warning("docs 디렉토리 없음: %s", docsDir)
+    panelDir = _panelDir()
+    if not panelDir.exists():
+        logger.warning("panel 디렉토리 없음: %s", panelDir)
         return nodes
 
     # 종목코드별 노드 인덱스
@@ -128,7 +128,7 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
         nodeMap.setdefault(node.stockCode, []).append(node)
 
     for code, codeNodes in nodeMap.items():
-        pqPath = docsDir / f"{code}.parquet"
+        pqPath = panelDir / f"{code}.parquet"
         if not pqPath.exists():
             continue
 
