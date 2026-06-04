@@ -5,6 +5,9 @@
 	import { base } from '$app/paths';
 	import { loadCompanies, type Co } from '$lib/viewer/companyNames';
 
+	// onpick 주면 이동(goto) 대신 콜백 — 비교 모드의 "회사 추가" 재사용.
+	let { onpick }: { onpick?: (code: string) => void } = $props();
+
 	let query = $state('');
 	let open = $state(false);
 	let items = $state<Co[]>([]);
@@ -25,6 +28,10 @@
 	function pick(code: string) {
 		query = '';
 		open = false;
+		if (onpick) {
+			onpick(code);
+			return;
+		}
 		void goto(`${base}/viewer/company/${code}`);
 	}
 	function onKey(e: KeyboardEvent) {

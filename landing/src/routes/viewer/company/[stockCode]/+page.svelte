@@ -3,21 +3,26 @@
 	// 디자인 = scan 방식(flat #050811 · #1e2433 보더 · 오렌지 단일 액센트). 풀블리드(좌우 패딩 0 · 갭 0).
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
-	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2 } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
 	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
+	import ComparisonMatrix from '$lib/components/viewer/ComparisonMatrix.svelte';
 	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
 	import CommandPalette from '$lib/components/viewer/CommandPalette.svelte';
+	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
+	import { alignBundles, commonPeriods } from '$lib/viewer/align';
 	import type { PanelBundle } from '$lib/viewer/types';
 
-	let { data }: { data: { code: string } } = $props();
+	let { data }: { data: { code: string; vs?: string[] } } = $props();
 	const code = $derived(data.code);
+	const vsCodes = $derived(data.vs ?? []);
 
 	// 회사명 — panel 엔 없음 → ecosystem(code→name) 해석. corp(panel) 우선, 없으면 ecosystem.
 	let nameMap = $state<Map<string, string>>(new Map());
@@ -41,6 +46,14 @@
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
 	let glowCell = $state<{ rowIndex: number; period: string } | null>(null);
+
+	// ── 회사 간 비교 (?vs=) ── 단일 뷰어 위에 additive. vs 없으면 전부 비활성.
+	let vsBundles = $state<PanelBundle[]>([]); // 비교 추가 회사 bundle (reference=bundle, 나머지=여기)
+	let lockedPeriod = $state(''); // 비교 모드 = 한 시점 lock
+	let addOpen = $state(false); // 회사 추가 팝오버
+	// 비교 모드 판정 — 파생을 일찍 선언(windowPeriods 등이 참조). vsCodes/bundle/vsBundles 에만 의존.
+	const compareMode = $derived(vsCodes.length > 0);
+	const allBundles = $derived(bundle ? [bundle, ...vsBundles] : []);
 
 	// code 바뀌면(검색 이동) 재로드.
 	$effect(() => {
@@ -91,6 +104,26 @@
 		};
 	});
 
+	// 비교 회사(?vs) 병렬 로드 — allSettled(한 회사 실패해도 나머지 비교). code/vs 바뀌면 재로드.
+	$effect(() => {
+		const codes = vsCodes;
+		void code; // code 바뀌면도 재로드(reference 교체)
+		if (!codes.length) {
+			vsBundles = [];
+			return;
+		}
+		let cancelled = false;
+		void Promise.allSettled(codes.map((c) => loadPanelBundle(c))).then((results) => {
+			if (cancelled) return;
+			vsBundles = results
+				.filter((r): r is PromiseFulfilledResult<PanelBundle> => r.status === 'fulfilled' && r.value.periods.length > 0)
+				.map((r) => r.value);
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
+
 	// 검색 결과 클릭 → 그 섹션·기간으로 격자 점프 + 셀 글로우.
 	function onSearchResult(hit: SearchHit) {
 		pickSection(hit.sectionKey);
@@ -116,7 +149,10 @@
 		return b ? periods.filter((p) => b.periodKind[p] === 'annual') : [];
 	});
 	const visiblePeriods = $derived(annualOnly && annualPeriods.length ? annualPeriods : periods);
-	const windowPeriods = $derived(visiblePeriods.slice(windowEnd, windowEnd + cols));
+	// 비교 모드 = 한 시점만 강조(타임라인은 시점 선택기). 단일 모드 = 기존 윈도.
+	const windowPeriods = $derived(
+		compareMode ? (lockedPeriod ? [lockedPeriod] : []) : visiblePeriods.slice(windowEnd, windowEnd + cols)
+	);
 	// 활성 섹션 행 — 주석(blockLeaf) 선택 시 그 주석만(기간별), 아니면 섹션 전체.
 	const rows = $derived.by(() => {
 		if (!activeSectionKey || !bundle) return [];
@@ -130,6 +166,36 @@
 	});
 	const corpName = $derived(bundle?.corpName || nameMap.get(code) || '');
 
+	// ── 비교 모드 파생 (compareMode·allBundles 는 위에서 선언) ──
+	const cmpCompanies = $derived(
+		allBundles.map((b) => ({ code: b.stockCode, corpName: b.corpName || nameMap.get(b.stockCode) || b.stockCode }))
+	);
+	const alignedRows = $derived(
+		compareMode && activeSectionKey && lockedPeriod && allBundles.length >= 2
+			? alignBundles(allBundles, activeSectionKey, lockedPeriod)
+			: []
+	);
+	// 비교 시점 기본 = 최신 공통 기간. 유효하지 않으면 보정.
+	$effect(() => {
+		if (!compareMode || allBundles.length < 2) return;
+		const cp = commonPeriods(allBundles);
+		if (!lockedPeriod || !cp.includes(lockedPeriod)) lockedPeriod = cp[0] ?? '';
+	});
+
+	// ── 비교 회사 추가/제거 (URL ?vs=) ──
+	function vsUrl(codes: string[]): string {
+		const q = codes.filter((c) => c && c !== code).join(',');
+		return `${base}/viewer/company/${code}${q ? `?vs=${q}` : ''}`;
+	}
+	function addCompany(c: string) {
+		if (!c || c === code || vsCodes.includes(c) || allBundles.length >= 6) return;
+		addOpen = false;
+		void goto(vsUrl([...vsCodes, c]));
+	}
+	function removeCompany(c: string) {
+		void goto(vsUrl(vsCodes.filter((x) => x !== c)));
+	}
+
 	function pickSection(sectionKey: string) {
 		activeSectionKey = sectionKey;
 		activeBlock = null; // 섹션 헤더 클릭 = 전체
@@ -141,21 +207,36 @@
 		windowEnd = 0;
 	}
 	function pickPeriod(p: string) {
+		if (compareMode) {
+			lockedPeriod = p; // 비교 = 시점 lock (N사 동시 그 시점)
+			return;
+		}
 		const idx = visiblePeriods.indexOf(p);
 		if (idx >= 0) windowEnd = idx;
 	}
 	function moveNewer() {
+		if (compareMode) {
+			const i = visiblePeriods.indexOf(lockedPeriod);
+			if (i > 0) lockedPeriod = visiblePeriods[i - 1];
+			return;
+		}
 		windowEnd = Math.max(0, windowEnd - 1);
 	}
 	function moveOlder() {
+		if (compareMode) {
+			const i = visiblePeriods.indexOf(lockedPeriod);
+			if (i >= 0 && i + 1 < visiblePeriods.length) lockedPeriod = visiblePeriods[i + 1];
+			return;
+		}
 		windowEnd = Math.min(visiblePeriods.length - 1, windowEnd + 1);
 	}
 	function toggleAnnual() {
 		annualOnly = !annualOnly;
 		windowEnd = 0; // 축이 바뀌므로 최신으로 리셋
 	}
-	const canNewer = $derived(windowEnd > 0);
-	const canOlder = $derived(windowEnd + 1 < visiblePeriods.length);
+	const lockedIdx = $derived(visiblePeriods.indexOf(lockedPeriod));
+	const canNewer = $derived(compareMode ? lockedIdx > 0 : windowEnd > 0);
+	const canOlder = $derived(compareMode ? lockedIdx >= 0 && lockedIdx + 1 < visiblePeriods.length : windowEnd + 1 < visiblePeriods.length);
 </script>
 
 <svelte:head><title>{corpName || code} 공시뷰어 · dartlab</title></svelte:head>
@@ -167,9 +248,23 @@
 <main class="viewer-page" class:fullscreen={isFullscreen}>
 	<header class="page-head">
 		<div class="ph-left">
-			<h1 class="ph-corp">{corpName || code}</h1>
-			<span class="ph-code">{code}</span>
-			{#if bundle && sectionLabel}<span class="ph-section">{sectionLabel}</span>{/if}
+			{#if compareMode}
+				<div class="chips">
+					{#each cmpCompanies as c (c.code)}
+						<span class="chip" class:ref={c.code === code}>
+							<span class="chip-name">{c.corpName}</span>
+							{#if c.code !== code}
+								<button type="button" class="chip-x" onclick={() => removeCompany(c.code)} title="비교에서 제거"><X size={10} /></button>
+							{/if}
+						</span>
+					{/each}
+				</div>
+				{#if sectionLabel}<span class="ph-section">{sectionLabel}</span>{/if}
+			{:else}
+				<h1 class="ph-corp">{corpName || code}</h1>
+				<span class="ph-code">{code}</span>
+				{#if bundle && sectionLabel}<span class="ph-section">{sectionLabel}</span>{/if}
+			{/if}
 		</div>
 		<div class="ph-right">
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
@@ -180,14 +275,28 @@
 				<MessageSquare size={13} /> 토론
 			</button>
 			{#if bundle}
-				<span class="meta">항목 {rows.length} · 기간 {visiblePeriods.length}{annualOnly ? '(연간)' : ''}</span>
-				<button type="button" class="annual-btn" class:active={annualOnly} onclick={toggleAnnual} title="사업보고서(연간)만 표시 — 회사 결산월 보정">연간만</button>
-				<div class="cols" title="동시 표시 기간 수 (가로 폭)">
-					<Columns3 size={13} />
-					{#each COL_CHOICES as n (n)}
-						<button type="button" class="col-btn" class:active={cols === n} onclick={() => (cols = n)}>{n}</button>
-					{/each}
+				<div class="add-wrap">
+					<button type="button" class="fs-btn" class:active={compareMode} onclick={() => (addOpen = !addOpen)} title="회사 간 비교 — 회사 추가 (최대 6)" disabled={allBundles.length >= 6}>
+						<Plus size={13} /> 비교
+					</button>
+					{#if addOpen}
+						<div class="add-pop"><CompanySearch onpick={addCompany} /></div>
+					{/if}
 				</div>
+				{#if compareMode}
+					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · 항목 {alignedRows.length}</span>
+				{:else}
+					<span class="meta">항목 {rows.length} · 기간 {visiblePeriods.length}{annualOnly ? '(연간)' : ''}</span>
+				{/if}
+				<button type="button" class="annual-btn" class:active={annualOnly} onclick={toggleAnnual} title="사업보고서(연간)만 표시 — 회사 결산월 보정">연간만</button>
+				{#if !compareMode}
+					<div class="cols" title="동시 표시 기간 수 (가로 폭)">
+						<Columns3 size={13} />
+						{#each COL_CHOICES as n (n)}
+							<button type="button" class="col-btn" class:active={cols === n} onclick={() => (cols = n)}>{n}</button>
+						{/each}
+					</div>
+				{/if}
 				<button type="button" class="fs-btn" onclick={() => (isFullscreen = !isFullscreen)} title={isFullscreen ? '전체보기 해제 (Esc)' : '전체보기'}>
 					{#if isFullscreen}<Minimize2 size={13} /> 복귀{:else}<Maximize2 size={13} /> 전체{/if}
 				</button>
@@ -224,7 +333,15 @@
 				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
 			<section class="board">
-				<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
+				{#if compareMode}
+					{#if allBundles.length < 2}
+						<div class="cmp-loading"><div class="spinner"></div><p>비교 회사 여는 중…</p></div>
+					{:else}
+						<ComparisonMatrix rows={alignedRows} companies={cmpCompanies} period={lockedPeriod} />
+					{/if}
+				{:else}
+					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
+				{/if}
 			</section>
 		</div>
 	{/if}
@@ -347,6 +464,86 @@
 	.fs-btn:hover {
 		border-color: #fb923c;
 		color: #fb923c;
+	}
+	.fs-btn.active {
+		border-color: rgba(251, 146, 60, 0.5);
+		background: rgba(251, 146, 60, 0.12);
+		color: #fb923c;
+		font-weight: 600;
+	}
+	.fs-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	/* 회사 간 비교 — 칩 + 추가 팝오버 */
+	.chips {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		flex-wrap: wrap;
+		min-width: 0;
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		height: 24px;
+		padding: 0 4px 0 9px;
+		border: 1px solid #1e2433;
+		border-radius: 12px;
+		background: #0a0e18;
+		font-size: 12px;
+		color: #cbd5e1;
+		white-space: nowrap;
+	}
+	.chip.ref {
+		border-color: rgba(251, 146, 60, 0.5);
+		background: rgba(251, 146, 60, 0.1);
+		color: #f8fafc;
+		padding-right: 9px;
+	}
+	.chip-name {
+		font-weight: 600;
+		max-width: 130px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.chip-x {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: #64748b;
+		cursor: pointer;
+		padding: 0;
+	}
+	.chip-x:hover {
+		background: rgba(248, 113, 113, 0.15);
+		color: #f87171;
+	}
+	.add-wrap {
+		position: relative;
+	}
+	.add-pop {
+		position: absolute;
+		top: calc(100% + 6px);
+		right: 0;
+		z-index: 60;
+	}
+	.cmp-loading {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		color: #94a3b8;
+		font-size: 13px;
 	}
 	.annual-btn {
 		height: 30px;
