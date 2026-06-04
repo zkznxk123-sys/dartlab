@@ -239,11 +239,12 @@ def _runScenario(scenarioId: str) -> dict[str, Any]:
         company = _company()
         return {"type": type(company).__name__, "height": 1}
     if scenarioId == "company.show.IS":
-        return _ensureNonEmpty("company.show.IS", _company().show("IS"), minHeight=1)
+        # 공개 show 은퇴 → panel 단일 표면 (finance facade). 시나리오 ID 는 호환 위해 유지.
+        return _ensureNonEmpty("company.show.IS", _company().panel("IS"), minHeight=1)
     if scenarioId == "company.show.BS":
-        return _ensureNonEmpty("company.show.BS", _company().show("BS"), minHeight=1)
+        return _ensureNonEmpty("company.show.BS", _company().panel("BS"), minHeight=1)
     if scenarioId == "company.show.ratios":
-        return _ensureNonEmpty("company.show.ratios", _company().show("ratios"), minHeight=1)
+        return _ensureNonEmpty("company.show.ratios", _company().panel("ratios"), minHeight=1)
     if scenarioId == "company.sections":
         return _ensureNonEmpty("company.sections", _company().sections, minHeight=1)
     if scenarioId == "company.topics":
