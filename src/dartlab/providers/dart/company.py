@@ -2596,6 +2596,57 @@ class Company:
         p._strongFn = isStrongTopic
         return p
 
+    @property
+    def show(self):
+        """원본 데이터 단일 진입점 — 재무제표 (BS/IS/CF/CIS) / 주석 / 공시 DataFrame.
+
+        analysis 결과 검증용 + LLM tool dispatch 의 공통 surface.
+
+        Guide:
+            - "손익계산서" → ``c.show("IS")``
+            - "재무상태" → ``c.show("BS")``
+            - "현금흐름" → ``c.show("CF")``
+            - "사업 개요" → ``c.show("businessOverview")``
+            - "주요 제품" → ``c.show("mainProduct")``
+            - "주요주주/최대주주" → ``c.show("majorHolder")`` (``majorShareholder`` 아님)
+            - "차입금" → ``c.show("borrowings")``
+
+        Returns:
+            ``CallableAccessor`` — dual-access proxy. ``c.show("BS")`` call-form 또는
+            ``c.show.BS()`` attr-form 호출 시 ``_showImpl`` 이 실행되어 ``pl.DataFrame``
+            반환. 반환 구조 상세는 ``_showImpl`` docstring.
+
+        Example:
+            >>> c = Company("005930")
+            >>> c.show("BS")          # 재무상태표
+            >>> c.show("IS", period="2024")
+            >>> c.show.dividend()     # attr-form
+
+        Raises:
+            없음 (topic 미존재 시 ``_showImpl`` 이 None 반환).
+
+        SeeAlso:
+            - ``_showImpl`` — 실제 구현 + 120+ topic dispatch.
+            - ``select`` / ``trace`` — show 결과 필터 / origin 추적.
+            - ``topics`` — 사용 가능 topic 카탈로그.
+
+        Requires:
+            - dartlab
+            - polars
+
+        Capabilities:
+            - finance + docs + report 3 source 의 120+ topic 통합 dispatch entry. call (c.show("BS"))
+              + attr (c.show.BS()) dual access. freq/scope/period/block 4 토글로 view 변환.
+
+        AIContext:
+            workbench 의 핵심 단일 진입점 — 모든 topic 데이터 조회가 본 함수를 통과.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_showAccessor" not in self._cache:
+            self._cache["_showAccessor"] = CallableAccessor(self._showImpl, name="show")
+        return self._cache["_showAccessor"]
+
     def _showImpl(
         self,
         topic: str,
@@ -2863,9 +2914,9 @@ class Company:
         from dartlab.frame.select import SelectResult
         from dartlab.providers._common.show import selectFromShow
 
-        # 생존 엔진 _showImpl 직접 호출 (공개 show API 은퇴, panel 이 표면). ValueError propagate.
+        # show() 가 ValueError 발생하면 그대로 propagate (silent None X)
         try:
-            df = self._showImpl(topic, freq=freq, scope=scope)
+            df = self.show(topic, freq=freq, scope=scope)
         except (ValueError, KeyError):
             if strict:
                 raise
