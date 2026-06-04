@@ -574,7 +574,7 @@ def _showFromSectionsArtifact(
         if base is None or "sectionLeaf" not in base.columns:
             company._cache[cacheKey] = None
             return None
-        from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
+        from dartlab.providers.dart.sectionTopic import mapSectionTitle
 
         tagged = base.with_columns(
             pl.col("sectionLeaf").fill_null("").map_elements(mapSectionTitle, return_dtype=pl.Utf8).alias("_mtopic")

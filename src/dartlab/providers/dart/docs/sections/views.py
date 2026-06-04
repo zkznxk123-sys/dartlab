@@ -7,12 +7,12 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 from dartlab.providers.dart.docs.sections.pipeline import iterPeriodSubsets
 from dartlab.providers.dart.docs.sections.sectionsBase import (
     periodOrderValue,
     sortPeriods,
 )
+from dartlab.providers.dart.sectionTopic import mapSectionTitle, stripSectionPrefix
 
 RE_MAJOR = re.compile(r"^([가-힣])\.\s*(.+)$")
 RE_MINOR = re.compile(r"^\((\d+)\)\s*(.+)$")

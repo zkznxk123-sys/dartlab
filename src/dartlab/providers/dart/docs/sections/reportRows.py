@@ -14,8 +14,8 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
+from dartlab.providers.dart.sectionTopic import mapSectionTitle, stripSectionPrefix
 
 
 def _normalizeRowspanShift(tableMd: str) -> str:

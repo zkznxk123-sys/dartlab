@@ -723,4 +723,4 @@ from dartlab.providers.dart.docs.sections.dedupCleanup import (  # noqa: F401
     _CHAPTER_CATCH_ALL_RE,
     _dropChapterCatchAllDuplicates,
 )
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle  # noqa: F401, E402
+from dartlab.providers.dart.sectionTopic import mapSectionTitle  # noqa: F401, E402

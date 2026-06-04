@@ -7,7 +7,7 @@ from functools import lru_cache
 from typing import Any, Literal
 
 from dartlab.core.textNormalize import stripPeriodMarkers
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
+from dartlab.providers.dart.sectionTopic import mapSectionTitle, stripSectionPrefix
 
 TextNodeType = Literal["heading", "body"]
 

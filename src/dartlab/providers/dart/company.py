@@ -1182,7 +1182,7 @@ class Company:
             )
             if raw is not None and not raw.is_empty() and "section_content" in raw.columns:
                 from dartlab.providers._common.reportSelector import selectReport
-                from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
+                from dartlab.providers.dart.sectionTopic import mapSectionTitle
 
                 # 최신 연도의 사업보고서에서 추출
                 years = sorted(
