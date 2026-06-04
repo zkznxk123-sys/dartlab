@@ -24,9 +24,9 @@ linkedSkills:
   - engines.company
   - engines.analysis
 inputs:
-  - Company.show IS (영업이익·EBIT·법인세·이자비용)
-  - Company.show CF (영업현금흐름·CAPEX·운전자본 변동)
-  - Company.show BS (감가상각·무형자산상각·이자부 부채)
+  - Company.panel IS (영업이익·EBIT·법인세·이자비용)
+  - Company.panel CF (영업현금흐름·CAPEX·운전자본 변동)
+  - Company.panel BS (감가상각·무형자산상각·이자부 부채)
   - Company.disclosure (합병·인수 공시 — EV/EBITDA 산정)
 outputs:
   - EBT → EBIT → EBITDA → OCF 4 단계 bridge ledger
@@ -85,7 +85,7 @@ testUniverse:
   market: KR
   asOfPolicy: latest
 falsifier:
-  description: "CF 본문 (영업현금흐름·CAPEX) 부재 또는 EV (Enterprise Value — 시가총액 + 순부채) 산정 불가 시 적정성 판정 불가 — *Company.show CF 본문 + 인수 공시 EV 산정 본문 fetch 후 재호출* 한계 명시."
+  description: "CF 본문 (영업현금흐름·CAPEX) 부재 또는 EV (Enterprise Value — 시가총액 + 순부채) 산정 불가 시 적정성 판정 불가 — *Company.panel CF 본문 + 인수 공시 EV 산정 본문 fetch 후 재호출* 한계 명시."
 lastUpdated: '2026-05-21'
 runtimeCompatibility:
   server:
@@ -114,15 +114,15 @@ target = "005300"  # 예 — 롯데칠성 (두산주류 인수)
 c = dartlab.Company(target)
 
 # 1. IS — EBIT / EBT / 이자비용 / 법인세
-yis = c.show("IS", freq="Y")
-qis = c.show("IS", freq="Q")
+yis = c.panel("IS", freq="Y")
+qis = c.panel("IS", freq="Q")
 
 # 2. CF — 영업현금흐름 / CAPEX / 운전자본 변동 / 감가상각
-ycf = c.show("CF", freq="Y")
-qcf = c.show("CF", freq="Q")
+ycf = c.panel("CF", freq="Y")
+qcf = c.panel("CF", freq="Q")
 
 # 3. BS — 이자부 부채 / 시가총액 → EV 산정 기초
-ybs = c.show("BS", freq="Y")
+ybs = c.panel("BS", freq="Y")
 
 # 4. 인수 공시 (가능 시)
 merger_section = c.disclosure("인수") if hasattr(c, "disclosure") else None
@@ -211,7 +211,7 @@ graph LR
 
 ### 4. 반례·한계
 
-- **Falsifier**: CF 본문 또는 EV 산정 기초 부재 시 적정성 판정 불가 — *Company.show CF 본문 + 인수 공시 EV 산정 본문 fetch 후 재호출*.
+- **Falsifier**: CF 본문 또는 EV 산정 기초 부재 시 적정성 판정 불가 — *Company.panel CF 본문 + 인수 공시 EV 산정 본문 fetch 후 재호출*.
 - **EBITDA ≠ 현금흐름**: EBITDA 는 *발생주의* 영업이익에 감가상각 추가 한 것이라 *현금* 이 아님. 운전자본 증가 (매출채권·재고) 시 EBITDA 크지만 OCF 작음. CAPEX heavy 산업 (조선·정유·통신) 에서는 EBITDA - CAPEX 가 사실상 0 인 경우 多.
 - **시너지 가정 신뢰도**: 인수가격 산정 시 *합병 시너지* (매출 +X%·원가 -Y%) 를 EBITDA 에 미리 반영하면 multiple 이 인위적으로 낮아 보인다. 합병 전 standalone EBITDA 별도 검증.
 - **정상화 (normalized) EBITDA**: 일회성 이익 (자산매각·평가이익·소송 환입) 을 *정상 EBITDA* 에 포함하면 과대평가. peer 비교 시 동일 정상화 기준 적용 의무.
@@ -267,7 +267,7 @@ graph LR
 
 1. `ReadSkill` 에서 EBITDA·EV multiple·인수가격 질문이면 본 recipe 선정.
 2. target stockCode 확인.
-3. `Company.show("IS", freq="Y")` + `Company.show("CF", freq="Y")` + `Company.show("BS", freq="Y")` 시계열.
+3. `Company.panel("IS", freq="Y")` + `Company.panel("CF", freq="Y")` + `Company.panel("BS", freq="Y")` 시계열.
 4. `Company.disclosure("인수")` 또는 합병 공시 (EV·EBITDA 산정 본문).
 5. RunPython 으로 4 단계 bridge + EV/EBITDA multiple + FCF 분해.
 6. 동종 업종 peer multiple 외부 인용.

@@ -25,11 +25,11 @@ linkedSkills:
   - recipes.fundamental.quality.forensics.goodwillImpairmentCheck
   - engines.company
 inputs:
-  - Company.show BS (유형자산·재평가잉여금·자본 시계열)
-  - Company.show CIS (기타포괄손익 — 재평가잉여금 증감)
-  - Company.show 주석 (감정평가·재평가 방법)
+  - Company.panel BS (유형자산·재평가잉여금·자본 시계열)
+  - Company.panel CIS (기타포괄손익 — 재평가잉여금 증감)
+  - Company.panel 주석 (감정평가·재평가 방법)
   - Company.disclosure (자산재평가 결의 공시)
-  - Company.show IS (재평가 후 ROE·영업이익 회귀)
+  - Company.panel IS (재평가 후 ROE·영업이익 회귀)
 outputs:
   - 재평가 시점 ledger
   - 재평가증·재평가잉여금 시계열
@@ -89,7 +89,7 @@ testUniverse:
   market: KR
   asOfPolicy: latest
 falsifier:
-  description: "유형자산 sections·재평가잉여금 본문 또는 자산재평가 공시 부재 시 진단 불가 — *Company.show BS 유형자산 sections + DART 자산재평가 결의 공시 fetch 후 재호출* 한계 명시. 감정평가 본문 (평가법인·평가일·평가방법) 도 사업보고서 별도 fetch 필요."
+  description: "유형자산 sections·재평가잉여금 본문 또는 자산재평가 공시 부재 시 진단 불가 — *Company.panel BS 유형자산 sections + DART 자산재평가 결의 공시 fetch 후 재호출* 한계 명시. 감정평가 본문 (평가법인·평가일·평가방법) 도 사업보고서 별도 fetch 필요."
 lastUpdated: '2026-05-21'
 runtimeCompatibility:
   server:
@@ -110,7 +110,7 @@ visualRefs:
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 자산 재평가 — 계정 추적 ledger.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 자산 재평가 — 계정 추적 ledger.
 
 ```python
 import dartlab
@@ -122,16 +122,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -256,7 +256,7 @@ graph LR
 
 ### 4. 반례·한계
 
-- **Falsifier**: 유형자산 sections·재평가잉여금 본문 또는 자산재평가 공시 부재 시 진단 불가 — *Company.show BS 유형자산 sections + DART 자산재평가 결의 공시 fetch 후 재호출*.
+- **Falsifier**: 유형자산 sections·재평가잉여금 본문 또는 자산재평가 공시 부재 시 진단 불가 — *Company.panel BS 유형자산 sections + DART 자산재평가 결의 공시 fetch 후 재호출*.
 - **부동산 실가치 상승 정상**: 한국 부동산 시장 (강남·여의도 등 도심) 실가치 상승은 *정상 회계 반영* 으로 보는 게 합리. 시장 평균 부동산 가격 상승률 비교 후 *시장 평균 대비 초과 증가* 만 진단 신호.
 - **IFRS 도입 효과**: 2011 IFRS 도입 후 *공정가 모델* (revaluation model) vs *원가 모델* (cost model) 선택 가능. 공정가 모델 채택 자체는 정상 회계 정책 선택.
 - **재평가잉여금 = OCI**: 재평가잉여금 증가는 *기타포괄손익 (OCI)* 이지 *당기손익* 아니다. ROE 분자 (당기이익) 에 영향 없음. ROE 변동은 *순수 분모 (자본) 효과*.
@@ -312,9 +312,9 @@ graph LR
 
 1. `ReadSkill` 에서 자산재평가·재평가잉여금·공정가 모델 질문이면 본 recipe 선정.
 2. target stockCode 확인.
-3. `Company.show("BS", freq="Y")` 유형자산·재평가잉여금 시계열.
-4. `Company.show("CIS", freq="Y")` 기타포괄손익 변동.
+3. `Company.panel("BS", freq="Y")` 유형자산·재평가잉여금 시계열.
+4. `Company.panel("CIS", freq="Y")` 기타포괄손익 변동.
 5. `Company.disclosure("자산재평가")` 결의 timestamp + 본문.
-6. `Company.show("유형자산")` 또는 사업보고서 감정평가 주석 fetch.
+6. `Company.panel("유형자산")` 또는 사업보고서 감정평가 주석 fetch.
 7. RunPython 으로 비율 분자/분모 효과 분해 + 시계열 회귀.
 8. 답변에 *시점 ledger + 증감 시계열 + 비율 변동 + 의도 분류 + 감정평가 가정* 5 셋 + 반례·한계 필수.

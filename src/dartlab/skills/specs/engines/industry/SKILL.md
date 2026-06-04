@@ -138,7 +138,7 @@ position = c.industry()
 
 ## 강행 호출 룰 (agent 답변 품질 회귀 차단)
 
-1. **단일 종목 산업 질문 = `Company.show("IS").data.industryBadge` 1 회 인용** (Track E 자동 부착). `EngineCall("industry")` 별도 호출 금지 — industryBadge 가 이미 industryName · stageName · phase · peers · confidence 완전 형태.
+1. **단일 종목 산업 질문 = `Company.panel("IS").data.industryBadge` 1 회 인용** (Track E 자동 부착). `EngineCall("industry")` 별도 호출 금지 — industryBadge 가 이미 industryName · stageName · phase · peers · confidence 완전 형태.
 2. **여러 종목 / 산업 전체 질문은 `EngineCall(apiRef="industry", args={...})` 1 차** — RunPython 직접 industry parquet 로드 금지.
 3. **본문 안 산업명·phase·peers 에 `[tableRef:...]` inline 표기 필수**. lifecycle phase (도입/성장/성숙/쇠퇴) 는 `[conf:30]` 기본 (Vernon 3-phase 정의 기준 변동성).
 4. **공정 (chainName) 비교는 같은 산업 안에서만**. cross-industry 비교는 한계 명시 필수.
@@ -193,9 +193,9 @@ Company("005930").industry()
 
 산업 답변은 `target` (종목코드) · `industryId` · `stage` · taxonomy `dataAsOf` (운영자 갱신 시점) 를 남긴다. `confidence < 0.5` 면 매칭 신뢰도 낮음을 답변에 명시.
 
-## Company.show 응답에 industryBadge 자동 부착 — 단일 종목 답변 권장 경로
+## Company.panel 응답에 industryBadge 자동 부착 — 단일 종목 답변 권장 경로
 
-`Company.show(topic)` (또는 `EngineCall(apiRef="Company.show")`) 의 반환 `data` dict 에 `industryBadge` 가 자동 부착된다 (Track E). 단일 종목 답변이면 별도 `industry()` 호출 불필요:
+`Company.panel(topic)` (또는 `EngineCall(apiRef="Company.panel")`) 의 반환 `data` dict 에 `industryBadge` 가 자동 부착된다 (Track E). 단일 종목 답변이면 별도 `industry()` 호출 불필요:
 
 ```text
 data.industryBadge = {
@@ -228,7 +228,7 @@ data.industryBadge = {
 
 ## 기본 실행 순서
 
-1. **단일 종목 산업 위치** — `Company.show(...).data.industryBadge` 그대로 인용 (자동 부착, 추가 호출 불필요).
+1. **단일 종목 산업 위치** — `Company.panel(...).data.industryBadge` 그대로 인용 (자동 부착, 추가 호출 불필요).
 2. **산업 ID 모를 때 가이드** — `dartlab.industry()` 로 목록.
 3. **산업 전체 횡단 / 공정별 집계** — `dartlab.industry(industryId, summary=True, year=...)`.
 4. **연도별 라이프사이클 phase 추적** — `dartlab.industry(industryId, lifecycle=True)`.

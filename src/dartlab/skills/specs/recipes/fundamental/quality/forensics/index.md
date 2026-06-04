@@ -8,7 +8,7 @@ status: curated
 entryHint: true
 graphTier: L1.5
 cluster: incubator.forensics
-purpose: L2 분석엔진을 호출하지 않고 Company.show 원표, DART/EDGAR 공시 원문, scan primitive, synth helper만으로 회계·공시 포렌식 신호를 실험하고 엔진 승격 후보를 남기는 L1/L1.5 스킬팩 진입점이다. 트리거 — '포렌식 팩', 'L1.5 회계 검증', '엔진 후보 인큐베이터'.
+purpose: L2 분석엔진을 호출하지 않고 Company.panel 원표, DART/EDGAR 공시 원문, scan primitive, synth helper만으로 회계·공시 포렌식 신호를 실험하고 엔진 승격 후보를 남기는 L1/L1.5 스킬팩 진입점이다. 트리거 — '포렌식 팩', 'L1.5 회계 검증', '엔진 후보 인큐베이터'.
 whenToUse:
   - 포렌식 팩
   - L1.5 회계 검증
@@ -19,7 +19,7 @@ whenToUse:
   - working capital pressure
 inputs:
   - 기업 코드 또는 ticker
-  - Company.show 원표 BS IS CF
+  - Company.panel 원표 BS IS CF
   - 공시 섹션 원문 또는 topic text
   - scan primitive row
 outputs:
@@ -103,14 +103,14 @@ runtimeCompatibility:
   pyodide:
     status: limited
     limitations:
-      - 브라우저 snapshot 범위에서는 Company.show 원표와 section text가 제한될 수 있다.
+      - 브라우저 snapshot 범위에서는 Company.panel 원표와 section text가 제한될 수 있다.
 forbidden:
   - c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.
   - L2 엔진 결과를 근거로 포렌식 신호를 만들지 않는다.
   - 의심 신호를 반증 ledger 없이 위험 결론으로 단정하지 않는다.
   - ask 답변 품질 점검 없이 엔진 승격 후보로 확정하지 않는다.
 failureModes:
-  - Company.show topic 결손을 0으로 채워 bridge 계산
+  - Company.panel topic 결손을 0으로 채워 bridge 계산
   - 매출채권 증가를 계절성·고객 믹스 변화 반증 없이 위험으로 단정
   - boilerplate 공시 문구를 실제 위험 이벤트처럼 해석
   - scan 횡단면 이상치를 단일 기업 결론으로 바로 사용
@@ -119,7 +119,7 @@ examples:
   - analysis 없이 원표와 공시만으로 이익 품질 검증
   - 매출 증가가 현금으로 따라오는지 포렌식 ledger 작성
 audiences:
-  llm: L2 분석엔진을 쓰지 말고 Company.show, Company.disclosure, scan primitive는 EngineCall로 우선 호출한 뒤 synth helper RunPython fallback으로 evidence ledger와 falsifier를 만든다.
+  llm: L2 분석엔진을 쓰지 말고 Company.panel, Company.disclosure, scan primitive는 EngineCall로 우선 호출한 뒤 synth helper RunPython fallback으로 evidence ledger와 falsifier를 만든다.
   agent: ReadSkill 후 GetSkillBody로 본문을 읽고 capabilityRefs는 EngineCall로 먼저 호출한다. L1.5 memo builder가 필요할 때만 공개 호출 블록을 RunPython fallback으로 실행해 tableRef/valueRef/dateRef를 만든다.
   human: 원표와 공시 원문만으로 새 분석법을 실험하고, 유효하면 나중에 엔진으로 환류할 수 있게 만드는 포렌식 인큐베이터다.
 humanIntro: "이 팩은 완성된 L2 분석엔진을 잘 호출하는 조합기가 아니다. BS/IS/CF 원표, 공시 섹션, scan primitive 같은 L1/L1.5 재료만으로 아직 엔진화되지 않은 회계·공시 신호를 발굴하고, 반증 조건과 승격 후보를 함께 남긴다."
@@ -129,7 +129,7 @@ validatedAt: '2026-05-27'
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 surface 로 호출한다. 아래 Python 블록은 같은 근거를 묶어 `buildEvidenceForensicsMemo` 를 실행해야 하는 **RunPython fallback** 절차다.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 surface 로 호출한다. 아래 Python 블록은 같은 근거를 묶어 `buildEvidenceForensicsMemo` 를 실행해야 하는 **RunPython fallback** 절차다.
 
 ```python
 import dartlab
@@ -140,16 +140,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -177,13 +177,13 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-근거는 `Company.show("IS"|"BS"|"CF")`, optional section text, optional scan primitive row에서만 나온다. 답변에는 target, period, sourceRef, tableRef, valueRef, dateRef, executionRef가 함께 있어야 한다.
+근거는 `Company.panel("IS"|"BS"|"CF")`, optional section text, optional scan primitive row에서만 나온다. 답변에는 target, period, sourceRef, tableRef, valueRef, dateRef, executionRef가 함께 있어야 한다.
 
 ### 3. 메커니즘 분석
 
 ```mermaid
 graph LR
-  A["Company.show IS/BS/CF"] --> B["account trace ledger"]
+  A["Company.panel IS/BS/CF"] --> B["account trace ledger"]
   B --> C["revenue-to-cash bridge"]
   B --> D["working-capital pressure"]
   E["filing sections"] --> F["note keyword signal"]

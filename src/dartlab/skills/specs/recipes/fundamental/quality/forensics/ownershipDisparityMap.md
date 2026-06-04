@@ -23,8 +23,8 @@ linkedSkills:
   - recipes.fundamental.quality.forensics.mergerRatioFairness
   - engines.company
 inputs:
-  - Company.show 주주현황 / 지분율 / 특수관계자
-  - Company.show 계열회사 / 종속기업 / 관계기업
+  - Company.panel 주주현황 / 지분율 / 특수관계자
+  - Company.panel 계열회사 / 종속기업 / 관계기업
   - Company.disclosure (지분 변동·합병·분할·지주사 전환)
   - scan governance (지분율·사외이사·감사)
 outputs:
@@ -106,7 +106,7 @@ visualRefs:
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 지분 불일치 — falsifier.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 지분 불일치 — falsifier.
 
 ```python
 import dartlab
@@ -118,16 +118,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -302,9 +302,9 @@ graph LR
 
 1. `ReadSkill` 에서 지분율·지배구조·순환출자 질문이면 본 recipe 선정.
 2. target stockCode 확인.
-3. `Company.show("주주현황")` + `Company.show("최대주주")` + `Company.show("특수관계자")` 본문.
-4. `Company.show("종속기업")` + `Company.show("관계기업")` 계열사 매핑.
-5. `Company.show("BS", freq="Y")` 자기주식·우선주 잔액.
+3. `Company.panel("주주현황")` + `Company.panel("최대주주")` + `Company.panel("특수관계자")` 본문.
+4. `Company.panel("종속기업")` + `Company.panel("관계기업")` 계열사 매핑.
+5. `Company.panel("BS", freq="Y")` 자기주식·우선주 잔액.
 6. `scan("governance")` 횡단 비교.
 7. RunPython 으로 의결권/배당권 + 간접 지분 + 피라미드 깊이 계산.
 8. 답변에 *의결권 vs 배당권 + 피라미드 그래프 + 순환출자 매트릭스 + 차등의결권 ledger* 4 셋 + 반례·한계 필수.

@@ -24,9 +24,9 @@ linkedSkills:
   - recipes.fundamental.quality.forensics.disclosureTimingAnomaly
   - engines.company
 inputs:
-  - Company.show 임원보수 / 주식보상 (가능 시 sections)
-  - Company.show IS (성과 KPI 시계열 — 매출·영업이익·EPS)
-  - Company.show 자기주식 변동 (RSU·자사주 보상 동행)
+  - Company.panel 임원보수 / 주식보상 (가능 시 sections)
+  - Company.panel IS (성과 KPI 시계열 — 매출·영업이익·EPS)
+  - Company.panel 자기주식 변동 (RSU·자사주 보상 동행)
   - Company.disclosure (임원변동·스톡옵션 부여·결의)
   - scan governance (지분율·사외이사·감사)
 outputs:
@@ -107,7 +107,7 @@ visualRefs:
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 임원 보수 — 주석 신호.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 임원 보수 — 주석 신호.
 
 ```python
 import dartlab
@@ -119,16 +119,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -301,8 +301,8 @@ graph LR
 
 1. `ReadSkill` 에서 임원 보수·스톡옵션·사외이사 질문이면 본 recipe 선정.
 2. target stockCode 확인.
-3. `Company.show("임원보수")` 또는 사업보고서 섹션 fetch.
-4. `Company.show("IS", freq="Y")` 시계열 + EPS / TSR 보완.
+3. `Company.panel("임원보수")` 또는 사업보고서 섹션 fetch.
+4. `Company.panel("IS", freq="Y")` 시계열 + EPS / TSR 보완.
 5. `Company.disclosure("스톡옵션")` 부여·행사 timestamp.
 6. `scan("governance")` 사외이사·지분율 횡단.
 7. RunPython 으로 상관·옵션 차익·독립성 점수 계산.

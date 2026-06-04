@@ -26,9 +26,9 @@ linkedSkills:
   - engines.company
   - engines.credit
 inputs:
-  - Company.show BS (자기자본·NPL·대손충당금 시계열)
-  - Company.show IS (이자수익·대손비용·NIM)
-  - Company.show 주석 (BIS·유동성·NPL 분류)
+  - Company.panel BS (자기자본·NPL·대손충당금 시계열)
+  - Company.panel IS (이자수익·대손비용·NIM)
+  - Company.panel 주석 (BIS·유동성·NPL 분류)
   - Company.disclosure (자본확충·인수·매각 공시)
   - scan financialHealth (금융기관 횡단 부실 지표)
 outputs:
@@ -92,7 +92,7 @@ testUniverse:
   market: KR
   asOfPolicy: latest
 falsifier:
-  description: "금융기관 감독 지표 (BIS·NPL·LCR·RBC·K-ICS) 본문 또는 자본확충 공시 부재 시 진단 불가 — *Company.show 주석 + DART 자본확충·인수·매각 공시 fetch 후 재호출* 한계 명시. 보험사 K-ICS·증권사 NCR·은행 BIS 등 *업권별 감독 지표* 별도 적용 — 단일 지표만으로 단정 금지."
+  description: "금융기관 감독 지표 (BIS·NPL·LCR·RBC·K-ICS) 본문 또는 자본확충 공시 부재 시 진단 불가 — *Company.panel 주석 + DART 자본확충·인수·매각 공시 fetch 후 재호출* 한계 명시. 보험사 K-ICS·증권사 NCR·은행 BIS 등 *업권별 감독 지표* 별도 적용 — 단일 지표만으로 단정 금지."
 lastUpdated: '2026-05-21'
 runtimeCompatibility:
   server:
@@ -113,7 +113,7 @@ visualRefs:
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 부실 금융기관 — 엔진 후보 메모.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 부실 금융기관 — 엔진 후보 메모.
 
 ```python
 import dartlab
@@ -125,16 +125,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -271,7 +271,7 @@ graph LR
 
 ### 4. 반례·한계
 
-- **Falsifier**: 금융기관 감독 지표 본문 또는 자본확충 공시 부재 시 진단 불가 — *Company.show 주석 + DART 자본확충·인수·매각 공시 fetch 후 재호출*.
+- **Falsifier**: 금융기관 감독 지표 본문 또는 자본확충 공시 부재 시 진단 불가 — *Company.panel 주석 + DART 자본확충·인수·매각 공시 fetch 후 재호출*.
 - **업권별 감독 지표 차이**: 은행 (BIS·CET1) / 증권 (NCR) / 보험 (RBC·K-ICS) / 저축은행 (BIS·고유 비율) — 지표 적용 다름. 단일 지표로 단정 금지.
 - **분기말 일시 변동**: BIS·LCR 은 *분기말 자본조달·자산 매각 등 일시 조정* 가능. 시계열 ≥ 4 분기 동행 평가.
 - **위험가중자산 (RWA) 산정 차이**: 표준방식 vs 내부등급방식 (IRB) 산정 결과 달라 단순 BIS 절대값 비교 한계. 산정 방법 명시 필수.
@@ -333,8 +333,8 @@ graph LR
 
 1. `ReadSkill` 에서 금융기관 부실·BIS·NPL·헐값매각 질문이면 본 recipe 선정.
 2. target stockCode 확인 (은행·증권·보험·저축은행 분류).
-3. `Company.show("BS","IS",freq="Y")` 시계열.
-4. `Company.show("BIS")` 또는 사업보고서 감독 지표 주석 fetch.
+3. `Company.panel("BS","IS",freq="Y")` 시계열.
+4. `Company.panel("BIS")` 또는 사업보고서 감독 지표 주석 fetch.
 5. `Company.disclosure("자본확충","인수","합병")` 공시.
 6. `scan("financialHealth")` 산업 평균 횡단.
 7. RunPython 으로 5 차원 매트릭스 계산.

@@ -27,9 +27,9 @@ linkedSkills:
   - recipes.fundamental.quality.forensics.mergerRatioFairness
   - engines.company
 inputs:
-  - Company.show 관계기업·종속기업 sections
-  - Company.show majorHolder (주요주주)
-  - Company.show 충당부채 (옵션 약정)
+  - Company.panel 관계기업·종속기업 sections
+  - Company.panel majorHolder (주요주주)
+  - Company.panel 충당부채 (옵션 약정)
   - Company.disclosure (합작·M&A 공시)
   - scan governance (지배구조)
 outputs:
@@ -109,7 +109,7 @@ visualRefs:
 
 ## 공개 호출 방식
 
-AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 지배력 판정 — falsifier 후보.
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.panel("IS"|"BS"|"CF")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다 — 지배력 판정 — falsifier 후보.
 
 ```python
 import dartlab
@@ -121,16 +121,16 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except TypeError:
-        statements[topic] = c.show(topic)
+        statements[topic] = c.panel(topic)
     except Exception:
         pass
 
 sectionTexts = {}
 for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
     try:
-        sectionTexts[topic] = str(c.show(topic))[:20000]
+        sectionTexts[topic] = str(c.panel(topic))[:20000]
     except Exception:
         pass
 
@@ -322,8 +322,8 @@ graph LR
 ## AI 직접 사용 방식
 
 1. `ReadSkill` 에서 실질지배력·연결범위·합작·삼바 류 질문이면 본 recipe 선정.
-2. `Company.show("관계기업")` `Company.show("종속기업")` `Company.show("majorHolder")` 본문 추출.
-3. `Company.show("충당부채")` 옵션 약정.
+2. `Company.panel("관계기업")` `Company.panel("종속기업")` `Company.panel("majorHolder")` 본문 추출.
+3. `Company.panel("충당부채")` 옵션 약정.
 4. `Company.disclosure(keyword="합작"/"인수", days=1825)` 합작·M&A 공시.
 5. RunPython 으로 IFRS 10 5 기준 매트릭스 + 방어권 vs 경영권 분리 + 잠재 의결권 평가.
 6. 답변에 *기업 ledger + 5 기준 매트릭스 + 방어권/경영권 비교 + 한계 (계약서 비공개)* 4 셋 필수.
