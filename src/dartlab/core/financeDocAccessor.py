@@ -58,7 +58,8 @@ class FinanceDocAccessor(Protocol):
 
 _ACCESSOR: FinanceDocAccessor | None = None
 
-_KNOWN_ACCESSOR_MODULES: tuple[str, ...] = ("dartlab.providers.dart.accessor.financeDocAccessor",)
+# docs 농장 은퇴 — DART financeDoc accessor 제거. 미등록 시 getFinanceDocAccessor()=None → 소비처 graceful degrade.
+_KNOWN_ACCESSOR_MODULES: tuple[str, ...] = ()
 _DISCOVERED = False
 
 
