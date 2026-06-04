@@ -253,13 +253,6 @@ class _MockNotesAccessor:
         return None
 
 
-class _MockDocsAccessor:
-    """docs.diff() 등 None 반환."""
-
-    def diff(self):
-        return None
-
-
 class _MockFinanceAccessor:
     """finance.ratios / ratioSeries 기본 반환."""
 
@@ -315,7 +308,6 @@ class MockCompany:
         self.market = market
         self.currency = currency
         self.notes = _MockNotesAccessor()
-        self._docs = _MockDocsAccessor()
         self._finance = _MockFinanceAccessor()
         self._cache: dict = {}
 

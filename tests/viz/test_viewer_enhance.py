@@ -340,7 +340,7 @@ class TestIntegrationReal(unittest.TestCase):
     def test_diff_matrix_real(self):
         from dartlab.providers._common.diff import buildDiffMatrix
 
-        sections = self.c._docs.sections.raw
+        sections = self.c.sections
         result = buildDiffMatrix(sections, textOnly=True)
         self.assertGreater(result["topic_count"], 0)
         self.assertGreater(result["period_count"], 0)
@@ -354,7 +354,7 @@ class TestIntegrationReal(unittest.TestCase):
             matchAmounts,
         )
 
-        sections = self.c._docs.sections.raw
+        sections = self.c.sections
         periods = sorted(
             [c for c in sections.columns if re.fullmatch(r"\d{4}(Q[1-4])?", c)],
             reverse=True,
@@ -384,7 +384,7 @@ class TestIntegrationReal(unittest.TestCase):
             getRelatedTopics,
         )
 
-        sections = self.c._docs.sections.raw
+        sections = self.c.sections
         matrix = buildMentionMatrix(sections)
         self.assertGreater(len(matrix["adjacency"]), 0)
 

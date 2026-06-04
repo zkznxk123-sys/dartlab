@@ -51,14 +51,6 @@ def test_edgar_company_class_has_all_protocol_members():
     assert not missing, f"EDGAR Company missing: {missing}"
 
 
-def test_dart_docs_class_has_all_protocol_members():
-    from dartlab.providers.dart.accessor.docsAccessor import _DocsAccessor
-
-    members = _get_protocol_required_members(DocsProtocol)
-    missing = _class_has_all_members(_DocsAccessor, members)
-    assert not missing, f"DART _DocsAccessor missing: {missing}"
-
-
 def test_edgar_docs_class_has_all_protocol_members():
     from dartlab.providers.edgar.company import _DocsAccessor
 
@@ -92,14 +84,6 @@ def test_dart_company_isinstance_protocol():
 
     c = Company(SAMSUNG)
     assert isinstance(c, CompanyProtocol)
-
-
-@requires_samsung
-def test_dart_docs_isinstance_protocol():
-    from dartlab.providers.dart.company import Company
-
-    c = Company(SAMSUNG)
-    assert isinstance(c._docs, DocsProtocol)
 
 
 @requires_samsung
