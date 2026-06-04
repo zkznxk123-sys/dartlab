@@ -43,8 +43,8 @@ print(events)  # timestamp + 본문 abstract
 
 
 - `c = dartlab.Company("005930")`
-- `c.show()`
-- `c.show("BS")`
+- `c.panel()`
+- `c.panel("BS")`
 - `c.index()`
 - `c.trace()`
 
