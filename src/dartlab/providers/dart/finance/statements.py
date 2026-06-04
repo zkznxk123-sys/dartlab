@@ -219,7 +219,7 @@ def splitStatements(content: str) -> dict[str, str]:
         제표 영역의 raw 텍스트 (다음 헤더 직전까지).
 
     Example:
-        >>> from dartlab.providers.dart.docs.finance.statements import splitStatements
+        >>> from dartlab.providers.dart.finance.statements import splitStatements
         >>> content = "재무상태표\\n자산 100\\n손익계산서\\n매출 50"
         >>> parts = splitStatements(content)
         >>> "BS" in parts and "PNL" in parts
@@ -343,7 +343,7 @@ def statements(
         또는 None). 데이터 부족 시 None.
 
     Example:
-        >>> from dartlab.providers.dart.docs.finance.statements import statements
+        >>> from dartlab.providers.dart.finance.statements import statements
         >>> r = statements("005930", period="y")  # 삼성전자 연도별 BS/IS/CF
         >>> r is None or r.nYears >= 0
         True

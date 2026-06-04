@@ -290,8 +290,8 @@ def _getModuleRegistry() -> list[tuple[str, str, str, Any]]:
     global _MODULE_REGISTRY, _MODULE_INDEX
     if _MODULE_REGISTRY is None:
         _MODULE_REGISTRY = [
-            ("dartlab.providers.dart.docs.finance.summary", "fsSummary", "요약재무정보", None),
-            ("dartlab.providers.dart.docs.finance.statements", "statements", "재무제표", None),
+            # finance 재무제표 — docs 농장 은퇴로 finance/ 로 relocate (XBRL 보조 docs 파싱 source).
+            ("dartlab.providers.dart.finance.statements", "statements", "재무제표", None),
         ] + [(e.modulePath, e.funcName, e.label, e.extractor) for e in _getModuleEntries()]
         _MODULE_INDEX = {entry[1]: i for i, entry in enumerate(_MODULE_REGISTRY)}
     return _MODULE_REGISTRY
