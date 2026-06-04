@@ -136,22 +136,12 @@ def test_sectionMappings_inWheel(builtWheel: Path):
     with zipfile.ZipFile(builtWheel) as zf:
         names = zf.namelist()
     required = [
-        "dartlab/providers/dart/docs/sections/mapperData/sectionMappings.json",
-        "dartlab/providers/dart/docs/sections/mapperData/tableMappings.json",
+        "dartlab/providers/dart/sectionTopicData/sectionMappings.json",
         "dartlab/providers/edgar/docs/sections/mapperData/sectionMappings.json",
         "dartlab/providers/edinet/docs/sections/mapperData/sectionMappings.json",
     ]
     for req in required:
         assert req in names, f"wheel 에 {req} 누락"
-
-
-def test_sectionProfileTable_parquet_inWheel(builtWheel: Path):
-    """sectionProfileTable.parquet — sections 런타임 필수 데이터."""
-    with zipfile.ZipFile(builtWheel) as zf:
-        names = zf.namelist()
-    assert "dartlab/providers/dart/docs/sections/profileData/sectionProfileTable.parquet" in names, (
-        "sectionProfileTable.parquet 누락 — sections 파이프라인 동작 불가"
-    )
 
 
 def test_skillSpecs_inWheel(builtWheel: Path):
@@ -353,38 +343,3 @@ def test_rrCrisisDB_loadRrCrises_loudFail_onMissingData(monkeypatch):
     with pytest.raises(FileNotFoundError) as exc:
         mod._loadRrCrises()
     assert "rrCrises800y.json" in str(exc.value)
-
-
-def test_loadProjectionRules_loudFail_onKnownChapterMissing(monkeypatch):
-    """loadProjectionRules 가 알려진 chapter 의 파일 부재 시 loud-fail."""
-
-    import dartlab.providers.dart.docs.sections.artifacts as mod
-
-    # 정상 로드 확인
-    mod.loadProjectionRules.cache_clear()
-    rules = mod.loadProjectionRules("chapterII")
-    assert isinstance(rules, dict)
-    assert rules, "projectionRules.chapterII.json 이 빈 dict"
-
-    # 미등록 chapter 는 여전히 빈 dict (기존 동작 유지)
-    mod.loadProjectionRules.cache_clear()
-    assert mod.loadProjectionRules("chapter_does_not_exist_xyz") == {}
-
-    # 알려진 chapter 의 파일이 없다고 가정하면 FNF
-    mod.loadProjectionRules.cache_clear()
-
-    class _FakeRef:
-        def read_text(self, *args, **kwargs):
-            raise FileNotFoundError("simulated missing")
-
-    def _fakeFiles(pkg):
-        class _F:
-            def __truediv__(self, name):
-                return _FakeRef()
-
-        return _F()
-
-    monkeypatch.setattr(mod, "files", _fakeFiles)
-    with pytest.raises(FileNotFoundError) as exc:
-        mod.loadProjectionRules("chapterII")
-    assert "projectionRules.chapterII.json" in str(exc.value)

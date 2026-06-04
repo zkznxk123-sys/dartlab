@@ -69,7 +69,6 @@ _FORBIDDEN_UPSTREAM_PREFIXES: tuple[str, ...] = (
 _DENYLIST: tuple[tuple[str, str, str], ...] = (
     ("cross", "L2 도메인 조합 (architecture #4 — story 가 단독 부담)", "story/cross/ 또는 skills"),
     ("_entries", "Company API entry = L4 표면 (architecture L4)", "dartlab/_entries/ 또는 company/"),
-    ("docs", "공시 문서 처리 = L1 providers/dart 영역", "providers/dart/docs/"),
     ("show.py", "Company.show() API = L4", "company/show.py 또는 dartlab/"),
     ("select.py", "Company.select() API = L4", "company/select.py 또는 dartlab/"),
     ("messaging.py", "cli/server messaging = ≥ L1", "cli/messaging.py 또는 server/messaging.py"),

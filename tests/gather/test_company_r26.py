@@ -96,7 +96,7 @@ def test_notes_explicit_attribute_error():
     """R26 보조: c.notes.없는것 이 AttributeError + 안내 (audit C7 검증)."""
     import inspect
 
-    from dartlab.providers.dart.docs.notes import Notes
+    from dartlab.providers.dart.notes import Notes
 
     # __getattr__ 에 명시적 에러 안내가 있는지 source check
     if hasattr(Notes, "__getattr__"):

@@ -50,10 +50,7 @@ _REQUIRED_FILES = [
     "providers/mappers/mapperData/notesStructure.json",
     "reference/data/labelSupplements.json",
     # sections runtime 의존 JSON
-    "providers/dart/docs/sections/mapperData/sectionMappings.json",
-    "providers/dart/docs/sections/mapperData/tableMappings.json",
-    "providers/dart/docs/sections/profileData/projectionRules.chapterII.json",
-    "providers/dart/docs/sections/profileData/sectionProfileTable.parquet",
+    "providers/dart/sectionTopicData/sectionMappings.json",
     # EDGAR sections
     "providers/edgar/docs/sections/mapperData/sectionMappings.json",
 ]
@@ -114,7 +111,7 @@ def test_accountMappings_hasKrFsKeys():
 
 def test_sectionMappings_isNonEmpty():
     """sections/mapperData/sectionMappings.json — section 제목 → topic 매핑."""
-    path = _PKG_ROOT / "providers/dart/docs/sections/mapperData/sectionMappings.json"
+    path = _PKG_ROOT / "providers/dart/sectionTopicData/sectionMappings.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(data, dict)
     assert len(data) > 100, f"sectionMappings.json 항목 {len(data)}개 — 정상(500+) 대비 비정상"
@@ -134,19 +131,6 @@ def test_loadSections_returnsPopulatedDict():
     assert result, "loadSections() 빈 dict — 2026-04-19 크래시 재현 조건"
     assert "chapterByMajor" in result
     assert result["chapterByMajor"], "chapterByMajor 빈 dict — 파이프라인 silent-fail"
-
-
-def test_chapterFromMajorNum_mapsKnownRange():
-    """runtime.chapterFromMajorNum 이 1~9 모두 non-None 매핑."""
-    from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
-
-    for majorNum in range(1, 10):
-        result = chapterFromMajorNum(majorNum)
-        assert result is not None, (
-            f"chapterFromMajorNum({majorNum}) None — _CHAPTER_BY_MAJOR 초기화 실패 (parserMappings 누락)"
-        )
-        assert isinstance(result, str)
-        assert result  # 빈 문자열도 아님
 
 
 def test_loadAffiliate_returnsPopulatedDict():

@@ -108,7 +108,7 @@ def test_module_exports() -> None:
 
 def test_viewer_block_class_identity_with_dart() -> None:
     """EDGAR viewer 의 ViewerBlock 이 DART viewer 와 동일 클래스 (re-export)."""
-    from dartlab.providers.dart.docs.viewer import ViewerBlock as DartViewerBlock
+    from dartlab.providers.dart.viewer import ViewerBlock as DartViewerBlock
 
     assert ViewerBlock is DartViewerBlock, "EDGAR/DART viewer block schema 일치 의무"
 

@@ -57,18 +57,6 @@ class TestCacheCaps:
 
         assert _LOAD_CACHE_MAX <= 8, f"_LOAD_CACHE_MAX={_LOAD_CACHE_MAX} — 8 초과는 회사 다중 분석 시 RSS 폭증"
 
-    def test_prepared_cache_max_capped(self):
-        """sections pipeline 의 _PREPARED_CACHE_MAX 가 1 로 유지된다.
-
-        _PreparedRows 는 DataFrame 을 list[dict] 로 변환 보유 → 회사 1 종목 ~수백 MB.
-        2 이상이면 회사 다중 분석 시 동시 보유로 OOM 위험.
-        """
-        from dartlab.providers.dart.docs.sections.pipeline import _PREPARED_CACHE_MAX
-
-        assert _PREPARED_CACHE_MAX == 1, (
-            f"_PREPARED_CACHE_MAX={_PREPARED_CACHE_MAX} — 1 초과는 회사 동시 보유로 GB 압박"
-        )
-
 
 class TestPressureLevels:
     """M1: PRESSURE_* 4 단계 escalation 임계 분리 검증."""

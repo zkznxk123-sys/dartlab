@@ -43,7 +43,7 @@ def _legacyIndexDocsRows(company) -> list[dict[str, object]]:
         return []
 
     from dartlab.providers.dart.company import _CHAPTER_ORDER, _CHAPTER_TITLES
-    from dartlab.providers.dart.docs.sections import displayPeriod, formatPeriodRange, sortPeriods
+    from dartlab.providers.dart.sectionPeriod import displayPeriod, formatPeriodRange, sortPeriods
 
     periodCols = sortPeriods([column for column in sec.columns if str(column).startswith("20")], descending=True)
     periodRange = formatPeriodRange(periodCols, descending=True, annualAsQ4=True)

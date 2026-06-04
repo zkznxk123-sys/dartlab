@@ -37,14 +37,8 @@ def freshSectionsCache():
     `_preparedCache` 가 남아있으면 이전 호출 결과를 재사용해서
     "fresh install 첫 호출" 시나리오가 재현되지 않는다.
     """
-    try:
-        from dartlab.providers.dart.docs.sections.pipeline import clearPreparedCache
-
-        clearPreparedCache()
-        yield
-        clearPreparedCache()
-    except ImportError:
-        yield
+    # sections pipeline 농장 은퇴 — prepared cache 없음. no-op.
+    yield
 
 
 @pytest.fixture(scope="class")

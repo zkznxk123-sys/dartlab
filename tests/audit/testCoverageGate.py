@@ -56,7 +56,6 @@ _EXEMPT_PATH_PREFIXES = (
     "providers/dart/openapi/",
     "providers/edgar/openapi/",
     "providers/edinet/openapi/",
-    "providers/dart/docs/viewer",
     "viz/charts/",
     "viz/display/",
     "viz/generators.py",

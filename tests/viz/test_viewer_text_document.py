@@ -9,7 +9,7 @@ pytestmark = [
 
 import polars as pl
 
-from dartlab.providers.dart.docs.viewer import (
+from dartlab.providers.dart.viewer import (
     BlockMeta,
     ViewerBlock,
     viewerTextDocument,

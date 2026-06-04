@@ -9,12 +9,9 @@
 
 from __future__ import annotations
 
-import inspect
-
 import pytest
 
 from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.providers.dart.docs.sections import sectionsStorage as dartStorage
 from dartlab.providers.edgar.docs.sections import sectionsStorage as edgarStorage
 
 
@@ -27,22 +24,6 @@ def test_module_imports_clean() -> None:
     assert hasattr(edgarStorage, "loadSectionsLong")
     assert hasattr(edgarStorage, "loadSectionsWide")
     assert hasattr(edgarStorage, "loadSectionsIndex")
-
-
-@pytest.mark.parametrize(
-    "fnName",
-    ["sectionsDir", "sectionsPath", "listAvailablePeriods", "hasSectionsArtifact"],
-)
-def test_api_parity_with_dart(fnName: str) -> None:
-    """DART/EDGAR sectionsStorage 의 핵심 read API 시그니처 동등."""
-    dartFn = getattr(dartStorage, fnName)
-    edgarFn = getattr(edgarStorage, fnName)
-    dartSig = inspect.signature(dartFn)
-    edgarSig = inspect.signature(edgarFn)
-    # parameter 이름은 다를 수 있음 (stockCode vs ticker) — count + kind 만 비교.
-    assert len(dartSig.parameters) == len(edgarSig.parameters), (
-        f"{fnName} parameter 개수 mismatch: dart={dartSig} edgar={edgarSig}"
-    )
 
 
 def test_artifact_absent_returns_none() -> None:
@@ -75,14 +56,9 @@ def test_data_releases_has_edgar_sections() -> None:
 
 
 def test_path_provider_isolation() -> None:
-    """DART ``dart/sections`` 와 EDGAR ``edgar/sections`` cross-pollination 0."""
-    dartParts = dartStorage.sectionsDir("005930").parts
+    """EDGAR ``edgar/sections`` path segment 격리 (DART docs 농장 은퇴 — EDGAR 단독)."""
     edgarParts = edgarStorage.sectionsDir("AAPL").parts
-    # repo root 의 "dartlab" 같은 디렉터리명이 substring 일치하지 않도록 segment 단위로 검사.
-    assert "dart" in dartParts and "sections" in dartParts
     assert "edgar" in edgarParts and "sections" in edgarParts
-    assert "edgar" not in dartParts
-    assert "dart" not in edgarParts
 
 
 def test_ticker_normalization() -> None:
