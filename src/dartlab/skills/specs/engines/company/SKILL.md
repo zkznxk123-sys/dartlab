@@ -1122,7 +1122,7 @@ EDGAR 도 같은 구조. topic 이름만 SEC form 규약 (`10-K::item1Business`,
 
 - ticker를 식별하고 EDGAR Company 경로가 가능한지 확인한다.
 - EDGAR prefetched finance/docs snapshot 또는 OpenEdgar/Company.liveFilings 경로가 있는지 먼저 확인한다. 없으면 데이터 부재를 한계로 좁혀 말하고 DART 전용 경로로 대체하지 않는다.
-- Company.analysis, Company.show, Company.filings/readFiling capability를 찾아 재무와 공시 근거를 분리한다.
+- Company.analysis, Company.panel, Company.filings/readFiling capability를 찾아 재무와 공시 근거를 분리한다.
 - 재무 숫자는 EDGAR finance table/value ref가 있을 때만 말한다. 숫자 claim은 period, metric, value가 들어간 supporting ref에 직접 묶는다.
 - filing claim은 접수일, form, 제목 또는 본문 ref에 묶는다.
 - fiscal period가 있는 경우 calendar period와 혼동하지 않도록 기준을 밝힌다.
@@ -1131,8 +1131,8 @@ EDGAR 도 같은 구조. topic 이름만 SEC form 규약 (`10-K::item1Business`,
 ## 공개 호출 방식
 
 - `c = dartlab.Company("005930")`
-- `c.show()`
-- `c.show("BS")`
+- `c.panel()`
+- `c.panel("BS")`
 - `c.index()`
 - `c.trace()`
 
