@@ -47,6 +47,29 @@ def test_role_short_names_and_ifrs() -> None:
     assert roleToStatement("http://x/role/BalanceSheetParenthetical") is None
 
 
+def test_caption_to_statement_title_form() -> None:
+    """표 캡션 제목 → statement (INS-era fallback). 제목 형식만 — prose·off-balance 오탐 배제."""
+    from dartlab.providers.edgar.panel.build.mapper import captionToStatement
+
+    assert captionToStatement("AAR CORP. AND SUBSIDIARIES CONSOLIDATED BALANCE SHEETS ASSETS") == "BS"
+    assert captionToStatement("CONSOLIDATED STATEMENTS OF CASH FLOWS") == "CF"
+    assert captionToStatement("CONSOLIDATED STATEMENTS OF INCOME") == "IS"
+    assert captionToStatement("CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME (LOSS)") == "CIS"
+    assert captionToStatement("CONSOLIDATED STATEMENTS OF CHANGES IN EQUITY FOR THE THREE YEARS") == "EF"
+    assert captionToStatement("STATEMENT OF FINANCIAL POSITION") == "BS"  # IFRS
+    # prose(주석 본문)·off-balance·빈 캡션 = None (제목 아님)
+    assert captionToStatement("A summary of the components of comprehensive income is as follows:") is None
+    assert captionToStatement("contractual cash obligations and off-balance sheet arrangements") is None
+    assert captionToStatement("") is None
+
+
+def test_caption_comprehensive_before_income() -> None:
+    """ComprehensiveIncome 캡션은 IS 가 아니라 CIS (검사 순서 가드 — role 규칙과 동형)."""
+    from dartlab.providers.edgar.panel.build.mapper import captionToStatement
+
+    assert captionToStatement("CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME") == "CIS"
+
+
 def test_context_to_cell_instant_year_vs_interim() -> None:
     from dartlab.providers.edgar.panel.build.mapper import contextToCell
 

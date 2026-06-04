@@ -6,7 +6,7 @@ from collections import Counter
 
 import pytest
 
-from .synthData import synthPre, synthPrimaryHtml
+from .synthData import synthPre, synthPrimaryHtml, synthPrimaryHtmlNoInline
 
 pytestmark = pytest.mark.unit
 
@@ -43,3 +43,16 @@ def test_text_table_split_and_order() -> None:
 def test_item_heading_detected() -> None:
     rows = _walk()
     assert any(r["sectionLeaf"].startswith("Item 1") for r in rows)
+
+
+def test_caption_fallback_anchors_ins_era() -> None:
+    """inline fact 0 (INS-era) — 표 캡션 제목으로 BS/IS 앵커 (captionToStatement fallback)."""
+    from dartlab.providers.edgar.panel.build.linkbase import parsePresentation
+    from dartlab.providers.edgar.panel.build.walker import buildStatementConcepts, walkBody
+
+    sc = buildStatementConcepts(parsePresentation(synthPre()))
+    rows = walkBody(synthPrimaryHtmlNoInline(), formType="10-K", statementConcepts=sc)
+    anchored = Counter(r["disclosureKey"] for r in rows if r["disclosureKey"])
+    assert anchored["BS"] == 1 and anchored["IS"] == 1  # 캡션으로 본표 앵커
+    # "off-balance sheet" note 표는 BS 오앵커 금지 (statement 당 1개 + off- 음성 룩비하인드)
+    assert sum(anchored.values()) == 2

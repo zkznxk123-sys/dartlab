@@ -2,9 +2,11 @@
 
 DART walker(SECTION 구조 walk + leafSplit text/table 분리)의 EDGAR 미러. primary HTML 을 문서순서로
 walk 하며 ``<table>`` = table leaf(중첩표는 바깥 1단위), 사이 텍스트 = text leaf 로 분리(blockOrder
-보존). 재무제표 본표는 **statement role concept 커버리지 최대 표 1개**만 disclosureKey 앵커링
-(BS/IS/CF/CIS/EF) — 같은 concept 을 일부 쓰는 note 표가 본표로 오앵커되지 않게(DART 의 표당 1 ACLASS
-미러). 그 외 표·텍스트는 narrative(null). Item 헤딩 검출로 sectionLeaf 부여.
+보존). 재무제표 본표는 **statement 당 표 1개**만 disclosureKey 앵커링(BS/IS/CF/CIS/EF) — ① inline fact
+concept 커버리지 최대 표(정밀, ≈2021+ inline era), ② fact 0 인 INS-era(≈2012~2020, facts 가 별도
+EX-101.INS)·pre-inline 은 **표 캡션 제목**(captionToStatement) fallback 으로 전 시대 앵커. 같은 concept
+을 일부 쓰는 note 표가 본표로 오앵커되지 않게(DART 의 표당 1 ACLASS 미러). 그 외 표·텍스트는
+narrative(null). Item 헤딩 검출로 sectionLeaf 부여.
 
 LLM Specifications:
     AntiPatterns:
@@ -79,8 +81,9 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
     """primary HTML 본문 → 보드 leaf 행 (서술 text/table + 재무제표 앵커링, 문서순서).
 
     lxml HTMLParser(prolog strip, huge_tree)로 파싱 → iterwalk 로 ``<table>``(최외곽)=table leaf,
-    사이 텍스트=text leaf. 표마다 statement 별 concept 커버리지 계산 → **statement 당 커버리지 최대 표
-    1개**만 disclosureKey 앵커링(≥ ``_MIN_STMT_COVERAGE``), 나머지 null. Item 헤딩 검출로 sectionLeaf.
+    사이 텍스트=text leaf. 표마다 inline fact concept 커버리지(primary) + 직전 캡션(fallback) 계산 →
+    **statement 당 표 1개**만 disclosureKey 앵커링 — fact 커버리지 ≥ ``_MIN_STMT_COVERAGE`` 우선,
+    fact 0(INS-era·pre-inline)은 캡션 제목 매치 최대 표. 나머지 null. Item 헤딩 검출로 sectionLeaf.
 
     Args:
         html: primary iXBRL HTML.
@@ -106,12 +109,13 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
 
     Capabilities:
         - 본문 text/table leaf 무손실 분리 + 재무제표 본표 1개씩 disclosureKey 앵커링(panel급 핵심).
+        - inline(fact)·INS-era·pre-inline(캡션) 전 시대 본표 앵커 — 보드 재무제표 전 기간 수평화.
 
     Guide:
         - builder 가 호출. lxml 은 build 전용(read 표면 lxml 0 유지).
 
     AIContext:
-        - statement 당 best 표 1개 앵커 → note 표 오병합 0. blockOrder=문서순.
+        - statement 당 best 표 1개 앵커(fact primary + 캡션 fallback) → note 표 오병합 0. blockOrder=문서순.
 
     When:
         - 필링 본문을 16-col 보드 행으로.
@@ -135,7 +139,7 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
     """
     from lxml import etree
 
-    from .mapper import canonicalItem
+    from .mapper import canonicalItem, captionToStatement
 
     cleaned = re.sub(r"^\s*<\?xml[^>]*\?>", "", html, count=1)
     parser = etree.HTMLParser(recover=True, huge_tree=True)
@@ -194,6 +198,7 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
         if tag == "table":
             if event == "start":
                 if tableDepth == 0:
+                    caption = _blockText(" ".join(textBuf))[-200:]  # 표 직전 텍스트 = 캡션(_flushText 전 capture)
                     _flushText()
                     tableHtml = etree.tostring(el, encoding="unicode", method="html")
                     concepts = set(_FACT_NAME_RE.findall(tableHtml))
@@ -205,6 +210,8 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
                             "sectionLeaf": curItem or formType,
                             "blockLeaf": "",
                             "_cov": cov,
+                            "_caption": caption,
+                            "_size": tableHtml.lower().count("<td"),
                         }
                     )
                 tableDepth += 1
@@ -223,17 +230,38 @@ def walkBody(html: str, *, formType: str, statementConcepts: dict[str, set[str]]
                 textBuf.append(el.tail)
     _flushText()
 
-    # 2차 — statement 당 커버리지 최대 table 1개 앵커링(note 표 오병합 가드).
-    bestForStmt: dict[str, tuple[int, int]] = {}  # stmt → (blockIdx, coverage)
+    # 2차 — statement 당 표 1개 앵커링. **inline fact-coverage primary**(정밀, ≈2021+ inline era)
+    # + **캡션 fallback**(fact 0 인 INS-era·pre-inline — 표 캡션이 유일 신호). note 표 오병합 가드.
+    bestFact: dict[str, tuple[int, int]] = {}  # stmt → (blockIdx, coverage)
     for idx, b in enumerate(blocks):
         if b["leafType"] != "table":
             continue
-        for st, c in b["_cov"].items():
+        for st, c in b.get("_cov", {}).items():
             if c < _MIN_STMT_COVERAGE:
                 continue
-            if st not in bestForStmt or c > bestForStmt[st][1]:
-                bestForStmt[st] = (idx, c)
-    anchored: dict[int, str] = {idx: st for st, (idx, _c) in bestForStmt.items()}
+            if st not in bestFact or c > bestFact[st][1]:
+                bestFact[st] = (idx, c)
+    # 캡션 fallback — fact 로 앵커 안 된 statement 만, 캡션 제목 매치 표 중 최대 크기 1개(BS 양분 시 큰 쪽).
+    bestCap: dict[str, tuple[int, int]] = {}  # stmt → (blockIdx, size)
+    for idx, b in enumerate(blocks):
+        if b["leafType"] != "table":
+            continue
+        st = captionToStatement(b.get("_caption", ""))
+        if not st or st in bestFact:
+            continue
+        sz = b.get("_size", 0)
+        if st not in bestCap or sz > bestCap[st][1]:
+            bestCap[st] = (idx, sz)
+    anchored: dict[int, str] = {}
+    usedStmt: set[str] = set()
+    for st, (idx, _c) in bestFact.items():
+        anchored[idx] = st
+        usedStmt.add(st)
+    for st, (idx, _s) in bestCap.items():
+        if st in usedStmt or idx in anchored:
+            continue
+        anchored[idx] = st
+        usedStmt.add(st)
 
     rows: list[dict] = []
     for idx, b in enumerate(blocks):

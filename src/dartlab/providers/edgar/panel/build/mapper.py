@@ -72,6 +72,30 @@ _ROLE_REJECT: tuple[str, ...] = (
 )
 _NONNUM_RE = re.compile(r"[^a-z0-9]")
 
+# 표 캡션(HTML 제목 텍스트) → statement. role 이 아닌 **본문 표 캡션**으로 앵커(INS-era·pre-inline
+# 필링은 inline fact 가 0 → role-concept 커버리지 불가, 캡션이 유일 신호). 검사 순서 = 특이도 높은 것
+# 먼저(CIS·EF 가 IS·BS 보다 먼저). **제목 형식만**("Statements of X") — prose("...comprehensive income
+# is as follows:") 오탐 차단. BS 는 "off-balance sheet" 음성 룩비하인드로 서술 표 배제.
+_CAPTION_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"statements?\s+of\s+comprehensive\s+(income|loss)", re.IGNORECASE), "CIS"),
+    (
+        re.compile(
+            r"statements?\s+of\s+(changes\s+in\s+)?(stockholders|shareholders|share-?owners)?['’]?\s*equity",
+            re.IGNORECASE,
+        ),
+        "EF",
+    ),
+    (re.compile(r"statements?\s+of\s+cash\s+flows", re.IGNORECASE), "CF"),
+    (
+        re.compile(
+            r"consolidated\s+balance\s+sheets?|statements?\s+of\s+financial\s+position|(?<!off[\s-])\bbalance\s+sheets?",
+            re.IGNORECASE,
+        ),
+        "BS",
+    ),
+    (re.compile(r"statements?\s+of\s+(operations|income|earnings|profit)", re.IGNORECASE), "IS"),
+)
+
 
 def roleToStatement(roleUri: str) -> str | None:
     """presentation role URI → 정규 statement key (BS/IS/CF/CIS/EF) 또는 None.
@@ -142,6 +166,79 @@ def roleToStatement(roleUri: str) -> str | None:
         return None  # 주석·디테일·표지·괄호표 = 본표 아님(서술)
     for pat, stmt in _ROLE_RULES:
         if pat in norm:
+            return stmt
+    return None
+
+
+def captionToStatement(caption: str) -> str | None:
+    """표 캡션(HTML 제목 텍스트) → 정규 statement key (BS/IS/CF/CIS/EF) 또는 None.
+
+    ``roleToStatement`` 의 캡션 짝 — role URI 대신 **본문 재무제표 표 직전 텍스트**(예 "AAR CORP. AND
+    SUBSIDIARIES CONSOLIDATED BALANCE SHEETS")로 statement 판정. inline fact 가 0 인 INS-era(≈2012~2020,
+    facts 가 별도 EX-101.INS)·pre-inline 필링은 role-concept 커버리지가 불가능 → 캡션이 유일한 앵커 신호.
+    ``_CAPTION_RULES`` 는 **제목 형식만**("Statements of X") 매칭 — prose("comprehensive income is as
+    follows:")·"off-balance sheet" 같은 서술 표 오탐을 배제.
+
+    Args:
+        caption: 표 직전 텍스트(끝 ~160자 권장 — 표 바로 앞 제목이 캡션).
+
+    Returns:
+        "BS"/"IS"/"CF"/"CIS"/"EF" 또는 None (재무제표 제목 아님).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> captionToStatement("AAR CORP. AND SUBSIDIARIES CONSOLIDATED BALANCE SHEETS ASSETS")
+        'BS'
+        >>> captionToStatement("CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME (LOSS)")
+        'CIS'
+        >>> captionToStatement("A summary of the components of comprehensive income is as follows:") is None
+        True
+        >>> captionToStatement("contractual cash obligations and off-balance sheet arrangements") is None
+        True
+
+    SeeAlso:
+        - ``roleToStatement`` — role URI 짝(inline era 의 정밀 신호).
+        - ``walker.walkBody`` — fact-coverage primary + 본 캡션 fallback 앵커.
+
+    Requires:
+        - 없음.
+
+    Capabilities:
+        - inline fact 부재(INS-era·pre-inline) 필링의 재무제표 표를 캡션으로 앵커 — 전 시대 보드 수평화.
+
+    Guide:
+        - walker 가 fact-coverage 0 인 statement 에 대해서만 호출(fallback). 순수.
+
+    AIContext:
+        - 제목 형식 패턴(Statements of X)만 — prose 임베드·off-balance 오탐 차단. CIS·EF 가 IS·BS 보다 먼저.
+
+    When:
+        - inline fact 가 없는 필링에서 재무제표 표를 disclosureKey 로 앵커할 때.
+
+    How:
+        - 캡션 → _CAPTION_RULES 순서 첫 매치(제목 noun-phrase 요구).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단순 substring 매칭 금지 — 제목 형식("Statements of X") 요구(prose 오탐 차단).
+            - "off-balance sheet" 를 BS 로 매칭 금지 — 음성 룩비하인드.
+        OutputSchema:
+            - ``str | None``.
+        Prerequisites:
+            - 없음.
+        Freshness:
+            - 순수.
+        Dataflow:
+            - caption → _CAPTION_RULES 패턴 첫 매치.
+        TargetMarkets:
+            - US.
+    """
+    if not caption:
+        return None
+    for pat, stmt in _CAPTION_RULES:
+        if pat.search(caption):
             return stmt
     return None
 

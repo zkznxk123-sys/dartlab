@@ -41,6 +41,23 @@ def synthPrimaryHtml() -> str:
     )
 
 
+def synthPrimaryHtmlNoInline() -> str:
+    """INS-era 합성 HTML — inline ix fact 0 (facts 가 별도 EX-101.INS). 재무제표 표는 **캡션 제목**으로만
+    식별 → walker 의 captionToStatement fallback 앵커 검증용. 본표 캡션 + note 표(오앵커 가드)도 포함."""
+    return (
+        "<?xml version='1.0' encoding='ASCII'?>\n<html><body>"
+        "<p>Item 1. Business</p><div>We make widgets and provide services worldwide.</div>"
+        "<p>TEST CORP. AND SUBSIDIARIES CONSOLIDATED BALANCE SHEETS</p>"
+        "<table><tr><td>Total assets</td><td>1000</td></tr><tr><td>Total liabilities</td><td>500</td></tr>"
+        "<tr><td>Stockholders equity</td><td>500</td></tr></table>"
+        "<p>TEST CORP. AND SUBSIDIARIES CONSOLIDATED STATEMENTS OF INCOME</p>"
+        "<table><tr><td>Total revenues</td><td>5000</td></tr><tr><td>Net income</td><td>800</td></tr></table>"
+        "<p>A summary of our off-balance sheet arrangements is as follows:</p>"
+        "<table><tr><td>Operating leases</td><td>120</td></tr></table>"
+        "</body></html>"
+    )
+
+
 def synthPre() -> str:
     """합성 EX-101.PRE — BS role(5 concept 순서) + IS role(1 concept)."""
     bsArcs = "".join(
