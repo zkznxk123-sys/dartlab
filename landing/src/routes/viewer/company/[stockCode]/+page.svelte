@@ -3,7 +3,7 @@
 	// 디자인 = scan 방식(flat #050811 · #1e2433 보더 · 오렌지 단일 액센트). 풀블리드(좌우 패딩 0 · 갭 0).
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
-	import { Maximize2, Minimize2, Columns3, MessageSquare } from 'lucide-svelte';
+	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2 } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
@@ -11,6 +11,7 @@
 	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
 	import CommandPalette from '$lib/components/viewer/CommandPalette.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
+	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import type { PanelBundle } from '$lib/viewer/types';
@@ -35,6 +36,7 @@
 	let cols = $state(3);
 	let isFullscreen = $state(false);
 	let discussOpen = $state(false);
+	let financeOpen = $state(false); // 정량재무제표 다이얼로그
 	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
@@ -171,6 +173,9 @@
 		</div>
 		<div class="ph-right">
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
+			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="정량재무제표 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
+				<Table2 size={13} /> 정량재무
+			</button>
 			<button type="button" class="fs-btn" onclick={() => (discussOpen = true)} title="공시 토론 (GitHub Discussions)">
 				<MessageSquare size={13} /> 토론
 			</button>
@@ -226,6 +231,7 @@
 </main>
 
 <GiscusPanel {code} {corpName} open={discussOpen} onclose={() => (discussOpen = false)} />
+<FinanceDialog {code} {corpName} open={financeOpen} onclose={() => (financeOpen = false)} />
 
 <style>
 	.viewer-page {

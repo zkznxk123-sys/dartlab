@@ -6,6 +6,7 @@ import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
 import { narrativeCore } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
 import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
+import { mergeDriftVariants } from '../src/lib/viewer/finance/financePivot.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 
 let fail = 0;
@@ -70,5 +71,17 @@ eq(viewerUrl(marketForCode('005930'), '20260515002181'), 'https://dart.fss.or.kr
 eq(viewerUrl(marketForCode('AAPL'), '0000320193-25-000079'), 'https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/0000320193-25-000079-index.htm', 'US SEC');
 eq(viewerUrl('US', null), null, 'US null');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (40/40)' : `viewerCheck: ${fail} FAIL`);
+// mergeDriftVariants — 같은 label·기간 비충돌(era-drift 태그 변종) 병합, 공존 동명(기간 겹침)은 분리.
+const drift = mergeDriftVariants([
+	{ accountId: 'A', label: '수익(매출액)', ord: 0, values: { '2016': 100, '2017': 110 } }, // 옛 태그
+	{ accountId: 'B', label: '수익(매출액)', ord: 0, values: { '2024': 300, '2025': 333 } }, // 현 태그 (기간 비충돌)
+	{ accountId: 'C', label: '기타', ord: 5, values: { '2024': 10 } }, // 공존 기타
+	{ accountId: 'D', label: '기타', ord: 6, values: { '2024': 20 } } // 같은해 기타 (충돌 → 분리)
+]);
+eq(drift.filter((r) => r.label === '수익(매출액)').length, 1, 'drift 동의어 병합 1행');
+eq(drift.find((r) => r.label === '수익(매출액)')?.values['2016'], 100, 'drift 병합 옛값 보존');
+eq(drift.find((r) => r.label === '수익(매출액)')?.values['2025'], 333, 'drift 병합 현값 보존');
+eq(drift.filter((r) => r.label === '기타').length, 2, '공존 동명 분리 유지');
+
+console.log(fail === 0 ? 'viewerCheck: ALL OK (44/44)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);
