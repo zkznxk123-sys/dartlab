@@ -260,7 +260,6 @@ def iterName(keyword, *, limit: int | None = None):
     yield from df.iter_rows(named=True)
 
 
-from dartlab.providers.dart.accessor.docsAccessor import _DocsAccessor
 from dartlab.providers.dart.accessor.financeAccessor import _FinanceAccessor
 from dartlab.providers.dart.accessor.profileAccessor import _ProfileAccessor
 from dartlab.providers.dart.accessor.reportAccessor import _ReportAccessor
@@ -907,8 +906,7 @@ class Company:
         self._notesAccessor = Notes(self) if self._hasDocs else None
         # public namespace 모두 제거 (P3a/b/c/d)
         self._profileAccessor = _ProfileAccessor(self)
-        # private 백엔드 — 내부 compute 전용 (story/credit/valuation 등)
-        self._docs = _DocsAccessor(self)
+        # private 백엔드 — 내부 compute 전용 (story/credit/valuation 등). docs accessor 은퇴(농장 제거).
         self._finance = _FinanceAccessor(self)
         self._report = _ReportAccessor(self)
 
