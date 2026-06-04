@@ -52,7 +52,7 @@ _LOADERS: dict[str, LoaderProvider] = {}
 _KNOWN_LOADER_MODULES: tuple[str, ...] = (
     "dartlab.providers.edgar.docs.loader",  # EdgarDocsLoader
     "dartlab.providers.edgar.bulk",  # EdgarBulkLoader
-    "dartlab.providers.dart.docs.sections.loader",  # DartDocsLoader (docs↔sections 합성)
+    # DART docs 농장 은퇴 — DartDocsLoader 제거. loadData("docs")=빈 DF graceful(panel 이 공시 표면).
 )
 
 _DISCOVERED = False
