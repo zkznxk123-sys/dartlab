@@ -139,6 +139,16 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "DART 전체 공시 원문 데이터",
         "public": False,
     },
+    "dartOriginal": {
+        # 원본=SSOT 전략([[project_original_ssot_strategy]]) — DART 정기보고서(사업·분기·반기)
+        # document.xml zip 보관 (재빌드 가치 높은 분석 핵심). nested: original/dart/docs/{code}/{rcept}.zip.
+        # allFilings(비정기)는 월별 parquet 이라 zip 안함. EDGAR 는 panel 만(raw 폐기).
+        "dir": "original/dart/docs",
+        "label": "DART 정기보고서 원본 zip (재빌드용, 비공개)",
+        "public": False,  # 재배포 안전 — private repo
+        "nested": True,
+        "repo": "eddmpython/dartlab-dart-original",
+    },
     "stemIndex": {
         "dir": "dart/stemIndex",
         "label": "Ngram+Synonym 통합 검색 인덱스",

@@ -80,10 +80,7 @@ def main():
     )
     args = parser.parse_args()
     category = args.category
-    # DART 원본 zip 비공개 강제 — original/ 카테고리는 HF 업로드 금지 (사용자 결정 2026-05-21).
-    # 상세: CLAUDE.md "DART 원본 zip 비공개" 섹션 + operation.docsBuilderRefactor §7.
-    if "original" in category.lower():
-        raise ValueError(f"category='{category}' 거부 — data/dart/original/ 은 로컬 임시 보관 전용, HF 업로드 금지")
+    # 원본=SSOT 전략 전환(사용자 결정) — 옛 "원본 비공개" 가드 폐기. 원본 repo 는 비공개(public=False).
     dirPath = CATEGORY_DIR[category]
     localDir = Path(f"data/{dirPath}")
 

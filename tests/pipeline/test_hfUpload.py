@@ -49,16 +49,6 @@ def _mkParquet(d: Path, *names: str) -> None:
         p.write_bytes(b"x")
 
 
-def test_original_category_rejected(tmp_path, monkeypatch):
-    """원본 zip 카테고리/경로는 commit 전 ValueError (비우회 가드)."""
-    from dartlab.pipeline.hfUpload import _assertNotOriginal
-
-    with pytest.raises(ValueError):
-        _assertNotOriginal("dartOriginal", tmp_path)
-    with pytest.raises(ValueError):
-        _assertNotOriginal("docs", tmp_path / "dart" / "original" / "docs")
-
-
 def test_changed_empty_skips_commit(tmp_path):
     """changedFiles=[] → 0 commit, 반환 0."""
     from dartlab.pipeline.hfUpload import uploadCategoryToHf

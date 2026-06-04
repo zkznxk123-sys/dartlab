@@ -1,12 +1,11 @@
 """HuggingFace 업로드 — 옛 ``uploadData._uploadHf`` 정본 이동.
 
-증분(changed 매니페스트) 우선, 없으면 전체 폴더 fallback. nested 대용량(panel ~92k)은
+증분(changed 매니페스트) 우선, 없으면 전체 폴더 fallback. nested 대용량(panel·원본 zip/txt)은
 ``upload_large_folder``(resumable·병렬·자체 backoff), 일반은 ``create_commit`` 배치(300/commit).
 모든 HF 호출은 ``core.hfRetry.retryHfCall`` 로 감싼다(429·LFS-RuntimeError unwrap).
 
-⛔ "원본 zip 비공개" 가드를 **함수 내부 비우회 필터**로 내장 — caller allow_pattern 의존
-금지. category 에 "original" 포함 또는 경로에 ``original/`` 세그먼트가 있으면 commit 전
-ValueError. (3-layer 가드: gitignore + 본 reject + 워크플로 path 보존.)
+원본(DART 정기 zip·EDGAR 원본)도 ``nested`` 카테고리로 업로드 가능 — 옛 "원본 비공개"
+가드는 폐기(원본=SSOT 전략 전환). 원본 repo 는 ``DATA_RELEASES[...]['public']=False`` 로 비공개.
 """
 
 from __future__ import annotations
@@ -58,16 +57,9 @@ def _categoryDir(category: str, dataDir: str | None = None) -> Path:
     return base / DATA_RELEASES[category]["dir"]
 
 
-def _assertNotOriginal(category: str, localDir: Path) -> None:
-    """원본 zip HF 업로드 비우회 차단(category + 경로 양쪽)."""
-    if "original" in category.lower():
-        raise ValueError(f"category='{category}' 거부 — data/*/original/ 은 로컬 임시 전용, HF 업로드 금지")
-    if any(part.lower() == "original" for part in localDir.parts):
-        raise ValueError(f"경로 '{localDir}' 에 original/ 세그먼트 — HF 업로드 금지")
-
-
 def _monitorFileCount(localDir: Path, category: str, repo: str) -> int:
-    n = len(list(localDir.rglob("*.parquet")))
+    # 전 파일타입 카운트(parquet/arrow + 원본 zip/txt) — HF repo 파일수 한계는 타입 무관.
+    n = sum(1 for p in localDir.rglob("*") if p.is_file())
     if n >= _FILECOUNT_WARN:
         print(
             f"[hfUpload] ⚠ 파일수 경고 — {category} {n:,}개 (repo={repo}, 임계 {_FILECOUNT_WARN:,}). "
@@ -88,7 +80,7 @@ def uploadCategoryToHf(
 
     ``changedFiles`` 가 주어지면 그 상대경로만; None 이면 ``dist/changed_{category}.txt``
     매니페스트 확인(존재+빈목록=업로드 skip, 부재=전체 폴더 fallback). nested 대용량은
-    ``upload_large_folder``. 원본 zip 은 비우회 차단.
+    ``upload_large_folder``. 원본 zip/txt 도 nested 카테고리로 업로드(가드 폐기).
 
     Args:
         category: DATA_RELEASES 카테고리명.
@@ -100,7 +92,7 @@ def uploadCategoryToHf(
         업로드한 파일 수(증분) 또는 -1(전체 폴더 모드, 카운트 미집계) 또는 0(skip).
 
     Raises:
-        ValueError: 토큰 부재 또는 original 카테고리/경로.
+        ValueError: 토큰 부재.
 
     Example:
         >>> uploadCategoryToHf("docs", changedFiles=[])  # 변경 0 → skip  # doctest: +SKIP
@@ -114,7 +106,6 @@ def uploadCategoryToHf(
     dirPath = DATA_RELEASES[category]["dir"]
     repo = repoFor(category)
     localDir = _categoryDir(category, dataDir)
-    _assertNotOriginal(category, localDir)
     isNested = bool(DATA_RELEASES[category].get("nested"))
     api = HfApi(token=token)
 
@@ -171,7 +162,8 @@ def uploadCategoryToHf(
     # 전체 폴더 fallback
     if isNested:
         base = Path(dataDir or os.environ.get("DARTLAB_DATA_DIR") or os.path.join(os.getcwd(), "data"))
-        nFiles = len(list(localDir.rglob("*.parquet"))) + len(list(localDir.rglob("*.arrow")))
+        # 전 파일타입(parquet/arrow + 원본 zip/txt) — allow_patterns=[dir/**] 가 전부 업로드.
+        nFiles = sum(1 for p in localDir.rglob("*") if p.is_file())
         if nFiles == 0:
             print(f"[hfUpload] {localDir} 업로드할 파일 없음", flush=True)
             return 0
