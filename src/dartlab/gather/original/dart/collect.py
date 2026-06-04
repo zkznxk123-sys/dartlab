@@ -210,7 +210,8 @@ def archiveDartOriginals(
                 continue
             stats["days"] += 1
 
-            targets = []  # (rceptNo, outPath)
+            skippedBefore = int(stats["skipped"])  # 일별 skip 산출용(stats 는 전 기간 누적)
+            targets = []  # (rceptNo, outPath, stockCode)
             for row in rows:
                 reportNm = row.get("report_nm", "") or ""
                 periodic = _isPeriodic(reportNm)
@@ -233,19 +234,21 @@ def archiveDartOriginals(
 
             if not targets:
                 if showProgress:
-                    _log.info("[%s] 신규 0 (skip %d)", day, stats["skipped"])
+                    _log.info("[%s] 신규 0 (skip %d)", day, int(stats["skipped"]) - skippedBefore)
                 continue
 
             # changed 마킹은 zip 이 *실제로 써진*(ok) 종목만 — fetch 실패(error/no_body)는 제외.
             # 큐잉 시점 마킹이면 일시 fetch 실패가 panel 재빌드+원본 tar 덮어쓰기(부분이력)를 유발(데이터 손실).
+            okBefore, noBodyBefore, errBefore = int(stats["ok"]), int(stats["noBody"]), int(stats["error"])
             changedCodes |= _fetchDayTargets(client, targets, workers, stats)
             if showProgress:
+                # stats 는 전 기간 누적 — 일별 값은 (당일 후 − 당일 전) 차분, 마지막 항만 누적 ok.
                 _log.info(
                     "[%s] ok=%d noBody=%d error=%d (누적 ok=%d)",
                     day,
-                    stats["ok"],
-                    stats["noBody"],
-                    stats["error"],
+                    int(stats["ok"]) - okBefore,
+                    int(stats["noBody"]) - noBodyBefore,
+                    int(stats["error"]) - errBefore,
                     stats["ok"],
                 )
     finally:

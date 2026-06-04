@@ -39,7 +39,7 @@ on:
         options: [all, finance, report, docs]
 
 permissions:
-  contents: write
+  contents: read  # HF push 는 HF_TOKEN 사용 — git commit/push/release 없음(checkout+cache 만). 최소권한.
 
 # DART 경로 (dart/*) 에 push 하는 워크플로우만 직렬화.
 # 다른 경로 (edgar/*, kindlist/*, search/*) 는 별도 group — cancelled 연쇄 방지.

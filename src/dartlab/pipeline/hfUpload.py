@@ -135,6 +135,16 @@ def uploadCategoryToHf(
 
     if rels is not None:
         files = [localDir / r for r in rels if (localDir / r).exists()]
+        missing = [r for r in rels if not (localDir / r).exists()]
+        if missing:
+            # 매니페스트(changed_{cat}.txt)는 업로드 SSOT — 거기 적힌 파일이 로컬에 없으면 그 변경분이
+            # *조용히* 누락된다(부분 업로드). raise 대신 loud 경고 후 존재분만 진행(1건 부재가 전체
+            # 업로드를 막지 않게). 운영자는 경고로 매니페스트-디스크 불일치를 즉시 본다.
+            shown = ", ".join(missing[:10]) + (" …" if len(missing) > 10 else "")
+            print(
+                f"[hfUpload] ⚠ {category} 매니페스트 {len(rels)}건 중 {len(missing)}건 로컬 부재 — 업로드 누락: {shown}",
+                flush=True,
+            )
         if not files:
             print(f"[hfUpload] {category} 변경목록 {len(rels)}건이나 로컬 파일 0 → skip", flush=True)
             return 0

@@ -51,7 +51,10 @@ def _universeTickerByCik() -> dict[str, list[str]]:
     try:
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
-        uni = loadEdgarListedUniverse(forceUpdate=False)
+        # 일간 증분은 universe 를 *강제 갱신* — TTL(24h) 안의 stale universe 면 지난 24h 신규 상장
+        # (IPO)의 CIK 가 빠져 daily-index 의 그 공시가 조용히 누락되고 0 changed 로 녹색 보고된다.
+        # forceUpdate fetch 실패 시엔 universe.updateListedUniverse 가 stale 캐시를 서빙(무중단).
+        uni = loadEdgarListedUniverse(forceUpdate=True)
     except Exception:  # noqa: BLE001 — universe 부재면 빈 맵(상위가 0 changed 로 보고)
         return {}
     if "cik" not in uni.columns or "ticker" not in uni.columns:
@@ -91,7 +94,9 @@ def _seedTickerPanel(ticker: str, *, token: str | None) -> bool | None:
         )
     except (EntryNotFoundError, RepositoryNotFoundError):
         return False  # 신규 종목 — HF 미존재(404)
-    except Exception:  # noqa: BLE001 — 일시 실패 → skip(다음 run)
+    except Exception as exc:  # noqa: BLE001 — 일시 실패 → skip(다음 run)
+        # 근본 원인 관측화 — 호출부는 None 만 받아 exc 를 잃으므로 여기서 1줄 남긴다(간헐 패턴 추적).
+        print(f"[pipeline] edgarPanel seed {ticker} panel 일시실패: {type(exc).__name__}: {exc}", flush=True)
         return None
     # panelCell: 404(셀 0 종목)는 정상이나 *일시 실패*는 unsafe — append 시 기존 셀
     # 전체를 덮어쓰는 손실(board 와 동일 클래스)이라 None 으로 이번 run skip.
@@ -106,7 +111,8 @@ def _seedTickerPanel(ticker: str, *, token: str | None) -> bool | None:
         )
     except (EntryNotFoundError, RepositoryNotFoundError):
         pass  # 셀 0 종목 — 정상
-    except Exception:  # noqa: BLE001 — 일시 실패 → 기존 셀 손실 방지 위해 이번 run skip
+    except Exception as exc:  # noqa: BLE001 — 일시 실패 → 기존 셀 손실 방지 위해 이번 run skip
+        print(f"[pipeline] edgarPanel seed {ticker} panelCell 일시실패: {type(exc).__name__}: {exc}", flush=True)
         return None
     return True
 
@@ -167,11 +173,13 @@ def _runIncremental(res: StageResult, *, lookback: int, upload: bool, token: str
     discardRaw = os.environ.get("EDGAR_DISCARD_RAW", "1") == "1"  # 로컬 dev 는 0 으로 보존 가능
     changed: list[str] = []
     for cik, crows in byCik.items():
+        cikComplete = True  # 이 CIK 의 모든 ticker 가 완전 처리됐는가 — raw 폐기 안전 판정
         for ticker in tickerByCik[cik]:  # 한 CIK 의 모든 ticker(공유 클래스 전부 갱신)
             try:
                 seeded = _seedTickerPanel(ticker, token=token)
                 if seeded is None:
-                    res.report.failures.append(f"edgar seed {ticker}: 일시 실패 skip(다음 run)")
+                    res.report.failures.append(f"edgar seed {ticker}: 일시 실패 skip(다음 run 재시도)")
+                    cikComplete = False  # 일시 실패 → 미완(raw 보존, 다음 run 재시도)
                     continue
                 if seeded:  # 기존 종목 — 신규 accession 만 append
                     existing = existingAccessions(ticker)
@@ -186,14 +194,29 @@ def _runIncremental(res: StageResult, *, lookback: int, upload: bool, token: str
                     if stat["appended"]:
                         changed.append(ticker)
                 else:  # 신규 종목 — 전체 history archive + 빌드
-                    archiveEdgarOriginals([ticker], forms=list(_REGULAR_FORMS), sinceYear=sinceYear, showProgress=False)
+                    arc = archiveEdgarOriginals(
+                        [ticker], forms=list(_REGULAR_FORMS), sinceYear=sinceYear, showProgress=False
+                    )
+                    # archiveEdgarOriginals 는 개별 공시 실패를 raise 없이 error 카운트로 흡수한다.
+                    # error>0 = 불완전 이력 — 그대로 빌드+upload 하면 부분 panel 이 '완전'으로 박제되고
+                    # 이후 append 가 그 위에서만 진행돼 빠진 이력이 영구 누락(silent gap). skip 후
+                    # raw 보존 → 다음 run 이 full-build 재시도.
+                    if arc.get("error"):
+                        res.report.failures.append(
+                            f"edgar new {ticker}: archive error={arc['error']} → 불완전, skip(다음 run 재시도)"
+                        )
+                        cikComplete = False
+                        continue
                     stat = buildEdgarPanel(ticker, overwrite=True, verbose=False)
                     if stat.get("rows"):
                         changed.append(ticker)
             except Exception as exc:  # noqa: BLE001 — ticker 단위 격리(1건 실패가 run 중단 X)
                 res.report.failures.append(f"edgar ticker {ticker}: {type(exc).__name__}: {exc}")
+                cikComplete = False  # 예외 → 미완(raw 보존)
                 continue
-        if discardRaw:  # 이 CIK 의 raw 폐기(모든 ticker 처리 후 1회 — 공유클래스 안전)
+        # raw 폐기는 *완전 처리된* CIK 만 — 부분 실패(일시/예외/archive error)면 raw 를 보존해
+        # 다음 run 이 빠진 이력을 재수집하게 한다(데이터 완전성 > 디스크 절약).
+        if discardRaw and cikComplete:
             shutil.rmtree(Path(cfg.dataDir) / "original" / "edgar" / "docs" / cik, ignore_errors=True)
 
     res.rows = len(changed)
@@ -236,7 +259,7 @@ def _runFullRebuild(res: StageResult, *, upload: bool, token: str | None) -> Sta
         from dartlab.gather.original.edgar.collect import archiveEdgarOriginals
         from dartlab.providers.edgar.panel.build import buildEdgarPanelAll
 
-        uni = loadEdgarListedUniverse(forceUpdate=False)
+        uni = loadEdgarListedUniverse(forceUpdate=True)  # 전수 재빌드 — universe 도 최신(신규 상장 포함)
         tickers = [t for t in uni["ticker"].to_list() if t]
         sinceYear = int(os.environ.get("EDGAR_SINCE_YEAR") or "2015")
         archiveEdgarOriginals(tickers, forms=list(_REGULAR_FORMS), sinceYear=sinceYear, showProgress=False)

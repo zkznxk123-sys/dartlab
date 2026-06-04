@@ -146,6 +146,48 @@ def test_merge_keeping_schema_recasts_dtype_drift(tmp_path) -> None:
     assert set(merged["rceptNo"].to_list()) == {"OLD-1", "NEW-1"}  # 기존 보존 + 신규
 
 
+def test_merge_keeping_schema_prunes_with_empty_newrows(tmp_path) -> None:
+    """newRows 가 비어도 ``accessions`` 의 기존 행은 제거 — board↔cell 정합(셀 0 정정 idempotent).
+
+    회귀 가드(finding B): appendFilingsToPanel 이 셀 없는 공시(board only)에도 panelCell 을
+    accessions 로 prune 해야 옛 셀이 남지 않는다. 그 prune 의 코어가 빈 newRows 처리다.
+    """
+    from dartlab.providers.edgar.panel.build.builder import _mergeKeepingSchema, _rowsToDf
+    from dartlab.providers.edgar.panel.build.cellSchema import EDGAR_CELL_SCHEMA
+
+    base = {k: None for k in EDGAR_CELL_SCHEMA}
+    target = tmp_path / "cells.parquet"
+    _rowsToDf([{**base, "rceptNo": "KEEP-1"}, {**base, "rceptNo": "DROP-1"}], EDGAR_CELL_SCHEMA).write_parquet(
+        str(target)
+    )
+
+    merged = _mergeKeepingSchema(target, [], EDGAR_CELL_SCHEMA, {"DROP-1"})
+    assert merged["rceptNo"].to_list() == ["KEEP-1"]  # newRows 비어도 DROP-1 prune
+
+
+def test_merge_keeping_schema_warns_on_silent_cast_loss(tmp_path, caplog) -> None:
+    """strict=False 재캐스트가 비-null 값을 *조용히* null 로 만들면(오버플로) 경고로 관측화(finding C)."""
+    import logging
+
+    from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
+    from dartlab.providers.edgar.panel.build.builder import _mergeKeepingSchema, _rowsToDf
+
+    base = {k: None for k in PANEL_SCHEMA}
+    # 기존 parquet 의 blockOrder(UInt32) 에 UInt32 max 초과 Int64 주입 → cast strict=False 시 null
+    existing = _rowsToDf([{**base, "rceptNo": "OLD-1", "period": "2024Q4", "corp": "X"}], PANEL_SCHEMA).with_columns(
+        pl.Series("blockOrder", [5_000_000_000], dtype=pl.Int64)
+    )
+    target = tmp_path / "X.parquet"
+    existing.write_parquet(str(target))
+
+    new = {**base, "rceptNo": "NEW-1", "period": "2025Q1", "blockOrder": 7, "corp": "X"}
+    with caplog.at_level(logging.WARNING):
+        merged = _mergeKeepingSchema(target, [new], PANEL_SCHEMA, {"NEW-1"})
+
+    assert merged.filter(pl.col("rceptNo") == "OLD-1")["blockOrder"].to_list() == [None]  # 오버플로 → null
+    assert any("비-null→null" in r.message for r in caplog.records)  # 손실 경고 남김
+
+
 def test_build_edgar_panel_all(builtTicker) -> None:
     """buildEdgarPanelAll — 명시 ticker list + None(원본 docs dir 전수 cik→ticker 역해소)."""
     from dartlab.providers.edgar.panel.build.builder import buildEdgarPanelAll

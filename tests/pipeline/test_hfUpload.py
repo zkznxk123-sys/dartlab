@@ -75,6 +75,23 @@ def test_incremental_batches_commit(tmp_path):
     assert paths == {f"{DATA_RELEASES[cat]['dir']}/005930.parquet", f"{DATA_RELEASES[cat]['dir']}/000660.parquet"}
 
 
+def test_incremental_warns_on_missing_manifest_files(tmp_path, capsys):
+    """매니페스트 N건 중 일부가 로컬에 없으면 loud 경고 + 존재분만 업로드(부분 silent 방지, finding F)."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.pipeline.hfUpload import uploadCategoryToHf
+
+    cat = "finance"
+    localDir = tmp_path / DATA_RELEASES[cat]["dir"]
+    _mkParquet(localDir, "005930.parquet")  # 1건만 생성 — 매니페스트엔 2건
+    n = uploadCategoryToHf(cat, changedFiles=["005930.parquet", "000660.parquet"], dataDir=str(tmp_path))
+
+    assert n == 1  # 존재분만 업로드
+    out = capsys.readouterr().out
+    assert "로컬 부재" in out and "000660.parquet" in out  # 누락 loud 경고
+    paths = {op.path_in_repo for op in _FakeApi.instances[-1].commits[0]["ops"]}
+    assert paths == {f"{DATA_RELEASES[cat]['dir']}/005930.parquet"}  # 부재분 제외
+
+
 def test_token_resolution_param_over_env(tmp_path, monkeypatch):
     """토큰 우선순위 — 인자 > env > .env(부재 시 ValueError)."""
     from dartlab.pipeline.hfUpload import _resolveHfToken

@@ -423,8 +423,20 @@ def _mergeKeepingSchema(target: Path, newRows: list[dict], schema: dict, accessi
     existing = existing.select(list(schema)).filter(~pl.col("rceptNo").is_in(list(accessions)))
     merged = pl.concat([existing, newDf], how="vertical_relaxed")
     # vertical_relaxed 는 *기존* dtype 으로 수렴 → 옛 parquet 의 dtype drift(Utf8/Int64 등)가
-    # 살아남아 schema 계약 위반. 병합 후 schema dtype 으로 강제 재캐스트(strict=False=실패시 null).
-    return merged.select([pl.col(c).cast(dt, strict=False) for c, dt in schema.items()])
+    # 살아남아 schema 계약 위반. 병합 후 schema dtype 으로 강제 재캐스트. strict=True 면 옛 parquet
+    # 1개의 drift 가 ticker 전체 빌드를 죽이므로 strict=False(실패시 null)로 회복력 우선 — 단 비-null
+    # 값이 null 로 *조용히* 사라지면(오버플로/파싱불가=진짜 손실) 경고로 관측화.
+    recast = merged.select([pl.col(c).cast(dt, strict=False) for c, dt in schema.items()])
+    for c, dt in schema.items():
+        if dt == pl.Utf8:
+            continue  # Utf8 캐스트는 사실상 무손실 — 수치 컬럼만 손실 검사
+        before = int(merged.select(pl.col(c).is_not_null().sum()).item())
+        after = int(recast.select(pl.col(c).is_not_null().sum()).item())
+        if after < before:
+            _log.warning(
+                "edgar merge cast %s: 비-null→null %d (dtype drift 손실) target=%s", c, before - after, target.name
+            )
+    return recast
 
 
 def _writeDf(df: pl.DataFrame, target: Path) -> int:
@@ -520,10 +532,14 @@ def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = F
     mergedBoard = _capContentRawDf(mergedBoard)  # 병합 후 누적 cap(existing+new 합산)
     nRows = _writeDf(mergedBoard, panelPath(ticker))
 
+    # panelCell 도 *항상* accessions 로 prune — newCells 가 비어도(셀 0 공시/셀 없는 정정) 기존
+    # 동일 accession 의 옛 셀을 제거해 board↔cell 정합(idempotent append)을 유지한다. 단 기존
+    # cell 파일도 없고 새 셀도 없으면 빈 파일 생성을 피한다(board-only 종목).
     nCells = 0
-    if newCells:
-        mergedCells = _mergeKeepingSchema(panelCellPath(ticker), newCells, EDGAR_CELL_SCHEMA, accessions)
-        nCells = _writeDf(mergedCells, panelCellPath(ticker))
+    cellTarget = panelCellPath(ticker)
+    if newCells or cellTarget.exists():
+        mergedCells = _mergeKeepingSchema(cellTarget, newCells, EDGAR_CELL_SCHEMA, accessions)
+        nCells = _writeDf(mergedCells, cellTarget)
 
     if verbose:
         _log.info(
