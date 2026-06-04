@@ -129,7 +129,7 @@ def archiveDartOriginals(
     corpClasses: tuple[str, ...] = ("Y", "K"),
     workers: int = 4,
     showProgress: bool = True,
-) -> dict[str, int]:
+) -> dict[str, object]:
     """DART 공시 원본 zip 을 ``data/original/dart/`` 에 수집(가공 0, idempotent).
 
     Capabilities:
@@ -199,8 +199,9 @@ def archiveDartOriginals(
         raise ValueError(f"scope 는 all/periodic/nonperiodic: {scope!r}")
 
     client = OriginalDartClient()
-    stats = {"ok": 0, "noBody": 0, "skipped": 0, "error": 0, "days": 0}
+    stats: dict[str, object] = {"ok": 0, "noBody": 0, "skipped": 0, "error": 0, "days": 0}
     classSet = set(corpClasses)
+    changedCodes: set[str] = set()  # 신규 zip 받은 종목 (panel 증분 재빌드 대상)
 
     try:
         for day in _iterDays(start, end):
@@ -229,6 +230,7 @@ def archiveDartOriginals(
                     stats["skipped"] += 1
                     continue
                 targets.append((rceptNo, outPath))
+                changedCodes.add(stockCode)
 
             if not targets:
                 if showProgress:
@@ -248,8 +250,11 @@ def archiveDartOriginals(
     finally:
         client.close()
 
+    stats["changedCodes"] = sorted(changedCodes)
     if showProgress:
-        _log.info("DART 원본 수집 완료: %s", stats)
+        _log.info(
+            "DART 원본 수집 완료: ok=%s skipped=%s changed종목=%d", stats["ok"], stats["skipped"], len(changedCodes)
+        )
     return stats
 
 
