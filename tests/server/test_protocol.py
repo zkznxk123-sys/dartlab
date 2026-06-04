@@ -142,11 +142,7 @@ _DART_ONLY_EXEMPT: set[str] = {
     "sceMatrix",  # DART SCE matrix (EDGAR SCE 구조 다름)
     # ── 산업엔진 (DART docs 공정/거래처 텍스트 기반, SEC에 동등 구조 없음) ──
     "industry",  # DART docs 밸류체인 분석 (SEC 공정 구조화 데이터 없음)
-    # ── DART zip XML sections 전용 (SEC EDGAR 등가 layer 미구현) ──
-    "sectionsAs",  # DART zip XML sections wide DataFrame (stripTags 파라미터)
-    "sectionsLazy",  # DART sections LazyFrame (columnar projection) — SEC iXBRL 등가 미구현
-    "sectionsLong",  # DART sections long format (period sharded) — SEC iXBRL 등가 미구현
-    "sectionsTables",  # DART sections 표 추출 (raw XML cell) — SEC iXBRL 등가 미구현
+    # ── DART 공시 수평화 격자 (SEC EDGAR 등가 layer 미구현) ──
     "panel",  # DART 공시 수평화 격자 (panel.parquet) — EDGAR panel(marketNs="us")은 후속 미구현
     # ── DART docs/report 구조화 accessor 전용 (SEC 동등 구조 없음) ──
     "executivePay",  # DART 임원 보수 (사업보고서 구조화) — SEC DEF 14A 구조 상이
