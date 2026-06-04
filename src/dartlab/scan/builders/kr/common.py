@@ -131,6 +131,46 @@ def docsDir() -> Path:
     return Path(_dataDir("docs"))
 
 
+def panelDir() -> Path:
+    """Return the panel parquet directory (docs.parquet 은퇴 → panel SSOT source).
+
+    Capabilities:
+        Resolves the active panel parquet directory — scan docs prebuilds(changes·
+        docsIndex)의 본문 source root (docs.parquet 대체).
+
+    AIContext:
+        docs 농장 은퇴 후 scan 변화/인덱스 prebuild 의 공시 본문 출처.
+
+    Guide:
+        Keep panel source path centralized here to avoid drift.
+
+    When:
+        Called by docs scan builders(changes·docsIndex) before scanning panel parquet.
+
+    How:
+        Delegates to ``dartlab.core.dataLoader._dataDir("panel")`` and wraps as ``Path``.
+
+    Args:
+        None.
+
+    Returns:
+        ``Path`` pointing at the panel directory.
+
+    Raises:
+        Propagates data-root resolution errors from ``_dataDir``.
+
+    Example:
+        >>> panelDir().name
+        'panel'
+
+    SeeAlso:
+        ``docsDir`` and ``dartlab.frame.sections``.
+    """
+    from dartlab.core.dataLoader import _dataDir
+
+    return Path(_dataDir("panel"))
+
+
 def financeDir() -> Path:
     """Return the raw finance parquet directory.
 
