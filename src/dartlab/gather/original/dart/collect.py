@@ -229,15 +229,16 @@ def archiveDartOriginals(
                 if outPath.exists():
                     stats["skipped"] += 1
                     continue
-                targets.append((rceptNo, outPath))
-                changedCodes.add(stockCode)
+                targets.append((rceptNo, outPath, stockCode))
 
             if not targets:
                 if showProgress:
                     _log.info("[%s] 신규 0 (skip %d)", day, stats["skipped"])
                 continue
 
-            _fetchDayTargets(client, targets, workers, stats)
+            # changed 마킹은 zip 이 *실제로 써진*(ok) 종목만 — fetch 실패(error/no_body)는 제외.
+            # 큐잉 시점 마킹이면 일시 fetch 실패가 panel 재빌드+원본 tar 덮어쓰기(부분이력)를 유발(데이터 손실).
+            changedCodes |= _fetchDayTargets(client, targets, workers, stats)
             if showProgress:
                 _log.info(
                     "[%s] ok=%d noBody=%d error=%d (누적 ok=%d)",
@@ -294,34 +295,39 @@ def _collectDayRows(client: OriginalDartClient, day: str, classSet: set[str]) ->
 
 def _fetchDayTargets(
     client: OriginalDartClient,
-    targets: list[tuple[str, object]],
+    targets: list[tuple[str, object, str]],
     workers: int,
     stats: dict[str, int],
-) -> None:
+) -> set[str]:
     """하루치 신규 target 을 ThreadPool 로 document.xml fetch + write.
 
     Args:
         client: OriginalDartClient(스레드 안전).
-        targets: ``[(rceptNo, outPath), ...]``.
+        targets: ``[(rceptNo, outPath, stockCode), ...]``.
         workers: 워커 수.
         stats: 누적 집계 dict(in-place 갱신).
 
     Returns:
-        None.
+        set[str] — zip 이 실제로 써진(``"ok"``) 종목코드 집합(panel 증분 재빌드 대상).
 
     Raises:
         없음 — 개별 실패는 stats["error"] 로 집계.
 
     Example:
-        >>> _fetchDayTargets(client, [("...", path)], 4, stats)  # doctest: +SKIP
+        >>> _fetchDayTargets(client, [("...", path, "005930")], 4, stats)  # doctest: +SKIP
+        {'005930'}
     """
+    okCodes: set[str] = set()
     with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
-        futures = {ex.submit(_writeZip, client, rcept, path): rcept for rcept, path in targets}
+        futures = {ex.submit(_writeZip, client, rcept, path): code for rcept, path, code in targets}
         for fut in as_completed(futures):
             result = fut.result()
+            code = futures[fut]
             if result == "ok":
                 stats["ok"] += 1
+                okCodes.add(code)
             elif result == "no_body":
                 stats["noBody"] += 1
             else:
                 stats["error"] += 1
+    return okCodes

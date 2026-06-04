@@ -79,6 +79,47 @@ def test_archive_idempotent_skip(monkeypatch: pytest.MonkeyPatch, tmp_path) -> N
     assert stats2["ok"] == 0 and stats2["skipped"] == 2
 
 
+class _FakeClientPartialFail:
+    """정기(005930)는 본문부재(014), 비정기(000660)는 유효 zip — changed 마킹 분기 검증용."""
+
+    _FAIL_RCEPT = "20260601000001"
+
+    def __init__(self, *_, **__):
+        pass
+
+    def getFilingsPage(self, *, bgnDe, endDe, pageNo=1, pageCount=100, corpCls=None):
+        if pageNo == 1:
+            rowA = {**_PERIODIC, "stock_code": "005930", "rcept_no": self._FAIL_RCEPT}
+            rowB = {**_NONPERIODIC, "stock_code": "000660", "rcept_no": "20260601000002"}
+            return {"status": "000", "list": [rowA, rowB], "total_page": 1}
+        return {"status": "013", "list": [], "total_page": 1}
+
+    def getBytes(self, endpoint, params=None):
+        if (params or {}).get("rcept_no") == self._FAIL_RCEPT:
+            return b"<status>014</status>"  # 본문부재 → no_body, zip 미작성
+        return b"PK\x03\x04" + b"\x00" * 100
+
+    def close(self):
+        return None
+
+
+def test_changed_codes_only_on_successful_write(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """changedCodes 는 zip 이 *실제로 써진* 종목만 — fetch 실패(no_body) 종목 제외.
+
+    회귀 가드: 큐잉 시점 마킹이면 일시 fetch 실패가 panel 재빌드+원본 tar 덮어쓰기를 유발(데이터 손실).
+    """
+    import dartlab.config as cfg
+    from dartlab.gather.original.dart import collect
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setattr(collect, "OriginalDartClient", _FakeClientPartialFail)
+
+    stats = collect.archiveDartOriginals("20260601", "20260601", scope="all", showProgress=False)
+
+    assert stats["changedCodes"] == ["000660"]  # 005930(no_body)은 제외
+    assert stats["ok"] == 1 and stats["noBody"] == 1
+
+
 def test_scope_nonperiodic_only(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     """scope=nonperiodic 면 비정기만 수집(정기 store 중복 0)."""
     import dartlab.config as cfg

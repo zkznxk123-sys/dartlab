@@ -19,28 +19,35 @@ from pathlib import Path
 from dartlab.pipeline.types import PipelineMode, StageResult
 
 
-def _seedChangedFromHf(codes: list[str], *, token: str | None) -> int:
+def _seedChangedFromHf(codes: list[str], *, token: str | None) -> tuple[int, set[str]]:
     """변경 종목의 회사 tar 를 dartlab-dart-original 에서 받아 추출 — CI panel 빌드 전제.
 
     CI 러너엔 회사 zip 이력이 없으므로 archive 직후 변경 종목의 전체 tar 를 HF 에서
     내려받아 ``data/original/dart/docs/{code}/`` 에 풀어 ``buildPanelAll`` 이 완전 이력으로
-    빌드하게 한다. 방금 archive 된 신규 zip 은 보존(같은 이름=동일 내용). 신규 종목
-    (HF tar 미존재)은 archive 분만으로 빌드.
+    빌드하게 한다. 방금 archive 된 신규 zip 은 보존(같은 이름=동일 내용).
+
+    **404(HF tar 미존재)와 일시 실패를 구분한다** — 이게 데이터 손실 가드의 핵심:
+    404 면 *신규 종목*(이력 없음)이라 archive 분만으로 빌드해도 정당 → safe. 그러나
+    네트워크/5xx 등 *일시 실패* 면 이력이 불완전한 채 빌드하면 잘린 panel 이 정상 HF
+    panel 을, 부분 tar 가 원본 SSOT 를 덮어쓴다(영구 손실) → **unsafe → 빌드/업로드 제외**
+    (다음 run 자연 회복). 호출부는 safe 집합만 build/bundle/upload 한다.
 
     Args:
         codes: 변경 종목코드 list.
         token: HF 토큰.
 
     Returns:
-        int — seed 한 종목 수.
+        tuple[int, set[str]] — (seed 한 종목 수, *안전* 종목 집합 = seed 성공 ∪ 404 신규).
 
     Raises:
-        없음 (종목별 미존재는 skip).
+        없음 (종목별 미존재/일시실패는 분기 처리).
 
     Example:
         >>> _seedChangedFromHf(["005930"], token=None)  # doctest: +SKIP
+        (1, {'005930'})
     """
     from huggingface_hub import hf_hub_download
+    from huggingface_hub.utils import EntryNotFoundError, RepositoryNotFoundError
 
     import dartlab.config as cfg
     from dartlab.core.dataConfig import repoFor
@@ -51,19 +58,24 @@ def _seedChangedFromHf(codes: list[str], *, token: str | None) -> int:
     repo = repoFor("dartOriginal")
     tok = _resolveHfToken(token)
     n = 0
+    safe: set[str] = set()
     for code in codes:
         try:
             local = retryHfCall(
                 hf_hub_download, repo_id=repo, repo_type="dataset", filename=f"docs/{code}.tar", token=tok
             )
-        except Exception:  # noqa: BLE001 — 신규 종목(HF 미존재) → seed 없이 archive 분만
+        except (EntryNotFoundError, RepositoryNotFoundError):
+            safe.add(code)  # 신규 종목 — HF 미존재(404) → archive 분만으로 빌드 정당
+            continue
+        except Exception:  # noqa: BLE001 — 일시 실패(네트워크/5xx) → 이력 불완전, build/upload 제외
             continue
         dest = base / code
         dest.mkdir(parents=True, exist_ok=True)
         with tarfile.open(local, "r") as tf:
             tf.extractall(dest, filter="data")  # 평탄 zip 파일명만 — filter='data' 안전 추출
         n += 1
-    return n
+        safe.add(code)
+    return n, safe
 
 
 def _bundleAndUpload(codes: list[str], *, token: str | None) -> int:
@@ -168,19 +180,37 @@ def runDartZip(
     if not changed:
         return res
 
-    # 1.5 CI 전제: 변경 종목 전체 zip 이력을 HF 에서 seed (러너엔 이력 0)
+    # 1.5 CI 전제: 변경 종목 전체 zip 이력을 HF 에서 seed (러너엔 이력 0).
+    #     seed 가 *완전히 복원된*(또는 404 신규) 종목만 build/bundle/upload — 일시 실패로
+    #     이력이 불완전한 종목은 제외해 정상 HF panel·원본 tar 의 파괴적 덮어쓰기를 차단.
     if os.environ.get("DART_ZIP_SEED", "1") == "1":
         try:
-            seeded = _seedChangedFromHf(changed, token=token)
-            print(f"[pipeline] dartZip seed: {seeded}/{len(changed)}종목 HF tar 추출", flush=True)
-        except Exception as exc:  # noqa: BLE001 — seed 실패는 빌드 진행(부분 이력)
+            seeded, safeCodes = _seedChangedFromHf(changed, token=token)
+            buildCodes = [c for c in changed if c in safeCodes]
+            skipped = [c for c in changed if c not in safeCodes]
+            print(
+                f"[pipeline] dartZip seed: {seeded}/{len(changed)}종목 HF tar 추출 · "
+                f"빌드대상 {len(buildCodes)} · 제외(이력불완전) {len(skipped)}",
+                flush=True,
+            )
+            if skipped:
+                res.report.failures.append(f"dartZip seed 불완전 {len(skipped)}종목 제외(다음 run 회복): {skipped[:5]}")
+        except Exception as exc:  # noqa: BLE001 — seed 단계 전체 실패 → 이번 run 안전하게 무빌드
+            res.report.fail = 1
             res.report.failures.append(f"dartZip seed: {type(exc).__name__}: {exc}")
+            return res
+    else:
+        buildCodes = changed  # 로컬: 완전 이력 보유 전제(seed 불요)
 
-    # 2. panel 증분 재빌드 (변경 종목만, offline zip → flat {code}.parquet)
+    res.changedFiles = buildCodes
+    if not buildCodes:
+        return res
+
+    # 2. panel 증분 재빌드 (안전 종목만, offline zip → flat {code}.parquet)
     try:
         buildPanelAll(
             refPath=str(panelXbrlRefPath()),
-            codes=changed,
+            codes=buildCodes,
             numWorkers=int(os.environ.get("PANEL_WORKERS") or "2"),
             skipExisting=False,
             verbose=False,
@@ -190,17 +220,17 @@ def runDartZip(
         res.report.failures.append(f"dartZip panel build: {type(exc).__name__}: {exc}")
         print(f"[pipeline] dartZip panel build 실패(격리): {exc}", flush=True)
 
-    # 3. 업로드 — 원본 zip tar 번들(증분) + panel 변경분
+    # 3. 업로드 — 원본 zip tar 번들(증분) + panel 변경분 (안전 종목만)
     if upload:
         try:
-            res.uploaded = _bundleAndUpload(changed, token=token)
+            res.uploaded = _bundleAndUpload(buildCodes, token=token)
         except Exception as exc:  # noqa: BLE001 — 업로드 실패 격리
             res.report.fail = 1
             res.report.failures.append(f"dartZip original upload: {type(exc).__name__}: {exc}")
         try:
             from dartlab.pipeline.hfUpload import uploadCategoryToHf
 
-            uploadCategoryToHf("panel", changedFiles=[f"{c}.parquet" for c in changed], token=token)
+            uploadCategoryToHf("panel", changedFiles=[f"{c}.parquet" for c in buildCodes], token=token)
         except Exception as exc:  # noqa: BLE001 — panel 업로드 실패 격리
             res.report.fail = 1
             res.report.failures.append(f"dartZip panel upload: {type(exc).__name__}: {exc}")
