@@ -108,7 +108,7 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 | 채널 | 어떻게 자동인가 |
 |---|---|
 | `RunPython` | 모든 새 dartlab 공개 API 즉시 호출 가능. 새 엔진/메서드 추가 시 별도 도구 정의 불필요. 가장 보편적 흡수 채널 |
-| `ReadCapability` | `core/capability/_generated.py` 의 `@capability` 를 자동 색인 |
+| `ReadCapability` | `reference/capability/_generated.py` 의 capability catalog(docstring 에서 생성) 색인 |
 | `ReadSkill` | `skills/specs/**` 의 모든 skill markdown 자동 색인 (process-lifetime 캐시) |
 | `prompts/list` & `prompts/get` | Skill OS 의 `kind: recipe` 카테고리를 prompt 로 자동 노출. arguments 는 skill `inputs` frontmatter 에서 derive |
 | `dartlab://skills/{id}` resources | Skill OS 에서 런타임 derive |
@@ -136,7 +136,7 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 1. `bash tests/test-lock.sh tests/test_mcp.py tests/test_mcp_strong.py -v` — 흡수 표면 회귀.
 2. 새 카테고리가 들어왔다면 `_recipeSkillsForPrompts()` 의 `kind` 필터 확장 여부 결정.
 3. 새 top-level 모듈이라면 `dartlab/__init__._LAZY_ATTRS` 등록 + RunPython 안에서 import 가능한지 확인.
-4. capability 추가/변경 시 `src/dartlab/reference/capability/generateSpec.py` 재실행 후 `_generated.py` 커밋.
+4. capability 추가/변경 시 `src/dartlab/reference/capability/generateSpec.py` 재실행 후 `_generated.py`(+`_generated_analysis_graph.py`) 커밋. 재생성을 잊어도 CI `capability-catalog-sync` 게이트(`generateSpec.py --check`, 재생성-비교)가 소스↔카탈로그 drift 로 fail 시켜 차단한다.
 5. canonical tool 추가/제거 시 `ToolSpec` 의 4 hint 채움 + `tests/test_mcp.py::test_mcp_advertised_tools_carry_annotations` 갱신.
 6. **도그푸드 verification** — `uv run python -X utf8 tests/ai/runners/mcp_dogfood_probe.py` 실행. 11 항목 OK 출력 확인. 단위 테스트가 dispatch / 거부 경로 위주라 실 호출 happy path 회귀를 못 잡는 발견 (2026-05-09 LookAheadGuard `Company(market=...)` 회귀) — 큰 변화 후엔 도그푸드 필수.
 

@@ -147,6 +147,15 @@ GATES: dict[str, Gate] = {
         env={"DARTLAB_PROVIDER_SCOPE": "dart,edgar"},
         cmd="python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar",
     ),
+    "capability-catalog-sync": Gate(
+        name="capability-catalog-sync",
+        tier="fast",
+        install_pkg="editable",
+        # 소스 docstring/registry → reference/capability/_generated 카탈로그 in-sync 자동 확인.
+        # 재생성-비교만(write 없음): 소스 바꾸고 generateSpec.py 재실행 안 하면 drift 로 fail →
+        # 스킬엔진(EngineCall/ReadCapability) 이 stale 카탈로그를 서빙하는 회귀 차단.
+        cmd="python -X utf8 src/dartlab/reference/capability/generateSpec.py --check",
+    ),
     "typecheck": Gate(
         name="typecheck",
         tier="fast",

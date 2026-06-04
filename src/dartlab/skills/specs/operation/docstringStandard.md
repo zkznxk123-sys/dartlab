@@ -141,17 +141,24 @@ LLM Specifications:
 
 `src/dartlab/reference/capability/generateSpec.py` ([GitHub](https://github.com/eddmpython/dartlab/blob/master/src/dartlab/reference/capability/generateSpec.py)) 의 `_parseDocstringSections` 가 `## LLM Specifications` 또는 `LLM Specifications:` 헤더를 인식해 `_parseLLMSpecs(value)` 로 sub-key 6 종 (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets) 추출 → `entry["llmSpecs"]` 에 박힌다. 이 `llmSpecs` 는:
 
-- `dartlab/core/capability/_generated.py` 의 capability catalog
-- `dartlab.ai.tools.readCapability.readCapability(...)` 의 payload
-- `dartlab/mcp/_generated_tools.py` 의 mcp tool description 일부 (자동 생성)
+- `dartlab/reference/capability/_generated.py` 의 capability catalog (`CAPABILITIES`)
+- `dartlab/reference/capability/_generated_analysis_graph.py` 의 `ANALYSIS_GRAPH` (capability 에서 파생)
+- `dartlab.ai.tools.readCapability.readCapability(...)` 의 payload (catalog 경유)
 
-세 곳에서 동시에 사용된다. 한 docstring 변경 → `uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py` 재실행 → 세 산출물 동기 갱신.
+위 산출물은 docstring 에서 자동 추출된다. 한 docstring 변경 → 운영자가
+`uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py` 재실행(write 는 사람) → 산출물 동기 갱신.
+
+**자동 확인 (CI 게이트)**: write 는 사람이 하되, CI 는 `generateSpec.py --check` 로 매 PR
+소스 docstring ↔ 카탈로그 동기를 검증한다 (재생성-비교, write 없음). docstring 만 바꾸고
+재생성을 잊으면 `tests/run.py` 의 `capability-catalog-sync` 게이트가 drift 로 fail →
+스킬엔진(EngineCall/ReadCapability)이 stale 카탈로그를 서빙하는 회귀를 차단한다.
+(옛 `mcp/_generated_tools.py` 33 도구 산출은 0.10 BREAKING 폐기 — MCP 표면은 `ai.tools.registry` SSOT.)
 
 ## 진행 페이스
 
 전체 200+ capability 의 LLM Specifications 일괄 갱신은 1 회 작업으로 강행 X. 운영자가 손대는 capability 에서 자연 누적. 우선 채울 후보:
 
-- Company 핵심 10 메서드 (show / analysis / disclosure / filings / readFiling / sections / gather / update / credit / quant) — **현재 완료**
+- Company 핵심 10 메서드 (panel / analysis / disclosure / filings / readFiling / sections / gather / update / credit / quant) — **현재 완료**
 - 자주 호출되는 dartlab.* 모듈 함수 (scan / macro / search / capabilities)
 - ratios / debt / capital / governance 같은 _scanRelated 메서드
 

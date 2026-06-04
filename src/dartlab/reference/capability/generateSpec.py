@@ -9,8 +9,12 @@ dartlab.core.registry + 엔진 docstring(9 섹션) + axis registry 를 introspec
   (EngineCall · ReadCapability · ReadSkill · server 가 소비하는 경량 인덱스)
 - src/dartlab/reference/capability/_generated_analysis_graph.py — analysisGraph 가 import
 
-docstring/capability 변경 시 운영자가 수동 실행 (자동 CI 실행 없음):
+docstring/capability 변경 시 운영자가 수동 재생성 (자동 CI 실행은 안 함 — write 는 사람이):
     uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py
+
+CI 는 ``--check`` 로 **자동 확인**만 한다 (재생성-비교, write 없음). 소스 docstring 을 바꾸고
+카탈로그를 재생성 안 하면 drift 로 fail → 소스=카탈로그 동기를 영구 강제:
+    uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py --check
 """
 
 from __future__ import annotations
@@ -788,18 +792,75 @@ def _generateCapabilitiesPy() -> str:
 # ─── main ───────────────────────────────────────────────────────
 
 
-def main():
-    """런타임 capability 카탈로그 2종 재생성 — _generated.py + _generated_analysis_graph.py."""
+def _checkInSync(capabilitiesPy: str, analysisGraphPy: str) -> int:
+    """재생성 결과를 디스크 카탈로그와 비교 — 자동 확인 게이트 (write 없음).
+
+    소스 docstring/registry 에서 방금 재생성한 payload(dict) 를 디스크 ``_generated`` 모듈이
+    import 한 ``CAPABILITIES``/``ANALYSIS_GRAPH`` dict 와 비교한다. 파싱된 dict 비교라 ruff
+    포맷·따옴표 스타일·키 순서와 무관. 어긋나면(소스 변경 후 미재생성) exit 1 로 CI 차단.
+
+    Returns:
+        0 = in-sync, 1 = drift(또는 카탈로그 부재/손상).
+    """
+    freshCaps = _capabilitiesEntriesFromGeneratedPy(capabilitiesPy)
+    freshGraph = _capabilitiesEntriesFromGeneratedPy(analysisGraphPy)
+    drift: list[str] = []
+    try:
+        from dartlab.reference.capability._generated import CAPABILITIES as diskCaps
+
+        if diskCaps != freshCaps:
+            drift.append("_generated.py (CAPABILITIES)")
+    except Exception as exc:  # noqa: BLE001 — 부재/손상 모두 drift 로 취급
+        drift.append(f"_generated.py 로드 실패: {type(exc).__name__}")
+    try:
+        from dartlab.reference.capability._generated_analysis_graph import ANALYSIS_GRAPH as diskGraph
+
+        if diskGraph != freshGraph:
+            drift.append("_generated_analysis_graph.py (ANALYSIS_GRAPH)")
+    except Exception as exc:  # noqa: BLE001
+        drift.append(f"_generated_analysis_graph.py 로드 실패: {type(exc).__name__}")
+
+    if drift:
+        print("[generateSpec --check] DRIFT — 카탈로그가 소스 docstring 과 어긋남:", file=sys.stderr)
+        for d in drift:
+            print(f"  - {d}", file=sys.stderr)
+        print(
+            "  → 재생성: uv run python -X utf8 src/dartlab/reference/capability/generateSpec.py",
+            file=sys.stderr,
+        )
+        return 1
+    print("[generateSpec --check] in-sync ✓ — 소스 docstring = _generated 카탈로그")
+    return 0
+
+
+def main(argv: "list[str] | None" = None) -> int:
+    """카탈로그 생성(기본) 또는 ``--check`` 자동 확인.
+
+    - 인자 없음: ``_generated.py`` + ``_generated_analysis_graph.py`` 재생성 + ruff 포맷.
+    - ``--check``: write 없이 재생성-비교만. drift 시 exit 1 (CI 게이트).
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(description="런타임 capability 카탈로그 생성 또는 --check 자동 확인.")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="재생성-비교 검증만 (write 없음). 소스 docstring 과 _generated 가 어긋나면 exit 1.",
+    )
+    args = parser.parse_args(argv)
+
     capabilitiesPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated.py"
     analysisGraphPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated_analysis_graph.py"
 
     capabilitiesPy = _generateCapabilitiesPy()
+    capabilityEntries = _capabilitiesEntriesFromGeneratedPy(capabilitiesPy)
+    analysisGraphPy = _generateAnalysisGraphPy(capabilityEntries)
+
+    if args.check:
+        return _checkInSync(capabilitiesPy, analysisGraphPy)
+
     capabilitiesPyPath.write_text(capabilitiesPy, encoding="utf-8")
     print(f"  _generated.py ({len(capabilitiesPy):,} chars) -> {capabilitiesPyPath}")
-
-    capabilityEntries = _capabilitiesEntriesFromGeneratedPy(capabilitiesPy)
-
-    analysisGraphPy = _generateAnalysisGraphPy(capabilityEntries)
     analysisGraphPyPath.write_text(analysisGraphPy, encoding="utf-8")
     print(f"  _generated_analysis_graph.py ({len(analysisGraphPy):,} chars) -> {analysisGraphPyPath}")
 
@@ -821,7 +882,8 @@ def main():
         )
 
     print("\n  완료.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

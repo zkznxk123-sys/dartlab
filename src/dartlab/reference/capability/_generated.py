@@ -16,9 +16,9 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "Company": {
         "aicontext": "AI 는 `dartlab.ask()` 로 접근 (Company 를 직접 생성하지 않음).\n사람은 Company 객체 하나로 노트북·스크립트에서 모든 엔진 호출.\n엔진은 사람의 분석엔진이자 AI 의 skill (docstring SSOT) — 한 파일 두 역할.",
         "args": "stockCode: 종목코드, 회사명, 또는 영문 ticker.",
-        "capabilities": "종목 파사드 하나로 엔진 전수 접근: analysis · credit · quant · macro ·\nindustry · gather · show. 엔진 이름만 기억하면 됨.\n종목코드 (\"005930\"), 회사명 (\"삼성전자\"), 영문 ticker (\"AAPL\") 모두 지원\ncanHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)\n새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가\n핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()\n모든 데이터 접근은 ``c.show(topic)`` 으로 통합 — finance topic\n(BS·IS·CF·CIS·SCE·ratios) 도 ``c.show(\"BS\")`` · ``c.show(\"IS\", freq=\"Y\")``\n처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다\n(``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /\nc.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).\n메타: sections, topics, filings(), market, currency",
-        "example": "import dartlab\n\n# 사람의 만능 관문 — 한 객체로 전 엔진\nc = dartlab.Company(\"005930\")     # 삼성전자 (DART)\nc.story()                         # 분석 스토리 (보고서)\nc.analysis(\"financial\", \"수익성\") # 재무 분석\nc.credit()                        # 신용\nc.quant()                         # 주가\nc.show(\"businessOverview\")        # 원본 사업 개요\n\n# 글로벌 (EDGAR 자동 라우팅)\nc = dartlab.Company(\"AAPL\")\nc.analysis(\"financial\", \"valuation\")\n\n# module-level 엔진도 `stockCode=` 로 호출 가능 (일관성 규약)\ndartlab.analysis.financial(\"수익성\", stockCode=\"005930\")\ndartlab.credit(stockCode=\"005930\")",
-        "guide": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic,\nsource, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit ·\nstory 같은 응용 엔진으로 넘긴다.\nHandoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,\npeer/rank/universe 비교가 필요하면 scan 으로 넘어간다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
+        "capabilities": "종목 파사드 하나로 엔진 전수 접근: analysis · credit · quant · macro ·\nindustry · gather · show. 엔진 이름만 기억하면 됨.\n종목코드 (\"005930\"), 회사명 (\"삼성전자\"), 영문 ticker (\"AAPL\") 모두 지원\ncanHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)\n새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가\n핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()\n모든 데이터 접근은 ``c.panel(topic)`` 으로 통합 — finance topic\n(BS·IS·CF·CIS·SCE·ratios) 도 ``c.panel(\"BS\")`` · ``c.panel(\"IS\", freq=\"Y\")``\n처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다\n(``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /\nc.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).\n메타: sections, topics, filings(), market, currency",
+        "example": "import dartlab\n\n# 사람의 만능 관문 — 한 객체로 전 엔진\nc = dartlab.Company(\"005930\")     # 삼성전자 (DART)\nc.story()                         # 분석 스토리 (보고서)\nc.analysis(\"financial\", \"수익성\") # 재무 분석\nc.credit()                        # 신용\nc.quant()                         # 주가\nc.panel(\"businessOverview\")        # 원본 사업 개요\n\n# 글로벌 (EDGAR 자동 라우팅)\nc = dartlab.Company(\"AAPL\")\nc.analysis(\"financial\", \"valuation\")\n\n# module-level 엔진도 `stockCode=` 로 호출 가능 (일관성 규약)\ndartlab.analysis.financial(\"수익성\", stockCode=\"005930\")\ndartlab.credit(stockCode=\"005930\")",
+        "guide": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic,\nsource, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit ·\nstory 같은 응용 엔진으로 넘긴다.\nHandoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,\npeer/rank/universe 비교가 필요하면 scan 으로 넘어간다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.panel(\"IS\")\n\"사업 개요 보여줘\" -> c.panel(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
         "kind": "function",
         "requires": "DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).\nEDGAR: 인터넷 연결 (On-demand 수집).",
         "returns": "CompanyProtocol — DART 또는 EDGAR Company 인스턴스 (파사드).",
@@ -301,7 +301,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "view: None → 이 회사 행, \"all\" → 전체, \"market\" → 시장별 요약.",
         "capabilities": "배당수익률 + 배당성향 추이\n자사주 매입/소각 이력\n총주주환원율 (배당 + 자사주)\n시장 전체 주주환원 횡단 비교",
         "example": "c = Company(\"005930\")\nc.capital()              # 삼성전자 주주환원\nc.capital(\"all\")         # 전체 상장사",
-        "guide": "\"배당 정보\" → c.capital() 또는 c.show(\"dividend\")\n\"주주환원율은?\" → c.capital()\n\"전체 상장사 배당 비교\" → c.capital(\"all\")",
+        "guide": "\"배당 정보\" → c.capital() 또는 c.panel(\"dividend\")\n\"주주환원율은?\" → c.capital()\n\"전체 상장사 배당 비교\" → c.capital(\"all\")",
         "kind": "method",
         "llmSpecs": {
             "antiPatterns": [
@@ -325,7 +325,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returns": "pl.DataFrame [종목코드, 종목명, 배당수익률, 배당성향, 자사주매입, 총환원율, 분류] 또는 None.",
-        "seeAlso": "show: c.show(\"dividend\")로 docs 기반 배당 상세\nsceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)\ndebt: 부채 구조 (자본 정책의 다른 면)",
+        "seeAlso": "show: c.panel(\"dividend\")로 docs 기반 배당 상세\nsceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)\ndebt: 부채 구조 (자본 정책의 다른 면)",
         "summary": "주주환원 분석 (배당, 자사주, 총환원율)."
     },
     "Company.causalWeights": {
@@ -358,7 +358,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "Company.cleanupCache": {
         "aicontext": "AI 가 다종목 batch (50+ 종목 분석) 안 본 함수 의무 호출. 누락 시 Rust heap 누적 OOM.",
         "capabilities": "인스턴스 ``self._cache`` (BoundedCache) 의 모든 entry evict + Polars 네이티브 힙\n``cleanupBetweenCompanies`` 호출. KR multi-company loop 사이 회수.",
-        "example": ">>> c = Company(\"005930\")\n>>> c.show(\"IS\")\n>>> n = c.cleanupCache()\n>>> print(f\"evicted {n} entries\")\n\nRaises:\n없음 (cleanupBetweenCompanies 가 내부 silent).",
+        "example": ">>> c = Company(\"005930\")\n>>> c.panel(\"IS\")\n>>> n = c.cleanupCache()\n>>> print(f\"evicted {n} entries\")\n\nRaises:\n없음 (cleanupBetweenCompanies 가 내부 silent).",
         "guide": "\"다음 종목 진입 전 메모리 회수\" → 본 함수 또는 ``with Company(c):`` 컨텍스트.",
         "kind": "method",
         "llmSpecs": {
@@ -444,7 +444,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "view: None → 이 회사 행, \"all\" → 전체, \"market\" → 시장별 요약.",
         "capabilities": "총차입금 + 순차입금 규모\n부채비율 + 차입금의존도\n단기/장기 차입금 비율\n시장 전체 부채 구조 횡단 비교",
         "example": "c = Company(\"005930\")\nc.debt()                 # 삼성전자 부채 구조\nc.debt(\"all\")            # 전체 상장사",
-        "guide": "\"부채 구조 분석\" → c.debt()\n\"부채비율은?\" → c.debt() 또는 c.show(\"ratios\")\n\"전체 상장사 부채 비교\" → c.debt(\"all\")",
+        "guide": "\"부채 구조 분석\" → c.debt()\n\"부채비율은?\" → c.debt() 또는 c.panel(\"ratios\")\n\"전체 상장사 부채 비교\" → c.debt(\"all\")",
         "kind": "method",
         "llmSpecs": {
             "antiPatterns": [
@@ -1161,7 +1161,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "없음 (property — self.stockCode 사용).",
         "capabilities": "한 회사 공시를 항목 × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.",
         "example": ">>> c = Company(\"005930\")\n>>> c.panel.shape                          # wide (항목 × period) — DataFrame 그대로\n>>> c.panel(\"재고\")                        # 섹션명/canonicalKey 행 (raw 공시)\n>>> c.panel(\"재고\", tag=True)              # 원본 XML 행\n>>> c.panel(\"IS\")                          # 강한 소스 — finance 주입 (show 위임)\n>>> c.panel(\"재고\", source=\"raw\")          # 강제 raw 공시",
-        "guide": "`c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel.show(key)`. 회사간은 모듈\n레벨 `crossCompany` (회사 단위 facade 밖).",
+        "guide": "`c.panel.board()` 로 가용 canonicalKey 확인 후 `c.panel(key)`. 회사간은 모듈\n레벨 `crossCompany` (회사 단위 facade 밖).",
         "kind": "property",
         "llmSpecs": {
             "antiPatterns": [
@@ -1269,7 +1269,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "kind": "property",
         "llmSpecs": {
             "antiPatterns": [
-                "분석 답변에 raw parquet 직접 인용 (show(\"BS\") 등 가공본 우선)",
+                "분석 답변에 raw parquet 직접 인용 (panel(\"BS\") 등 가공본 우선)",
                 "매 호출 reload (캐시 — 1 회면 충분)"
             ],
             "freshness": "HuggingFace finance parquet 다운로드 시점. Raises: 없음.",
@@ -1862,7 +1862,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returns": "DataFrame 또는 데이터 없으면 None.",
-        "seeAlso": "governance: 이사회/감사위원 구성 (인력의 다른 관점)\nshow: c.show(\"employee\")로 docs 기반 직원 상세",
+        "seeAlso": "governance: 이사회/감사위원 구성 (인력의 다른 관점)\nshow: c.panel(\"employee\")로 docs 기반 직원 상세",
         "summary": "인력/급여 분석 (직원수, 평균급여, 근속연수)."
     },
     "Fred": {
@@ -3398,7 +3398,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "account/ratio 호출 시 target 누락 (둘 다 target 필수)",
                 "\"growth\" 결과 상위 그대로 추천 (매출 규모·기간 필터 없으면 micro-cap 잡음)"
             ],
-            "dataflow": "scan(axis) → 후보 → Company(stockCode).analysis(...) 또는 .show(...)",
+            "dataflow": "scan(axis) → 후보 → Company(stockCode).analysis(...) 또는 .panel(...)",
             "freshness": "prebuild parquet 빌드 시점. 분기 마감 후 30~45 일.",
             "outputSchema": [
                 "모든 axis 공통: 종목코드 (str) + 종목명 (str) + 축별 컬럼",
