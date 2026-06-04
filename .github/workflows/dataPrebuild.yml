@@ -3,8 +3,8 @@ name: Data Prebuild (DART)
 # ──────────────────────────────────────────────────────────────
 # DART Data Sync 완료 후 자동 트리거.
 # scan 프리빌드(changes/finance/report/sharesOutstanding/docsIndex) 생성 → HF 업로드.
-# changes·sharesOutstanding·docsIndex 는 panel(공시 수평화) SSOT 를 읽으므로 panel 을 HF 에서 seed
-# (docs.parquet 농장 은퇴 — 더 이상 docs 를 읽지 않는다).
+# 입력(finance/report/panel) seed 는 prebuildData.py 의 INPUT_CATEGORIES 가 단일 SSOT —
+# 스크립트가 HF 에서 자체 seed 하므로 워크플로에 카테고리 목록을 중복하지 않는다.
 #
 # EDGAR 프리빌드는 edgarSync.yml 이 전담 (end-to-end 벌크 → scan → HF).
 # 여기서는 **DART 전용**.
@@ -65,8 +65,8 @@ jobs:
           key: dartlab-data-report-prebuild-never-match
           restore-keys: dartlab-data-report-
 
-      # docs(42.5GB) restore 제거 — docs.parquet 농장 은퇴 후 어떤 빌더도 docs 를 읽지 않는다.
-      # panel(11GB)은 Actions 캐시 10GB 한도 초과 → 캐시 대신 HF seed(_isFresh idempotent)로 충전.
+      # finance/report 만 Actions 캐시 warm (cacheable, ~1GB). panel(11GB)은 캐시 10GB 한도 초과 →
+      # prebuildData 가 INPUT_CATEGORIES 전부를 HF 에서 직접 seed (cache hit 는 _isFresh 로 재다운 skip).
       - name: Verify cache hits
         run: |
           for cat in finance report; do
@@ -78,13 +78,6 @@ jobs:
         env:
           CACHE_MATCHED_FINANCE: ${{ steps.finance-cache.outputs.cache-matched-key }}
           CACHE_MATCHED_REPORT: ${{ steps.report-cache.outputs.cache-matched-key }}
-
-      # HF seed: cache miss/stale 대비 부족 parquet 을 HF 에서 채움 (idempotent).
-      # panel = changes/sharesOutstanding/docsIndex 빌더 입력 (회사 enum = 로컬 panel dir glob).
-      - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report,panel
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       # KRX KIND listing + corpProfile seed — prebuild = offline only 이므로 buildScan
       # 이 KIND HTTP 호출 시 OfflineViolation. kindlist.yml 이 HF push 한 결과를

@@ -3,9 +3,9 @@
 수집 완료 후 실행되어 scan 프리빌드 데이터를 생성하고 HuggingFace에 업로드.
 
 흐름:
-  1. 로컬 data/dart/{finance,report,panel} 캐시 확인
-     (changes/sharesOutstanding/docsIndex 는 panel 공시 수평화 SSOT 를 읽는다)
-  2. buildScan() 호출 → changes.parquet, finance.parquet, report/12개 apiType, sharesOutstanding.parquet
+  1. INPUT_CATEGORIES(finance/report/panel) 를 HF dataset 에서 seed (idempotent)
+  2. buildScan() → changes/finance/report(12 apiType)/sharesOutstanding + docsIndex
+     (changes/sharesOutstanding/docsIndex 는 panel 을 읽는다 — 회사 enum = 로컬 panel dir glob)
   3. HF upload_folder → dart/scan/
 
 환경변수:
@@ -22,17 +22,31 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _hfRetry import retryHfCall  # noqa: E402
 
+# scan 프리빌드가 읽는 입력 카테고리 SSOT — buildScan 하위 빌더의 원천.
+#   finance/report → 재무·보고서 빌더, panel → changes/sharesOutstanding/docsIndex 빌더.
+# seed·캐시확인 모두 이 한 곳을 참조한다 (워크플로 YAML 에 목록 중복 금지).
+INPUT_CATEGORIES: tuple[str, ...] = ("finance", "report", "panel")
+
+
+def _seedInputs(dataDir: str) -> None:
+    """INPUT_CATEGORIES 를 HF dataset 에서 idempotent seed.
+
+    offlineGuard 가 HuggingFace host 는 허용한다 (prebuild input 다운로드는 필수). panel 은
+    회사 enum 이 로컬 dir glob 이라 artifact 가 로컬에 있어야 빌더가 종목을 발견한다.
+    """
+    from dartlab.pipeline.seed import seedCategoriesFromHf
+
+    summary = seedCategoriesFromHf(list(INPUT_CATEGORIES), dataDir=dataDir)
+    for cat, (total, new, mb) in summary.items():
+        print(f"[prebuild] seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+
 
 def _checkDataReady(dataDir: str) -> dict[str, int]:
-    """finance/report/panel 캐시 존재 여부 확인. 카테고리별 파일 수 반환.
-
-    docs 농장 은퇴 → changes/sharesOutstanding/docsIndex 빌더가 panel(공시 수평화) SSOT 를
-    읽으므로 panel 존재를 확인한다 (docs 아님).
-    """
+    """INPUT_CATEGORIES 입력 캐시 존재 여부 확인. 카테고리별 파일 수 반환."""
     from dartlab.core.dataConfig import DATA_RELEASES
 
     counts = {}
-    for cat in ("finance", "report", "panel"):
+    for cat in INPUT_CATEGORIES:
         catDir = Path(dataDir) / DATA_RELEASES[cat]["dir"]
         n = len(list(catDir.glob("*.parquet"))) if catDir.exists() else 0
         counts[cat] = n
@@ -47,7 +61,7 @@ def _buildScan(dataDir: str) -> dict[str, Path | list[Path] | None]:
 
 
 def _buildDocsIndex(dataDir: str) -> Path | None:
-    """docs 슬림 인덱스 빌드 (P3 — whimsical 흡수).
+    """docsIndex 슬림 인덱스 빌드 — panel 섹션 메타에서 생성.
 
     Args:
         dataDir: 데이터 디렉토리.
@@ -150,9 +164,10 @@ def main():
     targets = os.environ.get("PREBUILD_TARGETS", "scan").split(",")
     print(f"[prebuild] targets={targets} dataDir={dataDir}")
 
-    # 1단계: 데이터 캐시 확인
+    # 1단계: 입력 seed (HF) + 로컬 캐시 확인
+    _seedInputs(dataDir)
     counts = _checkDataReady(dataDir)
-    print(f"[prebuild] 캐시: finance={counts['finance']} report={counts['report']} panel={counts['panel']}")
+    print("[prebuild] 캐시: " + " ".join(f"{k}={v}" for k, v in counts.items()))
 
     if all(v == 0 for v in counts.values()):
         print("[prebuild] 데이터 캐시 없음 → 프리빌드 건너뜀")
@@ -167,7 +182,7 @@ def main():
         elapsed = time.time() - start
         print(f"[prebuild] scan 빌드 완료: {elapsed:.0f}초")
 
-        # 2.5단계: docsIndex 슬림 인덱스 (panel 섹션 SSOT 에서 빌드, docs.parquet 농장 은퇴)
+        # 2.5단계: docsIndex 슬림 인덱스 (panel 섹션에서 빌드)
         if counts.get("panel", 0) > 0:
             results["docsIndex"] = _buildDocsIndex(dataDir)
 
