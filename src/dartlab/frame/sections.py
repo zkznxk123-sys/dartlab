@@ -45,6 +45,36 @@ def sectionTexts(
     return df.select(cols)
 
 
+def sectionsWide(
+    code: str,
+    *,
+    periods: list[str] | None = None,
+    marketNs: str = "kr",
+) -> pl.DataFrame | None:
+    """panel 섹션 본문 wide 뷰 — topic(sectionLeaf) 행 × period 열. sectionsDiff 입력 SSOT.
+
+    docs sections wide 대체 — ``providers._common.diff.sectionsDiff`` 가 기대하는
+    ``topic`` 행 × period 열 형태(셀=본문). 같은 (sectionLeaf, period) 블록은 결합.
+
+    Args:
+        code: 종목코드.
+        periods: 특정 period 만. None = 전체.
+        marketNs: 시장 namespace.
+
+    Returns:
+        pl.DataFrame | None — [topic, <period>...]. artifact 부재 시 None.
+
+    Example:
+        >>> sectionsWide("005930")  # doctest: +SKIP
+    """
+    df = sectionTexts(code, periods=periods, marketNs=marketNs)
+    if df is None or df.is_empty():
+        return None
+    agg = df.group_by(["sectionLeaf", "period"]).agg(pl.col("contentRaw").str.join("\n").alias("content"))
+    wide = agg.pivot(values="content", index="sectionLeaf", on="period")
+    return wide.rename({"sectionLeaf": "topic"})
+
+
 def sectionTables(
     code: str,
     *,
