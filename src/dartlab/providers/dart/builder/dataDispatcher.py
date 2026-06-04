@@ -591,7 +591,7 @@ def _showFromSectionsArtifact(
         periodCols = [period]
     rows = rows.select(labelCols + periodCols)
     if stripTags:
-        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+        from dartlab.providers.dart.sectionXml import stripTagsFromSectionsDf
 
         rows = stripTagsFromSectionsDf(rows)
     return rows
@@ -693,12 +693,12 @@ def showSectionsTopic(
             if period and isinstance(period, str) and period in cleaned.columns:
                 cleaned = cleaned.select(keep_meta + [period])
             if stripTags:
-                from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+                from dartlab.providers.dart.sectionXml import stripTagsFromSectionsDf
 
                 cleaned = stripTagsFromSectionsDf(cleaned)
             return cleaned
         if stripTags:
-            from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+            from dartlab.providers.dart.sectionXml import stripTagsFromSectionsDf
 
             topicRows = stripTagsFromSectionsDf(topicRows)
         return topicRows
@@ -728,7 +728,7 @@ def showSectionsTopic(
     # 명시. 옛 호출자 영향 — sections cell 의 HTML 태그가 plain text 화 됨 (CLI 콘솔
     # 렌더 정상화).
     if stripTags and isinstance(result, pl.DataFrame):
-        from dartlab.providers.dart.docs.sections.xmlAdapter import stripTagsFromSectionsDf
+        from dartlab.providers.dart.sectionXml import stripTagsFromSectionsDf
 
         result = stripTagsFromSectionsDf(result)
 

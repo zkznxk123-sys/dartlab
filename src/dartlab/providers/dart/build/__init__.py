@@ -65,7 +65,7 @@ class _DartBuildProvider:
 
     def xmlChunkToMixed(self, *args, **kwargs):
         """xml chunk → mixed string (docs.sections.xmlAdapter)."""
-        from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
+        from dartlab.providers.dart.sectionXml import xmlChunkToMixed
 
         return xmlChunkToMixed(*args, **kwargs)
 

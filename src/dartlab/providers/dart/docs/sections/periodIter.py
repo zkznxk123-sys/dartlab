@@ -16,8 +16,8 @@ import polars as pl
 
 from dartlab.core.dataLoader import loadData
 from dartlab.providers._common.reportSelector import selectReport
-from dartlab.providers.dart.docs.sections.xmlAdapter import xmlChunkToMixed
 from dartlab.providers.dart.sectionPeriod import REPORT_KINDS, detectContentCol
+from dartlab.providers.dart.sectionXml import xmlChunkToMixed
 
 
 def _periodSortKey(period: str) -> tuple[int, int]:
