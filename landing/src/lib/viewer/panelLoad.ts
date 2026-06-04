@@ -3,8 +3,8 @@
 
 import { readParquetRows } from '$lib/data/hfRange';
 import { marketForCode } from './dartUrl';
-import { buildPanelBundle, type LeafRow } from './panelWide';
-import type { PanelBundle } from './types';
+import { buildPanelBundle } from './panelWide';
+import type { LeafRow, PanelBundle } from './types';
 import noteTaxonomy from './noteTaxonomy.json';
 
 export const READ_COLUMNS = [

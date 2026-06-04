@@ -1,255 +1,24 @@
-// 브라우저 readWide — panel long(flat 16-col) 하나에서 항목×기간 wide 를 온더플라이 계산.
+// 브라우저 readWide 오케스트레이터 — panel long(flat 16-col) 하나에서 항목×기간 wide 를 온더플라이 계산.
 //
-// Python `panel.read.readWide` + `companyApi.buildToc/buildPanelGrid` 1:1 포팅(파생 artifact 0).
-// 파이프라인: scope → anchorLatest(라벨통일) → dedupKeyed → canonicalChapter → leafSeq → collapse →
-// pivot → order. 제외: alignNotes(주석 build-time 정렬·panel 이미 정렬), _stripExpr(뷰어 tag=True raw),
-// SPINE 정밀정렬(v1 은 _skel blockOrder fallback). hyparquet 으로 HF panel 직접 read.
+// Python `panel.read.readWide` 1:1 포팅. 파이프라인 단계는 pipeline/* 모듈, TOC 는 toc/buildToc, 보고서유형
+// 보정은 periodKind, 공유 키는 keys 로 분리(클린 모듈 트리). 본 파일은 단계 호출 + leafSeq·collapse·pivot·order
+// 오케스트레이션만. 파생 artifact 0 (hyparquet 으로 HF panel 직접 read).
 
-import { canonicalChapter, canonicalRank, isReportChapter } from './canonical';
-import { edgarSectionStatus, STMT_LABELS } from './edgarSection';
+import { canonicalChapter, canonicalRank } from './canonical';
 import { marketForCode, viewerUrl } from './dartUrl';
-import spineData from './spineData.json';
-import type { PanelBundle, PanelRow, PanelTocBlock, PanelTocChapter, PanelTocResponse, PanelTocSection } from './types';
-
-// 정부 서식 척추(SPINE, XBRL 기반) — rowIdentity → spineOrder. Python panel.spine.SPINE 1:1 (spineBuilder 생성물).
-const SPINE_ORDER = spineData as Record<string, number>;
-// rowIdentity — keyed=disclosureKey / narrative=NARR::{canonicalChapter}␟{sectionLeaf} (mapper.rowIdentity 1:1).
-function spineOrderFor(disclosureKey: string | null, chapter: string, sectionLeaf: string): number | null {
-	const id = disclosureKey ?? `NARR::${chapter}${SEP}${sectionLeaf}`;
-	return id in SPINE_ORDER ? SPINE_ORDER[id] : null;
-}
-
-// panel parquet 한 leaf 행 (필요 컬럼). 브라우저 read 컬럼 목록은 panelLoad.READ_COLUMNS.
-export interface LeafRow {
-	chapter: string | null;
-	sectionLeaf: string | null;
-	sectionPath: string | null;
-	blockLeaf: string | null;
-	leafType: string | null;
-	disclosureKey: string | null;
-	xbrlClass: string | null;
-	blockOrder: number | null;
-	contentRaw: string | null;
-	period: string | null;
-	rceptNo: string | null;
-}
-
-// scope 파생 (scopeExpr): xbrlClass 에 "_S" → standalone, else consolidated(null 포함).
-function scopeOf(xbrlClass: string | null): string {
-	return xbrlClass != null && xbrlClass.includes('_S') ? 'standalone' : 'consolidated';
-}
+import { SEP, sectionKeyFor, spineOrderFor } from './keys';
+import { computePeriodKind } from './periodKind';
+import { absorbAttachedRow, sectionNum } from './pipeline/absorbAttached';
+import { alignNotes } from './pipeline/alignNotes';
+import { anchorLatest } from './pipeline/anchorLatest';
+import { anchorNarrativeToSpineRow } from './pipeline/narrativeSpine';
+import { dedupKeyed } from './pipeline/dedupKeyed';
+import { buildToc } from './toc/buildToc';
+import type { LeafRow, PanelBundle, PanelRow } from './types';
 
 // period 최신순(내림차순) — "YYYYQn" 문자열 정렬.
 function sortPeriodsDesc(periods: string[]): string[] {
 	return [...periods].sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
-}
-
-const SEP = '␟'; // ␟
-const sectionKeyFor = (chapter: string, sectionLeaf: string): string => `${chapter}${SEP}${sectionLeaf}`;
-
-// (첨부) 물리 재무첨부((첨부)연결재무제표·(첨부)재무제표) → 정규 재무섹션 흡수 (read.py absorbAttached 1:1).
-// sectionPath(공백제거)에서 감지 → chapter→III, sectionLeaf→연결 "2."/별도 "4." (주석은 3./5.). 섹션 위치는
-// 정규(XBRL) 행이 잡게 흡수행 blockOrder 를 크게 밀어 _skel 뒤로(섹션 앞으로 끌림 차단).
-function absorbAttachedRow(r: LeafRow): void {
-	const path = (r.sectionPath ?? '').replace(/\s+/g, '');
-	if (!(path.includes('(첨부)') && path.includes('재무제표'))) return;
-	const consol = path.includes('연결');
-	const note = (r.sectionLeaf ?? '').includes('주석');
-	r.chapter = 'III. 재무에 관한 사항';
-	r.sectionLeaf = note ? (consol ? '3. 연결재무제표 주석' : '5. 재무제표 주석') : consol ? '2. 연결재무제표' : '4. 재무제표';
-	if (r.blockOrder != null) r.blockOrder += 1_000_000;
-}
-
-// 섹션 번호 정렬키 — "2. …"→2, "7-1. …"→[7,1]. 번호 없으면 null(nulls_last). orderBySpine _secNum/_secSub 1:1.
-function sectionNum(sectionLeaf: string): [number | null, number] {
-	const m = /^\s*(\d+)/.exec(sectionLeaf);
-	const sub = /^\s*\d+\s*-\s*(\d+)/.exec(sectionLeaf);
-	return [m ? parseInt(m[1], 10) : null, sub ? parseInt(sub[1], 10) : 0];
-}
-
-// ── alignNotes: 옛 split 주석행(null key) → (scope,정규화제목) 표준 NT_ 정렬 (회사 own 뼈대 우선, 전역 fallback) ──
-const NOTE_TITLE_NORM = /[()·\s]/g; // Python NOTE_TITLE_NORM_PATTERN
-const SUFFIX_CAP = /[-–―]\s*(연결|별도)\s*$/; // native 접미사 scope
-const SUFFIX_STRIP = /\s*[-–―]\s*(연결|별도)\s*$/; // 접미사 제거
-
-function alignNotes(rows: LeafRow[], noteTaxonomy: Record<string, string>): void {
-	const meta = rows.map((r) => {
-		const bl = r.blockLeaf ?? '';
-		const m = bl.match(SUFFIX_CAP);
-		const suf = m ? m[1] : null;
-		const bare = bl.replace(SUFFIX_STRIP, '');
-		const secMark = (r.chapter ?? '') + (r.sectionLeaf ?? '');
-		const scope = suf === '연결' ? 'consolidated' : suf === '별도' ? 'standalone' : secMark.includes('연결') ? 'consolidated' : 'standalone';
-		const title = bare.replace(NOTE_TITLE_NORM, '');
-		return { key: scope + '|' + title, titleLen: [...title].length, isNote: (r.sectionLeaf ?? '').includes('주석') };
-	});
-	// 자기 native NT_ 주석 뼈대 — ownStd(_U 제외 표준) + own(전체, fallback). 첫 등장 우선.
-	const ownStd = new Map<string, string>();
-	const own = new Map<string, string>();
-	for (let i = 0; i < rows.length; i++) {
-		const dk = rows[i].disclosureKey;
-		if (dk == null || !dk.startsWith('NT_') || meta[i].titleLen <= 1) continue;
-		const k = meta[i].key;
-		if (!own.has(k)) own.set(k, dk);
-		if (!dk.includes('_U') && !ownStd.has(k)) ownStd.set(k, dk);
-	}
-	// 부여 — Python when/then 순서: 주석&표준 → 표준 / 기존키 보존 / 주석&own / 주석&전역.
-	for (let i = 0; i < rows.length; i++) {
-		const r = rows[i];
-		const { key, isNote } = meta[i];
-		if (isNote && ownStd.has(key)) r.disclosureKey = ownStd.get(key)!;
-		else if (r.disclosureKey != null) continue;
-		else if (isNote && own.has(key)) r.disclosureKey = own.get(key)!;
-		else if (isNote && noteTaxonomy[key] != null) r.disclosureKey = noteTaxonomy[key];
-	}
-}
-
-// ── anchorLatest: scope era-안정 + keyed 라벨 최신통일 (narrative 보존) ──
-function anchorLatest(rows: LeafRow[]): void {
-	// scope 부착.
-	for (const r of rows) (r as LeafRow & { scope: string }).scope = scopeOf(r.xbrlClass);
-	const anchorKey = (r: LeafRow) => r.disclosureKey ?? r.xbrlClass;
-
-	// scope era-안정 — anchorKey & xbrlClass 보유 행의 최신 period scope 를 같은 anchorKey 전 era 에 전파.
-	const scopeByAnchor = new Map<string, { period: string; scope: string }>();
-	for (const r of rows) {
-		const ak = anchorKey(r);
-		if (ak == null || r.xbrlClass == null) continue;
-		const cur = scopeByAnchor.get(ak);
-		const p = r.period ?? '';
-		if (!cur || p > cur.period) scopeByAnchor.set(ak, { period: p, scope: scopeOf(r.xbrlClass) });
-	}
-	for (const r of rows) {
-		const ak = anchorKey(r);
-		if (ak != null) {
-			const s = scopeByAnchor.get(ak);
-			if (s) (r as LeafRow & { scope: string }).scope = s.scope;
-		}
-	}
-
-	// keyed 라벨 통일 — (anchorKey, scope) 최신 period 라벨. 같은 period 면 (첨부) 먼저 → canonical 채택.
-	type Label = { chapter: string | null; sectionLeaf: string | null; blockLeaf: string | null };
-	const labelByGroup = new Map<string, { period: string; attach: boolean; label: Label }>();
-	for (const r of rows) {
-		const ak = anchorKey(r);
-		if (ak == null) continue;
-		const scope = (r as LeafRow & { scope: string }).scope;
-		const gk = ak + SEP + scope;
-		const p = r.period ?? '';
-		const attach = (r.chapter ?? '').includes('(첨부)');
-		const cur = labelByGroup.get(gk);
-		// sort period asc + attach 먼저(desc) → last = (최신 period, 비첨부). 즉 최신 우선, 동 period 면 비첨부.
-		const better = !cur || p > cur.period || (p === cur.period && cur.attach && !attach);
-		if (better) labelByGroup.set(gk, { period: p, attach, label: { chapter: r.chapter, sectionLeaf: r.sectionLeaf, blockLeaf: r.blockLeaf } });
-	}
-	for (const r of rows) {
-		const ak = anchorKey(r);
-		if (ak == null) continue;
-		const scope = (r as LeafRow & { scope: string }).scope;
-		const g = labelByGroup.get(ak + SEP + scope);
-		if (g) {
-			if (g.label.chapter != null) r.chapter = g.label.chapter;
-			if (g.label.sectionLeaf != null) r.sectionLeaf = g.label.sectionLeaf;
-			if (g.label.blockLeaf != null) r.blockLeaf = g.label.blockLeaf;
-		}
-	}
-}
-
-// ── dedupKeyed: keyed 행 (disclosureKey,scope,leafType,period) 당 1개 (xbrlClass 있음·긴 본문 우선) ──
-function dedupKeyed(rows: LeafRow[]): LeafRow[] {
-	const seen = new Map<string, LeafRow>();
-	const out: LeafRow[] = [];
-	for (const r of rows) {
-		if (r.disclosureKey == null) {
-			out.push(r); // narrative 보존
-			continue;
-		}
-		const scope = (r as LeafRow & { scope: string }).scope;
-		const k = [r.disclosureKey, scope, r.leafType ?? '', r.period ?? ''].join(SEP);
-		const prev = seen.get(k);
-		if (!prev) {
-			seen.set(k, r);
-			out.push(r);
-			continue;
-		}
-		// 우선: xbrlClass 있음 > 없음, 그다음 본문 길이.
-		const score = (x: LeafRow) => [x.xbrlClass != null ? 1 : 0, (x.contentRaw ?? '').length];
-		const [pa, pb] = score(prev);
-		const [ca, cb] = score(r);
-		if (ca > pa || (ca === pa && cb > pb)) {
-			const idx = out.indexOf(prev);
-			if (idx >= 0) out[idx] = r;
-			seen.set(k, r);
-		}
-	}
-	return out;
-}
-
-// ── anchorNarrativeToSpine: narrative 섹션 라벨을 SPINE(최신 필링 골격=핵) 등재 라벨로 통일 (read.py 1:1) ──
-// anchorLatest 가 keyed 만 통일하므로 narrative(배당·증권·기타재무) era 변종("6.배당" vs "6.배당 등", 옛 "6.기타재무"
-// vs 현행 "8.기타재무")이 잔존 → 같은 chapter·제목코어의 SPINE 등재 라벨로 덮어써 통일(화이트리스트 bounded, 자유 fuzzy 0).
-const NARR_NUM_RE = /^\s*\d+(-\d+)?\.?\s*/; // 선행 절 번호
-const NARR_ETC_RE = /\s*등\s*$/; // 후행 '등'(era 변종)
-export function narrativeCore(leaf: string): string {
-	return (leaf ?? '').replace(NARR_NUM_RE, '').trim().replace(NARR_ETC_RE, '').replace(NOTE_TITLE_NORM, '');
-}
-// SPINE_ORDER 키(NARR::{chapter}␟{sectionLeaf})에서 {chapter␟코어 → 정식 sectionLeaf} 룩업 (첫 등장 우선).
-const SPINE_NARR_MAP: Record<string, string> = (() => {
-	const m: Record<string, string> = {};
-	for (const ident of Object.keys(SPINE_ORDER)) {
-		if (!ident.startsWith('NARR::')) continue;
-		const body = ident.slice('NARR::'.length);
-		const i = body.indexOf(SEP);
-		if (i < 0) continue;
-		const chap = body.slice(0, i);
-		const leaf = body.slice(i + 1);
-		const key = `${chap}${SEP}${narrativeCore(leaf)}`;
-		if (!(key in m)) m[key] = leaf;
-	}
-	return m;
-})();
-function anchorNarrativeToSpineRow(r: LeafRow): void {
-	if (r.disclosureKey != null) return; // keyed 불변 (anchorLatest 담당)
-	const canon = SPINE_NARR_MAP[`${r.chapter ?? ''}${SEP}${narrativeCore(r.sectionLeaf ?? '')}`];
-	if (canon != null) r.sectionLeaf = canon;
-}
-
-// ── computePeriodKind: 회사별 보고서 유형 보정 (사업보고서 vs 분기/반기) — "연간만" 필터용 ──
-// 연간보고서(사업보고서)는 회계연도-말 분기에 위치하고 분기/반기보다 본문(비빈 셀)이 많다. 완전연도(분기≥3 보유)의
-// 분기별 비빈셀 median 중 dominant 분기를 annual 로 검출 → 비-12월 결산도 자동 흡수(3월결산=Q1, 6월결산=Q2).
-// in-progress·bookend(분기<3) 연도는 표본 제외, dominance 불명확하면 Q4(12월 결산) fallback. period 분기 유도보다 견고.
-const _quarterOf = (p: string): number => {
-	const m = /Q([1-4])$/.exec(p);
-	return m ? parseInt(m[1], 10) : 0;
-};
-function _median(xs: number[]): number {
-	if (!xs.length) return 0;
-	const s = [...xs].sort((a, b) => a - b);
-	const mid = Math.floor(s.length / 2);
-	return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-}
-export function computePeriodKind(periods: string[], cellCount: Record<string, number>): Record<string, 'annual' | 'quarter'> {
-	const qByYear = new Map<string, Set<number>>();
-	for (const p of periods) {
-		const q = _quarterOf(p);
-		if (!q) continue;
-		const y = p.slice(0, 4);
-		let s = qByYear.get(y);
-		if (!s) qByYear.set(y, (s = new Set()));
-		s.add(q);
-	}
-	const complete = new Set([...qByYear].filter(([, s]) => s.size >= 3).map(([y]) => y));
-	const byQ: Record<number, number[]> = { 1: [], 2: [], 3: [], 4: [] };
-	for (const p of periods) {
-		const q = _quarterOf(p);
-		if (q && complete.has(p.slice(0, 4))) byQ[q].push(cellCount[p] ?? 0);
-	}
-	const med = [1, 2, 3, 4].map((q) => ({ q, m: _median(byQ[q]) })).sort((a, b) => b.m - a.m);
-	// dominant(상위 median > 1.3× 차순위) 분기 = annual, 아니면 Q4(12월 결산) fallback.
-	const annualQ = med[0].m > 0 && med[0].m > 1.3 * (med[1].m || 0) ? med[0].q : 4;
-	const out: Record<string, 'annual' | 'quarter'> = {};
-	for (const p of periods) out[p] = _quarterOf(p) === annualQ ? 'annual' : 'quarter';
-	return out;
 }
 
 // ── 핵심: leaf 행들 → PanelBundle (순수, 로컬 parity 테스트 가능) ──
@@ -277,7 +46,7 @@ export function buildPanelBundle(
 	anchorLatest(rows);
 	const deduped = dedupKeyed(rows);
 
-	// canonicalChapter (sectionPath 깊은 canonical 원소 우선) + (첨부) 물리 재무첨부 흡수.
+	// canonicalChapter (sectionPath 깊은 canonical 원소 우선) + (첨부) 흡수 + narrative era 변종 SPINE 통일.
 	for (const r of deduped) {
 		r.chapter = canonicalChapter(r.chapter, r.sectionPath);
 		absorbAttachedRow(r);
@@ -318,7 +87,7 @@ export function buildPanelBundle(
 		const leafType = r.leafType ?? '';
 		const period = r.period ?? '';
 		periodSet.add(period);
-		const ik = [chapter, sectionLeaf, blockLeaf, leafType, r.disclosureKey ?? ' ', scope ?? '', leafSeq].join(SEP);
+		const ik = [chapter, sectionLeaf, blockLeaf, leafType, r.disclosureKey ?? ' ', scope ?? '', leafSeq].join(SEP);
 		let a = aggs.get(ik);
 		if (!a) aggs.set(ik, (a = { chapter, sectionLeaf, blockLeaf, leafType, disclosureKey: r.disclosureKey, scope, leafSeq, cellParts: new Map() }));
 		let parts = a.cellParts.get(period);
@@ -409,54 +178,4 @@ export function buildPanelBundle(
 	const periodKind = computePeriodKind(periods, cellCount);
 
 	return { stockCode: opts.code, corpName, toc, periods, gridBySection, dartUrlByPeriod, periodKind };
-}
-
-// TOC — 본문(gridBySection) 섹션 기반 chapter > sectionLeaf > blockLeaf 트리 (market-aware).
-// DART: navigable 보고서 챕터(I~XII = REPORT_CHAPTER_LABELS)만 — 표지/확인서(cover/expert)·front-matter('')·
-// stray 제외. VII.주주처럼 본문이 전부 ==chapter 아래인 챕터는 헤더를 절로 노출. EDGAR: form 챕터 전부 +
-// edgarSectionStatus 로 오검출 Item(405/prose tail)·표지 제외, 재무제표 terse 키(BS/IS)는 사람 라벨 relabel
-// (sectionKey 는 raw 보존 → grid lookup parity). companyApi.buildToc(서버)와 동형 — 단 빈셀(전 기간 무내용)
-// 섹션은 JS 가 gridBySection 진입 전 skip(원 뷰어 엔진의 선재 차이, 본 변경 무관).
-function buildToc(
-	code: string,
-	corpName: string,
-	gridBySection: Map<string, PanelRow[]>,
-	periods: string[]
-): PanelTocResponse {
-	const isUs = marketForCode(code) === 'US';
-	const order: string[] = []; // chapter first-appearance
-	const chMap = new Map<string, { chapter: string; real: PanelTocSection[]; header: PanelTocSection | null }>();
-	for (const [sk, rows] of gridBySection) {
-		const i = sk.indexOf(SEP);
-		const chapter = i < 0 ? sk : sk.slice(0, i);
-		const rawLeaf = i < 0 ? '' : sk.slice(i + 1);
-		if (!chapter) continue;
-		let displayLeaf = rawLeaf;
-		if (isUs) {
-			const status = edgarSectionStatus(chapter, rawLeaf);
-			if (status === 'junk') continue; // 오검출 Item·표지 제외 (panel 데이터엔 보존)
-			if (status === 'stmt') displayLeaf = STMT_LABELS[rawLeaf] ?? rawLeaf; // BS → "Balance Sheet"
-		}
-		let ch = chMap.get(chapter);
-		if (!ch) { ch = { chapter, real: [], header: null }; chMap.set(chapter, ch); order.push(chapter); }
-		// blocks(chip) — blockLeaf 있는 행만, 첫등장 순서.
-		const blocks: PanelTocBlock[] = [];
-		const blockIdx = new Map<string, PanelTocBlock>();
-		for (const r of rows) {
-			if (!r.blockLeaf) continue;
-			const ex = blockIdx.get(r.blockLeaf);
-			if (ex) ex.rowCount++;
-			else { const b: PanelTocBlock = { blockLeaf: r.blockLeaf, rowCount: 1 }; blockIdx.set(r.blockLeaf, b); blocks.push(b); }
-		}
-		const sec: PanelTocSection = { sectionLeaf: displayLeaf, sectionKey: sk, rowCount: rows.length, blocks };
-		if (rawLeaf === chapter) ch.header = sec;
-		else ch.real.push(sec);
-	}
-	// 챕터 거름 — DART: REPORT_CHAPTER_LABELS(I~XII, cover/expert·front-matter·stray 제외). EDGAR: form 챕터 전부.
-	const chapters: PanelTocChapter[] = order
-		.map((c) => chMap.get(c)!)
-		.filter((ch) => (isUs ? !!ch.chapter : isReportChapter(ch.chapter)))
-		.map((ch) => ({ chapter: ch.chapter, sections: ch.real.length ? ch.real : ch.header ? [ch.header] : [] }))
-		.filter((ch) => ch.sections.length > 0);
-	return { stockCode: code, corpName, chapters, periods };
 }

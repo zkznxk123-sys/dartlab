@@ -3,7 +3,8 @@
 // (전체 parity = data/dart/panel 로컬 필요, 별도 수동 — 본 스크립트는 결정론 순수함수만.)
 import { canonicalChapter, isReportChapter } from '../src/lib/viewer/canonical.ts';
 import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
-import { narrativeCore, computePeriodKind } from '../src/lib/viewer/panelWide.ts';
+import { narrativeCore } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
+import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 

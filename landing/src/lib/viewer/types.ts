@@ -1,6 +1,21 @@
 // 공시뷰어 데이터 계약 — ui/web `features/dashboard/api/client.ts` 와 동일 shape.
 // 브라우저 readWide(panelWide.ts)가 산출하고 Svelte 컴포넌트가 소비.
 
+// panel parquet 한 leaf 행 (brower read 필요 컬럼). 컬럼 목록은 panelLoad.READ_COLUMNS. pipeline 입력 단위.
+export interface LeafRow {
+	chapter: string | null;
+	sectionLeaf: string | null;
+	sectionPath: string | null;
+	blockLeaf: string | null;
+	leafType: string | null;
+	disclosureKey: string | null;
+	xbrlClass: string | null;
+	blockOrder: number | null;
+	contentRaw: string | null;
+	period: string | null;
+	rceptNo: string | null;
+}
+
 export interface PanelRow {
 	chapter: string;
 	sectionLeaf: string;
