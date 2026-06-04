@@ -13,7 +13,7 @@ whenToUse:
   - thesis 취약 지표
   - kill-chain 지표
 inputs:
-  - Company.show IS BS CF
+  - Company.panel IS BS CF
   - price flow consensus rows
 outputs:
   - fragilityMap table
@@ -96,7 +96,7 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except Exception:
         pass
 
@@ -118,7 +118,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-- Company.show('IS' / 'BS' / 'CF', freq='Y') 3 statement
+- Company.panel('IS' / 'BS' / 'CF', freq='Y') 3 statement
 - Company.gather('price' / 'flow' / 'consensus') 3 보조
 - buildThesisKillChainMemo() → 8 metric 표
 - 각 metric × (value + status + thesisBreak)

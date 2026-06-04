@@ -112,7 +112,7 @@ trigger → mechanism → assumption path 단정. 예: "propagationPath 4 row or
 
 - triggerCatalog (watch/risk trigger)
 - assumptionLedger (5 표준 카테고리)
-- Company.show + disclosure + gather 보조 데이터
+- Company.panel + disclosure + gather 보조 데이터
 - buildThesisKillChainMemo() → propagationPath table
 
 ### 3. 메커니즘 분석

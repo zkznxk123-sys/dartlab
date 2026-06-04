@@ -111,7 +111,7 @@ claim 별 open/notTriggered + counterEvidenceNeeded 단정. 예: "falsifierLedge
 
 - propagationPath path × claim 추출
 - tripwireMonitor watch/risk 상태
-- Company.show + disclosure + gather 보조
+- Company.panel + disclosure + gather 보조
 - buildThesisKillChainMemo() → falsifierLedger table
 
 ### 3. 메커니즘 분석

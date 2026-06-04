@@ -111,7 +111,7 @@ tripwire current + threshold + action 단정. 예: "tripwireMonitor 6 row — T1
 
 - fragilityMap (current value)
 - triggerCatalog (threshold 정의)
-- Company.show/gather (실시간 current 재측정)
+- Company.panel/gather (실시간 current 재측정)
 - buildThesisKillChainMemo() → tripwireMonitor table
 
 ### 3. 메커니즘 분석

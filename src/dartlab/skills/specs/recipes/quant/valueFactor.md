@@ -145,7 +145,7 @@ value composite rank 단정 (0~1, 1 = 가장 cheap). 예: "B/M peer rank 0.82, E
 
 ### 2. 핵심 근거 수집
 
-- 회사 market cap + 재무 BS·IS·CF (Company.show)
+- 회사 market cap + 재무 BS·IS·CF (Company.panel)
 - B/M (Book/Market) = 자본 / 시총
 - E/P (Earnings yield) = 순이익 / 시총
 - CF/P (Cash flow yield) = 영업CF / 시총

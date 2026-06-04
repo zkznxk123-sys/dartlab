@@ -73,7 +73,7 @@ c = dartlab.Company(target)
 
 # 그룹 식별 (reference)
 try:
-    group_info = c.show("groupAffiliation").to_dicts()
+    group_info = c.panel("groupAffiliation").to_dicts()
     group_name = group_info[0].get("groupName") if group_info else None
 except Exception:
     group_name = None
@@ -123,7 +123,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-- Company.show('groupAffiliation') → groupName 식별
+- Company.panel('groupAffiliation') → groupName 식별
 - Company.scan('groupAffiliates', groupName) → 같은 그룹 계열사 list
 - 각 affiliate × (ownershipPct + reverseOwnershipPct + sharedDirectorCount) 3 metric
 - crossHolding = outwardPct > 0 AND inwardPct > 0

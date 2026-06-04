@@ -95,7 +95,7 @@ c = dartlab.Company(target)
 statements = {}
 for topic in ("IS", "BS", "CF"):
     try:
-        statements[topic] = c.show(topic, freq="Y")
+        statements[topic] = c.panel(topic, freq="Y")
     except Exception:
         pass
 
@@ -117,7 +117,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-- Company.show('IS' / 'BS' / 'CF', freq='Y') × 3 statement
+- Company.panel('IS' / 'BS' / 'CF', freq='Y') × 3 statement
 - Company.disclosure() filings
 - Company.gather('price' / 'flow' / 'consensus') × 3 axis
 - scan.market peers

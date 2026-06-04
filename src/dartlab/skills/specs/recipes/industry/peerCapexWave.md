@@ -131,7 +131,7 @@ target vs peer capex wave 선후 단정 (target_leads / peer_leads / sync). 예:
 
 ### 2. 핵심 근거 수집
 
-- target 의 capex / 매출 5y 시계열 (Company.show 의 capex 시계열 + revenue)
+- target 의 capex / 매출 5y 시계열 (Company.panel 의 capex 시계열 + revenue)
 - peer 별 capex / 매출 5y 시계열
 - Pearson corr0 (동시) + Pearson corrLag1 (peer 1년 후행 가정)
 

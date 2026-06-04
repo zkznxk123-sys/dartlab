@@ -45,4 +45,4 @@ linkedSkills:
 
 ## 정체성
 
-*generic industry analyst* 의 정성 narrative (성장기 vs 성숙기) 가 아닌, *peer set 정량 cross-section* 으로만 산업 시점 결론. 회사 단일 호출 (`Company.show`) 가 아닌 *industry universe* 위 비교 시점.
+*generic industry analyst* 의 정성 narrative (성장기 vs 성숙기) 가 아닌, *peer set 정량 cross-section* 으로만 산업 시점 결론. 회사 단일 호출 (`Company.panel`) 가 아닌 *industry universe* 위 비교 시점.

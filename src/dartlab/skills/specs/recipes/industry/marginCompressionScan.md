@@ -142,7 +142,7 @@ peer 3축 마진 압축 cluster 단정. 예: "5 peer 중 3 회사가 compression
 
 ### 2. 핵심 근거 수집
 
-- peer set 별 5년 IS 시계열 (Company.show IS)
+- peer set 별 5년 IS 시계열 (Company.panel IS)
 - 3 마진 계산: GP (gross) = 매출총이익/매출, OM (operating) = 영업이익/매출, NM (net) = 순이익/매출
 - 각 축 직전 3년 baseline mean/std → 최근 연도 z-score
 

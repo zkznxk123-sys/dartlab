@@ -107,7 +107,7 @@ forecast = c.analysis("growth")
 macro_sensitivity = c.analysis("macroSensitivity")
 valuation_band = c.analysis("valuationBand")
 scenario = dartlab.macro("scenario", market="KR")
-bs = c.show("BS", freq="Y")
+bs = c.panel("BS", freq="Y")
 
 emit_result(
     table=[
@@ -134,7 +134,7 @@ emit_result(
 - c.analysis('macroSensitivity') — rate / FX elasticity 계수
 - macro('scenario', market='KR') — 146 시나리오 grid (rate × FX × cyclePhase × 침체)
 - c.analysis('valuationBand') — 적정 multiple band
-- c.show('BS') — 기준 balance + 발행주식
+- c.panel('BS') — 기준 balance + 발행주식
 
 ### 3. 메커니즘 분석
 

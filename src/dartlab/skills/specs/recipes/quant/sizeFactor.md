@@ -132,7 +132,7 @@ logMarketCap + percentile rank 단정. 예: "005930 시총 460조 (logCap=33.5) 
 
 ### 2. 핵심 근거 수집
 
-- target market_cap (Company.show('snapshot'))
+- target market_cap (Company.panel('snapshot'))
 - Company.industry('peers') latest 20 종목 × market_cap
 - logCap = ln(marketCap) 변환 후 peer 단면
 - percentile rank: percentileLargeToSmall = below count / N

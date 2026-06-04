@@ -77,7 +77,7 @@ except Exception:
     rpt_rows = []
 
 try:
-    rev_rows = c.show("revenue").to_dicts()
+    rev_rows = c.panel("revenue").to_dicts()
     rev_by_year = {str(r.get("year"))[:4]: float(r.get("revenue") or 0) for r in rev_rows}
 except Exception:
     rev_by_year = {}
@@ -117,7 +117,7 @@ salesToRpPct + purchPct 추세 단정. 예: "5y 추세: salesToRpPct 24% → 31%
 ### 2. 핵심 근거 수집
 
 - Company.gather('relatedPartyTransactions') 연도별 (salesToRelated + purchasesFromRelated)
-- Company.show('revenue') 연도별 총매출
+- Company.panel('revenue') 연도별 총매출
 - salesToRpPct = salesToRelated / totalRevenue × 100
 - purchPct = purchasesFromRelated / totalRevenue × 100
 

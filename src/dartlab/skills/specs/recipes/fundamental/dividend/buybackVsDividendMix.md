@@ -95,7 +95,7 @@ except Exception:
 # fallback: cashflow row 에서 직접
 if not rows:
     try:
-        cf = c.show("cf")
+        cf = c.panel("cf")
         rows = cf.to_dicts() if hasattr(cf, "to_dicts") else []
     except Exception:
         rows = []

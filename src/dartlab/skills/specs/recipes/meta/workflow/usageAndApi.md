@@ -35,7 +35,7 @@ failureModes:
   - 사용법 답변에 분석 결과 (숫자) 혼합으로 가짜 evidence
 examples:
   - dartlab.gather 사용법
-  - Company.show API 도움말
+  - Company.panel API 도움말
   - quant axis 호출 방법
   - dartlab 능력 / 기능 안내
 lastUpdated: '2026-05-13'
@@ -68,7 +68,7 @@ from dartlab.ai.tools.readSkill import readSkill
 from dartlab.ai.tools.readCapability import readCapability
 
 skills = readSkill("dartlab 사용법", limit=8)
-caps = readCapability("Company.show", limit=5)
+caps = readCapability("Company.panel", limit=5)
 ```
 
 ## 호출 동작

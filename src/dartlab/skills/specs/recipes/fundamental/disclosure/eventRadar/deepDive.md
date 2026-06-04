@@ -186,7 +186,7 @@ eventRadar `finalDecision` row 의 `radarScore` + `decisionStatus` 단정. 예: 
 
 ### 2. 핵심 근거 수집
 
-- IS/BS/CF 시계열 (Company.show)
+- IS/BS/CF 시계열 (Company.panel)
 - 공시 row 50 건 (Company.disclosure)
 - 가격·수급·컨센서스 row (Company.gather price/flow/consensus)
 - L1.5 ledger 7 단계 (sourceCoverageAudit → eventInbox → priceFlowReaction → consensusReactionAudit → catalystThesisBridge → premortemCheck → visualDecisionPack)
