@@ -1,4 +1,10 @@
-"""prod JSON patch CLI — `accountMappings.json` `mappings` 키 단독 권한 갱신.
+"""prod JSON patch CLI — `accountMappings.json` SSOT layer 단독 권한 갱신.
+
+`--layer` 로 편집 대상 선택 (default `mappings`):
+    mappings · layers.idSynonym · layers.nameSynonym · layers.snakeAlias ·
+    layers.labelEn · layers.korSynonym
+value 가 snakeId 인 layer (mappings/snakeAlias/korSynonym) 만 standardAccounts
+hard check (ghost 차단) 적용.
 
 `src/dartlab/reference/mapping/mappingReview.py` 가 status=confirmed 로 결정한 staging 행만
 취합하여 atomic write 로 추가. 본 CLI 는 `accountMappings.json` 을 직접
@@ -28,6 +34,56 @@ import polars as pl
 
 _DEFAULT_STAGING = Path("data") / "mapping_candidates.parquet"
 _DEFAULT_JSON = Path("src/dartlab/reference/data/accountMappings.json")
+
+# 편집 가능한 SSOT layer — (JSON dotted 경로, value 가 snakeId 인가 = ghost check 대상)
+_LAYER_TARGETS: dict[str, tuple[str, bool]] = {
+    "mappings": ("mappings", True),
+    "idSynonym": ("layers.idSynonym", False),
+    "nameSynonym": ("layers.nameSynonym", False),
+    "snakeAlias": ("layers.snakeAlias", True),
+    "labelEn": ("layers.labelEn", False),
+    "korSynonym": ("layers.korSynonym", True),
+}
+
+
+def _targetNode(data: dict, layer: str) -> tuple[dict, str]:
+    """layer 의 부모 node + 마지막 키 (중간 node 없으면 생성).
+
+    Args:
+        data: accountMappings.json 파싱 dict.
+        layer: ``_LAYER_TARGETS`` 키.
+
+    Returns:
+        ``(node, key)`` — ``node[key]`` 가 편집 대상 dict.
+
+    Example:
+        >>> _targetNode({"layers": {"idSynonym": {}}}, "idSynonym")[1]
+        'idSynonym'
+    """
+    path, _ = _LAYER_TARGETS[layer]
+    parts = path.split(".")
+    node = data
+    for p in parts[:-1]:
+        node = node.setdefault(p, {})
+    return node, parts[-1]
+
+
+def _ghostCheckAccounts(data: dict, layer: str) -> dict[str, dict] | None:
+    """value 가 snakeId 인 layer 만 standardAccounts hard check 적용 (그 외 None).
+
+    Args:
+        data: accountMappings.json 파싱 dict.
+        layer: ``_LAYER_TARGETS`` 키.
+
+    Returns:
+        standardAccounts dict (snakeId-value layer) 또는 None (id/name/label layer).
+
+    Example:
+        >>> _ghostCheckAccounts({"standardAccounts": {}}, "idSynonym") is None
+        True
+    """
+    _, valueIsSnakeId = _LAYER_TARGETS[layer]
+    return data.get("standardAccounts", {}) if valueIsSnakeId else None
 
 
 def _loadJson(path: Path) -> dict:
@@ -162,11 +218,12 @@ def cmdDryrun(args: argparse.Namespace) -> int:
     """
     confirmed = _readConfirmed(args.staging)
     data = _loadJson(args.json)
-    existing = data.get("mappings", {})
-    standardAccounts = data.get("standardAccounts", {})
+    node, key = _targetNode(data, args.layer)
+    existing = node.get(key, {})
+    standardAccounts = _ghostCheckAccounts(data, args.layer)
     additions, conflicts, ghostSnakes = _computeDiff(existing, confirmed, standardAccounts)
 
-    print(f"[mappingPromote dryrun] 추가 예정 {len(additions)} 매핑:")
+    print(f"[mappingPromote dryrun] layer={args.layer} 추가 예정 {len(additions)} 매핑:")
     for nm, snake in sorted(additions.items()):
         print(f"  + {nm!r} → {snake}")
     if conflicts:
@@ -198,8 +255,9 @@ def cmdApply(args: argparse.Namespace) -> int:
     """
     confirmed = _readConfirmed(args.staging)
     data = _loadJson(args.json)
-    existing = data.get("mappings", {})
-    standardAccounts = data.get("standardAccounts", {})
+    node, key = _targetNode(data, args.layer)
+    existing = node.get(key, {})
+    standardAccounts = _ghostCheckAccounts(data, args.layer)
     additions, conflicts, ghostSnakes = _computeDiff(existing, confirmed, standardAccounts)
 
     if ghostSnakes and not args.force:
@@ -221,7 +279,7 @@ def cmdApply(args: argparse.Namespace) -> int:
     # patch
     merged = dict(existing)
     merged.update(additions)
-    data["mappings"] = merged
+    node[key] = merged
     meta = data.setdefault("_metadata", {})
     meta["lastUpdate"] = date.today().isoformat()
     meta["addedCount"] = int(meta.get("addedCount", 0)) + len(additions)
@@ -230,7 +288,7 @@ def cmdApply(args: argparse.Namespace) -> int:
     _writeJsonAtomic(args.json, data)
     _resetMapperCache()
 
-    print(f"[mappingPromote apply] {len(additions)} 매핑 추가, _metadata 갱신.")
+    print(f"[mappingPromote apply] layer={args.layer} {len(additions)} 매핑 추가, _metadata 갱신.")
     print(f"  lastUpdate: {meta['lastUpdate']}")
     print(f"  addedCount(누적): {meta['addedCount']}")
     return 0
@@ -283,6 +341,12 @@ def _buildParser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     p.add_argument("--staging", type=Path, default=_DEFAULT_STAGING)
     p.add_argument("--json", type=Path, default=_DEFAULT_JSON)
+    p.add_argument(
+        "--layer",
+        choices=list(_LAYER_TARGETS),
+        default="mappings",
+        help="편집 대상 SSOT layer (default mappings). idSynonym/nameSynonym/snakeAlias/labelEn/korSynonym.",
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pd_ = sub.add_parser("dryrun")

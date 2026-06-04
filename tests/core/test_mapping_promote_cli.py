@@ -285,6 +285,66 @@ def test_apply_rejects_ghost_snake_id(promoteMod, tmp_path: Path, jsonFile: Path
     assert before == after  # zero modification
 
 
+def test_apply_to_layer_routes_target(promoteMod, stagingFile: Path, jsonFile: Path) -> None:
+    """--layer nameSynonym → layers.nameSynonym 에 추가, 기본 mappings 미오염."""
+    rc = promoteMod.main(["--staging", str(stagingFile), "--json", str(jsonFile), "--layer", "nameSynonym", "apply"])
+    assert rc == 0
+    data = json.loads(jsonFile.read_text(encoding="utf-8"))
+    assert data["layers"]["nameSynonym"]["기타의금융자산"] == "other_financial_assets"
+    assert "기타의금융자산" not in data.get("mappings", {})
+
+
+def test_non_snake_layer_skips_ghost_check(promoteMod, tmp_path: Path, jsonFile: Path) -> None:
+    """idSynonym(value=영문 id, snakeId 아님)은 standardAccounts ghost check 미적용.
+
+    같은 후보가 mappings 였다면 ghost 로 reject 되지만, idSynonym 은 value 가
+    snakeId 가 아니므로 SA 부재여도 적용된다.
+    """
+    schema = {
+        "firstSeenAt": pl.String,
+        "lastSeenAt": pl.String,
+        "accountId": pl.String,
+        "accountNm": pl.String,
+        "occurrenceCount": pl.Int64,
+        "stockCodes": pl.List(pl.String),
+        "sjDivs": pl.List(pl.String),
+        "corporateDispersion": pl.Int64,
+        "suggestedSnakeId": pl.String,
+        "confidence": pl.Float64,
+        "signalBreakdown": pl.String,
+        "autoEligible": pl.Boolean,
+        "status": pl.String,
+        "operatorNote": pl.String,
+        "decidedAt": pl.String,
+    }
+    rows = [
+        {
+            "firstSeenAt": "2026-06-05T00:00:00+00:00",
+            "lastSeenAt": "2026-06-05T00:00:00+00:00",
+            "accountId": "",
+            "accountNm": "SalesRevenue",
+            "occurrenceCount": 10,
+            "stockCodes": ["005930", "000660", "035720"],
+            "sjDivs": ["IS"],
+            "corporateDispersion": 3,
+            "suggestedSnakeId": "Revenue",  # 영문 id, standardAccounts 부재 — idSynonym 에선 OK
+            "confidence": 0.9,
+            "signalBreakdown": "{}",
+            "autoEligible": True,
+            "status": "confirmed",
+            "operatorNote": None,
+            "decidedAt": "2026-06-05T00:00:00+00:00",
+        }
+    ]
+    staging = tmp_path / "idsyn_staging.parquet"
+    pl.DataFrame(rows, schema=schema).write_parquet(staging)
+
+    rc = promoteMod.main(["--staging", str(staging), "--json", str(jsonFile), "--layer", "idSynonym", "apply"])
+    assert rc == 0
+    data = json.loads(jsonFile.read_text(encoding="utf-8"))
+    assert data["layers"]["idSynonym"]["SalesRevenue"] == "Revenue"
+
+
 def test_rollback_restores_previous_file(promoteMod, monkeypatch, tmp_path: Path) -> None:
     """git show 호출을 mock 하고 복원 동작 검증."""
     target = tmp_path / "accountMappings.json"
