@@ -1244,28 +1244,6 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    def _callNotesDetail(self, keyword: str, period: str = "y") -> Any:
-        """notesDetail 호출 (키워드 + 기간별 캐싱).
-
-        Args:
-            keyword: 주석 키워드 (예: "재고자산", "매출채권").
-            period: "y" (연간, 기본), "q" (분기 포함), "h" (반기 포함).
-        """
-        if not self._hasDocs:
-            return None
-        cacheKey = f"notesDetail:{keyword}:{period}"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        result = _importAndCall(
-            "dartlab.providers.dart.docs.finance.notesDetail",
-            "notesDetail",
-            self.stockCode,
-            keyword=keyword,
-            period=period,
-        )
-        self._cache[cacheKey] = result
-        return result
-
     def _getPrimary(self, name: str, **kwargs) -> Any:
         """모듈 호출 후 primary DataFrame 추출."""
         import dartlab.config as config
@@ -5017,16 +4995,17 @@ class Company:
             period: "y" 연간 · "q" 분기 · "h" 반기 (default "y").
 
         Returns:
-            NotesDetailResult 또는 None — corpName + tables (keyword 별 NotesPeriod list) 보유.
+            pl.DataFrame 또는 None — panel native 주석 행(항목 × period wide).
+            keyword 가 disclosureKey/sectionLeaf/blockLeaf 에 매칭되는 주석 블록.
 
         Requires:
-            DART 정기보고서 docs (주석 본문 자동 파싱).
+            panel artifact (정부 native NT_ 주석 정렬 — ``read.alignNotes``).
 
         Example::
 
             c = Company("005930")
-            lease = c.notesDetail("리스")           # 리스 약정 5 년 panel
-            contingent = c.notesDetail("우발", "y") # 우발채무 연간
+            lease = c.notesDetail("리스")           # 리스 약정 native 주석 wide
+            contingent = c.notesDetail("우발", "y") # 우발채무 주석 행
 
         AIContext:
             - footnote-grade Q&A 의 raw 데이터 (Bloomberg/FactSet 미보유 영역)
@@ -5049,12 +5028,10 @@ class Company:
                 - 연간 답변에 분기 비교 (period 인자 무시)
                 - 5 년 panel 전체 dump (답변 본문 상위 3~5 년만 인용)
             OutputSchema:
-                - corpName : str
-                - tables : dict[키워드, list[NotesPeriod]]
-                - NotesPeriod : [year, kind, items, unit]
+                - pl.DataFrame | None — panel native 주석 wide (항목 × period).
             Prerequisites:
-                - 정기보고서 박힘 (자동 다운로드)
-                - keyword 가 NOTES_KEYWORDS 박힘
+                - panel artifact 박힘 (online/bulk 빌드)
+                - keyword 가 주석 제목/disclosureKey 에 매칭
             Freshness:
                 정기보고서 마감 후 30~45 일.
             TargetMarkets:
@@ -5063,9 +5040,12 @@ class Company:
         Raises:
             없음.
         """
-        from dartlab.providers.dart.docs.finance.notesDetail import notesDetail as _notesDetail
-
-        return _notesDetail(self.stockCode, keyword, period)
+        # docs.finance.notesDetail(regex 파싱) 은퇴 → panel native NT_ 주석(read.alignNotes) 직접.
+        # period 는 wide 주석 검색에 미사용(panel 은 전 기간 행 반환) — 시그니처 호환 유지.
+        # 제목 매칭(__call__) 우선, 없으면 본문 전문검색(search) fallback — 옛 본문기반 parity.
+        p = self.panel
+        hit = p(keyword)
+        return hit if hit is not None else p.search(keyword)
 
     def flow(self):
         """KRX 외국인/기관 일별 net-buy (Company.gather("flow") wrapper).
