@@ -88,7 +88,7 @@ examples:
   - NAVER 임원 5억 이상 보수 - Company.disclosure(category=임원변동) + 후속 sections
   - 삼성그룹 관계자거래 100억 이상 - Company.disclosure(category=대규모기업집단현황공시)
   - 005930 메모리 ASP 분기 추세 - Company.sections + section query 사업의 내용
-  - 셀트리온 별도 vs 연결 NI 차이 - Company.show(IS basis=separate) + Company.show(IS basis=consolidated)
+  - 셀트리온 별도 vs 연결 NI 차이 - Company.panel(IS basis=separate) + Company.panel(IS basis=consolidated)
 procedure:
   - 질문에서 한국 공시 종류 키워드 식별
   - 본 표의 apiRef 매핑 적용
@@ -118,8 +118,8 @@ narrative = sections.query("section == '사업의 내용'")
 audit = c.audit()
 
 # 별도 vs 연결
-sep = c.show("IS", basis="separate")
-con = c.show("IS", basis="consolidated")
+sep = c.panel("IS", basis="separate")
+con = c.panel("IS", basis="consolidated")
 ```
 
 ## 호출 동작
@@ -138,8 +138,8 @@ con = c.show("IS", basis="consolidated")
 | 임원 변동 · 5억 이상 보수 | `Company.disclosure(category="임원변동")` | DataFrame | rceptNo · filedAt · title · formType |
 | 사업보고서 II 항 segment narrative | `Company.sections` | LazyFrame | period · topic · content · sourceRef |
 | 감사보고서 | `Company.audit` | dict | auditor · opinion · keyAuditMatters |
-| 별도재무제표 (parent-only) | `Company.show("IS", basis="separate")` | DataFrame | account · value · period |
-| 연결재무제표 | `Company.show("IS", basis="consolidated")` | DataFrame | account · value · period · subsidiary |
+| 별도재무제표 (parent-only) | `Company.panel("IS", basis="separate")` | DataFrame | account · value · period |
+| 연결재무제표 | `Company.panel("IS", basis="consolidated")` | DataFrame | account · value · period · subsidiary |
 
 각 결과는 DART rceptNo + section + paragraph 의 source chain 보존 (wrapExternalInResult).
 

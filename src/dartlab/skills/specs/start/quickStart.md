@@ -50,7 +50,7 @@ runtimeCompatibility:
 procedure:
   - dartlab.Company(code) 로 회사 객체를 만든다.
   - c.sections / c.topics 로 회사 전체 지도를 본다.
-  - c.show(topic) 으로 개별 topic 본문을 연다 (BS · IS · CF · ratios 등).
+  - c.panel(topic) 으로 개별 topic 본문을 연다 (BS · IS · CF · ratios 등).
   - c.diff() 로 기간 간 변화 큰 topic 을 찾는다.
   - 미국 종목은 같은 API 로 동작한다 (Company("AAPL")).
   - dartlab.scan(group, axis) 로 시장 전체 횡단.
@@ -112,17 +112,17 @@ c.topics     # 어떤 topic 이 있나
 ## 3. 개별 topic 열기
 
 ```python
-c.show("businessOverview")   # 사업 개요 본문
-c.show("companyOverview")    # 회사 개요
+c.panel("businessOverview")   # 사업 개요 본문
+c.panel("companyOverview")    # 회사 개요
 ```
 
 ## 4. 재무제표
 
 ```python
-c.show("IS")       # 손익계산서
-c.show("BS")       # 재무상태표
-c.show("CF")       # 현금흐름표
-c.show("ratios")   # 47 개 재무비율
+c.panel("IS")       # 손익계산서
+c.panel("BS")       # 재무상태표
+c.panel("CF")       # 현금흐름표
+c.panel("ratios")   # 47 개 재무비율
 ```
 
 ## 5. 변화 감지

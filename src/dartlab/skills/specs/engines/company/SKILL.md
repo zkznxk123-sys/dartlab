@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.show'.
+purpose: Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.panel'.
 whenToUse:
   - Company
   - company
@@ -95,7 +95,7 @@ examples:
 procedure:
   - dartlab.Company(code) 로 종목코드 또는 ticker 로 facade 생성.
   - c.sections 또는 c.topics 로 사용 가능한 topic 확인.
-  - c.show(topic) 으로 단일 topic 본문 (source priority — finance > report > docs).
+  - c.panel(topic) 으로 단일 topic 본문 (source priority — finance > report > docs).
   - 깊이 분석은 c.analysis · c.credit · c.quant · c.macro · c.story 같은 하위 엔진.
   - 답변에 target · period · topic · tableRef · valueRef · dateRef · executionRef 묶음.
 linkedSkills:
@@ -127,7 +127,7 @@ import dartlab
 
 c = dartlab.Company("005930")
 
-raw = c.show("BS")
+raw = c.panel("BS")
 selected = c.select("매출액")
 trace = c.trace("영업이익")
 
@@ -145,10 +145,10 @@ industry = c.industry()
 
 단일 종목 질문은 본 엔진이 1 차 진입점. 다음 4 룰 강행:
 
-1. **`EngineCall(apiRef="Company.show", args={"stockCode": "...", "topic": "..."})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.
-2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `\`table:Company.show:005930\`` 형식 backtick 또는 `<tableRef:id>` 각괄호.
-3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.show 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.
-4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.show 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.
+1. **`EngineCall(apiRef="Company.panel", args={"stockCode": "...", "topic": "..."})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.
+2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `\`table:Company.panel:005930\`` 형식 backtick 또는 `<tableRef:id>` 각괄호.
+3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.panel 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.
+4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.panel 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.
 
 ## 호출 동작
 
@@ -156,9 +156,9 @@ Company 생성 시 target과 market/provider를 확정한다. 이후 `show/selec
 
 무인자 또는 topic 누락 호출은 가능한 topic/axis 가이드를 반환할 수 있다. 데이터가 없으면 결손을 0으로 채우지 않고 빈 DataFrame, `None`, flags, 제한 메시지로 표현한다.
 
-### `c.show()` 응답 data 의 자동 부착 필드 (단일 종목 답변의 1 차 진입점)
+### `c.panel()` 응답 data 의 자동 부착 필드 (단일 종목 답변의 1 차 진입점)
 
-`c.show(topic)` 의 반환 dict (server agent/MCP 경유 시 `EngineCall(apiRef="Company.show")` 결과의 `data`) 에는 원자료 외에 다음이 자동 부착된다 — 별도 도구 호출 없이 그대로 인용:
+`c.panel(topic)` 의 반환 dict (server agent/MCP 경유 시 `EngineCall(apiRef="Company.panel")` 결과의 `data`) 에는 원자료 외에 다음이 자동 부착된다 — 별도 도구 호출 없이 그대로 인용:
 
 | key | 내용 | 사용처 |
 | --- | --- | --- |
@@ -172,11 +172,11 @@ Company 생성 시 target과 market/provider를 확정한다. 이후 `show/selec
 
 ### stockCode resolve 실패 시 행동 (회복 절차)
 
-`c = dartlab.Company(code)` 가 코드 미발견 / 비상장 / 데이터셋 미수집 면 fail-fast — 같은 코드로 `c.show / c.credit / c.analysis` 등 반복 호출 금지. 한 번 `company_not_resolved` 면 즉시 답변에 "데이터 없음" + 가능한 원인 (잘못된 6 자리 / 비상장 / 미수집) 명시. 회사명만 주어졌으면 `dartlab.Company.search("회사명")` 1 회로 코드 lookup 후 재시도, 그것도 fail 이면 멈춤.
+`c = dartlab.Company(code)` 가 코드 미발견 / 비상장 / 데이터셋 미수집 면 fail-fast — 같은 코드로 `c.panel / c.credit / c.analysis` 등 반복 호출 금지. 한 번 `company_not_resolved` 면 즉시 답변에 "데이터 없음" + 가능한 원인 (잘못된 6 자리 / 비상장 / 미수집) 명시. 회사명만 주어졌으면 `dartlab.Company.search("회사명")` 1 회로 코드 lookup 후 재시도, 그것도 fail 이면 멈춤.
 
 ### dataAsOf freshness
 
-`c.show()` / `c.analysis()` 결과의 `latestPeriod` (또는 `dataAsOf`) 가 *오늘* 기준 stale (예: 2 분기 이상 뒤) 일 수 있다. 정기보고서 공시 지연 / 분기 잠정실적 미반영 / fixture 환경 가능성. 답변 헤더 chip 옆에 `📅 데이터 as-of {latestPeriod}` 노출 권장 — 사용자가 "지금이 최신인가" 즉시 판단.
+`c.panel()` / `c.analysis()` 결과의 `latestPeriod` (또는 `dataAsOf`) 가 *오늘* 기준 stale (예: 2 분기 이상 뒤) 일 수 있다. 정기보고서 공시 지연 / 분기 잠정실적 미반영 / fixture 환경 가능성. 답변 헤더 chip 옆에 `📅 데이터 as-of {latestPeriod}` 노출 권장 — 사용자가 "지금이 최신인가" 즉시 판단.
 
 ## 전체 축/메서드 목록
 
@@ -185,7 +185,7 @@ Company 생성 시 target과 market/provider를 확정한다. 이후 `show/selec
 | search/listing/resolve/codeName/status | 기업 식별/목록 | `dartlab.Company.search("삼성전자")` |
 | filings/disclosure/liveFilings/readFiling | 공시 목록/본문 | `c.disclosure()` |
 | rawDocs/rawFinance/rawReport | raw parquet 접근 | `c.rawFinance()` |
-| sections/show/select/trace/diff | 원자료 조회/추적/비교 | `c.show("BS")` |
+| sections/panel/select/trace/diff | 원자료 조회/추적/비교 | `c.panel("BS")` |
 | keywordTrend/news/watch | 텍스트/뉴스/감시 | `c.news()` |
 | story/validateStory/storyTree/narrativeDiff | 보고서/스토리 | `c.story()` |
 | analysis | 재무/가치/전망 분석 | `c.analysis("financial", "수익성")` |
@@ -670,14 +670,14 @@ except ImportError:
 import dartlab
 
 with dartlab.Company("005930") as c:
-    # 시계열 (분기 / 연도 / 누적) — Plan v10: c.show 단일 진입
-    q = c.show("IS", freq="Q")
-    y = c.show("IS", freq="Y")
-    cum = c.show("IS", freq="YTD")
+    # 시계열 (분기 / 연도 / 누적) — Plan v10: c.panel 단일 진입
+    q = c.panel("IS", freq="Q")
+    y = c.panel("IS", freq="Y")
+    cum = c.panel("IS", freq="YTD")
 
     # 재무비율
-    r = c.show("ratios")                       # CFS 기본
-    rOfs = c.show("ratios", scope="separate")  # OFS
+    r = c.panel("ratios")                       # CFS 기본
+    rOfs = c.panel("ratios", scope="separate")  # OFS
 
 # 6 sub-domain — 주석 영역 파서
 from dartlab.finance.summary import fsSummary
@@ -779,11 +779,11 @@ majorHolder(stockCode)
 
 | 호출 | 설명 |
 |--------|------|
-| `c.show(topic, freq="Q")` | 분기별 (CFS) — topic ∈ BS·IS·CF·CIS·SCE·ratios |
-| `c.show(topic, freq="Y")` | 연도별 (CFS) |
-| `c.show(topic, freq="YTD")` | 분기별 누적 (CFS) |
-| `c.show("ratios")` | 재무비율 (CFS) |
-| `c.show(topic, freq=..., scope="separate")` | 커스텀 (CFS/OFS scope) |
+| `c.panel(topic, freq="Q")` | 분기별 (CFS) — topic ∈ BS·IS·CF·CIS·SCE·ratios |
+| `c.panel(topic, freq="Y")` | 연도별 (CFS) |
+| `c.panel(topic, freq="YTD")` | 분기별 누적 (CFS) |
+| `c.panel("ratios")` | 재무비율 (CFS) |
+| `c.panel(topic, freq=..., scope="separate")` | 커스텀 (CFS/OFS scope) |
 
 ### scope 파라미터
 
@@ -942,8 +942,8 @@ DART 공시 요약재무정보에서 숫자 브릿지 매칭으로 계정명을 
 ```python
 import dartlab
 with dartlab.Company("005930") as c:
-    print(c.show("ratios").roe)                       # 8.29 (CFS)
-    print(c.show("ratios", scope="separate").roe)     # 5.19 (OFS)
+    print(c.panel("ratios").roe)                       # 8.29 (CFS)
+    print(c.panel("ratios", scope="separate").roe)     # 5.19 (OFS)
 
 from dartlab.finance.summary import fsSummary
 result = fsSummary("data/docsData/005930.parquet")
@@ -964,7 +964,7 @@ print(f"{result.corpName}: {result.allRate:.1%}")  # 매칭률
 
 - 기업명, 종목코드, ticker 중 무엇이 입력됐는지 먼저 식별한다.
 - 질문 목적이 수익성, 현금흐름, 신용, 공시, 비교, 밸류에이션, 배당, 지배구조 중 어디에 가까운지 skill 검색으로 고른다.
-- 단일 기업과 특정 축이 함께 있으면 해당 engine skill과 Company.analysis/Company.show를 먼저 사용한다. scan skill은 “후보”, “랭킹”, “전체 종목”, “많이 오른” 같은 횡단 의도가 있을 때만 1차 경로가 된다.
+- 단일 기업과 특정 축이 함께 있으면 해당 engine skill과 Company.analysis/Company.panel를 먼저 사용한다. scan skill은 “후보”, “랭킹”, “전체 종목”, “많이 오른” 같은 횡단 의도가 있을 때만 1차 경로가 된다.
 - 목적이 불명확하면 engines.story.companyCausal를 기본 후보로 두되, macro와 scan 맥락도 함께 확인한다.
 - 선택한 skill의 requiredEvidence를 실행 전 체크리스트로 둔다.
 - 실행 가능한 분석 질문이면 첫 답변에서 사용법만 설명하지 말고 target, period, source table ref를 만든 뒤 검산 가능한 결론을 낸다. 데이터가 부족하면 어떤 Company topic 또는 prebuild가 부족한지 한계로 남긴다.
@@ -972,8 +972,8 @@ print(f"{result.corpName}: {result.allRate:.1%}")  # 매칭률
 ## 공개 호출 방식
 
 - `c = dartlab.Company("005930")`
-- `c.show()`
-- `c.show("BS")`
+- `c.panel()`
+- `c.panel("BS")`
 - `c.index()`
 - `c.trace()`
 

@@ -166,7 +166,7 @@ profitability = dartlab.analysis("financial", "수익성", stockCode="005930")
 
 22 axis 질문 (수익성·밸류에이션·안정성·효율성·종합평가·이익품질·자본배분·성장성 등) 에서 다음 4 룰은 강행이다 — 위반 시 refs=0 회귀로 답변 품질 65 점 이하 하락.
 
-1. **1 차 도구는 EngineCall 강제**. axis 명이 질문에 있거나 22 axis 가이드 표에 매칭되면 `EngineCall(apiRef="Company.analysis", args={...})` 또는 `EngineCall(apiRef="Company.show", args={...})` 가 첫 호출. **RunPython 직접 ratio 계산은 engine 호출 결과가 부재할 때만 fallback** — 처음부터 raw 계산 금지.
+1. **1 차 도구는 EngineCall 강제**. axis 명이 질문에 있거나 22 axis 가이드 표에 매칭되면 `EngineCall(apiRef="Company.analysis", args={...})` 또는 `EngineCall(apiRef="Company.panel", args={...})` 가 첫 호출. **RunPython 직접 ratio 계산은 engine 호출 결과가 부재할 때만 fallback** — 처음부터 raw 계산 금지.
 
    이유: EngineCall 결과 dict 는 `@tagConfidence` 데코레이터로 `tableRef`·`valueRef`·`dateRef`·`executionRef` 자동 발급. RunPython 은 raw eval — refs 0 발급. 답변 본문 인용 가치체인이 깨진다.
 
@@ -184,8 +184,8 @@ profitability = dartlab.analysis("financial", "수익성", stockCode="005930")
 
 ```python
 # 1. 분기 raw (show 는 freq='Q' 지원)
-isQ = c.show("IS", freq="Q")  # 분기 손익
-bsQ = c.show("BS", freq="Q")  # 분기 재무상태
+isQ = c.panel("IS", freq="Q")  # 분기 손익
+bsQ = c.panel("BS", freq="Q")  # 분기 재무상태
 
 # 2. 연간 axis 분석 (grade + 임계값 + 추세)
 profit = c.analysis("financial", "수익성")  # 연간 grade A~F + DuPont
@@ -197,8 +197,8 @@ agent EngineCall 양식:
 
 ```python
 # 분기 raw
-EngineCall(apiRef="Company.show", args={"stockCode": "005930", "stmt": "IS", "freq": "Q"})
-EngineCall(apiRef="Company.show", args={"stockCode": "005930", "stmt": "BS", "freq": "Q"})
+EngineCall(apiRef="Company.panel", args={"stockCode": "005930", "stmt": "IS", "freq": "Q"})
+EngineCall(apiRef="Company.panel", args={"stockCode": "005930", "stmt": "BS", "freq": "Q"})
 
 # 연간 axis
 EngineCall(apiRef="Company.analysis", args={"stockCode": "005930", "group": "financial", "axis": "수익성"})
@@ -298,7 +298,7 @@ c.analysis("financial", "수익성")
 | macroSensitivity | 회귀 추정 기간 · 벤치마크 · p-value 명시; 시장 매크로 (engines.macro) 와 *기업 단위* 민감도 혼동 X — c.macro=시장, c.analysis("macro","매크로민감도")=기업 |
 | peerComparison | 한쪽 수치만으로 우열 단정 X; peer 산업 분기 무시한 cross-industry 비교 X; 같은 기간 / scope / 통화 정렬 명시 |
 | predictionSignal | 단일 신호로 *상승/하락* 단정 X (5+ 신호 종합); 신호 정확도 (hit ratio) 명시 |
-| profitability | ROE 분모 (평균자본 vs 기말자본) 정의 명시; stale 기간 (3 분기 전) 을 *현재* 단정 X (dataAsOf 명시); 다중 종목 비교는 **`CompareCompanies` 1 회** 권장 (Company.show N 회 X) |
+| profitability | ROE 분모 (평균자본 vs 기말자본) 정의 명시; stale 기간 (3 분기 전) 을 *현재* 단정 X (dataAsOf 명시); 다중 종목 비교는 **`CompareCompanies` 1 회** 권장 (Company.panel N 회 X) |
 | revenueForecast | 매출 전망 가정 (수량 · 단가 · mix · 환율) 분리 명시; 단일 시나리오 (best case 만) X (base/upside/downside 3 시나리오) |
 | revenueStructure | 사업부별 / 지역별 / 제품별 매출 분리 명시; 외화 매출 비중 명시 (환율 변동 영향 별도) |
 | scorecard | 5 영역 (수익성·안정성·성장성·효율성·현금흐름) 가중치 명시; 등급 (A-F) 임계값을 산업 평균 미참조 적용 X |
@@ -344,17 +344,17 @@ agent (ai/mcp/server) 가 본 엔진을 호출할 때는 `EngineCall(apiRef="Com
 
 **guard** — group 과 axis 를 점 표기로 합쳐 `apiRef="analysis.financial.profitability"` 호출 금지. `apiRef="Company.analysis"` 고정 + args 에 분리.
 
-## Company.show vs Company.analysis — 어느 쪽?
+## Company.panel vs Company.analysis — 어느 쪽?
 
 | 질문 | 권장 |
 | --- | --- |
-| "2025Q4 매출 / 영업이익 / 순이익 알려줘" — 원자료 인용 | `Company.show("IS")` |
+| "2025Q4 매출 / 영업이익 / 순이익 알려줘" — 원자료 인용 | `Company.panel("IS")` |
 | "이 회사 수익성 어때 / 개선됐어?" — 인과 해석 | `Company.analysis("financial", "수익성")` |
-| 7 축 신용 약점 분해 | `Company.show("IS").data.dcrBadge.axes` (자동 부착, 추가 호출 불필요) |
-| 산업 라이프사이클 / peers | `Company.show(...).data.industryBadge` (자동 부착) |
+| 7 축 신용 약점 분해 | `Company.panel("IS").data.dcrBadge.axes` (자동 부착, 추가 호출 불필요) |
+| 산업 라이프사이클 / peers | `Company.panel(...).data.industryBadge` (자동 부착) |
 | DCF / 멀티플 / 적정가 | `Company.analysis("valuation", "가치평가")` |
 
-**핵심 차이** — `Company.show` 는 *원자료 + 자동 부착 badge (dcrBadge / industryBadge)*, `Company.analysis` 는 *해석 결과 (assumptions · narrative · history)*. 단순 숫자 조회면 show, 해석/근거 chain 이 필요하면 analysis. 단일 종목 신용 질문은 show 1 회만으로 7 축 분해 완성 — analysis credit 또는 EngineCall("credit") 추가 불필요.
+**핵심 차이** — `Company.panel` 는 *원자료 + 자동 부착 badge (dcrBadge / industryBadge)*, `Company.analysis` 는 *해석 결과 (assumptions · narrative · history)*. 단순 숫자 조회면 panel, 해석/근거 chain 이 필요하면 analysis. 단일 종목 신용 질문은 panel 1 회만으로 7 축 분해 완성 — analysis credit 또는 EngineCall("credit") 추가 불필요.
 
 ## 축 선택 규칙
 

@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Mappers 는 DART/EDGAR 원문 계정명을 공통 snake_id 로 정규화하는 *내부 모듈* 이다. 사용자 직접 호출 capability 가 아니라, Company.show / scan 결과 안에서 자동 적용. 본 skill 은 매핑 규칙을 *AI 가 컬럼 정규화에 활용* 할 때 참조한다. 트리거 — '항목 매핑', '컬럼 정규화', 'snake_id 변환'.
+purpose: Mappers 는 DART/EDGAR 원문 계정명을 공통 snake_id 로 정규화하는 *내부 모듈* 이다. 사용자 직접 호출 capability 가 아니라, Company.panel / scan 결과 안에서 자동 적용. 본 skill 은 매핑 규칙을 *AI 가 컬럼 정규화에 활용* 할 때 참조한다. 트리거 — '항목 매핑', '컬럼 정규화', 'snake_id 변환'.
 whenToUse:
   - mappers
   - 계정 정규화
@@ -94,7 +94,7 @@ AI 가 직접 쓸 자리는 `RunPython` 안의 prelude 헬퍼 — `normalizeColu
 # RunPython 안에서 — prelude 자동 노출
 import dartlab
 c = dartlab.Company("005930")
-bs = c.show("BS", freq="Q")
+bs = c.panel("BS", freq="Q")
 
 # 한글 → snake_id 정규화 (추측 금지)
 col = normalizeColumn("BS", "총자산")        # → "total_assets"
@@ -110,11 +110,11 @@ print(availableTopics())   # BS / IS / CF / CIS / SCE
 
 ## 강행 호출 룰 (agent 답변 품질 회귀 차단)
 
-mappers 는 *내부 정규화 모듈* — Company.show / scan 결과 안에서 자동 적용. 다음 3 룰 강행:
+mappers 는 *내부 정규화 모듈* — Company.panel / scan 결과 안에서 자동 적용. 다음 3 룰 강행:
 
-1. **mappers 단독 EngineCall 금지** — `EngineCall(apiRef="mappers")` 호출 없음. Company.show / scan 결과의 `snake_id` 컬럼은 이미 정규화 완료.
+1. **mappers 단독 EngineCall 금지** — `EngineCall(apiRef="mappers")` 호출 없음. Company.panel / scan 결과의 `snake_id` 컬럼은 이미 정규화 완료.
 2. **snake_id 임의 추측 금지** — `normalizeColumn(topic, hint)` 또는 `columnsFor(topic)` RunPython 안에서 호출해 정확 매칭 후 사용. "total_equity" 같은 추측 키로 dict 접근 시 KeyError (P5 RunPython 회귀 사례).
-3. **`-표준계정코드 미사용-|...` fallback 데이터는 표준화 후보로 표기** — Company.show 결과 dict 의 nonstd_ 컬럼은 매핑 미완. 답변 본문에 "표준화 미완 N 건" 명시 + 임의 합산 금지.
+3. **`-표준계정코드 미사용-|...` fallback 데이터는 표준화 후보로 표기** — Company.panel 결과 dict 의 nonstd_ 컬럼은 매핑 미완. 답변 본문에 "표준화 미완 N 건" 명시 + 임의 합산 금지.
 
 ## 호출 동작
 
