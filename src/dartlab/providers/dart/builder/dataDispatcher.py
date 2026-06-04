@@ -485,27 +485,21 @@ def showImpl(
     """
     from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
-    from dartlab.providers.dart.notes import _NOTES_DISPATCH
 
-    # Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance / notes / sections).
+    # 공개 show/docs 농장 은퇴 — showImpl 은 finance 통계표(BS/IS/CF/CIS/SCE/ratios)만 dispatch.
+    # 정형 비재무·report·sections·notes·segments 토픽은 panel raw 공시 검색이 표면(facade 폴백) → None.
     topic = _resolveTopic(topic)
 
     if isinstance(period, list):
-        wide = company.show(topic, block, freq=freq, scope=scope, raw=raw)
+        wide = company._showImpl(topic, block, freq=freq, scope=scope, raw=raw)
         if wide is None or not isinstance(wide, pl.DataFrame):
             return None
         return transposeToVertical(wide, period)
 
-    if topic.startswith("segments:"):
-        return showSegmentsSub(company, topic.split(":", 1)[1])
-
     if topic in SHOW_FINANCE_TOPICS:
         return showFinanceStatement(company, topic, block, period=period, freq=freq, scope=scope)
 
-    if topic in _NOTES_DISPATCH and company._notesAccessor is not None:
-        return company._notesAccessor._get(topic)
-
-    return showSectionsTopic(company, topic, block, period=period, raw=raw, freq=freq, scope=scope)
+    return None
 
 
 def showFinanceStatement(
