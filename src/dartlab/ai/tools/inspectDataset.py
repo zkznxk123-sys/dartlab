@@ -4,7 +4,7 @@ WORK 패스에서 LLM 이 run_python 으로 코드를 짜기 전에 dataset 의 
 관측·행 수를 알 수 있게 해 emit_result 실패 사이클 (schema 추측 실패) 을 줄인다.
 
 지원 target:
-- "Company.panel:<stockCode>:<topic>" — 예: "Company.panel:005930:BS" (옛 "Company.show:" 도 허용)
+- "Company.panel:<stockCode>:<topic>" — 예: "Company.panel:005930:BS"
 - "scan:<axis>" — 예: "scan:profitability"
 - "macro" — dartlab.macro() 종합
 - "gather:<axis>:<target>" — dartlab.gather() 결과
@@ -69,7 +69,7 @@ def inspectDataset(target: str, *, sampleRows: int = 5) -> ToolResult:
 
 
 def _resolveDataset(target: str) -> tuple[Any, str]:
-    if target.startswith(("Company.panel:", "Company.show:")):  # show: 옛 호출 back-compat
+    if target.startswith("Company.panel:"):
         _, code, topic = target.split(":", 2) if target.count(":") >= 2 else (None, None, None)
         if not code:
             raise ValueError("Company.panel target 은 'Company.panel:<stockCode>:<topic>' 형식")

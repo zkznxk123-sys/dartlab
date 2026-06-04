@@ -7,7 +7,7 @@ unit:
     - missing apiRef → 422 (pydantic) 또는 400
 
 integration:
-    - Company.show 실제 호출 (데이터 있을 때만)
+    - Company.panel 실제 호출 (데이터 있을 때만)
 """
 
 from __future__ import annotations
@@ -80,11 +80,21 @@ class TestDlCallValidation:
         resp = client.post("/api/dl/call", json={})
         assert resp.status_code in {400, 422}
 
+    def test_retired_company_show_is_unknown_not_aliased(self, client):
+        """공개 show 은퇴 회귀 가드 — Company.show 를 panel 로 조용히 재작성하지 않고
+
+        unknown_api_ref 로 명시 거절한다 (silent back-compat alias 부활 차단).
+        """
+        resp = client.post("/api/dl/call", json={"apiRef": "Company.show"})
+        assert resp.status_code == 400
+        detail = resp.json().get("detail", {})
+        assert detail.get("error") == "unknown_api_ref"
+
     def test_capability_exists_but_no_target_returns_meaningful_error(self, client):
-        """Company.show 는 target 필요 — 빈 target 이면 graceful 실패."""
+        """Company.panel 은 target 필요 — 빈 target 이면 graceful 실패."""
         resp = client.post(
             "/api/dl/call",
-            json={"apiRef": "Company.show"},
+            json={"apiRef": "Company.panel"},
         )
         # 200 (어떻게든 처리) 또는 400 (target 필요) — 둘 다 허용. 500 아니면 OK.
         assert resp.status_code != 500

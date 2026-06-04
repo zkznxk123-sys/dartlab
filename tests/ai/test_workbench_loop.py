@@ -131,7 +131,7 @@ def test_inject_step_dependency_inherits_target_from_scan() -> None:
     prevResults = [{"plan": {"args": {"plan": {"apiRef": "scan.growth"}}}, "result": scan_result}]
     plan = {
         "tool": "engine_call",
-        "args": {"plan": {"apiRef": "Company.show", "_inheritTargetsFrom": 0}},
+        "args": {"plan": {"apiRef": "Company.panel", "_inheritTargetsFrom": 0}},
     }
     injected = _injectStepDependency(plan, prevResults)
     assert injected["args"]["plan"].get("target") == "005930"
@@ -142,6 +142,6 @@ def test_inject_step_dependency_passthrough_when_no_meta() -> None:
     """_inheritTargetsFrom 메타가 없으면 plan 그대로 반환 (회귀 보호)."""
     from dartlab.ai.workbench.loop import _injectStepDependency
 
-    plan = {"tool": "engine_call", "args": {"plan": {"apiRef": "Company.show", "target": "005930"}}}
+    plan = {"tool": "engine_call", "args": {"plan": {"apiRef": "Company.panel", "target": "005930"}}}
     injected = _injectStepDependency(plan, [])
     assert injected == plan

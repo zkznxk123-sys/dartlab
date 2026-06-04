@@ -11,7 +11,7 @@ LookAheadGuard 의 Company(market=...) 같은 외부 의존 회귀를 못 잡는
   1. ReadSkill — 분석 의도 매칭
   2. ReadCapability — API 카탈로그 검색
   3. RunPython sanity
-  4. RunPython 실제 dartlab.Company.show 호출
+  4. RunPython 실제 dartlab.Company.panel 호출
   5. S2 sandbox os.system 차단
   6. S3 GroundingCheck 답변 검증
   7. S3 LookAheadGuard 실호출 (asOf 강제)
@@ -129,7 +129,7 @@ async def main():
                     )
                     note("OK", f"실제 dartlab API 통한 BS 로드 성공 — rows={rows}")
                 else:
-                    note("FAIL", f"dartlab.Company.show 실패: {_short(sc.get('summary'))}")
+                    note("FAIL", f"dartlab.Company.panel 실패: {_short(sc.get('summary'))}")
             except Exception as e:
                 note("FAIL", f"RunPython exception: {e}")
 

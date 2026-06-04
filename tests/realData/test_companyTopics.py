@@ -1,4 +1,4 @@
-"""Company.show(topic) 전수 스모크 — registry 등록된 모든 topic 을 iterate.
+"""Company.panel(topic) 전수 스모크 — registry 등록된 모든 topic 을 iterate.
 
 core/registry 는 37개+ topic 을 자동 등록한다. 이 파일은 매 topic 을
 `c.panel(topic)` 으로 호출해 크래시/silent-None 을 잡는다.
