@@ -140,18 +140,6 @@ def _isolated_dartlab_home(tmp_path, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def _clear_sections_prepared_cache():
-    """sections pipeline Phase 1 캐시를 테스트마다 초기화."""
-    yield
-    try:
-        from dartlab.providers.dart.docs.sections.pipeline import clearPreparedCache
-
-        clearPreparedCache()
-    except ImportError:
-        pass
-
-
-@pytest.fixture(autouse=True)
 def _memory_guard_per_test():
     """매 테스트 후 메모리 체크 + GC.
 
