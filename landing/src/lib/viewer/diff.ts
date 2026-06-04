@@ -3,14 +3,6 @@
 
 import type { PanelRow } from './types';
 
-const SECTION_KEY_SEP = '␟';
-
-// 행 유니크 키 — disclosureKey(구조화) 또는 NARR:: 식별(서술). Python rowIdentity 와 동일 식별축.
-export function rowKey(r: PanelRow): string {
-	const id = r.disclosureKey ?? `NARR::${r.chapter}${SECTION_KEY_SEP}${r.sectionLeaf}${SECTION_KEY_SEP}${r.blockLeaf}`;
-	return `${id}|${r.scope ?? ''}`;
-}
-
 // 레일 라벨 = 사용자가 탐색하는 항목 축 = blockLeaf (TOC chip 과 동일).
 export function rowLabel(r: PanelRow): string {
 	return r.blockLeaf || '';

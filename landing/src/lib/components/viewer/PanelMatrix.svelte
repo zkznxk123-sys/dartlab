@@ -1,7 +1,7 @@
 <script lang="ts">
 	// 수평화 매트릭스 — 행=panel 항목, 열=period. ui/web PanelMatrix 이식 (sticky 헤더/레일).
 	import CellContent from './CellContent.svelte';
-	import { rowKey, rowLabel, hasVisibleContent } from '$lib/viewer/diff';
+	import { rowLabel, hasVisibleContent } from '$lib/viewer/diff';
 	import type { PanelRow } from '$lib/viewer/types';
 
 	let {
@@ -10,8 +10,10 @@
 		dartUrlByPeriod
 	}: { rows: PanelRow[]; periods: string[]; dartUrlByPeriod: Record<string, string | null> } = $props();
 
-	const visible = $derived(rows.filter((r) => hasVisibleContent(r, periods)));
-	const hasLabel = $derived(new Set(visible.map(rowLabel).filter(Boolean)).size >= 2);
+	// 섹션 내 build-order 인덱스 보존 — 행 식별(disclosureKey/NARR)은 leafSeq 미포함이라 EDGAR 동명 narrative
+	// 행이 충돌(each_key_duplicate). 별개 행이므로 둘 다 표시하되 DOM 키는 안정·유일한 원본 인덱스로.
+	const visible = $derived(rows.map((r, i) => ({ r, i })).filter(({ r }) => hasVisibleContent(r, periods)));
+	const hasLabel = $derived(new Set(visible.map(({ r }) => rowLabel(r)).filter(Boolean)).size >= 2);
 	const template = $derived(
 		`${hasLabel ? 'minmax(120px, 200px) ' : ''}repeat(${periods.length}, minmax(260px, 1fr))`
 	);
@@ -48,7 +50,7 @@
 			{/each}
 
 			<!-- 본문 -->
-			{#each visible as r (rowKey(r))}
+			{#each visible as { r, i } (i)}
 				{#if hasLabel}
 					<div class="sticky left-0 z-10 border-b border-r bg-card/70 px-2 py-2 text-[11px] font-medium backdrop-blur-sm" title={rowLabel(r)}>
 						<div class="line-clamp-6 break-words">{rowLabel(r)}</div>

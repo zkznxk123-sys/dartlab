@@ -172,6 +172,9 @@ export function buildPanelBundle(
 	};
 	if (rows.length === 0) return empty;
 
+	// corpName — panel 에 회사명 컬럼 없음(corp=코드). opt 로만 주입, 없으면 빈값(라우트가 코드로 표기).
+	const corpName = opts.corpName ?? '';
+
 	alignNotes(rows, opts.noteTaxonomy ?? {});
 	anchorLatest(rows);
 	const deduped = dedupKeyed(rows);
@@ -273,7 +276,7 @@ export function buildPanelBundle(
 		arr.push(row);
 	}
 
-	const toc = buildToc(opts.code, opts.corpName ?? '', built, periods);
+	const toc = buildToc(opts.code, corpName, built, periods);
 
 	// dartUrlByPeriod — period 별 첫 rceptNo (leafRows 원본).
 	const rceptByPeriod = new Map<string, string>();
@@ -283,7 +286,7 @@ export function buildPanelBundle(
 	const dartUrlByPeriod: Record<string, string | null> = {};
 	for (const p of periods) dartUrlByPeriod[p] = viewerUrl(market, rceptByPeriod.get(p) ?? null);
 
-	return { stockCode: opts.code, corpName: opts.corpName ?? '', toc, periods, gridBySection, dartUrlByPeriod };
+	return { stockCode: opts.code, corpName, toc, periods, gridBySection, dartUrlByPeriod };
 }
 
 // TOC — chapter > sectionLeaf > blockLeaf 트리 (정렬된 built 순서 first-appearance). buildToc 1:1.

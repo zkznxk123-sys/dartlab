@@ -47,7 +47,10 @@
 
 <div class="flex h-[calc(100vh-4rem)] min-h-0 overflow-hidden">
 	{#if loading}
-		<div class="flex w-full items-center justify-center text-sm text-muted-foreground">공시 본문 로드 중…</div>
+		<div class="flex w-full flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+			<div class="h-7 w-7 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground"></div>
+			<div>{code} 공시 본문 로드 중…</div>
+		</div>
 	{:else if errorMsg}
 		<div class="flex w-full items-center justify-center p-6 text-center text-sm text-muted-foreground">{errorMsg}</div>
 	{:else if bundle}
@@ -58,7 +61,7 @@
 			<div class="shrink-0 border-b bg-background px-3 py-2">
 				<div class="flex items-baseline justify-between gap-3">
 					<div>
-						<div class="text-xs text-muted-foreground">{bundle.corpName} · {code}</div>
+						<div class="text-xs text-muted-foreground">{bundle.corpName ? `${bundle.corpName} · ${code}` : code}</div>
 						<h1 class="mt-1 text-lg font-semibold tracking-tight">{sectionLabel}</h1>
 					</div>
 					<div class="flex items-center gap-2 text-[11px] text-muted-foreground">
