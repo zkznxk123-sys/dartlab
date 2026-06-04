@@ -164,7 +164,7 @@ def panelDir() -> Path:
         'panel'
 
     SeeAlso:
-        ``docsDir`` and ``dartlab.frame.sections``.
+        ``docsDir`` and ``dartlab.providers.dart.sections``.
     """
     from dartlab.core.dataLoader import _dataDir
 

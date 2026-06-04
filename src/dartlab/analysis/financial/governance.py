@@ -522,7 +522,7 @@ def _loadSanction(company):
         return None
     import polars as pl
 
-    from dartlab.frame.sections import sectionTables
+    from dartlab.providers.dart.sections import sectionTables
 
     rows: list[dict] = []
     for t in sectionTables(code, sectionPattern="제재"):
@@ -558,7 +558,7 @@ def _loadContingentLiability(company):
         return None
     import polars as pl
 
-    from dartlab.frame.sections import sectionTables, sectionTexts
+    from dartlab.providers.dart.sections import sectionTables, sectionTexts
 
     # 연도별 지급보증 총액 best-effort — '우발부채' 섹션 표 셀 중 원화 금액 합.
     texts = sectionTexts(code)
@@ -617,7 +617,7 @@ def _loadExecutiveDocs(company):
         return None
     import polars as pl
 
-    from dartlab.frame.sections import sectionTables
+    from dartlab.providers.dart.sections import sectionTables
 
     rows: list[dict] = []
     for t in sectionTables(code, sectionPattern="임원 및 직원"):
@@ -646,7 +646,7 @@ def _loadRelatedPartyTx(company):
         return None
     import polars as pl
 
-    from dartlab.frame.sections import sectionTables
+    from dartlab.providers.dart.sections import sectionTables
 
     entities: list[dict] = []
     for t in sectionTables(code, sectionPattern="특수관계자"):

@@ -196,7 +196,7 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
     # docs.parquet/sections artifact 농장 은퇴 → L1.5 frame.sections SSOT(panel 섹션 본문).
     # 옛 docs.parquet (long: year/section_title/section_content) 호환 schema 노출 →
     # 호출자 (sentiment/risk/changes/disclosureDiff 등 D.1 모듈) 0 변경.
-    from dartlab.frame.sections import sectionTexts
+    from dartlab.providers.dart.sections import sectionTexts
 
     long = sectionTexts(stockCode)
     if long is None or long.is_empty():

@@ -171,7 +171,7 @@ def scanCompany(
         >>> result.topScore if result else "no diff"
     """
     # docs.parquet 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션 topic×period) SSOT.
-    from dartlab.frame.sections import sectionsWide
+    from dartlab.providers.dart.sections import sectionsWide
 
     stockCode = getattr(company, "stockCode", "")
     docs_sections = sectionsWide(stockCode) if stockCode else None

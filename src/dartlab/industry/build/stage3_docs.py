@@ -33,7 +33,7 @@ _TOPIC_WEIGHT: dict[str, float] = {
 
 def _extractTexts(code: str) -> dict[str, str]:
     """한 종목 panel 섹션 본문에서 산업 관련 텍스트를 추출 (L1.5 frame SSOT 경유)."""
-    from dartlab.frame.sections import sectionTexts
+    from dartlab.providers.dart.sections import sectionTexts
 
     df = sectionTexts(code)
     if df is None or df.is_empty():

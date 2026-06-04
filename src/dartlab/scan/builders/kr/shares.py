@@ -132,7 +132,7 @@ def buildSharesOutstandingScan(*, write: bool = True, outputPath: "str | Path | 
     import polars as pl
 
     from dartlab.core.listingResolver import getListingResolver
-    from dartlab.frame.sections import sectionTables, sectionTexts
+    from dartlab.providers.dart.sections import sectionTables, sectionTexts
 
     panelRoot = _panelDir()
     if not panelRoot.exists():

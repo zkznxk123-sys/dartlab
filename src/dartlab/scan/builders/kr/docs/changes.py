@@ -46,9 +46,9 @@ def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | No
         panel artifact (frame.sectionTexts: sectionLeaf · contentRaw · period).
 
     SeeAlso:
-        ``buildChanges`` · ``dartlab.frame.sections.sectionTexts``.
+        ``buildChanges`` · ``dartlab.providers.dart.sections.sectionTexts``.
     """
-    from dartlab.frame.sections import sectionTexts
+    from dartlab.providers.dart.sections import sectionTexts
 
     df = sectionTexts(stockCode)
     if df is None or df.is_empty():

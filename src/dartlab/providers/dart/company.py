@@ -2218,7 +2218,7 @@ class Company:
         # docs.parquet/sections artifact 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션
         # topic×period) SSOT. chapter/sectionLeaf/topic/source + period 컬럼 — dataDispatcher
         # (chapter/sectionLeaf) + diff/keywordTrend(topic) 양쪽 정합. sectionsWide 가 태그 strip.
-        from dartlab.frame.sections import sectionsWide
+        from dartlab.providers.dart.sections import sectionsWide
 
         return sectionsWide(self.stockCode)
 
@@ -3161,13 +3161,13 @@ class Company:
         if topic is not None:
             topic = _resolveTopic(topic)
         # docs.parquet 농장 은퇴 → L1.5 frame.sectionsWide(panel 섹션 topic×period) SSOT.
-        from dartlab.frame.sections import sectionsWide
         from dartlab.providers._common.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
             topicHistoryDataFrame,
         )
+        from dartlab.providers.dart.sections import sectionsWide
 
         docsSections = sectionsWide(self.stockCode)
         if docsSections is None:
@@ -3239,8 +3239,8 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 텍스트).
         """
-        from dartlab.frame.sections import sectionsWide
         from dartlab.providers._common.diff import keywordFrequency
+        from dartlab.providers.dart.sections import sectionsWide
 
         docsSections = sectionsWide(self.stockCode)
         if docsSections is None:

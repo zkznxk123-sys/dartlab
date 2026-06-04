@@ -287,7 +287,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     targetNames = {name: code for name, code in n2c.items() if len(name) >= 3}
 
     # docs.parquet 농장 은퇴 → L1.5 frame.sections SSOT(panel 섹션 본문) 소비.
-    from dartlab.frame.sections import sectionTexts
+    from dartlab.providers.dart.sections import sectionTexts
 
     processed = 0
     for code, node in nodeIdx.items():
@@ -453,7 +453,6 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     # docs.parquet 농장 은퇴 → L1.5 frame.sections SSOT. panel contentRaw raw DART XML 표를
     # frame.sectionTables(lxml)가 markdown extractTables 와 동일 shape(표×행×셀)로 추출 —
     # 공급사명/매입액/비중 복원(드롭 0). period=None=전 기간(다운스트림 corp 명 dedup).
-    from dartlab.frame.sections import sectionTables
     from dartlab.industry.build.table_parser import (
         extractCorpNames,
         findTableByHeaders,
@@ -462,6 +461,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         parsePercent,
         tableToRowDictsWithHeaderRow,
     )
+    from dartlab.providers.dart.sections import sectionTables
 
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)

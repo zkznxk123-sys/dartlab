@@ -351,8 +351,8 @@ def _safeDiffResult(company):
     try:
         code = getattr(company, "stockCode", None)
         if code:
-            from dartlab.frame.sections import sectionsWide
             from dartlab.providers._common.diff import sectionsDiff
+            from dartlab.providers.dart.sections import sectionsWide
 
             wide = sectionsWide(code)
             if wide is not None:

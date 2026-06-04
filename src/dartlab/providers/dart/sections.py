@@ -1,11 +1,12 @@
-"""sections — L1.5 panel 공시 본문 정규화 뷰 + 표 추출 SSOT.
+"""sections — providers(L1) panel 공시 본문 정규화 뷰 + 표 추출 SSOT.
 
-panel(providers L1) ``contentRaw`` 위에서 L2 분석엔진(industry·quant·analysis)이 공통으로
+panel(providers L1) ``contentRaw`` 위에서 Company(L1)·scan(L1.5)·분석엔진(L2)이 공통으로
 보는 normalized 섹션 뷰와 표 행 추출을 단일 SSOT 로 제공한다. docs.parquet 농장(127 파일
 markdown 파서) 은퇴 — 입력은 panel ``contentRaw``(raw DART XML), 파싱은 본 모듈 한 곳.
 어댑터를 각 엔진에 흩지 않고, 못 주던 표 추출도 드롭하지 않고 여기서 SSOT 로 재건한다.
 
-L1.5 frame 책임 — raw(panel) 결합 → 분석 ready. 의미 분류·점수화·룰 매칭은 L2.
+**위치 = providers(L1)**: scan(L1.5 형제 cross 금지)·Company(L1)·L2 가 모두 하향/동일 레이어
+import 하려면 frame(L1.5) 이 아닌 panel 과 같은 L1 이어야 한다. 의미 분류·점수화·룰 매칭은 L2.
 """
 
 from __future__ import annotations
