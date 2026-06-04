@@ -9,8 +9,8 @@ DART Company와 동일한 구조를 제공한다.
     c = Company("AAPL")
     c.corpName             # "Apple Inc."
     c.index                # 수평화 보드 DataFrame
-    c.show("BS")           # 재무상태표 DataFrame
-    c.show("item1Business")        # docs topic DataFrame
+    c.panel("BS")           # 재무상태표 DataFrame
+    c.panel("item1Business")        # docs topic DataFrame
     c.trace("BS")          # source provenance
 """
 
@@ -545,12 +545,12 @@ class Company:
     Example::
 
         c = Company("AAPL")
-        c.show("BS")           # 연도별 재무상태표
-        c.show("IS")           # 연도별 손익계산서
-        c.show("CF")           # 연도별 현금흐름표
-        c.show("CIS")          # 연도별 포괄손익계산서
-        c.show("ratios")       # 재무비율 시계열
-        c.show("item1Business")  # docs topic
+        c.panel("BS")           # 연도별 재무상태표
+        c.panel("IS")           # 연도별 손익계산서
+        c.panel("CF")           # 연도별 현금흐름표
+        c.panel("CIS")          # 연도별 포괄손익계산서
+        c.panel("ratios")       # 재무비율 시계열
+        c.panel("item1Business")  # docs topic
         c.sections             # docs.sections 바로가기
         c.topics               # 전체 topic 목록
     """
@@ -686,13 +686,13 @@ class Company:
             - lazy SEC API — local parquet 우선 hit, 미스 시에만 네트워크.
 
         Guide:
-            - "Apple 재무" → ``Company("AAPL").show("IS")``.
+            - "Apple 재무" → ``Company("AAPL").panel("IS")``.
             - "CIK 만 알 때" → ``Company("0000320193")`` (zero-padded 또는 정수 모두 OK).
             - "다종목 순회" → ``with Company(t) as c: ...`` (OomTripwire 보호).
 
         AIContext:
             Ask Workbench Company facade — LLM 이 첫 호출하는 US provider 엔트리.
-            ``co.show("BS")`` / ``co.notes("inventory")`` 등 모든 후속 호출의 self.
+            ``co.panel("BS")`` / ``co.notes("inventory")`` 등 모든 후속 호출의 self.
 
         LLM Specifications:
             AntiPatterns:
@@ -804,7 +804,7 @@ class Company:
 
         Example:
             with Company("AAPL") as c:
-                c.show("IS").head()
+                c.panel("IS").head()
 
         Returns:
             self.
@@ -848,7 +848,7 @@ class Company:
 
         Example:
             >>> c = Company("AAPL")
-            >>> c.show("IS")
+            >>> c.panel("IS")
             >>> n = c.cleanupCache()
 
         Raises:
@@ -1738,7 +1738,7 @@ class Company:
     def _buildFinanceSeries(self, *, freq: str = "Q", scope: str = "consolidated"):
         """[INTERNAL] EDGAR finance series-tuple 빌더.
 
-        사용자 진입점은 ``c.show("IS", freq=, scope=)`` 만이다 (api-contract).
+        사용자 진입점은 ``c.panel("IS", freq=, scope=)`` 만이다 (api-contract).
         EDGAR 는 ``scope="separate"`` 미지원 (SEC 는 연결만 보고).
         ``freq="YTD"`` 도 미지원 — annual 로 fallback.
 
@@ -1754,9 +1754,9 @@ class Company:
         return buildFinanceSeries(self, freq=freq, scope=scope)
 
     # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
-    # 사용자는 c.show("IS") / c.show.IS() / c.show("IS", freq="Y") 사용.
+    # 사용자는 c.panel("IS") / c.panel("IS", freq="Y") 사용.
 
-    # c.SCE property 제거 (Plan v10 P1) — c.show("SCE") 사용
+    # c.SCE property 제거 (Plan v10 P1) — c.panel("SCE") 사용
 
     @property
     def sections(self) -> pl.DataFrame | None:
@@ -2910,49 +2910,6 @@ class Company:
         return result
 
     @property
-    def show(self):
-        """topic 데이터 조회 — dual access (api-contract).
-
-        Returns:
-            ``CallableAccessor`` — call/attr form 둘 다 ``_showImpl`` 호출. ``pl.DataFrame``
-            반환 (topic 부재 시 None). 상세는 ``_showImpl`` docstring.
-
-        Example:
-            >>> c = Company("AAPL")
-            >>> c.show("IS")               # call form
-            >>> c.show.IS()                # attr form
-            >>> c.show.IS(period="2024")
-
-        Raises:
-            없음 (topic 부재 시 ``_showImpl`` 이 None 반환).
-
-        SeeAlso:
-            - ``_showImpl`` — 실제 구현 + 상세 docstring.
-            - ``select`` — 행/열 필터 후속.
-            - ``trace`` — 본 결과의 source 추적.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - finance topic (BS/IS/CF/CIS/ratios) + docs topic (10-K Items + 단축 alias) 통합 조회의
-              dual-access 진입점. call/attr 양식 동일 backend.
-
-        Guide:
-            - "재무상태표" → ``c.show("BS")``.
-            - "Risk Factors 본문" → ``c.show("risk")``.
-
-        AIContext:
-            workbench 의 핵심 entry — finance + docs 단일 인터페이스. AI 가 topic 별로 다른 함수 호출 불필요.
-        """
-        from dartlab.core.dualAccess import CallableAccessor
-
-        if "_showAccessor" not in self._cache:
-            self._cache["_showAccessor"] = CallableAccessor(self._showImpl, name="show")
-        return self._cache["_showAccessor"]
-
-    @property
     def panel(self):
         """공시 수평화 보드 — 잡는 순간 item × 기간 wide DataFrame (EDGAR panel, marketNs="us").
 
@@ -2961,7 +2918,7 @@ class Company:
         을 ``marketNs="us"`` 로 재사용 — read 표면 복제 0). artifact 는 ``edgar.panel.build`` 가 gather
         sections 에서 생산(``data/edgar/panel/{ticker}.parquet``). ``c.panel`` 자체가 ``pl.DataFrame``
         (Panel subclass) — shape/filter 등 polars 연산 그대로. ``c.panel("Risk")`` 로 섹션 행 검색,
-        ``c.panel("IS")`` 같은 강한 소스는 companyfacts(``c.show``)로 위임 — EDGAR 는 native panel 셀
+        ``c.panel("IS")`` 같은 강한 소스는 companyfacts(내부 finance dispatch)로 위임 — EDGAR 는 native panel 셀
         별도 소스가 없어 소문자 ``c.panel("is")`` 도 companyfacts(강함)로 위임.
 
         Args:
@@ -2978,13 +2935,13 @@ class Company:
             >>> c = Company("AAPL")
             >>> c.panel.shape                          # wide (item × period) — DataFrame 그대로  # doctest: +SKIP
             >>> c.panel("Risk")                        # 섹션명/itemId 행 (raw 공시)  # doctest: +SKIP
-            >>> c.panel("IS")                          # 강한 소스 — companyfacts 위임 (c.show("IS"))  # doctest: +SKIP
+            >>> c.panel("IS")                          # 강한 소스 — companyfacts 위임 (내부 finance)  # doctest: +SKIP
             >>> c.panel.search("supply chain")         # 본문 전체검색  # doctest: +SKIP
 
         SeeAlso:
             - ``providers.dart.panel.Panel`` — 반환 본체 (pl.DataFrame subclass + __call__, cross-market).
             - ``providers.edgar.panel.build`` — gather sections → 16-col artifact 생산.
-            - ``show`` — 강한 소스(companyfacts finance) dispatch — c.panel 이 주입 재사용.
+            - ``_showImpl`` — 강한 소스(companyfacts finance) dispatch — c.panel 이 주입 재사용 (내부 머신러리).
 
         Requires:
             - data/edgar/panel/{ticker}.parquet (사전빌드 artifact, edgar.panel.build).
@@ -3002,7 +2959,7 @@ class Company:
             - 한 회사의 공시 수평화 보드가 EDGAR Company 흐름에서 필요할 때.
 
         How:
-            - self.ticker → Panel(ticker, marketNs="us") + _showFn(=show)/_strongFn(=isStrongTopic) 주입.
+            - self.ticker → Panel(ticker, marketNs="us") + _showFn(=_showImpl)/_strongFn(=isStrongTopic) 주입.
 
         LLM Specifications:
             AntiPatterns:
@@ -3027,10 +2984,10 @@ class Company:
 
         p = _Panel(self.ticker, marketNs="us")
         # facade 주입 (DI, cycle 0) — panel 패키지는 finance/cellRead 를 import 안 하고 주입된 callable 만 호출.
-        #   _showFn   : 대문자 IS/BS/CF/RATIOS = finance(companyfacts) 위임 (c.show).
+        #   _showFn   : 대문자 IS/BS/CF/RATIOS = finance(companyfacts) 위임 (내부 _showImpl).
         #   _strongFn : finance 강한 소스 판정(isStrongTopic).
         #   _nativeFn : 소문자 is/bs/cf/cis/sce/ratios = 필링 inline/INS XBRL 셀(panelCell) — DART native 대칭.
-        p._showFn = self.show
+        p._showFn = self._showImpl
         p._strongFn = isStrongTopic
         p._nativeFn = functools.partial(_cellRead.readNative, self.ticker)
         return p
@@ -3060,9 +3017,9 @@ class Company:
             - ask()/chat()에서 특정 topic 원문/수치 조회 컨텍스트
 
         Guide:
-            - "재무상태표 보여줘" → c.show("BS")
-            - "리스크 팩터 내용 보여줘" → c.show("risk") 또는 c.show("10-K::item1ARiskFactors")
-            - "2024년 손익만 보고 싶어" → c.show("IS", period="2024")
+            - "재무상태표 보여줘" → c.panel("BS")
+            - "리스크 팩터 내용 보여줘" → c.panel("risk") 또는 c.panel("10-K::item1ARiskFactors")
+            - "2024년 손익만 보고 싶어" → c.panel("IS", period="2024")
 
         SeeAlso:
             - select: show() 결과에서 행/열 필터
@@ -3095,10 +3052,10 @@ class Company:
         Example::
 
             c = Company("AAPL")
-            c.show("BS")                          # 재무상태표
-            c.show("10-K::item1ARiskFactors")     # Risk Factors 텍스트
-            c.show("risk")                        # 위와 동일 (alias)
-            c.show("IS", period="2024")           # 2024년만 필터
+            c.panel("BS")                          # 재무상태표
+            c.panel("10-K::item1ARiskFactors")     # Risk Factors 텍스트
+            c.panel("risk")                        # 위와 동일 (alias)
+            c.panel("IS", period="2024")           # 2024년만 필터
         """
         from dartlab.providers.edgar.builder.dataDispatcher import showImpl
 
@@ -3215,7 +3172,7 @@ class Company:
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None 차단)
         try:
-            df = self.show(topic)
+            df = self._showImpl(topic)
         except (ValueError, KeyError):
             if strict:
                 raise
@@ -3225,7 +3182,7 @@ class Company:
                 return None
             raise ValueError(
                 f"'{topic}' topic 의 데이터를 가져올 수 없습니다 (EDGAR). "
-                f"topic 이름을 확인하거나 c.show('{topic}') 로 직접 호출해보세요."
+                f"topic 이름을 확인하거나 c.panel('{topic}') 로 직접 호출해보세요."
             )
         if isinstance(indList, str):
             indList = [indList]
@@ -3257,7 +3214,7 @@ class Company:
             hint = f"\n  사용 가능한 행 일부: {', '.join(str(a) for a in available)}" if available else ""
             raise ValueError(
                 f"'{topic}' topic 에서 {ind_str} 를 찾을 수 없습니다 (EDGAR).{hint}\n"
-                f"  c.show('{topic}') 로 전체 행을 확인하세요."
+                f"  c.panel('{topic}') 로 전체 행을 확인하세요."
             )
         return SelectResult(
             filtered,
@@ -3924,7 +3881,7 @@ class Company:
 
     @property
     def _report(self):
-        """[INTERNAL] EDGAR report 백엔드 — XBRL 기반. 사용자 API: c.show(...)."""
+        """[INTERNAL] EDGAR report 백엔드 — XBRL 기반. 사용자 API: c.panel(...)."""
         if self._reportAccessor is None:
             from dartlab.providers.edgar.accessor.reportAccessor import _ReportAccessor
 
@@ -4197,7 +4154,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) — DART 호환 시그니처.
         """
-        df = self.show(topic, period=period)
+        df = self._showImpl(topic, period=period)
         if df is None:
             return None
         return df
@@ -4267,7 +4224,7 @@ class Company:
 
         findings: list[dict] = []
         # Item 9A: 내부통제
-        item9a = self.show("10-K::item9AControlsAndProcedures", block=0)
+        item9a = self._showImpl("10-K::item9AControlsAndProcedures", block=0)
         if item9a is not None:
             from dartlab.providers._common.show import isPeriodColumn
 
@@ -4285,7 +4242,7 @@ class Company:
                 if not findings:
                     findings.append({"type": "clean", "period": latest, "severity": "ok"})
         # Item 14: 감사 수수료
-        item14 = self.show("10-K::item14PrincipalAccountantFees", block=0)
+        item14 = self._showImpl("10-K::item14PrincipalAccountantFees", block=0)
         if item14 is not None:
             from dartlab.providers._common.show import isPeriodColumn
 
@@ -4367,7 +4324,7 @@ class Company:
             ("10-K::item12SecurityOwnership", "ownership"),
             ("10-K::item11ExecutiveCompensation", "compensation"),
         ]:
-            df = self.show(topic_key, block=0)
+            df = self._showImpl(topic_key, block=0)
             if df is not None:
                 from dartlab.providers._common.show import isPeriodColumn
 
@@ -4440,12 +4397,12 @@ class Company:
         # 모든 block의 텍스트를 합쳐서 employee 패턴 검색
         employee_count: int | None = None
         period: str | None = None
-        item1_idx = self.show("10-K::item1Business")
+        item1_idx = self._showImpl("10-K::item1Business")
         if item1_idx is None:
             return None
         for row in item1_idx.iter_rows(named=True):
             block_id = row.get("block", 0)
-            block_df = self.show("10-K::item1Business", block=block_id)
+            block_df = self._showImpl("10-K::item1Business", block=block_id)
             if block_df is None:
                 continue
             from dartlab.providers._common.show import isPeriodColumn
@@ -4484,7 +4441,7 @@ class Company:
             return None
         # 1인당 매출 계산
         rev_per_employee = None
-        isDf = self.show("IS")
+        isDf = self._showImpl("IS")
         if isDf is not None:
             from dartlab.providers._common.show import isPeriodColumn, selectFromShow
 
@@ -4571,8 +4528,8 @@ class Company:
         """
         if view in ("all", "market"):
             return None
-        bs = self.show("BS")
-        cf = self.show("CF")
+        bs = self._showImpl("BS")
+        cf = self._showImpl("CF")
         if bs is None:
             return None
         from dartlab.providers._common.show import selectFromShow
@@ -4660,7 +4617,7 @@ class Company:
         """
         if view in ("all", "market"):
             return None
-        bs = self.show("BS")
+        bs = self._showImpl("BS")
         if bs is None:
             return None
         from dartlab.providers._common.show import selectFromShow
