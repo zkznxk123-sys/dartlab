@@ -321,7 +321,7 @@ export function buildPanelBundle(
 		arr.push(row);
 	}
 
-	const toc = buildToc(opts.code, corpName, built, periods);
+	const toc = buildToc(opts.code, corpName, gridBySection, periods);
 
 	// dartUrlByPeriod — period 별 첫 rceptNo (leafRows 원본).
 	const rceptByPeriod = new Map<string, string>();
@@ -334,34 +334,40 @@ export function buildPanelBundle(
 	return { stockCode: opts.code, corpName, toc, periods, gridBySection, dartUrlByPeriod };
 }
 
-// TOC — chapter > sectionLeaf > blockLeaf 트리 (정렬된 built 순서 first-appearance). buildToc 1:1.
+// TOC — 본문(gridBySection) 섹션 기반 chapter > sectionLeaf > blockLeaf 트리.
+// sectionLeaf==chapter(절 헤더)는 다른 절이 있으면 제외(챕터 중복 헤더 차단), 없으면 그것을 절로 노출 —
+// VII.주주처럼 본문이 전부 ==chapter 아래인 챕터가 통째로 숨는 회귀 차단. (옛 built-기반 skip 보완.)
 function buildToc(
 	code: string,
 	corpName: string,
-	built: { chapter: string; sectionLeaf: string; blockLeaf: string }[],
+	gridBySection: Map<string, PanelRow[]>,
 	periods: string[]
 ): PanelTocResponse {
 	const order: string[] = []; // chapter first-appearance
-	const chMap = new Map<string, PanelTocChapter>();
-	const secMap = new Map<string, PanelTocSection>();
-	for (const b of built) {
-		const chapter = b.chapter;
+	const chMap = new Map<string, { chapter: string; real: PanelTocSection[]; header: PanelTocSection | null }>();
+	for (const [sk, rows] of gridBySection) {
+		const i = sk.indexOf(SEP);
+		const chapter = i < 0 ? sk : sk.slice(0, i);
+		const sectionLeaf = i < 0 ? '' : sk.slice(i + 1);
 		if (!chapter) continue;
 		let ch = chMap.get(chapter);
-		if (!ch) { ch = { chapter, sections: [] }; chMap.set(chapter, ch); order.push(chapter); }
-		const sectionLeaf = b.sectionLeaf;
-		if (!sectionLeaf || sectionLeaf === chapter) continue; // 빈 절/chapter 헤더 행 제외
-		const sk = sectionKeyFor(chapter, sectionLeaf);
-		let sec = secMap.get(sk);
-		if (!sec) { sec = { sectionLeaf, sectionKey: sk, rowCount: 0, blocks: [] }; secMap.set(sk, sec); ch.sections.push(sec); }
-		sec.rowCount++;
-		const blockLeaf = b.blockLeaf;
-		if (!blockLeaf) continue; // narrative anchor 행(blockLeaf 없음) 은 chip 제외
-		const block: PanelTocBlock | undefined = sec.blocks.find((x) => x.blockLeaf === blockLeaf);
-		if (block) block.rowCount++;
-		else sec.blocks.push({ blockLeaf, rowCount: 1 });
+		if (!ch) { ch = { chapter, real: [], header: null }; chMap.set(chapter, ch); order.push(chapter); }
+		// blocks(chip) — blockLeaf 있는 행만, 첫등장 순서.
+		const blocks: PanelTocBlock[] = [];
+		const blockIdx = new Map<string, PanelTocBlock>();
+		for (const r of rows) {
+			if (!r.blockLeaf) continue;
+			const ex = blockIdx.get(r.blockLeaf);
+			if (ex) ex.rowCount++;
+			else { const b: PanelTocBlock = { blockLeaf: r.blockLeaf, rowCount: 1 }; blockIdx.set(r.blockLeaf, b); blocks.push(b); }
+		}
+		const sec: PanelTocSection = { sectionLeaf, sectionKey: sk, rowCount: rows.length, blocks };
+		if (sectionLeaf === chapter) ch.header = sec;
+		else ch.real.push(sec);
 	}
-	// 섹션 ≥1 인 chapter 만 (Python buildToc `if sections:`).
-	const chapters = order.map((c) => chMap.get(c)!).filter((ch) => ch.sections.length > 0);
+	const chapters: PanelTocChapter[] = order
+		.map((c) => chMap.get(c)!)
+		.map((ch) => ({ chapter: ch.chapter, sections: ch.real.length ? ch.real : ch.header ? [ch.header] : [] }))
+		.filter((ch) => ch.sections.length > 0);
 	return { stockCode: code, corpName, chapters, periods };
 }

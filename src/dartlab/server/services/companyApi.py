@@ -157,9 +157,10 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
             continue
         chFrame = idx.filter(pl.col("chapter") == chapter)
         sections: list[TocSection] = []
+        headerSection: TocSection | None = None  # sectionLeaf==chapter(절 헤더) — 실제 절 없을 때만 노출
         for sectionLeaf in chFrame["sectionLeaf"].unique(maintain_order=True).to_list():
-            if not sectionLeaf or sectionLeaf == chapter:
-                continue  # 빈 절 / chapter 헤더 행 제외
+            if not sectionLeaf:
+                continue  # 빈 절 제외
             secFrame = chFrame.filter(pl.col("sectionLeaf") == sectionLeaf)
             blocks: list[TocBlock] = []
             for blockLeaf in secFrame["blockLeaf"].unique(maintain_order=True).to_list():
@@ -167,14 +168,18 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
                     continue  # narrative anchor 행 (blockLeaf 없음) 은 chip 에서 제외
                 cnt = secFrame.filter(pl.col("blockLeaf") == blockLeaf).height
                 blocks.append(TocBlock(blockLeaf=blockLeaf, rowCount=int(cnt)))
-            sections.append(
-                TocSection(
-                    sectionLeaf=sectionLeaf,
-                    sectionKey=sectionKeyFor(chapter, sectionLeaf),
-                    rowCount=int(secFrame.height),
-                    blocks=blocks,
-                )
+            sec = TocSection(
+                sectionLeaf=sectionLeaf,
+                sectionKey=sectionKeyFor(chapter, sectionLeaf),
+                rowCount=int(secFrame.height),
+                blocks=blocks,
             )
+            if sectionLeaf == chapter:
+                headerSection = sec  # 절 헤더 — 다른 절 있으면 제외, 없으면(VII.주주 등) 본문 노출
+            else:
+                sections.append(sec)
+        if not sections and headerSection is not None:
+            sections = [headerSection]
         if sections:
             chapters.append(TocChapter(chapter=chapter, sections=sections))
 
