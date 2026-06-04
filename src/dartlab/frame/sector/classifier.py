@@ -4,7 +4,7 @@
 실제 `classify` 정의는 `dartlab.frame.sector.__init__`.
 """
 
-from dartlab.frame.sector import (
+from dartlab.frame.sector.core import (
     IndustryGroup,
     Sector,
     _byValue,
