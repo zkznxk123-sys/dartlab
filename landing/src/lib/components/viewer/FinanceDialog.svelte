@@ -4,7 +4,7 @@
 	import { X } from 'lucide-svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { marketForCode } from '$lib/viewer/dartUrl';
-	import { loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
+	import { availableStatements, loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
 	import {
 		FREQ_BY_KIND,
 		FREQ_LABELS,
@@ -23,6 +23,29 @@
 	let kind = $state<FinanceKind>('IS');
 	let freq = $state<FinanceFreq>('annual');
 	let scope = $state<FinanceScope>('CFS');
+	let availableKinds = $state<FinanceKind[]>(KINDS); // 회사·scope 에 실제 있는 statement 만(빈 탭 숨김)
+
+	// 표시 탭 — 손익계산서는 항상 노출: IS 있으면 IS, 없으면 단일 포괄손익계산서(CIS)가 손익 포함이므로 CIS 를
+	// '손익계산서'로. 포괄손익은 2표식(IS·CIS 둘 다 = CIS 가 OCI 브리지)일 때만 별도 탭. → IS-주력이든 단일이든
+	// 사용자는 항상 '손익계산서' 탭에서 P&L 을 본다.
+	const displayTabs = $derived.by(() => {
+		const has = new Set(availableKinds);
+		const tabs: { label: string; kind: FinanceKind }[] = [];
+		if (has.has('IS')) tabs.push({ label: '손익계산서', kind: 'IS' });
+		else if (has.has('CIS')) tabs.push({ label: '손익계산서', kind: 'CIS' });
+		if (has.has('BS')) tabs.push({ label: '재무상태표', kind: 'BS' });
+		if (has.has('CF')) tabs.push({ label: '현금흐름표', kind: 'CF' });
+		if (has.has('IS') && has.has('CIS')) tabs.push({ label: '포괄손익', kind: 'CIS' });
+		if (has.has('SCE')) tabs.push({ label: '자본변동표', kind: 'SCE' });
+		return tabs;
+	});
+	// 현 kind 가 안 보이면 손익계산서(IS→CIS) 우선으로 전환.
+	function firstTabKind(avail: FinanceKind[]): FinanceKind {
+		const has = new Set(avail);
+		if (has.has('IS')) return 'IS';
+		if (has.has('CIS')) return 'CIS';
+		return avail[0] ?? 'BS';
+	}
 
 	let statement = $state<FinanceStatement | null>(null);
 	let loading = $state(false);
@@ -72,6 +95,26 @@
 		return m === 'US' ? 'EDGAR 정량재무제표는 준비 중입니다.' : '정량재무제표를 불러올 수 없습니다 (기기 제약 가능).';
 	}
 
+	// 가용 statement 탭 — open·scope·code 바뀌면 회사 데이터에서 실제 존재하는 sj_div 만 노출(단일 포괄손익 회사는
+	// IS 빈 탭 숨김). lastAvailKey(비반응)로 재실행 차단. 현 kind 가 사라지면 첫 가용 탭으로 전환.
+	let lastAvailKey = '';
+	$effect(() => {
+		if (!open) {
+			lastAvailKey = '';
+			return;
+		}
+		const m = market, c = code, s = scope;
+		const key = `${m}:${c}:${s}`;
+		if (key === lastAvailKey) return;
+		lastAvailKey = key;
+		void availableStatements(c, m, s)
+			.then((kinds) => {
+				availableKinds = kinds.length ? kinds : KINDS;
+				if (!availableKinds.includes(kind)) pickKind(firstTabKind(availableKinds)); // 현 탭 없으면 손익계산서 우선
+			})
+			.catch(() => {}); // 실패 시 기본 전체 탭 유지
+	});
+
 	// Esc 닫기 (모달만, 전체화면 유지).
 	$effect(() => {
 		if (!open) return;
@@ -98,8 +141,8 @@
 
 		<div class="controls">
 			<div class="tabs">
-				{#each KINDS as k (k)}
-					<button type="button" class="tab" class:active={kind === k} onclick={() => pickKind(k)} title={KIND_LABELS[k]}>{KIND_LABELS[k]}</button>
+				{#each displayTabs as t (t.label)}
+					<button type="button" class="tab" class:active={kind === t.kind} onclick={() => pickKind(t.kind)} title={t.label}>{t.label}</button>
 				{/each}
 			</div>
 			<div class="segs">

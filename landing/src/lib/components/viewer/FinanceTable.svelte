@@ -18,8 +18,8 @@
 		</thead>
 		<tbody>
 			{#each statement.rows as row (row.accountId)}
-				<tr>
-					<th class="acct-c" title={row.label}>{row.label}</th>
+				<tr class:total={row.depth === 0} class:sub={row.depth === 1}>
+					<th class="acct-c" style="padding-left: {10 + row.depth * 16}px" title={row.label}>{row.label}</th>
 					{#each statement.periods as p (p)}
 						{@const v = row.values[p]}
 						<td class="val" class:neg={v != null && v < 0} class:nil={v == null}>{fmt(v)}</td>
@@ -98,6 +98,18 @@
 	}
 	.val.nil {
 		color: #475569;
+	}
+	/* 구조 — 총계(depth 0) 굵게+상단 보더, 소계(depth 1) 굵게. 리프는 들여쓰기(inline padding-left). */
+	tr.total .acct-c,
+	tr.total .val {
+		font-weight: 700;
+		color: #f8fafc;
+		border-top: 1px solid #2a3650;
+	}
+	tr.sub .acct-c,
+	tr.sub .val {
+		font-weight: 600;
+		color: #eef2f7;
 	}
 	tbody tr:hover .acct-c {
 		background: #0c1424;

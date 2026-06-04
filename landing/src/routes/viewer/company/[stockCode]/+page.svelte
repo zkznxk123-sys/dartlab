@@ -268,8 +268,8 @@
 		</div>
 		<div class="ph-right">
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
-			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="정량재무제표 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
-				<Table2 size={13} /> 정량재무
+			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
+				<Table2 size={13} /> 재무제표(정량)
 			</button>
 			<button type="button" class="fs-btn" onclick={() => (discussOpen = true)} title="공시 토론 (GitHub Discussions)">
 				<MessageSquare size={13} /> 토론

@@ -8,6 +8,7 @@ export interface FinanceStmtRow {
 	accountId: string; // account_id (기간 정합 pivot 키)
 	label: string; // account_nm (표시)
 	ord: number; // 재무제표 표시순서
+	depth: number; // 0=총계(굵게) / 1=소계 / 2=리프(들여쓰기) — account_id XBRL 구조 분류
 	values: Record<string, number | null>; // period → 금액(원). null = 해당기간 미보고
 }
 

@@ -63,6 +63,33 @@ export function buildSql(stockCode: string, kind: FinanceKind, freq: FinanceFreq
 	`;
 }
 
+// 계정 depth — account_id(XBRL 개념)의 구조 분류. 총계/소계 개념집합은 회사간 매우 안정(실측 15/15).
+// standardAccounts.level 은 커버리지·의미 오류로 부적합. 0=총계(굵게)·1=소계·2=리프(들여쓰기).
+const DEPTH0 = new Set([
+	'ifrs-full_Assets',
+	'ifrs-full_Liabilities',
+	'ifrs-full_Equity',
+	'ifrs-full_EquityAndLiabilities',
+	'ifrs-full_ComprehensiveIncome',
+	'ifrs-full_ProfitLoss'
+]);
+const DEPTH1 = new Set([
+	'ifrs-full_CurrentAssets',
+	'ifrs-full_NoncurrentAssets',
+	'ifrs-full_CurrentLiabilities',
+	'ifrs-full_NoncurrentLiabilities',
+	'ifrs-full_EquityAttributableToOwnersOfParent',
+	'ifrs-full_GrossProfit',
+	'dart_OperatingIncomeLoss',
+	'ifrs-full_ProfitLossBeforeTax',
+	'ifrs-full_OtherComprehensiveIncome'
+]);
+export function accountDepth(accountId: string): number {
+	if (DEPTH0.has(accountId)) return 0;
+	if (DEPTH1.has(accountId)) return 1;
+	return 2;
+}
+
 // 최신좌측 정렬 — "YYYY"/"YYYYQn" 문자열 내림차순.
 const sortPeriodsDesc = (ps: string[]): string[] => [...ps].sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
 
@@ -100,7 +127,7 @@ export function pivot(rows: QueryRow[], kind: FinanceKind, scope: FinanceScope, 
 	for (const r of rows) {
 		let row = byAcct.get(r.acct);
 		if (!row) {
-			row = { accountId: r.acct, label: r.label || r.acct, ord: r.ord ?? Number.MAX_SAFE_INTEGER, values: {} };
+			row = { accountId: r.acct, label: r.label || r.acct, ord: r.ord ?? Number.MAX_SAFE_INTEGER, depth: accountDepth(r.acct), values: {} };
 			byAcct.set(r.acct, row);
 		}
 		row.ord = Math.min(row.ord, r.ord ?? Number.MAX_SAFE_INTEGER);

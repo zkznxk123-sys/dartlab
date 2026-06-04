@@ -6,7 +6,7 @@ import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
 import { narrativeCore } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
 import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
-import { mergeDriftVariants } from '../src/lib/viewer/finance/financePivot.ts';
+import { mergeDriftVariants, accountDepth } from '../src/lib/viewer/finance/financePivot.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 
 let fail = 0;
@@ -73,15 +73,23 @@ eq(viewerUrl('US', null), null, 'US null');
 
 // mergeDriftVariants — 같은 label·기간 비충돌(era-drift 태그 변종) 병합, 공존 동명(기간 겹침)은 분리.
 const drift = mergeDriftVariants([
-	{ accountId: 'A', label: '수익(매출액)', ord: 0, values: { '2016': 100, '2017': 110 } }, // 옛 태그
-	{ accountId: 'B', label: '수익(매출액)', ord: 0, values: { '2024': 300, '2025': 333 } }, // 현 태그 (기간 비충돌)
-	{ accountId: 'C', label: '기타', ord: 5, values: { '2024': 10 } }, // 공존 기타
-	{ accountId: 'D', label: '기타', ord: 6, values: { '2024': 20 } } // 같은해 기타 (충돌 → 분리)
+	{ accountId: 'A', label: '수익(매출액)', ord: 0, depth: 2, values: { '2016': 100, '2017': 110 } }, // 옛 태그
+	{ accountId: 'B', label: '수익(매출액)', ord: 0, depth: 2, values: { '2024': 300, '2025': 333 } }, // 현 태그 (기간 비충돌)
+	{ accountId: 'C', label: '기타', ord: 5, depth: 2, values: { '2024': 10 } }, // 공존 기타
+	{ accountId: 'D', label: '기타', ord: 6, depth: 2, values: { '2024': 20 } } // 같은해 기타 (충돌 → 분리)
 ]);
 eq(drift.filter((r) => r.label === '수익(매출액)').length, 1, 'drift 동의어 병합 1행');
 eq(drift.find((r) => r.label === '수익(매출액)')?.values['2016'], 100, 'drift 병합 옛값 보존');
 eq(drift.find((r) => r.label === '수익(매출액)')?.values['2025'], 333, 'drift 병합 현값 보존');
 eq(drift.filter((r) => r.label === '기타').length, 2, '공존 동명 분리 유지');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (44/44)' : `viewerCheck: ${fail} FAIL`);
+// accountDepth — account_id XBRL 구조: 총계 0·소계 1·리프 2.
+eq(accountDepth('ifrs-full_Assets'), 0, 'depth 자산총계=0');
+eq(accountDepth('ifrs-full_ProfitLoss'), 0, 'depth 당기순이익=0');
+eq(accountDepth('ifrs-full_CurrentAssets'), 1, 'depth 유동자산=1');
+eq(accountDepth('dart_OperatingIncomeLoss'), 1, 'depth 영업이익=1');
+eq(accountDepth('ifrs-full_CashAndCashEquivalents'), 2, 'depth 현금=2(리프)');
+eq(accountDepth('dart_ShortTermOtherReceivables'), 2, 'depth 미수금=2(리프)');
+
+console.log(fail === 0 ? 'viewerCheck: ALL OK (50/50)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);
