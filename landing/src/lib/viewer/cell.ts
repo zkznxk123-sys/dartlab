@@ -18,7 +18,19 @@ const DART_TAG_MAP: Record<string, string> = {
 	BR: 'br'
 };
 
-// ACODE/ACONTEXT 등 정부 메타 속성 제거, 표 구조 속성(colspan/rowspan/align)만 보존.
+// DART USERMARK(폰트 size/볼드/색) → 구조 class. 원본은 절제목·소항목 헤딩을 USERMARK="F-NN B" 로 인코딩 —
+// F-14↑ = 소항목 헤딩(가/나/다, block+볼드+위 줄바꿈), 그 외 B = 인라인 볼드. 본문(F-10)·색상(0X)·폰트패밀리
+// (F-GL/F-BT)는 손대지 않음(다크테마 가독성). standalone "B" 만 볼드로(F-BT/F-GL 의 B 오탐 차단).
+export function userMarkClass(um: string): string {
+	const sizeM = /F-(?:GL|BT)?(\d+)/.exec(um);
+	const size = sizeM ? parseInt(sizeM[1], 10) : 0;
+	const bold = /(?:^|\s)B(?:\s|$)/.test(um);
+	if (size >= 14) return 'dm-h'; // 소항목 헤딩
+	if (bold) return 'dm-b'; // 인라인 강조
+	return '';
+}
+
+// ACODE/ACONTEXT 등 정부 메타 속성 제거, 표 구조 속성(colspan/rowspan/align) + 헤딩 구조 class 보존.
 export function normalizeDartXml(value: string): string {
 	if (!value || value.indexOf('<') < 0) return value;
 	return value.replace(
@@ -30,6 +42,14 @@ export function normalizeDartXml(value: string): string {
 			if (!slash && attrs) {
 				const am = attrs.match(/\b(colspan|rowspan|align)\s*=\s*("[^"]*"|'[^']*'|\S+)/gi);
 				if (am) keep = ' ' + am.join(' ');
+				// 헤딩 구조 — TITLE(절 제목) + SPAN USERMARK(size/볼드). 원본 문서구조를 적당히 반영.
+				let cls = '';
+				if (upper === 'TITLE') cls = 'dm-title';
+				else if (upper === 'SPAN') {
+					const um = attrs.match(/USERMARK\s*=\s*"([^"]*)"/i);
+					if (um) cls = userMarkClass(um[1]);
+				}
+				if (cls) keep += ` class="${cls}"`;
 			}
 			return `<${slash}${name}${keep}>`;
 		}

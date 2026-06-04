@@ -214,6 +214,44 @@ function anchorNarrativeToSpineRow(r: LeafRow): void {
 	if (canon != null) r.sectionLeaf = canon;
 }
 
+// ── computePeriodKind: 회사별 보고서 유형 보정 (사업보고서 vs 분기/반기) — "연간만" 필터용 ──
+// 연간보고서(사업보고서)는 회계연도-말 분기에 위치하고 분기/반기보다 본문(비빈 셀)이 많다. 완전연도(분기≥3 보유)의
+// 분기별 비빈셀 median 중 dominant 분기를 annual 로 검출 → 비-12월 결산도 자동 흡수(3월결산=Q1, 6월결산=Q2).
+// in-progress·bookend(분기<3) 연도는 표본 제외, dominance 불명확하면 Q4(12월 결산) fallback. period 분기 유도보다 견고.
+const _quarterOf = (p: string): number => {
+	const m = /Q([1-4])$/.exec(p);
+	return m ? parseInt(m[1], 10) : 0;
+};
+function _median(xs: number[]): number {
+	if (!xs.length) return 0;
+	const s = [...xs].sort((a, b) => a - b);
+	const mid = Math.floor(s.length / 2);
+	return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+export function computePeriodKind(periods: string[], cellCount: Record<string, number>): Record<string, 'annual' | 'quarter'> {
+	const qByYear = new Map<string, Set<number>>();
+	for (const p of periods) {
+		const q = _quarterOf(p);
+		if (!q) continue;
+		const y = p.slice(0, 4);
+		let s = qByYear.get(y);
+		if (!s) qByYear.set(y, (s = new Set()));
+		s.add(q);
+	}
+	const complete = new Set([...qByYear].filter(([, s]) => s.size >= 3).map(([y]) => y));
+	const byQ: Record<number, number[]> = { 1: [], 2: [], 3: [], 4: [] };
+	for (const p of periods) {
+		const q = _quarterOf(p);
+		if (q && complete.has(p.slice(0, 4))) byQ[q].push(cellCount[p] ?? 0);
+	}
+	const med = [1, 2, 3, 4].map((q) => ({ q, m: _median(byQ[q]) })).sort((a, b) => b.m - a.m);
+	// dominant(상위 median > 1.3× 차순위) 분기 = annual, 아니면 Q4(12월 결산) fallback.
+	const annualQ = med[0].m > 0 && med[0].m > 1.3 * (med[1].m || 0) ? med[0].q : 4;
+	const out: Record<string, 'annual' | 'quarter'> = {};
+	for (const p of periods) out[p] = _quarterOf(p) === annualQ ? 'annual' : 'quarter';
+	return out;
+}
+
 // ── 핵심: leaf 행들 → PanelBundle (순수, 로컬 parity 테스트 가능) ──
 export function buildPanelBundle(
 	leafRows: LeafRow[],
@@ -227,7 +265,8 @@ export function buildPanelBundle(
 		toc: { stockCode: opts.code, corpName: opts.corpName ?? '', chapters: [], periods: [] },
 		periods: [],
 		gridBySection: new Map(),
-		dartUrlByPeriod: {}
+		dartUrlByPeriod: {},
+		periodKind: {}
 	};
 	if (rows.length === 0) return empty;
 
@@ -362,7 +401,14 @@ export function buildPanelBundle(
 	const dartUrlByPeriod: Record<string, string | null> = {};
 	for (const p of periods) dartUrlByPeriod[p] = viewerUrl(market, rceptByPeriod.get(p) ?? null);
 
-	return { stockCode: opts.code, corpName, toc, periods, gridBySection, dartUrlByPeriod };
+	// 보고서 유형 보정 — period 별 비빈 셀수(본문량) 누적 → computePeriodKind (사업보고서 분기 검출).
+	const cellCount: Record<string, number> = {};
+	for (const arr of gridBySection.values()) {
+		for (const row of arr) for (const p in row.cells) cellCount[p] = (cellCount[p] ?? 0) + 1;
+	}
+	const periodKind = computePeriodKind(periods, cellCount);
+
+	return { stockCode: opts.code, corpName, toc, periods, gridBySection, dartUrlByPeriod, periodKind };
 }
 
 // TOC — 본문(gridBySection) 섹션 기반 chapter > sectionLeaf > blockLeaf 트리 (market-aware).

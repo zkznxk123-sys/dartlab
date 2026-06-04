@@ -43,4 +43,5 @@ export interface PanelBundle {
 	periods: string[];
 	gridBySection: Map<string, PanelRow[]>; // sectionKey → rows
 	dartUrlByPeriod: Record<string, string | null>;
+	periodKind: Record<string, 'annual' | 'quarter'>; // period → 보고서 유형(회사별 결산 보정). "연간만" 필터용
 }

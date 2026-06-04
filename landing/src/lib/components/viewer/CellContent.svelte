@@ -121,4 +121,22 @@
 		font-weight: 600;
 		color: #e2e8f0;
 	}
+	/* 원본 XML 문서구조 반영 — 절 제목(TITLE) 크게, 소항목 헤딩(USERMARK F-14↑) 볼드+위 줄바꿈, 인라인 볼드. */
+	.dartlab-html :global(.dm-title) {
+		font-size: 14.5px;
+		font-weight: 700;
+		color: #f1f5f9;
+		margin: 2px 0 7px;
+	}
+	.dartlab-html :global(.dm-h) {
+		display: block;
+		margin-top: 9px;
+		font-size: 13px;
+		font-weight: 700;
+		color: #e2e8f0;
+	}
+	.dartlab-html :global(.dm-b) {
+		font-weight: 700;
+		color: #e2e8f0;
+	}
 </style>

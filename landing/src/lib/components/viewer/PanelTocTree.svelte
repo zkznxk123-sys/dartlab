@@ -1,12 +1,22 @@
 <script lang="ts">
-	// 목차 — chapter > sectionLeaf 트리. landing 디자인 언어(다크 네이비 + 오렌지 액센트).
+	// 목차 — chapter > sectionLeaf > (활성 섹션이면) blockLeaf 트리. landing 디자인(다크 네이비 + 오렌지).
+	// 최근 XBRL 주석은 개별 주석(일반사항·재무위험관리·유형자산…)이 blockLeaf(NT_ 키)로 상세 분해 — 활성 섹션
+	// 아래 그 blocks 를 펼쳐 주석 단위 네비게이션. 주석 클릭 시 격자가 그 주석만(기간별)으로 필터.
 	import type { PanelTocResponse } from '$lib/viewer/types';
 
 	let {
 		toc,
 		activeSectionKey,
-		onpick
-	}: { toc: PanelTocResponse; activeSectionKey: string | undefined; onpick: (sectionKey: string) => void } = $props();
+		activeBlock,
+		onpick,
+		onpickBlock
+	}: {
+		toc: PanelTocResponse;
+		activeSectionKey: string | undefined;
+		activeBlock: string | null;
+		onpick: (sectionKey: string) => void;
+		onpickBlock: (sectionKey: string, blockLeaf: string) => void;
+	} = $props();
 </script>
 
 <nav class="toc-tree">
@@ -18,12 +28,29 @@
 					<button
 						type="button"
 						class="section"
-						class:active={sec.sectionKey === activeSectionKey}
+						class:active={sec.sectionKey === activeSectionKey && !activeBlock}
+						class:open={sec.sectionKey === activeSectionKey}
 						onclick={() => onpick(sec.sectionKey)}
 						title={sec.sectionLeaf}
 					>
 						<span class="section-name">{sec.sectionLeaf}</span>
+						{#if sec.blocks.length > 1}<span class="count">{sec.blocks.length}</span>{/if}
 					</button>
+					{#if sec.sectionKey === activeSectionKey && sec.blocks.length > 1}
+						<div class="blocks">
+							{#each sec.blocks as b (b.blockLeaf)}
+								<button
+									type="button"
+									class="block"
+									class:active={activeBlock === b.blockLeaf}
+									onclick={() => onpickBlock(sec.sectionKey, b.blockLeaf)}
+									title={b.blockLeaf}
+								>
+									<span class="block-name">{b.blockLeaf}</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
 				{/each}
 			</div>
 		</div>
@@ -50,7 +77,9 @@
 		gap: 2px;
 	}
 	.section {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 6px;
 		width: 100%;
 		text-align: left;
 		padding: 5px 8px;
@@ -73,7 +102,60 @@
 		color: #f8fafc;
 		font-weight: 600;
 	}
+	.section.open:not(.active) {
+		color: #cbd5e1;
+	}
 	.section-name {
+		flex: 1 1 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.count {
+		flex-shrink: 0;
+		min-width: 18px;
+		padding: 0 5px;
+		border-radius: 9px;
+		background: rgba(148, 163, 184, 0.12);
+		color: #64748b;
+		font-size: 10px;
+		font-weight: 600;
+		text-align: center;
+		font-variant-numeric: tabular-nums;
+	}
+	.blocks {
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+		margin: 1px 0 3px 8px;
+		padding-left: 8px;
+		border-left: 1px solid #1e2433;
+	}
+	.block {
+		display: block;
+		width: 100%;
+		text-align: left;
+		padding: 4px 8px;
+		border: 1px solid transparent;
+		border-radius: 5px;
+		background: transparent;
+		color: #748094;
+		font: inherit;
+		font-size: 11.5px;
+		cursor: pointer;
+		transition: background 0.12s, color 0.12s, border-color 0.12s;
+	}
+	.block:hover {
+		background: rgba(251, 146, 60, 0.06);
+		color: #cbd5e1;
+	}
+	.block.active {
+		background: rgba(251, 146, 60, 0.12);
+		border-color: rgba(251, 146, 60, 0.45);
+		color: #f8fafc;
+		font-weight: 600;
+	}
+	.block-name {
 		display: block;
 		overflow: hidden;
 		text-overflow: ellipsis;

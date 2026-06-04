@@ -9,9 +9,10 @@
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
 	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
 	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
-	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
+	import CommandPalette from '$lib/components/viewer/CommandPalette.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
+	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import type { PanelBundle } from '$lib/viewer/types';
 
 	let { data }: { data: { code: string } } = $props();
@@ -29,10 +30,15 @@
 	let errorMsg = $state<string | null>(null);
 	let loading = $state(true);
 	let activeSectionKey = $state<string | undefined>(undefined);
+	let activeBlock = $state<string | null>(null); // 활성 주석(blockLeaf) — null 이면 섹션 전체
 	let windowEnd = $state(0); // periods 시작 인덱스 (0 = 최신, 좌측)
 	let cols = $state(3);
 	let isFullscreen = $state(false);
 	let discussOpen = $state(false);
+	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
+	let searchIndex = $state<SearchIndex | null>(null);
+	let indexing = $state(false);
+	let glowCell = $state<{ rowIndex: number; period: string } | null>(null);
 
 	// code 바뀌면(검색 이동) 재로드.
 	$effect(() => {
@@ -46,10 +52,12 @@
 		errorMsg = null;
 		bundle = null;
 		windowEnd = 0;
+		activeBlock = null;
 		loadPanelBundle(c)
 			.then((b) => {
 				bundle = b;
 				activeSectionKey = b.toc.chapters[0]?.sections[0]?.sectionKey;
+				activeBlock = null;
 				if (!b.periods.length) errorMsg = '이 종목의 panel 데이터가 없습니다 (HF 업로드 대기 중일 수 있음).';
 			})
 			.catch((e) => {
@@ -59,6 +67,35 @@
 				loading = false;
 			});
 	});
+
+	// 본문 검색 색인 — bundle 로드 후 타임슬라이싱 빌드(메인스레드 비차단). code 바뀌면 재빌드.
+	$effect(() => {
+		const b = bundle;
+		searchIndex = null;
+		if (!b || !b.periods.length) {
+			indexing = false;
+			return;
+		}
+		indexing = true;
+		let cancelled = false;
+		void buildIndexChunked(b).then((idx) => {
+			if (!cancelled) {
+				searchIndex = idx;
+				indexing = false;
+			}
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	// 검색 결과 클릭 → 그 섹션·기간으로 격자 점프 + 셀 글로우.
+	function onSearchResult(hit: SearchHit) {
+		pickSection(hit.sectionKey);
+		pickPeriod(hit.period);
+		glowCell = { rowIndex: hit.rowIndex, period: hit.period };
+		setTimeout(() => (glowCell = null), 2200);
+	}
 
 	// 전체보기 Esc 해제.
 	$effect(() => {
@@ -71,28 +108,52 @@
 	});
 
 	const periods = $derived(bundle?.periods ?? []);
-	const windowPeriods = $derived(periods.slice(windowEnd, windowEnd + cols));
-	const rows = $derived(activeSectionKey && bundle ? (bundle.gridBySection.get(activeSectionKey) ?? []) : []);
+	// "연간만" 필터 시 사업보고서(annual) period 만 — 빈 결과면 자동으로 전체로 폴백(빈 화면 방지).
+	const annualPeriods = $derived.by(() => {
+		const b = bundle;
+		return b ? periods.filter((p) => b.periodKind[p] === 'annual') : [];
+	});
+	const visiblePeriods = $derived(annualOnly && annualPeriods.length ? annualPeriods : periods);
+	const windowPeriods = $derived(visiblePeriods.slice(windowEnd, windowEnd + cols));
+	// 활성 섹션 행 — 주석(blockLeaf) 선택 시 그 주석만(기간별), 아니면 섹션 전체.
+	const rows = $derived.by(() => {
+		if (!activeSectionKey || !bundle) return [];
+		const base = bundle.gridBySection.get(activeSectionKey) ?? [];
+		return activeBlock ? base.filter((r) => r.blockLeaf === activeBlock) : base;
+	});
 	const dartUrls = $derived(bundle?.dartUrlByPeriod ?? {});
-	const sectionLabel = $derived(activeSectionKey?.split('␟').pop() ?? '');
+	const sectionLabel = $derived.by(() => {
+		const s = activeSectionKey?.split('␟').pop() ?? '';
+		return activeBlock ? `${s} · ${activeBlock}` : s;
+	});
 	const corpName = $derived(bundle?.corpName || nameMap.get(code) || '');
 
 	function pickSection(sectionKey: string) {
 		activeSectionKey = sectionKey;
+		activeBlock = null; // 섹션 헤더 클릭 = 전체
+		windowEnd = 0;
+	}
+	function pickBlock(sectionKey: string, blockLeaf: string) {
+		activeSectionKey = sectionKey;
+		activeBlock = blockLeaf; // 개별 주석 선택 = 그 주석만
 		windowEnd = 0;
 	}
 	function pickPeriod(p: string) {
-		const idx = periods.indexOf(p);
+		const idx = visiblePeriods.indexOf(p);
 		if (idx >= 0) windowEnd = idx;
 	}
 	function moveNewer() {
 		windowEnd = Math.max(0, windowEnd - 1);
 	}
 	function moveOlder() {
-		windowEnd = Math.min(periods.length - 1, windowEnd + 1);
+		windowEnd = Math.min(visiblePeriods.length - 1, windowEnd + 1);
+	}
+	function toggleAnnual() {
+		annualOnly = !annualOnly;
+		windowEnd = 0; // 축이 바뀌므로 최신으로 리셋
 	}
 	const canNewer = $derived(windowEnd > 0);
-	const canOlder = $derived(windowEnd + 1 < periods.length);
+	const canOlder = $derived(windowEnd + 1 < visiblePeriods.length);
 </script>
 
 <svelte:head><title>{corpName || code} 공시뷰어 · dartlab</title></svelte:head>
@@ -109,12 +170,13 @@
 			{#if bundle && sectionLabel}<span class="ph-section">{sectionLabel}</span>{/if}
 		</div>
 		<div class="ph-right">
-			<CompanySearch />
+			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
 			<button type="button" class="fs-btn" onclick={() => (discussOpen = true)} title="공시 토론 (GitHub Discussions)">
 				<MessageSquare size={13} /> 토론
 			</button>
 			{#if bundle}
-				<span class="meta">항목 {rows.length} · 전체 기간 {periods.length}</span>
+				<span class="meta">항목 {rows.length} · 기간 {visiblePeriods.length}{annualOnly ? '(연간)' : ''}</span>
+				<button type="button" class="annual-btn" class:active={annualOnly} onclick={toggleAnnual} title="사업보고서(연간)만 표시 — 회사 결산월 보정">연간만</button>
 				<div class="cols" title="동시 표시 기간 수 (가로 폭)">
 					<Columns3 size={13} />
 					{#each COL_CHOICES as n (n)}
@@ -130,7 +192,7 @@
 
 	{#if bundle && !loading}
 		<div class="ribbon-bar">
-			<TimelineRibbon {periods} {windowPeriods} onpick={pickPeriod} onnewer={moveNewer} onolder={moveOlder} {canNewer} {canOlder} />
+			<TimelineRibbon periods={visiblePeriods} {windowPeriods} onpick={pickPeriod} onnewer={moveNewer} onolder={moveOlder} {canNewer} {canOlder} />
 		</div>
 	{/if}
 
@@ -154,10 +216,10 @@
 	{:else if bundle}
 		<div class="studio">
 			<aside class="toc">
-				<PanelTocTree toc={bundle.toc} {activeSectionKey} onpick={pickSection} />
+				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
 			<section class="board">
-				<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} />
+				<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
 			</section>
 		</div>
 	{/if}
@@ -279,6 +341,28 @@
 	.fs-btn:hover {
 		border-color: #fb923c;
 		color: #fb923c;
+	}
+	.annual-btn {
+		height: 30px;
+		padding: 0 10px;
+		border: 1px solid #1e2433;
+		border-radius: 5px;
+		background: #050811;
+		color: #94a3b8;
+		font: inherit;
+		font-size: 11px;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.annual-btn:hover {
+		border-color: #fb923c;
+		color: #fb923c;
+	}
+	.annual-btn.active {
+		border-color: rgba(251, 146, 60, 0.5);
+		background: rgba(251, 146, 60, 0.12);
+		color: #fb923c;
+		font-weight: 600;
 	}
 
 	.ribbon-bar {

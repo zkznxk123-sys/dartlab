@@ -3,7 +3,8 @@
 // (전체 parity = data/dart/panel 로컬 필요, 별도 수동 — 본 스크립트는 결정론 순수함수만.)
 import { canonicalChapter, isReportChapter } from '../src/lib/viewer/canonical.ts';
 import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
-import { narrativeCore } from '../src/lib/viewer/panelWide.ts';
+import { narrativeCore, computePeriodKind } from '../src/lib/viewer/panelWide.ts';
+import { userMarkClass } from '../src/lib/viewer/cell.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 
 let fail = 0;
@@ -35,6 +36,23 @@ eq(narrativeCore('6. 기타 재무에 관한 사항'), '기타재무에관한사
 eq(narrativeCore('8. 기타 재무에 관한 사항'), '기타재무에관한사항', 'core 기타재무 현행');
 eq(narrativeCore('7-1. 증권의 발행을 통한 자금조달 실적'), '증권의발행을통한자금조달실적', 'core 7-1');
 
+// computePeriodKind — 회사별 결산 보정: 연간보고서 분기(본문 dominant) 검출. 12월결산=Q4, 3월결산=Q1.
+const decP = ['2020Q1', '2020Q2', '2020Q3', '2020Q4', '2021Q1', '2021Q2', '2021Q3', '2021Q4'];
+const decC = Object.fromEntries(decP.map((p) => [p, p.endsWith('Q4') ? 3000 : 1400]));
+eq(computePeriodKind(decP, decC)['2021Q4'], 'annual', 'periodKind Dec Q4=annual');
+eq(computePeriodKind(decP, decC)['2021Q2'], 'quarter', 'periodKind Dec Q2=quarter');
+const marC = Object.fromEntries(decP.map((p) => [p, p.endsWith('Q1') ? 3000 : 1400])); // 3월 결산: Q1 본문 dominant
+eq(computePeriodKind(decP, marC)['2021Q1'], 'annual', 'periodKind March Q1=annual');
+eq(computePeriodKind(decP, marC)['2021Q4'], 'quarter', 'periodKind March Q4=quarter');
+
+// userMarkClass — DART USERMARK → 헤딩 구조 class. F-14↑=헤딩, standalone B=볼드, 본문/폰트패밀리=무.
+eq(userMarkClass('F-14 B'), 'dm-h', 'um F-14 B 헤딩');
+eq(userMarkClass('F-16 B'), 'dm-h', 'um F-16 B 헤딩');
+eq(userMarkClass(' B'), 'dm-b', 'um B 볼드');
+eq(userMarkClass('F-10'), '', 'um F-10 본문');
+eq(userMarkClass('F-BT12'), '', 'um F-BT12 폰트패밀리 오탐X');
+eq(userMarkClass('0X0000FF'), '', 'um 색상 무시');
+
 // edgarSectionStatus — 카탈로그 표준명 정확일치 게이트 (Python mapper.edgarSectionStatus 대조).
 eq(edgarSectionStatus('10-K', 'Item 1. Business'), 'navi', 'edgar navi item1');
 eq(edgarSectionStatus('10-K', 'Item 1A. Risk Factors'), 'navi', 'edgar navi 1A');
@@ -51,5 +69,5 @@ eq(viewerUrl(marketForCode('005930'), '20260515002181'), 'https://dart.fss.or.kr
 eq(viewerUrl(marketForCode('AAPL'), '0000320193-25-000079'), 'https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/0000320193-25-000079-index.htm', 'US SEC');
 eq(viewerUrl('US', null), null, 'US null');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (30/30)' : `viewerCheck: ${fail} FAIL`);
+console.log(fail === 0 ? 'viewerCheck: ALL OK (40/40)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);
