@@ -24,6 +24,7 @@
 		{ label: 'Skills', href: `${base}/skills` },
 		{ label: 'Blog', href: `${base}/blog/` },
 		{ label: 'Scan', href: `${base}/scan` },
+		{ label: 'Viewer', href: `${base}/viewer` },
 		{ label: 'Map', href: `${base}/map` }
 	];
 

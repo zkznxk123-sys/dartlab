@@ -7,7 +7,16 @@
 
 import { canonicalChapter, canonicalRank } from './canonical';
 import { marketForCode, viewerUrl } from './dartUrl';
+import spineData from './spineData.json';
 import type { PanelBundle, PanelRow, PanelTocBlock, PanelTocChapter, PanelTocResponse, PanelTocSection } from './types';
+
+// 정부 서식 척추(SPINE, XBRL 기반) — rowIdentity → spineOrder. Python panel.spine.SPINE 1:1 (spineBuilder 생성물).
+const SPINE_ORDER = spineData as Record<string, number>;
+// rowIdentity — keyed=disclosureKey / narrative=NARR::{canonicalChapter}␟{sectionLeaf} (mapper.rowIdentity 1:1).
+function spineOrderFor(disclosureKey: string | null, chapter: string, sectionLeaf: string): number | null {
+	const id = disclosureKey ?? `NARR::${chapter}${SEP}${sectionLeaf}`;
+	return id in SPINE_ORDER ? SPINE_ORDER[id] : null;
+}
 
 // panel parquet 한 leaf 행 (필요 컬럼). 브라우저 read 컬럼 목록은 panelLoad.READ_COLUMNS.
 export interface LeafRow {
@@ -36,6 +45,26 @@ function sortPeriodsDesc(periods: string[]): string[] {
 
 const SEP = '␟'; // ␟
 const sectionKeyFor = (chapter: string, sectionLeaf: string): string => `${chapter}${SEP}${sectionLeaf}`;
+
+// (첨부) 물리 재무첨부((첨부)연결재무제표·(첨부)재무제표) → 정규 재무섹션 흡수 (read.py absorbAttached 1:1).
+// sectionPath(공백제거)에서 감지 → chapter→III, sectionLeaf→연결 "2."/별도 "4." (주석은 3./5.). 섹션 위치는
+// 정규(XBRL) 행이 잡게 흡수행 blockOrder 를 크게 밀어 _skel 뒤로(섹션 앞으로 끌림 차단).
+function absorbAttachedRow(r: LeafRow): void {
+	const path = (r.sectionPath ?? '').replace(/\s+/g, '');
+	if (!(path.includes('(첨부)') && path.includes('재무제표'))) return;
+	const consol = path.includes('연결');
+	const note = (r.sectionLeaf ?? '').includes('주석');
+	r.chapter = 'III. 재무에 관한 사항';
+	r.sectionLeaf = note ? (consol ? '3. 연결재무제표 주석' : '5. 재무제표 주석') : consol ? '2. 연결재무제표' : '4. 재무제표';
+	if (r.blockOrder != null) r.blockOrder += 1_000_000;
+}
+
+// 섹션 번호 정렬키 — "2. …"→2, "7-1. …"→[7,1]. 번호 없으면 null(nulls_last). orderBySpine _secNum/_secSub 1:1.
+function sectionNum(sectionLeaf: string): [number | null, number] {
+	const m = /^\s*(\d+)/.exec(sectionLeaf);
+	const sub = /^\s*\d+\s*-\s*(\d+)/.exec(sectionLeaf);
+	return [m ? parseInt(m[1], 10) : null, sub ? parseInt(sub[1], 10) : 0];
+}
 
 // ── alignNotes: 옛 split 주석행(null key) → (scope,정규화제목) 표준 NT_ 정렬 (회사 own 뼈대 우선, 전역 fallback) ──
 const NOTE_TITLE_NORM = /[()·\s]/g; // Python NOTE_TITLE_NORM_PATTERN
@@ -179,8 +208,11 @@ export function buildPanelBundle(
 	anchorLatest(rows);
 	const deduped = dedupKeyed(rows);
 
-	// canonicalChapter (sectionPath 깊은 canonical 원소 우선).
-	for (const r of deduped) r.chapter = canonicalChapter(r.chapter, r.sectionPath);
+	// canonicalChapter (sectionPath 깊은 canonical 원소 우선) + (첨부) 물리 재무첨부 흡수.
+	for (const r of deduped) {
+		r.chapter = canonicalChapter(r.chapter, r.sectionPath);
+		absorbAttachedRow(r);
+	}
 
 	// leafSeq — narrative(disclosureKey null) 는 (chapter,sectionLeaf,leafType,period) 내 blockOrder ordinal rank, keyed=0.
 	const seqGroups = new Map<string, LeafRow[]>();
@@ -229,7 +261,7 @@ export function buildPanelBundle(
 	const latestP = (q4.length ? q4 : periods).reduce((m, p) => (p > m ? p : m), '');
 
 	// 각 agg → cells(join by blockOrder) + skeleton(_skel=latestP _bo, _skelOld=마지막 period _bo).
-	interface Built extends Agg { cells: Record<string, string>; skel: number | null; skelOld: number | null; canonRank: number | null; }
+	interface Built extends Agg { cells: Record<string, string>; skel: number | null; skelOld: number | null; canonRank: number | null; spOrder: number | null; secNum: number | null; secSub: number; }
 	const built: Built[] = [];
 	for (const a of aggs.values()) {
 		const cells: Record<string, string> = {};
@@ -245,13 +277,26 @@ export function buildPanelBundle(
 			if (p === latestP) skel = minBo;
 			if (p >= lastPeriodSeen) { lastPeriodSeen = p; skelOld = minBo; } // 마지막(최대) period 의 _bo
 		}
-		built.push({ ...a, cells, skel, skelOld, canonRank: canonicalRank(a.chapter) });
+		const [secNum, secSub] = sectionNum(a.sectionLeaf);
+		built.push({
+			...a,
+			cells,
+			skel,
+			skelOld,
+			canonRank: canonicalRank(a.chapter),
+			spOrder: spineOrderFor(a.disclosureKey, a.chapter, a.sectionLeaf),
+			secNum,
+			secSub
+		});
 	}
 
-	// order — [_canonRank, _skel, _skelOld, leafSeq] nulls_last (SPINE v1 생략).
+	// order — [_canonRank, _secNum(절 번호), _secSub, _spOrder(XBRL 척추), _skel, _skelOld, leafSeq] nulls_last (orderBySpine 1:1).
 	const nl = (v: number | null) => (v == null ? Infinity : v);
 	built.sort((x, y) =>
 		nl(x.canonRank) - nl(y.canonRank) ||
+		nl(x.secNum) - nl(y.secNum) ||
+		x.secSub - y.secSub ||
+		nl(x.spOrder) - nl(y.spOrder) ||
 		nl(x.skel) - nl(y.skel) ||
 		nl(x.skelOld) - nl(y.skelOld) ||
 		x.leafSeq - y.leafSeq

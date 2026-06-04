@@ -9,7 +9,7 @@ export type CanonNode = readonly [id: string, label: string, keywords: readonly 
 
 // 정부표준 14 서사노드 (고정 순서 = chapter rank) + 드리프트 흡수 키워드.
 export const CANONICAL_L1: readonly CanonNode[] = [
-	['cover', '【 대표이사 등의 확인 】', ['대표이사', '확인']],
+	['cover', '【 대표이사 등의 확인 】', ['대표이사']],
 	['L1_company', 'I. 회사의 개요', ['회사의개요', '회사개요']],
 	['L2_business', 'II. 사업의 내용', ['사업의내용']],
 	['L3_finance', 'III. 재무에 관한 사항', ['재무에관한사항', '첨부재무제표', '첨부연결재무제표', '재무제표', '요약재무']],

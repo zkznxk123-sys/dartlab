@@ -47,24 +47,78 @@
 </script>
 
 {#if segments.length}
-	<div class="space-y-3">
+	<div class="cell-content">
 		{#each segments as seg, i (i)}
 			{#if seg.kind === 'text'}
-				<div class="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">{seg.text}</div>
+				<div class="narrative">{seg.text}</div>
 			{:else}
-				<div class="space-y-1">
+				<div class="table-block">
 					{#if seg.caption || seg.unit}
-						<div class="flex items-baseline justify-between gap-2 text-[11px]">
-							<div class="font-medium">{seg.caption}</div>
-							{#if seg.unit}<div class="text-muted-foreground">{seg.unit}</div>{/if}
+						<div class="caption-row">
+							<div class="caption">{seg.caption}</div>
+							{#if seg.unit}<div class="unit">{seg.unit}</div>{/if}
 						</div>
 					{/if}
 					{#if seg.html}
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						<div class="dartlab-html overflow-x-auto text-xs [&_td]:border [&_td]:border-border/40 [&_td]:px-1.5 [&_td]:py-0.5 [&_th]:border [&_th]:border-border/40 [&_th]:px-1.5 [&_th]:py-0.5">{@html seg.html}</div>
+						<div class="dartlab-html">{@html seg.html}</div>
 					{/if}
 				</div>
 			{/if}
 		{/each}
 	</div>
 {/if}
+
+<style>
+	.cell-content {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.narrative {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		font-size: 13px;
+		line-height: 1.55;
+		color: #cbd5e1;
+	}
+	.table-block {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.caption-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 8px;
+		font-size: 11px;
+	}
+	.caption {
+		font-weight: 600;
+		color: #e2e8f0;
+	}
+	.unit {
+		color: #94a3b8;
+	}
+	.dartlab-html {
+		overflow-x: auto;
+		font-size: 12px;
+		color: #cbd5e1;
+	}
+	.dartlab-html :global(table) {
+		border-collapse: collapse;
+	}
+	.dartlab-html :global(td),
+	.dartlab-html :global(th) {
+		border: 1px solid #1e2433;
+		padding: 3px 6px;
+		text-align: left;
+		vertical-align: top;
+	}
+	.dartlab-html :global(th) {
+		background: rgba(15, 23, 42, 0.6);
+		font-weight: 600;
+		color: #e2e8f0;
+	}
+</style>
