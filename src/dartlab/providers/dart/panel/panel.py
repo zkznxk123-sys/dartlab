@@ -247,6 +247,9 @@ class Panel(pl.DataFrame):
         tag: bool | None = None,
         periods: list[str] | None = None,
         freq: str | None = None,
+        scope: str | None = None,
+        asOf: str | None = None,
+        period: str | None = None,
     ) -> pl.DataFrame | None:
         """섹션 행 검색 + 강한 소스(finance/report) 주입 — facade 진입점.
 
@@ -341,6 +344,7 @@ class Panel(pl.DataFrame):
                     code,
                     statement=key,
                     freq=freq or "quarter",
+                    scope=scope,
                     marketNs=self._marketNs,
                     periods=periods or self._periods,
                 )
@@ -366,9 +370,18 @@ class Panel(pl.DataFrame):
             showFn = getattr(self, "_showFn", None)
             strongFn = getattr(self, "_strongFn", None)
             if showFn is not None and (source in ("finance", "report") or (strongFn is not None and strongFn(key))):
+                # finance/report 모듈(생존)로 직접 forwarding — scope/asOf/period/freq 전체 전달.
+                # panel 은 finance 를 모름; 주입된 callable(_showImpl) 이 dispatch (layer 격리).
+                kw: dict = {}
                 if freq is not None:
-                    return showFn(key, freq=_FINANCE_FREQ.get(freq, freq))
-                return showFn(key)
+                    kw["freq"] = _FINANCE_FREQ.get(freq, freq)
+                if scope is not None:
+                    kw["scope"] = scope
+                if period is not None:
+                    kw["period"] = period
+                if asOf is not None:
+                    kw["asOf"] = asOf
+                return showFn(key, **kw)
         # tag/periods override + code 보유(fresh 인스턴스) 시 재read, 그 외 self 필터.
         if code is not None and ((tag is not None and effTag != self._tag) or periods is not None):
             board: pl.DataFrame | None = _read.readWide(

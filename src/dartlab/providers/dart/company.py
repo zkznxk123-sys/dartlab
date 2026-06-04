@@ -2589,9 +2589,10 @@ class Company:
         from dartlab.providers.dart.panel import Panel as _Panel
 
         p = _Panel(self.stockCode, marketNs="kr")
-        # facade 주입 — c.panel("IS") 강한 소스는 show(finance/report) 위임, 그 외 raw 공시 행 검색.
+        # facade 주입 — c.panel("IS") 강한 소스는 finance/report 모듈(_showImpl 내부 dispatch)에 직접
+        # 붙는다(공개 c.show property 우회). finance 모듈은 삭제 대상이 아님 — panel 이 그 표면이 된다.
         # panel 패키지는 finance 를 import 안 함 — 주입된 callable 만 호출(layer 격리, cycle 0).
-        p._showFn = self.show
+        p._showFn = self._showImpl
         p._strongFn = isStrongTopic
         return p
 
