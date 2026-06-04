@@ -44,9 +44,15 @@ def _resolveHfToken(token: str | None = None) -> str:
         return envTok
     envPath = Path(".env")
     if envPath.exists():
-        for line in envPath.read_text(encoding="utf-8").splitlines():
-            if line.strip().startswith("HF_TOKEN="):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
+        for raw in envPath.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if line.startswith("export "):  # `export HF_TOKEN=...` 형식 허용
+                line = line[7:].strip()
+            if line.startswith("HF_TOKEN="):
+                # 인라인 주석(' #') 제거 + 따옴표/공백 정리. 빈 값이면 fall-through(명확한 에러).
+                val = line.split("=", 1)[1].split(" #", 1)[0].strip().strip('"').strip("'").strip()
+                if val:
+                    return val
     raise ValueError("HF_TOKEN 필요 — 인자/env/.env 어디에도 없음")
 
 
@@ -169,7 +175,10 @@ def uploadCategoryToHf(
             return 0
         nWorkers = int(os.environ.get("HF_UPLOAD_WORKERS", "2"))
         print(f"[hfUpload] {category} 대용량 업로드: {nFiles}개 {dirPath}/** → {repo} (workers={nWorkers})", flush=True)
-        api.upload_large_folder(
+        # retryHfCall 로 감쌈 — upload_large_folder 내부 create_repo 가 429(1000req/5min) 맞으면
+        # 전체 중단되던 것을 5분 윈도 백오프로 재시도(내부 워커 재개성은 별개로 보존).
+        retryHfCall(
+            api.upload_large_folder,
             repo_id=repo,
             repo_type="dataset",
             folder_path=str(base),

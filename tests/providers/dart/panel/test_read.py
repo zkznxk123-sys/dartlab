@@ -257,3 +257,41 @@ def test_align_notes_non_note_region_untouched() -> None:
     )
     out = alignNotes(df)
     assert out["disclosureKey"].to_list() == [None]  # 주석영역 아님 → null 유지
+
+
+def test_ensure_panel_from_hf_transient_vs_absent(monkeypatch, tmp_path) -> None:
+    """ensurePanelFromHf — 일시실패는 영구 마킹 안 함(재시도 가능), 부재는 1회 마킹(silent-empty 신호).
+
+    회귀 가드: 옛 코드는 시도 *전* 마킹 → 일시 네트워크 실패가 세션 내내 영구 empty 였다.
+    또 snapshot_download 는 HF 에 파일 없어도 예외 없이 '성공'(0파일)하므로 부재를 별도 구분해야 한다.
+    """
+    import huggingface_hub
+
+    import dartlab.config as cfg
+    from dartlab.providers.dart.panel import read as R
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setattr(R, "_HF_PANEL_ATTEMPTED", set())
+    monkeypatch.delenv("DARTLAB_NO_HF_DOWNLOAD", raising=False)
+
+    calls = {"n": 0}
+
+    def transientDownload(**k):
+        calls["n"] += 1
+        raise RuntimeError("429 transient")  # 파일 안 만듦
+
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", transientDownload)
+    R.ensurePanelFromHf("005930")
+    R.ensurePanelFromHf("005930")  # 영구 마킹 안 됐으면 다시 시도
+    assert calls["n"] == 2  # 재시도됨(일시실패 비영구)
+    assert "kr:005930" not in R._HF_PANEL_ATTEMPTED
+
+    def absentDownload(**k):
+        calls["n"] += 1  # 성공하나 파일 0 (HF 에 artifact 부재)
+
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", absentDownload)
+    before = calls["n"]
+    R.ensurePanelFromHf("000660")
+    R.ensurePanelFromHf("000660")  # 부재 마킹 → 2번째는 호출 안 됨
+    assert calls["n"] == before + 1  # 1회만(부재 영구 마킹)
+    assert "kr:000660" in R._HF_PANEL_ATTEMPTED

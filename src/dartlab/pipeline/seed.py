@@ -84,15 +84,17 @@ def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int
 def _seedOne(category: str, dataDir: Path, token: str | None) -> tuple[int, int, float]:
     from huggingface_hub import HfApi
 
-    from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+    from dartlab.core.hfRetry import retryHfCall
 
     if category not in DATA_RELEASES:
         raise ValueError(f"unknown category '{category}' — {list(DATA_RELEASES)}")
 
     dirPath = DATA_RELEASES[category]["dir"]
+    repo = repoFor(category)  # 전용 repo(dartOriginal 등) 존중 — HF_REPO 하드코딩 시 빈 seed
     api = HfApi(token=token)
-    print(f"[seed] {category}: list {HF_REPO}/{dirPath}/", flush=True)
-    repoInfo = api.repo_info(repo_id=HF_REPO, repo_type="dataset", files_metadata=True)
+    print(f"[seed] {category}: list {repo}/{dirPath}/", flush=True)
+    repoInfo = retryHfCall(api.repo_info, repo_id=repo, repo_type="dataset", files_metadata=True)
     prefix = f"{dirPath}/"
     remoteFiles = {
         s.rfilename: (s.size or 0)
@@ -105,7 +107,7 @@ def _seedOne(category: str, dataDir: Path, token: str | None) -> tuple[int, int,
     downloadedBytes = 0
     if missing:
         print(f"[seed] {category}: {len(missing)}개 다운로드", flush=True)
-        baseUrl = f"https://huggingface.co/datasets/{HF_REPO}/resolve/main"
+        baseUrl = f"https://huggingface.co/datasets/{repo}/resolve/main"
         with ThreadPoolExecutor(max_workers=4) as pool:
             futures = {pool.submit(_download, f"{baseUrl}/{rel}", dataDir / rel, token): rel for rel, _ in missing}
             for fut in as_completed(futures):

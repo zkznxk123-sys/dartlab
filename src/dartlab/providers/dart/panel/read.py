@@ -191,15 +191,14 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
     if marketNs not in ("kr", "us"):
         return
     code = code.upper() if marketNs == "us" else code  # EDGAR ticker 대소문자 무관 (build 가 upper 저장)
-    _d = _panelDir(code, marketNs)
-    if (_d.parent / f"{code}.parquet").exists() or _d.exists():  # flat 파일 또는 옛 폴더(하위호환)
+    flat = _panelDir(code, marketNs).parent / f"{code}.parquet"
+    if flat.exists():  # flat 파일만 — 옛 nested 폴더는 flat 다운로드를 막지 않음(stale 서빙 방지)
         return
     if _os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
         return
     attemptKey = f"{marketNs}:{code}"
     if attemptKey in _HF_PANEL_ATTEMPTED:
         return
-    _HF_PANEL_ATTEMPTED.add(attemptKey)
     try:
         from huggingface_hub import snapshot_download
 
@@ -219,8 +218,27 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
             allow_patterns=patterns,  # flat 회사당 1파일 (us 는 보드+셀)
             local_dir=str(Path(_cfg.dataDir)),
         )
-    except Exception:  # noqa: BLE001 — 자동로드 실패는 빈 결과(graceful)
+    except Exception as exc:  # noqa: BLE001 — 일시 실패(네트워크/429): 영구 마킹 안 함(다음 호출 재시도)
+        _log.warning("panel %s HF 다운로드 일시 실패(재시도 가능): %s", code, exc)
+        return
+    # snapshot_download 는 allow_patterns 가 HF 에 없어도 *예외 없이* 0 파일로 '성공'한다 — 이게
+    # 옛 silent-empty(reader flat ↔ HF nested 불일치)의 근본. 다운로드 후 파일 존재를 확인해
+    # 부재면 1회 가시 경고 + 영구 마킹(genuinely absent ≠ 일시 실패).
+    if flat.exists():
+        return
+    _HF_PANEL_ATTEMPTED.add(attemptKey)
+    try:
+        from dartlab.core.dataConfig import repoFor as _repoFor
+
+        _log.warning(
+            "panel %s: HF artifact 부재 — 빈 결과(repo=%s, pattern=%s). 데이터 미발행/오경로 가능.",
+            code,
+            _repoFor("panel" if marketNs == "kr" else "edgarPanel"),
+            patterns,
+        )
+    except Exception:  # noqa: BLE001 — 경고 자체 실패는 무시
         pass
+    return
 
 
 def scopeExpr(col: str = "xbrlClass") -> pl.Expr:
@@ -544,6 +562,99 @@ def alignNotes(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
+# (첨부) 물리 재무첨부 흡수 — sectionPath 에서 감지(공백 변형 무시), 정규 재무섹션 sectionLeaf 로 relabel.
+_ATTACH_TAG = "(첨부)"
+
+
+def absorbAttached(df: pl.DataFrame) -> pl.DataFrame:
+    """옛 연차보고서의 ``(첨부)연결재무제표``/``(첨부)재무제표`` 물리첨부를 정규 재무섹션으로 흡수(relabel).
+
+    최신 보고서는 연결/별도 본표가 인라인 XBRL(BS_C/IS_C/CF_C·BS_S 등) 로 ``2. 연결재무제표``/``4. 재무제표``
+    에 들어오지만, 옛 연차본은 같은 본표를 **XBRL 태깅 없는 물리 첨부**(``(첨부)연 결 재 무 제 표``)로 실어
+    ``xbrlClass``/``disclosureKey`` 가 null 이라 ``anchorLatest`` 가 못 잡는다 → ``(첨부)`` 가 ghost 섹션으로 잔존,
+    게다가 ``spine.SPINE`` 에 직접 등재돼(spineOrder) III 머리에 부유한다. 본 함수가 read-time 에 ``sectionPath``
+    (전 깊이 truth, 공백 변형 무시)에서 ``(첨부)`` + 재무제표류를 감지해 ``chapter``→III, ``sectionLeaf``→
+    연결 ``2. 연결재무제표``/별도 ``4. 재무제표`` (주석 하위는 ``3.``/``5. … 주석``) 로 relabel 한다. 정규 식별자가 되어
+    collapse/pivot 이 정규 섹션으로 모으고 ghost 부유가 자연 해소. ``alignNotes`` 와 동형(read-time, 재빌드 무관).
+
+    Args:
+        df: ``canonicalChapterExpr`` 적용 후 long DataFrame (chapter/sectionLeaf/sectionPath 컬럼).
+
+    Returns:
+        ``(첨부)`` 재무첨부 행의 chapter/sectionLeaf 가 정규 재무섹션으로 relabel 된 동일 schema DataFrame.
+        빈/필수컬럼 부재 시 원본.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> out = absorbAttached(longDf)  # doctest: +SKIP
+
+    SeeAlso:
+        - ``anchorLatest`` — keyed era drift 흡수(본 함수는 narrative 물리첨부 흡수 보완).
+        - ``readWide`` — canonicalChapter 직후 본 함수 호출.
+
+    Requires:
+        - polars. sectionPath 컬럼(없으면 원본 반환).
+
+    Capabilities:
+        - 옛 물리 재무첨부를 XBRL 정규 재무섹션으로 read-time 흡수 — ghost 섹션·spine 부유 제거(재빌드 무관).
+
+    Guide:
+        - readWide 가 canonicalChapter 직후 호출. 직접 호출 가능(순수).
+
+    AIContext:
+        - relabel 만(드롭 0) — (첨부) 본문은 정규 섹션의 과거 period 행으로 합류.
+
+    When:
+        - 옛 연차본의 물리 재무첨부를 정규 재무섹션으로 수평화 흡수할 때.
+
+    How:
+        - sectionPath(공백제거)에서 (첨부)+재무제표 감지 → 연결/별도·주석 분기 → chapter/sectionLeaf relabel.
+
+    LLM Specifications:
+        AntiPatterns:
+            - (첨부) 행 드롭 금지 — relabel(데이터 손실 0).
+            - 정규 "2.연결재무제표"(sectionPath 에 (첨부) 없음) 오감지 금지 — sectionPath 의 (첨부) 토큰 필수.
+        OutputSchema:
+            - ``absorbAttached(df) -> pl.DataFrame`` (chapter/sectionLeaf relabel).
+        Prerequisites:
+            - chapter/sectionLeaf/sectionPath 컬럼.
+        Freshness:
+            - read 파생 — 매 호출(재빌드 무관).
+        Dataflow:
+            - sectionPath(no-ws) → (첨부)+재무제표 감지 → 연결/별도·주석 → chapter/sectionLeaf relabel.
+        TargetMarkets:
+            - KR (DART).
+    """
+    if df.is_empty() or "sectionLeaf" not in df.columns or "sectionPath" not in df.columns:
+        return df
+    pathNoWs = pl.col("sectionPath").fill_null("").str.replace_all(_WS_RE, "")
+    isAttach = pathNoWs.str.contains(_ATTACH_TAG, literal=True) & pathNoWs.str.contains("재무제표", literal=True)
+    isConsol = pathNoWs.str.contains("연결", literal=True)
+    isNote = pl.col("sectionLeaf").fill_null("").str.contains("주석", literal=True)
+    newSection = (
+        pl.when(isAttach & isNote & isConsol)
+        .then(pl.lit("3. 연결재무제표 주석"))
+        .when(isAttach & isNote)
+        .then(pl.lit("5. 재무제표 주석"))
+        .when(isAttach & isConsol)
+        .then(pl.lit("2. 연결재무제표"))
+        .when(isAttach)
+        .then(pl.lit("4. 재무제표"))
+        .otherwise(pl.col("sectionLeaf"))
+    )
+    newChapter = pl.when(isAttach).then(pl.lit("III. 재무에 관한 사항")).otherwise(pl.col("chapter"))
+    cols = [newChapter.alias("chapter"), newSection.alias("sectionLeaf")]
+    # 섹션 위치는 정규(XBRL) 행이 잡아야 한다 — 흡수된 옛 물리첨부 행은 blockOrder 를 크게 밀어 _skel 정렬에서
+    # 섹션 뒤로(섹션이 앞으로 끌려가는 회귀 차단). 같은 offset 이라 흡수행 상호 순서·본문 join 은 불변.
+    if "blockOrder" in df.columns:
+        cols.append(
+            pl.when(isAttach).then(pl.col("blockOrder") + 1_000_000).otherwise(pl.col("blockOrder")).alias("blockOrder")
+        )
+    return df.with_columns(cols)
+
+
 def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = None) -> pl.DataFrame | None:
     """panel long format read + disclosureKey 보장 (period 파일 prune).
 
@@ -712,6 +823,9 @@ def readWide(
     if "chapter" in long.columns:
         pathCol = "sectionPath" if "sectionPath" in long.columns else "chapter"
         long = long.with_columns(canonicalChapterExpr("chapter", pathCol).alias("chapter"))
+    # (첨부) 물리 재무첨부((첨부)연결재무제표·(첨부)재무제표) → 정규 재무섹션(2.연결재무제표/4.재무제표 …)으로 흡수.
+    # 옛 연차본 물리첨부(XBRL 태깅 0 → anchor 못 잡음)가 ghost 섹션·spine 부유로 남는 것을 read-time 정규화.
+    long = absorbAttached(long)
     # narrative 수평화 — 과거 뭉태기 leaf 를 **섹션 내 문서위치**로 정렬(leafSeq). 각 leaf(표·텍스트)가 별도
     # 행이라 표↔표 안 뭉침(재뭉침 0). 같은 섹션의 같은 위치 표가 기간 간 한 행(매출실적 등 안정위치 표는 정렬).
     # 위치정렬은 안정위치 표엔 효과적이나 삽입 누적 시 drift — 표구조-aware fuzzy 정렬은 후속 정공(operation.architecture).

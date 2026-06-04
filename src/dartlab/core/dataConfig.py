@@ -23,17 +23,14 @@ DATA_RELEASES: dict[str, dict] = {
     # docs 농장 은퇴 — "sections" SSOT artifact category 제거(buildSections/sectionsStorage 삭제,
     # sync/runtime 참조 0). HF 기존 sections 데이터는 보존(코드만 제거). panel 이 공시 수평화 표면.
     "panel": {
-        # PRD jazzy-napping-seal — panel(공시 수평화) SSOT artifact (S5).
-        # nested: data/dart/panel/{code}/{period}.parquet (period-sharded, 14-col) 단일.
-        # providers.dart.panel.build 가 zip→14col 생산, disclosureKey 부착(build) → providers.dart.panel
-        # 이 read_parquet read. 옛 sections(dart/docs overlap) 와 분리된 별도 트리.
-        # nested=True 는 uploadData.py 가 rglob 으로 종목 디렉터리 안 파일 모두 업로드.
-        # 빌드 입력(panelXbrlRef.parquet)·어휘(bridge/panelBridge.parquet)는 build-side
-        # (사용자는 disclosureKey 채워진 artifact 만 다운로드 — bridge 불요). _index/_label 폐기.
+        # panel(공시 수평화) SSOT artifact — **flat** data/dart/panel/{code}.parquet (회사당 1파일,
+        # 17-col). providers.dart.panel.build 가 zip→17col 생산(disclosureKey 부착) → providers.dart.panel
+        # 이 read_parquet read(reader/uploader 모두 flat). EDGAR edgarPanel 과 동일 flat 정책.
+        # ⚠ nested 금지: 옛 period-sharded {code}/{period}.parquet 표기는 폐기됨 — nested:True 면
+        # uploader rglob·downloadAll glob 이 옛 nested 트리를 잘못 휩쓸어 reader(flat)와 어긋난다.
         "dir": "dart/panel",
-        "label": "DART 공시 panel 수평화 artifact (period-sharded, 14-col)",
+        "label": "DART 공시 panel 수평화 artifact (회사당 flat, 17-col)",
         "public": True,
-        "nested": True,
     },
     "finance": {
         "dir": "dart/finance",
