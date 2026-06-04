@@ -187,21 +187,40 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
 
 
 _DART_VIEWER = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo={}"
+# SEC EDGAR filing index — {cik}=leading-zero strip, {accDash}=accession 무하이픈, {acc}=accession 원형.
+_SEC_VIEWER = "https://www.sec.gov/Archives/edgar/data/{cik}/{accDash}/{acc}-index.htm"
 
 
-def _panelDartUrls(company: Company, periodCols: list[str], periods: list[str] | None) -> dict[str, str | None]:
-    """period → DART 뷰어 URL — panel artifact 의 rceptNo 로 생성 (docs 미로드).
+def _viewerUrlForFiling(*, isUs: bool, rceptNo: str, cik: str | None) -> str | None:
+    """rceptNo(+cik) → 시장별 공시 뷰어 URL.
+
+    KR(DART): ``main.do?rcpNo={rceptNo}``. US(EDGAR): SEC filing index
+    ``Archives/edgar/data/{cik}/{accDash}/{accession}-index.htm`` — rceptNo 가 SEC
+    accession(``0000320193-25-000079``) 이고 cik 가 있어야 생성 (없으면 None).
+    """
+    if not isUs:
+        return _DART_VIEWER.format(rceptNo)
+    c = str(cik or "").lstrip("0")
+    if not c:
+        return None
+    return _SEC_VIEWER.format(cik=c, accDash=rceptNo.replace("-", ""), acc=rceptNo)
+
+
+def _panelViewerUrls(company: Company, periodCols: list[str], periods: list[str] | None) -> dict[str, str | None]:
+    """period → 공시 뷰어 URL — panel artifact 의 rceptNo 로 생성 (docs 미로드, 시장분기 KR/US).
 
     옛 ``_dartUrlForPeriod`` 는 ``filings()`` → docs(2GB) 를 로드해 panel 엔드포인트에서
     GC 폭발·지연을 유발했다. panel ``readLong`` 의 ``rceptNo`` 로 대체 — panel 자급(docs 0),
-    window prune 로 가벼움.
+    window prune 로 가벼움. KR=DART, US=SEC EDGAR (``_viewerUrlForFiling`` 분기).
     """
     import polars as pl
 
     from dartlab.providers.dart.panel.read import readLong
 
     out: dict[str, str | None] = {p: None for p in periodCols}
-    ns = "us" if getattr(company, "market", "") == "US" else "kr"
+    isUs = getattr(company, "market", "") == "US"
+    ns = "us" if isUs else "kr"
+    cik = getattr(company, "cik", None)
     long = readLong(company.stockCode, marketNs=ns, periods=periods)
     if long is None or "rceptNo" not in long.columns or "period" not in long.columns:
         return out
@@ -209,7 +228,7 @@ def _panelDartUrls(company: Company, periodCols: list[str], periods: list[str] |
     for r in rcpt.iter_rows(named=True):
         p, no = r.get("period"), r.get("rceptNo")
         if p in out and no:
-            out[p] = _DART_VIEWER.format(no)
+            out[p] = _viewerUrlForFiling(isUs=isUs, rceptNo=no, cik=cik)
     return out
 
 
@@ -219,7 +238,7 @@ def serializePanelRows(wide, periodCols: list[str]) -> list[dict[str, Any]]:
     각 행 = panel index(chapter/sectionLeaf/blockLeaf/disclosureKey/scope) + 본문 cells.
     ``cells`` 는 period→contentRaw(raw XML 무손실, tag=True). 빈 셀 drop, 본문 0 행 skip
     (visible window 의 ghost row 차단). ``blockType`` 은 셀에 ``"<TABLE"`` 포함 여부 파생
-    (panel 14-col 에 blockType 컬럼 없음 — frontend content-sniffing 과 동일 규칙 1회).
+    (panel 16-col 에 blockType 컬럼 없음 — frontend content-sniffing 과 동일 규칙 1회).
     """
     rows: list[dict[str, Any]] = []
     for r in wide.iter_rows(named=True):
@@ -286,7 +305,7 @@ def buildPanelGrid(
 
     periodCols = _periodColumns(wide)
     rows = serializePanelRows(wide, periodCols)
-    dartUrlByPeriod = _panelDartUrls(company, periodCols, periodsArg)
+    dartUrlByPeriod = _panelViewerUrls(company, periodCols, periodsArg)
     return {
         **base,
         "periods": periodCols,

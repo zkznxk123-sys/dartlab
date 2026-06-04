@@ -13,6 +13,7 @@ import polars as pl
 import pytest
 
 from dartlab.server.services.companyApi import (
+    _viewerUrlForFiling,
     sectionKeyFor,
     serializePanelRows,
     splitSectionKey,
@@ -38,6 +39,23 @@ def _sampleWide() -> pl.DataFrame:
             "2024Q4": ["<P>옛 본문</P>", "", None],
         }
     )
+
+
+class TestViewerUrlForFiling:
+    """공시 뷰어 URL 시장분기 — KR=DART(rcpNo), US=SEC EDGAR(filing index)."""
+
+    def test_kr_dart_url(self):
+        url = _viewerUrlForFiling(isUs=False, rceptNo="20260515002181", cik=None)
+        assert url == "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260515002181"
+
+    def test_us_sec_url(self):
+        # rceptNo = SEC accession, cik leading-zero strip + accession 무하이픈 경로.
+        url = _viewerUrlForFiling(isUs=True, rceptNo="0000320193-25-000079", cik="0000320193")
+        assert url == "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/0000320193-25-000079-index.htm"
+
+    def test_us_without_cik_returns_none(self):
+        # cik 없으면 SEC URL 생성 불가 → None (잘못된 DART URL 박지 않음).
+        assert _viewerUrlForFiling(isUs=True, rceptNo="0000320193-25-000079", cik=None) is None
 
 
 class TestSerializePanelRows:
