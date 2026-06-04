@@ -101,7 +101,7 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
     Example:
         >>> traceFinanceTopic(c, "BS", period="2024")
     """
-    from dartlab.providers.dart.docs.sections import rawPeriod
+    from dartlab.providers.dart.sectionPeriod import rawPeriod
 
     requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
     rows: list[tuple[str, str]] = []

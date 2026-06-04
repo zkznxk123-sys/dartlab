@@ -560,7 +560,7 @@ class _ProfileAccessor:
         Raises:
             없음.
         """
-        from dartlab.providers.dart.docs.sections import rawPeriod
+        from dartlab.providers.dart.sectionPeriod import rawPeriod
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
         facts = self.facts
