@@ -225,12 +225,12 @@ def auditCompany(stockCode: str) -> list[dict]:
 
     # finance topics
     for topic in TOPICS_FINANCE:
-        r = _callSafe(c.show, topic, engine="company.show")
+        r = _callSafe(c.panel, topic, engine="company.show")
         results.append({"engine": "company.show", "axis": topic, "stockCode": stockCode, **r})
 
     # notes topics
     for topic in TOPICS_NOTES:
-        r = _callSafe(c.show, topic, engine="company.notes")
+        r = _callSafe(c.panel, topic, engine="company.notes")
         results.append({"engine": "company.notes", "axis": topic, "stockCode": stockCode, **r})
 
     return results

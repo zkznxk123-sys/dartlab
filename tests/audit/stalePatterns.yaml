@@ -126,7 +126,7 @@ patterns:
   - name: docs_namespace_attr
     regex: '\bc\.docs\.\w+'
     severity: error
-    message: "Plan v10: c.docs.X namespace 폐기. c.show(topic) 사용."
+    message: "Plan v10: c.docs.X namespace 폐기. c.panel(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
       - operation.apiContract  # anti-pattern 명시
@@ -136,7 +136,7 @@ patterns:
   - name: finance_namespace_attr
     regex: '\bc\.finance\.\w+'
     severity: error
-    message: "Plan v10: c.finance.X namespace 폐기. c.show(topic) 사용."
+    message: "Plan v10: c.finance.X namespace 폐기. c.panel(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
       - operation.apiContract
@@ -146,7 +146,7 @@ patterns:
   - name: report_namespace_attr
     regex: '\bc\.report\.\w+'
     severity: error
-    message: "Plan v10: c.report.X namespace 폐기. c.show(topic) 사용."
+    message: "Plan v10: c.report.X namespace 폐기. c.panel(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
       - operation.apiContract
@@ -155,7 +155,7 @@ patterns:
   - name: profile_namespace_attr
     regex: '\bc\.profile\.\w+'
     severity: error
-    message: "Plan v10: c.profile.X namespace 폐기. c.show(topic) 사용."
+    message: "Plan v10: c.profile.X namespace 폐기. c.panel(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
       - operation.apiContract

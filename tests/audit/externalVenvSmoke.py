@@ -60,8 +60,8 @@ def main() -> int:
         return 2
 
     # 2. show (BS/ratios — finance accessor)
-    results["show.BS"] = test("c.show('BS')", lambda: c.show("BS"))
-    results["show.ratios"] = test("c.show('ratios')", lambda: c.show("ratios"))
+    results["show.BS"] = test("c.panel('BS')", lambda: c.panel("BS"))
+    results["show.ratios"] = test("c.panel('ratios')", lambda: c.panel("ratios"))
 
     # 3. analysis — 가치평가 (dFV) + 종합평가
     results["analysis.valuation"] = test(

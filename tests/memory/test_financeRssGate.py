@@ -45,11 +45,11 @@ def test_simple_show_peak_rss_under_1000mb(stockCode: str) -> None:
         pytest.skip("peak RSS 측정 불가 (OS 미지원)")
 
     c = Company(stockCode)
-    c.show("IS")
-    c.show("BS")
-    c.show("CF")
+    c.panel("IS")
+    c.panel("BS")
+    c.panel("CF")
     try:
-        c.show("businessOverview")
+        c.panel("businessOverview")
     except Exception:  # noqa: BLE001 — sections 없으면 finance 만으로 검증
         pass
 
@@ -78,7 +78,7 @@ def test_repeated_company_sweep_rss_drift_under_500mb() -> None:
 
     for stockCode in available:
         c = Company(stockCode)
-        c.show("IS")
+        c.panel("IS")
         cleanupBetweenCompanies(label=stockCode)
 
     peakEnd = getPeakRssMb()

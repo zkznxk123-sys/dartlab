@@ -240,7 +240,7 @@ def findRegularFilings(
 
     AIContext:
         Ask Workbench EDGAR filings core — LLM 이 US 회사 공시 retrieval 시 entry.
-        결과 → ``c.docs.sections`` / ``c.docs.search`` 후속 호출의 accession_no 공급.
+        결과 → ``c.panel`` / ``c.panel.search`` 후속 호출의 accession_no 공급.
 
     LLM Specifications:
         AntiPatterns:

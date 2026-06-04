@@ -61,7 +61,7 @@ def test_show_registeredTopic_noValueError(samsungCompany, topic):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         try:
-            result = samsungCompany.show(topic)
+            result = samsungCompany.panel(topic)
         except ValueError as e:
             pytest.fail(f"show({topic!r}) ValueError — registry 에 등록된 topic 인데도 라우팅 실패: {e}")
         except NotImplementedError:
@@ -78,7 +78,7 @@ def test_show_unknownTopic_warnsButNoCrash(samsungCompany):
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         try:
-            result = samsungCompany.show("definitely_not_a_real_topic_xyz123")
+            result = samsungCompany.panel("definitely_not_a_real_topic_xyz123")
         except Exception as e:
             pytest.fail(f"unknown topic 에서 예상 외 크래시: {type(e).__name__}: {e}")
         # 결과는 None, warning 이 발생했을 수 있음 (엄격히 요구하진 않음)

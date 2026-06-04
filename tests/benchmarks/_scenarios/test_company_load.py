@@ -41,6 +41,6 @@ class TestCompanyLoad:
             return
 
         def showIs() -> object:
-            return company.show("IS")
+            return company.panel("IS")
 
         benchmark(showIs)

@@ -103,7 +103,7 @@ class _DocsNamespace:
             pl.DataFrame — sections wide DataFrame.
 
         Guide:
-            - "EDINET docs sections" → ``c.docs.sections``.
+            - "EDINET docs sections" → ``c.panel``.
 
         SeeAlso:
             - ``_loadSections`` (모듈 private) — 본 함수 본체.

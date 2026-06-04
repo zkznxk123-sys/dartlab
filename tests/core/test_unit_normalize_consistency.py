@@ -46,12 +46,12 @@ def _maxAbsLog(df, col: str) -> float | None:
     ],
 )
 def test_notes_unit_consistency(stockCode: str, notesKey: str, refLog: float, tolerance: float):
-    """notes 가 원 단위로 노출되어야 한다 (Plan v10: c.show("inventory") 등)."""
+    """notes 가 원 단위로 노출되어야 한다 (Plan v10: c.panel("inventory") 등)."""
     import dartlab
 
     c = dartlab.Company(stockCode)
     try:
-        df = c.show(notesKey)
+        df = c.panel(notesKey)
     except (ValueError, AttributeError):
         df = None
     if df is None or not hasattr(df, "columns"):

@@ -22,7 +22,7 @@ class TestShowTypeContract:
 
         c = Company(SAMSUNG)
         for topic in ("BS", "IS", "CF", "CIS", "SCE"):
-            result = c.show(topic)
+            result = c.panel(topic)
             assert result is None or isinstance(result, pl.DataFrame), (
                 f"show('{topic}') returned {type(result).__name__}, expected DataFrame | None"
             )
@@ -31,7 +31,7 @@ class TestShowTypeContract:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        result = c.show("ratios")
+        result = c.panel("ratios")
         assert result is None or isinstance(result, pl.DataFrame)
 
     def test_report_topics_return_dataframe(self):
@@ -39,7 +39,7 @@ class TestShowTypeContract:
 
         c = Company(SAMSUNG)
         for topic in ("dividend", "employee", "majorHolder", "audit"):
-            result = c.show(topic)
+            result = c.panel(topic)
             assert result is None or isinstance(result, pl.DataFrame), (
                 f"show('{topic}') returned {type(result).__name__}, expected DataFrame | None"
             )
@@ -49,7 +49,7 @@ class TestShowTypeContract:
 
         c = Company(SAMSUNG)
         for topic in ("salesOrder", "riskDerivative", "rawMaterial", "segments", "costByNature"):
-            result = c.show(topic)
+            result = c.panel(topic)
             assert result is None or isinstance(result, pl.DataFrame), (
                 f"show('{topic}') returned {type(result).__name__}, expected DataFrame | None"
             )
@@ -59,7 +59,7 @@ class TestShowTypeContract:
 
         c = Company(SAMSUNG)
         for topic in ("companyOverview", "businessOverview"):
-            result = c.show(topic)
+            result = c.panel(topic)
             assert result is None or isinstance(result, pl.DataFrame), (
                 f"show('{topic}') returned {type(result).__name__}, expected DataFrame | None"
             )
@@ -68,14 +68,14 @@ class TestShowTypeContract:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        assert c.show("completelyFakeTopicXyz") is None
+        assert c.panel("completelyFakeTopicXyz") is None
 
     def test_all_topics_satisfy_contract(self):
         from dartlab import Company
 
         c = Company(SAMSUNG)
         for topic in c.topics["topic"].to_list():
-            result = c.show(topic)
+            result = c.panel(topic)
             assert result is None or isinstance(result, pl.DataFrame), (
                 f"show('{topic}') returned {type(result).__name__}, expected DataFrame | None"
             )
@@ -97,7 +97,7 @@ class TestPerformanceRegression:
 
         c = Company(SAMSUNG)
         start = time.perf_counter()
-        c.show("BS")
+        c.panel("BS")
         assert time.perf_counter() - start < 5.0
 
 

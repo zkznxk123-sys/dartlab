@@ -14,8 +14,8 @@
   3. delta = baseline - after = 처방 효과
 
 c.story() 가 너무 오래 걸리므로 본 도구는 *대표 호출 path* 만:
-  - c.show("IS"), c.show("BS"), c.show("CF") — finance build trigger
-  - c.show("businessOverview") — sections build trigger
+  - c.panel("IS"), c.panel("BS"), c.panel("CF") — finance build trigger
+  - c.panel("businessOverview") — sections build trigger
   - c.analysis("financial", "수익성") — calc cross-statement trigger 1개
 
 마커: ``memory + slow + realData``. realData 부재 시 skip.
@@ -61,15 +61,15 @@ def test_measure_combined_peak_rss(stockCode: str, capsys) -> None:
     c = Company(stockCode)
 
     try:
-        c.show("IS")
-        c.show("BS")
-        c.show("CF")
+        c.panel("IS")
+        c.panel("BS")
+        c.panel("CF")
     except Exception as exc:  # noqa: BLE001
         with capsys.disabled():
             print(f"\n[measureFinancePeak] {stockCode} c.show finance 실패: {exc}")
 
     try:
-        c.show("businessOverview")
+        c.panel("businessOverview")
     except Exception as exc:  # noqa: BLE001
         with capsys.disabled():
             print(f"[measureFinancePeak] {stockCode} c.show sections 실패: {exc}")

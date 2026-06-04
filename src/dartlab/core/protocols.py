@@ -178,16 +178,11 @@ class RawProviderCompanyProtocol(Protocol):
         ...
 
     # Plan v10 P0/P1: c.BS / c.IS / c.CF / c.CIS / c.ratios / c.SCE property 제거.
-    # 사용자 진입점은 c.show("IS", freq=, scope=) / c.select(...) 만 (api-contract).
+    # 공개 show 은퇴 → 사용자 진입점은 c.panel(key, freq=, scope=) / c.select(...) 만 (api-contract).
 
-    def show(
-        self,
-        topic: str,
-        block: int | None = None,
-        *,
-        period: str | list[str] | None = None,
-    ) -> pl.DataFrame | None:
-        """topic payload 조회."""
+    @property
+    def panel(self) -> Any:
+        """공시 수평화 단일 표면 — c.panel(key)/c.panel("IS")/c.panel.search(...). show 대체."""
         ...
 
     def select(

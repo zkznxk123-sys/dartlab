@@ -45,12 +45,12 @@ def main():
     print(f"  c.index                   : {t:.3f}s")
 
     # 3. show("BS")
-    t, _ = _median(lambda: c.show("BS"))
-    print(f"  c.show('BS')              : {t:.3f}s")
+    t, _ = _median(lambda: c.panel("BS"))
+    print(f"  c.panel('BS')              : {t:.3f}s")
 
     # 4. show("companyOverview")
-    t, _ = _median(lambda: c.show("companyOverview"))
-    print(f"  c.show('companyOverview') : {t:.3f}s")
+    t, _ = _median(lambda: c.panel("companyOverview"))
+    print(f"  c.panel('companyOverview') : {t:.3f}s")
 
     # 5. diff()
     t, _ = _median(lambda: c.diff())

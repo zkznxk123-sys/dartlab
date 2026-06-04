@@ -86,7 +86,7 @@ def test_provider_company_isinstance_baseline() -> None:
                 continue
             # isinstance 호출 가능성만 검증 (실 인스턴스 생성은 무거움 — 회귀 가드는 클래스 검증만)
             CompanyCls = mod.Company
-            requiredAttrs = {"show", "select", "trace", "filings"}
+            requiredAttrs = {"panel", "select", "trace", "filings"}
             missingAttrs = requiredAttrs - set(dir(CompanyCls))
             if missingAttrs:
                 violations.append(f"{providerName}: {missingAttrs} 메서드 부재")
