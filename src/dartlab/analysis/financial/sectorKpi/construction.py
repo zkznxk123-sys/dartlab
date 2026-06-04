@@ -66,42 +66,50 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
     except (AttributeError, ValueError, TypeError):
         pass
 
-    # ── 도급 vs 자체개발 비중 (sections productService에서 키워드 추출) ──
+    # ── 도급 vs 자체개발 비중 (show 은퇴 → 공통파서 panel 제품/부문 표 키워드+금액) ──
     try:
-        ps = company.show("productService")
-        if ps is None:
-            ps = company.show("segments")
-        if ps is not None and hasattr(ps, "to_dicts"):
-            rows = ps.to_dicts()
-            contract_kw = ["도급", "시공", "건축"]
-            self_dev_kw = ["자체", "분양", "개발", "매각"]
-            contract_rev = sum(
-                abs(float(r.get("amount", 0) or 0))
-                for r in rows
-                if any(k in str(r.get("product", "")) for k in contract_kw)
-            )
-            selfdev_rev = sum(
-                abs(float(r.get("amount", 0) or 0))
-                for r in rows
-                if any(k in str(r.get("product", "")) for k in self_dev_kw)
-            )
-            total = contract_rev + selfdev_rev
-            if total > 0:
-                result["contractMix"] = {
-                    "contractRatio": round(contract_rev / total * 100, 1),
-                    "selfDevRatio": round(selfdev_rev / total * 100, 1),
-                    "note": "도급=시공/건축 키워드, 자체개발=분양/매각 키워드 기반 추정",
-                }
+        from dartlab.providers.dart.sections import sectionTables
+        from dartlab.providers.dart.tableRows import parseAmount
+
+        code = getattr(company, "stockCode", None)
+        tables = (
+            (sectionTables(code, sectionPattern="제품") or sectionTables(code, sectionPattern="부문")) if code else []
+        )
+        contract_kw = ["도급", "시공", "건축"]
+        self_dev_kw = ["자체", "분양", "개발", "매각"]
+        contract_rev = 0.0
+        selfdev_rev = 0.0
+        for table in tables:
+            for row in table[1:]:
+                text = " ".join(row)
+                amt = next((a for a in (parseAmount(c) for c in row) if a), None) or 0.0
+                if any(k in text for k in contract_kw):
+                    contract_rev += abs(amt)
+                elif any(k in text for k in self_dev_kw):
+                    selfdev_rev += abs(amt)
+        total = contract_rev + selfdev_rev
+        if total > 0:
+            result["contractMix"] = {
+                "contractRatio": round(contract_rev / total * 100, 1),
+                "selfDevRatio": round(selfdev_rev / total * 100, 1),
+                "note": "도급=시공/건축 키워드, 자체개발=분양/매각 키워드 기반 추정",
+            }
     except (AttributeError, ValueError, TypeError, KeyError):
         pass
 
-    # ── PF 노출 (충당부채/차입금에서 PF 키워드 탐색) ──
+    # ── PF 노출 (show 은퇴 → 공통파서 panel 충당부채 섹션 본문 PF 키워드) ──
     try:
-        provisions = company.show("provisions")
-        if provisions is not None and hasattr(provisions, "to_dicts"):
-            pf_items = [r for r in provisions.to_dicts() if "PF" in str(r) or "프로젝트" in str(r)]
-            if pf_items:
-                result["pfExposure"] = {"pfRelatedItems": len(pf_items), "note": "충당부채 내 PF 관련 항목 수"}
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionTexts
+
+        code = getattr(company, "stockCode", None)
+        texts = sectionTexts(code) if code else None
+        if texts is not None and not texts.is_empty():
+            sub = texts.filter(pl.col("sectionLeaf").str.contains("충당부채"))
+            pf_count = sum(1 for cr in sub["contentRaw"].to_list() if cr and ("PF" in cr or "프로젝트" in cr))
+            if pf_count:
+                result["pfExposure"] = {"pfRelatedItems": pf_count, "note": "충당부채 섹션 내 PF 관련 본문 수"}
     except (AttributeError, ValueError, TypeError, KeyError):
         pass
 

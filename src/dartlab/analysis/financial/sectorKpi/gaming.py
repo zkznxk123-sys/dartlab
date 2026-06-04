@@ -48,9 +48,13 @@ def calcGamingKpis(company, *, basePeriod: str | None = None) -> dict | None:
     result: dict = {}
 
     try:
-        ps = company.show("productService")
-        if ps is None:
-            ps = company.show("segments")
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionRows
+
+        code = getattr(company, "stockCode", None)
+        _r = (sectionRows(code, sectionPattern="제품") or sectionRows(code, sectionPattern="부문")) if code else []
+        ps = pl.DataFrame(_r) if _r else None
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()
             if not rows:

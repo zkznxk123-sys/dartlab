@@ -84,10 +84,14 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
 
     # ── 세그먼트에서 반도체 관련 매출 추정 ──
     try:
-        # DART: productService, EDGAR: segments fallback
-        ps = company.show("productService")
-        if ps is None:
-            ps = company.show("segments")
+        # show 은퇴 → 공통파서 panel 제품/부문 표 (EDGAR segments fallback)
+        import polars as pl
+
+        from dartlab.providers.dart.sections import sectionRows
+
+        code = getattr(company, "stockCode", None)
+        _r = (sectionRows(code, sectionPattern="제품") or sectionRows(code, sectionPattern="부문")) if code else []
+        ps = pl.DataFrame(_r) if _r else None
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()
             semi_kw = [

@@ -129,6 +129,38 @@ def sectionTables(
     return tables
 
 
+def sectionRows(
+    code: str,
+    *,
+    sectionPattern: str | None = None,
+    period: str | None = None,
+    marketNs: str = "kr",
+) -> list[dict[str, str]]:
+    """panel 섹션 표 → 헤더키 dict 행 — 엔진이 자기 패턴/키로 해석. topic 설정 0(농장 아님).
+
+    ``sectionTables``(표×행×셀) 를 첫 행 헤더 기준 dict 로 평탄화. 호출 엔진이 sectionPattern
+    과 컬럼 키를 직접 지정하므로 per-topic 설정 레지스트리가 아니다(공통 헬퍼 1개).
+
+    Args:
+        code: 종목코드.
+        sectionPattern: sectionLeaf 필터 정규식.
+        period: panel period. None = 전 기간.
+        marketNs: 시장 namespace.
+
+    Returns:
+        list[dict[str, str]] — 헤더(첫 행) 키 → 셀 값. 표 없으면 빈 list.
+
+    Example:
+        >>> sectionRows("005930", sectionPattern="제품")  # doctest: +SKIP
+    """
+    from dartlab.providers.dart.tableRows import tableToRowDicts
+
+    rows: list[dict[str, str]] = []
+    for table in sectionTables(code, sectionPattern=sectionPattern, period=period, marketNs=marketNs):
+        rows.extend(tableToRowDicts(table))
+    return rows
+
+
 def parseXmlTables(content: str) -> list[list[list[str]]]:
     """DART XML 본문 → 표 리스트(행 × 셀 텍스트). lxml recover 파싱.
 
@@ -171,4 +203,4 @@ def parseXmlTables(content: str) -> list[list[list[str]]]:
     return tables
 
 
-__all__ = ["sectionTexts", "sectionsWide", "sectionTables", "parseXmlTables"]
+__all__ = ["sectionTexts", "sectionsWide", "sectionTables", "sectionRows", "parseXmlTables"]
