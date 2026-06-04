@@ -2,6 +2,7 @@
 	// 공시뷰어 — panel 하나로 브라우저 readWide → TOC + 항목×기간 격자 + 타임라인 + 원본 링크.
 	// 디자인 = scan 방식(flat #050811 · #1e2433 보더 · 오렌지 단일 액센트). 풀블리드(좌우 패딩 0 · 갭 0).
 	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
 	import { Maximize2, Minimize2, Columns3 } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
@@ -34,6 +35,11 @@
 	// code 바뀌면(검색 이동) 재로드.
 	$effect(() => {
 		const c = code;
+		try {
+			localStorage.setItem('dartlab:lastViewer', c); // 마지막 본 종목 캐시 (재방문 시 /viewer 가 복원)
+		} catch {
+			/* localStorage 불가 무시 */
+		}
 		loading = true;
 		errorMsg = null;
 		bundle = null;
@@ -124,9 +130,22 @@
 	{/if}
 
 	{#if loading}
-		<div class="state"><div class="spinner"></div><p>{code} 공시 본문을 여는 중</p></div>
+		<div class="state">
+			<picture>
+				<source srcset="{base}/avatar-study.webp" type="image/webp" />
+				<img class="state-avatar" src="{base}/avatar-study.png" alt="" width="72" height="72" />
+			</picture>
+			<div class="spinner"></div>
+			<p>{corpName || code} 공시 본문을 여는 중</p>
+		</div>
 	{:else if errorMsg}
-		<div class="state"><p>{errorMsg}</p></div>
+		<div class="state">
+			<picture>
+				<source srcset="{base}/avatar-curious.webp" type="image/webp" />
+				<img class="state-avatar" src="{base}/avatar-curious.png" alt="" width="72" height="72" />
+			</picture>
+			<p>{errorMsg}</p>
+		</div>
 	{:else if bundle}
 		<div class="studio">
 			<aside class="toc">
@@ -263,14 +282,22 @@
 
 	.state {
 		flex: 1 1 auto;
-		display: grid;
-		place-items: center;
-		gap: 12px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 14px;
 		text-align: center;
+	}
+	.state-avatar {
+		border-radius: 50%;
+		opacity: 0.95;
+		filter: drop-shadow(0 4px 16px rgba(251, 146, 60, 0.18));
 	}
 	.state p {
 		color: #94a3b8;
 		font-size: 13px;
+		margin: 0;
 	}
 	.spinner {
 		width: 28px;
