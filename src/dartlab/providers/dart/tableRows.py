@@ -47,7 +47,7 @@ def extractTables(content: str) -> list[list[list[str]]]:
         없음.
 
     Example:
-        >>> from dartlab.industry.build.table_parser import extractTables
+        >>> from dartlab.providers.dart.tableRows import extractTables
         >>> tables = extractTables("|a|b|\\n|---|---|\\n|1|2|")
         >>> tables
         [[['a', 'b'], ['1', '2']]]
@@ -67,8 +67,8 @@ def extractTables(content: str) -> list[list[list[str]]]:
         - 외부 의존 없음 — 순수 텍스트 파싱.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.findTableByHeaders`` : 본 결과 검색
-        - ``dartlab.industry.build.table_parser.tableToRowDicts`` : 헤더 기반 dict 변환
+        - ``dartlab.providers.dart.tableRows.findTableByHeaders`` : 본 결과 검색
+        - ``dartlab.providers.dart.tableRows.tableToRowDicts`` : 헤더 기반 dict 변환
 
     AIContext:
         AI 가 docs 본문 표를 직접 다루지 않는다 (table_parser 가 처리한 후 IndustryEdge 형태로
@@ -135,7 +135,7 @@ def tableToRowDicts(table: list[list[str]]) -> list[dict[str, str]]:
         - 외부 의존 없음.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.tableToRowDictsWithHeaderRow`` : 헤더 행 선택
+        - ``dartlab.providers.dart.tableRows.tableToRowDictsWithHeaderRow`` : 헤더 행 선택
 
     AIContext:
         AI 직접 호출 없음 (내부 헬퍼).
@@ -190,7 +190,7 @@ def findTableByHeaders(
         없음 — 매칭 실패 시 None.
 
     Example:
-        >>> from dartlab.industry.build.table_parser import extractTables, findTableByHeaders
+        >>> from dartlab.providers.dart.tableRows import extractTables, findTableByHeaders
         >>> tables = extractTables(docContent)
         >>> findTableByHeaders(tables, ["매입처", "비중"])[1]
         0
@@ -250,7 +250,7 @@ def tableToRowDictsWithHeaderRow(
         - 외부 의존 없음.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.findTableByHeaders`` : 헤더 행 검색
+        - ``dartlab.providers.dart.tableRows.findTableByHeaders`` : 헤더 행 검색
         - ``dartlab.industry.build.edges.extractRawMaterialEdges`` : 본 함수 사용자
 
     AIContext:
@@ -339,7 +339,7 @@ def parseAmount(text: str) -> float | None:
         - 외부 의존 없음.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.parsePercent`` : 비율 셀 변환
+        - ``dartlab.providers.dart.tableRows.parsePercent`` : 비율 셀 변환
 
     AIContext:
         AI 직접 호출 없음.
@@ -387,7 +387,7 @@ def parsePercent(text: str) -> float | None:
         - 외부 의존 없음.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.parseAmount`` : 숫자 셀 변환
+        - ``dartlab.providers.dart.tableRows.parseAmount`` : 숫자 셀 변환
 
     AIContext:
         AI 직접 호출 없음.
@@ -443,7 +443,7 @@ def extractCorpNames(cell: str) -> list[str]:
         - 외부 의존 없음.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.normalizeCorpName`` : 매칭용 정규화
+        - ``dartlab.providers.dart.tableRows.normalizeCorpName`` : 매칭용 정규화
 
     AIContext:
         AI 직접 호출 없음.
@@ -500,7 +500,7 @@ def normalizeCorpName(name: str) -> str:
         - 외부 의존 없음.
 
     See Also:
-        - ``dartlab.industry.build.table_parser.extractCorpNames`` : 회사명 분리
+        - ``dartlab.providers.dart.tableRows.extractCorpNames`` : 회사명 분리
 
     AIContext:
         AI 직접 호출 없음.
