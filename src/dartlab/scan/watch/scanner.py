@@ -256,7 +256,7 @@ def scanMarket(
         scan 단계.
 
     Guide:
-        - sector / stockCodes 둘 다 None 이면 전체 로컬 docs 종목 대상 (~수천 종목, 분 단위).
+        - sector / stockCodes 둘 다 None 이면 전체 로컬 panel 종목 대상 (~수천 종목, 분 단위).
         - minScore 임계 조정으로 noise 제거.
 
     When:
@@ -267,7 +267,7 @@ def scanMarket(
         sort + topN.
 
     Requires:
-        - 로컬 ``data/dart/docs/{stockCode}.parquet`` 들
+        - 로컬 ``data/dart/panel/{stockCode}.parquet`` 들 (panel 섹션 본문)
 
     SeeAlso:
         - :func:`scanCompany` — 종목당 inner scan

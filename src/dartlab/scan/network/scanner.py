@@ -434,7 +434,7 @@ def scanAffiliateDocs(
     nameToCode: dict[str, str],
     codeToName: dict[str, str],
 ) -> dict[str, str]:
-    """docs parquet의 '계열회사 현황'에서 ground truth 그룹 매핑 추출.
+    """panel '계열회사 현황' 표에서 ground truth 그룹 매핑 추출 (docs.parquet 은퇴 → panel SSOT).
 
     Parameters
     ----------
@@ -464,18 +464,20 @@ def scanAffiliateDocs(
         ``buildGraph`` 진행 단계 안에서.
 
     How:
-        report parquet → 정제 → dict/DataFrame 변환.
+        panel 섹션 본문(``sectionTexts``) → '계열회사' 섹션 표(``parseXmlTables``) → 회사명 추출 →
+        Union-Find 클러스터링 → 그룹명 라벨링.
 
     Requires:
-        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport``) + KRX listing.
+        - 로컬 ``data/dart/panel/{code}.parquet`` (panel 섹션 본문) + KRX listing.
 
     SeeAlso:
         - :func:`dartlab.scan.network.buildGraph` — 본 함수들 호출자
+        - :func:`dartlab.providers.dart.sections.sectionTables` — 동일 표 추출 헬퍼
 
     Raises
     ------
     polars.PolarsError
-        docs parquet 손상 또는 schema 불일치 시.
+        panel parquet 손상 또는 schema 불일치 시.
 
     Examples
     --------
@@ -484,10 +486,13 @@ def scanAffiliateDocs(
     >>> gt = scanAffiliateDocs(n2c, c2n)
     >>> gt.get("005930")
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.providers.dart.sections import parseXmlTables, sectionTexts
+    from dartlab.scan.builders.kr.common import panelDir
 
-    docs_dir = Path(_dataDir("docs"))
-    parquet_files = sorted(docs_dir.glob("*.parquet"))
+    panelRoot = panelDir()
+    if not panelRoot.exists():
+        return {}
+    codes = sorted(p.stem for p in panelRoot.glob("*.parquet"))
 
     _TABLE_NOISE = {
         "상장",
@@ -506,31 +511,29 @@ def scanAffiliateDocs(
         "본문",
     }
 
-    def _extractCompanies(text: str) -> list[str]:
+    def _extractCompanies(tables: list[list[list[str]]]) -> list[str]:
         companies: list[str] = []
-        for line in text.split("\n"):
-            if "|" not in line:
-                continue
-            cells = [c.strip() for c in line.split("|") if c.strip()]
-            if not any(_SCAN_REGNUM_RE.search(c) for c in cells):
-                continue
-            for cell in cells:
-                if _SCAN_REGNUM_RE.search(cell):
+        # 사업자/법인등록번호 셀을 가진 행(회사 행)에서 회사명 셀만 수집.
+        for table in tables:
+            for row in table:
+                if not any(_SCAN_REGNUM_RE.search(c) for c in row):
                     continue
-                if re.match(r"^[\d,.\-\s]+$", cell):
-                    continue
-                if cell in _TABLE_NOISE or len(cell) < 2:
-                    continue
-                companies.append(cell)
+                for cell in row:
+                    if _SCAN_REGNUM_RE.search(cell):
+                        continue
+                    if re.match(r"^[\d,.\-\s]+$", cell):
+                        continue
+                    if cell in _TABLE_NOISE or len(cell) < 2:
+                        continue
+                    companies.append(cell)
+        # 등록번호 컬럼이 없는 표는 법인 접미사(주)·(유) 등 패턴으로 fallback.
         if not companies:
-            for line in text.split("\n"):
-                if "|" not in line:
-                    continue
-                cells = [c.strip() for c in line.split("|") if c.strip()]
-                for cell in cells:
-                    if _SCAN_CORP_RE.search(cell) and len(cell) >= 3:
-                        if not re.match(r"^[\d,.\-\s]+$", cell):
-                            companies.append(cell)
+            for table in tables:
+                for row in table:
+                    for cell in row:
+                        if _SCAN_CORP_RE.search(cell) and len(cell) >= 3:
+                            if not re.match(r"^[\d,.\-\s]+$", cell):
+                                companies.append(cell)
         return companies
 
     def _normalizeCorp(name: str) -> str:
@@ -538,27 +541,25 @@ def scanAffiliateDocs(
         return name.replace("㈜", "").replace("주식회사", "").strip()
 
     code_to_affiliate_set: dict[str, set[str]] = {}
-    for pf in parquet_files:
-        code = pf.stem
+    for code in codes:
         try:
-            affiliate = (
-                pl.scan_parquet(str(pf))
-                .filter(
-                    pl.col("section_title").str.contains("계열회사 현황")
-                    | pl.col("section_title").str.contains("계열회사에 관한 사항")
-                )
-                .collect(engine="streaming")
-            )
+            df = sectionTexts(code)
         except (pl.exceptions.PolarsError, OSError):
             continue
-        if len(affiliate) == 0:
+        if df is None or df.is_empty():
             continue
-        if "year" in affiliate.columns:
-            affiliate = affiliate.filter(pl.col("year") == affiliate["year"].max())
-        full_text = "\n".join(c for c in affiliate["section_content"].to_list() if c)
-        if not full_text:
+        # '계열회사' 섹션 중 표(<TR>)를 실제로 담은 행만 — 분기보고서엔 표가 빠진다.
+        aff = df.filter(pl.col("sectionLeaf").str.contains("계열회사") & pl.col("contentRaw").str.contains("<TR"))
+        if aff.is_empty():
             continue
-        companies = _extractCompanies(full_text)
+        aff = aff.filter(pl.col("period") == aff["period"].max())
+        tables: list[list[list[str]]] = []
+        for cr in aff["contentRaw"].to_list():
+            if cr:
+                tables.extend(parseXmlTables(cr))
+        if not tables:
+            continue
+        companies = _extractCompanies(tables)
         matched: set[str] = {code}
         for comp in companies:
             norm = _normalizeCorp(comp)

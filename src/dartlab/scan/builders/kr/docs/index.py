@@ -84,7 +84,7 @@ def buildDocsIndex(
     Args:
         sinceYear: 시작 연도. 이전 보고서 제외 (volume 축소).
         batchSize: 한 번에 concat 할 parquet 파일 수. 메모리 압박 시 줄임.
-        docsDir: ``data/dart/docs/`` 디렉토리. None 이면 기본 경로.
+        docsDir: 본문 source 디렉토리 override. None 이면 KR 기본 = ``data/dart/panel/`` (panel 섹션).
         outputPath: 산출 parquet 경로. None 이면 ``data/dart/scan/docsIndex.parquet``.
         verbose: 진행 로그 출력 여부.
 
@@ -102,7 +102,7 @@ def buildDocsIndex(
         .../data/dart/scan/docsIndex.parquet
 
     Capabilities:
-        - 종목별 docs parquet (수십~수백 MB) → 단일 슬림 parquet (~수십 MB) 으로 통합.
+        - 종목별 source parquet (panel 섹션, 수십~수백 MB) → 단일 슬림 parquet (~수십 MB) 으로 통합.
           ``_OUTPUT_SCHEMA`` 11 컬럼 — 본문 글자수 + 테이블 존재 여부만 보유.
         - ``withMemoryBudget(1000MB)`` 데코레이터로 RSS 한도 가드. ``batchSize`` 단위 chunked
           concat → 전체 단일 sink.
@@ -120,14 +120,14 @@ def buildDocsIndex(
 
     When:
         매 prebuild 사이클 (``buildScan`` 직후 별도 단계). `prebuildData.py` 의 `_buildDocsIndex`
-        가 docs 캐시 있을 때만 호출. 로컬 직접 호출은 디버깅 / cross-company 분석 prototype 용.
+        가 panel 캐시 있을 때만 호출. 로컬 직접 호출은 디버깅 / cross-company 분석 prototype 용.
 
     How:
-        docs 종목별 parquet 정렬 → `batchSize` 단위 chunk → 각 chunk read + 메타만 select →
+        source 종목별 parquet 정렬 → `batchSize` 단위 chunk → 각 chunk read + 메타만 select →
         polars concat → 최종 sink_parquet (single output). 빈 결과는 RuntimeError 로 fail-fast.
 
     Requires:
-        - 로컬 ``data/dart/docs/{stockCode}.parquet`` 들 (Data Sync 가 채움)
+        - 로컬 ``data/dart/panel/{stockCode}.parquet`` 들 (panel 섹션 본문, KR 기본 source)
         - ``dartlab.core.memory.withMemoryBudget`` (RSS 가드)
 
     SeeAlso:

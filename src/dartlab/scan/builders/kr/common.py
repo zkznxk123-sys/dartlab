@@ -82,53 +82,11 @@ def scanDir() -> Path:
         'scan'
 
     SeeAlso:
-        ``docsDir``, ``financeDir``, and ``reportDir``.
+        ``panelDir``, ``financeDir``, and ``reportDir``.
     """
     from dartlab.core.dataLoader import _dataDir
 
     return Path(_dataDir("scan"))
-
-
-def docsDir() -> Path:
-    """Return the raw docs parquet directory.
-
-    Capabilities:
-        Resolves the active raw disclosure-docs parquet directory.
-
-    AIContext:
-        Docs prebuilds use this as the source root for changes and text index generation.
-
-    Guide:
-        Keep source path resolution centralized here to avoid drift between builders.
-
-    When:
-        Called by docs scan builders before scanning raw document parquet files.
-
-    How:
-        Delegates to ``dartlab.core.dataLoader._dataDir("docs")`` and wraps the result as ``Path``.
-
-    Args:
-        None.
-
-    Returns:
-        ``Path`` pointing at the raw docs directory.
-
-    Requires:
-        Configured DartLab data root resolvable by ``_dataDir``.
-
-    Raises:
-        Propagates data-root resolution errors from ``_dataDir``.
-
-    Example:
-        >>> docsDir().name
-        'docs'
-
-    SeeAlso:
-        ``scanDir`` and ``dartlab.scan.builders.kr.docs``.
-    """
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("docs"))
 
 
 def panelDir() -> Path:
