@@ -22,14 +22,11 @@ pytestmark = pytest.mark.unit
 _NUM_PREFIX = re.compile(r"^\d+[.\s·]+")
 
 
-# ── SSOT 로드 (JSON 우선, 없으면 in-code) ──
+# ── SSOT 로드 (단일 진실의 원천만 읽음 — production 코드 미참조 독립 oracle) ──
 def _snakeAlias() -> dict[str, str]:
-    from dartlab.core.utils.labels import SNAKEID_ALIASES, _loadAccountMappings
+    from dartlab.core.accounts.data import loadAccounts
 
-    layers = _loadAccountMappings().get("layers")
-    if layers and "snakeAlias" in layers:
-        return layers["snakeAlias"]
-    return SNAKEID_ALIASES
+    return loadAccounts()["layers"]["snakeAlias"]
 
 
 def _deriveEdgarIndexes(accounts: list, learnedTags: dict) -> tuple[dict, dict]:
@@ -56,27 +53,16 @@ def _deriveEdgarIndexes(accounts: list, learnedTags: dict) -> tuple[dict, dict]:
 
 
 def _edgarSSOT() -> dict:
-    """EDGAR tag SSOT — JSON ``edgar`` 소스에서 인덱스 파생, 없으면 EdgarMapper 내부."""
-    from dartlab.core.utils.labels import _loadAccountMappings
+    """EDGAR tag SSOT — JSON ``edgar`` 소스에서 인덱스 파생 (독립 oracle)."""
+    from dartlab.core.accounts.data import loadAccounts
 
-    data = _loadAccountMappings()
-    edgar = data.get("edgar")
-    if edgar and "accounts" in edgar and "learnedTags" in edgar:
-        tagMap, stmtTagMap = _deriveEdgarIndexes(edgar["accounts"], edgar["learnedTags"])
-        return {
-            "accounts": edgar["accounts"],
-            "tagMap": tagMap,
-            "stmtTagMap": stmtTagMap,
-            "stmtOverrides": edgar["stmtOverrides"],
-        }
-    from dartlab.providers.edgar.finance.mapper import STMT_OVERRIDES, EdgarMapper
-
-    EdgarMapper._ensureLoaded()
+    edgar = loadAccounts()["edgar"]
+    tagMap, stmtTagMap = _deriveEdgarIndexes(edgar["accounts"], edgar["learnedTags"])
     return {
-        "accounts": EdgarMapper._accounts,
-        "tagMap": dict(EdgarMapper._tagMap),
-        "stmtTagMap": {k: dict(v) for k, v in EdgarMapper._stmtTagMap.items()},
-        "stmtOverrides": {f"{tag}|{stmt}": sid for (tag, stmt), sid in STMT_OVERRIDES.items()},
+        "accounts": edgar["accounts"],
+        "tagMap": tagMap,
+        "stmtTagMap": stmtTagMap,
+        "stmtOverrides": edgar["stmtOverrides"],
     }
 
 

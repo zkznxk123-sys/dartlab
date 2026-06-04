@@ -28,32 +28,14 @@ _KOR_TRIM_SUFFIXES = ("액", "등", "외")
 
 
 def _buildLayered() -> dict:
-    """단일 SSOT 구조 — JSON ``layers`` 우선, 없으면 in-code dict.
+    """단일 SSOT 구조 — accountMappings.json layers + mappings (독립 oracle, production 미참조)."""
+    from dartlab.core.accounts.data import loadAccounts
 
-    S0 (통합 전): in-code ``ID_SYNONYMS``/``ACCOUNT_NAME_SYNONYMS``.
-    S1+ (layers 추가 후): JSON ``layers.idSynonym``/``nameSynonym``.
-    parity 테스트가 둘의 동등을 별도 보장하므로 어느 쪽을 읽어도 동일.
-    """
-    from dartlab.core.utils.labels import _loadAccountMappings
-
-    data = _loadAccountMappings()
-    nameToSnake = data.get("mappings", {})
-    layers = data.get("layers")
-    if layers and "idSynonym" in layers and "nameSynonym" in layers:
-        return {
-            "idSynonym": layers["idSynonym"],
-            "nameSynonym": layers["nameSynonym"],
-            "nameToSnake": nameToSnake,
-        }
-    from dartlab.providers.dart.finance.mapper import (
-        ACCOUNT_NAME_SYNONYMS,
-        ID_SYNONYMS,
-    )
-
+    data = loadAccounts()
     return {
-        "idSynonym": dict(ID_SYNONYMS),
-        "nameSynonym": dict(ACCOUNT_NAME_SYNONYMS),
-        "nameToSnake": nameToSnake,
+        "idSynonym": data["layers"]["idSynonym"],
+        "nameSynonym": data["layers"]["nameSynonym"],
+        "nameToSnake": data["mappings"],
     }
 
 
@@ -172,20 +154,16 @@ _VARIANT_INPUTS: list[tuple[str, str]] = [
 
 def _universe() -> list[tuple[str, str]]:
     """결정적 입력 universe — SSOT 전 키 + 변형 케이스 (parquet 비의존)."""
-    from dartlab.core.utils.labels import _loadAccountMappings
-    from dartlab.providers.dart.finance.mapper import (
-        ACCOUNT_NAME_SYNONYMS,
-        ID_SYNONYMS,
-    )
+    from dartlab.core.accounts.data import loadAccounts
 
-    data = _loadAccountMappings()
+    data = loadAccounts()
     pairs: set[tuple[str, str]] = set(_VARIANT_INPUTS)
-    for k in data.get("mappings", {}):
+    for k in data["mappings"]:
         pairs.add(("", k))
-    for k in ID_SYNONYMS:
+    for k in data["layers"]["idSynonym"]:
         pairs.add((k, ""))
         pairs.add(("ifrs-full_" + k, ""))
-    for k in ACCOUNT_NAME_SYNONYMS:
+    for k in data["layers"]["nameSynonym"]:
         pairs.add(("", k))
     return sorted(pairs)
 
