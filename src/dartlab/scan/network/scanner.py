@@ -490,8 +490,7 @@ def scanAffiliateDocs(
     from dartlab.scan.builders.kr.common import panelDir
 
     panelRoot = panelDir()
-    if not panelRoot.exists():
-        return {}
+    # panel 루트 부재(데이터 미수집) 시 glob 가 빈 이터레이터 → codes=[] → 빈 그래프 자연 반환.
     codes = sorted(p.stem for p in panelRoot.glob("*.parquet"))
 
     _TABLE_NOISE = {

@@ -83,31 +83,30 @@ def suggest(funcName: str) -> str | None:
     When:
         메시징 레이어가 함수별 도움말이나 대체 호출 안내를 제안할 때.
     How:
-        ``dartlab.reference.capability.loadCapabilities()`` 로 라이브 카탈로그 dict 를 조회한다.
+        ``dartlab.core.di.getCapabilityCatalog()`` 로 라이브 카탈로그 dict 를 조회한다 (DI 경계 — core 가 reference 를 직접 import 안 함).
 
     Args:
         funcName: Name such as ``"valuation"``, ``"Company.BS"``, or ``"scan.governance"``.
 
     Returns:
-        Guidance text, or ``None`` when no generated capability entry matches.
+        Guidance text, or ``None`` when no capability entry matches.
 
     Raises:
-        No public exception; missing generated capability module returns ``None``.
+        No public exception; empty capability catalog returns ``None``.
     Requires:
-        생성된 capability 모듈이 있으면 사용한다. 없으면 ``None``을 반환한다.
+        capability 카탈로그(라이브)를 사용한다. 비면 ``None`` 을 반환한다.
 
     Example:
         >>> suggest("__missing__") is None
         True
     SeeAlso:
-        dartlab.reference.capability.loadCapabilities: 라이브 capability 카탈로그 source.
+        dartlab.core.di.getCapabilityCatalog: capability 카탈로그 DI 경계.
         formatMessage: catalog message formatting.
     """
-    try:
-        from dartlab.reference.capability import loadCapabilities
+    from dartlab.core.di import getCapabilityCatalog
 
-        capabilities = loadCapabilities()
-    except ImportError:
+    capabilities = getCapabilityCatalog()
+    if not capabilities:
         return None
 
     entry = capabilities.get(funcName)
