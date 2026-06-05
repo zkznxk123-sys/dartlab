@@ -30,6 +30,8 @@ from dartlab.analysis.financial.proforma import (
     buildProforma,
     extractHistoricalRatios,
 )
+from dartlab.core.accounts import reverseKoreanLabels
+from dartlab.core.utils.helpers import parseNumStr
 
 # ══════════════════════════════════════
 # 데이터 구조
@@ -93,17 +95,63 @@ class ScenarioSimulation:
 # ══════════════════════════════════════
 
 
+def _labelKeys(value: Any) -> tuple[str, ...]:
+    if value is None:
+        return ()
+
+    raw = str(value).strip()
+    if not raw:
+        return ()
+
+    base = raw.split("(")[0].split("（")[0].strip()
+    keys = [raw]
+    if base and base != raw:
+        keys.append(base)
+
+    for key in list(keys):
+        compact = "".join(key.split()).lower()
+        if compact and compact not in keys:
+            keys.append(compact)
+
+    return tuple(keys)
+
+
+def _rowMatchesSnakeId(row: dict[str, Any], snakeId: str) -> bool:
+    if str(row.get("snakeId") or "").strip() == snakeId:
+        return True
+
+    reverseLabels = reverseKoreanLabels()
+    for col in ("account", "label", "항목", "accountNm"):
+        for key in _labelKeys(row.get(col)):
+            if key == snakeId or reverseLabels.get(key) == snakeId:
+                return True
+    return False
+
+
+def _numericValue(value: Any) -> float:
+    if value is None:
+        return 0.0
+    if isinstance(value, int | float):
+        return float(value)
+
+    parsed = parseNumStr(str(value))
+    return float(parsed) if parsed is not None else 0.0
+
+
 def _quarterlyValues(isDf: Any, snakeId: str, year: str) -> list[float]:
     """IS DataFrame에서 특정 연도의 Q1~Q4 값 추출."""
-    row = isDf.filter(isDf["snakeId"] == snakeId)
-    if row.height == 0:
+    if isDf is None:
         return []
+
+    row = next((r for r in isDf.iter_rows(named=True) if _rowMatchesSnakeId(r, snakeId)), None)
+    if row is None:
+        return []
+
     vals = []
     for q in range(1, 5):
         col = f"{year}Q{q}"
-        if col in row.columns:
-            v = row[col].to_list()[0]
-            vals.append(float(v) if v is not None else 0)
+        if col in row:
+            vals.append(_numericValue(row.get(col)))
     return vals if len(vals) == 4 else []
 
 
