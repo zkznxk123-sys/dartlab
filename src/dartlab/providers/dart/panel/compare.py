@@ -213,7 +213,7 @@ def _chooseFinanceTargets(per: dict[str, dict[str, dict[str, tuple[str, float]]]
     return [sorted(pool, reverse=True)[0]] if pool else []
 
 
-def _compareCells(
+def _compareCellsResult(
     codes: list[str],
     *,
     statement: str,
@@ -221,8 +221,8 @@ def _compareCells(
     scope: str | None,
     marketNs: str,
     period: list[str] | str | None,
-) -> pl.DataFrame:
-    """N사 재무를 acode(XBRL 코드) 단위로 정렬 — 행=(acode,label), 열=회사, 셀=원 환산값.
+) -> tuple[pl.DataFrame, list[str]]:
+    """N사 재무 frame 과 실제 period 를 함께 만든다.
 
     이름 정렬(IS 6%)이 라벨 drift 로 실패하는 곳을 acode(IS 37%+)가 해소. scope 고정(자동폴백 금지 —
     연결↔별도 혼선 차단), freq 일치(분기↔연간 기간 착시 차단), 원 환산(단위 착시 차단)을 강제한다.
@@ -238,7 +238,7 @@ def _compareCells(
             per[c] = cc
     targets = targetLabels or _chooseFinanceTargets(per)
     if not targets:
-        return pl.DataFrame()
+        return pl.DataFrame(), []
     single = len(targets) == 1
     # acode union (첫 등장 라벨 대표 — acode 가 정체성, label 은 표시용)
     repr_label: dict[str, str] = {}
@@ -250,7 +250,7 @@ def _compareCells(
                     repr_label[ac] = lab
                     order.append(ac)
     if not order:
-        return pl.DataFrame()
+        return pl.DataFrame(), targets
     rows: list[dict[str, object]] = []
     for ac in order:
         row: dict[str, object] = {"acode": ac, "label": repr_label[ac], "scope": scope}
@@ -259,7 +259,21 @@ def _compareCells(
                 key = c if single else f"{c}{_SEP}{p}"
                 row[key] = per.get(c, {}).get(p, {}).get(ac, (None, None))[1]  # 원 환산값 or None(honest-gap)
         rows.append(row)
-    return pl.DataFrame(rows)
+    return pl.DataFrame(rows), targets
+
+
+def _compareCells(
+    codes: list[str],
+    *,
+    statement: str,
+    freq: str,
+    scope: str | None,
+    marketNs: str,
+    period: list[str] | str | None,
+) -> pl.DataFrame:
+    """N사 재무를 acode(XBRL 코드) 단위로 정렬 — 행=(acode,label), 열=회사, 셀=원 환산값."""
+    df, _ = _compareCellsResult(codes, statement=statement, freq=freq, scope=scope, marketNs=marketNs, period=period)
+    return df
 
 
 def _companyLong(code: str, wide: pl.DataFrame, scope: str | None) -> pl.DataFrame | None:
@@ -540,29 +554,6 @@ def _compareMode(topic: str | None) -> str:
     return "finance" if topic and topic.strip().lower() in _FIN_KEYS else "row"
 
 
-def _resolvedFinancePeriods(
-    codes: list[str],
-    statement: str,
-    freq: str,
-    scope: str | None,
-    marketNs: str,
-    period: list[str] | str | None,
-) -> list[str]:
-    """diagnostics 용 finance 실제 비교 period."""
-    scopeVal = _normScope(scope) or "consolidated"
-    targetLabels, panelPeriods = _financeTargets(period, freq)
-    if targetLabels is not None:
-        return targetLabels
-    per: dict[str, dict[str, dict[str, tuple[str, float]]]] = {}
-    for c in codes:
-        cc = _companyCellsByPeriod(
-            c, statement, freq, scopeVal, marketNs, targetLabels=targetLabels, panelPeriods=panelPeriods
-        )
-        if cc:
-            per[c] = cc
-    return _chooseFinanceTargets(per)
-
-
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
     """diagnostics 용 period 입력 정규화."""
     if isinstance(period, str):
@@ -696,16 +687,13 @@ def compareDiagnostics(
             if marketNs != "kr":
                 raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
             actualScope = normScope or "consolidated"
-            df = _compareCells(
+            df, resolvedPeriods = _compareCellsResult(
                 normCodes,
                 statement=str(topic).strip().lower(),
                 freq=normFreq,
                 scope=actualScope,
                 marketNs=marketNs,
                 period=normPeriod,
-            )
-            resolvedPeriods = _resolvedFinancePeriods(
-                normCodes, str(topic).strip().lower(), normFreq, actualScope, marketNs, normPeriod
             )
             emptyReason = "insufficientFinanceCells" if df.height == 0 else None
         else:

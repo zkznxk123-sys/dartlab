@@ -346,6 +346,33 @@ def test_compare_finance_uses_latest_common_period(monkeypatch: pytest.MonkeyPat
     assert diag["scope"] == "consolidated"
 
 
+def test_compare_diagnostics_finance_reads_cells_once_per_code(monkeypatch: pytest.MonkeyPatch) -> None:
+    """finance diagnostics 는 표와 resolved period 계산 때문에 셀을 중복 로드하지 않는다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    calls: list[str] = []
+
+    def fakeCompanyCellsByPeriod(
+        code: str,
+        statement: str,
+        freq: str,
+        scope: str,
+        marketNs: str,
+        *,
+        targetLabels: list[str] | None = None,
+        panelPeriods: list[str] | None = None,
+    ) -> dict[str, dict[str, tuple[str, float]]]:
+        calls.append(code)
+        return {"2025Q4": {"ifrs-full_Assets": ("자산총계", 10.0 if code == "111111" else 20.0)}}
+
+    monkeypatch.setattr(cmp, "_companyCellsByPeriod", fakeCompanyCellsByPeriod)
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs")
+    assert diag["ok"] is True
+    assert diag["resolvedPeriods"] == ["2025Q4"]
+    assert calls == ["111111", "222222"]
+
+
 def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: pytest.MonkeyPatch) -> None:
     """재무 셀모드도 명시 period/list period 계약을 따른다."""
     import importlib
