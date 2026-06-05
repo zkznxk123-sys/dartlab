@@ -279,8 +279,10 @@ def cmdDefer(args: argparse.Namespace) -> int:
 def cmdAlias(args: argparse.Namespace) -> int:
     """alias 결정 — staging status 만 ``alias_only`` 로, 별도 csv 에 추가.
 
-    ACCOUNT_NAME_SYNONYMS 는 Python in-code dict 이므로 본 CLI 가 직접 patch
-    하지 않는다. csv 출력만 — 운영자가 mapper.py 에 별도 PR 로 반영.
+    옛날엔 ACCOUNT_NAME_SYNONYMS 가 Python in-code dict 라 csv→수동 PR 이 유일
+    경로였으나, 2026-06 SSOT 통합 후 한글 동의어는 ``layers.nameSynonym`` 으로
+    이전돼 ``mappingPromote.py --layer nameSynonym`` 로 직접 승격 가능하다. 본
+    csv 는 결정 기록용 — alias 를 박으려면 ``confirm`` 후 ``--layer nameSynonym apply``.
 
     Args:
         args: argparse Namespace (accountNm, to, alias_csv, parquet).

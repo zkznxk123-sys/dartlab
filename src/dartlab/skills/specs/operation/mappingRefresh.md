@@ -102,14 +102,24 @@ testUniverse:
 
 ### 새 매핑 추가 (학습) — 두 경로
 
-1. **CLI (권장)** — `mappingPromote.py --layer <name> apply`:
+1. **CLI (권장)** — `mappingPromote.py --layer <name> apply` (DART+EDGAR 단일 write 진입점):
    ```bash
    uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer nameSynonym apply
+   uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer edgarLearnedTags apply
    ```
-   layer ∈ `mappings`(기본)/`idSynonym`/`nameSynonym`/`snakeAlias`/`labelEn`/`korSynonym`.
-   value=snakeId layer(mappings/snakeAlias/korSynonym)만 standardAccounts ghost check 적용.
-2. **직접 편집** — JSON 한 줄 추가 후 `from dartlab.core.accounts import release; release()`
-   (atomic write + single-line compact 보존 필수).
+   | 쓸 수 있는 layer | 대상 | ghost check |
+   |---|---|---|
+   | `mappings`(기본) | DART 한글/영문 → snakeId | O (SA) |
+   | `idSynonym`·`nameSynonym`·`labelEn` | id/한글/영문 변형 | X (value≠snakeId) |
+   | `snakeAlias`·`korSynonym` | snakeId alias·줄임말 | O (SA) |
+   | `edgarLearnedTags` | EDGAR tag → snakeId | X (EDGAR canonical) |
+
+   discovery 는 layer 마다 다르다 (DART mappings = nonstd anti-join, EDGAR = 미커버 tag).
+   하지만 *write 는 모두 `mappingPromote --layer apply` 단일 게이트* — atomic + single-line
+   + `release()` 일관. `mappingReview` 는 layer-agnostic (key→value 큐레이션), promote 가 라우팅.
+2. **직접 편집** — JSON 한 줄 추가 후 `from dartlab.core.accounts import release; release()`.
+3. **`standardAccounts` 승격** — 새 표준 계정 추가는 *구조 변경* (CLI 미지원) — JSON 직접
+   편집 + golden baseline 갱신. snakeId 자체를 새로 만드는 드문 작업.
 
 ### 드리프트 가드 (회귀 자동 차단)
 

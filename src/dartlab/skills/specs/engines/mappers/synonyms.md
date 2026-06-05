@@ -117,8 +117,8 @@ mapper.synonyms("operating_profit")
 | facade | `providers/{dart,edgar}/finance/mapper.py` (위임, 하위 호환 re-export) |
 
 옛 "EDGAR 별도 파일·대칭 작업 후속 트랙" 은 완료 — `providers/edgar/finance/mapperData/`
-2 파일 제거, `edgar` 구획으로 흡수. EDGAR learnedTags 추가는 직접 편집 + `release()`
-(현재 `mappingPromote --layer` 는 DART layers 6 종 대상; EDGAR 는 후속 layer 확장 후보).
+2 파일 제거, `edgar` 구획으로 흡수. EDGAR learnedTags 추가도
+`mappingPromote.py --layer edgarLearnedTags apply` 단일 게이트 (DART/EDGAR write 통일).
 
 ## 대표 반환 형태
 

@@ -1,10 +1,10 @@
 """prod JSON patch CLI — `accountMappings.json` SSOT layer 단독 권한 갱신.
 
-`--layer` 로 편집 대상 선택 (default `mappings`):
+`--layer` 로 편집 대상 선택 (default `mappings`) — DART/EDGAR 단일 write 진입점:
     mappings · layers.idSynonym · layers.nameSynonym · layers.snakeAlias ·
-    layers.labelEn · layers.korSynonym
-value 가 snakeId 인 layer (mappings/snakeAlias/korSynonym) 만 standardAccounts
-hard check (ghost 차단) 적용.
+    layers.labelEn · layers.korSynonym · edgar.learnedTags
+value 가 DART snakeId 인 layer (mappings/snakeAlias/korSynonym) 만 standardAccounts
+hard check (ghost 차단) 적용. edgarLearnedTags 는 EDGAR canonical snakeId 라 미적용.
 
 `src/dartlab/reference/mapping/mappingReview.py` 가 status=confirmed 로 결정한 staging 행만
 취합하여 atomic write 로 추가. 본 CLI 는 `accountMappings.json` 을 직접
@@ -35,7 +35,9 @@ import polars as pl
 _DEFAULT_STAGING = Path("data") / "mapping_candidates.parquet"
 _DEFAULT_JSON = Path("src/dartlab/reference/data/accountMappings.json")
 
-# 편집 가능한 SSOT layer — (JSON dotted 경로, value 가 snakeId 인가 = ghost check 대상)
+# 편집 가능한 SSOT layer — (JSON dotted 경로, value 가 DART snakeId 인가 = ghost check 대상)
+# edgarLearnedTags 는 value 가 EDGAR canonical snakeId (일부는 net_income_cf 등 DART
+# standardAccounts 부재) 라 SA hard check 미적용 — 과다 reject 회피.
 _LAYER_TARGETS: dict[str, tuple[str, bool]] = {
     "mappings": ("mappings", True),
     "idSynonym": ("layers.idSynonym", False),
@@ -43,6 +45,7 @@ _LAYER_TARGETS: dict[str, tuple[str, bool]] = {
     "snakeAlias": ("layers.snakeAlias", True),
     "labelEn": ("layers.labelEn", False),
     "korSynonym": ("layers.korSynonym", True),
+    "edgarLearnedTags": ("edgar.learnedTags", False),
 }
 
 
@@ -347,7 +350,8 @@ def _buildParser() -> argparse.ArgumentParser:
         "--layer",
         choices=list(_LAYER_TARGETS),
         default="mappings",
-        help="편집 대상 SSOT layer (default mappings). idSynonym/nameSynonym/snakeAlias/labelEn/korSynonym.",
+        help="편집 대상 SSOT layer (default mappings). "
+        "idSynonym/nameSynonym/snakeAlias/labelEn/korSynonym/edgarLearnedTags.",
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 

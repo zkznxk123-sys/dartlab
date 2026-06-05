@@ -345,6 +345,17 @@ def test_non_snake_layer_skips_ghost_check(promoteMod, tmp_path: Path, jsonFile:
     assert data["layers"]["idSynonym"]["SalesRevenue"] == "Revenue"
 
 
+def test_apply_to_edgar_learned_tags(promoteMod, stagingFile: Path, jsonFile: Path) -> None:
+    """--layer edgarLearnedTags → edgar.learnedTags (DART/EDGAR 단일 write 게이트)."""
+    rc = promoteMod.main(
+        ["--staging", str(stagingFile), "--json", str(jsonFile), "--layer", "edgarLearnedTags", "apply"]
+    )
+    assert rc == 0
+    data = json.loads(jsonFile.read_text(encoding="utf-8"))
+    assert data["edgar"]["learnedTags"]["기타의금융자산"] == "other_financial_assets"
+    assert "기타의금융자산" not in data.get("mappings", {})  # DART 미오염
+
+
 def test_rollback_restores_previous_file(promoteMod, monkeypatch, tmp_path: Path) -> None:
     """git show 호출을 mock 하고 복원 동작 검증."""
     target = tmp_path / "accountMappings.json"
