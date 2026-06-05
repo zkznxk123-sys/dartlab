@@ -5,7 +5,7 @@ dartlab.ai.tools.engineCall 의 dispatch 패턴을 참고하되, **JSON-safe 직
 하므로 structured 데이터 손실 발생). dashboard 가 사용할 master entry 는 dict /
 list / DataFrame 모두 구조 보존이 필수.
 
-capability 화이트리스트 + private 차단은 capability registry (_generated.py) 와
+capability 화이트리스트 + private 차단은 capability registry (loadCapabilities) 와
 공유 — engineCall 과 같은 ACL.
 
 엔드포인트:

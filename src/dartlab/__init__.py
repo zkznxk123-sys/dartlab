@@ -1028,7 +1028,7 @@ def capabilities(key: str | None = None, *, search: str | None = None) -> dict |
             - key 없을 때: dict[str, str] — apiRef → summary
             - key 있을 때: dict — summary / capabilities / guide / aicontext / args / returns / example / seeAlso / llmSpecs (있으면)
         Freshness:
-            generateSpec.py 빌드 시점 — _generated.py 와 동기.
+            loadCapabilities() 라이브 빌드 — docstring 소스 즉시 반영 (프로세스당 캐시).
         Dataflow:
             capabilities() → 목차 → capabilities("apiRef") → 상세 → run_python 으로 실행
     """

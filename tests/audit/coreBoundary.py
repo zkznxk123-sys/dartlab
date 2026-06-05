@@ -73,16 +73,6 @@ _DENYLIST: tuple[tuple[str, str, str], ...] = (
     ("select.py", "Company.select() API = L4", "company/select.py 또는 dartlab/"),
     ("messaging.py", "cli/server messaging = ≥ L1", "cli/messaging.py 또는 server/messaging.py"),
     (
-        "capability/_generated.py",
-        "generated capability (core_boundary.md 명시 위반)",
-        "capability/generated/ 별도 계층",
-    ),
-    (
-        "capability/_generated_analysis_graph.py",
-        "generated graph (core_boundary.md 명시 위반)",
-        "capability/generated/ 별도 계층",
-    ),
-    (
         "providers/secrets.py",
         "secret 설정 (core_boundary.md 명시 — ai 또는 제품 설정 계층)",
         "ai/providers/secrets.py",

@@ -131,7 +131,7 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 
 ### 큰 변화 시 점검 (체크리스트)
 
-엔진 surface 가 큰 폭으로 바뀔 때 (새 엔진 추가 / 기존 엔진 폐기 / 새 Skill OS 카테고리 도입 / `_generated.py` schema 개편) 다음을 확인한다.
+엔진 surface 가 큰 폭으로 바뀔 때 (새 엔진 추가 / 기존 엔진 폐기 / 새 Skill OS 카테고리 도입 / capability docstring 표준 개편) 다음을 확인한다.
 
 1. `bash tests/test-lock.sh tests/test_mcp.py tests/test_mcp_strong.py -v` — 흡수 표면 회귀.
 2. 새 카테고리가 들어왔다면 `_recipeSkillsForPrompts()` 의 `kind` 필터 확장 여부 결정.

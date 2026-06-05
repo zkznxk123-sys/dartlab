@@ -70,9 +70,9 @@
   <line x1="300" y1="435" x2="500" y2="435" stroke="#1f2937"/>
   <text x="400" y="455" text-anchor="middle" fill="#e9d5ff" font-size="11" font-weight="700">함수 docstring</text>
   <text x="400" y="471" text-anchor="middle" fill="#e9d5ff" font-size="11" font-weight="700">= tool schema</text>
-  <text x="400" y="497" text-anchor="middle" fill="#94a3b8" font-size="9" font-style="italic">자동 생성:</text>
-  <text x="400" y="512" text-anchor="middle" fill="#94a3b8" font-size="9">_generated.py</text>
-  <text x="400" y="527" text-anchor="middle" fill="#94a3b8" font-size="9">_generated_analysis_graph.py</text>
+  <text x="400" y="497" text-anchor="middle" fill="#94a3b8" font-size="9" font-style="italic">라이브 빌드:</text>
+  <text x="400" y="512" text-anchor="middle" fill="#94a3b8" font-size="9">loadCapabilities()</text>
+  <text x="400" y="527" text-anchor="middle" fill="#94a3b8" font-size="9">docstring 소스 · 캐시</text>
   <text x="400" y="552" text-anchor="middle" fill="#94a3b8" font-size="9">RunPython 안에서 모든</text>
   <text x="400" y="565" text-anchor="middle" fill="#94a3b8" font-size="9">capability 직접 호출</text>
 
