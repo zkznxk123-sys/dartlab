@@ -48,7 +48,7 @@ export function hfUrl(path: string): string {
 
 export async function headHfObject(path: string, fetchFn: FetchLike = fetch): Promise<HfObjectRef> {
 	const url = hfUrl(path);
-	const resp = await fetchFn(url, { headers: { Range: 'bytes=0-0' } });
+	const resp = await fetchResilient(fetchFn, url, { headers: { Range: 'bytes=0-0' } });
 	if (!resp.ok && resp.status !== 206) throw new Error(`${path} range probe 실패: ${resp.status}`);
 	const linkedSize = Number(resp.headers.get('x-linked-size'));
 	const contentLength = Number(resp.headers.get('content-length'));
@@ -89,6 +89,16 @@ export async function probeHfRange(
 	};
 }
 
+// 범위요청 + 브라우저 HTTP 캐시 충돌(net::ERR_CACHE_OPERATION_NOT_SUPPORTED 등 — Range 응답이 캐시와 어긋날 때
+// Chrome 이 던짐) → 캐시 우회(reload)로 1회 재시도. 잦은 "로드 실패" 가드.
+async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0], init?: RequestInit): Promise<Response> {
+	try {
+		return await fetchFn(input, init);
+	} catch {
+		return await fetchFn(input, { ...init, cache: 'reload' });
+	}
+}
+
 export async function openHfParquet(
 	path: string,
 	fetchFn: FetchLike = fetch
@@ -97,7 +107,7 @@ export async function openHfParquet(
 	const requests: RangeRequestStat[] = [];
 	const measuredFetch: FetchLike = async (input, init) => {
 		const t0 = performance.now();
-		const resp = await fetchFn(input, init);
+		const resp = await fetchResilient(fetchFn, input, init);
 		const cloned = resp.clone();
 		const bytes = Number(resp.headers.get('content-length')) || 0;
 		requests.push({

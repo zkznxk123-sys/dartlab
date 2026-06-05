@@ -17,6 +17,10 @@ const companyEntries = existsSync(mapCompaniesDir)
 			.map((f) => `/company/${f.replace('.json', '')}`)
 	: [];
 
+// 공시뷰어 동적 라우트(/viewer/company/[code]) prerender — 없으면 GitHub Pages 가 404.html(404 status) 로 fallback
+// 해 콘솔 404 + 캐시 꼬임(ERR_CACHE) + 로드 실패 유발. 회사별 정적 shell(ssr=false) 로 200 응답.
+const viewerEntries = companyEntries.map((p) => `/viewer${p}`);
+
 const mapIndustriesDir = resolve('./static/map/industries');
 const industryEntries = existsSync(mapIndustriesDir)
 	? readdirSync(mapIndustriesDir)
@@ -160,7 +164,7 @@ const config = {
 			strict: false
 		}),
 		prerender: {
-			entries: ['*', '/docs/', '/blog/', '/cheatsheet', ...companyEntries, ...industryEntries],
+			entries: ['*', '/docs/', '/blog/', '/cheatsheet', ...companyEntries, ...viewerEntries, ...industryEntries],
 			handleHttpError: ({ path, referrer, message }) => {
 				// basePath prefix 제거 후 검사 (CI에서 path는 /dartlab/... 형태)
 				const stripped = basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
