@@ -132,7 +132,14 @@ def _validateFinanceParquet(dataDir: str, sourceFileCount: int) -> None:
     scanDir = Path(dataDir) / DATA_RELEASES["scan"]["dir"]
     fp = scanDir / "finance.parquet"
     if not fp.exists():
-        print("[prebuild] finance.parquet 없음 → 검증 스킵")
+        # 원본 finance 가 있었는데 프리빌드 산출이 없으면 = seed/빌드 실패(부분 scan 을 HF 에 올릴 위험).
+        # 검증 스킵이 그 실패를 은폐하지 않게 fail-fast. 원본도 0 이면 정상(빌드 대상 없음) → 스킵.
+        if sourceFileCount > 0:
+            print(
+                f"[prebuild] ❌ 원본 finance {sourceFileCount}종목인데 프리빌드 finance.parquet 미생성 — seed/빌드 실패"
+            )
+            sys.exit(1)
+        print("[prebuild] finance.parquet 없음 (원본도 0) → 검증 스킵")
         return
 
     import polars as pl

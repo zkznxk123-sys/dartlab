@@ -103,9 +103,16 @@ def main() -> int:
     print(f"[buildPanel] 대상 {len(codes)} 종목 — workers={numWorkers}")
     from dartlab.providers.dart.panel.build import buildPanelAll, panelXbrlRefPath
 
+    # onlinePanel 과 동형 가드: ref 부재로 빌드하면 부분 panel 이 정상 HF panel 을 덮어쓸 위험 →
+    # HF seed 선행 강제(fail-fast). ref 없으면 cryptic 다운스트림 실패 대신 명확히 중단한다.
+    refPath = panelXbrlRefPath()
+    if not refPath.exists():
+        print(f"[buildPanel] panelXbrlRef 없음: {refPath} — HF seed 선행 필요(부분 panel 덮어쓰기 차단)")
+        return 1
+
     panelBase = Path(dataDir) / "dart" / "panel"
     out = buildPanelAll(
-        refPath=str(panelXbrlRefPath()),
+        refPath=str(refPath),
         outBaseDir=str(panelBase),
         codes=codes,
         numWorkers=numWorkers,
