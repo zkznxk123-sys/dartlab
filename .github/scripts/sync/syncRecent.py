@@ -236,9 +236,9 @@ def _discoverNewFilings(keys: str, lookbackDays: int, dataDir: str) -> tuple[set
     """
     import polars as pl
 
+    from dartlab.core.dartClient import DartApiError, DartClient
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.gather.dart.disclosure import listFilings
-    from dartlab.providers.dart.openapi.client import DartApiError, DartClient
 
     end = datetime.now()
     start = end - timedelta(days=lookbackDays)
