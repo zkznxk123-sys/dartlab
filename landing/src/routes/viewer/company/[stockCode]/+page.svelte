@@ -304,7 +304,10 @@
 					{/if}
 					<a class="dp-link dp-ds" href={DATASET_URL} target="_blank" rel="noreferrer">전체 데이터셋 (모든 회사) ↗</a>
 					<div class="dp-policy">
-						HuggingFace 공개 데이터셋. 원자료는 {dlMarket === 'US' ? 'SEC EDGAR' : 'DART 전자공시'}(공공) — 가공·수평화는 dartlab. 자유 사용 가능, <b>출처 표기 권장</b> (DART · dartlab).
+						<div>원자료 <b>{dlMarket === 'US' ? 'SEC EDGAR' : 'DART 전자공시'}</b> · 가공·수평화 <b>dartlab</b> · 배포 HuggingFace 공개 데이터셋.</div>
+						<div>{dlMarket === 'US' ? '미국 정부 저작물(퍼블릭 도메인)' : '공공데이터(공공데이터법)'} — 영리·비영리 <b>자유 이용·재배포 가능</b> · <b>출처 표기 권장</b>(DART/SEC · dartlab).</div>
+						<div class="dp-warn">⚠ 데이터 정확성·완전성 미보증(원자료는 공시제출인 책임) · <b>투자 판단·자문이 아닙니다</b>.</div>
+						<a class="dp-terms" href={dlMarket === 'US' ? 'https://www.sec.gov/os/accessing-edgar-data' : 'https://opendart.fss.or.kr/intro/terms.do'} target="_blank" rel="noreferrer">{dlMarket === 'US' ? 'SEC EDGAR 이용조건' : 'DART 이용약관'} ↗</a>
 					</div>
 				</div>
 			</div>
@@ -510,7 +513,7 @@
 		top: calc(100% + 6px);
 		right: 0;
 		z-index: 50;
-		width: 290px;
+		width: 320px;
 		display: none;
 		flex-direction: column;
 		gap: 4px;
@@ -555,15 +558,33 @@
 		color: #cbd5e1;
 	}
 	.dp-policy {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
 		margin-top: 4px;
 		padding-top: 6px;
 		border-top: 1px solid #1e2433;
 		font-size: 10px;
-		line-height: 1.55;
+		line-height: 1.5;
 		color: #94a3b8;
 	}
 	.dp-policy b {
 		color: #cbd5e1;
+		font-weight: 600;
+	}
+	.dp-warn {
+		color: #fbbf24;
+	}
+	.dp-warn b {
+		color: #fbbf24;
+	}
+	.dp-terms {
+		align-self: flex-start;
+		color: #fb923c;
+		text-decoration: none;
+	}
+	.dp-terms:hover {
+		text-decoration: underline;
 	}
 	.fs-btn.active {
 		border-color: rgba(251, 146, 60, 0.5);
