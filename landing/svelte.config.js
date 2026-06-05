@@ -20,6 +20,7 @@ const companyEntries = existsSync(mapCompaniesDir)
 // 공시뷰어 동적 라우트(/viewer/company/[code]) prerender — 없으면 GitHub Pages 가 404.html(404 status) 로 fallback
 // 해 콘솔 404 + 캐시 꼬임(ERR_CACHE) + 로드 실패 유발. 회사별 정적 shell(ssr=false) 로 200 응답.
 const viewerEntries = companyEntries.map((p) => `/viewer${p}`);
+const dashboardEntries = companyEntries.map((p) => p.replace('/company/', '/dashboard/'));
 
 const mapIndustriesDir = resolve('./static/map/industries');
 const industryEntries = existsSync(mapIndustriesDir)
@@ -164,7 +165,7 @@ const config = {
 			strict: false
 		}),
 		prerender: {
-			entries: ['*', '/docs/', '/blog/', '/cheatsheet', ...companyEntries, ...viewerEntries, ...industryEntries],
+			entries: ['*', '/docs/', '/blog/', '/cheatsheet', ...companyEntries, ...viewerEntries, ...dashboardEntries, ...industryEntries],
 			handleHttpError: ({ path, referrer, message }) => {
 				// basePath prefix 제거 후 검사 (CI에서 path는 /dartlab/... 형태)
 				const stripped = basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
@@ -178,6 +179,10 @@ const config = {
 				}
 				// /feed/ RSS/iCal 링크 — 정적 파일이라 prerender 불필요
 				if (stripped.startsWith('/feed/')) {
+					return;
+				}
+				// /thumbnails/ blog 썸네일 — static 자산으로 build 에 복사되며 prerender 방문 불필요
+				if (stripped.startsWith('/thumbnails/')) {
 					return;
 				}
 				// app.html icon 링크. static/favicon.ico 는 build assets 로 복사되므로 prerender 방문 불필요.

@@ -4,16 +4,18 @@
 	// 한쪽만 = honest-gap(⌀). 라벨 거터 없음(단일 뷰어와 동일 — 셀이 자기 식별).
 	import CellContent from './CellContent.svelte';
 	import type { AlignedRow } from '$lib/viewer/align';
-	import type { FinanceRow } from '$lib/viewer/financeCells';
+	import type { FinanceRow, UnitInfo } from '$lib/viewer/financeCells';
 
 	let {
 		rows,
 		financeRows = null,
+		financeUnits = null,
 		companies,
 		period
 	}: {
 		rows: AlignedRow[];
 		financeRows?: FinanceRow[] | null;
+		financeUnits?: UnitInfo[] | null;
 		companies: { code: string; corpName: string }[];
 		period: string;
 	} = $props();
@@ -45,16 +47,26 @@
 	{:else}
 		<div class="matrix-scroll">
 			<div class="matrix" style="grid-template-columns: {template}">
-				{#each companies as c (c.code)}
+				{#each companies as c, ci (c.code)}
+					{@const unit = financeUnits?.[ci]}
 					<div class="cell head company-head">
 						<span class="corp">{c.corpName || c.code}</span>
 						<span class="code">{c.code}</span>
-						<span class="period">{period} · 원</span>
+						<span class="period">{period}</span>
+						<span
+							class="unit-badge"
+							class:warn={unit?.confidence === 'magnitude'}
+							title={unit?.confidence === 'magnitude'
+								? '표머리 단위 캡션을 못 찾아 자릿수로 추정 — 천원↔백만원 불확실'
+								: `원 환산 (소스 단위 ${unit?.label ?? '백만원'})`}
+						>
+							{unit?.label ?? '백만원'}{unit?.confidence === 'magnitude' ? '?' : ''}→원
+						</span>
 					</div>
 				{/each}
 				{#each financeRows as r (r.acode)}
 					{#each companies as c, ci (c.code)}
-						<div class="cell fin-cell" class:gap={r.values[ci] == null}>
+						<div class="cell fin-cell" class:gap={r.values[ci] == null} class:d0={r.depth === 0} class:d2={r.depth >= 2}>
 							{#if r.values[ci] != null}
 								<span class="fin-label" title={r.acode}>{r.label}</span>
 								<span class="fin-value" class:neg={(r.values[ci] ?? 0) < 0}>{fmtWon(r.values[ci] ?? 0)}</span>
@@ -152,6 +164,16 @@
 		font-weight: 700;
 		color: #fb923c;
 	}
+	.unit-badge {
+		border: 1px solid rgba(251, 146, 60, 0.3);
+		border-radius: 4px;
+		padding: 1px 5px;
+		background: rgba(251, 146, 60, 0.08);
+		font-size: 10px;
+		font-weight: 700;
+		color: #fdba74;
+		white-space: nowrap;
+	}
 	.body-cell {
 		color: #cbd5e1;
 		max-height: 520px;
@@ -203,5 +225,22 @@
 	}
 	.fin-bar.neg {
 		background: rgba(248, 113, 113, 0.55);
+	}
+	/* 위계(accountDepth) — 총계 굵게·구분선, 리프 들여쓰기·톤다운 (새 마크업 0, CSS만) */
+	.fin-cell.d0 {
+		border-top: 1px solid #263145;
+	}
+	.fin-cell.d0 .fin-label {
+		color: #e2e8f0;
+		font-weight: 700;
+	}
+	.fin-cell.d2 .fin-label {
+		padding-left: 10px;
+		color: #64748b;
+	}
+	.unit-badge.warn {
+		border-color: rgba(251, 191, 36, 0.45);
+		background: rgba(251, 191, 36, 0.1);
+		color: #fbbf24;
 	}
 </style>

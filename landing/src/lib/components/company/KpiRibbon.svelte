@@ -36,13 +36,12 @@
 
 <section class="kpi-ribbon" aria-label="핵심 지표">
 	{#each metrics as metric}
-		<article
+		<button
+			type="button"
 			class="kpi {metric.tone}"
 			class:clickable={typeof onSelect === 'function'}
-			role={typeof onSelect === 'function' ? 'button' : undefined}
-			tabindex={typeof onSelect === 'function' ? 0 : undefined}
+			disabled={typeof onSelect !== 'function'}
 			onclick={() => handleClick(metric)}
-			onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleClick(metric)}
 		>
 			<div class="top">
 				<span>{metric.label}</span>
@@ -60,7 +59,7 @@
 					{/each}
 				</div>
 			{/if}
-		</article>
+		</button>
 	{/each}
 </section>
 
@@ -80,6 +79,12 @@
 		background: linear-gradient(180deg, #08101c 0%, #060b13 100%);
 		padding: 11px;
 		text-align: left;
+		color: inherit;
+		font: inherit;
+	}
+	.kpi:disabled {
+		opacity: 1;
+		cursor: default;
 	}
 	.kpi.clickable {
 		cursor: pointer;

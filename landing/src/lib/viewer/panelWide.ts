@@ -6,7 +6,7 @@
 
 import { canonicalChapter, canonicalRank } from './canonical';
 import { marketForCode, viewerUrl } from './dartUrl';
-import { SEP, sectionKeyFor, spineOrderFor } from './keys';
+import { SEP, sectionKeyFor, spineOrderFor, scopeOf } from './keys';
 import { computePeriodKind } from './periodKind';
 import { absorbAttachedRow, sectionNum } from './pipeline/absorbAttached';
 import { alignNotes } from './pipeline/alignNotes';
@@ -79,7 +79,7 @@ export function buildPanelBundle(
 	const aggs = new Map<string, Agg>();
 	const periodSet = new Set<string>();
 	for (const r of deduped) {
-		const scope = (r as LeafRow & { scope: string }).scope;
+		const scope = scopeOf(r.xbrlClass);
 		const leafSeq = (r as LeafRow & { leafSeq: number }).leafSeq;
 		const chapter = r.chapter ?? '';
 		const sectionLeaf = r.sectionLeaf ?? '';

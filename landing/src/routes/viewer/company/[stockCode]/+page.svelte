@@ -8,6 +8,9 @@
 	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus, Download } from 'lucide-svelte';
 	import { hfUrl } from '$lib/data/hfRange';
 	import { marketForCode } from '$lib/viewer/dartUrl';
+	import { panelToCsv, financeToExcel, downloadText } from '$lib/viewer/dataExport';
+	import { loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
+	import { KIND_LABELS, type FinanceKind, type FinanceStatement } from '$lib/viewer/finance/types';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
@@ -177,6 +180,26 @@
 	const financeDlUrl = $derived(hfUrl(`dart/finance/${code}.parquet`));
 	const DATASET_URL = 'https://huggingface.co/datasets/eddmpython/dartlab-data';
 
+	// 일반인용 다운로드 — 브라우저에 로드된 데이터를 CSV/Excel 로(서버 0). 공시 수평화표=CSV, 재무제표=Excel(멀티시트).
+	let financeDownloading = $state(false);
+	function downloadPanelCsv() {
+		if (bundle) downloadText(panelToCsv(bundle), `${corpName || code}_공시수평화.csv`, 'text/csv;charset=utf-8');
+	}
+	async function downloadFinanceExcel() {
+		if (financeDownloading) return;
+		financeDownloading = true;
+		try {
+			const sheets: Array<{ name: string; statement: FinanceStatement }> = [];
+			for (const k of ['IS', 'BS', 'CF', 'CIS'] as FinanceKind[]) {
+				const st = await loadFinanceStatement(code, dlMarket, k, 'annual', 'CFS');
+				if (st && st.rows.length) sheets.push({ name: KIND_LABELS[k], statement: st });
+			}
+			if (sheets.length) downloadText(financeToExcel(sheets), `${corpName || code}_재무제표_연간연결.xls`, 'application/vnd.ms-excel');
+		} finally {
+			financeDownloading = false;
+		}
+	}
+
 	// ── 비교 모드 파생 (compareMode·allBundles 는 위에서 선언) ──
 	const cmpCompanies = $derived(
 		allBundles.map((b) => ({ code: b.stockCode, corpName: b.corpName || nameMap.get(b.stockCode) || b.stockCode }))
@@ -185,10 +208,17 @@
 	const isFinance = $derived(
 		compareMode && !!bundle && !!activeSectionKey && isFinanceSection(bundle.gridBySection.get(activeSectionKey) ?? [])
 	);
-	const financeRows = $derived(
-		isFinance && lockedPeriod && allBundles.length >= 2
-			? alignFinance(allBundles, activeSectionKey!, lockedPeriod, 'quarter')
-			: []
+	// freq = lockedPeriod 의 보고서 유형(연간이면 year, 아니면 quarter). 하드코딩 시 연간시점에 손익(Q4
+	// 단독토큰 부재)이 통째 사라짐 → periodKind SSOT 로 결정.
+	const financeCmp = $derived(
+		isFinance && lockedPeriod && bundle && allBundles.length >= 2
+			? alignFinance(
+					allBundles,
+					activeSectionKey!,
+					lockedPeriod,
+					bundle.periodKind[lockedPeriod] === 'annual' ? 'year' : 'quarter'
+				)
+			: null
 	);
 	const alignedRows = $derived(
 		compareMode && !isFinance && activeSectionKey && lockedPeriod && allBundles.length >= 2
@@ -298,6 +328,12 @@
 				<button type="button" class="fs-btn"><Download size={13} /> 데이터</button>
 				<div class="data-pop">
 					<div class="dp-h">이 회사 데이터 · 공개 다운로드</div>
+					<div class="dp-sub">보기 쉬운 형식 — Excel · Sheets · 메모장</div>
+					<button type="button" class="dp-link dp-btn" onclick={downloadPanelCsv} disabled={!bundle}>공시 수평화표 <span class="dp-ext">CSV</span></button>
+					{#if dlMarket !== 'US'}
+						<button type="button" class="dp-link dp-btn" onclick={downloadFinanceExcel} disabled={financeDownloading}>재무제표 (IS·BS·CF·CIS) <span class="dp-ext">{financeDownloading ? '생성 중…' : 'Excel'}</span></button>
+					{/if}
+					<div class="dp-sub">원본 — 개발자용 (parquet)</div>
 					<a class="dp-link" href={panelDlUrl} download>공시 panel <span class="dp-ext">.parquet</span></a>
 					{#if dlMarket !== 'US'}
 						<a class="dp-link" href={financeDlUrl} download>재무제표 <span class="dp-ext">.parquet</span></a>
@@ -323,7 +359,7 @@
 					</div>
 				{/if}
 				{#if compareMode}
-					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · {isFinance ? `재무 ${financeRows.length}항목` : `항목 ${alignedRows.length}`}</span>
+					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · {isFinance ? `재무 ${financeCmp?.rows.length ?? 0}항목` : `항목 ${alignedRows.length}`}</span>
 				{:else}
 					<span class="meta">항목 {rows.length} · 기간 {visiblePeriods.length}{annualOnly ? '(연간)' : ''}</span>
 				{/if}
@@ -376,7 +412,13 @@
 					{#if allBundles.length < 2}
 						<div class="cmp-loading"><div class="spinner"></div><p>비교 회사 여는 중…</p></div>
 					{:else}
-						<ComparisonMatrix rows={alignedRows} financeRows={isFinance ? financeRows : null} companies={cmpCompanies} period={lockedPeriod} />
+						<ComparisonMatrix
+							rows={alignedRows}
+							financeRows={isFinance ? (financeCmp?.rows ?? null) : null}
+							financeUnits={financeCmp?.units ?? null}
+							companies={cmpCompanies}
+							period={lockedPeriod}
+						/>
 					{/if}
 				{:else}
 					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
@@ -549,6 +591,27 @@
 		border-color: #fb923c;
 		color: #fb923c;
 		background: rgba(251, 146, 60, 0.06);
+	}
+	.dp-sub {
+		margin-top: 4px;
+		font-size: 9px;
+		color: #475569;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.dp-btn {
+		width: 100%;
+		font: inherit;
+		font-size: 12px;
+		cursor: pointer;
+		text-align: left;
+		background: rgba(251, 146, 60, 0.08);
+		border-color: rgba(251, 146, 60, 0.4);
+		color: #f1f5f9;
+	}
+	.dp-btn:disabled {
+		opacity: 0.5;
+		cursor: default;
 	}
 	.dp-ext {
 		font-size: 10px;

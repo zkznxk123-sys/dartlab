@@ -83,7 +83,9 @@
 	let trendState = $state<'idle' | 'loading' | 'ready' | 'error'>('idle');
 	let trendError = $state<string | null>(null);
 	let DetailComponent = $state<any>(null);
+	let CompanyWorkspaceComponent = $state<any>(null);
 	let DataExplorerComponent = $state<any>(null);
+	let selectedCompany = $state<string | null>(null);
 
 	// ── Runtime data + opt-in DuckDB lifecycle ────────
 	let dbState = $state<DbState>('idle');
@@ -442,6 +444,7 @@
 	onMount(() => {
 		const url = new URL(page.url);
 		if (url.searchParams.get('explore') === '1') openDataExplorer();
+		const companyParam = url.searchParams.get('company');
 		const q = url.searchParams.get('q');
 		const presetId = url.searchParams.get('preset');
 		if (q) {
@@ -464,6 +467,11 @@
 			const preset = PRESETS_BY_ID.get(presetId);
 			if (preset) applyPreset(preset);
 		}
+		if (companyParam) {
+			selectedRow = companyParam;
+			selectedCompany = companyParam;
+			void loadCompanyWorkspaceComponent();
+		}
 		void bootRuntime();
 		void bootProductIndexRuntime();
 		void ensureLoaders(inferLoaders(activeColumns));
@@ -478,8 +486,9 @@
 	});
 
 	$effect(() => {
-		if (selectedRow && !DetailComponent) void loadDetailComponent();
-		if (selectedRow) void ensureLoaders(['finance5y']);
+		if (selectedRow && !selectedCompany && !DetailComponent) void loadDetailComponent();
+		if (selectedCompany && !CompanyWorkspaceComponent) void loadCompanyWorkspaceComponent();
+		if (selectedRow || selectedCompany) void ensureLoaders(['finance5y']);
 	});
 
 	// ── URL share encode (현재 상태 → ?q=) ────────────
@@ -491,7 +500,7 @@
 			s: sorts,
 			cols: activeColumns,
 			p: activePresetId ?? undefined,
-			sel: selectedRow ?? undefined
+			sel: selectedCompany ? undefined : (selectedRow ?? undefined)
 		};
 		const q = encodeScanPayload(payload);
 		if (typeof window === 'undefined') return '';
@@ -630,6 +639,10 @@
 
 	async function loadDetailComponent() {
 		DetailComponent = (await import('$lib/scan/Detail.svelte')).default;
+	}
+
+	async function loadCompanyWorkspaceComponent() {
+		CompanyWorkspaceComponent = (await import('$lib/company/CompanyWorkspace.svelte')).default;
 	}
 
 	async function loadDataExplorerComponent() {
@@ -1044,7 +1057,29 @@
 	}
 
 	function handleSelect(id: string) {
-		selectedRow = selectedRow === id ? null : id;
+		if (selectedCompany === id) {
+			closeCompanyWorkspace();
+			return;
+		}
+		selectedRow = id;
+		selectedCompany = id;
+		setCompanySearchParam(id);
+		void loadCompanyWorkspaceComponent();
+		void ensureLoaders(['finance5y']);
+	}
+
+	function closeCompanyWorkspace() {
+		selectedCompany = null;
+		selectedRow = null;
+		setCompanySearchParam(null);
+	}
+
+	function setCompanySearchParam(code: string | null) {
+		if (typeof window === 'undefined') return;
+		const url = new URL(window.location.href);
+		if (code) url.searchParams.set('company', code);
+		else url.searchParams.delete('company');
+		window.history.replaceState({}, '', url);
 	}
 
 	function handleCellHover(info: typeof cellHover) {
@@ -1195,7 +1230,7 @@
 	</div>
 
 	<!-- Detail panel (행 선택 시) 또는 Insights Feed -->
-	{#if selectedRow}
+	{#if selectedRow && !selectedCompany}
 		{@const node = allNodes.find((n) => n.id === selectedRow)}
 		{#if node}
 			{#if DetailComponent}
@@ -1275,6 +1310,17 @@
 			x={cellHover.x}
 			y={cellHover.y}
 		/>
+	{/if}
+
+	{#if selectedCompany}
+		<button type="button" class="company-backdrop" aria-label="회사 워크스페이스 닫기" onclick={closeCompanyWorkspace}></button>
+		<div class="company-modal" role="dialog" aria-modal="true" aria-label="회사 워크스페이스">
+			{#if CompanyWorkspaceComponent}
+				<CompanyWorkspaceComponent code={selectedCompany} embedded={true} onClose={closeCompanyWorkspace} />
+			{:else}
+				<div class="company-loading">회사 워크스페이스 로드 중…</div>
+			{/if}
+		</div>
 	{/if}
 </main>
 
@@ -1673,6 +1719,33 @@
 		font-size: 12px;
 		z-index: 1000;
 	}
+	.company-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 1200;
+		border: none;
+		background: rgba(2, 6, 23, 0.76);
+		backdrop-filter: blur(8px);
+		cursor: default;
+	}
+	.company-modal {
+		position: fixed;
+		inset: 18px;
+		z-index: 1201;
+		overflow: hidden;
+		border: 1px solid rgba(148, 163, 184, 0.24);
+		border-radius: 10px;
+		background: #050811;
+		box-shadow: 0 30px 90px rgba(0, 0, 0, 0.62);
+	}
+	.company-loading {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #94a3b8;
+		font-size: 12px;
+	}
 
 	@media (max-width: 1024px) {
 		.studio {
@@ -1680,6 +1753,10 @@
 		}
 		.distribution-area {
 			display: none;
+		}
+		.company-modal {
+			inset: 8px;
+			border-radius: 8px;
 		}
 	}
 </style>

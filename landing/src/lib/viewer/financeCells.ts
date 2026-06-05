@@ -5,13 +5,15 @@
 // ★text/html 금지 — HTML table-model 이 비표준 <TR>/<TE> 를 foster-parent 해 셀 누락. application/xml 필수.
 
 import type { PanelBundle, PanelRow } from './types';
+import { accountDepth } from './finance/financePivot';
 
 // ── ACONTEXT 디코드 (build/cell.py decodeAcontext 1:1, 순수 regex) ──
 const PERIOD_RE = /^(BP|P|C)FY(\d{4})([de])(FY|FQA|FQQ|FQ|HYA|HYQ|HY|TQA|TQQ|TQ)$/;
 const AXIS_PREFIXES = new Set(['ifrs-full', 'dart']);
 const MARKER_QUARTER: Record<string, number> = { FY: 4, FQ: 1, HY: 2, TQ: 3 };
-const UNIT_RE = /단위\s*[:：]\s*(백만원|천원|원)/;
+const UNIT_RE = /단위\s*[:：]?\s*[(]?\s*(백만원|천원|원)/;
 const UNIT_SCALE: Record<string, number> = { 백만원: 1_000_000, 천원: 1_000, 원: 1 };
+const UNIT_LABEL: Record<number, string> = { 1_000_000: '백만원', 1_000: '천원', 1: '원' };
 // 재무 5표 disclosureKey — 셀모드 화이트리스트(엔진 CELL_STATEMENTS 동형).
 export const FIN_STATEMENTS = new Set(['BS', 'IS1', 'IS2', 'IS3', 'CF', 'EF']);
 
@@ -104,53 +106,51 @@ function freqMatch(c: RawCell, freq: 'quarter' | 'year' | 'ytd'): boolean {
 		return (c.ctxFlow === 'd' && c.ctxMode === 'Q') || (c.ctxFlow === 'e' && (c.ctxMode === 'A' || c.ctxMode === 'Y'));
 	return c.ctxMode === 'A' || c.ctxMode === 'Y'; // ytd
 }
-function cellPeriod(c: RawCell, freq: 'quarter' | 'year' | 'ytd'): string {
-	return freq === 'year' ? String(c.ctxYear) : `${c.ctxYear}Q${c.ctxQuarter}`;
-}
-
-const UNIT_ALL_RE = /단위\s*[:：]\s*(백만원|천원|원)/g;
 const _BIG_NUM_RE = />\s*\(?\s*[△-]?\s*([\d,]{7,})/g; // TE 본문의 큰 금액(자릿수 단서)
 
-// 단위 배율(원 기준) — 표머리 캡션(백만원/천원)을 우선 신뢰(본문 EPS '단위:원' 오염 무시),
-// 캡션이 없으면 magnitude 로 원/비원 판정. 엔진 _detectUnitScale 의 브라우저 보강(에이전트 단위 검증).
-function detectUnitScale(rows: PanelRow[], period: string): number {
-	let captionUnit: string | null = null; // 백만원/천원만 (원은 EPS 오염 가능 → magnitude 로 확인)
+export interface UnitInfo {
+	scale: number;
+	label: string;
+	confidence: 'caption' | 'magnitude'; // caption=표머리 단위 확정, magnitude=캡션 부재 추정(불확실)
+}
+
+// 단위 배율(원 기준) — 셀의 **첫 단위 토큰**(블록오더 병합으로 표머리 `단위:X` 가 본문 ACODE/EPS 앞).
+// 원·천원·백만원 모두 캡션 신뢰(엔진 _detectUnitScale 동형 — '원' 폐기 금지: 원-신고사 1,000,000배 폭주 회귀).
+// 캡션 전무 시에만 magnitude(원 vs 비원) 추정 + 신뢰도 배지.
+function detectUnit(rows: PanelRow[], period: string): UnitInfo {
 	let maxRaw = 0;
 	for (const r of rows) {
 		const c = r.cells?.[period];
 		if (!c) continue;
-		if (!captionUnit) {
-			for (const m of c.matchAll(UNIT_ALL_RE)) {
-				if (m[1] === '백만원' || m[1] === '천원') {
-					captionUnit = m[1];
-					break;
-				}
-			}
+		const m = UNIT_RE.exec(c);
+		if (m) {
+			const scale = UNIT_SCALE[m[1]];
+			return { scale, label: UNIT_LABEL[scale], confidence: 'caption' };
 		}
-		for (const m of c.matchAll(_BIG_NUM_RE)) {
-			const n = parseFloat(m[1].replace(/,/g, ''));
+		for (const g of c.matchAll(_BIG_NUM_RE)) {
+			const n = parseFloat(g[1].replace(/,/g, ''));
 			if (isFinite(n) && n > maxRaw) maxRaw = n;
 		}
 	}
-	if (captionUnit) return UNIT_SCALE[captionUnit]; // 표머리 단위 신뢰
-	// 백만원/천원 캡션 부재 → magnitude: 1e12 초과(13자리+) = 원, 아니면 백만원(DART 표준).
-	// (백만원 회사가 1e12 백만원=100경 원 값을 가질 수 없으므로 원/백만원 분리는 확실. 천원은 캡션 의존.)
-	return maxRaw > 1e12 ? 1 : 1_000_000;
+	// 캡션 부재 → magnitude: 1e12 초과(13자리+) = 원, 아니면 백만원(DART 표준). 천원은 못 가름 → 배지.
+	const scale = maxRaw > 1e12 ? 1 : 1_000_000;
+	return { scale, label: UNIT_LABEL[scale], confidence: 'magnitude' };
 }
 
 export interface FinanceRow {
 	acode: string;
 	label: string;
+	depth: number; // 0=총계·1=소계·2=리프 (accountDepth 재사용 — 위계 표현용)
 	values: (number | null)[]; // 회사 index → 원 환산값 (null=honest-gap)
 }
 
-// 한 회사의 재무 섹션 → {acode: (label, 원환산값)} (locked period 의 freq 컨텍스트, depth-1).
+// 한 회사의 재무 섹션 → {acode: (label, 원환산값)} + 단위 정보 (locked period 의 freq 컨텍스트, depth-1).
 function companyFinance(
 	rows: PanelRow[],
 	period: string,
 	freq: 'quarter' | 'year' | 'ytd'
-): Map<string, { label: string; value: number }> {
-	const scale = detectUnitScale(rows, period);
+): { cells: Map<string, { label: string; value: number }>; unit: UnitInfo } {
+	const unit = detectUnit(rows, period);
 	const targetYear = parseInt(period.slice(0, 4), 10);
 	const targetQ = period.length > 5 ? parseInt(period[5], 10) : null;
 	const out = new Map<string, { label: string; value: number }>();
@@ -163,10 +163,10 @@ function companyFinance(
 			if (targetQ !== null && freq !== 'year' && c.ctxQuarter !== targetQ) continue;
 			if (out.has(c.acode)) continue; // 첫 등장(상위 라인) 우선
 			const num = parseNum(c.valueRaw);
-			if (num !== null) out.set(c.acode, { label: c.label, value: num * scale });
+			if (num !== null) out.set(c.acode, { label: c.label, value: num * unit.scale });
 		}
 	}
-	return out;
+	return { cells: out, unit };
 }
 
 function parseNum(s: string): number | null {
@@ -182,30 +182,36 @@ function parseNum(s: string): number | null {
 	return neg ? -n : n;
 }
 
+export interface FinanceCompare {
+	rows: FinanceRow[];
+	units: UnitInfo[]; // 회사 index → 단위(원환산 소스 단위 + 신뢰도 배지)
+}
+
 // N개 bundle 의 재무 섹션을 acode 로 정렬 — 행=acode·label, 회사별 원 환산값. honest-gap null.
 export function alignFinance(
 	bundles: PanelBundle[],
 	sectionKey: string,
 	period: string,
 	freq: 'quarter' | 'year' | 'ytd' = 'quarter'
-): FinanceRow[] {
-	const n = bundles.length;
+): FinanceCompare {
 	const per = bundles.map((b) => companyFinance(b.gridBySection.get(sectionKey) ?? [], period, freq));
 	const order: string[] = [];
 	const reprLabel = new Map<string, string>();
-	for (const m of per) {
-		for (const [ac, { label }] of m) {
+	for (const { cells } of per) {
+		for (const [ac, { label }] of cells) {
 			if (!reprLabel.has(ac)) {
 				reprLabel.set(ac, label);
 				order.push(ac);
 			}
 		}
 	}
-	return order.map((ac) => ({
+	const rows = order.map((ac) => ({
 		acode: ac,
 		label: reprLabel.get(ac) || ac,
-		values: per.map((m) => m.get(ac)?.value ?? null)
+		depth: accountDepth(ac),
+		values: per.map((p) => p.cells.get(ac)?.value ?? null)
 	}));
+	return { rows, units: per.map((p) => p.unit) };
 }
 
 // 섹션이 재무 셀모드 대상인가 — 섹션의 어떤 행이 재무 5표 disclosureKey 인가(화이트리스트, 오감지 차단).

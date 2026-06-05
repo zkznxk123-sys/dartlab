@@ -380,13 +380,18 @@
 						onmouseleave={onCellMouseLeave}
 					>
 						{#if key === 'label'}
-							<span
+							<button
+								type="button"
 								class="company-link"
 								title="{rowLabel(rd)} ({id})"
+								onclick={(e) => {
+									e.stopPropagation();
+									onSelect(id);
+								}}
 							>
 								<span class="ind-dot" style:background={rowColor(rd)}></span>
 								<span class="company-name">{rowLabel(rd)}</span>
-							</span>
+							</button>
 						{:else if key === 'id'}
 							<span class="code-cell">{id}</span>
 						{:else if key === 'market'}

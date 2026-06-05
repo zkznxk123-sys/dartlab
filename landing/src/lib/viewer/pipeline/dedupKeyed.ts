@@ -1,7 +1,7 @@
 // dedupKeyed — keyed 행 (disclosureKey,scope,leafType,period) 당 1개 (xbrlClass 있음·긴 본문 우선).
 // Python mapper.dedupKeyed 1:1. narrative(null key)는 보존.
 
-import { SEP } from '../keys';
+import { SEP, scopeOf } from '../keys';
 import type { LeafRow } from '../types';
 
 export function dedupKeyed(rows: LeafRow[]): LeafRow[] {
@@ -12,7 +12,7 @@ export function dedupKeyed(rows: LeafRow[]): LeafRow[] {
 			out.push(r); // narrative 보존
 			continue;
 		}
-		const scope = (r as LeafRow & { scope: string }).scope;
+		const scope = scopeOf(r.xbrlClass);
 		const k = [r.disclosureKey, scope, r.leafType ?? '', r.period ?? ''].join(SEP);
 		const prev = seen.get(k);
 		if (!prev) {
