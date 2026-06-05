@@ -167,6 +167,9 @@ def test_compare_topic_selects_period_after_topic_filter(monkeypatch: pytest.Mon
     assert df[0, "111111"] == "inventory-1"
     assert df[0, "222222"] == "inventory-2"
 
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    assert diag["resolvedPeriods"] == ["2025Q4"]
+
 
 def test_compare_topic_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyPatch) -> None:
     """topic 이 한 회사에만 있어도 비교 대상 회사 컬럼은 null 로 남긴다."""
@@ -207,6 +210,7 @@ def test_compare_topic_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyP
     assert df[0, "222222"] is None
 
     diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["presentCodes"] == ["111111"]
     assert diag["missingCodes"] == ["222222"]
     assert diag["soloRows"] == 1
@@ -241,6 +245,7 @@ def test_compare_row_keeps_missing_panel_company_as_null(monkeypatch: pytest.Mon
     assert df[0, "222222"] is None
 
     diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["presentCodes"] == ["111111"]
     assert diag["missingCodes"] == ["222222"]
     assert diag["soloRows"] == 1

@@ -292,6 +292,50 @@ def _ensureCellColumns(out: pl.DataFrame, ordered: list[str]) -> pl.DataFrame:
     return out.with_columns([pl.lit(None, dtype=pl.Utf8).alias(c) for c in missing])
 
 
+def _rowLongFrame(
+    codes: list[str],
+    *,
+    marketNs: str,
+    scopeVal: str | None,
+    period: list[str] | str | None,
+    topic: str | None,
+) -> tuple[pl.DataFrame | None, list[str]]:
+    """row 모드 입력 panel 을 topic 적용 long frame 으로 정규화."""
+    periodArg = [period] if isinstance(period, str) else period  # readWide 파일 prune
+    longs: list[pl.DataFrame] = []
+    present: list[str] = []
+    for c in codes:
+        wide = readWide(c, marketNs=marketNs, periods=periodArg, tag=False)
+        if wide is None or wide.is_empty():
+            continue
+        lg = _companyLong(c, wide, scopeVal)
+        if lg is not None and not lg.is_empty():
+            longs.append(lg)
+            present.append(c)
+    if not longs:
+        return None, present
+    long = pl.concat(longs, how="diagonal_relaxed")
+    if topic:
+        # topic 이 있을 때는 period 선택 전에 먼저 좁힌다. 전체 패널 최신 공통분기가
+        # topic 을 담지 않으면 직전 사업보고서 주석이 빈 표로 사라진다.
+        long = _matchTopic(long, topic)
+        if long.is_empty():
+            return None, present
+    return long, present
+
+
+def _chooseRowTargets(long: pl.DataFrame, present: list[str], period: list[str] | str | None) -> list[str]:
+    """row 모드 실제 비교 시점 — 명시 period 또는 최신 공통(없으면 union 최신)."""
+    if isinstance(period, str):
+        return [period]
+    if isinstance(period, list):
+        return list(period)
+    perByCode = {c: set(long.filter(pl.col("_code") == c)["_period"].to_list()) for c in present}
+    common = set.intersection(*perByCode.values()) if perByCode else set()
+    pool = common or set().union(*perByCode.values())
+    return [sortPeriods(list(pool), descending=True)[0]] if pool else []
+
+
 def compare(
     codes: list[str] | str,
     *,
@@ -397,39 +441,12 @@ def compare(
         )
 
     scopeVal = _normScope(scope)
-    periodArg = [period] if isinstance(period, str) else period  # readWide 파일 prune
-
-    longs: list[pl.DataFrame] = []
-    present: list[str] = []
-    for c in codes:
-        wide = readWide(c, marketNs=marketNs, periods=periodArg, tag=False)
-        if wide is None or wide.is_empty():
-            continue
-        lg = _companyLong(c, wide, scopeVal)
-        if lg is not None and not lg.is_empty():
-            longs.append(lg)
-            present.append(c)
-    if not longs:
+    long, present = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=topic)
+    if long is None:
         return pl.DataFrame()
 
-    long = pl.concat(longs, how="diagonal_relaxed")
-    if topic:
-        # topic 이 있을 때는 period 선택 전에 먼저 좁힌다. 전체 패널 최신 공통분기가
-        # topic 을 담지 않으면 직전 사업보고서 주석이 빈 표로 사라진다.
-        long = _matchTopic(long, topic)
-        if long.is_empty():
-            return pl.DataFrame()
-
     # 비교 시점 결정 — period 지정 시 그대로, 아니면 최신 공통(없으면 union 최신).
-    if isinstance(period, str):
-        targets = [period]
-    elif isinstance(period, list):
-        targets = list(period)
-    else:
-        perByCode = {c: set(long.filter(pl.col("_code") == c)["_period"].to_list()) for c in present}
-        common = set.intersection(*perByCode.values()) if perByCode else set()
-        pool = common or set().union(*perByCode.values())
-        targets = [sortPeriods(list(pool), descending=True)[0]] if pool else []
+    targets = _chooseRowTargets(long, present, period)
     if not targets:
         return pl.DataFrame()
     long = long.filter(pl.col("_period").is_in(targets))
@@ -499,6 +516,24 @@ def _resolvedFinancePeriods(
     return _chooseFinanceTargets(per)
 
 
+def _resolvedRowPeriods(
+    codes: list[str],
+    *,
+    topic: str | None,
+    scope: str | None,
+    marketNs: str,
+    period: list[str] | str | None,
+) -> list[str]:
+    """diagnostics 용 row 모드 실제 비교 period."""
+    if period is not None:
+        return _periodValue(period) or []
+    scopeVal = _normScope(scope)
+    long, present = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=topic)
+    if long is None:
+        return []
+    return _chooseRowTargets(long, present, period)
+
+
 def _resolvedPeriods(
     codes: list[str],
     *,
@@ -512,7 +547,7 @@ def _resolvedPeriods(
     """diagnostics 에 노출할 실제 period 축."""
     if mode == "finance" and topic:
         return _resolvedFinancePeriods(codes, topic.strip().lower(), freq, scope, marketNs, period)
-    return _periodValue(period)
+    return _resolvedRowPeriods(codes, topic=topic, scope=scope, marketNs=marketNs, period=period)
 
 
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
