@@ -33,6 +33,26 @@ function strip(raw: string): string {
 	return raw.replace(TAG, ' ').replace(ENT, ' ').replace(WS, ' ').trim();
 }
 
+// ── 금액 추출 (원 단위) — "100억 이상" 같은 숫자/조건 검색용. tests/_attempts/viewerSearch/constraintFacet.py
+// 검증판 1:1. 명시단위 조/억만, "조" 다의어(兆 vs 條 법조항) 2중 차단: 앞 '제' 배제 + 조는 뒤 원/억 동반시만. ──
+const AMT_KR = /(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)\s?(조|억)(?=\s*원|[\s,.)\]]|$)/g;
+const UNIT_MULT: Record<string, number> = { 조: 1e12, 억: 1e8 };
+function maxAmountKrw(text: string): number {
+	let max = 0;
+	AMT_KR.lastIndex = 0;
+	let m: RegExpExecArray | null;
+	while ((m = AMT_KR.exec(text)) !== null) {
+		if (text.slice(Math.max(0, m.index - 2), m.index).includes('제')) continue; // 제N조 = 법조항(條)
+		if (m[2] === '조') {
+			const tail = text.slice(m.index + m[0].length, m.index + m[0].length + 14);
+			if (!/^\s*원/.test(tail) && !/^\s*[\d,]+\s*억/.test(tail)) continue; // 兆(금액)은 뒤 원/억 동반시만
+		}
+		const v = parseFloat(m[1].replace(/,/g, '')) * UNIT_MULT[m[2]];
+		if (v > max) max = v;
+	}
+	return max;
+}
+
 // 큐레이션 동의어 — dartlab `ngramIndex._L0_INFORMAL`(43키) + 공시 도메인 상식 시드. 운영자 수동 관리.
 // PMI/공기행렬 자동발굴 금지(단일회사 코퍼스 동어반복 인공물 — project_unified_search_table §8 격하).
 const SYNONYMS: Record<string, string[]> = {
@@ -64,6 +84,7 @@ export interface IndexedRow {
 	cells: Record<string, string>; // period → 평문 셀 (스니펫·hit period 용)
 	tf: Map<string, number>;
 	len: number;
+	maxAmount: number; // 행 본문 최대 금액(원) — "100억 이상" 조건검색 필터용. 없으면 0.
 }
 
 export interface SearchIndex {
@@ -135,7 +156,8 @@ function indexRow(acc: Acc, sectionKey: string, rowIndex: number, r: PanelRow, o
 		scope: r.scope ?? '',
 		cells,
 		tf,
-		len
+		len,
+		maxAmount: maxAmountKrw(Object.values(cells).join(' '))
 	});
 }
 
@@ -212,10 +234,32 @@ export function expandQuery(query: string, expand = true): { weights: Map<string
 	return { weights, added };
 }
 
+// ── 숫자/조건 쿼리 파싱 — 기존 검색창이 "100억 이상", "1조 초과", "50억 이하"를 이해(새 UI 0). ──
+// 작은 bounded 집합(조/억 × 이상·초과·넘는·넘게=gte / 이하·미만·미달=lte). 패턴이 끝없이 늘면 = 덕지덕지 신호.
+const AMOUNT_Q = /(\d[\d,]*(?:\.\d+)?)\s*(조|억)\s*(?:원\s*)?(이상|초과|넘는|넘게|이하|미만|미달)/;
+interface AmtConstraint {
+	min?: number;
+	max?: number;
+}
+function parseConstraint(query: string): { c: AmtConstraint | null; residual: string } {
+	const m = query.match(AMOUNT_Q);
+	if (!m || m.index === undefined) return { c: null, residual: query };
+	const v = parseFloat(m[1].replace(/,/g, '')) * UNIT_MULT[m[2]];
+	const gte = m[3] === '이상' || m[3] === '초과' || m[3] === '넘는' || m[3] === '넘게';
+	const residual = (query.slice(0, m.index) + ' ' + query.slice(m.index + m[0].length)).replace(/\s+/g, ' ').trim();
+	return { c: gte ? { min: v } : { max: v }, residual };
+}
+function amtOk(amt: number, c: AmtConstraint): boolean {
+	return amt > 0 && (c.min === undefined || amt >= c.min) && (c.max === undefined || amt <= c.max);
+}
+
 export function search(idx: SearchIndex, query: string, opts: { expand?: boolean; topK?: number } = {}): { hits: SearchHit[]; added: string[] } {
-	const { weights, added } = expandQuery(query, opts.expand ?? true);
+	// 조건("100억 이상")이 있으면 떼어내고, 남은 표면어로 BM25 + 금액 필터.
+	const { c, residual } = parseConstraint(query);
+	const lexQuery = c ? residual : query;
+	const { weights, added } = expandQuery(lexQuery, opts.expand ?? true);
 	const n = idx.rows.length;
-	if (n === 0 || weights.size === 0) return { hits: [], added };
+	if (n === 0) return { hits: [], added };
 	const scores = new Map<number, number>();
 	for (const [term, qw] of weights) {
 		const d = idx.df.get(term) ?? 0;
@@ -230,12 +274,26 @@ export function search(idx: SearchIndex, query: string, opts: { expand?: boolean
 			if (denom > 0) scores.set(pos, (scores.get(pos) ?? 0) + (qw * idf * (tf * (K1 + 1))) / denom);
 		}
 	}
+	// 후보 랭킹 — 표면어 BM25 점수 있으면 그 순(+조건이면 금액 필터); 순수 조건("100억 이상")이면 조건
+	// 만족 행을 금액 내림차순. 둘 다 없으면 빈 결과.
+	let ranked: Array<[number, number]>;
+	if (scores.size > 0) {
+		ranked = [...scores.entries()].sort((a, b) => b[1] - a[1]);
+		if (c) ranked = ranked.filter(([pos]) => amtOk(idx.rows[pos].maxAmount, c));
+	} else if (c) {
+		ranked = idx.rows
+			.map((r, i): [number, number] => [i, r.maxAmount])
+			.filter(([, amt]) => amtOk(amt, c))
+			.sort((a, b) => b[1] - a[1]);
+	} else {
+		return { hits: [], added };
+	}
 	// 결과 dedupe — 같은 (섹션,블록)의 scope(연결/별도)·leafSeq 변형을 하나로 접어 top-K 가 서로 다른 항목이
-	// 되게(출시 후 감사: 쿼리당 평균 1.2~1.6 중복 = "같은 항목 4번" 제거). 점수 내림차순 첫 등장(최고점)만 유지.
+	// 되게(출시 후 감사: 쿼리당 평균 1.2~1.6 중복 = "같은 항목 4번" 제거). 첫 등장(최고 랭킹)만 유지.
 	const topK = opts.topK ?? 8;
 	const seenLabel = new Set<string>();
 	const top: Array<[number, number]> = [];
-	for (const entry of [...scores.entries()].sort((a, b) => b[1] - a[1])) {
+	for (const entry of ranked) {
 		const r = idx.rows[entry[0]];
 		const label = r.sectionKey + '␟' + r.block;
 		if (seenLabel.has(label)) continue;
@@ -243,7 +301,7 @@ export function search(idx: SearchIndex, query: string, opts: { expand?: boolean
 		top.push(entry);
 		if (top.length >= topK) break;
 	}
-	const firstTok = (query.trim().split(/\s+/)[0] ?? '').replace(/[^가-힣A-Za-z]/g, '');
+	const firstTok = (lexQuery.trim().split(/\s+/)[0] ?? '').replace(/[^가-힣A-Za-z]/g, '');
 	const hits: SearchHit[] = top.map(([pos, sc]) => {
 		const row = idx.rows[pos];
 		const periodsDesc = Object.keys(row.cells).sort().reverse();
