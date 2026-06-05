@@ -1,9 +1,9 @@
 """AccountMapper — accountMappings.json 읽기 전용 래퍼.
 
 본 래퍼는 ``MapperEngine`` 인터페이스 (``BaseMapper.lookup``) 어댑터.
-실제 매핑 로직은 ``providers.dart.finance.mapper.AccountMapper`` (12 단계
-fallback, 역인덱스 3 종, suffix 흡수) 의 ``map()`` 본진을 *위임*. 같은
-사전 위 두 가지 매칭 로직 분산 = SSOT 위반 차단.
+실제 매핑 로직은 단일 소유 엔진 ``core.accounts.AccountNormalizer`` (12 단계
+fallback, 역인덱스 3 종, suffix 흡수) 에 *직결 위임* (facade 우회 X — owner 직접).
+같은 사전 위 두 가지 매칭 로직 분산 = SSOT 위반 차단.
 """
 
 from __future__ import annotations
@@ -37,9 +37,9 @@ class AccountMapper(BaseMapper):
         return "account"
 
     def _data(self) -> dict:
-        from dartlab.core.utils.labels import _loadAccountMappings
+        from dartlab.core.accounts.data import loadAccounts
 
-        return _loadAccountMappings()
+        return loadAccounts()
 
     def _mappings(self) -> dict[str, str]:
         """korName → snakeId 매핑."""
@@ -83,16 +83,16 @@ class AccountMapper(BaseMapper):
             ``korToSnakeId`` and ``snakeIdToKor`` ·
             ``providers.dart.finance.mapper.AccountMapper.map``.
         """
-        from dartlab.providers.dart.finance.mapper import AccountMapper as Engine
+        from dartlab.core.accounts import AccountNormalizer
 
-        engine = Engine.get()
+        norm = AccountNormalizer.get()
         standards = self._standardAccounts()
 
-        # 1. key 를 한글명으로 시도 — 본진 12 단계 fallback 흡수
-        snakeId = engine.map("", key)
-        # 2. 본진이 None 이면 영문 id 로 재시도 (synonym + prefix 정규화)
+        # 1. key 를 한글명으로 시도 — owner 12 단계 fallback 흡수
+        snakeId = norm.normalize("", key)
+        # 2. None 이면 영문 id 로 재시도 (synonym + prefix 정규화)
         if snakeId is None:
-            snakeId = engine.map(key, "")
+            snakeId = norm.normalize(key, "")
         # 3. 둘 다 None 이면 key 가 이미 snakeId 인 경우
         if snakeId is None and key in standards:
             return {"snakeId": key, **standards[key]}

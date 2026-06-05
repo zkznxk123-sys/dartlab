@@ -35,7 +35,7 @@ class AliasMapper(BaseMapper):
         return "alias"
 
     def _aliases(self) -> dict[str, str]:
-        from dartlab.core.utils.labels import SNAKEID_ALIASES
+        from dartlab.core.accounts import SNAKEID_ALIASES
 
         return SNAKEID_ALIASES
 

@@ -121,6 +121,14 @@ testUniverse:
 
 매핑 추가/구조 변경 후 `bash tests/test-lock.sh tests/golden/accountMapper -m unit` 가 통과 게이트.
 
+### DART/EDGAR alias 소비 비대칭 (의도된 보존 — 통합 후에도 다름)
+
+데이터 SSOT 는 합쳤지만 *소비 동작* 은 의도적으로 비대칭이다 — DART pivot 은
+`mergeAliasRows` 로 alias 행을 canonical 에 합쳐 **alias 행 제거**(`financeMappers`),
+EDGAR pivot 은 fixpoint 로 **canonical·alias 둘 다 노출**(복제, `providers/edgar/finance/pivot.py`).
+같은 `SNAKEID_ALIASES` 를 정반대로 쓰는 건 소비 측 계약 차이(EDGAR 소비자는 `total_assets`
+로도 접근 기대)지 미완이 아니다. 회귀 가드 — `tests/golden/accountMapper/test_alias_merge_semantics.py`.
+
 ### EDINET·SCE 제외 (별 type system)
 
 EDINET(`providers/edinet/finance/mapper.py`, 자체 taxonomy·반대 방향 dict)과 SCE
