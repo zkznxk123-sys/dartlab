@@ -645,6 +645,19 @@ def _cellColumns(columns: list[str], codes: list[str]) -> list[str]:
     return out
 
 
+def _identityColumns(columns: list[str], cellCols: list[str]) -> list[str]:
+    """compare 출력에서 회사 셀을 제외한 행 식별 컬럼만 추출."""
+    cellSet = set(cellCols)
+    return [col for col in columns if col not in cellSet]
+
+
+def _cellColumnShape(cellCols: list[str]) -> str:
+    """회사 셀 컬럼 형태 — empty/singlePeriod/multiPeriod."""
+    if not cellCols:
+        return "empty"
+    return "multiPeriod" if any(_SEP in col for col in cellCols) else "singlePeriod"
+
+
 def _codeHasValue(row: dict[str, object], code: str) -> bool:
     """단일 행에서 특정 회사가 직접/다기간 셀 중 하나라도 값을 갖는지."""
     if _isFilled(row.get(code)):
@@ -694,7 +707,9 @@ def compareDiagnostics(
 
     Returns:
         ``dict[str, object]`` — 입력 정규화, 시장, 실행 모드, 출력 행/열, 회사별 존재,
-        shared/partial/solo 행수, 실제 비교 period(``resolvedPeriods``), 빈 결과 사유를 담은 진단 payload.
+        식별 컬럼(``identityColumns``), 회사 셀 컬럼(``cellColumns``), 셀 컬럼 형태(``cellColumnShape``),
+        값 단위(``valueUnit``), shared/partial/solo 행수, 실제 비교 period(``resolvedPeriods``),
+        빈 결과 사유를 담은 진단 payload.
 
     Raises:
         없음. 입력 계약 오류도 ``ok=False`` 와 ``reason="invalidInput"`` 으로 반환한다.
@@ -719,7 +734,10 @@ def compareDiagnostics(
         "freq": freq,
         "rowCount": 0,
         "columns": [],
+        "identityColumns": [],
         "cellColumns": [],
+        "cellColumnShape": "empty",
+        "valueUnit": None,
         "presentCodes": [],
         "missingCodes": displayCodes,
         "sharedRows": 0,
@@ -777,6 +795,7 @@ def compareDiagnostics(
     diag["missingCodes"] = normCodes
     columns = list(df.columns)
     cellCols = _cellColumns(columns, normCodes)
+    identityCols = _identityColumns(columns, cellCols)
     presentCodes, sharedRows, partialRows, soloRows = _shareStats(df, normCodes)
     missingCodes = [code for code in normCodes if code not in presentCodes]
     rowCount = df.height
@@ -794,7 +813,10 @@ def compareDiagnostics(
             "freq": normFreq,
             "rowCount": rowCount,
             "columns": columns,
+            "identityColumns": identityCols,
             "cellColumns": cellCols,
+            "cellColumnShape": _cellColumnShape(cellCols),
+            "valueUnit": "KRW" if mode == "finance" else None,
             "presentCodes": presentCodes,
             "missingCodes": missingCodes,
             "sharedRows": sharedRows,

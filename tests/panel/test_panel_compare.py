@@ -339,6 +339,10 @@ def test_compare_diagnostics_counts_shared_partial_solo(monkeypatch: pytest.Monk
     monkeypatch.setattr(cmp, "readWide", fakeReadWide)
     diag = cmp.compareDiagnostics(["111111", "222222", "333333"], period="2025Q4")
     assert diag["rowCount"] == 3
+    assert diag["identityColumns"] == ["chapter", "sectionLeaf", "blockLeaf", "leafType", "disclosureKey", "scope"]
+    assert diag["cellColumns"] == ["111111", "222222", "333333"]
+    assert diag["cellColumnShape"] == "singlePeriod"
+    assert diag["valueUnit"] is None
     assert diag["sharedRows"] == 1
     assert diag["partialRows"] == 1
     assert diag["soloRows"] == 1
@@ -571,6 +575,10 @@ def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: p
 
     diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period=["2025Q4", "2026Q1"])
     assert diag["resolvedPeriods"] == ["2026Q1", "2025Q4"]
+    assert diag["identityColumns"] == ["acode", "label", "scope"]
+    assert diag["cellColumns"] == ["111111␟2026Q1", "111111␟2025Q4", "222222␟2026Q1", "222222␟2025Q4"]
+    assert diag["cellColumnShape"] == "multiPeriod"
+    assert diag["valueUnit"] == "KRW"
 
 
 def test_compare_finance_year_period_normalizes_label(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -886,6 +894,9 @@ def test_compare_diagnostics_row_contract_matches_frame() -> None:
     assert diag["rowCount"] == df.height
     assert diag["columns"] == df.columns
     assert diag["cellColumns"] == [c for c in df.columns if c in _PAIR]
+    assert diag["identityColumns"] == [c for c in df.columns if c not in _PAIR]
+    assert diag["cellColumnShape"] in {"empty", "singlePeriod"}
+    assert diag["valueUnit"] is None
     if df.height == 0:
         assert diag["ok"] is False
         assert diag["emptyReason"] == "topicFilteredEmpty"

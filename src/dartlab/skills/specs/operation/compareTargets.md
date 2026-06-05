@@ -99,6 +99,11 @@ bs = dartlab.compare(["005930", "000660"], topic="bs", period="2025Q4", scope="c
 `period=None` 이면 topic 필터 후 최신 공통 시점을 고른다. 공통 시점이 없으면 최신 union 시점을 쓰며,
 비교 대상 중 한 회사에 값이 없으면 해당 회사 컬럼은 null 로 남긴다.
 
+`compareDiagnostics(...)` 는 같은 입력에 대해 소비자용 반환 계약을 설명한다. `identityColumns` 는 행 식별
+컬럼, `cellColumns` 는 회사 값 컬럼, `cellColumnShape` 는 `singlePeriod`/`multiPeriod`/`empty`,
+`valueUnit` 은 재무 셀모드에서 `KRW` 다. 뷰어/AI 층은 DataFrame 컬럼명을 재추론하지 않고 이 계약을 먼저
+확인한다.
+
 `Company` 단일 진입은 한 회사 원표 확인용이다. 회사 간 비교는 `dartlab.compare(...)`가 공식 표면이다.
 
 ## 정공법 — 결손 처리
