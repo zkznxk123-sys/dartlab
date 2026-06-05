@@ -30,8 +30,6 @@
     "edgar/docs/sections/sectionsStorage.py",
     "edgar/docs/viewer.py",
     "edgar/panel/build/builder.py",
-    "edgar/panel/build/cell.py",
-    "edgar/panel/build/cellSchema.py",
     "edgar/panel/build/instance.py",
     "edgar/panel/build/linkbase.py",
     "edgar/panel/build/mapper.py",

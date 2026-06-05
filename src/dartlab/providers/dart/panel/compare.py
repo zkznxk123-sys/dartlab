@@ -1,13 +1,4 @@
-"""compare — N 회사 공시 panel 을 회사 간 시점 비교 wide 로 정렬 (회사 간 수평화).
-
-회사횡단(모듈 레벨, Company facade 밖 — ``Company.panel`` docstring 이 "회사간은 모듈 레벨"로
-못박은 결정). ``dartlab.compare`` 로 노출. 한 회사 ``Panel`` 이 항목×기간이면, ``compare`` 는 같은
-항목을 N 회사 × 기간으로 가로 정렬한 wide.
-
-정렬키 = keyed ``(disclosureKey, scope, leafType)`` (era-stable canonicalKey — 보고서-로컬 라벨/번호
-drift 를 자동 해소). narrative(disclosureKey 부재) = **섹션단위 병치만** (행단위 강제정렬은 거짓 1:1 =
-확신오정렬 → 금지). scope(연결/별도) 가 정렬키에 포함돼야 별도-BS ↔ 연결-BS 혼선을 막는다.
-"""
+"""compare — N 회사 panel 을 회사 간 시점 비교 wide 로 정렬."""
 
 from __future__ import annotations
 
@@ -31,8 +22,7 @@ _FIN_KEYS = frozenset({"bs", "is", "cf", "cis", "sce"})
 _VALID_FREQ = frozenset({"quarter", "year", "ytd"})
 _UNIT_RE = re.compile(r"단위\s*[:：]\s*(백만원|천원|원)")
 _UNIT_SCALE = {"백만원": 1_000_000, "천원": 1_000, "원": 1}
-# 셀 wide 의 기간 열 — 연간(YYYY) + 분기(YYYYQn) 둘 다. isPeriodColumn(YYYYQn 전용)이 year 열을 거부하는
-# 버그 회피 (freq="year" 비교가 전멸했던 원인).
+# 셀 wide 기간 열은 연간(YYYY)과 분기(YYYYQn)를 모두 받는다.
 _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 _PERIOD_INPUT_RE = re.compile(r"^\d{4}(?:Q[1-4])?$")
 _US_TICKER_RE = re.compile(r"^[A-Z][A-Z0-9.-]{0,9}$")
@@ -118,11 +108,7 @@ def _normPeriod(period: list[str] | str | None) -> list[str] | str | None:
 def _detectUnitScalesByStatement(
     code: str, marketNs: str, statements: tuple[str, ...] | None = None
 ) -> dict[str, dict[str, int]]:
-    """회사 재무표 statement×period별 caption '단위:X' → 원 배율 map. 미발견=백만원(DART 표준).
-
-    XBRL valueRaw 는 회사 신고단위 무손실 저장(삼성·SK=백만원, 카카오=원). 회사 간 비교 시
-    raw 나란히 두면 1000배 착시 → 원 환산 필수. 단위 토큰은 셀이 아니라 해당 filing period 표 caption 에 있다.
-    """
+    """statement×period caption 단위 → 원 배율 map. 미발견=백만원."""
     from .build.cell import CELL_STATEMENTS
     from .read import _panelDir, ensurePanelFromHf
 
@@ -143,8 +129,7 @@ def _detectUnitScalesByStatement(
         byPeriod: dict[str, int] = {}
         periods = [str(p) for p in scoped.select("period").unique()["period"].to_list() if p]
         for period in periods:
-            # 캡션 = **같은 statement·period 의 ACODE 없는 캡션 leaf**에서만 (본문 leaf 의 EPS 행단위
-            # '단위:원' 오염 차단 — 본문은 ACODE 보유). 다른 물리 statement 나 period 로 fallback 하지 않는다.
+            # 같은 statement/period의 ACODE 없는 caption leaf만 단위 근거로 쓴다.
             cap = scoped.filter(
                 (pl.col("period") == period) & ~pl.col("contentRaw").str.contains("ACODE=", literal=True)
             )
@@ -494,85 +479,24 @@ def compare(
     scope: str | None = None,
     freq: str = "quarter",
 ) -> pl.DataFrame:
-    """N 회사 공시 panel 을 회사 간 비교 wide 로 정렬한다 (재무는 셀 단위, 그 외는 항목 단위).
-
-    한 회사 ``Panel`` 이 항목×기간이라면, ``compare`` 는 같은 공시 항목을 여러 회사에 걸쳐 가로로
-    세운 wide 다. **콘텐츠 타입별 적응**:
-        - **재무제표(topic="bs"/"is"/"cf"/"cis"/"sce")**: 통짜 표가 아니라 **셀(항목) 단위** —
-          행=acode(XBRL 코드)·label, 열=회사, 셀=**원 환산 숫자**. 이름 drift(영업이익↔영업이익(손실))를
-          acode 가 해소하고, 단위(백만원↔원)·scope(연결↔별도)·freq(분기↔연간)를 강제 일치시킨다.
-          예: 자산총계 삼성 633조 / SK 222조 / 카카오 28.8조 (단위 착시 0).
-        - **그 외(주석·서술·None)**: 정렬키(disclosureKey, scope, leafType)로 항목 단위 정렬. 회사마다
-          다른 라벨·절 번호 drift 자동 해소 (삼성 "7. 유형자산" ↔ SK "11. 유형자산" 한 행).
-    한쪽 회사에만 있는 항목은 honest-gap(null) — 거짓 정렬보다 빈 칸이 정직하다.
+    """N 회사 공시 panel 을 회사 간 비교 wide 로 정렬한다.
 
     Args:
-        codes: 종목코드 2개 이상 (``list[str]`` 또는 단일 ``str``). KR 은 6자리 코드, US 는 ticker 만.
-            같은 시장(marketNs)끼리만.
-        topic: 비교할 항목 — 재무표("bs"/"is"/"cf"/"cis"/"sce")는 셀 단위, 한글 섹션명("재고")·
-            canonicalKey("NT_D826380")는 항목 단위. None 이면 전체 격자.
-        period: 비교 시점 — 단일 ``str``("2025Q4") 이면 그 시점 board(열=회사코드), ``list`` 면
-            회사×기간(열=``{code}␟{period}``, 최신순 정렬), None 이면 최신 공통 시점. 재무 셀모드도
-            같은 시점 계약을 따른다.
-        scope: "consolidated"/"separate"(=standalone). 연결↔별도 혼선 차단. None 이면 둘 다(재무는 연결 고정).
-        freq: 재무 셀모드 입도 — "quarter"(분기, 기본)/"year"(연간)/"ytd"(누적). 회사 간 freq 일치 강제.
-
-    시장(KR/US)은 codes 로 자동 판별(``detectMarket``) — 같은 시장끼리만. KO↔US 혼합은
-    ValueError(crossMarket 후속). 재무 셀모드는 현재 KR(DART)만 지원하며, US finance 는 EDGAR adapter
-    확정 전까지 차단한다.
+        codes: 종목코드 2~6개. KR은 6자리 코드, US는 ticker.
+        topic: None이면 전체 격자. ``bs/is/cf/cis/sce``는 재무 셀 비교 모드.
+        period: None, ``"2025Q4"``, ``"2025"``, 또는 리스트.
+        scope: None, ``"consolidated"``, ``"separate"``, ``"연결"``, ``"별도"``.
+        freq: 재무 셀모드 입도. ``"quarter"``/``"year"``/``"ytd"``.
 
     Returns:
-        ``pl.DataFrame`` — 행=정렬된 공시 항목(식별 컬럼 + 회사별 셀), 컬럼=식별
-        (chapter/sectionLeaf/blockLeaf/disclosureKey/scope/leafType) + 셀(단일 시점→회사코드,
-        다기간→{code}␟{period}). 빈(2사 미만 데이터)이면 빈 DataFrame.
+        ``pl.DataFrame`` — 식별 컬럼 + 회사별 셀. 다기간 열은 ``{code}␟{period}``.
 
     Raises:
-        ValueError: codes 2개 미만, 6개 초과, code/period/scope/freq 오타, marketNs 외 시장 혼합, 또는
-            US finance compare 시도.
+        ValueError: 대상 수, code/period/scope/freq 오타, 시장 혼합, US finance compare 시도.
 
     Example:
         >>> import dartlab
-        >>> dartlab.compare(["005930", "000660"], topic="재고")          # doctest: +SKIP
-        >>> dartlab.compare(["005930", "000660", "035720"])              # doctest: +SKIP  전체 격자
-        >>> dartlab.compare(["005930", "000660"], topic="bs", scope="consolidated")  # doctest: +SKIP
-
-    SeeAlso:
-        - ``Panel`` — 한 회사 wide (compare 의 입력 단위).
-        - ``read.readWide`` — 회사내 수평화(compare 가 회사당 1회 호출).
-        - ``dartlab.scan`` — 전종목 횡단 스크리닝(compare 는 지정 N 사 구조 비교).
-
-    Requires:
-        - polars. 각 code 의 panel artifact(data/{dart|edgar}/panel/{code}.parquet).
-
-    Capabilities:
-        - N 회사 공시 항목(재무표·주석·서술)을 era-stable 정렬키로 가로 정렬 — 라벨/번호 drift 자동 해소.
-        - 한쪽만 있는 항목은 honest-gap(null) — 확신오정렬보다 빈 칸.
-        - 반환이 평범한 wide DataFrame — polars 연산 즉시.
-
-    Guide:
-        - 같은 시장 N 사를 codes 로, 비교 항목은 topic, 시점은 period. KO↔US 는 후속.
-
-    AIContext:
-        - scalar 지표 랭킹은 peerCompareN(축 다름). compare 는 공시 항목 구조 그대로 가로 비교.
-        - 외부 본문(contentRaw)은 untrusted — ai 층이 마커로 감쌈.
-
-    LLM Specifications:
-        AntiPatterns:
-            - codes 1개 — 비교 의미 0(단일 종목은 Company.panel).
-            - bare disclosureKey 정렬 — scope/leafType 누락 시 별도↔연결·표↔서술 혼선.
-            - narrative 행단위 강제정렬 — 거짓 1:1(섹션단위만).
-        OutputSchema:
-            - ``pl.DataFrame`` (식별 컬럼 + 회사 셀). 단일 시점=회사코드 열, 다기간={code}␟{period}.
-        Prerequisites:
-            - 각 code panel artifact. 동일 marketNs.
-        Freshness:
-            - 매 호출 readWide(파생물 미저장).
-        Dataflow:
-            - row: codes → readWide×N → topic 필터 → period 결정 → (disclosureKey,scope,leafType) outer-align.
-            - finance: codes → DART cell parse×N → acode align → 원 환산 값.
-        TargetMarkets:
-            - row: KR(DART) 끼리 / US(EDGAR) 끼리. KO↔US 혼합은 후속(crossMarket).
-            - finance: KR(DART) only until EDGAR native adapter is finalized.
+        >>> dartlab.compare(["005930", "000660"], topic="재고")  # doctest: +SKIP
     """
     codes = _normCodes(codes)
     if len(codes) < 2:
@@ -585,6 +509,7 @@ def compare(
     periodVal = _normPeriod(period)
     topicVal = _normTopic(topic)
     freq = _normFreq(freq)
+    scopeVal = _normScope(scope)
     markets = {detectMarket(c) for c in codes}
     if len(markets) > 1:
         raise ValueError(
@@ -597,10 +522,9 @@ def compare(
         if marketNs != "kr":
             raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
         return _compareCells(
-            codes, statement=topicVal.lower(), freq=freq, scope=scope, marketNs=marketNs, period=periodVal
+            codes, statement=topicVal.lower(), freq=freq, scope=scopeVal, marketNs=marketNs, period=periodVal
         )
 
-    scopeVal = _normScope(scope)
     out, _, _ = _compareRows(codes, marketNs=marketNs, scopeVal=scopeVal, period=periodVal, topic=topicVal)
     return out
 
@@ -700,16 +624,14 @@ def compareDiagnostics(
 
     Args:
         codes: 비교할 종목코드 2~6개.
-        topic: compare 와 동일한 topic. 재무표 키는 finance 모드로 판정된다.
-        period: compare 와 동일한 period 입력. None 이면 compare 가 최신 공통 시점을 고른다.
+        topic: compare 와 동일한 topic.
+        period: compare 와 동일한 period 입력.
         scope: compare 와 동일한 연결/별도 scope.
         freq: compare 와 동일한 재무 셀모드 입도.
 
     Returns:
-        ``dict[str, object]`` — 입력 정규화, 시장, 실행 모드, 출력 행/열, 회사별 존재,
-        식별 컬럼(``identityColumns``), 회사 셀 컬럼(``cellColumns``), 셀 컬럼 형태(``cellColumnShape``),
-        값 단위(``valueUnit``), shared/partial/solo 행수, 실제 비교 period(``resolvedPeriods``),
-        빈 결과 사유를 담은 진단 payload.
+        ``dict[str, object]`` — 입력 정규화, 시장, 실행 모드, 출력 행/열,
+        회사별 존재, resolvedPeriods, emptyReason 등을 담은 payload.
 
     Raises:
         없음. 입력 계약 오류도 ``ok=False`` 와 ``reason="invalidInput"`` 으로 반환한다.

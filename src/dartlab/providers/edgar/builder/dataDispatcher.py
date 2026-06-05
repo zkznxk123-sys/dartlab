@@ -576,17 +576,15 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
 # ── show 진입점 ────────────────────────────────────────────────────
 
 
-_SHOW_FINANCE_TOPICS = frozenset({"IS", "BS", "CF", "CIS", "SCE", "ratios"})
-
-_STRONG_FINANCE_UPPER = frozenset({"IS", "BS", "CF", "CIS", "SCE", "RATIOS"})
+_SHOW_FINANCE_TOPICS = frozenset({"IS", "BS", "CF", "CIS", "SCE", "RATIOS"})
 
 
 def isStrongTopic(topic: str) -> bool:
     """topic 이 finance 강한 소스(companyfacts)인지 — ``c.panel`` facade 라우팅 SSOT.
 
-    EDGAR 는 DART 와 달리 native panel cell 별도 소스가 없다 — companyfacts 가 단일 강한 재무 소스다.
-    IS/BS/CF/CIS/SCE/ratios(+대소문자)면 ``c.show``(companyfacts)로 위임(True), 그 외(item 섹션명·
-    자유 텍스트)는 raw panel 보드 행 검색(False). ``providers.dart.builder.dataDispatcher.isStrongTopic``
+    EDGAR 도 DART 와 같이 소문자 is/bs/cf/ratios 는 native 다. 본 함수는 대문자
+    IS/BS/CF/CIS/SCE/RATIOS finance 호출만 ``c.show``(companyfacts) 위임 대상으로 본다. 그 외
+    item 섹션명·자유 텍스트는 raw panel 보드 행 검색(False). ``providers.dart.builder.dataDispatcher.isStrongTopic``
     의 EDGAR analog — panel facade 가 본 판정을 ``_strongFn`` 주입으로 받아 라우팅한다.
 
     Args:
@@ -600,7 +598,7 @@ def isStrongTopic(topic: str) -> bool:
 
     Example:
         >>> isStrongTopic("IS"), isStrongTopic("is"), isStrongTopic("RATIOS")
-        (True, True, True)
+        (True, False, True)
         >>> isStrongTopic("Risk"), isStrongTopic("item1Business"), isStrongTopic("")
         (False, False, False)
 
@@ -612,19 +610,20 @@ def isStrongTopic(topic: str) -> bool:
         - 없음 (순수 문자열 판정).
 
     Capabilities:
-        - panel facade 의 finance(companyfacts) vs raw 보드 검색 분류 SSOT (EDGAR 단일 재무 소스).
+        - panel facade 의 finance(companyfacts) vs raw 보드 검색 분류 SSOT. 소문자 native 는
+          Panel.__call__ 이 본 함수보다 먼저 처리한다.
 
     Guide:
         - ``Company.panel`` 이 ``p._strongFn = isStrongTopic`` 주입. 직접 호출 안전(순수).
 
     AIContext:
-        - EDGAR 는 native panel 셀 없음 — 소문자 is/bs/cf 도 companyfacts(강함)로 본다(DART 와 차이).
+        - EDGAR 소문자 is/bs/cf/ratios 는 panel 단일 artifact native. 대문자만 companyfacts.
 
     When:
         - panel ``c.panel(key)`` 가 finance 위임 vs 보드 검색을 가를 때.
 
     How:
-        - topic ∈ _SHOW_FINANCE_TOPICS 또는 upper ∈ {IS,BS,CF,CIS,SCE,RATIOS} → True.
+        - topic ∈ _SHOW_FINANCE_TOPICS → True. 대소문자 자동 승격 금지.
 
     LLM Specifications:
         AntiPatterns:
@@ -642,7 +641,7 @@ def isStrongTopic(topic: str) -> bool:
     """
     if not topic:
         return False
-    return topic in _SHOW_FINANCE_TOPICS or topic.upper() in _STRONG_FINANCE_UPPER
+    return topic in _SHOW_FINANCE_TOPICS
 
 
 def showImpl(

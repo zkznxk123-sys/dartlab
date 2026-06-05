@@ -110,12 +110,8 @@ def test_dartzip_seed_isolates_count_from_stale_zips(monkeypatch, tmp_path) -> N
     assert names == ["r1.zip", "r2.zip", "stale1.zip", "stale2.zip"]  # 잔재 보존 + 신규 병합
 
 
-def test_runincremental_partial_archive_preserves_raw(monkeypatch, tmp_path) -> None:
-    """신규 종목 archive 가 부분 실패(error>0)면 build/changed 제외 + raw 보존(다음 run 재시도, finding A).
-
-    archiveEdgarOriginals 는 개별 공시 실패를 raise 없이 error 카운트로 흡수한다. 그대로 빌드하면
-    부분 panel 이 '완전'으로 박제되고 이후 append 가 그 위에서만 진행돼 빠진 이력이 영구 누락된다.
-    """
+def test_runincremental_partial_fetch_skips_build_without_raw(monkeypatch, tmp_path) -> None:
+    """신규 종목 text fetch 가 부분 실패하면 build/changed 제외 + raw 미생성(다음 run 재시도)."""
     import importlib
 
     import dartlab.config as cfg
@@ -129,42 +125,49 @@ def test_runincremental_partial_archive_preserves_raw(monkeypatch, tmp_path) -> 
     edgarIdentity = importlib.import_module("dartlab.gather.edgar.identity")
 
     monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
-    monkeypatch.setenv("EDGAR_DISCARD_RAW", "1")
     monkeypatch.setattr(edgarPanel, "_universeTickerByCik", lambda: {"0000099999": ["NEW"]})
     monkeypatch.setattr(edgarPanel, "_seedTickerPanel", lambda ticker, *, token: False)  # 신규(404)
     monkeypatch.setattr(
-        edgarCollect, "listRecentFilings", lambda dates, *, forms: [{"cik": "0000099999", "accession_no": "X-1"}]
+        edgarCollect,
+        "listRecentFilings",
+        lambda dates, *, forms: [{"cik": "0000099999", "accession_no": "X-1", "txt_url": "u"}],
     )
     monkeypatch.setattr(edgarIdentity, "loadTickers", lambda refresh=False: None, raising=False)
 
-    archived = {"n": 0}
+    listed = {"n": 0}
+    fetched = {"n": 0}
     built = {"n": 0}
 
-    def fakeArchive(tickers, *, forms, sinceYear, showProgress):
-        archived["n"] += 1
-        return {"ok": 3, "skipped": 0, "error": 2, "issuers": 1}  # 부분 실패(불완전 이력)
+    def fakeListAll(ticker, *, forms, sinceYear):
+        listed["n"] += 1
+        return [
+            {"cik": "0000099999", "accession_no": "X-1", "txt_url": "u1"},
+            {"cik": "0000099999", "accession_no": "X-2", "txt_url": "u2"},
+        ]
 
-    def fakeBuild(ticker, *, overwrite, verbose):
+    def fakeFetch(rows):
+        fetched["n"] += 1
+        return {"0000099999": [{"cik": "0000099999", "accession_no": "X-1", "text": "x"}]}  # 1/2 부분 실패
+
+    def fakeBuild(ticker, filings, *, overwrite, verbose):
         built["n"] += 1
         return {"rows": 100}
 
-    monkeypatch.setattr(edgarCollect, "archiveEdgarOriginals", fakeArchive)
+    edgarSubmissions = importlib.import_module("dartlab.gather.original.edgar.submissions")
+    monkeypatch.setattr(edgarSubmissions, "listAllFilings", fakeListAll)
+    monkeypatch.setattr(edgarCollect, "fetchFilingTexts", fakeFetch)
     monkeypatch.setattr(edgarBuild, "buildEdgarPanel", fakeBuild)
-
-    rawDir = tmp_path / "original" / "edgar" / "docs" / "0000099999"
-    rawDir.mkdir(parents=True, exist_ok=True)
-    (rawDir / "x.txt").write_text("x", encoding="utf-8")
 
     out = edgarPanel._runIncremental(StageResult(category="edgarPanel"), lookback=3, upload=False, token="x")
 
-    assert archived["n"] == 1  # archive 시도함
-    assert built["n"] == 0  # error>0 → build 제외(부분 panel 박제 방지)
+    assert listed["n"] == 1 and fetched["n"] == 1
+    assert built["n"] == 0  # 부분 fetch → build 제외(부분 panel 박제 방지)
     assert out.rows == 0  # changed 0
-    assert rawDir.exists()  # cikComplete=False → raw 폐기 skip(다음 run 재시도)
+    assert not (tmp_path / "original" / "edgar" / "docs").exists()  # raw 저장 없음
 
 
 def test_seed_ticker_panel_404_vs_transient(monkeypatch, tmp_path) -> None:
-    """_seedTickerPanel — board 404=False, board 일시실패=None, cell 일시실패=None(셀 손실 가드)."""
+    """_seedTickerPanel — panel 404=False, panel 일시실패=None."""
     import huggingface_hub
 
     import dartlab.config as cfg
@@ -177,30 +180,24 @@ def test_seed_ticker_panel_404_vs_transient(monkeypatch, tmp_path) -> None:
 
     from huggingface_hub.utils import EntryNotFoundError
 
-    state = {"boardErr": None, "cellErr": None}
+    state = {"boardErr": None}
 
     def fake(*, repo_id, repo_type, filename, token, local_dir):
-        if "panelCell" in filename:
-            if state["cellErr"]:
-                raise state["cellErr"]
-        elif state["boardErr"]:
+        if state["boardErr"]:
             raise state["boardErr"]
         return filename
 
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", fake)
 
     # board 404 → False(신규)
-    state.update(boardErr=EntryNotFoundError("404"), cellErr=None)
+    state.update(boardErr=EntryNotFoundError("404"))
     assert edgarPanel._seedTickerPanel("AAR", token="x") is False
     # board 일시실패 → None
-    state.update(boardErr=RuntimeError("5xx"), cellErr=None)
+    state.update(boardErr=RuntimeError("5xx"))
     assert edgarPanel._seedTickerPanel("AAR", token="x") is None
-    # board ok + cell 404 → True(셀 0 종목 정상)
-    state.update(boardErr=None, cellErr=EntryNotFoundError("404"))
+    # board ok → True
+    state.update(boardErr=None)
     assert edgarPanel._seedTickerPanel("AAR", token="x") is True
-    # board ok + cell 일시실패 → None(기존 셀 손실 방지)
-    state.update(boardErr=None, cellErr=RuntimeError("5xx"))
-    assert edgarPanel._seedTickerPanel("AAR", token="x") is None
 
 
 def test_universe_ticker_by_cik_multiclass(monkeypatch) -> None:

@@ -176,7 +176,7 @@ def readCellWide(
     marketNs: str = "kr",
     periods: list[str] | None = None,
 ) -> pl.DataFrame | None:
-    """재무 5표 셀 artifact → acode×period wide (freq 토큰 선택, 평탄화 acode@axisPath).
+    """재무 5표 panel contentRaw read-time 셀 → acode×period wide (freq 토큰 선택, 평탄화 acode@axisPath).
 
     Args:
         code: 종목코드.
@@ -191,7 +191,7 @@ def readCellWide(
         cell = valueRaw. 또는 None (artifact 없음 / statement 미존재 / freq 매칭 0).
 
     Raises:
-        없음 — artifact 부재/빈 시 None.
+        없음 — panel/cell 부재·빈 시 None.
 
     Example:
         >>> readCellWide("005930", statement="IS2", freq="year")  # doctest: +SKIP — 손익 연간 acode×연도
@@ -226,7 +226,7 @@ def readCellWide(
         OutputSchema:
             - ``pl.DataFrame | None`` (acode×period wide).
         Prerequisites:
-            - 셀 artifact.
+            - panel.parquet 5표 contentRaw.
         Freshness:
             - 매 read.
         Dataflow:
@@ -385,7 +385,7 @@ def readStatement(
         OutputSchema:
             - ``pl.DataFrame | None`` (항목명×period).
         Prerequisites:
-            - 셀 artifact.
+            - panel.parquet 5표 contentRaw.
         Freshness:
             - 매 read.
         Dataflow:
@@ -599,7 +599,7 @@ def readRatios(
         OutputSchema:
             - ``pl.DataFrame | None`` ([ratio, label, *period]).
         Prerequisites:
-            - 셀 artifact + core 번들 리소스.
+            - panel.parquet 5표 contentRaw + core 번들 리소스.
         Freshness:
             - 매 read.
         Dataflow:

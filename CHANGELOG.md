@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (다음 release 작업 누적)
 
+### Added
+
+- EDGAR panel native/read/compare facade 추가 — `data/edgar/panel/{ticker}.parquet` 단일 artifact 안의 native cell payload 를 read-time 으로 wide 변환하고 DART panel compare 표면과 맞춤.
+
+### Changed
+
+- EDGAR panel sync/pipeline 을 SEC full-submission text 메모리 fetch → panel build/append → 원문 폐기 흐름으로 정리. 별도 raw `.txt` 원본 저장과 `panelCell` artifact 의존을 제거하고 `edgarPanel` 단일 배포 범위로 축소.
+- provider 내부 `dartlab.providers.edgar.panel.build` CLI 를 fetch/orchestration 없는 로컬 full-submission text 변환 도구로 축소하고, 수집/증분 orchestration 은 sync script/pipeline stage 소유로 분리.
+
+### Fixed
+
+- DART/EDGAR panel audit surface 보강 — 공개 compare symbol 시나리오, silent-fail allowlist, Guard protected Company facade line ledger, EDGAR panel docstring contract 를 현재 코드와 동기화.
+
 ### Removed
 
 - VSCode 확장 트랙 전체 폐기 — `ui/vscode/` (extension + webview Svelte 5 코드 ~44 source 파일), `.github/workflows/vscode.yml` publish 워크플로, `src/dartlab/cli/stdio.py` (확장 전용 JSONL 프로토콜), `src/dartlab/skills/specs/runtime/vscode.md` + 6 종 skill SSOT (`index/agent/mcp/graph/web/pyodide.json`) entry, `tests/audit/_baselines/skillGraphOrphans.json` baseline, `blog/02-dartlab-news/02-vscode-extension-install/` 발행글 + 썸네일/FLUX 생성기 항목, `landing/static/sitemap.xml` 의 `runtime.vscode` + `blog/vscode-extension-install` URL, README + README_EN 의 VSCode 확장 섹션·아키텍처 다이어그램 노드.

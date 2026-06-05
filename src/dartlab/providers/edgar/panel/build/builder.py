@@ -1,24 +1,23 @@
-"""EDGAR panel build — raw `.txt` → 16-col 보드 + EDGAR_CELL 셀 (DART panel.build 미러, 자급).
+"""EDGAR panel build — SEC full-submission text → 16-col panel (DART panel.build mirror).
 
-gather 원본 ``data/original/edgar/docs/{cik}/{accession}.txt`` 를 직접 파싱해 ① 16-col
-``PANEL_SCHEMA`` 보드(재무제표 disclosureKey 앵커링, 서술 null) → ``data/edgar/panel/{ticker}.parquet``,
-② ``EDGAR_CELL_SCHEMA`` 셀(계정×기간) → ``data/edgar/panelCell/{ticker}.parquet`` 생산. sections·gather·
-meta 의존 0(자급, 전 history). DART ``buildPanel`` 의 EDGAR 미러 — zip 대신 SEC full-submission `.txt`.
+SEC full-submission ``.txt`` 는 디스크 원본 artifact 로 저장하지 않는다. 호출자가 fetch 한 텍스트를
+메모리로 넘기면 build 가 즉시 파싱해 ``data/edgar/panel/{ticker}.parquet`` 만 생산한다. native
+재무 셀은 같은 panel row ``contentRaw`` payload 로 보존해 read-time 분해한다. 별도 artifact 는 없다.
 
 LLM Specifications:
     AntiPatterns:
-        - sections/gather/meta import 금지 — 원본 `.txt` 자급(폐기-무관).
+        - sections/gather/meta import 금지 — full-submission text 자급 파싱.
         - 전 ticker 동시 로드 금지 — per-ticker 순차(거대 `.txt` 메모리 bound).
         - 비-재무 폼(8-K/DEF 14A) 포함 금지 — 10-K/10-Q/20-F/40-F 만.
     OutputSchema:
-        - ``buildEdgarPanel(ticker, ...) -> dict`` ({"rows","cells","periods","filings"}).
-        - ``filingToBoardAndCells(txtPath, *, ticker) -> tuple[list, list]``.
+        - ``buildEdgarPanel(ticker, filings, ...) -> dict`` ({"rows","periods","filings"}).
+        - ``filingTextToBoard(txt, *, ticker, accession=None) -> list``.
     Prerequisites:
-        - polars. lxml(walker, build 전용). data/original/edgar/docs/. tickers.parquet.
+        - polars. lxml(walker, build 전용). tickers.parquet.
     Freshness:
-        - 원본 변경 시 재빌드 (offline — network 0).
+        - SEC fetch 결과 변경 시 재빌드.
     Dataflow:
-        - {cik}/*.txt → submission/instance/linkbase/walker/cell → 보드+셀 2 parquet.
+        - full-submission text → submission/linkbase/walker/native payload → panel parquet.
     TargetMarkets:
         - US.
 """
@@ -26,25 +25,26 @@ LLM Specifications:
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable, Mapping
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 
 import dartlab.config as _cfg
 from dartlab.providers.dart.panel.schema import PANEL_SCHEMA
+from dartlab.providers.edgar.panel.native import encodeNativeCellsPayload
 
-from .cell import buildCells
-from .cellSchema import EDGAR_CELL_SCHEMA
 from .instance import extractContexts, extractFacts, extractInstanceFacts
 from .linkbase import parseLabels, parsePresentation
 from .mapper import periodFromReport
+from .nativeCells import buildNativeCells
 from .submission import parseSubmission
 from .walker import buildStatementConcepts, walkBody
 
 _log = logging.getLogger(__name__)
 
 _PANEL_REL = "edgar/panel"
-_CELL_REL = "edgar/panelCell"
 _REGULAR_FORMS = frozenset({"10-K", "10-Q", "20-F", "40-F"})
 # content_raw in-memory 가드 (거대 filing HTML 누적 폭증 차단 — sectionsBuilder 가드 미러).
 _CONTENT_RAW_MEM_CAP = 1_500_000_000
@@ -67,25 +67,6 @@ def panelPath(ticker: str) -> Path:
         'AAPL.parquet'
     """
     return Path(_cfg.dataDir) / _PANEL_REL / f"{ticker.upper()}.parquet"
-
-
-def panelCellPath(ticker: str) -> Path:
-    """셀 artifact 경로 — ``data/edgar/panelCell/{TICKER}.parquet`` (cellRead 경로).
-
-    Args:
-        ticker: US ticker (대소문자 무관, ``upper()`` 정규화).
-
-    Returns:
-        ``data/edgar/panelCell/{TICKER}.parquet`` Path.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> panelCellPath("aapl").name
-        'AAPL.parquet'
-    """
-    return Path(_cfg.dataDir) / _CELL_REL / f"{ticker.upper()}.parquet"
 
 
 def resolveCikForTicker(ticker: str) -> str | None:
@@ -117,41 +98,90 @@ def resolveCikForTicker(ticker: str) -> str | None:
     return str(hit["cik"][0]).strip().zfill(10)
 
 
-def filingToBoardAndCells(txtPath: Path, *, ticker: str) -> tuple[list[dict], list[dict]]:
-    """1 filing `.txt` → (보드 16-col rows, 셀 EDGAR_CELL rows). 비-재무 폼/파싱불가는 ([], []).
+def _attachNativePayload(
+    board: list[dict],
+    cells: list[dict],
+    *,
+    form: str,
+    filingPeriod: str,
+    ticker: str,
+    accession: str,
+) -> None:
+    """native cells 를 statement row ``contentRaw`` 에 payload 로 붙인다."""
+    if not cells:
+        return
+    byStmt: dict[str, list[dict]] = {}
+    for cell in cells:
+        stmt = cell.get("statement")
+        if stmt:
+            byStmt.setdefault(stmt, []).append(cell)
+    if not byStmt:
+        return
+    nextOrder = max((int(r.get("blockOrder") or 0) for r in board), default=-1) + 1
+    for stmt, stmtCells in byStmt.items():
+        payload = encodeNativeCellsPayload(stmtCells)
+        if not payload:
+            continue
+        target = next((r for r in board if r.get("disclosureKey") == stmt), None)
+        if target is not None:
+            target["contentRaw"] = (target.get("contentRaw") or "") + payload
+            continue
+        board.append(
+            {
+                "chapter": form,
+                "sectionLeaf": stmt,
+                "sectionPath": f"{form}␟{stmt}",
+                "leafType": "table",
+                "blockLeaf": stmt,
+                "xbrlClass": None,
+                "xbrlMatched": True,
+                "xbrlMatchScore": 1.0,
+                "atocId": None,
+                "aassocnote": None,
+                "blockOrder": nextOrder,
+                "contentRaw": payload,
+                "period": filingPeriod,
+                "corp": ticker.upper(),
+                "rceptNo": accession,
+                "disclosureKey": stmt,
+            }
+        )
+        nextOrder += 1
 
-    submission → (header, primary HTML, EX-101.PRE/LAB) → instance(facts+contexts) +
-    linkbase(roles+labels) → walker(보드, 재무표 앵커링) + cell(셀). pre-XBRL(링크베이스/fact 부재)
-    필링은 서술 보드만(앵커 0, 셀 0) — DART era 미러.
+
+def filingTextToBoard(txt: str, *, ticker: str, accession: str | None = None) -> list[dict]:
+    """1 full-submission text → panel board rows. 비-재무 폼/파싱불가는 ``[]``.
+
+    submission → (header, primary HTML, EX-101.PRE/LAB/INS) → presentation role → walker.
+    EDGAR 재무표는 ``disclosureKey`` 로 앵커링하고 native cell 은 row payload 로 보존한다.
 
     Args:
-        txtPath: ``data/original/edgar/docs/{cik}/{accession}.txt``.
+        txt: SEC full-submission 원문.
         ticker: US ticker (corp 컬럼).
+        accession: header accession 이 없을 때 쓸 fallback.
 
     Returns:
-        ``(boardRows, cellRows)``. 보드 행은 16-col PANEL_SCHEMA 키, 셀 행은 EDGAR_CELL_SCHEMA 키.
+        보드 행 list. 행은 16-col ``PANEL_SCHEMA`` 키.
 
     Raises:
-        없음 — read/parse 실패는 ([], []).
+        없음 — parse 실패는 ``[]``.
 
     Example:
-        >>> board, cells = filingToBoardAndCells(Path(".../0001410578-25-001475.txt"), ticker="AAR")  # doctest: +SKIP
+        >>> board = filingTextToBoard("...", ticker="AAR")  # doctest: +SKIP
 
     SeeAlso:
-        - ``submission.parseSubmission`` / ``walker.walkBody`` / ``cell.buildCells``.
+        - ``submission.parseSubmission`` / ``walker.walkBody``.
     """
-    try:
-        txt = txtPath.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return [], []
     sub = parseSubmission(txt)
     form = (sub.get("form") or "").upper()
     if form not in _REGULAR_FORMS or not sub.get("primaryHtml"):
-        return [], []
+        return []
     filingPeriod = periodFromReport(form, sub.get("periodOfReport"))
     if not filingPeriod:
-        return [], []
-    accession = sub.get("accession") or txtPath.stem
+        return []
+    accessionNo = sub.get("accession") or accession or ""
+    if not accessionNo:
+        return []
 
     roles = parsePresentation(sub.get("ex101Pre") or "")
     labels = parseLabels(sub.get("ex101Lab") or "")
@@ -178,36 +208,32 @@ def filingToBoardAndCells(txtPath: Path, *, ticker: str) -> tuple[list[dict], li
                 "contentRaw": r["contentRaw"],
                 "period": filingPeriod,
                 "corp": ticker.upper(),
-                "rceptNo": accession,
+                "rceptNo": accessionNo,
                 "disclosureKey": r["disclosureKey"],
             }
         )
-
-    # 셀 (cell) — fact × context × role 분해. facts 는 inline(ix:, ≈2021+) + native EX-101.INS
-    # (separate-instance, ≈2012~2020) 합집합 → deep history. context 도 inline+INS 병합.
-    cells: list[dict] = []
-    if roles:
-        insXml = sub.get("ex101Ins") or ""
-        facts = extractFacts(primaryHtml) + extractInstanceFacts(insXml)
-        contexts = extractContexts(primaryHtml)
-        if insXml:
-            for cid, cval in extractContexts(insXml).items():
-                contexts.setdefault(cid, cval)
-        fyEnd = sub.get("fiscalYearEnd")  # "MMDD"
-        fyEndMonth = int(fyEnd[:2]) if fyEnd and len(fyEnd) == 4 and fyEnd[:2].isdigit() else None
-        cells = buildCells(
-            facts,
-            contexts,
-            roles,
-            labels,
-            meta={
-                "ticker": ticker.upper(),
-                "accession": accession,
-                "filingPeriod": filingPeriod,
-                "fyEndMonth": fyEndMonth,
-            },
-        )
-    return board, cells
+    insXml = sub.get("ex101Ins") or ""
+    facts = extractFacts(primaryHtml) + extractInstanceFacts(insXml)
+    contexts = extractContexts(primaryHtml)
+    if insXml:
+        for cid, cval in extractContexts(insXml).items():
+            contexts.setdefault(cid, cval)
+    fyEnd = sub.get("fiscalYearEnd")
+    fyEndMonth = int(fyEnd[:2]) if fyEnd and len(fyEnd) == 4 and fyEnd[:2].isdigit() else None
+    cells = buildNativeCells(
+        facts,
+        contexts,
+        roles,
+        labels,
+        meta={
+            "ticker": ticker.upper(),
+            "accession": accessionNo,
+            "filingPeriod": filingPeriod,
+            "fyEndMonth": fyEndMonth,
+        },
+    )
+    _attachNativePayload(board, cells, form=form, filingPeriod=filingPeriod, ticker=ticker, accession=accessionNo)
+    return board
 
 
 def _applyContentRawCap(board: list[dict], ticker: str) -> None:
@@ -237,49 +263,64 @@ def _writeParquet(rows: list[dict], schema: dict, target: Path) -> int:
     return int(df.height)
 
 
-def buildEdgarPanel(ticker: str, *, overwrite: bool = True, verbose: bool = False) -> dict[str, int]:
-    """1 ticker: 원본 `.txt` 전수 → 보드 + 셀 2 artifact (자급, offline).
+def _recordTextAndAccession(record: str | Mapping[str, Any]) -> tuple[str, str | None]:
+    """fetch result record → ``(text, accession)``."""
+    if isinstance(record, str):
+        return record, None
+    text = record.get("text") or record.get("content") or record.get("txt") or ""
+    accession = record.get("accession_no") or record.get("accession") or record.get("rceptNo")
+    return str(text), str(accession) if accession else None
 
-    ticker→cik 해소 후 ``data/original/edgar/docs/{cik}/*.txt`` 전 필링을 파싱(재무 폼만) → 보드/셀
-    누적 → 2 parquet write. content_raw mem-cap 가드.
+
+def buildEdgarPanel(
+    ticker: str,
+    filings: Iterable[str | Mapping[str, Any]] | None = None,
+    *,
+    overwrite: bool = True,
+    verbose: bool = False,
+) -> dict[str, int]:
+    """1 ticker: full-submission texts → panel 단일 artifact.
+
+    ``filings`` 로 받은 SEC full-submission text 를 순차 파싱해
+    ``data/edgar/panel/{ticker}.parquet`` 만 쓴다. 원문 `.txt` 저장과 별도 ``panelCell`` 저장은 하지 않는다.
 
     Args:
         ticker: US ticker.
+        filings: full-submission text 또는 ``{"text", "accession_no"}`` record iterable.
         overwrite: False 면 보드 artifact 존재 시 skip(증분).
         verbose: 진행 로그.
 
     Returns:
-        ``{"rows", "cells", "periods", "filings"}``. cik/원본 부재 시 0.
+        ``{"rows", "periods", "filings"}``.
 
     Raises:
         없음 — 필링별 실패는 흡수(resumable).
 
     Example:
-        >>> buildEdgarPanel("AAR")  # doctest: +SKIP
-        {'rows': 4100, 'cells': 12500, 'periods': 17, 'filings': 17}
+        >>> buildEdgarPanel("AAR", [{"text": "...", "accession_no": "..."}])  # doctest: +SKIP
+        {'rows': 4100, 'periods': 17, 'filings': 17}
 
     SeeAlso:
-        - ``filingToBoardAndCells`` — 1 필링.
+        - ``filingTextToBoard`` — 1 필링.
         - ``providers.dart.panel.Panel`` — 보드 read(marketNs="us").
-        - ``providers.edgar.panel.cellRead`` — 셀 read.
 
     Requires:
-        - polars. lxml. data/original/edgar/docs/. tickers.parquet.
+        - polars. lxml. SEC full-submission text.
 
     Capabilities:
-        - 한 회사 전 필링을 XBRL 앵커 보드 + 셀로 — DART buildPanel 의 EDGAR 미러.
+        - 한 회사 필링들을 XBRL 앵커 보드로 — DART buildPanel 의 EDGAR 미러.
 
     Guide:
-        - CLI ``python -X utf8 -m dartlab.providers.edgar.panel.build --tickers AAR``.
+        - pipeline/sync 가 fetch 한 text record 를 넘겨 호출.
 
     AIContext:
-        - offline 자급(network 0). 거대 `.txt` per-filing 처리 + mem-cap.
+        - 거대 full-submission text per-filing 처리 + mem-cap.
 
     When:
-        - 원본 수집 후 panel artifact 생산.
+        - SEC fetch 직후 panel artifact 생산.
 
     How:
-        - cik 해소 → *.txt glob → filingToBoardAndCells 누적 → 2 parquet.
+        - text records → filingTextToBoard 누적 → panel parquet.
 
     LLM Specifications:
         AntiPatterns:
@@ -287,11 +328,11 @@ def buildEdgarPanel(ticker: str, *, overwrite: bool = True, verbose: bool = Fals
         OutputSchema:
             - ``dict[str, int]``.
         Prerequisites:
-            - 원본 `.txt` + tickers.parquet.
+            - full-submission text records.
         Freshness:
             - 재빌드 시.
         Dataflow:
-            - *.txt → 보드/셀 → write.
+            - text → board → write.
         TargetMarkets:
             - US.
     """
@@ -299,55 +340,51 @@ def buildEdgarPanel(ticker: str, *, overwrite: bool = True, verbose: bool = Fals
     if not overwrite and target.exists():
         try:
             ex = pl.read_parquet(str(target), columns=["period"])
-            return {"rows": int(ex.height), "cells": 0, "periods": int(ex["period"].n_unique()), "filings": 0}
+            return {"rows": int(ex.height), "periods": int(ex["period"].n_unique()), "filings": 0}
         except (OSError, pl.exceptions.PolarsError):
             pass
-    cik = resolveCikForTicker(ticker)
-    if not cik:
+    if filings is None:
         if verbose:
-            _log.info("edgar panel %s: cik 미해소 — skip", ticker.upper())
-        return {"rows": 0, "cells": 0, "periods": 0, "filings": 0}
-    cikDir = Path(_cfg.dataDir) / "original" / "edgar" / "docs" / cik
-    if not cikDir.exists():
-        if verbose:
-            _log.info("edgar panel %s: 원본 %s 부재 — skip", ticker.upper(), cikDir)
-        return {"rows": 0, "cells": 0, "periods": 0, "filings": 0}
+            _log.info("edgar panel %s: filing text 0 — skip", ticker.upper())
+        return {"rows": 0, "periods": 0, "filings": 0}
 
     board: list[dict] = []
-    cells: list[dict] = []
-    filings = 0
-    for txtPath in sorted(cikDir.glob("*.txt")):
-        b, c = filingToBoardAndCells(txtPath, ticker=ticker)
+    nFilings = 0
+    for record in filings:
+        txt, accession = _recordTextAndAccession(record)
+        if not txt:
+            continue
+        b = filingTextToBoard(txt, ticker=ticker, accession=accession)
         if b:
             board.extend(b)
-            cells.extend(c)
-            filings += 1
+            nFilings += 1
     if not board:
-        return {"rows": 0, "cells": 0, "periods": 0, "filings": 0}
+        return {"rows": 0, "periods": 0, "filings": 0}
 
     _applyContentRawCap(board, ticker.upper())
     nRows = _writeParquet(board, PANEL_SCHEMA, target)
-    nCells = _writeParquet(cells, EDGAR_CELL_SCHEMA, panelCellPath(ticker)) if cells else 0
     periods = len({r["period"] for r in board})
     if verbose:
         _log.info(
-            "edgar panel %s: %d board rows, %d cells, %d periods, %d filings",
+            "edgar panel %s: %d board rows, %d periods, %d filings",
             ticker.upper(),
             nRows,
-            nCells,
             periods,
-            filings,
+            nFilings,
         )
-    return {"rows": nRows, "cells": nCells, "periods": periods, "filings": filings}
+    return {"rows": nRows, "periods": periods, "filings": nFilings}
 
 
 def buildEdgarPanelAll(
-    tickers: list[str] | None = None, *, overwrite: bool = True, verbose: bool = False
+    filingsByTicker: Mapping[str, Iterable[str | Mapping[str, Any]]] | None = None,
+    *,
+    overwrite: bool = True,
+    verbose: bool = False,
 ) -> dict[str, dict]:
-    """여러 ticker 순차 build (resumable, OOM 가드 — per-ticker). tickers=None 이면 원본 디렉터리 전수.
+    """여러 ticker 순차 build (resumable, OOM 가드 — per-ticker).
 
     Args:
-        tickers: ticker list. None 이면 ``data/original/edgar/docs/`` 의 cik → ticker 역해소 전수.
+        filingsByTicker: ``{ticker: full-submission text records}``.
         overwrite: False 면 기존 보드 skip(증분).
         verbose: 진행 로그.
 
@@ -358,19 +395,16 @@ def buildEdgarPanelAll(
         없음.
 
     Example:
-        >>> buildEdgarPanelAll(["AAR"])  # doctest: +SKIP
+        >>> buildEdgarPanelAll({"AAR": [{"text": "..."}]})  # doctest: +SKIP
 
     SeeAlso:
         - ``buildEdgarPanel`` — 단일.
     """
-    if tickers is None:
-        # 원본 cik → ticker 역해소 (tickers.parquet).
-        root = Path(_cfg.dataDir) / "original" / "edgar" / "docs"
-        ciks = sorted(p.name for p in root.glob("*") if p.is_dir()) if root.exists() else []
-        tickers = _ciksToTickers(ciks)
     out: dict[str, dict] = {}
-    for tk in tickers:
-        out[tk.upper()] = buildEdgarPanel(tk, overwrite=overwrite, verbose=verbose)
+    if not filingsByTicker:
+        return out
+    for tk, filings in filingsByTicker.items():
+        out[tk.upper()] = buildEdgarPanel(tk, filings, overwrite=overwrite, verbose=verbose)
     return out
 
 
@@ -459,29 +493,30 @@ def _capContentRawDf(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = False) -> dict[str, int]:
-    """신규 filing ``.txt`` 들을 기존 panel/panelCell 에 **append** (accession dedup, atomic).
+def appendFilingTextsToPanel(
+    ticker: str, filings: Iterable[str | Mapping[str, Any]], *, verbose: bool = False
+) -> dict[str, int]:
+    """신규 full-submission text 들을 기존 panel 에 **append** (accession dedup, atomic).
 
     Capabilities:
-        - 전체 history 재빌드 없이 신규 accession 의 보드/셀만 기존 artifact 에 병합한다
-          (per-filing 증분). 같은 accession 이 기존에 있으면 제거 후 재삽입(정정 idempotent).
-          기존 artifact 부재면 받은 filing 들만으로 생성. raw txt 폐기 전략과 정합 — 호출부가
-          신규 accession 의 .txt 만 받아 넘기면 되고 full 디스크 history 가 불필요.
+        - 전체 history 재빌드 없이 신규 accession 의 보드만 기존 artifact 에 병합한다.
+          같은 accession 이 기존에 있으면 제거 후 재삽입(정정 idempotent). 기존 artifact 부재면
+          받은 filing 들만으로 생성한다.
 
     Args:
         ticker: US ticker.
-        txtPaths: 신규 filing full submission ``.txt`` 경로 list.
+        filings: 신규 filing full-submission text 또는 ``{"text", "accession_no"}`` records.
         verbose: 진행 로그.
 
     Returns:
-        ``{"rows","cells","appended"}`` — 병합 후 보드/셀 총행수 + append 한 accession 수.
+        ``{"rows","appended"}`` — 병합 후 보드 총행수 + append 한 accession 수.
 
     Raises:
         없음 — 파싱 실패 filing 은 흡수.
 
     Example:
-        >>> appendFilingsToPanel("AAR", [Path(".../0001410578-25-001475.txt")])  # doctest: +SKIP
-        {'rows': 4220, 'cells': 12900, 'appended': 1}
+        >>> appendFilingTextsToPanel("AAR", [{"text": "...", "accession_no": "..."}])  # doctest: +SKIP
+        {'rows': 4220, 'appended': 1}
 
     SeeAlso:
         - ``buildEdgarPanel`` — 단일 ticker 전체 빌드(부트스트랩/신규 종목).
@@ -489,41 +524,42 @@ def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = F
         - ``gather.original.edgar.collect.listRecentFilings`` — 신규 발견.
 
     Requires:
-        - polars. lxml. 신규 filing ``.txt``.
+        - polars. lxml. 신규 filing full-submission text.
 
     When:
         - EDGAR panel 일간 증분: 기존 종목에 신규 공시 1+ 건 도착 시.
 
     How:
-        - filingToBoardAndCells 누적 → 기존 parquet 에서 동일 accession 제거 후 concat → 2 parquet write.
+        - filingTextToBoard 누적 → 기존 parquet 에서 동일 accession 제거 후 concat → panel write.
 
     AIContext:
         - offline 자급(network 0). per-ticker 소량 메모리.
 
     LLM Specifications:
         AntiPatterns:
-            - 신규 외 전 history .txt 를 넘기지 말 것 — 그건 buildEdgarPanel(overwrite) 영역.
+            - 신규 외 전 history text 를 넘기지 말 것 — 그건 buildEdgarPanel(overwrite) 영역.
             - 동일 accession 중복 우려로 호출부에서 직접 dedup 하지 말 것 — 본 함수가 처리.
         OutputSchema:
             - ``dict[str, int]``.
         Prerequisites:
-            - 신규 filing .txt + (선택)기존 artifact.
+            - 신규 filing text + (선택)기존 artifact.
         Freshness:
             - 신규 공시 도착 시 append.
         Dataflow:
-            - 신규 .txt → 보드/셀 → 기존 merge(dedup) → write.
+            - 신규 text → 보드 → 기존 merge(dedup) → write.
         TargetMarkets:
             - US.
     """
     newBoard: list[dict] = []
-    newCells: list[dict] = []
-    for tp in txtPaths:
-        b, c = filingToBoardAndCells(tp, ticker=ticker)
+    for record in filings:
+        txt, accession = _recordTextAndAccession(record)
+        if not txt:
+            continue
+        b = filingTextToBoard(txt, ticker=ticker, accession=accession)
         if b:
             newBoard.extend(b)
-            newCells.extend(c)
     if not newBoard:
-        return {"rows": 0, "cells": 0, "appended": 0}
+        return {"rows": 0, "appended": 0}
 
     _applyContentRawCap(newBoard, ticker.upper())
     accessions = {r["rceptNo"] for r in newBoard}
@@ -532,35 +568,11 @@ def appendFilingsToPanel(ticker: str, txtPaths: list[Path], *, verbose: bool = F
     mergedBoard = _capContentRawDf(mergedBoard)  # 병합 후 누적 cap(existing+new 합산)
     nRows = _writeDf(mergedBoard, panelPath(ticker))
 
-    # panelCell 도 *항상* accessions 로 prune — newCells 가 비어도(셀 0 공시/셀 없는 정정) 기존
-    # 동일 accession 의 옛 셀을 제거해 board↔cell 정합(idempotent append)을 유지한다. 단 기존
-    # cell 파일도 없고 새 셀도 없으면 빈 파일 생성을 피한다(board-only 종목).
-    nCells = 0
-    cellTarget = panelCellPath(ticker)
-    if newCells or cellTarget.exists():
-        mergedCells = _mergeKeepingSchema(cellTarget, newCells, EDGAR_CELL_SCHEMA, accessions)
-        nCells = _writeDf(mergedCells, cellTarget)
-
     if verbose:
         _log.info(
-            "edgar panel append %s: +%d filings → %d board rows, %d cells",
+            "edgar panel append %s: +%d filings → %d board rows",
             ticker.upper(),
             len(accessions),
             nRows,
-            nCells,
         )
-    return {"rows": nRows, "cells": nCells, "appended": len(accessions)}
-
-
-def _ciksToTickers(ciks: list[str]) -> list[str]:
-    """cik list → ticker list (tickers.parquet 역해소, 미등재 skip)."""
-    p = Path(_cfg.dataDir) / "edgar" / "tickers.parquet"
-    if not p.exists():
-        return []
-    try:
-        df = pl.read_parquet(str(p), columns=["cik", "ticker"])
-    except (OSError, pl.exceptions.PolarsError):
-        return []
-    cikSet = {c.zfill(10) for c in ciks}
-    hit = df.filter(pl.col("cik").cast(pl.Utf8).str.zfill(10).is_in(list(cikSet)))
-    return sorted(hit["ticker"].cast(pl.Utf8).to_list())
+    return {"rows": nRows, "appended": len(accessions)}

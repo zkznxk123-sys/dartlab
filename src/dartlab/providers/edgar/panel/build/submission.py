@@ -1,17 +1,16 @@
 """SEC full-submission ``.txt`` SGML 파서 — header + `<DOCUMENT>` 분해 (자급, 네트워크 0).
 
-gather 가 원본 그대로 저장한 ``data/original/edgar/docs/{cik}/{accession}.txt`` 를 파싱한다. 구조:
+호출자가 SEC 에서 fetch 한 full-submission text 를 파싱한다. 구조:
 ``<SEC-HEADER>`` (form·cik·accession·CONFORMED PERIOD OF REPORT·FISCAL YEAR END·name) + 다수
 ``<DOCUMENT>`` 블록(`<TYPE>`/`<SEQUENCE>`/`<FILENAME>`/`<TEXT>…</TEXT>`). primary(``<TYPE>{form}``,
 최소 SEQUENCE)=iXBRL HTML(본문+inline facts+`<xbrli:context>`), 별도 블록 ``EX-101.PRE/LAB`` = XBRL
 링크베이스. **모든 XBRL 재료가 한 파일 안에 자급** — DART 가 zip 을 자급 파싱하는 것의 EDGAR 미러.
 
-기존 파이프라인(``gather/edgar/docs/fetch``)은 stored ``.txt`` 를 안 쓰고 SEC 에서 viewer HTML 을
-재-fetch(네트워크) → 오프라인 build 에 무용. 본 모듈이 stored ``.txt`` 직접 파싱(자급 신규).
+기존 viewer HTML 재-fetch 경로가 아니라 full-submission text 자체를 한 번 파싱한다.
 
 LLM Specifications:
     AntiPatterns:
-        - 네트워크 재-fetch 금지 — stored ``.txt`` 자급 파싱(오프라인, 전 history).
+        - viewer HTML 재-fetch 금지 — full-submission text 자급 파싱.
         - exhibit(EX-*)/GRAPHIC 를 primary 로 오인 금지 — `<TYPE>==form` & 최소 SEQUENCE.
     OutputSchema:
         - ``parseSubmission(txt) -> dict`` (form/cik/accession/periodOfReport/fiscalYearEnd/name/primaryHtml/ex101).
@@ -77,7 +76,7 @@ def parseSubmission(txt: str) -> dict:
     primary(``<TYPE>==form``, 최소 SEQUENCE)=iXBRL HTML, ``EX-101.PRE``/``EX-101.LAB`` 링크베이스 추출.
 
     Args:
-        txt: SEC full-submission 원문 (``data/original/edgar/docs/{cik}/{accession}.txt``).
+        txt: SEC full-submission 원문.
 
     Returns:
         dict — ``{form, cik, accession, periodOfReport(date|None), fiscalYearEnd(str|None),
@@ -99,16 +98,16 @@ def parseSubmission(txt: str) -> dict:
         - 없음 (순수 문자열).
 
     Capabilities:
-        - stored ``.txt`` 1개에서 XBRL 전 재료(본문 HTML + 링크베이스) 자급 추출 — 네트워크 0.
+        - full-submission text 1개에서 XBRL 전 재료(본문 HTML + 링크베이스) 자급 추출.
 
     Guide:
-        - ``builder.filingToBoardAndCells`` 가 호출. 순수라 직접/테스트 호출 안전.
+        - ``builder.filingTextToBoard`` 가 호출. 순수라 직접/테스트 호출 안전.
 
     AIContext:
         - SGML 형식 규칙만 — 의미 추론 0. 거대 파일(16MB+)은 한 번 read 후 regex.
 
     When:
-        - raw 필링을 보드/셀로 파싱하기 직전.
+        - SEC fetch text 를 panel 보드로 파싱하기 직전.
 
     How:
         - `</SEC-HEADER>` 기준 header 분리 → 필드 regex → `<DOCUMENT>` split → TYPE/SEQ/TEXT.

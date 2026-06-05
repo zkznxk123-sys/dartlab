@@ -1,38 +1,49 @@
-"""EDGAR panel build CLI — ``python -X utf8 -m dartlab.providers.edgar.panel.build``.
+"""EDGAR panel build CLI — local full-submission text → panel 단일 artifact.
 
-raw 원본 ``data/original/edgar/docs/{cik}/*.txt`` 자급 XBRL 파싱 → 보드 + 셀 (offline, network 0).
+provider package 내부 CLI 는 fetch/orchestration 을 하지 않는다. SEC discovery/fetch 는
+``.github/scripts/sync/buildEdgarPanel.py`` 또는 pipeline stage 가 맡고, 이 엔트리는 이미
+받아둔 full-submission ``.txt`` 를 panel builder 에 넘기는 transform-only 도구다.
 
 사용::
 
-    python -X utf8 -m dartlab.providers.edgar.panel.build --tickers AAPL,MSFT
-    python -X utf8 -m dartlab.providers.edgar.panel.build --all                # 수집된 원본 전수
-    python -X utf8 -m dartlab.providers.edgar.panel.build --all --no-overwrite  # 증분(기존 보드 skip)
+    python -X utf8 -m dartlab.providers.edgar.panel.build --ticker AAPL filing1.txt filing2.txt
+    python -X utf8 -m dartlab.providers.edgar.panel.build --ticker AAPL --no-overwrite filing1.txt
 """
 
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
-from .builder import buildEdgarPanelAll
+
+def _recordsFromFiles(paths: list[str]) -> list[dict[str, str]]:
+    """local full-submission 파일들 → builder record list."""
+    records: list[dict[str, str]] = []
+    for raw in paths:
+        path = Path(raw)
+        text = path.read_bytes().decode("utf-8", errors="replace")
+        records.append({"text": text, "accession_no": path.stem})
+    return records
 
 
 def _main() -> None:
-    """argparse → buildEdgarPanelAll 위임 + 결과 요약 출력."""
+    """argparse → local file read + buildEdgarPanel 위임 + 결과 요약 출력."""
     parser = argparse.ArgumentParser(prog="dartlab.providers.edgar.panel.build")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--tickers", help="콤마구분 ticker 목록 (예: AAPL,MSFT)")
-    group.add_argument("--all", action="store_true", help="data/original/edgar/docs/ 수집 회사 전수")
+    parser.add_argument("--ticker", required=True, help="US ticker (예: AAPL)")
+    parser.add_argument("filings", nargs="+", help="SEC full-submission .txt 파일 경로")
     parser.add_argument("--no-overwrite", action="store_true", help="기존 보드 artifact skip(증분)")
     parser.add_argument("--quiet", action="store_true", help="per-ticker 로그 억제")
     args = parser.parse_args()
 
-    tickers = None if args.all else [t.strip() for t in args.tickers.split(",") if t.strip()]
-    results = buildEdgarPanelAll(tickers, overwrite=not args.no_overwrite, verbose=not args.quiet)
+    from .builder import buildEdgarPanel
 
-    totalRows = sum(r["rows"] for r in results.values())
-    totalCells = sum(r.get("cells", 0) for r in results.values())
-    built = sum(1 for r in results.values() if r["rows"] > 0)
-    print(f"edgar panel build: {built}/{len(results)} ticker, {totalRows:,} board rows, {totalCells:,} cells")  # noqa: T201
+    ticker = args.ticker.strip().upper()
+    result = buildEdgarPanel(
+        ticker, _recordsFromFiles(args.filings), overwrite=not args.no_overwrite, verbose=not args.quiet
+    )
+    print(  # noqa: T201
+        f"edgar panel build: {ticker} rows={result['rows']:,} periods={result['periods']} filings={result['filings']}"
+    )
 
 
 if __name__ == "__main__":

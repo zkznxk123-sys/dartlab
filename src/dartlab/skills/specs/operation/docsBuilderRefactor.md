@@ -61,9 +61,12 @@ testUniverse:
 **1.4 원본 영구 백업 전환 (사용자 결정 2026-06-03)**
 - 2026-05-21 의 "안정화 후 zip 단계 폐기" 옵션은 **철회** — 원본은 가공 0 ground truth 로
   **영구 보관**(parquet 운영 방향 변경 시 재파생 테스트). "비공개" 는 유지(publish-ready-gated).
-- 통일 백업 store `data/original/` 신설 — DART(정기 `dart/docs/` + 비정기 `dart/allFilings/`) +
-  EDGAR(`edgar/docs/{cik}/{accession}.txt` full submission, 전 form). 수집기 = `gather.original`
-  (gather 자체포함, `gather ↛ providers` 준수). `allFilingsCollector`(parquet content_raw)와 공존.
+- 통일 백업 store `data/original/` 신설 — DART 정기 `dart/docs/` zip 은 영구 보관한다.
+  DART 비정기 allFilings 는 월별 parquet 가 SSOT 이며 원본 zip 을 저장하지 않는다.
+  EDGAR 는 full-submission text 를 저장하지 않고 SEC 에서 메모리 fetch 한 record 를 곧바로
+  `providers.edgar.panel.build` 에 넘겨 `data/edgar/panel/{ticker}.parquet` 만 만든다.
+  수집기 = `gather.original` (gather 자체포함, `gather ↛ providers` 준수). `allFilingsCollector`
+  (parquet content_raw)와 공존.
 - 본 docs 파이프라인의 정기 zip 보관 위치도 `data/original/dart/docs/`로 통일 이전 완료 —
   panel/sections/refScan/freshness 경로 rewire 동반(옛 `dart/original/docs` 폐기).
 

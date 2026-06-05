@@ -105,7 +105,6 @@ def extractFacts(html: str) -> list[dict]:
 
     SeeAlso:
         - ``extractContexts`` — contextRef 해소.
-        - ``cell.buildCells`` — facts×context×role → 셀.
 
     Requires:
         - 없음.
@@ -120,7 +119,7 @@ def extractFacts(html: str) -> list[dict]:
         - scale/sign 적용으로 valueRaw 는 실제 값(companyfacts 비교 가능).
 
     When:
-        - 재무표 셀 분해 재료가 필요할 때.
+        - EDGAR iXBRL fact 를 독립 분석/테스트할 때.
 
     How:
         - ix:non* finditer → attr 추출 → _resolveValue.
@@ -188,7 +187,6 @@ def extractInstanceFacts(insXml: str) -> list[dict]:
 
     SeeAlso:
         - ``extractFacts`` — inline ix: 짝 (≈2021+).
-        - ``cell.buildCells`` — 두 era facts 공통 소비.
     """
     if not insXml:
         return []

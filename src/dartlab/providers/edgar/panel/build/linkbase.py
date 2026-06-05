@@ -31,7 +31,7 @@ _PRES_LINK_RE = re.compile(
     r"<(?:\w+:)?presentationLink\b[^>]*\brole=\"([^\"]+)\"[^>]*>(.*?)</(?:\w+:)?presentationLink>",
     re.IGNORECASE | re.DOTALL,
 )
-_LOC_RE = re.compile(r"<(?:\w+:)?loc\b[^>]*\bhref=\"[^\"]*#([^\"]+)\"[^>]*\blabel=\"([^\"]+)\"", re.IGNORECASE)
+_LOC_TAG_RE = re.compile(r"<(?:\w+:)?loc\b([^>]*)/?>", re.IGNORECASE)
 _PRES_ARC_RE = re.compile(r"<(?:\w+:)?presentationArc\b([^>]*)/?>", re.IGNORECASE)
 _LABEL_ARC_RE = re.compile(r"<(?:\w+:)?labelArc\b([^>]*)/?>", re.IGNORECASE)
 _LABEL_RE = re.compile(
@@ -45,6 +45,23 @@ _STD_LABEL_ROLE = "http://www.xbrl.org/2003/role/label"
 def _arcAttr(attrs: str, name: str) -> str | None:
     m = re.search(rf'\b{re.escape(name)}="([^"]*)"', attrs, re.IGNORECASE)
     return m.group(1) if m else None
+
+
+def _locAttrs(body: str) -> dict[str, str]:
+    """linkbase loc 태그들 → ``xlink:label`` label to href fragment map.
+
+    SEC 파일은 ``xlink:label``/``xlink:href`` 순서가 일정하지 않으므로 태그 속성 문자열에서
+    개별 attr 를 해소한다.
+    """
+    out: dict[str, str] = {}
+    for m in _LOC_TAG_RE.finditer(body):
+        attrs = m.group(1) or ""
+        label = _arcAttr(attrs, "label")
+        href = _arcAttr(attrs, "href")
+        if not label or not href or "#" not in href:
+            continue
+        out[label] = href.rsplit("#", 1)[-1]
+    return out
 
 
 def _fragmentToConcept(fragment: str) -> tuple[str, str]:
@@ -76,7 +93,7 @@ def parsePresentation(xml: str) -> dict[str, list[dict]]:
 
     SeeAlso:
         - ``mapper.roleToStatement`` — roleURI → BS/IS/CF/CIS/EF.
-        - ``cell.buildCells`` — role concept 순서로 셀 정렬·statement 귀속.
+        - ``walker.buildStatementConcepts`` — role concept 순서로 보드 앵커링.
 
     Requires:
         - 없음.
@@ -114,7 +131,7 @@ def parsePresentation(xml: str) -> dict[str, list[dict]]:
     for lm in _PRES_LINK_RE.finditer(xml):
         roleUri = lm.group(1)
         body = lm.group(2)
-        locMap = {label: frag for frag, label in _LOC_RE.findall(body)}
+        locMap = _locAttrs(body)
         entries: list[dict] = []
         seen: set[str] = set()
         for am in _PRES_ARC_RE.finditer(body):
@@ -159,13 +176,13 @@ def parseLabels(xml: str) -> dict[str, str]:
         'Total assets'
 
     SeeAlso:
-        - ``cell.buildCells`` — concept → label(미해소 시 local-name).
+        - ``parsePresentation`` — presentation role 구조.
 
     Requires:
         - 없음.
 
     Capabilities:
-        - concept 인간 라벨 추출 — 셀 label 컬럼.
+        - concept 인간 라벨 추출.
 
     Guide:
         - builder 가 호출. 순수. 라벨은 best-effort(미해소 fallback).
@@ -195,7 +212,7 @@ def parseLabels(xml: str) -> dict[str, str]:
     """
     # loc: locLabel → conceptKey
     locToConcept: dict[str, str] = {}
-    for frag, label in _LOC_RE.findall(xml):
+    for label, frag in _locAttrs(xml).items():
         ns, local = _fragmentToConcept(frag)
         locToConcept[label] = f"{ns}:{local}" if ns else local
     # labelArc: locLabel(from) → labelResLabel(to)

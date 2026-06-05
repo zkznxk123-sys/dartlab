@@ -1,11 +1,9 @@
-"""EDGAR panel 공개 계약 — 보드 read + native 셀 dispatch + 배포 config (DART 표면 동형).
+"""EDGAR panel 공개 계약 — 보드 read + finance dispatch + 배포 config.
 
-build round-trip(합성 원본→build→Panel(us)) + us native 라우팅(_nativeFn) + isStrongTopic + 배포 config.
+build round-trip(합성 text→build→Panel(us)) + us finance 라우팅 + isStrongTopic + 배포 config.
 """
 
 from __future__ import annotations
-
-import functools
 
 import polars as pl
 import pytest
@@ -14,12 +12,14 @@ pytestmark = pytest.mark.unit
 
 
 def test_panel_us_build_roundtrip(builtTicker) -> None:
-    """합성 원본 → build → Panel(us) 보드 wide + 재무표 검색 + 본문검색."""
-    from dartlab.providers.dart.panel import Panel
+    """합성 원본 → build → EDGAR Panel 보드 wide + 재무표 검색 + 본문검색."""
+    from dartlab.providers.edgar.panel import Panel
     from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
 
-    buildEdgarPanel(builtTicker)
-    p = Panel(builtTicker, marketNs="us")
+    from .synthData import synthSubmissionTxt
+
+    buildEdgarPanel(builtTicker, [{"text": synthSubmissionTxt()}])
+    p = Panel(builtTicker)
     assert isinstance(p, pl.DataFrame) and not p.is_empty()
     for col in ("chapter", "sectionLeaf", "disclosureKey", "scope"):
         assert col in p.columns
@@ -32,36 +32,19 @@ def test_panel_us_build_roundtrip(builtTicker) -> None:
     assert set(p["scope"].unique().to_list()) == {"consolidated"}
 
 
-def test_panel_us_native_cell_contract(builtTicker) -> None:
-    """c.panel("is") (facade _nativeFn 주입) → DART 계약 [account, label, *period]."""
-    from dartlab.providers.dart.panel import Panel
-    from dartlab.providers.edgar.panel import cellRead
-    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
+def test_panel_us_dispatch_native_lower_finance_upper() -> None:
+    """us: 소문자 재무 키는 native, 대문자 강한 재무 키는 finance(_showFn) 위임."""
+    from dartlab.providers.edgar.panel import Panel
 
-    buildEdgarPanel(builtTicker)
-    p = Panel(builtTicker, marketNs="us")
-    p._nativeFn = functools.partial(cellRead.readNative, builtTicker)  # facade 주입 미러
-    # 합성 원본은 연간(10-K)만 → freq="year" (분기 데이터 없음, quarter 면 정상적으로 빈손)
-    isw = p("is", freq="year")
-    assert isw is not None and isw.columns[:2] == ["account", "label"]
-    assert "2024" in isw.columns
-    bsw = p("bs", freq="year")
-    assert bsw is not None and bsw.columns[:2] == ["account", "label"]
-
-
-def test_panel_us_dispatch_native_vs_finance() -> None:
-    """us: 소문자=native(_nativeFn) / 대문자=finance(_showFn) — DART native/finance 대칭 (data 0)."""
-    from dartlab.providers.dart.panel import Panel
-
-    p = Panel("000000nonexistent", marketNs="us")
-    p._nativeFn = lambda statement, freq, periods: f"native:{statement}:{freq}"
+    p = Panel("000000nonexistent")
+    p._nativeFn = lambda statement, **kw: f"native:{statement}"
     p._showFn = lambda topic, **kw: f"fin:{topic}"
-    p._strongFn = lambda t: t.upper() in {"IS", "BS", "CF", "CIS", "SCE", "RATIOS"}
+    p._strongFn = lambda t: t in {"IS", "BS", "CF", "CIS", "SCE", "RATIOS"}
 
-    assert p("is") == "native:is:quarter"  # 소문자 native → _nativeFn
-    assert p("bs") == "native:bs:quarter"
-    assert p("ratios") == "native:ratios:quarter"
-    assert p("IS") == "fin:IS"  # 대문자 → companyfacts(finance)
+    assert p("is") == "native:is"
+    assert p("bs") == "native:bs"
+    assert p("ratios") == "native:ratios"
+    assert p("IS") == "fin:IS"
     assert p("RATIOS") == "fin:ratios"
     assert p("Risk") is None  # 약한 소스 → board(artifact 없어 None)
 
@@ -69,26 +52,46 @@ def test_panel_us_dispatch_native_vs_finance() -> None:
 def test_is_strong_topic_edgar() -> None:
     from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
 
-    assert isStrongTopic("IS") and isStrongTopic("is") and isStrongTopic("RATIOS") and isStrongTopic("ratios")
+    assert isStrongTopic("IS") and isStrongTopic("RATIOS")
+    assert not isStrongTopic("is") and not isStrongTopic("bs") and not isStrongTopic("ratios")
     assert not isStrongTopic("Risk") and not isStrongTopic("item1Business") and not isStrongTopic("")
 
 
 def test_edgar_panel_distribution_config() -> None:
-    """edgarPanel + edgarPanelCell DATA_RELEASES + deploy _CATEGORY_MAP 배선."""
+    """edgarPanel 단일 DATA_RELEASES + deploy _CATEGORY_MAP 배선."""
     from dartlab.core.dataConfig import DATA_RELEASES, repoFor
     from dartlab.providers.edgar.openapi.deploy import _CATEGORY_MAP
 
     assert DATA_RELEASES["edgarPanel"]["dir"] == "edgar/panel"
-    assert DATA_RELEASES["edgarPanelCell"]["dir"] == "edgar/panelCell"
-    assert _CATEGORY_MAP["panel"] == "edgarPanel" and _CATEGORY_MAP["panelCell"] == "edgarPanelCell"
-    assert repoFor("edgarPanel") and repoFor("edgarPanelCell")
+    assert "edgarPanelCell" not in DATA_RELEASES
+    assert _CATEGORY_MAP["panel"] == "edgarPanel"
+    assert "panelCell" not in _CATEGORY_MAP
+    assert repoFor("edgarPanel")
 
 
 def test_panel_us_ticker_case_insensitive(builtTicker) -> None:
-    """Panel("test", marketNs="us") 소문자도 TEST artifact 해석."""
-    from dartlab.providers.dart.panel import Panel
+    """EDGAR Panel("test") 소문자도 TEST artifact 해석."""
+    from dartlab.providers.edgar.panel import Panel
     from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
 
-    buildEdgarPanel(builtTicker)
-    p = Panel("test", marketNs="us")
+    from .synthData import synthSubmissionTxt
+
+    buildEdgarPanel(builtTicker, [{"text": synthSubmissionTxt()}])
+    p = Panel("test")
     assert not p.is_empty()
+
+
+def test_panel_us_standalone_lower_native_from_panel_payload(builtTicker) -> None:
+    """EDGAR Panel 직접 진입도 소문자 native 를 panel payload 에서 분해한다."""
+    from dartlab.providers.edgar.panel import Panel
+    from dartlab.providers.edgar.panel.build.builder import buildEdgarPanel
+
+    from .synthData import synthSubmissionTxt
+
+    buildEdgarPanel(builtTicker, [{"text": synthSubmissionTxt()}])
+    p = Panel("test")
+    isWide = p("is", freq="year")
+    bsWide = p("bs", freq="year")
+    assert isWide is not None and not isWide.is_empty()
+    assert bsWide is not None and not bsWide.is_empty()
+    assert "2024" in isWide.columns and "2024" in bsWide.columns

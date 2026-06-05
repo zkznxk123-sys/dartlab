@@ -1,35 +1,34 @@
-"""EDGAR panel build — raw SEC `.txt` 직접 파싱 → 16-col 보드 + EDGAR_CELL 셀 (자급, DART 미러).
+"""EDGAR panel build — SEC full-submission text → 16-col panel 단일 artifact.
 
-gather 원본 ``data/original/edgar/docs/{cik}/{accession}.txt`` 를 자급 파싱(sections/gather/meta 의존 0):
-submission(SGML) → instance(inline facts+context) → linkbase(EX-101.PRE/LAB) → walker(보드, 재무표
-disclosureKey 앵커링) + cell(계정×기간 셀). read 표면은 ``providers.dart.panel`` (marketNs="us") 재사용.
+호출자가 fetch 한 full-submission text 를 자급 파싱(sections/gather/meta 의존 0):
+submission(SGML) → linkbase(EX-101.PRE/LAB) → walker(보드, 재무표 disclosureKey 앵커링)
++ native payload. 원문 `.txt` 저장과 별도 panelCell artifact 는 없다.
 
 공개 표면:
-    - ``buildEdgarPanel(ticker)`` / ``buildEdgarPanelAll(tickers)`` — artifact 생산 (운영자/CI).
-    - ``filingToBoardAndCells(txtPath, *, ticker)`` — 1 필링 → (보드 rows, 셀 rows) (순수, 테스트).
-    - ``panelPath(ticker)`` / ``panelCellPath(ticker)`` — artifact 경로.
+    - ``buildEdgarPanel(ticker, filings)`` / ``buildEdgarPanelAll({ticker: filings})`` — artifact 생산.
+    - ``appendFilingTextsToPanel(ticker, filings)`` — per-filing 증분 append.
+    - ``filingTextToBoard(txt, *, ticker)`` — 1 필링 → 보드 rows.
+    - ``panelPath(ticker)`` — artifact 경로.
 """
 
 from __future__ import annotations
 
 from .builder import (
-    appendFilingsToPanel,
+    appendFilingTextsToPanel,
     buildEdgarPanel,
     buildEdgarPanelAll,
     existingAccessions,
-    filingToBoardAndCells,
-    panelCellPath,
+    filingTextToBoard,
     panelPath,
     resolveCikForTicker,
 )
 
 __all__ = [
-    "appendFilingsToPanel",
+    "appendFilingTextsToPanel",
     "buildEdgarPanel",
     "buildEdgarPanelAll",
     "existingAccessions",
-    "filingToBoardAndCells",
+    "filingTextToBoard",
     "panelPath",
-    "panelCellPath",
     "resolveCikForTicker",
 ]

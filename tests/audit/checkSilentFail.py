@@ -106,6 +106,8 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # panel per-corp 빌더 — zip dir 부재 = 해당 종목 "아직 수집 안 됨" = 빈 결과 정상(warning 로그).
         # 번들 리소스 아니라 종목별 빌더라 batch-safe skip 이 정공 (loud-fail 시 전종목 batch 깨짐).
         "providers/dart/panel/build/builder.py",
+        # panel 비교 unit hint — 종목별 panel cache 부재면 scale 추정 없음이 정상.
+        "providers/dart/panel/compare.py",
         "providers/edgar/docs/sections/sectionsStorage.py",
         # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
         "quant/risk/bottomUpBeta.py",

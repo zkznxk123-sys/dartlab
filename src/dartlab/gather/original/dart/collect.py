@@ -162,7 +162,7 @@ def archiveDartOriginals(
         - 대량 백필은 월 단위로 끊어 호출(키 일일 한도/재개성). 재실행은 자동 이어감.
 
     SeeAlso:
-        - ``gather.original.edgar.collect.archiveEdgarOriginals`` — EDGAR 짝.
+        - ``providers.edgar.panel.build`` — EDGAR 는 raw ``.txt`` 저장 없이 panel 을 직접 빌드.
         - ``OriginalDartClient`` — 본 함수의 fetch backend.
         - ``providers.dart.openapi.allFilingsCollector`` — 공존하는 parquet 수집(별개).
 

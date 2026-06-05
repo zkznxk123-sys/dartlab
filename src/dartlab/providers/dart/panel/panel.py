@@ -36,8 +36,9 @@ import polars as pl
 from . import read as _read
 from .period import isPeriodColumn as _isPeriodColumn
 
-# 소스 = 대소문자. 소문자 논리 키 → native(panel 자급 statement). 대문자 → finance(파사드 _showFn).
-# 논리 키→물리 XBRL 해소는 cell.STATEMENT_VARIANTS SSOT (회사별 손익 IS1/2/3·연결/별도 변형 흡수).
+# 소스 = 대소문자. KR 소문자 논리 키 → native(panel 자급 statement).
+# US EDGAR 는 별도 셀 artifact 없이 panel payload 를 read-time 분해해 소문자 native 를 제공한다.
+# 논리 키→물리 XBRL 해소는 KR cell.STATEMENT_VARIANTS SSOT (회사별 손익 IS1/2/3·연결/별도 변형 흡수).
 _NATIVE_KEYS: frozenset[str] = frozenset({"is", "bs", "cf", "cis", "sce"})
 # panel freq(입도) → finance freq (대문자 IS 경로). 소스 스위치 아님.
 _FINANCE_FREQ: dict[str, str] = {"year": "Y", "quarter": "Q", "ytd": "YTD"}
@@ -229,8 +230,9 @@ class Panel(pl.DataFrame):
             '  • c.panel("재고")              섹션명/canonicalKey 행 검색 (한글 substring 또는 NT_D826380)\n'
             '  • c.panel.search("반도체")      본문 전체검색 (이름표 아닌 내용)\n'
             "  • 소스 = 대소문자:\n"
-            '      소문자 native(자급)  c.panel("is"/"bs"/"cf"/"cis"/"sce", freq="year")  재무제표 항목×기간\n'
+            '      KR 소문자 native     c.panel("is"/"bs"/"cf"/"cis"/"sce", freq="year")  재무제표 항목×기간\n'
             '                           c.panel("ratios")                                  재무비율(자급)\n'
+            "      US 소문자 native     EDGAR panel 단일 artifact payload 를 read-time 분해\n"
             '      대문자 finance(파사드) c.panel("IS"/"BS"/"CF"/"RATIOS")                  강한 정규화 숫자(deep)\n'
             '                           c.panel("dividend")                                정형공시(report 주입)\n'
             '  • freq = 입도            "year"(연)/"quarter"(분기)/"ytd"(누적) — 소스 스위치 아님\n'
@@ -259,11 +261,11 @@ class Panel(pl.DataFrame):
         ``Company.panel`` facade 가 set — standalone ``Panel(code)`` 는 주입 없어 항상 raw 검색.
 
         Args:
-            key: None(기본) 면 전체 격자. **소스 = 대소문자** — 소문자 5표(is/bs/cf/cis/sce) = native
-                재무제표(panel 자급, XBRL+옛 통합 전기간). 대문자 5표(IS/BS/CF/CIS/SCE) = finance(파사드
-                _showFn 주입). 소문자 "ratios" = native 재무비율(BS/IS/CF native 항목 → core 공식, 자급),
-                대문자 "RATIOS" = finance 비율(파사드). canonicalKey("NT_D826380")·한글 섹션명("재고") = raw
-                공시 행 검색.
+            key: None(기본) 면 전체 격자. **소스 = 대소문자** — KR 소문자 5표(is/bs/cf/cis/sce) = native
+                재무제표(panel 자급, XBRL+옛 통합 전기간). EDGAR(US)도 별도 셀 artifact 없이 panel
+                payload 를 read-time 분해해 소문자 native 를 제공. 대문자 5표(IS/BS/CF/CIS/SCE) =
+                finance(파사드 _showFn 주입). 소문자 "ratios" = native 재무비율(BS/IS/CF native 항목 →
+                core 공식, 자급). canonicalKey("NT_D826380")·한글 섹션명("재고") = raw 공시 행 검색.
             source: "auto"(기본) / "raw"(강제 raw 공시) / "finance"/"report"(강제 주입).
             tag: None(기본) 면 인스턴스 tag 상속, 명시하면 그 tag 로 재read(override). raw 검색만 적용.
             periods: None(기본) 면 인스턴스 그대로, 명시하면 그 period 로 재read.
@@ -330,11 +332,9 @@ class Panel(pl.DataFrame):
         # 명시 빈 key("") → None (하위호환).
         if not key:
             return None
-        # native 재무제표/비율 (소문자 논리 키 is/bs/cf/cis/sce/ratios) — **시장별 자급 셀**, 동일 공개 계약
-        # ([account, label, *period]). **DART(kr)**: panel.parquet 셀 분해(cell.readStatement, 논리키→물리
-        # STATEMENT_VARIANTS). **EDGAR(us)**: panelCell artifact(필링 inline/INS XBRL 셀)을 주입된 _nativeFn
-        # (edgar.panel.cellRead.readNative)으로 — panel.py 가 edgar 를 import 안 하도록 DI(facade 주입,
-        # cycle 0, no-import-evasion). 대문자 IS/RATIOS = finance(companyfacts)는 아래 strong 블록(대칭).
+        # native 재무제표/비율 (소문자 논리 키 is/bs/cf/cis/sce/ratios).
+        # **DART(kr)**: panel.parquet 셀 read-time 분해(cell.readStatement, 논리키→물리
+        # STATEMENT_VARIANTS). **EDGAR(us)**: panel row payload read-time 분해(_nativeFn 주입).
         # freq=입도(year/quarter/ytd), 기본 quarter. 소스 스위치 아님.
         if self._marketNs == "kr":
             if key in _NATIVE_KEYS and code is not None:
@@ -357,19 +357,27 @@ class Panel(pl.DataFrame):
                     marketNs=self._marketNs,
                     periods=periods or self._periods,
                 )
-        else:  # us — native 셀은 facade 주입 _nativeFn(edgar.panel.cellRead) 위임 (DI, cycle 0)
+        else:  # us — 별도 native 셀 artifact 없음
             nativeFn = getattr(self, "_nativeFn", None)
             if nativeFn is not None and (key in _NATIVE_KEYS or key == "ratios"):
-                return nativeFn(statement=key, freq=freq or "quarter", periods=periods or self._periods)
+                return nativeFn(
+                    statement=key,
+                    freq=freq or "quarter",
+                    scope=scope or "consolidated",
+                    periods=periods or self._periods,
+                )
         # 대문자 RATIOS → finance topic 으로 치환해 아래 strong 블록(파사드 _showFn) 위임. is/IS 와 대칭.
-        if key == "RATIOS":
+        forceFinanceTopic = key == "RATIOS"
+        if forceFinanceTopic:
             key = "ratios"
         # 강한 소스(finance/report, 대문자 5표 IS/BS/CF/CIS/SCE 포함) 주입 — facade(Company.panel) _showFn.
         # panel.py 는 finance 를 모름 — 주입된 callable 만 호출(layer 격리, cycle 0). freq 는 finance 입도로 전달.
         if source != "raw":
             showFn = getattr(self, "_showFn", None)
             strongFn = getattr(self, "_strongFn", None)
-            if showFn is not None and (source in ("finance", "report") or (strongFn is not None and strongFn(key))):
+            if showFn is not None and (
+                source in ("finance", "report") or forceFinanceTopic or (strongFn is not None and strongFn(key))
+            ):
                 # finance/report 모듈(생존)로 직접 forwarding — scope/asOf/period/freq 전체 전달.
                 # panel 은 finance 를 모름; 주입된 callable(_showImpl) 이 dispatch (layer 격리).
                 kw: dict = {}

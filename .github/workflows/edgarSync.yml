@@ -83,28 +83,13 @@ jobs:
           key: dartlab-edgar-sections-${{ github.run_id }}
           restore-keys: dartlab-edgar-sections-
 
-      # EDGAR raw 원본 .txt cache — panel build 입력 (data/original/edgar/docs). 증분 archive.
-      - name: Restore EDGAR originals cache
-        uses: actions/cache/restore@v5
-        with:
-          path: data/original/edgar/docs
-          key: dartlab-edgar-originals-${{ github.run_id }}
-          restore-keys: dartlab-edgar-originals-
-
-      # EDGAR panel 보드 + 셀 cache — raw .txt 자급 파싱 산출물.
+      # EDGAR panel 보드 cache — SEC text 메모리 fetch 후 panel 단일 artifact.
       - name: Restore EDGAR panel cache
         uses: actions/cache/restore@v5
         with:
           path: data/edgar/panel
           key: dartlab-edgar-panel-${{ github.run_id }}
           restore-keys: dartlab-edgar-panel-
-
-      - name: Restore EDGAR panelCell cache
-        uses: actions/cache/restore@v5
-        with:
-          path: data/edgar/panelCell
-          key: dartlab-edgar-panelcell-${{ github.run_id }}
-          restore-keys: dartlab-edgar-panelcell-
 
       # ── 1+2. daily 벌크(companyfacts.zip) + 분기 벌크(sub/pre/tag, 최신 4분기) ──
       # 통합 진입점(dartlab.pipeline) — edgar stage 가 두 inline 스텝을 byte 동형 호출.
@@ -124,24 +109,14 @@ jobs:
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
 
-      # ── 3.5. panel — raw 원본 .txt 아카이브 → 자급 XBRL 파싱(보드+셀) (weekly) ──
-      # DART panel 이 zip 자급 파싱하듯, EDGAR 도 SEC full-submission .txt(data/original/edgar/docs/)를
-      # 직접 파싱. 원본 archive(SP500 universe, 증분) 선행 → buildEdgarPanel(보드+셀). sections 의존 0.
-      # 시작 universe = SP500 (운영자가 확장). 원본은 거대(.txt 수~수십MB)라 증분 + cache.
-      - name: Archive EDGAR originals + build panel (weekly full sync only)
-        if: ${{ github.event.schedule == '0 3 * * 0' || github.event.inputs.collectDocs == 'true' }}
-        run: |
-          uv run python -X utf8 -c "
-          from dartlab.core.dataLoader import loadEdgarTargetUniverse
-          from dartlab.gather.original.edgar.collect import archiveEdgarOriginals
-          u = loadEdgarTargetUniverse('sp500')
-          tickers = u['ticker'].to_list() if u is not None else []
-          if tickers:
-              archiveEdgarOriginals(tickers, forms=['10-K','10-Q','20-F','40-F'], sinceYear=2012, showProgress=False)
-          "
-          uv run python -X utf8 .github/scripts/sync/buildEdgarPanel.py --all --overwrite
+      # ── 3.5. panel — SEC text 메모리 fetch → panel 단일 artifact (daily incremental) ──
+      # raw .txt 저장과 별도 panelCell 없이 dartlab.pipeline 의 edgarPanel stage 가
+      # daily-index 발견 → fetchFilingTexts(record) → append/build → edgarPanel HF 업로드를 맡는다.
+      - name: Update EDGAR panel (daily incremental)
+        run: uv run python -X utf8 -m dartlab.pipeline edgarPanel
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       # ── 4. scan 프리빌드 ──
       - name: Build EDGAR scan prebuild
@@ -169,9 +144,7 @@ jobs:
               # data/edgar/sections/{ticker}/{period}.parquet 동시 emit. PR-E7 안전
               # 게이트 통과 후 docs 카테고리 폐기 예정.
               cats.append('sections')
-              # EDGAR panel(공시 수평화) — raw .txt 자급 파싱 보드(panel) + native 셀(panelCell).
-              cats.append('panel')
-              cats.append('panelCell')
+              # EDGAR panel 은 위 edgarPanel stage 가 변경 파일만 업로드한다.
           result = deployEdgarToHF(categories=cats)
           print(result)
           "
@@ -215,26 +188,12 @@ jobs:
           path: data/edgar/sections
           key: dartlab-edgar-sections-${{ github.run_id }}
 
-      - name: Save EDGAR originals cache
-        uses: actions/cache/save@v5
-        if: always()
-        with:
-          path: data/original/edgar/docs
-          key: dartlab-edgar-originals-${{ github.run_id }}
-
       - name: Save EDGAR panel cache
         uses: actions/cache/save@v5
         if: always()
         with:
           path: data/edgar/panel
           key: dartlab-edgar-panel-${{ github.run_id }}
-
-      - name: Save EDGAR panelCell cache
-        uses: actions/cache/save@v5
-        if: always()
-        with:
-          path: data/edgar/panelCell
-          key: dartlab-edgar-panelcell-${{ github.run_id }}
 
       - name: Summary
         if: always()
@@ -250,3 +209,4 @@ jobs:
           echo "| finance parquet | \`data/edgar/finance/\`|" >> $GITHUB_STEP_SUMMARY
           echo "| meta parquet | \`data/edgar/meta/{sub,pre,tag}/\`|" >> $GITHUB_STEP_SUMMARY
           echo "| scan parquet | \`data/edgar/scan/finance.parquet\`|" >> $GITHUB_STEP_SUMMARY
+          echo "| panel parquet | \`data/edgar/panel/{ticker}.parquet\`|" >> $GITHUB_STEP_SUMMARY

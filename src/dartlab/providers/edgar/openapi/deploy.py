@@ -38,8 +38,6 @@ _CATEGORY_MAP = {
     "sections": "edgarSections",
     # EDGAR panel(공시 수평화) artifact — DART panel 미러. flat (data/edgar/panel/{ticker}.parquet).
     "panel": "edgarPanel",
-    # EDGAR panel native 셀 artifact — 필링 XBRL 분해(계정×기간). flat (data/edgar/panelCell/{ticker}.parquet).
-    "panelCell": "edgarPanelCell",
 }
 
 # 업로드 명시 차단 목록 (원본이 SEC 벌크, HF 미러링 정책상 제외)

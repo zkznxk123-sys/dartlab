@@ -190,7 +190,7 @@ def listAllFilings(
     Capabilities:
         - SEC submissions API 의 recent + older paginated 를 병합해 전 form 공시를
           열거(10-K/10-Q/8-K/DEF 14A/S-1/Form 4 등 전부). ``forms`` 지정 시 그 set 만.
-          각 행에 full submission ``.txt`` URL 동봉 → ``archiveEdgarOriginals`` 가 즉시 fetch.
+          각 행에 full submission ``.txt`` URL 동봉 → panel 빌드가 메모리 fetch 로 즉시 소비.
 
     Args:
         cikOrTicker: ticker(``"AAPL"``) 또는 CIK 숫자.
@@ -215,20 +215,20 @@ def listAllFilings(
         - 전 form 은 종목당 수백~수천 건 — ``forms``/``sinceYear`` 로 범위 조절.
 
     SeeAlso:
-        - ``archiveEdgarOriginals`` — 본 목록을 .txt 로 수집.
+        - ``collect.fetchFilingTexts`` — 본 목록의 ``txt_url`` 을 저장 없이 메모리 text 로 fetch.
         - ``providers.edgar.openapi.submissions.findRegularFilings`` — 정기 4종 한정 원본(import 안 함).
 
     Requires:
         - 인터넷 + SEC User-Agent.
 
     When:
-        - 한 발행자의 전 form(정기+비정기) 원본 .txt 를 수집하기 직전 열거 단계.
+        - 한 발행자의 전 form(정기+비정기) panel 빌드 입력을 열거할 때.
 
     How:
         - CIK 해석 → submissions JSON(recent+older 병합) → form/sinceYear/limit 필터 → txt_url 구성.
 
     AIContext:
-        US 회사 전 공시 열거 — 원본 백업 입력. 본문은 untrusted(수집만, 해석 별도).
+        US 회사 전 공시 열거 — panel build 입력. 본문은 untrusted(해석 별도).
 
     LLM Specifications:
         AntiPatterns:

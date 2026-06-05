@@ -7,10 +7,10 @@
 
     data/original/dart/docs/{stock_code}/{rcept_no}.zip        # 정기보고서
     data/original/dart/allFilings/{stock_code}/{rcept_no}.zip  # 비정기
-    data/original/edgar/docs/{cik}/{accession_no}.txt          # 전 form full submission
 
 gated — ``DATA_RELEASES`` 미등록 + ``.gitignore`` + ``bulkUploadHf`` "original" 거부로
-HF 업로드 경로 진입 0. 공개 전환은 운영자 명시 결정 시 별도.
+HF 업로드 경로 진입 0. EDGAR full-submission ``.txt`` 는 로컬 원본으로 저장하지 않고
+panel 빌드 경로에서 메모리 fetch 후 즉시 ``edgar/panel`` 로 쓴다.
 """
 
 from __future__ import annotations
@@ -43,11 +43,11 @@ def originalRoot() -> Path:
         'original'
 
     Guide:
-        - 직접 파일을 쓰지 말고 ``dartDocsDir`` / ``dartFilingsDir`` / ``edgarDir`` 로
-          종목·종류별 디렉토리를 받는다.
+        - 직접 파일을 쓰지 말고 ``dartDocsDir`` / ``dartFilingsDir`` 로 종목·종류별
+          디렉토리를 받는다.
 
     SeeAlso:
-        - ``dartDocsDir`` · ``dartFilingsDir`` · ``edgarDir`` — 하위 경로 헬퍼.
+        - ``dartDocsDir`` · ``dartFilingsDir`` — 하위 경로 헬퍼.
 
     Requires:
         - ``dartlab.config.dataDir`` (env ``DARTLAB_DATA_DIR`` 또는 기본 repo ``data/``).
@@ -68,7 +68,7 @@ def originalRoot() -> Path:
         Dataflow:
             - config.dataDir → 본 헬퍼 → collect 모듈 write 경로.
         TargetMarkets:
-            - KR(DART) · US(EDGAR) 원본 백업 공용.
+            - KR(DART) 원본 백업.
     """
     return Path(_cfg.dataDir) / _ORIGINAL_DIR
 
@@ -168,52 +168,3 @@ def dartFilingsDir(stockCode: str) -> Path:
             - KR(DART) 비정기공시.
     """
     return originalRoot() / "dart" / "allFilings" / stockCode
-
-
-def edgarDir(cik: str) -> Path:
-    """EDGAR full submission 원본 디렉토리 — ``original/edgar/docs/{cik}/``.
-
-    Capabilities:
-        - 한 발행자(CIK)의 전 form full submission ``.txt`` 보관 디렉토리 해석. ``docs/``
-          한 단계를 둬서 향후 다른 EDGAR 원본 종류(예: XBRL 벌크)를 ``edgar/`` 밑에 형제로 추가 가능.
-
-    Args:
-        cik: SEC CIK. zero-padding 무관(내부에서 10자리 정규화).
-
-    Returns:
-        Path — ``{dataDir}/original/edgar/docs/{cik10}``. 생성은 호출자 책임.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> edgarDir("320193").parts[-2:]
-        ('docs', '0000320193')
-
-    Guide:
-        - accession 별 파일명은 ``{accession_no}.txt`` (full submission, SGML 전체).
-
-    SeeAlso:
-        - ``originalRoot`` — 공통 base.
-
-    Requires:
-        - ``dartlab.config.dataDir``.
-
-    AIContext:
-        EDGAR 원본 위치 — sections(content_raw) 재파생 ground truth.
-
-    LLM Specifications:
-        AntiPatterns:
-            - ticker 로 호출 X — 키는 CIK(전 form 통합 식별자).
-        OutputSchema:
-            - pathlib.Path.
-        Prerequisites:
-            - ``dartlab.config.dataDir`` + CIK.
-        Freshness:
-            - 정적.
-        Dataflow:
-            - cik → 본 헬퍼 → ``archiveEdgarOriginals`` write.
-        TargetMarkets:
-            - US(SEC EDGAR) 전 form.
-    """
-    return originalRoot() / "edgar" / "docs" / str(cik).strip().zfill(10)

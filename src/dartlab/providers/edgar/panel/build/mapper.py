@@ -294,7 +294,7 @@ def contextToCell(ctx: dict, *, fyEndMonth: int | None = None) -> tuple[int, str
         - context 간접참조를 셀 period/축으로 — DART ACONTEXT 토큰 디코드 미러.
 
     Guide:
-        - cell.buildCells 가 호출. 순수.
+        - context parser 유틸. 순수.
 
     AIContext:
         - 실제 날짜 기반(EDGAR 는 토큰 마커 없음) — 기간일수로 Y/A/Q.

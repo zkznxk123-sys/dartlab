@@ -47,15 +47,17 @@ linkedSkills:
 ```
 L0: raw source
    원본 백업 store (data/original/, gather.original, 로컬 백업·HF 미공개·.gitignore) — 가공 0 ground truth
-     dart/docs/{code}/{rcept}.zip (정기, panel/sections/refScan 입력) · dart/allFilings/{code}/{rcept}.zip (비정기)
-     edgar/docs/{cik}/{accession}.txt (전 form full submission)
-   EDGAR XBRL (HF dataset eddmpython/dartlab-data/edgar/)
+     dart/docs/{code}/{rcept}.zip (정기, panel/sections/refScan 입력)
+     dart/allFilings 는 월별 parquet 가 SSOT (원본 zip 저장 안 함)
+     EDGAR full-submission text 는 저장하지 않고 SEC 에서 메모리 fetch 후 panel build 에 즉시 전달
+   EDGAR companyfacts/bulk XBRL (HF dataset eddmpython/dartlab-data/edgar/)
    KRX OpenAPI (HF dataset eddmpython/dartlab-data/krx/)
    ↓
 L1: parquet (정규화)
    data/dart/finance/*.parquet  (BS/IS/CF/CIS/SCE × snake_id)
    data/dart/sections/*.parquet (section_content 본문)
    data/edgar/finance/*.parquet
+   data/edgar/panel/{ticker}.parquet (보드 + native payload 단일 artifact)
    data/krx/prices/*.parquet
    ↓
 L2: in-memory
@@ -68,7 +70,7 @@ L3: axis / recipe
 ```
 
 > **L1 = ETL 스테이지 분할** (수집 일원화). raw source → parquet 사이의 L1 은 두 책임으로
-> 갈린다 — **gather = Extract** (DART/EDGAR 네트워크 fetch → raw zip/json/bytes; client·키풀·
+> 갈린다 — **gather = Extract** (DART/EDGAR 네트워크 fetch → raw zip/json/bytes 또는 메모리 text record; client·키풀·
 > submissions/facts/docs/bulk/universe/FTS 전담), **providers = Transform+Load** (raw → parquet
 > build + parquet → DataFrame read; HTTP 클라이언트 import 0). providers build 가 fetch 를
 > 트리거해야 하면 core DIP seam(`core.dartClient`/`edgarClient` 등) 으로 위임한다. 상세
@@ -87,7 +89,8 @@ L3: axis / recipe
 | DART finance | dart/ | bs/is/cf/cis/sce | analysis 22 + credit + quant 일부 |
 | DART sections | dart/ | section_content | search + sections deep dive |
 | DART panel | dart/ | panel/{code}/{period} (14-col) + _index + _label | 공시 수평화 보드 (회사내·회사간) |
-| EDGAR XBRL | edgar/ | finance/* | edgar SKILL |
+| EDGAR companyfacts XBRL | edgar/ | finance/* | edgar finance 대문자 topic |
+| EDGAR full-submission text | edgar/ | panel/{ticker}.parquet | 공시 수평화 보드 + 소문자 native 재무 키 |
 | KRX OHLCV | krx/ | prices/raw-YYYY | quant 30+ + scan |
 | KRX events | krx/ | events/* | _adjustPrice (split/dividend) |
 | 한은 macro | macro/ | (외부 API) | macro 12 axis |
@@ -111,6 +114,19 @@ L3: axis / recipe
 > zip 원본은 local-only(HF skip, 3층 가드). online(B)은 zip 을 디스크에 만들지조차 않으므로
 > refScan(zip 전수 스캔) 불가 → 항상 HF seed ``panelXbrlRef`` 를 refDf 로 주입. 전수 재빌드·
 > 양식 era 변경 대응은 영구히 zip 트랙(A) 책임.
+
+### EDGAR panel 수집 (US)
+
+```
+SEC daily-index/submissions → full-submission text 메모리 fetch
+                            → providers.edgar.panel.build
+                            → data/edgar/panel/{ticker}.parquet
+```
+
+EDGAR 는 `data/original/edgar/docs/*.txt` 를 만들지 않는다. native 재무 cell 도 별도
+`panelCell` artifact 없이 panel row `contentRaw` payload 안에 보존하고 read-time 에 분해한다.
+소문자 `c.panel("is"/"bs"/"cf"/"ratios")` 는 이 payload 를 읽는 native 경로이고,
+대문자 `c.panel("IS"/"BS"/"CF"/"RATIOS")` 는 companyfacts finance 경로다.
 
 ## 갱신 절차
 

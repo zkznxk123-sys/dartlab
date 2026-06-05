@@ -207,11 +207,9 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
         if marketNs == "kr":
             category = "panel"
             patterns = [f"{DATA_RELEASES['panel']['dir']}/{code}.parquet"]
-        else:  # us — 보드 + 셀(panelCell) 동반 다운로드 (c.panel("is") 셀 read 동반)
+        else:  # us — panel 단일 artifact
             category = "edgarPanel"
             patterns = [f"{DATA_RELEASES['edgarPanel']['dir']}/{code}.parquet"]
-            if "edgarPanelCell" in DATA_RELEASES:
-                patterns.append(f"{DATA_RELEASES['edgarPanelCell']['dir']}/{code}.parquet")
         snapshot_download(
             repo_id=repoFor(category),
             repo_type="dataset",

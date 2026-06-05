@@ -117,6 +117,12 @@ def test_compare_invalid_scope_raises() -> None:
         compare(["005930", "000660"], topic="bs", scope="merged")
 
 
+def test_compare_invalid_scope_precedes_us_finance_guard() -> None:
+    """US finance 미지원보다 잘못된 scope 입력 계약 오류가 먼저다."""
+    with pytest.raises(ValueError, match="scope"):
+        compare(["AAPL", "MSFT"], topic="bs", scope="merged")
+
+
 def test_compare_invalid_freq_raises() -> None:
     """freq 오타 — 재무 셀모드 입도 오류."""
     with pytest.raises(ValueError, match="freq"):
@@ -208,6 +214,7 @@ def test_compare_diagnostics_normalizes_codes_before_error() -> None:
         (["005930", "000660"], {"period": []}, "period"),
         (["005930", "000660"], {"topic": "bs", "freq": "monthly"}, "freq"),
         (["005930", "000660"], {"topic": "bs", "scope": "merged"}, "scope"),
+        (["AAPL", "MSFT"], {"topic": "bs", "scope": "merged"}, "scope"),
         (["AAPL", "MSFT"], {"topic": "bs"}, "US 재무"),
     ],
 )

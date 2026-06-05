@@ -56,7 +56,7 @@ def buildRegistry() -> dict[str, StageSpec]:
         StageSpec(
             "edgarPanel",
             run=edgarPanel.runEdgarPanel,
-            uploadCategories=("edgarPanel", "edgarPanelCell"),
+            uploadCategories=("edgarPanel",),
             label="EDGAR panel per-filing 증분 (Job 3, daily-index 발견→append)",
         ),
         StageSpec("krx", run=krx.runKrx, uploadCategories=("krxPrices",), label="KRX 일별 가격"),

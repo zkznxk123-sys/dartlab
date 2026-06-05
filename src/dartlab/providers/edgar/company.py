@@ -2911,15 +2911,17 @@ class Company:
 
     @property
     def panel(self):
-        """공시 수평화 보드 — 잡는 순간 item × 기간 wide DataFrame (EDGAR panel, marketNs="us").
+        """공시 수평화 보드 — 잡는 순간 item × 기간 wide DataFrame (EDGAR panel, US 기본).
 
         DART ``c.panel`` 의 EDGAR 미러. SEC 10-K/10-Q/20-F 의 item(섹션·표·서술)을 cross-market
-        ``PANEL_SCHEMA`` 위에서 항목 × 기간 wide 로 수평화한 보드 (``providers.dart.panel`` 의 ``Panel``
-        을 ``marketNs="us"`` 로 재사용 — read 표면 복제 0). artifact 는 ``edgar.panel.build`` 가 gather
-        sections 에서 생산(``data/edgar/panel/{ticker}.parquet``). ``c.panel`` 자체가 ``pl.DataFrame``
+        ``PANEL_SCHEMA`` 위에서 항목 × 기간 wide 로 수평화한 보드 (``providers.edgar.panel`` 의 ``Panel``
+        기본 ``marketNs="us"``). artifact 는 ``edgar.panel.build`` 가
+        SEC full-submission text 를 메모리로 fetch 해 직접 생산(``data/edgar/panel/{ticker}.parquet``).
+        원본 ``.txt`` 저장과 별도 셀 artifact 는 없다. native 재무 payload 는 같은 panel row 에 보존한다.
+        ``c.panel`` 자체가 ``pl.DataFrame``
         (Panel subclass) — shape/filter 등 polars 연산 그대로. ``c.panel("Risk")`` 로 섹션 행 검색,
-        ``c.panel("IS")`` 같은 강한 소스는 companyfacts(내부 finance dispatch)로 위임 — EDGAR 는 native panel 셀
-        별도 소스가 없어 소문자 ``c.panel("is")`` 도 companyfacts(강함)로 위임.
+        소문자 ``c.panel("is")`` 는 panel payload native, ``c.panel("IS")`` 같은 대문자 강한 소스는
+        companyfacts(내부 finance dispatch)로 위임.
 
         Args:
             없음 (property — self.ticker 사용).
@@ -2939,8 +2941,8 @@ class Company:
             >>> c.panel.search("supply chain")         # 본문 전체검색  # doctest: +SKIP
 
         SeeAlso:
-            - ``providers.dart.panel.Panel`` — 반환 본체 (pl.DataFrame subclass + __call__, cross-market).
-            - ``providers.edgar.panel.build`` — gather sections → 16-col artifact 생산.
+            - ``providers.edgar.panel.Panel`` — 반환 본체 (pl.DataFrame subclass + __call__, US 기본).
+            - ``providers.edgar.panel.build`` — SEC text → panel 단일 artifact + native payload 생산.
             - ``_showImpl`` — 강한 소스(companyfacts finance) dispatch — c.panel 이 주입 재사용 (내부 머신러리).
 
         Requires:
@@ -2950,7 +2952,7 @@ class Company:
             - 한 회사 공시를 item × 기간 wide 로 — 잡는 순간 DataFrame, callable 로 섹션·강한 소스 라우팅.
 
         Guide:
-            - ``c.panel`` 잡으면 wide. ``c.panel("Risk")`` 섹션 검색. 재무는 ``c.panel("IS")`` (companyfacts).
+            - ``c.panel`` 잡으면 wide. ``c.panel("Risk")`` 섹션 검색. 재무는 소문자 native, 대문자 finance.
 
         AIContext:
             - 상태 없는 lazy read — 매 접근 새 Panel (누적 0). contentRaw 는 외부 untrusted.
@@ -2959,12 +2961,12 @@ class Company:
             - 한 회사의 공시 수평화 보드가 EDGAR Company 흐름에서 필요할 때.
 
         How:
-            - self.ticker → Panel(ticker, marketNs="us") + _showFn(=_showImpl)/_strongFn(=isStrongTopic) 주입.
+            - self.ticker → Panel(ticker) + _showFn(=_showImpl)/_strongFn(=isStrongTopic) 주입.
 
         LLM Specifications:
             AntiPatterns:
                 - c.panel 결과 캐싱 강제 금지 — 상태 없는 lazy(누적 0).
-                - native is/bs/cf 를 panel 자급 셀로 기대 금지 — EDGAR 는 companyfacts 위임(DART 와 차이).
+                - native is/bs/cf 를 별도 셀 artifact 로 기대 금지 — panel 단일 artifact payload 에서 분해.
             OutputSchema:
                 - ``Panel`` (wide DataFrame subclass + callable 검색).
             Prerequisites:
@@ -2972,24 +2974,28 @@ class Company:
             Freshness:
                 - 매 접근 read.
             Dataflow:
-                - self.ticker → Panel(wide, us) + _showFn/_strongFn 주입.
+                - self.ticker → Panel(wide, us) + _nativeFn/_showFn/_strongFn 주입.
             TargetMarkets:
                 - US (EDGAR).
         """
-        import functools
-
-        from dartlab.providers.dart.panel import Panel as _Panel
         from dartlab.providers.edgar.builder.dataDispatcher import isStrongTopic
-        from dartlab.providers.edgar.panel import cellRead as _cellRead
+        from dartlab.providers.edgar.panel import Panel as _Panel
+        from dartlab.providers.edgar.panel.native import readNative
 
-        p = _Panel(self.ticker, marketNs="us")
-        # facade 주입 (DI, cycle 0) — panel 패키지는 finance/cellRead 를 import 안 하고 주입된 callable 만 호출.
-        #   _showFn   : 대문자 IS/BS/CF/RATIOS = finance(companyfacts) 위임 (내부 _showImpl).
+        p = _Panel(self.ticker)
+        # facade 주입 (DI, cycle 0) — panel 패키지는 finance 를 import 안 하고 주입된 callable 만 호출.
+        #   _nativeFn : is/bs/cf/ratios = panel 단일 artifact payload read-time 분해.
+        #   _showFn   : IS/BS/CF/RATIOS = finance(companyfacts) 위임 (내부 _showImpl).
         #   _strongFn : finance 강한 소스 판정(isStrongTopic).
-        #   _nativeFn : 소문자 is/bs/cf/cis/sce/ratios = 필링 inline/INS XBRL 셀(panelCell) — DART native 대칭.
+        p._nativeFn = lambda statement, freq, scope, periods: readNative(
+            self.ticker,
+            statement=statement,
+            freq=freq,
+            scope=scope,
+            periods=periods,
+        )
         p._showFn = self._showImpl
         p._strongFn = isStrongTopic
-        p._nativeFn = functools.partial(_cellRead.readNative, self.ticker)
         return p
 
     def _showImpl(

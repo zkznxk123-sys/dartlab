@@ -1,13 +1,11 @@
-"""sync stage 의 EDGAR panel artifact 빌더 CLI — raw 원본 `.txt` → 16-col 보드 + 셀 (자급, offline).
+"""sync stage 의 EDGAR panel artifact 빌더 CLI — SEC text fetch → 16-col panel 단일 artifact.
 
-gather 원본 ``data/original/edgar/docs/{cik}/{accession}.txt`` (SEC full-submission)를 자급 파싱해
-``data/edgar/panel/{ticker}.parquet`` (보드) + ``data/edgar/panelCell/{ticker}.parquet`` (셀) 생산
-(network 0). DART ``buildPanel.py`` 의 EDGAR analog. **원본 archive(``archiveEdgarOriginals``)가
-선행돼야 한다** — 본 스크립트는 stored `.txt` 만 소비(sections 의존 0).
+SEC full-submission ``.txt`` 를 디스크 원본으로 저장하지 않고 메모리로 fetch 한 뒤
+``data/edgar/panel/{ticker}.parquet`` 만 생산한다. DART ``buildPanel.py`` 의 EDGAR analog.
 
 사용법::
 
-    # 수집된 원본 전체 → panel (증분: 기존 보드 skip)
+    # listed universe 전체 → panel (증분: 기존 보드 skip)
     uv run python -X utf8 .github/scripts/sync/buildEdgarPanel.py --all
 
     # 단일/여러 ticker
@@ -27,22 +25,39 @@ import sys
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="EDGAR panel 빌더 (raw 원본 .txt → 보드+셀 자급 파싱)")
+    parser = argparse.ArgumentParser(description="EDGAR panel 빌더 (SEC text fetch → panel 자급 파싱)")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--tickers", type=str, default=None, help="콤마구분 ticker (예: AAPL,MSFT)")
-    group.add_argument("--all", action="store_true", help="data/original/edgar/docs/ 수집 회사 전수")
+    group.add_argument("--all", action="store_true", help="listed universe 전수")
     parser.add_argument("--overwrite", action="store_true", help="기존 panel artifact 덮어쓰기 (기본 증분 skip)")
+    parser.add_argument("--since-year", type=int, default=2015, help="수집 시작 연도")
     args = parser.parse_args()
 
-    from dartlab.providers.edgar.panel.build import buildEdgarPanelAll
+    from dartlab.core.dataLoader import loadEdgarListedUniverse
+    from dartlab.gather.original.edgar.collect import fetchFilingTexts
+    from dartlab.gather.original.edgar.submissions import listAllFilings
+    from dartlab.providers.edgar.panel.build import buildEdgarPanel
 
-    tickers = None if args.all else [t.strip() for t in args.tickers.split(",") if t.strip()]
-    if tickers is not None and not tickers:
+    if args.all:
+        uni = loadEdgarListedUniverse(forceUpdate=True)
+        tickers = [str(t).strip().upper() for t in uni["ticker"].to_list() if t]
+    else:
+        tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+    if not tickers:
         print("ticker 0 — 입력 비어있음. skip.")
         return 0
 
-    # 증분 기본 — 기존 panel artifact 가 있으면 skip (overwrite 명시 시 재생성).
-    results = buildEdgarPanelAll(tickers, overwrite=args.overwrite, verbose=True)
+    results = {}
+    forms = ["10-K", "10-Q", "20-F", "40-F"]
+    for ticker in tickers:
+        rows = listAllFilings(ticker, sinceYear=args.since_year, forms=forms)
+        grouped = fetchFilingTexts(rows)
+        records = [rec for vals in grouped.values() for rec in vals]
+        if len(records) < len(rows):
+            print(f"[{ticker}] fetch {len(records)}/{len(rows)} — skip")
+            results[ticker] = {"rows": 0, "periods": 0, "filings": 0}
+            continue
+        results[ticker] = buildEdgarPanel(ticker, records, overwrite=args.overwrite, verbose=True)
 
     built = sum(1 for r in results.values() if r["rows"] > 0)
     totalRows = sum(r["rows"] for r in results.values())
