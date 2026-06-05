@@ -68,6 +68,11 @@ _RATIO_DEFS: dict[str, dict] = {
 }
 
 
+def _emptyStockCodeFrame() -> pl.DataFrame:
+    """scanRatio 빈 결과의 join key 타입을 고정한다."""
+    return pl.DataFrame(schema={"stockCode": pl.Utf8})
+
+
 def scanRatio(
     ratioName: str,
     *,
@@ -214,7 +219,7 @@ def _calcSimpleRatio(defn: dict, fsPref: str, *, freq: str = "Q") -> pl.DataFram
     commonYears = sorted(set(numerYears) & set(denomYears), reverse=True)
 
     if not commonYears:
-        return pl.DataFrame({"stockCode": []})
+        return _emptyStockCodeFrame()
 
     joined = numer.select(["stockCode"] + commonYears).join(
         denom.select(["stockCode"] + commonYears),
@@ -244,7 +249,7 @@ def _calcYoyRatio(defn: dict, fsPref: str, *, freq: str = "Q") -> pl.DataFrame:
     yearCols = sorted(c for c in base.columns if c != "stockCode")
 
     if len(yearCols) < 2:
-        return pl.DataFrame({"stockCode": []})
+        return _emptyStockCodeFrame()
 
     resultExprs = [pl.col("stockCode")]
     for i in range(1, len(yearCols)):

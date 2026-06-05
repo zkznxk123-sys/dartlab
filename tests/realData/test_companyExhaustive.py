@@ -71,11 +71,13 @@ _NONE_ALLOWED: frozenset[str] = frozenset(
     }
 )
 
+_MISSING_DATA_SENTINEL = "__dartlab_missing_samsung_docs__"
+
 
 def _publicAttrs() -> list[str]:
     """Company 공개 속성 전수 — 실제 인스턴스에서 동적 수집."""
     if not _has_data(SAMSUNG, "docs"):
-        pytest.skip(f"삼성전자 docs 데이터 없음 ({SAMSUNG}.parquet)", allow_module_level=True)
+        return [_MISSING_DATA_SENTINEL]
     from dartlab import Company
 
     c = Company(SAMSUNG)
@@ -93,6 +95,9 @@ def test_companyAttr_accessNoCrash(samsungRealData, attr):
     method/callable 은 '접근만' 검증 (인자 없이 호출하면 TypeError 발생 가능하므로
     접근 결과가 callable 이면 OK 로 처리).
     """
+    if attr == _MISSING_DATA_SENTINEL:
+        pytest.skip(f"삼성전자 docs 데이터 없음 ({SAMSUNG}.parquet)")
+
     try:
         value = getattr(samsungRealData, attr)
     except AttributeError as e:

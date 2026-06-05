@@ -40,6 +40,11 @@ _SCAN_ACCOUNT_BASE_COLS = (
 )
 
 
+def _emptyStockCodeFrame() -> pl.DataFrame:
+    """scan 계열 빈 결과의 join key 타입을 고정한다."""
+    return pl.DataFrame(schema={"stockCode": pl.Utf8})
+
+
 def _scanAccountColumns(columnNames: list[str], scCol: str) -> list[str]:
     """scanAccount 경로에서 필요한 컬럼만 반환한다."""
     available = set(columnNames)
@@ -531,7 +536,7 @@ def scanAccount(
             from dartlab.core.messaging import emit
 
             emit("hint:market_data_needed", category="finance", fn="scanAccount")
-            return pl.DataFrame({"stockCode": []})
+            return _emptyStockCodeFrame()
 
         _log.info(
             "scanAccount('%s', freq=%s): DuckDB raw glob fallback (%d 종목)",
@@ -552,7 +557,7 @@ def scanAccount(
             accountNms=set(fastKeys),
         )
         if lz is None:
-            return pl.DataFrame({"stockCode": []})
+            return _emptyStockCodeFrame()
 
         allDf = _scanAccountFromMerged(
             None,
@@ -566,7 +571,7 @@ def scanAccount(
         )
 
         if allDf is None or allDf.is_empty():
-            return pl.DataFrame({"stockCode": []})
+            return _emptyStockCodeFrame()
 
     # 기간당 첫 값 + pivot
     allDf = allDf.group_by(["stockCode", "period"]).agg(pl.col("amount").first())

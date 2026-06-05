@@ -59,6 +59,18 @@ class TestParseAmount:
         assert _parseAmount("") is None
 
 
+class TestEmptyScanFrame:
+    """데이터 없음 결과의 스키마 회귀 방지."""
+
+    def test_stockCode_is_utf8(self):
+        import polars as pl
+
+        from dartlab.providers.dart.finance.scanAccount import _emptyStockCodeFrame
+
+        df = _emptyStockCodeFrame()
+        assert df.schema["stockCode"] == pl.Utf8
+
+
 class TestScanAccountImport:
     """import 및 시그니처."""
 

@@ -1,6 +1,7 @@
 """데이터 로딩 및 공통 유틸."""
 
 import json
+import os
 import sys
 import time
 from collections import OrderedDict
@@ -155,6 +156,9 @@ def _fetchRemoteEtagAndSize(url: str) -> tuple[str, int]:
     일반 파일은 Content-Length. 둘 중 하나라도 있으면 사용.
     """
     req = Request(url, method="HEAD")
+    token = os.environ.get("HF_TOKEN", "").strip()
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
     with _socketTimeout(10):
         resp = urlopen(req)
     etag = resp.headers.get("ETag", "").strip('" ')
@@ -506,8 +510,6 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
             "또는 개별 종목은 dartlab.Company('005930')으로 자동 다운로드됩니다."
         ) from exc
 
-    import os
-
     dataDir = _dataDir(category)
     dataDir.mkdir(parents=True, exist_ok=True)
     label = DATA_RELEASES[category]["label"]
@@ -543,6 +545,7 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
                 local_dir=str(localDir),
                 allow_patterns=pattern,
                 force_download=forceUpdate if attempt == 0 else False,
+                token=os.environ.get("HF_TOKEN", "").strip() or None,
             )
             break
         except (OSError, ConnectionError, TimeoutError) as exc:

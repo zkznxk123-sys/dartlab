@@ -20,6 +20,32 @@ from dartlab.core.dataLoaderFreshness import downloadWithRetry
 
 
 @pytest.mark.unit
+def test_download_all_uses_hf_token(monkeypatch, tmp_path):
+    """HF_TOKEN 이 있으면 snapshot_download 경로에도 token 인자를 넘긴다."""
+    import dartlab
+    from dartlab.core.dataLoader import downloadAll
+
+    seen: dict[str, str | None] = {}
+    oldDataDir = dartlab.config.dataDir
+
+    def fakeSnapshotDownload(**kwargs):
+        seen["token"] = kwargs.get("token")
+        scanDir = Path(kwargs["local_dir"]) / "dart" / "scan"
+        scanDir.mkdir(parents=True, exist_ok=True)
+        (scanDir / "finance.parquet").write_bytes(b"fake")
+
+    monkeypatch.setenv("HF_TOKEN", "token-456")
+    monkeypatch.setattr("huggingface_hub.snapshot_download", fakeSnapshotDownload)
+    dartlab.config.dataDir = str(tmp_path)
+    try:
+        downloadAll("scan")
+    finally:
+        dartlab.config.dataDir = oldDataDir
+
+    assert seen["token"] == "token-456"
+
+
+@pytest.mark.unit
 def test_download_with_retry_uses_hf_token(monkeypatch, tmp_path):
     """HF_TOKEN 이 있으면 단건 parquet 다운로드에도 Authorization 헤더를 붙인다."""
     seen: dict[str, str | None] = {}
