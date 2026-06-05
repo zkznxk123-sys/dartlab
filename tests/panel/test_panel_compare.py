@@ -82,6 +82,12 @@ def test_compare_too_many_codes_raises() -> None:
         compare(["005930", "000660", "035720", "000270", "005380", "012330", "066570"])
 
 
+def test_compare_duplicate_codes_raises() -> None:
+    """중복 code 는 조용히 dedup 하지 않는다 — 비교 대상 수를 사용자가 명시해야 한다."""
+    with pytest.raises(ValueError, match="중복"):
+        compare(["005930", "000660", "005930"])
+
+
 def test_compare_invalid_scope_raises() -> None:
     """scope 오타 — 빈 표로 숨기지 않고 계약 오류."""
     with pytest.raises(ValueError, match="scope"):
@@ -110,6 +116,12 @@ def test_compare_invalid_period_raises() -> None:
     """period 오타 — 빈 표로 숨기지 않고 계약 오류."""
     with pytest.raises(ValueError, match="period"):
         compare(["005930", "000660"], period="2025Q5")
+
+
+def test_compare_empty_period_list_raises() -> None:
+    """period=[] 는 '비교 시점 없음' 이라 빈 결과가 아니라 입력 오류다."""
+    with pytest.raises(ValueError, match="period"):
+        compare(["005930", "000660"], period=[])
 
 
 def test_compare_us_finance_not_supported_yet() -> None:
@@ -561,6 +573,91 @@ def test_compare_finance_year_period_normalizes_label(monkeypatch: pytest.Monkey
     assert diag["period"] == ["2025Q4"]
     assert diag["resolvedPeriods"] == ["2025"]
     assert diag["scope"] == "consolidated"
+
+
+def test_compare_finance_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyPatch) -> None:
+    """재무 셀모드도 한 회사 결손을 표 전멸로 만들지 않고 null 회사 컬럼으로 보존한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeCompanyCellsByPeriod(
+        code: str,
+        statement: str,
+        freq: str,
+        scope: str,
+        marketNs: str,
+        *,
+        targetLabels: list[str] | None = None,
+        panelPeriods: list[str] | None = None,
+    ) -> dict[str, dict[str, tuple[str, float]]]:
+        if code == "111111":
+            return {"2025Q4": {"ifrs-full_Assets": ("자산총계", 150.0)}}
+        return {}
+
+    monkeypatch.setattr(cmp, "_companyCellsByPeriod", fakeCompanyCellsByPeriod)
+    df = cmp.compare(["111111", "222222"], topic="bs", period="2025Q4")
+    assert df.columns[-2:] == ["111111", "222222"]
+    assert df[0, "111111"] == 150.0
+    assert df[0, "222222"] is None
+
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period="2025Q4")
+    assert diag["resolvedPeriods"] == ["2025Q4"]
+    assert diag["presentCodes"] == ["111111"]
+    assert diag["missingCodes"] == ["222222"]
+    assert diag["soloRows"] == 1
+
+
+def test_compare_unit_scale_ignores_older_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """최신 재무표에 단위 캡션이 없으면 과거 period 의 '단위:원' 으로 오염되지 않는다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    read = importlib.import_module("dartlab.providers.dart.panel.read")
+    flat = tmp_path / "111111.parquet"
+    flat.write_bytes(b"")
+
+    monkeypatch.setattr(read, "ensurePanelFromHf", lambda code, marketNs: None)
+    monkeypatch.setattr(read, "_panelDir", lambda code, marketNs: tmp_path / "periods")
+    monkeypatch.setattr(
+        cmp.pl,
+        "read_parquet",
+        lambda path, columns: pl.DataFrame(
+            {
+                "disclosureKey": ["BS", "BS"],
+                "contentRaw": ["<TABLE><TR><TD>재무상태표</TD></TR></TABLE>", "<TABLE>단위 : 원</TABLE>"],
+                "period": ["2026Q1", "2018Q4"],
+            }
+        ),
+    )
+
+    assert cmp._detectUnitScale("111111", "kr") == 1_000_000
+
+
+def test_compare_unit_scale_uses_latest_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """최신 period 의 캡션은 그대로 신뢰한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    read = importlib.import_module("dartlab.providers.dart.panel.read")
+    flat = tmp_path / "111111.parquet"
+    flat.write_bytes(b"")
+
+    monkeypatch.setattr(read, "ensurePanelFromHf", lambda code, marketNs: None)
+    monkeypatch.setattr(read, "_panelDir", lambda code, marketNs: tmp_path / "periods")
+    monkeypatch.setattr(
+        cmp.pl,
+        "read_parquet",
+        lambda path, columns: pl.DataFrame(
+            {
+                "disclosureKey": ["BS", "BS"],
+                "contentRaw": ["<TABLE>단위 : 천원</TABLE>", "<TABLE>단위 : 원</TABLE>"],
+                "period": ["2026Q1", "2018Q4"],
+            }
+        ),
+    )
+
+    assert cmp._detectUnitScale("111111", "kr") == 1_000
 
 
 # ── 정렬 실데이터 ──

@@ -39,17 +39,17 @@ _US_TICKER_RE = re.compile(r"^[A-Z][A-Z0-9.-]{0,9}$")
 
 
 def _displayCodes(codes: list[str] | str | None) -> list[str]:
-    """진단 표시용 codes 정규화 — 검증 없이 str→[str], strip, 순서보존 dedup."""
+    """진단 표시용 codes 정규화 — 검증 없이 str→[str], strip, US ticker upper."""
     if isinstance(codes, str):
         codes = [codes]
-    seen: dict[str, None] = {}
+    out: list[str] = []
     for c in codes or []:
         c = str(c).strip()
         if c and not re.fullmatch(r"\d{6}", c):
             c = c.upper()
-        if c and c not in seen:
-            seen[c] = None
-    return list(seen)
+        if c:
+            out.append(c)
+    return out
 
 
 def _normCodes(codes: list[str] | str | None) -> list[str]:
@@ -58,6 +58,8 @@ def _normCodes(codes: list[str] | str | None) -> list[str]:
     invalid = [c for c in out if not (re.fullmatch(r"\d{6}", c) or _US_TICKER_RE.fullmatch(c))]
     if invalid:
         raise ValueError("codes 는 한국 6자리 종목코드 또는 미국 ticker 여야 합니다.")
+    if len(out) != len(set(out)):
+        raise ValueError("codes 에 중복 종목코드가 있습니다. 비교 대상은 서로 다른 회사여야 합니다.")
     return out
 
 
@@ -89,6 +91,8 @@ def _normPeriod(period: list[str] | str | None) -> list[str] | str | None:
     raw = [period] if single else period
     if not isinstance(raw, list):
         raise ValueError("period 는 YYYY/YYYYQn 문자열 또는 그 리스트여야 합니다.")
+    if len(raw) == 0:
+        raise ValueError("period 는 YYYY/YYYYQn 문자열 또는 비어 있지 않은 리스트여야 합니다.")
     vals: list[str] = []
     for p in raw:
         val = str(p).strip()
@@ -116,10 +120,13 @@ def _detectUnitScale(code: str, marketNs: str) -> int:
         return 1_000_000
     df = pl.read_parquet(str(flat), columns=["disclosureKey", "contentRaw", "period"])
     stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
-    # 캡션 = **ACODE 없는 캡션 leaf**에서만 (본문 leaf 의 EPS 행단위 '단위:원' 오염 차단 — 본문은 ACODE
-    # 보유). **최신 period 우선**(옛 era '단위:원' 캡션이 최신 백만원 본표 오염 차단). 한 표가 캡션 leaf +
-    # 본문 leaf 로 쪼개져 저장되므로 표머리 단위는 캡션 leaf 에 산다.
-    cap = stmt.filter(~pl.col("contentRaw").str.contains("ACODE=", literal=True)).sort("period", descending=True)
+    if stmt.is_empty():
+        return 1_000_000
+    latestPeriod = stmt.sort("period", descending=True)[0, "period"]
+    # 캡션 = **최신 period 의 ACODE 없는 캡션 leaf**에서만 (본문 leaf 의 EPS 행단위 '단위:원' 오염 차단 —
+    # 본문은 ACODE 보유). 최신 보고서에 캡션이 없으면 과거 era 캡션으로 fallback 하지 않는다. 옛 `단위:원`
+    # 캡션이 최신 백만원 본표를 1000배 축소시키는 vintage 오염을 막기 위해 period scope 가 단위 SSOT 다.
+    cap = stmt.filter((pl.col("period") == latestPeriod) & ~pl.col("contentRaw").str.contains("ACODE=", literal=True))
     for r in cap.iter_rows(named=True):
         m = _UNIT_RE.search(r["contentRaw"] or "")
         if m:
