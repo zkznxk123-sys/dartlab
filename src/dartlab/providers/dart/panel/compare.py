@@ -476,6 +476,45 @@ def _compareMode(topic: str | None) -> str:
     return "finance" if topic and topic.strip().lower() in _FIN_KEYS else "row"
 
 
+def _resolvedFinancePeriods(
+    codes: list[str],
+    statement: str,
+    freq: str,
+    scope: str | None,
+    marketNs: str,
+    period: list[str] | str | None,
+) -> list[str]:
+    """diagnostics 용 finance 실제 비교 period."""
+    scopeVal = _normScope(scope) or "consolidated"
+    targetLabels, panelPeriods = _financeTargets(period, freq)
+    if targetLabels is not None:
+        return targetLabels
+    per: dict[str, dict[str, dict[str, tuple[str, float]]]] = {}
+    for c in codes:
+        cc = _companyCellsByPeriod(
+            c, statement, freq, scopeVal, marketNs, targetLabels=targetLabels, panelPeriods=panelPeriods
+        )
+        if cc:
+            per[c] = cc
+    return _chooseFinanceTargets(per)
+
+
+def _resolvedPeriods(
+    codes: list[str],
+    *,
+    mode: str,
+    topic: str | None,
+    freq: str,
+    scope: str | None,
+    marketNs: str,
+    period: list[str] | str | None,
+) -> list[str] | None:
+    """diagnostics 에 노출할 실제 period 축."""
+    if mode == "finance" and topic:
+        return _resolvedFinancePeriods(codes, topic.strip().lower(), freq, scope, marketNs, period)
+    return _periodValue(period)
+
+
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
     """diagnostics 용 period 입력 정규화."""
     if isinstance(period, str):
@@ -552,7 +591,7 @@ def compareDiagnostics(
 
     Returns:
         ``dict[str, object]`` — 입력 정규화, 시장, 실행 모드, 출력 행/열, 회사별 존재,
-        shared/partial/solo 행수, 빈 결과 사유를 담은 진단 payload.
+        shared/partial/solo 행수, 실제 비교 period(``resolvedPeriods``), 빈 결과 사유를 담은 진단 payload.
 
     Raises:
         없음. 입력 계약 오류도 ``ok=False`` 와 ``reason="invalidInput"`` 으로 반환한다.
@@ -573,6 +612,7 @@ def compareDiagnostics(
         "marketNs": None,
         "topic": topic,
         "period": _periodValue(period),
+        "resolvedPeriods": None,
         "scope": scope,
         "freq": freq,
         "rowCount": 0,
@@ -618,6 +658,9 @@ def compareDiagnostics(
             "ok": rowCount > 0,
             "reason": "ready" if rowCount > 0 else "emptyResult",
             "marketNs": marketNs,
+            "resolvedPeriods": _resolvedPeriods(
+                normCodes, mode=mode, topic=topic, freq=normFreq, scope=scope, marketNs=marketNs, period=period
+            ),
             "scope": normScope,
             "freq": normFreq,
             "rowCount": rowCount,

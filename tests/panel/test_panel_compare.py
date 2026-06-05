@@ -247,6 +247,9 @@ def test_compare_finance_uses_latest_common_period(monkeypatch: pytest.MonkeyPat
     assert df[0, "111111"] == 150.0
     assert df[0, "222222"] == 250.0
 
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs")
+    assert diag["resolvedPeriods"] == ["2025Q4"]
+
 
 def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: pytest.MonkeyPatch) -> None:
     """재무 셀모드도 명시 period/list period 계약을 따른다."""
@@ -287,6 +290,9 @@ def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: p
     assert many[0, "111111␟2025Q4"] == 150.0
     assert many[0, "222222␟2026Q1"] is None
     assert many[0, "222222␟2025Q4"] == 250.0
+
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period=["2026Q1", "2025Q4"])
+    assert diag["resolvedPeriods"] == ["2026Q1", "2025Q4"]
 
 
 # ── 정렬 실데이터 ──
