@@ -199,6 +199,29 @@ def test_compare_diagnostics_normalizes_codes_before_error() -> None:
     assert "혼합" in str(diag["error"])
 
 
+@pytest.mark.parametrize(
+    ("codes", "kwargs", "needle"),
+    [
+        (["005930", "000660", "005930"], {}, "중복"),
+        (["005930", "000660", "035720", "000270", "005380", "012330", "066570"], {}, "최대"),
+        (["005930", "000660"], {"period": "2025Q5"}, "period"),
+        (["005930", "000660"], {"period": []}, "period"),
+        (["005930", "000660"], {"topic": "bs", "freq": "monthly"}, "freq"),
+        (["005930", "000660"], {"topic": "bs", "scope": "merged"}, "scope"),
+        (["AAPL", "MSFT"], {"topic": "bs"}, "US 재무"),
+    ],
+)
+def test_compare_diagnostics_invalid_variants_return_payload(
+    codes: list[str], kwargs: dict[str, object], needle: str
+) -> None:
+    """diagnostics 는 compare 입력 계약 오류를 예외 대신 invalidInput payload 로 보존한다."""
+    diag = compareDiagnostics(codes, **kwargs)
+    assert diag["ok"] is False
+    assert diag["reason"] == "invalidInput"
+    assert diag["emptyReason"] == "invalidInput"
+    assert needle in str(diag["error"])
+
+
 def test_compare_join_key_separates_scope_leaf_type_and_narrative() -> None:
     """정렬키 핵심 — scope·leafType·narrative company-row 를 각각 분리."""
     from dartlab.providers.dart.panel.compare import _companyLong
