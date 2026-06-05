@@ -409,7 +409,7 @@ def compare(
         if lg is not None and not lg.is_empty():
             longs.append(lg)
             present.append(c)
-    if len(longs) < 2:
+    if not longs:
         return pl.DataFrame()
 
     long = pl.concat(longs, how="diagonal_relaxed")
@@ -457,7 +457,7 @@ def compare(
 
     # 컬럼 순서 — 식별 먼저, 셀은 회사(codes 순) → 기간 최신순. topic 필터 후 한 회사가 전부 결손이어도
     # 컬럼을 null 로 보존해야 honest-gap 이 화면/API 에 남는다.
-    ordered = _orderedCellColumns(present, targets, single=single)
+    ordered = _orderedCellColumns(codes, targets, single=single)
     out = _ensureCellColumns(out, ordered)
     if topic:
         out = _matchTopic(out, topic)

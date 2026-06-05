@@ -212,6 +212,40 @@ def test_compare_topic_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyP
     assert diag["soloRows"] == 1
 
 
+def test_compare_row_keeps_missing_panel_company_as_null(monkeypatch: pytest.MonkeyPatch) -> None:
+    """한 회사 panel 이 없어도 읽힌 회사 row 와 누락 회사 null 컬럼을 보존한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame | None:
+        if code == "222222":
+            return None
+        return pl.DataFrame(
+            {
+                "chapter": ["III"],
+                "sectionLeaf": ["3. 주석"],
+                "blockLeaf": ["재고자산"],
+                "leafType": ["table"],
+                "disclosureKey": ["NT_INV"],
+                "scope": ["consolidated"],
+                "2025Q4": ["inventory-1"],
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"], topic="재고")
+    assert df.columns[-2:] == ["111111", "222222"]
+    assert df.height == 1
+    assert df[0, "111111"] == "inventory-1"
+    assert df[0, "222222"] is None
+
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    assert diag["presentCodes"] == ["111111"]
+    assert diag["missingCodes"] == ["222222"]
+    assert diag["soloRows"] == 1
+
+
 def test_compare_finance_uses_latest_common_period(monkeypatch: pytest.MonkeyPatch) -> None:
     """재무 셀모드 period=None 은 회사별 최신값이 아니라 최신 공통 시점으로 맞춘다."""
     import importlib
