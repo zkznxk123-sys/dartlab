@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { fmtPct } from '$lib/format/pct';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 	import type { DartDb } from '$lib/data/duckdb';
@@ -445,7 +446,10 @@
 		</section>
 
 		<section class="d-section filings">
-			<div class="sec-title">최근 정기공시</div>
+			<div class="filings-head">
+				<span class="sec-title">최근 정기공시</span>
+				<a class="viewer-btn" href={`${base}/viewer/company/${node.id}`} target="_blank" rel="noreferrer" title="공시뷰어로 열기 — panel 항목×기간 격자·정량재무제표">공시뷰어 ↗</a>
+			</div>
 			{#if filingsLoading}
 				<div class="loading">로드 중...</div>
 			{:else if filings.length === 0}
@@ -556,6 +560,31 @@
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin-bottom: 4px;
+	}
+	/* 최근 정기공시 제목 라인 — 우측에 공시뷰어 바로가기 */
+	.filings-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 4px;
+	}
+	.filings-head .sec-title {
+		margin-bottom: 0;
+	}
+	.viewer-btn {
+		flex-shrink: 0;
+		font-size: 10px;
+		color: #fb923c;
+		border: 1px solid rgba(251, 146, 60, 0.4);
+		border-radius: 4px;
+		padding: 2px 7px;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.viewer-btn:hover {
+		background: rgba(251, 146, 60, 0.12);
+		border-color: #fb923c;
 	}
 	.mini-chart {
 		min-width: 0;
