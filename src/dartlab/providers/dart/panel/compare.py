@@ -204,6 +204,25 @@ def _matchTopic(df: pl.DataFrame, topic: str) -> pl.DataFrame:
     return df.filter(mask.fill_null(False))
 
 
+def _orderedCellColumns(present: list[str], targets: list[str], *, single: bool) -> list[str]:
+    """출력 셀 컬럼 순서 — 단일=회사, 다기간=회사×기간 최신순."""
+    if single:
+        return list(present)
+    expected = [f"{code}{_SEP}{period}" for code in present for period in targets]
+    return sorted(
+        expected,
+        key=lambda x: (present.index(x.split(_SEP)[0]) if x.split(_SEP)[0] in present else 99, _negPeriodKey(x)),
+    )
+
+
+def _ensureCellColumns(out: pl.DataFrame, ordered: list[str]) -> pl.DataFrame:
+    """topic 필터 후 한 회사가 전부 결손이어도 비교 컬럼을 null 로 보존."""
+    missing = [c for c in ordered if c not in out.columns]
+    if not missing:
+        return out
+    return out.with_columns([pl.lit(None, dtype=pl.Utf8).alias(c) for c in missing])
+
+
 def compare(
     codes: list[str] | str,
     *,
@@ -365,15 +384,10 @@ def compare(
     sortCols = ["_cr", "_sn", *([c for c in ("sectionLeaf", "disclosureKey") if c in out.columns])]
     out = out.sort(sortCols, nulls_last=True).drop("_cr", "_sn")
 
-    # 컬럼 순서 — 식별 먼저, 셀은 회사(codes 순) → 기간 최신순.
-    cellCols = [c for c in out.columns if c not in idCols]
-    if single:
-        ordered = [c for c in present if c in cellCols]
-    else:
-        ordered = sorted(
-            cellCols,
-            key=lambda x: (present.index(x.split(_SEP)[0]) if x.split(_SEP)[0] in present else 99, _negPeriodKey(x)),
-        )
+    # 컬럼 순서 — 식별 먼저, 셀은 회사(codes 순) → 기간 최신순. topic 필터 후 한 회사가 전부 결손이어도
+    # 컬럼을 null 로 보존해야 honest-gap 이 화면/API 에 남는다.
+    ordered = _orderedCellColumns(present, targets, single=single)
+    out = _ensureCellColumns(out, ordered)
     if topic:
         out = _matchTopic(out, topic)
     return out.select([*idCols, *ordered])

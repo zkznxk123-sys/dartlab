@@ -168,6 +168,50 @@ def test_compare_topic_selects_period_after_topic_filter(monkeypatch: pytest.Mon
     assert df[0, "222222"] == "inventory-2"
 
 
+def test_compare_topic_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyPatch) -> None:
+    """topic 이 한 회사에만 있어도 비교 대상 회사 컬럼은 null 로 남긴다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        if code == "111111":
+            rows = {
+                "blockLeaf": ["재고자산", "최신항목"],
+                "disclosureKey": ["NT_INV", "BS"],
+                "2026Q1": [None, "latest-1"],
+                "2025Q4": ["inventory-1", "old-bs-1"],
+            }
+        else:
+            rows = {
+                "blockLeaf": ["매출채권", "최신항목"],
+                "disclosureKey": ["NT_AR", "BS"],
+                "2026Q1": [None, "latest-2"],
+                "2025Q4": ["receivable-2", "old-bs-2"],
+            }
+        return pl.DataFrame(
+            {
+                "chapter": ["III", "III"],
+                "sectionLeaf": ["3. 주석", "2. 연결재무제표"],
+                "leafType": ["table", "table"],
+                "scope": ["consolidated", "consolidated"],
+                **rows,
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"], topic="재고")
+    assert df.columns[-2:] == ["111111", "222222"]
+    assert df.height == 1
+    assert df[0, "111111"] == "inventory-1"
+    assert df[0, "222222"] is None
+
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    assert diag["presentCodes"] == ["111111"]
+    assert diag["missingCodes"] == ["222222"]
+    assert diag["soloRows"] == 1
+
+
 # ── 정렬 실데이터 ──
 
 
