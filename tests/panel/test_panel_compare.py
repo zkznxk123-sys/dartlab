@@ -55,6 +55,16 @@ def propAlign() -> pl.DataFrame:
 # ── 계약 가드 (데이터 불요) ──
 
 
+def test_compare_public_surface_callable() -> None:
+    """공식 표면 dartlab.compare 는 provider compare 와 같은 함수다."""
+    import dartlab
+    from dartlab.providers.dart.panel import compare as panelCompare
+
+    assert "compare" in dartlab.__all__
+    assert dartlab.compare is panelCompare
+    assert callable(dartlab.compare)
+
+
 def test_compare_single_code_raises() -> None:
     """codes 1개 — 비교 의미 0 → ValueError."""
     with pytest.raises(ValueError, match="2개 이상"):
