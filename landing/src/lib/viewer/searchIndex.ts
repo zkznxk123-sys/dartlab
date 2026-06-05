@@ -230,7 +230,19 @@ export function search(idx: SearchIndex, query: string, opts: { expand?: boolean
 			if (denom > 0) scores.set(pos, (scores.get(pos) ?? 0) + (qw * idf * (tf * (K1 + 1))) / denom);
 		}
 	}
-	const top = [...scores.entries()].sort((a, b) => b[1] - a[1]).slice(0, opts.topK ?? 8);
+	// 결과 dedupe — 같은 (섹션,블록)의 scope(연결/별도)·leafSeq 변형을 하나로 접어 top-K 가 서로 다른 항목이
+	// 되게(출시 후 감사: 쿼리당 평균 1.2~1.6 중복 = "같은 항목 4번" 제거). 점수 내림차순 첫 등장(최고점)만 유지.
+	const topK = opts.topK ?? 8;
+	const seenLabel = new Set<string>();
+	const top: Array<[number, number]> = [];
+	for (const entry of [...scores.entries()].sort((a, b) => b[1] - a[1])) {
+		const r = idx.rows[entry[0]];
+		const label = r.sectionKey + '␟' + r.block;
+		if (seenLabel.has(label)) continue;
+		seenLabel.add(label);
+		top.push(entry);
+		if (top.length >= topK) break;
+	}
 	const firstTok = (query.trim().split(/\s+/)[0] ?? '').replace(/[^가-힣A-Za-z]/g, '');
 	const hits: SearchHit[] = top.map(([pos, sc]) => {
 		const row = idx.rows[pos];
