@@ -34,10 +34,12 @@ _UNIT_SCALE = {"백만원": 1_000_000, "천원": 1_000, "원": 1}
 # 셀 wide 의 기간 열 — 연간(YYYY) + 분기(YYYYQn) 둘 다. isPeriodColumn(YYYYQn 전용)이 year 열을 거부하는
 # 버그 회피 (freq="year" 비교가 전멸했던 원인).
 _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
+_PERIOD_INPUT_RE = re.compile(r"^\d{4}(?:Q[1-4])?$")
+_US_TICKER_RE = re.compile(r"^[A-Z][A-Z0-9.-]{0,9}$")
 
 
-def _normCodes(codes: list[str] | str | None) -> list[str]:
-    """codes 정규화 — str→[str], strip, 순서보존 dedup."""
+def _displayCodes(codes: list[str] | str | None) -> list[str]:
+    """진단 표시용 codes 정규화 — 검증 없이 str→[str], strip, 순서보존 dedup."""
     if isinstance(codes, str):
         codes = [codes]
     seen: dict[str, None] = {}
@@ -48,6 +50,15 @@ def _normCodes(codes: list[str] | str | None) -> list[str]:
         if c and c not in seen:
             seen[c] = None
     return list(seen)
+
+
+def _normCodes(codes: list[str] | str | None) -> list[str]:
+    """codes 정규화·검증 — KR 6자리 또는 US ticker 만 허용."""
+    out = _displayCodes(codes)
+    invalid = [c for c in out if not (re.fullmatch(r"\d{6}", c) or _US_TICKER_RE.fullmatch(c))]
+    if invalid:
+        raise ValueError("codes 는 한국 6자리 종목코드 또는 미국 ticker 여야 합니다.")
+    return out
 
 
 def _normScope(scope: str | None) -> str | None:
@@ -68,6 +79,26 @@ def _normFreq(freq: str) -> str:
     if f not in _VALID_FREQ:
         raise ValueError("freq 는 quarter/year/ytd 중 하나여야 합니다.")
     return f
+
+
+def _normPeriod(period: list[str] | str | None) -> list[str] | str | None:
+    """period 입력 검증·정렬 — YYYY 또는 YYYYQn, list 는 최신순."""
+    if period is None:
+        return None
+    single = isinstance(period, str)
+    raw = [period] if single else period
+    if not isinstance(raw, list):
+        raise ValueError("period 는 YYYY/YYYYQn 문자열 또는 그 리스트여야 합니다.")
+    vals: list[str] = []
+    for p in raw:
+        val = str(p).strip()
+        if not _PERIOD_INPUT_RE.fullmatch(val):
+            raise ValueError("period 는 YYYY 또는 YYYYQn 형식이어야 합니다.")
+        vals.append(val)
+    vals = list(dict.fromkeys(vals))
+    if single:
+        return vals[0] if vals else None
+    return sortPeriods(vals, descending=True)
 
 
 def _detectUnitScale(code: str, marketNs: str) -> int:
@@ -329,11 +360,60 @@ def _chooseRowTargets(long: pl.DataFrame, present: list[str], period: list[str] 
     if isinstance(period, str):
         return [period]
     if isinstance(period, list):
-        return list(period)
+        return sortPeriods(list(dict.fromkeys(period)), descending=True)
     perByCode = {c: set(long.filter(pl.col("_code") == c)["_period"].to_list()) for c in present}
     common = set.intersection(*perByCode.values()) if perByCode else set()
     pool = common or set().union(*perByCode.values())
     return [sortPeriods(list(pool), descending=True)[0]] if pool else []
+
+
+def _compareRows(
+    codes: list[str],
+    *,
+    marketNs: str,
+    scopeVal: str | None,
+    period: list[str] | str | None,
+    topic: str | None,
+) -> tuple[pl.DataFrame, list[str], str | None]:
+    """row 모드 compare 결과와 실제 period/emptyReason 을 한 번에 만든다."""
+    long, present = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=topic)
+    if long is None:
+        if topic:
+            unfiltered, _ = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=None)
+            return pl.DataFrame(), [], "noPanelRows" if unfiltered is None else "topicFilteredEmpty"
+        return pl.DataFrame(), [], "noPanelRows"
+
+    targets = _chooseRowTargets(long, present, period)
+    if not targets:
+        return pl.DataFrame(), [], "noComparablePeriods"
+    long = long.filter(pl.col("_period").is_in(targets))
+    if long.is_empty():
+        return pl.DataFrame(), targets, "periodFilteredEmpty"
+
+    single = len(targets) == 1
+    long = long.with_columns((pl.col("_code") if single else pl.col("_code") + _SEP + pl.col("_period")).alias("_cell"))
+
+    # 대표 식별(같은 joinKey 의 라벨 drift → 첫 등장 1개) + 셀 pivot.
+    idCols = [c for c in _IDENT if c in long.columns]
+    repr_ = long.group_by("_joinKey", maintain_order=True).agg([pl.col(c).first() for c in idCols])
+    grid = long.pivot("_cell", index="_joinKey", values="_value", aggregate_function="first")
+    out = repr_.join(grid, on="_joinKey", how="left").drop("_joinKey")
+
+    # 행 정렬 — canonical chapter rank → 절 번호 → sectionLeaf → disclosureKey (셀 컬럼은 보존).
+    out = out.with_columns(
+        canonicalRankExpr("chapter").alias("_cr") if "chapter" in out.columns else pl.lit(0).alias("_cr"),
+        pl.col("sectionLeaf").cast(pl.Utf8).str.extract(r"^\s*(\d+)", 1).cast(pl.Int64).alias("_sn")
+        if "sectionLeaf" in out.columns
+        else pl.lit(None, dtype=pl.Int64).alias("_sn"),
+    )
+    sortCols = ["_cr", "_sn", *([c for c in ("sectionLeaf", "disclosureKey") if c in out.columns])]
+    out = out.sort(sortCols, nulls_last=True).drop("_cr", "_sn")
+
+    # 컬럼 순서 — 식별 먼저, 셀은 회사(codes 순) → 기간 최신순. topic 필터 후 한 회사가 전부 결손이어도
+    # 컬럼을 null 로 보존해야 honest-gap 이 화면/API 에 남는다.
+    ordered = _orderedCellColumns(codes, targets, single=single)
+    out = _ensureCellColumns(out, ordered)
+    return out.select([*idCols, *ordered]), targets, None
 
 
 def compare(
@@ -426,6 +506,7 @@ def compare(
         )
     if len(codes) > _MAX_COMPARE:
         raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
+    periodVal = _normPeriod(period)
     freq = _normFreq(freq)
     markets = {detectMarket(c) for c in codes}
     if len(markets) > 1:
@@ -436,49 +517,15 @@ def compare(
 
     # 재무제표 토픽 = 셀(항목) 단위 비교 — acode 정렬 + 원 환산 (통짜 표 병치 대신).
     if topic and topic.strip().lower() in _FIN_KEYS:
+        if marketNs != "kr":
+            raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
         return _compareCells(
-            codes, statement=topic.strip().lower(), freq=freq, scope=scope, marketNs=marketNs, period=period
+            codes, statement=topic.strip().lower(), freq=freq, scope=scope, marketNs=marketNs, period=periodVal
         )
 
     scopeVal = _normScope(scope)
-    long, present = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=topic)
-    if long is None:
-        return pl.DataFrame()
-
-    # 비교 시점 결정 — period 지정 시 그대로, 아니면 최신 공통(없으면 union 최신).
-    targets = _chooseRowTargets(long, present, period)
-    if not targets:
-        return pl.DataFrame()
-    long = long.filter(pl.col("_period").is_in(targets))
-    if long.is_empty():
-        return pl.DataFrame()
-
-    single = len(targets) == 1
-    long = long.with_columns((pl.col("_code") if single else pl.col("_code") + _SEP + pl.col("_period")).alias("_cell"))
-
-    # 대표 식별(같은 joinKey 의 라벨 drift → 첫 등장 1개) + 셀 pivot.
-    idCols = [c for c in _IDENT if c in long.columns]
-    repr_ = long.group_by("_joinKey", maintain_order=True).agg([pl.col(c).first() for c in idCols])
-    grid = long.pivot("_cell", index="_joinKey", values="_value", aggregate_function="first")
-    out = repr_.join(grid, on="_joinKey", how="left").drop("_joinKey")
-
-    # 행 정렬 — canonical chapter rank → 절 번호 → sectionLeaf → disclosureKey (셀 컬럼은 보존).
-    out = out.with_columns(
-        canonicalRankExpr("chapter").alias("_cr") if "chapter" in out.columns else pl.lit(0).alias("_cr"),
-        pl.col("sectionLeaf").cast(pl.Utf8).str.extract(r"^\s*(\d+)", 1).cast(pl.Int64).alias("_sn")
-        if "sectionLeaf" in out.columns
-        else pl.lit(None, dtype=pl.Int64).alias("_sn"),
-    )
-    sortCols = ["_cr", "_sn", *([c for c in ("sectionLeaf", "disclosureKey") if c in out.columns])]
-    out = out.sort(sortCols, nulls_last=True).drop("_cr", "_sn")
-
-    # 컬럼 순서 — 식별 먼저, 셀은 회사(codes 순) → 기간 최신순. topic 필터 후 한 회사가 전부 결손이어도
-    # 컬럼을 null 로 보존해야 honest-gap 이 화면/API 에 남는다.
-    ordered = _orderedCellColumns(codes, targets, single=single)
-    out = _ensureCellColumns(out, ordered)
-    if topic:
-        out = _matchTopic(out, topic)
-    return out.select([*idCols, *ordered])
+    out, _, _ = _compareRows(codes, marketNs=marketNs, scopeVal=scopeVal, period=periodVal, topic=topic)
+    return out
 
 
 def _negPeriodKey(cell: str) -> str:
@@ -514,40 +561,6 @@ def _resolvedFinancePeriods(
         if cc:
             per[c] = cc
     return _chooseFinanceTargets(per)
-
-
-def _resolvedRowPeriods(
-    codes: list[str],
-    *,
-    topic: str | None,
-    scope: str | None,
-    marketNs: str,
-    period: list[str] | str | None,
-) -> list[str]:
-    """diagnostics 용 row 모드 실제 비교 period."""
-    if period is not None:
-        return _periodValue(period) or []
-    scopeVal = _normScope(scope)
-    long, present = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=topic)
-    if long is None:
-        return []
-    return _chooseRowTargets(long, present, period)
-
-
-def _resolvedPeriods(
-    codes: list[str],
-    *,
-    mode: str,
-    topic: str | None,
-    freq: str,
-    scope: str | None,
-    marketNs: str,
-    period: list[str] | str | None,
-) -> list[str] | None:
-    """diagnostics 에 노출할 실제 period 축."""
-    if mode == "finance" and topic:
-        return _resolvedFinancePeriods(codes, topic.strip().lower(), freq, scope, marketNs, period)
-    return _resolvedRowPeriods(codes, topic=topic, scope=scope, marketNs=marketNs, period=period)
 
 
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
@@ -635,18 +648,18 @@ def compareDiagnostics(
         >>> from dartlab.providers.dart.panel import compareDiagnostics
         >>> compareDiagnostics(["005930", "000660"], topic="재고")  # doctest: +SKIP
     """
-    normCodes = _normCodes(codes)
+    displayCodes = _displayCodes(codes)
     mode = _compareMode(topic)
     diag: dict[str, object] = {
         "ok": False,
         "reason": None,
         "mode": mode,
-        "codes": normCodes,
-        "requestedCodeCount": len(normCodes),
+        "codes": displayCodes,
+        "requestedCodeCount": len(displayCodes),
         "maxCompare": _MAX_COMPARE,
         "marketNs": None,
         "topic": topic,
-        "period": _periodValue(period),
+        "period": None,
         "resolvedPeriods": None,
         "scope": scope,
         "freq": freq,
@@ -654,7 +667,7 @@ def compareDiagnostics(
         "columns": [],
         "cellColumns": [],
         "presentCodes": [],
-        "missingCodes": normCodes,
+        "missingCodes": displayCodes,
         "sharedRows": 0,
         "partialRows": 0,
         "soloRows": 0,
@@ -662,6 +675,15 @@ def compareDiagnostics(
         "error": None,
     }
     try:
+        normCodes = _normCodes(codes)
+        if len(normCodes) < 2:
+            raise ValueError(
+                "compare 는 2개 이상 종목코드가 필요합니다 (예: dartlab.compare(['005930','000660'])). "
+                "단일 종목은 Company(code).panel 사용."
+            )
+        if len(normCodes) > _MAX_COMPARE:
+            raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
+        normPeriod = _normPeriod(period)
         normFreq = _normFreq(freq)
         normScope = _normScope(scope)
         markets = {detectMarket(c) for c in normCodes}
@@ -670,33 +692,50 @@ def compareDiagnostics(
                 f"KO↔US 혼합 비교는 불가 ({markets}). 같은 시장 종목끼리만 — cross-market 은 후속(crossMarket)."
             )
         marketNs = "us" if markets == {"US"} else "kr"
-        df = compare(normCodes, topic=topic, period=period, scope=scope, freq=freq)
+        if mode == "finance":
+            if marketNs != "kr":
+                raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
+            actualScope = normScope or "consolidated"
+            df = _compareCells(
+                normCodes,
+                statement=str(topic).strip().lower(),
+                freq=normFreq,
+                scope=actualScope,
+                marketNs=marketNs,
+                period=normPeriod,
+            )
+            resolvedPeriods = _resolvedFinancePeriods(
+                normCodes, str(topic).strip().lower(), normFreq, actualScope, marketNs, normPeriod
+            )
+            emptyReason = "insufficientFinanceCells" if df.height == 0 else None
+        else:
+            actualScope = normScope
+            df, resolvedPeriods, emptyReason = _compareRows(
+                normCodes, marketNs=marketNs, scopeVal=normScope, period=normPeriod, topic=topic
+            )
     except ValueError as exc:
         diag["reason"] = "invalidInput"
         diag["emptyReason"] = "invalidInput"
         diag["error"] = str(exc)
         return diag
 
+    diag["codes"] = normCodes
+    diag["requestedCodeCount"] = len(normCodes)
+    diag["missingCodes"] = normCodes
     columns = list(df.columns)
     cellCols = _cellColumns(columns, normCodes)
     presentCodes, sharedRows, partialRows, soloRows = _shareStats(df, normCodes)
     missingCodes = [code for code in normCodes if code not in presentCodes]
     rowCount = df.height
-    emptyReason = None
-    if rowCount == 0:
-        emptyReason = "insufficientFinanceCells" if mode == "finance" else "noComparableRows"
-        if topic and mode == "row":
-            emptyReason = "topicFilteredEmpty"
 
     diag.update(
         {
             "ok": rowCount > 0,
             "reason": "ready" if rowCount > 0 else "emptyResult",
             "marketNs": marketNs,
-            "resolvedPeriods": _resolvedPeriods(
-                normCodes, mode=mode, topic=topic, freq=normFreq, scope=scope, marketNs=marketNs, period=period
-            ),
-            "scope": normScope,
+            "period": _periodValue(normPeriod),
+            "resolvedPeriods": resolvedPeriods,
+            "scope": actualScope,
             "freq": normFreq,
             "rowCount": rowCount,
             "columns": columns,

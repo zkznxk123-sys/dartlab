@@ -5233,10 +5233,10 @@
       ],
       "procedure": [
         "종목 코드 2 개 이상 결정 (한국 6 자리 또는 미국 ticker)",
-        "토픽·기간 그리드 정의 (예 IS.revenue · 2024Q1~2024Q4)",
-        "dartlab.scan 또는 Company.show 반복 호출로 raw 추출",
-        "XBRL 표준 이름 매핑 적용 (provider canHandle 자동)",
-        "target × topic × period DataFrame 정규화",
+        "토픽·기간 그리드 정의 (예 bs · 재고 · 2024Q4)",
+        "dartlab.compare(codes, *, topic, period, scope, freq) 호출",
+        "재무제표 topic(bs/is/cf/cis/sce)은 acode 단위 원 환산 셀 비교",
+        "주석·서술 topic은 disclosureKey·scope·leafType 정렬키로 row 비교",
         "결손은 NaN 으로 유지 (0 채움 금지)",
         "차이 비교 + 인과 해석 (필요 시 engines.story 로 위임)"
       ],
@@ -5250,22 +5250,23 @@
         "executionRef (실행 코드)"
       ],
       "expectedOutputs": [
-        "Polars DataFrame (target × topic × period)",
-        "source 컬럼 (DART / EDGAR)",
-        "정규화된 표준 이름 (~97% 매핑)",
+        "Polars DataFrame (식별 컬럼 + 회사 셀 컬럼)",
+        "재무 topic은 acode·label·scope + 회사별 원 환산값",
+        "row topic은 chapter·sectionLeaf·blockLeaf·leafType·disclosureKey·scope + 회사별 원문 셀",
         "결손 NaN (강제 0 채움 없음)"
       ],
       "visualGuidance": [],
       "failureModes": [
         "토픽 이름 변종 미정규화 (매출액·영업수익·revenue 가 다른 컬럼으로 분리)",
         "기간 frequency 혼합 (분기 + 연도가 한 표에 섞임)",
-        "target 일부가 다른 provider (DART/EDGAR) 인데 통화 단위 미환산",
+        "target 일부가 다른 provider (DART/EDGAR) 인데 같은 표로 비교",
         "결손을 0 또는 직전 분기 값으로 채워 추세 왜곡"
       ],
       "forbidden": [
         "결손을 0 으로 채우기",
         "source priority 무시",
-        "환율 환산 없이 KRW/USD 직접 비교",
+        "KO/US 혼합 직접 비교",
+        "EDGAR 재무 adapter 확정 전 US finance compare",
         "비교 대상 회사명/티커 영문/한글 변종 혼용"
       ],
       "examples": [

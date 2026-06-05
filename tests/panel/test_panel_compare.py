@@ -22,8 +22,6 @@ import pytest
 import dartlab.config as _cfg
 from dartlab.providers.dart.panel.compare import compare, compareDiagnostics
 
-pytestmark = pytest.mark.requires_data
-
 _PANEL_DIR = Path(_cfg.dataDir) / "dart" / "panel"
 _PAIR = ["005930", "000660"]  # 삼성·SK하이닉스 (동종)
 _KAKAO = "035720"
@@ -34,7 +32,12 @@ def _has(code: str) -> bool:
     return (_PANEL_DIR / f"{code}.parquet").exists()
 
 
-requires_pair = pytest.mark.skipif(not all(_has(c) for c in _PAIR), reason="panel artifact 없음 (삼성·SK)")
+_requiresPairData = pytest.mark.skipif(not all(_has(c) for c in _PAIR), reason="panel artifact 없음 (삼성·SK)")
+
+
+def requires_pair(fn):
+    """실데이터 삼성·SK panel 이 필요한 테스트만 requires_data 로 분리한다."""
+    return pytest.mark.requires_data(_requiresPairData(fn))
 
 
 @pytest.fixture(scope="module")
@@ -80,6 +83,30 @@ def test_compare_invalid_freq_raises() -> None:
     """freq 오타 — 재무 셀모드 입도 오류."""
     with pytest.raises(ValueError, match="freq"):
         compare(["005930", "000660"], topic="bs", freq="monthly")
+
+
+def test_compare_invalid_code_raises_and_diagnostics_payload() -> None:
+    """compare 는 회사명이 아니라 KR 6자리 코드 또는 US ticker 만 받는다."""
+    with pytest.raises(ValueError, match="6자리"):
+        compare(["삼성전자", "000660"])
+
+    diag = compareDiagnostics(["삼성전자", "000660"])
+    assert diag["ok"] is False
+    assert diag["reason"] == "invalidInput"
+    assert diag["emptyReason"] == "invalidInput"
+    assert "6자리" in str(diag["error"])
+
+
+def test_compare_invalid_period_raises() -> None:
+    """period 오타 — 빈 표로 숨기지 않고 계약 오류."""
+    with pytest.raises(ValueError, match="period"):
+        compare(["005930", "000660"], period="2025Q5")
+
+
+def test_compare_us_finance_not_supported_yet() -> None:
+    """US row compare 와 달리 finance cell compare 는 EDGAR adapter 확정 전 차단한다."""
+    with pytest.raises(ValueError, match="US 재무 compare"):
+        compare(["AAPL", "MSFT"], topic="bs")
 
 
 def test_compare_us_ticker_normalized_before_market_guard() -> None:
@@ -134,6 +161,34 @@ def test_compare_join_key_separates_scope_leaf_type_and_narrative() -> None:
     other = _companyLong("000660", wide.filter(pl.col("disclosureKey").is_null()), None)
     assert other is not None
     assert set(keys).isdisjoint(set(other["_joinKey"].to_list())), "narrative key 는 회사 간 공유되면 안 됨"
+
+
+def test_compare_row_scope_mismatch_stays_separate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """같은 disclosureKey·leafType 도 scope 가 다르면 같은 행에 병치하지 않는다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        scope = "consolidated" if code == "111111" else "standalone"
+        return pl.DataFrame(
+            {
+                "chapter": ["III"],
+                "sectionLeaf": ["2. 재무제표"],
+                "blockLeaf": ["재무상태표"],
+                "leafType": ["table"],
+                "disclosureKey": ["BS"],
+                "scope": [scope],
+                "2025Q4": [f"{scope}-{code}"],
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"], topic="재무상태")
+    assert df.height == 2
+    assert set(df["scope"].to_list()) == {"consolidated", "standalone"}
+    both = df.filter(pl.col("111111").is_not_null() & pl.col("222222").is_not_null())
+    assert both.height == 0
 
 
 def test_compare_topic_selects_period_after_topic_filter(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -288,6 +343,7 @@ def test_compare_finance_uses_latest_common_period(monkeypatch: pytest.MonkeyPat
 
     diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs")
     assert diag["resolvedPeriods"] == ["2025Q4"]
+    assert diag["scope"] == "consolidated"
 
 
 def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -323,15 +379,49 @@ def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: p
     assert one[0, "111111"] == 150.0
     assert one[0, "222222"] == 250.0
 
-    many = cmp.compare(["111111", "222222"], topic="bs", period=["2026Q1", "2025Q4"])
+    many = cmp.compare(["111111", "222222"], topic="bs", period=["2025Q4", "2026Q1"])
+    assert seen[-2:] == [(["2026Q1", "2025Q4"], ["2026Q1", "2025Q4"])] * 2
     assert many.columns[-4:] == ["111111␟2026Q1", "111111␟2025Q4", "222222␟2026Q1", "222222␟2025Q4"]
     assert many[0, "111111␟2026Q1"] == 260.0
     assert many[0, "111111␟2025Q4"] == 150.0
     assert many[0, "222222␟2026Q1"] is None
     assert many[0, "222222␟2025Q4"] == 250.0
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period=["2026Q1", "2025Q4"])
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period=["2025Q4", "2026Q1"])
     assert diag["resolvedPeriods"] == ["2026Q1", "2025Q4"]
+
+
+def test_compare_finance_year_period_normalizes_label(monkeypatch: pytest.MonkeyPatch) -> None:
+    """freq=year 에서 명시 분기 period 는 출력 label=YYYY, panel prune=YYYYQn 으로 분리한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    seen: list[tuple[list[str] | None, list[str] | None, str]] = []
+
+    def fakeCompanyCellsByPeriod(
+        code: str,
+        statement: str,
+        freq: str,
+        scope: str,
+        marketNs: str,
+        *,
+        targetLabels: list[str] | None = None,
+        panelPeriods: list[str] | None = None,
+    ) -> dict[str, dict[str, tuple[str, float]]]:
+        seen.append((targetLabels, panelPeriods, scope))
+        return {"2025": {"ifrs-full_Assets": ("자산총계", 10.0 if code == "111111" else 20.0)}}
+
+    monkeypatch.setattr(cmp, "_companyCellsByPeriod", fakeCompanyCellsByPeriod)
+    df = cmp.compare(["111111", "222222"], topic="bs", period="2025Q4", freq="year")
+    assert seen[-2:] == [(["2025"], ["2025Q4"], "consolidated")] * 2
+    assert df.columns[-2:] == ["111111", "222222"]
+    assert df[0, "111111"] == 10.0
+    assert df[0, "222222"] == 20.0
+
+    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period="2025Q4", freq="year")
+    assert diag["period"] == ["2025Q4"]
+    assert diag["resolvedPeriods"] == ["2025"]
+    assert diag["scope"] == "consolidated"
 
 
 # ── 정렬 실데이터 ──
