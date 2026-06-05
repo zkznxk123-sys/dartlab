@@ -2,8 +2,8 @@
 // 순수 SQL빌더·pivot·merge 는 financePivot.ts(테스트 가능). 본 모듈은 duckdb 등록+query 만.
 
 import { loadDartDb, sqlEscape } from '$lib/data/duckdb';
-import { buildSql, pivot, type QueryRow } from './financePivot';
-import type { FinanceFreq, FinanceKind, FinanceScope, FinanceStatement } from './types';
+import { buildSceMatrix, buildSql, num, pivot, sceComponent, type QueryRow, type SceQueryRow } from './financePivot';
+import type { FinanceFreq, FinanceKind, FinanceScope, FinanceStatement, SceMatrixData } from './types';
 
 const ALL_KINDS: FinanceKind[] = ['IS', 'BS', 'CF', 'CIS', 'SCE'];
 
@@ -19,19 +19,49 @@ function serialize<T>(fn: () => Promise<T>): Promise<T> {
 	return run;
 }
 
-// 회사·scope 에 실제 존재하는 statement(sj_div) 집합 — 단일 포괄손익(one-statement) 회사는 IS 가 비어 IS 탭을
-// 숨기고 CIS 만 노출(빈 탭 제거). dart/finance 인코딩이 회사별로 다른 현실 반영(별도 2표 vs 단일 1표).
-export async function availableStatements(stockCode: string, market: 'KR' | 'US', scope: FinanceScope): Promise<FinanceKind[]> {
-	if (market !== 'KR') return [];
+export interface FinanceAvailability {
+	scopes: FinanceScope[]; // 실제 보고된 범위(CFS/OFS) — 개별 없는 회사는 OFS 토글 숨김
+	byScope: Record<string, FinanceKind[]>; // scope → 가용 statement (단일 포괄손익 회사는 IS 없음)
+}
+
+// 회사의 (scope × statement) 가용 조합을 한 번에 probe — 빈 scope 토글·빈 statement 탭 제거. dart/finance 인코딩이
+// 회사별로 다른 현실 반영(연결/개별 유무 + 별도 2표 vs 단일 포괄손익).
+export async function financeAvailability(stockCode: string, market: 'KR' | 'US'): Promise<FinanceAvailability> {
+	const fallback: FinanceAvailability = { scopes: ['CFS', 'OFS'], byScope: { CFS: ALL_KINDS, OFS: ALL_KINDS } };
+	if (market !== 'KR') return { scopes: [], byScope: {} };
 	return serialize(async () => {
 		const db = await loadDartDb();
-		if (!db) return ALL_KINDS; // 기기 제약 — 일단 전부 노출(호출 시 빈 표 안내)
+		if (!db) return fallback; // 기기 제약 — 일단 전부 노출
 		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
-		const rows = await db.query<{ sj_div: string }>(
-			`SELECT DISTINCT sj_div FROM companyFinance WHERE stock_code = '${sqlEscape(stockCode)}' AND fs_div = '${sqlEscape(scope)}' AND sj_div IS NOT NULL`
+		const rows = await db.query<{ fs_div: string; sj_div: string }>(
+			`SELECT DISTINCT fs_div, sj_div FROM companyFinance WHERE stock_code = '${sqlEscape(stockCode)}' AND fs_div IS NOT NULL AND sj_div IS NOT NULL`
 		);
-		const present = new Set(rows.map((r) => r.sj_div));
-		return ALL_KINDS.filter((k) => present.has(k));
+		const present: Record<string, Set<string>> = {};
+		for (const r of rows) (present[r.fs_div] ??= new Set()).add(r.sj_div);
+		const scopes = (['CFS', 'OFS'] as FinanceScope[]).filter((s) => present[s]?.size);
+		const byScope: Record<string, FinanceKind[]> = {};
+		for (const s of scopes) byScope[s] = ALL_KINDS.filter((k) => present[s].has(k));
+		return scopes.length ? { scopes, byScope } : fallback;
+	});
+}
+
+// 자본변동표(SCE) — 변동유형×자본구성요소 matrix (연간 11011). account×period 표가 아닌 전용.
+export async function loadSceMatrix(stockCode: string, market: 'KR' | 'US', scope: FinanceScope): Promise<SceMatrixData | null> {
+	if (market !== 'KR') return null;
+	return serialize(async () => {
+		const db = await loadDartDb();
+		if (!db) return null;
+		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
+		const raw = await db.query<{ period: string; label: string; detail: string | null; val: number | null; ord: number | null }>(
+			`SELECT bsns_year AS period, account_nm AS label, CAST(account_detail AS VARCHAR) AS detail,
+			        ${num('thstrm_amount')} AS val, TRY_CAST(ord AS INTEGER) AS ord
+			 FROM companyFinance
+			 WHERE stock_code = '${sqlEscape(stockCode)}' AND sj_div = 'SCE' AND fs_div = '${sqlEscape(scope)}'
+			   AND reprt_code = '11011' AND account_nm IS NOT NULL`
+		);
+		if (raw.length === 0) return { scope, periods: [], components: [], byPeriod: {}, unit: 'KRW' };
+		const rows: SceQueryRow[] = raw.map((r) => ({ period: r.period, label: r.label, comp: sceComponent(r.detail), val: r.val, ord: r.ord }));
+		return buildSceMatrix(rows, scope);
 	});
 }
 

@@ -6,7 +6,7 @@ import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
 import { narrativeCore } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
 import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
-import { mergeDriftVariants, accountDepth } from '../src/lib/viewer/finance/financePivot.ts';
+import { mergeDriftVariants, accountDepth, sceComponent, buildSceMatrix, buildSql } from '../src/lib/viewer/finance/financePivot.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 
 let fail = 0;
@@ -91,5 +91,29 @@ eq(accountDepth('dart_OperatingIncomeLoss'), 1, 'depth 영업이익=1');
 eq(accountDepth('ifrs-full_CashAndCashEquivalents'), 2, 'depth 현금=2(리프)');
 eq(accountDepth('dart_ShortTermOtherReceivables'), 2, 'depth 미수금=2(리프)');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (50/50)' : `viewerCheck: ${fail} FAIL`);
+// sceComponent — account_detail 경로 끝 = 자본구성요소, 연결재무제표/재무제표 [member] = 자본총계.
+eq(sceComponent('자본 [구성요소]|지배기업의 소유주에게 귀속되는 지분 [구성요소]|자본금 [구성요소]'), '자본금', 'sceComp 자본금');
+eq(sceComponent('연결재무제표 [member]'), '자본총계', 'sceComp 연결총계');
+eq(sceComponent(null), '기타', 'sceComp null');
+
+// buildSceMatrix — 기간 desc, 자본총계 열 마지막, 변동유형 ord 정렬.
+const sce = buildSceMatrix(
+	[
+		{ period: '2024', label: '당기순이익', comp: '이익잉여금', val: 100, ord: 5 },
+		{ period: '2024', label: '당기순이익', comp: '자본총계', val: 100, ord: 5 },
+		{ period: '2024', label: '기초자본', comp: '자본금', val: 50, ord: 1 },
+		{ period: '2023', label: '배당', comp: '자본총계', val: -20, ord: 6 }
+	],
+	'CFS'
+);
+eq(sce.periods, ['2024', '2023'], 'sceMatrix 기간 desc');
+eq(sce.components[sce.components.length - 1], '자본총계', 'sceMatrix 자본총계 마지막 열');
+eq(sce.byPeriod['2024'][0].label, '기초자본', 'sceMatrix ord 정렬(기초자본 먼저)');
+eq(sce.byPeriod['2024'][1].values['자본총계'], 100, 'sceMatrix 당기순이익 자본총계 셀');
+
+// buildSql 분기 단독 — Q4 = 연간−Q3누적 포함.
+const qsql = buildSql('005930', 'IS', 'quarter', 'CFS');
+eq(/'Q4'/.test(qsql) && /yr_amt - q3cum/.test(qsql), true, 'buildSql 분기 Q4(연간−Q3누적) 포함');
+
+console.log(fail === 0 ? 'viewerCheck: ALL OK (57/57)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);

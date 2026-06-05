@@ -39,3 +39,22 @@ export const KIND_LABELS: Record<FinanceKind, string> = {
 };
 export const FREQ_LABELS: Record<FinanceFreq, string> = { annual: '연간', quarter: '분기', cumulative: '누적' };
 export const SCOPE_LABELS: Record<FinanceScope, string> = { CFS: '연결', OFS: '개별' };
+
+// 단위 스케일 — 큰 금액 가독성. 백만원 기본(대기업 표준).
+export type FinanceUnit = '원' | '백만' | '억';
+export const UNIT_DIVISORS: Record<FinanceUnit, number> = { 원: 1, 백만: 1e6, 억: 1e8 };
+export const UNIT_LABELS: Record<FinanceUnit, string> = { 원: '원', 백만: '백만원', 억: '억원' };
+
+// 자본변동표(SCE) — 변동유형(행) × 자본구성요소(열) × period 3D. 기간 1개를 골라 2D matrix 로 렌더.
+export interface SceRow {
+	label: string; // 변동유형 (account_nm) — 기초자본·당기순이익·배당·자기주식취득 등
+	ord: number;
+	values: Record<string, number | null>; // 자본구성요소 → 금액
+}
+export interface SceMatrixData {
+	scope: FinanceScope;
+	periods: string[]; // 가용 연도 (최신좌측)
+	components: string[]; // 자본구성요소 열 (자본금→…→자본총계 순)
+	byPeriod: Record<string, SceRow[]>; // period → 변동유형 행
+	unit: string;
+}
