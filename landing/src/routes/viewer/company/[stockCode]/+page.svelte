@@ -198,15 +198,15 @@
 		void goto(vsUrl(vsCodes.filter((x) => x !== c)));
 	}
 
+	// 섹션/주석 이동은 보고 있던 기간 윈도우를 보존 — 기간축은 섹션 무관 글로벌이라 리셋할 이유 없음(같은 시점의
+	// 다른 TOC 를 보려는 흐름). 리셋은 축 변경(연간토글)·회사 변경 때만.
 	function pickSection(sectionKey: string) {
 		activeSectionKey = sectionKey;
 		activeBlock = null; // 섹션 헤더 클릭 = 전체
-		windowEnd = 0;
 	}
 	function pickBlock(sectionKey: string, blockLeaf: string) {
 		activeSectionKey = sectionKey;
 		activeBlock = blockLeaf; // 개별 주석 선택 = 그 주석만
-		windowEnd = 0;
 	}
 	function pickPeriod(p: string) {
 		if (compareMode) {
