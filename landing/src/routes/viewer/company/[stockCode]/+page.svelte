@@ -19,6 +19,7 @@
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import { alignBundles, commonPeriods } from '$lib/viewer/align';
+	import { alignFinance, isFinanceSection } from '$lib/viewer/financeCells';
 	import type { PanelBundle } from '$lib/viewer/types';
 
 	let { data }: { data: { code: string; vs?: string[] } } = $props();
@@ -172,8 +173,17 @@
 	const cmpCompanies = $derived(
 		allBundles.map((b) => ({ code: b.stockCode, corpName: b.corpName || nameMap.get(b.stockCode) || b.stockCode }))
 	);
+	// 활성 섹션이 재무 5표(BS/IS/CF…)면 셀(항목) 단위 비교(acode 정렬+원환산), 아니면 행(통짜) 비교.
+	const isFinance = $derived(
+		compareMode && !!bundle && !!activeSectionKey && isFinanceSection(bundle.gridBySection.get(activeSectionKey) ?? [])
+	);
+	const financeRows = $derived(
+		isFinance && lockedPeriod && allBundles.length >= 2
+			? alignFinance(allBundles, activeSectionKey!, lockedPeriod, 'quarter')
+			: []
+	);
 	const alignedRows = $derived(
-		compareMode && activeSectionKey && lockedPeriod && allBundles.length >= 2
+		compareMode && !isFinance && activeSectionKey && lockedPeriod && allBundles.length >= 2
 			? alignBundles(allBundles, activeSectionKey, lockedPeriod)
 			: []
 	);
@@ -288,7 +298,7 @@
 					</div>
 				{/if}
 				{#if compareMode}
-					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · 항목 {alignedRows.length}</span>
+					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · {isFinance ? `재무 ${financeRows.length}항목` : `항목 ${alignedRows.length}`}</span>
 				{:else}
 					<span class="meta">항목 {rows.length} · 기간 {visiblePeriods.length}{annualOnly ? '(연간)' : ''}</span>
 				{/if}
@@ -341,7 +351,7 @@
 					{#if allBundles.length < 2}
 						<div class="cmp-loading"><div class="spinner"></div><p>비교 회사 여는 중…</p></div>
 					{:else}
-						<ComparisonMatrix rows={alignedRows} companies={cmpCompanies} period={lockedPeriod} />
+						<ComparisonMatrix rows={alignedRows} financeRows={isFinance ? financeRows : null} companies={cmpCompanies} period={lockedPeriod} />
 					{/if}
 				{:else}
 					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
