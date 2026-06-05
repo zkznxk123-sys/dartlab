@@ -22,11 +22,11 @@
         "dartlab.capabilities"
       ]
     },
-    "elapsedSec": 0.969,
-    "rssBeforeMb": 23.7,
-    "rssAfterMb": 81.7,
-    "rssDeltaMb": 58.1,
-    "rssPeakMb": 81.7,
+    "elapsedSec": 1.375,
+    "rssBeforeMb": 23.4,
+    "rssAfterMb": 80.2,
+    "rssDeltaMb": 56.7,
+    "rssPeakMb": 80.2,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 20.0,
@@ -46,15 +46,15 @@
     },
     "details": {
       "type": "dict",
-      "height": 132,
+      "height": 125,
       "width": null,
       "columns": []
     },
-    "elapsedSec": 0.656,
-    "rssBeforeMb": 23.7,
-    "rssAfterMb": 71.4,
-    "rssDeltaMb": 47.7,
-    "rssPeakMb": 71.4,
+    "elapsedSec": 1.172,
+    "rssBeforeMb": 23.2,
+    "rssAfterMb": 71.0,
+    "rssDeltaMb": 47.8,
+    "rssPeakMb": 71.0,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 20.0,
@@ -85,11 +85,11 @@
         "apiKey"
       ]
     },
-    "elapsedSec": 0.797,
-    "rssBeforeMb": 23.8,
-    "rssAfterMb": 75.7,
-    "rssDeltaMb": 52.0,
-    "rssPeakMb": 75.7,
+    "elapsedSec": 1.172,
+    "rssBeforeMb": 23.3,
+    "rssAfterMb": 72.7,
+    "rssDeltaMb": 49.3,
+    "rssPeakMb": 72.7,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 20.0,
@@ -111,13 +111,13 @@
       "type": "Company",
       "height": 1
     },
-    "elapsedSec": 5.265,
-    "rssBeforeMb": 23.7,
-    "rssAfterMb": 125.2,
-    "rssDeltaMb": 101.6,
-    "rssPeakMb": 125.2,
+    "elapsedSec": 7.719,
+    "rssBeforeMb": 23.2,
+    "rssAfterMb": 114.3,
+    "rssDeltaMb": 91.0,
+    "rssPeakMb": 114.3,
     "returnCode": 0,
-    "stderrTail": "[dartlab] 005930 (DART 공시 문서 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] 005930 (재무 숫자 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] ✓ 재무 숫자 데이터 다운로드 완료 (293KB)\nmessage_emit\n[dartlab] 005930 (정기보고서 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] ✓ 정기보고서 데이터 다운로드 완료 (224KB)\nmessage_emit\n[dartlab] ✓ DART 공시 문서 데이터 다운로드 완료 (41.0MB)\nmessage_emit\n[dartlab] KRX KIND 상장법인 목록 다운로드 중...\nmessage_emit\n[dartlab] 2664개 종목 로드 완료\nmessage_emit\nCompany('005930') 준비 완료 (4.1s)\n",
+    "stderrTail": "[dartlab] 005930 (DART 공시 문서 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] 005930 (재무 숫자 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] ✓ 재무 숫자 데이터 다운로드 완료 (293KB)\nmessage_emit\n[dartlab] 005930 (정기보고서 데이터) → 첫 사용: 자동 다운로드 중...\nmessage_emit\n[dartlab] ✓ 정기보고서 데이터 다운로드 완료 (224KB)\nmessage_emit\n[dartlab] ✓ DART 공시 문서 데이터 다운로드 완료 (41.0MB)\nmessage_emit\n[dartlab] KRX KIND 상장법인 목록 다운로드 중...\nmessage_emit\n[dartlab] 2664개 종목 로드 완료\nmessage_emit\nCompany('005930') 준비 완료 (5.9s)\n",
     "budget": {
       "maxElapsedSec": 30.0,
       "maxRssDeltaMb": 700.0,
