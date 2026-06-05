@@ -120,7 +120,7 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/reference/capability/registry.py",
         "src/dartlab/reference/capability/search.py",
         "src/dartlab/reference/capability/analysisGraph.py",
-        "src/dartlab/reference/capability/generateSpec.py",
+        "src/dartlab/reference/capability/builder.py",
         "src/dartlab/core/credentials.py",
         "src/dartlab/synth/axisGuide.py",
         "src/dartlab/viz/display",

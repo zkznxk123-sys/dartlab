@@ -1,4 +1,4 @@
-"""macro 엔진 메타데이터 — generateSpec.py 연동."""
+"""macro 엔진 메타데이터 — capability 라이브 빌더(builder.py) 연동."""
 
 from __future__ import annotations
 

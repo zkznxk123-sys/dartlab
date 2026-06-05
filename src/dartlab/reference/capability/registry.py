@@ -399,8 +399,8 @@ def buildCapabilitySummary(specs: list[CapabilitySpec] | None = None) -> dict[st
 # Analysis Graph contract SSOT.
 #
 # 이 dict는 런타임 분기용 임시 키워드 뭉치가 아니라, docstring/CAPABILITIES 위에
-# 얹히는 최소 기계 검증 계약이다. src/dartlab/reference/capability/generateSpec.py가 이 값을
-# CAPABILITIES 및 generated Analysis Graph로 컴파일한다.
+# 얹히는 최소 기계 검증 계약이다. src/dartlab/reference/capability/builder.py가 이 값을
+# CAPABILITIES 및 Analysis Graph로 라이브 컴파일한다.
 ANALYSIS_CONTRACTS: dict[str, dict[str, Any]] = {
     "gather.krx": {
         "contractId": "gather.krx.close",

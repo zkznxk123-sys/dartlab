@@ -1,4 +1,4 @@
-"""quant 엔진 스펙 — AI/generateSpec.py 자동 수집용."""
+"""quant 엔진 스펙 — capability 라이브 빌더(builder.py) 자동 수집용."""
 
 SPEC = {
     "engine": "quant",

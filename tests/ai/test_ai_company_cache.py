@@ -13,7 +13,7 @@ def test_legacy_company_cache_runtime_is_removed():
     assert importlib.util.find_spec("dartlab.ai.runtime") is None
 
 
-def test_engine_call_company_requires_generated_spec():
+def test_engine_call_blocks_private_api():
     from dartlab.ai.tools.engineCall import engineCall
 
     result = engineCall({"apiRef": "Company._private", "target": "005930"})

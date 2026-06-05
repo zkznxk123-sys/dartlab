@@ -10,7 +10,7 @@
 > - `pyodide.json` — Pyodide 런타임 manifest.
 > - `graph.json` — 257 노드 + 1337 엣지 + cycle/orphan/unreachable 메타.
 >
-> `llms.txt` · `sitemap.xml` 은 별도 `src/dartlab/reference/capability/generateSpec.py` 책임.
+> `llms.txt` · `sitemap.xml` 은 landing 정적 SEO 자산(동결·수동 관리) — 본 6 JSON·capability 빌더와 무관.
 
 ## 1. 5 카테고리 + 디렉토리
 

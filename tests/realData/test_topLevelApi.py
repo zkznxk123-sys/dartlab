@@ -45,7 +45,7 @@ def test_topLevelSymbol_accessible(symbol):
 @pytest.mark.realData
 @pytest.mark.integration
 def test_capabilities_listsAllEngines():
-    """dartlab.capabilities 가 엔진 목록 반환 (generateSpec 소비자)."""
+    """dartlab.capabilities 가 엔진 목록 반환 (loadCapabilities 소비자)."""
     import dartlab
 
     try:

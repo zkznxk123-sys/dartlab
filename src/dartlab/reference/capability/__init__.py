@@ -10,7 +10,7 @@ Submodules
   / ``build_capability_summary`` / ``ANALYSIS_CONTRACTS`` (런타임 등록 SSOT).
 - ``search``   — ``searchCapabilities`` / ``formatSearchResults`` (자연어 검색).
 - ``analysisGraph`` — graph queries (``loadAnalysisGraph`` 결과 위에서 동작).
-- ``generateSpec`` — ``loadCapabilities()`` / ``loadAnalysisGraph()`` 라이브 빌더.
+- ``builder`` — ``loadCapabilities()`` / ``loadAnalysisGraph()`` 라이브 빌더.
   docstring 소스에서 첫 조회 시 1 회 빌드(캐시) — 생성 사본 파일 없음, drift 표면 0.
 
 카탈로그 SSOT = 엔진 docstring (operation.code §"CAPABILITIES 단일 진실의 원천").
@@ -20,7 +20,7 @@ Submodules
 
 from __future__ import annotations
 
-from dartlab.reference.capability.generateSpec import (
+from dartlab.reference.capability.builder import (
     buildCapabilities,
     loadAnalysisGraph,
     loadCapabilities,
