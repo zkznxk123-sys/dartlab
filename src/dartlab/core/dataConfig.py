@@ -81,14 +81,6 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 공시 panel 수평화 artifact (회사당 flat, cross-market 16-col)",
         "public": True,
     },
-    "edgarPanelCell": {
-        # EDGAR panel native 셀 artifact — 필링 inline/INS XBRL 분해 (계정×기간, c.panel("is")).
-        # flat: data/edgar/panelCell/{ticker}.parquet. providers.edgar.panel.build.cell 생산,
-        # providers.edgar.panel.cellRead read. EDGAR_CELL_SCHEMA(14-col, DART CELL_SCHEMA 미러).
-        "dir": "edgar/panelCell",
-        "label": "SEC EDGAR panel native 셀 artifact (계정×기간, 필링 XBRL 분해)",
-        "public": True,
-    },
     "edgar": {
         "dir": "edgar/finance",
         "label": "SEC EDGAR 재무 데이터 (companyfacts.zip 벌크 파생)",
@@ -102,6 +94,11 @@ DATA_RELEASES: dict[str, dict] = {
     "krxPrices": {
         "dir": "krx/prices",
         "label": "KRX 일별 전종목 OHLCV+시총+발행주식수 (raw, long parquet)",
+        "public": True,
+    },
+    "krxPriceCompany": {
+        "dir": "krx/prices/company",
+        "label": "KRX 회사별 일별 OHLCV+시총 타임라인 (landing dashboard artifact)",
         "public": True,
     },
     "krxIndices": {

@@ -4,9 +4,10 @@
 	import { base } from '$app/paths';
 	import { LayoutDashboard, FileText, BarChart3, TrendingUp, ExternalLink, X } from 'lucide-svelte';
 	import KpiRibbon from '$lib/components/company/KpiRibbon.svelte';
-	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
 	import OverviewFinanceCharts from './OverviewFinanceCharts.svelte';
+	import CompanyFinancePane from './CompanyFinancePane.svelte';
 	import CompanyViewerPane from './CompanyViewerPane.svelte';
+	import PriceDisclosureTimeline from './PriceDisclosureTimeline.svelte';
 	import { loadLiveCompany, type LiveCompanyBundle } from '$lib/browser/companyLive';
 	import { loadCompanyFinanceLitePeriods, type CompanyFinancePeriodRow } from '$lib/scan/financeLiteRuntime';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
@@ -37,15 +38,13 @@
 		series: Array<number | null>;
 		note?: string;
 	};
-	type View = 'overview' | 'viewer' | 'price';
-	type NavId = View | 'finance';
+	type View = 'overview' | 'viewer' | 'finance' | 'price';
 	let activeView = $state<View>('overview');
 	let bundle = $state<LiveCompanyBundle | null>(null);
 	let periods = $state.raw<CompanyFinancePeriodRow[]>([]);
 	let filings = $state.raw<RegularFiling[]>([]);
 	let loading = $state(true);
 	let errorMsg = $state<string | null>(null);
-	let financeOpen = $state(false);
 
 	// code 바뀌면 재로드 (모달 입구 대비). loadLiveCompany 는 로컬 map/companies/{code}.json 경량.
 	$effect(() => {
@@ -97,22 +96,14 @@
 		];
 	});
 
-	const NAV: Array<{ id: NavId; label: string; icon: typeof LayoutDashboard }> = [
+	const NAV: Array<{ id: View; label: string; icon: typeof LayoutDashboard }> = [
 		{ id: 'overview', label: '개요', icon: LayoutDashboard },
 		{ id: 'viewer', label: '공시뷰어', icon: FileText },
 		{ id: 'finance', label: '재무제표', icon: BarChart3 },
 		{ id: 'price', label: '주가·밸류', icon: TrendingUp }
 	];
 
-	function onNav(id: NavId) {
-		if (id === 'viewer') {
-			activeView = 'viewer';
-			return;
-		}
-		if (id === 'finance') {
-			financeOpen = true;
-			return;
-		}
+	function onNav(id: View) {
 		activeView = id;
 	}
 
@@ -135,8 +126,8 @@
 			{#if industryName}<span class="ind">{industryName}</span>{/if}
 		</div>
 		<div class="dhead-right">
-			<a class="hbtn" href={`${base}/company/${code}`} title="기존 분석 페이지(내러티브)로">
-				<ExternalLink size={13} /> 분석 페이지
+			<a class="hbtn" href={`${base}/viewer/company/${code}`} target="_blank" rel="noreferrer" title="공시뷰어 전체 화면으로 열기">
+				<ExternalLink size={13} /> 전체 공시뷰어
 			</a>
 			{#if embedded && onClose}
 				<button type="button" class="hbtn" onclick={onClose} title="닫기">
@@ -152,7 +143,7 @@
 				<button
 					type="button"
 					class="rail-btn"
-					class:active={item.id === activeView || (item.id === 'finance' && financeOpen)}
+					class:active={item.id === activeView}
 					onclick={() => onNav(item.id)}
 					title={item.label}
 				>
@@ -216,19 +207,15 @@
 					</div>
 				{:else if activeView === 'viewer'}
 					<CompanyViewerPane {code} {corpName} />
+				{:else if activeView === 'finance'}
+					<CompanyFinancePane {code} {corpName} />
 				{:else if activeView === 'price'}
-					<div class="state placeholder">
-						<TrendingUp size={28} color="#475569" />
-						<p>주가·공시 타임라인 — 준비 중</p>
-						<small>per-company 주가 데이터(일별 OHLC) 연결 후 활성화. 현재는 공시뷰어·재무제표 뷰가 동작합니다.</small>
-					</div>
+					<PriceDisclosureTimeline {code} {corpName} {filings} />
 				{/if}
 			{/if}
 		</section>
 	</div>
 </div>
-
-<FinanceDialog {code} {corpName} open={financeOpen} onclose={() => (financeOpen = false)} />
 
 <style>
 	.dash {
@@ -454,12 +441,6 @@
 		gap: 12px;
 		color: #94a3b8;
 		text-align: center;
-	}
-	.placeholder small {
-		max-width: 360px;
-		color: #64748b;
-		font-size: 12px;
-		line-height: 1.5;
 	}
 	.spinner {
 		width: 26px;

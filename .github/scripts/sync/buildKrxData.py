@@ -34,6 +34,24 @@ from dartlab.gather.krx.krxApi import _normalizeDate, fetchKrxRange
 
 _KST = timezone(timedelta(hours=9))
 _KRX_READY_KST = time(17, 0)
+_COMPANY_PRICE_MIN_LOCAL_YEARS = 2
+
+_COMPANY_PRICE_COLUMNS = {
+    "BAS_DD": "date",
+    "ISU_CD": "stockCode",
+    "ISU_NM": "name",
+    "MKT_NM": "market",
+    "TDD_OPNPRC": "open",
+    "TDD_HGPRC": "high",
+    "TDD_LWPRC": "low",
+    "TDD_CLSPRC": "close",
+    "CMPPREVDD_PRC": "priceChange",
+    "FLUC_RT": "fluctuationRate",
+    "ACC_TRDVOL": "volume",
+    "ACC_TRDVAL": "tradedValue",
+    "MKTCAP": "marketCap",
+    "LIST_SHRS": "listedShares",
+}
 
 
 def _getKey() -> str:
@@ -88,6 +106,75 @@ def _appendYearly(df: pl.DataFrame, outDir: Path) -> dict[int, int]:
         grp.write_parquet(out, compression="zstd")
         counts[year] = grp.height
         print(f"[krx] {year}: {grp.height} rows → {out}")
+    return counts
+
+
+def _companyPriceFrame(frame: pl.DataFrame | pl.LazyFrame) -> pl.DataFrame:
+    """KRX raw long table 을 랜딩 회사 워크스페이스용 schema 로 정규화한다."""
+    schemaNames = frame.collect_schema().names() if isinstance(frame, pl.LazyFrame) else list(frame.schema)
+    missing = [col for col in _COMPANY_PRICE_COLUMNS if col not in schemaNames]
+    if missing:
+        raise RuntimeError(f"KRX raw parquet schema 누락: {missing}")
+
+    projected = (
+        frame.select([pl.col(src).alias(dst) for src, dst in _COMPANY_PRICE_COLUMNS.items()])
+        .with_columns(
+            pl.col("date").cast(pl.Utf8),
+            pl.col("stockCode").cast(pl.Utf8).str.replace(r"^A", ""),
+            pl.col("name").cast(pl.Utf8),
+            pl.col("market").cast(pl.Utf8),
+            pl.col("open").cast(pl.Float64, strict=False),
+            pl.col("high").cast(pl.Float64, strict=False),
+            pl.col("low").cast(pl.Float64, strict=False),
+            pl.col("close").cast(pl.Float64, strict=False),
+            pl.col("priceChange").cast(pl.Float64, strict=False),
+            pl.col("fluctuationRate").cast(pl.Float64, strict=False),
+            pl.col("volume").cast(pl.Float64, strict=False),
+            pl.col("tradedValue").cast(pl.Float64, strict=False),
+            pl.col("marketCap").cast(pl.Float64, strict=False),
+            pl.col("listedShares").cast(pl.Float64, strict=False),
+        )
+        .filter(pl.col("stockCode").str.len_chars() == 6)
+        .sort(["stockCode", "date"])
+    )
+    if isinstance(projected, pl.LazyFrame):
+        return projected.collect()
+    return projected
+
+
+def buildCompanyPriceArtifacts(
+    outDir: Path,
+    *,
+    companyDir: Path | None = None,
+    minYears: int = _COMPANY_PRICE_MIN_LOCAL_YEARS,
+) -> dict[str, int]:
+    """연도별 KRX raw parquet 에서 회사별 가격 parquet 을 파생한다.
+
+    랜딩의 단일회사 대시보드는 전종목 연도 파일을 브라우저에서 반복 스캔하지 않는다.
+    이 함수가 ``krx/prices/company/{stockCode}.parquet`` 를 만들어 가격 탭의 SSOT 로
+    제공한다. 로컬 raw 파일이 너무 적으면 cache miss 로 인한 부분 artifact 업로드를
+    피하기 위해 생성을 건너뛴다.
+    """
+    files = sorted(outDir.glob("raw-*.parquet"))
+    if len(files) < minYears:
+        print(f"[krx/company] raw parquet {len(files)}년치만 존재 → 부분 artifact 방지로 skip")
+        return {}
+
+    target = companyDir or (outDir / "company")
+    target.mkdir(parents=True, exist_ok=True)
+
+    frame = pl.scan_parquet([str(path) for path in files])
+    rows = _companyPriceFrame(frame)
+    counts: dict[str, int] = {}
+    for key, group in rows.partition_by("stockCode", as_dict=True).items():
+        code = key[0] if isinstance(key, tuple) else key
+        if not code:
+            continue
+        out = target / f"{code}.parquet"
+        group.write_parquet(out, compression="zstd")
+        counts[str(code)] = group.height
+
+    print(f"[krx/company] {len(counts)}사 price timeline → {target}")
     return counts
 
 
@@ -248,6 +335,15 @@ def main() -> int:
         default="eddmpython/dartlab-data",
         help="HF dataset repo (default: eddmpython/dartlab-data, path: krx/prices)",
     )
+    parser.add_argument(
+        "--company-out",
+        help="회사별 주가 parquet 출력 디렉토리 (default: <out>/company)",
+    )
+    parser.add_argument(
+        "--skip-company-artifacts",
+        action="store_true",
+        help="krx/prices/company/{stockCode}.parquet 파생 생성을 건너뜀",
+    )
     parser.add_argument("--push", action="store_true", help="HF 업로드 실행")
     args = parser.parse_args()
 
@@ -261,6 +357,13 @@ def main() -> int:
         if not (args.start and args.end):
             parser.error("backfill 모드는 --start, --end 필수")
         counts = asyncio.run(buildBackfill(outDir, args.start, args.end, apiKey))
+
+    companyCounts: dict[str, int] = {}
+    if counts and not args.skip_company_artifacts:
+        companyCounts = buildCompanyPriceArtifacts(
+            outDir,
+            companyDir=Path(args.company_out) if args.company_out else None,
+        )
 
     if args.push:
         from dartlab.gather.bulkData.hfDeploy import deployKrxToHF
@@ -277,7 +380,11 @@ def main() -> int:
                     source="KRX prices",
                     version=args.end or "incremental",
                     rowCount=rowCountTotal,
-                    extra={"mode": args.mode, "outDir": str(outDir)},
+                    extra={
+                        "mode": args.mode,
+                        "outDir": str(outDir),
+                        "companyArtifacts": len(companyCounts),
+                    },
                 )
             except ImportError:
                 pass  # dartlab 미설치 환경 graceful
