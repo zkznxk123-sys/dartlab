@@ -20,6 +20,7 @@ export interface PanelRow {
 	chapter: string;
 	sectionLeaf: string;
 	blockLeaf: string;
+	leafType: string;
 	disclosureKey: string | null; // null = narrative 행
 	scope: string | null;
 	blockType: 'text' | 'table';

@@ -9,6 +9,8 @@ import { userMarkClass } from '../src/lib/viewer/cell.ts';
 import { mergeDriftVariants, accountDepth, sceComponent, buildSceMatrix, buildSql } from '../src/lib/viewer/finance/financePivot.ts';
 import { toCsv, cellText, financeToExcel } from '../src/lib/viewer/dataExport.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
+import { buildCompareBoard, compareRows, detectFinanceUnit, normalizeCompareTargets } from '../src/lib/viewer/compare/index.ts';
+import type { PanelBundle, PanelRow } from '../src/lib/viewer/types.ts';
 
 let fail = 0;
 const eq = (got: unknown, exp: unknown, label: string) => {
@@ -133,5 +135,75 @@ eq(/ss:Name="손익계산서"/.test(xls), true, 'xls 시트명');
 eq(/ss:Type="Number">100</.test(xls), true, 'xls 숫자셀');
 eq(xls.includes('progid="Excel.Sheet"'), true, 'xls Excel 헤더');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (66/66)' : `viewerCheck: ${fail} FAIL`);
+const cmpRow = (patch: Partial<PanelRow>): PanelRow => ({
+	chapter: 'III. 재무에 관한 사항',
+	sectionLeaf: '2. 연결재무제표',
+	blockLeaf: '',
+	leafType: 'body',
+	disclosureKey: null,
+	scope: null,
+	blockType: 'text',
+	cells: { '2026Q1': '본문' },
+	...patch
+});
+const cmpBundle = (stockCode: string, rows: PanelRow[]): PanelBundle => ({
+	stockCode,
+	corpName: stockCode,
+	toc: { stockCode, corpName: stockCode, chapters: [], periods: ['2026Q1'] },
+	periods: ['2026Q1'],
+	gridBySection: new Map([['III. 재무에 관한 사항␟2. 연결재무제표', rows]]),
+	dartUrlByPeriod: {},
+	periodKind: { '2026Q1': 'quarter' }
+});
+
+const narrCmp = compareRows(
+	[
+		cmpBundle('005930', [cmpRow({ cells: { '2026Q1': '삼성 서술 1' } })]),
+		cmpBundle('000660', [cmpRow({ cells: { '2026Q1': 'SK 서술 1' } })])
+	],
+	'III. 재무에 관한 사항␟2. 연결재무제표',
+	'2026Q1'
+).rows;
+eq(narrCmp.length, 2, 'compare narrative 회사행 분리');
+eq(narrCmp.every((r) => r.cells.filter((c) => c != null).length === 1), true, 'compare narrative false-merge 금지');
+eq(
+	buildCompareBoard(
+		[
+			cmpBundle('005930', [cmpRow({ cells: { '2026Q1': '삼성 서술 1' } })]),
+			cmpBundle('000660', [cmpRow({ cells: { '2026Q1': 'SK 서술 1' } })])
+		],
+		{ sectionKey: 'III. 재무에 관한 사항␟2. 연결재무제표', period: '2026Q1' }
+	).diagnostics.mode,
+	'row',
+	'compare board row entrypoint'
+);
+
+const leafCmp = compareRows(
+	[
+		cmpBundle('005930', [
+			cmpRow({ disclosureKey: 'NT_X', scope: 'consolidated', leafType: 'table-a', blockType: 'table', cells: { '2026Q1': 'A' } }),
+			cmpRow({ disclosureKey: 'NT_X', scope: 'consolidated', leafType: 'table-b', blockType: 'table', cells: { '2026Q1': 'B' } })
+		]),
+		cmpBundle('000660', [])
+	],
+	'III. 재무에 관한 사항␟2. 연결재무제표',
+	'2026Q1'
+).rows;
+eq(leafCmp.length, 2, 'compare key leafType 분리');
+
+const unitRows = [
+	cmpRow({
+		blockType: 'table',
+		cells: {
+			'2026Q1':
+				'<P>(단위:백만원)</P><TABLE><TR><TE ACODE="ifrs-full_Revenue" ACONTEXT="CFY2026dFQ_ifrs-full_ConsolidatedMember">1,234</TE></TR><TR><TE>기본주당이익(손실)(단위:원)</TE><TE ACODE="ifrs-full_BasicEarningsLossPerShare" ACONTEXT="CFY2026dFQ_ifrs-full_ConsolidatedMember">10</TE></TR></TABLE>'
+		}
+	})
+];
+eq(detectFinanceUnit(unitRows, '2026Q1').label, '백만원', 'finance unit 캡션이 EPS 원보다 우선');
+eq(detectFinanceUnit([cmpRow({ cells: { '2026Q1': '<TE ACODE="ifrs-full_Assets">2,000,000,000,000</TE>' } })], '2026Q1').label, '원', 'finance unit 캡션부재 magnitude 원');
+eq(normalizeCompareTargets('005930', '000660,005930,AAPL,000660').vs, ['000660'], 'compare targets self/dup/cross-market 제거');
+eq(normalizeCompareTargets('005930', '000001,000002,000003,000004,000005,000006').vs.length, 5, 'compare targets 총 6사 제한');
+
+console.log(fail === 0 ? 'viewerCheck: ALL OK (74/74)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);

@@ -23,11 +23,10 @@
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
-	import { alignBundles, commonPeriods } from '$lib/viewer/align';
-	import { alignFinance, isFinanceSection } from '$lib/viewer/financeCells';
+	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
 	import type { PanelBundle } from '$lib/viewer/types';
 
-	let { data }: { data: { code: string; vs?: string[] } } = $props();
+	let { data }: { data: { code: string; vs?: string[]; vsRejected?: Array<{ code: string; reason: string }> } } = $props();
 	const code = $derived(data.code);
 	const vsCodes = $derived(data.vs ?? []);
 
@@ -56,6 +55,8 @@
 
 	// ── 회사 간 비교 (?vs=) ── 단일 뷰어 위에 additive. vs 없으면 전부 비활성.
 	let vsBundles = $state<PanelBundle[]>([]); // 비교 추가 회사 bundle (reference=bundle, 나머지=여기)
+	let vsLoading = $state(false);
+	let vsFailed = $state(0);
 	let lockedPeriod = $state(''); // 비교 모드 = 한 시점 lock
 	let addOpen = $state(false); // 회사 추가 팝오버
 	// 비교 모드 판정 — 파생을 일찍 선언(windowPeriods 등이 참조). vsCodes/bundle/vsBundles 에만 의존.
@@ -118,14 +119,20 @@
 		void code; // code 바뀌면도 재로드(reference 교체)
 		if (!codes.length) {
 			vsBundles = [];
+			vsLoading = false;
+			vsFailed = 0;
 			return;
 		}
 		let cancelled = false;
+		vsLoading = true;
+		vsFailed = 0;
 		void Promise.allSettled(codes.map((c) => loadPanelBundle(c))).then((results) => {
 			if (cancelled) return;
 			vsBundles = results
 				.filter((r): r is PromiseFulfilledResult<PanelBundle> => r.status === 'fulfilled' && r.value.periods.length > 0)
 				.map((r) => r.value);
+			vsFailed = results.length - vsBundles.length;
+			vsLoading = false;
 		});
 		return () => {
 			cancelled = true;
@@ -204,26 +211,20 @@
 	const cmpCompanies = $derived(
 		allBundles.map((b) => ({ code: b.stockCode, corpName: b.corpName || nameMap.get(b.stockCode) || b.stockCode }))
 	);
-	// 활성 섹션이 재무 5표(BS/IS/CF…)면 셀(항목) 단위 비교(acode 정렬+원환산), 아니면 행(통짜) 비교.
-	const isFinance = $derived(
-		compareMode && !!bundle && !!activeSectionKey && isFinanceSection(bundle.gridBySection.get(activeSectionKey) ?? [])
-	);
-	// freq = lockedPeriod 의 보고서 유형(연간이면 year, 아니면 quarter). 하드코딩 시 연간시점에 손익(Q4
-	// 단독토큰 부재)이 통째 사라짐 → periodKind SSOT 로 결정.
-	const financeCmp = $derived(
-		isFinance && lockedPeriod && bundle && allBundles.length >= 2
-			? alignFinance(
-					allBundles,
-					activeSectionKey!,
-					lockedPeriod,
-					bundle.periodKind[lockedPeriod] === 'annual' ? 'year' : 'quarter'
-				)
+	// compare 본진은 $lib/viewer/compare. route 는 section/period/bundle 만 넘기고 정렬 계약은 모듈이 담당.
+	const compareBoard = $derived(
+		compareMode && activeSectionKey && lockedPeriod && allBundles.length >= 2
+			? buildCompareBoard(allBundles, { sectionKey: activeSectionKey, period: lockedPeriod })
 			: null
 	);
-	const alignedRows = $derived(
-		compareMode && !isFinance && activeSectionKey && lockedPeriod && allBundles.length >= 2
-			? alignBundles(allBundles, activeSectionKey, lockedPeriod)
-			: []
+	const compareMeta = $derived(
+		compareBoard
+			? compareBoard.mode === 'finance'
+				? `재무 ${compareBoard.diagnostics.rowCount}항목`
+				: `항목 ${compareBoard.diagnostics.rowCount}`
+			: vsLoading
+				? '비교 회사 로드 중'
+				: '비교 대기'
 	);
 	// 비교 시점 기본 = 최신 공통 기간. 유효하지 않으면 보정.
 	$effect(() => {
@@ -359,7 +360,7 @@
 					</div>
 				{/if}
 				{#if compareMode}
-					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · {isFinance ? `재무 ${financeCmp?.rows.length ?? 0}항목` : `항목 ${alignedRows.length}`}</span>
+					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · {compareMeta}</span>
 				{:else}
 					<span class="meta">항목 {rows.length} · 기간 {visiblePeriods.length}{annualOnly ? '(연간)' : ''}</span>
 				{/if}
@@ -410,12 +411,16 @@
 			<section class="board">
 				{#if compareMode}
 					{#if allBundles.length < 2}
-						<div class="cmp-loading"><div class="spinner"></div><p>비교 회사 여는 중…</p></div>
+						{#if vsLoading}
+							<div class="cmp-loading"><div class="spinner"></div><p>비교 회사 여는 중…</p></div>
+						{:else}
+							<div class="cmp-loading"><p>비교 가능한 회사 데이터가 없습니다{vsFailed ? ` (${vsFailed}개 실패)` : ''}.</p></div>
+						{/if}
 					{:else}
 						<ComparisonMatrix
-							rows={alignedRows}
-							financeRows={isFinance ? (financeCmp?.rows ?? null) : null}
-							financeUnits={financeCmp?.units ?? null}
+							rows={compareBoard?.rows ?? []}
+							financeRows={compareBoard?.financeRows ?? null}
+							financeUnits={compareBoard?.financeUnits ?? null}
 							companies={cmpCompanies}
 							period={lockedPeriod}
 						/>

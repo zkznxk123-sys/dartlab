@@ -149,6 +149,7 @@ export function buildPanelBundle(
 			chapter: b.chapter,
 			sectionLeaf: b.sectionLeaf,
 			blockLeaf: b.blockLeaf,
+			leafType: b.leafType,
 			disclosureKey: b.disclosureKey,
 			scope: b.scope,
 			blockType: Object.values(b.cells).some((v) => v.includes('<TABLE')) ? 'table' : 'text',

@@ -3,8 +3,7 @@
 	// 적응: 재무 섹션이면 셀(항목) 단위 숫자행(financeRows), 그 외는 통짜 본문 셀(rows). 둘 다 회사 열만.
 	// 한쪽만 = honest-gap(⌀). 라벨 거터 없음(단일 뷰어와 동일 — 셀이 자기 식별).
 	import CellContent from './CellContent.svelte';
-	import type { AlignedRow } from '$lib/viewer/align';
-	import type { FinanceRow, UnitInfo } from '$lib/viewer/financeCells';
+	import type { AlignedRow, FinanceRow, UnitInfo } from '$lib/viewer/compare';
 
 	let {
 		rows,
