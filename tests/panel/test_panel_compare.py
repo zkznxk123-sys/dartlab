@@ -24,7 +24,6 @@ from dartlab.providers.dart.panel.compare import compare, compareDiagnostics
 
 _PANEL_DIR = Path(_cfg.dataDir) / "dart" / "panel"
 _PAIR = ["005930", "000660"]  # 삼성·SK하이닉스 (동종)
-_KAKAO = "035720"
 _QUAD = ["005930", "000660", "035720", "000270"]  # +카카오·기아
 
 
@@ -199,6 +198,109 @@ def test_compare_row_scope_mismatch_stays_separate(monkeypatch: pytest.MonkeyPat
     assert set(df["scope"].to_list()) == {"consolidated", "standalone"}
     both = df.filter(pl.col("111111").is_not_null() & pl.col("222222").is_not_null())
     assert both.height == 0
+
+
+def test_compare_row_uses_latest_common_period_without_topic(monkeypatch: pytest.MonkeyPatch) -> None:
+    """topic=None 에서 period 미지정이면 전체 panel 최신 공통 시점을 고른다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        if code == "111111":
+            values = {"2026Q1": "new-only-1", "2025Q4": "common-1"}
+        else:
+            values = {"2026Q1": None, "2025Q4": "common-2"}
+        return pl.DataFrame(
+            {
+                "chapter": ["III"],
+                "sectionLeaf": ["2. 재무제표"],
+                "blockLeaf": ["공통항목"],
+                "leafType": ["table"],
+                "disclosureKey": ["BS"],
+                "scope": ["consolidated"],
+                **values,
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"])
+    assert df.columns[-2:] == ["111111", "222222"]
+    assert df[0, "111111"] == "common-1"
+    assert df[0, "222222"] == "common-2"
+
+    diag = cmp.compareDiagnostics(["111111", "222222"])
+    assert diag["resolvedPeriods"] == ["2025Q4"]
+    assert diag["sharedRows"] == 1
+
+
+def test_compare_row_falls_back_to_latest_union_when_no_common_period(monkeypatch: pytest.MonkeyPatch) -> None:
+    """공통 시점이 없으면 최신 union 시점으로 honest-gap 을 보존한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        if code == "111111":
+            values = {"2026Q1": "latest-1", "2025Q4": None}
+        else:
+            values = {"2026Q1": None, "2025Q4": "old-2"}
+        return pl.DataFrame(
+            {
+                "chapter": ["III"],
+                "sectionLeaf": ["2. 재무제표"],
+                "blockLeaf": ["공통항목"],
+                "leafType": ["table"],
+                "disclosureKey": ["BS"],
+                "scope": ["consolidated"],
+                **values,
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"])
+    assert df.columns[-2:] == ["111111", "222222"]
+    assert df[0, "111111"] == "latest-1"
+    assert df[0, "222222"] is None
+
+    diag = cmp.compareDiagnostics(["111111", "222222"])
+    assert diag["resolvedPeriods"] == ["2026Q1"]
+    assert diag["soloRows"] == 1
+    assert diag["missingCodes"] == ["222222"]
+
+
+def test_compare_diagnostics_counts_shared_partial_solo(monkeypatch: pytest.MonkeyPatch) -> None:
+    """3사 diagnostics 는 shared/partial/solo row 를 구분한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        valuesByCode = {
+            "111111": ["shared-1", "partial-1", "solo-1"],
+            "222222": ["shared-2", "partial-2", None],
+            "333333": ["shared-3", None, None],
+        }
+        return pl.DataFrame(
+            {
+                "chapter": ["III", "III", "III"],
+                "sectionLeaf": ["2. 재무제표", "3. 주석", "4. 기타"],
+                "blockLeaf": ["공통", "부분", "단독"],
+                "leafType": ["table", "table", "table"],
+                "disclosureKey": ["ROW_SHARED", "ROW_PARTIAL", "ROW_SOLO"],
+                "scope": ["consolidated", "consolidated", "consolidated"],
+                "2025Q4": valuesByCode[code],
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    diag = cmp.compareDiagnostics(["111111", "222222", "333333"], period="2025Q4")
+    assert diag["rowCount"] == 3
+    assert diag["sharedRows"] == 1
+    assert diag["partialRows"] == 1
+    assert diag["soloRows"] == 1
+    assert diag["presentCodes"] == ["111111", "222222", "333333"]
+    assert diag["missingCodes"] == []
 
 
 def test_compare_topic_selects_period_after_topic_filter(monkeypatch: pytest.MonkeyPatch) -> None:
