@@ -7,6 +7,7 @@
 	import OverviewFinanceCharts from './OverviewFinanceCharts.svelte';
 	import CompanyFinancePane from './CompanyFinancePane.svelte';
 	import CompanyViewerPane from './CompanyViewerPane.svelte';
+	import FinanceSignalBoard from './FinanceSignalBoard.svelte';
 	import PriceDisclosureTimeline from './PriceDisclosureTimeline.svelte';
 	import { loadLiveCompany, type LiveCompanyBundle } from '$lib/browser/companyLive';
 	import { loadCompanyFinanceLitePeriods, type CompanyFinancePeriodRow } from '$lib/scan/financeLiteRuntime';
@@ -162,6 +163,8 @@
 				{#if activeView === 'overview'}
 					<div class="overview">
 						<div class="kpi-wrap"><KpiRibbon metrics={kpis} /></div>
+
+						<FinanceSignalBoard {periods} />
 
 						<div class="panel">
 							<div class="panel-head"><span>재무 추세</span><small>단위 억원 · 최근 {periods.length}기</small></div>
