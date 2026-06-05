@@ -282,7 +282,7 @@ def compare(
         Freshness:
             - 매 호출 readWide(파생물 미저장).
         Dataflow:
-            - codes → readWide×N → (disclosureKey,scope,leafType) outer-align → topic 필터 → period 투영.
+            - codes → readWide×N → (disclosureKey,scope,leafType) outer-align → topic 필터 → period 결정/투영.
         TargetMarkets:
             - KR(DART) 끼리 / US(EDGAR) 끼리. KO↔US 혼합은 후속(crossMarket).
     """
@@ -323,6 +323,12 @@ def compare(
         return pl.DataFrame()
 
     long = pl.concat(longs, how="diagonal_relaxed")
+    if topic:
+        # topic 이 있을 때는 period 선택 전에 먼저 좁힌다. 전체 패널 최신 공통분기가
+        # topic 을 담지 않으면 직전 사업보고서 주석이 빈 표로 사라진다.
+        long = _matchTopic(long, topic)
+        if long.is_empty():
+            return pl.DataFrame()
 
     # 비교 시점 결정 — period 지정 시 그대로, 아니면 최신 공통(없으면 union 최신).
     if isinstance(period, str):

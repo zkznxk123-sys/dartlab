@@ -136,6 +136,38 @@ def test_compare_join_key_separates_scope_leaf_type_and_narrative() -> None:
     assert set(keys).isdisjoint(set(other["_joinKey"].to_list())), "narrative key 는 회사 간 공유되면 안 됨"
 
 
+def test_compare_topic_selects_period_after_topic_filter(monkeypatch: pytest.MonkeyPatch) -> None:
+    """topic 지정 시 전체 최신분기가 아니라 topic 내부 최신분기를 고른다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        assert marketNs == "kr"
+        assert periods is None
+        assert tag is False
+        suffix = code[-1]
+        return pl.DataFrame(
+            {
+                "chapter": ["III", "III"],
+                "sectionLeaf": ["2. 연결재무제표", "3. 주석"],
+                "blockLeaf": ["최신항목", "재고자산"],
+                "leafType": ["table", "table"],
+                "disclosureKey": ["BS", "NT_INV"],
+                "scope": ["consolidated", "consolidated"],
+                "2026Q1": [f"latest-{suffix}", None],
+                "2025Q4": [f"old-bs-{suffix}", f"inventory-{suffix}"],
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"], topic="재고")
+    assert df.height == 1
+    assert df[0, "disclosureKey"] == "NT_INV"
+    assert df[0, "111111"] == "inventory-1"
+    assert df[0, "222222"] == "inventory-2"
+
+
 # ── 정렬 실데이터 ──
 
 
