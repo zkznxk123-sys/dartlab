@@ -100,26 +100,59 @@ testUniverse:
 옛 `providers/dart/finance/mapper.py`·`core/utils/labels.py`·`providers/edgar/finance/mapper.py`
 는 *얇은 위임 facade* (전 심볼 re-export 보존). 새 코드는 `dartlab.core.accounts` 직접 import.
 
-### 새 매핑 추가 (학습) — 두 경로
+### 새 매핑 추가 (학습) — 경로 A (CLI 파이프라인) · 경로 B (대량 직접 편집)
 
-1. **CLI (권장)** — `mappingPromote.py --layer <name> apply` (DART+EDGAR 단일 write 진입점):
-   ```bash
-   uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer nameSynonym apply
-   uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer edgarLearnedTags apply
-   ```
-   | 쓸 수 있는 layer | 대상 | ghost check |
-   |---|---|---|
-   | `mappings`(기본) | DART 한글/영문 → snakeId | O (SA) |
-   | `idSynonym`·`nameSynonym`·`labelEn` | id/한글/영문 변형 | X (value≠snakeId) |
-   | `snakeAlias`·`korSynonym` | snakeId alias·줄임말 | O (SA) |
-   | `edgarLearnedTags` | EDGAR tag → snakeId | X (EDGAR canonical) |
+두 경로가 공존한다. **소수·신중 = 경로 A**(staging 큐레이션 후 안전 박기), **한 cycle
+수십~수백 = 경로 B**(§2~§5.3 anti-join + 직접 patch). 둘을 *한 cycle 에 섞지 말 것*
+(`addedCount` 이중 증가).
 
-   discovery 는 layer 마다 다르다 (DART mappings = nonstd anti-join, EDGAR = 미커버 tag).
-   하지만 *write 는 모두 `mappingPromote --layer apply` 단일 게이트* — atomic + single-line
-   + `release()` 일관. `mappingReview` 는 layer-agnostic (key→value 큐레이션), promote 가 라우팅.
-2. **직접 편집** — JSON 한 줄 추가 후 `from dartlab.core.accounts import release; release()`.
-3. **`standardAccounts` 승격** — 새 표준 계정 추가는 *구조 변경* (CLI 미지원) — JSON 직접
-   편집 + golden baseline 갱신. snakeId 자체를 새로 만드는 드문 작업.
+**경로 A — CLI 3-스텝** (staging → review → promote). `apply` 는 staging parquet 의
+`status=confirmed` 행만 먹으므로 staging 생성·큐레이션이 **반드시 선행**한다 (없으면
+`apply` 가 `FileNotFoundError`):
+
+```bash
+# 1) staging parquet 생성 — DARTLAB_MAPPING_LEDGER ENV 하 pivot 이 흘린 ndjson 을 5 신호 평가
+#    (ndjson 출처·ENV 상세는 mappingLedgerCompact.py docstring)
+uv run python -X utf8 src/dartlab/reference/mapping/mappingLedgerCompact.py \
+    --raw /tmp/mapping_ledger.ndjson --out data/mapping_candidates.parquet
+# 2) 운영자 큐레이션 — 한 줄씩 의미 검토 후 confirm/reject (status 갱신만, JSON 미수정)
+uv run python -X utf8 src/dartlab/reference/mapping/mappingReview.py inspect <accountNm>
+uv run python -X utf8 src/dartlab/reference/mapping/mappingReview.py confirm <accountNm> --to=<snakeId>
+# 3) prod 박기 — confirmed 행만 atomic write + _metadata 자동 갱신 + release() (dryrun 먼저)
+uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer mappings dryrun
+uv run python -X utf8 src/dartlab/reference/mapping/mappingPromote.py --layer mappings apply
+```
+
+`mappingReview` 는 layer-agnostic (key→value 큐레이션), `mappingPromote --layer` 가 대상
+layer 로 라우팅. **`addedCount`·`lastUpdate` 는 `apply` 가 자동 갱신** — 경로 A 에선 손대지 말 것.
+
+**layer 선택** (어느 구획에 박나 — `--layer` 값):
+
+| 추가하려는 것 | layer | ghost check |
+|---|---|---|
+| 신규 한글/영문 *회사 계정명* → snakeId (대부분) | `mappings`(기본) | O (SA) |
+| 이미 매핑된 한글명의 *동의어 변형* (배당금↔현금배당) | `nameSynonym` | X |
+| 이미 매핑된 영문 XBRL id 의 *동의어* (OperatingRevenue↔Revenue) | `idSynonym` | X |
+| snakeId 자체의 *alias* (operating_income↔operating_profit) | `snakeAlias` | O (SA) |
+| snakeId → 영문 display label | `labelEn` | X |
+| 한글 줄임말 → snakeId | `korSynonym` | O (SA) |
+| EDGAR SEC tag → snakeId | `edgarLearnedTags` | X (EDGAR canonical) |
+
+판단: **새 계정명이면 `mappings`**(직접 hit, fallback 우회 — 가장 안전). 이미 매핑된
+표현의 *다른 표기*면 `nameSynonym`/`idSynonym`(12 단계 fallback step 3~4 재조회 대상).
+헷갈리면 `mappings`.
+
+**경로 B — 대량 직접 편집** (§5.3): JSON 직접 patch 가 빠른 대신 *직접 `release()`* +
+*직접 single-line 형식 유지* + *직접 `addedCount` 갱신* 책임이 운영자에게 온다(§5.3 스니펫).
+
+**`standardAccounts` 새 계정 승격**: 새 snakeId 자체를 만드는 *구조 변경* (양 경로 미지원)
+— JSON 직접 편집 + golden baseline 갱신. 드문 작업.
+
+**캐시 무효화 범위 (양 경로 공통)**: `apply`/`release()` 는 *동일 프로세스* 캐시만 비운다.
+실행 중인 웹 서버·MCP 워커는 매핑 추가 후 **재시작해야** 새 매핑이 보인다.
+
+**롤백**: 잘못 박았으면 `mappingPromote.py rollback --to=<git-sha>` 로 이전 commit 의
+`accountMappings.json` 복원(git show 기반) 후 commit. git revert 와 동치이나 단일 파일 한정.
 
 ### 드리프트 가드 (회귀 자동 차단)
 
@@ -159,9 +192,10 @@ mapper 의 34,000+ 매핑은 *모두 운영자가 미커버 한글명을 보고 
 | 1. 전수 미커버 추출 | Bash inline (`polars.scan_parquet` + 4 단 `anti-join`) | 읽기 | 미커버 그룹 ≈ 33k |
 | 2. mapper 더블체크 | Python (`mapper.map()` 11 단계 fallback) | 읽기 | 진짜 미커버 ≈ 20k |
 | 3. SA 매칭 후보 추출 | Python (SA korName substring + 5 가드 + score) | 읽기 | 강한 후보 ≈ 1.5k |
-| 4. 운영자 박기 | 사람 검토 + JSON 직접 patch + `AccountMapper.release()` | prod patch | `accountMappings.json` 매핑 추가 |
+| 4. 운영자 박기 | 경로 A `mappingPromote apply`(권장) 또는 경로 B 직접 patch + `release()` | prod patch | `accountMappings.json` 매핑 추가 |
 
-각 cycle 마다 step 4 에서 5~100 매핑 박음. cycle 반복하며 점진 정리.
+각 cycle 마다 step 4 에서 5~100 매핑 박음. cycle 반복하며 점진 정리. 경로 선택은 §0 참조
+(소수·신중 = A, 대량 batch = B; 둘 섞으면 `addedCount` 이중).
 
 ## 2. Step 1 — polars lazy + anti-join 전수 미커버 추출
 
@@ -211,10 +245,9 @@ fallback (synonym, prefix, 사전 변형 noSpace/noParen/noHyphen 역인덱스,
 suffix 흡수) 로 매핑되는 false-positive 제거:
 
 ```python
+from dartlab.core.accounts import release
 from dartlab.providers.dart.finance.mapper import AccountMapper
-from dartlab.core.utils.labels import _loadAccountMappings
-_loadAccountMappings.cache_clear()
-AccountMapper.release()
+release()  # owner 단일 무효화 (loadAccounts lru + 파생캐시 + in-place dict)
 mapper = AccountMapper.get()
 
 true_um = [r for r in out.to_dicts()
@@ -353,7 +386,10 @@ confidence 분류 (실증 V10 카카오 None 29 기반):
 - **회사 1 disp 단일 라벨** — 일반화 무리
 - **SA 정확 매핑 부재** — SA 자체에 적합 snakeId 없으면 SA 보강 트랙 별
 
-### 5.3 박기 + AccountMapper.release()
+### 5.3 박기 (경로 B — 대량 직접 편집) + release()
+
+경로 B 는 `addedCount`·single-line 형식·`release()` 를 **운영자가 직접** 챙긴다
+(경로 A `apply` 는 이 셋을 자동 처리하므로, 같은 cycle 에 섞으면 `addedCount` 이중 증가).
 
 ```python
 import json, os
@@ -386,11 +422,10 @@ open(tmp, 'w', encoding='utf-8').write(
 )
 os.replace(tmp, path)
 
-# 캐시 무효화
-from dartlab.providers.dart.finance.mapper import AccountMapper
-from dartlab.core.utils.labels import _loadAccountMappings
-_loadAccountMappings.cache_clear()
-AccountMapper.release()
+# 캐시 무효화 — owner 단일 호출 (loadAccounts lru + normalize/edgar/labels/aliases
+# 파생캐시 + in-place 모듈 dict 전부 리셋, 동일 프로세스 한정 — 웹/MCP 워커는 재시작)
+from dartlab.core.accounts import release
+release()
 ```
 
 ### 5.4 commit 규약
@@ -596,9 +631,10 @@ snake_case 변환 박기 전 *한글명 의미 일치 가드* 필수.
 
 - **SA hard check** — 부재 snakeId 차단 (현재 수동 assert; 향후 lint 룰화
   후보)
-- **single-line JSON 보존** — git diff 폭증 회피 (`separators=(',', ':')`)
-- **AccountMapper 캐시 무효화** — apply 직후 동일 프로세스 캐시 정합
-  (`_loadAccountMappings.cache_clear()` + `AccountMapper.release()`)
+- **single-line JSON 보존** — git diff 폭증 회피 (`separators=(',', ':')`). 경로 A `apply` 자동;
+  경로 B 직접 편집 시 운영자 책임 (indent=2 저장 금지)
+- **캐시 무효화** — apply/직접 박기 직후 owner `release()` 단일 호출 (loadAccounts lru +
+  파생캐시 + in-place dict 전부). **동일 프로세스 한정** — 실행 중 웹/MCP 워커는 재시작 필요
 - **SCE 무시** — finance pivot 대상 아님 (SCE 는 `buildSceMatrix` 별도 흐름)
 - **commit -o 명시 path** — 다른 변경 섞임 차단 (`.claude/hooks/check_git_commit_only.ps1`)
 
@@ -616,9 +652,13 @@ snake_case 변환 박기 전 *한글명 의미 일치 가드* 필수.
   로그 출력 위치
 - `src/dartlab/reference/data/accountMappings.json` — prod 매핑 사전
   (single-line compact JSON, 34,000+ 매핑)
-- `src/dartlab/reference/mapping/mappingPromote.py` — prod JSON patch CLI
-  (staging parquet 우회 경로, step 4 inline batch 와 동치)
-- `src/dartlab/reference/mapping/mappingReview.py` — staging review CLI
+- `src/dartlab/reference/mapping/mappingPromote.py` — prod JSON patch CLI (경로 A 박기
+  단독 권한). staging `confirmed` 행 → atomic write + `_metadata` 자동 + `release()`.
+  `--layer` 7 구획 라우팅, `dryrun`/`apply`/`rollback --to=<sha>` 서브커맨드.
+- `src/dartlab/reference/mapping/mappingLedgerCompact.py` — ledger ndjson → 5 신호 평가
+  staging parquet (경로 A 1단계 입력 생성)
+- `src/dartlab/reference/mapping/mappingReview.py` — staging confirm/reject 큐레이션 CLI
+  (경로 A 2단계, status 갱신만 — JSON 미수정)
 - `tests/providers/dart/finance/test_mapperFallbackVariants.py` — 회귀
   가드 10 케이스 (cycle 5/12/17 회귀 + 사전 변형 흡수 + suffix 흡수
   + reference 래퍼 일관성 + 짝 박기 룰)
