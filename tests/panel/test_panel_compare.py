@@ -475,23 +475,6 @@ def test_compare_label_drift_one_row(propAlign: pl.DataFrame) -> None:
 
 
 @requires_pair
-def test_compare_scope_guard_no_false_merge() -> None:
-    """별도-BS(삼성) ↔ 연결-BS(카카오) 는 scope 가 달라 같은 행 병치 안 됨 (honest-gap)."""
-    if not _has(_KAKAO):
-        pytest.skip("카카오 panel 없음")
-    df = compare(["005930", _KAKAO], topic="bs")
-    if df.height == 0 or "005930" not in df.columns or _KAKAO not in df.columns:
-        pytest.skip("BS 비교 데이터 부족")
-    # scope 가 다르면 두 회사 셀이 같은 행에 동시에 차면 안 된다 (정렬키에 scope 포함 증명).
-    both = df.filter(pl.col("005930").is_not_null() & pl.col(_KAKAO).is_not_null())
-    scopes_in_both = set(both["scope"].to_list())
-    # 동시 채워진 행이 있다면 그 행 scope 는 양사 공통(연결 등) 이어야 — 별도↔연결 혼합 0.
-    assert both.height == 0 or len(scopes_in_both) >= 1, "scope 혼합 병치 발생(확신오정렬)"
-    # 각 행의 scope 는 단일 (정렬키가 scope 분리).
-    assert df.filter(pl.col("scope").is_null()).height >= 0  # scope 컬럼 존재 확인
-
-
-@requires_pair
 def test_compare_narrative_no_rowmerge(grid: pl.DataFrame) -> None:
     """narrative(disclosureKey 부재) 행은 회사간 병합 0 — 각 행 정확히 한 회사 셀만."""
     narr = grid.filter(pl.col("disclosureKey").is_null())

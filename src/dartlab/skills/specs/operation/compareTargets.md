@@ -32,7 +32,7 @@ expectedOutputs:
 requiredEvidence:
   - target (종목코드 명시)
   - topic (토픽 이름)
-  - period (분기 YYYYQN 또는 연도 YYYY)
+  - period (분기 YYYYQn 또는 연도 YYYY)
   - tableRef (출력 표)
   - valueRef (개별 수치)
   - executionRef (실행 코드)

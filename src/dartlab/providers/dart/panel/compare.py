@@ -451,16 +451,19 @@ def compare(
     한쪽 회사에만 있는 항목은 honest-gap(null) — 거짓 정렬보다 빈 칸이 정직하다.
 
     Args:
-        codes: 종목코드 2개 이상 (``list[str]`` 또는 단일 ``str``). 같은 시장(marketNs)끼리만.
+        codes: 종목코드 2개 이상 (``list[str]`` 또는 단일 ``str``). KR 은 6자리 코드, US 는 ticker 만.
+            같은 시장(marketNs)끼리만.
         topic: 비교할 항목 — 재무표("bs"/"is"/"cf"/"cis"/"sce")는 셀 단위, 한글 섹션명("재고")·
             canonicalKey("NT_D826380")는 항목 단위. None 이면 전체 격자.
         period: 비교 시점 — 단일 ``str``("2025Q4") 이면 그 시점 board(열=회사코드), ``list`` 면
-            회사×기간(열=``{code}␟{period}``), None 이면 최신 공통 시점. 재무 셀모드도 같은 시점 계약을 따른다.
+            회사×기간(열=``{code}␟{period}``, 최신순 정렬), None 이면 최신 공통 시점. 재무 셀모드도
+            같은 시점 계약을 따른다.
         scope: "consolidated"/"separate"(=standalone). 연결↔별도 혼선 차단. None 이면 둘 다(재무는 연결 고정).
         freq: 재무 셀모드 입도 — "quarter"(분기, 기본)/"year"(연간)/"ytd"(누적). 회사 간 freq 일치 강제.
 
     시장(KR/US)은 codes 로 자동 판별(``detectMarket``) — 같은 시장끼리만. KO↔US 혼합은
-    ValueError(crossMarket 후속).
+    ValueError(crossMarket 후속). 재무 셀모드는 현재 KR(DART)만 지원하며, US finance 는 EDGAR adapter
+    확정 전까지 차단한다.
 
     Returns:
         ``pl.DataFrame`` — 행=정렬된 공시 항목(식별 컬럼 + 회사별 셀), 컬럼=식별
@@ -468,7 +471,8 @@ def compare(
         다기간→{code}␟{period}). 빈(2사 미만 데이터)이면 빈 DataFrame.
 
     Raises:
-        ValueError: codes 2개 미만, 6개 초과, scope/freq 오타, 또는 marketNs 외 시장 혼합 시도.
+        ValueError: codes 2개 미만, 6개 초과, code/period/scope/freq 오타, marketNs 외 시장 혼합, 또는
+            US finance compare 시도.
 
     Example:
         >>> import dartlab
@@ -508,9 +512,11 @@ def compare(
         Freshness:
             - 매 호출 readWide(파생물 미저장).
         Dataflow:
-            - codes → readWide×N → (disclosureKey,scope,leafType) outer-align → topic 필터 → period 결정/투영.
+            - row: codes → readWide×N → topic 필터 → period 결정 → (disclosureKey,scope,leafType) outer-align.
+            - finance: codes → DART cell parse×N → acode align → 원 환산 값.
         TargetMarkets:
-            - KR(DART) 끼리 / US(EDGAR) 끼리. KO↔US 혼합은 후속(crossMarket).
+            - row: KR(DART) 끼리 / US(EDGAR) 끼리. KO↔US 혼합은 후속(crossMarket).
+            - finance: KR(DART) only until EDGAR native adapter is finalized.
     """
     codes = _normCodes(codes)
     if len(codes) < 2:
