@@ -616,7 +616,9 @@ def test_compare_finance_scales_each_period_independently(monkeypatch: pytest.Mo
     cell = importlib.import_module("dartlab.providers.dart.panel.cell")
 
     monkeypatch.setattr(
-        cmp, "_detectUnitScales", lambda code, marketNs, statements=None: {"2026Q1": 1_000, "2025Q4": 1}
+        cmp,
+        "_detectUnitScalesByStatement",
+        lambda code, marketNs, statements=None: {"BS": {"2026Q1": 1_000, "2025Q4": 1}},
     )
     monkeypatch.setattr(cell, "_cellsFromPanel", lambda code, marketNs, periods: pl.DataFrame({"dummy": [1]}))
     monkeypatch.setattr(
@@ -636,6 +638,48 @@ def test_compare_finance_scales_each_period_independently(monkeypatch: pytest.Mo
     per = cmp._companyCellsByPeriod("111111", "bs", "quarter", "consolidated", "kr")
     assert per["2026Q1"]["ifrs-full_Assets"][1] == 2_000
     assert per["2025Q4"]["ifrs-full_Assets"][1] == 3
+
+
+def test_compare_finance_scales_statement_variants_independently(monkeypatch: pytest.MonkeyPatch) -> None:
+    """논리 statement 안의 물리 변형(IS2/IS3 등)도 각자 캡션 단위로 원 환산한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    cell = importlib.import_module("dartlab.providers.dart.panel.cell")
+
+    monkeypatch.setattr(
+        cmp,
+        "_detectUnitScalesByStatement",
+        lambda code, marketNs, statements=None: {"IS2": {"2026Q1": 1}, "IS3": {"2026Q1": 1_000}},
+    )
+    monkeypatch.setattr(cell, "_cellsFromPanel", lambda code, marketNs, periods: pl.DataFrame({"dummy": [1]}))
+
+    def fakeCellWideFromCells(cells: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame:
+        if statement == "IS2":
+            return pl.DataFrame(
+                {
+                    "axisPath": [""],
+                    "acode": ["dart_OperatingIncomeLoss"],
+                    "label": ["영업이익"],
+                    "2026Q1": ["7"],
+                }
+            )
+        if statement == "IS3":
+            return pl.DataFrame(
+                {
+                    "axisPath": [""],
+                    "acode": ["ifrs-full_Revenue"],
+                    "label": ["매출액"],
+                    "2026Q1": ["2"],
+                }
+            )
+        return pl.DataFrame()
+
+    monkeypatch.setattr(cell, "_cellWideFromCells", fakeCellWideFromCells)
+
+    per = cmp._companyCellsByPeriod("111111", "is", "quarter", "consolidated", "kr")
+    assert per["2026Q1"]["dart_OperatingIncomeLoss"][1] == 7
+    assert per["2026Q1"]["ifrs-full_Revenue"][1] == 2_000
 
 
 def test_compare_unit_scale_is_statement_scoped(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
