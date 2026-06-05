@@ -19,9 +19,12 @@ export interface AlignedRow {
 	shareClass: 'shared' | 'partial' | 'solo';
 }
 
-function alignKeyOf(r: PanelRow, companyIdx: number, rowIdx: number): string {
+// 정렬키 — keyed = disclosureKey␟scope␟blockType (회사 간 era-stable). narrative(키 부재) = 섹션 내
+// content-bearing 위치 ordinal — 한 회사의 k 번째 서술 행이 다른 회사의 k 번째와 한 행에 정렬(항목=행).
+// (단일 뷰어의 기간축 정렬이 회사축으로 바뀐 것 — 사용자 멘탈모델. 서술은 위치 best-effort, keyed 는 exact.)
+function alignKeyOf(r: PanelRow, narrOrd: number): string {
 	if (r.disclosureKey) return `${r.disclosureKey}${SEP}${r.scope ?? ''}${SEP}${r.blockType}`;
-	return `NARR${SEP}${companyIdx}${SEP}${rowIdx}`; // narrative — 회사·행 고유로 병합 차단
+	return `NARR${SEP}${narrOrd}`;
 }
 
 // N 개 bundle 의 한 섹션을 시점(period) 기준으로 정렬. content-bearing(비빈 셀)만, union 행수.
@@ -31,10 +34,12 @@ export function alignBundles(bundles: PanelBundle[], sectionKey: string, period:
 	const order: string[] = [];
 	bundles.forEach((b, ci) => {
 		const rows = b.gridBySection.get(sectionKey) ?? [];
-		rows.forEach((r, ri) => {
+		let narrOrd = 0; // 이 회사 섹션 내 content-bearing 서술 행 순번
+		rows.forEach((r) => {
 			const cell = r.cells?.[period];
 			if (typeof cell !== 'string' || cell.trim() === '') return; // 빈 셀 제외 (착시 차단)
-			const key = alignKeyOf(r, ci, ri);
+			const key = alignKeyOf(r, narrOrd);
+			if (!r.disclosureKey) narrOrd++;
 			let g = groups.get(key);
 			if (!g) {
 				g = {

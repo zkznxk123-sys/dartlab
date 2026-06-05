@@ -1,7 +1,7 @@
 <script lang="ts">
-	// 회사 간 비교 매트릭스 — 좌측 sticky 라벨 거터 + N사 열, 한 시점(point-in-time).
-	// 행 = 정렬된 공시 항목(disclosureKey/narrative), 셀 = 회사별 본문. 한쪽만=honest-gap(⌀).
-	// landing 디자인(다크 네이비 + 오렌지). 단일 PanelMatrix 와 분리(섞임 0).
+	// 회사 간 비교 매트릭스 — 단일 PanelMatrix 와 같은 골격, 단 열 = period 대신 **회사**.
+	// 행 = 정렬된 공시 항목(disclosureKey/위치), 셀 = 그 회사의 본문(자기 식별). 한쪽만 = honest-gap(⌀).
+	// 라벨 거터 없음(단일 뷰어와 동일 — 셀 본문이 표 제목으로 자기 식별).
 	import CellContent from './CellContent.svelte';
 	import type { AlignedRow } from '$lib/viewer/align';
 
@@ -15,8 +15,8 @@
 		period: string;
 	} = $props();
 
-	// 거터(라벨) + 회사 열. 회사당 minmax(300px,1fr) — N≥5 가로 스크롤(.matrix-scroll overflow:auto).
-	const template = $derived(`200px repeat(${companies.length}, minmax(300px, 1fr))`);
+	// 열 = 회사. 회사당 minmax(280px,1fr) — N≥5 가로 스크롤(.matrix-scroll overflow:auto).
+	const template = $derived(`repeat(${companies.length}, minmax(280px, 1fr))`);
 </script>
 
 {#if !period}
@@ -26,23 +26,17 @@
 {:else}
 	<div class="matrix-scroll">
 		<div class="matrix" style="grid-template-columns: {template}">
-			<!-- 헤더: 거터 + 회사명 -->
-			<div class="cell head gutter-head">
-				<span class="period">{period}</span>
-			</div>
+			<!-- 헤더: 회사명 + 시점 -->
 			{#each companies as c (c.code)}
 				<div class="cell head company-head">
 					<span class="corp">{c.corpName || c.code}</span>
 					<span class="code">{c.code}</span>
+					<span class="period">{period}</span>
 				</div>
 			{/each}
 
-			<!-- 본문: 행마다 거터 라벨 + 회사 셀 -->
+			<!-- 본문: 정렬된 항목 행마다 회사별 셀 -->
 			{#each rows as r (r.alignKey)}
-				<div class="cell gutter" title={r.label}>
-					<span class="label">{r.label}</span>
-					{#if r.scope}<span class="scope" class:consol={r.scope === 'consolidated'}>{r.scope === 'consolidated' ? '연결' : '별도'}</span>{/if}
-				</div>
 				{#each companies as c, ci (c.code)}
 					<div class="cell body-cell" class:gap={r.cells[ci] == null}>
 						{#if r.cells[ci] != null}
@@ -85,25 +79,14 @@
 		background: #0a0e18;
 		border-bottom: 1px solid #263145;
 	}
-	.gutter,
-	.gutter-head {
-		position: sticky;
-		left: 0;
-		z-index: 10;
-		background: #070b14;
-		border-right: 1px solid #263145;
-	}
-	.gutter-head {
-		z-index: 30;
-	}
 	.company-head {
 		display: flex;
-		flex-direction: column;
-		gap: 2px;
+		align-items: baseline;
+		gap: 8px;
 	}
 	.corp {
-		font-size: 13px;
-		font-weight: 700;
+		font-size: 14px;
+		font-weight: 800;
 		color: #f1f5f9;
 		white-space: nowrap;
 		overflow: hidden;
@@ -115,41 +98,15 @@
 		color: #64748b;
 	}
 	.period {
+		margin-left: auto;
 		font-family: monospace;
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: 700;
-		color: #fb923c;
-	}
-	.gutter {
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-		max-height: 480px;
-		overflow: hidden;
-	}
-	.label {
-		font-size: 12px;
-		font-weight: 600;
-		color: #cbd5e1;
-		line-height: 1.35;
-		word-break: break-word;
-	}
-	.scope {
-		align-self: flex-start;
-		padding: 0 5px;
-		border-radius: 8px;
-		font-size: 9px;
-		font-weight: 700;
-		background: rgba(148, 163, 184, 0.14);
-		color: #94a3b8;
-	}
-	.scope.consol {
-		background: rgba(251, 146, 60, 0.14);
 		color: #fb923c;
 	}
 	.body-cell {
 		color: #cbd5e1;
-		max-height: 480px;
+		max-height: 520px;
 		overflow: auto;
 	}
 	.body-cell.gap {

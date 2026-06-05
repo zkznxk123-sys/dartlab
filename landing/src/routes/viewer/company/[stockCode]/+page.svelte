@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import { dev } from '$app/environment'; // 회사 비교 = 미완성 → dev 에서만(GitHub Pages 프로덕션 숨김)
 	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
@@ -52,7 +53,8 @@
 	let lockedPeriod = $state(''); // 비교 모드 = 한 시점 lock
 	let addOpen = $state(false); // 회사 추가 팝오버
 	// 비교 모드 판정 — 파생을 일찍 선언(windowPeriods 등이 참조). vsCodes/bundle/vsBundles 에만 의존.
-	const compareMode = $derived(vsCodes.length > 0);
+	// dev 게이트: 회사 비교는 미완성 → 로컬 dev 에서만. 프로덕션(GitHub Pages)은 ?vs= 무시(단일 뷰어).
+	const compareMode = $derived(dev && vsCodes.length > 0);
 	const allBundles = $derived(bundle ? [bundle, ...vsBundles] : []);
 
 	// code 바뀌면(검색 이동) 재로드.
@@ -275,14 +277,16 @@
 				<MessageSquare size={13} /> 토론
 			</button>
 			{#if bundle}
-				<div class="add-wrap">
-					<button type="button" class="fs-btn" class:active={compareMode} onclick={() => (addOpen = !addOpen)} title="회사 간 비교 — 회사 추가 (최대 6)" disabled={allBundles.length >= 6}>
-						<Plus size={13} /> 비교
-					</button>
-					{#if addOpen}
-						<div class="add-pop"><CompanySearch onpick={addCompany} /></div>
-					{/if}
-				</div>
+				{#if dev}
+					<div class="add-wrap">
+						<button type="button" class="fs-btn" class:active={compareMode} onclick={() => (addOpen = !addOpen)} title="회사 간 비교 — 회사 추가 (최대 6) · 미완성(dev 전용)" disabled={allBundles.length >= 6}>
+							<Plus size={13} /> 비교
+						</button>
+						{#if addOpen}
+							<div class="add-pop"><CompanySearch onpick={addCompany} /></div>
+						{/if}
+					</div>
+				{/if}
 				{#if compareMode}
 					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · 항목 {alignedRows.length}</span>
 				{:else}
