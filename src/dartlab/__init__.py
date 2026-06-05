@@ -55,6 +55,7 @@ _LAZY_ATTRS: dict[str, tuple[str, str | None]] = {
     "ChartResult": ("dartlab.frame.select", "ChartResult"),
     "SelectResult": ("dartlab.frame.select", "SelectResult"),
     "compare": ("dartlab.providers.dart.panel", "compare"),
+    "compareDiagnostics": ("dartlab.providers.dart.panel", "compareDiagnostics"),
 }
 if not _IS_PYODIDE:
     _LAZY_ATTRS.update(
@@ -973,6 +974,7 @@ __all__ = [
     "SelectResult",
     "ChartResult",
     "compare",
+    "compareDiagnostics",
     "capabilities",
 ]
 

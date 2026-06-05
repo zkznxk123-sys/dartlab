@@ -64,6 +64,16 @@ def test_compare_public_surface_callable() -> None:
     assert callable(dartlab.compare)
 
 
+def test_compare_diagnostics_public_surface_callable() -> None:
+    """공식 진단 표면 dartlab.compareDiagnostics 는 provider 진단과 같은 함수다."""
+    import dartlab
+    from dartlab.providers.dart.panel import compareDiagnostics as panelDiagnostics
+
+    assert "compareDiagnostics" in dartlab.__all__
+    assert dartlab.compareDiagnostics is panelDiagnostics
+    assert callable(dartlab.compareDiagnostics)
+
+
 def test_compare_capability_catalog_contains_compare() -> None:
     """AI/EngineCall capability 표면에도 compare 가 docstring 기반으로 살아 있어야 한다."""
     from dartlab.reference.capability import loadCapabilities
@@ -72,6 +82,9 @@ def test_compare_capability_catalog_contains_compare() -> None:
     assert "compare" in caps
     assert caps["compare"]["kind"] == "function"
     assert "N 회사" in caps["compare"]["summary"]
+    assert "compareDiagnostics" in caps
+    assert caps["compareDiagnostics"]["kind"] == "function"
+    assert "compare 실행 계약" in caps["compareDiagnostics"]["summary"]
 
 
 def test_compare_single_code_raises() -> None:
