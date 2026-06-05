@@ -48,6 +48,8 @@ jobs:
           python-version: ${{ matrix.python || '3.12' }}
       - name: Run ${{ matrix.gate }}
         shell: bash
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python -X utf8 tests/run.py gate ${{ matrix.gate }} \
             ${{ matrix.python && format('--python {0}', matrix.python) || '' }}
@@ -100,3 +102,5 @@ jobs:
           python-version: "3.12"
           cache: "pip"
       - run: python -X utf8 tests/run.py gate realdata-suite --test ${{ matrix.test_file }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

@@ -9,12 +9,55 @@ P0 버그 (2026-04-06): etag 사이드카가 없을 때 현재 HF ETag를 그대
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from dartlab.core.dataLoader import _checkRemoteFreshness
+from dartlab.core.dataLoaderFreshness import downloadWithRetry
+
+
+@pytest.mark.unit
+def test_download_with_retry_uses_hf_token(monkeypatch, tmp_path):
+    """HF_TOKEN 이 있으면 단건 parquet 다운로드에도 Authorization 헤더를 붙인다."""
+    seen: dict[str, str | None] = {}
+
+    class _Response:
+        def __init__(self):
+            self._chunks = [b"abc", b""]
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, _size: int) -> bytes:
+            return self._chunks.pop(0)
+
+    def fakeUrlopen(req):
+        seen["authorization"] = req.get_header("Authorization")
+        return _Response()
+
+    def failUrlretrieve(_url, _tmp):
+        raise AssertionError("HF_TOKEN path should not call urlretrieve")
+
+    monkeypatch.setenv("HF_TOKEN", "token-123")
+    monkeypatch.setattr("dartlab.core.dataLoaderFreshness.urlopen", fakeUrlopen)
+
+    dest = tmp_path / "005930.parquet"
+    downloadWithRetry(
+        "https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/dart/docs/005930.parquet",
+        dest,
+        maxRetries=1,
+        socketTimeout=nullcontext,
+        urlretrieve=failUrlretrieve,
+    )
+
+    assert seen["authorization"] == "Bearer token-123"
+    assert dest.read_bytes() == b"abc"
 
 
 def _load_sync_recent_module():

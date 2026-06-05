@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 from typing import Callable
 from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 
 def _noRefreshEnv() -> bool:
@@ -55,10 +56,18 @@ def downloadWithRetry(
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".tmp")
     lastErr = None
+    token = os.environ.get("HF_TOKEN", "").strip()
     for attempt in range(maxRetries):
         try:
             with socketTimeout():
-                urlretrieve(url, tmp)  # tmp 로 받고 atomic rename — 중단 시 손상 dest 미생성
+                if token:
+                    req = Request(url)
+                    req.add_header("Authorization", f"Bearer {token}")
+                    with urlopen(req) as resp, tmp.open("wb") as f:
+                        while chunk := resp.read(1 << 20):
+                            f.write(chunk)
+                else:
+                    urlretrieve(url, tmp)  # tmp 로 받고 atomic rename — 중단 시 손상 dest 미생성
             tmp.replace(dest)
             return
         except (URLError, socket.timeout, OSError) as exc:

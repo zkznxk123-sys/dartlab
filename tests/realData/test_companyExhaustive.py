@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import pytest
 
+from tests.conftest import SAMSUNG, _has_data
+
 # 데이터 부재 시 None 이 공식 허용되는 속성 (명시적 화이트리스트).
 _NONE_ALLOWED: frozenset[str] = frozenset(
     {
@@ -72,20 +74,19 @@ _NONE_ALLOWED: frozenset[str] = frozenset(
 
 def _publicAttrs() -> list[str]:
     """Company 공개 속성 전수 — 실제 인스턴스에서 동적 수집."""
+    if not _has_data(SAMSUNG, "docs"):
+        pytest.skip(f"삼성전자 docs 데이터 없음 ({SAMSUNG}.parquet)", allow_module_level=True)
     from dartlab import Company
 
-    c = Company("005930")
+    c = Company(SAMSUNG)
     attrs = sorted(a for a in dir(c) if not a.startswith("_"))
     del c
     return attrs
 
 
-PUBLIC_ATTRS = _publicAttrs()
-
-
 @pytest.mark.realData
 @pytest.mark.integration
-@pytest.mark.parametrize("attr", PUBLIC_ATTRS)
+@pytest.mark.parametrize("attr", _publicAttrs())
 def test_companyAttr_accessNoCrash(samsungRealData, attr):
     """c.<attr> 접근이 크래시 없이 동작. None 은 화이트리스트 밖에서 실패.
 
