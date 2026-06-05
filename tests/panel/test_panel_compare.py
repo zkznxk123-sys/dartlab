@@ -137,6 +137,34 @@ def test_compare_engine_call_contract() -> None:
     assert r.refs and r.refs[0].kind == "tableRef"
 
 
+@pytest.mark.heavy  # 셀 데이터 lxml 파싱 — 메모리 무거움, 로컬 분리 실행
+@requires_pair
+def test_compare_finance_cell_mode() -> None:
+    """재무 토픽(is) = 셀 단위 비교 — acode 정렬 + 원 환산(단위 착시 0)."""
+    df = compare(_PAIR, topic="is")
+    if df.height == 0:
+        pytest.skip("재무 셀 데이터 부족")
+    assert "acode" in df.columns, f"셀모드는 acode 컬럼 필수: {df.columns}"
+    for code in _PAIR:
+        assert code in df.columns
+    # 매출(ifrs-full_Revenue) 한 행에 양사 정렬 + 원 환산(삼성 매출 ~수십~수백조 = 1e13~1e14, raw 백만원 아님).
+    rev = df.filter(pl.col("acode") == "ifrs-full_Revenue")
+    assert rev.height >= 1, "ifrs-full_Revenue 정렬 행 없음"
+    sam = rev[0, "005930"]
+    assert sam is not None and sam > 1e12, f"원 환산 실패(단위 착시): 삼성 매출 {sam} (1e12 미만이면 미환산)"
+
+
+@pytest.mark.heavy  # 셀 데이터 lxml 파싱 경로 동반 — 로컬 분리 실행
+@requires_pair
+def test_compare_finance_row_mode_for_notes() -> None:
+    """재무 아닌 토픽(재고 주석)은 행 단위(통짜) 모드 — acode 컬럼 없음."""
+    df = compare(_PAIR, topic="재고")
+    if df.height == 0:
+        pytest.skip("재고 주석 데이터 부족")
+    assert "acode" not in df.columns, "주석 토픽은 행모드(acode 컬럼 없어야)"
+    assert "disclosureKey" in df.columns
+
+
 @requires_pair
 def test_compare_multi_period_columns() -> None:
     """period 다기간 지정 → 셀 컬럼 = {code}␟{period}."""
