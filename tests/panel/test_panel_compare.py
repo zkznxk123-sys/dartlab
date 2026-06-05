@@ -898,6 +898,21 @@ def test_compare_engine_call_contract() -> None:
 
 
 @requires_pair
+def test_compare_diagnostics_engine_call_contract() -> None:
+    """EngineCall compareDiagnostics 는 진단 dict 를 문자열이 아니라 구조 payload 로 보존한다."""
+    from dartlab.ai.tools.engineCall import engineCall
+
+    r = engineCall({"apiRef": "compareDiagnostics", "args": {"codes": _PAIR, "topic": "재고"}})
+    assert r.ok, f"EngineCall compareDiagnostics 실패: {r.error}"
+    assert r.refs and r.refs[0].kind == "executionRef"
+    payload = r.refs[0].payload["result"]
+    assert isinstance(payload, dict)
+    assert payload["mode"] == "row"
+    assert payload["cellColumnShape"] in {"empty", "singlePeriod"}
+    assert (r.data or {})["result"] == payload
+
+
+@requires_pair
 def test_compare_diagnostics_row_contract_matches_frame() -> None:
     """진단 payload 는 compare row 출력의 모드·행수·열·회사 존재를 설명한다."""
     df = compare(_PAIR, topic="재고")

@@ -595,6 +595,16 @@ def _resultToRefs(apiRef: str, result: Any, *, target: str = "") -> ToolResult:
             refs=[table_ref],
             data={"rowCount": result.height, "columns": list(result.columns)},
         )
+    if isinstance(result, dict | list | tuple):
+        payload = _jsonableResult(result)
+        ref = Ref(
+            id=f"execution:{apiRef}:{target or 'result'}",
+            kind="executionRef",
+            title=f"{apiRef} result",
+            source=apiRef,
+            payload={"result": payload, "preview": str(payload)[:4000]},
+        )
+        return ToolResult(True, f"{apiRef} 실행 완료", refs=[ref], data={"result": payload})
     ref = Ref(
         id=f"execution:{apiRef}:{target or 'result'}",
         kind="executionRef",
@@ -603,6 +613,17 @@ def _resultToRefs(apiRef: str, result: Any, *, target: str = "") -> ToolResult:
         payload={"preview": str(result)[:4000]},
     )
     return ToolResult(True, f"{apiRef} 실행 완료", refs=[ref], data={"result": str(result)})
+
+
+def _jsonableResult(value: Any) -> Any:
+    """ToolResult payload 에 실을 수 있게 primitive/container 로 축소한다."""
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    if isinstance(value, dict):
+        return {str(k): _jsonableResult(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [_jsonableResult(v) for v in value]
+    return str(value)
 
 
 def _resolveCompany(target: str):
