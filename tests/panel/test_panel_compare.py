@@ -89,6 +89,35 @@ def test_compare_us_ticker_normalized_before_market_guard() -> None:
     assert _normCodes(["aapl", "msft"]) == ["AAPL", "MSFT"]
 
 
+def test_compare_join_key_separates_scope_leaf_type_and_narrative() -> None:
+    """정렬키 핵심 — scope·leafType·narrative company-row 를 각각 분리."""
+    from dartlab.providers.dart.panel.compare import _companyLong
+
+    wide = pl.DataFrame(
+        {
+            "chapter": ["III", "III", "III", "III"],
+            "sectionLeaf": ["2. 연결재무제표"] * 4,
+            "blockLeaf": ["재무상태표", "재무상태표", "같은키텍스트", "서술"],
+            "leafType": ["table", "table-alt", "text", "text"],
+            "disclosureKey": ["BS", "BS", "BS", None],
+            "scope": ["consolidated", "consolidated", "standalone", None],
+            "2026Q1": ["연결표", "연결표-alt", "별도텍스트", "서술본문"],
+        }
+    )
+    long = _companyLong("005930", wide, None)
+    assert long is not None
+    keys = long["_joinKey"].to_list()
+    assert len(keys) == len(set(keys)), "scope/leafType/narrative 분리가 안 되면 joinKey 충돌"
+    assert any("BS␟consolidated␟table" == k for k in keys)
+    assert any("BS␟consolidated␟table-alt" == k for k in keys)
+    assert any("BS␟standalone␟text" == k for k in keys)
+    assert any(str(k).startswith("NARR␟005930␟") for k in keys)
+
+    other = _companyLong("000660", wide.filter(pl.col("disclosureKey").is_null()), None)
+    assert other is not None
+    assert set(keys).isdisjoint(set(other["_joinKey"].to_list())), "narrative key 는 회사 간 공유되면 안 됨"
+
+
 # ── 정렬 실데이터 ──
 
 
