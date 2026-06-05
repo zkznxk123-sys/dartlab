@@ -15,6 +15,7 @@ procedure:
   - 종목 코드 2 개 이상 결정 (한국 6 자리 또는 미국 ticker)
   - 토픽·기간 그리드 정의 (예 bs · 재고 · 2024Q4)
   - dartlab.compare(codes, *, topic, period, scope, freq) 호출
+  - 필요 시 dartlab.compareDiagnostics(codes, *, topic, period, scope, freq) 로 mode·resolvedPeriods·cellColumns 확인
   - 재무제표 topic(bs/is/cf/cis/sce)은 acode 단위 원 환산 셀 비교
   - 주석·서술 topic은 disclosureKey·scope·leafType 정렬키로 row 비교
   - 결손은 NaN 으로 유지 (0 채움 금지)
@@ -28,6 +29,7 @@ expectedOutputs:
   - Polars DataFrame (식별 컬럼 + 회사 셀 컬럼)
   - 재무 topic은 acode·label·scope + 회사별 원 환산값
   - row topic은 chapter·sectionLeaf·blockLeaf·leafType·disclosureKey·scope + 회사별 원문 셀
+  - compareDiagnostics payload (mode·resolvedPeriods·identityColumns·cellColumns·cellColumnShape·valueUnit)
   - 결손 NaN (강제 0 채움 없음)
 requiredEvidence:
   - target (종목코드 명시)
@@ -69,7 +71,7 @@ runtimeCompatibility:
     status: supported
     notes: []
 status: observed
-lastUpdated: "2026-05-12"
+lastUpdated: "2026-06-05"
 testUniverse:
   market: KR
   stockCodes:

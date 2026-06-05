@@ -715,8 +715,8 @@ def compareDiagnostics(
         없음. 입력 계약 오류도 ``ok=False`` 와 ``reason="invalidInput"`` 으로 반환한다.
 
     Example:
-        >>> from dartlab.providers.dart.panel import compareDiagnostics
-        >>> compareDiagnostics(["005930", "000660"], topic="재고")  # doctest: +SKIP
+        >>> import dartlab
+        >>> dartlab.compareDiagnostics(["005930", "000660"], topic="재고")  # doctest: +SKIP
     """
     displayCodes = _displayCodes(codes)
     diag: dict[str, object] = {
