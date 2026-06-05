@@ -608,6 +608,34 @@ def test_compare_finance_keeps_missing_company_as_null(monkeypatch: pytest.Monke
     assert diag["soloRows"] == 1
 
 
+def test_compare_finance_scales_each_period_independently(monkeypatch: pytest.MonkeyPatch) -> None:
+    """재무 셀모드는 최신 단위 하나가 아니라 각 period 캡션 단위로 원 환산한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    cell = importlib.import_module("dartlab.providers.dart.panel.cell")
+
+    monkeypatch.setattr(cmp, "_detectUnitScales", lambda code, marketNs: {"2026Q1": 1_000, "2025Q4": 1})
+    monkeypatch.setattr(cell, "_cellsFromPanel", lambda code, marketNs, periods: pl.DataFrame({"dummy": [1]}))
+    monkeypatch.setattr(
+        cell,
+        "_cellWideFromCells",
+        lambda cells, *, statement, freq, scope: pl.DataFrame(
+            {
+                "axisPath": [""],
+                "acode": ["ifrs-full_Assets"],
+                "label": ["자산총계"],
+                "2026Q1": ["2"],
+                "2025Q4": ["3"],
+            }
+        ),
+    )
+
+    per = cmp._companyCellsByPeriod("111111", "bs", "quarter", "consolidated", "kr")
+    assert per["2026Q1"]["ifrs-full_Assets"][1] == 2_000
+    assert per["2025Q4"]["ifrs-full_Assets"][1] == 3
+
+
 def test_compare_unit_scale_ignores_older_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """최신 재무표에 단위 캡션이 없으면 과거 period 의 '단위:원' 으로 오염되지 않는다."""
     import importlib
@@ -632,6 +660,34 @@ def test_compare_unit_scale_ignores_older_period_caption(monkeypatch: pytest.Mon
     )
 
     assert cmp._detectUnitScale("111111", "kr") == 1_000_000
+
+
+def test_compare_unit_scale_can_scope_to_requested_period(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """단위 검출은 요청 period 를 주면 그 period 의 캡션만 사용한다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    read = importlib.import_module("dartlab.providers.dart.panel.read")
+    flat = tmp_path / "111111.parquet"
+    flat.write_bytes(b"")
+
+    monkeypatch.setattr(read, "ensurePanelFromHf", lambda code, marketNs: None)
+    monkeypatch.setattr(read, "_panelDir", lambda code, marketNs: tmp_path / "periods")
+    monkeypatch.setattr(
+        cmp.pl,
+        "read_parquet",
+        lambda path, columns: pl.DataFrame(
+            {
+                "disclosureKey": ["BS", "BS"],
+                "contentRaw": ["<TABLE>단위 : 천원</TABLE>", "<TABLE>단위 : 원</TABLE>"],
+                "period": ["2026Q1", "2025Q4"],
+            }
+        ),
+    )
+
+    assert cmp._detectUnitScale("111111", "kr") == 1_000
+    assert cmp._detectUnitScale("111111", "kr", period="2025Q4") == 1
+    assert cmp._detectUnitScale("111111", "kr", period="2025") == 1
 
 
 def test_compare_unit_scale_uses_latest_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

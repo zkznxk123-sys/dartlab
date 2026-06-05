@@ -105,11 +105,11 @@ def _normPeriod(period: list[str] | str | None) -> list[str] | str | None:
     return sortPeriods(vals, descending=True)
 
 
-def _detectUnitScale(code: str, marketNs: str) -> int:
-    """회사 재무표 caption '단위:X' → 원 배율. 미발견=백만원(DART 표준).
+def _detectUnitScales(code: str, marketNs: str) -> dict[str, int]:
+    """회사 재무표 period별 caption '단위:X' → 원 배율 map. 미발견 period=백만원(DART 표준).
 
     XBRL valueRaw 는 회사 신고단위 무손실 저장(삼성·SK=백만원, 카카오=원). 회사 간 비교 시
-    raw 나란히 두면 1000배 착시 → 원 환산 필수. 단위 토큰은 셀이 아니라 표 caption 에 있다.
+    raw 나란히 두면 1000배 착시 → 원 환산 필수. 단위 토큰은 셀이 아니라 해당 filing period 표 caption 에 있다.
     """
     from .build.cell import CELL_STATEMENTS
     from .read import _panelDir, ensurePanelFromHf
@@ -117,21 +117,36 @@ def _detectUnitScale(code: str, marketNs: str) -> int:
     ensurePanelFromHf(code, marketNs)
     flat = _panelDir(code, marketNs).parent / f"{code}.parquet"
     if not flat.exists():
-        return 1_000_000
+        return {}
     df = pl.read_parquet(str(flat), columns=["disclosureKey", "contentRaw", "period"])
     stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
     if stmt.is_empty():
+        return {}
+    out: dict[str, int] = {}
+    periods = [str(p) for p in stmt.select("period").unique()["period"].to_list() if p]
+    for period in periods:
+        # 캡션 = **같은 period 의 ACODE 없는 캡션 leaf**에서만 (본문 leaf 의 EPS 행단위 '단위:원' 오염 차단 —
+        # 본문은 ACODE 보유). 해당 period 에 캡션이 없으면 과거/미래 period 로 fallback 하지 않는다.
+        cap = stmt.filter((pl.col("period") == period) & ~pl.col("contentRaw").str.contains("ACODE=", literal=True))
+        scale = 1_000_000
+        for r in cap.iter_rows(named=True):
+            m = _UNIT_RE.search(r["contentRaw"] or "")
+            if m:
+                scale = _UNIT_SCALE[m.group(1)]
+                break
+        out[period] = scale
+    return out
+
+
+def _detectUnitScale(code: str, marketNs: str, period: str | None = None) -> int:
+    """회사 재무표 caption '단위:X' → 원 배율. period 없으면 최신 filing period 기준."""
+    scales = _detectUnitScales(code, marketNs)
+    if period is not None:
+        return scales.get(_financePanelPeriod(period), 1_000_000)
+    if not scales:
         return 1_000_000
-    latestPeriod = stmt.sort("period", descending=True)[0, "period"]
-    # 캡션 = **최신 period 의 ACODE 없는 캡션 leaf**에서만 (본문 leaf 의 EPS 행단위 '단위:원' 오염 차단 —
-    # 본문은 ACODE 보유). 최신 보고서에 캡션이 없으면 과거 era 캡션으로 fallback 하지 않는다. 옛 `단위:원`
-    # 캡션이 최신 백만원 본표를 1000배 축소시키는 vintage 오염을 막기 위해 period scope 가 단위 SSOT 다.
-    cap = stmt.filter((pl.col("period") == latestPeriod) & ~pl.col("contentRaw").str.contains("ACODE=", literal=True))
-    for r in cap.iter_rows(named=True):
-        m = _UNIT_RE.search(r["contentRaw"] or "")
-        if m:
-            return _UNIT_SCALE[m.group(1)]
-    return 1_000_000  # 캡션 부재 = DART 표준 백만원
+    latest = sortPeriods(list(scales), descending=True)[0]
+    return scales.get(latest, 1_000_000)
 
 
 def _financePeriodLabel(period: str, freq: str) -> str:
@@ -181,7 +196,7 @@ def _companyCellsByPeriod(
     cells = _cell._cellsFromPanel(code, marketNs=marketNs, periods=panelPeriods)
     if cells is None:
         return {}
-    scale = _detectUnitScale(code, marketNs)
+    unitScales = _detectUnitScales(code, marketNs)
     variants = _cell.STATEMENT_VARIANTS.get(statement, (statement.upper(),))
     wanted = set(targetLabels) if targetLabels is not None else None
     out: dict[str, dict[str, tuple[str, float]]] = {}
@@ -196,6 +211,7 @@ def _companyCellsByPeriod(
         if not periods:
             continue
         for p in periods:
+            scale = unitScales.get(_financePanelPeriod(p), 1_000_000)
             bucket = out.setdefault(p, {})
             for r in w.sort("axisPath").iter_rows(named=True):
                 ac = r.get("acode")
