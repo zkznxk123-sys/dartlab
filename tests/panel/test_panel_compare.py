@@ -615,7 +615,9 @@ def test_compare_finance_scales_each_period_independently(monkeypatch: pytest.Mo
     cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
     cell = importlib.import_module("dartlab.providers.dart.panel.cell")
 
-    monkeypatch.setattr(cmp, "_detectUnitScales", lambda code, marketNs: {"2026Q1": 1_000, "2025Q4": 1})
+    monkeypatch.setattr(
+        cmp, "_detectUnitScales", lambda code, marketNs, statements=None: {"2026Q1": 1_000, "2025Q4": 1}
+    )
     monkeypatch.setattr(cell, "_cellsFromPanel", lambda code, marketNs, periods: pl.DataFrame({"dummy": [1]}))
     monkeypatch.setattr(
         cell,
@@ -634,6 +636,33 @@ def test_compare_finance_scales_each_period_independently(monkeypatch: pytest.Mo
     per = cmp._companyCellsByPeriod("111111", "bs", "quarter", "consolidated", "kr")
     assert per["2026Q1"]["ifrs-full_Assets"][1] == 2_000
     assert per["2025Q4"]["ifrs-full_Assets"][1] == 3
+
+
+def test_compare_unit_scale_is_statement_scoped(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """단위 캡션은 비교 statement 후보 안에서만 찾는다 — IS '원' 이 BS 를 오염시키면 안 된다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    read = importlib.import_module("dartlab.providers.dart.panel.read")
+    flat = tmp_path / "111111.parquet"
+    flat.write_bytes(b"")
+
+    monkeypatch.setattr(read, "ensurePanelFromHf", lambda code, marketNs: None)
+    monkeypatch.setattr(read, "_panelDir", lambda code, marketNs: tmp_path / "periods")
+    monkeypatch.setattr(
+        cmp.pl,
+        "read_parquet",
+        lambda path, columns: pl.DataFrame(
+            {
+                "disclosureKey": ["IS2", "BS"],
+                "contentRaw": ["<TABLE>단위 : 원</TABLE>", "<TABLE>단위 : 백만원</TABLE>"],
+                "period": ["2026Q1", "2026Q1"],
+            }
+        ),
+    )
+
+    assert cmp._detectUnitScale("111111", "kr", statements=("BS",)) == 1_000_000
+    assert cmp._detectUnitScale("111111", "kr", statements=("IS2",)) == 1
 
 
 def test_compare_unit_scale_ignores_older_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

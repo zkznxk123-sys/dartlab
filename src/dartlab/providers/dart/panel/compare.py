@@ -105,7 +105,7 @@ def _normPeriod(period: list[str] | str | None) -> list[str] | str | None:
     return sortPeriods(vals, descending=True)
 
 
-def _detectUnitScales(code: str, marketNs: str) -> dict[str, int]:
+def _detectUnitScales(code: str, marketNs: str, statements: tuple[str, ...] | None = None) -> dict[str, int]:
     """회사 재무표 period별 caption '단위:X' → 원 배율 map. 미발견 period=백만원(DART 표준).
 
     XBRL valueRaw 는 회사 신고단위 무손실 저장(삼성·SK=백만원, 카카오=원). 회사 간 비교 시
@@ -119,7 +119,8 @@ def _detectUnitScales(code: str, marketNs: str) -> dict[str, int]:
     if not flat.exists():
         return {}
     df = pl.read_parquet(str(flat), columns=["disclosureKey", "contentRaw", "period"])
-    stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
+    targetStatements = statements or tuple(CELL_STATEMENTS)
+    stmt = df.filter(pl.col("disclosureKey").is_in(list(targetStatements)))
     if stmt.is_empty():
         return {}
     out: dict[str, int] = {}
@@ -138,9 +139,11 @@ def _detectUnitScales(code: str, marketNs: str) -> dict[str, int]:
     return out
 
 
-def _detectUnitScale(code: str, marketNs: str, period: str | None = None) -> int:
+def _detectUnitScale(
+    code: str, marketNs: str, period: str | None = None, statements: tuple[str, ...] | None = None
+) -> int:
     """회사 재무표 caption '단위:X' → 원 배율. period 없으면 최신 filing period 기준."""
-    scales = _detectUnitScales(code, marketNs)
+    scales = _detectUnitScales(code, marketNs, statements)
     if period is not None:
         return scales.get(_financePanelPeriod(period), 1_000_000)
     if not scales:
@@ -196,8 +199,8 @@ def _companyCellsByPeriod(
     cells = _cell._cellsFromPanel(code, marketNs=marketNs, periods=panelPeriods)
     if cells is None:
         return {}
-    unitScales = _detectUnitScales(code, marketNs)
     variants = _cell.STATEMENT_VARIANTS.get(statement, (statement.upper(),))
+    unitScales = _detectUnitScales(code, marketNs, variants)
     wanted = set(targetLabels) if targetLabels is not None else None
     out: dict[str, dict[str, tuple[str, float]]] = {}
     for v in variants:
