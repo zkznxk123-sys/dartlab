@@ -64,6 +64,31 @@ def test_compare_cross_market_raises() -> None:
         compare(["005930", "AAPL"])
 
 
+def test_compare_too_many_codes_raises() -> None:
+    """codes 7개 이상 — 조용한 truncate 금지."""
+    with pytest.raises(ValueError, match="최대 6개"):
+        compare(["005930", "000660", "035720", "000270", "005380", "012330", "066570"])
+
+
+def test_compare_invalid_scope_raises() -> None:
+    """scope 오타 — 빈 표로 숨기지 않고 계약 오류."""
+    with pytest.raises(ValueError, match="scope"):
+        compare(["005930", "000660"], topic="bs", scope="merged")
+
+
+def test_compare_invalid_freq_raises() -> None:
+    """freq 오타 — 재무 셀모드 입도 오류."""
+    with pytest.raises(ValueError, match="freq"):
+        compare(["005930", "000660"], topic="bs", freq="monthly")
+
+
+def test_compare_us_ticker_normalized_before_market_guard() -> None:
+    """US ticker 소문자 입력도 시장 판정 전 대문자 정규화."""
+    from dartlab.providers.dart.panel.compare import _normCodes
+
+    assert _normCodes(["aapl", "msft"]) == ["AAPL", "MSFT"]
+
+
 # ── 정렬 실데이터 ──
 
 

@@ -17,9 +17,9 @@ export interface CompareTargetSet {
 }
 
 export function normalizeCompareTargets(reference: string, rawVs: string[] | string | null | undefined): CompareTargetSet {
-	const ref = reference.trim();
+	const ref = normalizeCode(reference);
 	const market = marketForCode(ref);
-	const candidates = (Array.isArray(rawVs) ? rawVs : (rawVs ?? '').split(',')).map((s) => s.trim()).filter(Boolean);
+	const candidates = (Array.isArray(rawVs) ? rawVs : (rawVs ?? '').split(',')).map(normalizeCode).filter(Boolean);
 	const seen = new Set([ref]);
 	const vs: string[] = [];
 	const rejected: CompareTargetRejection[] = [];
@@ -44,4 +44,9 @@ export function normalizeCompareTargets(reference: string, rawVs: string[] | str
 		vs.push(c);
 	}
 	return { reference: ref, market, vs, rejected };
+}
+
+function normalizeCode(code: string): string {
+	const c = code.trim();
+	return /^\d{6}$/.test(c) ? c : c.toUpperCase();
 }

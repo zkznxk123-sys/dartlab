@@ -28,6 +28,7 @@ _SEP = "␟"  # ␟ — 셀 컬럼 namespace 구분자 ({code}␟{period})
 
 # 재무제표 토픽 — 셀(항목) 단위 비교(acode 정렬 + 원 환산). 통짜 표 병치 대신.
 _FIN_KEYS = frozenset({"bs", "is", "cf", "cis", "sce"})
+_VALID_FREQ = frozenset({"quarter", "year", "ytd"})
 _UNIT_RE = re.compile(r"단위\s*[:：]\s*(백만원|천원|원)")
 _UNIT_SCALE = {"백만원": 1_000_000, "천원": 1_000, "원": 1}
 # 셀 wide 의 기간 열 — 연간(YYYY) + 분기(YYYYQn) 둘 다. isPeriodColumn(YYYYQn 전용)이 year 열을 거부하는
@@ -42,6 +43,8 @@ def _normCodes(codes: list[str] | str | None) -> list[str]:
     seen: dict[str, None] = {}
     for c in codes or []:
         c = str(c).strip()
+        if c and not re.fullmatch(r"\d{6}", c):
+            c = c.upper()
         if c and c not in seen:
             seen[c] = None
     return list(seen)
@@ -56,7 +59,15 @@ def _normScope(scope: str | None) -> str | None:
         return "consolidated"
     if s in {"separate", "standalone", "별도", "s"}:
         return "standalone"
-    return scope
+    raise ValueError("scope 는 consolidated/standalone(연결/별도) 중 하나여야 합니다.")
+
+
+def _normFreq(freq: str) -> str:
+    """freq 정규화 — 재무 셀모드 입도 명시."""
+    f = str(freq).strip().lower()
+    if f not in _VALID_FREQ:
+        raise ValueError("freq 는 quarter/year/ytd 중 하나여야 합니다.")
+    return f
 
 
 def _detectUnitScale(code: str, marketNs: str) -> int:
@@ -231,7 +242,7 @@ def compare(
         다기간→{code}␟{period}). 빈(2사 미만 데이터)이면 빈 DataFrame.
 
     Raises:
-        ValueError: codes 2개 미만, 또는 marketNs 외 시장 혼합 시도.
+        ValueError: codes 2개 미만, 6개 초과, scope/freq 오타, 또는 marketNs 외 시장 혼합 시도.
 
     Example:
         >>> import dartlab
@@ -282,7 +293,8 @@ def compare(
             "단일 종목은 Company(code).panel 사용."
         )
     if len(codes) > _MAX_COMPARE:
-        codes = codes[:_MAX_COMPARE]
+        raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
+    freq = _normFreq(freq)
     markets = {detectMarket(c) for c in codes}
     if len(markets) > 1:
         raise ValueError(

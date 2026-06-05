@@ -204,6 +204,7 @@ eq(detectFinanceUnit(unitRows, '2026Q1').label, '백만원', 'finance unit 캡�
 eq(detectFinanceUnit([cmpRow({ cells: { '2026Q1': '<TE ACODE="ifrs-full_Assets">2,000,000,000,000</TE>' } })], '2026Q1').label, '원', 'finance unit 캡션부재 magnitude 원');
 eq(normalizeCompareTargets('005930', '000660,005930,AAPL,000660').vs, ['000660'], 'compare targets self/dup/cross-market 제거');
 eq(normalizeCompareTargets('005930', '000001,000002,000003,000004,000005,000006').vs.length, 5, 'compare targets 총 6사 제한');
+eq(normalizeCompareTargets('AAPL', 'msft,aapl').vs, ['MSFT'], 'compare targets US ticker 대문자 정규화');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (74/74)' : `viewerCheck: ${fail} FAIL`);
+console.log(fail === 0 ? 'viewerCheck: ALL OK (75/75)' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);
