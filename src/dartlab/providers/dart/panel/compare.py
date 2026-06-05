@@ -30,6 +30,9 @@ _SEP = "␟"  # ␟ — 셀 컬럼 namespace 구분자 ({code}␟{period})
 _FIN_KEYS = frozenset({"bs", "is", "cf", "cis", "sce"})
 _UNIT_RE = re.compile(r"단위\s*[:：]\s*(백만원|천원|원)")
 _UNIT_SCALE = {"백만원": 1_000_000, "천원": 1_000, "원": 1}
+# 셀 wide 의 기간 열 — 연간(YYYY) + 분기(YYYYQn) 둘 다. isPeriodColumn(YYYYQn 전용)이 year 열을 거부하는
+# 버그 회피 (freq="year" 비교가 전멸했던 원인).
+_PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 
 def _normCodes(codes: list[str] | str | None) -> list[str]:
@@ -70,12 +73,16 @@ def _detectUnitScale(code: str, marketNs: str) -> int:
     if not flat.exists():
         return 1_000_000
     df = pl.read_parquet(str(flat), columns=["disclosureKey", "contentRaw", "period"])
-    stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS))).sort("period", descending=True)
-    for r in stmt.iter_rows(named=True):
+    stmt = df.filter(pl.col("disclosureKey").is_in(list(CELL_STATEMENTS)))
+    # 캡션 = **ACODE 없는 캡션 leaf**에서만 (본문 leaf 의 EPS 행단위 '단위:원' 오염 차단 — 본문은 ACODE
+    # 보유). **최신 period 우선**(옛 era '단위:원' 캡션이 최신 백만원 본표 오염 차단). 한 표가 캡션 leaf +
+    # 본문 leaf 로 쪼개져 저장되므로 표머리 단위는 캡션 leaf 에 산다.
+    cap = stmt.filter(~pl.col("contentRaw").str.contains("ACODE=", literal=True)).sort("period", descending=True)
+    for r in cap.iter_rows(named=True):
         m = _UNIT_RE.search(r["contentRaw"] or "")
         if m:
             return _UNIT_SCALE[m.group(1)]
-    return 1_000_000
+    return 1_000_000  # 캡션 부재 = DART 표준 백만원
 
 
 def _companyCells(code: str, statement: str, freq: str, scope: str, marketNs: str) -> dict[str, tuple[str, float]]:
@@ -94,10 +101,11 @@ def _companyCells(code: str, statement: str, freq: str, scope: str, marketNs: st
         w = _cell._cellWideFromCells(cells, statement=v, freq=freq, scope=scope)
         if w is None or w.is_empty():
             continue
-        periods = [c for c in w.columns if isPeriodColumn(c)]
+        # 연간(YYYY)+분기(YYYYQn) 둘 다 — isPeriodColumn(YYYYQn 전용)은 year 열 거부(freq="year" 전멸 버그).
+        periods = [c for c in w.columns if _PERIOD_COL_RE.match(c)]
         if not periods:
             continue
-        latest = sortPeriods(periods, descending=True)[0]
+        latest = max(periods)  # 동일 포맷 내 문자열 max = 최신
         for r in w.sort("axisPath").iter_rows(named=True):
             ac = r.get("acode")
             ax = r.get("axisPath") or ""

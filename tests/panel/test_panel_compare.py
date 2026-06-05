@@ -154,6 +154,32 @@ def test_compare_finance_cell_mode() -> None:
     assert sam is not None and sam > 1e12, f"원 환산 실패(단위 착시): 삼성 매출 {sam} (1e12 미만이면 미환산)"
 
 
+@pytest.mark.heavy
+@requires_pair
+def test_compare_finance_freq_year_nonempty() -> None:
+    """회귀(Y1) — freq="year" 비교가 빈 결과 아니어야 (year 열 YYYY 를 isPeriodColumn 이 거부했던 버그)."""
+    dq = compare(_PAIR, topic="bs", freq="quarter")
+    dy = compare(_PAIR, topic="bs", freq="year")
+    if dq.height == 0:
+        pytest.skip("재무 셀 데이터 부족")
+    assert dy.height > 0, "freq=year 비교가 빈 결과 (year 열 YYYY 거부 회귀)"
+    assert "acode" in dy.columns
+
+
+@pytest.mark.heavy
+@requires_pair
+def test_compare_unit_caption_scoping() -> None:
+    """회귀(U5) — 단위는 ACODE 없는 캡션 leaf 에서 (본문 leaf 의 EPS '단위:원' 오염 금지).
+
+    삼성·SK 는 백만원 신고 → 자산총계가 수백조(1e14대), 원 오염 시 1e8 로 1,000,000배 축소.
+    """
+    from dartlab.providers.dart.panel.compare import _detectUnitScale
+
+    for code in _PAIR:
+        scale = _detectUnitScale(code, "kr")
+        assert scale == 1_000_000, f"{code} 단위 오검출 {scale} (백만원 1e6 기대 — EPS '원' 오염 의심)"
+
+
 @pytest.mark.heavy  # 셀 데이터 lxml 파싱 경로 동반 — 로컬 분리 실행
 @requires_pair
 def test_compare_finance_row_mode_for_notes() -> None:
