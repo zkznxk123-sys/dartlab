@@ -67,12 +67,22 @@ def _normScope(scope: str | None) -> str | None:
     """사용자 scope 어휘 → wide 의 scope 값('consolidated'/'standalone')."""
     if scope is None:
         return None
-    s = scope.strip().lower()
+    s = str(scope).strip().lower()
     if s in {"consolidated", "연결", "c"}:
         return "consolidated"
     if s in {"separate", "standalone", "별도", "s"}:
         return "standalone"
     raise ValueError("scope 는 consolidated/standalone(연결/별도) 중 하나여야 합니다.")
+
+
+def _normTopic(topic: str | None) -> str | None:
+    """topic 입력 정규화 — None 또는 비어있지 않은 문자열."""
+    if topic is None:
+        return None
+    value = str(topic).strip()
+    if not value:
+        raise ValueError("topic 은 비어 있지 않은 문자열이어야 합니다.")
+    return value
 
 
 def _normFreq(freq: str) -> str:
@@ -352,7 +362,7 @@ def _matchTopic(df: pl.DataFrame, topic: str) -> pl.DataFrame:
 
     ``Panel.__call__`` 의 key 흡수 규칙과 동형 (topic vs disclosureKey 인자 분리 금지).
     """
-    up = topic.strip().upper()
+    up = topic.upper()
     natives = {"BS", "IS", "CF", "CIS", "EF", "SCE"}
     dk = pl.col("disclosureKey").cast(pl.Utf8)
     mask = dk == topic
@@ -573,6 +583,7 @@ def compare(
     if len(codes) > _MAX_COMPARE:
         raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
     periodVal = _normPeriod(period)
+    topicVal = _normTopic(topic)
     freq = _normFreq(freq)
     markets = {detectMarket(c) for c in codes}
     if len(markets) > 1:
@@ -582,15 +593,15 @@ def compare(
     marketNs = "us" if markets == {"US"} else "kr"
 
     # 재무제표 토픽 = 셀(항목) 단위 비교 — acode 정렬 + 원 환산 (통짜 표 병치 대신).
-    if topic and topic.strip().lower() in _FIN_KEYS:
+    if topicVal and topicVal.lower() in _FIN_KEYS:
         if marketNs != "kr":
             raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
         return _compareCells(
-            codes, statement=topic.strip().lower(), freq=freq, scope=scope, marketNs=marketNs, period=periodVal
+            codes, statement=topicVal.lower(), freq=freq, scope=scope, marketNs=marketNs, period=periodVal
         )
 
     scopeVal = _normScope(scope)
-    out, _, _ = _compareRows(codes, marketNs=marketNs, scopeVal=scopeVal, period=periodVal, topic=topic)
+    out, _, _ = _compareRows(codes, marketNs=marketNs, scopeVal=scopeVal, period=periodVal, topic=topicVal)
     return out
 
 
@@ -603,7 +614,8 @@ def _negPeriodKey(cell: str) -> str:
 
 def _compareMode(topic: str | None) -> str:
     """topic 기반 compare 실행 모드."""
-    return "finance" if topic and topic.strip().lower() in _FIN_KEYS else "row"
+    topicVal = _normTopic(topic)
+    return "finance" if topicVal and topicVal.lower() in _FIN_KEYS else "row"
 
 
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
@@ -692,11 +704,10 @@ def compareDiagnostics(
         >>> compareDiagnostics(["005930", "000660"], topic="재고")  # doctest: +SKIP
     """
     displayCodes = _displayCodes(codes)
-    mode = _compareMode(topic)
     diag: dict[str, object] = {
         "ok": False,
         "reason": None,
-        "mode": mode,
+        "mode": None,
         "codes": displayCodes,
         "requestedCodeCount": len(displayCodes),
         "maxCompare": _MAX_COMPARE,
@@ -727,6 +738,8 @@ def compareDiagnostics(
         if len(normCodes) > _MAX_COMPARE:
             raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
         normPeriod = _normPeriod(period)
+        normTopic = _normTopic(topic)
+        mode = _compareMode(normTopic)
         normFreq = _normFreq(freq)
         normScope = _normScope(scope)
         markets = {detectMarket(c) for c in normCodes}
@@ -741,7 +754,7 @@ def compareDiagnostics(
             actualScope = normScope or "consolidated"
             df, resolvedPeriods = _compareCellsResult(
                 normCodes,
-                statement=str(topic).strip().lower(),
+                statement=str(normTopic).strip().lower(),
                 freq=normFreq,
                 scope=actualScope,
                 marketNs=marketNs,
@@ -751,7 +764,7 @@ def compareDiagnostics(
         else:
             actualScope = normScope
             df, resolvedPeriods, emptyReason = _compareRows(
-                normCodes, marketNs=marketNs, scopeVal=normScope, period=normPeriod, topic=topic
+                normCodes, marketNs=marketNs, scopeVal=normScope, period=normPeriod, topic=normTopic
             )
     except ValueError as exc:
         diag["reason"] = "invalidInput"
@@ -772,7 +785,9 @@ def compareDiagnostics(
         {
             "ok": rowCount > 0,
             "reason": "ready" if rowCount > 0 else "emptyResult",
+            "mode": mode,
             "marketNs": marketNs,
+            "topic": normTopic,
             "period": _periodValue(normPeriod),
             "resolvedPeriods": resolvedPeriods,
             "scope": actualScope,

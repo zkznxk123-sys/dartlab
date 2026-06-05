@@ -64,6 +64,16 @@ def test_compare_public_surface_callable() -> None:
     assert callable(dartlab.compare)
 
 
+def test_compare_capability_catalog_contains_compare() -> None:
+    """AI/EngineCall capability 표면에도 compare 가 docstring 기반으로 살아 있어야 한다."""
+    from dartlab.reference.capability import loadCapabilities
+
+    caps = loadCapabilities()
+    assert "compare" in caps
+    assert caps["compare"]["kind"] == "function"
+    assert "N 회사" in caps["compare"]["summary"]
+
+
 def test_compare_single_code_raises() -> None:
     """codes 1개 — 비교 의미 0 → ValueError."""
     with pytest.raises(ValueError, match="2개 이상"):
@@ -116,6 +126,27 @@ def test_compare_invalid_period_raises() -> None:
     """period 오타 — 빈 표로 숨기지 않고 계약 오류."""
     with pytest.raises(ValueError, match="period"):
         compare(["005930", "000660"], period="2025Q5")
+
+
+def test_compare_empty_topic_raises_and_diagnostics_payload() -> None:
+    """빈 topic 은 전체격자(None)가 아니라 입력 오류다."""
+    with pytest.raises(ValueError, match="topic"):
+        compare(["005930", "000660"], topic=" ")
+
+    diag = compareDiagnostics(["005930", "000660"], topic=" ")
+    assert diag["ok"] is False
+    assert diag["reason"] == "invalidInput"
+    assert diag["emptyReason"] == "invalidInput"
+    assert "topic" in str(diag["error"])
+
+
+def test_compare_diagnostics_invalid_scope_type_returns_payload() -> None:
+    """scope 타입 오류도 AttributeError 로 새지 않고 invalidInput payload 로 반환한다."""
+    diag = compareDiagnostics(["005930", "000660"], scope=123)  # type: ignore[arg-type]
+    assert diag["ok"] is False
+    assert diag["reason"] == "invalidInput"
+    assert diag["emptyReason"] == "invalidInput"
+    assert "scope" in str(diag["error"])
 
 
 def test_compare_empty_period_list_raises() -> None:
