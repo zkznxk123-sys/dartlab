@@ -380,4 +380,167 @@ def _negPeriodKey(cell: str) -> str:
     return "".join(chr(255 - ord(ch)) for ch in p)  # 내림차순
 
 
-__all__ = ["compare"]
+def _compareMode(topic: str | None) -> str:
+    """topic 기반 compare 실행 모드."""
+    return "finance" if topic and topic.strip().lower() in _FIN_KEYS else "row"
+
+
+def _periodValue(period: list[str] | str | None) -> list[str] | None:
+    """diagnostics 용 period 입력 정규화."""
+    if isinstance(period, str):
+        return [period]
+    if period is None:
+        return None
+    return [str(p) for p in period]
+
+
+def _isFilled(value: object) -> bool:
+    """셀 값 존재 판정 — 결손 0 채움 없이 빈 문자열만 결손."""
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return value.strip() != ""
+    return True
+
+
+def _cellColumns(columns: list[str], codes: list[str]) -> list[str]:
+    """compare 출력에서 회사 셀 컬럼만 추출."""
+    out: list[str] = []
+    for col in columns:
+        if col in codes or any(col.startswith(f"{code}{_SEP}") for code in codes):
+            out.append(col)
+    return out
+
+
+def _codeHasValue(row: dict[str, object], code: str) -> bool:
+    """단일 행에서 특정 회사가 직접/다기간 셀 중 하나라도 값을 갖는지."""
+    if _isFilled(row.get(code)):
+        return True
+    prefix = f"{code}{_SEP}"
+    return any(col.startswith(prefix) and _isFilled(value) for col, value in row.items())
+
+
+def _shareStats(df: pl.DataFrame, codes: list[str]) -> tuple[list[str], int, int, int]:
+    """회사별 존재와 shared/partial/solo 행수를 계산."""
+    presentSeen = {code: False for code in codes}
+    sharedRows = 0
+    partialRows = 0
+    soloRows = 0
+    for row in df.iter_rows(named=True):
+        filledCodes = 0
+        for code in codes:
+            if _codeHasValue(row, code):
+                presentSeen[code] = True
+                filledCodes += 1
+        if filledCodes == len(codes):
+            sharedRows += 1
+        elif filledCodes >= 2:
+            partialRows += 1
+        elif filledCodes == 1:
+            soloRows += 1
+    presentCodes = [code for code in codes if presentSeen[code]]
+    return presentCodes, sharedRows, partialRows, soloRows
+
+
+def compareDiagnostics(
+    codes: list[str] | str,
+    *,
+    topic: str | None = None,
+    period: list[str] | str | None = None,
+    scope: str | None = None,
+    freq: str = "quarter",
+) -> dict[str, object]:
+    """N 회사 compare 실행 계약을 표와 분리해 진단한다.
+
+    Args:
+        codes: 비교할 종목코드 2~6개.
+        topic: compare 와 동일한 topic. 재무표 키는 finance 모드로 판정된다.
+        period: compare 와 동일한 period 입력. None 이면 compare 가 최신 공통 시점을 고른다.
+        scope: compare 와 동일한 연결/별도 scope.
+        freq: compare 와 동일한 재무 셀모드 입도.
+
+    Returns:
+        ``dict[str, object]`` — 입력 정규화, 시장, 실행 모드, 출력 행/열, 회사별 존재,
+        shared/partial/solo 행수, 빈 결과 사유를 담은 진단 payload.
+
+    Raises:
+        없음. 입력 계약 오류도 ``ok=False`` 와 ``reason="invalidInput"`` 으로 반환한다.
+
+    Example:
+        >>> from dartlab.providers.dart.panel import compareDiagnostics
+        >>> compareDiagnostics(["005930", "000660"], topic="재고")  # doctest: +SKIP
+    """
+    normCodes = _normCodes(codes)
+    mode = _compareMode(topic)
+    diag: dict[str, object] = {
+        "ok": False,
+        "reason": None,
+        "mode": mode,
+        "codes": normCodes,
+        "requestedCodeCount": len(normCodes),
+        "maxCompare": _MAX_COMPARE,
+        "marketNs": None,
+        "topic": topic,
+        "period": _periodValue(period),
+        "scope": scope,
+        "freq": freq,
+        "rowCount": 0,
+        "columns": [],
+        "cellColumns": [],
+        "presentCodes": [],
+        "missingCodes": normCodes,
+        "sharedRows": 0,
+        "partialRows": 0,
+        "soloRows": 0,
+        "emptyReason": None,
+        "error": None,
+    }
+    try:
+        normFreq = _normFreq(freq)
+        normScope = _normScope(scope)
+        markets = {detectMarket(c) for c in normCodes}
+        if len(markets) > 1:
+            raise ValueError(
+                f"KO↔US 혼합 비교는 불가 ({markets}). 같은 시장 종목끼리만 — cross-market 은 후속(crossMarket)."
+            )
+        marketNs = "us" if markets == {"US"} else "kr"
+        df = compare(normCodes, topic=topic, period=period, scope=scope, freq=freq)
+    except ValueError as exc:
+        diag["reason"] = "invalidInput"
+        diag["emptyReason"] = "invalidInput"
+        diag["error"] = str(exc)
+        return diag
+
+    columns = list(df.columns)
+    cellCols = _cellColumns(columns, normCodes)
+    presentCodes, sharedRows, partialRows, soloRows = _shareStats(df, normCodes)
+    missingCodes = [code for code in normCodes if code not in presentCodes]
+    rowCount = df.height
+    emptyReason = None
+    if rowCount == 0:
+        emptyReason = "insufficientFinanceCells" if mode == "finance" else "noComparableRows"
+        if topic and mode == "row":
+            emptyReason = "topicFilteredEmpty"
+
+    diag.update(
+        {
+            "ok": rowCount > 0,
+            "reason": "ready" if rowCount > 0 else "emptyResult",
+            "marketNs": marketNs,
+            "scope": normScope,
+            "freq": normFreq,
+            "rowCount": rowCount,
+            "columns": columns,
+            "cellColumns": cellCols,
+            "presentCodes": presentCodes,
+            "missingCodes": missingCodes,
+            "sharedRows": sharedRows,
+            "partialRows": partialRows,
+            "soloRows": soloRows,
+            "emptyReason": emptyReason,
+        }
+    )
+    return diag
+
+
+__all__ = ["compare", "compareDiagnostics"]

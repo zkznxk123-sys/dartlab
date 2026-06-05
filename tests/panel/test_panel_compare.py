@@ -20,7 +20,7 @@ import polars as pl
 import pytest
 
 import dartlab.config as _cfg
-from dartlab.providers.dart.panel.compare import compare
+from dartlab.providers.dart.panel.compare import compare, compareDiagnostics
 
 pytestmark = pytest.mark.requires_data
 
@@ -87,6 +87,24 @@ def test_compare_us_ticker_normalized_before_market_guard() -> None:
     from dartlab.providers.dart.panel.compare import _normCodes
 
     assert _normCodes(["aapl", "msft"]) == ["AAPL", "MSFT"]
+
+
+def test_compare_diagnostics_invalid_input_returns_payload() -> None:
+    """진단 표면은 입력 오류도 payload 로 설명한다."""
+    diag = compareDiagnostics(["005930"])
+    assert diag["ok"] is False
+    assert diag["reason"] == "invalidInput"
+    assert diag["emptyReason"] == "invalidInput"
+    assert "2개 이상" in str(diag["error"])
+
+
+def test_compare_diagnostics_normalizes_codes_before_error() -> None:
+    """진단도 compare 와 같은 code 정규화·시장 가드를 쓴다."""
+    diag = compareDiagnostics(["005930", "aapl"])
+    assert diag["ok"] is False
+    assert diag["reason"] == "invalidInput"
+    assert diag["codes"] == ["005930", "AAPL"]
+    assert "혼합" in str(diag["error"])
 
 
 def test_compare_join_key_separates_scope_leaf_type_and_narrative() -> None:
@@ -189,6 +207,26 @@ def test_compare_engine_call_contract() -> None:
     r = engineCall({"apiRef": "compare", "args": {"codes": _PAIR, "topic": "재고"}})
     assert r.ok, f"EngineCall compare 실패: {r.error}"
     assert r.refs and r.refs[0].kind == "tableRef"
+
+
+@requires_pair
+def test_compare_diagnostics_row_contract_matches_frame() -> None:
+    """진단 payload 는 compare row 출력의 모드·행수·열·회사 존재를 설명한다."""
+    df = compare(_PAIR, topic="재고")
+    diag = compareDiagnostics(_PAIR, topic="재고")
+    assert diag["mode"] == "row"
+    assert diag["marketNs"] == "kr"
+    assert diag["rowCount"] == df.height
+    assert diag["columns"] == df.columns
+    assert diag["cellColumns"] == [c for c in df.columns if c in _PAIR]
+    if df.height == 0:
+        assert diag["ok"] is False
+        assert diag["emptyReason"] == "topicFilteredEmpty"
+    else:
+        assert diag["ok"] is True
+        assert diag["reason"] == "ready"
+        assert set(diag["presentCodes"]).issubset(set(_PAIR))
+        assert diag["sharedRows"] + diag["partialRows"] + diag["soloRows"] <= df.height
 
 
 @pytest.mark.heavy  # 셀 데이터 lxml 파싱 — 메모리 무거움, 로컬 분리 실행
