@@ -212,6 +212,83 @@ def test_compare_topic_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyP
     assert diag["soloRows"] == 1
 
 
+def test_compare_finance_uses_latest_common_period(monkeypatch: pytest.MonkeyPatch) -> None:
+    """재무 셀모드 period=None 은 회사별 최신값이 아니라 최신 공통 시점으로 맞춘다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeCompanyCellsByPeriod(
+        code: str,
+        statement: str,
+        freq: str,
+        scope: str,
+        marketNs: str,
+        *,
+        targetLabels: list[str] | None = None,
+        panelPeriods: list[str] | None = None,
+    ) -> dict[str, dict[str, tuple[str, float]]]:
+        assert statement == "bs"
+        assert freq == "quarter"
+        assert scope == "consolidated"
+        assert marketNs == "kr"
+        assert targetLabels is None
+        assert panelPeriods is None
+        if code == "111111":
+            return {
+                "2026Q1": {"ifrs-full_Assets": ("자산총계", 260.0)},
+                "2025Q4": {"ifrs-full_Assets": ("자산총계", 150.0)},
+            }
+        return {"2025Q4": {"ifrs-full_Assets": ("자산총계", 250.0)}}
+
+    monkeypatch.setattr(cmp, "_companyCellsByPeriod", fakeCompanyCellsByPeriod)
+    df = cmp.compare(["111111", "222222"], topic="bs")
+    assert df.height == 1
+    assert df[0, "111111"] == 150.0
+    assert df[0, "222222"] == 250.0
+
+
+def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: pytest.MonkeyPatch) -> None:
+    """재무 셀모드도 명시 period/list period 계약을 따른다."""
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    seen: list[tuple[list[str] | None, list[str] | None]] = []
+
+    def fakeCompanyCellsByPeriod(
+        code: str,
+        statement: str,
+        freq: str,
+        scope: str,
+        marketNs: str,
+        *,
+        targetLabels: list[str] | None = None,
+        panelPeriods: list[str] | None = None,
+    ) -> dict[str, dict[str, tuple[str, float]]]:
+        seen.append((targetLabels, panelPeriods))
+        if code == "111111":
+            return {
+                "2026Q1": {"ifrs-full_Assets": ("자산총계", 260.0)},
+                "2025Q4": {"ifrs-full_Assets": ("자산총계", 150.0)},
+            }
+        return {"2025Q4": {"ifrs-full_Assets": ("자산총계", 250.0)}}
+
+    monkeypatch.setattr(cmp, "_companyCellsByPeriod", fakeCompanyCellsByPeriod)
+
+    one = cmp.compare(["111111", "222222"], topic="bs", period="2025Q4")
+    assert seen[-2:] == [(["2025Q4"], ["2025Q4"]), (["2025Q4"], ["2025Q4"])]
+    assert one.columns[-2:] == ["111111", "222222"]
+    assert one[0, "111111"] == 150.0
+    assert one[0, "222222"] == 250.0
+
+    many = cmp.compare(["111111", "222222"], topic="bs", period=["2026Q1", "2025Q4"])
+    assert many.columns[-4:] == ["111111␟2026Q1", "111111␟2025Q4", "222222␟2026Q1", "222222␟2025Q4"]
+    assert many[0, "111111␟2026Q1"] == 260.0
+    assert many[0, "111111␟2025Q4"] == 150.0
+    assert many[0, "222222␟2026Q1"] is None
+    assert many[0, "222222␟2025Q4"] == 250.0
+
+
 # ── 정렬 실데이터 ──
 
 

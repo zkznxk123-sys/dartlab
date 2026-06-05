@@ -96,68 +96,137 @@ def _detectUnitScale(code: str, marketNs: str) -> int:
     return 1_000_000  # 캡션 부재 = DART 표준 백만원
 
 
-def _companyCells(code: str, statement: str, freq: str, scope: str, marketNs: str) -> dict[str, tuple[str, float]]:
-    """{acode: (label, 원환산값)} — statement 변형 union, depth-1 라인아이템, 단위 환산."""
+def _financePeriodLabel(period: str, freq: str) -> str:
+    """사용자 period 입력 → finance wide 컬럼 라벨."""
+    p = str(period).strip()
+    if freq == "year":
+        m = re.fullmatch(r"(\d{4})(?:Q[1-4])?", p)
+        return m.group(1) if m else p
+    if re.fullmatch(r"\d{4}", p):
+        return f"{p}Q4"
+    return p
+
+
+def _financePanelPeriod(period: str) -> str:
+    """사용자 period 입력 → panel filing period prune 라벨."""
+    p = str(period).strip()
+    if re.fullmatch(r"\d{4}", p):
+        return f"{p}Q4"
+    return p
+
+
+def _financeTargets(period: list[str] | str | None, freq: str) -> tuple[list[str] | None, list[str] | None]:
+    """finance mode period 입력을 출력 라벨과 panel prune 라벨로 분리."""
+    if period is None:
+        return None, None
+    raw = [period] if isinstance(period, str) else list(period)
+    labels = list(dict.fromkeys(_financePeriodLabel(str(p), freq) for p in raw))
+    panelPeriods = list(dict.fromkeys(_financePanelPeriod(str(p)) for p in raw))
+    return labels, panelPeriods
+
+
+def _companyCellsByPeriod(
+    code: str,
+    statement: str,
+    freq: str,
+    scope: str,
+    marketNs: str,
+    *,
+    targetLabels: list[str] | None = None,
+    panelPeriods: list[str] | None = None,
+) -> dict[str, dict[str, tuple[str, float]]]:
+    """{period: {acode: (label, 원환산값)}} — statement 변형 union, depth-1 라인아이템."""
     from dartlab.core.utils.helpers import parseNumStr
 
     from . import cell as _cell
 
-    cells = _cell._cellsFromPanel(code, marketNs=marketNs)
+    cells = _cell._cellsFromPanel(code, marketNs=marketNs, periods=panelPeriods)
     if cells is None:
         return {}
     scale = _detectUnitScale(code, marketNs)
     variants = _cell.STATEMENT_VARIANTS.get(statement, (statement.upper(),))
-    out: dict[str, tuple[str, float]] = {}
+    wanted = set(targetLabels) if targetLabels is not None else None
+    out: dict[str, dict[str, tuple[str, float]]] = {}
     for v in variants:
         w = _cell._cellWideFromCells(cells, statement=v, freq=freq, scope=scope)
         if w is None or w.is_empty():
             continue
         # 연간(YYYY)+분기(YYYYQn) 둘 다 — isPeriodColumn(YYYYQn 전용)은 year 열 거부(freq="year" 전멸 버그).
         periods = [c for c in w.columns if _PERIOD_COL_RE.match(c)]
+        if wanted is not None:
+            periods = [p for p in periods if p in wanted]
         if not periods:
             continue
-        latest = max(periods)  # 동일 포맷 내 문자열 max = 최신
-        for r in w.sort("axisPath").iter_rows(named=True):
-            ac = r.get("acode")
-            ax = r.get("axisPath") or ""
-            raw = r.get(latest)
-            lab = r.get("label") or ""
-            # depth-1(파이프 없음 = top-level 라인아이템), acode 첫 등장 우선.
-            if ac and raw is not None and "|" not in ax and ac not in out:
-                num = parseNumStr(str(raw))
-                if num is not None:
-                    out[ac] = (str(lab), num * scale)
+        for p in periods:
+            bucket = out.setdefault(p, {})
+            for r in w.sort("axisPath").iter_rows(named=True):
+                ac = r.get("acode")
+                ax = r.get("axisPath") or ""
+                raw = r.get(p)
+                lab = r.get("label") or ""
+                # depth-1(파이프 없음 = top-level 라인아이템), acode 첫 등장 우선.
+                if ac and raw is not None and "|" not in ax and ac not in bucket:
+                    num = parseNumStr(str(raw))
+                    if num is not None:
+                        bucket[ac] = (str(lab), num * scale)
     return out
 
 
-def _compareCells(codes: list[str], *, statement: str, freq: str, scope: str | None, marketNs: str) -> pl.DataFrame:
+def _chooseFinanceTargets(per: dict[str, dict[str, dict[str, tuple[str, float]]]]) -> list[str]:
+    """회사별 finance period map 에서 최신 공통 period, 없으면 최신 union period 1개."""
+    periodSets = [set(byPeriod) for byPeriod in per.values() if byPeriod]
+    if not periodSets:
+        return []
+    common = set.intersection(*periodSets) if len(periodSets) > 1 else periodSets[0]
+    pool = common or set().union(*periodSets)
+    return [sorted(pool, reverse=True)[0]] if pool else []
+
+
+def _compareCells(
+    codes: list[str],
+    *,
+    statement: str,
+    freq: str,
+    scope: str | None,
+    marketNs: str,
+    period: list[str] | str | None,
+) -> pl.DataFrame:
     """N사 재무를 acode(XBRL 코드) 단위로 정렬 — 행=(acode,label), 열=회사, 셀=원 환산값.
 
     이름 정렬(IS 6%)이 라벨 drift 로 실패하는 곳을 acode(IS 37%+)가 해소. scope 고정(자동폴백 금지 —
     연결↔별도 혼선 차단), freq 일치(분기↔연간 기간 착시 차단), 원 환산(단위 착시 차단)을 강제한다.
     """
     scope = _normScope(scope) or "consolidated"  # 비교는 scope 명시 고정
-    per: dict[str, dict[str, tuple[str, float]]] = {}
+    targetLabels, panelPeriods = _financeTargets(period, freq)
+    per: dict[str, dict[str, dict[str, tuple[str, float]]]] = {}
     for c in codes:
-        cc = _companyCells(c, statement, freq, scope, marketNs)
+        cc = _companyCellsByPeriod(
+            c, statement, freq, scope, marketNs, targetLabels=targetLabels, panelPeriods=panelPeriods
+        )
         if cc:
             per[c] = cc
-    if len(per) < 2:
+    targets = targetLabels or _chooseFinanceTargets(per)
+    if not targets:
         return pl.DataFrame()
-    present = [c for c in codes if c in per]
+    single = len(targets) == 1
     # acode union (첫 등장 라벨 대표 — acode 가 정체성, label 은 표시용)
     repr_label: dict[str, str] = {}
     order: list[str] = []
-    for c in present:
-        for ac, (lab, _v) in per[c].items():
-            if ac not in repr_label:
-                repr_label[ac] = lab
-                order.append(ac)
+    for c in codes:
+        for p in targets:
+            for ac, (lab, _v) in per.get(c, {}).get(p, {}).items():
+                if ac not in repr_label:
+                    repr_label[ac] = lab
+                    order.append(ac)
+    if not order:
+        return pl.DataFrame()
     rows: list[dict[str, object]] = []
     for ac in order:
         row: dict[str, object] = {"acode": ac, "label": repr_label[ac], "scope": scope}
-        for c in present:
-            row[c] = per[c].get(ac, (None, None))[1]  # 원 환산값 or None(honest-gap)
+        for c in codes:
+            for p in targets:
+                key = c if single else f"{c}{_SEP}{p}"
+                row[key] = per.get(c, {}).get(p, {}).get(ac, (None, None))[1]  # 원 환산값 or None(honest-gap)
         rows.append(row)
     return pl.DataFrame(rows)
 
@@ -248,7 +317,7 @@ def compare(
         topic: 비교할 항목 — 재무표("bs"/"is"/"cf"/"cis"/"sce")는 셀 단위, 한글 섹션명("재고")·
             canonicalKey("NT_D826380")는 항목 단위. None 이면 전체 격자.
         period: 비교 시점 — 단일 ``str``("2025Q4") 이면 그 시점 board(열=회사코드), ``list`` 면
-            회사×기간(열=``{code}␟{period}``), None 이면 최신 공통 시점. (재무 셀모드는 freq 최신 1시점.)
+            회사×기간(열=``{code}␟{period}``), None 이면 최신 공통 시점. 재무 셀모드도 같은 시점 계약을 따른다.
         scope: "consolidated"/"separate"(=standalone). 연결↔별도 혼선 차단. None 이면 둘 다(재무는 연결 고정).
         freq: 재무 셀모드 입도 — "quarter"(분기, 기본)/"year"(연간)/"ytd"(누적). 회사 간 freq 일치 강제.
 
@@ -323,7 +392,9 @@ def compare(
 
     # 재무제표 토픽 = 셀(항목) 단위 비교 — acode 정렬 + 원 환산 (통짜 표 병치 대신).
     if topic and topic.strip().lower() in _FIN_KEYS:
-        return _compareCells(codes, statement=topic.strip().lower(), freq=freq, scope=scope, marketNs=marketNs)
+        return _compareCells(
+            codes, statement=topic.strip().lower(), freq=freq, scope=scope, marketNs=marketNs, period=period
+        )
 
     scopeVal = _normScope(scope)
     periodArg = [period] if isinstance(period, str) else period  # readWide 파일 prune
