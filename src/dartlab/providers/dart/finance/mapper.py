@@ -4,7 +4,8 @@
 통합됐다. 본 모듈은 기존 import 경로를 보존하는 *얇은 위임 facade*:
 
 - ``AccountMapper`` — ``core.accounts.AccountNormalizer.normalize`` 위임 + 라벨/순서 헬퍼
-- ``ID_SYNONYMS`` / ``ACCOUNT_NAME_SYNONYMS`` — SSOT ``layers`` 직접 노출
+- ``ID_SYNONYMS`` / ``ACCOUNT_NAME_SYNONYMS`` — owner 의 in-place 단일 객체 re-export
+  (release 후에도 identity·최신 내용 보존; scanAccount 등 by-reference 소비처 정합)
 - ``_PREFIX_RE`` / ``_PAREN_RE`` / ``_KOR_TRIM_SUFFIXES`` / ``_stripPrefix`` — 정규화 상수
 
 새 코드는 ``dartlab.core.accounts`` 를 직접 import 한다.
@@ -15,11 +16,12 @@ from __future__ import annotations
 from typing import Optional
 
 from dartlab.core.accounts import release as _release
-from dartlab.core.accounts.data import loadAccounts
 from dartlab.core.accounts.normalize import (
     _KOR_TRIM_SUFFIXES,
     _PAREN_RE,
     _PREFIX_RE,
+    ACCOUNT_NAME_SYNONYMS,
+    ID_SYNONYMS,
     AccountNormalizer,
 )
 from dartlab.core.accounts.normalize import (
@@ -27,10 +29,6 @@ from dartlab.core.accounts.normalize import (
 )
 from dartlab.core.utils.ordering import levelMap as _commonLevelMap
 from dartlab.core.utils.ordering import sortOrder as _commonSortOrder
-
-# 옛 in-code 동의어 dict — SSOT layers 직접 노출 (동일 객체 identity 보존)
-ID_SYNONYMS: dict[str, str] = loadAccounts()["layers"]["idSynonym"]
-ACCOUNT_NAME_SYNONYMS: dict[str, str] = loadAccounts()["layers"]["nameSynonym"]
 
 __all__ = [
     "AccountMapper",

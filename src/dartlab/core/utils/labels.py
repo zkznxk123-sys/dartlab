@@ -12,20 +12,18 @@ from dartlab.core.accounts.aliases import SNAKEID_ALIASES, mergeAliasRows
 from dartlab.core.accounts.data import loadAccounts as _loadAccountMappings
 from dartlab.core.accounts.data import loadSupplements as _loadLabelSupplements
 from dartlab.core.accounts.labels import (
-    _edgarKorNames as _loadEdgarStandardAccounts,
-)
-from dartlab.core.accounts.labels import (
+    _EDGAR_LABELS,
+    _KR_SYNONYMS,
     _snakeToTitle,
     resolveLabel,
+)
+from dartlab.core.accounts.labels import (
+    _edgarKorNames as _loadEdgarStandardAccounts,
 )
 from dartlab.core.accounts.labels import accountLabels as getAccountLabels
 from dartlab.core.accounts.labels import englishLabels as getEnglishLabels
 from dartlab.core.accounts.labels import koreanLabels as getKoreanLabels
 from dartlab.core.accounts.labels import reverseKoreanLabels as getReverseKoreanLabels
-
-# SSOT layers 직접 노출 (옛 module 상수 — 동일 객체 identity 보존)
-_EDGAR_LABELS = _loadAccountMappings()["layers"]["labelEn"]
-_KR_SYNONYMS = _loadAccountMappings()["layers"]["korSynonym"]
 
 
 def _loadStandardAccounts() -> dict[str, dict]:

@@ -111,6 +111,26 @@ class EdgarTagMapper:
         return tag.lower() in cls._commonTags
 
     @classmethod
+    def tagMap(cls) -> dict[str, str]:
+        """전체 tag(lower) → snakeId 매핑 (learnedTags + commonTags 병합본) 사본.
+
+        Args:
+            없음.
+
+        Returns:
+            ``{tag_lower: snakeId}`` dict (commonTags 가 learnedTags 우선).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarTagMapper.tagMap()["revenues"]
+            'sales'
+        """
+        cls._ensureLoaded()
+        return dict(cls._tagMap)
+
+    @classmethod
     def map(cls, tag: str, stmtType: str = "") -> Optional[str]:
         """EDGAR 태그 → snakeId, stmt 충돌 시 override 적용.
 

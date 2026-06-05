@@ -54,6 +54,25 @@ def stripPrefix(accountId: str) -> str:
     return _PREFIX_RE.sub("", accountId)
 
 
+# 옛 in-code 동의어 dict — SSOT layers 에서 로드하되 *module-level 단일 객체* 의
+# identity 를 보존 (facade·scanAccount 가 by-reference import). ``reset()`` 은
+# rebind 가 아닌 in-place clear+update 로 release 후에도 같은 객체에 최신 내용 반영
+# (aliases.SNAKEID_ALIASES 와 동일 패턴 — release 후 stale 차단).
+ID_SYNONYMS: dict[str, str] = {}
+ACCOUNT_NAME_SYNONYMS: dict[str, str] = {}
+
+
+def _populate() -> None:
+    layers = loadAccounts().get("layers", {})
+    ID_SYNONYMS.clear()
+    ID_SYNONYMS.update(layers.get("idSynonym", {}))
+    ACCOUNT_NAME_SYNONYMS.clear()
+    ACCOUNT_NAME_SYNONYMS.update(layers.get("nameSynonym", {}))
+
+
+_populate()
+
+
 class AccountNormalizer:
     """DART account_id + account_nm → snakeId 정규화기 (12 단계 fallback).
 
@@ -63,8 +82,6 @@ class AccountNormalizer:
 
     _instance: Optional[AccountNormalizer] = None
     _mappings: Optional[dict[str, str]] = None
-    _idSynonym: Optional[dict[str, str]] = None
-    _nameSynonym: Optional[dict[str, str]] = None
     _noHyphenIndex: Optional[dict[str, str]] = None
     _noSpaceIndex: Optional[dict[str, str]] = None
     _noParenIndex: Optional[dict[str, str]] = None
@@ -108,19 +125,14 @@ class AccountNormalizer:
         """
         cls._instance = None
         cls._mappings = None
-        cls._idSynonym = None
-        cls._nameSynonym = None
         cls._noHyphenIndex = None
         cls._noSpaceIndex = None
         cls._noParenIndex = None
+        _populate()  # 모듈 synonym dict in-place 갱신 (identity 보존, stale 차단)
 
     def __init__(self) -> None:
         if AccountNormalizer._mappings is None:
-            data = loadAccounts()
-            AccountNormalizer._mappings = data.get("mappings", {})
-            layers = data.get("layers", {})
-            AccountNormalizer._idSynonym = layers.get("idSynonym", {})
-            AccountNormalizer._nameSynonym = layers.get("nameSynonym", {})
+            AccountNormalizer._mappings = loadAccounts().get("mappings", {})
 
     def _getNoHyphenIndex(self) -> dict[str, str]:
         if AccountNormalizer._noHyphenIndex is None:
@@ -172,7 +184,7 @@ class AccountNormalizer:
         """
         m = self._mappings
         stripped = _PREFIX_RE.sub("", accountId) if accountId else ""
-        normalizedId = self._idSynonym.get(stripped, stripped)
+        normalizedId = ID_SYNONYMS.get(stripped, stripped)
 
         # 1. 사전 직접 hit (synonym 정규화 전) — 의미 보존 우선
         if accountNm and accountNm in m:
@@ -181,7 +193,7 @@ class AccountNormalizer:
             return m[stripped]
 
         # 2. nameSynonym 정규화 후 재조회 — 사전에 없는 변형 흡수
-        normalizedNm = self._nameSynonym.get(accountNm, accountNm) if accountNm else ""
+        normalizedNm = ACCOUNT_NAME_SYNONYMS.get(accountNm, accountNm) if accountNm else ""
         if normalizedNm and normalizedNm in m:
             return m[normalizedNm]
         if normalizedId and normalizedId in m:

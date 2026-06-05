@@ -23,8 +23,7 @@ _log = logging.getLogger(__name__)
 
 def _buildEdgarTagKeys(dartSnakeId: str) -> set[str]:
     """dartSnakeId에 매핑되는 모든 EDGAR XBRL tag를 수집."""
-    EdgarMapper._ensureLoaded()
-    tagMap = EdgarMapper._tagMap or {}
+    tagMap = EdgarMapper.tagMap()
 
     # DART alias → EDGAR snakeId 역매핑
     edgarIds = {dartSnakeId}

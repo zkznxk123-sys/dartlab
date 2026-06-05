@@ -16,6 +16,22 @@ from dartlab.core.accounts.data import loadAccounts, loadSupplements
 
 _NUM_PREFIX = re.compile(r"^\d+[.\s·]+")
 
+# 옛 in-code 상수 — SSOT layers 에서 로드하되 module-level 단일 객체 identity 보존
+# (facade `_EDGAR_LABELS`/`_KR_SYNONYMS` re-export 대상). reset() 이 in-place 갱신.
+_EDGAR_LABELS: dict[str, str] = {}
+_KR_SYNONYMS: dict[str, str] = {}
+
+
+def _populate() -> None:
+    layers = loadAccounts().get("layers", {})
+    _EDGAR_LABELS.clear()
+    _EDGAR_LABELS.update(layers.get("labelEn", {}))
+    _KR_SYNONYMS.clear()
+    _KR_SYNONYMS.update(layers.get("korSynonym", {}))
+
+
+_populate()
+
 
 def _edgarKorNames() -> dict[str, str]:
     """SSOT ``edgar.accounts`` 에서 snakeId → korName (US-GAAP 계정)."""
@@ -120,7 +136,7 @@ def englishLabels() -> dict[str, str]:
         >>> englishLabels()["sales"]
         'Revenue'
     """
-    return dict(loadAccounts().get("layers", {}).get("labelEn", {}))
+    return dict(_EDGAR_LABELS)
 
 
 def _snakeToTitle(snakeId: str) -> str:
@@ -154,8 +170,7 @@ def reverseKoreanLabels() -> dict[str, str]:
         nk = re.sub(r"\s+", "", nk).lower()
         if nk not in reverse:
             reverse[nk] = sid
-    korSynonym = loadAccounts().get("layers", {}).get("korSynonym", {})
-    for synonym, sid in korSynonym.items():
+    for synonym, sid in _KR_SYNONYMS.items():
         if synonym not in reverse:
             reverse[synonym] = sid
     return reverse
@@ -224,6 +239,7 @@ def reset() -> None:
         >>> from dartlab.core.accounts import labels
         >>> labels.reset()
     """
+    _populate()  # 모듈 상수 in-place 갱신 (identity 보존, facade re-export stale 차단)
     koreanLabels.cache_clear()
     englishLabels.cache_clear()
     reverseKoreanLabels.cache_clear()

@@ -189,13 +189,15 @@ def _writeJsonAtomic(path: Path, data: dict, *, compact: bool = True) -> None:
 
 
 def _resetMapperCache() -> None:
-    """AccountMapper 싱글턴 + labels lru_cache 모두 무효화."""
-    try:
-        from dartlab.core.utils.labels import _loadAccountMappings
-        from dartlab.providers.dart.finance.mapper import AccountMapper
+    """account SSOT 전 캐시 무효화 — owner ``release()`` 직결.
 
-        _loadAccountMappings.cache_clear()
-        AccountMapper.release()
+    loadAccounts/loadSupplements lru + normalize/edgar/labels/aliases 파생캐시 +
+    in-place 모듈 dict(ID_SYNONYMS/SNAKEID_ALIASES 등) 전부 1 함수로 리셋.
+    """
+    try:
+        from dartlab.core.accounts import release
+
+        release()
     except ImportError:  # pragma: no cover - import 실패 시 동일 프로세스 캐시 미해제
         pass
 
