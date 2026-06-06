@@ -107,7 +107,7 @@ def scoreChanges(
     Examples
     --------
     >>> from dartlab.scan.watch.scorer import scoreChanges
-    >>> scored = scoreChanges(diffResult, sections=docs.sections)
+    >>> scored = scoreChanges(diffResult, sections=panelTextWide)
     >>> scored[0].score
 
     Capabilities:

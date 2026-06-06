@@ -503,7 +503,7 @@ def listAvailableModules(c: Company) -> list[dict[str, str]]:
     from dartlab.core.registry import getEntry
 
     _DATA_FLAGS = {
-        "docs": c._hasDocs,
+        "panel": c._hasPanel,
         "finance": _hasFinance(c),
         "report": c._hasReport,
     }

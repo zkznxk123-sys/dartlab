@@ -33,6 +33,15 @@ get_company = getCompany
 stream_topic_summary = streamTopicSummary
 
 
+def _panelTextWide(company):
+    """Return DART panel text wide view for compatibility endpoints."""
+
+    loader = getattr(company, "_panelTextWide", None)
+    if loader is None:
+        return None
+    return loader()
+
+
 @router.get("/api/search")
 def apiSearch(q: str = Query(..., min_length=1)):
     """종목 검색 — 회사명 substring + KIND 주요제품 substring 합집합. 둘 다 0 이면 fuzzy.
@@ -382,58 +391,6 @@ def apiCompanyIndex(code: str, request: Request, response: Response):
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
-@router.get("/api/company/{code}/sections")
-def apiCompanySections(code: str, request: Request, response: Response):
-    """merged topic x period 수평화 테이블."""
-    try:
-        company = getCompany(code)
-        data = {
-            "stockCode": company.stockCode,
-            "corpName": company.corpName,
-            "payload": serializePayload(company.sections, maxRows=5000),
-        }
-        return etagResponse(request, response, data, maxAge=300, swr=1800)
-    except HANDLED_API_ERRORS as exc:
-        raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
-
-
-@router.get("/api/company/{code}/sections/raw")
-def apiCompanySectionsRaw(
-    code: str,
-    request: Request,
-    period: str | None = Query(None, description="단일 period 필터"),
-    sectionTitle: str | None = Query(None, alias="section_title", description="단일 section_title 필터"),
-    response: Response = None,
-):
-    """raw XML 원본 — 모든 DART 태그 보존. viewer / parser 룰 변경 입력.
-
-    plan snazzy-wibbling-origami. sections artifact 의 ``_raw.parquet`` 직접 응답:
-    P / SPAN / TABLE / TD ALIGN / AUNIT / ADENO / CLASS / USERMARK 등 모든 태그.
-    frontend renderer 가 raw XML 직접 파싱 가능. docs.parquet 우회 (사용자 측 폐기 path).
-    """
-    try:
-        company = getCompany(code)
-        # docs sections artifact 은퇴 → panel raw 공시 보드(tag=True, 원본 XML 태그 보존).
-        periods_filter = [period] if period else None
-        df = company.panel(tag=True, periods=periods_filter)
-        if df is None or df.is_empty():
-            raise HTTPException(status_code=404, detail=f"panel raw 공시 부재 (code={code})")
-        if sectionTitle:
-            import polars as pl
-
-            col = "sectionLeaf" if "sectionLeaf" in df.columns else "section_title"
-            df = df.filter(pl.col(col) == sectionTitle)
-        data = {
-            "stockCode": company.stockCode,
-            "corpName": company.corpName,
-            "rowCount": df.height,
-            "rows": df.to_dicts(),
-        }
-        return etagResponse(request, response, data, maxAge=300, swr=1800)
-    except HANDLED_API_ERRORS as exc:
-        raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
-
-
 @router.get("/api/company/{code}/panel/init")
 def apiCompanyInit(
     code: str,
@@ -542,12 +499,12 @@ def apiViewerDoc(
     compare: str | None = Query(None),
     response: Response = None,
 ):
-    """sections 기반 신구대조 뷰어 — viewer() dict 반환."""
+    """panel text 기반 신구대조 뷰어 — viewer() dict 반환."""
     try:
         company = getCompany(code)
-        sec = company.sections
+        sec = _panelTextWide(company)
         if sec is None:
-            raise HTTPException(status_code=404, detail="sections 없음")
+            raise HTTPException(status_code=404, detail="panel text 없음")
 
         if not base:
             periods = sorted(

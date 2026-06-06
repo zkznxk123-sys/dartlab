@@ -42,36 +42,9 @@ def normalizeLoadedFrame(df: pl.DataFrame, category: str) -> pl.DataFrame:
     """loadData 반환 직전 category별 표준 컬럼과 메모리 타입을 정리한다."""
     if "__index_level_0__" in df.columns:
         df = df.drop("__index_level_0__")
-    if category == "docs":
-        df = normalizeDartDocs(df)
-    elif category == "edgarDocs":
+    if category == "edgarDocs":
         df = normalizeEdgarDocs(df)
     return optimizeMemory(df)
-
-
-def normalizeDartDocs(df: pl.DataFrame) -> pl.DataFrame:
-    """DART docs parquet에 공통 docs 컬럼 alias를 부여한다."""
-    cols = set(df.columns)
-    exprs: list[pl.Expr] = []
-
-    if "source" not in cols:
-        exprs.append(pl.lit("dart").alias("source"))
-    if "entity_id" not in cols and "stock_code" in cols:
-        exprs.append(pl.col("stock_code").alias("entity_id"))
-    if "doc_id" not in cols and "rcept_no" in cols:
-        exprs.append(pl.col("rcept_no").alias("doc_id"))
-    if "doc_date" not in cols and "rcept_date" in cols:
-        exprs.append(pl.col("rcept_date").alias("doc_date"))
-    if "doc_url" not in cols and "section_url" in cols:
-        exprs.append(pl.col("section_url").alias("doc_url"))
-    if "period_key" not in cols and "report_type" in cols:
-        from dartlab.core.utils.periodKey import parsePeriodKey
-
-        exprs.append(pl.col("report_type").map_elements(parsePeriodKey, return_dtype=pl.Utf8).alias("period_key"))
-
-    if exprs:
-        return df.with_columns(exprs)
-    return df
 
 
 def normalizeEdgarDocs(df: pl.DataFrame) -> pl.DataFrame:
@@ -197,7 +170,6 @@ __all__ = [
     "applyEdgarPeriodKeys",
     "edgarReportTypeFromRow",
     "inferEdgarPeriodKeyMap",
-    "normalizeDartDocs",
     "normalizeEdgarDocs",
     "normalizeLoadedFrame",
     "optimizeMemory",

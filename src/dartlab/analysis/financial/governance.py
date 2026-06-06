@@ -17,7 +17,7 @@ from dartlab.core.memory import memoizedCalc
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
 
-# ── docs 농장 은퇴 → providers.dart.sections 기반 정성 표 재건 (드롭 아님, SSOT) ──
+# ── docs 농장 은퇴 → providers.dart.panel.text 기반 정성 표 재건 (드롭 아님, SSOT) ──
 
 _KRW_UNIT = {"백만원": 1_000_000, "백만": 1_000_000, "억원": 100_000_000, "억": 100_000_000, "천원": 1_000}
 
@@ -516,16 +516,16 @@ def _getDartStockCode(company) -> str | None:
 
 
 def _loadSanction(company):
-    """제재 현황 — providers.dart.sections.sectionTables(panel '제재' 표) 재건. DART 외/데이터 없음 None."""
+    """제재 현황 — providers.dart.panel.text.panelXmlTables(panel '제재' 표) 재건. DART 외/데이터 없음 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
     import polars as pl
 
-    from dartlab.providers.dart.sections import sectionTables
+    from dartlab.providers.dart.panel.text import panelXmlTables
 
     rows: list[dict] = []
-    for t in sectionTables(code, sectionPattern="제재"):
+    for t in panelXmlTables(code, sectionPattern="제재"):
         header = "".join(t[0]) if t else ""
         if "제재기관" not in header and "제재 기관" not in header:
             continue
@@ -549,7 +549,7 @@ def _loadSanction(company):
 
 
 def _loadContingentLiability(company):
-    """우발부채/지급보증 — providers.dart.sections.sectionTables(panel '우발부채' 표) 재건.
+    """우발부채/지급보증 — providers.dart.panel.text.panelXmlTables(panel '우발부채' 표) 재건.
 
     소송(lawsuitDf)은 별도 표 부재 시 빈 DF, 지급보증(guaranteeDf)은 표 금액 best-effort 합산.
     """
@@ -558,10 +558,10 @@ def _loadContingentLiability(company):
         return None
     import polars as pl
 
-    from dartlab.providers.dart.sections import sectionTables, sectionTexts
+    from dartlab.providers.dart.panel.text import panelTextRows, panelXmlTables
 
     # 연도별 지급보증 총액 best-effort — '우발부채' 섹션 표 셀 중 원화 금액 합.
-    texts = sectionTexts(code)
+    texts = panelTextRows(code)
     guaranteeRows: list[dict] = []
     if texts is not None and not texts.is_empty():
         sub = texts.filter(pl.col("sectionLeaf").str.contains("우발"))
@@ -569,7 +569,7 @@ def _loadContingentLiability(company):
             if not (period[:4].isdigit()):
                 continue
             total = 0
-            for t in sectionTables(code, sectionPattern="우발", period=period):
+            for t in panelXmlTables(code, sectionPattern="우발", period=period):
                 for r in t[1:]:
                     for cell in r:
                         amt = _parseKrwAmount(cell)
@@ -611,16 +611,16 @@ def _fetchLatestEquity(company, *, basePeriod: str | None = None) -> int | None:
 
 
 def _loadExecutiveDocs(company):
-    """임원 현황 — providers.dart.sections.sectionTables(panel '임원' 표) 재건. 표 부재 None."""
+    """임원 현황 — providers.dart.panel.text.panelXmlTables(panel '임원' 표) 재건. 표 부재 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
     import polars as pl
 
-    from dartlab.providers.dart.sections import sectionTables
+    from dartlab.providers.dart.panel.text import panelXmlTables
 
     rows: list[dict] = []
-    for t in sectionTables(code, sectionPattern="임원 및 직원"):
+    for t in panelXmlTables(code, sectionPattern="임원 및 직원"):
         header = "".join(t[0]) if t else ""
         if "성명" not in header and "직위" not in header and "직책" not in header:
             continue
@@ -640,16 +640,16 @@ CEO_TURNOVER_WINDOW_YEARS = 5
 
 
 def _loadRelatedPartyTx(company):
-    """특수관계자 거래 — providers.dart.sections.sectionTables(panel '특수관계자' 표) 재건. 표 부재 None."""
+    """특수관계자 거래 — providers.dart.panel.text.panelXmlTables(panel '특수관계자' 표) 재건. 표 부재 None."""
     code = _getDartStockCode(company)
     if not code:
         return None
     import polars as pl
 
-    from dartlab.providers.dart.sections import sectionTables
+    from dartlab.providers.dart.panel.text import panelXmlTables
 
     entities: list[dict] = []
-    for t in sectionTables(code, sectionPattern="특수관계자"):
+    for t in panelXmlTables(code, sectionPattern="특수관계자"):
         for r in t[1:]:
             ent = (r[0] or "").strip() if r else ""
             if ent and ent not in ("기초", "기말", "소계", "합계", "구분"):

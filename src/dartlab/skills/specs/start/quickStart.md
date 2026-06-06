@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: start
-purpose: 설치 직후 Company · sections · show · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.
+purpose: 설치 직후 Company · topics/panel · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.
 whenToUse:
   - DartLab 설치 직후 첫 분석
   - 핵심 기능 빠르게 훑기
@@ -58,11 +58,11 @@ procedure:
   - dartlab.ask(question) 으로 자연어 분석 (LLM provider 필요).
 failureModes:
   - 종목코드 / ticker 혼동 (한국 6 자리 vs 미국 알파벳)
-  - show 의 topic 이름 오타 (companyOverview vs company-overview)
+  - panel 의 topic 이름 오타 (companyOverview vs company-overview)
   - ask 호출 전 dartlab[llm] 미설치
 forbidden:
   - 검증 없이 코드 결과를 결론으로 단정
-  - sections 에서 누락 (null) 을 0 으로 대체
+  - panel 결과의 누락 (null) 을 0 으로 대체
 examples:
   - 처음 dartlab 깔고 뭘 해봐야 하나
   - 8 분 안에 회사·시장·AI 까지 한 번 훑기
@@ -99,7 +99,6 @@ c = dartlab.Company("005930")  # 삼성전자
 
 - **첫 사용**: HuggingFace 에서 자동 다운로드 (종목당 수 MB).
 - **이후**: 24 시간마다 HF 갱신 자동 확인 (HTTP HEAD, 비용 거의 0).
-- **대량 다운로드**: `dartlab.downloadAll("finance")` — 전 종목 일괄 (`pip install dartlab[hf]`).
 - **오프라인**: `dartlab.loadData("005930", refresh="local_only")` — 네트워크 체크 생략.
 
 ## 2. 회사 전체 보기
@@ -135,8 +134,8 @@ c.diff("businessOverview")  # 한 topic 깊이 보기
 
 ```python
 apple = dartlab.Company("AAPL")
-apple.show("IS")
-apple.show("10-K::item1ARiskFactors")
+apple.panel("IS")
+apple.panel("10-K::item1ARiskFactors")
 ```
 
 ## 7. 시장 횡단 (Scan)

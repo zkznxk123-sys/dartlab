@@ -2,11 +2,11 @@
 
 사용 예시::
 
-    dartlab update                   # finance+report 갱신 (기본)
-    dartlab update --all             # finance+report+docs 전부
+    dartlab update                   # 로컬 finance+report 파일 갱신 확인 (기본)
+    dartlab update --all             # 로컬 finance+report+panel 파일 갱신 확인
     dartlab update -c finance        # finance만
     dartlab update 005930            # 특정 종목만 갱신
-    dartlab update 005930 -c docs    # 특정 종목 docs만
+    dartlab update 005930 -c panel   # 특정 종목 panel만
 """
 
 from __future__ import annotations
@@ -28,12 +28,12 @@ def configureParser(subparsers) -> None:
         "-c",
         type=str,
         default=None,
-        help="카테고리 (쉼표 구분: finance,report,docs)",
+        help="카테고리 (쉼표 구분: finance,report,panel)",
     )
     parser.add_argument(
         "--all",
         action="store_true",
-        help="docs 포함 전체 갱신 (기본은 finance+report만)",
+        help="panel 포함 로컬 파일 갱신 확인 (기본은 finance+report만)",
     )
     parser.set_defaults(handler=run)
 
@@ -75,22 +75,30 @@ def _updateCodes(console, args) -> int:
 
 
 def _updateAll(console, args) -> int:
-    """전체 카테고리를 HF 최신으로 갱신."""
-    from dartlab.core.dataLoader import downloadAll
+    """로컬에 존재하는 파일만 HF 최신 여부를 확인하고 갱신."""
+    from dartlab.core.dataConfig import resolveDataCategory
+    from dartlab.core.dataLoader import _dataDir, loadData
 
-    cats = _parseCategories(args)
+    cats = [resolveDataCategory(cat) for cat in _parseCategories(args)]
+    updated = 0
 
     for cat in cats:
-        console.print(f"[bold]{cat}[/] 갱신 중...")
-        try:
-            downloadAll(cat, forceUpdate=True)
-            console.print(f"[bold]{cat}[/] 갱신 완료")
-        except ImportError:
-            console.print(f"[red]{cat}: huggingface_hub 필요 (pip install --upgrade dartlab)[/]")
-            return 1
-        except RuntimeError as e:
-            console.print(f"[red]{cat}: {e}[/]")
-            return 1
+        dataDir = _dataDir(cat)
+        files = sorted(path for path in dataDir.glob("*.parquet") if not path.name.startswith("_"))
+        if not files:
+            console.print(f"[yellow]{cat}: 로컬 파일 없음 — 건너뜀[/]")
+            continue
+
+        console.print(f"[bold]{cat}[/] {len(files)}개 로컬 파일 갱신 확인...")
+        for path in files:
+            code = path.stem
+            try:
+                loadData(code, cat, refresh="force_check")
+                updated += 1
+            except (RuntimeError, FileNotFoundError, ValueError) as e:
+                console.print(f"  {code}/{cat}: [red]{e}[/]")
+
+    console.print(f"\n확인 완료: {updated}건")
 
     return 0
 
@@ -100,5 +108,5 @@ def _parseCategories(args) -> list[str]:
     if args.categories:
         return [c.strip() for c in args.categories.split(",")]
     if getattr(args, "all", False):
-        return ["finance", "report", "docs"]
+        return ["finance", "report", "panel"]
     return ["finance", "report"]

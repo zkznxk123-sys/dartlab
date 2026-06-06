@@ -12,36 +12,8 @@ from urllib.request import Request, urlopen
 
 
 def _noRefreshEnv() -> bool:
-    """``DARTLAB_NO_REFRESH=1`` 시 HF refresh 우회 — 로컬 zip 재빌드 docs.parquet
-    가 HF 의 옛 본문으로 덮어쓰이지 않도록. 로컬 작업 / 디버그 / 정밀 회귀 검증 시.
-
-    ``checks.py::_checkDartDocsFreshness`` 와 짝 — L1/L2/L3 freshness 경로 전수 차단.
-    """
+    """``DARTLAB_NO_REFRESH=1`` 시 HF refresh 우회."""
     return os.environ.get("DARTLAB_NO_REFRESH") == "1"
-
-
-def _hasLocalDocsZips(path: Path) -> bool:
-    """``docs`` 카테고리 path 에 한해, 로컬 ``data/original/dart/docs/{code}/`` zip 디렉토리가
-    1 개 이상 zip 을 보유하면 True.
-
-    zip = SSOT, parquet = derived (zipCollector docstring). zip 가 있는데 HF 본문으로
-    parquet 를 덮어쓰는 것은 SSOT 위반 — 운영자가 직접 rebuildFromZips 한 결과가
-    무효화된다. 본 가드는 ``shouldRefreshDart`` / ``shouldRefreshHfCategory`` 진입
-    직후 호출 — env var 와 무관하게 로컬 zip 우선 정책 강행.
-    """
-    try:
-        if path.parent.name != "docs":
-            return False
-        code = path.stem
-        # path = data/dart/docs/{code}.parquet → parent×3 = data → original/dart/docs/{code}
-        zipDir = path.parent.parent.parent / "original" / "dart" / "docs" / code
-        if not zipDir.is_dir():
-            return False
-        for _ in zipDir.glob("*.zip"):
-            return True
-        return False
-    except OSError:
-        return False
 
 
 def downloadWithRetry(
@@ -158,8 +130,6 @@ def shouldRefreshDart(
     """DART 카테고리 로컬 파일의 갱신 필요 여부를 판단한다."""
     if _noRefreshEnv():
         return False
-    if _hasLocalDocsZips(path):
-        return False
     if refresh == "local_only":
         return False
     if refresh == "force_check":
@@ -192,8 +162,6 @@ def shouldRefreshHfCategory(
 ) -> bool:
     """HF 공개 parquet 카테고리별 freshness 정책."""
     if _noRefreshEnv():
-        return False
-    if category == "docs" and _hasLocalDocsZips(path):
         return False
     if category not in {"krxPrices", "krxIndices"}:
         return shouldRefreshDartFunc(path, refresh)

@@ -118,7 +118,7 @@ def buildIndustryMap(
         2800
 
     Guide:
-        ``Industry().build()`` 의 위임 대상. 전 종목 docs parquet 스캔 + finance.parquet 로드로
+        ``Industry().build()`` 의 위임 대상. 전 종목 panel parquet 스캔 + finance.parquet 로드로
         비용이 큼 — 일반 사용자 호출 금지.
 
     When:

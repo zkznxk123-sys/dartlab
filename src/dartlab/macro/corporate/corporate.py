@@ -109,7 +109,7 @@ def analyzeCorporate(*, market: str = "KR", asOf: str | None = None, overrides: 
         leverageCycle 3 함수 호출 → dict 합성.
 
     Requires:
-        scan/finance.parquet (dartlab collect --scan 또는 downloadAll('scan')).
+        scan/finance.parquet 또는 collect 기반 scan 데이터.
 
     Raises:
         없음 — parquet 없으면 description 안내 메시지 반환.
@@ -143,7 +143,7 @@ def analyzeCorporate(*, market: str = "KR", asOf: str | None = None, overrides: 
         result["earningsCycle"] = None
         result["ponziRatio"] = None
         result["leverageCycle"] = None
-        result["description"] = "scan/finance.parquet 없음 — dartlab collect --scan 또는 downloadAll('scan') 필요"
+        result["description"] = "scan/finance.parquet 없음 — scan 프리빌드 또는 collect 데이터 필요"
         return result
 
     # 이익 사이클

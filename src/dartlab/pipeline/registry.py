@@ -10,8 +10,8 @@ from __future__ import annotations
 from dartlab.pipeline.types import StageSpec
 
 # recent set — `dartlab sync`(인자 없음) 기본 수집 카테고리.
-# docs 농장 은퇴 — sections artifact 빌드 stage 제거(farm sectionsBuilder 삭제). docs 수집은 유지(HF 보존).
-RECENT_SET: tuple[str, ...] = ("finance", "report", "docs", "panel")
+# DART 공시 본문은 panel SSOT 이므로 finance/report/panel 만 유지.
+RECENT_SET: tuple[str, ...] = ("finance", "report", "panel")
 
 
 def buildRegistry() -> dict[str, StageSpec]:
@@ -38,12 +38,11 @@ def buildRegistry() -> dict[str, StageSpec]:
             uploadCategories=("allFilings",),
             label="DART 비정기 공시 일별 parquet (forward 7일 증분)",
         ),
-        StageSpec("docs", run=dart.runDartRecent, uploadCategories=("docs",), label="DART 공시문서 (증분)"),
         StageSpec("full", run=dart.runDartFull, uploadCategories=("finance", "report"), label="DART 88분기 전수"),
         StageSpec(
             "newStocks",
             run=dart.runDartNewStocks,
-            uploadCategories=("finance", "report", "docs"),
+            uploadCategories=("finance", "report"),
             label="DART 신규상장 부트스트랩",
         ),
         StageSpec("panel", run=dart.runDartPanel, uploadCategories=("panel",), label="DART panel 수평화"),

@@ -3,7 +3,7 @@
 본 PR-E6 단독 검증:
 - ``_looksLikeEdgarTicker`` 판별 — 영문 ticker True, KR 6 자리 False
 - ``_loadEdgarSectionsAsDocs`` 가 EDGAR sections artifact → 옛 docs schema 변환
-- ``loadDocsForStock(ticker)`` 가 ticker 입력 시 EDGAR path 사용
+- ``loadPanelTextForStock(ticker)`` 가 ticker 입력 시 EDGAR path 사용
 - 호환 schema (year/section_title/section_content/period) 노출 — caller 변경 0
 
 artifact 부재 시 None — caller (sentiment/risk 등) 가 None 분기.
@@ -19,7 +19,7 @@ from dartlab.providers.edgar.docs.sections.sectionsBuilder import (
 from dartlab.quant.screen._dataAccessScan import (
     _loadEdgarSectionsAsDocs,
     _looksLikeEdgarTicker,
-    loadDocsForStock,
+    loadPanelTextForStock,
 )
 
 _FIXTURE_TICKER = "ZTSTA"  # SEC ticker 양식 (영문 1~5 자) — underscore 미허용.
@@ -88,7 +88,7 @@ def test_loads_edgar_sections_as_docs_exposes_compat_schema() -> None:
 
 
 def test_load_docs_for_stock_dispatches_to_edgar_for_ticker() -> None:
-    """loadDocsForStock(ticker) 가 EDGAR path 사용 — DART path 도달 0 보장."""
+    """loadPanelTextForStock(ticker) 가 EDGAR path 사용 — DART path 도달 0 보장."""
     removeSectionsArtifact(_FIXTURE_TICKER)
     rows = buildSectionRowsFromFiling(
         items=[{"title": "Item 7. MDA", "content": "MD&A body."}],
@@ -105,7 +105,7 @@ def test_load_docs_for_stock_dispatches_to_edgar_for_ticker() -> None:
     )
     emitPeriodArtifacts(_FIXTURE_TICKER, rows)
     try:
-        df = loadDocsForStock(_FIXTURE_TICKER)
+        df = loadPanelTextForStock(_FIXTURE_TICKER)
         assert df is not None
         assert "section_content" in df.columns
         # EDGAR path 가 부재 분기 안 탔는지 — content 가 EDGAR markdown 본문.
@@ -120,6 +120,6 @@ def test_load_docs_for_stock_kr_path_unaffected() -> None:
 
     artifact 부재 KR 종목 → log warning + None 반환 (옛 동작 동일).
     """
-    df = loadDocsForStock("999999")  # 부재 KR 종목
+    df = loadPanelTextForStock("999999")  # 부재 KR 종목
     # 옛 path 가 None 반환 (artifact 없음 + docs.parquet 없음).
     assert df is None

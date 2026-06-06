@@ -1,0 +1,38 @@
+{
+  "_metadata": {
+    "description": "DART panel topic 라우팅 매핑 — panel topic 파서 SSOT",
+    "source": "providers/dart/panel"
+  },
+  "detailTopicMap": {
+    "재고자산명세서": "noteInventoryDetail",
+    "감가상각비등명세서": "noteDepreciationDetail",
+    "제조원가명세서": "noteManufacturingCostDetail",
+    "법인세등명세서": "noteTaxDetail",
+    "법인세비용명세서": "noteTaxDetail",
+    "개별재무제표에관한사항": "noteSeparateFinancialStatementsDetail",
+    "연결재무제표에관한사항": "noteConsolidatedFinancialStatementsDetail",
+    "유가증권명세서": "noteSecuritiesDetail",
+    "주요채권명세서": "noteReceivablesDetail",
+    "사채명세서": "noteDebtDetail",
+    "장기차입금명세서": "noteDebtDetail",
+    "단기차입금명세서": "noteDebtDetail",
+    "주요채무명세서": "noteDebtDetail",
+    "예금등명세서": "noteCashDetail",
+    "감사인의보수등에관한사항": "auditFeeDetail"
+  },
+  "detailTopicKeywords": {
+    "noteInventoryDetail": ["재고자산", "inventory"],
+    "noteDepreciationDetail": ["감가상각", "depreciation"],
+    "noteManufacturingCostDetail": ["제조원가", "manufacturing"],
+    "noteTaxDetail": ["법인세", "세무", "tax"],
+    "noteSecuritiesDetail": ["유가증권", "securities"],
+    "noteReceivablesDetail": ["채권", "매출채권", "receivables"],
+    "noteDebtDetail": ["차입금", "사채", "채무", "debt", "borrowings"],
+    "noteCashDetail": ["예금", "현금", "cash"],
+    "auditFeeDetail": ["감사보수", "보수", "비감사용역"]
+  },
+  "chapterByMajor": {
+    "1": "I", "2": "II", "3": "III", "4": "IV", "5": "V", "6": "VI",
+    "7": "VII", "8": "VIII", "9": "IX", "10": "X", "11": "XI", "12": "XII"
+  }
+}

@@ -84,7 +84,7 @@ dart · edgar · edinet 3 provider 의 공통 표면을 정의하는 **5 Protoco
 
 | Protocol | 위치 | 핵심 메서드 |
 |---|---|---|
-| `CompanyProtocol` | `src/dartlab/core/protocols.py:69-225` | `__enter__` / `__exit__` / `show` / `select` / `trace` / `diff` / `filings` / `disclosure` / `liveFilings` / `readFiling` / `view` / `quant` / `ask` + `index` / `topics` / `sections` property |
+| `CompanyProtocol` | `src/dartlab/core/protocols.py:69-225` | `__enter__` / `__exit__` / `show` / `select` / `trace` / `diff` / `filings` / `disclosure` / `liveFilings` / `readFiling` / `view` / `quant` / `ask` + `index` / `topics` property |
 | `DocsProvider` | `src/dartlab/core/protocols.py:366-419` | `fetchFiling(stockCode, *, period)` / `listSections(...)` / `iterSections(...)` |
 | `FinanceProvider` | `src/dartlab/core/protocols.py:422-476` | `fetchStatements(...)` / `listAccounts(...)` / `iterAccounts(...)` |
 | `FilingsProvider` | `src/dartlab/core/protocols.py:480-513` | `search(query, *, market=None, limit=20)` / `iterSearch(...)` |
@@ -96,7 +96,7 @@ dart · edgar · edinet 3 provider 의 공통 표면을 정의하는 **5 Protoco
 
 ### 1. `providers/{name}/company.py` 의 `Company` 가 `CompanyProtocol` 구현
 
-12 메서드 + 3 property 시그니처 그대로. dart-only 메서드 (`codeName` / `keywordTrend` / `news` / `listing` / `credit` 등 18) 는 본 Protocol 에 없음 — 신규 provider 는 구현 의무 없음.
+12 메서드 + 2 property 시그니처 그대로. dart-only 메서드 (`codeName` / `keywordTrend` / `news` / `listing` / `credit` 등 18) 는 본 Protocol 에 없음 — 신규 provider 는 구현 의무 없음.
 
 ```python
 # providers/sgx/company.py 예시
@@ -106,7 +106,7 @@ class Company:  # implements CompanyProtocol structurally
     def __init__(self, stockCode: str) -> None: ...
     def __enter__(self) -> "Company": ...
     def __exit__(self, *_: object) -> None: ...
-    # show / select / trace / ... 12 method + 3 property
+    # show / select / trace / ... 12 method + 2 property
 ```
 
 ### 2. `providers/{name}/{docs,finance,filings}` namespace 가 각 Provider Protocol 구현
@@ -150,7 +150,7 @@ __all__ = ["finance", "docs", "filings", "Company"]
 | 시장 메타 | `listing` / `industry` |
 | 검색 / 뉴스 | `search` / `keywordTrend` / `news` / `publicSentiment` |
 | 분석 결합 | `credit` / `marketScan` / `keywordTrend` / `watch` / `story` / `analysis` / `validateStory` |
-| 데이터 | `gather` / `table` / `rawDocs` / `rawFinance` / `rawReport` |
+| 데이터 | `gather` / `table` / `rawFinance` / `rawReport` |
 
 ### edgar (미국, 15,010 LoC)
 P-PR6/7/8 후 dart 패리티 도달. XBRL / 10-K sections / Form 4 / DEF 14A / 8-K — 자체 구현 확장 (외부 `edgartools` 미도입).

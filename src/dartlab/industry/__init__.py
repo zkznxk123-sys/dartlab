@@ -260,7 +260,7 @@ class Industry:
             >>> Industry().build(skipDocs=False)
 
         Guide:
-            전 종목 docs parquet 스캔 비용이 크다. 일반 사용자는 호출하지 말고 manifest 빌드된
+            전 종목 panel parquet 스캔 비용이 크다. 일반 사용자는 호출하지 말고 manifest 빌드된
             결과 (``Industry()(industryId)`` / ``edges()``) 조회만.
 
         When:
@@ -272,7 +272,7 @@ class Industry:
 
         Requires:
             - L1 raw: DART 사업보고서·재무·KindList
-            - L1.5 frame: scan/finance.parquet + docs/{code}.parquet
+            - L1.5 frame: scan/finance.parquet + panel/{code}.parquet
 
         See Also:
             - ``dartlab.industry.build.pipeline.buildIndustryMap`` : 본 위임 대상

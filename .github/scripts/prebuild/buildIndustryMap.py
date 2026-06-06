@@ -1586,8 +1586,8 @@ def _buildMeta() -> dict:
 
     # finance parquet 가장 최근 갱신
     finance_mtime = _latest_mtime(data_dir / "scan", "*.parquet")
-    # docs parquet (공시 원문)
-    docs_mtime = _latest_mtime(data_dir / "docs", "*.parquet")
+    # panel parquet (공시 본문 SSOT)
+    panel_mtime = _latest_mtime(data_dir / "panel", "*.parquet")
     # 블로그 분석글 최근 갱신
     reviews_mtime = _latest_mtime(blog_dir, "index.md")
     # taxonomy/nodes (산업 분류)
@@ -1626,7 +1626,7 @@ def _buildMeta() -> dict:
         "buildTime": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "commitSha": commit_sha,
         "dataAsOf": {
-            "dart": docs_mtime,
+            "dart": panel_mtime,
             "finance": finance_mtime,
             "reviews": reviews_mtime,
             "taxonomy": taxonomy_mtime,

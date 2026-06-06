@@ -280,7 +280,7 @@ HuggingFace 에서 받기 때문에 네트워크 속도에 의존한다.
 ## 다음 단계
 
 - [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 첫 진입과 검색 절차.
-- [start.quickStart](/skills/start.quickStart) — 8 분 walkthrough (Company / sections / show / scan / ask).
+- [start.quickStart](/skills/start.quickStart) — 8 분 walkthrough (Company / topics/panel / scan / ask).
 - [start.useSkillsCatalog](/skills/start.useSkillsCatalog) — skills 카탈로그 사용법.
 - [Skills 카탈로그 (`/skills`)](/skills) — 178 개 절차 검색.
 

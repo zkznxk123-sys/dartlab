@@ -1,6 +1,6 @@
 """재무공시 doc 단발 호출 추상화 — DIP (정공법 B).
 
-analysis/financial 의 governance/predictionSignals/valuation 가 providers/dart/docs/finance/X
+analysis/financial 의 governance/predictionSignals/valuation 가 과거 provider 내부 finance/doc 함수
 및 providers/dart/report/pivot 의 단발 함수 (sanction/contingentLiability/executive/
 relatedPartyTx/pivotDividend) 를 직접 호출. 그게 analysis ↔ providers cycle 의 원인.
 
@@ -58,7 +58,7 @@ class FinanceDocAccessor(Protocol):
 
 _ACCESSOR: FinanceDocAccessor | None = None
 
-# docs 농장 은퇴 — DART financeDoc accessor 제거. 미등록 시 getFinanceDocAccessor()=None → 소비처 graceful degrade.
+# DART financeDoc accessor 제거. 미등록 시 getFinanceDocAccessor()=None → 소비처 graceful degrade.
 _KNOWN_ACCESSOR_MODULES: tuple[str, ...] = ()
 _DISCOVERED = False
 

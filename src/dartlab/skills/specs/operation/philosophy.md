@@ -104,7 +104,7 @@ dartlab 은 **4 가지 비교 가능성** 을 늘리는 데 존재한다.
 | 비교 축 | 의미 | 엔진 |
 |---|---|---|
 | **회사간** | 같은 시점에 다른 기업을 비교 | `engines.company`, `engines.scan` |
-| **기간간** | 같은 회사를 다른 시점으로 비교 | `Company.sections`, `Company.diff` |
+| **기간간** | 같은 회사를 다른 시점으로 비교 | `Company.panel`, `Company.diff` |
 | **시장간** | 한국 DART vs 미국 EDGAR | `engines.edgar`, `Company("AAPL")` |
 | **엔진간** | 다른 분석 축의 결과를 한 회사 위에서 합침 | `engines.analysis`, `engines.story` |
 

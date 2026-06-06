@@ -294,7 +294,7 @@ def fetchEdgarDocs(
     emit("edgar:docs_start", ticker=ticker, count=len(filings), sinceYear=sinceYear)
 
     rows: list[dict] = []
-    sectionRows: list[dict] = []
+    panelTableRows: list[dict] = []
     filingIndex: list[dict] = []
     skippedFilings: list[str] = []
     if showProgress:
@@ -308,7 +308,7 @@ def fetchEdgarDocs(
                 _bar,
                 filingTimeout,
                 skippedFilings,
-                sectionRows=sectionRows,
+                panelTableRows=panelTableRows,
                 filingIndex=filingIndex,
             )
     else:
@@ -320,7 +320,7 @@ def fetchEdgarDocs(
             None,
             filingTimeout,
             skippedFilings,
-            sectionRows=sectionRows,
+            panelTableRows=panelTableRows,
             filingIndex=filingIndex,
         )
 
@@ -353,11 +353,11 @@ def fetchEdgarDocs(
 
     # PR-E2 dual-write — sections artifact 도 동시 emit. emit 실패 시 옛 docs.parquet 만
     # 보존 (warning + 진행). PR-E7 안전 게이트 통과 전까지 옛 path 단독으로 fallback 가능.
-    if sectionRows:
+    if panelTableRows:
         try:
             from dartlab.core.edgarBuild import emitIndexArtifact, emitPeriodArtifacts
 
-            secResult = emitPeriodArtifacts(ticker, sectionRows)
+            secResult = emitPeriodArtifacts(ticker, panelTableRows)
             emitIndexArtifact(ticker, filingIndex)
             emit(
                 "edgar:sections_save",
@@ -488,13 +488,13 @@ def _collectFilingRows(
     bar,
     filingTimeout: int,
     skippedFilings: list[str],
-    sectionRows: list[dict] | None = None,
+    panelTableRows: list[dict] | None = None,
     filingIndex: list[dict] | None = None,
 ) -> None:
-    """filing list 를 순회하면서 옛 rows (docs.parquet) + 신 sectionRows (sections artifact) 동시 누적.
+    """filing list 를 순회하면서 옛 rows (docs.parquet) + 신 panelTableRows (sections artifact) 동시 누적.
 
-    plan delegated-prancing-tower PR-E2 — dual-write 강행. ``sectionRows`` 가 None 이면
-    옛 path 단독 (back-compat). non-None 이면 buildSectionRowsFromFiling 호출해 신
+    plan delegated-prancing-tower PR-E2 — dual-write 강행. ``panelTableRows`` 가 None 이면
+    옛 path 단독 (back-compat). non-None 이면 buildpanelTableRowsFromFiling 호출해 신
     sections artifact row 도 누적. raw HTML 은 ``html`` 변수에서 두 path 동시 활용.
     """
     for filing in filings:
@@ -543,8 +543,8 @@ def _collectFilingRows(
             )
 
         # PR-E2 dual-write — sections artifact 신 path 동시 누적.
-        if sectionRows is not None and html is not None and items:
-            from dartlab.core.edgarBuild import buildSectionRowsFromFiling
+        if panelTableRows is not None and html is not None and items:
+            from dartlab.core.edgarBuild import buildpanelTableRowsFromFiling
 
             sectionMeta = {
                 "ticker": ticker,
@@ -559,13 +559,13 @@ def _collectFilingRows(
                 "year": filing["year"],
             }
             try:
-                secRows = buildSectionRowsFromFiling(
+                secRows = buildpanelTableRowsFromFiling(
                     items=items,
                     rawHtml=html,
                     formType=filing["formType"],
                     meta=sectionMeta,
                 )
-                sectionRows.extend(secRows)
+                panelTableRows.extend(secRows)
                 if filingIndex is not None:
                     filingIndex.append(sectionMeta)
             except (ValueError, AttributeError, OSError) as exc:

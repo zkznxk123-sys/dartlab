@@ -71,7 +71,6 @@ _ALWAYS_SHOW_PREFIXES = (
     "error:",
     "collect:",
     "download:",
-    "download_all:",
     "edgar:",
     "scan:prebuild",
     "stemindex:",

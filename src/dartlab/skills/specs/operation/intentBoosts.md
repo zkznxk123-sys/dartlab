@@ -285,7 +285,7 @@ intentBoosts:
       - corporate governance
       - K-ESG
     boost: 11.0
-  - skillIds: ["engines.company.sections"]
+  - skillIds: ["engines.panel"]
     terms:
       - 사업의 내용
       - segment

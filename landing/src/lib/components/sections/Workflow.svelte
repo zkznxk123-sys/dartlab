@@ -21,9 +21,9 @@
 		{
 			icon: LineChart,
 			step: '03',
-			title: 'sections = 회사',
-			desc: '모든 토픽 × 모든 기간이 담긴 단일 DataFrame. show · diff · trace 는 그 위의 뷰일 뿐.',
-			code: 'c.sections  # 끝',
+			title: 'panel = 회사',
+			desc: 'topics 로 catalog 를 보고 panel(topic) 으로 같은 기간 축의 공시·재무 보드를 연다. show · diff · trace 는 그 위의 뷰다.',
+			code: 'c.panel("businessOverview")',
 			color: 'text-dl-success bg-dl-success/10 border-dl-success/20'
 		}
 	];

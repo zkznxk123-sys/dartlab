@@ -1,9 +1,8 @@
-"""docs.parquet 의 raw XML chunk (section_content) → sections layer 입력 양식 변환.
+"""DART raw XML chunk → panel/section view 입력 양식 변환.
 
-``ZipDocsCollector.rebuildFromZips`` 가 docs.parquet 의 ``section_content`` 컬럼에
 DART zip XML 의 TITLE 직속 본문 (P / SPAN / TABLE / TABLE-GROUP / COLGROUP / TR /
-TD 등 *모든 태그 그대로*) 의 raw XML chunk 들을 join 으로 저장한다. zip = SSOT
-원칙 — parse 로직 변경 시 docs.parquet 재빌드 0.
+TD 등 *모든 태그 그대로*) raw XML chunk 를 사람이 읽을 mixed/plain text 로 변환한다.
+panel contentRaw 가 DART 공시 본문 SSOT 이다.
 
 본 모듈은 sections layer 의 첫 단계에서 호출되어:
 
@@ -15,8 +14,7 @@ TD 등 *모든 태그 그대로*) 의 raw XML chunk 들을 join 으로 저장한
 - ``stripTags=True`` (show / agent / analysis): 모든 태그 제거 + plain text. HTML
   table 도 cell text 만 추출 (xml itertext).
 
-옛 양식 (markdown/HTML mixed in section_content) 은 폐기. docs.parquet 가 zip
-원본 SSOT 가 된다 — parser 변경 시 zip 재빌드 불필요.
+옛 markdown/HTML mixed 저장 양식은 폐기. 변환은 read/build 시점에서 raw XML을 대상으로 수행한다.
 """
 
 from __future__ import annotations
@@ -277,8 +275,7 @@ def xmlChunkToMixed(rawXml: str) -> str:
     의 emit 결과와 동일 양식.
 
     Args:
-        rawXml: docs.parquet ``section_content`` 컬럼 — TITLE 직속 raw XML chunks
-            join 결과.
+        rawXml: TITLE 직속 raw XML chunks join 결과.
 
     Returns:
         markdown/HTML mixed string — sections pipeline 의 ``_splitContentBlocks``
@@ -316,7 +313,7 @@ def xmlChunkToPlain(rawXml: str) -> str:
     show / agent / analysis 호환 양식. markdown prefix (``## ``) 도 추가 안 함.
 
     Args:
-        rawXml: docs.parquet ``section_content`` 컬럼.
+        rawXml: TITLE 직속 raw XML chunks join 결과.
 
     Returns:
         plain text — 모든 XML 태그 제거. 다중 공백 정리.
@@ -396,7 +393,7 @@ def stripTagsFromSectionsDf(df, periodCols=None):
     이면 ``df.columns`` 에서 ``20\\d\\d`` prefix 자동 감지.
 
     Args:
-        df: ``Company.sections`` 결과 wide DataFrame.
+        df: panel text wide DataFrame.
         periodCols: 강제 지정 — None 이면 자동 감지.
 
     Returns:
@@ -408,7 +405,7 @@ def stripTagsFromSectionsDf(df, periodCols=None):
     Example:
         >>> from dartlab import Company
         >>> from dartlab.providers.dart.sectionXml import stripTagsFromSectionsDf
-        >>> df = stripTagsFromSectionsDf(Company('005930').sections)
+        >>> df = stripTagsFromSectionsDf(Company('005930').panel("사업의 내용"))
     """
     if df is None:
         return None

@@ -1,7 +1,7 @@
 name: DART New Stocks Sync
 
 # KindList 에 새로 들어온 종목이 recent 공시 동기화에 걸리지 않아도
-# finance/report/docs 기본 parquet 은 반드시 bootstrap 한다.
+# finance/report 기본 parquet 은 반드시 bootstrap 한다.
 
 on:
   workflow_run:
@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
     inputs:
       categories:
-        description: 'finance,report,docs 중 쉼표 구분'
-        default: 'finance,report,docs'
+        description: 'finance,report 중 쉼표 구분'
+        default: 'finance,report'
         type: string
       limit:
         description: '카테고리별 최대 신규 종목 수 (0은 제한 없음)'
@@ -62,19 +62,12 @@ jobs:
           key: dartlab-data-report-new-${{ github.run_id }}
           restore-keys: dartlab-data-report-
 
-      - name: Restore docs cache
-        uses: actions/cache/restore@v5
-        with:
-          path: data/dart/docs
-          key: dartlab-data-docs-new-${{ github.run_id }}
-          restore-keys: dartlab-data-docs-
-
       - name: Sync KindList new stocks
         run: uv run python -X utf8 .github/scripts/sync/syncNewStocks.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          NEW_STOCK_CATEGORIES: ${{ github.event.inputs.categories || 'finance,report,docs' }}
+          NEW_STOCK_CATEGORIES: ${{ github.event.inputs.categories || 'finance,report' }}
           NEW_STOCK_LIMIT: ${{ github.event.inputs.limit || '50' }}
           SYNC_STATE_SCOPE: new-stocks
 
@@ -100,17 +93,6 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: report
 
-      - name: Upload to HuggingFace (docs)
-        if: hashFiles('dist/changed_docs.txt') != ''
-        run: |
-          if [ -s dist/changed_docs.txt ]; then
-            cp dist/changed_docs.txt dist/changed.txt
-            uv run python .github/scripts/sync/uploadData.py --target hf
-          fi
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          SYNC_CATEGORY: docs
-
       - name: Save finance cache
         if: always()
         uses: actions/cache/save@v5
@@ -124,10 +106,3 @@ jobs:
         with:
           path: data/dart/report
           key: dartlab-data-report-new-${{ github.run_id }}
-
-      - name: Save docs cache
-        if: always()
-        uses: actions/cache/save@v5
-        with:
-          path: data/dart/docs
-          key: dartlab-data-docs-new-${{ github.run_id }}

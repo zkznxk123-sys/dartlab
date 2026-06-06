@@ -7,7 +7,7 @@
 
 환경변수:
   DART_API_KEYS: DART OpenAPI 키 (쉼표 구분)
-  SYNC_CATEGORY: finance / report / docs
+  SYNC_CATEGORY: finance / report
   SYNC_MODE: all (전 종목 증분) / new (파일 없는 종목만)
   DARTLAB_DATA_DIR: 데이터 저장 경로 (기본: ./data)
 """

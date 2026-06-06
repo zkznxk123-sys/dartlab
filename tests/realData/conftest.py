@@ -4,8 +4,8 @@
     기존 unit/integration 테스트는 editable 소스와 로컬 parquet 스냅샷을
     그대로 사용한다. 그래서 "HF parquet은 최신, 설치된 wheel은 구버전"처럼
     데이터↔코드 스키마가 어긋나 조용히 None 을 리턴하는 실제 사용자 크래시를
-    잡지 못한다. (예: c.sections → _call_module("sections") → None →
-    AttributeError on .raw.columns.)
+    잡지 못한다. (예: c.topics 또는 c.panel(...) → None →
+    AttributeError on .columns.)
 
     realData 스위트는 반대로 "엔진의 공식 공개 진입점을 실제 데이터로 호출하고
     None/빈 결과/비정상 shape 를 즉시 실패로 처리"한다. 한 엔진당 1~2개의
@@ -38,8 +38,8 @@ def samsungRealData():
     module scope — 각 테스트 파일 단위로 로드/해제.
     session scope 금지 (Polars 네이티브 메모리 누수 위험).
     """
-    if not _has_data(SAMSUNG, "docs"):
-        pytest.skip(f"삼성전자 docs 데이터 없음 ({SAMSUNG}.parquet)")
+    if not _has_data(SAMSUNG, "panel"):
+        pytest.skip(f"삼성전자 panel 데이터 없음 ({SAMSUNG}.parquet)")
     from dartlab import Company
 
     c = Company(SAMSUNG)

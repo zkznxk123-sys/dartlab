@@ -1,7 +1,7 @@
 """Search content index main 풀리빌드 + HF 업로드.
 
 월 1회 실행 (또는 수동):
-1. 전체 docs + allFilings → main 세그먼트 풀리빌드 (rebuildContent)
+1. 전체 allFilings + panel → main 세그먼트 풀리빌드 (rebuildContent)
 2. HF `eddmpython/dartlab-data` 에 `dart/contentIndex/main.*` 업로드
 3. delta 비움 (main에 흡수되었으므로)
 
@@ -23,7 +23,7 @@ from _hfRetry import retryHfCall  # noqa: E402
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
 
-    print("[main] content 인덱스 풀리빌드 시작 (allFilings + docs + panel 롤업 + 뉴스)")
+    print("[main] content 인덱스 풀리빌드 시작 (allFilings + panel 롤업 + 뉴스)")
     from dartlab.providers.dart.search import buildGateRef, buildMeaningGraph, rebuildContent
 
     t0 = time.perf_counter()
@@ -42,7 +42,7 @@ def main() -> int:
         return 1
 
     # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 allFilings/meaning 이 0 이 된다.
-    # 이 상태로 업로드하면 프로덕션 인덱스를 docs-only/빈-의미로 *덮어쓰는 퇴행*. 업로드 중단.
+    # 이 상태로 업로드하면 프로덕션 인덱스를 빈-의미로 *덮어쓰는 퇴행*. 업로드 중단.
     minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "500000"))
     if nNodes == 0 or nDocs < minDocs:
         print(

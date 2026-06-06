@@ -85,9 +85,9 @@ NOTEBOOKS: dict[str, list[dict]] = {
         md(
             "## 사업보고서 섹션 · 공시 이력",
             "",
-            "`sections` 로 보고서 토픽 전체를, `filings()` 로 제출 이력을 확인한다.",
+            "`topics` 로 보고서 토픽 catalog 를 확인하고 `panel(topic)` 으로 본문을 연다. `filings()` 는 제출 이력이다.",
         ),
-        code("c.sections.head(20)"),
+        code("c.topics.head(20)", "c.panel('businessOverview').head(20)"),
         code("c.filings().head(10)"),
     ],
     "02_gather.ipynb": [

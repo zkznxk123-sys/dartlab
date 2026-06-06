@@ -92,13 +92,13 @@ def _historyTest(company) -> TestResult:
         return TestResult(
             name="History",
             passed=False,
-            detail="peer 비교 데이터 부족. scan 프리빌드 필요: dartlab.downloadAll('scan') 실행 후 재시도",
+            detail="peer 비교 데이터 부족. scan 프리빌드 또는 collect 데이터 준비 후 재시도",
         )
     except (ImportError, AttributeError, ValueError):
         return TestResult(
             name="History",
             passed=False,
-            detail="scan 데이터 접근 불가. dartlab.downloadAll('scan') 실행 필요",
+            detail="scan 데이터 접근 불가. scan 프리빌드 또는 collect 데이터 필요",
         )
 
 
@@ -120,13 +120,13 @@ def _experienceTest(company) -> TestResult:
         return TestResult(
             name="Experience",
             passed=False,
-            detail=f"동종업계 {total}개사 — 비교 표본 부족 (50개 미만). dartlab.downloadAll('scan') 실행 후 재시도",
+            detail=f"동종업계 {total}개사 — 비교 표본 부족 (50개 미만). scan 데이터 준비 후 재시도",
         )
     except (ImportError, AttributeError, ValueError):
         return TestResult(
             name="Experience",
             passed=False,
-            detail="scan 데이터 접근 불가. dartlab.downloadAll('scan') 실행 필요",
+            detail="scan 데이터 접근 불가. scan 프리빌드 또는 collect 데이터 필요",
         )
 
 

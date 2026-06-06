@@ -89,10 +89,14 @@ def calcSotpNav(
     try:
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionRows
+        from dartlab.providers.dart.panel.text import panelTableRows
 
         _code = getattr(company, "stockCode", None)
-        _r = (sectionRows(_code, sectionPattern="타법인") or sectionRows(_code, sectionPattern="출자")) if _code else []
+        _r = (
+            (panelTableRows(_code, sectionPattern="타법인") or panelTableRows(_code, sectionPattern="출자"))
+            if _code
+            else []
+        )
         inv = pl.DataFrame(_r) if _r else None
         if inv is not None and hasattr(inv, "iter_rows"):
             for row in inv.iter_rows(named=True):

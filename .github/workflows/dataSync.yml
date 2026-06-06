@@ -5,7 +5,7 @@ name: Data Sync
 #
 # 자동 cron (recent 모드):
 #   1. DART list.json 으로 최근 N일 정기공시 조회
-#   2. 카테고리별 독립 누락 검사 (docs rcept_no + finance reprt_code)
+#   2. 카테고리별 독립 누락 검사 (finance reprt_code + report rcept_no)
 #   3. 누락된 종목·분기만 수집 — 88분기 차집합 X
 #   4. 이전 실행 pending.txt (API 한도 잘림) 우선 회수
 #   5. 변경 파일만 HF push
@@ -33,10 +33,10 @@ on:
         type: choice
         options: [recent, full]
       category:
-        description: '(full 모드용) finance/report/docs/all'
+        description: '(full 모드용) finance/report/all'
         default: 'all'
         type: choice
-        options: [all, finance, report, docs]
+        options: [all, finance, report]
 
 permissions:
   contents: read  # HF push 는 HF_TOKEN 사용 — git commit/push/release 없음(checkout+cache 만). 최소권한.
@@ -83,13 +83,6 @@ jobs:
           key: dartlab-data-report-${{ github.run_id }}
           restore-keys: dartlab-data-report-
 
-      - name: Restore docs cache (비교용)
-        uses: actions/cache/restore@v5
-        with:
-          path: data/dart/docs
-          key: dartlab-data-docs-${{ github.run_id }}
-          restore-keys: dartlab-data-docs-
-
       - name: Restore collect state (pending.txt) — fr scope
         uses: actions/cache/restore@v5
         with:
@@ -100,7 +93,7 @@ jobs:
       # HF seed: GHA cache 가 cold/stale 해도 부족 parquet 을 HF 에서 채움 (idempotent).
       # cold start death spiral 차단 — HF 가 source of truth, GHA cache 는 속도 부스터.
       - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report,docs
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
@@ -170,102 +163,7 @@ jobs:
           path: data/dart/_collect_state/fr
           key: dartlab-collect-state-fr-${{ github.run_id }}
 
-  # ── Job 2: docs (느림, 별도 타임아웃) ──
-  sync-docs:
-    if: ${{ github.event.inputs.mode != 'full' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 150
-
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Set up Python
-        run: uv python install 3.12
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Smoke import (fail fast on src regression)
-        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
-
-      - name: Restore docs cache
-        uses: actions/cache/restore@v5
-        with:
-          path: data/dart/docs
-          key: dartlab-data-docs-${{ github.run_id }}
-          restore-keys: dartlab-data-docs-
-
-      - name: Restore collect state (pending.txt) — docs scope
-        uses: actions/cache/restore@v5
-        with:
-          path: data/dart/_collect_state/docs
-          key: dartlab-collect-state-docs-${{ github.run_id }}
-          restore-keys: dartlab-collect-state-docs-
-
-      # HF seed: cold/stale cache 대비 (idempotent).
-      - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category docs
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-
-      - name: Sync recent (docs)
-        # 통합 진입점 — dart stage 가 syncRecent 를 SYNC_CATEGORIES=docs env 로 동형 호출.
-        # --no-upload: 업로드는 아래 uploadData(docs) 스텝(syncRecent checkpoint 업로드 보존).
-        run: uv run python -X utf8 -m dartlab.pipeline docs --no-upload
-        env:
-          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # syncRecent checkpoint subprocess (uploadData.py) 가 필요
-          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
-          SYNC_CATEGORIES: docs
-          SYNC_STATE_SCOPE: docs
-          PYTHONUNBUFFERED: "1"
-
-      # Phase A — IPC mirror 빌드
-      - name: Build IPC mirror (docs)
-        run: uv run python -X utf8 .github/scripts/sync/buildIpcMirror.py
-        env:
-          SYNC_CATEGORY: docs
-
-      - name: Upload to HuggingFace (docs)
-        if: hashFiles('dist/changed_docs.txt') != ''
-        run: |
-          if [ -s dist/changed_docs.txt ]; then
-            cp dist/changed_docs.txt dist/changed.txt
-            uv run python .github/scripts/sync/uploadData.py --target hf
-          fi
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          SYNC_CATEGORY: docs
-
-      # docs 농장 은퇴 — sections SSOT artifact 빌드/업로드 스텝 제거(buildSections farm 삭제).
-      # HF 기존 sections 데이터는 보존(삭제하지 않음). panel 이 공시 수평화 단일 표면.
-
-      # panel 빌드+업로드 단일 소유자 = originalSync.yml `dart-zip`(Job 1, offline).
-      # 원본=SSOT 전략([[project_original_ssot_strategy]]): 정기 zip 보관 + 그 zip 으로 panel
-      # 빌드가 authoritative. 옛 online 1패스 panel(여기 06:00/18:00, buildPanelFromStream)을
-      # 제거 — dart-zip(02:00, buildPanelAll from zip)과 같은 dart/panel/{code}.parquet 을
-      # 이중 소유(빌더 발산 시 실행 순서로 산출물 flip)하던 것을 zip-SSOT 단일 소유로 정리.
-
-      # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
-
-      - name: Save docs cache
-        if: always()
-        uses: actions/cache/save@v5
-        with:
-          path: data/dart/docs
-          key: dartlab-data-docs-${{ github.run_id }}
-
-      - name: Save collect state — docs scope
-        if: always()
-        uses: actions/cache/save@v5
-        with:
-          path: data/dart/_collect_state/docs
-          key: dartlab-collect-state-docs-${{ github.run_id }}
-
-  # ── Job 3 (workflow_dispatch full 전용): 88분기 차집합 (heavy) ──
+  # ── Job 2 (workflow_dispatch full 전용): 88분기 차집합 (heavy) ──
   full-collect:
     if: ${{ github.event.inputs.mode == 'full' }}
     runs-on: ubuntu-latest
@@ -274,7 +172,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        category: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.category == 'all' && 'finance","report","docs' || inputs.category)) || fromJSON('["finance","report","docs"]') }}
+        category: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.category == 'all' && 'finance","report' || inputs.category)) || fromJSON('["finance","report"]') }}
 
     steps:
       - uses: actions/checkout@v5

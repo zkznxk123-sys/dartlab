@@ -311,7 +311,7 @@ _MINIMAL_META: tuple[str, ...] = (
 )
 
 
-def loadSectionsWide(
+def loadpanelTextWide(
     ticker: str,
     *,
     periods: list[str] | None = None,
@@ -335,7 +335,7 @@ def loadSectionsWide(
         없음.
 
     Example:
-        >>> df = loadSectionsWide("AAPL")  # doctest: +SKIP
+        >>> df = loadpanelTextWide("AAPL")  # doctest: +SKIP
         >>> df.columns[:6]  # doctest: +SKIP
         ['topic', 'blockType', 'blockOrder', 'textNodeType', 'textLevel', 'textPath']
     """
@@ -345,7 +345,7 @@ def loadSectionsWide(
         return None
     if valueColumn not in long.columns:
         _log.warning(
-            "edgar sectionsWide: valueColumn '%s' 부재 (사용 가능: %s)",
+            "edgar panelTextWide: valueColumn '%s' 부재 (사용 가능: %s)",
             valueColumn,
             long.columns,
         )
@@ -359,5 +359,5 @@ def loadSectionsWide(
             aggregate_function="first",
         )
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
-        _log.warning("edgar sectionsWide pivot 실패 (%s): %s", ticker, exc)
+        _log.warning("edgar panelTextWide pivot 실패 (%s): %s", ticker, exc)
         return None

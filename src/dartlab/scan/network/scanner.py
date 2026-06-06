@@ -434,7 +434,7 @@ def scanAffiliateDocs(
     nameToCode: dict[str, str],
     codeToName: dict[str, str],
 ) -> dict[str, str]:
-    """panel '계열회사 현황' 표에서 ground truth 그룹 매핑 추출 (docs.parquet 은퇴 → panel SSOT).
+    """panel '계열회사 현황' 표에서 ground truth 그룹 매핑 추출 (panel SSOT).
 
     Parameters
     ----------
@@ -464,7 +464,7 @@ def scanAffiliateDocs(
         ``buildGraph`` 진행 단계 안에서.
 
     How:
-        panel 섹션 본문(``sectionTexts``) → '계열회사' 섹션 표(``parseXmlTables``) → 회사명 추출 →
+        panel 섹션 본문(``panelTextRows``) → '계열회사' 섹션 표(``parsePanelXmlTables``) → 회사명 추출 →
         Union-Find 클러스터링 → 그룹명 라벨링.
 
     Requires:
@@ -472,7 +472,7 @@ def scanAffiliateDocs(
 
     SeeAlso:
         - :func:`dartlab.scan.network.buildGraph` — 본 함수들 호출자
-        - :func:`dartlab.providers.dart.sections.sectionTables` — 동일 표 추출 헬퍼
+        - :func:`dartlab.providers.dart.panel.text.panelXmlTables` — 동일 표 추출 헬퍼
 
     Raises
     ------
@@ -486,7 +486,7 @@ def scanAffiliateDocs(
     >>> gt = scanAffiliateDocs(n2c, c2n)
     >>> gt.get("005930")
     """
-    from dartlab.providers.dart.sections import parseXmlTables, sectionTexts
+    from dartlab.providers.dart.panel.text import panelTextRows, parsePanelXmlTables
     from dartlab.scan.builders.kr.common import panelDir
 
     panelRoot = panelDir()
@@ -542,7 +542,7 @@ def scanAffiliateDocs(
     code_to_affiliate_set: dict[str, set[str]] = {}
     for code in codes:
         try:
-            df = sectionTexts(code)
+            df = panelTextRows(code)
         except (pl.exceptions.PolarsError, OSError):
             continue
         if df is None or df.is_empty():
@@ -555,7 +555,7 @@ def scanAffiliateDocs(
         tables: list[list[list[str]]] = []
         for cr in aff["contentRaw"].to_list():
             if cr:
-                tables.extend(parseXmlTables(cr))
+                tables.extend(parsePanelXmlTables(cr))
         if not tables:
             continue
         companies = _extractCompanies(tables)

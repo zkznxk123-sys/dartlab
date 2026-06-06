@@ -11,7 +11,7 @@ build 서브트리(lxml 격리) — read 표면은 이 모듈을 **함수 내 la
 
 LLM Specifications:
     AntiPatterns:
-        - zip 재처리/docs.parquet read 금지 — panel.parquet contentRaw 만 (R3).
+        - zip 재처리 금지 — panel.parquet contentRaw 만 (R3).
         - valueRaw 숫자화(콤마/괄호 제거) 금지 — 불변 원본, 숫자화는 소비자.
         - 셀을 디스크 parquet 로 영속 금지 — read 가 호출 시 in-memory 분해 (단일 artifact).
     OutputSchema:
@@ -285,7 +285,7 @@ def cellsFromContent(
     """panel.parquet 한 5표 row 의 contentRaw → 셀 행 iter (XBRL/옛 분기).
 
     contentRaw 에 ACONTEXT TE 가 있으면 XBRL 정밀 경로(decodeAcontext), 없으면 옛 표 위치 파싱
-    (`_parseOldStatementTable`). panel 은 docs.parquet 안 봄 — 자기 artifact(panel.parquet) contentRaw 만.
+    (`_parseOldStatementTable`). panel 은 자기 artifact(panel.parquet) contentRaw 만 본다.
 
     Args:
         contentRaw: 5표 row 의 표 XML (panel.parquet contentRaw).

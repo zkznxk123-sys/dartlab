@@ -54,7 +54,7 @@ def _scanCounts() -> tuple[int, int, int]:
 def test_streaming_ratio_above_baseline():
     """``.collect(engine="streaming")`` 비율 ≥ 80% — M2 일괄 도입 회귀 가드."""
     streaming, bare, unsupported = _scanCounts()
-    polarsCalls = streaming + bare  # gc.collect, ZipDocsCollector.collect 제외
+    polarsCalls = streaming + bare  # gc.collect 제외
     assert polarsCalls > 0, "polars collect 호출 0 — scan 로직 부재 의심"
     ratio = streaming / polarsCalls
     assert ratio >= _MIN_STREAMING_RATIO, (

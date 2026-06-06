@@ -337,10 +337,10 @@ def calcDisclosureDeltaFlags(company, *, basePeriod: str | None = None) -> list[
 
 
 def _safeDiffResult(company):
-    """providers.dart.sections.sectionsWide(panel 섹션)에서 DiffResult를 안전하게 얻는다.
+    """providers.dart.panel.text.panelTextWide(panel 섹션)에서 DiffResult를 안전하게 얻는다.
 
-    docs.parquet 농장 은퇴 → panel 섹션 wide(topic×period) SSOT 경유. 결과를
-    company._cache에 저장하여 4개 calc 함수가 공유.
+    panel 섹션 wide(topic×period) SSOT 경유. 결과를 company._cache에 저장하여
+    4개 calc 함수가 공유.
     """
     cache = getattr(company, "_cache", None)
     _KEY = "_diffResult"
@@ -352,9 +352,9 @@ def _safeDiffResult(company):
         code = getattr(company, "stockCode", None)
         if code:
             from dartlab.providers._common.diff import sectionsDiff
-            from dartlab.providers.dart.sections import sectionsWide
+            from dartlab.providers.dart.panel.text import panelTextWide
 
-            wide = sectionsWide(code)
+            wide = panelTextWide(code)
             if wide is not None:
                 result = sectionsDiff(wide)
     except (AttributeError, ValueError, KeyError, TypeError, ImportError):

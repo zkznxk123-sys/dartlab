@@ -340,8 +340,10 @@ class TestIntegrationReal(unittest.TestCase):
     def test_diff_matrix_real(self):
         from dartlab.providers._common.diff import buildDiffMatrix
 
-        sections = self.c.sections
-        result = buildDiffMatrix(sections, textOnly=True)
+        panelText = self.c._panelTextWide()
+        if panelText is None:
+            self.skipTest("panel text 없음")
+        result = buildDiffMatrix(panelText, textOnly=True)
         self.assertGreater(result["topic_count"], 0)
         self.assertGreater(result["period_count"], 0)
 
@@ -354,15 +356,19 @@ class TestIntegrationReal(unittest.TestCase):
             matchAmounts,
         )
 
-        sections = self.c.sections
+        panelText = self.c._panelTextWide()
+        if panelText is None:
+            self.skipTest("panel text 없음")
         periods = sorted(
-            [c for c in sections.columns if re.fullmatch(r"\d{4}(Q[1-4])?", c)],
+            [c for c in panelText.columns if re.fullmatch(r"\d{4}(Q[1-4])?", c)],
             reverse=True,
         )
         if not periods:
             self.skipTest("기간 없음")
 
-        topic_rows = sections.filter((pl.col("topic") == "businessOverview") & (pl.col("blockType") == "text"))
+        topic_rows = panelText.filter(pl.col("topic") == "businessOverview")
+        if "blockType" in topic_rows.columns:
+            topic_rows = topic_rows.filter(pl.col("blockType") == "text")
         if topic_rows.height == 0:
             self.skipTest("businessOverview 텍스트 없음")
 
@@ -384,15 +390,17 @@ class TestIntegrationReal(unittest.TestCase):
             getRelatedTopics,
         )
 
-        sections = self.c.sections
-        matrix = buildMentionMatrix(sections)
+        panelText = self.c._panelTextWide()
+        if panelText is None:
+            self.skipTest("panel text 없음")
+        matrix = buildMentionMatrix(panelText)
         self.assertGreater(len(matrix["adjacency"]), 0)
 
         analysis = analyzeGraph(matrix["adjacency"])
         self.assertGreater(analysis["nodes"], 0)
         self.assertGreater(analysis["avg_degree"], 2)
 
-        related = getRelatedTopics(sections, "businessOverview")
+        related = getRelatedTopics(panelText, "businessOverview")
         self.assertGreater(len(related), 0)
 
     def test_scan_payload_real(self):

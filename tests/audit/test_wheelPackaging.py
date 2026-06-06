@@ -110,7 +110,7 @@ def test_parserMappings_inWheel(builtWheel: Path):
     with zipfile.ZipFile(builtWheel) as zf:
         names = zf.namelist()
     required = [
-        "dartlab/providers/mappers/mapperData/parserMappings/sections.json",
+        "dartlab/providers/mappers/mapperData/parserMappings/panelTopics.json",
         "dartlab/providers/mappers/mapperData/parserMappings/affiliate.json",
         "dartlab/providers/mappers/mapperData/parserMappings/costByNature.json",
         "dartlab/providers/mappers/mapperData/parserMappings/sectorPriors.json",
@@ -165,7 +165,7 @@ def test_skillSpecs_inWheel(builtWheel: Path):
 
 @pytest.mark.heavy
 def test_installedWheel_importAndSectionsLoad(builtWheel: Path, tmp_path):
-    """빌드된 wheel 을 격리 venv 에 설치하고 실제로 loadSections() 호출.
+    """빌드된 wheel 을 격리 venv 에 설치하고 실제로 panel topic 매핑 로더 호출.
 
     단순 파일 존재가 아니라 "설치 후 import → 런타임 체인 정상 동작" 까지 검증.
     2026-04-19 사고의 최종 증상(외부 사용자 첫 호출 crash)을 직접 재현.
@@ -191,7 +191,7 @@ def test_installedWheel_importAndSectionsLoad(builtWheel: Path, tmp_path):
     if install.returncode != 0:
         pytest.skip(f"venv 에 wheel 설치 실패: {install.stderr[-300:]}")
 
-    # loadSections().chapterByMajor 실제 호출
+    # loadSections().chapterByMajor 실제 호출 — 호환 이름, 실제 파일은 panelTopics.json
     check = subprocess.run(
         [
             str(py),

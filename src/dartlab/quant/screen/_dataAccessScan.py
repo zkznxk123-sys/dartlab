@@ -143,11 +143,11 @@ def loadSharesOutstanding(market: str = "KR") -> "pl.DataFrame | None":
     return pl.scan_parquet(path)
 
 
-def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
-    """단일 종목 docs parquet 로드.
+def loadPanelTextForStock(stockCode: str) -> "pl.DataFrame | None":
+    """단일 종목 panel text 로드.
 
     Capabilities:
-        - ``data/dart/docs/{stockCode}.parquet`` eager read
+        - ``providers.dart.panel.text.panelTextRows`` eager read
         - 종목별 사업보고서 본문 텍스트 (텍스트 alpha 입력)
 
     Args:
@@ -157,23 +157,22 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
         pl.DataFrame | None — 파일 부재 시 None.
 
     Guide:
-        Quant text alpha (sentiment/toneChange/riskText/governance) 의 본문 입력. 종목별
-        한 파일.
+        Quant text alpha (sentiment/toneChange/riskText/governance) 의 본문 입력.
 
     When:
         Text factor 계산 + AI 공시 본문 기반 답변.
 
     How:
-        ``_scanDataRoot`` → ``dart/docs/{stockCode}.parquet`` → ``pl.read_parquet``.
+        ``providers.dart.panel.text.panelTextRows`` → 옛 text-alpha 호환 schema.
 
     Requires:
-        ``data/dart/docs/{stockCode}.parquet`` 존재.
+        ``data/dart/panel/{stockCode}.parquet`` 존재.
 
     Raises:
         없음 — 부재 시 warning + None.
 
     Example:
-        >>> df = loadDocsForStock("005930")
+        >>> df = loadPanelTextForStock("005930")
         >>> df["section"].unique().to_list()[:3]
         ['business', 'risk', 'mdAndA']
 
@@ -193,12 +192,12 @@ def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
         if edgarDf is not None:
             return edgarDf
 
-    # docs.parquet/sections artifact 농장 은퇴 → providers.dart.sections SSOT(panel 섹션 본문).
-    # 옛 docs.parquet (long: year/section_title/section_content) 호환 schema 노출 →
+    # providers.dart.panel.text SSOT(panel 섹션 본문).
+    # 옛 text-alpha long schema(year/section_title/section_content) 호환 schema 노출 →
     # 호출자 (sentiment/risk/changes/disclosureDiff 등 D.1 모듈) 0 변경.
-    from dartlab.providers.dart.sections import sectionTexts
+    from dartlab.providers.dart.panel.text import panelTextRows
 
-    long = sectionTexts(stockCode)
+    long = panelTextRows(stockCode)
     if long is None or long.is_empty():
         log.warning("panel 섹션 본문 없음: %s", stockCode)
         return None

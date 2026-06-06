@@ -131,15 +131,6 @@ def test_data_releases_has_edgarDocs():
     assert DATA_RELEASES["edgarDocs"]["label"]  # label 존재 확인
 
 
-def test_downloadAll_blocks_edgarDocs_bulk_download():
-    import pytest
-
-    from dartlab.core.dataLoader import downloadAll
-
-    with pytest.raises(ValueError, match="edgarDocs"):
-        downloadAll("edgarDocs")
-
-
 def test_download_skips_edgarDocs(monkeypatch, capsys, tmp_path):
     from dartlab import config
     from dartlab.frame import dataLoader

@@ -41,8 +41,8 @@ def samsungCompany():
     """삼성전자 Company — 모듈 scope 로 재사용."""
     import gc
 
-    if not _has_data(SAMSUNG, "docs"):
-        pytest.skip("삼성전자 docs 데이터 없음")
+    if not _has_data(SAMSUNG, "panel"):
+        pytest.skip("삼성전자 panel 데이터 없음")
     from dartlab import Company
 
     c = Company(SAMSUNG)

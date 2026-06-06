@@ -1,9 +1,9 @@
-"""3단계: docs 텍스트 → 소분류 (공정/역할 보강).
+"""3단계: panel 텍스트 → 소분류 (공정/역할 보강).
 
-docs parquet의 businessOverview, productService, rawMaterial 텍스트를 스캔하여
+panel의 businessOverview, productService, rawMaterial 텍스트를 스캔하여
 2단계 결과의 stage를 보강하거나 신뢰도를 갱신한다.
 
-Company 객체를 로드하지 않고 parquet을 직접 LazyFrame으로 스캔한다 (메모리 안전).
+Company 객체를 로드하지 않고 panel reader로 텍스트 행만 스캔한다 (메모리 안전).
 """
 
 from __future__ import annotations
@@ -33,9 +33,9 @@ _TOPIC_WEIGHT: dict[str, float] = {
 
 def _extractTexts(code: str) -> dict[str, str]:
     """한 종목 panel 섹션 본문에서 산업 관련 텍스트를 추출 (L1.5 frame SSOT 경유)."""
-    from dartlab.providers.dart.sections import sectionTexts
+    from dartlab.providers.dart.panel.text import panelTextRows
 
-    df = sectionTexts(code)
+    df = panelTextRows(code)
     if df is None or df.is_empty():
         return {}
 
@@ -54,12 +54,12 @@ def _extractTexts(code: str) -> dict[str, str]:
 
 
 def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
-    """docs 텍스트로 노드의 stage/confidence를 보강한다.
+    """panel 텍스트로 노드의 stage/confidence를 보강한다.
 
     Capabilities:
-        2 단계까지 채워진 노드 중 stage 가 비어있거나 confidence 가 낮은 종목에 대해 ``docs/
-        {code}.parquet`` 본문 (사업의 내용 / 원재료 등 토픽별 가중 합성) 으로 stage 재매칭.
-        보강 시 ``source="docs"`` 마킹.
+        2 단계까지 채워진 노드 중 stage 가 비어있거나 confidence 가 낮은 종목에 대해 ``panel/
+        {code}`` 본문 (사업의 내용 / 원재료 등 토픽별 가중 합성) 으로 stage 재매칭.
+        보강 시 ``source="panel"`` 마킹.
 
     Parameters
     ----------
@@ -69,30 +69,30 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
     Returns
     -------
     list[IndustryNode]
-        docs 분석으로 보강된 노드 리스트.
+        panel 분석으로 보강된 노드 리스트.
 
     Raises:
-        없음 — docs 폴더 부재 시 warning + 입력 그대로 반환.
+        없음 — panel 부재 시 warning + 입력 그대로 반환.
 
     Example:
         >>> from dartlab.industry.build.stage3_docs import enrich
         >>> nodes = enrich(stage2Nodes)
-        >>> sum(1 for n in nodes if n.source == "docs")
+        >>> sum(1 for n in nodes if n.source == "panel")
         720
 
     Guide:
-        ``buildIndustryMap`` 의 3 단계. docs parquet 전 종목 스캔이라 비용이 큼 — ``skipDocs=True``
+        ``buildIndustryMap`` 의 3 단계. panel 전 종목 스캔이라 비용이 큼 — ``skipDocs=True``
         로 단계 건너뛰기 가능 (빠른 테스트).
 
     When:
         manifest 빌드 3 단계. KindList 주요제품 만으로 stage 매칭 안 되는 종목 보강 시.
 
     How:
-        nodes 인덱스 (종목별) → 종목별 ``docs/{code}.parquet`` 토픽 스캔 → 합성 텍스트 →
+        nodes 인덱스 (종목별) → 종목별 panel 토픽 스캔 → 합성 텍스트 →
         ``matchStageByKeywords`` → 결과 stage/conf 으로 노드 업데이트.
 
     Requires:
-        - L1.5 frame: docs parquet 폴더
+        - L1.5 frame: panel parquet 폴더
         - 입력 nodes (stage1+2 결과)
 
     See Also:
@@ -100,7 +100,7 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
         - ``dartlab.industry.build.stage4_review.applyOverrides`` : 4 단계 보정
 
     AIContext:
-        AI 가 직접 호출하지 않는다 (배치). 답변에서 ``source=="docs"`` 노드는 "사업보고서 본문
+        AI 가 직접 호출하지 않는다 (배치). 답변에서 ``source=="panel"`` 노드는 "사업보고서 본문
         분석 결과" 단서 인용.
     """
     # 종목코드별 노드 인덱스
@@ -126,7 +126,7 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
             )
 
             if stageKey and confidence > 0:
-                # docs 결과가 기존보다 신뢰도 높으면 갱신
+                # panel 결과가 기존보다 신뢰도 높으면 갱신
                 if confidence > node.confidence or not node.stage:
                     ind = getIndustry(node.industry)
                     stageInfo = ind.stageByKey(stageKey) if ind else None
@@ -134,6 +134,6 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
                     node.role = stageInfo.role if stageInfo else node.role
                     node.stream = stageInfo.stream if stageInfo else node.stream
                     node.confidence = confidence
-                    node.source = "docs"
+                    node.source = "panel"
 
     return nodes

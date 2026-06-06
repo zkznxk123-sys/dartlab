@@ -11,10 +11,6 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData, yearsDesc
-from dartlab.providers._common.reportSelector import parsePeriodKey, selectReport
-from dartlab.providers._common.tableParser import extractAccounts
-
 if TYPE_CHECKING:
     import polars as pl
 
@@ -401,71 +397,7 @@ def statements(
     Raises:
         없음.
     """
-    df = loadData(stockCode)
-    if df.is_empty() or not _TEXT_STATEMENT_COLS.issubset(set(df.columns)):
-        return _statementsFromFinancePivot(stockCode, period=period)
-    corpName = extractCorpName(df)
-
-    kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
-    years = yearsDesc(df)
-
-    # 기간별 각 제표 데이터 수집
-    bsData: dict[str, tuple[dict, list]] = {}
-    isData: dict[str, tuple[dict, list]] = {}
-    cfData: dict[str, tuple[dict, list]] = {}
-    scopes: set[str] = set()
-
-    for year in years:
-        for kind in kinds:
-            report = selectReport(df, year, reportKind=kind)
-            if report is None:
-                continue
-
-            content, contentScope = extractContent(report, scope=scope)
-            if content is None:
-                continue
-
-            scopes.add(contentScope)
-            parts = splitStatements(content)
-
-            if period == "y":
-                key = year
-            else:
-                reportType = report["report_type"][0]
-                key = parsePeriodKey(reportType)
-                if key is None:
-                    continue
-
-            if ifrsOnly and int(key[:4]) < 2011:
-                continue
-
-            for stKey, stContent, target in [
-                ("BS", parts.get("BS"), bsData),
-                ("IS", parts.get("PNL"), isData),
-                ("CF", parts.get("CF"), cfData),
-            ]:
-                if stContent is None:
-                    continue
-                accounts, order = extractAccounts(stContent)
-                if accounts:
-                    target[key] = (accounts, order)
-
-    if not bsData and not isData and not cfData:
-        return None
-
-    allKeys = sorted(set(bsData) | set(isData) | set(cfData), reverse=True)
-
-    resultScope = "consolidated" if "consolidated" in scopes else "separate"
-
-    return StatementsResult(
-        corpName=corpName,
-        period=period,
-        scope=resultScope,
-        nYears=len(allKeys),
-        BS=_buildDf(allKeys, bsData),
-        IS=_buildDf(allKeys, isData),
-        CF=_buildDf(allKeys, cfData),
-    )
+    return _statementsFromFinancePivot(stockCode, period=period)
 
 
 def _statementsFromFinancePivot(stockCode: str, *, period: str) -> StatementsResult | None:

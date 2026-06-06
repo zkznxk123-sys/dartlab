@@ -263,11 +263,11 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
     try:
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionRows
+        from dartlab.providers.dart.panel.text import panelTableRows
 
         _code = getattr(company, "stockCode", None)
         _r = (
-            (sectionRows(_code, sectionPattern="감사의견") or sectionRows(_code, sectionPattern="감사보고서"))
+            (panelTableRows(_code, sectionPattern="감사의견") or panelTableRows(_code, sectionPattern="감사보고서"))
             if _code
             else []
         )

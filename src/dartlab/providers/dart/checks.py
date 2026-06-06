@@ -71,11 +71,7 @@ def _ensureData(stockCode: str, category: str) -> bool:
             mode = "병렬" if len(keys) >= 2 else "순차"
             emit("collect:start", stockCode=stockCode, label=label, keyCount=len(keys), mode=mode)
             try:
-                if category == "docs":
-                    from dartlab.core.dartClient import zipDocsCollector
-
-                    collected = zipDocsCollector(stockCode).collect() > 0
-                elif category == "finance":
+                if category == "finance":
                     from dartlab.core.dartClient import dartCollector
 
                     dartCollector()(stockCode).saveFinance(2016)
@@ -94,24 +90,21 @@ def _ensureData(stockCode: str, category: str) -> bool:
             return True
 
     # 실패: 안내 메시지 (hint:missing_docs/other 모두 API 키 유무 자동 분기)
-    if category == "docs":
-        emit("hint:missing_docs", stockCode=stockCode, label=label)
-    else:
-        emit("hint:missing_other", stockCode=stockCode, label=label)
+    emit("hint:missing_other", stockCode=stockCode, label=label)
     return False
 
 
 def _ensureAllData(stockCode: str) -> dict[str, bool]:
-    """docs/finance/report를 한번에 확인 + 수집."""
+    """panel/finance/report를 한번에 확인 + 수집."""
     import sys
 
     if sys.platform == "emscripten":
         # Pyodide: 로컬 파일시스템 없음. loadData()가 on-demand로 HF fetch.
-        return {"docs": True, "finance": True, "report": True}
+        return {"panel": True, "finance": True, "report": True}
 
     from dartlab.core.dataLoader import _dataDir
 
-    categories = ["docs", "finance", "report"]
+    categories = ["panel", "finance", "report"]
     result: dict[str, bool] = {}
     missing: list[str] = []
 
@@ -145,17 +138,12 @@ def _ensureAllData(stockCode: str) -> dict[str, bool]:
     return result
 
 
-def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
-    """DART docs parquet 최신성 확인 — L1 HF ETag → L2 TTL → L3 DART API.
+def _checkDartDocsFreshness(stockCode: str, category: str = "panel"):
+    """DART panel parquet 최신성 확인 — L1 HF ETag → L2 TTL → L3 DART API.
 
     Returns: FreshnessResult | None (L3 체크 결과, API 키 없으면 None).
 
-    환경변수 ``DARTLAB_NO_REFRESH=1`` 시 freshness check 전체 우회 — 로컬 zip 재빌드
-    parquet 을 HF 의 옛 본문으로 덮어쓰지 않도록. 로컬 작업 / 디버그 / 정밀 회귀 검증 시.
-
-    추가 가드 — ``data/original/dart/docs/{stockCode}/`` 에 zip 1 개 이상 존재 시 우회
-    (env 와 무관). zip = SSOT, parquet = derived (zipCollector docstring) 정책 — 운영자
-    가 직접 rebuildFromZips 한 HTML 보유 parquet 가 L1 HF download 로 덮어쓰이지 않도록.
+    함수명은 호환 때문에 유지한다. 실제 freshness 대상은 panel 이다.
     """
     import os
 
@@ -168,11 +156,6 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
     path = _dataDir(category) / f"{stockCode}.parquet"
     if not path.exists():
         return None
-
-    if category == "docs":
-        zipDir = path.parent.parent.parent / "original" / "dart" / "docs" / stockCode
-        if zipDir.is_dir() and any(zipDir.glob("*.zip")):
-            return None
 
     # L1: HF ETag 비교
     isStale = _checkRemoteFreshness(stockCode, path, category)

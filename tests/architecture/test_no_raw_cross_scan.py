@@ -148,10 +148,10 @@ def test_inline_annotation_excluded() -> None:
     명시 마킹. M3 가 22 호출부에 주석 부착.
     """
     # 차단 패턴 단독 → violation
-    assert _isLineViolation('lf = pl.scan_parquet("data/dart/docs/*.parquet")')
+    assert _isLineViolation('lf = pl.scan_parquet("data/dart/panel/*.parquet")')
     # 차단 패턴 + 주석 → 화이트리스트
     assert not _isLineViolation(
-        'lf = pl.scan_parquet("data/dart/docs/*.parquet")  # polars-streaming-unsupported: pivot'
+        'lf = pl.scan_parquet("data/dart/panel/*.parquet")  # polars-streaming-unsupported: pivot'
     )
     # 주석만 있고 패턴 없음 → violation 아님
     assert not _isLineViolation("# polars-streaming-unsupported: comment only")

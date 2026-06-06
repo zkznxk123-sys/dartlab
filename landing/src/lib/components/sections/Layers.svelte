@@ -46,7 +46,7 @@
 				<div class="space-y-2 text-xs text-dl-text-dim">
 					<div class="flex items-center gap-2">
 						<span class="w-1 h-1 rounded-full bg-dl-accent"></span>
-						`sections` 표준 spine
+						`panel` 표준 spine
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="w-1 h-1 rounded-full bg-dl-accent"></span>
@@ -125,12 +125,12 @@
 				<div class="text-xs font-mono bg-gradient-to-r from-dl-primary to-dl-accent bg-clip-text text-transparent mb-2">profile</div>
 				<h3 class="text-lg font-bold text-dl-text mb-2">머지된 Company 레이어</h3>
 				<p class="text-sm text-dl-text-muted leading-relaxed mb-4">
-					사용자가 기본으로 보는 것: 같은 sections spine 위에 만든 단일 Company 표면. 지금은 Python 워크플로우, 다음은 AI 인터페이스.
+					사용자가 기본으로 보는 것: 같은 panel spine 위에 만든 단일 Company 표면. 지금은 Python 워크플로우, 다음은 AI 인터페이스.
 				</p>
 				<div class="space-y-2 text-xs text-dl-text-dim">
 					<div class="flex items-center gap-2">
 						<span class="w-1 h-1 rounded-full bg-dl-primary"></span>
-						`c.sections`
+						`c.panel(topic)`
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="w-1 h-1 rounded-full bg-dl-accent"></span>

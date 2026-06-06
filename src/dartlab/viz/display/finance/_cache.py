@@ -1,4 +1,4 @@
-"""Company LRU(8) + prefetch (rawFinance/rawDocs/rawReport).
+"""Company LRU(8) + prefetch (rawFinance/rawReport).
 
 normFinance 메모이제이션도 같이 — Company instance lifecycle 안 1회 계산.
 rawFinance 와 동일 lifespan (Company LRU evict 시 함께 GC). storage cache
@@ -127,15 +127,15 @@ def ttmAvailability(company: "Company") -> dict:
 
 
 def prefetch(stockCode: str) -> dict:
-    """rawFinance + rawDocs + rawReport 강제 collect → Company _cache 안착.
+    """rawFinance + rawReport 강제 collect → Company _cache 안착.
 
     Returns:
-        {ok, stockCode, accessors: {finance, docs, report}, elapsedMs}
+        {ok, stockCode, accessors: {finance, report}, elapsedMs}
     """
     started = time.perf_counter()
     c = getCompany(stockCode)
     accessors: dict[str, int] = {}
-    for name in ("rawFinance", "rawDocs", "rawReport"):
+    for name in ("rawFinance", "rawReport"):
         try:
             df = getattr(c, name)
             accessors[name] = int(df.height) if df is not None else 0

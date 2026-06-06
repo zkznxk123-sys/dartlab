@@ -54,7 +54,7 @@ def metaSuffix() -> str:
     return _META_SUFFIX
 
 
-# 정기공시 (사업/분기/반기보고서) 는 `data/dart/docs/` 가 owner — allFilings 본문 수집에서 스킵.
+# 정기공시 (사업/분기/반기보고서) 본문은 panel 이 owner — allFilings 본문 수집에서 스킵.
 # 89% 가 docs/ 와 중복 (2026-05 검증). 부피 큰 공시 본문 중복 호출 차단.
 _PERIODIC_REPORT_PATTERNS: tuple[str, ...] = ("사업보고서", "분기보고서", "반기보고서")
 

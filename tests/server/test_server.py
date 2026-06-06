@@ -16,9 +16,9 @@ from starlette.testclient import TestClient  # noqa: E402
 from dartlab.server import app  # noqa: E402
 from tests.conftest import SAMSUNG, _has_data
 
-_has_samsung_docs = _has_data(SAMSUNG, "docs")
+_has_samsung_panel = _has_data(SAMSUNG, "panel")
 _has_samsung_finance = _has_data(SAMSUNG, "finance")
-_has_any_samsung = _has_samsung_docs or _has_samsung_finance
+_has_any_samsung = _has_samsung_panel or _has_samsung_finance
 
 requires_samsung_any = pytest.mark.skipif(not _has_any_samsung, reason="삼성전자 데이터 없음")
 
@@ -428,9 +428,9 @@ class TestDataStats:
         assert resp.status_code == 200
         data = resp.json()
         assert "version" in data
-        assert "docs" in data
+        assert "panel" in data
         assert "finance" in data
-        assert isinstance(data["docs"]["count"], int)
+        assert isinstance(data["panel"]["count"], int)
         assert isinstance(data["finance"]["count"], int)
 
 
@@ -636,10 +636,10 @@ class TestDataPreview:
         resp = client.get(f"/api/data/preview/{SAMSUNG}/nonexistent_module")
         assert resp.status_code == 404
 
-    @pytest.mark.skipif(not _has_samsung_docs, reason="삼성전자 docs 데이터 없음")
-    def test_preview_docs_module(self, client):
-        """GET /api/data/preview — docs salesBreakdown."""
-        resp = client.get(f"/api/data/preview/{SAMSUNG}/salesBreakdown")
+    @pytest.mark.skipif(not _has_samsung_panel, reason="삼성전자 panel 데이터 없음")
+    def test_preview_panel_module(self, client):
+        """GET /api/data/preview — panel keywordTrend."""
+        resp = client.get(f"/api/data/preview/{SAMSUNG}/keywordTrend")
         if resp.status_code == 200:
             data = resp.json()
             assert data["type"] in ("table", "dict", "text", "unknown")
@@ -856,20 +856,7 @@ class TestCompanyCache:
 
 
 class TestCompanyAPIExtended:
-    """sections, toc, insights, network, scan 등 추가 엔드포인트."""
-
-    @requires_samsung_any
-    def test_company_sections(self, client):
-        """GET /api/company/{code}/sections — sections 수평화 테이블."""
-        resp = client.get(f"/api/company/{SAMSUNG}/sections")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["stockCode"] == SAMSUNG
-        assert "payload" in data
-
-    def test_company_sections_not_found(self, client):
-        resp = client.get("/api/company/999999/sections")
-        assert resp.status_code == 404
+    """panel, toc, insights, network, scan 등 추가 엔드포인트."""
 
     @requires_samsung_any
     def test_company_toc(self, client):

@@ -1,7 +1,7 @@
 """ParserMapper — 파서 매핑 데이터 통합 매퍼.
 
-affiliate/costByNature/sections 파서의 인라인 매핑을
-JSON 파일로 추출한 후 통합 인터페이스로 제공.
+affiliate/costByNature/panel topic 파서의 인라인 매핑을 JSON 파일로 추출한 후
+통합 인터페이스로 제공.
 
 각 파서는 코드에 매핑 데이터 0줄 — JSON 로드만.
 """
@@ -22,9 +22,9 @@ def _loadRequired(filename: str) -> dict:
 
     과거 사고 (2026-04-19): PyPI wheel 0.9.15 에서 `reference/data/parserMappings/`
     디렉토리가 통째로 누락된 채 배포됨. loadSections() 가 빈 dict 를 리턴했고,
-    sections runtime 의 `_CHAPTER_BY_MAJOR` 가 빈 상태로 초기화되어 모든
+    panel topic routing 의 `_CHAPTER_BY_MAJOR` 가 빈 상태로 초기화되어 모든
     `chapterFromMajorNum(N)` 이 None → _reportRowsToTopicRows 빈 리스트 →
-    sections() None → c.sections `.raw.columns` AttributeError 로 외부 사용자
+    panel() None → Company.panel 반환 검증 누락으로 외부 사용자
     첫 호출이 크래시.
 
     silent `{}` 리턴은 위 사고의 근본 원인. 파일이 없다는 것은 wheel 패키징
@@ -80,23 +80,23 @@ def loadCostByNature() -> dict:
 
 @lru_cache(maxsize=1)
 def loadSections() -> dict:
-    """sections 파서 매핑 로드 (detailTopicMap/detailTopicKeywords/chapterByMajor).
+    """panel topic 파서 매핑 로드 (detailTopicMap/detailTopicKeywords/chapterByMajor).
 
     Returns:
-        sections.json 파싱 dict. lru_cache 로 1회만 read.
+        panelTopics.json 파싱 dict. lru_cache 로 1회만 read.
 
     Example:
         >>> "chapterByMajor" in loadSections()  # doctest: +SKIP
         True
 
     Raises:
-        FileNotFoundError: 번들 sections.json 누락 시 (2026-04-19 사고 class).
+        FileNotFoundError: 번들 panelTopics.json 누락 시 (2026-04-19 사고 class).
     """
-    return _loadRequired("sections.json")
+    return _loadRequired("panelTopics.json")
 
 
 class ParserMapper(BaseMapper):
-    """파서 매핑 통합 매퍼 — affiliate/costByNature/sections."""
+    """파서 매핑 통합 매퍼 — affiliate/costByNature/panel topic."""
 
     @property
     def name(self) -> str:
@@ -292,7 +292,7 @@ class ParserMapper(BaseMapper):
     # ── BaseMapper ──
 
     def lookup(self, key: str) -> dict | None:
-        """통합 검색 — affiliate → cost → sections 순.
+        """통합 검색 — affiliate → cost → panel topic 순.
 
         Args:
             key: 검색 키 (열 이름·항목명·heading 등).
@@ -322,15 +322,15 @@ class ParserMapper(BaseMapper):
         if val:
             return {"source": "costByNature.normalize", "canonical": val}
 
-        # section topic
+        # panel topic
         val = self.sectionTopic(key)
         if val:
-            return {"source": "sections.detailTopic", "topicCode": val}
+            return {"source": "panelTopics.detailTopic", "topicCode": val}
 
         return None
 
     def stats(self) -> MapperStats:
-        """통합 통계 — 4 source (affiliate movement/profile/transposed + costNormalize + sectionTopicMap) 합계.
+        """통합 통계 — 4 source (affiliate movement/profile/transposed + costNormalize + panel topicMap) 합계.
 
         Returns:
             MapperStats(name, totalEntries=합계, mappedEntries=동일, coverage=1.0, lastUpdated="").
@@ -364,7 +364,7 @@ class ParserMapper(BaseMapper):
         """4 source 의 모든 key 합쳐서 list — 통합 검색 / debug 용.
 
         Returns:
-            affiliate movement/profile + cost normalize + sections topicMap 의 key 합본 list.
+            affiliate movement/profile + cost normalize + panel topicMap 의 key 합본 list.
 
         Example:
             >>> isinstance(ParserMapper().allKeys(), list)  # doctest: +SKIP

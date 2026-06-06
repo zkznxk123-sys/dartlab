@@ -352,7 +352,7 @@ def buildTargetsFromFilingList(
 ) -> list[tuple[str, str]]:
     """DART 공시목록 API(``listFilings`` filingType="A") → (code, rceptNo) 페어 list.
 
-    docs.parquet 무관 — 정기보고서(사업/분기/반기) rcept 의 독립 출처. corp 지정 시
+    DART 문서 parquet와 무관 — 정기보고서(사업/분기/반기) rcept 의 독립 출처. corp 지정 시
     DART list.json 이 전 기간 조회 가능(3개월 제한은 corp 생략 때만)이라 누적 매니페스트를
     단일 호출로 재현. panel online 빌드(``buildPanelFromStream`` merge=True 증분)의 입력.
 

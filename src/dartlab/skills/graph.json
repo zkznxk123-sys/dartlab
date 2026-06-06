@@ -30,7 +30,7 @@
       "id": "engines.company",
       "title": "Company",
       "category": "engines",
-      "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.show'.",
+      "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.panel'.",
       "inDegree": 87,
       "outDegree": 12,
       "cluster": "company",
@@ -54,9 +54,9 @@
     },
     {
       "id": "engines.company.docsInternals",
-      "title": "docsInternals — sections 파이프라인 + 테이블 수평화 + Rust 포팅 R&D",
+      "title": "Company Docs Internals",
       "category": "engines",
-      "purpose": "docsInternals 는 engines.company.sections 의 내부 구현 SSOT 다. sections pipeline (textPathKey + occurrence 논리 row identity · semantic vs comparable spine · structure event detection) · 테이블 수평화 알고리즘 (헤더 시그니처 그룹핑 · matrix 분리 · canonical schema 실험 결과) · Rust 포팅 로드맵 (Phase 1~3 인터페이스 + 25 배속 목표) 을 한 곳에 둔다. 트리거 — 'sections 내부', 'textPathKey', '테이블 수평화', 'pyo3 polars', 'Rust 포팅'.",
+      "purpose": "Company 의 docs (사업보고서 sections) 내부 파이프라인 — fetch → parse → topic 매핑.",
       "inDegree": 0,
       "outDegree": 4,
       "cluster": "company",
@@ -2101,7 +2101,7 @@
       "id": "start.quickStart",
       "title": "DartLab 8 단계 빠른 시작",
       "category": "start",
-      "purpose": "설치 직후 Company · sections · show · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.",
+      "purpose": "설치 직후 Company · topics/panel · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.",
       "inDegree": 4,
       "outDegree": 1,
       "cluster": "start",
@@ -2877,7 +2877,7 @@
     },
     {
       "src": "engines.company",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "linkedRecipe"
     },
     {
@@ -2937,7 +2937,7 @@
     },
     {
       "src": "engines.company.docsInternals",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "linkedRecipe"
     },
     {
@@ -2947,7 +2947,7 @@
     },
     {
       "src": "engines.company.docsInternals",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "knowledge"
     },
     {
@@ -2967,7 +2967,7 @@
     },
     {
       "src": "engines.company.finance",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "linkedRecipe"
     },
     {
@@ -2983,21 +2983,6 @@
     {
       "src": "engines.company.finance",
       "dst": "engines.data.foundation",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.company.sections",
-      "dst": "engines.company",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.company.sections",
-      "dst": "engines.data.foundation",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.company.sections",
-      "dst": "engines.story",
       "kind": "knowledge"
     },
     {
@@ -3107,7 +3092,7 @@
     },
     {
       "src": "engines.dashboard.viewerSpec",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "linkedRecipe"
     },
     {
@@ -3117,7 +3102,7 @@
     },
     {
       "src": "engines.dashboard.viewerSpec",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "knowledge"
     },
     {
@@ -3222,7 +3207,7 @@
     },
     {
       "src": "engines.edgar.docs",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "linkedRecipe"
     },
     {
@@ -3232,7 +3217,7 @@
     },
     {
       "src": "engines.edgar.docs",
-      "dst": "engines.company.sections",
+      "dst": "engines.panel",
       "kind": "knowledge"
     },
     {

@@ -1,9 +1,9 @@
 """Ngram+Synonym 검색 엔진 — stem ID 역인덱스, CSR 구조, bincount 검색.
 
-report_nm + section_title 대상 bigram/trigram 역인덱스.
+report_nm + panel section_title 대상 bigram/trigram 역인덱스.
 scope="title" 검색에서 사용.
 
-allFilings(수시공시) + docs(사업보고서) 통합 인덱스 지원.
+allFilings(수시공시) + panel(정기보고서) 통합 인덱스 지원.
 """
 
 from __future__ import annotations
@@ -127,6 +127,29 @@ def _stemIndexDir() -> Path:
     return d
 
 
+def _panelCodes() -> list[str]:
+    """panel artifact 에서 사용 가능한 종목코드 목록."""
+    panelDir = Path(_cfg.dataDir) / DATA_RELEASES["panel"]["dir"]
+    if not panelDir.exists():
+        return []
+    flat = {p.stem for p in panelDir.glob("*.parquet") if not p.name.startswith("_")}
+    nested = {p.name for p in panelDir.iterdir() if p.is_dir()}
+    return sorted(flat | nested)
+
+
+def _periodToReportName(period: str) -> str:
+    """panel period(YYYYQn) → DART 정기보고서명 추정."""
+    if not period:
+        return ""
+    if period.endswith("Q4"):
+        return "사업보고서"
+    if period.endswith("Q2"):
+        return "반기보고서"
+    if period.endswith("Q1") or period.endswith("Q3"):
+        return "분기보고서"
+    return period
+
+
 # 캐시
 _cachedIndex: dict | None = None
 _cachedMeta: pl.DataFrame | None = None
@@ -138,19 +161,19 @@ _cachedMeta: pl.DataFrame | None = None
 def buildNgramIndex(
     parquetPaths: list[str | Path] | None = None,
     *,
-    includeDocs: bool = False,
-    docsBatchSize: int = 100,
+    includePanel: bool = False,
+    panelBatchSize: int = 100,
     showProgress: bool = True,
 ) -> int:
     """통합 stem ID 역인덱스 구축.
 
-    allFilings parquet + (선택) docs parquet → stemIndex.npz + stemDict.json + meta.parquet
+    allFilings parquet + (선택) panel parquet → stemIndex.npz + stemDict.json + meta.parquet
 
     Parameters
     ----------
     parquetPaths : allFilings parquet 경로. None이면 자동 탐색.
-    includeDocs : True면 docs(사업보고서)도 포함.
-    docsBatchSize : docs 배치 크기 (OOM 방지).
+    includePanel : True면 panel(정기보고서)도 포함.
+    panelBatchSize : panel 종목 배치 크기 (OOM 방지).
     showProgress : 진행 표시.
 
     Returns
@@ -166,8 +189,8 @@ def buildNgramIndex(
 
     Args:
         parquetPaths: 인덱스 source parquet 경로 리스트. None 이면 기본.
-        includeDocs: True 면 docs sections section_title 포함.
-        docsBatchSize: docs 처리 batch 크기.
+        includePanel: True 면 panel sectionLeaf 포함.
+        panelBatchSize: panel 처리 batch 크기.
         showProgress: True 면 progress 로그.
 
     Returns:
@@ -193,7 +216,7 @@ def buildNgramIndex(
     allMeta: list[dict] = []
     globalDocId = 0
     # allFilings 신규 schema 는 한 공시 = 1 row 이라 rcept_no 자체로 unique.
-    # docs (사업보고서 등) 는 여전히 section 분할이라 (rcept_no, section_order) 필요.
+    # panel (사업보고서 등) 는 block 분할이라 (rcept_no, block_order) 필요.
     existingKeys: set[tuple[str, int]] = set()
 
     # allFilings — raw 본문 단일 컬럼 (content_raw, DART XML/HTML 생긴 그대로). 표시용
@@ -256,43 +279,48 @@ def buildNgramIndex(
         if showProgress:
             _log.info(f"[stemIndex] allFilings: {globalDocId:,}문서, {nextId:,} stems")
 
-    # ── Phase 2: docs 로드 (배치) ──
-    if includeDocs:
-        docsDir = Path(_cfg.dataDir) / DATA_RELEASES["docs"]["dir"]
-        docsFiles = sorted(docsDir.glob("*.parquet"))
+    # ── Phase 2: panel 로드 (배치) ──
+    if includePanel:
+        from dartlab.providers.dart.panel.text import panelTextRows
+
+        panelCodes = _panelCodes()
+        try:
+            from dartlab.core.listingResolver import getListingResolver
+
+            resolver = getListingResolver()
+        except Exception:  # noqa: BLE001 — resolver 부재는 메타 회사명 공백으로 graceful degrade
+            resolver = None
 
         if showProgress:
-            _log.info(f"[stemIndex] docs: {len(docsFiles)}종목 처리 시작")
+            _log.info(f"[stemIndex] panel: {len(panelCodes)}종목 처리 시작")
 
-        for batchStart in range(0, len(docsFiles), docsBatchSize):
-            batchFiles = docsFiles[batchStart : batchStart + docsBatchSize]
-            for f in batchFiles:
+        for batchStart in range(0, len(panelCodes), panelBatchSize):
+            batchCodes = panelCodes[batchStart : batchStart + panelBatchSize]
+            for code in batchCodes:
                 try:
-                    df = pl.read_parquet(
-                        f,
-                        columns=[
-                            "rcept_no",
-                            "corp_code",
-                            "corp_name",
-                            "stock_code",
-                            "report_type",
-                            "section_title",
-                            "section_order",
-                            "section_content",
-                        ],
-                    )
+                    df = panelTextRows(code)
                 except (pl.exceptions.PolarsError, OSError):
                     continue
+                if df is None or df.is_empty():
+                    continue
+                try:
+                    corpName = resolver.codeToName(code) if resolver else ""
+                except Exception:  # noqa: BLE001 — resolver 구현 오류가 색인을 막지 않게 함
+                    corpName = ""
 
                 for row in df.iter_rows(named=True):
-                    key = (row["rcept_no"], row.get("section_order", 0))
+                    rceptNo = row.get("rceptNo") or ""
+                    if not rceptNo:
+                        continue
+                    blockOrder = int(row.get("blockOrder") or 0)
+                    key = (rceptNo, blockOrder)
                     if key in existingKeys:
                         continue
                     existingKeys.add(key)
 
-                    reportNm = row.get("report_type", "")
-                    sectionTitle = row.get("section_title", "") or ""
-                    contentHead = (row.get("section_content", "") or "")[:_CONTENT_INDEX_CHARS]
+                    reportNm = _periodToReportName(str(row.get("period") or ""))
+                    sectionTitle = row.get("sectionLeaf") or ""
+                    contentHead = (row.get("contentRaw", "") or "")[:_CONTENT_INDEX_CHARS]
                     text = f"{reportNm} {sectionTitle} {contentHead}"
 
                     tokens = _tokenize(text)
@@ -308,25 +336,25 @@ def buildNgramIndex(
 
                     allMeta.append(
                         {
-                            "rcept_no": row["rcept_no"],
-                            "corp_code": row.get("corp_code", ""),
-                            "corp_name": row.get("corp_name", ""),
-                            "stock_code": row.get("stock_code", ""),
-                            "rcept_dt": "",
+                            "rcept_no": rceptNo,
+                            "corp_code": "",
+                            "corp_name": corpName or "",
+                            "stock_code": code,
+                            "rcept_dt": rceptNo[:8] if len(rceptNo) >= 8 else "",
                             "report_nm": reportNm,
                             "section_title": sectionTitle,
-                            "source": "docs",
+                            "source": "panel",
                             "text": "",
                         }
                     )
                     globalDocId += 1
 
-            if showProgress and (batchStart + docsBatchSize) % (docsBatchSize * 5) == 0:
+            if showProgress and (batchStart + panelBatchSize) % (panelBatchSize * 5) == 0:
                 elapsed = time.time() - t0
                 _log.info(
                     "  [%d/%d] %s문서, %s stems, %.0f초",
-                    batchStart + len(batchFiles),
-                    len(docsFiles),
+                    batchStart + len(batchCodes),
+                    len(panelCodes),
                     f"{globalDocId:,}",
                     f"{nextId:,}",
                     elapsed,

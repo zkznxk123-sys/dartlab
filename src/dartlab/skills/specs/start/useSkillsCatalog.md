@@ -148,7 +148,7 @@ skill 의 코드 예시를 그대로 실행한다 (또는 MCP tool 로 호출). 
 
 | 질문 패턴 | 추천 skill |
 |---|---|
-| 회사 분석 진입 | `engines.company`, `engines.company.sections` |
+| 회사 분석 진입 | `engines.company` |
 | 재무비율 / ROE / OPM | `engines.analysis.profitability`, `engines.scan.ratio` |
 | 시장 횡단 (전 종목) | `engines.scan` 군 (19 축) |
 | 매크로 / 거시 / 경기 | `engines.macro` 군 (12 축) |

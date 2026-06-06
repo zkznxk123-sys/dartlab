@@ -292,7 +292,7 @@ def _forensicsMemo(args: dict[str, Any]) -> ToolResult:
         market=str(getattr(company, "market", "KR")),
         companyName=str(getattr(company, "corpName", getattr(company, "companyName", target))),
         statements=statements,
-        sectionTexts=section_texts,
+        panelTextRows=section_texts,
         events=events,
         scanRows=scan_rows,
     )

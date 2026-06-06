@@ -365,7 +365,7 @@ def readStatement(
         - polars. data/dart/panel/{code}.parquet (5표 contentRaw).
 
     Capabilities:
-        - native 재무제표를 XBRL 경계(2022) 넘어 항목명 매칭으로 과거 연장 — docs.parquet 0.
+        - native 재무제표를 XBRL 경계(2022) 넘어 항목명 매칭으로 과거 연장.
 
     Guide:
         - ``c.panel("is")`` 소문자 호출 → 본 함수. 대문자 IS 는 finance(파사드).
@@ -595,7 +595,7 @@ def readRatios(
     LLM Specifications:
         AntiPatterns:
             - 비율 공식·snakeId 매핑 재구현 금지(농장) — core SSOT 호출만.
-            - lxml import 금지(R2). finance/company/docs import 금지(R1). docs.parquet read 금지(R3).
+            - lxml import 금지(R2). finance/company import 금지(R1). panel.parquet contentRaw 만 소비(R3).
         OutputSchema:
             - ``pl.DataFrame | None`` ([ratio, label, *period]).
         Prerequisites:

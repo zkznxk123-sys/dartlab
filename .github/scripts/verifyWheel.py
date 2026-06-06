@@ -33,7 +33,7 @@ from pathlib import Path
 # `tests/audit/test_wheelPackaging.py::test_parserMappings_inWheel` 와 동기화.
 _REQUIRED_BUNDLE_FILES = [
     # parserMappings
-    "dartlab/providers/mappers/mapperData/parserMappings/sections.json",
+    "dartlab/providers/mappers/mapperData/parserMappings/panelTopics.json",
     "dartlab/providers/mappers/mapperData/parserMappings/affiliate.json",
     "dartlab/providers/mappers/mapperData/parserMappings/costByNature.json",
     "dartlab/providers/mappers/mapperData/parserMappings/sectorPriors.json",
@@ -69,7 +69,7 @@ def checkBundle(whl: Path) -> int:
 
 
 def checkRuntime(whl: Path) -> int:
-    """격리 venv 에 wheel 설치 후 loadSections() 호출."""
+    """격리 venv 에 wheel 설치 후 panel topic 매핑 로더 호출."""
     with tempfile.TemporaryDirectory(prefix="wheel-verify-") as tmp:
         venvDir = Path(tmp) / "venv"
         venv.create(venvDir, with_pip=True)

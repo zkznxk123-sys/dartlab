@@ -1,6 +1,6 @@
 """반도체 KPI — CAPEX 사이클/웨이퍼 ASP 추정/가동률 추정.
 
-DART sections(productService/생산실적) + IS(매출/CAPEX) 활용.
+DART panel(productService/생산실적) + IS(매출/CAPEX) 활용.
 """
 
 from __future__ import annotations
@@ -87,10 +87,12 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
         # show 은퇴 → 공통파서 panel 제품/부문 표 (EDGAR segments fallback)
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionRows
+        from dartlab.providers.dart.panel.text import panelTableRows
 
         code = getattr(company, "stockCode", None)
-        _r = (sectionRows(code, sectionPattern="제품") or sectionRows(code, sectionPattern="부문")) if code else []
+        _r = (
+            (panelTableRows(code, sectionPattern="제품") or panelTableRows(code, sectionPattern="부문")) if code else []
+        )
         ps = pl.DataFrame(_r) if _r else None
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()

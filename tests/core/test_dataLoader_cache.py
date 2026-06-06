@@ -33,7 +33,7 @@ class TestLoadDataCachePhaseD:
         ):
             loadData("005930", "finance")
             loadData("005930", "finance")
-            loadData("068270", "docs")
+            loadData("068270", "panel")
         assert len(_LOAD_CACHE) == 0
 
     def test_each_call_reloads_from_disk(self):

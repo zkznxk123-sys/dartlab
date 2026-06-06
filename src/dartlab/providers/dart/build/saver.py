@@ -388,7 +388,7 @@ def korColumns(
 
     Args:
         df: Polars DataFrame 입력.
-        category: finance/report/docs.
+        category: finance/report/filings/company.
 
     Returns:
         pl.DataFrame — 한글화/추가 컬럼 후 결과.
@@ -454,7 +454,6 @@ def korColumns(
 _SORT_BY_CATEGORY: dict[str, list[str]] = {
     "finance": ["sj_div", "fs_div", "bsns_year", "reprt_nm", "account_id"],
     "report": ["apiType", "bsns_year", "rcept_no"],
-    "docs": ["year", "report_type", "section_order"],
     "filings": ["bsns_year", "rcept_dt", "rcept_no"],
     "allFilings": ["bsns_year", "rcept_dt", "rcept_no"],
 }
@@ -474,7 +473,7 @@ def _categoryForPath(dest: Path) -> str | None:
 def writeParquetSorted(df: pl.DataFrame, dest: Path) -> None:
     """category 자동 추론 + sort + row_group_size 적용 후 원자적 write.
 
-    Phase A 처방 — DART finance/report/docs parquet 의 row group statistics 를
+    Phase A 처방 — DART finance/report parquet 의 row group statistics 를
     sort 컬럼 기반 disjoint 으로 만들어 predicate pushdown 을 활성화한다.
 
     Args:

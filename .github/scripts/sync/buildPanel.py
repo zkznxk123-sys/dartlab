@@ -4,7 +4,7 @@ plan snazzy-wibbling-origami P6. 로컬 DART zip(``data/original/dart/docs/{code
 period-sharded panel artifact(14-col) + slim ``_index.parquet`` 를 빌드해 HF push 를 준비한다.
 일일 sync 흐름:
 
-    docs zip 수집 → 변경 종목 list → buildPanel (본 entry) → uploadData (SYNC_CATEGORY=panel)
+    원본 zip 수집 → 변경 종목 list → buildPanel (본 entry) → uploadData (SYNC_CATEGORY=panel)
 
 본 entry 는 network 0 — 로컬 zip 만 소비한다 (zip 수집은 별도 DART 수집기 선행). build 본체는
 ``dartlab.providers.dart.panel.build.buildPanelAll`` (zip→14col, multiprocessing). 본 파일은
@@ -12,7 +12,7 @@ CI 진입(코드 해석 + changed list 작성)만 담당. _index/_label 은 PRD 
 폐기 (cross·라벨검색 표면 제거) — panel artifact 는 ``{code}/{period}.parquet`` 단일.
 
 사용법:
-    # 변경 종목만 (dist/changed_docs.txt 또는 dist/changed.txt 기반)
+    # 변경 종목만 (dist/changed_panel.txt 또는 dist/changed.txt 기반)
     python .github/scripts/sync/buildPanel.py
 
     # 특정 종목 list
@@ -35,8 +35,8 @@ from pathlib import Path
 
 
 def _resolveChangedCodes() -> list[str]:
-    """dist/changed_docs.txt 또는 dist/changed.txt 에서 변경된 docs 종목 추출."""
-    for p in (Path("dist/changed_docs.txt"), Path("dist/changed.txt")):
+    """dist/changed_panel.txt 또는 dist/changed.txt 에서 변경된 panel 종목 추출."""
+    for p in (Path("dist/changed_panel.txt"), Path("dist/changed.txt")):
         if not p.exists():
             continue
         names = [n.strip() for n in p.read_text(encoding="utf-8").splitlines() if n.strip()]
@@ -80,7 +80,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="panel SSOT artifact 빌더")
     parser.add_argument("--codes", help="쉼표 구분 종목 코드 list (예: 005930,000660)")
     parser.add_argument("--all", action="store_true", help="data/original/dart/docs/ 의 모든 종목 빌드")
-    parser.add_argument("--changed", action="store_true", help="dist/changed_docs.txt 또는 dist/changed.txt 기반")
+    parser.add_argument("--changed", action="store_true", help="dist/changed_panel.txt 또는 dist/changed.txt 기반")
     args = parser.parse_args()
 
     if "DARTLAB_DATA_DIR" not in os.environ:

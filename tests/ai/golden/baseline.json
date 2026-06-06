@@ -41,12 +41,11 @@
           "api:Company.show",
           "api:Company",
           "api:listing",
-          "api:downloadAll",
           "api:gather",
           "api:macro",
           "api:search"
         ],
-        "refCount": 18
+        "refCount": 17
       }
     },
     {

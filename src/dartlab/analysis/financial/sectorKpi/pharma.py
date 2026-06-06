@@ -1,6 +1,6 @@
 """제약·바이오 KPI — 임상 파이프라인/마일스톤/R&D 집중도.
 
-DART sections(사업개요/주요제품) + IS(R&D비용) 활용.
+DART panel(사업개요/주요제품) + IS(R&D비용) 활용.
 """
 
 from __future__ import annotations
@@ -69,11 +69,11 @@ def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
     try:
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionTexts
+        from dartlab.providers.dart.panel.text import panelTextRows
 
         # show 은퇴 → 공통파서 panel 본문(사업의 내용/연구개발/사업 개요 섹션) 텍스트
         _code = getattr(company, "stockCode", None)
-        _texts = sectionTexts(_code) if _code else None
+        _texts = panelTextRows(_code) if _code else None
         text = ""
         if _texts is not None and not _texts.is_empty():
             _sub = _texts.filter(pl.col("sectionLeaf").str.contains("사업의 내용|연구개발|사업의 개요"))

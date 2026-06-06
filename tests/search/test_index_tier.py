@@ -90,9 +90,9 @@ def test_rebuild_main_lite_sincedate_reduces(synthRoot):
     from dartlab.providers.dart.search import fieldIndexRebuild as FIR
 
     _mkAllFilings(synthRoot)
-    n_full = FIR.rebuildMain(includeDocs=False, tier="full", showProgress=False)
+    n_full = FIR.rebuildMain(includePanel=False, tier="full", showProgress=False)
     FI.clearCache()
-    n_lite = FIR.rebuildMain(includeDocs=False, tier="lite", sinceDate="20240601", showProgress=False)
+    n_lite = FIR.rebuildMain(includePanel=False, tier="lite", sinceDate="20240601", showProgress=False)
     assert n_full == 2
     assert n_lite == 1  # 20240101 제외, 20241201 포함
     assert (FI._contentIndexDir() / "main.npz").exists()
@@ -105,7 +105,7 @@ def test_index_info_schema_version(synthRoot):
     from dartlab.providers.dart.search import fieldIndexRebuild as FIR
 
     _mkAllFilings(synthRoot)
-    FIR.rebuildMain(includeDocs=False, tier="full", showProgress=False)
+    FIR.rebuildMain(includePanel=False, tier="full", showProgress=False)
     info = FIR.indexInfo()
     assert info["available"] is True
     assert info["schemaVersion"] == FI.INDEX_SCHEMA_VERSION
@@ -113,66 +113,60 @@ def test_index_info_schema_version(synthRoot):
     assert info["nDocs"] == 2
 
 
-def _mkDocs(root):
-    """flat docs parquet 합성 — 실제 스키마(rcept_date/report_type, rcept_dt 아님)."""
+def _mkPanel(root):
+    """flat panel parquet 합성 — 운영 스키마(data/dart/panel/{code}.parquet)."""
     import polars as pl
 
-    docsDir = root / "dart" / "docs"
-    docsDir.mkdir(parents=True, exist_ok=True)
+    panelDir = root / "dart" / "panel"
+    panelDir.mkdir(parents=True, exist_ok=True)
     pl.DataFrame(
         [
             {
-                "corp_code": "",
-                "corp_name": "삼성",
-                "stock_code": "005930",
-                "rcept_date": "20240115",
-                "rcept_no": "20240115000001",
-                "report_type": "사업보고서",
-                "section_order": 0,
-                "section_title": "사업의 개요",
-                "section_content": "반도체 메모리 사업 매출 성장",
-            },
+                "rceptNo": "20240115000001",
+                "period": "2023Q4",
+                "sectionLeaf": "사업의 개요",
+                "contentRaw": "<P>반도체 메모리 사업 매출 성장</P>",
+            }
+        ]
+    ).write_parquet(panelDir / "005930.parquet")
+    pl.DataFrame(
+        [
             {
-                "corp_code": "",
-                "corp_name": "하이닉스",
-                "stock_code": "000660",
-                "rcept_date": "20250320",
-                "rcept_no": "20250320000002",
-                "report_type": "분기보고서",
-                "section_order": 0,
-                "section_title": "재무제표",
-                "section_content": "영업이익 흑자전환 HBM 수요",
+                "rceptNo": "20250320000002",
+                "period": "2025Q1",
+                "sectionLeaf": "재무제표",
+                "contentRaw": "<P>영업이익 흑자전환 HBM 수요</P>",
             },
         ]
-    ).write_parquet(docsDir / "synthetic.parquet")
+    ).write_parquet(panelDir / "000660.parquet")
 
 
-def test_docs_meta_columnkey_coalesce(synthRoot):
-    """docs(rcept_date/report_type) 컬럼키가 rcept_dt/report_nm 으로 정규화돼 메타가 채워진다(공백 아님)."""
+def test_panel_meta_from_flat_artifact(synthRoot):
+    """flat panel artifact 에서 rcept_dt/report_nm 메타가 채워진다(공백 아님)."""
     import polars as pl
 
     from dartlab.providers.dart.search import fieldIndex as FI
     from dartlab.providers.dart.search import fieldIndexRebuild as FIR
 
-    _mkDocs(synthRoot)
-    n = FIR.rebuildMain(includeAllFilings=False, includeDocs=True, tier="full", showProgress=False)
+    _mkPanel(synthRoot)
+    n = FIR.rebuildMain(includeAllFilings=False, includePanel=True, tier="full", showProgress=False)
     assert n == 2
     meta = pl.read_parquet(FI._contentIndexDir() / "main_meta.parquet")
-    # 컬럼키 버그면 rcept_dt/report_nm 가 전부 "" — coalesce 후 실제 날짜·유형이 채워져야 한다.
     assert set(meta["rcept_dt"].to_list()) == {"20240115", "20250320"}
     assert "사업보고서" in meta["report_nm"].to_list()
+    assert set(meta["source"].to_list()) == {"panel"}
 
 
-def test_lite_sincedate_keeps_recent_docs(synthRoot):
-    """lite sinceDate 가 docs 를 전량 탈락시키지 않고 최근 docs 만 보존(컬럼키 버그 회귀 가드)."""
+def test_lite_sincedate_keeps_recent_panel(synthRoot):
+    """lite sinceDate 가 panel 을 전량 탈락시키지 않고 최근 filing 만 보존."""
     from dartlab.providers.dart.search import fieldIndex as FI
     from dartlab.providers.dart.search import fieldIndexRebuild as FIR
 
-    _mkDocs(synthRoot)
+    _mkPanel(synthRoot)
     n = FIR.rebuildMain(
-        includeAllFilings=False, includeDocs=True, tier="lite", sinceDate="20250101", showProgress=False
+        includeAllFilings=False, includePanel=True, tier="lite", sinceDate="20250101", showProgress=False
     )
-    # 20240115 제외, 20250320 보존 = 1 (버그 시 0 = docs 전량 탈락)
+    # 20240115 제외, 20250320 보존 = 1
     assert n == 1
     assert (FI._contentIndexDir("lite") / "main.npz").exists()
 

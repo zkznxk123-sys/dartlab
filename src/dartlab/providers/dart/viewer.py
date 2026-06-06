@@ -195,13 +195,27 @@ def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
         blk = _buildFinanceBlock(company, topic)
         return [blk] if blk else []
 
-    sec = company.sections
-    if sec is None:
+    panel = company.panel
+    if panel is None or panel.is_empty():
         return []
 
-    topicFrame = sec.filter(pl.col("topic") == topic)
+    if "sectionLeaf" not in panel.columns:
+        return []
+    topicFrame = panel.filter(pl.col("sectionLeaf") == topic)
     if topicFrame.is_empty():
         return []
+    if "leafSeq" not in topicFrame.columns:
+        topicFrame = topicFrame.with_row_index("leafSeq")
+    blockTypeExpr = (
+        pl.when(pl.col("leafType") == "table").then(pl.lit("table")).otherwise(pl.lit("text")).alias("blockType")
+        if "leafType" in topicFrame.columns
+        else pl.lit("text").alias("blockType")
+    )
+    topicFrame = topicFrame.with_columns(
+        pl.col("leafSeq").fill_null(0).cast(pl.Int64).alias("blockOrder"),
+        blockTypeExpr,
+        pl.lit("panel").alias("source"),
+    )
 
     periodCols = _periodCols(topicFrame)
     blocks: list[ViewerBlock] = []
@@ -214,7 +228,7 @@ def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
     for bo in blockOrders:
         boRows = topicFrame.filter(pl.col("blockOrder") == bo)
         bt = boRows["blockType"][0] if "blockType" in boRows.columns else "text"
-        source = boRows["source"][0] if "source" in boRows.columns else "docs"
+        source = boRows["source"][0] if "source" in boRows.columns else "panel"
 
         if source == "finance":
             blk = _buildFinanceBlock(company, topic)
@@ -501,7 +515,7 @@ def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> Vie
     return ViewerBlock(
         block=bo,
         kind="text",
-        source="docs",
+        source=str(row.get("source") or "panel"),
         data=textDf,
         meta=BlockMeta(
             periods=nonNullCols,

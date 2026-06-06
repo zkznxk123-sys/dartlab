@@ -29,7 +29,7 @@ class DataEntry:
     - report: 공시 파싱 모듈 (dividend, employee 등)
     - notes: K-IFRS 주석 (notes.receivables 등)
     - disclosure: 서술형 공시 (business, mdna 등)
-    - raw: 원본 parquet (rawDocs, rawFinance, rawReport)
+    - raw: 원본 parquet (rawFinance, rawReport)
     - analysis: L2 분석 엔진 (ratios, insight, sector, rank)
     """
 

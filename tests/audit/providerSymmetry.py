@@ -63,7 +63,6 @@ _DART_ONLY: frozenset[str] = frozenset(
         "gather",
         "table",
         # raw provider 접근
-        "rawDocs",
         "rawFinance",
         "rawReport",
     }

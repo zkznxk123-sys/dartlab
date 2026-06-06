@@ -4,16 +4,16 @@
 이 파일이 잡는 버그 클래스 (2026-04-19 실제 사고):
 ========================================
 PyPI 0.9.15 wheel 에서 `reference/data/parserMappings/` 디렉토리가 통째로 누락된 채
-배포되어, 외부 사용자 `Company("005930").sections` 첫 호출이
+배포되어, 외부 사용자 `Company("005930").topics` 첫 호출이
 `AttributeError: NoneType has no columns` 로 크래시.
 
 연쇄:
-    parserMappings/sections.json 누락
+    parserMappings/panelTopics.json 누락
     → loadSections() {}
     → runtime 모듈 import 시 _CHAPTER_BY_MAJOR = {}
     → chapterFromMajorNum(N) 모두 None
     → _reportRowsToTopicRows 0 rows
-    → sections() None
+    → panel topic rows 0개
     → _SectionsSource.raw.columns AttributeError
 
 이 테스트는 unit 마커로 CI 매 실행마다 돌아가 재발을 즉시 감지한다.
@@ -41,7 +41,7 @@ _PKG_ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 # git 에 커밋되지 않고 wheel 에도 포함되지 않음 — 필수 목록 제외.
 _REQUIRED_FILES = [
     # core parserMappings — 2026-04-19 사고 발생 위치
-    "providers/mappers/mapperData/parserMappings/sections.json",
+    "providers/mappers/mapperData/parserMappings/panelTopics.json",
     "providers/mappers/mapperData/parserMappings/affiliate.json",
     "providers/mappers/mapperData/parserMappings/costByNature.json",
     "providers/mappers/mapperData/parserMappings/sectorPriors.json",
@@ -72,18 +72,18 @@ def test_requiredBundleFile_exists(relativePath: str):
 # ════════════════════════════════════════
 
 
-def test_parserMappingsSections_hasChapterByMajor():
-    """sections.json 의 chapterByMajor 가 비어있지 않음.
+def test_parserMappingsPanelTopics_hasChapterByMajor():
+    """panelTopics.json 의 chapterByMajor 가 비어있지 않음.
 
-    이 필드가 비면 chapterFromMajorNum() 모두 None 리턴 → sections() 파이프라인
+    이 필드가 비면 chapterFromMajorNum() 모두 None 리턴 → panel topic 파이프라인
     전체가 silent-fail. wheel 에 파일은 있어도 내용이 깨졌을 때를 잡는다.
     """
-    path = _PKG_ROOT / "providers/mappers/mapperData/parserMappings/sections.json"
+    path = _PKG_ROOT / "providers/mappers/mapperData/parserMappings/panelTopics.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    assert isinstance(data, dict), "sections.json 루트가 dict 아님"
+    assert isinstance(data, dict), "panelTopics.json 루트가 dict 아님"
 
     chapterByMajor = data.get("chapterByMajor")
-    assert chapterByMajor, "sections.json 에 'chapterByMajor' 키 없거나 빔"
+    assert chapterByMajor, "panelTopics.json 에 'chapterByMajor' 키 없거나 빔"
     assert isinstance(chapterByMajor, dict)
     # I~IX 까지 기본 장번호는 반드시 존재해야 함 (DART 보고서 표준 장 구조)
     for majorNum in ("1", "2", "3", "4", "5"):
@@ -92,12 +92,12 @@ def test_parserMappingsSections_hasChapterByMajor():
         )
 
 
-def test_parserMappingsSections_hasDetailTopicMap():
-    """sections.json 의 detailTopicMap — 상세 토픽 라우팅 테이블."""
-    path = _PKG_ROOT / "providers/mappers/mapperData/parserMappings/sections.json"
+def test_parserMappingsPanelTopics_hasDetailTopicMap():
+    """panelTopics.json 의 detailTopicMap — 상세 토픽 라우팅 테이블."""
+    path = _PKG_ROOT / "providers/mappers/mapperData/parserMappings/panelTopics.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     dtm = data.get("detailTopicMap")
-    assert dtm, "sections.json 에 detailTopicMap 키 누락"
+    assert dtm, "panelTopics.json 에 detailTopicMap 키 누락"
     assert isinstance(dtm, dict)
 
 

@@ -1,10 +1,8 @@
 """core ↛ providers 강제 — 정적 import + importlib 리터럴 dispatch 0.
 
 `test_core_l0_only` 가 core 의 상위계층 module-level import 를 막지만, core/dataLoader
-가 과거 ``importlib.import_module("dartlab.providers.dart.docs.sections.sectionsStorage")``
-로 providers 를 런타임 더듬던 스멜(문자열 리터럴이라 AST module-level 검사 우회)을 별도로
-lock 한다. docs↔sections 합성을 providers `DartDocsLoader`(LoaderProvider DIP)로 정위치한
-뒤 회귀 차단.
+가 과거 문자열 리터럴로 providers 를 런타임 더듬던 스멜(AST module-level 검사 우회)을
+별도로 lock 한다. provider별 loader 등록은 LoaderProvider DIP 경계에서만 허용한다.
 
 허용: `core/loaders.py`·`gatherProvider.py` 등 DIP discovery 의 ``import_module(modPath)``
 — modPath 가 ``_KNOWN_*_MODULES`` 변수(문자열 리터럴 아님)라 본 검사에 안 걸린다.

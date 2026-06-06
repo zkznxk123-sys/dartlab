@@ -2,9 +2,8 @@
 
 전 종목 raw parquet 일괄 lazy scan 사고 (STATUS_STACK_BUFFER_OVERRUN) 재발 방지.
 
-docs.parquet 농장 은퇴 후 buildDocsIndex 는 panel SSOT(``sectionTexts(code)``)에서 본문을
-회수한다. fixture 는 panel dir 의 종목 parquet(코드 enum 용)과 ``sectionTexts`` monkeypatch
-(본문 주입)로 합성 — 옛 docs.parquet 직접 작성 대체.
+buildDocsIndex 는 panel SSOT(``panelTextRows(code)``)에서 본문을 회수한다. fixture 는
+panel dir 의 종목 parquet(코드 enum 용)과 ``panelTextRows`` monkeypatch(본문 주입)로 합성한다.
 """
 
 from __future__ import annotations
@@ -17,7 +16,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-# code → [(sectionLeaf, contentRaw), ...] — sectionTexts monkeypatch 가 반환할 합성 본문.
+# code → [(sectionLeaf, contentRaw), ...] — panelTextRows monkeypatch 가 반환할 합성 본문.
 _FIXTURE_SECTIONS: dict[str, list[tuple[str, str]]] = {
     "005930": [
         ("사업의 개요", "반도체와 모바일이 주력 사업이다. " * 30),
@@ -35,14 +34,14 @@ _FIXTURE_SECTIONS: dict[str, list[tuple[str, str]]] = {
 
 @pytest.fixture
 def docsFixture(tmp_path: Path, monkeypatch) -> Path:
-    """3 회사 panel fixture — 종목 parquet(코드 enum) + sectionTexts 본문 주입."""
+    """3 회사 panel fixture — 종목 parquet(코드 enum) + panelTextRows 본문 주입."""
     panelDir = tmp_path / "panel"
     panelDir.mkdir()
     for code in _FIXTURE_SECTIONS:
-        # 코드 enum 용 placeholder — buildDocsIndex 는 glob 으로 종목만 발견, 본문은 sectionTexts.
+        # 코드 enum 용 placeholder — buildDocsIndex 는 glob 으로 종목만 발견, 본문은 panelTextRows.
         pl.DataFrame({"_": [1]}).write_parquet(str(panelDir / f"{code}.parquet"))
 
-    def _fakeSectionTexts(code: str, *args, **kwargs):
+    def _fakepanelTextRows(code: str, *args, **kwargs):
         secs = _FIXTURE_SECTIONS.get(code)
         if not secs:
             return None
@@ -58,7 +57,7 @@ def docsFixture(tmp_path: Path, monkeypatch) -> Path:
         ]
         return pl.DataFrame(rows)
 
-    monkeypatch.setattr("dartlab.providers.dart.sections.sectionTexts", _fakeSectionTexts)
+    monkeypatch.setattr("dartlab.providers.dart.panel.text.panelTextRows", _fakepanelTextRows)
     return panelDir
 
 

@@ -3,12 +3,12 @@
 사용 예시::
 
     # DART (종목코드 = 숫자 → 자동 감지)
-    dartlab collect 005930                    # 단일 종목 (finance+report+docs 증분)
+    dartlab collect 005930                    # 단일 종목 (finance+report 증분)
     dartlab collect 005930 -c finance         # finance만 증분 수집
     dartlab collect 005930 -c finance,report  # finance+report만
-    dartlab collect --check 005930            # freshness 체크 (docs+finance+report)
+    dartlab collect --check 005930            # freshness 체크 (panel+finance+report)
     dartlab collect --incremental 005930      # 누락 공시 증분 수집
-    dartlab collect --auto                    # 미수집 docs 전체
+    dartlab collect --auto                    # 안내 출력
     dartlab collect --batch                   # 전체 상장, 미수집만
     dartlab collect --batch -c finance        # 전체 상장, 재무만
 
@@ -95,14 +95,14 @@ def configureParser(subparsers) -> None:
     parser.add_argument(
         "--batch",
         action="store_true",
-        help="배치 모드 (DART: finance/report/docs 전체, 멀티키 병렬)",
+        help="배치 모드 (DART: finance/report, 멀티키 병렬)",
     )
     parser.add_argument(
         "--categories",
         "-c",
         type=str,
         default=None,
-        help="수집 카테고리 (쉼표 구분: finance,report,docs)",
+        help="수집 카테고리 (쉼표 구분: finance,report)",
     )
     parser.add_argument(
         "--mode",
@@ -219,12 +219,11 @@ def _printHelp(console) -> None:
     """통합 도움말."""
     console.print("[bold]dartlab collect[/] — DART/EDGAR 데이터 수집\n")
     console.print("  [bold]DART[/] (종목코드 = 숫자 → 자동 감지):")
-    console.print("  dartlab collect 005930              단일 종목 (finance+report+docs)")
+    console.print("  dartlab collect 005930              단일 종목 (finance+report)")
     console.print("  dartlab collect 005930 -c finance   finance만 증분 수집")
-    console.print("  dartlab collect 005930 -c docs      docs만 수집")
-    console.print("  dartlab collect --check 005930      freshness 체크 (docs+finance+report)")
+    console.print("  dartlab collect --check 005930      freshness 체크 (panel+finance+report)")
     console.print("  dartlab collect --incremental 005930 누락 증분 수집")
-    console.print("  dartlab collect --auto              미수집 docs 자동 수집")
+    console.print("  dartlab collect --auto              collect 안내")
     console.print("  dartlab collect --batch             전체 상장 배치 수집")
     console.print("  dartlab collect --stats             수집 현황")
     console.print()
@@ -260,7 +259,7 @@ def _runRepairCache(console, args) -> int:
 
     dryRun = getattr(args, "dry_run", False)
     catsArg = getattr(args, "categories", None)
-    cats = [c.strip() for c in catsArg.split(",")] if catsArg else ["finance", "report", "docs"]
+    cats = [c.strip() for c in catsArg.split(",")] if catsArg else ["finance", "report", "panel"]
 
     console.print(f"[bold]캐시 무결성 회복[/] categories={cats} dryRun={dryRun}")
     if dryRun:
@@ -591,30 +590,22 @@ def _runUncollected(console, limit: int) -> int:
 
 
 def _runAuto(console, args) -> int:
-    from dartlab.gather.dart.batch import batchCollect
-    from dartlab.gather.dart.collector import listUncollectedKind
-
-    stocks = listUncollectedKind(limit=args.limit)
-
-    if not stocks:
-        console.print("[green]모든 종목이 수집되었습니다.[/]")
-        return 0
-
-    codes = [code for code, _name in stocks]
-
-    console.print(f"[bold]자동 수집 시작[/]: {len(codes)}개 종목 docs\n")
-
-    for i, (code, name) in enumerate(stocks[:10]):
-        console.print(f"  {i + 1:>3}. {name} ({code})")
-    if len(stocks) > 10:
-        console.print(f"  ... 외 {len(stocks) - 10}개")
-
-    results = batchCollect(codes, categories=["docs"])
-
-    total = len(results)
-    success = sum(1 for v in results.values() if v.get("docs", 0) > 0)
-    console.print(f"\n[bold green]완료[/]: 성공 {success} / 총 {total}")
+    console.print(
+        "[yellow]DART collect는 finance/report 증분 수집만 담당합니다. panel은 pipeline/buildPanel 경로를 사용하세요.[/]"
+    )
     return 0
+
+
+def _parseDartCollectCategories(raw: str | None, console) -> list[str] | None:
+    """CLI 입력 카테고리를 DART batch 수집 표면으로 제한."""
+    if raw is None:
+        return None
+    cats = [c.strip() for c in raw.split(",") if c.strip()]
+    invalid = [c for c in cats if c not in {"finance", "report"}]
+    if invalid:
+        console.print(f"[red]DART collect 카테고리는 finance/report만 지원합니다: {invalid}[/]")
+        return []
+    return cats
 
 
 def _runBatch(console, args) -> int:
@@ -626,8 +617,10 @@ def _runBatch(console, args) -> int:
         console.print("[red]DART API 키가 필요합니다. DART_API_KEY(S) 환경변수를 설정하세요.[/]")
         return 1
 
-    cats = [c.strip() for c in args.categories.split(",")] if args.categories else None
-    catLabel = ", ".join(cats) if cats else "finance, report, docs"
+    cats = _parseDartCollectCategories(args.categories, console)
+    if cats == []:
+        return 1
+    catLabel = ", ".join(cats) if cats else "finance, report"
 
     if args.codes:
         console.print(f"[bold]배치 수집[/]: {len(args.codes)}개 종목 | {catLabel} | {len(keys)}키 병렬\n")
@@ -662,13 +655,13 @@ def _runCheck(console, args) -> int:
     if args.codes:
         for code in args.codes:
             result = checkFreshness(code, forceCheck=True)
-            # docs freshness
+            # panel freshness
             if result.missingCount > 0:
-                console.print(f"  ⚠ {code} docs — 새 공시 {result.missingCount}건")
+                console.print(f"  ⚠ {code} panel — 새 공시 {result.missingCount}건")
                 for f in result.missingFilings[:5]:
                     console.print(f"    {f['rcept_dt']} {f['report_nm']}")
             else:
-                console.print(f"  ✓ {code} docs — 최신 상태")
+                console.print(f"  ✓ {code} panel — 최신 상태")
 
             # finance freshness
             if result.financeMissing:
@@ -710,7 +703,9 @@ def _runIncremental(console, args) -> int:
         console.print("[red]DART API 키가 필요합니다: dartlab setup dart-key[/]")
         return 1
 
-    cats = [c.strip() for c in args.categories.split(",")] if args.categories else None
+    cats = _parseDartCollectCategories(args.categories, console)
+    if cats == []:
+        return 1
 
     if args.codes:
         for code in args.codes:
@@ -742,26 +737,13 @@ def _runIncremental(console, args) -> int:
 
 def _runCollect(console, args) -> int:
     codes = args.codes
-    cats = [c.strip() for c in args.categories.split(",")] if args.categories else ["finance", "report", "docs"]
+    cats = _parseDartCollectCategories(args.categories, console) if args.categories else ["finance", "report"]
+    if cats == []:
+        return 1
 
     if len(codes) == 1:
         code = codes[0]
         result: dict[str, int] = {}
-
-        # docs 수집
-        if "docs" in cats:
-            from dartlab.gather.dart.zipCollector import ZipDocsCollector
-
-            try:
-                collector = ZipDocsCollector(code)
-                count = collector.collect(
-                    includeQuarterly=not args.annual_only,
-                    showProgress=True,
-                )
-                result["docs"] = count
-            except ValueError as e:
-                console.print(f"[red]docs: {e}[/]")
-                result["docs"] = 0
 
         # finance/report 증분 수집
         frCats = [c for c in cats if c in ("finance", "report")]

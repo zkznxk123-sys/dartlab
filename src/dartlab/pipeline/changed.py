@@ -21,7 +21,7 @@ def changedPath(category: str) -> Path:
     """category 의 변경 매니페스트 경로(``dist/changed_{category}.txt``).
 
     Args:
-        category: DATA_RELEASES 카테고리명(docs/finance/panel 등).
+        category: DATA_RELEASES 카테고리명(finance/report/panel 등).
 
     Returns:
         매니페스트 ``Path``.

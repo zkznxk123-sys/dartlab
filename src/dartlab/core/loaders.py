@@ -25,12 +25,12 @@ class LoaderProvider(Protocol):
 
     선택적 도메인 read 메서드 (Protocol 필수 아님 — core 는 ``hasattr`` 로 dispatch):
     - ``load(stockCode, *, columns, sinceYear, predicate) -> pl.DataFrame`` —
-      도메인 합성 read (예: DartDocsLoader 의 docs↔sections). 제공 시 loadData 가 직접 사용.
+      도메인 합성 read. 제공 시 loadData 가 직접 사용.
     - ``synthesizeToPath(stockCode, dest) -> bool`` — ensure 경로의 합성 저장.
       제공 시 _ensureLocalParquet 가 HF 다운로드 전 시도.
     """
 
-    category: str  # 카테고리 식별자 (예: "edgarDocs", "edgar", "docs")
+    category: str  # 카테고리 식별자 (예: "edgarDocs", "edgar", "panel")
 
     def ensure(
         self,
@@ -52,7 +52,6 @@ _LOADERS: dict[str, LoaderProvider] = {}
 _KNOWN_LOADER_MODULES: tuple[str, ...] = (
     "dartlab.providers.edgar.docs.loader",  # EdgarDocsLoader
     "dartlab.providers.edgar.bulk",  # EdgarBulkLoader
-    # DART docs 농장 은퇴 — DartDocsLoader 제거. loadData("docs")=빈 DF graceful(panel 이 공시 표면).
 )
 
 _DISCOVERED = False

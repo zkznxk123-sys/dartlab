@@ -52,7 +52,7 @@ def _buildTableBlock(
             return ViewerBlock(
                 block=bo,
                 kind="structured",
-                source="docs",
+                source="panel",
                 data=result,
                 meta=BlockMeta(
                     scale=scale,
@@ -84,7 +84,7 @@ def _buildTableBlock(
     return ViewerBlock(
         block=bo,
         kind="raw_markdown",
-        source="docs",
+        source="panel",
         data=None,
         meta=BlockMeta(
             periods=list(rawMd.keys()),
@@ -107,7 +107,7 @@ def _buildRawMarkdownBlock(result: pl.DataFrame, bo: int, resPeriods: list[str],
     return ViewerBlock(
         block=bo,
         kind="raw_markdown",
-        source="docs",
+        source="panel",
         data=None,
         meta=BlockMeta(
             periods=list(rawMd.keys()),

@@ -3,7 +3,7 @@
 #
 # 목적:
 #   로컬 editable 설치가 아닌 **빌드된 wheel** 을 격리 venv 에 설치하고
-#   realData 스위트의 freshInstall 마커를 실행. 과거 사고 (c.sections 크래시)
+#   realData 스위트의 freshInstall 마커를 실행. 과거 사고 (Company.panel 크래시)
 #   처럼 "소스는 멀쩡한데 wheel 만 깨지는" schema-drift/packaging 누락을 잡는다.
 #
 # 사용법:
@@ -63,8 +63,8 @@ fi
 
 # 3. 패키징 검증 — 번들 데이터 누락 체크
 # 2026-04-19 사고: PyPI 0.9.15 에서 parserMappings/ 디렉토리 통째 누락 →
-# loadSections() {} → chapterFromMajorNum() 모두 None → sections() None →
-# c.sections 외부 사용자 첫 호출 크래시. 재발 방지 필수 게이트.
+# loadSections() {} → chapterFromMajorNum() 모두 None → panel topic rows 0개 →
+# Company.panel 외부 사용자 첫 호출 크래시. 재발 방지 필수 게이트.
 echo "[wheel-smoke] 번들 리소스 검증..."
 export PYTHONIOENCODING=utf-8
 "$VENV_PYTHON" -X utf8 -c "
@@ -72,35 +72,31 @@ import importlib.util
 import pathlib
 spec = importlib.util.find_spec('dartlab')
 root = pathlib.Path(spec.submodule_search_locations[0])
-# 필수 디렉토리 (없으면 sections 파이프라인 통째로 silent-fail)
+# 필수 디렉토리 (없으면 panel topic 라우팅이 silent-fail)
 mustHaveDirs = [
-    'providers/data/parserMappings',
+    'providers/mappers/mapperData/parserMappings',
     'reference/data',
-    'providers/dart/docs/sections/mapperData',
-    'providers/dart/docs/sections/profileData',
 ]
 # 필수 JSON (silent-fail 의 근원 파일들)
 mustHaveFiles = [
-    'providers/data/parserMappings/sections.json',
-    'providers/data/parserMappings/affiliate.json',
-    'providers/data/parserMappings/costByNature.json',
+    'providers/mappers/mapperData/parserMappings/panelTopics.json',
+    'providers/mappers/mapperData/parserMappings/affiliate.json',
+    'providers/mappers/mapperData/parserMappings/costByNature.json',
     'reference/data/accountMappings.json',
-    'providers/dart/docs/sections/mapperData/sectionMappings.json',
-    'providers/dart/docs/sections/mapperData/tableMappings.json',
 ]
 missing = [p for p in mustHaveDirs + mustHaveFiles if not (root / p).exists()]
 if missing:
     raise SystemExit(f'wheel 번들 누락 (2026-04-19 사고 재현): {missing}')
 
-# sections 런타임 실제 로드 검증 — silent-fail 경로가 살아있는지
+# panel topic 런타임 실제 로드 검증 — silent-fail 경로가 살아있는지
 from dartlab.providers.mappers.parserMapper import loadSections
 sec = loadSections()
 if not sec.get('chapterByMajor'):
     raise SystemExit(
-        'loadSections()[\"chapterByMajor\"] 비어있음 — sections 파이프라인 전부 무력화 상태. '
-        'wheel 에 sections.json 이 있어도 내용이 깨졌음.'
+        'loadSections()[\"chapterByMajor\"] 비어있음 — panel topic 라우팅 전부 무력화 상태. '
+        'wheel 에 panelTopics.json 이 있어도 내용이 깨졌음.'
     )
-print('[wheel-smoke] 번들 OK — parserMappings + sections.chapterByMajor 정상')
+print('[wheel-smoke] 번들 OK — parserMappings + panelTopics.chapterByMajor 정상')
 "
 
 # 4. 제품 스모크 — 배포될 wheel 을 빈 데이터 디렉터리에서 사용자 대표 API로 실행.

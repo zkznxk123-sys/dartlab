@@ -3,7 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 
 	const features = [
-		{ feature: 'sections 수평화', dart: true, edgar: true },
+		{ feature: 'panel 수평화', dart: true, edgar: true },
 		{ feature: 'show(topic)', dart: true, edgar: true },
 		{ feature: 'trace(topic)', dart: true, edgar: true },
 		{ feature: 'diff(topic)', dart: true, edgar: true },
@@ -43,7 +43,8 @@
 				<div class="p-4">
 					<div class="text-[10px] font-mono text-dl-primary uppercase tracking-wider mb-3">한국 (DART)</div>
 					<pre class="font-mono text-xs text-dl-text-muted leading-relaxed"><code>c = Company(<span class="text-dl-primary">"005930"</span>)
-c.sections
+c.topics
+c.panel(<span class="text-dl-primary">"businessOverview"</span>)
 c.show(<span class="text-dl-primary">"businessOverview"</span>)
 c.show("BS")
 c.show("ratios")

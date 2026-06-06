@@ -295,10 +295,6 @@ omit = [
     "src/dartlab/providers/edgar/openapi/*",
     "src/dartlab/providers/edinet/openapi/*",
 
-    # DART docs viewer/rendering — HTML/마크다운 생성, 시각 검증 영역.
-    "src/dartlab/providers/dart/docs/viewer.py",
-    "src/dartlab/providers/dart/docs/viewerExport.py",
-
     # 메신저 어댑터 — Slack/Telegram/Discord SDK 모킹 ROI 낮음.
     "src/dartlab/channel/adapters/*",
     "src/dartlab/channel/devtunnel.py",

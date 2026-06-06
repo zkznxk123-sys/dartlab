@@ -9,7 +9,7 @@ import logging
 
 from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import loadDocsForStock
+from dartlab.quant.screen.dataAccess import loadPanelTextForStock
 
 log = logging.getLogger(__name__)
 
@@ -73,10 +73,10 @@ def calcRiskText(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         Text 위험 + AI 공시 위험 경고 답변.
 
     How:
-        ``loadChangesForStock`` → 키워드 매칭 → 기간별 카운트 + 추세.
+        ``loadPanelTextForStock`` → 키워드 매칭 → 기간별 카운트 + 추세.
 
     Requires:
-        docs 또는 changes 데이터 가용.
+        panel text 데이터 가용.
 
     Raises:
         없음 — 데이터 부재 시 ``{error}``.
@@ -95,20 +95,20 @@ def calcRiskText(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    docs = loadDocsForStock(stockCode)
-    if isEmptyDf(docs):
-        return {**result, "error": "docs 데이터 없음"}
+    panelText = loadPanelTextForStock(stockCode)
+    if isEmptyDf(panelText):
+        return {**result, "error": "panel 데이터 없음"}
 
-    text_col = next((c for c in ["content", "section_content", "text", "body"] if c in docs.columns), None)
+    text_col = next((c for c in ["content", "section_content", "text", "body"] if c in panelText.columns), None)
     if text_col is None:
         return {**result, "error": "텍스트 컬럼 없음"}
 
-    period_col = next((c for c in ["period", "bsns_year", "year", "rcept_dt"] if c in docs.columns), None)
+    period_col = next((c for c in ["period", "bsns_year", "year", "rcept_dt"] if c in panelText.columns), None)
 
     # 기간별 리스크 키워드 집계
     period_risks: dict[str, dict[str, int]] = {}
-    texts = docs.get_column(text_col).to_list()
-    periods = docs.get_column(period_col).to_list() if period_col else [str(i) for i in range(len(texts))]
+    texts = panelText.get_column(text_col).to_list()
+    periods = panelText.get_column(period_col).to_list() if period_col else [str(i) for i in range(len(texts))]
 
     total_mentions = 0
     for text, period in zip(texts, periods):

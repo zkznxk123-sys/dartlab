@@ -4,12 +4,11 @@ name: Search Index Main (monthly)
 # content 인덱스 main 세그먼트 풀리빌드 + HF 업로드 (full + lite tier).
 #
 # 매월 1일 KST 05:00 실행 (또는 수동):
-#   1. 전체 docs + allFilings + panel + 뉴스 → full main 세그먼트 풀리빌드 (약 18분)
+#   1. 전체 allFilings + panel + 뉴스 → full main 세그먼트 풀리빌드 (약 18분)
 #   2. HF dart/contentIndex/*  (full = flat) 업로드 + delta 제거 (main에 흡수)
 #   3. lite tier — 최근 N개월(DARTLAB_LITE_MONTHS, 기본 18) 축소 색인 → dart/contentIndex/lite/ 업로드
 #      (pip 사용자 기본 경량 배포; full 과 별 디렉터리라 공존. lite 빌드 실패해도 full 은 이미 배포됨)
 #
-# docs 데이터(8GB)를 HF에서 pull해야 하므로 오래 걸린다.
 # delta는 searchIndexDelta.yml (매일 04:00).
 # ──────────────────────────────────────────────────────────────
 
@@ -28,12 +27,12 @@ concurrency:
 jobs:
   build-main:
     runs-on: ubuntu-latest
-    timeout-minutes: 180  # 3시간 (docs 다운로드 + 빌드)
+    timeout-minutes: 180  # 3시간 (panel 다운로드 + 빌드)
 
     steps:
       - uses: actions/checkout@v5
 
-      # docs(8GB)+allFilings(1.3GB)+panel(16GB) ≈ 25GB → 기본 러너 디스크(~14GB) 초과. 선제 확보(~25GB).
+      # allFilings(1.3GB)+panel(16GB) → 기본 러너 디스크(~14GB) 압박. 선제 확보.
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
@@ -57,8 +56,8 @@ jobs:
           import time
           from huggingface_hub import snapshot_download
           from huggingface_hub.errors import HfHubHTTPError
-          # panel·news 는 nested → 재귀 패턴. docs/allFilings 는 flat. news 는 additive(부재 허용).
-          for folder, pat in [('dart/docs', 'dart/docs/*'), ('dart/allFilings', 'dart/allFilings/*'), ('dart/panel', 'dart/panel/**'), ('news/headlines', 'news/headlines/**')]:
+          # panel·news 는 nested → 재귀 패턴. allFilings 는 flat. news 는 additive(부재 허용).
+          for folder, pat in [('dart/allFilings', 'dart/allFilings/*'), ('dart/panel', 'dart/panel/**'), ('news/headlines', 'news/headlines/**')]:
               for t in range(6):
                   try:
                       snapshot_download(repo_id='eddmpython/dartlab-data', repo_type='dataset', allow_patterns=pat, local_dir='data', max_workers=4)
@@ -72,10 +71,9 @@ jobs:
             # 검증 — 429 가 예외 없이 빈 local_dir 을 반환하는 silent-empty 차단. 폴더별 파일수 확인.
             af=$(find data/dart/allFilings -name '*.parquet' 2>/dev/null | wc -l)
             pn=$(find data/dart/panel -name '*.parquet' 2>/dev/null | wc -l)
-            dc=$(find data/dart/docs -name '*.parquet' 2>/dev/null | wc -l)
             nh=$(find data/news/headlines -name '*.parquet' 2>/dev/null | wc -l)
-            echo "pull 검증: docs=$dc allFilings=$af panel=$pn news=$nh (news additive)"
-            if [ "$af" -gt 0 ] && [ "$pn" -gt 0 ] && [ "$dc" -gt 0 ]; then ok=1; break; fi
+            echo "pull 검증: allFilings=$af panel=$pn news=$nh (news additive)"
+            if [ "$af" -gt 0 ] && [ "$pn" -gt 0 ]; then ok=1; break; fi
             echo "pull attempt $attempt 미완(빈 폴더) — 120s 후 재시도"; sleep 120
           done
           [ "$ok" = "1" ]

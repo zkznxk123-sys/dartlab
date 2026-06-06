@@ -1,6 +1,6 @@
-"""docs 슬림 cross-company 인덱스 빌더 — P3 / P3.5.
+"""공시 슬림 cross-company 인덱스 빌더 — P3 / P3.5.
 
-전 종목 ``data/{provider}/docs/*.parquet`` 를 단일 슬림 parquet 으로 통합. 메타데이터만
+KR은 panel parquet에서, EDGAR/EDINET은 각 provider docs parquet에서 단일 슬림 parquet을 통합. 메타데이터만
 (``section_content`` 제외) 보유해 cross-company 질문 ("X 섹션 보유 회사") 을
 RSS <100 MB 로 1~2 초 내 답.
 
@@ -19,7 +19,7 @@ RSS <100 MB 로 1~2 초 내 답.
 
 룰 8 (limit) + 룰 9 (raw cross-scan 차단) 충족 — Scan.docsSections() 가 본 인덱스 경유.
 
-P3: DART (`buildDocsIndex`)
+P3: DART panel (`buildDocsIndex`)
 P3.5: EDGAR (`buildEdgarDocsIndex`) / EDINET (`buildEdinetDocsIndex`) — 동일 schema.
 """
 
@@ -74,7 +74,7 @@ def buildDocsIndex(
     outputPath: str | Path | None = None,
     verbose: bool = False,
 ) -> Path:
-    """전 종목 docs parquet → 슬림 메타 인덱스 통합 빌드 (P3, cross-company 1~2 초 응답).
+    """전 종목 panel parquet → 슬림 메타 인덱스 통합 빌드 (P3, cross-company 1~2 초 응답).
 
     ``section_content`` 같은 본문 컬럼을 제외하고 메타만 (~제목·길이·URL·section_order)
     추출한 슬림 인덱스. cross-company 질문 ("X 섹션 보유 회사") 를 RSS <100 MB 로 1~2 초
@@ -137,10 +137,10 @@ def buildDocsIndex(
     """
     from dartlab.core.dataLoader import _dataDir
     from dartlab.core.listingResolver import getListingResolver
-    from dartlab.providers.dart.sections import sectionTexts
+    from dartlab.providers.dart.panel.text import panelTextRows
 
-    # docs.parquet 농장 은퇴 → providers.dart.sections(panel 섹션) SSOT. docsDir override 는
-    # 하위호환(미지정 시 panel dir glob 으로 종목 enum).
+    # providers.dart.panel.text(panel 섹션) SSOT. docsDir override 는 테스트/디버그용이며
+    # 미지정 시 panel dir glob 으로 종목 enum.
     panelRoot = Path(docsDir) if docsDir else Path(_dataDir("panel"))
     if not panelRoot.exists():
         raise FileNotFoundError(f"panel 디렉토리 부재: {panelRoot}")
@@ -162,7 +162,7 @@ def buildDocsIndex(
         batch_dfs: list[pl.DataFrame] = []
         for code in batch:
             try:
-                src = sectionTexts(code)
+                src = panelTextRows(code)
             except (pl.exceptions.PolarsError, OSError):
                 failedFiles += 1
                 continue

@@ -1,7 +1,7 @@
-"""DART 공시 수집 상태 helper — collector.py 분할 (룰 3 LoC).
+"""DART panel collection status helpers.
 
-`collector.py` 843 LoC 가 룰 3 임계 (>800) 위반. list / iter / stats 류 status
-helper (~330 줄) 를 본 모듈로 분리. caller compat — collector.py 가 re-export.
+``collector.py`` is now a thin compatibility re-export. This module owns the
+list / iter / stats helpers that inspect local panel parquet coverage.
 """
 
 from __future__ import annotations
@@ -20,9 +20,9 @@ _log = getLogger(__name__)
 
 
 def _resolveDataDir() -> Path:
-    """docs 데이터 디렉토리 (dartlab 캐시 경로) — collector.py 와 동일."""
+    """panel 데이터 디렉토리 (dartlab 캐시 경로) — collector.py 와 동일."""
     root = Path(_cfg.dataDir)
-    d = root / DATA_RELEASES["docs"]["dir"]
+    d = root / DATA_RELEASES["panel"]["dir"]
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -44,7 +44,7 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
         없음.
 
     SeeAlso:
-        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
+        - ``dartlab.gather.dart.collector`` — status-helper compatibility import.
 
     Requires:
         - dartlab
@@ -54,7 +54,7 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
         - random
 
     Capabilities:
-        - DART 정기보고서 docs 수집 + 통계.
+        - DART panel 수집 현황 통계.
 
     Guide:
         - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
@@ -73,7 +73,7 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
         Freshness:
             - DART OpenAPI 실시간.
         Dataflow:
-            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
+            - panel parquet 디렉토리 → 종목별 수집 현황.
         TargetMarkets:
             - KR (DART) 정기보고서.
     """
@@ -112,7 +112,7 @@ def collectionStats(*, client: DartClient | None = None) -> dict:
         dict — 수집 통계.
 
     SeeAlso:
-        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
+        - ``dartlab.gather.dart.collector`` — status-helper compatibility import.
 
     Requires:
         - dartlab
@@ -122,7 +122,7 @@ def collectionStats(*, client: DartClient | None = None) -> dict:
         - random
 
     Capabilities:
-        - DART 정기보고서 docs 수집 + 통계.
+        - DART panel 수집 현황 통계.
 
     Guide:
         - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
@@ -141,7 +141,7 @@ def collectionStats(*, client: DartClient | None = None) -> dict:
         Freshness:
             - DART OpenAPI 실시간.
         Dataflow:
-            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
+            - panel parquet 디렉토리 → 종목별 수집 현황.
         TargetMarkets:
             - KR (DART) 정기보고서.
     """
@@ -192,7 +192,7 @@ def listUncollectedKind(
         list[tuple[str, str]] — 종목 (코드, 이름) 페어 리스트.
 
     SeeAlso:
-        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
+        - ``dartlab.gather.dart.collector`` — status-helper compatibility import.
 
     Requires:
         - dartlab
@@ -202,7 +202,7 @@ def listUncollectedKind(
         - random
 
     Capabilities:
-        - DART 정기보고서 docs 수집 + 통계.
+        - DART panel 수집 현황 통계.
 
     Guide:
         - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
@@ -221,7 +221,7 @@ def listUncollectedKind(
         Freshness:
             - DART OpenAPI 실시간.
         Dataflow:
-            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
+            - panel parquet 디렉토리 → 종목별 수집 현황.
         TargetMarkets:
             - KR (DART) 정기보고서.
     """
@@ -269,7 +269,7 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
         ...     print(code, name)
 
     SeeAlso:
-        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
+        - ``dartlab.gather.dart.collector`` — status-helper compatibility import.
 
     Requires:
         - dartlab
@@ -279,7 +279,7 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
         - random
 
     Capabilities:
-        - DART 정기보고서 docs 수집 + 통계.
+        - DART panel 수집 현황 통계.
 
     Guide:
         - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
@@ -298,7 +298,7 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
         Freshness:
             - DART OpenAPI 실시간.
         Dataflow:
-            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
+            - panel parquet 디렉토리 → 종목별 수집 현황.
         TargetMarkets:
             - KR (DART) 정기보고서.
     """
@@ -322,7 +322,7 @@ def iterUncollectedKind(*, limit: int | None = None):
         ...     print(code, name)
 
     SeeAlso:
-        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
+        - ``dartlab.gather.dart.collector`` — status-helper compatibility import.
 
     Requires:
         - dartlab
@@ -332,7 +332,7 @@ def iterUncollectedKind(*, limit: int | None = None):
         - random
 
     Capabilities:
-        - DART 정기보고서 docs 수집 + 통계.
+        - DART panel 수집 현황 통계.
 
     Guide:
         - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
@@ -351,7 +351,7 @@ def iterUncollectedKind(*, limit: int | None = None):
         Freshness:
             - DART OpenAPI 실시간.
         Dataflow:
-            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
+            - panel parquet 디렉토리 → 종목별 수집 현황.
         TargetMarkets:
             - KR (DART) 정기보고서.
     """

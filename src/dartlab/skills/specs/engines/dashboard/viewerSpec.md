@@ -28,7 +28,7 @@ toolRefs:
   - EngineCall
   - RunPython
 knowledgeRefs:
-  - engines.company.sections
+  - engines.panel
   - engines.dashboard
 sourceRefs:
   - dartlab://skills/engines.dashboard.viewerSpec
@@ -78,7 +78,7 @@ procedure:
   - 테이블은 본문 뒤 별도 구간, 첫 컬럼 sticky.
   - 본문 색상 rgba(241, 245, 249, 0.82) + 폰트 14px + 줄간격 1.85.
 linkedSkills:
-  - engines.company.sections
+  - engines.panel
   - engines.dashboard
 source:
   type: manual_skill

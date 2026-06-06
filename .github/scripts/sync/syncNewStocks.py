@@ -1,13 +1,13 @@
 """KindList 신규 종목 DART bootstrap.
 
 일일 recent sync 는 최근 정기공시가 있는 종목만 잡는다. 이 스크립트는 KindList 를
-기준으로 HF dataset 에 아직 없는 신규 종목 parquet 을 찾아 finance/report/docs 를
+기준으로 HF dataset 에 아직 없는 신규 종목 parquet 을 찾아 finance/report 를
 최소 범위로 수집한다.
 
 환경변수:
   DART_API_KEYS: DART OpenAPI 키 (쉼표 구분)
   HF_TOKEN: HuggingFace 토큰 (파일 목록 조회 rate limit 완화)
-  NEW_STOCK_CATEGORIES: finance,report,docs (기본)
+  NEW_STOCK_CATEGORIES: finance,report (기본)
   NEW_STOCK_LIMIT: 카테고리별 최대 수집 종목 수 (기본 50, 0이면 제한 없음)
   NEW_STOCK_MAX_WORKERS: DART API worker 수 제한 (선택)
   DARTLAB_DATA_DIR: 데이터 루트 (기본 ./data)
@@ -25,7 +25,7 @@ from typing import Any
 
 import polars as pl
 
-VALID_CATEGORIES = {"finance", "report", "docs"}
+VALID_CATEGORIES = {"finance", "report"}
 
 
 def _fileHash(path: Path) -> str:
@@ -47,7 +47,7 @@ def _parseCategories(raw: str) -> list[str]:
     invalid = [c for c in categories if c not in VALID_CATEGORIES]
     if invalid:
         raise SystemExit(f"[syncNewStocks] invalid NEW_STOCK_CATEGORIES: {invalid}")
-    return categories or ["finance", "report", "docs"]
+    return categories or ["finance", "report"]
 
 
 def _kindListCodes() -> list[str]:
@@ -159,7 +159,7 @@ def main() -> None:
     dataDir = Path(os.environ["DARTLAB_DATA_DIR"]).resolve()
     dataDir.mkdir(parents=True, exist_ok=True)
 
-    categories = _parseCategories(os.environ.get("NEW_STOCK_CATEGORIES", "finance,report,docs"))
+    categories = _parseCategories(os.environ.get("NEW_STOCK_CATEGORIES", "finance,report"))
     limit = int(os.environ.get("NEW_STOCK_LIMIT", "50"))
 
     print(f"[syncNewStocks] categories={categories} limit={limit if limit > 0 else 'unlimited'} dataDir={dataDir}")

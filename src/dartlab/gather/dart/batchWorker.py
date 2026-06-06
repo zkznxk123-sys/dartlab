@@ -6,7 +6,6 @@ _resolveCorpCode / _workerLoop / _resolveCorpMap.
 from __future__ import annotations
 
 import asyncio
-import zipfile
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
@@ -19,7 +18,6 @@ if TYPE_CHECKING:
     from dartlab.gather.dart.batch import AsyncDartClient
 
 from dartlab.gather.dart.batchCollectors import (
-    _collectDocs,
     _collectFinance,
     _collectReport,
 )
@@ -116,16 +114,8 @@ async def _workerLoop(
                         onPeriod=_periodCb,
                         targetPeriods=targetPeriods,
                     )
-                elif cat == "docs":
-                    count = await _collectDocs(
-                        stockCode,
-                        corpCode,
-                        corpName,
-                        client,
-                        onPeriod=_periodCb,
-                    )
                 else:
-                    count = 0
+                    raise ValueError(f"unsupported DART batch category: {cat}")
                 result[cat] = count
             except asyncio.CancelledError:
                 return
@@ -135,7 +125,6 @@ async def _workerLoop(
                 ValueError,
                 KeyError,
                 RuntimeError,
-                zipfile.BadZipFile,
             ) as e:
                 result[cat] = 0
                 # P0 수정 (2026-04-06): 무성한 try/except → 로깅 + 실패 사전 기록.

@@ -114,14 +114,14 @@ def onCompanyCreated(company: Any) -> list[str]:
     """
     hints: list[str] = []
 
-    hasDocs = getattr(company, "_hasDocs", False)
+    hasPanel = getattr(company, "_hasPanel", False)
     hasFinance = getattr(company, "_hasFinanceParquet", False)
     hasReport = getattr(company, "_hasReport", False)
     stockCode = getattr(company, "stockCode", "")
 
-    if hasDocs and not hasFinance:
+    if hasPanel and not hasFinance:
         hints.append(f"finance 데이터를 추가하면 재무비율/분석을 사용할 수 있습니다: dartlab.collect('{stockCode}')")
-    if hasDocs and not hasReport:
+    if hasPanel and not hasReport:
         hints.append("report 데이터를 추가하면 배당/임원/지배구조 상세를 볼 수 있습니다")
 
     freshnessResult = getattr(company, "_freshnessResult", None)
@@ -151,13 +151,13 @@ def nextSteps(company: Any) -> list[str]:
         True
     """
     hasFinance = getattr(company, "_hasFinanceParquet", False)
-    hasDocs = getattr(company, "_hasDocs", False)
+    hasPanel = getattr(company, "_hasPanel", False)
     steps: list[str] = []
 
     if hasFinance:
         steps.append("c.panel('IS' / 'BS' / 'CF')   재무제표")
         steps.append("c.panel('ratios')             재무비율")
-    if hasDocs:
+    if hasPanel:
         steps.append("c.panel(topic)                공시 원문 조회")
         steps.append("c.topics                     사용 가능한 topic 목록")
     steps.append("c.analysis('수익성')             14축 분석")

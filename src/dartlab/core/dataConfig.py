@@ -14,20 +14,13 @@ DATA_RELEASES: dict[str, dict] = {
     # ipcMirror: True 면 sync ETL 이 parquet 외에 .arrow IPC mirror artifact 도 빌드.
     # Phase D 의 pl.read_ipc(memory_map=True) 진입점이 사용. mmap 안 되는 환경 (pyodide)
     # 은 무시 후 parquet fallback.
-    "docs": {
-        "dir": "dart/docs",
-        "label": "DART 공시 문서 데이터",
-        "public": True,
-        "ipcMirror": True,
-    },
-    # docs 농장 은퇴 — "sections" SSOT artifact category 제거(buildSections/sectionsStorage 삭제,
-    # sync/runtime 참조 0). HF 기존 sections 데이터는 보존(코드만 제거). panel 이 공시 수평화 표면.
+    # DART disclosure parquet SSOT is panel. The retired docs category is not aliased.
     "panel": {
         # panel(공시 수평화) SSOT artifact — **flat** data/dart/panel/{code}.parquet (회사당 1파일,
         # 17-col). providers.dart.panel.build 가 zip→17col 생산(disclosureKey 부착) → providers.dart.panel
         # 이 read_parquet read(reader/uploader 모두 flat). EDGAR edgarPanel 과 동일 flat 정책.
         # ⚠ nested 금지: 옛 period-sharded {code}/{period}.parquet 표기는 폐기됨 — nested:True 면
-        # uploader rglob·downloadAll glob 이 옛 nested 트리를 잘못 휩쓸어 reader(flat)와 어긋난다.
+        # uploader rglob 이 옛 nested 트리를 잘못 휩쓸어 reader(flat)와 어긋난다.
         "dir": "dart/panel",
         "label": "DART 공시 panel 수평화 artifact (회사당 flat, 17-col)",
         "public": True,
@@ -202,6 +195,15 @@ DATA_RELEASES: dict[str, dict] = {
 }
 
 
+DATA_CATEGORY_ALIASES: dict[str, str] = {}
+
+
+def resolveDataCategory(category: str) -> str:
+    """Return the active data category for compatibility names."""
+
+    return DATA_CATEGORY_ALIASES.get(category, category)
+
+
 def repoFor(category: str) -> str:
     """카테고리별 HuggingFace repo id — 전용 repo 가 지정됐으면 그것, 아니면 기본 HF_REPO.
 
@@ -233,10 +235,11 @@ def repoFor(category: str) -> str:
         DATA_RELEASES: 카테고리별 `repo`(선택)·`dir`·공개 여부.
         hfBaseUrl: repoFor 를 사용해 resolve URL 을 만든다.
     """
+    category = resolveDataCategory(category)
     return DATA_RELEASES.get(category, {}).get("repo") or HF_REPO
 
 
-def hfBaseUrl(category: str = "docs") -> str:
+def hfBaseUrl(category: str = "panel") -> str:
     """HuggingFace 데이터셋 base URL.
 
     Capabilities:
@@ -264,5 +267,6 @@ def hfBaseUrl(category: str = "docs") -> str:
         DATA_RELEASES: 카테고리별 원격 디렉터리와 공개 여부.
         dartlab.core.dataLoader.download: 반환 URL을 실제 다운로드에 사용한다.
     """
+    category = resolveDataCategory(category)
     dirPath = DATA_RELEASES[category]["dir"]
     return f"https://huggingface.co/datasets/{repoFor(category)}/resolve/main/{dirPath}"

@@ -12,7 +12,7 @@ LLM Specifications:
     AntiPatterns:
         - 한 종목 빌드 중 다른 종목 zip read 금지 — strict per-corp.
         - period 매핑 시 rcept_no 직접 사용 금지 — 표지 사업연도 종료일 기준.
-        - 옛 docs.parquet schema 호환 금지 — 신 17-col PANEL_SCHEMA 단독.
+        - 별도 문서 parquet schema 호환 금지 — 신 17-col PANEL_SCHEMA 단독.
         - contentRaw 태그 strip 금지 — etree.tostring 원본(R4).
         - 회사당 폴더/{period}.parquet 분할 금지 — flat 단일파일 (증분은 period upsert).
     OutputSchema:

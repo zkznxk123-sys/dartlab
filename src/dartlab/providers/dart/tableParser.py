@@ -65,7 +65,7 @@ _RE_HTML_STRIP = re.compile(r"<[^>]+>")
 def _htmlTableHeaderHash(html: str) -> str:
     """HTML ``<table><tr><th|td>...`` 첫 진짜 header row → blake2b 4-byte hex.
 
-    commit 8dc4233b8 이후 docs.parquet 가 markdown 대신 HTML 표 출력 — 옛
+    commit 8dc4233b8 이후 DART 본문 표가 markdown 대신 HTML 표 출력 — 옛
     tableHeaderHash 는 markdown ``|`` row 만 지원 → HTML 표 hash="empty" 폴백 →
     같은 path 안 표 들이 occurrence-only 매칭 → cross-period swap 회귀.
 

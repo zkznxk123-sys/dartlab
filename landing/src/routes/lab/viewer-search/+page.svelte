@@ -7,10 +7,12 @@
 	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
 	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
+	import { checkBrowserAiAvailability, runBrowserAiPrompt, type BrowserAiStatus } from '$lib/viewer/browserAi';
 	import { scanDeepRowsChunked, type DeepSearchRow } from '$lib/viewer/deepSearch';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import { buildIndexChunked, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
 	import { buildEvidencePack, highlightParts, type EvidenceItem } from '$lib/viewer/searchEvidence';
+	import { analyzeEvidencePack, attachBrowserAiText, type ViewerAnalysis } from '$lib/viewer/viewerAnalyst';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import type { PanelBundle } from '$lib/viewer/types';
 
@@ -43,10 +45,17 @@
 	let deepRows = $state(0);
 	let deepHits = $state<SearchHit[]>([]);
 	let deepError = $state<string | null>(null);
+	let browserAi = $state<BrowserAiStatus>({ status: 'unsupported' });
+	let analysis = $state<ViewerAnalysis | null>(null);
+	let aiRunning = $state(false);
+	let aiError = $state<string | null>(null);
+	let aiMs = $state(0);
+	let aiDownloadRatio = $state<number | null>(null);
 	let requestSeq = 0;
 
 	onMount(() => {
 		void loadCompanies().then((companies) => (nameMap = new Map(companies.map((item) => [item.code, item.name]))));
+		void checkBrowserAiAvailability().then((status) => (browserAi = status));
 	});
 
 	$effect(() => {
@@ -57,6 +66,9 @@
 		searchIndex = null;
 		deepHits = [];
 		deepError = null;
+		analysis = null;
+		aiError = null;
+		aiMs = 0;
 		void loadPanelBundle(c)
 			.then((next) => {
 				if (code !== c) return;
@@ -118,8 +130,19 @@
 		if (!searchIndex || query.trim().length < 1) return null;
 		return buildEvidencePack(searchIndex, query, { topK: 10, expand });
 	});
+	const canAnalyze = $derived.by(() => Boolean(bundle && searchIndex && query.trim().length > 0 && !indexing && !aiRunning));
 	const canNewer = $derived(windowEnd > 0);
 	const canOlder = $derived(windowEnd + cols < visiblePeriods.length);
+
+	$effect(() => {
+		query;
+		expand;
+		deepHits;
+		analysis = null;
+		aiError = null;
+		aiMs = 0;
+		aiDownloadRatio = null;
+	});
 
 	function gotoCompany(nextCode: string) {
 		void goto(`${base}/lab/viewer-search?code=${nextCode}`);
@@ -222,6 +245,39 @@
 		}
 	}
 
+	async function runAiAnalysis() {
+		if (!bundle || !evidencePack || aiRunning) return;
+		aiRunning = true;
+		aiError = null;
+		aiDownloadRatio = null;
+		const started = performance.now();
+		const baseAnalysis = analyzeEvidencePack({
+			code,
+			companyName: corpName,
+			periodCount: periods.length,
+			evidencePack,
+			deepHits
+		});
+		analysis = baseAnalysis;
+		try {
+			if (browserAi.status === 'available') {
+				const modelText = await runBrowserAiPrompt(baseAnalysis.prompt, {
+					onDownload(progress) {
+						aiDownloadRatio = typeof progress.ratio === 'number' ? progress.ratio : null;
+					}
+				});
+				analysis = attachBrowserAiText(baseAnalysis, modelText);
+				browserAi = { status: 'available', raw: 'available' };
+			}
+		} catch (error) {
+			aiError = `브라우저 AI 실패, 근거팩 분석 유지: ${error instanceof Error ? error.message : String(error)}`;
+			browserAi = await checkBrowserAiAvailability();
+		} finally {
+			aiMs = performance.now() - started;
+			aiRunning = false;
+		}
+	}
+
 	function kindLabel(kind: SearchHit['matchKind']): string {
 		if (kind === 'table') return '표';
 		if (kind === 'amount') return '금액';
@@ -230,6 +286,21 @@
 
 	function hitLabel(hit: SearchHit | EvidenceItem): string {
 		return [hit.chapter, hit.section, hit.block].filter(Boolean).join(' > ');
+	}
+
+	function aiStatusLabel(status: BrowserAiStatus['status']): string {
+		if (status === 'available') return 'model ready';
+		if (status === 'downloadable') return 'downloadable';
+		if (status === 'downloading') return 'downloading';
+		if (status === 'unavailable') return 'unavailable';
+		if (status === 'error') return 'error';
+		return 'evidence mode';
+	}
+
+	function confidenceLabel(confidence: ViewerAnalysis['confidence']): string {
+		if (confidence === 'high') return '높음';
+		if (confidence === 'medium') return '중간';
+		return '낮음';
 	}
 </script>
 
@@ -257,6 +328,7 @@
 			<div class="metric"><Activity size={14} /> 기본색인 {indexing ? '준비 중' : searchIndex ? `${indexMs.toFixed(0)}ms` : '-'}</div>
 			<div class="metric"><Database size={14} /> 행 {searchIndex?.rows.length ?? 0} · vocab {searchIndex?.vocab ?? 0}</div>
 			<div class="metric"><Table2 size={14} /> deep {deepBuilding ? `검색 중 ${deepRows || '-'}행` : deepRows ? `${deepRows}행 스캔` : '대기'}</div>
+			<div class="metric"><Sparkles size={14} /> AI {aiRunning ? '분석 중' : aiStatusLabel(browserAi.status)}</div>
 		</div>
 	</section>
 
@@ -267,6 +339,9 @@
 			<button type="button" class:active={expand} onclick={() => (expand = !expand)}>동의어</button>
 			<button type="button" onclick={runDeepSearch} disabled={!bundle || deepBuilding}>
 				{deepBuilding ? '표 검색 중' : '표까지 검색'}
+			</button>
+			<button type="button" class="ai-run" onclick={runAiAnalysis} disabled={!canAnalyze}>
+				<Sparkles size={14} /> {aiRunning ? '분석 중' : '분석'}
 			</button>
 		</div>
 		<div class="samples">
@@ -345,6 +420,49 @@
 						{/each}
 					{:else}
 						<div class="empty">검색어를 입력하면 생성</div>
+					{/if}
+				</div>
+
+				<div class="result-group analyst">
+					<div class="panel-title">AI analyst <span>{analysis ? confidenceLabel(analysis.confidence) : aiStatusLabel(browserAi.status)}</span></div>
+					<div class="pack-stats">
+						<span>{analysis?.modelMode ?? 'evidence'}</span>
+						<span>{aiMs ? `${aiMs.toFixed(0)}ms` : 'standby'}</span>
+						{#if aiDownloadRatio !== null}
+							<span>{Math.round(aiDownloadRatio * 100)}%</span>
+						{/if}
+					</div>
+					{#if aiRunning && !analysis}
+						<div class="empty">분석 중</div>
+					{:else if analysis}
+						<p class="analysis-answer">{analysis.modelText ?? analysis.answer}</p>
+						<div class="signals">
+							{#each analysis.signals as signal}
+								<div class="signal">
+									<span>{signal.label}</span>
+									<strong>{signal.value}</strong>
+									<small>{signal.detail}</small>
+								</div>
+							{/each}
+						</div>
+						<div class="analysis-evidence">
+							{#each analysis.evidence as item (item.id)}
+								<button type="button" class="mini-hit" onmousedown={() => focusEvidence(item)}>
+									<code>{item.period}</code>
+									<span>{hitLabel(item)}</span>
+								</button>
+							{/each}
+						</div>
+						<div class="next-queries">
+							{#each analysis.nextQueries as nextQuery}
+								<button type="button" onclick={() => (query = nextQuery)}>{nextQuery}</button>
+							{/each}
+						</div>
+					{:else}
+						<div class="empty">근거팩 생성 후 분석 실행</div>
+					{/if}
+					{#if aiError}
+						<div class="empty error">{aiError}</div>
 					{/if}
 				</div>
 
@@ -491,6 +609,10 @@
 	.querybox button,
 	.samples button,
 	.view-controls button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
 		height: 30px;
 		padding: 0 10px;
 		border: 1px solid #1e2433;
@@ -514,6 +636,11 @@
 	.querybox button:disabled {
 		opacity: 0.45;
 		cursor: default;
+	}
+	.querybox .ai-run {
+		border-color: rgba(56, 189, 248, 0.45);
+		color: #bae6fd;
+		background: rgba(14, 165, 233, 0.08);
 	}
 	.samples {
 		display: flex;
@@ -636,6 +763,76 @@
 		border-radius: 999px;
 		color: #94a3b8;
 		font-size: 10px;
+	}
+	.analysis-answer {
+		margin: 0 0 9px;
+		padding: 10px;
+		border: 1px solid #1e2433;
+		border-radius: 7px;
+		background: #0a0e18;
+		color: #dbeafe;
+		font-size: 12px;
+		line-height: 1.55;
+		white-space: pre-wrap;
+	}
+	.signals {
+		display: grid;
+		gap: 6px;
+	}
+	.signal {
+		display: grid;
+		gap: 3px;
+		padding: 8px;
+		border: 1px solid #1e2433;
+		border-radius: 7px;
+		background: #070b14;
+	}
+	.signal span {
+		color: #64748b;
+		font-size: 10px;
+		text-transform: uppercase;
+	}
+	.signal strong {
+		color: #e2e8f0;
+		font-size: 12px;
+		line-height: 1.35;
+	}
+	.signal small {
+		color: #94a3b8;
+		font-size: 11px;
+		line-height: 1.35;
+	}
+	.analysis-evidence,
+	.next-queries {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px;
+		margin-top: 8px;
+	}
+	.mini-hit,
+	.next-queries button {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		max-width: 100%;
+		padding: 5px 7px;
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		background: #050811;
+		color: #94a3b8;
+		font-size: 11px;
+		cursor: pointer;
+	}
+	.mini-hit span {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mini-hit:hover,
+	.next-queries button:hover {
+		border-color: rgba(56, 189, 248, 0.5);
+		color: #bae6fd;
 	}
 	.empty,
 	.state {

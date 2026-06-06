@@ -1,6 +1,6 @@
-"""DART stage — recent(증분)/full(88분기)/newStocks/sections/panel.
+"""DART stage — recent(증분)/full(88분기)/newStocks/panel.
 
-W2 전환기: 검증된 sync 스크립트(syncRecent·syncData·syncNewStocks·buildSections·
+W2 전환기: 검증된 sync 스크립트(syncRecent·syncData·syncNewStocks·
 onlinePanel/buildPanel)를 ``runScript`` 로 동형 호출 + ``uploadCategoryToHf`` 로 업로드.
 후속 웨이브에서 본체를 인라인하며 스크립트는 shim 으로 역전한다.
 """
@@ -47,10 +47,10 @@ def runDartRecent(
     upload: bool = True,
     token: str | None = None,
 ) -> StageResult:
-    """DART 증분 수집(finance/report/docs) — syncRecent 동형 + HF 업로드.
+    """DART 증분 수집(finance/report) — syncRecent 동형 + HF 업로드.
 
     Args:
-        category: finance/report/docs.
+        category: finance/report.
         mode: 미사용(증분 고정).
         codes: 미사용(syncRecent 가 lookback 발견).
         upload: HF 업로드 여부.
@@ -127,8 +127,8 @@ def runDartNewStocks(
         없음.
 
     Example:
-        >>> runDartNewStocks(category="docs", upload=False)  # doctest: +SKIP
-        StageResult(category='docs', ...)
+        >>> runDartNewStocks(category="finance", upload=False)  # doctest: +SKIP
+        StageResult(category='finance', ...)
     """
     rc = runScript(".github/scripts/sync/syncNewStocks.py")
     return _upload(_result(category, rc, "syncNewStocks"), category, upload, token)
@@ -144,7 +144,7 @@ def runDartPanel(
 ) -> StageResult:
     """DART panel 수평화 — online(1-pass) 또는 offline(zip) + HF 업로드.
 
-    online: onlinePanel(docs.parquet → stream → 14-col). offline: buildPanel(로컬 zip).
+    online: onlinePanel(DART API list → stream → 17-col). offline: buildPanel(로컬 zip).
     refDf(panelXbrlRef) 부재 등 전제 미충족 시 stage 가 graceful skip(rc=0, 산출 0).
 
     Args:

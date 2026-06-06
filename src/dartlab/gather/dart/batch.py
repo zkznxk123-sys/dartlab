@@ -4,7 +4,7 @@ eddmpython v2 DartBase 패턴을 dartlab에 흡수.
 키 N개 → asyncio 워커 N개 → Queue 기반 종목 분배.
 
 개별: Dart()("005930").saveFinance(2016)  # 기존 그대로
-배치: batchCollect(["005930", "000660"], categories=["finance", "report", "docs"])
+배치: batchCollect(["005930", "000660"], categories=["finance", "report"])
 전체: batchCollectAll(categories=["finance"])  # 전체 상장종목
 """
 
@@ -408,6 +408,18 @@ def _resolveCorpMap(stockCodes: list[str]) -> dict[str, tuple[str, str]]:
     return corpMap
 
 
+def _activeDartCategories(categories: list[str] | None) -> list[str]:
+    """DART 수집 카테고리 정규화.
+
+    정기보고서 본문은 panel builder가 생산하므로 batch 수집기는 finance/report만 실행한다.
+    """
+    cats = list(categories or ["finance", "report"])
+    invalid = [c for c in cats if c not in {"finance", "report"}]
+    if invalid:
+        raise ValueError(f"DART batch 수집 카테고리는 finance/report만 지원합니다: {invalid}")
+    return cats
+
+
 def batchCollect(
     stockCodes: list[str],
     *,
@@ -421,7 +433,7 @@ def batchCollect(
 ) -> dict[str, dict[str, int]]:
     """병렬 배치 수집. 키 N개 → 워커 N개 → 종목 분배.
 
-    Returns: {"005930": {"finance": 120, "report": 450, "docs": 1681}, ...}
+    Returns: {"005930": {"finance": 120, "report": 450}, ...}
 
     Args:
         targetPeriodsByCode: list.json에서 발견한 종목별 정확한 (year, reprt_code).
@@ -433,7 +445,9 @@ def batchCollect(
     Example:
         >>> batchCollect(...)
     """
-    cats = categories or ["finance", "report", "docs"]
+    cats = _activeDartCategories(categories)
+    if not cats:
+        return {sc: {} for sc in stockCodes}
     keys = resolveDartKeys()
     if not keys:
         raise ValueError("DART API 키가 필요합니다. DART_API_KEYS 환경변수를 설정하세요.")
@@ -518,8 +532,7 @@ def batchCollect(
 
             from dartlab.core.dataLoader import _getDataRoot
 
-            # 병렬 Job (sync-finance-report / sync-docs) 간 동시 쓰기 경쟁 회피 —
-            # env SYNC_STATE_SCOPE 로 하위 디렉토리 분리 (fr / docs).
+            # 병렬 Job 간 동시 쓰기 경쟁 회피 — env SYNC_STATE_SCOPE 로 하위 디렉토리 분리.
             baseDir = _getDataRoot() / "dart" / "_collect_state"
             scope = os.environ.get("SYNC_STATE_SCOPE", "").strip()
             stateDir = baseDir / scope if scope else baseDir
@@ -724,7 +737,9 @@ def batchCollectAll(
     allCodes = kindDf["종목코드"].to_list()
 
     if mode == "new":
-        cats = categories or ["finance", "report", "docs"]
+        cats = _activeDartCategories(categories)
+        if not cats:
+            return {}
         newCodes = []
         for sc in allCodes:
             missing = any(not _dataPath(cat, sc).exists() for cat in cats)
@@ -750,7 +765,6 @@ def batchCollectAll(
 
 # ── 재내보내기 (분리: batchCollectors.py · batchWorker.py) ──────
 from dartlab.gather.dart.batchCollectors import (  # noqa: E402  re-export
-    _collectDocs,
     _collectFinance,
     _collectReport,
     _getProcessPool,

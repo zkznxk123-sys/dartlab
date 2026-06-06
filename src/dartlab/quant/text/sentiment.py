@@ -9,7 +9,7 @@ import logging
 
 from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import loadDocsForStock
+from dartlab.quant.screen.dataAccess import loadPanelTextForStock
 
 log = logging.getLogger(__name__)
 
@@ -56,10 +56,10 @@ def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         Text alpha + AI 공시 톤 답변.
 
     How:
-        ``loadDocsForStock`` → 토큰화 → 사전 매칭 → 통계 + 시계열.
+        ``loadPanelTextForStock`` → 토큰화 → 사전 매칭 → 통계 + 시계열.
 
     Requires:
-        ``data/dart/docs/{stockCode}.parquet`` 가용.
+        ``data/dart/panel/{stockCode}.parquet`` 가용.
 
     Raises:
         없음 — 텍스트 부재 시 ``{error}``.
@@ -79,24 +79,24 @@ def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    docs = loadDocsForStock(stockCode)
-    if isEmptyDf(docs):
-        return {**result, "error": "docs 데이터 없음"}
+    panelText = loadPanelTextForStock(stockCode)
+    if isEmptyDf(panelText):
+        return {**result, "error": "panel 데이터 없음"}
 
     from dartlab.quant.text.lmDict import NEGATIVE_KR, POSITIVE_KR, UNCERTAINTY_KR
 
-    text_col = next((c for c in ["content", "section_content", "text", "body"] if c in docs.columns), None)
+    text_col = next((c for c in ["content", "section_content", "text", "body"] if c in panelText.columns), None)
     if text_col is None:
-        return {**result, "error": "텍스트 컬럼 없음", "columns": docs.columns}
+        return {**result, "error": "텍스트 컬럼 없음", "columns": panelText.columns}
 
-    period_col = next((c for c in ["period", "bsns_year", "year", "rcept_dt"] if c in docs.columns), None)
+    period_col = next((c for c in ["period", "bsns_year", "year", "rcept_dt"] if c in panelText.columns), None)
 
     scores = []
     total_pos = total_neg = total_unc = total_words = 0
     neg_counts: dict[str, int] = {}
 
-    texts = docs.get_column(text_col).to_list()
-    periods = docs.get_column(period_col).to_list() if period_col else [None] * len(texts)
+    texts = panelText.get_column(text_col).to_list()
+    periods = panelText.get_column(period_col).to_list() if period_col else [None] * len(texts)
 
     for text, period in zip(texts, periods):
         if not isinstance(text, str) or not text.strip():

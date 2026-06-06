@@ -92,7 +92,7 @@ class TestHints:
         from dartlab.core.messaging import onCompanyCreated
 
         company = MagicMock()
-        company._hasDocs = True
+        company._hasPanel = True
         company._hasFinanceParquet = True
         company._hasReport = True
         company.stockCode = "005930"
@@ -105,7 +105,7 @@ class TestHints:
         from dartlab.core.messaging import onCompanyCreated
 
         company = MagicMock()
-        company._hasDocs = True
+        company._hasPanel = True
         company._hasFinanceParquet = False
         company._hasReport = True
         company.stockCode = "005930"
@@ -118,7 +118,7 @@ class TestHints:
         from dartlab.core.messaging import onCompanyCreated
 
         company = MagicMock()
-        company._hasDocs = True
+        company._hasPanel = True
         company._hasFinanceParquet = True
         company._hasReport = True
         company.stockCode = "005930"
@@ -135,7 +135,7 @@ class TestHints:
 
         company = MagicMock()
         company._hasFinanceParquet = True
-        company._hasDocs = True
+        company._hasPanel = True
 
         steps = nextSteps(company)
         assert any("BS" in s for s in steps)
@@ -146,7 +146,7 @@ class TestHints:
 
         company = MagicMock()
         company._hasFinanceParquet = False
-        company._hasDocs = True
+        company._hasPanel = True
 
         steps = nextSteps(company)
         # No BS/IS/CF/ratios steps

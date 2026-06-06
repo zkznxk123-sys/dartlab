@@ -12,20 +12,6 @@ def test_imports():
         pytest.skip(f"module import requires data/env: {e}")
 
 
-def test_collect_callable() -> None:
-    """collect() callable smoke."""
-    from dartlab.gather.dart.collector import DocsCollector
-
-    assert hasattr(DocsCollector, "collect")
-
-
-def test_collect_multiple_callable() -> None:
-    """collectMultiple() callable smoke."""
-    from dartlab.gather.dart.collector import collectMultiple
-
-    assert callable(collectMultiple)
-
-
 def test_collection_stats_callable() -> None:
     """collectionStats() callable smoke."""
     from dartlab.gather.dart.collector import collectionStats

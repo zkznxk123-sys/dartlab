@@ -1,4 +1,4 @@
-"""docs spine + finance/report authoritative merge accessor.
+"""panel text + finance/report authoritative merge accessor.
 
 company.py에서 분리된 accessor 클래스.
 """
@@ -91,7 +91,7 @@ class _ProfileAccessor:
 
     @property
     def facts(self) -> pl.DataFrame | None:
-        """기업 facts 통합 long-format — finance + CIS + SCE + report + docs 4 source merge.
+        """기업 facts 통합 long-format — finance + CIS + SCE + report source merge.
 
         Capabilities:
             - finance series (BS/IS/CF) annual → "finance" source, priority 300.
@@ -102,7 +102,7 @@ class _ProfileAccessor:
 
         Returns:
             pl.DataFrame | None — long format. 컬럼 ``topic`` (str) / ``period`` (str) /
-            ``source`` (finance/report/docs) / ``valueType`` (number/field/text/table 등) /
+            ``source`` (finance/report) / ``valueType`` (number/field/text/table 등) /
             ``valueKey`` (str) / ``value`` (Union) / ``payloadRef`` (str) / ``priority`` (Int) /
             ``summary`` (str). 모든 source 부재 → None.
 
@@ -117,8 +117,8 @@ class _ProfileAccessor:
             - "summary 만 LLM 입력" → ``facts.select("summary")`` head.
 
         SeeAlso:
-            - ``sections`` — docs spine 캐노니컬 sections (본 함수와 보완).
-            - ``availableTopics`` — facts + sections topic 합집합.
+            - ``_panelTextWide`` — panel text wide view (본 함수와 보완).
+            - ``availableTopics`` — facts + panel text topic 합집합.
             - ``trace`` — 단일 topic 의 출처 우선순위 분석.
             - ``Company._buildFinanceSeries`` / ``_financeCisAnnual`` / ``_sceSeriesAnnual`` —
               finance source.
@@ -129,7 +129,7 @@ class _ProfileAccessor:
 
         AIContext:
             Workbench "이 회사 무슨 데이터 있냐" / "모든 출처 보여줘" 질문 entry. priority 컬럼
-            으로 finance > report > docs 자동 ranking. AI 가 summary 컬럼만 추려 토큰 절약.
+            으로 finance > report > panel 자동 ranking. AI 가 summary 컬럼만 추려 토큰 절약.
             None 시 회사 데이터 미수집.
 
         LLM Specifications:
@@ -145,7 +145,7 @@ class _ProfileAccessor:
             Freshness:
                 - source 의 freshness 의존 + cache.
             Dataflow:
-                - 4 source → 본 함수 (long merge) → caller (AI / trace / availableTopics).
+                - finance/report source → 본 함수 (long merge) → caller (AI / trace / availableTopics).
             TargetMarkets:
                 - KR (DART) 한정.
 
@@ -278,62 +278,16 @@ class _ProfileAccessor:
         self._company._cache[cacheKey] = result
         return result
 
-    @property
-    def sections(self) -> pl.DataFrame | None:
-        """merged canonical sections — docs spine + finance/report 통합 wide 보드.
-
-        Capabilities:
-            - ``Company._getPrimary("sections")`` 위임 — docs sections + finance/report merge.
-            - facts 는 long, 본 함수는 wide (topic × period).
-            - sections 결과의 period 컬럼은 ``_isPeriodColumn`` 매칭 (예 "2024Q1").
-
-        Returns:
-            pl.DataFrame | None — wide DataFrame. 컬럼 ``topic`` + period N + meta.
-            sections 미수집 → None.
-
-        Example:
-            >>> # c._profileAccessor.sections.head()
-
-        Guide:
-            - "이 회사 topic × 시간 매트릭스" → 본 함수.
-            - long format 으로 → ``facts`` 사용.
-
-        SeeAlso:
-            - ``facts`` — 본 함수의 long format 자매.
-            - ``Company._getPrimary("sections")`` — 본 함수 본체.
-
-        Requires:
-            - polars — DataFrame.
-
-        AIContext:
-            Workbench "이 회사 토픽 매트릭스" 질문 처리. AI 가 wide → 각 topic row 의 period
-            컬럼 lookup → 자연어 답변.
-
-        LLM Specifications:
-            AntiPatterns:
-                - sections 미수집 (docs 또는 finance 모두 부재) → None.
-            OutputSchema:
-                - wide DataFrame — topic + period + meta.
-            Prerequisites:
-                - docs sections parquet 또는 finance 수집.
-            Freshness:
-                - source 의존.
-            Dataflow:
-                - docs / finance → _getPrimary → 본 함수 → AI.
-            TargetMarkets:
-                - KR (DART) 한정.
-
-        Raises:
-            없음.
-        """
-        return self._company._getPrimary("sections")
+    def _panelTextWide(self) -> pl.DataFrame | None:
+        """panel text wide view for internal topic/trace fallback."""
+        return self._company._panelTextWide()
 
     @property
     def availableTopics(self) -> list[str]:
-        """profile 에서 접근 가능한 topic 목록 — sections 컬럼 + facts topic 합집합 정렬.
+        """profile 에서 접근 가능한 topic 목록 — panel text + facts topic 합집합 정렬.
 
         Capabilities:
-            - sections 의 ``topic`` 컬럼 to_list + facts 의 ``topic`` unique to_list 합집합.
+            - panel text 의 ``topic`` 컬럼 to_list + facts 의 ``topic`` unique to_list 합집합.
             - None 값 제외 + 알파벳 정렬.
 
         Returns:
@@ -350,7 +304,7 @@ class _ProfileAccessor:
             - "출처 우선순위" → ``trace(topic)``.
 
         SeeAlso:
-            - ``facts`` / ``sections`` — 본 함수의 source.
+            - ``facts`` / ``_panelTextWide`` — 본 함수의 source.
             - ``trace`` — 단일 topic 출처 분석.
 
         Requires:
@@ -362,16 +316,16 @@ class _ProfileAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - sections/facts 모두 부재 → 빈 list.
+                - panel text/facts 모두 부재 → 빈 list.
                 - topic 이름이 한국어/영문 혼재 가능 (apiType 가 영문, docs topic 이 한국어 변형).
             OutputSchema:
                 - list[str] — 알파벳 정렬.
             Prerequisites:
-                - facts 또는 sections 1 개 이상.
+                - facts 또는 panel text 1 개 이상.
             Freshness:
                 - source 의존.
             Dataflow:
-                - facts + sections → union → 본 함수.
+                - facts + panel text → union → 본 함수.
             TargetMarkets:
                 - KR (DART) 한정.
 
@@ -379,8 +333,9 @@ class _ProfileAccessor:
             없음.
         """
         topics = set()
-        if self.sections is not None and "topic" in self.sections.columns:
-            topics.update(self.sections["topic"].to_list())
+        textWide = self._panelTextWide()
+        if textWide is not None and "topic" in textWide.columns:
+            topics.update(textWide["topic"].to_list())
         facts = self.facts
         if facts is not None and "topic" in facts.columns:
             topics.update(facts["topic"].unique().to_list())
@@ -394,7 +349,7 @@ class _ProfileAccessor:
             - BS/IS/CF/CIS → finance attribute lookup.
             - SCE → ``_finance.SCE``.
             - report authoritative topic → report attribute lookup.
-            - 그 외 → sections row filter.
+            - 그 외 → panel text row filter.
 
         Args:
             topic: topic 이름.
@@ -411,14 +366,14 @@ class _ProfileAccessor:
 
         Guide:
             - 본 함수 사용 X → ``c.panel(topic)`` 또는 ``c.select(topic, [...])``.
-            - profile 페이지의 raw access 가 필요하면 ``facts`` / ``sections`` 직접.
+            - profile 페이지의 raw access 가 필요하면 ``facts`` / ``_panelTextWide`` 직접.
 
         SeeAlso:
             - ``Company.panel`` / ``Company.select`` — 권장 API.
-            - ``facts`` / ``sections`` — long/wide raw access.
+            - ``facts`` / ``_panelTextWide`` — long/wide raw access.
 
         Requires:
-            - polars — DataFrame (sections 경로).
+            - polars — DataFrame (panel text 경로).
             - warnings (stdlib).
 
         AIContext:
@@ -427,7 +382,7 @@ class _ProfileAccessor:
         LLM Specifications:
             AntiPatterns:
                 - 본 함수 새로 호출 → DeprecationWarning 누적. show 로 마이그.
-                - report topic 이 _REPORT_AUTHORITATIVE_TOPICS 외 → sections fallback.
+                - report topic 이 _REPORT_AUTHORITATIVE_TOPICS 외 → panel text fallback.
             OutputSchema:
                 - DataFrame / dict / None (topic 의 source 의존).
             Prerequisites:
@@ -435,7 +390,7 @@ class _ProfileAccessor:
             Freshness:
                 - source 의존.
             Dataflow:
-                - 본 함수 → finance / report / sections attribute.
+                - 본 함수 → finance / report / panel text.
             TargetMarkets:
                 - KR (DART) 한정.
         """
@@ -450,17 +405,17 @@ class _ProfileAccessor:
             if topic == "audit":
                 return self._company._report.audit
             return getattr(self._company._report, topic, None)
-        sections = self.sections
-        if sections is None:
+        textWide = self._panelTextWide()
+        if textWide is None:
             return None
-        return sections.filter(pl.col("topic") == topic)
+        return textWide.filter(pl.col("topic") == topic)
 
     def trace(self, topic: str, period: str | None = None) -> pl.DataFrame | dict[str, Any] | None:
         """topic 출처 추적 — 4 source 우선순위 + payloadRef + whySelected 메타.
 
         Capabilities:
             - facts (long) 에서 topic 별 row 추출 → source 별 group_by + priority max.
-            - docs sections 의 wide row 추가 ("docs-sections:topic:period" payload).
+            - panel text wide row 추가 ("panel-text:topic:period" payload).
             - period 명시 시 ``rawPeriod`` 정규화 후 filter.
             - 출처 list 를 (priority, source) 내림차순 정렬 → primary + fallback 분리.
             - 출처 1 개 이상 있으면 dict, 없으면 None.
@@ -483,7 +438,7 @@ class _ProfileAccessor:
             - "여러 period 한 번에" → period=None 후 availableSources 그룹 분석.
 
         SeeAlso:
-            - ``facts`` / ``sections`` — 본 함수의 source.
+            - ``facts`` / ``_panelTextWide`` — 본 함수의 source.
             - ``_sourcePriority`` (모듈 private) — whySelected 의 priority 로직.
             - ``dartlab.providers.dart.sectionPeriod.rawPeriod`` — period 정규화.
 
@@ -503,11 +458,11 @@ class _ProfileAccessor:
             OutputSchema:
                 - dict — 7 키 또는 None.
             Prerequisites:
-                - facts 또는 sections 중 1 개 이상.
+                - facts 또는 panel text 중 1 개 이상.
             Freshness:
                 - source 의존.
             Dataflow:
-                - facts + sections → 본 함수 → AI 디버그 응답.
+                - facts + panel text → 본 함수 → AI 디버그 응답.
             TargetMarkets:
                 - KR (DART) 한정.
 
@@ -518,7 +473,7 @@ class _ProfileAccessor:
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
         facts = self.facts
-        docsSections = self._company.sections
+        docsSections = self._company._panelTextWide()
 
         sources: list[dict[str, Any]] = []
 
@@ -546,9 +501,9 @@ class _ProfileAccessor:
                     if value is not None:
                         sources.append(
                             {
-                                "source": "docs",
+                                "source": "panel",
                                 "rows": 1,
-                                "payloadRef": f"docs-sections:{topic}:{requestedPeriod}",
+                                "payloadRef": f"panel-text:{topic}:{requestedPeriod}",
                                 "summary": str(value)[:400],
                                 "priority": 100,
                             }

@@ -70,29 +70,30 @@ This dataset is the **data layer** behind DartLab. When you run `dartlab.Company
 
 ```
 dart/
-├── docs/          2,547 companies  ~8 GB      disclosure text (sections, tables, markdown)
-├── finance/       2,744 companies  ~586 MB    financial statements (BS, IS, CF, XBRL)
-└── report/        2,711 companies  ~319 MB    structured disclosure APIs (28 types)
+├── panel/         DART disclosure panel (horizontalized filings)
+├── finance/       financial statements (BS, IS, CF, XBRL)
+└── report/        structured disclosure APIs (28 types)
 ```
 
 Each file is one company: `{stockCode}.parquet`
 
-### docs — Disclosure Text
+### panel — Disclosure Panel
 
-Full-text sections from annual/quarterly reports, parsed into structured blocks.
+DART periodic reports horizontalized into a company-level panel. Narrative text and XBRL-linked tables share one artifact so the viewer, search, and comparison tools use the same source.
 
 | Column | Description |
 |--------|------------|
-| `rcept_no` | DART filing ID |
-| `rcept_date` | Filing date |
-| `stock_code` | Stock code |
-| `corp_name` | Company name |
-| `report_type` | Annual/quarterly report type |
-| `section_title` | Original section title |
-| `section_order` | Section ordering |
-| `content` | Section text (markdown) |
-| `blockType` | `text` / `table` / `heading` |
-| `year` | Filing year |
+| `corp` | Stock code |
+| `period` | Period key (`YYYYQn`) |
+| `rceptNo` | DART filing ID |
+| `chapter` | Top-level report chapter |
+| `sectionLeaf` | Native section title |
+| `sectionPath` | Full native section path |
+| `leafType` | `text` / `table` |
+| `blockLeaf` | Block or table title |
+| `xbrlClass` | Native DART XBRL class |
+| `disclosureKey` | Canonical horizontalization key |
+| `contentRaw` | Source-preserving XML/text payload |
 
 ### finance — Financial Statements
 

@@ -59,8 +59,8 @@ def test_account_order_ts_is_synced(orderModel) -> None:
     assert _TARGET_PATH.read_text(encoding="utf-8") == mod.render(model)
 
 
-def test_bs_total_assets_sorts_after_current_and_noncurrent_assets(orderModel) -> None:
-    """삼성 2026Q1 raw ord처럼 자산총계가 앞에 와도 SSOT 순서로 복구."""
+def test_bs_total_assets_sorts_before_current_and_noncurrent_assets(orderModel) -> None:
+    """삼성 2026Q1 raw ord가 흔들려도 BS 총계 → 소계 → 리프 순서를 유지."""
     model, _ = orderModel
     rows = [
         ("ifrs-full_Assets", "자산총계", 7),
@@ -72,7 +72,7 @@ def test_bs_total_assets_sorts_after_current_and_noncurrent_assets(orderModel) -
 
     labels = [label for _, label, _ in sorted(rows, key=lambda r: _displayOrder(model, *r, stmt="BS"))]
 
-    assert labels == ["유동자산", "현금및현금성자산", "비유동자산", "유형자산", "자산총계"]
+    assert labels == ["자산총계", "유동자산", "현금및현금성자산", "비유동자산", "유형자산"]
 
 
 def test_bs_depth_uses_total_sub_leaf_levels(orderModel) -> None:
@@ -82,6 +82,9 @@ def test_bs_depth_uses_total_sub_leaf_levels(orderModel) -> None:
     assert _depth(model, "ifrs-full_Assets", "자산총계", "BS") == 0
     assert _depth(model, "ifrs-full_CurrentAssets", "유동자산", "BS") == 1
     assert _depth(model, "ifrs-full_CashAndCashEquivalents", "현금및현금성자산", "BS") == 2
+    assert _depth(model, "ifrs-full_Liabilities", "부채총계", "BS") == 0
+    assert _depth(model, "ifrs-full_CurrentLiabilities", "유동부채", "BS") == 1
+    assert _depth(model, "ifrs-full_Equity", "자본총계", "BS") == 0
 
 
 def test_recent_ifrs_id_gaps_resolve_to_statement_order(orderModel) -> None:
@@ -100,4 +103,10 @@ def test_recent_ifrs_id_gaps_resolve_to_statement_order(orderModel) -> None:
     assert currentFvpl == "shortterm_financial_assets_at_fair_value_through_profit_or_loss"
     assert noncurrentFvpl == "longterm_financial_assets_at_fair_value_through_profit_or_loss"
     assert currentPortion == "current_portion_of_longterm_borrowings"
-    assert order[currentFvpl] < order["noncurrent_assets"] < order[noncurrentFvpl] < order["total_assets"]
+    assert (
+        order["total_assets"]
+        < order["current_assets"]
+        < order[currentFvpl]
+        < order["noncurrent_assets"]
+        < order[noncurrentFvpl]
+    )

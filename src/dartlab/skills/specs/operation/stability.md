@@ -88,13 +88,13 @@ dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 
 | API | 설명 |
 |---|---|
 | `dartlab.Company(code)` | Company 객체 생성 facade |
-| `Company.show()` | topic payload 조회 (source-aware) |
+| `Company.panel(topic)` | topic payload 조회 (source-aware) |
 | `Company.trace()` | source provenance 조회 |
 | `Company.diff()` | 기간 간 텍스트 변화 감지 |
 | `Company.topics` | 사용 가능 topic 리스트 |
 | `dartlab.listing()` | 전체 상장사 디렉터리 |
-| `Company.show("BS"|"IS"|"CF"|"CIS")` | 재무제표 조회 |
-| `Company.show("ratios")` | 재무비율 조회 |
+| `Company.panel("BS"|"IS"|"CF"|"CIS")` | 재무제표 조회 |
+| `Company.panel("ratios")` | 재무비율 조회 |
 | `Company.select(topic, accounts)` | topic 의 행/열 선택 |
 | `Company.index` | topic × 기간 정형 보드 DataFrame |
 | `Company.filings()` | 공시 문서 리스트 |
@@ -128,8 +128,8 @@ dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 
 | `dartlab` 서브커맨드 | `ask`, `status`, `setup`, `ai`, `excel` UX |
 | Server API `/api/*` | 웹 서버 엔드포인트 |
 | `engines.ai.*` | AI/LLM 엔진 |
-| `Company.show("SCE")` | 자본변동표 (DART) |
-| `Company.show("ratioSeries")` | 비율 시계열 |
+| `Company.panel("SCE")` | 자본변동표 (DART) |
+| `Company.panel("ratioSeries")` | 비율 시계열 |
 | `Company.network()` | 계열사 네트워크 그래프 |
 | `Company.governance()` | 지배구조 데이터 |
 | `Company.workforce()` | 인력 데이터 |

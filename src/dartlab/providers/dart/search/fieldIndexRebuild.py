@@ -49,8 +49,7 @@ _log = getLogger(__name__)
 def rebuildMain(
     *,
     includeAllFilings: bool = True,
-    includeDocs: bool = True,
-    includePanel: bool = False,
+    includePanel: bool = True,
     includeNews: bool = False,
     contentLimit: int | None = None,
     panelLimit: int = 4000,
@@ -60,7 +59,7 @@ def rebuildMain(
     whitelist: set[str] | list[str] | None = None,
     showProgress: bool = True,
 ) -> int:
-    """main 세그먼트 풀리빌드 — docs + allFilings (+ panel filing 롤업).
+    """main 세그먼트 풀리빌드 — panel + allFilings.
 
     스트리밍 빌드: 파일 단위로 읽고 즉시 빌더에 feed 후 해제 (메모리 안전).
     시간 오래 걸림 (4M 문서 기준 약 18분). 월 1회 실행 권장.
@@ -75,10 +74,9 @@ def rebuildMain(
 
     Args:
         includeAllFilings: True 면 전체 공시 (수시 포함).
-        includeDocs: True 면 docs sections 포함.
         includePanel: True 면 panel 정규화 본문을 filing 롤업으로 추가.
         includeNews: True 면 뉴스 헤드라인 포함.
-        contentLimit: allFilings/docs 본문 최대 문자 수.
+        contentLimit: allFilings 본문 최대 문자 수.
         panelLimit: panel filing 롤업 본문 최대 문자 수.
         newsLimit: 뉴스 본문 최대 문자 수.
         tier: ``"full"`` (flat 전량) / ``"lite"`` (서브디렉터리 축소). 출력 경로 결정.
@@ -127,7 +125,6 @@ def rebuildMain(
         afMeta = _buildAfMeta(showProgress=showProgress)
 
     # allFilings 는 content_raw (DART XML/HTML 태그 보존) — regex tag-strip 으로 평문화 (빌드시간 가드).
-    # docs/ 는 옛 section_content (이미 평문) 그대로 사용.
     def feedDf(df: pl.DataFrame, source: str, *, contentColumn: str, skipRcepts: set[str] | None = None) -> int:
         """parquet DataFrame 의 각 row 를 builder 에 추가 + meta record 동행 — 빌드 건수 반환.
 
@@ -135,7 +132,7 @@ def rebuildMain(
             df: parquet DataFrame.
             source: 인덱스 라벨 (예 ``"main"`` / ``"delta"``).
             contentColumn: 본문 컬럼명. ``"content_raw"`` 이면 regex tag-strip 평문화,
-                ``"section_content"`` 이면 그대로 사용.
+                그 외 컬럼은 이미 평문화된 텍스트로 보고 그대로 사용.
 
         Returns:
             추가된 doc 수.
@@ -150,9 +147,8 @@ def rebuildMain(
         for row in df.iter_rows(named=True):
             if skipRcepts and (row.get("rcept_no") or "") in skipRcepts:
                 continue
-            # 컬럼키 정규화 — allFilings 는 rcept_dt/report_nm, docs(flat sections)는 rcept_date/report_type.
-            # 두 소스가 같은 feedDf 를 쓰므로 coalesce 안 하면 docs 메타가 통째 공백 → 날짜필터·lite sinceDate 에서
-            # docs 전량 침묵 탈락. (실측: data/dart/docs/*.parquet 는 rcept_date·report_type 컬럼.)
+            # 컬럼키 정규화 — allFilings 는 rcept_dt/report_nm 를 쓰되, 과거 합성 fixture 호환을 위해
+            # rcept_date/report_type 도 coalesce 한다.
             rdt = str(row.get("rcept_dt") or row.get("rcept_date") or "")
             rnm = row.get("report_nm") or row.get("report_type") or ""
             # lite tier 축소 — 종목 whitelist / rcept_dt 하한.
@@ -219,27 +215,7 @@ def rebuildMain(
                 gc.collect()
                 if showProgress:
                     elapsed = time.perf_counter() - t0
-                    _log.info(f"  allFilings {i + 1}/{len(files)}: {totalDocs:,} docs, {elapsed:.0f}초")
-
-    if includeDocs:
-        from dartlab.core.dataLoader import _getDataRoot
-
-        docsDir = _getDataRoot() / "dart" / "docs"
-        docsFiles = sorted(docsDir.glob("*.parquet"))
-        if showProgress:
-            _log.info(f"[main] docs 스트리밍: {len(docsFiles)}개 파일")
-        for i, f in enumerate(docsFiles):
-            try:
-                df = pl.read_parquet(f).filter(pl.col("section_content").is_not_null())
-            except (pl.exceptions.PolarsError, OSError):
-                continue
-            totalDocs += feedDf(df, "docs", contentColumn="section_content")
-            del df
-            if (i + 1) % 200 == 0:
-                gc.collect()
-                if showProgress:
-                    elapsed = time.perf_counter() - t0
-                    _log.info(f"  docs {i + 1}/{len(docsFiles)}: {totalDocs:,} docs, {elapsed:.0f}초")
+                    _log.info(f"  allFilings {i + 1}/{len(files)}: {totalDocs:,} 문서, {elapsed:.0f}초")
 
     if showProgress:
         _log.info(f"[main] 축적 완료: {totalDocs:,} 문서, finalize 시작")
@@ -300,6 +276,34 @@ def _panelDir():
     return _getDataRoot() / "dart" / "panel"
 
 
+def _periodToReportName(period: str) -> str:
+    """panel period(YYYYQn) → DART 정기보고서명 추정."""
+    if not period:
+        return ""
+    if period.endswith("Q4"):
+        return "사업보고서"
+    if period.endswith("Q2"):
+        return "반기보고서"
+    if period.endswith("Q1") or period.endswith("Q3"):
+        return "분기보고서"
+    return period
+
+
+def _panelEntries(base: Path) -> list[tuple[str, list[Path]]]:
+    """flat/nested panel artifact 를 종목 단위로 열거."""
+    if not base.exists():
+        return []
+    flat = {p.stem: [p] for p in base.glob("*.parquet") if not p.name.startswith("_")}
+    entries: dict[str, list[Path]] = dict(flat)
+    for d in base.iterdir():
+        if not d.is_dir() or d.name in entries:
+            continue
+        files = sorted(f for f in d.glob("*.parquet") if not f.name.startswith("_"))
+        if files:
+            entries[d.name] = files
+    return sorted(entries.items())
+
+
 def _feedPanelRollup(
     builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress, *, whitelist=None, sinceDate=None
 ) -> int:
@@ -318,24 +322,21 @@ def _feedPanelRollup(
         if showProgress:
             _log.info("[main] panel 디렉토리 없음 — 롤업 skip")
         return 0
-    codeDirs = sorted(d for d in base.iterdir() if d.is_dir())
+    entries = _panelEntries(base)
     if whitelist is not None:  # lite — 종목 한정
-        codeDirs = [d for d in codeDirs if d.name in whitelist]
+        entries = [(code, files) for code, files in entries if code in whitelist]
     _codeLimit = int(os.environ.get("DARTLAB_SEARCH_PANEL_CODES", "0"))  # 테스트용 제한(0=무제한)
     if _codeLimit > 0:
-        codeDirs = codeDirs[:_codeLimit]
+        entries = entries[:_codeLimit]
 
     tag = re.compile(r"<[^>]+>")
     sp = re.compile(r"\s+")
     perSection = 2000  # 섹션당 raw 캡 (메모리·시간 가드)
     rawCap = panelLimit * 4
     added = 0
-    for ci, cd in enumerate(codeDirs):
-        files = [f for f in cd.glob("*.parquet") if not f.name.startswith("_")]
-        if not files:
-            continue
+    for ci, (code, files) in enumerate(entries):
         try:
-            df = pl.read_parquet(files, columns=["rceptNo", "contentRaw", "sectionLeaf"])
+            df = pl.read_parquet(files, columns=["rceptNo", "period", "contentRaw", "sectionLeaf"])
         except (pl.exceptions.PolarsError, OSError):
             continue
         if df.height == 0:
@@ -349,6 +350,7 @@ def _feedPanelRollup(
                 .agg(
                     pl.col("contentRaw").alias("parts"),
                     pl.col("sectionLeaf").first().alias("leaf"),
+                    pl.col("period").first().alias("period"),
                 )
             )
         except (pl.exceptions.PolarsError, OSError):
@@ -359,8 +361,10 @@ def _feedPanelRollup(
             if not rn:
                 continue
             m = afMeta.get(rn, {})
-            if sinceDate and str(m.get("rcept_dt", "")) < sinceDate:  # lite — rcept_dt 하한(addDoc 전 검사로 meta 정합)
+            rdt = str(m.get("rcept_dt") or (rn[:8] if len(rn) >= 8 else ""))
+            if sinceDate and rdt < sinceDate:  # lite — rcept_dt 하한(addDoc 전 검사로 meta 정합)
                 continue
+            reportNm = m.get("report_nm") or _periodToReportName(str(row.get("period") or ""))
             parts = row["parts"] or []
             raw = " ".join(p for p in parts if p)[:rawCap]
             text = sp.sub(" ", tag.sub(" ", raw)).strip()[:panelLimit]
@@ -373,9 +377,9 @@ def _feedPanelRollup(
                     "section_order": 0,
                     "corp_code": m.get("corp_code", ""),
                     "corp_name": m.get("corp_name", ""),
-                    "stock_code": m.get("stock_code", "") or cd.name,
-                    "rcept_dt": m.get("rcept_dt", ""),
-                    "report_nm": m.get("report_nm", ""),
+                    "stock_code": m.get("stock_code", "") or code,
+                    "rcept_dt": rdt,
+                    "report_nm": reportNm,
                     "section_title": row.get("leaf") or "",
                     "text": text[:500],
                     "source": "panel",
@@ -388,7 +392,7 @@ def _feedPanelRollup(
         if (ci + 1) % 200 == 0:
             gc.collect()
             if showProgress:
-                _log.info(f"  panel {ci + 1}/{len(codeDirs)}: {added:,} filing")
+                _log.info(f"  panel {ci + 1}/{len(entries)}: {added:,} filing")
     return added
 
 

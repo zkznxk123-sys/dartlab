@@ -1,8 +1,8 @@
-"""Pandera FinanceSchema/ReportSchema/DocsSchema — fixture 12 종 + drift 회귀.
+"""Pandera FinanceSchema/ReportSchema — fixture + drift 회귀.
 
 본 SSOT 통합 PR (Phase 2b) — Pandera schema 가 raw fetch 결과를 *데이터 계약*
-으로 못박는 1 차 방어선. fixture 12 종 (실 production 데이터 snapshot) 전수 통과
-+ 의도적 drift (컬럼 삭제) 시 에러 발생 확인.
+으로 못박는 1 차 방어선. 실 production 데이터 snapshot 전수 통과 + 의도적 drift
+(컬럼 삭제) 시 에러 발생 확인.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from dartlab.core.schemas import DocsSchema, FinanceSchema, ReportSchema
+from dartlab.core.schemas import FinanceSchema, ReportSchema
 
 pytestmark = pytest.mark.unit
 
@@ -45,12 +45,6 @@ def test_ReportSchema_acceptsFixture() -> None:
     ReportSchema.validate(df, lazy=True)
 
 
-def test_DocsSchema_acceptsFixture() -> None:
-    """docs fixture 가 DocsSchema 통과."""
-    df = pl.read_parquet(_FIXTURE_DIR / "005930.docs.parquet")
-    DocsSchema.validate(df, lazy=True)
-
-
 def test_FinanceSchema_rejectsMissingRequiredColumn() -> None:
     """필수 컬럼 (rcept_no) 누락 시 SchemaError — drift 차단 회귀."""
     import pandera.errors
@@ -69,16 +63,6 @@ def test_FinanceSchema_rejectsMissingStockCode() -> None:
     dfDropped = df.drop("stock_code")
     with pytest.raises(pandera.errors.SchemaErrors):
         FinanceSchema.validate(dfDropped, lazy=True)
-
-
-def test_DocsSchema_rejectsMissingSectionContent() -> None:
-    """docs 의 핵심 컬럼 section_content 누락 → BM25 색인 깨짐 사전 차단."""
-    import pandera.errors
-
-    df = pl.read_parquet(_FIXTURE_DIR / "005930.docs.parquet")
-    dfDropped = df.drop("section_content")
-    with pytest.raises(pandera.errors.SchemaErrors):
-        DocsSchema.validate(dfDropped, lazy=True)
 
 
 def test_maybeValidateFinance_envGateOff_noOp() -> None:

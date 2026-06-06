@@ -22,24 +22,24 @@ def renderCompany(company: Any) -> str:
     lines.append(f"  시장: {market}   통화: {currency}")
 
     # 데이터 보유 현황
-    hasDocs = getattr(company, "_hasDocs", False)
+    hasPanel = getattr(company, "_hasPanel", False)
     hasFin = getattr(company, "_hasFinanceParquet", False)
     hasRpt = getattr(company, "_hasReport", False)
-    lines.append(f"  데이터: docs {_checkMark(hasDocs)}  finance {_checkMark(hasFin)}  report {_checkMark(hasRpt)}")
+    lines.append(f"  데이터: panel {_checkMark(hasPanel)}  finance {_checkMark(hasFin)}  report {_checkMark(hasRpt)}")
 
-    # 기간 범위 (sections 캐시된 경우에만)
+    # 기간 범위 (panel text cache가 있는 경우에만)
     cache = getattr(company, "_cache", {})
-    sectionsKey = "_lazyMergedSections"
-    if sectionsKey in cache:
-        sections = cache[sectionsKey]
-        periodCols = [c for c in sections.columns if c[:4].isdigit()]
+    panelKey = "_panelTextWide"
+    if panelKey in cache:
+        panel = cache[panelKey]
+        periodCols = [c for c in panel.columns if c[:4].isdigit()]
         if periodCols:
             sortedPeriods = sorted(periodCols)
             lines.append(f"  기간: {sortedPeriods[0]} ~ {sortedPeriods[-1]} ({len(sortedPeriods)}기)")
 
-        topics = sections.get_column("topic").unique()
-        chapters = sections.get_column("chapter").unique()
-        lines.append(f"  sections: {len(topics)} topics · {len(chapters)} chapters")
+        topics = panel.get_column("topic").unique()
+        chapters = panel.get_column("chapter").unique()
+        lines.append(f"  panel: {len(topics)} topics · {len(chapters)} chapters")
 
     # guide 힌트 (데이터 보완, freshness 등)
     try:

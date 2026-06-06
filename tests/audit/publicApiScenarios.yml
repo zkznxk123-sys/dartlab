@@ -22,7 +22,6 @@ public_api:
     - config
     - credit
     - dataDir
-    - downloadAll
     - gather
     - help
     - industry
@@ -99,7 +98,6 @@ scenarios:
       - dartlab.config
       - dartlab.credit
       - dartlab.dataDir
-      - dartlab.downloadAll
       - dartlab.gather
       - dartlab.help
       - dartlab.industry
@@ -317,10 +315,6 @@ waivers:
     owner: release
     expires: "2026-12-31"
     reason: "대량 수집 side effect. 운영자 전용 경로라 productSmoke 실행 대상에서 제외."
-  dartlab.downloadAll.call:
-    owner: release
-    expires: "2026-12-31"
-    reason: "대량 다운로드 side effect. productSmoke는 자동 다운로드를 scan/company 호출로 검증한다."
   dartlab.setup.call:
     owner: release
     expires: "2026-12-31"

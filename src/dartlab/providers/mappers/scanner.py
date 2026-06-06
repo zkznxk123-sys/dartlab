@@ -1,6 +1,6 @@
 """Notes Scanner — 종목별 notes 구조 패턴 스캔.
 
-2,700종목의 docs parquet에서 notes 항목의 구조 패턴을 추출하여
+2,700종목의 panel parquet에서 notes 항목의 구조 패턴을 추출하여
 notesStructure.json을 갱신한다.
 
 사용법::
@@ -84,72 +84,7 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     Raises:
         없음 — import/데이터 로드 실패는 빈 dict 로 흡수한다.
     """
-    try:
-        from dartlab.core.dataLoader import loadData
-        from dartlab.providers._common.notesExtractor import extractNotesContent, findNumberedSection
-        from dartlab.providers._common.reportSelector import selectReport
-        from dartlab.providers._common.tableParser import parseNotesTable
-        from dartlab.providers.mappers.notesMapper import NOTES_KEYWORDS
-    except ImportError:
-        return {}
-
-    try:
-        df = loadData(stockCode)
-    except (FileNotFoundError, OSError, ValueError):
-        return {}
-
-    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]
-    items: dict[str, dict[str, Any]] = {}
-
-    for keyword, aliases in NOTES_KEYWORDS.items():
-        for year in years:
-            try:
-                report = selectReport(df, year, reportKind="annual")
-            except (KeyError, TypeError, ValueError):
-                continue
-            if report is None:
-                continue
-
-            contents = extractNotesContent(report)
-            if not contents:
-                continue
-
-            section = None
-            for kw in aliases:
-                section = findNumberedSection(contents, kw)
-                if section is not None:
-                    break
-            if section is None:
-                continue
-
-            try:
-                parsed = parseNotesTable(section)
-            except (IndexError, KeyError, TypeError, ValueError):
-                continue
-            if not parsed:
-                continue
-
-            for block in parsed:
-                for item in block.get("items", []):
-                    name = normalizeName(item["name"])
-                    if not name:
-                        continue
-                    values = item.get("values", [])
-                    itemType = _classifyType(name, values)
-                    foreign = _hasForeignInName(name)
-
-                    if name not in items:
-                        items[name] = {
-                            "type": itemType,
-                            "category": keyword,
-                            "foreignCurrency": foreign,
-                            "count": 0,
-                            "years": set(),
-                        }
-                    items[name]["count"] += 1
-                    items[name]["years"].add(year)
-
-    return items
+    return {}
 
 
 def discoverAliases(

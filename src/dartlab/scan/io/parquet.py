@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -90,9 +89,6 @@ _log = getLogger(__name__)
 
 _scanDownloaded = False
 
-# scan 프리빌드 freshness — HF 수집 주기(일 1회)에 맞춰 24h TTL
-_SCAN_FRESHNESS_TTL_SECONDS = 24 * 3600
-
 # scan 프리빌드 루트 필수 파일 — HF `dart/scan/` 루트에 있어야 하는 산출물.
 # 과거 `allow_patterns="dart/scan/**/*.parquet"` 버그로 루트 파일이 누락된
 # 불완전 캐시 상태 환경이 존재한다 (report/ 12개만 받아진 상태). 이 리스트로
@@ -142,13 +138,12 @@ def _isScanComplete(scanDir: Path) -> bool:
 
 
 def _ensureScanData() -> Path:
-    """scan 프리빌드 디렉토리 확인 — 없거나 오래됐으면 HF에서 자동 다운로드.
+    """scan 프리빌드 디렉토리 확인.
 
     일반 환경: 루트 필수 파일(finance/changes/sharesOutstanding) 이 모두 존재하고
-    TTL(24h) 이내면 즉시 반환. 하나라도 없거나 TTL 초과면 다운로드 시도.
+    있으면 즉시 반환. 하나라도 없으면 fallback 호출자가 종목별 데이터를 사용한다.
 
-    Pyodide(브라우저): 경량본 `finance-lite.parquet` 1 개만 요구. 없으면 HF 에서
-    개별 fetch (`_pyodideFetchScanLite` 경유).
+    Pyodide(브라우저): 경량본 `finance-lite.parquet` 1 개만 요구한다.
 
     Returns
     -------
@@ -171,44 +166,14 @@ def _ensureScanData() -> Path:
             _scanDownloaded = True
             return scanDir
         emit("scan:prebuild_missing")
-        try:
-            from dartlab.core.dataLoader import downloadAll
-
-            downloadAll("scan")  # pyodide 분기에서 _pyodideFetchScanLite 호출
-            _scanDownloaded = True
-            emit("scan:prebuild_ready", fileCount="finance-lite")
-        except (ImportError, RuntimeError, OSError) as e:
-            emit("scan:prebuild_failed", error=str(e))
         return scanDir
 
     if _isScanComplete(scanDir):
-        financeParquet = scanDir / "finance.parquet"
-        age = time.time() - financeParquet.stat().st_mtime
-        if age < _SCAN_FRESHNESS_TTL_SECONDS:
-            # 최신 — HF 호출 없이 즉시 반환
-            _scanDownloaded = True
-            return scanDir
-        # TTL 초과 — 갱신 시도하되 실패해도 기존 파일 사용
-        try:
-            from dartlab.core.dataLoader import downloadAll
-
-            downloadAll("scan")
-        except (ImportError, RuntimeError, ValueError):
-            pass
         _scanDownloaded = True
         return scanDir
 
-    # 루트 필수 파일 누락 (신규 사용자 또는 과거 버그로 불완전 캐시) → HF 다운로드
+    # 루트 필수 파일 누락 (신규 사용자 또는 과거 버그로 불완전 캐시)
     emit("scan:prebuild_missing")
-    try:
-        from dartlab.core.dataLoader import downloadAll
-
-        downloadAll("scan")
-        _scanDownloaded = True
-        fileCount = sum(1 for _ in scanDir.rglob("*.parquet"))
-        emit("scan:prebuild_ready", fileCount=fileCount)
-    except (ImportError, RuntimeError, ValueError) as e:
-        emit("scan:prebuild_failed", error=str(e))
 
     return scanDir
 

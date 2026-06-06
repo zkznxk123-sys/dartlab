@@ -14,7 +14,7 @@ COMMAND_SPECS = (
     CommandSpec("show", "dartlab.cli.commands.show", "topic 기반 데이터 조회"),
     CommandSpec("search", "dartlab.cli.commands.search", "종목코드/회사명 검색"),
     CommandSpec("statement", "dartlab.cli.commands.statement", "재무제표 출력 (BS/IS/CIS/CF/SCE)"),
-    CommandSpec("sections", "dartlab.cli.commands.sections", "docs 수평화 sections 출력"),
+    CommandSpec("sections", "dartlab.cli.commands.sections", "panel 공시 격자 출력"),
     CommandSpec("profile", "dartlab.cli.commands.profile", "Company index/facts 출력"),
     CommandSpec("modules", "dartlab.cli.commands.modules", "사용 가능한 데이터 모듈 목록"),
     # 에이전트 / 내보내기
@@ -51,9 +51,9 @@ HELP_EPILOG = """\
 서브커맨드 그룹
 
   데이터 조회
-    show         topic 기반 데이터 조회 (BS/IS/CF · sections · 정형 보고서)
+    show         topic 기반 데이터 조회 (BS/IS/CF · panel · 정형 보고서)
     statement    재무제표 출력 (BS/IS/CIS/CF/SCE)
-    sections     docs 수평화 sections 출력
+    sections     panel 공시 격자 출력
     profile      Company index/facts 출력
     search       종목코드/회사명 검색
     modules      사용 가능한 데이터 모듈 목록

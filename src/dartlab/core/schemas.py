@@ -1,7 +1,7 @@
 """dartlab 데이터 프레임 계약 — Pandera polars schema SSOT.
 
 Capabilities:
-    DART/EDGAR/EDINET 의 raw finance/report/docs parquet 가 *런타임 schema drift*
+    DART/EDGAR/EDINET 의 raw finance/report parquet 가 *런타임 schema drift*
     를 일으키지 않도록 컬럼 이름·필수 존재·타입을 명시. Pandera 0.31+ 의 polars
     네이티브 백엔드 사용. silent None 누락 · 의도 외 컬럼 삭제 · DART 응답 schema
     변경 같은 데이터 회귀를 *gather 끝점* 에서 즉시 차단한다.
@@ -64,7 +64,7 @@ class FinanceSchema(pa.DataFrameModel):
         >>> FinanceSchema.validate(df, lazy=True)
     Guide: raw 끝점 직후 호출 권장. 24 row 가 null 인 fixture (207940 등) 존재로
         nullable=True 정책.
-    SeeAlso: ReportSchema · DocsSchema.
+    SeeAlso: ReportSchema.
     Requires: pandera[polars] >= 0.29.
     AIContext: silent drift 차단의 1 차 방어선 — 컬럼 *이름 변경* / *삭제* 즉시 탐지.
     Raises: pandera.errors.SchemaError — 컬럼 누락.
@@ -100,8 +100,8 @@ class ReportSchema(pa.DataFrameModel):
     Returns: pandera Schema.
     Example:
         >>> ReportSchema.validate(df, lazy=True)
-    Guide: docs 와 다름 — report 는 보고서 본문 표, docs 는 첨부 (zip 압축).
-    SeeAlso: FinanceSchema · DocsSchema.
+    Guide: report 는 보고서 본문 표를 담당한다.
+    SeeAlso: FinanceSchema.
     Requires: pandera[polars] >= 0.29.
     AIContext: report 본문 키워드 검색 (BM25) 의 입력 검증.
     Raises: pandera.errors.SchemaError.
@@ -114,35 +114,6 @@ class ReportSchema(pa.DataFrameModel):
 
     class Config:
         """strict=False — DART report 의 카테고리별 추가 컬럼 허용."""
-
-        strict = False
-        coerce = False
-
-
-class DocsSchema(pa.DataFrameModel):
-    """DART docs (zip 안 HTML 섹션 텍스트) raw 계약.
-
-    Capabilities: docs fixture (005930.docs.parquet) + ZipDocsCollector 결과의
-    section 단위 핵심 컬럼 검증.
-    Args: 없음.
-    Returns: pandera Schema.
-    Example:
-        >>> DocsSchema.validate(df, lazy=True)
-    Guide: section_content 가 길어 메모리 주의 — heavy marker 부착.
-    SeeAlso: FinanceSchema · ReportSchema.
-    Requires: pandera[polars] >= 0.29.
-    AIContext: docs 본문 BM25 색인 (ngramIndex/fieldIndex) 의 입력 검증.
-    Raises: pandera.errors.SchemaError.
-    """
-
-    rcept_no: Series[str] = pa.Field(nullable=True)
-    corp_code: Series[str] = pa.Field(nullable=True)
-    corp_name: Series[str] = pa.Field(nullable=True)
-    section_title: Series[str] = pa.Field(nullable=True)
-    section_content: Series[str] = pa.Field(nullable=True)
-
-    class Config:
-        """strict=False — section_order/section_url 등 보조 컬럼 허용."""
 
         strict = False
         coerce = False
@@ -824,7 +795,6 @@ class DriftAlertSchema(pa.DataFrameModel):
 
 
 __all__ = [
-    "DocsSchema",
     "FinanceSchema",
     "ReportSchema",
     "ScanResultSchema",

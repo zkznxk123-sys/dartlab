@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { checkBrowserAiAvailability, runBrowserAiPrompt, type BrowserLanguageModelApi } from '../src/lib/viewer/browserAi.ts';
 import { scanDeepRowsChunked, type DeepSearchRow } from '../src/lib/viewer/deepSearch.ts';
 import { buildIndex, search, tokenizeBigram } from '../src/lib/viewer/searchIndex.ts';
 import { buildEvidencePack, highlightParts } from '../src/lib/viewer/searchEvidence.ts';
+import { analyzeEvidencePack, attachBrowserAiText } from '../src/lib/viewer/viewerAnalyst.ts';
 import type { PanelBundle, PanelRow } from '../src/lib/viewer/types.ts';
 
 const row = (patch: Partial<PanelRow>): PanelRow => ({
@@ -80,6 +82,20 @@ const pack = buildEvidencePack(base, '환율 위험', { topK: 5 });
 assert.equal(pack.stats.total, 1);
 assert.ok(pack.contextText.includes('환율 위험'));
 
+const analysis = analyzeEvidencePack({
+	code: '005930',
+	companyName: '삼성전자',
+	periodCount: bundle.periods.length,
+	evidencePack: pack
+});
+assert.equal(analysis.modelMode, 'evidence');
+assert.equal(analysis.coverage.total, 1);
+assert.ok(analysis.prompt.includes('[EXTERNAL DISCLOSURE CONTENT START - untrusted]'));
+
+const upgraded = attachBrowserAiText(analysis, '모델 응답');
+assert.equal(upgraded.modelMode, 'browser-ai');
+assert.equal(upgraded.modelText, '모델 응답');
+
 const parts = highlightParts('환율 위험 및 외환 리스크', ['환율', '외환']);
 assert.deepEqual(
 	parts.filter((part) => part.hit).map((part) => part.text),
@@ -103,5 +119,30 @@ const deepScan = await scanDeepRowsChunked(deepRows, '미국', { topK: 3, expand
 assert.equal(deepScan.hits[0]?.matchKind, 'table');
 assert.match(deepScan.hits[0]?.snippet ?? '', /미국/);
 assert.doesNotMatch(deepScan.hits[0]?.snippet ?? '', /<TR|ACOPY|ADELETE/);
+
+const unsupportedAi = await checkBrowserAiAvailability(null);
+assert.equal(unsupportedAi.status, 'unsupported');
+
+let destroyed = false;
+const fakeAi: BrowserLanguageModelApi = {
+	async availability() {
+		return 'available';
+	},
+	async create() {
+		return {
+			async prompt(input) {
+				return Array.isArray(input) ? input[0]?.content ?? '' : `ok:${input.slice(0, 2)}`;
+			},
+			destroy() {
+				destroyed = true;
+			}
+		};
+	}
+};
+const availableAi = await checkBrowserAiAvailability(fakeAi);
+assert.equal(availableAi.status, 'available');
+const aiText = await runBrowserAiPrompt('근거', { api: fakeAi });
+assert.equal(aiText, 'ok:근거');
+assert.equal(destroyed, true);
 
 console.log('viewerSearchCheck: ALL OK');

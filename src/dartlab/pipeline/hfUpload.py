@@ -102,7 +102,7 @@ def uploadCategoryToHf(
         ValueError: 토큰 부재.
 
     Example:
-        >>> uploadCategoryToHf("docs", changedFiles=[])  # 변경 0 → skip  # doctest: +SKIP
+        >>> uploadCategoryToHf("panel", changedFiles=[])  # 변경 0 → skip  # doctest: +SKIP
         0
     """
     from huggingface_hub import CommitOperationAdd, HfApi

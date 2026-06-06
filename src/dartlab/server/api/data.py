@@ -37,7 +37,7 @@ async def apiDataSources(code: str):
 
     hasFlags = {
         "finance": c._hasFinance,
-        "docs": c._hasDocs,
+        "panel": c._hasPanel,
         "report": c._hasReport,
     }
 
@@ -168,13 +168,13 @@ async def apiDataPreview(
 
 @router.get("/api/data/stats")
 def apiDataStats():
-    """로컬 데이터 현황 — 문서/재무 파일 수, dartlab 버전."""
+    """로컬 데이터 현황 — panel/재무 파일 수, dartlab 버전."""
     from dartlab.core.dataLoader import _dataDir
 
     stats: dict[str, Any] = {
         "version": dartlab.__version__ if hasattr(dartlab, "__version__") else "unknown",
     }
-    for category in ("docs", "finance"):
+    for category in ("panel", "finance"):
         try:
             d = _dataDir(category)
             if d.exists():

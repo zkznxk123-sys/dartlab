@@ -43,7 +43,7 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
         sector dispatch → market 별 product 텍스트 추출.
 
     Requires:
-        company.sector + (KR) listing 또는 (US) docs.sections.
+        company.sector + (KR) listing 또는 (US) EDGAR sections view.
 
     Raises:
         없음.

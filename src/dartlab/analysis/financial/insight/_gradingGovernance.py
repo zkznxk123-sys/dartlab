@@ -25,7 +25,7 @@ def _analyzeGovernanceFromSections(company: Company) -> InsightResult:
     Parameters
     ----------
     company : Company
-        기업 객체. docs.sections DataFrame 사용.
+        기업 객체. DART는 report/panel, EDGAR는 EDGAR sections view 사용.
 
     Returns
     -------
@@ -111,7 +111,7 @@ def analyzeGovernance(company: Company | None) -> InsightResult:
         rpt.majorHolder/audit/internalControl 추출 → 룰 분기 → score/maxScore 누적 → grade.
 
     Requires:
-        company.report (DART KR) 또는 company.sections (EDGAR US) 보유.
+        company.report (DART KR) 또는 EDGAR sections view 보유.
 
     Raises:
         없음 — 데이터 부재 시 'N' 등급.

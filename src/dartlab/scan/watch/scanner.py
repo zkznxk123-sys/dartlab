@@ -1,6 +1,6 @@
 """변화 감지 스캐너.
 
-단일 기업 또는 로컬 docs corpus 전체를 순회하며
+단일 기업 또는 로컬 panel corpus 전체를 순회하며
 sections diff + 중요도 스코어링을 실행한다.
 
 사용법::
@@ -10,7 +10,7 @@ sections diff + 중요도 스코어링을 실행한다.
     # 단일 기업 (Company 객체)
     result = scan_company(company)
 
-    # 시장 전체 (로컬에 있는 docs parquet 기준)
+    # 시장 전체 (로컬에 있는 panel parquet 기준)
     top = scan_market(sector="반도체", top_n=20)
 """
 
@@ -131,7 +131,7 @@ def scanCompany(
     """단일 기업의 sections diff + 중요도 스코어링.
 
     Args:
-        company: dartlab Company 객체 (docs.sections 속성 필요).
+        company: dartlab Company 객체 (panel text wide 조회 가능).
         topic: 특정 topic만 필터링 (None이면 전체).
 
     Returns:
@@ -141,23 +141,23 @@ def scanCompany(
         없음 — sections 누락 시 None 반환.
 
     Capabilities:
-        - 단일 기업 docs.sections → diff → 중요도 score 통합. topic 필터로 특정 영역 한정.
+        - 단일 기업 panel text wide → diff → 중요도 score 통합. topic 필터로 특정 영역 한정.
 
     AIContext:
         ``Company.watch()`` 의 entry. AI agent 가 "이 기업 변화" 단일 종목 질문 시 본 함수 dispatch.
 
     Guide:
-        - sections 없으면 (raw docs 미보유 종목) None — caller 가 안내.
+        - panel text 없으면 None — caller 가 안내.
 
     When:
         Company.watch() 호출 시. scanMarket 의 inner iteration.
 
     How:
-        ``docs_sections`` 추출 → topic 필터 (선택) → ``sectionsDiff`` → ``scoreChanges`` →
+        ``panelTextWide`` 추출 → topic 필터 (선택) → ``sectionsDiff`` → ``scoreChanges`` →
         ScanResult.
 
     Requires:
-        - ``Company.docs.sections`` accessor
+        - ``Company.panel`` / 내부 panel text wide helper
         - ``sectionsDiff`` · ``scoreChanges``
 
     SeeAlso:
@@ -170,24 +170,24 @@ def scanCompany(
         >>> result = scanCompany(c, topic="riskManagement")
         >>> result.topScore if result else "no diff"
     """
-    # docs.parquet 농장 은퇴 → providers.dart.sections.sectionsWide(panel 섹션 topic×period) SSOT.
-    from dartlab.providers.dart.sections import sectionsWide
+    # providers.dart.panel.text.panelTextWide(panel 섹션 topic×period) SSOT.
+    from dartlab.providers.dart.panel.text import panelTextWide
 
     stockCode = getattr(company, "stockCode", "")
-    docs_sections = sectionsWide(stockCode) if stockCode else None
-    if docs_sections is None:
+    panelSections = panelTextWide(stockCode) if stockCode else None
+    if panelSections is None:
         return None
 
-    if topic is not None and "topic" in docs_sections.columns:
-        docs_sections = docs_sections.filter(pl.col("topic") == topic)
-        if docs_sections.height == 0:
+    if topic is not None and "topic" in panelSections.columns:
+        panelSections = panelSections.filter(pl.col("topic") == topic)
+        if panelSections.height == 0:
             return None
 
-    diffResult = sectionsDiff(docs_sections)
+    diffResult = sectionsDiff(panelSections)
     if not diffResult.summaries:
         return None
 
-    scored = scoreChanges(diffResult, sections=docs_sections)
+    scored = scoreChanges(diffResult, sections=panelSections)
 
     corpName = getattr(company, "corpName", None)
 
@@ -199,8 +199,8 @@ def scanCompany(
     )
 
 
-def _listLocalDocs() -> list[str]:
-    """로컬 panel parquet 종목코드 목록 (docs.parquet 은퇴 → panel SSOT).
+def _listLocalPanel() -> list[str]:
+    """로컬 panel parquet 종목코드 목록 (panel SSOT).
 
     Returns
     -------
@@ -226,7 +226,7 @@ def scanMarket(
 ) -> pl.DataFrame:
     """시장 전체 또는 섹터별 변화 감지 스캔.
 
-    로컬에 다운로드된 docs parquet을 순회하며 각 기업의
+    로컬에 다운로드된 panel parquet을 순회하며 각 기업의
     sections diff → 중요도 스코어링을 실행한 뒤 상위 변화를 집계한다.
 
     Args:
@@ -240,7 +240,7 @@ def scanMarket(
         stockCode, corpName, topic, score, changeRate, reason 등 컬럼의 DataFrame.
 
     Raises:
-        polars.PolarsError: docs parquet 손상 시.
+        polars.PolarsError: panel parquet 손상 시.
 
     Example:
         >>> import dartlab
@@ -248,7 +248,7 @@ def scanMarket(
         >>> df.sort("score", descending=True).head()
 
     Capabilities:
-        - 로컬 docs parquet glob → 종목별 ``scanCompany`` 반복 → minScore 이상 row aggregate
+        - 로컬 panel parquet glob → 종목별 ``scanCompany`` 반복 → minScore 이상 row aggregate
           → score 내림차순 topN. sector 필터 또는 명시 stockCodes 지원.
 
     AIContext:
@@ -274,14 +274,14 @@ def scanMarket(
         - :func:`dartlab.scan.watch.scanDigest` — 본 함수 호출자
     """
     if stockCodes is None:
-        codes = _listLocalDocs()
+        codes = _listLocalPanel()
     else:
         codes = list(stockCodes)
 
     if not codes:
         from dartlab.core.messaging import emit
 
-        emit("hint:market_data_needed", category="docs", fn="digest")
+        emit("hint:market_data_needed", category="panel", fn="digest")
         return pl.DataFrame(
             schema={
                 "stockCode": pl.Utf8,

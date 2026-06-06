@@ -413,7 +413,7 @@ cases:
       - ReadSkill
       - EngineCall
     expectedSkillRefs:
-      - engines.company.sections
+      - engines.panel
     expectedRefKinds:
       - docRef
       - tableRef

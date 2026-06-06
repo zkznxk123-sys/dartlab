@@ -70,12 +70,12 @@ AAPL = "AAPL"
 _PYTEST_MEMORY_LIMIT_MB = float(os.environ.get("PYTEST_MEMORY_LIMIT_MB", str(PRESSURE_CRITICAL_MB)))
 
 
-def _has_data(code: str, category: str = "docs") -> bool:
+def _has_data(code: str, category: str = "panel") -> bool:
     return (_dataDir(category) / f"{code}.parquet").exists()
 
 
-requires_samsung = pytest.mark.skipif(not _has_data(SAMSUNG, "docs"), reason="삼성전자 docs 데이터 없음")
-requires_hyundai = pytest.mark.skipif(not _has_data(HYUNDAI, "docs"), reason="현대자동차 docs 데이터 없음")
+requires_samsung = pytest.mark.skipif(not _has_data(SAMSUNG, "panel"), reason="삼성전자 panel 데이터 없음")
+requires_hyundai = pytest.mark.skipif(not _has_data(HYUNDAI, "panel"), reason="현대자동차 panel 데이터 없음")
 requires_finance = pytest.mark.skipif(not _has_data(SAMSUNG, "finance"), reason="삼성전자 finance 데이터 없음")
 requires_report = pytest.mark.skipif(not _has_data(SAMSUNG, "report"), reason="삼성전자 report 데이터 없음")
 requires_shinhan = pytest.mark.skipif(not _has_data(SHINHAN, "finance"), reason="신한지주 finance 데이터 없음")
@@ -85,8 +85,8 @@ requires_edgar = pytest.mark.skipif(not _has_data(AAPL, "edgar"), reason="EDGAR 
 
 _DATA_SKIP_REASONS = frozenset(
     {
-        "삼성전자 docs 데이터 없음",
-        "현대자동차 docs 데이터 없음",
+        "삼성전자 panel 데이터 없음",
+        "현대자동차 panel 데이터 없음",
         "삼성전자 finance 데이터 없음",
         "삼성전자 report 데이터 없음",
         "신한지주 finance 데이터 없음",
@@ -447,8 +447,8 @@ def empty_mock_company():
 @pytest.fixture(scope="module")
 def samsung():
     """삼성전자 Company — 모듈 단위로 로드/해제."""
-    if not _has_data(SAMSUNG, "docs"):
-        pytest.skip("삼성전자 docs 데이터 없음")
+    if not _has_data(SAMSUNG, "panel"):
+        pytest.skip("삼성전자 panel 데이터 없음")
     from dartlab import Company
 
     c = Company(SAMSUNG)
@@ -473,8 +473,8 @@ def aapl():
 @pytest.fixture(scope="module")
 def samsung_with_finance():
     """삼성전자 Company (finance 데이터 필수) — 모듈 단위로 로드/해제."""
-    if not _has_data(SAMSUNG, "docs") or not _has_data(SAMSUNG, "finance"):
-        pytest.skip("삼성전자 docs/finance 데이터 없음")
+    if not _has_data(SAMSUNG, "panel") or not _has_data(SAMSUNG, "finance"):
+        pytest.skip("삼성전자 panel/finance 데이터 없음")
     from dartlab import Company
 
     c = Company(SAMSUNG)

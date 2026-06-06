@@ -34,14 +34,14 @@ class FreshnessResult:
     reportMissing: list[str] = field(default_factory=list)
 
 
-def _freshnessPath(stockCode: str, category: str = "docs") -> Path:
+def _freshnessPath(stockCode: str, category: str = "panel") -> Path:
     """freshness 사이드카 파일 경로."""
     from dartlab.core.dataLoader import _dataDir
 
     return _dataDir(category) / f"{stockCode}.freshness"
 
 
-def _isFreshnessCheckExpired(stockCode: str, category: str = "docs", *, ttlHours: int = _FRESHNESS_TTL_HOURS) -> bool:
+def _isFreshnessCheckExpired(stockCode: str, category: str = "panel", *, ttlHours: int = _FRESHNESS_TTL_HOURS) -> bool:
     """TTL 게이트: 마지막 체크로부터 ttlHours 이내면 False."""
     fp = _freshnessPath(stockCode, category)
     if not fp.exists():
@@ -50,7 +50,7 @@ def _isFreshnessCheckExpired(stockCode: str, category: str = "docs", *, ttlHours
     return ageSeconds > ttlHours * 3600
 
 
-def _saveFreshnessResult(result: FreshnessResult, category: str = "docs") -> None:
+def _saveFreshnessResult(result: FreshnessResult, category: str = "panel") -> None:
     """체크 결과를 사이드카 파일에 기록."""
     fp = _freshnessPath(result.stockCode, category)
     fp.parent.mkdir(parents=True, exist_ok=True)
@@ -65,19 +65,29 @@ def _saveFreshnessResult(result: FreshnessResult, category: str = "docs") -> Non
 
 
 def _loadLocalRceptNos(stockCode: str) -> tuple[set[str], str | None]:
-    """로컬 docs parquet에서 rcept_no 세트 + 최신 rcept_dt."""
+    """로컬 panel parquet에서 rceptNo 세트 + 최신 rcept_dt."""
     from dartlab.core.dataLoader import _dataDir
 
-    path = _dataDir("docs") / f"{stockCode}.parquet"
-    if not path.exists():
+    panelDir = _dataDir("panel")
+    flat = panelDir / f"{stockCode}.parquet"
+    nested = panelDir / stockCode
+    if flat.exists():
+        paths: str | list[str] = str(flat)
+    elif nested.exists():
+        files = sorted(str(p) for p in nested.glob("*.parquet") if not p.name.startswith("_"))
+        if not files:
+            return set(), None
+        paths = files
+    else:
         return set(), None
 
-    df = pl.scan_parquet(path).select("rcept_no", "rcept_date").unique(subset=["rcept_no"]).collect(engine="streaming")
+    df = pl.scan_parquet(paths).select(pl.col("rceptNo").alias("rcept_no")).unique().collect(engine="streaming")
     if df.is_empty():
         return set(), None
 
     rceptNos = set(df["rcept_no"].drop_nulls().to_list())
-    latestDt = df["rcept_date"].drop_nulls().max()
+    latestDates = [rn[:8] for rn in rceptNos if isinstance(rn, str) and len(rn) >= 8 and rn[:8].isdigit()]
+    latestDt = max(latestDates) if latestDates else None
     return rceptNos, latestDt
 
 
@@ -362,9 +372,11 @@ def scanMarketFreshness(
 
     # 로컬 종목 목록
     if stockCodes is None:
-        docsDir = _dataDir("docs")
-        if docsDir.exists():
-            stockCodes = [f.stem for f in docsDir.glob("*.parquet")]
+        panelDir = _dataDir("panel")
+        if panelDir.exists():
+            flatCodes = {f.stem for f in panelDir.glob("*.parquet") if not f.name.startswith("_")}
+            nestedCodes = {d.name for d in panelDir.iterdir() if d.is_dir()}
+            stockCodes = sorted(flatCodes | nestedCodes)
         else:
             stockCodes = []
 
@@ -443,7 +455,7 @@ def collectMissing(
     *,
     categories: list[str] | None = None,
 ) -> dict[str, int]:
-    """누락된 공시를 증분 수집. 기존 ZipDocsCollector/batch 인프라 활용.
+    """누락된 공시를 증분 수집. 기존 batch 인프라 활용.
 
     Args:
         stockCode: 인자.
@@ -499,27 +511,16 @@ def collectMissing(
         emit("collect:no_key")
         return {}
 
-    cats = categories or ["docs", "finance", "report"]
+    cats = categories or ["finance", "report"]
+    invalid = [cat for cat in cats if cat not in {"finance", "report"}]
+    if invalid:
+        raise ValueError(f"DART 증분 수집 카테고리는 finance/report만 지원합니다: {invalid}")
     result: dict[str, int] = {}
-
-    if "docs" in cats:
-        result["docs"] = _collectMissingDocs(stockCode)
 
     if "finance" in cats or "report" in cats:
         result.update(_collectMissingFinanceReport(stockCode, cats))
 
     return result
-
-
-def _collectMissingDocs(stockCode: str) -> int:
-    """docs 증분 수집 — ZipDocsCollector 활용."""
-    try:
-        from dartlab.gather.dart.zipCollector import ZipDocsCollector
-
-        collector = ZipDocsCollector(stockCode)
-        return collector.collect()
-    except (ValueError, KeyError, RuntimeError, OSError):
-        return 0
 
 
 def _collectMissingFinanceReport(stockCode: str, cats: list[str]) -> dict[str, int]:

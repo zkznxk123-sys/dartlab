@@ -148,11 +148,6 @@ def openDart(*args: Any, **kwargs: Any) -> Any:
     return _call("dart", "OpenDart", *args, **kwargs)
 
 
-def zipDocsCollector(*args: Any, **kwargs: Any) -> Any:
-    """ZipDocsCollector 인스턴스 생성 — gather/dart 위임. Requires: gather.dart + DART_API_KEY. Raises: ValueError. Example: >>> zipDocsCollector("005930").collect()  # doctest: +SKIP"""
-    return _call("zipCollector", "ZipDocsCollector", *args, **kwargs)
-
-
 def collectOneZip(*args: Any, **kwargs: Any) -> Any:
     """단일 공시 ZIP 다운로드+파싱 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx/ValueError. Example: >>> collectOneZip(client, rceptNo)  # doctest: +SKIP"""
     return _call("zipCollector", "_collectOneZip", *args, **kwargs)

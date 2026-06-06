@@ -264,9 +264,9 @@ from dartlab.providers.dart.accessor.financeAccessor import _FinanceAccessor
 from dartlab.providers.dart.accessor.profileAccessor import _ProfileAccessor
 from dartlab.providers.dart.accessor.reportAccessor import _ReportAccessor
 from dartlab.providers.dart.checks import (
-    _checkDartDocsFreshness,
     _ensureAllData,
     _importAndCall,
+    _isPeriodColumn,
     _shapeString,
 )
 from dartlab.providers.dart.financeMappers import (
@@ -290,7 +290,7 @@ def _getModuleRegistry() -> list[tuple[str, str, str, Any]]:
     global _MODULE_REGISTRY, _MODULE_INDEX
     if _MODULE_REGISTRY is None:
         _MODULE_REGISTRY = [
-            # finance 재무제표 — docs 농장 은퇴로 finance/ 로 relocate (XBRL 보조 docs 파싱 source).
+            # finance 재무제표 — panel-only 전환 후 finance/ 경로가 XBRL 재무 SSOT.
             ("dartlab.providers.dart.finance.statements", "statements", "재무제표", None),
         ] + [(e.modulePath, e.funcName, e.label, e.extractor) for e in _getModuleEntries()]
         _MODULE_INDEX = {entry[1]: i for i, entry in enumerate(_MODULE_REGISTRY)}
@@ -647,10 +647,10 @@ class Company:
 
     - **finance** (XBRL 정규화): BS/IS/CIS/CF/SCE, timeseries, annual, ratios
     - **report** (DART API 정형): 28개 apiType 체계, 현재 가용 항목 중심 structured disclosure
-    - **docs** (HTML 파싱): 서술형(business, mdna), K-IFRS 주석(notes), 거버넌스, 리스크 등
+    - **panel** (공시 수평화): 서술형(business, mdna), K-IFRS 주석(notes), 거버넌스, 리스크 등
 
     소스 우선순위:
-    - docs sections 수평화가 구조의 spine
+    - panel 수평화가 구조의 spine
     - finance가 숫자 재무 authoritative source
     - report가 정형 공시 authoritative source
     - Company는 이 세 source를 merged board로 제공한다
@@ -666,11 +666,11 @@ class Company:
         c.panel("CIS")                    # 포괄손익계산서
         c.panel("SCE")                    # 자본변동표
         c.panel("treasuryStock")          # 정형 공시
-        c.panel("sections")              # docs source view
+        c.panel("sections")              # panel source view
 
     Notes
     -----
-    **첫 호출 시간** — Company(stockCode) 최초 호출은 해당 종목의 docs /
+    **첫 호출 시간** — Company(stockCode) 최초 호출은 해당 종목의 panel /
     finance / report parquet 를 HuggingFace 에서 자동 다운로드한다 (총
     ~수MB ~ 수십MB). 네트워크 속도에 따라 **30~60초** 소요. 2회째부터는
     로컬 캐시 사용 — 즉시 반환.
@@ -794,7 +794,7 @@ class Company:
 
         Raises:
             ValueError: ``stockCode`` 가 KIND 매핑/parquet 어디에도 없을 때
-                (``"'X'에 해당하는 종목을 찾을 수 없음"``) 또는 docs/finance/report
+                (``"'X'에 해당하는 종목을 찾을 수 없음"``) 또는 panel/finance/report
                 parquet 셋 다 부재 시 ``emit("error:no_data", raiseAs=ValueError)``.
 
         Example:
@@ -806,16 +806,16 @@ class Company:
         SeeAlso:
             - ``nameToCode`` — 한글명 → 6 자리 코드 매핑 (ListingResolver).
             - ``__enter__`` / ``__exit__`` — context manager + OomTripwire + cleanupCache.
-            - ``_ensureAllData`` — docs/finance/report parquet 셋 verify.
+            - ``_ensureAllData`` — panel/finance/report parquet 셋 verify.
 
         Requires:
             - polars
             - dartlab.core.memory.BoundedCache (30 entry cap)
-            - dartlab.providers.dart.accessor.* (Notes/Profile/Docs/Finance/Report)
+            - dartlab.providers.dart.accessor.* (Notes/Profile/Finance/Report)
             - dartlab.core.dataLoader.loadData (corpName 추출)
 
         Capabilities:
-            - 단일 한국 상장사 facade 진입점 — docs/finance/report 통합 access.
+            - 단일 한국 상장사 facade 진입점 — panel/finance/report 통합 access.
             - lazy finance — 첫 ``c.finance.*`` 접근 시 parquet load.
             - pyodide-aware — emscripten 에선 corpName 을 stockCode 로 폴백 (네트워크 비용 회피).
 
@@ -836,20 +836,20 @@ class Company:
                 - 한글 외 다국어 회사명 (Samsung/サムスン) → KIND 미매치 → ValueError.
             OutputSchema:
                 - Company 인스턴스 — ``stockCode`` (str 6 upper) / ``corpName`` (str)
-                  / ``_cache`` (BoundedCache 30) / ``_hasDocs/_hasFinanceParquet/_hasReport`` (bool).
-                - 내부 accessor: ``_docs`` (DocsAccessor) / ``_finance`` (FinanceAccessor)
-                  / ``_report`` (ReportAccessor) / ``_profileAccessor`` / ``_notesAccessor`` (docs 있을 때만).
+                  / ``_cache`` (BoundedCache 30) / ``_hasPanel/_hasFinanceParquet/_hasReport`` (bool).
+                - 내부 accessor: ``_finance`` (FinanceAccessor)
+                  / ``_report`` (ReportAccessor) / ``_profileAccessor`` / ``_notesAccessor`` (panel 있을 때만).
             Prerequisites:
                 - KIND 룩업 캐시 또는 HuggingFace origin 다운로드 권한 (cold start 가능).
-                - ``_ensureAllData`` 가 docs/finance/report parquet 확인 — 하나라도 있으면 통과.
+                - ``_ensureAllData`` 가 panel/finance/report parquet 확인 — 하나라도 있으면 통과.
             Freshness:
                 - 초기화 wall-clock ≥ 2.0s 시 INFO log (HF cold start 추적).
-                - docs freshness 는 ``_checkDartDocsFreshness`` 가 trailing date 와 비교 후
+                - panel freshness 는 ``_checkDartDocsFreshness`` 가 trailing date 와 비교 후
                   stale 시 ``_freshnessResult`` 에 warning record.
                 - KIND 매핑은 ListingResolver TTL (일 단위).
             Dataflow:
                 - stockCode (raw) → ``nameToCode`` (회사명 path) → 6 자리 정규화
-                - → ``_ensureAllData`` (docs/finance/report parquet existence check)
+                - → ``_ensureAllData`` (panel/finance/report parquet existence check)
                 - → BoundedCache(30) + 5 accessor 인스턴스화 → Company.
             TargetMarkets:
                 - KR (DART) — KOSPI/KOSDAQ/KONEX 등록 종목 한정. 비상장/외국주 X.
@@ -871,10 +871,8 @@ class Company:
         self._cache: BoundedCache = BoundedCache(maxEntries=30)
 
         _dataStatus = _ensureAllData(self.stockCode)
-        self._hasDocs = _dataStatus.get("docs", False)
+        self._hasPanel = _dataStatus.get("panel", False)
         self._freshnessResult = None
-        if self._hasDocs:
-            self._freshnessResult = _checkDartDocsFreshness(self.stockCode, "docs")
         self._hasFinanceParquet = _dataStatus.get("finance", False)
         self._hasReport = _dataStatus.get("report", False)
 
@@ -884,29 +882,26 @@ class Company:
         if corpName:
             self.corpName = corpName
         elif sys.platform == "emscripten":
-            # pyodide: docs 선행 fetch 회피 — 사용자가 요청한 카테고리만 lazy fetch.
-            # 진짜 corpName 이 필요하면 show/select 가 나중에 docs 를 가져옴.
+            # pyodide: panel 선행 fetch 회피 — 사용자가 요청한 카테고리만 lazy fetch.
+            # 진짜 corpName 이 필요하면 show/select 가 나중에 panel 을 가져옴.
             self.corpName = self.stockCode
-        elif self._hasDocs:
-            df = loadData(self.stockCode, category="docs", columns=["corp_name"])
-            self.corpName = extractCorpName(df)
         else:
             self.corpName = self.stockCode
 
         # finance는 lazy — 첫 접근 시 _ensureFinanceLoaded()에서 검증
         self._financeChecked = False
 
-        if not self._hasDocs and not self._hasFinanceParquet and not self._hasReport:
+        if not self._hasPanel and not self._hasFinanceParquet and not self._hasReport:
             from dartlab.core.messaging import emit
 
             emit("error:no_data", stockCode=self.stockCode, raiseAs=ValueError)
 
         self._hintedKeys: set[str] = set()  # 동일 안내 반복 방지
 
-        self._notesAccessor = Notes(self) if self._hasDocs else None
+        self._notesAccessor = Notes(self) if self._hasPanel else None
         # public namespace 모두 제거 (P3a/b/c/d)
         self._profileAccessor = _ProfileAccessor(self)
-        # private 백엔드 — 내부 compute 전용 (story/credit/valuation 등). docs accessor 은퇴(농장 제거).
+        # private 백엔드 — 내부 compute 전용 (story/credit/valuation 등). panel-only로 docs accessor 은퇴.
         self._finance = _FinanceAccessor(self)
         self._report = _ReportAccessor(self)
 
@@ -943,7 +938,7 @@ class Company:
         """
         return self._report
 
-    def _hintOnce(self, key: str, prop: str, category: str = "docs") -> None:
+    def _hintOnce(self, key: str, prop: str, category: str = "panel") -> None:
         """동일 안내를 세션 내 1회만 출력."""
         if key in self._hintedKeys:
             return
@@ -1121,7 +1116,7 @@ class Company:
     def topicSummaries(self) -> dict[str, str]:
         """토픽별 요약 dict — AI가 경로 탐색에 사용.
 
-        각 docs topic의 최신 기간 첫 텍스트에서 200자 요약을 추출한다.
+        각 panel text topic의 최신 기간 첫 텍스트에서 200자 요약을 추출한다.
         finance topic은 고정 설명을 반환한다.
 
         Returns
@@ -1139,14 +1134,14 @@ class Company:
         SeeAlso:
             - ``topics`` — DataFrame 카탈로그.
             - ``index`` — topic 메타 보드.
-            - ``mapSectionTitle`` — sections title 정규화 매핑.
+            - ``panel`` — 공시 본문/표 원본 격자.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - finance 6 topic 은 고정 한국어 설명 + docs topic 은 최신 사업보고서 첫 200 자 요약 합산.
+            - finance 6 topic 은 고정 한국어 설명 + panel text topic 은 최신 본문 첫 200 자 요약 합산.
               AI 가 topic 라우팅 결정 시 (어느 topic 사용자 질문에 해당?) 의 origin.
 
         Guide:
@@ -1162,11 +1157,11 @@ class Company:
             OutputSchema:
                 - dict[str, str] — topic 이름 → 한국어 요약 (≤ 200 자).
             Prerequisites:
-                - 최신 사업보고서 docs (선택) + finance topic 카탈로그.
+                - panel text (선택) + finance topic 카탈로그.
             Freshness:
                 - 인스턴스 cache — 동일 인스턴스 lifetime 동안 고정.
             Dataflow:
-                - finance summaries (고정) + docs latest report 200 자 합산.
+                - finance summaries (고정) + panel latest text 200 자 합산.
             TargetMarkets:
                 - KR.
         """
@@ -1187,43 +1182,29 @@ class Company:
         }
         summaries.update(_FINANCE_SUMMARIES)
 
-        # docs topic 요약 — 최신 기간 첫 텍스트 200자
-        if self._hasDocs:
-            raw = loadData(
-                self.stockCode,
-                category="docs",
-                sinceYear=2016,
-                columns=["year", "report_type", "section_order", "section_title", "section_content"],
+        # panel topic 요약 — 최신 기간 첫 텍스트 200자
+        textWide = self._panelTextWide() if self._hasPanel else None
+        if textWide is not None and not textWide.is_empty():
+            periodCols = sorted(
+                [c for c in textWide.columns if _isPeriodColumn(c)],
+                reverse=True,
             )
-            if raw is not None and not raw.is_empty() and "section_content" in raw.columns:
-                from dartlab.providers._common.reportSelector import selectReport
-                from dartlab.providers.dart.sectionTopic import mapSectionTitle
-
-                # 최신 연도의 사업보고서에서 추출
-                years = sorted(
-                    {str(y) for y in raw["year"].drop_nulls().to_list()},
-                    reverse=True,
-                )
-                for year in years:
-                    report = selectReport(raw, year, reportKind="annual")
-                    if isEmptyDf(report):
+            topicCol = "topic" if "topic" in textWide.columns else "sectionLeaf"
+            if topicCol in textWide.columns and periodCols:
+                seen: set[str] = set()
+                for row in textWide.iter_rows(named=True):
+                    topic = str(row.get(topicCol) or "").strip()
+                    if not topic or topic in seen or topic in summaries:
                         continue
-                    scoped = report.filter(pl.col("section_content").is_not_null()).sort("section_order")
-                    seen: set[str] = set()
-                    for row in scoped.iter_rows(named=True):
-                        rawTitle = str(row.get("section_title") or "").strip()
-                        topic = mapSectionTitle(rawTitle)
-                        if not topic or topic in seen or topic in summaries:
-                            continue
-                        seen.add(topic)
-                        content = str(row.get("section_content") or "").strip()
+                    for periodCol in periodCols:
+                        content = str(row.get(periodCol) or "").strip()
                         if not content:
                             continue
-                        # 첫 200자 (줄바꿈 → 공백)
                         preview = content.replace("\n", " ").replace("  ", " ")[:200].strip()
                         if preview:
                             summaries[topic] = preview
-                    break  # 최신 연도만
+                            seen.add(topic)
+                        break
 
         self._cache[cacheKey] = summaries
         return summaries
@@ -1238,7 +1219,7 @@ class Company:
 
     def _callModule(self, name: str, **kwargs) -> Any:
         """모듈 호출 + 캐싱. Notes에서도 사용."""
-        if not self._hasDocs:
+        if not self._hasPanel:
             return None
         cacheKey = f"{name}:{sorted(kwargs.items())}" if kwargs else name
         if cacheKey in self._cache:
@@ -1436,11 +1417,11 @@ class Company:
         """로컬에 보유한 전체 종목 인덱스.
 
         Capabilities:
-            - 로컬 데이터 현황 (종목별 docs/finance/report 보유 여부)
+            - 로컬 데이터 현황 (종목별 panel/finance/report 보유 여부)
             - 최종 업데이트 일시
 
         Returns:
-            pl.DataFrame — 종목코드, 회사명, docs/finance/report 유무, 최종일시.
+            pl.DataFrame — 종목코드, 회사명, panel/finance/report 유무, 최종일시.
 
         Raises:
             없음.
@@ -1453,7 +1434,7 @@ class Company:
                 - 전체 status DataFrame LLM 컨텍스트 → 수천 row.
                 - 보유 == 최신 가정 X — update() 미실행 시 stale 가능.
             OutputSchema:
-                - pl.DataFrame [stockCode, corpName, docs:bool, finance:bool, report:bool, lastUpdated].
+                - pl.DataFrame [stockCode, corpName, panel:bool, finance:bool, report:bool, lastUpdated].
             Prerequisites:
                 - 로컬 data/ 디렉토리 인덱스 build.
             Freshness:
@@ -1489,7 +1470,7 @@ class Company:
             - update: 누락 공시 증분 수집
 
         Requires:
-            데이터: docs (자동 다운로드)
+            데이터: panel (자동 다운로드)
 
         LLM Specifications:
             AntiPatterns:
@@ -1788,60 +1769,6 @@ class Company:
     # ── 원본 데이터 (property) ──
 
     @property
-    def rawDocs(self) -> pl.DataFrame | None:
-        """공시 문서 원본 parquet 전체 (가공 전).
-
-        Capabilities:
-            - HuggingFace docs 카테고리 원본 데이터 직접 접근
-            - 가공/정규화 이전 상태 그대로 반환
-
-        Returns:
-            pl.DataFrame | None -- 원본 docs parquet. 데이터 없으면 None.
-
-        Requires:
-            데이터: HuggingFace docs parquet (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.rawDocs              # 삼성전자 공시 문서 원본
-            c.rawDocs.columns      # 컬럼 목록 확인
-
-        AIContext:
-            - 원본 데이터 구조 파악 — 파싱 전 상태로 디버깅/검증에 활용
-
-        Guide:
-            - "원본 공시 데이터 보여줘" → c.rawDocs
-            - "가공 전 데이터 확인" → c.rawDocs
-
-        SeeAlso:
-            - sections: docs 가공 후 topic x period 통합 지도
-            - rawFinance: 재무제표 원본 데이터
-            - rawReport: 정기보고서 원본 데이터
-
-        LLM Specifications:
-            AntiPatterns:
-                - 분석 답변에 raw parquet 직접 인용 (sections / show 가공본 우선)
-                - 메모리 부담 큼 — 매 호출마다 호출 X (캐시)
-            OutputSchema:
-                - HuggingFace docs parquet 원본 — 컬럼 구조는 dataset 별로 다름
-            Freshness:
-                HuggingFace parquet 다운로드 시점.
-
-        Raises:
-            없음.
-        """
-        if not self._hasDocs:
-            self._hintOnce("rawDocs", "rawDocs", "docs")
-            return None
-        cacheKey = "_rawDocs"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        df = loadData(self.stockCode, category="docs")
-        self._cache[cacheKey] = df
-        return df
-
-    @property
     def rawFinance(self) -> pl.DataFrame | None:
         """재무제표 원본 parquet 전체 (가공 전).
 
@@ -1871,7 +1798,7 @@ class Company:
         SeeAlso:
             - BS: 가공된 재무상태표
             - IS: 가공된 손익계산서
-            - rawDocs: 공시 문서 원본
+            - panel: 공시 본문/표 원본 격자
 
         LLM Specifications:
             AntiPatterns:
@@ -1923,7 +1850,7 @@ class Company:
             - "정기보고서 원본 확인" → c.rawReport
 
         SeeAlso:
-            - rawDocs: 공시 문서 원본
+            - panel: 공시 본문/표 원본 격자
             - rawFinance: 재무제표 원본
             - show: 가공된 topic 데이터 조회
 
@@ -2016,72 +1943,11 @@ class Company:
     # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
     # 사용자는 c.panel("IS") / c.panel("IS", freq="Y", scope="separate") 사용.
 
-    @property
-    def sections(self) -> pl.DataFrame | None:
-        """sections — docs + finance + report 통합 지도.
+    def _panelTextWide(self) -> pl.DataFrame | None:
+        """panel text wide view for internal catalog/diff/trace consumers."""
+        from dartlab.providers.dart.panel.text import panelTextWide
 
-        plan snazzy-wibbling-origami PR-2a 이후: ``data/dart/sections/{code}/{period}.parquet``
-        artifact 가 있으면 *mmap parquet read + lazy pivot* 으로 콜드 1s 내 완료
-        (현재 0.1s 실측). artifact 부재 시 옛 ``buildSections`` 런타임 빌드 fallback —
-        회귀 0.
-
-        ⚠️ artifact fallback path 진입 시 (HF artifact 미다운로드 환경) 전체 docs +
-        finance + report 통합 build → 메모리 200~500MB. 특정 topic만 필요하면 show(topic) 사용.
-
-        docs 수평화 위에 finance/report를 같은 topic 안에 끼워넣는다.
-        - docs에 있는 topic (dividend 등) → docs 블록 뒤에 report 행 append
-        - docs에 없는 topic (BS, auditContract 등) → 해당 chapter에 독립 삽입
-
-        Capabilities:
-            - topic × period 수평화 통합 DataFrame
-            - docs/finance/report 3-source 병합
-            - show(topic)/trace(topic)/diff() 의 근간 데이터
-
-        AIContext:
-            - 전체 지도가 필요할 때만 사용. 개별 topic은 show(topic) 추천
-            - 메모리 부하가 크므로 AI 코드에서 직접 접근 지양
-
-        Guide:
-            - "이 회사 전체 데이터 지도" → c.sections
-            - "어떤 topic이 있어?" → c.topics (경량)
-
-        SeeAlso:
-            - topics: sections 기반 topic 요약 (더 간결)
-            - show: 특정 topic 데이터 조회
-            - index: 전체 구조 메타데이터 목차
-
-        Returns:
-            pl.DataFrame — chapter | topic | period | source | ... 또는 None.
-
-        Requires:
-            데이터: docs (필수), finance/report (선택, 자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.sections  # 전체 sections 지도
-
-        LLM Specifications:
-            AntiPatterns:
-                - 단일 topic 만 필요한데 sections 호출 (메모리 폭주 — show(topic) 사용)
-                - sections 결과를 캐시 안 하고 반복 호출 (re-build 비용 큼)
-            OutputSchema:
-                - chapter : str — 장 이름
-                - topic : str — topic 식별자
-                - period : str — 기간
-                - source : str — docs / finance / report
-            Freshness:
-                docs/finance/report 3 source 각각의 최신 시점. c.update() 시점.
-
-        Raises:
-            없음.
-        """
-        # docs.parquet/sections artifact 농장 은퇴 → providers.dart.sections.sectionsWide(panel 섹션
-        # topic×period) SSOT. chapter/sectionLeaf/topic/source + period 컬럼 — dataDispatcher
-        # (chapter/sectionLeaf) + diff/keywordTrend(topic) 양쪽 정합. sectionsWide 가 태그 strip.
-        from dartlab.providers.dart.sections import sectionsWide
-
-        return sectionsWide(self.stockCode)
+        return panelTextWide(self.stockCode)
 
     # docs profile 농장(docsProfileBuilder) 은퇴 — chapter/label 메타는 panel section 카탈로그가 표면.
     # 하위호환 graceful stub: profileTable=None, chapterMap={}, chapter="", label=topic 그대로.
@@ -2221,11 +2087,11 @@ class Company:
         Capabilities:
             - 120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)
             - 기간 / 주기 / 범위 / 블록 / 세로뷰 모두 파라미터 토글
-            - docs / finance / report 3 source 자동 통합
+            - panel / finance / report 3 source 자동 통합
 
         Args:
             topic: topic 이름. ``"BS"`` ``"IS"`` ``"CF"`` ``"CIS"`` ``"SCE"`` ``"ratios"``
-                같은 finance topic 또는 ``"dividend"`` ``"companyOverview"`` 같은 docs/report
+                같은 finance topic 또는 ``"dividend"`` ``"companyOverview"`` 같은 panel/report
                 topic. 주요주주/최대주주 topic은 ``"majorHolder"`` 이며
                 ``"majorShareholder"`` 가 아니다. 전체 목록은 ``c.topics``.
             block: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).
@@ -2258,7 +2124,7 @@ class Company:
             데이터 없으면 None.
 
         Requires:
-            데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.
+            데이터: panel (자동 다운로드). finance topic 은 finance parquet 도 필요.
 
         AIContext:
             - 120+ topic 단일 접근점 — LLM 이 데이터 조회 핵심 도구
@@ -2443,7 +2309,7 @@ class Company:
                 "필터링할 항목을 1개 이상 전달하세요. 예: c.select('IS', ['매출액'])"
             )
 
-        # _showImpl 은 finance 통계표만 반환(공개 show + docs 농장 은퇴) — block-index docs 경로 소멸.
+        # _showImpl 은 finance 통계표만 반환(공개 show + panel-only) — block-index 경로 소멸.
         filtered = selectFromShow(df, indList, colList)
         if filtered is None:
             if not strict:
@@ -2474,10 +2340,10 @@ class Company:
         )
 
     def trace(self, topic: str, period: str | None = None) -> dict[str, Any] | None:
-        """topic 데이터의 출처 (docs/finance/report) 와 선택 근거 추적.
+        """topic 데이터의 출처 (panel/finance/report) 와 선택 근거 추적.
 
         Capabilities:
-            - topic 별 데이터 출처 확인 (docs, finance, report)
+            - topic 별 데이터 출처 확인 (panel, finance, report)
             - 출처 선택 이유 (우선순위, fallback 경로)
             - 각 출처별 데이터 행 수, 기간 수, 커버리지
 
@@ -2493,7 +2359,7 @@ class Company:
             없음 (데이터 부재 시 None 반환).
 
         Requires:
-            데이터: docs + finance + report (보유한 것만 추적)
+            데이터: panel + finance + report (보유한 것만 추적)
 
         Example:
             >>> c.trace("BS")           # 재무상태표 출처
@@ -2519,24 +2385,24 @@ class Company:
                 - dict {topic, period, primarySource, fallbackSources, selectedPayloadRef,
                   availableSources:list, whySelected, template?, rowCount?, yearCount?, coverage?} 또는 None.
             Prerequisites:
-                - docs/finance/report origin 중 최소 1 보유.
+                - panel/finance/report origin 중 최소 1 보유.
             Freshness:
-                - 호출 시점 (sections + finance index 기준).
+                - 호출 시점 (panel + finance index 기준).
             Dataflow:
-                - topic → resolveTopic → ratios/finance/docs 분기 → source priority 결정 → 본 dict.
+                - topic → resolveTopic → ratios/finance/panel 분기 → source priority 결정 → 본 dict.
             TargetMarkets:
                 - KR (DART provenance).
         """
         topic = _resolveTopic(topic)
-        if topic == "docsStatus" and not self._hasDocs:
+        if topic == "panelStatus" and not self._hasPanel:
             return {
                 "topic": topic,
                 "period": period,
-                "primarySource": "docs",
+                "primarySource": "panel",
                 "fallbackSources": [],
                 "selectedPayloadRef": None,
                 "availableSources": [],
-                "whySelected": "docs unavailable",
+                "whySelected": "panel unavailable",
             }
         if topic == "ratios":
             ratioSeries = self._ratioSeries()
@@ -2609,7 +2475,7 @@ class Company:
             pl.DataFrame | None — 변경 요약, 히스토리, 또는 줄 단위 diff.
 
         Requires:
-            데이터: docs (2개 이상 기간 필요)
+            데이터: panel (2개 이상 기간 필요)
 
         Example::
 
@@ -2637,30 +2503,30 @@ class Company:
         LLM Specifications:
             AntiPatterns:
                 - 줄 단위 diff (3 인자) 결과를 그대로 LLM → 거대 본문 토큰 폭증. 변경 줄만.
-                - period 형식 변형 ("2023Q4" vs "2023") → sections 컬럼명 매칭 X.
+                - period 형식 변형 ("2023Q4" vs "2023") → panel text 컬럼명 매칭 X.
             OutputSchema:
                 - 호출 모드별 — (1) 전체 요약 (2) topic 히스토리 (3) 줄 단위 diff DataFrame.
             Prerequisites:
-                - docs.sections (2 기간 이상).
+                - panel text wide (2 기간 이상).
             Freshness:
-                - sections 갱신 시점.
+                - panel 갱신 시점.
             Dataflow:
-                - docs.sections → 모드 별 diff (summary/history/lineDiff) → 본 함수.
+                - panel text wide → 모드 별 diff (summary/history/lineDiff) → 본 함수.
             TargetMarkets:
                 - KR (DART 정기보고서 변경).
         """
         if topic is not None:
             topic = _resolveTopic(topic)
-        # docs.parquet 농장 은퇴 → providers.dart.sections.sectionsWide(panel 섹션 topic×period) SSOT.
+        # panel 섹션 topic×period text wide SSOT.
         from dartlab.providers._common.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
             topicHistoryDataFrame,
         )
-        from dartlab.providers.dart.sections import sectionsWide
+        from dartlab.providers.dart.panel.text import panelTextWide
 
-        docsSections = sectionsWide(self.stockCode)
+        docsSections = panelTextWide(self.stockCode)
         if docsSections is None:
             return None
         if topic is not None and fromPeriod is not None and toPeriod is not None:
@@ -2691,7 +2557,7 @@ class Company:
             pl.DataFrame | None — topic x period x keyword 빈도.
 
         Requires:
-            데이터: docs (자동 다운로드)
+            데이터: panel
 
         Example::
 
@@ -2722,18 +2588,18 @@ class Company:
             OutputSchema:
                 - pl.DataFrame [topic, period, keyword, count] 또는 None.
             Prerequisites:
-                - docs.sections.
+                - panel text wide.
             Freshness:
-                - sections 갱신 시점.
+                - panel 갱신 시점.
             Dataflow:
-                - docs.sections + keywords → keywordFrequency → 본 DF.
+                - panel text wide + keywords → keywordFrequency → 본 DF.
             TargetMarkets:
                 - KR (DART 정기보고서 텍스트).
         """
         from dartlab.providers._common.diff import keywordFrequency
-        from dartlab.providers.dart.sections import sectionsWide
+        from dartlab.providers.dart.panel.text import panelTextWide
 
-        docsSections = sectionsWide(self.stockCode)
+        docsSections = panelTextWide(self.stockCode)
         if docsSections is None:
             return None
         kws = None
@@ -2818,7 +2684,7 @@ class Company:
             pl.DataFrame | None — topic, score, changeType, details 등.
 
         Requires:
-            데이터: docs (자동 다운로드)
+            데이터: panel (자동 다운로드)
 
         Example::
 
@@ -2847,7 +2713,7 @@ class Company:
             OutputSchema:
                 - pl.DataFrame [topic, score, changeType, fromPeriod, toPeriod, details] 또는 None.
             Prerequisites:
-                - docs.sections (정기보고서 본문 2 기간+).
+                - panel text wide (정기보고서 본문 2 기간+).
             Freshness:
                 - sections 갱신 시점.
             Dataflow:
@@ -3479,7 +3345,7 @@ class Company:
             ParsedSubtopicTable (df, subtopic, columns) 또는 파싱 불가 시 None
 
         Requires:
-            데이터: docs (자동 다운로드)
+            데이터: panel (자동 다운로드)
 
         Example::
 
@@ -3509,15 +3375,15 @@ class Company:
             OutputSchema:
                 - ParsedSubtopicTable {df: pl.DataFrame, subtopic: str, columns: list} 또는 None.
             Prerequisites:
-                - docs 본 회사 보유 + 해당 topic 의 markdown table 본문.
+                - panel 본 회사 보유 + 해당 topic 의 markdown table 본문.
             Freshness:
-                - docs 갱신 시점.
+                - panel 갱신 시점.
             Dataflow:
-                - docs.subtables → parseSubtopicTable(numeric) → period filter → 본 함수.
+                - panel table rows → parseSubtopicTable(numeric) → period filter → 본 함수.
             TargetMarkets:
                 - KR (DART 정기보고서 표).
         """
-        # docs subtopic markdown 표 농장 은퇴(§영구소실) — 정형 표는 panel/공통파서(sections.sectionTables)
+        # subtopic markdown 표 농장 은퇴(§영구소실) — 정형 표는 panel/공통파서(panelXmlTables)
         # 또는 c.panel raw 공시 검색 사용. 본 API 는 None 반환.
         _ = (topic, subtopic, numeric, period)
         return None
@@ -3527,7 +3393,7 @@ class Company:
         """topic별 요약 DataFrame -- 전체 데이터 지도.
 
         Capabilities:
-            - docs/finance/report 모든 source의 topic을 하나의 DataFrame으로 통합
+            - panel/finance/report 모든 source의 topic을 하나의 DataFrame으로 통합
             - chapter 순서대로 정렬, 각 topic의 블록 수/기간 수/최신 기간 표시
             - 어떤 데이터가 있는지 한눈에 파악
 
@@ -3541,14 +3407,14 @@ class Company:
 
         SeeAlso:
             - show: 특정 topic 데이터 조회
-            - sections: topic x period 전체 지도 (topics보다 상세)
+            - panel: topic x period 전체 지도 (topics보다 상세)
             - index: 전체 구조 메타데이터 목차
 
         Returns:
             pl.DataFrame -- 컬럼: order, chapter, topic, source, blocks, periods, latestPeriod
 
         Requires:
-            데이터: docs/finance/report 중 하나 이상 (자동 다운로드)
+            데이터: panel/finance/report 중 하나 이상 (자동 다운로드)
 
         Example::
 
@@ -3564,12 +3430,12 @@ class Company:
                 - order : int — chapter 순서
                 - chapter : str — 장 이름
                 - topic : str — topic 식별자 (show 호출 키)
-                - source : str — docs / finance / report
+                - source : str — panel / finance / report
                 - blocks : int — 블록 수
                 - periods : int — 기간 수
                 - latestPeriod : str — 최신 기간
             Freshness:
-                docs/finance/report 각각의 c.update() 시점.
+                panel/finance/report 각각의 c.update() 시점.
 
         Raises:
             없음.
@@ -3578,16 +3444,16 @@ class Company:
         if cacheKey in self._cache:
             return self._cache[cacheKey]
 
-        # docs topic 카탈로그 — survivor sectionsWide(panel 섹션) 에서 유도 (농장 topicManifest 은퇴).
-        sections = self.sections
+        # panel topic catalog — panel text wide 에서 유도 (docs topicManifest 은퇴).
+        textWide = self._panelTextWide()
         rows: list[dict[str, Any]] = []
         seen: set[str] = set()
-        if sections is not None and not sections.is_empty():
-            topicCol = next((c for c in ("topic", "sectionLeaf") if c in sections.columns), None)
+        if textWide is not None and not textWide.is_empty():
+            topicCol = next((c for c in ("topic", "sectionLeaf") if c in textWide.columns), None)
             metaCols = {"chapter", "sectionLeaf", "blockLeaf", "topic", "source", "disclosureKey", "scope"}
-            periodCols = [c for c in sections.columns if c not in metaCols]
+            periodCols = [c for c in textWide.columns if c not in metaCols]
             if topicCol is not None:
-                for row in sections.iter_rows(named=True):
+                for row in textWide.iter_rows(named=True):
                     topic = row.get(topicCol)
                     if not isinstance(topic, str) or not topic.strip() or topic in seen:
                         continue
@@ -3600,7 +3466,7 @@ class Company:
                             "order": len(rows),
                             "chapter": chapter,
                             "topic": topic,
-                            "source": "docs",
+                            "source": "panel",
                             "blocks": 1,
                             "periods": nPeriods,
                             "latestPeriod": None,
@@ -3658,10 +3524,10 @@ class Company:
 
     @property
     def sources(self) -> pl.DataFrame:
-        """docs/finance/report 3개 source의 가용 현황 요약.
+        """panel/finance/report 3개 source의 가용 현황 요약.
 
         Capabilities:
-            - 3개 데이터 source(docs, finance, report) 존재 여부/규모 한눈에 확인
+            - 3개 데이터 source(panel, finance, report) 존재 여부/규모 한눈에 확인
             - 각 source의 row/col 수와 shape 문자열 제공
             - 데이터 로드 전 가용성 사전 점검
 
@@ -3681,7 +3547,7 @@ class Company:
 
         Guide:
             - "데이터 뭐가 있어?" → c.sources
-            - "docs/finance/report 상태" → c.sources
+            - "panel/finance/report 상태" → c.sources
 
         SeeAlso:
             - topics: topic 단위 상세 데이터 지도
@@ -3692,20 +3558,21 @@ class Company:
                 - 매 분석마다 c.sources 호출 (캐시 — 1 회면 충분)
                 - sources 결과로 분석 결정 (가용성만 확인, 실제 분석은 show)
             OutputSchema:
-                - source : str — docs / finance / report
+                - source : str — panel / finance / report
                 - available : bool — 데이터 보유 여부
                 - rows : int | None — 행 수
                 - cols : int | None — 컬럼 수
                 - shape : str — "rows × cols" 표기
             Freshness:
-                rawDocs / rawFinance / rawReport 의 다운로드 시점 기준.
+                panel / rawFinance / rawReport 의 다운로드 시점 기준.
 
         Raises:
             없음.
         """
         rows = []
+        panel = self.panel
         for source, raw in (
-            ("docs", self.rawDocs),
+            ("panel", panel if not panel.is_empty() else None),
             ("finance", self.rawFinance),
             ("report", self.rawReport),
         ):
@@ -3725,9 +3592,9 @@ class Company:
         """현재 공개 Company 구조 인덱스 DataFrame -- 전체 데이터 목차.
 
         Capabilities:
-            - docs sections + finance + report 전체를 하나의 목차로 통합
+            - panel + finance + report 전체를 하나의 목차로 통합
             - 각 항목의 chapter, topic, label, kind, source, periods, shape, preview 제공
-            - sections 메타데이터 + 존재 확인만으로 구성 (파서 미호출, lazy)
+            - panel text 메타데이터 + 존재 확인만으로 구성 (파서 미호출, lazy)
             - viewer/렌더러가 소비하는 메타데이터 원천
 
         AIContext:
@@ -3740,7 +3607,7 @@ class Company:
 
         SeeAlso:
             - topics: topic 단위 요약 (index보다 간결)
-            - sections: 전체 sections 지도 (index의 원본)
+            - panel: 전체 topic 지도 (index의 원본)
             - profile: 통합 프로필 접근자
 
         Returns:
@@ -3750,28 +3617,28 @@ class Company:
             없음 (데이터 부재 시 빈 DataFrame).
 
         Requires:
-            데이터: docs/finance/report 중 하나 이상 (자동 다운로드).
+            데이터: panel/finance/report 중 하나 이상 (자동 다운로드).
 
         Example:
             >>> c = Company("005930")
             >>> c.index                    # 전체 구조 목차
-            c.index.filter(pl.col("source") == "docs")  # docs 항목만
+            c.index.filter(pl.col("source") == "panel")  # panel 항목만
 
         LLM Specifications:
             AntiPatterns:
                 - index 결과 전체를 답변 본문에 dump (50+ 행)
-                - chapter / kind 추측 (docs / finance / report 중 source 컬럼 확인 후)
+                - chapter / kind 추측 (panel / finance / report 중 source 컬럼 확인 후)
             OutputSchema:
                 - chapter : str — I / II / III ... (보고서 장)
                 - topic : str — topic 식별자 (show 호출 키)
                 - label : str — 사람용 라벨
                 - kind : str — table / text / notice
-                - source : str — docs / finance / report
+                - source : str — panel / finance / report
                 - periods : str — 보유 기간 표기
                 - shape : str — "rows × cols"
                 - preview : str — 첫 줄 미리보기
             Freshness:
-                docs / finance / report 다운로드 시점.
+                panel / finance / report 다운로드 시점.
         """
         cacheKey = "_lazyIndex"
         if cacheKey in self._cache:
@@ -3779,14 +3646,14 @@ class Company:
 
         rows: list[dict[str, Any]] = []
 
-        if not self._hasDocs:
+        if not self._hasPanel:
             rows.append(
                 {
                     "chapter": "안내",
-                    "topic": "docsStatus",
+                    "topic": "panelStatus",
                     "label": "사업보고서",
                     "kind": "notice",
-                    "source": "docs",
+                    "source": "panel",
                     "periods": "-",
                     "shape": "missing",
                     "preview": "현재 사업보고서 부재",
@@ -3794,7 +3661,7 @@ class Company:
                 }
             )
 
-        # docs 농장(docsIndexBuilder) 은퇴 — survivor c.topics(finance+panel section 카탈로그)에서 index 행 유도.
+        # panel 카탈로그에서 index 행 유도.
         seenTopics = {r["topic"] for r in rows}
         topicsDf = self.topics
         if topicsDf is not None and not topicsDf.is_empty():
@@ -4203,7 +4070,7 @@ class Company:
             internalControl : str — 내부회계관리제도 검토의견
 
         Requires:
-            데이터: docs + report (자동 다운로드)
+            데이터: panel + report (자동 다운로드)
 
         Example::
 
@@ -5375,7 +5242,7 @@ class Company:
 
         Capabilities:
             - 로컬 서버 기반 공시 뷰어 실행
-            - 브라우저에서 sections/index 탐색
+            - 브라우저에서 panel/index 탐색
 
         Args:
             port: 로컬 서버 포트. 기본 8400.
@@ -5384,7 +5251,7 @@ class Company:
             None
 
         Requires:
-            데이터: HuggingFace docs parquet (자동 다운로드)
+            데이터: panel parquet (자동 다운로드)
 
         Example::
 
@@ -5400,7 +5267,7 @@ class Company:
 
         SeeAlso:
             - index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)
-            - sections: 뷰어의 원본 데이터
+            - panel: 뷰어의 원본 데이터
 
         Raises:
             없음.

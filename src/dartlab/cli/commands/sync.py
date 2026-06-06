@@ -2,11 +2,10 @@
 
 로컬에서 한 명령으로 수집 — CI 워크플로(`python -m dartlab.pipeline`)와 동일 진입점.
 
-    dartlab sync                  # recent set(finance,report,docs,sections,panel)
+    dartlab sync                  # recent set(finance,report,panel)
     dartlab sync finance          # finance 증분 + HF push
     dartlab sync panel --mode online
     dartlab sync --list
-    dartlab sync docs --no-upload
 """
 
 from __future__ import annotations

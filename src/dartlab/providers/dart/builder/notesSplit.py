@@ -208,7 +208,7 @@ def splitNotesSections(df: pl.DataFrame) -> pl.DataFrame:
     """sections frame 의 notes row 들을 sub-topic 으로 분할.
 
     Args:
-        df: sections frame (``c.sections`` 의 raw — chapter/topic/blockOrder/period... 컬럼).
+        df: panel text frame (chapter/topic/blockOrder/period... 컬럼).
 
     Returns:
         분할 후 sections frame. notes 외 topic 은 변경 0. parent topic key (예
@@ -219,7 +219,7 @@ def splitNotesSections(df: pl.DataFrame) -> pl.DataFrame:
         없음.
 
     Example:
-        >>> splitNotesSections(c.sections)  # financialNotes 113 rows → 31 sub-topic 으로 분할
+        >>> splitNotesSections(c._panelTextWide())  # financialNotes 113 rows → 31 sub-topic 으로 분할
 
     동작 보장:
         - 분할 대상 topic 에서 ``N.`` 헤딩 추출 실패 (예 옛 보고서 형식) row 는

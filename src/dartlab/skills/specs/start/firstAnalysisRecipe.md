@@ -30,9 +30,9 @@ recipeSteps:
   - skillId: start.installUv
     note: uv 설치 → 가상환경 → uv add dartlab → import 검증.
   - skillId: start.quickStart
-    note: Company / sections / show / scan / ask 8 단계 walkthrough.
+    note: Company / topics/panel / scan / ask 8 단계 walkthrough.
   - skillId: engines.company
-    note: 단일 기업 facade 로 sections · show · trace · diff · 하위 엔진 호출.
+    note: 단일 기업 facade 로 topics · panel · trace · diff · 하위 엔진 호출.
   - skillId: engines.analysis
     note: 수익성 · 성장성 · 안정성 · 가치평가 22 축 중 선택해 분석.
 sourceRefs:

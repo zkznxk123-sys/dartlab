@@ -64,7 +64,7 @@ class _DartBuildProvider:
         return korColumns(*args, **kwargs)
 
     def xmlChunkToMixed(self, *args, **kwargs):
-        """xml chunk → mixed string (docs.sections.xmlAdapter)."""
+        """xml chunk → mixed string (panel XML adapter)."""
         from dartlab.providers.dart.sectionXml import xmlChunkToMixed
 
         return xmlChunkToMixed(*args, **kwargs)

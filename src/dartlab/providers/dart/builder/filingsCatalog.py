@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
-from dartlab.core.dataLoader import DART_VIEWER, _dataDir, loadData
+from dartlab.core.dataLoader import DART_VIEWER
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers._common.filingHelpers import (
     filingRecord,
@@ -27,6 +27,7 @@ from dartlab.providers._common.filingHelpers import (
     resolveDateWindow,
     truncateText,
 )
+from dartlab.providers.dart.panel.text import panelTextRows
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -34,26 +35,37 @@ if TYPE_CHECKING:
 
 _RCEPT_NO_PATTERN = re.compile(r"[?&]rcpNo=(\d{14})")
 
+_FILINGS_SCHEMA = {
+    "year": pl.Utf8,
+    "rceptDate": pl.Utf8,
+    "rceptNo": pl.Utf8,
+    "reportType": pl.Utf8,
+    "dartUrl": pl.Utf8,
+}
 
-# ── filings (로컬 parquet) ───────────────────────────────────────
+
+def _emptyFilingsFrame() -> pl.DataFrame:
+    return pl.DataFrame(schema=_FILINGS_SCHEMA)
+
+
+# ── filings (panel provenance) ───────────────────────────────────
 
 
 def buildFilings(company: Company) -> pl.DataFrame | None:
-    """종목의 공시 문서 목록 + DART 뷰어 링크 (로컬 parquet 기반).
+    """종목의 보유 공시 목록 + DART 뷰어 링크 (panel 기반).
 
     Capabilities:
-        - ``loadData(stockCode)`` 로 docs parquet 로드 → 공시 메타 컬럼만 추출.
-        - ``rcept_no`` 기준 unique (한 보고서당 1 row).
-        - DART 뷰어 URL 자동 조합 (``DART_VIEWER`` + rcept_no).
+        - panel row 의 ``rceptNo`` 기준 unique (한 보고서당 1 row).
+        - DART 뷰어 URL 자동 조합 (``DART_VIEWER`` + rceptNo).
         - ``year``/``rceptDate`` 내림차순 정렬 (최신이 먼저).
-        - docs parquet 부재 (``_hasDocs=False``) → 빈 schema DataFrame.
+        - panel artifact 부재 (``_hasPanel=False``) → 빈 schema DataFrame.
 
     Args:
         company: Company 인스턴스 (Company facade 의 self).
 
     Returns:
         pl.DataFrame — 컬럼 ``year`` (Utf8) / ``rceptDate`` (Utf8) / ``rceptNo`` (Utf8) /
-        ``reportType`` (Utf8) / ``dartUrl`` (Utf8). docs 부재 시 빈 schema DataFrame.
+        ``reportType`` (Utf8) / ``dartUrl`` (Utf8). panel 부재 시 빈 schema DataFrame.
 
     Example:
         >>> # df = buildFilings(c)
@@ -68,77 +80,67 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
         - ``buildUpdate`` — 본 함수의 누락 공시 증분 수집 자매.
         - ``buildDisclosure`` — OpenDART 직접 호출 (로컬 parquet X).
         - ``Company.filings`` — 본 함수의 facade.
-        - ``dartlab.core.dataLoader.loadData`` / ``DART_VIEWER`` — 데이터/URL source.
+        - ``dartlab.providers.dart.panel.text.panelTextRows`` / ``DART_VIEWER`` — 데이터/URL source.
 
     Requires:
         - polars — DataFrame.
-        - dartlab.core.dataLoader — loadData + DART_VIEWER 상수.
+        - dartlab.core.dataLoader — DART_VIEWER 상수.
+        - dartlab.providers.dart.panel.text — panelTextRows.
 
     AIContext:
-        Workbench "이 회사 공시 목록" / "최근 보고서" 질문 entry. 로컬 parquet 기반이라 빠름.
-        OpenDART rate limit 무관. ``_hasDocs=False`` 회사 (예 비상장/신규 종목) → 빈 결과 →
+        Workbench "이 회사 공시 목록" / "최근 보고서" 질문 entry. 로컬 panel 기반이라 빠름.
+        OpenDART rate limit 무관. ``_hasPanel=False`` 회사 (예 비상장/신규 종목) → 빈 결과 →
         caller 는 ``buildDisclosure`` fallback.
 
     LLM Specifications:
         AntiPatterns:
-            - docs parquet 결락 → 빈 schema. caller 는 height 0 검사 후 buildDisclosure 시도.
-            - rcept_no 중복 (gather 버그) → unique 로 자동 1 개만 유지.
+            - panel artifact 결락 → 빈 schema. caller 는 height 0 검사 후 buildDisclosure 시도.
+            - rceptNo 중복 → unique 로 자동 1 개만 유지.
         OutputSchema:
             - 컬럼 5 (year/rceptDate/rceptNo/reportType/dartUrl).
             - 정렬: year + rceptDate 내림차순.
         Prerequisites:
-            - gather (정기보고서 docs) 가 stockCode 수집 완료.
+            - gather panel 이 stockCode 수집 완료.
         Freshness:
-            - parquet 수집 시점 의존. 본 함수 무상태.
+            - panel 수집 시점 의존. 본 함수 무상태.
         Dataflow:
-            - gather → parquet → loadData → 본 함수 → AI 답변.
+            - gather → panel parquet → panelTextRows → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정. EDGAR 는 ``edgar`` provider 의 동등 함수.
 
     Raises:
         없음.
     """
-    if not company._hasDocs:
-        return pl.DataFrame(
-            schema={
-                "year": pl.Utf8,
-                "rceptDate": pl.Utf8,
-                "rceptNo": pl.Utf8,
-                "reportType": pl.Utf8,
-                "dartUrl": pl.Utf8,
-            }
+    if not company._hasPanel:
+        return _emptyFilingsFrame()
+
+    df = panelTextRows(company.stockCode)
+    if df is None or df.is_empty() or "rceptNo" not in df.columns:
+        return _emptyFilingsFrame()
+
+    period = pl.col("period").cast(pl.Utf8)
+    rcept = pl.col("rceptNo").cast(pl.Utf8)
+    filings = (
+        df.select(
+            period.str.slice(0, 4).alias("year"),
+            rcept.str.slice(0, 8).alias("rceptDate"),
+            rcept.alias("rceptNo"),
+            pl.when(period.str.ends_with("Q4"))
+            .then(pl.lit("사업보고서"))
+            .when(period.str.ends_with("Q2"))
+            .then(pl.lit("반기보고서"))
+            .when(period.str.contains(r"Q[13]$"))
+            .then(pl.lit("분기보고서"))
+            .otherwise(period)
+            .alias("reportType"),
         )
-    legacyPath = _dataDir("docs") / f"{company.stockCode}.parquet"
-    if legacyPath.exists():
-        df = pl.read_parquet(str(legacyPath))
-    else:
-        df = loadData(company.stockCode)
-    if df is None or df.is_empty() or "year" not in df.columns:
-        return pl.DataFrame(
-            schema={
-                "year": pl.Utf8,
-                "rceptDate": pl.Utf8,
-                "rceptNo": pl.Utf8,
-                "reportType": pl.Utf8,
-                "dartUrl": pl.Utf8,
-            }
-        )
-    docs = (
-        df.select("year", "rcept_date", "rcept_no", "report_type")
-        .unique(subset=["rcept_no"])
-        .with_columns(
-            pl.lit(DART_VIEWER).add(pl.col("rcept_no")).alias("dartUrl"),
-        )
-        .rename(
-            {
-                "report_type": "reportType",
-                "rcept_date": "rceptDate",
-                "rcept_no": "rceptNo",
-            }
-        )
-        .sort("year", "rceptDate", descending=[True, True])
+        .filter(pl.col("rceptNo").is_not_null() & (pl.col("rceptNo") != ""))
+        .unique(subset=["rceptNo"], keep="first")
+        .with_columns((pl.lit(DART_VIEWER) + pl.col("rceptNo")).alias("dartUrl"))
+        .select(list(_FILINGS_SCHEMA))
+        .sort(["year", "rceptDate", "rceptNo"], descending=[True, True, True])
     )
-    return docs
+    return filings
 
 
 # ── update (증분 수집) ───────────────────────────────────────────
@@ -150,7 +152,7 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
     Capabilities:
         - ``openapi.freshness.collectMissing`` wrapper — 로컬 parquet 와 OpenDART 공시 목록 diff.
         - 누락 row 만 fetch + parquet append.
-        - categories 로 영역 한정 (예 docs / report / 재무 / executive 등).
+        - categories 로 영역 한정 (finance / report). panel 은 별도 builder/pipeline 경로.
 
     Args:
         company: Company 인스턴스.
@@ -160,11 +162,11 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
         dict[str, int] — ``{category: 수집된 row 수}``.
 
     Example:
-        >>> # buildUpdate(c, categories=["docs"])
-        >>> # {"docs": 3}
+        >>> # buildUpdate(c, categories=["finance"])
+        >>> # {"finance": 3}
 
     Guide:
-        - "삼성전자 최신 공시 따라가기" → ``c.update(categories=["docs"])``.
+        - "삼성전자 최신 재무/정형 공시 따라가기" → ``c.update(categories=["finance", "report"])``.
         - "전체 영역 갱신" → ``c.update()``.
         - 정기 batch update → 운영자가 gather 스크립트 사용 (본 함수는 1 종목 단위).
 
@@ -180,7 +182,7 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
 
     AIContext:
         AI 가 "이 회사 어제자 공시 있냐" 같은 freshness 질문 받으면 본 함수 우선 호출 →
-        buildFilings 재조회. category 자동 지정 ("docs") 권장.
+        buildFilings 재조회. 본문 panel 갱신은 panel builder/pipeline 경로가 담당.
 
     LLM Specifications:
         AntiPatterns:

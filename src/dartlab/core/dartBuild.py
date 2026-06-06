@@ -185,7 +185,7 @@ def korColumns(*args: Any, **kwargs: Any) -> Any:
 def xmlChunkToMixed(*args: Any, **kwargs: Any) -> Any:
     """xml chunk → markdown/HTML mixed string — providers/dart/build 위임.
 
-    Requires: ``dartlab.providers.dart.build`` (docs.sections.xmlAdapter).
+    Requires: ``dartlab.providers.dart.build`` (panel XML adapter).
     Raises: RuntimeError — 미등록.
     Example:
         >>> xmlChunkToMixed(chunk)  # doctest: +SKIP

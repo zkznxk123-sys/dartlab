@@ -14,6 +14,7 @@ from dartlab.core.dataConfig import (
     DATA_RELEASES,
     hfBaseUrl,
     repoFor,
+    resolveDataCategory,
 )
 
 _IS_PYODIDE = sys.platform == "emscripten"
@@ -95,7 +96,8 @@ def _socketTimeout(seconds: int = _DOWNLOAD_TIMEOUT):
         socket.setdefaulttimeout(oldTimeout)
 
 
-def _dataDir(category: str = "docs") -> Path:
+def _dataDir(category: str = "panel") -> Path:
+    category = resolveDataCategory(category)
     return _getDataRoot() / DATA_RELEASES[category]["dir"]
 
 
@@ -106,7 +108,7 @@ def _downloadWithRetry(url: str, dest: Path) -> None:
     downloadWithRetry(url, dest, maxRetries=_MAX_RETRIES, socketTimeout=_socketTimeout, urlretrieve=urlretrieve)
 
 
-def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "docs") -> bool | None:
+def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "panel") -> bool | None:
     """로컬 파일이 원격보다 오래됐는지 HTTP HEAD로 확인.
 
     검증 2단계:
@@ -127,6 +129,7 @@ def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "docs
     """
     from dartlab.core.dataLoaderFreshness import checkRemoteFreshness
 
+    category = resolveDataCategory(category)
     return checkRemoteFreshness(
         stockCode,
         localPath,
@@ -136,10 +139,11 @@ def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "docs
     )
 
 
-def _saveEtag(stockCode: str, dest: Path, category: str = "docs") -> None:
+def _saveEtag(stockCode: str, dest: Path, category: str = "panel") -> None:
     """다운로드 성공 후 HF ETag를 사이드카 파일에 저장."""
     from dartlab.core.dataLoaderFreshness import saveEtag
 
+    category = resolveDataCategory(category)
     saveEtag(stockCode, dest, category, hfBaseUrl=hfBaseUrl, fetchRemoteEtag=_fetchRemoteEtag)
 
 
@@ -170,8 +174,9 @@ def _fetchRemoteEtagAndSize(url: str) -> tuple[str, int]:
     return etag, size
 
 
-def _download(stockCode: str, dest: Path, category: str = "docs") -> None:
+def _download(stockCode: str, dest: Path, category: str = "panel") -> None:
     """HuggingFace 데이터셋에서 단건 다운로드."""
+    category = resolveDataCategory(category)
     hfUrl = f"{hfBaseUrl(category)}/{stockCode}.parquet"
     _downloadWithRetry(hfUrl, dest)
     _saveEtag(stockCode, dest, category)
@@ -218,6 +223,7 @@ def _refreshFromHf(stockCode: str, path: Path, category: str) -> None:
     """ETag 비교 후 HF가 최신이면 다운로드로 갱신. 실패 시 기존 파일 유지."""
     from dartlab.core.dataLoaderFreshness import refreshFromHf
 
+    category = resolveDataCategory(category)
     refreshFromHf(
         stockCode,
         path,
@@ -243,12 +249,13 @@ def repairLocalCache(category: str = "finance", *, dryRun: bool = False) -> dict
     3. stale이면 새 코드로 다운로드 (dryRun=True면 통계만)
 
     Args:
-        category: "finance", "report", "docs" 중 하나
+        category: "finance", "report", "panel" 중 하나.
         dryRun: True면 다운로드 안 하고 통계만 반환
 
     Returns:
         {"checked": N, "stale": N, "repaired": N, "failed": N, "fresh": N}
     """
+    category = resolveDataCategory(category)
     dataDir = _dataDir(category)
     if not dataDir.exists():
         return {"checked": 0, "stale": 0, "repaired": 0, "failed": 0, "fresh": 0}
@@ -277,7 +284,7 @@ def repairLocalCache(category: str = "finance", *, dryRun: bool = False) -> dict
 
 def loadData(
     stockCode: str,
-    category: str = "docs",
+    category: str = "panel",
     *,
     sinceYear: int | None = None,
     asOf: str | None = None,
@@ -299,25 +306,6 @@ def loadData(
     if _IS_PYODIDE:
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
     from dartlab.core.memory import checkMemoryAndGc
-
-    # plan snazzy-wibbling-origami Phase 2 — docs.parquet loader 끊기.
-    # 옛 flat docs.parquet (data/dart/docs/{code}.parquet) read 0. 신규 sections artifact
-    # (element-granular) 를 section-granular 로 재구성하는 in-memory 어댑터 경유.
-    # 빌더 모드 (DARTLAB_BUILDER_MODE) 만 자기 재귀 회피 위해 우회.
-    # finance 파서 40+ 6/6 parity 검증 완료. show/select/diff/trace 는 신규 artifact
-    # 정렬에 맞춰 재배선 (Phase 3) — 옛 mapper 세분도 기준 아님.
-    if category == "docs":
-        import os as _os
-
-        if _os.environ.get("DARTLAB_BUILDER_MODE", "").strip() not in ("1", "true", "True"):
-            checkMemoryAndGc(f"loadData({stockCode},docs)")
-            # docs↔sections 합성은 providers 도메인 책임 — LoaderProvider DIP 디스패치.
-            from dartlab.core.loaders import getLoader
-
-            loader = getLoader("docs")
-            if loader is None or not hasattr(loader, "load"):
-                return pl.DataFrame()
-            return loader.load(stockCode, columns=columns, sinceYear=sinceYear, predicate=predicate)
 
     dataDir = _dataDir(category)
     path = dataDir / f"{stockCode}.parquet"
@@ -413,8 +401,6 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
     """카테고리별 로컬 parquet 보장 (최초 로드 + refresh 통합 라우터).
 
     - ``edgar`` → SEC 벌크 (companyfacts.zip) 자동 다운로드·변환, HF 미러링 없음
-    - ``docs`` → sections artifact 합성 fallback (plan snazzy-wibbling-origami PR-4b
-      docs.parquet 사용자 측 폐기) → HF docs.parquet → 일반
     - 그 외 → HF 다운로드 + ETag 기반 증분 갱신
     """
     if category == "edgar":
@@ -428,14 +414,6 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
         return
 
     if not path.exists():
-        # docs 합성은 providers 도메인 책임 — LoaderProvider DIP 로 synthesizeToPath 위임.
-        # 합성 실패(빌더 모드·artifact 부재) 시 HF docs.parquet 다운로드 fallback (core 원시기능).
-        if category == "docs":
-            from dartlab.core.loaders import getLoader
-
-            loader = getLoader("docs")
-            if loader is not None and hasattr(loader, "synthesizeToPath") and loader.synthesizeToPath(stockCode, path):
-                return
         _downloadFromHf(stockCode, path, category)
         return
 
@@ -448,6 +426,7 @@ def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     from dartlab.core.messaging import emit
     from dartlab.core.messaging import format as gfmt
 
+    category = resolveDataCategory(category)
     label = DATA_RELEASES[category]["label"]
     emit("download:start", stockCode=stockCode, label=label)
     try:
@@ -466,124 +445,8 @@ def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     emit("download:done_short", sizeStr=sizeStr)
 
 
-_HF_MAX_RETRIES = 3
-
-
-def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
-    """HuggingFace 데이터셋에서 카테고리 전체 parquet을 다운로드.
-
-    huggingface_hub의 snapshot_download를 사용하여 resume/병렬 다운로드를 지원한다.
-    중간에 끊겨도 이어받기가 가능하며, 이미 받은 파일은 자동 skip.
-
-    Args:
-        category: "docs", "finance", "report" 등.
-        forceUpdate: True면 로컬 캐시 무시하고 원격 최신 파일로 갱신.
-
-    Examples::
-
-        import dartlab
-        dartlab.downloadAll("finance")              # 재무 전체 (~600MB)
-        dartlab.downloadAll("docs")                 # 공시 전체 (~8GB)
-        dartlab.downloadAll("finance", forceUpdate=True)  # 강제 갱신
-    """
-    if category in _EXPLICIT_DOWNLOAD_ONLY_CATEGORIES:
-        raise ValueError(
-            f"{category}는 전체 다운로드를 지원하지 않음. 개별 종목 loadData(..., category='{category}')를 사용하세요."
-        )
-
-    # Pyodide (WASM 브라우저) 는 huggingface_hub 가 설치 안 되고 전체 다운로드가 용량상
-    # 부적합. scan 카테고리만 경량 `finance-lite.parquet`(~18MB) 을 pyfetch 로 개별 수신.
-    if _IS_PYODIDE:
-        if category == "scan":
-            _pyodideFetchScanLite()
-            return
-        raise NotImplementedError(
-            f"Pyodide 환경에서 downloadAll('{category}') 는 지원하지 않습니다. "
-            "scan 은 'finance-lite' 경량본만 지원되며 개별 종목은 Company() 로 자동 수신됩니다."
-        )
-
-    try:
-        from huggingface_hub import snapshot_download
-    except ImportError as exc:
-        raise ImportError(
-            "downloadAll()은 huggingface_hub가 필요합니다.\n"
-            "또는 개별 종목은 dartlab.Company('005930')으로 자동 다운로드됩니다."
-        ) from exc
-
-    dataDir = _dataDir(category)
-    dataDir.mkdir(parents=True, exist_ok=True)
-    label = DATA_RELEASES[category]["label"]
-    hfDir = DATA_RELEASES[category]["dir"]
-    repo = repoFor(category)  # 전용 repo 가 지정된 카테고리면 그쪽, 아니면 기본 HF_REPO
-
-    from dartlab.core.logger import getLogger
-    from dartlab.core.messaging import emit
-
-    _log = getLogger(__name__)
-    emit("download_all:hf_start", label=label, repo=repo, dir=hfDir)
-    _log.info("[cyan]⬇ HF[/] %s (%s/%s)", label, repo, hfDir)
-
-    # rate limit 방지: 동시 다운로드 workers를 보수적으로 설정
-    if "HF_HUB_DOWNLOAD_WORKERS" not in os.environ:
-        os.environ["HF_HUB_DOWNLOAD_WORKERS"] = "4"
-
-    localDir = _getDataRoot()
-    lastErr = None
-    for attempt in range(_HF_MAX_RETRIES):
-        try:
-            # scan 은 루트(finance.parquet 등) + 하위 폴더(report/) 둘 다 받아야 한다.
-            # huggingface_hub 의 allow_patterns 는 fnmatch — `**` 가 특수문자가 아니라
-            # 중간 디렉토리 최소 1개를 강제한다. `dart/scan/**/*.parquet` 는 루트 파일을
-            # 제외시키므로 두 패턴을 모두 넘겨야 finance.parquet 같은 루트 파일까지 받아진다.
-            # nested=True 카테고리 (sections — period-sharded {code}/{period}.parquet) 도
-            # 같은 두 패턴 — 루트 _index.parquet (있다면) + 종목 디렉터리 안 period parquet.
-            isNested = DATA_RELEASES[category].get("nested", False) or category == "scan"
-            pattern = [f"{hfDir}/*.parquet", f"{hfDir}/**/*.parquet"] if isNested else f"{hfDir}/*.parquet"
-            snapshot_download(
-                repo_id=repo,
-                repo_type="dataset",
-                local_dir=str(localDir),
-                allow_patterns=pattern,
-                force_download=forceUpdate if attempt == 0 else False,
-                token=os.environ.get("HF_TOKEN", "").strip() or None,
-            )
-            break
-        except (OSError, ConnectionError, TimeoutError) as exc:
-            lastErr = exc
-            emit("download_all:hf_retry", attempt=attempt + 1, error=str(exc))
-            if attempt < _HF_MAX_RETRIES - 1:
-                time.sleep(2 ** (attempt + 1))
-    else:
-        raise RuntimeError(
-            f"{label} 다운로드 실패 ({_HF_MAX_RETRIES}회 재시도 후). "
-            f"네트워크를 확인하거나 HF 토큰을 설정하세요: huggingface-cli login\n"
-            f"마지막 에러: {lastErr}"
-        )
-
-    isNested = DATA_RELEASES[category].get("nested", False) or category == "scan"
-    globPattern = "**/*.parquet" if isNested else "*.parquet"
-    fileCount = len(list(dataDir.glob(globPattern)))
-    # scan/sections 처럼 nested 카테고리는 파일 수 ≠ 종목 수 (sections 는 종목당 분기 수 만큼).
-    countLabel = f"{fileCount}파일" if isNested else f"{fileCount}종목"
-    emit("download_all:hf_done", label=label, count=countLabel, dataDir=str(dataDir))
-    _log.info("[green]✓[/] %s (%s)", label, countLabel)
-
-    # scan 은 finance.parquet 이 핵심 산출물. allow_patterns 회귀 등으로
-    # 조용히 누락되면 상위 fallback 경로가 부분 결과(예: 종목 2개)를 전수인 양
-    # 반환하는 심각한 오동작이 발생한다. 필수 파일 존재를 강제 검증.
-    if category == "scan":
-        required = ("finance.parquet",)
-        missing = [name for name in required if not (dataDir / name).exists()]
-        if missing:
-            emit("scan:prebuild_incomplete", missing=missing)
-            raise RuntimeError(
-                f"scan 프리빌드 다운로드가 불완전합니다 (누락: {missing}). "
-                f"네트워크 확인 후 dartlab.downloadAll('scan', forceUpdate=True) 로 재시도하세요."
-            )
-
-
 def download(stockCode: str) -> None:
-    """특정 종목의 docs + finance + report 데이터를 모두 다운로드."""
+    """특정 종목의 등록된 공개 parquet 데이터를 다운로드."""
     from dartlab.core.messaging import emit
 
     for category in DATA_RELEASES:
@@ -610,13 +473,14 @@ def download(stockCode: str) -> None:
 DART_VIEWER = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo="
 
 
-def buildIndex(category: str = "docs") -> pl.DataFrame:
+def buildIndex(category: str = "panel") -> pl.DataFrame:
     """로컬 parquet 전체를 스캔해서 종목 인덱스 생성.
 
     Returns:
         DataFrame (stockCode, corpName, rows, yearFrom, yearTo, nDocs)
         로컬에 파일이 없으면 빈 DataFrame.
     """
+    category = resolveDataCategory(category)
     dataDir = _dataDir(category)
     files = sorted(dataDir.glob("*.parquet"))
     if not files:
@@ -642,8 +506,17 @@ def buildIndex(category: str = "docs") -> pl.DataFrame:
             df = _normalizeLoadedFrame(pl.read_parquet(str(f)), category)
             code = f.stem
             name = extractCorpName(df)
-            years = sorted(df["year"].unique().to_list())
+            if name is None and "corp" in df.columns:
+                name = str(df["corp"][0] or "") if df.height else None
+            if "year" in df.columns:
+                years = sorted(df["year"].unique().to_list())
+            elif "period" in df.columns:
+                years = sorted({str(p)[:4] for p in df["period"].to_list() if p})
+            else:
+                years = []
             docIdCol = _docIdColumn(df)
+            if docIdCol is None and "rceptNo" in df.columns:
+                docIdCol = "rceptNo"
             nDocs = df[docIdCol].n_unique() if docIdCol else 0
             records.append(
                 {
@@ -742,7 +615,7 @@ def yearsDesc(df: pl.DataFrame | None, *, limit: int | None = None) -> list:
 
 
 def _docIdColumn(df: pl.DataFrame) -> str | None:
-    for col in ("rcept_no", "accession_no"):
+    for col in ("rcept_no", "rceptNo", "accession_no"):
         if col in df.columns:
             return col
     return None
@@ -820,19 +693,6 @@ def _loadDataPyodide(
     from dartlab.core.dataLoaderPyodide import loadDataPyodide
 
     return loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
-
-
-def _pyodideFetchScanLite() -> None:
-    """Pyodide: scan 경량 프리빌드(`finance-lite.parquet`, ~18MB) 만 받아 FS에 저장.
-
-    `huggingface_hub.snapshot_download` 는 pyodide 에 설치되지 않고, 전체 프리빌드
-    (307MB finance + report 12개 등) 를 브라우저에서 받기엔 부담이므로 스캔 카테고리의
-    경량본 1 파일만 선별 수신한다. 실패 시 명시적 에러를 emit 하여 fallback 이 조용히
-    부분 결과를 돌려주는 상황을 차단한다.
-    """
-    from dartlab.core.dataLoaderPyodide import pyodideFetchScanLite
-
-    pyodideFetchScanLite(_dataDir)
 
 
 def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -> None:

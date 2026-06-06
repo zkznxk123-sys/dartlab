@@ -4,9 +4,9 @@
 ``<TABLE>`` rowspan/colspan + ``<SPAN USERMARK="F-14 B">`` 가/나/다 bold marker
 를 직접 사용 → sections layer 의 regex 추론을 builder 단에서 사전 해결.
 
-기존 ``zipCollector._parseSections`` 의 SECTION-1/SECTION-2 통째 본문 추출은
-chapter 본문이 4MB 통째로 cell 에 들어가 sections layer 가 regex 로 sub-section
-분리 → 추론 오류 다발. 본 모듈의 ``parseSectionsByTitle`` 은 각 ``<TITLE>`` 별로
+기존 SECTION-1/SECTION-2 통째 본문 추출은 chapter 본문이 4MB 통째로 cell 에
+들어가 sections layer 가 regex 로 sub-section 분리 → 추론 오류 다발. 본 모듈의
+``parseSectionsByTitle`` 은 각 ``<TITLE>`` 별로
 row 를 분리하고 직속 본문만 attach — sub-section 별 cell value 가 작아짐 +
 hierarchy (AASSOCNOTE / ATOCID) 보존.
 
@@ -251,9 +251,8 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
 
     # 명시 DFS — TITLE 단위로 분리하고 TITLE 직속 본문 (다음 TITLE 까지의 element 들)
     # 의 *raw XML chunk* 를 그대로 보존. P/SPAN/TABLE/COLGROUP/TR/TD 등 모든 태그 살려.
-    # sections layer 의 xmlAdapter 가 stripTags 파라미터로 markdown/HTML 변환 또는
-    # plain text 추출. 옛 양식 (markdown/HTML mixed in section_content) 폐기 —
-    # docs.parquet 가 zip 원본 SSOT. parse 변경 시 zip 재빌드 불필요.
+    # panel reader 가 stripTags 파라미터로 markdown/HTML 변환 또는 plain text 추출.
+    # 원본 XML chunk 는 panel contentRaw 에 보존한다.
     def _walk(elem) -> None:
         nonlocal currentTitle
         tag = elem.tag
@@ -288,7 +287,7 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
     return sections
 
 
-# 한 row 의 section_content 최대 size — build(parse)·gather(zipCollector) 공유 한도.
+# 한 row 의 section_content 최대 size — panel build/parser 공유 한도.
 # core.dartConstants 정본 (회귀 차단: polars row_tuples PyObject 변환이 4MB+ panic.
 # 1MB 안전선 + pa.string() 32-bit offset column total 한도 회피).
 from dartlab.core.dartConstants import MAX_CELL_BYTES  # noqa: E402

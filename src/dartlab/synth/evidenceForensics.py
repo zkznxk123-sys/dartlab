@@ -54,7 +54,7 @@ def buildEvidenceForensicsMemo(
     market: str = "KR",
     companyName: str = "",
     statements: Mapping[str, pl.DataFrame] | None = None,
-    sectionTexts: Mapping[str, str] | None = None,
+    panelTextRows: Mapping[str, str] | None = None,
     events: Iterable[Mapping[str, Any]] | None = None,
     scanRows: Iterable[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
@@ -71,7 +71,7 @@ def buildEvidenceForensicsMemo(
         market: ``"KR"``/``"US"``.
         companyName: 한국어 회사명.
         statements: BS/IS/CF raw 테이블.
-        sectionTexts: 공시 sections 텍스트 dict.
+        panelTextRows: 공시 sections 텍스트 dict.
         events: 이벤트 list (자기주식 등).
         scanRows: scan 횡단면 raw rows.
 
@@ -115,7 +115,7 @@ def buildEvidenceForensicsMemo(
     LLM Specifications:
         AntiPatterns:
             - riskScore 만 인용 — candidateRows + falsifierRows 함께 노출.
-            - sectionTexts 빈 dict 호출 → 공시 변화 source 누락. trace 확인 필수.
+            - panelTextRows 빈 dict 호출 → 공시 변화 source 누락. trace 확인 필수.
         OutputSchema:
             상기 9 키 dict.
         Prerequisites:
@@ -137,7 +137,7 @@ def buildEvidenceForensicsMemo(
     trace_rows = _traceRows(statement_map)
     cash_rows = _revenueCashBridge(analysis_panel)
     wc_rows = _workingCapitalRows(analysis_panel)
-    note_rows = _noteSignalRows(sectionTexts or {})
+    note_rows = _noteSignalRows(panelTextRows or {})
     event_rows = _eventRows(events or (), note_rows=note_rows, panel=analysis_panel)
     anomaly_rows = _anomalyRows(scanRows or ())
     falsifier_rows = _falsifierRows(cash_rows, wc_rows, note_rows, event_rows)
@@ -407,8 +407,8 @@ def _workingCapitalRows(panel: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return rows
 
 
-def _noteSignalRows(sectionTexts: Mapping[str, str]) -> list[dict[str, Any]]:
-    joined = "\n".join(str(text or "") for text in sectionTexts.values())
+def _noteSignalRows(panelTextRows: Mapping[str, str]) -> list[dict[str, Any]]:
+    joined = "\n".join(str(text or "") for text in panelTextRows.values())
     lowered = joined.lower()
     rows: list[dict[str, Any]] = []
     for category, keywords in _NOTE_KEYWORDS.items():
@@ -420,7 +420,7 @@ def _noteSignalRows(sectionTexts: Mapping[str, str]) -> list[dict[str, Any]]:
                 "hitCount": hits,
                 "status": status,
                 "keywords": ", ".join(keywords[:4]),
-                "evidence": "section text keyword count" if sectionTexts else "no section text supplied",
+                "evidence": "section text keyword count" if panelTextRows else "no section text supplied",
             }
         )
     return rows

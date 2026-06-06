@@ -1,6 +1,6 @@
 """건설업 KPI — 수주잔고/도급vs자체/PF노출/시공안전.
 
-DART report(constructionOrders) + sections(productService) + notes(provisions/borrowings) 활용.
+DART report(constructionOrders) + panel(productService) + panel(provisions/borrowings) 활용.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
         - 수주잔고·도급비중·PF 노출 3 종 KPI 통합 산출.
 
     Guide:
-        DART report(constructionOrders) + sections(productService) + notes(provisions) 결합.
+        DART report(constructionOrders) + panel(productService) + panel(provisions) 결합.
 
     When:
         건설사 (현대건설·GS건설 등) 펀더멘털 분석 시.
@@ -68,12 +68,12 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
 
     # ── 도급 vs 자체개발 비중 (show 은퇴 → 공통파서 panel 제품/부문 표 키워드+금액) ──
     try:
-        from dartlab.providers.dart.sections import sectionTables
+        from dartlab.providers.dart.panel.text import panelXmlTables
         from dartlab.providers.dart.tableRows import parseAmount
 
         code = getattr(company, "stockCode", None)
         tables = (
-            (sectionTables(code, sectionPattern="제품") or sectionTables(code, sectionPattern="부문")) if code else []
+            (panelXmlTables(code, sectionPattern="제품") or panelXmlTables(code, sectionPattern="부문")) if code else []
         )
         contract_kw = ["도급", "시공", "건축"]
         self_dev_kw = ["자체", "분양", "개발", "매각"]
@@ -101,10 +101,10 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
     try:
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionTexts
+        from dartlab.providers.dart.panel.text import panelTextRows
 
         code = getattr(company, "stockCode", None)
-        texts = sectionTexts(code) if code else None
+        texts = panelTextRows(code) if code else None
         if texts is not None and not texts.is_empty():
             sub = texts.filter(pl.col("sectionLeaf").str.contains("충당부채"))
             pf_count = sum(1 for cr in sub["contentRaw"].to_list() if cr and ("PF" in cr or "프로젝트" in cr))

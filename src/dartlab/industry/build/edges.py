@@ -2,7 +2,7 @@
 
 데이터 소스:
 1. scan/network — 투자관계(investedCompany), 계열사(affiliateGroup)
-2. docs parquet — 거래처(rawMaterial 텍스트), 특수관계자거래
+2. panel — 거래처(rawMaterial 텍스트), 특수관계자거래
 3. 추후: AI/사람 검수
 
 Company 객체를 로드하지 않고 parquet/report를 직접 스캔한다.
@@ -107,7 +107,7 @@ def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         - reference: KindList (`_listingLookup`) — 상장사 code↔name 매핑
 
     See Also:
-        - ``dartlab.industry.build.edges.extractDocsEdges`` : docs 패턴 추출
+        - ``dartlab.industry.build.edges.extractDocsEdges`` : panel 패턴 추출
         - ``dartlab.industry.build.edges.extractRawMaterialEdges`` : 원재료 거래 추출
         - ``dartlab.industry.build.edges.buildAllEdges`` : 본 함수 호출 사용자
 
@@ -187,7 +187,7 @@ def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     return unique
 
 
-# ── 2. docs에서 거래처 관계 (rawMaterial/relatedPartyTx) ──
+# ── 2. panel에서 거래처 관계 (rawMaterial/relatedPartyTx) ──
 
 # section_title → 공급/수요 분류 패턴
 _SUPPLIER_TITLE = re.compile(r"원재료|원자재|부자재|매입처|공급처|거래처|생산설비")
@@ -222,10 +222,10 @@ def _extractCorpNames(content: str) -> list[str]:
 
 
 def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
-    """docs parquet의 섹션 제목 패턴으로 supplier/customer/affiliate 엣지를 추출한다.
+    """panel의 섹션 제목 패턴으로 supplier/customer/affiliate 엣지를 추출한다.
 
     Capabilities:
-        DART 사업보고서 docs parquet 의 ``section_title`` 패턴 (원재료/매출처/특수관계자) 으로
+        DART 사업보고서 panel 의 ``section_title`` 패턴 (원재료/매출처/특수관계자) 으로
         본문에서 거래 상대방 상장사를 자동 식별. ㈜/주식회사 패턴 추출 + 상장사명 직접 매칭
         2 방식 병행.
 
@@ -236,7 +236,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     Parameters
     ----------
     nodes : list[IndustryNode]
-        전체 노드 리스트. primary 노드의 종목코드별로 docs parquet를 스캔.
+        전체 노드 리스트. primary 노드의 종목코드별로 panel를 스캔.
 
     Returns
     -------
@@ -245,7 +245,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         supplier confidence 0.7, customer 0.6, affiliate 0.5.
 
     Raises:
-        없음 — 개별 docs parquet 로드 실패 시 해당 종목만 skip.
+        없음 — 개별 panel 로드 실패 시 해당 종목만 skip.
 
     Example:
         >>> from dartlab.industry.build.edges import extractDocsEdges
@@ -263,11 +263,11 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         우선. 두 함수 결과는 ``buildAllEdges`` 에서 병합.
 
     How:
-        nodes 종목별 ``docs/{code}.parquet`` 스캔 → section_title 패턴 매칭 → 본문에서 ㈜/상장사명
+        nodes 종목별 ``panel/{code}.parquet`` 스캔 → section_title 패턴 매칭 → 본문에서 ㈜/상장사명
         추출 → IndustryEdge 변환 → from+to+type 중복 제거.
 
     Requires:
-        - providers.dart.sections: panel 섹션 본문 (`sectionTexts`)
+        - providers.dart.panel.text: panel 섹션 본문 (`panelTextRows`)
         - reference: KindList (`_listingLookup`) — 상장사 code↔name 매핑
 
     See Also:
@@ -286,12 +286,12 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     # 매칭할 상장사명 집합 (3글자 이상 — 노이즈 방지)
     targetNames = {name: code for name, code in n2c.items() if len(name) >= 3}
 
-    # docs.parquet 농장 은퇴 → providers.dart.sections SSOT(panel 섹션 본문) 소비.
-    from dartlab.providers.dart.sections import sectionTexts
+    # providers.dart.panel.text SSOT(panel 섹션 본문) 소비.
+    from dartlab.providers.dart.panel.text import panelTextRows
 
     processed = 0
     for code, node in nodeIdx.items():
-        df = sectionTexts(code)
+        df = panelTextRows(code)
         if df is None or df.is_empty():
             continue
 
@@ -339,7 +339,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                             edgeType="supplier",
                             industry=node.industry,
                             confidence=confidence,
-                            source="docs",
+                            source="panel_text",
                             evidence=f"{title}",
                         )
                     )
@@ -353,7 +353,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                             edgeType="customer",
                             industry=node.industry,
                             confidence=confidence,
-                            source="docs",
+                            source="panel_text",
                             evidence=f"{title}",
                         )
                     )
@@ -367,14 +367,14 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                             edgeType="affiliate",
                             industry=node.industry,
                             confidence=0.5,
-                            source="docs",
+                            source="panel_text",
                             evidence=f"{title}",
                         )
                     )
 
         processed += 1
 
-    logger.info("docs 엣지: %d사 스캔, %d건 추출", processed, len(edges))
+    logger.info("panel 텍스트 엣지: %d사 스캔, %d건 추출", processed, len(edges))
 
     # 중복 제거
     seen: set[tuple[str, str, str]] = set()
@@ -388,11 +388,11 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     return unique
 
 
-# ── 3. docs 원재료 테이블 파싱 (강력한 한방) ──
+# ── 3. panel 원재료 테이블 파싱 (강력한 한방) ──
 
 
 def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
-    """docs "원재료 및 생산설비" 마크다운 테이블에서 구조화된 supplier 엣지를 추출한다.
+    """panel "원재료 및 생산설비" 마크다운 테이블에서 구조화된 supplier 엣지를 추출한다.
 
     Capabilities:
         DART 사업보고서 "원재료 및 생산설비" 섹션의 마크다운 테이블 (부문/품목/매입액/비중/매입처)
@@ -414,7 +414,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         각 엣지에 product (품목명), amount (매입액, 억원), ratio (비중, %) 포함.
 
     Raises:
-        없음 — 개별 docs parquet 로드 실패 시 해당 종목만 skip.
+        없음 — 개별 panel 로드 실패 시 해당 종목만 skip.
 
     Example:
         >>> from dartlab.industry.build.edges import extractRawMaterialEdges
@@ -433,12 +433,12 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         ``extractDocsEdges``.
 
     How:
-        nodes 종목별 ``docs/{code}.parquet`` 의 "원재료" 섹션 → 최신 사업보고서 row → 마크다운
+        nodes 종목별 ``panel/{code}.parquet`` 의 "원재료" 섹션 → 최신 사업보고서 row → 마크다운
         테이블 추출 → "매입처" 헤더 매칭 → 행 단위 IndustryEdge 변환 (품목/매입액/비중/매입처
         정규화).
 
     Requires:
-        - providers.dart.sections: panel 섹션 표 (`sectionTables`) + table_parser 헬퍼
+        - providers.dart.panel.text: panel 섹션 표 (`panelXmlTables`) + table_parser 헬퍼
         - reference: KindList (정규화된 회사명 매핑)
 
     See Also:
@@ -450,10 +450,10 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         "주요 원재료 공급사", "매입처 비중" 류 답변 데이터. ``amount`` 와 ``ratio`` 보유한 엣지만
         강한 단정 가능 — ``preciseEdgeCount`` 적은 회사는 "일부 거래만 공시" 단서 명시.
     """
-    # docs.parquet 농장 은퇴 → providers.dart.sections SSOT. panel contentRaw raw DART XML 표를
-    # providers.dart.sections.sectionTables(lxml)가 markdown extractTables 와 동일 shape(표×행×셀)로 추출 —
+    # providers.dart.panel.text SSOT. panel contentRaw raw DART XML 표를
+    # providers.dart.panel.text.panelXmlTables(lxml)가 markdown extractTables 와 동일 shape(표×행×셀)로 추출 —
     # 공급사명/매입액/비중 복원(드롭 0). period=None=전 기간(다운스트림 corp 명 dedup).
-    from dartlab.providers.dart.sections import sectionTables
+    from dartlab.providers.dart.panel.text import panelXmlTables
     from dartlab.providers.dart.tableRows import (
         extractCorpNames,
         findTableByHeaders,
@@ -474,7 +474,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     matched = 0
 
     for code, node in nodeIdx.items():
-        tables = sectionTables(code, sectionPattern="원재료")
+        tables = panelXmlTables(code, sectionPattern="원재료")
         if not tables:
             continue
 
@@ -523,7 +523,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                         edgeType="supplier",
                         industry=node.industry,
                         confidence=0.9,  # 테이블 직접 매칭 — 높은 신뢰도
-                        source="docs_table",
+                        source="panel_table",
                         evidence=f"{bumun} {product}".strip(),
                         product=product,
                         amount=amount,
@@ -543,7 +543,7 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
 
     Capabilities:
         3 소스 (`extractNetworkEdges` / `extractDocsEdges` / `extractRawMaterialEdges`) 엣지를
-        병합하고 (from, to, edgeType) 키로 중복 제거. 우선순위 docs_table > docs > network 적용.
+        병합하고 (from, to, edgeType) 키로 중복 제거. 우선순위 panel_table > panel_text > network 적용.
         ``skipDocs`` 로 docs 패스 생략 가능 (빠른 테스트).
 
     Parameters
@@ -557,7 +557,7 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
     -------
     list[IndustryEdge]
         통합 엣지 리스트. from+to+type 기준 중복 제거.
-        우선순위: docs_table > docs > network.
+        우선순위: panel_table > panel_text > network.
 
     Raises:
         없음 — 각 소스 추출 실패 시 warning + skip, 부분 결과 보존.
@@ -571,18 +571,18 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
 
     Guide:
         manifest 빌드 (`buildIndustryMap`) 의 단일 엣지 수집 진입점. 결과는 ``edges.json`` 으로
-        직렬화. 동일 쌍의 docs_table 엣지가 docs/network 엣지를 덮어써 메타 풍부도 우선.
+        직렬화. 동일 쌍의 panel_table 엣지가 panel_text/network 엣지를 덮어써 메타 풍부도 우선.
 
     When:
         ``buildIndustryMap`` 의 엣지 수집 단계. 일반 분석 흐름에서는 호출하지 않는다 — 전 종목
-        docs parquet 스캔 비용 때문.
+        panel 스캔 비용 때문.
 
     How:
         ``extractNetworkEdges`` (출자) → ``extractDocsEdges`` (패턴) → ``extractRawMaterialEdges``
         (테이블) 순차 호출 → source 우선순위로 정렬 후 (from, to, edgeType) 중복 제거.
 
     Requires:
-        - 3 소스 의존성 합집합: scan/network + docs parquet + KindList reference
+        - 3 소스 의존성 합집합: scan/network + panel + KindList reference
         - nodes 리스트 (primary 노드 기반)
 
     See Also:
@@ -593,7 +593,7 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
 
     AIContext:
         산업지도 manifest 의 모든 회사 관계 (계열·매입·매출·원재료) 진입점. AI 답변에서 엣지
-        ``source`` 가 docs_table 이면 강한 단정, network 면 "출자 관계", docs (텍스트 매칭) 면
+        ``source`` 가 panel_table 이면 강한 단정, network 면 "출자 관계", panel_text (텍스트 매칭) 면
         "보고서 언급" 단서 권장.
     """
     edges: list[IndustryEdge] = []
@@ -606,16 +606,16 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
     except Exception as e:
         logger.warning("network 엣지 실패: %s", e)
 
-    # 2. docs (텍스트 기반)
+    # 2. panel text (텍스트 기반)
     if not skipDocs:
         try:
             docsEdges = extractDocsEdges(nodes)
             edges.extend(docsEdges)
-            logger.info("docs 엣지: %d건", len(docsEdges))
+            logger.info("panel 텍스트 엣지: %d건", len(docsEdges))
         except Exception as e:
-            logger.warning("docs 엣지 실패: %s", e)
+            logger.warning("panel 텍스트 엣지 실패: %s", e)
 
-        # 3. docs 원재료 테이블 (구조화 파싱)
+        # 3. panel 원재료 테이블 (구조화 파싱)
         try:
             tableEdges = extractRawMaterialEdges(nodes)
             edges.extend(tableEdges)
@@ -626,8 +626,8 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
     # 중복 제거 (from+to+type 기준, 테이블 우선)
     seen: set[tuple[str, str, str]] = set()
     unique: list[IndustryEdge] = []
-    # source 우선순위: docs_table > docs > network
-    priority = {"docs_table": 0, "docs": 1, "network": 2}
+    # source 우선순위: panel_table > panel_text > network
+    priority = {"panel_table": 0, "panel_text": 1, "network": 2}
     edges.sort(key=lambda e: priority.get(e.source, 3))
     for e in edges:
         key = (e.fromCode, e.toCode, e.edgeType)

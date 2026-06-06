@@ -78,7 +78,7 @@ def calcStoryPrecedents(
                 "count": 0,
                 "confidence": "low",
                 "source": "scan_not_downloaded",
-                "hint": "`dartlab.downloadAll('scan')` 로 271MB 프리빌드 다운로드 후 재시도",
+                "hint": "scan 프리빌드 또는 collect 데이터 준비 후 재시도",
             }
 
     # company 객체에서 기본값 추출

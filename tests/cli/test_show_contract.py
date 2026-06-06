@@ -54,7 +54,7 @@ class TestShowTypeContract:
                 f"show('{topic}') returned {type(result).__name__}, expected DataFrame | None"
             )
 
-    def test_docs_topics_return_dataframe(self):
+    def test_panel_topics_return_dataframe(self):
         from dartlab import Company
 
         c = Company(SAMSUNG)

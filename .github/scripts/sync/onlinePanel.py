@@ -2,7 +2,7 @@
 
 plan snazzy-wibbling-origami P6. ``buildPanel.py``(로컬 zip 트랙 A)의 online 쌍둥이(트랙 B):
 
-    docs.parquet rcept → streamZipBytes(providers, 메모리) → buildPanelFromStream(providers.panel.build)
+    공시목록 rcept → streamZipBytes(providers, 메모리) → buildPanelFromStream(providers.panel.build)
         → dist/changed_panel.txt → uploadData(SYNC_CATEGORY=panel)
 
 R1(gather↛providers): 본 entry 는 ``.github/scripts``(dartlab 패키지 밖, import 가드 비대상)라
@@ -11,7 +11,7 @@ providers fetch + gather build 를 한 프로세스에서 조합한다 (``syncRe
 로 자동 scanRefBaseline 불가). 산출물은 buildPanel(A)과 바이트 동형(같은 build core).
 
 사용법:
-    python .github/scripts/sync/onlinePanel.py --changed       # dist/changed_docs.txt 종목
+    python .github/scripts/sync/onlinePanel.py --changed       # dist/changed_panel.txt 종목
     python .github/scripts/sync/onlinePanel.py --codes 005930,000660
 
 환경변수:
@@ -29,8 +29,8 @@ from pathlib import Path
 
 
 def _resolveChangedCodes() -> list[str]:
-    """dist/changed_docs.txt 또는 dist/changed.txt 에서 변경된 docs 종목코드 추출."""
-    for p in (Path("dist/changed_docs.txt"), Path("dist/changed.txt")):
+    """dist/changed_panel.txt 또는 dist/changed.txt 에서 변경된 panel 종목코드 추출."""
+    for p in (Path("dist/changed_panel.txt"), Path("dist/changed.txt")):
         if not p.exists():
             continue
         names = [n.strip() for n in p.read_text(encoding="utf-8").splitlines() if n.strip()]
@@ -65,7 +65,7 @@ def main() -> int:
     """online 1패스 panel 빌드 CLI entry — providers fetch + gather build 조합 (R1 layer-밖)."""
     parser = argparse.ArgumentParser(description="online 1패스 panel 빌더 (디스크 zip 0)")
     parser.add_argument("--codes", help="쉼표 구분 종목 코드 list (예: 005930,000660)")
-    parser.add_argument("--changed", action="store_true", help="dist/changed_docs.txt 또는 dist/changed.txt 기반")
+    parser.add_argument("--changed", action="store_true", help="dist/changed_panel.txt 또는 dist/changed.txt 기반")
     args = parser.parse_args()
 
     if "DARTLAB_DATA_DIR" not in os.environ:
@@ -100,7 +100,7 @@ def main() -> int:
     totalRows = 0
     print(f"[onlinePanel] 대상 {len(codes)} 종목 — fetch workers={workers} (디스크 zip 0)")
     for code in codes:
-        targets = buildTargetsFromFilingList(client, [code])  # 공시목록 API rcept (per-corp, docs.parquet 무관)
+        targets = buildTargetsFromFilingList(client, [code])  # 공시목록 API rcept (per-corp, legacy parquet 무관)
         if not targets:
             continue
         # 종목 단위 stream — bytes 메모리 bound (Q4 대형 zip 폭주 가드).

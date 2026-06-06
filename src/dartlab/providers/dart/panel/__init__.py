@@ -12,8 +12,20 @@ from __future__ import annotations
 
 from .compare import compare
 from .panel import Panel
+from .text import (
+    panelTableRows,
+    panelTextRows,
+    panelTextWide,
+    panelXmlTables,
+    parsePanelXmlTables,
+)
 
 __all__ = [
     "Panel",
     "compare",
+    "panelTableRows",
+    "panelTextRows",
+    "panelTextWide",
+    "panelXmlTables",
+    "parsePanelXmlTables",
 ]

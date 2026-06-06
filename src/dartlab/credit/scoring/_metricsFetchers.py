@@ -59,10 +59,10 @@ def _fetchSegmentComposition(company) -> dict | None:
         # year 컬럼 없으면 아래 yearCols 로직이 graceful None.
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionRows
+        from dartlab.providers.dart.panel.text import panelTableRows
 
         _code = getattr(company, "stockCode", None)
-        _r = sectionRows(_code, sectionPattern="부문") if _code else []
+        _r = panelTableRows(_code, sectionPattern="부문") if _code else []
         df = pl.DataFrame(_r) if _r else None
         if df is None or not hasattr(df, "columns"):
             return None
@@ -238,10 +238,10 @@ def _fetchAuditOpinion(company) -> str | None:
     try:
         import polars as pl
 
-        from dartlab.providers.dart.sections import sectionTexts
+        from dartlab.providers.dart.panel.text import panelTextRows
 
         _code = getattr(company, "stockCode", None)
-        _texts = sectionTexts(_code) if _code else None
+        _texts = panelTextRows(_code) if _code else None
         if _texts is not None and not _texts.is_empty():
             _sub = _texts.filter(pl.col("sectionLeaf").str.contains("감사의견|감사보고서|외부감사"))
             text = " ".join(c for c in _sub["contentRaw"].to_list() if c)

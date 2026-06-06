@@ -1,4 +1,4 @@
-"""`dartlab sections` command."""
+"""`dartlab sections` compatibility command backed by panel."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from dartlab.cli.services.runtime import configureDartlab
 
 
 def configureParser(subparsers) -> None:
-    """sections 서브커맨드 등록 — pure docs 수평화 sections 출력."""
-    parser = subparsers.add_parser("sections", help="pure docs 수평화 sections 출력")
+    """sections 서브커맨드 등록 — panel 공시 격자 출력."""
+    parser = subparsers.add_parser("sections", help="panel 공시 격자 출력")
     parser.add_argument("company", help="종목코드 (005930) 또는 회사명 (삼성전자)")
     parser.add_argument(
         "--raw",
@@ -37,12 +37,12 @@ def run(args) -> int:
     console.print(f"\n  [bold]{company.corpName}[/] ({company.stockCode})\n")
 
     # CLI 기본 — plain text(tag=False). --raw 시 원본 XML 태그 보존(tag=True).
-    sections = company.panel(tag=args.raw)
-    if sections is None:
-        console.print(f"[dim]{company.corpName} sections 데이터가 없습니다.[/]")
+    panel = company.panel(tag=args.raw)
+    if panel is None:
+        console.print(f"[dim]{company.corpName} panel 데이터가 없습니다.[/]")
         return 0
-    if not isinstance(sections, pl.DataFrame):
-        console.print("[bold red]오류:[/] sections 데이터 형식이 올바르지 않습니다.")
+    if not isinstance(panel, pl.DataFrame):
+        console.print("[bold red]오류:[/] panel 데이터 형식이 올바르지 않습니다.")
         return 1
-    printDataframe(sections, title="Sections")
+    printDataframe(panel, title="Panel")
     return 0

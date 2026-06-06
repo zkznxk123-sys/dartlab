@@ -457,42 +457,14 @@ GATES: dict[str, Gate] = {
         blocking=False,
         timeout_minutes=90,
     ),
-    "sections-parity-fast": Gate(
-        name="sections-parity-fast",
+    "dart-panel-only": Gate(
+        name="dart-panel-only",
         tier="fast",
         install_pkg="editable",
         env={"DARTLAB_TEST_LOCKED": "1"},
-        cmd="python -X utf8 tests/audit/sectionsParity.py --codes 005380,005930,035720,207940,000660 --strict",
+        cmd="python -X utf8 tests/audit/dartPanelOnly.py",
         blocking=True,
         timeout_minutes=5,
-    ),
-    "sections-parity-bulk": Gate(
-        name="sections-parity-bulk",
-        tier="nightly",
-        install_pkg="editable",
-        env={"DARTLAB_TEST_LOCKED": "1"},
-        cmd="python -X utf8 tests/audit/sectionsBulkScan.py --sample 200 --seed 42",
-        blocking=True,
-        timeout_minutes=60,
-    ),
-    "sections-loss": Gate(
-        name="sections-loss",
-        tier="nightly",
-        install_pkg="editable",
-        env={"DARTLAB_TEST_LOCKED": "1"},
-        cmd="python -X utf8 tests/audit/sectionsLossAccount.py --check",
-        blocking=False,
-        timeout_minutes=10,
-    ),
-    "sections-memory": Gate(
-        name="sections-memory",
-        tier="nightly",
-        deps=("psutil",),
-        install_pkg="editable",
-        env={"DARTLAB_TEST_LOCKED": "1"},
-        cmd="python -X utf8 tests/audit/sectionsMemoryAudit.py --check",
-        blocking=False,
-        timeout_minutes=15,
     ),
     # T3-2 — benchmark weekly gate. nightly tier blocking=False (baseline ±10% 회귀만 알람)
     "benchmark-weekly": Gate(
@@ -504,15 +476,6 @@ GATES: dict[str, Gate] = {
         cmd="pytest tests/benchmarks/_scenarios/ -m benchmark --benchmark-only --benchmark-json=benchmark-results.json -v --tb=short",
         blocking=False,
         timeout_minutes=30,
-    ),
-    "sections-precision": Gate(
-        name="sections-precision",
-        tier="nightly",
-        install_pkg="editable",
-        env={"DARTLAB_TEST_LOCKED": "1"},
-        cmd="python -X utf8 tests/audit/sectionsPrecisionAudit.py --check",
-        blocking=False,
-        timeout_minutes=15,
     ),
 }
 

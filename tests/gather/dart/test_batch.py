@@ -124,7 +124,6 @@ def test_batch_collect_invokes_on_checkpoint_per_n_stocks(monkeypatch) -> None:
 
     monkeypatch.setattr(batch, "_collectFinance", _zero)
     monkeypatch.setattr(batch, "_collectReport", _zero)
-    monkeypatch.setattr(batch, "_collectDocs", _zero)
 
     calls: list[list[str]] = []
 
@@ -174,7 +173,6 @@ def test_batch_collect_skips_checkpoint_when_disabled(monkeypatch) -> None:
 
     monkeypatch.setattr(batch, "_collectFinance", _zero)
     monkeypatch.setattr(batch, "_collectReport", _zero)
-    monkeypatch.setattr(batch, "_collectDocs", _zero)
 
     invoked = {"n": 0}
 

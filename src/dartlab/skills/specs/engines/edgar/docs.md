@@ -10,7 +10,7 @@ whenToUse:
   - 10-K · 10-Q · 20-F · 40-F section 추출
   - form_type::topicId horizontal view
   - EDGAR docs parquet 스키마
-  - dartlab.providers.edgar.Company.sections
+  - dartlab.providers.edgar.Company panel/topic view
   - GitHub Release `data-edgar-docs` 배포
 inputs:
   - SEC EDGAR API 또는 로컬 parquet (`data/edgar/docs/{ticker}.parquet`)
@@ -21,14 +21,14 @@ outputs:
   - 표준 공통 컬럼 (year · filing_date · report_type · period_key · section_order · section_title · section_content)
   - EDGAR 전용 메타 (cik · company_name · ticker · accession_no · form_type · filing_url)
 capabilityRefs:
-  - Company.sections
+  - Company.topics
   - Company.panel
 toolRefs:
   - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.edgar
-  - engines.company.sections
+  - engines.panel
 sourceRefs:
   - dartlab://skills/engines.edgar.docs
 requiredEvidence:
@@ -59,12 +59,12 @@ failureModes:
   - 저장 시점에 HTML table 을 plain text 로 변환 (markdown 보존 의무)
   - 로더가 SEC EDGAR API 직접 수집 단계 건너뛰기 (parquet → release → API 3 단계)
 forbidden:
-  - "downloadAll('edgarDocs') 호출 — issuer-deduped 의무 (downloadListedEdgarDocs(limit=2000))"
+  - "전체 mirror 다운로드 호출 — issuer-deduped 의무 (downloadListedEdgarDocs(limit=2000))"
   - "Full Document fallback 을 기본 흐름으로 사용"
   - "EDGAR 전용 컬럼 (cik · accession_no · filing_url) 제거"
   - "DART 와 EDGAR 의 저장 스키마를 강제 통일 (공통 뷰에서만 맞춘다)"
 examples:
-  - dartlab.Company('AAPL').sections → 10-K::item1Business 등
+  - dartlab.Company('AAPL').panel('10-K::item1Business') → item1Business 본문
   - downloadListedEdgarDocs(limit=2000) → 배치 progress (forms_found · rows_saved · failure_kind)
   - 057 실험 — table markdown fidelity 감시 + 057-015 readiness 리포트
 procedure:
@@ -74,7 +74,7 @@ procedure:
   - sectionMappings.json — stable topic id SSOT.
 linkedSkills:
   - engines.edgar
-  - engines.company.sections
+  - engines.panel
 source:
   type: manual_skill
   format: markdown
@@ -100,8 +100,8 @@ from dartlab.frame.dataLoader import loadData
 
 # 사용자 진입점 — Company facade
 c = dartlab.Company("AAPL")
-df = c.sections                        # 통합 sections DataFrame
-df_10k = c.sections.filter(...)        # form_type 필터
+topics = c.topics                      # 사용 가능한 form_type::topicId catalog
+df = c.panel("10-K::item1Business")    # 단일 EDGAR topic DataFrame
 
 # 내부 진입점 — provider 직접
 df = sections("AAPL", sinceYear=2015)  # 2015 이후만
@@ -150,8 +150,7 @@ docs2 = loadData("MSFT", category="edgarDocs", sinceYear=2015)
 
 ### 대량 수집 정책
 
-- `downloadAll("edgarDocs")` 는 지원하지 않는다.
-- 대신 `downloadListedEdgarDocs(limit=2000)` 처럼 issuer-deduped collectible universe 를 기준으로 배치 수집.
+- `downloadListedEdgarDocs(limit=2000)` 처럼 issuer-deduped collectible universe 를 기준으로 배치 수집.
 - 배치 수집은 요청 폭주를 막기 위해 일정 건수마다 휴지 시간을 둔다.
 - `6-K` 는 기본 docs 배치 대상에서 제외.
 - 배치 progress 는 ticker · cik · status 뿐 아니라 `forms_found`, `rows_saved`, `filings_saved`, `full_document_rows`, `table_rows`, `failure_kind` 까지 남긴다.

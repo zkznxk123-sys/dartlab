@@ -120,5 +120,5 @@ def test_dart_recent_respects_sync_categories_env(monkeypatch):
     mod.runDartRecent(category="finance", upload=False)
     assert calls[-1][1]["env"] == {"SYNC_CATEGORIES": "finance,report"}
     monkeypatch.delenv("SYNC_CATEGORIES", raising=False)
-    mod.runDartRecent(category="docs", upload=False)
-    assert calls[-1][1]["env"] == {"SYNC_CATEGORIES": "docs"}
+    mod.runDartRecent(category="report", upload=False)
+    assert calls[-1][1]["env"] == {"SYNC_CATEGORIES": "report"}

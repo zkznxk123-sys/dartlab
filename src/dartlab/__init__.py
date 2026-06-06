@@ -421,7 +421,7 @@ def collectAll(
         - 전체 상장종목 DART 공시 데이터 일괄 수집
         - 미수집 종목만 선별 수집 (mode="new") 또는 전체 재수집 (mode="all")
         - 멀티키 병렬 수집 (DART_API_KEYS 쉼표 구분)
-        - 카테고리별 선택 (finance, docs, report)
+        - 카테고리별 선택 (finance, panel, report)
 
     Requires:
         API 키: DART_API_KEY
@@ -433,10 +433,10 @@ def collectAll(
 
     SeeAlso:
         - collect: 특정 종목만 수집
-        - downloadAll: HuggingFace 사전구축 데이터 (API 키 불필요, 더 빠름)
+        - Company/loadData: HuggingFace 사전구축 데이터 자동 사용
 
     Args:
-        categories: 수집 카테고리 ["finance", "docs", "report"]. None이면 전체.
+        categories: 수집 카테고리 ["finance", "panel", "report"]. None이면 전체.
         mode: "new" (미수집만, 기본) 또는 "all" (전체 재수집).
         maxWorkers: 병렬 워커 수. None이면 키 수에 따라 자동.
         incremental: True면 증분 수집. False면 전체 재수집.
@@ -459,46 +459,6 @@ def collectAll(
         maxWorkers=maxWorkers,
         incremental=incremental,
     )
-
-
-def downloadAll(category: str = "finance", *, forceUpdate: bool = False) -> None:
-    """HuggingFace에서 전체 시장 데이터 다운로드.
-
-    Capabilities:
-        - HuggingFace 사전 구축 데이터 일괄 다운로드
-        - finance (~600MB), docs (~8GB), report (~320MB) — 전 상장사 범위
-        - 이어받기/병렬 다운로드 지원 (huggingface_hub)
-        - 전사 분석(scanAccount, governance, digest 등)에 필요한 데이터 사전 준비
-
-    Requires:
-        없음 (HuggingFace 공개 데이터셋)
-
-    Guide:
-        - "데이터 어떻게 받아?" -> downloadAll("finance") 안내. API 키 불필요
-        - "scan 쓰려면?" -> downloadAll("finance") + downloadAll("report") 필요
-        - finance 먼저 (600MB), report 다음 (320MB), docs는 대용량 주의 (8GB)
-
-    SeeAlso:
-        - scan: 다운로드된 데이터로 전종목 비교
-        - collect: DART API로 직접 수집 (최신 데이터, API 키 필요)
-
-    Args:
-        category: "finance" (재무 ~600MB), "docs" (공시 ~8GB), "report" (보고서 ~320MB).
-        forceUpdate: True면 이미 있는 파일도 최신으로 갱신.
-
-    Returns:
-        None.
-
-    Example::
-
-        import dartlab
-        dartlab.downloadAll("finance")   # 재무 전체 — scanAccount/scanRatio 등에 필요
-        dartlab.downloadAll("report")    # 보고서 전체 — governance/workforce/capital/debt에 필요
-        dartlab.downloadAll("docs")      # 공시 전체 — digest에 필요 (대용량 ~8GB)
-    """
-    from dartlab.core.dataLoader import downloadAll as _downloadAll
-
-    _downloadAll(category, forceUpdate=forceUpdate)
 
 
 def checkFreshness(stockCode: str, *, forceCheck: bool = False):
@@ -962,7 +922,6 @@ __all__ = [
     "listing",
     "collect",
     "collectAll",
-    "downloadAll",
     "scan",
     "analysis",
     "gather",

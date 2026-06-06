@@ -2,9 +2,6 @@
 
 사용법:
     python bulkUploadHf.py finance              # 미업로드만 (기존 skip)
-    python bulkUploadHf.py docs                 # 미업로드만
-    python bulkUploadHf.py docs --force         # 전체 재업로드 (schema 마이그레이션)
-    python bulkUploadHf.py docs --since 86400   # 최근 N초 안 mtime 변경분만
     python bulkUploadHf.py krxPricesV2 --force  # bitemporal v2 schema 일괄 push
 """
 
@@ -51,7 +48,6 @@ def _saveExistingCache(category: str, existing: set) -> None:
 
 
 CATEGORY_DIR = {
-    "docs": "dart/docs",
     "finance": "dart/finance",
     "report": "dart/report",
     "panel": "dart/panel",
@@ -70,7 +66,7 @@ NESTED_CATEGORIES = {"newsHeadlines", "newsEnriched", "newsGdelt", "panel"}
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("category", nargs="?", default="finance", help="finance/report/docs/krxPricesV2")
+    parser.add_argument("category", nargs="?", default="finance", help="finance/report/panel/krxPricesV2")
     parser.add_argument("--force", action="store_true", help="전체 재업로드 (schema 마이그레이션)")
     parser.add_argument(
         "--since",
@@ -103,7 +99,7 @@ def main():
             if not rf.endswith(".parquet"):
                 continue  # 폴더/비-parquet 제외
             # nested: 'dart/panel/000010/2025Q4.parquet' → '000010/2025Q4.parquet' relpath
-            # flat: 'dart/docs/foo.parquet' → 'foo.parquet'
+            # flat: 'dart/finance/foo.parquet' → 'foo.parquet'
             relpath = rf[len(dirPath) + 1 :] if rf.startswith(dirPath + "/") else rf
             s.add(relpath)
         return s

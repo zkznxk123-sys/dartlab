@@ -3,7 +3,7 @@
 core/registry 는 37개+ topic 을 자동 등록한다. 이 파일은 매 topic 을
 `c.panel(topic)` 으로 호출해 크래시/silent-None 을 잡는다.
 
-과거 회귀: sections topic 이 silent None → c.sections .raw.columns 크래시.
+과거 회귀: topic/panel 표면이 silent None → 후속 .columns 접근 크래시.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ _TOPIC_NONE_ALLOWED: frozenset[str] = frozenset(
         "dividend",  # 무배당 회사
         "otherFinance",  # 기타 재무 없음 가능
         # fixture 한계로 None 허용 (로컬 실데이터에서는 데이터 존재)
-        "business",  # 사업의내용 — fixture docs parquet 에 text 빈 상태
+        "business",  # 사업의내용 — fixture panel 데이터 한계
         "companyOverviewDetail",  # 회사개요 상세 — 동일
     }
 )

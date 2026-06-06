@@ -2,7 +2,7 @@
 # requires-python = ">=3.12"
 # dependencies = ["dartlab", "marimo"]
 # ///
-"""DART 한국 상장기업 탐색 — sections 중심 흐름.
+"""DART 한국 상장기업 탐색 — panel 중심 흐름.
 
 실행: marimo edit startMarimo/dartCompany.py
 """
@@ -24,15 +24,15 @@ def _():
 
 @app.cell
 def _(c):
-    # topic × period 수평화 DataFrame — 회사의 전체 지도
-    c.sections
+    # 회사의 topic catalog
+    c.topics
     return
 
 
 @app.cell
 def _(c):
-    # 이 회사의 topic 목록
-    c.topics
+    # topic × period panel view
+    c.panel("businessOverview")
     return
 
 

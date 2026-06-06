@@ -12,7 +12,8 @@ def test_list_and_describe_stages():
     from dartlab.pipeline import describeStages, listStages
 
     stages = listStages()
-    assert {"finance", "report", "docs", "panel", "krx", "macro", "news", "edgar"} <= set(stages)
+    assert {"finance", "report", "panel", "krx", "macro", "news", "edgar"} <= set(stages)
+    assert "docs" not in stages
     metas = describeStages()
     assert all({"category", "online", "uploadCategories", "label"} <= set(m) for m in metas)
 
@@ -31,7 +32,7 @@ def test_run_stage_nonzero_rc_isolated(monkeypatch):
     import dartlab.pipeline.stages.dart as dart
 
     monkeypatch.setattr(dart, "runScript", lambda *a, **k: 7)
-    res = dart.runDartRecent(category="docs", upload=False)
+    res = dart.runDartRecent(category="report", upload=False)
     assert res.report.err == 1 and "rc=7" in res.report.failures[0]
 
 
@@ -57,9 +58,9 @@ def test_run_pipeline_isolation(monkeypatch):
         return r
 
     monkeypatch.setattr(orch, "runStage", fakeRunStage)
-    results = orch.runPipeline(["finance", "report", "docs"], upload=False)
+    results = orch.runPipeline(["finance", "report", "panel"], upload=False)
     assert results["finance"].report.ok == 1
-    assert results["docs"].report.ok == 1
+    assert results["panel"].report.ok == 1
     assert results["report"].report.fail == 1 and "boom" in results["report"].report.failures[0]
 
 

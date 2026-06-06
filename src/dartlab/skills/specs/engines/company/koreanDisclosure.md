@@ -44,7 +44,7 @@ outputs:
 capabilityRefs:
   - Company.disclosure
   - Company.governance
-  - Company.sections
+  - Company.topics
   - Company.audit
   - Company.readFiling
   - Company.panel
@@ -52,7 +52,7 @@ knowledgeRefs:
   - engines.company
   - engines.company.disclosureEvent
   - engines.company.governance
-  - engines.company.sections
+  - engines.panel
   - engines.company.audit
 sourceRefs:
   - dartlab://skills/engines.company.koreanDisclosure
@@ -85,9 +85,9 @@ forbidden:
   - DART rceptNo 또는 section ref 없이 한국 공시 숫자/본문을 인용하지 않는다
 examples:
   - 삼성전자 사외이사 비율 - Company.governance
-  - NAVER 임원 5억 이상 보수 - Company.disclosure(category=임원변동) + 후속 sections
+  - NAVER 임원 5억 이상 보수 - Company.disclosure(category=임원변동) + 후속 panel
   - 삼성그룹 관계자거래 100억 이상 - Company.disclosure(category=대규모기업집단현황공시)
-  - 005930 메모리 ASP 분기 추세 - Company.sections + section query 사업의 내용
+  - 005930 메모리 ASP 분기 추세 - Company.panel("businessOverview") + topic query 사업의 내용
   - 셀트리온 별도 vs 연결 NI 차이 - Company.panel(IS basis=separate) + Company.panel(IS basis=consolidated)
 procedure:
   - 질문에서 한국 공시 종류 키워드 식별
@@ -111,8 +111,7 @@ gov = c.governance()
 events = c.disclosure(category="임원변동")
 
 # 사업보고서 segment narrative
-sections = c.sections
-narrative = sections.query("section == '사업의 내용'")
+narrative = c.panel("businessOverview")
 
 # 감사보고서
 audit = c.audit()
@@ -136,7 +135,7 @@ con = c.panel("IS", basis="consolidated")
 |---|---|---|---|
 | 기업지배구조보고서 (15 핵심지표) | `Company.governance` | dict | board · audit · disclosure 분기 |
 | 임원 변동 · 5억 이상 보수 | `Company.disclosure(category="임원변동")` | DataFrame | rceptNo · filedAt · title · formType |
-| 사업보고서 II 항 segment narrative | `Company.sections` | LazyFrame | period · topic · content · sourceRef |
+| 사업보고서 II 항 segment narrative | `Company.panel("businessOverview")` | DataFrame | period · topic · content · sourceRef |
 | 감사보고서 | `Company.audit` | dict | auditor · opinion · keyAuditMatters |
 | 별도재무제표 (parent-only) | `Company.panel("IS", basis="separate")` | DataFrame | account · value · period |
 | 연결재무제표 | `Company.panel("IS", basis="consolidated")` | DataFrame | account · value · period · subsidiary |

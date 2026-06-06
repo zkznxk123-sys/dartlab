@@ -389,8 +389,8 @@
       "level": 2
     },
     "assets": {
-      "sortOrder": 1900,
-      "level": 1
+      "sortOrder": 900,
+      "level": 0
     },
     "current_liabilities": {
       "sortOrder": 2000,
@@ -753,8 +753,8 @@
       "level": 2
     },
     "liabilities": {
-      "sortOrder": 2900,
-      "level": 1
+      "sortOrder": 1950,
+      "level": 0
     },
     "owners_of_parent_equity": {
       "sortOrder": 3000,
@@ -841,12 +841,12 @@
       "level": 1
     },
     "stockholders_equity": {
-      "sortOrder": 3900,
-      "level": 1
+      "sortOrder": 2995,
+      "level": 0
     },
     "total_liabilities_and_equity": {
       "sortOrder": 4001,
-      "level": 1
+      "level": 0
     },
     "current_derivative_liabilities": {
       "sortOrder": 4110,
@@ -1037,16 +1037,16 @@
       "level": 2
     },
     "total_assets": {
-      "sortOrder": 1900,
-      "level": 1
+      "sortOrder": 900,
+      "level": 0
     },
     "total_liabilities": {
-      "sortOrder": 2900,
-      "level": 1
+      "sortOrder": 1950,
+      "level": 0
     },
     "total_stockholders_equity": {
-      "sortOrder": 3900,
-      "level": 1
+      "sortOrder": 2995,
+      "level": 0
     },
     "trade_and_other_receivables": {
       "sortOrder": 1062,

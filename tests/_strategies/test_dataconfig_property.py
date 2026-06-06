@@ -24,7 +24,7 @@ class TestDataConfigProperty:
         assert isinstance(url, str)
         assert url.startswith("http")
 
-    @given(category=st.sampled_from(["docs"]))
+    @given(category=st.sampled_from(["panel"]))
     def test_hf_base_url_known_category(self, category: str) -> None:
         from dartlab.core.dataConfig import hfBaseUrl
 

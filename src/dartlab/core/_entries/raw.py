@@ -11,14 +11,6 @@ _RAW_ENTRIES: list[DataEntry] = [
     # raw — 원본 parquet
     # ═══════════════════════════════════════════════════════
     DataEntry(
-        name="rawDocs",
-        label="공시 원본",
-        category="raw",
-        dataType="dataframe",
-        description="공시 문서 원본 parquet. 가공 전 전체 테이블과 텍스트.",
-        requires="docs",
-    ),
-    DataEntry(
         name="rawFinance",
         label="XBRL 원본",
         category="raw",

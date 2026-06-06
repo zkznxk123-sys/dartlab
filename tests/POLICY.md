@@ -260,7 +260,7 @@ $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_out
 
 | 항목 | 위치 |
 |---|---|
-| 스키마 | `src/dartlab/core/schemas.py` (FinanceSchema · ReportSchema · DocsSchema) |
+| 스키마 | `src/dartlab/core/schemas.py` (FinanceSchema · ReportSchema) |
 | 회귀 | `tests/_schemas/test_finance_schema.py` (fixture 12 종 + drift reject) |
 | Production 게이트 | `DARTLAB_VALIDATE_SCHEMA=1` 환경변수 (production default OFF) |
 

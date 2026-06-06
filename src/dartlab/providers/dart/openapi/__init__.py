@@ -14,7 +14,7 @@ s.saveFinance("재무.csv", 2020, kr=True) # 한글 컬럼 저장
 호환 alias:
     from dartlab import Dart
 
-NOTE: Dart/OpenDart 파사드·ZipDocsCollector·korColumns 는 lazy ``__getattr__`` 노출 —
+NOTE: Dart/OpenDart 파사드·korColumns 는 lazy ``__getattr__`` 노출 —
 build(``build.saver``→``core.dartConstants``) ↔ facade 순환 import 회피. DartClient·키·
 DartApiError 는 gather fetch 전담(core.dartClient seam). zip 병렬 fetch 는 gather.dart.document.
 """
@@ -24,7 +24,7 @@ from __future__ import annotations
 # core 재노출(경량) — gather 가 fetch 전담, providers 소비자 호환용 seam.
 from dartlab.core.dartClient import DartApiError, DartClient
 
-# NOTE: Dart/OpenDart/ZipDocsCollector/korColumns 는 아래 ``__getattr__`` 로 런타임 lazy 재노출
+# NOTE: Dart/OpenDart/korColumns 는 아래 ``__getattr__`` 로 런타임 lazy 재노출
 # (``_LAZY`` 문자열 importlib) — providers↛gather 단방향 유지 위해 static import 는 두지 않는다.
 
 __all__ = [
@@ -34,7 +34,6 @@ __all__ = [
     "DartCompany",
     "DartClient",
     "DartApiError",
-    "ZipDocsCollector",
     "korColumns",
 ]
 
@@ -43,7 +42,6 @@ _LAZY: dict[str, str] = {
     "OpenDartCompany": "dartlab.gather.dart.dart",
     "Dart": "dartlab.gather.dart.dart",
     "DartCompany": "dartlab.gather.dart.dart",
-    "ZipDocsCollector": "dartlab.gather.dart.zipCollector",
     "korColumns": "dartlab.providers.dart.build.saver",
 }
 

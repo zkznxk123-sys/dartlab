@@ -28,7 +28,7 @@ def mockCompany():
     c.stockCode = "005930"
     c.corpName = "삼성전자"
     c._hasFinance = True
-    c._hasDocs = True
+    c._hasPanel = True
     c._hasReport = True
     c._cache = {"_finance_q_CFS": ({"IS": {"sales": [1, 2, 3]}, "BS": {}, "CF": {}}, ["2022_Q1"])}
     c._buildFinanceSeries = MagicMock(return_value=None)
@@ -103,7 +103,7 @@ def test_exportToExcel_default_filename(mockCompany):
 def test_exportToExcel_no_data_raises(mockCompany):
     mockCompany._hasFinance = False
     mockCompany._hasReport = False
-    mockCompany._hasDocs = False
+    mockCompany._hasPanel = False
     mockCompany.report = None
 
     with pytest.raises(ValueError, match="내보낼 데이터 없음"):

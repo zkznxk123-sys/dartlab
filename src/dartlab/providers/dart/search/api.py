@@ -4,8 +4,8 @@
 모든 함수 정의 위치. `__init__.py` 는 thin re-export 만 (룰 4).
 
 scope 분리 검색:
-- title: report_nm + section_title ngram (제목형 쿼리)
-- content: section_content word BM25 (본문형 쿼리)
+- title: report_nm + panel section_title ngram (제목형 쿼리)
+- content: panel/allFilings word BM25 (본문형 쿼리)
 - auto (기본): 자동 판별
 """
 
@@ -88,7 +88,7 @@ def search(
                 "info": [
                     f"'{corp}'은 US ticker입니다. dartlab.search()는 DART(한국) 공시 전용입니다.",
                     "SEC EDGAR 공시 검색: https://efts.sec.gov/LATEST/search-index?q=...",
-                    "또는 Company('AAPL').docs.sections로 10-K/10-Q 섹션을 조회하세요.",
+                    "또는 Company('AAPL').panel(...)로 10-K/10-Q topic을 조회하세요.",
                 ]
             }
         )
@@ -182,15 +182,15 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
     return None, None
 
 
-def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = False, **kwargs) -> int:
-    """Ngram (title) 인덱스 빌드 — allFilings parquet + (옵션) docs sections 통합.
+def buildIndex(parquetPaths: list[str] | None = None, *, includePanel: bool = False, **kwargs) -> int:
+    """Ngram (title) 인덱스 빌드 — allFilings parquet + (옵션) panel 통합.
           시 default allFilings.parquet 1 종 처리.
-        - ``includeDocs=True`` → sections parquet 도 인덱싱 (제목 + section_title ngram).
+        - ``includePanel=True`` → panel 도 인덱싱 (제목 + sectionLeaf ngram).
         - 운영자 admin 함수 — 일반 사용자 (AI) 가 직접 호출 X.
 
     Args:
         parquetPaths: 인덱싱 대상 parquet 경로 list. None → default.
-        includeDocs: True → sections 도 포함. 기본 False.
+        includePanel: True → panel 도 포함. 기본 False.
         **kwargs: ngramIndex.buildNgramIndex 로 forward.
 
     Returns:
@@ -198,18 +198,18 @@ def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = Fal
 
     Example:
         >>> # buildIndex()  # default
-        >>> # buildIndex(includeDocs=True)  # 전체
+        >>> # buildIndex(includePanel=True)  # 전체
 
     Raises:
         없음.
     """
     from dartlab.providers.dart.search.ngramIndex import buildNgramIndex
 
-    return buildNgramIndex(parquetPaths, includeDocs=includeDocs, **kwargs)
+    return buildNgramIndex(parquetPaths, includePanel=includePanel, **kwargs)
 
 
 def rebuildIndex(**kwargs) -> int:
-    """전체 인덱스 리빌드 — ``buildIndex(includeDocs=True)`` 단축.
+    """전체 인덱스 리빌드 — ``buildIndex(includePanel=True)`` 단축.
 
     Args:
         **kwargs: buildIndex 로 forward.
@@ -223,7 +223,7 @@ def rebuildIndex(**kwargs) -> int:
     Raises:
         없음.
     """
-    return buildIndex(includeDocs=True, **kwargs)
+    return buildIndex(includePanel=True, **kwargs)
 
 
 def rebuildContent(**kwargs) -> int:

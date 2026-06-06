@@ -54,7 +54,7 @@ def Company(stockCode: str) -> CompanyProtocol:
         - 메타: topics, index, filings(), market, currency
 
     Requires:
-        DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).
+        DART: Company/loadData 단건 자동 다운로드 또는 collect 데이터.
         EDGAR: 인터넷 연결 (On-demand 수집).
 
     AIContext:

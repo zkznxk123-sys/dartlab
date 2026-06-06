@@ -334,7 +334,7 @@ def normalizeSectionTitle(title: str) -> str:
         - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel(...)`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal section mapper — AI 직접 호출 X.
@@ -397,7 +397,7 @@ def loadSectionMappings() -> dict[str, str]:
         - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel(...)`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal section mapper — AI 직접 호출 X.
@@ -461,7 +461,7 @@ def mapSectionTitle(title: str) -> str:
         - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel(...)`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal section mapper — AI 직접 호출 X.
@@ -538,7 +538,7 @@ def measureMappingRate(titles: list[str]) -> dict:
         - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.panel(...)`` — 본 모듈 직접 호출 X.
 
     AIContext:
         internal section mapper — AI 직접 호출 X.

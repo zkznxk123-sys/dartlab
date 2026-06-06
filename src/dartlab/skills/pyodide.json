@@ -30,7 +30,7 @@
       "id": "engines.company",
       "title": "Company",
       "category": "engines",
-      "status": "limited",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -41,7 +41,7 @@
       "category": "engines",
       "status": "limited",
       "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
         "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
       ],
       "requiredSetup": [
@@ -54,9 +54,9 @@
     },
     {
       "id": "engines.company.docsInternals",
-      "title": "docsInternals — sections 파이프라인 + 테이블 수평화 + Rust 포팅 R&D",
+      "title": "Company Docs Internals",
       "category": "engines",
-      "status": "limited",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -149,7 +149,7 @@
       "id": "engines.edgar.docs",
       "title": "edgar.docs — SEC 공시 sections + form-native payload",
       "category": "engines",
-      "status": "limited",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -362,7 +362,7 @@
       "category": "engines",
       "status": "limited",
       "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
         "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
         "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
       ],
@@ -379,7 +379,7 @@
       "category": "engines",
       "status": "supported",
       "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
         "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
         "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
       ],
@@ -542,7 +542,7 @@
       "id": "operation.philosophy",
       "title": "Philosophy — dartlab 사상 SSOT",
       "category": "operation",
-      "status": "supported",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -581,7 +581,7 @@
       "id": "operation.stability",
       "title": "API 안정성 정책 (tier · deprecation · semver)",
       "category": "operation",
-      "status": "supported",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -660,7 +660,7 @@
       "id": "runtime.providerProtocol",
       "title": "Provider Protocol 동일 surface — 3-regulator drop-in",
       "category": "runtime",
-      "status": "limited",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -729,7 +729,7 @@
       "id": "start.firstAnalysisRecipe",
       "title": "첫 회사 분석 recipe — install → quickStart → Company → Analysis",
       "category": "start",
-      "status": "limited",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -738,7 +738,7 @@
       "id": "start.quickStart",
       "title": "DartLab 8 단계 빠른 시작",
       "category": "start",
-      "status": "limited",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -747,7 +747,7 @@
       "id": "start.useSkillsCatalog",
       "title": "Skill catalog 기반 작업 시작",
       "category": "start",
-      "status": "supported",
+      "status": "observed",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": [

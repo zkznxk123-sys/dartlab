@@ -123,7 +123,6 @@ def test_facade_company_isinstance_protocol():
 # DART 전용으로 의식적으로 제외한 메소드 (사유 주석 필수)
 _DART_ONLY_EXEMPT: set[str] = {
     # ── 데이터 소스 구조 차이 (DART는 로컬 parquet, EDGAR는 on-demand API) ──
-    "rawDocs",  # DART 로컬 docs parquet 직접 접근
     "rawFinance",  # DART 로컬 finance parquet 직접 접근
     "rawReport",  # DART 로컬 report parquet 직접 접근
     "update",  # DART 증분 수집 (EDGAR는 on-demand API)
@@ -135,20 +134,20 @@ _DART_ONLY_EXEMPT: set[str] = {
     "resolve",  # 종목코드/회사명 해석 (DART listing)
     "search",  # 회사명 검색 (DART listing)
     "listing",  # 전체 상장사 목록 (DART listing)
-    "topicSummaries",  # topic 요약 (DART docs 전용 구조)
+    "topicSummaries",  # topic 요약 (DART panel 전용 구조)
     "sector",  # KRX 섹터 벤치마크 (US 별도 인프라 필요)
     "sectorParams",  # KRX 섹터 파라미터
     # ── 데이터 구조 차이 (DART XBRL vs EDGAR XBRL 형태 상이) ──
     "sceMatrix",  # DART SCE matrix (EDGAR SCE 구조 다름)
-    # ── 산업엔진 (DART docs 공정/거래처 텍스트 기반, SEC에 동등 구조 없음) ──
-    "industry",  # DART docs 밸류체인 분석 (SEC 공정 구조화 데이터 없음)
+    # ── 산업엔진 (DART panel 공정/거래처 텍스트 기반, SEC에 동등 구조 없음) ──
+    "industry",  # DART panel 밸류체인 분석 (SEC 공정 구조화 데이터 없음)
     # ── DART 공시 수평화 격자 (SEC EDGAR 등가 layer 미구현) ──
     "panel",  # DART 공시 수평화 격자 (panel.parquet) — EDGAR panel(marketNs="us")은 후속 미구현
-    # ── DART docs/report 구조화 accessor 전용 (SEC 동등 구조 없음) ──
+    # ── DART panel/report 구조화 accessor 전용 (SEC 동등 구조 없음) ──
     "executivePay",  # DART 임원 보수 (사업보고서 구조화) — SEC DEF 14A 구조 상이
     "relatedPartyTx",  # DART 특수관계자 거래 (사업보고서) — SEC 구조 상이
-    "notesDetail",  # DART 주석 상세 테이블 (docs sections) — SEC 미지원
-    "flow",  # DART 자금/거래 흐름 docs accessor — SEC 동등 구조 없음
+    "notesDetail",  # DART 주석 상세 테이블 (panel) — SEC 미지원
+    "flow",  # DART 자금/거래 흐름 panel accessor — SEC 동등 구조 없음
 }
 
 

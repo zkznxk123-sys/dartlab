@@ -25,11 +25,11 @@
   <rect x="60" y="490" width="960" height="180" rx="12" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
   <circle cx="100" cy="530" r="22" fill="#ea580c"/>
   <text x="100" y="538" text-anchor="middle" font-size="20" font-weight="700" fill="#ffffff">3</text>
-  <text x="140" y="530" font-size="18" font-weight="700" fill="#7c2d12">선택 — 전체 미리 받고 싶으면 한 줄 더</text>
+  <text x="140" y="530" font-size="18" font-weight="700" fill="#7c2d12">선택 — 대량 데이터가 필요하면 로컬 수집</text>
   <rect x="140" y="550" width="860" height="100" rx="6" fill="#0f172a"/>
-  <text x="160" y="578" font-size="13" font-family="monospace" fill="#fde68a">dartlab.downloadAll("scan")     # 271MB 미리 받아두기</text>
-  <text x="160" y="602" font-size="13" font-family="monospace" fill="#fde68a">dartlab.downloadAll("finance")  # 2GB 한 번에</text>
-  <text x="160" y="626" font-size="13" font-family="monospace" fill="#fde68a">dartlab.downloadAll()           # 전부 — 10GB+</text>
+  <text x="160" y="578" font-size="13" font-family="monospace" fill="#fde68a">dartlab collect --scan all      # scan 프리빌드</text>
+  <text x="160" y="602" font-size="13" font-family="monospace" fill="#fde68a">dartlab sync finance --no-upload # finance 로컬 수집</text>
+  <text x="160" y="626" font-size="13" font-family="monospace" fill="#fde68a">dartlab sync --all --no-upload  # recent set 전체</text>
 
   <text x="60" y="705" font-size="13" fill="#475569">안 받아도 된다. `c.show("IS")` 호출되는 순간 해당 종목 parquet 2MB만 자동으로 따라온다.</text>
 </svg>

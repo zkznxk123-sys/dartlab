@@ -10,7 +10,7 @@ import os
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--category", required=True, help="쉼표 구분 (예: finance,report,docs)")
+    p.add_argument("--category", required=True, help="쉼표 구분 (예: finance,report,panel)")
     p.add_argument("--data-dir", default=os.environ.get("DARTLAB_DATA_DIR", "./data"))
     args = p.parse_args()
 

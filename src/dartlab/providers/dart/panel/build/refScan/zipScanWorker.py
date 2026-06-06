@@ -7,8 +7,7 @@ LLM Specifications:
     AntiPatterns:
         - zip 안 여러 XML 가정 금지 — DART zip 1 개당 XML 1 개 (실측 확인).
         - period 추출 시 zip filename 만 의존 금지 — rcept_no.xml 양식이 변경
-          가능. ``rcept_no`` 별도 보유 + period 는 caller (builder)
-          또는 docs.parquet 의 메타 통해 매핑.
+          가능. ``rcept_no`` 별도 보유 + period 는 caller (builder) 메타로 매핑.
         - rcept_no → period 매핑은 본 모듈에서 안 함. 본 모듈은 zip path +
           rcept_no 만 carry.
     OutputSchema:
@@ -160,8 +159,7 @@ def scanZipFiles(
         AntiPatterns:
             - corp 추출 시 zipPath.parent.name 가정 — 호출자가 표준 구조
               유지 책임 (data/original/dart/docs/{code}/{rcept_no}.zip).
-            - period 추출은 baseline 에서 NULL — rcept_no → period 매핑은
-              docs.parquet 또는 별 lookup 필요.
+            - period 추출은 baseline 에서 NULL — rcept_no → period 매핑은 caller 메타가 담당.
         OutputSchema:
             - polars DataFrame, 11 col.
         Prerequisites:

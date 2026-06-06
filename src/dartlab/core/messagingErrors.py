@@ -141,9 +141,7 @@ def handleError(error: Exception, *, feature: str | None = None) -> str:
         return onTunnelStartFailed(errStr[-500:])
 
     if isinstance(error, FileNotFoundError):
-        return (
-            f"파일을 찾을 수 없습니다: {errStr}\n  dartlab.downloadAll() 또는 dartlab.collect()로 데이터를 준비하세요."
-        )
+        return f"파일을 찾을 수 없습니다: {errStr}\n  dartlab.collect() 또는 Company/loadData 자동 경로로 데이터를 준비하세요."
 
     if isinstance(error, PermissionError):
         return f"권한 오류: {errStr}\n  dartlab.setup()으로 인증을 확인하세요."

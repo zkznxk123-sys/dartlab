@@ -21,7 +21,7 @@ dartlab mcp                          # MCP 서버 진입
 | `show` | Company.show 등가 |
 | `analyze` | 분석 엔진 (analysis / credit / macro / quant / industry) |
 | `mcp` | MCP server 진입 (외부 LLM 도구 등록) |
-| `download` | HF dataset 다운로드 (`downloadAll`) |
+| `download` | 특정 종목 데이터 준비 |
 | `setup` | OAuth / API 키 셋업 |
 
 ---

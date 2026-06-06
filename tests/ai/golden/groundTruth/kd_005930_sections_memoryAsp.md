@@ -3,15 +3,15 @@ caseId: kd_005930_sections_memoryAsp
 stockCode: '005930'
 disclosure: 사업보고서 II 항
 target: 005930 (삼성전자)
-expectedApi: Company.sections
-goldenSubSkill: engines.company.sections
+expectedApi: Company.panel
+goldenSubSkill: engines.panel
 ---
 
 # Ground truth — 005930 메모리 ASP narrative 분기별
 
 ## 기대 routing
 
-`사용자 query` → ReadSkill (intent boost "메모리 ASP" matches `engines.company.sections`) → `EngineCall(apiRef="Company.sections", args={"stockCode": "005930"})` → LazyFrame filter `section == "사업의 내용"` + topic contains "메모리".
+`사용자 query` → ReadSkill (intent boost "메모리 ASP" matches `engines.panel`) → `EngineCall(apiRef="Company.panel", args={"stockCode": "005930", "topic": "businessOverview"})` → panel text filter `sectionLeaf` / `topic` contains "메모리".
 
 ## 기대 답변 골격
 

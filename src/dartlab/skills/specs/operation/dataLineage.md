@@ -87,7 +87,7 @@ L3: axis / recipe
 | source | provider | parquet | axis 영향 |
 |---|---|---|---|
 | DART finance | dart/ | bs/is/cf/cis/sce | analysis 22 + credit + quant 일부 |
-| DART sections | dart/ | section_content | search + sections deep dive |
+| DART panel text | dart/ | panel contentRaw/content | search + panel deep dive |
 | DART panel | dart/ | panel/{code}/{period} (14-col) + _index + _label | 공시 수평화 보드 (회사내·회사간) |
 | EDGAR companyfacts XBRL | edgar/ | finance/* | edgar finance 대문자 topic |
 | EDGAR full-submission text | edgar/ | panel/{ticker}.parquet | 공시 수평화 보드 + 소문자 native 재무 키 |
@@ -103,7 +103,7 @@ L3: axis / recipe
              → buildPanel(gather, lxml/zip) → data/dart/panel/{code}/{period}.parquet
 
 (B) online 1패스 트랙 — 증분·신규분기 (디스크 zip 0)
-    docs.parquet rcept → streamZipBytes(providers, 메모리) → buildPanelFromStream(gather)
+    DART filings rcept → streamZipBytes(gather, 메모리) → buildPanelFromStream(gather)
                        → data/dart/panel/{code}/{period}.parquet   (A 와 바이트 동형)
 
 공통: 정렬키 = core.panel.canonicalKey (native ACLASS scope-strip, 손 매핑 0)

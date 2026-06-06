@@ -48,10 +48,10 @@ class Scan:
         - network: 상장사 관계 네트워크 (출자/지분/계열)
 
     Requires:
-        데이터: 축별로 다름 (dartlab.downloadAll() 참조)
+        데이터: 축별로 다름 (prebuild 또는 collect 데이터)
         - governance/workforce/capital/debt/audit/insider: report
         - account/ratio: finance
-        - network/digest: docs
+        - network/digest: panel
 
     AIContext:
         시장 전체 비교/순위 질문에 사용. 개별 종목 분석은 Company 메서드 사용.

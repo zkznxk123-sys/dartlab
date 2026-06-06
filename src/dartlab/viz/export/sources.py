@@ -112,7 +112,7 @@ def _probeFinance(c: Company, entry: DataEntry) -> SourceItem:
 
 def _probeNotes(c: Company, entry: DataEntry) -> SourceItem:
     """notes 카테고리 엔트리 프로브 (lazy — 실제 로드하지 않음)."""
-    available = c._hasDocs
+    available = c._hasPanel
     return SourceItem(
         name=entry.name,
         label=entry.label,
@@ -125,7 +125,7 @@ def _probeNotes(c: Company, entry: DataEntry) -> SourceItem:
 
 def _probeRaw(c: Company, entry: DataEntry) -> SourceItem:
     """raw 카테고리 엔트리 프로브."""
-    reqMap = {"docs": c._hasDocs, "finance": c._hasFinance, "report": c._hasReport}
+    reqMap = {"panel": c._hasPanel, "finance": c._hasFinance, "report": c._hasReport}
     available = reqMap.get(entry.requires or "", False)
     return SourceItem(
         name=entry.name,
@@ -139,10 +139,8 @@ def _probeRaw(c: Company, entry: DataEntry) -> SourceItem:
 
 def _probeAnalysis(c: Company, entry: DataEntry) -> SourceItem:
     """analysis 카테고리 엔트리 프로브."""
-    if entry.requires == "finance":
-        available = c._hasFinance
-    else:
-        available = True
+    reqMap = {"panel": c._hasPanel, "finance": c._hasFinance, "report": c._hasReport}
+    available = reqMap.get(entry.requires or "", True)
     return SourceItem(
         name=entry.name,
         label=entry.label,
@@ -158,7 +156,7 @@ def _probeModule(c: Company, entry: DataEntry) -> SourceItem:
 
     실제 데이터를 getattr로 로드하여 available, columns, rowCount를 채운다.
     """
-    reqMap = {"docs": c._hasDocs, "finance": c._hasFinance, "report": c._hasReport}
+    reqMap = {"panel": c._hasPanel, "finance": c._hasFinance, "report": c._hasReport}
     reqOk = reqMap.get(entry.requires or "", True)
     if not reqOk:
         return SourceItem(

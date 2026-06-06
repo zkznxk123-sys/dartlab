@@ -34,8 +34,6 @@
     "src/dartlab/gather/dart/client.py::hasKey",
     "src/dartlab/gather/dart/client.py::makeClient",
     "src/dartlab/gather/dart/client.py::resolveKeys",
-    "src/dartlab/gather/dart/collector.py::collect",
-    "src/dartlab/gather/dart/collector.py::collectMultiple",
     "src/dartlab/gather/dart/collectorStatus.py::collectionStats",
     "src/dartlab/gather/dart/collectorStatus.py::listUncollected",
     "src/dartlab/gather/dart/collectorStatus.py::listUncollectedKind",

@@ -76,7 +76,7 @@ procedure:
   - 잡는 순간 `Panel(code)`·`c.panel` 이 wide pl.DataFrame — shape/filter/columns 등 polars 연산 그대로.
   - 섹션 검색은 `panel("재고")`(한글) 또는 `panel("NT_D826380")`(canonicalKey). 기본 raw, plain 은 `tag=False`.
   - 본문 전체검색(이름표 아닌 내용)은 `panel.search("키워드")` — 별 메서드(의도 분리).
-  - 소스는 대소문자로 가른다. native 재무제표는 소문자 `panel("is"|"bs"|"cf"|"cis"|"sce", freq=)` — XBRL 정밀(2022+) + 옛 표 항목명 파싱(과거 2011~) 통합 statement, panel 자급(docs.parquet 0). finance 는 대문자 `panel("IS", freq=)` — 파사드가 `c.show` 주입(deep history). SCE=자본변동표(EF), CIS=포괄손익(IS3).
+  - 소스는 대소문자로 가른다. native 재무제표는 소문자 `panel("is"|"bs"|"cf"|"cis"|"sce", freq=)` — XBRL 정밀(2022+) + 옛 표 항목명 파싱(과거 2011~) 통합 statement, panel 자급. finance 는 대문자 `panel("IS", freq=)` — 파사드가 `c.show` 주입(deep history). SCE=자본변동표(EF), CIS=포괄손익(IS3).
   - freq 는 입도(year/quarter/ytd), 소스 스위치 아님 — native·finance 둘 다 받음. finance 는 Y/Q/YTD 로 매핑.
   - report(dividend 등) 정형공시도 facade `c.panel("dividend")` 가 주입. raw 공시 강제는 `source="raw"`.
   - 빌드는 운영자/CI — 로컬 zip `python -m dartlab.providers.dart.panel.build`, 또는 online `.github/scripts/sync/onlinePanel.py`.
@@ -194,7 +194,7 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
 
 메인 16-col blob 격자(wide 정체성 불가침)는 안 건드리고, 재무 5표(BS/IS/CIS/CF/SCE)를 **별개 parquet 파일
 없이** panel.parquet 의 5표 row `contentRaw`(표 XML)에서 **read-time 분해**(`cell._cellsFromPanel` →
-`build/cell.cellsFromContent` 함수 lazy lxml). **소스 = panel.parquet 단일**(zip 재처리 0, **docs.parquet 0**,
+`build/cell.cellsFromContent` 함수 lazy lxml). **소스 = panel.parquet 단일**(zip 재처리 0, 별도 DART 문서 parquet 0,
 별 panelCell artifact 0). 체인 zip → buildPanel → panel.parquet → (read 시) `cellsFromContent` 분해 →
 `cell.readStatement` → `c.panel("is", freq=)`(소문자, panel 자급, 단일 artifact). 콜드: 모듈 top-level lxml 0
 (분해는 panel("is") 호출 시에만 lazy 로드). finance(대문자 IS)는 파사드 attach(별개).
@@ -345,7 +345,7 @@ python -X utf8 -m dartlab.providers.dart.panel.build --codes 005930,000660
 python .github/scripts/sync/buildPanel.py --changed                       # sync 증분(로컬 zip)
 
 # 빌드 트랙 B — online 1패스 (DART API → 메모리 → parquet, 디스크 zip 0)
-python .github/scripts/sync/onlinePanel.py --changed                      # docs.parquet rcept fetch
+python .github/scripts/sync/onlinePanel.py --changed                      # DART filings rcept fetch
 
 # 정부 서식 뼈대(spine) 생성 — 기준 종목 최신 사업보고서 문서순서·트리 → spine/spineData.py (git 추적)
 python -X utf8 -m dartlab.providers.dart.panel.build --spine --codes 005930,000660

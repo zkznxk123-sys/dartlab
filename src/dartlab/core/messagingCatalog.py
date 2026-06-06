@@ -15,9 +15,6 @@ SIMPLE: dict[str, str] = {
     "download:failed_single": "\u2717 {stockCode} ({label}) 다운로드 실패: {error}",
     "download:failed_item": "\u2717 {name} 실패: {error}",
     "download:refreshed": "\u2713 {stockCode} 데이터 갱신 완료",
-    "download_all:hf_start": "{label} \u2014 HuggingFace ({repo}/{dir}) 전체 다운로드 시작...",
-    "download_all:hf_retry": "\u26a0 다운로드 재시도 ({attempt}/{maxRetries})... {error}",
-    "download_all:hf_done": "\u2713 {label} 전체 다운로드 완료 \u2014 {count} \u2192 {dataDir}",
     "collect:start": "{stockCode} ({label}) \u2192 로컬에 없음. DART API로 수집 중... ({keyCount}키 {mode})",
     "collect:done": "\u2713 {label} 수집 완료 ({sizeStr})",
     "collect:skip": "\u2713 {stockCode} ({label}) 이미 수집됨",
@@ -61,16 +58,15 @@ SIMPLE: dict[str, str] = {
     "scan:signal_start": "서술형 시그널 스캔: {count}사",
     "scan:network_health": "그룹 건전성 분석 중...",
     "scan:prebuild_check": "scan 프리빌드 데이터 확인 중... ({dir})",
-    "scan:prebuild_missing": "scan 프리빌드 데이터 없음 \u2192 HuggingFace에서 다운로드 (약 271MB, 시간이 걸릴 수 있습니다)",
+    "scan:prebuild_missing": "scan 프리빌드 데이터 없음 — 배치 prebuild 또는 collect 데이터가 필요합니다",
     "scan:prebuild_ready": "\u2713 scan 프리빌드 준비 완료 ({fileCount}개 파일)",
     "scan:prebuild_failed": "\u26a0 scan 프리빌드 다운로드 실패: {error} \u2014 종목별 fallback 사용 (느림)",
     "scan:prebuild_incomplete": (
-        "⚠ scan 프리빌드 다운로드 불완전 — 누락 파일: {missing}. "
-        "네트워크 확인 후 dartlab.downloadAll('scan', forceUpdate=True) 로 재시도하세요."
+        "⚠ scan 프리빌드 불완전 — 누락 파일: {missing}. 배치 prebuild 산출물 또는 collect 데이터가 필요합니다."
     ),
     "scan:fallback_insufficient": (
         "⚠ scan/finance.parquet 프리빌드가 없어 종목별 파일 {count}개만으로 fallback. "
-        "전종목(~2700)이 아닌 부분 결과입니다. dartlab.downloadAll('scan') 으로 프리빌드를 받으세요."
+        "전종목(~2700)이 아닌 부분 결과입니다. 배치 prebuild 산출물이 필요합니다."
     ),
     "edgar:bulk_start": "EDGAR {kind} 배치 수집 시작 \u2014 {total}종목 (시간이 걸릴 수 있습니다)",
     "edgar:bulk_done": "\u2713 EDGAR {kind} 배치 완료 (성공 {success} / 실패 {failed} / {elapsedSec:.0f}초)",
@@ -84,7 +80,7 @@ SIMPLE: dict[str, str] = {
     "data:stale_warning": "\u26a0 로컬 데이터가 {ageDays}일째 갱신되지 않았습니다. 네트워크 또는 HuggingFace 접근을 확인하세요.",
     "hint:market_data_needed": (
         "\u26a0 {category} 데이터가 로컬에 없습니다. {fn}은 전체 시장 데이터가 필요합니다.\n"
-        "  dartlab.downloadAll('{category}')"
+        "  dartlab.collect() 또는 배치 prebuild 데이터를 준비하세요."
     ),
     "edgar:universe_update": "SEC listed universe 갱신 중...",
     "edgar:universe_save": "저장 완료: {path}",
@@ -92,8 +88,8 @@ SIMPLE: dict[str, str] = {
     "edgar:collect_exhausted": "EDGAR 수집 키 소진 — 일부 미수집 (재시도 권장)",
     "edgar:docs_skip_deprecated": "EDGAR {ticker} docs.parquet emit 생략 ({reason})",
     "hint:no_docs": "{stockCode} docs 데이터 없음 \u2192 {prop} 사용 불가. dartlab.Company('{stockCode}')로 자동 다운로드 또는 dartlab.collect('{stockCode}')",
-    "hint:no_finance": "{stockCode} finance 데이터 없음 \u2192 {prop} 사용 불가. dartlab.downloadAll('finance') 또는 dartlab.collect('{stockCode}')",
-    "hint:no_report": "{stockCode} report 데이터 없음 \u2192 {prop} 사용 불가. dartlab.downloadAll('report')",
+    "hint:no_finance": "{stockCode} finance 데이터 없음 \u2192 {prop} 사용 불가. dartlab.collect('{stockCode}') 또는 Company 자동 다운로드 경로를 확인하세요.",
+    "hint:no_report": "{stockCode} report 데이터 없음 \u2192 {prop} 사용 불가. dartlab.collect('{stockCode}') 또는 Company 자동 다운로드 경로를 확인하세요.",
     "hint:no_ai": "AI provider 미설정 \u2192 {fn} 사용 불가. dartlab.setup()으로 설정하세요.",
 }
 

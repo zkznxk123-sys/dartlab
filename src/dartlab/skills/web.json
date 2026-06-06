@@ -339,7 +339,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.show'.",
+      "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.panel'.",
       "whenToUse": [
         "Company",
         "company",
@@ -391,7 +391,7 @@
         "engines.story"
       ],
       "linkedSkills": [
-        "engines.company.sections",
+        "engines.panel",
         "engines.analysis",
         "engines.scan",
         "engines.story",
@@ -406,8 +406,8 @@
       ],
       "procedure": [
         "dartlab.Company(code) 로 종목코드 또는 ticker 로 facade 생성.",
-        "c.sections 또는 c.topics 로 사용 가능한 topic 확인.",
-        "c.show(topic) 으로 단일 topic 본문 (source priority — finance > report > docs).",
+        "c.topics 로 사용 가능한 topic 확인.",
+        "c.panel(topic) 으로 단일 topic 본문 (source priority — finance > report > docs).",
         "깊이 분석은 c.analysis · c.credit · c.quant · c.macro · c.story 같은 하위 엔진.",
         "답변에 target · period · topic · tableRef · valueRef · dateRef · executionRef 묶음."
       ],
@@ -419,7 +419,8 @@
         "tableRef",
         "valueRef",
         "dateRef",
-        "executionRef"
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "대상 기업",
@@ -445,7 +446,7 @@
         "dartlab.Company 사용법",
         "005930 분석 시작",
         "AAPL EDGAR 재무 분석",
-        "단일 기업 sections 가로화",
+        "단일 기업 topic catalog 확인",
         "기간 간 텍스트 변화 (diff) 추적"
       ],
       "runtimeCompatibility": {
@@ -467,7 +468,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "## 엔진 역할\n\n`Company`는 DartLab의 단일 기업 facade다. 사용자는 종목코드나 ticker로 `Company`를 만들고, 이 객체에서 원자료 조회, 공시 탐색, 분석, 신용, gather, quant, macro, story를 호출한다.\n\n한국 DART 회사와 미국 EDGAR 회사 모두 같은 facade 패턴을 따른다. 세부 topic/컬럼은 시장과 provider별로 다를 수 있으므로 반환값의 source와 기준일을 확인한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nraw = c.panel(\"BS\")\nselected = c.select(\"매출액\")\ntrace = c.trace(\"영업이익\")\n\nanalysis = c.analysis(\"financial\", \"수익성\")\ncredit = c.credit()\nprice = c.gather(\"price\")\nquant = c.quant(\"모멘텀\")\nmacro = c.macro(\"사이클\")                          # 시장 매크로 (사이클/위기/시나리오/유동성/심리)\nsensitivity = c.analysis(\"macro\", \"매크로민감도\")  # 기업 단위 매크로 민감도는 analysis 엔진\nstory = c.story()\nindustry = c.industry()\n```\n\n## 강행 호출 룰 (agent 답변 품질 회귀 차단)\n\n단일 종목 질문은 본 엔진이 1 차 진입점. 다음 4 룰 강행:\n\n1. **`EngineCall(apiRef=\"Company.panel\", args={\"stockCode\": \"...\", \"topic\": \"...\"})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.\n2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `\\`table:Company.panel:005930\\`` 형식 backtick 또는 `<tableRef:id>` 각괄호.\n3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.panel 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.\n4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.panel 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.\n\n## 호출 동작\n\nCompany 생성 시 target과 market/provider를 확정한다. 이후 `show/select/trace`는 원자료 조회, `analysis/credit/quant/macro/story`는 하위 엔진 호출, `gather`는 보조 데이터 수집, `disclosure/liveFilings/readFiling`은 공시 접근을 담당한다.\n\n무인자 또는 topic 누락 호출은 가능한 topic/axis 가이드를 반환할 수 있다. 데이터가 없으면 결손을 0으로 채우지 않고 빈 DataFrame, `None`, flags, 제한 메시지로 표현한다.\n\n### `c.panel()` 응답 data 의 자동 부착 필드 (단일 종목 답변의 1 차 진입점)\n\n`c.panel(topic)` 의 반환 dict (server agent/MCP 경유 시 `EngineCall(apiRef=\"Company.panel\")` 결과의 `data`) 에는 원자료 외에 다음이 자동 부착된다 — 별도 도구 호출 없이 그대로 인용:\n\n| key | 내용 | 사용처 |\n| --- | --- | --- |\n| `dcrBadge.grade` · `dcrBadge.score` · `dcrBadge.healthScore` · `dcrBadge.outlook` | dCR 등급 + 위험/건전성 점수 + 전망 | 답변 헤더 chip · 신용 한 줄 결론 |\n| `dcrBadge.axes` | **7 축 완전 형태** — 각 항목 `{name, weight, score}` (채무상환 25w/X / 자본구조 20w/X / 유동성 15w/X / 현금흐름 15w/X / 사업안정성 10w/X / 재무신뢰성 10w/X / 공시 5w/X) | 7 축 약점 분해 — 추가 `c.credit()` 호출 불필요 |\n| `dcrBadge.confidence` · `dcrBadge.confidenceMethod` | 신뢰도 (0-100, \"ratio\" 등) | `[conf:N]` chip |\n| `industryBadge.industryId` · `industryBadge.industryName` · `industryBadge.stageName` · `industryBadge.phase` | 산업 식별 + 라이프사이클 단계 (도입·성장·성숙·재도약·쇠퇴) | 답변 헤더 chip · 산업 맥락 |\n| `industryBadge.peers` | 같은 산업 노드의 동종 종목 list | 비교 후보 |\n\n**가드** — 7 축 점수가 `dcrBadge.axes` 에 *이미 있다*. \"7 축 약점 / 점수 차이\" 질문에 `EngineCall(\"credit\")` 재호출 금지 (반환은 axis 가이드 metadata 만 — 실제 점수 아님). 약점 분해 양식: `약점 = weight × score 기여도`. 예: 재무신뢰성 10% × 25.0 = 2.50, 채무상환 25% × 6.77 = 1.69.\n\n### stockCode resolve 실패 시 행동 (회복 절차)\n\n`c = dartlab.Company(code)` 가 코드 미발견 / 비상장 / 데이터셋 미수집 면 fail-fast — 같은 코드로 `c.panel / c.credit / c.analysis` 등 반복 호출 금지. 한 번 `company_not_resolved` 면 즉시 답변에 \"데이터 없음\" + 가능한 원인 (잘못된 6 자리 / 비상장 / 미수집) 명시. 회사명만 주어졌으면 `dartlab.Company.search(\"회사명\")` 1 회로 코드 lookup 후 재시도, 그것도 fail 이면 멈춤.\n\n### dataAsOf freshness\n\n`c.panel()` / `c.analysis()` 결과의 `latestPeriod` (또는 `dataAsOf`) 가 *오늘* 기준 stale (예: 2 분기 이상 뒤) 일 수 있다. 정기보고서 공시 지연 / 분기 잠정실적 미반영 / fixture 환경 가능성. 답변 헤더 chip 옆에 `📅 데이터 as-of {latestPeriod}` 노출 권장 — 사용자가 \"지금이 최신인가\" 즉시 판단.\n\n## 전체 축/메서드 목록\n\n| method | 담당 | 대표 호출 |\n| --- | --- | --- |\n| search/listing/resolve/codeName/status | 기업 식별/목록 | `dartlab.Company.search(\"삼성전자\")` |\n| filings/disclosure/liveFilings/readFiling | 공시 목록/본문 | `c.disclosure()` |\n| rawFinance/rawReport | raw parquet 접근 | `c.rawFinance()` |\n| sections/panel/select/trace/diff | 원자료 조회/추적/비교 | `c.panel(\"BS\")` |\n| keywordTrend/news/watch | 텍스트/뉴스/감시 | `c.news()` |\n| story/validateStory/storyTree/narrativeDiff | 보고서/스토리 | `c.story()` |\n| analysis | 재무/가치/전망 분석 | `c.analysis(\"financial\", \"수익성\")` |\n| credit | 신용/부실위험 | `c.credit()` |\n| gather | 외부/보조 데이터 | `c.gather(\"price\")` |\n| quant | 정량 분석 | `c.quant(\"모멘텀\")` |\n| macro | 시장 매크로 (사이클/위기/시나리오/유동성/심리, KR 자동) | `c.macro(\"사이클\")` |\n| table/topics/sources/index/facts | 탐색 메타 | `c.index()` |\n| retrievalBlocks/contextSlices/ask | AI 컨텍스트/질의 | `c.ask(\"질문\")` |\n| sector/rank/audit/market/currency/fiscalYearEnd | 회사 메타/검증 | `c.market()` |\n| network/governance/workforce/capital/debt | scan view 연결 | `c.governance()` |\n| causalWeights/valuationImpact/industry/view | story/industry/view 연결 | `c.industry()` |\n\n## 대표 반환 형태\n\nCompany 메서드는 topic별 DataFrame, dict/list, 하위 엔진 결과 객체, 또는 `None`을 반환한다.\n\n```text\nstockCode/ticker, companyName, market, period/date,\ntopic/axis, source, metric, value, unit,\ntableRef, valueRef, dateRef, executionRef\n```\n\n`show/select/trace`는 원자료 기반 table/selection/lineage가 중심이고, `analysis/credit/quant/macro/story`는 각 엔진의 반환 계약을 따른다.\n\n## evidence 기준\n\n단일 기업 답변은 target, period, topic/axis, tableRef, valueRef, dateRef, executionRef를 남긴다. 공시나 뉴스는 filing id, URL/source, 접수일/게시일을 함께 확인한다.\n\n## 기본 실행 순서\n\n1. `dartlab.Company(code_or_ticker)`로 target을 고정한다.\n2. 원자료 확인이면 `show/select/trace`, 심층 분석이면 하위 엔진 메서드를 고른다.\n3. 반환값의 기준일, source, 결손/flags를 확인한다.\n4. 숫자 claim은 valueRef/tableRef에 묶는다.\n5. 여러 축을 조합하는 최종 서술은 `story`로 넘긴다.\n\n## 기본 검증\n\n스킬은 공개 실행 문서다. Company 공개 메서드, 하위 엔진 연결, 대표 반환 형태가 바뀌면 이 파일과 관련 응용 스킬을 같은 변경에서 갱신한다.\n\n## 메모리 안전 — 다중 회사 loop\n\nPolars = 네이티브 Rust 힙, `gc.collect()` 회수 불가, Company 1 개 ≈ 200~500MB. 다중 회사 loop 진입점은 매 iteration 끝에 `cleanupBetweenCompanies(label=...)` 호출 또는 `with Company(code) as c:` (context manager `__exit__` 자동 호출) 강행. 누락 시 OOM.\n\n자동 검출 lint:\n\n| 스크립트 | 룰 |\n|---|---|\n| `tests/audit/cleanupBetweenCompaniesCalls.py` | M8 — AST heuristic 으로 (1) `for x in <stockCodes\\|codes\\|tickers\\|parquetFiles>:` 패턴 (2) body 안 `loadData()` / `Company()` 무거운 호출 (3) body 안 `cleanupBetweenCompanies(` 부재 — 세 조건 AND 시 violation. baseline `tests/audit/_baselines/cleanupCalls.json` 외만 fail |\n\n\n---\n\n# 흡수된 sub-spec 본문 (Phase D-1, 2026-05-18)\n\n## (흡수) engines.company.disclosureEvent 본문\n\n## 절차\n\n- 공시 목록의 접수일, 제목, 유형을 확인한다.\n- 가능한 경우 경량 본문 조회로 제목 기준 판단을 보강한다.\n- 본문 미조회 상태에서는 제목 기준 우선순위라고 명시한다.\n\n## 공개 호출 방식\n\n- `c = dartlab.Company(\"005930\")`\n- `c.panel()`\n- `c.panel(\"BS\")`\n- `c.index()`\n- `c.trace()`\n\n## 호출 동작\n\n- 종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다.\n- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.\n- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.\n\n## 대표 반환 형태\n\n- Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다.\n- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.\n\n## 기본 검증\n\n- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.\n- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.\n- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.\n\n## (흡수) engines.company.docsInternals 본문\n\n## 엔진 역할\n\n`docsInternals` 는 이름만 남은 호환 skill 이며, 현행 SSOT 는 DART `panel` 이다. 공개 사용자 API 는 `c.topics` / `c.panel(topic)` 이고, 서버/뷰어/AI 는 동일한 panel artifact 를 읽는다.\n\n## 공개 호출 방식\n\n내부 점검은 panel 모듈을 직접 호출한다.\n\n```python\nimport dartlab\nfrom dartlab.providers.dart.panel.text import panelTextWide\n\nc = dartlab.Company(\"005930\")\ndf = panelTextWide(c.stockCode)\nview = c.panel(\"businessOverview\")\n```\n\n## 호출 동작\n\n- 원천 zip XML 은 `data/original/dart/docs` 계층에 남을 수 있지만, 분석/뷰어/검색의 read SSOT 는 `data/dart/panel` 산출물이다.\n- panel build 는 `src/dartlab/providers/dart/panel/build` 가 담당한다. topic 매핑은 `src/dartlab/providers/dart/panel/mapper.py` 와 panel schema 계층에서 관리한다.\n- row identity 는 panel 컬럼의 `topic`, `blockType`, `blockOrder`, `sectionLeaf`, `contentRaw`/`content` 조합으로 판단한다.\n- DART `/api/company/{code}/sections` 와 DART docs parquet read path 는 현행 사용자/API 표면이 아니다.\n\n## 대표 반환 형태\n\n`panelTextWide(code)` 와 `c.panel(topic)` 은 topic/block 행과 period 컬럼을 가진 wide DataFrame 을 반환한다. 핵심 식별자는 stockCode, corpName, topic, blockType, blockOrder, period, content/contentRaw 이다.\n\n## 기본 검증\n\n- panel 계약 변경 시 `engines.panel`, `operation.dataLineage`, 서버 viewer 계약, landing viewer 검증을 함께 갱신한다.\n- DART 본문 계층에서 오래된 docs parquet read path, `Company`의 폐기된 sections 표면, 폐기된 대량 다운로드 표면이 되살아나면 SSOT 회귀로 본다.\n\n## (흡수) engines.company.finance 본문\n\n## 엔진 역할\n\n`company.finance` 는 사용자 capability 가 아니라 *Company 엔진 내부 sub-module* 이다. XBRL 표준 계정 매핑 + 주석 영역 6 sub-domain 파서를 묶어 단일 회사의 재무 시계열을 빌드한다. dartlab 공개 호출은 Company facade 경유.\n\n본 sub-spec 은 운영 SSOT — 파일 구조 · 6 sub-domain 책임 · 검증 결과 · 매핑 사이클을 한 곳에서 관리.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nwith dartlab.Company(\"005930\") as c:\n    # 시계열 (분기 / 연도 / 누적) — Plan v10: c.panel 단일 진입\n    q = c.panel(\"IS\", freq=\"Q\")\n    y = c.panel(\"IS\", freq=\"Y\")\n    cum = c.panel(\"IS\", freq=\"YTD\")\n\n    # 재무비율\n    r = c.panel(\"ratios\")                       # CFS 기본\n    rOfs = c.panel(\"ratios\", scope=\"separate\")  # OFS\n\n# 6 sub-domain — 주석 영역 파서\nfrom dartlab.finance.summary import fsSummary\nfrom dartlab.finance.majorHolder import majorHolder, holderOverview\nfrom dartlab.finance.segment import segments\nfrom dartlab.finance.affiliate import affiliates\nfrom dartlab.finance.costByNature import costByNature\nfrom dartlab.finance.rawMaterial import rawMaterial\n\nresult = fsSummary(\"005930\")        # 요약재무 브릿지 매칭\nmh = majorHolder(\"005930\")          # 최대주주 + 시계열\nseg = segments(\"005930\")            # 사업부문 / 제품 / 지역\naff = affiliates(\"005930\")          # 관계기업 / 공동기업\ncbn = costByNature(\"005930\", \"y\")   # 비용 성격별\nraw = rawMaterial(\"005930\")         # 원재료 / 생산설비 / 시설투자\n```\n\n## 호출 동작\n\n- `Company.timeseries` / `annual` / `cumulative` — `buildTimeseries(stockCode, fsDivPref)` 위임. CFS 우선, 없으면 OFS fallback. snakeId × period 의 nested dict 반환.\n- `Company.ratios` — `calcRatios(series, marketCap=None)` 위임. ROE · ROA · 마진 · 부채비율 · FCF 등.\n- `Company.getTimeseries(period, fsDivPref)` — 4 조합 (q/y/cum × CFS/OFS) 명시 조회.\n- `fsSummary(source, ifrsOnly=True)` — 4 단계 브릿지 매칭. 2 년 미만 → None.\n- `majorHolder(stockCode)` — 사업보고서 \"VII. 주주에 관한 사항\" 파싱.\n- `segments(stockCode)` / `affiliates(stockCode)` — 주석 표 추출 (일반 + 횡전개).\n- `costByNature(stockCode, period)` — 3 가지 테이블 유형 (inline / split / multiCol) 자동 감지.\n- `rawMaterial(stockCode)` — 원재료 + 유형자산 변동 + 시설투자 3 영역 동시 추출.\n\n미매핑 계정 발견 시 `engines.mappers` 학습 후보 데이터로 흐른다 (사람 검토 후 `AccountMapper.release()`).\n\n## 대표 반환 형태\n\n```text\nCompany.ratios\n→ RatioResult\n   roe : float          # 자기자본이익률 (%)\n   roa : float          # 총자산이익률 (%)\n   operatingMargin : float\n   debtRatio : float\n   currentRatio : float\n   fcf : float          # Free Cash Flow\n\nfsSummary(source)\n→ AnalysisResult | None\n   corpName : str | None\n   nYears : int\n   allRate : float | None        # 전체 매칭률\n   contRate : float | None       # 연속 매칭률\n   segments : list[Segment]      # 구간 통계\n   breakpoints : list[BridgeResult]\n   yearAccounts : dict[str, YearAccounts]\n\nmajorHolder(stockCode)\n→ MajorHolderResult | None\n   majorHolder : str | None      # 최대주주명\n   majorRatio : float | None\n   totalRatio : float | None\n   holders : list[Holder]\n   timeSeries : pl.DataFrame\n```\n\n## 코어 finance 엔진\n\n`src/dartlab/providers/dart/finance/` — 분기별 · 연도별 · 누적 시계열 + 재무비율.\n\n| 파일 | 역할 |\n|------|------|\n| `__init__.py` | public API export |\n| `mapper.py` | XBRL account_id + 한글명 → snakeId 매핑 (engines.mappers 위임) |\n| `sceMapper.py` | 자본변동표 (SCE) 별도 매퍼 |\n| `pivot.py` | parquet → 시계열 dict 피벗 + 동의어 병합 + 연도별/누적 집계 |\n| `scanAccount.py` | 미매핑 계정 스캔 (학습 후속 데이터) |\n| `spec.py` | 엔진 명세 (`summary.mappedAccounts` 등) |\n\n데이터 SSOT — `reference/data/accountMappings.json` (`learnedSynonyms: 31,489` / `standardAccounts: 3,402` / `merged: 34,171`). 학습 사이클은 `engines.mappers` 참조.\n\n### 시계열 API\n\n| 함수 | 반환 | 설명 |\n|------|------|------|\n| `buildTimeseries(stockCode, fsDivPref=\"CFS\")` | `(series, periods)` | 분기별 standalone |\n| `buildAnnual(stockCode, fsDivPref=\"CFS\")` | `(series, years)` | 연도별 |\n| `buildCumulative(stockCode, fsDivPref=\"CFS\")` | `(series, periods)` | 분기별 누적 |\n\n### 값 추출\n\n| 함수 | 설명 |\n|------|------|\n| `getTTM(series, sjDiv, snakeId)` | 최근 4 분기 합 (IS/CF) |\n| `getLatest(series, sjDiv, snakeId)` | 최신 non-null 값 (BS) |\n| `getAnnualValues(series, sjDiv, snakeId)` | 전체 시계열 리스트 |\n| `getRevenueGrowth3Y(series)` | 매출 3 년 CAGR (%) |\n\n### 비율 계산\n\n`calcRatios(series, marketCap=None)` → `RatioResult` (ROE · ROA · 마진 · 부채 · FCF 등).\n\n### Company 통합\n\n| 호출 | 설명 |\n|--------|------|\n| `c.panel(topic, freq=\"Q\")` | 분기별 (CFS) — topic ∈ BS·IS·CF·CIS·SCE·ratios |\n| `c.panel(topic, freq=\"Y\")` | 연도별 (CFS) |\n| `c.panel(topic, freq=\"YTD\")` | 분기별 누적 (CFS) |\n| `c.panel(\"ratios\")` | 재무비율 (CFS) |\n| `c.panel(topic, freq=..., scope=\"separate\")` | 커스텀 (CFS/OFS scope) |\n\n### scope 파라미터\n\n- `\"consolidated\"` — 연결재무제표 (기본값). 없으면 separate fallback.\n- `\"separate\"` — 별도재무제표. 없으면 consolidated fallback.\n\n### 검증 결과 (삼성전자 005930, 2024)\n\n| 지표 | CFS | OFS |\n|------|-----|-----|\n| Revenue | 300.9T | 209.1T |\n| ROE | 8.29% | 5.19% |\n| Debt Ratio | 27.40% | 20.67% |\n\n## 6 sub-domain (주석 영역 파서)\n\n`src/dartlab/providers/dart/docs/finance/{name}/` + `disclosure/rawMaterial/` 의 6 영역.\n\n### 1. summary — 요약재무 브릿지 매칭\n\n`dartlab.finance.summary.fsSummary(source, ifrsOnly=True)` → `AnalysisResult | None`.\n\nDART 공시 요약재무정보에서 숫자 브릿지 매칭으로 계정명을 연도간 매핑하여 시계열 생성.\n\n| 파일 | 설명 |\n|------|------|\n| `constants.py` | 매칭 임계값, 핵심 계정 목록 |\n| `types.py` | `AnalysisResult` · `Segment` · `BridgeResult` · `YearAccounts` |\n| `contentExtractor.py` | 요약재무 영역 추출 (연결 우선) |\n| `bridgeMatcher.py` | 4 단계 숫자 브릿지 매칭 알고리즘 |\n| `segmentation.py` | 전환점 탐지, 구간 분리 |\n| `pipeline.py` | `fsSummary()` · `loadYearData()` 오케스트레이터 |\n\n**매칭 알고리즘 (4 단계)**:\n1. **정확 매칭** — N년 전기 금액 == N-1년 당기 금액 (차이 &lt; 0.5)\n2. **재작성 보정** — 이름 유사도 0.8+ 금액 차이 5% 이내\n3. **명칭변경 보정** — 이름 유사도 0.6+ 금액 차이 5% 이내\n4. **특수항목** — EPS · 회사수 등 이름 강제 매칭\n\n**검증** — 158 개 기업 구간 내 97.7%, 오매칭 0.07%. 임계 `BREAKPOINT_THRESHOLD = 0.85`. 핵심 계정 10 개.\n\n**AnalysisResult 필드** — corpName / nYears / nPairs / nBreakpoints / nSegments / allRate / contRate / segments / breakpoints / pairResults / yearAccounts.\n\n**BridgeResult** — `pairs: {당해년도 계정명: 전년도 계정명}` · `yearGap` (보통 1, 갭 있으면 2+).\n\n**입력 데이터** — polars DataFrame 또는 parquet. 필수: `year` / `report_type` / `rcept_date` / `section_title` / `section_content`. 선택: `corp_name`.\n\n### 2. majorHolder — 주주 현황\n\n`dartlab.finance.majorHolder.majorHolder(stockCode)` → `MajorHolderResult | None`.\n`dartlab.finance.majorHolder.holderOverview(stockCode)` → `HolderOverview | None`.\n\n**MajorHolderResult** — corpName / majorHolder (최대주주명) / majorRatio / totalRatio (특수관계인 포함) / holders / timeSeries.\n\n**HolderOverview** — bigHolders (5% 이상) · minority (소액주주) · voting (의결권).\n\n**파싱 성공률 (267 종목)** — 최대주주 100% (227/0/40) · 5% 이상 주주 100% (217/0/50) · 소액주주 100% (214/0/53) · 의결권 100% (223/0/44).\n\n**파싱 전략**:\n- majorHolder — \"VII. 주주에 관한 사항\" → \"성 명 | 관 계\" 헤더 + 8-cell 데이터행, \"본인\"/\"최대주주\" 관계 식별\n- 5% 이상 주주 — `| 5% 이상 주주 | 주주명 | 소유주식수 | 지분율 | 비고 |` 구조\n- 소액주주 — 단일행 `| 주주수 | 전체주주수 | 비율 | 소액주식수 | 총발행 | 비율 |`\n- 의결권 — A(발행총수) ~ F(행사가능) 보통주/우선주 분리\n\n**주의** — 2015 년 이전 보고서 테이블 구조 차이로 지분율 오류 가능. 스팩/비상장사 5% 이상 주주/소액주주 부재.\n\n### 3. segment — 사업부문 보고\n\n`dartlab.finance.segment.segments(stockCode)` → `SegmentsResult` (사업부문 · 제품 · 지역 테이블).\n\n| 파일 | 설명 |\n|------|------|\n| `types.py` | `SegmentsResult` · `SegmentTable` |\n| `extractor.py` | `core.notesExtractor` re-export |\n| `parser.py` | 부문 테이블 파싱 (일반 + 횡전개) |\n| `pipeline.py` | `segments()` 오케스트레이터 |\n\n### 4. affiliate — 관계기업 / 공동기업\n\n`dartlab.finance.affiliate.affiliates(stockCode)` → `AffiliatesResult` (지분 현황 + 변동).\n\n| 파일 | 설명 |\n|------|------|\n| `types.py` | `AffiliatesResult` · `AffiliateProfile` · `AffiliateMovement` |\n| `extractor.py` | 마크다운 테이블 행 추출 (`parseTableRows`) |\n| `parser.py` | 프로필 / 변동 파싱 (일반 + 횡전개) |\n| `pipeline.py` | `affiliates()` 오케스트레이터 |\n\n### 5. costByNature — 비용의 성격별 분류\n\n`dartlab.finance.costByNature.costByNature(stockCode, period)` → `CostByNatureResult`.\n\n**파일 구성** — `types.py` (`CostByNatureResult`) · `parser.py` (inline/split/multiCol 3 방식) · `pipeline.py`.\n\n**성능** — 171 / 171 (100%) 파싱 성공 · 시계열 173 종목 · 교차검증 일치율 87.8% · null 17.5%.\n\n**파서 구조**:\n- 3 가지 테이블 유형 자동 감지 (inline / split / multiCol)\n- 30 개 정규화 매핑 (487 원본 → 표준)\n- 22 가지 합계행 패턴 자동 제거\n\n**period** — `\"y\"` 사업보고서 (연간) · `\"q\"` Q1/반기/Q3/사업보고서 (분기) · `\"h\"` 반기.\n\n**ratios** — 각 비용 항목의 양수 합계 대비 비율 (%) DataFrame (year · account · amount · ratio).\n\n**제한** — 금융업/리츠/지주회사 58 / 267 미공시. 교차검증 불일치 12.2% 는 소급 재작성 (파서 오류 아님).\n\n### 6. rawMaterial — 원재료 · 생산설비 · 시설투자\n\n`dartlab.finance.rawMaterial.rawMaterial(stockCode)` → `RawMaterialResult | None`.\n\n**RawMaterialResult** — corpName / year / materials / equipment / capexItems.\n\n- **RawMaterial** — segment · item · usage · amount · ratio · supplier\n- **Equipment** — land · buildings · structures · machinery · construction · vehicles · fixtures · rou · undelivered · other · total · depreciation · capex\n- **CapexItem** — segment · amount\n\n**파싱 성공률 (267 종목)** — 원재료 93.0% · 생산설비 33.8% · 시설투자 16.2%. 125 종목 None (해당사항 없음 또는 매입 테이블 부재).\n\n**품질 검증** — ratio 이상 (>100%) 2 / DL이앤씨 1, 그 외 0 건 (amt-None / 숫자 item / total 음수 / 1조 초과 / 런타임 에러).\n\n**검증 완료 종목 스팟체크** — 삼성전자 (14 건 매입 · 2,059,452 설비) · 현대차 (17 건 · 44,533,941) · SK하이닉스 (5 건 · 60,157,474) · LG화학 (5 건 · 54,570,446) · LG · SK · F&F.\n\n**파싱 전략 (원재료 12 단계)**:\n1. 헤더 직접 감지 — `(매입액|투입액)` + `(품목|원재료|부문)` 조합\n2. `_findHeaderIndices()` 동적 매핑\n3. shifted 행 감지 (segment 생략 시 왼쪽 밀림)\n4. 합쳐진 \"매입액 (비율)\" 셀 분리 — `1,483,067 (43.8%)` 패턴\n5. 연도별 헤더 (`제N기`, `20XX년`) 지원\n6. 분할 헤더 (row1 + row2 병합)\n7. 비율 > 100 shifted 감지\n8. 연도 컬럼 ratio 제외\n9. 생산 테이블 필터 (생산능력/수량 키워드)\n10. 숫자 item 필터 (shift 데이터 판단)\n11. 각주 참조 필터 (`(주N)`)\n12. amount 없는 헤더 진입 차단\n\n**제한** — DL이앤씨 헤더 shifted 2 건 · 단위 혼재 (USD/천USD/백만원) 미지원 · 생산설비 33.8% (테이블 형식 다양).\n\n## 의존 (sub-domain 공통)\n\n- `dartlab.frame.dataLoader` — `loadData` · `extractCorpName` · `PERIOD_KINDS`\n- `dartlab.providers.notesExtractor` — `extractNotesContent` · `findNumberedSection`\n- `dartlab.providers.reportSelector` — 보고서 선택\n- `dartlab.providers.tableParser` — 마크다운 테이블 파싱, 금액/단위 처리\n- `engines.mappers` — 계정명 → snakeId 정규화\n\n## evidence 기준\n\n- finance 시계열 인용 시 `stockCode` · `fsDivPref` · `period` · `snakeId` · `source` (DART).\n- 6 sub-domain 인용 시 `parsing_success_rate` 명시 (예 — 원재료 93.0%, 생산설비 33.8%).\n- 미매핑 계정 발견 시 `engines.mappers` 후속 학습 후보로 로그.\n\n## 기본 검증\n\n```python\nimport dartlab\nwith dartlab.Company(\"005930\") as c:\n    print(c.panel(\"ratios\").roe)                       # 8.29 (CFS)\n    print(c.panel(\"ratios\", scope=\"separate\").roe)     # 5.19 (OFS)\n\nfrom dartlab.finance.summary import fsSummary\nresult = fsSummary(\"data/docsData/005930.parquet\")\nprint(f\"{result.corpName}: {result.allRate:.1%}\")  # 매칭률\n```\n\n## 변경 이력\n\n- 2026-03-06 — 6 sub-domain 패키지 초기 구축 (affiliate / segment / summary / majorHolder / costByNature / rawMaterial)\n- 2026-03-06 — `stockCode` 시그니처 전환, `extractor` 중복 제거 → `core` re-export\n- 2026-03-07 — rawMaterial 실무 투입\n- 2026-03-09 — XBRL 계정 표준화 + Company `docs/finance` 통합\n- 2026-05-12 — STATUS.md 7 곳 → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격)\n\n## (흡수) engines.company.researchStarter 본문\n\n## 절차\n\n- 기업명, 종목코드, ticker 중 무엇이 입력됐는지 먼저 식별한다.\n- 질문 목적이 수익성, 현금흐름, 신용, 공시, 비교, 밸류에이션, 배당, 지배구조 중 어디에 가까운지 skill 검색으로 고른다.\n- 단일 기업과 특정 축이 함께 있으면 해당 engine skill과 Company.analysis/Company.panel를 먼저 사용한다. scan skill은 “후보”, “랭킹”, “전체 종목”, “많이 오른” 같은 횡단 의도가 있을 때만 1차 경로가 된다.\n- 목적이 불명확하면 engines.story.companyCausal를 기본 후보로 두되, macro와 scan 맥락도 함께 확인한다.\n- 선택한 skill의 requiredEvidence를 실행 전 체크리스트로 둔다.\n- 실행 가능한 분석 질문이면 첫 답변에서 사용법만 설명하지 말고 target, period, source table ref를 만든 뒤 검산 가능한 결론을 낸다. 데이터가 부족하면 어떤 Company topic 또는 prebuild가 부족한지 한계로 남긴다.\n\n## 공개 호출 방식\n\n- `c = dartlab.Company(\"005930\")`\n- `c.panel()`\n- `c.panel(\"BS\")`\n- `c.index()`\n- `c.trace()`\n\n## 호출 동작\n\n- 종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다.\n- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.\n- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.\n\n## 대표 반환 형태\n\n- Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다.\n- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.\n\n## 기본 검증\n\n- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.\n- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.\n- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.\n\n## (흡수) engines.panel 본문\n\n## 엔진 역할\n\n`sections` 는 한 회사의 전체 지도다. 각 보고기간 공시 문서를 topic 별로 쪼개고 시간축으로 옆으로 늘어놓아 가로화 보드 하나로 만든다. 개별 사업보고서를 하나씩 열지 않고 모든 공시 섹션을 시계열로 한 번에 비교한다.\n\n한국 DART 사업보고서는 수십 개 섹션을 갖는다 — 제 I 장 (회사 개황) ~ 제 XII 장 (상세표). 각 보고서가 분기/연도별로 별도 파일이라서 같은 topic (\"사업의 개요\") 이 여러 기간에 흩어진다. `sections` 는 이 흩어진 원문을 **topic × 기간 매트릭스**로 재구성한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\nc.topics                         # 사용 가능한 topic catalog\nc.panel(\"BS\")                    # 단일 topic + source priority\nc.trace(\"BS\")                    # 어떤 source 가 선택됐나\nc.panel(\"companyOverview\")       # 특정 topic 의 실제 데이터\n```\n\n미국 종목도 같은 API:\n\n```python\nus = dartlab.Company(\"AAPL\")\nus.topics\nus.panel(\"10-K::item1Business\")\nus.panel(\"BS\")\n```\n\nsectionsStorage 내부 wide view 는 Polars DataFrame 이므로 자유 필터:\n\n```python\nimport polars as pl\nfrom dartlab.providers.dart.panel.text import panelTextWide\n\ndf = panelTextWide(\"005930\")\ndf = df.filter(pl.col(\"topic\") == \"companyOverview\")\n```\n\n## 호출 동작\n\n`Company.panel` 공개 facade 는 폐기됐다. 사용자는 `c.topics` 로 topic catalog 를 확인하고 `c.panel(topic)` 으로 진입한다. 내부 panelTextWide view 는 각 행이 한 topic 블록, 각 열이 한 기간인 검증/파이프라인용 구조다.\n\n`c.panel(topic)` 는 source priority 를 적용한다:\n\n1. **finance** (BS, IS, CF, CIS, SCE) — 숫자는 권위 있으므로 docs 본문보다 우선.\n2. **report** — DART 정형 공시 데이터.\n3. **docs** — 원본 산문 텍스트와 표.\n\n`c.trace(topic)` 는 어떤 source 가 실제 선택됐는지 확인:\n- 선택된 source (docs / finance / report).\n- 기간별 데이터 커버리지.\n- chapter, label 같은 메타.\n\n기간 컬럼의 `null` 은 그 기간 데이터 없음. 0 으로 대체하지 않는다.\n\n## 대표 반환 형태\n\nsectionsStorage wide DataFrame 구조:\n\n```\nchapter │ topic            │ blockType │ textNodeType │ 2025Q4 │ 2024Q4 │ 2024Q3 │ …\nI       │ companyOverview  │ text      │ heading      │ \"…\"    │ \"…\"    │ \"…\"    │\nI       │ companyOverview  │ text      │ body         │ \"…\"    │ \"…\"    │ \"…\"    │\nI       │ companyOverview  │ table     │ null         │ \"…\"    │ \"…\"    │ null   │\nII      │ businessOverview │ text      │ heading      │ \"…\"    │ \"…\"    │ \"…\"    │\n```\n\n### 구조 컬럼\n\n| 컬럼 | 설명 |\n|---|---|\n| `chapter` | 최상위 장 번호 (I ~ XII). |\n| `topic` | snakeCase 표준 식별자 (`companyOverview`, `businessOverview`, `BS`, `IS`, `CF`). |\n| `blockType` | `\"text\"` 또는 `\"table\"`. |\n| `blockOrder` | topic 내 블록 순서 (원문 순서 보존). |\n| `textNodeType` | text 블록 sub-type — `\"heading\"` 또는 `\"body\"`. table 은 null. |\n| `textLevel` | heading 깊이 (1, 2, 3, ...). body / table 은 null. |\n| `textPath` | heading 의 구조 경로. |\n\n### 기간 컬럼\n\n`2025Q4`, `2024Q4`, `2024Q3`, ... 최신순. 사업보고서는 Q4. 각 셀 = 그 기간의 원본 payload (text 블록은 산문, table 블록은 markdown table). null = 데이터 없음.\n\nEDGAR 도 같은 구조. topic 이름만 SEC form 규약 (`10-K::item1Business`, `10-K::item7MDA`). 재무 topic (BS, IS, CF) 은 DART 와 같은 이름.\n\n## evidence 기준\n\n- target (종목코드 / ticker).\n- period (어느 분기/연도).\n- topic (어떤 섹션).\n- tableRef / valueRef / dateRef / executionRef.\n\n## 기본 실행 순서\n\n1. `dartlab.Company(code)` 로 회사 객체 생성.\n2. `c.topics` 로 사용 가능한 topic 확인.\n3. 분석할 topic 선택 → `c.panel(topic)` 으로 본문 확인.\n4. 기간 비교가 필요하면 `c.diff()` · `c.diff(topic)`.\n5. source 가 의심되면 `c.trace(topic)` 으로 검증.\n\n## 기본 검증\n\n- 결과 DataFrame 의 행 수와 기간 컬럼 수 확인.\n- null 비율이 비정상이면 `coverage()` 또는 `trace()` 로 source 점검.\n- 숫자 답변은 `tableRef` / `valueRef` / `dateRef` / `executionRef` 묶어서 답변.\n\n## 다음 단계\n\n- [engines.company](/skills/engines.company) — Company facade 전체 메서드 카탈로그.\n- **engines.company.disclosureEvent** — 공시 이벤트 추적 (본문 § \"(흡수) engines.company.disclosureEvent 본문\" 참고).\n- **engines.company.usEdgarReview** — 미국 종목 EDGAR 리뷰 (본문 § \"(흡수) engines.company.usEdgarReview 본문\" 참고).\n- [start.quickStart](/skills/start.quickStart) — 8 단계 walkthrough.\n\n## (흡수) engines.company.usEdgarReview 본문\n\n## 절차\n\n- ticker를 식별하고 EDGAR Company 경로가 가능한지 확인한다.\n- EDGAR prefetched finance/docs snapshot 또는 OpenEdgar/Company.liveFilings 경로가 있는지 먼저 확인한다. 없으면 데이터 부재를 한계로 좁혀 말하고 DART 전용 경로로 대체하지 않는다.\n- Company.analysis, Company.panel, Company.filings/readFiling capability를 찾아 재무와 공시 근거를 분리한다.\n- 재무 숫자는 EDGAR finance table/value ref가 있을 때만 말한다. 숫자 claim은 period, metric, value가 들어간 supporting ref에 직접 묶는다.\n- filing claim은 접수일, form, 제목 또는 본문 ref에 묶는다.\n- fiscal period가 있는 경우 calendar period와 혼동하지 않도록 기준을 밝힌다.\n- 검산이 숫자 claim을 거절하면, ref로 뒷받침되는 filing/데이터 가용성 중심의 좁은 답변으로 줄인다.\n\n## 공개 호출 방식\n\n- `c = dartlab.Company(\"005930\")`\n- `c.panel()`\n- `c.panel(\"BS\")`\n- `c.index()`\n- `c.trace()`\n\n## 호출 동작\n\n- 종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다.\n- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.\n- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.\n\n## 대표 반환 형태\n\n- Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다.\n- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.\n\n## 기본 검증\n\n- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.\n- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.\n- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.\n",
+      "bodyPreview": "## 엔진 역할\n\n`Company`는 DartLab의 단일 기업 facade다. 사용자는 종목코드나 ticker로 `Company`를 만들고, 이 객체에서 원자료 조회, 공시 탐색, 분석, 신용, gather, quant, macro, story를 호출한다.\n\n한국 DART 회사와 미국 EDGAR 회사 모두 같은 facade 패턴을 따른다. 세부 topic/컬럼은 시장과 provider별로 다를 수 있으므로 반환값의 source와 기준일을 확인한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nraw = c.panel(\"BS\")\nselected = c.select(\"매출액\")\ntrace = c.trace(\"영업이익\")\n\nanalysis = c.analysis(\"financial\", \"수익성\")\ncredit = c.credit()\nprice = c.gather(\"price\")\nquant = c.quant(\"모멘텀\")\nmacro = c.macro(\"사이클\")                          # 시장 매크로 (사이클/위기/시나리오/유동성/심리)\nsensitivity = c.analysis(\"macro\", \"매크로민감도\")  # 기업 단위 매크로 민감도는 analysis 엔진\nstory = c.story()\nindustry = c.industry()\n```\n\n## 강행 호출 룰 (agent 답변 품질 회귀 차단)\n\n단일 종목 질문은 본 엔진이 1 차 진입점. 다음 4 룰 강행:\n\n1. **`EngineCall(apiRef=\"Company.panel\", args={\"stockCode\": \"...\", \"topic\": \"...\"})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.\n2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `\\`table:Company.panel:005930\\`` 형식 backtick 또는 `<tableRef:id>` 각괄호.\n3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.panel 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.\n4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.panel 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.\n\n## 호출 동작\n\nCompany 생성 시 target과 market/provider를 확정한다. 이후 `"
     },
     {
       "id": "engines.company.disclosureEvent",
@@ -561,7 +563,7 @@
         "pyodide": {
           "status": "limited",
           "dataSources": [
-            "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+            "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
             "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
           ],
           "requiredSetup": [
@@ -579,19 +581,16 @@
     },
     {
       "id": "engines.company.docsInternals",
-      "title": "docsInternals — sections 파이프라인 + 테이블 수평화 + Rust 포팅 R&D",
+      "title": "Company Panel Internals",
       "category": "engines",
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "docsInternals 는 engines.company.sections 의 내부 구현 SSOT 다. sections pipeline (textPathKey + occurrence 논리 row identity · semantic vs comparable spine · structure event detection) · 테이블 수평화 알고리즘 (헤더 시그니처 그룹핑 · matrix 분리 · canonical schema 실험 결과) · Rust 포팅 로드맵 (Phase 1~3 인터페이스 + 25 배속 목표) 을 한 곳에 둔다. 트리거 — 'sections 내부', 'textPathKey', '테이블 수평화', 'pyo3 polars', 'Rust 포팅'.",
+      "purpose": "Company 의 DART panel 공시 본문 파이프라인 — original zip → panel parquet → topic wide view 내부 추적.",
       "whenToUse": [
-        "sections 파이프라인 내부 구조",
-        "textPathKey / textSemanticPathKey 차이",
-        "structureEvents / structureChanges 해석",
-        "테이블 수평화 실패 분석",
-        "sections Rust 포팅 인터페이스",
-        "canonical schema 실험 결과"
+        "Company panel 파이프라인 내부 추적",
+        "DART panel row identity 디버깅",
+        "panel topic 매핑 점검"
       ],
       "inputs": [
         "사업보고서 markdown body",
@@ -610,11 +609,10 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "engines.company.sections",
         "engines.company"
       ],
       "linkedSkills": [
-        "engines.company.sections",
+        "engines.panel",
         "engines.company"
       ],
       "requires": [],
@@ -673,7 +671,7 @@
           "status": "supported"
         },
         "webAi": {
-          "status": "supported"
+          "status": "limited"
         },
         "pyodide": {
           "status": "limited"
@@ -681,7 +679,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "## 엔진 역할\n\n`docsInternals` 는 이름만 남은 호환 skill 이며, 현행 SSOT 는 DART `panel` 이다. 공개 사용자 API 는 `c.topics` / `c.panel(topic)` 이고, 서버/뷰어/AI 는 동일한 panel artifact 를 읽는다.\n\n## 공개 호출 방식\n\n내부 점검은 panel 모듈을 직접 호출한다.\n\n```python\nimport dartlab\nfrom dartlab.providers.dart.panel.text import panelTextWide\n\nc = dartlab.Company(\"005930\")\ndf = panelTextWide(c.stockCode)\nview = c.panel(\"businessOverview\")\n```\n\n## 호출 동작\n\n- 원천 zip XML 은 `data/original/dart/docs` 계층에 남을 수 있지만, 분석/뷰어/검색의 read SSOT 는 `data/dart/panel` 산출물이다.\n- panel build 는 `src/dartlab/providers/dart/panel/build` 가 담당한다. topic 매핑은 `src/dartlab/providers/dart/panel/mapper.py` 와 panel schema 계층에서 관리한다.\n- row identity 는 panel 컬럼의 `topic`, `blockType`, `blockOrder`, `sectionLeaf`, `contentRaw`/`content` 조합으로 판단한다.\n- DART `/api/company/{code}/sections` 와 DART docs parquet read path 는 현행 사용자/API 표면이 아니다.\n\n## 대표 반환 형태\n\n`panelTextWide(code)` 와 `c.panel(topic)` 은 topic/block 행과 period 컬럼을 가진 wide DataFrame 을 반환한다. 핵심 식별자는 stockCode, corpName, topic, blockType, blockOrder, period, content/contentRaw 이다.\n\n## 기본 검증\n\n- panel 계약 변경 시 `engines.panel`, `operation.dataLineage`, 서버 viewer 계약, landing viewer 검증을 함께 갱신한다.\n- DART 본문 계층에서 오래된 docs parquet read path, `Company`의 폐기된 sections 표면, 폐기된 대량 다운로드 표면이 되살아나면 SSOT 회귀로 본다.\n\n",
+      "bodyPreview": "## 엔진 역할\n\n`docsInternals` 는 panel 공시 본문 파이프라인의 레거시 내부 메모다. 공개 사용자 API 는 `c.topics` / `c.panel(topic)` 이며, 내부 sectionsStorage 에서 일어나는 row identity 결정 · 테이블 수평화 알고리즘 · Rust 포팅 로드맵을 본 spec 이 보관.\n\n본 spec 의 청중 — dartlab 코어 컨트리뷰터 + sections pipeline R&D 진행자.\n\n### 데이터 손실 정책 (의도 drop + 잠재 손실 가시화)\n\npanel topic view 는 panel contentRaw 의 *모든* block 을 분석 행으로 보존하지 않는다. 의도된 drop 5 종:\n\n1. **chapter 결정 전 prelude row** — `parseMajorNum` 미인식 + 첫 chapter 헤딩 등장 전 sub-section row drop (`reportRows.py:1067-1072`).\n2. **chapter row catch-all dedup** — sub-section 에 cover 된 chapter row block drop. 8자 미만 line 만 있는 block 은 unique 후보에서 제외 (`reportRows.py:1023`).\n3. **projection-suppressed sourceTopic** — chapter II 합산 topic 이 `applyProjections` 로 분배된 후 원본 sourceTopic row drop (`aggregation.py` line ~95).\n4. **detailTopic suppression** — `detailTopicForTopic(topic) is not None` 매치 row drop — 이미 detail 분류된 row 가 본체에서 제거 (`aggregation.py` line ~97).\n5. **정정공시 silent drop** — `providers/reportSelector.py::selectReport` 가 원본 우선 / 정정공시만 있을 때 최신 type 1 건 선택. 정정 전 본문 비교는 sections layer 에선 불가능 (logger.info 한 줄로 관찰 가능).\n\n본 정책의 정량 관찰치 (5 종목 baseline 박제 전 005930 단일): byte 보존율 **0.511**. 즉 원본 byte 의 ~49% 가 의도 drop 으로 빠짐.\n\n**잠재 손실 3 종** (silent → 측정 가능):\n\n- **pivot last-wins 충돌** — `aggregation.py` pivot 직전 `(topic, segmentKey, periodKey)` 중복 카운터 logger.warning. `DARTLAB_SECTIONS_STRICT=1` → ValueError 승격.\n- **chapter dedup 8자 임계** — `reportRows.py:1023` 의 `len(ln) >= 8` 임계. 짧은 row 만 있는 chapter-only 표 손실 가능.\n-"
     },
     {
       "id": "engines.credit",
@@ -1198,11 +1197,11 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "engines.company.sections",
+        "engines.panel",
         "engines.dashboard"
       ],
       "linkedSkills": [
-        "engines.company.sections",
+        "engines.panel",
         "engines.dashboard"
       ],
       "requires": [],
@@ -1295,7 +1294,7 @@
       ],
       "inputs": [
         "종목코드 또는 universe",
-        "수집 카테고리 (finance · docs · report)",
+        "수집 카테고리 (finance · panel · report)",
         "빌드 주기 (12h · 일 · 수동)"
       ],
       "requiredInputs": [],
@@ -1308,8 +1307,7 @@
         "Company",
         "gather",
         "scan",
-        "collect",
-        "downloadAll"
+        "collect"
       ],
       "toolRefs": [],
       "datasetRefs": [],
@@ -1333,7 +1331,7 @@
         "dartlab://skills/engines.data"
       ],
       "procedure": [
-        "python 사용자 진입점은 `dartlab.checkFreshness(\"005930\")` (개별) · `dartlab.collect(...)` · `dartlab.downloadAll(\"finance\")`.",
+        "python 사용자 진입점은 `dartlab.checkFreshness(\"005930\")` (개별) · `dartlab.collect(...)` · `dartlab.Company(code).panel(topic)`.",
         "단일 종목 데이터는 `dartlab.Company(code).show(topic)` — topic 은 `c.topics` 로 확인.",
         "전종목 횡단은 `dartlab.scan(axis)` — prebuilt parquet 또는 provider scan 함수 자동 라우팅.",
         "운영자 워크플로우는 `.github/workflows/dataSync.yml` (12h) · `dataPrebuild.yml` (workflow_run) · `edgarSync.yml` (일).",
@@ -1657,7 +1655,7 @@
         "10-K · 10-Q · 20-F · 40-F section 추출",
         "form_type::topicId horizontal view",
         "EDGAR docs parquet 스키마",
-        "dartlab.providers.edgar.Company.sections",
+        "dartlab.providers.edgar.Company panel/topic view",
         "GitHub Release `data-edgar-docs` 배포"
       ],
       "inputs": [
@@ -1672,20 +1670,21 @@
         "EDGAR 전용 메타 (cik · company_name · ticker · accession_no · form_type · filing_url)"
       ],
       "apiRefs": [
-        "Company.sections",
+        "Company.topics",
         "Company.show"
       ],
       "toolRefs": [
+        "EngineCall",
         "RunPython"
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
         "engines.edgar",
-        "engines.company.sections"
+        "engines.panel"
       ],
       "linkedSkills": [
         "engines.edgar",
-        "engines.company.sections"
+        "engines.panel"
       ],
       "requires": [],
       "alternatives": [],
@@ -1705,7 +1704,9 @@
         "ticker",
         "form_type",
         "period_key",
-        "accession_no"
+        "accession_no",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "topic × period 매트릭스 (form_type::topicId 행)",
@@ -1720,13 +1721,13 @@
         "로더가 SEC EDGAR API 직접 수집 단계 건너뛰기 (parquet → release → API 3 단계)"
       ],
       "forbidden": [
-        "downloadAll('edgarDocs') 호출 — issuer-deduped 의무 (downloadListedEdgarDocs(limit=2000))",
+        "전체 mirror 다운로드 호출 — issuer-deduped 의무 (downloadListedEdgarDocs(limit=2000))",
         "Full Document fallback 을 기본 흐름으로 사용",
         "EDGAR 전용 컬럼 (cik · accession_no · filing_url) 제거",
         "DART 와 EDGAR 의 저장 스키마를 강제 통일 (공통 뷰에서만 맞춘다)"
       ],
       "examples": [
-        "dartlab.Company('AAPL').sections → 10-K::item1Business 등",
+        "dartlab.Company('AAPL').panel('10-K::item1Business') → item1Business 본문",
         "downloadListedEdgarDocs(limit=2000) → 배치 progress (forms_found · rows_saved · failure_kind)",
         "057 실험 — table markdown fidelity 감시 + 057-015 readiness 리포트"
       ],
@@ -1749,7 +1750,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "## 엔진 역할\n\n`edgar.docs` 는 SEC EDGAR 원문 공시를 섹션 단위 parquet 로 저장하고, `sections()` 까지 포함한 form-native text 비교 계층을 제공한다. 현재 package 계약은 `10-K`, `10-Q`, `20-F`, `40-F` 를 `section_title`, `section_content`, `period_key` 중심으로 읽고, `form_type::topicId` 기준 horizontal view 를 만드는 것이다.\n\n시장 진입점은 `dartlab.providers.edgar.Company` 다. 루트 `dartlab.Company` 가 이 EDGAR 진입점을 통합 facade 로 감싼다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.providers.edgar.docs.sections import sections\nfrom dartlab.frame.dataLoader import loadData\n\n# 사용자 진입점 — Company facade\nc = dartlab.Company(\"AAPL\")\ntopics = c.topics                      # 사용 가능한 form_type::topicId catalog\ndf = c.panel(\"10-K::item1Business\")    # 단일 EDGAR topic DataFrame\n\n# 내부 진입점 — provider 직접\ndf = sections(\"AAPL\", sinceYear=2015)  # 2015 이후만\n\n# 로더 — 3 단계 fallback\ndocs = loadData(\"AAPL\", category=\"edgarDocs\")\ndocs2 = loadData(\"MSFT\", category=\"edgarDocs\", sinceYear=2015)\n```\n\n## 호출 동작\n\n### 데이터 소스\n\n- **원본** — `data/edgar/docs/{ticker}.parquet`\n- **GitHub Release** — `data-edgar-docs`\n- **기본 단위** — filing 별 section row\n- **기본 파일명** — ticker 기준 (`AAPL.parquet`, `MSFT.parquet`)\n- **기본 수집 시작점** — `2009 년`\n- **기본 수집 범위** — `10-K`, `10-Q`, `20-F`, `40-F` 전 기간\n\n### 로더 동작\n\n`loadData(\"AAPL\", category=\"edgarDocs\")`:\n1. 로컬 parquet 우선\n2. 없으면 GitHub Release 시도\n3. 없으면 SEC EDGAR API 에서 `2009 년부터` 직접 수집\n\n추가 범위 제어 — `loadData(..., category=\"edgarDocs\", sinceYear=2015)` 처럼 시작 연도 공개 파라미터.\n\n### sections 계약\n\n- `dartlab.providers.edgar.docs.sections.sections(stockCode, sinceYear=None)`\n  - 반환 — `topic(행) × period(열)` DataFrame\n  - topic namespace — `form_type::topicId`\n  - 기간 정렬 — 같은 연도에서는 annual → Q3 → Q2 → Q1\n- `10-K`, `10-Q`, `20-F` — structured split 대상\n- `40-F` — 현재 annual `Full Document` fallback 으로 저장\n- `Full Document` — hard fallback 으로만 남기고 기본 흐름에서는 최소화\n- `sectionMappings.json` — stable topic id 의 source of truth\n\n### 테이블 보존 계약\n\n- 저장 시점에 HTML table 은 markdown table 로 보존\n- `section_content` 는 text + markdown table 을 함께 보존하는 source-native payload\n- table-only fidelity 는 `057` 실험에서 계속 감시\n\n### 대량 수집 정책\n\n- `downloadListedEdgarDocs(limit=2000)` 처럼 issuer-deduped collectible universe 를 기준으로 배치 수집.\n- 배치 수집은 요청 폭주를 막기 위해 일정 건수마다 휴지 시간을 둔다.\n- `6-K` 는 기본 docs 배치 대상에서 제외.\n- 배치 progress 는 ticker · cik · status 뿐 아니라 `forms_found`, `rows_saved`, `filings_saved`, `full_document_rows`, `table_rows`, `failure_kind` 까지 남긴다.\n- readiness 리포트는 `057-015` 에서 progress 와 로컬 parquet 품질을 함께 요약.\n\n## 대표 반환 형태\n\n### 최소 공통 스키마\n\n모든 EDGAR docs parquet 가 반드시 포함해야 하는 컬럼:\n\n| 컬럼 | 설명 |\n|---|---|\n| `year` | 사업연도 |\n| `filing_date` | 제출일 |\n| `report_type` | 보고서 유형 (10-K · 10-Q · 20-F · 40-F) |\n| `period_key` | 기간 식별자 |\n| `section_order` | 섹션 순서 |\n| `section_title` | 섹션 제목 |\n| `section_content` | 본문 payload (text + markdown table) |\n\n### EDGAR 전용 보존 컬럼\n\n| 컬럼 | 설명 |\n|---|---|\n| `cik` | SEC 등록 번호 |\n| `company_name` | 발행사명 |\n| `ticker` | 거래 심볼 |\n| `accession_no` | filing 고유 ID |\n| `form_type` | 양식 (10-K / 10-Q / 20-F / 40-F) |\n| `filing_url` | SEC 원본 URL |\n\n### sections() DataFrame 구조\n\n```text\nform_type::topicId          │ 2024-Q4 │ 2024-Q3 │ 2024-Q2 │ 2024-Q1 │ 2023-Q4 │ …\n10-K::item1Business         │ \"…\"     │ null    │ null    │ null    │ \"…\"     │\n10-Q::item2MDA              │ null    │ \"…\"     │ \"…\"     │ \"…\"     │ null    │\n20-F::item3KeyInformation   │ \"…\"     │ null    │ null    │ null    │ \"…\"     │\n```\n\n## DART docs 와의 관계\n\n- 완전 동일 스키마를 강제하지 않는다.\n- 공통 소비 계층은 `year`, `section_title`, `section_content` 와 문서 식별자 fallback 만 가정.\n- 문서 식별자 — DART `rcept_no`, EDGAR `accession_no` 각각 사용.\n- 기업명 — DART `corp_name`, EDGAR `company_name` 각각 사용.\n- 로더 공통 뷰에서는 `source`, `entity_id`, `doc_id`, `doc_date`, `doc_url`, `period_key` 를 추가해 비교 축만 맞춘다.\n\n## source-native 원칙\n\n- 저장 parquet 는 EDGAR 메타를 그대로 유지.\n- `form_type`, `accession_no`, `filing_url`, `cik`, `period_end` 같은 EDGAR 고유 컬럼은 제거하지 않는다.\n- DART 와의 비교 가능성은 저장 포맷 통일이 아니라 로더 공통 뷰에서 확보.\n\n## 현재 readiness 기준\n\n- local corpus 기준 `sections()` 무에러\n- candidate coverage **100%**\n- raw coverage 는 최신 표본 기준 계속 감시, 새 long-tail 은 `057` 루프에서 흡수\n- `10-K`, `10-Q`, `20-F` 모두 structured split\n- `40-F` annual fallback 허용\n- table markdown regression 없음\n- progress 기준 failure taxonomy 가 운영적으로 해석 가능함\n\n## 후속 과제\n\n- `dartlab.providers.edgar.Company` 연동 (M-track P-PR6/7/8 — XBRL 깊이 + 10-K extractor + Form 4 / DEF 14A / 8-K)\n- registry, AI, export, server 노출\n- `business`, `mdna`, `riskFactors` 같은 개별 공개 모듈\n\n## 기본 검증\n\nEDGAR docs 변경 시 동기화 경로:\n\n- 위 \"table markdown regression 없음\" · \"40-F annual fallback 허용\" · \"progress 기준 failure taxonomy\" 가 회귀 가드.\n- `dartlab.providers.edgar.docs` 공개 메서드·반환 컬럼·실패 taxonomy 가 바뀌면 본 sub-spec + base `engines.edgar` 동시 갱신.\n- 결손 표시: 본문 fetch 실패 시 빈 string X → `flags.docs_fetch_status` 에 실패 사유 명시. failure taxonomy 누락 시 운영 해석 불가능.\n\n## 변경 이력\n\n- 2026-05-12 — `providers/edgar/docs/SPEC.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격)\n",
+      "bodyPreview": "## 엔진 역할\n\n`edgar.docs` 는 SEC EDGAR 원문 공시를 섹션 단위 parquet 로 저장하고, `sections()` 까지 포함한 form-native text 비교 계층을 제공한다. 현재 package 계약은 `10-K`, `10-Q`, `20-F`, `40-F` 를 `section_title`, `section_content`, `period_key` 중심으로 읽고, `form_type::topicId` 기준 horizontal view 를 만드는 것이다.\n\n시장 진입점은 `dartlab.providers.edgar.Company` 다. 루트 `dartlab.Company` 가 이 EDGAR 진입점을 통합 facade 로 감싼다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.providers.edgar.docs.sections import sections\nfrom dartlab.frame.dataLoader import loadData\n\n# 사용자 진입점 — Company facade\nc = dartlab.Company(\"AAPL\")\ntopics = c.topics                      # 사용 가능한 form_type::topicId catalog\ndf = c.panel(\"10-K::item1Business\")    # 단일 EDGAR topic DataFrame\n\n# 내부 진입점 — provider 직접\ndf = sections(\"AAPL\", sinceYear=2015)  # 2015 이후만\n\n# 로더 — 3 단계 fallback\ndocs = loadData(\"AAPL\", category=\"edgarDocs\")\ndocs2 = loadData(\"MSFT\", category=\"edgarDocs\", sinceYear=2015)\n```\n\n## 호출 동작\n\n### 데이터 소스\n\n- **원본** — `data/edgar/docs/{ticker}.parquet`\n- **GitHub Release** — `data-edgar-docs`\n- **기본 단위** — filing 별 section row\n- **기본 파일명** — ticker 기준 (`AAPL.parquet`, `MSFT.parquet`)\n- **기본 수집 시작점** — `2009 년`\n- **기본 수집 범위** — `10-K`, `10-Q`, `20-F`, `40-F` 전 기간\n\n### 로더 동작\n\n`loadData(\"AAPL\", category=\"edgarDocs\")`:\n1. 로컬 parquet 우선\n2. 없으면 GitHub Release 시도\n3. 없으면 SEC EDGAR API 에서 `2009 년부터` 직접 수집\n\n추가 범위 제어 — `loadData(..., category=\"edgarDocs\", sinceYear=2015)` 처럼 시작 연도 공개 파라미터.\n\n### sections 계약\n\n- `dartlab.providers.edgar.docs.sections.sections(stockCod"
     },
     {
       "id": "engines.gather",
@@ -4059,7 +4061,7 @@
         "pyodide": {
           "status": "limited",
           "dataSources": [
-            "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+            "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
             "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
             "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
           ],
@@ -4192,7 +4194,7 @@
         "pyodide": {
           "status": "supported",
           "dataSources": [
-            "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+            "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
             "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
             "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
           ],
@@ -6109,7 +6111,9 @@
       "recipeSteps": [],
       "requiredEvidence": [
         "사상 게이트 적용 결과",
-        "SSOT 통합 점검"
+        "SSOT 통합 점검",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "비교 가능성 분류",
@@ -6158,7 +6162,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "dartlab 의 존재 이유 · 설계 원칙 · 검증 게이트를 한 문서에 묶는다. 새 기능 · 변경 · 분석 시작 전 본 사상 게이트를 통과시킨다.\n\n## 1. 사상 한 줄 — AI ↔ 사람 상호 의존, 엔진이 다리\n\n사람이 엔진 코드와 블로그로 자산을 만든다. 그 자산은 자동으로 AI 의 skill 이 된다 — 공개 함수 docstring 이 곧 AI tool schema, skill 본문이 사용 절차. AI 가 실행 중 발견한 반복 패턴 · 반례 · 새 조합은 엔진 docstring 또는 블로그 frontmatter 로 사람 자산에 환류한다.\n\n**엔진이 다리** — 한 파일이 사람의 분석엔진이자 AI 의 skill 본문.\n\n## 2. 존재 이유 — 비교 가능성\n\ndartlab 은 **4 가지 비교 가능성** 을 늘리는 데 존재한다.\n\n| 비교 축 | 의미 | 엔진 |\n|---|---|---|\n| **회사간** | 같은 시점에 다른 기업을 비교 | `engines.company`, `engines.scan` |\n| **기간간** | 같은 회사를 다른 시점으로 비교 | `Company.panel`, `Company.diff` |\n| **시장간** | 한국 DART vs 미국 EDGAR | `engines.edgar`, `Company(\"AAPL\")` |\n| **엔진간** | 다른 분석 축의 결과를 한 회사 위에서 합침 | `engines.analysis`, `engines.story` |\n\n이 4 축 밖의 차원을 즉흥 신설하지 않는다. 새 기능이 **어떤 비교 가능성을 늘리는지** 가 첫 자문.\n\n## 3. 6 막 인과 — 분석 범위\n\n```\n경제 → 섹터 → 기업 → 재무 → 가치 → 가격\n```\n\n종목 없이도 가능한 분석 (경제 · 섹터) 부터 종목이 있어야 가능한 분석 (기업 · 재무 · 가치) 까지. 가격은 결과지 본체가 아니다.\n\nAI 는 적극적 분석가 — Company 분석 시에도 macro · scan · industry 를 엮어 해석한다. 6 막 외부 (예 — 종목 가격 단독 trick · 차트 해석만) 를 분석 본체로 삼지 않는다.\n\n## 4. Company 편의성 3 원칙\n\n| 원칙 | 의미 |\n|---|---|\n| **접근성** | 종목코드 하나, 추가 import 금지. `dartlab.Company(\"005930\")`. |\n| **속도** | 첫 호출 5 초 이내. HuggingFace 자동 다운로드, 캐시. |\n| **신뢰성** | 숫자는 원본 그대로, 없으면 `None` (0 으로 채우지 않는다). |\n\n에러 메시지는 해결책 포함:\n\n- 안 됨 — \"데이터 없음\"\n- 됨 — \"데이터 없음 → `dartlab.gather('price', '005930')` 먼저 수집하세요\"\n\nAPI 키 필요 시 발급 URL + `.env` 설정법까지.\n\n## 5. SSOT — 모든 지식 · 설정 · 룰은 단일 원천\n\n같은 내용 두 곳 금지. 발견 시 즉시 통합 + 나머지는 포인터만.\n\n- **문서 · 룰**: `skills/specs/**` · 도메인 문서 · `CLAUDE.md` 중 한 곳에만. 메모리는 라우팅 인덱스 + 운영자↔AI 약속만.\n- **코드**: 상수 · dict · 설정 · 매핑은 한 파일 · 한 심볼에만. 하드코딩 dict + registry 공존 금지. 다단 fallback 패치 금지 — 단일 진입점 재설계. 중복 formatter / validator 는 공통 util 통합.\n- **skill 동기화**: 기능 개선 · API 변경 · 반환 형태 변경 시 `skills/specs/engines/{engine}/SKILL.md` 동시 갱신. **skill 동기화 없는 기능 개선은 미완료**.\n\n## 6. Simple > Complex\n\n새 모듈 추가 전 자문 — \"기존 함수 호출 N 회로 가능한가?\" 가능하면 만들지 않는다.\n\n- wrapper · adapter · 중간 레이어 금지.\n- 미노출 API (호출처 0) = 즉시 삭제.\n- 하드코딩 dict 와 registry 공존 금지.\n- 다단 fallback 보다 단일 진입점 재설계.\n\n## 7. 환류 — 사람 ↔ 엔진 ↔ AI\n\n```\n사람: 엔진 코드 · 블로그 · 지식 → 자산\n   ↓\n엔진: 공개 함수 docstring = AI tool schema\n   ↓\nAI: 발견한 반복 패턴 · 반례 · 조합 → docstring · 블로그 frontmatter 로 환류\n```\n\n이 환류 고리가 깨지면:\n- AI 가 발견한 패턴이 코멘트로만 남는다.\n- 사람이 같은 발견을 다시 한다.\n- skill 본문이 코드 변경에 뒤처진다.\n\n환류는 작업 끝의 옵션이 아니라 작업 일부. **skill 동기화 없는 기능 개선은 미완료** 가 환류의 강행규칙.\n\n## 사상 적용 검증 게이트 (실행 절차)\n\n새 기능 · 변경 · 분석 시작 전 다음 5 가지를 자문한다:\n\n1. **비교 가능성** — 어떤 비교 축 (회사간 · 기간간 · 시장간 · 엔진간) 을 늘리나? 4 축 밖이면 다시 생각.\n2. **6 막 위치** — 경제 → 섹터 → 기업 → 재무 → 가치 → 가격 중 어디?\n3. **simple > complex** — 기존 함수 호출로 가능한가? wrapper 신설 유혹은 없나?\n4. **SSOT** — 이 내용이 다른 곳에 이미 있나? 통합 또는 포인터?\n5. **환류** — 발견 패턴을 사람 자산 (docstring · skill · 블로그) 으로 돌리는 경로가 있나?\n\n5 항목 통과 후 코드 / 문서 / skill 갱신.\n\n## 다음 단계\n\n- [operation.coreloop](/skills/operation.coreloop) — 자가개선 루프 운영 SSOT.\n- [operation.opsAsSkills](/skills/operation.opsAsSkills) — 운영 문서가 skills 체계로 흡수된 흐름.\n- [operation.code](/skills/operation.code) — 코드 품질 · 독스트링 · SSOT 3 종.\n- [operation.architecture](/skills/operation.architecture) — 레이어 구조 · import 방향.\n- [operation.apiContract](/skills/operation.apiContract) — 새 함수 추가 시 API 계약.\n- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 첫 진입.\n",
+      "bodyPreview": "dartlab 의 존재 이유 · 설계 원칙 · 검증 게이트를 한 문서에 묶는다. 새 기능 · 변경 · 분석 시작 전 본 사상 게이트를 통과시킨다.\n\n## 1. 사상 한 줄 — AI ↔ 사람 상호 의존, 엔진이 다리\n\n사람이 엔진 코드와 블로그로 자산을 만든다. 그 자산은 자동으로 AI 의 skill 이 된다 — 공개 함수 docstring 이 곧 AI tool schema, skill 본문이 사용 절차. AI 가 실행 중 발견한 반복 패턴 · 반례 · 새 조합은 엔진 docstring 또는 블로그 frontmatter 로 사람 자산에 환류한다.\n\n**엔진이 다리** — 한 파일이 사람의 분석엔진이자 AI 의 skill 본문.\n\n## 2. 존재 이유 — 비교 가능성\n\ndartlab 은 **4 가지 비교 가능성** 을 늘리는 데 존재한다.\n\n| 비교 축 | 의미 | 엔진 |\n|---|---|---|\n| **회사간** | 같은 시점에 다른 기업을 비교 | `engines.company`, `engines.scan` |\n| **기간간** | 같은 회사를 다른 시점으로 비교 | `Company.panel`, `Company.diff` |\n| **시장간** | 한국 DART vs 미국 EDGAR | `engines.edgar`, `Company(\"AAPL\")` |\n| **엔진간** | 다른 분석 축의 결과를 한 회사 위에서 합침 | `engines.analysis`, `engines.story` |\n\n이 4 축 밖의 차원을 즉흥 신설하지 않는다. 새 기능이 **어떤 비교 가능성을 늘리는지** 가 첫 자문.\n\n## 3. 6 막 인과 — 분석 범위\n\n```\n경제 → 섹터 → 기업 → 재무 → 가치 → 가격\n```\n\n종목 없이도 가능한 분석 (경제 · 섹터) 부터 종목이 있어야 가능한 분석 (기업 · 재무 · 가치) 까지. 가격은 결과지 본체가 아니다.\n\nAI 는 적극적 분석가 — Company 분석 시에도 macro · scan · industry 를 엮어 해석한다. 6 막 외부 (예 — 종목 가격 단독 trick · 차트 해석만) 를 분석 본체로 삼지 않는다.\n\n## 4. Company 편의성 3 원칙\n\n| 원칙 | 의미 |\n|---|---|\n| **접근성** | 종목코드 하나, 추가 import 금지. `dartlab.Company(\"005930\")`. |\n| **속도** | 첫 호출 5 초 이내. HuggingFace 자동 다운로드, 캐시. |\n| **신뢰성** | 숫자는 원본 그대로, 없으면 `None` (0 으로 채우지 않는다). |\n\n에러 메시지는 해결책 포함:\n\n- 안 됨 — \"데이터 없음\"\n- 됨 — \"데이터 없음 → `dartlab.gather('price', '005930')` 먼저 수집하세요\"\n\nAPI 키 필요 시 발급 URL + `.env` 설정법까지.\n\n## 5. SSOT — 모든 지식 · 설정 · 룰은 단일 원천\n\n같은 내용 두 곳 금지. 발견 시 즉시 통합 + 나머지는 포인터만.\n\n- **문서 · 룰**: `skills/sp"
     },
     {
       "id": "operation.recipePromote",
@@ -6679,7 +6684,9 @@
       "requiredEvidence": [
         "tier 분류 결정 근거",
         "영향받는 호출처 목록",
-        "CHANGELOG 항목"
+        "CHANGELOG 항목",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "변경 tier 와 적용 정책",
@@ -6722,7 +6729,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 tier 와 호환성 정책이다.\n\n## Tier 분류\n\n### Tier 1: Stable\n\n변경 시 deprecation 기간 + 마이그레이션 가이드 동반.\n\n| API | 설명 |\n|---|---|\n| `dartlab.Company(code)` | Company 객체 생성 facade |\n| `Company.panel(topic)` | topic payload 조회 (source-aware) |\n| `Company.trace()` | source provenance 조회 |\n| `Company.diff()` | 기간 간 텍스트 변화 감지 |\n| `Company.topics` | 사용 가능 topic 리스트 |\n| `dartlab.listing()` | 전체 상장사 디렉터리 |\n| `Company.panel(\"BS\"|\"IS\"|\"CF\"|\"CIS\")` | 재무제표 조회 |\n| `Company.panel(\"ratios\")` | 재무비율 조회 |\n| `Company.select(topic, accounts)` | topic 의 행/열 선택 |\n| `Company.index` | topic × 기간 정형 보드 DataFrame |\n| `Company.filings()` | 공시 문서 리스트 |\n| `dartlab` CLI 진입점 | 공개 CLI 명령 진입점 |\n| `dartlab.Company(\"AAPL\")` | EDGAR Company facade (US 종목) |\n| `engines.edgar.docs` | EDGAR 10-K/10-Q/20-F 섹션 가로화 |\n| `engines.edgar.docs.retrievalBlocks` | EDGAR 블록 단위 LLM 검색 |\n| `engines.edgar.docs.contextSlices` | EDGAR LLM context window 슬라이싱 |\n| `engines.edgar.finance` | SEC XBRL 재무제표 (BS/IS/CF) |\n| `engines.edgar.profile` | EDGAR docs + finance 병합 레이어 |\n| `c.analysis(\"valuation\", \"가치평가\")` | 다중 가치평가 (DCF · DDM · 상대) — KRW/USD 자동 감지 |\n| `c.analysis(\"forecast\", \"매출전망\")` | 매출 전망 (시계열 · 컨센서스 · 매크로 · ROIC) |\n\n### Tier 2: Beta\n\n경고 후 변경 가능. CHANGELOG 기록.\n\n| API | 설명 |\n|---|---|\n| `dartlab.search()` | DART 공시 ngram/BM25 검색 — 인덱스 신선도 제한 (일별 delta 자동화 보류). 단일 종목 공시는 `Company.disclosure` / `liveFilings` 권장. |\n| `engines.edgar.finance.SCE` | 자본변동표 (BS delta + CF) |\n| `engines.edgar.finance.explore()` | XBRL Fact Explorer (tag 단위 history) |\n| `engines.edgar.finance.listTags()` | XBRL tag 인벤토리 |\n| `engines.edgar.docs.notes()` | XBRL TextBlock 주석 추출 |\n| `engines.edgar.docs.freq()` | topic × 기간 분포 매트릭스 |\n| `engines.edgar.docs.coverage()` | topic 커버리지 요약 |\n| `Company.insights` | 인사이트 등급 (7 영역) |\n| `Company.insights.distress` | 부실 예측 스코어카드 (4 축, 신용 등급, 현금 런웨이) |\n| `Company.rank` | 시장 규모 랭킹 |\n| `Company.ask()` | LLM 기반 분석 |\n| `dartlab` 서브커맨드 | `ask`, `status`, `setup`, `ai`, `excel` UX |\n| Server API `/api/*` | 웹 서버 엔드포인트 |\n| `engines.ai.*` | AI/LLM 엔진 |\n| `Company.panel(\"SCE\")` | 자본변동표 (DART) |\n| `Company.panel(\"ratioSeries\")` | 비율 시계열 |\n| `Company.network()` | 계열사 네트워크 그래프 |\n| `Company.governance()` | 지배구조 데이터 |\n| `Company.workforce()` | 인력 데이터 |\n| `Company.capital()` | 자본 구조 |\n| `Company.debt()` | 부채 상세 |\n| `Company.table()` | 인라인 표 추출 |\n| `dartlab.chart` | chart 도구 모듈 |\n| `dartlab.ai.tools.table` | table 도구 모듈 |\n| `dartlab.text` | text 도구 모듈 |\n| MCP server | MCP protocol 서버 (60 tools, stdio) |\n| `dartlab mcp` | MCP CLI 명령 |\n\n### Tier 3: Experimental\n\nBreaking 변경 허용. 프로덕션 비권장.\n\n| API | 설명 |\n|---|---|\n| `export.*` | Excel export |\n| `engines.ai.tools.*` | LLM tool calling |\n\n### Tier 4: Alpha\n\n초기 단계. 동작은 하지만 미완성.\n\n| 기능 | 설명 |\n|---|---|\n| Desktop App (Windows .exe) | 독립 데스크탑 앱 — 동작 가능, 미완성 |\n| Sections Viewer | 가로화 공시 뷰어 — 핵심 컨셉 동작, 구조 미정 |\n\n## Deprecation 정책\n\n| Tier | 안내 | 제거 |\n|---|---|---|\n| Tier 1 | 2 minor 사전 | DeprecationWarning → 다음 minor 에서 제거 |\n| Tier 2 | 1 minor 사전 | CHANGELOG 후 변경 |\n| Tier 3 | 즉시 | CHANGELOG 만 |\n| Tier 4 | 없음 | 통보 없이 변경/소멸 가능 |\n\nDeprecationWarning 예시:\n\n```python\nimport warnings\nwarnings.warn(\n    \"Company.oldMethod() will be removed in v0.5.0. \"\n    \"Use Company.newMethod() instead.\",\n    DeprecationWarning,\n    stacklevel=2,\n)\n```\n\n## Stability 기준\n\nDART core stable 기준:\n\n- CI 테스트 커버리지 80%+ (core 엔진).\n- API Tier 1 테스트 100% 통과.\n- sections raw residual 0 유지 (대표 종목 셋).\n- BS identity check 95%+ 통과.\n- Tier 1 breaking change 3 개월 부재.\n- PyPI 다운로드 안정 추세.\n- 외부 사용자 피드백 수렴 (2 건+).\n\n## 버전 정책\n\n- **semver 준수**: major = breaking, minor = feature, patch = bugfix.\n- DART core stable 범위는 minor 안에서 호환성 우선.\n- EDGAR 와 일부 AI 기능은 tier 정책에 따라 더 빨리 변할 수 있다.\n- 내부 profile merge 레이어는 docs spine 위. 공식 사용 경로는 `c.topics` 로 topic catalog 확인 후 `c.panel(topic)` 호출.\n\n## CLI 호환성 규칙\n\n- 최상위 `dartlab` 진입점은 Tier 1.\n- 공개 서브커맨드와 주요 옵션 변경은 1 minor 이상 deprecation 사전 안내.\n- exit code 는 계약: `0` 성공, `1` 런타임 에러, `2` 사용 에러, `130` 사용자 인터럽트.\n- deprecated 별칭은 help 에서 숨겨도 제거 전까지는 실행 가능 유지.\n\n## EDGAR Topic Naming\n\nEDGAR topic 은 `{formType}::{itemId}` 형식.\n\n- `10-K::item1Business` — 사업 설명.\n- `10-K::item1ARiskFactors` — 위험 요인.\n- `10-K::item7Mdna` — 경영진 토의.\n\n짧은 별칭도 동작: `business`, `risk`, `mdna`, `governance`.\n\n## DART · EDGAR Namespace 차이\n\n- EDGAR 는 accessor 분리 (_DocsAccessor, _FinanceAccessor, _ProfileAccessor) + retrievalBlocks + contextSlices + 서버 API 지원 — DART 아키텍처와 같은 핵심.\n- DART `docs` namespace 는 추가 sections 분석 (coverage, freq, semanticRegistry, structureRegistry) — EDGAR 미지원, Tier 2.\n- DART `report` namespace (28 종 정형 공시 API) 는 EDGAR 에 없다 — DART 와 SEC 의 구조적 차이.\n\n## 다음 단계\n\n- [operation.code](/skills/operation.code) — 코드 품질 · 독스트링 · 릴리즈.\n- [operation.apiContract](/skills/operation.apiContract) — 새 함수 추가 시 API 계약.\n- [operation.cliMaintenance](/skills/operation.cliMaintenance) — CLI 유지보수 규칙.\n",
+      "bodyPreview": "dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 tier 와 호환성 정책이다.\n\n## Tier 분류\n\n### Tier 1: Stable\n\n변경 시 deprecation 기간 + 마이그레이션 가이드 동반.\n\n| API | 설명 |\n|---|---|\n| `dartlab.Company(code)` | Company 객체 생성 facade |\n| `Company.panel(topic)` | topic payload 조회 (source-aware) |\n| `Company.trace()` | source provenance 조회 |\n| `Company.diff()` | 기간 간 텍스트 변화 감지 |\n| `Company.topics` | 사용 가능 topic 리스트 |\n| `dartlab.listing()` | 전체 상장사 디렉터리 |\n| `Company.panel(\"BS\"|\"IS\"|\"CF\"|\"CIS\")` | 재무제표 조회 |\n| `Company.panel(\"ratios\")` | 재무비율 조회 |\n| `Company.select(topic, accounts)` | topic 의 행/열 선택 |\n| `Company.index` | topic × 기간 정형 보드 DataFrame |\n| `Company.filings()` | 공시 문서 리스트 |\n| `dartlab` CLI 진입점 | 공개 CLI 명령 진입점 |\n| `dartlab.Company(\"AAPL\")` | EDGAR Company facade (US 종목) |\n| `engines.edgar.docs` | EDGAR 10-K/10-Q/20-F 섹션 가로화 |\n| `engines.edgar.docs.retrievalBlocks` | EDGAR 블록 단위 LLM 검색 |\n| `engines.edgar.docs.contextSlices` | EDGAR LLM context window 슬라이싱 |\n| `engines.edgar.finance` | SEC XBRL 재무제표 (BS/IS/CF) |\n| `engines.edgar.profile` | EDGAR docs + finance 병합 레이어 |\n| `c.analysis(\"valuation\", \"가치평가\")` | 다중 가치평가 (DCF · DDM · 상대) — KRW/USD 자동 감지 |\n| `c.analysis(\"forecast\", \"매출전망\")` | 매출 전망 (시계열 · 컨센서스 · 매크로 · ROIC) |\n\n### Tier 2: Beta\n\n경고 후 변경 가능. CHANGELOG 기록.\n\n| API | 설명 |\n|---|---|\n| `dartlab.search()` | DART 공시 ngram/BM25 검색 — 인덱스 신선도 제한 (일별 delta 자동화 보류). 단일 종목 공시는 `Company.disclosure` / `liveFilings` 권장. |\n| `engines.edgar.finance.SCE` | 자본변동표 (BS delta + CF) |\n| `engines.edgar.finance.e"
     },
     {
       "id": "operation.testing",
@@ -7593,7 +7601,8 @@
       "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
-        "executionRef"
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "3+ provider 모두 isinstance(Company(code), CompanyProtocol) == True",
@@ -7638,7 +7647,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "## 무엇을 하나\n\ndart · edgar · edinet 3 provider 의 공통 표면을 정의하는 **5 Protocol** SSOT 와 그 SSOT 위에 새 regulator 를 drop-in 으로 얹는 4 단계 절차를 박는다. P-PR 트랙의 method-level symmetry baseline (`providerSymmetry.json`) 의 객관 기준이 본 spec.\n\n## Protocol 5 종 (SSOT 위치)\n\n| Protocol | 위치 | 핵심 메서드 |\n|---|---|---|\n| `CompanyProtocol` | `src/dartlab/core/protocols.py:69-225` | `__enter__` / `__exit__` / `show` / `select` / `trace` / `diff` / `filings` / `disclosure` / `liveFilings` / `readFiling` / `view` / `quant` / `ask` + `index` / `topics` property |\n| `DocsProvider` | `src/dartlab/core/protocols.py:366-419` | `fetchFiling(stockCode, *, period)` / `listSections(...)` / `iterSections(...)` |\n| `FinanceProvider` | `src/dartlab/core/protocols.py:422-476` | `fetchStatements(...)` / `listAccounts(...)` / `iterAccounts(...)` |\n| `FilingsProvider` | `src/dartlab/core/protocols.py:480-513` | `search(query, *, market=None, limit=20)` / `iterSearch(...)` |\n| `MemorySafeProvider` | `src/dartlab/core/protocols.py:517-540` | `cleanupCache() -> int` / `memorySnapshot() -> dict[str, int]` |\n\n5 종 모두 `@runtime_checkable` — `isinstance(co, CompanyProtocol)` 가능.\n\n## 새 provider 추가 4 단계\n\n### 1. `providers/{name}/company.py` 의 `Company` 가 `CompanyProtocol` 구현\n\n12 메서드 + 2 property 시그니처 그대로. dart-only 메서드 (`codeName` / `keywordTrend` / `news` / `listing` / `credit` 등 18) 는 본 Protocol 에 없음 — 신규 provider 는 구현 의무 없음.\n\n```python\n# providers/sgx/company.py 예시\nfrom dartlab.core.protocols import CompanyProtocol\n\nclass Company:  # implements CompanyProtocol structurally\n    def __init__(self, stockCode: str) -> None: ...\n    def __enter__(self) -> \"Company\": ...\n    def __exit__(self, *_: object) -> None: ...\n    # show / select / trace / ... 12 method + 2 property\n```\n\n### 2. `providers/{name}/{docs,finance,filings}` namespace 가 각 Provider Protocol 구현\n\n```python\n# providers/sgx/docs/__init__.py\nfrom dartlab.core.protocols import DocsProvider, FilingResult, Section\n\nclass _SgxDocs:  # implements DocsProvider\n    def fetchFiling(self, stockCode: str, *, period: str) -> FilingResult | None: ...\n    def listSections(self, stockCode: str, *, period: str) -> list[Section]: ...\n    def iterSections(self, stockCode: str, *, period: str) -> Iterator[Section]: ...\n```\n\n### 3. `providers/{name}/__init__.py` 에 Company + 3 namespace re-export\n\n```python\n\"\"\"SGX (싱가포르 거래소) 데이터 소스 엔진.\"\"\"\nfrom dartlab.providers.sgx import docs, finance, filings\nfrom dartlab.providers.sgx.company import Company\n\n__all__ = [\"finance\", \"docs\", \"filings\", \"Company\"]\n```\n\n`providers/__init__.py` 의 `__all__` 에 `\"sgx\"` 추가.\n\n### 4. baseline 갱신\n\n- `tests/test_providerContract.py` 의 provider iteration 에 `\"sgx\"` 추가.\n- `tests/audit/_baselines/providerSymmetry.json` 에 신규 provider 항목 등록.\n- `tests/audit/providerSymmetry.py` 의 `_SYMMETRY_MAP` 에 SGX-specific rename / dart_only / sgx_deferred 항목 등록.\n\n## 3 provider asymmetry (현 상태)\n\n### dart (한국, 50,855 LoC)\n가장 깊은 구현. 한국 시장 특화 18 메서드 보유 — edgar 패리티 대상 아님. `_SYMMETRY_MAP.dart_only` 영구 등록:\n\n| 카테고리 | 메서드 |\n|---|---|\n| 식별자 | `codeName` / `resolve` / `status` |\n| 시장 메타 | `listing` / `industry` |\n| 검색 / 뉴스 | `search` / `keywordTrend` / `news` / `publicSentiment` |\n| 분석 결합 | `credit` / `marketScan` / `keywordTrend` / `watch` / `story` / `analysis` / `validateStory` |\n| 데이터 | `gather` / `table` / `rawFinance` / `rawReport` |\n\n### edgar (미국, 15,010 LoC)\nP-PR6/7/8 후 dart 패리티 도달. XBRL / 10-K sections / Form 4 / DEF 14A / 8-K — 자체 구현 확장 (외부 `edgartools` 미도입).\n\n### edinet (일본, 2,856 LoC)\n**5 method 사용자 명시적 deferred** — `_SYMMETRY_MAP.edinet_deferred` 영구 등록:\n\n- `ask` (LLM 통합)\n- `quant` (기술적 분석)\n- `disclosure` (공시 검색 확장)\n- `liveFilings` (실시간 공시)\n- `readFiling` (원문 읽기)\n\n본 5 method 는 EDINET API 한정 차이 + 우선순위 결정. P-PR8 strict 전환 시 baseline 영구 제외.\n\n## 검증\n\n```bash\nuv run python -X utf8 -c \"\nfrom dartlab.core.protocols import CompanyProtocol\nfrom dartlab.providers import dart, edgar, edinet\nfor mod, code in [(dart, '005930'), (edgar, 'AAPL'), (edinet, '7203')]:\n    co = mod.Company(code)\n    assert isinstance(co, CompanyProtocol), f'{mod.__name__}: CompanyProtocol fail'\n    print(f'{mod.__name__}: CompanyProtocol OK')\n\"\n```\n\n`tests/test_providerContract.py` 의 `test_company_isinstance_runtime` + `test_provider_namespaces_isinstance` 자동화.\n\n## 폴더 mirror (10 sub-folder)\n\n| 폴더 | 책임 |\n|---|---|\n| `accessor/` | provider-specific data access (DartClient · SEC API client 등) |\n| `builder/` | 캐시 빌더 (filings catalog · finance statements 등) |\n| `bulk/` | bulk 적재 (corp_code dump · companyfacts batch 등) |\n| `docs/` | 공시 본문 파싱 (`DocsProvider` 구현) |\n| `finance/` | 재무제표 정규화 (`FinanceProvider` 구현) |\n| `openapi/` | raw HTTP client / API key |\n| `ops/` | 운영 유틸 (calendar / disclosure schedule 등) |\n| `parse/` | 표·HTML·XBRL 파서 |\n| `report/` | 정형 report (옵션) |\n| `search/` | 도메인 검색 (`FilingsProvider` 구현) |\n\n누락 폴더는 placeholder `__init__.py` 만 — Protocol contract 만족 위해.\n\n## 다음 단계\n\n- `engines.company` — Company facade 사용법\n- `engines.dart` / `engines.edgar` / `engines.edinet` — provider 별 엔진 사용법\n- `operation.code` § 11 룰 — 모든 provider 준수 룰\n- `operation.architecture` § 3-provider mirror — 아키텍처 SSOT\n",
+      "bodyPreview": "## 무엇을 하나\n\ndart · edgar · edinet 3 provider 의 공통 표면을 정의하는 **5 Protocol** SSOT 와 그 SSOT 위에 새 regulator 를 drop-in 으로 얹는 4 단계 절차를 박는다. P-PR 트랙의 method-level symmetry baseline (`providerSymmetry.json`) 의 객관 기준이 본 spec.\n\n## Protocol 5 종 (SSOT 위치)\n\n| Protocol | 위치 | 핵심 메서드 |\n|---|---|---|\n| `CompanyProtocol` | `src/dartlab/core/protocols.py:69-225` | `__enter__` / `__exit__` / `show` / `select` / `trace` / `diff` / `filings` / `disclosure` / `liveFilings` / `readFiling` / `view` / `quant` / `ask` + `index` / `topics` property |\n| `DocsProvider` | `src/dartlab/core/protocols.py:366-419` | `fetchFiling(stockCode, *, period)` / `listSections(...)` / `iterSections(...)` |\n| `FinanceProvider` | `src/dartlab/core/protocols.py:422-476` | `fetchStatements(...)` / `listAccounts(...)` / `iterAccounts(...)` |\n| `FilingsProvider` | `src/dartlab/core/protocols.py:480-513` | `search(query, *, market=None, limit=20)` / `iterSearch(...)` |\n| `MemorySafeProvider` | `src/dartlab/core/protocols.py:517-540` | `cleanupCache() -> int` / `memorySnapshot() -> dict[str, int]` |\n\n5 종 모두 `@runtime_checkable` — `isinstance(co, CompanyProtocol)` 가능.\n\n## 새 provider 추가 4 단계\n\n### 1. `providers/{name}/company.py` 의 `Company` 가 `CompanyProtocol` 구현\n\n12 메서드 + 2 property 시그니처 그대로. dart-only 메서드 (`codeName` / `keywordTrend` / `news` / `listing` / `credit` 등 18) 는 본 Protocol 에 없음 — 신규 provider 는 구현 의무 없음.\n\n```python\n# providers/sgx/company.py 예시\nfrom dartlab.core.protocols import CompanyProtocol\n\nclass Company:  # impl"
     },
     {
       "id": "runtime.pyodide",
@@ -8241,11 +8251,11 @@
         },
         {
           "skillId": "start.quickStart",
-          "note": "Company / sections / show / scan / ask 8 단계 walkthrough."
+          "note": "Company / topics/panel / scan / ask 8 단계 walkthrough."
         },
         {
           "skillId": "engines.company",
-          "note": "단일 기업 facade 로 sections · show · trace · diff · 하위 엔진 호출."
+          "note": "단일 기업 facade 로 topics · panel · trace · diff · 하위 엔진 호출."
         },
         {
           "skillId": "engines.analysis",
@@ -8254,7 +8264,9 @@
       ],
       "requiredEvidence": [
         "각 단계 완료 결과",
-        "첫 Company target / period / topic"
+        "첫 Company target / period / topic",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "첫 분석 결과",
@@ -8302,7 +8314,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "dartlab 을 처음 만나는 사람·AI 가 **환경 준비 → walkthrough → 회사 facade → 분석 축 적용** 4 단계로 첫 결과까지 도달하는 recipe. 각 단계는 별도 skill 을 가리키고, 끝나면 다음 분기 (시장 횡단 · 매크로 · 스토리) 로 자연 이어진다.\n\n## 무엇을 만드나\n\n| 단계 | 산출물 |\n|---|---|\n| 1 | 작동하는 dartlab 환경 (uv + Python 3.12 + dartlab) |\n| 2 | Company · Scan · Ask 8 단계 walkthrough 통과 |\n| 3 | 단일 회사 facade — topics · panel · trace · diff |\n| 4 | 22 축 중 1 축 분석 결과 (수익성 · 가치평가 · 성장성 등) |\n\n## 연계 절차\n\n1. start.installUv — uv 로 dartlab 환경 준비. `uv add dartlab` 후 `Company(\"005930\")` import 검증.\n2. start.quickStart — 8 단계 walkthrough 로 Company / topics / panel / scan / ask 의 호출 흐름을 한 번에 통과.\n3. engines.company — 단일 기업 facade. `c.topics` · `c.panel(\"BS\")` · `c.trace(\"BS\")` · `c.diff()` 로 회사 topic catalog 와 source priority 이해.\n4. engines.analysis — 22 분석 축 중 하나 선택 (`c.analysis(\"financial\", \"수익성\")` 또는 `c.analysis(\"valuation\", \"가치평가\")`).\n\n## 단계별 핵심 호출\n\n```python\nimport dartlab\n\n# 단계 3 — 회사 facade\nc = dartlab.Company(\"005930\")\nc.topics                         # 사용 가능한 topic catalog\nc.panel(\"BS\")                     # 재무상태표 (source priority 적용)\nc.diff()                         # 어떤 topic 이 가장 변했나\n\n# 단계 4 — 분석 축\nresult = c.analysis(\"financial\", \"수익성\")\nprint(result)\n```\n\n## 검증 게이트\n\n각 단계가 끝났을 때 다음을 확인:\n\n| 단계 | 검증 항목 |\n|---|---|\n| 1 | `uv run python -X utf8 -c \"import dartlab; print(dartlab.__version__)\"` 가 버전 출력 |\n| 2 | `c.panel(\"IS\")` 가 손익계산서 DataFrame 반환 |\n| 3 | `c.trace(\"BS\")` 가 finance source 선택 확인 |\n| 4 | analysis 결과의 `tableRef` · `valueRef` · `dateRef` · `executionRef` 가 묶여 있음 |\n\n## 다음 분기\n\n4 단계까지 끝나면 다음 중 하나로:\n\n- **시장 횡단** — `dartlab.scan(\"ratio\", \"roe\")` 또는 [engines.scan](/skills/engines.scan) 에서 19 축 중 선택.\n- **매크로 환경** — [engines.macro](/skills/engines.macro) 군 12 축으로 거시 위치 잡기.\n- **스토리 보고서** — `c.story()` 로 구조화 보고서 + 보강은 [engines.story](/skills/engines.story).\n- **가치평가 깊이** — [engines.quant](/skills/engines.quant) 의 damodaranValuation axis 로 DCF.\n- **AI workflow** — [runtime.workbenchEvidenceFlow](/skills/runtime.workbenchEvidenceFlow) 로 자연어 분석.\n\n## 다음 단계\n\n- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 5 카테고리 + 검증 게이트.\n- [start.useSkillsCatalog](/skills/start.useSkillsCatalog) — 검색 → 선택 → 검증 → 실행 패턴.\n- [Skills 카탈로그](/skills) — 179 개 skill 검색.\n",
+      "bodyPreview": "dartlab 을 처음 만나는 사람·AI 가 **환경 준비 → walkthrough → 회사 facade → 분석 축 적용** 4 단계로 첫 결과까지 도달하는 recipe. 각 단계는 별도 skill 을 가리키고, 끝나면 다음 분기 (시장 횡단 · 매크로 · 스토리) 로 자연 이어진다.\n\n## 무엇을 만드나\n\n| 단계 | 산출물 |\n|---|---|\n| 1 | 작동하는 dartlab 환경 (uv + Python 3.12 + dartlab) |\n| 2 | Company · Scan · Ask 8 단계 walkthrough 통과 |\n| 3 | 단일 회사 facade — topics · panel · trace · diff |\n| 4 | 22 축 중 1 축 분석 결과 (수익성 · 가치평가 · 성장성 등) |\n\n## 연계 절차\n\n1. start.installUv — uv 로 dartlab 환경 준비. `uv add dartlab` 후 `Company(\"005930\")` import 검증.\n2. start.quickStart — 8 단계 walkthrough 로 Company / topics / panel / scan / ask 의 호출 흐름을 한 번에 통과.\n3. engines.company — 단일 기업 facade. `c.topics` · `c.panel(\"BS\")` · `c.trace(\"BS\")` · `c.diff()` 로 회사 topic catalog 와 source priority 이해.\n4. engines.analysis — 22 분석 축 중 하나 선택 (`c.analysis(\"financial\", \"수익성\")` 또는 `c.analysis(\"valuation\", \"가치평가\")`).\n\n## 단계별 핵심 호출\n\n```python\nimport dartlab\n\n# 단계 3 — 회사 facade\nc = dartlab.Company(\"005930\")\nc.topics                         # 사용 가능한 topic catalog\nc.panel(\"BS\")                     # 재무상태표 (source priority 적용)\nc.diff()                         # 어떤 topic 이 가장 변했나\n\n# 단계 4 — 분석 축\nresult = c.analysis(\"financial\", \"수익성\")\nprint(result)\n```\n\n## 검증 게이트\n\n각 단계가 끝났을 때 다음을 확인:\n\n| 단계 | 검증 항목 |\n|---|---|\n| 1 | `uv run python -X utf8 -c \"import dartlab; print(dartlab.__version__)\"` 가 버전 출력 |\n| 2 | `c.panel(\"IS\")` 가 손익계산서 DataFrame 반환 |\n| 3 | `c.trace(\"BS\")` 가 finance source 선택 확인 |\n| 4 | analysis 결과의 `tableRef` · `valueRef` · `dateRef` · `executionRef` 가 묶여 있음 |\n\n"
     },
     {
       "id": "start.installUv",
@@ -8355,7 +8368,9 @@
       ],
       "recipeSteps": [],
       "requiredEvidence": [
-        "execution"
+        "execution",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "설치 명령",
@@ -8403,7 +8418,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "## 무엇을 설치하나\n\nDartLab 은 **uv** 와 **Python** 위에서 돌아간다. Python 이 없어도 괜찮다 — uv 가 자동으로 받아준다.\n\n> **uv 가 뭔가**: Rust 로 만든 Python 패키지 관리자. pip 보다 10~100 배 빠르고 Python 버전까지 관리한다. uv 만 설치하면 별도 Python 설치는 필요 없다.\n\n---\n\n## 0 단계 — 터미널 열기\n\n### Windows\n\n`Win + R` → `powershell` 입력 → Enter. 또는 작업 표시줄 검색에 `PowerShell` 입력 → Windows PowerShell 클릭.\n\n> Command Prompt (cmd) 가 아니라 **PowerShell** 이어야 한다. 아래 설치 명령 일부가 cmd 에서 작동하지 않는다.\n\n### macOS\n\n`Cmd + Space` → Spotlight 에 `Terminal` 입력 → Enter.\n\n### Linux\n\n대부분의 배포판에서 `Ctrl + Alt + T`.\n\n---\n\n## 1 단계 — uv 설치\n\n### Windows (PowerShell)\n\n```bash\npowershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"\n```\n\n설치 후 터미널을 **닫고 다시 열어야** `uv` 명령이 인식된다.\n\n### macOS / Linux\n\n```bash\ncurl -LsSf https://astral.sh/uv/install.sh | sh\n```\n\n설치 후 터미널을 다시 열거나 `source ~/.bashrc` (또는 `~/.zshrc`) 를 실행한다.\n\n### 설치 확인\n\n```bash\nuv --version\n```\n\n버전 번호가 찍히면 성공. `uv: command not found` 가 보이면 터미널을 다시 연다.\n\n---\n\n## 2 단계 — 프로젝트 만들기\n\n```bash\nuv init my-dart-analysis\ncd my-dart-analysis\n```\n\n이 명령이 자동으로 처리한다:\n- Python 3.12+ 감지 또는 **자동 다운로드**.\n- `pyproject.toml` (프로젝트 설정) 생성.\n- `.venv/` 가상환경 생성.\n\nPython 을 따로 설치할 필요는 없다.\n\n---\n\n## 3 단계 — DartLab 설치\n\n```bash\nuv add dartlab\n```\n\n의존성 (Polars, rich, alive-progress) 도 같이 설치된다.\n\n---\n\n## 4 단계 — 설치 검증\n\n```bash\nuv run python -X utf8 -c \"import dartlab; c = dartlab.Company('005930'); print(c.corpName)\"\n```\n\n`삼성전자` 가 출력되면 끝.\n\n> `uv run` 은 가상환경 안에서 실행한다. `uv run python` 을 쓰면 방금 설치한 dartlab 패키지가 보장된다. `-X utf8` 은 Windows 의 cp949 출력 깨짐을 막는다.\n\n---\n\n## AI 옵션 (dartlab ai)\n\nLLM 기반 회사 분석 웹 인터페이스를 쓰려면 AI 의존성을 추가한다.\n\n```bash\nuv add \"dartlab[ai]\"\nuv run dartlab ai\n```\n\n브라우저가 `http://localhost:8400` 에서 열린다. Ollama 설치 ([ollama.com/download](https://ollama.com/download)) 후 `ollama pull gemma3` 으로 모델을 받아두면 바로 동작한다.\n\n---\n\n## 데이터 흐름\n\nDartLab 은 DART 공시 원문을 파싱한 Parquet 파일을 사용한다. 직접 다운로드할 필요 없다 — `dartlab.Company(\"005930\")` 호출 시 없으면 **자동으로 받는다**.\n\n### DART — 3 단계 파이프라인\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")   # 로컬 없으면 자동 다운로드\n```\n\n1. **로컬 캐시** — 이미 받았으면 즉시.\n2. **HuggingFace** — [HuggingFace Datasets](https://huggingface.co/datasets/eddmpython/dartlab-data) 미리 빌드된 Parquet (빠르고 전 종목 커버).\n3. **DART API** — OpenDART 직접 수집 (느리고 API 키 필요).\n\n### 신선도 자동 감지\n\n3 계층 모델로 로컬 데이터의 최신 여부를 확인한다:\n\n| 계층 | 방식 | 속도 | 감지 대상 |\n|---|---|---|---|\n| L1 | HuggingFace ETag (HTTP HEAD) | ~0.5s | 미리 빌드 데이터 갱신 |\n| L2 | 파일 나이 TTL (90 일) | 즉시 | 오래된 로컬 파일 |\n| L3 | DART API `rcept_no` diff | ~1s | DART 신규 공시 |\n\nL1 + L2 는 API 키 없이 동작. L3 는 DART API 키 필요 (`dartlab setup dart-key`).\n\n새 공시가 감지되면 안내 메시지만 띄우고 자동 수집은 하지 않는다 (`Company` 생성 시점에는).\n\n```python\nresult = dartlab.checkFreshness(\"005930\")\nprint(result.isFresh, result.missingCount)\n\nc = dartlab.Company(\"005930\")\nc.update()  # 누락된 공시만 증분 수집\n```\n\n```bash\ndartlab collect --check 005930          # 단일 종목 신선도\ndartlab collect --check                 # 로컬 종목 전수 (7 일)\ndartlab collect --incremental 005930    # 단일 종목 증분\ndartlab collect --incremental           # 신규 공시 있는 모든 종목 증분\n```\n\n### EDGAR — 실시간 가져오기\n\n미국 종목은 SEC API 에서 처음 호출 시 가져온다.\n\n```python\nc = dartlab.Company(\"AAPL\")   # SEC API 호출\n```\n\nSEC 의 rate limit 때문에 첫 로드가 잠깐 걸릴 수 있다. 이후는 로컬 캐시.\n\n---\n\n## Google Colab 으로 시도\n\n로컬 설치 없이 바로 돌려보고 싶으면 Colab.\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb)\n\nColab 셀에서:\n\n```python\n!pip install dartlab\n\nimport dartlab\nc = dartlab.Company(\"005930\")\nc.panel(\"BS\")\n```\n\n---\n\n## 트러블슈팅\n\n### `uv: command not found`\n\n터미널을 닫고 다시 연다. 그래도 안 되면 설치 스크립트를 다시 실행.\n\n### Windows: `irm` 명령 인식 안 됨\n\nPowerShell 이 아니라 cmd 에 있을 가능성. `Win + R` → `powershell` → Enter.\n\n### `ModuleNotFoundError: No module named 'dartlab'`\n\n`python` 이 아니라 `uv run python` 을 써야 한다. 가상환경 밖의 시스템 Python 으로는 dartlab 을 못 찾는다.\n\n### 데이터 다운로드가 느림\n\nHuggingFace 에서 받기 때문에 네트워크 속도에 의존한다.\n\n---\n\n## 다음 단계\n\n- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 첫 진입과 검색 절차.\n- [start.quickStart](/skills/start.quickStart) — 8 분 walkthrough (Company / topics/panel / scan / ask).\n- [start.useSkillsCatalog](/skills/start.useSkillsCatalog) — skills 카탈로그 사용법.\n- [Skills 카탈로그 (`/skills`)](/skills) — 178 개 절차 검색.\n\n## 요구 사양\n\n| 패키지 | 최소 버전 | 비고 |\n|---|---|---|\n| Python | 3.12 | uv 가 자동 설치 |\n| Polars | 1.0.0 | 자동 설치 |\n| alive-progress | 3.0.0 | 진행률 바 |\n| rich | 13.0.0 | 터미널 출력 |\n",
+      "bodyPreview": "## 무엇을 설치하나\n\nDartLab 은 **uv** 와 **Python** 위에서 돌아간다. Python 이 없어도 괜찮다 — uv 가 자동으로 받아준다.\n\n> **uv 가 뭔가**: Rust 로 만든 Python 패키지 관리자. pip 보다 10~100 배 빠르고 Python 버전까지 관리한다. uv 만 설치하면 별도 Python 설치는 필요 없다.\n\n---\n\n## 0 단계 — 터미널 열기\n\n### Windows\n\n`Win + R` → `powershell` 입력 → Enter. 또는 작업 표시줄 검색에 `PowerShell` 입력 → Windows PowerShell 클릭.\n\n> Command Prompt (cmd) 가 아니라 **PowerShell** 이어야 한다. 아래 설치 명령 일부가 cmd 에서 작동하지 않는다.\n\n### macOS\n\n`Cmd + Space` → Spotlight 에 `Terminal` 입력 → Enter.\n\n### Linux\n\n대부분의 배포판에서 `Ctrl + Alt + T`.\n\n---\n\n## 1 단계 — uv 설치\n\n### Windows (PowerShell)\n\n```bash\npowershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"\n```\n\n설치 후 터미널을 **닫고 다시 열어야** `uv` 명령이 인식된다.\n\n### macOS / Linux\n\n```bash\ncurl -LsSf https://astral.sh/uv/install.sh | sh\n```\n\n설치 후 터미널을 다시 열거나 `source ~/.bashrc` (또는 `~/.zshrc`) 를 실행한다.\n\n### 설치 확인\n\n```bash\nuv --version\n```\n\n버전 번호가 찍히면 성공. `uv: command not found` 가 보이면 터미널을 다시 연다.\n\n---\n\n## 2 단계 — 프로젝트 만들기\n\n```bash\nuv init my-dart-analysis\ncd my-dart-analysis\n```\n\n이 명령이 자동으로 처리한다:\n- Python 3.12+ 감지 또는 **자동 다운로드**.\n- `pyproject.toml` (프로젝트 설정) 생성.\n- `.venv/` 가상환경 생성.\n\nPython 을 따로 설치할 필요는 없다.\n\n---\n\n## 3 단계 — DartLab 설치\n\n```bash\nuv add dartlab\n```\n\n의존성 (Polars, rich, alive-progress) 도 같이 설치된다.\n\n---\n\n## 4 단계 — 설치 검증\n\n```bash\nuv run python -X utf8 -c \"import dartlab; c = dartlab.Company('005930'); print(c.corpName)\"\n```\n\n`삼성전자` 가 출력되면 끝.\n\n> `uv run` 은 가상환경 안에서 실행한다. `uv run python` 을 쓰면 방금 설치한 dartlab 패키지가 보장된다. `-X utf8` 은 Windows 의 cp949 출"
     },
     {
       "id": "start.quickStart",
@@ -8412,7 +8428,7 @@
       "categoryTitle": "Start",
       "kind": "curated",
       "status": "observed",
-      "purpose": "설치 직후 Company · sections · show · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.",
+      "purpose": "설치 직후 Company · topics/panel · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.",
       "whenToUse": [
         "DartLab 설치 직후 첫 분석",
         "핵심 기능 빠르게 훑기",
@@ -8449,8 +8465,8 @@
       ],
       "procedure": [
         "dartlab.Company(code) 로 회사 객체를 만든다.",
-        "c.sections / c.topics 로 회사 전체 지도를 본다.",
-        "c.show(topic) 으로 개별 topic 본문을 연다 (BS · IS · CF · ratios 등).",
+        "c.topics 로 사용 가능한 topic 목록을 본다.",
+        "c.panel(topic) 으로 개별 topic 본문을 연다 (BS · IS · CF · ratios 등).",
         "c.diff() 로 기간 간 변화 큰 topic 을 찾는다.",
         "미국 종목은 같은 API 로 동작한다 (Company(\"AAPL\")).",
         "dartlab.scan(group, axis) 로 시장 전체 횡단.",
@@ -8459,7 +8475,9 @@
       ],
       "recipeSteps": [],
       "requiredEvidence": [
-        "execution"
+        "execution",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "회사 단위 결과",
@@ -8469,12 +8487,12 @@
       "visualGuidance": [],
       "failureModes": [
         "종목코드 / ticker 혼동 (한국 6 자리 vs 미국 알파벳)",
-        "show 의 topic 이름 오타 (companyOverview vs company-overview)",
+        "panel 의 topic 이름 오타 (companyOverview vs company-overview)",
         "ask 호출 전 dartlab[llm] 미설치"
       ],
       "forbidden": [
         "검증 없이 코드 결과를 결론으로 단정",
-        "sections 에서 누락 (null) 을 0 으로 대체"
+        "panel 결과의 누락 (null) 을 0 으로 대체"
       ],
       "examples": [
         "처음 dartlab 깔고 뭘 해봐야 하나",
@@ -8503,7 +8521,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "DartLab 은 세 가지를 한다 — **Company** (한 회사 깊게), **Scan** (시장 횡단), **Ask** (AI 분석).\n\n## 0. 설치\n\n```bash\nuv add dartlab\n```\n\n## 1. Company — 아무 회사나 읽기\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")  # 삼성전자\n```\n\n데이터는 첫 호출 시 자동 다운로드. 별도 셋업 없음.\n\n### 신선도\n\n- **첫 사용**: HuggingFace 에서 자동 다운로드 (종목당 수 MB).\n- **이후**: 24 시간마다 HF 갱신 자동 확인 (HTTP HEAD, 비용 거의 0).\n- **오프라인**: `dartlab.loadData(\"005930\", refresh=\"local_only\")` — 네트워크 체크 생략.\n\n## 2. 회사 전체 보기\n\n```python\nc.topics     # 어떤 topic 이 있나\n```\n\n## 3. 개별 topic 열기\n\n```python\nc.panel(\"businessOverview\")   # 사업 개요 본문\nc.panel(\"companyOverview\")    # 회사 개요\n```\n\n## 4. 재무제표\n\n```python\nc.panel(\"IS\")       # 손익계산서\nc.panel(\"BS\")       # 재무상태표\nc.panel(\"CF\")       # 현금흐름표\nc.panel(\"ratios\")   # 47 개 재무비율\n```\n\n## 5. 변화 감지\n\n```python\nc.diff()                    # 어떤 topic 이 가장 많이 바뀌었나\nc.diff(\"businessOverview\")  # 한 topic 깊이 보기\n```\n\n## 6. 미국 종목 — 같은 API\n\n```python\napple = dartlab.Company(\"AAPL\")\napple.panel(\"IS\")\napple.panel(\"10-K::item1ARiskFactors\")\n```\n\n## 7. 시장 횡단 (Scan)\n\n```python\ndartlab.search(\"삼성전자\")              # 회사 검색\ndartlab.scan(\"ratio\", \"roe\")           # 전 상장 ROE\ndartlab.scan(\"account\", \"매출액\")       # 전 상장 매출\n```\n\n## 8. AI 분석 (Ask)\n\n```bash\nuv add \"dartlab[llm]\"\n```\n\n```python\ndartlab.ask(\"삼성전자 재무 건강도 분석\")\n```\n\nprovider (OpenAI · Ollama · ChatGPT OAuth) 가 필요하다. `dartlab setup` 으로 옵션 확인.\n\n## 실습 노트북\n\n같은 코드를 Colab · Molab · 로컬 marimo 세 경로로 돌려볼 수 있다 → [runtime.notebooks](/skills/runtime.notebooks).\n\n## 다음 단계\n\n- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 카탈로그 첫 진입.\n- [engines.company](/skills/engines.company) — Company 엔진 전체 메서드.\n- [engines.scan](/skills/engines.scan) — 시장 횡단 19 축.\n- [engines.story](/skills/engines.story) — 구조화 보고서 생성.\n",
+      "bodyPreview": "DartLab 은 세 가지를 한다 — **Company** (한 회사 깊게), **Scan** (시장 횡단), **Ask** (AI 분석).\n\n## 0. 설치\n\n```bash\nuv add dartlab\n```\n\n## 1. Company — 아무 회사나 읽기\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")  # 삼성전자\n```\n\n데이터는 첫 호출 시 자동 다운로드. 별도 셋업 없음.\n\n### 신선도\n\n- **첫 사용**: HuggingFace 에서 자동 다운로드 (종목당 수 MB).\n- **이후**: 24 시간마다 HF 갱신 자동 확인 (HTTP HEAD, 비용 거의 0).\n- **오프라인**: `dartlab.loadData(\"005930\", refresh=\"local_only\")` — 네트워크 체크 생략.\n\n## 2. 회사 전체 보기\n\n```python\nc.topics     # 어떤 topic 이 있나\n```\n\n## 3. 개별 topic 열기\n\n```python\nc.panel(\"businessOverview\")   # 사업 개요 본문\nc.panel(\"companyOverview\")    # 회사 개요\n```\n\n## 4. 재무제표\n\n```python\nc.panel(\"IS\")       # 손익계산서\nc.panel(\"BS\")       # 재무상태표\nc.panel(\"CF\")       # 현금흐름표\nc.panel(\"ratios\")   # 47 개 재무비율\n```\n\n## 5. 변화 감지\n\n```python\nc.diff()                    # 어떤 topic 이 가장 많이 바뀌었나\nc.diff(\"businessOverview\")  # 한 topic 깊이 보기\n```\n\n## 6. 미국 종목 — 같은 API\n\n```python\napple = dartlab.Company(\"AAPL\")\napple.panel(\"IS\")\napple.panel(\"10-K::item1ARiskFactors\")\n```\n\n## 7. 시장 횡단 (Scan)\n\n```python\ndartlab.search(\"삼성전자\")              # 회사 검색\ndartlab.scan(\"ratio\", \"roe\")           # 전 상장 ROE\ndartlab.scan(\"account\", \"매출액\")       # 전 상장 매출\n```\n\n## 8. AI 분석 (Ask)\n\n```bash\nuv add \"dartlab[llm]\"\n```\n\n```python\ndartlab.ask(\"삼성전자 재무 건강도 분석\")\n```\n\nprovider (OpenAI · Ollama · ChatGPT OAuth) 가 필요하다. `dartlab setup` 으로 옵션 확인.\n\n## 실습 노트북\n\n같은 코드를 Colab · Molab · 로컬 marimo 세 경로로 돌려볼 수 있다 → ["
     },
     {
       "id": "start.useSkillsCatalog",
@@ -8519,7 +8538,7 @@
         "dartlab 기능과 가능한 분석",
         "스킬만 보고 시작",
         "외부 AI 가 dartlab 기능을 찾기",
-        "목적 기반 기능 검색",
+        "목적 기반 capability 검색",
         "show 함수 사용법",
         "skill 검색 패턴",
         "whenToUse 키워드 어떻게 매칭",
@@ -8532,7 +8551,7 @@
       "requiredInputs": [],
       "outputs": [
         "selectedSkill",
-        "사용 기능",
+        "capabilityRefs",
         "requiredEvidence",
         "runtime limits"
       ],
@@ -8570,21 +8589,23 @@
         "사용자 질문을 그대로 skill 검색어로 사용한다 (자연어 그대로, whenToUse[] 가 매칭).",
         "후보가 너무 많으면 카테고리 (start · runtime · operation · engines) 또는 sub-group 으로 좁힌다.",
         "후보 skill 의 frontmatter (purpose · inputs · outputs · runtimeCompatibility) 와 본문 (## 공개 호출 방식 ·",
-        "사용 기능 · requiredEvidence · forbidden 을 확인하고 답변에 묶을 ref 종류를 고정한다.",
+        "capabilityRefs · requiredEvidence · forbidden 을 확인하고 답변에 묶을 ref 종류를 고정한다.",
         "skill 의 procedure 또는 코드 예시를 따라 실행하고, 반환 source 와 결손을 검증한다."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
-        "skillRef"
+        "skillRef",
+        "executionRef",
+        "sourceRef"
       ],
       "expectedOutputs": [
         "목적 skill 후보",
-        "기능 참조 목록",
+        "capability ref 목록",
         "실행 전 확인할 evidence 목록"
       ],
       "visualGuidance": [],
       "failureModes": [
-        "엔진 기본 skill 을 보지 않고 기능 이름만 보고 분석 시작",
+        "엔진 기본 skill 을 보지 않고 capability 이름만 보고 분석 시작",
         "dartlab 기능 설명 질문을 RuntimeDatasetCatalog 만으로 답함",
         "skill 의",
         "requiredEvidence 확인 없이 답변 작성",
@@ -8592,7 +8613,7 @@
       ],
       "forbidden": [
         "skill 과 실제 공개 API 의 불일치를 방치하지 않는다.",
-        "사용 기능 확인 없이 실행 코드 작성하지 않는다.",
+        "capabilityRefs 확인 없이 실행 코드 작성하지 않는다.",
         "sourceRefs 없는 답변을 공식 절차로 취급하지 않는다."
       ],
       "examples": [
@@ -8626,7 +8647,8 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "dartlab 의 모든 기능은 **`/skills` 카탈로그** 에 진입한다. 사람과 AI 가 같은 표면을 본다. 외부 API 문서나 코드 트리 직접 탐색 대신 skill frontmatter 와 본문으로 시작한다.\n\n## 검색 → 선택 → 검증 → 실행\n\n### 1. 검색\n\n자연어 질문을 그대로 검색어로. dartlab skill 의 `whenToUse[]` 에 한국어 + 영문 키워드가 풍부하게 들어있어 매칭이 직접 일어난다.\n\n```\n\"삼성전자 재무 분석\"  →  engines.company / engines.analysis\n\"시장 ROE 횡단\"      →  engines.scan / engines.scan.ratio\n\"신용 등급 분석\"      →  engines.credit.creditRisk\n\"공시 변경 추적\"      →  engines.company.disclosureEvent\n\"매크로 분석\"        →  engines.macro 군 (12 개)\n\"AI workflow\"       →  runtime.workbenchEvidenceFlow\n```\n\n### 2. 선택\n\n후보 1~3 개를 frontmatter 만 보고 좁힌다.\n\n- **`purpose`** — 1~2 줄. 이게 내 질문에 맞나?\n- **`inputs` · `outputs`** — 어떤 인자를 받고 어떤 결과를 내나?\n- **`runtimeCompatibility`** — 내 실행 환경 (`localPython` · `mcp` · `pyodide` 등) 에서 동작?\n- **`whenToUse`** — 내 질문과 실제로 매칭되는지 재확인.\n\n후보가 1 개로 좁혀지지 않으면 **엔진 기본 skill (`engines.{group}`)** 부터 본다 — 거기서 응용 skill 로 좁힌다.\n\n### 3. 검증\n\n본문 진입 — 답변 전 다음 5 가지 확인:\n\n| 확인 | 위치 |\n|---|---|\n| 호출 방법 | 본문 `## 공개 호출 방식` |\n| 입출력 형태 | 본문 `## 호출 동작` + `## 대표 반환 형태` |\n| 답변에 묶을 evidence | frontmatter `requiredEvidence[]` |\n| 어겨선 안 되는 항목 | frontmatter `forbidden[]` |\n| 흔한 실패 회피 | frontmatter `failureModes[]` |\n\n### 4. 실행\n\nskill 의 코드 예시를 그대로 실행한다 (또는 MCP tool 로 호출). 결과의 `source`, 결손값, ref 를 검증하고 답변에 묶는다.\n\n## 자주 쓰는 검색 패턴\n\n| 질문 패턴 | 추천 skill |\n|---|---|\n| 회사 분석 진입 | `engines.company` |\n| 재무비율 / ROE / OPM | `engines.analysis.profitability`, `engines.scan.ratio` |\n| 시장 횡단 (전 종목) | `engines.scan` 군 (19 축) |\n| 매크로 / 거시 / 경기 | `engines.macro` 군 (12 축) |\n| 가치평가 | `engines.analysis.valuation`, `engines.quant.damodaranValuation` |\n| 신용 / 부실 위험 | `engines.credit.creditRisk` |\n| 공시 검색 / 본문 | `engines.search`, `engines.company.disclosureEvent` |\n| 보고서 / story | `engines.story` 군 |\n| AI / 자연어 분석 | `runtime.workbenchEvidenceFlow`, `runtime.mcpWorkbench` |\n| 노트북 (Colab · marimo) | `runtime.notebooks` |\n| 운영 규칙 (테스트 · 안정성) | `operation.testing`, `operation.stability`, `operation.methodology` |\n\n## capability vs skill — 다른 결\n\n- **capability** = `Company.panel` 같은 공개 함수 식별자 (코드 원천).\n- **skill** = 그 capability 를 어떤 절차로 쓰는지 + 입출력 + 검증 (사용 절차 SSOT).\n\nskill 본문은 capability 의 사용 설명. 세부 인자와 전체 반환 필드는 capability docstring 으로 검산한다 (skill 본문에 docstring 통째로 복사 금지 — SSOT 분리).\n\n## 다음 단계\n\n- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 5 카테고리 + 검증 게이트.\n- [start.installUv](/skills/start.installUv) — uv 설치와 첫 실행.\n- [start.quickStart](/skills/start.quickStart) — 8 단계 walkthrough.\n- [start.firstAnalysisRecipe](/skills/start.firstAnalysisRecipe) — 첫 회사 분석 recipe.\n- [Skills 카탈로그](/skills) — 179 개 skill 검색.\n",
+      "bodyPreview": "dartlab 의 모든 기능은 **`/skills` 카탈로그** 에 진입한다. 사람과 AI 가 같은 표면을 본다. 외부 API 문서나 코드 트리 직접 탐색 대신 skill frontmatter 와 본문으로 시작한다.\n\n## 검색 → 선택 → 검증 → 실행\n\n### 1. 검색\n\n자연어 질문을 그대로 검색어로. dartlab skill 의 `whenToUse[]` 에 한국어 + 영문 키워드가 풍부하게 들어있어 매칭이 직접 일어난다.\n\n```\n\"삼성전자 재무 분석\"  →  engines.company / engines.analysis\n\"시장 ROE 횡단\"      →  engines.scan / engines.scan.ratio\n\"신용 등급 분석\"      →  engines.credit.creditRisk\n\"공시 변경 추적\"      →  engines.company.disclosureEvent\n\"매크로 분석\"        →  engines.macro 군 (12 개)\n\"AI workflow\"       →  runtime.workbenchEvidenceFlow\n```\n\n### 2. 선택\n\n후보 1~3 개를 frontmatter 만 보고 좁힌다.\n\n- **`purpose`** — 1~2 줄. 이게 내 질문에 맞나?\n- **`inputs` · `outputs`** — 어떤 인자를 받고 어떤 결과를 내나?\n- **`runtimeCompatibility`** — 내 실행 환경 (`localPython` · `mcp` · `pyodide` 등) 에서 동작?\n- **`whenToUse`** — 내 질문과 실제로 매칭되는지 재확인.\n\n후보가 1 개로 좁혀지지 않으면 **엔진 기본 skill (`engines.{group}`)** 부터 본다 — 거기서 응용 skill 로 좁힌다.\n\n### 3. 검증\n\n본문 진입 — 답변 전 다음 5 가지 확인:\n\n| 확인 | 위치 |\n|---|---|\n| 호출 방법 | 본문 `## 공개 호출 방식` |\n| 입출력 형태 | 본문 `## 호출 동작` + `## 대표 반환 형태` |\n| 답변에 묶을 evidence | frontmatter `requiredEvidence[]` |\n| 어겨선 안 되는 항목 | frontmatter `forbidden[]` |\n| 흔한 실패 회피 | frontmatter `failureModes[]` |\n\n### 4. 실행\n\nskill 의 코드 예시를 그대로 실행한다 (또는 MCP tool 로 호출). 결과의 `source`, 결손값, ref 를 검증하고 답변에 묶는다.\n\n## 자주 쓰는 검색 패턴\n\n| 질문 패턴 | 추천 skill |\n|---|---|\n| 회사 분석 진입 | `engines.company` |\n| 재무비율 / ROE / OPM | `engines.analysis.profitability`, `engines.scan.ratio` |\n| 시장 횡단 (전 종목) | `engines.scan` 군 (19 축) |\n| 매크로 / 거시 / 경기 | `engines.macro` 군 (12"
     },
     {
       "id": "engines.viz.evidenceCoverage",
