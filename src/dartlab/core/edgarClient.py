@@ -6,8 +6,8 @@ gather 가 모든 EDGAR network fetch 를 전담(ETL Extract). providers 의 bui
 
 ``EdgarApiError`` + ``DEFAULT_*`` URL/User-Agent 는 build·fetch 양쪽이 쓰는 공유
 식별자/상수라 core 에 정의 (gather raise/fetch, providers except/URL 조립). 본 모듈의
-``EdgarClient`` 는 *factory 함수* — 소비자 호출부(``EdgarClient(...)``)는 그대로 두고
-import 경로만 본 모듈로 교체.
+``EdgarClient`` 는 wrapper class — 소비자 호출부(``EdgarClient(...)``)와
+``EdgarClient.getJson`` monkeypatch 표면을 유지하면서 실제 HTTP 구현은 gather provider 에 위임.
 
 CredentialProvider/LoaderProvider/DartFetchProvider 와 동일 패턴.
 """
@@ -107,15 +107,8 @@ def _provider() -> EdgarFetchProvider:
     return provider
 
 
-def EdgarClient(
-    *,
-    userAgent: str | None = None,
-    email: str | None = None,
-    minInterval: float = 0.2,
-    timeout: float = 30.0,
-    maxRetries: int = 3,
-) -> Any:
-    """SEC EDGAR 클라이언트 factory — gather EdgarFetchProvider 위임.
+class EdgarClient:
+    """SEC EDGAR 클라이언트 wrapper — gather EdgarFetchProvider 위임.
 
     Requires: ``dartlab.gather.edgar.client`` (EdgarFetchProvider 등록). SEC public API
         는 키 불요, User-Agent 필수(_buildUserAgent 자동).
@@ -124,13 +117,30 @@ def EdgarClient(
         >>> from dartlab.core.edgarClient import EdgarClient  # doctest: +SKIP
         >>> client = EdgarClient()
     """
-    return _provider().makeClient(
-        userAgent=userAgent,
-        email=email,
-        minInterval=minInterval,
-        timeout=timeout,
-        maxRetries=maxRetries,
-    )
+
+    def __init__(
+        self,
+        *,
+        userAgent: str | None = None,
+        email: str | None = None,
+        minInterval: float = 0.2,
+        timeout: float = 30.0,
+        maxRetries: int = 3,
+    ) -> None:
+        self._client = _provider().makeClient(
+            userAgent=userAgent,
+            email=email,
+            minInterval=minInterval,
+            timeout=timeout,
+            maxRetries=maxRetries,
+        )
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._client, name)
+
+    def getJson(self, url: str) -> dict[str, Any]:
+        """SEC JSON endpoint 호출 — 실제 구현은 등록된 gather client 에 위임."""
+        return self._client.getJson(url)
 
 
 # ── gather/edgar fetch+normalize 위임 delegate (providers 소비자 호환 seam) ──
@@ -187,8 +197,39 @@ def loadTickers(*args: Any, **kwargs: Any) -> Any:
 
 
 def resolveIssuer(*args: Any, **kwargs: Any) -> Any:
-    """ticker/CIK → issuer dict — gather/edgar 위임. Requires: gather.edgar. Raises: 없음. Example: >>> resolveIssuer("AAPL")  # doctest: +SKIP"""
-    return _call("identity", "resolveIssuer", *args, **kwargs)
+    """ticker/CIK → issuer dict. ``loadTickers`` seam 을 사용해 monkeypatch 가능한 표면 유지."""
+    query = args[0] if args else kwargs.pop("query")
+    client = args[1] if len(args) > 1 else kwargs.pop("client", None)
+    refresh = bool(kwargs.pop("refresh", False))
+    if kwargs:
+        raise TypeError(f"unexpected keyword arguments: {', '.join(kwargs)}")
+    if not query or not str(query).strip():
+        raise ValueError("tickerOrCik가 비어 있음")
+
+    text = str(query).strip()
+    normalized = text.upper()
+    cikQuery = text.zfill(10) if text.isdigit() else ""
+
+    df = loadTickers(client, refresh=refresh)
+    row = None
+    if cikQuery:
+        match = df.filter(pl.col("cik") == cikQuery)
+        if match.height > 0:
+            row = match.row(0, named=True)
+    else:
+        match = df.filter(pl.col("ticker") == normalized)
+        if match.height > 0:
+            row = match.row(0, named=True)
+    if row is None:
+        raise ValueError(f"{query}에 해당하는 CIK를 찾을 수 없음")
+    return {
+        "ticker": str(row.get("ticker") or normalized),
+        "cik": str(row.get("cik") or "").zfill(10),
+        "title": str(row.get("title") or normalized),
+        "exchange": row.get("exchange"),
+        "is_exchange_listed": row.get("is_exchange_listed"),
+        "is_otc": row.get("is_otc"),
+    }
 
 
 def searchIssuers(*args: Any, **kwargs: Any) -> Any:

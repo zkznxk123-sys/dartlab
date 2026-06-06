@@ -241,6 +241,15 @@ def _parseDetailLast(detail: str) -> str | None:
     return parts[-1] if parts else None
 
 
+def _isTotalDetailRoot(detail: str) -> bool:
+    cleaned = re.sub(r"\s*\[(member|구성요소|구성 요소)\]", "", detail).strip()
+    parts = [p.strip() for p in cleaned.split("|") if p.strip()]
+    if len(parts) != 1:
+        return False
+    root = parts[0].replace(" ", "")
+    return root in {"자본", "자본총계", "연결재무제표", "연결자본", "총자본"}
+
+
 def _matchDetailMap(last: str) -> str | None:
     """DETAIL_MAP 직접 매칭 (공백 포함 + 무시)."""
     from dartlab.providers.dart.finance.sceMapper import DETAIL_MAP
@@ -284,6 +293,8 @@ def normalizeDetail(detail: str | None) -> str:
         return "total"
     if re.search(r"별도재무제표\s*\[", detail):
         return "total_separate"
+    if _isTotalDetailRoot(detail):
+        return "total"
 
     last = _parseDetailLast(detail)
     if last is None:

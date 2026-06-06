@@ -138,7 +138,7 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
         hit 시 즉시 응답.
 
     Guide:
-        - importlib 우회로 industry(L2) → scan(L1.5) 단방향 정책 유지.
+        - 섹터 분류는 하위 SSOT인 core.sector.classify 를 사용한다.
         - 캐시 stale 정책 없음 — caller 가 명시 rebuild.
 
     When:
@@ -165,15 +165,10 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     >>> snap["005930"].sizeClass
     'large'
     """
-    import importlib
-
+    from dartlab.core.sector import classify
     from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
     from dartlab.gather.krx.listing import getKindList
     from dartlab.providers.dart.finance.pivot import buildAnnual
-
-    # industry(L2) 는 단방향 정책 상 scan(L1.5) 이 직접 import 금지 — importlib 우회.
-    # cycleScan/import-linter 가 못 잡는 동적 import.
-    classify = getattr(importlib.import_module("dartlab.industry"), "classify")
 
     kindDf = getKindList()
     codes = kindDf["종목코드"].to_list()
@@ -430,7 +425,7 @@ def getRankOrBuild(stockCode: str, *, verbose: bool = True) -> RankInfo | None:
         hit 시 즉시 응답.
 
     Guide:
-        - importlib 우회로 industry(L2) → scan(L1.5) 단방향 정책 유지.
+        - 섹터 분류는 하위 SSOT인 core.sector.classify 를 사용한다.
         - 캐시 stale 정책 없음 — caller 가 명시 rebuild.
 
     When:

@@ -83,8 +83,14 @@ async def apiDataSources(code: str):
 
 
 @router.get("/api/data/preview/{code}/{module}")
-async def apiDataPreview(code: str, module: str, maxRows: int = Query(50, ge=1, le=500)):
+async def apiDataPreview(
+    code: str,
+    module: str,
+    maxRows: int = Query(50, ge=1, le=500, alias="max_rows"),
+    maxRowsCompat: int | None = Query(None, ge=1, le=500, alias="maxRows"),
+):
     """데이터 미리보기 — 모듈 데이터를 JSON으로 반환 (테이블/텍스트)."""
+    rowLimit = maxRowsCompat if maxRowsCompat is not None and maxRows == 50 else maxRows
     try:
         c = await asyncio.to_thread(Company, code)
     except (ValueError, OSError) as e:
@@ -109,7 +115,7 @@ async def apiDataPreview(code: str, module: str, maxRows: int = Query(50, ge=1, 
     if isinstance(data, pl.DataFrame):
         if "year" in data.columns:
             data = data.sort("year")
-        serialized = serializePayload(data, maxRows=maxRows)
+        serialized = serializePayload(data, maxRows=rowLimit)
         result: dict[str, Any] = {
             **serialized,
             "module": module,
@@ -341,30 +347,11 @@ def _resolveModuleData(c: Company, entry) -> Any:
 
     if name.startswith("annual.") or name.startswith("timeseries."):
         prefix, stmt = name.split(".", 1)
-        prop = "annual" if prefix == "annual" else "timeseries"
-        result = getattr(c, prop, None)
-        if result is None:
-            return None
-        series, periods = result
-        stmt_data = series.get(stmt)
-        if not stmt_data or not periods:
-            return None
+        freq = "Y" if prefix == "annual" else "Q"
+        return _resolveFinancePanel(c, stmt, freq=freq)
 
-        from dartlab.providers.dart.finance.mapper import AccountMapper
-
-        order = AccountMapper.get().sortOrder(stmt)
-
-        rows = []
-        for account, values in stmt_data.items():
-            row = {"항목": account}
-            for i, p in enumerate(periods):
-                row[str(p)] = values[i] if i < len(values) else None
-            rows.append(row)
-        if not rows:
-            return None
-        if order:
-            rows.sort(key=lambda r: order.get(r["항목"], 9999))
-        return pl.DataFrame(rows)
+    if name == "ratios":
+        return _resolveFinancePanel(c, "ratios")
 
     attrName = entry.funcName or entry.name
     if name in ("IS", "BS", "CF"):
@@ -398,6 +385,16 @@ def _resolveModuleData(c: Company, entry) -> Any:
         data = cleaned
 
     return data
+
+
+def _resolveFinancePanel(c: Company, topic: str, *, freq: str | None = None) -> Any:
+    """Company.panel finance 표면에서 preview용 데이터를 조회한다."""
+    panel = getattr(c, "panel", None)
+    if panel is None or not callable(panel):
+        return None
+    if freq is None:
+        return panel(topic)
+    return panel(topic, freq=freq)
 
 
 def _buildFinanceMeta(moduleName: str) -> dict[str, Any]:

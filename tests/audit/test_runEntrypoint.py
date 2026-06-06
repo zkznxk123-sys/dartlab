@@ -28,6 +28,7 @@ from run import (  # noqa: E402
     GATES_BLOCK_START,
     REALDATA_SHARDS,
     renderGatesBlock,
+    resolveGateEnv,
 )
 
 WORKFLOWS = REPO_ROOT / ".github" / "workflows"
@@ -72,6 +73,22 @@ def test_matrixParamPlaceholderPresent():
             assert "{cov_flags}" in gate.cmd, f"{gate.name}: {{cov_flags}} 누락"
         elif gate.matrix_param == "test":
             assert "{test_file}" in gate.cmd, f"{gate.name}: {{test_file}} 누락"
+
+
+@pytest.mark.unit
+def test_resolveGateEnvSubstitutesGithubWorkspace():
+    env = resolveGateEnv(
+        {
+            "DARTLAB_DATA_DIR": "${{ github.workspace }}/tests/fixtures",
+            "STATIC": "value",
+            "UNSUPPORTED": "${{ github.output }}",
+        },
+        {"GITHUB_WORKSPACE": "/tmp/work/repo"},
+    )
+    assert env == {
+        "DARTLAB_DATA_DIR": "/tmp/work/repo/tests/fixtures",
+        "STATIC": "value",
+    }
 
 
 @pytest.mark.unit

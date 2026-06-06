@@ -126,6 +126,25 @@ _FINANCE_SHEETS = frozenset({"IS", "BS", "CF"})
 _SPECIAL_SHEETS = frozenset({"ratios"})
 
 
+def _hasFlag(c: Company, name: str) -> bool:
+    return getattr(c, name, False) is True
+
+
+def _hasFinance(c: Company) -> bool:
+    return _hasFlag(c, "_hasFinance") or _hasFlag(c, "_hasFinanceParquet")
+
+
+def _buildAnnualSeries(c: Company):
+    accessor = getFinanceDocAccessor()
+    if accessor is not None:
+        result = accessor.buildAnnual(c.stockCode)
+        if result:
+            return result
+    from dartlab.providers.dart.finance.pivot import buildAnnual
+
+    return buildAnnual(c.stockCode)
+
+
 def _autoWidth(ws, minWidth: int = 12, maxWidth: int = 30) -> None:
     for col in ws.columns:
         colLetter = get_column_letter(col[0].column)
@@ -290,7 +309,23 @@ def _writeDataFrameSheet(
 
 def _getAvailableModules(c: Company) -> list[tuple[str, str]]:
     accessor = getFinanceDocAccessor()
-    available = list(accessor.exportModules()) if accessor else []
+    available = [("IS", "손익계산서"), ("BS", "재무상태표"), ("CF", "현금흐름표")]
+    known = {name for name, _ in available}
+    if accessor:
+        providerModules = accessor.exportModules()
+    else:
+        try:
+            from dartlab.providers.dart.company import listExportModules
+            from dartlab.providers.dart.report.types import API_TYPE_LABELS
+
+            providerModules = listExportModules()
+            knownProvider = {name for name, _ in providerModules}
+            providerModules.extend(
+                (name, label) for name, label in API_TYPE_LABELS.items() if name not in knownProvider
+            )
+        except (ImportError, RuntimeError):
+            providerModules = []
+    available.extend((name, label) for name, label in providerModules if name not in known)
     available.append(("ratios", "재무비율"))
     return available
 
@@ -301,7 +336,18 @@ def _resolveData(c: Company, moduleName: str) -> pl.DataFrame | None:
     try:
         data = c.panel(moduleName)
     except (KeyError, ValueError, TypeError):
-        return None
+        data = None
+    if isinstance(data, pl.DataFrame) and data.height > 0:
+        return data
+    show = getattr(c, "show", None)
+    if callable(show):
+        try:
+            data = show(moduleName)
+        except (KeyError, ValueError, TypeError):
+            data = None
+    if isinstance(data, pl.DataFrame) and data.height > 0:
+        return data
+    data = getattr(c, moduleName, None)
     if isinstance(data, pl.DataFrame) and data.height > 0:
         return data
     return None
@@ -338,16 +384,15 @@ def exportToExcel(
     wb.remove(wb.active)
 
     financeModules = [m for m in targetModules if m in _FINANCE_SHEETS]
-    if financeModules and c._hasFinance:
-        accessor = getFinanceDocAccessor()
-        result = accessor.buildAnnual(c.stockCode) if accessor else None
+    if financeModules and _hasFinance(c):
+        result = _buildAnnualSeries(c)
         if result:
             series, years = result
             for sjDiv in financeModules:
                 if sjDiv in series:
                     _writeFinanceSheet(wb, sjDiv, series, years)
 
-    if "ratios" in targetModules and c._hasFinance:
+    if "ratios" in targetModules and _hasFinance(c):
         _writeRatiosSheet(wb, c)
 
     for moduleName in targetModules:
@@ -397,11 +442,10 @@ def exportWithTemplate(
         source = spec.source
 
         if source in _FINANCE_SHEETS:
-            if not c._hasFinance:
+            if not _hasFinance(c):
                 continue
             if annualCache is None:
-                accessor = getFinanceDocAccessor()
-                result = accessor.buildAnnual(c.stockCode) if accessor else None
+                result = _buildAnnualSeries(c)
                 if result is None:
                     continue
                 annualCache = result
@@ -419,7 +463,7 @@ def exportWithTemplate(
             continue
 
         if source == "ratios":
-            if c._hasFinance:
+            if _hasFinance(c):
                 _writeRatiosSheet(wb, c, label=spec.label)
             continue
 
@@ -456,7 +500,7 @@ def listAvailableModules(c: Company) -> list[dict[str, str]]:
 
     _DATA_FLAGS = {
         "docs": c._hasDocs,
-        "finance": c._hasFinance,
+        "finance": _hasFinance(c),
         "report": c._hasReport,
     }
 
@@ -467,7 +511,7 @@ def listAvailableModules(c: Company) -> list[dict[str, str]]:
             if not _DATA_FLAGS.get(entry.requires, False):
                 continue
         elif name in _FINANCE_SHEETS or name == "ratios":
-            if not c._hasFinance:
+            if not _hasFinance(c):
                 continue
         result.append({"name": name, "label": label})
     return result

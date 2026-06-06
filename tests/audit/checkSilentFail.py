@@ -51,7 +51,7 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "gather/domains/yahooChart.py",
         "providers/dart/openapi/allFilingsCollector.py",
         "providers/dart/openapi/batch.py",
-        "providers/dart/openapi/dartKey.py",
+        "gather/dart/keys.py",
         "providers/dart/accessor/financeDocAccessor.py",
         "providers/dart/ops/insiderTrades.py",
         "providers/mappers/scanner.py",

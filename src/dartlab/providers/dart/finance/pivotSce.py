@@ -42,6 +42,7 @@ def buildSceMatrix(
         "fs_div",
         "account_id",
         "account_nm",
+        "account_detail",
         "bsns_year",
         "reprt_nm",
         "thstrm_amount",

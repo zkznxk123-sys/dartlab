@@ -3894,6 +3894,23 @@ class Company:
             self._reportAccessor = _ReportAccessor(self)
         return self._reportAccessor
 
+    @property
+    def report(self):
+        """EDGAR report accessor.
+
+        Returns:
+            _ReportAccessor: EDGAR XBRL 기반 report accessor.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.report is not None
+            True
+        """
+        return self._report
+
     # ── DartCompany 동기화 메소드 (test_protocol 방어막) ──
     # 아래 메소드는 DartCompany와 인터페이스를 맞추기 위해 존재한다.
     # DART report 전용 데이터가 필요한 경우 None/빈값을 반환한다.

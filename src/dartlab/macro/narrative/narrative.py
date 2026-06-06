@@ -121,7 +121,7 @@ def analyzeNarrative(
         archive 미존재 시 score=0 + label="중립" + empty pulse 반환.
 
     See Also:
-        ``dartlab.quant.text.narrativePulse.buildNarrativePulse``: 입력 SSOT.
+        ``dartlab.synth.narrativePulse.buildNarrativePulse``: 입력 SSOT.
         ``dartlab.macro.summary.analyzeSummary``: 12 축 통합 caller.
         ``dartlab.macro.scenarios.engine._computeDelta``: narrative_signal 계산.
 
@@ -133,7 +133,7 @@ def analyzeNarrative(
         Cost: O(lookback_days × archive_per_day) ≈ 1 초 (mmap parquet).
         Determinism: same inputs → same outputs (asOf 고정 시).
     """
-    from dartlab.quant.text.narrativePulse import buildNarrativePulse
+    from dartlab.synth.narrativePulse import buildNarrativePulse
 
     # asOf 가 명시되면 PIT 필터, 명시 안 됐으면 today + no PIT (당일 captured_at 보존).
     asof_explicit = asOf is not None

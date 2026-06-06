@@ -48,9 +48,9 @@ def _closesToReturns(closes: pl.Series) -> np.ndarray:
 
 
 def _defaultOhlcv(stockCode: str, market: str) -> pl.DataFrame | None:
-    """default ohlcv fetcher — quant._dataAccessOhlcv.fetchOhlcv 위임."""
+    """default ohlcv fetcher."""
     try:
-        from dartlab.quant.screen._dataAccessOhlcv import fetchOhlcv
+        from dartlab.synth.marketDataAccess import fetchOhlcv
 
         return fetchOhlcv(stockCode, market=market)
     except Exception as exc:
@@ -61,7 +61,7 @@ def _defaultOhlcv(stockCode: str, market: str) -> pl.DataFrame | None:
 def _defaultBenchmark(market: str) -> pl.DataFrame | None:
     """default benchmark fetcher — KOSPI/SPY."""
     try:
-        from dartlab.quant.screen._dataAccessOhlcv import fetchBenchmark
+        from dartlab.synth.marketDataAccess import fetchBenchmark
 
         return fetchBenchmark(market=market)
     except Exception as exc:
@@ -147,7 +147,7 @@ def newsImpact(
     # returns array 가 dates 보다 1 짧음 — eventIdx 보정
     retIdx = eventIdx - 1 if eventIdx > 0 else 0
 
-    from dartlab.quant.signal.eventStudy import calcCAR
+    from dartlab.synth.eventStudy import calcCAR
 
     carResult = calcCAR(
         stockRet,

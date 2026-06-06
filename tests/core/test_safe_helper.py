@@ -77,16 +77,16 @@ def test_yoy_none_or_zero():
 @pytest.mark.unit
 def test_no_duplicate_get_in_analysis():
     """B2 sentinel: analysis/financial 에서 _get/_getF* 정의 0건."""
-    import os
-    import subprocess
+    import re
+    from pathlib import Path
 
-    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    # grep "def _get" or "def _getF[0-9]*" in analysis/financial 루트 .py 만
-    result = subprocess.run(
-        ["grep", "-rE", r"^def _get(\b|F[0-9]*\b)", "src/dartlab/analysis/financial/"],
-        capture_output=True,
-        text=True,
-    )
+    root = Path(__file__).resolve().parents[2]
+    pattern = re.compile(r"^def _get(\b|F[0-9]*\b)")
+    matches = []
+    for path in (root / "src" / "dartlab" / "analysis" / "financial").rglob("*.py"):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if pattern.search(line):
+                matches.append(f"{path}:{line}")
     # 통합 완료 후 0건 — B2 끝나면 activate
     # 현재는 informational (assert 없음). B2 완료 후 assert 추가.
-    print(f"_get/_getF* 정의 수: {len(result.stdout.splitlines())}")
+    print(f"_get/_getF* 정의 수: {len(matches)}")

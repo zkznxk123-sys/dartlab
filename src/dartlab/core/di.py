@@ -12,7 +12,7 @@ L2 엔진은 `getXxxAccessor()` 로 default 인스턴스를 받거나, 테스트
 from __future__ import annotations
 
 import importlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     from dartlab.core.protocols import (  # noqa: F401
@@ -36,6 +36,7 @@ __all__ = [
     "getMacroProvider",
     "setMacroProvider",
     "getCapabilityCatalog",
+    "setCapabilityCatalogProvider",
 ]
 
 
@@ -43,6 +44,7 @@ _financeAccessor: "FinanceDataAccessor | None" = None
 _quantAccessor: "QuantDataAccessor | None" = None
 _industryAccessor: "IndustryDataAccessor | None" = None
 _macroProvider: "MacroDataProvider | None" = None
+_capabilityCatalogProvider: Callable[[], dict[str, Any]] | None = None
 
 
 def getFinanceAccessor() -> "FinanceDataAccessor":
@@ -302,34 +304,44 @@ def setMacroProvider(impl: "MacroDataProvider | None") -> None:
 
 
 def getCapabilityCatalog() -> "dict[str, Any]":
-    """capability 카탈로그(docstring 라이브 빌드) lazy 조회 — core L0 의 DI 경계.
+    """capability 카탈로그(docstring 라이브 빌드) lazy 조회 — core L0 의 DI 슬롯.
 
     Capabilities:
-        ``reference.capability.loadCapabilities()`` 결과(라이브 카탈로그 dict)를 반환한다.
+        등록된 capability catalog provider 결과를 반환한다.
     AIContext:
-        core 메시징(suggest)이 reference 계층을 직접 import 하지 않고 capability 안내를 만들게 한다.
+        core 메시징(suggest)이 reference 계층을 import 하지 않고 capability 안내를 만들게 한다.
     Guide:
-        호출부는 빈 dict(카탈로그 미가용)를 graceful 하게 처리한다.
+        호출부는 provider 미등록 또는 빈 dict(카탈로그 미가용)를 graceful 하게 처리한다.
     When:
         메시징/안내 레이어가 함수별 capability 요약이 필요할 때.
     How:
-        ``dartlab.reference.capability`` 를 동적 import 해 ``loadCapabilities()`` (프로세스 캐시)를 호출한다.
+        ``setCapabilityCatalogProvider`` 로 등록된 callable 을 호출한다.
     Args:
         None.
     Returns:
         ``dict[str, Any]`` capability 카탈로그. import 불가 시 빈 dict.
     Requires:
-        카탈로그 사용 시 ``dartlab.reference.capability`` import 가능.
+        카탈로그 provider 는 dict 반환 callable 이어야 한다.
     Raises:
-        없음 — import 실패는 빈 dict 로 흡수.
+        없음 — provider 미등록/실패는 빈 dict 로 흡수.
     Example:
         >>> isinstance(getCapabilityCatalog(), dict)
         True
     SeeAlso:
-        ``dartlab.reference.capability.loadCapabilities``.
+        ``setCapabilityCatalogProvider``.
     """
-    try:
-        loadCapabilities = importlib.import_module("dartlab.reference.capability").loadCapabilities
-    except ImportError:
+    if _capabilityCatalogProvider is None:
         return {}
-    return loadCapabilities()
+    try:
+        return _capabilityCatalogProvider()
+    except Exception:
+        return {}
+
+
+def setCapabilityCatalogProvider(provider: Callable[[], dict[str, Any]] | None) -> None:
+    """capability catalog provider 등록.
+
+    reference 계층이 자체 초기화 시 등록하고, core 는 등록된 callable 만 호출한다.
+    """
+    global _capabilityCatalogProvider
+    _capabilityCatalogProvider = provider

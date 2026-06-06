@@ -85,6 +85,47 @@ def _dartUrlForPeriod(company: Company, period: str | None = None) -> str | None
 _latestDartUrl = _dartUrlForPeriod
 
 
+def buildViewer(
+    company: Company,
+    topic: str,
+    *,
+    compact: bool = False,
+    limit: int | None = None,
+) -> dict[str, Any]:
+    """Legacy viewer payload wrapper.
+
+    The current product UI uses panel grid endpoints.  This wrapper keeps audit
+    scripts and older consumers on the source-specific viewer block path.
+    """
+    if getattr(company, "market", "") == "US":
+        from dartlab.providers.edgar.docs.viewer import (
+            serializeViewerBlock,
+            serializeViewerTextDocument,
+            viewerBlocks,
+            viewerTextDocument,
+        )
+    else:
+        from dartlab.providers.dart.viewer import viewerBlocks, viewerTextDocument
+        from dartlab.providers.dart.viewerSerialize import (
+            serializeViewerBlock,
+            serializeViewerTextDocument,
+        )
+
+    blocks = viewerBlocks(company, topic)
+    if limit is not None:
+        blocks = blocks[: max(0, int(limit))]
+    payload = {
+        "stockCode": company.stockCode,
+        "corpName": company.corpName,
+        "topic": topic,
+        "compact": bool(compact),
+        "blocks": [serializeViewerBlock(block) for block in blocks],
+        "textDocument": serializeViewerTextDocument(viewerTextDocument(topic, blocks)),
+    }
+    payload["rows"] = payload["blocks"]
+    return payload
+
+
 def _panelFor(company: Company, *, periods: list[str] | None = None):
     """Company 의 panel wide (항목 × 기간) — viewer/TOC 의 단일 데이터 소스 (SSOT).
 

@@ -1,8 +1,8 @@
 """DART OpenAPI 키 resolve — gather 자체포함(core/providers 미의존).
 
 「공시 오리지널 수집」 모듈이 ``gather ↛ providers`` 규칙을 지키며 자체포함되도록,
-DART 키 해석을 모듈 안에서 직접 한다. 우선순위는 providers 의 ``resolveDartKeys``
-(``providers/dart/openapi/dartKey.py``)와 동일 계약:
+DART 키 해석을 모듈 안에서 직접 한다. 우선순위는 gather 의 ``resolveDartKeys``
+(``gather/dart/keys.py``)와 동일 계약:
 
     인자 → OS env(DART_API_KEYS 쉼표 / DART_API_KEY 단일) → 프로젝트 .env
 
@@ -89,7 +89,7 @@ def resolveDartKeys(
 
     Capabilities:
         - 단일/복수 키를 인자·환경변수·.env 3 소스에서 해석 + 가장 많은 키를 가진
-          소스 채택(키풀 극대화). providers ``dartKey.resolveDartKeys`` 와 동일 계약을
+          소스 채택(키풀 극대화). gather ``keys.resolveDartKeys`` 와 동일 계약을
           모듈 내부에 자체포함.
 
     Args:
@@ -115,7 +115,7 @@ def resolveDartKeys(
 
     SeeAlso:
         - ``OriginalDartClient`` — 본 키 목록을 키풀로 사용.
-        - ``providers.dart.openapi.dartKey.resolveDartKeys`` — 동일 계약 원본(import 안 함).
+        - ``gather.dart.keys.resolveDartKeys`` — 동일 계약 원본(import 안 함).
 
     Requires:
         - 환경변수 ``DART_API_KEYS``/``DART_API_KEY`` 또는 프로젝트 ``.env``.

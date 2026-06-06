@@ -20,7 +20,7 @@ def test_analyze_narrative_smoke_empty_archive(monkeypatch) -> None:
     from dartlab.macro.narrative.narrative import analyzeNarrative
 
     monkeypatch.setattr(
-        "dartlab.quant.text.narrativePulse.buildNarrativePulse",
+        "dartlab.synth.narrativePulse.buildNarrativePulse",
         lambda *a, **k: pl.DataFrame(),
     )
     r = analyzeNarrative(market="KR", lookbackDays=7)
@@ -38,7 +38,7 @@ def test_analyze_narrative_with_pulse(monkeypatch: pytest.MonkeyPatch) -> None:
     from datetime import date as _date
 
     from dartlab.macro.narrative import narrative as narr_mod
-    from dartlab.quant.text import narrativePulse as np_mod
+    from dartlab.synth import narrativePulse as np_mod
 
     # mock pulse: 2 토픽 (one bullish, one bearish), 140 헤드라인 — analyzeNarrative 가
     # lazy import 하므로 source 모듈에 patch.

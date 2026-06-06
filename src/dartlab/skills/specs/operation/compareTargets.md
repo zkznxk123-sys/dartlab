@@ -15,7 +15,6 @@ procedure:
   - 종목 코드 2 개 이상 결정 (한국 6 자리 또는 미국 ticker)
   - 토픽·기간 그리드 정의 (예 bs · 재고 · 2024Q4)
   - dartlab.compare(codes, *, topic, period, scope, freq) 호출
-  - 필요 시 dartlab.compareDiagnostics(codes, *, topic, period, scope, freq) 로 mode·resolvedPeriods·cellColumns 확인
   - 재무제표 topic(bs/is/cf/cis/sce)은 acode 단위 원 환산 셀 비교
   - 주석·서술 topic은 disclosureKey·scope·leafType 정렬키로 row 비교
   - 결손은 NaN 으로 유지 (0 채움 금지)
@@ -29,7 +28,6 @@ expectedOutputs:
   - Polars DataFrame (식별 컬럼 + 회사 셀 컬럼)
   - 재무 topic은 acode·label·scope + 회사별 원 환산값
   - row topic은 chapter·sectionLeaf·blockLeaf·leafType·disclosureKey·scope + 회사별 원문 셀
-  - compareDiagnostics payload (mode·resolvedPeriods·identityColumns·cellColumns·cellColumnShape·valueUnit)
   - 결손 NaN (강제 0 채움 없음)
 requiredEvidence:
   - target (종목코드 명시)
@@ -101,12 +99,9 @@ bs = dartlab.compare(["005930", "000660"], topic="bs", period="2025Q4", scope="c
 `period=None` 이면 topic 필터 후 최신 공통 시점을 고른다. 공통 시점이 없으면 최신 union 시점을 쓰며,
 비교 대상 중 한 회사에 값이 없으면 해당 회사 컬럼은 null 로 남긴다.
 
-`dartlab.compareDiagnostics(...)` 는 같은 입력에 대해 소비자용 반환 계약을 설명한다. `identityColumns` 는 행 식별
-컬럼, `cellColumns` 는 회사 값 컬럼, `cellColumnShape` 는 `singlePeriod`/`multiPeriod`/`empty`,
-`valueUnit` 은 재무 셀모드에서 `KRW` 다. 뷰어/AI 층은 DataFrame 컬럼명을 재추론하지 않고 이 계약을 먼저
-확인한다.
-
 `Company` 단일 진입은 한 회사 원표 확인용이다. 회사 간 비교는 `dartlab.compare(...)`가 공식 표면이다.
+재무 topic은 `acode·label·scope` 뒤에 회사별 값 컬럼이 붙고, row topic은
+`chapter·sectionLeaf·blockLeaf·leafType·disclosureKey·scope` 뒤에 회사별 원문 셀이 붙는다.
 
 ## 정공법 — 결손 처리
 

@@ -55,7 +55,6 @@ _LAZY_ATTRS: dict[str, tuple[str, str | None]] = {
     "ChartResult": ("dartlab.frame.select", "ChartResult"),
     "SelectResult": ("dartlab.frame.select", "SelectResult"),
     "compare": ("dartlab.providers.dart.panel", "compare"),
-    "compareDiagnostics": ("dartlab.providers.dart.panel", "compareDiagnostics"),
 }
 if not _IS_PYODIDE:
     _LAZY_ATTRS.update(
@@ -855,15 +854,10 @@ sys.modules[__name__].__class__ = _Module
 # ── 모듈 callable 패치 (Pyodide 제외 — 서버/CLI/네트워크 의존) ──
 
 if not _IS_PYODIDE:
-    # gather 모듈을 GatherEntry callable로 덮어쓰기
-    # (gather 서브모듈이 top-level import로 이미 로드되므로 __getattr__ lazy 불가)
-    from dartlab.gather.entry import GatherEntry as _GatherEntry
-
-    sys.modules[__name__].gather = _GatherEntry()
-
     # scan/analysis/credit/quant — 어떤 import 체인이 모듈을 먼저 로드하면
     # 모듈 클래스의 __getattr__이 동작 안 함 (CI에서 발견된 회귀).
     # 해결: 모듈 자체를 callable로 패치 — 모듈 객체에 __call__을 직접 부여.
+    import importlib
     import types as _types
 
     def _makeCallableModule(modName: str, instanceFactory):
@@ -884,6 +878,12 @@ if not _IS_PYODIDE:
                 return self._instance(*args, **kwargs)
 
             def __getattr__(self, name):
+                try:
+                    submodule = importlib.import_module(f"{modName}.{name}")
+                    setattr(self, name, submodule)
+                    return submodule
+                except ImportError:
+                    pass
                 if self._instance is None:
                     self._instance = instanceFactory()
                 try:
@@ -892,6 +892,11 @@ if not _IS_PYODIDE:
                     raise AttributeError(f"module '{modName}' has no attribute '{name}'") from None
 
         mod.__class__ = _CallableModule
+
+    def _gatherFactory():
+        from dartlab.gather.entry import GatherEntry
+
+        return GatherEntry()
 
     def _scanFactory():
         Scan = importlib.import_module("dartlab.scan").Scan
@@ -921,20 +926,22 @@ if not _IS_PYODIDE:
     # scan/analysis/quant/macro/industry — 모듈 자체를 callable 로 변환.
     # importlib 동적 import 로 import-linter 의 정적 cycle 검사 우회 (top-level
     # dartlab → L2 import 가 단방향 정책 위반으로 잡히는 것 방지).
-    import importlib
 
+    importlib.import_module("dartlab.gather")
     importlib.import_module("dartlab.analysis.financial")
     importlib.import_module("dartlab.industry")
     importlib.import_module("dartlab.macro")
     importlib.import_module("dartlab.quant")
     importlib.import_module("dartlab.scan")
 
+    _makeCallableModule("dartlab.gather", _gatherFactory)
     _makeCallableModule("dartlab.scan", _scanFactory)
     _makeCallableModule("dartlab.analysis", _analysisFactory)
     _makeCallableModule("dartlab.analysis.financial", _analysisFactory)
     _makeCallableModule("dartlab.quant", _quantFactory)
     _makeCallableModule("dartlab.macro", _macroFactory)
     _makeCallableModule("dartlab.industry", _industryFactory)
+    sys.modules[__name__].gather = sys.modules["dartlab.gather"]
 
     # credit은 함수형 (이미 callable)
     from dartlab.credit import credit as _credit_callable
@@ -974,7 +981,6 @@ __all__ = [
     "SelectResult",
     "ChartResult",
     "compare",
-    "compareDiagnostics",
     "capabilities",
 ]
 

@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
-from dartlab.core.dataLoader import DART_VIEWER, loadData
+from dartlab.core.dataLoader import DART_VIEWER, _dataDir, loadData
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers._common.filingHelpers import (
     filingRecord,
@@ -108,7 +108,11 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
                 "dartUrl": pl.Utf8,
             }
         )
-    df = loadData(company.stockCode)
+    legacyPath = _dataDir("docs") / f"{company.stockCode}.parquet"
+    if legacyPath.exists():
+        df = pl.read_parquet(str(legacyPath))
+    else:
+        df = loadData(company.stockCode)
     if df is None or df.is_empty() or "year" not in df.columns:
         return pl.DataFrame(
             schema={

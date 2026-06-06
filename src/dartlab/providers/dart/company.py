@@ -926,6 +926,23 @@ class Company:
                 return text
         return f"Company({self.stockCode}, {self.corpName})"
 
+    @property
+    def report(self):
+        """정형 report accessor 하위호환 alias.
+
+        Returns:
+            _ReportAccessor: DART 정형 report accessor.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("005930")
+            >>> c.report is not None
+            True
+        """
+        return self._report
+
     def _hintOnce(self, key: str, prop: str, category: str = "docs") -> None:
         """동일 안내를 세션 내 1회만 출력."""
         if key in self._hintedKeys:
@@ -3787,11 +3804,13 @@ class Company:
                     continue
                 seenTopics.add(topic)
                 isFinance = tr.get("source") == "finance"
+                from dartlab.providers.dart.topicStandard import chapterLabelKr, labelFor
+
                 rows.append(
                     {
-                        "chapter": str(tr.get("chapter") or ""),
+                        "chapter": chapterLabelKr(str(tr.get("chapter") or "")),
                         "topic": topic,
-                        "label": topic,
+                        "label": labelFor(topic, fallback=topic),
                         "kind": "statement" if isFinance else "section",
                         "source": str(tr.get("source") or ""),
                         "periods": str(tr.get("periods") or "-"),
@@ -4035,7 +4054,7 @@ class Company:
         cacheKey = "_sector"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.industry import classify
+        from dartlab.core.sector import classify
 
         kindDf = getKindList()
         row = kindDf.filter(pl.col("종목코드") == self.stockCode)
@@ -4083,7 +4102,7 @@ class Company:
         cacheKey = "_sectorParams"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.industry import getParams
+        from dartlab.core.sector import getParams
 
         result = getParams(self.sector)
         self._cache[cacheKey] = result

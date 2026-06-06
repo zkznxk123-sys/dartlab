@@ -292,11 +292,11 @@ class TestOpenDartKey:
 
     def test_validate_dart_key_endpoint(self, client, monkeypatch):
         monkeypatch.setattr(
-            "dartlab.providers.dart.openapi.dartKey.validateDartApiKey",
+            "dartlab.gather.dart.keys.validateDartApiKey",
             lambda key: {"ok": True, "validatedKey": key[-4:]},
         )
         monkeypatch.setattr(
-            "dartlab.providers.dart.openapi.dartKey.getDartKeyStatus",
+            "dartlab.gather.dart.keys.getDartKeyStatus",
             lambda startPath=None: type(
                 "Status",
                 (),
@@ -321,11 +321,11 @@ class TestOpenDartKey:
 
     def test_save_dart_key_endpoint(self, client, monkeypatch):
         monkeypatch.setattr(
-            "dartlab.providers.dart.openapi.dartKey.saveDartKeyToDotenv",
+            "dartlab.gather.dart.keys.saveDartKeyToDotenv",
             lambda key: "C:/tmp/.env",
         )
         monkeypatch.setattr(
-            "dartlab.providers.dart.openapi.dartKey.getDartKeyStatus",
+            "dartlab.gather.dart.keys.getDartKeyStatus",
             lambda startPath=None: type(
                 "Status",
                 (),
@@ -350,11 +350,11 @@ class TestOpenDartKey:
 
     def test_delete_dart_key_endpoint(self, client, monkeypatch):
         monkeypatch.setattr(
-            "dartlab.providers.dart.openapi.dartKey.clearDartKeyFromDotenv",
+            "dartlab.gather.dart.keys.clearDartKeyFromDotenv",
             lambda: "C:/tmp/.env",
         )
         monkeypatch.setattr(
-            "dartlab.providers.dart.openapi.dartKey.getDartKeyStatus",
+            "dartlab.gather.dart.keys.getDartKeyStatus",
             lambda startPath=None: type(
                 "Status",
                 (),

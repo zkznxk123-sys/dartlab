@@ -612,7 +612,7 @@ def _shareStats(df: pl.DataFrame, codes: list[str]) -> tuple[list[str], int, int
     return presentCodes, sharedRows, partialRows, soloRows
 
 
-def compareDiagnostics(
+def _compareDiagnostics(
     codes: list[str] | str,
     *,
     topic: str | None = None,
@@ -620,7 +620,7 @@ def compareDiagnostics(
     scope: str | None = None,
     freq: str = "quarter",
 ) -> dict[str, object]:
-    """N 회사 compare 실행 계약을 표와 분리해 진단한다.
+    """N 회사 compare 실행 상태를 내부 소비자/테스트용으로 진단한다.
 
     Args:
         codes: 비교할 종목코드 2~6개.
@@ -636,9 +636,8 @@ def compareDiagnostics(
     Raises:
         없음. 입력 계약 오류도 ``ok=False`` 와 ``reason="invalidInput"`` 으로 반환한다.
 
-    Example:
-        >>> import dartlab
-        >>> dartlab.compareDiagnostics(["005930", "000660"], topic="재고")  # doctest: +SKIP
+    공개 호출계약은 ``dartlab.compare(...)`` 하나다. 이 helper 는 뷰어/엔진이
+    DataFrame 컬럼을 재추론하지 않아야 할 때 내부에서만 쓴다.
     """
     displayCodes = _displayCodes(codes)
     diag: dict[str, object] = {
@@ -750,4 +749,4 @@ def compareDiagnostics(
     return diag
 
 
-__all__ = ["compare", "compareDiagnostics"]
+__all__ = ["compare"]

@@ -43,6 +43,8 @@ _STATEMENT_PATTERNS = {
     "CF": r"현금흐름표",
 }
 
+_TEXT_STATEMENT_COLS = {"year", "report_type", "section_title", "section_content"}
+
 
 def extractContent(
     report: pl.DataFrame,
@@ -400,6 +402,8 @@ def statements(
         없음.
     """
     df = loadData(stockCode)
+    if df.is_empty() or not _TEXT_STATEMENT_COLS.issubset(set(df.columns)):
+        return _statementsFromFinancePivot(stockCode, period=period)
     corpName = extractCorpName(df)
 
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
@@ -462,6 +466,45 @@ def statements(
         IS=_buildDf(allKeys, isData),
         CF=_buildDf(allKeys, cfData),
     )
+
+
+def _statementsFromFinancePivot(stockCode: str, *, period: str) -> StatementsResult | None:
+    """텍스트 section parquet 부재 시 finance pivot으로 StatementsResult 구성."""
+    from dartlab.providers.dart.finance.pivot import buildAnnual, buildTimeseries
+
+    result = buildAnnual(stockCode) if period == "y" else buildTimeseries(stockCode)
+    if result is None:
+        return None
+    series, keys = result
+    bs = _buildSeriesDf(keys, series.get("BS", {}))
+    is_ = _buildSeriesDf(keys, series.get("IS", {}))
+    cf = _buildSeriesDf(keys, series.get("CF", {}))
+    if bs.is_empty() and is_.is_empty() and cf.is_empty():
+        return None
+    return StatementsResult(
+        corpName=None,
+        period=period,
+        scope="consolidated",
+        nYears=len(keys),
+        BS=bs,
+        IS=is_,
+        CF=cf,
+    )
+
+
+def _buildSeriesDf(sortedKeys: list[str], data: dict[str, list[float | None]]) -> pl.DataFrame:
+    rows = []
+    for name, values in data.items():
+        row: dict[str, object] = {"항목": name}
+        for i, key in enumerate(sortedKeys):
+            row[key] = values[i] if i < len(values) else None
+        rows.append(row)
+    if not rows:
+        return pl.DataFrame()
+    schema = {"항목": pl.Utf8}
+    for key in sortedKeys:
+        schema[key] = pl.Float64
+    return pl.DataFrame(rows, schema=schema)
 
 
 def _buildDf(

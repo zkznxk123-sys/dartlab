@@ -84,14 +84,14 @@ def priceShockNews(
         return _CACHE[cacheKey]
 
     if ohlcvFetcher is None:
-        from dartlab.quant.screen._dataAccessOhlcv import fetchOhlcv as _default_o
+        from dartlab.synth.marketDataAccess import fetchOhlcv as _default_o
 
         def ohlcvFetcher(c, m):
-            """default ohlcv fetcher — quant._dataAccessOhlcv."""
+            """default ohlcv fetcher."""
             return _default_o(c, market=m)
 
     if benchmarkFetcher is None:
-        from dartlab.quant.screen._dataAccessOhlcv import fetchBenchmark as _default_b
+        from dartlab.synth.marketDataAccess import fetchBenchmark as _default_b
 
         def benchmarkFetcher(m):
             """default benchmark fetcher — KR=KOSPI, US=SPY."""

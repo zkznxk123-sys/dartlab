@@ -20,7 +20,7 @@ import polars as pl
 import pytest
 
 import dartlab.config as _cfg
-from dartlab.providers.dart.panel.compare import compare, compareDiagnostics
+from dartlab.providers.dart.panel.compare import _compareDiagnostics, compare
 
 _PANEL_DIR = Path(_cfg.dataDir) / "dart" / "panel"
 _PAIR = ["005930", "000660"]  # 삼성·SK하이닉스 (동종)
@@ -64,14 +64,14 @@ def test_compare_public_surface_callable() -> None:
     assert callable(dartlab.compare)
 
 
-def test_compare_diagnostics_public_surface_callable() -> None:
-    """공식 진단 표면 dartlab.compareDiagnostics 는 provider 진단과 같은 함수다."""
+def test_compare_keeps_single_public_call_contract() -> None:
+    """사용자 공개 호출계약은 dartlab.compare 하나로 유지한다."""
     import dartlab
-    from dartlab.providers.dart.panel import compareDiagnostics as panelDiagnostics
+    from dartlab.providers.dart import panel
 
-    assert "compareDiagnostics" in dartlab.__all__
-    assert dartlab.compareDiagnostics is panelDiagnostics
-    assert callable(dartlab.compareDiagnostics)
+    assert "compareDiagnostics" not in dartlab.__all__
+    assert "compareDiagnostics" not in panel.__all__
+    assert not hasattr(dartlab, "compareDiagnostics")
 
 
 def test_compare_capability_catalog_contains_compare() -> None:
@@ -82,9 +82,7 @@ def test_compare_capability_catalog_contains_compare() -> None:
     assert "compare" in caps
     assert caps["compare"]["kind"] == "function"
     assert "N 회사" in caps["compare"]["summary"]
-    assert "compareDiagnostics" in caps
-    assert caps["compareDiagnostics"]["kind"] == "function"
-    assert "compare 실행 계약" in caps["compareDiagnostics"]["summary"]
+    assert "compareDiagnostics" not in caps
 
 
 def test_compare_single_code_raises() -> None:
@@ -134,7 +132,7 @@ def test_compare_invalid_code_raises_and_diagnostics_payload() -> None:
     with pytest.raises(ValueError, match="6자리"):
         compare(["삼성전자", "000660"])
 
-    diag = compareDiagnostics(["삼성전자", "000660"])
+    diag = _compareDiagnostics(["삼성전자", "000660"])
     assert diag["ok"] is False
     assert diag["reason"] == "invalidInput"
     assert diag["emptyReason"] == "invalidInput"
@@ -152,7 +150,7 @@ def test_compare_empty_topic_raises_and_diagnostics_payload() -> None:
     with pytest.raises(ValueError, match="topic"):
         compare(["005930", "000660"], topic=" ")
 
-    diag = compareDiagnostics(["005930", "000660"], topic=" ")
+    diag = _compareDiagnostics(["005930", "000660"], topic=" ")
     assert diag["ok"] is False
     assert diag["reason"] == "invalidInput"
     assert diag["emptyReason"] == "invalidInput"
@@ -161,7 +159,7 @@ def test_compare_empty_topic_raises_and_diagnostics_payload() -> None:
 
 def test_compare_diagnostics_invalid_scope_type_returns_payload() -> None:
     """scope 타입 오류도 AttributeError 로 새지 않고 invalidInput payload 로 반환한다."""
-    diag = compareDiagnostics(["005930", "000660"], scope=123)  # type: ignore[arg-type]
+    diag = _compareDiagnostics(["005930", "000660"], scope=123)  # type: ignore[arg-type]
     assert diag["ok"] is False
     assert diag["reason"] == "invalidInput"
     assert diag["emptyReason"] == "invalidInput"
@@ -188,8 +186,8 @@ def test_compare_us_ticker_normalized_before_market_guard() -> None:
 
 
 def test_compare_diagnostics_invalid_input_returns_payload() -> None:
-    """진단 표면은 입력 오류도 payload 로 설명한다."""
-    diag = compareDiagnostics(["005930"])
+    """내부 진단 helper 는 입력 오류도 payload 로 설명한다."""
+    diag = _compareDiagnostics(["005930"])
     assert diag["ok"] is False
     assert diag["reason"] == "invalidInput"
     assert diag["emptyReason"] == "invalidInput"
@@ -198,7 +196,7 @@ def test_compare_diagnostics_invalid_input_returns_payload() -> None:
 
 def test_compare_diagnostics_normalizes_codes_before_error() -> None:
     """진단도 compare 와 같은 code 정규화·시장 가드를 쓴다."""
-    diag = compareDiagnostics(["005930", "aapl"])
+    diag = _compareDiagnostics(["005930", "aapl"])
     assert diag["ok"] is False
     assert diag["reason"] == "invalidInput"
     assert diag["codes"] == ["005930", "AAPL"]
@@ -222,7 +220,7 @@ def test_compare_diagnostics_invalid_variants_return_payload(
     codes: list[str], kwargs: dict[str, object], needle: str
 ) -> None:
     """diagnostics 는 compare 입력 계약 오류를 예외 대신 invalidInput payload 로 보존한다."""
-    diag = compareDiagnostics(codes, **kwargs)
+    diag = _compareDiagnostics(codes, **kwargs)
     assert diag["ok"] is False
     assert diag["reason"] == "invalidInput"
     assert diag["emptyReason"] == "invalidInput"
@@ -315,7 +313,7 @@ def test_compare_row_uses_latest_common_period_without_topic(monkeypatch: pytest
     assert df[0, "111111"] == "common-1"
     assert df[0, "222222"] == "common-2"
 
-    diag = cmp.compareDiagnostics(["111111", "222222"])
+    diag = cmp._compareDiagnostics(["111111", "222222"])
     assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["sharedRows"] == 1
 
@@ -349,7 +347,7 @@ def test_compare_row_falls_back_to_latest_union_when_no_common_period(monkeypatc
     assert df[0, "111111"] == "latest-1"
     assert df[0, "222222"] is None
 
-    diag = cmp.compareDiagnostics(["111111", "222222"])
+    diag = cmp._compareDiagnostics(["111111", "222222"])
     assert diag["resolvedPeriods"] == ["2026Q1"]
     assert diag["soloRows"] == 1
     assert diag["missingCodes"] == ["222222"]
@@ -380,7 +378,7 @@ def test_compare_diagnostics_counts_shared_partial_solo(monkeypatch: pytest.Monk
         )
 
     monkeypatch.setattr(cmp, "readWide", fakeReadWide)
-    diag = cmp.compareDiagnostics(["111111", "222222", "333333"], period="2025Q4")
+    diag = cmp._compareDiagnostics(["111111", "222222", "333333"], period="2025Q4")
     assert diag["rowCount"] == 3
     assert diag["identityColumns"] == ["chapter", "sectionLeaf", "blockLeaf", "leafType", "disclosureKey", "scope"]
     assert diag["cellColumns"] == ["111111", "222222", "333333"]
@@ -424,7 +422,7 @@ def test_compare_topic_selects_period_after_topic_filter(monkeypatch: pytest.Mon
     assert df[0, "111111"] == "inventory-1"
     assert df[0, "222222"] == "inventory-2"
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="재고")
     assert diag["resolvedPeriods"] == ["2025Q4"]
 
 
@@ -466,7 +464,7 @@ def test_compare_topic_keeps_missing_company_as_null(monkeypatch: pytest.MonkeyP
     assert df[0, "111111"] == "inventory-1"
     assert df[0, "222222"] is None
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="재고")
     assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["presentCodes"] == ["111111"]
     assert diag["missingCodes"] == ["222222"]
@@ -501,7 +499,7 @@ def test_compare_row_keeps_missing_panel_company_as_null(monkeypatch: pytest.Mon
     assert df[0, "111111"] == "inventory-1"
     assert df[0, "222222"] is None
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="재고")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="재고")
     assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["presentCodes"] == ["111111"]
     assert diag["missingCodes"] == ["222222"]
@@ -543,7 +541,7 @@ def test_compare_finance_uses_latest_common_period(monkeypatch: pytest.MonkeyPat
     assert df[0, "111111"] == 150.0
     assert df[0, "222222"] == 250.0
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="bs")
     assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["scope"] == "consolidated"
 
@@ -569,7 +567,7 @@ def test_compare_diagnostics_finance_reads_cells_once_per_code(monkeypatch: pyte
         return {"2025Q4": {"ifrs-full_Assets": ("자산총계", 10.0 if code == "111111" else 20.0)}}
 
     monkeypatch.setattr(cmp, "_companyCellsByPeriod", fakeCompanyCellsByPeriod)
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="bs")
     assert diag["ok"] is True
     assert diag["resolvedPeriods"] == ["2025Q4"]
     assert calls == ["111111", "222222"]
@@ -616,7 +614,7 @@ def test_compare_finance_respects_explicit_period_and_multiperiod(monkeypatch: p
     assert many[0, "222222␟2026Q1"] is None
     assert many[0, "222222␟2025Q4"] == 250.0
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period=["2025Q4", "2026Q1"])
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="bs", period=["2025Q4", "2026Q1"])
     assert diag["resolvedPeriods"] == ["2026Q1", "2025Q4"]
     assert diag["identityColumns"] == ["acode", "label", "scope"]
     assert diag["cellColumns"] == ["111111␟2026Q1", "111111␟2025Q4", "222222␟2026Q1", "222222␟2025Q4"]
@@ -651,7 +649,7 @@ def test_compare_finance_year_period_normalizes_label(monkeypatch: pytest.Monkey
     assert df[0, "111111"] == 10.0
     assert df[0, "222222"] == 20.0
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period="2025Q4", freq="year")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="bs", period="2025Q4", freq="year")
     assert diag["period"] == ["2025Q4"]
     assert diag["resolvedPeriods"] == ["2025"]
     assert diag["scope"] == "consolidated"
@@ -683,7 +681,7 @@ def test_compare_finance_keeps_missing_company_as_null(monkeypatch: pytest.Monke
     assert df[0, "111111"] == 150.0
     assert df[0, "222222"] is None
 
-    diag = cmp.compareDiagnostics(["111111", "222222"], topic="bs", period="2025Q4")
+    diag = cmp._compareDiagnostics(["111111", "222222"], topic="bs", period="2025Q4")
     assert diag["resolvedPeriods"] == ["2025Q4"]
     assert diag["presentCodes"] == ["111111"]
     assert diag["missingCodes"] == ["222222"]
@@ -928,25 +926,20 @@ def test_compare_engine_call_contract() -> None:
 
 
 @requires_pair
-def test_compare_diagnostics_engine_call_contract() -> None:
-    """EngineCall compareDiagnostics 는 진단 dict 를 문자열이 아니라 구조 payload 로 보존한다."""
+def test_compare_diagnostics_is_not_engine_call_contract() -> None:
+    """EngineCall 공개 호출계약은 compareDiagnostics 를 받지 않는다."""
     from dartlab.ai.tools.engineCall import engineCall
 
     r = engineCall({"apiRef": "compareDiagnostics", "args": {"codes": _PAIR, "topic": "재고"}})
-    assert r.ok, f"EngineCall compareDiagnostics 실패: {r.error}"
-    assert r.refs and r.refs[0].kind == "executionRef"
-    payload = r.refs[0].payload["result"]
-    assert isinstance(payload, dict)
-    assert payload["mode"] == "row"
-    assert payload["cellColumnShape"] in {"empty", "singlePeriod"}
-    assert (r.data or {})["result"] == payload
+    assert not r.ok
+    assert r.error == "unknown_api_ref"
 
 
 @requires_pair
 def test_compare_diagnostics_row_contract_matches_frame() -> None:
     """진단 payload 는 compare row 출력의 모드·행수·열·회사 존재를 설명한다."""
     df = compare(_PAIR, topic="재고")
-    diag = compareDiagnostics(_PAIR, topic="재고")
+    diag = _compareDiagnostics(_PAIR, topic="재고")
     assert diag["mode"] == "row"
     assert diag["marketNs"] == "kr"
     assert diag["rowCount"] == df.height

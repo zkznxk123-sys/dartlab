@@ -26,4 +26,11 @@ from dartlab.reference.capability.builder import (
     loadCapabilities,
 )
 
+try:
+    from dartlab.core.di import setCapabilityCatalogProvider
+
+    setCapabilityCatalogProvider(loadCapabilities)
+except Exception:
+    pass
+
 __all__ = ["loadCapabilities", "loadAnalysisGraph", "buildCapabilities"]

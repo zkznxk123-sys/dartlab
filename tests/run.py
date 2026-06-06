@@ -564,6 +564,28 @@ def buildShellCommand(gate: Gate, mp: dict[str, str]) -> str:
     return " && ".join(p for p in parts if p)
 
 
+def resolveGateEnv(raw: dict[str, str], base: dict[str, str] | None = None) -> dict[str, str]:
+    """GATES env 값을 현재 실행 환경에 맞게 해석한다.
+
+    GitHub Actions expression 은 workflow YAML 안에서만 평가된다. ``tests/run.py`` 의
+    GATES dict 값은 Python 런타임 문자열이므로, CI 에서는 ``GITHUB_WORKSPACE`` 로 직접
+    치환해야 한다.
+    """
+    base_env = base or os.environ
+    workspace = base_env.get("GITHUB_WORKSPACE")
+    out: dict[str, str] = {}
+    for key, value in raw.items():
+        if "${{ github.workspace }}" in value:
+            if not workspace:
+                continue
+            out[key] = value.replace("${{ github.workspace }}", workspace)
+            continue
+        if "${{" in value:
+            continue
+        out[key] = value
+    return out
+
+
 def runGate(name: str, *, dry_run: bool, mp: dict[str, str]) -> int:
     """단일 게이트 실행. blocking=False 면 exit code 무관하게 0 반환."""
     if name not in GATES:
@@ -572,8 +594,9 @@ def runGate(name: str, *, dry_run: bool, mp: dict[str, str]) -> int:
         return 2
     gate = GATES[name]
 
-    # GITHUB_OUTPUT-style placeholder 는 로컬에선 의미 없으니 빼고 보여줌
-    env_local = {k: v for k, v in gate.env.items() if "${{" not in v}
+    # GITHUB_OUTPUT-style placeholder 는 로컬에선 의미 없으니 빼고 보여줌.
+    # 단, GITHUB_WORKSPACE 는 tests/run.py 내부에서 직접 치환한다.
+    env_local = resolveGateEnv(gate.env)
     if env_local:
         env_str = " ".join(f"{k}={shlex.quote(v)}" for k, v in env_local.items())
     else:

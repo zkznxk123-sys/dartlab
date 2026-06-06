@@ -14,6 +14,14 @@ from dartlab.ai.agent import _formatDashboardSnapshotBlock, _injectPastContextIf
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _disableAmbientMemoryBlocks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """dashboardSnapshot 단위 테스트는 주변 memory prompt 주입을 격리한다."""
+    monkeypatch.setattr("dartlab.ai.memory.synthesizer.buildToneBlock", lambda: "")
+    monkeypatch.setattr("dartlab.ai.memory.dialectic.buildUserContextBlock", lambda history=None: "")
+    monkeypatch.setattr("dartlab.ai.memory.dialectic.buildFeedbackSignalsBlock", lambda: "")
+
+
 class TestFormatDashboardSnapshotBlock:
     """_formatDashboardSnapshotBlock 출력 검증."""
 

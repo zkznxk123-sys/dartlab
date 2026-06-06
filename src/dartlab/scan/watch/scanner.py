@@ -295,15 +295,10 @@ def scanMarket(
             }
         )
 
-    # 섹터 필터링 — industry classifier 는 lazy importlib (scan 이 industry 직접 import 안 함, 단방향 정책).
+    # 섹터 필터링 — core.sector classifier 는 하위 SSOT.
     if sector is not None and stockCodes is None:
-        classifier = None
-        try:
-            import importlib
+        from dartlab.core.sector import classify as classifier
 
-            classifier = getattr(importlib.import_module("dartlab.industry"), "classify", None)
-        except ImportError:
-            pass
         codes = _filterBySector(codes, sector, classifier=classifier)
 
     # F5: scan → company 직접 의존 제거. FinanceDataAccessor.lookupCompany 위임 (정공법 B+C).

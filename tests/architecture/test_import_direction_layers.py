@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import ast
-import re
 from pathlib import Path
 
 import pytest
@@ -16,7 +15,14 @@ LAYERS = {
     "dartlab.providers": 1,
     "dartlab.gather": 1,
     "dartlab.scan": 1,
+    "dartlab.frame": 1,
+    "dartlab.reference": 1,
+    "dartlab.synth": 1,
     "dartlab.analysis": 2,
+    "dartlab.credit": 2,
+    "dartlab.industry": 2,
+    "dartlab.macro": 2,
+    "dartlab.quant": 2,
     "dartlab.ai": 3,
 }
 
@@ -57,18 +63,50 @@ def _extractImports(filePath: Path) -> list[str]:
 
 
 def _extractLazyImports(filePath: Path) -> list[str]:
-    """문자열 기반 lazy import 패턴 추출."""
-    text = filePath.read_text(encoding="utf-8")
-    pattern = re.compile(r"""(?:from\s+|import\s+)(dartlab\.[a-zA-Z0-9_.]+)""")
-    return pattern.findall(text)
+    """AST 기반 lazy import 패턴 추출."""
+    try:
+        tree = ast.parse(filePath.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return []
+
+    modules: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        callName = _callName(node.func)
+        if callName not in {"importlib.import_module", "import_module", "__import__"}:
+            continue
+        if not node.args:
+            continue
+        firstArg = node.args[0]
+        if isinstance(firstArg, ast.Constant) and isinstance(firstArg.value, str):
+            if firstArg.value.startswith("dartlab"):
+                modules.append(firstArg.value)
+    return modules
 
 
-# ── Company facade lazy import는 의도적 설계 (편의성 프로퍼티) ──
+def _callName(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        parent = _callName(node.value)
+        return f"{parent}.{node.attr}" if parent else node.attr
+    return None
+
+
+# ── Company public facade lazy import는 의도적 설계 ──
 _FACADE_PATTERNS = {
-    # dart/edgar Company → analysis (lazy property: insights, sector, rank, ...)
+    # dart/edgar Company → L2/L3 engines.
+    # provider 내부 구현 의존이 아니라 public Company surface의 dual-access facade다.
     ("dartlab.providers.dart.company", "dartlab.analysis"),
     ("dartlab.providers.edgar.company", "dartlab.analysis"),
-    # dart/edgar Company → ai (lazy: ask, chat)
+    ("dartlab.providers.dart.company", "dartlab.credit"),
+    ("dartlab.providers.edgar.company", "dartlab.credit"),
+    ("dartlab.providers.dart.company", "dartlab.industry.calcs.companyCalcs"),
+    ("dartlab.providers.dart.company", "dartlab.macro"),
+    ("dartlab.providers.edgar.company", "dartlab.macro"),
+    ("dartlab.providers.dart.company", "dartlab.quant"),
+    ("dartlab.providers.edgar.company", "dartlab.quant"),
     ("dartlab.providers.dart.company", "dartlab.ai"),
     ("dartlab.providers.edgar.company", "dartlab.ai"),
     # dart/_finance_helpers → sector.types (sector 코드 참조)
@@ -96,8 +134,6 @@ _KNOWN_VIOLATIONS = {
     # core/finance → scan (L0→L1) — lazy import (함수 내부)
     ("dartlab.quant.bottomUpBeta", "dartlab.scan"),
     ("dartlab.macro.rates.impliedERP", "dartlab.scan"),
-    # synth/distress → analysis (L1.5→L2) — lazy import via importlib (_estimateShares → calcDcf)
-    ("dartlab.synth.distress.chsFeatures", "dartlab.analysis"),
     # analysis → ai (L2→L3) — lazy import (storyValidation → KnowledgeDB 조회)
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
     # core/credentials → providers — DART API 키 관리 lazy import

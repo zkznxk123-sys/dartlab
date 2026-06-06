@@ -191,7 +191,7 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
             else []
         )
     sampleDocTopic = str(docTopics[0]) if docTopics else None
-    sampleDocShow = company.panel(sampleDocTopic) if sampleDocTopic else None
+    sampleDocShow = company._showImpl(sampleDocTopic) if sampleDocTopic else None
     sampleDocTrace = company.trace(sampleDocTopic) if sampleDocTopic else None
     bsTrace = company.trace("BS")
     return {

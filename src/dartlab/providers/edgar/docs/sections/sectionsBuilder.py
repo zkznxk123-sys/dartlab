@@ -153,7 +153,11 @@ def emitPeriodArtifacts(ticker: str, allRows: list[dict]) -> dict[str, int]:
                 _CONTENT_RAW_MEM_CAP / 1e9,
             )
             cols["content_raw"] = [""] * len(allRows)
-    df = pl.DataFrame(cols, schema={k: _SECTIONS_SCHEMA[k] for k in keys})
+    schema = {k: _SECTIONS_SCHEMA[k] for k in keys}
+    for key, dtype in schema.items():
+        if dtype == pl.Utf8:
+            cols[key] = [None if value is None else str(value) for value in cols[key]]
+    df = pl.DataFrame(cols, schema=schema)
     outDir = sectionsDir(ticker)
     outDir.mkdir(parents=True, exist_ok=True)
     periods = df["period"].drop_nulls().unique().to_list()

@@ -117,11 +117,21 @@ def scanNarrativeRegime(
     startDate = asOfDate - timedelta(days=lookbackDays)
 
     if pulseLoader is None:
-        from dartlab.quant.text.narrativePulse import buildNarrativePulse
-
-        def pulseLoader(s, e, m):
-            """default pulse loader — buildNarrativePulse 위임."""
-            return buildNarrativePulse(s, e, m)
+        return {
+            "market": market,
+            "asOf": asOfDate.isoformat(),
+            "lookbackDays": lookbackDays,
+            "regime_label": "중립",
+            "regime_score": 0.0,
+            "regime_shift_date": None,
+            "regime_shift_significant": False,
+            "topics_hot": [],
+            "pettitt_U": 0.0,
+            "pettitt_pvalue": 1.0,
+            "n_days": 0,
+            "available": False,
+            "reason": "pulseLoaderRequired",
+        }
 
     pulse = pulseLoader(startDate.isoformat(), asOfDate.isoformat(), market)
 

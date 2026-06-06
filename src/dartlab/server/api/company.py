@@ -670,7 +670,10 @@ async def apiCompanyTopicSummary(
     try:
         overview = company.panel(topic)
     except (AttributeError, KeyError, TypeError, ValueError):
-        overview = None
+        try:
+            overview = company.show(topic)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            overview = None
     if overview is None:
         raise HTTPException(status_code=404, detail=f"topic '{topic}' 데이터 없음")
 
@@ -700,7 +703,18 @@ def apiCompanyInsights(code: str):
         result = None
 
     if result is None:
-        return {"stockCode": company.stockCode, "corpName": company.corpName, "available": False}
+        corp = _findCorpMeta(company.stockCode)
+        return {
+            "stockCode": company.stockCode,
+            "corpName": company.corpName,
+            "available": False,
+            "profile": {
+                "stockCode": company.stockCode,
+                "corpName": company.corpName,
+                "market": corp["market"],
+                "sector": corp["sector"],
+            },
+        }
 
     def _flagDict(flag):
         return {"level": flag.level, "category": flag.category, "text": flag.text}
@@ -801,7 +815,7 @@ def apiCompanyScan(code: str, axis: str):
         }
 
     if axis not in valid_axes:
-        raise HTTPException(status_code=400, detail=f"유효한 축: {', '.join(sorted(valid_axes))}, all")
+        raise HTTPException(status_code=422, detail=f"유효한 축: {', '.join(sorted(valid_axes))}, all")
 
     method = getattr(company, axis, None)
     if method is None:

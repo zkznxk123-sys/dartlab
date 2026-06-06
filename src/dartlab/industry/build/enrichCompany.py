@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +98,8 @@ def _loadBlogIndex() -> dict[str, list[dict]]:
     return index
 
 
-def _getAIInsight(stockCode: str) -> dict | None:
-    """KnowledgeDB 에서 과거 AI 분석 인사이트 조회.
+def _getAIInsight(stockCode: str, loader: Callable[[str], dict | None] | None = None) -> dict | None:
+    """호출자가 주입한 loader로 AI 분석 인사이트 조회.
 
     dartlab.ask() 실행 시 축적된 회사별 분석 결과(narrative, strengths,
     weaknesses)를 SQLite DB 에서 읽어온다.
@@ -120,21 +120,10 @@ def _getAIInsight(stockCode: str) -> dict | None:
         createdAt : str — 생성 일시
         인사이트 없으면 None.
     """
+    if loader is None:
+        return None
     try:
-        from dartlab.ai.persistence.knowledge_db import KnowledgeDB
-
-        db = KnowledgeDB.get()
-        rec = db.get_insight(stockCode)
-        if not rec:
-            return None
-        return {
-            "narrative": rec.narrative or "",
-            "strengths": list(rec.strengths or []),
-            "weaknesses": list(rec.weaknesses or []),
-            "sector": rec.sector or "",
-            "source": rec.source or "",
-            "createdAt": str(rec.created_at) if rec.created_at else "",
-        }
+        return loader(stockCode)
     except Exception as e:
         logger.debug("AI insight 조회 실패 (%s): %s", stockCode, e)
         return None
@@ -213,6 +202,7 @@ def enrichCompanyData(
     nodes: list[Any],
     blogIndex: dict[str, list[dict]] | None = None,
     hop2Data: dict[str, dict] | None = None,
+    aiInsightLoader: Callable[[str], dict | None] | None = None,
 ) -> dict:
     """기존 ego JSON에 추가 데이터를 병합.
 
@@ -265,7 +255,7 @@ def enrichCompanyData(
     Requires:
         - L1.5 frame: nodes + edges + ego 그래프 (buildCompanyEgograph 산출)
         - L1.5 scan: finance.parquet (5y financials)
-        - L4 ai: AI insight 캐시 (선택)
+        - L4 ai: 호출자가 주입한 AI insight loader (선택)
         - blog: blogs/{code}.json (선택)
 
     See Also:
@@ -283,7 +273,7 @@ def enrichCompanyData(
         blogIndex = _loadBlogIndex()
 
     supplyInsights = calcSupplyInsights(stockCode, edges, nodes)
-    aiInsight = _getAIInsight(stockCode)
+    aiInsight = _getAIInsight(stockCode, aiInsightLoader)
     financials5y = _getFinancials5y(stockCode)
     blogPosts = blogIndex.get(stockCode, [])
 

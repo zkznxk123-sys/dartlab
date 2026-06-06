@@ -42,7 +42,7 @@ class EnvironmentSnapshot:
 class CredentialProvider(Protocol):
     """단일 자격 증명 제공자 — Protocol DIP.
 
-    구현 위치: providers/dart/openapi/dartKey.py 의 DartKeyProvider 등.
+    구현 위치: gather/dart/keys.py 의 DartKeyProvider 등.
     각 provider 는 import 시점에 registerCredentialProvider() 로 등록.
     """
 

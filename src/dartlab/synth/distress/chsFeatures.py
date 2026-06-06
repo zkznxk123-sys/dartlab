@@ -8,12 +8,14 @@ credit/engine.py::_calcCHSAdjustment 에서 분리 — 순환 의존 방지.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from dartlab.synth.distress.chsModel import CHSResult, calcCHS
 
+ShareEstimator = Callable[[Any, float], float | int | None]
 
-def extractChsFeatures(company: Any) -> dict | None:
+
+def extractChsFeatures(company: Any, *, shareEstimator: ShareEstimator | None = None) -> dict | None:
     """Company → Campbell-Hilscher-Szilagyi (CHS) feature dict 추출.
 
     Capabilities:
@@ -48,10 +50,10 @@ def extractChsFeatures(company: Any) -> dict | None:
 
     Guide:
         BS 에서 자산총계 · 부채총계 · 현금, IS 에서 당기순이익을 가져온다.
-        주가/시가총액/변동성/excessReturn 은 ``_gatherMarketData`` 가 macro
-        provider 의 gather("price") 로 30 영업일 이상 시계열을 받아 산출.
-        주식수는 ``analysis.calcDcf`` 의 equityValue/perShareValue 역산을
-        시도 (importlib 동적 호출 — credit ↔ analysis 순환 회피).
+        주가/시가총액/변동성/excessReturn 은 ``_gatherMarketData`` 가 provider
+        의 gather("price") 로 30 영업일 이상 시계열을 받아 산출.
+        주식수는 company 속성/재무제표에서 직접 추정하고, 상위 valuation
+        레이어가 더 정밀한 추정을 원하면 ``shareEstimator`` 로 주입한다.
 
     SeeAlso:
         - ``computeChsProbability`` — 본 feature 를 ``calcCHS`` 에 넣어 PD 출력
@@ -77,14 +79,14 @@ def extractChsFeatures(company: Any) -> dict | None:
             ``{netIncome, totalLiabilities, cash, totalAssets, marketCap,
             equityVolatility, excessReturn, stockPrice}`` 8 키, 모두 float.
         Prerequisites:
-            BS/IS 최신 분기 데이터 + 종가 시계열 30 봉 이상 + analysis.calcDcf
-            가 equityValue & perShareValue 둘 다 반환.
+            BS/IS 최신 분기 데이터 + 종가 시계열 30 봉 이상 + 주식수 직접
+            추정 또는 shareEstimator 반환값.
         Freshness:
             BS/IS = 최신 보고기간 (분기). 주가 = gather("price") 의 cache.
         Dataflow:
             company.select → toDictBySnakeId → latest period dict
             → _gatherMarketData (price → variance · cumulative return)
-            → _estimateShares (calcDcf 역산) → marketCap.
+            → _estimateShares (company/shareEstimator) → marketCap.
         TargetMarkets: KR (DART), US (EDGAR). 통화 단위는 company.currency.
     """
     try:
@@ -131,7 +133,7 @@ def extractChsFeatures(company: Any) -> dict | None:
         return None
 
     # 주가 수집 (시가총액, 변동성, excessReturn)
-    marketCap, sigma, exret, stock_price = _gatherMarketData(company)
+    marketCap, sigma, exret, stock_price = _gatherMarketData(company, shareEstimator=shareEstimator)
     if marketCap is None:
         return None
 
@@ -147,7 +149,7 @@ def extractChsFeatures(company: Any) -> dict | None:
     }
 
 
-def computeChsProbability(company: Any) -> dict | None:
+def computeChsProbability(company: Any, *, shareEstimator: ShareEstimator | None = None) -> dict | None:
     """Company → CHS 12 개월 부도확률 + zone + feature 추적.
 
     Capabilities:
@@ -186,7 +188,7 @@ def computeChsProbability(company: Any) -> dict | None:
         - ``dartlab.synth.distress.chsModel.calcCHS``
 
     Requires:
-        Company 객체 + analysis.calcDcf + macro provider gather("price").
+        Company 객체 + 주가 gather + 주식수 추정값 또는 shareEstimator.
 
     AIContext:
         ``zone == "distress"`` 종목은 valuation 가중을 낮추거나 credit notch
@@ -212,7 +214,7 @@ def computeChsProbability(company: Any) -> dict | None:
             → {probability, zone, logitScore, features}.
         TargetMarkets: KR, US.
     """
-    features = extractChsFeatures(company)
+    features = extractChsFeatures(company, shareEstimator=shareEstimator)
     if not features:
         return None
 
@@ -228,7 +230,9 @@ def computeChsProbability(company: Any) -> dict | None:
     }
 
 
-def _gatherMarketData(company: Any) -> tuple[float | None, float | None, float | None, float | None]:
+def _gatherMarketData(
+    company: Any, *, shareEstimator: ShareEstimator | None = None
+) -> tuple[float | None, float | None, float | None, float | None]:
     """주가 시계열에서 시가총액 / 변동성 / excessReturn / 주가 추출."""
     try:
         from dartlab.core.di import getMacroProvider
@@ -254,29 +258,72 @@ def _gatherMarketData(company: Any) -> tuple[float | None, float | None, float |
         exret = (closes[-1] / closes[0] - 1) if closes[0] else 0.0
 
         # 주식수는 calcDcf 역산 또는 BS 시도 — 여기서는 proxy
-        shares = _estimateShares(company, latest_price)
+        shares = _estimateShares(company, latest_price, shareEstimator=shareEstimator)
         marketCap = shares * latest_price if shares else None
         return marketCap, sigma, exret, latest_price
     except (ImportError, AttributeError, KeyError, TypeError, ValueError, IndexError):
         return None, None, None, None
 
 
-def _estimateShares(company: Any, price: float) -> int | None:
-    """주식수 역산 — calcDcf 결과의 equityValue / perShareValue.
+def _estimateShares(company: Any, price: float, *, shareEstimator: ShareEstimator | None = None) -> float | None:
+    """주식수 추정.
 
-    analysis.calcDcf 는 importlib 동적 호출 — credit ↔ analysis cycle 회피.
+    synth 는 analysis valuation 을 import하지 않는다. 더 정밀한 상위 레이어
+    계산이 필요하면 호출자가 ``shareEstimator`` 를 주입한다.
     """
+    if shareEstimator is not None:
+        try:
+            estimated = _positiveFloat(shareEstimator(company, price))
+            if estimated is not None:
+                return estimated
+        except (AttributeError, KeyError, TypeError, ValueError):
+            pass
+
+    for attr in (
+        "sharesOutstanding",
+        "outstandingShares",
+        "totalShares",
+        "shares",
+        "shares_outstanding",
+    ):
+        try:
+            estimated = _positiveFloat(getattr(company, attr, None))
+            if estimated is not None:
+                return estimated
+        except (AttributeError, TypeError, ValueError):
+            pass
+
+    for attr in ("marketCap", "currentMarketCap"):
+        try:
+            market_cap = _positiveFloat(getattr(company, attr, None))
+            if market_cap is not None and price > 0:
+                return market_cap / price
+        except (AttributeError, TypeError, ValueError):
+            pass
+
     try:
-        import importlib
+        from dartlab.core.utils.helpers import toDictBySnakeId
 
-        calcDcf = getattr(importlib.import_module("dartlab.analysis.financial.valuation"), "calcDcf")
-
-        r = calcDcf(company)
-        if isinstance(r, dict):
-            eq = r.get("equityValue")
-            ps = r.get("perShareValue")
-            if eq and ps and ps > 0:
-                return int(eq / ps)
-    except (ImportError, AttributeError, ValueError, TypeError):
+        bs = company.select("BS", ["총발행주식수", "발행주식수"])
+        parsed = toDictBySnakeId(bs)
+        if parsed:
+            data, periods = parsed
+            for period in periods:
+                for key in ("outstanding_shares", "shares_outstanding", "total_shares", "발행주식수"):
+                    estimated = _positiveFloat((data.get(key) or {}).get(period))
+                    if estimated is not None:
+                        return estimated
+    except (ImportError, AttributeError, KeyError, TypeError, ValueError):
         pass
+
+    return None
+
+
+def _positiveFloat(value: Any) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    if parsed > 0:
+        return parsed
     return None

@@ -19,7 +19,6 @@ public_api:
     - collect
     - collectAll
     - compare
-    - compareDiagnostics
     - config
     - credit
     - dataDir
@@ -98,7 +97,6 @@ scenarios:
       - dartlab.collect
       - dartlab.collectAll
       - dartlab.compare
-      - dartlab.compareDiagnostics
       - dartlab.config
       - dartlab.credit
       - dartlab.dataDir
