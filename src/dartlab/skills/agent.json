@@ -568,16 +568,16 @@
     },
     {
       "id": "engines.company.docsInternals",
-      "title": "Company Docs Internals",
+      "title": "Company Panel Internals",
       "category": "engines",
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "Company 의 docs (사업보고서 sections) 내부 파이프라인 — fetch → parse → topic 매핑.",
+      "purpose": "Company 의 DART panel 공시 본문 파이프라인 — original zip → panel artifact → topic wide view 내부 추적.",
       "whenToUse": [
-        "Company docs 파이프라인 내부 추적",
-        "fetch → parse → topic 매핑",
-        "sections 디버깅"
+        "Company panel 파이프라인 내부 추적",
+        "DART panel row identity 디버깅",
+        "panel topic 매핑 점검"
       ],
       "inputs": [
         "사업보고서 markdown body",
@@ -596,7 +596,8 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "engines.company"
+        "engines.company",
+        "engines.panel"
       ],
       "linkedSkills": [
         "engines.panel",

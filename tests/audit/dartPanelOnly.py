@@ -1,8 +1,8 @@
 """DART panel-only source guard.
 
-This audit blocks the retired KR DART docs/sections runtime surface from
-reappearing. EDGAR/EDINET still have their own source-native sections packages;
-this guard is deliberately scoped to DART KR runtime and its direct tests.
+This audit blocks retired KR DART document runtime surfaces from reappearing.
+EDGAR/EDINET keep their own source-native document packages; this guard is
+deliberately scoped to DART KR runtime and its direct tests.
 """
 
 from __future__ import annotations
@@ -49,21 +49,27 @@ ALLOW_DOCS_CATEGORY = {
     ROOT / "src" / "dartlab" / "providers" / "dart" / "checks.py",
 }
 
+
+def _token(*parts: str) -> str:
+    return "".join(parts)
+
+
 BANNED_FIXED = (
-    "dartlab.providers.dart.sections",
+    _token("dartlab.providers.dart", ".sections"),
     "rawDocs",
-    "c.sections",
-    "company.sections",
-    "Company.sections",
-    "self.c.sections",
+    _token("c", ".sections"),
+    _token("company", ".sections"),
+    _token("Company", ".sections"),
+    _token("self.c", ".sections"),
     "_hasDocs",
     "loadDocsForStock",
-    "loadLiveCompanyDocs",
-    "dataExport",
-    "downloadPanelCsv",
-    "downloadFinanceExcel",
-    "panelToCsv",
-    "financeToExcel",
+    _token("loadLiveCompany", "Docs"),
+    _token("data", "Export"),
+    _token("download", "All"),
+    _token("downloadPanel", "Csv"),
+    _token("downloadFinance", "Excel"),
+    _token("panelTo", "Csv"),
+    _token("financeTo", "Excel"),
     "DATASET_URL",
     "전체 데이터셋",
     "includeDocs",

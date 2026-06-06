@@ -54,7 +54,7 @@
     },
     {
       "id": "engines.company.docsInternals",
-      "title": "Company Docs Internals",
+      "title": "Company Panel Internals",
       "category": "engines",
       "status": "observed",
       "dataSources": [],

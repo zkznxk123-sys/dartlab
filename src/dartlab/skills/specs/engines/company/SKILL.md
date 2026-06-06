@@ -279,7 +279,7 @@ Polars = 네이티브 Rust 힙, `gc.collect()` 회수 불가, Company 1 개 ≈ 
 
 ## 엔진 역할
 
-`docsInternals` 는 이름만 남은 호환 skill 이며, 현행 SSOT 는 DART `panel` 이다. 공개 사용자 API 는 `c.topics` / `c.panel(topic)` 이고, 서버/뷰어/AI 는 동일한 panel artifact 를 읽는다.
+Company panel internals 는 DART 본문을 `panel` 산출물로 읽는 내부 추적 skill 이다. 공개 사용자 API 는 `c.topics` / `c.panel(topic)` 이고, 서버/뷰어/AI 는 동일한 panel artifact 를 읽는다.
 
 ## 공개 호출 방식
 
@@ -296,10 +296,10 @@ view = c.panel("businessOverview")
 
 ## 호출 동작
 
-- 원천 zip XML 은 `data/original/dart/docs` 계층에 남을 수 있지만, 분석/뷰어/검색의 read SSOT 는 `data/dart/panel` 산출물이다.
+- 원천 zip XML 은 original archive 계층에 남을 수 있지만, 분석/뷰어/검색의 read SSOT 는 `data/dart/panel` 산출물이다.
 - panel build 는 `src/dartlab/providers/dart/panel/build` 가 담당한다. topic 매핑은 `src/dartlab/providers/dart/panel/mapper.py` 와 panel schema 계층에서 관리한다.
 - row identity 는 panel 컬럼의 `topic`, `blockType`, `blockOrder`, `sectionLeaf`, `contentRaw`/`content` 조합으로 판단한다.
-- DART `/api/company/{code}/sections` 와 DART docs parquet read path 는 현행 사용자/API 표면이 아니다.
+- DART 본문 조회의 사용자/API 표면은 panel topic catalog 와 `c.panel(topic)` 뿐이다.
 
 ## 대표 반환 형태
 
@@ -308,7 +308,7 @@ view = c.panel("businessOverview")
 ## 기본 검증
 
 - panel 계약 변경 시 `engines.panel`, `operation.dataLineage`, 서버 viewer 계약, landing viewer 검증을 함께 갱신한다.
-- DART 본문 계층에서 오래된 docs parquet read path, `Company`의 폐기된 sections 표면, 폐기된 대량 다운로드 표면이 되살아나면 SSOT 회귀로 본다.
+- DART 본문 계층에서 옛 문서 읽기 경로, 폐기된 섹션 표면, 폐기된 대량 다운로드 표면이 되살아나면 SSOT 회귀로 본다.
 
 ## (흡수) engines.company.finance 본문
 
