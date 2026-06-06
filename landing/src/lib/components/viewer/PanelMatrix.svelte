@@ -8,12 +8,14 @@
 		rows,
 		periods,
 		dartUrlByPeriod,
-		glow = null
+		glow = null,
+		highlight = null
 	}: {
 		rows: PanelRow[];
 		periods: string[];
 		dartUrlByPeriod: Record<string, string | null>;
 		glow?: { rowIndex: number; period: string } | null;
+		highlight?: { rowIndex: number; period: string; terms: string[] } | null;
 	} = $props();
 
 	// 섹션 내 build-order 인덱스 보존 — 행 식별(disclosureKey/NARR)은 leafSeq 미포함이라 EDGAR 동명 narrative
@@ -56,7 +58,7 @@
 			{#each visible as { r, i } (i)}
 				{#each periods as p (p)}
 					<div class="cell body-cell" class:glow={glow && glow.rowIndex === i && glow.period === p} data-cell={`${i}|${p}`}>
-						<CellContent value={r.cells?.[p] ?? ''} />
+						<CellContent value={r.cells?.[p] ?? ''} highlightTerms={highlight && highlight.rowIndex === i && highlight.period === p ? highlight.terms : []} />
 					</div>
 				{/each}
 			{/each}

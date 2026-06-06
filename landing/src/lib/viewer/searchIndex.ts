@@ -29,7 +29,7 @@ export function tokenizeBigram(text: string): string[] {
 
 // 검색용 경량 평문화 — 태그·엔티티→공백, 공백 1회 정규화. (cell.ts stripInlineTags 는 캡션파싱용 6패스라
 // 대량 인덱싱엔 과함 — 실측 2배 느림. 인덱싱은 단일라인 평문이면 충분.)
-function strip(raw: string): string {
+export function plainText(raw: string): string {
 	return raw.replace(TAG, ' ').replace(ENT, ' ').replace(WS, ' ').trim();
 }
 
@@ -81,6 +81,7 @@ export interface IndexedRow {
 	section: string;
 	block: string;
 	scope: string;
+	blockType: 'text' | 'table';
 	cells: Record<string, string>; // period → 평문 셀 (스니펫·hit period 용)
 	tf: Map<string, number>;
 	len: number;
@@ -105,6 +106,8 @@ export interface SearchHit {
 	period: string;
 	score: number;
 	snippet: string;
+	matchKind: 'text' | 'table' | 'amount';
+	matchedTerms: string[];
 }
 
 export interface BuildOpts {
@@ -125,7 +128,7 @@ interface Acc {
 function indexRow(acc: Acc, sectionKey: string, rowIndex: number, r: PanelRow, opts: Required<BuildOpts>): void {
 	const cells: Record<string, string> = {};
 	for (const [p, raw] of Object.entries(r.cells)) {
-		if (raw) cells[p] = strip(raw);
+		if (raw) cells[p] = plainText(raw);
 	}
 	if (Object.keys(cells).length === 0) return;
 	const label = `${r.chapter} ${r.sectionLeaf} ${r.blockLeaf}`;
@@ -154,6 +157,7 @@ function indexRow(acc: Acc, sectionKey: string, rowIndex: number, r: PanelRow, o
 		section: r.sectionLeaf,
 		block: r.blockLeaf,
 		scope: r.scope ?? '',
+		blockType: r.blockType,
 		cells,
 		tf,
 		len,
@@ -253,7 +257,46 @@ function amtOk(amt: number, c: AmtConstraint): boolean {
 	return amt > 0 && (c.min === undefined || amt >= c.min) && (c.max === undefined || amt <= c.max);
 }
 
-export function search(idx: SearchIndex, query: string, opts: { expand?: boolean; topK?: number } = {}): { hits: SearchHit[]; added: string[] } {
+function surfaceNeedles(query: string, added: string[]): string[] {
+	const needles = new Set<string>();
+	for (const source of [query, ...added]) {
+		for (const m of source.matchAll(/[가-힣A-Za-z0-9]{2,}/g)) {
+			const v = m[0].trim();
+			if (v.length >= 2) needles.add(v);
+		}
+	}
+	return [...needles].sort((a, b) => b.length - a.length);
+}
+
+function snippetFor(cells: Record<string, string>, periodsDesc: string[], needles: string[]): { period: string; snippet: string; matchedTerms: string[] } {
+	let fallbackPeriod = periodsDesc[0] ?? '';
+	for (const p of periodsDesc) {
+		const cell = cells[p] ?? '';
+		if (cell) fallbackPeriod = p;
+		let bestAt = Number.POSITIVE_INFINITY;
+		const matched: string[] = [];
+		for (const needle of needles) {
+			const at = cell.toLowerCase().indexOf(needle.toLowerCase());
+			if (at >= 0) {
+				bestAt = Math.min(bestAt, at);
+				matched.push(needle);
+			}
+		}
+		if (matched.length) {
+			const start = Math.max(0, bestAt - 34);
+			const end = Math.min(cell.length, bestAt + 92);
+			return { period: p, snippet: cell.slice(start, end), matchedTerms: matched.slice(0, 8) };
+		}
+	}
+	const snippet = (cells[fallbackPeriod] ?? '').slice(0, 96);
+	return { period: fallbackPeriod, snippet, matchedTerms: [] };
+}
+
+export function search(
+	idx: SearchIndex,
+	query: string,
+	opts: { expand?: boolean; topK?: number; dedupe?: boolean } = {}
+): { hits: SearchHit[]; added: string[] } {
 	// 조건("100억 이상")이 있으면 떼어내고, 남은 표면어로 BM25 + 금액 필터.
 	const { c, residual } = parseConstraint(query);
 	const lexQuery = c ? residual : query;
@@ -296,28 +339,18 @@ export function search(idx: SearchIndex, query: string, opts: { expand?: boolean
 	for (const entry of ranked) {
 		const r = idx.rows[entry[0]];
 		const label = r.sectionKey + '␟' + r.block;
-		if (seenLabel.has(label)) continue;
-		seenLabel.add(label);
+		if (opts.dedupe ?? true) {
+			if (seenLabel.has(label)) continue;
+			seenLabel.add(label);
+		}
 		top.push(entry);
 		if (top.length >= topK) break;
 	}
-	const firstTok = (lexQuery.trim().split(/\s+/)[0] ?? '').replace(/[^가-힣A-Za-z]/g, '');
+	const needles = surfaceNeedles(lexQuery, added);
 	const hits: SearchHit[] = top.map(([pos, sc]) => {
 		const row = idx.rows[pos];
 		const periodsDesc = Object.keys(row.cells).sort().reverse();
-		let hitP = periodsDesc[0] ?? '';
-		let snippet = '';
-		if (firstTok.length >= 2) {
-			for (const p of periodsDesc) {
-				const at = row.cells[p].indexOf(firstTok);
-				if (at >= 0) {
-					hitP = p;
-					snippet = row.cells[p].slice(Math.max(0, at - 28), at + 52);
-					break;
-				}
-			}
-		}
-		if (!snippet) snippet = (row.cells[hitP] ?? '').slice(0, 72);
+		const snippet = snippetFor(row.cells, periodsDesc, needles);
 		return {
 			sectionKey: row.sectionKey,
 			rowIndex: row.rowIndex,
@@ -325,9 +358,11 @@ export function search(idx: SearchIndex, query: string, opts: { expand?: boolean
 			section: row.section,
 			block: row.block,
 			scope: row.scope,
-			period: hitP,
+			period: snippet.period,
 			score: sc,
-			snippet
+			snippet: snippet.snippet,
+			matchKind: c && amtOk(row.maxAmount, c) ? 'amount' : row.blockType === 'table' ? 'table' : 'text',
+			matchedTerms: snippet.matchedTerms
 		};
 	});
 	return { hits, added };

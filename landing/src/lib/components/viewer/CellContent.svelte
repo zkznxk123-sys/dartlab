@@ -8,8 +8,9 @@
 		absorbCaptionUnitFromText,
 		stripInlineTags
 	} from '$lib/viewer/cell';
+	import { highlightParts } from '$lib/viewer/searchEvidence';
 
-	let { value }: { value: string } = $props();
+	let { value, highlightTerms = [] }: { value: string; highlightTerms?: string[] } = $props();
 
 	type Seg = { kind: 'htmltable'; html: string; caption: string; unit: string } | { kind: 'text'; text: string };
 
@@ -17,7 +18,7 @@
 		return DOMPurify.sanitize(html, SANITIZE_CONFIG) as unknown as string;
 	}
 
-	function build(v: string): Seg[] {
+	function build(v: string, highlight: string[]): Seg[] {
 		if (!v || !v.trim()) return [];
 		const html = normalizeDartXml(v);
 		if (/<\s*table[\s>]/i.test(html)) {
@@ -40,17 +41,26 @@
 			return out;
 		}
 		if (!/<[a-zA-Z]/.test(html)) return [{ kind: 'text', text: html.replace(/&cr;/g, ' ') }];
+		if (highlight.length) return [{ kind: 'text', text: stripInlineTags(html).replace(/&cr;/g, ' ') }];
 		return [{ kind: 'htmltable', html: clean(html), caption: '', unit: '' }];
 	}
 
-	const segments = $derived(build(value));
+	const segments = $derived(build(value, highlightTerms));
 </script>
 
 {#if segments.length}
 	<div class="cell-content">
 		{#each segments as seg, i (i)}
 			{#if seg.kind === 'text'}
-				<div class="narrative">{seg.text}</div>
+				<div class="narrative">
+					{#if highlightTerms.length}
+						{#each highlightParts(seg.text, highlightTerms) as part}
+							{#if part.hit}<mark>{part.text}</mark>{:else}{part.text}{/if}
+						{/each}
+					{:else}
+						{seg.text}
+					{/if}
+				</div>
 			{:else}
 				<div class="table-block">
 					{#if seg.caption || seg.unit}
@@ -81,6 +91,12 @@
 		font-size: 13px;
 		line-height: 1.55;
 		color: #cbd5e1;
+	}
+	.narrative mark {
+		padding: 0 2px;
+		border-radius: 3px;
+		background: rgba(251, 191, 36, 0.22);
+		color: #fef3c7;
 	}
 	.table-block {
 		display: flex;
