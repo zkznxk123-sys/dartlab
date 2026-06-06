@@ -96,6 +96,65 @@ def test_computeProfitability_noLongerDroppedByGlobalLatestYear():
     assert codes == {"A", "B", "C", "D"}
 
 
+def test_computeProfitability_missingStockCodeReturnsSchemaEmpty():
+    """부분 fixture / 불완전 fallback 은 컬럼 누락으로 크래시하지 않고 빈 스키마를 반환."""
+    from dartlab.scan.financial.profitability import _computeProfitability
+
+    df = pl.DataFrame(
+        {
+            "stock_code": ["005930"],
+            "bsns_year": [2025],
+            "account_id": ["Revenue"],
+            "account_nm": ["매출액"],
+            "thstrm_amount": [1_000_000],
+        }
+    )
+
+    result = _computeProfitability(df, "stockCode")
+
+    assert result.is_empty()
+    assert result.columns == [
+        "stockCode",
+        "opMargin",
+        "netMargin",
+        "roe",
+        "roa",
+        "grade",
+        "nonRecurring",
+    ]
+
+
+def test_scanProfitability_perFileFallbackNormalizesStockCode(tmp_path, monkeypatch):
+    """개별 finance parquet 의 legacy `stock_code` 컬럼을 fallback 에서 `stockCode`로 정규화."""
+    from dartlab.scan.financial import profitability
+
+    finance_dir = tmp_path / "finance"
+    finance_dir.mkdir()
+    rows = []
+    for sj, aid, nm, amt in [
+        ("IS", "Revenue", "매출액", 1_000_000),
+        ("IS", "ProfitLossFromOperatingActivities", "영업이익", 100_000),
+        ("IS", "ProfitLoss", "당기순이익", 80_000),
+        ("BS", "Assets", "자산총계", 10_000_000),
+        ("BS", "Equity", "자본총계", 5_000_000),
+    ]:
+        rows.append(_mockFinanceRow("005930", 2025, aid, nm, amt, sj_div=sj))
+    df = pl.DataFrame(rows).rename({"stockCode": "stock_code"})
+    df.write_parquet(finance_dir / "005930.parquet")
+
+    def fakeDataDir(category: str):
+        assert category == "finance"
+        return finance_dir
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", fakeDataDir)
+
+    result = profitability._scanPerFile()
+
+    assert result.height == 1
+    assert result.item(0, "stockCode") == "005930"
+    assert result.item(0, "opMargin") == 10.0
+
+
 def test_computeGrowth_perStockYearsNotGlobal():
     """CAGR 계산이 각 종목의 자기 최신·기준 연도 pair 를 쓰는지 검증."""
     from dartlab.scan.financial.growth import _computeGrowth

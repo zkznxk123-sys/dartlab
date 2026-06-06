@@ -38,9 +38,24 @@ from dartlab.scan.io.parquet import (
 )
 from dartlab.scan.io.parquet import (
     _ensureScanData,
+    _loadRawFinanceViaDuckDb,
     extractAccount,
     filterLatestPerStock,
 )
+
+_PROFITABILITY_SCHEMA = {
+    "stockCode": pl.Utf8,
+    "opMargin": pl.Float64,
+    "netMargin": pl.Float64,
+    "roe": pl.Float64,
+    "roa": pl.Float64,
+    "grade": pl.Utf8,
+    "nonRecurring": pl.Boolean,
+}
+
+
+def _emptyProfitabilityFrame() -> pl.DataFrame:
+    return pl.DataFrame(schema=_PROFITABILITY_SCHEMA)
 
 
 def _gradeProfitability(opMargin: float | None, roe: float | None) -> str:
@@ -162,6 +177,8 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
     """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
     scCol = "stockCode"
+    if scCol not in schema:
+        return _emptyProfitabilityFrame()
 
     allIds = list(_REVENUE_IDS | _OP_IDS | _NI_IDS | _TA_IDS | _EQ_IDS)
     allNms = list(_REVENUE_NMS | _OP_NMS | _NI_NMS | _TA_NMS | _EQ_NMS)
@@ -175,8 +192,8 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         )
         .collect(engine="streaming")
     )
-    if target.is_empty():
-        return pl.DataFrame()
+    if target.is_empty() or scCol not in target.columns:
+        return _emptyProfitabilityFrame()
 
     # 연결 우선
     cfs = target.filter(pl.col("fs_nm").str.contains("연결"))
@@ -201,6 +218,27 @@ def _scanPerFile() -> pl.DataFrame:
     from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
+    scCol = "stockCode"
+    allIds = _REVENUE_IDS | _OP_IDS | _NI_IDS | _TA_IDS | _EQ_IDS
+    allNms = _REVENUE_NMS | _OP_NMS | _NI_NMS | _TA_NMS | _EQ_NMS
+
+    lz = _loadRawFinanceViaDuckDb(
+        financeDir,
+        sjDivs=["IS", "CIS", "BS"],
+        accountIds=allIds,
+        accountNms=allNms,
+    )
+    if lz is not None:
+        try:
+            target = lz.filter(pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표")).collect(
+                engine="streaming"
+            )
+        except (pl.exceptions.PolarsError, OSError):
+            target = _emptyProfitabilityFrame()
+        if not target.is_empty() and scCol in target.columns:
+            cfs = target.filter(pl.col("fs_nm").str.contains("연결"))
+            return _computeProfitability(cfs if not cfs.is_empty() else target, scCol)
+
     parquetFiles = sorted(financeDir.glob("*.parquet"))
 
     allDfs = []
@@ -218,14 +256,18 @@ def _scanPerFile() -> pl.DataFrame:
             continue
         if df.is_empty():
             continue
+        if "stockCode" not in df.columns:
+            if "stock_code" in df.columns:
+                df = df.with_columns(pl.col("stock_code").cast(pl.Utf8).alias("stockCode"))
+            else:
+                df = df.with_columns(pl.lit(pf.stem).alias("stockCode"))
         cfs = df.filter(pl.col("fs_nm").str.contains("연결"))
         allDfs.append(cfs if not cfs.is_empty() else df)
 
     if not allDfs:
-        return pl.DataFrame()
+        return _emptyProfitabilityFrame()
 
     combined = pl.concat(allDfs, how="diagonal_relaxed")
-    scCol = "stockCode"
     return _computeProfitability(combined, scCol)
 
 
@@ -253,11 +295,15 @@ def _computeProfitability(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         - grade : str — 수익성 등급 (우수/양호/보통/저수익/적자)
         - nonRecurring : bool — 비경상 이익 의심 여부 (순이익률이 영업이익률 대비 극단적으로 클 때 True)
     """
+    required = {scCol, "bsns_year", "account_id", "account_nm", "thstrm_amount"}
+    if target.is_empty() or not required.issubset(set(target.columns)):
+        return _emptyProfitabilityFrame()
+
     # 종목별 최신 연도 — 글로벌 max 버그 방지 (2026 Q1 조기 제출 3 종목 때문에
     # 2025 자 2895 종목이 전부 버려지던 현상 수정, 2026-04-23).
     latest = filterLatestPerStock(target, scCol)
     if latest.is_empty():
-        return pl.DataFrame()
+        return _emptyProfitabilityFrame()
 
     rows: list[dict] = []
     for code in latest[scCol].unique().to_list():
@@ -298,18 +344,9 @@ def _computeProfitability(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         )
 
     if not rows:
-        return pl.DataFrame()
+        return _emptyProfitabilityFrame()
 
-    schema = {
-        "stockCode": pl.Utf8,
-        "opMargin": pl.Float64,
-        "netMargin": pl.Float64,
-        "roe": pl.Float64,
-        "roa": pl.Float64,
-        "grade": pl.Utf8,
-        "nonRecurring": pl.Boolean,
-    }
-    return pl.DataFrame(rows, schema=schema)
+    return pl.DataFrame(rows, schema=_PROFITABILITY_SCHEMA)
 
 
 __all__ = ["scanProfitability"]
