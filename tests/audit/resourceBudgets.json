@@ -65,11 +65,6 @@
       "maxRssDeltaMb": 900,
       "maxRssPeakMb": 1800
     },
-    "company.sections": {
-      "maxElapsedSec": 60,
-      "maxRssDeltaMb": 1100,
-      "maxRssPeakMb": 2200
-    },
     "company.topics": {
       "maxElapsedSec": 45,
       "maxRssDeltaMb": 900,

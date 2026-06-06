@@ -172,11 +172,6 @@ class RawProviderCompanyProtocol(Protocol):
         """사용 가능한 topic 목록."""
         ...
 
-    @property
-    def sections(self) -> pl.DataFrame | None:
-        """merged topic x period 수평화 테이블."""
-        ...
-
     # Plan v10 P0/P1: c.BS / c.IS / c.CF / c.CIS / c.ratios / c.SCE property 제거.
     # 공개 show 은퇴 → 사용자 진입점은 c.panel(key, freq=, scope=) / c.select(...) 만 (api-contract).
 

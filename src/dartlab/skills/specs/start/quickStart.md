@@ -49,7 +49,7 @@ runtimeCompatibility:
       - scan 과 ask 는 데이터·모델 의존성에 따라 제한될 수 있다.
 procedure:
   - dartlab.Company(code) 로 회사 객체를 만든다.
-  - c.sections / c.topics 로 회사 전체 지도를 본다.
+  - c.topics 로 사용 가능한 topic 목록을 본다.
   - c.panel(topic) 으로 개별 topic 본문을 연다 (BS · IS · CF · ratios 등).
   - c.diff() 로 기간 간 변화 큰 topic 을 찾는다.
   - 미국 종목은 같은 API 로 동작한다 (Company("AAPL")).
@@ -105,7 +105,6 @@ c = dartlab.Company("005930")  # 삼성전자
 ## 2. 회사 전체 보기
 
 ```python
-c.sections   # topic × 기간 회사 지도
 c.topics     # 어떤 topic 이 있나
 ```
 

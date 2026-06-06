@@ -42,11 +42,12 @@ class TestCompany:
         with pytest.raises(ValueError):
             Company("존재하지않는회사명zzz")
 
-    def test_sections_hide_raw_source_topics(self):
+    def test_topics_hide_raw_source_topics(self):
         c = self.c
-        sections = c.sections
-        assert sections is not None
-        topics = set(sections["topic"].to_list())
+        topicsDf = c.topics
+        assert topicsDf is not None
+        assert isinstance(topicsDf, pl.DataFrame)
+        topics = set(topicsDf["topic"].to_list())
         assert "주요제품및원재료등" not in topics
         assert "파생상품등에관한사항" not in topics
         assert "I.회사의개황" not in topics
@@ -67,8 +68,9 @@ class TestCompany:
         c = self.c
         assert c.index.height > 0
         assert set(["chapter", "topic", "kind", "source", "periods", "shape", "preview"]).issubset(set(c.index.columns))
-        assert c.sections is not None
-        assert isinstance(c.sections, pl.DataFrame)
+        assert c.topics is not None
+        assert isinstance(c.topics, pl.DataFrame)
+        assert c.topics.height > 0
         assert c.facts is not None
         assert isinstance(c.facts, pl.DataFrame)
 

@@ -76,8 +76,8 @@ def main() -> int:
     # 4. story
     results["story"] = test("c.story()", lambda: c.story())
 
-    # 5. sections (docs 파이프라인)
-    results["sections"] = test("c.sections", lambda: c.sections)
+    # 5. topics (공개 topic catalog)
+    results["topics"] = test("c.topics", lambda: c.topics)
 
     # 6. macro
     results["macro"] = test("dartlab.macro()", lambda: dartlab.macro())

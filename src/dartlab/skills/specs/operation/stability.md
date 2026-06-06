@@ -88,7 +88,6 @@ dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 
 | API | 설명 |
 |---|---|
 | `dartlab.Company(code)` | Company 객체 생성 facade |
-| `Company.sections` | 회사 지도 (topic × 기간 Polars DataFrame) |
 | `Company.show()` | topic payload 조회 (source-aware) |
 | `Company.trace()` | source provenance 조회 |
 | `Company.diff()` | 기간 간 텍스트 변화 감지 |
@@ -199,7 +198,7 @@ DART core stable 기준:
 - **semver 준수**: major = breaking, minor = feature, patch = bugfix.
 - DART core stable 범위는 minor 안에서 호환성 우선.
 - EDGAR 와 일부 AI 기능은 tier 정책에 따라 더 빨리 변할 수 있다.
-- 내부 profile merge 레이어는 docs spine 위. `c.sections` 와 `c.show()` 가 공식 사용 경로.
+- 내부 profile merge 레이어는 docs spine 위. 공식 사용 경로는 `c.topics` 로 topic catalog 확인 후 `c.panel(topic)` 호출.
 
 ## CLI 호환성 규칙
 

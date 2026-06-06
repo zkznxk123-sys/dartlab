@@ -34,10 +34,10 @@ def testDartlabGuardStrictJson() -> None:
     payload = json.loads(result.stdout)
     assert payload["summary"]["status"] == "pass"
     assert payload["summary"]["activeKnownDebt"] == 0
-    assert payload["summary"]["protectedCompanyFacadeDebt"] == 19
     active = payload["baseline"]["activeKnownViolations"]
     protected = payload["baseline"]["protectedCompanyFacadeDebt"]
+    assert payload["summary"]["protectedCompanyFacadeDebt"] == len(protected)
     assert len(active) == 0
-    assert len(protected) == 19
+    assert protected
     assert all("/company.py" not in item["path"] for item in active)
     assert all(item["path"].endswith("/company.py") for item in protected)

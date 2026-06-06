@@ -51,7 +51,7 @@ def Company(stockCode: str) -> CompanyProtocol:
           처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다
           (``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /
           c.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).
-        - 메타: sections, topics, filings(), market, currency
+        - 메타: topics, index, filings(), market, currency
 
     Requires:
         DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).

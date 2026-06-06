@@ -72,7 +72,6 @@ public_api:
     - industry
     - macro
     - quant
-    - sections
     - select
     - show
     - story
@@ -256,12 +255,6 @@ scenarios:
     budget: company.show.ratios
     covers:
       - Company.show
-
-  company.sections:
-    suites: [release, nightly]
-    budget: company.sections
-    covers:
-      - Company.sections
 
   company.topics:
     suites: [release, nightly]

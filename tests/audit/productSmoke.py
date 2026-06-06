@@ -245,8 +245,6 @@ def _runScenario(scenarioId: str) -> dict[str, Any]:
         return _ensureNonEmpty("company.show.BS", _company().panel("BS"), minHeight=1)
     if scenarioId == "company.show.ratios":
         return _ensureNonEmpty("company.show.ratios", _company().panel("ratios"), minHeight=1)
-    if scenarioId == "company.sections":
-        return _ensureNonEmpty("company.sections", _company().sections, minHeight=1)
     if scenarioId == "company.topics":
         return _ensureNonEmpty("company.topics", _company().topics, minHeight=1)
     if scenarioId == "company.select.IS":

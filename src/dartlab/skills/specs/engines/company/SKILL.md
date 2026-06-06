@@ -90,11 +90,11 @@ examples:
   - dartlab.Company 사용법
   - 005930 분석 시작
   - AAPL EDGAR 재무 분석
-  - 단일 기업 sections 가로화
+  - 단일 기업 topic catalog 확인
   - 기간 간 텍스트 변화 (diff) 추적
 procedure:
   - dartlab.Company(code) 로 종목코드 또는 ticker 로 facade 생성.
-  - c.sections 또는 c.topics 로 사용 가능한 topic 확인.
+  - c.topics 로 사용 가능한 topic 확인.
   - c.panel(topic) 으로 단일 topic 본문 (source priority — finance > report > docs).
   - 깊이 분석은 c.analysis · c.credit · c.quant · c.macro · c.story 같은 하위 엔진.
   - 답변에 target · period · topic · tableRef · valueRef · dateRef · executionRef 묶음.
@@ -279,13 +279,13 @@ Polars = 네이티브 Rust 힙, `gc.collect()` 회수 불가, Company 1 개 ≈ 
 
 ## 엔진 역할
 
-`docsInternals` 는 `engines.company.sections` 의 내부 구현 SSOT. 외부 사용자 API 는 `c.sections` / `c.show()` 가 모두지만, 그 내부에서 일어나는 row identity 결정 · 테이블 수평화 알고리즘 · Rust 포팅 로드맵을 본 spec 이 보관.
+`docsInternals` 는 `engines.company.sections` 의 내부 구현 SSOT. 공개 사용자 API 는 `c.topics` / `c.panel(topic)` 이며, 내부 sectionsStorage 에서 일어나는 row identity 결정 · 테이블 수평화 알고리즘 · Rust 포팅 로드맵을 본 spec 이 보관.
 
 본 spec 의 청중 — dartlab 코어 컨트리뷰터 + sections pipeline R&D 진행자.
 
 ### 데이터 손실 정책 (의도 drop + 잠재 손실 가시화)
 
-`c.sections` 는 원본 `docs.parquet` 의 *모든* row 를 보존하지 않는다. 의도된 drop 5 종:
+sectionsStorage wide view 는 원본 `docs.parquet` 의 *모든* row 를 보존하지 않는다. 의도된 drop 5 종:
 
 1. **chapter 결정 전 prelude row** — `parseMajorNum` 미인식 + 첫 chapter 헤딩 등장 전 sub-section row drop (`reportRows.py:1067-1072`).
 2. **chapter row catch-all dedup** — sub-section 에 cover 된 chapter row block drop. 8자 미만 line 만 있는 block 은 unique 후보에서 제외 (`reportRows.py:1023`).
@@ -313,11 +313,11 @@ Polars = 네이티브 Rust 힙, `gc.collect()` 회수 불가, Company 1 개 ≈ 
 내부 helper 는 `RunPython` 으로 직접 호출 가능:
 
 ```python
-import dartlab
+from dartlab.providers.dart.sections import sectionsWide
 from dartlab.providers.dart.docs.sections import pipeline
 
-c = dartlab.Company("005930")
-df = c.sections
+df = sectionsWide("005930")
+assert df is not None
 
 # structure 진단 (5 종)
 reg = pipeline.structureRegistry(df, topic="businessOverview")
@@ -1008,44 +1008,36 @@ print(f"{result.corpName}: {result.allRate:.1%}")  # 매칭률
 import dartlab
 
 c = dartlab.Company("005930")
-c.sections                       # 전체 topic × 기간 DataFrame
-c.show("BS")                     # 단일 topic + source priority
+c.topics                         # 사용 가능한 topic catalog
+c.panel("BS")                    # 단일 topic + source priority
 c.trace("BS")                    # 어떤 source 가 선택됐나
-c.show("companyOverview", 0)     # 특정 블록의 실제 데이터
+c.panel("companyOverview")       # 특정 topic 의 실제 데이터
 ```
 
 미국 종목도 같은 API:
 
 ```python
 us = dartlab.Company("AAPL")
-us.sections
-us.show("10-K::item1Business")
-us.show("BS")
+us.topics
+us.panel("10-K::item1Business")
+us.panel("BS")
 ```
 
-Polars DataFrame 이므로 자유 필터:
+sectionsStorage 내부 wide view 는 Polars DataFrame 이므로 자유 필터:
 
 ```python
 import polars as pl
+from dartlab.providers.dart.sections import sectionsWide
 
-df = c.sections.filter(pl.col("topic") == "companyOverview")
-df_text = c.sections.filter(pl.col("blockType") == "text")
-df_table = c.sections.filter(pl.col("blockType") == "table")
-```
-
-편의 메서드:
-
-```python
-c.sections.periods()    # 기간 리스트
-c.sections.ordered()    # 최신순 정렬
-c.sections.coverage()   # topic 별 기간 커버리지 요약
+df = sectionsWide("005930")
+df = df.filter(pl.col("topic") == "companyOverview")
 ```
 
 ## 호출 동작
 
-`c.sections` 는 사용자 진입점. 각 행이 한 topic 블록, 각 열이 한 기간. 텍스트와 표는 원본 그대로 보존, 시간축에만 정렬한다.
+`Company.sections` 공개 facade 는 폐기됐다. 사용자는 `c.topics` 로 topic catalog 를 확인하고 `c.panel(topic)` 으로 진입한다. 내부 sectionsStorage wide view 는 각 행이 한 topic 블록, 각 열이 한 기간인 검증/파이프라인용 구조다.
 
-`c.show(topic)` 는 `sections` 위에서 동작하고 source priority 를 적용한다:
+`c.panel(topic)` 는 source priority 를 적용한다:
 
 1. **finance** (BS, IS, CF, CIS, SCE) — 숫자는 권위 있으므로 docs 본문보다 우선.
 2. **report** — DART 정형 공시 데이터.
@@ -1060,7 +1052,7 @@ c.sections.coverage()   # topic 별 기간 커버리지 요약
 
 ## 대표 반환 형태
 
-`c.sections` DataFrame 구조:
+sectionsStorage wide DataFrame 구조:
 
 ```
 chapter │ topic            │ blockType │ textNodeType │ 2025Q4 │ 2024Q4 │ 2024Q3 │ …
@@ -1098,8 +1090,8 @@ EDGAR 도 같은 구조. topic 이름만 SEC form 규약 (`10-K::item1Business`,
 ## 기본 실행 순서
 
 1. `dartlab.Company(code)` 로 회사 객체 생성.
-2. `c.sections` 또는 `c.topics` 로 사용 가능한 topic 확인.
-3. 분석할 topic 선택 → `c.show(topic)` 으로 본문 확인.
+2. `c.topics` 로 사용 가능한 topic 확인.
+3. 분석할 topic 선택 → `c.panel(topic)` 으로 본문 확인.
 4. 기간 비교가 필요하면 `c.diff()` · `c.diff(topic)`.
 5. source 가 의심되면 `c.trace(topic)` 으로 검증.
 
