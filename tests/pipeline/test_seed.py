@@ -67,6 +67,29 @@ def test_seed_downloads_missing_only(tmp_path, monkeypatch):
     assert _FakeApi.calls == [("eddmpython/dartlab-data", "dart/finance", "dataset")]
 
 
+def test_seed_skips_hf_tree_resolve_404(tmp_path, monkeypatch):
+    """HF list-tree 와 resolve 사이 stale 404는 seed 전체를 죽이지 않고 skip."""
+    import huggingface_hub
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", _FakeApi)
+
+    import dartlab.pipeline.seed as seedmod
+
+    def fakeDownload(url, dest, token, timeout=60):
+        if url.endswith("/a.parquet"):
+            Path(dest).parent.mkdir(parents=True, exist_ok=True)
+            Path(dest).write_bytes(b"000")
+            return 3
+        return None
+
+    monkeypatch.setattr(seedmod, "_download", fakeDownload)
+
+    result = seedmod.seedCategoriesFromHf(["finance"], dataDir=str(tmp_path))
+    total, newCount, _mb = result["finance"]
+    assert newCount == 1
+    assert total == 1
+
+
 def test_is_fresh(tmp_path):
     """_isFresh — 존재 + size 일치만 True."""
     from dartlab.pipeline.seed import _isFresh

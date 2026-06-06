@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 
-def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int:
+def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int | None:
     """단일 파일 HTTP GET — 429/5xx/네트워크 transient 재시도, tmp→rename atomic.
 
     Args:
@@ -25,10 +25,10 @@ def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int
         timeout: 소켓 타임아웃 초.
 
     Returns:
-        다운로드 바이트 수.
+        다운로드 바이트 수. HF tree/resolve drift 로 404가 나면 None.
 
     Raises:
-        urllib.error.HTTPError: 비-transient 또는 재시도 소진.
+        urllib.error.HTTPError: 404가 아닌 비-transient 또는 재시도 소진.
 
     Example:
         >>> _download("https://example/x", Path("/tmp/x"), None)  # doctest: +SKIP
@@ -56,6 +56,13 @@ def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int
             tmp.replace(dest)
             return bytesWritten
         except urllib.error.HTTPError as e:
+            if e.code == 404:
+                try:
+                    tmp.unlink()
+                except FileNotFoundError:
+                    pass
+                print(f"[seed] 404 skip ({dest.name}) — HF tree/resolve drift", flush=True)
+                return None
             if e.code == 429 and attempt < maxRetries - 1:
                 retryAfter = e.headers.get("Retry-After")
                 try:
@@ -100,21 +107,29 @@ def _seedOne(category: str, dataDir: Path, token: str | None) -> tuple[int, int,
 
     missing = [(rel, size) for rel, size in remoteFiles.items() if not _isFresh(dataDir / rel, size)]
     downloadedBytes = 0
+    downloadedCount = 0
+    skipped404 = 0
     if missing:
         print(f"[seed] {category}: {len(missing)}개 다운로드", flush=True)
         baseUrl = f"https://huggingface.co/datasets/{repo}/resolve/main"
         with ThreadPoolExecutor(max_workers=4) as pool:
             futures = {pool.submit(_download, f"{baseUrl}/{rel}", dataDir / rel, token): rel for rel, _ in missing}
             for fut in as_completed(futures):
-                downloadedBytes += fut.result()
+                bytesWritten = fut.result()
+                if bytesWritten is None:
+                    skipped404 += 1
+                    continue
+                downloadedCount += 1
+                downloadedBytes += bytesWritten
     else:
         print(f"[seed] {category}: 로컬 모두 최신 — skip", flush=True)
 
     localCat = dataDir / dirPath
     total = sum(1 for p in localCat.rglob("*") if p.is_file()) if localCat.exists() else 0
     mb = downloadedBytes / 1024 / 1024
-    print(f"[seed] {category}: 로컬 {total}개, 신규 {len(missing)}개 / {mb:.1f}MB", flush=True)
-    return total, len(missing), mb
+    skipped = f", 404-skip {skipped404}개" if skipped404 else ""
+    print(f"[seed] {category}: 로컬 {total}개, 신규 {downloadedCount}개{skipped} / {mb:.1f}MB", flush=True)
+    return total, downloadedCount, mb
 
 
 def _remoteTreeFiles(api: Any, *, repo: str, dirPath: str, token: str | None) -> dict[str, int]:
