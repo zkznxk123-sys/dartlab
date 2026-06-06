@@ -3,9 +3,9 @@
 
 	const tabs = [
 		{
-			label: 'sections',
-			code: 'samsung.sections',
-			desc: '회사 지도 전체 — 329 개 토픽을 기간 축으로 수평화',
+			label: 'panel',
+			code: 'samsung.panel("businessOverview")',
+			desc: '공시 panel — 토픽과 블록을 기간 축으로 수평화',
 			headers: ['chapter', 'topic', 'blockType', '2024', '2023', '2022'],
 			rows: [
 				['I', 'companyOverview', 'text', '1969년 설립…', '1969년 설립…', '1969년 설립…'],
@@ -14,7 +14,7 @@
 				['III', 'riskManagement', 'text', '환율 위험 노출…', '환율 위험 노출…', '—'],
 				['V', 'auditOpinion', 'text', '적정', '적정', '적정']
 			],
-			footer: 'shape: (329, 106) — 토픽 329 × 기간 106'
+			footer: 'shape: (329, 106) — panel 토픽 329 × 기간 106'
 		},
 		{
 			label: 'show("BS")',
@@ -66,9 +66,9 @@
 			rows: [
 				['primarySource', 'finance'],
 				['reason', '숫자 재무제표는 finance 가 공식'],
-				['docsAvailable', 'true (sections 의 텍스트 버전)'],
+				['panelAvailable', 'true (공시 panel 텍스트 버전)'],
 				['reportAvailable', 'false (BS 는 report API 아님)'],
-				['fallback', 'docs.sections → 원본 텍스트 표']
+				['fallback', 'panel → 원본 텍스트 표']
 			],
 			footer: 'trace() 가 토픽의 소스 우선순위 체인을 드러낸다'
 		},

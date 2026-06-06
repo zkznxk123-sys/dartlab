@@ -494,7 +494,7 @@ def _collectFilingRows(
     """filing list 를 순회하면서 옛 rows (docs.parquet) + 신 panelTableRows (sections artifact) 동시 누적.
 
     plan delegated-prancing-tower PR-E2 — dual-write 강행. ``panelTableRows`` 가 None 이면
-    옛 path 단독 (back-compat). non-None 이면 buildpanelTableRowsFromFiling 호출해 신
+    옛 path 단독 (back-compat). non-None 이면 buildPanelTableRowsFromFiling 호출해 신
     sections artifact row 도 누적. raw HTML 은 ``html`` 변수에서 두 path 동시 활용.
     """
     for filing in filings:
@@ -544,7 +544,7 @@ def _collectFilingRows(
 
         # PR-E2 dual-write — sections artifact 신 path 동시 누적.
         if panelTableRows is not None and html is not None and items:
-            from dartlab.core.edgarBuild import buildpanelTableRowsFromFiling
+            from dartlab.core.edgarBuild import buildPanelTableRowsFromFiling
 
             sectionMeta = {
                 "ticker": ticker,
@@ -559,7 +559,7 @@ def _collectFilingRows(
                 "year": filing["year"],
             }
             try:
-                secRows = buildpanelTableRowsFromFiling(
+                secRows = buildPanelTableRowsFromFiling(
                     items=items,
                     rawHtml=html,
                     formType=filing["formType"],

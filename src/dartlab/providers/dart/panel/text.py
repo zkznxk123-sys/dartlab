@@ -174,30 +174,35 @@ def parsePanelXmlTables(content: str) -> list[list[list[str]]]:
         >>> parsePanelXmlTables("<TABLE><TR><TH>A</TH></TR><TR><TD>1</TD></TR></TABLE>")
         [[['A'], ['1']]]
     """
-    from lxml import etree
+    import xml.etree.ElementTree as ET
 
-    parser = etree.XMLParser(recover=True, resolve_entities=False)
     try:
-        root = etree.fromstring(f"<root>{content}</root>", parser=parser)
-    except (etree.XMLSyntaxError, ValueError):
-        return []
-    if root is None:
+        root = ET.fromstring(f"<root>{content}</root>")
+    except (ET.ParseError, ValueError):
         return []
     tables: list[list[list[str]]] = []
-    for tableEl in root.iter("TABLE"):
+    for tableEl in root.iter():
+        if _xmlTag(tableEl.tag) != "TABLE":
+            continue
         rows: list[list[str]] = []
-        for tr in tableEl.iter("TR"):
+        for tr in tableEl.iter():
+            if _xmlTag(tr.tag) != "TR":
+                continue
             cells: list[str] = []
             for cell in tr:
-                if not isinstance(cell.tag, str):
-                    continue
-                if cell.tag in _CELL_TAGS:
+                if _xmlTag(cell.tag) in _CELL_TAGS:
                     cells.append("".join(cell.itertext()).strip())
             if cells:
                 rows.append(cells)
         if len(rows) >= 2:
             tables.append(rows)
     return tables
+
+
+def _xmlTag(tag: object) -> str:
+    if not isinstance(tag, str):
+        return ""
+    return tag.rsplit("}", 1)[-1].upper()
 
 
 __all__ = [

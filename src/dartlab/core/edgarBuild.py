@@ -87,6 +87,14 @@ def buildSectionRowsFromFiling(*args: Any, **kwargs: Any) -> Any:
     return _call("docs.sections.sectionsBuilder", "buildSectionRowsFromFiling", *args, **kwargs)
 
 
+def buildPanelTableRowsFromFiling(*args: Any, **kwargs: Any) -> Any:
+    """filing → panel table rows build — providers/edgar 위임. Requires: providers.edgar. Raises: 없음. Example: >>> buildPanelTableRowsFromFiling(items=..., meta=...)  # doctest: +SKIP"""
+    return _call("docs.sections.sectionsBuilder", "buildSectionRowsFromFiling", *args, **kwargs)
+
+
+buildpanelTableRowsFromFiling = buildPanelTableRowsFromFiling
+
+
 def sections(*args: Any, **kwargs: Any) -> Any:
     """ticker → sections horizontal view(소비자 smoke-check) — providers/edgar 위임. Requires: providers.edgar. Raises: 없음. Example: >>> sections("AAPL")  # doctest: +SKIP"""
     return _call("docs.sections.pipeline", "sections", *args, **kwargs)

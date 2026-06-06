@@ -55,6 +55,7 @@ def buildEvidenceForensicsMemo(
     companyName: str = "",
     statements: Mapping[str, pl.DataFrame] | None = None,
     panelTextRows: Mapping[str, str] | None = None,
+    sectionTexts: Mapping[str, str] | None = None,
     events: Iterable[Mapping[str, Any]] | None = None,
     scanRows: Iterable[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
@@ -71,7 +72,8 @@ def buildEvidenceForensicsMemo(
         market: ``"KR"``/``"US"``.
         companyName: 한국어 회사명.
         statements: BS/IS/CF raw 테이블.
-        panelTextRows: 공시 sections 텍스트 dict.
+        panelTextRows: 공시 panel 텍스트 dict.
+        sectionTexts: 호환 별칭. 제공 시 ``panelTextRows`` 가 없을 때만 사용.
         events: 이벤트 list (자기주식 등).
         scanRows: scan 횡단면 raw rows.
 
@@ -137,7 +139,8 @@ def buildEvidenceForensicsMemo(
     trace_rows = _traceRows(statement_map)
     cash_rows = _revenueCashBridge(analysis_panel)
     wc_rows = _workingCapitalRows(analysis_panel)
-    note_rows = _noteSignalRows(panelTextRows or {})
+    text_rows = panelTextRows if panelTextRows is not None else sectionTexts
+    note_rows = _noteSignalRows(text_rows or {})
     event_rows = _eventRows(events or (), note_rows=note_rows, panel=analysis_panel)
     anomaly_rows = _anomalyRows(scanRows or ())
     falsifier_rows = _falsifierRows(cash_rows, wc_rows, note_rows, event_rows)

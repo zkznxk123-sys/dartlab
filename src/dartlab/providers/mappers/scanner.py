@@ -238,13 +238,13 @@ def scanAll(
     try:
         from dartlab.core.dataLoader import _dataDir
 
-        dataDir = _dataDir("docs")
+        dataDir = _dataDir("panel")
     except (ImportError, KeyError):
         log.warning("데이터 디렉토리 없음 — 스캔 불가")
         return {"scanned": 0, "newItems": 0, "updatedItems": 0, "totalItems": len(existingItems)}
 
     if not dataDir.exists():
-        log.warning("docs 디렉토리 없음: %s", dataDir)
+        log.warning("panel 디렉토리 없음: %s", dataDir)
         return {"scanned": 0, "newItems": 0, "updatedItems": 0, "totalItems": len(existingItems)}
 
     stockCodes = sorted(p.stem for p in dataDir.glob("*.parquet") if len(p.stem) == 6 and p.stem.isdigit())

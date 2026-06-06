@@ -10,8 +10,8 @@
 			color: 'border-dl-success/30',
 			items: [
 				'Company facade',
-				'DART sections / show / trace / diff',
-				'DART docs / finance / report',
+				'DART panel / show / trace / diff',
+				'DART panel / finance / report',
 				'search / listing',
 				'BS · IS · CF · ratios · timeseries'
 			]
@@ -42,9 +42,9 @@
 	];
 
 	const roadmap = [
-		{ quarter: '지금', label: 'v0.6', items: ['sections 텍스트 구조', 'EDGAR sections 100%', '네트워크 스캐너'] },
-		{ quarter: '다음', label: 'v0.7', items: ['profile.sections 머지 뷰', 'TopicView 구현', 'show() 완성'] },
-		{ quarter: '이후', label: 'v0.8+', items: ['EDINET 엔진', 'AI GUI 개선', 'Rust 파이프라인 (sections)'] }
+		{ quarter: '지금', label: 'v0.6', items: ['panel 텍스트 구조', 'EDGAR panel 정합성', '네트워크 스캐너'] },
+		{ quarter: '다음', label: 'v0.7', items: ['panel 머지 뷰', 'TopicView 구현', 'show() 완성'] },
+		{ quarter: '이후', label: 'v0.8+', items: ['EDINET 엔진', 'AI GUI 개선', 'Rust 파이프라인 (panel)'] }
 	];
 </script>
 

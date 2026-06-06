@@ -339,40 +339,49 @@ export async function loadLiveCompanyDocs(stockCode: string, limit = 8): Promise
 	try {
 		const db = await loadDartDb();
 		if (!db) return [];
-		await db.registerHfParquet('companyDocs', `dart/docs/${stockCode}.parquet`);
+		await db.registerHfParquet('companyPanel', `dart/panel/${stockCode}.parquet`);
 		const rows = await db.query<any>(`
 			SELECT
-				year,
-				report_type AS reportType,
-				section_title AS title,
-				rcept_no AS rceptNo,
-				SUBSTR(REGEXP_REPLACE(section_content, '\\s+', ' ', 'g'), 1, 360) AS excerpt
-			FROM companyDocs
-			WHERE stock_code = '${sqlEscape(stockCode)}'
-			  AND section_content IS NOT NULL
-			  AND LENGTH(section_content) > 80
+				"period",
+				COALESCE(NULLIF("sectionLeaf", ''), NULLIF("blockLeaf", ''), NULLIF("chapter", ''), 'panel 원문') AS title,
+				"rceptNo",
+				SUBSTR(
+					REGEXP_REPLACE(REGEXP_REPLACE("contentRaw", '<[^>]+>', ' ', 'g'), '\\s+', ' ', 'g'),
+					1,
+					360
+				) AS excerpt
+			FROM companyPanel
+			WHERE "contentRaw" IS NOT NULL
+			  AND LENGTH("contentRaw") > 80
 			  AND (
-				section_title LIKE '%사업%'
-				OR section_title LIKE '%제품%'
-				OR section_title LIKE '%매출%'
-				OR section_title LIKE '%위험%'
-				OR section_title LIKE '%재무%'
-				OR section_title LIKE '%주석%'
-				OR section_title LIKE '%감사%'
+				"sectionLeaf" LIKE '%사업%'
+				OR "sectionLeaf" LIKE '%제품%'
+				OR "sectionLeaf" LIKE '%매출%'
+				OR "sectionLeaf" LIKE '%위험%'
+				OR "sectionLeaf" LIKE '%재무%'
+				OR "sectionLeaf" LIKE '%주석%'
+				OR "sectionLeaf" LIKE '%감사%'
+				OR "blockLeaf" LIKE '%사업%'
+				OR "blockLeaf" LIKE '%제품%'
+				OR "blockLeaf" LIKE '%매출%'
+				OR "blockLeaf" LIKE '%위험%'
+				OR "blockLeaf" LIKE '%재무%'
+				OR "blockLeaf" LIKE '%주석%'
+				OR "blockLeaf" LIKE '%감사%'
 			  )
-			ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST, section_order ASC
+			ORDER BY "period" DESC NULLS LAST, "blockOrder" ASC
 			LIMIT ${Math.max(1, Math.min(20, limit))}
 		`);
 		return rows.map((row) => ({
-			title: row.title ?? '원문 섹션',
-			year: row.year ?? null,
-			reportType: row.reportType ?? null,
+			title: row.title ?? 'panel 원문',
+			year: periodYear(row.period),
+			reportType: periodReportType(row.period),
 			excerpt: row.excerpt ?? '',
 			rceptNo: row.rceptNo ?? null,
-			source: `dart/docs/${stockCode}.parquet`
+			source: `dart/panel/${stockCode}.parquet`
 		}));
 	} catch (err) {
-		console.warn(`[dartlab-browser] docs fallback: ${stockCode}`, err);
+		console.warn(`[dartlab-browser] panel excerpt fallback: ${stockCode}`, err);
 		return [];
 	}
 }
@@ -705,10 +714,24 @@ function sourceLabel(source: string | undefined | null): string {
 	if (!source) return '출처 대기';
 	if (source.includes('dart/finance')) return '재무제표';
 	if (source.includes('dashboards/finance') || source.includes('dashboards/quarters')) return '재무제표';
-	if (source.includes('dart/docs')) return '사업보고서 원문';
+	if (source.includes('dart/panel')) return '공시 panel 원문';
 	if (source.includes('report')) return '정기보고서';
 	if (source.includes('map') || source.includes('dashboard')) return '산업지도';
 	return '원본 데이터';
+}
+
+function periodYear(period: unknown): string | null {
+	const text = String(period ?? '').trim();
+	const match = text.match(/^(\d{4})/);
+	return match?.[1] ?? null;
+}
+
+function periodReportType(period: unknown): string | null {
+	const text = String(period ?? '').trim().toUpperCase();
+	if (text.endsWith('Q4')) return '사업보고서';
+	if (text.endsWith('Q2')) return '반기보고서';
+	if (text.endsWith('Q1') || text.endsWith('Q3')) return '분기보고서';
+	return text ? '정기보고서' : null;
 }
 
 function evidenceLabels(label: string, key: string): { docs: string[]; facts: string[] } {

@@ -5,7 +5,7 @@
 <section class="py-24 px-6 bg-dl-bg-darker/50">
 	<div class="mx-auto max-w-4xl">
 		<div class="text-center mb-16">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Sections</span>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Panel</span>
 			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">세로로 쌓인 공시를 하나의 수평 맵으로</h2>
 			<p class="text-dl-text-muted text-lg">진짜 제품은 파서 목록이 아니라 지도다.</p>
 		</div>
@@ -51,7 +51,7 @@
 
 				<div class="space-y-4 font-mono text-sm">
 					<div class="grid grid-cols-3 gap-3 text-center">
-						<div class="text-xs text-dl-text-dim">docs</div>
+						<div class="text-xs text-dl-text-dim">panel</div>
 						<div class="text-xs text-dl-text-dim">finance</div>
 						<div class="text-xs text-dl-text-dim">report</div>
 					</div>
@@ -112,7 +112,7 @@
 					</div>
 					<div class="pl-3 border-l border-dl-border/60 space-y-1 text-xs">
 						<div class="text-dl-text-dim">primarySource: <span class="text-dl-text">finance</span></div>
-						<div class="text-dl-text-dim">fallback: <span class="text-dl-text">docs.sections</span></div>
+						<div class="text-dl-text-dim">fallback: <span class="text-dl-text">panel</span></div>
 						<div class="text-dl-text-dim">block: <span class="text-dl-text">2024 Q4 · 손익계산서</span></div>
 					</div>
 				</div>
