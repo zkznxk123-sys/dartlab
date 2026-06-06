@@ -40,7 +40,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -51,7 +51,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -59,7 +59,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -95,7 +95,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -106,7 +106,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -114,7 +114,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -150,7 +150,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -161,7 +161,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -169,7 +169,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -207,7 +207,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -218,7 +218,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -226,7 +226,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -261,7 +261,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -272,7 +272,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -280,7 +280,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -310,7 +310,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -321,7 +321,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -329,7 +329,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -359,7 +359,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -370,7 +370,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -378,7 +378,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -413,7 +413,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -424,7 +424,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -432,7 +432,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:
@@ -467,7 +467,7 @@ class _DocsAccessor:
 
         SeeAlso:
             - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
 
         Requires:
             - dartlab
@@ -478,7 +478,7 @@ class _DocsAccessor:
               (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` / ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
@@ -486,7 +486,7 @@ class _DocsAccessor:
         LLM Specifications:
             AntiPatterns:
                 - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.panel()``.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.panel()``.
             OutputSchema:
                 - pl.DataFrame 또는 None.
             Prerequisites:

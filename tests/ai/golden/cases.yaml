@@ -403,7 +403,7 @@ cases:
       - PCAOB ICFR  # 한국 K-IFRS audit 을 US PCAOB 양식과 1:1 매핑 금지
     groundTruthFile: groundTruth/kd_005930_audit_opinion.md
 
-  - id: kd_005930_sections_memoryAsp
+  - id: kd_005930_panel_memoryAsp
     stockCode: '005930'
     market: KR
     industryHint: korean_disclosure_sections
@@ -418,7 +418,7 @@ cases:
       - docRef
       - tableRef
     requiredKeywords: [사업의 내용, 메모리, ASP]
-    groundTruthFile: groundTruth/kd_005930_sections_memoryAsp.md
+    groundTruthFile: groundTruth/kd_005930_panel_memoryAsp.md
 
   - id: kd_005930_flow_foreignNet
     stockCode: '005930'

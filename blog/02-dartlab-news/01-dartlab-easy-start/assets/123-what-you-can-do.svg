@@ -20,7 +20,7 @@
   <text x="60" y="170" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">사업보고서 전체를 topic × period 지도로 펼친다.</text>
   <text x="60" y="192" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">"사업의 내용"이 3년간 어떻게 바뀌었는지 한눈에.</text>
   <rect x="60" y="210" width="320" height="36" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-  <text x="72" y="233" fill="#e2e8f0" font-family="monospace" font-size="12">c.sections</text>
+  <text x="72" y="233" fill="#e2e8f0" font-family="monospace" font-size="12">c.panel()</text>
   <rect x="60" y="256" width="320" height="36" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
   <text x="72" y="279" fill="#e2e8f0" font-family="monospace" font-size="12">c.show("businessOverview")</text>
 

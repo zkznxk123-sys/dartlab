@@ -4,7 +4,7 @@ DART zip XML 의 TITLE 직속 본문 (P / SPAN / TABLE / TABLE-GROUP / COLGROUP 
 TD 등 *모든 태그 그대로*) raw XML chunk 를 사람이 읽을 mixed/plain text 로 변환한다.
 panel contentRaw 가 DART 공시 본문 SSOT 이다.
 
-본 모듈은 sections layer 의 첫 단계에서 호출되어:
+본 모듈은 내부 legacy parser 단계에서 호출되어:
 
 - ``stripTags=False`` (viewer): markdown/HTML mixed → 진짜 데이터 표 (BORDER="1") 는
   HTML ``<table rowspan colspan>`` 그대로 보존, paragraph framing / caption layout
@@ -278,7 +278,7 @@ def xmlChunkToMixed(rawXml: str) -> str:
         rawXml: TITLE 직속 raw XML chunks join 결과.
 
     Returns:
-        markdown/HTML mixed string — sections pipeline 의 ``_splitContentBlocks``
+        markdown/HTML mixed string — legacy parser pipeline 의 ``_splitContentBlocks``
         가 받을 양식.
 
     Raises:

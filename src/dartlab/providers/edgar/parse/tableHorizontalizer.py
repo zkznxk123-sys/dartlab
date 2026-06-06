@@ -107,7 +107,7 @@ def iterHorizontalSlice(facts: pl.DataFrame, conceptGroups: list[list[str]], *, 
 def parseHtmlTable(html: str, *, tableIndex: int = 0) -> pl.DataFrame | None:
     """raw iXBRL HTML 의 ``<table>`` 을 native 파싱 — rowspan/colspan expansion.
 
-    plan delegated-prancing-tower PR-E8. ``Company.sectionsRaw()`` 결과의 cell 안
+    plan delegated-prancing-tower PR-E8. EDGAR raw docs wide 결과의 cell 안
     ``<table>`` 을 BeautifulSoup 으로 직접 파싱. markdown 변환 (``_tableToMarkdown``)
     이 lossy 되던 ``rowspan/colspan/align`` 정보 native 인식.
 

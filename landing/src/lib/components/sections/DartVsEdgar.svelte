@@ -54,7 +54,7 @@ c.insights.grades()</code></pre>
 				<div class="p-4">
 					<div class="text-[10px] font-mono text-dl-accent uppercase tracking-wider mb-3">US (EDGAR)</div>
 					<pre class="font-mono text-xs text-dl-text-muted leading-relaxed"><code>c = Company(<span class="text-dl-accent">"AAPL"</span>)
-c.sections
+c.panel()
 c.show(<span class="text-dl-accent">"business"</span>)
 c.show("BS")
 c.show("ratios")

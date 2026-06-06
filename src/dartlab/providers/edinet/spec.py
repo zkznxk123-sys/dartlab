@@ -61,9 +61,8 @@ def buildSpec() -> dict:
             },
             "publicAPI": [
                 "Company(edinetCode) — EDINET Company 객체",
-                "Company.sections — sections 수평화",
-                "Company.show(topic) — topic별 데이터",
-                "Company.BS / IS / CF — 재무제표 바로가기",
+                "Company.panel(topic) — topic별 데이터",
+                "Company.show(topic) — panel 호환 alias",
                 "Company.index — 전체 topic 요약 보드",
             ],
         },

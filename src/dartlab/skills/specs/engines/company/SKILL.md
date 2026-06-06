@@ -185,7 +185,7 @@ Company 생성 시 target과 market/provider를 확정한다. 이후 `show/selec
 | search/listing/resolve/codeName/status | 기업 식별/목록 | `dartlab.Company.search("삼성전자")` |
 | filings/disclosure/liveFilings/readFiling | 공시 목록/본문 | `c.disclosure()` |
 | rawFinance/rawReport | raw parquet 접근 | `c.rawFinance()` |
-| sections/panel/select/trace/diff | 원자료 조회/추적/비교 | `c.panel("BS")` |
+| panel/select/trace/diff | 원자료 조회/추적/비교 | `c.panel("BS")` |
 | keywordTrend/news/watch | 텍스트/뉴스/감시 | `c.news()` |
 | story/validateStory/storyTree/narrativeDiff | 보고서/스토리 | `c.story()` |
 | analysis | 재무/가치/전망 분석 | `c.analysis("financial", "수익성")` |
@@ -600,7 +600,7 @@ with dartlab.Company("005930") as c:
     print(c.panel("ratios", scope="separate").roe)     # 5.19 (OFS)
 
 from dartlab.finance.summary import fsSummary
-result = fsSummary("data/docsData/005930.parquet")
+result = fsSummary("005930")
 print(f"{result.corpName}: {result.allRate:.1%}")  # 매칭률
 ```
 
@@ -652,9 +652,9 @@ print(f"{result.corpName}: {result.allRate:.1%}")  # 매칭률
 
 ## 엔진 역할
 
-`sections` 는 한 회사의 전체 지도다. 각 보고기간 공시 문서를 topic 별로 쪼개고 시간축으로 옆으로 늘어놓아 가로화 보드 하나로 만든다. 개별 사업보고서를 하나씩 열지 않고 모든 공시 섹션을 시계열로 한 번에 비교한다.
+`panel` 은 한 회사의 전체 공시 지도다. 각 보고기간 공시 문서를 topic 별로 쪼개고 시간축으로 옆으로 늘어놓아 가로화 보드 하나로 만든다. 개별 사업보고서를 하나씩 열지 않고 모든 공시 블록을 시계열로 한 번에 비교한다.
 
-한국 DART 사업보고서는 수십 개 섹션을 갖는다 — 제 I 장 (회사 개황) ~ 제 XII 장 (상세표). 각 보고서가 분기/연도별로 별도 파일이라서 같은 topic ("사업의 개요") 이 여러 기간에 흩어진다. `sections` 는 이 흩어진 원문을 **topic × 기간 매트릭스**로 재구성한다.
+한국 DART 사업보고서는 수십 개 장/하위 항목을 갖는다 — 제 I 장 (회사 개황) ~ 제 XII 장 (상세표). 각 보고서가 분기/연도별로 별도 파일이라서 같은 topic ("사업의 개요") 이 여러 기간에 흩어진다. `panel` 은 이 흩어진 원문을 **topic × 기간 매트릭스**로 재구성한다.
 
 ## 공개 호출 방식
 
@@ -689,7 +689,7 @@ df = df.filter(pl.col("topic") == "companyOverview")
 
 ## 호출 동작
 
-`Company.panel` 공개 facade 는 폐기됐다. 사용자는 `c.topics` 로 topic catalog 를 확인하고 `c.panel(topic)` 으로 진입한다. 내부 panelTextWide view 는 각 행이 한 topic 블록, 각 열이 한 기간인 검증/파이프라인용 구조다.
+옛 section 공개 facade 는 폐기됐다. 사용자는 `c.topics` 로 topic catalog 를 확인하고 `c.panel(topic)` 으로 진입한다. 내부 panelTextWide view 는 각 행이 한 topic 블록, 각 열이 한 기간인 검증/파이프라인용 구조다.
 
 `c.panel(topic)` 는 source priority 를 적용한다:
 

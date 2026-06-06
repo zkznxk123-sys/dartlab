@@ -55,7 +55,7 @@ L0: raw source
    ↓
 L1: parquet (정규화)
    data/dart/finance/*.parquet  (BS/IS/CF/CIS/SCE × snake_id)
-   data/dart/sections/*.parquet (section_content 본문)
+   data/dart/panel/{code}.parquet (contentRaw/content 본문; DART read SSOT)
    data/edgar/finance/*.parquet
    data/edgar/panel/{ticker}.parquet (보드 + native payload 단일 artifact)
    data/krx/prices/*.parquet

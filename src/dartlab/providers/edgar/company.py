@@ -551,7 +551,6 @@ class Company:
         c.panel("CIS")          # 연도별 포괄손익계산서
         c.panel("ratios")       # 재무비율 시계열
         c.panel("item1Business")  # docs topic
-        c.sections             # docs.sections 바로가기
         c.topics               # 전체 topic 목록
     """
 
@@ -1757,105 +1756,6 @@ class Company:
     # 사용자는 c.panel("IS") / c.panel("IS", freq="Y") 사용.
 
     # c.SCE property 제거 (Plan v10 P1) — c.panel("SCE") 사용
-
-    @property
-    def sections(self) -> pl.DataFrame | None:
-        """sections — docs + finance 통합 지도 (topic x period 수평화).
-
-        Capabilities:
-            - 10-K/10-Q/20-F 문서 항목 + 재무제표를 단일 DataFrame으로 통합
-            - topic별 blockType(text/table), 기간별 셀 구조
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 기업 전체 공시 구조 파악 컨텍스트
-
-        Guide:
-            - "전체 공시 지도를 보고 싶어" → c.sections
-            - "어떤 topic이 있는지 전체 구조를 보여줘" → c.sections
-
-        SeeAlso:
-            - topics: topic 목록 요약
-            - index: topic 메타데이터 보드
-            - show: 특정 topic 조회
-            - diff: 기간간 텍스트 변화 비교
-
-        Returns:
-            pl.DataFrame — topic | blockType | blockOrder | 2024 | 2023 | ... 또는 None.
-
-        Raises:
-            없음.
-
-        Example::
-
-            c = Company("AAPL")
-            c.sections  # Apple 전체 sections 지도
-
-        LLM Specifications:
-            AntiPatterns:
-                - 전체 DataFrame 그대로 LLM 컨텍스트 노출 → 토큰 폭증. topic 필터 후 또는 head 후 사용.
-                - 본 결과 없음 (None) 시 caller 가 10-K 본 회사 미존재 또는 fetch 실패 분기 의무.
-            OutputSchema:
-                - pl.DataFrame — 컬럼 [topic, blockType, blockOrder, period 별 셀] 또는 None.
-            Prerequisites:
-                - companyfacts + 10-K HTML 본문 (profileAccessor 가 합산).
-            Freshness:
-                - SEC 10-K/Q 갱신 시점 + profile cache.
-            Dataflow:
-                - 10-K HTML + companyfacts → profileAccessor.sections → 본 property.
-            TargetMarkets:
-                - US (SEC EDGAR) 10-K/10-Q/20-F.
-        """
-        return self._profileAccessor.sections
-
-    def sectionsRaw(self) -> pl.DataFrame | None:
-        """viewer / parser 전용 raw HTML wide DataFrame.
-
-        plan delegated-prancing-tower PR-E4 — ``content_raw`` 컬럼 (filing-level
-        sanitized iXBRL HTML, ALIGN/COLGROUP/rowspan/USERMARK 등 모든 태그 보존) pivot.
-
-        ``Company.sections`` 가 ``content_plain`` (markdown) 을 default cell 로 반환하는
-        반면 본 함수는 viewer 시각 fidelity 가 필요한 호출자 (``server/services/companyApi``
-        / ``providers/edgar/parse/tableHorizontalizer`` 등) 전용 raw HTML surface.
-        artifact 부재 시 ``Company.sections`` 와 동일 fallback path 거치고 None 반환.
-
-        Returns:
-            wide DataFrame (topic / blockType / blockOrder / textNodeType / textLevel /
-            textPath + period 컬럼들 — cell = raw HTML) 또는 None.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> raw = Company("AAPL").sectionsRaw()  # doctest: +SKIP
-
-        LLM Specifications:
-            AntiPatterns:
-                - 본 결과를 LLM 컨텍스트로 통째 노출 금지 — raw HTML 토큰 비용 큼.
-                  viewer / table parser 전용. 분석 path 는 ``Company.sections``.
-                - artifact (sectionsStorage) 부재 시 None 반환 — caller None 분기 의무.
-            OutputSchema:
-                - pl.DataFrame — meta + period 컬럼 (cell = HTML str) 또는 None.
-            Prerequisites:
-                - ``data/edgar/sections/{ticker}/{period}.parquet`` 의 ``content_raw`` 컬럼.
-                - PR-E2 dual-write 후 sectionsBuilder 가 emit. 옛 docs.parquet only 환경 시 None.
-            Freshness:
-                - sections artifact 갱신 시점 (``edgarSync.yml`` daily).
-            Dataflow:
-                - sectionsStorage.loadSectionsWide(valueColumn="content_raw") → 본 함수.
-            TargetMarkets:
-                - US (SEC EDGAR) — iXBRL HTML raw 보존 surface.
-        """
-        from dartlab.providers.edgar.docs.sections.sectionsStorage import (
-            hasSectionsArtifact,
-            loadSectionsWide,
-        )
-
-        if not hasSectionsArtifact(self.ticker):
-            return None
-        return loadSectionsWide(self.ticker, valueColumn="content_raw")
 
     def _buildRatios(self) -> pl.DataFrame | None:
         """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출."""

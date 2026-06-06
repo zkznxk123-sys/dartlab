@@ -37,7 +37,7 @@ def freshCompanyFacadeCache():
     `_preparedCache` 가 남아있으면 이전 호출 결과를 재사용해서
     "fresh install 첫 호출" 시나리오가 재현되지 않는다.
     """
-    # sections pipeline 농장 은퇴 — prepared cache 없음. no-op.
+    # panel pipeline prepared cache 은퇴 — no-op.
     yield
 
 

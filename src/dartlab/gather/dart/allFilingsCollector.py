@@ -579,7 +579,7 @@ _HF_DOWNLOAD_ATTEMPTED: set[str] = set()
 def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None) -> int:
     """allFilings parquet 을 HF dataset 에 업로드.
 
-    sectionsStorage / fieldIndexRebuild 의 push 패턴과 동일 — `huggingface_hub.HfApi`
+    panel sync / fieldIndexRebuild 의 push 패턴과 동일 — `huggingface_hub.HfApi`
     `upload_file` 로 일자별 `.parquet` 을 `{HF_REPO}:dart/allFilings/{period}.parquet`
     경로에 저장. 옛 파일 같은 경로면 자동 덮어쓰기 (HF Hub 의 commit-based 업로드).
 
@@ -642,7 +642,7 @@ def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None
 def _ensureFromHf(period: str | None = None) -> bool:
     """artifact 부재 시 HF dataset 에서 lazy 다운로드.
 
-    sectionsStorage `_ensureFromHf` 동일 패턴 — `huggingface_hub.snapshot_download`
+    panel sync `_ensureFromHf` 동일 패턴 — `huggingface_hub.snapshot_download`
     로 `{HF_REPO}:dart/allFilings/` 의 parquet 받음.
 
     Args:

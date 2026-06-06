@@ -10,7 +10,7 @@ Plan v10 정합성 위해 제공하지 않는다 — 모든 접근은 ``c.show()
 
     c = Company("E00001")           # EDINET 코드
     c.corpName                      # "トヨタ自動車株式会社"
-    c.sections                      # sections 수평화 DataFrame
+    c.panel("riskFactors")          # sections 기반 topic DataFrame
     c.show("riskFactors")           # 사업等のリスク
     c.show("BS")                    # 재무상태표 (XBRL 정규화)
 """
@@ -85,7 +85,7 @@ class _DocsNamespace:
     """docs namespace — pure docs source.
 
     내부 보조 namespace. 외부 사용자는 ``c._docs.X`` 직접 접근 대신
-    ``c.show(topic)`` 또는 ``c.sections`` (merged view) 사용.
+    ``c.show(topic)`` 또는 ``c.panel(topic)`` 사용.
     """
 
     def __init__(self, company: Company):
@@ -376,52 +376,6 @@ class Company:
         """
         return self._securitiesCode
 
-    # ── sections (merged view) ──
-
-    @property
-    def sections(self) -> pl.DataFrame:
-        """profile.sections — docs.sections 기반 merged view.
-
-        Capabilities:
-            - ``self.docs.sections`` 그대로 위임.
-
-        Returns:
-            pl.DataFrame — sections wide DataFrame.
-
-        Guide:
-            - "EDINET 회사 sections" → ``c.sections``.
-
-        SeeAlso:
-            - ``_DocsNamespace.sections`` — 본 함수의 source.
-
-        Requires:
-            - polars.
-
-        AIContext:
-            EDINET 작업 패스 영역. AI 가 직접 호출 X (placeholder).
-
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 (현 단계 빈) 를 분석 결과 부재로 단정 X — EDINET API 미연결 상태.
-            OutputSchema:
-                - sections wide DataFrame [topic, period, text, sourceLabel].
-            Prerequisites:
-                - docs.sections 가 채워져 있음.
-            Freshness:
-                - docs 수집 시점.
-            Dataflow:
-                - docs.sections → 본 함수.
-            TargetMarkets:
-                - JP (EDINET) 한정.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> sections(...)
-        """
-        return self.docs.sections
-
     # ── 공개 인터페이스 ──
 
     def _loadFinanceTimeseries(self) -> dict[str, pl.DataFrame]:
@@ -433,6 +387,39 @@ class Company:
         if self._financeTimeseries is None:
             self._financeTimeseries = {}
         return self._financeTimeseries
+
+    @property
+    def panel(self):
+        """EDINET panel facade — 현 단계 ``show`` 호환 callable.
+
+        공개 sections facade 는 폐기됐고, 사용자는 ``c.panel(topic)`` 으로
+        진입한다. EDINET 본 수집/패널 artifact 는 후속 단계라 현재는 ``show`` 경로를
+        같은 호출계약으로 감싼다.
+
+        Args:
+            없음 — 반환된 callable 에 topic 을 전달한다.
+
+        Returns:
+            CallableAccessor — ``c.panel(topic)`` 호출 표면.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("7203")
+            >>> panel = c.panel
+            >>> callable(panel)
+            True
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        return CallableAccessor(self._panelImpl, name="panel")
+
+    def _panelImpl(self, topic: str | None = None, **_kw: Any) -> pl.DataFrame | None:
+        """panel callable 본체 — topic 없으면 내부 docs wide, topic 있으면 show alias."""
+        if topic is None:
+            return self.docs.sections
+        return self.show(topic)
 
     def show(self, topic: str) -> pl.DataFrame | None:
         """topic별 데이터 표시.
@@ -484,7 +471,7 @@ class Company:
             return self._loadFinanceTimeseries().get(resolved)
 
         # docs topic
-        secs = self.sections
+        secs = self.docs.sections
         if secs.is_empty():
             return None
         filtered = secs.filter(pl.col("topic") == resolved)
@@ -535,7 +522,7 @@ class Company:
         Example:
             >>> index(...)
         """
-        secs = self.sections
+        secs = self.docs.sections
         if secs.is_empty():
             return pl.DataFrame(
                 schema={
@@ -733,7 +720,7 @@ class Company:
         Requires:
             - polars
         """
-        secs = self.sections
+        secs = self.docs.sections
         if secs.is_empty():
             return pl.DataFrame(schema={"topic": pl.Utf8})
         return secs.select("topic").unique().sort("topic")

@@ -39,17 +39,9 @@ jobs:
             artifact_path: |
               mutation-results.txt
               mutants/
-          - gate: sections-loss
-            timeout: 10
-          - gate: sections-memory
-            timeout: 15
-          - gate: sections-precision
-            timeout: 15
           - gate: benchmark-weekly
             timeout: 30
           - gate: eval-full
-            timeout: 30
-          - gate: sections-parity-bulk
             timeout: 30
     steps:
       - uses: actions/checkout@v5

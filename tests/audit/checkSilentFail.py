@@ -108,6 +108,10 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "providers/dart/panel/build/builder.py",
         # panel 비교 unit hint — 종목별 panel cache 부재면 scale 추정 없음이 정상.
         "providers/dart/panel/compare.py",
+        # search index builders — panel/content index 는 선택적 로컬/HF 산출물.
+        # 부재 = 아직 빌드/동기화 대상 0건, 검색 caller 가 "인덱스 없음" 메시지를 반환.
+        "providers/dart/search/fieldIndexRebuild.py",
+        "providers/dart/search/ngramIndex.py",
         "providers/edgar/docs/sections/sectionsStorage.py",
         # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
         "quant/risk/bottomUpBeta.py",

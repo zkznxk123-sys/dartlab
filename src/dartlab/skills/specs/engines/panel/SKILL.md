@@ -120,7 +120,7 @@ wide 로 수평화**하는 엔진이다. 양식(era)·회사마다 흔들리는 
 - **BUILD/READ import 격리** — build(`build/`, lxml/zipfile)는 무거운 zip→16col·spine 생산, read 표면
   (`panel.py`·`read.py`·`spine/`)은 build 를 import 안 함 → read 표면 lxml 0 (콜드 <1s, R2).
   KR 정규화는 native canonicalKey 단독(bridge lookup 농장 0) — US cross-market 정규화는 후속(별도
-  설계, `scan.sectionsNew` bridge 재사용).
+  설계, scan panel bridge 재사용).
 - **태그 무손실** — contentRaw = 원본 XML 그대로 저장. 기본 read 는 plain(태그 strip), `tag=True`
   면 원본 XML (collapse 단계 1회 strip, raw wide 2중 materialize 회피).
 

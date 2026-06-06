@@ -736,7 +736,7 @@ def showImpl(
     except (ImportError, AttributeError):
         pass
 
-    sec = company.sections
+    sec = company._docs.sections
     if sec is None:
         # silent None 대신 명시적 ValueError 로 안내
         raise ValueError(

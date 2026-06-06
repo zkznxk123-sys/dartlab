@@ -2,7 +2,7 @@
 # requires-python = ">=3.12"
 # dependencies = ["dartlab", "marimo"]
 # ///
-"""EDGAR 미국 상장기업 탐색 — sections 중심 흐름.
+"""EDGAR 미국 상장기업 탐색 — panel 중심 흐름.
 
 실행: marimo edit startMarimo/edgarCompany.py
 """
@@ -25,7 +25,7 @@ def _():
 @app.cell
 def _(c):
     # topic × period 수평화 DataFrame
-    c.sections
+    c.panel()
     return
 
 

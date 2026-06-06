@@ -150,7 +150,7 @@ def test_realdataShardsMatchNightlyMatrix():
 @pytest.mark.unit
 def test_totalGateCountFrozen():
     """30 게이트 동결 — 의도 없는 추가/삭제 방지. 변경 시 본 테스트 함께 수정."""
-    assert len(GATES) == 34, f"게이트 수 변경: {len(GATES)} (의도된 변경이면 본 테스트도 수정)"
+    assert len(GATES) == 30, f"게이트 수 변경: {len(GATES)} (의도된 변경이면 본 테스트도 수정)"
 
 
 @pytest.mark.unit
@@ -158,7 +158,7 @@ def test_tierDistributionFrozen():
     from collections import Counter
 
     c = Counter(g.tier for g in GATES.values())
-    assert dict(c) == {"fast": 17, "full": 6, "nightly": 11}, f"tier 분포 변경: {dict(c)}"
+    assert dict(c) == {"fast": 17, "full": 6, "nightly": 7}, f"tier 분포 변경: {dict(c)}"
 
 
 @pytest.mark.unit
@@ -166,7 +166,7 @@ def test_tierDistributionFrozen():
 def test_docsGatesBlockInSync(rel):
     """사람용 문서의 gates:auto 블록 == GATES 렌더 (드리프트 차단).
 
-    27↔34 류 "문서가 게이트 개수를 손으로 베껴 적어 어긋남" 회귀를 영구 차단.
+    게이트 개수를 손으로 베껴 적어 어긋나는 회귀를 영구 차단.
     out of sync 시: `uv run python -X utf8 tests/run.py docs --write`.
     """
     path = REPO_ROOT / rel

@@ -14,14 +14,14 @@ _log = logging.getLogger(__name__)
 def selectReport(df: pl.DataFrame, year: str, reportKind: str = "annual") -> pl.DataFrame | None:
     """해당 연도+기간 보고서 선택.
 
-    정정공시 정책 (silent drop 됨, sections layer 에선 추적 불가):
+    정정공시 정책 (silent drop 됨, panel read 계층에선 추적 불가):
 
     1. 원본 우선 — ``기재정정`` · ``첨부`` 가 아닌 report_type. 원본 0+ 건 시 *전부* 반환.
     2. 정정공시만 있으면 — ``rcept_date`` 최신 1 건의 report_type 과 동일한 type 행 반환.
        즉 같은 시점 정정공시들 (단일 type) 만 살아남고, 정정 전 버전·다른 type 정정은 drop.
 
-    sections layer 는 본 함수 호출 후 1 ~ N row DataFrame 을 받으므로, 정정 *전후* 본문
-    비교는 sections 안에선 불가능. 정정 전 row 가 본 함수에서 drop 되면 logger.info
+    panel read 계층은 본 함수 호출 후 1 ~ N row DataFrame 을 받으므로, 정정 *전후* 본문
+    비교는 panel 안에선 불가능. 정정 전 row 가 본 함수에서 drop 되면 logger.info
     한 줄 출력 (관찰 가능성).
 
     Args:

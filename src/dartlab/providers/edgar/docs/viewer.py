@@ -1,7 +1,7 @@
 """EDGAR viewer — plan delegated-prancing-tower PR-E5.
 
 DART viewer 의 ``_buildTextBlock`` / ``_buildTableBlock`` / ``viewerTextDocument`` /
-``serialize*`` 헬퍼를 그대로 재사용. EDGAR ``Company.sections`` 의 wide schema 가
+``serialize*`` 헬퍼를 그대로 재사용. EDGAR 내부 docs wide schema 가
 DART 와 동일 (``topic / blockType / blockOrder / textNodeType / textLevel / textPath +
 period 컬럼``) 이므로 block builder 가 source-agnostic.
 
@@ -45,13 +45,13 @@ __all__ = [
 
 
 def viewerBlocks(company, topic: str) -> list[ViewerBlock]:
-    """EDGAR Company.sections wide 위에서 topic 의 block 리스트 빌드.
+    """EDGAR 내부 docs wide 위에서 topic 의 block 리스트 빌드.
 
     DART 의 동치 함수의 축소판 — finance / report block path 제외. EDGAR sections
     artifact 의 text / table row 만 viewer 대상.
 
     Args:
-        company: EDGAR ``Company`` 인스턴스 (sections wide property 가짐).
+        company: EDGAR ``Company`` 인스턴스 (``_docs.sections`` 내부 wide accessor 보유).
         topic: 검색 topic (예 ``"10-K::item7Mdna"``).
 
     Returns:
@@ -63,7 +63,7 @@ def viewerBlocks(company, topic: str) -> list[ViewerBlock]:
     Example:
         >>> blocks = viewerBlocks(Company("AAPL"), "10-K::item7Mdna")  # doctest: +SKIP
     """
-    sec = company.sections
+    sec = company._docs.sections
     if sec is None or sec.is_empty():
         return []
     topicFrame = sec.filter(pl.col("topic") == topic)

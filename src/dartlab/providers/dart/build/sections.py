@@ -2,19 +2,19 @@
 
 원본 XML 의 ``<TITLE ATOC="Y" AASSOCNOTE="D-0-3-1-0">`` 명시 hierarchy 와
 ``<TABLE>`` rowspan/colspan + ``<SPAN USERMARK="F-14 B">`` 가/나/다 bold marker
-를 직접 사용 → sections layer 의 regex 추론을 builder 단에서 사전 해결.
+를 직접 사용 → legacy parser layer 의 regex 추론을 builder 단에서 사전 해결.
 
 기존 SECTION-1/SECTION-2 통째 본문 추출은 chapter 본문이 4MB 통째로 cell 에
-들어가 sections layer 가 regex 로 sub-section 분리 → 추론 오류 다발. 본 모듈의
+들어가 legacy parser layer 가 regex 로 sub-section 분리 → 추론 오류 다발. 본 모듈의
 ``parseSectionsByTitle`` 은 각 ``<TITLE>`` 별로
 row 를 분리하고 직속 본문만 attach — sub-section 별 cell value 가 작아짐 +
 hierarchy (AASSOCNOTE / ATOCID) 보존.
 
 회귀 보장:
 - ``section_title`` / ``section_content`` 컬럼 호환 — 기존 caller 영향 0.
-- 추가 컬럼 ``atocid`` / ``assocnote`` — sections layer 가 활용 가능 (optional).
-- 005930 검증: 1 rcept × 57 sub-doc → 144 TITLE-level rows, sectionsParity 0
-  violations, sectionsRawCompare spurious 6 → 0.
+- 추가 컬럼 ``atocid`` / ``assocnote`` — legacy parser layer 가 활용 가능 (optional).
+- 005930 검증: 1 rcept × 57 sub-doc → 144 TITLE-level rows, panel parity
+  regression 0.
 
 호출:
     >>> from dartlab.providers.dart.build.sections import parseSectionsByTitle
@@ -144,7 +144,7 @@ def _tableToMarkdown(table) -> str:
 
 # Phase B-5: DART XML 의 `<P>` word-wrap 분할 결함 복원. 한 시각적 line 의 단어들이
 # 다수 `<P>` 로 부서져 있는 패턴 (예: <P>사업부문별</P><P>현황</P>) 을 같은 line 으로
-# 합침. 회귀 사례: "사업부문별" / "현황" 두 P 가 sections layer 의 textPath build 에서
+# 합침. 회귀 사례: "사업부문별" / "현황" 두 P 가 legacy parser layer 의 textPath build 에서
 # "사업부문별 > " (현황 잘림) 으로 잘려나가던 것을 "사업부문별현황" 한 단위로 복원.
 _SENTENCE_END_SUFFIX = ("다.", "요.", "니다.", ".", "?", "!", ")", "]", ":", ";", "다", "요")
 _P_MERGE_MAX_LEN = 20
@@ -240,7 +240,7 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
     def _flush() -> None:
         nonlocal currentTitle, bodyParts, order
         if currentTitle is not None:
-            # raw XML chunks join — sections layer (xmlAdapter) 가 markdown/HTML
+            # raw XML chunks join — legacy parser layer (xmlAdapter) 가 markdown/HTML
             # mixed 또는 plain text 로 stripTags 파라미터로 변환.
             currentTitle["content"] = "\n".join(p for p in bodyParts if p).strip()
             currentTitle["order"] = order

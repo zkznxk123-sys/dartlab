@@ -1,10 +1,10 @@
-"""EDGAR pipeline.sections() 신우선/구fallback + Company.sectionsRaw() 가드 — PR-E4.
+"""EDGAR pipeline.sections() 신우선/구fallback + raw wide loader 가드 — PR-E4.
 
 본 PR-E4 단독 검증:
 - ``pipeline.sections()`` 가 sectionsStorage artifact 있을 때 mmap path 우선
 - artifact 부재 시 ``_legacySectionsBuild`` 자동 fallback (호출 검증)
 - ``DARTLAB_EDGAR_LEGACY=1`` 환경변수 강제 fallback
-- ``Company.sectionsRaw()`` 가 artifact 부재 시 None
+- ``loadSectionsWide(valueColumn="content_raw")`` 가 raw HTML pivot wide 반환
 """
 
 from __future__ import annotations
@@ -91,36 +91,29 @@ def test_sections_force_legacy_env() -> None:
         removeSectionsArtifact(_FIXTURE_TICKER)
 
 
-def test_sections_raw_method_returns_none_when_absent() -> None:
-    """Company.sectionsRaw() — artifact 부재 ticker 는 None."""
+def test_sections_raw_public_facade_removed() -> None:
+    """공개 raw sections facade 는 폐기 — raw wide 는 storage helper 내부 경로."""
     from dartlab.providers.edgar.company import Company
+    from dartlab.providers.edgar.docs.sections.sectionsStorage import hasSectionsArtifact, loadSectionsWide
 
-    # Company 인스턴스화 — 가짜 ticker 자체는 _resolveTickerRow 실패하면 ValueError.
-    # 대신 인스턴스 직접 fabricate 후 sectionsRaw 만 검증.
-    inst = Company.__new__(Company)
-    inst.ticker = _FIXTURE_TICKER
-    inst.cik = "0000000000"
-    inst.corpName = "Fixture"
     removeSectionsArtifact(_FIXTURE_TICKER)
     os.environ["DARTLAB_NO_HF_DOWNLOAD"] = "1"
     try:
-        assert inst.sectionsRaw() is None
+        assert not hasattr(Company, "sectionsRaw")
+        assert hasSectionsArtifact(_FIXTURE_TICKER) is False
+        assert loadSectionsWide(_FIXTURE_TICKER, valueColumn="content_raw") is None
     finally:
         os.environ.pop("DARTLAB_NO_HF_DOWNLOAD", None)
 
 
-def test_sections_raw_returns_wide_with_content_raw() -> None:
-    """artifact 있을 때 sectionsRaw() 는 raw HTML pivot wide 반환."""
-    from dartlab.providers.edgar.company import Company
+def test_sections_raw_loader_returns_wide_with_content_raw() -> None:
+    """artifact 있을 때 storage loader 는 raw HTML pivot wide 반환."""
+    from dartlab.providers.edgar.docs.sections.sectionsStorage import loadSectionsWide
 
     removeSectionsArtifact(_FIXTURE_TICKER)
     _seedArtifact(_FIXTURE_TICKER)
     try:
-        inst = Company.__new__(Company)
-        inst.ticker = _FIXTURE_TICKER
-        inst.cik = "0000000000"
-        inst.corpName = "Fixture"
-        raw = inst.sectionsRaw()
+        raw = loadSectionsWide(_FIXTURE_TICKER, valueColumn="content_raw")
         assert raw is not None
         # period 컬럼 1 개 이상 (2024Q4 또는 그 양식).
         periodCols = [c for c in raw.columns if len(c) >= 4 and c[:4].isdigit()]

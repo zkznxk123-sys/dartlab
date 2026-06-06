@@ -57,6 +57,13 @@ def buildNoteTaxonomy(
 
     Returns:
         ``{"scope|정규화제목": "NT_D######"}`` (정렬). 모호·희소 제목 미포함.
+
+    Raises:
+        No explicit exceptions; unreadable parquet files are skipped.
+
+    Example:
+        >>> isinstance(buildNoteTaxonomy(panelBaseDir="missing"), dict)
+        True
     """
     base = Path(panelBaseDir) if panelBaseDir else Path(_cfg.dataDir) / "dart" / "panel"
     files = sorted(base.glob("*.parquet"))  # flat: {code}.parquet (회사당 1파일, 전 period)
@@ -96,7 +103,21 @@ def _q(s: str) -> str:
 
 
 def renderModule(taxonomy: dict[str, str]) -> str:
-    """택소노미 dict → ``noteTaxonomyData.py`` 소스 문자열 (NOTE_TAXONOMY literal)."""
+    """택소노미 dict → ``noteTaxonomyData.py`` 소스 문자열 (NOTE_TAXONOMY literal).
+
+    Args:
+        taxonomy: ``{"scope|title": "NT_D..."}`` mapping.
+
+    Returns:
+        Python module source with a ``NOTE_TAXONOMY`` literal.
+
+    Raises:
+        No explicit exceptions.
+
+    Example:
+        >>> "NOTE_TAXONOMY" in renderModule({})
+        True
+    """
     header = (
         '"""note 택소노미 SSOT — 정규화 (scope, 항목제목) → 정부 표준 NT_ 코드 (생성물).\n\n'
         "DART XBRL 주석 코드는 정부 표준이라 회사 무관(재고자산 연결=NT_D826380·별도=NT_D826385).\n"
@@ -133,6 +154,13 @@ def buildAndWrite(*, outModulePath: Path | str | None = None, verbose: bool = Tr
 
     Returns:
         ``{"entries": 항목수}``.
+
+    Raises:
+        OSError: output path cannot be written.
+
+    Example:
+        >>> callable(buildAndWrite)
+        True
     """
     taxonomy = buildNoteTaxonomy(**kw)
     outPath = Path(outModulePath) if outModulePath else _DEFAULT_MODULE

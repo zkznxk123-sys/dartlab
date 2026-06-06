@@ -123,25 +123,66 @@ _REQUIRED_REPORT_FILES: tuple[str, ...] = (
 )
 
 
-def _isScanComplete(scanDir: Path) -> bool:
-    """scan 프리빌드 루트 + report/ 필수 파일 모두 존재 확인.
+def _isScanRootComplete(scanDir: Path) -> bool:
+    """scan 프리빌드 루트 필수 파일 존재 확인."""
 
-    root 3 개 (_REQUIRED_SCAN_ROOT_FILES) + report 15 개 (_REQUIRED_REPORT_FILES) 모두
-    있어야 True. 둘 중 하나 누락 시 _ensureScanData() 가 재다운로드 강제.
-    """
-    if not all((scanDir / name).exists() for name in _REQUIRED_SCAN_ROOT_FILES):
-        return False
+    return all((scanDir / name).exists() for name in _REQUIRED_SCAN_ROOT_FILES)
+
+
+def _isScanReportComplete(scanDir: Path) -> bool:
+    """scan/report 필수 prebuild 파일 존재 확인."""
+
     reportDir = scanDir / "report"
     if not reportDir.is_dir():
         return False
     return all((reportDir / name).exists() for name in _REQUIRED_REPORT_FILES)
 
 
-def _ensureScanData() -> Path:
+def _missingScanFiles(scanDir: Path, *, requireReports: bool) -> list[str]:
+    """현재 scanDir 기준으로 부족한 prebuild 상대 경로를 반환한다."""
+
+    missing = [name for name in _REQUIRED_SCAN_ROOT_FILES if not (scanDir / name).exists()]
+    if requireReports:
+        reportDir = scanDir / "report"
+        missing.extend(f"report/{name}" for name in _REQUIRED_REPORT_FILES if not (reportDir / name).exists())
+    return missing
+
+
+def _downloadScanFile(scanDir: Path, relativePath: str) -> None:
+    """HF `scan` 카테고리의 단일 prebuild 파일을 원자적으로 다운로드한다."""
+
+    from dartlab.core.dataConfig import hfBaseUrl
+    from dartlab.core.dataLoader import _downloadWithRetry
+
+    rel = relativePath.replace("\\", "/")
+    dest = scanDir / Path(rel)
+    tmp = dest.with_name(f"{dest.name}.tmp")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if tmp.exists():
+        tmp.unlink()
+    _downloadWithRetry(f"{hfBaseUrl('scan')}/{rel}", tmp)
+    if not tmp.exists() or tmp.stat().st_size <= 0:
+        if tmp.exists():
+            tmp.unlink()
+        raise RuntimeError(f"empty scan prebuild download: {rel}")
+    tmp.replace(dest)
+
+
+def _isScanComplete(scanDir: Path) -> bool:
+    """scan 프리빌드 루트 + report/ 필수 파일 모두 존재 확인.
+
+    root 3 개 (_REQUIRED_SCAN_ROOT_FILES) + report 15 개 (_REQUIRED_REPORT_FILES) 모두
+    있어야 True. 둘 중 하나 누락 시 _ensureScanData() 가 재다운로드 강제.
+    """
+    return _isScanRootComplete(scanDir) and _isScanReportComplete(scanDir)
+
+
+def _ensureScanData(*, requireReports: bool = False) -> Path:
     """scan 프리빌드 디렉토리 확인.
 
     일반 환경: 루트 필수 파일(finance/changes/sharesOutstanding) 이 모두 존재하고
-    있으면 즉시 반환. 하나라도 없으면 fallback 호출자가 종목별 데이터를 사용한다.
+    있으면 즉시 반환. 하나라도 없으면 HF scan 카테고리에서 자동 다운로드한다.
+    report axis 호출자는 requireReports=True 로 report prebuild 까지 보장한다.
 
     Pyodide(브라우저): 경량본 `finance-lite.parquet` 1 개만 요구한다.
 
@@ -156,7 +197,7 @@ def _ensureScanData() -> Path:
     scanDir = Path(_dataDir("scan"))
 
     global _scanDownloaded
-    if _scanDownloaded:
+    if _scanDownloaded and (not requireReports or _isScanReportComplete(scanDir)):
         return scanDir
 
     # Pyodide: finance-lite.parquet 단일 파일만 체크 (전체 프리빌드는 용량상 불가)
@@ -168,12 +209,28 @@ def _ensureScanData() -> Path:
         emit("scan:prebuild_missing")
         return scanDir
 
-    if _isScanComplete(scanDir):
+    if not _missingScanFiles(scanDir, requireReports=requireReports):
         _scanDownloaded = True
         return scanDir
 
     # 루트 필수 파일 누락 (신규 사용자 또는 과거 버그로 불완전 캐시)
     emit("scan:prebuild_missing")
+    missing = _missingScanFiles(scanDir, requireReports=requireReports)
+    try:
+        for rel in missing:
+            _downloadScanFile(scanDir, rel)
+    except (OSError, RuntimeError, ValueError) as e:
+        emit("scan:prebuild_failed", error=str(e))
+        return scanDir
+
+    missingAfter = _missingScanFiles(scanDir, requireReports=requireReports)
+    if missingAfter:
+        emit("scan:prebuild_incomplete", missing=", ".join(missingAfter[:8]))
+        return scanDir
+
+    _scanDownloaded = True
+    fileCount = len(_REQUIRED_SCAN_ROOT_FILES) + (len(_REQUIRED_REPORT_FILES) if requireReports else 0)
+    emit("scan:prebuild_ready", fileCount=fileCount)
 
     return scanDir
 
@@ -241,7 +298,7 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
         - :data:`SCAN_API_TYPES` — 처리 apiType 12 종 list
     """
     # 1순위: 프리빌드 scan parquet (없으면 자동 다운로드 시도)
-    scanDir = _ensureScanData()
+    scanDir = _ensureScanData(requireReports=True)
     scan_path = scanDir / "report" / f"{apiType}.parquet"
     if scan_path.exists():
         try:

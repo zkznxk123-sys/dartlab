@@ -1,5 +1,5 @@
 ---
-caseId: kd_005930_sections_memoryAsp
+caseId: kd_005930_panel_memoryAsp
 stockCode: '005930'
 disclosure: 사업보고서 II 항
 target: 005930 (삼성전자)
@@ -16,7 +16,7 @@ goldenSubSkill: engines.panel
 ## 기대 답변 골격
 
 - period × topic narrative grid — 분기별 ASP 추세.
-- 005930 sectionsStorage 실측: 40 분기 · 60 distinct topics · 3,100 page-equiv.
+- 005930 panelTextWide 실측: 40 분기 · 60 distinct topics · 3,100 page-equiv.
 - period 미명시 호출 시 LazyFrame .collect() 직전 gc.collect() 강제 (Polars OOM 가드).
 - DART 사업보고서 rceptNo + section paragraph 인용.
 

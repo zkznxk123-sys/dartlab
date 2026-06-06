@@ -2,7 +2,7 @@
 
 본 PR-E5 단독 검증:
 - ``providers/edgar/docs/viewer`` 의 4 함수 import + re-export
-- ``viewerBlocks(company, topic)`` 가 EDGAR sections wide 위에서 text/table block 생성
+- ``viewerBlocks(company, topic)`` 가 EDGAR 내부 docs wide 위에서 text/table block 생성
 - finance topic / report topic 은 미지원 (빈 list)
 - companyApi.py 의 provider 분기 (market=='US' → EDGAR viewer) 정적 grep
 - DART viewer 와 schema 동일성 (ViewerBlock 클래스 동일)
@@ -34,12 +34,12 @@ _FIXTURE_TICKER = "TEST_VIEWER_FIXTURE"
 class _StubCompany:
     """fixture Company — viewerBlocks 가 호출하는 surface 만 emulate.
 
-    실제 EDGAR Company 는 _profileAccessor.sections → merge 거치는데, 본 unit 의
-    범위는 viewerBlocks 의 sections wide → block list 변환만. stub 으로 격리.
+    실제 EDGAR Company 는 _docs.sections 내부 accessor 를 쓰는데, 본 unit 의
+    범위는 viewerBlocks 의 docs wide → block list 변환만. stub 으로 격리.
     """
 
     def __init__(self, sectionsWide):
-        self.sections = sectionsWide
+        self._docs = type("_Docs", (), {"sections": sectionsWide})()
         self.stockCode = _FIXTURE_TICKER
         self.ticker = _FIXTURE_TICKER
         self.market = "US"

@@ -127,6 +127,14 @@ def dechunkNotes(df: pl.DataFrame) -> pl.DataFrame:
     Returns:
         동일 schema DataFrame — 노트 블록이 [preamble 행(재무제표 본표 등) + 제목별 행(blockLeaf=제목,
         disclosureKey=null)]으로 분할. 노트 블록 없으면 입력 그대로. preamble + Σ제목행 = 원 블록(byte-exact 무손실).
+
+    Raises:
+        Polars expression errors propagate when required columns have incompatible types.
+
+    Example:
+        >>> import polars as pl
+        >>> dechunkNotes(pl.DataFrame()).is_empty()
+        True
     """
     if df.is_empty() or "contentRaw" not in df.columns or "sectionLeaf" not in df.columns:
         return df

@@ -64,7 +64,7 @@ CI Fast 17 게이트 + CI Full 28 jobs + Deploy Site 정합 회복. PyPI 0.10.1 
 - `.github/workflows/ci-full.yml` test-full 3.12/3.13 timeout 30/25m 명시 (3.12 coverage 21 분, default 20 분 초과 cancel).
 - `src/dartlab/skills/specs/recipes/technical/rsiBollingerCluster.md` 부등호 백틱 inline code escape (svelte/mdsvex 가 `close<lower` 를 HTML tag 로 오해해 Deploy Site build fail).
 - `landing/src/lib/skills/catalog.ts` `allSkillById` 분리 + `skills` 배열 `componentsById.has` 필터 + `hasSkillPage` helper — `index.json` 등록 ↔ spec md 미작성 134 개 mismatch broken link 차단.
-- hard-coded `/skills/` 미존재 참조 7 종 부모 skill/평문화 — `engines.company.sections` redirectMap, SKILL.md 내 `engines.company.{disclosureEvent,usEdgarReview}` · `engines.credit.creditRisk` · `engines.analysis.revenueForecast` · `engines.quant.damodaranValuation`.
+- hard-coded `/skills/` 미존재 참조 7 종 부모 skill/평문화 — legacy company section redirectMap, SKILL.md 내 `engines.company.{disclosureEvent,usEdgarReview}` · `engines.credit.creditRisk` · `engines.analysis.revenueForecast` · `engines.quant.damodaranValuation`.
 - in-page anchor (`](#…)`) 4 평문화 — `engines.analysis` SKILL.md 2 종 + `engines.credit` SKILL.md + `operation/sectionsRefactor.md` (mdsvex rehype-slug 자동 id mismatch 차단).
 - `landing/src/routes/skills/market/[id]/+page.svelte` `mappedBuiltinSkills` chip `hasSkillPage` 분기 + `.muted-chip` fallback (`marketIndex.json` `engines.analysis.growth` 등 미작성 ref prerender 차단).
 - `src/dartlab/providers/dart/builder/docsIndexBuilder.py` `latestAnnualRows or []` + `applyProjections(periodRows.pop(…, []))` — Polars DataFrame bool 평가 TypeError → `.to_dicts()` 명시 변환.
@@ -623,7 +623,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 
 ### Fixed
 
-- **`Company.sections` 접근 안정화**: `_SectionsSource.raw` 가 None 일 때 `.columns` 속성 접근으로 이어지지 않도록 명시적 가드 추가. 데이터가 비어있는 경우 None 을 그대로 반환.
+- **legacy sections 접근 안정화**: `_SectionsSource.raw` 가 None 일 때 `.columns` 속성 접근으로 이어지지 않도록 명시적 가드 추가. 데이터가 비어있는 경우 None 을 그대로 반환.
 - **`c.select(...).render("html")` 기간 컬럼 표시**: HTML 렌더의 Console width 를 고정값(120) 대신 컬럼 수에 비례해 동적으로 계산. 기간 컬럼이 많은 재무제표에서도 모든 컬럼이 표시됨.
 - **`c.facts` 속성 참조 수정**: `_profile_accessor` 에서 내부 `_report` 대신 존재하지 않는 `report` 를 참조하던 부분 교정.
 
@@ -960,7 +960,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 
 ### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)
 
-**API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.story() / c.analysis() / c.credit()` 만으로 단일화.
+**API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / legacy sections view / c.diff() / c.filings() / c.facts / c.story() / c.analysis() / c.credit()` 만으로 단일화.
 
 **P0 — finance property 4종 제거**:
 - `c.IS / c.BS / c.CF / c.CIS` (DART + EDGAR) → `c.show("IS")` / `c.show("BS")` / `c.show("CF")` / `c.show("CIS")`
@@ -975,7 +975,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 - `c.docs / c.finance / c.report / c.profile` (DART + EDGAR) public 접근 0
 - 사용자 surface 에서 namespace 4종 완전 제거
 - `c.facts` 신설 (이전 `c.profile.facts`)
-- `c.sections / c.diff() / c.trace() / c.filings()` 는 top-level 유지 (sections 사상 핵심)
+- legacy sections view / `c.diff()` / `c.trace()` / `c.filings()` 는 top-level 유지 (sections 사상 핵심)
 - 내부 compute (review/credit/valuation/analysis) 는 `c._docs / _finance / _report` private 백엔드 사용 — 데이터 형식 차이 (RatioResult 객체 vs DataFrame) 로 show() 흡수 불가
 
 **P4 — Plan vN 마커 정리**: Plan v3~v9 / R26 마커 38곳 수동 정리.
@@ -1004,7 +1004,7 @@ c.ratioSeries                     c.show("ratioSeries")
 c.SCE / c.sceMatrix               c.show("SCE") / c.show("sceMatrix")
 c.notes.inventory                 c.show("inventory")
 c.notes.borrowings                c.show("borrowings")
-c.docs.sections                   c.sections
+c.docs legacy view                current panel view
 c.docs.diff()                     c.diff()
 c.docs.filings()                  c.filings()
 c.finance.ratios                  c.show("ratios")
@@ -1012,7 +1012,7 @@ c.report.dividend                 c.show("dividend")
 c.report.majorHolder              c.show("majorHolder")
 c.profile.facts                   c.facts
 c.profile.trace(topic)            c.trace(topic)
-c.profile.sections                c.sections
+c.profile legacy view             current panel view
 df["계정명"]                       df["항목"]
 ```
 
@@ -1959,7 +1959,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 ### Changed
 
 **docs/sections production 마감**
-- `Company.sections` 가 raw markdown를 보존한 canonical wide view로 동작하면서 appendix/detail row는 기본 core view에서 숨김
+- legacy sections view가 raw markdown를 보존한 canonical wide view로 동작하면서 appendix/detail row는 기본 core view에서 숨김
 - `Company.retrievalBlocks`, `Company.contextSlices` 가 `sourceTopic`, `cellKey`, `semanticTopic`, `detailTopic` 을 함께 반환해 원문 block을 역추적 가능하게 정리
 - appendix/detail 명세서(`재고자산명세서`, `감가상각비등명세서`, `제조원가명세서`, `법인세등명세서`, 감사 보수 등)를 detail semantic layer로 분리
 - broad raw residual 일부를 exact mapping으로 흡수해 package 기본 수평화 품질을 마감
@@ -2012,7 +2012,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 ### Added
 
 **docs/sections 학습형 수평화 runtime**
-- `Company.sections`가 learned section rules 기반으로 coarse report를 fine topic 축에 즉시 backfill
+- legacy sections view가 learned section rules 기반으로 coarse report를 fine topic 축에 즉시 backfill
 - `projectionRules.chapterII.json` 패키지 포함
 - `sectionProfileTable.parquet` 패키지 포함 + runtime artifact loader 추가
 

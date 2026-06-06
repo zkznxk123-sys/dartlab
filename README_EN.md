@@ -62,7 +62,7 @@ import dartlab
 
 c = dartlab.Company("005930")       # Samsung Electronics
 
-c.sections                          # every topic, every period, side by side
+c.panel()                           # every topic, every period, side by side
 # shape: (41, 12) — 41 topics across 12 periods
 #                     2025Q4  2024Q4  2024Q3  2023Q4  ...
 # companyOverview       v       v       v       v
@@ -72,7 +72,7 @@ c.sections                          # every topic, every period, side by side
 
 > Text and numbers on a single timeline — the core of cross-period comparability
 >
-> <img src=".github/assets/sections-example.webp" alt="c.sections output — Samsung Electronics, 41 topics × 12 periods" width="720">
+> <img src=".github/assets/sections-example.webp" alt="DartLab panel output — Samsung Electronics, 41 topics × 12 periods" width="720">
 
 ```python
 
@@ -452,7 +452,7 @@ Same interface, different data source. Auto-fetched from SEC API — no pre-down
 ```python
 # Korea (DART)                          # US (EDGAR)
 c = dartlab.Company("005930")           c = dartlab.Company("AAPL")
-c.sections                              c.sections
+c.panel()                               c.panel()
 c.show("businessOverview")              c.show("business")
 c.show("BS")                            c.show("BS")
 c.show("ratios")                        c.show("ratios")

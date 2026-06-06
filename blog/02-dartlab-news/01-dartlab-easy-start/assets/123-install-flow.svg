@@ -108,7 +108,7 @@
   <text x="852" y="304" fill="#e2e8f0" font-family="monospace" font-size="12">c = dartlab.Company(</text>
   <text x="852" y="322" fill="#4ade80" font-family="monospace" font-size="12">    "005930"</text>
   <text x="852" y="340" fill="#e2e8f0" font-family="monospace" font-size="12">)</text>
-  <text x="852" y="366" fill="#fbbf24" font-family="monospace" font-size="12">print(c.sections)</text>
+  <text x="852" y="366" fill="#fbbf24" font-family="monospace" font-size="12">print(c.panel())</text>
   <text x="852" y="388" fill="#fbbf24" font-family="monospace" font-size="12">print(c.show("IS"))</text>
 
   <!-- Run -->

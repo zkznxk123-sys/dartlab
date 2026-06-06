@@ -287,7 +287,7 @@ def stripSectionPrefix(title: str) -> str:
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - 본 모듈 직접 호출 X — legacy parser pipeline 내부.
             - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
             - str / list / dict — 함수별.
@@ -341,7 +341,7 @@ def normalizeSectionTitle(title: str) -> str:
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - 본 모듈 직접 호출 X — legacy parser pipeline 내부.
             - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
             - str / list / dict — 함수별.
@@ -404,7 +404,7 @@ def loadSectionMappings() -> dict[str, str]:
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - 본 모듈 직접 호출 X — legacy parser pipeline 내부.
             - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
             - str / list / dict — 함수별.
@@ -468,7 +468,7 @@ def mapSectionTitle(title: str) -> str:
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - 본 모듈 직접 호출 X — legacy parser pipeline 내부.
             - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
             - str / list / dict — 함수별.
@@ -545,7 +545,7 @@ def measureMappingRate(titles: list[str]) -> dict:
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - 본 모듈 직접 호출 X — legacy parser pipeline 내부.
             - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
             - str / list / dict — 함수별.

@@ -1,7 +1,7 @@
 """EDGAR sections artifact SSOT read — period-sharded parquet.
 
 본 모듈은 plan ``delegated-prancing-tower`` 의 PR-E1 산출물이다. EDGAR
-``Company.sections`` / ``Company.sectionsRaw`` / D.1 분석의 단일 read 진입점.
+EDGAR 내부 docs wide / D.1 분석의 전환기 read 진입점.
 빌더 (PR-E2) 가 emit 하는 ``data/edgar/sections/{ticker}/{period}.parquet`` 를
 mmap + columnar projection + lazy pivot 으로 read.
 
@@ -311,7 +311,7 @@ _MINIMAL_META: tuple[str, ...] = (
 )
 
 
-def loadpanelTextWide(
+def loadSectionsWide(
     ticker: str,
     *,
     periods: list[str] | None = None,
@@ -320,8 +320,8 @@ def loadpanelTextWide(
     """sections artifact wide format read — long → pivot(period).
 
     ``valueColumn`` 으로 cell 값 종류 선택:
-    - ``"content_plain"`` (default) — markdown, ``Company.sections`` / 분석 / show
-    - ``"content_raw"`` — iXBRL HTML, ``Company.sectionsRaw()`` / viewer 전용
+    - ``"content_plain"`` (default) — markdown, 내부 docs 분석 / legacy show
+    - ``"content_raw"`` — iXBRL HTML, viewer 전용
 
     Args:
         ticker: US ticker.
@@ -335,7 +335,7 @@ def loadpanelTextWide(
         없음.
 
     Example:
-        >>> df = loadpanelTextWide("AAPL")  # doctest: +SKIP
+        >>> df = loadSectionsWide("AAPL")  # doctest: +SKIP
         >>> df.columns[:6]  # doctest: +SKIP
         ['topic', 'blockType', 'blockOrder', 'textNodeType', 'textLevel', 'textPath']
     """
@@ -345,7 +345,7 @@ def loadpanelTextWide(
         return None
     if valueColumn not in long.columns:
         _log.warning(
-            "edgar panelTextWide: valueColumn '%s' 부재 (사용 가능: %s)",
+            "edgar sectionsWide: valueColumn '%s' 부재 (사용 가능: %s)",
             valueColumn,
             long.columns,
         )
@@ -359,5 +359,5 @@ def loadpanelTextWide(
             aggregate_function="first",
         )
     except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
-        _log.warning("edgar panelTextWide pivot 실패 (%s): %s", ticker, exc)
+        _log.warning("edgar sectionsWide pivot 실패 (%s): %s", ticker, exc)
         return None

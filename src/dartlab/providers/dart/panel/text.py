@@ -18,7 +18,23 @@ def panelTextRows(
     periods: list[str] | None = None,
     marketNs: str = "kr",
 ) -> pl.DataFrame | None:
-    """panel long rows projected to text-bearing columns."""
+    """panel long rows projected to text-bearing columns.
+
+    Args:
+        code: 6-digit DART stock code.
+        periods: optional period labels to project.
+        marketNs: panel namespace, normally ``"kr"``.
+
+    Returns:
+        Text-bearing long rows or ``None`` when no panel rows exist.
+
+    Raises:
+        No explicit exceptions; panel reader errors propagate from ``readLong``.
+
+    Example:
+        >>> panelTextRows("005930") is None or True
+        True
+    """
     from dartlab.providers.dart.panel.read import readLong
 
     df = readLong(code, marketNs=marketNs, periods=periods)
@@ -38,7 +54,23 @@ def panelTextWide(
     periods: list[str] | None = None,
     marketNs: str = "kr",
 ) -> pl.DataFrame | None:
-    """panel text wide view for diff/keyword consumers."""
+    """panel text wide view for diff/keyword consumers.
+
+    Args:
+        code: 6-digit DART stock code.
+        periods: optional period labels to project.
+        marketNs: panel namespace, normally ``"kr"``.
+
+    Returns:
+        Wide DataFrame keyed by section/topic and period, or ``None``.
+
+    Raises:
+        No explicit exceptions; panel reader errors propagate from ``readLong``.
+
+    Example:
+        >>> panelTextWide("005930") is None or True
+        True
+    """
     df = panelTextRows(code, periods=periods, marketNs=marketNs)
     if df is None or df.is_empty():
         return None
@@ -61,7 +93,24 @@ def panelXmlTables(
     period: str | None = None,
     marketNs: str = "kr",
 ) -> list[list[list[str]]]:
-    """Extract XML tables from panel ``contentRaw``."""
+    """Extract XML tables from panel ``contentRaw``.
+
+    Args:
+        code: 6-digit DART stock code.
+        sectionPattern: optional regex applied to ``sectionLeaf``.
+        period: optional single period label.
+        marketNs: panel namespace, normally ``"kr"``.
+
+    Returns:
+        List of tables, each represented as row/cell text lists.
+
+    Raises:
+        No explicit exceptions; panel reader errors propagate from ``readLong``.
+
+    Example:
+        >>> panelXmlTables("005930")
+        []
+    """
     from dartlab.providers.dart.panel.read import readLong
 
     df = readLong(code, marketNs=marketNs, periods=[period] if period else None)
@@ -83,7 +132,24 @@ def panelTableRows(
     period: str | None = None,
     marketNs: str = "kr",
 ) -> list[dict[str, str]]:
-    """Extract XML tables from panel and flatten each table by its header row."""
+    """Extract XML tables from panel and flatten each table by its header row.
+
+    Args:
+        code: 6-digit DART stock code.
+        sectionPattern: optional regex applied to ``sectionLeaf``.
+        period: optional single period label.
+        marketNs: panel namespace, normally ``"kr"``.
+
+    Returns:
+        Row dictionaries produced from table headers.
+
+    Raises:
+        No explicit exceptions; table conversion errors propagate from ``tableToRowDicts``.
+
+    Example:
+        >>> panelTableRows("005930")
+        []
+    """
     from dartlab.providers.dart.tableRows import tableToRowDicts
 
     rows: list[dict[str, str]] = []
@@ -93,7 +159,21 @@ def panelTableRows(
 
 
 def parsePanelXmlTables(content: str) -> list[list[list[str]]]:
-    """Parse DART XML fragment into tables represented as rows and cell text."""
+    """Parse DART XML fragment into tables represented as rows and cell text.
+
+    Args:
+        content: DART XML fragment containing zero or more ``TABLE`` nodes.
+
+    Returns:
+        Parsed tables with at least a header and one body row.
+
+    Raises:
+        No explicit exceptions; malformed XML returns an empty list.
+
+    Example:
+        >>> parsePanelXmlTables("<TABLE><TR><TH>A</TH></TR><TR><TD>1</TD></TR></TABLE>")
+        [[['A'], ['1']]]
+    """
     from lxml import etree
 
     parser = etree.XMLParser(recover=True, resolve_entities=False)

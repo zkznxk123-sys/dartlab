@@ -42,7 +42,7 @@ class _ProfileAccessor:
             >>> c._profileAccessor.sections
 
         SeeAlso:
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
             - ``_DocsAccessor.sections`` — docs spine origin.
 
         Requires:
@@ -53,7 +53,7 @@ class _ProfileAccessor:
               period 통합 보드. ratios 별도 column 통합.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel(...)`` / ``c.topics`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal merge accessor — AI 가 직접 호출 X. Company facade 가 본 함수 위임.
@@ -149,7 +149,7 @@ class _ProfileAccessor:
             >>> c._profileAccessor.sharesOutstanding
 
         SeeAlso:
-            - ``Company.sections`` — public surface.
+            - ``Company.panel`` — public surface.
             - ``_DocsAccessor.sections`` — docs spine origin.
 
         Requires:
@@ -160,7 +160,7 @@ class _ProfileAccessor:
               period 통합 보드. ratios 별도 column 통합.
 
         Guide:
-            - 사용자 API 는 ``c.sections`` — 본 namespace 직접 호출 X.
+            - 사용자 API 는 ``c.panel(...)`` / ``c.topics`` — 본 namespace 직접 호출 X.
 
         AIContext:
             internal merge accessor — AI 가 직접 호출 X. Company facade 가 본 함수 위임.
