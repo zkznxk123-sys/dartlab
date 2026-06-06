@@ -64,22 +64,32 @@ def _kindListCodes() -> list[str]:
 def _remoteParquetCodes(categories: list[str]) -> dict[str, set[str]]:
     from huggingface_hub import HfApi
 
-    from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+    from dartlab.core.hfRetry import retryHfCall
 
     api = HfApi(token=os.environ.get("HF_TOKEN") or None)
-    info = api.repo_info(repo_id=HF_REPO, repo_type="dataset", files_metadata=False)
-
     result = {cat: set() for cat in categories}
-    prefixes = {cat: f"{DATA_RELEASES[cat]['dir']}/" for cat in categories}
 
-    for sibling in info.siblings or []:
-        name = sibling.rfilename
-        if not name.endswith(".parquet"):
-            continue
-        for cat, prefix in prefixes.items():
-            if name.startswith(prefix):
-                result[cat].add(Path(name).stem.zfill(6))
-                break
+    for category in categories:
+        dirPath = DATA_RELEASES[category]["dir"]
+        repo = repoFor(category)
+
+        def _listTree():
+            return list(
+                api.list_repo_tree(
+                    repo_id=repo,
+                    path_in_repo=dirPath,
+                    repo_type="dataset",
+                    recursive=True,
+                    expand=False,
+                    token=os.environ.get("HF_TOKEN") or None,
+                )
+            )
+
+        for sibling in retryHfCall(_listTree):
+            name = getattr(sibling, "rfilename", None) or getattr(sibling, "path", "")
+            if name.endswith(".parquet"):
+                result[category].add(Path(name).stem.zfill(6))
     return result
 
 

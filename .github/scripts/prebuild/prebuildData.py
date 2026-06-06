@@ -53,6 +53,34 @@ def _checkDataReady(dataDir: str) -> dict[str, int]:
     return counts
 
 
+def _validateInputCoverage(counts: dict[str, int]) -> None:
+    """prebuild 입력 coverage 가 scan 생성에 충분한지 검증한다.
+
+    panel 은 changes/sharesOutstanding/docsIndex 의 source 이자 회사 enum 이므로 선택 입력이
+    아니다. finance/report 만 cache hit 된 상태에서 panel seed 가 실패하면 부분 scan 을 HF 에
+    올리는 것이 더 위험하므로 fail-fast 한다.
+    """
+
+    if all(v == 0 for v in counts.values()):
+        print("[prebuild] ❌ 입력 데이터가 전부 0개 — HF seed 실패 또는 빈 dataset")
+        sys.exit(1)
+
+    panelCount = counts.get("panel", 0)
+    if panelCount <= 0:
+        print("[prebuild] ❌ panel 입력 0개 — changes/sharesOutstanding/docsIndex 빌드 불가")
+        sys.exit(1)
+
+    sourceCount = max(counts.get("finance", 0), counts.get("report", 0))
+    if sourceCount >= 100:
+        minPanelCount = max(1, int(sourceCount * 0.5))
+        if panelCount < minPanelCount:
+            print(
+                f"[prebuild] ❌ panel coverage 부족: panel={panelCount}, "
+                f"finance/report 기준={sourceCount}, 최소={minPanelCount}"
+            )
+            sys.exit(1)
+
+
 def _buildScan(dataDir: str) -> dict[str, Path | list[Path] | None]:
     """scan 프리빌드 실행."""
     from dartlab.scan.builders.kr import buildScan
@@ -175,11 +203,7 @@ def main():
     _seedInputs(dataDir)
     counts = _checkDataReady(dataDir)
     print("[prebuild] 캐시: " + " ".join(f"{k}={v}" for k, v in counts.items()))
-
-    if all(v == 0 for v in counts.values()):
-        print("[prebuild] 데이터 캐시 없음 → 프리빌드 건너뜀")
-        _writeSummary(counts, None, 0)
-        return
+    _validateInputCoverage(counts)
 
     # 2단계: scan 프리빌드 — 외부 API 호출 0. corp_profile 은 sync/meta 단계 (kindlist.yml)
     # 가 책임지고 HF dataset 에 push, 여기서는 로컬 parquet 만 읽는다.

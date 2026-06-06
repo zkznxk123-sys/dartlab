@@ -1,7 +1,7 @@
 """HF dataset → 로컬 parquet seed (idempotent) — 옛 ``seedFromHf.seedCategory`` 정본.
 
-HF 를 single source of truth 로: list 1회 + 로컬 size-대조 + 누락분만 GET 으로
-cold-start death-spiral 차단(snapshot_download 의 파일당 HEAD rate-limit 회피).
+HF 를 single source of truth 로: category prefix tree 1회 + 로컬 size-대조 + 누락분만
+GET 으로 cold-start death-spiral 차단(snapshot_download 의 파일당 HEAD rate-limit 회피).
 429 는 Retry-After/310s window 존중, 5xx/네트워크는 지수 백오프, tmp→rename atomic.
 ``upload`` 의 ``core.hfRetry`` 와 별 경로(여긴 urllib GET, hf_hub 아님)라 둘 다 보존.
 """
@@ -12,6 +12,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Any
 
 
 def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int:
@@ -93,14 +94,8 @@ def _seedOne(category: str, dataDir: Path, token: str | None) -> tuple[int, int,
     dirPath = DATA_RELEASES[category]["dir"]
     repo = repoFor(category)  # 전용 repo(dartOriginal 등) 존중 — HF_REPO 하드코딩 시 빈 seed
     api = HfApi(token=token)
-    print(f"[seed] {category}: list {repo}/{dirPath}/", flush=True)
-    repoInfo = retryHfCall(api.repo_info, repo_id=repo, repo_type="dataset", files_metadata=True)
-    prefix = f"{dirPath}/"
-    remoteFiles = {
-        s.rfilename: (s.size or 0)
-        for s in (repoInfo.siblings or [])
-        if s.rfilename.startswith(prefix) and not s.rfilename.endswith("/")
-    }
+    print(f"[seed] {category}: list-tree {repo}/{dirPath}/", flush=True)
+    remoteFiles = _remoteTreeFiles(api, repo=repo, dirPath=dirPath, token=token)
     print(f"[seed] {category}: HF {len(remoteFiles)}개 발견", flush=True)
 
     missing = [(rel, size) for rel, size in remoteFiles.items() if not _isFresh(dataDir / rel, size)]
@@ -120,6 +115,40 @@ def _seedOne(category: str, dataDir: Path, token: str | None) -> tuple[int, int,
     mb = downloadedBytes / 1024 / 1024
     print(f"[seed] {category}: 로컬 {total}개, 신규 {len(missing)}개 / {mb:.1f}MB", flush=True)
     return total, len(missing), mb
+
+
+def _remoteTreeFiles(api: Any, *, repo: str, dirPath: str, token: str | None) -> dict[str, int]:
+    """HF dataset 의 특정 category prefix 아래 파일만 열거한다.
+
+    ``repo_info(files_metadata=True)`` 는 dataset 전체 siblings metadata 를 읽어
+    ``/api/datasets/{repo}?blobs=True`` 쿼터를 크게 소모한다. prebuild 의 panel seed 는
+    이 경로에서 반복적으로 429 를 맞았으므로, category path 로 scope 된 tree endpoint 만
+    사용한다.
+    """
+
+    from dartlab.core.hfRetry import retryHfCall
+
+    def _listTree() -> list[Any]:
+        return list(
+            api.list_repo_tree(
+                repo_id=repo,
+                path_in_repo=dirPath,
+                repo_type="dataset",
+                recursive=True,
+                expand=True,
+                token=token,
+            )
+        )
+
+    entries = retryHfCall(_listTree)
+    files: dict[str, int] = {}
+    for item in entries:
+        rel = getattr(item, "rfilename", None) or getattr(item, "path", "")
+        if not rel or rel.endswith("/"):
+            continue
+        size = getattr(item, "size", 0) or 0
+        files[str(rel)] = int(size)
+    return files
 
 
 def _isFresh(local: Path, size: int) -> bool:
