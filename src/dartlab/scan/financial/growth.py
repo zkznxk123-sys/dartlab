@@ -30,6 +30,21 @@ from dartlab.scan.io.parquet import (
     extractAccount,
 )
 
+_GROWTH_SCHEMA = {
+    "stockCode": pl.Utf8,
+    "revenue": pl.Float64,
+    "revenueCagr": pl.Float64,
+    "opIncomeCagr": pl.Float64,
+    "netIncomeCagr": pl.Float64,
+    "years": pl.Int64,
+    "grade": pl.Utf8,
+    "pattern": pl.Utf8,
+}
+
+
+def _emptyGrowthFrame() -> pl.DataFrame:
+    return pl.DataFrame(schema=_GROWTH_SCHEMA)
+
 
 def _gradeGrowth(revCagr: float | None, opCagr: float | None) -> str:
     """매출·영업이익 CAGR 중 높은 값으로 성장성 등급 분류.
@@ -199,8 +214,8 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         )
         .collect(engine="streaming")
     )
-    if target.is_empty():
-        return pl.DataFrame()
+    if target.is_empty() or scCol not in target.columns:
+        return _emptyGrowthFrame()
 
     # 연결 우선
     cfs = target.filter(pl.col("fs_nm").str.contains("연결"))
@@ -243,11 +258,16 @@ def _scanPerFile() -> pl.DataFrame:
             continue
         if df.is_empty():
             continue
+        if "stockCode" not in df.columns:
+            if "stock_code" in df.columns:
+                df = df.with_columns(pl.col("stock_code").cast(pl.Utf8).alias("stockCode"))
+            else:
+                df = df.with_columns(pl.lit(pf.stem).alias("stockCode"))
         cfs = df.filter(pl.col("fs_nm").str.contains("연결"))
         allDfs.append(cfs if not cfs.is_empty() else df)
 
     if not allDfs:
-        return pl.DataFrame()
+        return _emptyGrowthFrame()
 
     combined = pl.concat(allDfs, how="diagonal_relaxed")
     scCol = "stockCode"
@@ -279,6 +299,10 @@ def _computeGrowth(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         - grade : str — 성장성 등급 (고성장/성장/정체/역성장/급감)
         - pattern : str — 성장 패턴 (균형성장/수익개선/외형성장/구조조정/전면역성장/혼합)
     """
+    required = {scCol, "bsns_year", "account_id", "account_nm", "thstrm_amount"}
+    if target.is_empty() or not required.issubset(set(target.columns)):
+        return _emptyGrowthFrame()
+
     # 종목별 최신·기준 연도 (CAGR 은 pair 필요) — 글로벌 years[0] 버그 방지 (2026-04-23).
     # 한 종목의 2026 Q1 조기 제출 때문에 전종목이 2025 로 커트되던 현상 수정.
     rows: list[dict] = []
@@ -333,19 +357,9 @@ def _computeGrowth(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         )
 
     if not rows:
-        return pl.DataFrame()
+        return _emptyGrowthFrame()
 
-    schema = {
-        "stockCode": pl.Utf8,
-        "revenue": pl.Float64,
-        "revenueCagr": pl.Float64,
-        "opIncomeCagr": pl.Float64,
-        "netIncomeCagr": pl.Float64,
-        "years": pl.Int64,
-        "grade": pl.Utf8,
-        "pattern": pl.Utf8,
-    }
-    return pl.DataFrame(rows, schema=schema)
+    return pl.DataFrame(rows, schema=_GROWTH_SCHEMA)
 
 
 __all__ = ["scanGrowth"]

@@ -129,3 +129,61 @@ def test_computeGrowth_perStockYearsNotGlobal():
     yrs_per_stock = dict(zip(result["stockCode"].to_list(), result["years"].to_list()))
     assert yrs_per_stock["A"] == 3
     assert yrs_per_stock["B"] == 3
+
+
+def test_computeGrowth_missingStockCodeReturnsSchemaEmpty():
+    """부분 fixture / 불완전 fallback 은 컬럼 누락으로 크래시하지 않고 빈 스키마를 반환."""
+    from dartlab.scan.financial.growth import _computeGrowth
+
+    df = pl.DataFrame(
+        {
+            "stock_code": ["005930"],
+            "bsns_year": [2025],
+            "account_id": ["Revenue"],
+            "account_nm": ["매출액"],
+            "thstrm_amount": [1_000_000],
+        }
+    )
+
+    result = _computeGrowth(df, "stockCode")
+
+    assert result.is_empty()
+    assert result.columns == [
+        "stockCode",
+        "revenue",
+        "revenueCagr",
+        "opIncomeCagr",
+        "netIncomeCagr",
+        "years",
+        "grade",
+        "pattern",
+    ]
+
+
+def test_scanGrowth_perFileFallbackNormalizesStockCode(tmp_path, monkeypatch):
+    """개별 finance parquet 의 legacy `stock_code` 컬럼을 fallback 에서 `stockCode`로 정규화."""
+    from dartlab.scan.financial import growth
+
+    finance_dir = tmp_path / "finance"
+    finance_dir.mkdir()
+    rows = [
+        _mockFinanceRow("005930", 2022, "Revenue", "매출액", 100_000),
+        _mockFinanceRow("005930", 2022, "ProfitLossFromOperatingActivities", "영업이익", 10_000),
+        _mockFinanceRow("005930", 2022, "ProfitLoss", "당기순이익", 8_000),
+        _mockFinanceRow("005930", 2025, "Revenue", "매출액", 150_000),
+        _mockFinanceRow("005930", 2025, "ProfitLossFromOperatingActivities", "영업이익", 20_000),
+        _mockFinanceRow("005930", 2025, "ProfitLoss", "당기순이익", 12_000),
+    ]
+    df = pl.DataFrame(rows).rename({"stockCode": "stock_code"})
+    df.write_parquet(finance_dir / "005930.parquet")
+
+    def fakeDataDir(category: str):
+        assert category == "finance"
+        return finance_dir
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", fakeDataDir)
+
+    result = growth._scanPerFile()
+
+    assert result.height == 1
+    assert result.item(0, "stockCode") == "005930"
