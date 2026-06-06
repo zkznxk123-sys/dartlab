@@ -119,7 +119,6 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
 
         Example:
             >>> collect({"sales": [1000]}, [2024], "IS")  # nested function example
-        - ``SectionsAnalyzer`` — sections 파생표.
         """
         if not series:
             return

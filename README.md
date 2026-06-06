@@ -716,7 +716,7 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 | Tier | 범위 |
 |------|------|
-| **Stable** | DART Company (sections, show, trace, diff, BS/IS/CF, CIS, index, filings, profile), EDGAR Company core, valuation, forecast, simulation |
+| **Stable** | DART Company (panel, show, trace, diff, BS/IS/CF, CIS, index, filings, profile), EDGAR Company core, valuation, forecast, simulation |
 | **Beta** | EDGAR 파워유저 (SCE, notes, freq, coverage), credit, insights, distress, ratios, timeseries, network, governance, workforce, capital, debt, chart/table/text 도구, ask/chat, OpenDart, OpenEdgar, Server API, MCP |
 | **Experimental** | AI 도구 호출, export, viz (차트) |
 

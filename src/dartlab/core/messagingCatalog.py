@@ -87,7 +87,6 @@ SIMPLE: dict[str, str] = {
     "edgar:sections_save": "EDGAR {ticker} sections 저장: {periodsWritten}개 기간 / {totalRows}행",
     "edgar:collect_exhausted": "EDGAR 수집 키 소진 — 일부 미수집 (재시도 권장)",
     "edgar:docs_skip_deprecated": "EDGAR {ticker} docs.parquet emit 생략 ({reason})",
-    "hint:no_docs": "{stockCode} docs 데이터 없음 \u2192 {prop} 사용 불가. dartlab.Company('{stockCode}')로 자동 다운로드 또는 dartlab.collect('{stockCode}')",
     "hint:no_finance": "{stockCode} finance 데이터 없음 \u2192 {prop} 사용 불가. dartlab.collect('{stockCode}') 또는 Company 자동 다운로드 경로를 확인하세요.",
     "hint:no_report": "{stockCode} report 데이터 없음 \u2192 {prop} 사용 불가. dartlab.collect('{stockCode}') 또는 Company 자동 다운로드 경로를 확인하세요.",
     "hint:no_ai": "AI provider 미설정 \u2192 {fn} 사용 불가. dartlab.setup()으로 설정하세요.",

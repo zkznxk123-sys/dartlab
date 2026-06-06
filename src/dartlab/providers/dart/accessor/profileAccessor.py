@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class _ProfileAccessor:
-    """docs spine + finance/report authoritative merge."""
+    """panel text spine + finance/report authoritative merge."""
 
     _CANONICAL_TOPIC_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
 
@@ -612,4 +612,4 @@ class _ProfileAccessor:
             return "finance"
         if topic in self._REPORT_AUTHORITATIVE_TOPICS:
             return "report"
-        return "docs"
+        return "panel"

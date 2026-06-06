@@ -1239,7 +1239,7 @@ class Company:
         entry = _getModuleRegistry()[idx]
         label = entry[2]
 
-        if config.verbose and cacheKey not in self._cache and name != "sections":
+        if config.verbose and cacheKey not in self._cache:
             _log.info("  ▶ %s · %s", self.corpName, label)
 
         result = self._callModule(name, **kwargs)

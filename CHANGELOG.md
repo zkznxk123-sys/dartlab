@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (다음 release 작업 누적)
 
+## [0.10.5] - 2026-06-07
+
+### Fixed
+
+- DART panel 이관 잔재 정리 — Company facade 의 도달 불가능한 `sections` 모듈 분기, 발화되지 않는 `hint:no_docs` 메시지, 잔여 `SectionsAnalyzer` docstring, profile trace 의 stale `docs` source 라벨(실데이터는 panel)을 제거·정정.
+
+### Changed
+
+- PyPI 메타데이터 정합화 — `py.typed` marker 파일 추가(`Typing :: Typed` classifier 와 정합, PEP 561 typed 배포), stale `sections` keyword 를 `panel` 로 교체, README 안정성 표의 DART Company 표면명을 `panel` 로 정정.
+
+### Removed
+
+- dormant `providers/dart/builder/notesSplit.py` 제거 — 호출자 0. 주석(notes) 분해 기능은 panel build 의 `dechunkNotes`/`noteTaxonomy` 로 이관 완료. src↔tests mirror baseline 동기화.
+
 ## [0.10.4] - 2026-06-07
 
 ### Added

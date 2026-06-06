@@ -1,6 +1,5 @@
 {
   "missingMirrors": [
-    "dart/builder/notesSplit.py",
     "dart/disclosureDiff.py",
     "dart/finance/pivotArrow.py",
     "dart/finance/statements.py",
