@@ -33,9 +33,11 @@ def _snake(model: dict, accountId: str, label: str, stmt: str) -> str | None:
     idSnake = model["idMap"].get(stripped)
     if idSnake and idSnake in order:
         return idSnake
-    for candidate in model["nameCandidates"].get(label, []):
-        if candidate in order:
-            return candidate
+    orderedCandidates = [
+        (order[candidate], candidate) for candidate in model["nameCandidates"].get(label, []) if candidate in order
+    ]
+    if orderedCandidates:
+        return min(orderedCandidates)[1]
     return idSnake
 
 
@@ -110,3 +112,17 @@ def test_recent_ifrs_id_gaps_resolve_to_statement_order(orderModel) -> None:
         < order["noncurrent_assets"]
         < order[noncurrentFvpl]
     )
+
+
+def test_korean_mapping_labels_resolve_when_account_id_is_missing(orderModel) -> None:
+    """account_id 가 비표준이어도 standard account 라벨 SSOT 로 순서와 depth 를 복구한다."""
+    model, _ = orderModel
+
+    assert _snake(model, "-표준계정코드 미사용-", "자산총계", "BS") == "assets"
+    assert _snake(model, "-표준계정코드 미사용-", "유동자산", "BS") == "current_assets"
+    assert _snake(model, "-표준계정코드 미사용-", "재고자산", "BS") == "inventories"
+    assert _displayOrder(model, "-표준계정코드 미사용-", "자산총계", 999, "BS") < _displayOrder(
+        model, "-표준계정코드 미사용-", "유동자산", 999, "BS"
+    )
+    assert _depth(model, "-표준계정코드 미사용-", "자산총계", "BS") == 0
+    assert _depth(model, "-표준계정코드 미사용-", "유동자산", "BS") == 1

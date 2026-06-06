@@ -335,7 +335,7 @@ export async function loadLiveCompanyReportFacts(stockCode: string): Promise<Liv
 	}
 }
 
-export async function loadLiveCompanyDocs(stockCode: string, limit = 8): Promise<LiveCompanyDocExcerpt[]> {
+export async function loadLiveCompanyPanelExcerpts(stockCode: string, limit = 8): Promise<LiveCompanyDocExcerpt[]> {
 	try {
 		const db = await loadDartDb();
 		if (!db) return [];

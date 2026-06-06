@@ -148,7 +148,15 @@ function accountDepthFromSnake(snake: string, kind?: FinanceKind): number | null
 function firstOrderedCandidate(candidates: readonly string[] | undefined, order: Record<string, number> | null): string | null {
 	if (!candidates?.length) return null;
 	if (!order) return candidates[0] ?? null;
-	return candidates.find((snake) => order[snake] != null) ?? candidates[0] ?? null;
+	let best: string | null = null;
+	let bestOrder = Number.POSITIVE_INFINITY;
+	for (const snake of candidates) {
+		const candidateOrder = order[snake];
+		if (candidateOrder == null || candidateOrder >= bestOrder) continue;
+		best = snake;
+		bestOrder = candidateOrder;
+	}
+	return best ?? candidates[0] ?? null;
 }
 
 export function accountSnake(accountId: string, label = '', kind?: FinanceKind): string | null {

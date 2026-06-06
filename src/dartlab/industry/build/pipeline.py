@@ -1,6 +1,6 @@
 """4단계 빌드 오케스트레이터.
 
-taxonomy.json + KindList + docs → nodes.json + edges.json 생성.
+taxonomy.json + KindList + panel → nodes.json + edges.json 생성.
 
 사용법::
 
@@ -93,13 +93,13 @@ def buildIndustryMap(
     """4단계 파이프라인을 실행하여 nodes.json을 생성한다.
 
     Capabilities:
-        KSIC → 제품 → docs → review 4 단계 + 재무 attach + 엣지 빌드를 1 회 실행. 결과는
+        KSIC → 제품 → panel → review 4 단계 + 재무 attach + 엣지 빌드를 1 회 실행. 결과는
         ``data/industry/{nodes,edges}.json`` 으로 직렬화. 전 종목 산업/공정/매출 manifest 생성.
 
     Parameters
     ----------
     skipDocs : bool
-        True이면 3단계(docs 스캔) 생략. 빠른 테스트용.
+        기존 호환 플래그. True이면 3단계(panel 텍스트 스캔) 생략. 빠른 테스트용.
     verbose : bool
         진행 상황 출력.
 
@@ -125,12 +125,12 @@ def buildIndustryMap(
         manifest stale 시 (재무 / KindList 갱신 후) 만. 일반 사용자는 ``Industry()(code)`` 조회.
 
     How:
-        stage1_ksic.classify → stage2_product.classify → stage3_docs.enrich (선택) →
+        stage1_ksic.classify → stage2_product.classify → stage3_docs.enrich(panel, 선택) →
         stage4_review.applyOverrides → attachFinancials → buildAllEdges → _saveNodes / _saveEdges.
 
     Requires:
         - L1 raw: DART KindList + 사업보고서 + 재무 1+ 연도
-        - L1.5 frame: scan/finance.parquet + docs/{code}.parquet
+        - L1.5 frame: scan/finance.parquet + panel/{code}.parquet
 
     See Also:
         - ``dartlab.industry.Industry.build`` : 본 함수 사용자 (사용자 친화 진입점)
@@ -164,12 +164,12 @@ def buildIndustryMap(
     if verbose:
         logger.info(f"[industry] 2단계 제품: {staged}사 공정 매칭")
 
-    # 3단계: docs → 소분류
+    # 3단계: panel → 소분류
     if not skipDocs:
         nodes = stage3(nodes)
-        docsStaged = sum(1 for n in nodes if n.source == "docs")
+        docsStaged = sum(1 for n in nodes if n.source == "panel")
         if verbose:
-            logger.info(f"[industry] 3단계 docs: {docsStaged}사 보강")
+            logger.info(f"[industry] 3단계 panel: {docsStaged}사 보강")
 
     # 4단계: override 적용
     nodes = stage4(nodes)

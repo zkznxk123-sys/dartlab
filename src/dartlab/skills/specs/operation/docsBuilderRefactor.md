@@ -9,7 +9,7 @@ purpose: |
   기존 viewer.do HTML → htmlToText() plain text 파이프라인이 heading hierarchy
   lossy → legacy parser layer 가 regex 추론 → 8 commit 덕지덕지 fix 누적. document.xml
   zip 의 <TITLE ATOC AASSOCNOTE> + <TABLE rowspan/colspan> 직접 사용 정공법으로
-  전환. zip 은 로컬 임시 보관만 (HF 미공개), parquet 만 공개.
+  전환. zip 은 로컬 임시 보관만 (HF 미공개), panel parquet 만 공개.
 whenToUse:
   - docs 파이프라인 빌더 변경
   - legacy parser layer regex 추론 폐기 검토
@@ -68,7 +68,7 @@ testUniverse:
   수집기 = `gather.original` (gather 자체포함, `gather ↛ providers` 준수). `allFilingsCollector`
   (parquet content_raw)와 공존.
 - 본 docs 파이프라인의 정기 zip 보관 위치도 `data/original/dart/docs/`로 통일 이전 완료 —
-  panel/sections/refScan/freshness 경로 rewire 동반(옛 `dart/original/docs` 폐기).
+  panel/refScan/freshness 경로 rewire 동반(옛 `dart/original/docs` 폐기).
 
 ## §2 — schema 비교
 
@@ -274,7 +274,7 @@ layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merg
 
 **옵션 1 — 폐기된 topic-hash 디스크 캐시 (`diskCache.py`, 커밋 0e08ef731):**
 - topic-hash 기반 캐시 저장
-- Freshness: `docs/{stockCode}.parquet` mtime > cache mtime → stale → rebuild
+- Freshness: `panel/{stockCode}.parquet` mtime > cache mtime → stale → rebuild
 - `topicsHash` = `blake2b(",".join(sorted(topics)), digest_size=3)`. None = `"all"`.
 - 효과:
   - 1st cold build: 13.48s (+ 디스크 save)
@@ -330,7 +330,7 @@ python -m dartlab.providers.dart.panel.build --codes 005930 035720 005380 207940
 **HF 업로드 파이프라인 (`.github/scripts/sync/bulkUploadHf.py`, 커밋 56b841944):**
 - `--force` — 전체 재업로드 (schema 마이그레이션).
 - `--since N` — 최근 N초 안 mtime 변경 파일만.
-- R1+R2 완료 후 `bulkUploadHf.py docs --force` 가 최종 단계.
+- R1+R2 완료 후 `bulkUploadHf.py panel --force` 가 최종 단계.
 
 **P-단위 line-join 완료 (커밋 fd76bdb8a):**
 `zipDocsXml.parseSectionsByTitle._mergeShortPs` — 인접 P 둘 다 len ≤ 20 + 첫 P 가

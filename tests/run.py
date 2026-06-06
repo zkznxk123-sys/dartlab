@@ -358,6 +358,7 @@ GATES: dict[str, Gate] = {
         tier="full",
         install_pkg="none",
         fetch_depth=0,
+        env={"DARTLAB_DATA_DIR": "${{ github.workspace }}/tests/fixtures"},
         cmd=(
             "python -X utf8 .github/scripts/ops/planRealdata.py > /tmp/tests.json && "
             "cat /tmp/tests.json && "
@@ -365,9 +366,11 @@ GATES: dict[str, Gate] = {
             'echo "tests=$(cat /tmp/tests.json)" >> "${GITHUB_OUTPUT:-/dev/null}" && '
             'if [ "$COUNT" -gt 0 ]; then '
             'echo hasAny=true >> "${GITHUB_OUTPUT:-/dev/null}"; '
+            "python -m pip install --upgrade pip && "
+            "pip install -e . && "
+            "python -X utf8 .github/scripts/ops/prepareRealdataScanCache.py; "
             'else echo hasAny=false >> "${GITHUB_OUTPUT:-/dev/null}"; fi'
         ),
-        blocking=False,
     ),
     "realdata-suite": Gate(
         name="realdata-suite",

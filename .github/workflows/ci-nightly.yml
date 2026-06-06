@@ -58,11 +58,37 @@ jobs:
           path: ${{ matrix.artifact_path }}
           retention-days: 30
 
+  realdata-cache:
+    if: ${{ github.event.inputs.skip_realdata != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Prepare realdata scan prebuild
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          python -X utf8 .github/scripts/ops/prepareRealdataScanCache.py
+      - name: Upload realdata scan prebuild
+        uses: actions/upload-artifact@v5
+        with:
+          name: realdata-scan-prebuild
+          path: tests/fixtures/dart/scan/
+          if-no-files-found: error
+
   # realdata 20 shard 전수 — 1 잡 / 1 shard fan-out.
   # matrix.test_file 은 tests/run.py REALDATA_SHARDS 와 1:1
   # (test_runEntrypoint.py 의 test_realdataShardsMatchNightlyMatrix 가 검증).
   realdata-suite-full:
     if: ${{ github.event.inputs.skip_realdata != 'true' }}
+    needs: realdata-cache
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -95,4 +121,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+      - name: Download realdata scan prebuild
+        uses: actions/download-artifact@v5
+        with:
+          name: realdata-scan-prebuild
+          path: tests/fixtures/dart/scan/
       - run: python -X utf8 tests/run.py gate realdata-suite-full --test ${{ matrix.test_file }}

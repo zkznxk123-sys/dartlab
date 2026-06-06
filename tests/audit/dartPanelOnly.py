@@ -35,6 +35,7 @@ SCAN_ROOTS = (
     ROOT / "src" / "dartlab" / "core",
     ROOT / "src" / "dartlab" / "gather" / "dart",
     ROOT / "src" / "dartlab" / "pipeline",
+    ROOT / "landing" / "src",
     ROOT / "tests" / "audit",
     ROOT / "tests" / "cli",
     ROOT / "tests" / "search",
@@ -57,6 +58,14 @@ BANNED_FIXED = (
     "self.c.sections",
     "_hasDocs",
     "loadDocsForStock",
+    "loadLiveCompanyDocs",
+    "dataExport",
+    "downloadPanelCsv",
+    "downloadFinanceExcel",
+    "panelToCsv",
+    "financeToExcel",
+    "DATASET_URL",
+    "전체 데이터셋",
     "includeDocs",
     "docsBatchSize",
     '_dataDir("docs")',
@@ -82,7 +91,7 @@ def _iterFiles() -> list[Path]:
                 continue
             if path == Path(__file__).resolve():
                 continue
-            if path.suffix not in {".py", ".yml", ".yaml", ".sh"}:
+            if path.suffix not in {".py", ".yml", ".yaml", ".sh", ".ts", ".svelte"}:
                 continue
             rel = path.relative_to(ROOT).as_posix()
             if "/providers/edgar/" in rel or "/providers/edinet/" in rel:

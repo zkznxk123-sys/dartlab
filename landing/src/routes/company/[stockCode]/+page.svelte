@@ -12,7 +12,7 @@
 		buildStatementDashboard,
 		loadLiveCompany,
 		loadLiveCompanyChanges,
-		loadLiveCompanyDocs,
+		loadLiveCompanyPanelExcerpts,
 		loadLiveCompanyReportFacts,
 		loadLiveCompanyStatement,
 		type LiveCompanyBundle,
@@ -114,7 +114,7 @@
 			const [nextChanges, nextFacts, nextDocs, isY, bsY, cfY] = await Promise.all([
 				loadLiveCompanyChanges(data.stockCode, 12),
 				loadLiveCompanyReportFacts(data.stockCode),
-				loadLiveCompanyDocs(data.stockCode, 16),
+				loadLiveCompanyPanelExcerpts(data.stockCode, 16),
 				loadLiveCompanyStatement(data.stockCode, 'IS', 'Y'),
 				loadLiveCompanyStatement(data.stockCode, 'BS', 'Y'),
 				loadLiveCompanyStatement(data.stockCode, 'CF', 'Y')

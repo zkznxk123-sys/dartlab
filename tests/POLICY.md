@@ -213,7 +213,7 @@ $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_out
 | `fixture-integration` | full | ✅ | - | 15m |
 | `cross-os-smoke` | full | ✅ | os | 20m |
 | `product-smoke-wheel` | full | ✅ | - | 30m |
-| `realdata-plan` | full | — | - | 20m |
+| `realdata-plan` | full | ✅ | - | 20m |
 | `realdata-suite` | full | ✅ | test | 30m |
 | `guard-full-census` | nightly | ✅ | - | 15m |
 | `realdata-suite-full` | nightly | ✅ | test | 30m |

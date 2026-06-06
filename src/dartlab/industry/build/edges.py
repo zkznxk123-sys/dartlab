@@ -1,4 +1,4 @@
-"""엣지 빌더 — docs + scan/network에서 공급-수요·계열 관계 추출.
+"""엣지 빌더 — panel + scan/network에서 공급-수요·계열 관계 추출.
 
 데이터 소스:
 1. scan/network — 투자관계(investedCompany), 계열사(affiliateGroup)
@@ -539,19 +539,19 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 
 
 def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[IndustryEdge]:
-    """network·docs·원재료 테이블 3개 소스에서 엣지를 수집하여 통합한다.
+    """network·panel 텍스트·원재료 테이블 3개 소스에서 엣지를 수집하여 통합한다.
 
     Capabilities:
         3 소스 (`extractNetworkEdges` / `extractDocsEdges` / `extractRawMaterialEdges`) 엣지를
         병합하고 (from, to, edgeType) 키로 중복 제거. 우선순위 panel_table > panel_text > network 적용.
-        ``skipDocs`` 로 docs 패스 생략 가능 (빠른 테스트).
+        ``skipDocs`` 는 기존 호환 이름이며 panel 텍스트/테이블 패스를 생략한다.
 
     Parameters
     ----------
     nodes : list[IndustryNode]
         전체 노드 리스트.
     skipDocs : bool
-        True이면 docs 기반 엣지(텍스트+테이블) 생략. 빠른 테스트용.
+        기존 호환 플래그. True이면 panel 기반 엣지(텍스트+테이블) 생략. 빠른 테스트용.
 
     Returns
     -------
@@ -578,7 +578,7 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
         panel 스캔 비용 때문.
 
     How:
-        ``extractNetworkEdges`` (출자) → ``extractDocsEdges`` (패턴) → ``extractRawMaterialEdges``
+        ``extractNetworkEdges`` (출자) → ``extractDocsEdges`` (panel 패턴) → ``extractRawMaterialEdges``
         (테이블) 순차 호출 → source 우선순위로 정렬 후 (from, to, edgeType) 중복 제거.
 
     Requires:

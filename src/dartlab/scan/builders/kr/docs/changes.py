@@ -142,14 +142,14 @@ def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | No
 
 
 def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
-    """docs/*.parquet → ``changes.parquet`` 프리빌드.
+    """panel parquet → ``changes.parquet`` 프리빌드.
 
     Parameters:
         sinceYear: 시작 연도. 이전 연도는 비교 baseline 으로만 사용.
         verbose: 진행 로그 출력 여부.
 
     Returns:
-        생성된 ``changes.parquet`` 경로. docs 데이터 없으면 None.
+        생성된 ``changes.parquet`` 경로. panel 데이터 없으면 None.
 
     Raises:
         polars.PolarsError: parquet write/merge 실패 시.
@@ -158,10 +158,10 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
         >>> p = buildChanges(sinceYear=2021, verbose=True)
 
     Guide:
-        scan prebuild 의 docs 변화 감지 전용 단계다.
+        scan prebuild 의 panel 본문 변화 감지 전용 단계다.
 
     Capabilities:
-        전종목 docs 변화 row 를 배치 parquet 으로 쓴 뒤 단일 ``changes.parquet`` 로 합산.
+        전종목 panel 변화 row 를 배치 parquet 으로 쓴 뒤 단일 ``changes.parquet`` 로 합산.
 
     AIContext:
         AI agent 가 disclosureRisk/dividendTrend 를 호출할 때 선행 리스크 신호 원천이 된다.
