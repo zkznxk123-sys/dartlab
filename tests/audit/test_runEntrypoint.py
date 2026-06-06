@@ -162,6 +162,18 @@ def test_tierDistributionFrozen():
 
 
 @pytest.mark.unit
+def test_productSmokeDataModesKeepCiAndExternalSeparated():
+    """Blocking CI product smoke must not depend on live HF availability."""
+    run_product_wheel = (REPO_ROOT / "tests" / "audit" / "runProductSmokeWheel.py").read_text(encoding="utf-8")
+    verify_wheel = (REPO_ROOT / ".github" / "scripts" / "verifyWheel.py").read_text(encoding="utf-8")
+
+    assert "--data-mode fixtures" in GATES["smoke"].cmd
+    assert '"fixtures"' in run_product_wheel
+    assert '"fixtures"' in verify_wheel
+    assert "--data-mode empty" in GATES["external-venv-smoke"].cmd
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize("rel", DOC_TARGETS)
 def test_docsGatesBlockInSync(rel):
     """사람용 문서의 gates:auto 블록 == GATES 렌더 (드리프트 차단).

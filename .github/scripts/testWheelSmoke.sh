@@ -99,12 +99,12 @@ if not sec.get('chapterByMajor'):
 print('[wheel-smoke] 번들 OK — parserMappings + panelTopics.chapterByMajor 정상')
 "
 
-# 4. 제품 스모크 — 배포될 wheel 을 빈 데이터 디렉터리에서 사용자 대표 API로 실행.
-#    네트워크/데이터 실패도 publish 실패로 처리한다. 여기서 실패하면 사용자 첫 실행도 실패한다.
-echo "[wheel-smoke] product smoke release 실행 (빈 데이터 디렉터리)..."
+# 4. 제품 스모크 — 배포될 wheel 을 fixture 데이터로 사용자 대표 API 실행.
+#    외부 HF/PyPI empty 경로는 nightly external-venv-smoke 가 별도로 맡는다.
+echo "[wheel-smoke] product smoke release 실행 (fixture 데이터)..."
 "$VENV_PYTHON" -X utf8 "$REPO_ROOT/tests/audit/productSmoke.py" \
     --suite release \
-    --data-mode empty \
+    --data-mode fixtures \
     --import-mode installed \
     --json-out "$WORK_DIR/product-smoke-release.json"
 EXIT_CODE=$?

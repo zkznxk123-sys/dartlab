@@ -167,7 +167,7 @@ GATES: dict[str, Gate] = {
             "print(f'smoke OK — {len(dartlab.__all__)} symbols')\" && "
             "python -X utf8 tests/audit/publicApiCoverage.py && "
             "python -X utf8 tests/audit/memoryBudgetAudit.py && "
-            "python -X utf8 tests/audit/productSmoke.py --suite quick --data-mode empty "
+            "python -X utf8 tests/audit/productSmoke.py --suite quick --data-mode fixtures "
             "--import-mode source --json-out product-smoke-quick.json"
         ),
     ),

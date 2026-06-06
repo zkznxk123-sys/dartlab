@@ -65,7 +65,7 @@ def main() -> int:
             "--suite",
             "release",
             "--data-mode",
-            "empty",
+            "fixtures",
             "--import-mode",
             "installed",
             "--json-out",

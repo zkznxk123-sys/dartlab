@@ -126,7 +126,7 @@ def checkRuntime(whl: Path) -> int:
                 "--suite",
                 "quick",
                 "--data-mode",
-                "empty",
+                "fixtures",
                 "--import-mode",
                 "installed",
             ],
