@@ -1,4 +1,4 @@
-"""Prepare shared scan prebuild files for realData CI shards."""
+"""Build shared scan prebuild files for realData CI shards."""
 
 from __future__ import annotations
 
@@ -7,9 +7,22 @@ from pathlib import Path
 
 
 def main() -> int:
+    from dartlab.scan.builders.kr.common import scanDir
+    from dartlab.scan.builders.kr.core import buildChanges, buildFinance, buildFinanceLite, buildReport
+    from dartlab.scan.builders.kr.shares import buildSharesOutstandingSafe
     from dartlab.scan.io import parquet as scan_parquet
 
-    scan_dir = Path(scan_parquet._ensureScanData(requireReports=True))
+    scan_dir = Path(scanDir())
+    scan_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"[prepareRealdataScanCache] build into: {scan_dir}")
+    buildChanges(sinceYear=2021, verbose=True)
+    finance_path = buildFinance(sinceYear=2021, verbose=True)
+    if finance_path is not None:
+        buildFinanceLite(verbose=True)
+    buildReport(sinceYear=2021, verbose=True)
+    buildSharesOutstandingSafe(verbose=True)
+
     missing = scan_parquet._missingScanFiles(scan_dir, requireReports=True)
     if missing:
         print("[prepareRealdataScanCache] scan prebuild incomplete", file=sys.stderr)
