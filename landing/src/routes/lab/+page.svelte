@@ -46,6 +46,7 @@
 		<nav class="nav-links">
 			<a href="{base}/lab/dashboard/005930" class="nav-link">/dashboard</a>
 			<a href="{base}/lab/viewer-search" class="nav-link">/viewer-search</a>
+			<a href="{base}/lab/viewer-analyze" class="nav-link">/viewer-analyze</a>
 			<a href="{base}/lab/map" class="nav-link">/map</a>
 			<a href="{base}/lab/compare" class="nav-link">/compare</a>
 			<a href="{base}/lab/screener" class="nav-link">/screener</a>

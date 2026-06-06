@@ -37,7 +37,8 @@ export function plainText(raw: string): string {
 // 검증판 1:1. 명시단위 조/억만, "조" 다의어(兆 vs 條 법조항) 2중 차단: 앞 '제' 배제 + 조는 뒤 원/억 동반시만. ──
 const AMT_KR = /(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)\s?(조|억)(?=\s*원|[\s,.)\]]|$)/g;
 const UNIT_MULT: Record<string, number> = { 조: 1e12, 억: 1e8 };
-function maxAmountKrw(text: string): number {
+// 셀 1개(text)→최대 금액(원). 행 전체 join 호출 = 행 max, 단일 셀 호출 = per-period 금액(diff.ts 재사용).
+export function maxAmountKrw(text: string): number {
 	let max = 0;
 	AMT_KR.lastIndex = 0;
 	let m: RegExpExecArray | null;
@@ -241,11 +242,11 @@ export function expandQuery(query: string, expand = true): { weights: Map<string
 // ── 숫자/조건 쿼리 파싱 — 기존 검색창이 "100억 이상", "1조 초과", "50억 이하"를 이해(새 UI 0). ──
 // 작은 bounded 집합(조/억 × 이상·초과·넘는·넘게=gte / 이하·미만·미달=lte). 패턴이 끝없이 늘면 = 덕지덕지 신호.
 const AMOUNT_Q = /(\d[\d,]*(?:\.\d+)?)\s*(조|억)\s*(?:원\s*)?(이상|초과|넘는|넘게|이하|미만|미달)/;
-interface AmtConstraint {
+export interface AmtConstraint {
 	min?: number;
 	max?: number;
 }
-function parseConstraint(query: string): { c: AmtConstraint | null; residual: string } {
+export function parseConstraint(query: string): { c: AmtConstraint | null; residual: string } {
 	const m = query.match(AMOUNT_Q);
 	if (!m || m.index === undefined) return { c: null, residual: query };
 	const v = parseFloat(m[1].replace(/,/g, '')) * UNIT_MULT[m[2]];
@@ -253,7 +254,7 @@ function parseConstraint(query: string): { c: AmtConstraint | null; residual: st
 	const residual = (query.slice(0, m.index) + ' ' + query.slice(m.index + m[0].length)).replace(/\s+/g, ' ').trim();
 	return { c: gte ? { min: v } : { max: v }, residual };
 }
-function amtOk(amt: number, c: AmtConstraint): boolean {
+export function amtOk(amt: number, c: AmtConstraint): boolean {
 	return amt > 0 && (c.min === undefined || amt >= c.min) && (c.max === undefined || amt <= c.max);
 }
 
