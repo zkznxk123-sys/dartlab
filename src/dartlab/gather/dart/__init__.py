@@ -13,7 +13,7 @@ untrusted 본문:
 
 NOTE: facade/viewer/types 는 lazy ``__getattr__`` 노출 — client/keys/콜렉터 서브모듈
 import 시 무거운 viewer 로딩 + 순환 import(facade↔infra↔core.parse) 회피. client/keys/
-콜렉터(zipCollector/allFilingsCollector/batch 등)는 서브모듈로 직접 import 한다.
+콜렉터(allFilingsCollector/batch 등)는 서브모듈로 직접 import 한다.
 """
 
 from __future__ import annotations

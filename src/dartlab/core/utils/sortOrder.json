@@ -1312,7 +1312,7 @@
     },
     "net_profit": {
       "sortOrder": 2300,
-      "level": 1
+      "level": 0
     },
     "net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": {
       "sortOrder": 2401,
@@ -1420,7 +1420,7 @@
     },
     "total_comprehensive_income": {
       "sortOrder": 2700,
-      "level": 1
+      "level": 0
     },
     "total_comprehensive_income_owners_of_parent": {
       "sortOrder": 2710,
@@ -1808,7 +1808,7 @@
     },
     "net_income": {
       "sortOrder": 2050,
-      "level": 1
+      "level": 0
     },
     "loss_before_tax": {
       "sortOrder": 1905,

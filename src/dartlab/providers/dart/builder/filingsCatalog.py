@@ -467,7 +467,7 @@ def buildLiveFilings(
     return result
 
 
-# ── readFiling (원문 텍스트 / ZIP 섹션) ──────────────────────────
+# ── readFiling (원문 텍스트) ──────────────────────────
 
 
 def buildReadFiling(
@@ -475,38 +475,34 @@ def buildReadFiling(
     filing: Any,
     *,
     maxChars: int | None = None,
-    sections: bool = False,
 ) -> dict[str, Any]:
-    """공시 원문 (text / ZIP 섹션) 읽기 — rceptNo / liveFilings row / viewer URL 입력 자동 인식.
+    """공시 원문 텍스트 읽기 — rceptNo / liveFilings row / viewer URL 입력 자동 인식.
 
     Capabilities:
         - filing 입력 3 종 지원: 14 자리 숫자 str (rceptNo) / dict-like (Series/dict) /
           DART viewer URL (rcpNo query param 자동 추출).
         - dict 입력 시 ``rceptNo``/``docId``/``viewerUrl`` 키 우선순위 시도.
-        - sections=True → ZIP 다운로드 + 섹션 분리. False → 텍스트 본문.
         - maxChars 로 본문 truncate (긴 보고서의 메모리 보호).
 
     Args:
         company: Company 인스턴스.
         filing: 14 자리 rceptNo (str) / liveFilings row (dict|Series) / DART viewer URL.
         maxChars: 본문 최대 글자 수. None → 무제한 (긴 보고서는 위험).
-        sections: True → ZIP 다운로드 후 섹션 분리. False → 단일 텍스트 본문.
 
     Returns:
-        dict[str, Any] — ``docId``/``market``/``title``/``docUrl``/``viewerUrl``/``text``
-        또는 ``sections`` 키 (sections=True 시).
+        dict[str, Any] — ``docId``/``market``/``title``/``docUrl``/``viewerUrl``/``text``.
 
     Raises:
         ValueError: rceptNo 추출 실패 (14 자리 숫자도, viewer URL 의 ``rcpNo`` query 도 없음).
 
     Example:
         >>> # buildReadFiling(c, "20240315000123", maxChars=5000)
-        >>> # buildReadFiling(c, row, sections=True)  # liveFilings row 그대로
+        >>> # buildReadFiling(c, row)  # liveFilings row 그대로
 
     Guide:
         - "특정 공시 본문 보기" → ``c.readFiling(rceptNo)``.
-        - "ZIP 으로 섹션 분리 (긴 사업보고서)" → ``sections=True``.
         - "긴 보고서 일부만" → ``maxChars=5000``.
+        - "정기보고서 topic 비교" → ``c.panel(topic)``.
         - liveFilings 결과 row 그대로 → ``buildReadFiling(c, df.row(0, named=True))``.
 
     SeeAlso:
@@ -517,23 +513,21 @@ def buildReadFiling(
     Requires:
         - polars (입력 Series 처리) + dartlab.providers._common.filingHelpers — filingRecord / truncateText.
         - dartlab.core.dataLoader — DART_VIEWER.
-        - dartlab.providers.dart.openapi — ZIP 다운로드 (sections=True 시).
-        - DART_API_KEY (ZIP 다운로드 시).
+        - DART_API_KEY (documentText 호출 시).
 
     AIContext:
         AI 가 "X 공시 본문 요약" 질문 받으면 본 함수로 텍스트 fetch → 토큰 한계 내에서 요약.
-        긴 사업보고서 (수십만 자) 는 sections=True 후 특정 섹션만 골라 처리 권장.
+        긴 정기보고서 topic 분석은 panel catalog 와 ``c.panel(topic)`` 으로 처리.
 
     LLM Specifications:
         AntiPatterns:
             - rceptNo 추출 실패 → ValueError (raise). caller 가 try/except.
-            - sections=True 인데 ZIP 다운로드 실패 → 부분 결과 또는 예외.
             - maxChars=None 인데 본문이 수십만 자 → 토큰 폭증.
+            - 정기보고서 topic 분석을 readFiling 원문 분해로 우회.
         OutputSchema:
-            - dict — 키 ``docId``/``market``/``title``/``docUrl``/``viewerUrl`` + 본문 키
-              (``text`` 또는 ``sections``).
+            - dict — 키 ``docId``/``market``/``title``/``docUrl``/``viewerUrl`` + ``text``.
         Prerequisites:
-            - rceptNo 유효 (DART 에 실제 등록). DART_API_KEY (sections=True 시).
+            - rceptNo 유효 (DART 에 실제 등록). DART_API_KEY.
         Freshness:
             - DART 등록 후 즉시 (rate limit 외).
         Dataflow:
@@ -563,24 +557,8 @@ def buildReadFiling(
     if not rceptNo:
         raise ValueError("DART filing 읽기에는 rceptNo 또는 rcpNo가 포함된 viewer URL이 필요합니다.")
 
-    from dartlab.core.messaging import progress
-
-    if sections:
-        from dartlab.core.dartClient import DartClient, collectOneZip
-
-        progress(f"{company.corpName} 공시 ZIP 다운로드 중... ({rceptNo})")
-        client = DartClient()
-        parsed = collectOneZip(client, rceptNo)
-        return {
-            "docId": rceptNo,
-            "market": "KR",
-            "title": record.get("title") or record.get("reportNm") or record.get("report_nm") or "",
-            "docUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
-            "viewerUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
-            "sections": parsed or [],
-        }
-
     from dartlab.core.dartClient import openDart
+    from dartlab.core.messaging import progress
 
     progress(f"{company.corpName} 공시 원문 다운로드 중... ({rceptNo})")
     rawText = openDart().documentText(rceptNo)

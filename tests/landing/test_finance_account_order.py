@@ -89,6 +89,16 @@ def test_bs_depth_uses_total_sub_leaf_levels(orderModel) -> None:
     assert _depth(model, "ifrs-full_Equity", "자본총계", "BS") == 0
 
 
+def test_is_bottom_line_depth_uses_statement_level_ssot(orderModel) -> None:
+    """손익 최종행은 viewer 특수규칙이 아니라 sortOrder level mirror 로 depth 0 이 된다."""
+    model, _ = orderModel
+
+    assert _depth(model, "ifrs-full_ProfitLoss", "당기순이익", "IS") == 0
+    assert _depth(model, "ifrs-full_NetProfit", "당기순이익", "IS") == 0
+    assert _depth(model, "-표준계정코드 미사용-", "당기순이익", "IS") == 0
+    assert _depth(model, "dart_OperatingIncomeLoss", "영업이익", "IS") == 1
+
+
 def test_recent_ifrs_id_gaps_resolve_to_statement_order(orderModel) -> None:
     """최근 DART finance raw 에서 드러난 ID gap 이 raw ord fallback 으로 밀리지 않는다."""
     model, _ = orderModel

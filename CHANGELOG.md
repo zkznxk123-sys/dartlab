@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- landing viewer 의 폐기된 대량 다운로드 표면과 `downloadAll` 계열 export 경로 제거.
+- landing viewer 의 폐기된 대량 다운로드 표면과 export 경로 제거.
 - VSCode 확장 트랙 전체 폐기 — `ui/vscode/` (extension + webview Svelte 5 코드 ~44 source 파일), `.github/workflows/vscode.yml` publish 워크플로, `src/dartlab/cli/stdio.py` (확장 전용 JSONL 프로토콜), `src/dartlab/skills/specs/runtime/vscode.md` + 6 종 skill SSOT (`index/agent/mcp/graph/web/pyodide.json`) entry, `tests/audit/_baselines/skillGraphOrphans.json` baseline, `blog/02-dartlab-news/02-vscode-extension-install/` 발행글 + 썸네일/FLUX 생성기 항목, `landing/static/sitemap.xml` 의 `runtime.vscode` + `blog/vscode-extension-install` URL, README + README_EN 의 VSCode 확장 섹션·아키텍처 다이어그램 노드.
 - 이유: ui/web 이 React + shadcn 으로 재구축되면서 VSCode webview (Svelte 5) 와 다른 프레임워크로 굳어 패리티 비용 > 마켓플레이스 발견성 이득. Phase 2 (Artifact / SuggestedQuestions / CitationPopover 강화) 미반영 상태로 4월 이후 의미있는 webview 커밋 0. `dartlab` MCP + ui/web + landing 으로 진입로 충분.
 - 마켓플레이스 `eddmpython.dartlab` v0.2.3 unpublish 는 publisher 본인 권한으로 별도 수행 (`vsce unpublish eddmpython.dartlab`).

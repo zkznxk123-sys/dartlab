@@ -7,7 +7,6 @@ import { narrativeCore } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
 import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
 import { mergeDriftVariants, accountDepth, sceComponent, buildSceMatrix, buildSql } from '../src/lib/viewer/finance/financePivot.ts';
-import { toCsv, cellText, financeToExcel } from '../src/lib/viewer/dataExport.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 import { buildCompareBoard, compareRows, detectFinanceUnit, normalizeCompareTargets } from '../src/lib/viewer/compare/index.ts';
 import type { PanelBundle, PanelRow } from '../src/lib/viewer/types.ts';
@@ -117,23 +116,6 @@ eq(sce.byPeriod['2024'][1].values['자본총계'], 100, 'sceMatrix 당기순이�
 // buildSql 분기 단독 — Q4 = 연간−Q3누적 포함.
 const qsql = buildSql('005930', 'IS', 'quarter', 'CFS');
 eq(/'Q4'/.test(qsql) && /yr_amt - q3cum/.test(qsql), true, 'buildSql 분기 Q4(연간−Q3누적) 포함');
-
-// dataExport — CSV(BOM·인용 escaping)·cellText(태그·엔티티 제거)·financeToExcel(SpreadsheetML 멀티시트).
-eq(toCsv([['a']]).charCodeAt(0), 0xfeff, 'csv UTF-8 BOM');
-eq(toCsv([['a,b', 'c']]).includes('"a,b"'), true, 'csv 콤마 인용');
-eq(toCsv([['he"llo']]).includes('"he""llo"'), true, 'csv 따옴표 이스케이프');
-eq(cellText('<p>가<br>나</p>'), '가 나', 'cellText 태그 제거');
-eq(cellText('a&amp;b&nbsp;c'), 'a&b c', 'cellText 엔티티 디코드');
-eq(cellText(undefined), '', 'cellText undefined');
-const xls = financeToExcel([
-	{
-		name: '손익계산서',
-		statement: { kind: 'IS', scope: 'CFS', freq: 'annual', periods: ['2024'], unit: 'KRW', rows: [{ accountId: 'A', label: '매출액', ord: 0, depth: 2, values: { '2024': 100 } }] }
-	}
-]);
-eq(/ss:Name="손익계산서"/.test(xls), true, 'xls 시트명');
-eq(/ss:Type="Number">100</.test(xls), true, 'xls 숫자셀');
-eq(xls.includes('progid="Excel.Sheet"'), true, 'xls Excel 헤더');
 
 const cmpRow = (patch: Partial<PanelRow>): PanelRow => ({
 	chapter: 'III. 재무에 관한 사항',

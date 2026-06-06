@@ -93,8 +93,6 @@
     "src/dartlab/gather/dart/remote.py::getDf",
     "src/dartlab/gather/dart/remote.py::getDfAll",
     "src/dartlab/gather/dart/remote.py::getJson",
-    "src/dartlab/gather/dart/zipCollector.py::collect",
-    "src/dartlab/gather/dart/zipCollector.py::rebuildFromZips",
     "src/dartlab/gather/ecb/catalog.py::getEntry",
     "src/dartlab/gather/ecb/catalog.py::hasIndicator",
     "src/dartlab/gather/ecb/catalog.py::listCatalog",

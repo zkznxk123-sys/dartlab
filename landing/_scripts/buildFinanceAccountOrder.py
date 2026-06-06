@@ -43,7 +43,7 @@ def _depthMaps(sortData: dict[str, Any], accounts: dict[str, Any]) -> dict[str, 
         for snakeId, meta in rows.items():
             label = standardAccounts.get(snakeId, {}).get("korName", "")
             level = int(meta.get("level", 1))
-            if snakeId.startswith("total_") or "총계" in label:
+            if level <= 0 or snakeId.startswith("total_") or "총계" in label:
                 stmtDepths[snakeId] = 0
             else:
                 stmtDepths[snakeId] = max(1, min(level, 3))

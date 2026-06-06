@@ -1,13 +1,13 @@
-"""DART document.xml → 섹션 row list (정공법).
+"""DART document.xml → panel title-row list.
 
 원본 XML 의 ``<TITLE ATOC="Y" AASSOCNOTE="D-0-3-1-0">`` 명시 hierarchy 와
 ``<TABLE>`` rowspan/colspan + ``<SPAN USERMARK="F-14 B">`` 가/나/다 bold marker
 를 직접 사용 → legacy parser layer 의 regex 추론을 builder 단에서 사전 해결.
 
 기존 SECTION-1/SECTION-2 통째 본문 추출은 chapter 본문이 4MB 통째로 cell 에
-들어가 legacy parser layer 가 regex 로 sub-section 분리 → 추론 오류 다발. 본 모듈의
+들어가 legacy parser layer 가 regex 로 하위 title 을 분리 → 추론 오류 다발. 본 모듈의
 ``parseSectionsByTitle`` 은 각 ``<TITLE>`` 별로
-row 를 분리하고 직속 본문만 attach — sub-section 별 cell value 가 작아짐 +
+row 를 분리하고 직속 본문만 attach — title 별 cell value 가 작아짐 +
 hierarchy (AASSOCNOTE / ATOCID) 보존.
 
 회귀 보장:
@@ -17,9 +17,9 @@ hierarchy (AASSOCNOTE / ATOCID) 보존.
   regression 0.
 
 호출:
-    >>> from dartlab.providers.dart.build.sections import parseSectionsByTitle
-    >>> sections = parseSectionsByTitle(xmlContent)
-    >>> sections[0]
+    >>> from dartlab.providers.dart.panel.build.titleRows import parseSectionsByTitle
+    >>> rows = parseSectionsByTitle(xmlContent)
+    >>> rows[0]
     {'order': 0, 'title': '사 업 보 고 서', 'content': '...', 'atocid': '402', 'assocnote': 'COVER'}
 """
 

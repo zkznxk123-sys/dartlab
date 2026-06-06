@@ -2,12 +2,6 @@
   "missingMirrors": [
     "bis/catalog.py",
     "bulkData/newsHeadlines.py",
-    "dart/sections/build/builder.py",
-    "dart/sections/build/refScan/aclassExtractor.py",
-    "dart/sections/build/refScan/refMatcher.py",
-    "dart/sections/build/refScan/titleNormalizer.py",
-    "dart/sections/build/refScan/zipScanWorker.py",
-    "dart/sections/build/walker.py",
     "ecb/catalog.py",
     "imf/catalog.py",
     "infra/sdmxTypes.py",

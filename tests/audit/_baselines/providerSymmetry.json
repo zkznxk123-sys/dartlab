@@ -4,11 +4,7 @@
     "edgar.executivePay (dart.executivePay)",
     "edgar.flow (dart.flow)",
     "edgar.notesDetail (dart.notesDetail)",
-    "edgar.relatedPartyTx (dart.relatedPartyTx)",
-    "edgar.sectionsAs (dart.sectionsAs)",
-    "edgar.sectionsLazy (dart.sectionsLazy)",
-    "edgar.sectionsLong (dart.sectionsLong)",
-    "edgar.sectionsTables (dart.sectionsTables)"
+    "edgar.relatedPartyTx (dart.relatedPartyTx)"
   ],
   "shallow": []
 }

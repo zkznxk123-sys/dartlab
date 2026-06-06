@@ -2,7 +2,7 @@
 
 수집 일원화(ETL 분할): fetch 는 gather/dart 전담, 본 패키지는 Transform 전담.
 
-- ``sections`` — zip document.xml → ``<TITLE>`` 단위 sections rows (parseSectionsByTitle).
+- panel title rows — zip document.xml → ``<TITLE>`` 단위 rows (parseSectionsByTitle).
 - ``saver`` — enrich(재무/보고서 컬럼) + 정렬 + atomic parquet write.
 
 gather 수집 orchestration 은 ``core.dartBuild`` DIP 로 본 패키지 함수를 위임받는다
@@ -16,7 +16,7 @@ class _DartBuildProvider:
     """core.dartBuild.DartBuildProvider 구현 — raw→parquet 변환을 providers 가 전담."""
 
     def parseSectionsByTitle(self, *args, **kwargs):
-        """zip XML → sections rows.
+        """zip XML → panel title rows.
 
         Args:
             *args: delegated parser positional arguments.
@@ -32,7 +32,7 @@ class _DartBuildProvider:
             >>> hasattr(_DartBuildProvider(), "parseSectionsByTitle")
             True
         """
-        from dartlab.providers.dart.build.sections import parseSectionsByTitle
+        from dartlab.providers.dart.panel.build.titleRows import parseSectionsByTitle
 
         return parseSectionsByTitle(*args, **kwargs)
 
@@ -53,7 +53,7 @@ class _DartBuildProvider:
             >>> hasattr(_DartBuildProvider(), "splitLargeContent")
             True
         """
-        from dartlab.providers.dart.build.sections import splitLargeContent
+        from dartlab.providers.dart.panel.build.titleRows import splitLargeContent
 
         return splitLargeContent(*args, **kwargs)
 

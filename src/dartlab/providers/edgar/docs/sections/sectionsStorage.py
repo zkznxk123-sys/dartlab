@@ -27,7 +27,7 @@ mmap + columnar projection + lazy pivot 으로 read.
     data/edgar/sections/{ticker}/_index.parquet  ─ 분기 list + filing meta (small)
 
 DART sectionsStorage 와 동일 API. EDGAR 특화 차이:
-- path: ``edgar/sections`` (DART 는 ``dart/sections``)
+- path: ``edgar/sections`` (DART KR 본문은 ``dart/panel`` artifact)
 - valueColumn 기본: ``content_plain`` (EDGAR markdown 이 SSOT analytic surface).
 - ``loadSectionsIndex`` 신규 — accession_no 기반 freshness diff 가 ``_index.parquet`` 만 scan.
 """

@@ -1709,22 +1709,20 @@ class Company:
         filing: Any,
         *,
         maxChars: int | None = None,
-        sections: bool = False,
     ) -> dict[str, Any]:
         """접수번호 또는 liveFilings row로 공시 원문을 읽는다.
 
         Capabilities:
             - 접수번호(str) 직접 지정 또는 DataFrame row 자동 파싱
-            - 전문 텍스트 또는 ZIP 기반 구조화 섹션 반환
+            - 전문 텍스트 반환
             - 텍스트 길이 제한 (truncation) 지원
 
         Args:
             filing: 접수번호(str) 또는 disclosure()/liveFilings() row.
-            maxChars: 텍스트 최대 길이 (sections=False일 때만 적용).
-            sections: True면 ZIP 기반 구조화된 섹션 목록 반환.
+            maxChars: 텍스트 최대 길이.
 
         Returns:
-            dict -- rceptNo, viewerUrl, text/sections 등 원문 정보.
+            dict -- rceptNo, viewerUrl, text 등 원문 정보.
 
         Requires:
             API 키: DART_API_KEY
@@ -1733,15 +1731,15 @@ class Company:
 
             c = Company("005930")
             result = c.readFiling("20240315000123")
-            result = c.readFiling("20240315000123", sections=True)
 
         AIContext:
             - 공시 원문 텍스트를 LLM 컨텍스트에 주입하여 심층 분석 수행
-            - sections=True로 구조화하면 특정 섹션만 선택적 분석 가능
+            - 정기보고서의 topic 단위 분석은 panel catalog 와 c.panel(topic)을 사용
 
         Guide:
             - "이 공시 내용 보여줘" → c.readFiling(접수번호)
             - "공시 원문 분석해줘" → c.readFiling()으로 원문 확보 후 ask()로 분석
+            - "사업보고서 topic 비교" → c.panel(topic)
 
         SeeAlso:
             - liveFilings: 최신 공시 목록에서 접수번호 확인
@@ -1750,12 +1748,11 @@ class Company:
         LLM Specifications:
             AntiPatterns:
                 - 종목 이름 (str) 을 filing 인자로 전달 (rceptNo 또는 row 만)
-                - sections=True + maxChars 동시 (sections 일 때 maxChars 무시)
+                - 정기보고서 topic 분석을 readFiling 원문 분해로 우회
             OutputSchema:
                 - rceptNo : str — 공시 접수번호
                 - viewerUrl : str — DART 뷰어 링크
-                - text : str — 공시 본문 (sections=False)
-                - sections : list[dict] — 섹션 목록 (sections=True)
+                - text : str — 공시 본문
             Freshness:
                 DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download.
 
@@ -1764,7 +1761,7 @@ class Company:
         """
         from dartlab.providers.dart.builder.filingsCatalog import buildReadFiling
 
-        return buildReadFiling(self, filing, maxChars=maxChars, sections=sections)
+        return buildReadFiling(self, filing, maxChars=maxChars)
 
     # ── 원본 데이터 (property) ──
 

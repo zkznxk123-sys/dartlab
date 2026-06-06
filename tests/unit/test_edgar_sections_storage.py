@@ -4,7 +4,7 @@
 - 모듈 import 성공 + DART sectionsStorage 와 API parity
 - artifact 부재 ticker 에 대해 hasSectionsArtifact → False, loadSectionsLong/Wide → None
 - ``DATA_RELEASES["edgarSections"]`` 등록 + nested=True
-- path 분리 — DART ``dart/sections`` 와 EDGAR ``edgar/sections`` cross-pollination 0
+- path 분리 — DART KR ``dart/panel`` 와 EDGAR ``edgar/sections`` cross-pollination 0
 """
 
 from __future__ import annotations

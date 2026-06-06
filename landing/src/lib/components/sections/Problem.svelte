@@ -46,7 +46,7 @@
 				</div>
 				<div class="space-y-2.5 font-mono text-sm">
 					<div class="flex items-center gap-3 text-dl-text">
-						<span class="text-dl-primary">✓</span> 모든 공시의 모든 섹션, 이미 구조화 완료
+						<span class="text-dl-primary">✓</span> 모든 공시 topic, panel 로 구조화 완료
 					</div>
 					<div class="flex items-center gap-3 text-dl-text">
 						<span class="text-dl-primary">✓</span> 텍스트 + 숫자 + 보고서, 하나의 Company 객체
@@ -59,7 +59,7 @@
 						<span class="text-dl-primary">✓</span> DART · EDGAR 동일한 `Company` 인터페이스
 					</div>
 					<div class="flex items-center gap-3 text-dl-text">
-						<span class="text-dl-primary">✓</span> 구조화된 섹션이 바로 LLM 컨텍스트로
+						<span class="text-dl-primary">✓</span> 구조화된 panel topic 이 바로 LLM 컨텍스트로
 					</div>
 					<div class="flex items-center gap-3 text-dl-text">
 						<span class="text-dl-accent">✓</span> 전 상장사 횡단 스캔

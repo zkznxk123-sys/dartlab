@@ -148,11 +148,6 @@ def openDart(*args: Any, **kwargs: Any) -> Any:
     return _call("dart", "OpenDart", *args, **kwargs)
 
 
-def collectOneZip(*args: Any, **kwargs: Any) -> Any:
-    """단일 공시 ZIP 다운로드+파싱 — gather/dart 위임. Requires: gather.dart + 인터넷. Raises: httpx/ValueError. Example: >>> collectOneZip(client, rceptNo)  # doctest: +SKIP"""
-    return _call("zipCollector", "_collectOneZip", *args, **kwargs)
-
-
 def dartHtmlToText(*args: Any, **kwargs: Any) -> Any:
     """DART 공시 HTML → text normalize — gather/dart 위임. Requires: gather.dart. Raises: 없음. Example: >>> dartHtmlToText(html)  # doctest: +SKIP"""
     return _call("collector", "_htmlToText", *args, **kwargs)

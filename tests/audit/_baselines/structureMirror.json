@@ -1,6 +1,5 @@
 {
   "missingMirrors": [
-    "dart/build/sections.py",
     "dart/builder/notesSplit.py",
     "dart/disclosureDiff.py",
     "dart/finance/pivotArrow.py",
@@ -8,6 +7,7 @@
     "dart/notes.py",
     "dart/panel/build/leafSplit.py",
     "dart/panel/build/noteTaxonomyData.py",
+    "dart/panel/build/titleRows.py",
     "dart/panel/canonical/canonicalData.py",
     "dart/panel/spine/spineData.py",
     "dart/parse/htmlTableParser.py",
@@ -15,7 +15,6 @@
     "dart/sectionPeriod.py",
     "dart/sectionTopic.py",
     "dart/sectionXml.py",
-    "dart/sections.py",
     "dart/tableAI.py",
     "dart/tableParser.py",
     "dart/tableRows.py",

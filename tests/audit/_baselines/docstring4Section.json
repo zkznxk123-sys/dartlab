@@ -13,10 +13,6 @@
     "src/dartlab/providers/dart/panel/build/dechunkNotes.py::dechunkNotes",
     "src/dartlab/providers/dart/panel/build/noteTaxonomy.py::buildAndWrite",
     "src/dartlab/providers/dart/panel/build/noteTaxonomy.py::buildNoteTaxonomy",
-    "src/dartlab/providers/dart/panel/build/noteTaxonomy.py::renderModule",
-    "src/dartlab/providers/dart/sections.py::sectionRows",
-    "src/dartlab/providers/dart/sections.py::sectionTables",
-    "src/dartlab/providers/dart/sections.py::sectionTexts",
-    "src/dartlab/providers/dart/sections.py::sectionsWide"
+    "src/dartlab/providers/dart/panel/build/noteTaxonomy.py::renderModule"
   ]
 }

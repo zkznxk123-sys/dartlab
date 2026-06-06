@@ -54,9 +54,9 @@
     },
     {
       "id": "engines.company.docsInternals",
-      "title": "Company Docs Internals",
+      "title": "Company Panel Internals",
       "category": "engines",
-      "purpose": "Company 의 docs (사업보고서 sections) 내부 파이프라인 — fetch → parse → topic 매핑.",
+      "purpose": "Company 의 DART panel 공시 본문 파이프라인 — original zip → panel artifact → topic wide view 내부 추적.",
       "inDegree": 0,
       "outDegree": 4,
       "cluster": "company",
