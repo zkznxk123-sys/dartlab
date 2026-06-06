@@ -41,6 +41,16 @@ class TestParseNumStr:
         """▲ 기호도 마이너스 처리."""
         assert parseNumStr("▲1,000") == -1000.0
 
+    def test_parenthesized_negative(self):
+        """회계 괄호 음수 ``(1,234)`` = -1234 (valueRaw 계약 — 결손금/순손실 등)."""
+        assert parseNumStr("(1,234)") == -1234.0
+        assert parseNumStr("(500)") == -500.0
+
+    def test_parenthesized_annotation_is_not_number(self):
+        """괄호 안이 숫자가 아니면(주석참조 등) 음수가 아니라 None."""
+        assert parseNumStr("(주3)") is None
+        assert parseNumStr("()") is None
+
     def test_none_input(self):
         assert parseNumStr(None) is None
 

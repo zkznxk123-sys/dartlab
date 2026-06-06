@@ -422,6 +422,19 @@ def _chooseRowTargets(long: pl.DataFrame, present: list[str], period: list[str] 
     return [sortPeriods(list(pool), descending=True)[0]] if pool else []
 
 
+def _normRowPeriod(period: list[str] | str | None) -> list[str] | str | None:
+    """row 모드 period 입력을 panel 열 라벨로 정규화 — 연도 ``YYYY`` → ``YYYYQ4``.
+
+    row panel 열은 항상 ``YYYYQn`` 이라 bare 연도는 어느 열과도 안 맞아 조용히 빈 결과가 됐다.
+    finance 경로(``_financePanelPeriod``)와 동형으로 연도를 연말 분기로 정규화한다.
+    """
+    if period is None:
+        return None
+    if isinstance(period, str):
+        return _financePanelPeriod(period)
+    return [_financePanelPeriod(p) for p in period]
+
+
 def _compareRows(
     codes: list[str],
     *,
@@ -431,6 +444,7 @@ def _compareRows(
     topic: str | None,
 ) -> tuple[pl.DataFrame, list[str], str | None]:
     """row 모드 compare 결과와 실제 period/emptyReason 을 한 번에 만든다."""
+    period = _normRowPeriod(period)
     long, present = _rowLongFrame(codes, marketNs=marketNs, scopeVal=scopeVal, period=period, topic=topic)
     if long is None:
         if topic:

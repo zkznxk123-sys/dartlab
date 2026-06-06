@@ -21,7 +21,7 @@ _TRIANGLE_RE = re.compile(r"[△▲\u25B3\u25B2]")
 
 
 def parseNumStr(s: str | None) -> float | None:
-    """문자열 숫자를 float로 변환. 콤마, △(마이너스), % 처리."""
+    """문자열 숫자를 float로 변환. 콤마, △/▲(마이너스), 회계 괄호 음수 ``(1,234)``, % 처리."""
     if s is None:
         return None
     s = str(s).strip()
@@ -31,6 +31,11 @@ def parseNumStr(s: str | None) -> float | None:
     if _TRIANGLE_RE.match(s):
         negative = True
         s = _TRIANGLE_RE.sub("", s)
+    elif s.startswith("(") and s.endswith(")"):
+        # 회계 괄호 음수 — valueRaw 계약상 "(1,234)" = -1234 (cellSchema). 괄호 안이
+        # 숫자가 아니면(예 "(주3)" 주석참조) 아래 float() 이 None 으로 떨군다.
+        negative = True
+        s = s[1:-1].strip()
     s = s.replace(",", "").replace("%", "").strip()
     if not s:
         return None

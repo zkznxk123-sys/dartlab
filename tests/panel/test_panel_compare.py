@@ -353,6 +353,40 @@ def test_compare_row_falls_back_to_latest_union_when_no_common_period(monkeypatc
     assert diag["missingCodes"] == ["222222"]
 
 
+def test_compare_row_year_period_maps_to_year_end_quarter(monkeypatch: pytest.MonkeyPatch) -> None:
+    """row 모드 period='2025'(연도)는 조용히 빈 결과가 아니라 연말 분기(2025Q4)로 정규화한다.
+
+    회귀 — docstring 은 period='2025' 를 허용하나, row panel 열은 항상 YYYYQn 이라
+    옛 row 경로는 bare 연도를 정규화 안 해 어느 열과도 안 맞아 빈 표가 됐다(조용한 실패).
+    """
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+
+    def fakeReadWide(code: str, *, marketNs: str, periods: list[str] | None, tag: bool) -> pl.DataFrame:
+        assert periods == ["2025Q4"], f"row 연도 정규화 실패 — readWide 가 받은 prune: {periods}"
+        return pl.DataFrame(
+            {
+                "chapter": ["III"],
+                "sectionLeaf": ["2. 재무제표"],
+                "blockLeaf": ["공통항목"],
+                "leafType": ["table"],
+                "disclosureKey": ["BS"],
+                "scope": ["consolidated"],
+                "2025Q4": [f"v-{code[-1]}"],
+            }
+        )
+
+    monkeypatch.setattr(cmp, "readWide", fakeReadWide)
+    df = cmp.compare(["111111", "222222"], period="2025")
+    assert df.height == 1
+    assert df[0, "111111"] == "v-1"
+    assert df[0, "222222"] == "v-2"
+
+    diag = cmp._compareDiagnostics(["111111", "222222"], period="2025")
+    assert diag["resolvedPeriods"] == ["2025Q4"]
+
+
 def test_compare_diagnostics_counts_shared_partial_solo(monkeypatch: pytest.MonkeyPatch) -> None:
     """3사 diagnostics 는 shared/partial/solo row 를 구분한다."""
     import importlib
@@ -760,6 +794,42 @@ def test_compare_finance_scales_statement_variants_independently(monkeypatch: py
     per = cmp._companyCellsByPeriod("111111", "is", "quarter", "consolidated", "kr")
     assert per["2026Q1"]["dart_OperatingIncomeLoss"][1] == 7
     assert per["2026Q1"]["ifrs-full_Revenue"][1] == 2_000
+
+
+def test_compare_finance_parses_parenthesized_negative(monkeypatch: pytest.MonkeyPatch) -> None:
+    """재무 셀 음수 표기 '(1,234)'(valueRaw 계약)도 acode 행을 잃지 않고 음수로 환산한다.
+
+    회귀 — 결손금/당기순손실/기타포괄손익 등은 valueRaw 가 괄호 음수로 신고된다.
+    옛 parseNumStr 는 괄호를 못 읽어 num=None → acode 가 bucket 에서 빠져 행이 통째로
+    사라지거나 한 회사만 채워졌다(사상④·honest-gap 동시 위반).
+    """
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    cell = importlib.import_module("dartlab.providers.dart.panel.cell")
+
+    monkeypatch.setattr(
+        cmp,
+        "_detectUnitScalesByStatement",
+        lambda code, marketNs, statements=None: {"BS": {"2025Q4": 1}},
+    )
+    monkeypatch.setattr(cell, "_cellsFromPanel", lambda code, marketNs, periods: pl.DataFrame({"dummy": [1]}))
+    monkeypatch.setattr(
+        cell,
+        "_cellWideFromCells",
+        lambda cells, *, statement, freq, scope: pl.DataFrame(
+            {
+                "axisPath": ["", ""],
+                "acode": ["ifrs-full_RetainedEarnings", "ifrs-full_Assets"],
+                "label": ["이익잉여금(결손금)", "자산총계"],
+                "2025Q4": ["(1,234)", "5,000"],
+            }
+        ),
+    )
+
+    per = cmp._companyCellsByPeriod("111111", "bs", "quarter", "consolidated", "kr")
+    assert per["2025Q4"]["ifrs-full_RetainedEarnings"] == ("이익잉여금(결손금)", -1234.0)
+    assert per["2025Q4"]["ifrs-full_Assets"] == ("자산총계", 5000.0)
 
 
 def test_compare_unit_scale_is_statement_scoped(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
