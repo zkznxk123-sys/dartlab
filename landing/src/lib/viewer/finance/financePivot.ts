@@ -10,6 +10,22 @@ import type {
 	SceMatrixData,
 	SceRow
 } from './types';
+import {
+	FINANCE_ACCOUNT_DEPTH,
+	FINANCE_ACCOUNT_ID_TO_SNAKE,
+	FINANCE_ACCOUNT_NAME_TO_SNAKES,
+	FINANCE_ACCOUNT_ORDER,
+	type FinanceStatementOrderKey
+} from './accountOrder';
+
+type NumberMap = Record<string, number>;
+type StringMap = Record<string, string>;
+type NameCandidateMap = Record<string, readonly string[]>;
+
+const ACCOUNT_ORDER = FINANCE_ACCOUNT_ORDER as Record<FinanceStatementOrderKey, NumberMap>;
+const ACCOUNT_DEPTH = FINANCE_ACCOUNT_DEPTH as Record<FinanceStatementOrderKey, NumberMap>;
+const ACCOUNT_ID_TO_SNAKE = FINANCE_ACCOUNT_ID_TO_SNAKE as StringMap;
+const ACCOUNT_NAME_TO_SNAKES = FINANCE_ACCOUNT_NAME_TO_SNAKES as NameCandidateMap;
 
 export interface QueryRow {
 	period: string;
@@ -96,34 +112,68 @@ export function buildSql(stockCode: string, kind: FinanceKind, freq: FinanceFreq
 	`;
 }
 
-// 계정 depth — account_id(XBRL 개념)의 구조 분류. 총계/소계 개념집합은 회사간 매우 안정(실측 15/15).
-// standardAccounts.level 은 커버리지·의미 오류로 부적합. 0=총계(굵게)·1=소계·2=리프(들여쓰기).
-const DEPTH0 = new Set([
-	'ifrs-full_Assets',
-	'ifrs-full_Liabilities',
-	'ifrs-full_Equity',
-	'ifrs-full_EquityAndLiabilities',
-	'ifrs-full_ComprehensiveIncome',
-	'ifrs-full_ProfitLoss'
-]);
-const DEPTH1 = new Set([
-	'ifrs-full_CurrentAssets',
-	'ifrs-full_NoncurrentAssets',
-	'ifrs-full_CurrentLiabilities',
-	'ifrs-full_NoncurrentLiabilities',
-	'ifrs-full_EquityAttributableToOwnersOfParent',
-	'ifrs-full_GrossProfit',
-	'dart_OperatingIncomeLoss',
-	'ifrs-full_OperatingIncomeLoss',
-	'ifrs-full_ProfitLossBeforeTax',
-	'ifrs-full_ProfitLossFromContinuingOperations',
-	'ifrs-full_OtherComprehensiveIncome',
-	'ifrs-full_OtherComprehensiveIncomeNetOfTax'
-]);
-export function accountDepth(accountId: string): number {
-	if (DEPTH0.has(accountId)) return 0;
-	if (DEPTH1.has(accountId)) return 1;
-	return 2;
+const ACCOUNT_PREFIX_RE = /^(?:ifrs-full_|ifrs_|dart_|ifrs-smes_)/;
+const UNKNOWN_ORDER_BASE = 1_000_000;
+
+function statementOrderKey(kind?: FinanceKind): FinanceStatementOrderKey | null {
+	if (kind === 'BS' || kind === 'CF') return kind;
+	if (kind === 'IS' || kind === 'CIS') return 'IS';
+	return null;
+}
+
+function stripAccountPrefix(accountId: string): string {
+	return accountId.replace(ACCOUNT_PREFIX_RE, '');
+}
+
+function orderMap(kind?: FinanceKind): Record<string, number> | null {
+	const key = statementOrderKey(kind);
+	return key ? ACCOUNT_ORDER[key] : null;
+}
+
+function depthMap(kind?: FinanceKind): Record<string, number> | null {
+	const key = statementOrderKey(kind);
+	return key ? ACCOUNT_DEPTH[key] : null;
+}
+
+function accountDepthFromSnake(snake: string, kind?: FinanceKind): number | null {
+	return (
+		depthMap(kind)?.[snake] ??
+		ACCOUNT_DEPTH.BS[snake] ??
+		ACCOUNT_DEPTH.IS[snake] ??
+		ACCOUNT_DEPTH.CF[snake] ??
+		null
+	);
+}
+
+function firstOrderedCandidate(candidates: readonly string[] | undefined, order: Record<string, number> | null): string | null {
+	if (!candidates?.length) return null;
+	if (!order) return candidates[0] ?? null;
+	return candidates.find((snake) => order[snake] != null) ?? candidates[0] ?? null;
+}
+
+export function accountSnake(accountId: string, label = '', kind?: FinanceKind): string | null {
+	const order = orderMap(kind);
+	const stripped = stripAccountPrefix(accountId || '');
+	const idSnake = stripped ? ACCOUNT_ID_TO_SNAKE[stripped] : undefined;
+	if (idSnake && (!order || order[idSnake] != null)) return idSnake;
+
+	const labelSnake = firstOrderedCandidate(ACCOUNT_NAME_TO_SNAKES[label], order);
+	if (labelSnake && (!order || order[labelSnake] != null)) return labelSnake;
+	return idSnake ?? labelSnake;
+}
+
+// 0=총계, 1=소계/대분류, 2+=리프. 정렬/레벨의 원천은 Python mapper 와 같은 account SSOT mirror.
+export function accountDepth(accountId: string, label = '', kind?: FinanceKind): number {
+	const snake = accountSnake(accountId, label, kind);
+	if (!snake) return 2;
+	return accountDepthFromSnake(snake, kind) ?? 2;
+}
+
+export function accountDisplayOrder(accountId: string, label: string, kind: FinanceKind, rawOrd: number | null): number {
+	const snake = accountSnake(accountId, label, kind);
+	const order = snake ? orderMap(kind)?.[snake] : null;
+	if (order != null) return order;
+	return UNKNOWN_ORDER_BASE + (rawOrd ?? Number.MAX_SAFE_INTEGER);
 }
 
 // 최신좌측 정렬 — "YYYY"/"YYYYQn" 문자열 내림차순.
@@ -162,11 +212,18 @@ export function pivot(rows: QueryRow[], kind: FinanceKind, scope: FinanceScope, 
 	const byAcct = new Map<string, FinanceStmtRow>();
 	for (const r of rows) {
 		let row = byAcct.get(r.acct);
+		const displayOrd = accountDisplayOrder(r.acct, r.label, kind, r.ord);
 		if (!row) {
-			row = { accountId: r.acct, label: r.label || r.acct, ord: r.ord ?? Number.MAX_SAFE_INTEGER, depth: accountDepth(r.acct), values: {} };
+			row = {
+				accountId: r.acct,
+				label: r.label || r.acct,
+				ord: displayOrd,
+				depth: accountDepth(r.acct, r.label, kind),
+				values: {}
+			};
 			byAcct.set(r.acct, row);
 		}
-		row.ord = Math.min(row.ord, r.ord ?? Number.MAX_SAFE_INTEGER);
+		row.ord = Math.min(row.ord, displayOrd);
 		row.values[r.period] = r.val;
 	}
 	return { kind, scope, freq, periods, rows: mergeDriftVariants([...byAcct.values()]), unit: 'KRW' };

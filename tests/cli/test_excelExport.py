@@ -2,7 +2,7 @@
 
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
@@ -10,8 +10,6 @@ import pytest
 from dartlab.viz.export.excel import exportToExcel, listAvailableModules
 
 pytestmark = pytest.mark.integration
-
-PATCH_TARGET = "dartlab.providers.dart.finance.pivot.buildAnnual"
 
 
 class _ShowableMock(MagicMock):
@@ -33,6 +31,7 @@ def mockCompany():
     c._hasDocs = True
     c._hasReport = True
     c._cache = {"_finance_q_CFS": ({"IS": {"sales": [1, 2, 3]}, "BS": {}, "CF": {}}, ["2022_Q1"])}
+    c._buildFinanceSeries = MagicMock(return_value=None)
     c.report = MagicMock()
     c._report.dividend = None
     c._report.employee = None
@@ -46,20 +45,20 @@ def test_exportToExcel_creates_file(mockCompany):
         "CF": {"operating_cashflow": [50, 60, 70]},
     }
     years = ["2022", "2023", "2024"]
+    mockCompany._buildFinanceSeries = MagicMock(return_value=(series, years))
 
-    with patch(PATCH_TARGET, return_value=(series, years)):
-        with tempfile.TemporaryDirectory() as tmpDir:
-            outPath = Path(tmpDir) / "test.xlsx"
-            result = exportToExcel(mockCompany, outputPath=outPath, modules=["IS", "BS", "CF"])
-            assert Path(result).exists()
-            assert result.endswith(".xlsx")
+    with tempfile.TemporaryDirectory() as tmpDir:
+        outPath = Path(tmpDir) / "test.xlsx"
+        result = exportToExcel(mockCompany, outputPath=outPath, modules=["IS", "BS", "CF"])
+        assert Path(result).exists()
+        assert result.endswith(".xlsx")
 
-            from openpyxl import load_workbook
+        from openpyxl import load_workbook
 
-            wb = load_workbook(result)
-            assert "손익계산서" in wb.sheetnames
-            assert "재무상태표" in wb.sheetnames
-            assert "현금흐름표" in wb.sheetnames
+        wb = load_workbook(result)
+        assert "손익계산서" in wb.sheetnames
+        assert "재무상태표" in wb.sheetnames
+        assert "현금흐름표" in wb.sheetnames
 
 
 def test_exportToExcel_module_selection(mockCompany):
@@ -69,36 +68,36 @@ def test_exportToExcel_module_selection(mockCompany):
         "CF": {},
     }
     years = ["2023", "2024"]
+    mockCompany._buildFinanceSeries = MagicMock(return_value=(series, years))
 
-    with patch(PATCH_TARGET, return_value=(series, years)):
-        with tempfile.TemporaryDirectory() as tmpDir:
-            outPath = Path(tmpDir) / "test.xlsx"
-            result = exportToExcel(mockCompany, outputPath=outPath, modules=["IS"])
+    with tempfile.TemporaryDirectory() as tmpDir:
+        outPath = Path(tmpDir) / "test.xlsx"
+        result = exportToExcel(mockCompany, outputPath=outPath, modules=["IS"])
 
-            from openpyxl import load_workbook
+        from openpyxl import load_workbook
 
-            wb = load_workbook(result)
-            assert "손익계산서" in wb.sheetnames
-            assert "재무상태표" not in wb.sheetnames
+        wb = load_workbook(result)
+        assert "손익계산서" in wb.sheetnames
+        assert "재무상태표" not in wb.sheetnames
 
 
 def test_exportToExcel_default_filename(mockCompany):
     series = {"IS": {"sales": [100]}, "BS": {}, "CF": {}}
     years = ["2024"]
+    mockCompany._buildFinanceSeries = MagicMock(return_value=(series, years))
 
-    with patch(PATCH_TARGET, return_value=(series, years)):
-        with tempfile.TemporaryDirectory() as tmpDir:
-            import os
+    with tempfile.TemporaryDirectory() as tmpDir:
+        import os
 
-            origCwd = os.getcwd()
-            os.chdir(tmpDir)
-            try:
-                result = exportToExcel(mockCompany, modules=["IS"])
-                assert "005930" in result
-                assert "삼성전자" in result
-                assert result.endswith(".xlsx")
-            finally:
-                os.chdir(origCwd)
+        origCwd = os.getcwd()
+        os.chdir(tmpDir)
+        try:
+            result = exportToExcel(mockCompany, modules=["IS"])
+            assert "005930" in result
+            assert "삼성전자" in result
+            assert result.endswith(".xlsx")
+        finally:
+            os.chdir(origCwd)
 
 
 def test_exportToExcel_no_data_raises(mockCompany):
@@ -125,21 +124,20 @@ def test_ratios_sheet(mockCompany):
     years = ["2022", "2023", "2024"]
     mockCompany._buildFinanceSeries = lambda **kwargs: (annualSeries, years)
 
-    with patch(PATCH_TARGET, return_value=(annualSeries, years)):
-        with tempfile.TemporaryDirectory() as tmpDir:
-            outPath = Path(tmpDir) / "test.xlsx"
-            result = exportToExcel(mockCompany, outputPath=outPath, modules=["ratios"])
+    with tempfile.TemporaryDirectory() as tmpDir:
+        outPath = Path(tmpDir) / "test.xlsx"
+        result = exportToExcel(mockCompany, outputPath=outPath, modules=["ratios"])
 
-            from openpyxl import load_workbook
+        from openpyxl import load_workbook
 
-            wb = load_workbook(result)
-            assert "재무비율" in wb.sheetnames
-            ws = wb["재무비율"]
-            assert ws.cell(2, 1).value == "수익성"
-            assert ws.cell(2, 2).value is None
-            assert ws.cell(3, 1).value is not None
-            headers = [ws.cell(1, c).value for c in range(2, 5)]
-            assert headers == ["2022", "2023", "2024"]
+        wb = load_workbook(result)
+        assert "재무비율" in wb.sheetnames
+        ws = wb["재무비율"]
+        assert ws.cell(2, 1).value == "수익성"
+        assert ws.cell(2, 2).value is None
+        assert ws.cell(3, 1).value is not None
+        headers = [ws.cell(1, c).value for c in range(2, 5)]
+        assert headers == ["2022", "2023", "2024"]
 
 
 def test_dataframe_property_as_sheet(mockCompany):
@@ -155,8 +153,8 @@ def test_dataframe_property_as_sheet(mockCompany):
         from openpyxl import load_workbook
 
         wb = load_workbook(result)
-        assert "배당" in wb.sheetnames
-        ws = wb["배당"]
+        assert "dividend" in wb.sheetnames
+        ws = wb["dividend"]
         assert ws.cell(1, 1).value == "year"
         assert ws.cell(2, 1).value == 2022
 
@@ -170,4 +168,4 @@ def test_listAvailableModules(mockCompany):
     names = [m["name"] for m in result]
     assert "IS" in names
     assert "ratios" in names
-    assert "dividend" in names
+    assert "dividend" not in names

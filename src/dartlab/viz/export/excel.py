@@ -140,9 +140,12 @@ def _buildAnnualSeries(c: Company):
         result = accessor.buildAnnual(c.stockCode)
         if result:
             return result
-    from dartlab.providers.dart.finance.pivot import buildAnnual
-
-    return buildAnnual(c.stockCode)
+    builder = getattr(c, "_buildFinanceSeries", None)
+    if callable(builder):
+        result = builder(freq="Y")
+        if result:
+            return result
+    return None
 
 
 def _autoWidth(ws, minWidth: int = 12, maxWidth: int = 30) -> None:
@@ -308,25 +311,27 @@ def _writeDataFrameSheet(
 
 
 def _getAvailableModules(c: Company) -> list[tuple[str, str]]:
+    from dartlab.core.registry import getEntries
+
     accessor = getFinanceDocAccessor()
     available = [("IS", "손익계산서"), ("BS", "재무상태표"), ("CF", "현금흐름표")]
     known = {name for name, _ in available}
+    for category in ("report", "disclosure"):
+        for entry in getEntries(category=category):
+            if entry.name not in known:
+                available.append((entry.name, entry.label))
+                known.add(entry.name)
     if accessor:
-        providerModules = accessor.exportModules()
-    else:
         try:
-            from dartlab.providers.dart.company import listExportModules
-            from dartlab.providers.dart.report.types import API_TYPE_LABELS
-
-            providerModules = listExportModules()
-            knownProvider = {name for name, _ in providerModules}
-            providerModules.extend(
-                (name, label) for name, label in API_TYPE_LABELS.items() if name not in knownProvider
-            )
-        except (ImportError, RuntimeError):
-            providerModules = []
-    available.extend((name, label) for name, label in providerModules if name not in known)
-    available.append(("ratios", "재무비율"))
+            accessorModules = accessor.exportModules()
+        except (RuntimeError, TypeError, ValueError):
+            accessorModules = []
+        for name, label in accessorModules:
+            if name not in known:
+                available.append((name, label))
+                known.add(name)
+    if "ratios" not in known:
+        available.append(("ratios", "재무비율"))
     return available
 
 
@@ -372,13 +377,12 @@ def exportToExcel(
             저장된 파일 경로 (str).
     """
     allModules = _getAvailableModules(c)
-    allNames = {name for name, _ in allModules}
     labelMap = {name: label for name, label in allModules}
 
     if modules is None:
         targetModules = [name for name, _ in allModules]
     else:
-        targetModules = [m for m in modules if m in allNames]
+        targetModules = list(dict.fromkeys(modules))
 
     wb = Workbook()
     wb.remove(wb.active)

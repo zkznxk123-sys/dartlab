@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
+from importlib import resources
 from pathlib import Path
 from typing import Any
 
@@ -241,8 +242,8 @@ def loadIndustryNodes() -> list[dict[str, Any]]:
     Raises:
         FileNotFoundError — nodes.json 누락.
     """
-    path = Path(__file__).resolve().parents[2] / "industry" / "nodes.json"
-    return json.loads(path.read_text(encoding="utf-8"))
+    text = resources.files("dartlab").joinpath("industry", "nodes.json").read_text(encoding="utf-8")
+    return json.loads(text)
 
 
 def primaryIndustryNode(stockCode: str | None) -> dict[str, Any] | None:

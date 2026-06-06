@@ -1,0 +1,4712 @@
+// Mirrors DartLab account ordering metadata for the browser finance viewer.
+// Source: src/dartlab/core/utils/sortOrder.json + src/dartlab/reference/data/accountMappings.json
+
+export type FinanceStatementOrderKey = 'BS' | 'IS' | 'CF';
+
+export const FINANCE_ACCOUNT_ORDER = {
+	"BS": {
+		"accrued_dividends": 259,
+		"accrued_expenses": 134,
+		"accrued_income": 33,
+		"accrued_income_taxes_current": 207,
+		"accumulated_deficit": 241,
+		"accumulated_depreciation": 195,
+		"accumulated_impairment_losses": 197,
+		"accumulated_oci_related_to_assets_held_for_sale": 251,
+		"accumulated_other_comprehensive_income": 249,
+		"additional_paid_in_capital": 239,
+		"advance_from_customers": 137,
+		"advance_payments": 35,
+		"allowance_for_doubtful_accounts": 57,
+		"asset_held_for_sale": 45,
+		"assets": 118,
+		"assets_held_under_a_finance_lease": 28,
+		"availableforsale_financial_assets": 22,
+		"biological_assets": 50,
+		"bonds": 173,
+		"bonds_with_stock_warrants": 178,
+		"borrowings": 129,
+		"borrowings_from_financial_institutes": 128,
+		"capital_lease_current": 179,
+		"capital_stock": 231,
+		"capital_surplus": 236,
+		"cash_and_cash_equivalents": 1,
+		"cash_and_receivables_from_banks": 2,
+		"commercial_paper_liability": 167,
+		"common_stock": 232,
+		"computer_software": 206,
+		"consideration_for_conversion_rights": 284,
+		"consideration_for_stock_warrants": 285,
+		"construction_in_progress": 90,
+		"construction_in_progress_receivables": 58,
+		"contract_assets": 56,
+		"contract_liabilities": 141,
+		"contract_liability": 204,
+		"convertible_bonds": 177,
+		"copyrights": 208,
+		"current_afs_financial_assets": 18,
+		"current_assets": 0,
+		"current_derivative_assets": 54,
+		"current_derivative_liabilities": 257,
+		"current_financial_assets": 5,
+		"current_financial_guarantee_liabilities": 261,
+		"current_income_tax_assetsprepaid_income_tax_payments": 43,
+		"current_income_tax_liabilitiesincome_taxes_payable": 147,
+		"current_inventories": 41,
+		"current_lease_liabilities": 155,
+		"current_liabilities": 121,
+		"current_portion_of_bonds": 150,
+		"current_portion_of_convertible_bonds": 258,
+		"current_portion_of_lease_obligationsother_payables": 263,
+		"current_portion_of_longterm_borrowings": 149,
+		"current_portion_of_longterm_debt": 148,
+		"current_provisions": 159,
+		"debentures": 175,
+		"deferred_revenue_current": 201,
+		"deferred_revenue_noncurrent": 219,
+		"deferred_tax_assets": 102,
+		"deferred_tax_liabilities": 212,
+		"defined_benefit_assets": 101,
+		"defined_benefit_liabilities": 209,
+		"defined_benefit_liability": 162,
+		"deposits_liabilities": 144,
+		"derivatives_assets": 75,
+		"derivatives_liabilities": 202,
+		"employee_benefit_assets": 120,
+		"equity_method_investments": 114,
+		"equity_related_to_assets_held_for_sale": 250,
+		"estimates_of_contract_losses": 277,
+		"facilities": 193,
+		"finance_lease_liability_noncurrent": 218,
+		"financial_assets_at_amortised_cost": 8,
+		"financial_assets_at_amortized_cost": 9,
+		"financial_assets_at_fv_through_oci": 15,
+		"financial_assets_at_fv_through_profit": 39,
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income": 64,
+		"financial_assets_measured_at_fair_value_through_profit_or_loss": 12,
+		"financial_liabilities_at_amortised_cost": 131,
+		"financial_liabilities_measured_at_fair_value_through_profit_or_loss": 151,
+		"financial_liability_at_fv_through_profit": 184,
+		"gains_from_capital_reduction": 278,
+		"gains_on_disposition_of_treasury_stock": 286,
+		"gains_on_foreign_currency_translation": 290,
+		"gains_on_valuation_of_availableforsale_financial_assets": 287,
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 289,
+		"goods_in_transit": 51,
+		"goodwill": 98,
+		"government_grants": 181,
+		"government_grants_deferred_income": 276,
+		"gross_amount_due_to_customers_for_contract_work": 264,
+		"guarantee_deposits_withhold": 145,
+		"held_to_maturity_financial_assets": 20,
+		"held_to_maturity_investments": 69,
+		"hybrid_bond": 252,
+		"income_taxes_payable": 146,
+		"insurance_contract_assets": 107,
+		"insurance_contract_liabilities": 223,
+		"intangible_assets": 95,
+		"intangible_assets_under_development": 97,
+		"inventories": 40,
+		"investment_in_properties": 99,
+		"investments_in_associates": 79,
+		"investments_in_associates_and_joint_ventures": 110,
+		"investments_in_associates_subsidiaries_and_joint_venteures": 77,
+		"investments_in_associatesequity_method_securities": 81,
+		"investments_in_associatesinvestments_in_equity_method": 80,
+		"investments_in_equity_method": 82,
+		"investments_in_joint_ventures": 171,
+		"investments_in_subsidiaries": 76,
+		"investments_in_subsidiaries_and_associates_equity_method": 78,
+		"investments_in_subsidiaries_associates_and_joint_ventures": 113,
+		"lease_liabilities": 172,
+		"lease_obligations": 158,
+		"leased_assets": 92,
+		"leasehold_deposits_received": 265,
+		"legal_proceedings_provisions": 271,
+		"legal_reserve": 280,
+		"liabilities": 226,
+		"liabilities_classified_as_held_for_sale": 165,
+		"liabilities_included_in_disposal_groups_classified_as_held_for_sale": 164,
+		"loans": 11,
+		"long_term_investments": 115,
+		"longterm_accounts_receivablesconstruction_work": 84,
+		"longterm_accrued_expenses": 189,
+		"longterm_advance_from_customers": 194,
+		"longterm_advance_payments": 104,
+		"longterm_availableforsale_financial_assets": 66,
+		"longterm_borrowings": 180,
+		"longterm_derivative_assets": 73,
+		"longterm_derivative_liabilities": 199,
+		"longterm_finance_lease_receivables": 174,
+		"longterm_financial_assets": 61,
+		"longterm_financial_assets_at_fair_value_through_profit_or_loss": 63,
+		"longterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 65,
+		"longterm_financial_instruments": 60,
+		"longterm_financial_liabilities": 183,
+		"longterm_guarantee_deposits_withhold": 198,
+		"longterm_gurarantee": 105,
+		"longterm_held_to_maturity_investments": 70,
+		"longterm_investment_assets": 62,
+		"longterm_leasehold_deposits_provided": 106,
+		"longterm_leasehold_deposits_received": 268,
+		"longterm_loans": 29,
+		"longterm_other_payables": 185,
+		"longterm_other_payables_others": 187,
+		"longterm_preferred_stock_of_redemption": 260,
+		"longterm_prepaid_expenses": 103,
+		"longterm_provisions": 213,
+		"longterm_receivables": 83,
+		"longterm_trade_and_other_noncurrent_payables": 192,
+		"longterm_trade_payables": 267,
+		"longterm_trade_receivables": 85,
+		"longterm_unearned_income": 196,
+		"losses_on_foreign_currency_translation": 291,
+		"losses_on_valuation_of_availableforsale_financial_assets": 288,
+		"lt_trade_and_other_receivables": 86,
+		"motor_vehicles": 186,
+		"noncontrolling_interests_equity": 253,
+		"noncurrent_afs_financial_assets": 67,
+		"noncurrent_asset_held_for_sale_or_disposal_group": 46,
+		"noncurrent_assets": 59,
+		"noncurrent_borrowings": 216,
+		"noncurrent_derivative_assets": 168,
+		"noncurrent_derivative_liabilities": 266,
+		"noncurrent_financial_guarantee_liabilities": 270,
+		"noncurrent_lease_liabilities": 205,
+		"noncurrent_liabilities": 170,
+		"noncurrent_provisions": 214,
+		"noncurrent_provisions_for_employee_benefits": 210,
+		"office_furniture_and_equipment": 191,
+		"operating_lease_liability_current": 176,
+		"operating_lease_liability_noncurrent": 217,
+		"operating_lease_rou_asset": 117,
+		"other_accrued_expenses": 136,
+		"other_accrued_income": 34,
+		"other_advance_payments": 36,
+		"other_allowance": 161,
+		"other_assets": 111,
+		"other_capital_surplus": 237,
+		"other_components_of_equity": 245,
+		"other_comprehensive_income_of_associates_etc": 292,
+		"other_current_assets": 44,
+		"other_current_financial_assets": 21,
+		"other_current_financial_liabilities": 154,
+		"other_current_liabilities": 163,
+		"other_equity": 246,
+		"other_financial_assets": 169,
+		"other_financial_institutions_liabilities": 274,
+		"other_intangible_assets": 96,
+		"other_inventories": 42,
+		"other_investment_in_properties": 100,
+		"other_leased_assets": 93,
+		"other_legal_reserves": 282,
+		"other_liabilities": 222,
+		"other_longterm_availableforsale_financial_assets": 68,
+		"other_longterm_borrowings": 182,
+		"other_longterm_derivatives": 74,
+		"other_longterm_financial_liabilities": 203,
+		"other_longterm_held_to_maturity_investments": 71,
+		"other_longterm_provisions": 215,
+		"other_noncurrent_assets": 112,
+		"other_noncurrent_financial_assets": 72,
+		"other_noncurrent_financial_liabilities": 221,
+		"other_noncurrent_liabilities": 220,
+		"other_noncurrent_receivables": 116,
+		"other_paid_in_capital": 279,
+		"other_payables": 132,
+		"other_payables_others": 133,
+		"other_property_plant_equipment": 89,
+		"other_receivables": 32,
+		"other_receivables_current": 47,
+		"other_reserves": 244,
+		"other_retained_earnings": 243,
+		"other_shortterm_borrowings": 127,
+		"other_shortterm_provisions": 160,
+		"other_withholdings": 143,
+		"others_in_advance_from_customers": 139,
+		"owners_of_parent_equity": 229,
+		"paidin_capital": 230,
+		"paidin_capital_in_excess_of_par_value": 234,
+		"plan_assets": 200,
+		"policyholders_equity_adjustment": 248,
+		"preferred_stock": 233,
+		"prepaid_expenses": 37,
+		"prepaid_income_taxes": 48,
+		"present_value_discount": 275,
+		"present_value_of_defined_benefit_obligations": 211,
+		"product_warranties_provisions": 273,
+		"property_plant_and_equipment": 87,
+		"provision_for_construction_provisions": 272,
+		"provisions": 157,
+		"provisions_for_restoration_costs": 269,
+		"raw_materialssubmaterials": 49,
+		"receivables": 30,
+		"redeemable_noncontrolling_interest": 228,
+		"reinsurance_assets": 108,
+		"rental_assets": 94,
+		"reserve_for_outstanding_claims_for_reinsurance_ceded": 224,
+		"restricted_cash_current": 3,
+		"retained_earnings": 240,
+		"returned_products_provisions": 262,
+		"revaluation_surplus": 238,
+		"right_of_use_assets": 91,
+		"securities_at_amortised_cost": 10,
+		"separate_account_credits": 109,
+		"separate_account_liabilities": 225,
+		"share_premium": 235,
+		"short_term_borrowings": 166,
+		"short_term_investments": 7,
+		"shortterm_accrued_expenses": 135,
+		"shortterm_advance_from_customers": 138,
+		"shortterm_availableforsale_financial_assets": 17,
+		"shortterm_bonds": 130,
+		"shortterm_borrowings": 126,
+		"shortterm_deposits_provided": 55,
+		"shortterm_derivative_assets": 23,
+		"shortterm_derivative_liabilities": 153,
+		"shortterm_financial_assets_at_fair_value_through_profit_or_loss": 16,
+		"shortterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 14,
+		"shortterm_financial_instruments": 4,
+		"shortterm_financial_liabilities": 152,
+		"shortterm_held_to_maturity_investments": 19,
+		"shortterm_investment_assets": 6,
+		"shortterm_loans": 26,
+		"shortterm_other_receivables": 31,
+		"shortterm_prepaid_expenses": 38,
+		"shortterm_trade_and_other_current_payables": 124,
+		"shortterm_trading_financial_assets": 13,
+		"shortterm_trading_financial_liabilities": 156,
+		"stock_options": 283,
+		"stockholders_equity": 254,
+		"structures": 190,
+		"suppliesconsumables": 53,
+		"tangible_assets": 88,
+		"tools_and_office_equipment": 188,
+		"total_assets": 119,
+		"total_liabilities": 227,
+		"total_liabilities_and_equity": 256,
+		"total_stockholders_equity": 255,
+		"trade_and_other_current_payables": 123,
+		"trade_and_other_current_receivables": 25,
+		"trade_and_other_payables": 125,
+		"trade_and_other_receivables": 27,
+		"trade_payables": 122,
+		"trade_receivables": 24,
+		"treasury_stock": 247,
+		"unappropriated_retained_earnings_deficit": 242,
+		"unearned_income": 140,
+		"voluntary_reserves": 281,
+		"withholdings": 142,
+		"work_in_process": 52
+	},
+	"CF": {
+		"accounts_payable_change": 96,
+		"accounts_receivable_change": 87,
+		"addition_of_expenses_of_noncash_transactions": 82,
+		"adjustments_for_sales": 10,
+		"adjustments_to_reconcile_net_income": 6,
+		"amortization_of_discount_on_bonds": 59,
+		"amortization_of_intangible_assets": 14,
+		"availableforsale_financial_assets": 261,
+		"bonds_with_stock_warrants": 363,
+		"business_combination": 324,
+		"cash_and_cash_equivalents": 402,
+		"cash_and_cash_equivalents_at_the_beginning_of_year": 398,
+		"cash_and_cash_equivalents_at_the_end_of_year": 400,
+		"cash_and_cash_equivalents_beginning": 399,
+		"cash_and_cash_equivalents_ending": 401,
+		"cash_flows_from_business": 182,
+		"cash_flows_from_control_of_subsidiaries_or_other_businesses": 322,
+		"cash_flows_from_financing": 339,
+		"cash_flows_from_financing_activities": 337,
+		"cash_flows_from_investing": 214,
+		"cash_flows_from_investing_activities": 212,
+		"cash_flows_from_loss_of_control_of_subsidiaries_or_other_businesses": 323,
+		"cash_flows_from_operating_activities": 0,
+		"cash_flows_from_operatings": 2,
+		"cash_from_acquisition_or_loss_of_control_of_subsidiaries": 387,
+		"cash_inflows_from_derivatives": 330,
+		"cash_inflows_from_discontinued_operations": 391,
+		"cash_inflows_from_disposal_of_equity_or_debt_instruments": 332,
+		"cash_inflows_from_exercise_of_conversion_rights": 375,
+		"cash_inflows_from_investing_activities": 215,
+		"cash_outflows_from_acquisition_of_equity_or_debt_instruments": 331,
+		"cash_outflows_from_derivatives": 329,
+		"cash_outflows_from_discontinued_operations": 392,
+		"cash_outflows_from_investing_activities": 216,
+		"change_by_merger_and_acquisition": 386,
+		"change_in_noncontrolling_interests": 371,
+		"change_in_working_capital": 89,
+		"change_of_consolidated_scope": 130,
+		"changes_in_operating_assets_and_liabilities": 4,
+		"collection_of_advance_payments_and_loans_to_third_parties": 333,
+		"commission_expenses": 127,
+		"contribution_from_noncontrolling_interests": 378,
+		"debt_issuance": 347,
+		"debt_repayment": 354,
+		"decrease_in_availableforsale_financial_assets": 238,
+		"decrease_in_biological_assets": 199,
+		"decrease_in_buildings_and_structures": 287,
+		"decrease_in_consolidated_capital_transaction": 389,
+		"decrease_in_construction_in_progress": 279,
+		"decrease_in_equity_investments": 318,
+		"decrease_in_financial_assets_at_amortised_cost": 264,
+		"decrease_in_financial_assets_at_fv_through_profit": 229,
+		"decrease_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 254,
+		"decrease_in_financial_assets_measured_at_fair_value_through_profit_or_loss": 230,
+		"decrease_in_financial_instruments": 257,
+		"decrease_in_goodwill": 305,
+		"decrease_in_guarantee_deposits": 252,
+		"decrease_in_held_to_maturity_investments": 246,
+		"decrease_in_intangible_assets": 300,
+		"decrease_in_investment_in_properties": 273,
+		"decrease_in_investments_in_associates": 309,
+		"decrease_in_investments_in_associates_subsidiaries_and_joint_venteures": 311,
+		"decrease_in_investments_in_associatesequity_method_securities": 313,
+		"decrease_in_investments_in_joint_ventures": 315,
+		"decrease_in_investments_in_subsidiaries": 320,
+		"decrease_in_land": 285,
+		"decrease_in_lease_obligations": 353,
+		"decrease_in_leasehold_deposits_provided": 248,
+		"decrease_in_leasehold_deposits_received": 250,
+		"decrease_in_liabilities_held_for_sale": 328,
+		"decrease_in_loans": 224,
+		"decrease_in_loans_and_receivables": 227,
+		"decrease_in_longterm_availableforsale_financial_assets": 260,
+		"decrease_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": 236,
+		"decrease_in_longterm_financial_instruments": 219,
+		"decrease_in_machinery_and_equipment": 283,
+		"decrease_in_motor_vehicles": 280,
+		"decrease_in_noncontrolling_interests": 377,
+		"decrease_in_noncurrent_asset_held_for_sale": 325,
+		"decrease_in_other_current_financial_assets": 255,
+		"decrease_in_other_financial_assets": 242,
+		"decrease_in_other_financial_liabilities": 177,
+		"decrease_in_other_liabilities": 169,
+		"decrease_in_other_noncurrent_financial_assets": 244,
+		"decrease_in_other_property_and_equipment": 294,
+		"decrease_in_property_plant_and_equipment": 296,
+		"decrease_in_shortterm_availableforsale_financial_assets": 262,
+		"decrease_in_shortterm_borrowings": 343,
+		"decrease_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": 234,
+		"decrease_in_shortterm_financial_instruments": 218,
+		"decrease_in_shortterm_held_to_maturity_investments": 265,
+		"decrease_in_shortterm_loans": 222,
+		"decrease_in_structures": 290,
+		"decrease_in_tools_and_office_equipment": 297,
+		"decrease_of_convertible_bonds": 361,
+		"decrease_of_exchangeable_bonds": 367,
+		"decreaseincrease_in_accrued_revenues": 156,
+		"decreaseincrease_in_advance_payments": 98,
+		"decreaseincrease_in_construction_in_progress_receivables": 189,
+		"decreaseincrease_in_contract_assetscosts": 117,
+		"decreaseincrease_in_current_income_tax_assetsprepaid_income_tax_payments": 162,
+		"decreaseincrease_in_deferred_income_tax_assets": 190,
+		"decreaseincrease_in_deposits_provided": 158,
+		"decreaseincrease_in_derivative_assets": 149,
+		"decreaseincrease_in_due_from_banks": 193,
+		"decreaseincrease_in_financing_leases_receivables": 293,
+		"decreaseincrease_in_inventories": 100,
+		"decreaseincrease_in_loans": 225,
+		"decreaseincrease_in_longterm_advance_payments": 183,
+		"decreaseincrease_in_longterm_deposits_provided": 184,
+		"decreaseincrease_in_longterm_prepaid_expenses": 122,
+		"decreaseincrease_in_longterm_receivables": 119,
+		"decreaseincrease_in_longterm_trade_receivables": 167,
+		"decreaseincrease_in_other_assets": 168,
+		"decreaseincrease_in_other_current_assets": 111,
+		"decreaseincrease_in_other_current_financial_assets": 163,
+		"decreaseincrease_in_other_financial_assets": 176,
+		"decreaseincrease_in_other_noncurrent_assets": 160,
+		"decreaseincrease_in_other_noncurrent_financial_assets": 165,
+		"decreaseincrease_in_other_receivables": 97,
+		"decreaseincrease_in_other_trade_and_other_receivables": 181,
+		"decreaseincrease_in_plan_assets": 114,
+		"decreaseincrease_in_prepaid_expenses": 99,
+		"decreaseincrease_in_receivables": 198,
+		"decreaseincrease_in_shortterm_deposits_provided": 175,
+		"decreaseincrease_in_shortterm_prepaid_expenses": 197,
+		"decreaseincrease_in_trade_and_other_current_receivables": 147,
+		"decreaseincrease_in_trade_and_other_noncurrent_receivables": 166,
+		"decreaseincrease_in_trade_and_other_receivables": 145,
+		"decreaseincrease_in_trade_receivables": 95,
+		"deferred_taxes": 24,
+		"depreciation": 12,
+		"depreciation_cf": 11,
+		"depreciation_other_amortization_and_impairment_losses_expense": 9,
+		"difference_by_changes_in_foreign_exchange_rates": 393,
+		"discontinued_operating_incomeloss": 144,
+		"disposal_of_finance_lease_assets": 291,
+		"disposal_of_intangible_assets": 299,
+		"disposal_of_tangible_assets": 270,
+		"disposition_of_interest_in_subsidiaries": 321,
+		"dividends_paid": 208,
+		"dividends_received": 207,
+		"effect_of_exchange_rate_changes": 394,
+		"employee_benefits": 153,
+		"ending_cash": 403,
+		"exchangeable_bonds": 365,
+		"exercise_of_stock_options": 374,
+		"expenses_of_allowance_for_doubtful_accounts": 15,
+		"financial_assets_at_amortised_cost": 253,
+		"financial_assets_measured_at_fair_value_through_profit_or_loss": 233,
+		"financial_guarantee_provisions": 188,
+		"financial_income": 17,
+		"financing_cashflow": 338,
+		"financing_expenses": 18,
+		"foreign_currency_translation": 146,
+		"gains_on_bargain_purchase": 139,
+		"gains_on_debt_restructuring": 88,
+		"gains_on_derivatives_transactions": 75,
+		"gains_on_disposal_of_assets": 48,
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 240,
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 54,
+		"gains_on_disposal_of_financial_liabilities_measured_at_fair_value_through_profit_or_loss": 137,
+		"gains_on_disposal_of_held_for_sale_or_disposal_group": 90,
+		"gains_on_disposal_of_intangible_assets": 26,
+		"gains_on_disposal_of_leased_housing_assets": 46,
+		"gains_on_disposal_of_tangible_assets": 22,
+		"gains_on_disposition_of_associates": 45,
+		"gains_on_disposition_of_associates_subsidiaries_joint_ventures": 65,
+		"gains_on_disposition_of_availableforsale_financial_assets": 56,
+		"gains_on_disposition_of_financial_assets": 62,
+		"gains_on_disposition_of_investments": 71,
+		"gains_on_disposition_of_subsidiaries": 44,
+		"gains_on_foreign_currencies_transaction": 148,
+		"gains_on_foreign_currency_translation": 20,
+		"gains_on_investment_in_properties": 50,
+		"gains_on_redemption_of_bonds": 42,
+		"gains_on_valuation_of_equity_method_securities": 30,
+		"gains_on_valuation_of_financial_assets_at_fv_through_profit": 36,
+		"gains_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 38,
+		"gains_on_valuation_of_investments": 85,
+		"gains_on_valuations_of_derivatives": 31,
+		"gainslosses_in_equity_method": 67,
+		"gainslosses_on_disposition_of_noncurrent_assets": 60,
+		"gainslosses_on_disposition_of_other_noncurrent_assets": 277,
+		"government_grants_received": 335,
+		"hybrid_bond_dividends": 385,
+		"impairment_loss_on_inventories": 123,
+		"impairment_losses_on_asset_held_for_sale_or_disposal_group": 49,
+		"impairment_losses_on_associates": 93,
+		"impairment_losses_on_availableforsale_financial_assets": 58,
+		"impairment_losses_on_held_to_maturity_investments": 135,
+		"impairment_losses_on_intangible_assets": 28,
+		"impairment_losses_on_investments": 84,
+		"impairment_losses_on_investments_in_subsidiaries": 40,
+		"impairment_losses_on_investments_in_subsidiaries_associates_joint_ventures": 64,
+		"impairment_losses_on_property_plant_and_equipment": 25,
+		"impairment_losses_on_right_of_use_assets": 94,
+		"income_taxes": 19,
+		"increase_in_advance_payments": 143,
+		"increase_in_availableforsale_financial_assets": 237,
+		"increase_in_bonds": 364,
+		"increase_in_borrowings": 352,
+		"increase_in_buildings_and_structures": 286,
+		"increase_in_consolidated_capital_transaction": 390,
+		"increase_in_construction_in_progress": 278,
+		"increase_in_equity_investments": 316,
+		"increase_in_financial_assets_at_amortised_cost": 263,
+		"increase_in_financial_assets_at_fv_through_profit": 228,
+		"increase_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 239,
+		"increase_in_financial_assets_measured_at_fair_value_through_profit_or_loss": 231,
+		"increase_in_financial_instruments": 258,
+		"increase_in_goodwill": 304,
+		"increase_in_held_to_maturity_investments": 245,
+		"increase_in_industrial_property_rights": 303,
+		"increase_in_intangible_assets": 301,
+		"increase_in_investment_in_properties": 271,
+		"increase_in_investments_in_associates": 307,
+		"increase_in_investments_in_associates_subsidiaries_and_joint_venteures": 310,
+		"increase_in_investments_in_associatesequity_method_securities": 312,
+		"increase_in_investments_in_joint_ventures": 314,
+		"increase_in_investments_in_subsidiaries": 319,
+		"increase_in_land": 284,
+		"increase_in_lease_obligations": 172,
+		"increase_in_leasehold_deposits_provided": 247,
+		"increase_in_leasehold_deposits_received": 249,
+		"increase_in_loans": 223,
+		"increase_in_loans_and_receivables": 226,
+		"increase_in_longterm_availableforsale_financial_assets": 259,
+		"increase_in_longterm_borrowings": 346,
+		"increase_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": 235,
+		"increase_in_longterm_financial_instruments": 220,
+		"increase_in_longtermborrowings": 349,
+		"increase_in_machinery_and_equipment": 281,
+		"increase_in_motor_vehicles": 282,
+		"increase_in_noncontrolling_interests": 376,
+		"increase_in_noncurrent_asset_held_for_sale": 326,
+		"increase_in_other_current_financial_assets": 256,
+		"increase_in_other_financial_assets": 241,
+		"increase_in_other_financial_liabilities": 186,
+		"increase_in_other_longterm_assets": 276,
+		"increase_in_other_noncurrent_financial_assets": 243,
+		"increase_in_other_property_and_equipment": 292,
+		"increase_in_preferred_stock_of_redemption": 381,
+		"increase_in_property_and_equipment": 288,
+		"increase_in_property_plant_and_equipment": 295,
+		"increase_in_right_of_use_assets": 275,
+		"increase_in_shortterm_borrowings": 341,
+		"increase_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": 232,
+		"increase_in_shortterm_financial_instruments": 217,
+		"increase_in_shortterm_held_to_maturity_investments": 266,
+		"increase_in_shortterm_loans": 221,
+		"increase_in_structures": 289,
+		"increase_of_convertible_bonds": 359,
+		"increase_of_exchangeable_bonds": 366,
+		"increase_of_longtermbonds": 358,
+		"increasedecrease_in_accrued_expenses": 103,
+		"increasedecrease_in_advance_from_customers": 105,
+		"increasedecrease_in_cash_and_cash_equivalents": 396,
+		"increasedecrease_in_contract_liabilities": 118,
+		"increasedecrease_in_current_income_tax_liabilitiesincome_taxes_payable": 108,
+		"increasedecrease_in_deferred_income_tax_liabilities": 191,
+		"increasedecrease_in_deferred_revenue": 106,
+		"increasedecrease_in_defined_benefit_liabilities": 112,
+		"increasedecrease_in_defined_benefit_liability": 115,
+		"increasedecrease_in_deposits_provided": 251,
+		"increasedecrease_in_derivative_liabilities": 151,
+		"increasedecrease_in_dividends_payable": 203,
+		"increasedecrease_in_excess_billing": 194,
+		"increasedecrease_in_liability_provisions": 170,
+		"increasedecrease_in_longterm_other_payables": 120,
+		"increasedecrease_in_longterm_trade_and_other_payables": 171,
+		"increasedecrease_in_noncurrent_provisions": 174,
+		"increasedecrease_in_other_current_liabilities": 113,
+		"increasedecrease_in_other_financial_liabilities": 164,
+		"increasedecrease_in_other_liabilities": 180,
+		"increasedecrease_in_other_noncurrent_liabilities": 116,
+		"increasedecrease_in_other_payables": 102,
+		"increasedecrease_in_other_provisions": 179,
+		"increasedecrease_in_other_trade_and_payables": 152,
+		"increasedecrease_in_product_warranties_provisions": 187,
+		"increasedecrease_in_provisions": 109,
+		"increasedecrease_in_provisions_for_employee_benefits": 173,
+		"increasedecrease_in_provisions_for_restoration_costs": 195,
+		"increasedecrease_in_shortterm_borrowings": 340,
+		"increasedecrease_in_trade_and_other_payables": 140,
+		"increasedecrease_in_trade_payables": 101,
+		"increasedecrease_in_withholdings": 104,
+		"interest_expensesamortization_of_discount_on_bonds_etc": 206,
+		"interest_paid": 205,
+		"interest_received": 204,
+		"inventory_change": 107,
+		"investing_cashflow": 213,
+		"investment_maturities": 274,
+		"investment_purchases": 269,
+		"investment_sales": 272,
+		"investments_in_associates": 308,
+		"investments_in_associates_and_joint_ventures_transactions": 317,
+		"issuance_of_bonds": 355,
+		"issuance_of_common_stock": 370,
+		"issue_of_hybrid_bond": 383,
+		"leasehold_deposits_received": 178,
+		"liability_provisions": 79,
+		"longterm_accrued_expenses": 192,
+		"longterm_advance_from_customers": 121,
+		"longterm_guarantee_deposits_withhold": 196,
+		"longterm_held_to_maturity_investments": 267,
+		"longterm_withholdings": 154,
+		"losses_on_derivatives_transactions": 74,
+		"losses_on_disposal_of_assets": 78,
+		"losses_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 138,
+		"losses_on_disposal_of_held_for_sale_or_disposal_group": 91,
+		"losses_on_disposal_of_intangible_assets": 27,
+		"losses_on_disposal_of_tangible_assets": 23,
+		"losses_on_disposal_of_trade_receivables": 35,
+		"losses_on_disposition_of_associates_subsidiaries_joint_ventures": 66,
+		"losses_on_disposition_of_availableforsale_financial_assets": 57,
+		"losses_on_disposition_of_designatedfinancial_assets_at_fv_through_profit": 55,
+		"losses_on_disposition_of_financial_assets": 63,
+		"losses_on_disposition_of_investments": 72,
+		"losses_on_disposition_of_subsidiaries": 43,
+		"losses_on_evaluation_of_inventories": 33,
+		"losses_on_foreign_currency_translation": 21,
+		"losses_on_inventory_clearing": 34,
+		"losses_on_investment_in_properties": 51,
+		"losses_on_redemption_of_bonds": 41,
+		"losses_on_revaluation_of_property_plant_and_equipment": 142,
+		"losses_on_valuation_of_equity_method_securities": 29,
+		"losses_on_valuation_of_financial_assets_at_fv_through_profit": 37,
+		"losses_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 39,
+		"losses_on_valuation_of_investment_assets": 86,
+		"losses_on_valuations_of_derivatives": 32,
+		"miscellaneous_income_for_lease": 69,
+		"miscellaneous_losses": 70,
+		"net_change_in_cash": 395,
+		"net_decrease_in_shortterm_borrowings": 345,
+		"net_income_cf": 5,
+		"net_increase_decrease_in_cash_and_cash_equivalents": 397,
+		"net_increase_in_shortterm_borrowings": 344,
+		"net_profit": 3,
+		"operating_cashflow": 1,
+		"other_adjustments_to_reconcile_net_income": 73,
+		"other_cash_inflows_outflows": 334,
+		"other_current_financial_assets": 200,
+		"other_current_financial_liabilities": 202,
+		"other_expenses_of_allowance_for_doubtful_accounts": 61,
+		"other_financing_cost": 157,
+		"other_intangible_assets": 302,
+		"other_items_classified_as_investing_or_financing_activities": 8,
+		"other_noncash_adjustments": 125,
+		"other_nonoperating_income": 126,
+		"other_operating_income": 336,
+		"other_reserves": 47,
+		"other_revenues_without_cash_inflows": 83,
+		"others_longterm_employee_benefits_liabilitiesbonuses_etc": 129,
+		"paid_in_capital_decrease": 380,
+		"paid_in_capital_increase": 379,
+		"paidin_capital_in_excess_of_par_value": 373,
+		"payment_of_stock_issuance_costs": 372,
+		"payments_of_income_taxes": 209,
+		"payments_of_retirement_allowance": 110,
+		"product_warranties_expenses": 124,
+		"profit_from_discontinued_operations": 7,
+		"provision_for_construction_provisions": 133,
+		"provision_for_loss_on_acceptances_and_guarantees": 131,
+		"provisions_for_others": 150,
+		"purchase_of_intangible_assets": 298,
+		"purchase_of_property_plant_and_equipment": 268,
+		"purchase_of_treasury_stock": 368,
+		"recovery_of_impairment_losses_on_assets": 81,
+		"recovery_of_impairment_losses_on_associates": 132,
+		"recovery_of_impairment_losses_on_availableforsale_financial_assets": 136,
+		"recovery_of_impairment_losses_on_intangible_assets": 77,
+		"recovery_of_impairment_losses_on_property_plant_and_equipment": 92,
+		"recovery_of_losses_on_evaluation_of_inventories": 76,
+		"redemption_of_callable_stock": 382,
+		"redemption_of_current_portion_of_longterm_borrowings": 351,
+		"redemption_of_hybrid_bond": 384,
+		"refunds_of_income_taxes": 210,
+		"refunds_payments_of_income_taxes": 211,
+		"rent": 159,
+		"repayment_of_borrowings": 350,
+		"repayment_of_convertible_bonds": 362,
+		"repayment_of_longterm_borrowings": 348,
+		"repayment_of_shortterm_borrowings": 342,
+		"repayments_of_bonds": 357,
+		"repayments_of_government_grants": 388,
+		"reserve_of_sharebased_payments": 128,
+		"returned_products_provisions": 185,
+		"reversal_of_allowance_for_acceptances_and_guarantees": 155,
+		"reversal_of_allowance_for_doubtful_accounts": 68,
+		"reversal_of_other_provisions": 161,
+		"reversion_of_liability_provisions": 80,
+		"reversion_of_provisions_for_restoration_costs": 141,
+		"sale_of_treasury_stock": 369,
+		"severance_and_retirement_benefits": 16,
+		"software": 306,
+		"stock_compensation": 13,
+		"stock_compensation_expenses": 52,
+		"stock_dividends": 53,
+		"stock_issuance": 360,
+		"stock_repurchase": 356,
+		"supplies": 134,
+		"trade_and_other_noncurrent_receivables": 201,
+		"transfer_to_assets_held_for_sale": 327
+	},
+	"IS": {
+		"actuarial_gains_or_losses_on_defined_benefit_plans": 56,
+		"advertising_expenses": 91,
+		"amortization_of_intangible_assets": 101,
+		"availableforsale_financial_assets_valuation": 64,
+		"basic_earnings_per_share": 76,
+		"basic_earnings_per_share_from_continuing_operations": 77,
+		"basic_earnings_per_share_from_discontinued_operations": 78,
+		"basic_earnings_per_share_preferred": 151,
+		"capital_change_in_equity_method": 63,
+		"cash_flow_hedges": 71,
+		"change_of_retained_earnings_in_equity_method": 159,
+		"commission_expenses": 92,
+		"communication_expenses": 94,
+		"comprehensive_income": 73,
+		"cost_of_finished_goods_sold": 34,
+		"cost_of_merchandise_finished_goods": 36,
+		"cost_of_merchandise_sold": 33,
+		"cost_of_sales": 7,
+		"cost_of_service": 38,
+		"depreciation": 90,
+		"depreciation_amortization": 112,
+		"derivative_valuation": 70,
+		"diluted_earnings_per_share": 79,
+		"diluted_earnings_per_share_from_continuing_operations": 80,
+		"diluted_earnings_per_share_from_discontinued_operations": 81,
+		"dividends": 116,
+		"donations": 133,
+		"earnings_per_share": 75,
+		"employee_benefits": 85,
+		"entertainment": 87,
+		"expenses_of_allowance_for_doubtful_accounts": 106,
+		"expenses_of_allowance_for_doubtful_accounts_provision_for_allowance_for_bad_debits": 102,
+		"finance_costs": 24,
+		"finance_income": 19,
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income": 160,
+		"financial_costs": 25,
+		"financial_income": 18,
+		"financing_expenses": 23,
+		"foreign_currency_translation": 66,
+		"foreign_currency_translation_differences": 68,
+		"foreign_currency_translation_differences_before_tax": 154,
+		"gains_on_assets_revaluations": 57,
+		"gains_on_disposal_of_intangible_assets": 130,
+		"gains_on_disposal_of_other_assets": 128,
+		"gains_on_disposal_of_tangible_assets": 120,
+		"gains_on_disposition_of_associates": 125,
+		"gains_on_disposition_of_equity_method_securities": 124,
+		"gains_on_disposition_of_investments": 129,
+		"gains_on_disposition_of_subsidiaries": 123,
+		"gains_on_foreign_currencies_transaction": 121,
+		"gains_on_foreign_currency_translation": 122,
+		"gains_on_valuation_of_equity_method_securities": 27,
+		"gains_on_valuation_of_shortterm_trading_financial_assets": 127,
+		"gains_on_valuations_of_derivatives": 22,
+		"gainslosses_in_equity_method": 28,
+		"gainslosses_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 61,
+		"gainslosses_on_valuation_of_availableforsale_financial_assets": 59,
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 58,
+		"gross_profit": 9,
+		"hedges_of_net_investment_in_foreign_operations": 69,
+		"impairment_losses_on_associates": 141,
+		"impairment_losses_on_availableforsale_financial_assets": 148,
+		"impairment_losses_on_financial_assets": 105,
+		"impairment_losses_on_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 158,
+		"impairment_losses_on_intangible_assets": 140,
+		"impairment_losses_on_investments_in_subsidiaries": 149,
+		"impairment_losses_on_property_plant_and_equipment": 147,
+		"income_tax_benefit": 37,
+		"income_tax_expense": 35,
+		"income_taxes": 32,
+		"insurance_premium": 97,
+		"interest_expenses": 26,
+		"interest_income": 20,
+		"loss_before_tax": 31,
+		"losses_on_disposal_of_intangible_assets": 138,
+		"losses_on_disposal_of_tangible_assets": 139,
+		"losses_on_disposition_of_associates": 136,
+		"losses_on_disposition_of_investments": 145,
+		"losses_on_disposition_of_subsidiaries": 135,
+		"losses_on_evaluation_of_inventories": 146,
+		"losses_on_foreign_currencies_transaction": 134,
+		"losses_on_foreign_currency_translation": 137,
+		"losses_on_valuation_of_equity_method_securities": 29,
+		"losses_on_valuation_of_shortterm_trading_financial_assets": 142,
+		"losses_on_valuations_of_derivatives": 144,
+		"miscellaneous_income_for_lease": 117,
+		"miscellaneous_losses": 131,
+		"net_income": 40,
+		"net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity": 50,
+		"net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": 44,
+		"net_profit": 43,
+		"noncontrolling_interests_equity": 48,
+		"nonoperating_income_expenses": 114,
+		"operating_expenses": 8,
+		"operating_profit": 12,
+		"operating_revenues": 1,
+		"other_comprehensive_income": 53,
+		"other_comprehensive_income_not_to_be_reclassified": 54,
+		"other_comprehensive_income_not_to_be_reclassified_before_tax": 156,
+		"other_comprehensive_income_to_be_reclassified": 62,
+		"other_comprehensive_income_to_be_reclassified_before_tax": 157,
+		"other_cost_of_sales": 39,
+		"other_expenses": 16,
+		"other_expenses_of_allowance_for_doubtful_accounts": 132,
+		"other_financial_expenses": 143,
+		"other_financial_income": 115,
+		"other_income": 13,
+		"other_nonoperating_expenses": 17,
+		"other_nonoperating_income": 14,
+		"other_operating_expenses": 111,
+		"other_operating_income": 83,
+		"other_sales": 4,
+		"other_sga": 109,
+		"others_expense": 15,
+		"owners_of_parent_equity": 45,
+		"packing_expenses": 108,
+		"periodicals_and_printing_expenses": 93,
+		"profit_attributable_to_noncontrolling_interests": 49,
+		"profit_before_tax": 30,
+		"profit_from_continuing_operations": 41,
+		"profit_from_continuing_operations_attributable_to_noncontrolling_interests": 51,
+		"profit_from_continuing_operations_attributable_to_owners_of_parent": 46,
+		"profit_from_discontinued_operations": 42,
+		"profit_from_discontinued_operations_attributable_to_noncontrolling_interests": 52,
+		"profit_from_discontinued_operations_attributable_to_owners_of_parent": 47,
+		"reclassification_of_availableforsale_financial_assets": 60,
+		"remeasurement_elements_of_defined_benefit_plans": 55,
+		"remeasurement_elements_of_defined_benefit_plans_before_tax": 152,
+		"rent": 89,
+		"rental_income": 119,
+		"rental_lease_income": 118,
+		"repairs_and_maintenance_expenses": 96,
+		"research_development": 110,
+		"reversal_of_allowance_for_other_doubtful_accounts": 126,
+		"salaries_and_wages": 82,
+		"sales": 0,
+		"sales_of_finished_goods": 6,
+		"sales_of_merchandise": 5,
+		"sales_of_merchandise_finished_goods": 2,
+		"sales_promotion_expenses": 107,
+		"selling_and_administrative_expenses": 11,
+		"service_revenue": 3,
+		"severance_and_retirement_benefits": 84,
+		"sga": 10,
+		"share_of_oci_of_associates_and_joint_ventures": 67,
+		"share_of_other_comprehensive_income_of_associates_and_joint_ventures": 65,
+		"stock_compensation_expense": 113,
+		"stock_compensation_expenses": 104,
+		"stock_dividends": 21,
+		"supplies": 86,
+		"tax_on_items_not_reclassified_to_profit_or_loss": 153,
+		"tax_on_items_reclassified_to_profit_or_loss": 155,
+		"taxes_and_dues": 98,
+		"total_comprehensive_income": 72,
+		"total_comprehensive_income_from_continuing_operations_owners_of_parent": 161,
+		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": 162,
+		"total_comprehensive_income_owners_of_parent": 74,
+		"total_other_comprehensive_income": 150,
+		"training_expenses": 99,
+		"transportation_expenses": 103,
+		"traveling_expenses": 88,
+		"vehicle_maintenance_expenses": 95,
+		"water_light_and_heating_expenses": 100
+	}
+} as const;
+
+export const FINANCE_ACCOUNT_LEVEL = {
+	"BS": {
+		"accrued_dividends": 2,
+		"accrued_expenses": 2,
+		"accrued_income": 2,
+		"accrued_income_taxes_current": 2,
+		"accumulated_deficit": 2,
+		"accumulated_depreciation": 2,
+		"accumulated_impairment_losses": 2,
+		"accumulated_oci_related_to_assets_held_for_sale": 2,
+		"accumulated_other_comprehensive_income": 2,
+		"additional_paid_in_capital": 2,
+		"advance_from_customers": 2,
+		"advance_payments": 2,
+		"allowance_for_doubtful_accounts": 2,
+		"asset_held_for_sale": 2,
+		"assets": 1,
+		"assets_held_under_a_finance_lease": 2,
+		"availableforsale_financial_assets": 2,
+		"biological_assets": 2,
+		"bonds": 2,
+		"bonds_with_stock_warrants": 2,
+		"borrowings": 2,
+		"borrowings_from_financial_institutes": 2,
+		"capital_lease_current": 2,
+		"capital_stock": 2,
+		"capital_surplus": 2,
+		"cash_and_cash_equivalents": 2,
+		"cash_and_receivables_from_banks": 2,
+		"commercial_paper_liability": 2,
+		"common_stock": 3,
+		"computer_software": 2,
+		"consideration_for_conversion_rights": 2,
+		"consideration_for_stock_warrants": 2,
+		"construction_in_progress": 2,
+		"construction_in_progress_receivables": 2,
+		"contract_assets": 2,
+		"contract_liabilities": 2,
+		"contract_liability": 2,
+		"convertible_bonds": 2,
+		"copyrights": 2,
+		"current_afs_financial_assets": 2,
+		"current_assets": 1,
+		"current_derivative_assets": 2,
+		"current_derivative_liabilities": 2,
+		"current_financial_assets": 2,
+		"current_financial_guarantee_liabilities": 2,
+		"current_income_tax_assetsprepaid_income_tax_payments": 2,
+		"current_income_tax_liabilitiesincome_taxes_payable": 2,
+		"current_inventories": 2,
+		"current_lease_liabilities": 2,
+		"current_liabilities": 1,
+		"current_portion_of_bonds": 2,
+		"current_portion_of_convertible_bonds": 2,
+		"current_portion_of_lease_obligationsother_payables": 2,
+		"current_portion_of_longterm_borrowings": 2,
+		"current_portion_of_longterm_debt": 2,
+		"current_provisions": 2,
+		"debentures": 2,
+		"deferred_revenue_current": 2,
+		"deferred_revenue_noncurrent": 2,
+		"deferred_tax_assets": 2,
+		"deferred_tax_liabilities": 2,
+		"defined_benefit_assets": 2,
+		"defined_benefit_liabilities": 2,
+		"defined_benefit_liability": 2,
+		"deposits_liabilities": 2,
+		"derivatives_assets": 2,
+		"derivatives_liabilities": 2,
+		"employee_benefit_assets": 2,
+		"equity_method_investments": 2,
+		"equity_related_to_assets_held_for_sale": 2,
+		"estimates_of_contract_losses": 2,
+		"facilities": 2,
+		"finance_lease_liability_noncurrent": 2,
+		"financial_assets_at_amortised_cost": 2,
+		"financial_assets_at_amortized_cost": 2,
+		"financial_assets_at_fv_through_oci": 2,
+		"financial_assets_at_fv_through_profit": 2,
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"financial_liabilities_at_amortised_cost": 2,
+		"financial_liabilities_measured_at_fair_value_through_profit_or_loss": 2,
+		"financial_liability_at_fv_through_profit": 2,
+		"gains_from_capital_reduction": 2,
+		"gains_on_disposition_of_treasury_stock": 2,
+		"gains_on_foreign_currency_translation": 2,
+		"gains_on_valuation_of_availableforsale_financial_assets": 2,
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"goods_in_transit": 2,
+		"goodwill": 2,
+		"government_grants": 2,
+		"government_grants_deferred_income": 2,
+		"gross_amount_due_to_customers_for_contract_work": 2,
+		"guarantee_deposits_withhold": 2,
+		"held_to_maturity_financial_assets": 2,
+		"held_to_maturity_investments": 2,
+		"hybrid_bond": 2,
+		"income_taxes_payable": 2,
+		"insurance_contract_assets": 2,
+		"insurance_contract_liabilities": 2,
+		"intangible_assets": 2,
+		"intangible_assets_under_development": 2,
+		"inventories": 2,
+		"investment_in_properties": 2,
+		"investments_in_associates": 2,
+		"investments_in_associates_and_joint_ventures": 2,
+		"investments_in_associates_subsidiaries_and_joint_venteures": 2,
+		"investments_in_associatesequity_method_securities": 2,
+		"investments_in_associatesinvestments_in_equity_method": 2,
+		"investments_in_equity_method": 2,
+		"investments_in_joint_ventures": 2,
+		"investments_in_subsidiaries": 2,
+		"investments_in_subsidiaries_and_associates_equity_method": 2,
+		"investments_in_subsidiaries_associates_and_joint_ventures": 2,
+		"lease_liabilities": 2,
+		"lease_obligations": 2,
+		"leased_assets": 2,
+		"leasehold_deposits_received": 2,
+		"legal_proceedings_provisions": 2,
+		"legal_reserve": 2,
+		"liabilities": 1,
+		"liabilities_classified_as_held_for_sale": 2,
+		"liabilities_included_in_disposal_groups_classified_as_held_for_sale": 2,
+		"loans": 2,
+		"long_term_investments": 2,
+		"longterm_accounts_receivablesconstruction_work": 2,
+		"longterm_accrued_expenses": 2,
+		"longterm_advance_from_customers": 2,
+		"longterm_advance_payments": 2,
+		"longterm_availableforsale_financial_assets": 2,
+		"longterm_borrowings": 2,
+		"longterm_derivative_assets": 2,
+		"longterm_derivative_liabilities": 2,
+		"longterm_finance_lease_receivables": 2,
+		"longterm_financial_assets": 2,
+		"longterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"longterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"longterm_financial_instruments": 2,
+		"longterm_financial_liabilities": 2,
+		"longterm_guarantee_deposits_withhold": 2,
+		"longterm_gurarantee": 2,
+		"longterm_held_to_maturity_investments": 2,
+		"longterm_investment_assets": 2,
+		"longterm_leasehold_deposits_provided": 2,
+		"longterm_leasehold_deposits_received": 2,
+		"longterm_loans": 2,
+		"longterm_other_payables": 2,
+		"longterm_other_payables_others": 2,
+		"longterm_preferred_stock_of_redemption": 2,
+		"longterm_prepaid_expenses": 2,
+		"longterm_provisions": 2,
+		"longterm_receivables": 2,
+		"longterm_trade_and_other_noncurrent_payables": 2,
+		"longterm_trade_payables": 2,
+		"longterm_trade_receivables": 2,
+		"longterm_unearned_income": 2,
+		"losses_on_foreign_currency_translation": 2,
+		"losses_on_valuation_of_availableforsale_financial_assets": 2,
+		"lt_trade_and_other_receivables": 2,
+		"motor_vehicles": 2,
+		"noncontrolling_interests_equity": 1,
+		"noncurrent_afs_financial_assets": 2,
+		"noncurrent_asset_held_for_sale_or_disposal_group": 2,
+		"noncurrent_assets": 1,
+		"noncurrent_borrowings": 2,
+		"noncurrent_derivative_assets": 2,
+		"noncurrent_derivative_liabilities": 2,
+		"noncurrent_financial_guarantee_liabilities": 2,
+		"noncurrent_lease_liabilities": 2,
+		"noncurrent_liabilities": 1,
+		"noncurrent_provisions": 2,
+		"noncurrent_provisions_for_employee_benefits": 2,
+		"office_furniture_and_equipment": 2,
+		"operating_lease_liability_current": 2,
+		"operating_lease_liability_noncurrent": 2,
+		"operating_lease_rou_asset": 2,
+		"other_accrued_expenses": 2,
+		"other_accrued_income": 2,
+		"other_advance_payments": 2,
+		"other_allowance": 2,
+		"other_assets": 2,
+		"other_capital_surplus": 2,
+		"other_components_of_equity": 2,
+		"other_comprehensive_income_of_associates_etc": 2,
+		"other_current_assets": 2,
+		"other_current_financial_assets": 2,
+		"other_current_financial_liabilities": 2,
+		"other_current_liabilities": 2,
+		"other_equity": 2,
+		"other_financial_assets": 2,
+		"other_financial_institutions_liabilities": 2,
+		"other_intangible_assets": 2,
+		"other_inventories": 2,
+		"other_investment_in_properties": 2,
+		"other_leased_assets": 2,
+		"other_legal_reserves": 2,
+		"other_liabilities": 2,
+		"other_longterm_availableforsale_financial_assets": 2,
+		"other_longterm_borrowings": 2,
+		"other_longterm_derivatives": 2,
+		"other_longterm_financial_liabilities": 2,
+		"other_longterm_held_to_maturity_investments": 2,
+		"other_longterm_provisions": 2,
+		"other_noncurrent_assets": 2,
+		"other_noncurrent_financial_assets": 2,
+		"other_noncurrent_financial_liabilities": 2,
+		"other_noncurrent_liabilities": 2,
+		"other_noncurrent_receivables": 2,
+		"other_paid_in_capital": 2,
+		"other_payables": 2,
+		"other_payables_others": 2,
+		"other_property_plant_equipment": 2,
+		"other_receivables": 2,
+		"other_receivables_current": 2,
+		"other_reserves": 2,
+		"other_retained_earnings": 2,
+		"other_shortterm_borrowings": 2,
+		"other_shortterm_provisions": 2,
+		"other_withholdings": 2,
+		"others_in_advance_from_customers": 2,
+		"owners_of_parent_equity": 1,
+		"paidin_capital": 2,
+		"paidin_capital_in_excess_of_par_value": 2,
+		"plan_assets": 2,
+		"policyholders_equity_adjustment": 2,
+		"preferred_stock": 3,
+		"prepaid_expenses": 2,
+		"prepaid_income_taxes": 2,
+		"present_value_discount": 2,
+		"present_value_of_defined_benefit_obligations": 2,
+		"product_warranties_provisions": 2,
+		"property_plant_and_equipment": 2,
+		"provision_for_construction_provisions": 2,
+		"provisions": 2,
+		"provisions_for_restoration_costs": 2,
+		"raw_materialssubmaterials": 2,
+		"receivables": 2,
+		"redeemable_noncontrolling_interest": 1,
+		"reinsurance_assets": 2,
+		"rental_assets": 2,
+		"reserve_for_outstanding_claims_for_reinsurance_ceded": 2,
+		"restricted_cash_current": 2,
+		"retained_earnings": 2,
+		"returned_products_provisions": 2,
+		"revaluation_surplus": 2,
+		"right_of_use_assets": 2,
+		"securities_at_amortised_cost": 2,
+		"separate_account_credits": 2,
+		"separate_account_liabilities": 2,
+		"share_premium": 2,
+		"short_term_borrowings": 2,
+		"short_term_investments": 2,
+		"shortterm_accrued_expenses": 2,
+		"shortterm_advance_from_customers": 2,
+		"shortterm_availableforsale_financial_assets": 2,
+		"shortterm_bonds": 2,
+		"shortterm_borrowings": 2,
+		"shortterm_deposits_provided": 2,
+		"shortterm_derivative_assets": 2,
+		"shortterm_derivative_liabilities": 2,
+		"shortterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"shortterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"shortterm_financial_instruments": 2,
+		"shortterm_financial_liabilities": 2,
+		"shortterm_held_to_maturity_investments": 2,
+		"shortterm_investment_assets": 2,
+		"shortterm_loans": 2,
+		"shortterm_other_receivables": 2,
+		"shortterm_prepaid_expenses": 2,
+		"shortterm_trade_and_other_current_payables": 2,
+		"shortterm_trading_financial_assets": 2,
+		"shortterm_trading_financial_liabilities": 2,
+		"stock_options": 2,
+		"stockholders_equity": 1,
+		"structures": 2,
+		"suppliesconsumables": 2,
+		"tangible_assets": 2,
+		"tools_and_office_equipment": 2,
+		"total_assets": 1,
+		"total_liabilities": 1,
+		"total_liabilities_and_equity": 1,
+		"total_stockholders_equity": 1,
+		"trade_and_other_current_payables": 2,
+		"trade_and_other_current_receivables": 2,
+		"trade_and_other_payables": 2,
+		"trade_and_other_receivables": 2,
+		"trade_payables": 2,
+		"trade_receivables": 2,
+		"treasury_stock": 2,
+		"unappropriated_retained_earnings_deficit": 2,
+		"unearned_income": 2,
+		"voluntary_reserves": 2,
+		"withholdings": 2,
+		"work_in_process": 2
+	},
+	"CF": {
+		"accounts_payable_change": 2,
+		"accounts_receivable_change": 2,
+		"addition_of_expenses_of_noncash_transactions": 3,
+		"adjustments_for_sales": 2,
+		"adjustments_to_reconcile_net_income": 2,
+		"amortization_of_discount_on_bonds": 3,
+		"amortization_of_intangible_assets": 3,
+		"availableforsale_financial_assets": 2,
+		"bonds_with_stock_warrants": 2,
+		"business_combination": 2,
+		"cash_and_cash_equivalents": 1,
+		"cash_and_cash_equivalents_at_the_beginning_of_year": 1,
+		"cash_and_cash_equivalents_at_the_end_of_year": 1,
+		"cash_and_cash_equivalents_beginning": 1,
+		"cash_and_cash_equivalents_ending": 1,
+		"cash_flows_from_business": 2,
+		"cash_flows_from_control_of_subsidiaries_or_other_businesses": 2,
+		"cash_flows_from_financing": 1,
+		"cash_flows_from_financing_activities": 1,
+		"cash_flows_from_investing": 1,
+		"cash_flows_from_investing_activities": 1,
+		"cash_flows_from_loss_of_control_of_subsidiaries_or_other_businesses": 2,
+		"cash_flows_from_operating_activities": 1,
+		"cash_flows_from_operatings": 1,
+		"cash_from_acquisition_or_loss_of_control_of_subsidiaries": 2,
+		"cash_inflows_from_derivatives": 2,
+		"cash_inflows_from_discontinued_operations": 2,
+		"cash_inflows_from_disposal_of_equity_or_debt_instruments": 2,
+		"cash_inflows_from_exercise_of_conversion_rights": 2,
+		"cash_inflows_from_investing_activities": 2,
+		"cash_outflows_from_acquisition_of_equity_or_debt_instruments": 2,
+		"cash_outflows_from_derivatives": 2,
+		"cash_outflows_from_discontinued_operations": 2,
+		"cash_outflows_from_investing_activities": 2,
+		"change_by_merger_and_acquisition": 2,
+		"change_in_noncontrolling_interests": 2,
+		"change_in_working_capital": 2,
+		"change_of_consolidated_scope": 3,
+		"changes_in_operating_assets_and_liabilities": 2,
+		"collection_of_advance_payments_and_loans_to_third_parties": 2,
+		"commission_expenses": 3,
+		"contribution_from_noncontrolling_interests": 2,
+		"debt_issuance": 2,
+		"debt_repayment": 2,
+		"decrease_in_availableforsale_financial_assets": 2,
+		"decrease_in_biological_assets": 3,
+		"decrease_in_buildings_and_structures": 2,
+		"decrease_in_consolidated_capital_transaction": 2,
+		"decrease_in_construction_in_progress": 2,
+		"decrease_in_equity_investments": 2,
+		"decrease_in_financial_assets_at_amortised_cost": 2,
+		"decrease_in_financial_assets_at_fv_through_profit": 2,
+		"decrease_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"decrease_in_financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"decrease_in_financial_instruments": 2,
+		"decrease_in_goodwill": 2,
+		"decrease_in_guarantee_deposits": 2,
+		"decrease_in_held_to_maturity_investments": 2,
+		"decrease_in_intangible_assets": 2,
+		"decrease_in_investment_in_properties": 2,
+		"decrease_in_investments_in_associates": 2,
+		"decrease_in_investments_in_associates_subsidiaries_and_joint_venteures": 2,
+		"decrease_in_investments_in_associatesequity_method_securities": 2,
+		"decrease_in_investments_in_joint_ventures": 2,
+		"decrease_in_investments_in_subsidiaries": 2,
+		"decrease_in_land": 2,
+		"decrease_in_lease_obligations": 2,
+		"decrease_in_leasehold_deposits_provided": 2,
+		"decrease_in_leasehold_deposits_received": 2,
+		"decrease_in_liabilities_held_for_sale": 2,
+		"decrease_in_loans": 2,
+		"decrease_in_loans_and_receivables": 2,
+		"decrease_in_longterm_availableforsale_financial_assets": 2,
+		"decrease_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"decrease_in_longterm_financial_instruments": 2,
+		"decrease_in_machinery_and_equipment": 2,
+		"decrease_in_motor_vehicles": 2,
+		"decrease_in_noncontrolling_interests": 2,
+		"decrease_in_noncurrent_asset_held_for_sale": 2,
+		"decrease_in_other_current_financial_assets": 2,
+		"decrease_in_other_financial_assets": 2,
+		"decrease_in_other_financial_liabilities": 3,
+		"decrease_in_other_liabilities": 3,
+		"decrease_in_other_noncurrent_financial_assets": 2,
+		"decrease_in_other_property_and_equipment": 2,
+		"decrease_in_property_plant_and_equipment": 2,
+		"decrease_in_shortterm_availableforsale_financial_assets": 2,
+		"decrease_in_shortterm_borrowings": 2,
+		"decrease_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"decrease_in_shortterm_financial_instruments": 2,
+		"decrease_in_shortterm_held_to_maturity_investments": 2,
+		"decrease_in_shortterm_loans": 2,
+		"decrease_in_structures": 2,
+		"decrease_in_tools_and_office_equipment": 2,
+		"decrease_of_convertible_bonds": 2,
+		"decrease_of_exchangeable_bonds": 2,
+		"decreaseincrease_in_accrued_revenues": 3,
+		"decreaseincrease_in_advance_payments": 3,
+		"decreaseincrease_in_construction_in_progress_receivables": 3,
+		"decreaseincrease_in_contract_assetscosts": 3,
+		"decreaseincrease_in_current_income_tax_assetsprepaid_income_tax_payments": 3,
+		"decreaseincrease_in_deferred_income_tax_assets": 3,
+		"decreaseincrease_in_deposits_provided": 3,
+		"decreaseincrease_in_derivative_assets": 3,
+		"decreaseincrease_in_due_from_banks": 3,
+		"decreaseincrease_in_financing_leases_receivables": 2,
+		"decreaseincrease_in_inventories": 3,
+		"decreaseincrease_in_loans": 2,
+		"decreaseincrease_in_longterm_advance_payments": 3,
+		"decreaseincrease_in_longterm_deposits_provided": 3,
+		"decreaseincrease_in_longterm_prepaid_expenses": 3,
+		"decreaseincrease_in_longterm_receivables": 3,
+		"decreaseincrease_in_longterm_trade_receivables": 3,
+		"decreaseincrease_in_other_assets": 3,
+		"decreaseincrease_in_other_current_assets": 3,
+		"decreaseincrease_in_other_current_financial_assets": 3,
+		"decreaseincrease_in_other_financial_assets": 3,
+		"decreaseincrease_in_other_noncurrent_assets": 3,
+		"decreaseincrease_in_other_noncurrent_financial_assets": 3,
+		"decreaseincrease_in_other_receivables": 3,
+		"decreaseincrease_in_other_trade_and_other_receivables": 3,
+		"decreaseincrease_in_plan_assets": 3,
+		"decreaseincrease_in_prepaid_expenses": 3,
+		"decreaseincrease_in_receivables": 3,
+		"decreaseincrease_in_shortterm_deposits_provided": 3,
+		"decreaseincrease_in_shortterm_prepaid_expenses": 3,
+		"decreaseincrease_in_trade_and_other_current_receivables": 3,
+		"decreaseincrease_in_trade_and_other_noncurrent_receivables": 3,
+		"decreaseincrease_in_trade_and_other_receivables": 3,
+		"decreaseincrease_in_trade_receivables": 3,
+		"deferred_taxes": 2,
+		"depreciation": 3,
+		"depreciation_cf": 2,
+		"depreciation_other_amortization_and_impairment_losses_expense": 3,
+		"difference_by_changes_in_foreign_exchange_rates": 1,
+		"discontinued_operating_incomeloss": 3,
+		"disposal_of_finance_lease_assets": 2,
+		"disposal_of_intangible_assets": 2,
+		"disposal_of_tangible_assets": 2,
+		"disposition_of_interest_in_subsidiaries": 2,
+		"dividends_paid": 2,
+		"dividends_received": 2,
+		"effect_of_exchange_rate_changes": 1,
+		"employee_benefits": 3,
+		"ending_cash": 2,
+		"exchangeable_bonds": 2,
+		"exercise_of_stock_options": 2,
+		"expenses_of_allowance_for_doubtful_accounts": 3,
+		"financial_assets_at_amortised_cost": 2,
+		"financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"financial_guarantee_provisions": 3,
+		"financial_income": 3,
+		"financing_cashflow": 1,
+		"financing_expenses": 3,
+		"foreign_currency_translation": 3,
+		"gains_on_bargain_purchase": 3,
+		"gains_on_debt_restructuring": 3,
+		"gains_on_derivatives_transactions": 3,
+		"gains_on_disposal_of_assets": 3,
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"gains_on_disposal_of_financial_liabilities_measured_at_fair_value_through_profit_or_loss": 3,
+		"gains_on_disposal_of_held_for_sale_or_disposal_group": 3,
+		"gains_on_disposal_of_intangible_assets": 3,
+		"gains_on_disposal_of_leased_housing_assets": 3,
+		"gains_on_disposal_of_tangible_assets": 3,
+		"gains_on_disposition_of_associates": 3,
+		"gains_on_disposition_of_associates_subsidiaries_joint_ventures": 3,
+		"gains_on_disposition_of_availableforsale_financial_assets": 3,
+		"gains_on_disposition_of_financial_assets": 3,
+		"gains_on_disposition_of_investments": 3,
+		"gains_on_disposition_of_subsidiaries": 3,
+		"gains_on_foreign_currencies_transaction": 3,
+		"gains_on_foreign_currency_translation": 3,
+		"gains_on_investment_in_properties": 3,
+		"gains_on_redemption_of_bonds": 3,
+		"gains_on_valuation_of_equity_method_securities": 3,
+		"gains_on_valuation_of_financial_assets_at_fv_through_profit": 3,
+		"gains_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"gains_on_valuation_of_investments": 3,
+		"gains_on_valuations_of_derivatives": 3,
+		"gainslosses_in_equity_method": 3,
+		"gainslosses_on_disposition_of_noncurrent_assets": 3,
+		"gainslosses_on_disposition_of_other_noncurrent_assets": 2,
+		"government_grants_received": 2,
+		"hybrid_bond_dividends": 2,
+		"impairment_loss_on_inventories": 3,
+		"impairment_losses_on_asset_held_for_sale_or_disposal_group": 3,
+		"impairment_losses_on_associates": 3,
+		"impairment_losses_on_availableforsale_financial_assets": 3,
+		"impairment_losses_on_held_to_maturity_investments": 3,
+		"impairment_losses_on_intangible_assets": 3,
+		"impairment_losses_on_investments": 3,
+		"impairment_losses_on_investments_in_subsidiaries": 3,
+		"impairment_losses_on_investments_in_subsidiaries_associates_joint_ventures": 3,
+		"impairment_losses_on_property_plant_and_equipment": 3,
+		"impairment_losses_on_right_of_use_assets": 3,
+		"income_taxes": 3,
+		"increase_in_advance_payments": 3,
+		"increase_in_availableforsale_financial_assets": 2,
+		"increase_in_bonds": 2,
+		"increase_in_borrowings": 2,
+		"increase_in_buildings_and_structures": 2,
+		"increase_in_consolidated_capital_transaction": 2,
+		"increase_in_construction_in_progress": 2,
+		"increase_in_equity_investments": 2,
+		"increase_in_financial_assets_at_amortised_cost": 2,
+		"increase_in_financial_assets_at_fv_through_profit": 2,
+		"increase_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"increase_in_financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"increase_in_financial_instruments": 2,
+		"increase_in_goodwill": 2,
+		"increase_in_held_to_maturity_investments": 2,
+		"increase_in_industrial_property_rights": 2,
+		"increase_in_intangible_assets": 2,
+		"increase_in_investment_in_properties": 2,
+		"increase_in_investments_in_associates": 2,
+		"increase_in_investments_in_associates_subsidiaries_and_joint_venteures": 2,
+		"increase_in_investments_in_associatesequity_method_securities": 2,
+		"increase_in_investments_in_joint_ventures": 2,
+		"increase_in_investments_in_subsidiaries": 2,
+		"increase_in_land": 2,
+		"increase_in_lease_obligations": 3,
+		"increase_in_leasehold_deposits_provided": 2,
+		"increase_in_leasehold_deposits_received": 2,
+		"increase_in_loans": 2,
+		"increase_in_loans_and_receivables": 2,
+		"increase_in_longterm_availableforsale_financial_assets": 2,
+		"increase_in_longterm_borrowings": 2,
+		"increase_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"increase_in_longterm_financial_instruments": 2,
+		"increase_in_longtermborrowings": 2,
+		"increase_in_machinery_and_equipment": 2,
+		"increase_in_motor_vehicles": 2,
+		"increase_in_noncontrolling_interests": 2,
+		"increase_in_noncurrent_asset_held_for_sale": 2,
+		"increase_in_other_current_financial_assets": 2,
+		"increase_in_other_financial_assets": 2,
+		"increase_in_other_financial_liabilities": 3,
+		"increase_in_other_longterm_assets": 2,
+		"increase_in_other_noncurrent_financial_assets": 2,
+		"increase_in_other_property_and_equipment": 2,
+		"increase_in_preferred_stock_of_redemption": 2,
+		"increase_in_property_and_equipment": 2,
+		"increase_in_property_plant_and_equipment": 2,
+		"increase_in_right_of_use_assets": 2,
+		"increase_in_shortterm_borrowings": 2,
+		"increase_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"increase_in_shortterm_financial_instruments": 2,
+		"increase_in_shortterm_held_to_maturity_investments": 2,
+		"increase_in_shortterm_loans": 2,
+		"increase_in_structures": 2,
+		"increase_of_convertible_bonds": 2,
+		"increase_of_exchangeable_bonds": 2,
+		"increase_of_longtermbonds": 2,
+		"increasedecrease_in_accrued_expenses": 3,
+		"increasedecrease_in_advance_from_customers": 3,
+		"increasedecrease_in_cash_and_cash_equivalents": 1,
+		"increasedecrease_in_contract_liabilities": 3,
+		"increasedecrease_in_current_income_tax_liabilitiesincome_taxes_payable": 3,
+		"increasedecrease_in_deferred_income_tax_liabilities": 3,
+		"increasedecrease_in_deferred_revenue": 3,
+		"increasedecrease_in_defined_benefit_liabilities": 3,
+		"increasedecrease_in_defined_benefit_liability": 3,
+		"increasedecrease_in_deposits_provided": 2,
+		"increasedecrease_in_derivative_liabilities": 3,
+		"increasedecrease_in_dividends_payable": 3,
+		"increasedecrease_in_excess_billing": 3,
+		"increasedecrease_in_liability_provisions": 3,
+		"increasedecrease_in_longterm_other_payables": 3,
+		"increasedecrease_in_longterm_trade_and_other_payables": 3,
+		"increasedecrease_in_noncurrent_provisions": 3,
+		"increasedecrease_in_other_current_liabilities": 3,
+		"increasedecrease_in_other_financial_liabilities": 3,
+		"increasedecrease_in_other_liabilities": 3,
+		"increasedecrease_in_other_noncurrent_liabilities": 3,
+		"increasedecrease_in_other_payables": 3,
+		"increasedecrease_in_other_provisions": 3,
+		"increasedecrease_in_other_trade_and_payables": 3,
+		"increasedecrease_in_product_warranties_provisions": 3,
+		"increasedecrease_in_provisions": 3,
+		"increasedecrease_in_provisions_for_employee_benefits": 3,
+		"increasedecrease_in_provisions_for_restoration_costs": 3,
+		"increasedecrease_in_shortterm_borrowings": 2,
+		"increasedecrease_in_trade_and_other_payables": 3,
+		"increasedecrease_in_trade_payables": 3,
+		"increasedecrease_in_withholdings": 3,
+		"interest_expensesamortization_of_discount_on_bonds_etc": 2,
+		"interest_paid": 2,
+		"interest_received": 2,
+		"inventory_change": 2,
+		"investing_cashflow": 1,
+		"investment_maturities": 2,
+		"investment_purchases": 2,
+		"investment_sales": 2,
+		"investments_in_associates": 2,
+		"investments_in_associates_and_joint_ventures_transactions": 2,
+		"issuance_of_bonds": 2,
+		"issuance_of_common_stock": 2,
+		"issue_of_hybrid_bond": 2,
+		"leasehold_deposits_received": 3,
+		"liability_provisions": 3,
+		"longterm_accrued_expenses": 3,
+		"longterm_advance_from_customers": 3,
+		"longterm_guarantee_deposits_withhold": 3,
+		"longterm_held_to_maturity_investments": 2,
+		"longterm_withholdings": 3,
+		"losses_on_derivatives_transactions": 3,
+		"losses_on_disposal_of_assets": 3,
+		"losses_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"losses_on_disposal_of_held_for_sale_or_disposal_group": 3,
+		"losses_on_disposal_of_intangible_assets": 3,
+		"losses_on_disposal_of_tangible_assets": 3,
+		"losses_on_disposal_of_trade_receivables": 3,
+		"losses_on_disposition_of_associates_subsidiaries_joint_ventures": 3,
+		"losses_on_disposition_of_availableforsale_financial_assets": 3,
+		"losses_on_disposition_of_designatedfinancial_assets_at_fv_through_profit": 3,
+		"losses_on_disposition_of_financial_assets": 3,
+		"losses_on_disposition_of_investments": 3,
+		"losses_on_disposition_of_subsidiaries": 3,
+		"losses_on_evaluation_of_inventories": 3,
+		"losses_on_foreign_currency_translation": 3,
+		"losses_on_inventory_clearing": 3,
+		"losses_on_investment_in_properties": 3,
+		"losses_on_redemption_of_bonds": 3,
+		"losses_on_revaluation_of_property_plant_and_equipment": 3,
+		"losses_on_valuation_of_equity_method_securities": 3,
+		"losses_on_valuation_of_financial_assets_at_fv_through_profit": 3,
+		"losses_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"losses_on_valuation_of_investment_assets": 3,
+		"losses_on_valuations_of_derivatives": 3,
+		"miscellaneous_income_for_lease": 3,
+		"miscellaneous_losses": 3,
+		"net_change_in_cash": 1,
+		"net_decrease_in_shortterm_borrowings": 2,
+		"net_income_cf": 2,
+		"net_increase_decrease_in_cash_and_cash_equivalents": 1,
+		"net_increase_in_shortterm_borrowings": 2,
+		"net_profit": 2,
+		"operating_cashflow": 1,
+		"other_adjustments_to_reconcile_net_income": 3,
+		"other_cash_inflows_outflows": 2,
+		"other_current_financial_assets": 3,
+		"other_current_financial_liabilities": 3,
+		"other_expenses_of_allowance_for_doubtful_accounts": 3,
+		"other_financing_cost": 3,
+		"other_intangible_assets": 2,
+		"other_items_classified_as_investing_or_financing_activities": 3,
+		"other_noncash_adjustments": 3,
+		"other_nonoperating_income": 3,
+		"other_operating_income": 2,
+		"other_reserves": 3,
+		"other_revenues_without_cash_inflows": 3,
+		"others_longterm_employee_benefits_liabilitiesbonuses_etc": 3,
+		"paid_in_capital_decrease": 2,
+		"paid_in_capital_increase": 2,
+		"paidin_capital_in_excess_of_par_value": 2,
+		"payment_of_stock_issuance_costs": 2,
+		"payments_of_income_taxes": 2,
+		"payments_of_retirement_allowance": 3,
+		"product_warranties_expenses": 3,
+		"profit_from_discontinued_operations": 3,
+		"provision_for_construction_provisions": 3,
+		"provision_for_loss_on_acceptances_and_guarantees": 3,
+		"provisions_for_others": 3,
+		"purchase_of_intangible_assets": 2,
+		"purchase_of_property_plant_and_equipment": 2,
+		"purchase_of_treasury_stock": 2,
+		"recovery_of_impairment_losses_on_assets": 3,
+		"recovery_of_impairment_losses_on_associates": 3,
+		"recovery_of_impairment_losses_on_availableforsale_financial_assets": 3,
+		"recovery_of_impairment_losses_on_intangible_assets": 3,
+		"recovery_of_impairment_losses_on_property_plant_and_equipment": 3,
+		"recovery_of_losses_on_evaluation_of_inventories": 3,
+		"redemption_of_callable_stock": 2,
+		"redemption_of_current_portion_of_longterm_borrowings": 2,
+		"redemption_of_hybrid_bond": 2,
+		"refunds_of_income_taxes": 2,
+		"refunds_payments_of_income_taxes": 2,
+		"rent": 3,
+		"repayment_of_borrowings": 2,
+		"repayment_of_convertible_bonds": 2,
+		"repayment_of_longterm_borrowings": 2,
+		"repayment_of_shortterm_borrowings": 2,
+		"repayments_of_bonds": 2,
+		"repayments_of_government_grants": 2,
+		"reserve_of_sharebased_payments": 3,
+		"returned_products_provisions": 3,
+		"reversal_of_allowance_for_acceptances_and_guarantees": 3,
+		"reversal_of_allowance_for_doubtful_accounts": 3,
+		"reversal_of_other_provisions": 3,
+		"reversion_of_liability_provisions": 3,
+		"reversion_of_provisions_for_restoration_costs": 3,
+		"sale_of_treasury_stock": 2,
+		"severance_and_retirement_benefits": 3,
+		"software": 2,
+		"stock_compensation": 2,
+		"stock_compensation_expenses": 3,
+		"stock_dividends": 3,
+		"stock_issuance": 2,
+		"stock_repurchase": 2,
+		"supplies": 3,
+		"trade_and_other_noncurrent_receivables": 3,
+		"transfer_to_assets_held_for_sale": 2
+	},
+	"IS": {
+		"actuarial_gains_or_losses_on_defined_benefit_plans": 2,
+		"advertising_expenses": 2,
+		"amortization_of_intangible_assets": 2,
+		"availableforsale_financial_assets_valuation": 2,
+		"basic_earnings_per_share": 2,
+		"basic_earnings_per_share_from_continuing_operations": 2,
+		"basic_earnings_per_share_from_discontinued_operations": 2,
+		"basic_earnings_per_share_preferred": 2,
+		"capital_change_in_equity_method": 2,
+		"cash_flow_hedges": 2,
+		"change_of_retained_earnings_in_equity_method": 2,
+		"commission_expenses": 2,
+		"communication_expenses": 2,
+		"comprehensive_income": 1,
+		"cost_of_finished_goods_sold": 2,
+		"cost_of_merchandise_finished_goods": 2,
+		"cost_of_merchandise_sold": 2,
+		"cost_of_sales": 1,
+		"cost_of_service": 2,
+		"depreciation": 2,
+		"depreciation_amortization": 2,
+		"derivative_valuation": 2,
+		"diluted_earnings_per_share": 2,
+		"diluted_earnings_per_share_from_continuing_operations": 2,
+		"diluted_earnings_per_share_from_discontinued_operations": 2,
+		"dividends": 2,
+		"donations": 2,
+		"earnings_per_share": 1,
+		"employee_benefits": 2,
+		"entertainment": 2,
+		"expenses_of_allowance_for_doubtful_accounts": 2,
+		"expenses_of_allowance_for_doubtful_accounts_provision_for_allowance_for_bad_debits": 2,
+		"finance_costs": 2,
+		"finance_income": 2,
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"financial_costs": 2,
+		"financial_income": 2,
+		"financing_expenses": 2,
+		"foreign_currency_translation": 2,
+		"foreign_currency_translation_differences": 2,
+		"foreign_currency_translation_differences_before_tax": 2,
+		"gains_on_assets_revaluations": 2,
+		"gains_on_disposal_of_intangible_assets": 2,
+		"gains_on_disposal_of_other_assets": 2,
+		"gains_on_disposal_of_tangible_assets": 2,
+		"gains_on_disposition_of_associates": 2,
+		"gains_on_disposition_of_equity_method_securities": 2,
+		"gains_on_disposition_of_investments": 2,
+		"gains_on_disposition_of_subsidiaries": 2,
+		"gains_on_foreign_currencies_transaction": 2,
+		"gains_on_foreign_currency_translation": 2,
+		"gains_on_valuation_of_equity_method_securities": 2,
+		"gains_on_valuation_of_shortterm_trading_financial_assets": 2,
+		"gains_on_valuations_of_derivatives": 3,
+		"gainslosses_in_equity_method": 2,
+		"gainslosses_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"gainslosses_on_valuation_of_availableforsale_financial_assets": 2,
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"gross_profit": 1,
+		"hedges_of_net_investment_in_foreign_operations": 2,
+		"impairment_losses_on_associates": 2,
+		"impairment_losses_on_availableforsale_financial_assets": 2,
+		"impairment_losses_on_financial_assets": 2,
+		"impairment_losses_on_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"impairment_losses_on_intangible_assets": 2,
+		"impairment_losses_on_investments_in_subsidiaries": 2,
+		"impairment_losses_on_property_plant_and_equipment": 2,
+		"income_tax_benefit": 1,
+		"income_tax_expense": 1,
+		"income_taxes": 1,
+		"insurance_premium": 2,
+		"interest_expenses": 3,
+		"interest_income": 3,
+		"loss_before_tax": 1,
+		"losses_on_disposal_of_intangible_assets": 2,
+		"losses_on_disposal_of_tangible_assets": 2,
+		"losses_on_disposition_of_associates": 2,
+		"losses_on_disposition_of_investments": 2,
+		"losses_on_disposition_of_subsidiaries": 2,
+		"losses_on_evaluation_of_inventories": 2,
+		"losses_on_foreign_currencies_transaction": 2,
+		"losses_on_foreign_currency_translation": 2,
+		"losses_on_valuation_of_equity_method_securities": 2,
+		"losses_on_valuation_of_shortterm_trading_financial_assets": 2,
+		"losses_on_valuations_of_derivatives": 2,
+		"miscellaneous_income_for_lease": 2,
+		"miscellaneous_losses": 2,
+		"net_income": 1,
+		"net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity": 2,
+		"net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": 2,
+		"net_profit": 1,
+		"noncontrolling_interests_equity": 2,
+		"nonoperating_income_expenses": 1,
+		"operating_expenses": 1,
+		"operating_profit": 1,
+		"operating_revenues": 1,
+		"other_comprehensive_income": 1,
+		"other_comprehensive_income_not_to_be_reclassified": 2,
+		"other_comprehensive_income_not_to_be_reclassified_before_tax": 2,
+		"other_comprehensive_income_to_be_reclassified": 2,
+		"other_comprehensive_income_to_be_reclassified_before_tax": 2,
+		"other_cost_of_sales": 2,
+		"other_expenses": 2,
+		"other_expenses_of_allowance_for_doubtful_accounts": 2,
+		"other_financial_expenses": 2,
+		"other_financial_income": 2,
+		"other_income": 2,
+		"other_nonoperating_expenses": 2,
+		"other_nonoperating_income": 2,
+		"other_operating_expenses": 2,
+		"other_operating_income": 2,
+		"other_sales": 2,
+		"other_sga": 2,
+		"others_expense": 2,
+		"owners_of_parent_equity": 2,
+		"packing_expenses": 2,
+		"periodicals_and_printing_expenses": 2,
+		"profit_attributable_to_noncontrolling_interests": 2,
+		"profit_before_tax": 1,
+		"profit_from_continuing_operations": 1,
+		"profit_from_continuing_operations_attributable_to_noncontrolling_interests": 2,
+		"profit_from_continuing_operations_attributable_to_owners_of_parent": 2,
+		"profit_from_discontinued_operations": 1,
+		"profit_from_discontinued_operations_attributable_to_noncontrolling_interests": 2,
+		"profit_from_discontinued_operations_attributable_to_owners_of_parent": 2,
+		"reclassification_of_availableforsale_financial_assets": 2,
+		"remeasurement_elements_of_defined_benefit_plans": 2,
+		"remeasurement_elements_of_defined_benefit_plans_before_tax": 2,
+		"rent": 2,
+		"rental_income": 2,
+		"rental_lease_income": 2,
+		"repairs_and_maintenance_expenses": 2,
+		"research_development": 2,
+		"reversal_of_allowance_for_other_doubtful_accounts": 2,
+		"salaries_and_wages": 2,
+		"sales": 1,
+		"sales_of_finished_goods": 2,
+		"sales_of_merchandise": 2,
+		"sales_of_merchandise_finished_goods": 2,
+		"sales_promotion_expenses": 2,
+		"selling_and_administrative_expenses": 1,
+		"service_revenue": 2,
+		"severance_and_retirement_benefits": 2,
+		"sga": 1,
+		"share_of_oci_of_associates_and_joint_ventures": 2,
+		"share_of_other_comprehensive_income_of_associates_and_joint_ventures": 2,
+		"stock_compensation_expense": 2,
+		"stock_compensation_expenses": 2,
+		"stock_dividends": 3,
+		"supplies": 2,
+		"tax_on_items_not_reclassified_to_profit_or_loss": 2,
+		"tax_on_items_reclassified_to_profit_or_loss": 2,
+		"taxes_and_dues": 2,
+		"total_comprehensive_income": 1,
+		"total_comprehensive_income_from_continuing_operations_owners_of_parent": 2,
+		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": 2,
+		"total_comprehensive_income_owners_of_parent": 2,
+		"total_other_comprehensive_income": 1,
+		"training_expenses": 2,
+		"transportation_expenses": 2,
+		"traveling_expenses": 2,
+		"vehicle_maintenance_expenses": 2,
+		"water_light_and_heating_expenses": 2
+	}
+} as const;
+
+export const FINANCE_ACCOUNT_DEPTH = {
+	"BS": {
+		"accrued_dividends": 2,
+		"accrued_expenses": 2,
+		"accrued_income": 2,
+		"accrued_income_taxes_current": 2,
+		"accumulated_deficit": 2,
+		"accumulated_depreciation": 2,
+		"accumulated_impairment_losses": 2,
+		"accumulated_oci_related_to_assets_held_for_sale": 2,
+		"accumulated_other_comprehensive_income": 2,
+		"additional_paid_in_capital": 2,
+		"advance_from_customers": 2,
+		"advance_payments": 2,
+		"allowance_for_doubtful_accounts": 2,
+		"asset_held_for_sale": 2,
+		"assets": 0,
+		"assets_held_under_a_finance_lease": 2,
+		"availableforsale_financial_assets": 2,
+		"biological_assets": 2,
+		"bonds": 2,
+		"bonds_with_stock_warrants": 2,
+		"borrowings": 2,
+		"borrowings_from_financial_institutes": 2,
+		"capital_lease_current": 2,
+		"capital_stock": 2,
+		"capital_surplus": 2,
+		"cash_and_cash_equivalents": 2,
+		"cash_and_receivables_from_banks": 2,
+		"commercial_paper_liability": 2,
+		"common_stock": 3,
+		"computer_software": 2,
+		"consideration_for_conversion_rights": 2,
+		"consideration_for_stock_warrants": 2,
+		"construction_in_progress": 2,
+		"construction_in_progress_receivables": 2,
+		"contract_assets": 2,
+		"contract_liabilities": 2,
+		"contract_liability": 2,
+		"convertible_bonds": 2,
+		"copyrights": 2,
+		"current_afs_financial_assets": 2,
+		"current_assets": 1,
+		"current_derivative_assets": 2,
+		"current_derivative_liabilities": 2,
+		"current_financial_assets": 2,
+		"current_financial_guarantee_liabilities": 2,
+		"current_income_tax_assetsprepaid_income_tax_payments": 2,
+		"current_income_tax_liabilitiesincome_taxes_payable": 2,
+		"current_inventories": 2,
+		"current_lease_liabilities": 2,
+		"current_liabilities": 1,
+		"current_portion_of_bonds": 2,
+		"current_portion_of_convertible_bonds": 2,
+		"current_portion_of_lease_obligationsother_payables": 2,
+		"current_portion_of_longterm_borrowings": 2,
+		"current_portion_of_longterm_debt": 2,
+		"current_provisions": 2,
+		"debentures": 2,
+		"deferred_revenue_current": 2,
+		"deferred_revenue_noncurrent": 2,
+		"deferred_tax_assets": 2,
+		"deferred_tax_liabilities": 2,
+		"defined_benefit_assets": 2,
+		"defined_benefit_liabilities": 2,
+		"defined_benefit_liability": 2,
+		"deposits_liabilities": 2,
+		"derivatives_assets": 2,
+		"derivatives_liabilities": 2,
+		"employee_benefit_assets": 2,
+		"equity_method_investments": 2,
+		"equity_related_to_assets_held_for_sale": 2,
+		"estimates_of_contract_losses": 2,
+		"facilities": 2,
+		"finance_lease_liability_noncurrent": 2,
+		"financial_assets_at_amortised_cost": 2,
+		"financial_assets_at_amortized_cost": 2,
+		"financial_assets_at_fv_through_oci": 2,
+		"financial_assets_at_fv_through_profit": 2,
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"financial_liabilities_at_amortised_cost": 2,
+		"financial_liabilities_measured_at_fair_value_through_profit_or_loss": 2,
+		"financial_liability_at_fv_through_profit": 2,
+		"gains_from_capital_reduction": 2,
+		"gains_on_disposition_of_treasury_stock": 2,
+		"gains_on_foreign_currency_translation": 2,
+		"gains_on_valuation_of_availableforsale_financial_assets": 2,
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"goods_in_transit": 2,
+		"goodwill": 2,
+		"government_grants": 2,
+		"government_grants_deferred_income": 2,
+		"gross_amount_due_to_customers_for_contract_work": 2,
+		"guarantee_deposits_withhold": 2,
+		"held_to_maturity_financial_assets": 2,
+		"held_to_maturity_investments": 2,
+		"hybrid_bond": 2,
+		"income_taxes_payable": 2,
+		"insurance_contract_assets": 2,
+		"insurance_contract_liabilities": 2,
+		"intangible_assets": 2,
+		"intangible_assets_under_development": 2,
+		"inventories": 2,
+		"investment_in_properties": 2,
+		"investments_in_associates": 2,
+		"investments_in_associates_and_joint_ventures": 2,
+		"investments_in_associates_subsidiaries_and_joint_venteures": 2,
+		"investments_in_associatesequity_method_securities": 2,
+		"investments_in_associatesinvestments_in_equity_method": 2,
+		"investments_in_equity_method": 2,
+		"investments_in_joint_ventures": 2,
+		"investments_in_subsidiaries": 2,
+		"investments_in_subsidiaries_and_associates_equity_method": 2,
+		"investments_in_subsidiaries_associates_and_joint_ventures": 2,
+		"lease_liabilities": 2,
+		"lease_obligations": 2,
+		"leased_assets": 2,
+		"leasehold_deposits_received": 2,
+		"legal_proceedings_provisions": 2,
+		"legal_reserve": 2,
+		"liabilities": 0,
+		"liabilities_classified_as_held_for_sale": 2,
+		"liabilities_included_in_disposal_groups_classified_as_held_for_sale": 2,
+		"loans": 2,
+		"long_term_investments": 2,
+		"longterm_accounts_receivablesconstruction_work": 2,
+		"longterm_accrued_expenses": 2,
+		"longterm_advance_from_customers": 2,
+		"longterm_advance_payments": 2,
+		"longterm_availableforsale_financial_assets": 2,
+		"longterm_borrowings": 2,
+		"longterm_derivative_assets": 2,
+		"longterm_derivative_liabilities": 2,
+		"longterm_finance_lease_receivables": 2,
+		"longterm_financial_assets": 2,
+		"longterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"longterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"longterm_financial_instruments": 2,
+		"longterm_financial_liabilities": 2,
+		"longterm_guarantee_deposits_withhold": 2,
+		"longterm_gurarantee": 2,
+		"longterm_held_to_maturity_investments": 2,
+		"longterm_investment_assets": 2,
+		"longterm_leasehold_deposits_provided": 2,
+		"longterm_leasehold_deposits_received": 2,
+		"longterm_loans": 2,
+		"longterm_other_payables": 2,
+		"longterm_other_payables_others": 2,
+		"longterm_preferred_stock_of_redemption": 2,
+		"longterm_prepaid_expenses": 2,
+		"longterm_provisions": 2,
+		"longterm_receivables": 2,
+		"longterm_trade_and_other_noncurrent_payables": 2,
+		"longterm_trade_payables": 2,
+		"longterm_trade_receivables": 2,
+		"longterm_unearned_income": 2,
+		"losses_on_foreign_currency_translation": 2,
+		"losses_on_valuation_of_availableforsale_financial_assets": 2,
+		"lt_trade_and_other_receivables": 2,
+		"motor_vehicles": 2,
+		"noncontrolling_interests_equity": 1,
+		"noncurrent_afs_financial_assets": 2,
+		"noncurrent_asset_held_for_sale_or_disposal_group": 2,
+		"noncurrent_assets": 1,
+		"noncurrent_borrowings": 2,
+		"noncurrent_derivative_assets": 2,
+		"noncurrent_derivative_liabilities": 2,
+		"noncurrent_financial_guarantee_liabilities": 2,
+		"noncurrent_lease_liabilities": 2,
+		"noncurrent_liabilities": 1,
+		"noncurrent_provisions": 2,
+		"noncurrent_provisions_for_employee_benefits": 2,
+		"office_furniture_and_equipment": 2,
+		"operating_lease_liability_current": 2,
+		"operating_lease_liability_noncurrent": 2,
+		"operating_lease_rou_asset": 2,
+		"other_accrued_expenses": 2,
+		"other_accrued_income": 2,
+		"other_advance_payments": 2,
+		"other_allowance": 2,
+		"other_assets": 2,
+		"other_capital_surplus": 2,
+		"other_components_of_equity": 2,
+		"other_comprehensive_income_of_associates_etc": 2,
+		"other_current_assets": 2,
+		"other_current_financial_assets": 2,
+		"other_current_financial_liabilities": 2,
+		"other_current_liabilities": 2,
+		"other_equity": 2,
+		"other_financial_assets": 2,
+		"other_financial_institutions_liabilities": 2,
+		"other_intangible_assets": 2,
+		"other_inventories": 2,
+		"other_investment_in_properties": 2,
+		"other_leased_assets": 2,
+		"other_legal_reserves": 2,
+		"other_liabilities": 2,
+		"other_longterm_availableforsale_financial_assets": 2,
+		"other_longterm_borrowings": 2,
+		"other_longterm_derivatives": 2,
+		"other_longterm_financial_liabilities": 2,
+		"other_longterm_held_to_maturity_investments": 2,
+		"other_longterm_provisions": 2,
+		"other_noncurrent_assets": 2,
+		"other_noncurrent_financial_assets": 2,
+		"other_noncurrent_financial_liabilities": 2,
+		"other_noncurrent_liabilities": 2,
+		"other_noncurrent_receivables": 2,
+		"other_paid_in_capital": 2,
+		"other_payables": 2,
+		"other_payables_others": 2,
+		"other_property_plant_equipment": 2,
+		"other_receivables": 2,
+		"other_receivables_current": 2,
+		"other_reserves": 2,
+		"other_retained_earnings": 2,
+		"other_shortterm_borrowings": 2,
+		"other_shortterm_provisions": 2,
+		"other_withholdings": 2,
+		"others_in_advance_from_customers": 2,
+		"owners_of_parent_equity": 1,
+		"paidin_capital": 2,
+		"paidin_capital_in_excess_of_par_value": 2,
+		"plan_assets": 2,
+		"policyholders_equity_adjustment": 2,
+		"preferred_stock": 3,
+		"prepaid_expenses": 2,
+		"prepaid_income_taxes": 2,
+		"present_value_discount": 2,
+		"present_value_of_defined_benefit_obligations": 2,
+		"product_warranties_provisions": 2,
+		"property_plant_and_equipment": 2,
+		"provision_for_construction_provisions": 2,
+		"provisions": 2,
+		"provisions_for_restoration_costs": 2,
+		"raw_materialssubmaterials": 2,
+		"receivables": 2,
+		"redeemable_noncontrolling_interest": 1,
+		"reinsurance_assets": 2,
+		"rental_assets": 2,
+		"reserve_for_outstanding_claims_for_reinsurance_ceded": 2,
+		"restricted_cash_current": 2,
+		"retained_earnings": 2,
+		"returned_products_provisions": 2,
+		"revaluation_surplus": 2,
+		"right_of_use_assets": 2,
+		"securities_at_amortised_cost": 2,
+		"separate_account_credits": 2,
+		"separate_account_liabilities": 2,
+		"share_premium": 2,
+		"short_term_borrowings": 2,
+		"short_term_investments": 2,
+		"shortterm_accrued_expenses": 2,
+		"shortterm_advance_from_customers": 2,
+		"shortterm_availableforsale_financial_assets": 2,
+		"shortterm_bonds": 2,
+		"shortterm_borrowings": 2,
+		"shortterm_deposits_provided": 2,
+		"shortterm_derivative_assets": 2,
+		"shortterm_derivative_liabilities": 2,
+		"shortterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"shortterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"shortterm_financial_instruments": 2,
+		"shortterm_financial_liabilities": 2,
+		"shortterm_held_to_maturity_investments": 2,
+		"shortterm_investment_assets": 2,
+		"shortterm_loans": 2,
+		"shortterm_other_receivables": 2,
+		"shortterm_prepaid_expenses": 2,
+		"shortterm_trade_and_other_current_payables": 2,
+		"shortterm_trading_financial_assets": 2,
+		"shortterm_trading_financial_liabilities": 2,
+		"stock_options": 2,
+		"stockholders_equity": 0,
+		"structures": 2,
+		"suppliesconsumables": 2,
+		"tangible_assets": 2,
+		"tools_and_office_equipment": 2,
+		"total_assets": 0,
+		"total_liabilities": 0,
+		"total_liabilities_and_equity": 0,
+		"total_stockholders_equity": 0,
+		"trade_and_other_current_payables": 2,
+		"trade_and_other_current_receivables": 2,
+		"trade_and_other_payables": 2,
+		"trade_and_other_receivables": 2,
+		"trade_payables": 2,
+		"trade_receivables": 2,
+		"treasury_stock": 2,
+		"unappropriated_retained_earnings_deficit": 2,
+		"unearned_income": 2,
+		"voluntary_reserves": 2,
+		"withholdings": 2,
+		"work_in_process": 2
+	},
+	"CF": {
+		"accounts_payable_change": 2,
+		"accounts_receivable_change": 2,
+		"addition_of_expenses_of_noncash_transactions": 3,
+		"adjustments_for_sales": 2,
+		"adjustments_to_reconcile_net_income": 2,
+		"amortization_of_discount_on_bonds": 3,
+		"amortization_of_intangible_assets": 3,
+		"availableforsale_financial_assets": 2,
+		"bonds_with_stock_warrants": 2,
+		"business_combination": 2,
+		"cash_and_cash_equivalents": 1,
+		"cash_and_cash_equivalents_at_the_beginning_of_year": 1,
+		"cash_and_cash_equivalents_at_the_end_of_year": 1,
+		"cash_and_cash_equivalents_beginning": 1,
+		"cash_and_cash_equivalents_ending": 1,
+		"cash_flows_from_business": 2,
+		"cash_flows_from_control_of_subsidiaries_or_other_businesses": 2,
+		"cash_flows_from_financing": 1,
+		"cash_flows_from_financing_activities": 1,
+		"cash_flows_from_investing": 1,
+		"cash_flows_from_investing_activities": 1,
+		"cash_flows_from_loss_of_control_of_subsidiaries_or_other_businesses": 2,
+		"cash_flows_from_operating_activities": 1,
+		"cash_flows_from_operatings": 1,
+		"cash_from_acquisition_or_loss_of_control_of_subsidiaries": 2,
+		"cash_inflows_from_derivatives": 2,
+		"cash_inflows_from_discontinued_operations": 2,
+		"cash_inflows_from_disposal_of_equity_or_debt_instruments": 2,
+		"cash_inflows_from_exercise_of_conversion_rights": 2,
+		"cash_inflows_from_investing_activities": 2,
+		"cash_outflows_from_acquisition_of_equity_or_debt_instruments": 2,
+		"cash_outflows_from_derivatives": 2,
+		"cash_outflows_from_discontinued_operations": 2,
+		"cash_outflows_from_investing_activities": 2,
+		"change_by_merger_and_acquisition": 2,
+		"change_in_noncontrolling_interests": 2,
+		"change_in_working_capital": 2,
+		"change_of_consolidated_scope": 3,
+		"changes_in_operating_assets_and_liabilities": 2,
+		"collection_of_advance_payments_and_loans_to_third_parties": 2,
+		"commission_expenses": 3,
+		"contribution_from_noncontrolling_interests": 2,
+		"debt_issuance": 2,
+		"debt_repayment": 2,
+		"decrease_in_availableforsale_financial_assets": 2,
+		"decrease_in_biological_assets": 3,
+		"decrease_in_buildings_and_structures": 2,
+		"decrease_in_consolidated_capital_transaction": 2,
+		"decrease_in_construction_in_progress": 2,
+		"decrease_in_equity_investments": 2,
+		"decrease_in_financial_assets_at_amortised_cost": 2,
+		"decrease_in_financial_assets_at_fv_through_profit": 2,
+		"decrease_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"decrease_in_financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"decrease_in_financial_instruments": 2,
+		"decrease_in_goodwill": 2,
+		"decrease_in_guarantee_deposits": 2,
+		"decrease_in_held_to_maturity_investments": 2,
+		"decrease_in_intangible_assets": 2,
+		"decrease_in_investment_in_properties": 2,
+		"decrease_in_investments_in_associates": 2,
+		"decrease_in_investments_in_associates_subsidiaries_and_joint_venteures": 2,
+		"decrease_in_investments_in_associatesequity_method_securities": 2,
+		"decrease_in_investments_in_joint_ventures": 2,
+		"decrease_in_investments_in_subsidiaries": 2,
+		"decrease_in_land": 2,
+		"decrease_in_lease_obligations": 2,
+		"decrease_in_leasehold_deposits_provided": 2,
+		"decrease_in_leasehold_deposits_received": 2,
+		"decrease_in_liabilities_held_for_sale": 2,
+		"decrease_in_loans": 2,
+		"decrease_in_loans_and_receivables": 2,
+		"decrease_in_longterm_availableforsale_financial_assets": 2,
+		"decrease_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"decrease_in_longterm_financial_instruments": 2,
+		"decrease_in_machinery_and_equipment": 2,
+		"decrease_in_motor_vehicles": 2,
+		"decrease_in_noncontrolling_interests": 2,
+		"decrease_in_noncurrent_asset_held_for_sale": 2,
+		"decrease_in_other_current_financial_assets": 2,
+		"decrease_in_other_financial_assets": 2,
+		"decrease_in_other_financial_liabilities": 3,
+		"decrease_in_other_liabilities": 3,
+		"decrease_in_other_noncurrent_financial_assets": 2,
+		"decrease_in_other_property_and_equipment": 2,
+		"decrease_in_property_plant_and_equipment": 2,
+		"decrease_in_shortterm_availableforsale_financial_assets": 2,
+		"decrease_in_shortterm_borrowings": 2,
+		"decrease_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"decrease_in_shortterm_financial_instruments": 2,
+		"decrease_in_shortterm_held_to_maturity_investments": 2,
+		"decrease_in_shortterm_loans": 2,
+		"decrease_in_structures": 2,
+		"decrease_in_tools_and_office_equipment": 2,
+		"decrease_of_convertible_bonds": 2,
+		"decrease_of_exchangeable_bonds": 2,
+		"decreaseincrease_in_accrued_revenues": 3,
+		"decreaseincrease_in_advance_payments": 3,
+		"decreaseincrease_in_construction_in_progress_receivables": 3,
+		"decreaseincrease_in_contract_assetscosts": 3,
+		"decreaseincrease_in_current_income_tax_assetsprepaid_income_tax_payments": 3,
+		"decreaseincrease_in_deferred_income_tax_assets": 3,
+		"decreaseincrease_in_deposits_provided": 3,
+		"decreaseincrease_in_derivative_assets": 3,
+		"decreaseincrease_in_due_from_banks": 3,
+		"decreaseincrease_in_financing_leases_receivables": 2,
+		"decreaseincrease_in_inventories": 3,
+		"decreaseincrease_in_loans": 2,
+		"decreaseincrease_in_longterm_advance_payments": 3,
+		"decreaseincrease_in_longterm_deposits_provided": 3,
+		"decreaseincrease_in_longterm_prepaid_expenses": 3,
+		"decreaseincrease_in_longterm_receivables": 3,
+		"decreaseincrease_in_longterm_trade_receivables": 3,
+		"decreaseincrease_in_other_assets": 3,
+		"decreaseincrease_in_other_current_assets": 3,
+		"decreaseincrease_in_other_current_financial_assets": 3,
+		"decreaseincrease_in_other_financial_assets": 3,
+		"decreaseincrease_in_other_noncurrent_assets": 3,
+		"decreaseincrease_in_other_noncurrent_financial_assets": 3,
+		"decreaseincrease_in_other_receivables": 3,
+		"decreaseincrease_in_other_trade_and_other_receivables": 3,
+		"decreaseincrease_in_plan_assets": 3,
+		"decreaseincrease_in_prepaid_expenses": 3,
+		"decreaseincrease_in_receivables": 3,
+		"decreaseincrease_in_shortterm_deposits_provided": 3,
+		"decreaseincrease_in_shortterm_prepaid_expenses": 3,
+		"decreaseincrease_in_trade_and_other_current_receivables": 3,
+		"decreaseincrease_in_trade_and_other_noncurrent_receivables": 3,
+		"decreaseincrease_in_trade_and_other_receivables": 3,
+		"decreaseincrease_in_trade_receivables": 3,
+		"deferred_taxes": 2,
+		"depreciation": 3,
+		"depreciation_cf": 2,
+		"depreciation_other_amortization_and_impairment_losses_expense": 3,
+		"difference_by_changes_in_foreign_exchange_rates": 1,
+		"discontinued_operating_incomeloss": 3,
+		"disposal_of_finance_lease_assets": 2,
+		"disposal_of_intangible_assets": 2,
+		"disposal_of_tangible_assets": 2,
+		"disposition_of_interest_in_subsidiaries": 2,
+		"dividends_paid": 2,
+		"dividends_received": 2,
+		"effect_of_exchange_rate_changes": 1,
+		"employee_benefits": 3,
+		"ending_cash": 2,
+		"exchangeable_bonds": 2,
+		"exercise_of_stock_options": 2,
+		"expenses_of_allowance_for_doubtful_accounts": 3,
+		"financial_assets_at_amortised_cost": 2,
+		"financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"financial_guarantee_provisions": 3,
+		"financial_income": 3,
+		"financing_cashflow": 1,
+		"financing_expenses": 3,
+		"foreign_currency_translation": 3,
+		"gains_on_bargain_purchase": 3,
+		"gains_on_debt_restructuring": 3,
+		"gains_on_derivatives_transactions": 3,
+		"gains_on_disposal_of_assets": 3,
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"gains_on_disposal_of_financial_liabilities_measured_at_fair_value_through_profit_or_loss": 3,
+		"gains_on_disposal_of_held_for_sale_or_disposal_group": 3,
+		"gains_on_disposal_of_intangible_assets": 3,
+		"gains_on_disposal_of_leased_housing_assets": 3,
+		"gains_on_disposal_of_tangible_assets": 3,
+		"gains_on_disposition_of_associates": 3,
+		"gains_on_disposition_of_associates_subsidiaries_joint_ventures": 3,
+		"gains_on_disposition_of_availableforsale_financial_assets": 3,
+		"gains_on_disposition_of_financial_assets": 3,
+		"gains_on_disposition_of_investments": 3,
+		"gains_on_disposition_of_subsidiaries": 3,
+		"gains_on_foreign_currencies_transaction": 3,
+		"gains_on_foreign_currency_translation": 3,
+		"gains_on_investment_in_properties": 3,
+		"gains_on_redemption_of_bonds": 3,
+		"gains_on_valuation_of_equity_method_securities": 3,
+		"gains_on_valuation_of_financial_assets_at_fv_through_profit": 3,
+		"gains_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"gains_on_valuation_of_investments": 3,
+		"gains_on_valuations_of_derivatives": 3,
+		"gainslosses_in_equity_method": 3,
+		"gainslosses_on_disposition_of_noncurrent_assets": 3,
+		"gainslosses_on_disposition_of_other_noncurrent_assets": 2,
+		"government_grants_received": 2,
+		"hybrid_bond_dividends": 2,
+		"impairment_loss_on_inventories": 3,
+		"impairment_losses_on_asset_held_for_sale_or_disposal_group": 3,
+		"impairment_losses_on_associates": 3,
+		"impairment_losses_on_availableforsale_financial_assets": 3,
+		"impairment_losses_on_held_to_maturity_investments": 3,
+		"impairment_losses_on_intangible_assets": 3,
+		"impairment_losses_on_investments": 3,
+		"impairment_losses_on_investments_in_subsidiaries": 3,
+		"impairment_losses_on_investments_in_subsidiaries_associates_joint_ventures": 3,
+		"impairment_losses_on_property_plant_and_equipment": 3,
+		"impairment_losses_on_right_of_use_assets": 3,
+		"income_taxes": 3,
+		"increase_in_advance_payments": 3,
+		"increase_in_availableforsale_financial_assets": 2,
+		"increase_in_bonds": 2,
+		"increase_in_borrowings": 2,
+		"increase_in_buildings_and_structures": 2,
+		"increase_in_consolidated_capital_transaction": 2,
+		"increase_in_construction_in_progress": 2,
+		"increase_in_equity_investments": 2,
+		"increase_in_financial_assets_at_amortised_cost": 2,
+		"increase_in_financial_assets_at_fv_through_profit": 2,
+		"increase_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"increase_in_financial_assets_measured_at_fair_value_through_profit_or_loss": 2,
+		"increase_in_financial_instruments": 2,
+		"increase_in_goodwill": 2,
+		"increase_in_held_to_maturity_investments": 2,
+		"increase_in_industrial_property_rights": 2,
+		"increase_in_intangible_assets": 2,
+		"increase_in_investment_in_properties": 2,
+		"increase_in_investments_in_associates": 2,
+		"increase_in_investments_in_associates_subsidiaries_and_joint_venteures": 2,
+		"increase_in_investments_in_associatesequity_method_securities": 2,
+		"increase_in_investments_in_joint_ventures": 2,
+		"increase_in_investments_in_subsidiaries": 2,
+		"increase_in_land": 2,
+		"increase_in_lease_obligations": 3,
+		"increase_in_leasehold_deposits_provided": 2,
+		"increase_in_leasehold_deposits_received": 2,
+		"increase_in_loans": 2,
+		"increase_in_loans_and_receivables": 2,
+		"increase_in_longterm_availableforsale_financial_assets": 2,
+		"increase_in_longterm_borrowings": 2,
+		"increase_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"increase_in_longterm_financial_instruments": 2,
+		"increase_in_longtermborrowings": 2,
+		"increase_in_machinery_and_equipment": 2,
+		"increase_in_motor_vehicles": 2,
+		"increase_in_noncontrolling_interests": 2,
+		"increase_in_noncurrent_asset_held_for_sale": 2,
+		"increase_in_other_current_financial_assets": 2,
+		"increase_in_other_financial_assets": 2,
+		"increase_in_other_financial_liabilities": 3,
+		"increase_in_other_longterm_assets": 2,
+		"increase_in_other_noncurrent_financial_assets": 2,
+		"increase_in_other_property_and_equipment": 2,
+		"increase_in_preferred_stock_of_redemption": 2,
+		"increase_in_property_and_equipment": 2,
+		"increase_in_property_plant_and_equipment": 2,
+		"increase_in_right_of_use_assets": 2,
+		"increase_in_shortterm_borrowings": 2,
+		"increase_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": 2,
+		"increase_in_shortterm_financial_instruments": 2,
+		"increase_in_shortterm_held_to_maturity_investments": 2,
+		"increase_in_shortterm_loans": 2,
+		"increase_in_structures": 2,
+		"increase_of_convertible_bonds": 2,
+		"increase_of_exchangeable_bonds": 2,
+		"increase_of_longtermbonds": 2,
+		"increasedecrease_in_accrued_expenses": 3,
+		"increasedecrease_in_advance_from_customers": 3,
+		"increasedecrease_in_cash_and_cash_equivalents": 1,
+		"increasedecrease_in_contract_liabilities": 3,
+		"increasedecrease_in_current_income_tax_liabilitiesincome_taxes_payable": 3,
+		"increasedecrease_in_deferred_income_tax_liabilities": 3,
+		"increasedecrease_in_deferred_revenue": 3,
+		"increasedecrease_in_defined_benefit_liabilities": 3,
+		"increasedecrease_in_defined_benefit_liability": 3,
+		"increasedecrease_in_deposits_provided": 2,
+		"increasedecrease_in_derivative_liabilities": 3,
+		"increasedecrease_in_dividends_payable": 3,
+		"increasedecrease_in_excess_billing": 3,
+		"increasedecrease_in_liability_provisions": 3,
+		"increasedecrease_in_longterm_other_payables": 3,
+		"increasedecrease_in_longterm_trade_and_other_payables": 3,
+		"increasedecrease_in_noncurrent_provisions": 3,
+		"increasedecrease_in_other_current_liabilities": 3,
+		"increasedecrease_in_other_financial_liabilities": 3,
+		"increasedecrease_in_other_liabilities": 3,
+		"increasedecrease_in_other_noncurrent_liabilities": 3,
+		"increasedecrease_in_other_payables": 3,
+		"increasedecrease_in_other_provisions": 3,
+		"increasedecrease_in_other_trade_and_payables": 3,
+		"increasedecrease_in_product_warranties_provisions": 3,
+		"increasedecrease_in_provisions": 3,
+		"increasedecrease_in_provisions_for_employee_benefits": 3,
+		"increasedecrease_in_provisions_for_restoration_costs": 3,
+		"increasedecrease_in_shortterm_borrowings": 2,
+		"increasedecrease_in_trade_and_other_payables": 3,
+		"increasedecrease_in_trade_payables": 3,
+		"increasedecrease_in_withholdings": 3,
+		"interest_expensesamortization_of_discount_on_bonds_etc": 2,
+		"interest_paid": 2,
+		"interest_received": 2,
+		"inventory_change": 2,
+		"investing_cashflow": 1,
+		"investment_maturities": 2,
+		"investment_purchases": 2,
+		"investment_sales": 2,
+		"investments_in_associates": 2,
+		"investments_in_associates_and_joint_ventures_transactions": 2,
+		"issuance_of_bonds": 2,
+		"issuance_of_common_stock": 2,
+		"issue_of_hybrid_bond": 2,
+		"leasehold_deposits_received": 3,
+		"liability_provisions": 3,
+		"longterm_accrued_expenses": 3,
+		"longterm_advance_from_customers": 3,
+		"longterm_guarantee_deposits_withhold": 3,
+		"longterm_held_to_maturity_investments": 2,
+		"longterm_withholdings": 3,
+		"losses_on_derivatives_transactions": 3,
+		"losses_on_disposal_of_assets": 3,
+		"losses_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"losses_on_disposal_of_held_for_sale_or_disposal_group": 3,
+		"losses_on_disposal_of_intangible_assets": 3,
+		"losses_on_disposal_of_tangible_assets": 3,
+		"losses_on_disposal_of_trade_receivables": 3,
+		"losses_on_disposition_of_associates_subsidiaries_joint_ventures": 3,
+		"losses_on_disposition_of_availableforsale_financial_assets": 3,
+		"losses_on_disposition_of_designatedfinancial_assets_at_fv_through_profit": 3,
+		"losses_on_disposition_of_financial_assets": 3,
+		"losses_on_disposition_of_investments": 3,
+		"losses_on_disposition_of_subsidiaries": 3,
+		"losses_on_evaluation_of_inventories": 3,
+		"losses_on_foreign_currency_translation": 3,
+		"losses_on_inventory_clearing": 3,
+		"losses_on_investment_in_properties": 3,
+		"losses_on_redemption_of_bonds": 3,
+		"losses_on_revaluation_of_property_plant_and_equipment": 3,
+		"losses_on_valuation_of_equity_method_securities": 3,
+		"losses_on_valuation_of_financial_assets_at_fv_through_profit": 3,
+		"losses_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": 3,
+		"losses_on_valuation_of_investment_assets": 3,
+		"losses_on_valuations_of_derivatives": 3,
+		"miscellaneous_income_for_lease": 3,
+		"miscellaneous_losses": 3,
+		"net_change_in_cash": 1,
+		"net_decrease_in_shortterm_borrowings": 2,
+		"net_income_cf": 2,
+		"net_increase_decrease_in_cash_and_cash_equivalents": 1,
+		"net_increase_in_shortterm_borrowings": 2,
+		"net_profit": 2,
+		"operating_cashflow": 1,
+		"other_adjustments_to_reconcile_net_income": 3,
+		"other_cash_inflows_outflows": 2,
+		"other_current_financial_assets": 3,
+		"other_current_financial_liabilities": 3,
+		"other_expenses_of_allowance_for_doubtful_accounts": 3,
+		"other_financing_cost": 3,
+		"other_intangible_assets": 2,
+		"other_items_classified_as_investing_or_financing_activities": 3,
+		"other_noncash_adjustments": 3,
+		"other_nonoperating_income": 3,
+		"other_operating_income": 2,
+		"other_reserves": 3,
+		"other_revenues_without_cash_inflows": 3,
+		"others_longterm_employee_benefits_liabilitiesbonuses_etc": 3,
+		"paid_in_capital_decrease": 2,
+		"paid_in_capital_increase": 2,
+		"paidin_capital_in_excess_of_par_value": 2,
+		"payment_of_stock_issuance_costs": 2,
+		"payments_of_income_taxes": 2,
+		"payments_of_retirement_allowance": 3,
+		"product_warranties_expenses": 3,
+		"profit_from_discontinued_operations": 3,
+		"provision_for_construction_provisions": 3,
+		"provision_for_loss_on_acceptances_and_guarantees": 3,
+		"provisions_for_others": 3,
+		"purchase_of_intangible_assets": 2,
+		"purchase_of_property_plant_and_equipment": 2,
+		"purchase_of_treasury_stock": 2,
+		"recovery_of_impairment_losses_on_assets": 3,
+		"recovery_of_impairment_losses_on_associates": 3,
+		"recovery_of_impairment_losses_on_availableforsale_financial_assets": 3,
+		"recovery_of_impairment_losses_on_intangible_assets": 3,
+		"recovery_of_impairment_losses_on_property_plant_and_equipment": 3,
+		"recovery_of_losses_on_evaluation_of_inventories": 3,
+		"redemption_of_callable_stock": 2,
+		"redemption_of_current_portion_of_longterm_borrowings": 2,
+		"redemption_of_hybrid_bond": 2,
+		"refunds_of_income_taxes": 2,
+		"refunds_payments_of_income_taxes": 2,
+		"rent": 3,
+		"repayment_of_borrowings": 2,
+		"repayment_of_convertible_bonds": 2,
+		"repayment_of_longterm_borrowings": 2,
+		"repayment_of_shortterm_borrowings": 2,
+		"repayments_of_bonds": 2,
+		"repayments_of_government_grants": 2,
+		"reserve_of_sharebased_payments": 3,
+		"returned_products_provisions": 3,
+		"reversal_of_allowance_for_acceptances_and_guarantees": 3,
+		"reversal_of_allowance_for_doubtful_accounts": 3,
+		"reversal_of_other_provisions": 3,
+		"reversion_of_liability_provisions": 3,
+		"reversion_of_provisions_for_restoration_costs": 3,
+		"sale_of_treasury_stock": 2,
+		"severance_and_retirement_benefits": 3,
+		"software": 2,
+		"stock_compensation": 2,
+		"stock_compensation_expenses": 3,
+		"stock_dividends": 3,
+		"stock_issuance": 2,
+		"stock_repurchase": 2,
+		"supplies": 3,
+		"trade_and_other_noncurrent_receivables": 3,
+		"transfer_to_assets_held_for_sale": 2
+	},
+	"IS": {
+		"actuarial_gains_or_losses_on_defined_benefit_plans": 2,
+		"advertising_expenses": 2,
+		"amortization_of_intangible_assets": 2,
+		"availableforsale_financial_assets_valuation": 2,
+		"basic_earnings_per_share": 2,
+		"basic_earnings_per_share_from_continuing_operations": 2,
+		"basic_earnings_per_share_from_discontinued_operations": 2,
+		"basic_earnings_per_share_preferred": 2,
+		"capital_change_in_equity_method": 2,
+		"cash_flow_hedges": 2,
+		"change_of_retained_earnings_in_equity_method": 2,
+		"commission_expenses": 2,
+		"communication_expenses": 2,
+		"comprehensive_income": 1,
+		"cost_of_finished_goods_sold": 2,
+		"cost_of_merchandise_finished_goods": 2,
+		"cost_of_merchandise_sold": 2,
+		"cost_of_sales": 1,
+		"cost_of_service": 2,
+		"depreciation": 2,
+		"depreciation_amortization": 2,
+		"derivative_valuation": 2,
+		"diluted_earnings_per_share": 2,
+		"diluted_earnings_per_share_from_continuing_operations": 2,
+		"diluted_earnings_per_share_from_discontinued_operations": 2,
+		"dividends": 2,
+		"donations": 2,
+		"earnings_per_share": 1,
+		"employee_benefits": 2,
+		"entertainment": 2,
+		"expenses_of_allowance_for_doubtful_accounts": 2,
+		"expenses_of_allowance_for_doubtful_accounts_provision_for_allowance_for_bad_debits": 2,
+		"finance_costs": 2,
+		"finance_income": 2,
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"financial_costs": 2,
+		"financial_income": 2,
+		"financing_expenses": 2,
+		"foreign_currency_translation": 2,
+		"foreign_currency_translation_differences": 2,
+		"foreign_currency_translation_differences_before_tax": 2,
+		"gains_on_assets_revaluations": 2,
+		"gains_on_disposal_of_intangible_assets": 2,
+		"gains_on_disposal_of_other_assets": 2,
+		"gains_on_disposal_of_tangible_assets": 2,
+		"gains_on_disposition_of_associates": 2,
+		"gains_on_disposition_of_equity_method_securities": 2,
+		"gains_on_disposition_of_investments": 2,
+		"gains_on_disposition_of_subsidiaries": 2,
+		"gains_on_foreign_currencies_transaction": 2,
+		"gains_on_foreign_currency_translation": 2,
+		"gains_on_valuation_of_equity_method_securities": 2,
+		"gains_on_valuation_of_shortterm_trading_financial_assets": 2,
+		"gains_on_valuations_of_derivatives": 3,
+		"gainslosses_in_equity_method": 2,
+		"gainslosses_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"gainslosses_on_valuation_of_availableforsale_financial_assets": 2,
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"gross_profit": 1,
+		"hedges_of_net_investment_in_foreign_operations": 2,
+		"impairment_losses_on_associates": 2,
+		"impairment_losses_on_availableforsale_financial_assets": 2,
+		"impairment_losses_on_financial_assets": 2,
+		"impairment_losses_on_financial_assets_measured_at_fair_value_through_other_comprehensive_income": 2,
+		"impairment_losses_on_intangible_assets": 2,
+		"impairment_losses_on_investments_in_subsidiaries": 2,
+		"impairment_losses_on_property_plant_and_equipment": 2,
+		"income_tax_benefit": 1,
+		"income_tax_expense": 1,
+		"income_taxes": 1,
+		"insurance_premium": 2,
+		"interest_expenses": 3,
+		"interest_income": 3,
+		"loss_before_tax": 1,
+		"losses_on_disposal_of_intangible_assets": 2,
+		"losses_on_disposal_of_tangible_assets": 2,
+		"losses_on_disposition_of_associates": 2,
+		"losses_on_disposition_of_investments": 2,
+		"losses_on_disposition_of_subsidiaries": 2,
+		"losses_on_evaluation_of_inventories": 2,
+		"losses_on_foreign_currencies_transaction": 2,
+		"losses_on_foreign_currency_translation": 2,
+		"losses_on_valuation_of_equity_method_securities": 2,
+		"losses_on_valuation_of_shortterm_trading_financial_assets": 2,
+		"losses_on_valuations_of_derivatives": 2,
+		"miscellaneous_income_for_lease": 2,
+		"miscellaneous_losses": 2,
+		"net_income": 1,
+		"net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity": 2,
+		"net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": 2,
+		"net_profit": 1,
+		"noncontrolling_interests_equity": 2,
+		"nonoperating_income_expenses": 1,
+		"operating_expenses": 1,
+		"operating_profit": 1,
+		"operating_revenues": 1,
+		"other_comprehensive_income": 1,
+		"other_comprehensive_income_not_to_be_reclassified": 2,
+		"other_comprehensive_income_not_to_be_reclassified_before_tax": 2,
+		"other_comprehensive_income_to_be_reclassified": 2,
+		"other_comprehensive_income_to_be_reclassified_before_tax": 2,
+		"other_cost_of_sales": 2,
+		"other_expenses": 2,
+		"other_expenses_of_allowance_for_doubtful_accounts": 2,
+		"other_financial_expenses": 2,
+		"other_financial_income": 2,
+		"other_income": 2,
+		"other_nonoperating_expenses": 2,
+		"other_nonoperating_income": 2,
+		"other_operating_expenses": 2,
+		"other_operating_income": 2,
+		"other_sales": 2,
+		"other_sga": 2,
+		"others_expense": 2,
+		"owners_of_parent_equity": 2,
+		"packing_expenses": 2,
+		"periodicals_and_printing_expenses": 2,
+		"profit_attributable_to_noncontrolling_interests": 2,
+		"profit_before_tax": 1,
+		"profit_from_continuing_operations": 1,
+		"profit_from_continuing_operations_attributable_to_noncontrolling_interests": 2,
+		"profit_from_continuing_operations_attributable_to_owners_of_parent": 2,
+		"profit_from_discontinued_operations": 1,
+		"profit_from_discontinued_operations_attributable_to_noncontrolling_interests": 2,
+		"profit_from_discontinued_operations_attributable_to_owners_of_parent": 2,
+		"reclassification_of_availableforsale_financial_assets": 2,
+		"remeasurement_elements_of_defined_benefit_plans": 2,
+		"remeasurement_elements_of_defined_benefit_plans_before_tax": 2,
+		"rent": 2,
+		"rental_income": 2,
+		"rental_lease_income": 2,
+		"repairs_and_maintenance_expenses": 2,
+		"research_development": 2,
+		"reversal_of_allowance_for_other_doubtful_accounts": 2,
+		"salaries_and_wages": 2,
+		"sales": 1,
+		"sales_of_finished_goods": 2,
+		"sales_of_merchandise": 2,
+		"sales_of_merchandise_finished_goods": 2,
+		"sales_promotion_expenses": 2,
+		"selling_and_administrative_expenses": 1,
+		"service_revenue": 2,
+		"severance_and_retirement_benefits": 2,
+		"sga": 1,
+		"share_of_oci_of_associates_and_joint_ventures": 2,
+		"share_of_other_comprehensive_income_of_associates_and_joint_ventures": 2,
+		"stock_compensation_expense": 2,
+		"stock_compensation_expenses": 2,
+		"stock_dividends": 3,
+		"supplies": 2,
+		"tax_on_items_not_reclassified_to_profit_or_loss": 2,
+		"tax_on_items_reclassified_to_profit_or_loss": 2,
+		"taxes_and_dues": 2,
+		"total_comprehensive_income": 0,
+		"total_comprehensive_income_from_continuing_operations_owners_of_parent": 0,
+		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": 0,
+		"total_comprehensive_income_owners_of_parent": 0,
+		"total_other_comprehensive_income": 0,
+		"training_expenses": 2,
+		"transportation_expenses": 2,
+		"traveling_expenses": 2,
+		"vehicle_maintenance_expenses": 2,
+		"water_light_and_heating_expenses": 2
+	}
+} as const;
+
+export const FINANCE_ACCOUNT_ID_TO_SNAKE = {
+	"AccountsPayable": "trade_payables",
+	"AccountsReceivable": "trade_receivables",
+	"AccrualsClassifiedAsCurrent": "accrued_expenses",
+	"AccumulatedOtherComprehensiveIncome": "accumulated_other_comprehensive_income",
+	"AccumulatedProfits": "retained_earnings",
+	"AcquisitionOfTreasuryShares": "purchase_of_treasury_stock",
+	"AdditionReversalOfCreditLossFinancialAssets": "expenses_of_allowance_for_doubtful_accounts",
+	"AdditionalAllowanceRecognisedInProfitOrLossAllowanceAccountForCreditLossesOfFinancialAssets": "other_reserves",
+	"AdditionalPaidInCapital": "capital_surplus",
+	"AdjustmentsForAdditionalAllowanceRecognisedInProfitOrLossAllowanceAccountForCreditLossesOfFinancialAssets": "other_reserves",
+	"AdjustmentsForAmortisationExpense": "amortization_of_intangible_assets",
+	"AdjustmentsForAssetsLiabilitiesOfOperatingActivities": "change_in_working_capital",
+	"AdjustmentsForBargainPurchaseGains": "gains_on_bargain_purchase",
+	"AdjustmentsForDecreaseIncreaseInDerivativeAssets": "decreaseincrease_in_derivative_assets",
+	"AdjustmentsForDecreaseIncreaseInDuefromBanks": "decreaseincrease_in_due_from_banks",
+	"AdjustmentsForDecreaseIncreaseInFinancialAssetsAtFairValueThroughProfitOrLossClassifiedAsOperatingActivities": "financial_assets_at_fv_through_profit",
+	"AdjustmentsForDecreaseIncreaseInFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeClassifiedAsOperatingActivities": "financial_assets_at_fv_through_oci",
+	"AdjustmentsForDecreaseIncreaseInInventories": "decreaseincrease_in_inventories",
+	"AdjustmentsForDecreaseIncreaseInLoans": "decreaseincrease_in_loans",
+	"AdjustmentsForDecreaseIncreaseInOtherAssets": "decreaseincrease_in_other_assets",
+	"AdjustmentsForDecreaseIncreaseInOtherCurrentAssets": "decreaseincrease_in_other_current_assets",
+	"AdjustmentsForDecreaseIncreaseInReinsuranceContractsHeldThatAreAssets": "reinsurance_assets",
+	"AdjustmentsForDecreaseIncreaseInTradeAccountReceivable": "decreaseincrease_in_trade_receivables",
+	"AdjustmentsForDecreaseincreaseInCurrentTaxAssets": "decreaseincrease_in_current_income_tax_assetsprepaid_income_tax_payments",
+	"AdjustmentsForDecreaseincreaseInDeferredTaxAssets": "decreaseincrease_in_deferred_income_tax_assets",
+	"AdjustmentsForDecreaseincreaseInDepositsProvided": "decreaseincrease_in_deposits_provided",
+	"AdjustmentsForDecreaseincreaseInFairValueOfPlanAssets": "decreaseincrease_in_plan_assets",
+	"AdjustmentsForDecreaseincreaseInLongTermAdvancePayments": "decreaseincrease_in_longterm_advance_payments",
+	"AdjustmentsForDecreaseincreaseInOtherCurrentFinancialAssets": "decreaseincrease_in_other_current_financial_assets",
+	"AdjustmentsForDecreaseincreaseInOtherFinancialAssets": "decreaseincrease_in_other_financial_assets",
+	"AdjustmentsForDecreaseincreaseInOtherNonCurrentFinancialAssets": "decreaseincrease_in_other_noncurrent_financial_assets",
+	"AdjustmentsForDecreaseincreaseInOtherNonCurrentNonFinancialAssets": "decreaseincrease_in_other_noncurrent_assets",
+	"AdjustmentsForDecreaseincreaseInOtherReceivables": "decreaseincrease_in_other_receivables",
+	"AdjustmentsForDecreaseincreaseInTradeAndOtherCurrentReceivables": "decreaseincrease_in_trade_and_other_current_receivables",
+	"AdjustmentsForDecreaseincreaseInTradeAndOtherReceivables": "decreaseincrease_in_trade_and_other_receivables",
+	"AdjustmentsForDepreciationAndAmortisationExpense": "depreciation_other_amortization_and_impairment_losses_expense",
+	"AdjustmentsForDepreciationExpense": "depreciation",
+	"AdjustmentsForFinanceCosts": "finance_costs",
+	"AdjustmentsForGainOnDisposalOfInvestmentsInSubsidiaries": "gains_on_disposition_of_subsidiaries",
+	"AdjustmentsForGainOnDispositionOfTangibleAssets": "gains_on_disposal_of_tangible_assets",
+	"AdjustmentsForGainsOnDisposalsOfInvestmentsInAssociates": "gains_on_disposition_of_associates_subsidiaries_joint_ventures",
+	"AdjustmentsForGainsOnEvaluationOfFairValueFinancialAssets": "gains_on_valuation_of_financial_assets_at_fv_through_profit",
+	"AdjustmentsForGainsOnTransactionOfDerivativeFinancialAssets": "gains_on_derivatives_transactions",
+	"AdjustmentsForImpairmentLossesOnInvestmentsInAssociates": "impairment_losses_on_investments_in_subsidiaries",
+	"AdjustmentsForIncomeTaxExpense": "income_taxes",
+	"AdjustmentsForIncreaseDecreaseInDerivativeLiabilities": "increasedecrease_in_derivative_liabilities",
+	"AdjustmentsForIncreaseDecreaseInInsuranceContractsIssuedThatAreLiabilities": "insurance_contract_liabilities",
+	"AdjustmentsForIncreaseDecreaseInOtherCurrentLiabilities": "increasedecrease_in_other_current_liabilities",
+	"AdjustmentsForIncreaseDecreaseInOtherLiabilities": "increasedecrease_in_other_liabilities",
+	"AdjustmentsForIncreaseDecreaseInOtherNonCurrentLiabilities": "increasedecrease_in_other_noncurrent_liabilities",
+	"AdjustmentsForIncreaseDecreaseInTradeAccountPayable": "increasedecrease_in_trade_payables",
+	"AdjustmentsForIncreasedecreaseInAccruedExpenses": "increasedecrease_in_accrued_expenses",
+	"AdjustmentsForIncreasedecreaseInCurrentTaxLiabilities": "increasedecrease_in_current_income_tax_liabilitiesincome_taxes_payable",
+	"AdjustmentsForIncreasedecreaseInDeferredTaxLiabilities": "increasedecrease_in_deferred_income_tax_liabilities",
+	"AdjustmentsForIncreasedecreaseInLongTermTradeAndOtherNonCurrentPayables": "increasedecrease_in_longterm_trade_and_other_payables",
+	"AdjustmentsForIncreasedecreaseInMiscellaneousOtherProvisions": "increasedecrease_in_liability_provisions",
+	"AdjustmentsForIncreasedecreaseInOtherNonCurrentFinancialLiabilities": "increasedecrease_in_other_financial_liabilities",
+	"AdjustmentsForIncreasedecreaseInOtherNonCurrentNonFinancialLiabilities": "increasedecrease_in_other_financial_liabilities",
+	"AdjustmentsForIncreasedecreaseInOtherPayables": "increasedecrease_in_other_payables",
+	"AdjustmentsForIncreasedecreaseInOtherProvisions": "increasedecrease_in_other_provisions",
+	"AdjustmentsForIncreasedecreaseInPostemploymentBenefitObligations": "increasedecrease_in_defined_benefit_liabilities",
+	"AdjustmentsForIncreasedecreaseInProvisions": "increasedecrease_in_provisions",
+	"AdjustmentsForIncreasedecreaseInTradeAndOtherPayables": "increasedecrease_in_trade_and_other_payables",
+	"AdjustmentsForInterestIncome": "interest_income",
+	"AdjustmentsForLossesOnDisposalsofInvestmentsInAssociates": "losses_on_disposition_of_associates_subsidiaries_joint_ventures",
+	"AdjustmentsForLossesOnDispositionOfPropertyPlantAndEquipment": "losses_on_disposal_of_tangible_assets",
+	"AdjustmentsForLossesOnEvaluationOfFairValueFinancialAssets": "losses_on_valuation_of_financial_assets_at_fv_through_profit",
+	"AdjustmentsForMiscellaneousLosses": "miscellaneous_losses",
+	"AdjustmentsForOtherBadDebtExpenses": "other_expenses_of_allowance_for_doubtful_accounts",
+	"AdjustmentsForOtherGainsWithoutCashFlowIn": "other_revenues_without_cash_inflows",
+	"AdjustmentsForProfitLossFromDiscontinuedOperations": "profit_from_discontinued_operations",
+	"AdjustmentsForReconcileProfitLoss": "adjustments_to_reconcile_net_income",
+	"AdjustmentsForReversalAllowanceDoubtfulAccounts": "reversal_of_allowance_for_doubtful_accounts",
+	"AdjustmentsForReversalsOfBadDebtExpenses": "reversal_of_allowance_for_doubtful_accounts",
+	"AdjustmentsForShareBasedPayment": "stock_compensation_expenses",
+	"AdjustmentsForSharebasedPayments": "reserve_of_sharebased_payments",
+	"AdjustmentsForUnrealisedForeignExchangeLossesGains": "foreign_currency_translation",
+	"AdjustmentsForWritedownsOfInventories": "losses_on_evaluation_of_inventories",
+	"AmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSale": "accumulated_oci_related_to_assets_held_for_sale",
+	"AmountRemovedFromReserveOfCashFlowHedgesAndIncludedInInitialCostOrOtherCarryingAmountOfNonfinancialAssetLiabilityOrFirmCommitmentForWhichFairValueHedgeAccountingIsApplied": "derivative_valuation",
+	"Assets": "total_assets",
+	"BasicEarningsLossPerShare": "basic_earnings_per_share",
+	"BasicEarningsLossPerShareFromContinuingOperations": "basic_earnings_per_share_from_continuing_operations",
+	"BasicEarningsLossPerShareFromDiscontinuedOperations": "basic_earnings_per_share_from_discontinued_operations",
+	"BasicEarningsLossPerSharePreferredStock": "basic_earnings_per_share_preferred",
+	"BasicEarningsLossPerSharePreferredStockFromContinuingOperations": "earnings_per_share",
+	"BondWithWarrant": "bonds",
+	"Bonds": "bonds",
+	"BondsIssued": "bonds",
+	"BonusIssue": "stock_dividends",
+	"Capital": "capital_stock",
+	"CapitalAdjustments": "other_reserves",
+	"CapitalSurplus": "capital_surplus",
+	"CashAdvancesAndLoansMadeToOtherPartiesClassifiedAsInvestingActivities": "increase_in_advance_payments",
+	"CashAndCashEquivalentsAtBeginningOfPeriodCf": "cash_and_cash_equivalents_beginning",
+	"CashAndCashEquivalentsAtEndOfPeriodCf": "cash_and_cash_equivalents_ending",
+	"CashAndCashEquivalentsInSubsidiaryOrBusinessesAcquiredOrDisposed2013": "cash_inflows_from_investing_activities",
+	"CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities": "cash_flows_from_loss_of_control_of_subsidiaries_or_other_businesses",
+	"CashFlowsFromUsedInFinancingActivities": "financing_cashflow",
+	"CashFlowsFromUsedInIncreaseDecreaseInCurrentBorrowings": "increasedecrease_in_shortterm_borrowings",
+	"CashFlowsFromUsedInInvestingActivities": "investing_cashflow",
+	"CashFlowsFromUsedInOperatingActivities": "operating_cashflow",
+	"CashFlowsFromUsedInOperations": "cash_flows_from_business",
+	"CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities": "cash_flows_from_control_of_subsidiaries_or_other_businesses",
+	"CashIncrease": "increasedecrease_in_cash_and_cash_equivalents",
+	"CashOutflowForRepaymentOfHybridBond": "redemption_of_hybrid_bond",
+	"CashPaymentsForDiscontinuedOperations": "cash_outflows_from_discontinued_operations",
+	"CashPaymentsForFutureContractsForwardContractsOptionContractsAndSwapContractsClassifiedAsInvestingActivities": "cash_outflows_from_derivatives",
+	"CashReceiptsFromDiscontinuedOperations": "cash_inflows_from_discontinued_operations",
+	"CashReceiptsFromFutureContractsForwardContractsOptionContractsAndSwapContractsClassifiedAsInvestingActivities": "cash_inflows_from_derivatives",
+	"CashReceiptsFromRepaymentOfAdvancesAndLoansMadeToOtherPartiesClassifiedAsInvestingActivities": "collection_of_advance_payments_and_loans_to_third_parties",
+	"ChangesInConsolidatedCompanies": "change_of_consolidated_scope",
+	"ChangesInForeignExchangeRates": "foreign_currency_translation",
+	"CompoundFinancialInstrumentRedemption": "repayment_of_convertible_bonds",
+	"ComprehensiveIncome": "comprehensive_income",
+	"ComprehensiveIncomeAttributableToNoncontrollingInterests": "noncontrolling_interests_equity",
+	"ComprehensiveIncomeAttributableToOwnersOfParent": "total_comprehensive_income_owners_of_parent",
+	"ComprehensiveIncomeForStatementOfChangesInEquity": "comprehensive_income",
+	"ContributedEquity": "paidin_capital",
+	"ConvertibleBonds": "bonds",
+	"ConvertibleBondsNet": "bonds",
+	"CostOfSales": "cost_of_sales",
+	"CurrentAdvances": "advance_from_customers",
+	"CurrentAssets": "current_assets",
+	"CurrentAvailableForSaleFinancialAssets": "shortterm_availableforsale_financial_assets",
+	"CurrentBondsIssuedAndCurrentPortionOfNoncurrentBondsIssued": "bonds",
+	"CurrentBorrowingsAndCurrentPortionOfNoncurrentBorrowings": "short_term_borrowings",
+	"CurrentContractAssets": "contract_assets",
+	"CurrentContractLiabilities": "contract_liabilities",
+	"CurrentDerivativeAsset": "current_derivative_assets",
+	"CurrentDerivativeLiabilities": "current_derivative_liabilities",
+	"CurrentFinancialAssetDesignationAsAtFairValueThroughProfitOrLoss": "shortterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"CurrentFinancialAssetsAtAmortisedCost": "financial_assets_at_amortised_cost",
+	"CurrentFinancialAssetsAtFairValueThroughProfitOrLoss": "shortterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"CurrentFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncome": "shortterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"CurrentFinancialLiabilitiesDesignationAsAtFairValueThroughProfitOrLoss": "shortterm_trading_financial_liabilities",
+	"CurrentInventories": "inventories",
+	"CurrentInvestments": "shortterm_investment_assets",
+	"CurrentLeaseLiabilities": "current_lease_liabilities",
+	"CurrentLiabilities": "current_liabilities",
+	"CurrentNontradePayables": "other_payables",
+	"CurrentPortionOfBondWithWarrant": "bonds",
+	"CurrentPortionOfBonds": "bonds",
+	"CurrentPortionOfConvertibleBonds": "bonds",
+	"CurrentPortionOfExchangeableBond": "bonds",
+	"CurrentPortionOfLongtermBorrowings": "current_portion_of_longterm_borrowings",
+	"CurrentPrepaidExpenses": "prepaid_expenses",
+	"CurrentProvisions": "current_provisions",
+	"CurrentTaxAssets": "current_income_tax_assetsprepaid_income_tax_payments",
+	"CurrentTaxLiabilities": "current_income_tax_liabilitiesincome_taxes_payable",
+	"CurrentTradeReceivables": "trade_receivables",
+	"DecreaseInGuaranteeDeposits": "decrease_in_leasehold_deposits_provided",
+	"DecreaseInLoans": "decrease_in_loans",
+	"DecreaseInNoncontrollingInterests": "decrease_in_noncontrolling_interests",
+	"DecreaseThroughClassifiedAsHeldForSalePropertyPlantAndEquipment": "transfer_to_assets_held_for_sale",
+	"DeferredTax": "deferred_tax_liabilities",
+	"DeferredTaxAssets": "deferred_tax_assets",
+	"DeferredTaxLiabilities": "deferred_tax_liabilities",
+	"DepositsForSeveranceInsurance": "defined_benefit_assets",
+	"DilutedEarningsLossPerShare": "diluted_earnings_per_share",
+	"DilutedEarningsLossPerShareFromContinuingOperations": "diluted_earnings_per_share_from_continuing_operations",
+	"DilutedEarningsLossPerShareFromDiscontinuedOperations": "diluted_earnings_per_share_from_discontinued_operations",
+	"DividendToHybridBond": "hybrid_bond_dividends",
+	"DividendsPaid": "dividends_paid",
+	"DividendsPaidClassifiedAsFinancingActivities": "dividends_paid",
+	"DividendsPaidClassifiedAsOperatingActivities": "dividends_paid",
+	"DividendsPaidToHybridBond": "hybrid_bond_dividends",
+	"DividendsPaidToNoncontrollingInterests": "dividends_paid",
+	"DividendsReceivedClassifiedAsInvestingActivities": "dividends_received",
+	"DividendsReceivedClassifiedAsOperatingActivities": "dividends_received",
+	"EPS": "basic_earnings_per_share",
+	"EarningsPerShare": "basic_earnings_per_share",
+	"EffectOfExchangeRateChangesOnCashAndCashEquivalents": "effect_of_exchange_rate_changes",
+	"ElementsOfOtherStockholdersEquity": "other_equity",
+	"EquityAndLiabilities": "total_liabilities_and_equity",
+	"EquityAttributableToOwnersOfParent": "owners_of_parent_equity",
+	"ExchangeableBonds": "bonds",
+	"ExpenseFromSharebasedPaymentTransactionsWithEmployees": "stock_compensation_expenses",
+	"FeeAndCommissionExpense": "commission_expenses",
+	"FinanceCosts": "finance_costs",
+	"FinanceCostsPaidClassifiedAsOperatingActivities": "interest_expenses",
+	"FinanceIncome": "finance_income",
+	"FinancialAssetsAtFairValueThroughProfitOrLoss": "financial_assets_at_fv_through_profit",
+	"GainOnValuationOfAvailableForSaleFinancialAssets": "gainslosses_on_valuation_of_availableforsale_financial_assets",
+	"GainsLossesArisingFromDifferenceBetweenPreviousCarryingAmountAndFairValueOfFinancialAssetsReclassifiedAsMeasuredAtFairValue": "gainslosses_in_equity_method",
+	"GainsLossesOnCashFlowHedgesBeforeTax": "derivative_valuation",
+	"GainsLossesOnCashFlowHedgesNetOfTax": "cash_flow_hedges",
+	"GainsLossesOnChangeInValueOfTimeValueOfOptionsNetOfTax": "derivative_valuation",
+	"GainsLossesOnExchangeDifferencesOnTranslationBeforeTax": "foreign_currency_translation_differences_before_tax",
+	"GainsLossesOnExchangeDifferencesOnTranslationNetOfTax": "foreign_currency_translation_differences",
+	"GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax": "gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"GainsLossesOnHedgesOfNetInvestmentsInForeignOperationsBeforeTax": "foreign_currency_translation",
+	"GainsLossesOnHedgesOfNetInvestmentsInForeignOperationsNetOfTax": "hedges_of_net_investment_in_foreign_operations",
+	"GainsLossesOnRemeasuringAvailableforsaleFinancialAssetsNetOfTax": "gainslosses_on_valuation_of_availableforsale_financial_assets",
+	"GainsOnSaleOfInvestmentsInSubsidiaries": "gains_on_disposition_of_subsidiaries",
+	"GainsOnValuationOfDerivativeFinancialInstrument": "gains_on_valuations_of_derivatives",
+	"GainsOnValuationOfDerivativeFinancialInstrumentsFinancialIncome": "gains_on_valuations_of_derivatives",
+	"GoodwillGross": "goodwill",
+	"GrossProfit": "gross_profit",
+	"GrossProfitLoss": "gross_profit",
+	"HybridBonds": "bonds",
+	"IFRS9": "retained_earnings",
+	"ImpairmentLossImpairmentGainAndReversalOfImpairmentLossDeterminedInAccordanceWithIFRS9": "expenses_of_allowance_for_doubtful_accounts",
+	"IncomeFromContinuingOperationsAttributableToOwnersOfParent": "profit_from_continuing_operations_attributable_to_owners_of_parent",
+	"IncomeFromDiscontinuedOperationsAttributableToOwnersOfParent": "profit_from_discontinued_operations_attributable_to_owners_of_parent",
+	"IncomeTaxExpenseContinuingOperations": "income_taxes",
+	"IncomeTaxRelatingToComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLoss": "tax_on_items_reclassified_to_profit_or_loss",
+	"IncomeTaxRelatingToComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLoss": "tax_on_items_not_reclassified_to_profit_or_loss",
+	"IncomeTaxesPaidRefundClassifiedAsOperatingActivities": "payments_of_income_taxes",
+	"IncreaseDecreaseDueToChangesInAccountingPolicy": "change_of_retained_earnings_in_equity_method",
+	"IncreaseDecreaseInCashAndCashEquivalents": "increasedecrease_in_cash_and_cash_equivalents",
+	"IncreaseDecreaseInCashAndCashEquivalentsBeforeEffectOfExchangeRateChanges": "increasedecrease_in_cash_and_cash_equivalents",
+	"IncreaseDecreaseThroughBusinessCombinations": "business_combination",
+	"IncreaseDecreaseThroughExerciseOfWarrantsEquity": "exercise_of_stock_options",
+	"IncreaseDecreaseThroughOtherContributionsByOwners": "paid_in_capital_increase",
+	"IncreaseDueToBusinessCombinationsFinancialAssets": "change_by_merger_and_acquisition",
+	"IncreaseInGuaranteeDeposits": "increase_in_leasehold_deposits_provided",
+	"IncreaseInLoans": "increase_in_loans",
+	"IncreaseInNoncontrollingInterests": "increase_in_noncontrolling_interests",
+	"IncreaseThroughBusinessCombinationsContractAssets": "contract_assets",
+	"InflowsOfCashFromInvestingActivities": "cash_flows_from_investing_activities",
+	"InsuranceContractsIssuedThatAreAssets": "insurance_contract_assets",
+	"InsuranceContractsIssuedThatAreLiabilities": "insurance_contract_liabilities",
+	"InsuranceFinanceExpensesFromInsuranceContractsIssuedRecognisedInProfitOrLoss": "insurance_premium",
+	"InsuranceServiceExpensesFromInsuranceContractsIssued": "insurance_premium",
+	"IntangibleAssets": "intangible_assets",
+	"IntangibleAssetsAndGoodwill": "intangible_assets",
+	"IntangibleAssetsOtherThanGoodwill": "intangible_assets",
+	"IntercompanyAcquisition": "gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"InterestIncomeFinanceIncome": "interest_income",
+	"InterestIncomeOnFinancialAssetsDesignatedAtFairValueThroughProfitOrLoss": "interest_income",
+	"InterestPaidClassifiedAsFinancingActivities": "interest_paid",
+	"InterestPaidClassifiedAsInvestingActivities": "interest_paid",
+	"InterestPaidClassifiedAsOperatingActivities": "interest_paid",
+	"InterestPaidToHybridBond": "hybrid_bond_dividends",
+	"InterestReceivedClassifiedAsInvestingActivities": "interest_received",
+	"InterestReceivedClassifiedAsOperatingActivities": "interest_received",
+	"InterestRevenueCalculatedUsingEffectiveInterestMethod": "interest_income",
+	"InterestRevenueOnFinancialAssetsAtFairValueThroughProfitOrLoss": "interest_income",
+	"Inventories": "inventories",
+	"InvestedAssetForPostemploymentBenefit": "defined_benefit_assets",
+	"InvestmentAccountedForUsingEquityMethod": "investments_in_equity_method",
+	"InvestmentProperty": "investment_in_properties",
+	"InvestmentsInAssociates": "investments_in_associates",
+	"InvestmentsInSubsidiaries": "investments_in_subsidiaries",
+	"InvestmentsInSubsidiariesJointVenturesAndAssociates": "investments_in_associates_subsidiaries_and_joint_venteures",
+	"IssueOfEquity": "paid_in_capital_increase",
+	"IssueOfHybridBond": "issue_of_hybrid_bond",
+	"IssuedCapital": "capital_stock",
+	"IssuedCapitalOfCommonStock": "capital_stock",
+	"IssuedCapitalOfPreferredStock": "capital_stock",
+	"Liabilities": "total_liabilities",
+	"LiabilitiesIncludedInDisposalGroupsClassifiedAsHeldForSale": "liabilities_included_in_disposal_groups_classified_as_held_for_sale",
+	"LoansAtAmortisedCost": "loans",
+	"LoansReceived": "short_term_borrowings",
+	"LongTermAccruedExpensesGross": "longterm_accrued_expenses",
+	"LongTermDepositsNotClassifiedAsCashEquivalents": "longterm_financial_instruments",
+	"LongTermDepositsProvidedGross": "longterm_gurarantee",
+	"LongTermLeaseholdDeposits": "longterm_leasehold_deposits_provided",
+	"LongTermOtherPayablesGross": "longterm_other_payables",
+	"LongTermOtherReceivablesGross": "longterm_receivables",
+	"LongTermPrepaidExpenses": "longterm_prepaid_expenses",
+	"LongTermTradeAndOtherNonCurrentPayables": "trade_payables",
+	"LongTermTradeAndOtherNonCurrentReceivablesGross": "trade_receivables",
+	"LongTermTradePayablesGross": "trade_payables",
+	"LongTermTradeReceivablesGross": "trade_receivables",
+	"NetCashFlow": "increasedecrease_in_cash_and_cash_equivalents",
+	"NetCashflowsFromUsedInOperations": "cash_flows_from_business",
+	"NetIncome": "net_income",
+	"NetProfit": "net_income",
+	"NonCurrentAvailableForSaleFinancialAssets": "financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"NonCurrentBiologicalAssetsGross": "biological_assets",
+	"NonCurrentDerivativeAssets": "noncurrent_derivative_assets",
+	"NonCurrentDerivativeLiabilities": "noncurrent_derivative_liabilities",
+	"NonCurrentFairValueFinancialAsset": "longterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"NonCurrentFinancialAssetsHeldToMaturity": "longterm_held_to_maturity_investments",
+	"NonCurrentFinancialLiabilitiesAtFairValueThroughProfitOrLoss": "financial_liability_at_fv_through_profit",
+	"NonOperatingProfitLoss": "nonoperating_income_expenses",
+	"NoncurrentAssetsOrDisposalGroupsClassifiedAsHeldForSale": "noncurrent_asset_held_for_sale_or_disposal_group",
+	"NoncurrentAssetsOrDisposalGroupsClassifiedAsHeldForSaleOrAsHeldForDistributionToOwners": "asset_held_for_sale",
+	"NoncurrentDerivativeFinancialAssets": "noncurrent_derivative_assets",
+	"NoncurrentFinanceLeaseReceivable": "longterm_finance_lease_receivables",
+	"NoncurrentFinancialAssetsAtAmortisedCost": "financial_assets_at_amortized_cost",
+	"NoncurrentFinancialAssetsAtFairValueThroughProfitOrLoss": "longterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"NoncurrentFinancialAssetsAtFairValueThroughProfitOrLossDesignatedUponInitialRecognition": "financial_assets_at_fv_through_profit",
+	"NoncurrentFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncome": "financial_assets_at_fv_through_oci",
+	"NoncurrentInvestmentsOtherThanInvestmentsAccountedForUsingEquityMethod": "longterm_investment_assets",
+	"NoncurrentLeaseLiabilities": "noncurrent_lease_liabilities",
+	"NoncurrentPayables": "trade_payables",
+	"NoncurrentPayablesToTradeSuppliers": "other_longterm_financial_liabilities",
+	"NoncurrentPortionOfNoncurrentBondsIssued": "bonds",
+	"NoncurrentProvisions": "noncurrent_provisions",
+	"NoncurrentReceivables": "trade_receivables",
+	"NoncurrentRecognisedAssetsDefinedBenefitPlan": "defined_benefit_assets",
+	"NoncurrentRecognisedLiabilitiesDefinedBenefitPlan": "defined_benefit_liabilities",
+	"NoncurrentTradeReceivables": "trade_receivables",
+	"OCI": "other_comprehensive_income",
+	"OperatingExpense": "operating_expenses",
+	"OperatingIncome": "operating_profit",
+	"OperatingIncomeLoss": "operating_profit",
+	"OperatingProfit": "operating_profit",
+	"OtherAdjustmentsForWhichCashEffectsAreInvestingOrFinancingCashFlow": "other_items_classified_as_investing_or_financing_activities",
+	"OtherAdjustmentsToReconcileProfitLoss": "other_adjustments_to_reconcile_net_income",
+	"OtherAssets": "other_assets",
+	"OtherBorrowings": "borrowings",
+	"OtherCapitalAdjustments": "other_reserves",
+	"OtherCapitalSurplus": "capital_surplus",
+	"OtherCashPaymentsToAcquireEquityOrDebtInstrumentsOfOtherEntitiesClassifiedAsInvestingActivities": "cash_outflows_from_acquisition_of_equity_or_debt_instruments",
+	"OtherCashPaymentsToAcquireInterestsInJointVenturesClassifiedAsInvestingActivities": "increase_in_investments_in_joint_ventures",
+	"OtherCashReceiptsFromSalesOfEquityOrDebtInstrumentsOfOtherEntitiesClassifiedAsInvestingActivities": "cash_inflows_from_disposal_of_equity_or_debt_instruments",
+	"OtherCashReceiptsFromSalesOfInterestsInJointVenturesClassifiedAsInvestingActivities": "decrease_in_investments_in_joint_ventures",
+	"OtherComprehensiveIncome": "other_comprehensive_income",
+	"OtherComprehensiveIncomeBeforeTaxCashFlowHedges": "derivative_valuation",
+	"OtherComprehensiveIncomeBeforeTaxExchangeDifferencesOnTranslation": "foreign_currency_translation",
+	"OtherComprehensiveIncomeBeforeTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans": "remeasurement_elements_of_defined_benefit_plans_before_tax",
+	"OtherComprehensiveIncomeForStatementOfChangesInEquity": "other_comprehensive_income",
+	"OtherComprehensiveIncomeLossAccumulatedAmount": "accumulated_other_comprehensive_income",
+	"OtherComprehensiveIncomeNetOfTaxActuarialGainsLossesOnDefinedBenefitPlans": "actuarial_gains_or_losses_on_defined_benefit_plans",
+	"OtherComprehensiveIncomeNetOfTaxAvailableforsaleFinancialAssets": "availableforsale_financial_assets_valuation",
+	"OtherComprehensiveIncomeNetOfTaxCashFlowHedges": "cash_flow_hedges",
+	"OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfInvestmentsInEquityInstruments": "gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"OtherComprehensiveIncomeNetOfTaxDisposalOfInvestmentsInEquityInstruments": "gainslosses_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation": "foreign_currency_translation",
+	"OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans": "remeasurement_elements_of_defined_benefit_plans",
+	"OtherComprehensiveIncomeNetOfTaxGainsLossesOnRevaluation": "gains_on_assets_revaluations",
+	"OtherComprehensiveIncomeNetOfTaxGainsLossesOnRevaluationOfPropertyPlandAndEquipment": "revaluation_surplus",
+	"OtherComprehensiveIncomeNetOfTaxHedgesOfNetInvestmentsInForeignOperations": "foreign_currency_translation",
+	"OtherComprehensiveIncomeNetOfTaxSeparateAccount": "separate_account_liabilities",
+	"OtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossBeforeTax": "other_comprehensive_income_to_be_reclassified_before_tax",
+	"OtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTax": "other_comprehensive_income_to_be_reclassified",
+	"OtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossBeforeTax": "other_comprehensive_income_not_to_be_reclassified_before_tax",
+	"OtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTax": "other_comprehensive_income_not_to_be_reclassified",
+	"OtherCurrentAssets": "other_current_assets",
+	"OtherCurrentFinancialAssets": "other_current_financial_assets",
+	"OtherCurrentFinancialLiabilities": "other_current_financial_liabilities",
+	"OtherCurrentLiabilities": "other_current_liabilities",
+	"OtherCurrentPayables": "other_payables",
+	"OtherCurrentReceivables": "other_receivables",
+	"OtherEquityInterest": "other_components_of_equity",
+	"OtherGains": "other_income",
+	"OtherInflowsOutflowsOfCashClassifiedAsFinancingActivities": "other_cash_inflows_outflows",
+	"OtherInflowsOutflowsOfCashClassifiedAsInvestingActivities": "other_cash_inflows_outflows",
+	"OtherLiabilities": "other_liabilities",
+	"OtherLongtermProvisions": "provisions",
+	"OtherLosses": "other_expenses",
+	"OtherNonCurrentAssets": "other_noncurrent_assets",
+	"OtherNonCurrentLiabilities": "other_noncurrent_liabilities",
+	"OtherNoncurrentFinancialAssets": "other_noncurrent_financial_assets",
+	"OtherNoncurrentFinancialLiabilities": "other_noncurrent_financial_liabilities",
+	"OtherNoncurrentReceivables": "trade_and_other_noncurrent_receivables",
+	"OtherOperatingIncome": "other_operating_income",
+	"OtherShorttermProvisions": "provisions",
+	"OutflowsOfCashFromInvestingActivities": "cash_flows_from_investing_activities",
+	"PPE": "tangible_assets",
+	"PaymentForConsolidatedCapitalTransactions": "decrease_in_consolidated_capital_transaction",
+	"PaymentForStockIssueCost": "payment_of_stock_issuance_costs",
+	"PaymentForStockRedemption": "paid_in_capital_decrease",
+	"PaymentsFromChangesInOwnershipInterestsInSubsidiaries": "disposition_of_interest_in_subsidiaries",
+	"PaymentsOfFinanceLeaseLiabilitiesClassifiedAsFinancingActivities": "decrease_in_lease_obligations",
+	"PaymentsOfIncomeTaxesPayable": "income_taxes_payable",
+	"PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities": "decrease_in_lease_obligations",
+	"PaymentsOfOtherEquityInstruments": "decrease_in_other_financial_liabilities",
+	"PostemploymentBenefitExpenseDefinedBenefitPlans": "defined_benefit_liability",
+	"PostemploymentBenefitObligations": "defined_benefit_liability",
+	"PresentValueOfDefinedBenefitObligation": "present_value_of_defined_benefit_obligations",
+	"ProceedsFromBondWithWarrant": "increase_in_bonds",
+	"ProceedsFromChangesInOwnershipInterestsInSubsidiaries": "disposition_of_interest_in_subsidiaries",
+	"ProceedsFromConsolidatedCapitalTransactions": "increase_in_consolidated_capital_transaction",
+	"ProceedsFromContributionsOfNoncontrollingInterests": "contribution_from_noncontrolling_interests",
+	"ProceedsFromConvertibleBonds": "increase_of_convertible_bonds",
+	"ProceedsFromExchangeableBond": "increase_of_exchangeable_bonds",
+	"ProceedsFromExerciseOfConvertibleRightOrWarrant": "cash_inflows_from_exercise_of_conversion_rights",
+	"ProceedsFromExerciseOfShareOptions": "exercise_of_stock_options",
+	"ProceedsFromFinanceLeaseLiabilitiesClassifiedAsFinancingActivities": "increase_in_lease_obligations",
+	"ProceedsFromGovernmentGrantsClassifiedAsInvestingActivities": "government_grants_received",
+	"ProceedsFromIssueOfBondsNotesAndDebentures": "issuance_of_bonds",
+	"ProceedsFromIssuingConvertibleBonds": "increase_in_preferred_stock_of_redemption",
+	"ProceedsFromIssuingShares": "issuance_of_common_stock",
+	"ProceedsFromLongTermBorrowings": "increase_in_longterm_borrowings",
+	"ProceedsFromNoncurrentBorrowings": "increase_in_longterm_borrowings",
+	"ProceedsFromPaidinCapitalIncrease": "paid_in_capital_increase",
+	"ProceedsFromSalesOfAvailableForSaleFinancialAssets": "decrease_in_availableforsale_financial_assets",
+	"ProceedsFromSalesOfCurrentFairValueFinancialAsset": "decrease_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"ProceedsFromSalesOfFairValueFinancialAsset": "decrease_in_financial_assets_at_fv_through_profit",
+	"ProceedsFromSalesOfFinanceLeaseAssets": "disposal_of_finance_lease_assets",
+	"ProceedsFromSalesOfFinancialAssetsAtAmortisedCostClassifiedAsInvestingActivities": "decrease_in_financial_assets_at_amortised_cost",
+	"ProceedsFromSalesOfFinancialAssetsAtFairValueThroughOtherComprehensiveIncome": "decrease_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"ProceedsFromSalesOfFinancialAssetsHeldToMaturity": "decrease_in_held_to_maturity_investments",
+	"ProceedsFromSalesOfFinancialInstruments": "decrease_in_financial_instruments",
+	"ProceedsFromSalesOfGoodwill": "decrease_in_goodwill",
+	"ProceedsFromSalesOfIntangibleAssetsClassifiedAsInvestingActivities": "disposal_of_intangible_assets",
+	"ProceedsFromSalesOfInterestsInAssociates": "decrease_in_investments_in_associates",
+	"ProceedsFromSalesOfInvestmentProperty": "decrease_in_investment_in_properties",
+	"ProceedsFromSalesOfInvestmentsAccountedForUsingEquityMethod": "decrease_in_investments_in_associatesequity_method_securities",
+	"ProceedsFromSalesOfInvestmentsInAssociates": "decrease_in_investments_in_associates",
+	"ProceedsFromSalesOfInvestmentsInSubsidiaries": "decrease_in_investments_in_subsidiaries",
+	"ProceedsFromSalesOfInvestmentsInSubsidiariesJointVenturesAndAssociates": "decrease_in_investments_in_associates_subsidiaries_and_joint_venteures",
+	"ProceedsFromSalesOfLiabilitiesIncludedInDisposalGroupsClassifiedAsHeldForSale": "decrease_in_liabilities_held_for_sale",
+	"ProceedsFromSalesOfLoansAndReceivables": "decrease_in_loans_and_receivables",
+	"ProceedsFromSalesOfLongTermFinancialInstruments": "decrease_in_longterm_financial_instruments",
+	"ProceedsFromSalesOfNonCurrentAssetsOrDisposalGroupsClassifiedAsHeldForSale": "decrease_in_noncurrent_asset_held_for_sale",
+	"ProceedsFromSalesOfNonCurrentAssetsOrDisposalGroupsClassifiedAsHeldForSaleOrAsHeldForDistributionToOwners": "decrease_in_noncurrent_asset_held_for_sale",
+	"ProceedsFromSalesOfNonCurrentAvailableForSaleFinancialAssets": "decrease_in_longterm_availableforsale_financial_assets",
+	"ProceedsFromSalesOfNonCurrentFairValueFinancialAsset": "decrease_in_longterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"ProceedsFromSalesOfOtherCurrentFinancialAssets": "decrease_in_other_current_financial_assets",
+	"ProceedsFromSalesOfOtherFinancialAssets": "decrease_in_other_financial_assets",
+	"ProceedsFromSalesOfOtherNonCurrentFinancialAssets": "decrease_in_other_noncurrent_financial_assets",
+	"ProceedsFromSalesOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities": "disposal_of_tangible_assets",
+	"ProceedsFromSalesOfShortTermFinancialInstruments": "decrease_in_shortterm_financial_instruments",
+	"ProceedsFromSalesOfShortTermLoansAndReceivables": "decrease_in_shortterm_loans",
+	"ProceedsFromShortTermBorrowings": "increase_in_shortterm_borrowings",
+	"Profit": "net_income",
+	"ProfitBeforeIncomeTax": "profit_before_tax",
+	"ProfitBeforeTax": "profit_before_tax",
+	"ProfitFromOperations": "operating_profit",
+	"ProfitLoss": "net_income",
+	"ProfitLossAttributableToNoncontrollingInterests": "net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity",
+	"ProfitLossAttributableToOwnersOfParent": "net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity",
+	"ProfitLossBeforeTax": "profit_before_tax",
+	"ProfitLossForStatementOfCashFlows": "net_profit",
+	"ProfitLossFromContinuingOperations": "profit_from_continuing_operations",
+	"ProfitLossFromContinuingOperationsAttributableToNoncontrollingInterests": "profit_from_continuing_operations",
+	"ProfitLossFromDiscontinuedOperations": "profit_from_discontinued_operations",
+	"ProfitLossFromDiscontinuedOperationsAttributableToNoncontrollingInterests": "profit_from_discontinued_operations_attributable_to_noncontrolling_interests",
+	"PropertyPlantAndEquipment": "tangible_assets",
+	"Provisions": "provisions",
+	"PurchaseDispostionOfAssociatesOrJointVenture": "investments_in_associates_and_joint_ventures_transactions",
+	"PurchaseOfAvailableForSaleFinancialAssets": "increase_in_availableforsale_financial_assets",
+	"PurchaseOfCurrentFairValueFinancialAsset": "increase_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"PurchaseOfFairValueFinancialAsset": "increase_in_financial_assets_at_fv_through_profit",
+	"PurchaseOfFinancialAssetsAtAmortisedCostClassifiedAsInvestingActivities": "increase_in_financial_assets_at_amortised_cost",
+	"PurchaseOfFinancialAssetsAtFairValueThroughOtherComprehensiveIncome": "increase_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income",
+	"PurchaseOfFinancialAssetsHeldToMaturity": "increase_in_held_to_maturity_investments",
+	"PurchaseOfFinancialInstruments": "increase_in_financial_instruments",
+	"PurchaseOfGoodwill": "increase_in_goodwill",
+	"PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities": "purchase_of_intangible_assets",
+	"PurchaseOfInterestsInAssociates": "increase_in_investments_in_associates",
+	"PurchaseOfInterestsInInvestmentsAccountedForUsingEquityMethod": "increase_in_investments_in_associatesequity_method_securities",
+	"PurchaseOfInvestmentProperty": "increase_in_investment_in_properties",
+	"PurchaseOfInvestmentsInAssociates": "increase_in_investments_in_associates",
+	"PurchaseOfInvestmentsInJointVentures": "increase_in_investments_in_joint_ventures",
+	"PurchaseOfInvestmentsInSubsidiaries": "increase_in_investments_in_subsidiaries",
+	"PurchaseOfInvestmentsInSubsidiariesJointVenturesAndAssociates": "increase_in_investments_in_associates_subsidiaries_and_joint_venteures",
+	"PurchaseOfLoansAndReceivables": "increase_in_loans_and_receivables",
+	"PurchaseOfLongTermFinancialInstruments": "increase_in_longterm_financial_instruments",
+	"PurchaseOfNonCurrentAvailableForSaleFinancialAssets": "increase_in_longterm_availableforsale_financial_assets",
+	"PurchaseOfNonCurrentFairValueFinancialAsset": "increase_in_longterm_financial_assets_at_fair_value_through_profit_or_loss",
+	"PurchaseOfOtherCurrentFinancialAssets": "increase_in_other_current_financial_assets",
+	"PurchaseOfOtherFinancialAssets": "increase_in_other_financial_assets",
+	"PurchaseOfOtherLongtermAssetsClassifiedAsInvestingActivities": "increase_in_other_longterm_assets",
+	"PurchaseOfOtherNonCurrentFinancialAssets": "increase_in_other_noncurrent_financial_assets",
+	"PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities": "purchase_of_property_plant_and_equipment",
+	"PurchaseOfShortTermFinancialInstruments": "increase_in_shortterm_financial_instruments",
+	"PurchaseOfShortTermLoansAndReceivables": "increase_in_shortterm_loans",
+	"PurchaseOfTreasuryShares": "purchase_of_treasury_stock",
+	"ReclassificationAdjustmentsOnAvailableforsaleFinancialAssetsNetOfTax": "reclassification_of_availableforsale_financial_assets",
+	"RecognisedAssetsDefinedBenefitPlan": "defined_benefit_assets",
+	"RecognisedLiabilitiesDefinedBenefitPlan": "defined_benefit_liabilities",
+	"ReinsuranceContractsHeldThatAreAssets": "reinsurance_assets",
+	"ReinsuranceContractsHeldThatAreLiabilities": "reserve_for_outstanding_claims_for_reinsurance_ceded",
+	"RepaymentForGovernmentGrantsClassifiedAsFinancingActivities": "repayments_of_government_grants",
+	"RepaymentOfHybridBond": "redemption_of_hybrid_bond",
+	"RepaymentsOfBondWithWarrant": "bonds_with_stock_warrants",
+	"RepaymentsOfBorrowingsClassifiedAsFinancingActivities": "repayment_of_borrowings",
+	"RepaymentsOfConvertibleBonds": "decrease_of_convertible_bonds",
+	"RepaymentsOfCurrentBorrowings": "repayment_of_shortterm_borrowings",
+	"RepaymentsOfExchangeableBond": "decrease_of_exchangeable_bonds",
+	"RepaymentsOfLongTermBorrowings": "repayment_of_longterm_borrowings",
+	"RepaymentsOfNoncurrentBorrowings": "redemption_of_current_portion_of_longterm_borrowings",
+	"RepaymentsOfShortTermBorrowings": "repayment_of_shortterm_borrowings",
+	"RetainedEarnings": "retained_earnings",
+	"RevenueFromInterest": "interest_income",
+	"RightofuseAssets": "right_of_use_assets",
+	"ShareCapital": "capital_stock",
+	"ShareOfOtherComprehensiveIncomeOfAssociatesAndJointVenturesAccountedForUsingEquityMethodThatWillNotBeReclassifiedToProfitOrLossNetOfTax": "share_of_other_comprehensive_income_of_associates_and_joint_ventures",
+	"ShareOfProfitLossOfAssociatesAccountedForUsingEquityMethod": "gainslosses_in_equity_method",
+	"ShareOfRetainedEarningsOfAssociatesAndJointVenturesAccountedForUsingEquityMethod": "change_of_retained_earnings_in_equity_method",
+	"SharePremium": "capital_surplus",
+	"ShortTermAccruedExpenses": "shortterm_accrued_expenses",
+	"ShortTermAdvancePayments": "advance_payments",
+	"ShortTermAdvancesCustomers": "shortterm_advance_from_customers",
+	"ShortTermBorrowings": "short_term_borrowings",
+	"ShortTermDepositsNotClassifiedAsCashEquivalents": "shortterm_financial_instruments",
+	"ShortTermOtherPayables": "other_payables",
+	"ShortTermOtherReceivables": "shortterm_other_receivables",
+	"ShortTermOtherReceivablesNet": "other_receivables",
+	"ShortTermPrepaidExpenses": "shortterm_prepaid_expenses",
+	"ShortTermTradePayables": "trade_payables",
+	"ShortTermTradeReceivable": "trade_receivables",
+	"ShortTermWithholdings": "withholdings",
+	"ShorttermBorrowings": "short_term_borrowings",
+	"SpinoffOrDropdown": "change_by_merger_and_acquisition",
+	"Stock": "inventories",
+	"SubscriptionOnNewStocks": "paid_in_capital_increase",
+	"TangibleAssets": "tangible_assets",
+	"TotalAssets": "total_assets",
+	"TotalComprehensiveIncome": "comprehensive_income",
+	"TotalCurrentAssets": "current_assets",
+	"TotalCurrentLiabilities": "current_liabilities",
+	"TotalLiabilities": "total_liabilities",
+	"TotalSellingGeneralAdministrativeExpenses": "selling_and_administrative_expenses",
+	"TradeAndOtherCurrentPayables": "trade_payables",
+	"TradeAndOtherCurrentPayablesToTradeSuppliers": "trade_payables",
+	"TradeAndOtherCurrentReceivables": "trade_receivables",
+	"TradeAndOtherPayables": "trade_payables",
+	"TradeAndOtherReceivables": "trade_receivables",
+	"TradePayables": "trade_payables",
+	"TradeReceivables": "trade_receivables",
+	"TransferOfAmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSale": "equity_related_to_assets_held_for_sale",
+	"TreasuryShares": "treasury_stock",
+	"entity00121570_PaymentOfPlanAssetsOfAdjustmentsForAssetsLiabilitiesOfOperatingActivities": "plan_assets"
+} as const;
+
+export const FINANCE_ACCOUNT_NAME_TO_SNAKES = {
+	"(감가상각누계액)": [
+		"accumulated_depreciation"
+	],
+	"(금융)리스부채": [
+		"lease_obligations"
+	],
+	"(금융)리스부채의감소": [
+		"decrease_in_lease_obligations"
+	],
+	"(금융)리스부채의증가": [
+		"increase_in_lease_obligations"
+	],
+	"(대손충당금)": [
+		"allowance_for_doubtful_accounts"
+	],
+	"(매출조정)": [
+		"adjustments_for_sales"
+	],
+	"(비지배주주지분)당기순이익": [
+		"net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity"
+	],
+	"(사외적립자산)": [
+		"plan_assets"
+	],
+	"(손상차손누계액)": [
+		"accumulated_impairment_losses"
+	],
+	"(신종자본증권분배금)": [
+		"hybrid_bond_dividends"
+	],
+	"(임대보증금)": [
+		"leasehold_deposits_received"
+	],
+	"(정부보조금등)": [
+		"government_grants"
+	],
+	"(지배주주지분)당기순이익": [
+		"net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity"
+	],
+	"(추정공사손실)": [
+		"estimates_of_contract_losses"
+	],
+	"(현재가치할인차금)": [
+		"present_value_discount"
+	],
+	"*감가상각비와기타상각비및손상차손": [
+		"depreciation_other_amortization_and_impairment_losses_expense"
+	],
+	"*기타비용": [
+		"other_expenses"
+	],
+	"*세금과공과": [
+		"taxes_and_dues"
+	],
+	"*영업에서창출된현금흐름": [
+		"cash_flows_from_business"
+	],
+	"*임대주택자산처분이익": [
+		"gains_on_disposal_of_leased_housing_assets"
+	],
+	"*주당순이익": [
+		"earnings_per_share"
+	],
+	"BW": [
+		"bonds_with_stock_warrants"
+	],
+	"CB": [
+		"convertible_bonds"
+	],
+	"EB": [
+		"exchangeable_bonds"
+	],
+	"감가상각비": [
+		"depreciation"
+	],
+	"감자차익": [
+		"gains_from_capital_reduction"
+	],
+	"개발중인무형자산": [
+		"intangible_assets_under_development"
+	],
+	"건물및부속설비의감소": [
+		"decrease_in_buildings_and_structures"
+	],
+	"건물및부속설비의증가": [
+		"increase_in_buildings_and_structures"
+	],
+	"건설중인자산": [
+		"construction_in_progress"
+	],
+	"건설중인자산의감소": [
+		"decrease_in_construction_in_progress"
+	],
+	"건설중인자산의증가": [
+		"increase_in_construction_in_progress"
+	],
+	"계속사업이익": [
+		"profit_from_continuing_operations"
+	],
+	"계약부채": [
+		"contract_liabilities"
+	],
+	"계약부채의증가": [
+		"increasedecrease_in_contract_liabilities"
+	],
+	"계약자산": [
+		"contract_assets"
+	],
+	"계약자산(원가)의감소": [
+		"decreaseincrease_in_contract_assetscosts"
+	],
+	"계약자지분조정": [
+		"policyholders_equity_adjustment"
+	],
+	"공구기구비품": [
+		"tools_and_office_equipment"
+	],
+	"공구기구비품의감소": [
+		"decrease_in_tools_and_office_equipment"
+	],
+	"공탁금의감소": [
+		"decrease_in_guarantee_deposits"
+	],
+	"관계기업등기타포괄이익": [
+		"other_comprehensive_income_of_associates_etc"
+	],
+	"관계기업등지분관련투자자산": [
+		"investments_in_associates",
+		"investments_in_associates_subsidiaries_and_joint_venteures"
+	],
+	"관계기업손상차손": [
+		"impairment_losses_on_associates"
+	],
+	"관계기업손상차손환입": [
+		"recovery_of_impairment_losses_on_associates"
+	],
+	"관계기업처분손실": [
+		"losses_on_disposition_of_associates"
+	],
+	"관계기업처분이익": [
+		"gains_on_disposition_of_associates"
+	],
+	"관계기업투자(지분법적용투자)": [
+		"investments_in_associatesinvestments_in_equity_method"
+	],
+	"관계기업투자등(지분법적용투자주식)": [
+		"investments_in_associatesequity_method_securities"
+	],
+	"관계기업투자등(지분법적용투자주식)의감소": [
+		"decrease_in_investments_in_associatesequity_method_securities"
+	],
+	"관계기업투자등(지분법적용투자주식)의증가": [
+		"increase_in_investments_in_associatesequity_method_securities"
+	],
+	"광고선전비": [
+		"advertising_expenses"
+	],
+	"교육훈련비": [
+		"training_expenses"
+	],
+	"구축물": [
+		"structures"
+	],
+	"구축물의감소": [
+		"decrease_in_structures"
+	],
+	"구축물의증가": [
+		"increase_in_structures"
+	],
+	"금융기관차입금": [
+		"borrowings_from_financial_institutes"
+	],
+	"금융리스채권": [
+		"assets_held_under_a_finance_lease"
+	],
+	"금융리스채권의감소": [
+		"decreaseincrease_in_financing_leases_receivables"
+	],
+	"금융보증충당부채": [
+		"financial_guarantee_provisions"
+	],
+	"금융비용": [
+		"financing_expenses"
+	],
+	"금융수익": [
+		"financial_income"
+	],
+	"금융원가": [
+		"financial_costs"
+	],
+	"금융자산손상차손": [
+		"impairment_losses_on_financial_assets"
+	],
+	"금융자산처분손실": [
+		"losses_on_disposition_of_financial_assets"
+	],
+	"금융자산처분이익": [
+		"gains_on_disposition_of_financial_assets"
+	],
+	"급여": [
+		"salaries_and_wages"
+	],
+	"기계장치의감소": [
+		"decrease_in_machinery_and_equipment"
+	],
+	"기계장치의증가": [
+		"increase_in_machinery_and_equipment"
+	],
+	"기구및비품": [
+		"office_furniture_and_equipment"
+	],
+	"기말현금및현금성자산": [
+		"cash_and_cash_equivalents_at_the_end_of_year"
+	],
+	"기부금": [
+		"donations"
+	],
+	"기초현금및현금성자산": [
+		"cash_and_cash_equivalents_at_the_beginning_of_year"
+	],
+	"기타금융부채의감소": [
+		"decrease_in_other_financial_liabilities"
+	],
+	"기타금융부채의증가": [
+		"increase_in_other_financial_liabilities",
+		"increasedecrease_in_other_financial_liabilities"
+	],
+	"기타금융비용": [
+		"other_financing_cost"
+	],
+	"기타금융수익": [
+		"other_financial_income"
+	],
+	"기타금융업부채": [
+		"other_financial_institutions_liabilities"
+	],
+	"기타금융원가": [
+		"other_financial_expenses"
+	],
+	"기타금융자산": [
+		"other_financial_assets"
+	],
+	"기타금융자산의감소": [
+		"decreaseincrease_in_other_financial_assets"
+	],
+	"기타단기금융자산": [
+		"other_current_financial_assets"
+	],
+	"기타단기금융자산의감소": [
+		"decrease_in_other_current_financial_assets"
+	],
+	"기타단기금융자산의증가": [
+		"increase_in_other_current_financial_assets"
+	],
+	"기타단기차입금": [
+		"other_shortterm_borrowings"
+	],
+	"기타대손상각비": [
+		"other_expenses_of_allowance_for_doubtful_accounts"
+	],
+	"기타대손충당금환입": [
+		"reversal_of_allowance_for_other_doubtful_accounts"
+	],
+	"기타리스자산": [
+		"other_leased_assets"
+	],
+	"기타매출원가": [
+		"other_cost_of_sales"
+	],
+	"기타매출채권및기타채권의감소": [
+		"decreaseincrease_in_other_trade_and_other_receivables"
+	],
+	"기타무형자산": [
+		"other_intangible_assets"
+	],
+	"기타미수수익": [
+		"other_accrued_income"
+	],
+	"기타미지급금": [
+		"other_payables_others"
+	],
+	"기타미지급비용": [
+		"other_accrued_expenses"
+	],
+	"기타법정적립금": [
+		"other_legal_reserves"
+	],
+	"기타부채": [
+		"other_liabilities"
+	],
+	"기타부채의감소": [
+		"decrease_in_other_liabilities"
+	],
+	"기타부채의증가": [
+		"increasedecrease_in_other_liabilities"
+	],
+	"기타비용": [
+		"others_expense"
+	],
+	"기타비유동금융자산": [
+		"other_noncurrent_financial_assets"
+	],
+	"기타비유동부채": [
+		"other_noncurrent_liabilities"
+	],
+	"기타비유동자산": [
+		"other_noncurrent_assets"
+	],
+	"기타산업재산권의증가": [
+		"increase_in_industrial_property_rights"
+	],
+	"기타선급금": [
+		"other_advance_payments"
+	],
+	"기타선수금": [
+		"others_in_advance_from_customers"
+	],
+	"기타수익": [
+		"other_sales"
+	],
+	"기타영업비용": [
+		"other_operating_expenses"
+	],
+	"기타영업외비용": [
+		"other_nonoperating_expenses"
+	],
+	"기타영업외수익": [
+		"other_nonoperating_income"
+	],
+	"기타영업이익": [
+		"other_operating_income"
+	],
+	"기타예수금": [
+		"other_withholdings"
+	],
+	"기타유동금융부채": [
+		"other_current_financial_liabilities"
+	],
+	"기타유동부채": [
+		"other_current_liabilities"
+	],
+	"기타유동자산": [
+		"other_current_assets"
+	],
+	"기타유형자산": [
+		"other_property_plant_equipment"
+	],
+	"기타유형자산의감소": [
+		"decrease_in_other_property_and_equipment"
+	],
+	"기타유형자산의증가": [
+		"increase_in_other_property_and_equipment"
+	],
+	"기타이익잉여금": [
+		"other_retained_earnings"
+	],
+	"기타자본": [
+		"other_reserves"
+	],
+	"기타자본구성요소": [
+		"other_equity"
+	],
+	"기타자본잉여금": [
+		"other_capital_surplus"
+	],
+	"기타자산": [
+		"other_assets"
+	],
+	"기타자산의감소": [
+		"decreaseincrease_in_other_assets"
+	],
+	"기타자산처분이익": [
+		"gains_on_disposal_of_other_assets"
+	],
+	"기타장기금융부채": [
+		"other_longterm_financial_liabilities"
+	],
+	"기타장기금융자산의감소": [
+		"decrease_in_other_noncurrent_financial_assets"
+	],
+	"기타장기금융자산의증가": [
+		"increase_in_other_noncurrent_financial_assets"
+	],
+	"기타장기만기보유금융자산": [
+		"other_longterm_held_to_maturity_investments"
+	],
+	"기타장기매도가능금융자산": [
+		"other_longterm_availableforsale_financial_assets"
+	],
+	"기타장기미지급금": [
+		"longterm_other_payables_others"
+	],
+	"기타장기종업원급여부채(연차,상여등)": [
+		"others_longterm_employee_benefits_liabilitiesbonuses_etc"
+	],
+	"기타장기차입금": [
+		"other_longterm_borrowings"
+	],
+	"기타장기충당부채": [
+		"other_longterm_provisions"
+	],
+	"기타장기파생상품자산": [
+		"other_longterm_derivatives"
+	],
+	"기타재고자산": [
+		"other_inventories"
+	],
+	"기타충당부채": [
+		"other_allowance"
+	],
+	"기타충당부채전입액": [
+		"provisions_for_others"
+	],
+	"기타투자부동산": [
+		"other_investment_in_properties"
+	],
+	"기타포괄손익-공정가치측정금융자산": [
+		"financial_assets_measured_at_fair_value_through_other_comprehensive_income"
+	],
+	"기타포괄손익-공정가치측정금융자산손상차손": [
+		"impairment_losses_on_financial_assets_measured_at_fair_value_through_other_comprehensive_income"
+	],
+	"기타포괄손익-공정가치측정금융자산의감소": [
+		"decrease_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income"
+	],
+	"기타포괄손익-공정가치측정금융자산의증가": [
+		"increase_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income"
+	],
+	"기타포괄손익-공정가치측정금융자산처분이익": [
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income"
+	],
+	"기타포괄손익-공정가치측정금융자산평가손익": [
+		"gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income"
+	],
+	"기타포괄이익": [
+		"other_comprehensive_income"
+	],
+	"기타포괄이익누계액": [
+		"accumulated_other_comprehensive_income"
+	],
+	"단기금융상품": [
+		"shortterm_financial_instruments"
+	],
+	"단기금융상품의감소": [
+		"decrease_in_shortterm_financial_instruments"
+	],
+	"단기금융상품의증가": [
+		"increase_in_shortterm_financial_instruments"
+	],
+	"단기대여금": [
+		"shortterm_loans"
+	],
+	"단기대여금의감소": [
+		"decrease_in_shortterm_loans"
+	],
+	"단기대여금의증가": [
+		"increase_in_shortterm_loans"
+	],
+	"단기만기보유금융자산": [
+		"shortterm_held_to_maturity_investments"
+	],
+	"단기만기보유금융자산의감소": [
+		"decrease_in_shortterm_held_to_maturity_investments"
+	],
+	"단기만기보유금융자산의증가": [
+		"increase_in_shortterm_held_to_maturity_investments"
+	],
+	"단기매도가능금융자산": [
+		"shortterm_availableforsale_financial_assets"
+	],
+	"단기매도가능금융자산의감소": [
+		"decrease_in_shortterm_availableforsale_financial_assets"
+	],
+	"단기매매금융부채": [
+		"shortterm_trading_financial_liabilities"
+	],
+	"단기매매금융자산": [
+		"shortterm_trading_financial_assets"
+	],
+	"단기매매금융자산평가손실": [
+		"losses_on_valuation_of_shortterm_trading_financial_assets"
+	],
+	"단기매매금융자산평가이익": [
+		"gains_on_valuation_of_shortterm_trading_financial_assets"
+	],
+	"단기매입채무및기타유동채무": [
+		"shortterm_trade_and_other_current_payables"
+	],
+	"단기보증금": [
+		"shortterm_deposits_provided"
+	],
+	"단기차입금": [
+		"shortterm_borrowings"
+	],
+	"단기차입금의감소": [
+		"decrease_in_shortterm_borrowings"
+	],
+	"단기차입금의상환": [
+		"repayment_of_shortterm_borrowings"
+	],
+	"단기차입금의증가": [
+		"increase_in_shortterm_borrowings"
+	],
+	"단기충당부채": [
+		"other_shortterm_provisions"
+	],
+	"단기파생상품부채": [
+		"shortterm_derivative_liabilities"
+	],
+	"단기파생상품자산": [
+		"shortterm_derivative_assets"
+	],
+	"당기법인세(미지급법인세)의증가": [
+		"increasedecrease_in_current_income_tax_liabilitiesincome_taxes_payable"
+	],
+	"당기법인세부채(미지급법인세)": [
+		"current_income_tax_liabilitiesincome_taxes_payable"
+	],
+	"당기법인세자산(선급법인세)": [
+		"current_income_tax_assetsprepaid_income_tax_payments"
+	],
+	"당기법인세자산(선급법인세)의감소": [
+		"decreaseincrease_in_current_income_tax_assetsprepaid_income_tax_payments"
+	],
+	"당기손익-공정가치측정금융부채": [
+		"financial_liabilities_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융부채처분이익": [
+		"gains_on_disposal_of_financial_liabilities_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산": [
+		"financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산의감소": [
+		"decrease_in_financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산의증가": [
+		"increase_in_financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산처분손실": [
+		"losses_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산처분이익": [
+		"gains_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산평가손실": [
+		"losses_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익-공정가치측정금융자산평가이익": [
+		"gains_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss"
+	],
+	"당기손익으로재분류되지않는항목(세후기타포괄손익)": [
+		"other_comprehensive_income_not_to_be_reclassified"
+	],
+	"당기손익으로재분류될수있는항목(세후기타포괄손익)": [
+		"other_comprehensive_income_to_be_reclassified"
+	],
+	"당기손익인식금융자산": [
+		"financial_assets_at_fv_through_profit"
+	],
+	"당기손익인식금융자산처분손실": [
+		"losses_on_disposition_of_designatedfinancial_assets_at_fv_through_profit"
+	],
+	"당기순이익": [
+		"net_profit"
+	],
+	"대손상각비": [
+		"expenses_of_allowance_for_doubtful_accounts"
+	],
+	"대손상각비(대손충당금전입액)": [
+		"expenses_of_allowance_for_doubtful_accounts_provision_for_allowance_for_bad_debits"
+	],
+	"대손충당금환입액": [
+		"reversal_of_allowance_for_doubtful_accounts"
+	],
+	"대출금의감소": [
+		"decrease_in_loans",
+		"decreaseincrease_in_loans"
+	],
+	"대출금의증가": [
+		"increase_in_loans"
+	],
+	"대출채권": [
+		"loans"
+	],
+	"도서인쇄비": [
+		"periodicals_and_printing_expenses"
+	],
+	"렌탈자산": [
+		"rental_assets"
+	],
+	"리스자산": [
+		"leased_assets"
+	],
+	"리스잡수익": [
+		"miscellaneous_income_for_lease"
+	],
+	"만기보유금융자산": [
+		"held_to_maturity_investments"
+	],
+	"만기보유금융자산손상차손": [
+		"impairment_losses_on_held_to_maturity_investments"
+	],
+	"만기보유금융자산의감소": [
+		"decrease_in_held_to_maturity_investments"
+	],
+	"만기보유금융자산의증가": [
+		"increase_in_held_to_maturity_investments"
+	],
+	"매각및처분예정자산집단처분손실": [
+		"losses_on_disposal_of_held_for_sale_or_disposal_group"
+	],
+	"매각및처분예정자산집단처분이익": [
+		"gains_on_disposal_of_held_for_sale_or_disposal_group"
+	],
+	"매각예정비유동자산의감소": [
+		"decrease_in_noncurrent_asset_held_for_sale"
+	],
+	"매각예정비유동자산의증가": [
+		"increase_in_noncurrent_asset_held_for_sale"
+	],
+	"매각예정처분자산집단손상차손": [
+		"impairment_losses_on_asset_held_for_sale_or_disposal_group"
+	],
+	"매도가능금융자산": [
+		"availableforsale_financial_assets"
+	],
+	"매도가능금융자산손상차손": [
+		"impairment_losses_on_availableforsale_financial_assets"
+	],
+	"매도가능금융자산손상차손환입": [
+		"recovery_of_impairment_losses_on_availableforsale_financial_assets"
+	],
+	"매도가능금융자산의감소": [
+		"decrease_in_availableforsale_financial_assets"
+	],
+	"매도가능금융자산의증가": [
+		"increase_in_availableforsale_financial_assets"
+	],
+	"매도가능금융자산처분손실": [
+		"losses_on_disposition_of_availableforsale_financial_assets"
+	],
+	"매도가능금융자산처분이익": [
+		"gains_on_disposition_of_availableforsale_financial_assets"
+	],
+	"매도가능금융자산평가손실": [
+		"losses_on_valuation_of_availableforsale_financial_assets"
+	],
+	"매도가능금융자산평가손익": [
+		"gainslosses_on_valuation_of_availableforsale_financial_assets"
+	],
+	"매도가능금융자산평가이익": [
+		"gains_on_valuation_of_availableforsale_financial_assets"
+	],
+	"매입채무": [
+		"trade_payables"
+	],
+	"매입채무및기타채무": [
+		"trade_and_other_current_payables",
+		"trade_and_other_payables"
+	],
+	"매입채무및기타채무의증가": [
+		"increasedecrease_in_other_trade_and_payables"
+	],
+	"매입채무의증가": [
+		"increasedecrease_in_trade_payables"
+	],
+	"매출액": [
+		"sales"
+	],
+	"매출원가": [
+		"cost_of_sales"
+	],
+	"매출채권": [
+		"trade_receivables"
+	],
+	"매출채권및기타채권": [
+		"trade_and_other_current_receivables",
+		"trade_and_other_receivables"
+	],
+	"매출채권및기타채권의감소": [
+		"decreaseincrease_in_trade_and_other_receivables"
+	],
+	"매출채권의감소": [
+		"decreaseincrease_in_trade_receivables"
+	],
+	"매출채권처분손실": [
+		"losses_on_disposal_of_trade_receivables"
+	],
+	"매출총이익": [
+		"gross_profit"
+	],
+	"무형자산": [
+		"intangible_assets"
+	],
+	"무형자산상각비": [
+		"amortization_of_intangible_assets"
+	],
+	"무형자산손상차손": [
+		"impairment_losses_on_intangible_assets"
+	],
+	"무형자산손상차손환입": [
+		"recovery_of_impairment_losses_on_intangible_assets"
+	],
+	"무형자산의감소": [
+		"decrease_in_intangible_assets"
+	],
+	"무형자산의증가": [
+		"increase_in_intangible_assets"
+	],
+	"무형자산의처분": [
+		"disposal_of_intangible_assets"
+	],
+	"무형자산의취득": [
+		"purchase_of_intangible_assets"
+	],
+	"무형자산처분손실": [
+		"losses_on_disposal_of_intangible_assets"
+	],
+	"무형자산처분이익": [
+		"gains_on_disposal_of_intangible_assets"
+	],
+	"미수금": [
+		"other_receivables",
+		"receivables"
+	],
+	"미수금의감소": [
+		"decreaseincrease_in_receivables"
+	],
+	"미수배당금": [
+		"accrued_dividends"
+	],
+	"미수수익": [
+		"accrued_income"
+	],
+	"미수수익의감소": [
+		"decreaseincrease_in_accrued_revenues"
+	],
+	"미지급금": [
+		"other_payables"
+	],
+	"미지급금의증가": [
+		"increasedecrease_in_other_payables"
+	],
+	"미지급배당금의증가": [
+		"increasedecrease_in_dividends_payable"
+	],
+	"미지급비용": [
+		"accrued_expenses"
+	],
+	"미지급비용의증가": [
+		"increasedecrease_in_accrued_expenses"
+	],
+	"미착품": [
+		"goods_in_transit"
+	],
+	"미처분이익잉여금(결손금)": [
+		"unappropriated_retained_earnings_deficit"
+	],
+	"반품충당부채": [
+		"returned_products_provisions"
+	],
+	"배당금": [
+		"dividends"
+	],
+	"배당금수익": [
+		"stock_dividends"
+	],
+	"배당금수입": [
+		"dividends_received"
+	],
+	"배당금지급": [
+		"dividends_paid"
+	],
+	"법인세납부(-)": [
+		"payments_of_income_taxes"
+	],
+	"법인세비용": [
+		"income_taxes"
+	],
+	"법인세환급액": [
+		"refunds_of_income_taxes"
+	],
+	"법인세환입(납부)": [
+		"refunds_payments_of_income_taxes"
+	],
+	"보증금등의감소": [
+		"decreaseincrease_in_deposits_provided"
+	],
+	"보증금의증가": [
+		"increasedecrease_in_deposits_provided"
+	],
+	"보통주자본금": [
+		"common_stock"
+	],
+	"보험료": [
+		"insurance_premium"
+	],
+	"복구충당부채": [
+		"provisions_for_restoration_costs"
+	],
+	"복구충당부채의증가(감소)": [
+		"increasedecrease_in_provisions_for_restoration_costs"
+	],
+	"복구충당부채환입액": [
+		"reversion_of_provisions_for_restoration_costs"
+	],
+	"복리후생비": [
+		"employee_benefits"
+	],
+	"부채_매각예정처분자산": [
+		"liabilities_included_in_disposal_groups_classified_as_held_for_sale"
+	],
+	"부채총계": [
+		"liabilities",
+		"total_liabilities"
+	],
+	"비유동금융부채": [
+		"longterm_financial_liabilities"
+	],
+	"비유동부채": [
+		"noncurrent_liabilities"
+	],
+	"비유동생물자산": [
+		"biological_assets"
+	],
+	"비유동자산": [
+		"noncurrent_assets"
+	],
+	"비유동종업원급여충당부채": [
+		"noncurrent_provisions_for_employee_benefits"
+	],
+	"비지배주주지분": [
+		"noncontrolling_interests_equity"
+	],
+	"사외적립자산의감소": [
+		"decreaseincrease_in_plan_assets"
+	],
+	"사용권자산": [
+		"right_of_use_assets"
+	],
+	"사채": [
+		"bonds",
+		"shortterm_bonds"
+	],
+	"사채상환손실": [
+		"losses_on_redemption_of_bonds"
+	],
+	"사채상환이익": [
+		"gains_on_redemption_of_bonds"
+	],
+	"사채의감소": [
+		"repayments_of_bonds"
+	],
+	"사채의발행": [
+		"issuance_of_bonds"
+	],
+	"사채의증가": [
+		"increase_in_bonds",
+		"increase_of_longtermbonds"
+	],
+	"사채할인발행차금상각": [
+		"amortization_of_discount_on_bonds"
+	],
+	"상각후원가측정금융부채": [
+		"financial_liabilities_at_amortised_cost"
+	],
+	"상각후원가측정금융자산": [
+		"financial_assets_at_amortised_cost"
+	],
+	"상각후원가측정금융자산의감소": [
+		"decrease_in_financial_assets_at_amortised_cost"
+	],
+	"상각후원가측정금융자산의증가": [
+		"increase_in_financial_assets_at_amortised_cost"
+	],
+	"상각후원가측정유가증권": [
+		"securities_at_amortised_cost"
+	],
+	"상품·제품매출원가": [
+		"cost_of_merchandise_finished_goods"
+	],
+	"상품매출액": [
+		"sales_of_merchandise"
+	],
+	"상품매출원가": [
+		"cost_of_merchandise_sold"
+	],
+	"상환우선주부채의증가": [
+		"increase_in_preferred_stock_of_redemption"
+	],
+	"생물자산의감소": [
+		"decrease_in_biological_assets"
+	],
+	"선급금": [
+		"advance_payments"
+	],
+	"선급금의감소": [
+		"decreaseincrease_in_advance_payments"
+	],
+	"선급비용": [
+		"prepaid_expenses"
+	],
+	"선급비용의감소": [
+		"decreaseincrease_in_prepaid_expenses"
+	],
+	"선수금": [
+		"advance_from_customers"
+	],
+	"선수금의증가": [
+		"increasedecrease_in_advance_from_customers"
+	],
+	"선수수익": [
+		"unearned_income"
+	],
+	"소모품비": [
+		"supplies"
+	],
+	"소송충당부채": [
+		"legal_proceedings_provisions"
+	],
+	"수도광열비": [
+		"water_light_and_heating_expenses"
+	],
+	"수선비": [
+		"repairs_and_maintenance_expenses"
+	],
+	"수수료비용": [
+		"commission_expenses"
+	],
+	"시설장치": [
+		"facilities"
+	],
+	"신종자본증권": [
+		"hybrid_bond"
+	],
+	"신종자본증권의발행": [
+		"issue_of_hybrid_bond"
+	],
+	"신주인수권대가": [
+		"consideration_for_stock_warrants"
+	],
+	"여비교통비": [
+		"traveling_expenses"
+	],
+	"연결범위변동으로인한현금의증가": [
+		"change_of_consolidated_scope"
+	],
+	"연결자본거래로인한현금유입액": [
+		"increase_in_consolidated_capital_transaction"
+	],
+	"연결자본거래로인한현금유출액": [
+		"decrease_in_consolidated_capital_transaction"
+	],
+	"연구개발비": [
+		"research_development"
+	],
+	"영업권": [
+		"goodwill"
+	],
+	"영업권의감소": [
+		"decrease_in_goodwill"
+	],
+	"영업권의증가": [
+		"increase_in_goodwill"
+	],
+	"영업비용": [
+		"operating_expenses"
+	],
+	"영업수익": [
+		"operating_revenues"
+	],
+	"영업이익": [
+		"operating_profit"
+	],
+	"영업활동으로인한현금흐름": [
+		"cash_flows_from_operating_activities",
+		"cash_flows_from_operatings"
+	],
+	"영업활동현금흐름": [
+		"operating_cashflow"
+	],
+	"예수금": [
+		"withholdings"
+	],
+	"예수보증금": [
+		"guarantee_deposits_withhold"
+	],
+	"예수부채": [
+		"deposits_liabilities"
+	],
+	"외화환산손실": [
+		"losses_on_foreign_currency_translation"
+	],
+	"외화환산이익": [
+		"gains_on_foreign_currency_translation"
+	],
+	"외환차손": [
+		"losses_on_foreign_currencies_transaction"
+	],
+	"외환차익": [
+		"gains_on_foreign_currencies_transaction"
+	],
+	"용역원가": [
+		"cost_of_service"
+	],
+	"용역의제공으로인한수익(매출액)": [
+		"service_revenue"
+	],
+	"우선주자본금": [
+		"preferred_stock"
+	],
+	"운반비": [
+		"transportation_expenses"
+	],
+	"운전자본증감": [
+		"change_in_working_capital"
+	],
+	"원재료(부재료)": [
+		"raw_materialssubmaterials"
+	],
+	"유동금융부채": [
+		"shortterm_financial_liabilities"
+	],
+	"유동금융자산": [
+		"current_financial_assets"
+	],
+	"유동부채": [
+		"current_liabilities"
+	],
+	"유동성(금융)리스부채(미지급금등)": [
+		"current_portion_of_lease_obligationsother_payables"
+	],
+	"유동성사채": [
+		"current_portion_of_bonds"
+	],
+	"유동성장기부채": [
+		"current_portion_of_longterm_debt"
+	],
+	"유동성장기부채의감소": [
+		"redemption_of_current_portion_of_longterm_borrowings"
+	],
+	"유동성장기차입금": [
+		"current_portion_of_longterm_borrowings"
+	],
+	"유동자산": [
+		"current_assets"
+	],
+	"유상감자": [
+		"paid_in_capital_decrease"
+	],
+	"유상증자": [
+		"paid_in_capital_increase"
+	],
+	"유형자산": [
+		"property_plant_and_equipment",
+		"tangible_assets"
+	],
+	"유형자산손상차손": [
+		"impairment_losses_on_property_plant_and_equipment"
+	],
+	"유형자산손상차손환입": [
+		"recovery_of_impairment_losses_on_property_plant_and_equipment"
+	],
+	"유형자산의감소": [
+		"decrease_in_property_plant_and_equipment"
+	],
+	"유형자산의증가": [
+		"increase_in_property_and_equipment",
+		"increase_in_property_plant_and_equipment"
+	],
+	"유형자산의처분": [
+		"disposal_of_tangible_assets"
+	],
+	"유형자산의취득": [
+		"purchase_of_property_plant_and_equipment"
+	],
+	"이연법인세부채": [
+		"deferred_tax_liabilities"
+	],
+	"이연법인세부채의증가": [
+		"increasedecrease_in_deferred_income_tax_liabilities"
+	],
+	"이연법인세자산": [
+		"deferred_tax_assets"
+	],
+	"이연법인세자산의감소": [
+		"decreaseincrease_in_deferred_income_tax_assets"
+	],
+	"이연수익": [
+		"government_grants_deferred_income"
+	],
+	"이익잉여금": [
+		"retained_earnings"
+	],
+	"이익준비금": [
+		"legal_reserve"
+	],
+	"이자비용": [
+		"interest_expenses"
+	],
+	"이자비용(사채할인발행차금상각등)": [
+		"interest_expensesamortization_of_discount_on_bonds_etc"
+	],
+	"이자수익": [
+		"interest_income"
+	],
+	"이자수입": [
+		"interest_received"
+	],
+	"이자지급(-)": [
+		"interest_paid"
+	],
+	"임대료수익": [
+		"rental_income"
+	],
+	"임대보증금의감소": [
+		"decrease_in_leasehold_deposits_received"
+	],
+	"임대보증금의증가": [
+		"increase_in_leasehold_deposits_received"
+	],
+	"임대수익": [
+		"rental_lease_income"
+	],
+	"임의적립금": [
+		"voluntary_reserves"
+	],
+	"임차료": [
+		"rent"
+	],
+	"자기주식": [
+		"treasury_stock"
+	],
+	"자기주식의처분": [
+		"sale_of_treasury_stock"
+	],
+	"자기주식의취득": [
+		"purchase_of_treasury_stock"
+	],
+	"자기주식처분이익": [
+		"gains_on_disposition_of_treasury_stock"
+	],
+	"자본과부채총계": [
+		"total_liabilities_and_equity"
+	],
+	"자본금": [
+		"capital_stock",
+		"paidin_capital"
+	],
+	"자본잉여금": [
+		"capital_surplus"
+	],
+	"자본총계": [
+		"stockholders_equity",
+		"total_stockholders_equity"
+	],
+	"자산_매각예정비유동자산처분": [
+		"noncurrent_asset_held_for_sale_or_disposal_group"
+	],
+	"자산손상차손환입": [
+		"recovery_of_impairment_losses_on_assets"
+	],
+	"자산재평가이익": [
+		"gains_on_assets_revaluations"
+	],
+	"자산처분(폐기)손실": [
+		"losses_on_disposal_of_assets"
+	],
+	"자산처분(폐기)이익": [
+		"gains_on_disposal_of_assets"
+	],
+	"자산총계": [
+		"assets",
+		"total_assets"
+	],
+	"자산평가손실": [
+		"losses_on_valuation_of_investment_assets"
+	],
+	"자산평가이익": [
+		"gains_on_valuation_of_investments"
+	],
+	"장기공사미수금": [
+		"longterm_accounts_receivablesconstruction_work"
+	],
+	"장기금융상품": [
+		"longterm_financial_instruments"
+	],
+	"장기금융상품의감소": [
+		"decrease_in_longterm_financial_instruments"
+	],
+	"장기금융상품의증가": [
+		"increase_in_longterm_financial_instruments"
+	],
+	"장기금융자산": [
+		"longterm_financial_assets"
+	],
+	"장기당기손익인식금융부채": [
+		"financial_liability_at_fv_through_profit"
+	],
+	"장기당기손익인식금융자산": [
+		"longterm_financial_assets_at_fair_value_through_profit_or_loss"
+	],
+	"장기대여금": [
+		"longterm_loans"
+	],
+	"장기만기보유금융자산": [
+		"longterm_held_to_maturity_investments"
+	],
+	"장기매도가능금융자산": [
+		"longterm_availableforsale_financial_assets"
+	],
+	"장기매입채무": [
+		"longterm_trade_payables"
+	],
+	"장기매입채무및기타채무": [
+		"longterm_trade_and_other_noncurrent_payables"
+	],
+	"장기매출채권": [
+		"longterm_trade_receivables"
+	],
+	"장기매출채권및기타채권": [
+		"lt_trade_and_other_receivables",
+		"trade_and_other_noncurrent_receivables"
+	],
+	"장기미수금": [
+		"longterm_receivables"
+	],
+	"장기미지급금": [
+		"longterm_other_payables"
+	],
+	"장기미지급비용": [
+		"longterm_accrued_expenses"
+	],
+	"장기보증금": [
+		"longterm_gurarantee"
+	],
+	"장기상환우선주부채": [
+		"longterm_preferred_stock_of_redemption"
+	],
+	"장기선급금": [
+		"longterm_advance_payments"
+	],
+	"장기선급비용": [
+		"longterm_prepaid_expenses"
+	],
+	"장기선수금": [
+		"longterm_advance_from_customers"
+	],
+	"장기선수수익": [
+		"longterm_unearned_income"
+	],
+	"장기예수금": [
+		"longterm_withholdings"
+	],
+	"장기예수보증금": [
+		"longterm_guarantee_deposits_withhold"
+	],
+	"장기임대보증금": [
+		"longterm_leasehold_deposits_received"
+	],
+	"장기차입금": [
+		"longterm_borrowings"
+	],
+	"장기차입금의상환": [
+		"repayment_of_longterm_borrowings"
+	],
+	"장기차입금의증가": [
+		"increase_in_longtermborrowings"
+	],
+	"장기차입금의차입": [
+		"increase_in_longterm_borrowings"
+	],
+	"장기충당부채": [
+		"longterm_provisions"
+	],
+	"장기파생상품부채": [
+		"longterm_derivative_liabilities"
+	],
+	"장기파생상품자산": [
+		"longterm_derivative_assets"
+	],
+	"재고자산": [
+		"inventories"
+	],
+	"재고자산감모손실": [
+		"impairment_loss_on_inventories"
+	],
+	"재고자산의감소": [
+		"decreaseincrease_in_inventories"
+	],
+	"재고자산폐기(처분)손실": [
+		"losses_on_inventory_clearing"
+	],
+	"재공품": [
+		"work_in_process"
+	],
+	"재무활동으로인한현금흐름": [
+		"cash_flows_from_financing",
+		"cash_flows_from_financing_activities"
+	],
+	"재보험자산": [
+		"reinsurance_assets"
+	],
+	"재평가잉여금": [
+		"revaluation_surplus"
+	],
+	"재화의판매로인한수익(상품,제품매출액)": [
+		"sales_of_merchandise_finished_goods"
+	],
+	"저작권": [
+		"copyrights"
+	],
+	"저장품(소모품)": [
+		"suppliesconsumables"
+	],
+	"전환권대가": [
+		"consideration_for_conversion_rights"
+	],
+	"접대비": [
+		"entertainment"
+	],
+	"제품매출액": [
+		"sales_of_finished_goods"
+	],
+	"제품매출원가": [
+		"cost_of_finished_goods_sold"
+	],
+	"제품보증충당부채": [
+		"product_warranties_provisions"
+	],
+	"조인트벤처투자(공동기업투자)": [
+		"investments_in_joint_ventures"
+	],
+	"조인트벤처투자의감소": [
+		"decrease_in_investments_in_joint_ventures"
+	],
+	"조인트벤처투자의증가": [
+		"increase_in_investments_in_joint_ventures"
+	],
+	"종속기업,공동지배기업및관계기업(지분법)관련손실": [
+		"losses_on_valuation_of_equity_method_securities"
+	],
+	"종속기업및기타사업의지배력관련한현금흐름": [
+		"cash_flows_from_control_of_subsidiaries_or_other_businesses"
+	],
+	"종속기업소유지분변동에따른현금흐름": [
+		"disposition_of_interest_in_subsidiaries"
+	],
+	"종속기업처분손실": [
+		"losses_on_disposition_of_subsidiaries"
+	],
+	"종속기업처분이익": [
+		"gains_on_disposition_of_subsidiaries"
+	],
+	"종속기업투자": [
+		"investments_in_subsidiaries"
+	],
+	"종속기업투자의감소": [
+		"decrease_in_investments_in_subsidiaries"
+	],
+	"종속기업투자의증가": [
+		"increase_in_investments_in_subsidiaries"
+	],
+	"주식기준보상적립금": [
+		"reserve_of_sharebased_payments"
+	],
+	"주식매수선택권": [
+		"stock_options"
+	],
+	"주식매입선택권의행사": [
+		"exercise_of_stock_options"
+	],
+	"주식발행초과금": [
+		"paidin_capital_in_excess_of_par_value"
+	],
+	"중단사업이익": [
+		"discontinued_operating_incomeloss",
+		"profit_from_discontinued_operations"
+	],
+	"지급보증충당부채전입액": [
+		"provision_for_loss_on_acceptances_and_guarantees"
+	],
+	"지급보증충당부채환입액": [
+		"reversal_of_allowance_for_acceptances_and_guarantees"
+	],
+	"지배주주지분": [
+		"owners_of_parent_equity"
+	],
+	"지분법관련손익": [
+		"gainslosses_in_equity_method"
+	],
+	"지분법이익": [
+		"gains_on_valuation_of_equity_method_securities"
+	],
+	"지분법자본변동": [
+		"capital_change_in_equity_method"
+	],
+	"지분법적용투자주식처분이익": [
+		"gains_on_disposition_of_equity_method_securities"
+	],
+	"차량운반구": [
+		"motor_vehicles"
+	],
+	"차량운반구의감소": [
+		"decrease_in_motor_vehicles"
+	],
+	"차량운반구의증가": [
+		"increase_in_motor_vehicles"
+	],
+	"차량유지비": [
+		"vehicle_maintenance_expenses"
+	],
+	"차입부채": [
+		"borrowings"
+	],
+	"차입부채의증가": [
+		"increase_in_borrowings"
+	],
+	"초과청구공사": [
+		"gross_amount_due_to_customers_for_contract_work"
+	],
+	"총포괄이익": [
+		"total_comprehensive_income"
+	],
+	"출자금의감소": [
+		"decrease_in_equity_investments"
+	],
+	"출자금의증가": [
+		"increase_in_equity_investments"
+	],
+	"출재지급준비금": [
+		"reserve_for_outstanding_claims_for_reinsurance_ceded"
+	],
+	"충당부채의증가": [
+		"increasedecrease_in_liability_provisions"
+	],
+	"충당부채전입액": [
+		"liability_provisions"
+	],
+	"충당부채환입액": [
+		"reversion_of_liability_provisions"
+	],
+	"컴퓨터소프트웨어": [
+		"computer_software",
+		"software"
+	],
+	"토지의감소": [
+		"decrease_in_land"
+	],
+	"토지의증가": [
+		"increase_in_land"
+	],
+	"통신비": [
+		"communication_expenses"
+	],
+	"퇴직금의지급": [
+		"payments_of_retirement_allowance"
+	],
+	"퇴직급여": [
+		"severance_and_retirement_benefits"
+	],
+	"퇴직급여채무(종업원급여충당부채,확정급여부채)의증가": [
+		"increasedecrease_in_provisions_for_employee_benefits"
+	],
+	"투자부동산": [
+		"investment_in_properties"
+	],
+	"투자부동산의감소": [
+		"decrease_in_investment_in_properties"
+	],
+	"투자부동산의증가": [
+		"increase_in_investment_in_properties"
+	],
+	"투자부동산처분손실": [
+		"losses_on_investment_in_properties"
+	],
+	"투자부동산처분이익": [
+		"gains_on_investment_in_properties"
+	],
+	"투자자산처분손실": [
+		"losses_on_disposition_of_investments"
+	],
+	"투자자산처분이익": [
+		"gains_on_disposition_of_investments"
+	],
+	"투자활동으로인한현금유입액": [
+		"cash_inflows_from_investing_activities"
+	],
+	"투자활동으로인한현금유출액": [
+		"cash_outflows_from_investing_activities"
+	],
+	"투자활동으로인한현금흐름": [
+		"cash_flows_from_investing",
+		"cash_flows_from_investing_activities"
+	],
+	"투자활동현금흐름": [
+		"investing_cashflow"
+	],
+	"특별계정부채": [
+		"separate_account_liabilities"
+	],
+	"특별계정자산": [
+		"separate_account_credits"
+	],
+	"파생금융자산의감소": [
+		"decreaseincrease_in_derivative_assets"
+	],
+	"파생상품거래손실": [
+		"losses_on_derivatives_transactions"
+	],
+	"파생상품거래이익": [
+		"gains_on_derivatives_transactions"
+	],
+	"파생상품부채": [
+		"derivatives_liabilities"
+	],
+	"파생상품부채의증가": [
+		"increasedecrease_in_derivative_liabilities"
+	],
+	"파생상품자산": [
+		"derivatives_assets"
+	],
+	"파생상품평가손실": [
+		"losses_on_valuations_of_derivatives"
+	],
+	"파생상품평가이익": [
+		"gains_on_valuations_of_derivatives"
+	],
+	"판매비와관리비": [
+		"selling_and_administrative_expenses",
+		"sga"
+	],
+	"판매촉진비": [
+		"sales_promotion_expenses"
+	],
+	"포장비": [
+		"packing_expenses"
+	],
+	"하자보수충당부채": [
+		"provision_for_construction_provisions"
+	],
+	"합병분할(영업양수도등)로인한변동": [
+		"change_by_merger_and_acquisition"
+	],
+	"해외사업장순투자위험회피": [
+		"hedges_of_net_investment_in_foreign_operations"
+	],
+	"해외사업환산손익": [
+		"foreign_currency_translation"
+	],
+	"현금및예치금": [
+		"cash_and_receivables_from_banks"
+	],
+	"현금및현금성자산": [
+		"cash_and_cash_equivalents"
+	],
+	"현금및현금성자산에대한환율변동효과": [
+		"effect_of_exchange_rate_changes"
+	],
+	"현금유출이없는비용등가산": [
+		"addition_of_expenses_of_noncash_transactions"
+	],
+	"현금의증가": [
+		"increasedecrease_in_cash_and_cash_equivalents"
+	],
+	"현금흐름위험회피적립금": [
+		"cash_flow_hedges"
+	],
+	"확정급여부채": [
+		"defined_benefit_liability"
+	],
+	"확정급여자산등": [
+		"defined_benefit_assets"
+	],
+	"확정급여제도의보험수리적손익": [
+		"actuarial_gains_or_losses_on_defined_benefit_plans"
+	],
+	"확정급여제도의재측정요소": [
+		"remeasurement_elements_of_defined_benefit_plans"
+	],
+	"환율변동으로인한차이조정": [
+		"difference_by_changes_in_foreign_exchange_rates"
+	]
+} as const;
