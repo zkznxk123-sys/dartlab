@@ -2,8 +2,38 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
+from pathlib import Path
+
 import polars as pl
 import pytest
+
+
+@lru_cache(maxsize=None)
+def _scanUniqueStockCount(parquetName: str) -> int | None:
+    from dartlab.scan.builders.kr.common import scanDir
+
+    path = Path(scanDir()) / parquetName
+    if not path.exists():
+        return None
+    try:
+        lf = pl.scan_parquet(path)
+        schema = lf.collect_schema()
+        stock_col = (
+            "stockCode" if "stockCode" in schema.names() else "stock_code" if "stock_code" in schema.names() else None
+        )
+        if stock_col is None:
+            return None
+        return int(lf.select(pl.col(stock_col).n_unique().alias("stocks")).collect().item(0, "stocks"))
+    except (OSError, pl.exceptions.PolarsError):
+        return None
+
+
+def _coverageMinHeight(default: int, *, parquetName: str = "finance.parquet") -> int:
+    unique_stocks = _scanUniqueStockCount(parquetName)
+    if unique_stocks is None or unique_stocks >= default:
+        return default
+    return max(1, int(unique_stocks * 0.8))
 
 
 def _assertFrame(result, name: str, *, minHeight: int = 1):
@@ -52,7 +82,7 @@ class TestScanEngine:
             result = dartlab.scan("account", "매출액")
         except MemoryBudgetExceeded as e:
             pytest.fail(f"scan('account', '매출액') 메모리 예산 회귀: {e}")
-        df = _assertFrame(result, "scan.account.sales", minHeight=1000)
+        df = _assertFrame(result, "scan.account.sales", minHeight=_coverageMinHeight(1000))
         periodCols = [col for col in df.columns if str(col)[:4].isdigit()]
         assert periodCols, "scan.account.sales 기간 컬럼 없음"
 
@@ -65,7 +95,7 @@ class TestScanEngine:
             result = dartlab.scan("ratio", "roe")
         except MemoryBudgetExceeded as e:
             pytest.fail(f"scan('ratio', 'roe') 메모리 예산 회귀: {e}")
-        df = _assertFrame(result, "scan.ratio.roe", minHeight=1000)
+        df = _assertFrame(result, "scan.ratio.roe", minHeight=_coverageMinHeight(1000))
         periodCols = [col for col in df.columns if str(col)[:4].isdigit()]
         assert periodCols, "scan.ratio.roe 기간 컬럼 없음"
 

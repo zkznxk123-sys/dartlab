@@ -6,6 +6,11 @@ import sys
 from pathlib import Path
 
 
+def _missingReportApiTypes(scan_dir: Path, required: tuple[str, ...]) -> tuple[str, ...]:
+    report_dir = scan_dir / "report"
+    return tuple(Path(name).stem for name in required if not (report_dir / name).exists())
+
+
 def main() -> int:
     from dartlab.scan.builders.kr.common import scanDir
     from dartlab.scan.builders.kr.core import buildChanges, buildFinance, buildFinanceLite, buildReport
@@ -16,12 +21,33 @@ def main() -> int:
     scan_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"[prepareRealdataScanCache] build into: {scan_dir}")
-    buildChanges(sinceYear=2021, verbose=True)
-    finance_path = buildFinance(sinceYear=2021, verbose=True)
-    if finance_path is not None:
+
+    if not (scan_dir / "changes.parquet").exists():
+        buildChanges(sinceYear=2021, verbose=True)
+    else:
+        print("[prepareRealdataScanCache] preserve existing changes.parquet")
+
+    finance_path = None
+    if not (scan_dir / "finance.parquet").exists():
+        finance_path = buildFinance(sinceYear=2021, verbose=True)
+    else:
+        print("[prepareRealdataScanCache] preserve existing finance.parquet")
+
+    if finance_path is not None or (
+        (scan_dir / "finance.parquet").exists() and not (scan_dir / "finance-lite.parquet").exists()
+    ):
         buildFinanceLite(verbose=True)
-    buildReport(sinceYear=2021, verbose=True)
-    buildSharesOutstandingSafe(verbose=True)
+
+    missing_report_api_types = _missingReportApiTypes(scan_dir, scan_parquet._REQUIRED_REPORT_FILES)
+    if missing_report_api_types:
+        buildReport(sinceYear=2021, verbose=True, apiTypes=missing_report_api_types)
+    else:
+        print("[prepareRealdataScanCache] preserve existing report prebuilds")
+
+    if not (scan_dir / "sharesOutstanding.parquet").exists():
+        buildSharesOutstandingSafe(verbose=True)
+    else:
+        print("[prepareRealdataScanCache] preserve existing sharesOutstanding.parquet")
 
     missing = scan_parquet._missingScanFiles(scan_dir, requireReports=True)
     if missing:

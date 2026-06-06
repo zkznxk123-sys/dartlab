@@ -104,3 +104,58 @@ def test_prepareRealdataScanCache_builds_from_fixture_sources(monkeypatch: pytes
 
     assert mod.main() == 0
     assert calls == ["changes", "finance", "finance-lite", "report", "shares"]
+
+
+def test_prepareRealdataScanCache_preserves_existing_report_prebuilds(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import importlib.util
+
+    import dartlab.scan.builders.kr.common as common
+    import dartlab.scan.builders.kr.core as core
+    import dartlab.scan.builders.kr.shares as shares
+    import dartlab.scan.io.parquet as parquet
+
+    script_path = Path(".github/scripts/ops/prepareRealdataScanCache.py").resolve()
+    spec = importlib.util.spec_from_file_location("prepare_realdata_scan_cache", script_path)
+    assert spec and spec.loader
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    scan_dir = tmp_path / "dart" / "scan"
+    report_dir = scan_dir / "report"
+    report_dir.mkdir(parents=True)
+    for name in parquet._REQUIRED_SCAN_ROOT_FILES:
+        (scan_dir / name).write_bytes(b"parquet")
+    (scan_dir / "finance-lite.parquet").write_bytes(b"parquet")
+    missing_report = "commercialPaper.parquet"
+    for name in parquet._REQUIRED_REPORT_FILES:
+        if name != missing_report:
+            (report_dir / name).write_bytes(b"preserve")
+
+    built_report_api_types: list[tuple[str, ...]] = []
+
+    def build_missing_reports(**kwargs) -> list[Path]:
+        api_types = tuple(kwargs.get("apiTypes") or ())
+        built_report_api_types.append(api_types)
+        for api_type in api_types:
+            (report_dir / f"{api_type}.parquet").write_bytes(b"built")
+        return [report_dir / f"{api_type}.parquet" for api_type in api_types]
+
+    monkeypatch.setattr(common, "scanDir", lambda: scan_dir)
+    monkeypatch.setattr(core, "buildChanges", lambda **_kwargs: pytest.fail("existing changes must be preserved"))
+    monkeypatch.setattr(core, "buildFinance", lambda **_kwargs: pytest.fail("existing finance must be preserved"))
+    monkeypatch.setattr(
+        core, "buildFinanceLite", lambda **_kwargs: pytest.fail("existing finance-lite must be preserved")
+    )
+    monkeypatch.setattr(core, "buildReport", build_missing_reports)
+    monkeypatch.setattr(
+        shares,
+        "buildSharesOutstandingSafe",
+        lambda **_kwargs: pytest.fail("existing sharesOutstanding must be preserved"),
+    )
+
+    assert mod.main() == 0
+    assert built_report_api_types == [("commercialPaper",)]
+    assert (report_dir / missing_report).read_bytes() == b"built"
+    assert (report_dir / "majorHolder.parquet").read_bytes() == b"preserve"

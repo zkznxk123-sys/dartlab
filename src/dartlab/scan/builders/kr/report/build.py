@@ -41,6 +41,7 @@ from __future__ import annotations
 import shutil
 import time
 from pathlib import Path
+from typing import Iterable
 
 import polars as pl
 
@@ -72,7 +73,7 @@ SCAN_API_TYPES = [
 ]
 
 
-def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
+def buildReport(*, sinceYear: int = 2021, verbose: bool = True, apiTypes: Iterable[str] | None = None) -> list[Path]:
     """report/*.parquet → apiType별 12개 분리 parquet 프리빌드.
 
     ``SCAN_API_TYPES`` 15 종 (majorHolder/executive/employee/auditOpinion/dividend/...) 의
@@ -85,6 +86,8 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
         포함할 최소 ``year`` (``year >= sinceYear``). 기본 2021.
     verbose : bool
         진행 로그 출력 여부.
+    apiTypes : Iterable[str] | None
+        생성할 apiType 목록. ``None`` 이면 :data:`SCAN_API_TYPES` 전체를 생성한다.
 
     Returns
     -------
@@ -143,6 +146,11 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
     outDir = _scanDir() / "report"
     outDir.mkdir(parents=True, exist_ok=True)
 
+    selectedApiTypes = tuple(apiTypes) if apiTypes is not None else tuple(SCAN_API_TYPES)
+    unknown = sorted(set(selectedApiTypes) - set(SCAN_API_TYPES))
+    if unknown:
+        raise ValueError(f"알 수 없는 report apiType: {unknown}")
+
     allFiles = sorted(repDir.glob("*.parquet"))
     if not allFiles:
         if verbose:
@@ -150,7 +158,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
         return []
 
     if verbose:
-        _say(f"[report] {len(allFiles)}종목 → apiType별 분리")
+        _say(f"[report] {len(allFiles)}종목 → apiType별 분리 ({len(selectedApiTypes)}개)")
 
     t0 = time.perf_counter()
 
@@ -158,7 +166,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
     apiBatchIdx: dict[str, int] = {}
     apiChunks: dict[str, list[pl.DataFrame]] = {}
     apiRows: dict[str, int] = {}
-    for at in SCAN_API_TYPES:
+    for at in selectedApiTypes:
         bd = outDir / f"_tmp_{at}"
         bd.mkdir(parents=True, exist_ok=True)
         apiBatchDirs[at] = bd
@@ -186,7 +194,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
 
         processed += 1
 
-        for apiType in SCAN_API_TYPES:
+        for apiType in selectedApiTypes:
             sub = df.filter(pl.col("apiType") == apiType)
             if sub.height > 0:
                 apiChunks[apiType].append(sub)
@@ -207,7 +215,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
             _say(f"  [{i + 1}/{len(allFiles)}] {processed}ok {time.perf_counter() - t0:.0f}s")
 
     outputs: list[Path] = []
-    for apiType in SCAN_API_TYPES:
+    for apiType in selectedApiTypes:
         if apiChunks[apiType]:
             batch = pl.concat(apiChunks[apiType], how="diagonal_relaxed")
             idx = apiBatchIdx[apiType]
