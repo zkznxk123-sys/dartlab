@@ -1,65 +1,33 @@
-// Viewer compare model — browser mirror of Python `dartlab.compare`.
-// Pure data contracts only; Svelte components consume this through the compare module.
+// Viewer compare model — 회사 비교 surface. 각 회사의 섹션/블록 콘텐츠를 열로 병치한다
+// (계정/키 분해 없음). null 셀 = honest-gap(그 회사엔 해당 공시 없음).
 
 export const COMPARE_SEP = '␟';
 
 export type ShareClass = 'shared' | 'partial' | 'solo';
-export type FinanceFreq = 'quarter' | 'year' | 'ytd';
-export type UnitConfidence = 'caption' | 'magnitude';
-
-export interface CompareCompany {
-	code: string;
-	corpName: string;
-}
 
 export interface CompareDiagnostics {
-	mode: 'row' | 'finance';
+	mode: 'row';
 	period: string;
-	freq?: FinanceFreq;
-	scope?: string | null;
 	rowCount: number;
 	sharedRows: number;
 	partialRows: number;
 	soloRows: number;
 	narrativePolicy?: 'company-row';
-	unitWarnings?: number;
 }
 
 export interface AlignedRow {
 	alignKey: string;
-	label: string; // gutter/self-identifying label = blockLeaf || sectionLeaf || disclosureKey
+	label: string; // 자기 식별 라벨 = blockLeaf || sectionLeaf || disclosureKey
 	disclosureKey: string | null;
 	scope: string | null;
 	leafType: string;
 	blockType: 'text' | 'table';
-	cells: (string | null)[]; // company index -> cell body; null = honest-gap
+	cells: (string | null)[]; // company index -> 셀 본문; null = honest-gap
 	shareClass: ShareClass;
 }
 
-export interface UnitInfo {
-	scale: number;
-	label: string;
-	confidence: UnitConfidence;
-}
-
-export interface FinanceRow {
-	acode: string;
-	label: string;
-	depth: number; // 들여쓰기 깊이(순수 구조) — IS 본류 균일 1, 리프 2+
-	isTotal: boolean; // 총계 강조 — depth 와 분리(IS 당기순이익/총포괄손익은 depth 1 + true)
-	values: (number | null)[]; // company index -> KRW-normalized value; null = honest-gap
-}
-
-export interface FinanceCompare {
-	rows: FinanceRow[];
-	units: UnitInfo[]; // company index -> source unit metadata
-	diagnostics: CompareDiagnostics;
-}
-
 export interface CompareBoard {
-	mode: 'row' | 'finance';
+	mode: 'row';
 	rows: AlignedRow[];
-	financeRows: FinanceRow[] | null;
-	financeUnits: UnitInfo[] | null;
 	diagnostics: CompareDiagnostics;
 }

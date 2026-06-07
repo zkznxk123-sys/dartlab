@@ -4,7 +4,6 @@
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { dev } from '$app/environment'; // 회사 비교 = 미완성 → dev 에서만(GitHub Pages 프로덕션 숨김)
 	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus, Search, Download } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
@@ -64,8 +63,7 @@
 	let lockedPeriod = $state(''); // 비교 모드 = 한 시점 lock
 	let addOpen = $state(false); // 회사 추가 팝오버
 	// 비교 모드 판정 — 파생을 일찍 선언(windowPeriods 등이 참조). vsCodes/bundle/vsBundles 에만 의존.
-	// dev 게이트: 회사 비교는 미완성 → 로컬 dev 에서만. 프로덕션(GitHub Pages)은 ?vs= 무시(단일 뷰어).
-	const compareMode = $derived(dev && vsCodes.length > 0);
+	const compareMode = $derived(vsCodes.length > 0);
 	const allBundles = $derived(bundle ? [bundle, ...vsBundles] : []);
 
 	// code 바뀌면(검색 이동) 재로드.
@@ -151,9 +149,11 @@
 		glowCell = { rowIndex: hit.rowIndex, period: hit.period };
 	}
 
-	// 종목검색 — 다른 회사 공시뷰어로 이동(단일). param 변경이라 AskDrawer 는 재마운트 안 됨(대화 유지).
+	// 종목검색 — 다른 회사 공시뷰어로 이동(단일). 대화는 askSession 스토어로 유지된다(수동 이동도 동행).
+	// askCarryQ 비움 = 수동 이동엔 자동질문 없음(직전 AI 이동의 묵은 carryQ 재발화 차단).
 	function onStockPick(c: string) {
 		stockSearchOpen = false;
+		askCarryQ = '';
 		if (c && c !== code) void goto(`${base}/viewer/company/${c}`);
 	}
 
@@ -236,13 +236,7 @@
 			: null
 	);
 	const compareMeta = $derived(
-		compareBoard
-			? compareBoard.mode === 'finance'
-				? `재무 ${compareBoard.diagnostics.rowCount}항목`
-				: `항목 ${compareBoard.diagnostics.rowCount}`
-			: vsLoading
-				? '비교 회사 로드 중'
-				: '비교 대기'
+		compareBoard ? `항목 ${compareBoard.diagnostics.rowCount}` : vsLoading ? '비교 회사 로드 중' : '비교 대기'
 	);
 	// 비교 시점 기본 = 최신 공통 기간. 유효하지 않으면 보정.
 	$effect(() => {
@@ -378,16 +372,14 @@
 				<MessageSquare size={13} /> 토론
 			</button>
 			{#if bundle}
-				{#if dev}
-					<div class="add-wrap">
-						<button type="button" class="fs-btn" class:active={compareMode} onclick={() => (addOpen = !addOpen)} title="회사 간 비교 — 회사 추가 (최대 6) · 미완성(dev 전용)" disabled={allBundles.length >= 6}>
-							<Plus size={13} /> 비교
-						</button>
-						{#if addOpen}
-							<div class="add-pop"><CompanySearch onpick={addCompany} /></div>
-						{/if}
-					</div>
-				{/if}
+				<div class="add-wrap">
+					<button type="button" class="fs-btn" class:active={compareMode} onclick={() => (addOpen = !addOpen)} title="회사 간 비교 — 회사 추가 (최대 6)" disabled={allBundles.length >= 6}>
+						<Plus size={13} /> 비교
+					</button>
+					{#if addOpen}
+						<div class="add-pop"><CompanySearch onpick={addCompany} /></div>
+					{/if}
+				</div>
 				{#if compareMode}
 					<span class="meta">{cmpCompanies.length}사 · {lockedPeriod} · {compareMeta}</span>
 				{:else}
@@ -448,8 +440,6 @@
 					{:else}
 						<ComparisonMatrix
 							rows={compareBoard?.rows ?? []}
-							financeRows={compareBoard?.financeRows ?? null}
-							financeUnits={compareBoard?.financeUnits ?? null}
 							companies={cmpCompanies}
 							period={lockedPeriod}
 						/>
