@@ -8,7 +8,8 @@ export interface FinanceStmtRow {
 	accountId: string; // account_id (기간 정합 pivot 키)
 	label: string; // account_nm (표시)
 	ord: number; // 재무제표 표시순서
-	depth: number; // 0=총계(굵게) / 1=소계 / 2=리프(들여쓰기) — account_id XBRL 구조 분류
+	depth: number; // 들여쓰기 깊이(순수 구조) — IS 본류(매출액~당기순이익) 균일 1, 리프 2+. SSOT level mirror
+	isTotal: boolean; // 총계 강조(굵게+상단보더). depth 와 분리 — IS 당기순이익/총포괄손익은 depth 1 이어도 true
 	values: Record<string, number | null>; // period → 금액(원). null = 해당기간 미보고
 }
 

@@ -34,21 +34,33 @@ def _orderedStatementMaps(sortData: dict[str, Any]) -> tuple[dict[str, dict[str,
     return orders, levels
 
 
-def _depthMaps(sortData: dict[str, Any], accounts: dict[str, Any]) -> dict[str, dict[str, int]]:
-    standardAccounts: dict[str, dict[str, Any]] = accounts.get("standardAccounts", {})
+def _depthMaps(sortData: dict[str, Any]) -> dict[str, dict[str, int]]:
+    """들여쓰기 깊이 — SSOT level 만 반영(강조와 분리). level 0=루트(BS 총계), 그 외 clamp(1..3)."""
     depths: dict[str, dict[str, int]] = {}
     for stmt in STATEMENTS:
         rows = sortData.get(stmt, {})
         stmtDepths: dict[str, int] = {}
         for snakeId, meta in rows.items():
-            label = standardAccounts.get(snakeId, {}).get("korName", "")
             level = int(meta.get("level", 1))
-            if level <= 0 or snakeId.startswith("total_") or "총계" in label:
-                stmtDepths[snakeId] = 0
-            else:
-                stmtDepths[snakeId] = max(1, min(level, 3))
+            stmtDepths[snakeId] = 0 if level <= 0 else max(1, min(level, 3))
         depths[stmt] = stmtDepths
     return depths
+
+
+def _isTotalMaps(sortData: dict[str, Any], accounts: dict[str, Any]) -> dict[str, dict[str, bool]]:
+    """총계 강조(굵게+상단보더) 여부 — depth 와 분리. SSOT isTotal(IS 당기순이익/총포괄손익) +
+    total_ 접두/'총계' 라벨 휴리스틱(BS 자산·부채·자본총계, 포괄손익 귀속 합계). True 항목만 수록."""
+    standardAccounts: dict[str, dict[str, Any]] = accounts.get("standardAccounts", {})
+    totals: dict[str, dict[str, bool]] = {}
+    for stmt in STATEMENTS:
+        rows = sortData.get(stmt, {})
+        stmtTotals: dict[str, bool] = {}
+        for snakeId, meta in rows.items():
+            label = standardAccounts.get(snakeId, {}).get("korName", "")
+            if meta.get("isTotal") or snakeId.startswith("total_") or "총계" in label:
+                stmtTotals[snakeId] = True
+        totals[stmt] = stmtTotals
+    return totals
 
 
 def _idMap(accounts: dict[str, Any], validSnakeIds: set[str]) -> dict[str, str]:
@@ -87,7 +99,8 @@ def buildModel() -> dict[str, Any]:
     return {
         "orders": orders,
         "levels": levels,
-        "depths": _depthMaps(sortData, accounts),
+        "depths": _depthMaps(sortData),
+        "isTotal": _isTotalMaps(sortData, accounts),
         "idMap": _idMap(accounts, validSnakeIds),
         "nameCandidates": _nameCandidates(accounts, validSnakeIds),
     }
@@ -108,6 +121,8 @@ def render(model: dict[str, Any]) -> str:
         + _tsConst("FINANCE_ACCOUNT_LEVEL", model["levels"])
         + "\n"
         + _tsConst("FINANCE_ACCOUNT_DEPTH", model["depths"])
+        + "\n"
+        + _tsConst("FINANCE_ACCOUNT_IS_TOTAL", model["isTotal"])
         + "\n"
         + _tsConst("FINANCE_ACCOUNT_ID_TO_SNAKE", model["idMap"])
         + "\n"

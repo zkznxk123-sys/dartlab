@@ -65,7 +65,7 @@
 				{/each}
 				{#each financeRows as r (r.acode)}
 					{#each companies as c, ci (c.code)}
-						<div class="cell fin-cell" class:gap={r.values[ci] == null} class:d0={r.depth === 0} class:d2={r.depth >= 2}>
+						<div class="cell fin-cell" class:gap={r.values[ci] == null} class:d0={r.isTotal} class:d2={!r.isTotal && r.depth >= 2}>
 							{#if r.values[ci] != null}
 								<span class="fin-label" title={r.acode}>{r.label}</span>
 								<span class="fin-value" class:neg={(r.values[ci] ?? 0) < 0}>{fmtWon(r.values[ci] ?? 0)}</span>

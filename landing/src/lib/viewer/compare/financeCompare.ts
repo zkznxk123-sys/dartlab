@@ -2,7 +2,7 @@
 // Rows align by acode; values are normalized to KRW with source-unit diagnostics.
 
 import type { PanelBundle, PanelRow } from '../types';
-import { accountDepth } from '../finance/financePivot';
+import { accountDepth, accountIsTotal } from '../finance/financePivot';
 import type { CompareDiagnostics, FinanceCompare, FinanceFreq, FinanceRow, UnitInfo } from './types';
 
 const PERIOD_RE = /^(BP|P|C)FY(\d{4})([de])(FY|FQA|FQQ|FQ|HYA|HYQ|HY|TQA|TQQ|TQ)$/;
@@ -203,6 +203,7 @@ export function alignFinance(
 		acode: ac,
 		label: reprLabel.get(ac) || ac,
 		depth: accountDepth(ac),
+		isTotal: accountIsTotal(ac),
 		values: per.map((p) => p.cells.get(ac)?.value ?? null)
 	}));
 	const sharedRows = rows.filter((r) => r.values.every((v) => v != null)).length;

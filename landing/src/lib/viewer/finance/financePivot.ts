@@ -13,6 +13,7 @@ import type {
 import {
 	FINANCE_ACCOUNT_DEPTH,
 	FINANCE_ACCOUNT_ID_TO_SNAKE,
+	FINANCE_ACCOUNT_IS_TOTAL,
 	FINANCE_ACCOUNT_NAME_TO_SNAKES,
 	FINANCE_ACCOUNT_ORDER,
 	type FinanceStatementOrderKey
@@ -20,10 +21,12 @@ import {
 
 type NumberMap = Record<string, number>;
 type StringMap = Record<string, string>;
+type BoolMap = Record<string, boolean>;
 type NameCandidateMap = Record<string, readonly string[]>;
 
 const ACCOUNT_ORDER = FINANCE_ACCOUNT_ORDER as Record<FinanceStatementOrderKey, NumberMap>;
 const ACCOUNT_DEPTH = FINANCE_ACCOUNT_DEPTH as Record<FinanceStatementOrderKey, NumberMap>;
+const ACCOUNT_IS_TOTAL = FINANCE_ACCOUNT_IS_TOTAL as Record<FinanceStatementOrderKey, BoolMap>;
 const ACCOUNT_ID_TO_SNAKE = FINANCE_ACCOUNT_ID_TO_SNAKE as StringMap;
 const ACCOUNT_NAME_TO_SNAKES = FINANCE_ACCOUNT_NAME_TO_SNAKES as NameCandidateMap;
 
@@ -145,6 +148,21 @@ function accountDepthFromSnake(snake: string, kind?: FinanceKind): number | null
 	);
 }
 
+function isTotalMap(kind?: FinanceKind): Record<string, boolean> | null {
+	const key = statementOrderKey(kind);
+	return key ? ACCOUNT_IS_TOTAL[key] : null;
+}
+
+function accountIsTotalFromSnake(snake: string, kind?: FinanceKind): boolean {
+	return (
+		isTotalMap(kind)?.[snake] ??
+		ACCOUNT_IS_TOTAL.BS[snake] ??
+		ACCOUNT_IS_TOTAL.IS[snake] ??
+		ACCOUNT_IS_TOTAL.CF[snake] ??
+		false
+	);
+}
+
 function firstOrderedCandidate(candidates: readonly string[] | undefined, order: Record<string, number> | null): string | null {
 	if (!candidates?.length) return null;
 	if (!order) return candidates[0] ?? null;
@@ -170,11 +188,19 @@ export function accountSnake(accountId: string, label = '', kind?: FinanceKind):
 	return idSnake ?? labelSnake;
 }
 
-// 0=총계, 1=소계/대분류, 2+=리프. 정렬/레벨의 원천은 Python mapper 와 같은 account SSOT mirror.
+// 들여쓰기 깊이(순수 구조) — IS 본류(매출액~당기순이익) 균일 1, 리프 2+. 원천은 Python 과 같은 account SSOT mirror.
 export function accountDepth(accountId: string, label = '', kind?: FinanceKind): number {
 	const snake = accountSnake(accountId, label, kind);
 	if (!snake) return 2;
 	return accountDepthFromSnake(snake, kind) ?? 2;
+}
+
+// 총계 강조(굵게+상단보더) 여부 — depth(들여쓰기)와 분리된 emphasis 신호. snakeId 명시 SSOT mirror.
+// IS 당기순이익/총포괄손익은 depth 1 이어도 true, BS 자산·부채·자본총계는 depth 0 + true.
+export function accountIsTotal(accountId: string, label = '', kind?: FinanceKind): boolean {
+	const snake = accountSnake(accountId, label, kind);
+	if (!snake) return false;
+	return accountIsTotalFromSnake(snake, kind);
 }
 
 export function accountDisplayOrder(accountId: string, label: string, kind: FinanceKind, rawOrd: number | null): number {
@@ -227,6 +253,7 @@ export function pivot(rows: QueryRow[], kind: FinanceKind, scope: FinanceScope, 
 				label: r.label || r.acct,
 				ord: displayOrd,
 				depth: accountDepth(r.acct, r.label, kind),
+				isTotal: accountIsTotal(r.acct, r.label, kind),
 				values: {}
 			};
 			byAcct.set(r.acct, row);

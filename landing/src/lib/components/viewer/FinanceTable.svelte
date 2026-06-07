@@ -18,7 +18,7 @@
 		</thead>
 		<tbody>
 			{#each statement.rows as row (row.accountId)}
-				<tr class:total={row.depth === 0} class:sub={row.depth === 1}>
+				<tr class:total={row.isTotal} class:sub={!row.isTotal && row.depth <= 1}>
 					<th class="acct-c" style="padding-left: {10 + row.depth * 16}px" title={row.label}>{row.label}</th>
 					{#each statement.periods as p (p)}
 						{@const v = row.values[p]}
@@ -99,7 +99,7 @@
 	.val.nil {
 		color: #475569;
 	}
-	/* 구조 — 총계(depth 0) 굵게+상단 보더, 소계(depth 1) 굵게. 리프는 들여쓰기(inline padding-left). */
+	/* 구조 — 총계(isTotal) 굵게+상단 보더, 소계(비총계 depth≤1) 굵게. 들여쓰기는 depth(inline padding-left). */
 	tr.total .acct-c,
 	tr.total .val {
 		font-weight: 700;

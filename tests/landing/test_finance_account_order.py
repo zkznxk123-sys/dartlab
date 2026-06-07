@@ -55,6 +55,13 @@ def _depth(model: dict, accountId: str, label: str, stmt: str) -> int:
     return model["depths"][stmt].get(snake, 2)
 
 
+def _isTotal(model: dict, accountId: str, label: str, stmt: str) -> bool:
+    snake = _snake(model, accountId, label, stmt)
+    if not snake:
+        return False
+    return bool(model["isTotal"][stmt].get(snake, False))
+
+
 def test_account_order_ts_is_synced(orderModel) -> None:
     """Committed TS mirror matches current account SSOT."""
     model, mod = orderModel
@@ -89,14 +96,24 @@ def test_bs_depth_uses_total_sub_leaf_levels(orderModel) -> None:
     assert _depth(model, "ifrs-full_Equity", "자본총계", "BS") == 0
 
 
-def test_is_bottom_line_depth_uses_statement_level_ssot(orderModel) -> None:
-    """손익 최종행은 viewer 특수규칙이 아니라 sortOrder level mirror 로 depth 0 이 된다."""
+def test_is_bottom_line_depth_decoupled_from_total_emphasis(orderModel) -> None:
+    """손익 본류(매출액~당기순이익)는 균일 depth 1 로 정렬되고, 당기순이익의 총계 강조는
+    depth 가 아니라 isTotal mirror 로 따로 표현된다(들여쓰기/강조 분리)."""
     model, _ = orderModel
 
-    assert _depth(model, "ifrs-full_ProfitLoss", "당기순이익", "IS") == 0
-    assert _depth(model, "ifrs-full_NetProfit", "당기순이익", "IS") == 0
-    assert _depth(model, "-표준계정코드 미사용-", "당기순이익", "IS") == 0
+    # 들여쓰기: 당기순이익이 영업이익(본류)과 같은 depth 1 — 더 이상 좌측으로 튀지 않는다.
+    assert _depth(model, "ifrs-full_ProfitLoss", "당기순이익", "IS") == 1
+    assert _depth(model, "ifrs-full_NetProfit", "당기순이익", "IS") == 1
+    assert _depth(model, "-표준계정코드 미사용-", "당기순이익", "IS") == 1
     assert _depth(model, "dart_OperatingIncomeLoss", "영업이익", "IS") == 1
+
+    # 강조: 당기순이익은 depth 1 이어도 총계(isTotal=True), 본류 소계(영업이익)는 False.
+    assert _isTotal(model, "ifrs-full_ProfitLoss", "당기순이익", "IS") is True
+    assert _isTotal(model, "ifrs-full_NetProfit", "당기순이익", "IS") is True
+    assert _isTotal(model, "dart_OperatingIncomeLoss", "영업이익", "IS") is False
+    # BS 총계는 depth 0(루트) 유지 + isTotal True.
+    assert _depth(model, "ifrs-full_Assets", "자산총계", "BS") == 0
+    assert _isTotal(model, "ifrs-full_Assets", "자산총계", "BS") is True
 
 
 def test_recent_ifrs_id_gaps_resolve_to_statement_order(orderModel) -> None:

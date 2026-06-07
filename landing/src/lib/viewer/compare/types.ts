@@ -45,7 +45,8 @@ export interface UnitInfo {
 export interface FinanceRow {
 	acode: string;
 	label: string;
-	depth: number; // 0=total, 1=subtotal, 2=leaf
+	depth: number; // 들여쓰기 깊이(순수 구조) — IS 본류 균일 1, 리프 2+
+	isTotal: boolean; // 총계 강조 — depth 와 분리(IS 당기순이익/총포괄손익은 depth 1 + true)
 	values: (number | null)[]; // company index -> KRW-normalized value; null = honest-gap
 }
 
