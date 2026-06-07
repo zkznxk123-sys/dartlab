@@ -260,19 +260,19 @@ def _compareCellsResult(
         return pl.DataFrame(), []
     single = len(targets) == 1
     # acode union (첫 등장 라벨 대표 — acode 가 정체성, label 은 표시용)
-    repr_label: dict[str, str] = {}
+    reprLabel: dict[str, str] = {}
     order: list[str] = []
     for c in codes:
         for p in targets:
             for ac, (lab, _v) in per.get(c, {}).get(p, {}).items():
-                if ac not in repr_label:
-                    repr_label[ac] = lab
+                if ac not in reprLabel:
+                    reprLabel[ac] = lab
                     order.append(ac)
     if not order:
         return pl.DataFrame(), targets
     rows: list[dict[str, object]] = []
     for ac in order:
-        row: dict[str, object] = {"acode": ac, "label": repr_label[ac], "scope": scope}
+        row: dict[str, object] = {"acode": ac, "label": reprLabel[ac], "scope": scope}
         for c in codes:
             for p in targets:
                 key = c if single else f"{c}{_SEP}{p}"
@@ -321,6 +321,13 @@ def _matchTopic(df: pl.DataFrame, topic: str) -> pl.DataFrame:
         if c in df.columns:
             mask = mask | pl.col(c).cast(pl.Utf8).str.contains(topic, literal=True)
     return df.filter(mask.fill_null(False))
+
+
+def _negPeriodKey(cell: str) -> str:
+    """다기간 셀 컬럼 '{code}␟{period}' 의 period 최신순 정렬키 (역순 문자열)."""
+    parts = cell.split(_SEP)
+    p = parts[1] if len(parts) > 1 else ""
+    return "".join(chr(255 - ord(ch)) for ch in p)  # 내림차순
 
 
 def _orderedCellColumns(present: list[str], targets: list[str], *, single: bool) -> list[str]:
@@ -428,9 +435,9 @@ def _compareRows(
 
     # 대표 식별(같은 joinKey 의 라벨 drift → 첫 등장 1개) + 셀 pivot.
     idCols = [c for c in _IDENT if c in long.columns]
-    repr_ = long.group_by("_joinKey", maintain_order=True).agg([pl.col(c).first() for c in idCols])
+    reprIdent = long.group_by("_joinKey", maintain_order=True).agg([pl.col(c).first() for c in idCols])
     grid = long.pivot("_cell", index="_joinKey", values="_value", aggregate_function="first")
-    out = repr_.join(grid, on="_joinKey", how="left").drop("_joinKey")
+    out = reprIdent.join(grid, on="_joinKey", how="left").drop("_joinKey")
 
     # 행 정렬 — canonical chapter rank → 절 번호 → sectionLeaf → disclosureKey (셀 컬럼은 보존).
     out = out.with_columns(
@@ -538,13 +545,6 @@ def compare(
     """
     df, _, _ = _runCompare(_resolveInputs(codes, topic=topic, period=period, scope=scope, freq=freq))
     return df
-
-
-def _negPeriodKey(cell: str) -> str:
-    """다기간 셀 컬럼 '{code}␟{period}' 의 period 최신순 정렬키 (역순 문자열)."""
-    parts = cell.split(_SEP)
-    p = parts[1] if len(parts) > 1 else ""
-    return "".join(chr(255 - ord(ch)) for ch in p)  # 내림차순
 
 
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
