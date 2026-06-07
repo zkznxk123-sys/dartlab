@@ -1,45 +1,25 @@
-// Per-bundle global disclosure-key index — lets compare align by disclosureKey across
-// companies regardless of TOC section number (삼성 "7.유형자산" ↔ SK "11.유형자산"),
-// mirroring Python compare's (disclosureKey, scope, leafType) whole-panel alignment.
-//
-// Without this, fetching other companies' rows by the base company's drift-prone
-// sectionKey (`${chapter}␟${sectionLeaf}`, sectionLeaf carries the 절번호) returned the
-// wrong/empty section — the "TOC 클릭 시 이상한 비교" bug. The base company drives WHICH
-// rows show (same TOC); other companies' cells come from this global lookup.
+// Per-bundle disclosureKey index — 절번호 drift(회사마다 같은 공시가 다른 절번호)로 같은
+// sectionKey 가 없는 회사를 disclosureKey 로 전역 조회해 비교 누락을 막는다.
 
 import type { PanelBundle, PanelRow } from '../types';
-import { COMPARE_SEP } from './types';
-
-export function rowLeafType(r: PanelRow): string {
-	return r.leafType || r.blockType || '';
-}
-
-// Python compare.py keyed identity: (disclosureKey, scope, leafType).
-export function alignKeyOf(r: PanelRow): string {
-	return `${r.disclosureKey}${COMPARE_SEP}${r.scope ?? ''}${COMPARE_SEP}${rowLeafType(r)}`;
-}
 
 interface BundleIndex {
-	byAlignKey: Map<string, PanelRow>; // dk␟scope␟leafType → first row (row-mode global align)
-	byDisclosureKey: Map<string, PanelRow[]>; // dk → all rows (finance statement gather)
+	byDisclosureKey: Map<string, PanelRow[]>; // dk → all rows across sections
 }
 
 const cache = new WeakMap<PanelBundle, BundleIndex>();
 
 function buildIndex(b: PanelBundle): BundleIndex {
-	const byAlignKey = new Map<string, PanelRow>();
 	const byDisclosureKey = new Map<string, PanelRow[]>();
 	for (const rows of b.gridBySection.values()) {
 		for (const r of rows) {
-			if (!r.disclosureKey) continue; // narrative 행은 키 정렬 불가
-			const ak = alignKeyOf(r);
-			if (!byAlignKey.has(ak)) byAlignKey.set(ak, r); // 첫 등장 = 최신 filing (상류 dedup)
-			let arr = byDisclosureKey.get(r.disclosureKey);
-			if (!arr) byDisclosureKey.set(r.disclosureKey, (arr = []));
-			arr.push(r);
+			if (!r.disclosureKey) continue;
+			let d = byDisclosureKey.get(r.disclosureKey);
+			if (!d) byDisclosureKey.set(r.disclosureKey, (d = []));
+			d.push(r);
 		}
 	}
-	return { byAlignKey, byDisclosureKey };
+	return { byDisclosureKey };
 }
 
 export function bundleIndex(b: PanelBundle): BundleIndex {
@@ -48,8 +28,8 @@ export function bundleIndex(b: PanelBundle): BundleIndex {
 	return idx;
 }
 
-// All rows across sections whose disclosureKey is one of the given statements — finance
-// compare gathers a company's whole BS/IS/CF regardless of section number.
+// 주어진 statement(disclosureKey) 집합에 속하는 전 섹션 행 — finance 셀 렌더(financeCells)가
+// 회사의 BS/IS/CF 를 절번호 무관 수집할 때 사용.
 export function rowsForStatements(b: PanelBundle, statements: Set<string>): PanelRow[] {
 	if (!statements.size) return [];
 	const idx = bundleIndex(b);
