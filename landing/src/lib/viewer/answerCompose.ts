@@ -43,30 +43,44 @@ export function classifyIntent(q: string, hasConstraint: boolean): Intent {
 }
 
 // 질문어 → 재무계정 매칭 (label 부분일치 + 경량 동의어). 더 구체(긴) 라벨 우선.
-const ACCT_SYN: Record<string, string> = {
-	판관비: '판매비와관리비',
-	순이익: '당기순이익',
-	영업현금: '영업활동현금흐름',
-	영업현금흐름: '영업활동현금흐름',
-	매출: '매출액',
-	차입금: '차입금',
-	이익잉여: '이익잉여금'
+// 단축어 → 정식 계정명 후보(질문에 단축어 있으면 probe 에 정식명들 덧붙여 매칭). "부채"⊂"부채총계" 부분어 +
+// 업종별 변형(제조=매출액, IT/금융=영업수익) 해소. searchIndex.SYNONYMS 와 같은 큐레이션 — bounded.
+const ACCT_SYN: Record<string, string[]> = {
+	판관비: ['판매비와관리비'],
+	순이익: ['당기순이익'],
+	영업현금: ['영업활동현금흐름'],
+	영업현금흐름: ['영업활동현금흐름'],
+	현금흐름: ['영업활동현금흐름'],
+	매출: ['매출액', '영업수익'],
+	수익: ['영업수익', '매출액'],
+	부채: ['부채총계'],
+	자산: ['자산총계'],
+	자본: ['자본총계'],
+	차입금: ['차입금'],
+	이익잉여: ['이익잉여금']
 };
-// 라벨 정규화 — DART 괄호 접미사("(손실)"·"(주석)" 등)·공백 제거. "영업이익(손실)" → "영업이익".
-function normLabel(s: string): string {
-	return s.replace(/\([^)]*\)/g, '').replace(/\s/g, '');
+// 라벨 변형 — 전체("수익(매출액)")·괄호제거("수익")·괄호내용("매출액", 단 3자+ 만 = 손실/이익/손익 2자 노이즈 배제).
+function labelVariants(label: string): string[] {
+	const noSp = label.replace(/\s/g, '');
+	const stripped = noSp.replace(/\([^)]*\)/g, '');
+	const out = new Set<string>();
+	if (noSp.length >= 2) out.add(noSp);
+	if (stripped.length >= 2) out.add(stripped);
+	for (const m of noSp.matchAll(/\(([^)]*)\)/g)) if (m[1].length >= 3) out.add(m[1]);
+	return [...out];
 }
 function matchSignal(q: string, signals: FinanceSignal[]): FinanceSignal | null {
 	const nq = q.replace(/\s/g, '');
 	let probe = nq;
-	for (const [k, v] of Object.entries(ACCT_SYN)) if (nq.includes(k)) probe += v;
+	for (const [k, vs] of Object.entries(ACCT_SYN)) if (nq.includes(k)) probe += vs.join('');
 	let best: FinanceSignal | null = null;
 	let bestLen = 0;
 	for (const s of signals) {
-		const label = normLabel(s.label);
-		if (label.length >= 2 && probe.includes(label) && label.length > bestLen) {
-			best = s;
-			bestLen = label.length;
+		for (const v of labelVariants(s.label)) {
+			if (probe.includes(v) && v.length > bestLen) {
+				best = s;
+				bestLen = v.length;
+			}
 		}
 	}
 	return best;
