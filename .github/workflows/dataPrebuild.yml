@@ -1,36 +1,45 @@
 name: Data Prebuild (DART)
 
 # ──────────────────────────────────────────────────────────────
-# DART Data Sync 완료 후 자동 트리거.
+# DART Data Sync 완료 후 자동 트리거 (증분) + 주 1 회 full 재생성.
 # scan 프리빌드(changes/finance/report/sharesOutstanding/docsIndex) 생성 → HF 업로드.
-# 입력(finance/report/panel) seed 는 prebuildData.py 의 INPUT_CATEGORIES 가 단일 SSOT —
-# 스크립트가 HF 에서 자체 seed 하므로 워크플로에 카테고리 목록을 중복하지 않는다.
 #
-# EDGAR 프리빌드는 edgarSync.yml 이 전담 (end-to-end 벌크 → scan → HF).
-# 여기서는 **DART 전용**.
+# 증분(기본): panel 변경 종목만 다운로드 → changes/sharesOutstanding/docsIndex 변경분만
+#   재계산 후 기존 parquet 에 종목 단위 머지. 전 92K panel(11GB) seed 금지 = OOM/디스크
+#   고갈 근본원인 제거. finance/report 는 캐시 full 입력이라 full 빌드.
+# full(일요일 cron / dispatch full=true): 디스크 확보 후 전 종목 panel seed → 전체 재생성.
+#   빌더 변경·backfill drift 교정 안전망. _scanBuildState ledger 가 두 경로를 잇는다.
+#
+# 입력 seed 는 prebuildData.py 가 단일 SSOT (BASE_SEED_CATEGORIES). EDGAR 는 edgarSync.yml 전담.
 # ──────────────────────────────────────────────────────────────
 
 on:
   workflow_run:
     workflows: ["Data Sync"]
     types: [completed]
+  schedule:
+    - cron: '0 17 * * 0'  # UTC 17:00 일 = KST 02:00 월, 주간 full 재생성 (Data Sync 18:00 와 1h 이격)
   workflow_dispatch:
+    inputs:
+      full:
+        description: '전 종목 full 재생성 (panel 전량 seed, 디스크 확보)'
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
 
 concurrency:
   group: hf-dart-push
   cancel-in-progress: false
 
 permissions:
-  contents: read  # HF push 는 HF_TOKEN 사용 — git commit/push/release 없음(checkout+cache 만). 최소권한.
+  contents: read  # HF push 는 HF_TOKEN 사용 — git 작업 없음(checkout+cache 만). 최소권한.
 
 jobs:
+  # ── 증분: Data Sync 직후 / dispatch(full=false). panel 변경분만 ──
   prebuild-scan:
+    if: ${{ (github.event_name == 'workflow_run' && (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.full != 'true') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    # 체인 decouple (하나 깨지면 다 깨진다 가드): upstream(Data Sync) 실패에도 실행 — prebuild 가
-    # HF seed(source of truth)로 데이터 충전하고, 자체 Smoke import 가 src 회귀를 별도로 막는다.
-    # cancelled 만 skip (의도적 중단). dispatch 는 항상 실행. docs/dartNewStocks 와 동일 resilient 패턴.
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v5
@@ -47,10 +56,8 @@ jobs:
       - name: Smoke import (fail fast on src regression)
         run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
 
-      # workflow_run 컨텍스트는 소스 workflow 의 run_id 를 모름 → restore-keys 접두사 매칭으로
-      # 최신 dataSync 캐시 찾는다. key 는 의도적으로 miss 시켜 fallback 강제.
+      # workflow_run 컨텍스트는 소스 run_id 를 모름 → restore-keys 접두사 매칭으로 최신 캐시.
       - name: Restore finance cache
-        id: finance-cache
         uses: actions/cache/restore@v5
         with:
           path: data/dart/finance
@@ -58,30 +65,23 @@ jobs:
           restore-keys: dartlab-data-finance-
 
       - name: Restore report cache
-        id: report-cache
         uses: actions/cache/restore@v5
         with:
           path: data/dart/report
           key: dartlab-data-report-prebuild-never-match
           restore-keys: dartlab-data-report-
 
-      # finance/report 만 Actions 캐시 warm (cacheable, ~1GB). panel(11GB)은 캐시 10GB 한도 초과 →
-      # prebuildData 가 INPUT_CATEGORIES 전부를 HF 에서 직접 seed (cache hit 는 _isFresh 로 재다운 skip).
-      - name: Verify cache hits
-        run: |
-          for cat in finance report; do
-            cat_var="$(echo $cat | tr a-z A-Z)"
-            var="${cat_var}_CACHE_MATCHED_KEY"
-            # actions/cache/restore 는 matched key 를 outputs.cache-matched-key 로 노출
-            echo "[$cat] matched=$(eval echo \${CACHE_MATCHED_${cat_var}:-MISS})"
-          done
-        env:
-          CACHE_MATCHED_FINANCE: ${{ steps.finance-cache.outputs.cache-matched-key }}
-          CACHE_MATCHED_REPORT: ${{ steps.report-cache.outputs.cache-matched-key }}
+      # 직전 scan 산출물(+_scanBuildState ledger) 복원 → 증분 머지/prune 기준. cache miss 면
+      # prebuildData 의 base seed 가 HF 에서 scan 카테고리를 idempotent 충전한다.
+      - name: Restore scan cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/dart/scan
+          key: dartlab-data-scan-prebuild-never-match
+          restore-keys: dartlab-data-scan-
 
       # KRX KIND listing + corpProfile seed — prebuild = offline only 이므로 buildScan
-      # 이 KIND HTTP 호출 시 OfflineViolation. kindlist.yml 이 HF push 한 결과를
-      # 다운로드해 KIND file cache 위치에 둔다. 2026-05-18 회귀 차단.
+      # 이 KIND HTTP 호출 시 OfflineViolation. kindlist.yml HF push 결과를 다운로드.
       - name: Seed KRX KIND + corpProfile from HF
         run: |
           mkdir -p data/kindList data/dartList data/dart/scan
@@ -109,10 +109,91 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-      - name: Build DART scan prebuilds + upload
+      - name: Build DART scan prebuilds (incremental) + upload
         run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Save DART scan cache
+        if: always()
+        uses: actions/cache/save@v5
+        with:
+          path: data/dart/scan
+          key: dartlab-data-scan-${{ github.run_id }}
+
+  # ── full: 주간 / dispatch(full=true). 전 종목 panel seed (디스크 확보) ──
+  prebuild-full:
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.full == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # 전 종목 panel(~11GB) seed 를 위한 디스크 확보 — 기본 러너 / 파티션 ~14GB 한계 회피.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL || true
+          df -h /
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Smoke import (fail fast on src regression)
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
+      - name: Restore finance cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/dart/finance
+          key: dartlab-data-finance-prebuild-never-match
+          restore-keys: dartlab-data-finance-
+
+      - name: Restore report cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/dart/report
+          key: dartlab-data-report-prebuild-never-match
+          restore-keys: dartlab-data-report-
+
+      - name: Seed KRX KIND + corpProfile from HF
+        run: |
+          mkdir -p data/kindList data/dartList data/dart/scan
+          uv run python -X utf8 -c "
+          from pathlib import Path
+          from huggingface_hub import hf_hub_download
+          import shutil
+          for src, dst in [
+              ('metadata/corpList.parquet', 'data/kindList/corpList.parquet'),
+              ('metadata/dartList.parquet', 'data/dartList/dartList.parquet'),
+              ('dart/scan/corpProfile.parquet', 'data/dart/scan/corpProfile.parquet'),
+          ]:
+              try:
+                  p = hf_hub_download(
+                      repo_id='eddmpython/dartlab-data',
+                      repo_type='dataset',
+                      filename=src,
+                  )
+                  Path(dst).parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy(p, dst)
+                  print(f'seed: {src} -> {dst}')
+              except Exception as e:
+                  print(f'seed skip ({src}): {type(e).__name__}: {e}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build DART scan prebuilds (full rebuild) + upload
+        run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          PREBUILD_FULL: "1"
 
       - name: Save DART scan cache
         if: always()

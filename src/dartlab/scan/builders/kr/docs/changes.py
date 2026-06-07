@@ -8,7 +8,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan.builders.kr.common import BATCH_SIZE, mergeBatchFiles, panelDir, say, scanDir
+from dartlab.scan.builders.kr.common import BATCH_SIZE, mergeBatchFiles, mergeIncremental, panelDir, say, scanDir
 
 
 def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | None:
@@ -141,12 +141,15 @@ def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | No
     )
 
 
-def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
+def buildChanges(*, sinceYear: int = 2021, verbose: bool = True, incremental: bool = False) -> Path | None:
     """panel parquet → ``changes.parquet`` 프리빌드.
 
     Parameters:
         sinceYear: 시작 연도. 이전 연도는 비교 baseline 으로만 사용.
         verbose: 진행 로그 출력 여부.
+        incremental: True 면 로컬 panel dir(=변경 종목만 seed 된 상태)에서 재계산한 행을
+            기존 ``changes.parquet`` 에 종목 단위로 갈아끼운다(:func:`mergeIncremental`).
+            전 종목 panel 을 seed 하지 않아 prebuild OOM/디스크 고갈을 막는 일일 경로.
 
     Returns:
         생성된 ``changes.parquet`` 경로. panel 데이터 없으면 None.
@@ -227,14 +230,22 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
         if verbose:
             say("  changes 결과 없음")
         shutil.rmtree(batchDir, ignore_errors=True)
-        return None
+        # 증분 사이클에서 변경 종목이 changes 를 내지 않았으면 직전 산출 보존.
+        return outputPath if (incremental and outputPath.exists()) else None
 
-    mergeBatchFiles(batchDir, outputPath)
+    if incremental and outputPath.exists():
+        tmpMerged = batchDir / "_rebuilt.parquet"
+        mergeBatchFiles(batchDir, tmpMerged)
+        rebuilt = pl.read_parquet(str(tmpMerged))
+        finalRows = mergeIncremental(outputPath, rebuilt, key="stockCode")
+    else:
+        finalRows = mergeBatchFiles(batchDir, outputPath)
     shutil.rmtree(batchDir, ignore_errors=True)
 
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024
     if verbose:
-        say(f"  완료: {success}종목, {totalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
+        mode = "증분" if incremental else "full"
+        say(f"  완료({mode}): {success}종목 재계산, 총 {finalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
 
     return outputPath

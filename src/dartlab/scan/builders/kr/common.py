@@ -36,6 +36,7 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import polars as pl
@@ -45,6 +46,10 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 BATCH_SIZE = 200
+
+# 증분 prebuild 변경 감지 ledger 파일명 (scanDir 아래). panel HF listing 의
+# {filename: size} 스냅샷을 직전 빌드가 남기고, 다음 사이클이 size 차이로 변경 종목을 가린다.
+SCAN_BUILD_STATE_FILE = "_scanBuildState.json"
 
 
 def scanDir() -> Path:
@@ -301,3 +306,131 @@ def mergeBatchFiles(batchDir: Path, outputPath: Path, *, how: str = "vertical") 
     merged = pl.concat(lazyParts, how=how)
     merged.sink_parquet(str(outputPath), compression="zstd")
     return pl.scan_parquet(str(outputPath)).select(pl.len()).collect().item()
+
+
+def loadScanBuildState() -> dict[str, int]:
+    """직전 prebuild 가 남긴 panel 변경 감지 ledger 를 읽는다.
+
+    Args:
+        없음.
+
+    Returns:
+        ``{panelFilename: sizeBytes}`` dict. ledger 부재/파손 시 빈 dict.
+
+    Raises:
+        없음 — 파일 부재·JSON 파손은 빈 dict 로 흡수(증분 대신 full 로 안전 폴백).
+
+    Example:
+        >>> isinstance(loadScanBuildState(), dict)
+        True
+    """
+    statePath = scanDir() / SCAN_BUILD_STATE_FILE
+    if not statePath.exists():
+        return {}
+    try:
+        raw = json.loads(statePath.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return {str(k): int(v) for k, v in raw.items() if isinstance(v, (int, float))}
+
+
+def saveScanBuildState(state: dict[str, int]) -> Path:
+    """panel 변경 감지 ledger 를 scanDir 에 기록한다 (다음 사이클 변경 가림용).
+
+    Args:
+        state: ``{panelFilename: sizeBytes}`` — 보통 ``hfGateway.hfList("panel")`` 결과.
+
+    Returns:
+        기록된 ledger 경로.
+
+    Raises:
+        OSError: 쓰기 실패 시.
+
+    Example:
+        >>> p = saveScanBuildState({"005930.parquet": 1234})  # doctest: +SKIP
+    """
+    out = scanDir()
+    out.mkdir(parents=True, exist_ok=True)
+    statePath = out / SCAN_BUILD_STATE_FILE
+    statePath.write_text(json.dumps(state, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    return statePath
+
+
+def mergeIncremental(existingPath: Path, rebuilt: pl.DataFrame, *, key: str = "stockCode") -> int:
+    """재계산 행(rebuilt)을 기존 scan parquet 에 종목 단위로 갈아끼운다.
+
+    기존 parquet 에서 ``rebuilt[key]`` 에 속한 종목 행을 드롭하고 rebuilt 를 append 한 뒤
+    ``existingPath`` 에 zstd 로 다시 쓴다. 증분 빌더가 변경 종목만 재계산했을 때, 전 종목
+    parquet 을 재생성하지 않고 해당 종목 슬라이스만 교체하는 단일 진입점이다.
+
+    Args:
+        existingPath: 직전 사이클 산출 parquet (HF 에서 seed 된 것). 없으면 rebuilt 그대로 기록.
+        rebuilt: 변경 종목만 재계산한 DataFrame. 빈 DataFrame 이면 기존 보존(no-op write).
+        key: 종목 식별 컬럼 (changes/docsIndex=``stockCode``, shares=``stock_code``).
+
+    Returns:
+        병합 후 최종 행 수.
+
+    Raises:
+        polars.PolarsError: parquet read/write 실패 시.
+
+    Example:
+        >>> import polars as pl
+        >>> n = mergeIncremental(Path("/tmp/x.parquet"), pl.DataFrame({"stockCode": ["1"]}))  # doctest: +SKIP
+    """
+    existingPath = Path(existingPath)
+    if rebuilt.is_empty() and existingPath.exists():
+        return pl.scan_parquet(str(existingPath)).select(pl.len()).collect().item()
+
+    if existingPath.exists():
+        changedKeys = rebuilt.get_column(key).unique().to_list()
+        prior = pl.read_parquet(str(existingPath)).filter(~pl.col(key).is_in(changedKeys))
+        # 서로 다른 parquet 소스의 Categorical 은 string-cache 가 달라 concat 시 충돌 →
+        # 방어적으로 Utf8 로 풀어 합친다(Categorical 은 저장 size 최적화일 뿐, 의미 동일).
+        combined = pl.concat([_decategorize(prior), _decategorize(rebuilt)], how="diagonal_relaxed")
+    else:
+        combined = _decategorize(rebuilt)
+
+    existingPath.parent.mkdir(parents=True, exist_ok=True)
+    combined.write_parquet(str(existingPath), compression="zstd")
+    return combined.height
+
+
+def _decategorize(df: pl.DataFrame) -> pl.DataFrame:
+    """Categorical 컬럼을 Utf8 로 캐스팅 (cross-source concat string-cache 충돌 회피)."""
+    catCols = [c for c, dt in zip(df.columns, df.dtypes, strict=False) if dt == pl.Categorical]
+    return df.with_columns([pl.col(c).cast(pl.Utf8) for c in catCols]) if catCols else df
+
+
+def pruneScanCodes(existingPath: Path, removedCodes: list[str], *, key: str = "stockCode") -> int:
+    """상장폐지 등으로 사라진 종목 행을 기존 scan parquet 에서 제거한다(다운로드 불요).
+
+    panel HF listing 에서 빠진 종목은 panel 파일을 받지 않고도 ledger diff 로 식별 가능하다.
+    증분 사이클이 add/change(다운로드 후 :func:`mergeIncremental`) 와 delete(본 함수) 를 모두
+    덮어 daily 경로만으로 데이터 drift 가 누적되지 않게 한다.
+
+    Args:
+        existingPath: 정리 대상 parquet. 없으면 0 반환(no-op).
+        removedCodes: 제거할 종목코드 목록(파일 stem). 빈 목록이면 no-op.
+        key: 종목 식별 컬럼.
+
+    Returns:
+        제거된 행 수.
+
+    Raises:
+        polars.PolarsError: parquet read/write 실패 시.
+
+    Example:
+        >>> pruneScanCodes(Path("/tmp/none.parquet"), ["009999"])
+        0
+    """
+    existingPath = Path(existingPath)
+    if not removedCodes or not existingPath.exists():
+        return 0
+    df = pl.read_parquet(str(existingPath))
+    before = df.height
+    df = df.filter(~pl.col(key).is_in(removedCodes))
+    removed = before - df.height
+    if removed:
+        df.write_parquet(str(existingPath), compression="zstd")
+    return removed

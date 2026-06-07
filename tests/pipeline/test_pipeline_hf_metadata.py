@@ -57,14 +57,25 @@ def test_sync_new_stocks_uses_prefix_tree_listing(monkeypatch):
 
 
 def test_prebuild_requires_panel_input():
-    """Prebuild 는 panel 없이 부분 scan 을 만들면 안 된다."""
+    """full 모드: prebuild 는 panel 없이 부분 scan 을 만들면 안 된다."""
     mod = _loadScript(".github/scripts/prebuild/prebuildData.py")
 
     with pytest.raises(SystemExit):
-        mod._validateInputCoverage({"finance": 0, "report": 0, "panel": 0})
+        mod._validateInputCoverage({"finance": 0, "report": 0, "panel": 0}, incremental=False)
     with pytest.raises(SystemExit):
-        mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 0})
+        mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 0}, incremental=False)
     with pytest.raises(SystemExit):
-        mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 100})
+        mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 100}, incremental=False)
 
-    mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 600})
+    mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 600}, incremental=False)
+
+
+def test_prebuild_incremental_allows_zero_panel():
+    """증분 모드: panel 로컬 수 = 변경 종목 수라 0 도 정상(전량 보존). 단 전부 0 은 실패."""
+    mod = _loadScript(".github/scripts/prebuild/prebuildData.py")
+
+    # finance/report 존재하면 panel 변경 0 은 통과 (no-op 사이클)
+    mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 0}, incremental=True)
+    # base seed 실패로 전부 0 이면 증분이어도 실패
+    with pytest.raises(SystemExit):
+        mod._validateInputCoverage({"finance": 0, "report": 0, "panel": 0}, incremental=True)

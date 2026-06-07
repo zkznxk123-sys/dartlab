@@ -197,3 +197,87 @@ def seedCategoriesFromHf(
     root.mkdir(parents=True, exist_ok=True)
     tok = token or os.environ.get("HF_TOKEN") or None
     return {c.strip(): _seedOne(c.strip(), root, tok) for c in categories if c and c.strip()}
+
+
+def listRemoteFiles(category: str, *, token: str | None = None) -> dict[str, int]:
+    """카테고리 prefix 아래 HF 파일을 다운로드 없이 1회 열거한다 — 증분 변경 감지용.
+
+    panel 같은 대용량 카테고리를 전량 받지 않고 ``{rel: size}`` 스냅샷만 얻어 직전 빌드
+    ledger 와 size 비교 → 변경/삭제 종목을 가린다. ``retryHfCall`` 로 감싼 scoped tree
+    열거(``_remoteTreeFiles``)라 전체 dataset metadata 폭주(429)를 일으키지 않는다.
+
+    Args:
+        category: ``DATA_RELEASES`` 카테고리 키 (예: ``"panel"``).
+        token: HF 토큰. None 이면 ``HF_TOKEN`` env.
+
+    Returns:
+        ``{repoRelPath: sizeBytes}`` dict (예: ``{"dart/panel/005930.parquet": 12345}``).
+
+    Raises:
+        ValueError: 미등록 category.
+
+    Example:
+        >>> listRemoteFiles("panel")  # doctest: +SKIP
+        {'dart/panel/005930.parquet': 123456, ...}
+    """
+    from huggingface_hub import HfApi
+
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+
+    if category not in DATA_RELEASES:
+        raise ValueError(f"unknown category '{category}' — {list(DATA_RELEASES)}")
+    tok = token or os.environ.get("HF_TOKEN") or None
+    api = HfApi(token=tok)
+    return _remoteTreeFiles(api, repo=repoFor(category), dirPath=DATA_RELEASES[category]["dir"], token=tok)
+
+
+def downloadCategoryFiles(
+    category: str,
+    relPaths: list[str],
+    *,
+    dataDir: str | None = None,
+    token: str | None = None,
+) -> tuple[int, int]:
+    """카테고리의 *지정 파일만* 로컬로 받는다(전량 seed 회피) — 증분 prebuild 의 변경분 충전.
+
+    ``seedCategoriesFromHf`` 가 카테고리 전체를 idempotent 충전한다면, 본 함수는 호출자가
+    가린 변경 파일 목록만 받는다. ``_download`` (429/5xx/네트워크 재시도 + tmp→rename atomic)
+    를 4-워커로 재사용한다.
+
+    Args:
+        category: ``DATA_RELEASES`` 카테고리 키.
+        relPaths: 받을 repo-상대 경로 목록 (``listRemoteFiles`` 키와 동형).
+        dataDir: 데이터 루트. None 이면 env/``./data``.
+        token: HF 토큰. None 이면 ``HF_TOKEN`` env.
+
+    Returns:
+        ``(다운로드수, 404-skip수)``.
+
+    Raises:
+        ValueError: 미등록 category.
+
+    Example:
+        >>> downloadCategoryFiles("panel", ["dart/panel/005930.parquet"])  # doctest: +SKIP
+        (1, 0)
+    """
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+
+    if category not in DATA_RELEASES:
+        raise ValueError(f"unknown category '{category}' — {list(DATA_RELEASES)}")
+    if not relPaths:
+        return 0, 0
+    root = Path(dataDir or os.environ.get("DARTLAB_DATA_DIR") or "./data").resolve()
+    tok = token or os.environ.get("HF_TOKEN") or None
+    baseUrl = f"https://huggingface.co/datasets/{repoFor(category)}/resolve/main"
+
+    downloaded = 0
+    skipped404 = 0
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futures = {pool.submit(_download, f"{baseUrl}/{rel}", root / rel, tok): rel for rel in relPaths}
+        for fut in as_completed(futures):
+            bytesWritten = fut.result()
+            if bytesWritten is None:
+                skipped404 += 1
+                continue
+            downloaded += 1
+    return downloaded, skipped404

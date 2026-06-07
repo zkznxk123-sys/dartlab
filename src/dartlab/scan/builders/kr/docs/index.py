@@ -73,6 +73,7 @@ def buildDocsIndex(
     docsDir: str | Path | None = None,
     outputPath: str | Path | None = None,
     verbose: bool = False,
+    incremental: bool = False,
 ) -> Path:
     """전 종목 panel parquet → 슬림 메타 인덱스 통합 빌드 (P3, cross-company 1~2 초 응답).
 
@@ -87,6 +88,8 @@ def buildDocsIndex(
         docsDir: 본문 source 디렉토리 override. None 이면 KR 기본 = ``data/dart/panel/`` (panel 섹션).
         outputPath: 산출 parquet 경로. None 이면 ``data/dart/scan/docsIndex.parquet``.
         verbose: 진행 로그 출력 여부.
+        incremental: True 면 재계산 행을 기존 docsIndex 에 ``stockCode`` 단위로 머지
+            (변경 종목만 seed 된 일일 prebuild 경로). 기존 산출 부재 시 full write.
 
     Returns:
         산출 parquet 절대 경로.
@@ -217,6 +220,15 @@ def buildDocsIndex(
         outputPath = scanDir / "docsIndex.parquet"
     outputPath = Path(outputPath)
     outputPath.parent.mkdir(parents=True, exist_ok=True)
+    # 증분: 로컬 panel dir(=변경 종목만 seed)에서 재계산한 result 를 기존 docsIndex 에
+    # stockCode 단위로 갈아끼운다. 전 종목 panel seed 없이 prebuild OOM/디스크 고갈 회피.
+    if incremental and outputPath.exists():
+        from dartlab.scan.builders.kr.common import mergeIncremental
+
+        finalRows = mergeIncremental(outputPath, result, key="stockCode")
+        if verbose:
+            log.info("[docsIndex] 증분 머지 완료 → 총 %d rows → %s", finalRows, outputPath)
+        return outputPath
     result.write_parquet(str(outputPath), compression="zstd", row_group_size=50_000)
 
     elapsed = time.time() - t0

@@ -2,16 +2,23 @@
 
 수집 완료 후 실행되어 scan 프리빌드 데이터를 생성하고 HuggingFace에 업로드.
 
-흐름:
-  1. INPUT_CATEGORIES(finance/report/panel) 를 HF dataset 에서 seed (idempotent)
-  2. buildScan() → changes/finance/report(12 apiType)/sharesOutstanding + docsIndex
-     (changes/sharesOutstanding/docsIndex 는 panel 을 읽는다 — 회사 enum = 로컬 panel dir glob)
-  3. HF upload_folder → dart/scan/
+일일 흐름 (증분 — 기본):
+  1. base seed: finance/report(full, cacheable) + scan(직전 산출물 + _scanBuildState) 를 HF 에서 seed
+  2. panel listing 1 회(다운로드 0) → 직전 ledger 대비 변경/삭제 종목 가림
+  3. 변경 종목 panel parquet 만 다운로드 (전 92K seed 금지 = OOM/디스크 고갈 회피)
+  4. buildScan(incremental=True): changes/sharesOutstanding 는 변경분만 재계산 후 기존 parquet 에
+     종목 단위 머지. finance/report 는 입력이 full 캐시이므로 full 빌드.
+  5. docsIndex 증분 머지 + 삭제 종목 prune + _scanBuildState 갱신
+  6. HF upload_folder → dart/scan/
+
+주간 흐름 (full — PREBUILD_FULL=1, 디스크 확보된 별도 job):
+  전 종목 panel seed → buildScan(incremental=False) full 재생성 (빌더 변경/backfill drift 교정 안전망)
 
 환경변수:
   DARTLAB_DATA_DIR: 데이터 경로 (기본: ./data)
   HF_TOKEN: HuggingFace write 토큰
   PREBUILD_TARGETS: scan (기본, 쉼표 구분 확장 가능)
+  PREBUILD_FULL: "1"/"true" 면 전 종목 full 재생성 (주간 cron)
 """
 
 import os
@@ -24,25 +31,106 @@ from _hfRetry import retryHfCall  # noqa: E402
 
 # scan 프리빌드가 읽는 입력 카테고리 SSOT — buildScan 하위 빌더의 원천.
 #   finance/report → 재무·보고서 빌더, panel → changes/sharesOutstanding/docsIndex 빌더.
-# seed·캐시확인 모두 이 한 곳을 참조한다 (워크플로 YAML 에 목록 중복 금지).
 INPUT_CATEGORIES: tuple[str, ...] = ("finance", "report", "panel")
+# 증분 사이클 base seed: finance/report(full 빌드 입력) + scan(직전 산출물 + ledger).
+# panel 은 전량 seed 하지 않고 변경분만 받는다 (전 92K seed = prebuild OOM/디스크 고갈 근본원인).
+BASE_SEED_CATEGORIES: tuple[str, ...] = ("finance", "report", "scan")
+
+SCAN_OUTPUT_KEYS = (
+    ("changes.parquet", "stockCode"),
+    ("sharesOutstanding.parquet", "stock_code"),
+    ("docsIndex.parquet", "stockCode"),
+)
+
+# 일일 증분 변경분 다운로드 상한 — 초과분은 다음 사이클로 drain (대량 변경 시 디스크/시간 폭주
+# 방지, OOM 근본원인 재발 차단). 정상 일일 변경은 수십~수백이라 거의 닿지 않는다.
+INCREMENTAL_DOWNLOAD_CAP = 8000
 
 
-def _seedInputs(dataDir: str) -> None:
-    """INPUT_CATEGORIES 를 HF dataset 에서 idempotent seed.
+def _isFullMode() -> bool:
+    return os.environ.get("PREBUILD_FULL", "").strip().lower() in ("1", "true", "yes")
 
-    offlineGuard 가 HuggingFace host 는 허용한다 (prebuild input 다운로드는 필수). panel 은
-    회사 enum 이 로컬 dir glob 이라 artifact 가 로컬에 있어야 빌더가 종목을 발견한다.
-    """
+
+def _seedBaseInputs(dataDir: str) -> None:
+    """finance/report(full 입력) + scan(직전 산출물 + ledger) 를 HF 에서 idempotent seed."""
     from dartlab.pipeline.seed import seedCategoriesFromHf
 
-    summary = seedCategoriesFromHf(list(INPUT_CATEGORIES), dataDir=dataDir)
+    summary = seedCategoriesFromHf(list(BASE_SEED_CATEGORIES), dataDir=dataDir)
     for cat, (total, new, mb) in summary.items():
-        print(f"[prebuild] seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+        print(f"[prebuild] base seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+
+
+def _seedFullPanel(dataDir: str) -> dict[str, int]:
+    """(full 모드) 전 종목 panel seed — 디스크 확보된 주간 job 전용. ledger 용 remote state 반환."""
+    from dartlab.pipeline.seed import listRemoteFiles, seedCategoriesFromHf
+
+    summary = seedCategoriesFromHf(["panel"], dataDir=dataDir)
+    for cat, (total, new, mb) in summary.items():
+        print(f"[prebuild] full panel seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+    return listRemoteFiles("panel")
+
+
+def _prepareIncrementalPanel(dataDir: str) -> tuple[list[str], list[str], dict[str, int]]:
+    """panel listing(다운로드 0) → 직전 ledger 대비 변경/삭제 가림 → 변경분만 다운로드.
+
+    부트스트랩(ledger 부재)은 변경분을 받지 않고 ledger 만 기록한다 — 전 92K seed(=OOM
+    근본원인)를 일으키지 않기 위함. baseline 산출물은 주간 full cron 이 생성한다.
+    대량 변경은 ``INCREMENTAL_DOWNLOAD_CAP`` 까지만 받고 나머지는 다음 사이클로 drain.
+
+    Returns:
+        (changedCodes, removedCodes, newState) — newState 는 다음 사이클 ledger(처리분만 반영).
+    """
+    from dartlab.pipeline.seed import downloadCategoryFiles, listRemoteFiles
+    from dartlab.scan.builders.kr.common import loadScanBuildState
+
+    remote = listRemoteFiles("panel")  # {dart/panel/CODE.parquet: size}
+    prior = loadScanBuildState()
+    print(f"[prebuild] panel listing: 원격 {len(remote)}개, 직전 ledger {len(prior)}개")
+
+    if not prior:
+        # 부트스트랩: 전량 다운로드 금지. ledger 만 기록 → 다음 사이클부터 진짜 변경분만.
+        print(
+            "[prebuild] ⚠ ledger 부재(부트스트랩) — panel 다운로드 skip, ledger 만 기록. baseline 은 full cron 이 생성"
+        )
+        return [], [], dict(remote)
+
+    changedRel = sorted(rel for rel, size in remote.items() if prior.get(rel) != size)
+    removedRel = [rel for rel in prior if rel not in remote]
+
+    capped = len(changedRel) > INCREMENTAL_DOWNLOAD_CAP
+    processRel = changedRel[:INCREMENTAL_DOWNLOAD_CAP] if capped else changedRel
+    if capped:
+        print(
+            f"[prebuild] ⚠ 변경 {len(changedRel)}개 > 상한 {INCREMENTAL_DOWNLOAD_CAP} — "
+            f"{len(processRel)}개만 처리, 나머지는 다음 사이클 drain"
+        )
+
+    # ledger 는 '처리한 것'만 반영(미처리 changed 는 다음 사이클 재감지). 삭제는 즉시 반영.
+    newState = dict(prior)
+    for rel in removedRel:
+        newState.pop(rel, None)
+    for rel in processRel:
+        newState[rel] = remote[rel]
+
+    changedCodes = sorted(Path(r).stem for r in processRel)
+    removedCodes = sorted(Path(r).stem for r in removedRel)
+
+    if processRel:
+        print(f"[prebuild] 변경 종목 {len(processRel)}개 panel 다운로드")
+        downloaded, skipped404 = downloadCategoryFiles("panel", processRel, dataDir=dataDir)
+        skip = f", 404-skip {skipped404}" if skipped404 else ""
+        print(f"[prebuild] panel 다운로드 완료: {downloaded}개{skip}")
+    else:
+        print("[prebuild] 변경 종목 없음 — panel 다운로드 skip")
+
+    return changedCodes, removedCodes, newState
 
 
 def _checkDataReady(dataDir: str) -> dict[str, int]:
-    """INPUT_CATEGORIES 입력 캐시 존재 여부 확인. 카테고리별 파일 수 반환."""
+    """INPUT_CATEGORIES 입력 캐시 존재 여부 확인. 카테고리별 파일 수 반환.
+
+    증분 모드에서 panel 수 = '변경 종목 수' (0 허용)이다.
+    """
     from dartlab.core.dataConfig import DATA_RELEASES
 
     counts = {}
@@ -53,17 +141,19 @@ def _checkDataReady(dataDir: str) -> dict[str, int]:
     return counts
 
 
-def _validateInputCoverage(counts: dict[str, int]) -> None:
-    """prebuild 입력 coverage 가 scan 생성에 충분한지 검증한다.
+def _validateInputCoverage(counts: dict[str, int], *, incremental: bool) -> None:
+    """prebuild 입력 coverage 검증.
 
-    panel 은 changes/sharesOutstanding/docsIndex 의 source 이자 회사 enum 이므로 선택 입력이
-    아니다. finance/report 만 cache hit 된 상태에서 panel seed 가 실패하면 부분 scan 을 HF 에
-    올리는 것이 더 위험하므로 fail-fast 한다.
+    full 모드: panel 은 changes/sharesOutstanding/docsIndex 의 source 이자 회사 enum 이므로 필수.
+    증분 모드: panel 로컬 수 = 변경 종목 수라 0 도 정상. finance/report 존재로 충분하며,
+    finance 산출 검증은 빌드 후 _validateFinanceParquet 가 담당.
     """
-
     if all(v == 0 for v in counts.values()):
-        print("[prebuild] ❌ 입력 데이터가 전부 0개 — HF seed 실패 또는 빈 dataset")
+        print("[prebuild] ❌ 입력 데이터가 전부 0개 — base seed 실패 또는 빈 dataset")
         sys.exit(1)
+
+    if incremental:
+        return
 
     panelCount = counts.get("panel", 0)
     if panelCount <= 0:
@@ -81,18 +171,19 @@ def _validateInputCoverage(counts: dict[str, int]) -> None:
             sys.exit(1)
 
 
-def _buildScan(dataDir: str) -> dict[str, Path | list[Path] | None]:
-    """scan 프리빌드 실행."""
+def _buildScan(dataDir: str, *, incremental: bool) -> dict[str, Path | list[Path] | None]:
+    """scan 프리빌드 실행 (incremental=True 면 panel 빌더는 변경분만 재계산·머지)."""
     from dartlab.scan.builders.kr import buildScan
 
-    return buildScan(sinceYear=2021, verbose=True)
+    return buildScan(sinceYear=2021, verbose=True, incremental=incremental)
 
 
-def _buildDocsIndex(dataDir: str) -> Path | None:
-    """docsIndex 슬림 인덱스 빌드 — panel 섹션 메타에서 생성.
+def _buildDocsIndex(dataDir: str, *, incremental: bool) -> Path | None:
+    """docsIndex 슬림 인덱스 빌드 — panel 섹션 메타에서 생성 (실패는 silent → summary 표기).
 
     Args:
         dataDir: 데이터 디렉토리.
+        incremental: True 면 변경 종목 행을 기존 docsIndex 에 머지.
 
     Returns:
         산출 parquet 경로 또는 None (실패 시).
@@ -101,21 +192,32 @@ def _buildDocsIndex(dataDir: str) -> Path | None:
         없음 (실패는 silent → summary 에 표기).
 
     Example:
-        >>> path = _buildDocsIndex("./data")
-        >>> path
-        PosixPath('data/dart/scan/docsIndex.parquet')
+        >>> _buildDocsIndex("./data", incremental=False)  # doctest: +SKIP
     """
     try:
         from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
-        return buildDocsIndex(sinceYear=2016, batchSize=100, verbose=True)
+        return buildDocsIndex(sinceYear=2016, batchSize=100, verbose=True, incremental=incremental)
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"[prebuild] docsIndex 빌드 실패 (스킵): {exc}")
         return None
 
 
+def _pruneRemovedCodes(removedCodes: list[str]) -> None:
+    """상장폐지 등으로 사라진 종목 행을 scan 산출물에서 제거 (다운로드 불요)."""
+    if not removedCodes:
+        return
+    from dartlab.scan.builders.kr.common import pruneScanCodes, scanDir
+
+    sd = scanDir()
+    for fname, key in SCAN_OUTPUT_KEYS:
+        removed = pruneScanCodes(sd / fname, removedCodes, key=key)
+        if removed:
+            print(f"[prebuild] prune {fname}: {removed}행 제거 ({len(removedCodes)}종목 삭제)")
+
+
 def _uploadScan(dataDir: str) -> None:
-    """scan 결과를 HuggingFace에 업로드."""
+    """scan 결과를 HuggingFace에 업로드 (_scanBuildState.json 포함)."""
     token = os.environ.get("HF_TOKEN", "")
     if not token:
         print("[prebuild] HF_TOKEN 없음 → 업로드 스킵")
@@ -138,7 +240,7 @@ def _uploadScan(dataDir: str) -> None:
     api = HfApi(token=token)
     dirPath = DATA_RELEASES["scan"]["dir"]
 
-    print(f"[prebuild] HF 업로드: {len(parquets)}개 파일 → {HF_REPO}/{dirPath}/")
+    print(f"[prebuild] HF 업로드: {len(parquets)}개 parquet (+ledger) → {HF_REPO}/{dirPath}/")
     retryHfCall(
         api.upload_folder,
         repo_id=HF_REPO,
@@ -161,7 +263,6 @@ def _validateFinanceParquet(dataDir: str, sourceFileCount: int) -> None:
     fp = scanDir / "finance.parquet"
     if not fp.exists():
         # 원본 finance 가 있었는데 프리빌드 산출이 없으면 = seed/빌드 실패(부분 scan 을 HF 에 올릴 위험).
-        # 검증 스킵이 그 실패를 은폐하지 않게 fail-fast. 원본도 0 이면 정상(빌드 대상 없음) → 스킵.
         if sourceFileCount > 0:
             print(
                 f"[prebuild] ❌ 원본 finance {sourceFileCount}종목인데 프리빌드 finance.parquet 미생성 — seed/빌드 실패"
@@ -187,7 +288,9 @@ def _validateFinanceParquet(dataDir: str, sourceFileCount: int) -> None:
 def main():
     # prebuild = offline only. 외부 API 호출은 sync 단계 책임 — 가드로 강제.
     # HF dataset 다운로드는 default allow.
+    from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.offlineGuard import enforceOffline
+    from dartlab.scan.builders.kr.common import saveScanBuildState
 
     enforceOffline()
 
@@ -197,30 +300,51 @@ def main():
     os.makedirs(dataDir, exist_ok=True)
 
     targets = os.environ.get("PREBUILD_TARGETS", "scan").split(",")
-    print(f"[prebuild] targets={targets} dataDir={dataDir}")
+    fullMode = _isFullMode()
+    incremental = not fullMode
+    print(f"[prebuild] targets={targets} dataDir={dataDir} mode={'full' if fullMode else 'incremental'}")
 
-    # 1단계: 입력 seed (HF) + 로컬 캐시 확인
-    _seedInputs(dataDir)
+    # panel 로컬 dir 보장 (증분 0-change 사이클에서도 빌더 glob 이 FileNotFoundError 안 나게)
+    (Path(dataDir) / DATA_RELEASES["panel"]["dir"]).mkdir(parents=True, exist_ok=True)
+
+    # 1단계: base seed (finance/report full + scan 직전 산출물/ledger)
+    _seedBaseInputs(dataDir)
+
+    # 2단계: panel 변경 감지 (증분) 또는 전량 seed (full)
+    if fullMode:
+        remoteState = _seedFullPanel(dataDir)
+        changedCodes, removedCodes = [], []
+    else:
+        changedCodes, removedCodes, remoteState = _prepareIncrementalPanel(dataDir)
+        print(f"[prebuild] 증분: 변경 {len(changedCodes)}종목 · 삭제 {len(removedCodes)}종목")
+
     counts = _checkDataReady(dataDir)
     print("[prebuild] 캐시: " + " ".join(f"{k}={v}" for k, v in counts.items()))
-    _validateInputCoverage(counts)
+    _validateInputCoverage(counts, incremental=incremental)
 
-    # 2단계: scan 프리빌드 — 외부 API 호출 0. corp_profile 은 sync/meta 단계 (kindlist.yml)
-    # 가 책임지고 HF dataset 에 push, 여기서는 로컬 parquet 만 읽는다.
+    # 3단계: scan 프리빌드 (외부 API 호출 0)
     if "scan" in targets:
         start = time.time()
-        results = _buildScan(dataDir)
+        results = _buildScan(dataDir, incremental=incremental)
         elapsed = time.time() - start
         print(f"[prebuild] scan 빌드 완료: {elapsed:.0f}초")
 
-        # 2.5단계: docsIndex 슬림 인덱스 (panel 섹션에서 빌드)
-        if counts.get("panel", 0) > 0:
-            results["docsIndex"] = _buildDocsIndex(dataDir)
+        # 3.5단계: docsIndex (panel 섹션) — 증분이면 변경분 머지, full 이면 전체.
+        #   증분 0-change 사이클은 panel 로컬 0 → buildDocsIndex 가 안전히 skip(직전 산출 보존).
+        if fullMode or changedCodes:
+            results["docsIndex"] = _buildDocsIndex(dataDir, incremental=incremental)
 
-        # 2.6단계: 데이터 품질 검증
+        # 3.6단계: 삭제 종목 prune (증분 전용)
+        _pruneRemovedCodes(removedCodes)
+
+        # 3.7단계: ledger 갱신 (다음 사이클 변경 감지 기준)
+        saveScanBuildState(remoteState)
+        print(f"[prebuild] ledger 갱신: panel {len(remoteState)}개")
+
+        # 3.8단계: 데이터 품질 검증 (finance 는 full 빌드라 모드 무관)
         _validateFinanceParquet(dataDir, counts["finance"])
 
-        # 3단계: HF 업로드
+        # 4단계: HF 업로드
         _uploadScan(dataDir)
         _writeSummary(counts, results, elapsed)
     else:
@@ -242,9 +366,10 @@ def _writeSummary(
 
     with open(summaryPath, "a", encoding="utf-8") as f:
         f.write("## Scan Prebuild\n\n")
-        f.write("| 항목 | 값 |\n|------|----|\n")
+        f.write(f"| 모드 | {'full' if _isFullMode() else 'incremental'} |\n|------|----|\n")
         for cat, n in counts.items():
-            f.write(f"| {cat} 캐시 | {n}개 |\n")
+            label = f"{cat} 캐시" if cat != "panel" or _isFullMode() else "panel 변경분"
+            f.write(f"| {label} | {n}개 |\n")
         f.write(f"| 소요 시간 | {elapsed:.0f}초 |\n")
 
         if results:

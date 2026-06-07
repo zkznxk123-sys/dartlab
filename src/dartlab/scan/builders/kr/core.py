@@ -65,7 +65,9 @@ from dartlab.scan.builders.kr.shares import buildSharesOutstandingSafe as _build
 from dartlab.scan.builders.kr.valuationBuild import buildValuation as buildValuation
 
 
-def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path | list[Path] | None]:
+def buildScan(
+    *, sinceYear: int = 2021, verbose: bool = True, incremental: bool = False
+) -> dict[str, Path | list[Path] | None]:
     """scan 프리빌드 통합 (changes + finance + finance-lite + report + sharesOutstanding).
 
     ``.github/scripts/prebuildData.py`` 가 매 prebuild 사이클 (KST 03:00 / 15:00) 에 호출하는
@@ -79,6 +81,11 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
         ``buildFinanceLite`` 는 ``LITE_SINCE_YEAR`` 자체 기본값 (2022) 사용.
     verbose : bool
         진행 로그 출력 여부.
+    incremental : bool
+        True 면 panel 을 읽는 단계(``changes`` · ``sharesOutstanding``)가 로컬 panel
+        dir(=변경 종목만 seed 된 상태)에서 재계산한 행만 기존 parquet 에 종목 단위로
+        머지한다. finance/report 는 입력이 full 캐시이므로 항상 full 빌드(증분 무관).
+        전 종목 panel(11GB) seed 없이 일일 prebuild 의 OOM/디스크 고갈을 막는 경로.
 
     Returns
     -------
@@ -141,11 +148,11 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
 
     results: dict[str, Path | list[Path] | None] = {}
 
-    results["changes"] = buildChanges(sinceYear=sinceYear, verbose=verbose)
+    results["changes"] = buildChanges(sinceYear=sinceYear, verbose=verbose, incremental=incremental)
     results["finance"] = buildFinance(sinceYear=sinceYear, verbose=verbose)
     results["finance_lite"] = buildFinanceLite(verbose=verbose)
     results["report"] = buildReport(sinceYear=sinceYear, verbose=verbose)
-    results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose)
+    results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose, incremental=incremental)
 
     if verbose:
         _say("=" * 60)

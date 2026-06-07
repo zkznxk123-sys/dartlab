@@ -39,6 +39,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from dartlab.scan.builders.kr.common import mergeIncremental as _mergeIncremental
 from dartlab.scan.builders.kr.common import panelDir as _panelDir
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
@@ -112,12 +113,16 @@ def _parseSharesTable(tables: list[list[list[str]]]) -> dict | None:
     return None
 
 
-def buildSharesOutstandingScan(*, write: bool = True, outputPath: "str | Path | None" = None) -> "object":
+def buildSharesOutstandingScan(
+    *, write: bool = True, outputPath: "str | Path | None" = None, incremental: bool = False
+) -> "object":
     """전 종목 panel 발행주식수 scan (providers.dart.panel.text SSOT).
 
     Args:
         write: True면 ``sharesOutstanding.parquet`` 저장.
         outputPath: 출력 경로. None이면 ``data/dart/scan/sharesOutstanding.parquet``.
+        incremental: True 면 로컬 panel dir(=변경 종목만 seed)에서 재계산한 행을 기존
+            parquet 에 ``stock_code`` 단위로 갈아끼운다(:func:`mergeIncremental`).
 
     Returns:
         발행주식수 DataFrame (stock_code × period, rcept_date desc).
@@ -186,17 +191,22 @@ def buildSharesOutstandingScan(*, write: bool = True, outputPath: "str | Path | 
             outputPath = _scanDir() / "sharesOutstanding.parquet"
         outputPath = Path(outputPath)
         outputPath.parent.mkdir(parents=True, exist_ok=True)
-        out.write_parquet(str(outputPath), compression="zstd")
+        if incremental and outputPath.exists():
+            _mergeIncremental(outputPath, out, key="stock_code")
+        else:
+            out.write_parquet(str(outputPath), compression="zstd")
     return out
 
 
-def buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
+def buildSharesOutstandingSafe(*, verbose: bool = True, incremental: bool = False) -> Path | None:
     """발행주식수 풀 빌드 — 실패해도 전체 scan 진행.
 
     Parameters
     ----------
     verbose : bool
         진행 로그 출력 여부.
+    incremental : bool
+        True 면 변경 종목만 재계산해 기존 parquet 에 ``stock_code`` 단위로 머지.
 
     Returns
     -------
@@ -236,10 +246,11 @@ def buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
     """
     try:
         if verbose:
-            _say("[shares] 발행주식수 풀 빌드 시작 (providers.dart.panel.text SSOT)")
-        df = buildSharesOutstandingScan()
+            mode = "증분" if incremental else "full"
+            _say(f"[shares] 발행주식수 {mode} 빌드 시작 (providers.dart.panel.text SSOT)")
+        df = buildSharesOutstandingScan(incremental=incremental)
         if verbose:
-            _say(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")
+            _say(f"[shares] 완료: 재계산 rows={df.height} stocks={df['stock_code'].n_unique()}")
         return _scanDir() / "sharesOutstanding.parquet"
     except (FileNotFoundError, RuntimeError, OSError, ValueError) as exc:
         if verbose:
