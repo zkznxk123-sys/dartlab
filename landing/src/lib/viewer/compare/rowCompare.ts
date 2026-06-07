@@ -24,27 +24,32 @@ export function alignBundles(bundles: PanelBundle[], sectionKey: string, period:
 	return compareRows(bundles, sectionKey, period).rows;
 }
 
-// Base (bundles[0]) section defines the rows in TOC order. Keyed rows align across companies
-// by disclosureKey (절번호 무관 전역 조회); narrative rows (no key) are placed side-by-side by
-// position ordinal — each company's k-th content-bearing 서술 셀 shares one row, cells
-// self-identify (제목 내장) so this 시각 병치 is honest, not a structural cross-key claim.
+// Base (bundles[0]) section defines the rows in TOC order. Keyed rows (disclosureKey) align
+// across companies by (disclosureKey, scope, leafType) — 절번호 무관 전역 조회. Narrative rows
+// (no key) are NOT row-aligned across companies: 회사마다 서술 구조가 달라(삼성 '법적명칭' vs
+// SK '종속회사개황') 위치 정렬은 거짓 비교가 된다(실데이터 확인). 대신 각 회사의 섹션 서술을
+// 자기 열에 통으로 모아 한 행으로 — 나란히 읽되 거짓 1:1 주장 없음.
 export function compareRows(bundles: PanelBundle[], sectionKey: string, period: string): RowCompareResult {
 	const base = bundles[0];
 	const baseRows = base?.gridBySection.get(sectionKey) ?? [];
 	const indexes = bundles.map(bundleIndex);
-	// 각 회사의 이 섹션 narrative(키 없음, content-bearing) 셀 목록 — 위치순 병치용.
-	const narrCells = bundles.map((b) =>
-		(b.gridBySection.get(sectionKey) ?? [])
+	// 각 회사의 이 섹션 narrative(키 없음) 셀을 통합 — 회사=열, 한 셀에 그 회사 서술 전체.
+	const narrCells = bundles.map((b) => {
+		const joined = (b.gridBySection.get(sectionKey) ?? [])
 			.filter((r) => !r.disclosureKey)
 			.map((r) => r.cells?.[period])
 			.filter((c): c is string => typeof c === 'string' && c.trim() !== '')
-	);
-	const narrRow = (k: number, label: string, leafType: string, blockType: 'text' | 'table'): AlignedRow => {
-		const cells = narrCells.map((arr) => arr[k] ?? null);
-		return { alignKey: `NARR${COMPARE_SEP}${k}`, label, disclosureKey: null, scope: null, leafType, blockType, cells, shareClass: shareClass(cells) };
-	};
+			.join('\n');
+		return joined !== '' ? joined : null;
+	});
+	const hasNarr = narrCells.some((c) => c != null);
 	const rows: AlignedRow[] = [];
-	let narrOrd = 0;
+	let narrPlaced = false;
+	const placeNarr = (label: string) => {
+		if (narrPlaced || !hasNarr) return;
+		narrPlaced = true;
+		rows.push({ alignKey: `NARR${COMPARE_SEP}${sectionKey}`, label, disclosureKey: null, scope: null, leafType: 'text', blockType: 'text', cells: narrCells, shareClass: shareClass(narrCells) });
+	};
 	for (const r of baseRows) {
 		if (r.disclosureKey) {
 			// keyed = 회사 간 정렬. 각 회사의 같은 disclosureKey 행을 절번호 무관 전역 조회.
@@ -65,18 +70,11 @@ export function compareRows(bundles: PanelBundle[], sectionKey: string, period: 
 				shareClass: shareClass(cells)
 			});
 		} else {
-			// narrative = 위치순 병치(기준 TOC 순서 보존). 각 회사 k번째 서술 셀을 한 행에.
-			const baseCell = r.cells?.[period];
-			if (typeof baseCell !== 'string' || baseCell.trim() === '') continue;
-			rows.push(narrRow(narrOrd++, r.blockLeaf || r.sectionLeaf || '', rowLeafType(r), r.blockType));
+			// 첫 서술 위치에 통합 서술 행 1회(기준 TOC 순서 보존 — 보통 서술이 표보다 앞).
+			placeNarr(r.sectionLeaf || '');
 		}
 	}
-	// 비기준 회사가 기준보다 서술이 많으면 남은 위치도 추가(어느 회사 content 도 숨기지 않음).
-	const maxNarr = Math.max(0, ...narrCells.map((a) => a.length));
-	for (let k = narrOrd; k < maxNarr; k++) {
-		const row = narrRow(k, '', 'text', 'text');
-		if (!row.cells.every((c) => c == null)) rows.push(row);
-	}
+	placeNarr(''); // baseRows 에 서술 없어도 비기준 회사 서술 있으면 보존
 	const sharedRows = rows.filter((r) => r.shareClass === 'shared').length;
 	const partialRows = rows.filter((r) => r.shareClass === 'partial').length;
 	return {
