@@ -20,7 +20,7 @@ on:
 permissions:
   contents: read
   issues: write
-  actions: read
+  actions: write  # transient 단발 실패 자동 재실행(gh run rerun) 용
 
 concurrency:
   group: data-audit
