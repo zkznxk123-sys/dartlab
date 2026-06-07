@@ -53,6 +53,9 @@ const ACCT_SYN: Record<string, string[]> = {
 	현금흐름: ['영업활동현금흐름'],
 	매출: ['매출액', '영업수익'],
 	수익: ['영업수익', '매출액'],
+	돈: ['매출액', '영업수익', '당기순이익'], // "돈을 어떻게 버나" 의미형 → 매출/순이익 결정론 매칭(신설 사전 0)
+	사업: ['매출액', '영업수익'], // "무슨 사업으로 버나"
+	실적: ['영업이익', '매출액', '당기순이익'], // "실적 어때"
 	부채: ['부채총계'],
 	자산: ['자산총계'],
 	자본: ['자본총계'],
@@ -108,7 +111,9 @@ export function composeAnswer(q: string, hits: SearchHit[], addedTerms: string[]
 	const { c } = parseConstraint(q);
 	const intent = classifyIntent(q, !!c);
 	const suggestLlm = WHY_RE.test(q) || SYNTH_RE.test(q);
-	const sig = intent === 'trend' || intent === 'flip' || intent === 'magnitude' ? matchSignal(q, signals) : null;
+	// lookup 도 계정 매칭 시도 — "무슨 사업으로 돈을 버나"(추세어 없음)처럼 추세/규모 키워드는 없지만 계정어(돈→매출)가
+	// 있으면 thin lookup 대신 수치 답(sig 분기의 magnitude fallthrough). constraint/existence 만 제외.
+	const sig = intent === 'constraint' || intent === 'existence' ? null : matchSignal(q, signals);
 
 	// 조건(금액) — search 가 이미 amount 필터+내림차순
 	if (intent === 'constraint') {

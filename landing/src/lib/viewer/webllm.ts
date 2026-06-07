@@ -46,6 +46,19 @@ export async function webgpuUsable(): Promise<boolean> {
 
 let enginePromise: Promise<MLCEngineInterface> | null = null;
 
+// 가중치(~705MB)가 이미 브라우저 Cache API 에 있는지만 검사 — 다운로드·GPU 적재 안 함(빠름).
+// true 면 "받기"가 아니라 "불러오기(빠름)"로 분기해, F5/재방문마다 705MB 재다운로드처럼 보이는 오해를 없앤다.
+// appConfig 미지정 = prebuiltAppConfig (ensureEngine 의 CreateWebWorkerMLCEngine 과 동일 캐시 키).
+export async function isModelCached(): Promise<boolean> {
+	if (!webgpuAvailable()) return false;
+	try {
+		const webllm = await import('@mlc-ai/web-llm');
+		return await webllm.hasModelInCache(MODEL_ID);
+	} catch {
+		return false;
+	}
+}
+
 // 모델 다운로드/적재만 미리(드로어 진행바용). 이미 적재됐으면 즉시 resolve.
 export async function warmEngine(onProgress?: (p: WebLlmProgress) => void): Promise<void> {
 	await ensureEngine(onProgress);
@@ -126,7 +139,7 @@ export interface ChatTurn {
 
 export const CHAT_SYSTEM =
 	'너는 한국 기업 공시 분석가다. [근거]는 참고 자료일 뿐 그대로 베끼지 마라. ' +
-	'사용자 [질문]에 대한 답을 네 문장으로 2~4문장, 한국어로만 쓴다. ' +
+	'사용자 [질문]에 한국어로만, 핵심을 충분히 설명해 3~6문장으로 답한다. ' +
 	'근거에 있는 숫자·기간·계정명만 인용하고 새로 만들지 않는다. 근거에 없으면 "공시 데이터에서 확인되지 않습니다"라고 한다. ' +
 	'머리표([근거 N], [EXTERNAL ...])나 근거 원문을 그대로 출력하지 마라. 이전 대화 맥락은 이어간다. 답변 문장만 출력한다.';
 
@@ -141,7 +154,7 @@ export function buildChatMessages(history: ChatTurn[], evidence: AskEvidence[]):
 	const last = history[history.length - 1];
 	const user =
 		`${buildEvidenceBlock(evidence)}\n\n[질문] ${last?.content ?? ''}\n\n` +
-		'[답] 위 [질문]에 [근거]만 사용해, 머리표 없이 한국어 2~4문장으로:';
+		'[답] 위 [질문]에 [근거]만 사용해, 머리표 없이 한국어로:';
 	return [
 		{ role: 'system', content: CHAT_SYSTEM },
 		...prior.map((t) => ({ role: t.role, content: t.content })),
@@ -153,7 +166,7 @@ export function buildChatMessages(history: ChatTurn[], evidence: AskEvidence[]):
 export async function chatAnswer(history: ChatTurn[], evidence: AskEvidence[], opts: AnswerOpts = {}): Promise<string> {
 	const engine = await ensureEngine(opts.onProgress);
 	const messages = buildChatMessages(history, evidence);
-	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 420, stream: true });
+	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 640, stream: true });
 	let full = '';
 	for await (const chunk of stream) {
 		const delta = chunk.choices[0]?.delta?.content ?? '';

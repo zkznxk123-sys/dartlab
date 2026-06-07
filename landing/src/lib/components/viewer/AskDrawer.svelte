@@ -9,27 +9,27 @@
 	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
 	import { ask, type EvRef, type NavOption } from '$lib/viewer/askSession.svelte';
-	import { routeChat, stripEcho, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn, type Provider } from '$lib/viewer/webllm';
+	import { isModelCached, routeChat, stripEcho, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn, type Provider } from '$lib/viewer/webllm';
 	import { detectOllama } from '$lib/viewer/ollama';
 	import type { FinanceSignal } from '$lib/viewer/diff';
 	import type { PanelBundle } from '$lib/viewer/types';
 
-	// 로컬 Ollama 연결 안내(툴팁). origin 은 실배포처 고정(환각 URL 금지).
-	const OLLAMA_TIP = `로컬 Ollama로 더 좋은 답변 (다운로드 없이 PC의 모델 사용)
-
-1. 설치 — ollama.com 에서 받아 실행
-2. 모델 받기 — 터미널에 입력
-     ollama pull qwen2.5:3b   (한국어 강함: ollama pull exaone3.5:7.8b)
-3. 이 사이트 허용 (한 번만) — 아래 1줄 실행 후 Ollama 재시작
-     · Windows: setx OLLAMA_ORIGINS "https://eddmpython.github.io"
-     · macOS: launchctl setenv OLLAMA_ORIGINS "https://eddmpython.github.io"
-     · Linux: systemctl edit ollama.service → Environment="OLLAMA_ORIGINS=https://eddmpython.github.io"
-4. "로컬 Ollama 연결" 클릭 → 브라우저가 "로컬 네트워크 접근 허용?"을 물으면 [허용]
-
-연결되면 PC의 모델로 답합니다. 외부 전송 0, 모두 로컬.`;
-	const OLLAMA_NO_MODEL = 'Ollama는 켜졌는데 설치된 모델이 없습니다. 터미널에 "ollama pull qwen2.5:3b" 후 다시 연결하세요.';
-	const OLLAMA_BLOCKED =
-		'로컬 Ollama에 연결하지 못했습니다. 설치·실행, 사이트 허용(OLLAMA_ORIGINS), 브라우저 "로컬 접근 허용"을 확인하세요(ⓘ). WebLLM으로 계속 쓸 수 있습니다.';
+	// 로컬 Ollama 설치 4단계 — 인라인 렌더(blocked/no-model 에서도 항상 보임, 툴팁 클리핑 0). origin 은 실배포처 고정(환각 URL 금지).
+	// {cmd:true} 줄은 monospace 코드 박스로 렌더해 명령을 복사·식별 가능하게 한다.
+	const OLLAMA_STEPS: { t: string; cmd?: boolean }[] = [
+		{ t: '1. 설치 — ollama.com 에서 받아 실행' },
+		{ t: '2. 모델 받기 (터미널)' },
+		{ t: 'ollama pull qwen2.5:3b', cmd: true },
+		{ t: '한국어 강함: ollama pull exaone3.5:7.8b' },
+		{ t: '3. 이 사이트 허용 (한 번만) — 1줄 실행 후 Ollama 재시작' },
+		{ t: 'Windows: setx OLLAMA_ORIGINS "https://eddmpython.github.io"', cmd: true },
+		{ t: 'macOS: launchctl setenv OLLAMA_ORIGINS "https://eddmpython.github.io"', cmd: true },
+		{ t: 'Linux: systemctl edit ollama.service → Environment="OLLAMA_ORIGINS=https://eddmpython.github.io"', cmd: true },
+		{ t: '4. 아래 [다시 연결] → "로컬 네트워크 접근 허용?"에 [허용]' }
+	];
+	// 상태별 한 줄 진단(인라인 가이드 위에 띄움). reason 4종을 구분해 정확히 안내(설치/모델/허용).
+	const OLLAMA_NO_MODEL = 'Ollama는 켜졌는데 설치된 모델이 없습니다. 아래 2번으로 모델을 받은 뒤 다시 연결하세요.';
+	const OLLAMA_BLOCKED = '로컬 모델에 연결하지 못했습니다. 아래 단계를 확인한 뒤 다시 연결하세요. 받기 전에도 근거·답은 그대로 됩니다.';
 
 	let {
 		code,
@@ -55,7 +55,7 @@
 	let question = $state('');
 	let busy = $state(false);
 	let finSignals = $state<FinanceSignal[]>([]);
-	let modelProgress = $state(0);
+	let guideOpen = $state(false); // hidden 상태에서 설치 가이드 펼침(blocked/no-model 은 항상 펼침)
 	let inputEl = $state<HTMLTextAreaElement | null>(null);
 	let scrollEl = $state<HTMLElement | null>(null);
 
@@ -63,9 +63,30 @@
 	// null 로 만들어 AskDrawer 가 언마운트돼도 세션이 생존한다(크로스-회사 "AI 화면 그대로" 요구).
 	const provider = $derived<Provider>(ask.ollamaState === 'ready' ? 'ollama' : 'webllm');
 
+	// blocked 진단 한 줄 — reason 4종을 정확히. timeout=로딩 중일 수 있음, cors=허용 안 됨, unreachable=미실행.
+	const ollamaDiag = $derived(
+		ask.ollamaReason === 'timeout'
+			? '응답이 늦습니다 — 큰 모델 로딩 중일 수 있어요. 잠시 후 다시 연결하세요.'
+			: ask.ollamaReason === 'unreachable'
+				? 'Ollama 응답이 비정상입니다 — 실행 상태를 확인하세요(1번).'
+				: '대개 3번(사이트 허용) 누락입니다 — 설정 후 Ollama 재시작.'
+	);
+
+	// 마운트 1회: WebGPU 가용 → 캐시 보유 여부까지 물어 'cached'(이미 받음·빠른 불러오기) vs 'idle'(처음·~705MB) 분기.
+	// 캐시 무관 항상 "705MB 받기"를 띄워 매 접속 재다운로드처럼 오해시키던 문제 제거. ready 는 같은 세션 생존이라 건드리지 않음.
 	$effect(() => {
-		void webgpuUsable().then((v) => {
-			if (ask.modelState === 'checking') ask.modelState = v ? 'idle' : 'unsupported';
+		if (ask.modelState !== 'checking') return;
+		void webgpuUsable().then(async (v) => {
+			if (ask.modelState !== 'checking') return; // 비동기 사이 상태 변동 가드
+			if (!v) {
+				ask.modelState = 'unsupported';
+				return;
+			}
+			if (await isModelCached()) {
+				void warmModel(true); // 이미 받음 → 버튼 없이 자동 불러오기(캐시라 몇 초, 다운로드 0). "안 받아도 됨" 안 보임.
+			} else {
+				ask.modelState = 'idle'; // 처음 — 명시 [받기] 버튼(705MB 다운로드는 사용자 동의 필요)
+			}
 		});
 	});
 	// [회귀가드] ask.chat·ollama 는 code 변경에 불간섭(크로스-회사 대화 유지 핵심). 여기에 ask.chat=[] 또는
@@ -87,16 +108,25 @@
 		});
 	}
 
-	async function downloadModel() {
-		if (ask.modelState !== 'idle' && ask.modelState !== 'error') return;
+	// 캐시에서 불러오는 중인지(받기 아님) — 진행바 카피 분기용. loading 진입 시점에 고정.
+	let loadingFromCache = $state(false);
+
+	// 모델 GPU 적재 — fromCache=true 면 캐시에서(다운로드 0·몇 초), false 면 첫 다운로드(~705MB).
+	async function warmModel(fromCache: boolean) {
+		if (ask.modelState === 'loading' || ask.modelState === 'ready') return;
+		loadingFromCache = fromCache;
 		ask.modelState = 'loading';
-		modelProgress = 0;
+		ask.modelProgress = 0;
 		try {
-			await warmEngine((p) => (modelProgress = p.progress));
+			await warmEngine((p) => (ask.modelProgress = p.progress));
 			ask.modelState = 'ready';
 		} catch {
 			ask.modelState = 'error';
 		}
+	}
+	// 명시 버튼 전용 — 첫 다운로드(idle) · 재시도(error). cached 는 마운트에서 자동 불러오므로 버튼이 없다.
+	function downloadModel() {
+		void warmModel(loadingFromCache); // error 재시도는 직전 맥락(받기/불러오기) 유지, idle 은 false
 	}
 
 	// 사용자 제스처(클릭) 안에서만 — Chrome 142 LNA 팝업이 제스처 직후에만 의미 있게 뜬다($effect/마운트 호출 금지).
@@ -106,10 +136,13 @@
 		if (s.ok) {
 			ask.ollamaState = 'ready';
 			ask.ollamaModel = s.pick;
+			ask.ollamaReason = null;
 		} else if (s.reason === 'no-model') {
 			ask.ollamaState = 'no-model';
+			ask.ollamaReason = null;
 		} else {
-			ask.ollamaState = 'blocked'; // unreachable/cors/timeout 통합
+			ask.ollamaState = 'blocked'; // unreachable/cors/timeout 통합(상태 1개) — 카피만 reason 으로 정확히
+			ask.ollamaReason = s.reason ?? 'cors';
 		}
 	}
 
@@ -131,7 +164,8 @@
 		if (!finSignals.length && sigs.length) finSignals = sigs;
 		const composed = composeAnswer(q, hits, added, sigs);
 		const aiReady = provider === 'ollama' ? ask.ollamaState === 'ready' : ask.modelState === 'ready';
-		const useAi = aiReady && (evItems.length > 0 || composed.citedSignal != null);
+		// suggestLlm(왜/종합/의미형)도 생성 트리거 — 근거 0건이어도 결정론 payload 로 grounded. (옛 코드는 산출만 하고 미사용)
+		const useAi = aiReady && (evItems.length > 0 || composed.citedSignal != null || composed.suggestLlm);
 
 		ask.chat.push({
 			q,
@@ -149,6 +183,10 @@
 		scrollBottom();
 
 		if (!useAi) {
+			// 의미형 질문인데 모델 미보유(받을 수 있는데 안 받음) → 결정론 답 뒤에 1줄 유도. unsupported 는 제외(헛유도 방지).
+			if (composed.suggestLlm && !aiReady && ask.modelState !== 'unsupported') {
+				ask.chat[idx].det += ' — 대화 모델을 받으면 이 질문을 더 깊이 풀어드릴 수 있어요(아래 [대화 모델 받기]).';
+			}
 			busy = false;
 			return;
 		}
@@ -249,6 +287,16 @@
 	}
 </script>
 
+<!-- Ollama 설치 4단계 인라인 가이드 — hidden(펼침)·blocked·no-model 공용. 컨테이너 폭에 맞춰 줄바꿈(클리핑 0). -->
+{#snippet guide()}
+	<div class="ob-guide">
+		{#each OLLAMA_STEPS as s (s.t)}
+			{#if s.cmd}<code class="g-cmd">{s.t}</code>{:else}<span class="g-step">{s.t}</span>{/if}
+		{/each}
+		<span class="g-foot">연결되면 PC의 모델로 답합니다 · 외부 전송 0</span>
+	</div>
+{/snippet}
+
 <aside class="ask-drawer">
 	<header class="ad-head">
 		<picture>
@@ -267,34 +315,46 @@
 					<source srcset="{base}/avatar.webp" type="image/webp" />
 					<img class="onboard-ava" src="{base}/avatar.png" alt="" width="76" height="76" />
 				</picture>
-				{#if ask.modelState === 'idle'}
-					<button type="button" class="onboard-dl" onclick={downloadModel}><Download size={15} /> 대화 모델 받기</button>
-					<span class="onboard-sub">~705MB · 1회 · 안 받아도 근거·답은 즉시</span>
-				{:else if ask.modelState === 'loading'}
-					<div class="onboard-bar"><div class="bar-fill" style="width:{Math.round(modelProgress * 100)}%"></div><span class="bar-txt">받는 중 {Math.round(modelProgress * 100)}%</span></div>
-				{:else if ask.modelState === 'ready'}
-					<span class="onboard-sub">무엇이든 물어보세요</span>
-				{:else if ask.modelState === 'error'}
-					<button type="button" class="onboard-dl err" onclick={downloadModel}>로드 실패 · 다시</button>
-				{:else if ask.modelState === 'unsupported'}
-					<span class="onboard-sub">이 브라우저는 대화 미지원 — 근거·결정론 답은 됩니다</span>
-				{/if}
 
-				<!-- 로컬 Ollama 옵션 레인 (더 좋은 품질·버벅임0). 자동 프로브 금지 — 클릭 시만. -->
-				{#if ask.ollamaState === 'hidden'}
-					<button type="button" class="ollama-link" onclick={connectOllama}>
-						더 좋은 품질? 로컬 Ollama 연결
-						<span class="info" tabindex="0" role="button" aria-label="Ollama 연결 안내">ⓘ<span class="tip">{OLLAMA_TIP}</span></span>
-					</button>
-				{:else if ask.ollamaState === 'probing'}
-					<span class="onboard-sub">Ollama 찾는 중…</span>
-				{:else if ask.ollamaState === 'ready'}
-					<span class="ollama-on">● Ollama 연결됨 · {ask.ollamaModel}</span>
-				{:else if ask.ollamaState === 'no-model'}
-					<span class="ollama-warn">{OLLAMA_NO_MODEL} <button type="button" class="retry" onclick={connectOllama}>다시</button></span>
-				{:else if ask.ollamaState === 'blocked'}
-					<span class="ollama-warn">{OLLAMA_BLOCKED} <button type="button" class="retry" onclick={connectOllama}>다시</button></span>
-				{/if}
+				<!-- 온디바이스 모델 영역 — 자식 폭을 한 컬럼(.ob-block)으로 묶어 좌우 정렬 일치 -->
+				<div class="ob-block">
+					{#if ask.modelState === 'idle'}
+						<button type="button" class="onboard-dl" onclick={downloadModel}><Download size={15} /> 대화 모델 받기</button>
+						<span class="onboard-sub">처음 1회 ~705MB · 안 받아도 근거·답은 즉시</span>
+					{:else if ask.modelState === 'cached'}
+						<span class="onboard-sub">대화 모델 불러오는 중…</span>
+					{:else if ask.modelState === 'loading'}
+						<div class="onboard-bar"><div class="bar-fill" style="width:{Math.round(ask.modelProgress * 100)}%"></div><span class="bar-txt">{loadingFromCache ? '불러오는 중' : '받는 중'} {Math.round(ask.modelProgress * 100)}%</span></div>
+					{:else if ask.modelState === 'ready'}
+						<span class="onboard-sub">무엇이든 물어보세요</span>
+					{:else if ask.modelState === 'error'}
+						<button type="button" class="onboard-dl err" onclick={downloadModel}>로드 실패 · 다시</button>
+					{:else if ask.modelState === 'unsupported'}
+						<span class="onboard-sub">이 브라우저는 대화 미지원 — 근거·결정론 답은 됩니다</span>
+					{/if}
+				</div>
+
+				<!-- 로컬 Ollama 옵션 영역 — 같은 .ob-block 컬럼. 자동 프로브 금지(클릭 시만). 가이드는 인라인(툴팁 클리핑 0). -->
+				<div class="ob-block">
+					{#if ask.ollamaState === 'hidden'}
+						<button type="button" class="ollama-link" onclick={connectOllama}>로컬 Ollama 연결 — 더 좋은 품질</button>
+						<button type="button" class="ob-guide-toggle" onclick={() => (guideOpen = !guideOpen)} aria-expanded={guideOpen}>설치 방법 {guideOpen ? '접기' : '보기'}</button>
+						{#if guideOpen}{@render guide()}{/if}
+					{:else if ask.ollamaState === 'probing'}
+						<span class="onboard-sub">Ollama 찾는 중…</span>
+					{:else if ask.ollamaState === 'ready'}
+						<span class="ollama-on">● Ollama 연결됨 · {ask.ollamaModel}</span>
+					{:else if ask.ollamaState === 'no-model'}
+						<span class="ollama-warn">{OLLAMA_NO_MODEL}</span>
+						{@render guide()}
+						<button type="button" class="retry" onclick={connectOllama}>다시 연결</button>
+					{:else if ask.ollamaState === 'blocked'}
+						<span class="ollama-warn">{OLLAMA_BLOCKED}</span>
+						<span class="ollama-diag">{ollamaDiag}</span>
+						{@render guide()}
+						<button type="button" class="retry" onclick={connectOllama}>다시 연결</button>
+					{/if}
+				</div>
 			</div>
 		{/if}
 		{#each ask.chat as t, ti (ti)}
@@ -336,15 +396,15 @@
 		{/each}
 	</div>
 
-	<!-- 대화 중 모델 strip — 메시지 있고 아직 안 받았을 때만(중앙 온보딩과 중복 방지). ready 면 숨김. -->
+	<!-- 대화 중 모델 strip — 메시지 있고 아직 안 올렸을 때만(중앙 온보딩과 중복 방지). ready 면 숨김. -->
 	{#if ask.chat.length > 0 && ask.modelState === 'idle' && ask.ollamaState !== 'ready'}
 		<button type="button" class="ad-model dl" onclick={downloadModel}>
-			<Download size={14} /> 대화 모델 받기 <span class="sz">~705MB · 1회</span>
+			<Download size={14} /> 대화 모델 받기 <span class="sz">처음 1회 ~705MB</span>
 		</button>
 	{:else if ask.chat.length > 0 && ask.modelState === 'loading'}
 		<div class="ad-model bar">
-			<div class="bar-fill" style="width:{Math.round(modelProgress * 100)}%"></div>
-			<span class="bar-txt">대화 모델 받는 중 {Math.round(modelProgress * 100)}%</span>
+			<div class="bar-fill" style="width:{Math.round(ask.modelProgress * 100)}%"></div>
+			<span class="bar-txt">대화 모델 {loadingFromCache ? '불러오는' : '받는'} 중 {Math.round(ask.modelProgress * 100)}%</span>
 		</div>
 	{:else if ask.chat.length > 0 && ask.modelState === 'error'}
 		<button type="button" class="ad-model dl err" onclick={downloadModel}>대화 모델 로드 실패 · 다시</button>
@@ -503,18 +563,28 @@
 		text-overflow: ellipsis;
 	}
 	.nav-chip:hover { background: rgba(251, 146, 60, 0.2); }
-	/* 중앙 온보딩 — 빈 대화 시 아바타 + 모델 받기 정중앙 */
+	/* 중앙 온보딩 — 빈 대화 시 아바타 + 모델 영역 + Ollama 영역. 단일 폭(.ob-block)으로 좌우 정렬 일치. */
 	.onboard {
 		margin: auto;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 12px;
+		gap: 16px;
 		text-align: center;
 		padding: 20px 12px;
+		width: 100%;
+		max-width: 300px;
 	}
 	.onboard-ava {
 		border-radius: 50%;
+	}
+	/* 정렬 컨테이너 — 모델/Ollama 자식을 같은 폭·같은 좌측선으로. 폭 혼재(240px warn vs inline-flex link) 제거. */
+	.ob-block {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 7px;
 	}
 	.onboard-dl {
 		display: inline-flex;
@@ -629,9 +699,6 @@
 
 	/* Ollama 옵션 레인 — 기존 팔레트 재사용(새 색 없음). ready 만 초록, 나머지 muted/warn. */
 	.ollama-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
 		padding: 0;
 		border: none;
 		background: transparent;
@@ -643,20 +710,61 @@
 		text-underline-offset: 2px;
 	}
 	.ollama-link:hover { color: #fb923c; }
-	.ollama-on { display: inline-flex; align-items: center; gap: 5px; color: #34d399; font-size: 11px; }
-	.ollama-warn { color: #94a3b8; font-size: 11px; line-height: 1.5; max-width: 240px; text-align: center; }
-	.retry {
-		margin-left: 4px;
-		padding: 2px 7px;
-		border: 1px solid #1e2433;
-		border-radius: 6px;
-		background: #0a0e18;
-		color: #bae6fd;
+	/* hidden 상태 가이드 펼치기 토글 — 작은 보조 링크(평소 접힘, 클릭 시 인라인 가이드). */
+	.ob-guide-toggle {
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: #475569;
 		font: inherit;
-		font-size: 10px;
+		font-size: 10.5px;
+		cursor: pointer;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.ob-guide-toggle:hover { color: #94a3b8; }
+	.ollama-on { display: inline-flex; align-items: center; gap: 5px; color: #34d399; font-size: 11px; }
+	.ollama-warn { color: #94a3b8; font-size: 11.5px; line-height: 1.55; text-align: center; }
+	.ollama-diag { color: #fdba74; font-size: 10.5px; line-height: 1.5; text-align: center; }
+	.retry {
+		padding: 5px 12px;
+		border: 1px solid rgba(251, 146, 60, 0.4);
+		border-radius: 7px;
+		background: rgba(251, 146, 60, 0.08);
+		color: #fdba74;
+		font: inherit;
+		font-size: 11px;
+		font-weight: 600;
 		cursor: pointer;
 	}
-	.retry:hover { border-color: rgba(251, 146, 60, 0.5); color: #fb923c; }
+	.retry:hover { background: rgba(251, 146, 60, 0.18); }
+	/* 인라인 설치 가이드 — 컨테이너 폭(최대 300px) 안에서 줄바꿈, 좌측 정렬. 절대배치/280px 툴팁 폐기로 클리핑 0. */
+	.ob-guide {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		padding: 10px 12px;
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+		background: #0a0e18;
+		text-align: left;
+	}
+	.g-step { color: #cbd5e1; font-size: 11px; line-height: 1.5; }
+	.g-cmd {
+		display: block;
+		padding: 5px 8px;
+		border-radius: 6px;
+		background: #050811;
+		border: 1px solid #1e2433;
+		color: #bae6fd;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 10px;
+		line-height: 1.5;
+		white-space: pre-wrap;
+		word-break: break-all;
+	}
+	.g-foot { margin-top: 2px; color: #475569; font-size: 10px; }
 	.hd-badge {
 		padding: 2px 8px;
 		border: 1px solid rgba(52, 211, 153, 0.4);
@@ -666,38 +774,4 @@
 		font-size: 10px;
 		font-weight: 700;
 	}
-	.info {
-		position: relative;
-		display: inline-grid;
-		place-items: center;
-		width: 15px;
-		height: 15px;
-		border-radius: 50%;
-		border: 1px solid #1e2433;
-		color: #64748b;
-		font-size: 9px;
-		cursor: help;
-	}
-	.info:hover, .info:focus-within { color: #fb923c; border-color: rgba(251, 146, 60, 0.5); }
-	.info .tip {
-		display: none;
-		position: absolute;
-		bottom: calc(100% + 8px);
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 20;
-		width: 280px;
-		max-width: 78vw;
-		padding: 10px 12px;
-		border: 1px solid #1e2433;
-		border-radius: 8px;
-		background: #0a0e18;
-		color: #cbd5e1;
-		font-size: 11px;
-		line-height: 1.6;
-		white-space: pre-wrap;
-		text-align: left;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-	}
-	.info:hover .tip, .info:focus-within .tip { display: block; }
 </style>

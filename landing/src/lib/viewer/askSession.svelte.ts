@@ -27,19 +27,26 @@ export interface Turn {
 	aiRunning: boolean;
 	aiErr: string | null;
 }
-export type ModelState = 'checking' | 'unsupported' | 'idle' | 'loading' | 'ready' | 'error';
+// 'cached' = 가중치가 브라우저 Cache 에 이미 있음(받기 아님, GPU 적재만 수 초). 'idle' = 한 번도 안 받음(~705MB).
+export type ModelState = 'checking' | 'unsupported' | 'idle' | 'cached' | 'loading' | 'ready' | 'error';
 export type OllamaState = 'hidden' | 'probing' | 'ready' | 'no-model' | 'blocked';
+// blocked 의 세부 원인 — 같은 상태로 합치되 카피만 정확히(설치확인 vs 허용설정 vs 로딩대기).
+export type OllamaReason = 'unreachable' | 'cors' | 'timeout' | null;
 
 export const ask = $state<{
 	chat: Turn[];
 	modelState: ModelState;
+	modelProgress: number; // 0..1 — modelState 와 같은 생존범위(스토어)여야 회사 이동 언마운트 후 진행바 0% 멈춤 0
 	ollamaState: OllamaState;
+	ollamaReason: OllamaReason;
 	ollamaModel: string | null;
 	consumedCarry: string; // 이미 자동실행한 carryQ — 재마운트에도 생존해 수동 종목검색 후 묵은 질문 재발화 차단
 }>({
 	chat: [],
 	modelState: 'checking',
+	modelProgress: 0,
 	ollamaState: 'hidden',
+	ollamaReason: null,
 	ollamaModel: null,
 	consumedCarry: ''
 });

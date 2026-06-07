@@ -67,7 +67,7 @@ export async function ollamaChat(
 			model,
 			messages,
 			stream: true,
-			options: { temperature: 0.4, num_predict: 420 }
+			options: { temperature: 0.4, num_predict: 640 }
 		}),
 		signal: opts.signal
 	} as LocalRequestInit);
