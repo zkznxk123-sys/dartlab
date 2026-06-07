@@ -203,6 +203,7 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
         from huggingface_hub import snapshot_download
 
         from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+        from dartlab.core.hfRetry import retryHfCall
 
         if marketNs == "kr":
             category = "panel"
@@ -210,7 +211,8 @@ def ensurePanelFromHf(code: str, marketNs: str = "kr") -> None:
         else:  # us — panel 단일 artifact
             category = "edgarPanel"
             patterns = [f"{DATA_RELEASES['edgarPanel']['dir']}/{code}.parquet"]
-        snapshot_download(
+        retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+            snapshot_download,
             repo_id=repoFor(category),
             repo_type="dataset",
             allow_patterns=patterns,  # flat 회사당 1파일 (us 는 보드+셀)

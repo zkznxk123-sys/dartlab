@@ -197,11 +197,13 @@ def _ensureFromHf(ticker: str) -> bool:
         from huggingface_hub import snapshot_download
 
         from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+        from dartlab.core.hfRetry import retryHfCall
 
         if "edgarSections" not in DATA_RELEASES:
             return False
         sectionsDirRel = DATA_RELEASES["edgarSections"]["dir"]
-        snapshot_download(
+        retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+            snapshot_download,
             repo_id=repoFor("edgarSections"),  # 전용 repo 존중 (HF_REPO 하드코딩 시 전환 후 빈 결과)
             repo_type="dataset",
             allow_patterns=[f"{sectionsDirRel}/{tickerUpper}/*.parquet"],

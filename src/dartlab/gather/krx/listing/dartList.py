@@ -53,8 +53,11 @@ def _loadDartListFromHf() -> pl.DataFrame | None:
     try:
         from huggingface_hub import hf_hub_download
 
+        from dartlab.core.hfRetry import retryHfCall
+
         log.info("[cyan]⬇ HF[/] metadata/dartList.parquet")
-        path = hf_hub_download(
+        path = retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+            hf_hub_download,
             repo_id="eddmpython/dartlab-data",
             repo_type="dataset",
             filename="metadata/dartList.parquet",

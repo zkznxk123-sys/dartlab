@@ -772,11 +772,13 @@ def ensureContentIndex(tier: str | None = None) -> None:
         from huggingface_hub import snapshot_download
 
         from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+        from dartlab.core.hfRetry import retryHfCall
 
         ciDir = DATA_RELEASES["contentIndex"]["dir"]
         repo = repoFor("contentIndex")
-        # 1) tier 서브디렉터리 우선 pull (경량 배포).
-        snapshot_download(
+        # 1) tier 서브디렉터리 우선 pull (경량 배포). HF read SSOT(core.hfRetry) 경유.
+        retryHfCall(
+            snapshot_download,
             repo_id=repo,
             repo_type="dataset",
             allow_patterns=[f"{ciDir}/{tier}/*"],
@@ -785,7 +787,8 @@ def ensureContentIndex(tier: str | None = None) -> None:
         if (base / tier / "main.npz").exists():
             return
         # 2) 전환기 fallback — tier 미배포 시 flat(legacy full) pull (기존 사용자 동작 보호).
-        snapshot_download(
+        retryHfCall(
+            snapshot_download,
             repo_id=repo,
             repo_type="dataset",
             allow_patterns=[f"{ciDir}/*"],
@@ -937,10 +940,13 @@ def pullContentIndex(tier: str = "full") -> int:
         "gateRef.json",
     ]
     ok = 0
+    from dartlab.core.hfRetry import retryHfCall
+
     _log.info("[cyan]⬇ HF[/] contentIndex (%d 파일, tier=%s)", len(names), tier)
     for name in names:
         try:
-            hf_hub_download(
+            retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+                hf_hub_download,
                 repo_id=repo,
                 repo_type="dataset",
                 filename=f"{repoPrefix}/{name}",

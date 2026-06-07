@@ -675,10 +675,12 @@ def _ensureFromHf(period: str | None = None) -> bool:
         from huggingface_hub import snapshot_download
 
         from dartlab.core.dataConfig import repoFor
+        from dartlab.core.hfRetry import retryHfCall
 
         relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
         pattern = f"{relDir}/{period}.parquet" if period else f"{relDir}/*.parquet"
-        snapshot_download(
+        retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+            snapshot_download,
             repo_id=repoFor(_ALLFILINGS_DIR_KEY),
             repo_type="dataset",
             allow_patterns=[pattern],

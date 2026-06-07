@@ -153,7 +153,6 @@ def _downloadScanFile(scanDir: Path, relativePath: str) -> None:
 
     import os
     import shutil
-    import time
 
     from dartlab.core.dataConfig import DATA_RELEASES, hfBaseUrl, repoFor
     from dartlab.core.dataLoader import _downloadWithRetry
@@ -169,32 +168,19 @@ def _downloadScanFile(scanDir: Path, relativePath: str) -> None:
     try:
         from huggingface_hub import hf_hub_download
 
-        lastHubError: Exception | None = None
-        for attempt in range(5):
-            try:
-                downloaded = Path(
-                    hf_hub_download(
-                        repo_id=repoFor("scan"),
-                        repo_type="dataset",
-                        filename=hfPath,
-                        token=os.environ.get("HF_TOKEN") or None,
-                    )
-                )
-                shutil.copyfile(downloaded, tmp)
-                break
-            except Exception as exc:  # noqa: BLE001 — HF rate-limit/transport 예외 계층이 버전별로 다르다.
-                lastHubError = exc
-                if attempt == 4:
-                    raise
-                response = getattr(exc, "response", None)
-                retry_after = getattr(getattr(response, "headers", None), "get", lambda _key: None)("retry-after")
-                try:
-                    delay = int(retry_after) if retry_after else min(2**attempt, 16)
-                except ValueError:
-                    delay = min(2**attempt, 16)
-                time.sleep(delay)
-        if lastHubError is not None and not tmp.exists():
-            raise lastHubError
+        from dartlab.core.hfRetry import retryHfCall
+
+        # HF read SSOT(core.hfRetry) — 자체 5-retry 루프 삭제, 429/503/504 단일 백오프 정책으로 수렴.
+        downloaded = Path(
+            retryHfCall(
+                hf_hub_download,
+                repo_id=repoFor("scan"),
+                repo_type="dataset",
+                filename=hfPath,
+                token=os.environ.get("HF_TOKEN") or None,
+            )
+        )
+        shutil.copyfile(downloaded, tmp)
     except Exception as hubError:  # noqa: BLE001 — hub 경로 실패 시 기존 resolve URL fallback
         _log.warning("scan prebuild HF hub download failed for %s: %s", rel, hubError)
         _downloadWithRetry(f"{hfBaseUrl('scan')}/{rel}", tmp)

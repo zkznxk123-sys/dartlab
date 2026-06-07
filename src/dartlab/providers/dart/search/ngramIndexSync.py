@@ -97,7 +97,10 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
     emit("stemindex:hf_start", repo=HF_REPO)
     _log.info("[cyan]⬇ HF[/] stemIndex (%s/%s)", HF_REPO, hfDir)
     try:
-        snapshot_download(
+        from dartlab.core.hfRetry import retryHfCall
+
+        retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+            snapshot_download,
             repo_id=HF_REPO,
             repo_type="dataset",
             allow_patterns=f"{hfDir}/**",
