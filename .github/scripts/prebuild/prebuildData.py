@@ -22,6 +22,7 @@
 """
 
 import os
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -58,6 +59,34 @@ def _seedBaseInputs(dataDir: str) -> None:
     summary = seedCategoriesFromHf(list(BASE_SEED_CATEGORIES), dataDir=dataDir)
     for cat, (total, new, mb) in summary.items():
         print(f"[prebuild] base seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+
+
+def _seedKindAndCorpProfile(dataDir: str) -> None:
+    """KIND/dartList/corpProfile 메타를 HF 에서 로컬 캐시 위치로 seed (retryHfCall SSOT 경유).
+
+    buildScan 이 KIND HTTP 호출 시 OfflineViolation 이므로 kindlist.yml 이 HF push 한 결과를
+    오프라인 가드 아래 다운로드해 둔다. 결산월 SSOT(corpProfile) 도 함께. best-effort —
+    부재/일시실패는 다음 빌드 단계가 raw 추정으로 보강하므로 빌드를 막지 않는다.
+    """
+    from huggingface_hub import hf_hub_download
+
+    from dartlab.core.dataConfig import HF_REPO
+
+    root = Path(dataDir)
+    seeds = [
+        ("metadata/corpList.parquet", root / "kindList" / "corpList.parquet"),
+        ("metadata/dartList.parquet", root / "dartList" / "dartList.parquet"),
+        ("dart/scan/corpProfile.parquet", root / "dart" / "scan" / "corpProfile.parquet"),
+    ]
+    token = os.environ.get("HF_TOKEN") or None
+    for src, dst in seeds:
+        try:
+            cached = retryHfCall(hf_hub_download, repo_id=HF_REPO, repo_type="dataset", filename=src, token=token)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(cached, dst)
+            print(f"[prebuild] KIND seed: {src} -> {dst}")
+        except Exception as exc:  # noqa: BLE001 — best-effort: 부재/일시실패는 빌드 단계가 보강
+            print(f"[prebuild] KIND seed skip ({src}): {type(exc).__name__}: {exc}")
 
 
 def _seedFullPanel(dataDir: str) -> dict[str, int]:
@@ -307,8 +336,9 @@ def main():
     # panel 로컬 dir 보장 (증분 0-change 사이클에서도 빌더 glob 이 FileNotFoundError 안 나게)
     (Path(dataDir) / DATA_RELEASES["panel"]["dir"]).mkdir(parents=True, exist_ok=True)
 
-    # 1단계: base seed (finance/report full + scan 직전 산출물/ledger)
+    # 1단계: base seed (finance/report full + scan 직전 산출물/ledger) + KIND/corpProfile 메타
     _seedBaseInputs(dataDir)
+    _seedKindAndCorpProfile(dataDir)
 
     # 2단계: panel 변경 감지 (증분) 또는 전량 seed (full)
     if fullMode:

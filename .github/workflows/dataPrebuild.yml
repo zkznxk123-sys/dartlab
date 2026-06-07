@@ -80,35 +80,8 @@ jobs:
           key: dartlab-data-scan-prebuild-never-match
           restore-keys: dartlab-data-scan-
 
-      # KRX KIND listing + corpProfile seed — prebuild = offline only 이므로 buildScan
-      # 이 KIND HTTP 호출 시 OfflineViolation. kindlist.yml HF push 결과를 다운로드.
-      - name: Seed KRX KIND + corpProfile from HF
-        run: |
-          mkdir -p data/kindList data/dartList data/dart/scan
-          uv run python -X utf8 -c "
-          from pathlib import Path
-          from huggingface_hub import hf_hub_download
-          import shutil
-          for src, dst in [
-              ('metadata/corpList.parquet', 'data/kindList/corpList.parquet'),
-              ('metadata/dartList.parquet', 'data/dartList/dartList.parquet'),
-              ('dart/scan/corpProfile.parquet', 'data/dart/scan/corpProfile.parquet'),
-          ]:
-              try:
-                  p = hf_hub_download(
-                      repo_id='eddmpython/dartlab-data',
-                      repo_type='dataset',
-                      filename=src,
-                  )
-                  Path(dst).parent.mkdir(parents=True, exist_ok=True)
-                  shutil.copy(p, dst)
-                  print(f'seed: {src} -> {dst}')
-              except Exception as e:
-                  print(f'seed skip ({src}): {type(e).__name__}: {e}')
-          "
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-
+      # KIND/dartList/corpProfile seed 는 prebuildData.py 가 retryHfCall SSOT 로 자체 수행
+      # (offline 가드 아래 HF 다운로드 — buildScan 의 KIND OfflineViolation 회피).
       - name: Build DART scan prebuilds (incremental) + upload
         run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
         env:
@@ -162,33 +135,7 @@ jobs:
           key: dartlab-data-report-prebuild-never-match
           restore-keys: dartlab-data-report-
 
-      - name: Seed KRX KIND + corpProfile from HF
-        run: |
-          mkdir -p data/kindList data/dartList data/dart/scan
-          uv run python -X utf8 -c "
-          from pathlib import Path
-          from huggingface_hub import hf_hub_download
-          import shutil
-          for src, dst in [
-              ('metadata/corpList.parquet', 'data/kindList/corpList.parquet'),
-              ('metadata/dartList.parquet', 'data/dartList/dartList.parquet'),
-              ('dart/scan/corpProfile.parquet', 'data/dart/scan/corpProfile.parquet'),
-          ]:
-              try:
-                  p = hf_hub_download(
-                      repo_id='eddmpython/dartlab-data',
-                      repo_type='dataset',
-                      filename=src,
-                  )
-                  Path(dst).parent.mkdir(parents=True, exist_ok=True)
-                  shutil.copy(p, dst)
-                  print(f'seed: {src} -> {dst}')
-              except Exception as e:
-                  print(f'seed skip ({src}): {type(e).__name__}: {e}')
-          "
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-
+      # KIND/dartList/corpProfile seed 는 prebuildData.py 가 retryHfCall SSOT 로 자체 수행.
       - name: Build DART scan prebuilds (full rebuild) + upload
         run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
         env:
