@@ -1,13 +1,10 @@
 <script lang="ts">
-	// ⌘K 커맨드 팔레트 — 공시뷰어 본문검색 + 섹션점프 + 회사전환 단일 진입점.
+	// ⌘K 커맨드 팔레트 — 공시뷰어 *화면내검색* 전용 (본문검색 + 섹션점프). 회사전환은 헤더 종목검색 버튼이 담당(분리).
 	// 본문검색은 searchIndex(gridBySection BM25) 결과를 그대로 격자로 데려간다(pickSection+pickPeriod+glow).
-	// scan 검색 디자인 언어(다크 #050811 · 오렌지 #fb923c). 회사 유니버스는 lazy(@ 첫 입력 시 1회).
+	// scan 검색 디자인 언어(다크 #050811 · 오렌지 #fb923c).
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
 	import { Search } from 'lucide-svelte';
 	import { search, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
-	import { loadCompanies, type Co } from '$lib/viewer/companyNames';
 	import type { PanelTocResponse } from '$lib/viewer/types';
 
 	let {
@@ -29,12 +26,10 @@
 	let sel = $state(0);
 	let expand = $state(true);
 	let inputEl = $state<HTMLInputElement | null>(null);
-	let companies = $state<Co[]>([]);
-	let companiesLoaded = false;
 
-	type Mode = 'body' | 'section' | 'company';
-	const mode = $derived<Mode>(query.startsWith('>') ? 'section' : query.startsWith('@') ? 'company' : 'body');
-	const term = $derived(query.replace(/^[>@]/, '').trim());
+	type Mode = 'body' | 'section';
+	const mode = $derived<Mode>(query.startsWith('>') ? 'section' : 'body');
+	const term = $derived(query.replace(/^>/, '').trim());
 
 	// 본문 검색 결과.
 	const bodyRes = $derived.by(() => {
@@ -56,15 +51,7 @@
 		return out.slice(0, 12);
 	});
 
-	// 회사 전환 후보.
-	const companyRes = $derived.by(() => {
-		if (mode !== 'company') return [] as Co[];
-		const q = term.toLowerCase();
-		if (!q) return companies.slice(0, 10);
-		return companies.filter((c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)).slice(0, 10);
-	});
-
-	const count = $derived(mode === 'body' ? bodyRes.hits.length : mode === 'section' ? sectionRes.length : companyRes.length);
+	const count = $derived(mode === 'body' ? bodyRes.hits.length : sectionRes.length);
 
 	$effect(() => {
 		// 결과 집합 바뀌면 선택 리셋.
@@ -72,12 +59,6 @@
 		void query;
 		sel = 0;
 	});
-
-	async function ensureCompanies() {
-		if (companiesLoaded) return;
-		companiesLoaded = true;
-		companies = await loadCompanies();
-	}
 
 	function openPalette() {
 		open = true;
@@ -89,20 +70,13 @@
 		open = false;
 	}
 
-	function onInput() {
-		if (mode === 'company') void ensureCompanies();
-	}
-
 	function pickAt(i: number) {
 		if (mode === 'body') {
 			const h = bodyRes.hits[i];
 			if (h) onResult(h);
-		} else if (mode === 'section') {
+		} else {
 			const s = sectionRes[i];
 			if (s) onSection(s.key);
-		} else {
-			const c = companyRes[i];
-			if (c) void goto(`${base}/viewer/company/${c.code}`);
 		}
 		close();
 	}
@@ -143,9 +117,9 @@
 	}
 </script>
 
-<button class="kbd-hint" type="button" onclick={openPalette} title="본문 검색 (⌘K)">
+<button class="kbd-hint" type="button" onclick={openPalette} title="화면내검색 — 이 공시 본문에서 찾기 (⌘K)">
 	<Search size={13} />
-	<span>검색</span>
+	<span>화면내검색</span>
 	<kbd>⌘K</kbd>
 </button>
 
@@ -161,10 +135,9 @@
 					bind:value={query}
 					class="palette-input"
 					type="text"
-					placeholder="본문 검색  ·  &gt; 섹션 점프  ·  @ 회사 전환"
-					oninput={onInput}
+					placeholder="이 공시 본문에서 찾기  ·  &gt; 섹션 점프"
 					onkeydown={onKeydown}
-					aria-label="공시 검색"
+					aria-label="화면내검색"
 				/>
 				{#if mode === 'body'}
 					<button class="exp-toggle" class:on={expand} type="button" onclick={() => (expand = !expand)} title="동의어 확장">동의어</button>
@@ -181,7 +154,7 @@
 				{#if mode === 'body' && !index}
 					<div class="hint">{indexing ? '본문 색인 준비 중…' : '본문 색인 없음'}</div>
 				{:else if !term}
-					<div class="hint">검색어를 입력하세요. <b>&gt;</b> 섹션 · <b>@</b> 회사</div>
+					<div class="hint">이 공시 본문에서 찾을 말을 입력하세요. <b>&gt;</b> 섹션 점프</div>
 				{:else if count === 0}
 					<div class="hint">결과 없음</div>
 				{:else if mode === 'body'}
@@ -194,17 +167,10 @@
 							{#if h.snippet}<div class="row-snippet">{h.snippet}</div>{/if}
 						</button>
 					{/each}
-				{:else if mode === 'section'}
+				{:else}
 					{#each sectionRes as s, i (s.key)}
 						<button class="row" class:sel={i === sel} type="button" onmousedown={() => pickAt(i)} onmouseenter={() => (sel = i)}>
 							<span class="row-label">{s.label}</span>
-						</button>
-					{/each}
-				{:else}
-					{#each companyRes as c, i (c.code)}
-						<button class="row" class:sel={i === sel} type="button" onmousedown={() => pickAt(i)} onmouseenter={() => (sel = i)}>
-							<span class="row-label">{c.name}</span>
-							<span class="row-period mono">{c.code}</span>
 						</button>
 					{/each}
 				{/if}
@@ -363,9 +329,6 @@
 		flex-shrink: 0;
 		font-family: monospace;
 		font-size: 11px;
-		color: #64748b;
-	}
-	.row-period.mono {
 		color: #64748b;
 	}
 	.row-snippet {

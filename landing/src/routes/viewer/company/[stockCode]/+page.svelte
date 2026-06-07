@@ -5,7 +5,7 @@
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { dev } from '$app/environment'; // 회사 비교 = 미완성 → dev 에서만(GitHub Pages 프로덕션 숨김)
-	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus } from 'lucide-svelte';
+	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus, Search } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
@@ -45,6 +45,8 @@
 	let discussOpen = $state(false);
 	let financeOpen = $state(false); // 정량재무제표 다이얼로그
 	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
+	let stockSearchOpen = $state(false); // 종목검색 팝오버 (화면내검색 ⌘K 와 분리된 회사전환 입력)
+	let askCarryQ = $state(''); // AI 가 타 회사 감지 → 이동 후 새 회사 index 준비되면 운반·자동 ask 할 질문
 	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
@@ -142,6 +144,20 @@
 		pickPeriod(hit.period);
 		glowCell = { rowIndex: hit.rowIndex, period: hit.period };
 		setTimeout(() => (glowCell = null), 2200);
+	}
+
+	// 종목검색 — 다른 회사 공시뷰어로 이동(단일). param 변경이라 AskDrawer 는 재마운트 안 됨(대화 유지).
+	function onStockPick(c: string) {
+		stockSearchOpen = false;
+		if (c && c !== code) void goto(`${base}/viewer/company/${c}`);
+	}
+
+	// AI 가 질문에서 타 회사 감지 → 이동 칩 클릭 시 호출. 단일 뷰어로 goto + 원질문 운반(carryQ).
+	// AskDrawer 는 askOpen 유지 + code 무관이라 재마운트 0 → 대화 유지. 새 회사 index 준비되면 자동 ask.
+	function onAskNavigate(targetCode: string, carryQuestion: string) {
+		if (!targetCode || targetCode === code) return;
+		askCarryQ = carryQuestion;
+		void goto(`${base}/viewer/company/${targetCode}`);
 	}
 
 	// 전체보기 Esc 해제.
@@ -289,6 +305,14 @@
 			{/if}
 		</div>
 		<div class="ph-right">
+			<div class="stock-wrap">
+				<button type="button" class="fs-btn" class:active={stockSearchOpen} onclick={() => (stockSearchOpen = !stockSearchOpen)} title="종목검색 — 다른 회사 공시뷰어로 이동">
+					<Search size={13} /> 종목검색
+				</button>
+				{#if stockSearchOpen}
+					<div class="stock-pop"><CompanySearch onpick={onStockPick} /></div>
+				{/if}
+			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
 			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={() => (askOpen = !askOpen)} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
 				<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{base}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
@@ -381,7 +405,17 @@
 				{/if}
 			</section>
 			{#if askOpen}
-				<AskDrawer {code} {bundle} {searchIndex} {indexing} onfocus={onSearchResult} onclose={() => (askOpen = false)} />
+				<AskDrawer
+					{code}
+					{bundle}
+					{searchIndex}
+					{indexing}
+					{corpName}
+					carryQ={askCarryQ}
+					onfocus={onSearchResult}
+					onNavigate={onAskNavigate}
+					onclose={() => (askOpen = false)}
+				/>
 			{/if}
 		</div>
 	{/if}
@@ -573,6 +607,16 @@
 		position: absolute;
 		top: calc(100% + 6px);
 		right: 0;
+		z-index: 60;
+	}
+	/* 종목검색 팝오버 — 화면내검색(⌘K)과 분리된 회사전환 입력 */
+	.stock-wrap {
+		position: relative;
+	}
+	.stock-pop {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
 		z-index: 60;
 	}
 	.cmp-loading {

@@ -6,6 +6,7 @@
 	import { Download, Send, Sparkles, X } from 'lucide-svelte';
 	import { plainText, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
 	import { composeAnswer } from '$lib/viewer/answerCompose';
+	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
 	import { routeChat, stripEcho, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn, type Provider } from '$lib/viewer/webllm';
 	import { detectOllama } from '$lib/viewer/ollama';
@@ -33,20 +34,29 @@
 		code,
 		bundle,
 		searchIndex,
+		corpName,
+		carryQ = '',
 		onfocus,
+		onNavigate,
 		onclose
 	}: {
 		code: string;
 		bundle: PanelBundle | null;
 		searchIndex: SearchIndex | null;
 		indexing?: boolean;
+		corpName: string;
+		carryQ?: string; // 이동 후 부모가 운반한 질문(새 회사 index 준비되면 1회 자동 ask)
 		onfocus: (hit: SearchHit) => void;
+		onNavigate: (targetCode: string, carryQuestion: string) => void;
 		onclose: () => void;
 	} = $props();
 
 	interface EvRef { n: number; period: string; path: string; text: string }
+	interface NavOption { code: string; name: string }
 	interface Turn {
 		q: string;
+		companyName: string; // 이 답을 만든 회사명 (history 태그·배지·전환 divider)
+		nav: NavOption[]; // 이동 칩(타 회사 감지 시). [] 면 일반 답 turn
 		det: string;
 		citedLabel: string | null;
 		evItems: EvRef[];
@@ -77,14 +87,13 @@
 			if (modelState === 'checking') modelState = v ? 'idle' : 'unsupported';
 		});
 	});
+	// [회귀가드] chat·ollama 는 code 변경에 불간섭(크로스-회사 대화 유지 핵심). 여기에 chat=[] 또는
+	// {#key code} 추가 시 회사 이동마다 대화 소멸 — 절대 금지. finance prefetch 만 code 따라간다.
 	$effect(() => {
 		const c = code;
-		chat = [];
 		finSignals = [];
-		ollamaState = 'hidden';
-		ollamaModel = null;
 		void loadCompanyFinanceSignals(c).then((s) => {
-			if (code === c) finSignals = s;
+			if (code === c) finSignals = s; // 경쟁 가드: 도착 시점 code 일치할 때만
 		});
 	});
 	$effect(() => {
@@ -123,18 +132,15 @@
 		}
 	}
 
-	async function ask() {
-		if (!searchIndex || !bundle || !question.trim() || busy) return;
-		const q = question.trim();
-		question = '';
-		busy = true;
-
-		const { hits, added } = search(searchIndex, q, { topK: 6, expand: true });
+	// 현재 회사(=code) 패널에서 grounded 답 — 결정론(즉시) + (모델 ready 면) 대화 스트리밍.
+	// b/i 를 인자로 받아 이동 직후 stale 클로저를 피한다(항상 현재 reactive 값으로 호출). busy 해제 책임은 여기.
+	async function answerOnCompany(q: string, b: PanelBundle, i: SearchIndex) {
+		const { hits, added } = search(i, q, { topK: 6, expand: true });
 		const evHits: SearchHit[] = [];
 		const evItems: EvRef[] = [];
 		let n = 1;
 		for (const h of hits) {
-			const cell = bundle.gridBySection.get(h.sectionKey)?.[h.rowIndex]?.cells?.[h.period] ?? '';
+			const cell = b.gridBySection.get(h.sectionKey)?.[h.rowIndex]?.cells?.[h.period] ?? '';
 			const text = plainText(cell).slice(0, 700);
 			if (!text) continue;
 			evHits.push(h);
@@ -146,7 +152,18 @@
 		const aiReady = provider === 'ollama' ? ollamaState === 'ready' : modelState === 'ready';
 		const useAi = aiReady && (evItems.length > 0 || composed.citedSignal != null);
 
-		chat.push({ q, det: composed.answer, citedLabel: composed.citedSignal?.label ?? null, evItems, evHits, ai: '', aiRunning: useAi, aiErr: null });
+		chat.push({
+			q,
+			companyName: corpName,
+			nav: [],
+			det: composed.answer,
+			citedLabel: composed.citedSignal?.label ?? null,
+			evItems,
+			evHits,
+			ai: '',
+			aiRunning: useAi,
+			aiErr: null
+		});
 		const idx = chat.length - 1;
 		scrollBottom();
 
@@ -155,9 +172,11 @@
 			return;
 		}
 		const history: ChatTurn[] = [];
-		for (let i = 0; i < chat.length; i++) {
-			history.push({ role: 'user', content: chat[i].q });
-			if (i !== idx) history.push({ role: 'assistant', content: chat[i].ai || chat[i].det });
+		for (let k = 0; k < chat.length; k++) {
+			if (chat[k].nav.length) continue; // 이동-칩 turn 은 history 제외
+			// 회사 태그 프리픽스 — 이동 후 대명사/비교 맥락 유지("그럼 얘 매출은?" → 현재 회사 해석).
+			history.push({ role: 'user', content: `[${chat[k].companyName}] ${chat[k].q}` });
+			if (k !== idx) history.push({ role: 'assistant', content: chat[k].ai || chat[k].det });
 		}
 		const payload: AskEvidence[] = [
 			{ n: 0, period: '', path: '결정론 분석(숫자 확정)', text: composed.answer },
@@ -189,6 +208,57 @@
 			scrollBottom();
 		}
 	}
+
+	async function ask() {
+		if (!searchIndex || !bundle || !question.trim() || busy) return;
+		const q = question.trim();
+		question = '';
+		busy = true;
+
+		// 0) 결정론 회사 감지(검색 전). 없는 회사·현재 회사·모호 0 → [] → 현재 회사로 정상 답.
+		const targets = await resolveCompanies(q, code);
+		if (targets.length === 0) {
+			await answerOnCompany(q, bundle, searchIndex);
+			return;
+		}
+
+		// 타 회사 감지(단일·모호 공통) → 답 안 함. 이동 칩 turn push 후 종료(클릭 시 이동+원질문 자동 답).
+		const det =
+			targets.length === 1
+				? `질문에서 '${targets[0].name}'을(를) 봤어요. 이 뷰어는 한 번에 한 회사예요.`
+				: `'${q}'에 여러 회사가 보여요. 어디로 갈까요?`;
+		chat.push({
+			q,
+			companyName: corpName,
+			nav: targets,
+			det,
+			citedLabel: null,
+			evItems: [],
+			evHits: [],
+			ai: '',
+			aiRunning: false,
+			aiErr: null
+		});
+		scrollBottom();
+		busy = false;
+	}
+
+	// 이동 칩 클릭 — 부모로 위임(goto + 원질문 운반). 부모가 새 회사 로드 후 carryQ 로 자동 재실행.
+	function clickNav(target: NavOption, carryQuestion: string) {
+		onNavigate(target.code, carryQuestion);
+	}
+
+	// 이동 후 운반된 질문 1회 자동 실행 — carryQ + 새 회사 bundle/index 가 모두 reactive prop 이라,
+	// "새 회사 인덱스 준비됨"을 effect 가 자연 감지해 1회 ask. consumedCarry 가드로 재실행 방지.
+	let consumedCarry = $state('');
+	$effect(() => {
+		const cq = carryQ;
+		if (!cq || cq === consumedCarry) return;
+		if (!searchIndex || !bundle || !bundle.periods.length) return; // 새 회사 데이터 준비 대기(헛답 방지)
+		consumedCarry = cq;
+		busy = true;
+		void answerOnCompany(cq, bundle, searchIndex); // 이동된 회사(=현재 code)로 답
+	});
 
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
@@ -247,23 +317,39 @@
 			</div>
 		{/if}
 		{#each chat as t, ti (ti)}
+			{#if t.nav.length === 0 && ti > 0 && t.companyName !== chat[ti - 1].companyName}
+				<div class="co-divider">──── {t.companyName} ────</div>
+			{/if}
 			<div class="msg user">{t.q}</div>
 			<div class="msg bot">
-				{#if t.ai}
-					<p class="bot-text">{t.ai}</p>
-					<div class="det-line">{t.det}</div>
-				{:else}
-					<p class="bot-text">{t.det}</p>
-					{#if t.aiRunning}<div class="gen"><span class="dot"></span>생성 중…</div>{/if}
+				{#if t.nav.length === 0 && (ti === 0 || t.companyName !== chat[ti - 1].companyName) && t.companyName}
+					<span class="co-badge">{t.companyName}</span>
 				{/if}
-				{#if t.aiErr}<div class="gen err">{t.aiErr}</div>{/if}
-				{#if t.citedLabel}<div class="cite">재무: {t.citedLabel}</div>{/if}
-				{#if t.evItems.length}
+				{#if t.nav.length}
+					<!-- 이동 칩 turn — 답 대신 안내 + 칩(클릭 시 이동·원질문 자동 답) -->
+					<p class="bot-text">{t.det}</p>
 					<div class="ev-row">
-						{#each t.evItems as e, i (e.n)}
-							<button type="button" class="ev-chip" onclick={() => onfocus(t.evHits[i])} title={e.path}>근거 {e.n} · {e.period}</button>
+						{#each t.nav as opt (opt.code)}
+							<button type="button" class="nav-chip" onclick={() => clickNav(opt, t.q)}>→ {opt.name}({opt.code})로 이동해서 답하기</button>
 						{/each}
 					</div>
+				{:else}
+					{#if t.ai}
+						<p class="bot-text">{t.ai}</p>
+						<div class="det-line">{t.det}</div>
+					{:else}
+						<p class="bot-text">{t.det}</p>
+						{#if t.aiRunning}<div class="gen"><span class="dot"></span>생성 중…</div>{/if}
+					{/if}
+					{#if t.aiErr}<div class="gen err">{t.aiErr}</div>{/if}
+					{#if t.citedLabel}<div class="cite">재무: {t.citedLabel}</div>{/if}
+					{#if t.evItems.length}
+						<div class="ev-row">
+							{#each t.evItems as e, i (e.n)}
+								<button type="button" class="ev-chip" onclick={() => onfocus(t.evHits[i])} title={e.path}>근거 {e.n} · {e.period}</button>
+							{/each}
+						</div>
+					{/if}
 				{/if}
 			</div>
 		{/each}
@@ -389,6 +475,44 @@
 		text-overflow: ellipsis;
 	}
 	.ev-chip:hover { border-color: rgba(251, 146, 60, 0.55); color: #fb923c; }
+	/* 크로스-회사 이동 — 전환 divider + 회사 배지 + 이동 칩 */
+	.co-divider {
+		align-self: stretch;
+		text-align: center;
+		margin: 6px 0 2px;
+		color: #475569;
+		font-size: 10.5px;
+		letter-spacing: 0.04em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.co-badge {
+		display: inline-block;
+		margin-bottom: 6px;
+		padding: 1px 7px;
+		border: 1px solid #1e2433;
+		border-radius: 999px;
+		background: #050811;
+		color: #64748b;
+		font-size: 10px;
+	}
+	.nav-chip {
+		max-width: 100%;
+		padding: 5px 10px;
+		border: 1px solid rgba(251, 146, 60, 0.55);
+		border-radius: 999px;
+		background: rgba(251, 146, 60, 0.1);
+		color: #fb923c;
+		font: inherit;
+		font-size: 11px;
+		font-weight: 600;
+		cursor: pointer;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.nav-chip:hover { background: rgba(251, 146, 60, 0.2); }
 	/* 중앙 온보딩 — 빈 대화 시 아바타 + 모델 받기 정중앙 */
 	.onboard {
 		margin: auto;
