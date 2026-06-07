@@ -16,6 +16,7 @@
 	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
+	import AskDrawer from '$lib/components/viewer/AskDrawer.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
@@ -43,6 +44,7 @@
 	let isFullscreen = $state(false);
 	let discussOpen = $state(false);
 	let financeOpen = $state(false); // 정량재무제표 다이얼로그
+	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
 	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
@@ -288,6 +290,9 @@
 		</div>
 		<div class="ph-right">
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
+			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={() => (askOpen = !askOpen)} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
+				<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{base}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
+			</button>
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
@@ -350,7 +355,7 @@
 			<p>{errorMsg}</p>
 		</div>
 	{:else if bundle}
-		<div class="studio">
+		<div class="studio" class:ask-open={askOpen}>
 			<aside class="toc">
 				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
@@ -375,6 +380,9 @@
 					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
 				{/if}
 			</section>
+			{#if askOpen}
+				<AskDrawer {code} {bundle} {searchIndex} {indexing} onfocus={onSearchResult} onclose={() => (askOpen = false)} />
+			{/if}
 		</div>
 	{/if}
 </main>
@@ -644,6 +652,34 @@
 		min-height: 0;
 		display: grid;
 		grid-template-columns: 240px 1fr;
+	}
+	.studio.ask-open {
+		grid-template-columns: 240px minmax(0, 1fr) 380px;
+	}
+	.ask-trigger {
+		gap: 5px;
+	}
+	.ask-ava {
+		border-radius: 50%;
+		vertical-align: middle;
+	}
+	.ask-trigger.active {
+		border-color: rgba(251, 146, 60, 0.6);
+		color: #fb923c;
+		background: rgba(251, 146, 60, 0.1);
+	}
+	@media (max-width: 1120px) {
+		.studio.ask-open {
+			grid-template-columns: minmax(0, 1fr) 360px;
+		}
+		.studio.ask-open .toc {
+			display: none;
+		}
+	}
+	@media (max-width: 720px) {
+		.studio.ask-open {
+			grid-template-columns: 1fr;
+		}
 	}
 	.toc {
 		min-height: 0;
