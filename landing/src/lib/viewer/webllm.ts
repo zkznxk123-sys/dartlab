@@ -11,9 +11,23 @@
 import type { InitProgressReport, MLCEngineInterface } from '@mlc-ai/web-llm';
 import { ollamaChat } from './ollama';
 
-// Tier 1(opt-in) 모델. Llama-3.2-1B 비추론(~705MB) — Qwen3 는 thinking 모델이라 답 전에 <think> 를
-// 길게 뱉어 첫토큰 지연이 크고 0.6B 는 /no_think 도 불안정. 비추론이 단발 Q&A 에 지연 예측가능·한국어 종합 우수.
-const MODEL_ID = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+// Tier 1(opt-in) 큐레이션 모델 — web-llm prebuiltAppConfig 실재(q4f16_1, 전부 lowres). 사용자가 골라 받는다.
+// 비추론 모델만(Qwen3 thinking 은 <think> 지연·0.6B 불안정 회피). 기본 = 가장 작은 Llama-1B.
+export interface WebLlmModel {
+	id: string;
+	label: string;
+	sizeMB: number;
+	note: string;
+}
+export const WEBLLM_MODELS: WebLlmModel[] = [
+	{ id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC', label: 'Llama 3.2 1B', sizeMB: 879, note: '빠름' },
+	{ id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', label: 'Qwen2.5 1.5B', sizeMB: 1630, note: '한국어' },
+	{ id: 'Qwen2.5-3B-Instruct-q4f16_1-MLC', label: 'Qwen2.5 3B', sizeMB: 2505, note: '고품질' }
+];
+export const DEFAULT_MODEL_ID = WEBLLM_MODELS[0].id;
+export function isKnownModel(id: string): boolean {
+	return WEBLLM_MODELS.some((m) => m.id === id);
+}
 
 export interface WebLlmProgress {
 	text: string;
@@ -44,41 +58,64 @@ export async function webgpuUsable(): Promise<boolean> {
 	}
 }
 
+// 워커·엔진 싱글턴(모델 무관) + 현재 적재된 모델 id. 모델 교체는 새 워커가 아니라 engine.reload(id) 로 — 워커1·엔진1·모델N.
 let enginePromise: Promise<MLCEngineInterface> | null = null;
+let loadedModelId: string | null = null;
 
-// 가중치(~705MB)가 이미 브라우저 Cache API 에 있는지만 검사 — 다운로드·GPU 적재 안 함(빠름).
-// true 면 "받기"가 아니라 "불러오기(빠름)"로 분기해, F5/재방문마다 705MB 재다운로드처럼 보이는 오해를 없앤다.
-// appConfig 미지정 = prebuiltAppConfig (ensureEngine 의 CreateWebWorkerMLCEngine 과 동일 캐시 키).
-export async function isModelCached(): Promise<boolean> {
+// 가중치가 이미 브라우저 Cache API 에 있는지만 검사(모델별) — 다운로드·GPU 적재 안 함(빠름). true 면 "받기" 아닌
+// "불러오기(빠름)" 분기에 써서 F5/재방문마다 재다운로드처럼 보이는 오해를 없앤다.
+export async function isModelCached(modelId: string = DEFAULT_MODEL_ID): Promise<boolean> {
 	if (!webgpuAvailable()) return false;
 	try {
 		const webllm = await import('@mlc-ai/web-llm');
-		return await webllm.hasModelInCache(MODEL_ID);
+		return await webllm.hasModelInCache(modelId);
 	} catch {
 		return false;
 	}
 }
 
-// 모델 다운로드/적재만 미리(드로어 진행바용). 이미 적재됐으면 즉시 resolve.
-export async function warmEngine(onProgress?: (p: WebLlmProgress) => void): Promise<void> {
-	await ensureEngine(onProgress);
+// 선택 모델 다운로드/적재만 미리(드로어 진행바용). 이미 그 모델이 적재됐으면 즉시 resolve.
+export async function warmEngine(modelId: string = DEFAULT_MODEL_ID, onProgress?: (p: WebLlmProgress) => void): Promise<void> {
+	await ensureModel(modelId, onProgress);
 }
 
-async function ensureEngine(onProgress?: (p: WebLlmProgress) => void): Promise<MLCEngineInterface> {
+// 현재 적재된 모델 id(없으면 null) — UI 가 선택과 실제 적재 일치 확인용.
+export function loadedModel(): string | null {
+	return loadedModelId;
+}
+
+// 빈 워커 엔진 싱글턴(modelId 없이 생성 → reload 로 모델 주입). CreateWebWorkerMLCEngine(worker, modelId) 를 안 쓰는
+// 이유: 그건 생성 시 모델을 박아 교체마다 새 엔진/워커 누적. new WebWorkerMLCEngine(worker) 는 엔진만 만든다.
+async function getEngine(): Promise<MLCEngineInterface> {
 	if (!webgpuAvailable()) throw new Error('WebGPU 미지원 브라우저');
 	if (!enginePromise) {
 		enginePromise = (async () => {
 			const webllm = await import('@mlc-ai/web-llm');
 			const worker = new Worker(new URL('./webllmWorker.ts', import.meta.url), { type: 'module' });
-			return webllm.CreateWebWorkerMLCEngine(worker, MODEL_ID, {
-				initProgressCallback: (r: InitProgressReport) => onProgress?.({ text: r.text, progress: r.progress })
-			});
+			return new webllm.WebWorkerMLCEngine(worker) as unknown as MLCEngineInterface;
 		})().catch((e) => {
 			enginePromise = null; // 실패 시 재시도 허용
 			throw e;
 		});
 	}
 	return enginePromise;
+}
+
+// 선택 모델 보장 — 같으면 즉시 반환, 다르면 reload(워커 재사용). 진행 콜백은 공식 setInitProgressCallback 으로 매번 교체.
+async function ensureModel(modelId: string, onProgress?: (p: WebLlmProgress) => void): Promise<MLCEngineInterface> {
+	const engine = await getEngine();
+	if (loadedModelId === modelId) return engine;
+	engine.setInitProgressCallback((r: InitProgressReport) => onProgress?.({ text: r.text, progress: r.progress }));
+	try {
+		await engine.reload(modelId);
+		loadedModelId = modelId;
+		return engine;
+	} catch (e) {
+		// device-lost(OOM 등): 죽은 엔진 재사용 금지 — 워커/엔진까지 리셋해야 진짜 복구.
+		enginePromise = null;
+		loadedModelId = null;
+		throw e;
+	}
 }
 
 const ASK_SYSTEM =
@@ -106,11 +143,12 @@ export function stripEcho(s: string): string {
 export interface AnswerOpts {
 	onProgress?: (p: WebLlmProgress) => void; // 모델 다운로드/적재 진행
 	onToken?: (delta: string) => void; // 스트리밍 토큰
+	modelId?: string; // 선택 WebLLM 모델(미지정 = DEFAULT_MODEL_ID)
 }
 
 // grounded 질문응답 — 검색이 찾은 근거에 한해서만 답한다. onToken 주면 스트리밍.
 export async function answerQuestion(question: string, evidence: AskEvidence[], opts: AnswerOpts = {}): Promise<string> {
-	const engine = await ensureEngine(opts.onProgress);
+	const engine = await ensureModel(opts.modelId ?? DEFAULT_MODEL_ID, opts.onProgress);
 	const messages = [
 		{ role: 'system' as const, content: ASK_SYSTEM },
 		{ role: 'user' as const, content: `${buildEvidenceBlock(evidence)}\n\n[질문] ${question}` }
@@ -164,7 +202,7 @@ export function buildChatMessages(history: ChatTurn[], evidence: AskEvidence[]):
 
 // history = 전체 대화(마지막 = 현재 질문). evidence = 현재 질문의 근거. onToken 스트리밍. (WebLLM 경로)
 export async function chatAnswer(history: ChatTurn[], evidence: AskEvidence[], opts: AnswerOpts = {}): Promise<string> {
-	const engine = await ensureEngine(opts.onProgress);
+	const engine = await ensureModel(opts.modelId ?? DEFAULT_MODEL_ID, opts.onProgress);
 	const messages = buildChatMessages(history, evidence);
 	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 640, stream: true });
 	let full = '';
@@ -180,7 +218,7 @@ export async function chatAnswer(history: ChatTurn[], evidence: AskEvidence[], o
 
 // (보조) 결정론 분석 결과를 한국어로 다듬기만 — viewer-analyze 정량 패널용. 숫자 불변.
 export async function narrateSignals(deterministicText: string, opts: { onProgress?: (p: WebLlmProgress) => void } = {}): Promise<string> {
-	const engine = await ensureEngine(opts.onProgress);
+	const engine = await ensureModel(DEFAULT_MODEL_ID, opts.onProgress);
 	const reply = await engine.chat.completions.create({
 		messages: [
 			{
@@ -202,13 +240,14 @@ export type Provider = 'webllm' | 'ollama';
 export interface ChatRouteOpts extends AnswerOpts {
 	provider: Provider;
 	ollamaModel?: string;
+	webllmModel?: string; // 선택 WebLLM 모델(provider='webllm' 일 때)
 }
 
 export async function routeChat(history: ChatTurn[], evidence: AskEvidence[], opts: ChatRouteOpts): Promise<string> {
 	if (opts.provider === 'ollama') {
-		if (!opts.ollamaModel) throw new Error('Ollama 모델이 선택되지 않았습니다');
+		if (!opts.ollamaModel) throw new Error('로컬 모델이 선택되지 않았습니다');
 		const messages = buildChatMessages(history, evidence);
 		return ollamaChat(messages, opts.ollamaModel, { onToken: opts.onToken });
 	}
-	return chatAnswer(history, evidence, opts); // 기존 WebLLM 경로(모델 progress 포함) 그대로
+	return chatAnswer(history, evidence, { ...opts, modelId: opts.webllmModel }); // 선택 모델로 WebLLM 경로
 }

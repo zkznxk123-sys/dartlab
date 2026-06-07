@@ -9,7 +9,17 @@
 	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
 	import { ask, type EvRef, type NavOption } from '$lib/viewer/askSession.svelte';
-	import { isModelCached, routeChat, stripEcho, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn, type Provider } from '$lib/viewer/webllm';
+	import {
+		isModelCached,
+		routeChat,
+		stripEcho,
+		warmEngine,
+		webgpuUsable,
+		WEBLLM_MODELS,
+		type AskEvidence,
+		type ChatTurn,
+		type Provider
+	} from '$lib/viewer/webllm';
 	import { detectOllama } from '$lib/viewer/ollama';
 	import type { FinanceSignal } from '$lib/viewer/diff';
 	import type { PanelBundle } from '$lib/viewer/types';
@@ -59,6 +69,27 @@
 	let inputEl = $state<HTMLTextAreaElement | null>(null);
 	let scrollEl = $state<HTMLElement | null>(null);
 
+	// 모바일이면 큰 모델(>2GB·3B)은 피커에서 숨김(저사양 OOM 방지). 드로어는 클라이언트 전용이라 window 안전.
+	let isMobile = $state(false);
+	$effect(() => {
+		isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 880px)').matches;
+	});
+	const pickerModels = $derived(WEBLLM_MODELS.filter((m) => !(isMobile && m.sizeMB > 2000)));
+	const selModel = $derived(WEBLLM_MODELS.find((m) => m.id === ask.selectedModel) ?? WEBLLM_MODELS[0]);
+	const notEmbed = (m: string) => !/embed|bge|nomic|mxbai|e5-/i.test(m); // 채팅 불가(임베딩) 모델 제외
+	function sizeLabel(mb: number): string {
+		return mb >= 1000 ? `${(mb / 1000).toFixed(1)}GB` : `${mb}MB`;
+	}
+	// 모델 선택 변경 — 영속 + modelState='checking' 으로 마운트 effect 재산정(선택 모델 캐시 여부 → 자동/받기).
+	function onModelChange() {
+		try {
+			localStorage.setItem('dartlab.viewer.webllmModel', ask.selectedModel);
+		} catch {
+			/* localStorage 불가 무시 */
+		}
+		ask.modelState = 'checking';
+	}
+
 	// 대화·모델·Ollama 상태는 askSession 모듈 스토어(ask) 에 둔다 — 회사 이동 시 viewer +page 가 bundle 을 잠시
 	// null 로 만들어 AskDrawer 가 언마운트돼도 세션이 생존한다(크로스-회사 "AI 화면 그대로" 요구).
 	const provider = $derived<Provider>(ask.ollamaState === 'ready' ? 'ollama' : 'webllm');
@@ -82,10 +113,16 @@
 				ask.modelState = 'unsupported';
 				return;
 			}
-			if (await isModelCached()) {
-				void warmModel(true); // 이미 받음 → 버튼 없이 자동 불러오기(캐시라 몇 초, 다운로드 0). "안 받아도 됨" 안 보임.
+			// 모델별 캐시 배지 — 비었으면 1회 수집(회사 이동 재마운트에도 생존). 큐레이션 3종만.
+			if (ask.cachedModels.length === 0) {
+				const flags = await Promise.all(WEBLLM_MODELS.map((m) => isModelCached(m.id)));
+				ask.cachedModels = WEBLLM_MODELS.filter((_, i) => flags[i]).map((m) => m.id);
+			}
+			if (ask.modelState !== 'checking') return;
+			if (await isModelCached(ask.selectedModel)) {
+				void warmModel(ask.selectedModel, true); // 선택 모델 이미 받음 → 버튼 없이 자동 불러오기(다운로드 0)
 			} else {
-				ask.modelState = 'idle'; // 처음 — 명시 [받기] 버튼(705MB 다운로드는 사용자 동의 필요)
+				ask.modelState = 'idle'; // 선택 모델 처음 — 명시 [받기](다운로드는 사용자 동의)
 			}
 		});
 	});
@@ -111,22 +148,23 @@
 	// 캐시에서 불러오는 중인지(받기 아님) — 진행바 카피 분기용. loading 진입 시점에 고정.
 	let loadingFromCache = $state(false);
 
-	// 모델 GPU 적재 — fromCache=true 면 캐시에서(다운로드 0·몇 초), false 면 첫 다운로드(~705MB).
-	async function warmModel(fromCache: boolean) {
+	// 선택 모델 GPU 적재 — fromCache=true 면 캐시에서(다운로드 0·몇 초), false 면 첫 다운로드. reload 로 모델만 교체.
+	async function warmModel(modelId: string, fromCache: boolean) {
 		if (ask.modelState === 'loading' || ask.modelState === 'ready') return;
 		loadingFromCache = fromCache;
 		ask.modelState = 'loading';
 		ask.modelProgress = 0;
 		try {
-			await warmEngine((p) => (ask.modelProgress = p.progress));
+			await warmEngine(modelId, (p) => (ask.modelProgress = p.progress));
 			ask.modelState = 'ready';
+			if (!ask.cachedModels.includes(modelId)) ask.cachedModels = [...ask.cachedModels, modelId]; // 받음 배지 갱신
 		} catch {
 			ask.modelState = 'error';
 		}
 	}
 	// 명시 버튼 전용 — 첫 다운로드(idle) · 재시도(error). cached 는 마운트에서 자동 불러오므로 버튼이 없다.
 	function downloadModel() {
-		void warmModel(loadingFromCache); // error 재시도는 직전 맥락(받기/불러오기) 유지, idle 은 false
+		void warmModel(ask.selectedModel, loadingFromCache); // 현재 선택 모델로(재시도는 직전 받기/불러오기 맥락 유지)
 	}
 
 	// 사용자 제스처(클릭) 안에서만 — Chrome 142 LNA 팝업이 제스처 직후에만 의미 있게 뜬다($effect/마운트 호출 금지).
@@ -135,7 +173,8 @@
 		const s = await detectOllama();
 		if (s.ok) {
 			ask.ollamaState = 'ready';
-			ask.ollamaModel = s.pick;
+			ask.ollamaModels = s.models.filter(notEmbed); // 채팅 가능 모델만 택1 후보
+			ask.ollamaModel = ask.ollamaModels.includes(s.pick ?? '') ? s.pick : (ask.ollamaModels[0] ?? s.pick);
 			ask.ollamaReason = null;
 		} else if (s.reason === 'no-model') {
 			ask.ollamaState = 'no-model';
@@ -207,6 +246,7 @@
 			await routeChat(history, payload, {
 				provider,
 				ollamaModel: ask.ollamaModel ?? undefined,
+				webllmModel: ask.selectedModel,
 				onToken: (d) => {
 					buf += d;
 					const now = performance.now();
@@ -319,15 +359,25 @@
 				<!-- 온디바이스 모델 영역 — 자식 폭을 한 컬럼(.ob-block)으로 묶어 좌우 정렬 일치 -->
 				<div class="ob-block">
 					{#if ask.modelState === 'idle'}
+						<select class="model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 선택">
+							{#each pickerModels as m (m.id)}
+								<option value={m.id}>{m.label} · {sizeLabel(m.sizeMB)} · {m.note}{ask.cachedModels.includes(m.id) ? ' · 받음' : ''}</option>
+							{/each}
+						</select>
 						<button type="button" class="onboard-dl" onclick={downloadModel}><Download size={15} /> 대화 모델 받기</button>
-						<span class="onboard-sub">처음 1회 ~705MB · 안 받아도 근거·답은 즉시</span>
+						<span class="onboard-sub">처음 1회 {sizeLabel(selModel.sizeMB)} · 안 받아도 근거·답은 즉시</span>
 					{:else if ask.modelState === 'cached'}
 						<span class="onboard-sub">대화 모델 불러오는 중…</span>
 					{:else if ask.modelState === 'loading'}
 						<div class="onboard-bar"><div class="bar-fill" style="width:{Math.round(ask.modelProgress * 100)}%"></div><span class="bar-txt">{loadingFromCache ? '불러오는 중' : '받는 중'} {Math.round(ask.modelProgress * 100)}%</span></div>
 					{:else if ask.modelState === 'ready'}
-						<span class="onboard-sub">무엇이든 물어보세요</span>
+						<span class="onboard-sub">{selModel.label} 준비됨 · 무엇이든 물어보세요</span>
 					{:else if ask.modelState === 'error'}
+						<select class="model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 선택">
+							{#each pickerModels as m (m.id)}
+								<option value={m.id}>{m.label} · {sizeLabel(m.sizeMB)} · {m.note}{ask.cachedModels.includes(m.id) ? ' · 받음' : ''}</option>
+							{/each}
+						</select>
 						<button type="button" class="onboard-dl err" onclick={downloadModel}>로드 실패 · 다시</button>
 					{:else if ask.modelState === 'unsupported'}
 						<span class="onboard-sub">이 브라우저는 대화 미지원 — 근거·결정론 답은 됩니다</span>
@@ -343,7 +393,16 @@
 					{:else if ask.ollamaState === 'probing'}
 						<span class="onboard-sub">Ollama 찾는 중…</span>
 					{:else if ask.ollamaState === 'ready'}
-						<span class="ollama-on">● Ollama 연결됨 · {ask.ollamaModel}</span>
+						<span class="ollama-on">● 로컬 모델 연결됨</span>
+						{#if ask.ollamaModels.length > 1}
+							<div class="ev-row ollama-pick">
+								{#each ask.ollamaModels as m (m)}
+									<button type="button" class="ev-chip" class:on={m === ask.ollamaModel} onclick={() => (ask.ollamaModel = m)}>{m}</button>
+								{/each}
+							</div>
+						{:else}
+							<span class="onboard-sub">{ask.ollamaModel}</span>
+						{/if}
 					{:else if ask.ollamaState === 'no-model'}
 						<span class="ollama-warn">{OLLAMA_NO_MODEL}</span>
 						{@render guide()}
@@ -516,6 +575,8 @@
 		text-overflow: ellipsis;
 	}
 	.ev-chip:hover { border-color: rgba(251, 146, 60, 0.55); color: #fb923c; }
+	.ev-chip.on { border-color: rgba(52, 211, 153, 0.6); color: #34d399; background: rgba(52, 211, 153, 0.1); }
+	.ollama-pick { justify-content: center; }
 	.ev-chip.stale { border-style: dashed; }
 	.stale-tag {
 		margin-left: 3px;
@@ -585,6 +646,23 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 7px;
+	}
+	/* 모델 선택 드롭다운 — 받기 전 어떤 모델을 받을지 고른다. scan 다크 폼 스타일. */
+	.model-pick {
+		width: 100%;
+		max-width: 240px;
+		padding: 7px 10px;
+		border: 1px solid #263145;
+		border-radius: 8px;
+		background: #0a0e18;
+		color: #cbd5e1;
+		font: inherit;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.model-pick:focus {
+		outline: none;
+		border-color: #38bdf8;
 	}
 	.onboard-dl {
 		display: inline-flex;
@@ -773,5 +851,43 @@
 		color: #34d399;
 		font-size: 10px;
 		font-weight: 700;
+	}
+
+	/* D5 — 모바일 터치 타깃 HIG(44px). 데스크톱(≥881px)은 위 기본값(26/38px) 불변.
+	   드로어가 모바일에선 전체화면 오버레이(부모 +page @media)라 입력·닫기·전송이 손가락에 충분해야 한다. */
+	@media (max-width: 880px) {
+		.ad-head {
+			padding: 12px 14px;
+		}
+		.ad-x {
+			width: 40px;
+			height: 40px;
+		}
+		.ad-askbox {
+			padding: 0 14px 14px;
+			gap: 10px;
+		}
+		.ad-askbox textarea {
+			min-height: 44px;
+			font-size: 16px; /* iOS 자동 줌인 방지(≥16px) */
+		}
+		.ad-send {
+			width: 48px;
+			height: 48px;
+		}
+		/* 온보딩 모델 영역 — 오버레이 풀폭이라 카드도 넉넉히. 받기 버튼 터치 타깃 확대. */
+		.onboard {
+			max-width: 420px;
+		}
+		.onboard-dl {
+			min-height: 48px;
+			font-size: 14px;
+		}
+		.retry {
+			min-height: 44px;
+		}
+		.ad-model.dl {
+			min-height: 44px;
+		}
 	}
 </style>
