@@ -192,7 +192,8 @@
 			score: item.score,
 			snippet: item.snippet,
 			matchKind: item.matchKind,
-			matchedTerms: item.matchedTerms
+			matchedTerms: item.matchedTerms,
+			stale: false // 재구성은 점프·glow 좌표용(섹션/행/기간) — 칩 재표시 아님이라 stale 무관
 		});
 	}
 

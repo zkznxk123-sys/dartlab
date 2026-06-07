@@ -95,6 +95,7 @@ export interface SearchIndex {
 	df: Map<string, number>;
 	avgdl: number;
 	vocab: number;
+	periods: string[]; // bundle.periods (최신좌측 timeline SSOT) — 근거 기간선택·recency 랭킹의 정본
 }
 
 export interface SearchHit {
@@ -109,6 +110,7 @@ export interface SearchHit {
 	snippet: string;
 	matchKind: 'text' | 'table' | 'amount';
 	matchedTerms: string[];
+	stale: boolean; // 근거 셀이 이 행의 더 최신 셀보다 옛것 = "이 항목의 최근 언급은 과거" (UX 정직 표기)
 }
 
 export interface BuildOpts {
@@ -166,13 +168,14 @@ function indexRow(acc: Acc, sectionKey: string, rowIndex: number, r: PanelRow, o
 	});
 }
 
-function finalize(acc: Acc): SearchIndex {
+function finalize(acc: Acc, bundle: PanelBundle): SearchIndex {
 	return {
 		rows: acc.rows,
 		postings: acc.postings,
 		df: acc.df,
 		avgdl: acc.totalLen / Math.max(1, acc.rows.length),
-		vocab: acc.df.size
+		vocab: acc.df.size,
+		periods: bundle.periods // SSOT(최신좌측) 보존 — 호출 시 cells 키 재정렬 금지(과거기간 근거 버그 근본차단)
 	};
 }
 
@@ -187,7 +190,7 @@ export function buildIndex(bundle: PanelBundle, opts: BuildOpts = {}): SearchInd
 	for (const [sectionKey, prows] of bundle.gridBySection) {
 		for (let i = 0; i < prows.length; i++) indexRow(acc, sectionKey, i, prows[i], o);
 	}
-	return finalize(acc);
+	return finalize(acc, bundle);
 }
 
 // MessageChannel 기반 yield-to-main (setTimeout 4ms clamp 회피, 진짜 macrotask 양보 = 렌더 비차단).
@@ -214,11 +217,23 @@ export async function buildIndexChunked(bundle: PanelBundle, opts: BuildOpts = {
 			await yieldToMain();
 		}
 	}
-	return finalize(acc);
+	return finalize(acc, bundle);
 }
 
 const K1 = 1.5;
 const B = 0.75;
+// 공시 Q&A 는 기본 최신우선 — 근거의 최신 needle 셀이 오래될수록 점수 감쇠(1/(1+λ·rank)). λ=0.08 →
+// 5기간전 ×0.71, 40기간전 ×0.24. 강한 relevance 는 살리되 옛 근거를 최신 위로 못 올린다(불만2 "과거기간" 직격).
+const RECENCY_LAMBDA = 0.08;
+const RERANK_POOL = 50; // BM25 상위 풀만 recency 재랭킹(비용 bound, topK ≪ pool)
+const SCORE_CUT_RATIO = 0.25; // top1 대비 미만 곁가지 컷(불만1 "안맞는 근거" 완화, 최소 1건 보장)
+// 텍스트 행인데 표면어가 어느 셀에도 없음 = bigram 유령매칭(예 "영업이익" 질의에 이익잉여금 행 — 영업·이익 조각만
+// 맞고 문구는 없음). 감점해 진짜 문구 든 행을 올린다. 표(table) 행은 라벨매칭이 본가치라 제외(표라벨 정답 보존).
+const SURFACELESS_PENALTY = 0.5;
+
+function recencyWeight(rank: number): number {
+	return 1 / (1 + RECENCY_LAMBDA * rank);
+}
 
 /** 쿼리 → bigram 가중치 + 적용된 동의어 목록(칩 노출용). */
 export function expandQuery(query: string, expand = true): { weights: Map<string, number>; added: string[] } {
@@ -226,9 +241,12 @@ export function expandQuery(query: string, expand = true): { weights: Map<string
 	for (const t of tokenizeBigram(query)) weights.set(t, 1.0);
 	const added: string[] = [];
 	if (expand) {
-		const qns = query.replace(/\s+/g, '');
+		// 동의어 발화 = *어절 경계* 매칭 (옛 query.replace(공백) substring 은 "확정급여부채"→부채, "리스크"→리스 등
+		// 단어경계 넘은 오발화 다수 — 곁가지 동의어를 끌어왔다). 어절이 key 와 일치 또는 key 로 시작할 때만.
+		const words = query.toLowerCase().match(/[가-힣a-z0-9]{2,}/g) ?? [];
 		for (const [key, syns] of Object.entries(SYNONYMS)) {
-			if (qns.includes(key)) {
+			const k = key.toLowerCase();
+			if (words.some((w) => w === k || w.startsWith(k))) {
 				for (const syn of syns) {
 					for (const bg of tokenizeBigram(syn)) weights.set(bg, Math.max(weights.get(bg) ?? 0, 0.5));
 					added.push(syn);
@@ -269,28 +287,46 @@ function surfaceNeedles(query: string, added: string[]): string[] {
 	return [...needles].sort((a, b) => b.length - a.length);
 }
 
-function snippetFor(cells: Record<string, string>, periodsDesc: string[], needles: string[]): { period: string; snippet: string; matchedTerms: string[] } {
-	let fallbackPeriod = periodsDesc[0] ?? '';
-	for (const p of periodsDesc) {
-		const cell = cells[p] ?? '';
-		if (cell) fallbackPeriod = p;
-		let bestAt = Number.POSITIVE_INFINITY;
-		const matched: string[] = [];
-		for (const needle of needles) {
-			const at = cell.toLowerCase().indexOf(needle.toLowerCase());
-			if (at >= 0) {
-				bestAt = Math.min(bestAt, at);
-				matched.push(needle);
+interface EvPeriod { period: string; rank: number; hasNeedle: boolean; stale: boolean }
+
+// 근거 기간 선택 — SSOT periods(최신좌측) 순회: needle 든 *최신* 셀. 없으면 최신 비어있지 않은 셀
+// (옛 fallback 은 가장 오래된 셀로 추락했음 — 2015Q4 소송 같은 헛근거 근본차단). needlesLc = 소문자 needle.
+// stale = needle 셀이 이 행의 더 최신 비어있지 않은 셀보다 옛것 = "이 항목의 최근 언급은 과거".
+function evidencePeriod(cells: Record<string, string>, periods: string[], needlesLc: string[]): EvPeriod {
+	let firstNonEmpty = -1;
+	for (let i = 0; i < periods.length; i++) {
+		const cell = cells[periods[i]];
+		if (!cell) continue;
+		if (firstNonEmpty < 0) firstNonEmpty = i;
+		const lc = cell.toLowerCase();
+		for (const needle of needlesLc) {
+			if (lc.includes(needle)) {
+				return { period: periods[i], rank: i, hasNeedle: true, stale: i > firstNonEmpty };
 			}
 		}
-		if (matched.length) {
-			const start = Math.max(0, bestAt - 34);
-			const end = Math.min(cell.length, bestAt + 92);
-			return { period: p, snippet: cell.slice(start, end), matchedTerms: matched.slice(0, 8) };
+	}
+	const idx = firstNonEmpty >= 0 ? firstNonEmpty : 0;
+	return { period: periods[idx] ?? '', rank: idx, hasNeedle: false, stale: false };
+}
+
+// 선택된 셀에서 스니펫 + 매칭어. (period 선택은 evidencePeriod 가 담당 — 셀/period 항상 정합.)
+function snippetAt(cell: string, needles: string[]): { snippet: string; matchedTerms: string[] } {
+	const lc = cell.toLowerCase();
+	let bestAt = Number.POSITIVE_INFINITY;
+	const matched: string[] = [];
+	for (const needle of needles) {
+		const at = lc.indexOf(needle.toLowerCase());
+		if (at >= 0) {
+			bestAt = Math.min(bestAt, at);
+			matched.push(needle);
 		}
 	}
-	const snippet = (cells[fallbackPeriod] ?? '').slice(0, 96);
-	return { period: fallbackPeriod, snippet, matchedTerms: [] };
+	if (matched.length) {
+		const start = Math.max(0, bestAt - 34);
+		const end = Math.min(cell.length, bestAt + 92);
+		return { snippet: cell.slice(start, end), matchedTerms: matched.slice(0, 8) };
+	}
+	return { snippet: cell.slice(0, 96), matchedTerms: [] };
 }
 
 export function search(
@@ -318,20 +354,48 @@ export function search(
 			if (denom > 0) scores.set(pos, (scores.get(pos) ?? 0) + (qw * idf * (tf * (K1 + 1))) / denom);
 		}
 	}
-	// 후보 랭킹 — 표면어 BM25 점수 있으면 그 순(+조건이면 금액 필터); 순수 조건("100억 이상")이면 조건
-	// 만족 행을 금액 내림차순. 둘 다 없으면 빈 결과.
+
+	// 근거 기간/스니펫에 쓸 표면어. evidencePeriod 재계산을 행당 1회로 메모.
+	const needles = surfaceNeedles(lexQuery, added);
+	const needlesLc = needles.map((s) => s.toLowerCase());
+	const epCache = new Map<number, EvPeriod>();
+	const epOf = (pos: number): EvPeriod => {
+		let e = epCache.get(pos);
+		if (!e) {
+			e = evidencePeriod(idx.rows[pos].cells, idx.periods, needlesLc);
+			epCache.set(pos, e);
+		}
+		return e;
+	};
+
+	// 후보 랭킹 — 표면어 BM25 있으면: 상위 풀만 recency 재랭킹(최신우선) → 상대컷(곁가지 제거).
+	// 순수 조건("100억 이상")이면 조건 만족 행을 금액 내림차순. 둘 다 없으면 빈 결과.
 	let ranked: Array<[number, number]>;
 	if (scores.size > 0) {
-		ranked = [...scores.entries()].sort((a, b) => b[1] - a[1]);
-		if (c) ranked = ranked.filter(([pos]) => amtOk(idx.rows[pos].maxAmount, c));
+		let byBm25 = [...scores.entries()].sort((a, b) => b[1] - a[1]);
+		if (c) byBm25 = byBm25.filter(([pos]) => amtOk(idx.rows[pos].maxAmount, c));
+		const reranked = byBm25
+			.slice(0, RERANK_POOL)
+			.map(([pos, bm25]): [number, number] => {
+				const ep = epOf(pos);
+				let s = bm25 * recencyWeight(ep.rank);
+				if (idx.rows[pos].blockType === 'text' && !ep.hasNeedle) s *= SURFACELESS_PENALTY;
+				return [pos, s];
+			})
+			.sort((a, b) => b[1] - a[1]);
+		const cut = (reranked[0]?.[1] ?? 0) * SCORE_CUT_RATIO;
+		ranked = reranked.filter(([, s]) => s >= cut);
+		if (!ranked.length && reranked.length) ranked = [reranked[0]]; // 최소 1건 보장
 	} else if (c) {
 		ranked = idx.rows
 			.map((r, i): [number, number] => [i, r.maxAmount])
 			.filter(([, amt]) => amtOk(amt, c))
-			.sort((a, b) => b[1] - a[1]);
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, RERANK_POOL);
 	} else {
 		return { hits: [], added };
 	}
+
 	// 결과 dedupe — 같은 (섹션,블록)의 scope(연결/별도)·leafSeq 변형을 하나로 접어 top-K 가 서로 다른 항목이
 	// 되게(출시 후 감사: 쿼리당 평균 1.2~1.6 중복 = "같은 항목 4번" 제거). 첫 등장(최고 랭킹)만 유지.
 	const topK = opts.topK ?? 8;
@@ -347,11 +411,10 @@ export function search(
 		top.push(entry);
 		if (top.length >= topK) break;
 	}
-	const needles = surfaceNeedles(lexQuery, added);
 	const hits: SearchHit[] = top.map(([pos, sc]) => {
 		const row = idx.rows[pos];
-		const periodsDesc = Object.keys(row.cells).sort().reverse();
-		const snippet = snippetFor(row.cells, periodsDesc, needles);
+		const ep = epOf(pos);
+		const { snippet, matchedTerms } = snippetAt(row.cells[ep.period] ?? '', needles);
 		return {
 			sectionKey: row.sectionKey,
 			rowIndex: row.rowIndex,
@@ -359,11 +422,12 @@ export function search(
 			section: row.section,
 			block: row.block,
 			scope: row.scope,
-			period: snippet.period,
+			period: ep.period,
 			score: sc,
-			snippet: snippet.snippet,
+			snippet,
 			matchKind: c && amtOk(row.maxAmount, c) ? 'amount' : row.blockType === 'table' ? 'table' : 'text',
-			matchedTerms: snippet.matchedTerms
+			matchedTerms,
+			stale: ep.stale
 		};
 	});
 	return { hits, added };

@@ -51,7 +51,7 @@
 		onclose: () => void;
 	} = $props();
 
-	interface EvRef { n: number; period: string; path: string; text: string }
+	interface EvRef { n: number; period: string; path: string; text: string; stale: boolean }
 	interface NavOption { code: string; name: string }
 	interface Turn {
 		q: string;
@@ -144,7 +144,7 @@
 			const text = plainText(cell).slice(0, 700);
 			if (!text) continue;
 			evHits.push(h);
-			evItems.push({ n: n++, period: h.period, path: [h.chapter, h.section, h.block].filter(Boolean).join(' > '), text });
+			evItems.push({ n: n++, period: h.period, path: [h.chapter, h.section, h.block].filter(Boolean).join(' > '), text, stale: h.stale });
 		}
 		const sigs = finSignals.length ? finSignals : await loadCompanyFinanceSignals(code);
 		if (!finSignals.length && sigs.length) finSignals = sigs;
@@ -346,7 +346,7 @@
 					{#if t.evItems.length}
 						<div class="ev-row">
 							{#each t.evItems as e, i (e.n)}
-								<button type="button" class="ev-chip" onclick={() => onfocus(t.evHits[i])} title={e.path}>근거 {e.n} · {e.period}</button>
+								<button type="button" class="ev-chip" class:stale={e.stale} onclick={() => onfocus(t.evHits[i])} title={e.stale ? `${e.path} · 이 항목의 최근 언급은 과거 시점입니다` : e.path}>근거 {e.n} · {e.period}{#if e.stale} <span class="stale-tag">과거</span>{/if}</button>
 							{/each}
 						</div>
 					{/if}
@@ -475,6 +475,15 @@
 		text-overflow: ellipsis;
 	}
 	.ev-chip:hover { border-color: rgba(251, 146, 60, 0.55); color: #fb923c; }
+	.ev-chip.stale { border-style: dashed; }
+	.stale-tag {
+		margin-left: 3px;
+		padding: 0 4px;
+		border-radius: 6px;
+		background: rgba(148, 163, 184, 0.16);
+		color: #94a3b8;
+		font-size: 9px;
+	}
 	/* 크로스-회사 이동 — 전환 divider + 회사 배지 + 이동 칩 */
 	.co-divider {
 		align-self: stretch;
