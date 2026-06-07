@@ -17,8 +17,8 @@ name: News Archive Sync
 
 on:
   schedule:
-    - cron: '0 18 * * *'  # UTC 18:00 = KST 03:00 (야간 헤드라인 캡처)
-    - cron: '0 6 * * *'   # UTC 06:00 = KST 15:00 (당일 오전 헤드라인)
+    - cron: '0 16 * * *'  # UTC 16:00 = KST 01:00 (야간 헤드라인 — Data Sync 18:00 과 HF 충돌 분리)
+    - cron: '0 8 * * *'   # UTC 08:00 = KST 17:00 (오후 헤드라인 — Data Sync 06:00 과 HF 충돌 분리)
   workflow_dispatch:
     inputs:
       max_queries:

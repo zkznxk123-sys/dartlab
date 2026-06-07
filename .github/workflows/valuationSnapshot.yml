@@ -12,7 +12,7 @@ name: Valuation Snapshot
 
 on:
   schedule:
-    - cron: '0 19 * * *'   # UTC 19:00 = KST 04:00 (장 마감 + 마감동시호가 완료 후)
+    - cron: '0 23 * * *'   # UTC 23:00 = KST 08:00 (장 마감 후 + searchIndexDelta 19:00·Data Sync 18:00 과 HF 충돌 분리)
   workflow_dispatch:
 
 concurrency:
