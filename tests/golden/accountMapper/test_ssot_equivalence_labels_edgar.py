@@ -91,13 +91,21 @@ def _koreanLabelsRef() -> dict[str, str]:
             result[snakeId] = korName
             used.add(korName)
 
+    for snakeId, korName in edgarLabels.items():
+        if korName and result.get(snakeId) in (None, snakeId):
+            result[snakeId] = korName
+
+    for sid, name in supplements.items():
+        if result.get(sid) in (None, sid):
+            result[sid] = name
+
     if mappings:
         reverse: dict[str, list[str]] = {}
         for name, snakeId in mappings.items():
             if any("가" <= ch <= "힣" for ch in name):
                 reverse.setdefault(snakeId, []).append(name)
         for snakeId, names in reverse.items():
-            if snakeId in result:
+            if snakeId in result and result[snakeId] != snakeId:
                 continue
             candidate = min(names, key=len)
             if candidate in used:
@@ -108,29 +116,22 @@ def _koreanLabelsRef() -> dict[str, str]:
                 result[snakeId] = candidate
             used.add(result[snakeId])
 
-    for snakeId, korName in edgarLabels.items():
-        if not korName:
-            continue
-        current = result.get(snakeId)
-        if current is None or current == snakeId:
-            result[snakeId] = korName
-
-    for sid, name in supplements.items():
-        if sid not in result:
-            result[sid] = name
-
     for src, tgt in snakeAlias.items():
-        if tgt not in result and src in result:
-            result[tgt] = result[src]
-        if src not in result and tgt in result:
+        if tgt in result and result.get(src) in (None, src):
             result[src] = result[tgt]
+    for src, tgt in snakeAlias.items():
+        if src in result and result.get(tgt) in (None, tgt):
+            result[tgt] = result[src]
 
     for sid in result:
         val = result[sid]
+        if val and val.startswith("*"):
+            val = val[1:]
         if val and val[0].isdigit():
             cleaned = _NUM_PREFIX.sub("", val)
             if cleaned:
-                result[sid] = cleaned
+                val = cleaned
+        result[sid] = val
 
     return result
 

@@ -38,7 +38,10 @@ def _snake(model: dict, accountId: str, label: str, stmt: str) -> str | None:
     ]
     if orderedCandidates:
         return min(orderedCandidates)[1]
-    return idSnake
+    aliasSnake = model.get("idAlias", {}).get(stripped)
+    if aliasSnake and aliasSnake in order:
+        return aliasSnake
+    return idSnake or aliasSnake
 
 
 def _displayOrder(model: dict, accountId: str, label: str, rawOrd: int, stmt: str) -> int:

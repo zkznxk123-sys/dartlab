@@ -26,6 +26,11 @@
     "common_stock": "보통주자본금",
     "additional_paid_in_capital": "주식발행초과금",
     "accumulated_other_comprehensive_income": "기타포괄손익누계액",
-    "treasury_stock": "자기주식"
+    "treasury_stock": "자기주식",
+    "current_inventories": "유동재고자산",
+    "share_premium": "주식발행초과금",
+    "held_to_maturity_financial_assets": "만기보유금융자산",
+    "current_afs_financial_assets": "단기매도가능금융자산",
+    "availableforsale_financial_assets_valuation": "매도가능금융자산평가손익"
   }
 }

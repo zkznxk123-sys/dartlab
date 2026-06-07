@@ -12,8 +12,10 @@ import type {
 } from './types';
 import {
 	FINANCE_ACCOUNT_DEPTH,
+	FINANCE_ACCOUNT_ID_ALIAS,
 	FINANCE_ACCOUNT_ID_TO_SNAKE,
 	FINANCE_ACCOUNT_IS_TOTAL,
+	FINANCE_ACCOUNT_LABEL,
 	FINANCE_ACCOUNT_NAME_TO_SNAKES,
 	FINANCE_ACCOUNT_ORDER,
 	type FinanceStatementOrderKey
@@ -27,7 +29,9 @@ type NameCandidateMap = Record<string, readonly string[]>;
 const ACCOUNT_ORDER = FINANCE_ACCOUNT_ORDER as Record<FinanceStatementOrderKey, NumberMap>;
 const ACCOUNT_DEPTH = FINANCE_ACCOUNT_DEPTH as Record<FinanceStatementOrderKey, NumberMap>;
 const ACCOUNT_IS_TOTAL = FINANCE_ACCOUNT_IS_TOTAL as Record<FinanceStatementOrderKey, BoolMap>;
+const ACCOUNT_LABEL = FINANCE_ACCOUNT_LABEL as StringMap;
 const ACCOUNT_ID_TO_SNAKE = FINANCE_ACCOUNT_ID_TO_SNAKE as StringMap;
+const ACCOUNT_ID_ALIAS = FINANCE_ACCOUNT_ID_ALIAS as StringMap;
 const ACCOUNT_NAME_TO_SNAKES = FINANCE_ACCOUNT_NAME_TO_SNAKES as NameCandidateMap;
 
 export interface QueryRow {
@@ -185,7 +189,13 @@ export function accountSnake(accountId: string, label = '', kind?: FinanceKind):
 
 	const labelSnake = firstOrderedCandidate(ACCOUNT_NAME_TO_SNAKES[label], order);
 	if (labelSnake && (!order || order[labelSnake] != null)) return labelSnake;
-	return idSnake ?? labelSnake;
+
+	// 최저 우선순위 — 직접 id·name 둘 다 실패 시에만 alias-follow(예: Revenue→sales). name 이 맞는
+	// 케이스(Equity→자본총계→stockholders_equity)는 이미 위에서 반환되어 여기 도달 안 함.
+	const aliasSnake = stripped ? ACCOUNT_ID_ALIAS[stripped] : undefined;
+	if (aliasSnake && (!order || order[aliasSnake] != null)) return aliasSnake;
+
+	return idSnake ?? labelSnake ?? aliasSnake ?? null;
 }
 
 // 들여쓰기 깊이(순수 구조) — IS 본류(매출액~당기순이익) 균일 1, 리프 2+. 원천은 Python 과 같은 account SSOT mirror.
@@ -201,6 +211,14 @@ export function accountIsTotal(accountId: string, label = '', kind?: FinanceKind
 	const snake = accountSnake(accountId, label, kind);
 	if (!snake) return false;
 	return accountIsTotalFromSnake(snake, kind);
+}
+
+// 표시 라벨 — 엔진 panel 과 동일한 표준 한글명(snakeId→korName SSOT mirror). account_id/account_nm 의
+// as-reported 표류(수익(매출액)/매출액/영업수익)를 표준명으로 통일. 미해결(매핑 없음)은 as-reported 원문 유지.
+export function accountLabel(accountId: string, label = '', kind?: FinanceKind): string {
+	const snake = accountSnake(accountId, label, kind);
+	const std = snake ? ACCOUNT_LABEL[snake] : undefined;
+	return std || label || accountId;
 }
 
 export function accountDisplayOrder(accountId: string, label: string, kind: FinanceKind, rawOrd: number | null): number {
@@ -250,7 +268,7 @@ export function pivot(rows: QueryRow[], kind: FinanceKind, scope: FinanceScope, 
 		if (!row) {
 			row = {
 				accountId: r.acct,
-				label: r.label || r.acct,
+				label: accountLabel(r.acct, r.label, kind),
 				ord: displayOrd,
 				depth: accountDepth(r.acct, r.label, kind),
 				isTotal: accountIsTotal(r.acct, r.label, kind),

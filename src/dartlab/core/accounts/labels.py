@@ -42,12 +42,16 @@ def _edgarKorNames() -> dict[str, str]:
 def koreanLabels() -> dict[str, str]:
     """snakeId → 한글 라벨 SSOT (6 단계 우선순위 cascade).
 
-    1. standardAccounts.korName (정본)
-    2. mappings 역인덱스 — 가장 짧은 한국어명 (충돌 시 alt)
-    3. edgar.accounts korName (DART 에 없는 US-GAAP 계정)
-    4. labelSupplements 보충
-    5. snakeAlias 양방향 전파
-    6. 선행 번호 제거
+    1. standardAccounts.korName (정본 큐레이션)
+    2. edgar.accounts korName (DART 에 없는 US-GAAP 계정 — 큐레이션)
+    3. labelSupplements 보충 (큐레이션)
+    4. mappings 역인덱스 — 가장 짧은 한국어명 (휴리스틱, degenerate 행만 채움)
+    5. snakeAlias — degenerate 한 src 만 canonical 라벨로 통일(동의어) + canonical 역채움
+    6. 선행 '*' 큐레이션 마커 제거 후 선행 번호 제거
+
+    큐레이션 소스(1~3)를 휴리스틱(4)보다 먼저 둬 garbage(예: net_income→'중단영업')가
+    정답(당기순이익)을 덮는 회귀를 차단한다. 5 의 동의어 통일은 4 이후에도 degenerate 한
+    (라벨 없음 또는 라벨==snakeId) src 에만 적용 — 자기 고유명을 가진 lump(이자수익 등)는 보존.
 
     Args:
         없음.
@@ -75,13 +79,24 @@ def koreanLabels() -> dict[str, str]:
             result[snakeId] = korName
             used.add(korName)
 
+    # 2. edgar.accounts korName (큐레이션) — degenerate 행만 채움
+    for snakeId, korName in _edgarKorNames().items():
+        if korName and result.get(snakeId) in (None, snakeId):
+            result[snakeId] = korName
+
+    # 3. labelSupplements (큐레이션) — degenerate 행만 채움
+    for sid, name in loadSupplements().items():
+        if result.get(sid) in (None, sid):
+            result[sid] = name
+
+    # 4. mappings 역인덱스 최단명 (휴리스틱) — 큐레이션 라벨은 보존하되 raw-snakeId placeholder 는 갱신
     if mappings:
         reverse: dict[str, list[str]] = {}
         for name, snakeId in mappings.items():
             if any("가" <= ch <= "힣" for ch in name):
                 reverse.setdefault(snakeId, []).append(name)
         for snakeId, names in reverse.items():
-            if snakeId in result:
+            if snakeId in result and result[snakeId] != snakeId:
                 continue
             candidate = min(names, key=len)
             if candidate in used:
@@ -92,29 +107,24 @@ def koreanLabels() -> dict[str, str]:
                 result[snakeId] = candidate
             used.add(result[snakeId])
 
-    for snakeId, korName in _edgarKorNames().items():
-        if not korName:
-            continue
-        current = result.get(snakeId)
-        if current is None or current == snakeId:
-            result[snakeId] = korName
-
-    for sid, name in loadSupplements().items():
-        if sid not in result:
-            result[sid] = name
-
+    # 5. snakeAlias — degenerate src 동의어 통일(canonical 라벨 상속) + canonical 역채움
     for src, tgt in SNAKEID_ALIASES.items():
-        if tgt not in result and src in result:
-            result[tgt] = result[src]
-        if src not in result and tgt in result:
+        if tgt in result and result.get(src) in (None, src):
             result[src] = result[tgt]
+    for src, tgt in SNAKEID_ALIASES.items():
+        if src in result and result.get(tgt) in (None, tgt):
+            result[tgt] = result[src]
 
+    # 6. 선행 '*' 큐레이션 마커 제거 후 선행 번호 제거
     for sid in result:
         val = result[sid]
+        if val and val.startswith("*"):
+            val = val[1:]
         if val and val[0].isdigit():
             cleaned = _NUM_PREFIX.sub("", val)
             if cleaned:
-                result[sid] = cleaned
+                val = cleaned
+        result[sid] = val
 
     return result
 

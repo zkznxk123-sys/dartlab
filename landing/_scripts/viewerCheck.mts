@@ -6,7 +6,7 @@ import { edgarSectionStatus } from '../src/lib/viewer/edgarSection.ts';
 import { narrativeCore } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
 import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
-import { mergeDriftVariants, accountDepth, accountIsTotal, sceComponent, buildSceMatrix, buildSql } from '../src/lib/viewer/finance/financePivot.ts';
+import { mergeDriftVariants, accountDepth, accountIsTotal, accountLabel, sceComponent, buildSceMatrix, buildSql } from '../src/lib/viewer/finance/financePivot.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
 import { buildCompareBoard, compareRows, detectFinanceUnit, normalizeCompareTargets } from '../src/lib/viewer/compare/index.ts';
 import type { PanelBundle, PanelRow } from '../src/lib/viewer/types.ts';
@@ -98,6 +98,13 @@ eq(accountIsTotal('ifrs-full_Assets'), true, 'isTotal 자산총계=true');
 eq(accountIsTotal('ifrs-full_ProfitLoss'), true, 'isTotal 당기순이익=true(depth 1 이어도 강조)');
 eq(accountIsTotal('dart_OperatingIncomeLoss'), false, 'isTotal 영업이익=false(소계)');
 eq(accountIsTotal('ifrs-full_CashAndCashEquivalents'), false, 'isTotal 현금=false(리프)');
+
+// accountLabel — 엔진 panel 과 동일 표준 한글명(snakeId→korName mirror). as-reported 표류 통일, 미해결은 원문.
+eq(accountLabel('ifrs-full_Revenue', '수익(매출액)', 'IS'), '매출액', 'label 수익(매출액)→매출액(표준)');
+eq(accountLabel('ifrs-full_ProfitLoss', '당기순이익', 'IS'), '당기순이익', 'label 당기순이익(중단영업 회귀 차단)');
+eq(accountLabel('dart_OtherLosses', '기타손실', 'IS'), '기타비용', 'label 기타손실→기타비용(별표 strip+표준)');
+eq(accountLabel('ifrs-full_FinanceIncome', '금융수익', 'IS'), '금융이익', 'label 금융수익→금융이익(엔진 일치)');
+eq(accountLabel('ifrs-full_UNKNOWNXYZ', '독자계정명', 'IS'), '독자계정명', 'label 미해결→as-reported 원문 유지');
 
 // sceComponent — account_detail 경로 끝 = 자본구성요소, 연결재무제표/재무제표 [member] = 자본총계.
 eq(sceComponent('자본 [구성요소]|지배기업의 소유주에게 귀속되는 지분 [구성요소]|자본금 [구성요소]'), '자본금', 'sceComp 자본금');

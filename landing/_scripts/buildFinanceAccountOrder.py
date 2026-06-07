@@ -63,6 +63,24 @@ def _isTotalMaps(sortData: dict[str, Any], accounts: dict[str, Any]) -> dict[str
     return totals
 
 
+def _labelMap(validSnakeIds: set[str]) -> dict[str, str]:
+    """snakeId → 표준 한글 라벨 (엔진 koreanLabels SSOT 미러, skeleton 한정).
+
+    엔진(panel)과 byte 일치를 보장하려 ``dartlab.core.accounts.labels.koreanLabels`` 를
+    직접 사용한다(복제 drift 차단). 라벨 미도출(raw snakeId placeholder)은 제외해
+    뷰어가 account_nm 으로 fallback 하도록 둔다.
+    """
+    from dartlab.core.accounts.labels import koreanLabels
+
+    labels = koreanLabels()
+    out: dict[str, str] = {}
+    for snakeId in validSnakeIds:
+        label = labels.get(snakeId)
+        if label and label != snakeId:
+            out[snakeId] = label
+    return out
+
+
 def _idMap(accounts: dict[str, Any], validSnakeIds: set[str]) -> dict[str, str]:
     mappings: dict[str, str] = accounts.get("mappings", {})
     out: dict[str, str] = {}
@@ -81,6 +99,27 @@ def _idMap(accounts: dict[str, Any], validSnakeIds: set[str]) -> dict[str, str]:
     return dict(sorted(out.items()))
 
 
+def _idAliasMap(accounts: dict[str, Any], validSnakeIds: set[str], directIds: dict[str, str]) -> dict[str, str]:
+    """직접 매핑이 skeleton 밖 snakeId 를 가리킬 때 snakeAlias 로 canonical 추적 — *최저 우선순위* id 맵.
+
+    예: ifrs-full_Revenue → 'Revenue' → mappings 'revenue'(skeleton 밖) → alias 'sales'(skeleton).
+    뷰어 accountSnake 가 직접 id → name → 본 맵 순으로 시도하므로, name 해상도가 맞는 경우
+    (예: 'Equity' → name '자본총계' → stockholders_equity)는 덮지 않는다. 직접 맵에 이미 있는
+    키는 제외.
+    """
+    mappings: dict[str, str] = accounts.get("mappings", {})
+    snakeAlias: dict[str, str] = accounts.get("layers", {}).get("snakeAlias", {})
+    out: dict[str, str] = {}
+    for key, snakeId in mappings.items():
+        stripped = PREFIX_RE.sub("", key)
+        if not IDLIKE_RE.match(stripped) or stripped in directIds or stripped in out:
+            continue
+        canonical = snakeAlias.get(snakeId)
+        if snakeId not in validSnakeIds and canonical in validSnakeIds:
+            out[stripped] = canonical
+    return dict(sorted(out.items()))
+
+
 def _nameCandidates(accounts: dict[str, Any], validSnakeIds: set[str]) -> dict[str, list[str]]:
     buckets: dict[str, set[str]] = {}
     for snakeId, meta in accounts.get("standardAccounts", {}).items():
@@ -96,12 +135,15 @@ def buildModel() -> dict[str, Any]:
     accounts = _loadJson(ACCOUNT_MAPPINGS_PATH)
     orders, levels = _orderedStatementMaps(sortData)
     validSnakeIds = {snakeId for rows in orders.values() for snakeId in rows}
+    idMap = _idMap(accounts, validSnakeIds)
     return {
         "orders": orders,
         "levels": levels,
         "depths": _depthMaps(sortData),
         "isTotal": _isTotalMaps(sortData, accounts),
-        "idMap": _idMap(accounts, validSnakeIds),
+        "labels": _labelMap(validSnakeIds),
+        "idMap": idMap,
+        "idAlias": _idAliasMap(accounts, validSnakeIds, idMap),
         "nameCandidates": _nameCandidates(accounts, validSnakeIds),
     }
 
@@ -124,7 +166,11 @@ def render(model: dict[str, Any]) -> str:
         + "\n"
         + _tsConst("FINANCE_ACCOUNT_IS_TOTAL", model["isTotal"])
         + "\n"
+        + _tsConst("FINANCE_ACCOUNT_LABEL", model["labels"])
+        + "\n"
         + _tsConst("FINANCE_ACCOUNT_ID_TO_SNAKE", model["idMap"])
+        + "\n"
+        + _tsConst("FINANCE_ACCOUNT_ID_ALIAS", model["idAlias"])
         + "\n"
         + _tsConst("FINANCE_ACCOUNT_NAME_TO_SNAKES", model["nameCandidates"])
     )
