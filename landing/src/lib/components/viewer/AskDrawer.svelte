@@ -7,9 +7,27 @@
 	import { plainText, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
 	import { composeAnswer } from '$lib/viewer/answerCompose';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
-	import { chatAnswer, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn } from '$lib/viewer/webllm';
+	import { routeChat, stripEcho, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn, type Provider } from '$lib/viewer/webllm';
+	import { detectOllama } from '$lib/viewer/ollama';
 	import type { FinanceSignal } from '$lib/viewer/diff';
 	import type { PanelBundle } from '$lib/viewer/types';
+
+	// 로컬 Ollama 연결 안내(툴팁). origin 은 실배포처 고정(환각 URL 금지).
+	const OLLAMA_TIP = `로컬 Ollama로 더 좋은 답변 (다운로드 없이 PC의 모델 사용)
+
+1. 설치 — ollama.com 에서 받아 실행
+2. 모델 받기 — 터미널에 입력
+     ollama pull qwen2.5:3b   (한국어 강함: ollama pull exaone3.5:7.8b)
+3. 이 사이트 허용 (한 번만) — 아래 1줄 실행 후 Ollama 재시작
+     · Windows: setx OLLAMA_ORIGINS "https://eddmpython.github.io"
+     · macOS: launchctl setenv OLLAMA_ORIGINS "https://eddmpython.github.io"
+     · Linux: systemctl edit ollama.service → Environment="OLLAMA_ORIGINS=https://eddmpython.github.io"
+4. "로컬 Ollama 연결" 클릭 → 브라우저가 "로컬 네트워크 접근 허용?"을 물으면 [허용]
+
+연결되면 PC의 모델로 답합니다. 외부 전송 0, 모두 로컬.`;
+	const OLLAMA_NO_MODEL = 'Ollama는 켜졌는데 설치된 모델이 없습니다. 터미널에 "ollama pull qwen2.5:3b" 후 다시 연결하세요.';
+	const OLLAMA_BLOCKED =
+		'로컬 Ollama에 연결하지 못했습니다. 설치·실행, 사이트 허용(OLLAMA_ORIGINS), 브라우저 "로컬 접근 허용"을 확인하세요(ⓘ). WebLLM으로 계속 쓸 수 있습니다.';
 
 	let {
 		code,
@@ -48,6 +66,12 @@
 	let inputEl = $state<HTMLTextAreaElement | null>(null);
 	let scrollEl = $state<HTMLElement | null>(null);
 
+	// 로컬 Ollama 옵션 레인 — ready 면 provider='ollama'(더 좋은 품질). 자동 프로브 금지(연결 버튼 클릭 시만).
+	type OllamaState = 'hidden' | 'probing' | 'ready' | 'no-model' | 'blocked';
+	let ollamaState = $state<OllamaState>('hidden');
+	let ollamaModel = $state<string | null>(null);
+	const provider = $derived<Provider>(ollamaState === 'ready' ? 'ollama' : 'webllm');
+
 	$effect(() => {
 		void webgpuUsable().then((v) => {
 			if (modelState === 'checking') modelState = v ? 'idle' : 'unsupported';
@@ -57,6 +81,8 @@
 		const c = code;
 		chat = [];
 		finSignals = [];
+		ollamaState = 'hidden';
+		ollamaModel = null;
 		void loadCompanyFinanceSignals(c).then((s) => {
 			if (code === c) finSignals = s;
 		});
@@ -83,6 +109,20 @@
 		}
 	}
 
+	// 사용자 제스처(클릭) 안에서만 — Chrome 142 LNA 팝업이 제스처 직후에만 의미 있게 뜬다($effect/마운트 호출 금지).
+	async function connectOllama() {
+		ollamaState = 'probing';
+		const s = await detectOllama();
+		if (s.ok) {
+			ollamaState = 'ready';
+			ollamaModel = s.pick;
+		} else if (s.reason === 'no-model') {
+			ollamaState = 'no-model';
+		} else {
+			ollamaState = 'blocked'; // unreachable/cors/timeout 통합
+		}
+	}
+
 	async function ask() {
 		if (!searchIndex || !bundle || !question.trim() || busy) return;
 		const q = question.trim();
@@ -103,7 +143,8 @@
 		const sigs = finSignals.length ? finSignals : await loadCompanyFinanceSignals(code);
 		if (!finSignals.length && sigs.length) finSignals = sigs;
 		const composed = composeAnswer(q, hits, added, sigs);
-		const useAi = modelState === 'ready' && (evItems.length > 0 || composed.citedSignal != null);
+		const aiReady = provider === 'ollama' ? ollamaState === 'ready' : modelState === 'ready';
+		const useAi = aiReady && (evItems.length > 0 || composed.citedSignal != null);
 
 		chat.push({ q, det: composed.answer, citedLabel: composed.citedSignal?.label ?? null, evItems, evHits, ai: '', aiRunning: useAi, aiErr: null });
 		const idx = chat.length - 1;
@@ -125,20 +166,23 @@
 		let buf = '';
 		let last = 0;
 		try {
-			await chatAnswer(history, payload, {
+			await routeChat(history, payload, {
+				provider,
+				ollamaModel: ollamaModel ?? undefined,
 				onToken: (d) => {
 					buf += d;
 					const now = performance.now();
 					if (now - last > 45) {
-						chat[idx].ai = buf;
+						chat[idx].ai = stripEcho(buf); // 약한 모델 parroting/마커 누출 제거
 						last = now;
 						scrollBottom();
 					}
 				}
 			});
-			chat[idx].ai = buf;
+			chat[idx].ai = stripEcho(buf);
 		} catch (e) {
 			chat[idx].aiErr = e instanceof Error ? e.message : String(e);
+			if (provider === 'ollama') ollamaState = 'blocked'; // 도중 사망 → 다음 질문 자동 WebLLM 강등
 		} finally {
 			chat[idx].aiRunning = false;
 			busy = false;
@@ -161,6 +205,7 @@
 			<img src="{base}/avatar-detective.png" alt="" width="22" height="22" />
 		</picture>
 		<strong>공시 Q&A</strong>
+		{#if ollamaState === 'ready'}<span class="hd-badge" title="로컬 Ollama 사용 중 · 외부 전송 없음">Ollama · {ollamaModel}</span>{/if}
 		<button type="button" class="ad-x" onclick={onclose} aria-label="닫기"><X size={15} /></button>
 	</header>
 
@@ -182,6 +227,22 @@
 					<button type="button" class="onboard-dl err" onclick={downloadModel}>로드 실패 · 다시</button>
 				{:else if modelState === 'unsupported'}
 					<span class="onboard-sub">이 브라우저는 대화 미지원 — 근거·결정론 답은 됩니다</span>
+				{/if}
+
+				<!-- 로컬 Ollama 옵션 레인 (더 좋은 품질·버벅임0). 자동 프로브 금지 — 클릭 시만. -->
+				{#if ollamaState === 'hidden'}
+					<button type="button" class="ollama-link" onclick={connectOllama}>
+						더 좋은 품질? 로컬 Ollama 연결
+						<span class="info" tabindex="0" role="button" aria-label="Ollama 연결 안내">ⓘ<span class="tip">{OLLAMA_TIP}</span></span>
+					</button>
+				{:else if ollamaState === 'probing'}
+					<span class="onboard-sub">Ollama 찾는 중…</span>
+				{:else if ollamaState === 'ready'}
+					<span class="ollama-on">● Ollama 연결됨 · {ollamaModel}</span>
+				{:else if ollamaState === 'no-model'}
+					<span class="ollama-warn">{OLLAMA_NO_MODEL} <button type="button" class="retry" onclick={connectOllama}>다시</button></span>
+				{:else if ollamaState === 'blocked'}
+					<span class="ollama-warn">{OLLAMA_BLOCKED} <button type="button" class="retry" onclick={connectOllama}>다시</button></span>
 				{/if}
 			</div>
 		{/if}
@@ -209,7 +270,7 @@
 	</div>
 
 	<!-- 대화 중 모델 strip — 메시지 있고 아직 안 받았을 때만(중앙 온보딩과 중복 방지). ready 면 숨김. -->
-	{#if chat.length > 0 && modelState === 'idle'}
+	{#if chat.length > 0 && modelState === 'idle' && ollamaState !== 'ready'}
 		<button type="button" class="ad-model dl" onclick={downloadModel}>
 			<Download size={14} /> 대화 모델 받기 <span class="sz">~705MB · 1회</span>
 		</button>
@@ -451,4 +512,78 @@
 		cursor: pointer;
 	}
 	.ad-send:disabled { opacity: 0.45; cursor: default; }
+
+	/* Ollama 옵션 레인 — 기존 팔레트 재사용(새 색 없음). ready 만 초록, 나머지 muted/warn. */
+	.ollama-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: #64748b;
+		font: inherit;
+		font-size: 11px;
+		cursor: pointer;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.ollama-link:hover { color: #fb923c; }
+	.ollama-on { display: inline-flex; align-items: center; gap: 5px; color: #34d399; font-size: 11px; }
+	.ollama-warn { color: #94a3b8; font-size: 11px; line-height: 1.5; max-width: 240px; text-align: center; }
+	.retry {
+		margin-left: 4px;
+		padding: 2px 7px;
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		background: #0a0e18;
+		color: #bae6fd;
+		font: inherit;
+		font-size: 10px;
+		cursor: pointer;
+	}
+	.retry:hover { border-color: rgba(251, 146, 60, 0.5); color: #fb923c; }
+	.hd-badge {
+		padding: 2px 8px;
+		border: 1px solid rgba(52, 211, 153, 0.4);
+		border-radius: 999px;
+		background: rgba(52, 211, 153, 0.08);
+		color: #34d399;
+		font-size: 10px;
+		font-weight: 700;
+	}
+	.info {
+		position: relative;
+		display: inline-grid;
+		place-items: center;
+		width: 15px;
+		height: 15px;
+		border-radius: 50%;
+		border: 1px solid #1e2433;
+		color: #64748b;
+		font-size: 9px;
+		cursor: help;
+	}
+	.info:hover, .info:focus-within { color: #fb923c; border-color: rgba(251, 146, 60, 0.5); }
+	.info .tip {
+		display: none;
+		position: absolute;
+		bottom: calc(100% + 8px);
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 20;
+		width: 280px;
+		max-width: 78vw;
+		padding: 10px 12px;
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+		background: #0a0e18;
+		color: #cbd5e1;
+		font-size: 11px;
+		line-height: 1.6;
+		white-space: pre-wrap;
+		text-align: left;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+	}
+	.info:hover .tip, .info:focus-within .tip { display: block; }
 </style>
