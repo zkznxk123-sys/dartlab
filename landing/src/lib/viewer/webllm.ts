@@ -45,6 +45,11 @@ export async function webgpuUsable(): Promise<boolean> {
 
 let enginePromise: Promise<MLCEngineInterface> | null = null;
 
+// 모델 다운로드/적재만 미리(드로어 진행바용). 이미 적재됐으면 즉시 resolve.
+export async function warmEngine(onProgress?: (p: WebLlmProgress) => void): Promise<void> {
+	await ensureEngine(onProgress);
+}
+
 async function ensureEngine(onProgress?: (p: WebLlmProgress) => void): Promise<MLCEngineInterface> {
 	if (!webgpuAvailable()) throw new Error('WebGPU 미지원 브라우저');
 	if (!enginePromise) {
@@ -123,7 +128,7 @@ export async function chatAnswer(history: ChatTurn[], evidence: AskEvidence[], o
 		...prior.map((t) => ({ role: t.role, content: t.content })),
 		{ role: 'user' as const, content: `${buildEvidenceBlock(evidence)}\n\n[질문] ${last?.content ?? ''}` }
 	];
-	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 640, stream: true });
+	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 420, stream: true });
 	let full = '';
 	for await (const chunk of stream) {
 		const delta = chunk.choices[0]?.delta?.content ?? '';
