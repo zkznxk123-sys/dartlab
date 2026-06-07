@@ -38,11 +38,9 @@
 		loadChartManifest,
 		groupBySection,
 		type ChartManifest,
-		type ChartSpec,
-		type ChartPointRef
+		type ChartSpec
 	} from '$lib/browser/charts';
 	import ChartRenderer from '$chart/ChartRenderer.svelte';
-	import CopilotDock from '$lib/components/company/CopilotDock.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -257,21 +255,9 @@
 	let heroCharts = $derived((chartSections.hero ?? []).map((e) => chartSpecs.get(e.key)).filter((s): s is ChartSpec => Boolean(s)));
 	let narrativeCharts = $derived((chartSections.narrative ?? []).map((e) => ({ entry: e, spec: chartSpecs.get(e.key) })).filter((p): p is { entry: typeof p.entry; spec: ChartSpec } => Boolean(p.spec)));
 
-	let copilotDock = $state<{ setContext: (ctx: Record<string, unknown>) => void } | null>(null);
-
-	function onChartPoint(ref: object) {
-		// drill-back 회로의 진입점.
-		// 1. EvidencePanel 열기 (Phase 2 deep-link).
-		// 2. CopilotDock 에 selection context 주입 (다음 질문이 그 selection 컨텍스트로).
+	function onChartPoint() {
+		// 차트 datapoint 클릭 → EvidencePanel 열기 (Phase 2 deep-link).
 		evidenceOpen = true;
-		const point = ref as ChartPointRef;
-		copilotDock?.setContext({
-			chartId: point.name,
-			accountKey: point.name,
-			valueRef: point.valueRef,
-			period: point.period,
-			rcept_no: point.rcept_no
-		});
 	}
 </script>
 
@@ -371,14 +357,6 @@
 			{changes}
 			sourceStatus={company.sourceStatus}
 		/>
-
-		<div class="copilot-anchor">
-			<CopilotDock
-				bind:this={copilotDock}
-				stockCode={data.stockCode}
-				onOpenEvidence={() => (evidenceOpen = true)}
-			/>
-		</div>
 	{/if}
 </main>
 
@@ -451,22 +429,6 @@
 		font-size: 14px;
 		font-weight: 700;
 		color: #f8fafc;
-	}
-	.copilot-anchor {
-		position: fixed;
-		right: 16px;
-		bottom: 16px;
-		width: min(360px, calc(100vw - 32px));
-		max-height: calc(100vh - 32px);
-		z-index: 60;
-		pointer-events: auto;
-	}
-	@media (max-width: 880px) {
-		.copilot-anchor {
-			right: 8px;
-			bottom: 8px;
-			width: calc(100vw - 16px);
-		}
 	}
 	.eyebrow {
 		color: #fb923c;
