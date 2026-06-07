@@ -1662,10 +1662,10 @@ export const FINANCE_ACCOUNT_LEVEL = {
 		"losses_on_valuations_of_derivatives": 2,
 		"miscellaneous_income_for_lease": 2,
 		"miscellaneous_losses": 2,
-		"net_income": 0,
+		"net_income": 1,
 		"net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity": 2,
 		"net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": 2,
-		"net_profit": 0,
+		"net_profit": 1,
 		"noncontrolling_interests_equity": 2,
 		"nonoperating_income_expenses": 1,
 		"operating_expenses": 1,
@@ -1728,7 +1728,7 @@ export const FINANCE_ACCOUNT_LEVEL = {
 		"tax_on_items_not_reclassified_to_profit_or_loss": 2,
 		"tax_on_items_reclassified_to_profit_or_loss": 2,
 		"taxes_and_dues": 2,
-		"total_comprehensive_income": 0,
+		"total_comprehensive_income": 1,
 		"total_comprehensive_income_from_continuing_operations_owners_of_parent": 2,
 		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": 2,
 		"total_comprehensive_income_owners_of_parent": 2,
@@ -2531,10 +2531,10 @@ export const FINANCE_ACCOUNT_DEPTH = {
 		"losses_on_valuations_of_derivatives": 2,
 		"miscellaneous_income_for_lease": 2,
 		"miscellaneous_losses": 2,
-		"net_income": 0,
+		"net_income": 1,
 		"net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity": 2,
 		"net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": 2,
-		"net_profit": 0,
+		"net_profit": 1,
 		"noncontrolling_interests_equity": 2,
 		"nonoperating_income_expenses": 1,
 		"operating_expenses": 1,
@@ -2597,16 +2597,38 @@ export const FINANCE_ACCOUNT_DEPTH = {
 		"tax_on_items_not_reclassified_to_profit_or_loss": 2,
 		"tax_on_items_reclassified_to_profit_or_loss": 2,
 		"taxes_and_dues": 2,
-		"total_comprehensive_income": 0,
-		"total_comprehensive_income_from_continuing_operations_owners_of_parent": 0,
-		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": 0,
-		"total_comprehensive_income_owners_of_parent": 0,
-		"total_other_comprehensive_income": 0,
+		"total_comprehensive_income": 1,
+		"total_comprehensive_income_from_continuing_operations_owners_of_parent": 2,
+		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": 2,
+		"total_comprehensive_income_owners_of_parent": 2,
+		"total_other_comprehensive_income": 1,
 		"training_expenses": 2,
 		"transportation_expenses": 2,
 		"traveling_expenses": 2,
 		"vehicle_maintenance_expenses": 2,
 		"water_light_and_heating_expenses": 2
+	}
+} as const;
+
+export const FINANCE_ACCOUNT_IS_TOTAL = {
+	"BS": {
+		"assets": true,
+		"liabilities": true,
+		"stockholders_equity": true,
+		"total_assets": true,
+		"total_liabilities": true,
+		"total_liabilities_and_equity": true,
+		"total_stockholders_equity": true
+	},
+	"CF": {},
+	"IS": {
+		"net_income": true,
+		"net_profit": true,
+		"total_comprehensive_income": true,
+		"total_comprehensive_income_from_continuing_operations_owners_of_parent": true,
+		"total_comprehensive_income_from_discontinued_operations_owners_of_parent": true,
+		"total_comprehensive_income_owners_of_parent": true,
+		"total_other_comprehensive_income": true
 	}
 } as const;
 
