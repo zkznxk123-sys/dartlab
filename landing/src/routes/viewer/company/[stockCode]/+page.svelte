@@ -34,6 +34,9 @@
 	let nameMap = $state<Map<string, string>>(new Map());
 	onMount(() => {
 		void loadCompanies().then((l) => (nameMap = new Map(l.map((c) => [c.code, c.name]))));
+		// D3 — 모바일(≤880px)은 동시표시 기간 1개가 기본(390px 에 260px 셀 3개 강제 가로스크롤 회피).
+		// 데스크톱은 cols=3 그대로(이 분기는 mount 시 1회·좁은 화면에서만). 이후 사용자 cols 토글은 자유.
+		if (typeof window !== 'undefined' && window.matchMedia('(max-width: 880px)').matches) cols = 1;
 	});
 
 	const COL_CHOICES = [3, 6, 9] as const;
@@ -869,8 +872,20 @@
 		}
 	}
 	@media (max-width: 720px) {
+		/* D2 — 모바일에서 드로어를 격자 아래로 적층(grid 1열)하지 않는다. 적층하면 board(상단·죽은 공간) +
+		   drawer(하단·끼임)로 둘 다 못 쓴다. 대신 드로어를 전체화면 오버레이로 띄워 board 위에 덮는다.
+		   board grid 는 단일 1fr 그대로 유지(데스크톱 push grid 미사용) → board 는 정상 풀폭으로 살아있고,
+		   드로어는 그 위에 fixed 로 덮인다. .ask-open 의 3번째(380px) 트랙을 만들지 않아 board 압착 0. */
 		.studio.ask-open {
+			position: relative; /* 드로어 오버레이의 positioning context — board/ribbon 아래 studio 영역에 정확히 덮임 */
 			grid-template-columns: 1fr;
+		}
+		.studio.ask-open :global(.ask-drawer) {
+			position: absolute;
+			inset: 0; /* studio 영역(헤더·리본 아래) 전체를 덮는 오버레이 — 전체화면/일반 모두 정확 */
+			z-index: 90;
+			border-left: none;
+			box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6);
 		}
 	}
 	.toc {
@@ -892,9 +907,47 @@
 			grid-template-columns: 1fr;
 		}
 		.toc {
-			max-height: 180px;
+			/* D4 — 모바일 TOC 상단 접이: 더 얕게(140px) + 자체 스크롤. 격자에 세로 공간 양보. */
+			max-height: 140px;
 			border-right: none;
 			border-bottom: 1px solid #1e2433;
+		}
+
+		/* D1 — 헤더 11버튼 가로 오버플로(scrollW 927 > 390) 해소. 데스크톱은 nowrap 한 줄 유지,
+		   모바일에선 줄바꿈(wrap)으로 모든 버튼을 화면 안에 둔다. 가로스크롤(overflow-x:auto) 대신 wrap 을
+		   택한 이유: .stock-pop/.data-pop/.add-pop 가 absolute 라 overflow 컨테이너에 세로로도 클리핑된다. */
+		.page-head {
+			flex-wrap: wrap;
+			gap: 8px 10px;
+			padding: 8px 10px;
+		}
+		.ph-left {
+			/* 회사명이 0폭으로 압착돼 "삼"으로 잘리던 문제 — 한 줄 통째로 차지하게 해 온전히 보이게 한다. */
+			flex: 1 0 100%;
+			min-width: 0;
+		}
+		.ph-corp {
+			font-size: 17px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.ph-right {
+			/* 두 번째 줄에 버튼들을 줄바꿈 배치 — flex-shrink 해제하고 wrap 허용. */
+			flex: 1 1 100%;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+		/* D5 — 터치 타깃 44px(HIG). 헤더 버튼·연간만 토글 높이 확대(데스크톱 30px 불변). */
+		.fs-btn,
+		.annual-btn {
+			min-height: 44px;
+		}
+		.cols {
+			min-height: 44px;
+		}
+		.col-btn {
+			min-height: 36px;
+			min-width: 32px;
 		}
 	}
 </style>

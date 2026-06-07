@@ -176,4 +176,13 @@
 			background: rgba(251, 146, 60, 0.24);
 		}
 	}
+
+	/* D3 — 모바일 격자 가독성. 데스크톱(≥881px)은 inline style 의 repeat(N, minmax(260px,1fr)) 그대로(불변).
+	   모바일에선 부모(+page)가 cols=1 로 강제해 periods.length=1 → 격자가 자연히 단일 컬럼(DOM 순서상 head→body
+	   정렬 유지). 여기선 셀 패딩만 모바일용으로 키워 손가락·가독 여백 확보(가로스크롤 0, 풀폭 셀). 기간 전환은 리본. */
+	@media (max-width: 880px) {
+		.cell {
+			padding: 10px 12px;
+		}
+	}
 </style>
