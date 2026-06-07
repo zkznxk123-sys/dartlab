@@ -56,6 +56,25 @@ def test_sync_new_stocks_uses_prefix_tree_listing(monkeypatch):
     ]
 
 
+def test_sync_new_stocks_degrades_on_listing_failure(monkeypatch):
+    """enumeration 실패(429 retry 소진 등) 시 hard-fail 대신 빈 set 으로 degrade(로컬 캐시 폴백)."""
+    import huggingface_hub
+
+    class FakeApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_tree(self, **_kwargs):  # noqa: N802
+            raise RuntimeError("simulated HF enumeration failure")
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", FakeApi)
+    mod = _loadScript(".github/scripts/sync/syncNewStocks.py")
+
+    # 하드페일 없이 빈 set 반환 → main() 이 _localParquetCodes 로 진행.
+    result = mod._remoteParquetCodes(["finance", "report"])
+    assert result == {"finance": set(), "report": set()}
+
+
 def test_prebuild_requires_panel_input():
     """full 모드: prebuild 는 panel 없이 부분 scan 을 만들면 안 된다."""
     mod = _loadScript(".github/scripts/prebuild/prebuildData.py")

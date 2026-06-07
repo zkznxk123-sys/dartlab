@@ -86,7 +86,18 @@ def _remoteParquetCodes(categories: list[str]) -> dict[str, set[str]]:
                 )
             )
 
-        for sibling in retryHfCall(_listTree):
+        # enumeration 은 '이미 있는 종목' 판별용 보조 신호다. 429 등으로 retry 가 소진되면
+        # hard-fail 대신 로컬 캐시(restore-keys 로 warm)로 degrade — 신규 종목 일부를 다음 run 으로
+        # 미루는 게 전체 워크플로 실패보다 안전(idempotent, limit 캡). HF 계정 rate-limit 견고화.
+        try:
+            siblings = retryHfCall(_listTree)
+        except Exception as exc:  # noqa: BLE001 — enumeration 실패 → 로컬 캐시 기반 degrade
+            print(
+                f"[syncNewStocks] {category} 원격 목록 실패 — 로컬 캐시 기준으로 진행"
+                f"(신규 누락 시 다음 run 회복): {type(exc).__name__}: {exc}"
+            )
+            continue
+        for sibling in siblings:
             name = getattr(sibling, "rfilename", None) or getattr(sibling, "path", "")
             if name.endswith(".parquet"):
                 result[category].add(Path(name).stem.zfill(6))
