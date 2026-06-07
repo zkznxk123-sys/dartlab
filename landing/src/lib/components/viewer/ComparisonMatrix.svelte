@@ -1,18 +1,28 @@
 <script lang="ts">
 	// 회사 간 비교 매트릭스 — 단일 PanelMatrix 와 같은 골격, 단 열 = period 대신 **회사**.
 	// 각 회사의 섹션/블록 콘텐츠를 자기 열에 통째로(셀 = 본문). 한쪽만 = honest-gap(⌀).
-	// 라벨 거터 없음(단일 뷰어와 동일 — 셀이 자기 식별).
+	// 헤더 = 회사명·코드 + 원본(DART) 링크 + ✕(비교에서 빼기). 기간은 상단 타임라인이 담당하므로 헤더에 없음.
+	import { X } from 'lucide-svelte';
 	import CellContent from './CellContent.svelte';
 	import type { AlignedRow } from '$lib/viewer/compare';
+
+	interface CompareCol {
+		code: string;
+		corpName: string;
+		dartUrl?: string | null; // 그 회사의 현재 시점 DART 원본 공시 링크
+		isRef?: boolean; // 기준(보고 있는) 회사 — 빼기 불가
+	}
 
 	let {
 		rows,
 		companies,
-		period
+		period,
+		onRemove
 	}: {
 		rows: AlignedRow[];
-		companies: { code: string; corpName: string }[];
+		companies: CompareCol[];
 		period: string;
+		onRemove?: (code: string) => void;
 	} = $props();
 
 	// 열 = 회사. 회사당 minmax(280px,1fr) — N≥5 가로 스크롤(.matrix-scroll overflow:auto).
@@ -26,12 +36,21 @@
 {:else}
 	<div class="matrix-scroll">
 		<div class="matrix" style="grid-template-columns: {template}">
-			<!-- 헤더: 회사명 + 시점 -->
+			<!-- 헤더: 회사명 + 원본 링크 + 빼기 -->
 			{#each companies as c (c.code)}
 				<div class="cell head company-head">
 					<span class="corp">{c.corpName || c.code}</span>
 					<span class="code">{c.code}</span>
-					<span class="period">{period}</span>
+					<span class="head-actions">
+						{#if c.dartUrl}
+							<a class="src-link" href={c.dartUrl} target="_blank" rel="noreferrer noopener" title={`${period} 원본 공시`}>원본 ↗</a>
+						{/if}
+						{#if onRemove && !c.isRef}
+							<button type="button" class="rm-btn" onclick={() => onRemove?.(c.code)} title="비교에서 빼기" aria-label={`${c.corpName} 비교에서 빼기`}>
+								<X size={11} />
+							</button>
+						{/if}
+					</span>
 				</div>
 			{/each}
 
@@ -97,12 +116,35 @@
 		font-size: 10px;
 		color: #64748b;
 	}
-	.period {
+	.head-actions {
 		margin-left: auto;
-		font-family: monospace;
-		font-size: 11px;
-		font-weight: 700;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		flex-shrink: 0;
+	}
+	.src-link {
+		font-size: 10px;
+		color: #64748b;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.src-link:hover {
 		color: #fb923c;
+	}
+	.rm-btn {
+		display: inline-flex;
+		align-items: center;
+		padding: 2px;
+		background: none;
+		border: none;
+		border-radius: 3px;
+		color: #475569;
+		cursor: pointer;
+	}
+	.rm-btn:hover {
+		color: #f87171;
+		background: rgba(248, 113, 113, 0.12);
 	}
 	.body-cell {
 		color: #cbd5e1;
