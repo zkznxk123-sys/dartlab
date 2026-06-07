@@ -15,7 +15,6 @@
 	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
-	import AskDrawer from '$lib/components/viewer/AskDrawer.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
@@ -56,9 +55,7 @@
 	let isFullscreen = $state(false);
 	let discussOpen = $state(false);
 	let financeOpen = $state(false); // 정량재무제표 다이얼로그
-	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
 	let stockSearchOpen = $state(false); // 종목검색 팝오버 (화면내검색 ⌘K 와 분리된 회사전환 입력)
-	let askCarryQ = $state(''); // AI 가 타 회사 감지 → 이동 후 새 회사 index 준비되면 운반·자동 ask 할 질문
 	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
@@ -166,22 +163,10 @@
 		glowCell = { rowIndex: hit.rowIndex, period: hit.period };
 	}
 
-	// 종목검색 — 다른 회사 공시뷰어로 이동(단일). 대화는 askSession 스토어로 유지된다(수동 이동도 동행).
-	// askCarryQ 비움 = 수동 이동엔 자동질문 없음(직전 AI 이동의 묵은 carryQ 재발화 차단).
+	// 종목검색 — 다른 회사 공시뷰어로 이동(단일).
 	function onStockPick(c: string) {
 		stockSearchOpen = false;
-		askCarryQ = '';
 		if (c && c !== code) void goto(`${base}/viewer/company/${c}`);
-	}
-
-	// AI 가 질문에서 타 회사 감지 → 자동 이동. 단일 뷰어로 goto 후 *완료된 뒤* 원질문 운반(carryQ).
-	// ★goto 전에 askCarryQ 를 set 하면 옛 회사 mount 의 carryQ effect 가 먼저 발화해 옛 회사 데이터로
-	// 답하고 consumedCarry 를 소비 → 새 회사 mount 가 skip(삼성 데이터로 하이닉스 답하는 race). goto 완료
-	// 후 set 해야 새 회사 mount 만 픽업한다. 대화는 askSession 스토어로 유지(언마운트 무관).
-	async function onAskNavigate(targetCode: string, carryQuestion: string) {
-		if (!targetCode || targetCode === code) return;
-		await goto(`${base}/viewer/company/${targetCode}`);
-		askCarryQ = carryQuestion;
 	}
 
 	// 전체보기 Esc 해제.
@@ -246,7 +231,12 @@
 
 	// ── 비교 모드 파생 (compareMode·allBundles 는 위에서 선언) ──
 	const cmpCompanies = $derived(
-		allBundles.map((b) => ({ code: b.stockCode, corpName: b.corpName || nameMap.get(b.stockCode) || b.stockCode }))
+		allBundles.map((b) => ({
+			code: b.stockCode,
+			corpName: b.corpName || nameMap.get(b.stockCode) || b.stockCode,
+			dartUrl: b.dartUrlByPeriod[lockedPeriod] ?? null, // 그 회사·현재 시점 DART 원본 링크
+			isRef: b.stockCode === code // 기준 회사 = 빼기 불가
+		}))
 	);
 	// compare 본진은 $lib/viewer/compare. route 는 section/period/bundle 만 넘기고 정렬 계약은 모듈이 담당.
 	const compareBoard = $derived(
@@ -272,10 +262,11 @@
 	function addCompany(c: string) {
 		if (!c || c === code || vsCodes.includes(c) || allBundles.length >= 6) return;
 		addOpen = false;
-		void goto(vsUrl([...vsCodes, c]));
+		// invalidateAll: 같은 경로 + ?vs= 쿼리만 바뀌는 goto 가 load 를 다시 안 돌리는 케이스 방지.
+		void goto(vsUrl([...vsCodes, c]), { invalidateAll: true });
 	}
 	function removeCompany(c: string) {
-		void goto(vsUrl(vsCodes.filter((x) => x !== c)));
+		void goto(vsUrl(vsCodes.filter((x) => x !== c)), { invalidateAll: true });
 	}
 
 	// 섹션/주석 이동은 보고 있던 기간 윈도우를 보존 — 기간축은 섹션 무관 글로벌이라 리셋할 이유 없음(같은 시점의
@@ -358,9 +349,6 @@
 				{/if}
 			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
-			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={() => (askOpen = !askOpen)} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
-				<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{base}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
-			</button>
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
@@ -460,7 +448,7 @@
 			<p>{errorMsg}</p>
 		</div>
 	{:else if bundle}
-		<div class="studio" class:ask-open={askOpen}>
+		<div class="studio">
 			<aside class="toc">
 				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
@@ -477,25 +465,13 @@
 							rows={compareBoard?.rows ?? []}
 							companies={cmpCompanies}
 							period={lockedPeriod}
+							onRemove={removeCompany}
 						/>
 					{/if}
 				{:else}
 					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
 				{/if}
 			</section>
-			{#if askOpen}
-				<AskDrawer
-					{code}
-					{bundle}
-					{searchIndex}
-					{indexing}
-					{corpName}
-					carryQ={askCarryQ}
-					onfocus={onSearchResult}
-					onNavigate={onAskNavigate}
-					onclose={() => (askOpen = false)}
-				/>
-			{/if}
 		</div>
 	{/if}
 </main>
@@ -928,46 +904,6 @@
 		min-height: 0;
 		display: grid;
 		grid-template-columns: 240px 1fr;
-	}
-	.studio.ask-open {
-		grid-template-columns: 240px minmax(0, 1fr) 380px;
-	}
-	.ask-trigger {
-		gap: 5px;
-	}
-	.ask-ava {
-		border-radius: 50%;
-		vertical-align: middle;
-	}
-	.ask-trigger.active {
-		border-color: rgba(251, 146, 60, 0.6);
-		color: #fb923c;
-		background: rgba(251, 146, 60, 0.1);
-	}
-	@media (max-width: 1120px) {
-		.studio.ask-open {
-			grid-template-columns: minmax(0, 1fr) 360px;
-		}
-		.studio.ask-open .toc {
-			display: none;
-		}
-	}
-	@media (max-width: 720px) {
-		/* D2 — 모바일에서 드로어를 격자 아래로 적층(grid 1열)하지 않는다. 적층하면 board(상단·죽은 공간) +
-		   drawer(하단·끼임)로 둘 다 못 쓴다. 대신 드로어를 전체화면 오버레이로 띄워 board 위에 덮는다.
-		   board grid 는 단일 1fr 그대로 유지(데스크톱 push grid 미사용) → board 는 정상 풀폭으로 살아있고,
-		   드로어는 그 위에 fixed 로 덮인다. .ask-open 의 3번째(380px) 트랙을 만들지 않아 board 압착 0. */
-		.studio.ask-open {
-			position: relative; /* 드로어 오버레이의 positioning context — board/ribbon 아래 studio 영역에 정확히 덮임 */
-			grid-template-columns: 1fr;
-		}
-		.studio.ask-open :global(.ask-drawer) {
-			position: absolute;
-			inset: 0; /* studio 영역(헤더·리본 아래) 전체를 덮는 오버레이 — 전체화면/일반 모두 정확 */
-			z-index: 90;
-			border-left: none;
-			box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6);
-		}
 	}
 	.toc {
 		min-height: 0;
