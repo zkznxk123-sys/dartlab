@@ -10,6 +10,7 @@
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { analyzeViewport, financeSignals, type CellFacet, type FinanceSignal } from '$lib/viewer/diff';
 	import { financeAvailability, loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
+	import { narrateSignals, webgpuAvailable } from '$lib/viewer/webllm';
 	import type { FinanceKind, FinanceScope } from '$lib/viewer/finance/types';
 	import type { PanelBundle } from '$lib/viewer/types';
 
@@ -44,7 +45,15 @@
 	let financeSigs = $state<FinanceSignal[]>([]);
 	let financeRan = $state(false);
 
+	// WebLLM 내레이션 (실험) — 결정론 신호를 한국어로 다듬기만(숫자 불변). WebGPU 없으면 비활성.
+	let webgpuOk = $state(false);
+	let llmText = $state<string | null>(null);
+	let llmLoading = $state(false);
+	let llmErr = $state<string | null>(null);
+	let llmProgress = $state(0);
+
 	$effect(() => {
+		webgpuOk = webgpuAvailable();
 		void loadCompanies().then((companies) => (nameMap = new Map(companies.map((c) => [c.code, c.name]))));
 	});
 
@@ -184,6 +193,28 @@
 		if (movers.length) parts.push(`직전 대비 큰 변동 ${movers.length}건 (${movers[0].label} ${pct(movers[0].deltaPct)}).`);
 		return parts.join(' ');
 	});
+
+	// 화면/신호가 바뀌면 이전 LLM 다듬기 결과 무효화 (stale 방지).
+	$effect(() => {
+		void narration;
+		llmText = null;
+		llmErr = null;
+		llmProgress = 0;
+	});
+
+	async function runLlmNarration() {
+		if (!narration || llmLoading) return;
+		llmLoading = true;
+		llmErr = null;
+		llmProgress = 0;
+		try {
+			llmText = await narrateSignals(narration, { onProgress: (p) => (llmProgress = p.progress) });
+		} catch (e) {
+			llmErr = e instanceof Error ? e.message : String(e);
+		} finally {
+			llmLoading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -318,11 +349,27 @@
 					{/if}
 				</div>
 
-				<!-- 3) 요약 (결정론 한국어 내레이션, model 0) -->
+				<!-- 3) 요약 (결정론 한국어 내레이션, model 0) + 선택: WebLLM 다듬기(실험) -->
 				<div class="group">
 					<div class="panel-title">요약 <span>결정론</span></div>
 					<p class="narration">{narration}</p>
-					<div class="note">숫자는 결정론 추출이라 절대 틀리지 않습니다. (LLM 내레이션은 별도 실험)</div>
+					<div class="note">숫자는 결정론 추출이라 절대 틀리지 않습니다.</div>
+
+					{#if webgpuOk}
+						<button type="button" class="llm-run" onclick={runLlmNarration} disabled={llmLoading || !narration}>
+							<Sparkles size={13} />
+							{llmLoading ? `온디바이스 모델 준비 ${Math.round(llmProgress * 100)}%` : 'LLM으로 다듬기 (실험)'}
+						</button>
+						{#if llmText}
+							<p class="narration llm">{llmText}</p>
+						{/if}
+						{#if llmErr}
+							<div class="note err">{llmErr}</div>
+						{/if}
+						<div class="note">실험: Qwen3-0.6B 온디바이스(~360MB 1회 다운로드, 외부 전송 0). 위 결정론 신호를 문장만 다듬음 — 숫자·사실의 진실 원본은 결정론.</div>
+					{:else}
+						<div class="note">이 브라우저는 WebGPU 미지원 — 결정론 내레이션만 제공(온디바이스 LLM 다듬기 비활성).</div>
+					{/if}
 				</div>
 			</aside>
 		</section>
@@ -642,9 +689,37 @@
 		font-size: 12px;
 		line-height: 1.6;
 	}
+	.narration.llm {
+		margin-top: 8px;
+		border-color: rgba(56, 189, 248, 0.35);
+		background: rgba(14, 165, 233, 0.06);
+		color: #bae6fd;
+	}
+	.llm-run {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 28px;
+		margin: 2px 0 6px;
+		padding: 0 10px;
+		border: 1px solid rgba(56, 189, 248, 0.45);
+		border-radius: 6px;
+		background: rgba(14, 165, 233, 0.08);
+		color: #bae6fd;
+		font: inherit;
+		font-size: 11px;
+		cursor: pointer;
+	}
+	.llm-run:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
 	.note {
 		color: #64748b;
 		font-size: 10px;
+	}
+	.note.err {
+		color: #f87171;
 	}
 	.empty {
 		padding: 12px;
