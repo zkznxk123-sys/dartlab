@@ -70,6 +70,53 @@ def test_prebuild_requires_panel_input():
     mod._validateInputCoverage({"finance": 1000, "report": 1000, "panel": 600}, incremental=False)
 
 
+def test_listRemoteFiles_returns_name_size(monkeypatch):
+    """listRemoteFiles 는 카테고리 prefix tree 로 {rel: size} 만 얻고 다운로드하지 않는다."""
+    import huggingface_hub
+
+    from dartlab.pipeline import seed
+
+    class FakeApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def repo_info(self, **_kwargs):  # noqa: N802
+            raise AssertionError("listRemoteFiles must not use broad repo_info listing")
+
+        def list_repo_tree(self, *, repo_id, path_in_repo, repo_type, recursive, expand, token=None):  # noqa: N802
+            return [
+                SimpleNamespace(path=f"{path_in_repo}/005930.parquet", size=111),
+                SimpleNamespace(path=f"{path_in_repo}/000660.parquet", size=222),
+                SimpleNamespace(path=f"{path_in_repo}/", size=0),  # 디렉토리 — 제외
+            ]
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", FakeApi)
+    out = seed.listRemoteFiles("panel")
+    assert out == {"dart/panel/005930.parquet": 111, "dart/panel/000660.parquet": 222}
+
+
+def test_downloadCategoryFiles_downloads_only_given(monkeypatch, tmp_path):
+    """downloadCategoryFiles 는 지정 파일만 받고 (다운로드수, 404skip) 반환. 빈 목록은 no-op."""
+    from dartlab.pipeline import seed
+
+    calls: list[str] = []
+
+    def fakeDownload(url, dest, token, timeout=60):
+        calls.append(url)
+        return None if url.endswith("MISSING.parquet") else 100  # None = 404 skip
+
+    monkeypatch.setattr(seed, "_download", fakeDownload)
+
+    n, skip = seed.downloadCategoryFiles(
+        "panel",
+        ["dart/panel/005930.parquet", "dart/panel/MISSING.parquet"],
+        dataDir=str(tmp_path),
+    )
+    assert n == 1 and skip == 1
+    assert any(c.endswith("dart/panel/005930.parquet") for c in calls)
+    assert seed.downloadCategoryFiles("panel", [], dataDir=str(tmp_path)) == (0, 0)
+
+
 def test_prebuild_incremental_allows_zero_panel():
     """증분 모드: panel 로컬 수 = 변경 종목 수라 0 도 정상(전량 보존). 단 전부 0 은 실패."""
     mod = _loadScript(".github/scripts/prebuild/prebuildData.py")

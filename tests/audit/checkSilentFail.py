@@ -75,6 +75,8 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "scan/builders/edgar/builder.py",
         # corpProfile.parquet 는 선택 prebuild 데이터. 없으면 raw finance 추정으로 보강.
         "scan/builders/kr/fiscal.py",
+        # _scanBuildState.json 증분 ledger 로더 — 부재 = 부트스트랩(전량 seed 회피) semantic, loud-fail 부적합.
+        "scan/builders/kr/common.py",
         "scan/edgar/builder.py",
         "scan/io/parquet.py",
         # AI 런타임 상태 저장 (없으면 첫 실행)

@@ -197,3 +197,47 @@ def test_buildChanges_incremental_merges_only_changed(tmp_path: Path, monkeypatc
     assert aRows.height >= 1
     assert "2023Q4" in aRows["toPeriod"].to_list()
     assert "옛섹션" not in aRows["sectionTitle"].to_list()  # 옛 A 행 교체됨
+
+
+def test_buildSharesOutstandingScan_incremental_merges(tmp_path, monkeypatch) -> None:
+    """변경 종목(A)만 발행주식수 재계산 후 기존 parquet 에 stock_code 단위 머지 — B 보존."""
+    from dartlab.scan.builders.kr import shares
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+
+    panelDir = tmp_path / "panel"
+    panelDir.mkdir(parents=True)
+    scanDir = tmp_path / "scan"
+    scanDir.mkdir(parents=True)
+
+    # 기존 sharesOutstanding: A 옛값 + B 보존 대상.
+    pl.DataFrame({"stock_code": ["A", "B"], "year": [2022, 2022], "outstandingShares": [1, 2]}).write_parquet(
+        str(scanDir / "sharesOutstanding.parquet")
+    )
+    pl.DataFrame({"_": [1]}).write_parquet(str(panelDir / "A.parquet"))  # 변경 종목 A 만 seed
+
+    def fakeTextRows(code, *a, **k):
+        if code != "A":
+            return None
+        return pl.DataFrame({"period": ["2023Q4"], "sectionLeaf": ["주식의 총수 현황"], "rceptNo": ["20230101000001"]})
+
+    def fakeXmlTables(code, *, sectionPattern=None, period=None):
+        return [
+            [
+                ["발행할 주식의 총수", "", "", "1000"],
+                ["현재까지 발행한 주식", "", "", "800"],
+                ["발행주식의 총수", "", "", "800"],
+            ]
+        ]
+
+    monkeypatch.setattr("dartlab.providers.dart.panel.text.panelTextRows", fakeTextRows)
+    monkeypatch.setattr("dartlab.providers.dart.panel.text.panelXmlTables", fakeXmlTables)
+    monkeypatch.setattr("dartlab.core.listingResolver.getListingResolver", lambda: None)
+
+    shares.buildSharesOutstandingScan(incremental=True)
+
+    df = pl.read_parquet(str(scanDir / "sharesOutstanding.parquet"))
+    assert "B" in df["stock_code"].to_list()  # 미변경 보존
+    aRows = df.filter(pl.col("stock_code") == "A")
+    assert aRows.height == 1
+    assert aRows["outstandingShares"][0] == 800  # 재계산값으로 교체
