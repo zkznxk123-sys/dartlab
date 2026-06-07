@@ -3,6 +3,7 @@
 
 import type { PanelBundle, PanelRow } from '../types';
 import { accountDepth, accountIsTotal } from '../finance/financePivot';
+import { rowsForStatements } from './bundleIndex';
 import type { CompareDiagnostics, FinanceCompare, FinanceFreq, FinanceRow, UnitInfo } from './types';
 
 const PERIOD_RE = /^(BP|P|C)FY(\d{4})([de])(FY|FQA|FQQ|FQ|HYA|HYQ|HY|TQA|TQQ|TQ)$/;
@@ -188,7 +189,11 @@ export function alignFinance(
 ): FinanceCompare {
 	const referenceRows = bundles[0]?.gridBySection.get(sectionKey) ?? [];
 	const scope = scopeOverride ?? targetScope(referenceRows);
-	const per = bundles.map((b) => companyFinance(b.gridBySection.get(sectionKey) ?? [], period, freq, scope));
+	// 기준 섹션의 재무제표 statement(disclosureKey) 집합 — 각 회사를 절번호 무관 전역 수집
+	// (BS/IS/CF 를 회사별 섹션 위치와 무관하게 모아 acode 정렬, Python compare 동형).
+	const statements = new Set<string>();
+	for (const r of referenceRows) if (r.disclosureKey && FIN_STATEMENTS.has(r.disclosureKey)) statements.add(r.disclosureKey);
+	const per = bundles.map((b) => companyFinance(rowsForStatements(b, statements), period, freq, scope));
 	const order: string[] = [];
 	const reprLabel = new Map<string, string>();
 	for (const { cells } of per) {
