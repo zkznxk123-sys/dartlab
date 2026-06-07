@@ -1,9 +1,11 @@
 <script lang="ts">
-	// 공시뷰어 grounded Q&A 코파일럿 — 질문하면 그 회사 패널에서 근거를 검색해 찾고, WebLLM(Qwen3)이 그 근거에
-	// 한해서만 한국어로 답한다. 근거 칩 클릭 시 뷰어의 해당 셀로 점프(glow). WebGPU 없으면 근거만 표시(데이터는 찾음).
+	// 공시뷰어 grounded Q&A 코파일럿 (3티어).
+	// Tier 0(항상·0다운로드·환각0): 질문→패널 근거 검색 + 재무신호(financeSignals)로 결정론 한국어 답 즉시 조립.
+	// Tier 1(opt-in·WebGPU): "왜?/종합/해석"만 온디바이스 LLM(Llama-3.2-1B)이 결정론 답+근거 위에서 서술 확장.
+	// 근거 칩 클릭 시 뷰어의 해당 셀로 점프(glow). 대부분 질문은 Tier 0 만으로 답이 끝난다.
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { CornerDownLeft, FileSearch, Send, Sparkles } from 'lucide-svelte';
+	import { FileSearch, Send, Sparkles } from 'lucide-svelte';
 	import CompanyQuickSearch from '$lib/components/search/CompanyQuickSearch.svelte';
 	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
@@ -12,6 +14,9 @@
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, plainText, search, type SearchIndex } from '$lib/viewer/searchIndex';
 	import { answerQuestion, webgpuAvailable, type AskEvidence } from '$lib/viewer/webllm';
+	import { composeAnswer, type ComposeResult } from '$lib/viewer/answerCompose';
+	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
+	import type { FinanceSignal } from '$lib/viewer/diff';
 	import type { PanelBundle } from '$lib/viewer/types';
 
 	let { data }: { data: { code: string } } = $props();
@@ -38,15 +43,20 @@
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
 
-	// Q&A
+	// Q&A — Tier 0(결정론 답·0다운로드) + Tier 1(opt-in LLM 확장)
 	let question = $state('');
-	let asking = $state(false);
-	let answer = $state('');
-	let answerErr = $state<string | null>(null);
+	let composing = $state(false);
+	let composed = $state<ComposeResult | null>(null); // 결정론 답(즉시)
 	let evidence = $state<EvItem[]>([]);
+	let searchErr = $state<string | null>(null);
+	let finSignals = $state<FinanceSignal[]>([]); // 재무 신호(진입 prefetch)
+	let webgpuOk = $state(false);
+	// Tier 1
+	let llmAnswer = $state('');
+	let llmRunning = $state(false);
+	let llmErr = $state<string | null>(null);
 	let modelProgress = $state(0);
 	let modelText = $state('');
-	let webgpuOk = $state(false);
 
 	$effect(() => {
 		webgpuOk = webgpuAvailable();
@@ -59,9 +69,16 @@
 		errorMsg = null;
 		bundle = null;
 		searchIndex = null;
-		answer = '';
-		answerErr = null;
+		composed = null;
+		llmAnswer = '';
+		llmErr = null;
+		searchErr = null;
 		evidence = [];
+		finSignals = [];
+		// 재무 신호 백그라운드 prefetch — 질문 시점엔 캐시 히트(0ms). 실패해도 텍스트 검색으로 답함.
+		void loadCompanyFinanceSignals(c).then((sigs) => {
+			if (code === c) finSignals = sigs;
+		});
 		void loadPanelBundle(c)
 			.then((next) => {
 				if (code !== c) return;
@@ -142,17 +159,19 @@
 		window.setTimeout(() => (glowCell = null), 2400);
 	}
 
+	// Tier 0 — 검색(즉시) + 결정론 답 조립(0다운로드·환각0). 모델 안 부름.
 	async function ask() {
-		if (!searchIndex || !bundle || !question.trim() || asking) return;
+		if (!searchIndex || !bundle || !question.trim()) return;
 		const q = question.trim();
-		asking = true;
-		answer = '';
-		answerErr = null;
+		composing = true;
+		composed = null;
+		llmAnswer = '';
+		llmErr = null;
+		searchErr = null;
 		evidence = [];
 		modelProgress = 0;
 		modelText = '';
-		// 1) 검색으로 근거 찾기 (질문 → 관련 행/셀)
-		const { hits } = search(searchIndex, q, { topK: 6, expand: true });
+		const { hits, added } = search(searchIndex, q, { topK: 6, expand: true });
 		const ev: EvItem[] = [];
 		let n = 1;
 		for (const h of hits) {
@@ -162,29 +181,39 @@
 			ev.push({ n: n++, period: h.period, path: [h.chapter, h.section, h.block].filter(Boolean).join(' > '), text, sectionKey: h.sectionKey, rowIndex: h.rowIndex });
 		}
 		evidence = ev;
-		if (!ev.length) {
-			answerErr = '관련 데이터를 찾지 못했습니다. 다른 표현으로 질문해 보세요.';
-			asking = false;
-			return;
-		}
-		// 2) WebGPU 있으면 그 근거에 한해 LLM 답변 (없으면 근거만 표시 = 데이터는 찾아줌)
-		if (!webgpuOk) {
-			asking = false;
-			return;
-		}
+		// 재무 신호(진입 prefetch 캐시 히트 = 0ms, 미준비면 로드)
+		const sigs = finSignals.length ? finSignals : await loadCompanyFinanceSignals(code);
+		if (!finSignals.length && sigs.length) finSignals = sigs;
+		composed = composeAnswer(q, hits, added, sigs);
+		if (!ev.length && !composed.citedSignal) searchErr = '관련 근거를 찾지 못했습니다. 다른 표현으로 질문해 보세요.';
+		composing = false;
+	}
+
+	// Tier 1 (opt-in) — "왜?/종합/본문해석"을 LLM 이 결정론 답+근거 위에서 한국어로 확장. 숫자는 Tier0 공급, 모델은 서술만.
+	async function runLlm() {
+		if (!composed || !evidence.length || llmRunning || !webgpuOk) return;
+		const q = question.trim();
+		llmRunning = true;
+		llmErr = null;
+		llmAnswer = '';
+		modelProgress = 0;
+		modelText = '';
+		const payload: AskEvidence[] = [
+			{ n: 0, period: '', path: '결정론 분석(숫자 확정)', text: composed.answer },
+			...evidence.map(({ n, period, path, text }) => ({ n, period, path, text }))
+		];
 		try {
-			const payload: AskEvidence[] = ev.map(({ n, period, path, text }) => ({ n, period, path, text }));
 			await answerQuestion(q, payload, {
 				onProgress: (p) => {
 					modelProgress = p.progress;
 					modelText = p.text;
 				},
-				onToken: (d) => (answer += d)
+				onToken: (d) => (llmAnswer += d)
 			});
 		} catch (e) {
-			answerErr = e instanceof Error ? e.message : String(e);
+			llmErr = e instanceof Error ? e.message : String(e);
 		} finally {
-			asking = false;
+			llmRunning = false;
 		}
 	}
 
@@ -228,19 +257,17 @@
 				placeholder="이 회사 공시에 대해 질문하세요. 예: 주요 소송이 있나? (⌘/Ctrl+Enter)"
 				onkeydown={onKey}
 			></textarea>
-			<button type="button" class="ask-go" onclick={ask} disabled={!ready || asking || !question.trim()}>
-				{#if asking}<Sparkles size={15} />{:else}<Send size={15} />{/if}
-				{asking ? '분석 중' : '질문'}
+			<button type="button" class="ask-go" onclick={ask} disabled={!ready || composing || !question.trim()}>
+				{#if composing}<Sparkles size={15} />{:else}<Send size={15} />{/if}
+				{composing ? '찾는 중' : '질문'}
 			</button>
 		</div>
 		<div class="samples">
 			{#each SAMPLES as s}
-				<button type="button" onclick={() => ((question = s), ask())} disabled={!ready || asking}>{s}</button>
+				<button type="button" onclick={() => ((question = s), ask())} disabled={!ready || composing}>{s}</button>
 			{/each}
 		</div>
-		{#if !webgpuOk}
-			<div class="gpu-note">이 브라우저는 WebGPU 미지원 — 근거 검색(데이터 찾기)은 되지만 온디바이스 답변 생성은 비활성입니다. (Chrome/Edge 데스크톱 권장)</div>
-		{/if}
+		<div class="gpu-note">즉시 답(다운로드 0)은 모든 브라우저에서. {webgpuOk ? '"AI로 더 자세히"는 첫 1회 모델(~705MB·이후 캐시) 다운로드 후.' : '이 브라우저는 WebGPU 미지원 — 결정론 답·근거 검색만(대화형 확장 비활성, Chrome/Edge 데스크톱 권장).'}</div>
 	</section>
 
 	{#if loading}
@@ -267,24 +294,39 @@
 			</section>
 
 			<aside class="right">
-				<!-- 답변 -->
+				<!-- 답변 (Tier 0: 결정론·즉시·0다운로드) -->
 				<div class="group">
-					<div class="panel-title">답변 <span>{webgpuOk ? '온디바이스' : '근거검색'}</span></div>
-					{#if asking && !answer && webgpuOk}
-						<div class="answering">
-							<div class="spinner sm"></div>
-							<span>{modelProgress < 1 && modelText ? `모델 준비 ${Math.round(modelProgress * 100)}%` : '근거 읽고 답하는 중…'}</span>
-						</div>
-					{/if}
-					{#if answer}
-						<p class="answer">{answer}</p>
-					{:else if !asking && !answerErr && evidence.length && !webgpuOk}
-						<p class="answer muted">아래 근거를 찾았습니다. (답변 생성은 WebGPU 브라우저에서)</p>
-					{:else if !asking && !answer && !answerErr && !evidence.length}
-						<div class="empty">질문하면 이 회사 공시에서 근거를 찾아 답합니다.</div>
-					{/if}
-					{#if answerErr}
-						<div class="empty err">{answerErr}</div>
+					<div class="panel-title">답변 <span>{composed ? '즉시·결정론' : '대기'}</span></div>
+					{#if composed}
+						<p class="answer">{composed.answer}</p>
+						{#if composed.citedSignal}
+							<div class="cited">재무 근거: {composed.citedSignal.label} · 최근 {composed.citedSignal.points[0]?.period}</div>
+						{/if}
+						<!-- Tier 1: opt-in LLM 확장 (왜/종합/해석) -->
+						{#if webgpuOk}
+							{#if llmAnswer}
+								<div class="llm-block">
+									<div class="llm-tag">AI 확장</div>
+									<p class="answer llm">{llmAnswer}</p>
+								</div>
+							{:else if llmRunning}
+								<div class="answering">
+									<div class="spinner sm"></div>
+									<span>{modelProgress < 1 && modelText ? `모델 준비 ${Math.round(modelProgress * 100)}% (첫 1회 ~705MB)` : '근거 읽고 서술 중…'}</span>
+								</div>
+							{:else}
+								<button type="button" class="llm-run" onclick={runLlm}>
+									<Sparkles size={13} /> AI로 더 자세히 (왜·종합 — 첫 1회 모델 다운로드)
+								</button>
+							{/if}
+							{#if llmErr}<div class="empty err">{llmErr}</div>{/if}
+						{/if}
+					{:else if composing}
+						<div class="answering"><div class="spinner sm"></div><span>공시에서 근거 찾는 중…</span></div>
+					{:else if searchErr}
+						<div class="empty err">{searchErr}</div>
+					{:else}
+						<div class="empty">질문하면 이 회사 공시 데이터에서 근거를 찾아 즉시 답합니다(다운로드 0).</div>
 					{/if}
 				</div>
 
@@ -545,10 +587,43 @@
 		line-height: 1.65;
 		white-space: pre-wrap;
 	}
-	.answer.muted {
-		border-color: #1e2433;
-		background: #0a0e18;
-		color: #94a3b8;
+	.cited {
+		margin-top: 6px;
+		color: #fb923c;
+		font-size: 11px;
+	}
+	.llm-block {
+		margin-top: 10px;
+	}
+	.llm-tag {
+		color: #bae6fd;
+		font-size: 10px;
+		font-weight: 800;
+		text-transform: uppercase;
+		margin-bottom: 4px;
+	}
+	.answer.llm {
+		border-color: rgba(56, 189, 248, 0.4);
+		background: rgba(14, 165, 233, 0.1);
+		color: #dbeafe;
+	}
+	.llm-run {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 10px;
+		height: 30px;
+		padding: 0 12px;
+		border: 1px solid rgba(56, 189, 248, 0.45);
+		border-radius: 7px;
+		background: rgba(14, 165, 233, 0.08);
+		color: #bae6fd;
+		font: inherit;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.llm-run:hover {
+		background: rgba(14, 165, 233, 0.16);
 	}
 	.ev {
 		display: flex;

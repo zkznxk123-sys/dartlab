@@ -10,8 +10,9 @@
 
 import type { InitProgressReport, MLCEngineInterface } from '@mlc-ai/web-llm';
 
-// 기본 0.6B(빠름·~360MB). 더 나은 추론이 필요하면 'Qwen3-1.7B-q4f16_1-MLC'(~1.1GB)로 한 줄 교체.
-const MODEL_ID = 'Qwen3-0.6B-q4f16_1-MLC';
+// Tier 1(opt-in) 모델. Llama-3.2-1B 비추론(~705MB) — Qwen3 는 thinking 모델이라 답 전에 <think> 를
+// 길게 뱉어 첫토큰 지연이 크고 0.6B 는 /no_think 도 불안정. 비추론이 단발 Q&A 에 지연 예측가능·한국어 종합 우수.
+const MODEL_ID = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
 
 export interface WebLlmProgress {
 	text: string;
