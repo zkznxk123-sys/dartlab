@@ -49,32 +49,38 @@ const NAME_ALIAS: Record<string, string> = {
  */
 export async function resolveCompanies(q: string, currentCode: string): Promise<CompanyHit[]> {
 	const cos = await loadCompanies();
-	const nq = q.replace(/\s/g, '').toLowerCase();
+	// 어절(공백·구두점 분리) 단위 매칭 — 옛 공백제거 concatenation + includes 는 "하이닉스"에서 "이닉스" 같은
+	// 접미/접요 부분일치 오감지를 냈다. 어절이 이름과 일치하거나 이름으로 시작(조사 흡수)할 때만 매칭.
+	const words = q.toLowerCase().match(/[가-힣a-z0-9]+/g) ?? [];
+	if (!words.length) return [];
+	const wordHit = (s: string) => words.some((w) => w === s || w.startsWith(s));
 	const out = new Map<string, CompanyHit>(); // code → hit (중복 제거)
+	const lenByCode = new Map<string, number>(); // longest 정렬 가중(별칭은 999)
 
 	// 1) 별칭 — 식별성 높은 토막 우선.
 	for (const [alias, acode] of Object.entries(NAME_ALIAS)) {
 		if (acode === currentCode) continue; // 현재 회사 무시
-		if (nq.includes(alias.toLowerCase())) {
+		if (wordHit(alias.toLowerCase())) {
 			const c = cos.find((x) => x.code === acode);
-			if (c) out.set(c.code, { code: c.code, name: c.name });
+			if (c) {
+				out.set(c.code, { code: c.code, name: c.name });
+				lenByCode.set(c.code, 999);
+			}
 		}
 	}
 
-	// 2) 정식 회사명 부분일치 — 데이터셋에 있는 이름만. 2자 이하 제외(흔출어 충돌).
-	//    질문 내 등장 이름 길이를 모아 longest 정렬에 쓴다(별칭은 가중 999).
-	const lenByCode = new Map<string, number>();
+	// 2) 정식 회사명 — 데이터셋에 있는 이름만(환각 차단). 2자 이하 제외(흔출어 충돌).
 	for (const c of cos) {
 		if (c.code === currentCode) continue; // 현재 회사 무시
-		const nm = c.name.replace(/\s/g, '');
+		const nm = c.name.replace(/\s/g, '').toLowerCase();
 		if (nm.length < 3) continue; // "LG"·"GS" 등 2자 차단
-		if (nq.includes(nm.toLowerCase())) {
+		if (wordHit(nm)) {
 			out.set(c.code, { code: c.code, name: c.name });
-			lenByCode.set(c.code, nm.length);
+			if (!lenByCode.has(c.code)) lenByCode.set(c.code, nm.length);
 		}
 	}
 
 	const arr = [...out.values()];
-	arr.sort((a, b) => (lenByCode.get(b.code) ?? 999) - (lenByCode.get(a.code) ?? 999));
+	arr.sort((a, b) => (lenByCode.get(b.code) ?? 0) - (lenByCode.get(a.code) ?? 0));
 	return arr.slice(0, 3); // 모호 시 상위 3 (UX 후보 칩 상한)
 }

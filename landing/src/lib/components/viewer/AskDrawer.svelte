@@ -8,6 +8,7 @@
 	import { composeAnswer } from '$lib/viewer/answerCompose';
 	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
+	import { ask, type EvRef, type NavOption } from '$lib/viewer/askSession.svelte';
 	import { routeChat, stripEcho, warmEngine, webgpuUsable, type AskEvidence, type ChatTurn, type Provider } from '$lib/viewer/webllm';
 	import { detectOllama } from '$lib/viewer/ollama';
 	import type { FinanceSignal } from '$lib/viewer/diff';
@@ -51,43 +52,23 @@
 		onclose: () => void;
 	} = $props();
 
-	interface EvRef { n: number; period: string; path: string; text: string; stale: boolean }
-	interface NavOption { code: string; name: string }
-	interface Turn {
-		q: string;
-		companyName: string; // 이 답을 만든 회사명 (history 태그·배지·전환 divider)
-		nav: NavOption[]; // 이동 칩(타 회사 감지 시). [] 면 일반 답 turn
-		det: string;
-		citedLabel: string | null;
-		evItems: EvRef[];
-		evHits: SearchHit[];
-		ai: string;
-		aiRunning: boolean;
-		aiErr: string | null;
-	}
-	type ModelState = 'checking' | 'unsupported' | 'idle' | 'loading' | 'ready' | 'error';
-
 	let question = $state('');
-	let chat = $state<Turn[]>([]);
 	let busy = $state(false);
 	let finSignals = $state<FinanceSignal[]>([]);
-	let modelState = $state<ModelState>('checking');
 	let modelProgress = $state(0);
 	let inputEl = $state<HTMLTextAreaElement | null>(null);
 	let scrollEl = $state<HTMLElement | null>(null);
 
-	// 로컬 Ollama 옵션 레인 — ready 면 provider='ollama'(더 좋은 품질). 자동 프로브 금지(연결 버튼 클릭 시만).
-	type OllamaState = 'hidden' | 'probing' | 'ready' | 'no-model' | 'blocked';
-	let ollamaState = $state<OllamaState>('hidden');
-	let ollamaModel = $state<string | null>(null);
-	const provider = $derived<Provider>(ollamaState === 'ready' ? 'ollama' : 'webllm');
+	// 대화·모델·Ollama 상태는 askSession 모듈 스토어(ask) 에 둔다 — 회사 이동 시 viewer +page 가 bundle 을 잠시
+	// null 로 만들어 AskDrawer 가 언마운트돼도 세션이 생존한다(크로스-회사 "AI 화면 그대로" 요구).
+	const provider = $derived<Provider>(ask.ollamaState === 'ready' ? 'ollama' : 'webllm');
 
 	$effect(() => {
 		void webgpuUsable().then((v) => {
-			if (modelState === 'checking') modelState = v ? 'idle' : 'unsupported';
+			if (ask.modelState === 'checking') ask.modelState = v ? 'idle' : 'unsupported';
 		});
 	});
-	// [회귀가드] chat·ollama 는 code 변경에 불간섭(크로스-회사 대화 유지 핵심). 여기에 chat=[] 또는
+	// [회귀가드] ask.chat·ollama 는 code 변경에 불간섭(크로스-회사 대화 유지 핵심). 여기에 ask.chat=[] 또는
 	// {#key code} 추가 시 회사 이동마다 대화 소멸 — 절대 금지. finance prefetch 만 code 따라간다.
 	$effect(() => {
 		const c = code;
@@ -107,28 +88,28 @@
 	}
 
 	async function downloadModel() {
-		if (modelState !== 'idle' && modelState !== 'error') return;
-		modelState = 'loading';
+		if (ask.modelState !== 'idle' && ask.modelState !== 'error') return;
+		ask.modelState = 'loading';
 		modelProgress = 0;
 		try {
 			await warmEngine((p) => (modelProgress = p.progress));
-			modelState = 'ready';
+			ask.modelState = 'ready';
 		} catch {
-			modelState = 'error';
+			ask.modelState = 'error';
 		}
 	}
 
 	// 사용자 제스처(클릭) 안에서만 — Chrome 142 LNA 팝업이 제스처 직후에만 의미 있게 뜬다($effect/마운트 호출 금지).
 	async function connectOllama() {
-		ollamaState = 'probing';
+		ask.ollamaState = 'probing';
 		const s = await detectOllama();
 		if (s.ok) {
-			ollamaState = 'ready';
-			ollamaModel = s.pick;
+			ask.ollamaState = 'ready';
+			ask.ollamaModel = s.pick;
 		} else if (s.reason === 'no-model') {
-			ollamaState = 'no-model';
+			ask.ollamaState = 'no-model';
 		} else {
-			ollamaState = 'blocked'; // unreachable/cors/timeout 통합
+			ask.ollamaState = 'blocked'; // unreachable/cors/timeout 통합
 		}
 	}
 
@@ -149,10 +130,10 @@
 		const sigs = finSignals.length ? finSignals : await loadCompanyFinanceSignals(code);
 		if (!finSignals.length && sigs.length) finSignals = sigs;
 		const composed = composeAnswer(q, hits, added, sigs);
-		const aiReady = provider === 'ollama' ? ollamaState === 'ready' : modelState === 'ready';
+		const aiReady = provider === 'ollama' ? ask.ollamaState === 'ready' : ask.modelState === 'ready';
 		const useAi = aiReady && (evItems.length > 0 || composed.citedSignal != null);
 
-		chat.push({
+		ask.chat.push({
 			q,
 			companyName: corpName,
 			nav: [],
@@ -164,7 +145,7 @@
 			aiRunning: useAi,
 			aiErr: null
 		});
-		const idx = chat.length - 1;
+		const idx = ask.chat.length - 1;
 		scrollBottom();
 
 		if (!useAi) {
@@ -172,11 +153,11 @@
 			return;
 		}
 		const history: ChatTurn[] = [];
-		for (let k = 0; k < chat.length; k++) {
-			if (chat[k].nav.length) continue; // 이동-칩 turn 은 history 제외
+		for (let k = 0; k < ask.chat.length; k++) {
+			if (ask.chat[k].nav.length) continue; // 이동-칩 turn 은 history 제외
 			// 회사 태그 프리픽스 — 이동 후 대명사/비교 맥락 유지("그럼 얘 매출은?" → 현재 회사 해석).
-			history.push({ role: 'user', content: `[${chat[k].companyName}] ${chat[k].q}` });
-			if (k !== idx) history.push({ role: 'assistant', content: chat[k].ai || chat[k].det });
+			history.push({ role: 'user', content: `[${ask.chat[k].companyName}] ${ask.chat[k].q}` });
+			if (k !== idx) history.push({ role: 'assistant', content: ask.chat[k].ai || ask.chat[k].det });
 		}
 		const payload: AskEvidence[] = [
 			{ n: 0, period: '', path: '결정론 분석(숫자 확정)', text: composed.answer },
@@ -187,29 +168,29 @@
 		try {
 			await routeChat(history, payload, {
 				provider,
-				ollamaModel: ollamaModel ?? undefined,
+				ollamaModel: ask.ollamaModel ?? undefined,
 				onToken: (d) => {
 					buf += d;
 					const now = performance.now();
 					if (now - last > 45) {
-						chat[idx].ai = stripEcho(buf); // 약한 모델 parroting/마커 누출 제거
+						ask.chat[idx].ai = stripEcho(buf); // 약한 모델 parroting/마커 누출 제거
 						last = now;
 						scrollBottom();
 					}
 				}
 			});
-			chat[idx].ai = stripEcho(buf);
+			ask.chat[idx].ai = stripEcho(buf);
 		} catch (e) {
-			chat[idx].aiErr = e instanceof Error ? e.message : String(e);
-			if (provider === 'ollama') ollamaState = 'blocked'; // 도중 사망 → 다음 질문 자동 WebLLM 강등
+			ask.chat[idx].aiErr = e instanceof Error ? e.message : String(e);
+			if (provider === 'ollama') ask.ollamaState = 'blocked'; // 도중 사망 → 다음 질문 자동 WebLLM 강등
 		} finally {
-			chat[idx].aiRunning = false;
+			ask.chat[idx].aiRunning = false;
 			busy = false;
 			scrollBottom();
 		}
 	}
 
-	async function ask() {
+	async function submitQuestion() {
 		if (!searchIndex || !bundle || !question.trim() || busy) return;
 		const q = question.trim();
 		question = '';
@@ -227,7 +208,7 @@
 			targets.length === 1
 				? `질문에서 '${targets[0].name}'을(를) 봤어요. 이 뷰어는 한 번에 한 회사예요.`
 				: `'${q}'에 여러 회사가 보여요. 어디로 갈까요?`;
-		chat.push({
+		ask.chat.push({
 			q,
 			companyName: corpName,
 			nav: targets,
@@ -249,13 +230,13 @@
 	}
 
 	// 이동 후 운반된 질문 1회 자동 실행 — carryQ + 새 회사 bundle/index 가 모두 reactive prop 이라,
-	// "새 회사 인덱스 준비됨"을 effect 가 자연 감지해 1회 ask. consumedCarry 가드로 재실행 방지.
-	let consumedCarry = $state('');
+	// "새 회사 인덱스 준비됨"을 effect 가 자연 감지해 1회 ask. ask.consumedCarry(스토어) 가드로 재실행 방지
+	// — 재마운트에도 생존해 수동 종목검색 후 묵은 carryQ 재발화를 막는다.
 	$effect(() => {
 		const cq = carryQ;
-		if (!cq || cq === consumedCarry) return;
+		if (!cq || cq === ask.consumedCarry) return;
 		if (!searchIndex || !bundle || !bundle.periods.length) return; // 새 회사 데이터 준비 대기(헛답 방지)
-		consumedCarry = cq;
+		ask.consumedCarry = cq;
 		busy = true;
 		void answerOnCompany(cq, bundle, searchIndex); // 이동된 회사(=현재 code)로 답
 	});
@@ -263,7 +244,7 @@
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
 			e.preventDefault();
-			void ask();
+			void submitQuestion();
 		}
 	}
 </script>
@@ -275,54 +256,54 @@
 			<img src="{base}/avatar-detective.png" alt="" width="22" height="22" />
 		</picture>
 		<strong>공시 Q&A</strong>
-		{#if ollamaState === 'ready'}<span class="hd-badge" title="로컬 Ollama 사용 중 · 외부 전송 없음">Ollama · {ollamaModel}</span>{/if}
+		{#if ask.ollamaState === 'ready'}<span class="hd-badge" title="로컬 Ollama 사용 중 · 외부 전송 없음">Ollama · {ask.ollamaModel}</span>{/if}
 		<button type="button" class="ad-x" onclick={onclose} aria-label="닫기"><X size={15} /></button>
 	</header>
 
 	<div class="ad-scroll" bind:this={scrollEl}>
-		{#if chat.length === 0}
+		{#if ask.chat.length === 0}
 			<div class="onboard">
 				<picture>
 					<source srcset="{base}/avatar.webp" type="image/webp" />
 					<img class="onboard-ava" src="{base}/avatar.png" alt="" width="76" height="76" />
 				</picture>
-				{#if modelState === 'idle'}
+				{#if ask.modelState === 'idle'}
 					<button type="button" class="onboard-dl" onclick={downloadModel}><Download size={15} /> 대화 모델 받기</button>
 					<span class="onboard-sub">~705MB · 1회 · 안 받아도 근거·답은 즉시</span>
-				{:else if modelState === 'loading'}
+				{:else if ask.modelState === 'loading'}
 					<div class="onboard-bar"><div class="bar-fill" style="width:{Math.round(modelProgress * 100)}%"></div><span class="bar-txt">받는 중 {Math.round(modelProgress * 100)}%</span></div>
-				{:else if modelState === 'ready'}
+				{:else if ask.modelState === 'ready'}
 					<span class="onboard-sub">무엇이든 물어보세요</span>
-				{:else if modelState === 'error'}
+				{:else if ask.modelState === 'error'}
 					<button type="button" class="onboard-dl err" onclick={downloadModel}>로드 실패 · 다시</button>
-				{:else if modelState === 'unsupported'}
+				{:else if ask.modelState === 'unsupported'}
 					<span class="onboard-sub">이 브라우저는 대화 미지원 — 근거·결정론 답은 됩니다</span>
 				{/if}
 
 				<!-- 로컬 Ollama 옵션 레인 (더 좋은 품질·버벅임0). 자동 프로브 금지 — 클릭 시만. -->
-				{#if ollamaState === 'hidden'}
+				{#if ask.ollamaState === 'hidden'}
 					<button type="button" class="ollama-link" onclick={connectOllama}>
 						더 좋은 품질? 로컬 Ollama 연결
 						<span class="info" tabindex="0" role="button" aria-label="Ollama 연결 안내">ⓘ<span class="tip">{OLLAMA_TIP}</span></span>
 					</button>
-				{:else if ollamaState === 'probing'}
+				{:else if ask.ollamaState === 'probing'}
 					<span class="onboard-sub">Ollama 찾는 중…</span>
-				{:else if ollamaState === 'ready'}
-					<span class="ollama-on">● Ollama 연결됨 · {ollamaModel}</span>
-				{:else if ollamaState === 'no-model'}
+				{:else if ask.ollamaState === 'ready'}
+					<span class="ollama-on">● Ollama 연결됨 · {ask.ollamaModel}</span>
+				{:else if ask.ollamaState === 'no-model'}
 					<span class="ollama-warn">{OLLAMA_NO_MODEL} <button type="button" class="retry" onclick={connectOllama}>다시</button></span>
-				{:else if ollamaState === 'blocked'}
+				{:else if ask.ollamaState === 'blocked'}
 					<span class="ollama-warn">{OLLAMA_BLOCKED} <button type="button" class="retry" onclick={connectOllama}>다시</button></span>
 				{/if}
 			</div>
 		{/if}
-		{#each chat as t, ti (ti)}
-			{#if t.nav.length === 0 && ti > 0 && t.companyName !== chat[ti - 1].companyName}
+		{#each ask.chat as t, ti (ti)}
+			{#if t.nav.length === 0 && ti > 0 && t.companyName !== ask.chat[ti - 1].companyName}
 				<div class="co-divider">──── {t.companyName} ────</div>
 			{/if}
 			<div class="msg user">{t.q}</div>
 			<div class="msg bot">
-				{#if t.nav.length === 0 && (ti === 0 || t.companyName !== chat[ti - 1].companyName) && t.companyName}
+				{#if t.nav.length === 0 && (ti === 0 || t.companyName !== ask.chat[ti - 1].companyName) && t.companyName}
 					<span class="co-badge">{t.companyName}</span>
 				{/if}
 				{#if t.nav.length}
@@ -356,22 +337,22 @@
 	</div>
 
 	<!-- 대화 중 모델 strip — 메시지 있고 아직 안 받았을 때만(중앙 온보딩과 중복 방지). ready 면 숨김. -->
-	{#if chat.length > 0 && modelState === 'idle' && ollamaState !== 'ready'}
+	{#if ask.chat.length > 0 && ask.modelState === 'idle' && ask.ollamaState !== 'ready'}
 		<button type="button" class="ad-model dl" onclick={downloadModel}>
 			<Download size={14} /> 대화 모델 받기 <span class="sz">~705MB · 1회</span>
 		</button>
-	{:else if chat.length > 0 && modelState === 'loading'}
+	{:else if ask.chat.length > 0 && ask.modelState === 'loading'}
 		<div class="ad-model bar">
 			<div class="bar-fill" style="width:{Math.round(modelProgress * 100)}%"></div>
 			<span class="bar-txt">대화 모델 받는 중 {Math.round(modelProgress * 100)}%</span>
 		</div>
-	{:else if chat.length > 0 && modelState === 'error'}
+	{:else if ask.chat.length > 0 && ask.modelState === 'error'}
 		<button type="button" class="ad-model dl err" onclick={downloadModel}>대화 모델 로드 실패 · 다시</button>
 	{/if}
 
 	<div class="ad-askbox">
 		<textarea bind:this={inputEl} bind:value={question} rows="1" placeholder="공시에 대해 질문…" onkeydown={onKey}></textarea>
-		<button type="button" class="ad-send" onclick={ask} disabled={!searchIndex || busy || !question.trim()} aria-label="질문">
+		<button type="button" class="ad-send" onclick={submitQuestion} disabled={!searchIndex || busy || !question.trim()} aria-label="질문">
 			{#if busy}<Sparkles size={15} />{:else}<Send size={15} />{/if}
 		</button>
 	</div>

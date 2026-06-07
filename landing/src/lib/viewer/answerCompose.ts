@@ -75,11 +75,17 @@ function matchSignal(q: string, signals: FinanceSignal[]): FinanceSignal | null 
 	for (const [k, vs] of Object.entries(ACCT_SYN)) if (nq.includes(k)) probe += vs.join('');
 	let best: FinanceSignal | null = null;
 	let bestLen = 0;
+	let bestFull = Infinity;
 	for (const s of signals) {
+		const full = s.label.replace(/\s/g, '').length;
 		for (const v of labelVariants(s.label)) {
-			if (probe.includes(v) && v.length > bestLen) {
+			if (!probe.includes(v)) continue;
+			// 더 긴 매칭 우선; 동률이면 *전체 라벨이 짧은* 본 계정 우선 — "당기순이익" > "(비지배주주지분)당기순이익"
+			// (괄호제거 변형이 동률을 만들어 하위 라인이 잘못 선택되던 버그 차단).
+			if (v.length > bestLen || (v.length === bestLen && full < bestFull)) {
 				best = s;
 				bestLen = v.length;
+				bestFull = full;
 			}
 		}
 	}
@@ -88,6 +94,14 @@ function matchSignal(q: string, signals: FinanceSignal[]): FinanceSignal | null 
 
 function dirWord(d: FinanceSignal['direction']): string {
 	return d === 'up' ? '증가' : d === 'down' ? '감소' : d === 'flat' ? '거의 변화 없음' : '등락 혼조';
+}
+
+// 주제격 조사 — 마지막 글자 받침 유무로 은/는 선택("부채총계는"·"영업이익은"). 한글 아니면 는.
+function topicJosa(word: string): string {
+	const ch = word.trim().slice(-1);
+	const code = ch.charCodeAt(0);
+	if (code < 0xac00 || code > 0xd7a3) return '는';
+	return (code - 0xac00) % 28 !== 0 ? '은' : '는';
 }
 
 export function composeAnswer(q: string, hits: SearchHit[], addedTerms: string[], signals: FinanceSignal[]): ComposeResult {
@@ -106,9 +120,10 @@ export function composeAnswer(q: string, hits: SearchHit[], addedTerms: string[]
 	// 재무 정렬숫자에서 직접 답(가장 정확) — TREND/FLIP/MAGNITUDE
 	if (sig) {
 		if (intent === 'flip') {
+			const j = topicJosa(sig.label);
 			const ans = sig.signFlip
-				? `${sig.label}은(는) ${sig.flipAt} 기간에 ${sig.latest < 0 ? '흑자 → 적자' : '적자 → 흑자'}로 전환됐습니다. 최근값 ${won(sig.latest)}원(${sig.points[0].period}).`
-				: `${sig.label}은(는) 조회 기간 내 흑↔적자 전환이 없습니다. 최근값 ${won(sig.latest)}원(${sig.points[0].period}, ${sig.latest < 0 ? '적자' : '흑자'}).`;
+				? `${sig.label}${j} ${sig.flipAt} 기간에 ${sig.latest < 0 ? '흑자 → 적자' : '적자 → 흑자'}로 전환됐습니다. 최근값 ${won(sig.latest)}원(${sig.points[0].period}).`
+				: `${sig.label}${j} 조회 기간 내 흑↔적자 전환이 없습니다. 최근값 ${won(sig.latest)}원(${sig.points[0].period}, ${sig.latest < 0 ? '적자' : '흑자'}).`;
 			return { intent, answer: ans, citedSignal: sig, suggestLlm };
 		}
 		if (intent === 'trend') {
@@ -117,7 +132,7 @@ export function composeAnswer(q: string, hits: SearchHit[], addedTerms: string[]
 			const streak = (sig.direction === 'up' || sig.direction === 'down') && sig.monotoneRun >= 3 ? ` (${sig.monotoneRun}개 기간 연속 ${dirWord(sig.direction)})` : '';
 			return {
 				intent,
-				answer: `${sig.label}은(는) ${oldest.period}~${sig.points[0].period} ${dirWord(sig.direction)} 추세입니다. 최근값 ${won(sig.latest)}원${pct}${streak}.`,
+				answer: `${sig.label}${topicJosa(sig.label)} ${oldest.period}~${sig.points[0].period} ${dirWord(sig.direction)} 추세입니다. 최근값 ${won(sig.latest)}원${pct}${streak}.`,
 				citedSignal: sig,
 				suggestLlm
 			};
