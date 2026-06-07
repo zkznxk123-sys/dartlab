@@ -274,23 +274,27 @@
 		question = '';
 		busy = true;
 
-		// 0) 결정론 회사 감지(검색 전). 없는 회사·현재 회사·모호 0 → [] → 현재 회사로 정상 답.
+		// 0) 결정론 회사 감지(검색 전). 없는 회사·현재 회사 → [] → 현재 회사로 정상 답.
 		const targets = await resolveCompanies(q, code);
 		if (targets.length === 0) {
 			await answerOnCompany(q, bundle, searchIndex);
 			return;
 		}
 
-		// 타 회사 감지(단일·모호 공통) → 답 안 함. 이동 칩 turn push 후 종료(클릭 시 이동+원질문 자동 답).
-		const det =
-			targets.length === 1
-				? `질문에서 '${targets[0].name}'을(를) 봤어요. 이 뷰어는 한 번에 한 회사예요.`
-				: `'${q}'에 여러 회사가 보여요. 어디로 갈까요?`;
+		// 단일 타 회사 감지 → *자동 이동*. 본문(viewer)이 그 회사로 바뀌고, 대화는 스토어로 유지되며, carryQ 로
+		// 새 회사에서 원 질문 자동 답. 확인 칩 없이 바로(사용자 요구). 감지는 어절매칭이라 오탐 낮음.
+		if (targets.length === 1) {
+			onNavigate(targets[0].code, q);
+			busy = false;
+			return;
+		}
+
+		// 모호(≥2) → 자동선택 불가. 후보 칩 제시(클릭 시 그 회사로 이동+원질문 자동 답).
 		ask.chat.push({
 			q,
 			companyName: corpName,
 			nav: targets,
-			det,
+			det: `'${q}'에 여러 회사가 보여요. 어디로 갈까요?`,
 			citedLabel: null,
 			evItems: [],
 			evHits: [],

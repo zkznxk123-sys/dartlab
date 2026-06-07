@@ -160,12 +160,14 @@
 		if (c && c !== code) void goto(`${base}/viewer/company/${c}`);
 	}
 
-	// AI 가 질문에서 타 회사 감지 → 이동 칩 클릭 시 호출. 단일 뷰어로 goto + 원질문 운반(carryQ).
-	// AskDrawer 는 askOpen 유지 + code 무관이라 재마운트 0 → 대화 유지. 새 회사 index 준비되면 자동 ask.
-	function onAskNavigate(targetCode: string, carryQuestion: string) {
+	// AI 가 질문에서 타 회사 감지 → 자동 이동. 단일 뷰어로 goto 후 *완료된 뒤* 원질문 운반(carryQ).
+	// ★goto 전에 askCarryQ 를 set 하면 옛 회사 mount 의 carryQ effect 가 먼저 발화해 옛 회사 데이터로
+	// 답하고 consumedCarry 를 소비 → 새 회사 mount 가 skip(삼성 데이터로 하이닉스 답하는 race). goto 완료
+	// 후 set 해야 새 회사 mount 만 픽업한다. 대화는 askSession 스토어로 유지(언마운트 무관).
+	async function onAskNavigate(targetCode: string, carryQuestion: string) {
 		if (!targetCode || targetCode === code) return;
+		await goto(`${base}/viewer/company/${targetCode}`);
 		askCarryQ = carryQuestion;
-		void goto(`${base}/viewer/company/${targetCode}`);
 	}
 
 	// 전체보기 Esc 해제.
