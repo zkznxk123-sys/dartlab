@@ -34,6 +34,11 @@
 	let nameMap = $state<Map<string, string>>(new Map());
 	onMount(() => {
 		void loadCompanies().then((l) => (nameMap = new Map(l.map((c) => [c.code, c.name]))));
+		try {
+			if (localStorage.getItem('dartlab:cmpHint') === 'done') cmpHintDismissed = true;
+		} catch {
+			/* localStorage 불가 무시 */
+		}
 		// D3 — 모바일(≤880px)은 동시표시 기간 1개가 기본(390px 에 260px 셀 3개 강제 가로스크롤 회피).
 		// 데스크톱은 cols=3 그대로(이 분기는 mount 시 1회·좁은 화면에서만). 이후 사용자 cols 토글은 자유.
 		if (typeof window !== 'undefined' && window.matchMedia('(max-width: 880px)').matches) cols = 1;
@@ -65,8 +70,17 @@
 	let vsFailed = $state(0);
 	let lockedPeriod = $state(''); // 비교 모드 = 한 시점 lock
 	let addOpen = $state(false); // 회사 추가 팝오버
+	let cmpHintDismissed = $state(false); // 비교 모드 안내 띠 — 한 번 닫으면 localStorage 로 다시 안 뜸
 	// 비교 모드 판정 — 파생을 일찍 선언(windowPeriods 등이 참조). vsCodes/bundle/vsBundles 에만 의존.
 	const compareMode = $derived(vsCodes.length > 0);
+	function dismissCmpHint() {
+		cmpHintDismissed = true;
+		try {
+			localStorage.setItem('dartlab:cmpHint', 'done');
+		} catch {
+			/* localStorage 불가 무시 */
+		}
+	}
 	const allBundles = $derived(bundle ? [bundle, ...vsBundles] : []);
 
 	// code 바뀌면(검색 이동) 재로드.
@@ -382,7 +396,13 @@
 						<Plus size={13} /> 비교
 					</button>
 					{#if addOpen}
-						<div class="add-pop"><CompanySearch onpick={addCompany} /></div>
+						<div class="add-pop">
+							<p class="add-hint">
+								추가한 회사를 <b>지금 보는 시점·항목 그대로</b> 나란히 비교합니다 (최대 6사).<br />
+								<span class="add-eg">예: 삼성전자 + SK하이닉스 → 같은 재무상태표를 한 화면에</span>
+							</p>
+							<CompanySearch onpick={addCompany} />
+						</div>
 					{/if}
 				</div>
 				{#if compareMode}
@@ -409,6 +429,16 @@
 	{#if bundle && !loading}
 		<div class="ribbon-bar">
 			<TimelineRibbon periods={visiblePeriods} {windowPeriods} onpick={pickPeriod} onnewer={moveNewer} onolder={moveOlder} {canNewer} {canOlder} />
+		</div>
+	{/if}
+
+	{#if compareMode && allBundles.length >= 2 && !cmpHintDismissed}
+		<div class="cmp-hint">
+			<span
+				><b>비교 모드</b> — 같은 시점·같은 항목으로 회사를 나란히. 시점은 <b>상단 타임라인</b>, 항목은
+				<b>좌측 TOC</b> 에서 고르고, 회사 빼기는 칩의 ✕</span
+			>
+			<button type="button" class="cmp-hint-x" onclick={dismissCmpHint} title="안내 닫기"><X size={12} /></button>
 		</div>
 	{/if}
 
@@ -762,6 +792,25 @@
 		right: 0;
 		z-index: 60;
 	}
+	.add-hint {
+		max-width: 320px;
+		margin: 0 0 8px;
+		padding: 8px 10px;
+		background: #0a0e18;
+		border: 1px solid #263145;
+		border-radius: 6px;
+		font-size: 11px;
+		line-height: 1.55;
+		color: #cbd5e1;
+	}
+	.add-hint b {
+		color: #fdba74;
+		font-weight: 700;
+	}
+	.add-eg {
+		color: #64748b;
+		font-size: 10px;
+	}
 	/* 종목검색 팝오버 — 화면내검색(⌘K)과 분리된 회사전환 입력 */
 	.stock-wrap {
 		position: relative;
@@ -809,6 +858,36 @@
 		flex-shrink: 0;
 		padding: 6px 12px;
 		border-bottom: 1px solid #1e2433;
+	}
+	.cmp-hint {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 6px 12px;
+		background: rgba(251, 146, 60, 0.08);
+		border-bottom: 1px solid rgba(251, 146, 60, 0.25);
+		font-size: 11px;
+		line-height: 1.45;
+		color: #cbd5e1;
+	}
+	.cmp-hint b {
+		color: #fdba74;
+		font-weight: 700;
+	}
+	.cmp-hint-x {
+		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		padding: 2px;
+		background: none;
+		border: none;
+		color: #64748b;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+	.cmp-hint-x:hover {
+		color: #f1f5f9;
 	}
 
 	.state {
