@@ -302,6 +302,13 @@ def showImpl(
     # 정형 비재무·report·sections·notes·segments 토픽은 panel raw 공시 검색이 표면(facade 폴백) → None.
     topic = _resolveTopic(topic)
 
+    # 비용상세(판관비·by-nature 성격별) — panel 노트 + finance reconcile 합성(expenseDetailBuilder).
+    # cross-source 라 panel/finance 직접 import 없이 builder 가 company 를 받아 합성(sce/ratios 동형).
+    if topic == "expenseDetail":
+        from dartlab.providers.dart.builder.expenseDetailBuilder import expenseDetail
+
+        return expenseDetail(company)
+
     if isinstance(period, list):
         wide = company._showImpl(topic, block, freq=freq, scope=scope, raw=raw)
         if wide is None or not isinstance(wide, pl.DataFrame):
@@ -413,7 +420,7 @@ def isStrongTopic(topic: str) -> bool:
     from dartlab.providers.dart.notes import _NOTES_DISPATCH
 
     t = _resolveTopic(topic)
-    if t in SHOW_FINANCE_TOPICS or t in _NOTES_DISPATCH:
+    if t == "expenseDetail" or t in SHOW_FINANCE_TOPICS or t in _NOTES_DISPATCH:
         return True
     # report/notes/finance category = 정규화된 강한 소스 (dividend 등 정형 공시). disclosure(서술
     # docs)·canonicalKey·한글 섹션명은 raw 공시(panel 본분) → False.

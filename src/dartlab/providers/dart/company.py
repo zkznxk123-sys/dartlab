@@ -3479,7 +3479,7 @@ class Company:
                 else []
             )
             latestPeriod = years[-1] if years else None
-            for idx, topic in enumerate(("BS", "IS", "CIS", "CF", "SCE", "ratios")):
+            for idx, topic in enumerate(("BS", "IS", "CIS", "CF", "SCE", "ratios", "expenseDetail")):
                 if topic in seen:
                     continue
                 financeRows.append(
