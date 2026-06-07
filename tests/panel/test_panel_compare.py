@@ -855,8 +855,9 @@ def test_compare_unit_scale_is_statement_scoped(monkeypatch: pytest.MonkeyPatch,
         ),
     )
 
-    assert cmp._detectUnitScale("111111", "kr", statements=("BS",)) == 1_000_000
-    assert cmp._detectUnitScale("111111", "kr", statements=("IS2",)) == 1
+    byStmt = cmp._detectUnitScalesByStatement("111111", "kr", ("BS", "IS2"))
+    assert byStmt["BS"]["2026Q1"] == 1_000_000
+    assert byStmt["IS2"]["2026Q1"] == 1
 
 
 def test_compare_unit_scale_ignores_older_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -882,11 +883,13 @@ def test_compare_unit_scale_ignores_older_period_caption(monkeypatch: pytest.Mon
         ),
     )
 
-    assert cmp._detectUnitScale("111111", "kr") == 1_000_000
+    # 최신 2026Q1 은 캡션 없음 → 백만원 기본(과거 2018Q4 '원' 캡션에 오염 안 됨).
+    byStmt = cmp._detectUnitScalesByStatement("111111", "kr", ("BS",))
+    assert byStmt["BS"]["2026Q1"] == 1_000_000
 
 
 def test_compare_unit_scale_can_scope_to_requested_period(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    """단위 검출은 요청 period 를 주면 그 period 의 캡션만 사용한다."""
+    """단위 검출은 period별 캡션을 독립 맵으로 분리한다(소비자가 처리 period 로 조회)."""
     import importlib
 
     cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
@@ -908,9 +911,9 @@ def test_compare_unit_scale_can_scope_to_requested_period(monkeypatch: pytest.Mo
         ),
     )
 
-    assert cmp._detectUnitScale("111111", "kr") == 1_000
-    assert cmp._detectUnitScale("111111", "kr", period="2025Q4") == 1
-    assert cmp._detectUnitScale("111111", "kr", period="2025") == 1
+    byStmt = cmp._detectUnitScalesByStatement("111111", "kr", ("BS",))
+    assert byStmt["BS"]["2026Q1"] == 1_000
+    assert byStmt["BS"]["2025Q4"] == 1
 
 
 def test_compare_unit_scale_uses_latest_period_caption(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -936,7 +939,8 @@ def test_compare_unit_scale_uses_latest_period_caption(monkeypatch: pytest.Monke
         ),
     )
 
-    assert cmp._detectUnitScale("111111", "kr") == 1_000
+    byStmt = cmp._detectUnitScalesByStatement("111111", "kr", ("BS",))
+    assert byStmt["BS"]["2026Q1"] == 1_000
 
 
 # ── 정렬 실데이터 ──
@@ -1064,11 +1068,13 @@ def test_compare_unit_caption_scoping() -> None:
 
     삼성·SK 는 백만원 신고 → 자산총계가 수백조(1e14대), 원 오염 시 1e8 로 1,000,000배 축소.
     """
-    from dartlab.providers.dart.panel.compare import _detectUnitScale
+    from dartlab.providers.dart.panel.compare import _detectUnitScalesByStatement
 
     for code in _PAIR:
-        scale = _detectUnitScale(code, "kr")
-        assert scale == 1_000_000, f"{code} 단위 오검출 {scale} (백만원 1e6 기대 — EPS '원' 오염 의심)"
+        byStmt = _detectUnitScalesByStatement(code, "kr", ("BS",))
+        scales = set(byStmt.get("BS", {}).values())
+        assert scales, f"{code} BS 단위 캡션 미검출"
+        assert scales <= {1_000_000}, f"{code} 단위 오검출 {scales} (백만원 1e6 기대 — EPS '원' 오염 의심)"
 
 
 @pytest.mark.heavy  # 셀 데이터 lxml 파싱 경로 동반 — 로컬 분리 실행

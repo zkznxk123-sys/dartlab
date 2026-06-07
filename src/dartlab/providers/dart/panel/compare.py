@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 
 import polars as pl
 
@@ -144,29 +145,6 @@ def _detectUnitScalesByStatement(
     return out
 
 
-def _detectUnitScales(code: str, marketNs: str, statements: tuple[str, ...] | None = None) -> dict[str, int]:
-    """회사 재무표 period별 caption '단위:X' → 원 배율 map. 여러 statement 는 입력 순서 첫 캡션 우선."""
-    byStatement = _detectUnitScalesByStatement(code, marketNs, statements)
-    out: dict[str, int] = {}
-    for statement in statements or tuple(byStatement):
-        for period, scale in byStatement.get(statement, {}).items():
-            out.setdefault(period, scale)
-    return out
-
-
-def _detectUnitScale(
-    code: str, marketNs: str, period: str | None = None, statements: tuple[str, ...] | None = None
-) -> int:
-    """회사 재무표 caption '단위:X' → 원 배율. period 없으면 최신 filing period 기준."""
-    scales = _detectUnitScales(code, marketNs, statements)
-    if period is not None:
-        return scales.get(_financePanelPeriod(period), 1_000_000)
-    if not scales:
-        return 1_000_000
-    latest = sortPeriods(list(scales), descending=True)[0]
-    return scales.get(latest, 1_000_000)
-
-
 def _financePeriodLabel(period: str, freq: str) -> str:
     """사용자 period 입력 → finance wide 컬럼 라벨."""
     p = str(period).strip()
@@ -301,20 +279,6 @@ def _compareCellsResult(
                 row[key] = per.get(c, {}).get(p, {}).get(ac, (None, None))[1]  # 원 환산값 or None(honest-gap)
         rows.append(row)
     return pl.DataFrame(rows), targets
-
-
-def _compareCells(
-    codes: list[str],
-    *,
-    statement: str,
-    freq: str,
-    scope: str | None,
-    marketNs: str,
-    period: list[str] | str | None,
-) -> pl.DataFrame:
-    """N사 재무를 acode(XBRL 코드) 단위로 정렬 — 행=(acode,label), 열=회사, 셀=원 환산값."""
-    df, _ = _compareCellsResult(codes, statement=statement, freq=freq, scope=scope, marketNs=marketNs, period=period)
-    return df
 
 
 def _companyLong(code: str, wide: pl.DataFrame, scope: str | None) -> pl.DataFrame | None:
@@ -485,6 +449,66 @@ def _compareRows(
     return out.select([*idCols, *ordered]), targets, None
 
 
+@dataclass
+class _Resolved:
+    """compare 입력 해소 결과 — 정규화·검증·시장·모드 SSOT (compare/diagnostics 공유)."""
+
+    codes: list[str]
+    topic: str | None
+    period: list[str] | str | None
+    scope: str | None
+    freq: str
+    marketNs: str
+    mode: str  # "finance" | "row"
+
+
+def _resolveInputs(
+    codes: list[str] | str,
+    *,
+    topic: str | None,
+    period: list[str] | str | None,
+    scope: str | None,
+    freq: str,
+) -> _Resolved:
+    """compare 입력 정규화·계약 가드 SSOT. 위반 시 ValueError (compare/diagnostics 동일 메시지)."""
+    norm = _normCodes(codes)
+    if len(norm) < 2:
+        raise ValueError(
+            "compare 는 2개 이상 종목코드가 필요합니다 (예: dartlab.compare(['005930','000660'])). "
+            "단일 종목은 Company(code).panel 사용."
+        )
+    if len(norm) > _MAX_COMPARE:
+        raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
+    periodVal = _normPeriod(period)
+    topicVal = _normTopic(topic)
+    freqVal = _normFreq(freq)
+    scopeVal = _normScope(scope)
+    markets = {detectMarket(c) for c in norm}
+    if len(markets) > 1:
+        raise ValueError(
+            f"KO↔US 혼합 비교는 불가 ({markets}). 같은 시장 종목끼리만 — cross-market 은 후속(crossMarket)."
+        )
+    marketNs = "us" if markets == {"US"} else "kr"
+    mode = "finance" if topicVal and topicVal.lower() in _FIN_KEYS else "row"
+    if mode == "finance" and marketNs != "kr":
+        raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
+    return _Resolved(
+        codes=norm, topic=topicVal, period=periodVal, scope=scopeVal, freq=freqVal, marketNs=marketNs, mode=mode
+    )
+
+
+def _runCompare(r: _Resolved) -> tuple[pl.DataFrame, list[str], str | None]:
+    """해소된 입력으로 finance/row 실행 — (df, resolvedPeriods, emptyReason). compare/diagnostics 공유."""
+    if r.mode == "finance":
+        # 재무 토픽 = 셀(항목) 단위 비교(acode 정렬 + 원 환산). scope 명시 고정(자동폴백 금지).
+        scope = r.scope or "consolidated"
+        df, periods = _compareCellsResult(
+            r.codes, statement=str(r.topic).lower(), freq=r.freq, scope=scope, marketNs=r.marketNs, period=r.period
+        )
+        return df, periods, ("insufficientFinanceCells" if df.height == 0 else None)
+    return _compareRows(r.codes, marketNs=r.marketNs, scopeVal=r.scope, period=r.period, topic=r.topic)
+
+
 def compare(
     codes: list[str] | str,
     *,
@@ -512,35 +536,8 @@ def compare(
         >>> import dartlab
         >>> dartlab.compare(["005930", "000660"], topic="재고")  # doctest: +SKIP
     """
-    codes = _normCodes(codes)
-    if len(codes) < 2:
-        raise ValueError(
-            "compare 는 2개 이상 종목코드가 필요합니다 (예: dartlab.compare(['005930','000660'])). "
-            "단일 종목은 Company(code).panel 사용."
-        )
-    if len(codes) > _MAX_COMPARE:
-        raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
-    periodVal = _normPeriod(period)
-    topicVal = _normTopic(topic)
-    freq = _normFreq(freq)
-    scopeVal = _normScope(scope)
-    markets = {detectMarket(c) for c in codes}
-    if len(markets) > 1:
-        raise ValueError(
-            f"KO↔US 혼합 비교는 불가 ({markets}). 같은 시장 종목끼리만 — cross-market 은 후속(crossMarket)."
-        )
-    marketNs = "us" if markets == {"US"} else "kr"
-
-    # 재무제표 토픽 = 셀(항목) 단위 비교 — acode 정렬 + 원 환산 (통짜 표 병치 대신).
-    if topicVal and topicVal.lower() in _FIN_KEYS:
-        if marketNs != "kr":
-            raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
-        return _compareCells(
-            codes, statement=topicVal.lower(), freq=freq, scope=scopeVal, marketNs=marketNs, period=periodVal
-        )
-
-    out, _, _ = _compareRows(codes, marketNs=marketNs, scopeVal=scopeVal, period=periodVal, topic=topicVal)
-    return out
+    df, _, _ = _runCompare(_resolveInputs(codes, topic=topic, period=period, scope=scope, freq=freq))
+    return df
 
 
 def _negPeriodKey(cell: str) -> str:
@@ -548,12 +545,6 @@ def _negPeriodKey(cell: str) -> str:
     parts = cell.split(_SEP)
     p = parts[1] if len(parts) > 1 else ""
     return "".join(chr(255 - ord(ch)) for ch in p)  # 내림차순
-
-
-def _compareMode(topic: str | None) -> str:
-    """topic 기반 compare 실행 모드."""
-    topicVal = _normTopic(topic)
-    return "finance" if topicVal and topicVal.lower() in _FIN_KEYS else "row"
 
 
 def _periodValue(period: list[str] | str | None) -> list[str] | None:
@@ -682,78 +673,41 @@ def _compareDiagnostics(
         "error": None,
     }
     try:
-        normCodes = _normCodes(codes)
-        if len(normCodes) < 2:
-            raise ValueError(
-                "compare 는 2개 이상 종목코드가 필요합니다 (예: dartlab.compare(['005930','000660'])). "
-                "단일 종목은 Company(code).panel 사용."
-            )
-        if len(normCodes) > _MAX_COMPARE:
-            raise ValueError(f"compare 는 최대 {_MAX_COMPARE}개 종목까지만 지원합니다.")
-        normPeriod = _normPeriod(period)
-        normTopic = _normTopic(topic)
-        mode = _compareMode(normTopic)
-        normFreq = _normFreq(freq)
-        normScope = _normScope(scope)
-        markets = {detectMarket(c) for c in normCodes}
-        if len(markets) > 1:
-            raise ValueError(
-                f"KO↔US 혼합 비교는 불가 ({markets}). 같은 시장 종목끼리만 — cross-market 은 후속(crossMarket)."
-            )
-        marketNs = "us" if markets == {"US"} else "kr"
-        if mode == "finance":
-            if marketNs != "kr":
-                raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
-            actualScope = normScope or "consolidated"
-            df, resolvedPeriods = _compareCellsResult(
-                normCodes,
-                statement=str(normTopic).strip().lower(),
-                freq=normFreq,
-                scope=actualScope,
-                marketNs=marketNs,
-                period=normPeriod,
-            )
-            emptyReason = "insufficientFinanceCells" if df.height == 0 else None
-        else:
-            actualScope = normScope
-            df, resolvedPeriods, emptyReason = _compareRows(
-                normCodes, marketNs=marketNs, scopeVal=normScope, period=normPeriod, topic=normTopic
-            )
+        r = _resolveInputs(codes, topic=topic, period=period, scope=scope, freq=freq)
+        df, resolvedPeriods, emptyReason = _runCompare(r)
     except ValueError as exc:
         diag["reason"] = "invalidInput"
         diag["emptyReason"] = "invalidInput"
         diag["error"] = str(exc)
         return diag
 
-    diag["codes"] = normCodes
-    diag["requestedCodeCount"] = len(normCodes)
-    diag["missingCodes"] = normCodes
+    actualScope = (r.scope or "consolidated") if r.mode == "finance" else r.scope
     columns = list(df.columns)
-    cellCols = _cellColumns(columns, normCodes)
-    identityCols = _identityColumns(columns, cellCols)
-    presentCodes, sharedRows, partialRows, soloRows = _shareStats(df, normCodes)
-    missingCodes = [code for code in normCodes if code not in presentCodes]
+    cellCols = _cellColumns(columns, r.codes)
+    presentCodes, sharedRows, partialRows, soloRows = _shareStats(df, r.codes)
     rowCount = df.height
 
     diag.update(
         {
             "ok": rowCount > 0,
             "reason": "ready" if rowCount > 0 else "emptyResult",
-            "mode": mode,
-            "marketNs": marketNs,
-            "topic": normTopic,
-            "period": _periodValue(normPeriod),
+            "mode": r.mode,
+            "codes": r.codes,
+            "requestedCodeCount": len(r.codes),
+            "marketNs": r.marketNs,
+            "topic": r.topic,
+            "period": _periodValue(r.period),
             "resolvedPeriods": resolvedPeriods,
             "scope": actualScope,
-            "freq": normFreq,
+            "freq": r.freq,
             "rowCount": rowCount,
             "columns": columns,
-            "identityColumns": identityCols,
+            "identityColumns": _identityColumns(columns, cellCols),
             "cellColumns": cellCols,
             "cellColumnShape": _cellColumnShape(cellCols),
-            "valueUnit": "KRW" if mode == "finance" else None,
+            "valueUnit": "KRW" if r.mode == "finance" else None,
             "presentCodes": presentCodes,
-            "missingCodes": missingCodes,
+            "missingCodes": [c for c in r.codes if c not in presentCodes],
             "sharedRows": sharedRows,
             "partialRows": partialRows,
             "soloRows": soloRows,
