@@ -119,9 +119,13 @@ testUniverse:
 
 ## 공개 호출 방식
 
-- `dartlab.gather("price", "005930")`
-- `dartlab.scan("fields")`
-- `dartlab.Company("005930").show("finance")`
+```python
+import dartlab
+
+dartlab.gather("price", "005930")          # 최신 raw data 보강 (provider·latestAsOf)
+dartlab.scan("fields")                       # universe·rank 위치 (횡단 비교)
+dartlab.Company("005930").show("finance")    # 단일 종목 원자료 (target·topic·period)
+```
 
 ## 호출 동작
 
