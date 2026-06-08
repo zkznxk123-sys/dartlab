@@ -71,14 +71,12 @@ BANNED_FIXED = (
     "collectOneZip",
     "ZIP 다운로드 + 섹션",
     "구조화된 섹션",
-    _token("data", "Export"),
+    # 전체(bulk) 다운로드만 차단 — 사이트에서 전 회사 데이터를 통째로 긁어가는 표면 방지.
+    # 뷰어 개별 다운로드(보던 회사 1곳의 panel CSV·재무 Excel, 이미 로드된 데이터 변환,
+    # panel-SSOT 기반)와 HF 데이터셋 링크는 허용(2026-06-08 운영자 결정). 옛 0e986832d 가
+    # docs/sections 정리하며 개별 export(dataExport/panelToCsv/financeToExcel/downloadPanel
+    # Csv/downloadFinanceExcel)·HF 링크(DATASET_URL/전체 데이터셋)까지 쓸어담은 과잉 차단을 해제.
     _token("download", "All"),
-    _token("downloadPanel", "Csv"),
-    _token("downloadFinance", "Excel"),
-    _token("panelTo", "Csv"),
-    _token("financeTo", "Excel"),
-    "DATASET_URL",
-    "전체 데이터셋",
     "includeDocs",
     "docsBatchSize",
     '_dataDir("docs")',
