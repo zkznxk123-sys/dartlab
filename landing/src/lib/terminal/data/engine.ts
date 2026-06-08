@@ -1,0 +1,569 @@
+// DartLab Terminal — compute engine (dartlab.js 포팅 + 데이터 정직성 수정).
+//   · 연간 cf.op/inv/fin 은 실데이터 → CFO/CFI/CFF/FCF 실표시 (opening/closing 은 null → 제외)
+//   · ecosystem YoY delta 는 99% null → finance 5Y 배열에서 직접 YoY 계산 (실데이터화)
+//   · 합성 OHLC 제거 → 실 재무추세(매출·영업이익·이익률) annual/quarter
+// 전역 없음: createEngine(raw) 가 raw 위에서 동작하는 순수 클로저 묶음을 반환.
+
+import type {
+	RawData,
+	Company,
+	Credit,
+	Valuation,
+	RiskFlag,
+	Verdict,
+	Tone,
+	EcoNode,
+	Num,
+	TrendSeries,
+	StatementRow,
+	PercentileMetric
+} from './types';
+
+const SECTOR_EN: Record<string, string> = {
+	semiconductor: 'Semiconductors', auto: 'Automobile', energy: 'Energy', electronics: 'Electronics',
+	chemical: 'Chemicals', aerospace: 'Aerospace & Defense', shipbuilding: 'Shipbuilding', steel: 'Steel',
+	food: 'Food & Bev', software: 'Software', pharma: 'Pharma', finance: 'Financials', retail: 'Retail',
+	construction: 'Construction', telecom: 'Telecom', media: 'Media', battery: 'Batteries', textile: 'Apparel',
+	logistics: 'Logistics', cosmetics: 'Cosmetics', machinery: 'Machinery', paper: 'Paper', leisure: 'Leisure',
+	electrical: 'Electrical', plastic: 'Plastics', realestate: 'Real Estate', education: 'Education',
+	medicalDevice: 'Medical Devices', environment: 'Environment', buildingMaterials: 'Building Materials',
+	railroad: 'Railroad', consulting: 'Holding/Consulting', agriculture: 'Agriculture', misc: 'Misc'
+};
+const SECTOR_KR: Record<string, string> = {
+	semiconductor: '반도체', auto: '자동차', energy: '에너지', electronics: '전자', chemical: '화학',
+	aerospace: '항공우주', shipbuilding: '조선', steel: '철강', food: '음식료', software: '소프트웨어',
+	pharma: '제약바이오', finance: '금융', retail: '유통', construction: '건설', telecom: '통신',
+	media: '미디어', battery: '2차전지', textile: '섬유의류', logistics: '물류', cosmetics: '화장품',
+	machinery: '기계', paper: '제지', leisure: '레저', electrical: '전기', plastic: '플라스틱',
+	realestate: '부동산', education: '교육', medicalDevice: '의료기기', environment: '환경',
+	buildingMaterials: '건자재', railroad: '철도', consulting: '지주', agriculture: '농업', misc: '기타'
+};
+const GRADE_SCALE: Record<string, string[]> = {
+	prof: ['우수', '양호', '보통', '저수익', '적자'],
+	debt: ['안전', '관찰', '주의', '고위험'],
+	growth: ['고성장', '성장', '정체', '역성장', '급감'],
+	gov: ['A', 'B', 'C', 'D', 'E'],
+	qual: ['우수', '양호', '보통', '주의', '위험'],
+	liq: ['우수', '양호', '보통', '주의', '위험'],
+	audit: ['저위험', '중위험', '고위험'],
+	stab: ['안정', '보통', '불안정', '취약', '경고', '위험']
+};
+// dartlab scan group colors — dartlab 토큰 계열로 정렬
+const GROUP_COLOR: Record<string, string> = {
+	identity: '#a3a8b3', income: '#60a5fa', health: '#34d399', governance: '#a78bfa',
+	quality: '#fbbf24', workforce: '#f472b6', changes: '#fb923c', price: '#ea4647',
+	valuation: '#34d399', disclosure: '#c084fc'
+};
+const MARKET_LABEL: Record<string, string> = { 유가증권: 'KOSPI', 코스닥: 'KOSDAQ', 코넥스: 'KONEX' };
+// industry → macro.sectorTailwind 키 (실 macro.json 키와 검증 일치)
+const TAILWIND_MAP: Record<string, string> = {
+	auto: 'automotive', pharma: 'biotech', chemical: 'chemicals', construction: 'construction',
+	electronics: 'display', energy: 'energy', finance: 'finance', software: 'it_software',
+	retail: 'retail', semiconductor: 'semiconductor', shipbuilding: 'shipbuilding', steel: 'steel',
+	battery: 'chemicals', telecom: 'it_software'
+};
+
+const rev = <T>(a: T[] | undefined): T[] => (a || []).slice().reverse();
+const num = (v: Num): Num => (v == null || Number.isNaN(v) ? null : v);
+function lastNonNull(arr: Num[] | undefined): { v: number; i: number } | null {
+	if (!arr) return null;
+	for (let i = arr.length - 1; i >= 0; i--) {
+		const x = arr[i];
+		if (x != null) return { v: x, i };
+	}
+	return null;
+}
+function firstNonNull(arr: Num[] | undefined): number | null {
+	if (!arr) return null;
+	for (const x of arr) if (x != null) return x;
+	return null;
+}
+function median(a: Num[]): number | null {
+	const s = a.filter((x): x is number => x != null && Number.isFinite(x)).sort((x, y) => x - y);
+	return s.length ? s[Math.floor(s.length / 2)] : null;
+}
+function pctRank(arr: Num[], v: Num, lowerBetter?: boolean): number | null {
+	const xs = arr.filter((x): x is number => x != null && Number.isFinite(x));
+	if (!xs.length || v == null) return null;
+	const below = xs.filter((x) => x <= v).length;
+	let p = Math.round((below / xs.length) * 100);
+	if (lowerBetter) p = 100 - p;
+	return Math.max(1, Math.min(100, p));
+}
+export function gradeTone(scaleKey: string, val?: string): Tone {
+	const sc = GRADE_SCALE[scaleKey];
+	if (!sc || !val) return 'neutral';
+	const i = sc.indexOf(val);
+	if (i < 0) return 'neutral';
+	const f = i / (sc.length - 1);
+	return f <= 0.18 ? 'up' : f <= 0.45 ? 'good' : f <= 0.62 ? 'neutral' : f <= 0.8 ? 'warn' : 'down';
+}
+function gradeScore(scaleKey: string, val?: string): Num {
+	const sc = GRADE_SCALE[scaleKey];
+	if (!sc || !val) return null;
+	const i = sc.indexOf(val);
+	if (i < 0) return null;
+	return 1 - i / (sc.length - 1);
+}
+
+export function fmtKRW(v: Num): string {
+	if (v == null) return '—';
+	if (v >= 1e12) return (v / 1e12).toFixed(1) + '조';
+	if (v >= 1e8) return (v / 1e8).toFixed(0) + '억';
+	return v.toLocaleString();
+}
+
+export interface Engine {
+	raw: RawData;
+	years: string[];
+	source: string;
+	buildCompany(code: string): Company | null;
+	search(q: string): string | null;
+	featured(n?: number): string[];
+	sectorPerf(): { id: string; kr: string; en: string; chg: number; n: number }[];
+	priceOf(code: string): RawData['prices']['data'][string] | undefined;
+	nameOf(code: string): string;
+}
+
+export function createEngine(raw: RawData): Engine {
+	const byCode: Record<string, RawData['index'][number]> = {};
+	for (const r of raw.index) byCode[r.stockCode] = r;
+	const ecoByCode: Record<string, EcoNode> = {};
+	for (const n of raw.eco?.nodes || []) ecoByCode[n.id] = n;
+	const years = raw.finance?.years || ['2021', '2022', '2023', '2024', '2025'];
+
+	const industryNodes = (industry: string): EcoNode[] =>
+		Object.values(ecoByCode).filter((n) => n.industry === industry);
+
+	function deriveCredit(fin: RawData['finance']['companies'][string]): Credit {
+		const dr = lastNonNull(fin.ratios.debtRatio);
+		const roe = lastNonNull(fin.ratios.roe);
+		const ca = lastNonNull(fin.bs.totals.currAsset);
+		const cl = lastNonNull(fin.bs.totals.currLiab);
+		const opm = lastNonNull(fin.is.opMargin);
+		const op = lastNonNull(fin.is.op);
+		const debtRatio = dr ? dr.v : null;
+		const curr = ca && cl && cl.v ? (ca.v / cl.v) * 100 : null;
+		const sCap = debtRatio == null ? 60 : Math.max(5, Math.min(100, 100 - debtRatio / 6));
+		const sLiq = curr == null ? 60 : Math.max(5, Math.min(100, curr / 3));
+		const sProf = opm == null ? 50 : Math.max(5, Math.min(100, 50 + opm.v * 2.2));
+		const sCf = op == null ? 55 : Math.max(5, Math.min(100, op.v > 0 ? 92 : 35));
+		const sStab = roe == null ? 55 : Math.max(5, Math.min(100, 55 + roe.v * 1.4));
+		const health = Math.round(sCap * 0.26 + sLiq * 0.18 + sProf * 0.2 + sCf * 0.2 + sStab * 0.16);
+		const grades: [number, string][] = [
+			[95, 'dCR-AAA'], [88, 'dCR-AA+'], [82, 'dCR-AA'], [76, 'dCR-AA-'], [70, 'dCR-A+'], [63, 'dCR-A'],
+			[56, 'dCR-A-'], [49, 'dCR-BBB+'], [42, 'dCR-BBB'], [35, 'dCR-BBB-'], [28, 'dCR-BB+'], [20, 'dCR-BB'],
+			[12, 'dCR-B'], [0, 'dCR-CCC']
+		];
+		const grade = (grades.find((g) => health >= g[0]) || grades[grades.length - 1])[1];
+		const pd = Math.max(0.005, Math.min(28, Math.pow((100 - health) / 100, 3.1) * 30)).toFixed(2) + '%';
+		return {
+			grade,
+			healthScore: health,
+			pd,
+			tone: health >= 70 ? 'up' : health >= 49 ? 'good' : 'warn',
+			tracks: [
+				{ kr: '자본구조', en: 'Capital structure', score: Math.round(sCap) },
+				{ kr: '유동성', en: 'Liquidity', score: Math.round(sLiq) },
+				{ kr: '수익성', en: 'Profitability', score: Math.round(sProf) },
+				{ kr: '현금흐름', en: 'Cash flow', score: Math.round(sCf) },
+				{ kr: '재무안정성', en: 'Stability', score: Math.round(sStab) }
+			],
+			basis: { debtRatio, curr: curr == null ? null : Math.round(curr), opm: opm ? opm.v : null }
+		};
+	}
+
+	function valuationOf(code: string): Valuation | null {
+		const node = ecoByCode[code];
+		const fin = raw.finance.companies[code];
+		const px = raw.prices.data[code];
+		if (!node || !fin || !px || !px.currentPrice) return null;
+		const net = lastNonNull(fin.is.net);
+		const eq = lastNonNull(fin.bs.totals.totalEquity);
+		const shares = px.marketCap / px.currentPrice;
+		const per = net && net.v > 0 ? px.marketCap / (net.v * 1e12) : null;
+		const pbr = eq && eq.v > 0 ? px.marketCap / (eq.v * 1e12) : null;
+		const perL: number[] = [];
+		const pbrL: number[] = [];
+		for (const n of industryNodes(node.industry)) {
+			const f = raw.finance.companies[n.id];
+			const p = raw.prices.data[n.id];
+			if (!f || !p || !p.marketCap) continue;
+			const nn = lastNonNull(f.is.net);
+			const ee = lastNonNull(f.bs.totals.totalEquity);
+			if (nn && nn.v > 0) {
+				const x = p.marketCap / (nn.v * 1e12);
+				if (x > 0 && x < 200) perL.push(x);
+			}
+			if (ee && ee.v > 0) {
+				const x = p.marketCap / (ee.v * 1e12);
+				if (x > 0 && x < 60) pbrL.push(x);
+			}
+		}
+		const perMed = median(perL);
+		const pbrMed = median(pbrL);
+		const fairPer = perMed && net && net.v > 0 ? (perMed * net.v * 1e12) / shares : null;
+		const fairPbr = pbrMed && eq && eq.v > 0 ? (pbrMed * eq.v * 1e12) / shares : null;
+		const fair = [fairPer, fairPbr].filter((x): x is number => x != null && x > 0);
+		const fairMid = fair.length ? fair.reduce((a, b) => a + b, 0) / fair.length : null;
+		const upside = fairMid ? ((fairMid - px.currentPrice) / px.currentPrice) * 100 : null;
+		const perPos = per != null && perMed ? (per <= perMed ? 'cheap' : 'rich') : null;
+		return {
+			per, pbr, perMed, pbrMed,
+			fairLow: fair.length ? Math.min(...fair) : null,
+			fairHigh: fair.length ? Math.max(...fair) : null,
+			fairMid, upside, last: px.currentPrice, perPos
+		};
+	}
+
+	function riskFlagsOf(code: string): RiskFlag[] {
+		const e = ecoByCode[code] || ({} as EcoNode);
+		const f: RiskFlag[] = [];
+		const add = (lv: RiskFlag['lv'], kr: string, en: string, d = '') => f.push({ lv, kr, en, d });
+		if (e.profGrade === '적자' || (e.opMargin != null && e.opMargin < 0))
+			add('red', '영업적자', 'Operating loss', e.opMargin != null ? e.opMargin.toFixed(1) + '%' : '');
+		else if (e.profGrade === '저수익')
+			add('yellow', '저수익', 'Low margin', e.opMargin != null ? e.opMargin.toFixed(1) + '%' : '');
+		if (e.growthGrade === '급감')
+			add('red', '매출 급감', 'Revenue collapse', e.revCagr != null ? e.revCagr.toFixed(0) + '%' : '');
+		else if (e.growthGrade === '역성장')
+			add('yellow', '매출 역성장', 'Revenue decline', e.revCagr != null ? e.revCagr.toFixed(0) + '%' : '');
+		if (e.auditRisk === '고위험') add('red', '감사 고위험', 'Audit high risk');
+		else if (e.auditRisk === '중위험') add('yellow', '감사 위험', 'Audit risk');
+		if (e.qualGrade === '위험') add('red', '이익질 위험', 'Earnings quality risk');
+		else if (e.qualGrade === '주의') add('yellow', '이익질 주의', 'Earnings quality watch');
+		if (e.liqGrade === '위험') add('red', '유동성 위험', 'Liquidity risk');
+		else if (e.liqGrade === '주의') add('yellow', '유동성 주의', 'Liquidity watch');
+		if (e.stability && ['경고', '위험'].includes(e.stability)) add('red', '경영 불안정', 'Unstable', e.stability);
+		else if (e.stability === '취약') add('yellow', '경영 취약', 'Fragile', e.stability);
+		if (e.cfPattern === '현금위기형') add('red', '현금위기형', 'Cash crisis pattern');
+		else if (e.cfPattern === '외부의존형') add('yellow', '외부자금 의존', 'External-dependent');
+		if (e.holderChange != null && e.holderChange < -3)
+			add('yellow', '대주주 지분 급감', 'Owner stake drop', e.holderChange.toFixed(1) + '%p');
+		if (e.debtRatioDelta != null && e.debtRatioDelta > 30)
+			add('yellow', '부채비율 급증', 'Debt spike', '+' + e.debtRatioDelta.toFixed(0) + '%p');
+		if (!f.length) add('green', '주요 위험 신호 없음', 'No major red flags', '핵심 등급 양호');
+		return f;
+	}
+
+	function tailwindOf(industry: string): Company['tailwind'] {
+		const k = TAILWIND_MAP[industry];
+		const tw = k && raw.macro?.sectorTailwind ? raw.macro.sectorTailwind[k] : null;
+		if (!tw) return null;
+		const b = tw.blended;
+		return {
+			key: k, kr: SECTOR_KR[industry] || industry, blended: b, krScore: tw.kr, usScore: tw.us,
+			label: b >= 0.4 ? '순풍' : b >= 0.2 ? '중립' : '역풍',
+			tone: b >= 0.4 ? 'up' : b >= 0.2 ? 'neutral' : 'down'
+		};
+	}
+
+	function verdictOf(co: Company): Verdict {
+		const scores = co.radar.map((r) => r.s).filter((s): s is number => s != null);
+		const gradeAvg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0.5;
+		const up = co.valuation && co.valuation.upside != null ? co.valuation.upside : 0;
+		const valScore = up > 25 ? 1 : up > 5 ? 0.72 : up > -15 ? 0.45 : 0.2;
+		const r1y = co.price.ret1y == null ? 0 : co.price.ret1y;
+		const momScore = r1y > 80 ? 0.85 : r1y > 20 ? 0.7 : r1y > -10 ? 0.5 : 0.25;
+		const tw = co.tailwind;
+		const twScore = tw ? Math.min(1, tw.blended / 0.6) : 0.5;
+		const riskRed = co.risks.filter((x) => x.lv === 'red').length;
+		let composite = 0.44 * gradeAvg + 0.18 * valScore + 0.14 * momScore + 0.18 * twScore + 0.06 * (riskRed ? 0 : 1);
+		composite = Math.round(composite * 100);
+		const band: Verdict['band'] =
+			composite >= 74 ? { kr: '강세 · 우량', en: 'STRONG', tone: 'up' }
+				: composite >= 60 ? { kr: '양호 · 관심', en: 'SOLID', tone: 'good' }
+				: composite >= 46 ? { kr: '중립 · 관망', en: 'NEUTRAL', tone: 'neutral' }
+				: composite >= 32 ? { kr: '주의 · 점검', en: 'CAUTION', tone: 'warn' }
+				: { kr: '취약 · 회피', en: 'WEAK', tone: 'down' };
+		const sorted = co.radar.filter((r) => r.s != null).slice().sort((a, b) => (b.s as number) - (a.s as number));
+		const strengths: Verdict['strengths'] = [];
+		const concerns: Verdict['concerns'] = [];
+		for (const r of sorted.slice(0, 2)) if ((r.s as number) >= 0.6) strengths.push({ kr: `${r.kr} 우수 (상위)`, en: `Strong ${r.en}` });
+		for (const r of sorted.slice(-2)) if ((r.s as number) <= 0.45) concerns.push({ kr: `${r.kr} 취약`, en: `Weak ${r.en}` });
+		if (up != null && up > 15) strengths.push({ kr: `업종 대비 저평가 (+${up.toFixed(0)}% 여력)`, en: `Undervalued vs peers (+${up.toFixed(0)}%)` });
+		if (up != null && up < -15) concerns.push({ kr: `업종 대비 고평가 (${up.toFixed(0)}%)`, en: `Rich vs peers (${up.toFixed(0)}%)` });
+		if (r1y > 50) strengths.push({ kr: `1년 모멘텀 강함 (+${r1y.toFixed(0)}%)`, en: 'Strong 1Y momentum' });
+		if (tw && tw.blended >= 0.4) strengths.push({ kr: `${tw.kr} 섹터 순풍`, en: `${tw.kr} sector tailwind` });
+		for (const x of co.risks.filter((x) => x.lv === 'red').slice(0, 2)) concerns.push({ kr: x.kr, en: x.en });
+		return {
+			composite, band, strengths: strengths.slice(0, 3), concerns: concerns.slice(0, 3),
+			riskRed, riskYellow: co.risks.filter((x) => x.lv === 'yellow').length
+		};
+	}
+
+	function industryPercentile(code: string): Company['percentile'] {
+		const node = ecoByCode[code];
+		if (!node) return null;
+		const peers = industryNodes(node.industry);
+		const col = (f: keyof EcoNode): Num[] => peers.map((n) => (n[f] as Num) ?? null);
+		const metrics = [
+			{ kr: '영업이익률', en: 'OP margin', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%' },
+			{ kr: 'ROE', en: 'ROE', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%' },
+			{ kr: '매출성장', en: 'Rev growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%' },
+			{ kr: '매출규모', en: 'Revenue', v: node.revenue ?? null, p: pctRank(col('revenue'), node.revenue ?? null), unit: 'rev' },
+			{ kr: '점유율', en: 'Mkt share', v: node.marketShare ?? null, p: pctRank(col('marketShare'), node.marketShare ?? null), unit: '%' }
+		].filter((m): m is PercentileMetric => m.p != null);
+		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics };
+	}
+
+	function derivePeers(code: string, industry: string): Company['peers'] {
+		return raw.index
+			.filter((r) => r.industry === industry)
+			.sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
+			.slice(0, 8)
+			.map((r) => ({ code: r.stockCode, name: r.corpName, revenue: r.revenue, self: r.stockCode === code }));
+	}
+
+	// 실 재무추세: finance(연간) + quarters(분기). 합성 없음.
+	function trendFromFinance(fin: RawData['finance']['companies'][string]): TrendSeries {
+		return {
+			periods: years,
+			sales: fin.is.sales.slice(),
+			op: fin.is.op.slice(),
+			net: fin.is.net.slice(),
+			opMargin: fin.is.opMargin.slice(),
+			freq: 'annual'
+		};
+	}
+	function trendFromQuarters(code: string): TrendSeries | null {
+		const q = raw.quarters?.companies[code];
+		if (!q || !q.is || !Array.isArray(q.is.sales) || !Array.isArray(q.is.op) || !Array.isArray(q.is.net)) return null;
+		if (!q.is.sales.some((v) => v != null)) return null;
+		const op = q.is.op;
+		const opMargin = q.is.sales.map((s, i) => {
+			const o = op[i];
+			return s != null && s !== 0 && o != null ? +((o / s) * 100).toFixed(1) : null;
+		});
+		return {
+			periods: raw.quarters?.periods || [],
+			sales: q.is.sales.slice(),
+			op: q.is.op.slice(),
+			net: q.is.net.slice(),
+			opMargin,
+			freq: 'quarter'
+		};
+	}
+
+	function cagr(arr: Num[]): number | null {
+		const a = arr.filter((v): v is number => v != null);
+		if (a.length < 2 || a[0] <= 0) return null;
+		return (Math.pow(a[a.length - 1] / a[0], 1 / (a.length - 1)) - 1) * 100;
+	}
+
+	function buildCompany(code: string): Company | null {
+		const fin = raw.finance.companies[code];
+		const px = raw.prices.data[code];
+		if (!fin || !px) return null;
+		const idx = byCode[code];
+		const eco = ecoByCode[code] || ({} as EcoNode);
+		const yrs = rev(years);
+		const name = idx ? idx.corpName : code;
+		const industry = idx ? idx.industry : 'misc';
+		const last = px.currentPrice;
+		const mktcapKRW = px.marketCap;
+
+		const net = lastNonNull(fin.is.net);
+		const sales = lastNonNull(fin.is.sales);
+		const eq = lastNonNull(fin.bs.totals.totalEquity);
+		const opm = lastNonNull(fin.is.opMargin);
+		const roe = lastNonNull(fin.ratios.roe);
+		const dr = lastNonNull(fin.ratios.debtRatio);
+		const per = net && net.v > 0 ? mktcapKRW / (net.v * 1e12) : null;
+		const pbr = eq && eq.v > 0 ? mktcapKRW / (eq.v * 1e12) : null;
+		const psr = sales && sales.v > 0 ? mktcapKRW / (sales.v * 1e12) : null;
+		const npm = net && sales && sales.v ? (net.v / sales.v) * 100 : null;
+
+		const income = {
+			periods: yrs,
+			rows: [
+				{ kr: '매출액', en: 'Revenue', id: 'sales', vals: rev(fin.is.sales) },
+				{ kr: '영업이익', en: 'Operating income', id: 'op', vals: rev(fin.is.op) },
+				{ kr: '영업이익률', en: 'OP margin %', id: 'opMargin', pct: true, vals: rev(fin.is.opMargin) },
+				{ kr: '당기순이익', en: 'Net income', id: 'net', vals: rev(fin.is.net) }
+			] as StatementRow[]
+		};
+		const T = fin.bs.totals;
+		const nonCurr = rev(T.totalAsset).map((v, i) => {
+			const c = rev(T.currAsset)[i];
+			return v != null && c != null ? +(v - c).toFixed(2) : null;
+		});
+		const balance = {
+			periods: yrs,
+			rows: [
+				{ kr: '유동자산', en: 'Current assets', id: 'currAsset', vals: rev(T.currAsset) },
+				{ kr: '비유동자산', en: 'Non-current assets', id: 'nonCurr', vals: nonCurr },
+				{ kr: '자산총계', en: 'Total assets', id: 'totalAsset', vals: rev(T.totalAsset) },
+				{ kr: '유동부채', en: 'Current liabilities', id: 'currLiab', vals: rev(T.currLiab) },
+				{ kr: '부채총계', en: 'Total liabilities', id: 'totalLiab', vals: rev(T.totalLiab) },
+				{ kr: '자본총계', en: 'Total equity', id: 'totalEquity', vals: rev(T.totalEquity) }
+			] as StatementRow[]
+		};
+		// 현금흐름: op/inv/fin 실데이터, FCF=op+inv. opening/closing 은 null 이라 제외(정직).
+		const cf = fin.cf || ({} as RawData['finance']['companies'][string]['cf']);
+		const fcf = cf.op != null && cf.inv != null ? +(cf.op + cf.inv).toFixed(2) : null;
+		const cashflow = {
+			periods: [yrs[0]],
+			rows: [
+				{ kr: '영업활동현금흐름', en: 'CFO', id: 'cfo', vals: [num(cf.op)] },
+				{ kr: '투자활동현금흐름', en: 'CFI', id: 'cfi', vals: [num(cf.inv)] },
+				{ kr: '재무활동현금흐름', en: 'CFF', id: 'cff', vals: [num(cf.fin)] },
+				{ kr: '잉여현금흐름', en: 'Free cash flow', id: 'fcf', vals: [fcf] }
+			] as StatementRow[]
+		};
+
+		const crVal = (() => {
+			const c = lastNonNull(T.currAsset);
+			const l = lastNonNull(T.currLiab);
+			return c && l && l.v ? ((c.v / l.v) * 100).toFixed(0) + '%' : '—';
+		})();
+		const ratios = [
+			{ kr: 'ROE', en: 'Return on equity', id: 'roe', v: roe ? roe.v.toFixed(1) + '%' : '—', tone: (roe && roe.v > 8 ? 'up' : 'neutral') as Tone },
+			{ kr: '영업이익률', en: 'Operating margin', id: 'opm', v: opm ? opm.v.toFixed(1) + '%' : '—', tone: (opm && opm.v > 8 ? 'up' : opm && opm.v < 0 ? 'down' : 'neutral') as Tone },
+			{ kr: '순이익률', en: 'Net margin', id: 'npm', v: npm != null ? npm.toFixed(1) + '%' : '—', tone: (npm != null && npm > 5 ? 'up' : npm != null && npm < 0 ? 'down' : 'neutral') as Tone },
+			{ kr: '부채비율', en: 'Debt ratio', id: 'dr', v: dr ? dr.v.toFixed(1) + '%' : '—', tone: (dr && dr.v < 100 ? 'good' : dr && dr.v > 300 ? 'warn' : 'neutral') as Tone },
+			{ kr: '유동비율', en: 'Current ratio', id: 'cr', v: crVal, tone: 'good' as Tone },
+			{ kr: 'PER', en: 'P/E', id: 'per', v: per != null ? per.toFixed(1) + 'x' : '—', tone: 'neutral' as Tone },
+			{ kr: 'PBR', en: 'P/B', id: 'pbr', v: pbr != null ? pbr.toFixed(2) + 'x' : '—', tone: 'neutral' as Tone },
+			{ kr: 'PSR', en: 'P/S', id: 'psr', v: psr != null ? psr.toFixed(2) + 'x' : '—', tone: 'neutral' as Tone }
+		];
+
+		const salesCagr = cagr(fin.is.sales);
+		const opmArr = fin.is.opMargin.filter((v): v is number => v != null);
+		const opmDelta = opmArr.length >= 2 ? opmArr[opmArr.length - 1] - opmArr[0] : null;
+		const credit = deriveCredit(fin);
+		const tn = (b: unknown): Tone => (b ? 'up' : 'warn');
+		const analysis = {
+			summary: {
+				kr: `${name}는 5년 매출 CAGR ${salesCagr != null ? (salesCagr >= 0 ? '+' : '') + salesCagr.toFixed(1) + '%' : '—'}, 최근 영업이익률 ${opm ? opm.v.toFixed(1) + '%' : '—'}. ROE ${roe ? roe.v.toFixed(1) + '%' : '—'} · 부채비율 ${dr ? dr.v.toFixed(0) + '%' : '—'}. dartlab 파생 신용 ${credit.grade}, 건전도 ${credit.healthScore}/100.`,
+				en: `${name}: 5Y revenue CAGR ${salesCagr != null ? (salesCagr >= 0 ? '+' : '') + salesCagr.toFixed(1) + '%' : '—'}, latest OP margin ${opm ? opm.v.toFixed(1) + '%' : '—'}. ROE ${roe ? roe.v.toFixed(1) + '%' : '—'} · debt ${dr ? dr.v.toFixed(0) + '%' : '—'}. Derived credit ${credit.grade}, health ${credit.healthScore}/100.`
+			},
+			tracks: [
+				{ kr: '수익성', en: 'Profitability', verdict: { kr: `영업이익률 ${opm ? opm.v.toFixed(1) + '%' : '—'}, 5년 ${opmDelta != null ? (opmDelta >= 0 ? '+' : '') + opmDelta.toFixed(1) + 'pp' : '—'}`, en: `OP margin ${opm ? opm.v.toFixed(1) + '%' : '—'}, 5Y ${opmDelta != null ? (opmDelta >= 0 ? '+' : '') + opmDelta.toFixed(1) + 'pp' : '—'}` }, tone: tn(opm && opm.v > 5), delta: opm ? opm.v.toFixed(1) + '%' : '—' },
+				{ kr: '성장성', en: 'Growth', verdict: { kr: `매출 CAGR ${salesCagr != null ? salesCagr.toFixed(1) + '%' : '—'}`, en: `Revenue CAGR ${salesCagr != null ? salesCagr.toFixed(1) + '%' : '—'}` }, tone: tn(salesCagr != null && salesCagr > 0), delta: salesCagr != null ? (salesCagr >= 0 ? '+' : '') + salesCagr.toFixed(1) + '%' : '—' },
+				{ kr: '안정성', en: 'Stability', verdict: { kr: `부채비율 ${dr ? dr.v.toFixed(0) + '%' : '—'} · 유동 ${credit.basis.curr != null ? credit.basis.curr + '%' : '—'}`, en: `Debt ${dr ? dr.v.toFixed(0) + '%' : '—'} · current ${credit.basis.curr != null ? credit.basis.curr + '%' : '—'}` }, tone: tn(dr && dr.v < 150), delta: dr ? dr.v.toFixed(0) + '%' : '—' },
+				{ kr: '현금흐름', en: 'Cash flow', verdict: { kr: `영업CF ${cf.op != null ? cf.op + '조' : '—'} · FCF ${fcf != null ? fcf + '조' : '—'}`, en: `CFO ${cf.op != null ? cf.op + 'T' : '—'} · FCF ${fcf != null ? fcf + 'T' : '—'}` }, tone: tn(fcf != null && fcf > 0), delta: fcf != null ? (fcf >= 0 ? 'FCF+' : 'FCF-') : '—' },
+				{ kr: '가치평가', en: 'Valuation', verdict: { kr: `PER ${per != null ? per.toFixed(1) + 'x' : '—'} · PBR ${pbr != null ? pbr.toFixed(2) + 'x' : '—'}`, en: `PER ${per != null ? per.toFixed(1) + 'x' : '—'} · PBR ${pbr != null ? pbr.toFixed(2) + 'x' : '—'}` }, tone: 'good' as Tone, delta: per != null ? per.toFixed(1) + 'x' : '—' }
+			]
+		};
+
+		const blog = raw.meta?.blog ? raw.meta.blog[code] : undefined;
+		const marketLabel = MARKET_LABEL[eco.market || ''] || 'KRX';
+		const grades = [
+			{ key: 'prof', kr: '수익성', en: 'Profit', group: 'health', v: eco.profGrade },
+			{ key: 'growth', kr: '성장성', en: 'Growth', group: 'income', v: eco.growthGrade },
+			{ key: 'gov', kr: '거버넌스', en: 'Govern', group: 'governance', v: eco.govGrade },
+			{ key: 'qual', kr: '이익질', en: 'Quality', group: 'quality', v: eco.qualGrade },
+			{ key: 'liq', kr: '유동성', en: 'Liquid', group: 'quality', v: eco.liqGrade },
+			{ key: 'audit', kr: '감사위험', en: 'Audit', group: 'quality', v: eco.auditRisk },
+			{ key: 'stab', kr: '경영안정', en: 'Stable', group: 'governance', v: eco.stability }
+		]
+			.filter((g): g is typeof g & { v: string } => !!g.v)
+			.map((g) => ({ key: g.key, kr: g.kr, en: g.en, v: g.v, tone: gradeTone(g.key, g.v), color: GROUP_COLOR[g.group] }));
+		const radar = [
+			{ kr: '수익성', en: 'Profit', s: gradeScore('prof', eco.profGrade) },
+			{ kr: '성장성', en: 'Growth', s: gradeScore('growth', eco.growthGrade) },
+			{ kr: '안정성', en: 'Stability', s: gradeScore('stab', eco.stability) },
+			{ kr: '이익질', en: 'Quality', s: gradeScore('qual', eco.qualGrade) },
+			{ kr: '유동성', en: 'Liquidity', s: gradeScore('liq', eco.liqGrade) },
+			{ kr: '거버넌스', en: 'Govern', s: gradeScore('gov', eco.govGrade) }
+		];
+
+		// YoY 변화 — ecosystem delta 가 99% null 이므로 finance 5Y 배열에서 직접 계산 (실데이터).
+		const yoyDelta = (arr: Num[]): Num => {
+			const a = arr.filter((v): v is number => v != null);
+			return a.length >= 2 ? +(a[a.length - 1] - a[a.length - 2]).toFixed(1) : null;
+		};
+		const salesYoy = (() => {
+			const a = fin.is.sales.filter((v): v is number => v != null);
+			return a.length >= 2 && a[a.length - 2] !== 0 ? +(((a[a.length - 1] - a[a.length - 2]) / Math.abs(a[a.length - 2])) * 100).toFixed(1) : null;
+		})();
+		const changes = [
+			{ kr: 'ROE', en: 'ROE', v: yoyDelta(fin.ratios.roe), unit: '%p' },
+			{ kr: '영업이익률', en: 'OP margin', v: yoyDelta(fin.is.opMargin), unit: '%p' },
+			{ kr: '부채비율', en: 'Debt ratio', v: yoyDelta(fin.ratios.debtRatio), unit: '%p', invert: true },
+			{ kr: '매출 YoY', en: 'Revenue YoY', v: salesYoy, unit: '%' }
+		];
+
+		const co: Company = {
+			code,
+			marketLabel,
+			name: { kr: name, en: name },
+			sector: { kr: eco.industryName || SECTOR_KR[industry] || industry, en: SECTOR_EN[industry] || industry },
+			stage: eco.stageName || '',
+			role: eco.role || '',
+			eco,
+			grades,
+			radar,
+			changes,
+			price: {
+				last,
+				mktcap: fmtKRW(mktcapKRW),
+				ret1m: px.return1m, ret3m: px.return3m, ret1y: px.return1y,
+				vol1y: px.volatility1y, hi52: px.week52High, lo52: px.week52Low, vol: px.volumeAvg30d,
+				asOf: fmtDate(px.priceUpdated)
+			},
+			fundamentals: { per, pbr, psr, npm, roe: roe ? roe.v : null, opm: opm ? opm.v : null, dr: dr ? dr.v : null },
+			trendAnnual: trendFromFinance(fin),
+			trendQuarter: trendFromQuarters(code),
+			income, balance, cashflow, ratios, credit, analysis,
+			peers: derivePeers(code, industry),
+			story: blog ? { title: blog.title, date: blog.date, readTime: blog.readTime, slug: blog.slug } : null,
+			percentile: null, valuation: null, risks: [], tailwind: null,
+			verdict: {} as Verdict
+		};
+		co.percentile = industryPercentile(code);
+		co.valuation = valuationOf(code);
+		co.risks = riskFlagsOf(code);
+		co.tailwind = tailwindOf(industry);
+		co.verdict = verdictOf(co);
+		return co;
+	}
+
+	function search(q: string): string | null {
+		q = (q || '').trim();
+		if (!q) return null;
+		if (raw.finance.companies[q] && raw.prices.data[q]) return q;
+		const up = q.toUpperCase();
+		const hit = raw.index.find(
+			(r) => r.stockCode === q || r.corpName === q || r.corpName.includes(q) || r.corpName.toUpperCase() === up
+		);
+		if (hit && raw.finance.companies[hit.stockCode] && raw.prices.data[hit.stockCode]) return hit.stockCode;
+		return null;
+	}
+
+	function featured(n = 14): string[] {
+		const out: string[] = [];
+		for (const r of raw.index) {
+			if (raw.finance.companies[r.stockCode] && raw.prices.data[r.stockCode]) out.push(r.stockCode);
+			if (out.length >= n) break;
+		}
+		return out;
+	}
+
+	function sectorPerf() {
+		const agg: Record<string, number[]> = {};
+		for (const r of raw.index) {
+			const p = raw.prices.data[r.stockCode];
+			if (!p || p.return1m == null) continue;
+			(agg[r.industry] = agg[r.industry] || []).push(p.return1m);
+		}
+		return Object.entries(agg)
+			.map(([k, arr]) => ({ id: k, kr: SECTOR_KR[k] || k, en: SECTOR_EN[k] || k, chg: arr.reduce((a, b) => a + b, 0) / arr.length, n: arr.length }))
+			.filter((s) => s.n >= 3)
+			.sort((a, b) => b.chg - a.chg);
+	}
+
+	return {
+		raw, years, source: 'HuggingFace · dartlab-data',
+		buildCompany, search, featured, sectorPerf,
+		priceOf: (code: string) => raw.prices.data[code],
+		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
+	};
+}
+
+function fmtDate(yyyymmdd: string): string {
+	const s = String(yyyymmdd || '');
+	if (s.length === 8) return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+	return s;
+}

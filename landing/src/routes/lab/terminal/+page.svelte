@@ -1,26 +1,34 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import type { PageData } from './$types';
+	import { createEngine } from '$lib/terminal/data/engine';
+	import type { RawData } from '$lib/terminal/data/types';
+	import Terminal from '$lib/terminal/Terminal.svelte';
 
-	// 정적 아티팩트는 build 시 static/terminal → /terminal 로 복사.
-	// base 접두로 GitHub Pages(/dartlab) 와 로컬(dev) 모두 정상 해소.
-	const src = `${base}/terminal/index.html`;
+	let { data }: { data: PageData } = $props();
+	const eng = $derived(createEngine(data.raw as RawData));
+	const ready = $derived(!!data.raw.finance.years.length && Object.keys(data.raw.prices.data).length > 0);
 </script>
 
 <svelte:head>
-	<title>dartlab · /lab/terminal — Bloomberg 스타일 터미널 (검증)</title>
+	<title>dartlab · /lab/terminal — DartLab Terminal (검증)</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<iframe class="terminal-frame" {src} title="DartLab Terminal" loading="eager"></iframe>
+{#if ready}
+	<Terminal {eng} initial="005930" />
+{:else}
+	<div class="loading">HuggingFace · dartlab-data 연결 중 …</div>
+{/if}
 
 <style>
-	/* lab-shell 의 패딩/배경을 넘어 풀뷰포트로 띄운다 — 터미널 자체가 100vh 레이아웃 */
-	.terminal-frame {
-		display: block;
-		width: 100%;
+	.loading {
 		height: 100vh;
-		border: 0;
-		margin: 0;
-		background: #050811;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--dl-bg-base);
+		color: var(--dl-ink-mute);
+		font-family: var(--dl-font-mono);
+		font-size: 12px;
 	}
 </style>
