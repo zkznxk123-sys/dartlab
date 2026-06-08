@@ -18,6 +18,7 @@
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
 	import type { FinanceSignal } from '$lib/viewer/diff';
 	import type { PanelBundle } from '$lib/viewer/types';
+	import { translateAnswer, translatorSupported, TARGET_LANGS, type TargetLang } from '$lib/viewer/translate';
 
 	let { data }: { data: { code: string } } = $props();
 	const code = $derived(data.code);
@@ -57,9 +58,17 @@
 	let llmErr = $state<string | null>(null);
 	let modelProgress = $state(0);
 	let modelText = $state('');
+	// 번역 (Chrome 온디바이스 Translator API — WebGPU 불필요, Tier1 과 독립)
+	let translatorOk = $state(false);
+	let targetLang = $state<TargetLang>('en');
+	let translated = $state('');
+	let translating = $state(false);
+	let translateErr = $state<string | null>(null);
+	let translateProg = $state(0);
 
 	$effect(() => {
 		webgpuOk = webgpuAvailable();
+		translatorOk = translatorSupported();
 		void loadCompanies().then((cs) => (nameMap = new Map(cs.map((c) => [c.code, c.name]))));
 	});
 
@@ -75,6 +84,9 @@
 		searchErr = null;
 		evidence = [];
 		finSignals = [];
+		translated = '';
+		translateErr = null;
+		translateProg = 0;
 		// 재무 신호 백그라운드 prefetch — 질문 시점엔 캐시 히트(0ms). 실패해도 텍스트 검색으로 답함.
 		void loadCompanyFinanceSignals(c).then((sigs) => {
 			if (code === c) finSignals = sigs;
@@ -171,6 +183,9 @@
 		evidence = [];
 		modelProgress = 0;
 		modelText = '';
+		translated = '';
+		translateErr = null;
+		translateProg = 0;
 		const { hits, added } = search(searchIndex, q, { topK: 6, expand: true });
 		const ev: EvItem[] = [];
 		let n = 1;
@@ -215,6 +230,19 @@
 		} finally {
 			llmRunning = false;
 		}
+	}
+
+	// 번역 — 결정론 한국어 답을 선택 언어로 온디바이스 번역(환각 0·WebGPU 불필요).
+	async function doTranslate() {
+		if (!composed || !translatorOk || translating) return;
+		translating = true;
+		translateErr = null;
+		translated = '';
+		translateProg = 0;
+		const r = await translateAnswer(composed.answer, targetLang, { onProgress: (p) => (translateProg = p.loaded) });
+		if (r.supported) translated = r.text;
+		else translateErr = r.reason ?? '번역에 실패했습니다.';
+		translating = false;
 	}
 
 	function onKey(e: KeyboardEvent) {
@@ -299,6 +327,19 @@
 					<div class="panel-title">답변 <span>{composed ? '즉시·결정론' : '대기'}</span></div>
 					{#if composed}
 						<p class="answer">{composed.answer}</p>
+						{#if translatorOk}
+							<div class="xlate-bar">
+								<span class="xlate-lbl">번역</span>
+								{#each TARGET_LANGS as t}
+									<button type="button" class:active={targetLang === t.code} onclick={() => (targetLang = t.code)} disabled={translating}>{t.label}</button>
+								{/each}
+								<button type="button" class="xlate-go" onclick={doTranslate} disabled={translating}>{translating ? '번역 중' + (translateProg > 0 && translateProg < 1 ? ' ' + Math.round(translateProg * 100) + '%' : '…') : targetLang.toUpperCase() + '로 번역'}</button>
+							</div>
+							{#if translated}
+								<div class="llm-block"><div class="llm-tag">{targetLang.toUpperCase()} 번역 · 기계번역(원문이 SSOT)</div><p class="answer llm">{translated}</p></div>
+							{/if}
+							{#if translateErr}<div class="empty err">{translateErr}</div>{/if}
+						{/if}
 						{#if composed.citedSignal}
 							<div class="cited">재무 근거: {composed.citedSignal.label} · 최근 {composed.citedSignal.points[0]?.period}</div>
 						{/if}
@@ -624,6 +665,42 @@
 	}
 	.llm-run:hover {
 		background: rgba(14, 165, 233, 0.16);
+	}
+	.xlate-bar {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-wrap: wrap;
+		margin-top: 10px;
+	}
+	.xlate-lbl {
+		color: #64748b;
+		font-size: 11px;
+		font-weight: 800;
+		text-transform: uppercase;
+	}
+	.xlate-bar button {
+		height: 26px;
+		padding: 0 9px;
+		border: 1px solid #1e2433;
+		border-radius: 999px;
+		background: #050811;
+		color: #94a3b8;
+		font: inherit;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.xlate-bar button.active {
+		border-color: rgba(56, 189, 248, 0.5);
+		color: #bae6fd;
+		background: rgba(14, 165, 233, 0.08);
+	}
+	.xlate-bar button:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+	.xlate-go {
+		font-weight: 700;
 	}
 	.ev {
 		display: flex;
