@@ -11,52 +11,99 @@
     },
     {
       "id": "engines.analysis.profitability",
-      "title": "수익성 분석",
+      "title": "Analysis — 수익성 (profitability)",
       "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "Company 재무 snapshot 또는 finance-lite prebuild를 먼저 확인한다."
-      ],
-      "limitations": [
-        "live macro 보강은 서버 환경에서 수행한다."
-      ]
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.company",
       "title": "Company",
       "category": "engines",
-      "status": "observed",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.audit",
+      "title": "Company Audit (감사보고서)",
+      "category": "engines",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
     },
     {
       "id": "engines.company.disclosureEvent",
-      "title": "공시 이벤트 중요도 검토",
+      "title": "Company Disclosure Event",
       "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 prefetched 공시/보고서 데이터만 사용한다."
-      ],
-      "limitations": [
-        "liveFilings와 DART OpenAPI 직접 호출은 CORS 때문에 사용하지 않는다.",
-        "본문 미조회 상태에서는 제목/프리빌드 기준 한계로 표시한다."
-      ]
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.company.docsInternals",
       "title": "Company Panel Internals",
       "category": "engines",
-      "status": "observed",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.executivePay",
+      "title": "Company Executive Pay",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.flow",
+      "title": "Company KRX Flow (외국인/기관/개인)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.governance",
+      "title": "Company Governance",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.koreanDisclosure",
+      "title": "Korean Disclosure Routing",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.notesDetail",
+      "title": "Company K-IFRS Notes Detail",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.relatedPartyTx",
+      "title": "Company Related Party Transactions",
+      "category": "engines",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -72,23 +119,16 @@
     },
     {
       "id": "engines.credit.creditRisk",
-      "title": "신용 위험 분석",
+      "title": "신용위험 분석 (Company.credit 응용)",
       "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
-      ],
-      "requiredSetup": [
-        "Company 재무 snapshot을 먼저 prefetch한다."
-      ],
-      "limitations": [
-        "신용등급 외부 실시간 조회는 서버 또는 로컬 Python 환경에서만 가능하다."
-      ]
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.credit.methodology",
-      "title": "credit.methodology — 독립 신용분석 방법론 SSOT (사상·등급체계·파이프라인·audit)",
+      "title": "Credit Methodology — 등급 결정 사상·알고리즘·audit SSOT",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -100,6 +140,15 @@
       "title": "Dashboard (회사 종합 스냅샷)",
       "category": "engines",
       "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.dashboard.cardCatalog",
+      "title": "대시보드 카드 카탈로그 (종류·5-tier·variance·adapter SSOT)",
+      "category": "engines",
+      "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -137,6 +186,51 @@
       ]
     },
     {
+      "id": "engines.derivatives",
+      "title": "Derivatives (KOSPI200 옵션 + 파생상품)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.derivatives.ivSurface",
+      "title": "Derivatives — IV Surface (strike × expiry)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.derivatives.putCallSkew",
+      "title": "Derivatives — Put-Call Skew (25Δ)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.derivatives.riskNeutralDensity",
+      "title": "Derivatives — Risk-Neutral Density (Breeden-Litzenberger)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.derivatives.vkospi",
+      "title": "Derivatives — VKOSPI Regime",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.edgar",
       "title": "EDGAR (US 공시·재무)",
       "category": "engines",
@@ -149,7 +243,70 @@
       "id": "engines.edgar.docs",
       "title": "edgar.docs — SEC 공시 sections + form-native payload",
       "category": "engines",
-      "status": "observed",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.fixedIncome",
+      "title": "Fixed Income (KR 회사채 + 국고채)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.fixedIncome.kgbYieldCurve",
+      "title": "Fixed Income — KGB Yield Curve Regime",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.fixedIncome.krCorporateSpread",
+      "title": "Fixed Income — KR 회사채 Spread",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.flow",
+      "title": "Flow (공매도·대차·프로그램매매 KR 특화)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.flow.programTrade",
+      "title": "Flow — 프로그램매매 (programTrade)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.flow.securitiesLending",
+      "title": "Flow — 대차잔고 (securitiesLending)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.flow.shortInterest",
+      "title": "Flow — 공매도 잔고 (shortInterest)",
+      "category": "engines",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -165,7 +322,7 @@
     },
     {
       "id": "engines.gather.listing",
-      "title": "listing — 카탈로그 단일 진입점 (companies · filings · topics · dartlist)",
+      "title": "Gather Listing — KRX 상장사 목록",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -182,6 +339,42 @@
       "limitations": []
     },
     {
+      "id": "engines.industry.lifecycle",
+      "title": "Industry — 라이프사이클 (lifecycle)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.industry.peers",
+      "title": "Industry — Peers 추출 (peers)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.industry.supplyChain",
+      "title": "Industry — 밸류체인 그래프 (supplyChain)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.industry.taxonomyOps",
+      "title": "Industry — Taxonomy 운영 (taxonomyOps)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.macro",
       "title": "Macro",
       "category": "engines",
@@ -191,8 +384,98 @@
       "limitations": []
     },
     {
+      "id": "engines.macro.commodityCycle",
+      "title": "Macro — Commodity Cycle (Copper-Gold + Oil)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.cycles",
+      "title": "Macro — 경기 사이클 (cycles)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.fxRegime",
+      "title": "Macro — FX Regime (USD/KRW)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.observables",
+      "title": "Macro — 핵심 Observable 5 축 (observables)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.positioning",
+      "title": "Macro — CFTC COT Positioning",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.regimes",
+      "title": "Macro — Regime 분류 (regimes)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.scenarios",
+      "title": "Macro — 시나리오 카탈로그 (scenarios)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.mappers",
       "title": "Mappers (계정 정규화)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.mappers.accountMappings",
+      "title": "Mappers — accountMappings.json (DART SSOT)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.mappers.synonyms",
+      "title": "Mappers — Synonyms (한글·영문·한자 변형 + EDGAR 비대칭)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.panel",
+      "title": "Panel (공시 수평화)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -210,16 +493,16 @@
     },
     {
       "id": "engines.quant.forecast",
-      "title": "Quant Forecast 축",
+      "title": "Quant Forecast — 가격 예측",
       "category": "engines",
-      "status": "supported",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
     },
     {
       "id": "engines.quant.marketContext",
-      "title": "Quant Market Context 축",
+      "title": "Quant Market Context",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -228,7 +511,7 @@
     },
     {
       "id": "engines.quant.scanBacktest",
-      "title": "Quant scanBacktest top-level helper",
+      "title": "Quant Scan Backtest",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -237,45 +520,9 @@
     },
     {
       "id": "engines.quant.walkforward",
-      "title": "Quant - 워크포워드",
+      "title": "Quant Walk-forward Validation",
       "category": "engines",
       "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.macro.companyMacroPathProjection",
-      "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.macro.quantScenarioBacktest",
-      "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.macro.qualityMacroBeta",
-      "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.workflow.usageAndApi",
-      "title": "dartlab 사용법·API 설명 (RunPython 우회)",
-      "category": "recipes",
-      "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -291,56 +538,43 @@
     },
     {
       "id": "engines.scan.crossSectionStockScreen",
-      "title": "전종목 횡단면 주가 스크리닝",
+      "title": "Cross-section Stock Screen",
       "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data krx/prices parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "가격 랭킹은 HF KRX 가격 parquet를 /data/krx/prices에 내려받아 계산한다.",
-        "재무 조건형 스크리닝은 finance-lite prebuild로 제한한다."
-      ],
-      "limitations": [
-        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
-        "finance-lite에는 주요 계정만 있어 전체 scan과 동일하지 않다."
-      ]
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.scan.krxIndexStrength",
-      "title": "KRX 지수 강세 분석",
+      "title": "KRX Index Strength",
       "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data krx/indices parquet"
-      ],
-      "requiredSetup": [
-        "HF parquet를 Pyodide FS의 /data/krx/indices에 내려받은 뒤 inspect_dataset과 run_python으로 계산한다."
-      ],
-      "limitations": [
-        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
-        "최신성은 HF에 업로드된 parquet의 BAS_DD 기준으로만 말한다."
-      ]
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.scan.undervaluedQuality",
-      "title": "저평가·수익성 종목 후보 찾기",
+      "title": "Scan — 저평가 + 수익성 결합 (undervaluedQuality)",
       "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "finance-lite prebuild를 브라우저 런타임에 로드한다."
-      ],
-      "limitations": [
-        "full scan 축 전체가 아니라 prebuild에 포함된 지표 기준 후보만 만든다."
-      ]
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.search",
-      "title": "Search (공시 본문/제목 검색, BETA)",
+      "title": "Search (공시 의미·본문·제목 검색)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.search.disclosureSearch",
+      "title": "Search — DART 공시 검색 패턴 (disclosureSearch)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -358,43 +592,114 @@
     },
     {
       "id": "engines.story.companyCausal",
-      "title": "기업 6막 인과 분석",
+      "title": "Story Company Causal — 6 막 인과",
       "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
-      ],
-      "limitations": [
-        "live gather, 외부 macro API, OAuth ask는 브라우저 CORS/인증 제약으로 제외한다."
-      ]
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.story.dartlabStory",
-      "title": "DartLab 스토리형 분석",
+      "title": "DartLab Story — 종목 6 막 narrative",
       "category": "engines",
-      "status": "supported",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/panel/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
-      ],
-      "limitations": [
-        "브라우저에서는 외부 API를 추가 호출하지 않고 prefetched parquet 기준으로만 작성한다."
-      ]
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.viz",
       "title": "Viz (차트·다이어그램 spec)",
       "category": "engines",
       "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz.balanceStructureTrend",
+      "title": "Viz - 자산·조달 구조 추이",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저에서는 사전 구성된 BalanceStructureView 또는 landing dashboard model 이 노출한 view 만 사용한다."
+      ]
+    },
+    {
+      "id": "engines.viz.cashflowWaterfall",
+      "title": "Viz - Cashflow Waterfall",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz.evidenceCoverage",
+      "title": "Viz - Evidence Coverage",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz.financialStructureCharts",
+      "title": "Viz - 재무제표 구조 차트 묶음",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저에서는 사전 구성된 view dict 또는 landing dashboard model 이 노출한 범위만 사용한다."
+      ]
+    },
+    {
+      "id": "engines.viz.kpiRibbon",
+      "title": "Viz - KPI Ribbon",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz.mermaidDiagram",
+      "title": "Viz - Mermaid 인과 다이어그램",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz.peerMatrix",
+      "title": "Viz - Peer Matrix",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz.priceChart",
+      "title": "Viz - 주가차트",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저에서는 사전 제공된 HF 가격 parquet 또는 landing priceRuntime 이 노출한 row 범위만 사용한다."
+      ]
+    },
+    {
+      "id": "engines.viz.scenarioVisuals",
+      "title": "Viz - 시나리오·민감도 시각화",
+      "category": "engines",
+      "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -409,6 +714,24 @@
       "limitations": [
         "시각화는 브라우저 renderer가 지원하는 chart spec 범위로 제한한다."
       ]
+    },
+    {
+      "id": "operation.agentAudit",
+      "title": "Agent Audit — 답변 품질 회귀 측정 절차",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.agentBoundaries",
+      "title": "Agent Boundaries — checkAgentBoundary lint 외부 공개 SSOT",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "operation.aiEngine",
@@ -426,9 +749,7 @@
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
-      "limitations": [
-        "Product replatform contract is readable in Pyodide; server-side Agent Gateway execution is not available in-browser."
-      ]
+      "limitations": []
     },
     {
       "id": "operation.apiContract",
@@ -458,15 +779,6 @@
       "limitations": []
     },
     {
-      "id": "operation.compareTargets",
-      "title": "여러 종목 토픽-기간 그리드 비교",
-      "category": "operation",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "operation.coreloop",
       "title": "Core Loop — 자가개선 루프 운영 SSOT",
       "category": "operation",
@@ -476,10 +788,37 @@
       "limitations": []
     },
     {
+      "id": "operation.dashboardDesign",
+      "title": "대시보드 배치·설계 원칙 (bento·정사각·위계·Playwright loop)",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.dataLineage",
+      "title": "Data Lineage — raw → parquet → axis 매핑 SSOT",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.docsBuilderRefactor",
+      "title": "docs 파이프라인 — viewer.do HTML → document.xml zip 정공법 전환",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.docstringStandard",
       "title": "capability docstring 의 LLM Specifications 섹션 표준",
       "category": "operation",
-      "status": "supported",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -521,10 +860,28 @@
       "limitations": []
     },
     {
+      "id": "operation.mappingRefresh",
+      "title": "accountMappings 보강 4 단계 파이프라인",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.methodology",
       "title": "검증 방법론 (credit · forecast · search · ai)",
       "category": "operation",
       "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.observability",
+      "title": "Observability — logging / tracing 표준",
+      "category": "operation",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -539,10 +896,19 @@
       "limitations": []
     },
     {
+      "id": "operation.performanceProfile",
+      "title": "Performance Profile — Polars heap + py-spy + mprof 절차서",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.philosophy",
       "title": "Philosophy — dartlab 사상 SSOT",
       "category": "operation",
-      "status": "observed",
+      "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -578,10 +944,19 @@
       ]
     },
     {
+      "id": "operation.skillMarket",
+      "title": "Skill Market 운영 규칙",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.stability",
       "title": "API 안정성 정책 (tier · deprecation · semver)",
       "category": "operation",
-      "status": "observed",
+      "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -605,21 +980,1519 @@
       "limitations": []
     },
     {
-      "id": "operation.skillMarket",
-      "title": "Skill Market 운영 규칙",
-      "category": "operation",
+      "id": "recipes.derivatives.kospi200ImpliedVol",
+      "title": "KOSPI200 Implied Volatility — ATM IV term structure",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.derivatives.optionFlowDetector",
+      "title": "Option Flow Detector — unusual volume / open interest jump",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.derivatives.putCallSkewSignal",
+      "title": "Put-Call Skew Signal — extreme z 신호",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.derivatives.vkospiRegime",
+      "title": "VKOSPI Regime × Macro Cycle 정합",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.credit.creditRatingMigration",
+      "title": "Credit Rating Migration — 신용등급 변동 추적",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.credit.krCorporateSpreadWidening",
+      "title": "KR Corporate Spread Widening — by rating",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.credit.usHighYieldSpread",
+      "title": "미국 High Yield OAS spread regime (BofA HY OAS)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.credit.yieldCurveInversion",
+      "title": "KGB Yield Curve Inversion — recession indicator",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
+      "title": "Event Radar Capital Action Monitor",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
+      "title": "Event Radar Consensus Drift Watch",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "title": "Event Radar Deep Dive",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
+      "title": "Event Radar Engine Candidate Memo",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.eventInbox",
+      "title": "Event Radar Event Inbox",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
+      "title": "Event Radar Falsifier Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.index",
+      "title": "Event Radar Incubator 진입점",
+      "category": "recipes",
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": [
-        "Pyodide 는 정적 market index 조회만 수행하고 GitHub Discussion 재색인은 하지 않는다."
+        "브라우저 snapshot 범위에서는 live filing, price, flow, consensus row가 제한될 수 있다."
       ]
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
+      "title": "Event Radar Insider Ownership Signal",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
+      "title": "Event Radar Price Flow Reaction",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
+      "title": "Event Radar Source Coverage Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
+      "title": "Event Radar Visual Decision Pack",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.sec10kRiskFactors",
+      "title": "SEC 10-K Item 1A 위험 요인 변화 (YoY 신규/삭제 항목 수)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.disclosure.sec8kMaterialEvents",
+      "title": "SEC 8-K material event burst (30 day 윈도우 카운트)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.dividend.buybackVsDividendMix",
+      "title": "자사주 매입 vs 배당 환원 mix",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.dividend.foreignOwnershipCorr",
+      "title": "외국인 보유율 vs 배당성향 상관",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.dividend.payoutFcfCoverage",
+      "title": "배당성향 vs FCF 커버리지 z-score",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.flow.foreignVsInstitutional",
+      "title": "Foreign vs Institutional Flow Divergence",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.flow.programTradeImbalance",
+      "title": "Program Trade Imbalance — 차익 vs 비차익 z",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.flow.shortInterestSpike",
+      "title": "Short Interest Spike — 공매도 잔고 z>2 detection",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.governance.boardIndependenceTrend",
+      "title": "이사회 독립성 추세 (사외이사 비중 + 다선 history)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.governance.chaebolEntityNetwork",
+      "title": "재벌 계열사 망 (지분율·이사 동시재직)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.governance.relatedPartyTransactionShare",
+      "title": "특수관계자 매출·매입 비중 추세",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.ebitdaCashBridge",
+      "title": "EBITDA·OCF·인수가격 적정성 bridge",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.accountTraceLedger",
+      "title": "Forensics Account Trace Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.accountingPolicyChange",
+      "title": "회계정책 변경 추적 — 정책 변경 + 회계추정 변경 + 오류 수정 분리",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.assetRevaluationTrace",
+      "title": "자산재평가 추적 — 토지·건물 공정가 평가 효과 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.auditorIndependenceHistory",
+      "title": "회계감사인 독립성·이력 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.bigBathDetection",
+      "title": "빅 배스 (Big Bath) 회계처리 탐지",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.controllingPowerJudgment",
+      "title": "실질지배력·연결범위·방어권 판단 진단 (IFRS 10)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
+      "title": "Cross Section Anomaly Rank",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.dataCoverageAudit",
+      "title": "Forensics Data Coverage Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.deepDive",
+      "title": "Evidence Forensics Deep Dive",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.disclosureTimingAnomaly",
+      "title": "공시 타이밍 이상 — 늑장·집중·호재 부풀리기 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.distressedFinancialInstitutionRule",
+      "title": "부실 금융기관 분류·BIS·헐값매각 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.engineCandidateMemo",
+      "title": "Forensics Engine Candidate Memo",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
+      "title": "Event To Statement Matcher",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.executiveCompensationAudit",
+      "title": "임원 보수·스톡옵션·성과급 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.fairDisclosureBreach",
+      "title": "미공개 내부정보·공정공시 위반 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.falsifierLedger",
+      "title": "Forensics Falsifier Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.goodwillImpairmentCheck",
+      "title": "영업권 손상검사 정량 (forensics)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.hybridSecurityClassification",
+      "title": "하이브리드 증권 부채-자본 분류 진단 (영구채·CB·RCPS·전환우선주)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.index",
+      "title": "Evidence Forensics Incubator 진입점",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 snapshot 범위에서는 Company.panel 원표와 section text가 제한될 수 있다."
+      ]
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.lboFairnessAudit",
+      "title": "LBO 차입매수 적정성·재무부담 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.mergerRatioFairness",
+      "title": "합병비율·소수주주 보호 점검 (forensics)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.noteSignalExtractor",
+      "title": "Filing Note Signal Extractor",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.ownershipDisparityMap",
+      "title": "지분율 괴리도·순환출자·차등의결권 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.revenueToCashBridge",
+      "title": "Revenue To Cash Bridge",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.treasuryStockUsage",
+      "title": "자사주 취득·처분·소각 의도 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.trsDerivativeUsage",
+      "title": "TRS·파생·의결권 분리 거래 진단",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
+      "title": "Working Capital Pressure Map",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+      "title": "Damodaran 계정 출처 감사",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.businessModelFit",
+      "title": "Damodaran 모델 적합성 게이트",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.costOfCapital",
+      "title": "Damodaran 비용자본 가정",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.dataAudit",
+      "title": "Damodaran L1.5 데이터 감사",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.deepDive",
+      "title": "Damodaran L1/L1.5 딥다이브",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+      "title": "Damodaran Distress 조정 DCF 경로",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.fcffDcf",
+      "title": "Damodaran FCFF DCF 밴드",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+      "title": "Damodaran 금융업 Excess Return 경로",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.growthFeasibility",
+      "title": "Damodaran 성장 실현가능성 검증",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.index",
+      "title": "Damodaran L1/L1.5 분석체계 진입점",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+      "title": "Damodaran 리스부채 조정 감사",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+      "title": "Damodaran 생애주기 분류",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.narrativeMap",
+      "title": "Damodaran 내러티브 맵",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+      "title": "Damodaran 정규화 재무 패널",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+      "title": "Damodaran 일회성 항목 조정 감사",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+      "title": "Damodaran Peer Multiple 분해",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.rdCapitalization",
+      "title": "Damodaran R&D 자본화 감사",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+      "title": "Damodaran 재투자율과 ROC",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.relativeCheck",
+      "title": "Damodaran 상대가치 검산",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+      "title": "Damodaran 시나리오 반증",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.storyToDrivers",
+      "title": "Damodaran 스토리-드라이버 변환",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.fundamental.valuation.damodaran.sumOfParts",
+      "title": "Damodaran Sum-of-Parts 경로",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.industryStagePhase",
+      "title": "산업 단계 매핑 — ROIC-WACC spread 분포로 phase 판정",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.marginCompressionScan",
+      "title": "peer set 마진 압축 cluster (GP·OM·NM 동시 하락)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.peerCapexWave",
+      "title": "peer set capex wave 동조성 (lead / lag)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.peerPriceConvergence",
+      "title": "동종 peer 가격 수렴 / 발산 (60d ret 분포)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.rdIntensityTrend",
+      "title": "R&D / 매출 비율 추세 + peer cross-section rank",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.sectorFlowConcentration",
+      "title": "섹터 자금 흐름 집중도 (외인 비중 + 거래대금 share)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.sectorMomentumLeadership",
+      "title": "섹터 안 모멘텀 leader / laggard (20d 분포 top/bottom)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.industry.supplyChainConcentration",
+      "title": "매출 상위 고객 / 매입 상위 거래처 비중 (HHI 기반)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.companyMacroPathProjection",
+      "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.copperGoldRatio",
+      "title": "Copper-Gold Ratio — risk on/off sentiment",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.dollarFundingStress",
+      "title": "달러 펀딩 스트레스 원자료 점검",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.globalLiquidityPulse",
+      "title": "글로벌 유동성 펄스 원자료 점검",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.historicalPositioning",
+      "title": "현재 매크로 위치의 역사적 비교",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.inflationBreadthWatch",
+      "title": "인플레이션 확산성 원자료 점검",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.koreaExportCycleNowcast",
+      "title": "한국 수출 사이클 원자료 나우캐스트",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.koreaMacroStressMap",
+      "title": "한국 매크로 스트레스 지도",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.laborMarketTurningPoint",
+      "title": "노동시장 전환점 원자료 점검",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.narrativeRegime",
+      "title": "시장 narrative regime + Pettitt change-point",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.oilCycleImpact",
+      "title": "Oil Cycle Impact — KR 산업별 sensitivity",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.qualityMacroBeta",
+      "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.quantScenarioBacktest",
+      "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.scenarioDiagram",
+      "title": "경제 시나리오 인과 다이어그램",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.sixActs",
+      "title": "경제분석 6막 진입 절차",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.tailRiskScenarioScan",
+      "title": "꼬리위험 시나리오 스캔",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.usFedDotPlotGap",
+      "title": "미국 Fed dot plot vs market path 갭",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.usYieldCurveRegime",
+      "title": "미국 yield curve regime (10y-2y / 10y-3m 동시)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.usdKrwRegime",
+      "title": "USD/KRW Regime — KR 수출주 alpha driver",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.macro.yieldCurveStress",
+      "title": "수익률곡선 스트레스 원자료 점검",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.report.catalystCalendar",
+      "title": "Catalyst Calendar — 향후 30/90 일 예정 이벤트",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.report.dailyMorningNote",
+      "title": "Daily Morning Note — 장 마감 후 시황 1 페이지",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.report.thesisTracker",
+      "title": "Thesis Tracker — falsifier × 신규 evidence diff",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.screen.distressEarlyWarning",
+      "title": "Distress Early Warning — Altman Z″<1.8 ∧ Beneish M>-1.78",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.screen.insiderClusterScreen",
+      "title": "Insider Cluster Screen — 180 일 ≥ 3 명 매수",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.screen.macroRegimeAlignedScreen",
+      "title": "Macro Regime × Sector Momentum Aligned Screen",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.screen.qualityValueScreen",
+      "title": "Quality × Value 동시 스크린 — Piotroski F≥7 ∧ Value z>1",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.screen.upsideAsymmetryScreen",
+      "title": "Upside Asymmetry Screen — MDD ≤ 15% ∧ catalyst ≥ 2",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.assumptionLedger",
+      "title": "Thesis Kill-Chain Assumption Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.deepDive",
+      "title": "Thesis Kill-Chain Deep Dive",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
+      "title": "Thesis Kill-Chain Evidence Coverage Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.falsifierLedger",
+      "title": "Thesis Kill-Chain Falsifier Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.fragilityMap",
+      "title": "Thesis Kill-Chain Fragility Map",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.index",
+      "title": "Thesis Kill-Chain Scenario 진입점",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 snapshot 범위에서는 filings, price, flow, consensus row가 제한될 수 있다."
+      ]
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.premortemQualityGate",
+      "title": "Thesis Kill-Chain Premortem Quality Gate",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.propagationPath",
+      "title": "Thesis Kill-Chain Propagation Path",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.scenarioStoryboard",
+      "title": "Thesis Kill-Chain Scenario Storyboard",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.thesisIntake",
+      "title": "Thesis Kill-Chain Thesis Intake",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.triggerCatalog",
+      "title": "Thesis Kill-Chain Trigger Catalog",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.tripwireMonitor",
+      "title": "Thesis Kill-Chain Tripwire Monitor",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.thesisKillChain.visualDecisionPack",
+      "title": "Thesis Kill-Chain Visual Decision Pack",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.meta.workflow.usageAndApi",
+      "title": "dartlab 사용법·API 설명 (RunPython 우회)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.calendarEventClock",
+      "title": "이벤트 캘린더 시계 (예정 IR/실적/배당락 + 잔여일)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.disclosureLatencyAudit",
+      "title": "공시 ↔ 뉴스 시간 간격 분포 (latency audit)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.disclosureNewsCrosscheck",
+      "title": "Disclosure News Crosscheck",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.eventTimelineFusion",
+      "title": "Event Timeline Fusion",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.eventVolatilityCheck",
+      "title": "이벤트 직전·직후 변동성 (ATR ratio)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.industryNewsSpillover",
+      "title": "산업 뉴스 spillover (peer 이벤트 → target 영향 추적)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.newsHeadlineVelocity",
+      "title": "뉴스 헤드라인 빈도 가속 (7/30 일 분당 비율)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.newsImpact",
+      "title": "단일 사건 → CAR + t-stat + 동기간 뉴스 컨텍스트",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.priceShockNews",
+      "title": "|AR|>3σ 가격 shock 자동 검출 + 인접 뉴스 컨텍스트",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.repeatedHeadlineFrequency",
+      "title": "반복 헤드라인 빈도 (같은 사건의 여러 보도 카운트)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.news.untrustedToneAudit",
+      "title": "News Untrusted Tone Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.foreignFlowFactor",
+      "title": "외인 보유율 factor cross-section (5종 quartile)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.macroBetaFactor",
+      "title": "매크로 beta 팩터 cross-section",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.momentumFactor",
+      "title": "Momentum 팩터 (Jegadeesh-Titman 12-1m return)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.portfolio.blackLittermanViewBuild",
+      "title": "Black-Litterman View Build",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.portfolio.meanCvarConstruction",
+      "title": "Mean-CVaR Portfolio Construction",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.qualityFactor",
+      "title": "Quality 팩터 — QMJ (Frazzini-Pedersen-Asness 2014)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.sizeFactor",
+      "title": "Size 팩터 (Fama-French SMB) — log market cap percentile",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.quant.valueFactor",
+      "title": "Value 팩터 composite (Fama-French B/M + E/P + CF/P)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.consensusRevisionPace",
+      "title": "컨센서스 revision 속도 (애널리스트 EPS 추정 변화율 z-score)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.flowImbalance",
+      "title": "외국인·기관·개인 순매수 imbalance z-score",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.foreignBuyMomentum",
+      "title": "외국인 누적 순매수 모멘텀 (5/20/60 일 가속도)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.insiderClusterTiming",
+      "title": "내부자 매수/매도 cluster + 가격 lag",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.newsSentimentFactor",
+      "title": "뉴스 sentiment cross-section factor + IC + 5분위 spread",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.ownershipShiftSignal",
+      "title": "주요주주 보유 변화 신호 (5% 보유공시 누적 변화)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.priceMomentumGap",
+      "title": "가격 모멘텀 갭 (5/20/60 일 변화율 격차)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.retailFlowReversal",
+      "title": "개인 매매 반전 신호 (외인/기관 vs 개인 z-divergence)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.sentiment.shortBalanceMomentum",
+      "title": "공매도 잔고 변화율 모멘텀",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.atrRegimeShift",
+      "title": "ATR 변동성 체제 전환 (단기 vs 장기 ATR ratio)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.breakoutPriceConfirmation",
+      "title": "52주 신고가 돌파율 z-score (breakoutNewsConfirmation v2 변형)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.momentumFlowDecouple",
+      "title": "모멘텀-수급 동조 와해 (momentumFlowSplit v2 변형)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.movingAverageConfluence",
+      "title": "이동평균선 정합 (5/20/60/120 동시 정렬)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.priceVolumeZScore",
+      "title": "거래량 z-score + 가격 변화율 동조 신호",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.rsiBollingerCluster",
+      "title": "RSI + 볼린저 밴드 동시 cluster (이중 oversold/overbought)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.technical.sectorRelativeStrength",
+      "title": "섹터 대비 상대 강도 (20d / 60d 수익률 차)",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.cacheStrategy",
+      "title": "Cache Strategy — prompt cache + dartlab cache key",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "runtime.channel",
       "title": "Channel",
       "category": "runtime",
       "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.citationFormat",
+      "title": "Citation Format — evidence ref 표준 format",
+      "category": "runtime",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -639,10 +2512,28 @@
       ]
     },
     {
+      "id": "runtime.embeddingSearch",
+      "title": "Embedding Search — provider/protocol 등록",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.mcp",
       "title": "MCP",
       "category": "runtime",
       "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.multimodal",
+      "title": "Multimodal Input — chart image + PDF OCR",
+      "category": "runtime",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -657,10 +2548,19 @@
       "limitations": []
     },
     {
+      "id": "runtime.promptingPatterns",
+      "title": "Prompting Patterns — 6 막 인과 + axis 카탈로그",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.providerProtocol",
       "title": "Provider Protocol 동일 surface — 3-regulator drop-in",
       "category": "runtime",
-      "status": "observed",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -698,9 +2598,56 @@
       "limitations": []
     },
     {
+      "id": "runtime.ragPipeline",
+      "title": "RAG Pipeline — chunk → retrieve → cite",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.streaming",
+      "title": "Streaming — chat-native 응답 패턴 SSOT",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.toolComposition",
+      "title": "Tool Composition — 11 도구 조합 패턴 SSOT",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.untrustedContent",
+      "title": "외부 본문 untrusted tier SSOT",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.workbenchEvidenceFlow",
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저에서는 선택한 skill과 dataset snapshot 범위 안에서만 실행한다."
+      ]
+    },
+    {
+      "id": "start.contributionPRWalkthrough",
+      "title": "Contribution PR Walkthrough — 외부 기여자 sample PR",
+      "category": "start",
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
@@ -713,23 +2660,31 @@
       "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
-      "limitations": [],
-      "whenToUse": [],
-      "procedure": [
-        "공개 API 또는 새 호출 경로를 다루면 먼저 operation.apiContract 의 공개 진입점 정책을 확인한다."
-      ],
-      "failureModes": [
-        "provider facade 밖 내부 함수/ops/helper 를 공개 진입점처럼 안내함"
-      ],
-      "forbidden": [
-        "operation.apiContract 확인 없이 provider facade 밖 새 공개 진입점을 만들지 않는다."
-      ]
+      "limitations": []
+    },
+    {
+      "id": "start.discordBot",
+      "title": "Discord Bot — community 채널 진입점",
+      "category": "start",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "start.firstAnalysisRecipe",
       "title": "첫 회사 분석 recipe — install → quickStart → Company → Analysis",
       "category": "start",
-      "status": "observed",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "start.openApiSpec",
+      "title": "OpenAPI Spec — public REST 진입점",
+      "category": "start",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -738,7 +2693,16 @@
       "id": "start.quickStart",
       "title": "DartLab 8 단계 빠른 시작",
       "category": "start",
-      "status": "observed",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "start.slashCommands",
+      "title": "Slash Commands — VSCode plugin 진입점 카탈로그",
+      "category": "start",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -747,622 +2711,12 @@
       "id": "start.useSkillsCatalog",
       "title": "Skill catalog 기반 작업 시작",
       "category": "start",
-      "status": "observed",
+      "status": "supported",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": [
         "실제 분석 실행 가능 여부는 선택한 skill 의 runtimeCompatibility 를 따른다."
       ]
-    },
-    {
-      "id": "engines.viz.balanceStructureTrend",
-      "title": "Viz - 자산·조달 구조 추이",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "브라우저에서는 사전 구성된 BalanceStructureView 또는 landing dashboard model 이 노출한 view 만 사용한다."
-      ]
-    },
-    {
-      "id": "engines.viz.priceChart",
-      "title": "Viz - 주가차트",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "브라우저에서는 사전 제공된 HF 가격 parquet 또는 landing priceRuntime 이 노출한 row 범위만 사용한다."
-      ]
-    },
-    {
-      "id": "engines.viz.financialStructureCharts",
-      "title": "Viz - 재무제표 구조 차트 묶음",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "브라우저에서는 사전 구성된 view dict 또는 landing dashboard model 이 노출한 범위만 사용한다."
-      ]
-    },
-    {
-      "id": "engines.viz.peerMatrix",
-      "title": "Viz - Peer Matrix",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.viz.evidenceCoverage",
-      "title": "Viz - Evidence Coverage",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.viz.kpiRibbon",
-      "title": "Viz - KPI Ribbon",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.viz.scenarioVisuals",
-      "title": "Viz - 시나리오·민감도 시각화",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.viz.cashflowWaterfall",
-      "title": "Viz - Cashflow Waterfall",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.viz.mermaidDiagram",
-      "title": "Viz - Mermaid 인과 다이어그램",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.index",
-      "title": "Damodaran L1/L1.5 분석체계 진입점",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "로컬 parquet 가격·시총 경로 대신 bundled reference JSON 기반 체계 점검만 수행한다."
-      ]
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.dataAudit",
-      "title": "Damodaran L1.5 데이터 감사",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "패키지 내장 reference JSON과 로컬 데이터 snapshot만 점검한다."
-      ]
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.businessModelFit",
-      "title": "Damodaran 모델 적합성 게이트",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
-      "title": "Damodaran 생애주기 분류",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.narrativeMap",
-      "title": "Damodaran 내러티브 맵",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.storyToDrivers",
-      "title": "Damodaran 스토리-드라이버 변환",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
-      "title": "Damodaran 정규화 재무 패널",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
-      "title": "Damodaran 계정 출처 감사",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.rdCapitalization",
-      "title": "Damodaran R&D 자본화 감사",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
-      "title": "Damodaran 리스부채 조정 감사",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
-      "title": "Damodaran 일회성 항목 조정 감사",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
-      "title": "Damodaran 재투자율과 ROC",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.growthFeasibility",
-      "title": "Damodaran 성장 실현가능성 검증",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.costOfCapital",
-      "title": "Damodaran 비용자본 가정",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.fcffDcf",
-      "title": "Damodaran FCFF DCF 밴드",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.relativeCheck",
-      "title": "Damodaran 상대가치 검산",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
-      "title": "Damodaran Peer Multiple 분해",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
-      "title": "Damodaran 금융업 Excess Return 경로",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.sumOfParts",
-      "title": "Damodaran Sum-of-Parts 경로",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
-      "title": "Damodaran Distress 조정 DCF 경로",
-      "category": "recipes",
-      "status": "unknown",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
-      "title": "Damodaran 시나리오 반증",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.valuation.damodaran.deepDive",
-      "title": "Damodaran L1/L1.5 딥다이브",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.index",
-      "title": "Evidence Forensics Incubator 진입점",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "브라우저 snapshot 범위에서는 Company.show 원표와 section text가 제한될 수 있다."
-      ]
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.dataCoverageAudit",
-      "title": "Forensics Data Coverage Audit",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.accountTraceLedger",
-      "title": "Forensics Account Trace Ledger",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.revenueToCashBridge",
-      "title": "Revenue To Cash Bridge",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
-      "title": "Working Capital Pressure Map",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.noteSignalExtractor",
-      "title": "Filing Note Signal Extractor",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
-      "title": "Event To Statement Matcher",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
-      "title": "Cross Section Anomaly Rank",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.falsifierLedger",
-      "title": "Forensics Falsifier Ledger",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.engineCandidateMemo",
-      "title": "Forensics Engine Candidate Memo",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.quality.forensics.deepDive",
-      "title": "Evidence Forensics Deep Dive",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.index",
-      "title": "Event Radar Incubator 진입점",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "브라우저 snapshot 범위에서는 live filing, price, flow, consensus row가 제한될 수 있다."
-      ]
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
-      "title": "Event Radar Source Coverage Audit",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.eventInbox",
-      "title": "Event Radar Event Inbox",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
-      "title": "Event Radar Price Flow Reaction",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
-      "title": "Event Radar Insider Ownership Signal",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
-      "title": "Event Radar Capital Action Monitor",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
-      "title": "Event Radar Consensus Drift Watch",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
-      "title": "Event Radar Falsifier Ledger",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
-      "title": "Event Radar Engine Candidate Memo",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
-      "title": "Event Radar Visual Decision Pack",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.fundamental.disclosure.eventRadar.deepDive",
-      "title": "Event Radar Deep Dive",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.index",
-      "title": "Thesis Kill-Chain Scenario 진입점",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "브라우저 snapshot 범위에서는 filings, price, flow, consensus row가 제한될 수 있다."
-      ]
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.thesisIntake",
-      "title": "Thesis Kill-Chain Thesis Intake",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
-      "title": "Thesis Kill-Chain Evidence Coverage Audit",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.assumptionLedger",
-      "title": "Thesis Kill-Chain Assumption Ledger",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.fragilityMap",
-      "title": "Thesis Kill-Chain Fragility Map",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.triggerCatalog",
-      "title": "Thesis Kill-Chain Trigger Catalog",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.propagationPath",
-      "title": "Thesis Kill-Chain Propagation Path",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.tripwireMonitor",
-      "title": "Thesis Kill-Chain Tripwire Monitor",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.falsifierLedger",
-      "title": "Thesis Kill-Chain Falsifier Ledger",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.scenarioStoryboard",
-      "title": "Thesis Kill-Chain Scenario Storyboard",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.visualDecisionPack",
-      "title": "Thesis Kill-Chain Visual Decision Pack",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.premortemQualityGate",
-      "title": "Thesis Kill-Chain Premortem Quality Gate",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.meta.thesisKillChain.deepDive",
-      "title": "Thesis Kill-Chain Deep Dive",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
     }
   ]
 }
