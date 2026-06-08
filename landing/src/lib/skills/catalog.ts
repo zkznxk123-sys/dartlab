@@ -1,4 +1,4 @@
-import skillIndex from '$skills/index.json';
+import skillIndex from '$skills/catalog.json';
 
 // operation 카테고리는 landing 검색에서 제외 (skills 필터 참조) — 메뉴/순서에서도 노출 X.
 export const skillCategoryOrder = ['start', 'runtime', 'engines', 'recipes'] as const;

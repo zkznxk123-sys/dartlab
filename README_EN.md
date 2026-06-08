@@ -72,36 +72,36 @@ c.panel()                           # every topic, every period, side by side
 
 > Text and numbers on a single timeline — the core of cross-period comparability
 >
-> <img src=".github/assets/sections-example.webp" alt="DartLab panel output — Samsung Electronics, 41 topics × 12 periods" width="720">
+> <img src=".github/assets/panel-grid.webp" alt="c.panel() output — Samsung Electronics, full disclosure grid (topics × periods)" width="720">
 
 ```python
-
-c.show("IS")                        # income statement — quarterly by default
+c.panel("IS")                       # income statement — finance-normalized (quarterly by default)
+c.panel("IS", freq="year")          # freq="year" for annual aggregation
 ```
 
-> Quarterly financials are the default — snakeId + Korean labels side by side
+> Finance-normalized — XBRL standard accounts (snakeId) + Korean labels, exact KRW figures
 >
-> <img src=".github/assets/show-is-quarterly.webp" alt="c.show('IS') — Samsung Electronics quarterly income statement" width="720">
+> <img src=".github/assets/panel-is-finance.webp" alt="c.panel('IS', freq='year') — Samsung Electronics annual income statement (finance-normalized)" width="720">
 
 ```python
-c.show("IS", freq="Y")             # freq="Y" for annual aggregation
+c.panel("is", freq="year")          # native income statement — report line items as-filed (since 2013)
+c.panel("ratios")                   # native financial ratios, computed from the five statements
 ```
 
-> Same data, annualized — automatic 4-quarter summation
+> Lowercase = native — line items exactly as filed, deep history reaching pre-XBRL (since 2013)
 >
-> <img src=".github/assets/show-is-annual.webp" alt="c.show('IS', freq='Y') — Samsung Electronics annual income statement" width="720">
+> <img src=".github/assets/panel-is-native.webp" alt="c.panel('is', freq='year') — Samsung Electronics annual income statement (native, as-filed line items)" width="720">
 
 ```python
-c.show("businessOverview")          # what this company actually does
-c.diff("businessOverview")          # what changed since last year
-c.show("ratios")                    # financial ratios, already calculated
+c.panel("business")                 # business overview etc. — search disclosure body rows
+c.panel.search("inventory")         # full-text body search
 
 c.filings()                         # all reports — direct links to DART viewer
 ```
 
 > From annual reports to quarterly filings, dartUrl links straight to the original
 >
-> <img src=".github/assets/show-filings.webp" alt="c.filings() — Samsung Electronics report list with DART viewer links" width="720">
+> <img src=".github/assets/panel-filings.webp" alt="c.filings() — Samsung Electronics report list with DART viewer links" width="720">
 
 ```python
 # Same interface, different country
@@ -200,6 +200,30 @@ dartlab.scan("account", "매출액")      # revenue time-series across all firms
 > All listed companies at a glance — quarterly revenue side by side
 >
 > <img src=".github/assets/scan-account.webp" alt="dartlab.scan('account', '매출액') — cross-company revenue comparison" width="720">
+
+### Compare — N Companies Side by Side
+
+> Design: [engines.panel](https://eddmpython.github.io/dartlab/skills/engines.panel)
+
+Where `Company.panel` horizontalizes one company into topic × period, `dartlab.compare` aligns **2–6 companies** onto the same topic/period grid. Like `scan`, it is a single-word top-level verb — the canonical surface for cross-company comparison.
+
+```python
+import dartlab
+
+# Notes / narrative comparison — aligned by (disclosureKey, scope, leafType)
+dartlab.compare(["005930", "000660"], topic="inventory")
+
+# Financial-statement cell comparison — acode-level, values converted to KRW
+dartlab.compare(["005930", "000660"], topic="is", freq="year")
+
+# Multi-period — cell columns become {code}␟{period}
+dartlab.compare(["005930", "000660"], topic="tangibleAsset", period=["2025Q4", "2024Q4"])
+```
+
+- **Label-drift resolved automatically** — the same line item under a different section number per company (Samsung "7. PP&E" ↔ SK "11. PP&E") still aligns to one row.
+- **No confident misalignment** — consolidated↔standalone (scope) and table↔narrative (leafType) never share a row.
+- **Gaps stay NaN** — no zero-fill or forward-fill, so missing cells stay blank (honest-gap, no trend distortion).
+- **Market boundary** — KO↔US mixing is blocked. US (EDGAR) currently supports row comparison only; financial-cell comparison is KR (DART, KRW-converted) only.
 
 ### Gather — External Market Data
 

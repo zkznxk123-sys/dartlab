@@ -15,6 +15,13 @@ whenToUse:
   - disclosureKey
   - 항목 × 기간 wide
   - 회사내 수평화
+  - 여러 종목 비교
+  - 종목 묶음 분석
+  - "삼성전자 vs SK하이닉스"
+  - peer compare
+  - "AAPL과 MSFT"
+  - 동종 산업 비교
+  - cross-target ranking
 inputs:
   - 종목코드 (KR 6자리)
   - 섹션 검색 key — canonicalKey(NT_D826380/BS) 또는 한글 섹션명 substring(재고) 또는 강한 소스 topic(IS/dividend)
@@ -22,6 +29,8 @@ inputs:
   - tag (선택, 기본 raw 원본 XML / False 면 plain 태그 strip)
   - 소스 = 대소문자 5표 — 소문자 is/bs/cf/cis/sce = native(자급) / 대문자 IS/BS/CF/CIS/SCE = finance(파사드)
   - freq (선택, 입도 — year 연/quarter 분기/ytd 누적, 소스와 직교)
+  - 비교 codes 2~6개 (compare — 같은 시장끼리, KR 6자리 또는 US ticker)
+  - 비교 scope (compare — consolidated/standalone, 재무 셀모드 고정)
 outputs:
   - 항목 × period 수평화 wide (pl.DataFrame, Panel subclass)
   - 섹션 검색 행 (panel(key)) / 본문 전체검색 (panel.search(term))
@@ -29,12 +38,21 @@ outputs:
   - finance 재무제표 (c.panel("IS", freq="year") = 파사드 attach, deep history)
   - native 재무비율 (c.panel("ratios") = BS/IS/CF native 항목 → core 공식, 자급, deep history)
   - finance 재무비율 (c.panel("RATIOS") = 파사드 attach, 기존)
+  - N사 비교 wide (compare — 식별 컬럼 + 회사별 셀, 재무 topic 은 acode·원 환산, 다기간은 {code}␟{period})
 knowledgeRefs:
   - start.dartlabSkillOs
   - engines.company
   - engines.data
+  - operation.philosophy
+capabilityRefs:
+  - compare
 sourceRefs:
   - dartlab://skills/engines.panel
+forbidden:
+  - 결손을 0 또는 직전 분기 값으로 채워 추세 왜곡 (compare honest-gap NaN 유지)
+  - KO/US 혼합을 한 표로 직접 비교 (compare 시장 경계)
+  - EDGAR 재무 adapter 확정 전 US finance 셀 비교
+  - 비교 대상 회사명/티커의 영문·한글 변종 혼용
 requiredEvidence:
   - disclosureKey
   - canonicalKey
@@ -65,11 +83,15 @@ failureModes:
   - c.panel("IS") 를 raw 공시로 가정 (강한 소스는 finance 주입 — source="raw" 로 raw 강제)
   - freq 를 native↔finance 스위치로 오인 (freq=입도, 소스는 대소문자 is/IS)
   - native(is)에 XBRL 정밀(acode/축)을 2022 이전 기대 (옛 표는 항목명 파싱 — XBRL 태그 없음)
+  - 회사 간 비교를 단일 Company 로 반복 (회사 간은 dartlab.compare 가 정렬키로 한 표에 수평화)
+  - 토픽 변종 미정규화 (매출액·영업수익·revenue 가 다른 행으로 분리 — compare 가 acode/정렬키로 해소)
 examples:
   - 005930 잡는 순간 wide raw (Panel("005930") 또는 c.panel) / plain 은 c.panel(tag=False)
   - 재고자산 주석 다기간 행 검색 (c.panel("재고")) / 본문 전체검색 (c.panel.search("반도체"))
   - native 손익 연속 (c.panel("is", freq="year") — 항목명×연도, XBRL 최근+옛 표 과거 2011~)
   - finance 손익 (c.panel("IS", freq="year") — 파사드 attach, OpenDART deep history)
+  - 회사 간 재고 비교 (dartlab.compare(["005930","000660"], topic="재고"))
+  - 회사 간 손익 셀 비교 (dartlab.compare(["005930","000660"], topic="is", freq="year") — acode 정렬·원 환산)
 procedure:
   - KR(DART) 진입은 `from dartlab.providers.dart.panel import Panel` 또는 `Company(code).panel`.
   - US(EDGAR) 진입은 `from dartlab.providers.edgar.panel import Panel` 또는 `Company(ticker).panel`.
@@ -404,6 +426,38 @@ contentRaw · period · corp · rceptNo · disclosureKey(=canonicalKey). `scope`
 III~XII 를 II 아래 mis-nesting 해 chapter 가 붕괴할 때 read 가 sectionPath 깊은 canonical 원소로 진짜 챕터
 복원(은행 99.5% 붕괴→정상). `leafType`(text/table) = 확실한 결정론 경계라 BUILD 가 표·텍스트를 별도 행으로
 분할(표↔표 비교). 행 순서·계층은 artifact 가 아니라 정부 서식 spine + canonical chapter 가 결정 — schema 불변.
+
+## 회사 간 비교 (compare)
+
+`Panel`/`c.panel` 이 *한 회사* 를 항목×기간으로 수평화한다면, **`dartlab.compare`** 는 *2~6개 회사* 를 같은
+토픽·시점 격자로 정렬한다. `scan` 처럼 단어 1 개 톱레벨 verb — 회사 간 비교의 공식 호출계약이다 (호출계약은
+`dartlab.compare` 하나, 옛 `compareTargets`/`comparePanel` 별칭 없음). 구현 `providers/dart/panel/compare.py`,
+EDGAR 미러 `providers/edgar/panel/compare.py`.
+
+```python
+import dartlab
+
+# 주석·서술 row 비교 — 정렬키 (disclosureKey, scope, leafType)
+dartlab.compare(["005930", "000660"], topic="재고")
+
+# 재무제표 셀 비교 — acode 단위, 값은 원 환산 (단위·라벨 착시 제거)
+dartlab.compare(["005930", "000660"], topic="is", freq="year")
+
+# 다기간 — 셀 컬럼이 {code}␟{period}
+dartlab.compare(["005930", "000660"], topic="유형자산", period=["2025Q4", "2024Q4"])
+```
+
+호출 동작:
+- **호출계약** `dartlab.compare(codes, *, topic=None, period=None, scope=None, freq="quarter")`. keyword-only
+  인자는 DART·EDGAR 동일 이름·어휘. `freq` 는 `quarter`/`year`/`ytd` 셋 — **재무 셀 비교 입도**라 row 비교엔 무영향.
+- **재무 topic**(`bs/is/cf/cis/sce`) = 셀모드 — acode 정렬 + 원 환산(단위 착시 0), scope 명시 고정(연결↔별도
+  자동폴백 금지), freq 일치. 식별 컬럼 `acode·label·scope` 뒤 회사별 값.
+- **그 외 topic/None** = row 모드 — `chapter·sectionLeaf·blockLeaf·leafType·disclosureKey·scope` 정렬키로
+  회사 간 한 행 정렬. label-drift 자동 해소(삼성 "7. 유형자산" ↔ SK "11. 유형자산" → 한 행). narrative(disclosureKey
+  부재) 행은 회사 간 병합 0.
+- `period=None` 이면 topic 필터 후 최신 공통 시점, 없으면 최신 union. 결손은 **NaN 유지**(0 채움·forward-fill 금지,
+  honest-gap). 한 회사 결손이어도 그 회사 컬럼은 null 로 보존.
+- **시장 경계** — KO↔US 혼합은 ValueError. US(EDGAR)는 현재 row 비교만, 재무 셀 비교는 DART(원 환산)만 열려 있다.
 
 ## evidence 기준
 

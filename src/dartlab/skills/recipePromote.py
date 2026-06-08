@@ -18,7 +18,7 @@ frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
     uv run python -X utf8 src/dartlab/skills/recipePromote.py archive --status drafted --dry-run
 
 격리 정책 (`.archive/`):
-- drafted / unverified 상태 recipe 는 사용자 노출 (index/agent/mcp/web/pyodide/graph.json 6 종 + landing /skills) 차단.
+- drafted / unverified 상태 recipe 는 사용자 노출 (catalog/agent/mcp/web/pyodide/graph.json 6 종 + landing /skills) 차단.
 - `registry.py::_builtinSpecPaths` 가 `.archive/` 폴더 path 를 필터링 — listSkills cascade 에서 invisible.
 - 페르소나 디렉토리 구조 (fundamental/credit/, macro/, meta/screen/, technical/ 등) 그대로 보존 — 승격 시 원위치 git mv 1 회로 복원.
 """

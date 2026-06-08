@@ -477,7 +477,7 @@ def _builtinSpecPaths() -> list[Path]:
     """builtin spec 전수 수집 — `.archive/` 폴더 제외.
 
     `.archive/` 는 drafted/unverified recipe 페르소나 보존 격리 (T4 archive).
-    index/agent/mcp/web/pyodide/graph.json 에 미등록 + registry/landing 노출 X.
+    catalog/agent/mcp/web/pyodide/graph.json 에 미등록 + registry/landing 노출 X.
     승격 시 `recipePromote.py archive --restore <id>` 또는 git mv 로 다시 활성.
     """
     root = _builtinSpecsRoot()
@@ -489,7 +489,12 @@ def _builtinSpecPaths() -> list[Path]:
         *root.rglob("*.yml"),
         *root.rglob("*.json"),
     ]
-    return sorted(p for p in paths if ".archive" not in p.parts)
+    return sorted(p for p in paths if ".archive" not in p.parts and not _isDirReadme(p))
+
+
+def _isDirReadme(path: Path) -> bool:
+    """디렉터리 README 는 스킬이 아니라 폴더 문서 — skill discovery 에서 제외."""
+    return path.name.lower() == "readme.md"
 
 
 def _userSpecPaths() -> list[Path]:
@@ -502,7 +507,7 @@ def _userSpecPaths() -> list[Path]:
         *root.rglob("*.yml"),
         *root.rglob("*.json"),
     ]
-    return sorted(p for p in paths if ".archive" not in p.parts)
+    return sorted(p for p in paths if ".archive" not in p.parts and not _isDirReadme(p))
 
 
 def _loadSpec(path: Path, *, defaultScope: str, forceUser: bool = False) -> SkillSpec:

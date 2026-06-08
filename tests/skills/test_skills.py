@@ -459,7 +459,7 @@ def testReadSkillExposesRecipeVisualGuidance() -> None:
 def testSkillArtifactsKeepRecipeCategorySeparateFromEngines() -> None:
     """랜딩/외부 산출물에서 recipes.* 가 engines sidebar 로 섞이지 않아야 한다."""
     artifactDir = Path("src/dartlab/skills")
-    for name in ("index.json", "agent.json", "web.json", "mcp.json", "pyodide.json"):
+    for name in ("catalog.json", "agent.json", "web.json", "mcp.json", "pyodide.json"):
         rows = json.loads((artifactDir / name).read_text(encoding="utf-8")).get("skills", [])
         bad = [
             row["id"]

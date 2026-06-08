@@ -57,7 +57,7 @@ knowledgeRefs:
   - engines.quant
   - engines.industry
 linkedSkills:
-  - operation.compareTargets
+  - engines.panel
 sourceRefs:
   - dartlab://skills/operation.sixActsAnalysis
 runtimeCompatibility:
@@ -142,7 +142,7 @@ ref 없는 막은 출력 차단 (GATE).
 ## 다음 단계
 
 - 막별 깊이 분석: `engines.analysis` · `engines.credit` · `engines.macro` · `engines.quant` · `engines.industry`.
-- 여러 종목 6 막 비교: [operation.compareTargets](/skills/operation.compareTargets) + 막별 결합.
+- 여러 종목 6 막 비교: [engines.panel](/skills/engines.panel) 의 `dartlab.compare` + 막별 결합.
 - 6 막을 카루셀 · 블로그 · 영상 콘텐츠로: `sns/CAROUSEL_DESIGN.md` · `blog/BLOG.md`.
 
 ## 무엇을 하지 *않는가*

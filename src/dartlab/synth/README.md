@@ -15,5 +15,5 @@
 
 ## 관련
 
-- [src/dartlab/skills/specs/operation/compareTargets.md](../skills/specs/operation/compareTargets.md)
+- [src/dartlab/skills/specs/engines/panel/SKILL.md](../skills/specs/engines/panel/SKILL.md) — 회사 간 비교 `dartlab.compare`
 - [tests/metamorphic/test_commutativity.py](../../../tests/metamorphic/test_commutativity.py) — scenarioMatch A↔B 대칭 (T6-3)

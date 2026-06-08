@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { Search, FileText, ArrowRight, Wrench } from 'lucide-svelte';
 	import { posts } from '$lib/blog/posts';
-	import skillIndex from '$skills/index.json';
+	import skillIndex from '$skills/catalog.json';
 
 	let open = $state(false);
 	let query = $state('');

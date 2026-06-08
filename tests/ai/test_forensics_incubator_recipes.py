@@ -112,7 +112,7 @@ def testForensicsSkillsAreExposedThroughAiEntryPoints() -> None:
 def testForensicsSkillsAreInPublicSkillArtifacts() -> None:
     artifact_dir = REPO_ROOT / "src" / "dartlab" / "skills"
 
-    for name in ("index.json", "agent.json", "web.json", "mcp.json", "pyodide.json"):
+    for name in ("catalog.json", "agent.json", "web.json", "mcp.json", "pyodide.json"):
         payload = json.loads((artifact_dir / name).read_text(encoding="utf-8"))
         rows = payload.get("skills", [])
         by_id = {row["id"]: row for row in rows}
@@ -122,9 +122,9 @@ def testForensicsSkillsAreInPublicSkillArtifacts() -> None:
             assert payload["meta"]["skillCount"] == len(rows)
             recipe_meta = [row for row in payload["meta"]["categories"] if row["id"] == "recipes"]
             assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
-        if name in {"index.json", "agent.json", "mcp.json"}:
+        if name in {"catalog.json", "agent.json", "mcp.json"}:
             assert by_id["recipes.fundamental.quality.forensics.index"]["bodyPreview"]
-        if name in {"index.json", "agent.json", "web.json"}:
+        if name in {"catalog.json", "agent.json", "web.json"}:
             assert by_id["recipes.fundamental.quality.forensics.deepDive"]["expectedOutputs"]
         if name == "web.json":
             assert by_id["recipes.fundamental.quality.forensics.index"]["bodyHuman"]

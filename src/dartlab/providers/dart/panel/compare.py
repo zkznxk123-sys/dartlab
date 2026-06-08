@@ -21,11 +21,8 @@ _SEP = "␟"  # ␟ — 셀 컬럼 namespace 구분자 ({code}␟{period})
 # 재무제표 토픽 — 셀(항목) 단위 비교(acode 정렬 + 원 환산). 통짜 표 병치 대신.
 _FIN_KEYS = frozenset({"bs", "is", "cf", "cis", "sce"})
 _VALID_FREQ = frozenset({"quarter", "year", "ytd"})
-_UNIT_RE = re.compile(r"단위\s*[:：]\s*(백만원|천원|원)")
-_UNIT_SCALE = {"백만원": 1_000_000, "천원": 1_000, "원": 1}
-# 셀 wide 기간 열은 연간(YYYY)과 분기(YYYYQn)를 모두 받는다.
-_PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
-_PERIOD_INPUT_RE = re.compile(r"^\d{4}(?:Q[1-4])?$")
+# 입력·셀 wide 기간 열은 연간(YYYY)과 분기(YYYYQn)를 모두 받는다 (단위 배율 SSOT=build.cell).
+_PERIOD_RE = re.compile(r"^\d{4}(?:Q[1-4])?$")
 _US_TICKER_RE = re.compile(r"^[A-Z][A-Z0-9.-]{0,9}$")
 
 
@@ -97,7 +94,7 @@ def _normPeriod(period: list[str] | str | None) -> list[str] | str | None:
     vals: list[str] = []
     for p in raw:
         val = str(p).strip()
-        if not _PERIOD_INPUT_RE.fullmatch(val):
+        if not _PERIOD_RE.fullmatch(val):
             raise ValueError("period 는 YYYY 또는 YYYYQn 형식이어야 합니다.")
         vals.append(val)
     vals = list(dict.fromkeys(vals))
@@ -110,7 +107,7 @@ def _detectUnitScalesByStatement(
     code: str, marketNs: str, statements: tuple[str, ...] | None = None
 ) -> dict[str, dict[str, int]]:
     """statement×period caption 단위 → 원 배율 map. 미발견=백만원."""
-    from .build.cell import CELL_STATEMENTS
+    from .build.cell import _UNIT_RE, _UNIT_SCALE, CELL_STATEMENTS  # 단위 배율 SSOT — 재정의 금지
     from .read import _panelDir, ensurePanelFromHf
 
     ensurePanelFromHf(code, marketNs)
@@ -201,7 +198,7 @@ def _companyCellsByPeriod(
         if w is None or w.is_empty():
             continue
         # 연간(YYYY)+분기(YYYYQn) 둘 다 — isPeriodColumn(YYYYQn 전용)은 year 열 거부(freq="year" 전멸 버그).
-        periods = [c for c in w.columns if _PERIOD_COL_RE.match(c)]
+        periods = [c for c in w.columns if _PERIOD_RE.fullmatch(c)]
         if wanted is not None:
             periods = [p for p in periods if p in wanted]
         if not periods:
@@ -323,22 +320,12 @@ def _matchTopic(df: pl.DataFrame, topic: str) -> pl.DataFrame:
     return df.filter(mask.fill_null(False))
 
 
-def _negPeriodKey(cell: str) -> str:
-    """다기간 셀 컬럼 '{code}␟{period}' 의 period 최신순 정렬키 (역순 문자열)."""
-    parts = cell.split(_SEP)
-    p = parts[1] if len(parts) > 1 else ""
-    return "".join(chr(255 - ord(ch)) for ch in p)  # 내림차순
-
-
 def _orderedCellColumns(present: list[str], targets: list[str], *, single: bool) -> list[str]:
-    """출력 셀 컬럼 순서 — 단일=회사, 다기간=회사×기간 최신순."""
+    """출력 셀 컬럼 순서 — 단일=회사, 다기간=회사(codes 순)×기간(최신순)."""
     if single:
         return list(present)
-    expected = [f"{code}{_SEP}{period}" for code in present for period in targets]
-    return sorted(
-        expected,
-        key=lambda x: (present.index(x.split(_SEP)[0]) if x.split(_SEP)[0] in present else 99, _negPeriodKey(x)),
-    )
+    periods = sortPeriods(list(dict.fromkeys(targets)), descending=True)
+    return [f"{code}{_SEP}{period}" for code in present for period in periods]
 
 
 def _ensureCellColumns(out: pl.DataFrame, ordered: list[str]) -> pl.DataFrame:

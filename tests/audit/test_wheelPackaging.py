@@ -156,7 +156,7 @@ def test_skillSpecs_inWheel(builtWheel: Path):
         "dartlab/skills/specs/engines/scan/undervaluedQuality.md",
         "dartlab/skills/specs/operation/apiContract.md",
         "dartlab/skills/specs/runtime/mcp.md",
-        "dartlab/skills/index.json",
+        "dartlab/skills/catalog.json",
         "dartlab/skills/pyodide.json",
     ]
     for req in required:

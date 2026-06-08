@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { posts } from '$lib/blog/posts';
-	import skillIndex from '$skills/index.json';
+	import skillIndex from '$skills/catalog.json';
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd } from '$lib/seo';
 	import { onMount } from 'svelte';
 

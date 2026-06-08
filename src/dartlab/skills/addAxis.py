@@ -14,9 +14,9 @@ addEngine.py 의 축소판 — 새 엔진이 아니라 *기존 엔진 안의 응
 - JSON 산출물 6 종은 운영자·사용자·사용자가 위임한 AI 가 명시적으로 관리하고 검토한다.
 
 사용법:
-    uv run python -X utf8 src/dartlab/skills/addAxis.py company compareTargets \\
-        --title "여러 종목 토픽-기간 그리드 비교" \\
-        --purpose "compareTargets axis 는 ..."
+    uv run python -X utf8 src/dartlab/skills/addAxis.py company cashConversion \\
+        --title "현금전환주기 분석" \\
+        --purpose "cashConversion axis 는 ..."
 """
 
 from __future__ import annotations
@@ -84,7 +84,7 @@ def main() -> int:
     """axis sub-spec 1 명령 생성 + 검증 자동 동행."""
     parser = argparse.ArgumentParser(description="engines.{group}.{axis} sub-spec 추가")
     parser.add_argument("group", help="엔진 group (예 company / analysis / quant)")
-    parser.add_argument("axis", help="axis 이름 (camelCase, 예 compareTargets)")
+    parser.add_argument("axis", help="axis 이름 (camelCase, 예 cashConversion)")
     parser.add_argument("--title", required=True, help="사람 가독 제목")
     parser.add_argument("--purpose", required=True, help="1~2 문장 목적 설명")
     parser.add_argument("--dry-run", action="store_true", help="변경 없이 미리보기만")

@@ -146,8 +146,8 @@ for (const section of sections) {
 	llmsTxt += '\n';
 }
 
-// Skills — inject from compiled SSOT index.json (src/dartlab/skills/index.json)
-const skillsIndexPath = resolve(projectRoot, 'src', 'dartlab', 'skills', 'index.json');
+// Skills — inject from compiled SSOT catalog.json (src/dartlab/skills/catalog.json)
+const skillsIndexPath = resolve(projectRoot, 'src', 'dartlab', 'skills', 'catalog.json');
 let skillEntries = [];
 if (existsSync(skillsIndexPath)) {
 	try {

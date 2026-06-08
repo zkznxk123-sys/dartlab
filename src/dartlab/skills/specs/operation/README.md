@@ -54,7 +54,7 @@ whenToUse:
 | **데이터 / 매핑** | mappingRefresh · docsBuilderRefactor |
 | **AI / Skill** | aiEngine · aiProductReplatform · extendSkills · intentBoosts · opsAsSkills · skillMarket · docstringStandard |
 | **UI / 시각** | dashboardDesign · ui |
-| **분석 시나리오** | compareTargets · sixActsAnalysis |
+| **분석 시나리오** | sixActsAnalysis (회사 간 비교는 engines.panel `dartlab.compare`) |
 
 ---
 
