@@ -692,6 +692,169 @@ def _ensureFromHf(period: str | None = None) -> bool:
         return False
 
 
+def _remoteDates(*, token: str | None = None) -> set[str]:
+    """HF dataset 에 올라간 allFilings **본문** parquet 의 일자(YYYYMMDD) 집합.
+
+    reconcile 의 "HF 가 가진 일자" 쪽. ``list_repo_tree`` scoped 열거(retryHfCall)로
+    ``dart/allFilings/`` prefix 만 읽어 전체 dataset metadata 폭주(429)를 피한다.
+    ``_meta``(목록만) parquet 은 제외 — 본문 완료(``{YYYYMMDD}.parquet``)만 SSOT.
+
+    Args:
+        token: HF 토큰. None 이면 env ``HF_TOKEN``.
+
+    Returns:
+        set[str] — 본문 완료 일자 집합 (예: ``{"20260603", "20260604"}``). HF 호출
+        실패(네트워크/인증/부재)면 빈 set.
+
+    Raises:
+        없음 — 모든 예외는 warning 로그 후 빈 set 으로 흡수.
+
+    Example:
+        >>> _remoteDates()  # doctest: +SKIP
+        {'20260601', '20260602'}
+    """
+    import os as _os
+
+    tok = token or _os.environ.get("HF_TOKEN") or None
+    relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
+    try:
+        from huggingface_hub import HfApi
+
+        from dartlab.core.dataConfig import repoFor
+        from dartlab.core.hfRetry import retryHfCall
+
+        api = HfApi(token=tok)
+
+        def _listTree() -> list:
+            return list(
+                api.list_repo_tree(
+                    repo_id=repoFor(_ALLFILINGS_DIR_KEY),
+                    path_in_repo=relDir,
+                    repo_type="dataset",
+                    recursive=False,
+                    token=tok,
+                )
+            )
+
+        entries = retryHfCall(_listTree)
+    except Exception as exc:  # noqa: BLE001 — 원격 목록 실패는 빈 set(로컬 우선 fallback)
+        _log.warning("[HF] allFilings 원격 목록 조회 실패: %s", exc)
+        return set()
+
+    dates: set[str] = set()
+    for item in entries:
+        rel = getattr(item, "path", "") or getattr(item, "rfilename", "")
+        name = Path(str(rel)).name
+        stem = name[:-8] if name.endswith(".parquet") else ""  # ".parquet" = 8자
+        if len(stem) == 8 and stem.isdigit():
+            dates.add(stem)
+    return dates
+
+
+def _pullDates(dates: list[str], *, token: str | None = None) -> int:
+    """지정 일자들의 본문 parquet 을 HF→로컬 1회 snapshot_download(retry).
+
+    reconcile 의 pull 방향 헬퍼 — 일자별 개별 호출 대신 ``allow_patterns`` 리스트로
+    한 번에 받는다. tmp→rename atomic 은 huggingface_hub 가 보장.
+
+    Args:
+        dates: 받을 일자 list (YYYYMMDD).
+        token: HF 토큰. None 이면 env ``HF_TOKEN``.
+
+    Returns:
+        int — 실제로 로컬에 떨어진(존재 확인) 일자 수. 빈 입력/실패면 0.
+
+    Raises:
+        없음 — HF 실패는 warning 후 0.
+
+    Example:
+        >>> _pullDates(["20260601", "20260602"])  # doctest: +SKIP
+        2
+    """
+    if not dates:
+        return 0
+
+    import os as _os
+
+    tok = token or _os.environ.get("HF_TOKEN") or None
+    relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
+    try:
+        from huggingface_hub import snapshot_download
+
+        from dartlab.core.dataConfig import repoFor
+        from dartlab.core.hfRetry import retryHfCall
+
+        retryHfCall(
+            snapshot_download,
+            repo_id=repoFor(_ALLFILINGS_DIR_KEY),
+            repo_type="dataset",
+            allow_patterns=[f"{relDir}/{d}.parquet" for d in dates],
+            local_dir=str(Path(_cfg.dataDir)),
+            token=tok,
+        )
+    except Exception as exc:  # noqa: BLE001 — pull 실패는 격리(다음 reconcile 자연 회복)
+        _log.warning("[HF↓] allFilings reconcile pull 실패 (%d일): %s", len(dates), exc)
+        return 0
+
+    outDir = _allFilingsDir()
+    return sum(1 for d in dates if (outDir / f"{d}.parquet").exists())
+
+
+def reconcileAllFilings(
+    *,
+    pull: bool = True,
+    push: bool = True,
+    token: str | None = None,
+) -> dict:
+    """로컬 ↔ HF allFilings parquet **양방향 reconcile** — 집합 차분, 부족분만 채움.
+
+    로컬 본문 완료 일자(``collectedDates``)와 HF 일자(``_remoteDates``)를 비교해:
+        - **HF 가 앞섬**(HF 에만 있는 일자) → ``pull`` 이면 로컬로 다운로드.
+        - **로컬이 앞섬**(로컬에만 있는 일자) → ``push`` 이면 HF 로 업로드.
+    양쪽을 합집합으로 수렴시킨다. 이미 양쪽에 있는 일자는 건드리지 않는다(idempotent).
+
+    Args:
+        pull: HF→로컬 (HF 가 앞선 일자 다운로드).
+        push: 로컬→HF (로컬이 앞선 일자 업로드).
+        token: HF 토큰. None 이면 env ``HF_TOKEN``.
+
+    Returns:
+        dict — ``{"localBefore", "remoteBefore", "pullDates", "pushDates", "pulled",
+        "pushed", "localAfter", "inSync"}``. ``inSync`` 는 활성 방향 기준 처리 대상 0 여부.
+
+    Raises:
+        없음 — HF 호출 실패는 _remoteDates/_pullDates/pushAllFilings 내부에서 격리.
+
+    Example:
+        >>> reconcileAllFilings()  # doctest: +SKIP
+        {'localBefore': 225, 'remoteBefore': 230, 'pulled': 5, 'pushed': 0, ...}
+
+    Guide:
+        - 운영자 로컬 머신용 — 로컬 store 가 영속인 곳에서 의미. CI ephemeral runner 는
+          pull 이 전 이력 재다운로드라 무의미(daily forward+push job 이 CI 최신화 담당).
+        - 월 단위 백필 후 push 로 새 일자 HF 반영, 다른 머신/CI 가 수집한 일자는 pull 로 로컬 보강.
+    """
+    localDates = set(collectedDates())
+    remoteDates = _remoteDates(token=token)
+
+    pullDates = sorted(remoteDates - localDates) if pull else []
+    pushDates = sorted(localDates - remoteDates) if push else []
+
+    pulledN = _pullDates(pullDates, token=token)
+    pushedN = pushAllFilings(pushDates, token=token) if pushDates else 0
+
+    return {
+        "localBefore": len(localDates),
+        "remoteBefore": len(remoteDates),
+        "pullDates": pullDates,
+        "pushDates": pushDates,
+        "pulled": pulledN,
+        "pushed": pushedN,
+        "localAfter": len(collectedDates()),
+        "inSync": not pullDates and not pushDates,
+    }
+
+
 def loadDay(period: str) -> pl.DataFrame | None:
     """수집된 하루치 데이터 로드. 로컬 부재 시 HF 에서 lazy 다운로드.
 

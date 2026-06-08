@@ -81,3 +81,57 @@ def runAllFilings(
             res.report.failures.append(f"allFilings push: {type(exc).__name__}: {exc}")
             print(f"[pipeline] allFilings push 실패(격리): {exc}", flush=True)
     return res
+
+
+def runAllFilingsReconcile(
+    *,
+    category: str = "allFilingsReconcile",
+    mode: PipelineMode = "incremental",
+    codes: list[str] | None = None,
+    upload: bool = True,
+    token: str | None = None,
+) -> StageResult:
+    """allFilings 로컬 ↔ HF **양방향 reconcile** stage (운영자 트리거).
+
+    forward 증분(``runAllFilings``)이 최근 N일만 본다면, 본 stage 는 로컬·HF 전 일자를
+    집합 비교해 부족분만 양쪽으로 채운다(``reconcileAllFilings``): HF 가 앞선 일자는
+    로컬로 pull, 로컬이 앞선 일자는 HF 로 push. 월 단위 백필 후 또는 머신/CI 간 동기화에
+    쓴다. ⚠ ephemeral CI runner 에서 부르면 pull 이 전 이력 재다운로드라 무의미 —
+    영속 로컬 store(운영자 머신)용. daily 최신화는 ``originalSync.yml`` allfilings job 이 담당.
+
+    Args:
+        category: 미사용("allFilingsReconcile" 고정).
+        mode: 미사용.
+        codes: 미사용(전 일자 집합 비교).
+        upload: False 면 push 방향 끔(pull-only reconcile).
+        token: HF 토큰.
+
+    Returns:
+        StageResult (rows=pull 한 일자수, uploaded=push 한 일자수).
+
+    Raises:
+        없음 (reconcile 예외는 StageResult 로 격리).
+
+    Example:
+        >>> runAllFilingsReconcile(upload=False)  # doctest: +SKIP
+        StageResult(category='allFilingsReconcile', ...)
+    """
+    from dartlab.gather.dart.allFilingsCollector import reconcileAllFilings
+
+    res = StageResult(category="allFilingsReconcile")
+    try:
+        summary = reconcileAllFilings(pull=True, push=upload, token=token)
+        res.rows = int(summary["pulled"])
+        res.uploaded = int(summary["pushed"])
+        res.report.ok = 1
+        print(
+            f"[pipeline] allFilings reconcile: 로컬 {summary['localBefore']}→{summary['localAfter']}일, "
+            f"HF {summary['remoteBefore']}일 · pull {summary['pulled']} · push {summary['pushed']}"
+            f" · inSync={summary['inSync']}",
+            flush=True,
+        )
+    except Exception as exc:  # noqa: BLE001 — reconcile 실패 격리(다음 호출 자연 회복)
+        res.report.err = 1
+        res.report.failures.append(f"allFilings reconcile: {type(exc).__name__}: {exc}")
+        print(f"[pipeline] allFilings reconcile 실패(격리): {exc}", flush=True)
+    return res

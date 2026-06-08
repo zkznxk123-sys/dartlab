@@ -213,3 +213,81 @@ def test_universe_ticker_by_cik_multiclass(monkeypatch) -> None:
     m = edgarPanel._universeTickerByCik()
     assert sorted(m["0001652044"]) == ["GOOG", "GOOGL"]  # 두 클래스 모두 보존
     assert m["0000320193"] == ["AAPL"]
+
+
+def test_run_allfilings_callable() -> None:
+    """runAllFilings forward 증분 stage callable smoke."""
+    from dartlab.pipeline.stages.allFilings import runAllFilings
+
+    assert callable(runAllFilings)
+
+
+def test_run_allfilings_reconcile_maps_summary(monkeypatch) -> None:
+    """runAllFilingsReconcile — reconcile summary → StageResult(rows=pulled, uploaded=pushed, ok)."""
+    from dartlab.gather.dart import allFilingsCollector as collector
+    from dartlab.pipeline.stages import allFilings
+
+    captured: dict[str, bool] = {}
+
+    def stubReconcile(*, pull, push, token=None):
+        captured["pull"] = pull
+        captured["push"] = push
+        return {
+            "localBefore": 220,
+            "remoteBefore": 225,
+            "pullDates": ["20260605"],
+            "pushDates": ["20260606", "20260607"],
+            "pulled": 1,
+            "pushed": 2,
+            "localAfter": 221,
+            "inSync": False,
+        }
+
+    monkeypatch.setattr(collector, "reconcileAllFilings", stubReconcile)
+    res = allFilings.runAllFilingsReconcile(upload=True)
+    assert res.rows == 1  # pulled (HF→로컬)
+    assert res.uploaded == 2  # pushed (로컬→HF)
+    assert res.report.ok == 1
+    assert res.report.err == 0
+    assert captured == {"pull": True, "push": True}
+
+
+def test_run_allfilings_reconcile_push_disabled(monkeypatch) -> None:
+    """upload=False → reconcile push=False 전달 (pull-only)."""
+    from dartlab.gather.dart import allFilingsCollector as collector
+    from dartlab.pipeline.stages import allFilings
+
+    captured: dict[str, bool] = {}
+
+    def stubReconcile(*, pull, push, token=None):
+        captured["pull"] = pull
+        captured["push"] = push
+        return {
+            "localBefore": 1,
+            "remoteBefore": 2,
+            "pullDates": [],
+            "pushDates": [],
+            "pulled": 0,
+            "pushed": 0,
+            "localAfter": 1,
+            "inSync": True,
+        }
+
+    monkeypatch.setattr(collector, "reconcileAllFilings", stubReconcile)
+    allFilings.runAllFilingsReconcile(upload=False)
+    assert captured == {"pull": True, "push": False}
+
+
+def test_run_allfilings_reconcile_isolates_failure(monkeypatch) -> None:
+    """reconcile 예외는 StageResult.report.err 로 격리 — run 중단·전파 X."""
+    from dartlab.gather.dart import allFilingsCollector as collector
+    from dartlab.pipeline.stages import allFilings
+
+    def boom(*, pull, push, token=None):
+        raise RuntimeError("HF down")
+
+    monkeypatch.setattr(collector, "reconcileAllFilings", boom)
+    res = allFilings.runAllFilingsReconcile()
+    assert res.report.err == 1
+    assert res.report.ok == 0
+    assert any("reconcile" in f for f in res.report.failures)
