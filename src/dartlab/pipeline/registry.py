@@ -27,7 +27,7 @@ def buildRegistry() -> dict[str, StageSpec]:
         >>> "finance" in buildRegistry()
         True
     """
-    from dartlab.pipeline.stages import allFilings, dart, dartZip, edgar, edgarPanel, krx, macro, news
+    from dartlab.pipeline.stages import allFilings, dart, dartZip, edgar, edgarPanel, krx, macro, news, reconcile
 
     specs: list[StageSpec] = [
         StageSpec("finance", run=dart.runDartRecent, uploadCategories=("finance",), label="DART 재무 (증분)"),
@@ -63,6 +63,18 @@ def buildRegistry() -> dict[str, StageSpec]:
             run=edgarPanel.runEdgarPanel,
             uploadCategories=("edgarPanel",),
             label="EDGAR panel per-filing 증분 (Job 3, daily-index 발견→append)",
+        ),
+        StageSpec(
+            "panelReconcile",
+            run=reconcile.runPanelReconcile,
+            uploadCategories=("panel",),
+            label="DART panel 로컬↔HF 양방향 reconcile (운영자 트리거)",
+        ),
+        StageSpec(
+            "edgarPanelReconcile",
+            run=reconcile.runEdgarPanelReconcile,
+            uploadCategories=("edgarPanel",),
+            label="EDGAR panel 로컬↔HF 양방향 reconcile (운영자 트리거)",
         ),
         StageSpec("krx", run=krx.runKrx, uploadCategories=("krxPrices",), label="KRX 일별 가격"),
         StageSpec("krxIndex", run=krx.runKrxIndex, uploadCategories=("krxIndices",), label="KRX 지수"),
