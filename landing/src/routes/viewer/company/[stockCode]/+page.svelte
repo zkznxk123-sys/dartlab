@@ -15,6 +15,7 @@
 	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
+	import AskDrawer from '$lib/components/viewer/AskDrawer.svelte';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
@@ -56,6 +57,8 @@
 	let discussOpen = $state(false);
 	let financeOpen = $state(false); // 정량재무제표 다이얼로그
 	let stockSearchOpen = $state(false); // 종목검색 팝오버 (화면내검색 ⌘K 와 분리된 회사전환 입력)
+	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
+	let askCarryQ = $state(''); // AI 가 타 회사 감지 → 이동 후 새 회사 index 준비되면 운반·자동 ask 할 질문
 	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
@@ -168,7 +171,15 @@
 	// 종목검색 — 다른 회사 공시뷰어로 이동(단일).
 	function onStockPick(c: string) {
 		stockSearchOpen = false;
+		askCarryQ = '';
 		if (c && c !== code) void goto(`${base}/viewer/company/${c}`);
+	}
+
+	// AI 가 질문에서 타 회사 감지 → 자동 이동. goto 완료 후 carryQ 운반(옛 회사 mount 의 carryQ 선발화 race 방지).
+	async function onAskNavigate(targetCode: string, carryQuestion: string) {
+		if (!targetCode || targetCode === code) return;
+		await goto(`${base}/viewer/company/${targetCode}`);
+		askCarryQ = carryQuestion;
 	}
 
 	// 전체보기 Esc 해제.
@@ -363,6 +374,9 @@
 				{/if}
 			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
+			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={() => (askOpen = !askOpen)} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
+				<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{base}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
+			</button>
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
@@ -462,7 +476,7 @@
 			<p>{errorMsg}</p>
 		</div>
 	{:else if bundle}
-		<div class="studio">
+		<div class="studio" class:ask-open={askOpen}>
 			<aside class="toc">
 				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
@@ -487,6 +501,19 @@
 					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
 				{/if}
 			</section>
+			{#if askOpen}
+				<AskDrawer
+					{code}
+					{bundle}
+					{searchIndex}
+					{indexing}
+					{corpName}
+					carryQ={askCarryQ}
+					onfocus={onSearchResult}
+					onNavigate={onAskNavigate}
+					onclose={() => (askOpen = false)}
+				/>
+			{/if}
 		</div>
 	{/if}
 </main>
@@ -919,6 +946,42 @@
 		min-height: 0;
 		display: grid;
 		grid-template-columns: 240px 1fr;
+	}
+	.studio.ask-open {
+		grid-template-columns: 240px minmax(0, 1fr) 380px;
+	}
+	.ask-trigger {
+		gap: 5px;
+	}
+	.ask-ava {
+		border-radius: 50%;
+		vertical-align: middle;
+	}
+	.ask-trigger.active {
+		border-color: rgba(251, 146, 60, 0.6);
+		color: #fb923c;
+		background: rgba(251, 146, 60, 0.1);
+	}
+	@media (max-width: 1120px) {
+		.studio.ask-open {
+			grid-template-columns: minmax(0, 1fr) 360px;
+		}
+		.studio.ask-open .toc {
+			display: none;
+		}
+	}
+	@media (max-width: 720px) {
+		.studio.ask-open {
+			position: relative;
+			grid-template-columns: 1fr;
+		}
+		.studio.ask-open :global(.ask-drawer) {
+			position: absolute;
+			inset: 0;
+			z-index: 90;
+			border-left: none;
+			box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6);
+		}
 	}
 	.toc {
 		min-height: 0;
