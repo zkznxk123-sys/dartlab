@@ -291,3 +291,14 @@ def test_run_allfilings_reconcile_isolates_failure(monkeypatch) -> None:
     assert res.report.err == 1
     assert res.report.ok == 0
     assert any("reconcile" in f for f in res.report.failures)
+
+
+def test_allfilings_reconcile_registered() -> None:
+    """buildRegistry 에 allFilingsReconcile stage 등록 — run 바인딩 + uploadCategories."""
+    from dartlab.pipeline.registry import buildRegistry
+    from dartlab.pipeline.stages.allFilings import runAllFilingsReconcile
+
+    reg = buildRegistry()
+    assert "allFilingsReconcile" in reg
+    assert reg["allFilingsReconcile"].run is runAllFilingsReconcile
+    assert "allFilings" in reg["allFilingsReconcile"].uploadCategories
