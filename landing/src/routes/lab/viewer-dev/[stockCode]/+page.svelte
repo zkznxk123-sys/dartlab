@@ -1,7 +1,7 @@
 <script lang="ts">
 	// 공시뷰어 — panel 하나로 브라우저 readWide → TOC + 항목×기간 격자 + 타임라인 + 원본 링크.
 	// 디자인 = scan 방식(flat #050811 · #1e2433 보더 · 오렌지 단일 액센트). 풀블리드(좌우 패딩 0 · 갭 0).
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus, Search, Download } from 'lucide-svelte';
@@ -50,6 +50,7 @@
 	let bundle = $state<PanelBundle | null>(null);
 	let errorMsg = $state<string | null>(null);
 	let loading = $state(true);
+	let swapping = $state(false); // 회사 전환 중 — 옛 화면 유지 + 미세 인디케이터(soft swap, 전체화면 스피너 회피)
 	let activeSectionKey = $state<string | undefined>(undefined);
 	let activeBlock = $state<string | null>(null); // 활성 주석(blockLeaf) — null 이면 섹션 전체
 	let windowEnd = $state(0); // periods 시작 인덱스 (0 = 최신, 좌측)
@@ -84,7 +85,8 @@
 	}
 	const allBundles = $derived(bundle ? [bundle, ...vsBundles] : []);
 
-	// code 바뀌면(검색 이동) 재로드.
+	// code 바뀌면(검색 이동) 재로드 — soft swap. 첫 로드만 전체화면 스피너, 회사 전환은 옛 화면을 유지한 채
+	// 새 번들을 백그라운드 로드 후 준비되면 교체(studio·AskDrawer 언마운트 0 → 깜빡임 없는 매끄러운 전환).
 	$effect(() => {
 		const c = code;
 		try {
@@ -92,24 +94,33 @@
 		} catch {
 			/* localStorage 불가 무시 */
 		}
-		loading = true;
 		errorMsg = null;
-		bundle = null;
-		windowEnd = 0;
-		activeBlock = null;
+		// 첫 로드(bundle 없음)=전체화면 로딩 / 회사 전환(bundle 있음)=미세 swap 인디케이터. untrack 으로 bundle 을
+		// effect 의존성에서 제외(여기서 bundle 을 set 하므로 그냥 읽으면 자기재발화).
+		if (untrack(() => bundle) === null) loading = true;
+		else swapping = true;
+		let cancelled = false;
 		loadPanelBundle(c)
 			.then((b) => {
-				bundle = b;
-				activeSectionKey = b.toc.chapters[0]?.sections[0]?.sectionKey;
+				if (cancelled) return; // 빠른 연속 전환 — 옛 응답이 새 회사를 덮어쓰지 않게
+				bundle = b; // 새 회사 화면으로 교체(리셋도 이 시점에만 → 전환 중 옛 화면 안정)
+				windowEnd = 0;
 				activeBlock = null;
+				activeSectionKey = b.toc.chapters[0]?.sections[0]?.sectionKey;
 				if (!b.periods.length) errorMsg = '이 종목의 panel 데이터가 없습니다 (HF 업로드 대기 중일 수 있음).';
 			})
 			.catch((e) => {
+				if (cancelled) return;
 				errorMsg = `로드 실패: ${e instanceof Error ? e.message : String(e)}`;
 			})
 			.finally(() => {
+				if (cancelled) return;
 				loading = false;
+				swapping = false;
 			});
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	// 본문 검색 색인 — bundle 로드 후 타임슬라이싱 빌드(메인스레드 비차단). code 바뀌면 재빌드.
@@ -362,6 +373,7 @@
 
 <main class="viewer-page" class:fullscreen={isFullscreen}>
 	<header class="page-head">
+		{#if swapping}<div class="swap-bar" aria-hidden="true"></div>{/if}
 		<div class="ph-left">
 			{#if compareMode}
 				<div class="chips">
@@ -493,7 +505,7 @@
 			<p>{errorMsg}</p>
 		</div>
 	{:else if bundle}
-		<div class="studio" class:ask-open={askOpen}>
+		<div class="studio" class:ask-open={askOpen} class:swapping>
 			<aside class="toc">
 				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
@@ -553,6 +565,7 @@
 	}
 
 	.page-head {
+		position: relative;
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
@@ -560,6 +573,33 @@
 		gap: 16px;
 		padding: 8px 12px;
 		border-bottom: 1px solid #1e2433;
+	}
+	/* 회사 전환 진행 바 — 헤더 하단에 얇게, 레이아웃 시프트 0(absolute overlay). */
+	.swap-bar {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -1px;
+		height: 2px;
+		overflow: hidden;
+		background: rgba(251, 146, 60, 0.12);
+	}
+	.swap-bar::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 40%;
+		background: #fb923c;
+		animation: swapslide 1s ease-in-out infinite;
+	}
+	@keyframes swapslide {
+		0% {
+			left: -40%;
+		}
+		100% {
+			left: 100%;
+		}
 	}
 	.ph-left {
 		display: flex;
@@ -963,6 +1003,13 @@
 	}
 	.studio.ask-open {
 		grid-template-columns: 240px minmax(0, 1fr) 380px;
+	}
+	/* soft swap — 전환 중 문서영역(TOC·격자)만 살짝 죽여 "로딩 중" 신호 + 묵은 클릭 차단. 드로어는 또렷이 유지. */
+	.studio.swapping .toc,
+	.studio.swapping .board {
+		opacity: 0.5;
+		pointer-events: none;
+		transition: opacity 0.15s;
 	}
 	.ask-trigger {
 		gap: 5px;

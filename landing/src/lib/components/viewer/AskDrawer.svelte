@@ -345,6 +345,7 @@
 		const cq = carryQ;
 		if (!cq || cq === ask.consumedCarry) return;
 		if (!searchIndex || !bundle || !bundle.periods.length) return; // 새 회사 데이터 준비 대기(헛답 방지)
+		if (bundle.stockCode !== code) return; // soft-swap: 번들이 아직 옛 회사면 대기(옛 데이터로 새 질문 답 방지)
 		ask.consumedCarry = cq;
 		busy = true;
 		void answerOnCompany(cq, bundle, searchIndex); // 이동된 회사(=현재 code)로 답
