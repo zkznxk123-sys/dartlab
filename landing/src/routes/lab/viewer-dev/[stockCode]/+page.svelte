@@ -16,6 +16,7 @@
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
 	import AskDrawer from '$lib/components/viewer/AskDrawer.svelte';
+	import { executeAction, type ViewerAction, type ViewerApi } from '$lib/viewer/viewerActions';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
 	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
@@ -316,6 +317,38 @@
 		annualOnly = !annualOnly;
 		windowEnd = 0; // 축이 바뀌므로 최신으로 리셋
 	}
+
+	// 액션 버스 호스트 — 기존 mutator + 라이브 검증 게터를 ViewerApi 로 묶어 executeAction 에 주입.
+	function setCols(n: 3 | 6 | 9) {
+		cols = n;
+	}
+	function openFinance() {
+		financeOpen = true;
+	}
+	function closeFinance() {
+		financeOpen = false;
+	}
+	const viewerApi: ViewerApi = {
+		navigateCompany: onAskNavigate,
+		focusEvidence: onSearchResult,
+		setSection: pickSection,
+		setBlock: pickBlock,
+		setPeriod: pickPeriod,
+		moveNewer,
+		moveOlder,
+		setCols,
+		toggleAnnual,
+		openFinance,
+		closeFinance,
+		addCompare: addCompany,
+		removeCompare: removeCompany,
+		hasSection: (k) => !!bundle?.gridBySection.has(k),
+		hasPeriod: (p) => visiblePeriods.includes(p),
+		knownCode: (c) => c !== code && nameMap.has(c)
+	};
+	const onAction = (a: ViewerAction) => {
+		executeAction(a, viewerApi);
+	};
 	const lockedIdx = $derived(visiblePeriods.indexOf(lockedPeriod));
 	const canNewer = $derived(compareMode ? lockedIdx > 0 : windowEnd > 0);
 	const canOlder = $derived(compareMode ? lockedIdx >= 0 && lockedIdx + 1 < visiblePeriods.length : windowEnd + 1 < visiblePeriods.length);
@@ -491,8 +524,7 @@
 					{indexing}
 					{corpName}
 					carryQ={askCarryQ}
-					onfocus={onSearchResult}
-					onNavigate={onAskNavigate}
+					{onAction}
 					onclose={() => (askOpen = false)}
 				/>
 			{/if}

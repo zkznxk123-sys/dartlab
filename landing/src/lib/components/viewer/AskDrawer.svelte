@@ -10,6 +10,7 @@
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
 	import { ask, type EvRef, type NavOption } from '$lib/viewer/askSession.svelte';
 	import { translateAnswer, translatorSupported, TARGET_LANGS, type TargetLang } from '$lib/viewer/translate';
+	import { deriveActions, type ViewerAction } from '$lib/viewer/viewerActions';
 	import {
 		isModelCached,
 		routeChat,
@@ -48,8 +49,7 @@
 		searchIndex,
 		corpName,
 		carryQ = '',
-		onfocus,
-		onNavigate,
+		onAction,
 		onclose
 	}: {
 		code: string;
@@ -58,8 +58,7 @@
 		indexing?: boolean;
 		corpName: string;
 		carryQ?: string; // 이동 후 부모가 운반한 질문(새 회사 index 준비되면 1회 자동 ask)
-		onfocus: (hit: SearchHit) => void;
-		onNavigate: (targetCode: string, carryQuestion: string) => void;
+		onAction: (a: ViewerAction) => void; // 챗→백뷰 제어 단일 채널(executeAction 으로 검증·실행)
 		onclose: () => void;
 	} = $props();
 
@@ -242,6 +241,9 @@
 		const idx = ask.chat.length - 1;
 		scrollBottom();
 
+		// 액션 버스 — 답이 가리키는 곳으로 뒷화면 이동(근거 셀 점프·재무 열기·연도 시점). 결정론·즉시.
+		for (const a of deriveActions({ q, targets: [], hits, intent: composed.intent, topHit: evHits[0] ?? null, visiblePeriods: b.periods })) onAction(a);
+
 		if (!useAi) {
 			// 의미형 질문인데 모델 미보유(받을 수 있는데 안 받음) → 결정론 답 뒤에 1줄 유도. unsupported 는 제외(헛유도 방지).
 			if (composed.suggestLlm && !aiReady && ask.modelState !== 'unsupported') {
@@ -305,7 +307,7 @@
 		// 단일 타 회사 감지 → *자동 이동*. 본문(viewer)이 그 회사로 바뀌고, 대화는 스토어로 유지되며, carryQ 로
 		// 새 회사에서 원 질문 자동 답. 확인 칩 없이 바로(사용자 요구). 감지는 어절매칭이라 오탐 낮음.
 		if (targets.length === 1) {
-			onNavigate(targets[0].code, q);
+			onAction({ kind: 'navigateCompany', code: targets[0].code, carryQ: q });
 			busy = false;
 			return;
 		}
@@ -333,7 +335,7 @@
 
 	// 이동 칩 클릭 — 부모로 위임(goto + 원질문 운반). 부모가 새 회사 로드 후 carryQ 로 자동 재실행.
 	function clickNav(target: NavOption, carryQuestion: string) {
-		onNavigate(target.code, carryQuestion);
+		onAction({ kind: 'navigateCompany', code: target.code, carryQ: carryQuestion });
 	}
 
 	// 이동 후 운반된 질문 1회 자동 실행 — carryQ + 새 회사 bundle/index 가 모두 reactive prop 이라,
@@ -485,7 +487,7 @@
 					{#if t.evItems.length}
 						<div class="ev-row">
 							{#each t.evItems as e, i (e.n)}
-								<button type="button" class="ev-chip" class:stale={e.stale} onclick={() => onfocus(t.evHits[i])} title={e.stale ? `${e.path} · 이 항목의 최근 언급은 과거 시점입니다` : e.path}>근거 {e.n} · {e.period}{#if e.stale} <span class="stale-tag">과거</span>{/if}</button>
+								<button type="button" class="ev-chip" class:stale={e.stale} onclick={() => onAction({ kind: 'focusEvidence', hit: t.evHits[i] })} title={e.stale ? `${e.path} · 이 항목의 최근 언급은 과거 시점입니다` : e.path}>근거 {e.n} · {e.period}{#if e.stale} <span class="stale-tag">과거</span>{/if}</button>
 							{/each}
 						</div>
 					{/if}
