@@ -227,6 +227,39 @@ def test_push_all_filings_no_token(monkeypatch, tmp_path) -> None:
     assert n == 0
 
 
+def test_push_all_filings_single_commit_batch(monkeypatch, tmp_path) -> None:
+    """pushAllFilings 는 파일당 commit 아닌 create_commit 단일 배치 — 128 commit/hr 한도 회피."""
+    import dartlab.config as _cfg
+    from dartlab.gather.dart import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    outDir = mod._allFilingsDir()
+    (outDir / "20260527.parquet").write_bytes(b"PK")
+    (outDir / "20260528.parquet").write_bytes(b"PK")
+
+    commits: list[dict] = []
+
+    class _FakeApi:
+        def __init__(self, *a, **k):
+            pass
+
+        def create_commit(self, *, repo_id, repo_type, operations, commit_message):  # noqa: N802
+            commits.append({"ops": list(operations), "msg": commit_message})
+
+    import huggingface_hub
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", _FakeApi)
+
+    n = mod.pushAllFilings(["20260527", "20260528"], token="x")
+    assert n == 2
+    assert len(commits) == 1  # 2 파일 → 단일 commit (파일당 아님)
+    ops = commits[0]["ops"]
+    assert sorted(op.path_in_repo for op in ops) == [
+        "dart/allFilings/20260527.parquet",
+        "dart/allFilings/20260528.parquet",
+    ]
+
+
 def test_ensure_from_hf_env_skip(monkeypatch) -> None:
     """DARTLAB_NO_HF_DOWNLOAD=1 환경에서 즉시 False — 외부 호출 없음."""
     from dartlab.gather.dart import allFilingsCollector as mod

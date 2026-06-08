@@ -577,11 +577,13 @@ _HF_DOWNLOAD_ATTEMPTED: set[str] = set()
 
 
 def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None) -> int:
-    """allFilings parquet 을 HF dataset 에 업로드.
+    """allFilings parquet 을 HF dataset 에 **단일 commit 배치**로 업로드.
 
-    panel sync / fieldIndexRebuild 의 push 패턴과 동일 — `huggingface_hub.HfApi`
-    `upload_file` 로 일자별 `.parquet` 을 `{HF_REPO}:dart/allFilings/{period}.parquet`
-    경로에 저장. 옛 파일 같은 경로면 자동 덮어쓰기 (HF Hub 의 commit-based 업로드).
+    파일당 `upload_file`(= 파일당 commit)은 HF 무료플랜 **128 commit/hr** 한도를
+    때려 대량 백필 push 가 partial 로 잘린다(reconcile 203일 → 128 성공 사고). 그래서
+    pipeline `hfUpload` 와 동일하게 `create_commit` 배치(300 files/commit, `retryHfCall`
+    로 429·LFS-RuntimeError 백오프)로 commit 수를 1~수 개로 줄인다. 같은 경로 파일은
+    자동 덮어쓰기(HF Hub commit-based).
 
     Args:
         periods: 업로드 일자 list (YYYYMMDD). None 이면 로컬 `data/dart/allFilings/`
@@ -589,10 +591,10 @@ def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None
         token: HF token. None 이면 env `HF_TOKEN`.
 
     Returns:
-        int — 업로드 성공 파일 수.
+        int — 업로드 성공 파일 수(성공 commit 에 포함된 파일 합).
 
     Raises:
-        없음 — HF 호출 실패는 warning 로그 후 다음 파일 진행.
+        없음 — 배치 commit 실패는 warning 로그 후 다음 배치 진행(멱등 — 다음 reconcile 이어감).
 
     Example:
         >>> pushAllFilings(["20260527", "20260528"], token=os.environ["HF_TOKEN"])  # doctest: +SKIP
@@ -615,26 +617,34 @@ def pushAllFilings(periods: list[str] | None = None, *, token: str | None = None
         _log.info("[HF↑] 업로드 대상 0")
         return 0
 
-    from huggingface_hub import HfApi
+    from huggingface_hub import CommitOperationAdd, HfApi
 
     from dartlab.core.dataConfig import repoFor
+    from dartlab.core.hfRetry import retryHfCall
 
     relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
+    repo = repoFor(_ALLFILINGS_DIR_KEY)
     api = HfApi(token=hfToken)
+
+    batchSize = 300  # hfUpload 와 동일 — commit 당 파일 수 상한(128 commit/hr 한도 회피)
+    total = (len(files) + batchSize - 1) // batchSize
     ok = 0
-    for f in files:
-        dst = f"{relDir}/{f.name}"
+    for i in range(0, len(files), batchSize):
+        batch = files[i : i + batchSize]
+        n = i // batchSize + 1
+        ops = [CommitOperationAdd(path_in_repo=f"{relDir}/{f.name}", path_or_fileobj=str(f)) for f in batch]
         try:
-            api.upload_file(
-                path_or_fileobj=str(f),
-                path_in_repo=dst,
-                repo_id=repoFor(_ALLFILINGS_DIR_KEY),
+            retryHfCall(
+                api.create_commit,
+                repo_id=repo,
                 repo_type="dataset",
+                operations=ops,
+                commit_message=f"allFilings push: {len(batch)} files ({n}/{total})",
             )
-            ok += 1
-            _log.info("[HF↑] %s (%.1f MB)", dst, f.stat().st_size / 1024 / 1024)
-        except Exception as exc:  # noqa: BLE001
-            _log.warning("[HF↑] %s 실패: %s", dst, exc)
+            ok += len(batch)
+            _log.info("[HF↑] %d/%d 파일 commit (배치 %d/%d)", ok, len(files), n, total)
+        except Exception as exc:  # noqa: BLE001 — 배치 실패 격리(멱등, 다음 reconcile 이어감)
+            _log.warning("[HF↑] 배치 %d/%d (%d 파일) 실패: %s", n, total, len(batch), exc)
     _log.info("[HF↑] 완료: %d/%d 파일", ok, len(files))
     return ok
 
