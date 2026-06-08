@@ -81,6 +81,18 @@ def buildRegistry() -> dict[str, StageSpec]:
         StageSpec("macro", run=macro.runMacro, uploadCategories=("macroFred", "macroEcos"), label="거시 FRED/ECOS"),
         StageSpec("news", run=news.runNewsHeadlines, uploadCategories=("newsHeadlines",), label="뉴스 헤드라인"),
         StageSpec(
+            "newsEnrich",
+            run=news.runNewsEnrich,
+            uploadCategories=("newsEnriched",),
+            label="뉴스 감성/토픽 enrich (Phase B, 로컬 headlines→enriched)",
+        ),
+        StageSpec(
+            "gdeltForward",
+            run=news.runGdeltForward,
+            uploadCategories=("newsGdelt",),
+            label="GDELT GKG forward 일별 (Phase D, yesterday 까지 lookback upsert)",
+        ),
+        StageSpec(
             "edgar",
             run=edgar.runEdgar,
             uploadCategories=("edgar", "edgarMeta"),

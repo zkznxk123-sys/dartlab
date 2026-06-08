@@ -70,6 +70,13 @@ jobs:
           NEWS_MAX_QUERIES_US: ${{ github.event.inputs.max_queries || '80' }}
         run: uv run python -X utf8 -m dartlab.pipeline news
 
+      # Phase B — 방금 받은 로컬 headlines 를 sentiment/topic enrich → newsEnriched HF push.
+      # 모델 미가용(narrative 그룹 미설치) 시 lm_dict/query-proxy fallback 자동(CI 기본 env 안전).
+      - name: Enrich headlines (KR/US) + HF push (Phase B)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run python -X utf8 -m dartlab.pipeline newsEnrich
+
       - name: Save news headlines cache
         if: always()
         uses: actions/cache/save@v5

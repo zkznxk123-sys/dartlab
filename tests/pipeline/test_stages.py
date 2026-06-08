@@ -83,6 +83,55 @@ def test_news_no_upload(monkeypatch):
     assert all("bulkUploadHf" not in c[0][0] for c in calls)
 
 
+def test_news_enrich_faithful(monkeypatch):
+    """newsEnrich(Phase B) — KR/US enrich(--since 86400 --model) + bulkUploadHf(newsEnriched)."""
+    monkeypatch.delenv("NEWS_ENRICH_MODEL", raising=False)
+    mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.news")
+    res = mod.runNewsEnrich(upload=True)
+    scripts = [c[0] for c in calls]
+    assert scripts[0] == (
+        ".github/scripts/sync/enrichNewsHeadlines.py",
+        "--market",
+        "KR",
+        "--since",
+        "86400",
+        "--model",
+        "lm_dict",  # CI 기본 — 모델 미가용 안전
+    )
+    assert scripts[1][1:4] == ("--market", "US", "--since")
+    assert scripts[2] == (".github/scripts/sync/bulkUploadHf.py", "newsEnriched", "--since", "86400")
+    assert res.report.ok == 1
+
+
+def test_gdelt_forward_faithful(monkeypatch):
+    """gdeltForward(Phase D) — syncGdeltBackfill(--start/--end yesterday, --markets, --step) + upload."""
+    monkeypatch.delenv("GDELT_LOOKBACK_DAYS", raising=False)
+    monkeypatch.delenv("GDELT_STEP_MINUTES", raising=False)
+    monkeypatch.delenv("GDELT_MARKETS", raising=False)
+    mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.news")
+    res = mod.runGdeltForward(upload=True)
+    a = calls[0][0]
+    assert a[0] == ".github/scripts/sync/syncGdeltBackfill.py"
+    assert a[1] == "--start" and a[3] == "--end"
+    assert a[2] < a[4]  # start < end(yesterday) — ISO 비교
+    assert "--step-minutes" in a and "360" in a
+    assert "--markets" in a and "KR" in a and "GLOBAL" in a
+    assert calls[1][0] == (".github/scripts/sync/bulkUploadHf.py", "newsGdelt", "--since", "86400")
+    assert res.report.ok == 1
+
+
+def test_news_enrich_gdelt_registered():
+    """buildRegistry 에 newsEnrich·gdeltForward 등록 + run 바인딩 + uploadCategories."""
+    from dartlab.pipeline.registry import buildRegistry
+    from dartlab.pipeline.stages.news import runGdeltForward, runNewsEnrich
+
+    reg = buildRegistry()
+    assert reg["newsEnrich"].run is runNewsEnrich
+    assert reg["gdeltForward"].run is runGdeltForward
+    assert "newsEnriched" in reg["newsEnrich"].uploadCategories
+    assert "newsGdelt" in reg["gdeltForward"].uploadCategories
+
+
 def test_edgar_four_quarters():
     """edgar 4분기 wrap — 분기 경계 음수 보정."""
     from dartlab.pipeline.stages.edgar import _fourQuarters

@@ -30,6 +30,7 @@ MONITORED_WORKFLOWS = [
     "KRX Index Data Sync (Bulk)",
     "Macro Data Sync (Bulk)",
     "News Archive Sync",
+    "GDELT Sync",
     "Valuation Snapshot",
     "Search Index Delta (daily)",
     "Search Index Main (monthly)",

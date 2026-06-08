@@ -136,6 +136,7 @@ def test_monitored_covers_core_scheduled_pipelines():
         "KRX Index Data Sync (Bulk)",
         "Macro Data Sync (Bulk)",
         "News Archive Sync",
+        "GDELT Sync",
         "Valuation Snapshot",
         "Search Index Delta (daily)",
         "Search Index Main (monthly)",
