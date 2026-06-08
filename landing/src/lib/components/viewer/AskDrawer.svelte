@@ -9,6 +9,7 @@
 	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
 	import { ask, type EvRef, type NavOption } from '$lib/viewer/askSession.svelte';
+	import { translateAnswer, translatorSupported, TARGET_LANGS, type TargetLang } from '$lib/viewer/translate';
 	import {
 		isModelCached,
 		routeChat,
@@ -71,8 +72,10 @@
 
 	// 모바일이면 큰 모델(>2GB·3B)은 피커에서 숨김(저사양 OOM 방지). 드로어는 클라이언트 전용이라 window 안전.
 	let isMobile = $state(false);
+	let translatorOk = $state(false); // Chrome 내장 Translator 가용(WebGPU 무관)
 	$effect(() => {
 		isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 880px)').matches;
+		translatorOk = translatorSupported();
 	});
 	const pickerModels = $derived(WEBLLM_MODELS.filter((m) => !(isMobile && m.sizeMB > 2000)));
 	const selModel = $derived(WEBLLM_MODELS.find((m) => m.id === ask.selectedModel) ?? WEBLLM_MODELS[0]);
@@ -88,6 +91,20 @@
 			/* localStorage 불가 무시 */
 		}
 		ask.modelState = 'checking';
+	}
+
+	// 결정론 답(det)을 선택 언어로 온디바이스 번역 (Chrome Translator·환각 0·WebGPU 불필요).
+	async function translateTurn(ti: number, lang: TargetLang) {
+		const t = ask.chat[ti];
+		if (!t || t.trBusy) return;
+		t.trBusy = true;
+		t.trErr = null;
+		t.tr = '';
+		t.trLang = lang;
+		const r = await translateAnswer(t.det, lang);
+		if (r.supported) t.tr = r.text;
+		else t.trErr = r.reason ?? '번역에 실패했습니다.';
+		t.trBusy = false;
 	}
 
 	// 대화·모델·Ollama 상태는 askSession 모듈 스토어(ask) 에 둔다 — 회사 이동 시 viewer +page 가 bundle 을 잠시
@@ -216,7 +233,11 @@
 			evHits,
 			ai: '',
 			aiRunning: useAi,
-			aiErr: null
+			aiErr: null,
+			tr: '',
+			trLang: '',
+			trBusy: false,
+			trErr: null
 		});
 		const idx = ask.chat.length - 1;
 		scrollBottom();
@@ -300,7 +321,11 @@
 			evHits: [],
 			ai: '',
 			aiRunning: false,
-			aiErr: null
+			aiErr: null,
+			tr: '',
+			trLang: '',
+			trBusy: false,
+			trErr: null
 		});
 		scrollBottom();
 		busy = false;
@@ -445,6 +470,16 @@
 						<p class="bot-text">{t.det}</p>
 						{#if t.aiRunning}<div class="gen"><span class="dot"></span>생성 중…</div>{/if}
 					{/if}
+					{#if translatorOk}
+						<div class="tr-bar">
+							{#each TARGET_LANGS as l (l.code)}
+								<button type="button" class="tr-pill" class:on={t.trLang === l.code && !!t.tr} onclick={() => translateTurn(ti, l.code)} disabled={t.trBusy}>{l.label}</button>
+							{/each}
+							{#if t.trBusy}<span class="tr-busy">번역 중…</span>{/if}
+						</div>
+						{#if t.tr}<div class="tr-out">{t.tr}</div>{/if}
+						{#if t.trErr}<div class="gen err">{t.trErr}</div>{/if}
+					{/if}
 					{#if t.aiErr}<div class="gen err">{t.aiErr}</div>{/if}
 					{#if t.citedLabel}<div class="cite">재무: {t.citedLabel}</div>{/if}
 					{#if t.evItems.length}
@@ -550,6 +585,12 @@
 		background: #0a0e18;
 	}
 	.bot-text { margin: 0; color: #e2e8f0; font-size: 13px; line-height: 1.6; }
+	.tr-bar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+	.tr-pill { height: 22px; padding: 0 8px; border: 1px solid #1e2433; border-radius: 999px; background: #050811; color: #94a3b8; font: inherit; font-size: 11px; cursor: pointer; }
+	.tr-pill.on { border-color: rgba(56, 189, 248, 0.5); color: #bae6fd; background: rgba(14, 165, 233, 0.08); }
+	.tr-pill:disabled { opacity: 0.5; cursor: default; }
+	.tr-busy { color: #64748b; font-size: 11px; }
+	.tr-out { margin-top: 6px; padding: 8px 10px; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; background: rgba(14, 165, 233, 0.06); color: #dbeafe; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
 	.det-line {
 		margin-top: 7px;
 		padding-top: 6px;

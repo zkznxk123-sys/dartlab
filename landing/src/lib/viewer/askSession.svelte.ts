@@ -37,6 +37,10 @@ export interface Turn {
 	ai: string;
 	aiRunning: boolean;
 	aiErr: string | null;
+	tr: string; // 결정론 답(det) 번역 — Chrome Translator 온디바이스
+	trLang: string; // 번역 대상 언어 코드(빈값=미번역)
+	trBusy: boolean;
+	trErr: string | null;
 }
 // 'cached' = 가중치가 브라우저 Cache 에 이미 있음(받기 아님, GPU 적재만 수 초). 'idle' = 한 번도 안 받음(~705MB).
 export type ModelState = 'checking' | 'unsupported' | 'idle' | 'cached' | 'loading' | 'ready' | 'error';
