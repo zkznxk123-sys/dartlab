@@ -3,8 +3,12 @@
 원본=SSOT 전략([[project_original_ssot_strategy]]): 정기보고서(사업/분기/반기) document.xml
 zip 을 보관(``dartlab-dart-original`` private, 회사당 tar 번들) + 그 zip 으로 14-col panel
 빌드. ``archiveDartOriginals(scope="periodic")`` 가 신규 zip 받은 종목(``changedCodes``)을
-반환 → 그 종목만 ① 회사당 tar 재번들 업로드(증분) ② ``buildPanelAll`` 증분 재빌드
-(``skipExisting=False`` 로 변경 종목 overwrite) ③ panel 변경분 업로드.
+반환 → 그 종목만 ① 회사당 tar 재번들 업로드(증분) ② **panel within-company 증분 빌드**
+(``_buildPanelIncremental``: 신규 zip만 ``buildPanelFromStream`` merge=True 로 기존 parquet 에
+period upsert — 전이력 재파싱 OOM 회피) ③ panel 변경분 업로드.
+
+옛 full-rebuild(전 zip 재파싱 + 통째 overwrite)는 ``DART_PANEL_FULL_REBUILD=1`` 일 때만 — 빌드 단계
+추출 로직 변경을 과거 전 period 에 전파하는 self-heal 용(EDGAR ``EDGAR_FULL_REBUILD`` 와 동형).
 
 lookback 일수는 ``SYNC_LOOKBACK_DAYS`` env(기본 7).
 """
@@ -95,6 +99,64 @@ def _seedChangedFromHf(codes: list[str], *, token: str | None) -> tuple[int, set
     return n, safe
 
 
+def _seedPanelFromHf(codes: list[str], *, token: str | None) -> tuple[int, set[str]]:
+    """변경 종목의 기존 panel parquet 를 HF 에서 받아 merge base 배치 — 증분 데이터손실 가드.
+
+    증분 빌드(``buildPanelFromStream`` merge=True)는 기존 ``data/dart/panel/{code}.parquet`` 을 읽어
+    이번 신규 분기 period 만 교체하고 나머지 period 를 보존한다. CI 러너엔 그 기존 파일이 없으므로 빌드
+    전 HF ``panel`` repo 에서 받아 merge base 로 깔아둔다 (``_seedChangedFromHf`` 가 zip 이력을 받는 것의
+    panel 짝). **404 와 일시 실패를 구분** — 이게 데이터 손실 가드의 핵심: 404 면 *신규 종목*(HF panel
+    미존재) 이라 base 없이 merge=신규 전부 write 가 정당(잃을 이력 0) → safe. 네트워크/5xx 등 *일시 실패*
+    면 base 부재로 merge 하면 신규 period 만 남아 *정상 HF panel 을 파괴적으로 덮어쓴다*(history 소실) →
+    **unsafe → 빌드/업로드 제외**(다음 run 자연 회복). 호출부는 safe 집합만 build/upload 한다.
+
+    Args:
+        codes: 변경 종목코드 list.
+        token: HF 토큰.
+
+    Returns:
+        tuple[int, set[str]] — (seed 한 종목 수, *안전* 종목 집합 = seed 성공 ∪ 404 신규).
+
+    Raises:
+        없음 (종목별 미존재/일시실패는 분기 처리).
+
+    Example:
+        >>> _seedPanelFromHf(["005930"], token=None)  # doctest: +SKIP
+        (1, {'005930'})
+    """
+    from huggingface_hub import hf_hub_download
+    from huggingface_hub.utils import EntryNotFoundError, RepositoryNotFoundError
+
+    import dartlab.config as cfg
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+    from dartlab.core.hfRetry import retryHfCall
+    from dartlab.pipeline.hfUpload import _resolveHfToken
+
+    relDir = DATA_RELEASES["panel"]["dir"]  # "dart/panel" — local_dir 하위로 풀려 merge base 위치와 일치
+    repo = repoFor("panel")
+    tok = _resolveHfToken(token)
+    n = 0
+    safe: set[str] = set()
+    for code in codes:
+        try:
+            retryHfCall(  # HF read SSOT(core.hfRetry) — 429/503/504 단일 백오프
+                hf_hub_download,
+                repo_id=repo,
+                repo_type="dataset",
+                filename=f"{relDir}/{code}.parquet",
+                local_dir=str(cfg.dataDir),  # → data/dart/panel/{code}.parquet (merge base)
+                token=tok,
+            )
+        except (EntryNotFoundError, RepositoryNotFoundError):
+            safe.add(code)  # 신규 종목 — HF panel 미존재(404) → base 없이 merge=신규 전부 write 정당
+            continue
+        except Exception:  # noqa: BLE001 — 일시 실패(네트워크/5xx): merge base 부재 → 파괴적 덮어쓰기 가드로 제외
+            continue
+        n += 1
+        safe.add(code)
+    return n, safe
+
+
 def _bundleAndUpload(codes: list[str], *, token: str | None) -> int:
     """변경 종목의 zip 을 회사당 tar 로 묶어 dartlab-dart-original 에 증분 업로드.
 
@@ -145,6 +207,72 @@ def _bundleAndUpload(codes: list[str], *, token: str | None) -> int:
     return n
 
 
+def _buildPanelIncremental(
+    changed: list[str], newZipsByCode: dict[str, list[Path]], res: StageResult, *, token: str | None
+) -> list[str]:
+    """within-company 증분 panel 빌드 — 신규 zip만 파싱해 기존 parquet 에 period upsert(merge=True).
+
+    각 변경 종목의 *방금 archive 된* zip(``newZipsByCode``)을 bytes 로 읽어 ``buildPanelFromStream``
+    (merge=True) 에 흘린다. ``_readZip``↔``_readZipBytes`` 가 동일 ``_zipToXmls`` 코어라 디스크 zip 을
+    bytes 로 먹여도 ``buildPanel`` 과 row-동형 — 전이력 lxml 재파싱(거대 금융지주 OOM 근본)을 제거한다.
+    빌드 전 HF panel parquet 을 merge base 로 seed(``_seedPanelFromHf``); base 부재(일시 실패) 종목은
+    history 파괴적 덮어쓰기 방지로 제외. 순차 루프는 ``onlinePanel.py`` 의 검증된 패턴(per-corp stream)과
+    동형이되 신규 zip만 파싱이라 더 가벼움(메모리 bound). 종목 단위 예외 격리(한 종목 실패가 나머지 안 막음).
+
+    Args:
+        changed: 변경 종목코드 list.
+        newZipsByCode: ``{code: [신규 zip Path]}`` (archive 전후 차분).
+        res: StageResult — 실패/제외 보고 누적(부수효과).
+        token: HF 토큰.
+
+    Returns:
+        실제 빌드(merge)된 종목코드 list (panel upload 대상).
+
+    Raises:
+        없음 (종목별 예외는 res.report 로 격리).
+
+    Example:
+        >>> _buildPanelIncremental(["005930"], {"005930": [p]}, res, token=None)  # doctest: +SKIP
+        ['005930']
+    """
+    import polars as pl
+
+    import dartlab.config as cfg
+    from dartlab.providers.dart.panel.build import buildPanelFromStream, panelXbrlRefPath
+
+    try:
+        pseeded, panelSafe = _seedPanelFromHf(changed, token=token)
+    except Exception as exc:  # noqa: BLE001 — seed 전체 실패 → 이번 run 무빌드(안전)
+        res.report.fail = 1
+        res.report.failures.append(f"dartZip panel seed: {type(exc).__name__}: {exc}")
+        return []
+    pSkipped = [c for c in changed if c not in panelSafe]
+    print(
+        f"[pipeline] dartZip panel seed: {pseeded}/{len(changed)}종목 merge base · "
+        f"빌드대상 {len(panelSafe)} · 제외(일시실패) {len(pSkipped)}",
+        flush=True,
+    )
+    if pSkipped:
+        res.report.failures.append(f"dartZip panel seed 불완전 {len(pSkipped)}종목 제외(다음 run 회복): {pSkipped[:5]}")
+
+    refDf = pl.read_parquet(str(panelXbrlRefPath()))  # 패키지 동봉 ref 1회 로드(zip 부재라 자동 scan 금지)
+    panelBase = Path(cfg.dataDir) / "dart" / "panel"
+    built: list[str] = []
+    for code in sorted(panelSafe):
+        zips = newZipsByCode.get(code) or []
+        if not zips:
+            continue  # 신규 zip 없으면 merge 할 분기 없음 — skip
+        stream = ((zp.stem, zp.read_bytes()) for zp in zips)  # zp.stem = rcept ({rcept}.zip)
+        try:
+            out = buildPanelFromStream(code, stream, refDf=refDf, outBaseDir=panelBase, overwrite=True)
+            if out:
+                built.append(code)
+        except Exception as exc:  # noqa: BLE001 — 종목 단위 격리(나머지 진행)
+            res.report.failures.append(f"dartZip panel build {code}: {type(exc).__name__}: {exc}")
+    print(f"[pipeline] dartZip panel 증분: {len(built)}/{len(panelSafe)}종목 merge(신규 분기만)", flush=True)
+    return built
+
+
 def runDartZip(
     *,
     category: str = "dartOriginal",
@@ -172,6 +300,7 @@ def runDartZip(
         >>> runDartZip(upload=False)  # doctest: +SKIP
         StageResult(category='dartOriginal', ...)
     """
+    import dartlab.config as cfg
     from dartlab.gather.original.dart.collect import archiveDartOriginals
     from dartlab.providers.dart.panel.build import buildPanelAll, panelXbrlRefPath
 
@@ -179,9 +308,14 @@ def runDartZip(
     today = date.today()
     start = (today - timedelta(days=days - 1)).strftime("%Y%m%d")
     end = today.strftime("%Y%m%d")
+    fullRebuild = os.environ.get("DART_PANEL_FULL_REBUILD", "0") == "1"
     res = StageResult(category="dartOriginal")
+    docsBase = Path(cfg.dataDir) / "original" / "dart" / "docs"
 
-    # 1. 정기보고서 원본 zip archive (idempotent) → 변경 종목
+    # 1. 정기보고서 원본 zip archive (idempotent) → 변경 종목 + 신규 zip 차분(증분 빌드 입력).
+    #    archive 전후 docs/*/*.zip 집합 차분으로 *방금 받은* zip 만 식별한다 (CI=빈 before·로컬=full
+    #    before 모두 정상, archiveDartOriginals signature 무변경). 회사 1건 신규 공시 → 그 zip 만 파싱.
+    zipsBefore = set(docsBase.glob("*/*.zip"))
     try:
         stats = archiveDartOriginals(start, end, scope="periodic", showProgress=False)
         changed = list(stats.get("changedCodes") or [])
@@ -197,58 +331,66 @@ def runDartZip(
     if not changed:
         return res
 
-    # 1.5 CI 전제: 변경 종목 전체 zip 이력을 HF 에서 seed (러너엔 이력 0).
-    #     seed 가 *완전히 복원된*(또는 404 신규) 종목만 build/bundle/upload — 일시 실패로
-    #     이력이 불완전한 종목은 제외해 정상 HF panel·원본 tar 의 파괴적 덮어쓰기를 차단.
+    newZipsByCode: dict[str, list[Path]] = {}
+    for zp in set(docsBase.glob("*/*.zip")) - zipsBefore:
+        newZipsByCode.setdefault(zp.parent.name, []).append(zp)
+
+    # 1.5 원본 tar 아카이브용 seed — 변경 종목 전체 zip 이력을 HF 에서 복원(러너 이력 0).
+    #     _bundleAndUpload 가 로컬 zip 전체를 re-tar 해 HF docs/{code}.tar 를 덮으므로 full 이력 필수
+    #     (부분 tar 업로드=원본 SSOT 파괴). 완전 복원(또는 404 신규) 종목만 archive-safe. ⚠ panel 증분
+    #     빌드는 이 이력 zip 이 아니라 newZipsByCode(신규분)+panel parquet seed 를 쓴다(관심사 분리).
     if os.environ.get("DART_ZIP_SEED", "1") == "1":
         try:
-            seeded, safeCodes = _seedChangedFromHf(changed, token=token)
-            buildCodes = [c for c in changed if c in safeCodes]
-            skipped = [c for c in changed if c not in safeCodes]
+            seeded, archiveSafe = _seedChangedFromHf(changed, token=token)
+            skipped = [c for c in changed if c not in archiveSafe]
             print(
                 f"[pipeline] dartZip seed: {seeded}/{len(changed)}종목 HF tar 추출 · "
-                f"빌드대상 {len(buildCodes)} · 제외(이력불완전) {len(skipped)}",
+                f"archive대상 {len(archiveSafe)} · 제외(이력불완전) {len(skipped)}",
                 flush=True,
             )
             if skipped:
                 res.report.failures.append(f"dartZip seed 불완전 {len(skipped)}종목 제외(다음 run 회복): {skipped[:5]}")
-        except Exception as exc:  # noqa: BLE001 — seed 단계 전체 실패 → 이번 run 안전하게 무빌드
+        except Exception as exc:  # noqa: BLE001 — seed 단계 전체 실패 → 이번 run 안전하게 무 archive
             res.report.fail = 1
             res.report.failures.append(f"dartZip seed: {type(exc).__name__}: {exc}")
             return res
     else:
-        buildCodes = changed  # 로컬: 완전 이력 보유 전제(seed 불요)
+        archiveSafe = set(changed)  # 로컬: 완전 이력 보유 전제(seed 불요)
 
-    res.changedFiles = buildCodes
-    if not buildCodes:
-        return res
+    # 2. panel 빌드 — 기본 within-company 증분(신규 zip만 merge), DART_PANEL_FULL_REBUILD=1 시 전이력 재빌드.
+    if fullRebuild:
+        # self-heal: 빌드 단계 추출 로직 변경을 과거 전 period 에 전파(archive seed 의 full 이력 필요).
+        panelBuilt = sorted(archiveSafe)
+        try:
+            buildPanelAll(
+                refPath=str(panelXbrlRefPath()),
+                codes=panelBuilt,
+                numWorkers=int(os.environ.get("PANEL_WORKERS") or "2"),
+                skipExisting=False,
+                verbose=False,
+            )
+        except Exception as exc:  # noqa: BLE001 — build 실패 격리
+            res.report.fail = 1
+            res.report.failures.append(f"dartZip panel full-rebuild: {type(exc).__name__}: {exc}")
+            print(f"[pipeline] dartZip panel full-rebuild 실패(격리): {exc}", flush=True)
+    else:
+        panelBuilt = _buildPanelIncremental(changed, newZipsByCode, res, token=token)
 
-    # 2. panel 증분 재빌드 (안전 종목만, offline zip → flat {code}.parquet)
-    try:
-        buildPanelAll(
-            refPath=str(panelXbrlRefPath()),
-            codes=buildCodes,
-            numWorkers=int(os.environ.get("PANEL_WORKERS") or "2"),
-            skipExisting=False,
-            verbose=False,
-        )
-    except Exception as exc:  # noqa: BLE001 — build 실패 격리
-        res.report.fail = 1
-        res.report.failures.append(f"dartZip panel build: {type(exc).__name__}: {exc}")
-        print(f"[pipeline] dartZip panel build 실패(격리): {exc}", flush=True)
+    res.changedFiles = panelBuilt
 
-    # 3. 업로드 — 원본 zip tar 번들(증분) + panel 변경분 (안전 종목만)
+    # 3. 업로드 — 원본 zip tar 번들(archive-safe) + panel 변경분(실제 빌드분만).
     if upload:
         try:
-            res.uploaded = _bundleAndUpload(buildCodes, token=token)
+            res.uploaded = _bundleAndUpload(sorted(archiveSafe), token=token)
         except Exception as exc:  # noqa: BLE001 — 업로드 실패 격리
             res.report.fail = 1
             res.report.failures.append(f"dartZip original upload: {type(exc).__name__}: {exc}")
-        try:
-            from dartlab.pipeline.hfUpload import uploadCategoryToHf
+        if panelBuilt:
+            try:
+                from dartlab.pipeline.hfUpload import uploadCategoryToHf
 
-            uploadCategoryToHf("panel", changedFiles=[f"{c}.parquet" for c in buildCodes], token=token)
-        except Exception as exc:  # noqa: BLE001 — panel 업로드 실패 격리
-            res.report.fail = 1
-            res.report.failures.append(f"dartZip panel upload: {type(exc).__name__}: {exc}")
+                uploadCategoryToHf("panel", changedFiles=[f"{c}.parquet" for c in panelBuilt], token=token)
+            except Exception as exc:  # noqa: BLE001 — panel 업로드 실패 격리
+                res.report.fail = 1
+                res.report.failures.append(f"dartZip panel upload: {type(exc).__name__}: {exc}")
     return res

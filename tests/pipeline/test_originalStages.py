@@ -302,3 +302,144 @@ def test_allfilings_reconcile_registered() -> None:
     assert "allFilingsReconcile" in reg
     assert reg["allFilingsReconcile"].run is runAllFilingsReconcile
     assert "allFilings" in reg["allFilingsReconcile"].uploadCategories
+
+
+# ── dartZip within-company 증분 빌드 (신규 zip만 merge=True, 전이력 재파싱 OOM 제거) ──
+
+
+def test_seed_panel_from_hf_404_vs_transient(monkeypatch, tmp_path) -> None:
+    """_seedPanelFromHf — 성공·404(신규) 는 safe, *일시 실패* 는 제외(merge base 부재 → 파괴적 덮어쓰기 가드)."""
+    from pathlib import Path
+
+    import huggingface_hub
+    from huggingface_hub.utils import EntryNotFoundError
+
+    import dartlab.config as cfg
+    from dartlab.pipeline import hfUpload
+    from dartlab.pipeline.stages import dartZip
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setattr(hfUpload, "_resolveHfToken", lambda token=None: "x")
+    monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, *a, **k: fn(*a, **k))
+
+    def fakeDownload(*, repo_id, repo_type, filename, local_dir, token):
+        code = filename.split("/")[-1][: -len(".parquet")]
+        if code == "AAA":
+            p = Path(local_dir) / filename  # local_dir 하위에 merge base 배치(증분 빌드가 읽음)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(b"PARQUETBASE")
+            return str(p)
+        if code == "BBB":
+            raise EntryNotFoundError("404")  # 신규 종목 — HF panel 없음 → base 없이 merge 정당
+        raise RuntimeError("transient 5xx")  # 일시 실패 → 제외
+
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", fakeDownload)
+
+    n, safe = dartZip._seedPanelFromHf(["AAA", "BBB", "CCC"], token="x")
+    assert safe == {"AAA", "BBB"}  # CCC(일시 실패) 제외
+    assert n == 1  # AAA 만 실제 다운로드
+    assert (tmp_path / "dart" / "panel" / "AAA.parquet").exists()  # merge base 배치
+
+
+def _fakeRefAndStream(monkeypatch, tmp_path):
+    """_buildPanelIncremental 의 refDf 로드(panelXbrlRef)와 buildPanelFromStream 을 mock — 호출 capture."""
+    import polars as pl
+
+    ref = tmp_path / "ref.parquet"
+    pl.DataFrame({"a": [1]}).write_parquet(str(ref))
+    monkeypatch.setattr("dartlab.providers.dart.panel.build.panelXbrlRefPath", lambda: ref)
+
+    calls: list[tuple[str, list]] = []
+
+    def fakeStream(code, docStream, *, refDf, outBaseDir, overwrite):
+        calls.append((code, list(docStream)))  # 스트림 소비(= 어떤 zip 이 흘렀는지)
+        return {"2025Q4": 5}
+
+    monkeypatch.setattr("dartlab.providers.dart.panel.build.buildPanelFromStream", fakeStream)
+    return calls
+
+
+def test_dartzip_incremental_builds_only_new_zips(monkeypatch, tmp_path) -> None:
+    """_buildPanelIncremental — 신규 zip(newZipsByCode)만 bytes 스트림으로 merge, 빌드된 코드 반환."""
+    import dartlab.config as cfg
+    from dartlab.pipeline.stages import dartZip
+    from dartlab.pipeline.types import StageResult
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setattr(dartZip, "_seedPanelFromHf", lambda codes, *, token: (1, {"AAA"}))
+    calls = _fakeRefAndStream(monkeypatch, tmp_path)
+
+    zdir = tmp_path / "original" / "dart" / "docs" / "AAA"
+    zdir.mkdir(parents=True, exist_ok=True)
+    z = zdir / "20250101000001.zip"
+    z.write_bytes(b"PK\x03\x04new")
+    newZipsByCode = {"AAA": [z]}
+
+    res = StageResult(category="dartOriginal")
+    built = dartZip._buildPanelIncremental(["AAA"], newZipsByCode, res, token=None)
+
+    assert built == ["AAA"]
+    assert len(calls) == 1
+    code, stream = calls[0]
+    assert code == "AAA"
+    assert stream == [("20250101000001", b"PK\x03\x04new")]  # zp.stem=rcept, zp.read_bytes()=bytes
+
+
+def test_dartzip_panel_seed_transient_excludes_build(monkeypatch, tmp_path) -> None:
+    """panel seed 일시 실패 코드는 panelSafe 밖 → build·upload 제외(데이터손실 가드, return 에서 누락)."""
+    import dartlab.config as cfg
+    from dartlab.pipeline.stages import dartZip
+    from dartlab.pipeline.types import StageResult
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    # BBB 는 일시 실패로 panelSafe 에서 빠짐(AAA 만 safe)
+    monkeypatch.setattr(dartZip, "_seedPanelFromHf", lambda codes, *, token: (1, {"AAA"}))
+    calls = _fakeRefAndStream(monkeypatch, tmp_path)
+
+    base = tmp_path / "original" / "dart" / "docs"
+    newZipsByCode = {}
+    for code in ("AAA", "BBB"):
+        d = base / code
+        d.mkdir(parents=True, exist_ok=True)
+        z = d / f"2025010100000{code[-1]}.zip"
+        z.write_bytes(b"PK\x03\x04")
+        newZipsByCode[code] = [z]
+
+    res = StageResult(category="dartOriginal")
+    built = dartZip._buildPanelIncremental(["AAA", "BBB"], newZipsByCode, res, token=None)
+
+    assert built == ["AAA"]  # BBB 제외(merge base 부재 → 빌드 안 함)
+    assert [c for c, _ in calls] == ["AAA"]
+
+
+def test_dartzip_full_rebuild_flag_routes_build(monkeypatch, tmp_path) -> None:
+    """DART_PANEL_FULL_REBUILD=1 → buildPanelAll(전이력), 미설정 → _buildPanelIncremental(증분) 라우팅."""
+    import dartlab.config as cfg
+    from dartlab.pipeline.stages import dartZip
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+
+    def fakeArchive(start, end, *, scope, showProgress):
+        d = tmp_path / "original" / "dart" / "docs" / "AAA"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "20250101000001.zip").write_bytes(b"PK\x03\x04")  # 신규 zip → newZipsByCode 차분 포착
+        return {"changedCodes": ["AAA"]}
+
+    monkeypatch.setattr("dartlab.gather.original.dart.collect.archiveDartOriginals", fakeArchive)
+    monkeypatch.setattr(dartZip, "_seedChangedFromHf", lambda codes, *, token: (1, {"AAA"}))
+    monkeypatch.setattr("dartlab.providers.dart.panel.build.panelXbrlRefPath", lambda: tmp_path / "ref.parquet")
+
+    fullCalls: list = []
+    incCalls: list = []
+    monkeypatch.setattr("dartlab.providers.dart.panel.build.buildPanelAll", lambda **k: fullCalls.append(k))
+    monkeypatch.setattr(dartZip, "_buildPanelIncremental", lambda *a, **k: incCalls.append(a) or ["AAA"])
+
+    for flag, expectFull in (("1", True), ("0", False)):
+        fullCalls.clear()
+        incCalls.clear()
+        monkeypatch.setenv("DART_PANEL_FULL_REBUILD", flag)
+        dartZip.runDartZip(upload=False, token=None)  # upload=False → tar/panel push 스킵(라우팅만)
+        if expectFull:
+            assert fullCalls and not incCalls  # 전이력 재빌드
+        else:
+            assert incCalls and not fullCalls  # within-company 증분
