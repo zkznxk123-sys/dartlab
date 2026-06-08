@@ -15,7 +15,7 @@
 	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
 	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
 	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
-	import AskDrawer from '$lib/components/viewer/AskDrawer.svelte';
+	import AskDrawer from '$lib/viewer/dev/AskDrawer.svelte';
 	import { executeAction, type ViewerAction, type ViewerApi } from '$lib/viewer/viewerActions';
 	import { loadCompanies } from '$lib/viewer/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
