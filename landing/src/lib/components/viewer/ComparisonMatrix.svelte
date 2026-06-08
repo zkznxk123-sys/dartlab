@@ -17,12 +17,14 @@
 		rows,
 		companies,
 		period,
-		onRemove
+		onRemove,
+		removingCode = null
 	}: {
 		rows: AlignedRow[];
 		companies: CompareCol[];
 		period: string;
 		onRemove?: (code: string) => void;
+		removingCode?: string | null; // 빼는 중인 회사 — 그 ✕ 에 스피너
 	} = $props();
 
 	// 열 = 회사. 회사당 minmax(280px,1fr) — N≥5 가로 스크롤(.matrix-scroll overflow:auto).
@@ -46,8 +48,19 @@
 							<a class="src-link" href={c.dartUrl} target="_blank" rel="noreferrer noopener" title={`${period} 원본 공시`}>원본 ↗</a>
 						{/if}
 						{#if onRemove && !c.isRef}
-							<button type="button" class="rm-btn" onclick={() => onRemove?.(c.code)} title="비교에서 빼기" aria-label={`${c.corpName} 비교에서 빼기`}>
-								<X size={11} />
+							<button
+								type="button"
+								class="rm-btn"
+								onclick={() => onRemove?.(c.code)}
+								disabled={c.code === removingCode}
+								title="비교에서 빼기"
+								aria-label={`${c.corpName} 비교에서 빼기`}
+							>
+								{#if c.code === removingCode}
+									<span class="rm-spinner" aria-hidden="true"></span>
+								{:else}
+									<X size={11} />
+								{/if}
 							</button>
 						{/if}
 					</span>
@@ -145,6 +158,23 @@
 	.rm-btn:hover {
 		color: #f87171;
 		background: rgba(248, 113, 113, 0.12);
+	}
+	.rm-btn:disabled {
+		cursor: wait;
+	}
+	.rm-spinner {
+		display: inline-block;
+		width: 11px;
+		height: 11px;
+		border: 2px solid rgba(248, 113, 113, 0.3);
+		border-top-color: #f87171;
+		border-radius: 50%;
+		animation: rm-spin 0.6s linear infinite;
+	}
+	@keyframes rm-spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 	.body-cell {
 		color: #cbd5e1;

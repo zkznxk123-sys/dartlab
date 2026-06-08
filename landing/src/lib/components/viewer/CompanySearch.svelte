@@ -7,7 +7,8 @@
 	import { loadCompanies, type Co } from '$lib/viewer/companyNames';
 
 	// onpick 주면 이동(goto) 대신 콜백 — 비교 모드의 "회사 추가" 재사용.
-	let { onpick }: { onpick?: (code: string) => void } = $props();
+	// busy = 추가한 회사 로딩 중 → 입력창에 스피너 + 입력 잠금.
+	let { onpick, busy = false }: { onpick?: (code: string) => void; busy?: boolean } = $props();
 
 	let query = $state('');
 	let open = $state(false);
@@ -65,9 +66,10 @@
 		class="search-input"
 		type="text"
 		bind:value={query}
-		placeholder="회사명 / 종목코드 검색"
+		placeholder={busy ? '회사 여는 중…' : '회사명 / 종목코드 검색'}
 		aria-label="회사 검색"
 		autocomplete="off"
+		disabled={busy}
 		onfocus={() => {
 			open = true;
 			void ensure();
@@ -79,7 +81,10 @@
 		onkeydown={onKey}
 		onblur={() => setTimeout(() => (open = false), 150)}
 	/>
-	{#if open && matches.length}
+	{#if busy}
+		<span class="cs-spinner" aria-hidden="true"></span>
+	{/if}
+	{#if open && matches.length && !busy}
 		<div class="dropdown">
 			{#each matches as c, i (c.code)}
 				<button
@@ -122,6 +127,28 @@
 	.search-input:focus {
 		outline: none;
 		border-color: #fb923c;
+	}
+	.search-input:disabled {
+		opacity: 0.7;
+		cursor: wait;
+	}
+	.cs-spinner {
+		position: absolute;
+		top: 50%;
+		right: 10px;
+		width: 13px;
+		height: 13px;
+		margin-top: -7px;
+		border: 2px solid rgba(251, 146, 60, 0.3);
+		border-top-color: #fb923c;
+		border-radius: 50%;
+		animation: cs-spin 0.6s linear infinite;
+		pointer-events: none;
+	}
+	@keyframes cs-spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 	.dropdown {
 		position: absolute;

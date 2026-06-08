@@ -68,6 +68,8 @@
 	let lockedPeriod = $state(''); // 비교 모드 = 한 시점 lock
 	let addOpen = $state(false); // 회사 추가 팝오버
 	let cmpHintDismissed = $state(false); // 비교 모드 안내 띠 — 한 번 닫으면 localStorage 로 다시 안 뜸
+	let pendingAdd = $state(false); // 회사 추가 로딩 — 검색창에 스피너
+	let removingCode = $state<string | null>(null); // 빼는 중인 회사 — 그 ✕ 에 스피너
 	// 비교 모드 판정 — 파생을 일찍 선언(windowPeriods 등이 참조). vsCodes/bundle/vsBundles 에만 의존.
 	const compareMode = $derived(vsCodes.length > 0);
 	function dismissCmpHint() {
@@ -261,13 +263,25 @@
 	}
 	function addCompany(c: string) {
 		if (!c || c === code || vsCodes.includes(c) || allBundles.length >= 6) return;
-		addOpen = false;
+		pendingAdd = true;
+		vsLoading = true; // 스피너 즉시 — goto 의 load 재실행 전에 정리 effect 가 꺼버리지 않게 미리 켬
 		// invalidateAll: 같은 경로 + ?vs= 쿼리만 바뀌는 goto 가 load 를 다시 안 돌리는 케이스 방지.
 		void goto(vsUrl([...vsCodes, c]), { invalidateAll: true });
 	}
 	function removeCompany(c: string) {
+		removingCode = c;
+		vsLoading = true;
 		void goto(vsUrl(vsCodes.filter((x) => x !== c)), { invalidateAll: true });
 	}
+	// 추가/빼기 로딩이 끝나면(vsLoading 내려감) 스피너·팝오버 정리.
+	$effect(() => {
+		if (vsLoading) return;
+		if (pendingAdd) {
+			pendingAdd = false;
+			addOpen = false;
+		}
+		if (removingCode) removingCode = null;
+	});
 
 	// 섹션/주석 이동은 보고 있던 기간 윈도우를 보존 — 기간축은 섹션 무관 글로벌이라 리셋할 이유 없음(같은 시점의
 	// 다른 TOC 를 보려는 흐름). 리셋은 축 변경(연간토글)·회사 변경 때만.
@@ -389,7 +403,7 @@
 								추가한 회사를 <b>지금 보는 시점·항목 그대로</b> 나란히 비교합니다 (최대 6사).<br />
 								<span class="add-eg">예: 삼성전자 + SK하이닉스 → 같은 재무상태표를 한 화면에</span>
 							</p>
-							<CompanySearch onpick={addCompany} />
+							<CompanySearch onpick={addCompany} busy={pendingAdd} />
 						</div>
 					{/if}
 				</div>
@@ -466,6 +480,7 @@
 							companies={cmpCompanies}
 							period={lockedPeriod}
 							onRemove={removeCompany}
+							{removingCode}
 						/>
 					{/if}
 				{:else}
