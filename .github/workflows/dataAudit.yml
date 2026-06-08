@@ -1,10 +1,12 @@
 name: Data Audit
 
 # ──────────────────────────────────────────────────────────────
-# 매일 1회 데이터 파이프라인 감사 — 실패 시 Issue 자동 알림.
+# 매일 1회 데이터 파이프라인 감사 — 모든 실패 Issue 자동 알림(단발은 auto-rerun 병행).
 #
-# 감사 대상: Data Sync / Data Prebuild / EDGAR Data Sync / KRX Data Sync /
-#          KRX Index Data Sync / Update KindList.
+# 감사 대상 = scheduled(cron) 데이터/자동화 파이프라인 전체 (목록 SSOT = monitorPipeline.py
+#          MONITORED_WORKFLOWS): Original SSOT Sync · Data Sync · DART New Stocks · Data Prebuild ·
+#          EDGAR · KRX(가격/지수) · Macro · News Archive · Valuation Snapshot · Search Index(delta/main) ·
+#          Quant Audit · Update KindList. 새 scheduled 워크플로우 추가 시 그 목록에도 등록.
 #
 # 수동 (workflow_dispatch):
 #   - 즉시 감사 실행 (실패 Issue 갱신 포함)

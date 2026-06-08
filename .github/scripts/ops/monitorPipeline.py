@@ -1,12 +1,16 @@
-"""파이프라인 건강 모니터 — 자가치유 + 연속실패만 알림.
+"""파이프라인 건강 모니터 — 모든 실패 알림 + 단발은 자동 재실행 병행.
 
-gh CLI로 각 워크플로우의 최근 실행을 조회한다. 단발 transient 실패는 **자동 재실행**(rerun)
-하고 알림하지 않는다(다음 정기 실행이면 자가치유될 blip 으로 운영자를 깨우지 않음). **연속
-2회 이상** 실패(persistent)만 Issue 로 알리며, 실패 로그/주석에서 원인(메모리/디스크·HF
-429·timeout·code)을 분류해 actionable 하게 적는다. 전부 정상이면 열린 Issue 를 닫는다.
+gh CLI로 각 워크플로우의 최근 실행을 조회한다. **실패는 단발이든 연속이든 모두 Issue 로
+알린다**(운영자 가시성 우선 — 조용히 삼키지 않음). 단발 transient 실패는 알림과 **동시에 자동
+재실행**(rerun)해 자가치유를 시도하고 Issue 에 "단발 — 자동 재실행 중"으로, **연속 2회+**
+(persistent)는 "연속 — 조치 필요"로 표시해 심각도를 구분한다. 실패 로그/주석에서 원인(메모리/
+디스크·HF 429·timeout·code)을 분류해 actionable 하게 적고, 전부 정상이면 열린 Issue 를 닫는다.
+
+감시 대상 = **scheduled(cron) 데이터/자동화 파이프라인 전체**. 새 scheduled 워크플로우를
+추가하면 여기 name 도 등록해야 그 실패가 알림된다(미등록 = 조용한 실패).
 
 환경변수:
-  GH_TOKEN: GitHub 토큰 (Actions에서 자동 제공). rerun 은 actions:write 권한 필요.
+  GH_TOKEN: GitHub 토큰 (Actions에서 자동 제공). rerun 은 actions:write, Issue 는 issues:write.
 """
 
 import json
@@ -14,13 +18,22 @@ import os
 import subprocess
 from datetime import datetime, timezone
 
+# scheduled(cron) 데이터/자동화 파이프라인 전체 — gh run list 의 워크플로우 `name:` 값과 정확히 일치해야 함.
+# (제외: 코드 CI/CodeQL/Policy·Deploy·Publish·Metrics·EDGAR Safety Gate·Data Audit 자기 자신·mapBuild(cron 없음))
 MONITORED_WORKFLOWS = [
+    "Original SSOT Sync",  # dart-zip · allfilings · edgar (cron 0 2) — 핵심 원본/panel 파이프라인
     "Data Sync",
     "DART New Stocks Sync",
     "Data Prebuild (DART)",
     "EDGAR Data Sync (Bulk)",
     "KRX Data Sync (Bulk)",
     "KRX Index Data Sync (Bulk)",
+    "Macro Data Sync (Bulk)",
+    "News Archive Sync",
+    "Valuation Snapshot",
+    "Search Index Delta (daily)",
+    "Search Index Main (monthly)",
+    "Quant Audit",
     "Update KindList",
 ]
 
@@ -169,6 +182,33 @@ def _findOpenIssue() -> int | None:
         return None
 
 
+def _issueTitle(persistent: list[dict], retried: list[dict]) -> str:
+    """실패 Issue 제목 — 연속 실패가 있으면 'Pipeline failure', 단발뿐이면 '(자동 재실행 중)' 표기.
+
+    Args:
+        persistent: 연속 2회+ 실패 entry list.
+        retried: 단발 실패(자동 재실행) entry list.
+
+    Returns:
+        100자 이내 Issue 제목. 워크플로우가 많아 길면 개수 요약으로 축약.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _issueTitle([{"name": "Original SSOT Sync"}], [])
+        'Pipeline failure: Original SSOT Sync'
+        >>> _issueTitle([], [{"name": "Macro Data Sync (Bulk)"}])
+        'Pipeline failure (자동 재실행 중): Macro Data Sync (Bulk)'
+    """
+    names = ", ".join(f["name"] for f in (persistent + retried))
+    prefix = "Pipeline failure" if persistent else "Pipeline failure (자동 재실행 중)"
+    title = f"{prefix}: {names}"
+    if len(title) > 100:
+        title = f"{prefix}: {len(persistent) + len(retried)}개 워크플로우"
+    return title
+
+
 def main():
     print(f"[monitor] {len(MONITORED_WORKFLOWS)}개 워크플로우 상태 확인")
 
@@ -207,26 +247,19 @@ def main():
     _ensureLabel()
     openIssue = _findOpenIssue()
 
-    if persistent:
+    failing = persistent + retried  # 단발이든 연속이든 모든 실패를 알린다(가시성 우선 — 조용한 실패 0)
+    if failing:
         body = _buildIssueBody(statuses, persistent, retried)
         if openIssue:
             _gh(["issue", "comment", str(openIssue), "--body", body])
-            print(f"[monitor] 기존 Issue #{openIssue}에 코멘트 추가 (연속 실패 {len(persistent)}건)")
+            print(f"[monitor] 기존 Issue #{openIssue} 갱신 (연속 {len(persistent)} · 단발 {len(retried)})")
         else:
-            failNames = ", ".join(f["name"] for f in persistent)
-            title = f"Pipeline failure: {failNames}"
-            if len(title) > 100:
-                title = f"Pipeline failure: {len(persistent)}개 워크플로우 (연속 실패)"
+            title = _issueTitle(persistent, retried)
             out = _gh(["issue", "create", "--title", title, "--body", body, "--label", FAILURE_LABEL])
-            print(f"[monitor] Issue 생성: {out}")
+            print(f"[monitor] Issue 생성 (연속 {len(persistent)} · 단발 {len(retried)}): {out}")
     elif openIssue:
-        note = "모든 파이프라인 워크플로우 연속 실패가 해소되었습니다. 자동 닫기."
-        if retried:
-            note += f" (단발 실패 {len(retried)}건은 자동 재실행 중)"
-        _gh(["issue", "close", str(openIssue), "--comment", note])
-        print(f"[monitor] Issue #{openIssue} 자동 닫기 (연속 실패 0)")
-    elif retried:
-        print(f"[monitor] 단발 실패 {len(retried)}건 자동 재실행 — Issue 생성 보류(자가치유 대기)")
+        _gh(["issue", "close", str(openIssue), "--comment", "모든 파이프라인 정상 복구 — 자동 닫기."])
+        print(f"[monitor] Issue #{openIssue} 자동 닫기 (실패 0)")
     else:
         print("[monitor] 전부 정상, 열린 Issue 없음")
 
@@ -263,7 +296,10 @@ def _buildIssueBody(statuses: list[dict], persistent: list[dict], retried: list[
             mark = "재실행됨" if r.get("reran") else "재실행 실패"
             lines.append(f"- {r['name']}: {r.get('classification', '-')} ({mark}) — [로그]({r['url']})")
 
-    lines.append(f"\n> 자동 생성 by Pipeline Monitor ({now}). 연속 2회+ 실패만 알림, 단발은 자동 재실행.")
+    lines.append(
+        f"\n> 자동 생성 by Pipeline Monitor ({now}). 모든 실패 알림 — 단발은 자동 재실행 병행(blip 이면 자가치유), "
+        "연속 2회+ 는 조치 필요. 복구되면 자동 닫힘."
+    )
     return "\n".join(lines)
 
 
