@@ -224,7 +224,7 @@ def test_run_allfilings_callable() -> None:
 
 def test_run_allfilings_reconcile_maps_summary(monkeypatch) -> None:
     """runAllFilingsReconcile — reconcile summary → StageResult(rows=pulled, uploaded=pushed, ok)."""
-    from dartlab.gather.dart import allFilingsCollector as collector
+    from dartlab.gather.dart import allFilingsSync as collector
     from dartlab.pipeline.stages import allFilings
 
     captured: dict[str, bool] = {}
@@ -254,7 +254,7 @@ def test_run_allfilings_reconcile_maps_summary(monkeypatch) -> None:
 
 def test_run_allfilings_reconcile_push_disabled(monkeypatch) -> None:
     """upload=False → reconcile push=False 전달 (pull-only)."""
-    from dartlab.gather.dart import allFilingsCollector as collector
+    from dartlab.gather.dart import allFilingsSync as collector
     from dartlab.pipeline.stages import allFilings
 
     captured: dict[str, bool] = {}
@@ -280,7 +280,7 @@ def test_run_allfilings_reconcile_push_disabled(monkeypatch) -> None:
 
 def test_run_allfilings_reconcile_isolates_failure(monkeypatch) -> None:
     """reconcile 예외는 StageResult.report.err 로 격리 — run 중단·전파 X."""
-    from dartlab.gather.dart import allFilingsCollector as collector
+    from dartlab.gather.dart import allFilingsSync as collector
     from dartlab.pipeline.stages import allFilings
 
     def boom(*, pull, push, token=None):

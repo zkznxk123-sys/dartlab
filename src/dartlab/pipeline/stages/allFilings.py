@@ -50,7 +50,8 @@ def runAllFilings(
         >>> runAllFilings(upload=False)  # doctest: +SKIP
         StageResult(category='allFilings', ...)
     """
-    from dartlab.gather.dart.allFilingsCollector import collectMetaRange, fillContent, pushAllFilings
+    from dartlab.gather.dart.allFilingsCollector import collectMetaRange, fillContent
+    from dartlab.gather.dart.allFilingsSync import pushAllFilings
 
     days = int(os.environ.get("SYNC_LOOKBACK_DAYS") or os.environ.get("DART_ALLFILINGS_LOOKBACK") or "7")
     dates = _recentDates(days)
@@ -116,7 +117,7 @@ def runAllFilingsReconcile(
         >>> runAllFilingsReconcile(upload=False)  # doctest: +SKIP
         StageResult(category='allFilingsReconcile', ...)
     """
-    from dartlab.gather.dart.allFilingsCollector import reconcileAllFilings
+    from dartlab.gather.dart.allFilingsSync import reconcileAllFilings
 
     res = StageResult(category="allFilingsReconcile")
     try:
