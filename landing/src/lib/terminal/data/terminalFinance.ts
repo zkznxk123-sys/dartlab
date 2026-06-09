@@ -27,6 +27,9 @@ export interface TerminalFinance {
 	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
 	freq: 'quarter' | 'annual' | 'ttm';
 	cards: FinCard[];
+	revYoy: Num[]; // 매출 YoY % (분기=4분기전, 연간=전년)
+	opYoy: Num[]; // 영업이익 YoY %
+	cashQuality: Num[]; // 영업CF / 순이익 배수 (순이익>0 일 때만)
 }
 
 // ── 28 표준계정 (accounts.py _STANDARDS 포팅) ──
@@ -413,7 +416,15 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 
 		// 회사에 데이터 전무(빈 파케이)면 null. 개별 카드 sparse 는 셀 유지 (빈칸 방지).
 		if (!cards.some((c) => c.series.some((s) => s.data.some((v) => v != null)))) return null;
-		return { periods, freq: mode, cards };
+		// 파생 인사이트 — 실적 모멘텀(YoY) + 현금흐름 품질(영업CF/순익).
+		const revYoy = yoy('revenue');
+		const opYoy = yoy('operatingIncome');
+		const cashQuality: Num[] = used.map((_, i) => {
+			const cf = valAtIdx('cfOperating', i);
+			const ni = valAtIdx('netIncome', i);
+			return cf != null && ni != null && ni > 0 ? +(cf / ni).toFixed(2) : null;
+		});
+		return { periods, freq: mode, cards, revYoy, opYoy, cashQuality };
 	};
 
 	const views: Record<FinMode, TerminalFinance | null> = {

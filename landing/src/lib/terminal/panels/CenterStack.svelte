@@ -154,6 +154,41 @@
 				})()
 			: null
 	);
+	// ── 추가 인사이트: 실적 모멘텀(분기 YoY) + 현금흐름 품질(영업CF/순익) ──
+	const momentum = $derived.by(() => {
+		const fv = finBundle?.views.quarter ?? finBundle?.views.ttm;
+		if (!fv || !fv.periods.length) return null;
+		const li = fv.periods.length - 1;
+		const revL = fv.revYoy[li];
+		const opL = fv.opYoy[li];
+		if (revL == null && opL == null) return null;
+		const revPrev = li > 0 ? fv.revYoy[li - 1] : null;
+		const accel = revL != null && revPrev != null ? revL - revPrev : null;
+		let tone: Tone = 'neutral';
+		let kr = '안정 성장';
+		let en = 'steady';
+		if (revL != null && revL < 0) { tone = 'down'; kr = '역성장'; en = 'declining'; }
+		else if (accel != null && accel > 1) { tone = 'up'; kr = '가속'; en = 'accelerating'; }
+		else if (accel != null && accel < -1) { tone = 'warn'; kr = '둔화'; en = 'decelerating'; }
+		else { tone = 'good'; }
+		return { periods: fv.periods, revYoy: fv.revYoy, opYoy: fv.opYoy, revL, opL, tone, kr, en };
+	});
+	const cashQ = $derived.by(() => {
+		const fv = finBundle?.views.annual ?? finBundle?.views.ttm;
+		if (!fv) return null;
+		const arr = fv.cashQuality;
+		let li = -1;
+		for (let i = arr.length - 1; i >= 0; i--) if (arr[i] != null) { li = i; break; }
+		if (li < 0) return null;
+		const last = arr[li] as number;
+		let tone: Tone = 'neutral';
+		let kr = '보통';
+		let en = 'moderate';
+		if (last < 0) { tone = 'down'; kr = '영업현금 적자'; en = 'op-cash deficit'; }
+		else if (last >= 1) { tone = 'good'; kr = '이익이 현금으로'; en = 'cash-backed'; }
+		else if (last < 0.6) { tone = 'warn'; kr = '현금전환 약함'; en = 'weak conversion'; }
+		return { arr, last, tone, kr, en };
+	});
 </script>
 
 <!-- SYMBOL HEADER -->
@@ -309,3 +344,50 @@
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션', en: 'VALUATION' }} flush><div class="storyEmpty">{lang === 'en' ? 'Insufficient data.' : '데이터 부족.'}</div></Panel>
 	{/if}
 </div>
+
+<!-- 실적 모멘텀 ‖ 현금흐름 품질 (추가 인사이트 카드 — panel finance report 파생) -->
+{#if momentum || cashQ}
+	<div class="rowSplit">
+		{#if momentum}
+			<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '실적 모멘텀', en: 'MOMENTUM' }} sub={{ kr: '분기 YoY', en: 'quarter YoY' }} flush>
+				{#snippet right()}<span class={tcls(momentum.tone)}>{lang === 'en' ? momentum.en : momentum.kr}</span>{/snippet}
+				<div class="dupontRow">
+					<div class="dpCell">
+						<span class="dpLbl">{lang === 'en' ? 'Revenue YoY' : '매출 YoY'}</span>
+						<b class={'dpVal mono ' + (momentum.revL == null ? 'tNeu' : momentum.revL >= 0 ? 'tUp' : 'tDn')}>{momentum.revL != null ? sign(momentum.revL, 1) + '%' : '—'}</b>
+						<svg class="dpSpark" viewBox="0 0 46 13" preserveAspectRatio="none" aria-hidden="true"><path d={spark(momentum.revYoy)} fill="none" stroke="#5b9bf0" stroke-width="1.2" /></svg>
+					</div>
+					<div class="dpCell">
+						<span class="dpLbl">{lang === 'en' ? 'Op inc YoY' : '영업익 YoY'}</span>
+						<b class={'dpVal mono ' + (momentum.opL == null ? 'tNeu' : momentum.opL >= 0 ? 'tUp' : 'tDn')}>{momentum.opL != null ? sign(momentum.opL, 1) + '%' : '—'}</b>
+						<svg class="dpSpark" viewBox="0 0 46 13" preserveAspectRatio="none" aria-hidden="true"><path d={spark(momentum.opYoy)} fill="none" stroke="#fb923c" stroke-width="1.2" /></svg>
+					</div>
+				</div>
+				<div class="dpVerdict">
+					{#if momentum.tone === 'down'}{lang === 'en' ? 'Revenue below year-ago — contraction phase.' : '매출이 전년 동기 대비 감소 — 역성장 국면.'}
+					{:else if momentum.tone === 'up'}{lang === 'en' ? 'Growth accelerating vs prior quarter.' : '매출 성장률이 직전 분기보다 가속 — 모멘텀 강화.'}
+					{:else if momentum.tone === 'warn'}{lang === 'en' ? 'Growth decelerating — momentum fading.' : '성장률 둔화 — 모멘텀 약화 신호.'}
+					{:else}{lang === 'en' ? 'Steady top-line growth.' : '매출 성장 안정적 — 견조한 외형.'}{/if}
+				</div>
+			</Panel>
+		{/if}
+		{#if cashQ}
+			<Panel {lang} className="eValuation" prov="derived" title={{ kr: '현금흐름 품질', en: 'CASH QUALITY' }} sub={{ kr: '영업CF ÷ 순이익', en: 'OCF / net income' }} flush>
+				{#snippet right()}<b class={'mono ' + tcls(cashQ.tone)}>{cashQ.last.toFixed(2)}×</b>{/snippet}
+				<div class="dupontRow">
+					<div class="dpCell" style="flex:1">
+						<span class="dpLbl">{lang === 'en' ? 'OCF / Net income' : '영업현금 ÷ 순이익'}</span>
+						<b class={'dpVal mono ' + tcls(cashQ.tone)}>{cashQ.last.toFixed(2)}{lang === 'en' ? '×' : '배'}</b>
+						<svg class="dpSpark" viewBox="0 0 46 13" preserveAspectRatio="none" aria-hidden="true"><path d={spark(cashQ.arr)} fill="none" stroke="#22d3ee" stroke-width="1.2" /></svg>
+					</div>
+				</div>
+				<div class="dpVerdict">
+					{#if cashQ.tone === 'down'}{lang === 'en' ? 'Operating cash flow negative — earnings not cash-backed.' : '영업활동 현금흐름 적자 — 이익이 현금으로 뒷받침되지 않음.'}
+					{:else if cashQ.tone === 'good'}{lang === 'en' ? 'Operating cash exceeds net income — high earnings quality.' : '영업현금이 순이익을 웃돎 — 이익의 질 우수(현금 뒷받침).'}
+					{:else if cashQ.tone === 'warn'}{lang === 'en' ? 'Operating cash well below earnings — watch conversion.' : '영업현금이 순이익에 크게 못 미침 — 이익 현금전환 주의.'}
+					{:else}{lang === 'en' ? 'Operating cash covers most of earnings.' : '영업현금이 순이익 대부분을 커버 — 보통 수준.'}{/if}
+				</div>
+			</Panel>
+		{/if}
+	</div>
+{/if}
