@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { Company, Lang, Statement } from '../data/types';
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
@@ -10,6 +11,7 @@
 	} from '$lib/browser/companyLive';
 	import type { CompanyChange } from '$lib/scan/duckSql';
 	import { loadCompanyRelations, type CompanyRelations } from '../data/relations';
+	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 
 	interface Props {
 		co: Company;
@@ -23,6 +25,7 @@
 	let reportFacts = $state<LiveCompanyReportFact[]>([]);
 	let disclChanges = $state<CompanyChange[]>([]);
 	let relations = $state<CompanyRelations | null>(null);
+	let regFilings = $state<RegularFiling[]>([]);
 	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
 	$effect(() => {
 		const code = co.code;
@@ -30,6 +33,7 @@
 		reportFacts = [];
 		disclChanges = [];
 		relations = null;
+		regFilings = [];
 		let cancelled = false;
 		loadLiveCompanyReportFacts(code).then((f) => {
 			if (cancelled) return;
@@ -41,6 +45,9 @@
 		});
 		loadCompanyRelations(code).then((r) => {
 			if (!cancelled) relations = r;
+		});
+		loadCompanyRegularFilings(code, 12).then((f) => {
+			if (!cancelled) regFilings = f;
 		});
 		return () => {
 			cancelled = true;
@@ -208,7 +215,7 @@
 <!-- 공시 변경 내역 (changes parquet — 섹션별 수치/구조 변경) -->
 {#if disclChanges.length}
 	<Panel {lang} className="eChanges" prov="live" title={{ kr: '공시 변경 내역', en: 'FILING CHANGES' }} sub={{ kr: 'changes · 섹션', en: 'changes · sections' }} flush>
-		{#snippet right()}<span class="dim">{disclChanges.length}</span>{/snippet}
+		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기">뷰어 ↗</a><span class="dim">{disclChanges.length}</span>{/snippet}
 		<div class="chgFeed">
 			{#each disclChanges as c, i (i)}
 				<div class="chgFeedRow">
@@ -217,6 +224,23 @@
 					<span class="chgPer mono">{c.fromPeriod}→{c.toPeriod}</span>
 					{#if c.preview}<span class="chgPrev">{c.preview}</span>{/if}
 				</div>
+			{/each}
+		</div>
+	</Panel>
+{/if}
+
+<!-- 정기공시 목록 (panel rceptNo → DART 원문 + 뷰어 링크) -->
+{#if regFilings.length}
+	<Panel {lang} className="eChanges" prov="live" title={{ kr: '정기공시 목록', en: 'REGULAR FILINGS' }} sub={{ kr: 'panel · DART 원문', en: 'panel · DART' }} flush>
+		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기">뷰어 ↗</a>{/snippet}
+		<div class="filingList">
+			{#each regFilings as f (f.rceptNo)}
+				<a class="filingRow" href={f.url} target="_blank" rel="noopener">
+					<span class="flType">{f.reportType}</span>
+					<span class="flYear mono">{f.year}</span>
+					<span class="flDate mono">{f.rceptDate}</span>
+					<span class="flArrow">↗</span>
+				</a>
 			{/each}
 		</div>
 	</Panel>
