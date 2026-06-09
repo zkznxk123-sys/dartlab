@@ -329,7 +329,7 @@
       "id": "engines.edgar",
       "title": "EDGAR (US 공시·재무)",
       "category": "engines",
-      "purpose": "EDGAR 는 미국 SEC 공시 (10-K · 10-Q · 8-K · S-1 등) 와 XBRL 재무를 dartlab.Company facade 로 통합 접근하는 provider 다. 한국 DART 와 동일한 인터페이스 (show / liveFilings / readFiling / 하위 엔진) — market=\"US\" 자동 라우팅. 트리거 — '미국 공시', '10-K', 'SEC', 'EDGAR', 'AAPL'.",
+      "purpose": "EDGAR 는 미국 SEC 공시 (10-K · 10-Q · 8-K · S-1 등) 와 XBRL 재무를 dartlab.Company facade 로 통합 접근하는 provider 다. 한국 DART 와 동일한 인터페이스 (panel / liveFilings / readFiling / 하위 엔진) — market=\"US\" 자동 라우팅. 재무는 소문자 native (panel payload 셀) 와 대문자 companyfacts 두 소스로 분기. 트리거 — '미국 공시', '10-K', 'SEC', 'EDGAR', 'AAPL'.",
       "inDegree": 4,
       "outDegree": 8,
       "cluster": "edgar",

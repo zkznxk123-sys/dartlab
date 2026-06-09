@@ -578,7 +578,7 @@
       "id": "engines.edgar",
       "title": "EDGAR (US 공시·재무)",
       "category": "engines",
-      "purpose": "EDGAR 는 미국 SEC 공시 (10-K · 10-Q · 8-K · S-1 등) 와 XBRL 재무를 dartlab.Company facade 로 통합 접근하는 provider 다. 한국 DART 와 동일한 인터페이스 (show / liveFilings / readFiling / 하위 엔진) — market=\"US\" 자동 라우팅. 트리거 — '미국 공시', '10-K', 'SEC', 'EDGAR', 'AAPL'.",
+      "purpose": "EDGAR 는 미국 SEC 공시 (10-K · 10-Q · 8-K · S-1 등) 와 XBRL 재무를 dartlab.Company facade 로 통합 접근하는 provider 다. 한국 DART 와 동일한 인터페이스 (panel / liveFilings / readFiling / 하위 엔진) — market=\"US\" 자동 라우팅. 재무는 소문자 native (panel payload 셀) 와 대문자 companyfacts 두 소스로 분기. 트리거 — '미국 공시', '10-K', 'SEC', 'EDGAR', 'AAPL'.",
       "whenToUse": [
         "EDGAR",
         "edgar",
@@ -597,7 +597,7 @@
         "engines.gather",
         "engines.scan"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`edgar` 는 별도 사용자 capability 가 아니라 — `dartlab.Company` facade 가 ticker / CIK 를 받았을 때 자동 활성화되는 *provider* 다. DartCompany ↔ EdgarCompany 는 **public 메서드 양쪽 동등 SSOT** — `show / select / trace / disclosure / liveFilings / readFiling / analysis / credit / quant / industry` 모두 같은 시그니처. 시장만 다름.\n\nXBRL 재무는 SEC 벌크 데이터셋을 primary source 로 쓴다. live filings 는 SEC EDGAR API. 거시는 FRED (`gather(\"macro\", \"FEDFUNDS\")`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. Company facade — ticker 또는 CIK 인식 자동 EDGAR 라우팅\nc = dartlab.Company(\"AAPL\")\nprint(c.market)       # \"US\"\nprint(c.topics)       # 사용 가능한 topic —"
+      "bodyPreview": "## 엔진 역할\n\n`edgar` 는 별도 사용자 capability 가 아니라 — `dartlab.Company` facade 가 ticker / CIK 를 받았을 때 자동 활성화되는 *provider* 다. DartCompany ↔ EdgarCompany 는 **public 메서드 양쪽 동등 SSOT** — `panel / select / trace / disclosure / liveFilings / readFiling / analysis / credit / quant` 모두 같은 시그니처. 시장만 다름. (`industry` 는 KR 가치사슬 지도 전용 — US 동등 데이터 부재로 EXEMPT, 아래 EXEMPT 섹션 참조.)\n\nEDGAR 재무는 **두 소스로 분기**한다 (DART 와 같은 메커니즘):\n- **소문자 native** (`c.panel(\"is\"/\"bs\"/\"cf\"/\"cis\"/\"sce\"/\"ratios\")`) — panel 단일 artifact 의 row payload 에 보존된 XBRL native 셀을 read-time 분해 (presentation role 앵커링). DART `c.panel(\"is\")` 의 panel 셀 경로 미러. `c"
     },
     {
       "id": "engines.edgar.docs",
