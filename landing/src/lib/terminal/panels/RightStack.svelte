@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import type { Company, Lang, Statement } from '../data/types';
+	import type { Company, Lang } from '../data/types';
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
@@ -13,6 +13,7 @@
 	import { loadCompanyRelations, type CompanyRelations } from '../data/relations';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 	import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
+	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode, type StmtKind } from '../data/terminalFinance';
 
 	interface Props {
 		co: Company;
@@ -39,7 +40,11 @@
 		regFilings = [];
 		nonRegFilings = [];
 		nonRegState = 'loading';
+		finBundle = null;
 		let cancelled = false;
+		loadTerminalFinance(code).then((b) => {
+			if (!cancelled) finBundle = b;
+		});
 		loadLiveCompanyReportFacts(code).then((f) => {
 			if (cancelled) return;
 			reportFacts = f;
@@ -64,13 +69,14 @@
 		};
 	});
 
-	let stmt = $state<'SUM' | 'IS' | 'BS' | 'CF' | 'RT'>('SUM');
-	const tabs = [{ k: 'SUM', kr: '요약', en: 'Key' }, { k: 'IS', kr: '손익', en: 'IS' }, { k: 'BS', kr: '재무상태', en: 'BS' }, { k: 'CF', kr: '현금흐름', en: 'CF' }, { k: 'RT', kr: '비율', en: 'Ratios' }] as const;
-	const summary = $derived<Statement>({
-		periods: co.income.periods,
-		rows: co.income.rows.concat(co.balance.rows.filter((r) => ['totalAsset', 'totalLiab', 'totalEquity'].includes(r.id)))
-	});
-	const stmtData = $derived<Statement>(({ SUM: summary, IS: co.income, BS: co.balance, CF: co.cashflow, RT: summary } as Record<string, Statement>)[stmt]);
+	// 재무제표 — c.panel 전 기간(분기/연간 토글). 요약 탭 폐지, 손익·재무상태·현금흐름·비용·비율.
+	let stmt = $state<StmtKind | 'RT'>('IS');
+	let finMode = $state<FinMode>('quarter');
+	let finBundle = $state<TerminalFinanceBundle | null>(null);
+	const tabs = [{ k: 'IS', kr: '손익', en: 'IS' }, { k: 'BS', kr: '재무상태', en: 'BS' }, { k: 'CF', kr: '현금흐름', en: 'CF' }, { k: 'EXP', kr: '비용', en: 'Expense' }, { k: 'RT', kr: '비율', en: 'Ratios' }] as const;
+	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
+	const finView = $derived(finBundle ? (finBundle.views[finMode] ?? finBundle.views[finBundle.defaultMode]) : null);
+	const KEY_ROWS = ['operatingIncome', 'netIncome', 'assets', 'equity', 'liabilities', 'cfOperating'];
 
 	const risks = $derived(co.risks);
 	const pc = $derived(co.percentile);
@@ -126,26 +132,33 @@
 {/if}
 
 <!-- FINANCIALS -->
-<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={{ kr: 'c.panel · 연간', en: 'c.panel · annual' }} flush>
+<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · 조', en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
+	{#snippet right()}
+		{#if finBundle && finBundle.modes.filter((m) => m !== 'ttm').length > 1 && stmt !== 'RT'}
+			<span class="segGroup mini">{#each finBundle.modes.filter((m) => m !== 'ttm') as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
+		{/if}
+	{/snippet}
 	<div class="finTabs">{#each tabs as t (t.k)}<button class={'finTab ' + (stmt === t.k ? 'on' : '')} onclick={() => (stmt = t.k)}>{lang === 'en' ? t.en : t.kr}</button>{/each}</div>
 	{#if stmt === 'RT'}
 		<div class="finScroll"><table class="finTable"><tbody>
 			{#each co.ratios as r (r.id)}<tr><td class="finAcct">{lang === 'en' ? r.en : r.kr}</td><td class={'r mono ' + toneClass(r.tone)}>{r.v}</td></tr>{/each}
 		</tbody></table></div>
-	{:else}
-		<div class="finScroll"><table class="finTable">
-			<thead><tr><th class="finAcct">{lang === 'en' ? 'ACCOUNT' : '계정'}</th>{#each stmtData.periods as p (p)}<th class="r">{p}</th>{/each}</tr></thead>
+	{:else if finView}
+		<div class="finScroll finScrollX"><table class="finTable">
+			<thead><tr><th class="finAcct">{lang === 'en' ? 'ACCOUNT' : '계정'}</th>{#each finView.periods as p (p)}<th class="r">{p}</th>{/each}</tr></thead>
 			<tbody>
-				{#each stmtData.rows as r (r.id)}
-					<tr class={['op', 'net', 'fcf', 'totalEquity', 'totalAsset'].includes(r.id) ? 'finKey' : ''}>
+				{#each finView.statements[stmt] as r (r.key)}
+					<tr class={KEY_ROWS.includes(r.key) ? 'finKey' : ''}>
 						<td class="finAcct">{lang === 'en' ? r.en : r.kr}</td>
-						{#each r.vals as val, i (i)}<td class={'r mono ' + (r.pct ? (val != null && val >= 8 ? 'tUp' : val != null && val < 0 ? 'tDn' : 'tNeu') : val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : r.pct ? val.toFixed(1) + '%' : fmtNum(val, 1)}</td>{/each}
+						{#each r.values as val, i (i)}<td class={'r mono ' + (val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : fmtNum(val, 1)}</td>{/each}
 					</tr>
 				{/each}
 			</tbody>
 		</table></div>
+	{:else}
+		<div class="chartLoad" style="height:90px">{lang === 'en' ? 'loading statements …' : '재무제표 불러오는 중 …'}</div>
 	{/if}
-	<div class="finNote">finance.json · {firstYr}–{lastYr} · 조 KRW{stmt === 'CF' ? ' · CFO/CFI/CFF 실데이터' : ''}</div>
+	<div class="finNote">c.panel · {finView ? finView.periods.length + (lang === 'en' ? 'p' : '기') : '—'} · 조 KRW</div>
 </Panel>
 
 <!-- DART 정기보고서 팩트 (배당·자사주·임원·감사·대주주·회사채 — report parquet) -->

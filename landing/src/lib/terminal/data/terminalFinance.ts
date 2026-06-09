@@ -23,6 +23,13 @@ export interface FinCard {
 	stacked?: boolean;
 	signed?: boolean; // 0 기준선 (음수 가능)
 }
+export interface StmtRow {
+	key: string;
+	kr: string;
+	en: string;
+	values: Num[]; // 기간별 조 KRW
+}
+export type StmtKind = 'IS' | 'BS' | 'CF' | 'EXP';
 export interface TerminalFinance {
 	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
 	freq: 'quarter' | 'annual' | 'ttm';
@@ -30,7 +37,47 @@ export interface TerminalFinance {
 	revYoy: Num[]; // 매출 YoY % (분기=4분기전, 연간=전년)
 	opYoy: Num[]; // 영업이익 YoY %
 	cashQuality: Num[]; // 영업CF / 순이익 배수 (순이익>0 일 때만)
+	statements: Record<StmtKind, StmtRow[]>; // 손익·재무상태·현금흐름·비용 — 전 기간 계정×기간 표
 }
+
+// 재무제표 표(손익/재무상태/현금흐름/비용) 행 정의 — STD key + 표시 라벨.
+const STMT_DEF: Record<StmtKind, { key: string; kr: string; en: string }[]> = {
+	IS: [
+		{ key: 'revenue', kr: '매출액', en: 'Revenue' },
+		{ key: 'costOfSales', kr: '매출원가', en: 'COGS' },
+		{ key: 'grossProfit', kr: '매출총이익', en: 'Gross profit' },
+		{ key: 'sga', kr: '판매관리비', en: 'SG&A' },
+		{ key: 'operatingIncome', kr: '영업이익', en: 'Operating income' },
+		{ key: 'financeIncome', kr: '금융수익', en: 'Finance income' },
+		{ key: 'financeCosts', kr: '금융비용', en: 'Finance costs' },
+		{ key: 'incomeTax', kr: '법인세비용', en: 'Income tax' },
+		{ key: 'netIncome', kr: '당기순이익', en: 'Net income' }
+	],
+	BS: [
+		{ key: 'assets', kr: '자산총계', en: 'Assets' },
+		{ key: 'currentAssets', kr: '유동자산', en: 'Current assets' },
+		{ key: 'cash', kr: '현금성자산', en: 'Cash' },
+		{ key: 'inventories', kr: '재고자산', en: 'Inventories' },
+		{ key: 'receivables', kr: '매출채권', en: 'Receivables' },
+		{ key: 'liabilities', kr: '부채총계', en: 'Liabilities' },
+		{ key: 'currentLiabilities', kr: '유동부채', en: 'Current liab' },
+		{ key: 'equity', kr: '자본총계', en: 'Equity' },
+		{ key: 'retainedEarnings', kr: '이익잉여금', en: 'Retained earnings' }
+	],
+	CF: [
+		{ key: 'cfOperating', kr: '영업활동현금흐름', en: 'Operating CF' },
+		{ key: 'cfInvesting', kr: '투자활동현금흐름', en: 'Investing CF' },
+		{ key: 'cfFinancing', kr: '재무활동현금흐름', en: 'Financing CF' },
+		{ key: 'capex', kr: '설비투자(CAPEX)', en: 'CapEx' },
+		{ key: 'dividendsPaid', kr: '배당금지급', en: 'Dividends paid' }
+	],
+	EXP: [
+		{ key: 'costOfSales', kr: '매출원가', en: 'COGS' },
+		{ key: 'sga', kr: '판매관리비', en: 'SG&A' },
+		{ key: 'financeCosts', kr: '금융비용', en: 'Finance costs' },
+		{ key: 'incomeTax', kr: '법인세비용', en: 'Income tax' }
+	]
+};
 
 // ── 28 표준계정 (accounts.py _STANDARDS 포팅) ──
 interface StdAcct {
@@ -424,7 +471,10 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			const ni = valAtIdx('netIncome', i);
 			return cf != null && ni != null && ni > 0 ? +(cf / ni).toFixed(2) : null;
 		});
-		return { periods, freq: mode, cards, revYoy, opYoy, cashQuality };
+		// 재무제표 표 — 전 기간 계정×기간 (조 KRW). 손익·재무상태·현금흐름·비용.
+		const mkStmt = (defs: { key: string; kr: string; en: string }[]): StmtRow[] => defs.map((d) => ({ key: d.key, kr: d.kr, en: d.en, values: ser(d.key) }));
+		const statements: Record<StmtKind, StmtRow[]> = { IS: mkStmt(STMT_DEF.IS), BS: mkStmt(STMT_DEF.BS), CF: mkStmt(STMT_DEF.CF), EXP: mkStmt(STMT_DEF.EXP) };
+		return { periods, freq: mode, cards, revYoy, opYoy, cashQuality, statements };
 	};
 
 	const views: Record<FinMode, TerminalFinance | null> = {

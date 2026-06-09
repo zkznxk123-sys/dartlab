@@ -514,6 +514,12 @@
 .dlTerm .finTable tr.finKey .finAcct { color: var(--amber); font-weight: 600; }
 .dlTerm .finTable tbody tr:hover { background: var(--dl-bg-overlay); }
 .dlTerm .finNote { font-family: var(--mono); font-size: 7.5px; color: var(--dimmer); padding: 2px 7px; border-top: 1px solid var(--bd); letter-spacing: 0.3px; }
+/* 전 기간(분기) 가로 스크롤 — 계정명 열 sticky-left 고정 */
+.dlTerm .finScrollX { overflow-x: auto; overflow-y: auto; }
+.dlTerm .finScrollX .finTable { width: max-content; min-width: 100%; }
+.dlTerm .finScrollX .finTable th.r, .dlTerm .finScrollX .finTable td.r { min-width: 50px; }
+.dlTerm .finScrollX .finAcct { position: sticky; left: 0; z-index: 1; background: var(--panel); }
+.dlTerm .finScrollX .finTable th.finAcct { z-index: 2; }
 
 /* DART REPORT FACTS */
 .dlTerm .factGrid { display: flex; flex-direction: column; }
