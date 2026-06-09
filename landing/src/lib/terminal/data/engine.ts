@@ -20,8 +20,6 @@ import type {
 	Financials,
 	StackSeg,
 	FinanceCompany,
-	ChartSpec,
-	FinSection
 } from './types';
 
 const SECTOR_EN: Record<string, string> = {
@@ -397,165 +395,6 @@ export function createEngine(raw: RawData): Engine {
 		};
 	}
 
-	// 재무제표 그래프 빌더 — ui/web analysis.financial 체계 포팅.
-	// 4 내러티브 섹션 × 다중 trend 카드. 각 spec.chartType 이 ChartRenderer dispatch 키.
-	function buildCharts(fin: FinanceCompany, code: string): { sections: FinSection[] } {
-		const yrs = years;
-		const is = fin.is;
-		const T = fin.bs.totals;
-		const A = fin.bs.assets || {};
-		const L = fin.bs.liab || {};
-		const E = fin.bs.equity || {};
-		const arr = (o: Record<string, Num[]>, k: string): Num[] => o[k] || [];
-		const sub = (a: Num[], b: Num[]): Num[] => a.map((v, i) => (v != null && b[i] != null ? +(v - b[i]!).toFixed(2) : null));
-		const sumArr = (...xs: Num[][]): Num[] => yrs.map((_, i) => { let s = 0; let any = false; for (const x of xs) { if (x[i] != null) { s += x[i]!; any = true; } } return any ? +s.toFixed(2) : null; });
-		const netMargin = is.sales.map((s, i) => (s && is.net[i] != null ? +((is.net[i]! / s) * 100).toFixed(1) : null));
-
-		const income: ChartSpec = {
-			chartType: 'income-trend-matrix',
-			title: '손익 추세',
-			categories: yrs,
-			series: [
-				{ name: '매출액', data: is.sales.slice(), color: '#60a5fa', type: 'bar', axis: 'amount', unit: '조' },
-				{ name: '영업이익', data: is.op.slice(), color: '#fb923c', type: 'bar', axis: 'amount', unit: '조' },
-				{ name: '당기순이익', data: is.net.slice(), color: '#34d399', type: 'line', axis: 'amount', unit: '조' },
-				{ name: '영업이익률', data: is.opMargin.slice(), color: '#fbbf24', type: 'line', axis: 'margin', unit: '%' },
-				{ name: '순이익률', data: netMargin, color: '#a78bfa', type: 'line', axis: 'margin', unit: '%' }
-			],
-			options: { secondaryY: ['영업이익률', '순이익률'] }
-		};
-
-		// 재무상태 — 3 밴드(자산/조달/자본) 내부 구성 (shares = 그룹 내 %)
-		const assetSegs: [string, Num[], string][] = [
-			['현금', arr(A, 'cash'), '#60a5fa'], ['매출채권', arr(A, 'recv'), '#34d399'], ['재고', arr(A, 'inv'), '#fbbf24'],
-			['유형자산', arr(A, 'tang'), '#fb923c'], ['무형자산', arr(A, 'intan'), '#a78bfa']
-		];
-		const assetKnown = sumArr(...assetSegs.map((s) => s[1]));
-		assetSegs.push(['기타자산', sub(T.totalAsset, assetKnown).map((v) => (v != null && v > 0 ? v : null)), '#475569']);
-		const liabSegs: [string, Num[], string][] = [
-			['매입채무', arr(L, 'pay'), '#f0616f'], ['단기차입', arr(L, 'shortDebt'), '#ef8b6f'], ['장기차입', arr(L, 'longDebt'), '#d9534f'],
-			['사채', arr(L, 'bonds'), '#c4453f'], ['충당부채', arr(L, 'prov'), '#a83838']
-		];
-		const liabKnown = sumArr(...liabSegs.map((s) => s[1]));
-		liabSegs.push(['기타부채', sub(T.totalLiab, liabKnown).map((v) => (v != null && v > 0 ? v : null)), '#7a3030']);
-		const equitySegs: [string, Num[], string][] = [
-			['자본금', arr(E, 'paidIn'), '#1d6b4d'], ['자본잉여금', arr(E, 'surplus'), '#2a8a63'],
-			['이익잉여금', arr(E, 'retained'), '#34d399'], ['기타자본', arr(E, 'otherComp'), '#6ee7b7']
-		];
-		const shareOf = (data: Num[], total: Num[]): Num[] => data.map((v, i) => (v != null && total[i] ? +((v / total[i]!) * 100).toFixed(1) : null));
-		const totFunding = sumArr(T.totalLiab, T.totalEquity);
-		const mkSeg = (group: string, segs: [string, Num[], string][], total: Num[]) =>
-			segs.filter((s) => s[1].some((v) => v != null && v > 0)).map((s) => ({ name: `${group}::${s[0]}`, data: s[1], shares: shareOf(s[1], total), color: s[2], unit: '조' }));
-		const drLatest = (() => { const l = T.totalLiab[T.totalLiab.length - 1]; const e = T.totalEquity[T.totalEquity.length - 1]; return l != null && e ? +((l / e) * 100).toFixed(0) : null; })();
-		const balance: ChartSpec = {
-			chartType: 'balance-structure-trend',
-			title: '재무상태 구조',
-			categories: yrs,
-			series: [
-				...mkSeg('자산', assetSegs, T.totalAsset),
-				...mkSeg('조달', liabSegs, T.totalLiab),
-				...mkSeg('자본', equitySegs, T.totalEquity)
-			],
-			options: { totalAssetsSeries: T.totalAsset.slice(), totalFundingSeries: totFunding, debtRatio: drLatest }
-		};
-
-		const cf = fin.cf || ({} as FinanceCompany['cf']);
-		const fcf = cf.op != null && cf.inv != null ? +(cf.op + cf.inv).toFixed(2) : null;
-		const ly = yrs[yrs.length - 1];
-		const cashflow: ChartSpec = {
-			chartType: 'cashflow-signed-matrix',
-			title: '현금흐름 (최신)',
-			categories: [ly],
-			series: [
-				{ name: '영업활동', data: [cf.op ?? null], color: '#34d399', signed: true, tone: cf.op != null && cf.op >= 0 ? 'good' : 'bad', unit: '조' },
-				{ name: '투자활동', data: [cf.inv ?? null], color: '#60a5fa', signed: true, tone: 'neutral', unit: '조' },
-				{ name: '재무활동', data: [cf.fin ?? null], color: '#fb923c', signed: true, tone: 'neutral', unit: '조' }
-			],
-			options: {
-				latest: [
-					{ id: 'cfo', label: '영업CF', value: cf.op ?? null, unit: '조', tone: cf.op != null && cf.op >= 0 ? 'good' : 'bad' },
-					{ id: 'cfi', label: '투자CF', value: cf.inv ?? null, unit: '조', tone: 'neutral' },
-					{ id: 'cff', label: '재무CF', value: cf.fin ?? null, unit: '조', tone: 'neutral' },
-					{ id: 'fcf', label: 'FCF', value: fcf, unit: '조', tone: fcf != null && fcf >= 0 ? 'good' : 'bad' }
-				]
-			}
-		};
-
-		// ── 수익성 추세 (ROE·영업이익률·순이익률) — 단일 % 축 combo line ──
-		const opMargin = is.opMargin.slice();
-		const roe = fin.ratios.roe.slice();
-		const profit: ChartSpec = {
-			chartType: 'combo',
-			title: '수익성 추세 (%)',
-			categories: yrs,
-			series: [
-				{ name: 'ROE', data: roe, color: '#34d399', type: 'line' },
-				{ name: '영업이익률', data: opMargin, color: '#fbbf24', type: 'line' },
-				{ name: '순이익률', data: netMargin, color: '#a78bfa', type: 'line' }
-			],
-			options: { unit: '%' }
-		};
-
-		// ── 레버리지·유동성 (부채비율 bar + 유동비율 line) ──
-		const deRatio = T.totalLiab.map((l, i) => { const e = T.totalEquity[i]; return l != null && e ? +((l / e) * 100).toFixed(0) : null; });
-		const currRatio = T.currAsset.map((c, i) => { const cl = T.currLiab[i]; return c != null && cl ? +((c / cl) * 100).toFixed(0) : null; });
-		const leverage: ChartSpec = {
-			chartType: 'combo',
-			title: '레버리지 · 유동성 (%)',
-			categories: yrs,
-			series: [
-				{ name: '부채비율', data: deRatio.map((v) => v ?? 0), color: '#f0616f', type: 'bar' },
-				{ name: '유동비율', data: currRatio, color: '#60a5fa', type: 'line' }
-			],
-			options: { unit: '%' }
-		};
-
-		// ── 성장 (매출·영업이익 YoY) ──
-		const yoy = (a: Num[]): Num[] => a.map((v, i) => (i > 0 && v != null && a[i - 1] != null && a[i - 1] !== 0 ? +(((v - a[i - 1]!) / Math.abs(a[i - 1]!)) * 100).toFixed(1) : null));
-		const growth: ChartSpec = {
-			chartType: 'combo',
-			title: '성장 YoY (%)',
-			categories: yrs.slice(1), // YoY 첫 해는 비교 대상 없음 → 제외 (null bar 방지)
-			series: [
-				{ name: '매출 성장', data: yoy(is.sales).slice(1).map((v) => v ?? 0), color: '#60a5fa', type: 'bar' },
-				{ name: '영업이익 성장', data: yoy(is.op).slice(1).map((v) => v ?? 0), color: '#fb923c', type: 'bar' }
-			],
-			options: { unit: '%' }
-		};
-
-		// ── 분기 현금흐름 추세 (quarters.json — 있으면 latest CF 보다 우선) ──
-		const q = raw.quarters?.companies[code];
-		let cfTrend: ChartSpec | null = null;
-		if (q?.cf && Array.isArray(q.cf.ocf) && q.cf.ocf.some((v) => v != null)) {
-			const qp = raw.quarters!.periods || [];
-			const N = q.cf.ocf.length;
-			const showN = Math.min(N, 12);
-			const s0 = Math.max(0, N - showN);
-			const ocf = q.cf.ocf.slice(s0);
-			const icf = (q.cf.icf || []).slice(s0);
-			const qfcf = ocf.map((v, i) => (v != null && icf[i] != null ? +(v + icf[i]!).toFixed(2) : null));
-			cfTrend = {
-				chartType: 'combo',
-				title: '현금흐름 추세 (분기 · 조 KRW)',
-				categories: qp.slice(s0, s0 + showN),
-				series: [
-					{ name: '영업CF', data: ocf.map((v) => v ?? 0), color: '#34d399', type: 'bar' },
-					{ name: '투자CF', data: icf.map((v) => v ?? 0), color: '#60a5fa', type: 'bar' },
-					{ name: 'FCF', data: qfcf, color: '#fbbf24', type: 'line' }
-				],
-				options: { unit: '조' }
-			};
-		}
-
-		const sections: FinSection[] = [
-			{ idx: '01', title: '손익 · 마진', sub: '매출→영업→순이익 + 마진 (이중축)', cards: [{ key: 'income', title: '손익 추세', spec: income, wide: true }] },
-			{ idx: '02', title: '재무상태 구조', sub: '자산·조달·자본 구성 + 부채비율', cards: [{ key: 'balance', title: '재무상태 구조', spec: balance, wide: true }] },
-			{ idx: '03', title: '수익성 · 레버리지', sub: 'ROE·마진 + 부채·유동비율', cards: [{ key: 'profit', title: '수익성', spec: profit }, { key: 'leverage', title: '레버리지·유동성', spec: leverage }] },
-			{ idx: '04', title: '현금 · 성장', sub: 'CF + 매출·영업이익 YoY', cards: [{ key: 'cf', title: cfTrend ? '현금흐름 추세' : '현금흐름', spec: cfTrend ?? cashflow, wide: true }, { key: 'growth', title: '성장 YoY', spec: growth, wide: true }] }
-		];
-		return { sections };
-	}
-
 	function cagr(arr: Num[]): number | null {
 		const a = arr.filter((v): v is number => v != null);
 		if (a.length < 2 || a[0] <= 0) return null;
@@ -716,7 +555,6 @@ export function createEngine(raw: RawData): Engine {
 			},
 			fundamentals: { per, pbr, psr, npm, roe: roe ? roe.v : null, opm: opm ? opm.v : null, dr: dr ? dr.v : null },
 			financials: computeFinancials(fin),
-			charts: buildCharts(fin, code),
 			trendAnnual: trendFromFinance(fin),
 			trendQuarter: trendFromQuarters(code),
 			income, balance, cashflow, ratios, credit, analysis,

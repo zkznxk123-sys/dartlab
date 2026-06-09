@@ -4,22 +4,7 @@
 
 export type Num = number | null;
 // ui/shared/chart 의 ChartSpec (loose — 차트 컴포넌트는 @ts-nocheck spec 객체 수신).
-// spec.chartType 이 ChartRenderer dispatch 키 (income-trend-matrix · balance-structure-trend ·
-// cashflow-signed-matrix · combo · ...).
 export type ChartSpec = Record<string, unknown>;
-// 재무 그래프 카드 — ui/web analysis.financial 의 PackedCard 대응 (terminal density).
-export interface FinCard {
-	key: string;
-	title: string;
-	spec: ChartSpec;
-	wide?: boolean; // 2-col span (이중축·스택 카드)
-}
-export interface FinSection {
-	idx: string; // "01"
-	title: string;
-	sub: string;
-	cards: FinCard[];
-}
 export type Lang = 'kr' | 'en' | 'dual';
 export type Tone = 'up' | 'down' | 'good' | 'warn' | 'neutral';
 export type Prov = 'live' | 'derived' | 'wire';
@@ -353,9 +338,6 @@ export interface Company {
 	};
 	fundamentals: { per: Num; pbr: Num; psr: Num; npm: Num; roe: Num; opm: Num; dr: Num };
 	financials: Financials;
-	// 재무제표 그래프 — ui/web analysis.financial 체계 포팅:
-	// 섹션별 다중 trend 카드를 단일 디스패처 ChartRenderer 로 렌더. spec.chartType 이 dispatch 키.
-	charts: { sections: FinSection[] };
 	trendAnnual: TrendSeries;
 	trendQuarter: TrendSeries | null;
 	income: Statement;
