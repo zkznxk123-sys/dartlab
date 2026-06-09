@@ -23,26 +23,18 @@
 	// 소문자 회사명 사전 — 키 입력마다 nameOf().toLowerCase() 재계산 방지 (1 회 산출)
 	const lowerNames = $derived(new Map(nodes.map((n) => [n.id, (eng.nameOf(n.id) || '').toLowerCase()])));
 
-	// ── 통합 스크리너: 주가·재무를 한 리스트에서 정렬·조건검색 (3탭 렌즈 폐지) ──
-	type MetricKey = 'return1m' | 'return3m' | 'return1y' | 'volatility1y' | 'roe' | 'opMargin' | 'revCagr' | 'marketShare';
-	type PriceK = 'return1m' | 'return3m' | 'return1y' | 'volatility1y';
-	type FinK = 'roe' | 'opMargin' | 'revCagr' | 'marketShare';
-	interface MetricDef { k: MetricKey; kr: string; en: string; fam: 'price' | 'fin'; unit: string; }
-	const METRICS: MetricDef[] = [
-		{ k: 'return1m', kr: '1M', en: '1M', fam: 'price', unit: '%' },
-		{ k: 'return3m', kr: '3M', en: '3M', fam: 'price', unit: '%' },
-		{ k: 'return1y', kr: '1Y', en: '1Y', fam: 'price', unit: '%' },
-		{ k: 'volatility1y', kr: 'σ', en: 'σ', fam: 'price', unit: '' },
-		{ k: 'roe', kr: 'ROE', en: 'ROE', fam: 'fin', unit: '%' },
-		{ k: 'opMargin', kr: '영업이익률', en: 'OPM', fam: 'fin', unit: '%' },
-		{ k: 'revCagr', kr: '매출성장', en: 'CAGR', fam: 'fin', unit: '%' },
-		{ k: 'marketShare', kr: '점유율', en: 'Share', fam: 'fin', unit: '%' }
+	// ── 통합 스크리너: 주가·재무를 한 행에 같이 표시, 컬럼 헤더 클릭 정렬 (제품급 조건검색기). ──
+	type SortKey = 'return1y' | 'roe' | 'opMargin';
+	interface ColDef { k: SortKey; kr: string; en: string; }
+	const COLS: ColDef[] = [
+		{ k: 'return1y', kr: '1Y', en: '1Y' },
+		{ k: 'roe', kr: 'ROE', en: 'ROE' },
+		{ k: 'opMargin', kr: '영업익', en: 'OPM' }
 	];
-	let metricKey = $state<MetricKey>('return1y');
-	const activeMetric = $derived(METRICS.find((m) => m.k === metricKey) as MetricDef);
+	let sortKey = $state<SortKey>('return1y');
 	let screenerOpen = $state(false);
 
-	// 조건 검색 — query 는 입력 즉시 반영(입력칸 반응성), queryD 는 140ms 디바운스(무거운 rows 재계산 억제)
+	// 조건 검색 — query 즉시 반영(입력 반응성) + queryD 140ms 디바운스(무거운 rows 재계산 억제)
 	let query = $state('');
 	let queryD = $state('');
 	$effect(() => {
@@ -50,7 +42,6 @@
 		const t = setTimeout(() => (queryD = q), 140);
 		return () => clearTimeout(t);
 	});
-	let minVal = $state<number | null>(null);
 	let market = $state(''); // '' | 'KOSPI' | 'KOSDAQ'
 	let sectorFilter = $state(''); // industry id (히트맵 셀 클릭)
 	const MKT: Record<string, string> = { KOSPI: '유가증권', KOSDAQ: '코스닥' };
@@ -64,30 +55,21 @@
 		if (sectorFilter && n.industry !== sectorFilter) return false;
 		return true;
 	};
-	const valOf = (n: EcoNode): number | null => {
-		if (activeMetric.fam === 'price') {
-			const px = eng.priceOf(n.id);
-			return px ? ((px[activeMetric.k as PriceK] as number | null) ?? null) : null;
-		}
-		return (n[activeMetric.k as FinK] ?? null) as number | null;
-	};
+	// 주가(1Y) + 재무(ROE·영업이익률) 한 행에. ret1y=prices, roe/opMargin=eco node.
+	const r1yOf = (n: EcoNode): number | null => { const px = eng.priceOf(n.id); return px ? ((px.return1y as number | null) ?? null) : null; };
+	interface Row { n: EcoNode; r1y: number | null; roe: number | null; opm: number | null; }
+	const rowOf = (n: EcoNode): Row => ({ n, r1y: r1yOf(n), roe: (n.roe ?? null) as number | null, opm: (n.opMargin ?? null) as number | null });
+	const sortVal = (r: Row): number | null => (sortKey === 'return1y' ? r.r1y : sortKey === 'roe' ? r.roe : r.opm);
 	const rows = $derived(
 		nodes
 			.filter(matchFilter)
-			.map((n) => ({ n, v: valOf(n) }))
-			.filter((r) => r.v != null && (minVal == null || (r.v as number) >= minVal))
-			.sort((a, b) => (b.v as number) - (a.v as number))
+			.map(rowOf)
+			.filter((r) => sortVal(r) != null)
+			.sort((a, b) => (sortVal(b) as number) - (sortVal(a) as number))
 			.slice(0, 80)
 	);
-	const rowsMax = $derived(Math.max(...rows.map((r) => Math.abs(r.v as number)), 1));
-	const isReturn = $derived(activeMetric.fam === 'price' && activeMetric.k !== 'volatility1y');
-	const fmtVal = (v: number | null): string => {
-		if (v == null) return '—';
-		if (isReturn) return sign(v, 1) + '%';
-		if (activeMetric.k === 'volatility1y') return v.toFixed(0);
-		return v.toFixed(1) + activeMetric.unit;
-	};
 	const finPillOf = (n: EcoNode) => ({ v: n.profGrade, t: gradeTone('prof', n.profGrade) });
+	const fmtPct = (v: number | null, d = 1): string => (v == null ? '—' : v.toFixed(d));
 
 	// ── 경제 (최상단 고정) ──
 	const macro = $derived(eng.raw.macro);
@@ -134,34 +116,33 @@
 	</div>
 </Panel>
 
-<!-- 통합 스크리너 — 주가 + 재무 한 리스트, 조건 검색 -->
-<Panel {lang} className="eQuant fillCol" prov="live" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
+<!-- 통합 스크리너 — 주가(1Y) + 재무(ROE·영업이익률) 한 행, 컬럼 클릭 정렬. 복합 조건은 상세검색 모달. -->
+<Panel {lang} className="eQuant fillCol" prov="live" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} sub={{ kr: nodes.length + '종목 · 정렬 ' + (COLS.find((c) => c.k === sortKey)?.kr ?? ''), en: 'n=' + nodes.length }} flush>
 	{#snippet right()}<button class="scrOpenBtn" onclick={() => (screenerOpen = true)} title="상용급 다조건 검색">{lang === 'en' ? 'SCREEN' : '상세검색'}</button><a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">조건조사 ↗</a>{/snippet}
-	<div class="metricBar">
-		{#each METRICS as m, i (m.k)}
-			{#if i === 4}<span class="metricDiv"></span>{/if}
-			<button class={'seg' + (metricKey === m.k ? ' on' : '')} onclick={() => (metricKey = m.k)}>{lang === 'en' ? m.en : m.kr}</button>
-		{/each}
-	</div>
 	<div class="filtRow">
 		<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />
-		<span class="filtCond">{lang === 'en' ? activeMetric.en : activeMetric.kr} ≥<input class="filtNum mono" type="number" bind:value={minVal} placeholder="—" /></span>
-		<select class="filtSel" bind:value={market}><option value="">{lang === 'en' ? 'all' : '전체'}</option><option value="KOSPI">KOSPI</option><option value="KOSDAQ">KOSDAQ</option></select>
+		<select class="filtSel" bind:value={market}><option value="">{lang === 'en' ? 'all market' : '전체 시장'}</option><option value="KOSPI">KOSPI</option><option value="KOSDAQ">KOSDAQ</option></select>
 	</div>
 	{#if sectorFilter}
 		<div class="filtChipRow"><button class="filtChip" onclick={() => (sectorFilter = '')}>{lang === 'en' ? 'sector: ' : '섹터: '}{activeSectorName} ✕</button></div>
 	{/if}
+	<!-- 컬럼 헤더 (클릭=정렬) -->
+	<div class="rkHead">
+		<span class="rkHN">#</span>
+		<span class="rkHName">{lang === 'en' ? 'Company' : '종목'}</span>
+		{#each COLS as c (c.k)}
+			<button class={'rkHCol' + (sortKey === c.k ? ' on' : '')} onclick={() => (sortKey = c.k)}>{lang === 'en' ? c.en : c.kr}{sortKey === c.k ? ' ▼' : ''}</button>
+		{/each}
+	</div>
 	<div class="rankList">
 		{#each rows as r, i (r.n.id)}
 			{@const pill = finPillOf(r.n)}
 			<div class={'rankRow' + (active === r.n.id ? ' on' : '')} role="button" tabindex="0" onclick={() => onPick(r.n.id)} onkeydown={(e) => e.key === 'Enter' && onPick(r.n.id)}>
 				<span class="rkN mono">{i + 1}</span>
-				<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}</span></span>
-				{#if activeMetric.fam === 'fin' && pill.v}<span class={'gPill ' + tcls(pill.t)}>{pill.v}</span>{/if}
-				<span class="rkMag">
-					<span class="rkBar"><span class="rkBarFill" style={`width:${Math.min(100, (Math.abs(r.v as number) / rowsMax) * 100)}%;background:${isReturn ? ((r.v as number) >= 0 ? 'var(--up)' : 'var(--dn)') : 'var(--industry)'}`}></span></span>
-					<span class={'rkVal mono ' + (isReturn ? chgClass(r.v) : 'tNeu')}>{fmtVal(r.v)}</span>
-				</span>
+				<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}{pill.v ? ' · ' + pill.v : ''}</span></span>
+				<span class={'rkCol mono ' + chgClass(r.r1y)}>{r.r1y == null ? '—' : sign(r.r1y, 0) + '%'}</span>
+				<span class={'rkCol mono ' + (sortKey === 'roe' ? tcls(pill.t) : 'tNeu')}>{fmtPct(r.roe)}</span>
+				<span class="rkCol mono tNeu">{fmtPct(r.opm)}</span>
 			</div>
 		{/each}
 	</div>

@@ -146,7 +146,7 @@
 .dlTerm .tickerItem .mono { font-size: 10px; }
 
 /* BOARD */
-.dlTerm .board { flex: 1; min-height: 0; display: grid; grid-template-columns: 256px minmax(0, 1fr) 496px; gap: 3px; padding: 3px; }
+.dlTerm .board { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr) 496px; gap: 3px; padding: 3px; }
 .dlTerm .col { display: flex; flex-direction: column; gap: 3px; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 2px; }
 .dlTerm .col > * { flex: 0 0 auto; }
 .dlTerm .rowSplit { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; align-items: stretch; }
@@ -212,7 +212,7 @@
 .dlTerm .col > .panel.fillCol { flex: 1 1 auto; min-height: 0; }
 .dlTerm .panel.fillCol .panelBody { display: flex; flex-direction: column; }
 .dlTerm .panel.fillCol .rankList { flex: 1; max-height: none; }
-.dlTerm .rankRow { display: grid; grid-template-columns: 18px 1fr auto auto; align-items: center; gap: 6px; padding: 2.5px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
+.dlTerm .rankRow { display: grid; grid-template-columns: 16px 1fr 44px 36px 36px; align-items: center; gap: 5px; padding: 2.5px 6px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
 .dlTerm .rankRow:hover { background: var(--dl-bg-overlay); }
 .dlTerm .rankRow.on { background: rgba(251, 146, 60, 0.08); box-shadow: inset 2px 0 0 var(--amber); }
 .dlTerm .rkN { font-size: 8.5px; color: var(--dimmer); text-align: right; }
@@ -223,6 +223,13 @@
 .dlTerm .rkMag { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
 .dlTerm .rkBar { width: 28px; height: 4px; background: var(--dl-line); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
 .dlTerm .rkBarFill { display: block; height: 100%; border-radius: 2px; }
+.dlTerm .rkHead { display: grid; grid-template-columns: 16px 1fr 44px 36px 36px; align-items: center; gap: 5px; padding: 3px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); }
+.dlTerm .rkHN { font-size: 8px; color: var(--dimmer); text-align: right; }
+.dlTerm .rkHName { font-family: var(--cond); font-size: 8px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.3px; }
+.dlTerm .rkHCol { font-family: var(--cond); font-size: 8px; color: var(--dim); text-align: right; background: none; border: none; cursor: pointer; padding: 0; white-space: nowrap; }
+.dlTerm .rkHCol:hover { color: var(--txt); }
+.dlTerm .rkHCol.on { color: var(--amber); font-weight: 700; }
+.dlTerm .rkCol { font-size: 9.5px; text-align: right; white-space: nowrap; }
 
 /* SCREENER */
 .dlTerm .scrRow { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 7px; padding: 3px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
@@ -671,9 +678,9 @@
 .dlTerm .bootMsg { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.4px; }
 
 @media (max-width: 1520px) {
-	.dlTerm .board { grid-template-columns: 240px minmax(0, 1fr) 452px; }
+	.dlTerm .board { grid-template-columns: 284px minmax(0, 1fr) 452px; }
 }
 @media (max-width: 1320px) {
-	.dlTerm .board { grid-template-columns: 230px minmax(0, 1fr) 410px; }
+	.dlTerm .board { grid-template-columns: 270px minmax(0, 1fr) 410px; }
 	.dlTerm .symStats { grid-template-columns: repeat(3, auto); }
 }
