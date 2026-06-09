@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { Button } from '$lib/components/ui/button';
-	import YouTube from '$lib/components/YouTube.svelte';
 </script>
 
 <section class="viewer-showcase" aria-labelledby="viewer-showcase-title">
@@ -13,10 +12,6 @@
 			공시 뷰어는 그 격자를 설치도 코드도 없이 브라우저에서 만지게 한다.
 			셀을 누르면 공시 원문 근거로, 비교 모드를 켜면 여러 회사가 같은 행에 나란히 선다.
 		</p>
-
-		<div class="video">
-			<YouTube id="-Y3kY1zs62I" title="DartLab — 공시를 비교 가능한 데이터로" />
-		</div>
 
 		<div class="ctas">
 			<Button href="{base}/viewer">공시 뷰어 열기 →</Button>
@@ -56,9 +51,6 @@
 		color: #cbd5e1;
 		font-size: 15px;
 		line-height: 1.72;
-	}
-	.video {
-		margin: 0 auto 24px;
 	}
 	.ctas {
 		display: flex;
