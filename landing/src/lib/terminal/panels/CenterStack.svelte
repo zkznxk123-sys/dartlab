@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { Company, Lang } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
 	import Radar from '../charts/Radar.svelte';
@@ -103,6 +104,11 @@
 			<span class="symName">{co.name.kr}</span>
 		</div>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
+		<nav class="symLinks">
+			<a href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'viewer ↗' : '공시뷰어 ↗'}</a>
+			<a href="{base}/lab/dashboard/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'dashboard ↗' : '대시보드 ↗'}</a>
+			<a href="{base}/company/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'company ↗' : '회사 ↗'}</a>
+		</nav>
 	</div>
 	<div class="symPrice">
 		<span class="symLast mono">{fmtNum(p.last)}</span>

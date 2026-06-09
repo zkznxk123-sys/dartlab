@@ -236,6 +236,9 @@
 .dlTerm .symBadge.kr { background: rgba(96, 165, 250, 0.15); color: var(--dl-info); border: 1px solid rgba(96, 165, 250, 0.3); }
 .dlTerm .symName { font-family: var(--cond); font-weight: 600; font-size: 13px; color: var(--txt); }
 .dlTerm .symMeta { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); margin-top: 2px; letter-spacing: 0.3px; }
+.dlTerm .symLinks { display: flex; gap: 9px; margin-top: 3px; }
+.dlTerm .symLinks a { font-family: var(--mono); font-size: 8.5px; color: var(--amberDim); text-decoration: none; letter-spacing: 0.2px; }
+.dlTerm .symLinks a:hover { color: var(--amber); }
 .dlTerm .symPrice { display: flex; flex-direction: column; align-items: flex-end; }
 .dlTerm .symLast { font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1; }
 .dlTerm .symChg { font-family: var(--mono); font-size: 11px; margin-top: 2px; }
@@ -352,6 +355,23 @@
 .dlTerm .finTable tr.finKey .finAcct { color: var(--amber); font-weight: 600; }
 .dlTerm .finTable tbody tr:hover { background: var(--dl-bg-overlay); }
 .dlTerm .finNote { font-family: var(--mono); font-size: 7.5px; color: var(--dimmer); padding: 2px 7px; border-top: 1px solid var(--bd); letter-spacing: 0.3px; }
+
+/* DART REPORT FACTS */
+.dlTerm .factGrid { display: flex; flex-direction: column; }
+.dlTerm .factRow { display: grid; grid-template-columns: 64px auto 1fr; align-items: baseline; gap: 8px; padding: 3px 8px; border-bottom: 1px solid var(--dl-line); }
+.dlTerm .factL { font-family: var(--cond); font-weight: 600; font-size: 9.5px; color: var(--amber); white-space: nowrap; }
+.dlTerm .factV { font-size: 10px; color: var(--txt); font-weight: 600; white-space: nowrap; }
+.dlTerm .factD { font-family: var(--cond); font-size: 9px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* FILING CHANGES FEED */
+.dlTerm .chgFeed { display: flex; flex-direction: column; max-height: 132px; overflow-y: auto; }
+.dlTerm .chgFeedRow { display: grid; grid-template-columns: 34px auto auto 1fr; align-items: baseline; gap: 6px; padding: 2.5px 8px; border-bottom: 1px solid var(--dl-line); font-size: 9px; }
+.dlTerm .chgType { font-family: var(--cond); font-weight: 700; font-size: 7.5px; padding: 0 3px; border-radius: 2px; text-align: center; white-space: nowrap; }
+.dlTerm .chgType.st { color: var(--industry); background: rgba(167, 139, 250, 0.14); }
+.dlTerm .chgType.nu { color: var(--good); background: rgba(52, 211, 153, 0.12); }
+.dlTerm .chgSec { font-family: var(--cond); font-weight: 600; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.dlTerm .chgPer { font-size: 8.5px; color: var(--dimmer); white-space: nowrap; }
+.dlTerm .chgPrev { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* CREDIT */
 .dlTerm .creditTop { padding: 5px 7px; border-bottom: 1px solid var(--bd); }

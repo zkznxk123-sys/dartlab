@@ -3,6 +3,12 @@
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
+	import {
+		loadLiveCompanyReportFacts,
+		loadLiveCompanyChanges,
+		type LiveCompanyReportFact
+	} from '$lib/browser/companyLive';
+	import type { CompanyChange } from '$lib/scan/duckSql';
 
 	interface Props {
 		co: Company;
@@ -11,6 +17,29 @@
 	}
 	let { co, lang, onPick }: Props = $props();
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
+
+	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
+	let reportFacts = $state<LiveCompanyReportFact[]>([]);
+	let disclChanges = $state<CompanyChange[]>([]);
+	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
+	$effect(() => {
+		const code = co.code;
+		factsState = 'loading';
+		reportFacts = [];
+		disclChanges = [];
+		let cancelled = false;
+		loadLiveCompanyReportFacts(code).then((f) => {
+			if (cancelled) return;
+			reportFacts = f;
+			factsState = f.length ? 'ready' : 'empty';
+		});
+		loadLiveCompanyChanges(code, 8).then((c) => {
+			if (!cancelled) disclChanges = c;
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
 
 	let stmt = $state<'SUM' | 'IS' | 'BS' | 'CF' | 'RT'>('SUM');
 	let acct = $state<'kr' | 'en'>('kr');
@@ -98,10 +127,30 @@
 	<div class="finNote">finance.json · {firstYr}–{lastYr} · 조 KRW{stmt === 'CF' ? ' · CFO/CFI/CFF 실데이터' : ''}</div>
 </Panel>
 
+<!-- DART 정기보고서 팩트 (배당·자사주·임원·감사·대주주·회사채 — report parquet) -->
+<Panel {lang} className="eCredit" prov="live" title={{ kr: 'DART 정기보고서 팩트', en: 'DART REPORT FACTS' }} sub={{ kr: 'report · 공시원문', en: 'report · filings' }} flush>
+	{#snippet right()}<span class="dim">{factsState === 'ready' ? reportFacts.length : ''}</span>{/snippet}
+	{#if factsState === 'ready'}
+		<div class="factGrid">
+			{#each reportFacts as f (f.key)}
+				<div class="factRow">
+					<span class="factL">{f.label}</span>
+					<span class="factV mono">{f.value}</span>
+					{#if f.detail}<span class="factD">{f.detail}</span>{/if}
+				</div>
+			{/each}
+		</div>
+	{:else if factsState === 'loading'}
+		<div class="storyEmpty">{lang === 'en' ? 'loading report facts …' : '정기보고서 팩트 불러오는 중 …'}</div>
+	{:else}
+		<div class="storyEmpty">{lang === 'en' ? 'No report-parquet facts for this company.' : '해당 회사 정기보고서 팩트 없음.'}</div>
+	{/if}
+</Panel>
+
 <div class="rowSplit">
 	<!-- CREDIT -->
-	<Panel {lang} className="eCredit" prov="derived" title={{ kr: '신용 분석', en: 'CREDIT' }} sub={{ kr: 'c.credit · derived', en: 'derived' }} flush>
-		{#snippet right()}<span class="dim">{lang === 'en' ? '7-axis spirit' : '7축 정신'}</span>{/snippet}
+	<Panel {lang} className="eCredit" prov="derived" title={{ kr: 'dartlab 신용 스코어', en: 'dartlab CREDIT' }} sub={{ kr: '비공식 · 자체 피처', en: 'unofficial · own features' }} flush>
+		{#snippet right()}<span class="dim">{lang === 'en' ? '5-feature' : '5피처'}</span>{/snippet}
 		<div class="creditTop"><div class="creditGrade"><span class="cgVal tCredit">{cr.grade}</span><span class="cgSub">{lang === 'en' ? 'health' : '건전도'} <b class={toneClass(cr.tone)}>{cr.healthScore}</b>/100 · PD <b class="tNeu">{cr.pd}</b></span></div></div>
 		<div class="creditTracks">{#each cr.tracks as t (t.en)}<div class="ctRow"><span class="ctName">{txc(t, lang)}</span><div class="ctTrack"><div class="ctFill" style={`width:${t.score}%`}></div></div><span class="ctVal mono">{t.score}</span></div>{/each}</div>
 		<div class="creditDiv">{lang === 'en' ? `From finance.json: debt ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, current ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. Heuristic dCR — not official.` : `finance.json 기반: 부채비율 ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, 유동비율 ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. 휴리스틱 dCR — 공식등급 아님.`}</div>
@@ -123,6 +172,23 @@
 		<div class="finNote">finance.json · 직전 사업연도 대비</div>
 	</Panel>
 </div>
+
+<!-- 공시 변경 내역 (changes parquet — 섹션별 수치/구조 변경) -->
+{#if disclChanges.length}
+	<Panel {lang} className="eChanges" prov="live" title={{ kr: '공시 변경 내역', en: 'FILING CHANGES' }} sub={{ kr: 'changes · 섹션', en: 'changes · sections' }} flush>
+		{#snippet right()}<span class="dim">{disclChanges.length}</span>{/snippet}
+		<div class="chgFeed">
+			{#each disclChanges as c, i (i)}
+				<div class="chgFeedRow">
+					<span class={'chgType ' + (c.changeType === 'structural' ? 'st' : 'nu')}>{c.changeType === 'structural' ? (lang === 'en' ? 'STRUCT' : '구조') : (lang === 'en' ? 'NUM' : '수치')}</span>
+					<span class="chgSec">{c.sectionTitle}</span>
+					<span class="chgPer mono">{c.fromPeriod}→{c.toPeriod}</span>
+					{#if c.preview}<span class="chgPrev">{c.preview}</span>{/if}
+				</div>
+			{/each}
+		</div>
+	</Panel>
+{/if}
 
 <div class="rowSplit">
 	<!-- PEERS -->
