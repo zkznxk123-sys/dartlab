@@ -16,7 +16,10 @@ import type {
 	Num,
 	TrendSeries,
 	StatementRow,
-	PercentileMetric
+	PercentileMetric,
+	Financials,
+	StackSeg,
+	FinanceCompany
 } from './types';
 
 const SECTOR_EN: Record<string, string> = {
@@ -346,6 +349,52 @@ export function createEngine(raw: RawData): Engine {
 		};
 	}
 
+	// ui/web 재무카드 — finance.json 5Y 에서 계산 (DuckDB 불필요, 즉시)
+	function computeFinancials(fin: FinanceCompany): Financials {
+		const yrs = years;
+		const sales = fin.is.sales;
+		const net = fin.is.net;
+		const T = fin.bs.totals;
+		const div = (a: Num, b: Num): Num => (a != null && b != null && b !== 0 ? a / b : null);
+		const opMargin = fin.is.opMargin.slice();
+		const netMargin = sales.map((s, i) => (s && net[i] != null ? +((net[i]! / s) * 100).toFixed(1) : null));
+		const assetTurn = sales.map((s, i) => (s != null && T.totalAsset[i] ? +(s / T.totalAsset[i]!).toFixed(2) : null));
+		const equityMult = T.totalAsset.map((a, i) => (a != null && T.totalEquity[i] ? +(a / T.totalEquity[i]!).toFixed(2) : null));
+		const deRatio = T.totalLiab.map((l, i) => { const v = div(l, T.totalEquity[i]); return v == null ? null : +(v * 100).toFixed(0); });
+		const currRatio = T.currAsset.map((c, i) => { const v = div(c, T.currLiab[i]); return v == null ? null : +(v * 100).toFixed(0); });
+		const roe = fin.ratios.roe.slice();
+		const li = (arr: Num[]): number | null => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i] != null) return arr[i]; return null; };
+		const A = fin.bs.assets || {};
+		const at = (k: string): number => { const a = A[k]; return a && a.length ? a[a.length - 1] ?? 0 : 0; };
+		const totAssetL = li(T.totalAsset) ?? 0;
+		const sumBuckets = at('cash') + at('recv') + at('inv') + at('tang') + at('intan');
+		const assetMix: StackSeg[] = [
+			{ kr: '현금', v: at('cash'), color: '#60a5fa' },
+			{ kr: '매출채권', v: at('recv'), color: '#34d399' },
+			{ kr: '재고', v: at('inv'), color: '#fbbf24' },
+			{ kr: '유형자산', v: at('tang'), color: '#fb923c' },
+			{ kr: '무형자산', v: at('intan'), color: '#a78bfa' },
+			{ kr: '기타', v: Math.max(0, +(totAssetL - sumBuckets).toFixed(2)), color: '#475569' }
+		].filter((s) => s.v > 0);
+		const liabL = li(T.totalLiab) ?? 0;
+		const currL = li(T.currLiab) ?? 0;
+		const eqL = li(T.totalEquity) ?? 0;
+		const fundMix: StackSeg[] = [
+			{ kr: '유동부채', v: currL, color: '#5681c4' },
+			{ kr: '비유동부채', v: Math.max(0, liabL - currL), color: '#d65b56' },
+			{ kr: '자본', v: eqL, color: '#34d399' }
+		].filter((s) => s.v > 0);
+		const cf = fin.cf || ({} as FinanceCompany['cf']);
+		const fcf = cf.op != null && cf.inv != null ? +(cf.op + cf.inv).toFixed(2) : null;
+		return {
+			years: yrs,
+			opMargin, netMargin, roe, assetTurn, equityMult, deRatio, currRatio,
+			dupont: { netMargin: li(netMargin), assetTurn: li(assetTurn), equityMult: li(equityMult), roe: li(roe) },
+			assetMix, fundMix,
+			cf: { op: cf.op ?? null, inv: cf.inv ?? null, fin: cf.fin ?? null, fcf }
+		};
+	}
+
 	function cagr(arr: Num[]): number | null {
 		const a = arr.filter((v): v is number => v != null);
 		if (a.length < 2 || a[0] <= 0) return null;
@@ -505,6 +554,7 @@ export function createEngine(raw: RawData): Engine {
 				asOf: fmtDate(px.priceUpdated)
 			},
 			fundamentals: { per, pbr, psr, npm, roe: roe ? roe.v : null, opm: opm ? opm.v : null, dr: dr ? dr.v : null },
+			financials: computeFinancials(fin),
 			trendAnnual: trendFromFinance(fin),
 			trendQuarter: trendFromQuarters(code),
 			income, balance, cashflow, ratios, credit, analysis,

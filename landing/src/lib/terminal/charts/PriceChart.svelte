@@ -7,7 +7,7 @@
 	interface Props {
 		candles: Candle[];
 		lang: Lang;
-		period: '3M' | '6M' | '1Y' | 'MAX';
+		period: '3M' | '5M' | '6M' | '1Y' | 'MAX';
 		overlay: 'MA' | 'BB' | 'NONE';
 		sub: 'VOL' | 'RSI' | 'MACD';
 	}
@@ -16,13 +16,13 @@
 	let wrap: HTMLDivElement | null = $state(null);
 	let canvas: HTMLCanvasElement | null = $state(null);
 	let hover = $state<number | null>(null);
-	let dims = $state({ w: 800, h: 200 });
+	let dims = $state({ w: 800, h: 300 });
 
 	const C = {
 		up: '#d65b56', dn: '#5681c4', ma20: '#fb923c', ma60: '#60a5fa', bb: 'rgba(167,139,250,0.55)',
 		grid: '#1b2130', axis: '#2a3142', text: '#a3a8b3', macdUp: 'rgba(214,91,86,0.6)', macdDn: 'rgba(86,129,196,0.6)'
 	};
-	const PERIOD_N: Record<string, number> = { '3M': 66, '6M': 132, '1Y': 252, MAX: 100000 };
+	const PERIOD_N: Record<string, number> = { '3M': 66, '5M': 110, '6M': 132, '1Y': 252, MAX: 100000 };
 
 	$effect(() => {
 		if (!wrap) return;
@@ -263,7 +263,7 @@
 </script>
 
 <div class="chartWrap" bind:this={wrap} role="img" aria-label="price chart"
-	onmousemove={onMove} onmouseleave={() => (hover = null)} style="height:200px;min-height:180px;">
+	onmousemove={onMove} onmouseleave={() => (hover = null)} style="height:300px;min-height:280px;">
 	<canvas bind:this={canvas}></canvas>
 	{#if hv}
 		<div class="ohlcTag">

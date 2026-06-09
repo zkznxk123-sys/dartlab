@@ -5,6 +5,8 @@
 	import Radar from '../charts/Radar.svelte';
 	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
+	import MiniLines from '../charts/MiniLines.svelte';
+	import StackBar from '../charts/StackBar.svelte';
 	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 
@@ -24,7 +26,7 @@
 
 	// 주가 캔들 (DuckDB 온디맨드) — 부팅 비차단, 회사 전환 시 재로드
 	let chartMode = $state<'price' | 'fin'>('price');
-	let pPeriod = $state<'3M' | '6M' | '1Y' | 'MAX'>('1Y');
+	let pPeriod = $state<'3M' | '5M' | '6M' | '1Y' | 'MAX'>('5M');
 	let pOverlay = $state<'MA' | 'BB' | 'NONE'>('MA');
 	let pSub = $state<'VOL' | 'RSI' | 'MACD'>('VOL');
 	let candles = $state<Candle[] | null>(null);
@@ -48,6 +50,7 @@
 
 	const p = $derived(co.price);
 	const e = $derived(co.eco);
+	const fin = $derived(co.financials);
 	const stats = $derived([
 		{ l: '1M', v: p.ret1m == null ? '—' : sign(p.ret1m, 1) + '%', t: chgClass(p.ret1m) },
 		{ l: '3M', v: p.ret3m == null ? '—' : sign(p.ret3m, 1) + '%', t: chgClass(p.ret3m) },
@@ -91,8 +94,6 @@
 				})()
 			: null
 	);
-	const ver = $derived(co.verdict);
-	const tw = $derived(co.tailwind);
 </script>
 
 <!-- SYMBOL HEADER -->
@@ -133,33 +134,7 @@
 	</div>
 </Panel>
 
-<!-- VERDICT -->
-<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '투자 종합 판단', en: 'VERDICT' }} sub={{ kr: 'grades+value+momentum', en: 'composite' }} flush>
-	{#snippet right()}
-		{#if tw}<span class={'dim ' + (tw.tone === 'up' ? 'tUp' : tw.tone === 'down' ? 'tDn' : '')}>{tw.kr} {tw.label}</span>{/if}
-	{/snippet}
-	<div class="verdictWrap">
-		<div class="verdictScore">
-			<span class={'vsNum ' + tcls(ver.band.tone)}>{ver.composite}</span>
-			<span class={'vsBand ' + tcls(ver.band.tone)}>{lang === 'en' ? ver.band.en : ver.band.kr}</span>
-			<span class="vsLabel">{lang === 'en' ? 'dartlab score' : '종합점수'}</span>
-		</div>
-		<div class="verdictBody">
-			<div class="vRow s"><span class="vk">{lang === 'en' ? 'STRENGTH' : '강점'}</span>
-				<span class="vList">{#if ver.strengths.length}{#each ver.strengths as s, i (i)}<span>· {txc(s, lang)}</span>{/each}{:else}<span class="dim">—</span>{/if}</span></div>
-			<div class="vRow c"><span class="vk">{lang === 'en' ? 'CONCERN' : '우려'}</span>
-				<span class="vList">{#if ver.concerns.length}{#each ver.concerns as s, i (i)}<span>· {txc(s, lang)}</span>{/each}{:else}<span class="dim">{lang === 'en' ? 'none flagged' : '특이사항 없음'}</span>{/if}</span></div>
-		</div>
-	</div>
-	<div class="vRiskline">
-		<span>{lang === 'en' ? 'Red flags' : '위험 신호'} <b class="tDn">{ver.riskRed}</b></span>
-		<span>{lang === 'en' ? 'Watch' : '주의'} <b class="tWarn">{ver.riskYellow}</b></span>
-		{#if tw}<span>{lang === 'en' ? 'Sector' : '섹터'} <b class={tw.tone === 'up' ? 'tUp' : tw.tone === 'down' ? 'tDn' : 'tNeu'}>{tw.label}</b></span>{/if}
-		<span class="dim" style="margin-left:auto;">{lang === 'en' ? 'diagnosis, not advice' : '진단 — 투자권유 아님'}</span>
-	</div>
-</Panel>
-
-<!-- 주가 캔들(일별 실데이터·보조지표) ⇄ 재무 추세 -->
+<!-- 주가 캔들(일별 실데이터·보조지표) ⇄ 재무 추세 — 메인 히어로 -->
 <Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 · 재무', en: 'PRICE · FINANCIALS' }}
 	sub={chartMode === 'price' ? { kr: 'krx 일별 · EOD', en: 'krx daily · EOD' } : { kr: 'finance · 실데이터', en: 'finance · real' }} flush>
 	{#snippet right()}
@@ -170,7 +145,7 @@
 	{/snippet}
 	{#if chartMode === 'price'}
 		<div class="chartCtlRow">
-			<span class="segGroup">{#each ['3M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
+			<span class="segGroup">{#each ['3M', '5M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
 			<span class="segGroup">{#each [['MA', 'MA'], ['BB', 'BB'], ['NONE', '없음']] as [v, l] (v)}<button class={pOverlay === v ? 'seg on' : 'seg'} onclick={() => (pOverlay = v as typeof pOverlay)}>{l}</button>{/each}</span>
 			<span class="segGroup">{#each ['VOL', 'RSI', 'MACD'] as v (v)}<button class={pSub === v ? 'seg on' : 'seg'} onclick={() => (pSub = v as typeof pSub)}>{v}</button>{/each}</span>
 			<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>
@@ -193,6 +168,40 @@
 		<TrendChart {trend} {lang} />
 	{/if}
 </Panel>
+
+<!-- 재무 카드 (ui/web 포팅 — finance.json 5Y, 즉시) -->
+<div class="rowSplit">
+	<Panel {lang} className="eValuation" prov="derived" title={{ kr: '마진 추세', en: 'MARGIN TREND' }} sub={{ kr: 'finance 5Y', en: 'finance 5Y' }} flush>
+		<div class="finCardBody">
+			<MiniLines periods={fin.years} height={58}
+				series={[{ label: lang === 'en' ? 'OP' : '영업', color: '#fb923c', data: fin.opMargin, unit: '%' }, { label: lang === 'en' ? 'NET' : '순', color: '#34d399', data: fin.netMargin, unit: '%' }, { label: 'ROE', color: '#60a5fa', data: fin.roe, unit: '%' }]} />
+		</div>
+	</Panel>
+	<Panel {lang} className="eValuation" prov="derived" title={{ kr: 'DuPont · ROE 분해', en: 'DUPONT ROE' }} sub={{ kr: '순익률×회전×레버리지', en: 'margin×turn×lev' }} flush>
+		<div class="dupont">
+			<div class="dpF"><span class="dpL">{lang === 'en' ? 'NET MGN' : '순이익률'}</span><b class="mono">{fin.dupont.netMargin == null ? '—' : fin.dupont.netMargin.toFixed(1) + '%'}</b></div>
+			<span class="dpOp">×</span>
+			<div class="dpF"><span class="dpL">{lang === 'en' ? 'ASSET T' : '자산회전'}</span><b class="mono">{fin.dupont.assetTurn == null ? '—' : fin.dupont.assetTurn.toFixed(2)}</b></div>
+			<span class="dpOp">×</span>
+			<div class="dpF"><span class="dpL">{lang === 'en' ? 'LEVER' : '레버리지'}</span><b class="mono">{fin.dupont.equityMult == null ? '—' : fin.dupont.equityMult.toFixed(2)}</b></div>
+			<span class="dpOp">=</span>
+			<div class="dpF res"><span class="dpL">ROE</span><b class="mono tUp">{fin.dupont.roe == null ? '—' : fin.dupont.roe.toFixed(1) + '%'}</b></div>
+		</div>
+		<div class="finNote">{lang === 'en' ? 'ROE source: operations vs leverage' : 'ROE 의 원천 — 영업 vs 레버리지'}</div>
+	</Panel>
+</div>
+
+<div class="rowSplit">
+	<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무상태 구성', en: 'BALANCE SHEET' }} sub={{ kr: '최신 · 조 KRW', en: 'latest · T KRW' }} flush>
+		<StackBar groups={[{ label: lang === 'en' ? 'ASSET' : '자산', segs: fin.assetMix }, { label: lang === 'en' ? 'FUND' : '조달', segs: fin.fundMix }]} />
+	</Panel>
+	<Panel {lang} className="eCredit" prov="derived" title={{ kr: '레버리지 · 안정성', en: 'LEVERAGE' }} sub={{ kr: 'finance 5Y', en: 'finance 5Y' }} flush>
+		<div class="finCardBody">
+			<MiniLines periods={fin.years} height={58} refLines={[100]}
+				series={[{ label: lang === 'en' ? 'D/E' : '부채비율', color: '#d65b56', data: fin.deRatio, unit: '%' }, { label: lang === 'en' ? 'CURR' : '유동비율', color: '#5681c4', data: fin.currRatio, unit: '%' }]} />
+		</div>
+	</Panel>
+</div>
 
 <div class="rowSplit">
 	<!-- RADAR -->

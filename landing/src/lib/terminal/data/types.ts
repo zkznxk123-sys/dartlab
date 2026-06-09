@@ -291,6 +291,26 @@ export interface AnalysisTrack {
 	tone: Tone;
 	delta: string;
 }
+// ui/web 재무카드 포팅 — finance.json 5Y 에서 계산
+export interface StackSeg {
+	kr: string;
+	v: number;
+	color: string;
+}
+export interface Financials {
+	years: string[]; // 오래된→최신
+	opMargin: Num[];
+	netMargin: Num[];
+	roe: Num[];
+	assetTurn: Num[]; // 매출/자산 (회전)
+	equityMult: Num[]; // 자산/자본
+	deRatio: Num[]; // 부채/자본 %
+	currRatio: Num[]; // 유동자산/유동부채 %
+	dupont: { netMargin: Num; assetTurn: Num; equityMult: Num; roe: Num }; // 최신
+	assetMix: StackSeg[]; // 최신 자산 구성
+	fundMix: StackSeg[]; // 최신 부채+자본 구성
+	cf: { op: Num; inv: Num; fin: Num; fcf: Num };
+}
 export interface Company {
 	code: string;
 	marketLabel: string;
@@ -315,6 +335,7 @@ export interface Company {
 		asOf: string;
 	};
 	fundamentals: { per: Num; pbr: Num; psr: Num; npm: Num; roe: Num; opm: Num; dr: Num };
+	financials: Financials;
 	trendAnnual: TrendSeries;
 	trendQuarter: TrendSeries | null;
 	income: Statement;

@@ -3,6 +3,10 @@
 	import { createEngine } from '$lib/terminal/data/engine';
 	import type { RawData } from '$lib/terminal/data/types';
 	import Terminal from '$lib/terminal/Terminal.svelte';
+	import { loadDartDb } from '$lib/data/duckdb';
+
+	// DuckDB-WASM 프리워밍 — JSON 데이터 로드와 병렬로 미리 인스턴스화 (주가 차트 체감속도↑)
+	void loadDartDb();
 
 	let { data }: { data: PageData } = $props();
 	const eng = $derived(createEngine(data.raw as RawData));

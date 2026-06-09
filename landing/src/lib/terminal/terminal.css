@@ -142,7 +142,7 @@
 .dlTerm .tickerItem .mono { font-size: 10px; }
 
 /* BOARD */
-.dlTerm .board { flex: 1; min-height: 0; display: grid; grid-template-columns: 248px minmax(0, 1fr) 432px; gap: 3px; padding: 3px; }
+.dlTerm .board { flex: 1; min-height: 0; display: grid; grid-template-columns: 256px minmax(0, 1fr) 496px; gap: 3px; padding: 3px; }
 .dlTerm .col { display: flex; flex-direction: column; gap: 3px; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 2px; }
 .dlTerm .col > * { flex: 0 0 auto; }
 .dlTerm .rowSplit { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; align-items: stretch; }
@@ -188,6 +188,9 @@
 .dlTerm .lensScan:hover { color: var(--amber); }
 .dlTerm .segGroup.mini .seg { font-size: 8px; padding: 1px 4px; }
 .dlTerm .rankList { display: flex; flex-direction: column; max-height: 460px; overflow-y: auto; }
+.dlTerm .col > .panel.fillCol { flex: 1 1 auto; min-height: 0; }
+.dlTerm .panel.fillCol .panelBody { display: flex; flex-direction: column; }
+.dlTerm .panel.fillCol .rankList { flex: 1; max-height: none; }
 .dlTerm .rankRow { display: grid; grid-template-columns: 18px 1fr auto auto; align-items: center; gap: 6px; padding: 2.5px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
 .dlTerm .rankRow:hover { background: var(--dl-bg-overlay); }
 .dlTerm .rankRow.on { background: rgba(251, 146, 60, 0.08); box-shadow: inset 2px 0 0 var(--amber); }
@@ -290,7 +293,31 @@
 /* CHART CONTROL ROW (price/fin) */
 .dlTerm .chartCtlRow { display: flex; align-items: center; gap: 7px; padding: 3px 7px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); flex-wrap: wrap; }
 .dlTerm .eodBadge { margin-left: auto; font-family: var(--mono); font-size: 8px; color: var(--dimmer); border: 1px solid var(--bd); border-radius: 2px; padding: 1px 5px; letter-spacing: 0.3px; white-space: nowrap; }
-.dlTerm .chartLoad { height: 200px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--dimmer); padding: 0 12px; text-align: center; }
+.dlTerm .chartLoad { height: 300px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--dimmer); padding: 0 12px; text-align: center; }
+
+/* FINANCIAL CARDS (ui/web 포팅) */
+.dlTerm .finCardBody { padding: 4px 6px 2px; }
+.dlTerm .mlWrap { display: flex; flex-direction: column; gap: 2px; }
+.dlTerm .mlWrap canvas { display: block; width: 100%; }
+.dlTerm .mlLegend { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 1px; }
+.dlTerm .mlItem { display: flex; align-items: center; gap: 3px; font-family: var(--cond); font-size: 8.5px; color: var(--dim); }
+.dlTerm .mlItem b { color: var(--txt); }
+.dlTerm .mlDot { width: 6px; height: 6px; border-radius: 1px; }
+.dlTerm .dupont { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 6px; flex-wrap: wrap; }
+.dlTerm .dpF { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dlTerm .dpL { font-family: var(--cond); font-size: 8px; color: var(--dimmer); letter-spacing: 0.3px; text-transform: uppercase; }
+.dlTerm .dpF b { font-size: 13px; }
+.dlTerm .dpF.res b { font-size: 16px; }
+.dlTerm .dpOp { font-family: var(--mono); font-size: 11px; color: var(--dimmer); }
+.dlTerm .stackWrap { display: flex; flex-direction: column; gap: 5px; padding: 7px; }
+.dlTerm .stackRow { display: grid; grid-template-columns: 34px 1fr 52px; align-items: center; gap: 7px; }
+.dlTerm .stackLbl { font-family: var(--cond); font-weight: 600; font-size: 9px; color: var(--dim); }
+.dlTerm .stackBar { height: 12px; display: flex; border-radius: 2px; overflow: hidden; background: var(--dl-bg-overlay); }
+.dlTerm .stackSeg { height: 100%; }
+.dlTerm .stackTot { font-size: 9.5px; text-align: right; color: var(--txt); }
+.dlTerm .stackLegend { display: flex; flex-wrap: wrap; gap: 7px; padding-top: 2px; border-top: 1px solid var(--dl-line); }
+.dlTerm .slItem { display: flex; align-items: center; gap: 3px; font-family: var(--cond); font-size: 8px; color: var(--dim); }
+.dlTerm .slDot { width: 6px; height: 6px; border-radius: 1px; }
 
 /* RADAR */
 .dlTerm .radarWrap { display: flex; align-items: center; gap: 6px; padding: 3px; }
@@ -501,7 +528,10 @@
 @keyframes dlTermBoot { 0% { left: -40%; } 100% { left: 100%; } }
 .dlTerm .bootMsg { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.4px; }
 
+@media (max-width: 1520px) {
+	.dlTerm .board { grid-template-columns: 240px minmax(0, 1fr) 452px; }
+}
 @media (max-width: 1320px) {
-	.dlTerm .board { grid-template-columns: 230px minmax(0, 1fr) 400px; }
+	.dlTerm .board { grid-template-columns: 230px minmax(0, 1fr) 410px; }
 	.dlTerm .symStats { grid-template-columns: repeat(3, auto); }
 }

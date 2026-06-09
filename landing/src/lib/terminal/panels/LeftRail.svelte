@@ -36,7 +36,7 @@
 			.map((n) => ({ n, v: (eng.priceOf(n.id) as Record<string, number | null>)[priceKey] }))
 			.filter((r) => r.v != null)
 			.sort((a, b) => (b.v as number) - (a.v as number))
-			.slice(0, 26)
+			.slice(0, 60)
 	);
 
 	// ── 재무 렌즈 ──
@@ -53,7 +53,7 @@
 			.map((n) => ({ n, v: (n as Record<string, number | null | undefined>)[finKey] }))
 			.filter((r) => r.v != null)
 			.sort((a, b) => (b.v as number) - (a.v as number))
-			.slice(0, 26)
+			.slice(0, 60)
 	);
 	const finPill = (n: EcoNode): { v?: string; t: string } => ({ v: n.profGrade, t: gradeTone('prof', n.profGrade) });
 
@@ -110,7 +110,7 @@
 		</div>
 	</Panel>
 {:else if lens === 'price'}
-	<Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 랭킹', en: 'PRICE RANK' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
+	<Panel {lang} className="eQuant fillCol" prov="live" title={{ kr: '주가 랭킹', en: 'PRICE RANK' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
 		{#snippet right()}<span class="segGroup mini">{#each priceMetrics as m (m.k)}<button class={priceKey === m.k ? 'seg on' : 'seg'} onclick={() => (priceKey = m.k)}>{lang === 'en' ? m.en : m.kr}</button>{/each}</span>{/snippet}
 		<div class="rankList">
 			{#each priceRows as r, i (r.n.id)}
@@ -123,7 +123,7 @@
 		</div>
 	</Panel>
 {:else}
-	<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무 랭킹', en: 'FINANCIAL RANK' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
+	<Panel {lang} className="eAnalysis fillCol" prov="live" title={{ kr: '재무 랭킹', en: 'FINANCIAL RANK' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
 		{#snippet right()}<span class="segGroup mini">{#each finMetrics as m (m.k)}<button class={finKey === m.k ? 'seg on' : 'seg'} onclick={() => (finKey = m.k)}>{lang === 'en' ? m.en : m.kr}</button>{/each}</span>{/snippet}
 		<div class="rankList">
 			{#each finRows as r, i (r.n.id)}
