@@ -21,8 +21,15 @@ const PASS_HEADERS = ['Content-Type', 'Content-Length', 'Content-Range', 'Accept
 
 export default {
 	async fetch(req, env) {
+		// CORS allowlist: 프로덕션 origin(env.ALLOW_ORIGIN) + 로컬 dev(localhost/127.0.0.1). 일치 시 그 origin echo.
+		const reqOrigin = req.headers.get('Origin') || '';
+		const allowOrigin =
+			reqOrigin && (reqOrigin === env.ALLOW_ORIGIN || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(reqOrigin))
+				? reqOrigin
+				: env.ALLOW_ORIGIN || '*';
 		const cors = {
-			'Access-Control-Allow-Origin': env.ALLOW_ORIGIN || '*',
+			'Access-Control-Allow-Origin': allowOrigin,
+			'Vary': 'Origin',
 			'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
 			'Access-Control-Allow-Headers': 'Range, If-Range, If-None-Match',
 			'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges, ETag, x-linked-size',
