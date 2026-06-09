@@ -5,6 +5,7 @@
 	import { base } from '$app/paths';
 	import { Download, Send, Sparkles, X } from 'lucide-svelte';
 	import { plainText, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
+	import { loadIntentModel, queryScope, type IntentModel } from '$lib/viewer/queryCanon';
 	import { composeAnswer } from '$lib/viewer/answerCompose';
 	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
@@ -65,6 +66,7 @@
 	let question = $state('');
 	let busy = $state(false);
 	let finSignals = $state<FinanceSignal[]>([]);
+	let intentModel = $state<IntentModel | null>(null); // intentModel v2(번들 ~27KB) — query→intent 라우팅→섹션 scoping. 1회 로드, 실패=null→BM25 단독.
 	let guideOpen = $state(false); // hidden 상태에서 설치 가이드 펼침(blocked/no-model 은 항상 펼침)
 	let inputEl = $state<HTMLTextAreaElement | null>(null);
 	let scrollEl = $state<HTMLElement | null>(null);
@@ -145,6 +147,9 @@
 	// [회귀가드] ask.chat·ollama 는 code 변경에 불간섭(크로스-회사 대화 유지 핵심). 여기에 ask.chat=[] 또는
 	// {#key code} 추가 시 회사 이동마다 대화 소멸 — 절대 금지. finance prefetch 만 code 따라간다.
 	$effect(() => {
+		void loadIntentModel().then((m) => (intentModel = m)); // 시드 canonical 모델 1회 로드(모듈 캐시 → 1회)
+	});
+	$effect(() => {
 		const c = code;
 		finSignals = [];
 		void loadCompanyFinanceSignals(c).then((s) => {
@@ -204,7 +209,10 @@
 	// 현재 회사(=code) 패널에서 grounded 답 — 결정론(즉시) + (모델 ready 면) 대화 스트리밍.
 	// b/i 를 인자로 받아 이동 직후 stale 클로저를 피한다(항상 현재 reactive 값으로 호출). busy 해제 책임은 여기.
 	async function answerOnCompany(q: string, b: PanelBundle, i: SearchIndex) {
-		const { hits, added } = search(i, q, { topK: 6, expand: true });
+		// 결정론 섹션 scoping — query→intent(IDF 라우팅)→target 섹션 + canon 보강어. search 가 plain BM25 ⊕ (scope+canon)
+		// 을 RRF 융합(매퍼0·모델0·dense0). 5업종 held-out top-6 섹션도달 56~71%→95~98%(selfProbe). dense·fuzzy canon 능가.
+		const scope = queryScope(intentModel, q);
+		const { hits, added } = search(i, q, { topK: 6, expand: false, scopeSections: scope.sections, scopeTerms: scope.terms });
 		const evHits: SearchHit[] = [];
 		const evItems: EvRef[] = [];
 		let n = 1;
@@ -403,7 +411,12 @@
 					{:else if ask.modelState === 'loading'}
 						<div class="onboard-bar"><div class="bar-fill" style="width:{Math.round(ask.modelProgress * 100)}%"></div><span class="bar-txt">{loadingFromCache ? '불러오는 중' : '받는 중'} {Math.round(ask.modelProgress * 100)}%</span></div>
 					{:else if ask.modelState === 'ready'}
-						<span class="onboard-sub">{selModel.label} 준비됨 · 무엇이든 물어보세요</span>
+						<select class="model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 변경">
+								{#each pickerModels as m (m.id)}
+									<option value={m.id}>{m.label} · {sizeLabel(m.sizeMB)} · {m.note}{ask.cachedModels.includes(m.id) ? ' · 받음' : ''}</option>
+								{/each}
+							</select>
+							<span class="onboard-sub">{selModel.label} 준비됨 · 위에서 다른 모델로 바꿀 수 있어요(받은 모델은 즉시 전환)</span>
 					{:else if ask.modelState === 'error'}
 						<select class="model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 선택">
 							{#each pickerModels as m (m.id)}
@@ -509,6 +522,13 @@
 		</div>
 	{:else if ask.chat.length > 0 && ask.modelState === 'error'}
 		<button type="button" class="ad-model dl err" onclick={downloadModel}>대화 모델 로드 실패 · 다시</button>
+	{:else if ask.chat.length > 0 && ask.modelState === 'ready' && ask.ollamaState !== 'ready'}
+		<!-- 대화 중에도 모델 교체 — 받은 모델은 즉시 전환, 안 받은 모델은 받기로. 답 품질 낮으면 3B 로 바꿀 수 있게. -->
+		<select class="ad-model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 변경">
+			{#each pickerModels as m (m.id)}
+				<option value={m.id}>{m.label}{ask.cachedModels.includes(m.id) ? ' · 받음' : ' · ' + sizeLabel(m.sizeMB)}</option>
+			{/each}
+		</select>
 	{/if}
 
 	<div class="ad-askbox">
@@ -709,6 +729,25 @@
 		cursor: pointer;
 	}
 	.model-pick:focus {
+		outline: none;
+		border-color: #38bdf8;
+	}
+	/* 대화 중 컴팩트 모델 교체 셀렉트 — 입력창 위 strip. 받은 모델 즉시 전환. */
+	.ad-model-pick {
+		flex-shrink: 0;
+		align-self: flex-start;
+		margin: 0 12px 8px;
+		max-width: calc(100% - 24px);
+		padding: 6px 10px;
+		border: 1px solid #263145;
+		border-radius: 8px;
+		background: #0a0e18;
+		color: #94a3b8;
+		font: inherit;
+		font-size: 11.5px;
+		cursor: pointer;
+	}
+	.ad-model-pick:focus {
 		outline: none;
 		border-color: #38bdf8;
 	}

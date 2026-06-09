@@ -226,6 +226,7 @@ const B = 0.75;
 // 5기간전 ×0.71, 40기간전 ×0.24. 강한 relevance 는 살리되 옛 근거를 최신 위로 못 올린다(불만2 "과거기간" 직격).
 const RECENCY_LAMBDA = 0.08;
 const RERANK_POOL = 50; // BM25 상위 풀만 recency 재랭킹(비용 bound, topK ≪ pool)
+const RRF_K = 60; // Reciprocal Rank Fusion 상수(표준) — plain BM25 ⊕ 섹션scoping 융합 시 1/(K+rank) 합
 const SCORE_CUT_RATIO = 0.25; // top1 대비 미만 곁가지 컷(불만1 "안맞는 근거" 완화, 최소 1건 보장)
 // 텍스트 행인데 표면어가 어느 셀에도 없음 = bigram 유령매칭(예 "영업이익" 질의에 이익잉여금 행 — 영업·이익 조각만
 // 맞고 문구는 없음). 감점해 진짜 문구 든 행을 올린다. 표(table) 행은 라벨매칭이 본가치라 제외(표라벨 정답 보존).
@@ -332,7 +333,7 @@ function snippetAt(cell: string, needles: string[]): { snippet: string; matchedT
 export function search(
 	idx: SearchIndex,
 	query: string,
-	opts: { expand?: boolean; topK?: number; dedupe?: boolean } = {}
+	opts: { expand?: boolean; topK?: number; dedupe?: boolean; scopeSections?: string[]; scopeTerms?: string[] } = {}
 ): { hits: SearchHit[]; added: string[] } {
 	// 조건("100억 이상")이 있으면 떼어내고, 남은 표면어로 BM25 + 금액 필터.
 	const { c, residual } = parseConstraint(query);
@@ -368,18 +369,69 @@ export function search(
 		return e;
 	};
 
+	// 2차 신호 — 섹션scoping(scopeSections). RRF 융합용. 없으면 순수 BM25.
+	// scoped 레인 = (질의 ∪ 예측 intent canon=scopeTerms) BM25 를 *예측 target 섹션 행*에만 누적. canon 이 구어질의↔본문
+	// 어휘 간극 흡수("돌아가"→"가동률"), 섹션 제약이 곁가지 차단. 라우팅 틀려도 plain 보존 → always-safe.
+	// 5업종 held-out top-6 섹션도달 56~71%→92~98%(pipeline.py verify). 재계산 비용 = scope 행만 순회.
+	let secondary: Map<number, number> | undefined;
+	if (opts.scopeSections && opts.scopeSections.length) {
+		const scope = opts.scopeSections;
+		const inScope = (pos: number): boolean => {
+			const r = idx.rows[pos];
+			return scope.some((sec) => (r.chapter + ' ' + r.section).includes(sec));
+		};
+		const sw = new Map<string, number>(weights);
+		if (opts.scopeTerms) for (const t of tokenizeBigram(opts.scopeTerms.join(' '))) if (!sw.has(t)) sw.set(t, 0.5);
+		secondary = new Map<number, number>();
+		for (const [term, qw] of sw) {
+			const d = idx.df.get(term) ?? 0;
+			if (d <= 0) continue;
+			const idf = Math.log((n - d + 0.5) / (d + 0.5) + 1.0);
+			const postings = idx.postings.get(term);
+			if (!postings) continue;
+			for (const pos of postings) {
+				if (!inScope(pos)) continue;
+				const row = idx.rows[pos];
+				const tf = row.tf.get(term) ?? 0;
+				const denom = tf + K1 * (1 - B + B * (row.len / idx.avgdl));
+				if (denom > 0) secondary.set(pos, (secondary.get(pos) ?? 0) + (qw * idf * (tf * (K1 + 1))) / denom);
+			}
+		}
+	}
 	// 후보 랭킹 — 표면어 BM25 있으면: 상위 풀만 recency 재랭킹(최신우선) → 상대컷(곁가지 제거).
 	// 순수 조건("100억 이상")이면 조건 만족 행을 금액 내림차순. 둘 다 없으면 빈 결과.
+	const hasSecond = !!secondary && secondary.size > 0;
 	let ranked: Array<[number, number]>;
-	if (scores.size > 0) {
-		let byBm25 = [...scores.entries()].sort((a, b) => b[1] - a[1]);
-		if (c) byBm25 = byBm25.filter(([pos]) => amtOk(idx.rows[pos].maxAmount, c));
-		const reranked = byBm25
-			.slice(0, RERANK_POOL)
-			.map(([pos, bm25]): [number, number] => {
+	if (scores.size > 0 || hasSecond) {
+		const bmSorted = [...scores.entries()].sort((a, b) => b[1] - a[1]);
+		const bmRank = new Map<number, number>();
+		bmSorted.forEach(([pos], i) => bmRank.set(pos, i));
+
+		let candidates: number[];
+		let baseScore: (pos: number) => number;
+		if (hasSecond) {
+			// 융합 = plain BM25(어휘) ⊕ 섹션scoping RRF. 후보 = 양쪽 상위 풀 union(라우팅 틀려도 plain 보존).
+			const dnSorted = [...secondary!.entries()].sort((a, b) => b[1] - a[1]);
+			const dnRank = new Map<number, number>();
+			dnSorted.forEach(([pos], i) => dnRank.set(pos, i));
+			const pool = new Set<number>();
+			for (const [pos] of bmSorted.slice(0, RERANK_POOL)) pool.add(pos);
+			for (const [pos] of dnSorted.slice(0, RERANK_POOL)) pool.add(pos);
+			candidates = [...pool];
+			baseScore = (pos) =>
+				(bmRank.has(pos) ? 1 / (RRF_K + bmRank.get(pos)!) : 0) + (dnRank.has(pos) ? 1 / (RRF_K + dnRank.get(pos)!) : 0);
+		} else {
+			candidates = bmSorted.slice(0, RERANK_POOL).map(([pos]) => pos);
+			baseScore = (pos) => scores.get(pos) ?? 0;
+		}
+		if (c) candidates = candidates.filter((pos) => amtOk(idx.rows[pos].maxAmount, c));
+
+		const reranked = candidates
+			.map((pos): [number, number] => {
 				const ep = epOf(pos);
-				let s = bm25 * recencyWeight(ep.rank);
-				if (idx.rows[pos].blockType === 'text' && !ep.hasNeedle) s *= SURFACELESS_PENALTY;
+				let s = baseScore(pos) * recencyWeight(ep.rank);
+				// 표면어 없는 텍스트행 감점은 *plain BM25 단독*에서만(bigram 유령매칭 교정). 섹션scoping 모드선 canon 보강어 매칭이 정상이라 제외.
+				if (!hasSecond && idx.rows[pos].blockType === 'text' && !ep.hasNeedle) s *= SURFACELESS_PENALTY;
 				return [pos, s];
 			})
 			.sort((a, b) => b[1] - a[1]);

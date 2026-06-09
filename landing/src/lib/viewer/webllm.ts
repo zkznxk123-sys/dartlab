@@ -154,7 +154,7 @@ export async function answerQuestion(question: string, evidence: AskEvidence[], 
 		{ role: 'user' as const, content: `${buildEvidenceBlock(evidence)}\n\n[질문] ${question}` }
 	];
 	if (opts.onToken) {
-		const stream = await engine.chat.completions.create({ messages, temperature: 0.2, max_tokens: 512, stream: true });
+		const stream = await engine.chat.completions.create({ messages, temperature: 0.2, max_tokens: 512, frequency_penalty: 1.1, presence_penalty: 0.4, stream: true });
 		let full = '';
 		for await (const chunk of stream) {
 			const delta = chunk.choices[0]?.delta?.content ?? '';
@@ -165,7 +165,7 @@ export async function answerQuestion(question: string, evidence: AskEvidence[], 
 		}
 		return full.trim();
 	}
-	const reply = await engine.chat.completions.create({ messages, temperature: 0.2, max_tokens: 512 });
+	const reply = await engine.chat.completions.create({ messages, temperature: 0.2, max_tokens: 512, frequency_penalty: 1.1, presence_penalty: 0.4 });
 	return reply.choices[0]?.message?.content?.trim() ?? '';
 }
 
@@ -204,7 +204,8 @@ export function buildChatMessages(history: ChatTurn[], evidence: AskEvidence[]):
 export async function chatAnswer(history: ChatTurn[], evidence: AskEvidence[], opts: AnswerOpts = {}): Promise<string> {
 	const engine = await ensureModel(opts.modelId ?? DEFAULT_MODEL_ID, opts.onProgress);
 	const messages = buildChatMessages(history, evidence);
-	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 640, stream: true });
+	// frequency/presence penalty 필수 — 작은 모델(1B)이 페널티 없으면 "A52 5G Lite AI Lite…" 식 무한 반복 루프에 빠진다.
+	const stream = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 640, frequency_penalty: 1.1, presence_penalty: 0.4, stream: true });
 	let full = '';
 	for await (const chunk of stream) {
 		const delta = chunk.choices[0]?.delta?.content ?? '';

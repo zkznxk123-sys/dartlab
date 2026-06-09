@@ -5,6 +5,7 @@
 	import { base } from '$app/paths';
 	import { Download, Send, Sparkles, X } from 'lucide-svelte';
 	import { plainText, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
+	import { loadIntentModel, queryScope, type IntentModel } from '$lib/viewer/queryCanon';
 	import { composeAnswer } from '$lib/viewer/answerCompose';
 	import { resolveCompanies } from '$lib/viewer/companyNames';
 	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
@@ -65,6 +66,35 @@
 	let question = $state('');
 	let busy = $state(false);
 	let finSignals = $state<FinanceSignal[]>([]);
+	let intentModel = $state<IntentModel | null>(null); // intentModel(HF 라이브, 번들 fallback) — query→intent 라우팅→섹션 scoping. 1회 로드.
+
+	// opt-in 질문 수집 — 수신단(Cloudflare Worker) URL 이 설정된 경우만 활성(미설정=완전 비활성, UI 숨김). 기본 off, PII 0.
+	const FEEDBACK_URL: string = import.meta.env.VITE_FEEDBACK_URL ?? '';
+	let contribute = $state(false);
+	$effect(() => {
+		try {
+			contribute = localStorage.getItem('dartlab.viewer.contributeQuestions') === '1';
+		} catch {
+			/* localStorage 불가 무시 */
+		}
+	});
+	function toggleContribute() {
+		contribute = !contribute;
+		try {
+			localStorage.setItem('dartlab.viewer.contributeQuestions', contribute ? '1' : '0');
+		} catch {
+			/* 무시 */
+		}
+	}
+	// 익명 fire-and-forget — 질문 본문 + 예측 intent 만(회사코드/식별자 0). 실패 무음(AI 기능 무영향).
+	function logQuestion(q: string, intent: string) {
+		if (!FEEDBACK_URL || !contribute) return;
+		void fetch(FEEDBACK_URL, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ q, intent })
+		}).catch(() => {});
+	}
 	let guideOpen = $state(false); // hidden 상태에서 설치 가이드 펼침(blocked/no-model 은 항상 펼침)
 	let inputEl = $state<HTMLTextAreaElement | null>(null);
 	let scrollEl = $state<HTMLElement | null>(null);
@@ -142,6 +172,9 @@
 			}
 		});
 	});
+	$effect(() => {
+		void loadIntentModel().then((m) => (intentModel = m)); // 시드 라우팅 모델 1회 로드(모듈 캐시 → 1회)
+	});
 	// [회귀가드] ask.chat·ollama 는 code 변경에 불간섭(크로스-회사 대화 유지 핵심). 여기에 ask.chat=[] 또는
 	// {#key code} 추가 시 회사 이동마다 대화 소멸 — 절대 금지. finance prefetch 만 code 따라간다.
 	$effect(() => {
@@ -204,7 +237,10 @@
 	// 현재 회사(=code) 패널에서 grounded 답 — 결정론(즉시) + (모델 ready 면) 대화 스트리밍.
 	// b/i 를 인자로 받아 이동 직후 stale 클로저를 피한다(항상 현재 reactive 값으로 호출). busy 해제 책임은 여기.
 	async function answerOnCompany(q: string, b: PanelBundle, i: SearchIndex) {
-		const { hits, added } = search(i, q, { topK: 6, expand: true });
+		// 결정론 섹션 scoping — query→intent(IDF 라우팅)→target 섹션 + canon 어휘보강. search 가 plain BM25 ⊕ (scope+canon)
+		// 을 RRF 융합(매퍼0·모델0·dense0). 5업종 held-out top-6 섹션도달 56~71%→92~98%. 라우팅 틀려도 plain 보존(always-safe).
+		const scope = queryScope(intentModel, q);
+		const { hits, added } = search(i, q, { topK: 6, expand: false, scopeSections: scope.sections, scopeTerms: scope.terms });
 		const evHits: SearchHit[] = [];
 		const evItems: EvRef[] = [];
 		let n = 1;
@@ -218,6 +254,7 @@
 		const sigs = finSignals.length ? finSignals : await loadCompanyFinanceSignals(code);
 		if (!finSignals.length && sigs.length) finSignals = sigs;
 		const composed = composeAnswer(q, hits, added, sigs);
+		logQuestion(q, composed.intent); // opt-in 익명 수집(설정+동의 시만) — 라우팅 개선 원천
 		const aiReady = provider === 'ollama' ? ask.ollamaState === 'ready' : ask.modelState === 'ready';
 		// suggestLlm(왜/종합/의미형)도 생성 트리거 — 근거 0건이어도 결정론 payload 로 grounded. (옛 코드는 산출만 하고 미사용)
 		const useAi = aiReady && (evItems.length > 0 || composed.citedSignal != null || composed.suggestLlm);
@@ -403,7 +440,12 @@
 					{:else if ask.modelState === 'loading'}
 						<div class="onboard-bar"><div class="bar-fill" style="width:{Math.round(ask.modelProgress * 100)}%"></div><span class="bar-txt">{loadingFromCache ? '불러오는 중' : '받는 중'} {Math.round(ask.modelProgress * 100)}%</span></div>
 					{:else if ask.modelState === 'ready'}
-						<span class="onboard-sub">{selModel.label} 준비됨 · 무엇이든 물어보세요</span>
+						<select class="model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 변경">
+							{#each pickerModels as m (m.id)}
+								<option value={m.id}>{m.label} · {sizeLabel(m.sizeMB)} · {m.note}{ask.cachedModels.includes(m.id) ? ' · 받음' : ''}</option>
+							{/each}
+						</select>
+						<span class="onboard-sub">{selModel.label} 준비됨 · 위에서 다른 모델로 바꿀 수 있어요(받은 모델은 즉시 전환)</span>
 					{:else if ask.modelState === 'error'}
 						<select class="model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 선택">
 							{#each pickerModels as m (m.id)}
@@ -509,6 +551,20 @@
 		</div>
 	{:else if ask.chat.length > 0 && ask.modelState === 'error'}
 		<button type="button" class="ad-model dl err" onclick={downloadModel}>대화 모델 로드 실패 · 다시</button>
+	{:else if ask.chat.length > 0 && ask.modelState === 'ready' && ask.ollamaState !== 'ready'}
+		<!-- 대화 중에도 모델 교체 — 받은 모델은 즉시 전환, 안 받은 모델은 받기로. 답 품질 낮으면 3B 로 바꿀 수 있게. -->
+		<select class="ad-model-pick" bind:value={ask.selectedModel} onchange={onModelChange} aria-label="대화 모델 변경">
+			{#each pickerModels as m (m.id)}
+				<option value={m.id}>{m.label}{ask.cachedModels.includes(m.id) ? ' · 받음' : ' · ' + sizeLabel(m.sizeMB)}</option>
+			{/each}
+		</select>
+	{/if}
+
+	<!-- 질문 익명 기여 opt-in — 수신단(VITE_FEEDBACK_URL) 설정된 경우만 노출. 기본 off. 검색 품질 개선용, PII 0. -->
+	{#if FEEDBACK_URL}
+		<button type="button" class="ad-contrib" class:on={contribute} onclick={toggleContribute} title="내 질문을 익명으로 보내 검색 품질 개선에 기여합니다(회사·식별정보 0). 언제든 끌 수 있어요.">
+			<span class="cb">{contribute ? '☑' : '☐'}</span> 질문 익명 기여(검색 개선)
+		</button>
 	{/if}
 
 	<div class="ad-askbox">
@@ -711,6 +767,47 @@
 	.model-pick:focus {
 		outline: none;
 		border-color: #38bdf8;
+	}
+	/* 대화 중 컴팩트 모델 교체 셀렉트 — 입력창 위 strip. 받은 모델 즉시 전환. */
+	.ad-model-pick {
+		flex-shrink: 0;
+		align-self: flex-start;
+		margin: 0 12px 8px;
+		max-width: calc(100% - 24px);
+		padding: 6px 10px;
+		border: 1px solid #263145;
+		border-radius: 8px;
+		background: #0a0e18;
+		color: #94a3b8;
+		font: inherit;
+		font-size: 11.5px;
+		cursor: pointer;
+	}
+	.ad-model-pick:focus {
+		outline: none;
+		border-color: #38bdf8;
+	}
+	/* opt-in 질문 기여 토글 — 입력창 위 작은 텍스트 버튼. 기본 muted, 켜지면 초록. */
+	.ad-contrib {
+		flex-shrink: 0;
+		align-self: flex-start;
+		margin: 0 12px 6px;
+		padding: 2px 4px;
+		border: none;
+		background: transparent;
+		color: #64748b;
+		font: inherit;
+		font-size: 10.5px;
+		cursor: pointer;
+	}
+	.ad-contrib:hover {
+		color: #94a3b8;
+	}
+	.ad-contrib.on {
+		color: #34d399;
+	}
+	.ad-contrib .cb {
+		font-size: 11px;
 	}
 	.onboard-dl {
 		display: inline-flex;
