@@ -179,6 +179,24 @@
 .dlTerm .assetChip.uw { color: var(--dn); border-color: rgba(29, 100, 220, 0.3); }
 .dlTerm .assetChip.nu { color: var(--dim); }
 
+/* LEFT LENS (scan 축소판: 경제/주가/재무) */
+.dlTerm .lensBar { display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--bd); border-radius: 2px; padding: 2px; }
+.dlTerm .lensTab { flex: 1; background: transparent; color: var(--dim); font-family: var(--cond); font-weight: 700; font-size: 10px; letter-spacing: 0.5px; border: none; border-radius: 2px; padding: 3px 4px; cursor: pointer; }
+.dlTerm .lensTab.on { background: rgba(251, 146, 60, 0.14); color: var(--amber); }
+.dlTerm .lensTab:hover:not(.on) { color: var(--txt); }
+.dlTerm .lensScan { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); text-decoration: none; padding: 0 5px; white-space: nowrap; }
+.dlTerm .lensScan:hover { color: var(--amber); }
+.dlTerm .segGroup.mini .seg { font-size: 8px; padding: 1px 4px; }
+.dlTerm .rankList { display: flex; flex-direction: column; max-height: 460px; overflow-y: auto; }
+.dlTerm .rankRow { display: grid; grid-template-columns: 18px 1fr auto auto; align-items: center; gap: 6px; padding: 2.5px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
+.dlTerm .rankRow:hover { background: var(--dl-bg-overlay); }
+.dlTerm .rankRow.on { background: rgba(251, 146, 60, 0.08); box-shadow: inset 2px 0 0 var(--amber); }
+.dlTerm .rkN { font-size: 8.5px; color: var(--dimmer); text-align: right; }
+.dlTerm .rkName { display: flex; flex-direction: column; min-width: 0; }
+.dlTerm .rkName b { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .rkInd { font-family: var(--cond); font-size: 8px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .rkVal { font-size: 10px; text-align: right; white-space: nowrap; }
+
 /* SCREENER */
 .dlTerm .scrRow { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 7px; padding: 3px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
 .dlTerm .scrRow:hover { background: var(--dl-bg-overlay); }
