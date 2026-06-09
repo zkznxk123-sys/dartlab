@@ -321,12 +321,13 @@
 /* 지표·드로잉 팝오버 */
 .dlTerm .ctWrap { position: relative; }
 .dlTerm .ctMenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 12; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
-.dlTerm .ctRow { display: flex; gap: 3px; }
-.dlTerm .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 168px; }
+.dlTerm .ctMenu .ctRow { display: flex; gap: 3px; }
+.dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 208px; }
 .dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .mItem:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .mItem.mClear { width: 100%; color: var(--dl-red, #f0616f); }
+.dlTerm .ctMenuLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; margin: 3px 1px 0; }
 .dlTerm .ohlcTag { position: absolute; top: 5px; left: 8px; z-index: 5; display: flex; gap: 11px; font-family: var(--mono); font-size: 10px; color: var(--dim); pointer-events: none; }
 .dlTerm .ohlcTag b { color: var(--txt); font-weight: 600; }
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }
