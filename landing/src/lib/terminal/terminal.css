@@ -10,12 +10,12 @@
 	--amber: var(--dl-orange);
 	--amberDim: #b1701f;
 	--credit: var(--dl-red);
-	/* 한국 컨벤션 유지하되 첫인상 강렬함 완화 (캄 모드 — dartlab 토큰보다 살짝 desaturate) */
-	--up: #d65b56;               /* 상승 = 차분한 빨강 */
-	--dn: #5681c4;               /* 하락 = 차분한 파랑 */
-	--good: var(--dl-good);
+	/* 최초 zip 팔레트 — 상승=초록 / 하락=빨강 / good=파랑 (dartlab 톤 참고, 과하지 않게) */
+	--up: #34d399;               /* 상승 = 초록 */
+	--dn: #f0616f;               /* 하락 = 빨강 */
+	--good: #60a5fa;             /* good = 파랑 */
 	--warn: var(--dl-warn);
-	--industry: var(--dl-cat-runtime);
+	--industry: #a78bfa;
 	--valuation: var(--dl-good);
 	--txt: var(--dl-ink);
 	--dim: var(--dl-ink-mute);
@@ -175,8 +175,8 @@
 .dlTerm .quadDesc { font-size: 9px; color: var(--dim); line-height: 1.35; text-wrap: pretty; }
 .dlTerm .quadAssets { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
 .dlTerm .assetChip { font-family: var(--mono); font-size: 8px; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--bd); }
-.dlTerm .assetChip.ow { color: var(--up); border-color: rgba(228, 63, 63, 0.3); }
-.dlTerm .assetChip.uw { color: var(--dn); border-color: rgba(29, 100, 220, 0.3); }
+.dlTerm .assetChip.ow { color: var(--up); border-color: rgba(52, 211, 153, 0.3); }
+.dlTerm .assetChip.uw { color: var(--dn); border-color: rgba(240, 97, 111, 0.3); }
 .dlTerm .assetChip.nu { color: var(--dim); }
 
 /* LEFT LENS (scan 축소판: 경제/주가/재무) */
@@ -209,11 +209,11 @@
 .dlTerm .scrName .si { font-family: var(--mono); font-size: 8px; color: var(--dimmer); }
 .dlTerm .scrGrades { display: flex; gap: 2px; }
 .dlTerm .gPill { font-family: var(--cond); font-weight: 700; font-size: 8.5px; padding: 1px 4px; border-radius: 2px; line-height: 1.4; }
-.dlTerm .gPill.tUp { background: rgba(228, 63, 63, 0.14); color: var(--up); }
-.dlTerm .gPill.tGood { background: rgba(52, 211, 153, 0.14); color: var(--good); }
+.dlTerm .gPill.tUp { background: rgba(52, 211, 153, 0.14); color: var(--up); }
+.dlTerm .gPill.tGood { background: rgba(96, 165, 250, 0.14); color: var(--good); }
 .dlTerm .gPill.tNeu { background: rgba(148, 163, 184, 0.12); color: var(--dim); }
 .dlTerm .gPill.tWarn { background: rgba(251, 191, 36, 0.14); color: var(--warn); }
-.dlTerm .gPill.tDn { background: rgba(29, 100, 220, 0.14); color: var(--dn); }
+.dlTerm .gPill.tDn { background: rgba(240, 97, 111, 0.14); color: var(--dn); }
 .dlTerm .scrRet { font-family: var(--mono); font-size: 9.5px; text-align: right; width: 42px; }
 
 /* SECTOR MAP */
@@ -295,29 +295,11 @@
 .dlTerm .eodBadge { margin-left: auto; font-family: var(--mono); font-size: 8px; color: var(--dimmer); border: 1px solid var(--bd); border-radius: 2px; padding: 1px 5px; letter-spacing: 0.3px; white-space: nowrap; }
 .dlTerm .chartLoad { height: 300px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--dimmer); padding: 0 12px; text-align: center; }
 
-/* FINANCIAL CARDS (ui/web 포팅) */
-.dlTerm .finCardBody { padding: 4px 6px 2px; }
-.dlTerm .mlWrap { display: flex; flex-direction: column; gap: 2px; }
-.dlTerm .mlWrap canvas { display: block; width: 100%; }
-.dlTerm .mlLegend { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 1px; }
-.dlTerm .mlItem { display: flex; align-items: center; gap: 3px; font-family: var(--cond); font-size: 8.5px; color: var(--dim); }
-.dlTerm .mlItem b { color: var(--txt); }
-.dlTerm .mlDot { width: 6px; height: 6px; border-radius: 1px; }
-.dlTerm .dupont { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 6px; flex-wrap: wrap; }
-.dlTerm .dpF { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.dlTerm .dpL { font-family: var(--cond); font-size: 8px; color: var(--dimmer); letter-spacing: 0.3px; text-transform: uppercase; }
-.dlTerm .dpF b { font-size: 13px; }
-.dlTerm .dpF.res b { font-size: 16px; }
-.dlTerm .dpOp { font-family: var(--mono); font-size: 11px; color: var(--dimmer); }
-.dlTerm .stackWrap { display: flex; flex-direction: column; gap: 5px; padding: 7px; }
-.dlTerm .stackRow { display: grid; grid-template-columns: 34px 1fr 52px; align-items: center; gap: 7px; }
-.dlTerm .stackLbl { font-family: var(--cond); font-weight: 600; font-size: 9px; color: var(--dim); }
-.dlTerm .stackBar { height: 12px; display: flex; border-radius: 2px; overflow: hidden; background: var(--dl-bg-overlay); }
-.dlTerm .stackSeg { height: 100%; }
-.dlTerm .stackTot { font-size: 9.5px; text-align: right; color: var(--txt); }
-.dlTerm .stackLegend { display: flex; flex-wrap: wrap; gap: 7px; padding-top: 2px; border-top: 1px solid var(--dl-line); }
-.dlTerm .slItem { display: flex; align-items: center; gap: 3px; font-family: var(--cond); font-size: 8px; color: var(--dim); }
-.dlTerm .slDot { width: 6px; height: 6px; border-radius: 1px; }
+/* FINANCIAL STATEMENT CHARTS ($chart 래퍼) */
+.dlTerm .finChart { padding: 5px 7px; }
+.dlTerm .finChart svg { width: 100%; height: auto; display: block; }
+.dlTerm .finChart figure { margin: 0; }
+.dlTerm .finChart figcaption { font-family: var(--cond); font-size: 9px; color: var(--dimmer); margin-bottom: 3px; }
 
 /* RADAR */
 .dlTerm .radarWrap { display: flex; align-items: center; gap: 6px; padding: 3px; }

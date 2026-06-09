@@ -42,11 +42,11 @@ export function sign(n: number | null | undefined, d = 2): string {
 	if (n == null || Number.isNaN(n)) return '—';
 	return (n > 0 ? '+' : '') + fmtNum(n, d);
 }
-// heat color for sector/change cells (한국 컨벤션: 상승=빨강, 하락=파랑)
+// heat color for sector/change cells (zip 팔레트: 상승=초록, 하락=빨강)
 export function heat(v: number, max = 1): string {
 	const t = Math.max(-1, Math.min(1, v / max));
-	if (t >= 0) return `rgba(228, 63, 63, ${0.06 + t * 0.45})`;
-	return `rgba(29, 100, 220, ${0.06 + -t * 0.45})`;
+	if (t >= 0) return `rgba(52, 211, 153, ${0.06 + t * 0.45})`;
+	return `rgba(240, 97, 111, ${0.06 + -t * 0.45})`;
 }
 
 export const PROV: Record<string, { kr: string; en: string; cls: string; t: Bilingual }> = {

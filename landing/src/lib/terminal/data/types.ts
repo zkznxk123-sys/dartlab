@@ -3,6 +3,8 @@
 // 가짜 필드 없음 — cf.opening/closing 는 실데이터에서 null 이라 표면에 노출하지 않는다.
 
 export type Num = number | null;
+// ui/shared/chart 의 ChartSpec (loose — 차트 컴포넌트는 @ts-nocheck spec 객체 수신)
+export type ChartSpec = Record<string, unknown>;
 export type Lang = 'kr' | 'en' | 'dual';
 export type Tone = 'up' | 'down' | 'good' | 'warn' | 'neutral';
 export type Prov = 'live' | 'derived' | 'wire';
@@ -336,6 +338,8 @@ export interface Company {
 	};
 	fundamentals: { per: Num; pbr: Num; psr: Num; npm: Num; roe: Num; opm: Num; dr: Num };
 	financials: Financials;
+	// $chart(ui/shared/chart) ChartSpec — 손익/재무상태/현금흐름 그래프
+	charts: { income: ChartSpec; balance: ChartSpec; cashflow: ChartSpec };
 	trendAnnual: TrendSeries;
 	trendQuarter: TrendSeries | null;
 	income: Statement;

@@ -5,8 +5,9 @@
 	import Radar from '../charts/Radar.svelte';
 	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
-	import MiniLines from '../charts/MiniLines.svelte';
-	import StackBar from '../charts/StackBar.svelte';
+	import IncomeTrendMatrixChart from '$chart/IncomeTrendMatrixChart.svelte';
+	import BalanceStructureTrendChart from '$chart/BalanceStructureTrendChart.svelte';
+	import CashflowSignedMatrixChart from '$chart/CashflowSignedMatrixChart.svelte';
 	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 
@@ -50,7 +51,6 @@
 
 	const p = $derived(co.price);
 	const e = $derived(co.eco);
-	const fin = $derived(co.financials);
 	const stats = $derived([
 		{ l: '1M', v: p.ret1m == null ? '—' : sign(p.ret1m, 1) + '%', t: chgClass(p.ret1m) },
 		{ l: '3M', v: p.ret3m == null ? '—' : sign(p.ret3m, 1) + '%', t: chgClass(p.ret3m) },
@@ -169,39 +169,16 @@
 	{/if}
 </Panel>
 
-<!-- 재무 카드 (ui/web 포팅 — finance.json 5Y, 즉시) -->
-<div class="rowSplit">
-	<Panel {lang} className="eValuation" prov="derived" title={{ kr: '마진 추세', en: 'MARGIN TREND' }} sub={{ kr: 'finance 5Y', en: 'finance 5Y' }} flush>
-		<div class="finCardBody">
-			<MiniLines periods={fin.years} height={58}
-				series={[{ label: lang === 'en' ? 'OP' : '영업', color: '#fb923c', data: fin.opMargin, unit: '%' }, { label: lang === 'en' ? 'NET' : '순', color: '#34d399', data: fin.netMargin, unit: '%' }, { label: 'ROE', color: '#60a5fa', data: fin.roe, unit: '%' }]} />
-		</div>
-	</Panel>
-	<Panel {lang} className="eValuation" prov="derived" title={{ kr: 'DuPont · ROE 분해', en: 'DUPONT ROE' }} sub={{ kr: '순익률×회전×레버리지', en: 'margin×turn×lev' }} flush>
-		<div class="dupont">
-			<div class="dpF"><span class="dpL">{lang === 'en' ? 'NET MGN' : '순이익률'}</span><b class="mono">{fin.dupont.netMargin == null ? '—' : fin.dupont.netMargin.toFixed(1) + '%'}</b></div>
-			<span class="dpOp">×</span>
-			<div class="dpF"><span class="dpL">{lang === 'en' ? 'ASSET T' : '자산회전'}</span><b class="mono">{fin.dupont.assetTurn == null ? '—' : fin.dupont.assetTurn.toFixed(2)}</b></div>
-			<span class="dpOp">×</span>
-			<div class="dpF"><span class="dpL">{lang === 'en' ? 'LEVER' : '레버리지'}</span><b class="mono">{fin.dupont.equityMult == null ? '—' : fin.dupont.equityMult.toFixed(2)}</b></div>
-			<span class="dpOp">=</span>
-			<div class="dpF res"><span class="dpL">ROE</span><b class="mono tUp">{fin.dupont.roe == null ? '—' : fin.dupont.roe.toFixed(1) + '%'}</b></div>
-		</div>
-		<div class="finNote">{lang === 'en' ? 'ROE source: operations vs leverage' : 'ROE 의 원천 — 영업 vs 레버리지'}</div>
-	</Panel>
-</div>
-
-<div class="rowSplit">
-	<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무상태 구성', en: 'BALANCE SHEET' }} sub={{ kr: '최신 · 조 KRW', en: 'latest · T KRW' }} flush>
-		<StackBar groups={[{ label: lang === 'en' ? 'ASSET' : '자산', segs: fin.assetMix }, { label: lang === 'en' ? 'FUND' : '조달', segs: fin.fundMix }]} />
-	</Panel>
-	<Panel {lang} className="eCredit" prov="derived" title={{ kr: '레버리지 · 안정성', en: 'LEVERAGE' }} sub={{ kr: 'finance 5Y', en: 'finance 5Y' }} flush>
-		<div class="finCardBody">
-			<MiniLines periods={fin.years} height={58} refLines={[100]}
-				series={[{ label: lang === 'en' ? 'D/E' : '부채비율', color: '#d65b56', data: fin.deRatio, unit: '%' }, { label: lang === 'en' ? 'CURR' : '유동비율', color: '#5681c4', data: fin.currRatio, unit: '%' }]} />
-		</div>
-	</Panel>
-</div>
+<!-- 재무제표 그래프 ($chart — IS/BS/CF, ui/web 대시보드 방식 배선) -->
+<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '손익 추세', en: 'INCOME TREND' }} sub={{ kr: 'IS · 5Y · 조 KRW', en: 'IS · 5Y' }} flush>
+	<div class="finChart"><IncomeTrendMatrixChart spec={co.charts.income} /></div>
+</Panel>
+<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무상태 구조', en: 'BALANCE STRUCTURE' }} sub={{ kr: 'BS · 자산·조달·자본', en: 'BS · 5Y' }} flush>
+	<div class="finChart bs"><BalanceStructureTrendChart spec={co.charts.balance} /></div>
+</Panel>
+<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '현금흐름', en: 'CASH FLOW' }} sub={{ kr: 'CF · 최신', en: 'CF · latest' }} flush>
+	<div class="finChart"><CashflowSignedMatrixChart spec={co.charts.cashflow} /></div>
+</Panel>
 
 <div class="rowSplit">
 	<!-- RADAR -->

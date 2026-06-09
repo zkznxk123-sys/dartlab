@@ -19,8 +19,8 @@
 	let dims = $state({ w: 800, h: 300 });
 
 	const C = {
-		up: '#d65b56', dn: '#5681c4', ma20: '#fb923c', ma60: '#60a5fa', bb: 'rgba(167,139,250,0.55)',
-		grid: '#1b2130', axis: '#2a3142', text: '#a3a8b3', macdUp: 'rgba(214,91,86,0.6)', macdDn: 'rgba(86,129,196,0.6)'
+		up: '#34d399', dn: '#f0616f', ma20: '#fb923c', ma60: '#60a5fa', bb: 'rgba(167,139,250,0.55)',
+		grid: '#1b2130', axis: '#2a3142', text: '#a3a8b3', macdUp: 'rgba(52,211,153,0.6)', macdDn: 'rgba(240,97,111,0.6)'
 	};
 	const PERIOD_N: Record<string, number> = { '3M': 66, '5M': 110, '6M': 132, '1Y': 252, MAX: 100000 };
 
@@ -220,7 +220,7 @@
 				const x = X(i);
 				const up = c.c >= c.o;
 				const h = (c.v / vMax) * subH;
-				ctx.fillStyle = up ? 'rgba(214,91,86,0.45)' : 'rgba(86,129,196,0.45)';
+				ctx.fillStyle = up ? 'rgba(52,211,153,0.45)' : 'rgba(240,97,111,0.45)';
 				ctx.fillRect(x - Math.max(1, cw * 0.62) / 2, subTop + subH - h, Math.max(1, cw * 0.62), h);
 			});
 			ctx.fillStyle = C.text;

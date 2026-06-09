@@ -19,7 +19,8 @@ import type {
 	PercentileMetric,
 	Financials,
 	StackSeg,
-	FinanceCompany
+	FinanceCompany,
+	ChartSpec
 } from './types';
 
 const SECTOR_EN: Record<string, string> = {
@@ -395,6 +396,88 @@ export function createEngine(raw: RawData): Engine {
 		};
 	}
 
+	// $chart ChartSpec 빌더 — 재무제표(IS/BS/CF)를 그래프로 (ui/web 대시보드 방식)
+	function buildCharts(fin: FinanceCompany): { income: ChartSpec; balance: ChartSpec; cashflow: ChartSpec } {
+		const yrs = years;
+		const is = fin.is;
+		const T = fin.bs.totals;
+		const A = fin.bs.assets || {};
+		const L = fin.bs.liab || {};
+		const E = fin.bs.equity || {};
+		const arr = (o: Record<string, Num[]>, k: string): Num[] => o[k] || [];
+		const sub = (a: Num[], b: Num[]): Num[] => a.map((v, i) => (v != null && b[i] != null ? +(v - b[i]!).toFixed(2) : null));
+		const sumArr = (...xs: Num[][]): Num[] => yrs.map((_, i) => { let s = 0; let any = false; for (const x of xs) { if (x[i] != null) { s += x[i]!; any = true; } } return any ? +s.toFixed(2) : null; });
+		const netMargin = is.sales.map((s, i) => (s && is.net[i] != null ? +((is.net[i]! / s) * 100).toFixed(1) : null));
+
+		const income: ChartSpec = {
+			title: '손익 추세',
+			categories: yrs,
+			series: [
+				{ name: '매출액', data: is.sales.slice(), color: '#60a5fa', type: 'bar', axis: 'amount', unit: '조' },
+				{ name: '영업이익', data: is.op.slice(), color: '#fb923c', type: 'bar', axis: 'amount', unit: '조' },
+				{ name: '당기순이익', data: is.net.slice(), color: '#34d399', type: 'line', axis: 'amount', unit: '조' },
+				{ name: '영업이익률', data: is.opMargin.slice(), color: '#fbbf24', type: 'line', axis: 'margin', unit: '%' },
+				{ name: '순이익률', data: netMargin, color: '#a78bfa', type: 'line', axis: 'margin', unit: '%' }
+			],
+			options: { secondaryY: ['영업이익률', '순이익률'] }
+		};
+
+		// 재무상태 — 3 밴드(자산/조달/자본) 내부 구성 (shares = 그룹 내 %)
+		const assetSegs: [string, Num[], string][] = [
+			['현금', arr(A, 'cash'), '#60a5fa'], ['매출채권', arr(A, 'recv'), '#34d399'], ['재고', arr(A, 'inv'), '#fbbf24'],
+			['유형자산', arr(A, 'tang'), '#fb923c'], ['무형자산', arr(A, 'intan'), '#a78bfa']
+		];
+		const assetKnown = sumArr(...assetSegs.map((s) => s[1]));
+		assetSegs.push(['기타자산', sub(T.totalAsset, assetKnown).map((v) => (v != null && v > 0 ? v : null)), '#475569']);
+		const liabSegs: [string, Num[], string][] = [
+			['매입채무', arr(L, 'pay'), '#f0616f'], ['단기차입', arr(L, 'shortDebt'), '#ef8b6f'], ['장기차입', arr(L, 'longDebt'), '#d9534f'],
+			['사채', arr(L, 'bonds'), '#c4453f'], ['충당부채', arr(L, 'prov'), '#a83838']
+		];
+		const liabKnown = sumArr(...liabSegs.map((s) => s[1]));
+		liabSegs.push(['기타부채', sub(T.totalLiab, liabKnown).map((v) => (v != null && v > 0 ? v : null)), '#7a3030']);
+		const equitySegs: [string, Num[], string][] = [
+			['자본금', arr(E, 'paidIn'), '#1d6b4d'], ['자본잉여금', arr(E, 'surplus'), '#2a8a63'],
+			['이익잉여금', arr(E, 'retained'), '#34d399'], ['기타자본', arr(E, 'otherComp'), '#6ee7b7']
+		];
+		const shareOf = (data: Num[], total: Num[]): Num[] => data.map((v, i) => (v != null && total[i] ? +((v / total[i]!) * 100).toFixed(1) : null));
+		const totFunding = sumArr(T.totalLiab, T.totalEquity);
+		const mkSeg = (group: string, segs: [string, Num[], string][], total: Num[]) =>
+			segs.filter((s) => s[1].some((v) => v != null && v > 0)).map((s) => ({ name: `${group}::${s[0]}`, data: s[1], shares: shareOf(s[1], total), color: s[2], unit: '조' }));
+		const drLatest = (() => { const l = T.totalLiab[T.totalLiab.length - 1]; const e = T.totalEquity[T.totalEquity.length - 1]; return l != null && e ? +((l / e) * 100).toFixed(0) : null; })();
+		const balance: ChartSpec = {
+			title: '재무상태 구조',
+			categories: yrs,
+			series: [
+				...mkSeg('자산', assetSegs, T.totalAsset),
+				...mkSeg('조달', liabSegs, T.totalLiab),
+				...mkSeg('자본', equitySegs, T.totalEquity)
+			],
+			options: { totalAssetsSeries: T.totalAsset.slice(), totalFundingSeries: totFunding, debtRatio: drLatest }
+		};
+
+		const cf = fin.cf || ({} as FinanceCompany['cf']);
+		const fcf = cf.op != null && cf.inv != null ? +(cf.op + cf.inv).toFixed(2) : null;
+		const ly = yrs[yrs.length - 1];
+		const cashflow: ChartSpec = {
+			title: '현금흐름 (최신)',
+			categories: [ly],
+			series: [
+				{ name: '영업활동', data: [cf.op ?? null], color: '#34d399', signed: true, tone: cf.op != null && cf.op >= 0 ? 'good' : 'bad', unit: '조' },
+				{ name: '투자활동', data: [cf.inv ?? null], color: '#60a5fa', signed: true, tone: 'neutral', unit: '조' },
+				{ name: '재무활동', data: [cf.fin ?? null], color: '#fb923c', signed: true, tone: 'neutral', unit: '조' }
+			],
+			options: {
+				latest: [
+					{ id: 'cfo', label: '영업CF', value: cf.op ?? null, unit: '조', tone: cf.op != null && cf.op >= 0 ? 'good' : 'bad' },
+					{ id: 'cfi', label: '투자CF', value: cf.inv ?? null, unit: '조', tone: 'neutral' },
+					{ id: 'cff', label: '재무CF', value: cf.fin ?? null, unit: '조', tone: 'neutral' },
+					{ id: 'fcf', label: 'FCF', value: fcf, unit: '조', tone: fcf != null && fcf >= 0 ? 'good' : 'bad' }
+				]
+			}
+		};
+		return { income, balance, cashflow };
+	}
+
 	function cagr(arr: Num[]): number | null {
 		const a = arr.filter((v): v is number => v != null);
 		if (a.length < 2 || a[0] <= 0) return null;
@@ -555,6 +638,7 @@ export function createEngine(raw: RawData): Engine {
 			},
 			fundamentals: { per, pbr, psr, npm, roe: roe ? roe.v : null, opm: opm ? opm.v : null, dr: dr ? dr.v : null },
 			financials: computeFinancials(fin),
+			charts: buildCharts(fin),
 			trendAnnual: trendFromFinance(fin),
 			trendQuarter: trendFromQuarters(code),
 			income, balance, cashflow, ratios, credit, analysis,
