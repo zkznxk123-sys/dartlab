@@ -36,6 +36,7 @@ MONITORED_WORKFLOWS = [
     "Search Index Main (monthly)",
     "Quant Audit",
     "Update KindList",
+    "Intent Model Pipeline",  # 공시 Q&A 라우팅 모델 빌드+회귀게이트+HF 업로드 (cron 0 20 일요일)
 ]
 
 FAILURE_LABEL = "pipeline-failure"

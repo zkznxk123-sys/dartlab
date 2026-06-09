@@ -1,0 +1,29 @@
+{
+  "_doc": "배치 B — 배치 A·curated 와 겹치지 않는 완전 새 질문. 확정시드 병합 후 일반화 재검증(수집 파이프라인 신규 트래픽 시뮬레이션).",
+  "items": [
+    ["여기 어느 나라 회사야?", "overview"], ["회사가 언제 생겼지?", "overview"], ["대표가 누구지?", "overview"],
+    ["옛날엔 뭐 하던 회사야?", "ma"], ["다른 회사 흡수한 적 있어?", "ma"],
+    ["최대주주 바뀌었어?", "shareholders"], ["큰손이 누구야?", "shareholders"],
+    ["수익 잘 나?", "financialPerf"], ["매출 늘었나?", "financialPerf"], ["남는 게 있어?", "financialPerf"],
+    ["생산량 어때?", "production"], ["원자재 어디서 사와?", "production"],
+    ["감사인이 뭐라 그래?", "audit"], ["회계 깨끗해?", "audit"],
+    ["배당 챙겨줘?", "dividend"], ["주주한테 돈 나눠줘?", "dividend"],
+    ["직원 많은 편이야?", "workforce"], ["연봉 수준 어때?", "workforce"],
+    ["사외이사 몇 자리야?", "governance"], ["이사회 어떻게 굴러가?", "governance"],
+    ["임원 돈 얼마나 챙겨?", "execPay"], ["경영진 보수 공개됐어?", "execPay"],
+    ["법적 문제 있어?", "litigation"], ["송사 걸린 거 있어?", "litigation"],
+    ["친인척 회사랑 거래해?", "relatedParty"], ["내부거래 했어?", "relatedParty"],
+    ["환율 위험 관리해?", "riskFactor"], ["어떤 리스크가 있어?", "riskFactor"],
+    ["기술 개발 많이 해?", "rnd"], ["특허 보유 현황은?", "rnd"],
+    ["자금 어떻게 마련했어?", "financing"], ["회사채 찍었어?", "financing"],
+    ["자사주 매입했어?", "treasury"], ["발행주식 몇 주지?", "treasury"],
+    ["딸린 회사 어디야?", "affiliates"], ["투자한 법인 있어?", "affiliates"],
+    ["이 회사 업종이 뭐야?", "business"], ["주된 사업이 뭐지?", "business"],
+    ["수주 상황 어때?", "salesOrder"], ["납품처가 어디야?", "salesOrder"],
+    ["현금 잘 들어와?", "cashflow"], ["영업현금 어때?", "cashflow"],
+    ["빚 많은 편이야?", "financialPos"], ["자본 상태는 어때?", "financialPos"],
+    ["정관 내용이 뭐야?", "regulation"], ["주총 안건이 뭐였지?", "regulation"],
+    ["사업 잘 될 것 같아?", "outlook"], ["경영진 전망은 어때?", "outlook"],
+    ["부채비율 어느 정도야?", "ratios"], ["마진 괜찮아?", "ratios"]
+  ]
+}
