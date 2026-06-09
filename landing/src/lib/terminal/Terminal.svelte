@@ -55,7 +55,7 @@
 
 	const co = $derived(eng.buildCompany(sym));
 	const tickerCodes = $derived(eng.featured(14));
-	const langTabs: { k: Lang; l: string }[] = [{ k: 'kr', l: '한국어' }, { k: 'en', l: 'EN' }, { k: 'dual', l: 'KR+EN' }];
+	const langTabs: { k: Lang; l: string }[] = [{ k: 'kr', l: '한국어' }, { k: 'en', l: 'EN' }];
 
 	function setFlash(msg: string, ms = 900) {
 		flash = msg;

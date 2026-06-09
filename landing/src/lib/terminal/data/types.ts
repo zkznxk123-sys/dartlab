@@ -5,7 +5,7 @@
 export type Num = number | null;
 // ui/shared/chart 의 ChartSpec (loose — 차트 컴포넌트는 @ts-nocheck spec 객체 수신).
 export type ChartSpec = Record<string, unknown>;
-export type Lang = 'kr' | 'en' | 'dual';
+export type Lang = 'kr' | 'en';
 export type Tone = 'up' | 'down' | 'good' | 'warn' | 'neutral';
 export type Prov = 'live' | 'derived' | 'wire';
 

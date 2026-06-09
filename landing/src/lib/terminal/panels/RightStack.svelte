@@ -65,7 +65,6 @@
 	});
 
 	let stmt = $state<'SUM' | 'IS' | 'BS' | 'CF' | 'RT'>('SUM');
-	let acct = $state<'kr' | 'en'>('kr');
 	const tabs = [{ k: 'SUM', kr: '요약', en: 'Key' }, { k: 'IS', kr: '손익', en: 'IS' }, { k: 'BS', kr: '재무상태', en: 'BS' }, { k: 'CF', kr: '현금흐름', en: 'CF' }, { k: 'RT', kr: '비율', en: 'Ratios' }] as const;
 	const summary = $derived<Statement>({
 		periods: co.income.periods,
@@ -128,11 +127,10 @@
 
 <!-- FINANCIALS -->
 <Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={{ kr: 'c.panel · 연간', en: 'c.panel · annual' }} flush>
-	{#snippet right()}<span class="finCtl"><button class={'seg' + (acct === 'kr' ? ' on' : '')} onclick={() => (acct = acct === 'kr' ? 'en' : 'kr')}>{acct === 'kr' ? '한글' : 'EN'}</button></span>{/snippet}
 	<div class="finTabs">{#each tabs as t (t.k)}<button class={'finTab ' + (stmt === t.k ? 'on' : '')} onclick={() => (stmt = t.k)}>{lang === 'en' ? t.en : t.kr}</button>{/each}</div>
 	{#if stmt === 'RT'}
 		<div class="finScroll"><table class="finTable"><tbody>
-			{#each co.ratios as r (r.id)}<tr><td class="finAcct">{acct === 'kr' ? r.kr : r.en}</td><td class="finAcct dim">{acct === 'kr' ? r.en : r.kr}</td><td class={'r mono ' + toneClass(r.tone)}>{r.v}</td></tr>{/each}
+			{#each co.ratios as r (r.id)}<tr><td class="finAcct">{lang === 'en' ? r.en : r.kr}</td><td class={'r mono ' + toneClass(r.tone)}>{r.v}</td></tr>{/each}
 		</tbody></table></div>
 	{:else}
 		<div class="finScroll"><table class="finTable">
@@ -140,7 +138,7 @@
 			<tbody>
 				{#each stmtData.rows as r (r.id)}
 					<tr class={['op', 'net', 'fcf', 'totalEquity', 'totalAsset'].includes(r.id) ? 'finKey' : ''}>
-						<td class="finAcct">{acct === 'kr' ? r.kr : r.en}</td>
+						<td class="finAcct">{lang === 'en' ? r.en : r.kr}</td>
 						{#each r.vals as val, i (i)}<td class={'r mono ' + (r.pct ? (val != null && val >= 8 ? 'tUp' : val != null && val < 0 ? 'tDn' : 'tNeu') : val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : r.pct ? val.toFixed(1) + '%' : fmtNum(val, 1)}</td>{/each}
 					</tr>
 				{/each}

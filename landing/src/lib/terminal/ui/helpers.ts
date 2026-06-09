@@ -6,10 +6,9 @@ type MaybeBilingual = Bilingual | { kr?: string; en?: string } | string | null |
 export function tx(obj: MaybeBilingual, lang: Lang): string {
 	if (obj == null) return '';
 	if (typeof obj === 'string') return obj;
-	if (lang === 'dual') return (obj.kr || '') + (obj.en && obj.en !== obj.kr ? ' · ' + obj.en : '');
 	return obj[lang] || obj.kr || obj.en || '';
 }
-// compact: dual 은 KR 로 collapse (dense 라벨용)
+// compact 라벨 — 현재 언어 1개만 (dense)
 export function txc(obj: MaybeBilingual, lang: Lang): string {
 	if (obj == null) return '';
 	if (typeof obj === 'string') return obj;
