@@ -4,7 +4,8 @@
 	import { onMount, untrack } from 'svelte';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { Maximize2, Minimize2, Columns3, MessageSquare, Table2, X, Plus, Search, Download } from 'lucide-svelte';
+	import { Maximize2, Minimize2, Columns3, MessageSquare, Bug, Table2, X, Plus, Search, Download } from 'lucide-svelte';
+	import { brand } from '$lib/brand';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { loadPanelBundle } from '$lib/viewer/panelLoad';
 	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
@@ -452,6 +453,9 @@
 			<button type="button" class="fs-btn" onclick={() => (discussOpen = true)} title="공시 토론 (GitHub Discussions)">
 				<MessageSquare size={13} /> 토론
 			</button>
+			<a class="fs-btn" href="{brand.repo}/issues/new" target="_blank" rel="noopener" title="이슈 등록 — 버그·요청 (GitHub)">
+				<Bug size={13} /> 이슈
+			</a>
 			{#if bundle}
 				<div class="add-wrap">
 					<button type="button" class="fs-btn" class:active={compareMode} onclick={() => (addOpen = !addOpen)} title="회사 간 비교 — 회사 추가 (최대 6)" disabled={allBundles.length >= 6}>
