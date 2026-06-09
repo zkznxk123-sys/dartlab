@@ -301,7 +301,8 @@ def _edgarDispatch(axis: str, kwargs: dict) -> pl.DataFrame | None:
     pl.DataFrame | None
         EDGAR 축 결과 DataFrame. 구현 없는 축이면 None.
     """
-    # XBRL 기반 7축 — _edgar_helpers.scan_edgar_accounts 활용
+    # XBRL 기반 11 축 — edgarScan._DISPATCH 와 1:1. 미라우팅 시 scanClass 가 DART 구현
+    # (valuation=네이버 실시간가, audit=DART 감사데이터)으로 잘못 fallback 하므로 전 축을 라우팅한다.
     _EDGAR_XBRL_AXES = {
         "profitability",
         "growth",
@@ -312,6 +313,8 @@ def _edgarDispatch(axis: str, kwargs: dict) -> pl.DataFrame | None:
         "dividendTrend",
         "capital",
         "debt",
+        "valuation",
+        "audit",
     }
     if axis in _EDGAR_XBRL_AXES:
         from dartlab.scan.builders.edgar.scan import edgarScan

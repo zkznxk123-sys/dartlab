@@ -171,6 +171,52 @@ def _financeTargets(period: list[str] | str | None, freq: str) -> tuple[list[str
     return labels, panelPeriods
 
 
+def _companyCellsByPeriodEdgar(
+    code: str,
+    statement: str,
+    freq: str,
+    scope: str,
+    *,
+    targetLabels: list[str] | None = None,
+    panelPeriods: list[str] | None = None,
+) -> dict[str, dict[str, tuple[str, float]]]:
+    """{period: {account: (label, USD 실값)}} — EDGAR native 셀 비교 재료 (KR 경로 미러).
+
+    DART KR 경로(``_companyCellsByPeriod``)의 EDGAR 어댑터. 식별키는 ``acode`` 대신 native
+    ``account``(EdgarMapper snakeId, 매핑 실패 시 raw concept). EDGAR 값은 USD 실값이라 원
+    환산(scale) 없이 그대로 쓴다(``_detectUnitScalesByStatement`` 미호출 — 그건 KR 백만원 캡션 전용).
+    ``STATEMENT_VARIANTS`` 로 is↔cis 폴백(포괄손익표만 내는 미국 회사 흡수). import 는 함수 lazy
+    (모듈 top-level 로 올리면 edgar.panel ↔ dart.panel.compare 초기화 cycle).
+    """
+    from dartlab.core.utils.helpers import parseNumStr
+    from dartlab.providers.edgar.panel.native import _cellsFromPanel as _edgarCells
+    from dartlab.providers.edgar.panel.native import _statementWideVariants
+
+    cells = _edgarCells(code, panelPeriods)
+    if cells is None:
+        return {}
+    w = _statementWideVariants(cells, logical=statement.lower(), freq=freq, scope=scope)
+    if w is None or w.is_empty():
+        return {}
+    wanted = set(targetLabels) if targetLabels is not None else None
+    periods = [c for c in w.columns if _PERIOD_RE.fullmatch(c)]
+    if wanted is not None:
+        periods = [p for p in periods if p in wanted]
+    out: dict[str, dict[str, tuple[str, float]]] = {}
+    for p in periods:
+        bucket = out.setdefault(p, {})
+        for r in w.iter_rows(named=True):
+            acc = r.get("account")
+            raw = r.get(p)
+            lab = r.get("label") or ""
+            # account 첫 등장 우선. EDGAR native 는 이미 axisPath=="" depth-1 만 담는다.
+            if acc and raw is not None and acc not in bucket:
+                num = parseNumStr(str(raw))
+                if num is not None:
+                    bucket[acc] = (str(lab), num)  # USD 실값 (단위배율 1, 무스케일)
+    return out
+
+
 def _companyCellsByPeriod(
     code: str,
     statement: str,
@@ -181,7 +227,16 @@ def _companyCellsByPeriod(
     targetLabels: list[str] | None = None,
     panelPeriods: list[str] | None = None,
 ) -> dict[str, dict[str, tuple[str, float]]]:
-    """{period: {acode: (label, 원환산값)}} — statement 변형 union, depth-1 라인아이템."""
+    """{period: {acode: (label, 원환산값)}} — statement 변형 union, depth-1 라인아이템.
+
+    KR(DART)은 acode×period 셀(원 환산), US(EDGAR)는 native account×period 셀(USD 실값)로 갈린다 —
+    셀 스키마가 시장마다 다르므로(``acode``/``axisPath`` vs ``account``) marketNs 로 어댑터를 분기한다.
+    """
+    if marketNs == "us":
+        return _companyCellsByPeriodEdgar(
+            code, statement, freq, scope, targetLabels=targetLabels, panelPeriods=panelPeriods
+        )
+
     from dartlab.core.utils.helpers import parseNumStr
 
     from . import cell as _cell
@@ -484,8 +539,8 @@ def _resolveInputs(
         )
     marketNs = "us" if markets == {"US"} else "kr"
     mode = "finance" if topicVal and topicVal.lower() in _FIN_KEYS else "row"
-    if mode == "finance" and marketNs != "kr":
-        raise ValueError("US 재무 compare 는 아직 지원하지 않습니다. EDGAR 재무 adapter 확정 후 열립니다.")
+    if mode == "finance" and marketNs not in ("kr", "us"):
+        raise ValueError(f"재무 compare 미지원 시장: {marketNs}.")
     return _Resolved(
         codes=norm, topic=topicVal, period=periodVal, scope=scopeVal, freq=freqVal, marketNs=marketNs, mode=mode
     )
@@ -692,7 +747,7 @@ def _compareDiagnostics(
             "identityColumns": _identityColumns(columns, cellCols),
             "cellColumns": cellCols,
             "cellColumnShape": _cellColumnShape(cellCols),
-            "valueUnit": "KRW" if r.mode == "finance" else None,
+            "valueUnit": (("USD" if r.marketNs == "us" else "KRW") if r.mode == "finance" else None),
             "presentCodes": presentCodes,
             "missingCodes": [c for c in r.codes if c not in presentCodes],
             "sharedRows": sharedRows,

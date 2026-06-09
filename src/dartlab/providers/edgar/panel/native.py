@@ -39,7 +39,16 @@ NATIVE_CELL_SCHEMA: dict[str, pl.DataType] = {
     "cellOrder": pl.UInt32,
 }
 
-_LOGICAL_TO_STMT: dict[str, str] = {"is": "IS", "bs": "BS", "cf": "CF", "cis": "CIS", "sce": "EF"}
+# 논리 키 → 물리 statement 후보(우선순위). DART ``panel.cell.STATEMENT_VARIANTS`` 의 EDGAR 미러 —
+# 미국 회사가 손익을 단일 손익(IS) 또는 포괄손익(CIS) 한 표로만 내는 표현 변형을 한 곳에서 흡수한다
+# (폴백을 코드에 흩지 않음). BS/CF/EF 는 단일 후보.
+STATEMENT_VARIANTS: dict[str, tuple[str, ...]] = {
+    "is": ("IS", "CIS"),  # 손익 — 손익 우선, 없으면 포괄손익
+    "cis": ("CIS", "IS"),  # 포괄손익 — 포괄 우선, 없으면 손익
+    "bs": ("BS",),
+    "cf": ("CF",),
+    "sce": ("EF",),
+}
 _RATIO_SOURCE: dict[str, str] = {"BS": "bs", "IS": "is", "CF": "cf"}
 
 
@@ -159,6 +168,34 @@ def _statementWide(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -
     return wide.select(["account", "label", *periodCols])
 
 
+def _statementWideVariants(df: pl.DataFrame, *, logical: str, freq: str, scope: str) -> pl.DataFrame | None:
+    """논리 키 → ``STATEMENT_VARIANTS`` 물리 후보를 순서대로 시도, 첫 비어있지 않은 wide 반환.
+
+    DART ``panel.cell._resolveStatement`` 의 EDGAR 미러 — is/cis 처럼 표현 변형(손익/포괄손익)이
+    있는 논리 키를 한 후보씩 떨어뜨려 본다. 단일 후보(bs/cf/sce)는 ``_statementWide`` 와 동치.
+
+    Args:
+        df: ``_cellsFromPanel`` 결과 native cell DataFrame.
+        logical: 논리 키 (``is``/``bs``/``cf``/``cis``/``sce``).
+        freq: ``"quarter"``/``"year"``/``"ytd"``.
+        scope: scope 필터 (EDGAR native 는 ``"consolidated"`` 만 존재).
+
+    Returns:
+        ``[account, label, *period]`` wide 또는 후보 전부 빈 경우 None.
+
+    Raises:
+        없음 — 미지원 논리 키는 None.
+
+    Example:
+        >>> _statementWideVariants(df, logical="is", freq="year", scope="consolidated")  # doctest: +SKIP
+    """
+    for phys in STATEMENT_VARIANTS.get(logical, ()):
+        out = _statementWide(df, statement=phys, freq=freq, scope=scope)
+        if out is not None and not out.is_empty():
+            return out
+    return None
+
+
 def readNative(
     ticker: str,
     *,
@@ -172,7 +209,7 @@ def readNative(
     Args:
         ticker: US ticker.
         statement: ``is``/``bs``/``cf``/``cis``/``sce``/``ratios``.
-        freq: ``"quarter"`` 또는 ``"annual"``.
+        freq: ``"quarter"``/``"year"``/``"ytd"`` (DART ``_freqMask`` 공유 어휘).
         scope: ``"consolidated"`` 등 scope 필터.
         periods: 선택 기간 필터.
 
@@ -188,27 +225,30 @@ def readNative(
     key = statement.lower()
     if key == "ratios":
         return _readRatios(ticker, freq=freq, scope=scope, periods=periods)
-    phys = _LOGICAL_TO_STMT.get(key)
-    if phys is None:
+    if key not in STATEMENT_VARIANTS:
         return None
     cells = _cellsFromPanel(ticker, periods)
     if cells is None:
         return None
-    return _statementWide(cells, statement=phys, freq=freq, scope=scope)
+    return _statementWideVariants(cells, logical=key, freq=freq, scope=scope)
 
 
 def _readRatios(ticker: str, *, freq: str, scope: str, periods: list[str] | None) -> pl.DataFrame | None:
-    """native 재무비율 — panel native bs/is/cf 셀 → core ratios."""
-    from dartlab.core.ratioCategories import RATIO_CATEGORIES, RATIO_FIELD_LABELS
-    from dartlab.core.ratios import calcRatioSeries, toSeriesDict
+    """native 재무비율 — panel native bs/is/cf 셀 → core ratios (DART ``readRatios`` 미러).
+
+    bs/is/cf statement 항목을 snakeId series 로 조립 → ``core.ratios.calcRatioSeries`` (공식 SSOT)
+    → DART ``panel.cell._ratiosToWide`` (시계열 wide 조립 SSOT) 로 마감한다. 비율 wide 조립 로직은
+    DART 와 한 함수를 공유해 분기 drift 를 막는다 (재구현 0).
+    """
+    from dartlab.core.ratios import calcRatioSeries
     from dartlab.core.utils.helpers import parseNumStr
+    from dartlab.providers.dart.panel.cell import _ratiosToWide
 
     cells = _cellsFromPanel(ticker, periods)
     if cells is None:
         return None
     statements = {
-        sj: _statementWide(cells, statement=_LOGICAL_TO_STMT[key], freq=freq, scope=scope)
-        for sj, key in _RATIO_SOURCE.items()
+        sj: _statementWideVariants(cells, logical=key, freq=freq, scope=scope) for sj, key in _RATIO_SOURCE.items()
     }
     periodSet: set[str] = set()
     for df in statements.values():
@@ -232,19 +272,4 @@ def _readRatios(ticker: str, *, freq: str, scope: str, periods: list[str] | None
     if not series:
         return None
     rs = calcRatioSeries(series, years, yoyLag=(4 if freq == "quarter" else 1))
-    ratioDict = toSeriesDict(rs)[0]["RATIO"]
-    if not ratioDict:
-        return None
-    ordered = [field for _, fields in RATIO_CATEGORIES for field in fields if field in ratioDict]
-    rows: list[dict] = []
-    for field in ordered:
-        vals = ratioDict[field]
-        rec: dict = {"ratio": field, "label": RATIO_FIELD_LABELS.get(field, field)}
-        for i, y in enumerate(years):
-            rec[y] = vals[i] if i < len(vals) else None
-        rows.append(rec)
-    if not rows:
-        return None
-    wide = pl.DataFrame(rows)
-    periodCols = sorted((c for c in wide.columns if c not in ("ratio", "label")), reverse=True)
-    return wide.select(["ratio", "label", *periodCols])
+    return _ratiosToWide(rs, years)

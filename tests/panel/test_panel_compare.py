@@ -115,8 +115,8 @@ def test_compare_invalid_scope_raises() -> None:
         compare(["005930", "000660"], topic="bs", scope="merged")
 
 
-def test_compare_invalid_scope_precedes_us_finance_guard() -> None:
-    """US finance 미지원보다 잘못된 scope 입력 계약 오류가 먼저다."""
+def test_compare_invalid_scope_precedes_finance_dispatch() -> None:
+    """잘못된 scope 입력 계약 오류는 finance(US/KR) 셀 디스패치보다 먼저 raise 한다."""
     with pytest.raises(ValueError, match="scope"):
         compare(["AAPL", "MSFT"], topic="bs", scope="merged")
 
@@ -172,10 +172,38 @@ def test_compare_empty_period_list_raises() -> None:
         compare(["005930", "000660"], period=[])
 
 
-def test_compare_us_finance_not_supported_yet() -> None:
-    """US row compare 와 달리 finance cell compare 는 EDGAR adapter 확정 전 차단한다."""
-    with pytest.raises(ValueError, match="US 재무 compare"):
-        compare(["AAPL", "MSFT"], topic="bs")
+def test_compare_us_finance_now_supported(monkeypatch: pytest.MonkeyPatch) -> None:
+    """US 재무 compare 는 EDGAR native adapter 로 열렸다 — account 정렬 + USD valueUnit + honest-gap.
+
+    KR(acode·원환산)과 달리 US 는 native account(snakeId)·USD 실값으로 갈린다. 두 회사 공통
+    account 는 같은 행, 한쪽만 있는 account 는 null(honest-gap)로 보존한다.
+    """
+    import importlib
+
+    cmp = importlib.import_module("dartlab.providers.dart.panel.compare")
+    native = importlib.import_module("dartlab.providers.edgar.panel.native")
+
+    perTicker = {
+        "AAPL": pl.DataFrame(
+            {"account": ["sales", "net_profit"], "label": ["Revenue", "Net income"], "2024": ["391035", "93736"]}
+        ),
+        "MSFT": pl.DataFrame({"account": ["sales"], "label": ["Revenue"], "2024": ["245122"]}),
+    }
+    # _cellsFromPanel 은 ticker 를 marker 로 흘려보내고, _statementWideVariants 가 그 marker 로 wide 선택.
+    monkeypatch.setattr(native, "_cellsFromPanel", lambda code, periods=None: code)
+    monkeypatch.setattr(native, "_statementWideVariants", lambda cells, *, logical, freq, scope: perTicker.get(cells))
+
+    df = cmp.compare(["AAPL", "MSFT"], topic="is", freq="year")
+    assert {"acode", "label", "AAPL", "MSFT"} <= set(df.columns)
+    salesRow = df.filter(pl.col("acode") == "sales")
+    assert salesRow["AAPL"][0] == 391035.0 and salesRow["MSFT"][0] == 245122.0  # 공통 account 병치
+    niRow = df.filter(pl.col("acode") == "net_profit")
+    assert niRow["AAPL"][0] == 93736.0 and niRow["MSFT"][0] is None  # honest-gap (MSFT 결손)
+
+    diag = cmp._compareDiagnostics(["AAPL", "MSFT"], topic="is", freq="year")
+    assert diag["ok"] is True
+    assert diag["marketNs"] == "us"
+    assert diag["valueUnit"] == "USD"  # KRW 아님 — US 는 USD 실값
 
 
 def test_compare_us_ticker_normalized_before_market_guard() -> None:
@@ -213,7 +241,6 @@ def test_compare_diagnostics_normalizes_codes_before_error() -> None:
         (["005930", "000660"], {"topic": "bs", "freq": "monthly"}, "freq"),
         (["005930", "000660"], {"topic": "bs", "scope": "merged"}, "scope"),
         (["AAPL", "MSFT"], {"topic": "bs", "scope": "merged"}, "scope"),
-        (["AAPL", "MSFT"], {"topic": "bs"}, "US 재무"),
     ],
 )
 def test_compare_diagnostics_invalid_variants_return_payload(
