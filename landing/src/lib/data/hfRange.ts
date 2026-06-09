@@ -1,7 +1,6 @@
 import type { AsyncBuffer, FileMetaData, ParquetQueryFilter } from 'hyparquet';
+import { HF_RESOLVE } from './origin';
 
-const DEFAULT_HF_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
-const HF_RESOLVE = (import.meta.env.VITE_DARTLAB_HF_RESOLVE ?? DEFAULT_HF_RESOLVE).replace(/\/+$/, '');
 export type FetchLike = typeof fetch;
 
 export interface HfObjectRef {

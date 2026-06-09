@@ -1,11 +1,9 @@
 import { base } from '$app/paths';
 import { readJsonCache, writeJsonCache } from './cacheStore';
 
-const DEFAULT_HF_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
-export const HF_RESOLVE = (import.meta.env.VITE_DARTLAB_HF_RESOLVE ?? DEFAULT_HF_RESOLVE).replace(
-	/\/+$/,
-	''
-);
+// HF resolve base URL 은 origin.ts SSOT 에서 (내부 사용 + consumers 호환 위해 re-export).
+import { HF_RESOLVE } from './origin';
+export { HF_RESOLVE };
 const DEFAULT_TTL_MS = 6 * 60 * 60 * 1000;
 
 export type FetchLike = typeof fetch;
