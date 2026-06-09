@@ -222,7 +222,7 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 	};
 
 	// 표시 기간: 분기면 마지막 16, annual 이면 마지막 8
-	const keepN = freq === 'quarter' ? 16 : 8;
+	const keepN = freq === 'quarter' ? 24 : 12;
 	const used = (freq === 'quarter' ? allPk : allPk.filter((p) => p.q === 4)).slice(-keepN);
 	// 최신 분기가 명백한 이상치(매출 standalone > 직전 4분기 중앙값 1.6×)면 제외 — 예비/오류 공시 방어
 	while (freq === 'quarter' && used.length >= 5) {
@@ -379,6 +379,11 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 		{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', signed: true, series: [
 			{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
 			{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
+		] },
+		{ key: 'scale', title: '규모', unit: '조', series: [
+			{ name: '자산', data: ser('assets'), color: C.blue, type: 'line' },
+			{ name: '부채', data: ser('liabilities'), color: C.red, type: 'line' },
+			{ name: '자본', data: ser('equity'), color: C.good, type: 'line' }
 		] }
 	];
 
