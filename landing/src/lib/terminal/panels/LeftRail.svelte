@@ -16,10 +16,12 @@
 	let { eng, lang, active, onPick }: Props = $props();
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
-	// scan 와 동일 universe: finance+prices 보유 회사
+	// scan 와 동일 universe: finance+prices 보유 회사 (eng 불변 → 1 회 산출 후 캐시)
 	const nodes = $derived(
 		(eng.raw.eco?.nodes || []).filter((n) => eng.raw.finance.companies[n.id] && eng.priceOf(n.id))
 	);
+	// 소문자 회사명 사전 — 키 입력마다 nameOf().toLowerCase() 재계산 방지 (1 회 산출)
+	const lowerNames = $derived(new Map(nodes.map((n) => [n.id, (eng.nameOf(n.id) || '').toLowerCase()])));
 
 	// ── 통합 스크리너: 주가·재무를 한 리스트에서 정렬·조건검색 (3탭 렌즈 폐지) ──
 	type MetricKey = 'return1m' | 'return3m' | 'return1y' | 'volatility1y' | 'roe' | 'opMargin' | 'revCagr' | 'marketShare';
@@ -40,17 +42,23 @@
 	const activeMetric = $derived(METRICS.find((m) => m.k === metricKey) as MetricDef);
 	let screenerOpen = $state(false);
 
-	// 조건 검색
+	// 조건 검색 — query 는 입력 즉시 반영(입력칸 반응성), queryD 는 140ms 디바운스(무거운 rows 재계산 억제)
 	let query = $state('');
+	let queryD = $state('');
+	$effect(() => {
+		const q = query;
+		const t = setTimeout(() => (queryD = q), 140);
+		return () => clearTimeout(t);
+	});
 	let minVal = $state<number | null>(null);
 	let market = $state(''); // '' | 'KOSPI' | 'KOSDAQ'
 	let sectorFilter = $state(''); // industry id (히트맵 셀 클릭)
 	const MKT: Record<string, string> = { KOSPI: '유가증권', KOSDAQ: '코스닥' };
 	const matchFilter = (n: EcoNode): boolean => {
-		if (query) {
-			const q = query.trim().toLowerCase();
-			const name = (eng.nameOf(n.id) || '').toLowerCase();
-			if (!name.includes(q) && !n.id.includes(query.trim())) return false;
+		if (queryD) {
+			const q = queryD.trim().toLowerCase();
+			const name = lowerNames.get(n.id) || '';
+			if (!name.includes(q) && !n.id.includes(queryD.trim())) return false;
 		}
 		if (market && n.market !== MKT[market]) return false;
 		if (sectorFilter && n.industry !== sectorFilter) return false;

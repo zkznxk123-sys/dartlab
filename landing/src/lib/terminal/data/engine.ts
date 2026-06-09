@@ -136,8 +136,10 @@ export function createEngine(raw: RawData): Engine {
 	for (const n of raw.eco?.nodes || []) ecoByCode[n.id] = n;
 	const years = raw.finance?.years || ['2021', '2022', '2023', '2024', '2025'];
 
-	const industryNodes = (industry: string): EcoNode[] =>
-		Object.values(ecoByCode).filter((n) => n.industry === industry);
+	// industry → nodes 인덱스 1 회 구축 → industryNodes O(1) (회사전환마다 2664 전수스캔 3 회 제거).
+	const byIndustry: Record<string, EcoNode[]> = {};
+	for (const n of Object.values(ecoByCode)) (byIndustry[n.industry] ||= []).push(n);
+	const industryNodes = (industry: string): EcoNode[] => byIndustry[industry] || [];
 
 	function deriveCredit(fin: RawData['finance']['companies'][string]): Credit {
 		const dr = lastNonNull(fin.ratios.debtRatio);
@@ -401,7 +403,15 @@ export function createEngine(raw: RawData): Engine {
 		return (Math.pow(a[a.length - 1] / a[0], 1 / (a.length - 1)) - 1) * 100;
 	}
 
+	// 회사별 결과 캐시 — raw 불변이므로 재선택 시 즉시 반환(buildCompanyImpl 의 전수스캔 반복 제거).
+	const companyCache = new Map<string, Company | null>();
 	function buildCompany(code: string): Company | null {
+		if (companyCache.has(code)) return companyCache.get(code) ?? null;
+		const co = buildCompanyImpl(code);
+		companyCache.set(code, co);
+		return co;
+	}
+	function buildCompanyImpl(code: string): Company | null {
 		const fin = raw.finance.companies[code];
 		const px = raw.prices.data[code];
 		if (!fin || !px) return null;
