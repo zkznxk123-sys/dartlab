@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import type { Company, Lang } from '../data/types';
+	import type { Company, Lang, Tone, Num } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
-	import Radar from '../charts/Radar.svelte';
 	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
 	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
-	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
+	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
 
 	interface Props {
 		co: Company;
@@ -88,22 +87,47 @@
 		{ l: 'ROE', v: e.roe != null ? e.roe.toFixed(1) + '%' : '—' },
 		{ l: lang === 'en' ? 'OP MGN' : '영업이익률', v: e.opMargin != null ? e.opMargin.toFixed(1) + '%' : '—' }
 	]);
-	const w52pos = $derived(
-		p.hi52 && p.lo52 && p.hi52 > p.lo52 ? Math.max(0, Math.min(1, (p.last - p.lo52) / (p.hi52 - p.lo52))) : 0.5
-	);
-	const retCells = $derived([
-		{ l: '1M', v: p.ret1m, neu: false }, { l: '3M', v: p.ret3m, neu: false },
-		{ l: '1Y', v: p.ret1y, neu: false }, { l: 'σ 1Y', v: p.vol1y, neu: true }
+	// ── 하단 분석: 종합 판정 + DuPont ROE 분해 (모두 동기 tier — finance.json 즉시) ──
+	const fz = $derived(co.financials);
+	const dp = $derived(fz.dupont); // {netMargin, assetTurn, equityMult, roe}
+	const vd = $derived(co.verdict);
+	const dpTone = $derived(dp.roe == null ? 'tNeu' : dp.roe >= 12 ? 'tUp' : dp.roe >= 6 ? 'tNeu' : 'tDn');
+	const roeDriver = $derived.by<{ kr: string; en: string; tone: Tone } | null>(() => {
+		const { netMargin, assetTurn, equityMult } = dp;
+		if (netMargin == null || assetTurn == null || equityMult == null) return null;
+		if (equityMult >= 2.5 && netMargin < 8) return { kr: '레버리지형', en: 'leverage-led', tone: 'warn' };
+		if (netMargin >= 10) return { kr: '마진형', en: 'margin-led', tone: 'good' };
+		if (assetTurn >= 1) return { kr: '회전형', en: 'turnover-led', tone: 'up' };
+		return { kr: '균형형', en: 'balanced', tone: 'neutral' };
+	});
+	const dupontFactors = $derived([
+		{ k: 'nm', label: lang === 'en' ? 'Net mgn' : '순이익률', disp: dp.netMargin != null ? dp.netMargin.toFixed(1) + '%' : '—', arr: fz.netMargin, col: '#34d399', op: '×' },
+		{ k: 'at', label: lang === 'en' ? 'Asset turn' : '자산회전', disp: dp.assetTurn != null ? dp.assetTurn.toFixed(2) + '회' : '—', arr: fz.assetTurn, col: '#60a5fa', op: '×' },
+		{ k: 'em', label: lang === 'en' ? 'Leverage' : '레버리지', disp: dp.equityMult != null ? dp.equityMult.toFixed(2) + '배' : '—', arr: fz.equityMult, col: (dp.equityMult ?? 0) >= 2.5 ? '#f0616f' : (dp.equityMult ?? 0) >= 2 ? '#fbbf24' : '#a78bfa', op: '=' },
+		{ k: 'roe', label: 'ROE', disp: dp.roe != null ? dp.roe.toFixed(1) + '%' : '—', arr: fz.roe, col: '#34d399', op: '' }
 	]);
-	const f = $derived(co.fundamentals);
-	const fundCells = $derived([
-		{ l: 'PER', v: f.per != null ? f.per.toFixed(1) + 'x' : '—' },
-		{ l: 'PBR', v: f.pbr != null ? f.pbr.toFixed(2) + 'x' : '—' },
-		{ l: 'PSR', v: f.psr != null ? f.psr.toFixed(2) + 'x' : '—' },
-		{ l: 'ROE', v: f.roe != null ? f.roe.toFixed(1) + '%' : '—' },
-		{ l: lang === 'en' ? 'NET MGN' : '순이익률', v: f.npm != null ? f.npm.toFixed(1) + '%' : '—' },
-		{ l: lang === 'en' ? 'DEBT R' : '부채비율', v: f.dr != null ? f.dr.toFixed(0) + '%' : '—' }
-	]);
+	// 업종 백분위 중앙값 → 상위 N%
+	const pctTop = $derived.by<number | null>(() => {
+		const ms = co.percentile?.metrics ?? [];
+		const ps = ms.map((m) => m.p).filter((x): x is number => x != null).sort((a, b) => a - b);
+		if (!ps.length) return null;
+		return 100 - ps[Math.floor(ps.length / 2)] + 1;
+	});
+	// 미니 스파크라인 path
+	function spark(arr: Num[], w = 46, h = 13): string {
+		const vals = arr.filter((x): x is number => x != null);
+		if (vals.length < 2) return '';
+		const lo = Math.min(...vals), hi = Math.max(...vals), rng = hi - lo || 1, n = arr.length;
+		let d = '', pen = false;
+		arr.forEach((val, i) => {
+			if (val == null) { pen = false; return; }
+			const x = n <= 1 ? w / 2 : (i / (n - 1)) * w;
+			const y = h - ((val - lo) / rng) * h;
+			d += `${pen ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)} `;
+			pen = true;
+		});
+		return d.trim();
+	}
 	const v = $derived(co.valuation);
 	const valBand = $derived(
 		v && v.fairMid != null
@@ -212,37 +236,49 @@
 	{/if}
 </Panel>
 
-<div class="rowSplit">
-	<!-- RADAR -->
-	<Panel {lang} className="eIndustry" prov="live" title={{ kr: '종합 스노우플레이크', en: 'SNOWFLAKE' }} sub={{ kr: '6축 등급', en: '6-axis' }} flush>
-		<div class="radarWrap">
-			<Radar data={co.radar} {lang} size={134} />
-			<div class="radarLegend">
-				{#each co.radar as d (d.en)}
-					{@const sc = d.s == null ? 0 : Math.round(d.s * 100)}
-					{@const col = d.s == null ? 'var(--dimmer)' : d.s >= 0.66 ? 'var(--up)' : d.s >= 0.4 ? 'var(--warn)' : 'var(--dn)'}
-					<div class="rl">
-						<span class="rlName">{txc(d, lang)}</span>
-						<span class="rlBar"><span class="rlFill" style={`width:${sc}%;background:${col}`}></span></span>
-						<b class={d.s == null ? 'tNeu' : d.s >= 0.66 ? 'tUp' : d.s >= 0.4 ? 'tNeu' : 'tDn'}>{d.s == null ? '—' : sc}</b>
-					</div>
-				{/each}
-			</div>
+<!-- VERDICT (종합 판정 — co.verdict 합성, 동기 tier 즉시 렌더) -->
+<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '종합 판정', en: 'VERDICT' }} sub={{ kr: 'verdict · 합성', en: 'verdict · synth' }} flush>
+	{#snippet right()}<span class="vdRisk">{lang === 'en' ? 'risk' : '위험'} <b class="tDn">{vd.riskRed}</b>·<b class="tWarn">{vd.riskYellow}</b></span>{/snippet}
+	<div class="vdTop">
+		<span class={'vdBand ' + tcls(vd.band.tone)}>{txc(vd.band, lang)}</span>
+		<div class="vdChips">
+			<span class="vdChip"><i>{lang === 'en' ? 'credit' : '신용'}</i><b class="tCredit">{co.credit.grade}</b></span>
+			<span class="vdChip"><i>ROE</i><b class={dpTone}>{dp.roe != null ? dp.roe.toFixed(1) + '%' : '—'}</b>{#if roeDriver}<em class={tcls(roeDriver.tone)}>{txc(roeDriver, lang)}</em>{/if}</span>
+			{#if pctTop != null}<span class="vdChip"><i>{lang === 'en' ? 'sector' : '업종'}</i><b class="tUp">{lang === 'en' ? 'top ' + pctTop + '%' : '상위 ' + pctTop + '%'}</b></span>{/if}
+			{#if v && v.upside != null}<span class="vdChip"><i>{lang === 'en' ? 'value' : '밸류'}</i><b class={v.upside > 8 ? 'tUp' : v.upside < -8 ? 'tDn' : 'tNeu'}>{(v.upside >= 0 ? '+' : '') + v.upside.toFixed(0)}% {lang === 'en' ? 'up' : '여력'}</b></span>{/if}
 		</div>
-	</Panel>
-	<!-- RETURNS / RISK -->
-	<Panel {lang} className="eQuant" prov="live" title={{ kr: '수익률 · 리스크', en: 'RETURNS · RISK' }} sub={{ kr: 'prices-snapshot', en: 'prices-snapshot' }} flush>
-		<div class="retGrid">{#each retCells as c (c.l)}<div class="retCell"><span>{c.l}</span><b class={c.neu ? 'tNeu' : chgClass(c.v)}>{c.v == null ? '—' : sign(c.v, 1) + '%'}</b></div>{/each}</div>
-		<div class="w52">
-			<div class="w52Lbl"><span>{lang === 'en' ? '52W LOW' : '52주 최저'}</span><span>{lang === 'en' ? '52W HIGH' : '52주 최고'}</span></div>
-			<div class="w52Track"><div class="w52Fill" style={`width:${w52pos * 100}%`}></div><div class="w52Dot" style={`left:${w52pos * 100}%`}></div></div>
-			<div class="w52Lbl"><span class="mono">{fmtNum(p.lo52)}</span><span class="dim mono">{fmtNum(p.last)}</span><span class="mono">{fmtNum(p.hi52)}</span></div>
+	</div>
+	<div class="vdSummary">{tx(co.analysis.summary, lang)}</div>
+	{#if vd.strengths.length || vd.concerns.length}
+		<div class="vdSC">
+			{#each vd.strengths.slice(0, 3) as sg (sg.en)}<span class="vdS">▲ {tx(sg, lang)}</span>{/each}
+			{#each vd.concerns.slice(0, 3) as cn (cn.en)}<span class="vdC">▼ {tx(cn, lang)}</span>{/each}
 		</div>
-		<div class="finNote">price as of {p.asOf} · KRX</div>
-	</Panel>
-</div>
+	{/if}
+</Panel>
 
 <div class="rowSplit">
+	<!-- DUPONT ROE 분해 -->
+	<Panel {lang} className="eValuation" prov="derived" title={{ kr: 'DuPont ROE 분해', en: 'DUPONT ROE' }} sub={{ kr: '순이익률 × 자산회전 × 레버리지', en: 'margin × turn × leverage' }} flush>
+		{#snippet right()}<b class={'mono ' + dpTone}>{dp.roe != null ? dp.roe.toFixed(1) + '%' : '—'}</b>{/snippet}
+		<div class="dupontRow">
+			{#each dupontFactors as fct (fct.k)}
+				<div class="dpCell">
+					<span class="dpLbl">{fct.label}</span>
+					<b class="dpVal mono" style={`color:${fct.col}`}>{fct.disp}</b>
+					<svg class="dpSpark" viewBox="0 0 46 13" preserveAspectRatio="none" aria-hidden="true"><path d={spark(fct.arr)} fill="none" stroke={fct.col} stroke-width="1.2" /></svg>
+				</div>
+				{#if fct.op}<span class="dpOp">{fct.op}</span>{/if}
+			{/each}
+		</div>
+		<div class="dpVerdict">
+			{#if !roeDriver}{lang === 'en' ? 'Insufficient data for ROE decomposition.' : 'ROE 분해 데이터 부족.'}
+			{:else if roeDriver.tone === 'warn'}{lang === 'en' ? `Leverage-led — equity multiplier ${dp.equityMult?.toFixed(1)}×, margin only ${dp.netMargin?.toFixed(1)}%. Returns lean on debt.` : `차입 의존 ROE — 자본승수 ${dp.equityMult?.toFixed(1)}배, 순이익률 ${dp.netMargin?.toFixed(1)}%. 레버리지가 수익률을 떠받침.`}
+			{:else if roeDriver.tone === 'good'}{lang === 'en' ? `Margin-led — net margin ${dp.netMargin?.toFixed(1)}% drives returns. Durable quality.` : `마진형 ROE — 순이익률 ${dp.netMargin?.toFixed(1)}% 가 견인. 질 높은 수익률.`}
+			{:else if roeDriver.tone === 'up'}{lang === 'en' ? `Turnover-led — asset turn ${dp.assetTurn?.toFixed(2)}× drives returns.` : `회전형 ROE — 자산회전 ${dp.assetTurn?.toFixed(2)}회 가 견인. 효율 중심.`}
+			{:else}{lang === 'en' ? 'Balanced across margin, turnover and leverage.' : '마진·회전·레버리지가 고르게 기여하는 균형형 ROE.'}{/if}
+		</div>
+	</Panel>
 	<!-- VALUATION -->
 	{#if v}
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션 위치', en: 'VALUATION' }} sub={{ kr: '업종 중앙값 대비', en: 'vs peer median' }} flush>
@@ -274,18 +310,4 @@
 	{:else}
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션', en: 'VALUATION' }} flush><div class="storyEmpty">{lang === 'en' ? 'Insufficient data.' : '데이터 부족.'}</div></Panel>
 	{/if}
-	<!-- FUNDAMENTALS -->
-	<Panel {lang} className="eValuation" prov="derived" title={{ kr: '가치 · 펀더멘털', en: 'VALUATION' }} sub={{ kr: 'finance · derived', en: 'derived' }} flush>
-		<div class="fundGrid">{#each fundCells as c (c.l)}<div class="fundCell"><span class="fundL">{c.l}</span><span class="fundV mono">{c.v}</span></div>{/each}</div>
-	</Panel>
 </div>
-
-<!-- ANALYSIS -->
-<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '재무 분석', en: 'FINANCIAL ANALYSIS' }} sub={{ kr: 'c.analysis', en: 'c.analysis' }} flush>
-	<div class="anSummary">{tx(co.analysis.summary, lang)}</div>
-	<div class="anTracks">
-		{#each co.analysis.tracks as t (t.en)}
-			<div class="anRow"><span class="anName">{txc(t, lang)}</span><span class={'anDelta mono ' + toneClass(t.tone)}>{t.delta}</span><span class="anVerdict">{tx(t.verdict, lang)}</span></div>
-		{/each}
-	</div>
-</Panel>
