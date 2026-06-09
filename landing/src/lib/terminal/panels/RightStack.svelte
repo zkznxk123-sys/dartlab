@@ -51,10 +51,10 @@
 		loadCompanyRelations(code).then((r) => {
 			if (!cancelled) relations = r;
 		});
-		loadCompanyRegularFilings(code, 12).then((f) => {
+		loadCompanyRegularFilings(code, 500).then((f) => {
 			if (!cancelled) regFilings = f;
 		});
-		loadCompanyNonRegularFilings(code, { limit: 30 }).then((f) => {
+		loadCompanyNonRegularFilings(code, { limit: 200 }).then((f) => {
 			if (cancelled) return;
 			nonRegFilings = f;
 			nonRegState = f.length ? 'ready' : 'empty';

@@ -47,7 +47,10 @@
 	}
 	$effect(() => {
 		const onDocKey = (e: KeyboardEvent) => {
+			const tag = (e.target as HTMLElement | null)?.tagName;
+			const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
 			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdInput?.focus(); }
+			else if (e.key === '/' && !inInput) { e.preventDefault(); cmdInput?.focus(); }
 		};
 		window.addEventListener('keydown', onDocKey);
 		return () => window.removeEventListener('keydown', onDocKey);
@@ -176,9 +179,8 @@
 		</main>
 
 		<footer class="statusBar">
-			<span class="sbItem"><b class="tAmber">F1</b> SCREENER</span>
-			<span class="sbItem"><b class="tAmber">F2</b> TREND</span>
-			<span class="sbItem"><b class="tAmber">F3</b> GRADES</span>
+			<span class="sbItem"><b class="tAmber">⌘K</b> {lang === 'en' ? 'SEARCH' : '검색'}</span>
+			<span class="sbItem"><b class="tAmber">/</b> {lang === 'en' ? 'FOCUS' : '검색창'}</span>
 			<span class="sbItem dim">DATA · {eng.source}</span>
 			<span class="sbItem" style="gap:6px">
 				<span class="provTag pLive">LIVE</span><span class="dim">{lang === 'en' ? 'real' : '실데이터'}</span>
