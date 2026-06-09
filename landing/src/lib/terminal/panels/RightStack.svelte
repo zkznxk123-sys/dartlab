@@ -73,10 +73,13 @@
 	let stmt = $state<StmtKind | 'RT'>('IS');
 	let finMode = $state<FinMode>('quarter');
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
-	const tabs = [{ k: 'IS', kr: '손익', en: 'IS' }, { k: 'BS', kr: '재무상태', en: 'BS' }, { k: 'CF', kr: '현금흐름', en: 'CF' }, { k: 'EXP', kr: '비용', en: 'Expense' }, { k: 'RT', kr: '비율', en: 'Ratios' }] as const;
+	const tabs = [{ k: 'IS', kr: '손익', en: 'IS' }, { k: 'BS', kr: '재무상태', en: 'BS' }, { k: 'CF', kr: '현금흐름', en: 'CF' }, { k: 'RT', kr: '비율', en: 'Ratios' }] as const;
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
 	const finView = $derived(finBundle ? (finBundle.views[finMode] ?? finBundle.views[finBundle.defaultMode]) : null);
 	const KEY_ROWS = ['operatingIncome', 'netIncome', 'assets', 'equity', 'liabilities', 'cfOperating'];
+	// 최신 기간부터(역순) 표시 — 차트는 오름차순 유지, 표만 reverse.
+	const dispPeriods = $derived(finView ? finView.periods.slice().reverse() : []);
+	const stmtRows = $derived(finView ? (stmt === 'RT' ? finView.ratios : finView.statements[stmt as StmtKind]) : []);
 
 	const risks = $derived(co.risks);
 	const pc = $derived(co.percentile);
@@ -134,23 +137,19 @@
 <!-- FINANCIALS -->
 <Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · 조', en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
 	{#snippet right()}
-		{#if finBundle && finBundle.modes.filter((m) => m !== 'ttm').length > 1 && stmt !== 'RT'}
+		{#if finBundle && finBundle.modes.filter((m) => m !== 'ttm').length > 1}
 			<span class="segGroup mini">{#each finBundle.modes.filter((m) => m !== 'ttm') as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
 	{/snippet}
 	<div class="finTabs">{#each tabs as t (t.k)}<button class={'finTab ' + (stmt === t.k ? 'on' : '')} onclick={() => (stmt = t.k)}>{lang === 'en' ? t.en : t.kr}</button>{/each}</div>
-	{#if stmt === 'RT'}
-		<div class="finScroll"><table class="finTable"><tbody>
-			{#each co.ratios as r (r.id)}<tr><td class="finAcct">{lang === 'en' ? r.en : r.kr}</td><td class={'r mono ' + toneClass(r.tone)}>{r.v}</td></tr>{/each}
-		</tbody></table></div>
-	{:else if finView}
+	{#if finView}
 		<div class="finScroll finScrollX"><table class="finTable">
-			<thead><tr><th class="finAcct">{lang === 'en' ? 'ACCOUNT' : '계정'}</th>{#each finView.periods as p (p)}<th class="r">{p}</th>{/each}</tr></thead>
+			<thead><tr><th class="finAcct">{lang === 'en' ? 'ACCOUNT' : '계정'}</th>{#each dispPeriods as p (p)}<th class="r">{p}</th>{/each}</tr></thead>
 			<tbody>
-				{#each finView.statements[stmt] as r (r.key)}
+				{#each stmtRows as r (r.key)}
 					<tr class={KEY_ROWS.includes(r.key) ? 'finKey' : ''}>
-						<td class="finAcct">{lang === 'en' ? r.en : r.kr}</td>
-						{#each r.values as val, i (i)}<td class={'r mono ' + (val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : fmtNum(val, 1)}</td>{/each}
+						<td class="finAcct">{lang === 'en' ? r.en : r.kr}{#if r.unit}<span class="finUnit">{r.unit}</span>{/if}</td>
+						{#each r.values.slice().reverse() as val, i (i)}<td class={'r mono ' + (val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : fmtNum(val, 1)}</td>{/each}
 					</tr>
 				{/each}
 			</tbody>

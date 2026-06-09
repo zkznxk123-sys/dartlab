@@ -509,6 +509,7 @@
 .dlTerm .finTable th { font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 7px; text-align: right; border-bottom: 1px solid var(--bd); position: sticky; top: 0; background: var(--panel); }
 .dlTerm .finTable th.finAcct { text-align: left; }
 .dlTerm .finAcct { text-align: left; font-family: var(--sans); color: var(--txt); padding: 2.5px 7px; white-space: nowrap; }
+.dlTerm .finUnit { font-family: var(--mono); font-size: 7.5px; color: var(--dimmer); margin-left: 3px; font-weight: 400; }
 .dlTerm .finTable td.r { font-family: var(--mono); padding: 2.5px 7px; }
 .dlTerm .finTable tr.finKey { background: rgba(251, 146, 60, 0.05); }
 .dlTerm .finTable tr.finKey .finAcct { color: var(--amber); font-weight: 600; }

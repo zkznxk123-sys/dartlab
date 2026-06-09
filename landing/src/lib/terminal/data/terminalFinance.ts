@@ -27,9 +27,10 @@ export interface StmtRow {
 	key: string;
 	kr: string;
 	en: string;
-	values: Num[]; // 기간별 조 KRW
+	values: Num[]; // 기간별 조 KRW (비율 표는 % · 배)
+	unit?: string; // 비율 표 단위 표기 ('%' · '배'); 재무제표 본문은 생략(조)
 }
-export type StmtKind = 'IS' | 'BS' | 'CF' | 'EXP';
+export type StmtKind = 'IS' | 'BS' | 'CF';
 export interface TerminalFinance {
 	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
 	freq: 'quarter' | 'annual' | 'ttm';
@@ -37,10 +38,11 @@ export interface TerminalFinance {
 	revYoy: Num[]; // 매출 YoY % (분기=4분기전, 연간=전년)
 	opYoy: Num[]; // 영업이익 YoY %
 	cashQuality: Num[]; // 영업CF / 순이익 배수 (순이익>0 일 때만)
-	statements: Record<StmtKind, StmtRow[]>; // 손익·재무상태·현금흐름·비용 — 전 기간 계정×기간 표
+	statements: Record<StmtKind, StmtRow[]>; // 손익·재무상태·현금흐름 — 전 기간 계정×기간 표
+	ratios: StmtRow[]; // 핵심 비율 시계열 — 동일 기간 축 (% · 배)
 }
 
-// 재무제표 표(손익/재무상태/현금흐름/비용) 행 정의 — STD key + 표시 라벨.
+// 재무제표 표(손익/재무상태/현금흐름) 행 정의 — STD key + 표시 라벨.
 const STMT_DEF: Record<StmtKind, { key: string; kr: string; en: string }[]> = {
 	IS: [
 		{ key: 'revenue', kr: '매출액', en: 'Revenue' },
@@ -70,12 +72,6 @@ const STMT_DEF: Record<StmtKind, { key: string; kr: string; en: string }[]> = {
 		{ key: 'cfFinancing', kr: '재무활동현금흐름', en: 'Financing CF' },
 		{ key: 'capex', kr: '설비투자(CAPEX)', en: 'CapEx' },
 		{ key: 'dividendsPaid', kr: '배당금지급', en: 'Dividends paid' }
-	],
-	EXP: [
-		{ key: 'costOfSales', kr: '매출원가', en: 'COGS' },
-		{ key: 'sga', kr: '판매관리비', en: 'SG&A' },
-		{ key: 'financeCosts', kr: '금융비용', en: 'Finance costs' },
-		{ key: 'incomeTax', kr: '법인세비용', en: 'Income tax' }
 	]
 };
 
@@ -473,8 +469,21 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		});
 		// 재무제표 표 — 전 기간 계정×기간 (조 KRW). 손익·재무상태·현금흐름·비용.
 		const mkStmt = (defs: { key: string; kr: string; en: string }[]): StmtRow[] => defs.map((d) => ({ key: d.key, kr: d.kr, en: d.en, values: ser(d.key) }));
-		const statements: Record<StmtKind, StmtRow[]> = { IS: mkStmt(STMT_DEF.IS), BS: mkStmt(STMT_DEF.BS), CF: mkStmt(STMT_DEF.CF), EXP: mkStmt(STMT_DEF.EXP) };
-		return { periods, freq: mode, cards, revYoy, opYoy, cashQuality, statements };
+		const statements: Record<StmtKind, StmtRow[]> = { IS: mkStmt(STMT_DEF.IS), BS: mkStmt(STMT_DEF.BS), CF: mkStmt(STMT_DEF.CF) };
+		// 핵심 비율 시계열 — 재무제표와 동일 기간 축. 수익성·안정성·현금. (% · 이익품질만 배)
+		const ratios: StmtRow[] = [
+			{ key: 'roe', kr: 'ROE', en: 'ROE', unit: '%', values: ratio('netIncome', 'equity', 100, true) },
+			{ key: 'roa', kr: 'ROA', en: 'ROA', unit: '%', values: ratio('netIncome', 'assets', 100, true) },
+			{ key: 'gpm', kr: '매출총이익률', en: 'Gross margin', unit: '%', values: gpRatio() },
+			{ key: 'opm', kr: '영업이익률', en: 'Operating margin', unit: '%', values: ratio('operatingIncome', 'revenue') },
+			{ key: 'npm', kr: '순이익률', en: 'Net margin', unit: '%', values: ratio('netIncome', 'revenue') },
+			{ key: 'debtRatio', kr: '부채비율', en: 'Debt/Equity', unit: '%', values: ratio('liabilities', 'equity') },
+			{ key: 'currentRatio', kr: '유동비율', en: 'Current', unit: '%', values: ratio('currentAssets', 'currentLiabilities') },
+			{ key: 'equityRatio', kr: '자기자본비율', en: 'Equity ratio', unit: '%', values: ratio('equity', 'assets') },
+			{ key: 'cfoMargin', kr: '영업CF마진', en: 'CFO margin', unit: '%', values: ratio('cfOperating', 'revenue') },
+			{ key: 'earningsQuality', kr: '이익품질(CFO/NI)', en: 'Earnings quality', unit: '배', values: ratio('cfOperating', 'netIncome', 1) }
+		];
+		return { periods, freq: mode, cards, revYoy, opYoy, cashQuality, statements, ratios };
 	};
 
 	const views: Record<FinMode, TerminalFinance | null> = {
