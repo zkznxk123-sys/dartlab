@@ -5,7 +5,8 @@
 	import Radar from '../charts/Radar.svelte';
 	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
-	import ChartRenderer from '$chart/ChartRenderer.svelte';
+	import MiniFinChart from '../charts/MiniFinChart.svelte';
+	import { loadTerminalFinance, type TerminalFinance } from '../data/terminalFinance';
 	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 
@@ -41,6 +42,24 @@
 			if (cancelled) return;
 			candles = c;
 			candleState = c && c.length ? 'ready' : 'unavail';
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 분기 TTM, 온디맨드·회사별
+	let finData = $state<TerminalFinance | null>(null);
+	let finState = $state<'loading' | 'ready' | 'empty'>('loading');
+	$effect(() => {
+		const code = co.code;
+		finState = 'loading';
+		finData = null;
+		let cancelled = false;
+		loadTerminalFinance(code).then((f) => {
+			if (cancelled) return;
+			finData = f;
+			finState = f && f.cards.length ? 'ready' : 'empty';
 		});
 		return () => {
 			cancelled = true;
@@ -167,24 +186,23 @@
 	{/if}
 </Panel>
 
-<!-- 재무제표 그래프 — ui/web analysis.financial 체계: 4 내러티브 섹션 × 다중 trend 카드.
-     단일 디스패처 ChartRenderer(VizChart 대응)가 spec.chartType 으로 라우팅. -->
-<div class="finDash">
-	{#each co.charts.sections as sec (sec.idx)}
-		<div class="finSecHead">
-			<span class="finSecIdx mono">{sec.idx}</span>
-			<span class="finSecTitle">{sec.title}</span>
-			<span class="finSecSub">{sec.sub}</span>
-		</div>
-		<div class="finSecGrid">
-			{#each sec.cards as card (card.key)}
-				<Panel {lang} className={'eAnalysis finCard' + (card.wide ? ' wide' : '')} prov="derived" title={{ kr: card.title, en: card.title }} sub={{ kr: 'finance', en: 'finance' }} flush>
-					<div class={'finChart' + (card.key === 'balance' ? ' bs' : '')}><ChartRenderer spec={card.spec} /></div>
-				</Panel>
+<!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
+     ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
+<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
+	sub={finData ? { kr: (finData.freq === 'quarter' ? '분기 TTM' : '연간') + ' · ' + finData.periods.length + '기 · 조 KRW', en: finData.freq } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
+	{#snippet right()}{#if finData}<span class="dim mono">{finData.cards.length}</span>{/if}{/snippet}
+	{#if finState === 'ready' && finData}
+		<div class="finGrid">
+			{#each finData.cards as card (card.key)}
+				<div class="finMini"><MiniFinChart {card} periods={finData.periods} /></div>
 			{/each}
 		</div>
-	{/each}
-</div>
+	{:else if finState === 'loading'}
+		<div class="chartLoad" style="height:110px">{lang === 'en' ? 'loading financials …' : '재무제표 불러오는 중 …'}</div>
+	{:else}
+		<div class="storyEmpty">{lang === 'en' ? 'No quarterly financials for this company.' : '분기 재무 데이터 없음.'}</div>
+	{/if}
+</Panel>
 
 <div class="rowSplit">
 	<!-- RADAR -->
