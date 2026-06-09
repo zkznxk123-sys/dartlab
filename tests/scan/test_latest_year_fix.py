@@ -131,12 +131,13 @@ def test_scanProfitability_perFileFallbackNormalizesStockCode(tmp_path, monkeypa
     finance_dir = tmp_path / "finance"
     finance_dir.mkdir()
     rows = []
+    # 분모(매출·자본)는 1e6 원 materiality floor 위 현실 단위 사용 (floor 이하 = 비율 무의미 → None).
     for sj, aid, nm, amt in [
-        ("IS", "Revenue", "매출액", 1_000_000),
-        ("IS", "ProfitLossFromOperatingActivities", "영업이익", 100_000),
-        ("IS", "ProfitLoss", "당기순이익", 80_000),
-        ("BS", "Assets", "자산총계", 10_000_000),
-        ("BS", "Equity", "자본총계", 5_000_000),
+        ("IS", "Revenue", "매출액", 10_000_000),
+        ("IS", "ProfitLossFromOperatingActivities", "영업이익", 1_000_000),
+        ("IS", "ProfitLoss", "당기순이익", 800_000),
+        ("BS", "Assets", "자산총계", 100_000_000),
+        ("BS", "Equity", "자본총계", 50_000_000),
     ]:
         rows.append(_mockFinanceRow("005930", 2025, aid, nm, amt, sj_div=sj))
     df = pl.DataFrame(rows).rename({"stockCode": "stock_code"})

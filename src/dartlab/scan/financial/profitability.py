@@ -308,17 +308,26 @@ def _computeProfitability(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
     rows: list[dict] = []
     for code in latest[scCol].unique().to_list():
         sub = latest.filter(pl.col(scCol) == code)
+        # sj_div 앵커 — 자본·자산은 BS(stock), 매출·이익은 IS/CIS(flow)에서만 추출.
+        # (자본명 "지배기업 소유주지분"이 CIS 포괄손익 흐름행과 충돌해 ROE 폭주하던 버그 차단)
+        hasSj = "sj_div" in sub.columns
+        bs = sub.filter(pl.col("sj_div") == "BS") if hasSj else sub
+        flow = sub.filter(pl.col("sj_div").is_in(["IS", "CIS"])) if hasSj else sub
 
-        rev = extractAccount(sub, _REVENUE_IDS, _REVENUE_NMS)
-        op = extractAccount(sub, _OP_IDS, _OP_NMS)
-        ni = extractAccount(sub, _NI_IDS, _NI_NMS)
-        ta = extractAccount(sub, _TA_IDS, _TA_NMS)
-        eq = extractAccount(sub, _EQ_IDS, _EQ_NMS)
+        rev = extractAccount(flow, _REVENUE_IDS, _REVENUE_NMS)
+        op = extractAccount(flow, _OP_IDS, _OP_NMS)
+        ni = extractAccount(flow, _NI_IDS, _NI_NMS)
+        ta = extractAccount(bs, _TA_IDS, _TA_NMS)
+        eq = extractAccount(bs, _EQ_IDS, _EQ_NMS)
 
-        opMargin = round(op / rev * 100, 1) if rev and rev != 0 and op is not None else None
-        netMargin = round(ni / rev * 100, 1) if rev and rev != 0 and ni is not None else None
-        roe = round(ni / eq * 100, 1) if eq and eq != 0 and ni is not None else None
-        roa = round(ni / ta * 100, 1) if ta and ta != 0 and ni is not None else None
+        # 분모 양수·비자명 가드 — 0/음수 자본·매출은 비율 무의미(음수자본 ROE 폭주) → None
+        opMargin = round(op / rev * 100, 1) if rev and rev > 1e6 and op is not None else None
+        netMargin = round(ni / rev * 100, 1) if rev and rev > 1e6 and ni is not None else None
+        roe = round(ni / eq * 100, 1) if eq and eq > 1e6 and ni is not None else None
+        roa = round(ni / ta * 100, 1) if ta and ta > 1e6 and ni is not None else None
+        # 영업이익률 |값|>100% = 수학적 불가(op ≤ rev) → 매출 추출 artifact → None
+        if opMargin is not None and abs(opMargin) > 100:
+            opMargin = None
 
         if opMargin is None and netMargin is None and roe is None and roa is None:
             continue

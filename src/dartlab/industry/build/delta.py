@@ -185,16 +185,25 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     prior = df.filter(pl.col("bsns_year") == priorYear)
 
     def _ratios(sub: pl.DataFrame) -> tuple:
-        rev = _extractByIds(sub, REVENUE_IDS, REVENUE_NMS)
-        op = _extractByIds(sub, OP_IDS, OP_NMS)
-        ni = _extractByIds(sub, NI_IDS, NI_NMS)
-        eq = _extractByIds(sub, EQ_IDS, EQ_NMS)
-        li = _extractByIds(sub, LIABILITY_IDS, LIABILITY_NMS)
+        # sj_div 앵커 — 자본·부채는 BS(stock), 매출·이익은 IS/CIS(flow)에서만 추출.
+        # ("지배기업 소유주지분" CIS 포괄손익 흐름행과 충돌해 ROE 폭주하던 버그 차단)
+        hasSj = "sj_div" in sub.columns
+        bs = sub.filter(pl.col("sj_div") == "BS") if hasSj else sub
+        flow = sub.filter(pl.col("sj_div").is_in(["IS", "CIS"])) if hasSj else sub
+        rev = _extractByIds(flow, REVENUE_IDS, REVENUE_NMS)
+        op = _extractByIds(flow, OP_IDS, OP_NMS)
+        ni = _extractByIds(flow, NI_IDS, NI_NMS)
+        eq = _extractByIds(bs, EQ_IDS, EQ_NMS)
+        li = _extractByIds(bs, LIABILITY_IDS, LIABILITY_NMS)
 
-        opMargin = (op / rev * 100) if rev and rev != 0 and op is not None else None
-        netMargin = (ni / rev * 100) if rev and rev != 0 and ni is not None else None
-        roe = (ni / eq * 100) if eq and eq != 0 and ni is not None else None
-        debtRatio = (li / eq * 100) if eq and eq != 0 and li is not None else None
+        # 분모 양수·비자명 가드 — 0/음수 자본·매출은 비율 무의미(음수자본 ROE 폭주) → None
+        opMargin = (op / rev * 100) if rev and rev > 1e6 and op is not None else None
+        netMargin = (ni / rev * 100) if rev and rev > 1e6 and ni is not None else None
+        roe = (ni / eq * 100) if eq and eq > 1e6 and ni is not None else None
+        debtRatio = (li / eq * 100) if eq and eq > 1e6 and li is not None else None
+        # 영업이익률 |값|>100% = 수학적 불가(op ≤ rev) → 매출 추출 artifact → None
+        if opMargin is not None and abs(opMargin) > 100:
+            opMargin = None
         return rev, opMargin, netMargin, roe, debtRatio
 
     out: dict[str, dict[str, Any]] = {}
