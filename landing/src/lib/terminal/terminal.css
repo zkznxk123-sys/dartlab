@@ -187,6 +187,14 @@
 .dlTerm .lensScan { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); text-decoration: none; padding: 0 5px; white-space: nowrap; }
 .dlTerm .lensScan:hover { color: var(--amber); }
 .dlTerm .segGroup.mini .seg { font-size: 8px; padding: 1px 4px; }
+/* 렌즈 조건 필터 */
+.dlTerm .filtRow { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); }
+.dlTerm .filtInput { flex: 1; min-width: 0; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--txt); font-family: var(--mono); font-size: 9px; padding: 2px 5px; outline: none; }
+.dlTerm .filtInput:focus { border-color: var(--amber); }
+.dlTerm .filtCond { display: flex; align-items: center; gap: 2px; font-family: var(--cond); font-size: 8px; color: var(--dim); white-space: nowrap; }
+.dlTerm .filtNum { width: 38px; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--amber); font-size: 9px; padding: 2px 3px; outline: none; }
+.dlTerm .filtNum:focus { border-color: var(--amber); }
+.dlTerm .filtSel { background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--dim); font-family: var(--cond); font-size: 8.5px; padding: 2px 2px; outline: none; cursor: pointer; }
 .dlTerm .rankList { display: flex; flex-direction: column; max-height: 460px; overflow-y: auto; }
 .dlTerm .col > .panel.fillCol { flex: 1 1 auto; min-height: 0; }
 .dlTerm .panel.fillCol .panelBody { display: flex; flex-direction: column; }

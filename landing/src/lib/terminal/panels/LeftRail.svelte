@@ -17,6 +17,21 @@
 
 	let lens = $state<'econ' | 'price' | 'fin'>('price');
 
+	// 렌즈별 자체 조건 검색 (전체 universe 조사 — scan 이동 아님)
+	let query = $state('');
+	let minVal = $state<number | null>(null);
+	let market = $state(''); // '' | 'KOSPI' | 'KOSDAQ'
+	const MKT: Record<string, string> = { KOSPI: '유가증권', KOSDAQ: '코스닥' };
+	const matchFilter = (n: EcoNode): boolean => {
+		if (query) {
+			const q = query.trim().toLowerCase();
+			const name = (eng.nameOf(n.id) || '').toLowerCase();
+			if (!name.includes(q) && !n.id.includes(query.trim())) return false;
+		}
+		if (market && n.market !== MKT[market]) return false;
+		return true;
+	};
+
 	// scan 와 동일 universe: finance+prices 보유 회사
 	const nodes = $derived(
 		(eng.raw.eco?.nodes || []).filter((n) => eng.raw.finance.companies[n.id] && eng.priceOf(n.id))
@@ -33,8 +48,9 @@
 	];
 	const priceRows = $derived(
 		nodes
+			.filter(matchFilter)
 			.map((n) => ({ n, v: (eng.priceOf(n.id) as Record<string, number | null>)[priceKey] }))
-			.filter((r) => r.v != null)
+			.filter((r) => r.v != null && (minVal == null || (r.v as number) >= minVal))
 			.sort((a, b) => (b.v as number) - (a.v as number))
 			.slice(0, 60)
 	);
@@ -50,8 +66,9 @@
 	];
 	const finRows = $derived(
 		nodes
+			.filter(matchFilter)
 			.map((n) => ({ n, v: (n as Record<string, number | null | undefined>)[finKey] }))
-			.filter((r) => r.v != null)
+			.filter((r) => r.v != null && (minVal == null || (r.v as number) >= minVal))
 			.sort((a, b) => (b.v as number) - (a.v as number))
 			.slice(0, 60)
 	);
@@ -112,6 +129,11 @@
 {:else if lens === 'price'}
 	<Panel {lang} className="eQuant fillCol" prov="live" title={{ kr: '주가 랭킹', en: 'PRICE RANK' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
 		{#snippet right()}<span class="segGroup mini">{#each priceMetrics as m (m.k)}<button class={priceKey === m.k ? 'seg on' : 'seg'} onclick={() => (priceKey = m.k)}>{lang === 'en' ? m.en : m.kr}</button>{/each}</span>{/snippet}
+		<div class="filtRow">
+			<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />
+			<span class="filtCond">{priceMetrics.find((m) => m.k === priceKey)?.kr} ≥<input class="filtNum mono" type="number" bind:value={minVal} placeholder="—" /></span>
+			<select class="filtSel" bind:value={market}><option value="">{lang === 'en' ? 'all' : '전체'}</option><option value="KOSPI">KOSPI</option><option value="KOSDAQ">KOSDAQ</option></select>
+		</div>
 		<div class="rankList">
 			{#each priceRows as r, i (r.n.id)}
 				<div class={'rankRow' + (active === r.n.id ? ' on' : '')} role="button" tabindex="0" onclick={() => onPick(r.n.id)} onkeydown={(e) => e.key === 'Enter' && onPick(r.n.id)}>
@@ -125,6 +147,11 @@
 {:else}
 	<Panel {lang} className="eAnalysis fillCol" prov="live" title={{ kr: '재무 랭킹', en: 'FINANCIAL RANK' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
 		{#snippet right()}<span class="segGroup mini">{#each finMetrics as m (m.k)}<button class={finKey === m.k ? 'seg on' : 'seg'} onclick={() => (finKey = m.k)}>{lang === 'en' ? m.en : m.kr}</button>{/each}</span>{/snippet}
+		<div class="filtRow">
+			<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />
+			<span class="filtCond">{finMetrics.find((m) => m.k === finKey)?.kr} ≥<input class="filtNum mono" type="number" bind:value={minVal} placeholder="—" /></span>
+			<select class="filtSel" bind:value={market}><option value="">{lang === 'en' ? 'all' : '전체'}</option><option value="KOSPI">KOSPI</option><option value="KOSDAQ">KOSDAQ</option></select>
+		</div>
 		<div class="rankList">
 			{#each finRows as r, i (r.n.id)}
 				{@const pill = finPill(r.n)}
