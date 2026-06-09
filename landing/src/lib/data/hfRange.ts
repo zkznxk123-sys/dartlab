@@ -92,11 +92,27 @@ export async function probeHfRange(
 // 범위요청 + 브라우저 HTTP 캐시 충돌(net::ERR_CACHE_OPERATION_NOT_SUPPORTED 등 — Range 응답이 캐시와 어긋날 때
 // Chrome 이 던짐) → 캐시 우회(reload)로 1회 재시도. 잦은 "로드 실패" 가드.
 async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0], init?: RequestInit): Promise<Response> {
-	try {
-		return await fetchFn(input, init);
-	} catch {
-		return await fetchFn(input, { ...init, cache: 'reload' });
+	// 전이적 CDN 전파(갓 업로드/콜드 캐시)는 403/429/5xx 로 반환되거나 네트워크 throw → 짧은 백오프 재시도.
+	// (lazy 이력 로드 시 콜드 parquet 의 transient 403 이 hyparquet throw → unhandled 로 새던 것 차단.)
+	const LAST = 3;
+	for (let attempt = 0; attempt <= LAST; attempt++) {
+		try {
+			const resp = await fetchFn(input, attempt === 0 ? init : { ...init, cache: 'reload' });
+			if (resp.ok || resp.status === 206) return resp;
+			if (attempt < LAST && (resp.status === 403 || resp.status === 429 || resp.status >= 500)) {
+				await new Promise((r) => setTimeout(r, 200 + 280 * attempt));
+				continue;
+			}
+			return resp; // 최종 비-OK(404 등)는 그대로 — 호출측이 처리
+		} catch {
+			if (attempt < LAST) {
+				await new Promise((r) => setTimeout(r, 200 + 280 * attempt));
+				continue;
+			}
+			return await fetchFn(input, { ...init, cache: 'reload' });
+		}
 	}
+	return await fetchFn(input, { ...init, cache: 'reload' });
 }
 
 export async function openHfParquet(

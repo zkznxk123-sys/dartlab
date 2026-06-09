@@ -5,7 +5,7 @@
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
-	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
+	import { loadInitialOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
 
 	interface Props {
@@ -16,14 +16,7 @@
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
-	type SubKey = 'VOL' | 'RSI' | 'MACD' | 'STOCH' | 'OBV';
-	let pPeriod = $state<'3M' | '5M' | '6M' | '1Y' | 'MAX'>('5M');
-	let pOverlay = $state<'MA' | 'BB' | 'NONE'>('MA');
-	const SUB_ALL: SubKey[] = ['VOL', 'RSI', 'MACD', 'STOCH', 'OBV'];
-	let pSubs = $state<SubKey[]>(['VOL', 'RSI']); // 동시 표시 보조지표 (다중)
-	const toggleSub = (k: SubKey) => (pSubs = pSubs.includes(k) ? pSubs.filter((x) => x !== k) : [...pSubs, k]);
-	let pEvents = $state(false); // 실적·공시 시점 마커
-	let pValBand = $state(false); // 적정주가 밴드
+	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
 	let candles = $state<Candle[] | null>(null);
 	let candleState = $state<'loading' | 'ready' | 'unavail'>('loading');
 	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
@@ -33,10 +26,10 @@
 		candleState = 'loading';
 		candles = null;
 		let cancelled = false;
-		loadDailyOHLCV(code, yr).then((c) => {
+		loadInitialOHLCV(code, yr).then((r) => {
 			if (cancelled) return;
-			candles = c;
-			candleState = c && c.length ? 'ready' : 'unavail';
+			candles = r ? r.candles : null;
+			candleState = r && r.candles.length ? 'ready' : 'unavail';
 		});
 		return () => {
 			cancelled = true;
@@ -232,14 +225,8 @@
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
 <Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: 'krx 일별 · EOD', en: 'krx daily · EOD' }} flush>
 	{#snippet right()}<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>{/snippet}
-	<div class="chartCtlRow">
-		<span class="segGroup">{#each ['3M', '5M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
-		<span class="segGroup">{#each [['MA', 'MA'], ['BB', 'BB'], ['NONE', '없음']] as [v, l] (v)}<button class={pOverlay === v ? 'seg on' : 'seg'} onclick={() => (pOverlay = v as typeof pOverlay)}>{l}</button>{/each}</span>
-		<span class="segGroup">{#each SUB_ALL as k (k)}<button class={pSubs.includes(k) ? 'seg on' : 'seg'} onclick={() => toggleSub(k)} title="보조지표 다중 선택">{k}</button>{/each}</span>
-		<span class="segGroup"><button class={pEvents ? 'seg on' : 'seg'} onclick={() => (pEvents = !pEvents)} title="실적·공시 시점 마커">{lang === 'en' ? 'EARN' : '실적'}</button><button class={pValBand ? 'seg on' : 'seg'} disabled={!priceValBand} onclick={() => priceValBand && (pValBand = !pValBand)} title="적정주가 밴드">{lang === 'en' ? 'FAIR' : '밸류밴드'}</button></span>
-	</div>
 	{#if candleState === 'ready' && candles}
-		<PriceChart {candles} {lang} period={pPeriod} overlay={pOverlay} subs={pSubs} events={pEvents ? priceEvents : undefined} valBand={pValBand ? priceValBand : null} />
+		<PriceChart {candles} code={co.code} {lang} events={priceEvents} valBand={priceValBand} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}

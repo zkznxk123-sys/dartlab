@@ -1,7 +1,6 @@
 // 일별 OHLCV 시계열 — krx/prices/raw-{year}.parquet 을 hyparquet HTTP-range 로 직독.
-// DuckDB-WASM 제거 (init 수초 + whole-file serial scan = 느림). hyparquet 는 컬럼 projection
-// (7 컬럼) + ISU_CD 필터 pushdown + 병렬 range → 첫 페인트 비차단·sub-second. 회사별 캐시.
-// 현재+직전 연도 병렬 로드 (1Y/MAX window). 실패 시 빈 배열 → 호출측 EOD snapshot fallback.
+// hyparquet 는 컬럼 projection (7 컬럼) + ISU_CD 필터 pushdown + 병렬 range → 첫 페인트 비차단·sub-second.
+// 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
 import { browser } from '$app/environment';
 import { readParquetRows } from '$lib/data/hfRange';
 
@@ -14,17 +13,17 @@ export interface Candle {
 	v: number;
 }
 
-const OHLCV_COLUMNS = [
-	'ISU_CD',
-	'BAS_DD',
-	'TDD_OPNPRC',
-	'TDD_HGPRC',
-	'TDD_LWPRC',
-	'TDD_CLSPRC',
-	'ACC_TRDVOL'
-];
+// KRX raw 파케이 존재 하한 (HF 실측: raw-2010 ~ raw-2026). 이 아래는 404 → lazy 로드 종료.
+export const KRX_MIN_YEAR = 2010;
 
-const cache = new Map<string, Candle[] | null>();
+interface CompanyPrices {
+	candles: Candle[]; // 오름차순·일자 dedup
+	oldestYear: number; // 현재까지 로드한 가장 오래된 연도
+}
+
+const OHLCV_COLUMNS = ['ISU_CD', 'BAS_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL'];
+
+const cache = new Map<string, CompanyPrices | null>();
 
 interface KrxRow extends Record<string, unknown> {
 	ISU_CD?: string | null;
@@ -54,14 +53,7 @@ function toCandle(r: KrxRow): Candle | null {
 	if (c == null || c <= 0) return null;
 	const t = r.BAS_DD == null ? '' : String(r.BAS_DD);
 	if (!t) return null;
-	return {
-		t,
-		o: num(r.TDD_OPNPRC) ?? c,
-		h: num(r.TDD_HGPRC) ?? c,
-		l: num(r.TDD_LWPRC) ?? c,
-		c,
-		v: num(r.ACC_TRDVOL) ?? 0
-	};
+	return { t, o: num(r.TDD_OPNPRC) ?? c, h: num(r.TDD_HGPRC) ?? c, l: num(r.TDD_LWPRC) ?? c, c, v: num(r.ACC_TRDVOL) ?? 0 };
 }
 
 // ISU_CD 는 KRX 주식 = 'A' + 6 자리 (예: A005930). 드물게 prefix 없는 경우 대비 $in.
@@ -78,25 +70,9 @@ async function readYearCandles(year: number, isuA: string, isuPlain: string): Pr
 	}
 }
 
-/** 회사 일별 OHLCV (오름차순). 빈 배열 = 데이터 없음/실패 → 호출측 EOD fallback. */
-export async function loadDailyOHLCV(stockCode: string, year: number): Promise<Candle[] | null> {
-	if (!browser) return null;
-	const code = stockCode.trim();
-	if (cache.has(code)) return cache.get(code) ?? null;
-	const c = code.replace(/[^0-9A-Za-z]/g, '');
-	const isuA = `A${c}`;
-
-	// 현재+직전 연도 병렬 — 1Y/MAX window 커버. 병렬 range → 직렬 DuckDB 대비 빠름.
-	const [curr, prev] = await Promise.all([
-		readYearCandles(year, isuA, c),
-		readYearCandles(year - 1, isuA, c)
-	]);
-	const merged = [...prev, ...curr];
-	if (merged.length === 0) {
-		cache.set(code, null);
-		return null;
-	}
-	// 날짜 오름차순 + 중복 일자 제거 (연도 경계 안전)
+// 오름차순 병합 + 일자 dedup (연도 경계 안전).
+function mergeDedup(...lists: Candle[][]): Candle[] {
+	const merged = ([] as Candle[]).concat(...lists);
 	merged.sort((a, b) => a.t.localeCompare(b.t));
 	const out: Candle[] = [];
 	let lastT = '';
@@ -105,6 +81,37 @@ export async function loadDailyOHLCV(stockCode: string, year: number): Promise<C
 		out.push(k);
 		lastT = k.t;
 	}
-	cache.set(code, out);
 	return out;
+}
+
+/** 초기 로드 — 현재+직전 연도 (빠른 첫 페인트). null = 데이터 없음/실패. */
+export async function loadInitialOHLCV(stockCode: string, year: number): Promise<CompanyPrices | null> {
+	if (!browser) return null;
+	const code = stockCode.trim();
+	if (cache.has(code)) return cache.get(code) ?? null;
+	const c = code.replace(/[^0-9A-Za-z]/g, '');
+	const isuA = `A${c}`;
+	const [curr, prev] = await Promise.all([readYearCandles(year, isuA, c), readYearCandles(year - 1, isuA, c)]);
+	const candles = mergeDedup(prev, curr);
+	if (candles.length === 0) {
+		cache.set(code, null);
+		return null;
+	}
+	const rec: CompanyPrices = { candles, oldestYear: year - 1 };
+	cache.set(code, rec);
+	return rec;
+}
+
+/** 좌측 팬 시 더 오래된 연도 1 개 로드 (prepend 용). 캐시에도 병합. 빈 배열 = 데이터 없음. */
+export async function loadOlderYear(stockCode: string, targetYear: number): Promise<Candle[]> {
+	if (!browser || targetYear < KRX_MIN_YEAR) return [];
+	const code = stockCode.trim();
+	const c = code.replace(/[^0-9A-Za-z]/g, '');
+	const rows = await readYearCandles(targetYear, `A${c}`, c);
+	const rec = cache.get(code);
+	if (rec) {
+		rec.candles = mergeDedup(rows, rec.candles);
+		rec.oldestYear = Math.min(rec.oldestYear, targetYear);
+	}
+	return rows;
 }
