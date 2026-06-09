@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="270" height="58" viewBox="0 0 270 58" fill="none" role="img" aria-label="Open the Viewer">
+  <defs>
+    <linearGradient id="bgve" x1="0" y1="0" x2="0" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1a2230"/>
+      <stop offset="1" stop-color="#0a0e17"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="268" height="56" rx="14" fill="url(#bgve)" stroke="#ea4647" stroke-width="1.6"/>
+  <g transform="translate(31,29)" stroke="#ff6b6c" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="-3" cy="-3" r="8"/>
+    <line x1="3.2" y1="3.2" x2="9.5" y2="9.5"/>
+  </g>
+  <text x="57" y="37" font-family="'Segoe UI',Arial,Helvetica,sans-serif" font-size="19" font-weight="700" letter-spacing="-0.2" fill="#f8fafc">Open the Viewer</text>
+  <text x="246" y="37.5" font-family="'Segoe UI',Arial,sans-serif" font-size="21" font-weight="700" fill="#ff6b6c">&#8594;</text>
+</svg>
