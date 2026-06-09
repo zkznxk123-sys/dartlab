@@ -73,7 +73,8 @@ def scanEdgarAccounts(snakeIds: list[str], *, annual: bool = True) -> pl.DataFra
 
     base: pl.DataFrame | None = None
     for sid in snakeIds:
-        df = scanAccount(sid, annual=annual)
+        # scanAccount 계약은 freq("Q"/"Y") keyword — annual bool 이 아니다. annual→freq 변환.
+        df = scanAccount(sid, freq="Y" if annual else "Q")
         if df.is_empty():
             continue
         # 가장 데이터가 많은 기간을 선택 (non-null 최다)
@@ -90,7 +91,9 @@ def scanEdgarAccounts(snakeIds: list[str], *, annual: bool = True) -> pl.DataFra
         if base is None:
             base = narrow
         else:
-            base = base.join(narrow, on="stockCode", how="outer", suffix=f"_{sid}")
+            # full + coalesce=True: join 키(stockCode) 를 한 컬럼으로 병합 — 누락 시 stockCode_{sid}
+            # 누출 + 키 불일치 행 stockCode null 방지. corpName 은 키가 아니라 별도 coalesce.
+            base = base.join(narrow, on="stockCode", how="full", coalesce=True, suffix=f"_{sid}")
             if f"corpName_{sid}" in base.columns:
                 base = base.with_columns(
                     pl.coalesce(pl.col("corpName"), pl.col(f"corpName_{sid}")).alias("corpName")
