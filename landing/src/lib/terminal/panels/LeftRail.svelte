@@ -79,18 +79,23 @@
 	const wcls = (w?: string) => (w === 'overweight' ? 'ow' : w === 'underweight' ? 'uw' : 'nu');
 	const toggleSector = (id: string) => (sectorFilter = sectorFilter === id ? '' : id);
 	const activeSectorName = $derived(sectorFilter ? (sectors.find((s) => s.id === sectorFilter)?.kr || sectorFilter) : '');
+	// 매크로 국면 → 순풍/역풍 섹터(blended). 칩 클릭 = 아래 스크리너 섹터 필터.
+	const tailwinds = $derived(eng.sectorTailwinds());
+	const twTop = $derived(tailwinds.slice(0, 3));
+	const twBot = $derived(tailwinds.length > 3 ? tailwinds.slice(-3).reverse() : []);
+	const macroAsOf = $derived(macro?.asOf ?? '');
 </script>
 
 <!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
 {#if macro}
-	<Panel {lang} className="eMacro" prov="live" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro', en: 'dartlab.macro' }} flush>
+	<Panel {lang} className="eMacro" prov="live" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
 		{#snippet right()}<span class="liveDot">LIVE</span>{/snippet}
 		<div class="quadWrap">
 			{#each [{ side: 'kr', label: 'KR' }, { side: 'us', label: 'US' }] as box (box.side)}
 				{@const m = box.side === 'kr' ? macro.kr : macro.us}
 				{@const q = m.quadrant}
 				<div class="quadBox">
-					<div class="quadMkt">{box.label} · {lang === 'en' ? m.phase.toUpperCase() : m.phaseLabel}</div>
+					<div class="quadMkt">{box.label} · {lang === 'en' ? m.phase.toUpperCase() : m.phaseLabel}{q.inflation ? ' · ' + (lang === 'en' ? 'infl ' + q.inflation : '물가 ' + q.inflation) : ''}</div>
 					<div class={'quadPhase ' + (q.growth === 'rising' || q.growth === '상승' ? 'tUp' : 'tDn')}>{lang === 'en' ? q.quadrant : q.quadrantLabel}</div>
 					<div class="quadDesc">{q.description}</div>
 					<div class="quadAssets">
@@ -99,6 +104,13 @@
 				</div>
 			{/each}
 		</div>
+		{#if twTop.length}
+			<div class="twRibbon">
+				<span class="twHd tUp">{lang === 'en' ? 'TAILWIND' : '순풍'}</span>
+				{#each twTop as t (t.id)}<button class={'twChip up' + (sectorFilter === t.id ? ' on' : '')} onclick={() => toggleSector(t.id)} title={'blended ' + t.blended.toFixed(2)}>{txc(t, lang)}</button>{/each}
+				{#if twBot.length}<span class="twHd tDn">{lang === 'en' ? 'HEADWIND' : '역풍'}</span>{#each twBot as t (t.id)}<button class={'twChip dn' + (sectorFilter === t.id ? ' on' : '')} onclick={() => toggleSector(t.id)} title={'blended ' + t.blended.toFixed(2)}>{txc(t, lang)}</button>{/each}{/if}
+			</div>
+		{/if}
 	</Panel>
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />

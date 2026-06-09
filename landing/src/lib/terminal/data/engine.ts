@@ -125,6 +125,7 @@ export interface Engine {
 	suggest(q: string, n?: number): { code: string; name: string; industry: string }[];
 	featured(n?: number): string[];
 	sectorPerf(): { id: string; kr: string; en: string; chg: number; n: number }[];
+	sectorTailwinds(): { id: string; kr: string; en: string; blended: number }[];
 	priceOf(code: string): RawData['prices']['data'][string] | undefined;
 	nameOf(code: string): string;
 }
@@ -640,9 +641,24 @@ export function createEngine(raw: RawData): Engine {
 			.sort((a, b) => b.chg - a.chg);
 	}
 
+	// 매크로 국면 → 섹터 순풍/역풍(blended) — TAILWIND_MAP·SECTOR_KR SSOT 재사용, blended 내림차순.
+	function sectorTailwinds() {
+		const tw = raw.macro?.sectorTailwind;
+		if (!tw) return [];
+		const seen = new Set<string>();
+		const out: { id: string; kr: string; en: string; blended: number }[] = [];
+		for (const [id, key] of Object.entries(TAILWIND_MAP)) {
+			const e = tw[key];
+			if (!e || e.blended == null || seen.has(key)) continue;
+			seen.add(key);
+			out.push({ id, kr: SECTOR_KR[id] || id, en: SECTOR_EN[id] || id, blended: e.blended });
+		}
+		return out.sort((a, b) => b.blended - a.blended);
+	}
+
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, suggest, featured, sectorPerf,
+		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};

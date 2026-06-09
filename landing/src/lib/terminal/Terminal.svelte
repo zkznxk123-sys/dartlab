@@ -58,6 +58,25 @@
 
 	const co = $derived(eng.buildCompany(sym));
 	const tickerCodes = $derived(eng.featured(14));
+	// 경제·시장 KPI (CenterStack 헤더 티커) — 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
+	const macroKpis = $derived.by<{ l: string; v: string; t: string }[]>(() => {
+		const m = eng.raw.macro;
+		const tw = eng.sectorTailwinds();
+		const r1 = Object.values(eng.raw.prices.data).map((p) => p.return1m).filter((x): x is number => x != null);
+		const up = r1.length ? (r1.filter((x) => x > 0).length / r1.length) * 100 : null;
+		const avg = r1.length ? r1.reduce((a, b) => a + b, 0) / r1.length : null;
+		const out: { l: string; v: string; t: string }[] = [];
+		if (m) {
+			const dir = (g: string) => (g === 'rising' || g === '상승' ? 'tUp' : 'tDn');
+			out.push({ l: 'KR', v: lang === 'en' ? m.kr.phase : m.kr.phaseLabel, t: dir(m.kr.quadrant.growth) });
+			out.push({ l: 'US', v: lang === 'en' ? m.us.phase : m.us.phaseLabel, t: dir(m.us.quadrant.growth) });
+		}
+		if (tw[0]) out.push({ l: lang === 'en' ? 'tailwind' : '순풍', v: (lang === 'en' ? tw[0].en : tw[0].kr) + ' +' + tw[0].blended.toFixed(2), t: 'tUp' });
+		if (tw.length > 1) { const lo = tw[tw.length - 1]; out.push({ l: lang === 'en' ? 'headwind' : '역풍', v: (lang === 'en' ? lo.en : lo.kr) + ' ' + lo.blended.toFixed(2), t: 'tDn' }); }
+		if (up != null) out.push({ l: lang === 'en' ? 'breadth' : '시장폭', v: up.toFixed(0) + '%↑', t: up >= 50 ? 'tUp' : 'tDn' });
+		if (avg != null) out.push({ l: lang === 'en' ? 'avg 1M' : '평균1M', v: sign(avg, 1) + '%', t: avg >= 0 ? 'tUp' : 'tDn' });
+		return out;
+	});
 	const langTabs: { k: Lang; l: string }[] = [{ k: 'kr', l: '한국어' }, { k: 'en', l: 'EN' }];
 
 	function setFlash(msg: string, ms = 900) {
@@ -174,7 +193,7 @@
 
 		<main class="board">
 			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} /></div>
-			<div class="col colC"><CenterStack {co} {lang} /></div>
+			<div class="col colC"><CenterStack {co} {lang} kpis={macroKpis} /></div>
 			<div class="col colR"><RightStack {co} {lang} onPick={pick} /></div>
 		</main>
 

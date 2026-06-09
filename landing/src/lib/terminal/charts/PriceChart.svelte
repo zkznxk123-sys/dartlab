@@ -5,7 +5,7 @@
 	// 전체 이력(2010~) lazy 로드(setLoadDataCallback, 좌측 팬), 인스턴스 영속(회사전환=applyNewData, dispose 안 함).
 	// adapter-static·SSR 안전: $effect 안 동적 import + dispose cleanup. 화면 브랜딩 없음(Apache-2.0).
 	import { browser } from '$app/environment';
-	import { loadOlderYear, KRX_MIN_YEAR, type Candle } from '../data/priceSeries';
+	import { loadOlderYear, loadedCandles, KRX_MIN_YEAR, type Candle } from '../data/priceSeries';
 	import type { Lang } from '../data/types';
 
 	interface Props {
@@ -73,8 +73,8 @@
 	let bandIds: string[] = [];
 	let eventIds: string[] = [];
 	let drawIds: string[] = [];
-	// load-more 상태 (비반응 — 콜백이 읽음)
-	const hist = { code: '', oldestYear: 9999, loading: false };
+	// load-more 상태 (비반응 — 콜백이 읽음). oldestYear↔newestYear = 현재 로드된 이력 범위.
+	const hist = { code: '', oldestYear: 9999, newestYear: 0, loading: false };
 
 	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
 	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v });
@@ -142,6 +142,7 @@
 		if (!c || !cs || cs.length === 0) return;
 		hist.code = code;
 		hist.oldestYear = +cs[0].t.slice(0, 4);
+		hist.newestYear = +cs[cs.length - 1].t.slice(0, 4);
 		hist.loading = false;
 		const hasMore = hist.oldestYear - 1 >= KRX_MIN_YEAR;
 		c.applyNewData(cs.map(toK), hasMore);
@@ -151,13 +152,44 @@
 		bandIds = [];
 		eventIds = [];
 		drawIds = [];
-		applyPeriod(c);
+		applyPeriodFull(c);
 	});
 
-	function applyPeriod(c: any) {
-		const N = Math.min(PERIOD_N[period] ?? candles.length, candles.length);
+	// 가시 봉 수 재배치 — 현재 로드된 전체 캔들 길이 기준(백필 후 늘어난 길이 반영).
+	function applySpacing(c: any) {
+		const len = loadedCandles(hist.code).length || candles.length || 1;
+		const N = Math.min(PERIOD_N[period] ?? len, len);
 		const w = el?.clientWidth || 800;
-		try { c.setBarSpace(Math.max(0.5, Math.min(30, w / N))); c.scrollToRealTime(0); } catch { /* */ }
+		try { c.setBarSpace(Math.max(0.5, Math.min(30, w / Math.max(1, N)))); c.scrollToRealTime(0); } catch { /* */ }
+	}
+
+	// 기간(특히 3Y/MAX)·줌아웃 시 필요한 과거연도까지 능동 백필 → 전체 재적용 → 재배치.
+	// 좌측 드래그(Forward 콜백)에만 의존하지 않아 버튼만으로 전체 이력 도달. hist.loading = Forward 와 공유 mutex.
+	const yearsForPeriod = (p: string): number => (p === 'MAX' ? 999 : Math.ceil((PERIOD_N[p] ?? 252) / 252) + 1);
+	async function backfillForPeriod(c: any) {
+		const code0 = hist.code;
+		if (!code0) return;
+		const target = period === 'MAX' ? KRX_MIN_YEAR : Math.max(KRX_MIN_YEAR, hist.newestYear - yearsForPeriod(period) + 1);
+		let changed = false;
+		while (hist.oldestYear > target && !hist.loading) {
+			const y = hist.oldestYear - 1;
+			if (y < KRX_MIN_YEAR) break;
+			hist.loading = true;
+			try { await loadOlderYear(code0, y); } catch { hist.loading = false; break; }
+			hist.loading = false;
+			if (hist.code !== code0 || chart !== c) return; // 회사 전환·차트 교체 → 중단
+			hist.oldestYear = y;
+			changed = true;
+		}
+		if (changed && chart === c && hist.code === code0) {
+			c.applyNewData(loadedCandles(code0).map(toK), hist.oldestYear - 1 >= KRX_MIN_YEAR);
+			applySpacing(c);
+		}
+	}
+
+	function applyPeriodFull(c: any) {
+		applySpacing(c);
+		void backfillForPeriod(c);
 	}
 
 	// 메인 오버레이 (MA / EMA / BOLL / SAR)
@@ -236,11 +268,11 @@
 		try { c.setStyles({ candle: { type: t } }); } catch { /* */ }
 	});
 
-	// period 변경 → 가시 봉 수
+	// period 변경 → 가시 봉 수 + 필요 시 과거 백필
 	$effect(() => {
 		void period;
 		const c = chart;
-		if (c && candles.length) applyPeriod(c);
+		if (c && candles.length) applyPeriodFull(c);
 	});
 
 	// 전체화면 토글 → resize + ESC

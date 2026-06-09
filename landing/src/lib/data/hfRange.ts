@@ -45,7 +45,24 @@ export function hfUrl(path: string): string {
 	return `${HF_RESOLVE}/${path.replace(/^\/+/, '')}`;
 }
 
-export async function headHfObject(path: string, fetchFn: FetchLike = fetch): Promise<HfObjectRef> {
+// 동일 파일의 HEAD(범위 probe)는 세션 내 1 회만 — 반복 readParquetRows·lazy 좌측 팬의
+// 불필요한 RTT 제거. 파일은 세션 중 불변이므로 ref(size/etag) 캐시 안전.
+// 커스텀 fetchFn(측정/프록시 주입)은 캐시하지 않음.
+const refCache = new Map<string, Promise<HfObjectRef>>();
+
+export function headHfObject(path: string, fetchFn: FetchLike = fetch): Promise<HfObjectRef> {
+	if (fetchFn !== fetch) return headHfObjectFresh(path, fetchFn);
+	const hit = refCache.get(path);
+	if (hit) return hit;
+	const p = headHfObjectFresh(path, fetchFn).catch((e) => {
+		refCache.delete(path);
+		throw e;
+	});
+	refCache.set(path, p);
+	return p;
+}
+
+async function headHfObjectFresh(path: string, fetchFn: FetchLike): Promise<HfObjectRef> {
 	const url = hfUrl(path);
 	const resp = await fetchResilient(fetchFn, url, { headers: { Range: 'bytes=0-0' } });
 	if (!resp.ok && resp.status !== 206) throw new Error(`${path} range probe 실패: ${resp.status}`);

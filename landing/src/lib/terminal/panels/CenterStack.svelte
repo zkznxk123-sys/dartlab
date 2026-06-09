@@ -7,12 +7,14 @@
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
 	import { loadInitialOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
+	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 
 	interface Props {
 		co: Company;
 		lang: Lang;
+		kpis?: { l: string; v: string; t: string }[];
 	}
-	let { co, lang }: Props = $props();
+	let { co, lang, kpis = [] }: Props = $props();
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
@@ -56,6 +58,19 @@
 		return () => {
 			cancelled = true;
 		};
+	});
+
+	// 회사 주요제품 (corpList) — 헤더 빈 가운데 채움. 전역 캐시 공유(중복 다운로드 없음).
+	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
+	loadHfProductIndexMap().then((m) => (corpMeta = m));
+	const product = $derived(corpMeta?.get(co.code)?.product ?? '');
+	// 재무제표 분석 전체화면 토글 (ESC 닫기)
+	let finFull = $state(false);
+	$effect(() => {
+		if (!finFull) return;
+		const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') finFull = false; };
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
 	});
 
 	const p = $derived(co.price);
@@ -149,6 +164,13 @@
 	);
 </script>
 
+<!-- 경제·시장 KPI 티커 (종목/주가 라인 위, 좌우 흐름) -->
+{#if kpis.length}
+	<div class="kpiTicker"><div class="kpiTrack">
+		{#each kpis.concat(kpis) as k, i (i)}<span class="kpiItem"><i>{k.l}</i><b class={k.t}>{k.v}</b></span>{/each}
+	</div></div>
+{/if}
+
 <!-- SYMBOL HEADER -->
 <div class="symHead">
 	<div>
@@ -164,6 +186,12 @@
 			<a href="{base}/company/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'company ↗' : '회사 ↗'}</a>
 		</nav>
 	</div>
+	{#if product}
+		<div class="symProd" title={product}>
+			<span class="symProdLbl">{lang === 'en' ? 'PRODUCTS' : '주요제품'}</span>
+			<span class="symProdV">{product}</span>
+		</div>
+	{/if}
 	<div class="symPrice">
 		<span class="symLast mono">{fmtNum(p.last)}</span>
 		<span class={'symChg ' + chgClass(p.ret1m)}>{p.ret1m == null ? '' : sign(p.ret1m, 2) + '% · 1M'}</span>
@@ -201,12 +229,13 @@
 
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
      ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
-<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
+<Panel {lang} className={'eAnalysis' + (finFull ? ' finFull' : '')} prov="live" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
 	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · 조 KRW', en: finMode + ' · ' + finData.periods.length + 'p' } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
 	{#snippet right()}
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
+		<button class="finFullBtn" onclick={() => (finFull = !finFull)} title={finFull ? (lang === 'en' ? 'exit fullscreen (ESC)' : '전체화면 해제 (ESC)') : (lang === 'en' ? 'fullscreen' : '전체화면')} aria-label="fullscreen">{finFull ? '✕' : '⤢'}</button>
 	{/snippet}
 	{#if finState === 'ready' && finData}
 		<div class="finGrid">

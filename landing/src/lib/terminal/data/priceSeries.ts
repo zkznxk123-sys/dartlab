@@ -102,6 +102,11 @@ export async function loadInitialOHLCV(stockCode: string, year: number): Promise
 	return rec;
 }
 
+/** 현재까지 캐시된 전체 캔들(오름차순). 백필 후 차트 재적용·기간 윈도잉에 사용. */
+export function loadedCandles(stockCode: string): Candle[] {
+	return cache.get(stockCode.trim())?.candles ?? [];
+}
+
 /** 좌측 팬 시 더 오래된 연도 1 개 로드 (prepend 용). 캐시에도 병합. 빈 배열 = 데이터 없음. */
 export async function loadOlderYear(stockCode: string, targetYear: number): Promise<Candle[]> {
 	if (!browser || targetYear < KRX_MIN_YEAR) return [];

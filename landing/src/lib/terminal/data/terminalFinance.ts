@@ -163,22 +163,26 @@ export interface TerminalFinanceBundle {
 	defaultMode: FinMode;
 }
 
-const cache = new Map<string, TerminalFinanceBundle | null>();
+// in-flight Promise 캐시 — CenterStack·RightStack 가 같은 회사 재무를 동시 호출해도
+// 다운로드는 1 회만(중복 fetch 경쟁 제거). 해소 후엔 같은 Promise 가 즉시 resolve.
+const cache = new Map<string, Promise<TerminalFinanceBundle | null>>();
 
-export async function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceBundle | null> {
-	if (!browser) return null;
+export function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceBundle | null> {
+	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
-	if (cache.has(code)) return cache.get(code) ?? null;
-	try {
-		const { rows } = await readParquetRows<RawRow>(`dart/finance/${code}.parquet`, { columns: FINANCE_COLUMNS });
-		const built = buildBundle(rows);
-		cache.set(code, built);
-		return built;
-	} catch (e) {
-		console.warn('[terminal/finance] load failed', code, e);
-		cache.set(code, null);
-		return null;
-	}
+	const hit = cache.get(code);
+	if (hit) return hit;
+	const p = (async () => {
+		try {
+			const { rows } = await readParquetRows<RawRow>(`dart/finance/${code}.parquet`, { columns: FINANCE_COLUMNS });
+			return buildBundle(rows);
+		} catch (e) {
+			console.warn('[terminal/finance] load failed', code, e);
+			return null;
+		}
+	})();
+	cache.set(code, p);
+	return p;
 }
 
 function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
@@ -288,16 +292,9 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		} else {
 			used = allPk.map((p, gi) => ({ y: p.y, q: p.q, gi })).slice(-KEEP);
 		}
-		// 최신 분기 이상치(매출 standalone > 직전 4분기 중앙값 1.5×) 제외 — 예비/오류 공시 방어
-		while (!isAnnual && used.length >= 5) {
-			const li = used.length - 1;
-			const lastRev = standalone('revenue', used[li].y, used[li].q);
-			const prior = used.slice(li - 4, li).map((p) => standalone('revenue', p.y, p.q)).filter((v): v is number => v != null);
-			if (lastRev == null || prior.length < 3) break;
-			const med = [...prior].sort((a, b) => a - b)[Math.floor(prior.length / 2)];
-			if (med > 0 && lastRev > med * 1.5) used.pop();
-			else break;
-		}
+		// 접지 원칙: DART 제출 분기는 그대로 노출. 과거의 "최신 이상치 pop" 휴리스틱은
+		// 실제 정식 공시(예: 메모리 슈퍼사이클 분기 급증)를 조용히 삭제해 최신 분기가 누락되는
+		// 회귀를 일으켰다 — 값 기준 파괴적 삭제는 폐지하고, 원본 공시값을 표시한다.
 		if (used.length === 0) return null;
 		const periods = used.map((p) => (isAnnual ? `FY${String(p.y).slice(2)}` : `${String(p.y).slice(2)}Q${p.q}`));
 

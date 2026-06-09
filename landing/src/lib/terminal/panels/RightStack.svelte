@@ -100,8 +100,28 @@
 		{ l: lang === 'en' ? 'OWNER %' : '대주주', v: e.holderPct != null ? e.holderPct.toFixed(1) + '%' : '—', t: 'neutral' },
 		{ l: lang === 'en' ? 'OWNER Δ' : '지분변화', v: e.holderChange != null ? sign(e.holderChange, 1) + '%p' : '—', t: 'neutral' },
 		{ l: lang === 'en' ? 'AUDIT' : '감사위험', v: e.auditRisk || (lang === 'en' ? 'n/a' : '해당없음'), t: gradeTone('audit', e.auditRisk) },
-		{ l: lang === 'en' ? 'QUALITY' : '이익질', v: e.qualGrade || '—', t: gradeTone('qual', e.qualGrade) }
+		{ l: lang === 'en' ? 'QUALITY' : '이익질', v: e.qualGrade || '—', t: gradeTone('qual', e.qualGrade) },
+		{ l: lang === 'en' ? 'LIQUID' : '유동성', v: e.liqGrade || '—', t: gradeTone('liq', e.liqGrade) }
 	]);
+	// 현금흐름 실수치 (조) — 패널 제목 '현금흐름' 충족(기존엔 패턴 라벨만). FCF = 영업+투자.
+	const cf = $derived(co.financials.cf);
+	const cfCells = $derived([
+		{ l: lang === 'en' ? 'CFO' : '영업CF', v: cf.op, good: cf.op != null ? cf.op > 0 : null },
+		{ l: lang === 'en' ? 'CFI' : '투자CF', v: cf.inv, good: null },
+		{ l: lang === 'en' ? 'CFF' : '재무CF', v: cf.fin, good: null },
+		{ l: 'FCF', v: cf.fcf, good: cf.fcf != null ? cf.fcf > 0 : null }
+	]);
+	// 전년 대비 모멘텀 델타 (방향 신호). inv=true → 낮을수록 양호(부채). null 은 사전 제거(타입 확정).
+	const govDeltas = $derived(
+		([
+			{ l: lang === 'en' ? 'Rev YoY' : '매출 YoY', v: e.revenueYoyPct ?? null, u: '%', inv: false },
+			{ l: 'ROE Δ', v: e.roeDelta ?? null, u: '%p', inv: false },
+			{ l: lang === 'en' ? 'OPM Δ' : '영업益 Δ', v: e.opMarginDelta ?? null, u: '%p', inv: false },
+			{ l: lang === 'en' ? 'Debt Δ' : '부채 Δ', v: e.debtRatioDelta ?? null, u: '%p', inv: true }
+		] as { l: string; v: number | null; u: string; inv: boolean }[]).filter(
+			(d): d is { l: string; v: number; u: string; inv: boolean } => d.v != null
+		)
+	);
 	const s = $derived(co.story);
 	const dartUrl = 'https://dart.fss.or.kr/dsab007/main.do';
 	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
@@ -312,6 +332,16 @@
 	<Panel {lang} className="eIndustry" prov="live" title={{ kr: '거버넌스 · 현금흐름', en: 'GOVERNANCE' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
 		{#if e.cfPattern}<div class="patBig"><div class="pv">{e.cfPattern}</div><div class="ps">{lang === 'en' ? 'cash-flow pattern' : '현금흐름 패턴'}{e.empCount != null ? ' · ' + e.empCount.toLocaleString() + (lang === 'en' ? ' emp' : '명') : ''}</div></div>{/if}
 		<div class="govGrid">{#each govCells as c (c.l)}<div class="govCell"><span>{c.l}</span><b class={tcls(c.t)}>{c.v}</b></div>{/each}</div>
+		<div class="cfRow">
+			{#each cfCells as c (c.l)}
+				<div class="cfCell"><span>{c.l}</span><b class={'mono ' + (c.v == null ? 'tNeu' : c.good === true ? 'tUp' : c.good === false ? 'tDn' : c.v < 0 ? 'tDn' : 'tNeu')}>{c.v == null ? '—' : (c.v >= 0 ? '+' : '') + c.v.toFixed(1) + '조'}</b></div>
+			{/each}
+		</div>
+		{#if govDeltas.length}
+			<div class="govDeltaRow">
+				{#each govDeltas as d (d.l)}<span class="govDelta"><i>{d.l}</i><b class={(d.inv ? d.v < 0 : d.v > 0) ? 'tUp' : d.v === 0 ? 'tNeu' : 'tDn'}>{sign(d.v, 1)}{d.u}</b></span>{/each}
+			</div>
+		{/if}
 	</Panel>
 </div>
 
