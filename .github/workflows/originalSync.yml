@@ -5,7 +5,9 @@ name: Original SSOT Sync
 #  ① dart-zip   : 정기보고서 원본 zip archive(증분) → 변경 종목 tar seed → panel within-company
 #                 증분 빌드(신규 zip만 merge=True period upsert) → dartOriginal(tar) + panel HF push.
 #                 dart_full_rebuild=true 시에만 전이력 재빌드(self-heal).  (dartlab.pipeline dartZip)
-#  ② allfilings : 비정기 공시 월별 parquet forward 7일 증분.  (dartlab.pipeline allFilings)
+#  ② allfilings : 비정기 공시 일별 parquet forward 7일 증분.  (dartlab.pipeline allFilings)
+#  ②' allfilings-backfill : 과거 커버리지를 2개월/run 으로 늘림 — 현 최오래 일자 직전 달부터
+#                 과거로 collect+push, floor 201501 도달 시 no-op.  (dartlab.pipeline allFilingsBackfill)
 #  ③ edgar      : panel per-filing 증분 — daily-index 로 신규 재무공시 발견 → 영향 ticker
 #                 기존 panel HF seed → 신규 accession 만 append → 변경분 deploy → raw 폐기.
 #                 EDGAR_FULL_REBUILD=1 일 때만 전 universe 부트스트랩(dispatch, 디스크 floor).
@@ -25,10 +27,10 @@ on:
   workflow_dispatch:
     inputs:
       jobs:
-        description: 'all | dart-zip | allfilings | edgar'
+        description: 'all | dart-zip | allfilings | allfilings-backfill | edgar'
         default: 'all'
         type: choice
-        options: [all, dart-zip, allfilings, edgar]
+        options: [all, dart-zip, allfilings, allfilings-backfill, edgar]
       lookback_days:
         description: 'archive/allFilings forward 윈도 (일)'
         default: '7'
@@ -96,6 +98,33 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
         run: uv run python -X utf8 -m dartlab.pipeline allFilings
+
+  allfilings-backfill:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    concurrency:
+      group: hf-dart-push  # 메인 public repo 동거 → forward/dart-zip 와 직렬(412 회피)
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Smoke import
+        run: uv run python -c "import dartlab"
+      - name: allFilings 과거 백필 (2개월/run, floor 2015-01)
+        # HF 최오래 일자 직전 달부터 과거로 2개월 collect+push. floor 201501 도달 시 no-op.
+        # ephemeral 안전: _remoteDates 스코프 목록만 읽고 신규 일자만 수집(전이력 pull 없음).
+        env:
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DART_ALLFILINGS_BACKFILL_MONTHS: '2'
+          DART_ALLFILINGS_BACKFILL_FLOOR: '201501'
+        run: uv run python -X utf8 -m dartlab.pipeline allFilingsBackfill
 
   edgar:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'edgar' }}

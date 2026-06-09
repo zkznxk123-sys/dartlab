@@ -44,6 +44,12 @@ def buildRegistry() -> dict[str, StageSpec]:
             uploadCategories=("allFilings",),
             label="DART allFilings 로컬↔HF 양방향 reconcile (운영자 트리거)",
         ),
+        StageSpec(
+            "allFilingsBackfill",
+            run=allFilings.runAllFilingsBackfill,
+            uploadCategories=("allFilings",),
+            label="DART allFilings 과거 백필 (2개월/run, floor 2015-01)",
+        ),
         StageSpec("full", run=dart.runDartFull, uploadCategories=("finance", "report"), label="DART 88분기 전수"),
         StageSpec(
             "newStocks",

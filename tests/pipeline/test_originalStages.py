@@ -304,6 +304,115 @@ def test_allfilings_reconcile_registered() -> None:
     assert "allFilings" in reg["allFilingsReconcile"].uploadCategories
 
 
+# ── allFilings 과거 백필 (2개월/run, floor 2015-01) ──
+
+
+def test_prev_months_floor_inclusive() -> None:
+    """_prevMonths — 앵커 직전부터 과거로 N개월, floor 포함·이전 차단."""
+    from dartlab.pipeline.stages.allFilings import _prevMonths
+
+    assert _prevMonths("202503", 2, "201501") == ["202502", "202501"]  # 직전 2개월
+    assert _prevMonths("201502", 2, "201501") == ["201501"]  # floor inclusive (1개만)
+    assert _prevMonths("201501", 2, "201501") == []  # 앵커=floor → 커버리지 달성
+    assert _prevMonths("202601", 2, "201501") == ["202512", "202511"]  # 연 경계
+
+
+def test_month_days() -> None:
+    """_monthDays — 월 1일~말일 YYYYMMDD(2월 28·12월 31)."""
+    from dartlab.pipeline.stages.allFilings import _monthDays
+
+    assert _monthDays("202502") == [f"202502{d:02d}" for d in range(1, 29)]
+    assert len(_monthDays("202412")) == 31
+    assert _monthDays("202501")[0] == "20250101" and _monthDays("202501")[-1] == "20250131"
+
+
+def test_run_allfilings_backfill_collects_prev_months(monkeypatch) -> None:
+    """runAllFilingsBackfill — 앵커 직전 2개월 collect + 월별 push, StageResult 매핑."""
+    import polars as pl
+
+    import dartlab.core.dartClient as dc
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("DART_ALLFILINGS_BACKFILL_MONTHS", "2")
+    monkeypatch.setenv("DART_ALLFILINGS_BACKFILL_FLOOR", "201501")
+    monkeypatch.setattr(dc, "DartClient", lambda *a, **k: object())  # 실 DART init 차단
+    monkeypatch.setattr(coll, "collectedDates", lambda: [])  # CI = 로컬 비어있음
+    monkeypatch.setattr(sync, "_remoteDates", lambda token=None: {"20250304", "20250601"})  # earliest=202503
+
+    filled: list[str] = []
+
+    def fakeFill(period, *, client=None, showProgress=True):
+        filled.append(period)
+        return pl.DataFrame({"x": [1]}) if period[-2:] in ("02", "04") else None  # 나머지=휴일(None)
+
+    monkeypatch.setattr(coll, "fillContent", fakeFill)
+
+    pushed: list[list[str]] = []
+
+    def fakePush(dates, *, token=None):
+        pushed.append(list(dates))
+        return len(dates)
+
+    monkeypatch.setattr(sync, "pushAllFilings", fakePush)
+
+    res = allFilings.runAllFilingsBackfill(upload=True)
+
+    assert {d[:6] for d in filled} == {"202502", "202501"}  # 직전 2개월만 수집 시도
+    assert len(pushed) == 2  # 월별 push (timeout 내성)
+    assert all(p[-2:] in ("02", "04") for batch in pushed for p in batch)  # 본문 있는 일자만 push
+    assert res.report.ok == 1 and res.report.err == 0
+    assert res.uploaded == sum(len(b) for b in pushed)
+    assert res.rows == res.uploaded  # 본문 1행씩
+
+
+def test_run_allfilings_backfill_noop_at_floor(monkeypatch) -> None:
+    """앵커 월이 floor 이하면 no-op — fillContent 미호출, ok."""
+    import dartlab.core.dartClient as dc
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("DART_ALLFILINGS_BACKFILL_FLOOR", "201501")
+    monkeypatch.setattr(coll, "collectedDates", lambda: [])
+    monkeypatch.setattr(sync, "_remoteDates", lambda token=None: {"20150103"})  # earliest=201501=floor
+
+    def boomFill(*a, **k):
+        raise AssertionError("커버리지 달성 시 수집 금지")
+
+    monkeypatch.setattr(coll, "fillContent", boomFill)
+    monkeypatch.setattr(dc, "DartClient", lambda *a, **k: object())
+
+    res = allFilings.runAllFilingsBackfill(upload=False)
+    assert res.report.ok == 1 and res.rows == 0 and res.uploaded == 0
+
+
+def test_run_allfilings_backfill_isolates_failure(monkeypatch) -> None:
+    """앵커 조회 예외는 StageResult.report.err 로 격리 — run 중단·전파 X."""
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    def boom(token=None):
+        raise RuntimeError("HF down")
+
+    monkeypatch.setattr(sync, "_remoteDates", boom)
+    res = allFilings.runAllFilingsBackfill()
+    assert res.report.err == 1 and res.report.ok == 0
+    assert any("backfill" in f for f in res.report.failures)
+
+
+def test_allfilings_backfill_registered() -> None:
+    """buildRegistry 에 allFilingsBackfill stage 등록 — run 바인딩 + uploadCategories."""
+    from dartlab.pipeline.registry import buildRegistry
+    from dartlab.pipeline.stages.allFilings import runAllFilingsBackfill
+
+    reg = buildRegistry()
+    assert "allFilingsBackfill" in reg
+    assert reg["allFilingsBackfill"].run is runAllFilingsBackfill
+    assert "allFilings" in reg["allFilingsBackfill"].uploadCategories
+
+
 # ── dartZip within-company 증분 빌드 (신규 zip만 merge=True, 전이력 재파싱 OOM 제거) ──
 
 

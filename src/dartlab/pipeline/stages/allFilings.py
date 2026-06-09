@@ -23,6 +23,30 @@ def _recentDates(days: int) -> list[str]:
     return [(today - timedelta(days=i)).strftime("%Y%m%d") for i in range(days)]
 
 
+def _prevMonths(earliestYm: str, months: int, floorYm: str) -> list[str]:
+    """``earliestYm``(YYYYMM) 직전부터 과거로 최대 ``months`` 개월(YYYYMM), ``floorYm`` 이상만."""
+    out: list[str] = []
+    y, m = int(earliestYm[:4]), int(earliestYm[4:6])
+    for _ in range(months):
+        m -= 1
+        if m == 0:
+            y, m = y - 1, 12
+        ym = f"{y:04d}{m:02d}"
+        if ym < floorYm:
+            break
+        out.append(ym)
+    return out
+
+
+def _monthDays(ym: str) -> list[str]:
+    """``ym``(YYYYMM) 의 1일~말일 YYYYMMDD 리스트(과거→미래)."""
+    import calendar
+
+    y, m = int(ym[:4]), int(ym[4:6])
+    last = calendar.monthrange(y, m)[1]
+    return [f"{ym}{d:02d}" for d in range(1, last + 1)]
+
+
 def runAllFilings(
     *,
     category: str = "allFilings",
@@ -135,4 +159,110 @@ def runAllFilingsReconcile(
         res.report.err = 1
         res.report.failures.append(f"allFilings reconcile: {type(exc).__name__}: {exc}")
         print(f"[pipeline] allFilings reconcile 실패(격리): {exc}", flush=True)
+    return res
+
+
+def runAllFilingsBackfill(
+    *,
+    category: str = "allFilingsBackfill",
+    mode: PipelineMode = "backfill",
+    codes: list[str] | None = None,
+    upload: bool = True,
+    token: str | None = None,
+) -> StageResult:
+    """allFilings 과거 백필 — 현 커버리지 직전부터 과거로 N개월씩(floor 2015-01) 채워 push.
+
+    forward(``runAllFilings``)가 최신을 좇는다면, 본 stage 는 과거 커버리지를 한 run 당
+    ``DART_ALLFILINGS_BACKFILL_MONTHS``(기본 2) 개 캘린더 월만큼 늘린다. 로컬
+    (``collectedDates``)·HF(``_remoteDates``) 합집합의 최오래 일자를 앵커로 그 *직전* 달부터
+    과거로 월을 걷되, ``DART_ALLFILINGS_BACKFILL_FLOOR``(기본 201501) 이전은 건드리지 않는다 —
+    앵커 월이 floor 이하면 no-op(커버리지 달성). 휴일은 ``fillContent`` 가 자동 skip.
+    월 단위로 수집·push 해 timeout 내성을 갖는다(중간에 끊겨도 앞 월은 immutable 보존).
+    ephemeral CI 안전: HF 전 이력 다운로드 없이 ``_remoteDates`` 스코프 목록만 읽고 DART
+    에서 신규 일자만 수집 후 일자별 immutable push(reconcile 의 전이력 pull 안티패턴 회피).
+
+    Args:
+        category: 미사용("allFilingsBackfill" 고정).
+        mode: 미사용(backfill 고정).
+        codes: 미사용(날짜 윈도 기반).
+        upload: HF 업로드(``pushAllFilings``) 여부.
+        token: HF 토큰. None 이면 env ``HF_TOKEN``.
+
+    Returns:
+        StageResult (rows=수집 본문 행수, uploaded=push 한 일자수). 커버리지 달성 시 0/0.
+
+    Raises:
+        없음 (앵커 조회/수집/업로드 예외는 StageResult 로 격리).
+
+    Example:
+        >>> runAllFilingsBackfill(upload=False)  # doctest: +SKIP
+        StageResult(category='allFilingsBackfill', ...)
+    """
+    from dartlab.core.dartClient import DartClient
+    from dartlab.gather.dart.allFilingsCollector import collectedDates, fillContent
+    from dartlab.gather.dart.allFilingsSync import _remoteDates, pushAllFilings
+
+    months = int(os.environ.get("DART_ALLFILINGS_BACKFILL_MONTHS") or "2")
+    floorYm = (os.environ.get("DART_ALLFILINGS_BACKFILL_FLOOR") or "201501").strip()
+    res = StageResult(category="allFilingsBackfill")
+
+    try:
+        existing = set(collectedDates()) | _remoteDates(token=token)
+    except Exception as exc:  # noqa: BLE001 — 앵커 조회 실패 격리
+        res.report.err = 1
+        res.report.failures.append(f"allFilings backfill 앵커 조회: {type(exc).__name__}: {exc}")
+        print(f"[pipeline] allFilings backfill 앵커 조회 실패(격리): {exc}", flush=True)
+        return res
+
+    if not existing:
+        res.skipped = True
+        print("[pipeline] allFilings backfill: 기존 일자 0 — forward seed 선행 필요, skip", flush=True)
+        return res
+
+    earliestYm = min(existing)[:6]
+    targetMonths = _prevMonths(earliestYm, months, floorYm)
+    if not targetMonths:
+        res.report.ok = 1
+        print(
+            f"[pipeline] allFilings backfill: 앵커 월 {earliestYm} ≤ floor {floorYm} — 커버리지 달성, no-op",
+            flush=True,
+        )
+        return res
+
+    client = DartClient()
+    rows = 0
+    uploaded = 0
+    for ym in targetMonths:
+        days = [d for d in _monthDays(ym) if d not in existing]
+        collected: list[str] = []
+        try:
+            for d in days:
+                df = fillContent(d, client=client, showProgress=False)
+                if df is not None:
+                    rows += df.height
+                    collected.append(d)
+        except Exception as exc:  # noqa: BLE001 — 월 수집 실패 격리(앞 월 보존, 중단)
+            res.report.err = 1
+            res.report.failures.append(f"allFilings backfill {ym}: {type(exc).__name__}: {exc}")
+            print(f"[pipeline] allFilings backfill {ym} 수집 실패(격리): {exc}", flush=True)
+            break
+
+        if upload and collected:
+            try:
+                pushAllFilings(collected, token=token)
+                uploaded += len(collected)
+            except Exception as exc:  # noqa: BLE001 — push 실패 격리
+                res.report.fail = 1
+                res.report.failures.append(f"allFilings backfill push {ym}: {type(exc).__name__}: {exc}")
+                print(f"[pipeline] allFilings backfill {ym} push 실패(격리): {exc}", flush=True)
+        print(f"[pipeline] allFilings backfill {ym}: {len(collected)}일 수집·push", flush=True)
+
+    res.rows = rows
+    res.uploaded = uploaded
+    res.report.ok = 1
+    print(
+        f"[pipeline] allFilings backfill 완료: {targetMonths} ({len(targetMonths)}개월) · "
+        f"{rows} rows · push {uploaded}일 · floor={floorYm}",
+        flush=True,
+    )
     return res
