@@ -1,8 +1,8 @@
 """PeerCompareN — N (default 5) 종목 wide-format 비교 + peer-internal percentile rank.
 
-마스터 플랜 트랙 1 PR-2 (cryptic-discovering-kettle.md). 기존 compareCompanies max 3 한계 +
-peer ranking 부재 회귀 차단. 내부 자산 재사용 — compareCompanies._companyMetrics 그대로
-호출 (N 처리만 추가) + percentile rank helper 신규.
+마스터 플랜 트랙 1 PR-2 (cryptic-discovering-kettle.md). 옛 max 3 한계 +
+peer ranking 부재 회귀 차단. 재무 추출 SSOT 재사용 — companyMetrics.companyMetrics
+그대로 호출 (N 처리만 추가) + percentile rank helper 신규. 2~12 종목 단일 비교 도구.
 
 신뢰도 80 (ratio method) — 결정적 비율 계산.
 
@@ -16,8 +16,8 @@ from typing import Any
 from dartlab.ai.contracts import Ref
 from dartlab.core.confidence import baseScore
 
+from .companyMetrics import companyMetrics
 from .companyResolve import resolveCompanyOrNone
-from .compareCompanies import _companyMetrics
 from .creditBadge import getDcrBadge
 from .industryContext import getIndustryBadge
 from .types import ToolResult
@@ -85,8 +85,8 @@ def peerCompareN(
     """N 종목 비교 + peer-internal percentile rank.
 
     Capabilities:
-        compareCompanies max 3 한계 확장 (N ≤ 12) + peer-internal percentile rank
-        (각 metric 별 0.0 ~ 1.0, 1.0 = best) 신규. higher_is_better/lower_is_better
+        2~12 종목 단일 비교 도구 + peer-internal percentile rank
+        (각 metric 별 0.0 ~ 1.0, 1.0 = best). higher_is_better/lower_is_better
         방향 자동 적용. 동종 업종 peer 자동 추가 옵션은 별 PR.
 
     Parameters
@@ -117,12 +117,12 @@ def peerCompareN(
 
     Guide
     -----
-        N=2 도 허용. 각 종목 _companyMetrics 호출 (Company.panel 의 IS/BS 1 회씩).
+        N=2 도 허용. 각 종목 companyMetrics 호출 (Company.panel 의 IS/BS 1 회씩).
         percentile rank 는 N 종목 *내부* — 외부 sector peer 자동 비교는 후속 PR.
 
     SeeAlso
     -------
-        - compareCompanies : 기존 max 3 도구 (호환 유지)
+        - companyMetrics.companyMetrics : 재무 추출 SSOT (본 도구가 재사용)
         - industry.taxonomy.getIndustry : sector peer 자동 추가 (후속 PR)
         - DCFValuation : 단일 종목 가치평가
 
@@ -132,8 +132,8 @@ def peerCompareN(
 
     AIContext
     ---------
-        "5 개 회사 비교", "삼성 vs SK vs LG vs ...", "peer 분석" 류 질문에 본 도구
-        호출. compareCompanies 대비 N 확장 + percentile rank 명시.
+        "5 개 회사 비교", "삼성 vs SK vs LG vs ...", "A·B 비교", "peer 분석" 류 질문에
+        본 도구 1 회 호출 (2~12 종목). percentile rank + dCR/industry badge 자동 부착.
 
     LLM Specifications
     ------------------
@@ -147,7 +147,7 @@ def peerCompareN(
         Freshness:
             분기 결산 발표 후 갱신.
         Dataflow:
-            stockCodes → Company × N → IS/BS show × N → _companyMetrics × N →
+            stockCodes → Company × N → IS/BS show × N → companyMetrics × N →
             _calcPercentileRanks × M metric → tableRef.
         TargetMarkets:
             KR (DART) · US (EDGAR). JP (EDINET) 미가용.
@@ -175,7 +175,7 @@ def peerCompareN(
             continue
         corpName = str(getattr(company, "corpName", None) or "")
         row: dict[str, Any] = {"stockCode": code, "corpName": corpName}
-        row.update(_companyMetrics(company))
+        row.update(companyMetrics(company))
         rows.append(row)
         badges.append(
             {

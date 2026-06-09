@@ -147,7 +147,7 @@ industry = c.industry()
 
 1. **`EngineCall(apiRef="Company.panel", args={"stockCode": "...", "topic": "..."})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.
 2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `table:Company.panel:005930` 또는 `tableRef:id` literal 로 표기한다.
-3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.panel 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.
+3. **다중 종목 비교는 `PeerCompareN` 1 회 강제** (2~12 종목) — Company.panel 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.
 4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.panel 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.
 
 ## 호출 동작

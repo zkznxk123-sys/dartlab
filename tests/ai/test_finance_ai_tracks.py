@@ -2,7 +2,7 @@
 
 Track A v1 (filing deep-link) / B (confidence + provenance + ProvenanceTree) /
 G (dCR badge) / E (industry badge) / I (EvidenceGate) / H (PickStoryTemplate) /
-D (ScenarioOverlay) / C (CompareCompanies) / F (viz dataContract) contract 고정.
+D (ScenarioOverlay) / C (PeerCompareN) / F (viz dataContract) contract 고정.
 
 목적: 이름 / 시그니처 / 핵심 키 회귀 차단. dartlab 데이터 의존 무거운 경로는 skip.
 """
@@ -17,10 +17,11 @@ pytestmark = pytest.mark.unit
 
 
 def test_9track_tools_registered() -> None:
-    """9 트랙 신규 도구 4 종 모두 registry 에 등록."""
+    """9 트랙 신규 도구 모두 registry 에 등록 (CompareCompanies 는 PeerCompareN 에 흡수)."""
     names = listToolNames()
-    for tool in ("CompareCompanies", "ScenarioOverlay", "PickStoryTemplate", "EvidenceGate"):
+    for tool in ("PeerCompareN", "ScenarioOverlay", "PickStoryTemplate", "EvidenceGate"):
         assert tool in names, f"{tool} 누락"
+    assert "CompareCompanies" not in names, "CompareCompanies 는 PeerCompareN 에 흡수되어 제거됨"
 
 
 def test_track_b_confidence_label_ssot() -> None:
@@ -99,7 +100,7 @@ def test_track_d_scenario_missing_name() -> None:
 
 
 def test_track_c_compare_empty() -> None:
-    """Track C — stockCodes 빈 리스트는 에러."""
-    result = executeTool("CompareCompanies", {"stockCodes": []})
+    """Track C — PeerCompareN stockCodes 부족(2 개 미만)은 에러 (CompareCompanies 흡수)."""
+    result = executeTool("PeerCompareN", {"stockCodes": []})
     assert result["ok"] is False
-    assert result["error"] == "missing_stock_codes"
+    assert result["error"] == "insufficient_stock_codes"

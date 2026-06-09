@@ -1,7 +1,7 @@
 """CompileFinancialDashboard — 종목 한 화면 dashboard (3 template).
 
 마스터 플랜 트랙 1 PR-3 (cryptic-discovering-kettle.md). 단일 종목의 핵심 KPI +
-시계열 차트를 template 별로 한 도구 호출로 답변. compareCompanies + compileVisual
+시계열 차트를 template 별로 한 도구 호출로 답변. companyMetrics + compileVisual
 + RunPython 다단 우회 회귀 차단.
 
 template 3 종:
@@ -21,8 +21,8 @@ from typing import Any
 from dartlab.ai.contracts import Ref
 from dartlab.core.confidence import baseScore
 
+from .companyMetrics import companyMetrics
 from .companyResolve import resolveCompanyOrNone
-from .compareCompanies import _companyMetrics
 from .creditBadge import getDcrBadge
 from .industryContext import getIndustryBadge
 from .types import ToolResult
@@ -77,7 +77,7 @@ def compileFinancialDashboard(
 
     Capabilities:
         Company.panel 의 IS/BS 데이터 + ratio 계산 → template 별 dashboard spec
-        + ref. compareCompanies._companyMetrics 재사용 (단일 종목 path).
+        + ref. companyMetrics.companyMetrics 재사용 (단일 종목 path).
 
     Parameters
     ----------
@@ -113,7 +113,7 @@ def compileFinancialDashboard(
 
     SeeAlso
     -------
-        - compareCompanies._companyMetrics : 본 도구가 재사용
+        - companyMetrics.companyMetrics : 본 도구가 재사용
         - CompileVisual : 기존 11 chartType 본체 (본 도구는 spec 구조만 박음)
         - viz/catalog/finance.py : 후속 PR 확장 catalog SSOT
 
@@ -138,7 +138,7 @@ def compileFinancialDashboard(
         Freshness:
             분기 결산 발표 후.
         Dataflow:
-            stockCode → Company → IS/BS show → _companyMetrics → template 별
+            stockCode → Company → IS/BS show → companyMetrics → template 별
             metric subset → spec + visualRef.
         TargetMarkets:
             KR (DART) · US (EDGAR).
@@ -154,7 +154,7 @@ def compileFinancialDashboard(
         return ToolResult(False, f"company_not_resolved: {stockCode}", error="company_not_resolved")
 
     corpName = str(getattr(company, "corpName", None) or "")
-    metrics = _companyMetrics(company)
+    metrics = companyMetrics(company)
     spec = _buildDashboardSpec(template, corpName, stockCode, metrics)
 
     confidence = baseScore("ratio")

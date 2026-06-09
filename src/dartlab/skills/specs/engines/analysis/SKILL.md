@@ -298,7 +298,7 @@ c.analysis("financial", "수익성")
 | macroSensitivity | 회귀 추정 기간 · 벤치마크 · p-value 명시; 시장 매크로 (engines.macro) 와 *기업 단위* 민감도 혼동 X — c.macro=시장, c.analysis("macro","매크로민감도")=기업 |
 | peerComparison | 한쪽 수치만으로 우열 단정 X; peer 산업 분기 무시한 cross-industry 비교 X; 같은 기간 / scope / 통화 정렬 명시 |
 | predictionSignal | 단일 신호로 *상승/하락* 단정 X (5+ 신호 종합); 신호 정확도 (hit ratio) 명시 |
-| profitability | ROE 분모 (평균자본 vs 기말자본) 정의 명시; stale 기간 (3 분기 전) 을 *현재* 단정 X (dataAsOf 명시); 다중 종목 비교는 **`CompareCompanies` 1 회** 권장 (Company.panel N 회 X) |
+| profitability | ROE 분모 (평균자본 vs 기말자본) 정의 명시; stale 기간 (3 분기 전) 을 *현재* 단정 X (dataAsOf 명시); 다중 종목 비교는 **`PeerCompareN` 1 회** 권장 (Company.panel N 회 X) |
 | revenueForecast | 매출 전망 가정 (수량 · 단가 · mix · 환율) 분리 명시; 단일 시나리오 (best case 만) X (base/upside/downside 3 시나리오) |
 | revenueStructure | 사업부별 / 지역별 / 제품별 매출 분리 명시; 외화 매출 비중 명시 (환율 변동 영향 별도) |
 | scorecard | 5 영역 (수익성·안정성·성장성·효율성·현금흐름) 가중치 명시; 등급 (A-F) 임계값을 산업 평균 미참조 적용 X |

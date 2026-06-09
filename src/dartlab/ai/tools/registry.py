@@ -8,7 +8,6 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable
 
-from .compareCompanies import compareCompanies
 from .compileFinancialDashboard import compileFinancialDashboard
 from .compileVisual import compileVisual
 from .createUserSkill import createUserSkill
@@ -332,28 +331,9 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
-    "CompareCompanies": ToolSpec(
-        "CompareCompanies",
-        "다중 종목 (2~3 개) wide-format 비교. 매출·영업이익·순이익·총자산·자기자본·부채·debtRatio·ROE + 각 종목 dCR/industry badge 자동 부착. '삼성·하이닉스 비교' 류 질문에 1 회 호출.",
-        {
-            "type": "object",
-            "properties": {
-                "stockCodes": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "2~3 개 종목 코드. 초과 시 앞 3 개만.",
-                },
-            },
-            "required": ["stockCodes"],
-        },
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=False,
-    ),
     "PeerCompareN": ToolSpec(
         "PeerCompareN",
-        "N (2~12) 종목 wide-format 비교 + peer-internal percentile rank (각 metric 별 0.0~1.0, 1.0=best). compareCompanies max 3 한계 확장. '5 개 회사 비교', '삼성 vs SK vs LG vs ...' 류 질문에 1 회 호출.",
+        "N (2~12) 종목 wide-format 비교 + peer-internal percentile rank (각 metric 별 0.0~1.0, 1.0=best). 2~3 종목 비교도 본 도구 1 회. '5 개 회사 비교', '삼성 vs SK vs LG vs ...', 'A vs B' 류 질문에 1 회 호출.",
         {
             "type": "object",
             "properties": {
@@ -736,7 +716,6 @@ _TOOLS: dict[str, ToolFn] = {
     "EngineCall": engineCall,
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
-    "CompareCompanies": compareCompanies,
     "PeerCompareN": peerCompareN,
     "CompileFinancialDashboard": compileFinancialDashboard,
     "CreditScorecard": creditScorecard,
@@ -800,7 +779,6 @@ _LEGACY_NAME_MAP = {
     "engine_call": "EngineCall",
     "evidence_gate": "EvidenceGate",
     "pick_story_template": "PickStoryTemplate",
-    "compare_companies": "CompareCompanies",
     "peer_compare_n": "PeerCompareN",
     "dcf_valuation": "DCFValuation",
     "credit_scorecard": "CreditScorecard",

@@ -85,16 +85,12 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "SaveArtifact",
     "CreateUserSkill",
     "CompileVisual",
-    # finance-native primitive (Track C/G/H/I) — registry 등록만 됐다가 default 미노출
-    # 이라 LLM 이 호출 못 했던 회귀. 2026-05-17 OAuth probe 에서 다중 종목 비교 시
-    # CompareCompanies 1 회 대신 Company.panel 2 회 + RunPython 우회 (91s) 발견 후 합류.
-    "CompareCompanies",
     # 마스터 플랜 트랙 1 PR-1 — Damodaran DCF wrap (bear/base/bull 3 시나리오).
     # 직전 회귀: LLM 이 매번 RunPython 으로 ad-hoc DCF 코드 작성 → token 30% 낭비.
-    # default 노출 누락 시 LLM 호출 0 회 회귀 (CompareCompanies 2026-05-17 패턴).
+    # default 노출 누락 시 LLM 호출 0 회 회귀 (2026-05-17 default 미노출 패턴).
     "DCFValuation",
-    # 마스터 플랜 트랙 1 PR-2 — N(2~12) 종목 비교 + percentile rank.
-    # compareCompanies max 3 한계 확장 + peer-internal ranking 신규.
+    # 마스터 플랜 트랙 1 PR-2 — N(2~12) 종목 단일 비교 도구 + percentile rank.
+    # 옛 max 3 한계 확장 + peer-internal ranking. 2~3 종목 비교도 본 도구가 흡수.
     "PeerCompareN",
     # 마스터 플랜 트랙 1 PR-5 — N(2~5) macro 시나리오 baseline 대비 동시 비교.
     # ScenarioOverlay 1 회 + RunPython loop 우회 → 1 회 호출.
@@ -106,7 +102,7 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     # multiStageDcf 반복 호출 grid loop wrap.
     "SensitivityAnalysis",
     # 마스터 플랜 트랙 1 PR-3 — 단일 종목 한 화면 dashboard (3 template).
-    # compareCompanies + CompileVisual + RunPython 다단 우회 회귀 차단.
+    # companyMetrics + CompileVisual + RunPython 다단 우회 회귀 차단.
     "CompileFinancialDashboard",
     # 마스터 플랜 트랙 1 PR-7 — 매출 성장률 회귀 예측 (cross/panel cache load).
     # crossRegression.fit* + loadModel/loadPanelModel wrap.
@@ -899,7 +895,7 @@ def _formatIntentProfileBlock(kwargs: dict[str, Any]) -> str:
     if targets:
         lines.append(f"- 추정 종목: {', '.join(f'`{t}`' for t in targets[:5])}")
     if comparison:
-        lines.append("- 비교형 질문 — `PeerCompareN` (N≥2) 또는 `CompareCompanies` (max 3) 우선.")
+        lines.append("- 비교형 질문 — `PeerCompareN` (2~12 종목) 1 회 호출 우선.")
     if show_topic:
         lines.append(f"- 추정 토픽: `{show_topic}` — `EngineCall(Company.panel, topic='{show_topic}')` 우선.")
     # 마스터 플랜 v2 트랙 6 PR-L2 — trigger 표 dynamic inline (system prompt 압축 대체).

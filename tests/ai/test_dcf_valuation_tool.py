@@ -8,7 +8,7 @@
 3. company_not_resolved (잘못된 코드) → company_not_resolved error
 4. _scenarioDict / _safeBaseScore helper 결정론
 5. legacy snake_case 매핑 (dcf_valuation → DCFValuation)
-6. default tool 노출 (_DEFAULT_TOOL_NAMES) 회귀 가드 (2026-05-17 CompareCompanies 패턴)
+6. default tool 노출 (_DEFAULT_TOOL_NAMES) 회귀 가드 (2026-05-17 default 미노출 패턴)
 """
 
 from __future__ import annotations
@@ -49,8 +49,8 @@ def test_dcfValuation_legacy_snake_alias() -> None:
 def test_dcfValuation_default_exposed_to_llm() -> None:
     """default tool 노출 회귀 가드.
 
-    CompareCompanies 가 registry 등록만 됐다가 default 미노출이라 LLM 호출 0 회
-    회귀 (2026-05-17 OAuth probe). 본 검증으로 DCFValuation 도 동일 회귀 차단.
+    옛 도구가 registry 등록만 됐다가 default 미노출이라 LLM 호출 0 회 회귀
+    (2026-05-17 OAuth probe). 본 검증으로 DCFValuation 도 동일 회귀 차단.
     """
     from dartlab.ai.agent import _DEFAULT_TOOL_NAMES
 

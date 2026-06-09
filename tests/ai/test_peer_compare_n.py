@@ -1,7 +1,7 @@
 """PeerCompareN tool smoke + percentile rank 검증.
 
-마스터 플랜 트랙 1 PR-2 동행. compareCompanies max 3 한계 확장 + peer-internal
-percentile rank 결정론 검증.
+마스터 플랜 트랙 1 PR-2 동행. 옛 max 3 한계 확장(2~12 종목 단일 비교 도구) +
+peer-internal percentile rank 결정론 검증.
 """
 
 from __future__ import annotations

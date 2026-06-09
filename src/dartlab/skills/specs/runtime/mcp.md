@@ -108,10 +108,28 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 | 채널 | 어떻게 자동인가 |
 |---|---|
 | `RunPython` | 모든 새 dartlab 공개 API 즉시 호출 가능. 새 엔진/메서드 추가 시 별도 도구 정의 불필요. 가장 보편적 흡수 채널 |
+| `EngineCall` | allowlist 없는 generic dispatch — capability 등재된 모든 `dartlab.*` verb·`Company.*` 메서드를 `{apiRef, args}` 로 즉시 호출 (`_genericPublicCall` 이 `getattr(dartlab, verb)`). 새 verb 추가 시 손코딩 도구 불필요 (RunPython 보다 안전·간단) |
 | `ReadCapability` | `reference/capability.loadCapabilities()` 의 라이브 카탈로그(docstring 소스, 캐시) 색인 |
 | `ReadSkill` | `skills/specs/**` 의 모든 skill markdown 자동 색인 (process-lifetime 캐시) |
 | `prompts/list` & `prompts/get` | Skill OS 의 `kind: recipe` 카테고리를 prompt 로 자동 노출. arguments 는 skill `inputs` frontmatter 에서 derive |
 | `dartlab://skills/{id}` resources | Skill OS 에서 런타임 derive |
+
+### 도구 설계 원칙 — verb=SSOT, 손코딩 도구는 thin 위임
+
+데이터 verb(`compare`·`scan`·`gather`·`Company.*`)는 위 자동 채널(EngineCall·RunPython)로 손코딩 0
+에 노출된다. 따라서 새 비교/분석 능력을 위해 손코딩 도구를 또 만들 이유가 거의 없다.
+
+- **verb = SSOT** — 라이브러리 verb 가 단일 진실원. 같은 능력을 MCP 도구가 재구현하지 않는다.
+- **손코딩 도구 = thin 오케스트레이터만** — `PeerCompareN`·`DCFValuation` 처럼 *단일 verb 로 표현 못 하는*
+  다단 가공(percentile rank·dCR/industry badge·시나리오)만 손코딩한다. 데이터 추출은 verb 또는 단일
+  헬퍼(`ai/tools/companyMetrics.companyMetrics`)에 위임한다.
+- **자동 generator 금지** — 도구/skill 산출물을 capability 에서 자동 생성하는 도구를 만들지 않는다(운영자
+  수기 자산 덮어쓰기 회귀). 자동성은 *런타임 디스패치*(EngineCall)로 얻지 *코드 생성*으로 얻지 않는다.
+- **커버리지 경계** — `compare` 재무 셀 모드는 KR 전용(native acode). cross-market(KR+US) 재무가 필요한
+  도구는 finance 파사드(`companyMetrics`)를 쓴다 — 순수성 위해 US 커버리지를 희생하지 않는다.
+
+가드: `tests/ai/test_engine_call_reachability.py`(verb 자동경로 lock) ·
+`tests/audit/test_aiToolsSingleExtraction.py`(재무 추출 단일점 — facade 추출은 `companyMetrics.py` 한 곳만).
 
 ### 수동 touchpoint — 엔진 surface 변경 시 사람이 손대야 함
 

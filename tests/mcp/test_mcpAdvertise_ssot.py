@@ -52,7 +52,7 @@ def test_mcpAdvertisedToolNames_excludes_workbench_internals() -> None:
     from dartlab.mcp.protocol import mcpAdvertisedToolNames
 
     names = set(mcpAdvertisedToolNames())
-    excluded = {"RunWorkbench", "EvidenceGate", "PickStoryTemplate", "CompareCompanies"}
+    excluded = {"RunWorkbench", "EvidenceGate", "PickStoryTemplate"}
     leaked = excluded & names
     assert not leaked, f"workbench 내부 도구 MCP 외부 누출: {leaked}"
 

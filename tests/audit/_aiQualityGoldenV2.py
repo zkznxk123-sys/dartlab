@@ -98,7 +98,7 @@ _GOLDEN_V2: list[dict[str, Any]] = [
                 "forbiddenSlots": ["오류가 발생"],
             },
             "toolSelection": {
-                "expectedTools": ["PeerCompareN", "CompareCompanies"],
+                "expectedTools": ["PeerCompareN"],
                 "forbiddenTools": ["RunPython"],
                 "matchMode": "subset",
             },
