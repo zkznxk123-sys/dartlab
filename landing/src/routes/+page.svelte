@@ -8,6 +8,7 @@
 	import Problem from '$lib/components/sections/Problem.svelte';
 	import AccountPipeline from '$lib/components/sections/AccountPipeline.svelte';
 	import Alignment from '$lib/components/sections/Alignment.svelte';
+	import ViewerShowcase from '$lib/components/sections/ViewerShowcase.svelte';
 	import Layers from '$lib/components/sections/Layers.svelte';
 	import Workflow from '$lib/components/sections/Workflow.svelte';
 	import CodeDemo from '$lib/components/sections/CodeDemo.svelte';
@@ -107,6 +108,7 @@
 	<Problem />
 	<AccountPipeline />
 	<Alignment />
+	<ViewerShowcase />
 	<Layers />
 
 	<!-- 3. How -->
