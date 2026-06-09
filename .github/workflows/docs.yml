@@ -83,6 +83,9 @@ jobs:
 
       - name: Build site
         working-directory: landing
+        env:
+          # 공시 Q&A 질문 수집 Worker(공개 URL, secret 아님) — 빌드에 심어야 prod 토글 노출.
+          VITE_FEEDBACK_URL: https://dartlab-question-collector.eddmpython.workers.dev
         run: |
           npm ci
           BASE_PATH=/dartlab npm run build

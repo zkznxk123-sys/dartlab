@@ -1,6 +1,8 @@
 name = "dartlab-question-collector"
 main = "worker.js"
 compatibility_date = "2024-12-01"
+# @huggingface/hub 가 node 빌트인(fs/promises·url)을 import → Worker 런타임에 nodejs_compat 필요.
+compatibility_flags = ["nodejs_compat"]
 
 # HF_TOKEN(write) 은 secret 으로 — 커밋 금지: `wrangler secret put HF_TOKEN`
 # ALLOW_ORIGIN 은 실제 사이트 origin 으로 좁히길 권장(배포 후 vars 갱신).
