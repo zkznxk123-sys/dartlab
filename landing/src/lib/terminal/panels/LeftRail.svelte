@@ -4,6 +4,7 @@
 	import { gradeTone } from '../data/engine';
 	import type { EcoNode, Lang } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
+	import ScreenerModal from './ScreenerModal.svelte';
 	import { txc, chgClass, sign, heat } from '../ui/helpers';
 
 	interface Props {
@@ -37,6 +38,7 @@
 	];
 	let metricKey = $state<MetricKey>('return1y');
 	const activeMetric = $derived(METRICS.find((m) => m.k === metricKey) as MetricDef);
+	let screenerOpen = $state(false);
 
 	// 조건 검색
 	let query = $state('');
@@ -108,6 +110,8 @@
 			{/each}
 		</div>
 	</Panel>
+
+<ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {/if}
 <Panel {lang} className="eIndustry" prov="live" title={{ kr: '섹터 히트맵', en: 'SECTOR HEATMAP' }} sub={{ kr: '평균 1M · 클릭=필터', en: 'avg 1M · click to filter' }}>
 	<div class="sectorGrid">
@@ -124,7 +128,7 @@
 
 <!-- 통합 스크리너 — 주가 + 재무 한 리스트, 조건 검색 -->
 <Panel {lang} className="eQuant fillCol" prov="live" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} sub={{ kr: nodes.length + '종목', en: 'n=' + nodes.length }} flush>
-	{#snippet right()}<a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">조건조사 ↗</a>{/snippet}
+	{#snippet right()}<button class="scrOpenBtn" onclick={() => (screenerOpen = true)} title="상용급 다조건 검색">{lang === 'en' ? 'SCREEN' : '상세검색'}</button><a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">조건조사 ↗</a>{/snippet}
 	<div class="metricBar">
 		{#each METRICS as m, i (m.k)}
 			{#if i === 4}<span class="metricDiv"></span>{/if}

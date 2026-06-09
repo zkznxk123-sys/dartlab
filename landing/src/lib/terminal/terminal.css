@@ -197,6 +197,8 @@
 .dlTerm .filtChipRow { padding: 3px 6px 0; }
 .dlTerm .filtChip { font-family: var(--cond); font-size: 8.5px; color: var(--amber); background: rgba(251, 146, 60, 0.1); border: 1px solid var(--bdAmber); border-radius: 3px; padding: 1px 6px; cursor: pointer; }
 .dlTerm .filtChip:hover { background: rgba(251, 146, 60, 0.18); }
+.dlTerm .scrOpenBtn { font-family: var(--cond); font-size: 9px; font-weight: 700; letter-spacing: 0.4px; color: #1a1206; background: var(--amber); border: none; border-radius: 3px; padding: 2px 7px; cursor: pointer; margin-right: 6px; }
+.dlTerm .scrOpenBtn:hover { filter: brightness(1.08); }
 /* 렌즈 조건 필터 */
 .dlTerm .filtRow { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); }
 .dlTerm .filtInput { flex: 1; min-width: 0; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--txt); font-family: var(--mono); font-size: 9px; padding: 2px 5px; outline: none; }
@@ -431,6 +433,47 @@
 .dlTerm .filingRow:hover .flArrow { color: var(--amber); }
 .dlTerm .filingRow.nonreg { grid-template-columns: 1fr auto 12px; }
 .dlTerm .filingRow.nonreg .flType { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* 조건검색 모달 (상용급 스크리너) */
+.scrimWrap { position: fixed; inset: 0; z-index: 200; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
+.scrModal { width: min(960px, 96vw); max-height: 88vh; display: flex; flex-direction: column; background: var(--dl-bg-raised, #0e141f); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); overflow: hidden; font-family: var(--dl-font-ui); color: var(--dl-ink); }
+.scrModal .mono { font-family: var(--dl-font-mono); font-variant-numeric: tabular-nums; }
+.scrHead { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--dl-line, #1b2130); }
+.scrTitle { font-family: var(--dl-font-mono); font-weight: 700; font-size: 12px; letter-spacing: 0.14em; color: var(--amber, #fb923c); text-transform: uppercase; }
+.scrCount { font-size: 11px; color: var(--dl-ink-mute, #8a93a3); }
+.scrClose { margin-left: auto; background: none; border: none; color: var(--dl-ink-dim, #5b6473); font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 3px; }
+.scrClose:hover { color: var(--dl-ink); background: rgba(255, 255, 255, 0.06); }
+.scrConds { display: flex; flex-direction: column; gap: 5px; padding: 10px 14px; border-bottom: 1px solid var(--dl-line, #1b2130); max-height: 30vh; overflow-y: auto; }
+.scrCond { display: flex; align-items: center; gap: 6px; }
+.scrSel, .scrNum { background: var(--dl-bg-deep, #080c14); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 3px; color: var(--dl-ink); font-size: 11px; padding: 3px 6px; outline: none; }
+.scrSel:focus, .scrNum:focus { border-color: var(--amber, #fb923c); }
+.scrSel.field { flex: 1; min-width: 130px; }
+.scrSel.val { flex: 1; }
+.scrSel.op { width: 46px; text-align: center; }
+.scrSel.sort { min-width: 130px; }
+.scrNum { width: 84px; font-family: var(--dl-font-mono); }
+.scrOp { font-family: var(--dl-font-mono); color: var(--dl-ink-mute); width: 46px; text-align: center; }
+.scrUnit { font-size: 10px; color: var(--dl-ink-dim); width: 20px; }
+.scrDel { background: none; border: none; color: var(--dl-ink-dim); cursor: pointer; font-size: 11px; padding: 2px 5px; border-radius: 3px; }
+.scrDel:hover { color: var(--dn, #f0616f); background: rgba(240, 97, 111, 0.1); }
+.scrAdd { align-self: flex-start; margin-top: 2px; background: rgba(251, 146, 60, 0.08); border: 1px dashed var(--dl-line-strong, #2a3142); color: var(--amber, #fb923c); font-family: var(--dl-font-ui); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 3px; cursor: pointer; }
+.scrAdd:hover { background: rgba(251, 146, 60, 0.16); }
+.scrSortRow { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--dl-line, #1b2130); }
+.scrSortLbl { font-size: 10px; color: var(--dl-ink-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.scrDirBtn { background: var(--dl-bg-deep, #080c14); border: 1px solid var(--dl-line-strong, #2a3142); color: var(--dl-ink); font-family: var(--dl-font-ui); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+.scrDirBtn:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
+.scrShown { margin-left: auto; font-size: 10px; color: var(--dl-ink-dim); }
+.scrResults { flex: 1; overflow-y: auto; }
+.scrTable { width: 100%; border-collapse: collapse; font-size: 11px; }
+.scrTable th { position: sticky; top: 0; background: var(--dl-bg-raised, #0e141f); font-family: var(--dl-font-ui); font-size: 9px; font-weight: 600; color: var(--dl-ink-dim, #5b6473); text-transform: uppercase; letter-spacing: 0.4px; padding: 5px 10px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); }
+.scrTable th.l, .scrTable td.l { text-align: left; }
+.scrTable th.r, .scrTable td.r { text-align: right; }
+.scrTable td { padding: 4px 10px; border-bottom: 1px solid var(--dl-line, #1b2130); }
+.scrTable tbody tr { cursor: pointer; }
+.scrTable tbody tr:hover { background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.04)); }
+.scrTable td.l b { font-weight: 600; }
+.scrInd { display: block; font-size: 8.5px; color: var(--dl-ink-dim, #5b6473); }
+.scrEmpty { text-align: center; color: var(--dl-ink-dim); padding: 24px; font-size: 11px; }
 
 /* FINANCIALS */
 .dlTerm .finCtl { display: flex; gap: 0; border: 1px solid var(--bd); border-radius: 2px; overflow: hidden; }
