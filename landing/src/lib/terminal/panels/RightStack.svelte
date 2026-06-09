@@ -12,6 +12,7 @@
 	import type { CompanyChange } from '$lib/scan/duckSql';
 	import { loadCompanyRelations, type CompanyRelations } from '../data/relations';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
+	import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
 
 	interface Props {
 		co: Company;
@@ -26,6 +27,8 @@
 	let disclChanges = $state<CompanyChange[]>([]);
 	let relations = $state<CompanyRelations | null>(null);
 	let regFilings = $state<RegularFiling[]>([]);
+	let nonRegFilings = $state<NonRegularFiling[]>([]);
+	let nonRegState = $state<'loading' | 'ready' | 'empty'>('loading');
 	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
 	$effect(() => {
 		const code = co.code;
@@ -34,6 +37,8 @@
 		disclChanges = [];
 		relations = null;
 		regFilings = [];
+		nonRegFilings = [];
+		nonRegState = 'loading';
 		let cancelled = false;
 		loadLiveCompanyReportFacts(code).then((f) => {
 			if (cancelled) return;
@@ -48,6 +53,11 @@
 		});
 		loadCompanyRegularFilings(code, 12).then((f) => {
 			if (!cancelled) regFilings = f;
+		});
+		loadCompanyNonRegularFilings(code, { limit: 30 }).then((f) => {
+			if (cancelled) return;
+			nonRegFilings = f;
+			nonRegState = f.length ? 'ready' : 'empty';
 		});
 		return () => {
 			cancelled = true;
@@ -229,22 +239,44 @@
 	</Panel>
 {/if}
 
-<!-- 정기공시 목록 (panel rceptNo → DART 원문 + 뷰어 링크) -->
-{#if regFilings.length}
-	<Panel {lang} className="eChanges" prov="live" title={{ kr: '정기공시 목록', en: 'REGULAR FILINGS' }} sub={{ kr: 'panel · DART 원문', en: 'panel · DART' }} flush>
+<!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할 -->
+<div class="rowSplit">
+	<Panel {lang} className="eChanges" prov="live" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
 		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기">뷰어 ↗</a>{/snippet}
-		<div class="filingList">
-			{#each regFilings as f (f.rceptNo)}
-				<a class="filingRow" href={f.url} target="_blank" rel="noopener">
-					<span class="flType">{f.reportType}</span>
-					<span class="flYear mono">{f.year}</span>
-					<span class="flDate mono">{f.rceptDate}</span>
-					<span class="flArrow">↗</span>
-				</a>
-			{/each}
-		</div>
+		{#if regFilings.length}
+			<div class="filingList">
+				{#each regFilings as f (f.rceptNo)}
+					<a class="filingRow" href={f.url} target="_blank" rel="noopener">
+						<span class="flType">{f.reportType}</span>
+						<span class="flYear mono">{f.year}</span>
+						<span class="flDate mono">{f.rceptDate}</span>
+						<span class="flArrow">↗</span>
+					</a>
+				{/each}
+			</div>
+		{:else}
+			<div class="storyEmpty">{lang === 'en' ? 'no regular filings' : '정기공시 없음'}</div>
+		{/if}
 	</Panel>
-{/if}
+	<Panel {lang} className="eChanges" prov="live" title={{ kr: '비정기공시', en: 'OTHER FILINGS' }} sub={{ kr: 'allFilings · 수시', en: 'allFilings' }} flush>
+		{#snippet right()}<span class="dim">{nonRegState === 'ready' ? nonRegFilings.length : ''}</span>{/snippet}
+		{#if nonRegState === 'ready'}
+			<div class="filingList">
+				{#each nonRegFilings as f (f.rceptNo)}
+					<a class="filingRow nonreg" href={f.url} target="_blank" rel="noopener" title={f.reportNm + (f.filer ? ' · ' + f.filer : '')}>
+						<span class="flType">{f.reportNm}</span>
+						<span class="flDate mono">{f.rceptDate.slice(2)}</span>
+						<span class="flArrow">↗</span>
+					</a>
+				{/each}
+			</div>
+		{:else if nonRegState === 'loading'}
+			<div class="storyEmpty">{lang === 'en' ? 'scanning recent filings …' : '최근 공시 스캔 중 …'}</div>
+		{:else}
+			<div class="storyEmpty">{lang === 'en' ? 'no non-regular filings' : '비정기공시 없음'}</div>
+		{/if}
+	</Panel>
+</div>
 
 <div class="rowSplit">
 	<!-- PEERS -->

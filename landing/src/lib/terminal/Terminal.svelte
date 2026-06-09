@@ -135,6 +135,10 @@
 				<div class="langSwitch">{#each langTabs as t (t.k)}<button class={'langBtn ' + (lang === t.k ? 'on' : '')} onclick={() => (lang = t.k)}>{t.l}</button>{/each}</div>
 				<span class="clock mono">{clock}</span>
 				<span class="connDot"><span class="dot"></span>HF</span>
+				<div class="hdrLinks">
+					<a class="hdrLink" href="{brand.repo}/discussions" target="_blank" rel="noopener" title="GitHub 토론 — 의견·제안">{lang === 'en' ? 'Discuss' : '토론'}</a>
+					<a class="hdrLink" href="{brand.repo}/issues/new" target="_blank" rel="noopener" title="GitHub 이슈 등록 — 버그·요청">{lang === 'en' ? 'Issue' : '이슈'}</a>
+				</div>
 				<nav class="sns">
 					<a class="snsBtn" href={brand.repo} target="_blank" rel="noopener" title="GitHub"><Github size={15} /></a>
 					<a class="snsBtn" href={brand.coffee} target="_blank" rel="noopener" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">

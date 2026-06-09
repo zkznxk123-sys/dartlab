@@ -98,6 +98,10 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
         run: uv run python -X utf8 -m dartlab.pipeline allFilings
+      - name: 비정기공시 recent.parquet 통합 갱신 + HF push (랜딩 터미널 콘솔청결 단일파일)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run python -X utf8 .github/scripts/sync/buildAllFilingsRecent.py --days 400
 
   allfilings-backfill:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill' }}
