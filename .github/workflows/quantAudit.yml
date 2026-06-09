@@ -58,6 +58,8 @@ jobs:
                   lines.append(f'| {cat} | {lbl} | {d.get(\"n_signals\",0)} | t={d5.get(\"t_stat\",0):+.2f} | t={d10.get(\"t_stat\",0):+.2f} | t={d20.get(\"t_stat\",0):+.2f} | {p} |')
 
           report = '\n'.join(lines)
+          from pathlib import Path
+          Path('data/dart/auditQuant').mkdir(parents=True, exist_ok=True)
           with open('data/dart/auditQuant/verdict_categories.md', 'w', encoding='utf-8') as f:
               f.write(report)
           print(report)
