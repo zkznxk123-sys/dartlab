@@ -391,8 +391,8 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			] },
 			{ key: 'incomeBreakdown', title: '손익구조', unit: '조', series: [
 				{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
-				{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line' },
-				{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line' }
+				{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line', axis: 'r' },
+				{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line', axis: 'r' }
 			] },
 			{ key: 'cashflowSigned', title: '현금흐름', unit: '조', signed: true, series: [
 				{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },

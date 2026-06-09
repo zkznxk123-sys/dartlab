@@ -349,7 +349,7 @@
 .dlTerm .finChart figcaption { font-family: var(--cond); font-size: 9px; color: var(--dimmer); margin-bottom: 3px; }
 
 /* 재무제표 분석 — 4열 그리드, 계정명 범례 + Y축 숫자 + X축 기간 (해석 가능·크게) */
-.dlTerm .finGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 3px 2px; }
+.dlTerm .finGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 2px 2px 3px; }
 .dlTerm .finMini { border: 1px solid var(--bd); border-radius: 2px; background: var(--dl-bg-base); padding: 4px 2px 2px; min-width: 0; }
 .dlTerm .mfc { display: flex; flex-direction: column; }
 .dlTerm .mfcHead { display: flex; align-items: baseline; gap: 5px; line-height: 1.1; }
