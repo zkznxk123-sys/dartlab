@@ -28,7 +28,7 @@
 <a href="https://github.com/eddmpython/dartlab-desktop/releases/latest/download/DartLab.exe"><img src="https://img.shields.io/badge/Desktop-Windows-38bdf8?style=for-the-badge&labelColor=050811&logo=windows&logoColor=white" alt="Desktop Download"></a>
 </p>
 
-<a href="https://www.youtube.com/shorts/97lYLWMWzvA"><img src="https://img.youtube.com/vi/97lYLWMWzvA/maxresdefault.jpg" alt="DartLab Demo" width="320"></a>
+<a href="https://www.youtube.com/watch?v=-Y3kY1zs62I"><img src="https://img.youtube.com/vi/-Y3kY1zs62I/maxresdefault.jpg" alt="DartLab — 공시를 비교 가능한 데이터로" width="900"></a>
 
 </div>
 
