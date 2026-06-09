@@ -1,9 +1,10 @@
 <script lang="ts">
-	// 고성능 주가 캔들 (Canvas2D) — 멀티 보조지표 패널(동시 다중) + 멀티 MA + 적정밴드·실적 마커.
+	// 트레이딩뷰급 주가차트 — klinecharts(v9) 본체. 캔들 + 내장 지표(VOL/RSI/MACD/KDJ/OBV/MA/BOLL),
+	// 네이티브 줌·팬·크로스헤어·로그스케일 + 전체화면 + 실시간 updateData 경로.
+	// adapter-static·SSR 안전: $effect 안 동적 import + dispose() cleanup (콘솔 0). 화면 브랜딩 없음(Apache-2.0).
+	import { browser } from '$app/environment';
 	import type { Candle } from '../data/priceSeries';
 	import type { Lang } from '../data/types';
-	import { sma, rsi, macd, bollinger, stochastic, obv } from '../data/indicators';
-	import { fmtNum, fmtAbbr } from '../ui/helpers';
 
 	export type SubKey = 'VOL' | 'RSI' | 'MACD' | 'STOCH' | 'OBV';
 	interface Props {
@@ -11,334 +12,202 @@
 		lang: Lang;
 		period: '3M' | '5M' | '6M' | '1Y' | 'MAX';
 		overlay: 'MA' | 'BB' | 'NONE';
-		subs: SubKey[]; // 동시 표시할 보조지표 패널 (스택)
+		subs: SubKey[]; // 동시 표시 보조지표 페인 (스택)
 		events?: { date: string; label: string }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 	}
 	let { candles, lang, period, overlay, subs, events, valBand }: Props = $props();
 
-	let wrap: HTMLDivElement | null = $state(null);
-	let canvas: HTMLCanvasElement | null = $state(null);
-	let hover = $state<number | null>(null);
-	let dims = $state({ w: 800, h: 420 });
+	let el: HTMLDivElement | null = $state(null);
+	let chart = $state<any>(null);
+	let full = $state(false); // 전체화면 오버레이
+	let logScale = $state(false); // 로그 스케일
 
-	const C = {
-		up: '#34d399', dn: '#f0616f', ma5: '#e879f9', ma20: '#fb923c', ma60: '#60a5fa', ma120: '#a78bfa',
-		bb: 'rgba(167,139,250,0.5)', grid: '#1b2130', axis: '#2a3142', text: '#a3a8b3',
-		macdUp: 'rgba(52,211,153,0.6)', macdDn: 'rgba(240,97,111,0.6)', stochK: '#fb923c', stochD: '#60a5fa', obv: '#22d3ee'
-	};
+	// klinecharts 모듈·상태 보관 (비반응 — effect 가 mutate)
+	let kc: any = null;
+	const subPanes = new Map<SubKey, string>(); // 활성 보조지표 → paneId
+	let mainInd: string | null = null; // 메인 오버레이 (MA/BOLL)
+	let bandIds: string[] = [];
+	let eventIds: string[] = [];
+
+	const SUB_NAME: Record<SubKey, string> = { VOL: 'VOL', RSI: 'RSI', MACD: 'MACD', STOCH: 'KDJ', OBV: 'OBV' };
 	const PERIOD_N: Record<string, number> = { '3M': 66, '5M': 110, '6M': 132, '1Y': 252, MAX: 100000 };
-	const SUBH = 46;
-	const SUBGAP = 6;
+	const SUBH = 78;
+	const wrapH = $derived(360 + subs.length * SUBH);
 
-	// 차트 높이 = 가격영역 + 보조패널 수만큼 (보조지표 늘리면 차트가 커짐)
-	const wrapH = $derived(330 + subs.length * (SUBH + SUBGAP));
+	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
+	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v });
 
-	$effect(() => {
-		if (!wrap) return;
-		const ro = new ResizeObserver((es) => {
-			for (const e of es) {
-				const cr = e.contentRect;
-				dims = { w: Math.max(280, cr.width), h: Math.max(200, cr.height) };
-			}
-		});
-		ro.observe(wrap);
-		return () => ro.disconnect();
+	const themeStyles = () => ({
+		grid: { horizontal: { color: 'rgba(38,46,62,0.45)' }, vertical: { color: 'rgba(38,46,62,0.32)' } },
+		candle: {
+			bar: {
+				upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e',
+				upBorderColor: '#34d399', downBorderColor: '#f0616f', noChangeBorderColor: '#8b919e',
+				upWickColor: '#5eead4', downWickColor: '#fb7185', noChangeWickColor: '#8b919e'
+			},
+			priceMark: {
+				high: { color: '#8b919e' }, low: { color: '#8b919e' },
+				last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14' } }
+			},
+			tooltip: { text: { color: '#cfd3dc', size: 11 }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
+		},
+		indicator: { tooltip: { text: { color: '#8b919e', size: 10 } } },
+		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e' } },
+		yAxis: { type: logScale ? 'logarithmic' : 'normal', axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e' } },
+		separator: { color: '#222b3a', fill: true },
+		crosshair: {
+			horizontal: { line: { color: 'rgba(251,146,60,0.5)' }, text: { backgroundColor: '#b45309' } },
+			vertical: { line: { color: 'rgba(251,146,60,0.5)' }, text: { backgroundColor: '#b45309' } }
+		}
 	});
 
-	const slice = $derived(candles.slice(-Math.min(candles.length, PERIOD_N[period] || candles.length)));
-
+	// ── 초기화: 회사(candles) 변경 시에만 재생성 (줌 상태 보존 위해 토글은 별 effect) ──
 	$effect(() => {
-		const cv = canvas;
-		if (!cv) return;
-		const s = slice;
-		const hv = hover;
-		const ov = overlay;
-		const sbs = subs;
-		void events;
-		void valBand;
-		const dpr = window.devicePixelRatio || 1;
-		const W = dims.w;
-		const H = dims.h;
-		cv.width = W * dpr;
-		cv.height = H * dpr;
-		cv.style.width = W + 'px';
-		cv.style.height = H + 'px';
-		const ctx = cv.getContext('2d');
-		if (!ctx || !s.length) {
-			if (ctx) ctx.clearRect(0, 0, W, H);
-			return;
-		}
-		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-		ctx.clearRect(0, 0, W, H);
-		ctx.font = '8px "JetBrains Mono", monospace';
-		ctx.textBaseline = 'middle';
-
-		const padR = 48;
-		const padL = 4;
-		const padT = 6;
-		const xLblH = 14;
-		const subsBlock = sbs.length ? SUBGAP + sbs.length * SUBH + (sbs.length - 1) * SUBGAP : 0;
-		const priceH = H - padT - subsBlock - xLblH;
-		const plotW = W - padR - padL;
-		const n = s.length;
-		const closes = s.map((c) => c.c);
-		const highs = s.map((c) => c.h);
-		const lows = s.map((c) => c.l);
-		const vols = s.map((c) => c.v);
-
-		const lo = Math.min(...lows);
-		const hi = Math.max(...highs);
-		const pad = (hi - lo) * 0.04 || 1;
-		const yMin = lo - pad;
-		const yMax = hi + pad;
-		const Y = (v: number) => padT + priceH - ((v - yMin) / (yMax - yMin)) * priceH;
-		const cw = plotW / n;
-		const X = (i: number) => padL + i * cw + cw / 2;
-
-		// price grid + y labels
-		for (let k = 0; k <= 4; k++) {
-			const v = yMin + ((yMax - yMin) * k) / 4;
-			const y = Y(v);
-			ctx.strokeStyle = C.grid;
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.moveTo(padL, y);
-			ctx.lineTo(padL + plotW, y);
-			ctx.stroke();
-			ctx.fillStyle = C.text;
-			ctx.textAlign = 'left';
-			ctx.fillText(fmtNum(v, 0), padL + plotW + 4, y);
-		}
-
-		// 적정주가 밴드 (캔들 뒤)
-		if (valBand && valBand.hi > valBand.lo) {
-			const cl = (v: number) => Math.max(yMin, Math.min(yMax, v));
-			const yHi = Y(cl(valBand.hi));
-			const yLo = Y(cl(valBand.lo));
-			ctx.fillStyle = 'rgba(96,165,250,0.08)';
-			ctx.fillRect(padL, Math.min(yHi, yLo), plotW, Math.abs(yLo - yHi));
-			if (valBand.mid >= yMin && valBand.mid <= yMax) {
-				ctx.strokeStyle = 'rgba(96,165,250,0.55)';
-				ctx.setLineDash([4, 3]);
-				ctx.lineWidth = 1;
-				ctx.beginPath();
-				ctx.moveTo(padL, Y(valBand.mid));
-				ctx.lineTo(padL + plotW, Y(valBand.mid));
-				ctx.stroke();
-				ctx.setLineDash([]);
-			}
-			ctx.fillStyle = 'rgba(96,165,250,0.85)';
-			ctx.textAlign = 'left';
-			ctx.fillText(lang === 'en' ? 'fair' : '적정', padL + 2, Math.min(yHi, yLo) + 5);
-		}
-
-		const drawLine = (arr: (number | null)[], color: string, top: (v: number) => number, w = 1.2) => {
-			ctx.strokeStyle = color;
-			ctx.lineWidth = w;
-			ctx.beginPath();
-			let st = false;
-			arr.forEach((v, i) => {
-				if (v == null) return;
-				const x = X(i);
-				const y = top(v);
-				st ? ctx.lineTo(x, y) : ((ctx.moveTo(x, y), (st = true)));
-			});
-			ctx.stroke();
+		const cs = candles;
+		void lang;
+		if (!browser || !el || !cs || cs.length === 0) return;
+		let disposed = false;
+		let local: any = null;
+		(async () => {
+			const mod: any = await import('klinecharts');
+			if (disposed || !el) return;
+			kc = mod;
+			local = mod.init(el, { styles: themeStyles() });
+			if (!local) return;
+			local.setPriceVolumePrecision(0, 0);
+			local.setOffsetRightDistance(8);
+			local.applyNewData(cs.map(toK));
+			subPanes.clear();
+			mainInd = null;
+			bandIds = [];
+			eventIds = [];
+			chart = local; // → 토글 effect 들이 현재 상태로 채워 넣음
+		})();
+		return () => {
+			disposed = true;
+			if (local && kc) { try { kc.dispose(local); } catch { /* already */ } }
+			subPanes.clear();
+			mainInd = null;
+			bandIds = [];
+			eventIds = [];
+			if (chart === local) chart = null;
 		};
+	});
 
-		// Bollinger (캔들 뒤)
-		if (ov === 'BB') {
-			const bb = bollinger(closes, 20, 2);
-			drawLine(bb.upper, C.bb, Y);
-			drawLine(bb.lower, C.bb, Y);
-			drawLine(bb.mid, 'rgba(167,139,250,0.85)', Y);
+	// 메인 오버레이 (MA / BOLL / 없음)
+	$effect(() => {
+		const ov = overlay;
+		const c = chart;
+		if (!c) return;
+		if (mainInd) { c.removeIndicator('candle_pane', mainInd); mainInd = null; }
+		if (ov === 'MA') mainInd = c.createIndicator('MA', true, { id: 'candle_pane' }) ? 'MA' : null;
+		else if (ov === 'BB') mainInd = c.createIndicator('BOLL', true, { id: 'candle_pane' }) ? 'BOLL' : null;
+	});
+
+	// 보조지표 페인 reconcile (추가/제거만)
+	$effect(() => {
+		const want = new Set(subs);
+		const c = chart;
+		if (!c) return;
+		for (const [k, paneId] of [...subPanes]) {
+			if (!want.has(k)) { c.removeIndicator(paneId); subPanes.delete(k); }
 		}
-
-		// candles
-		s.forEach((c, i) => {
-			const x = X(i);
-			const up = c.c >= c.o;
-			const col = up ? C.up : C.dn;
-			ctx.strokeStyle = col;
-			ctx.fillStyle = col;
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.moveTo(x, Y(c.h));
-			ctx.lineTo(x, Y(c.l));
-			ctx.stroke();
-			const bw = Math.max(1, cw * 0.62);
-			const yo = Y(c.o);
-			const yc = Y(c.c);
-			ctx.fillRect(x - bw / 2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
+		subs.forEach((k) => {
+			if (subPanes.has(k)) return;
+			const id = c.createIndicator(SUB_NAME[k], false, { id: `pane_${k}`, height: SUBH });
+			if (id) subPanes.set(k, id);
 		});
+	});
 
-		// 실적·공시 시점 마커
-		if (events && events.length) {
-			const first = s[0].t;
-			const last = s[n - 1].t;
-			for (const ev of events) {
-				if (ev.date < first || ev.date > last) continue;
-				let j = 0;
-				let best = Infinity;
-				for (let i = 0; i < n; i++) {
-					const d = Math.abs(Number(s[i].t) - Number(ev.date));
-					if (d < best) { best = d; j = i; }
-				}
-				const x = X(j);
-				ctx.strokeStyle = 'rgba(251,146,60,0.4)';
-				ctx.setLineDash([2, 2]);
-				ctx.lineWidth = 1;
-				ctx.beginPath();
-				ctx.moveTo(x, padT + 9);
-				ctx.lineTo(x, padT + priceH);
-				ctx.stroke();
-				ctx.setLineDash([]);
-				ctx.fillStyle = 'rgba(251,146,60,0.9)';
-				ctx.beginPath();
-				ctx.moveTo(x, padT + priceH - 2);
-				ctx.lineTo(x - 3, padT + priceH + 3);
-				ctx.lineTo(x + 3, padT + priceH + 3);
-				ctx.closePath();
-				ctx.fill();
-				ctx.fillStyle = C.text;
-				ctx.textAlign = 'center';
-				ctx.fillText(ev.label, x, padT + 5);
-			}
-		}
-
-		// MA 오버레이 (5·20·60·120 다중)
-		if (ov === 'MA') {
-			drawLine(sma(closes, 5), C.ma5, Y, 1);
-			drawLine(sma(closes, 20), C.ma20, Y);
-			drawLine(sma(closes, 60), C.ma60, Y);
-			drawLine(sma(closes, 120), C.ma120, Y);
-			ctx.fillStyle = C.text;
-			ctx.textAlign = 'left';
-			ctx.fillText('MA 5·20·60·120', padL + 2, padT + 6);
-		}
-
-		// ── 보조지표 패널 (스택) ──
-		sbs.forEach((sb, idx) => {
-			const top = padT + priceH + SUBGAP + idx * (SUBH + SUBGAP);
-			const bot = top + SUBH;
-			ctx.strokeStyle = C.grid;
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.moveTo(padL, top);
-			ctx.lineTo(padL + plotW, top);
-			ctx.stroke();
-			const label = (t: string) => {
-				ctx.fillStyle = C.text;
-				ctx.textAlign = 'left';
-				ctx.fillText(t, padL + 2, top + 6);
-			};
-			if (sb === 'VOL') {
-				const vMax = Math.max(...vols, 1);
-				s.forEach((c, i) => {
-					const x = X(i);
-					const up = c.c >= c.o;
-					const h = (c.v / vMax) * (SUBH - 4);
-					ctx.fillStyle = up ? 'rgba(52,211,153,0.45)' : 'rgba(240,97,111,0.45)';
-					ctx.fillRect(x - Math.max(1, cw * 0.62) / 2, bot - h, Math.max(1, cw * 0.62), h);
-				});
-				label('VOL');
-			} else if (sb === 'RSI') {
-				const r = rsi(closes, 14);
-				const SY = (v: number) => bot - (v / 100) * SUBH;
-				[30, 70].forEach((lv) => {
-					ctx.strokeStyle = 'rgba(251,146,60,0.18)';
-					ctx.beginPath();
-					ctx.moveTo(padL, SY(lv));
-					ctx.lineTo(padL + plotW, SY(lv));
-					ctx.stroke();
-				});
-				drawLine(r, C.ma20, SY, 1.1);
-				label('RSI 14');
-			} else if (sb === 'MACD') {
-				const m = macd(closes);
-				const all = m.line.concat(m.signal, m.hist).filter((v) => Number.isFinite(v));
-				const mx = Math.max(...all.map(Math.abs), 1);
-				const SY = (v: number) => top + SUBH / 2 - (v / mx) * (SUBH / 2 - 3);
-				m.hist.forEach((v, i) => {
-					const x = X(i);
-					ctx.fillStyle = v >= 0 ? C.macdUp : C.macdDn;
-					const y0 = SY(0);
-					const y1 = SY(v);
-					ctx.fillRect(x - Math.max(1, cw * 0.5) / 2, Math.min(y0, y1), Math.max(1, cw * 0.5), Math.abs(y1 - y0));
-				});
-				drawLine(m.line, C.ma20, SY, 1);
-				drawLine(m.signal, C.ma60, SY, 1);
-				label('MACD 12/26/9');
-			} else if (sb === 'STOCH') {
-				const st = stochastic(highs, lows, closes, 14, 3);
-				const SY = (v: number) => bot - (v / 100) * SUBH;
-				[20, 80].forEach((lv) => {
-					ctx.strokeStyle = 'rgba(251,146,60,0.18)';
-					ctx.beginPath();
-					ctx.moveTo(padL, SY(lv));
-					ctx.lineTo(padL + plotW, SY(lv));
-					ctx.stroke();
-				});
-				drawLine(st.k, C.stochK, SY, 1.1);
-				drawLine(st.d, C.stochD, SY, 1);
-				label('STOCH 14/3');
-			} else if (sb === 'OBV') {
-				const o = obv(closes, vols);
-				const omin = Math.min(...o);
-				const omax = Math.max(...o);
-				const rng = omax - omin || 1;
-				const SY = (v: number) => bot - ((v - omin) / rng) * (SUBH - 4) - 2;
-				drawLine(o, C.obv, SY, 1.1);
-				label('OBV');
-			}
-		});
-
-		// x labels
-		ctx.fillStyle = C.text;
-		ctx.textAlign = 'center';
-		const step = Math.floor(n / 7) || 1;
-		for (let i = 0; i < n; i += step) {
-			const d = s[i].t;
-			ctx.fillText(`${d.slice(4, 6)}/${d.slice(6, 8)}`, X(i), H - 4);
-		}
-
-		// hover crosshair (전체 높이)
-		if (hv != null && hv >= 0 && hv < n) {
-			ctx.strokeStyle = 'rgba(251,146,60,0.5)';
-			ctx.setLineDash([3, 3]);
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.moveTo(X(hv), padT);
-			ctx.lineTo(X(hv), padT + priceH + subsBlock);
-			ctx.stroke();
-			ctx.setLineDash([]);
+	// 적정주가 밴드 → priceLine 오버레이
+	$effect(() => {
+		const vb = valBand;
+		const c = chart;
+		if (!c) return;
+		bandIds.forEach((id) => c.removeOverlay(id));
+		bandIds = [];
+		if (vb && vb.hi > vb.lo) {
+			const mk = (price: number, color: string, dash: boolean) =>
+				c.createOverlay({ name: 'priceLine', points: [{ value: price }], lock: true, styles: { line: { color, style: dash ? 'dashed' : 'solid', size: 1 }, text: { color } } });
+			const fair = lang === 'en' ? 'fair' : '적정';
+			void fair;
+			bandIds = [mk(vb.hi, 'rgba(96,165,250,0.5)', true), mk(vb.mid, 'rgba(96,165,250,0.85)', true), mk(vb.lo, 'rgba(96,165,250,0.5)', true)].filter(Boolean) as string[];
 		}
 	});
 
-	function onMove(e: MouseEvent) {
-		const cv = canvas;
-		if (!cv) return;
-		const r = cv.getBoundingClientRect();
-		const plotW = dims.w - 48 - 4;
-		const n = slice.length;
-		const i = Math.floor((e.clientX - r.left - 4) / (plotW / n));
-		hover = i >= 0 && i < n ? i : null;
+	// 실적·공시 시점 마커 → simpleAnnotation (가장 가까운 거래일 스냅)
+	$effect(() => {
+		const evs = events;
+		const cs = candles;
+		const c = chart;
+		if (!c || !cs.length) return;
+		eventIds.forEach((id) => c.removeOverlay(id));
+		eventIds = [];
+		if (!evs || !evs.length) return;
+		const first = cs[0].t;
+		const last = cs[cs.length - 1].t;
+		const snap = (d: string) => {
+			let best = cs[0];
+			let bd = Infinity;
+			for (const k of cs) { const dd = Math.abs(Number(k.t) - Number(d)); if (dd < bd) { bd = dd; best = k; } }
+			return best;
+		};
+		const ids: string[] = [];
+		for (const ev of evs) {
+			if (ev.date < first || ev.date > last) continue;
+			const k = snap(ev.date);
+			const id = c.createOverlay({
+				name: 'simpleAnnotation', extendData: ev.label,
+				points: [{ timestamp: toMs(k.t), value: k.h }],
+				styles: { text: { color: '#fb923c', backgroundColor: 'rgba(251,146,60,0.12)', borderColor: 'rgba(251,146,60,0.5)' } }
+			});
+			if (id) ids.push(id as string);
+		}
+		eventIds = ids;
+	});
+
+	// 로그 스케일
+	$effect(() => {
+		const lg = logScale;
+		const c = chart;
+		if (!c) return;
+		c.setStyles({ yAxis: { type: lg ? 'logarithmic' : 'normal' } });
+	});
+
+	// period → 가시 봉 수 (네이티브 줌/팬 유지)
+	$effect(() => {
+		const p = period;
+		const c = chart;
+		if (!c || !el || !candles.length) return;
+		const N = Math.min(PERIOD_N[p] ?? candles.length, candles.length);
+		const w = el.clientWidth || 800;
+		const space = Math.max(1, Math.min(30, w / N));
+		try { c.setBarSpace(space); c.scrollToRealTime(0); } catch { /* race */ }
+	});
+
+	// 전체화면 토글 → resize + ESC
+	$effect(() => {
+		if (!browser) return;
+		const c = chart;
+		void full;
+		requestAnimationFrame(() => { try { c?.resize(); } catch { /* */ } });
+		if (!full) return;
+		const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') full = false; };
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
+	});
+
+	// 실시간 틱 증분 갱신 — 나중 가격 API 연결 시 호출 (마지막 캔들만 갱신/추가)
+	export function pushTick(c: Candle) {
+		try { chart?.updateData(toK(c)); } catch { /* */ }
 	}
-	const hv = $derived(hover != null && hover < slice.length ? slice[hover] : slice[slice.length - 1]);
 </script>
 
-<div class="chartWrap" bind:this={wrap} role="img" aria-label="price chart"
-	onmousemove={onMove} onmouseleave={() => (hover = null)} style="height:{wrapH}px;min-height:300px;">
-	<canvas bind:this={canvas}></canvas>
-	{#if hv}
-		<div class="ohlcTag">
-			<span>{hv.t.slice(0, 4)}-{hv.t.slice(4, 6)}-{hv.t.slice(6, 8)}</span>
-			<span>O <b>{fmtNum(hv.o)}</b></span>
-			<span>H <b>{fmtNum(hv.h)}</b></span>
-			<span>L <b>{fmtNum(hv.l)}</b></span>
-			<span>C <b style="color:{hv.c >= hv.o ? C.up : C.dn}">{fmtNum(hv.c)}</b></span>
-			<span>V <b>{fmtAbbr(hv.v)}</b></span>
-		</div>
-	{/if}
+<div class="chartWrap" class:full role="img" aria-label="price chart" style={full ? '' : `height:${wrapH}px;min-height:320px;`}>
+	<div class="chartHost" bind:this={el}></div>
+	<div class="chartTools">
+		<button class={logScale ? 'chartTool on' : 'chartTool'} onclick={() => (logScale = !logScale)} title={lang === 'en' ? 'log scale' : '로그 스케일'}>LOG</button>
+		<button class="chartTool" onclick={() => (full = !full)} title={lang === 'en' ? 'fullscreen' : '전체화면'} aria-label="fullscreen">{full ? '✕' : '⤢'}</button>
+	</div>
 </div>

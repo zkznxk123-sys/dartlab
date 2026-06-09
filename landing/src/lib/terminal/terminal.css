@@ -303,9 +303,15 @@
 .dlTerm .vRiskline b { font-family: var(--mono); }
 
 /* CHART (trend) */
-.dlTerm .chartWrap { position: relative; width: 100%; height: 136px; min-height: 134px; overflow: hidden; }
-.dlTerm .chartWrap canvas { display: block; width: 100%; height: 100%; }
-.dlTerm .ohlcTag { position: absolute; top: 5px; left: 8px; display: flex; gap: 11px; font-family: var(--mono); font-size: 10px; color: var(--dim); pointer-events: none; }
+.dlTerm .chartWrap { position: relative; width: 100%; min-height: 320px; overflow: hidden; }
+.dlTerm .chartHost { width: 100%; height: 100%; }
+.dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 38px 10px 10px; }
+.dlTerm .chartTools { position: absolute; top: 6px; right: 12px; display: flex; gap: 4px; z-index: 6; }
+.dlTerm .chartWrap.full .chartTools { top: 10px; right: 16px; }
+.dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
+.dlTerm .chartTool:hover { color: var(--txt); border-color: var(--amber); }
+.dlTerm .chartTool.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
+.dlTerm .ohlcTag { position: absolute; top: 5px; left: 8px; z-index: 5; display: flex; gap: 11px; font-family: var(--mono); font-size: 10px; color: var(--dim); pointer-events: none; }
 .dlTerm .ohlcTag b { color: var(--txt); font-weight: 600; }
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }
 .dlTerm .chartCtl { display: flex; gap: 8px; align-items: center; }

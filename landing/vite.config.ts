@@ -119,7 +119,20 @@ export default defineConfig({
 		noExternal: [/^d3-/]
 	},
 	optimizeDeps: {
-		include: ['d3-scale', 'd3-selection', 'd3-shape', 'd3-array']
+		// d3 + 뷰어가 *동적 import* 하는 무거운 deps 를 시작 시 미리 최적화. 안 넣으면 뷰어 로드 중 뒤늦게 최적화되며
+		// "optimized dependencies changed. reloading" → 옛 청크 무효화 → 504(Outdated Optimize Dep) → 빈 화면 churn.
+		include: [
+			'd3-scale',
+			'd3-selection',
+			'd3-shape',
+			'd3-array',
+			'lucide-svelte',
+			'hyparquet',
+			'hyparquet-compressors',
+			'dompurify',
+			'@mlc-ai/web-llm',
+			'klinecharts'
+		]
 	},
 	server: {
 		host: '127.0.0.1',
