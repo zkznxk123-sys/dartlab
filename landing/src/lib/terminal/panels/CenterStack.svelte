@@ -208,10 +208,16 @@
 	<!-- RADAR -->
 	<Panel {lang} className="eIndustry" prov="live" title={{ kr: '종합 스노우플레이크', en: 'SNOWFLAKE' }} sub={{ kr: '6축 등급', en: '6-axis' }} flush>
 		<div class="radarWrap">
-			<Radar data={co.radar} {lang} size={104} />
+			<Radar data={co.radar} {lang} size={134} />
 			<div class="radarLegend">
 				{#each co.radar as d (d.en)}
-					<div class="rl"><span>{txc(d, lang)}</span><b class={d.s == null ? 'tNeu' : d.s >= 0.66 ? 'tUp' : d.s >= 0.4 ? 'tNeu' : 'tDn'}>{d.s == null ? '—' : Math.round(d.s * 100)}</b></div>
+					{@const sc = d.s == null ? 0 : Math.round(d.s * 100)}
+					{@const col = d.s == null ? 'var(--dimmer)' : d.s >= 0.66 ? 'var(--up)' : d.s >= 0.4 ? 'var(--warn)' : 'var(--dn)'}
+					<div class="rl">
+						<span class="rlName">{txc(d, lang)}</span>
+						<span class="rlBar"><span class="rlFill" style={`width:${sc}%;background:${col}`}></span></span>
+						<b class={d.s == null ? 'tNeu' : d.s >= 0.66 ? 'tUp' : d.s >= 0.4 ? 'tNeu' : 'tDn'}>{d.s == null ? '—' : sc}</b>
+					</div>
 				{/each}
 			</div>
 		</div>

@@ -301,78 +301,88 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 
 	const C = { rev: '#5b9bf0', op: '#fb923c', net: '#34d399', good: '#34d399', warn: '#fbbf24', purple: '#a78bfa', red: '#f0616f', blue: '#60a5fa', cyan: '#22d3ee', dim: '#64748b' };
 
-	// ── 핵심 10 카드 (viz/catalog/finance.py FINANCE_DASHBOARD_KEYS 핵심) ──
-	const cards: FinCard[] = [];
+	// FCF (원 단위) + raw 시리즈 분모 비율 (CF 마진용)
+	const fcfRaw = used.map((_, i) => { const op = valAtIdx('cfOperating', i); const cx = valAtIdx('capex', i); return op != null ? op - (cx ?? 0) : null; });
+	const ratioOfSeries = (numRaw: Num[], denKey: string, scale = 100): Num[] => { const d = raw(denKey); return used.map((_, i) => (numRaw[i] != null && d[i] ? +((numRaw[i]! / d[i]!) * scale).toFixed(1) : null)); };
 
-	// 1. 손익구조 — 매출 막대 + 영업/순이익 선
-	cards.push({ key: 'incomeBreakdown', title: '손익', unit: '조', series: [
-		{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
-		{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line' },
-		{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line' }
-	] });
+	// ── 재무제표 분석 15 카드 (기본 4 + 세트). universal 계정 위주 → 5열×3행 빈칸 0. ──
+	const cards: FinCard[] = [
+		// 기본 4 — 자산·조달·손익·현금
+		{ key: 'assetComposition', title: '자산구조', unit: '조', stacked: true, series: [
+			{ name: '현금', data: ser('cash'), color: C.good, type: 'bar' },
+			{ name: '매출채권', data: ser('receivables'), color: C.blue, type: 'bar' },
+			{ name: '재고', data: ser('inventories'), color: C.warn, type: 'bar' },
+			{ name: '기타', data: compose(['assets', 1], ['cash', -1], ['receivables', -1], ['inventories', -1]), color: C.dim, type: 'bar' }
+		] },
+		{ key: 'fundingStructure', title: '조달구조', unit: '조', stacked: true, series: [
+			{ name: '유동부채', data: ser('currentLiabilities'), color: C.red, type: 'bar' },
+			{ name: '비유동부채', data: compose(['liabilities', 1], ['currentLiabilities', -1]), color: C.op, type: 'bar' },
+			{ name: '자본', data: ser('equity'), color: C.good, type: 'bar' }
+		] },
+		{ key: 'incomeBreakdown', title: '손익구조', unit: '조', series: [
+			{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
+			{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line' },
+			{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line' }
+		] },
+		{ key: 'cashflowSigned', title: '현금흐름', unit: '조', signed: true, series: [
+			{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
+			{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
+			{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
+		] },
+		// 수익성
+		{ key: 'marginTrend', title: '이익률', unit: '%', series: [
+			{ name: 'GPM', data: gpRatio(), color: C.warn, type: 'line' },
+			{ name: 'OPM', data: ratio('operatingIncome', 'revenue'), color: C.op, type: 'line' },
+			{ name: 'NPM', data: ratio('netIncome', 'revenue'), color: C.net, type: 'line' }
+		] },
+		{ key: 'returnTrend', title: 'ROE·ROA', unit: '%', series: [
+			{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'line' },
+			{ name: 'ROA', data: ratio('netIncome', 'assets', 100, true), color: C.blue, type: 'line' }
+		] },
+		{ key: 'cfMargin', title: '현금마진', unit: '%', series: [
+			{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line' },
+			{ name: 'FCF/매출', data: ratioOfSeries(fcfRaw, 'revenue'), color: C.warn, type: 'line' }
+		] },
+		// 안정성
+		{ key: 'leverageTrend', title: '레버리지·유동', unit: '%', refLines: [100], series: [
+			{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
+			{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
+		] },
+		{ key: 'stability', title: '안정성', unit: '%', series: [
+			{ name: '자기자본비율', data: ratio('equity', 'assets'), color: C.good, type: 'bar' },
+			{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
+		] },
+		{ key: 'netDebt', title: '순차입금', unit: '조', signed: true, series: [
+			{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' },
+			{ name: 'D/E', data: ratio('liabilities', 'equity'), color: C.purple, type: 'line', axis: 'r' }
+		] },
+		// 현금·효율
+		{ key: 'fcfTrend', title: 'FCF', unit: '조', signed: true, series: [
+			{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
+			{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
+			{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
+		] },
+		{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
+			{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' },
+			{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line', axis: 'r' }
+		] },
+		{ key: 'turnover', title: '회전율', unit: '회', series: [
+			{ name: '자산회전', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line' },
+			{ name: '매출채권', data: ratio('revenue', 'receivables', 1, true), color: C.cyan, type: 'line' }
+		] },
+		// 성장
+		{ key: 'growthYoy', title: '성장 YoY', unit: '%', signed: true, series: [
+			{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
+			{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
+			{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
+		] },
+		{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', signed: true, series: [
+			{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
+			{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
+		] }
+	];
 
-	// 2. 이익률 — GPM/OPM/NPM
-	cards.push({ key: 'marginTrend', title: '이익률', unit: '%', series: [
-		{ name: 'GPM', data: gpRatio(), color: C.warn, type: 'line' },
-		{ name: 'OPM', data: ratio('operatingIncome', 'revenue'), color: C.op, type: 'line' },
-		{ name: 'NPM', data: ratio('netIncome', 'revenue'), color: C.net, type: 'line' }
-	] });
-
-	// 3. 수익성 — ROE/ROA (평균자본 분모)
-	cards.push({ key: 'returnTrend', title: 'ROE · ROA', unit: '%', series: [
-		{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'line' },
-		{ name: 'ROA', data: ratio('netIncome', 'assets', 100, true), color: C.blue, type: 'line' }
-	] });
-
-	// 4. 자산구조 — 자산 stacked (현금/매출채권/재고/기타) 시점
-	cards.push({ key: 'assetComposition', title: '자산구조', unit: '조', stacked: true, series: [
-		{ name: '현금', data: ser('cash'), color: C.good, type: 'bar' },
-		{ name: '매출채권', data: ser('receivables'), color: C.blue, type: 'bar' },
-		{ name: '재고', data: ser('inventories'), color: C.warn, type: 'bar' },
-		{ name: '기타', data: compose(['assets', 1], ['cash', -1], ['receivables', -1], ['inventories', -1]), color: C.dim, type: 'bar' }
-	] });
-
-	// 5. 레버리지 — 부채비율 bar + 유동비율 line(우축)
-	cards.push({ key: 'leverageTrend', title: '레버리지·유동', unit: '%', series: [
-		{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
-		{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
-	], refLines: [100] });
-
-	// 6. 순차입금 — netDebt signed bar + 차입금/자본 line
-	cards.push({ key: 'netDebt', title: '순차입금', unit: '조', signed: true, series: [
-		{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' },
-		{ name: 'D/E', data: ratio('liabilities', 'equity'), color: C.purple, type: 'line', axis: 'r' }
-	] });
-
-	// 7. 현금흐름 — CFO/CFI/CFF signed + 순증감 line
-	cards.push({ key: 'cashflowSigned', title: '현금흐름', unit: '조', signed: true, series: [
-		{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
-		{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
-		{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
-	] });
-
-	// 8. 잉여현금흐름 — FCF line(헤더값) + CFO/capex bar
-	cards.push({ key: 'fcfTrend', title: 'FCF', unit: '조', signed: true, series: [
-		{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
-		{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
-		{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
-	] });
-
-	// 9. 이익 품질 — CFO/순이익(배, 1.0 기준), CFO/매출 line
-	cards.push({ key: 'earningsQuality', title: '이익품질', unit: '배', series: [
-		{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' },
-		{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line', axis: 'r' }
-	], refLines: [1] });
-
-	// 10. 성장성 — 매출/영업익/순익 YoY
-	cards.push({ key: 'growthYoy', title: '성장 YoY', unit: '%', signed: true, series: [
-		{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
-		{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
-		{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
-	] });
-
-	// null-only 카드 제거 (데이터 없는 회사 방어)
-	const live = cards.filter((c) => c.series.some((s) => s.data.some((v) => v != null)));
-	if (live.length === 0) return null;
-	return { periods, freq, cards: live };
+	// 회사에 데이터 전무(빈 파케이)면 null. 개별 카드 sparse 는 셀 유지 (빈칸 방지).
+	if (!cards.some((c) => c.series.some((s) => s.data.some((v) => v != null)))) return null;
+	return { periods, freq, cards };
 }
