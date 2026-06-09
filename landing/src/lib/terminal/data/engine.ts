@@ -119,6 +119,7 @@ export interface Engine {
 	source: string;
 	buildCompany(code: string): Company | null;
 	search(q: string): string | null;
+	suggest(q: string, n?: number): { code: string; name: string; industry: string }[];
 	featured(n?: number): string[];
 	sectorPerf(): { id: string; kr: string; en: string; chg: number; n: number }[];
 	priceOf(code: string): RawData['prices']['data'][string] | undefined;
@@ -532,6 +533,31 @@ export function createEngine(raw: RawData): Engine {
 		return null;
 	}
 
+	// 자동완성: 코드/이름 부분일치 (viewer식 검색 드롭다운용)
+	function suggest(q: string, n = 8): { code: string; name: string; industry: string }[] {
+		q = (q || '').trim();
+		if (!q) return [];
+		const up = q.toUpperCase();
+		const out: { code: string; name: string; industry: string }[] = [];
+		const seen = new Set<string>();
+		const push = (r: RawData['index'][number]) => {
+			if (seen.has(r.stockCode)) return;
+			if (!raw.finance.companies[r.stockCode] || !raw.prices.data[r.stockCode]) return;
+			seen.add(r.stockCode);
+			out.push({ code: r.stockCode, name: r.corpName, industry: SECTOR_KR[r.industry] || r.industry });
+		};
+		// 1순위 정확/접두, 2순위 포함
+		for (const r of raw.index) {
+			if (out.length >= n) break;
+			if (r.stockCode === q || r.corpName === q || r.corpName.startsWith(q) || r.corpName.toUpperCase().startsWith(up) || r.stockCode.startsWith(q)) push(r);
+		}
+		for (const r of raw.index) {
+			if (out.length >= n) break;
+			if (r.corpName.includes(q) || r.corpName.toUpperCase().includes(up)) push(r);
+		}
+		return out;
+	}
+
 	function featured(n = 14): string[] {
 		const out: string[] = [];
 		for (const r of raw.index) {
@@ -556,7 +582,7 @@ export function createEngine(raw: RawData): Engine {
 
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, featured, sectorPerf,
+		buildCompany, search, suggest, featured, sectorPerf,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};

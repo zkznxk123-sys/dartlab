@@ -3,6 +3,8 @@
 	import Panel from '../ui/Panel.svelte';
 	import Radar from '../charts/Radar.svelte';
 	import TrendChart from '../charts/TrendChart.svelte';
+	import PriceChart from '../charts/PriceChart.svelte';
+	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 
 	interface Props {
@@ -17,6 +19,30 @@
 	$effect(() => {
 		// 분기 데이터 없는 회사로 전환 시 annual 로 복귀
 		if (freq === 'quarter' && !co.trendQuarter) freq = 'annual';
+	});
+
+	// 주가 캔들 (DuckDB 온디맨드) — 부팅 비차단, 회사 전환 시 재로드
+	let chartMode = $state<'price' | 'fin'>('price');
+	let pPeriod = $state<'3M' | '6M' | '1Y' | 'MAX'>('1Y');
+	let pOverlay = $state<'MA' | 'BB' | 'NONE'>('MA');
+	let pSub = $state<'VOL' | 'RSI' | 'MACD'>('VOL');
+	let candles = $state<Candle[] | null>(null);
+	let candleState = $state<'loading' | 'ready' | 'unavail'>('loading');
+	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
+	$effect(() => {
+		const code = co.code;
+		const yr = priceYear;
+		candleState = 'loading';
+		candles = null;
+		let cancelled = false;
+		loadDailyOHLCV(code, yr).then((c) => {
+			if (cancelled) return;
+			candles = c;
+			candleState = c && c.length ? 'ready' : 'unavail';
+		});
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	const p = $derived(co.price);
@@ -127,17 +153,39 @@
 	</div>
 </Panel>
 
-<!-- FINANCIAL TREND (실 매출·영업이익·이익률, 합성 OHLC 대체) -->
-<Panel {lang} className="eQuant" prov="live" title={{ kr: '재무 추세', en: 'FINANCIAL TREND' }} sub={{ kr: 'finance · 실데이터', en: 'finance · real' }} flush>
+<!-- 주가 캔들(일별 실데이터·보조지표) ⇄ 재무 추세 -->
+<Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 · 재무', en: 'PRICE · FINANCIALS' }}
+	sub={chartMode === 'price' ? { kr: 'krx 일별 · EOD', en: 'krx daily · EOD' } : { kr: 'finance · 실데이터', en: 'finance · real' }} flush>
 	{#snippet right()}
-		<span class="chartCtl">
+		<span class="segGroup">
+			<button class={chartMode === 'price' ? 'seg on' : 'seg'} onclick={() => (chartMode = 'price')}>{lang === 'en' ? 'PRICE' : '주가'}</button>
+			<button class={chartMode === 'fin' ? 'seg on' : 'seg'} onclick={() => (chartMode = 'fin')}>{lang === 'en' ? 'FIN' : '재무'}</button>
+		</span>
+	{/snippet}
+	{#if chartMode === 'price'}
+		<div class="chartCtlRow">
+			<span class="segGroup">{#each ['3M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
+			<span class="segGroup">{#each [['MA', 'MA'], ['BB', 'BB'], ['NONE', '없음']] as [v, l] (v)}<button class={pOverlay === v ? 'seg on' : 'seg'} onclick={() => (pOverlay = v as typeof pOverlay)}>{l}</button>{/each}</span>
+			<span class="segGroup">{#each ['VOL', 'RSI', 'MACD'] as v (v)}<button class={pSub === v ? 'seg on' : 'seg'} onclick={() => (pSub = v as typeof pSub)}>{v}</button>{/each}</span>
+			<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>
+		</div>
+		{#if candleState === 'ready' && candles}
+			<PriceChart {candles} {lang} period={pPeriod} overlay={pOverlay} sub={pSub} />
+		{:else if candleState === 'loading'}
+			<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
+		{:else}
+			<div class="chartLoad">{lang === 'en' ? 'daily chart unavailable here — snapshot only.' : '이 기기에서 일별 차트 불가 — 스냅샷만.'} 52W {fmtNum(co.price.lo52)}~{fmtNum(co.price.hi52)}</div>
+		{/if}
+	{:else}
+		<div class="chartCtlRow">
 			<span class="segGroup">
 				<button class={freq === 'annual' ? 'seg on' : 'seg'} onclick={() => (freq = 'annual')}>{lang === 'en' ? 'ANNUAL' : '연간'}</button>
 				<button class={freq === 'quarter' ? 'seg on' : 'seg'} disabled={!co.trendQuarter} style={!co.trendQuarter ? 'opacity:.4;cursor:not-allowed' : ''} onclick={() => co.trendQuarter && (freq = 'quarter')}>{lang === 'en' ? 'QUARTER' : '분기'}</button>
 			</span>
-		</span>
-	{/snippet}
-	<TrendChart {trend} {lang} />
+			<span class="dim" style="font-size:8.5px">{lang === 'en' ? 'revenue · op · margin' : '매출·영업이익·이익률'}</span>
+		</div>
+		<TrendChart {trend} {lang} />
+	{/if}
 </Panel>
 
 <div class="rowSplit">

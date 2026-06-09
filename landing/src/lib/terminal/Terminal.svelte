@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { Github } from 'lucide-svelte';
+	import { brand } from '$lib/brand';
 	import './terminal.css';
 	import type { Engine } from './data/engine';
 	import type { Lang } from './data/types';
@@ -20,6 +22,36 @@
 	let cmd = $state('');
 	let flash = $state<string | null>(null);
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
+
+	// viewer 식 자동완성 검색
+	let cmdInput = $state<HTMLInputElement | null>(null);
+	let showSuggest = $state(false);
+	let selIdx = $state(-1);
+	const suggestions = $derived(showSuggest ? eng.suggest(cmd, 8) : []);
+	function onInput() {
+		showSuggest = cmd.trim().length > 0;
+		selIdx = -1;
+	}
+	function onKey(e: KeyboardEvent) {
+		if (!suggestions.length) return;
+		if (e.key === 'ArrowDown') { e.preventDefault(); selIdx = (selIdx + 1) % suggestions.length; }
+		else if (e.key === 'ArrowUp') { e.preventDefault(); selIdx = (selIdx - 1 + suggestions.length) % suggestions.length; }
+		else if (e.key === 'Escape') { showSuggest = false; selIdx = -1; }
+		else if (e.key === 'Enter' && selIdx >= 0) { e.preventDefault(); choose(suggestions[selIdx].code); }
+	}
+	function choose(code: string) {
+		pick(code);
+		cmd = '';
+		showSuggest = false;
+		selIdx = -1;
+	}
+	$effect(() => {
+		const onDocKey = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdInput?.focus(); }
+		};
+		window.addEventListener('keydown', onDocKey);
+		return () => window.removeEventListener('keydown', onDocKey);
+	});
 
 	const co = $derived(eng.buildCompany(sym));
 	const tickerCodes = $derived(eng.featured(14));
@@ -61,29 +93,63 @@
 <div class="dlTerm">
 	{#if !co}
 		<div class="bootScreen">
-			<img class="brandLogo" src="{base}/avatar-detective.png" alt="DartLab" width="56" height="56" style="border-radius:14px" />
-			<div class="bootMark">DART<span>LAB</span> TERMINAL</div>
+			<img class="brandLogo" src="{base}/avatar.png" alt="DartLab" width="56" height="56" style="border-radius:50%" />
+			<div class="bootMark">DartLab <span>terminal</span></div>
 			<div class="bootBar"><div class="bootFill"></div></div>
 			<div class="bootMsg">{lang === 'en' ? 'company not found' : '회사 데이터를 찾을 수 없습니다'}</div>
 		</div>
 	{:else}
 		<header class="topBar">
-			<div class="brand">
-				<img class="brandLogo" src="{base}/avatar-detective.png" alt="DartLab" />
-				<span class="brandName">DARTLAB</span>
-				<span class="brandTag">KR TERMINAL</span>
-			</div>
-			<form class="cmdBar" onsubmit={go}>
+			<a class="brand" href="{base}/" title="dartlab">
+				<picture>
+					<source srcset="{base}/avatar.webp" type="image/webp" />
+					<img class="brandLogo" src="{base}/avatar.png" alt="DartLab" width="24" height="24" />
+				</picture>
+				<span class="brandName">DartLab</span>
+				<span class="brandSlash">/</span>
+				<span class="brandTag">terminal</span>
+			</a>
+			<form class="cmdBar" onsubmit={go} role="search">
 				<span class="cmdPrompt">‹GO›</span>
-				<input class="cmdInput" bind:value={cmd} spellcheck={false}
-					placeholder={lang === 'en' ? 'Search code or name  (005930 · 삼성전자 · 기아)' : '종목코드/이름 검색  (005930 · 삼성전자 · SK하이닉스)'} />
+				<input class="cmdInput" bind:this={cmdInput} bind:value={cmd} spellcheck={false}
+					oninput={onInput} onkeydown={onKey} onfocus={onInput}
+					onblur={() => setTimeout(() => (showSuggest = false), 120)}
+					placeholder={lang === 'en' ? 'Search code or name  (005930 · 삼성전자 · 기아)' : '종목코드 · 회사명 검색'} />
+				<kbd class="cmdKbd">⌘K</kbd>
 				<button class="cmdGo" type="submit">GO</button>
 				{#if flash}<span class="cmdFlash">{flash}</span>{/if}
+				{#if showSuggest && suggestions.length}
+					<div class="suggest">
+						{#each suggestions as s, i (s.code)}
+							<button type="button" class={'suggestRow' + (i === selIdx ? ' on' : '')}
+								onmousedown={() => choose(s.code)} onmouseenter={() => (selIdx = i)}>
+								<span class="sgName">{s.name}</span>
+								<span class="sgCode mono">{s.code}</span>
+								<span class="sgInd">{s.industry}</span>
+							</button>
+						{/each}
+					</div>
+				{/if}
 			</form>
 			<div class="topRight">
 				<div class="langSwitch">{#each langTabs as t (t.k)}<button class={'langBtn ' + (lang === t.k ? 'on' : '')} onclick={() => (lang = t.k)}>{t.l}</button>{/each}</div>
 				<span class="clock mono">{clock}</span>
-				<span class="connDot"><span class="dot"></span>HuggingFace</span>
+				<span class="connDot"><span class="dot"></span>HF</span>
+				<nav class="sns">
+					<a class="snsBtn" href={brand.repo} target="_blank" rel="noopener" title="GitHub"><Github size={15} /></a>
+					<a class="snsBtn" href={brand.coffee} target="_blank" rel="noopener" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">
+						<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" /><line x1="6" y1="2" x2="6" y2="4" /><line x1="10" y1="2" x2="10" y2="4" /><line x1="14" y1="2" x2="14" y2="4" /></svg>
+					</a>
+					<a class="snsBtn" href={brand.youtube} target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
+						<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+					</a>
+					<a class="snsBtn" href={brand.threads} target="_blank" rel="noopener" title="Threads · @dartlab.ai" aria-label="Threads">
+						<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z"/></svg>
+					</a>
+					<a class="snsBtn" href={brand.instagram} target="_blank" rel="noopener" title="Instagram · @dartlab.ai" aria-label="Instagram">
+						<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+					</a>
+				</nav>
 			</div>
 		</header>
 
