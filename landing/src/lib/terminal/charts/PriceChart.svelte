@@ -27,7 +27,7 @@
 		{ k: 'EMA', ind: 'EMA', label: 'EMA' },
 		{ k: 'BB', ind: 'BOLL', label: 'BOLL' },
 		{ k: 'SAR', ind: 'SAR', label: 'SAR' },
-		{ k: 'NONE', ind: null, label: lang === 'en' ? 'none' : '없음' }
+		{ k: 'NONE', ind: null, label: '없음' }
 	];
 	const DRAW_TOOLS: { name: string; kr: string; en: string }[] = [
 		{ name: 'segment', kr: '추세선', en: 'Trend' },
@@ -285,7 +285,7 @@
 			{#if menu === 'ind'}
 				<div class="ctMenu">
 					<div class="ctMenuLbl">{T('주가 오버레이', 'Price overlay')}</div>
-					<div class="ctRow ctRowWrap">{#each OVERLAYS as o (o.k)}<button class={overlay === o.k ? 'mItem on' : 'mItem'} onclick={() => (overlay = o.k)}>{o.label}</button>{/each}</div>
+					<div class="ctRow ctRowWrap">{#each OVERLAYS as o (o.k)}<button class={overlay === o.k ? 'mItem on' : 'mItem'} onclick={() => (overlay = o.k)}>{o.k === 'NONE' ? T('없음', 'none') : o.label}</button>{/each}</div>
 					<div class="ctMenuLbl">{T('보조 지표', 'Sub indicators')}</div>
 					<div class="ctRow ctRowWrap">{#each SUB_ALL as k (k)}<button class={subs.includes(k) ? 'mItem on' : 'mItem'} onclick={() => toggleSub(k)}>{SUB_LABEL[k]}</button>{/each}</div>
 				</div>
