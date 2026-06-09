@@ -1,37 +1,45 @@
 <script lang="ts">
+	// 고성능 주가 캔들 (Canvas2D) — 멀티 보조지표 패널(동시 다중) + 멀티 MA + 적정밴드·실적 마커.
 	import type { Candle } from '../data/priceSeries';
 	import type { Lang } from '../data/types';
-	import { sma, rsi, macd, bollinger } from '../data/indicators';
+	import { sma, rsi, macd, bollinger, stochastic, obv } from '../data/indicators';
 	import { fmtNum, fmtAbbr } from '../ui/helpers';
 
+	export type SubKey = 'VOL' | 'RSI' | 'MACD' | 'STOCH' | 'OBV';
 	interface Props {
 		candles: Candle[];
 		lang: Lang;
 		period: '3M' | '5M' | '6M' | '1Y' | 'MAX';
 		overlay: 'MA' | 'BB' | 'NONE';
-		sub: 'VOL' | 'RSI' | 'MACD';
-		events?: { date: string; label: string }[]; // 실적·공시 시점 (YYYYMMDD)
-		valBand?: { lo: number; mid: number; hi: number } | null; // 적정주가 밴드
+		subs: SubKey[]; // 동시 표시할 보조지표 패널 (스택)
+		events?: { date: string; label: string }[];
+		valBand?: { lo: number; mid: number; hi: number } | null;
 	}
-	let { candles, lang, period, overlay, sub, events, valBand }: Props = $props();
+	let { candles, lang, period, overlay, subs, events, valBand }: Props = $props();
 
 	let wrap: HTMLDivElement | null = $state(null);
 	let canvas: HTMLCanvasElement | null = $state(null);
 	let hover = $state<number | null>(null);
-	let dims = $state({ w: 800, h: 300 });
+	let dims = $state({ w: 800, h: 420 });
 
 	const C = {
-		up: '#34d399', dn: '#f0616f', ma20: '#fb923c', ma60: '#60a5fa', bb: 'rgba(167,139,250,0.55)',
-		grid: '#1b2130', axis: '#2a3142', text: '#a3a8b3', macdUp: 'rgba(52,211,153,0.6)', macdDn: 'rgba(240,97,111,0.6)'
+		up: '#34d399', dn: '#f0616f', ma5: '#e879f9', ma20: '#fb923c', ma60: '#60a5fa', ma120: '#a78bfa',
+		bb: 'rgba(167,139,250,0.5)', grid: '#1b2130', axis: '#2a3142', text: '#a3a8b3',
+		macdUp: 'rgba(52,211,153,0.6)', macdDn: 'rgba(240,97,111,0.6)', stochK: '#fb923c', stochD: '#60a5fa', obv: '#22d3ee'
 	};
 	const PERIOD_N: Record<string, number> = { '3M': 66, '5M': 110, '6M': 132, '1Y': 252, MAX: 100000 };
+	const SUBH = 46;
+	const SUBGAP = 6;
+
+	// 차트 높이 = 가격영역 + 보조패널 수만큼 (보조지표 늘리면 차트가 커짐)
+	const wrapH = $derived(330 + subs.length * (SUBH + SUBGAP));
 
 	$effect(() => {
 		if (!wrap) return;
 		const ro = new ResizeObserver((es) => {
 			for (const e of es) {
 				const cr = e.contentRect;
-				dims = { w: Math.max(280, cr.width), h: Math.max(150, cr.height) };
+				dims = { w: Math.max(280, cr.width), h: Math.max(200, cr.height) };
 			}
 		});
 		ro.observe(wrap);
@@ -46,7 +54,9 @@
 		const s = slice;
 		const hv = hover;
 		const ov = overlay;
-		const sb = sub;
+		const sbs = subs;
+		void events;
+		void valBand;
 		const dpr = window.devicePixelRatio || 1;
 		const W = dims.w;
 		const H = dims.h;
@@ -61,20 +71,24 @@
 		}
 		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 		ctx.clearRect(0, 0, W, H);
+		ctx.font = '8px "JetBrains Mono", monospace';
+		ctx.textBaseline = 'middle';
 
-		const padR = 46;
+		const padR = 48;
 		const padL = 4;
-		const padT = 4;
-		const subH = 30;
-		const gap = 4;
-		const xLblH = 12;
-		const priceH = H - padT - subH - gap - xLblH;
+		const padT = 6;
+		const xLblH = 14;
+		const subsBlock = sbs.length ? SUBGAP + sbs.length * SUBH + (sbs.length - 1) * SUBGAP : 0;
+		const priceH = H - padT - subsBlock - xLblH;
 		const plotW = W - padR - padL;
 		const n = s.length;
 		const closes = s.map((c) => c.c);
+		const highs = s.map((c) => c.h);
+		const lows = s.map((c) => c.l);
+		const vols = s.map((c) => c.v);
 
-		const lo = Math.min(...s.map((c) => c.l));
-		const hi = Math.max(...s.map((c) => c.h));
+		const lo = Math.min(...lows);
+		const hi = Math.max(...highs);
 		const pad = (hi - lo) * 0.04 || 1;
 		const yMin = lo - pad;
 		const yMax = hi + pad;
@@ -82,8 +96,7 @@
 		const cw = plotW / n;
 		const X = (i: number) => padL + i * cw + cw / 2;
 
-		ctx.font = '8px "JetBrains Mono", monospace';
-		ctx.textBaseline = 'middle';
+		// price grid + y labels
 		for (let k = 0; k <= 4; k++) {
 			const v = yMin + ((yMax - yMin) * k) / 4;
 			const y = Y(v);
@@ -98,7 +111,7 @@
 			ctx.fillText(fmtNum(v, 0), padL + plotW + 4, y);
 		}
 
-		// 적정주가 밴드 (캔들 뒤) — fairLow~fairHigh 음영 + fairMid 점선
+		// 적정주가 밴드 (캔들 뒤)
 		if (valBand && valBand.hi > valBand.lo) {
 			const cl = (v: number) => Math.max(yMin, Math.min(yMax, v));
 			const yHi = Y(cl(valBand.hi));
@@ -120,25 +133,26 @@
 			ctx.fillText(lang === 'en' ? 'fair' : '적정', padL + 2, Math.min(yHi, yLo) + 5);
 		}
 
-		// Bollinger band fill (behind candles)
+		const drawLine = (arr: (number | null)[], color: string, top: (v: number) => number, w = 1.2) => {
+			ctx.strokeStyle = color;
+			ctx.lineWidth = w;
+			ctx.beginPath();
+			let st = false;
+			arr.forEach((v, i) => {
+				if (v == null) return;
+				const x = X(i);
+				const y = top(v);
+				st ? ctx.lineTo(x, y) : ((ctx.moveTo(x, y), (st = true)));
+			});
+			ctx.stroke();
+		};
+
+		// Bollinger (캔들 뒤)
 		if (ov === 'BB') {
 			const bb = bollinger(closes, 20, 2);
-			const drawBand = (arr: (number | null)[], col: string) => {
-				ctx.strokeStyle = col;
-				ctx.lineWidth = 1;
-				ctx.beginPath();
-				let st = false;
-				arr.forEach((v, i) => {
-					if (v == null) return;
-					const x = X(i);
-					const y = Y(v);
-					st ? ctx.lineTo(x, y) : ((ctx.moveTo(x, y), (st = true)));
-				});
-				ctx.stroke();
-			};
-			drawBand(bb.upper, C.bb);
-			drawBand(bb.lower, C.bb);
-			drawBand(bb.mid, 'rgba(167,139,250,0.8)');
+			drawLine(bb.upper, C.bb, Y);
+			drawLine(bb.lower, C.bb, Y);
+			drawLine(bb.mid, 'rgba(167,139,250,0.85)', Y);
 		}
 
 		// candles
@@ -159,8 +173,8 @@
 			ctx.fillRect(x - bw / 2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
 		});
 
-		// 실적·공시 시점 마커 (주가↔재무 연결) — 분기 말 가까운 캔들에 세로선 + 삼각형 + 라벨
-		if (events && events.length && n > 0) {
+		// 실적·공시 시점 마커
+		if (events && events.length) {
 			const first = s[0].t;
 			const last = s[n - 1].t;
 			for (const ev of events) {
@@ -187,122 +201,116 @@
 				ctx.lineTo(x + 3, padT + priceH + 3);
 				ctx.closePath();
 				ctx.fill();
-				ctx.fillStyle = C.ma20;
+				ctx.fillStyle = C.text;
 				ctx.textAlign = 'center';
 				ctx.fillText(ev.label, x, padT + 5);
 			}
 		}
 
-		// MA overlays
+		// MA 오버레이 (5·20·60·120 다중)
 		if (ov === 'MA') {
-			const drawLine = (arr: (number | null)[], color: string) => {
-				ctx.strokeStyle = color;
-				ctx.lineWidth = 1.2;
-				ctx.beginPath();
-				let st = false;
-				arr.forEach((v, i) => {
-					if (v == null) return;
-					const x = X(i);
-					const y = Y(v);
-					st ? ctx.lineTo(x, y) : ((ctx.moveTo(x, y), (st = true)));
-				});
-				ctx.stroke();
-			};
-			drawLine(sma(closes, 20), C.ma20);
-			drawLine(sma(closes, 60), C.ma60);
+			drawLine(sma(closes, 5), C.ma5, Y, 1);
+			drawLine(sma(closes, 20), C.ma20, Y);
+			drawLine(sma(closes, 60), C.ma60, Y);
+			drawLine(sma(closes, 120), C.ma120, Y);
+			ctx.fillStyle = C.text;
+			ctx.textAlign = 'left';
+			ctx.fillText('MA 5·20·60·120', padL + 2, padT + 6);
 		}
 
-		// sub pane
-		const subTop = padT + priceH + gap;
-		ctx.strokeStyle = C.grid;
-		ctx.beginPath();
-		ctx.moveTo(padL, subTop);
-		ctx.lineTo(padL + plotW, subTop);
-		ctx.stroke();
-		if (sb === 'MACD') {
-			const m = macd(closes);
-			const all = m.line.concat(m.signal, m.hist).filter((v) => v != null);
-			const mx = Math.max(...all.map(Math.abs)) || 1;
-			const SY = (v: number) => subTop + subH / 2 - (v / mx) * (subH / 2 - 3);
-			m.hist.forEach((v, i) => {
-				const x = X(i);
-				ctx.fillStyle = v >= 0 ? C.macdUp : C.macdDn;
-				const y0 = SY(0);
-				const y1 = SY(v);
-				ctx.fillRect(x - Math.max(1, cw * 0.5) / 2, Math.min(y0, y1), Math.max(1, cw * 0.5), Math.abs(y1 - y0));
-			});
-			const dl = (arr: number[], col: string) => {
-				ctx.strokeStyle = col;
-				ctx.lineWidth = 1;
-				ctx.beginPath();
-				let st = false;
-				arr.forEach((v, i) => {
-					const x = X(i);
-					const y = SY(v);
-					st ? ctx.lineTo(x, y) : ((ctx.moveTo(x, y), (st = true)));
-				});
-				ctx.stroke();
-			};
-			dl(m.line, C.ma20);
-			dl(m.signal, C.ma60);
-			ctx.fillStyle = C.text;
-			ctx.textAlign = 'left';
-			ctx.fillText('MACD 12/26/9', padL + 2, subTop + 6);
-		} else if (sb === 'RSI') {
-			const r = rsi(closes, 14);
-			const SY = (v: number) => subTop + subH - (v / 100) * subH;
-			[30, 70].forEach((lv) => {
-				ctx.strokeStyle = 'rgba(251,146,60,0.18)';
-				ctx.beginPath();
-				ctx.moveTo(padL, SY(lv));
-				ctx.lineTo(padL + plotW, SY(lv));
-				ctx.stroke();
-			});
-			ctx.strokeStyle = C.ma20;
-			ctx.lineWidth = 1.1;
+		// ── 보조지표 패널 (스택) ──
+		sbs.forEach((sb, idx) => {
+			const top = padT + priceH + SUBGAP + idx * (SUBH + SUBGAP);
+			const bot = top + SUBH;
+			ctx.strokeStyle = C.grid;
+			ctx.lineWidth = 1;
 			ctx.beginPath();
-			let st = false;
-			r.forEach((v, i) => {
-				if (v == null) return;
-				const x = X(i);
-				const y = SY(v);
-				st ? ctx.lineTo(x, y) : ((ctx.moveTo(x, y), (st = true)));
-			});
+			ctx.moveTo(padL, top);
+			ctx.lineTo(padL + plotW, top);
 			ctx.stroke();
-			ctx.fillStyle = C.text;
-			ctx.textAlign = 'left';
-			ctx.fillText('RSI 14', padL + 2, subTop + 6);
-		} else {
-			const vMax = Math.max(...s.map((c) => c.v), 1);
-			s.forEach((c, i) => {
-				const x = X(i);
-				const up = c.c >= c.o;
-				const h = (c.v / vMax) * subH;
-				ctx.fillStyle = up ? 'rgba(52,211,153,0.45)' : 'rgba(240,97,111,0.45)';
-				ctx.fillRect(x - Math.max(1, cw * 0.62) / 2, subTop + subH - h, Math.max(1, cw * 0.62), h);
-			});
-			ctx.fillStyle = C.text;
-			ctx.textAlign = 'left';
-			ctx.fillText('VOL', padL + 2, subTop + 6);
-		}
+			const label = (t: string) => {
+				ctx.fillStyle = C.text;
+				ctx.textAlign = 'left';
+				ctx.fillText(t, padL + 2, top + 6);
+			};
+			if (sb === 'VOL') {
+				const vMax = Math.max(...vols, 1);
+				s.forEach((c, i) => {
+					const x = X(i);
+					const up = c.c >= c.o;
+					const h = (c.v / vMax) * (SUBH - 4);
+					ctx.fillStyle = up ? 'rgba(52,211,153,0.45)' : 'rgba(240,97,111,0.45)';
+					ctx.fillRect(x - Math.max(1, cw * 0.62) / 2, bot - h, Math.max(1, cw * 0.62), h);
+				});
+				label('VOL');
+			} else if (sb === 'RSI') {
+				const r = rsi(closes, 14);
+				const SY = (v: number) => bot - (v / 100) * SUBH;
+				[30, 70].forEach((lv) => {
+					ctx.strokeStyle = 'rgba(251,146,60,0.18)';
+					ctx.beginPath();
+					ctx.moveTo(padL, SY(lv));
+					ctx.lineTo(padL + plotW, SY(lv));
+					ctx.stroke();
+				});
+				drawLine(r, C.ma20, SY, 1.1);
+				label('RSI 14');
+			} else if (sb === 'MACD') {
+				const m = macd(closes);
+				const all = m.line.concat(m.signal, m.hist).filter((v) => Number.isFinite(v));
+				const mx = Math.max(...all.map(Math.abs), 1);
+				const SY = (v: number) => top + SUBH / 2 - (v / mx) * (SUBH / 2 - 3);
+				m.hist.forEach((v, i) => {
+					const x = X(i);
+					ctx.fillStyle = v >= 0 ? C.macdUp : C.macdDn;
+					const y0 = SY(0);
+					const y1 = SY(v);
+					ctx.fillRect(x - Math.max(1, cw * 0.5) / 2, Math.min(y0, y1), Math.max(1, cw * 0.5), Math.abs(y1 - y0));
+				});
+				drawLine(m.line, C.ma20, SY, 1);
+				drawLine(m.signal, C.ma60, SY, 1);
+				label('MACD 12/26/9');
+			} else if (sb === 'STOCH') {
+				const st = stochastic(highs, lows, closes, 14, 3);
+				const SY = (v: number) => bot - (v / 100) * SUBH;
+				[20, 80].forEach((lv) => {
+					ctx.strokeStyle = 'rgba(251,146,60,0.18)';
+					ctx.beginPath();
+					ctx.moveTo(padL, SY(lv));
+					ctx.lineTo(padL + plotW, SY(lv));
+					ctx.stroke();
+				});
+				drawLine(st.k, C.stochK, SY, 1.1);
+				drawLine(st.d, C.stochD, SY, 1);
+				label('STOCH 14/3');
+			} else if (sb === 'OBV') {
+				const o = obv(closes, vols);
+				const omin = Math.min(...o);
+				const omax = Math.max(...o);
+				const rng = omax - omin || 1;
+				const SY = (v: number) => bot - ((v - omin) / rng) * (SUBH - 4) - 2;
+				drawLine(o, C.obv, SY, 1.1);
+				label('OBV');
+			}
+		});
 
 		// x labels
 		ctx.fillStyle = C.text;
 		ctx.textAlign = 'center';
-		const step = Math.floor(n / 6) || 1;
+		const step = Math.floor(n / 7) || 1;
 		for (let i = 0; i < n; i += step) {
 			const d = s[i].t;
 			ctx.fillText(`${d.slice(4, 6)}/${d.slice(6, 8)}`, X(i), H - 4);
 		}
 
-		// hover crosshair
+		// hover crosshair (전체 높이)
 		if (hv != null && hv >= 0 && hv < n) {
 			ctx.strokeStyle = 'rgba(251,146,60,0.5)';
 			ctx.setLineDash([3, 3]);
 			ctx.lineWidth = 1;
 			ctx.beginPath();
 			ctx.moveTo(X(hv), padT);
-			ctx.lineTo(X(hv), padT + priceH);
+			ctx.lineTo(X(hv), padT + priceH + subsBlock);
 			ctx.stroke();
 			ctx.setLineDash([]);
 		}
@@ -312,7 +320,7 @@
 		const cv = canvas;
 		if (!cv) return;
 		const r = cv.getBoundingClientRect();
-		const plotW = dims.w - 46 - 4;
+		const plotW = dims.w - 48 - 4;
 		const n = slice.length;
 		const i = Math.floor((e.clientX - r.left - 4) / (plotW / n));
 		hover = i >= 0 && i < n ? i : null;
@@ -321,7 +329,7 @@
 </script>
 
 <div class="chartWrap" bind:this={wrap} role="img" aria-label="price chart"
-	onmousemove={onMove} onmouseleave={() => (hover = null)} style="height:300px;min-height:280px;">
+	onmousemove={onMove} onmouseleave={() => (hover = null)} style="height:{wrapH}px;min-height:300px;">
 	<canvas bind:this={canvas}></canvas>
 	{#if hv}
 		<div class="ohlcTag">

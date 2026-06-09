@@ -59,6 +59,52 @@ export function macd(a: number[]): Macd {
 	const hist = line.map((v, i) => v - signal[i]);
 	return { line, signal, hist };
 }
+export interface Stochastic {
+	k: (number | null)[];
+	d: (number | null)[];
+}
+export function stochastic(highs: number[], lows: number[], closes: number[], kP = 14, dP = 3): Stochastic {
+	const k: (number | null)[] = [];
+	for (let i = 0; i < closes.length; i++) {
+		if (i < kP - 1) {
+			k.push(null);
+			continue;
+		}
+		let hh = -Infinity;
+		let ll = Infinity;
+		for (let j = i - kP + 1; j <= i; j++) {
+			hh = Math.max(hh, highs[j]);
+			ll = Math.min(ll, lows[j]);
+		}
+		k.push(hh === ll ? 50 : ((closes[i] - ll) / (hh - ll)) * 100);
+	}
+	const d: (number | null)[] = [];
+	for (let i = 0; i < k.length; i++) {
+		if (i < kP - 1 + dP - 1) {
+			d.push(null);
+			continue;
+		}
+		let s = 0;
+		let c = 0;
+		for (let j = i - dP + 1; j <= i; j++) {
+			const v = k[j];
+			if (v != null) {
+				s += v;
+				c++;
+			}
+		}
+		d.push(c ? s / c : null);
+	}
+	return { k, d };
+}
+export function obv(closes: number[], vols: number[]): number[] {
+	const o: number[] = [0];
+	for (let i = 1; i < closes.length; i++) {
+		const prev = o[i - 1];
+		o.push(closes[i] > closes[i - 1] ? prev + vols[i] : closes[i] < closes[i - 1] ? prev - vols[i] : prev);
+	}
+	return o;
+}
 export interface Bollinger {
 	mid: (number | null)[];
 	upper: (number | null)[];

@@ -2,7 +2,6 @@
 	import { base } from '$app/paths';
 	import type { Company, Lang, Tone, Num } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
-	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
@@ -16,18 +15,13 @@
 	let { co, lang }: Props = $props();
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
-	let freq = $state<'annual' | 'quarter'>('annual');
-	const trend = $derived(freq === 'quarter' && co.trendQuarter ? co.trendQuarter : co.trendAnnual);
-	$effect(() => {
-		// 분기 데이터 없는 회사로 전환 시 annual 로 복귀
-		if (freq === 'quarter' && !co.trendQuarter) freq = 'annual';
-	});
-
-	// 주가 캔들 (DuckDB 온디맨드) — 부팅 비차단, 회사 전환 시 재로드
-	let chartMode = $state<'price' | 'fin'>('price');
+	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
+	type SubKey = 'VOL' | 'RSI' | 'MACD' | 'STOCH' | 'OBV';
 	let pPeriod = $state<'3M' | '5M' | '6M' | '1Y' | 'MAX'>('5M');
 	let pOverlay = $state<'MA' | 'BB' | 'NONE'>('MA');
-	let pSub = $state<'VOL' | 'RSI' | 'MACD'>('VOL');
+	const SUB_ALL: SubKey[] = ['VOL', 'RSI', 'MACD', 'STOCH', 'OBV'];
+	let pSubs = $state<SubKey[]>(['VOL', 'RSI']); // 동시 표시 보조지표 (다중)
+	const toggleSub = (k: SubKey) => (pSubs = pSubs.includes(k) ? pSubs.filter((x) => x !== k) : [...pSubs, k]);
 	let pEvents = $state(false); // 실적·공시 시점 마커
 	let pValBand = $state(false); // 적정주가 밴드
 	let candles = $state<Candle[] | null>(null);
@@ -200,38 +194,21 @@
 	</div>
 </Panel>
 
-<!-- 주가 캔들(일별 실데이터·보조지표) ⇄ 재무 추세 — 메인 히어로 -->
-<Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 · 재무', en: 'PRICE · FINANCIALS' }}
-	sub={chartMode === 'price' ? { kr: 'krx 일별 · EOD', en: 'krx daily · EOD' } : { kr: 'finance · 실데이터', en: 'finance · real' }} flush>
-	{#snippet right()}
-		<span class="segGroup">
-			<button class={chartMode === 'price' ? 'seg on' : 'seg'} onclick={() => (chartMode = 'price')}>{lang === 'en' ? 'PRICE' : '주가'}</button>
-			<button class={chartMode === 'fin' ? 'seg on' : 'seg'} onclick={() => (chartMode = 'fin')}>{lang === 'en' ? 'FIN' : '재무'}</button>
-		</span>
-	{/snippet}
-	{#if chartMode === 'price'}
-		<div class="chartCtlRow">
-			<span class="segGroup">{#each ['3M', '5M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
-			<span class="segGroup">{#each [['MA', 'MA'], ['BB', 'BB'], ['NONE', '없음']] as [v, l] (v)}<button class={pOverlay === v ? 'seg on' : 'seg'} onclick={() => (pOverlay = v as typeof pOverlay)}>{l}</button>{/each}</span>
-			<span class="segGroup">{#each ['VOL', 'RSI', 'MACD'] as v (v)}<button class={pSub === v ? 'seg on' : 'seg'} onclick={() => (pSub = v as typeof pSub)}>{v}</button>{/each}</span>
-			<span class="segGroup"><button class={pEvents ? 'seg on' : 'seg'} onclick={() => (pEvents = !pEvents)} title="실적·공시 시점 마커">{lang === 'en' ? 'EARN' : '실적'}</button><button class={pValBand ? 'seg on' : 'seg'} disabled={!priceValBand} onclick={() => priceValBand && (pValBand = !pValBand)} title="적정주가 밴드">{lang === 'en' ? 'FAIR' : '밸류밴드'}</button></span><span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>
-		</div>
-		{#if candleState === 'ready' && candles}
-			<PriceChart {candles} {lang} period={pPeriod} overlay={pOverlay} sub={pSub} events={pEvents ? priceEvents : undefined} valBand={pValBand ? priceValBand : null} />
-		{:else if candleState === 'loading'}
-			<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
-		{:else}
-			<div class="chartLoad">{lang === 'en' ? 'daily chart unavailable here — snapshot only.' : '이 기기에서 일별 차트 불가 — 스냅샷만.'} 52W {fmtNum(co.price.lo52)}~{fmtNum(co.price.hi52)}</div>
-		{/if}
+<!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
+<Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: 'krx 일별 · EOD', en: 'krx daily · EOD' }} flush>
+	{#snippet right()}<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>{/snippet}
+	<div class="chartCtlRow">
+		<span class="segGroup">{#each ['3M', '5M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
+		<span class="segGroup">{#each [['MA', 'MA'], ['BB', 'BB'], ['NONE', '없음']] as [v, l] (v)}<button class={pOverlay === v ? 'seg on' : 'seg'} onclick={() => (pOverlay = v as typeof pOverlay)}>{l}</button>{/each}</span>
+		<span class="segGroup">{#each SUB_ALL as k (k)}<button class={pSubs.includes(k) ? 'seg on' : 'seg'} onclick={() => toggleSub(k)} title="보조지표 다중 선택">{k}</button>{/each}</span>
+		<span class="segGroup"><button class={pEvents ? 'seg on' : 'seg'} onclick={() => (pEvents = !pEvents)} title="실적·공시 시점 마커">{lang === 'en' ? 'EARN' : '실적'}</button><button class={pValBand ? 'seg on' : 'seg'} disabled={!priceValBand} onclick={() => priceValBand && (pValBand = !pValBand)} title="적정주가 밴드">{lang === 'en' ? 'FAIR' : '밸류밴드'}</button></span>
+	</div>
+	{#if candleState === 'ready' && candles}
+		<PriceChart {candles} {lang} period={pPeriod} overlay={pOverlay} subs={pSubs} events={pEvents ? priceEvents : undefined} valBand={pValBand ? priceValBand : null} />
+	{:else if candleState === 'loading'}
+		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}
-		<div class="chartCtlRow">
-			<span class="segGroup">
-				<button class={freq === 'annual' ? 'seg on' : 'seg'} onclick={() => (freq = 'annual')}>{lang === 'en' ? 'ANNUAL' : '연간'}</button>
-				<button class={freq === 'quarter' ? 'seg on' : 'seg'} disabled={!co.trendQuarter} style={!co.trendQuarter ? 'opacity:.4;cursor:not-allowed' : ''} onclick={() => co.trendQuarter && (freq = 'quarter')}>{lang === 'en' ? 'QUARTER' : '분기'}</button>
-			</span>
-			<span class="dim" style="font-size:8.5px">{lang === 'en' ? 'revenue · op · margin' : '매출·영업이익·이익률'}</span>
-		</div>
-		<TrendChart {trend} {lang} />
+		<div class="chartLoad">{lang === 'en' ? 'daily chart unavailable here — snapshot only.' : '이 기기에서 일별 차트 불가 — 스냅샷만.'} 52W {fmtNum(co.price.lo52)}~{fmtNum(co.price.hi52)}</div>
 	{/if}
 </Panel>
 
