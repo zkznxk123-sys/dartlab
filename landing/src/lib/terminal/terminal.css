@@ -309,6 +309,17 @@
 .dlTerm .finChart figure { margin: 0; }
 .dlTerm .finChart figcaption { font-family: var(--cond); font-size: 9px; color: var(--dimmer); margin-bottom: 3px; }
 
+/* 재무 대시보드 — ui/web analysis.financial 체계: 섹션 헤더 + 2col 카드 그리드 */
+.dlTerm .finDash { display: flex; flex-direction: column; }
+.dlTerm .finSecHead { display: flex; align-items: baseline; gap: 7px; padding: 8px 3px 3px; flex-wrap: wrap; }
+.dlTerm .finSecIdx { font-size: 9px; color: var(--dimmer); letter-spacing: 1.5px; }
+.dlTerm .finSecTitle { font-family: var(--cond); font-size: 11.5px; font-weight: 700; color: var(--txt); letter-spacing: 0.3px; }
+.dlTerm .finSecSub { font-size: 9px; color: var(--dim); }
+.dlTerm .finSecGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.dlTerm .finSecGrid > .panel.wide { grid-column: 1 / -1; }
+.dlTerm .finCard .dl-chart-container { min-height: 0; margin: 0; }
+.dlTerm .finCard .chart-loading { min-height: 120px; }
+
 /* RADAR */
 .dlTerm .radarWrap { display: flex; align-items: center; gap: 6px; padding: 3px; }
 .dlTerm .radarWrap canvas { display: block; }

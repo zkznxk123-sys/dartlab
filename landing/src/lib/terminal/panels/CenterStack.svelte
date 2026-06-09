@@ -5,9 +5,7 @@
 	import Radar from '../charts/Radar.svelte';
 	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
-	import IncomeTrendMatrixChart from '$chart/IncomeTrendMatrixChart.svelte';
-	import BalanceStructureTrendChart from '$chart/BalanceStructureTrendChart.svelte';
-	import CashflowSignedMatrixChart from '$chart/CashflowSignedMatrixChart.svelte';
+	import ChartRenderer from '$chart/ChartRenderer.svelte';
 	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 
@@ -169,16 +167,24 @@
 	{/if}
 </Panel>
 
-<!-- 재무제표 그래프 ($chart — IS/BS/CF, ui/web 대시보드 방식 배선) -->
-<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '손익 추세', en: 'INCOME TREND' }} sub={{ kr: 'IS · 5Y · 조 KRW', en: 'IS · 5Y' }} flush>
-	<div class="finChart"><IncomeTrendMatrixChart spec={co.charts.income} /></div>
-</Panel>
-<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무상태 구조', en: 'BALANCE STRUCTURE' }} sub={{ kr: 'BS · 자산·조달·자본', en: 'BS · 5Y' }} flush>
-	<div class="finChart bs"><BalanceStructureTrendChart spec={co.charts.balance} /></div>
-</Panel>
-<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '현금흐름', en: 'CASH FLOW' }} sub={{ kr: 'CF · 최신', en: 'CF · latest' }} flush>
-	<div class="finChart"><CashflowSignedMatrixChart spec={co.charts.cashflow} /></div>
-</Panel>
+<!-- 재무제표 그래프 — ui/web analysis.financial 체계: 4 내러티브 섹션 × 다중 trend 카드.
+     단일 디스패처 ChartRenderer(VizChart 대응)가 spec.chartType 으로 라우팅. -->
+<div class="finDash">
+	{#each co.charts.sections as sec (sec.idx)}
+		<div class="finSecHead">
+			<span class="finSecIdx mono">{sec.idx}</span>
+			<span class="finSecTitle">{sec.title}</span>
+			<span class="finSecSub">{sec.sub}</span>
+		</div>
+		<div class="finSecGrid">
+			{#each sec.cards as card (card.key)}
+				<Panel {lang} className={'eAnalysis finCard' + (card.wide ? ' wide' : '')} prov="derived" title={{ kr: card.title, en: card.title }} sub={{ kr: 'finance', en: 'finance' }} flush>
+					<div class={'finChart' + (card.key === 'balance' ? ' bs' : '')}><ChartRenderer spec={card.spec} /></div>
+				</Panel>
+			{/each}
+		</div>
+	{/each}
+</div>
 
 <div class="rowSplit">
 	<!-- RADAR -->

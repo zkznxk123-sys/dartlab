@@ -49,7 +49,7 @@
 	const priceRows = $derived(
 		nodes
 			.filter(matchFilter)
-			.map((n) => ({ n, v: (eng.priceOf(n.id) as Record<string, number | null>)[priceKey] }))
+			.map((n) => ({ n, v: eng.priceOf(n.id)?.[priceKey] ?? null }))
 			.filter((r) => r.v != null && (minVal == null || (r.v as number) >= minVal))
 			.sort((a, b) => (b.v as number) - (a.v as number))
 			.slice(0, 60)
@@ -67,7 +67,7 @@
 	const finRows = $derived(
 		nodes
 			.filter(matchFilter)
-			.map((n) => ({ n, v: (n as Record<string, number | null | undefined>)[finKey] }))
+			.map((n) => ({ n, v: n[finKey] ?? null }))
 			.filter((r) => r.v != null && (minVal == null || (r.v as number) >= minVal))
 			.sort((a, b) => (b.v as number) - (a.v as number))
 			.slice(0, 60)
