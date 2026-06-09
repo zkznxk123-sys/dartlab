@@ -9,6 +9,7 @@
 		type LiveCompanyReportFact
 	} from '$lib/browser/companyLive';
 	import type { CompanyChange } from '$lib/scan/duckSql';
+	import { loadCompanyRelations, type CompanyRelations } from '../data/relations';
 
 	interface Props {
 		co: Company;
@@ -21,12 +22,14 @@
 	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
 	let reportFacts = $state<LiveCompanyReportFact[]>([]);
 	let disclChanges = $state<CompanyChange[]>([]);
+	let relations = $state<CompanyRelations | null>(null);
 	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
 	$effect(() => {
 		const code = co.code;
 		factsState = 'loading';
 		reportFacts = [];
 		disclChanges = [];
+		relations = null;
 		let cancelled = false;
 		loadLiveCompanyReportFacts(code).then((f) => {
 			if (cancelled) return;
@@ -35,6 +38,9 @@
 		});
 		loadLiveCompanyChanges(code, 8).then((c) => {
 			if (!cancelled) disclChanges = c;
+		});
+		loadCompanyRelations(code).then((r) => {
+			if (!cancelled) relations = r;
 		});
 		return () => {
 			cancelled = true;
@@ -146,6 +152,32 @@
 		<div class="storyEmpty">{lang === 'en' ? 'No report-parquet facts for this company.' : '해당 회사 정기보고서 팩트 없음.'}</div>
 	{/if}
 </Panel>
+
+<!-- 공급망 (dartlab 고유 — 공급사·고객사 제품·매출비중) -->
+{#if relations && (relations.suppliers.length || relations.customers.length)}
+	<Panel {lang} className="eIndustry" prov="live" title={{ kr: '공급망 · 거래선', en: 'SUPPLY CHAIN' }} sub={{ kr: 'map · ego ' + relations.neighborCount, en: 'ego n=' + relations.neighborCount }} flush>
+		<div class="scWrap">
+			<div class="scCol">
+				<div class="scHd tUp">▼ {lang === 'en' ? 'SUPPLIERS' : '공급사'}</div>
+				{#each relations.suppliers as e (e.stockCode + e.product)}
+					<div class="scRow" role="button" tabindex="0" onclick={() => onPick(e.stockCode)} onkeydown={(ev) => ev.key === 'Enter' && onPick(e.stockCode)}>
+						<span class="scName"><b>{e.corpName}</b>{#if e.product}<span class="scProd">{e.product}</span>{/if}</span>
+						{#if e.ratio != null}<span class="scRatio mono">{e.ratio.toFixed(1)}%</span>{/if}
+					</div>
+				{/each}
+			</div>
+			<div class="scCol">
+				<div class="scHd tDn">▲ {lang === 'en' ? 'CUSTOMERS' : '고객사'}</div>
+				{#each relations.customers as e (e.stockCode + (e.product || ''))}
+					<div class="scRow" role="button" tabindex="0" onclick={() => onPick(e.stockCode)} onkeydown={(ev) => ev.key === 'Enter' && onPick(e.stockCode)}>
+						<span class="scName"><b>{e.corpName}</b>{#if e.product}<span class="scProd">{e.product}</span>{/if}</span>
+						{#if e.ratio != null}<span class="scRatio mono">{e.ratio.toFixed(1)}%</span>{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+	</Panel>
+{/if}
 
 <div class="rowSplit">
 	<!-- CREDIT -->
