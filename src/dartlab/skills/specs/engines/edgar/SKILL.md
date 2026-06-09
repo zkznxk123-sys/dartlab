@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: EDGAR 는 미국 SEC 공시 (10-K · 10-Q · 8-K · S-1 등) 와 XBRL 재무를 dartlab.Company facade 로 통합 접근하는 provider 다. 한국 DART 와 동일한 인터페이스 (show / liveFilings / readFiling / 하위 엔진) — market="US" 자동 라우팅. 트리거 — '미국 공시', '10-K', 'SEC', 'EDGAR', 'AAPL'.
+purpose: EDGAR 는 미국 SEC 공시 (10-K · 10-Q · 8-K · S-1 등) 와 XBRL 재무를 dartlab.Company facade 로 통합 접근하는 provider 다. 한국 DART 와 동일한 인터페이스 (panel / liveFilings / readFiling / 하위 엔진) — market="US" 자동 라우팅. 재무는 소문자 native (panel payload 셀) 와 대문자 companyfacts 두 소스로 분기. 트리거 — '미국 공시', '10-K', 'SEC', 'EDGAR', 'AAPL'.
 whenToUse:
   - EDGAR
   - edgar
@@ -35,6 +35,7 @@ capabilityRefs:
   - Company.liveFilings
   - Company.readFiling
   - Company.disclosure
+  - compare
   - OpenEdgar
 knowledgeRefs:
   - start.dartlabSkillOs
@@ -96,18 +97,24 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-08'
+lastUpdated: '2026-06-10'
 testUniverse:
-  market: KR
+  market: US
   stockCodes:
-    - "005930"
+    - "AAPL"
 ---
 
 ## 엔진 역할
 
-`edgar` 는 별도 사용자 capability 가 아니라 — `dartlab.Company` facade 가 ticker / CIK 를 받았을 때 자동 활성화되는 *provider* 다. DartCompany ↔ EdgarCompany 는 **public 메서드 양쪽 동등 SSOT** — `show / select / trace / disclosure / liveFilings / readFiling / analysis / credit / quant / industry` 모두 같은 시그니처. 시장만 다름.
+`edgar` 는 별도 사용자 capability 가 아니라 — `dartlab.Company` facade 가 ticker / CIK 를 받았을 때 자동 활성화되는 *provider* 다. DartCompany ↔ EdgarCompany 는 **public 메서드 양쪽 동등 SSOT** — `panel / select / trace / disclosure / liveFilings / readFiling / analysis / credit / quant` 모두 같은 시그니처. 시장만 다름. (`industry` 는 KR 가치사슬 지도 전용 — US 동등 데이터 부재로 EXEMPT, 아래 EXEMPT 섹션 참조.)
 
-XBRL 재무는 SEC 벌크 데이터셋을 primary source 로 쓴다. live filings 는 SEC EDGAR API. 거시는 FRED (`gather("macro", "FEDFUNDS")`).
+EDGAR 재무는 **두 소스로 분기**한다 (DART 와 같은 메커니즘):
+- **소문자 native** (`c.panel("is"/"bs"/"cf"/"cis"/"sce"/"ratios")`) — panel 단일 artifact 의 row payload 에 보존된 XBRL native 셀을 read-time 분해 (presentation role 앵커링). DART `c.panel("is")` 의 panel 셀 경로 미러. `compare(codes, topic="is")` finance 비교도 이 native 셀을 쓴다 (account=snakeId, USD 실값).
+- **대문자 companyfacts** (`c.panel("IS"/"BS"/"CF"/"RATIOS")`) — SEC companyfacts 벌크(`edgar/finance`) 위임. panel 과 무관, 항상 가용.
+
+live filings 는 SEC EDGAR API. 거시는 FRED (`gather("macro", "FEDFUNDS")`).
+
+> ⚠ native(소문자) 경로는 panel artifact 에 native payload 가 있어야 동작한다. 2026-06-06 이전 빌드된 panel 은 payload 가 없어 `c.panel("is")`·`compare(topic=finance)` 가 빈 결과 — `EDGAR_FULL_REBUILD=1` (originalSync.yml dispatch) 전수 재빌드로 backfill. 대문자 companyfacts 경로는 영향 없음.
 
 ## 공개 호출 방식
 
@@ -132,8 +139,18 @@ body = c.readFiling(filings[0]["accession"])
 # 3.5. 공시 수평화 보드 — engines.panel 의 US 미러 (DART c.panel 과 동일 표면)
 c.panel                                    # item × 기간 wide (pl.DataFrame) — 잡는 순간 보드
 c.panel("Risk")                            # 섹션 행 검색 (10-K item 본문)
-c.panel("IS")                              # 강한 소스 — companyfacts 위임 (내부 finance)
+c.panel("is", freq="year")                 # native 재무 (소문자 — panel payload 셀, role 앵커)
+c.panel("ratios", freq="year")             # native 재무비율 (core 공식, panel 자급)
+c.panel("IS")                              # 대문자 — companyfacts 위임 (내부 finance, 항상 가용)
 c.panel.search("supply chain")             # 본문 전체검색
+
+# 3.6. 회사 간 재무 비교 — 탑레벨 verb (DART 와 동일 호출계약, native 셀 기반)
+import dartlab
+dartlab.compare(["AAPL", "MSFT"], topic="is", freq="year")   # account(snakeId)×회사, USD 실값
+
+# 3.7. 전종목 횡단 scan — market="us" (companyfacts 기반 재무축)
+dartlab.scan("profitability", market="us")                   # opMargin/netMargin/roe/roa + grade
+dartlab.scan("account", "sales", market="us")                # 단일 계정 전종목 시계열
 
 # 4. 보조 엔진도 동일 (US 자동)
 analysis = c.analysis("financial", "수익성")
@@ -170,7 +187,7 @@ US 종목 분석에서 본 엔진이 1 차 진입점. 다음 4 룰 강행:
 - 영문 ticker (1-5 자) 또는 CIK → EdgarCompany
 - 한글 회사명 → DART search → 미매칭이면 `resolveEnglishAlias` → EDGAR 재검색
 
-EdgarCompany 의 `show / select / trace / liveFilings / readFiling / analysis / credit` 등은 DartCompany 와 *시그니처 동등*. 데이터 소스만 다름 (DART KIND/OpenAPI ↔ SEC EDGAR API). 비대칭은 SSOT 위반 — `engines.edgar` 본 skill 갱신 + 양쪽 docstring 동시 반영.
+EdgarCompany 의 `panel / select / trace / liveFilings / readFiling / analysis / credit` 등은 DartCompany 와 *시그니처 동등*. 데이터 소스만 다름 (DART KIND/OpenAPI ↔ SEC EDGAR API). 비대칭은 SSOT 위반 — `engines.edgar` 본 skill 갱신 + 양쪽 docstring 동시 반영.
 
 XBRL concept 정규화는 EdgarCompany 내부에서 SEC GAAP 태그 → 공통 snake_id 매핑. 사용자 호출에선 DART 와 같은 한글/snake 이름 사용.
 
@@ -207,8 +224,11 @@ EDGAR 답변은 `cik` · `accession` · `form` · `filedAt` · `period` · `sour
 | --- | --- |
 | 식별 | `Company.search` · `searchName` |
 | 공시 | `disclosure` · `liveFilings` · `readFiling` · `filings` |
-| 재무 | `show("BS"/"IS"/"CF"/"ratios")` · `select` · `trace` · `diff` |
-| 분석 | `analysis` · `credit` · `quant` · `industry` |
+| 재무 (native 소문자) | `panel("is"/"bs"/"cf"/"cis"/"ratios")` — panel payload 셀(role 앵커) · `select` · `trace` · `diff` |
+| 재무 (companyfacts 대문자) | `panel("IS"/"BS"/"CF"/"RATIOS")` — SEC 벌크 위임 (panel 무관) |
+| 재무 비교 | `compare(codes, topic="is"/"bs"/...)` — 탑레벨 verb, native 셀(account=snakeId, USD) |
+| 분석 | `analysis` · `credit` · `quant` |
+| 횡단 | `scan(axis, market="us")` — 재무축 (companyfacts) · `scan("account"/"ratio", ..., market="us")` |
 | 보조 | `gather` · `news` · `keywordTrend` |
 | 메타 | `topics` · `sources` · `index` · `market` · `currency` · `fiscalYearEnd` |
 
@@ -222,6 +242,18 @@ EDGAR 답변은 `cik` · `accession` · `form` · `filedAt` · `period` · `sour
 - 한쪽 데이터 소스에 없는 메타 (DART 의 KindList vs SEC 의 Forms 분류)
 
 EXEMPT 항목은 본 skill 의 위 표 *밖* 에 별도 섹션으로 명시.
+
+### 현행 EXEMPT 목록 (DART 전용, US 동등 데이터 부재)
+
+| 메서드 | EXEMPT 사유 |
+| --- | --- |
+| `industry()` | KR 가치사슬 지도(`dartlab.industry`, 운영자 수동·한국 산업 정의·KR 종목 peer) 전용. US 가치사슬 지도 부재. |
+| `sector` · `sectorParams` | WICS 11 대 분류 — KR 거래소 분류 체계. |
+| `rank` · `network` · `topicSummaries` | KR 섹터 랭킹 / 계열사 그래프 / 토픽 요약 — US 동등 데이터(피어 유니버스·13F·item 분류) 부재로 placeholder. |
+| `executivePay` · `relatedPartyTx` · `notesDetail` · `flow` | K-IFRS 법정공시 고유 항목. |
+| `report` (정기보고서 OpenAPI) | DART OpenAPI 보고서 타입 — SEC 무대응 (운영자 인지된 갭). |
+
+US 고유: SEC `CIK` 식별자 · companyfacts 벌크 재무 (대문자 panel 경로). 신규 비대칭 발견 시 본 표에 추가하거나 양쪽 구현.
 
 ## 기본 실행 순서
 
