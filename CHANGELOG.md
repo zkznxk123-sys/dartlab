@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (다음 release 작업 누적)
 
+## [0.10.6] - 2026-06-09
+
+### Changed
+
+- `dartlab.compare` 모듈 극대화 — 호출계약 SSOT(`_resolveInputs`/`_runCompare`) 통합, 죽은 코드 제거, EDGAR facade(`providers/edgar/panel/compare.py`) 시그니처 대칭. compare 사용법을 `engines.panel` skill 로 흡수(옛 `operation.compareTargets` 제거).
+- MCP 도구 통일 — `CompareCompanies`(max 3) 를 `PeerCompareN`(2~12 종목 단일 비교 도구) 에 흡수. ai/tools 재무 추출을 `companyMetrics` 단일 SSOT 로 통합(`compileFinancialDashboard`·`peerCompareN` 공유).
+- Skill OS 카탈로그 `index.json` → `catalog.json` 개명(EDGAR `index.json` 충돌 해소), 비파괴 `artifactSync` 동기화 도구 복원(check 우선·수동 `--write`).
+- finance 계정 라벨 cascade 정렬 — 큐레이션 우선, 별표 strip, 동의어 alias.
+
+### Fixed
+
+- compare 재무 셀 괄호 음수 소실 + row 모드 연도(`YYYY`) period 정규화.
+
+### Added
+
+- MCP 도구 thin 원칙 가드 — EngineCall verb 자동경로 도달성 lock + ai/tools 재무 추출 단일점 census. `runtime.mcp` 에 "도구 설계 원칙(verb=SSOT·EngineCall-first·재구현/generator 금지)" 명문화.
+
 ## [0.10.5] - 2026-06-07
 
 ### Fixed
