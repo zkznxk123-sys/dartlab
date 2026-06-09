@@ -30,6 +30,12 @@
 
 <a href="https://www.youtube.com/watch?v=-Y3kY1zs62I"><img src="https://img.youtube.com/vi/-Y3kY1zs62I/maxresdefault.jpg" alt="DartLab — 공시를 비교 가능한 데이터로" width="900"></a>
 
+<p>
+<a href="https://eddmpython.github.io/dartlab/viewer"><img src="https://img.shields.io/badge/공시_뷰어_바로가기-ea4647?style=for-the-badge&labelColor=050811&logo=googlechrome&logoColor=white" alt="공시 뷰어 바로가기" height="44"></a>
+&nbsp;&nbsp;
+<a href="https://eddmpython.github.io/dartlab/"><img src="https://img.shields.io/badge/dartlab_공식_페이지-38bdf8?style=for-the-badge&labelColor=050811&logo=github&logoColor=white" alt="dartlab 공식 페이지" height="44"></a>
+</p>
+
 </div>
 
 ## 무엇을 해주는가

@@ -29,6 +29,12 @@
 
 <a href="https://www.youtube.com/watch?v=-Y3kY1zs62I"><img src="https://img.youtube.com/vi/-Y3kY1zs62I/maxresdefault.jpg" alt="DartLab — turn filings into comparable data" width="900"></a>
 
+<p>
+<a href="https://eddmpython.github.io/dartlab/viewer"><img src="https://img.shields.io/badge/Open_the_Viewer-ea4647?style=for-the-badge&labelColor=050811&logo=googlechrome&logoColor=white" alt="Open the Viewer" height="44"></a>
+&nbsp;&nbsp;
+<a href="https://eddmpython.github.io/dartlab/"><img src="https://img.shields.io/badge/Official_Site-38bdf8?style=for-the-badge&labelColor=050811&logo=github&logoColor=white" alt="Official Site" height="44"></a>
+</p>
+
 </div>
 
 ## Every Company Has a Story
