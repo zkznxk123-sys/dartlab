@@ -1,0 +1,8 @@
+name = "dartlab-hf-proxy"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# HF resolve/main parquet 레인지 프록시 — 공개 데이터셋 read 전용이라 secret 불필요.
+# ALLOW_ORIGIN 은 실제 사이트 origin 으로 좁힘(로컬 dev 는 와일드카드로 임시 허용 가능).
+[vars]
+ALLOW_ORIGIN = "https://eddmpython.github.io"
