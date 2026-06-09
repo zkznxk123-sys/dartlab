@@ -1029,7 +1029,7 @@ export async function loadCompanyChanges(
 				toPeriod,
 				sectionTitle,
 				changeType,
-				preview
+				NULLIF(TRIM(REGEXP_REPLACE(REGEXP_REPLACE(preview, '<[^>]+>', ' ', 'g'), '\\s+', ' ', 'g')), '') AS preview
 			FROM changes
 			WHERE stockCode = '${sqlEscape(stockCode)}'
 			ORDER BY toPeriod DESC, sectionTitle

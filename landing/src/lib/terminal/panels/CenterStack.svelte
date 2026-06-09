@@ -6,7 +6,7 @@
 	import TrendChart from '../charts/TrendChart.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
-	import { loadTerminalFinance, type TerminalFinance } from '../data/terminalFinance';
+	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
 	import { loadDailyOHLCV, type Candle } from '../data/priceSeries';
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 
@@ -48,18 +48,22 @@
 		};
 	});
 
-	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 분기 TTM, 온디맨드·회사별
-	let finData = $state<TerminalFinance | null>(null);
+	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
+	let finBundle = $state<TerminalFinanceBundle | null>(null);
+	let finMode = $state<FinMode>('ttm');
 	let finState = $state<'loading' | 'ready' | 'empty'>('loading');
+	const finData = $derived(finBundle ? finBundle.views[finMode] ?? null : null);
+	const finModeLabel: Record<FinMode, string> = { ttm: '분기 TTM', quarter: '분기', annual: '연간' };
 	$effect(() => {
 		const code = co.code;
 		finState = 'loading';
-		finData = null;
+		finBundle = null;
 		let cancelled = false;
-		loadTerminalFinance(code).then((f) => {
+		loadTerminalFinance(code).then((b) => {
 			if (cancelled) return;
-			finData = f;
-			finState = f && f.cards.length ? 'ready' : 'empty';
+			finBundle = b;
+			finMode = b ? b.defaultMode : 'ttm';
+			finState = b && b.modes.length ? 'ready' : 'empty';
 		});
 		return () => {
 			cancelled = true;
@@ -189,8 +193,12 @@
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
      ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
 <Panel {lang} className="eAnalysis" prov="live" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
-	sub={finData ? { kr: (finData.freq === 'quarter' ? '분기 TTM' : '연간') + ' · ' + finData.periods.length + '기 · 조 KRW', en: finData.freq } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
-	{#snippet right()}{#if finData}<span class="dim mono">{finData.cards.length}</span>{/if}{/snippet}
+	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · 조 KRW', en: finMode + ' · ' + finData.periods.length + 'p' } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
+	{#snippet right()}
+		{#if finBundle && finBundle.modes.length > 1}
+			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
+		{/if}
+	{/snippet}
 	{#if finState === 'ready' && finData}
 		<div class="finGrid">
 			{#each finData.cards as card (card.key)}

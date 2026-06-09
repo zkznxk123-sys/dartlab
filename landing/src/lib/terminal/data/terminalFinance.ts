@@ -24,8 +24,8 @@ export interface FinCard {
 	signed?: boolean; // 0 기준선 (음수 가능)
 }
 export interface TerminalFinance {
-	periods: string[]; // 표시용 압축 라벨 (예: '23Q4')
-	freq: 'quarter' | 'annual';
+	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
+	freq: 'quarter' | 'annual' | 'ttm';
 	cards: FinCard[];
 }
 
@@ -109,15 +109,23 @@ function num(v: unknown): number | null {
 
 const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'ord'];
 
-const cache = new Map<string, TerminalFinance | null>();
+// 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = TTM.
+export type FinMode = 'annual' | 'quarter' | 'ttm';
+export interface TerminalFinanceBundle {
+	modes: FinMode[]; // 데이터상 가능한 모드 (분기 없으면 annual 만)
+	views: Record<FinMode, TerminalFinance | null>;
+	defaultMode: FinMode;
+}
 
-export async function loadTerminalFinance(stockCode: string): Promise<TerminalFinance | null> {
+const cache = new Map<string, TerminalFinanceBundle | null>();
+
+export async function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceBundle | null> {
 	if (!browser) return null;
 	const code = stockCode.trim();
 	if (cache.has(code)) return cache.get(code) ?? null;
 	try {
 		const { rows } = await readParquetRows<RawRow>(`dart/finance/${code}.parquet`, { columns: FINANCE_COLUMNS });
-		const built = buildFinance(rows);
+		const built = buildBundle(rows);
 		cache.set(code, built);
 		return built;
 	} catch (e) {
@@ -127,7 +135,7 @@ export async function loadTerminalFinance(stockCode: string): Promise<TerminalFi
 	}
 }
 
-function buildFinance(rows: RawRow[]): TerminalFinance | null {
+function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	// fs_div 선호: CFS(연결) → 없으면 OFS(별도)
 	const hasCfs = rows.some((r) => (r.fs_div || '') === 'CFS');
 	const fs = hasCfs ? 'CFS' : 'OFS';
@@ -188,9 +196,9 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 		.sort((a, b) => a.y - b.y || a.q - b.q);
 	if (allPk.length === 0) return null;
 
-	// 분기 데이터가 충분한가? (Q1~Q3 존재) → 분기 TTM, 아니면 annual(Q4만)
+	// 분기(Q1~Q3) 존재 여부 → 분기·TTM 모드 가능. annual 은 Q4(연간) 존재 시.
 	const hasInterim = allPk.some((p) => p.q !== 4);
-	const freq: 'quarter' | 'annual' = hasInterim ? 'quarter' : 'annual';
+	const hasAnnual = allPk.some((p) => p.q === 4);
 
 	const rawV = (key: string, y: number, q: number): Num => grid[key].get(`${y}-${q}`)?.amt ?? null;
 
@@ -221,173 +229,203 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 		return res;
 	};
 
-	// 표시 기간: 분기면 마지막 16, annual 이면 마지막 8
-	const keepN = freq === 'quarter' ? 24 : 12;
-	const used = (freq === 'quarter' ? allPk : allPk.filter((p) => p.q === 4)).slice(-keepN);
-	// 최신 분기가 명백한 이상치(매출 standalone > 직전 4분기 중앙값 1.6×)면 제외 — 예비/오류 공시 방어
-	while (freq === 'quarter' && used.length >= 5) {
-		const li = used.length - 1;
-		const lastRev = standalone('revenue', used[li].y, used[li].q);
-		const prior = used.slice(li - 4, li).map((p) => standalone('revenue', p.y, p.q)).filter((v): v is number => v != null);
-		if (lastRev == null || prior.length < 3) break;
-		const med = [...prior].sort((a, b) => a - b)[Math.floor(prior.length / 2)];
-		if (med > 0 && lastRev > med * 1.5) used.pop();
-		else break;
-	}
-	const periods = used.map((p) => `${String(p.y).slice(2)}Q${p.q}`);
-
-	// 값: BS 시점 / IS·CF flow = TTM(직전 4 분기 standalone 합). annual freq = 연간 standalone.
-	const valAtIdx = (key: string, i: number): Num => {
-		const p = used[i];
-		if (isStock(key)) return rawV(key, p.y, p.q);
-		if (freq === 'annual') return standalone(key, p.y, 4);
-		let s = 0;
-		for (let k = 0; k < 4; k++) {
-			const j = i - k;
-			if (j < 0) return null;
-			const v = standalone(key, used[j].y, used[j].q);
-			if (v == null) return null;
-			s += v;
+	// ── 모드별(연간/분기/TTM) 뷰 빌드 ──
+	const buildMode = (mode: FinMode): TerminalFinance | null => {
+		const isAnnual = mode === 'annual';
+		const KEEP = isAnnual ? 24 : 48; // 최대한 많은 기간 (막대 얇아도 무방)
+		let used: { y: number; q: number; gi: number }[];
+		if (isAnnual) {
+			used = allPk.filter((p) => p.q === 4).slice(-KEEP).map((p) => ({ y: p.y, q: 4, gi: -1 }));
+		} else if (mode === 'ttm') {
+			// TTM 은 직전 4분기 필요 → 앞 3분기(gi<3) 제외해 선두 빈칸 방지
+			used = allPk.map((p, gi) => ({ y: p.y, q: p.q, gi })).filter((e) => e.gi >= 3).slice(-KEEP);
+		} else {
+			used = allPk.map((p, gi) => ({ y: p.y, q: p.q, gi })).slice(-KEEP);
 		}
-		return s;
-	};
+		// 최신 분기 이상치(매출 standalone > 직전 4분기 중앙값 1.5×) 제외 — 예비/오류 공시 방어
+		while (!isAnnual && used.length >= 5) {
+			const li = used.length - 1;
+			const lastRev = standalone('revenue', used[li].y, used[li].q);
+			const prior = used.slice(li - 4, li).map((p) => standalone('revenue', p.y, p.q)).filter((v): v is number => v != null);
+			if (lastRev == null || prior.length < 3) break;
+			const med = [...prior].sort((a, b) => a - b)[Math.floor(prior.length / 2)];
+			if (med > 0 && lastRev > med * 1.5) used.pop();
+			else break;
+		}
+		if (used.length === 0) return null;
+		const periods = used.map((p) => (isAnnual ? `FY${String(p.y).slice(2)}` : `${String(p.y).slice(2)}Q${p.q}`));
 
-	// 계정 시리즈 — 조 KRW 환산 (BS 시점, IS/CF TTM)
-	const ser = (key: string): Num[] => used.map((_, i) => { const v = valAtIdx(key, i); return v == null ? null : +(v / TRILLION).toFixed(3); });
-	const raw = (key: string): Num[] => used.map((_, i) => valAtIdx(key, i));
-	const ratio = (numK: string, denK: string, scale = 100, avgDen = false): Num[] => {
-		const n = raw(numK);
-		const d = raw(denK);
-		return used.map((_, i) => {
-			const nn = n[i];
-			let dd = d[i];
-			if (avgDen && i > 0 && d[i - 1] != null && dd != null) dd = (dd + d[i - 1]!) / 2;
-			return nn != null && dd != null && dd !== 0 ? +((nn / dd) * scale).toFixed(1) : null;
-		});
-	};
-	const yoy = (key: string): Num[] => {
-		const v = raw(key);
-		const lag = freq === 'quarter' ? 4 : 1; // TTM YoY = 4 분기(=1년) 전 대비
-		return used.map((_, i) => {
-			const cur = v[i];
-			const prev = i >= lag ? v[i - lag] : null;
-			return cur != null && prev != null && prev !== 0 ? +(((cur - prev) / Math.abs(prev)) * 100).toFixed(1) : null;
-		});
-	};
-	const compose = (...parts: [string, number][]): Num[] =>
-		used.map((_, i) => {
+		// 값: BS = 시점. flow(IS·CF) = annual 연간 / quarter 단일분기 / ttm 직전 4분기 합.
+		const flowAt = (key: string, i: number): Num => {
+			const p = used[i];
+			if (isAnnual) return standalone(key, p.y, 4);
+			if (mode === 'quarter') return standalone(key, p.y, p.q);
 			let s = 0;
-			let any = false;
-			for (const [k, sign] of parts) { const v = valAtIdx(k, i); if (v != null) { s += sign * v; any = true; } }
-			return any ? +(s / TRILLION).toFixed(3) : null;
-		});
+			for (let k = 0; k < 4; k++) {
+				const gi = p.gi - k;
+				if (gi < 0) return null;
+				const a = allPk[gi];
+				const v = standalone(key, a.y, a.q);
+				if (v == null) return null;
+				s += v;
+			}
+			return s;
+		};
+		const valAtIdx = (key: string, i: number): Num => {
+			if (isStock(key)) { const p = used[i]; return rawV(key, p.y, p.q); }
+			return flowAt(key, i);
+		};
+		const lag = isAnnual ? 1 : 4; // YoY: 연간 1년 전, 분기/TTM 4분기 전
 
-	// 보조: grossProfit 없으면 revenue - costOfSales
-	const grossProfitSer = (): Num[] => {
-		const gp = raw('grossProfit');
-		const rev = raw('revenue');
-		const cogs = raw('costOfSales');
-		return used.map((_, i) => {
-			const direct = gp[i];
-			if (direct != null) return direct;
-			return rev[i] != null && cogs[i] != null ? rev[i]! - cogs[i]! : null;
-		});
+		// 계정 시리즈 — 조 KRW 환산 (BS 시점, flow 모드별)
+		const ser = (key: string): Num[] => used.map((_, i) => { const v = valAtIdx(key, i); return v == null ? null : +(v / TRILLION).toFixed(3); });
+		const raw = (key: string): Num[] => used.map((_, i) => valAtIdx(key, i));
+		const ratio = (numK: string, denK: string, scale = 100, avgDen = false): Num[] => {
+			const n = raw(numK);
+			const d = raw(denK);
+			return used.map((_, i) => {
+				const nn = n[i];
+				let dd = d[i];
+				if (avgDen && i > 0 && d[i - 1] != null && dd != null) dd = (dd + d[i - 1]!) / 2;
+				return nn != null && dd != null && dd !== 0 ? +((nn / dd) * scale).toFixed(1) : null;
+			});
+		};
+		const yoy = (key: string): Num[] => {
+			const v = raw(key);
+			return used.map((_, i) => {
+				const cur = v[i];
+				const prev = i >= lag ? v[i - lag] : null;
+				return cur != null && prev != null && prev !== 0 ? +(((cur - prev) / Math.abs(prev)) * 100).toFixed(1) : null;
+			});
+		};
+		const compose = (...parts: [string, number][]): Num[] =>
+			used.map((_, i) => {
+				let s = 0;
+				let any = false;
+				for (const [k, sign] of parts) { const v = valAtIdx(k, i); if (v != null) { s += sign * v; any = true; } }
+				return any ? +(s / TRILLION).toFixed(3) : null;
+			});
+
+		// 보조: grossProfit 없으면 revenue - costOfSales
+		const grossProfitSer = (): Num[] => {
+			const gp = raw('grossProfit');
+			const rev = raw('revenue');
+			const cogs = raw('costOfSales');
+			return used.map((_, i) => {
+				const direct = gp[i];
+				if (direct != null) return direct;
+				return rev[i] != null && cogs[i] != null ? rev[i]! - cogs[i]! : null;
+			});
+		};
+		const gpRatio = (): Num[] => {
+			const g = grossProfitSer();
+			const rev = raw('revenue');
+			return used.map((_, i) => (g[i] != null && rev[i] ? +((g[i]! / rev[i]!) * 100).toFixed(1) : null));
+		};
+
+		const C = { rev: '#5b9bf0', op: '#fb923c', net: '#34d399', good: '#34d399', warn: '#fbbf24', purple: '#a78bfa', red: '#f0616f', blue: '#60a5fa', cyan: '#22d3ee', dim: '#64748b' };
+
+		// FCF (원 단위) + raw 시리즈 분모 비율 (CF 마진용)
+		const fcfRaw = used.map((_, i) => { const op = valAtIdx('cfOperating', i); const cx = valAtIdx('capex', i); return op != null ? op - (cx ?? 0) : null; });
+		const ratioOfSeries = (numRaw: Num[], denKey: string, scale = 100): Num[] => { const d = raw(denKey); return used.map((_, i) => (numRaw[i] != null && d[i] ? +((numRaw[i]! / d[i]!) * scale).toFixed(1) : null)); };
+
+		// ── 재무제표 분석 16 카드 (기본 4 + 세트). universal 계정 위주 → 빈칸 0. ──
+		const cards: FinCard[] = [
+			// 기본 4 — 자산·조달·손익·현금
+			{ key: 'assetComposition', title: '자산구조', unit: '조', stacked: true, series: [
+				{ name: '현금', data: ser('cash'), color: C.good, type: 'bar' },
+				{ name: '매출채권', data: ser('receivables'), color: C.blue, type: 'bar' },
+				{ name: '재고', data: ser('inventories'), color: C.warn, type: 'bar' },
+				{ name: '기타', data: compose(['assets', 1], ['cash', -1], ['receivables', -1], ['inventories', -1]), color: C.dim, type: 'bar' }
+			] },
+			{ key: 'fundingStructure', title: '조달구조', unit: '조', stacked: true, series: [
+				{ name: '유동부채', data: ser('currentLiabilities'), color: C.red, type: 'bar' },
+				{ name: '비유동부채', data: compose(['liabilities', 1], ['currentLiabilities', -1]), color: C.op, type: 'bar' },
+				{ name: '자본', data: ser('equity'), color: C.good, type: 'bar' }
+			] },
+			{ key: 'incomeBreakdown', title: '손익구조', unit: '조', series: [
+				{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
+				{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line' },
+				{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line' }
+			] },
+			{ key: 'cashflowSigned', title: '현금흐름', unit: '조', signed: true, series: [
+				{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
+				{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
+				{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
+			] },
+			// 수익성
+			{ key: 'marginTrend', title: '이익률', unit: '%', series: [
+				{ name: 'GPM', data: gpRatio(), color: C.warn, type: 'line' },
+				{ name: 'OPM', data: ratio('operatingIncome', 'revenue'), color: C.op, type: 'line' },
+				{ name: 'NPM', data: ratio('netIncome', 'revenue'), color: C.net, type: 'line' }
+			] },
+			{ key: 'returnTrend', title: 'ROE·ROA', unit: '%', series: [
+				{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'line' },
+				{ name: 'ROA', data: ratio('netIncome', 'assets', 100, true), color: C.blue, type: 'line' }
+			] },
+			{ key: 'cfMargin', title: '현금마진', unit: '%', series: [
+				{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line' },
+				{ name: 'FCF/매출', data: ratioOfSeries(fcfRaw, 'revenue'), color: C.warn, type: 'line' }
+			] },
+			// 안정성
+			{ key: 'leverageTrend', title: '레버리지·유동', unit: '%', refLines: [100], series: [
+				{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
+				{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
+			] },
+			{ key: 'stability', title: '안정성', unit: '%', series: [
+				{ name: '자기자본비율', data: ratio('equity', 'assets'), color: C.good, type: 'bar' },
+				{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
+			] },
+			{ key: 'netDebt', title: '순차입금', unit: '조', signed: true, series: [
+				{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' },
+				{ name: 'D/E', data: ratio('liabilities', 'equity'), color: C.purple, type: 'line', axis: 'r' }
+			] },
+			// 현금·효율
+			{ key: 'fcfTrend', title: 'FCF', unit: '조', signed: true, series: [
+				{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
+				{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
+				{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
+			] },
+			{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
+				{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' },
+				{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line', axis: 'r' }
+			] },
+			{ key: 'turnover', title: '회전율', unit: '회', series: [
+				{ name: '자산회전', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line' },
+				{ name: '매출채권', data: ratio('revenue', 'receivables', 1, true), color: C.cyan, type: 'line' }
+			] },
+			// 성장
+			{ key: 'growthYoy', title: '성장 YoY', unit: '%', signed: true, series: [
+				{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
+				{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
+				{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
+			] },
+			{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', signed: true, series: [
+				{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
+				{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
+			] },
+			{ key: 'scale', title: '규모', unit: '조', series: [
+				{ name: '자산', data: ser('assets'), color: C.blue, type: 'line' },
+				{ name: '부채', data: ser('liabilities'), color: C.red, type: 'line' },
+				{ name: '자본', data: ser('equity'), color: C.good, type: 'line' }
+			] }
+		];
+
+		// 회사에 데이터 전무(빈 파케이)면 null. 개별 카드 sparse 는 셀 유지 (빈칸 방지).
+		if (!cards.some((c) => c.series.some((s) => s.data.some((v) => v != null)))) return null;
+		return { periods, freq: mode, cards };
 	};
-	const gpRatio = (): Num[] => {
-		const g = grossProfitSer();
-		const rev = raw('revenue');
-		return used.map((_, i) => (g[i] != null && rev[i] ? +((g[i]! / rev[i]!) * 100).toFixed(1) : null));
+
+	const views: Record<FinMode, TerminalFinance | null> = {
+		annual: hasAnnual ? buildMode('annual') : null,
+		quarter: hasInterim ? buildMode('quarter') : null,
+		ttm: hasInterim ? buildMode('ttm') : null
 	};
-
-	const C = { rev: '#5b9bf0', op: '#fb923c', net: '#34d399', good: '#34d399', warn: '#fbbf24', purple: '#a78bfa', red: '#f0616f', blue: '#60a5fa', cyan: '#22d3ee', dim: '#64748b' };
-
-	// FCF (원 단위) + raw 시리즈 분모 비율 (CF 마진용)
-	const fcfRaw = used.map((_, i) => { const op = valAtIdx('cfOperating', i); const cx = valAtIdx('capex', i); return op != null ? op - (cx ?? 0) : null; });
-	const ratioOfSeries = (numRaw: Num[], denKey: string, scale = 100): Num[] => { const d = raw(denKey); return used.map((_, i) => (numRaw[i] != null && d[i] ? +((numRaw[i]! / d[i]!) * scale).toFixed(1) : null)); };
-
-	// ── 재무제표 분석 15 카드 (기본 4 + 세트). universal 계정 위주 → 5열×3행 빈칸 0. ──
-	const cards: FinCard[] = [
-		// 기본 4 — 자산·조달·손익·현금
-		{ key: 'assetComposition', title: '자산구조', unit: '조', stacked: true, series: [
-			{ name: '현금', data: ser('cash'), color: C.good, type: 'bar' },
-			{ name: '매출채권', data: ser('receivables'), color: C.blue, type: 'bar' },
-			{ name: '재고', data: ser('inventories'), color: C.warn, type: 'bar' },
-			{ name: '기타', data: compose(['assets', 1], ['cash', -1], ['receivables', -1], ['inventories', -1]), color: C.dim, type: 'bar' }
-		] },
-		{ key: 'fundingStructure', title: '조달구조', unit: '조', stacked: true, series: [
-			{ name: '유동부채', data: ser('currentLiabilities'), color: C.red, type: 'bar' },
-			{ name: '비유동부채', data: compose(['liabilities', 1], ['currentLiabilities', -1]), color: C.op, type: 'bar' },
-			{ name: '자본', data: ser('equity'), color: C.good, type: 'bar' }
-		] },
-		{ key: 'incomeBreakdown', title: '손익구조', unit: '조', series: [
-			{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
-			{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line' },
-			{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line' }
-		] },
-		{ key: 'cashflowSigned', title: '현금흐름', unit: '조', signed: true, series: [
-			{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
-			{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
-			{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
-		] },
-		// 수익성
-		{ key: 'marginTrend', title: '이익률', unit: '%', series: [
-			{ name: 'GPM', data: gpRatio(), color: C.warn, type: 'line' },
-			{ name: 'OPM', data: ratio('operatingIncome', 'revenue'), color: C.op, type: 'line' },
-			{ name: 'NPM', data: ratio('netIncome', 'revenue'), color: C.net, type: 'line' }
-		] },
-		{ key: 'returnTrend', title: 'ROE·ROA', unit: '%', series: [
-			{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'line' },
-			{ name: 'ROA', data: ratio('netIncome', 'assets', 100, true), color: C.blue, type: 'line' }
-		] },
-		{ key: 'cfMargin', title: '현금마진', unit: '%', series: [
-			{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line' },
-			{ name: 'FCF/매출', data: ratioOfSeries(fcfRaw, 'revenue'), color: C.warn, type: 'line' }
-		] },
-		// 안정성
-		{ key: 'leverageTrend', title: '레버리지·유동', unit: '%', refLines: [100], series: [
-			{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
-			{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
-		] },
-		{ key: 'stability', title: '안정성', unit: '%', series: [
-			{ name: '자기자본비율', data: ratio('equity', 'assets'), color: C.good, type: 'bar' },
-			{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
-		] },
-		{ key: 'netDebt', title: '순차입금', unit: '조', signed: true, series: [
-			{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' },
-			{ name: 'D/E', data: ratio('liabilities', 'equity'), color: C.purple, type: 'line', axis: 'r' }
-		] },
-		// 현금·효율
-		{ key: 'fcfTrend', title: 'FCF', unit: '조', signed: true, series: [
-			{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
-			{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
-			{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
-		] },
-		{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
-			{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' },
-			{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line', axis: 'r' }
-		] },
-		{ key: 'turnover', title: '회전율', unit: '회', series: [
-			{ name: '자산회전', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line' },
-			{ name: '매출채권', data: ratio('revenue', 'receivables', 1, true), color: C.cyan, type: 'line' }
-		] },
-		// 성장
-		{ key: 'growthYoy', title: '성장 YoY', unit: '%', signed: true, series: [
-			{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
-			{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
-			{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
-		] },
-		{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', signed: true, series: [
-			{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
-			{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
-		] },
-		{ key: 'scale', title: '규모', unit: '조', series: [
-			{ name: '자산', data: ser('assets'), color: C.blue, type: 'line' },
-			{ name: '부채', data: ser('liabilities'), color: C.red, type: 'line' },
-			{ name: '자본', data: ser('equity'), color: C.good, type: 'line' }
-		] }
-	];
-
-	// 회사에 데이터 전무(빈 파케이)면 null. 개별 카드 sparse 는 셀 유지 (빈칸 방지).
-	if (!cards.some((c) => c.series.some((s) => s.data.some((v) => v != null)))) return null;
-	return { periods, freq, cards };
+	const modes: FinMode[] = [];
+	if (views.ttm) modes.push('ttm');
+	if (views.quarter) modes.push('quarter');
+	if (views.annual) modes.push('annual');
+	if (modes.length === 0) return null;
+	const defaultMode: FinMode = views.ttm ? 'ttm' : views.annual ? 'annual' : modes[0];
+	return { modes, views, defaultMode };
 }
