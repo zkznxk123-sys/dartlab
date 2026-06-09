@@ -14,6 +14,7 @@
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 	import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode, type StmtKind } from '../data/terminalFinance';
+	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 
 	interface Props {
 		co: Company;
@@ -103,6 +104,10 @@
 	]);
 	const s = $derived(co.story);
 	const dartUrl = 'https://dart.fss.or.kr/dsab007/main.do';
+	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
+	loadHfProductIndexMap().then((m) => (corpMeta = m));
+	const homepage = $derived(corpMeta?.get(co.code)?.homepage ?? null);
+	const homepageHost = $derived(homepage ? homepage.replace(/^https?:\/\//, '').replace(/\/$/, '') : '');
 	const lastYr = $derived(co.income.periods[0]);
 	const firstYr = $derived(co.income.periods[co.income.periods.length - 1]);
 	const conf = $derived(cr.healthScore >= 70 ? 'HIGH' : 'MEDIUM');
@@ -234,7 +239,7 @@
 
 <!-- 공시 변경 내역 (changes parquet — 섹션별 수치/구조 변경) -->
 {#if disclChanges.length}
-	<Panel {lang} className="eChanges" prov="live" title={{ kr: '공시 변경 내역', en: 'FILING CHANGES' }} sub={{ kr: 'changes · 섹션', en: 'changes · sections' }} flush>
+	<Panel {lang} className="eChanges" prov="live" title={{ kr: "공시 변경 추적", en: "WHAT CHANGED" }} sub={{ kr: "직전 공시 대비 바뀐 섹션·내용", en: "vs prior filing" }} flush>
 		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기">뷰어 ↗</a><span class="dim">{disclChanges.length}</span>{/snippet}
 		<div class="chgFeed">
 			{#each disclChanges as c, i (i)}
@@ -294,8 +299,11 @@
 		<div class="peerList">
 			{#each peers as p (p.code)}
 				<div class={'peerRow' + (p.self ? ' self' : '')} role="button" tabindex="0" onclick={() => onPick(p.code)} onkeydown={(ev) => ev.key === 'Enter' && onPick(p.code)}>
+					<div class="peerTop">
 					<span class="peerName"><b>{p.name}</b><span class="pc">{p.code}</span></span>
 					<span class="peerBar"><span class="peerBarTrack"><span class="peerBarFill" style={`width:${((p.revenue || 0) / peerMax) * 100}%`}></span></span><span class="peerRev">{p.revenue != null ? (p.revenue / 10000).toFixed(1) + '조' : '—'}</span></span>
+					</div>
+					{#if corpMeta?.get(p.code)?.product}<span class="peerProd">{corpMeta?.get(p.code)?.product}</span>{/if}
 				</div>
 			{/each}
 		</div>
@@ -315,7 +323,7 @@
 		{:else}
 			<div class="storyEmpty">{lang === 'en' ? 'No published dartlab story yet.' : '발간된 dartlab 스토리는 아직 없습니다.'}</div>
 		{/if}
-		<div class="storyCard" style="border-top:1px solid var(--bd)"><div class="storyMeta">{lang === 'en' ? 'Primary filings — DART:' : '원문 공시 — DART:'}</div><a class="storyLink" href={dartUrl} target="_blank" rel="noopener" style="font-family:var(--mono);font-size:10px">dart.fss.or.kr · {co.name.kr} ↗</a></div>
+		<div class="storyCard" style="border-top:1px solid var(--bd)"><div class="storyMeta">{lang === "en" ? "Company homepage" : "회사 홈페이지"}</div>{#if homepage}<a class="storyLink" href={homepage} target="_blank" rel="noopener noreferrer" style="font-family:var(--mono);font-size:10px">{homepageHost} ↗</a>{:else}<span class="storyLink" style="font-family:var(--mono);font-size:10px;color:var(--dimmer)">{lang === "en" ? "n/a" : "홈페이지 정보 없음"}</span>{/if}</div>
 	</Panel>
 	<!-- SUMMARY (derived, 정직: 가짜 tool-call 제거) -->
 	<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: 'dartlab 요약', en: 'DARTLAB SUMMARY' }} sub={{ kr: 'derived', en: 'derived' }} flush>

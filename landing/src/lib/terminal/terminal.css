@@ -575,7 +575,9 @@
 
 /* PEERS */
 .dlTerm .peerList { display: flex; flex-direction: column; }
-.dlTerm .peerRow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 3px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; font-size: 10px; }
+.dlTerm .peerRow { display: flex; flex-direction: column; gap: 1px; padding: 3px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; font-size: 10px; }
+.dlTerm .peerTop { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
+.dlTerm .peerProd { font-size: 8px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .dlTerm .peerRow:hover { background: var(--dl-bg-overlay); }
 .dlTerm .peerRow.self { background: rgba(251, 146, 60, 0.08); box-shadow: inset 2px 0 0 var(--amber); }
 .dlTerm .peerName { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
