@@ -28,6 +28,8 @@
 	let pPeriod = $state<'3M' | '5M' | '6M' | '1Y' | 'MAX'>('5M');
 	let pOverlay = $state<'MA' | 'BB' | 'NONE'>('MA');
 	let pSub = $state<'VOL' | 'RSI' | 'MACD'>('VOL');
+	let pEvents = $state(false); // 실적·공시 시점 마커
+	let pValBand = $state(false); // 적정주가 밴드
 	let candles = $state<Candle[] | null>(null);
 	let candleState = $state<'loading' | 'ready' | 'unavail'>('loading');
 	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
@@ -128,7 +130,26 @@
 		});
 		return d.trim();
 	}
+	// 주가차트 재무 오버레이: 실적 시점(분기말) 마커 + 적정주가 밴드
+	const priceEvents = $derived.by(() => {
+		const src = finBundle?.views.quarter ?? finBundle?.views.ttm ?? finBundle?.views.annual;
+		const out: { date: string; label: string }[] = [];
+		if (!src) return out;
+		const QEND: Record<string, string> = { '1': '0331', '2': '0630', '3': '0930', '4': '1231' };
+		for (const p of src.periods) {
+			const mq = p.match(/^(\d{2})Q(\d)$/);
+			if (mq) { out.push({ date: '20' + mq[1] + QEND[mq[2]], label: p }); continue; }
+			const fy = p.match(/^FY(\d{2})$/);
+			if (fy) out.push({ date: '20' + fy[1] + '1231', label: p });
+		}
+		return out;
+	});
 	const v = $derived(co.valuation);
+	const priceValBand = $derived(
+		v && v.fairLow != null && v.fairHigh != null && v.fairMid != null
+			? { lo: v.fairLow, mid: v.fairMid, hi: v.fairHigh }
+			: null
+	);
 	const valBand = $derived(
 		v && v.fairMid != null
 			? (() => {
@@ -193,10 +214,10 @@
 			<span class="segGroup">{#each ['3M', '5M', '6M', '1Y', 'MAX'] as p (p)}<button class={pPeriod === p ? 'seg on' : 'seg'} onclick={() => (pPeriod = p as typeof pPeriod)}>{p}</button>{/each}</span>
 			<span class="segGroup">{#each [['MA', 'MA'], ['BB', 'BB'], ['NONE', '없음']] as [v, l] (v)}<button class={pOverlay === v ? 'seg on' : 'seg'} onclick={() => (pOverlay = v as typeof pOverlay)}>{l}</button>{/each}</span>
 			<span class="segGroup">{#each ['VOL', 'RSI', 'MACD'] as v (v)}<button class={pSub === v ? 'seg on' : 'seg'} onclick={() => (pSub = v as typeof pSub)}>{v}</button>{/each}</span>
-			<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>
+			<span class="segGroup"><button class={pEvents ? 'seg on' : 'seg'} onclick={() => (pEvents = !pEvents)} title="실적·공시 시점 마커">{lang === 'en' ? 'EARN' : '실적'}</button><button class={pValBand ? 'seg on' : 'seg'} disabled={!priceValBand} onclick={() => priceValBand && (pValBand = !pValBand)} title="적정주가 밴드">{lang === 'en' ? 'FAIR' : '밸류밴드'}</button></span><span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>
 		</div>
 		{#if candleState === 'ready' && candles}
-			<PriceChart {candles} {lang} period={pPeriod} overlay={pOverlay} sub={pSub} />
+			<PriceChart {candles} {lang} period={pPeriod} overlay={pOverlay} sub={pSub} events={pEvents ? priceEvents : undefined} valBand={pValBand ? priceValBand : null} />
 		{:else if candleState === 'loading'}
 			<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 		{:else}

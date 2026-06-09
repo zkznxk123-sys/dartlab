@@ -10,8 +10,10 @@
 		period: '3M' | '5M' | '6M' | '1Y' | 'MAX';
 		overlay: 'MA' | 'BB' | 'NONE';
 		sub: 'VOL' | 'RSI' | 'MACD';
+		events?: { date: string; label: string }[]; // 실적·공시 시점 (YYYYMMDD)
+		valBand?: { lo: number; mid: number; hi: number } | null; // 적정주가 밴드
 	}
-	let { candles, lang, period, overlay, sub }: Props = $props();
+	let { candles, lang, period, overlay, sub, events, valBand }: Props = $props();
 
 	let wrap: HTMLDivElement | null = $state(null);
 	let canvas: HTMLCanvasElement | null = $state(null);
@@ -96,6 +98,28 @@
 			ctx.fillText(fmtNum(v, 0), padL + plotW + 4, y);
 		}
 
+		// 적정주가 밴드 (캔들 뒤) — fairLow~fairHigh 음영 + fairMid 점선
+		if (valBand && valBand.hi > valBand.lo) {
+			const cl = (v: number) => Math.max(yMin, Math.min(yMax, v));
+			const yHi = Y(cl(valBand.hi));
+			const yLo = Y(cl(valBand.lo));
+			ctx.fillStyle = 'rgba(96,165,250,0.08)';
+			ctx.fillRect(padL, Math.min(yHi, yLo), plotW, Math.abs(yLo - yHi));
+			if (valBand.mid >= yMin && valBand.mid <= yMax) {
+				ctx.strokeStyle = 'rgba(96,165,250,0.55)';
+				ctx.setLineDash([4, 3]);
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.moveTo(padL, Y(valBand.mid));
+				ctx.lineTo(padL + plotW, Y(valBand.mid));
+				ctx.stroke();
+				ctx.setLineDash([]);
+			}
+			ctx.fillStyle = 'rgba(96,165,250,0.85)';
+			ctx.textAlign = 'left';
+			ctx.fillText(lang === 'en' ? 'fair' : '적정', padL + 2, Math.min(yHi, yLo) + 5);
+		}
+
 		// Bollinger band fill (behind candles)
 		if (ov === 'BB') {
 			const bb = bollinger(closes, 20, 2);
@@ -134,6 +158,40 @@
 			const yc = Y(c.c);
 			ctx.fillRect(x - bw / 2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
 		});
+
+		// 실적·공시 시점 마커 (주가↔재무 연결) — 분기 말 가까운 캔들에 세로선 + 삼각형 + 라벨
+		if (events && events.length && n > 0) {
+			const first = s[0].t;
+			const last = s[n - 1].t;
+			for (const ev of events) {
+				if (ev.date < first || ev.date > last) continue;
+				let j = 0;
+				let best = Infinity;
+				for (let i = 0; i < n; i++) {
+					const d = Math.abs(Number(s[i].t) - Number(ev.date));
+					if (d < best) { best = d; j = i; }
+				}
+				const x = X(j);
+				ctx.strokeStyle = 'rgba(251,146,60,0.4)';
+				ctx.setLineDash([2, 2]);
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.moveTo(x, padT + 9);
+				ctx.lineTo(x, padT + priceH);
+				ctx.stroke();
+				ctx.setLineDash([]);
+				ctx.fillStyle = 'rgba(251,146,60,0.9)';
+				ctx.beginPath();
+				ctx.moveTo(x, padT + priceH - 2);
+				ctx.lineTo(x - 3, padT + priceH + 3);
+				ctx.lineTo(x + 3, padT + priceH + 3);
+				ctx.closePath();
+				ctx.fill();
+				ctx.fillStyle = C.ma20;
+				ctx.textAlign = 'center';
+				ctx.fillText(ev.label, x, padT + 5);
+			}
+		}
 
 		// MA overlays
 		if (ov === 'MA') {
