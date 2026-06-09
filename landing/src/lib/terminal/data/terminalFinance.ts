@@ -131,6 +131,8 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 	// fs_div 선호: CFS(연결) → 없으면 OFS(별도)
 	const hasCfs = rows.some((r) => (r.fs_div || '') === 'CFS');
 	const fs = hasCfs ? 'CFS' : 'OFS';
+	// 손익 출처: IS(별도 손익계산서) 있으면 IS, 없으면 CIS(단일 포괄손익계산서·카카오류) 를 IS 로 채택.
+	const incomeSrc = rows.some((r) => (r.fs_div || '') === fs && r.sj_div === 'IS') ? 'IS' : 'CIS';
 	const parsed: Parsed[] = [];
 	for (const r of rows) {
 		if ((r.fs_div || '') !== fs) continue;
@@ -138,8 +140,14 @@ function buildFinance(rows: RawRow[]): TerminalFinance | null {
 		const year = Number(r.bsns_year);
 		const amt = num(r.thstrm_amount);
 		if (!q || !Number.isFinite(year) || amt == null) continue;
+		const sjRaw = String(r.sj_div || '');
+		let sj: string;
+		if (sjRaw === 'IS' || sjRaw === 'CIS') {
+			if (sjRaw !== incomeSrc) continue; // 채택 안 한 손익표 스킵
+			sj = 'IS';
+		} else sj = sjRaw; // BS · CF · SCE
 		parsed.push({
-			sj: String(r.sj_div || ''),
+			sj,
 			year,
 			q,
 			id: String(r.account_id || ''),
