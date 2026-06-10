@@ -14,10 +14,12 @@ HF = 캐시. 미리 전부 수집(bulk)하지 않는다. 두 갈래:
        gov/indices/index/{key}.parquet    지수 1개 호출 캐시 (--index, date/ 추출)
 
 모드:
-    --daily         어제 전종목 1콜 → date/{year} upsert (cron).
+    --daily         어제 전종목 1콜 → date/{year} upsert + recent.parquet 갱신 (cron).
     --daily-index   어제 전지수 1콜 → date/{year} upsert (cron).
     --stock CODE    종목 하나 → company/{code} (프론트 온디맨드 캐시 채움).
     --index "M|NM"  지수 하나(시장군|지수명) → index/{key} (프론트 온디맨드 캐시 채움).
+    --derive-companies  date/ 전 연도(기수집분)를 회사별 company/{code} 전종목 파생 (주간).
+                    gov API 호출 0 — 수집이 아닌 레이아웃 파생(미캐시 종목 차트 수 초 → 1 GET).
 
 키: DATA_GO_KR_KEY(디코딩) + HF_TOKEN. 환경변수 우선, 없으면 repo 루트 .env 직독.
 """
@@ -120,10 +122,10 @@ def _appendYearlyRaw(df: pl.DataFrame, dateDir: Path) -> dict[int, int]:
 
 
 def daily(*, apiKey: str, hfToken: str, basDt: str | None = None) -> int:
-    """어제(또는 basDt) 전종목 1콜 → date/{year} 1파일만 upsert → HF push (cron). 반환: 행수.
+    """어제(또는 basDt) 전종목 1콜 → date/{year} upsert + recent.parquet 갱신 → HF push (cron). 반환: 행수.
 
-    회사별 company/{code} 는 여기서 안 받는다 — 프론트가 종목 하나를 `--stock` 온디맨드로
-    채운다(HF=캐시). date/ 는 엔진 전시장 스캔용.
+    회사별 company/{code} 전량 갱신은 주간 `--derive-companies` 가 담당 — 일일 신선도는
+    recent.parquet(최근 30거래일 전종목 슬림 1파일)이 메운다(프론트가 회사파일과 병합).
     """
     from dartlab.gather.gov.govApi import fetchGovBydd, normalizeGovToKrxRaw
 
@@ -135,9 +137,94 @@ def daily(*, apiKey: str, hfToken: str, basDt: str | None = None) -> int:
     dateDir = Path("data/gov/prices/date")
     counts = _appendYearlyRaw(raw, dateDir)
     _deployFolder(dateDir, "gov/prices/date", hfToken, f"갱신: 주가 일별 {day}")
+    buildRecent(hfToken=hfToken)
     total = sum(counts.values())
     print(f"[gov/daily] {day}: date {len(counts)}개 연도, {total}행")
     return total
+
+
+# KRX raw(date 샤드) → 회사 표준 schema 매핑 (normalizeGovFrame 산출과 동일 컬럼명·Float64).
+_KRXRAW_TO_STD = {
+    "BAS_DD": "date",
+    "ISU_NM": "name",
+    "MKT_NM": "market",
+    "TDD_OPNPRC": "open",
+    "TDD_HGPRC": "high",
+    "TDD_LWPRC": "low",
+    "TDD_CLSPRC": "close",
+    "CMPPREVDD_PRC": "priceChange",
+    "FLUC_RT": "fluctuationRate",
+    "ACC_TRDVOL": "volume",
+    "ACC_TRDVAL": "tradedValue",
+    "MKTCAP": "marketCap",
+    "LIST_SHRS": "listedShares",
+}
+
+
+def _stdFromKrxRaw(df: pl.DataFrame) -> pl.DataFrame:
+    """date 샤드 KRX raw → 회사 표준 schema (stockCode 6자리, 수치 Float64).
+
+    ISU_CD 는 gov 시대 'A'+코드 / KRX 이관분 코드 단독 혼재 — 선행 'A' 제거 후 6자리만 채택.
+    """
+    cols = [c for c in _KRXRAW_TO_STD if c in df.columns]
+    out = df.select(["ISU_CD", *cols]).rename({c: _KRXRAW_TO_STD[c] for c in cols})
+    out = out.with_columns(pl.col("ISU_CD").cast(pl.Utf8).str.replace(r"^A", "").alias("stockCode")).drop("ISU_CD")
+    out = out.filter(pl.col("stockCode").str.contains(r"^\d{6}$"))
+    floatCols = [v for k, v in _KRXRAW_TO_STD.items() if v not in ("date", "name", "market") and v in out.columns]
+    return out.with_columns([pl.col(c).cast(pl.Float64, strict=False) for c in floatCols])
+
+
+def deriveCompanies(*, hfToken: str, sinceYear: int = 2010) -> int:
+    """date/ 전 연도(기수집분)를 회사별 company/{code}.parquet 전종목으로 파생 → 폴더 1커밋.
+
+    gov API 호출 0 — HF 에 이미 있는 date 샤드의 레이아웃 파생이다(수집 아님). 미캐시 종목의
+    차트 콜드 경로(전종목 날짜정렬 스캔 수 초)를 회사 파일 1 GET 으로 바꾼다. 주간 cron 이
+    재실행해 회사 파일 신선도를 회복하고, 일일 gap 은 recent.parquet 이 메운다. 반환: 종목 수.
+    """
+    frames = []
+    for y in range(sinceYear, _NOW_YEAR + 1):
+        local = Path(f"data/gov/prices/date/{y}.parquet")
+        df = pl.read_parquet(local) if local.exists() else _hfRead(f"gov/prices/date/{y}.parquet")
+        if df is None or df.is_empty():
+            continue
+        frames.append(_stdFromKrxRaw(df))
+        print(f"[gov/derive] {y}: {frames[-1].height}행")
+    if not frames:
+        print("[gov/derive] date 샤드 없음")
+        return 0
+    allDf = pl.concat(frames, how="diagonal_relaxed").unique(subset=["stockCode", "date"], keep="last")
+    outDir = Path("data/gov/prices/company")
+    outDir.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for partKey, grp in allDf.partition_by("stockCode", as_dict=True).items():
+        code = partKey[0] if isinstance(partKey, tuple) else partKey
+        grp.sort("date").write_parquet(outDir / f"{code}.parquet", compression="zstd")
+        n += 1
+    _deployFolder(outDir, "gov/prices/company", hfToken, f"갱신: 회사별 주가 전종목 파생 ({n}종목)")
+    print(f"[gov/derive] {n}종목 ({allDf.height}행)")
+    return n
+
+
+def buildRecent(*, hfToken: str, tradingDays: int = 30) -> int:
+    """현재 연도 date 샤드에서 최근 N거래일 전종목 슬림 추출 → recent.parquet 1파일.
+
+    프론트 신선 tail — 회사 파일(주간 파생)과 병합해 일일 갱신 없이도 최신 캔들 보장.
+    연초처럼 거래일이 N 미만이면 있는 만큼만(직전 연도 보충은 회사 파일이 커버). 반환: 행수.
+    """
+    local = Path(f"data/gov/prices/date/{_NOW_YEAR}.parquet")
+    df = pl.read_parquet(local) if local.exists() else _hfRead(f"gov/prices/date/{_NOW_YEAR}.parquet")
+    if df is None or df.is_empty():
+        print("[gov/recent] 현재 연도 date 샤드 없음 — 건너뜀")
+        return 0
+    days = sorted(df["BAS_DD"].unique().to_list())[-tradingDays:]
+    slim = (
+        _stdFromKrxRaw(df.filter(pl.col("BAS_DD").is_in(days)))
+        .select(["stockCode", "date", "open", "high", "low", "close", "volume"])
+        .sort(["stockCode", "date"])
+    )
+    _uploadFile(slim, "gov/prices/recent.parquet", hfToken, f"갱신: 최근 {len(days)}거래일 전종목")
+    print(f"[gov/recent] {len(days)}거래일 {slim.height}행")
+    return slim.height
 
 
 def produceStock(code: str, *, apiKey: str, hfToken: str, merge: bool = True) -> int:
@@ -249,6 +336,12 @@ def main() -> int:
     ap.add_argument("--stock", help="종목 하나 → company/{code} 온디맨드 캐시")
     ap.add_argument("--index", dest="indexSpec", help='지수 하나 "시장군|지수명" → index/{key} 온디맨드 캐시')
     ap.add_argument("--basDt", help="--daily/--daily-index 기준일자 YYYYMMDD (기본 어제)")
+    ap.add_argument(
+        "--derive-companies",
+        dest="deriveCompanies",
+        action="store_true",
+        help="date/ 전 연도 → 회사별 전종목 파생 (API 호출 0)",
+    )
     args = ap.parse_args()
 
     hfToken = _env("HF_TOKEN")
@@ -256,6 +349,10 @@ def main() -> int:
         print("HF_TOKEN 필수")
         return 1
 
+    if args.deriveCompanies:
+        deriveCompanies(hfToken=hfToken)
+        buildRecent(hfToken=hfToken)
+        return 0
     if args.indexSpec:
         if "|" not in args.indexSpec:
             print('--index 형식: "시장군|지수명" (예: "KOSPI|코스피 200")')

@@ -6,12 +6,20 @@ name: Gov Price Sync (Bulk)
 
 on:
   schedule:
-    - cron: '0 11 * * 1-5'  # KST 20:00 평일 (UTC 11:00) — 어제 전종목 1콜 upsert
+    # '어제' 수집이므로 화~토 실행 = 월~금 장 커버. 기존 월~금 실행은 금요일 데이터를 영원히
+    # 누락시키는 off-by-one (date/2026 9거래일 구멍의 근본 원인 — 2026-06-10 정정).
+    - cron: '0 11 * * 2-6'  # KST 20:00 화~토 (UTC 11:00) — 어제 전종목 1콜 upsert + recent.parquet
+    - cron: '0 13 * * 6'    # KST 22:00 토 — 회사별 전종목 파생 리프레시 (date 기수집분 재배치, API 호출 0)
   workflow_dispatch:
     inputs:
       basDt:
         description: '기준일자 YYYYMMDD (기본 어제)'
         required: false
+      mode:
+        description: 'daily=일별 upsert / derive=회사별 전종목 파생'
+        default: 'daily'
+        type: choice
+        options: ['daily', 'derive']
 
 permissions:
   contents: read
@@ -49,7 +57,12 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 13 * * 6" ] || [ "${{ github.event.inputs.mode }}" = "derive" ]; then
+            uv run python -X utf8 .github/scripts/sync/buildGovData.py --derive-companies
+          else
+            uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
+          fi
 
       - name: Save gov price parquet cache
         uses: actions/cache/save@v5
