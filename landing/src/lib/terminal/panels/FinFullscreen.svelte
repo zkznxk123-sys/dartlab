@@ -6,7 +6,9 @@
 	import type { Company, Lang } from '../data/types';
 	import type { TerminalFinanceBundle, FinMode } from '../data/terminalFinance';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
+	import AuditStrip from '../charts/AuditStrip.svelte';
 	import { FS_TABS, type TabCard } from '../data/finTabs';
+	import { loadAuditTrail, loadTopExecPay, type AuditYear, type TopExecPay } from '../data/reportSeries';
 
 	interface Props {
 		co: Company;
@@ -23,12 +25,17 @@
 	// report 카드 lazy 캐시. ⛔ self-dep 가드: 로드 effect 는 reportCards 를 untrack 으로만 읽는다
 	// (tracked read+write = effect 재실행 → 진행 중 로드 취소 버그). 회사 전환은 epoch 로 식별.
 	let reportCards = $state<Record<string, TabCard[] | 'loading'>>({});
+	// 부가 패널 (감사 스트립 · 임원 보수 표) — reportCards 와 동일한 epoch 가드·lazy 패턴
+	let auditTrail = $state<AuditYear[] | 'loading' | 'empty' | null>(null);
+	let execTop = $state<TopExecPay | 'loading' | 'empty' | null>(null);
 	let epoch = 0; // 비반응 — 회사 전환 세대
 	$effect(() => {
 		void co.code;
 		epoch++;
 		tab = 'all';
 		reportCards = {};
+		auditTrail = null;
+		execTop = null;
 	});
 	$effect(() => {
 		const t = tab;
@@ -44,18 +51,46 @@
 			reportCards[t] = cards;
 		});
 	});
+	$effect(() => {
+		const code = co.code;
+		if (tab !== 'debt' || untrack(() => auditTrail) != null) return;
+		const myEpoch = untrack(() => epoch);
+		auditTrail = 'loading';
+		loadAuditTrail(code).then((tr) => {
+			if (epoch !== myEpoch) return;
+			auditTrail = tr && tr.length ? tr : 'empty';
+		});
+	});
+	$effect(() => {
+		const code = co.code;
+		if (tab !== 'people' || untrack(() => execTop) != null) return;
+		const myEpoch = untrack(() => epoch);
+		execTop = 'loading';
+		loadTopExecPay(code).then((tp) => {
+			if (epoch !== myEpoch) return;
+			execTop = tp && tp.rows.length ? tp : 'empty';
+		});
+	});
+	const auditList = $derived(Array.isArray(auditTrail) ? auditTrail : null);
+	const execTopData = $derived(execTop !== null && execTop !== 'loading' && execTop !== 'empty' ? execTop : null);
 
 	const finData = $derived(bundle ? (bundle.views[mode] ?? null) : null);
 	const activeDef = $derived(FS_TABS.find((d) => d.key === tab) ?? null);
-	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김
+	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps 기준)
 	const finCards = $derived.by(() => {
 		if (tab === 'all' || !finData || !activeDef?.finKey) return [];
-		return finData.tabCards[activeDef.finKey].filter((c) => c.series.some((s) => s.data.some((v) => v != null)));
+		return finData.tabCards[activeDef.finKey].filter((c) =>
+			c.kind === 'waterfall' ? (c.steps?.some((s) => s.value != null) ?? false) : c.series.some((s) => s.data.some((v) => v != null))
+		);
 	});
 	const reportPart = $derived(tab === 'all' ? null : reportCards[tab]);
 	const reportLoading = $derived(activeDef?.load != null && (reportPart === 'loading' || reportPart === undefined));
 	const reportList = $derived(Array.isArray(reportPart) ? reportPart : []);
-	const tabEmpty = $derived(tab !== 'all' && !finCards.length && !reportLoading && !reportList.length);
+	const tabEmpty = $derived(
+		tab !== 'all' && !finCards.length && !reportLoading && !reportList.length &&
+		!(tab === 'debt' && (auditList || auditTrail === 'loading')) &&
+		!(tab === 'people' && (execTopData || execTop === 'loading'))
+	);
 
 	$effect(() => {
 		const onKey = (ev: KeyboardEvent) => {
@@ -94,6 +129,9 @@
 		{:else if tabEmpty}
 			<div class="storyEmpty">{lang === 'en' ? 'No data for this tab.' : '이 회사는 해당 탭 데이터가 없습니다.'}</div>
 		{:else}
+			{#if tab === 'debt' && auditList}
+				<AuditStrip trail={auditList} />
+			{/if}
 			<div class="finFsGrid">
 				{#each finCards as card (card.key)}
 					<div class="finMini"><MiniFinChart {card} periods={finData!.periods} /></div>
@@ -101,6 +139,29 @@
 				{#each reportList as tc (tc.card.key)}
 					<div class="finMini"><MiniFinChart card={tc.card} periods={tc.periods} /></div>
 				{/each}
+				{#if tab === 'people' && execTopData}
+					<div class="finMini execTopCell">
+						<div class="mfcHead">
+							<span class="mfcTitle">개별 임원 보수 Top {execTopData.rows.length} · FY{execTopData.year.slice(2)}</span>
+						</div>
+						<table class="execTopTbl">
+							<thead>
+								<tr><th>{lang === 'en' ? 'Name' : '이름'}</th><th>{lang === 'en' ? 'Title' : '직위'}</th><th class="num">{lang === 'en' ? 'Pay (100M)' : '보수(억)'}</th><th class="num">{lang === 'en' ? 'vs avg' : '평균 대비'}</th></tr>
+							</thead>
+							<tbody>
+								{#each execTopData.rows as r (r.name + r.title)}
+									<tr>
+										<td>{r.name}</td>
+										<td class="execTopTitle">{r.title}</td>
+										<td class="num mono">{(r.pay / 1e8).toFixed(1)}</td>
+										<td class="num mono">{execTopData.avgPay != null && execTopData.avgPay > 0 ? '×' + (r.pay / execTopData.avgPay).toFixed(1) : '—'}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+						<div class="execTopNote">5억원 이상 공시 대상 · 평균 = 이사·감사 1인평균 보수</div>
+					</div>
+				{/if}
 			</div>
 			{#if reportLoading}
 				<div class="chartLoad" style="height:60px">{lang === 'en' ? 'loading report series …' : '정기보고서 시계열 불러오는 중 …'}</div>

@@ -10,6 +10,8 @@
 	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../data/engine';
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
+	import { loadCompanyRelations } from '../data/relations';
+	import { loadCapitalChanges } from '../data/reportSeries';
 
 	interface Props {
 		co: Company;
@@ -63,6 +65,21 @@
 			finBundle = b;
 			finMode = b ? b.defaultMode : 'ttm';
 			finState = b && b.modes.length ? 'ready' : 'empty';
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	// 동종업계 — 주가차트 종목비교(VS) 후보 (map/companies relations, 회사별 캐시)
+	let chartPeers = $state<{ code: string; name: string }[]>([]);
+	$effect(() => {
+		const code = co.code;
+		let cancelled = false;
+		chartPeers = [];
+		loadCompanyRelations(code).then((r) => {
+			if (cancelled) return;
+			chartPeers = (r?.peers ?? []).filter((p) => p.stockCode && p.stockCode !== code).map((p) => ({ code: p.stockCode, name: p.corpName }));
 		});
 		return () => {
 			cancelled = true;
@@ -149,19 +166,50 @@
 		});
 		return d.trim();
 	}
-	// 주가차트 재무 오버레이: 실적 시점(분기말) 마커 + 적정주가 밴드
+	// 증자·감자 마커 — capitalChange 이벤트 (수정주가 자동 보정의 교차 검증 라벨).
+	// 전환·행사(스톡옵션 등 수천 건)는 제외, 동일자 합산, |수량| 상위 40 상한 — 마커 폭주 방지.
+	let capEvents = $state<{ date: string; label: string }[]>([]);
+	$effect(() => {
+		const code = co.code;
+		let cancelled = false;
+		capEvents = [];
+		loadCapitalChanges(code).then((b) => {
+			if (cancelled || !b) return;
+			const byDate = new Map<string, { kind: string; qty: number }>();
+			for (const ev of b.events) {
+				if (ev.kind === 'conversion') continue;
+				const d = ev.date.replace(/\D/g, '').slice(0, 8);
+				if (d.length !== 8) continue;
+				const key = `${d}|${ev.kind}`;
+				const cur = byDate.get(key);
+				if (cur) cur.qty += ev.qty;
+				else byDate.set(key, { kind: ev.kind, qty: ev.qty });
+			}
+			const fmtQty = (q: number) => (Math.abs(q) >= 1e4 ? Math.round(Math.abs(q) / 1e4).toLocaleString() + '만주' : Math.abs(q).toLocaleString() + '주');
+			capEvents = [...byDate.entries()]
+				.sort((a, b2) => Math.abs(b2[1].qty) - Math.abs(a[1].qty))
+				.slice(0, 40)
+				.map(([key, v]) => ({ date: key.slice(0, 8), label: `${v.kind === 'paidIn' ? '유상증자' : '감자·소각'} ${fmtQty(v.qty)}` }));
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	// 주가차트 재무 오버레이: 실적 시점(분기말) 마커 + 증자·감자 마커 + 적정주가 밴드
 	const priceEvents = $derived.by(() => {
 		const src = finBundle?.views.quarter ?? finBundle?.views.ttm ?? finBundle?.views.annual;
 		const out: { date: string; label: string }[] = [];
-		if (!src) return out;
-		const QEND: Record<string, string> = { '1': '0331', '2': '0630', '3': '0930', '4': '1231' };
-		for (const p of src.periods) {
-			const mq = p.match(/^(\d{2})Q(\d)$/);
-			if (mq) { out.push({ date: '20' + mq[1] + QEND[mq[2]], label: p }); continue; }
-			const fy = p.match(/^FY(\d{2})$/);
-			if (fy) out.push({ date: '20' + fy[1] + '1231', label: p });
+		if (src) {
+			const QEND: Record<string, string> = { '1': '0331', '2': '0630', '3': '0930', '4': '1231' };
+			for (const p of src.periods) {
+				const mq = p.match(/^(\d{2})Q(\d)$/);
+				if (mq) { out.push({ date: '20' + mq[1] + QEND[mq[2]], label: p }); continue; }
+				const fy = p.match(/^FY(\d{2})$/);
+				if (fy) out.push({ date: '20' + fy[1] + '1231', label: p });
+			}
 		}
-		return out;
+		return [...out, ...capEvents];
 	});
 	const v = $derived(co.valuation);
 	const priceValBand = $derived(
@@ -238,7 +286,7 @@
 <Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
 	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candleState === 'ready' && candles}
-		<PriceChart {candles} code={co.code} name={co.name.kr} {lang} events={priceEvents} valBand={priceValBand} />
+		<PriceChart {candles} code={co.code} name={co.name.kr} {lang} events={priceEvents} valBand={priceValBand} peers={chartPeers} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}

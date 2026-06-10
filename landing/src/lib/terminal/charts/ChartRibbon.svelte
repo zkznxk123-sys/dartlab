@@ -3,9 +3,10 @@
 	// Row1 = 보는 방법(종목·기간·캔들·축·마커·ECON), Row2 = 분석 작업대(오버레이/페인 활성 칩+카탈로그·그리기·BT).
 	// 상태 = ChartCtl 단일 SSOT (일반 메뉴와 공유 — 리본에서 켠 지표가 일반 메뉴에도 켜져 있다).
 	import type { Lang } from '../data/types';
-	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
+	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '../data/macroSeries';
 	import { ECON_COLORS } from './econOverlay';
+	import { CMP_COLORS } from './compareOverlay';
 	import { paramSummary, IND_DEFS } from './indicatorParams';
 	import IndParamEditor from './IndParamEditor.svelte';
 	import BtConfig from './BtConfig.svelte';
@@ -17,10 +18,12 @@
 		name: string;
 		code: string;
 		chgPct: number | null;
+		peers?: { code: string; name: string }[];
 		onDraw: (name: string) => void;
 		onClearDraw: () => void;
+		onSnapshot?: () => void;
 	}
-	let { ctl, lang, hasBand, name, code, chgPct, onDraw, onClearDraw }: Props = $props();
+	let { ctl, lang, hasBand, name, code, chgPct, peers = [], onDraw, onClearDraw, onSnapshot }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	let pop = $state<string>('none'); // 'econ' | 'ovAdd' | 'subAdd' | 'bt' | `edit:${지표명}`
 	const offOverlays = $derived(OVERLAY_ALL.filter((o) => !ctl.overlays.includes(o)));
@@ -35,11 +38,35 @@
 			{#if chgPct != null}<span class={'mono ' + (chgPct >= 0 ? 'tUp' : 'tDn')}>{chgPct >= 0 ? '+' : ''}{chgPct.toFixed(1)}%</span>{/if}
 		</div>
 		<div class="crGrp" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</div>
+		<div class="crGrp" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'cbtn on' : 'cbtn'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</div>
 		<div class="crGrp" role="radiogroup">{#each CANDLES as cs (cs.v)}<button class={ctl.candleStyle === cs.v ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</div>
 		<div class="crGrp" role="radiogroup">{#each YMODES as y (y.v)}<button class={ctl.yMode === y.v ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.yMode = y.v)}>{T(y.kr, y.en)}</button>{/each}</div>
 		<div class="crGrp">
+			<button class={ctl.adj ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.adj = !ctl.adj)} title={T('수정주가 (분할·증자 보정)', 'adjusted price')}>{T('수정', 'ADJ')}</button>
 			<button class={ctl.showEvents ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.showEvents = !ctl.showEvents)} title={T('실적 발표 마커', 'earnings markers')}>{T('실적', 'EARN')}</button>
 			<button class={ctl.showBand ? 'cbtn on' : 'cbtn'} disabled={!hasBand} onclick={() => hasBand && (ctl.showBand = !ctl.showBand)} title={T('적정주가 밴드', 'fair-value band')}>{T('밴드', 'BAND')}</button>
+			<button class={ctl.showRefs ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.showRefs = !ctl.showRefs)} title={T('52주 고저·전일종가 기준선', '52w hi/lo · prev close')}>{T('기준', 'REF')}</button>
+			<button class={ctl.showVP ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.showVP = !ctl.showVP)} title={T('매물대 (가시구간 거래대금 가중 + POC)', 'volume profile (visible range)')}>{T('매물대', 'VP')}</button>
+		</div>
+		<div class="crGrp crPop">
+			<button class={ctl.compares.length ? 'cbtn on' : 'cbtn'} onclick={() => (pop = pop === 'vs' ? 'none' : 'vs')}>VS ▾</button>
+			{#if pop === 'vs'}
+				<div class="crMenu">
+					<div class="ctMenuLbl">{T('종목비교 (최대 3 · % 축 자동)', 'Compare (max 3 · % axis)')}</div>
+					<div class="ctRow ctRowWrap">
+						{#if peers.length}
+							{#each peers as p (p.code)}
+								{@const ci = ctl.compares.findIndex((x) => x.code === p.code)}
+								<button class={ci >= 0 ? 'mItem on' : 'mItem'}
+									style={ci >= 0 ? `background:transparent;color:${CMP_COLORS[ci]};border-color:${CMP_COLORS[ci]};font-weight:600` : ''}
+									onclick={() => ctl.toggleCompare(p)}>{p.name}</button>
+							{/each}
+						{:else}
+							<span class="dim" style="font-size:9px">{T('동종업계 데이터 없음', 'no peer data')}</span>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</div>
 		<div class="crGrp crPop">
 			<button class={ctl.econ.length ? 'cbtn on' : 'cbtn'} onclick={() => (pop = pop === 'econ' ? 'none' : 'econ')}>ECON ▾</button>
@@ -56,7 +83,8 @@
 				</div>
 			{/if}
 		</div>
-		<button class="crClose cbtn" onclick={() => (ctl.full = false)} title="ESC">✕</button>
+		<button class="crClose cbtn" onclick={() => onSnapshot?.()} title={T('차트 PNG 저장 (S)', 'save PNG (S)')}>📷</button>
+		<button class="cbtn" onclick={() => (ctl.full = false)} title="ESC">✕</button>
 	</div>
 	<div class="crRow">
 		<div class="crGrp crChips">
@@ -102,13 +130,22 @@
 				{/if}
 			</span>
 		</div>
-		<div class="crGrp">
-			{#each DRAW_TOOLS as d (d.name)}<button class="cbtn" title={T(d.kr, d.en)} onclick={() => onDraw(d.name)}>{d.icon}</button>{/each}
-			<button class={ctl.magnet ? 'cbtn on' : 'cbtn'} title={T('자석 스냅', 'magnet snap')} onclick={() => (ctl.magnet = !ctl.magnet)}>🧲</button>
-			<button class="cbtn" disabled={!ctl.drawCount} title={T('그리기 전체 지우기', 'clear drawings')} onclick={onClearDraw}>🗑</button>
+		<div class="crGrp crPop">
+			<button class={ctl.drawCount ? 'cbtn on' : 'cbtn'} onclick={() => (pop = pop === 'draw' ? 'none' : 'draw')} title={T('그리기 팔레트 (우클릭 삭제 · Del 선택삭제 · 회사별 저장)', 'draw palette (right-click delete · Del · saved per company)')}>✏ {T('그리기', 'Draw')}{ctl.drawCount ? ` ${ctl.drawCount}` : ''} ▾</button>
+			{#if pop === 'draw'}
+				<div class="crMenu">
+					<div class="ctRow ctRowWrap">
+						{#each DRAW_TOOLS as d (d.name)}<button class="mItem" onclick={() => { pop = 'none'; onDraw(d.name); }}>{d.icon} {T(d.kr, d.en)}</button>{/each}
+					</div>
+					<div class="ctRow">
+						<button class={ctl.magnet ? 'mItem on' : 'mItem'} title={T('가까운 봉에 스냅', 'snap to bar')} onclick={() => (ctl.magnet = !ctl.magnet)}>🧲 {T('자석', 'Magnet')}</button>
+						<button class="mItem mClear" disabled={!ctl.drawCount} onclick={() => { pop = 'none'; onClearDraw(); }}>{T('전체 지우기', 'Clear all')}</button>
+					</div>
+				</div>
+			{/if}
 		</div>
 		<div class="crGrp crPop">
-			<button class={ctl.btKey ? 'crChip on' : 'crAdd'} onclick={() => (pop = pop === 'bt' ? 'none' : 'bt')}>
+			<button class={ctl.btKey ? 'crChip on' : 'crAdd'} disabled={ctl.tf !== 'D'} title={ctl.tf !== 'D' ? T('일봉 전용', 'daily only') : ''} onclick={() => (pop = pop === 'bt' ? 'none' : 'bt')}>
 				{ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : `＋ ${T('전략 백테스트', 'Backtest')}`}
 			</button>
 			{#if pop === 'bt'}<div class="crMenu crMenuR"><BtConfig {ctl} {lang} /></div>{/if}

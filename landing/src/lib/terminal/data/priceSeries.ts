@@ -11,6 +11,8 @@ export interface Candle {
 	l: number;
 	c: number;
 	v: number;
+	r?: number | null; // 기준가 대비 등락률(%) — 수정주가 체이닝용 (adjustCandles)
+	tv?: number | null; // 거래대금(원) — klinecharts turnover 로 전달
 }
 
 // date 샤드 파케 존재 하한 (HF 실측: date/2010 ~ date/2026). 이 아래는 404 → lazy 로드 종료.
@@ -21,7 +23,7 @@ export interface CompanyPrices {
 	oldestYear: number; // 현재까지 로드한 가장 오래된 연도
 }
 
-const OHLCV_COLUMNS = ['ISU_CD', 'BAS_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL'];
+const OHLCV_COLUMNS = ['ISU_CD', 'BAS_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL', 'FLUC_RT', 'ACC_TRDVAL'];
 
 const cache = new Map<string, CompanyPrices | null>();
 // 동시 보관 회사 수 상한 — 많은 회사 탐색 시 캔들 누수 방지(MAX 이력 = 회사당 수 MB). 초과 시 가장 오래된 항목 제거.
@@ -42,6 +44,8 @@ interface KrxRow extends Record<string, unknown> {
 	TDD_LWPRC?: string | number | null;
 	TDD_CLSPRC?: string | number | null;
 	ACC_TRDVOL?: string | number | null;
+	FLUC_RT?: string | number | null;
+	ACC_TRDVAL?: string | number | null;
 }
 
 function num(v: unknown): number | null {
@@ -62,7 +66,7 @@ function toCandle(r: KrxRow): Candle | null {
 	if (c == null || c <= 0) return null;
 	const t = r.BAS_DD == null ? '' : String(r.BAS_DD);
 	if (!t) return null;
-	return { t, o: num(r.TDD_OPNPRC) ?? c, h: num(r.TDD_HGPRC) ?? c, l: num(r.TDD_LWPRC) ?? c, c, v: num(r.ACC_TRDVOL) ?? 0 };
+	return { t, o: num(r.TDD_OPNPRC) ?? c, h: num(r.TDD_HGPRC) ?? c, l: num(r.TDD_LWPRC) ?? c, c, v: num(r.ACC_TRDVOL) ?? 0, r: num(r.FLUC_RT), tv: num(r.ACC_TRDVAL) };
 }
 
 // ISU_CD 는 KRX 주식 = 'A' + 6 자리 (예: A005930). 드물게 prefix 없는 경우 대비 $in.
@@ -77,6 +81,73 @@ async function readYearCandles(year: number, isuA: string, isuPlain: string): Pr
 	} catch {
 		return [];
 	}
+}
+
+// 입력 배열 identity 기준 메모 — reapply·백테스트·이벤트 effect 가 같은 배열로 반복 호출 (백필 merge 시 새 배열 = 자동 무효화)
+const adjCache = new WeakMap<Candle[], Candle[]>();
+
+/** HTS 수정주가 — 등락률(기준가 대비) 체이닝으로 액면분할·병합·감자·권리락 단차 제거.
+ *
+ * KRX 기준가는 자본 액션 시 조정되므로 `종가/전일종가` 와 `1+등락률` 의 괴리 = 액션 배율.
+ * 마지막 봉 기준으로 과거를 누적 보정 (가격 ×factor, 거래량 ÷factor). 괴리 ±3% 미만은
+ * 반올림 노이즈로 간주해 무시. 등락률 누락 봉은 보정 불가 → 해당 일 괴리 통과(드묾). */
+export function adjustCandles(daily: Candle[]): Candle[] {
+	const n = daily.length;
+	if (n < 2) return daily;
+	const hit = adjCache.get(daily);
+	if (hit) return hit;
+	let factor = 1;
+	let touched = false;
+	const out: Candle[] = new Array(n);
+	out[n - 1] = daily[n - 1];
+	for (let i = n - 1; i > 0; i--) {
+		const k = daily[i];
+		const prev = daily[i - 1];
+		const r = k.r;
+		if (r != null && prev.c > 0) {
+			const implied = k.c / (1 + r / 100); // 보정 반영된 전일 기준가
+			const ratio = implied / prev.c;
+			if (ratio > 0 && (ratio < 0.97 || ratio > 1.03)) {
+				factor *= ratio;
+				touched = true;
+			}
+		}
+		out[i - 1] = factor === 1 ? prev : { ...prev, o: prev.o * factor, h: prev.h * factor, l: prev.l * factor, c: prev.c * factor, v: prev.v / factor };
+	}
+	const res = touched ? out : daily;
+	adjCache.set(daily, res);
+	return res;
+}
+
+// 월요일 시작 주 키 — YYYYMMDD → 해당 주 월요일 YYYYMMDD (UTC 산술, 시간대 무관)
+function weekKey(t: string): string {
+	const d = new Date(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)));
+	d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+	return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+}
+
+/** 일봉 → 주봉('W')·월봉('M') 집계. 라벨 t = 버킷 마지막 거래일(HTS 관행), 마지막 버킷 = 진행중 부분봉. */
+export function aggregateCandles(daily: Candle[], tf: 'W' | 'M'): Candle[] {
+	const out: Candle[] = [];
+	let key = '';
+	let cur: Candle | null = null;
+	for (const k of daily) {
+		const kk = tf === 'M' ? k.t.slice(0, 6) : weekKey(k.t);
+		if (kk !== key) {
+			if (cur) out.push(cur);
+			key = kk;
+			cur = { ...k };
+		} else if (cur) {
+			cur.t = k.t;
+			cur.h = Math.max(cur.h, k.h);
+			cur.l = Math.min(cur.l, k.l);
+			cur.c = k.c;
+			cur.v += k.v;
+			if (k.tv != null) cur.tv = (cur.tv ?? 0) + k.tv;
+		}
+	}
+	if (cur) out.push(cur);
+	return out;
 }
 
 /** 오름차순 병합 + 일자 dedup (연도 경계 안전). 외부(회사파일+recent tail 병합)에서도 사용. */

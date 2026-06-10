@@ -319,7 +319,8 @@
 .dlTerm .chartTool.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .chartTool:disabled { opacity: 0.4; cursor: default; }
 /* 인-차트 툴바 — 기간(좌상) */
-.dlTerm .chartBar { position: absolute; top: 6px; left: 8px; z-index: 6; display: flex; gap: 3px; }
+.dlTerm .chartBar { position: absolute; top: 6px; left: 8px; z-index: 6; display: flex; gap: 3px; align-items: center; }
+.dlTerm .cbDiv { width: 1px; height: 12px; background: var(--bd); margin: 0 2px; }
 .dlTerm .cbtn { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
 .dlTerm .cbtn:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .cbtn.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
@@ -816,3 +817,29 @@
 .dlTerm .govDelta { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; }
 .dlTerm .govDelta i { font-family: var(--cond); font-style: normal; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; }
 .dlTerm .govDelta b { font-family: var(--mono); font-weight: 600; }
+
+/* ── FinFullscreen 격상 (append-only) — 감사 이력 스트립 + 개별 임원 보수 표 ── */
+.dlTerm .audStrip { border: 1px solid var(--bd); border-radius: 2px; background: var(--dl-bg-base); padding: 8px 10px; margin-bottom: 10px; }
+.dlTerm .audStripHead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.dlTerm .audStripTitle { font-family: var(--cond); font-size: 11px; letter-spacing: 0.6px; color: var(--dim); text-transform: uppercase; }
+.dlTerm .audStripMeta { font-size: 9.5px; color: var(--dimmer); }
+.dlTerm .audStripMeta i { font-style: normal; }
+.dlTerm .audStripMeta .audWarn { color: #f0616f; font-weight: 600; }
+.dlTerm .audRuns { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-end; }
+.dlTerm .audRun { display: flex; flex-direction: column; gap: 3px; border-left: 2px solid var(--runC, #5b9bf0); padding-left: 6px; }
+.dlTerm .audRunName { font-size: 10px; color: var(--runC, #5b9bf0); font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dlTerm .audSegs { display: flex; gap: 2px; }
+.dlTerm .audSeg { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 34px; padding: 3px 4px 2px; background: var(--panel); border: 1px solid var(--bd); border-radius: 2px; }
+.dlTerm .audSeg.bad { border-color: #f0616f; background: rgba(240, 97, 111, 0.08); }
+.dlTerm .audYear { font-size: 8.5px; color: var(--dimmer); }
+.dlTerm .audOp { font-size: 9px; color: var(--dim); }
+.dlTerm .audOp.bad { color: #f0616f; font-weight: 700; }
+.dlTerm .audDot { position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; }
+.dlTerm .execTopCell { display: flex; flex-direction: column; gap: 4px; }
+.dlTerm .execTopTbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+.dlTerm .execTopTbl th { font-family: var(--cond); font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--dimmer); text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--bd); }
+.dlTerm .execTopTbl td { padding: 3px 6px; border-bottom: 1px solid var(--bd); color: var(--fg); }
+.dlTerm .execTopTbl th.num, .dlTerm .execTopTbl td.num { text-align: right; }
+.dlTerm .execTopTbl tbody tr:last-child td { border-bottom: none; }
+.dlTerm .execTopTitle { color: var(--dimmer); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dlTerm .execTopNote { font-size: 9px; color: var(--dimmer); font-family: var(--mono); padding: 0 6px 2px; }

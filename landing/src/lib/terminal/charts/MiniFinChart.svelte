@@ -17,7 +17,22 @@
 	const plotH = $derived(H - M.t - M.b);
 
 	const fin = (v: Num): v is number => typeof v === 'number' && Number.isFinite(v);
-	const n = $derived(periods.length);
+
+	// ── 워터폴 (kind='waterfall') — steps 기반, series/periods 미사용 ──
+	const isWf = $derived(card.kind === 'waterfall');
+	const wfSteps = $derived(isWf ? ((card.steps ?? []).filter((s) => s.value != null) as { name: string; value: number; total?: boolean }[]) : []);
+	// 누적 floating: flow = 이전 레벨에서 ±, total = 0 부터 자기 값 (소계 막대)
+	const wfBars = $derived.by(() => {
+		let lvl = 0;
+		return wfSteps.map((s) => {
+			const from = s.total ? 0 : lvl;
+			const to = s.total ? s.value : lvl + s.value;
+			lvl = to;
+			return { name: s.name, value: s.value, from, to, total: !!s.total };
+		});
+	});
+
+	const n = $derived(isWf ? wfSteps.length : periods.length);
 
 	const leftSeries = $derived(card.series.filter((s) => s.axis !== 'r'));
 	const rightSeries = $derived(card.series.filter((s) => s.axis === 'r'));
@@ -35,7 +50,19 @@
 	}
 	const leftExt = $derived.by<[number, number]>(() => {
 		const vals: number[] = [];
-		if (card.stacked) {
+		if (isWf) {
+			for (const b of wfBars) vals.push(b.from, b.to);
+			return extent(vals, true);
+		}
+		if (card.stacked && card.signed) {
+			// signed 스택 — 양수합·음수합이 각각 위/아래 경계
+			for (let i = 0; i < n; i++) {
+				let pos = 0;
+				let neg = 0;
+				for (const b of barSeries) { const v = b.data[i]; if (fin(v)) { if (v > 0) pos += v; else neg += v; } }
+				vals.push(pos, neg);
+			}
+		} else if (card.stacked) {
 			for (let i = 0; i < n; i++) {
 				let s = 0;
 				for (const b of barSeries) { const v = b.data[i]; if (fin(v)) s += v; }
@@ -54,6 +81,8 @@
 	});
 
 	const x = (i: number) => (n <= 1 ? M.l + plotW / 2 : M.l + (i / (n - 1)) * plotW);
+	// 워터폴 전용 — 슬롯 중앙 배치 (양끝 클리핑 없음, step name 라벨 공간)
+	const xw = (i: number) => M.l + ((i + 0.5) / Math.max(1, n)) * plotW;
 	const yOf = (v: number, [lo, hi]: [number, number]) => M.t + plotH - ((v - lo) / (hi - lo || 1)) * plotH;
 	const yL = (v: number) => yOf(v, leftExt);
 	const yR = (v: number) => yOf(v, rightExt);
@@ -62,6 +91,8 @@
 	const slotW = $derived(n > 0 ? plotW / n : plotW);
 	const groupW = $derived(Math.min(slotW * 0.72, (card.stacked || barSeries.length <= 1 ? 1 : barSeries.length) * 22));
 	const barW = $derived(card.stacked || barSeries.length <= 1 ? groupW : groupW / barSeries.length);
+	const wfBarW = $derived(Math.min(slotW * 0.62, 26));
+	const wfColor = (b: { value: number; total: boolean }) => (b.total ? '#5b9bf0' : b.value >= 0 ? '#34d399' : '#f0616f');
 
 	// Y 눈금 (상·중·하)
 	function ticks([lo, hi]: [number, number]): number[] {
@@ -78,9 +109,9 @@
 		if (a >= 1) return v.toFixed(1);
 		return v.toFixed(2);
 	};
-	// X 라벨 (~5)
+	// X 라벨 (~5) — 워터폴은 step name 전부를 별도 렌더
 	const xLabels = $derived.by(() => {
-		if (n === 0) return [] as number[];
+		if (n === 0 || isWf) return [] as number[];
 		const out: number[] = [];
 		const step = Math.max(1, Math.ceil(n / 4));
 		for (let i = 0; i < n; i += step) out.push(i);
@@ -100,7 +131,7 @@
 	}
 
 	const primary = $derived(card.series[0]);
-	const latestI = $derived.by(() => { const d = primary?.data ?? []; for (let i = d.length - 1; i >= 0; i--) if (fin(d[i])) return i; return -1; });
+	const latestI = $derived.by(() => { if (isWf) return wfBars.length - 1; const d = primary?.data ?? []; for (let i = d.length - 1; i >= 0; i--) if (fin(d[i])) return i; return -1; });
 	const fmtVal = (v: number) => { const a = Math.abs(v); if (card.unit === '조' || card.unit === '배') return v.toFixed(2); return a >= 100 ? v.toFixed(0) : v.toFixed(1); };
 	const fmtTip = (v: number) => { const a = Math.abs(v); return a >= 100 ? v.toFixed(0) : a >= 10 ? v.toFixed(1) : v.toFixed(2); };
 	const zeroY = $derived(leftExt[0] < 0 && leftExt[1] > 0 ? yL(0) : null);
@@ -118,20 +149,31 @@
 	}
 	function onLeave() { hoverI = -1; }
 	const headI = $derived(hoverI >= 0 ? hoverI : latestI);
-	const headVal = $derived(headI >= 0 && primary && fin(primary.data[headI]) ? (primary.data[headI] as number) : null);
+	const headVal = $derived.by(() => {
+		if (headI < 0) return null;
+		if (isWf) return wfBars[headI]?.value ?? null;
+		return primary && fin(primary.data[headI]) ? (primary.data[headI] as number) : null;
+	});
+	const headSuffix = $derived(hoverI >= 0 ? ' · ' + (isWf ? (wfBars[hoverI]?.name ?? '') : periods[hoverI]) : '');
 </script>
 
 <div class="mfc">
 	<div class="mfcHead">
 		<span class="mfcTitle">{card.title}</span>
 		{#if headVal != null}
-			<b class="mfcVal mono">{fmtVal(headVal)}<span class="mfcUnit">{card.unit}{hoverI >= 0 ? ' · ' + periods[hoverI] : ''}</span></b>
+			<b class="mfcVal mono">{fmtVal(headVal)}<span class="mfcUnit">{card.unit}{headSuffix}</span></b>
 		{/if}
 	</div>
 	<div class="mfcLegend">
-		{#each card.series as s (s.name)}
-			<span class="mfcLg"><i style={`background:${s.color}`}></i>{s.name}{s.axis === 'r' ? '↗' : ''}</span>
-		{/each}
+		{#if isWf}
+			<span class="mfcLg"><i style="background:#34d399"></i>증가</span>
+			<span class="mfcLg"><i style="background:#f0616f"></i>감소</span>
+			<span class="mfcLg"><i style="background:#5b9bf0"></i>소계</span>
+		{:else}
+			{#each card.series as s (s.name)}
+				<span class="mfcLg"><i style={`background:${s.color}`}></i>{s.name}{s.axis === 'r' ? '↗' : ''}</span>
+			{/each}
+		{/if}
 	</div>
 	<div class="mfcPlot">
 		<svg bind:this={svgEl} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={card.title} onmousemove={onMove} onmouseleave={onLeave}>
@@ -149,46 +191,75 @@
 				{#if rl >= leftExt[0] && rl <= leftExt[1]}<line x1={M.l} x2={W - M.r} y1={yL(rl)} y2={yL(rl)} stroke="#5b6b86" stroke-width="0.7" stroke-dasharray="3 2" />{/if}
 			{/each}
 			{#if zeroY != null}<line x1={M.l} x2={W - M.r} y1={zeroY} y2={zeroY} stroke="#3a4660" stroke-width="0.8" />{/if}
-			{#if hoverI >= 0}<line x1={x(hoverI)} x2={x(hoverI)} y1={M.t} y2={M.t + plotH} stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2" />{/if}
-			<!-- bars -->
-			{#each periods as _p, i (i)}
-				{#if card.stacked}
-					{#each barSeries as b, bi (b.name)}
-						{@const below = barSeries.slice(0, bi).reduce((a, s) => a + (fin(s.data[i]) ? (s.data[i] as number) : 0), 0)}
-						{@const v = b.data[i]}
-						{#if fin(v) && v > 0}<rect x={x(i) - barW / 2} y={Math.min(yL(below), yL(below + v))} width={barW} height={Math.max(0.5, Math.abs(yL(below + v) - yL(below)))} fill={b.color} fill-opacity={hoverI < 0 || hoverI === i ? 0.9 : 0.42} />{/if}
-					{/each}
-				{:else}
-					{#each barSeries as b, bi (b.name)}
-						{@const v = b.data[i]}
-						{#if fin(v)}
-							{@const base = zeroY != null ? zeroY : yL(leftExt[0])}
-							{@const gx = x(i) - groupW / 2 + bi * barW + barW / 2}
-							<rect x={gx - barW / 2} y={Math.min(base, yL(v))} width={Math.max(0.8, barW - 0.6)} height={Math.max(0.5, Math.abs(yL(v) - base))} fill={b.color} fill-opacity={hoverI < 0 || hoverI === i ? 0.88 : 0.4} />
-						{/if}
+			{#if hoverI >= 0}<line x1={isWf ? xw(hoverI) : x(hoverI)} x2={isWf ? xw(hoverI) : x(hoverI)} y1={M.t} y2={M.t + plotH} stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2" />{/if}
+			{#if isWf}
+				<!-- 워터폴 — floating rect (total 은 0 부터) + 점선 connector + step name 라벨 -->
+				{#each wfBars as b, i (i)}
+					<rect x={xw(i) - wfBarW / 2} y={Math.min(yL(b.from), yL(b.to))} width={wfBarW} height={Math.max(0.8, Math.abs(yL(b.to) - yL(b.from)))} fill={wfColor(b)} fill-opacity={hoverI < 0 || hoverI === i ? 0.9 : 0.45} />
+					{#if i < wfBars.length - 1}
+						<line x1={xw(i) + wfBarW / 2} x2={xw(i + 1) - wfBarW / 2} y1={yL(b.to)} y2={yL(b.to)} stroke="#5b6b86" stroke-width="0.7" stroke-dasharray="2 2" />
+					{/if}
+					<text x={xw(i)} y={H - 4} text-anchor="middle" class="mfcAx">{b.name}</text>
+				{/each}
+			{:else}
+				<!-- bars -->
+				{#each periods as _p, i (i)}
+					{#if card.stacked && card.signed}
+						<!-- signed 스택 — 양수는 0 위로, 음수는 0 아래로 같은 부호끼리 누적 -->
+						{#each barSeries as b, bi (b.name)}
+							{@const v = b.data[i]}
+							{#if fin(v) && v !== 0}
+								{@const base = barSeries.slice(0, bi).reduce((a, s) => { const u = s.data[i]; return fin(u) && (u > 0) === (v > 0) ? a + u : a; }, 0)}
+								<rect x={x(i) - barW / 2} y={Math.min(yL(base), yL(base + v))} width={barW} height={Math.max(0.5, Math.abs(yL(base + v) - yL(base)))} fill={b.color} fill-opacity={hoverI < 0 || hoverI === i ? 0.9 : 0.42} />
+							{/if}
+						{/each}
+					{:else if card.stacked}
+						{#each barSeries as b, bi (b.name)}
+							{@const below = barSeries.slice(0, bi).reduce((a, s) => a + (fin(s.data[i]) ? (s.data[i] as number) : 0), 0)}
+							{@const v = b.data[i]}
+							{#if fin(v) && v > 0}<rect x={x(i) - barW / 2} y={Math.min(yL(below), yL(below + v))} width={barW} height={Math.max(0.5, Math.abs(yL(below + v) - yL(below)))} fill={b.color} fill-opacity={hoverI < 0 || hoverI === i ? 0.9 : 0.42} />{/if}
+						{/each}
+					{:else}
+						{#each barSeries as b, bi (b.name)}
+							{@const v = b.data[i]}
+							{#if fin(v)}
+								{@const base = zeroY != null ? zeroY : yL(leftExt[0])}
+								{@const gx = x(i) - groupW / 2 + bi * barW + barW / 2}
+								<rect x={gx - barW / 2} y={Math.min(base, yL(v))} width={Math.max(0.8, barW - 0.6)} height={Math.max(0.5, Math.abs(yL(v) - base))} fill={b.color} fill-opacity={hoverI < 0 || hoverI === i ? 0.88 : 0.4} />
+							{/if}
+						{/each}
+					{/if}
+				{/each}
+				<!-- lines -->
+				{#each leftLineSeries as l (l.name)}<path d={linePath(l.data, yL)} fill="none" stroke={l.color} stroke-width="1.7" />{/each}
+				{#each rightSeries as r (r.name)}<path d={linePath(r.data, yR)} fill="none" stroke={r.color} stroke-width="1.7" />{/each}
+				<!-- 호버 점 -->
+				{#if hoverI >= 0}
+					{#each card.series as s (s.name)}
+						{@const v = s.data[hoverI]}
+						{#if fin(v)}<circle cx={x(hoverI)} cy={(s.axis === 'r' ? yR : yL)(v)} r="2.4" fill={s.color} stroke="#0b1220" stroke-width="0.7" />{/if}
 					{/each}
 				{/if}
-			{/each}
-			<!-- lines -->
-			{#each leftLineSeries as l (l.name)}<path d={linePath(l.data, yL)} fill="none" stroke={l.color} stroke-width="1.7" />{/each}
-			{#each rightSeries as r (r.name)}<path d={linePath(r.data, yR)} fill="none" stroke={r.color} stroke-width="1.7" />{/each}
-			<!-- 호버 점 -->
-			{#if hoverI >= 0}
-				{#each card.series as s (s.name)}
-					{@const v = s.data[hoverI]}
-					{#if fin(v)}<circle cx={x(hoverI)} cy={(s.axis === 'r' ? yR : yL)(v)} r="2.4" fill={s.color} stroke="#0b1220" stroke-width="0.7" />{/if}
-				{/each}
+				<!-- X 라벨 -->
+				{#each xLabels as i (i)}<text x={x(i)} y={H - 4} text-anchor="middle" class="mfcAx">{periods[i]}</text>{/each}
 			{/if}
-			<!-- X 라벨 -->
-			{#each xLabels as i (i)}<text x={x(i)} y={H - 4} text-anchor="middle" class="mfcAx">{periods[i]}</text>{/each}
 		</svg>
 		{#if hoverI >= 0}
 			<div class="mfcTip" style={n > 1 && hoverI / (n - 1) > 0.5 ? 'left:3px' : 'right:3px'}>
-				<div class="mfcTipP mono">{periods[hoverI]}</div>
-				{#each card.series as s (s.name)}
-					{@const v = s.data[hoverI]}
-					<div class="mfcTipR"><i style={`background:${s.color}`}></i><span class="mfcTipN">{s.name}</span><b class="mono">{fin(v) ? fmtTip(v as number) : '—'}</b></div>
-				{/each}
+				{#if isWf}
+					{@const b = wfBars[hoverI]}
+					{#if b}
+						<div class="mfcTipP mono">{b.name}</div>
+						<div class="mfcTipR"><i style={`background:${wfColor(b)}`}></i><span class="mfcTipN">{b.total ? '소계' : '증감'}</span><b class="mono">{fmtTip(b.value)}</b></div>
+						{#if !b.total}<div class="mfcTipR"><i style="background:#5b6b86"></i><span class="mfcTipN">누계</span><b class="mono">{fmtTip(b.to)}</b></div>{/if}
+					{/if}
+				{:else}
+					<div class="mfcTipP mono">{periods[hoverI]}</div>
+					{#each card.series as s (s.name)}
+						{@const v = s.data[hoverI]}
+						<div class="mfcTipR"><i style={`background:${s.color}`}></i><span class="mfcTipN">{s.name}</span><b class="mono">{fin(v) ? fmtTip(v as number) : '—'}</b></div>
+					{/each}
+				{/if}
 			</div>
 		{/if}
 	</div>

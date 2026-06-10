@@ -22,8 +22,9 @@ export interface GovCandleFile {
 const cache = new Map<string, Candle[] | null>();
 const inflight = new Map<string, Promise<Candle[] | null>>();
 
-// HF 캐시 = 회사별 parquet (gov/prices/company 동일 schema). 필요한 OHLCV 컬럼만 projection.
-const GOV_PARQUET_COLUMNS = ['date', 'open', 'high', 'low', 'close', 'volume'];
+// HF 캐시 = 회사별 parquet (gov/prices/company 동일 schema). 필요한 OHLCV+등락률 컬럼만 projection.
+// fluctuationRate = 기준가 대비 등락률 — 수정주가(adjustCandles) 체이닝 입력.
+const GOV_PARQUET_COLUMNS = ['date', 'open', 'high', 'low', 'close', 'volume', 'fluctuationRate', 'tradedValue'];
 interface GovRow extends Record<string, unknown> {
 	date?: string | null;
 	open?: number | null;
@@ -31,12 +32,16 @@ interface GovRow extends Record<string, unknown> {
 	low?: number | null;
 	close?: number | null;
 	volume?: number | null;
+	fluctuationRate?: number | null;
+	tradedValue?: number | null;
 }
 function rowToCandle(r: GovRow): Candle | null {
 	const c = Number(r.close);
 	const t = r.date == null ? '' : String(r.date);
 	if (!t || !Number.isFinite(c) || c <= 0) return null;
-	return { t, o: Number(r.open) || c, h: Number(r.high) || c, l: Number(r.low) || c, c, v: Number(r.volume) || 0 };
+	const fr = Number(r.fluctuationRate);
+	const tv = Number(r.tradedValue);
+	return { t, o: Number(r.open) || c, h: Number(r.high) || c, l: Number(r.low) || c, c, v: Number(r.volume) || 0, r: Number.isFinite(fr) ? fr : null, tv: Number.isFinite(tv) ? tv : null };
 }
 function pick(j: unknown): Candle[] | null {
 	const f = j as GovCandleFile | null;
@@ -69,7 +74,7 @@ async function fillViaDev(code: string): Promise<Candle[] | null> {
 // 최근 30거래일 전종목 슬림 1파일 — 회사 파일(주간 파생)과 병합하는 신선 tail.
 // 전 종목이 한 파일을 공유 → 첫 다운로드 후 회사 전환 시 tail 비용 0.
 let recentPromise: Promise<Map<string, Candle[]> | null> | null = null;
-const RECENT_COLUMNS = ['stockCode', 'date', 'open', 'high', 'low', 'close', 'volume'];
+const RECENT_COLUMNS = ['stockCode', 'date', 'open', 'high', 'low', 'close', 'volume', 'fluctuationRate', 'tradedValue'];
 
 /** 최근 거래일 tail (code → 캔들 오름차순). null = recent 파일 미존재. */
 export function loadGovRecent(): Promise<Map<string, Candle[]> | null> {

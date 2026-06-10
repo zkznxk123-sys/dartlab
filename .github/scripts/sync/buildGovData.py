@@ -217,9 +217,10 @@ def buildRecent(*, hfToken: str, tradingDays: int = 30) -> int:
         print("[gov/recent] 현재 연도 date 샤드 없음 — 건너뜀")
         return 0
     days = sorted(df["BAS_DD"].unique().to_list())[-tradingDays:]
+    # fluctuationRate(기준가 대비 등락률) = 수정주가 체이닝 입력 / tradedValue = 거래대금 툴팁·TVAL 페인
     slim = (
         _stdFromKrxRaw(df.filter(pl.col("BAS_DD").is_in(days)))
-        .select(["stockCode", "date", "open", "high", "low", "close", "volume"])
+        .select(["stockCode", "date", "open", "high", "low", "close", "volume", "fluctuationRate", "tradedValue"])
         .sort(["stockCode", "date"])
     )
     _uploadFile(slim, "gov/prices/recent.parquet", hfToken, f"갱신: 최근 {len(days)}거래일 전종목")

@@ -21,7 +21,9 @@ export interface FinCard {
 	series: FinSeries[];
 	refLines?: number[];
 	stacked?: boolean;
-	signed?: boolean; // 0 기준선 (음수 가능)
+	signed?: boolean; // stacked 와 조합 시: 양수는 0 위로, 음수는 0 아래로 부호별 누적 (희석 이력 카드)
+	kind?: 'waterfall'; // 워터폴 브리지 — steps 사용, series/periods 무시
+	steps?: { name: string; value: number | null; total?: boolean }[]; // waterfall 전용 (total = 0 기준 소계 막대)
 }
 export interface StmtRow {
 	key: string;
@@ -373,7 +375,8 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const fcfRaw = used.map((_, i) => { const op = valAtIdx('cfOperating', i); const cx = valAtIdx('capex', i); return op != null ? op - (cx ?? 0) : null; });
 		const ratioOfSeries = (numRaw: Num[], denKey: string, scale = 100): Num[] => { const d = raw(denKey); return used.map((_, i) => (numRaw[i] != null && d[i] ? +((numRaw[i]! / d[i]!) * scale).toFixed(1) : null)); };
 
-		// ── 재무제표 분석 16 카드 (기본 4 + 세트). universal 계정 위주 → 빈칸 0. ──
+		// ── 재무제표 분석 13 카드 (기본 4 + 세트). universal 계정 위주 → 빈칸 0.
+		// 중복 깎기: scale(조달구조 하위호환)·stability(부채비율 역변환)·turnover(ccc·dupont 중복) 삭제. ──
 		const cards: FinCard[] = [
 			// 기본 4 — 자산·조달·손익·현금
 			{ key: 'assetComposition', title: '자산구조', unit: '조', stacked: true, series: [
@@ -392,7 +395,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line', axis: 'r' },
 				{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line', axis: 'r' }
 			] },
-			{ key: 'cashflowSigned', title: '현금흐름', unit: '조', signed: true, series: [
+			{ key: 'cashflowSigned', title: '현금흐름', unit: '조', series: [
 				{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
 				{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
 				{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
@@ -416,42 +419,27 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
 				{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
 			] },
-			{ key: 'stability', title: '안정성', unit: '%', series: [
-				{ name: '자기자본비율', data: ratio('equity', 'assets'), color: C.good, type: 'bar' },
-				{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
-			] },
-			{ key: 'netDebt', title: '순차입금', unit: '조', signed: true, series: [
-				{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' },
-				{ name: 'D/E', data: ratio('liabilities', 'equity'), color: C.purple, type: 'line', axis: 'r' }
+			{ key: 'netDebt', title: '순차입금', unit: '조', series: [
+				{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' }
 			] },
 			// 현금·효율
-			{ key: 'fcfTrend', title: 'FCF', unit: '조', signed: true, series: [
+			{ key: 'fcfTrend', title: 'FCF', unit: '조', series: [
 				{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
 				{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
 				{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
 			] },
 			{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
-				{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' },
-				{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line', axis: 'r' }
-			] },
-			{ key: 'turnover', title: '회전율', unit: '회', series: [
-				{ name: '자산회전', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line' },
-				{ name: '매출채권', data: ratio('revenue', 'receivables', 1, true), color: C.cyan, type: 'line' }
+				{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' }
 			] },
 			// 성장
-			{ key: 'growthYoy', title: '성장 YoY', unit: '%', signed: true, series: [
+			{ key: 'growthYoy', title: '성장 YoY', unit: '%', series: [
 				{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
 				{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
 				{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
 			] },
-			{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', signed: true, series: [
+			{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', series: [
 				{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
 				{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
-			] },
-			{ key: 'scale', title: '규모', unit: '조', series: [
-				{ name: '자산', data: ser('assets'), color: C.blue, type: 'line' },
-				{ name: '부채', data: ser('liabilities'), color: C.red, type: 'line' },
-				{ name: '자본', data: ser('equity'), color: C.good, type: 'line' }
 			] }
 		];
 
@@ -481,14 +469,66 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const dpo = used.map((_, i) => dayRatio(pay[i], cogs[i]));
 		const ccc = used.map((_, i) => (dso[i] != null && dpo[i] != null ? +(dso[i]! + (dio[i] ?? 0) - dpo[i]!).toFixed(1) : null));
 		const cfoRaw = raw('cfOperating');
+		// ── 워터폴 브리지 2종 (전체화면 탭 선두) — 현재 모드의 최신 유효 기간 1개 스냅샷 ──
+		const lastIdx = (...keys: string[]): number => {
+			for (let i = used.length - 1; i >= 0; i--) if (keys.every((k) => valAtIdx(k, i) != null)) return i;
+			return -1;
+		};
+		const tn = (key: string, i: number): Num => {
+			const v = valAtIdx(key, i);
+			return v == null ? null : +(v / TRILLION).toFixed(3);
+		};
+		// 손익 브리지: 매출 → −원가 → −판관비 → ±기타영업(plug) → 영업이익 → +순금융 → −법인세 → 순이익
+		const plBridge = ((): FinCard | null => {
+			const i = lastIdx('revenue', 'operatingIncome', 'netIncome');
+			if (i < 0) return null;
+			const rev = tn('revenue', i)!;
+			const cogs = tn('costOfSales', i);
+			const sgaV = tn('sga', i);
+			const oi = tn('operatingIncome', i)!;
+			const ni = tn('netIncome', i)!;
+			const fi = tn('financeIncome', i);
+			const fcV = tn('financeCosts', i);
+			const finNetV = fi != null || fcV != null ? +((fi ?? 0) - (fcV ?? 0)).toFixed(3) : null;
+			const tax = tn('incomeTax', i);
+			// 기타영업 plug = 보고 영업이익 − (매출 − 원가 − 판관비) — 유의미(매출 0.2% 또는 10억↑)할 때만 노출
+			const plug = +(oi - (rev - (cogs ?? 0) - (sgaV ?? 0))).toFixed(3);
+			const steps: NonNullable<FinCard['steps']> = [{ name: '매출', value: rev }];
+			if (cogs != null) steps.push({ name: '매출원가', value: -cogs });
+			if (sgaV != null) steps.push({ name: '판관비', value: -sgaV });
+			if (Math.abs(plug) >= Math.max(0.001, Math.abs(rev) * 0.002)) steps.push({ name: '기타영업', value: plug });
+			steps.push({ name: '영업이익', value: oi, total: true });
+			if (finNetV != null) steps.push({ name: '순금융', value: finNetV });
+			if (tax != null) steps.push({ name: '법인세', value: -tax });
+			steps.push({ name: '순이익', value: ni, total: true });
+			return { key: 'plBridge', title: `손익 브리지 · ${periods[i]}`, unit: '조', kind: 'waterfall', steps, series: [] };
+		})();
+		// 현금 브리지: 영업CF → −CAPEX → FCF → −배당금지급 → 잔여
+		const cashBridge = ((): FinCard | null => {
+			const i = lastIdx('cfOperating');
+			if (i < 0) return null;
+			const cfo = tn('cfOperating', i)!;
+			const cx = tn('capex', i);
+			const divRaw = tn('dividendsPaid', i);
+			if (cx == null && divRaw == null) return null; // 구성 단계 전무 — 브리지 무의미
+			const divOut = divRaw != null ? Math.abs(divRaw) : null; // 일부 공시 음수 표기 방어 (배당지급 = 항상 유출)
+			const fcf = +(cfo - (cx ?? 0)).toFixed(3);
+			const steps: NonNullable<FinCard['steps']> = [{ name: '영업CF', value: cfo }];
+			if (cx != null) steps.push({ name: 'CAPEX', value: -cx });
+			steps.push({ name: 'FCF', value: fcf, total: true });
+			if (divOut != null) steps.push({ name: '배당지급', value: -divOut });
+			steps.push({ name: '잔여', value: +(fcf - (divOut ?? 0)).toFixed(3), total: true });
+			return { key: 'cashBridge', title: `현금 브리지 · ${periods[i]}`, unit: '조', kind: 'waterfall', steps, series: [] };
+		})();
 		const tabCards = {
 			profitability: [
+				...(plBridge ? [plBridge] : []),
 				{ key: 'costStructure', title: '비용구조', unit: '조', stacked: true, series: [
 					{ name: '매출원가', data: ser('costOfSales'), color: C.red, type: 'bar' },
 					{ name: '판관비', data: ser('sga'), color: C.warn, type: 'bar' },
 					{ name: '매출', data: ser('revenue'), color: C.rev, type: 'line' }
 				] },
-				{ key: 'finNet', title: '금융손익', unit: '조', signed: true, series: [
+				{ key: 'finNet', title: '금융손익', unit: '조', series: [
 					{ name: '금융수익', data: ser('financeIncome'), color: C.good, type: 'bar' },
 					{ name: '금융비용(−)', data: compose(['financeCosts', -1]), color: C.red, type: 'bar' },
 					{ name: '순금융', data: compose(['financeIncome', 1], ['financeCosts', -1]), color: C.purple, type: 'line' }
@@ -505,16 +545,17 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				] }
 			] as FinCard[],
 			cashflow: [
+				...(cashBridge ? [cashBridge] : []),
 				{ key: 'cashConversion', title: '이익의 현금화', unit: '조', series: [
 					{ name: '순이익', data: ser('netIncome'), color: C.net, type: 'bar' },
 					{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
 					{ name: 'CFO/NI(배)', data: used.map((_, i) => (cfoRaw[i] != null && niRaw[i] != null && niRaw[i]! > 0 ? +(cfoRaw[i]! / niRaw[i]!).toFixed(2) : null)), color: C.cyan, type: 'line', axis: 'r' }
 				] },
-				{ key: 'workingCapital', title: '운전자본', unit: '조', signed: true, series: [
+				{ key: 'workingCapital', title: '운전자본', unit: '조', series: [
 					{ name: '순운전자본', data: compose(['receivables', 1], ['inventories', 1], ['payables', -1]), color: C.blue, type: 'bar' },
 					{ name: 'NWC/매출%', data: used.map((_, i) => { const n = (rcv[i] ?? 0) + (inv[i] ?? 0) - (pay[i] ?? 0); return rcv[i] != null && pay[i] != null && rev[i] != null && rev[i]! > 0 ? +((n / rev[i]!) * 100).toFixed(1) : null; }), color: C.warn, type: 'line', axis: 'r' }
 				] },
-				{ key: 'ccc', title: '현금전환주기', unit: '일', signed: true, series: [
+				{ key: 'ccc', title: '현금전환주기', unit: '일', series: [
 					{ name: 'CCC', data: ccc, color: C.purple, type: 'bar' },
 					{ name: 'DSO', data: dso, color: C.blue, type: 'line' },
 					{ name: 'DIO', data: dio, color: C.warn, type: 'line' },
@@ -533,9 +574,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 					{ name: '현금성자산', data: ser('cash'), color: C.good, type: 'line' }
 				] },
 				{ key: 'interestCover', title: '이자보상 (영업익/금융비용)', unit: '배', refLines: [1], series: [
-					{ name: '이자보상배율', data: used.map((_, i) => (oiRaw[i] != null && fc[i] != null && fc[i]! > 0 ? +(oiRaw[i]! / fc[i]!).toFixed(2) : null)), color: C.cyan, type: 'bar' },
-					{ name: '영업이익(조)', data: ser('operatingIncome'), color: C.op, type: 'line', axis: 'r' },
-					{ name: '금융비용(조)', data: ser('financeCosts'), color: C.red, type: 'line', axis: 'r' }
+					{ name: '이자보상배율', data: used.map((_, i) => (oiRaw[i] != null && fc[i] != null && fc[i]! > 0 ? +(oiRaw[i]! / fc[i]!).toFixed(2) : null)), color: C.cyan, type: 'bar' }
 				] }
 			] as FinCard[]
 		};

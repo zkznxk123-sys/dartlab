@@ -47,6 +47,7 @@ export interface OwnershipYear {
 	majorPct: Num; // 최대주주측 합산 지분율 % (계행·보통주 우선)
 	minorPct: Num; // 소액주주 지분율 %
 	minorCount: Num; // 소액주주 수 (명)
+	stockTotal: Num; // 총발행주식수 (주) — minorityHolder stock_tot_co
 }
 export interface ExecBoardYear {
 	year: string;
@@ -66,9 +67,19 @@ export interface DebtProfileYear {
 	stb: Num; // 단기사채 미상환 (원)
 	cp: Num; // CP 미상환 (원)
 }
+export interface DebtLadder {
+	year: string; // 2% 검산 통과한 최신 연도
+	buckets: Num[]; // 7버킷 (원): ≤1y · 1~2y · 2~3y · 3~4y · 4~5y · 5~10y · 10y+
+	shortTerm: Num; // 전단채+CP 합계 (원) — 만기 ≤1y 버킷에 합산 표시용
+}
+export interface DebtProfileBundle {
+	years: DebtProfileYear[]; // 연도 오름차순
+	ladder: DebtLadder | null; // 전방 만기 사다리 — 검산 통과 연도 없으면 null
+}
 export interface ShareholderReturnYear {
 	year: string;
 	dps: Num; // 주당 현금배당금 (원, 보통주)
+	eps: Num; // 주당순이익 (원) — (연결) 우선
 	totalDividend: Num; // 원 (백만원 → 환산)
 	payoutPct: Num; // (연결)현금배당성향
 	yieldPct: Num; // 현금배당수익률
@@ -76,6 +87,42 @@ export interface ShareholderReturnYear {
 	disposalQty: Num;
 	buybackCancel: Num; // 소각 (주)
 	treasuryEnd: Num; // 기말 보유 (주)
+}
+// ── 자본금 변동 (증자·감자·전환 이벤트) — capitalChange ──
+export interface CapitalChangeEvent {
+	date: string; // 발행(감소)일자 공시 원문 (예: '2025.08.21')
+	year: number; // date 앞 4자리
+	kind: 'paidIn' | 'conversion' | 'reduction';
+	type: string; // 발행(감소)형태 원문 (유상증자(제3자배정) 등)
+	qty: number; // 주 — 감자·소각은 음수
+}
+export interface DilutionYear {
+	year: number;
+	paidIn: Num; // 유상증자·출자전환·현물출자 (주)
+	conversion: Num; // 전환권·신주인수권·주식매수선택권 행사 (주)
+	reduction: Num; // 감자·소각 (음수, 주)
+}
+export interface CapitalChangesBundle {
+	events: CapitalChangeEvent[]; // 일자 오름차순 — 주가차트 마커 연결용
+	years: DilutionYear[]; // 연도 합산 — 희석 이력 카드용
+}
+// ── 감사 이력 — auditOpinion ──
+export interface AuditYear {
+	year: number; // 사업연도 (= 사업보고서 접수연도 − 1)
+	auditor: string;
+	opinion: string | null; // 적정/한정/부적정/의견거절 표준화 — 미기재 null
+	special: string | null; // 감사보고서 특기사항 ('-'·'해당사항 없음' → null)
+}
+// ── 개별 임원 보수 — executivePayIndividual (5억↑ 공시 대상만) ──
+export interface TopExecPayRow {
+	name: string;
+	title: string; // 직위
+	pay: number; // 보수총액 (원)
+}
+export interface TopExecPay {
+	year: string; // 최신 사업보고서 연도
+	avgPay: Num; // 같은 연도 이사·감사 1인평균 보수 (원) — 배수 병치용
+	rows: TopExecPayRow[]; // 보수 내림차순 top 8
 }
 // 패널 3종은 독립 로더 — Promise.all 로 묶으면 가장 무거운 investedCompany(16MB)가
 // 가벼운 인력·배당 패널까지 지연시킨다. 각자 캐시·각자 스트림-인.
@@ -141,7 +188,10 @@ const invCache = new Map<string, Promise<InvestmentsBundle | null>>();
 const srCache = new Map<string, Promise<ShareholderReturnYear[] | null>>();
 const ownCache = new Map<string, Promise<OwnershipYear[] | null>>();
 const ebCache = new Map<string, Promise<ExecBoardYear[] | null>>();
-const dpCache = new Map<string, Promise<DebtProfileYear[] | null>>();
+const dpCache = new Map<string, Promise<DebtProfileBundle | null>>();
+const ccCache = new Map<string, Promise<CapitalChangesBundle | null>>();
+const atCache = new Map<string, Promise<AuditYear[] | null>>();
+const tpCache = new Map<string, Promise<TopExecPay | null>>();
 
 /** 인력·생산성 연도 시계열 (employee.parquet 단독 — 가볍고 먼저 도착). */
 export function loadWorkforce(stockCode: string): Promise<WorkforceYear[] | null> {
@@ -163,9 +213,21 @@ export function loadOwnership(stockCode: string): Promise<OwnershipYear[] | null
 export function loadExecBoard(stockCode: string): Promise<ExecBoardYear[] | null> {
 	return cached(ebCache, stockCode, buildExecBoard);
 }
-/** 사채 만기 사다리 + 초단기물 (corporateBond + shortTermBond + commercialPaper). */
-export function loadDebtProfile(stockCode: string): Promise<DebtProfileYear[] | null> {
+/** 사채 잔액 추이 + 전방 만기 사다리 + 초단기물 (corporateBond + shortTermBond + commercialPaper). */
+export function loadDebtProfile(stockCode: string): Promise<DebtProfileBundle | null> {
 	return cached(dpCache, stockCode, buildDebtProfile);
+}
+/** 자본금 변동 이벤트 + 연도 합산 (capitalChange) — 희석 이력 카드 · 주가차트 마커 공용. */
+export function loadCapitalChanges(stockCode: string): Promise<CapitalChangesBundle | null> {
+	return cached(ccCache, stockCode, buildCapitalChanges);
+}
+/** 감사 이력 연도 시계열 (auditOpinion) — 감사인·의견·특기사항. */
+export function loadAuditTrail(stockCode: string): Promise<AuditYear[] | null> {
+	return cached(atCache, stockCode, buildAuditTrail);
+}
+/** 개별 임원 보수 top 8 (executivePayIndividual, 최신 사업보고서). */
+export function loadTopExecPay(stockCode: string): Promise<TopExecPay | null> {
+	return cached(tpCache, stockCode, buildTopExecPay);
 }
 
 async function buildWorkforce(code: string): Promise<WorkforceYear[] | null> {
@@ -263,7 +325,7 @@ async function buildShareholderReturn(code: string): Promise<ShareholderReturnYe
 	const srByYear = new Map<string, ShareholderReturnYear>();
 	const sr = (year: string): ShareholderReturnYear => {
 		let s = srByYear.get(year);
-		if (!s) { s = { year, dps: null, totalDividend: null, payoutPct: null, yieldPct: null, buybackQty: null, disposalQty: null, buybackCancel: null, treasuryEnd: null }; srByYear.set(year, s); }
+		if (!s) { s = { year, dps: null, eps: null, totalDividend: null, payoutPct: null, yieldPct: null, buybackQty: null, disposalQty: null, buybackCancel: null, treasuryEnd: null }; srByYear.set(year, s); }
 		return s;
 	};
 	for (const r of div) {
@@ -273,6 +335,7 @@ async function buildShareholderReturn(code: string): Promise<ShareholderReturnYe
 		const se = str(r.se);
 		const s = sr(str(r.year));
 		if (se.includes('주당 현금배당금')) s.dps = Math.max(s.dps ?? 0, v);
+		else if (se.includes('주당순이익')) { if (s.eps == null || se.includes('연결')) s.eps = v; } // (연결) 우선, 별도는 fallback
 		else if (se.includes('현금배당금총액')) s.totalDividend = v * 1e6; // 백만원 → 원
 		else if (se.includes('현금배당성향')) s.payoutPct = v;
 		else if (se.includes('현금배당수익률')) s.yieldPct = Math.max(s.yieldPct ?? 0, v);
@@ -307,12 +370,12 @@ const latestRcept = (rows: Row[]): Row[] => {
 async function buildOwnership(code: string): Promise<OwnershipYear[] | null> {
 	const [maj, min] = await Promise.all([
 		read('majorHolder', code, ['nm', 'stock_knd', 'trmend_posesn_stock_qota_rt', 'rcept_no']),
-		read('minorityHolder', code, ['se', 'shrholdr_co', 'hold_stock_rate', 'rcept_no'])
+		read('minorityHolder', code, ['se', 'shrholdr_co', 'hold_stock_rate', 'stock_tot_co', 'rcept_no'])
 	]);
 	const byYear = new Map<string, OwnershipYear>();
 	const own = (year: string): OwnershipYear => {
 		let o = byYear.get(year);
-		if (!o) { o = { year, majorPct: null, minorPct: null, minorCount: null }; byYear.set(year, o); }
+		if (!o) { o = { year, majorPct: null, minorPct: null, minorCount: null, stockTotal: null }; byYear.set(year, o); }
 		return o;
 	};
 	// majorHolder: 계행(최대주주측 합산)만 — 개별행 합산은 이중계상 위험으로 기각(계행 부재 연도 null 정직 표시).
@@ -332,9 +395,10 @@ async function buildOwnership(code: string): Promise<OwnershipYear[] | null> {
 		const o = own(year);
 		o.minorPct = num(r.hold_stock_rate);
 		o.minorCount = num(r.shrholdr_co);
+		o.stockTotal = num(r.stock_tot_co); // 같은 채택행만 — 분기 혼용 금지 (분할·소각 연중 변동 왜곡 방지)
 	}
 	const out = [...byYear.values()]
-		.filter((o) => o.majorPct != null || o.minorPct != null)
+		.filter((o) => o.majorPct != null || o.minorPct != null || o.stockTotal != null)
 		.sort((a, b) => a.year.localeCompare(b.year));
 	return out.length ? out : null;
 }
@@ -395,7 +459,7 @@ async function buildExecBoard(code: string): Promise<ExecBoardYear[] | null> {
 	return out.length ? out : null;
 }
 
-async function buildDebtProfile(code: string): Promise<DebtProfileYear[] | null> {
+async function buildDebtProfile(code: string): Promise<DebtProfileBundle | null> {
 	const [cb, stb, cp] = await Promise.all([
 		read('corporateBond', code, ['remndr_exprtn2', 'sm', 'yy1_below', 'yy1_excess_yy2_below', 'yy2_excess_yy3_below', 'yy3_excess_yy4_below', 'yy4_excess_yy5_below', 'yy5_excess_yy10_below', 'yy10_excess']),
 		read('shortTermBond', code, ['remndr_exprtn2', 'sm']),
@@ -408,6 +472,7 @@ async function buildDebtProfile(code: string): Promise<DebtProfileYear[] | null>
 		return d;
 	};
 	const isTotal = (r: Row) => str(r.remndr_exprtn2).trim() === '합계';
+	const buckets7 = new Map<string, Num[]>(); // 검산 통과 연도의 7버킷 원본 — 전방 만기 사다리용
 	// corporateBond: 합계행 우선(공모+사모 공시 오류 36건 자동 방어). 단위 = 원 실측 확정(기아 2.82조 BS 대조).
 	for (const [year, { rows }] of bestQuarterRows(cb)) {
 		const sumRow = rows.find((r) => isTotal(r) && num(r.sm) != null);
@@ -426,6 +491,7 @@ async function buildDebtProfile(code: string): Promise<DebtProfileYear[] | null>
 				d.bond1to5 = b15;
 				d.bond5to10 = b510;
 				d.bond10plus = b10p;
+				buckets7.set(year, [b1, mids[0], mids[1], mids[2], mids[3], b510, b10p]);
 			}
 		} else {
 			// 합계행 sm 결측 — 공모+사모 행 sm 합산 fallback (버킷 null)
@@ -444,5 +510,127 @@ async function buildDebtProfile(code: string): Promise<DebtProfileYear[] | null>
 	const out = [...byYear.values()]
 		.filter((d) => d.bondTotal != null || d.stb != null || d.cp != null)
 		.sort((a, b) => a.year.localeCompare(b.year));
+	if (!out.length) return null;
+	// 전방 만기 사다리 — 2% 검산 통과한 최신 연도만 발행. 전단채·CP(만기 ≤1y)는 같은 연도 합계.
+	let ladder: DebtLadder | null = null;
+	const ladderYears = [...buckets7.keys()].sort();
+	if (ladderYears.length) {
+		const y = ladderYears[ladderYears.length - 1];
+		const d = byYear.get(y);
+		const shortTerm = d && (d.stb != null || d.cp != null) ? (d.stb ?? 0) + (d.cp ?? 0) : null;
+		ladder = { year: y, buckets: buckets7.get(y)!, shortTerm };
+	}
+	return { years: out, ladder };
+}
+
+async function buildCapitalChanges(code: string): Promise<CapitalChangesBundle | null> {
+	const rows = await read('capitalChange', code, ['isu_dcrs_de', 'isu_dcrs_stle', 'isu_dcrs_stock_knd', 'isu_dcrs_qy', 'rcept_no']);
+	// 같은 이벤트가 여러 분기 보고서에 반복 수록 — (일자, 형태, 수량) 키 dedupe + rcept_no 최신 우선.
+	const best = new Map<string, Row>();
+	for (const r of rows) {
+		const de = str(r.isu_dcrs_de);
+		const stle = str(r.isu_dcrs_stle);
+		if (!de || de === '-' || !stle || stle === '-') continue;
+		const key = `${de}|${stle}|${str(r.isu_dcrs_qy)}`;
+		const cur = best.get(key);
+		if (!cur || str(r.rcept_no) > str(cur.rcept_no)) best.set(key, r);
+	}
+	// 유형 분류 — 무상증자·주식배당·주식분할(액면)은 기계적 주식수 변동이라 희석 집계 제외.
+	// 상환권행사 등 분류 밖 유형도 제외 (방향 모호 — 추측 집계 금지).
+	const kindOf = (stle: string): CapitalChangeEvent['kind'] | null => {
+		const s = stle.replace(/\s/g, '');
+		if (s.includes('무상증자') || s.includes('주식배당') || s.includes('주식분할') || s.includes('액면')) return null;
+		if (s.includes('유상증자') || s.includes('출자전환') || s.includes('현물출자')) return 'paidIn';
+		if (s.includes('전환권') || s.includes('신주인수권') || s.includes('주식매수선택권')) return 'conversion';
+		if (s.includes('감자') || s.includes('소각')) return 'reduction';
+		return null;
+	};
+	const events: CapitalChangeEvent[] = [];
+	for (const r of best.values()) {
+		const stle = str(r.isu_dcrs_stle);
+		const kind = kindOf(stle);
+		if (!kind) continue;
+		const qy = num(r.isu_dcrs_qy);
+		const ym = str(r.isu_dcrs_de).match(/^(\d{4})/);
+		if (qy == null || qy <= 0 || !ym) continue;
+		events.push({ date: str(r.isu_dcrs_de), year: Number(ym[1]), kind, type: stle, qty: kind === 'reduction' ? -qy : qy });
+	}
+	if (!events.length) return null;
+	events.sort((a, b) => a.date.localeCompare(b.date));
+	const dilByYear = new Map<number, DilutionYear>();
+	for (const e of events) {
+		let d = dilByYear.get(e.year);
+		if (!d) dilByYear.set(e.year, (d = { year: e.year, paidIn: null, conversion: null, reduction: null }));
+		d[e.kind] = (d[e.kind] ?? 0) + e.qty;
+	}
+	return { events, years: [...dilByYear.values()].sort((a, b) => a.year - b.year) };
+}
+
+async function buildAuditTrail(code: string): Promise<AuditYear[] | null> {
+	const rows = await read('auditOpinion', code, ['adtor', 'adt_opinion', 'adt_reprt_spcmnt_matter', 'rcept_no']);
+	// ⚠ auditOpinion 의 year 컬럼은 캘린더 연도가 아니라 공시 원문 기수 라벨('제55기(당기)' 류 — 실측).
+	// 신뢰 가능한 캘린더 앵커는 rcept_no(접수일자)뿐: 사업보고서(4분기)는 익년 제출 → 사업연도 = 접수연도 − 1.
+	// 한 보고서에 당기·전기·전전기 행이 같이 실리므로 당기 행만 채택 (마커 부재 옛 공시는 기수 최대 행).
+	const annual = rows.filter((r) => str(r.quarter) === '4분기' && str(r.rcept_no).length >= 8);
+	if (!annual.length) return null;
+	const byFy = new Map<number, Row[]>();
+	for (const r of annual) {
+		const fy = Number(str(r.rcept_no).slice(0, 4)) - 1;
+		if (!Number.isFinite(fy) || fy < 1990) continue;
+		let arr = byFy.get(fy);
+		if (!arr) byFy.set(fy, (arr = []));
+		arr.push(r);
+	}
+	const gisu = (label: string): number => {
+		const m = label.match(/제\s*(\d+)\s*기/);
+		return m ? Number(m[1]) : -1;
+	};
+	const normOpinion = (v: string): string | null => {
+		if (!v || v === '-') return null;
+		if (v.includes('의견거절')) return '의견거절';
+		if (v.includes('부적정')) return '부적정';
+		if (v.includes('한정')) return '한정';
+		if (v.includes('적정')) return '적정';
+		return null; // '해당사항 없음' 류 (분기 검토)
+	};
+	const out: AuditYear[] = [];
+	for (const [fy, grp0] of byFy) {
+		const grp = latestRcept(grp0); // 같은 연도 정정공시 — 최신 접수만
+		const tagged = grp.filter((r) => {
+			const l = str(r.year);
+			return l.includes('당기') && !l.includes('당분기') && !l.includes('당반기');
+		});
+		let pick: Row | undefined = tagged[0];
+		if (!pick) {
+			let bestN = -1;
+			for (const r of grp) { const gn = gisu(str(r.year)); if (gn > bestN) { bestN = gn; pick = r; } }
+		}
+		if (!pick) pick = grp[0];
+		if (!pick) continue;
+		const auditor = str(pick.adtor).trim();
+		if (!auditor || auditor === '-') continue;
+		const spRaw = str(pick.adt_reprt_spcmnt_matter).trim();
+		const special = !spRaw || spRaw === '-' || spRaw.replace(/\s/g, '').includes('해당사항없음') ? null : spRaw;
+		out.push({ year: fy, auditor, opinion: normOpinion(str(pick.adt_opinion)), special });
+	}
+	out.sort((a, b) => a.year - b.year);
 	return out.length ? out : null;
+}
+
+async function buildTopExecPay(code: string): Promise<TopExecPay | null> {
+	const rows = await read('executivePayIndividual', code, ['nm', 'ofcps', 'mendng_totamt', 'rcept_no']);
+	// 보수는 연간 확정값 — 사업보고서(4분기)만. 최신 연도 + 최신 접수(정정 우선) → 보수 내림차순 top 8.
+	const annual = rows.filter((r) => str(r.quarter) === '4분기' && num(r.mendng_totamt) != null && str(r.nm).trim() && str(r.nm) !== '-');
+	if (!annual.length) return null;
+	let year = '';
+	for (const r of annual) { const y = str(r.year); if (y > year) year = y; }
+	const grp = latestRcept(annual.filter((r) => str(r.year) === year));
+	const list = grp
+		.map((r) => ({ name: str(r.nm).trim(), title: str(r.ofcps).replace(/\s+/g, ' ').trim(), pay: num(r.mendng_totamt)! }))
+		.sort((a, b) => b.pay - a.pay)
+		.slice(0, 8);
+	if (!list.length) return null;
+	const eb = await loadExecBoard(code); // 캐시 공유 — 추가 fetch 없음 (1인평균 배수 병치용)
+	const avgPay = eb?.find((e) => e.year === year)?.execAvgPay ?? null;
+	return { year, avgPay, rows: list };
 }

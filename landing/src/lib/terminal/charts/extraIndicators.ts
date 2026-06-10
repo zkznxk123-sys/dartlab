@@ -132,6 +132,28 @@ export function registerExtraIndicators(kc: { registerIndicator: (t: unknown) =>
 	});
 
 	kc.registerIndicator({
+		name: 'TVAL',
+		shortName: 'TVAL',
+		series: 'volume',
+		shouldFormatBigNumber: true, // 거래대금(원) — 억 단위 축약 표기
+		precision: 0,
+		minValue: 0,
+		figures: [
+			{
+				key: 'tval',
+				title: '대금 ',
+				type: 'bar',
+				baseValue: 0,
+				styles: (data: { current?: { kLineData?: { close: number; open: number } } }) => {
+					const k = data.current?.kLineData;
+					return { color: !k || k.close === k.open ? '#8b919e' : k.close > k.open ? '#34d399' : '#f0616f' };
+				}
+			}
+		],
+		calc: (dataList: { turnover?: number }[]) => dataList.map((d) => ({ tval: d.turnover ?? null }))
+	});
+
+	kc.registerIndicator({
 		name: 'ENV',
 		shortName: 'ENV',
 		series: 'price',

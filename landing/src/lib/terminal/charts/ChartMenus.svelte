@@ -2,7 +2,7 @@
 	// 일반(비전체화면) 모드 차트 크롬 — 기간 칩(좌상) + 드롭다운 4개(지표·그리기·표시·백테스트) + 전체화면.
 	// 상태는 ChartCtl 단일 SSOT 공유 — 전체화면 리본(ChartRibbon)과 같은 인스턴스.
 	import type { Lang } from '../data/types';
-	import { type ChartCtl, OVERLAY_ALL, SUB_ALL, PERIODS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
+	import { type ChartCtl, OVERLAY_ALL, SUB_ALL, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '../data/macroSeries';
 	import { ECON_COLORS } from './econOverlay';
 	import { IND_DEFS, paramSummary } from './indicatorParams';
@@ -28,9 +28,11 @@
 
 <svelte:window onclick={() => (menu !== 'none' ? (menu = 'none') : null)} />
 
-<!-- 기간 (좌상) -->
+<!-- 기간 + 봉 주기 (좌상) -->
 <div class="chartBar">
 	{#each PERIODS as p (p)}<button class={ctl.period === p ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.period = p)}>{p}</button>{/each}
+	<span class="cbDiv"></span>
+	{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'cbtn on' : 'cbtn'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}
 </div>
 
 <!-- 우상 도구 -->
@@ -82,20 +84,22 @@
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={ctl.candleStyle !== 'candle_solid' || ctl.yMode !== 'normal' || ctl.showEvents || ctl.showBand ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'view' ? 'none' : 'view')} title={T('표시 설정', 'View')}>{T('표시', 'VIEW')}</button>
+		<button class={ctl.candleStyle !== 'candle_solid' || ctl.yMode !== 'normal' || ctl.showEvents || ctl.showBand || ctl.showRefs || ctl.showVP || !ctl.adj ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'view' ? 'none' : 'view')} title={T('표시 설정', 'View')}>{T('표시', 'VIEW')}</button>
 		{#if menu === 'view'}
 			<div class="ctMenu">
 				<div class="ctMenuLbl">{T('캔들', 'Candle')}</div>
 				<div class="ctRow">{#each CANDLES as cs (cs.v)}<button class={ctl.candleStyle === cs.v ? 'mItem on' : 'mItem'} onclick={() => (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</div>
 				<div class="ctMenuLbl">{T('Y축', 'Y axis')}</div>
 				<div class="ctRow">{#each YMODES as y (y.v)}<button class={ctl.yMode === y.v ? 'mItem on' : 'mItem'} onclick={() => (ctl.yMode = y.v)}>{T(y.kr, y.en)}</button>{/each}</div>
+				<div class="ctMenuLbl">{T('가격', 'Price')}</div>
+				<div class="ctRow"><button class={ctl.adj ? 'mItem on' : 'mItem'} onclick={() => (ctl.adj = !ctl.adj)}>{T('수정주가', 'Adjusted')}</button><button class={ctl.showRefs ? 'mItem on' : 'mItem'} onclick={() => (ctl.showRefs = !ctl.showRefs)}>{T('52주·전일 기준선', '52w/prev refs')}</button><button class={ctl.showVP ? 'mItem on' : 'mItem'} onclick={() => (ctl.showVP = !ctl.showVP)}>{T('매물대', 'Vol Profile')}</button></div>
 				<div class="ctMenuLbl">{T('마커', 'Markers')}</div>
 				<div class="ctRow"><button class={ctl.showEvents ? 'mItem on' : 'mItem'} onclick={() => (ctl.showEvents = !ctl.showEvents)}>{T('실적 발표', 'Earnings')}</button><button class={ctl.showBand ? 'mItem on' : 'mItem'} disabled={!hasBand} onclick={() => hasBand && (ctl.showBand = !ctl.showBand)}>{T('적정주가 밴드', 'Fair band')}</button></div>
 			</div>
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={ctl.btKey ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'bt' ? 'none' : 'bt')} title={T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
+		<button class={ctl.btKey ? 'chartTool on' : 'chartTool'} disabled={ctl.tf !== 'D'} onclick={() => (menu = menu === 'bt' ? 'none' : 'bt')} title={ctl.tf !== 'D' ? T('일봉 전용', 'daily only') : T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
 		{#if menu === 'bt'}
 			<div class="ctMenu"><BtConfig {ctl} {lang} /></div>
 		{/if}

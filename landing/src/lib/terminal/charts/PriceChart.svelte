@@ -4,7 +4,8 @@
 	// 본 컴포넌트 = 차트 인스턴스 수명주기 + 데이터(lazy 백필) + 상태→차트 반영 effect 들만.
 	// 전체 이력(2010~) lazy 로드, 인스턴스 영속(회사전환=applyNewData, dispose 안 함). SSR 안전.
 	import { browser } from '$app/environment';
-	import { KRX_MIN_YEAR, type Candle } from '../data/priceSeries';
+	import { untrack } from 'svelte';
+	import { KRX_MIN_YEAR, aggregateCandles, adjustCandles, type Candle } from '../data/priceSeries';
 	import { price as wbPrice } from '../data/workbench';
 	import type { Lang } from '../data/types';
 	import { runBacktest, type BtResult } from '../data/backtest';
@@ -12,7 +13,13 @@
 	import { MACRO_SERIES, loadMacroSeries, MACRO_ATTRIBUTION } from '../data/macroSeries';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
-	import { ChartCtl, PERIOD_N, type OverlayKey, type SubKey } from './chartState.svelte';
+	import { ChartCtl, PERIOD_N, TF_DIV, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
+	import { loadDraws, saveDraws, type SavedDraw } from './drawStore';
+	import { publishView } from './seriesBus';
+	import { registerWorkOverlays, MEASURE_NAME } from './avwapOverlay';
+	import { registerVolumeProfile, VP_INDICATOR } from './volumeProfile';
+	import { registerCmpIndicator, CMP_INDICATOR, type CmpExtend } from './compareOverlay';
+	import { downloadSnapshot } from './snapshot';
 	import { IND_DEFS } from './indicatorParams';
 	import ChartMenus from './ChartMenus.svelte';
 	import ChartRibbon from './ChartRibbon.svelte';
@@ -25,15 +32,15 @@
 		lang: Lang;
 		events?: { date: string; label: string }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
+		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
 	}
-	let { candles, code, name = '', lang, events, valBand }: Props = $props();
+	let { candles, code, name = '', lang, events, valBand, peers = [] }: Props = $props();
 
 	const ctl = new ChartCtl();
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
 	let btResult = $state<BtResult | null>(null);
-	// ⛔ 불변식: chart.applyNewData 를 호출하는 모든 지점은 bumpDataRev() 동행 (현재 2곳:
-	//    회사전환 데이터 적용 effect + backfillForPeriod). pushTick 은 제외.
+	// ⛔ 불변식: chart.applyNewData 는 reapply() 단일 지점 (bumpDataRev 동행). pushTick 은 제외.
 	// dataRev++ 직접 사용 금지 — $effect 안 증감은 읽기+쓰기라 self-dep 무한루프(effect_update_depth_exceeded).
 	let dataRev = $state(0);
 	let dataRevSeq = 0;
@@ -41,19 +48,28 @@
 	let btRunSeq = 0; // 비반응 — BT calcParams 재계산 트리거용 단조 증가
 	let econOn = false; // ECON indicator 생성 여부 (비반응)
 	let econToken = 0; // stale async 가드
+	let cmpOn = false; // 종목비교(CMP) indicator 생성 여부 (비반응)
+	let cmpToken = 0;
 
 	let kc: any = null;
 	const subPanes = new Map<SubKey, string>();
 	const mainOn = new Set<OverlayKey>();
+	let vpOn = false; // 매물대 indicator 생성 여부 (비반응)
 	const appliedParams: Record<string, number[]> = {}; // indParams diff 스냅샷 (비반응)
 	let bandIds: string[] = [];
 	let eventIds: string[] = [];
-	let drawIds: string[] = [];
+	let refIds: string[] = [];
+	// 드로잉 — drawMap = 완성 드로잉 id→직렬화 (localStorage 영속 SSOT). pending = 진행중(ESC 취소 대상).
+	const drawMap = new Map<string, SavedDraw>();
+	let pendingDrawId: string | null = null;
+	let selectedDrawId: string | null = null;
 	// load-more 상태 (비반응 — 콜백이 읽음). oldestYear↔newestYear = 현재 로드된 이력 범위.
-	const hist = { code: '', oldestYear: 9999, newestYear: 0, loading: false };
+	// viewLen = 현재 tf 로 차트에 적용된 봉 수 (주/월 집계 후 길이 — applySpacing 기준).
+	const hist = { code: '', oldestYear: 9999, newestYear: 0, loading: false, viewLen: 0 };
+	let appliedTf: TfKey = 'D'; // tf effect 의 mount 중복 재적용 차단용 비반응 스냅샷
 
 	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
-	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v });
+	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv ?? undefined });
 	const chgPct = $derived.by<number | null>(() => {
 		const n = candles.length;
 		return n >= 2 && candles[n - 2].c ? ((candles[n - 1].c / candles[n - 2].c) - 1) * 100 : null;
@@ -65,11 +81,11 @@
 		lg === 'en'
 			? [
 					{ title: 'O', value: '{open}' }, { title: 'H', value: '{high}' }, { title: 'L', value: '{low}' },
-					{ title: 'C', value: '{close}' }, { title: 'Vol', value: '{volume}' }, { title: 'Chg', value: '{change}' }
+					{ title: 'C', value: '{close}' }, { title: 'Vol', value: '{volume}' }, { title: 'TVal', value: '{turnover}' }, { title: 'Chg', value: '{change}' }
 				]
 			: [
 					{ title: '시', value: '{open}' }, { title: '고', value: '{high}' }, { title: '저', value: '{low}' },
-					{ title: '종', value: '{close}' }, { title: '량', value: '{volume}' }, { title: '등락', value: '{change}' }
+					{ title: '종', value: '{close}' }, { title: '량', value: '{volume}' }, { title: '대금', value: '{turnover}' }, { title: '등락', value: '{change}' }
 				];
 	const themeStyles = () => ({
 		grid: { horizontal: { color: 'rgba(48,58,78,0.55)' }, vertical: { color: 'rgba(38,46,62,0.3)' } },
@@ -106,10 +122,16 @@
 			registerBtIndicators(mod);
 			registerEconIndicator(mod);
 			registerExtraIndicators(mod);
+			registerWorkOverlays(mod);
+			registerVolumeProfile(mod);
+			registerCmpIndicator(mod);
 			local = mod.init(node, { styles: themeStyles() });
 			if (!local) return;
 			local.setPriceVolumePrecision(0, 0);
 			local.setOffsetRightDistance(12);
+			// timestamp 는 Date.UTC 자정 — timezone 미설정 시 XAxis 라벨이 브라우저 로컬 TZ 로 풀려
+			// 미주 사용자에게 하루 전 날짜로 표시되는 조용한 오류. 명시 고정.
+			try { local.setTimezone('UTC'); } catch { /* */ }
 			// 일봉 날짜 포맷 — 기본 'YYYY-MM-DD HH:mm' 하드코딩이 일봉에 09:00 같은 무의미 시각 노출.
 			// Tooltip(0)·Crosshair(1) 만 날짜로, XAxis 등은 라이브러리 기본 유지.
 			const fmtYmd = (ts: number) => {
@@ -125,15 +147,28 @@
 					}
 				});
 			} catch { /* setCustomApi 미지원 빌드 — 기본 포맷 유지 */ }
-			// 전체 이력 lazy 로드 — 좌측(forward) 도달 시 더 오래된 연도 prepend
+			// 전체 이력 lazy 로드 — 좌측(forward) 도달 시 더 오래된 연도 prepend.
+			// 주/월봉은 부분연도 prepend 가 버킷 경계를 깨므로 tf effect 가 전체 백필 후 재적용 (여기선 무시).
 			local.setLoadDataCallback((p: any) => {
 				const done = (rows: any[], more: boolean) => { try { p.callback(rows, more); } catch { /* */ } };
+				if (ctl.tf !== 'D') return done([], false);
 				if (p.type !== 'forward' || hist.loading) return done([], hist.oldestYear - 1 >= KRX_MIN_YEAR);
 				const next = hist.oldestYear - 1;
 				if (next < KRX_MIN_YEAR) return done([], false);
 				hist.loading = true;
 				wbPrice.older(hist.code, next)
-					.then((older) => { hist.oldestYear = next; hist.loading = false; done(older.map(toK), next - 1 >= KRX_MIN_YEAR); })
+					.then((older) => {
+						hist.oldestYear = next;
+						hist.loading = false;
+						let rows = older;
+						// 수정주가 ON — prepend 분도 전체 체이닝 재계산의 선두 슬라이스로 보정
+						// (원본 그대로 붙이면 분할 이전 연도가 보정 스케일과 어긋난 절벽을 만든다)
+						if (ctl.adj && older.length) {
+							const adj = adjustCandles(wbPrice.loaded(hist.code));
+							if (adj.length >= older.length) rows = adj.slice(0, older.length);
+						}
+						done(rows.map(toK), next - 1 >= KRX_MIN_YEAR);
+					})
 					.catch(() => { hist.loading = false; done([], false); });
 			});
 			chart = local;
@@ -144,13 +179,38 @@
 			subPanes.clear();
 			mainOn.clear();
 			econOn = false;
+			vpOn = false;
+			cmpOn = false;
 			for (const k of Object.keys(appliedParams)) delete appliedParams[k];
 			bandIds = [];
 			eventIds = [];
-			drawIds = [];
+			refIds = [];
+			drawMap.clear();
+			pendingDrawId = null;
+			selectedDrawId = null;
 			if (chart === local) chart = null;
 		};
 	});
+
+	// 표시 시계열 = 원본 일봉 → (수정주가 보정) → (주/월 집계). reapply·BT·이벤트 마커 공용.
+	function displaySeries(): Candle[] {
+		const all = wbPrice.loaded(hist.code);
+		const base = all.length ? all : candles; // 캐시 미시드 방어 — prop 직접 적용
+		if (!base.length) return base;
+		return untrack(() => ctl.adj) ? adjustCandles(base) : base;
+	}
+
+	// 로드된 전체 이력을 현재 tf 시점(일=원본, 주/월=집계)으로 재적용 — applyNewData 단일 지점.
+	function reapply(c: any) {
+		const tfv = untrack(() => ctl.tf);
+		const base = displaySeries();
+		if (!base.length) return;
+		const view = tfv === 'D' ? base : aggregateCandles(base, tfv);
+		hist.viewLen = view.length;
+		publishView(view, toMs); // AVWAP·측정룰러가 구독하는 표시 시계열 버스
+		c.applyNewData(view.map(toK), tfv === 'D' && hist.oldestYear - 1 >= KRX_MIN_YEAR);
+		bumpDataRev();
+	}
 
 	// ── 데이터 적용 (회사전환 = applyNewData, dispose 안 함 = 영속) ──
 	$effect(() => {
@@ -161,37 +221,48 @@
 		hist.oldestYear = +cs[0].t.slice(0, 4);
 		hist.newestYear = +cs[cs.length - 1].t.slice(0, 4);
 		hist.loading = false;
-		const hasMore = hist.oldestYear - 1 >= KRX_MIN_YEAR;
-		c.applyNewData(cs.map(toK), hasMore);
-		bumpDataRev();
+		reapply(c);
 		bandIds.forEach((id) => c.removeOverlay(id));
 		eventIds.forEach((id) => c.removeOverlay(id));
-		drawIds.forEach((id) => c.removeOverlay(id));
+		refIds.forEach((id) => c.removeOverlay(id));
+		try { c.removeOverlay({ groupId: 'draw' }); } catch { /* */ }
 		bandIds = [];
 		eventIds = [];
-		drawIds = [];
-		ctl.drawCount = 0;
-		applyPeriodFull(c);
+		refIds = [];
+		drawMap.clear();
+		pendingDrawId = null;
+		selectedDrawId = null;
+		restoreDraws(c); // 회사별 저장 드로잉 복원 (drawCount 동기화 포함)
+		untrack(() => ctl.clearCompares()); // 이전 회사 기준 종목비교 해제
+		// untrack — applyPeriodFull 의 ctl.period 읽기가 본 effect 의존이 되면 기간 클릭마다
+		// 회사전환 전체(재적용+드로잉 삭제)가 재실행되고, viewLen 갱신 전 이중 tf 상향(W→M)까지 일으킨다.
+		untrack(() => applyPeriodFull(c));
+		// 주/월봉 유지 상태로 회사 전환 — 집계 정합 위해 전체 백필 (gov 전이력 회사는 no-op)
+		if (untrack(() => ctl.tf) !== 'D') void backfillTo(c, KRX_MIN_YEAR);
 	});
 
-	// 가시 봉 수 재배치 — 현재 로드된 전체 캔들 길이 기준(백필 후 늘어난 길이 반영).
+	// 가시 봉 수 재배치 — 현재 tf 적용 후 봉 수(viewLen) 기준. klinecharts BarSpace 하한 = 1px:
+	// 미달이면 한 단계 굵은 봉으로 자동 상향 (일→주→월, HTS 관행. MAX 일봉 ~4천개 = 물리적 표시 불가).
 	function applySpacing(c: any) {
-		const len = wbPrice.loaded(hist.code).length || candles.length || 1;
-		const N = Math.min(PERIOD_N[ctl.period] ?? len, len);
+		const tfv = untrack(() => ctl.tf);
+		const len = hist.viewLen || candles.length || 1;
+		const N = Math.min(Math.ceil((PERIOD_N[ctl.period] ?? len) / TF_DIV[tfv]), len);
 		const w = el?.clientWidth || 800;
-		try { c.setBarSpace(Math.max(0.5, Math.min(30, w / Math.max(1, N)))); c.scrollToRealTime(0); } catch { /* */ }
+		const space = w / Math.max(1, N);
+		if (space < 1 && tfv !== 'M') {
+			ctl.tf = tfv === 'D' ? 'W' : 'M'; // tf effect 가 재적용+재배치 이어받음
+			return;
+		}
+		try { c.setBarSpace(Math.max(1, Math.min(30, space))); c.scrollToRealTime(0); } catch { /* */ }
 	}
 
-	// 기간(특히 3Y/MAX)·줌아웃 시 필요한 과거연도까지 능동 백필 → 전체 재적용 → 재배치.
-	const yearsForPeriod = (p: string): number => (p === 'MAX' ? 999 : Math.ceil((PERIOD_N[p] ?? 252) / 252) + 1);
-	async function backfillForPeriod(c: any) {
+	// 목표 연도까지 능동 백필 → (변경 시) 전체 재적용 + 재배치. 기간 점프·주/월봉 전환 공용.
+	async function backfillTo(c: any, target: number) {
 		const code0 = hist.code;
 		if (!code0) return;
-		const target = ctl.period === 'MAX' ? KRX_MIN_YEAR : Math.max(KRX_MIN_YEAR, hist.newestYear - yearsForPeriod(ctl.period) + 1);
 		let changed = false;
-		while (hist.oldestYear > target && !hist.loading) {
+		while (hist.oldestYear > Math.max(target, KRX_MIN_YEAR) && !hist.loading) {
 			const y = hist.oldestYear - 1;
-			if (y < KRX_MIN_YEAR) break;
 			hist.loading = true;
 			try { await wbPrice.older(code0, y); } catch { hist.loading = false; break; }
 			hist.loading = false;
@@ -200,16 +271,59 @@
 			changed = true;
 		}
 		if (changed && chart === c && hist.code === code0) {
-			c.applyNewData(wbPrice.loaded(code0).map(toK), hist.oldestYear - 1 >= KRX_MIN_YEAR);
-			bumpDataRev();
+			reapply(c);
 			applySpacing(c);
 		}
 	}
 
+	// 기간(특히 3Y/MAX)·줌아웃 시 필요한 과거연도까지 백필.
+	const yearsForPeriod = (p: string): number => (p === 'MAX' ? 999 : Math.ceil((PERIOD_N[p] ?? 252) / 252) + 1);
 	function applyPeriodFull(c: any) {
 		applySpacing(c);
-		void backfillForPeriod(c);
+		const target = ctl.period === 'MAX' ? KRX_MIN_YEAR : Math.max(KRX_MIN_YEAR, hist.newestYear - yearsForPeriod(ctl.period) + 1);
+		void backfillTo(c, target);
 	}
+
+	// ── 봉 주기(일/주/월) 전환 → 전체 백필 후 집계 재적용. BT 는 일봉 전용이라 자동 해제. ──
+	$effect(() => {
+		const tfv = ctl.tf;
+		const c = chart;
+		if (!c || !candles.length) return;
+		if (tfv === appliedTf) return;
+		appliedTf = tfv;
+		if (tfv !== 'D') ctl.btKey = null;
+		const code0 = hist.code;
+		(async () => {
+			if (tfv !== 'D') await backfillTo(c, KRX_MIN_YEAR);
+			if (chart !== c || hist.code !== code0) return;
+			reapply(c);
+			applySpacing(c);
+		})();
+	});
+
+	// ── 수정주가 토글 → 재적용 (mount·회사전환 중복 적용은 스냅샷 가드) ──
+	let appliedAdj = true;
+	$effect(() => {
+		const a = ctl.adj;
+		const c = chart;
+		if (!c || !candles.length) return;
+		if (a === appliedAdj) return;
+		appliedAdj = a;
+		reapply(c);
+	});
+
+	// ── 매물대 토글 → VPVR indicator 생성/제거 (candle_pane, figures:[] = y축 무왜곡) ──
+	$effect(() => {
+		const on = ctl.showVP;
+		const c = chart;
+		if (!c) return;
+		if (on && !vpOn) {
+			vpOn = !!c.createIndicator({ name: VP_INDICATOR }, true, { id: 'candle_pane' });
+		} else if (!on && vpOn) {
+			try { c.removeIndicator('candle_pane', VP_INDICATOR); } catch { /* */ }
+			vpOn = false;
+		}
+	});
 
 	// 메인 오버레이 reconcile (다중 — candle_pane 스택). ICHI 활성 시 선행스팬용 우측 여백 확보.
 	$effect(() => {
@@ -283,11 +397,37 @@
 		}
 	});
 
-	// 실적·공시 시점 마커 → simpleAnnotation (토글, 가장 가까운 거래일 스냅)
+	// 52주 고가·저가·전일종가 기준선 (HTS 관례 색: 고=적, 저=청, 전일=회) — 일봉 기준 산출.
+	$effect(() => {
+		const on = ctl.showRefs;
+		void ctl.adj;
+		void dataRev;
+		const c = chart;
+		if (!c) return;
+		refIds.forEach((id) => c.removeOverlay(id));
+		refIds = [];
+		if (!on) return;
+		const base = displaySeries();
+		if (base.length < 2) return;
+		const win = base.slice(-252);
+		let hi = -Infinity;
+		let lo = Infinity;
+		for (const k of win) {
+			if (k.h > hi) hi = k.h;
+			if (k.l < lo) lo = k.l;
+		}
+		const prevC = base[base.length - 2].c;
+		const mk = (price: number, color: string) => c.createOverlay({ name: 'priceLine', points: [{ value: price }], lock: true, styles: { line: { color, style: 'dashed', size: 1 }, text: { color } } });
+		refIds = [mk(hi, 'rgba(240,97,111,0.65)'), mk(lo, 'rgba(96,165,250,0.65)'), mk(prevC, 'rgba(139,145,158,0.65)')].filter(Boolean) as string[];
+	});
+
+	// 실적·공시 시점 마커 → simpleAnnotation (토글, 가장 가까운 거래일 스냅).
+	// 표시 시계열(수정주가 반영) 기준으로 고가 스냅 — 원본 기준이면 분할 이전 마커가 차트 밖으로 나간다.
 	$effect(() => {
 		const evs = events;
 		const on = ctl.showEvents;
-		const cs = candles;
+		void ctl.adj;
+		const cs = candles.length ? displaySeries() : candles;
 		const c = chart;
 		if (!c || !cs.length) return;
 		eventIds.forEach((id) => c.removeOverlay(id));
@@ -343,7 +483,9 @@
 			btResult = null;
 			return;
 		}
-		const all = wbPrice.loaded(hist.code);
+		void ctl.adj;
+		// 표시 시계열(수정주가 기본 ON)로 백테스트 — 원본이면 분할 절벽을 -98% 폭락으로 오인한다.
+		const all = displaySeries();
 		if (!all.length) return;
 		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
 		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc, costsBp: bp });
@@ -351,6 +493,36 @@
 		publishBt(res, all);
 		if (res) applyBt(c, ++btRunSeq);
 		else clearBt(c);
+	});
+
+	// 종목비교 오버레이 — 피어 회사파일 로드 → 수정주가 동일 보정 → CMP 생성/override.
+	// 피어 보정 누락 = 피어 분할이 상대수익률을 왜곡하므로 본주와 같은 adj 정책 강제.
+	$effect(() => {
+		const list = ctl.compares;
+		const adjOn = ctl.adj;
+		const c = chart;
+		if (!c) return;
+		if (!list.length) {
+			if (cmpOn) {
+				try { c.removeIndicator('candle_pane', CMP_INDICATOR); } catch { /* */ }
+				cmpOn = false;
+			}
+			return;
+		}
+		const token = ++cmpToken;
+		const yr = new Date().getFullYear();
+		Promise.all(list.map((p) => wbPrice.initial(p.code, yr))).then((rs) => {
+			if (token !== cmpToken || chart !== c) return;
+			const loaded = list
+				.map((p, i) => {
+					const cs = rs[i]?.candles ?? [];
+					return { code: p.code, name: p.name, candles: adjOn ? adjustCandles(cs) : cs };
+				})
+				.filter((p) => p.candles.length);
+			const extendData: CmpExtend = { peers: loaded };
+			if (cmpOn) c.overrideIndicator({ name: CMP_INDICATOR, extendData }, 'candle_pane');
+			else cmpOn = !!c.createIndicator({ name: CMP_INDICATOR, extendData }, true, { id: 'candle_pane' });
+		});
 	});
 
 	// 경제지표 오버레이 — 선택 → 로드 → 생성/override (figures:[] = 캔들 y축 무왜곡, econOverlay.ts)
@@ -378,7 +550,9 @@
 		});
 	});
 
-	// 전체화면 토글 → resize + 보조 페인 비례 재배분 + ESC
+	// 전체화면 토글 → resize + 보조 페인 비례 재배분 + 전문가 단축키 레이어.
+	// ESC 2단(진행중 드로잉 취소 → 닫기) · Delete 선택삭제 · ←/→ 스크롤(Shift=한 화면) ·
+	// +/− 줌 · 1~6 기간 · D/W/M 봉주기 — 전체화면 한정 (일반 모드 = 페이지 스크롤 충돌).
 	$effect(() => {
 		if (!browser) return;
 		const c = chart;
@@ -391,38 +565,142 @@
 			} catch { /* */ }
 		});
 		if (!ctl.full) return;
-		const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') ctl.full = false; };
+		const PERIOD_KEYS = ['1M', '3M', '6M', '1Y', '3Y', 'MAX'] as const;
+		const onKey = (e: KeyboardEvent) => {
+			const tgt = e.target as HTMLElement | null;
+			if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+			const k = e.key;
+			if (k === 'Escape') {
+				if (!cancelPendingDraw()) ctl.full = false;
+			} else if (k === 'Delete' || k === 'Backspace') {
+				removeDraw(selectedDrawId);
+			} else if (k === 'ArrowLeft' || k === 'ArrowRight') {
+				e.preventDefault();
+				const bs = (() => { try { return c?.getBarSpace?.() ?? 8; } catch { return 8; } })();
+				const w = el?.clientWidth || 800;
+				const step = e.shiftKey ? w : bs * 8;
+				try { c?.scrollByDistance(k === 'ArrowLeft' ? step : -step, 0); } catch { /* */ }
+			} else if (k === '+' || k === '=') {
+				try { c?.zoomAtCoordinate(1.15); } catch { /* */ }
+			} else if (k === '-' || k === '_') {
+				try { c?.zoomAtCoordinate(0.87); } catch { /* */ }
+			} else if (k >= '1' && k <= '6' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+				ctl.period = PERIOD_KEYS[+k - 1];
+			} else if ((k === 'd' || k === 'D') && !e.metaKey && !e.ctrlKey) {
+				ctl.tf = 'D';
+			} else if ((k === 'w' || k === 'W') && !e.metaKey && !e.ctrlKey) {
+				ctl.tf = 'W';
+			} else if ((k === 'm' || k === 'M') && !e.metaKey && !e.ctrlKey) {
+				ctl.tf = 'M';
+			} else if ((k === 's' || k === 'S') && !e.metaKey && !e.ctrlKey) {
+				snapshot();
+			}
+		};
 		window.addEventListener('keydown', onKey);
 		return () => window.removeEventListener('keydown', onKey);
 	});
 
+	// ── 드로잉 — 완성 시점 카운트·우클릭/Delete 삭제·드래그 편집 재저장·회사별 localStorage 영속 ──
+	const serializeDraw = (o: any): SavedDraw => ({ name: o.name, points: (o.points ?? []).map((p: any) => ({ timestamp: p.timestamp, value: p.value })) });
+	function persistDraws() { saveDraws(hist.code, [...drawMap.values()]); }
+	function drawOpts(toolName: string, points?: SavedDraw['points']) {
+		const ephemeral = toolName === MEASURE_NAME; // 측정룰러 — 영속 제외, 선택 해제 시 자동 제거
+		return {
+			name: toolName,
+			groupId: 'draw',
+			...(points ? { points } : {}),
+			mode: ctl.magnet ? 'weak_magnet' : 'normal',
+			onDrawEnd: (e: any) => {
+				const o = e.overlay;
+				if (!o?.id) return;
+				if (pendingDrawId === o.id) pendingDrawId = null;
+				if (ephemeral) return;
+				drawMap.set(o.id, serializeDraw(o));
+				ctl.drawCount = drawMap.size;
+				persistDraws();
+			},
+			onPressedMoveEnd: (e: any) => {
+				const o = e.overlay;
+				if (!o?.id || !drawMap.has(o.id)) return;
+				drawMap.set(o.id, serializeDraw(o));
+				persistDraws();
+			},
+			onSelected: (e: any) => { selectedDrawId = e.overlay?.id ?? null; },
+			onDeselected: (e: any) => {
+				if (selectedDrawId === e.overlay?.id) selectedDrawId = null;
+				if (ephemeral && e.overlay?.id) { try { chart?.removeOverlay(e.overlay.id); } catch { /* */ } }
+			},
+			onRightClick: (e: any) => { removeDraw(e.overlay?.id); return true; }
+		};
+	}
+	function removeDraw(id?: string | null) {
+		if (!id) return;
+		try { chart?.removeOverlay(id); } catch { /* */ }
+		drawMap.delete(id);
+		if (selectedDrawId === id) selectedDrawId = null;
+		if (pendingDrawId === id) pendingDrawId = null;
+		ctl.drawCount = drawMap.size;
+		persistDraws();
+	}
+	function cancelPendingDraw(): boolean {
+		if (!pendingDrawId) return false;
+		try { chart?.removeOverlay(pendingDrawId); } catch { /* */ }
+		pendingDrawId = null;
+		return true;
+	}
+	function restoreDraws(c: any) {
+		for (const d of loadDraws(hist.code)) {
+			const id = c.createOverlay(drawOpts(d.name, d.points));
+			if (id) drawMap.set(id as string, d);
+		}
+		ctl.drawCount = drawMap.size;
+	}
 	function startDraw(toolName: string) {
 		try {
-			const id = chart?.createOverlay({ name: toolName, mode: ctl.magnet ? 'weak_magnet' : 'normal' });
-			if (id) { drawIds.push(id as string); ctl.drawCount = drawIds.length; }
+			cancelPendingDraw(); // 미완 도형 교체 — 유령 진행상태 방지
+			const id = chart?.createOverlay(drawOpts(toolName));
+			if (id) pendingDrawId = id as string;
 		} catch { /* */ }
 	}
 	function clearDraw() {
-		drawIds.forEach((id) => { try { chart?.removeOverlay(id); } catch { /* */ } });
-		drawIds = [];
+		try { chart?.removeOverlay({ groupId: 'draw' }); } catch { /* */ }
+		drawMap.clear();
+		pendingDrawId = null;
+		selectedDrawId = null;
 		ctl.drawCount = 0;
+		persistDraws();
 	}
+	// 차트 환경 설정 영속 — persist() 내부의 상태 읽기가 전부 의존이 되어 변경 시마다 저장
+	$effect(() => {
+		ctl.persist();
+	});
+
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
-	// 실시간 틱 (나중 가격 API 연결 시 호출)
-	export function pushTick(c: Candle) { try { chart?.updateData(toK(c)); } catch { /* */ } }
+	// 출처 표기 SSOT — DOM 캡션과 스냅샷 띠가 같은 문자열 (공공누리 출처표시 의무)
+	const srcText = () =>
+		T('출처: 금융위원회·한국거래소 (공공데이터포털)', 'Source: FSC · KRX (data.go.kr)') +
+		(ctl.econ.length ? ' · ' + MACRO_ATTRIBUTION : '') +
+		(ctl.adj ? T(' · 수정주가', ' · adjusted') : '');
+	function snapshot() {
+		const ymd = candles.length ? candles[candles.length - 1].t : '';
+		const date = ymd ? `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}` : '';
+		void downloadSnapshot(chart, { fileTag: `${code}_${ymd}`, srcLine: `${name} ${code} · ${date} · ${srcText()}` }).catch(() => { /* 이미지 합성 실패 — 무해 */ });
+	}
+	// 실시간 틱 (나중 가격 API 연결 시 호출) — 일봉 전용 (주/월 집계 봉에 일봉 append 방지)
+	export function pushTick(c: Candle) { if (ctl.tf !== 'D') return; try { chart?.updateData(toK(c)); } catch { /* */ } }
 </script>
 
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	<div class="chartHost" bind:this={el}></div>
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} {chgPct} onDraw={startDraw} onClearDraw={clearDraw} />
+		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} {chgPct} {peers} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{:else}
 		<ChartMenus {ctl} {lang} hasBand={!!valBand} onDraw={startDraw} onClearDraw={clearDraw} />
 	{/if}
 
-	<!-- 데이터 출처 상시 표기 (공공누리 출처표시 의무, ECON 활성 시 ECOS·FRED 병기) -->
-	<div class="chartSrc">{T('출처: 금융위원회·한국거래소 (공공데이터포털)', 'Source: FSC · KRX (data.go.kr)')}{ctl.econ.length ? ' · ' + MACRO_ATTRIBUTION : ''}</div>
+	<!-- 데이터 출처 상시 표기 (공공누리 출처표시 의무, ECON·수정주가 병기 — 스냅샷 띠와 SSOT) -->
+	<div class="chartSrc">{srcText()}</div>
 
 	{#if btResult && ctl.btKey}
 		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} {lang} onClear={() => (ctl.btKey = null)} />

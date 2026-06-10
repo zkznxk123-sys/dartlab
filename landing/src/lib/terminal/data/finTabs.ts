@@ -10,8 +10,11 @@ import {
 	loadInvestments,
 	loadOwnership,
 	loadExecBoard,
-	loadDebtProfile
+	loadDebtProfile,
+	loadCapitalChanges,
+	type ShareholderReturnYear
 } from './reportSeries';
+import { price } from './workbench';
 
 export interface TabCard {
 	card: FinCard;
@@ -32,7 +35,7 @@ const fyLabel = (year: string) => 'FY' + year.slice(2);
 const alive = (tc: TabCard): boolean => tc.card.series.some((s) => s.data.some((v) => v != null));
 
 // finance annual statements 에서 계정 1행을 연도('2024') → 조 값 Map 으로
-function annualMap(bundle: TerminalFinanceBundle, stmt: 'IS' | 'CF', key: string): Map<string, number> {
+function annualMap(bundle: TerminalFinanceBundle, stmt: 'IS' | 'BS' | 'CF', key: string): Map<string, number> {
 	const out = new Map<string, number>();
 	const av = bundle.views.annual;
 	if (!av) return out;
@@ -44,6 +47,34 @@ function annualMap(bundle: TerminalFinanceBundle, stmt: 'IS' | 'CF', key: string
 		if (m && v != null) out.set('20' + m[1], v);
 	});
 	return out;
+}
+
+// 연도별 평균 종가 (원) — workbench price 모듈(회사 전이력 캔들)로 산출. 자사주 취득가치 추정용.
+// price.initial 은 in-flight dedup·LRU 캐시가 있어 차트와 같은 스캔을 공유한다 (중복 fetch 없음).
+const avgCloseCache = new Map<string, Promise<Map<number, number>>>();
+function yearAvgClose(code: string): Promise<Map<number, number>> {
+	const c = code.trim();
+	const hit = avgCloseCache.get(c);
+	if (hit) return hit;
+	const p = price
+		.initial(c, price.minYear)
+		.then((cp) => {
+			const sum = new Map<number, { s: number; n: number }>();
+			for (const k of cp?.candles ?? []) {
+				const y = Number(k.t.slice(0, 4));
+				if (!Number.isFinite(y) || !(k.c > 0)) continue;
+				let e = sum.get(y);
+				if (!e) sum.set(y, (e = { s: 0, n: 0 }));
+				e.s += k.c;
+				e.n++;
+			}
+			const out = new Map<number, number>();
+			for (const [y, { s, n }] of sum) if (n > 0) out.set(y, s / n);
+			return out;
+		})
+		.catch(() => new Map<number, number>());
+	avgCloseCache.set(c, p);
+	return p;
 }
 
 async function cashflowReport(code: string): Promise<TabCard[]> {
@@ -63,21 +94,67 @@ async function cashflowReport(code: string): Promise<TabCard[]> {
 }
 
 async function shareholderReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
-	const [sr, own] = await Promise.all([loadShareholderReturn(code), loadOwnership(code)]);
+	const [sr, own, dil, avgClose] = await Promise.all([
+		loadShareholderReturn(code),
+		loadOwnership(code),
+		loadCapitalChanges(code),
+		yearAvgClose(code)
+	]);
 	const cards: TabCard[] = [];
+	const ownBy = new Map((own ?? []).map((o) => [o.year, o]));
 	if (sr && sr.length) {
 		const srYears = sr.map((s) => s.year);
+		const srP = srYears.map(fyLabel);
+		const niBy = annualMap(bundle, 'IS', 'netIncome');
+		// 자사주 취득가치 추정 (원) = 취득수량 × 해당연도 평균종가 — 공시에 취득금액이 없어 추정치
+		const buyVal = (s: ShareholderReturnYear): Num => {
+			const px = avgClose.get(Number(s.year));
+			return s.buybackQty != null && s.buybackQty > 0 && px != null ? s.buybackQty * px : null;
+		};
+		// ① 총주주환원 — 배당총액 + 자사주 취득가치 스택 + 총환원율(순이익 대비)
 		cards.push({
-			periods: srYears.map(fyLabel),
+			periods: srP,
 			card: {
-				key: 'dpsYield', title: '주당배당·수익률 · 연', unit: '원', series: [
+				key: 'totalReturn', title: '총주주환원 (배당+자사주) · 연', unit: '조', stacked: true, series: [
+					{ name: '배당총액', data: sr.map((s) => (s.totalDividend != null ? +(s.totalDividend / 1e12).toFixed(3) : null)), color: C.blue, type: 'bar' },
+					{ name: '자사주취득(추정)', data: sr.map((s) => { const v = buyVal(s); return v != null ? +(v / 1e12).toFixed(3) : null; }), color: C.good, type: 'bar' },
+					{ name: '총환원율%', data: sr.map((s) => {
+						const ni = niBy.get(s.year);
+						if (ni == null || ni <= 0 || (s.totalDividend == null && buyVal(s) == null)) return null;
+						return +((((s.totalDividend ?? 0) + (buyVal(s) ?? 0)) / 1e12 / ni) * 100).toFixed(1);
+					}), color: C.purple, type: 'line', axis: 'r' }
+				]
+			}
+		});
+		// ② 주주수익률 — 배당수익률(공시값) + 자사주수익률(취득가치/시총 추정) + 합계
+		const buyYield = (s: ShareholderReturnYear): Num => {
+			const px = avgClose.get(Number(s.year));
+			const tot = ownBy.get(s.year)?.stockTotal;
+			const v = buyVal(s);
+			return v != null && px != null && tot != null && tot > 0 ? +((v / (px * tot)) * 100).toFixed(2) : null;
+		};
+		cards.push({
+			periods: srP,
+			card: {
+				key: 'tsrYield', title: '주주수익률 (배당+자사주) · 연', unit: '%', series: [
+					{ name: '배당수익률', data: sr.map((s) => s.yieldPct), color: C.blue, type: 'line' },
+					{ name: '자사주수익률(추정)', data: sr.map(buyYield), color: C.good, type: 'line' },
+					{ name: '합계', data: sr.map((s) => { const b = buyYield(s); return s.yieldPct != null || b != null ? +((s.yieldPct ?? 0) + (b ?? 0)).toFixed(2) : null; }), color: C.purple, type: 'line' }
+				]
+			}
+		});
+		// ③ 주당지표 — EPS·DPS + 주당 배당성향
+		cards.push({
+			periods: srP,
+			card: {
+				key: 'perShare', title: '주당지표 (EPS·DPS) · 연', unit: '원', series: [
+					{ name: 'EPS', data: sr.map((s) => s.eps), color: C.cyan, type: 'bar' },
 					{ name: 'DPS', data: sr.map((s) => s.dps), color: C.blue, type: 'bar' },
-					{ name: '시가배당수익률%', data: sr.map((s) => s.yieldPct), color: C.good, type: 'line', axis: 'r' }
+					{ name: 'DPS/EPS%', data: sr.map((s) => (s.eps != null && s.eps > 0 && s.dps != null ? +((s.dps / s.eps) * 100).toFixed(1) : null)), color: C.purple, type: 'line', axis: 'r' }
 				]
 			}
 		});
 		// 배당여력 — report 연도 ∪ finance annual 연도 union 축 (비12월 결산은 사업연도 기준 정렬)
-		const niBy = annualMap(bundle, 'IS', 'netIncome');
 		const cfoBy = annualMap(bundle, 'CF', 'cfOperating');
 		const capexBy = annualMap(bundle, 'CF', 'capex');
 		const years = [...new Set([...srYears, ...niBy.keys()])].sort();
@@ -93,17 +170,26 @@ async function shareholderReport(code: string, bundle: TerminalFinanceBundle): P
 				]
 			}
 		});
-		cards.push({
-			periods: srYears.map(fyLabel),
-			card: {
-				key: 'buybackFlow', title: '자사주 (보통주) · 연', unit: '만주', signed: true, series: [
-					{ name: '취득', data: sr.map((s) => (s.buybackQty != null ? +(s.buybackQty / 1e4).toFixed(1) : null)), color: C.good, type: 'bar' },
-					{ name: '처분(−)', data: sr.map((s) => (s.disposalQty != null ? +(-s.disposalQty / 1e4).toFixed(1) : null)), color: C.warn, type: 'bar' },
-					{ name: '소각(−)', data: sr.map((s) => (s.buybackCancel != null ? +(-s.buybackCancel / 1e4).toFixed(1) : null)), color: C.red, type: 'bar' },
-					{ name: '기말보유', data: sr.map((s) => (s.treasuryEnd != null ? +(s.treasuryEnd / 1e4).toFixed(1) : null)), color: C.cyan, type: 'line', axis: 'r' }
-				]
-			}
-		});
+	}
+	// 희석 이력 — capitalChange 이벤트 연 합산 (양수 = 신주, 음수 = 감자·소각) + 발행주식수 추이
+	{
+		const dilYears = (dil?.years ?? []).map((d) => String(d.year));
+		const stYears = (own ?? []).filter((o) => o.stockTotal != null).map((o) => o.year);
+		const years = [...new Set([...dilYears, ...stYears])].sort();
+		if (years.length) {
+			const dilBy = new Map((dil?.years ?? []).map((d) => [String(d.year), d]));
+			cards.push({
+				periods: years.map(fyLabel),
+				card: {
+					key: 'dilution', title: '주식수 변동 (희석 이력) · 연', unit: '만주', stacked: true, signed: true, series: [
+						{ name: '유상증자', data: years.map((y) => { const v = dilBy.get(y)?.paidIn; return v != null ? +(v / 1e4).toFixed(1) : null; }), color: C.red, type: 'bar' },
+						{ name: '전환·행사', data: years.map((y) => { const v = dilBy.get(y)?.conversion; return v != null ? +(v / 1e4).toFixed(1) : null; }), color: C.warn, type: 'bar' },
+						{ name: '감자·소각(−)', data: years.map((y) => { const v = dilBy.get(y)?.reduction; return v != null ? +(v / 1e4).toFixed(1) : null; }), color: C.blue, type: 'bar' },
+						{ name: '발행주식수', data: years.map((y) => { const v = ownBy.get(y)?.stockTotal; return v != null ? +(v / 1e4).toFixed(0) : null; }), color: C.cyan, type: 'line', axis: 'r' }
+					]
+				}
+			});
+		}
 	}
 	if (own && own.length) {
 		cards.push({
@@ -200,9 +286,29 @@ async function peopleReport(code: string, bundle: TerminalFinanceBundle): Promis
 	return cards.filter(alive);
 }
 
-async function debtReport(code: string): Promise<TabCard[]> {
-	const dpr = await loadDebtProfile(code);
-	if (!dpr || !dpr.length) return [];
+async function debtReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
+	const dp = await loadDebtProfile(code);
+	if (!dp || !dp.years.length) return [];
+	const dpr = dp.years;
+	const cards: TabCard[] = [];
+	// 전방 만기 사다리 — 최신 연도 잔존만기 7버킷 (x축 = 만기 버킷). 점선 = 최신 연간 현금성자산.
+	if (dp.ladder) {
+		const cashBy = annualMap(bundle, 'BS', 'cash');
+		const cashYears = [...cashBy.keys()].sort();
+		const cashLatest = cashYears.length ? (cashBy.get(cashYears[cashYears.length - 1]) ?? null) : null;
+		const L = dp.ladder;
+		cards.push({
+			periods: ['1년이하', '1~2년', '2~3년', '3~4년', '4~5년', '5~10년', '10년+'],
+			card: {
+				key: 'maturityLadder', title: `전방 만기 사다리 · ${fyLabel(L.year)}`, unit: '조', stacked: true,
+				refLines: cashLatest != null ? [cashLatest] : undefined,
+				series: [
+					{ name: '회사채', data: L.buckets.map((v) => (v != null ? +(v / 1e12).toFixed(3) : null)), color: C.op, type: 'bar' },
+					{ name: '전단채+CP(≤1y)', data: L.buckets.map((_, i) => (i === 0 && L.shortTerm != null ? +(L.shortTerm / 1e12).toFixed(3) : null)), color: C.cyan, type: 'bar' }
+				]
+			}
+		});
+	}
 	const series: FinCard['series'] = [
 		{ name: '1년이하', data: dpr.map((d) => (d.bond1y != null ? +(d.bond1y / 1e12).toFixed(3) : null)), color: C.red, type: 'bar' },
 		{ name: '1~5년', data: dpr.map((d) => (d.bond1to5 != null ? +(d.bond1to5 / 1e12).toFixed(3) : null)), color: C.op, type: 'bar' },
@@ -213,11 +319,11 @@ async function debtReport(code: string): Promise<TabCard[]> {
 	if (dpr.some((d) => d.stb != null || d.cp != null)) {
 		series.push({ name: '초단기물(전단채+CP)', data: dpr.map((d) => (d.stb != null || d.cp != null ? +(((d.stb ?? 0) + (d.cp ?? 0)) / 1e12).toFixed(3) : null)), color: C.cyan, type: 'line' });
 	}
-	const tc: TabCard = {
+	cards.push({
 		periods: dpr.map((d) => fyLabel(d.year)),
-		card: { key: 'bondMaturity', title: '사채 만기 사다리 · 연', unit: '조', stacked: true, series }
-	};
-	return [tc].filter(alive);
+		card: { key: 'bondMaturity', title: '사채 잔액 추이 · 연', unit: '조', stacked: true, series }
+	});
+	return cards.filter(alive);
 }
 
 export const FS_TABS: FsTab[] = [
@@ -225,7 +331,7 @@ export const FS_TABS: FsTab[] = [
 	{ key: 'cashflow', label: { kr: '현금·투자', en: 'CASH' }, finKey: 'cashflow', load: cashflowReport },
 	{
 		key: 'shareholder', label: { kr: '주주환원·소유', en: 'RETURN' }, load: shareholderReport,
-		note: '배당·자사주 = 보통주 기준 공시값 · report. 배당여력의 FCF·순이익 = 연간 재무제표 교차.'
+		note: '배당·자사주 = 보통주 기준 공시값 · report. 배당여력의 FCF·순이익 = 연간 재무제표 교차. 자사주 가치 = 연평균종가 × 취득수량 추정. 희석 이력 = 증자·전환·감자 공시 이벤트 연 합산 (무상증자·분할 제외).'
 	},
 	{
 		key: 'people', label: { kr: '인력·보수', en: 'PEOPLE' }, load: peopleReport,
@@ -233,6 +339,6 @@ export const FS_TABS: FsTab[] = [
 	},
 	{
 		key: 'debt', label: { kr: '부채·만기', en: 'DEBT' }, finKey: 'debt', load: debtReport,
-		note: '만기 사다리 = 액면 기준 미상환 잔액(report) — 장부가와 소폭 차이. 무사채 회사는 카드 비표시.'
+		note: '만기 사다리 = 액면 기준 미상환 잔액(report) — 장부가와 소폭 차이. 점선 = 최신 연간 현금성자산. 무사채 회사는 카드 비표시. 감사 이력 = 사업보고서 기준 (사업연도 = 접수연도−1).'
 	}
 ];
