@@ -73,7 +73,7 @@ SCAN_API_TYPES = [
 ]
 
 
-def buildReport(*, sinceYear: int = 2021, verbose: bool = True, apiTypes: Iterable[str] | None = None) -> list[Path]:
+def buildReport(*, sinceYear: int = 2016, verbose: bool = True, apiTypes: Iterable[str] | None = None) -> list[Path]:
     """report/*.parquet → apiType별 12개 분리 parquet 프리빌드.
 
     ``SCAN_API_TYPES`` 15 종 (majorHolder/executive/employee/auditOpinion/dividend/...) 의
@@ -83,7 +83,8 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True, apiTypes: Iterab
     Parameters
     ----------
     sinceYear : int
-        포함할 최소 ``year`` (``year >= sinceYear``). 기본 2021.
+        포함할 최소 ``year`` (``year >= sinceYear``). 기본 2016 — raw 수집 시작 연도와
+        일치, 정기보고서 시계열을 전 기간 노출 (터미널 재무 전체화면·우측 팩트).
     verbose : bool
         진행 로그 출력 여부.
     apiTypes : Iterable[str] | None

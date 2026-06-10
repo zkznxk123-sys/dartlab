@@ -40,7 +40,7 @@ def main() -> int:
 
     missing_report_api_types = _missingReportApiTypes(scan_dir, scan_parquet._REQUIRED_REPORT_FILES)
     if missing_report_api_types:
-        buildReport(sinceYear=2021, verbose=True, apiTypes=missing_report_api_types)
+        buildReport(sinceYear=2016, verbose=True, apiTypes=missing_report_api_types)
     else:
         print("[prepareRealdataScanCache] preserve existing report prebuilds")
 

@@ -66,7 +66,7 @@ from dartlab.scan.builders.kr.valuationBuild import buildValuation as buildValua
 
 
 def buildScan(
-    *, sinceYear: int = 2021, verbose: bool = True, incremental: bool = False
+    *, sinceYear: int = 2021, reportSinceYear: int = 2016, verbose: bool = True, incremental: bool = False
 ) -> dict[str, Path | list[Path] | None]:
     """scan 프리빌드 통합 (changes + finance + finance-lite + report + sharesOutstanding).
 
@@ -77,8 +77,13 @@ def buildScan(
     Parameters
     ----------
     sinceYear : int
-        시작 연도 (``buildFinance`` / ``buildReport`` / ``buildChanges`` 공통). 기본 2021.
+        시작 연도 (``buildFinance`` / ``buildChanges`` 공통). 기본 2021.
         ``buildFinanceLite`` 는 ``LITE_SINCE_YEAR`` 자체 기본값 (2022) 사용.
+    reportSinceYear : int
+        ``buildReport`` 전용 시작 연도. 기본 2016 — 정기보고서 정량 시계열(인력·배당·
+        보수·지배구조 등)은 raw 수집 시작 연도(2016)까지 전 기간 노출한다. finance/
+        changes 와 분리한 이유: 그 둘은 스크리너 신선도 용도라 2021 컷이 적정하고,
+        전역 확장 시 산출물이 약 2배로 불어난다.
     verbose : bool
         진행 로그 출력 여부.
     incremental : bool
@@ -151,7 +156,7 @@ def buildScan(
     results["changes"] = buildChanges(sinceYear=sinceYear, verbose=verbose, incremental=incremental)
     results["finance"] = buildFinance(sinceYear=sinceYear, verbose=verbose)
     results["finance_lite"] = buildFinanceLite(verbose=verbose)
-    results["report"] = buildReport(sinceYear=sinceYear, verbose=verbose)
+    results["report"] = buildReport(sinceYear=reportSinceYear, verbose=verbose)
     results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose, incremental=incremental)
 
     if verbose:

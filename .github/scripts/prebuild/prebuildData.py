@@ -204,7 +204,7 @@ def _buildScan(dataDir: str, *, incremental: bool) -> dict[str, Path | list[Path
     """scan 프리빌드 실행 (incremental=True 면 panel 빌더는 변경분만 재계산·머지)."""
     from dartlab.scan.builders.kr import buildScan
 
-    return buildScan(sinceYear=2021, verbose=True, incremental=incremental)
+    return buildScan(sinceYear=2021, reportSinceYear=2016, verbose=True, incremental=incremental)
 
 
 def _buildDocsIndex(dataDir: str, *, incremental: bool) -> Path | None:
