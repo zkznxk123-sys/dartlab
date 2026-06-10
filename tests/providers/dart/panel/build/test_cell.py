@@ -121,3 +121,35 @@ def test_parse_old_statement_table() -> None:
     assert all(r["ctxMode"] == "Y" and r["ctxFlow"] == "d" for r in rows)  # 사업보고서 연간, IS=흐름
     # 헤더 행(제 47 기)은 데이터 아님 → 제외
     assert "제 47 기" not in {r["label"] for r in rows}
+
+
+# 주석 옛표 — 총계행이 rowspan 으로 `합계|라벨|값` 3+셀 병합(naive 5표파서면 라벨=합계·값 한칸밀림 phantom)
+_NOTE_MERGED_CONTENT = """<TABLE><TR>
+  <TD><P>원재료 등의 사용액</P></TD>
+  <TD ALIGN="RIGHT"><P>1,000</P></TD>
+  <TD ALIGN="RIGHT"><P>900</P></TD></TR><TR>
+  <TD><P>합계</P></TD>
+  <TD><P>매출원가와 판매관리비</P></TD>
+  <TD ALIGN="RIGHT"><P>5,000</P></TD>
+  <TD ALIGN="RIGHT"><P>4,500</P></TD>
+</TR></TABLE>"""
+
+
+def test_parse_old_note_table_merged_row_guard() -> None:
+    """주석 옛표 병합행 가드 — `합계|라벨|값` 에서 라벨=중간셀, 값=당기(우측정렬). ctxYear phantom 차단."""
+    from dartlab.providers.dart.panel.build.cell import _parseFragment, _parseOldNoteTable
+
+    root = _parseFragment(_NOTE_MERGED_CONTENT)
+    rows = list(
+        _parseOldNoteTable(
+            root, statement="NT_D834300", scope="consolidated", period="2024Q4", code="000270", rcept="R0"
+        )
+    )
+    # 일반 행: 원재료 당기(2024)/전기(2023)
+    raw = {r["ctxYear"]: r["valueRaw"] for r in rows if r["label"].replace(" ", "") == "원재료등의사용액"}
+    assert raw == {2024: "1,000", 2023: "900"}
+    # 병합 총계행: 라벨=중간셀(합계 아님), 값 당기=2024 (naive 면 2023 phantom)
+    tot = [r for r in rows if r["valueRaw"] == "5,000"]
+    assert len(tot) == 1 and tot[0]["ctxYear"] == 2024
+    assert "합계" not in tot[0]["label"] and tot[0]["acode"] is None
+    assert tot[0]["axisPath"] == "ConsolidatedMember" and tot[0]["ctxMode"] == "Y"

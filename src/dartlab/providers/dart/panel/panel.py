@@ -357,6 +357,16 @@ class Panel(pl.DataFrame):
                     marketNs=self._marketNs,
                     periods=periods or self._periods,
                 )
+            # 주석(NT_) — 단일축 lineitem 은 IS/BS 처럼 항목명×period 정규화(readNoteStatement, 5표 엔진 공유).
+            # 다축 matrix·순수 서술 주석은 None → 아래 raw 행 검색(원본 blob, honest gap).
+            if key.startswith("NT_") and code is not None:
+                from . import cell as _cell
+
+                noteOut = _cell.readNoteStatement(
+                    code, statement=key, freq=freq or "year", scope=scope, marketNs=self._marketNs
+                )
+                if noteOut is not None:
+                    return noteOut
         else:  # us — 별도 native 셀 artifact 없음
             nativeFn = getattr(self, "_nativeFn", None)
             if nativeFn is not None and (key in _NATIVE_KEYS or key == "ratios"):

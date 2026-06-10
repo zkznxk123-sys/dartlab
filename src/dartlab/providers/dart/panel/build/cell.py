@@ -411,3 +411,70 @@ def _parseOldStatementTable(root, *, statement: str, scope: str, period: str, co
                 "cellOrder": order,
             }
             order += 1
+
+
+def _parseOldNoteTable(root, *, statement: str, scope: str, period: str, code: str, rcept: str) -> Iterator[dict]:
+    """옛(ACONTEXT 없음) **주석** 표 — 우측정렬 가드 위치파싱 (병합행 phantom 차단). 5표 파서는 무수정.
+
+    5표 ``_parseOldStatementTable`` 은 TR 첫 셀=항목명 가정이나, 주석 총계행은 rowspan 으로 ``합계|라벨|값``
+    3셀 병합이라 첫 셀('합계')을 라벨로 쓰면 값열이 한 칸 밀려 ctxYear 오배정(prior-year phantom, 표본 77.5%).
+    본 파서는 **값=후행 contiguous 숫자런, 라벨=값런 직전 텍스트셀**(우측정렬)이라 병합행도 정확. 단일축 lineitem
+    주석(비용성격별·판관비·법인세 등)을 5표처럼 당기/전기 비교열로 과거 연장(~2013).
+
+    Args:
+        root: contentRaw 파싱 root.
+        statement: 노트 코드(NT_D######) — 셀 statement 필드.
+        scope: consolidated / standalone.
+        period: 보고서 period(YYYYQn). 연도=당기, 컬럼 i=ctxYear(연도−i).
+        code: 종목코드.
+        rcept: 접수번호.
+
+    Yields:
+        CELL_SCHEMA dict (acode=None, label=항목명, axisPath=ConsolidatedMember).
+    """
+    periodYear = int(period[:4])
+    isAnnual = period.endswith("Q4")
+    quarter = 4 if isAnnual else (int(period[5]) if len(period) > 5 and period[5].isdigit() else 4)
+    mode = "Y" if isAnnual else "A"  # 옛 분기는 누적(A) — 단독(Q)은 태그 없어 불가
+    flow = _STMT_FLOW.get(statement, "d")
+    order = 0
+    for tr in root.iter("TR"):
+        cells = [c for c in tr if c.tag in ("TD", "TE")]
+        if len(cells) < 2:
+            continue
+        texts = [_teText(c) for c in cells]
+        amts = [_parseAmount(t) for t in texts]
+        # 후행 숫자런(오른쪽부터, 빈셀 건너뜀, 텍스트 만나면 정지) = 당기/전기/… 값열.
+        valIdx: list[int] = []
+        for i in range(len(cells) - 1, -1, -1):
+            if amts[i] is not None:
+                valIdx.append(i)
+            elif texts[i].strip():
+                break  # 라벨 경계
+        valIdx.reverse()
+        if not valIdx:
+            continue
+        firstVal = valIdx[0]
+        # 라벨 = 값런 직전 마지막 텍스트셀(병합행 `합계|라벨|값` 도 중간 라벨 정확).
+        labelCells = [texts[j] for j in range(firstVal) if texts[j].strip() and amts[j] is None]
+        label = labelCells[-1] if labelCells else (texts[0] if texts else "")
+        if not label or _parseAmount(label) is not None:
+            continue
+        for col, idx in enumerate(valIdx):  # 좌=당기, 우로 갈수록 과거
+            yield {
+                "corp": code,
+                "rceptNo": rcept,
+                "filingPeriod": period,
+                "statement": statement,
+                "scope": scope,
+                "acode": None,
+                "label": label,
+                "ctxYear": periodYear - col,
+                "ctxFlow": flow,
+                "ctxQuarter": quarter,
+                "ctxMode": mode,
+                "axisPath": "ConsolidatedMember",
+                "valueRaw": texts[idx],
+                "cellOrder": order,
+            }
+            order += 1

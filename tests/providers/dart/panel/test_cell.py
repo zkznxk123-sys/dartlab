@@ -303,3 +303,46 @@ def test_read_ratios_wide(monkeypatch) -> None:
     assert "roe" in ratios and "debtRatio" in ratios
     assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["2024"] is not None
     assert w.filter(pl.col("ratio") == "roe").row(0, named=True)["label"] == "자기자본이익률 (ROE %)"
+
+
+# ── 주석(NT_) 정규화 — c.panel("NT_D834300") 5표 엔진 공유 (readNoteStatement) ──
+
+
+def test_collapse_degen_axis() -> None:
+    """단일축 lineitem 의 degenerate axis → "" (depth-1 통과), 진짜 축 멤버는 보존(matrix 배제)."""
+    from dartlab.providers.dart.panel.cell import _collapseDegenAxis
+
+    assert _collapseDegenAxis("ConsolidatedMember|ReportedAmount") == ""
+    assert _collapseDegenAxis("ConsolidatedMember") == ""
+    assert _collapseDegenAxis("") == ""
+    assert _collapseDegenAxis("SemiconductorMember") == "SemiconductorMember"  # 진짜 축 보존
+    assert _collapseDegenAxis("ConsolidatedMember|SemiconductorMember") == "ConsolidatedMember|SemiconductorMember"
+
+
+def test_read_note_statement_non_nt_returns_none() -> None:
+    """NT_ 아닌 statement → None (5표 키는 readStatement 담당)."""
+    from dartlab.providers.dart.panel.cell import readNoteStatement
+
+    assert readNoteStatement("005930", statement="IS2") is None
+
+
+def test_read_note_statement_reuses_engine(monkeypatch) -> None:
+    """NT_ → _noteCellsFromPanel 셀 → 본진 _statementFromCells 재사용 (항목명×period, 옛 acode=None 연장)."""
+    import dartlab.providers.dart.panel.cell as C
+
+    cells = [
+        _row("2024Q4", "NT_D834300", "ifrs-full_ExpenseByNature", "계", 2024, "d", 4, "Y", "", "268,144,942"),
+        _row("2024Q4", "NT_D834300", "ifrs-full_ExpenseByNature", "계", 2023, "d", 4, "Y", "", "252,368,518"),
+        _row("2024Q4", "NT_D834300", "ifrs-full_EmployeeBenefitsExpense", "급여", 2024, "d", 4, "Y", "", "32,877,167"),
+        _oldRow("2020Q4", "급여", 2020, "25,054,684"),  # 옛 acode=None 연장
+    ]
+    cells[-1]["statement"] = "NT_D834300"
+    monkeypatch.setattr(C, "_noteCellsFromPanel", lambda code, nt, ns="kr": pl.DataFrame(cells, schema=CELL_SCHEMA))
+
+    w = C.readNoteStatement("X", statement="NT_D834300", freq="year")
+    assert w is not None
+    assert sorted(c for c in w.columns if c.isdigit()) == ["2020", "2023", "2024"]  # 옛 연장
+    tot = w.filter(pl.col("account") == "계")
+    assert tot.height == 1 and tot["2024"][0] == "268,144,942" and tot["2023"][0] == "252,368,518"
+    sal = w.filter(pl.col("account") == "급여")
+    assert sal["2024"][0] == "32,877,167" and sal["2020"][0] == "25,054,684"  # XBRL+옛 한 행

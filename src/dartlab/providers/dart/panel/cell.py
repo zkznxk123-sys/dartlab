@@ -137,6 +137,83 @@ def _cellsFromPanel(code: str, marketNs: str = "kr", periods: list[str] | None =
     return pl.DataFrame(rows, schema=CELL_SCHEMA)
 
 
+# 콤마 천단위 숫자런 (데이터표 leaf = 가장 많은 것).
+_NUMRUN_RE = re.compile(r"\d{1,3}(?:,\d{3})+")
+# 단일축 lineitem 주석의 degenerate axis 멤버 (연도 아닌 진짜 축 아님) — collapse 해 depth-1 통과.
+_DEGEN_AXIS: frozenset[str] = frozenset(
+    {"ConsolidatedMember", "ReportedAmount", "ReportedAmountMember", "EntityWideTotalMember", ""}
+)
+
+
+def _collapseDegenAxis(ap: str | None) -> str:
+    """단일축 lineitem 의 degenerate axisPath(ConsolidatedMember|ReportedAmount) → "" (depth-1 통과).
+
+    진짜 축 멤버(세그먼트·거래처 등)면 그대로 둠 → ``_statementFromCells`` depth-1 필터가 matrix 주석 배제.
+    """
+    if not ap:
+        return ""
+    members = [m for m in ap.split("|") if m]
+    return "" if all(m in _DEGEN_AXIS for m in members) else ap
+
+
+def _noteCellsFromPanel(code: str, ntCode: str, marketNs: str = "kr") -> pl.DataFrame | None:
+    """주석(NT_) 가족 contentRaw → CELL_SCHEMA 셀 — ``alignNotes`` 정체성 소스(``_cellsFromPanel`` 깊은과거 짝).
+
+    5표 ``_cellsFromPanel`` 은 flat parquet 의 keyed 5표(2023+)만 본다. 주석은 read-time ``alignNotes`` 가
+    null-key 깊은과거 주석행에 NT_ 정체성을 부여(2013~)하므로, 본 함수는 ``readLong→alignNotes→anchorLatest``
+    aligned long 을 소스로 주석가족(ntCode)을 분해한다. XBRL leaf = ``_xbrlCellsFromContent``(+ degenerate axis
+    collapse), 옛 leaf = ``_parseOldNoteTable``(병합행 가드). 연간 deep-history(Q4 사업보고서)만.
+
+    Args:
+        code: 종목코드.
+        ntCode: 주석 표준코드(NT_D######) substring.
+        marketNs: 시장 namespace.
+
+    Returns:
+        CELL_SCHEMA in-memory DataFrame 또는 None (주석가족/데이터표 부재).
+    """
+    from . import read as _read
+    from .build.cell import _parseFragment, _parseOldNoteTable, _xbrlCellsFromContent
+
+    long = _read.readLong(code, marketNs=marketNs)  # 전 period — alignNotes 뼈대는 최근 native 주석 필요
+    if long is None:
+        return None
+    aligned = _read.anchorLatest(_read.alignNotes(long))
+    fam = aligned.filter(
+        pl.col("disclosureKey").fill_null("").str.contains(ntCode)
+        & (pl.col("leafType") == "table")
+        & pl.col("period").str.ends_with("Q4")
+    )
+    if fam.is_empty():
+        return None
+    # (period, scope) 별 데이터표 leaf 1개 = 콤마숫자 가장 많은 contentRaw.
+    groups: dict[tuple[str, str], list[dict]] = {}
+    for r in fam.iter_rows(named=True):
+        groups.setdefault((r["period"], r.get("scope") or "consolidated"), []).append(r)
+    rows: list[dict] = []
+    for (period, scope), leaves in groups.items():
+        best, bn = None, 0
+        for r in leaves:
+            n = len(_NUMRUN_RE.findall(r.get("contentRaw") or ""))
+            if n > bn:
+                bn, best = n, r
+        if best is None or bn < 2:
+            continue
+        root = _parseFragment(best["contentRaw"])
+        if root is None:
+            continue
+        rcept = best.get("rceptNo") or ""
+        if root.find(".//TE[@ACONTEXT]") is not None:
+            for c in _xbrlCellsFromContent(root, statement=ntCode, scope=scope, period=period, code=code, rcept=rcept):
+                c["axisPath"] = _collapseDegenAxis(c["axisPath"])
+                rows.append(c)
+        else:
+            rows.extend(_parseOldNoteTable(root, statement=ntCode, scope=scope, period=period, code=code, rcept=rcept))
+    if not rows:
+        return None
+    return pl.DataFrame(rows, schema=CELL_SCHEMA)
+
+
 def _freqMask(freq: str) -> pl.Expr:
     """freq → ctxFlow/ctxMode filter mask (토큰 선택, 산수 0).
 
@@ -400,6 +477,56 @@ def readStatement(
     if df is None:
         return None
     return _resolveStatement(df, variants=variants, freq=freq, scope=scope)
+
+
+def readNoteStatement(
+    code: str,
+    *,
+    statement: str,
+    freq: str = "year",
+    scope: str | None = None,
+    marketNs: str = "kr",
+) -> pl.DataFrame | None:
+    """주석(NT_) 표를 IS/BS 처럼 항목명 × 전 기간 정규화 — 5표 read 엔진(`_resolveStatement`) 재사용.
+
+    ``c.panel("NT_D834300")`` 진입점. 단일축 lineitem 주석(비용성격별·판관비·법인세·금융손익·퇴직급여 등)을
+    ``readStatement`` 와 **동일 계약**(raw valueRaw, source 단위, `_stitchRecentName` 개명통합)으로 정규화한다.
+    셀 소스만 ``alignNotes`` aligned(깊은과거 2013~)로 다르고, stitch/pivot/scope 해소는 5표와 같은
+    ``_resolveStatement``. 다축 matrix 주석(세그먼트·특수관계자)은 axisPath 가 보존돼 depth-1 필터에서 제외
+    → None(축차원 view 는 별도). 순수 서술 주석도 셀 0 → None (honest gap).
+
+    Args:
+        code: 종목코드.
+        statement: 주석 표준코드 ("NT_D######").
+        freq: "year"(기본, 사업보고서 당기/전기 연장) / "quarter" / "ytd".
+        scope: None(기본)=연결→별도 자동 / "consolidated" / "standalone".
+        marketNs: 시장 namespace.
+
+    Returns:
+        항목명×period wide(raw valueRaw, 최신 좌측) 또는 None (주석가족 부재 / 다축·서술 주석 / 매칭 0).
+
+    Raises:
+        없음 — 주석/셀 부재 시 None.
+
+    Example:
+        >>> readNoteStatement("005930", statement="NT_D834300", freq="year")  # doctest: +SKIP — 비용성격별 12년
+
+    SeeAlso:
+        - ``readStatement`` — 5표 항목명 view (본 함수는 그 주석 짝, 엔진 공유).
+        - ``_noteCellsFromPanel`` — ``alignNotes`` 정체성 소스 셀(깊은과거).
+        - ``panel.Panel.__call__`` — ``c.panel("NT_D834300")`` 진입점.
+
+    AIContext:
+        - 상태 없는 read. valueRaw 그대로(숫자화는 소비자) — 5표와 동일 계약. 단위환산·content-signal 미적용.
+    """
+    if not statement.startswith("NT_"):
+        return None
+    df = _noteCellsFromPanel(code, statement, marketNs)
+    if df is None:
+        return None
+    # keyed era(2023+)는 native per-table NT_ 라 0 오염. 깊은과거 combined-note 에서 인접 tax 표가 같은 제목으로
+    # co-tagged 되면 그 period 만 행 혼입 — 큐레이션(content-signal) 없는 honest-gap(구조 정밀화는 alignNotes/dechunk 후속).
+    return _resolveStatement(df, variants=(statement,), freq=freq, scope=scope)
 
 
 def _resolveStatement(
