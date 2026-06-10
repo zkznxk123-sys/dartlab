@@ -25,11 +25,12 @@ const REGULAR_LIMIT = 500;
 const NONREGULAR_LIMIT = 200;
 const CHANGES_LIMIT = 8;
 
-// 주가 — 데이터 소스 단일 교체 지점. KRX 원자료 정책(유지/교체/게이트) 변경 시 이 세 함수만 바꾼다.
+// 주가 — 데이터 소스 단일 교체 지점. 정책 변경 시 이 세 함수만 바꾼다.
 export const price = {
 	minYear: KRX_MIN_YEAR,
-	// gov 회사별 parquet(재배포 가능·50KB 전체이력) 우선 → 미캐시/미지원 시 KRX 폴백(무회귀).
-	// gov 캔들은 priceSeries 캐시에 seed → loadedCandles/loadOlderYear 일관.
+	// 프론트가 종목 하나를 온디맨드로 호출 — HF gov/prices/company/{code} 캐시 hit 면 사용,
+	// 미스면 /__gov 가 gov API 라이브 호출 → 차트 → HF 저장(draw-first-save-later). HF = 캐시.
+	// gov 캔들은 priceSeries 캐시에 seed → loadedCandles/loadOlderYear(과거 연도 date/ 폴백) 일관.
 	initial: async (code: string, year: number): Promise<CompanyPrices | null> => {
 		const gov = await loadGovCandles(code);
 		if (gov && gov.length) return seedCandles(code, gov);
@@ -39,8 +40,7 @@ export const price = {
 	loaded: (code: string) => loadedCandles(code)
 };
 
-// 공공데이터포털(재배포 가능) 주가 캐시. 현재 차트는 KRX 유지 — gov 는 prefetch 로 HF 캐시만 덥힘.
-// 차트를 gov 우선으로 전환하려면 price.initial 에서 loadGovCandles 우선·KRX 폴백으로 한 줄 교체.
+// 공공데이터포털 회사별 단일 parquet 온디맨드 로더(차트 SSOT). 미스 시 /__gov 가 라이브 채움.
 export const govPrice = (code: string) => loadGovCandles(code);
 
 export const finance = (code: string): Promise<TerminalFinanceBundle | null> => loadTerminalFinance(code);
@@ -61,10 +61,9 @@ export const changes = (code: string): Promise<CompanyChange[]> => loadLiveCompa
 // 두 로더는 in-flight dedup 이 있어 패널의 같은 호출과 스캔을 공유(중복 fetch 없음).
 // 나머지 경량 로더(relations/filings/facts/changes)는 패널이 단일 호출 — 여기서 중복 발사하지 않음.
 export function prefetch(code: string, priceYear: number): void {
-	void loadInitialOHLCV(code, priceYear);
+	void loadGovCandles(code); // 회사별 gov 캐시 워밍 — dev: 라이브 fetch+HF 저장, prod: 캐시 읽기(미스=date/ 폴백)
 	void loadTerminalFinance(code);
 	void loadHfProductIndexMap();
-	void loadGovCandles(code); // gov(재배포 가능) 캐시 워밍 — dev: 라이브 fetch+HF 업로드, prod: 캐시 읽기(미스=무시)
 }
 
 export const workbench = {

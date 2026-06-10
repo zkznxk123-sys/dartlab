@@ -1,13 +1,14 @@
-"""KRX HF 데이터셋 부분 액세스 — 엔진 내부용 (Mode 2).
+"""KR 가격 HF 데이터셋 부분 액세스 — 엔진 내부용 (Mode 2).
 
 엔진 (quant/scan/analysis) 이 KR OHLCV/시총/발행주식수가 필요할 때 호출하는 단일 진입점.
 **사용자 KRX_API_KEY 환경변수 보지 않음.** HuggingFace 데이터셋이 SSOT.
+HF 벌크는 공공데이터포털(data.go.kr) gov 축이 publish (date 샤딩, KRX raw schema 동질).
 
 사용자 직접 호출 (Mode 1) 은 `gather/krxApi.py` 참조 — `engines.gather §9`.
 
-데이터 흐름 (dartlab 표준 — `core/dataLoader.loadData`):
-    1. 로컬 `data/krx/prices/raw-{YYYY}.parquet` 확인
-    2. 없으면 HF (`eddmpython/dartlab-data` / `krx/prices/raw-{YYYY}.parquet`) 다운로드
+데이터 흐름 (dartlab 표준 — `core/dataLoader.loadData`, category=govPrices):
+    1. 로컬 `data/gov/prices/date/{YYYY}.parquet` 확인
+    2. 없으면 HF (`eddmpython/dartlab-data` / `gov/prices/date/{YYYY}.parquet`) 다운로드
     3. 있으면 ETag + Content-Length 검증 → stale 시 재다운로드 (3-Layer Freshness, engines.data §13)
     4. LRU 캐시 (16개) — 같은 세션 재호출 시 메모리 hit
 
@@ -25,9 +26,9 @@ import polars as pl
 
 log = logging.getLogger(__name__)
 
-# dartlab 표준 카테고리 (DATA_RELEASES["krxPrices"] SSOT).
+# dartlab 표준 카테고리 (DATA_RELEASES["govPrices"] SSOT — gov/prices/date 샤딩).
 # core.dataLoader.loadData 가 dir/repo/freshness 를 자동 처리 — 직접 path 안 박음.
-_CATEGORY = "krxPrices"
+_CATEGORY = "govPrices"
 
 # KRX OpenAPI 응답 컬럼명 — krxApi._parseKrxResponse 통과 후 형식 (검증 2026-04-24)
 _COL_DATE = "BAS_DD"  # 기준일 (YYYYMMDD string)
@@ -84,14 +85,14 @@ def _loadYear(year: int) -> pl.DataFrame | None:
     """
     from dartlab.core.dataLoader import loadData
 
-    stockCode = f"raw-{year}"  # filename = stockCode + ".parquet" (loadData 컨벤션)
+    stockCode = f"{year}"  # date 는 dir(gov/prices/date)에 포함 → 파일명 = {year}.parquet
     try:
         return loadData(stockCode, category=_CATEGORY)
     except Exception as exc:
         # HF 미빌드 또는 해당 연도 미수집 — 모든 download/network 에러를 silent skip.
         # 정상 케이스 (HF 에 그 연도 파일 없음) 가 빈번해서 광범위 catch + debug 레벨.
         log.debug(
-            "krxPrices/%s.parquet 미가용 (HF 미빌드 또는 해당 연도 미수집): %s",
+            "govPrices/%s.parquet 미가용 (HF 미빌드 또는 해당 연도 미수집): %s",
             stockCode,
             type(exc).__name__,
         )

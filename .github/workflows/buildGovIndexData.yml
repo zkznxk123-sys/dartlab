@@ -1,0 +1,69 @@
+name: Gov Index Sync (Bulk)
+
+# engines.gather — 공공데이터포털(data.go.kr) 일별 전 시장군 지수 → HF dataset publish.
+# 출력: gov/indices/date/{YYYY}.parquet (전지수 횡단) + gov/indices/index/{key}.parquet (지수별).
+# 엔진(benchmarkMap·macro)은 이 결과를 hfIndexBulk.loadFiltered(category=govIndices)로 소비.
+
+on:
+  schedule:
+    - cron: '20 11 * * 1-5'  # KST 20:20 평일 — 어제 전지수 1콜 upsert
+  workflow_dispatch:
+    inputs:
+      basDt:
+        description: '기준일자 YYYYMMDD (기본 어제)'
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-dataset-push
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore gov index parquet cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/gov/indices
+          key: dartlab-gov-indices-${{ github.run_id }}
+          restore-keys: dartlab-gov-indices-
+
+      - name: Build gov index parquet + push to HF
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily-index ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
+
+      - name: Save gov index parquet cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/gov/indices
+          key: dartlab-gov-indices-${{ github.run_id }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Gov Index Sync (Bulk)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} ${{ github.event.schedule }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| HF dataset | \`eddmpython/dartlab-data/gov/indices\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 출력 | \`gov/indices/date/{YYYY}.parquet\` + \`gov/indices/index/{key}.parquet\` |" >> $GITHUB_STEP_SUMMARY

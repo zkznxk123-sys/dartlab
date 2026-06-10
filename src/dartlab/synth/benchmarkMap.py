@@ -68,26 +68,26 @@ SECTOR_INDEX_MAP: dict[str, tuple[tuple[str, str, float], ...]] = {
 
 @lru_cache(maxsize=1)
 def availableIndexNames() -> set[tuple[str, str]]:
-    """로컬 KRX 지수 데이터에 실제 존재하는 ``(시장군, 지수명)`` 집합.
+    """로컬 KR 지수 데이터에 실제 존재하는 ``(시장군, 지수명)`` 집합.
 
     Capabilities:
-        - data/krx/indices/raw-*.parquet 최신 2 파일에서 (MARKET_GROUP, IDX_NM) unique 집합
+        - data/gov/indices/date/*.parquet 최신 2 파일에서 (MARKET_GROUP, IDX_NM) unique 집합
         - lru_cache 로 세션 내 단 1 회 IO
 
     Returns:
         set[tuple[str, str]] — (indexMarket, indexName) 쌍.
 
     Guide:
-        벤치 indexExists 검증의 데이터 소스. 빈 집합 = krx 데이터 없음 (test/dev 환경).
+        벤치 indexExists 검증의 데이터 소스. 빈 집합 = 지수 데이터 없음 (test/dev 환경).
 
     When:
         Sector 후보 검증 + AI 사용 가능 벤치 답변.
 
     How:
-        ``_getDataRoot`` → krx/indices/raw-*.parquet → ``MARKET_GROUP/IDX_NM`` unique.
+        ``_getDataRoot`` → gov/indices/date/*.parquet → ``MARKET_GROUP/IDX_NM`` unique.
 
     Requires:
-        ``data/krx/indices/`` raw parquet ≥ 1.
+        ``data/gov/indices/date/`` parquet ≥ 1.
 
     Raises:
         없음 — 파일 없음 시 빈 집합.
@@ -107,8 +107,8 @@ def availableIndexNames() -> set[tuple[str, str]]:
 
     from dartlab.core.dataLoader import _getDataRoot
 
-    root = Path(_getDataRoot()) / "krx" / "indices"
-    files = sorted(root.glob("raw-*.parquet"), reverse=True)
+    root = Path(_getDataRoot()) / "gov" / "indices" / "date"
+    files = sorted(root.glob("*.parquet"), reverse=True)
     names: set[tuple[str, str]] = set()
     for path in files[:2]:
         df = pl.read_parquet(path, columns=["MARKET_GROUP", "IDX_NM"])

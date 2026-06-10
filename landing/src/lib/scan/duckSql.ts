@@ -2,7 +2,7 @@
  * Scan Studio — DuckDB-WASM 으로 HF parquet 직접 query.
  *
  * 3 source 별 lazy 로드:
- *   - prices  : gov/prices/raw-{year}.parquet + raw-{year-1}.parquet UNION → 1Y window
+ *   - prices  : gov/prices/date/{year}.parquet + raw-{year-1}.parquet UNION → 1Y window
  *               currentPrice/marketCap/ma20/high-low/return1m/3m/1y/volatility1y/spark
  *   - valuation: dart/scan/valuation.parquet → per/pbr/dividendYield/marketCap (Naver)
  *   - changes  : dart/scan/changes.parquet → 1Y numeric/structural/total 변경 카운트
@@ -32,9 +32,9 @@ async function persistedHas(db: DartDb, tableName: string): Promise<boolean> {
 /** KRX prices 1Y window view 등록 (krxPrices 라는 이름으로). */
 async function setupKrxPricesView(db: DartDb): Promise<void> {
 	const year = new Date().getFullYear();
-	await db.registerHfParquet('krxPricesCurr', `gov/prices/raw-${year}.parquet`);
+	await db.registerHfParquet('krxPricesCurr', `gov/prices/date/${year}.parquet`);
 	try {
-		await db.registerHfParquet('krxPricesPrev', `gov/prices/raw-${year - 1}.parquet`);
+		await db.registerHfParquet('krxPricesPrev', `gov/prices/date/${year - 1}.parquet`);
 		await db.query(
 			`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
 		);
@@ -154,7 +154,7 @@ export async function loadPriceSnapshot(db: DartDb): Promise<Map<string, PriceMe
 	const t0 = performance.now();
 	const year = new Date().getFullYear();
 	try {
-		await db.registerHfParquet('krxPricesCurr', `gov/prices/raw-${year}.parquet`);
+		await db.registerHfParquet('krxPricesCurr', `gov/prices/date/${year}.parquet`);
 		const rows = await db.query<{
 			ISU_CD: string;
 			currentPrice: number | null;
@@ -211,7 +211,7 @@ export async function loadPriceSnapshot(db: DartDb): Promise<Map<string, PriceMe
 export async function loadUniverseSnapshot(db: DartDb): Promise<UniverseNode[]> {
 	const year = new Date().getFullYear();
 	try {
-		await db.registerHfParquet('scanPricesCurr', `gov/prices/raw-${year}.parquet`);
+		await db.registerHfParquet('scanPricesCurr', `gov/prices/date/${year}.parquet`);
 		await db.registerHfParquet('scanValuation', 'dart/scan/valuation.parquet');
 
 		const rows = await db.query<{
@@ -772,9 +772,9 @@ export async function* loadPriceMetricsStream(
 	const t0 = performance.now();
 	const year = new Date().getFullYear();
 	try {
-		await db.registerHfParquet('krxPricesCurr', `gov/prices/raw-${year}.parquet`);
+		await db.registerHfParquet('krxPricesCurr', `gov/prices/date/${year}.parquet`);
 		try {
-			await db.registerHfParquet('krxPricesPrev', `gov/prices/raw-${year - 1}.parquet`);
+			await db.registerHfParquet('krxPricesPrev', `gov/prices/date/${year - 1}.parquet`);
 			await db.query(
 				`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
 			);

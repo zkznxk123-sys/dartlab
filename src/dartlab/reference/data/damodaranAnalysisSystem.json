@@ -428,7 +428,7 @@
         "marketCap",
         "shares"
       ],
-      "krPreferredPath": "data/krx/prices/raw-2026.parquet",
+      "krPreferredPath": "data/gov/prices/date/2026.parquet",
       "usPreferredPath": "dartlab.gather(\"price\", market=\"US\") plus data/edgar/finance/{cik}.parquet shares"
     },
     "referenceData": {

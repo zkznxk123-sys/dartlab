@@ -138,7 +138,7 @@ def _marketData():
         out["priceError"] = type(exc).__name__
 
     if market == "KR":
-        krx_path = Path("data/krx/prices/raw-2026.parquet")
+        krx_path = Path("data/gov/prices/date/2026.parquet")
         if krx_path.exists():
             try:
                 krx = (

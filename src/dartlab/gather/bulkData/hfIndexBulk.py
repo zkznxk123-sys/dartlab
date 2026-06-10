@@ -1,13 +1,14 @@
-"""KRX 지수 HF 데이터셋 부분 액세스.
+"""KR 지수 HF 데이터셋 부분 액세스.
 
 Summary
 -------
 ``gather("krxIndex", ...)`` 의 사용자 기본 경로. KRX API 키를 읽지 않고
-HuggingFace 데이터셋의 ``krx/indices/raw-{YYYY}.parquet`` 만 사용한다.
+HuggingFace 데이터셋의 ``gov/indices/date/{YYYY}.parquet`` 만 사용한다 (공공데이터포털
+gov 축 publish, KRX 지수 schema 동질).
 
 Description
 -----------
-저장 SSOT 는 ``DATA_RELEASES["krxIndices"]`` 이다. 연도별 raw parquet 을
+저장 SSOT 는 ``DATA_RELEASES["govIndices"]`` 이다. 연도별 date parquet 을
 ``core.dataLoader.loadData`` 로 읽으므로 로컬 캐시, HF 다운로드, ETag/size
 freshness 검증은 dartlab 공통 데이터 로더 정책을 그대로 따른다.
 
@@ -45,7 +46,7 @@ import polars as pl
 
 log = logging.getLogger(__name__)
 
-_CATEGORY = "krxIndices"
+_CATEGORY = "govIndices"  # DATA_RELEASES["govIndices"] SSOT — gov/indices/date 샤딩
 _COL_DATE = "BAS_DD"
 _COL_MARKET = "MARKET_GROUP"
 
@@ -99,12 +100,12 @@ def _loadYear(year: int) -> pl.DataFrame | None:
     """
     from dartlab.core.dataLoader import loadData
 
-    name = f"raw-{year}"
+    name = f"{year}"  # date 는 dir(gov/indices/date)에 포함 → 파일명 = {year}.parquet
     try:
         return loadData(name, category=_CATEGORY)
     except Exception as exc:
         log.debug(
-            "krxIndices/%s.parquet 미가용 (HF 미빌드 또는 해당 연도 미수집): %s",
+            "govIndices/%s.parquet 미가용 (HF 미빌드 또는 해당 연도 미수집): %s",
             name,
             type(exc).__name__,
         )

@@ -314,7 +314,10 @@ def loadData(
     # processes, the in-memory LRU must not pin yesterday's parquet after the
     # short KRX freshness TTL expires.
     krxShouldRefresh: bool | None = None
-    if category in {"krxPrices", "krxIndices"} and refresh == "auto":
+    if (
+        category in {"krxPrices", "krxIndices", "govPrices", "govPriceCompany", "govIndices", "govIndexPerIndex"}
+        and refresh == "auto"
+    ):
         krxShouldRefresh = _shouldRefreshHfCategory(path, category, refresh)
 
     checkMemoryAndGc(f"loadData({stockCode},{category})")

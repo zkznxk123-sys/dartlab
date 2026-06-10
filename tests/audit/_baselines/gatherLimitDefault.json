@@ -3,6 +3,9 @@
   "violations": [
     "src/dartlab/gather/bis/catalog.py::listCatalog",
     "src/dartlab/gather/ecb/catalog.py::listCatalog",
+    "src/dartlab/gather/gov/govApi.py::fetchGovBydd",
+    "src/dartlab/gather/gov/govApi.py::fetchGovIndex",
+    "src/dartlab/gather/gov/govApi.py::fetchGovStock",
     "src/dartlab/gather/imf/catalog.py::listCatalog",
     "src/dartlab/gather/infra/sdmxClient.py::fetch"
   ]

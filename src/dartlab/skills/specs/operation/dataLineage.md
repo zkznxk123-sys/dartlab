@@ -58,7 +58,7 @@ L1: parquet (정규화)
    data/dart/panel/{code}.parquet (contentRaw/content 본문; DART read SSOT)
    data/edgar/finance/*.parquet
    data/edgar/panel/{ticker}.parquet (보드 + native payload 단일 artifact)
-   data/krx/prices/*.parquet
+   data/gov/prices/date/*.parquet (공공데이터포털 일별 전종목 — date/company 샤딩)
    ↓
 L2: in-memory
    Company.show(...) — BoundedCache
@@ -91,7 +91,8 @@ L3: axis / recipe
 | DART panel | dart/ | panel/{code}/{period} (14-col) + _index + _label | 공시 수평화 보드 (회사내·회사간) |
 | EDGAR companyfacts XBRL | edgar/ | finance/* | edgar finance 대문자 topic |
 | EDGAR full-submission text | edgar/ | panel/{ticker}.parquet | 공시 수평화 보드 + 소문자 native 재무 키 |
-| KRX OHLCV | krx/ | prices/raw-YYYY | quant 30+ + scan |
+| KR OHLCV (공공데이터포털) | gov/ | prices/date/{YYYY} + prices/company/{code} | quant 30+ + scan + 차트 |
+| KR 지수 (공공데이터포털) | gov/ | indices/date/{YYYY} + indices/index/{key} | benchmarkMap + macro |
 | KRX events | krx/ | events/* | _adjustPrice (split/dividend) |
 | 한은 macro | macro/ | (외부 API) | macro 12 axis |
 

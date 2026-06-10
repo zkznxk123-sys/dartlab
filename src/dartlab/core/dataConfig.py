@@ -99,6 +99,27 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "KRX 시장군별 지수 일별 OHLCV+거래대금+시가총액 (raw, long parquet)",
         "public": True,
     },
+    # ── 공공데이터포털(data.go.kr) gov 축 — date/company/index 샤딩. 엔진 reader SSOT. ──
+    "govPrices": {
+        "dir": "gov/prices/date",
+        "label": "공공데이터포털 일별 전종목 OHLCV+시총+발행주식수 (date 샤딩, KRX raw schema)",
+        "public": True,
+    },
+    "govPriceCompany": {
+        "dir": "gov/prices/company",
+        "label": "공공데이터포털 회사별 일별 OHLCV+시총 타임라인 (차트 직독 artifact)",
+        "public": True,
+    },
+    "govIndices": {
+        "dir": "gov/indices/date",
+        "label": "공공데이터포털 시장군별 지수 일별 OHLCV+거래대금+시가총액 (date 샤딩, KRX 지수 schema)",
+        "public": True,
+    },
+    "govIndexPerIndex": {
+        "dir": "gov/indices/index",
+        "label": "공공데이터포털 지수별 일별 시계열 (지수 1개 직독 artifact)",
+        "public": True,
+    },
     "macroFred": {
         "dir": "macro/fred",
         "label": "FRED 거시경제 시계열 (HF 벌크, latest-revised)",

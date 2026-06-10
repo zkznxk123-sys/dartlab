@@ -55,7 +55,7 @@ export const TABLE_SOURCES: TableSource[] = [
 		label: 'prices (KRX)',
 		icon: TrendingUp,
 		source: 'parquet',
-		hfPath: 'gov/prices/raw-{year}.parquet',
+		hfPath: 'gov/prices/date/{year}.parquet',
 		viewName: 'krxPricesAll',
 		defaultLimit: 1000,
 		searchableColumns: ['ISU_CD'],

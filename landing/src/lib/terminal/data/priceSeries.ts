@@ -1,4 +1,4 @@
-// 일별 OHLCV 시계열 — gov/prices/raw-{year}.parquet 을 hyparquet HTTP-range 로 직독.
+// 일별 OHLCV 시계열 — gov/prices/date/{year}.parquet 을 hyparquet HTTP-range 로 직독.
 // hyparquet 는 컬럼 projection (7 컬럼) + ISU_CD 필터 pushdown + 병렬 range → 첫 페인트 비차단·sub-second.
 // 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
 import { browser } from '$app/environment';
@@ -13,7 +13,7 @@ export interface Candle {
 	v: number;
 }
 
-// KRX raw 파케이 존재 하한 (HF 실측: raw-2010 ~ raw-2026). 이 아래는 404 → lazy 로드 종료.
+// date 샤드 파케 존재 하한 (HF 실측: date/2010 ~ date/2026). 이 아래는 404 → lazy 로드 종료.
 export const KRX_MIN_YEAR = 2010;
 
 export interface CompanyPrices {
@@ -67,7 +67,7 @@ function toCandle(r: KrxRow): Candle | null {
 
 // ISU_CD 는 KRX 주식 = 'A' + 6 자리 (예: A005930). 드물게 prefix 없는 경우 대비 $in.
 async function readYearCandles(year: number, isuA: string, isuPlain: string): Promise<Candle[]> {
-	const path = `gov/prices/raw-${year}.parquet`;
+	const path = `gov/prices/date/${year}.parquet`;
 	try {
 		const { rows } = await readParquetRows<KrxRow>(path, {
 			columns: OHLCV_COLUMNS,

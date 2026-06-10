@@ -1,0 +1,120 @@
+"""gov(공공데이터포털) raw fetch + normalize 계약 — 순수 변환 오프라인 검증."""
+
+from __future__ import annotations
+
+import polars as pl
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
+def test_marketGroupFromIdxCsf_prefix_rule():
+    """idxCsf 접두 → MARKET_GROUP (테마지수·미지값은 KRX fallback)."""
+    from dartlab.gather.gov.govApi import _marketGroupFromIdxCsf
+
+    assert _marketGroupFromIdxCsf("KOSPI시리즈") == "KOSPI"
+    assert _marketGroupFromIdxCsf("KOSDAQ시리즈") == "KOSDAQ"
+    assert _marketGroupFromIdxCsf("KRX시리즈") == "KRX"
+    assert _marketGroupFromIdxCsf("테마지수") == "KRX"
+    assert _marketGroupFromIdxCsf(None) == "KRX"
+
+
+def test_normalizeGovIndexFrame_to_krx_schema():
+    """gov 지수 raw → KRX 13-col 지수 schema + MARKET_GROUP 파생."""
+    from dartlab.gather.gov.govApi import normalizeGovIndexFrame
+
+    raw = pl.DataFrame(
+        [
+            {
+                "basDt": "20260605",
+                "idxNm": "코스피 200",
+                "idxCsf": "KOSPI시리즈",
+                "clpr": 1297.02,
+                "mkp": 1323.25,
+                "hipr": 1338.13,
+                "lopr": 1278.65,
+                "vs": -82.54,
+                "fltRt": -5.98,
+                "trqu": 199470293,
+                "trPrc": 44729607853977,
+                "lstgMrktTotAmt": 6231443094675910,
+            }
+        ]
+    )
+    out = normalizeGovIndexFrame(raw)
+    assert out.columns == [
+        "BAS_DD",
+        "MARKET_GROUP",
+        "IDX_CLSS",
+        "IDX_NM",
+        "CLSPRC_IDX",
+        "OPNPRC_IDX",
+        "HGPRC_IDX",
+        "LWPRC_IDX",
+        "CMPPREVDD_IDX",
+        "FLUC_RT",
+        "ACC_TRDVOL",
+        "ACC_TRDVAL",
+        "MKTCAP",
+    ]
+    row = out.row(0, named=True)
+    assert row["MARKET_GROUP"] == "KOSPI"
+    assert row["IDX_NM"] == "코스피 200"
+    assert row["CLSPRC_IDX"] == 1297.02
+    assert out.schema["MKTCAP"] == pl.Int64
+
+
+def test_normalizeGovToKrxRaw_to_15col():
+    """gov 전종목 bydd → KRX 15-col raw + ISU_CD='A'+코드."""
+    from dartlab.gather.gov.govApi import normalizeGovToKrxRaw
+
+    raw = pl.DataFrame(
+        [
+            {
+                "basDt": "20260605",
+                "srtnCd": "005930",
+                "itmsNm": "삼성전자",
+                "mrktCtg": "KOSPI",
+                "mkp": 333500,
+                "hipr": 343000,
+                "lopr": 325000,
+                "clpr": 329000,
+                "vs": -22500,
+                "fltRt": -6.4,
+                "trqu": 33725012,
+                "trPrc": 11191087320641,
+                "mrktTotAmt": 1923425662032000,
+                "lstgStCnt": 5846278608,
+            }
+        ]
+    )
+    out = normalizeGovToKrxRaw(raw)
+    row = out.row(0, named=True)
+    assert row["ISU_CD"] == "A005930"
+    assert row["ISU_NM"] == "삼성전자"
+    assert row["TDD_CLSPRC"] == 329000
+    assert "SECT_TP_NM" in out.columns
+    assert out.schema["TDD_CLSPRC"] == pl.Int64
+    assert out.schema["FLUC_RT"] == pl.Float64
+
+
+def test_normalizeGovFrame_to_company_std():
+    """gov raw → 회사 표준 schema (date/stockCode/close...)."""
+    from dartlab.gather.gov.govApi import normalizeGovFrame
+
+    raw = pl.DataFrame(
+        [{"basDt": "20260605", "srtnCd": "005930", "itmsNm": "삼성전자", "mrktCtg": "KOSPI", "clpr": 329000.0}]
+    )
+    out = normalizeGovFrame(raw)
+    row = out.row(0, named=True)
+    assert row["date"] == "20260605"
+    assert row["stockCode"] == "005930"
+    assert row["close"] == 329000.0
+
+
+def test_normalize_empty_input_safe():
+    """빈/컬럼 누락 입력은 예외 없이 빈 DataFrame."""
+    from dartlab.gather.gov.govApi import normalizeGovIndexFrame, normalizeGovToKrxRaw
+
+    assert normalizeGovIndexFrame(pl.DataFrame()).is_empty()
+    assert normalizeGovToKrxRaw(pl.DataFrame()).is_empty()

@@ -1,0 +1,70 @@
+name: Gov Price Sync (Bulk)
+
+# engines.gather — 공공데이터포털(data.go.kr) 일별 전종목 주가 → HF dataset publish.
+# 출력: gov/prices/date/{YYYY}.parquet (전종목 횡단) + gov/prices/company/{code}.parquet (종목별).
+# 엔진(quant/scan/analysis)은 이 결과를 hfBulk.loadFiltered(category=govPrices)로 소비.
+
+on:
+  schedule:
+    - cron: '0 11 * * 1-5'  # KST 20:00 평일 (UTC 11:00) — 어제 전종목 1콜 upsert
+  workflow_dispatch:
+    inputs:
+      basDt:
+        description: '기준일자 YYYYMMDD (기본 어제)'
+        required: false
+
+permissions:
+  contents: read
+
+# engines.data — 모든 HF push 워크플로우는 단일 그룹으로 직렬화 (sliding-window 429 회피).
+concurrency:
+  group: hf-dataset-push
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore gov price parquet cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/gov/prices
+          key: dartlab-gov-prices-${{ github.run_id }}
+          restore-keys: dartlab-gov-prices-
+
+      - name: Build gov price parquet + push to HF
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
+
+      - name: Save gov price parquet cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/gov/prices
+          key: dartlab-gov-prices-${{ github.run_id }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Gov Price Sync (Bulk)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} ${{ github.event.schedule }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| HF dataset | \`eddmpython/dartlab-data/gov/prices\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 출력 | \`gov/prices/date/{YYYY}.parquet\` + \`gov/prices/company/{code}.parquet\` |" >> $GITHUB_STEP_SUMMARY
