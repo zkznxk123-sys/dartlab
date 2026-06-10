@@ -1,0 +1,66 @@
+// 공공데이터포털 금융위원회_주식시세정보(공공누리/KOGL, 비상업+출처표시 재배포 가능) 기반 주가 캐시.
+// KRX OpenAPI(제3자 제공 금지)와 달리 dartlab(비상업)은 출처표시 조건으로 공개 재배포·표시 합법.
+//
+// 파이프라인 (프리빌드 아님 — 런타임 온디맨드):
+//   1. 읽기 — HF `gov/prices/{code}.json` (공개·토큰 0, origin.ts HF_RESOLVE 경유).
+//   2. 미스 & 로컬 dev — Vite dev 미들웨어 `/__gov` 가 data.go.kr 라이브 호출 → 정규화 → HF 업로드 → 반환.
+//   3. 프로덕션 — 캐시 읽기 전용(미스 시 호출측이 KRX 폴백). 운영자가 로컬에서 열며 공유 HF 캐시를 채운다.
+// 출처표시 의무(공공누리): gov 데이터 표시 시 GOV_ATTRIBUTION 노출.
+import { browser } from '$app/environment';
+import { hfUrl } from '$lib/data/origin';
+import type { Candle } from './priceSeries';
+
+export const GOV_ATTRIBUTION = '출처: 금융위원회·한국거래소 (공공데이터포털)';
+
+export interface GovCandleFile {
+	source: string;
+	code: string;
+	asOf: string;
+	candles: Candle[];
+}
+
+const cache = new Map<string, Candle[] | null>();
+const inflight = new Map<string, Promise<Candle[] | null>>();
+
+function pick(j: unknown): Candle[] | null {
+	const f = j as GovCandleFile | null;
+	return f && Array.isArray(f.candles) && f.candles.length ? f.candles : null;
+}
+
+async function readHf(code: string): Promise<Candle[] | null> {
+	try {
+		const res = await fetch(hfUrl(`gov/prices/${code}.json`), { headers: { Accept: 'application/json' } });
+		if (!res.ok) return null;
+		return pick(await res.json());
+	} catch {
+		return null;
+	}
+}
+
+async function fillViaDev(code: string): Promise<Candle[] | null> {
+	if (!import.meta.env.DEV) return null; // 프로덕션: 토큰 없음 → 읽기 전용
+	try {
+		const res = await fetch(`/__gov?code=${encodeURIComponent(code)}`);
+		if (!res.ok) return null;
+		return pick(await res.json());
+	} catch {
+		return null;
+	}
+}
+
+/** gov 캐시 주가(전체 이력, 오름차순). null = 미캐시·미지원. 동시 호출 dedup. */
+export function loadGovCandles(code: string): Promise<Candle[] | null> {
+	if (!browser) return Promise.resolve(null);
+	const c = code.trim();
+	if (cache.has(c)) return Promise.resolve(cache.get(c) ?? null);
+	const hit = inflight.get(c);
+	if (hit) return hit;
+	const p = (async () => {
+		let candles = await readHf(c);
+		if (!candles) candles = await fillViaDev(c);
+		cache.set(c, candles);
+		return candles;
+	})().finally(() => inflight.delete(c));
+	inflight.set(c, p);
+	return p;
+}

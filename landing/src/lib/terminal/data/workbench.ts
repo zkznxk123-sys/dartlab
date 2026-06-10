@@ -16,6 +16,7 @@ import { loadCompanyRelations, type CompanyRelations } from './relations';
 import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
 import { loadLiveCompanyReportFacts, loadLiveCompanyChanges, type LiveCompanyReportFact } from '$lib/browser/companyLive';
+import { loadGovCandles } from './govPrice';
 import type { CompanyChange } from '$lib/scan/duckSql';
 
 export type { Candle, TerminalFinanceBundle, ProductIndexItem, CompanyRelations, RegularFiling, NonRegularFiling, LiveCompanyReportFact, CompanyChange };
@@ -31,6 +32,10 @@ export const price = {
 	older: (code: string, targetYear: number) => loadOlderYear(code, targetYear),
 	loaded: (code: string) => loadedCandles(code)
 };
+
+// 공공데이터포털(재배포 가능) 주가 캐시. 현재 차트는 KRX 유지 — gov 는 prefetch 로 HF 캐시만 덥힘.
+// 차트를 gov 우선으로 전환하려면 price.initial 에서 loadGovCandles 우선·KRX 폴백으로 한 줄 교체.
+export const govPrice = (code: string) => loadGovCandles(code);
 
 export const finance = (code: string): Promise<TerminalFinanceBundle | null> => loadTerminalFinance(code);
 
@@ -53,6 +58,7 @@ export function prefetch(code: string, priceYear: number): void {
 	void loadInitialOHLCV(code, priceYear);
 	void loadTerminalFinance(code);
 	void loadHfProductIndexMap();
+	void loadGovCandles(code); // gov(재배포 가능) 캐시 워밍 — dev: 라이브 fetch+HF 업로드, prod: 캐시 읽기(미스=무시)
 }
 
 export const workbench = {

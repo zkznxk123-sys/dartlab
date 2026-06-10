@@ -90,8 +90,103 @@ function skillCatalogPlugin() {
 	};
 }
 
+// repo 루트 .env 직독 (Vite 는 비-VITE_ 변수를 process.env 에 안 넣음 → dev 미들웨어용으로 직접 파싱).
+function readRepoEnv(): Record<string, string> {
+	try {
+		const txt = fs.readFileSync(path.resolve(__dirname, '..', '.env'), 'utf-8');
+		const out: Record<string, string> = {};
+		for (const line of txt.split(/\r?\n/)) {
+			const m = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+			if (m) out[m[1]] = m[2].replace(/^["']|["']$/g, '').trim();
+		}
+		return out;
+	} catch {
+		return {};
+	}
+}
+
+// 공공데이터포털 금융위원회_주식시세정보 (디코딩 키 → encodeURIComponent). 전체 이력 → Candle[] 정규화.
+const GOV_ENDPOINT = 'https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo';
+async function fetchGovCandles(code: string, key: string) {
+	const candles: { t: string; o: number; h: number; l: number; c: number; v: number }[] = [];
+	const seen = new Set<string>();
+	for (let page = 1; page <= 6; page++) {
+		const url = `${GOV_ENDPOINT}?serviceKey=${encodeURIComponent(key)}&resultType=json&numOfRows=4000&pageNo=${page}&likeSrtnCd=${encodeURIComponent(code)}`;
+		const res = await fetch(url);
+		if (!res.ok) throw new Error(`gov api ${res.status}`);
+		const j: any = await res.json();
+		const item = j?.response?.body?.items?.item;
+		const arr = Array.isArray(item) ? item : item ? [item] : [];
+		if (!arr.length) break;
+		for (const r of arr) {
+			if (String(r.srtnCd) !== code) continue; // likeSrtnCd = LIKE → 정확 매칭만 채택
+			const t = String(r.basDt);
+			const c = Number(r.clpr);
+			if (seen.has(t) || !Number.isFinite(c) || c <= 0) continue;
+			seen.add(t);
+			candles.push({ t, o: Number(r.mkp) || c, h: Number(r.hipr) || c, l: Number(r.lopr) || c, c, v: Number(r.trqu) || 0 });
+		}
+		const total = Number(j?.response?.body?.totalCount) || 0;
+		if (page * 4000 >= total) break;
+	}
+	candles.sort((a, b) => a.t.localeCompare(b.t));
+	return candles;
+}
+
+// HF 데이터셋에 작은 JSON 파일 commit (무의존 — HF commit API NDJSON, 비-LFS base64).
+async function hfCommitJson(repoPath: string, obj: unknown, token: string) {
+	const repo = 'eddmpython/dartlab-data';
+	const content = Buffer.from(JSON.stringify(obj)).toString('base64');
+	const body =
+		JSON.stringify({ key: 'header', value: { summary: `gov price cache ${repoPath}`, description: '' } }) +
+		'\n' +
+		JSON.stringify({ key: 'file', value: { path: repoPath, content, encoding: 'base64' } }) +
+		'\n';
+	const res = await fetch(`https://huggingface.co/api/datasets/${repo}/commit/main`, {
+		method: 'POST',
+		headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/x-ndjson' },
+		body
+	});
+	if (!res.ok) throw new Error(`hf commit ${res.status}: ${(await res.text()).slice(0, 200)}`);
+}
+
+// 프론트-먼저 HF 캐시-필 미들웨어 — /__gov?code=XXXXXX (dev only, 토큰 Node 서버측 보관).
+function govPriceDevPlugin() {
+	return {
+		name: 'gov-price-dev',
+		configureServer(server: ViteDevServer) {
+			server.middlewares.use('/__gov', async (req, res) => {
+				const send = (status: number, obj: unknown) => {
+					res.statusCode = status;
+					res.setHeader('Content-Type', 'application/json; charset=utf-8');
+					res.end(JSON.stringify(obj));
+				};
+				try {
+					const url = new URL(req.url ?? '', 'http://localhost');
+					const code = (url.searchParams.get('code') ?? '').replace(/[^0-9A-Za-z]/g, '');
+					if (!code) return send(400, { error: 'code 필요' });
+					const env = readRepoEnv();
+					if (!env.DATA_GO_KR_KEY) return send(503, { error: 'DATA_GO_KR_KEY 미설정(.env)' });
+					const candles = await fetchGovCandles(code, env.DATA_GO_KR_KEY);
+					const file = { source: 'data.go.kr/금융위원회·한국거래소', code, asOf: candles.at(-1)?.t ?? '', candles };
+					if (env.HF_TOKEN && candles.length) {
+						try {
+							await hfCommitJson(`gov/prices/${code}.json`, file, env.HF_TOKEN);
+						} catch (e) {
+							server.config.logger.warn(`[gov] HF 업로드 실패 ${code}: ${e}`);
+						}
+					}
+					send(200, file);
+				} catch (e) {
+					send(502, { error: String(e) });
+				}
+			});
+		}
+	};
+}
+
 export default defineConfig({
-	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), sveltekit()],
+	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), govPriceDevPlugin(), sveltekit()],
 	define: {
 		__DARTLAB_VERSION__: JSON.stringify(dartlabVersion)
 	},
