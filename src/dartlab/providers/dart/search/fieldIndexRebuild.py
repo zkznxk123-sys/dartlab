@@ -522,7 +522,7 @@ def buildMeaningGraph(*, contentLimit: int | None = None, tier: str = "full", sh
     from dartlab.core.dartClient import allFilingsMetaSuffix
 
     _META_SUFFIX = allFilingsMetaSuffix()
-    from dartlab.providers.dart.search.fieldIndex import CONTENT_LIMIT, _contentIndexDir, tokenizeWord
+    from dartlab.providers.dart.search.fieldIndex import CONTENT_LIMIT, _contentIndexDir, tokenizeContent
     from dartlab.providers.dart.search.semantic import coreFeatureWeights, reportNmCore
 
     if contentLimit is None:
@@ -555,7 +555,7 @@ def buildMeaningGraph(*, contentLimit: int | None = None, tier: str = "full", sh
             if not raw:
                 continue
             text = sp.sub(" ", tag.sub(" ", raw[: contentLimit * 6])).strip()[:contentLimit]
-            tf: Counter = Counter(t for t in tokenizeWord(text) if t not in core)
+            tf: Counter = Counter(t for t in tokenizeContent(text) if t not in core)
             body = [t for t, _ in tf.most_common(bodyCap)]
             if not body:
                 continue
@@ -611,7 +611,7 @@ def buildGateRef(*, sampleN: int = 2000, tier: str = "full", showProgress: bool 
         >>> buildGateRef()  # doctest: +SKIP
     """
     from dartlab.providers.dart.search import semantic as _sem
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, _scoreBM25, loadSegment, tokenizeWord
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, _scoreBM25, loadSegment, tokenizeContent
     from dartlab.providers.dart.search.semantic import reportNmCore
 
     segDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
@@ -626,7 +626,7 @@ def buildGateRef(*, sampleN: int = 2000, tier: str = "full", showProgress: bool 
     for i in range(0, meta.height, step):
         row = meta.row(i, named=True)
         core = reportNmCore(row.get("report_nm") or "")
-        toks = list(core) if core else tokenizeWord(row.get("text") or "")
+        toks = list(core) if core else tokenizeContent(row.get("text") or "")
         if not toks:
             continue
         scores = _scoreBM25(idx, toks)

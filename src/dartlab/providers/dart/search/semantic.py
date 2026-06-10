@@ -29,7 +29,7 @@ from dartlab.providers.dart.search.fieldIndex import (
     _getSegments,
     _resolveResultUrl,
     _scoreBM25,
-    tokenizeWord,
+    tokenizeContent,
 )
 
 _log = getLogger(__name__)
@@ -305,7 +305,7 @@ def searchSemantic(
     Example:
         >>> searchSemantic("유상증자", limit=5)  # doctest: +SKIP
     """
-    tokens = tokenizeWord(query)
+    tokens = tokenizeContent(query)
     if not tokens:
         return pl.DataFrame()
 

@@ -15,17 +15,19 @@ def test_scope_validation():
         dartlab.search("test", scope="invalid")
 
 
-def test_tokenize_word():
-    """word 토크나이저 동작."""
-    from dartlab.providers.dart.search.fieldIndex import tokenizeWord
+def test_tokenize_content():
+    """content 토크나이저(음절 bigram + ascii 소문자) 동작."""
+    from dartlab.providers.dart.search.fieldIndex import tokenizeContent
 
-    # 공백/구두점 분리
-    assert tokenizeWord("원재료 가격 급등") == ["원재료", "가격", "급등"]
-    # 영숫자 유지
-    assert tokenizeWord("HBM 투자 2025") == ["HBM", "투자", "2025"]
+    # 한글 run 별 음절 bigram (1음절 run 은 그대로)
+    assert tokenizeContent("원재료 가격 급등") == ["원재", "재료", "가격", "급등"]
+    # 영문 소문자화 + 숫자 제외 (vocab 오염 차단)
+    assert tokenizeContent("HBM 투자 2025") == ["투자", "hbm"]
+    # 조사 흡수 — "배당을" 이 "배당" 질의와 토큰 공유
+    assert "배당" in tokenizeContent("배당을 지급")
     # 빈 문자열
-    assert tokenizeWord("") == []
-    assert tokenizeWord(None) == []
+    assert tokenizeContent("") == []
+    assert tokenizeContent(None) == []
 
 
 def test_build_content_segment_smoke():
@@ -62,15 +64,16 @@ def test_build_content_segment_smoke():
     assert idx["nDocs"] == 2
     assert len(idx["stemDict"]) > 0
     assert meta.height == 2
-    # 토큰이 인덱스에 실제 들어갔는지
-    assert "반도체" in idx["stemDict"]
+    # 토큰(음절 bigram)이 인덱스에 실제 들어갔는지
+    assert "반도" in idx["stemDict"]
+    assert "도체" in idx["stemDict"]
     assert "환율" in idx["stemDict"]
 
 
 def test_bm25_ranks_relevant_doc():
     """BM25 스코어링이 관련 문서를 상위로 올리는지."""
 
-    from dartlab.providers.dart.search.fieldIndex import _scoreBM25, buildContentSegment
+    from dartlab.providers.dart.search.fieldIndex import _scoreBM25, buildContentSegment, tokenizeContent
 
     rows = [
         {
@@ -99,7 +102,7 @@ def test_bm25_ranks_relevant_doc():
         },
     ]
     idx, _ = buildContentSegment(rows, showProgress=False)
-    scores = _scoreBM25(idx, ["반도체", "HBM"])
+    scores = _scoreBM25(idx, tokenizeContent("반도체 HBM"))
     # 첫 문서 > 두 번째 문서
     assert scores[0] > scores[1]
 

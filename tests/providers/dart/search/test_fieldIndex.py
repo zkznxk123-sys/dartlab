@@ -89,8 +89,8 @@ def test_search_content_callable() -> None:
     assert callable(searchContent)
 
 
-def test_tokenize_word_callable() -> None:
-    """tokenizeWord() callable smoke."""
-    from dartlab.providers.dart.search.fieldIndex import tokenizeWord
+def test_tokenize_content_callable() -> None:
+    """tokenizeContent() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import tokenizeContent
 
-    assert callable(tokenizeWord)
+    assert callable(tokenizeContent)

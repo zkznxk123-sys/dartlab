@@ -47,11 +47,13 @@ import polars as pl
 CONTENT_LIMIT = 1500  # section_content 인덱싱 최대 글자 수
 
 # 인덱스 직렬화 포맷 버전 — 코드(라이브러리)와 HF 인덱스의 호환 계약.
-# bump 규칙: npz 키 구성·meaning.json/gateRef 포맷·meta 스키마가 비호환 변경될 때 +1.
+# bump 규칙: npz 키 구성·토크나이저(stems 어휘)·meta 스키마가 비호환 변경될 때 +1.
 # 사용자가 받은 인덱스 schemaVersion > 코드면 best-effort(경고), < 면 재pull 안내(indexInfo.compatible).
-INDEX_SCHEMA_VERSION = 1
+# v2: content 토크나이저 word → 음절 bigram (stems 어휘 전면 교체 — v1 인덱스와 매칭 불가).
+INDEX_SCHEMA_VERSION = 2
 
-_WORD_RE = re.compile(r"[가-힣a-zA-Z0-9]+")
+_HANGUL_RE = re.compile(r"[가-힣]+")
+_ASCII_RE = re.compile(r"[A-Za-z]{2,20}")
 
 
 def _contentIndexDir(tier: str | None = None) -> Path:
@@ -91,24 +93,36 @@ def _activeIndexDir() -> Path:
 # ── 토크나이저 ──
 
 
-def tokenizeWord(text: str) -> list[str]:
-    """content 토크나이저 — 공백/구두점으로 분리된 단어 단위.
+def tokenizeContent(text: str) -> list[str]:
+    """content 토크나이저 — 한글 음절 bigram + 영문 단어(소문자).
+
+    음절 bigram 이 조사 변형을 형태소 분석 0 으로 흡수한다("배당을"→[배당,당을] 가
+    "배당" 질의와 매칭). 숫자는 vocab 오염 차단을 위해 제외. landing
+    ``viewer/searchIndex.tokenizeBigram`` 과 byte-parity (브라우저·서버 동일 토큰).
 
     Args:
-        text: 인자.
+        text: 색인/질의 원문 (빈 값·None 허용).
 
     Raises:
         없음.
 
     Example:
-        >>> tokenizeWord(...)
+        >>> tokenizeContent("배당금 지급")
+        ['배당', '당금', '지급']
 
     Returns:
-        list[str] — 토큰 또는 stems 리스트.
+        list[str] — 한글 음절 bigram(1음절 run 은 그대로) + 영문 소문자 토큰.
     """
     if not text:
         return []
-    return _WORD_RE.findall(text)
+    out: list[str] = []
+    for run in _HANGUL_RE.findall(text):
+        if len(run) == 1:
+            out.append(run)
+        else:
+            out.extend(run[i : i + 2] for i in range(len(run) - 1))
+    out.extend(m.lower() for m in _ASCII_RE.findall(text))
+    return out
 
 
 # ── 빌더 ──
@@ -148,7 +162,7 @@ class _IncrementalBuilder:
         if not text:
             self._docLengths.append(0)
             return
-        toks = tokenizeWord(text)
+        toks = tokenizeContent(text)
         self._docLengths.append(len(toks))
         tf: dict[int, int] = {}
         getSid = self.stemToId.get
@@ -490,7 +504,7 @@ def searchContent(
     Returns:
         pl.DataFrame — 검색 결과 (rcept_no/score/snippet 등).
     """
-    tokens = tokenizeWord(query)
+    tokens = tokenizeContent(query)
     if not tokens:
         return pl.DataFrame()
 
