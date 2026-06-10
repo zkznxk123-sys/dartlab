@@ -79,8 +79,8 @@ async function readYearCandles(year: number, isuA: string, isuPlain: string): Pr
 	}
 }
 
-// 오름차순 병합 + 일자 dedup (연도 경계 안전).
-function mergeDedup(...lists: Candle[][]): Candle[] {
+/** 오름차순 병합 + 일자 dedup (연도 경계 안전). 외부(회사파일+recent tail 병합)에서도 사용. */
+export function mergeDedup(...lists: Candle[][]): Candle[] {
 	const merged = ([] as Candle[]).concat(...lists);
 	merged.sort((a, b) => a.t.localeCompare(b.t));
 	const out: Candle[] = [];

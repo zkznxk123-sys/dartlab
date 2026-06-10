@@ -7,7 +7,7 @@
 //   3. 프로덕션 — 캐시 읽기 전용(미스 시 호출측이 KRX 폴백). 운영자가 로컬에서 열며 공유 HF 캐시를 채운다.
 // 출처표시 의무(공공누리): gov 데이터 표시 시 GOV_ATTRIBUTION 노출.
 import { browser } from '$app/environment';
-import { readParquetRows } from '$lib/data/hfRange';
+import { readParquetWholeFile } from '$lib/data/hfRange';
 import type { Candle } from './priceSeries';
 
 export const GOV_ATTRIBUTION = '출처: 금융위원회·한국거래소 (공공데이터포털)';
@@ -45,7 +45,9 @@ function pick(j: unknown): Candle[] | null {
 
 async function readHf(code: string): Promise<Candle[] | null> {
 	try {
-		const { rows } = await readParquetRows<GovRow>(`gov/prices/company/${code}.parquet`, { columns: GOV_PARQUET_COLUMNS });
+		// 회사별 파일은 작다(~100KB) — HEAD probe 없이 GET 1 회 통파일 (핫패스 RTT 최소화)
+		const rows = await readParquetWholeFile<GovRow>(`gov/prices/company/${code}.parquet`, { columns: GOV_PARQUET_COLUMNS });
+		if (!rows) return null;
 		const candles = rows.map(rowToCandle).filter((x): x is Candle => x != null);
 		return candles.length ? candles : null;
 	} catch {
@@ -62,6 +64,37 @@ async function fillViaDev(code: string): Promise<Candle[] | null> {
 	} catch {
 		return null;
 	}
+}
+
+// 최근 30거래일 전종목 슬림 1파일 — 회사 파일(주간 파생)과 병합하는 신선 tail.
+// 전 종목이 한 파일을 공유 → 첫 다운로드 후 회사 전환 시 tail 비용 0.
+let recentPromise: Promise<Map<string, Candle[]> | null> | null = null;
+const RECENT_COLUMNS = ['stockCode', 'date', 'open', 'high', 'low', 'close', 'volume'];
+
+/** 최근 거래일 tail (code → 캔들 오름차순). null = recent 파일 미존재. */
+export function loadGovRecent(): Promise<Map<string, Candle[]> | null> {
+	if (!browser) return Promise.resolve(null);
+	if (recentPromise) return recentPromise;
+	recentPromise = (async () => {
+		try {
+			const { readParquetWholeFile } = await import('$lib/data/hfRange');
+			const rows = await readParquetWholeFile<GovRow & { stockCode?: string | null }>('gov/prices/recent.parquet', { columns: RECENT_COLUMNS });
+			if (!rows) return null;
+			const map = new Map<string, Candle[]>();
+			for (const r of rows) {
+				const codeKey = r.stockCode == null ? '' : String(r.stockCode);
+				const c = rowToCandle(r);
+				if (!codeKey || !c) continue;
+				let arr = map.get(codeKey);
+				if (!arr) map.set(codeKey, (arr = []));
+				arr.push(c);
+			}
+			return map;
+		} catch {
+			return null;
+		}
+	})();
+	return recentPromise;
 }
 
 /** gov 캐시 주가(전체 이력, 오름차순). null = 미캐시·미지원. 동시 호출 dedup. */

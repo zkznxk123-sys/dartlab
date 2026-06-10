@@ -9,14 +9,14 @@
 //
 // 점진 도입(big-bang 금지): 기존 로더를 걷어내지 않고 그대로 위임한다. 패널은 단계적으로
 // 이 표면으로 이전하며, 이전 전에도 prefetch 가 같은 모듈 캐시를 덥혀 이득을 준다.
-import { loadInitialOHLCV, loadOlderYear, loadedCandles, seedCandles, KRX_MIN_YEAR, type Candle, type CompanyPrices } from './priceSeries';
+import { loadInitialOHLCV, loadOlderYear, loadedCandles, seedCandles, mergeDedup, KRX_MIN_YEAR, type Candle, type CompanyPrices } from './priceSeries';
 import { loadTerminalFinance, type TerminalFinanceBundle } from './terminalFinance';
 import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 import { loadCompanyRelations, type CompanyRelations } from './relations';
 import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
 import { loadLiveCompanyReportFacts, loadLiveCompanyChanges, type LiveCompanyReportFact } from '$lib/browser/companyLive';
-import { loadGovCandles } from './govPrice';
+import { loadGovCandles, loadGovRecent } from './govPrice';
 import type { CompanyChange } from '$lib/scan/duckSql';
 
 export type { Candle, TerminalFinanceBundle, ProductIndexItem, CompanyRelations, RegularFiling, NonRegularFiling, LiveCompanyReportFact, CompanyChange };
@@ -31,12 +31,13 @@ export const LAST_SYM_KEY = 'dlTerm.lastSym';
 // 주가 — 데이터 소스 단일 교체 지점. 정책 변경 시 이 세 함수만 바꾼다.
 export const price = {
 	minYear: KRX_MIN_YEAR,
-	// 프론트가 종목 하나를 온디맨드로 호출 — HF gov/prices/company/{code} 캐시 hit 면 사용,
-	// 미스면 /__gov 가 gov API 라이브 호출 → 차트 → HF 저장(draw-first-save-later). HF = 캐시.
-	// gov 캔들은 priceSeries 캐시에 seed → loadedCandles/loadOlderYear(과거 연도 date/ 폴백) 일관.
+	// 회사파일(전종목 주간 파생, 전체 이력) ∥ recent(최근 30거래일 전종목 슬림 1파일) 병렬 → 병합.
+	// 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을 보장. 둘 다 미스(신규상장 직후)면
+	// date/ 파티션 폴백. dev 미스는 /__gov 라이브 채움 경로가 govPrice 안에서 동작.
 	initial: async (code: string, year: number): Promise<CompanyPrices | null> => {
-		const gov = await loadGovCandles(code);
-		if (gov && gov.length) return seedCandles(code, gov);
+		const [gov, recent] = await Promise.all([loadGovCandles(code), loadGovRecent()]);
+		const tail = recent?.get(code.trim()) ?? [];
+		if ((gov && gov.length) || tail.length) return seedCandles(code, mergeDedup(gov ?? [], tail));
 		return loadInitialOHLCV(code, year);
 	},
 	older: (code: string, targetYear: number) => loadOlderYear(code, targetYear),
@@ -65,6 +66,7 @@ export const changes = (code: string): Promise<CompanyChange[]> => loadLiveCompa
 // 나머지 경량 로더(relations/filings/facts/changes)는 패널이 단일 호출 — 여기서 중복 발사하지 않음.
 export function prefetch(code: string, priceYear: number): void {
 	void loadGovCandles(code); // 회사별 gov 캐시 워밍 — dev: 라이브 fetch+HF 저장, prod: 캐시 읽기(미스=date/ 폴백)
+	void loadGovRecent(); // 최근 거래일 tail — 전 종목 공유 1파일, 세션 1회
 	void loadTerminalFinance(code);
 	void loadHfProductIndexMap();
 }

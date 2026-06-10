@@ -189,6 +189,25 @@ export async function readParquetMetadata(
 	};
 }
 
+// 소형 단일 파일 직독 — HEAD probe 생략, GET 1 회로 전체 버퍼 → 파싱. 미존재(404)는 null.
+// gov 회사별 주가처럼 "작고 통째로 읽는" 핫패스 전용 (요청 2→1, 콜드 RTT 1회 제거).
+export async function readParquetWholeFile<T extends Record<string, unknown> = Record<string, unknown>>(
+	path: string,
+	options: { columns?: string[]; fetchFn?: FetchLike } = {}
+): Promise<T[] | null> {
+	const fetchFn = options.fetchFn ?? fetch;
+	const [{ parquetReadObjects }, { compressors }, resp] = await Promise.all([
+		import('hyparquet'),
+		import('hyparquet-compressors'),
+		fetchResilient(fetchFn, hfUrl(path))
+	]);
+	if (resp.status === 404) return null;
+	if (!resp.ok && resp.status !== 206) throw new Error(`${path} 전체 읽기 실패: ${resp.status}`);
+	const buf = await resp.arrayBuffer();
+	const file: AsyncBuffer = { byteLength: buf.byteLength, slice: (start: number, end?: number) => buf.slice(start, end ?? buf.byteLength) };
+	return (await parquetReadObjects({ file, compressors, columns: options.columns })) as T[];
+}
+
 export async function readParquetRows<T extends Record<string, unknown> = Record<string, unknown>>(
 	path: string,
 	options: {
