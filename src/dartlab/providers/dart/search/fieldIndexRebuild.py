@@ -26,14 +26,17 @@ from dartlab.core.logger import getLogger
 # 불필요·과부하 — regex tag-strip 으로 222파일/수억 토큰 빌드시간을 시간→분 단위로 단축.
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
+# style/script 는 태그만 걷으면 CSS 규칙·JS 본문이 평문에 남는다(".xforms { font-family... }" 류
+# 색인·스니펫 노이즈) — 블록 *내용째* 제거.
+_BLOCK_RE = re.compile(r"<(style|script)\b[^>]*>.*?</\1\s*>", re.IGNORECASE | re.DOTALL)
 
 
 def _stripTags(raw: str, *, limit: int) -> str:
-    """XML/HTML 태그 제거 + entity unescape + 공백 정규화 → 검색용 평문 (limit 자 캡)."""
+    """XML/HTML 태그 제거(style/script 는 내용째) + entity unescape + 공백 정규화 → 검색용 평문."""
     if not raw:
         return ""
     raw = raw[: limit * 6]  # 태그 제거 전 과대 입력 캡 (regex 비용 가드)
-    return _WS_RE.sub(" ", _TAG_RE.sub(" ", html.unescape(raw))).strip()[:limit]
+    return _WS_RE.sub(" ", _TAG_RE.sub(" ", html.unescape(_BLOCK_RE.sub(" ", raw)))).strip()[:limit]
 
 
 # fieldIndex ↔ fieldIndexRebuild 양방향 import 회피 — 함수 본문 lazy import.
@@ -369,8 +372,6 @@ def _feedPanelRollup(
     if _codeLimit > 0:
         entries = entries[:_codeLimit]
 
-    tag = re.compile(r"<[^>]+>")
-    sp = re.compile(r"\s+")
     perSection = 2000  # 섹션당 raw 캡 (메모리·시간 가드)
     rawCap = panelLimit * 4
     added = 0
@@ -412,7 +413,7 @@ def _feedPanelRollup(
                 continue
             parts = row["parts"] or []
             raw = " ".join(p for p in parts if p)[:rawCap]
-            text = sp.sub(" ", tag.sub(" ", raw)).strip()[:panelLimit]
+            text = _WS_RE.sub(" ", _TAG_RE.sub(" ", _BLOCK_RE.sub(" ", raw))).strip()[:panelLimit]
             if not text:
                 continue
             builder.addDoc(text)

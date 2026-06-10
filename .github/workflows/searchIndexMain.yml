@@ -74,8 +74,10 @@ jobs:
             pn=$(find data/dart/panel -name '*.parquet' 2>/dev/null | wc -l)
             ep=$(find data/edgar/panel -name '*.parquet' 2>/dev/null | wc -l)
             nh=$(find data/news/headlines -name '*.parquet' 2>/dev/null | wc -l)
-            echo "pull 검증: allFilings=$af panel=$pn edgarPanel=$ep news=$nh (news additive)"
-            if [ "$af" -gt 0 ] && [ "$pn" -gt 0 ] && [ "$ep" -gt 0 ]; then ok=1; break; fi
+            echo "pull 검증: allFilings=$af panel=$pn edgarPanel=$ep news=$nh"
+            # 하한 = 2026-06 정상 pull(af 347·pn 2929·ep 2529·nh 26)의 ~80% — silent-partial(429)이
+            # >0 검사를 통과해 빌드 8분을 낭비하고 퇴행가드에서야 잡힌 실측 사고(run 27258453698) 차단.
+            if [ "$af" -ge 300 ] && [ "$pn" -ge 2400 ] && [ "$ep" -ge 2000 ] && [ "$nh" -ge 1 ]; then ok=1; break; fi
             echo "pull attempt $attempt 미완(빈 폴더) — 120s 후 재시도"; sleep 120
           done
           [ "$ok" = "1" ]
