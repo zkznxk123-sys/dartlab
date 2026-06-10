@@ -50,6 +50,7 @@ def rebuildMain(
     *,
     includeAllFilings: bool = True,
     includePanel: bool = True,
+    includeEdgarPanel: bool = False,
     includeNews: bool = False,
     contentLimit: int | None = None,
     panelLimit: int = 4000,
@@ -59,7 +60,7 @@ def rebuildMain(
     whitelist: set[str] | list[str] | None = None,
     showProgress: bool = True,
 ) -> int:
-    """main 세그먼트 풀리빌드 — panel + allFilings.
+    """main 세그먼트 풀리빌드 — panel + allFilings (+ 옵션 EDGAR panel).
 
     스트리밍 빌드: 파일 단위로 읽고 즉시 빌더에 feed 후 해제 (메모리 안전).
     시간 오래 걸림 (4M 문서 기준 약 18분). 월 1회 실행 권장.
@@ -75,6 +76,8 @@ def rebuildMain(
     Args:
         includeAllFilings: True 면 전체 공시 (수시 포함).
         includePanel: True 면 panel 정규화 본문을 filing 롤업으로 추가.
+        includeEdgarPanel: True 면 EDGAR panel(미국, 동일 16-col 스키마)도 filing 롤업으로 추가.
+            full tier 전용 권장(lite 는 DART 날짜 prune 의미라 기본 제외).
         includeNews: True 면 뉴스 헤드라인 포함.
         contentLimit: allFilings 본문 최대 문자 수.
         panelLimit: panel filing 롤업 본문 최대 문자 수.
@@ -189,6 +192,23 @@ def rebuildMain(
         if showProgress:
             _log.info(f"[main] panel 롤업 완료: {len(panelRcepts):,} filing, {time.perf_counter() - t0:.0f}초")
 
+    if includeEdgarPanel:
+        edgarRcepts: set[str] = set()  # accession — allFilings(rcept_no) 와 충돌 없음, skip 셋 분리
+        totalDocs += _feedPanelRollup(
+            builder,
+            metaRecs,
+            {},
+            edgarRcepts,
+            panelLimit,
+            showProgress,
+            whitelist=whitelist,
+            base=_edgarPanelDir(),
+            source="edgar-panel",
+            market="us",
+        )
+        if showProgress:
+            _log.info(f"[main] EDGAR panel 롤업 완료: {len(edgarRcepts):,} filing, {time.perf_counter() - t0:.0f}초")
+
     if includeNews:
         totalDocs += _feedNews(builder, metaRecs, newsLimit, showProgress, sinceDate=sinceDate)
 
@@ -276,6 +296,12 @@ def _panelDir():
     return _getDataRoot() / "dart" / "panel"
 
 
+def _edgarPanelDir():
+    from dartlab.core.dataLoader import _getDataRoot
+
+    return _getDataRoot() / "edgar" / "panel"
+
+
 def _periodToReportName(period: str) -> str:
     """panel period(YYYYQn) → DART 정기보고서명 추정."""
     if not period:
@@ -305,22 +331,36 @@ def _panelEntries(base: Path) -> list[tuple[str, list[Path]]]:
 
 
 def _feedPanelRollup(
-    builder, metaRecs, afMeta, panelRcepts, panelLimit, showProgress, *, whitelist=None, sinceDate=None
+    builder,
+    metaRecs,
+    afMeta,
+    panelRcepts,
+    panelLimit,
+    showProgress,
+    *,
+    whitelist=None,
+    sinceDate=None,
+    base=None,
+    source="panel",
+    market="kr",
 ) -> int:
-    """panel 정규화 본문을 filing(rceptNo) 단위 롤업해 빌더에 추가 — "완전한 DART 문서" 색인.
+    """panel 정규화 본문을 filing(rceptNo) 단위 롤업해 빌더에 추가 — "완전한 문서" 색인.
 
     종목별 parquet 스트리밍(read+del+gc) → rceptNo 별 contentRaw concat → get_text → addDoc 1 문서.
-    표시 메타는 afMeta(allFilings) 에서 보강. 추가한 rceptNo 를 panelRcepts 에 기록(allFilings 패스 skip 용).
+    DART(market="kr")는 표시 메타를 afMeta(allFilings)에서 보강하고 추가 rceptNo 를 panelRcepts 에
+    기록(allFilings 패스 skip 용). EDGAR(market="us", base=_edgarPanelDir)는 동일 16-col 스키마라
+    같은 롤업 코어를 공유하되 rceptNo=SEC accession 이라 rcept_dt 유도·DART 메타 보강 없이 색인.
     lite tier — whitelist(종목 한정)는 codeDir 단위, sinceDate(rcept_dt 하한)는 afMeta 기준 filing 단위.
     """
     import gc
     import os
     import re
 
-    base = _panelDir()
+    if base is None:
+        base = _panelDir()
     if not base.exists():
         if showProgress:
-            _log.info("[main] panel 디렉토리 없음 — 롤업 skip")
+            _log.info(f"[main] {source} 디렉토리 없음 — 롤업 skip")
         return 0
     entries = _panelEntries(base)
     if whitelist is not None:  # lite — 종목 한정
@@ -361,10 +401,15 @@ def _feedPanelRollup(
             if not rn:
                 continue
             m = afMeta.get(rn, {})
-            rdt = str(m.get("rcept_dt") or (rn[:8] if len(rn) >= 8 else ""))
-            if sinceDate and rdt < sinceDate:  # lite — rcept_dt 하한(addDoc 전 검사로 meta 정합)
+            if market == "us":
+                # EDGAR accession 은 날짜가 아니라서 rcept_dt 유도 불가 — 빈값(정직). period 가 보고서명 대용.
+                rdt = ""
+                reportNm = str(row.get("leaf") or row.get("period") or "")
+            else:
+                rdt = str(m.get("rcept_dt") or (rn[:8] if len(rn) >= 8 else ""))
+                reportNm = m.get("report_nm") or _periodToReportName(str(row.get("period") or ""))
+            if market == "kr" and sinceDate and rdt < sinceDate:  # lite — rcept_dt 하한(DART 날짜 의미)
                 continue
-            reportNm = m.get("report_nm") or _periodToReportName(str(row.get("period") or ""))
             parts = row["parts"] or []
             raw = " ".join(p for p in parts if p)[:rawCap]
             text = sp.sub(" ", tag.sub(" ", raw)).strip()[:panelLimit]
@@ -382,7 +427,7 @@ def _feedPanelRollup(
                     "report_nm": reportNm,
                     "section_title": row.get("leaf") or "",
                     "text": text[:500],
-                    "source": "panel",
+                    "source": source,
                     "url": "",
                 }
             )

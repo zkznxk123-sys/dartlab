@@ -482,10 +482,13 @@ def _resolveResultUrl(df: pl.DataFrame) -> pl.DataFrame:
         return df
     hasUrl = "url" in df.columns
     dartBase = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + pl.col("rcept_no")
-    if hasUrl and "source" in df.columns:
-        return df.with_columns(
-            pl.when(pl.col("source") == "news").then(pl.col("url")).otherwise(dartBase).alias("dartUrl")
-        )
+    if "source" in df.columns:
+        # EDGAR rcept_no = SEC accession — DART 뷰어 URL 조합이 성립하지 않으므로 빈값(정직).
+        dartBase = pl.when(pl.col("source") == "edgar-panel").then(pl.lit("")).otherwise(dartBase)
+        if hasUrl:
+            return df.with_columns(
+                pl.when(pl.col("source") == "news").then(pl.col("url")).otherwise(dartBase).alias("dartUrl")
+            )
     return df.with_columns(dartBase.alias("dartUrl"))
 
 

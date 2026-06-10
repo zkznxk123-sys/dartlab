@@ -41,11 +41,11 @@ def _buildRouterArtifact(tier: str = "full") -> int:
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
 
-    print("[main] content 인덱스 풀리빌드 시작 (allFilings + panel 롤업 + 뉴스)")
+    print("[main] content 인덱스 풀리빌드 시작 (allFilings + DART panel + EDGAR panel + 뉴스)")
     from dartlab.providers.dart.search import rebuildContent
 
     t0 = time.perf_counter()
-    nDocs = rebuildContent(includePanel=True, includeNews=True, showProgress=True)
+    nDocs = rebuildContent(includePanel=True, includeEdgarPanel=True, includeNews=True, showProgress=True)
     elapsed = time.perf_counter() - t0
     print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
 

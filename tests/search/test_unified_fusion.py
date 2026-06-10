@@ -108,6 +108,38 @@ def test_router_canon_lane(tmp_path, monkeypatch):
     assert df.row(0, named=True)["rcept_no"] == "20260101000020"
 
 
+def test_edgar_panel_rollup_indexed(tmp_path, monkeypatch):
+    """EDGAR panel(동일 16-col 스키마)이 filing 롤업으로 색인 — source='edgar-panel', dartUrl 빈값."""
+    import polars as pl
+
+    from dartlab.providers.dart.search import fieldIndex, fieldIndexRebuild, unified
+
+    monkeypatch.setattr(fieldIndex, "_contentIndexDir", lambda tier=None: tmp_path)
+    edgarDir = tmp_path / "edgarPanel"
+    edgarDir.mkdir()
+    pl.DataFrame(
+        {
+            "rceptNo": ["0001090872-15-000032", "0001090872-15-000032"],
+            "period": ["2015Q1", "2015Q1"],
+            "contentRaw": ["<p>revenue increased due to semiconductor demand</p>", "<p>risk factors include</p>"],
+            "sectionLeaf": ["10-Q", "10-Q"],
+        }
+    ).write_parquet(edgarDir / "AAPL.parquet")
+    monkeypatch.setattr(fieldIndexRebuild, "_edgarPanelDir", lambda: edgarDir)
+
+    n = fieldIndexRebuild.rebuildMain(
+        includeAllFilings=False, includePanel=False, includeEdgarPanel=True, showProgress=False
+    )
+    assert n == 1  # rceptNo 롤업 = 1 filing 1 문서
+    fieldIndex.clearCache()
+    df = unified.searchUnified("semiconductor revenue", limit=5)
+    top = df.row(0, named=True)
+    assert top["rcept_no"] == "0001090872-15-000032"
+    assert top["source"] == "edgar-panel"
+    assert top["report_nm"] == "10-Q"
+    assert top["dartUrl"] == ""  # accession 은 DART 뷰어 URL 조합 불가 — 빈값(정직)
+
+
 def test_expansion_preserves_plain_top(tmp_path, monkeypatch):
     """확장이 발화해도 plain lane 1 위(정확 매칭)가 RRF 상위에 보존된다 (always-safe)."""
     fieldIndex, unified = _patchIndexDir(monkeypatch, tmp_path)
