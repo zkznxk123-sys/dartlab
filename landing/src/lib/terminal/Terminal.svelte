@@ -16,6 +16,8 @@
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import { prefetch as prefetchCompany, LAST_SYM_KEY } from './data/workbench';
 	import { loadMacroLatest, type MacroLatest } from './data/macroSeries';
+	import { loadGovRecent } from './data/govPrice';
+	import type { Candle } from './data/priceSeries';
 
 	interface Props {
 		eng: Engine;
@@ -73,6 +75,15 @@
 		if (c) prefetchCompany(c.code, +c.price.asOf.slice(0, 4) || new Date().getFullYear());
 	});
 	const tickerCodes = $derived(eng.featured(14));
+	// 회사 티커 스파크라인 — recent.parquet(최근 30거래일 전종목) 재사용, 추가 다운로드 0 (모듈 캐시 공유)
+	let recentMap = $state<Map<string, Candle[]> | null>(null);
+	loadGovRecent().then((m) => (recentMap = m));
+	const sparkPts = (s: number[], w = 34, hh = 11): string => {
+		const lo = Math.min(...s);
+		const hi = Math.max(...s);
+		const rng = hi - lo || 1;
+		return s.map((v, i) => `${((i / (s.length - 1)) * w).toFixed(1)},${(hh - ((v - lo) / rng) * (hh - 1.5) - 0.75).toFixed(1)}`).join(' ');
+	};
 	// 실 경제지표 최신값 (ECOS·FRED 시계열) — 종목명·주가차트 윗단 KPI 티커에 합류.
 	let macroLatest = $state<MacroLatest[]>([]);
 	loadMacroLatest().then((m) => (macroLatest = m));
@@ -210,8 +221,11 @@
 			{#each tickerCodes.concat(tickerCodes) as c, i (i)}
 				{@const px = eng.priceOf(c)}
 				{#if px}
+					{@const sp = recentMap?.get(c)}
 					<span class="tickerItem" role="button" tabindex="0" onclick={() => pick(c)} onkeydown={(ev) => ev.key === 'Enter' && pick(c)}>
-						<b>{eng.nameOf(c)}</b><span class="mono">{fmtNum(px.currentPrice)}</span>
+						<b>{eng.nameOf(c)}</b>
+						{#if sp && sp.length > 1}<svg class={'kpiSpark ' + chgClass(px.return1m)} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={sparkPts(sp.map((k) => k.c))} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}
+						<span class="mono">{fmtNum(px.currentPrice)}</span>
 						<span class={'mono ' + chgClass(px.return1m)}>{sign(px.return1m, 1)}%</span>
 					</span>
 				{/if}

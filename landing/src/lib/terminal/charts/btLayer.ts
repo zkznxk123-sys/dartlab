@@ -11,6 +11,7 @@ export const BT_EQUITY = 'BT_EQUITY';
 
 const tradeMap = new Map<number, { side: 'B' | 'S'; px: number }>();
 const eqMap = new Map<number, { eq: number | null; bh: number | null }>();
+let mddTs: { peak: number; recover: number | null } | null = null; // 최대낙폭 창 (timestamp) — 에쿼티 페인 음영
 
 const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
 
@@ -68,7 +69,27 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 			{ key: 'eq', title: 'BT ', type: 'line' },
 			{ key: 'bh', title: 'B&H ', type: 'line' }
 		],
-		calc: (list: { timestamp: number }[]) => list.map((d) => eqMap.get(d.timestamp) ?? {})
+		calc: (list: { timestamp: number }[]) => list.map((d) => eqMap.get(d.timestamp) ?? {}),
+		// 최대낙폭 창(피크→회복) 음영 — return false 로 기본 라인이 음영 위에 렌더 (ICHI 패턴)
+		draw: ({ ctx, kLineDataList, visibleRange, xAxis, bounding }: any): boolean => {
+			if (!mddTs) return false;
+			const from = Math.max(0, visibleRange.from);
+			const to = Math.min(kLineDataList.length, visibleRange.to);
+			let x0: number | null = null;
+			let x1: number | null = null;
+			for (let i = from; i < to; i++) {
+				const ts = kLineDataList[i]?.timestamp;
+				if (ts == null || ts < mddTs.peak || (mddTs.recover != null && ts > mddTs.recover)) continue;
+				const x = xAxis.convertToPixel(i);
+				if (x0 == null) x0 = x;
+				x1 = x;
+			}
+			if (x0 != null && x1 != null) {
+				ctx.fillStyle = 'rgba(240,97,111,0.10)';
+				ctx.fillRect(x0, 0, Math.max(1, x1 - x0), bounding.height);
+			}
+			return false;
+		}
 	});
 }
 
@@ -76,6 +97,7 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 export function publishBt(result: BtResult | null, candles: Candle[]): void {
 	tradeMap.clear();
 	eqMap.clear();
+	mddTs = null;
 	if (!result) return;
 	for (const tr of result.trades) {
 		tradeMap.set(toMs(tr.entryT), { side: 'B', px: tr.entryPx });
@@ -83,6 +105,10 @@ export function publishBt(result: BtResult | null, candles: Candle[]): void {
 	}
 	for (let i = result.startIdx; i < candles.length; i++) {
 		eqMap.set(toMs(candles[i].t), { eq: result.equity[i], bh: result.bhEquity[i] });
+	}
+	const w = result.mddWindow;
+	if (w && candles[w.peakIdx]) {
+		mddTs = { peak: toMs(candles[w.peakIdx].t), recover: w.recoverIdx != null && candles[w.recoverIdx] ? toMs(candles[w.recoverIdx].t) : null };
 	}
 }
 
@@ -105,7 +131,7 @@ export function applyBt(chart: any, rev: number): void {
 				}
 			},
 			false,
-			{ id: 'pane_BT', height: 78 }
+			{ id: 'pane_BT', height: 96, minHeight: 64, dragEnabled: true }
 		);
 		created.set(chart, !!(a || b));
 	}

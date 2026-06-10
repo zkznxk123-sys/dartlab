@@ -96,12 +96,13 @@
 	// 최신 기간부터(역순) 표시 — 차트는 오름차순 유지, 표만 reverse.
 	const dispPeriods = $derived(finView ? finView.periods.slice().reverse() : []);
 	const stmtRows = $derived(finView ? (stmt === 'RT' ? finView.ratios : finView.statements[stmt as StmtKind]) : []);
-	// 표 단위 자동 — 값이 작은 회사는 조 표가 전부 0.x 소수점 → 최대 절대값 2조 미만이면 억 전환 (비율 탭 제외)
+	// 표 단위 자동 — 조 고정이면 중형사 행 대부분이 0.0~0.1 소수점 범벅. 최대 절대값 50조 미만이면
+	// 억(콤마·정수, FnGuide 관례) 전환 — 초대형사만 조 유지 (비율 탭 제외).
 	const finUnitEok = $derived.by(() => {
 		if (!finView) return false;
 		let m = 0;
 		for (const k of ['IS', 'BS', 'CF'] as StmtKind[]) for (const r of finView.statements[k]) for (const v of r.values) if (v != null && Math.abs(v) > m) m = Math.abs(v);
-		return m > 0 && m < 2;
+		return m > 0 && m < 50;
 	});
 	const finUnit = $derived(finUnitEok ? '억' : '조');
 	const finVal = (v: number | null): string => (v == null ? '—' : finUnitEok ? fmtNum(v * 1e4, 0) : fmtNum(v, 1));

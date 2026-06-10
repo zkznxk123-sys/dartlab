@@ -5,7 +5,7 @@
 	// 전체 이력(2010~) lazy 로드, 인스턴스 영속(회사전환=applyNewData, dispose 안 함). SSR 안전.
 	import { browser } from '$app/environment';
 	import { untrack } from 'svelte';
-	import { KRX_MIN_YEAR, aggregateCandles, adjustCandles, type Candle } from '../data/priceSeries';
+	import { KRX_MIN_YEAR, aggregateCandles, adjustCandles, heikinAshi, type Candle } from '../data/priceSeries';
 	import { price as wbPrice } from '../data/workbench';
 	import type { Lang } from '../data/types';
 	import { runBacktest, type BtResult } from '../data/backtest';
@@ -13,7 +13,7 @@
 	import { MACRO_SERIES, loadMacroSeries, MACRO_ATTRIBUTION } from '../data/macroSeries';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
-	import { ChartCtl, PERIOD_N, TF_DIV, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
+	import { ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
 	import { loadDraws, saveDraws, type SavedDraw } from './drawStore';
 	import { publishView } from './seriesBus';
 	import { registerWorkOverlays, MEASURE_NAME } from './avwapOverlay';
@@ -23,6 +23,7 @@
 	import { IND_DEFS } from './indicatorParams';
 	import ChartMenus from './ChartMenus.svelte';
 	import ChartRibbon from './ChartRibbon.svelte';
+	import DrawToolbar from './DrawToolbar.svelte';
 	import BacktestStrip from './BacktestStrip.svelte';
 
 	interface Props {
@@ -67,6 +68,11 @@
 	// viewLen = 현재 tf 로 차트에 적용된 봉 수 (주/월 집계 후 길이 — applySpacing 기준).
 	const hist = { code: '', oldestYear: 9999, newestYear: 0, loading: false, viewLen: 0 };
 	let appliedTf: TfKey = 'D'; // tf effect 의 mount 중복 재적용 차단용 비반응 스냅샷
+	let appliedStyle: CandleStyle = ctl.candleStyle; // HA ↔ 비HA 전환만 데이터 재적용 (스냅샷 가드)
+	// 바 리플레이 — replayCutT = 현재 리플레이 봉 라벨(YYYYMMDD, 비반응). displaySeries 가 이 날짜까지
+	// 절단해 BT·기준선이 "그 시점까지 데이터만으로" 재계산되는 정직한 리플레이를 만든다.
+	let replayCutT: string | null = null;
+	let appliedReplay = { on: false, idx: -1 }; // replay effect 중복 재적용 차단 스냅샷
 
 	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
 	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv ?? undefined });
@@ -87,10 +93,12 @@
 					{ title: '시', value: '{open}' }, { title: '고', value: '{high}' }, { title: '저', value: '{low}' },
 					{ title: '종', value: '{close}' }, { title: '량', value: '{volume}' }, { title: '대금', value: '{turnover}' }, { title: '등락', value: '{change}' }
 				];
+	// 'ha'(하이킨아시)는 데이터 변환(reapply) — klinecharts 캔들 타입으로는 candle_solid 로 그린다.
+	const kcCandleType = (t: CandleStyle) => (t === 'ha' ? 'candle_solid' : t);
 	const themeStyles = () => ({
 		grid: { horizontal: { color: 'rgba(48,58,78,0.55)' }, vertical: { color: 'rgba(38,46,62,0.3)' } },
 		candle: {
-			type: ctl.candleStyle,
+			type: kcCandleType(ctl.candleStyle),
 			bar: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', upBorderColor: '#34d399', downBorderColor: '#f0616f', noChangeBorderColor: '#8b919e', upWickColor: '#5eead4', downWickColor: '#fb7185', noChangeWickColor: '#8b919e' },
 			area: { lineColor: '#5b9bf0', lineSize: 1.4, backgroundColor: [{ offset: 0, color: 'rgba(91,155,240,0.22)' }, { offset: 1, color: 'rgba(91,155,240,0.01)' }] },
 			priceMark: { high: { color: '#8b919e' }, low: { color: '#8b919e' }, last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14' } } },
@@ -151,7 +159,11 @@
 			// 주/월봉은 부분연도 prepend 가 버킷 경계를 깨므로 tf effect 가 전체 백필 후 재적용 (여기선 무시).
 			local.setLoadDataCallback((p: any) => {
 				const done = (rows: any[], more: boolean) => { try { p.callback(rows, more); } catch { /* */ } };
-				if (ctl.tf !== 'D') return done([], false);
+				// ⚠ untrack 필수 — klinecharts 는 applyNewData 안에서 본 콜백을 동기 호출(backward)한다.
+				// 여기 상태 읽기가 reapply 를 부른 effect(회사전환 등)의 의존이 되면 유령 재실행 루프.
+				const s = untrack(() => ({ replayOn: ctl.replay.on, tf: ctl.tf }));
+				if (s.replayOn) return done([], false); // 리플레이 — 절단 시계열에 과거 prepend 금지
+				if (s.tf !== 'D') return done([], false);
 				if (p.type !== 'forward' || hist.loading) return done([], hist.oldestYear - 1 >= KRX_MIN_YEAR);
 				const next = hist.oldestYear - 1;
 				if (next < KRX_MIN_YEAR) return done([], false);
@@ -192,24 +204,53 @@
 		};
 	});
 
-	// 표시 시계열 = 원본 일봉 → (수정주가 보정) → (주/월 집계). reapply·BT·이벤트 마커 공용.
-	function displaySeries(): Candle[] {
+	// 전체 표시 시계열 = 원본 일봉 → (수정주가 보정). reapply 내부 전용 (리플레이 절단 이전 원본).
+	function fullSeries(): Candle[] {
 		const all = wbPrice.loaded(hist.code);
 		const base = all.length ? all : candles; // 캐시 미시드 방어 — prop 직접 적용
 		if (!base.length) return base;
 		return untrack(() => ctl.adj) ? adjustCandles(base) : base;
 	}
 
-	// 로드된 전체 이력을 현재 tf 시점(일=원본, 주/월=집계)으로 재적용 — applyNewData 단일 지점.
+	// 표시 시계열 (BT·기준선·이벤트 마커 공용) — 리플레이 중엔 현재 봉 날짜까지 절단.
+	// 절단 덕에 dataRev 의존 effect(BT·52주 기준선)가 그 시점까지 데이터만으로 정직하게 재계산된다.
+	function displaySeries(): Candle[] {
+		const all = fullSeries();
+		if (replayCutT == null) return all;
+		let end = all.length;
+		while (end > 0 && all[end - 1].t > replayCutT) end--;
+		return all.slice(0, end);
+	}
+
+	// 로드된 전체 이력을 현재 tf 시점(일=원본, 주/월/분기/년=집계)으로 재적용 — applyNewData 단일 지점.
+	// 리플레이 ON 이면 idx 봉까지 절단, 하이킨아시면 적용 직전 변환(버스·BT 는 원본 가격 유지).
 	function reapply(c: any) {
 		const tfv = untrack(() => ctl.tf);
-		const base = displaySeries();
+		const base = fullSeries();
 		if (!base.length) return;
-		const view = tfv === 'D' ? base : aggregateCandles(base, tfv);
-		hist.viewLen = view.length;
-		publishView(view, toMs); // AVWAP·측정룰러가 구독하는 표시 시계열 버스
-		c.applyNewData(view.map(toK), tfv === 'D' && hist.oldestYear - 1 >= KRX_MIN_YEAR);
+		let view = tfv === 'D' ? base : aggregateCandles(base, tfv);
+		hist.viewLen = view.length; // 전체 길이 (리플레이 절단 전 — applySpacing·replay len 기준)
+		// ⚠ untrack 은 콜백 안 읽기만 보호 — proxy 를 꺼내 밖에서 .on 읽으면 호출 effect 에 의존이 생긴다
+		const rp = untrack(() => ({ on: ctl.replay.on, idx: ctl.replay.idx }));
+		if (rp.on) {
+			view = view.slice(0, Math.min(rp.idx, view.length - 1) + 1);
+			replayCutT = view[view.length - 1].t;
+		} else {
+			replayCutT = null;
+		}
+		publishView(view, toMs); // AVWAP·측정룰러가 구독하는 표시 시계열 버스 (원본 가격)
+		const out = untrack(() => ctl.candleStyle) === 'ha' ? heikinAshi(view) : view;
+		c.applyNewData(out.map(toK), !rp.on && tfv === 'D' && hist.oldestYear - 1 >= KRX_MIN_YEAR);
 		bumpDataRev();
+	}
+
+	// 리플레이를 reapply 없이 종료 — 직후 자체 reapply 하는 effect(회사전환·tf·adj)용 (이중 재적용 방지).
+	function exitReplaySilently() {
+		untrack(() => {
+			if (!ctl.replay.on) return;
+			ctl.replayExit();
+			appliedReplay = { on: false, idx: ctl.replay.idx };
+		});
 	}
 
 	// ── 데이터 적용 (회사전환 = applyNewData, dispose 안 함 = 영속) ──
@@ -221,6 +262,7 @@
 		hist.oldestYear = +cs[0].t.slice(0, 4);
 		hist.newestYear = +cs[cs.length - 1].t.slice(0, 4);
 		hist.loading = false;
+		exitReplaySilently(); // 회사 전환 — 이전 회사 시점 리플레이는 무의미
 		reapply(c);
 		bandIds.forEach((id) => c.removeOverlay(id));
 		eventIds.forEach((id) => c.removeOverlay(id));
@@ -249,8 +291,8 @@
 		const N = Math.min(Math.ceil((PERIOD_N[ctl.period] ?? len) / TF_DIV[tfv]), len);
 		const w = el?.clientWidth || 800;
 		const space = w / Math.max(1, N);
-		if (space < 1 && tfv !== 'M') {
-			ctl.tf = tfv === 'D' ? 'W' : 'M'; // tf effect 가 재적용+재배치 이어받음
+		if (space < 1 && (tfv === 'D' || tfv === 'W')) {
+			ctl.tf = tfv === 'D' ? 'W' : 'M'; // tf effect 가 재적용+재배치 이어받음 (분기·년은 수동 전용 — 자동 상향 제외)
 			return;
 		}
 		try { c.setBarSpace(Math.max(1, Math.min(30, space))); c.scrollToRealTime(0); } catch { /* */ }
@@ -284,13 +326,14 @@
 		void backfillTo(c, target);
 	}
 
-	// ── 봉 주기(일/주/월) 전환 → 전체 백필 후 집계 재적용. BT 는 일봉 전용이라 자동 해제. ──
+	// ── 봉 주기(일/주/월/분기/년) 전환 → 전체 백필 후 집계 재적용. BT 는 일봉 전용이라 자동 해제. ──
 	$effect(() => {
 		const tfv = ctl.tf;
 		const c = chart;
 		if (!c || !candles.length) return;
 		if (tfv === appliedTf) return;
 		appliedTf = tfv;
+		exitReplaySilently(); // 봉 주기 전환 — 리플레이 idx 좌표계가 깨지므로 자동 종료
 		if (tfv !== 'D') ctl.btKey = null;
 		const code0 = hist.code;
 		(async () => {
@@ -309,8 +352,35 @@
 		if (!c || !candles.length) return;
 		if (a === appliedAdj) return;
 		appliedAdj = a;
+		exitReplaySilently(); // 보정 전환 — 절단 기준 가격이 달라지므로 자동 종료
 		reapply(c);
 	});
+
+	// ── 바 리플레이 — on/idx 변경 → 절단 재적용 (dataRev 동행으로 BT·기준선 자동 추종) ──
+	$effect(() => {
+		const on = ctl.replay.on;
+		const idx = ctl.replay.idx;
+		const c = chart;
+		if (!c || !candles.length) return;
+		if (on === appliedReplay.on && idx === appliedReplay.idx) return;
+		appliedReplay = { on, idx };
+		reapply(c);
+	});
+
+	// 자동재생 — 400ms 간격 한 봉 전진. 끝 봉 도달 시 replayStep 이 playing 을 끄면 cleanup.
+	$effect(() => {
+		if (!ctl.replay.on || !ctl.replay.playing) return;
+		const t = setInterval(() => ctl.replayStep(), 400);
+		return () => clearInterval(t);
+	});
+
+	// 리플레이 진입 — 시작점 = 현재 기간 윈도 시작(최소 30봉 워밍업), 현재 tf 봉 수로 환산.
+	function enterReplay() {
+		if (!chart || !hist.viewLen) return;
+		const n = Math.ceil((PERIOD_N[ctl.period] ?? 252) / TF_DIV[ctl.tf]);
+		const idx = Math.min(Math.max(30, hist.viewLen - n), hist.viewLen - 1);
+		ctl.replay = { on: true, idx, playing: false, start: idx, len: hist.viewLen };
+	}
 
 	// ── 매물대 토글 → VPVR indicator 생성/제거 (candle_pane, figures:[] = y축 무왜곡) ──
 	$effect(() => {
@@ -458,14 +528,22 @@
 		const lg = lang;
 		const c = chart;
 		if (!c) return;
-		try { c.setStyles({ candle: { type: t, tooltip: { custom: tooltipCustom(lg) } } }); } catch { /* */ }
+		try { c.setStyles({ candle: { type: kcCandleType(t), tooltip: { custom: tooltipCustom(lg) } } }); } catch { /* */ }
+		// HA ↔ 비HA 전환은 데이터 변환이 바뀌므로 재적용 (스냅샷 가드 — mount·단순 타입 전환은 스킵)
+		if (t !== appliedStyle) {
+			const wasHa = appliedStyle === 'ha';
+			appliedStyle = t;
+			if (wasHa || t === 'ha') reapply(c);
+		}
 	});
 
-	// period 변경 → 가시 봉 수 + 필요 시 과거 백필
+	// period 변경 → 가시 봉 수 + 필요 시 과거 백필. 리플레이는 시작점 기준이 달라지므로 자동 종료.
 	$effect(() => {
 		void ctl.period;
 		const c = chart;
-		if (c && candles.length) applyPeriodFull(c);
+		if (!c || !candles.length) return;
+		untrack(() => { if (ctl.replay.on) ctl.replayExit(); }); // 비silent — replay effect 가 전체 복원
+		applyPeriodFull(c);
 	});
 
 	// 백테스트 — 의존: 프리셋·파라미터·비용(토글+bp)·기간·dataRev(applyNewData 동행).
@@ -564,18 +642,29 @@
 				for (const paneId of subPanes.values()) c?.setPaneOptions({ id: paneId, height: ph });
 			} catch { /* */ }
 		});
-		if (!ctl.full) return;
+		if (!ctl.full) {
+			// 전체화면 닫힘 — 리플레이 컨트롤(리본)이 사라지므로 동행 종료 (replay effect 가 전체 복원)
+			untrack(() => { if (ctl.replay.on) ctl.replayExit(); });
+			return;
+		}
 		const PERIOD_KEYS = ['1M', '3M', '6M', '1Y', '3Y', 'MAX'] as const;
 		const onKey = (e: KeyboardEvent) => {
 			const tgt = e.target as HTMLElement | null;
 			if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
 			const k = e.key;
 			if (k === 'Escape') {
-				if (!cancelPendingDraw()) ctl.full = false;
+				// 우선순위: 진행중 드로잉 취소 → 리플레이 종료 → 전체화면 닫기
+				if (cancelPendingDraw()) return;
+				if (ctl.replay.on) { ctl.replayExit(); return; }
+				ctl.full = false;
+			} else if (k === ' ' && ctl.replay.on) {
+				e.preventDefault(); // 리플레이 — 스페이스 = 한 봉 전진
+				ctl.replayStep();
 			} else if (k === 'Delete' || k === 'Backspace') {
 				removeDraw(selectedDrawId);
 			} else if (k === 'ArrowLeft' || k === 'ArrowRight') {
 				e.preventDefault();
+				if (k === 'ArrowRight' && ctl.replay.on) { ctl.replayStep(); return; } // 리플레이 — → = 한 봉 전진
 				const bs = (() => { try { return c?.getBarSpace?.() ?? 8; } catch { return 8; } })();
 				const w = el?.clientWidth || 800;
 				const step = e.shiftKey ? w : bs * 8;
@@ -618,6 +707,9 @@
 				drawMap.set(o.id, serializeDraw(o));
 				ctl.drawCount = drawMap.size;
 				persistDraws();
+				// 연속 그리기 — 같은 도구 즉시 재시작. setTimeout 0 = klinecharts 클릭 이벤트 재진입 회피.
+				// 복원(points 사전 채움)은 onDrawEnd 미발화라 회사전환 시 유령 도구가 생기지 않는다.
+				if (ctl.stayDraw) setTimeout(() => startDraw(toolName), 0);
 			},
 			onPressedMoveEnd: (e: any) => {
 				const o = e.overlay;
@@ -680,7 +772,8 @@
 	const srcText = () =>
 		T('출처: 금융위원회·한국거래소 (공공데이터포털)', 'Source: FSC · KRX (data.go.kr)') +
 		(ctl.econ.length ? ' · ' + MACRO_ATTRIBUTION : '') +
-		(ctl.adj ? T(' · 수정주가', ' · adjusted') : '');
+		(ctl.adj ? T(' · 수정주가', ' · adjusted') : '') +
+		(ctl.candleStyle === 'ha' ? ' · HA' : ''); // 하이킨아시 = 변형값 정직 고지
 	function snapshot() {
 		const ymd = candles.length ? candles[candles.length - 1].t : '';
 		const date = ymd ? `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}` : '';
@@ -694,7 +787,8 @@
 	<div class="chartHost" bind:this={el}></div>
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} {chgPct} {peers} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} {chgPct} {peers} onSnapshot={snapshot} onReplay={enterReplay} />
+		<DrawToolbar {ctl} {lang} onDraw={startDraw} onClearDraw={clearDraw} />
 	{:else}
 		<ChartMenus {ctl} {lang} hasBand={!!valBand} onDraw={startDraw} onClearDraw={clearDraw} />
 	{/if}
@@ -703,6 +797,6 @@
 	<div class="chartSrc">{srcText()}</div>
 
 	{#if btResult && ctl.btKey}
-		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} {lang} onClear={() => (ctl.btKey = null)} />
+		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClear={() => (ctl.btKey = null)} />
 	{/if}
 </div>

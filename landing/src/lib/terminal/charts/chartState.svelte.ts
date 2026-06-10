@@ -11,7 +11,8 @@ export type OverlayKey = 'MA' | 'EMA' | 'SMA' | 'BOLL' | 'BBI' | 'SAR' | 'ICHI' 
 export const OVERLAY_ALL: OverlayKey[] = ['MA', 'EMA', 'SMA', 'BOLL', 'BBI', 'SAR', 'ICHI', 'ENV'];
 // klinecharts YAxisType enum 은 'log' (logarithmic 아님 — 오기 시 조용히 무시되어 로그축이 죽는다)
 export type YMode = 'normal' | 'log' | 'percentage';
-export type CandleStyle = 'candle_solid' | 'candle_up_stroke' | 'ohlc' | 'area';
+// 'ha'(하이킨아시)는 klinecharts 네이티브 타입이 아니라 reapply 데이터 변환(heikinAshi) — 차트엔 candle_solid 로 적용.
+export type CandleStyle = 'candle_solid' | 'candle_up_stroke' | 'ohlc' | 'area' | 'ha';
 
 // 페인 지표 카탈로그 그룹 — 증권사 지표트리 멘탈모델 (리본 [+] 팝오버 3행)
 export const SUB_GROUPS: { kr: string; en: string; keys: SubKey[] }[] = [
@@ -26,14 +27,17 @@ export const OVERLAY_HINT: Partial<Record<OverlayKey, string>> = { ICHI: '일목
 export const PERIODS = ['1M', '3M', '6M', '1Y', '3Y', 'MAX'] as const;
 export type PeriodKey = (typeof PERIODS)[number];
 export const PERIOD_N: Record<string, number> = { '1M': 22, '3M': 66, '6M': 132, '1Y': 252, '3Y': 750, MAX: 100000 };
-// 봉 주기 — 데이터는 일봉, 주/월은 클라이언트 집계(aggregateCandles). TF_DIV = 거래일 환산 제수.
-export type TfKey = 'D' | 'W' | 'M';
+// 봉 주기 — 데이터는 일봉, 주/월/분기/년은 클라이언트 집계(aggregateCandles). TF_DIV = 거래일 환산 제수.
+// 자동 상향 체인(바스페이스 1px 미달)은 일→주→월까지만 — 분기·년은 수동 선택 전용.
+export type TfKey = 'D' | 'W' | 'M' | 'Q' | 'Y';
 export const TFS: { v: TfKey; kr: string; en: string }[] = [
 	{ v: 'D', kr: '일', en: 'D' },
 	{ v: 'W', kr: '주', en: 'W' },
-	{ v: 'M', kr: '월', en: 'M' }
+	{ v: 'M', kr: '월', en: 'M' },
+	{ v: 'Q', kr: '분기', en: 'Q' },
+	{ v: 'Y', kr: '년', en: 'Y' }
 ];
-export const TF_DIV: Record<TfKey, number> = { D: 1, W: 5, M: 21 };
+export const TF_DIV: Record<TfKey, number> = { D: 1, W: 5, M: 21, Q: 63, Y: 252 };
 export const YMODES: { v: YMode; kr: string; en: string }[] = [
 	{ v: 'normal', kr: '일반', en: 'Linear' },
 	{ v: 'log', kr: '로그', en: 'Log' },
@@ -43,7 +47,8 @@ export const CANDLES: { v: CandleStyle; kr: string; en: string }[] = [
 	{ v: 'candle_solid', kr: '캔들', en: 'Candle' },
 	{ v: 'candle_up_stroke', kr: '속빈', en: 'Hollow' },
 	{ v: 'ohlc', kr: '바', en: 'Bar' },
-	{ v: 'area', kr: '라인', en: 'Line' }
+	{ v: 'area', kr: '라인', en: 'Line' },
+	{ v: 'ha', kr: '하이킨아시', en: 'HA' }
 ];
 export const DRAW_TOOLS: { name: string; icon: string; kr: string; en: string }[] = [
 	{ name: 'segment', icon: '╱', kr: '추세선', en: 'Trend' },
@@ -55,6 +60,7 @@ export const DRAW_TOOLS: { name: string; icon: string; kr: string; en: string }[
 	{ name: 'parallelStraightLine', icon: '⫽', kr: '평행채널', en: 'Channel' },
 	{ name: 'priceChannelLine', icon: '⫻', kr: '가격채널', en: 'PriceCh' },
 	{ name: 'anchoredVWAP', icon: '⚓', kr: '앵커VWAP', en: 'AVWAP' },
+	{ name: 'positionTool', icon: '⚖', kr: '포지션', en: 'R:R' },
 	{ name: 'MEASURE', icon: '📏', kr: '측정', en: 'Measure' }
 ];
 
@@ -76,7 +82,11 @@ export class ChartCtl {
 	showRefs = $state(false); // 52주 고가·저가·전일종가 기준선
 	showVP = $state(false); // 매물대 (Volume Profile)
 	magnet = $state(false);
+	stayDraw = $state(false); // 연속 그리기 — 도형 완성 후 같은 도구 자동 재시작 (TV Stay in Drawing Mode)
 	full = $state(false);
+	// 바 리플레이 (TV Bar Replay, 일·집계봉 EOD) — 영속 제외 (세션·시점 한정 모드).
+	// idx = 현재 봉(표시 시계열 인덱스), start/len 은 PriceChart.enterReplay 가 진입 시점에 기록.
+	replay = $state<{ on: boolean; idx: number; playing: boolean; start: number; len: number }>({ on: false, idx: 0, playing: false, start: 0, len: 0 });
 	btKey = $state<BtPresetKey | null>(null);
 	btParams = $state<Record<string, number>>({});
 	btCosts = $state(true);
@@ -111,6 +121,7 @@ export class ChartCtl {
 			if (typeof p.showRefs === 'boolean') this.showRefs = p.showRefs;
 			if (typeof p.showVP === 'boolean') this.showVP = p.showVP;
 			if (typeof p.magnet === 'boolean') this.magnet = p.magnet;
+			if (typeof p.stayDraw === 'boolean') this.stayDraw = p.stayDraw;
 			if (p.indParams && typeof p.indParams === 'object') {
 				const ip: Record<string, number[]> = {};
 				for (const [k, v] of Object.entries(p.indParams as Record<string, unknown>)) {
@@ -132,7 +143,7 @@ export class ChartCtl {
 				JSON.stringify({
 					overlays: this.overlays, subs: this.subs, econ: this.econ, period: this.period, tf: this.tf,
 					yMode: this.yMode, candleStyle: this.candleStyle, indParams: this.indParams,
-					adj: this.adj, showEvents: this.showEvents, showRefs: this.showRefs, showVP: this.showVP, magnet: this.magnet
+					adj: this.adj, showEvents: this.showEvents, showRefs: this.showRefs, showVP: this.showVP, magnet: this.magnet, stayDraw: this.stayDraw
 				})
 			);
 		} catch {
@@ -140,6 +151,26 @@ export class ChartCtl {
 		}
 	}
 
+	/** 리플레이 한 봉 전진 — 끝 봉 도달 시 자동재생만 정지 (idx 불변). */
+	replayStep() {
+		if (!this.replay.on) return;
+		if (this.replay.idx >= this.replay.len - 1) {
+			this.replay.playing = false;
+			return;
+		}
+		this.replay.idx++;
+	}
+	/** 리플레이 시작점 복귀 (⏮) — 자동재생 정지 동행. */
+	replayRestart() {
+		if (!this.replay.on) return;
+		this.replay.idx = this.replay.start;
+		this.replay.playing = false;
+	}
+	/** 리플레이 종료 — PriceChart 의 replay effect 가 전체 시계열을 복원한다. */
+	replayExit() {
+		this.replay.on = false;
+		this.replay.playing = false;
+	}
 	toggleSub(k: SubKey) {
 		this.subs = this.subs.includes(k) ? this.subs.filter((x) => x !== k) : [...this.subs, k];
 	}

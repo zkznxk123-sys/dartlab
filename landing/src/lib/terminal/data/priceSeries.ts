@@ -126,13 +126,17 @@ function weekKey(t: string): string {
 	return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
-/** 일봉 → 주봉('W')·월봉('M') 집계. 라벨 t = 버킷 마지막 거래일(HTS 관행), 마지막 버킷 = 진행중 부분봉. */
-export function aggregateCandles(daily: Candle[], tf: 'W' | 'M'): Candle[] {
+/** 일봉 → 주봉('W')·월봉('M')·분기봉('Q')·년봉('Y') 집계. 라벨 t = 버킷 마지막 거래일(HTS 관행), 마지막 버킷 = 진행중 부분봉. */
+export function aggregateCandles(daily: Candle[], tf: 'W' | 'M' | 'Q' | 'Y'): Candle[] {
 	const out: Candle[] = [];
 	let key = '';
 	let cur: Candle | null = null;
 	for (const k of daily) {
-		const kk = tf === 'M' ? k.t.slice(0, 6) : weekKey(k.t);
+		const kk =
+			tf === 'Y' ? k.t.slice(0, 4)
+			: tf === 'Q' ? `${k.t.slice(0, 4)}Q${Math.floor((+k.t.slice(4, 6) - 1) / 3)}`
+			: tf === 'M' ? k.t.slice(0, 6)
+			: weekKey(k.t);
 		if (kk !== key) {
 			if (cur) out.push(cur);
 			key = kk;
@@ -147,6 +151,25 @@ export function aggregateCandles(daily: Candle[], tf: 'W' | 'M'): Candle[] {
 		}
 	}
 	if (cur) out.push(cur);
+	return out;
+}
+
+/** 하이킨아시 변환 — haC=(o+h+l+c)/4, haO=(전봉haO+전봉haC)/2 (첫 봉 = (o+c)/2),
+ * haH=max(h,haO,haC), haL=min(l,haO,haC). 순수함수: 입력 불변, prefix 안정(앞부분 슬라이스 결과 동일).
+ * 표시 전용 변형값 — 시계열 버스(publishView)·백테스트는 원본 가격을 유지한다. */
+export function heikinAshi(candles: Candle[]): Candle[] {
+	if (!candles.length) return candles;
+	const out: Candle[] = new Array(candles.length);
+	let prevO = 0;
+	let prevC = 0;
+	for (let i = 0; i < candles.length; i++) {
+		const k = candles[i];
+		const haC = (k.o + k.h + k.l + k.c) / 4;
+		const haO = i === 0 ? (k.o + k.c) / 2 : (prevO + prevC) / 2;
+		out[i] = { ...k, o: haO, c: haC, h: Math.max(k.h, haO, haC), l: Math.min(k.l, haO, haC) };
+		prevO = haO;
+		prevC = haC;
+	}
 	return out;
 }
 

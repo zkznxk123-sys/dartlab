@@ -6,7 +6,7 @@
 import { sma, rsi, macd, bollinger } from './indicators';
 import type { Candle } from './priceSeries';
 
-export type BtPresetKey = 'maCross' | 'rsiRevert' | 'bbRevert' | 'macdCross';
+export type BtPresetKey = 'maCross' | 'rsiRevert' | 'bbRevert' | 'macdCross' | 'donchian' | 'momentum';
 
 export interface BtParamDef {
 	name: string;
@@ -120,6 +120,49 @@ export const BT_PRESETS: BtPresetDef[] = [
 			for (let i = start; i < c.length; i++) t[i] = m.line[i] > m.signal[i] ? 1 : 0;
 			return t;
 		}
+	},
+	{
+		key: 'donchian',
+		kr: '채널 돌파 (터틀)',
+		en: 'Donchian Break',
+		descKr: 'N일 최고가 돌파 진입, M일 최저가 이탈 청산',
+		descEn: 'enter on N-day high break, exit on M-day low',
+		params: [
+			{ name: 'entry', kr: '진입N', en: 'entry', min: 10, max: 100, step: 5, def: 20 },
+			{ name: 'exit', kr: '청산M', en: 'exit', min: 5, max: 50, step: 5, def: 10 }
+		],
+		warmup: (p) => Math.max(p.entry, p.exit) + 1,
+		// 종가 기준 채널 — 당일 종가가 직전 N일(당일 제외) 최고 종가 초과 시 진입 (look-ahead 0)
+		signal: (c, p) => {
+			const t = new Int8Array(c.length);
+			let state = 0;
+			for (let i = 1; i < c.length; i++) {
+				let hh = -Infinity;
+				let ll = Infinity;
+				const eFrom = Math.max(0, i - p.entry);
+				const xFrom = Math.max(0, i - p.exit);
+				for (let j = eFrom; j < i; j++) if (c[j] > hh) hh = c[j];
+				for (let j = xFrom; j < i; j++) if (c[j] < ll) ll = c[j];
+				if (i < p.entry) { t[i] = 0; continue; }
+				state = state === 0 ? (c[i] > hh ? 1 : 0) : c[i] < ll ? 0 : 1;
+				t[i] = state;
+			}
+			return t;
+		}
+	},
+	{
+		key: 'momentum',
+		kr: '절대 모멘텀',
+		en: 'Momentum',
+		descKr: 'N일 수익률 > 0 이면 보유 (듀얼모멘텀의 절대축)',
+		descEn: 'hold while N-day return > 0',
+		params: [{ name: 'lookback', kr: '관측N', en: 'lookback', min: 60, max: 252, step: 21, def: 126 }],
+		warmup: (p) => p.lookback + 1,
+		signal: (c, p) => {
+			const t = new Int8Array(c.length);
+			for (let i = p.lookback; i < c.length; i++) t[i] = c[i - p.lookback] > 0 && c[i] > c[i - p.lookback] ? 1 : 0;
+			return t;
+		}
 	}
 ];
 
@@ -140,9 +183,15 @@ export interface BtMetrics {
 	retPct: number;
 	cagrPct: number | null; // windowBars < 252 → null (연환산 거짓말 차단)
 	mddPct: number;
+	mddDays: number | null; // 최장 수면(피크→회복) 거래일 — 미회복이면 현재까지
+	sharpe: number | null; // 일수익률 연환산 (rf=0), windowBars < 60 → null
+	sortino: number | null; // 하방 변동성 기준 — 하락일 0건이면 null
 	winRatePct: number | null;
 	profitFactor: number | null;
 	tradeCount: number;
+	avgTradePct: number | null; // 거래당 평균 수익률
+	bestTradePct: number | null;
+	worstTradePct: number | null;
 	avgHoldDays: number | null;
 	exposurePct: number;
 	costDragPct: number; // 비용 ON 수익률 − 비용 OFF 수익률 (≤0)
@@ -153,7 +202,8 @@ export interface BtResult {
 	bhEquity: (number | null)[];
 	trades: BtTrade[];
 	metrics: BtMetrics;
-	bh: { retPct: number; cagrPct: number | null; mddPct: number };
+	bh: { retPct: number; cagrPct: number | null; mddPct: number; sharpe: number | null };
+	mddWindow: { peakIdx: number; troughIdx: number; recoverIdx: number | null } | null; // 에쿼티 페인 음영용
 	warnings: BtWarning[];
 }
 
@@ -244,6 +294,54 @@ function mdd(equity: (number | null)[]): number {
 	return worst;
 }
 
+// 최대 낙폭 창 — 피크·저점·회복(피크 재돌파) 인덱스 + 최장 수면 거래일. 에쿼티 페인 음영·KPI 용.
+function mddWindowOf(equity: (number | null)[]): { peakIdx: number; troughIdx: number; recoverIdx: number | null; days: number } | null {
+	let peakIdx = -1;
+	let peak = -Infinity;
+	let worst = 0;
+	let wPeak = -1;
+	let wTrough = -1;
+	for (let i = 0; i < equity.length; i++) {
+		const e = equity[i];
+		if (e == null) continue;
+		if (e > peak) { peak = e; peakIdx = i; }
+		else if (peak > 0) {
+			const dd = (e / peak - 1) * 100;
+			if (dd < worst) { worst = dd; wPeak = peakIdx; wTrough = i; }
+		}
+	}
+	if (wPeak < 0) return null;
+	let recoverIdx: number | null = null;
+	const ref = equity[wPeak]!;
+	for (let i = wTrough + 1; i < equity.length; i++) {
+		const e = equity[i];
+		if (e != null && e >= ref) { recoverIdx = i; break; }
+	}
+	let last = equity.length - 1;
+	while (last > wPeak && equity[last] == null) last--;
+	return { peakIdx: wPeak, troughIdx: wTrough, recoverIdx, days: (recoverIdx ?? last) - wPeak };
+}
+
+// 일수익률 기반 연환산 Sharpe(rf=0)·Sortino — 표본 < 60봉이면 null (소표본 거짓말 차단).
+function riskRatios(equity: (number | null)[]): { sharpe: number | null; sortino: number | null } {
+	const rets: number[] = [];
+	let prev: number | null = null;
+	for (const e of equity) {
+		if (e == null) continue;
+		if (prev != null && prev > 0) rets.push(e / prev - 1);
+		prev = e;
+	}
+	if (rets.length < 60) return { sharpe: null, sortino: null };
+	const mean = rets.reduce((a, r) => a + r, 0) / rets.length;
+	const varAll = rets.reduce((a, r) => a + (r - mean) * (r - mean), 0) / rets.length;
+	const downs = rets.filter((r) => r < 0);
+	const varDown = downs.length ? downs.reduce((a, r) => a + r * r, 0) / rets.length : 0;
+	const ann = Math.sqrt(252);
+	const sharpe = varAll > 0 ? (mean / Math.sqrt(varAll)) * ann : null;
+	const sortino = varDown > 0 ? (mean / Math.sqrt(varDown)) * ann : null;
+	return { sharpe, sortino };
+}
+
 function endRet(equity: (number | null)[]): number {
 	for (let i = equity.length - 1; i >= 0; i--) if (equity[i] != null) return (equity[i]! / 100 - 1) * 100;
 	return 0;
@@ -300,6 +398,9 @@ export function runBacktest(
 	const losses = closedAndOpen.filter((t) => t.retPct < 0);
 	const gainSum = wins.reduce((a, t) => a + t.retPct, 0);
 	const lossSum = Math.abs(losses.reduce((a, t) => a + t.retPct, 0));
+	const ddWin = mddWindowOf(strat.equity);
+	const ratios = riskRatios(strat.equity);
+	const bhRatios = riskRatios(bhPass.equity);
 
 	const warnings: BtWarning[] = [];
 	if (closedAndOpen.length < 10) warnings.push({ kind: 'fewTrades' });
@@ -318,14 +419,21 @@ export function runBacktest(
 			retPct,
 			cagrPct: cagr(retPct, windowBars),
 			mddPct: mdd(strat.equity),
+			mddDays: ddWin ? ddWin.days : null,
+			sharpe: ratios.sharpe,
+			sortino: ratios.sortino,
 			winRatePct: closedAndOpen.length ? (wins.length / closedAndOpen.length) * 100 : null,
 			profitFactor: lossSum > 0 ? gainSum / lossSum : null,
 			tradeCount: closedAndOpen.length,
+			avgTradePct: closedAndOpen.length ? closedAndOpen.reduce((a, t) => a + t.retPct, 0) / closedAndOpen.length : null,
+			bestTradePct: closedAndOpen.length ? Math.max(...closedAndOpen.map((t) => t.retPct)) : null,
+			worstTradePct: closedAndOpen.length ? Math.min(...closedAndOpen.map((t) => t.retPct)) : null,
 			avgHoldDays: closedAndOpen.length ? closedAndOpen.reduce((a, t) => a + t.holdDays, 0) / closedAndOpen.length : null,
 			exposurePct: (strat.heldBars / Math.max(1, windowBars - 1)) * 100,
 			costDragPct: endRet(stratOn.equity) - endRet(stratOff.equity)
 		},
-		bh: { retPct: bhRet, cagrPct: cagr(bhRet, windowBars), mddPct: mdd(bhPass.equity) },
+		bh: { retPct: bhRet, cagrPct: cagr(bhRet, windowBars), mddPct: mdd(bhPass.equity), sharpe: bhRatios.sharpe },
+		mddWindow: ddWin ? { peakIdx: ddWin.peakIdx, troughIdx: ddWin.troughIdx, recoverIdx: ddWin.recoverIdx } : null,
 		warnings
 	};
 }

@@ -23,7 +23,7 @@ export interface TabCard {
 export interface FsTab {
 	key: string;
 	label: { kr: string; en: string };
-	finKey?: 'profitability' | 'cashflow' | 'debt'; // terminalFinance.tabCards 키 (모드 토글 동작)
+	finKey?: 'profitability' | 'cashflow' | 'debt' | 'shareholder'; // terminalFinance.tabCards 키 (모드 토글 동작)
 	load?: (code: string, bundle: TerminalFinanceBundle) => Promise<TabCard[]>; // report·교차 (연 축)
 	note?: string; // 탭 하단 정직성 캡션
 }
@@ -327,11 +327,14 @@ async function debtReport(code: string, bundle: TerminalFinanceBundle): Promise<
 }
 
 export const FS_TABS: FsTab[] = [
-	{ key: 'profitability', label: { kr: '수익성', en: 'PROFIT' }, finKey: 'profitability' },
+	{
+		key: 'profitability', label: { kr: '수익성', en: 'PROFIT' }, finKey: 'profitability',
+		note: '포괄손익 격차 = CIS(포괄손익계산서) 직독. OCI = 환산차이·금융자산평가·확정급여 재측정 등 — 손익계산서 밖에서 자본으로 직행하는 손익.'
+	},
 	{ key: 'cashflow', label: { kr: '현금·투자', en: 'CASH' }, finKey: 'cashflow', load: cashflowReport },
 	{
-		key: 'shareholder', label: { kr: '주주환원·소유', en: 'RETURN' }, load: shareholderReport,
-		note: '배당·자사주 = 보통주 기준 공시값 · report. 배당여력의 FCF·순이익 = 연간 재무제표 교차. 자사주 가치 = 연평균종가 × 취득수량 추정. 희석 이력 = 증자·전환·감자 공시 이벤트 연 합산 (무상증자·분할 제외).'
+		key: 'shareholder', label: { kr: '주주환원·소유', en: 'RETURN' }, finKey: 'shareholder', load: shareholderReport,
+		note: '자본변동 브리지 = 최신 연간 자본변동표(SCE) 합계 차원 — 기타 = 기말 대조 잔차(소유주거래·연결범위변동·주식보상 등). 배당·자사주 = 보통주 기준 공시값 · report. 배당여력의 FCF·순이익 = 연간 재무제표 교차. 자사주 가치 = 연평균종가 × 취득수량 추정. 희석 이력 = 증자·전환·감자 공시 이벤트 연 합산 (무상증자·분할 제외).'
 	},
 	{
 		key: 'people', label: { kr: '인력·보수', en: 'PEOPLE' }, load: peopleReport,

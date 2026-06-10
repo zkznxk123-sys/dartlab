@@ -3,11 +3,12 @@
 	// Row1 = 보는 방법(종목·기간·캔들·축·마커·ECON), Row2 = 분석 작업대(오버레이/페인 활성 칩+카탈로그·그리기·BT).
 	// 상태 = ChartCtl 단일 SSOT (일반 메뉴와 공유 — 리본에서 켠 지표가 일반 메뉴에도 켜져 있다).
 	import type { Lang } from '../data/types';
-	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
+	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '../data/macroSeries';
 	import { ECON_COLORS } from './econOverlay';
 	import { CMP_COLORS } from './compareOverlay';
 	import { paramSummary, IND_DEFS } from './indicatorParams';
+	import { loadTemplates, saveTemplate, deleteTemplate, applyTemplate } from './templateStore';
 	import IndParamEditor from './IndParamEditor.svelte';
 	import BtConfig from './BtConfig.svelte';
 
@@ -19,15 +20,17 @@
 		code: string;
 		chgPct: number | null;
 		peers?: { code: string; name: string }[];
-		onDraw: (name: string) => void;
-		onClearDraw: () => void;
 		onSnapshot?: () => void;
+		onReplay?: () => void; // 바 리플레이 진입 (시작점 환산은 PriceChart — viewLen 보유 주체)
 	}
-	let { ctl, lang, hasBand, name, code, chgPct, peers = [], onDraw, onClearDraw, onSnapshot }: Props = $props();
+	let { ctl, lang, hasBand, name, code, chgPct, peers = [], onSnapshot, onReplay }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
-	let pop = $state<string>('none'); // 'econ' | 'ovAdd' | 'subAdd' | 'bt' | `edit:${지표명}`
+	let pop = $state<string>('none'); // 'econ' | 'ovAdd' | 'subAdd' | 'bt' | 'vs' | 'tmpl' | `edit:${지표명}`
 	const offOverlays = $derived(OVERLAY_ALL.filter((o) => !ctl.overlays.includes(o)));
 	const hasParams = (k: string) => (IND_DEFS[k]?.params.length ?? 0) > 0;
+	// 차트틀 — localStorage 다중 슬롯 (templateStore). 목록은 본 컴포넌트 로컬 미러.
+	let templates = $state(loadTemplates());
+	let tmplName = $state('');
 </script>
 
 <svelte:window onclick={() => (pop !== 'none' ? (pop = 'none') : null)} />
@@ -83,6 +86,17 @@
 				</div>
 			{/if}
 		</div>
+		<div class="crGrp">
+			{#if ctl.replay.on}
+				<button class="cbtn" onclick={() => ctl.replayRestart()} title={T('시작점 복귀', 'restart')}>⏮</button>
+				<button class={ctl.replay.playing ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.replay.playing = !ctl.replay.playing)} title={T('자동재생 (400ms)', 'auto-play')}>{ctl.replay.playing ? '⏸' : '▶'}</button>
+				<button class="cbtn" onclick={() => ctl.replayStep()} title={T('한 봉 전진 (→·스페이스)', 'step (→/space)')}>▶▶</button>
+				<span class="mono dim rpPos">{ctl.replay.idx + 1}/{ctl.replay.len}</span>
+				<button class="cbtn" onclick={() => ctl.replayExit()} title={T('리플레이 종료 (ESC)', 'exit replay (ESC)')}>✕</button>
+			{:else}
+				<button class="cbtn" onclick={() => onReplay?.()} title={T('바 리플레이 — 과거 시점부터 한 봉씩 재생', 'bar replay')}>{T('리플레이', 'Replay')}</button>
+			{/if}
+		</div>
 		<button class="crClose cbtn" onclick={() => onSnapshot?.()} title={T('차트 PNG 저장 (S)', 'save PNG (S)')}>📷</button>
 		<button class="cbtn" onclick={() => (ctl.full = false)} title="ESC">✕</button>
 	</div>
@@ -131,24 +145,37 @@
 			</span>
 		</div>
 		<div class="crGrp crPop">
-			<button class={ctl.drawCount ? 'cbtn on' : 'cbtn'} onclick={() => (pop = pop === 'draw' ? 'none' : 'draw')} title={T('그리기 팔레트 (우클릭 삭제 · Del 선택삭제 · 회사별 저장)', 'draw palette (right-click delete · Del · saved per company)')}>✏ {T('그리기', 'Draw')}{ctl.drawCount ? ` ${ctl.drawCount}` : ''} ▾</button>
-			{#if pop === 'draw'}
-				<div class="crMenu">
-					<div class="ctRow ctRowWrap">
-						{#each DRAW_TOOLS as d (d.name)}<button class="mItem" onclick={() => { pop = 'none'; onDraw(d.name); }}>{d.icon} {T(d.kr, d.en)}</button>{/each}
-					</div>
-					<div class="ctRow">
-						<button class={ctl.magnet ? 'mItem on' : 'mItem'} title={T('가까운 봉에 스냅', 'snap to bar')} onclick={() => (ctl.magnet = !ctl.magnet)}>🧲 {T('자석', 'Magnet')}</button>
-						<button class="mItem mClear" disabled={!ctl.drawCount} onclick={() => { pop = 'none'; onClearDraw(); }}>{T('전체 지우기', 'Clear all')}</button>
-					</div>
-				</div>
-			{/if}
-		</div>
-		<div class="crGrp crPop">
 			<button class={ctl.btKey ? 'crChip on' : 'crAdd'} disabled={ctl.tf !== 'D'} title={ctl.tf !== 'D' ? T('일봉 전용', 'daily only') : ''} onclick={() => (pop = pop === 'bt' ? 'none' : 'bt')}>
 				{ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : `＋ ${T('전략 백테스트', 'Backtest')}`}
 			</button>
 			{#if pop === 'bt'}<div class="crMenu crMenuR"><BtConfig {ctl} {lang} /></div>{/if}
+		</div>
+		<div class="crGrp crPop">
+			<button class={templates.length ? 'cbtn on' : 'cbtn'} onclick={() => (pop = pop === 'tmpl' ? 'none' : 'tmpl')} title={T('차트틀 — 지표·축·봉주기 설정 저장/적용', 'chart templates')}>{T('틀', 'TMPL')} ▾</button>
+			{#if pop === 'tmpl'}
+				<div class="crMenu crMenuR">
+					<div class="ctMenuLbl">{T('차트틀 (지표·파라미터·축·캔들·봉주기 · 최대 12)', 'Templates (indicators · axis · tf · max 12)')}</div>
+					<input
+						class="tmplInput"
+						placeholder={T('현재 설정 이름 입력 후 Enter', 'name current setup + Enter')}
+						bind:value={tmplName}
+						onkeydown={(e) => {
+							if (e.key === 'Enter' && tmplName.trim()) {
+								templates = saveTemplate(ctl, tmplName.trim());
+								tmplName = '';
+							}
+						}}
+					/>
+					{#each templates as t (t.name)}
+						<div class="tmplRow">
+							<button class="mItem" title={`${t.overlays.join('·') || '—'} / ${t.subs.join('·') || '—'} · ${t.tf}`} onclick={() => { applyTemplate(ctl, t); pop = 'none'; }}>{t.name}</button>
+							<button class="crChip x" title={T('삭제', 'delete')} onclick={() => (templates = deleteTemplate(t.name))}>×</button>
+						</div>
+					{:else}
+						<span class="dim" style="font-size:9px">{T('저장된 틀 없음 — 위에 이름 입력', 'no templates yet')}</span>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 </header>

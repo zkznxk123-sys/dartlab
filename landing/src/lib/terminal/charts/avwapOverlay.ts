@@ -1,10 +1,12 @@
 // 앵커드 VWAP — 앵커 시점부터 현재까지 (h+l+c)/3 거래량가중 평균 누적선 (기관 평단 추정).
 // registerOverlay 기반: 매 paint 재계산이라 앵커 드래그·봉주기 전환·수정주가 토글 자동 추종.
 // 측정룰러(MEASURE)도 본 파일 — 2점 구간 Δ가격·%·봉수·일수 즉석 표기, 영속 제외(선택 해제 시 제거).
+// 포지션 R:R 도구(positionTool)도 본 파일 — 3점(진입→손절→목표) 리스크/리워드 박스 (TV Long/Short Position).
 import { viewCandles, viewIndexOf } from './seriesBus';
 
 export const AVWAP_NAME = 'anchoredVWAP';
 export const MEASURE_NAME = 'MEASURE';
+export const POSITION_NAME = 'positionTool';
 
 let registered = false;
 export function registerWorkOverlays(kc: { registerOverlay: (t: unknown) => void }): void {
@@ -73,6 +75,61 @@ export function registerWorkOverlays(kc: { registerOverlay: (t: unknown) => void
 				},
 				{ type: 'text', attrs: { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - 5, text: label, align: 'center', baseline: 'bottom' }, ignoreEvent: true, styles: { color: '#0b0e14', backgroundColor: col } }
 			];
+		}
+	});
+
+	// 롱/숏 포지션 R:R — 진입~손절 = 위험(빨강 반투명), 진입~목표 = 보상(초록 반투명).
+	// 라벨 = 롱/숏 + R:R 1:x + 진입/손절/목표 가격. 3점 영속(drawStore 자동 탑승)·드래그 편집 추종.
+	kc.registerOverlay({
+		name: POSITION_NAME,
+		totalStep: 4, // 3점 — 진입·손절·목표
+		needDefaultPointFigure: true,
+		createPointFigures: ({ overlay, coordinates }: any) => {
+			if (!coordinates || coordinates.length < 2) return [];
+			const [pe, ps, pt] = overlay.points ?? [];
+			const entry = pe?.value;
+			const stop = ps?.value;
+			const target = pt?.value;
+			if (entry == null || stop == null) return [];
+			const xs = coordinates.map((c: { x: number }) => c.x);
+			const x0 = Math.min(...xs);
+			const w = Math.max(Math.max(...xs) - x0, 90); // 점들이 수직으로 겹쳐도 최소 박스 폭 확보
+			const yE = coordinates[0].y;
+			const yS = coordinates[1].y;
+			const fmt = (v: number) => Math.round(v).toLocaleString();
+			const box = (yA: number, yB: number, fill: string, border: string) => ({
+				type: 'rect',
+				attrs: { x: x0, y: Math.min(yA, yB), width: w, height: Math.max(Math.abs(yB - yA), 1) },
+				styles: { style: 'stroke_fill', color: fill, borderColor: border, borderSize: 1 }
+			});
+			const figs: unknown[] = [box(yE, yS, 'rgba(240,97,111,0.12)', 'rgba(240,97,111,0.65)')];
+			if (target != null && coordinates.length >= 3) {
+				const yT = coordinates[2].y;
+				figs.push(box(yE, yT, 'rgba(52,211,153,0.12)', 'rgba(52,211,153,0.65)'));
+				const risk = Math.abs(entry - stop);
+				const rr = risk > 0 ? Math.abs(target - entry) / risk : null;
+				const long = target >= entry;
+				figs.push({
+					type: 'text',
+					attrs: {
+						x: x0 + w / 2,
+						y: Math.min(yE, yS, yT) - 5,
+						text: `${long ? '롱' : '숏'} R:R 1:${rr != null ? rr.toFixed(1) : '—'} · 진입 ${fmt(entry)} · 손절 ${fmt(stop)} · 목표 ${fmt(target)}`,
+						align: 'center',
+						baseline: 'bottom'
+					},
+					ignoreEvent: true,
+					styles: { color: '#0b0e14', backgroundColor: long ? '#34d399' : '#f0616f' }
+				});
+			} else {
+				figs.push({
+					type: 'text',
+					attrs: { x: x0 + w / 2, y: Math.min(yE, yS) - 5, text: `진입 ${fmt(entry)} · 손절 ${fmt(stop)} → 목표?`, align: 'center', baseline: 'bottom' },
+					ignoreEvent: true,
+					styles: { color: '#0b0e14', backgroundColor: '#f0616f' }
+				});
+			}
+			return figs;
 		}
 	});
 }

@@ -37,7 +37,7 @@ export interface TerminalFinance {
 	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
 	freq: 'quarter' | 'annual' | 'ttm';
 	cards: FinCard[];
-	tabCards: { profitability: FinCard[]; cashflow: FinCard[]; debt: FinCard[] }; // 전체화면 탭 심화 카드
+	tabCards: { profitability: FinCard[]; cashflow: FinCard[]; debt: FinCard[]; shareholder: FinCard[] }; // 전체화면 탭 심화 카드
 	revYoy: Num[]; // 매출 YoY % (분기=4분기전, 연간=전년)
 	opYoy: Num[]; // 영업이익 YoY %
 	cashQuality: Num[]; // 영업CF / 순이익 배수 (순이익>0 일 때만)
@@ -81,7 +81,7 @@ const STMT_DEF: Record<StmtKind, { key: string; kr: string; en: string }[]> = {
 // ── 28 표준계정 (accounts.py _STANDARDS 포팅) ──
 interface StdAcct {
 	key: string;
-	sj: 'IS' | 'BS' | 'CF';
+	sj: 'IS' | 'BS' | 'CF' | 'CIS';
 	ids: string[]; // account_id (IFRS) 우선
 	kw: string[]; // account_nm 키워드 fallback
 }
@@ -115,7 +115,11 @@ const STD: StdAcct[] = [
 	{ key: 'cfInvesting', sj: 'CF', ids: ['ifrs-full_CashFlowsFromUsedInInvestingActivities', 'ifrs_CashFlowsFromUsedInInvestingActivities'], kw: ['투자활동현금흐름', '투자활동'] },
 	{ key: 'cfFinancing', sj: 'CF', ids: ['ifrs-full_CashFlowsFromUsedInFinancingActivities', 'ifrs_CashFlowsFromUsedInFinancingActivities'], kw: ['재무활동현금흐름', '재무활동'] },
 	{ key: 'capex', sj: 'CF', ids: ['ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities', 'dart_PurchaseOfPropertyPlantAndEquipment'], kw: ['유형자산의취득', '유형자산취득'] },
-	{ key: 'dividendsPaid', sj: 'CF', ids: ['ifrs-full_DividendsPaidClassifiedAsFinancingActivities', 'ifrs_DividendsPaid'], kw: ['배당금지급'] }
+	{ key: 'dividendsPaid', sj: 'CF', ids: ['ifrs-full_DividendsPaidClassifiedAsFinancingActivities', 'ifrs_DividendsPaid'], kw: ['배당금지급'] },
+	// CIS — 포괄손익계산서 원본 레인. 기존 CIS→IS 정규화(단일 포괄손익 회사의 손익 카드 생명줄)와
+	// 완전 별개로, CIS 가 있는 모든 회사에서 포괄손익 격차 카드·SCE 브리지 OCI 폴백에 쓴다.
+	{ key: 'cisNetIncome', sj: 'CIS', ids: ['ifrs-full_ProfitLoss', 'ifrs_ProfitLoss'], kw: ['당기순이익', '분기순이익', '반기순이익'] },
+	{ key: 'cisComprehensive', sj: 'CIS', ids: ['ifrs-full_ComprehensiveIncome', 'ifrs_ComprehensiveIncome'], kw: ['총포괄손익', '총포괄이익'] }
 ];
 const STD_BY_KEY: Record<string, StdAcct> = Object.fromEntries(STD.map((s) => [s.key, s]));
 const isStock = (k: string) => STD_BY_KEY[k]?.sj === 'BS';
@@ -126,6 +130,7 @@ interface RawRow extends Record<string, unknown> {
 	sj_div?: string | null;
 	fs_div?: string | null;
 	reprt_code?: string | null;
+	rcept_no?: string | null;
 	bsns_year?: string | number | null;
 	account_id?: string | null;
 	account_nm?: string | null;
@@ -156,7 +161,7 @@ function num(v: unknown): number | null {
 	return null;
 }
 
-const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'ord'];
+const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'ord'];
 
 // 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = TTM.
 export type FinMode = 'annual' | 'quarter' | 'ttm';
@@ -188,6 +193,66 @@ export function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceB
 	return p;
 }
 
+// ── SCE(자본변동표) 브리지 — 최신 연간(11011)·최신 rcept_no 의 합계 차원에서
+// 기초자본 → +순이익 → +기타포괄 → −배당 → ±자기주식 → ±기타(잔차 plug) → 기말자본 워터폴.
+// 합계 차원 = account_detail 에 '|' 없는 '연결재무제표 [member]'/'재무제표 [member]' root
+// (삼성·카카오·POSCO·NAVER·덕양산업·신흥 6사 실측 공통). 미식별·기초/기말/순이익 결측 회사는
+// null — 카드 비표시가 정직. 기타 = 기말 anchor 대조 잔차(소유주거래·연결범위변동·주식보상 등).
+function buildSceBridge(rows: RawRow[], fs: string, ociFromCis: (year: number) => Num): FinCard | null {
+	const nrm = (v: unknown) => String(v ?? '').replace(/\s+/g, ' ').trim();
+	const sce = rows.filter((r) => (r.fs_div || '') === fs && r.sj_div === 'SCE' && String(r.reprt_code || '') === '11011');
+	let year = -1;
+	for (const r of sce) { const y = Number(r.bsns_year); if (Number.isFinite(y) && y > year) year = y; }
+	if (year < 0) return null;
+	const ofYear = sce.filter((r) => Number(r.bsns_year) === year);
+	let rcept = ''; // 정정공시 — 최신 접수만
+	for (const r of ofYear) { const rc = String(r.rcept_no || ''); if (rc > rcept) rcept = rc; }
+	const byNm = new Map<string, number>(); // 합계 차원 계정명 → 금액 (중복 nm 은 첫 행)
+	for (const r of ofYear) {
+		if (String(r.rcept_no || '') !== rcept) continue;
+		const d = nrm(r.account_detail);
+		if (d.includes('|') || !d.includes('재무제표')) continue;
+		const nm = nrm(r.account_nm);
+		const amt = num(r.thstrm_amount);
+		if (nm && amt != null && !byNm.has(nm)) byNm.set(nm, amt);
+	}
+	if (byNm.size === 0) return null;
+	const items = [...byNm.entries()].map(([nm, amt]) => ({ nm, amt }));
+	const pick = (...preds: ((nm: string) => boolean)[]): number | null => {
+		for (const p of preds) { const hit = items.find((x) => p(x.nm)); if (hit) return hit.amt; }
+		return null;
+	};
+	const begin = pick((n) => n.includes('수정후') && n.includes('기초'), (n) => n.includes('기초'));
+	const end = pick((n) => n.includes('기말'), (n) => n.includes('자본총계'));
+	const ni = pick((n) => n.includes('당기순이익'), (n) => n.includes('순이익') && !n.includes('총포괄'));
+	if (begin == null || end == null || ni == null) return null;
+	// 기타포괄: SCE 총포괄 행(TCI−NI) → SCE 단독 '기타포괄손익' 행 → CIS(총포괄−순이익) 폴백 순
+	const tci = pick((n) => n.includes('총포괄'));
+	const ociRow = items.find((x) => x.nm === '기타포괄손익' || x.nm === '연결기타포괄손익');
+	const oci = tci != null ? tci - ni : ociRow ? ociRow.amt : ociFromCis(year);
+	// 배당 — 변형 5종 실측('배당'·'연차/중간배당금'·'현금배당'·'배당금지급'·'소유주에 대한 배분…').
+	// 항상 자본 유출이라 −|합| (공시 부호 혼재 방어). 주식배당은 자본 내 재분류라 제외.
+	let divSum = 0;
+	for (const x of items) if (x.nm.includes('배당') && !x.nm.includes('주식배당')) divSum += Math.abs(x.amt);
+	// 자기주식 — 취득 = 항상 유출(−|v|), 처분 = 항상 유입(+|v|), 그 외(소각·거래 증감)는 공시 부호 그대로
+	let treas = 0;
+	for (const x of items) {
+		if (!x.nm.includes('자기주식')) continue;
+		treas += x.nm.includes('취득') ? -Math.abs(x.amt) : x.nm.includes('처분') ? Math.abs(x.amt) : x.amt;
+	}
+	const t = (v: number) => +(v / TRILLION).toFixed(3);
+	const steps: NonNullable<FinCard['steps']> = [{ name: '기초자본', value: t(begin), total: true }, { name: '순이익', value: t(ni) }];
+	if (oci != null) steps.push({ name: '기타포괄', value: t(oci) });
+	if (divSum >= TRILLION * 0.0005) steps.push({ name: '배당', value: t(-divSum) });
+	if (Math.abs(treas) >= TRILLION * 0.0005) steps.push({ name: '자기주식', value: t(treas) });
+	// 잔차 plug — 기말 anchor 정직. |값| 미미(10억 미만 또는 기말의 0.2% 미만)하면 생략.
+	const shown = steps.slice(1).reduce((a, s) => a + (s.value ?? 0), 0);
+	const plug = +(t(end) - t(begin) - shown).toFixed(3);
+	if (Math.abs(plug) >= Math.max(0.001, Math.abs(t(end)) * 0.002)) steps.push({ name: '기타', value: plug });
+	steps.push({ name: '기말자본', value: t(end), total: true });
+	return { key: 'sceBridge', title: `자본변동 브리지 · FY${String(year).slice(2)}`, unit: '조', kind: 'waterfall', steps, series: [] };
+}
+
 function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	// fs_div 선호: CFS(연결) → 없으면 OFS(별도)
 	const hasCfs = rows.some((r) => (r.fs_div || '') === 'CFS');
@@ -202,12 +267,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const amt = num(r.thstrm_amount);
 		if (!q || !Number.isFinite(year) || amt == null) continue;
 		const sjRaw = String(r.sj_div || '');
-		let sj: string;
-		if (sjRaw === 'IS' || sjRaw === 'CIS') {
-			if (sjRaw !== incomeSrc) continue; // 채택 안 한 손익표 스킵
-			sj = 'IS';
-		} else sj = sjRaw; // BS · CF · SCE
-		parsed.push({
+		const mk = (sj: string): Parsed => ({
 			sj,
 			year,
 			q,
@@ -217,6 +277,12 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			ord: num(r.ord) ?? Number.MAX_SAFE_INTEGER,
 			amt
 		});
+		// CIS 원본 레인 — 포괄손익 격차 카드·SCE 브리지 OCI 폴백 전용 (IS 정규화와 독립)
+		if (sjRaw === 'CIS') parsed.push(mk('CIS'));
+		if (sjRaw === 'IS' || sjRaw === 'CIS') {
+			if (sjRaw !== incomeSrc) continue; // 채택 안 한 손익표는 IS 정규화 스킵 (CIS 레인은 위에서 보존)
+			parsed.push(mk('IS'));
+		} else parsed.push(mk(sjRaw)); // BS · CF · SCE
 	}
 	if (parsed.length === 0) return null;
 
@@ -281,6 +347,14 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		stdCache.set(ck, res);
 		return res;
 	};
+
+	// SCE 브리지 (모드 무관 — 최신 연간 1개 스냅샷). OCI 폴백 = 같은 연도 CIS 연간(총포괄−순이익).
+	const ociFromCis = (y: number): Num => {
+		const tci = rawV('cisComprehensive', y, 4);
+		const niC = rawV('cisNetIncome', y, 4);
+		return tci != null && niC != null ? tci - niC : null;
+	};
+	const sceBridge = buildSceBridge(rows, fs, ociFromCis);
 
 	// ── 모드별(연간/분기/TTM) 뷰 빌드 ──
 	const buildMode = (mode: FinMode): TerminalFinance | null => {
@@ -520,6 +594,31 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			steps.push({ name: '잔여', value: +(fcf - (divOut ?? 0)).toFixed(3), total: true });
 			return { key: 'cashBridge', title: `현금 브리지 · ${periods[i]}`, unit: '조', kind: 'waterfall', steps, series: [] };
 		})();
+		// 포괄손익 격차 — CIS 원본 레인 (순이익 vs 총포괄, 우축 OCI). CIS 미보유·매칭 실패 회사는
+		// 전 시리즈 null → FinFullscreen 카드 필터가 자동 비표시.
+		const ociSer: Num[] = used.map((_, i) => {
+			const tci = valAtIdx('cisComprehensive', i);
+			const niC = valAtIdx('cisNetIncome', i);
+			return tci != null && niC != null ? +((tci - niC) / TRILLION).toFixed(3) : null;
+		});
+		const ociCard: FinCard = { key: 'oci', title: '포괄손익 격차', unit: '조', series: [
+			{ name: '순이익', data: ser('cisNetIncome'), color: C.net, type: 'bar' },
+			{ name: '총포괄이익', data: ser('cisComprehensive'), color: C.purple, type: 'line' },
+			{ name: 'OCI', data: ociSer, color: C.warn, type: 'line', axis: 'r' }
+		] };
+		// 자본 구성 추이 — BS 자본 내부 분해 (자본금·이익잉여금·기타). fundingStructure(부채·자본
+		// 조달 전체)와 분해 축이 달라 중복 아님. 두 구성 계정 다 없으면 비표시 (기타 왜곡 방지).
+		const equityComposition = ((): FinCard | null => {
+			const cs = ser('capitalStock');
+			const re = ser('retainedEarnings');
+			if (!cs.some((v) => v != null) || !re.some((v) => v != null)) return null;
+			return { key: 'equityComposition', title: '자본 구성 추이', unit: '조', stacked: true, signed: true, series: [
+				{ name: '자본금', data: cs, color: C.dim, type: 'bar' },
+				{ name: '이익잉여금', data: re, color: C.good, type: 'bar' },
+				{ name: '기타·비지배', data: compose(['equity', 1], ['capitalStock', -1], ['retainedEarnings', -1]), color: C.blue, type: 'bar' },
+				{ name: '자본총계', data: ser('equity'), color: C.purple, type: 'line' }
+			] };
+		})();
 		const tabCards = {
 			profitability: [
 				...(plBridge ? [plBridge] : []),
@@ -542,7 +641,8 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 					{ name: '순이익률', data: ratio('netIncome', 'revenue'), color: C.cyan, type: 'line' },
 					{ name: '자산회전(회)', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line', axis: 'r' },
 					{ name: '레버리지(배)', data: ratio('assets', 'equity', 1), color: C.red, type: 'line', axis: 'r' }
-				] }
+				] },
+				ociCard
 			] as FinCard[],
 			cashflow: [
 				...(cashBridge ? [cashBridge] : []),
@@ -576,7 +676,9 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				{ key: 'interestCover', title: '이자보상 (영업익/금융비용)', unit: '배', refLines: [1], series: [
 					{ name: '이자보상배율', data: used.map((_, i) => (oiRaw[i] != null && fc[i] != null && fc[i]! > 0 ? +(oiRaw[i]! / fc[i]!).toFixed(2) : null)), color: C.cyan, type: 'bar' }
 				] }
-			] as FinCard[]
+			] as FinCard[],
+			// 주주환원·소유 탭 선두 — SCE 브리지(모드 무관 스냅샷) + 자본 구성 추이(모드 동작)
+			shareholder: [...(sceBridge ? [sceBridge] : []), ...(equityComposition ? [equityComposition] : [])] as FinCard[]
 		};
 
 		// 회사에 데이터 전무(빈 파케이)면 null. 개별 카드 sparse 는 셀 유지 (빈칸 방지).

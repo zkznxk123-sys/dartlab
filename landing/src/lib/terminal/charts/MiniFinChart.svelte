@@ -80,6 +80,19 @@
 		return extent(vals, true);
 	});
 
+	// 조 단위 카드 자동 강등 — 좌축 최대 |값| < 0.5조면 억으로 표시 (중소형사 0.0조 범벅 방지).
+	// 데이터·스케일 불변, 라벨 환산만. 우축(%) 시리즈는 무관.
+	const unitScale = $derived.by<{ k: number; unit: string }>(() => {
+		if (card.unit !== '조') return { k: 1, unit: card.unit };
+		let m = 0;
+		if (isWf) {
+			for (const b of wfBars) m = Math.max(m, Math.abs(b.from), Math.abs(b.to));
+		} else {
+			for (const s of leftSeries) for (const v of s.data) if (fin(v)) m = Math.max(m, Math.abs(v));
+		}
+		return m > 0 && m < 0.5 ? { k: 1e4, unit: '억' } : { k: 1, unit: '조' };
+	});
+
 	const x = (i: number) => (n <= 1 ? M.l + plotW / 2 : M.l + (i / (n - 1)) * plotW);
 	// 워터폴 전용 — 슬롯 중앙 배치 (양끝 클리핑 없음, step name 라벨 공간)
 	const xw = (i: number) => M.l + ((i + 0.5) / Math.max(1, n)) * plotW;
@@ -104,7 +117,7 @@
 	const rightTicks = $derived(rightSeries.length ? ticks(rightExt) : []);
 	const fmtTick = (v: number) => {
 		const a = Math.abs(v);
-		if (a >= 100) return v.toFixed(0);
+		if (a >= 1000) return Math.round(v).toLocaleString();
 		if (a >= 10) return v.toFixed(0);
 		if (a >= 1) return v.toFixed(1);
 		return v.toFixed(2);
@@ -132,8 +145,20 @@
 
 	const primary = $derived(card.series[0]);
 	const latestI = $derived.by(() => { if (isWf) return wfBars.length - 1; const d = primary?.data ?? []; for (let i = d.length - 1; i >= 0; i--) if (fin(d[i])) return i; return -1; });
-	const fmtVal = (v: number) => { const a = Math.abs(v); if (card.unit === '조' || card.unit === '배') return v.toFixed(2); return a >= 100 ? v.toFixed(0) : v.toFixed(1); };
-	const fmtTip = (v: number) => { const a = Math.abs(v); return a >= 100 ? v.toFixed(0) : a >= 10 ? v.toFixed(1) : v.toFixed(2); };
+	const fmtVal = (v0: number) => {
+		const v = v0 * unitScale.k;
+		const a = Math.abs(v);
+		if (unitScale.unit === '억') return a >= 1000 ? Math.round(v).toLocaleString() : a >= 100 ? v.toFixed(0) : v.toFixed(1);
+		if (card.unit === '조' || card.unit === '배') return a >= 100 ? v.toFixed(1) : v.toFixed(2);
+		return a >= 100 ? v.toFixed(0) : v.toFixed(1);
+	};
+	// scaled = 좌축(조→억 환산 대상) 값 여부 — 우축(%·배율)은 원값 그대로
+	const fmtTip = (v0: number, scaled = true) => {
+		const v = scaled ? v0 * unitScale.k : v0;
+		const a = Math.abs(v);
+		if (a >= 1000) return Math.round(v).toLocaleString();
+		return a >= 100 ? v.toFixed(0) : a >= 10 ? v.toFixed(1) : v.toFixed(2);
+	};
 	const zeroY = $derived(leftExt[0] < 0 && leftExt[1] > 0 ? yL(0) : null);
 
 	// 호버
@@ -161,7 +186,7 @@
 	<div class="mfcHead">
 		<span class="mfcTitle">{card.title}</span>
 		{#if headVal != null}
-			<b class="mfcVal mono">{fmtVal(headVal)}<span class="mfcUnit">{card.unit}{headSuffix}</span></b>
+			<b class="mfcVal mono">{fmtVal(headVal)}<span class="mfcUnit">{unitScale.unit}{headSuffix}</span></b>
 		{/if}
 	</div>
 	<div class="mfcLegend">
@@ -180,7 +205,7 @@
 			<!-- Y grid + 좌 눈금 숫자 -->
 			{#each leftTicks as t (t)}
 				<line x1={M.l} x2={W - M.r} y1={yL(t)} y2={yL(t)} stroke="#222a3a" stroke-width="0.6" />
-				<text x={M.l - 3} y={yL(t) + 2.5} text-anchor="end" class="mfcAx">{fmtTick(t)}</text>
+				<text x={M.l - 3} y={yL(t) + 2.5} text-anchor="end" class="mfcAx">{fmtTick(t * unitScale.k)}</text>
 			{/each}
 			<!-- 우 눈금 숫자 -->
 			{#each rightTicks as t (t)}
@@ -250,14 +275,14 @@
 					{@const b = wfBars[hoverI]}
 					{#if b}
 						<div class="mfcTipP mono">{b.name}</div>
-						<div class="mfcTipR"><i style={`background:${wfColor(b)}`}></i><span class="mfcTipN">{b.total ? '소계' : '증감'}</span><b class="mono">{fmtTip(b.value)}</b></div>
-						{#if !b.total}<div class="mfcTipR"><i style="background:#5b6b86"></i><span class="mfcTipN">누계</span><b class="mono">{fmtTip(b.to)}</b></div>{/if}
+						<div class="mfcTipR"><i style={`background:${wfColor(b)}`}></i><span class="mfcTipN">{b.total ? '소계' : '증감'}</span><b class="mono">{fmtTip(b.value)}{unitScale.unit}</b></div>
+						{#if !b.total}<div class="mfcTipR"><i style="background:#5b6b86"></i><span class="mfcTipN">누계</span><b class="mono">{fmtTip(b.to)}{unitScale.unit}</b></div>{/if}
 					{/if}
 				{:else}
 					<div class="mfcTipP mono">{periods[hoverI]}</div>
 					{#each card.series as s (s.name)}
 						{@const v = s.data[hoverI]}
-						<div class="mfcTipR"><i style={`background:${s.color}`}></i><span class="mfcTipN">{s.name}</span><b class="mono">{fin(v) ? fmtTip(v as number) : '—'}</b></div>
+						<div class="mfcTipR"><i style={`background:${s.color}`}></i><span class="mfcTipN">{s.name}</span><b class="mono">{fin(v) ? fmtTip(v as number, s.axis !== 'r') : '—'}</b></div>
 					{/each}
 				{/if}
 			</div>
