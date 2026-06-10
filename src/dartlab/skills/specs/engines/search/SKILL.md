@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope="auto"(기본)는 *의미 검색* — bm25 키워드 + type(report_nm)→본문 경험확장 gated fusion 으로 키워드가 못 잡는 동의·관련 공시까지 회수(임베딩·GPU 0). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '의미 검색', '제목 매칭', '본문 BM25', 'search'.
+purpose: Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope="auto"(기본)는 *통합 검색* — 음절 bigram BM25 에 큐레이션 동의어·결정론 라우팅 canon 확장 lane 을 RRF 융합해 구어·약어 질의도 회수(임베딩·GPU 0, always-safe). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '통합 검색', '제목 매칭', '본문 BM25', 'search'.
 whenToUse:
   - search
   - 공시 검색
@@ -40,7 +40,7 @@ requiredEvidence:
 expectedOutputs:
   - 매칭 공시 목록
   - DART 뷰어 URL
-  - BETA 한계 명시
+  - 신선도(dataAsOf) 명시
 runtimeCompatibility:
   server:
     status: supported
@@ -87,7 +87,7 @@ testUniverse:
 
 ## 엔진 역할
 
-`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 "완전한 문서" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — numpy 역인덱스 + 경험그래프(meaning.json)만으로 의미 검색. scope="auto" 가 키워드(bm25)와 의미확장을 신뢰도 gated 융합해, 단어가 달라도 같은 의미의 공시를 회수한다. 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.
+`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 "완전한 문서" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색. scope="auto" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe). 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.
 
 단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — "어떤 회사가 유상증자했나" 같은 질문 한정.
 
@@ -127,13 +127,13 @@ recent = c.liveFilings()        # 라이브
 
 ## 호출 동작
 
-`scope="auto"` (기본): **의미 검색** — bm25(본문 키워드) + type(report_nm)→본문 경험확장(meaning.json)을 bm25-신뢰도 gated fusion(naive sum 아님; 키워드 강하면 키워드 신뢰, 약하면 의미가중↑). 키워드가 못 잡는 동의·관련 공시 회수. 실색인 벤치: auto MRR 0.95 ≫ bm25 0.77, 키워드 사각 회복 92%, harm 0.7%. meaning.json 미빌드 시 bm25 단독으로 graceful degrade. (인덱스 빌드: 월간 `searchIndexMain`.)
+`scope="auto"` (기본): **통합 검색 R\*** — plain BM25(음절 bigram) ⊕ 확장 BM25(큐레이션 동의어 + 결정론 라우팅 canon, 0.5 가중) RRF 융합. 구어·약어("자사주 샀어?")를 공시 용어(자기주식취득)로 회수하되, 확장이 틀려도 plain lane 이 보존돼 최악이 plain 과 동급(always-safe). held-out 실측: 자유구어 nDCG@10 0.237(word·무확장) → 0.502, 정식어 0.618 → 0.943. router.json 부재 시 라우팅 lane 만 생략(동의어는 코드 내장), 확장 미발화 시 plain 단독 graceful degrade. (인덱스 빌드: 월간 `searchIndexMain`.)
 
 `scope="content"`: `section_content` 본문 BM25 단독 (의미확장 없이 순수 키워드). 디버그/비교용.
 
 `scope="title"`: `report_nm + section_title` ngram 검색. 제목형 쿼리 전용. ~1ms.
 
-`scope="both"`: title(ngram) + content(bm25) 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 title·content 단순합산은 품질 저하). auto 의 gated fusion 은 이와 다른 메커니즘(content+의미확장).
+`scope="both"`: title(ngram) + content(bm25) 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 title·content 단순합산은 품질 저하). auto 의 RRF 융합은 이와 다른 메커니즘(content lane 내 plain⊕확장).
 
 `scope="news"`: gather 뉴스 헤드라인(`news/headlines`)만 검색(공시 제외). 뉴스는 `rcept_no` 없음 → `news:`+url해시로 식별, `dartUrl` = 기사 url. corp 지정 시 0 건(뉴스는 종목 매핑 없음 — title 매칭만). allFilings+panel+뉴스가 한 인덱스에 통합되어 `includeNews=True` 빌드 시 auto 결과에도 자연 노출.
 
@@ -181,7 +181,7 @@ dartlab.search("유상증자")
 - **첫 검색 자동 fetch**: `dartlab.search()` 첫 호출 시 로컬 인덱스 부재면 tier(기본 lite)를 HF 에서 자동 다운로드(세션 1회, graceful). 로컬 있으면 no-op.
 - **사전 워밍**: `prefetch(tier="lite"|"full")` — cold start 완화용 선다운로드.
 - **캐시 위치**: pip 설치 사용자는 쓰기 가능한 사용자 캐시(`~/.cache/dartlab` 류, 플랫폼별)에 저장. dev 체크아웃·`DARTLAB_DATA_DIR`·`.dartlab.yml` 은 그 경로 우선.
-- **신선도·버전 조회**: `indexInfo()` → `{available, dataAsOf(빌드시점), nDocs, hasMeaning, hasDelta, schemaVersion, compatible}`. `compatible=False` 면 받은 인덱스가 라이브러리보다 신버전 → `pip install -U dartlab` 안내(best-effort 로드). evidence 의 `dataAsOf` 실 공급원.
+- **신선도·버전 조회**: `indexInfo()` → `{available, dataAsOf(빌드시점), nDocs, hasRouter, hasDelta, schemaVersion, compatible}`. `compatible=False` 면 받은 인덱스가 라이브러리보다 신버전 → `pip install -U dartlab` 안내(best-effort 로드). evidence 의 `dataAsOf` 실 공급원.
 - **offline/제약 환경**: `DARTLAB_NO_HF_DOWNLOAD=1` 이면 다운로드 skip → 로컬 인덱스 없으면 빈 결과(info 안내). CI/notebook 권장.
 - **신선도 한계**: 월간(main) + 일간(delta) 빌드 → 최근 며칠 stale 가능. 최신은 `Company.liveFilings()` 병행.
 

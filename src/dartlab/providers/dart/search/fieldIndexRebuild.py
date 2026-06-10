@@ -493,154 +493,6 @@ def _feedNews(builder, metaRecs, newsLimit, showProgress, *, sinceDate=None) -> 
     return added
 
 
-def buildMeaningGraph(*, contentLimit: int | None = None, tier: str = "full", showProgress: bool = True) -> int:
-    """type(report_nm)→본문 경험그래프 build → meaning.json 저장. allFilings 스트리밍 (SPPMI top-K).
-
-    의미검색(scope=auto) 확장 엔진의 artifact. 키워드가 못 잡는 동의·관련 공시 회복용.
-    그래프는 코퍼스 전역(tier 무관)이지만 출력 위치는 tier 디렉터리에 둬 인덱스와 동거(활성 디렉터리 일치).
-
-    Args:
-        contentLimit: 본문 토큰화 최대 문자 수. None 이면 CONTENT_LIMIT.
-        tier: ``"full"`` (flat) / ``"lite"`` (서브디렉터리) — meaning.json 저장 위치.
-        showProgress: True 면 progress 로그.
-
-    Returns:
-        int — 그래프 feature 노드 수.
-
-    Raises:
-        없음 (파일별 read 오류는 skip).
-
-    Example:
-        >>> buildMeaningGraph()  # doctest: +SKIP
-    """
-    import gc
-    import os
-    import re
-    from collections import Counter
-
-    from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
-    from dartlab.core.dartClient import allFilingsMetaSuffix
-
-    _META_SUFFIX = allFilingsMetaSuffix()
-    from dartlab.providers.dart.search.fieldIndex import CONTENT_LIMIT, _contentIndexDir, tokenizeContent
-    from dartlab.providers.dart.search.semantic import coreFeatureWeights, reportNmCore
-
-    if contentLimit is None:
-        contentLimit = CONTENT_LIMIT
-    # 그래프는 토큰 분포만 필요 — 정밀 파서(BeautifulSoup) 대신 regex tag-strip (5~10x 빠름, 222파일 timeout 회피).
-    tag = re.compile(r"<[^>]+>")
-    sp = re.compile(r"\s+")
-    shift, branch, minCo, bodyCap = 0.7, 24, 3, 150
-    co: dict[str, Counter] = {}
-    titleDf: Counter = Counter()
-    bodyDf: Counter = Counter()
-    nDocs = 0
-
-    files = sorted(f for f in _allFilingsDir().glob("*.parquet") if _META_SUFFIX not in f.stem)
-    _afl = int(os.environ.get("DARTLAB_SEARCH_AF_FILES", "0"))  # 테스트용 제한(0=무제한)
-    if _afl > 0:
-        files = files[-_afl:]
-    for i, f in enumerate(files):
-        try:
-            df = pl.read_parquet(f, columns=["report_nm", "content_raw", "fetch_status"]).filter(
-                pl.col("fetch_status") == "ok"
-            )
-        except (pl.exceptions.PolarsError, OSError):
-            continue
-        for row in df.iter_rows(named=True):
-            core = reportNmCore(row.get("report_nm") or "")
-            if not core:
-                continue
-            raw = row.get("content_raw") or ""
-            if not raw:
-                continue
-            text = sp.sub(" ", tag.sub(" ", raw[: contentLimit * 6])).strip()[:contentLimit]
-            tf: Counter = Counter(t for t in tokenizeContent(text) if t not in core)
-            body = [t for t, _ in tf.most_common(bodyCap)]
-            if not body:
-                continue
-            nDocs += 1
-            for b in body:
-                bodyDf[b] += 1
-            for fkey in set(coreFeatureWeights(core)):
-                titleDf[fkey] += 1
-                co.setdefault(fkey, Counter()).update(body)
-        del df
-        if (i + 1) % 50 == 0:
-            gc.collect()
-    n = max(1, nDocs)
-    graph: dict[str, dict[str, float]] = {}
-    for fkey, counts in co.items():
-        fDf = titleDf[fkey]
-        w: dict[str, float] = {}
-        for b, c in counts.items():
-            if c < minCo:
-                continue
-            bDf = bodyDf.get(b, 0)
-            if bDf <= 0:
-                continue
-            pmi = math.log((c * n) / (fDf * bDf)) - shift
-            if pmi > 0:
-                w[b] = round(pmi * math.log(1.0 + n / bDf), 5)
-        if w:
-            graph[fkey] = dict(sorted(w.items(), key=lambda kv: kv[1], reverse=True)[:branch])
-    outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
-    (outDir / "meaning.json").write_text(json.dumps(graph, ensure_ascii=False), encoding="utf-8")
-    if showProgress:
-        _log.info(f"[meaning] {nDocs:,} 문서 → feature {len(graph):,} 노드 meaning.json 저장(tier={tier})")
-    return len(graph)
-
-
-def buildGateRef(*, sampleN: int = 2000, tier: str = "full", showProgress: bool = True) -> float:
-    """gate 기준값(코퍼스 median bm25 top1) → gateRef.json. 색인 규모 적응(V238 보강).
-
-    main 세그먼트의 self-query(report_nm core) bm25 top1 분포 중앙값.
-
-    Args:
-        sampleN: top1 분포 샘플 질의 수.
-        tier: ``"full"`` (flat) / ``"lite"`` (서브디렉터리) — main 세그먼트 로드·gateRef 저장 위치.
-        showProgress: True 면 progress 로그.
-
-    Returns:
-        float — ref (median bm25 top1). main 세그먼트 부재 시 0.0(균등).
-
-    Raises:
-        없음.
-
-    Example:
-        >>> buildGateRef()  # doctest: +SKIP
-    """
-    from dartlab.providers.dart.search import semantic as _sem
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, _scoreBM25, loadSegment, tokenizeContent
-    from dartlab.providers.dart.search.semantic import reportNmCore
-
-    segDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
-    seg = loadSegment("main", segDir)
-    out = {"ref": 0.0, "gmin": _sem.GMIN, "gmax": _sem.GMAX, "gateX": _sem.GATE_X}
-    if seg is None:
-        (segDir / "gateRef.json").write_text(json.dumps(out), encoding="utf-8")
-        return 0.0
-    idx, meta = seg
-    top1s: list[float] = []
-    step = max(1, meta.height // sampleN)
-    for i in range(0, meta.height, step):
-        row = meta.row(i, named=True)
-        core = reportNmCore(row.get("report_nm") or "")
-        toks = list(core) if core else tokenizeContent(row.get("text") or "")
-        if not toks:
-            continue
-        scores = _scoreBM25(idx, toks)
-        if scores.size and scores.max() > 0:
-            top1s.append(float(scores.max()))
-    if top1s:
-        top1s.sort()
-        out["ref"] = top1s[len(top1s) // 2]
-    (segDir / "gateRef.json").write_text(json.dumps(out), encoding="utf-8")
-    if showProgress:
-        _log.info(f"[gateRef] n={len(top1s)} ref(median bm25 top1)={out['ref']:.2f}")
-    return out["ref"]
-
-
 def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress: bool = True) -> int:
     """delta 세그먼트 빌드 — 최근 N일 allFilings.
 
@@ -799,13 +651,13 @@ def ensureContentIndex(tier: str | None = None) -> None:
 
 
 def indexInfo() -> dict:
-    """검색 인덱스 메타(dataAsOf/nDocs/의미확장 가용) 반환 — freshness 노출용.
+    """검색 인덱스 메타(dataAsOf/nDocs/라우터 가용) 반환 — freshness 노출용.
 
     Args:
         (없음).
 
     Returns:
-        dict — {available, dataAsOf, nDocs, hasMeaning, hasDelta, schemaVersion, compatible}.
+        dict — {available, dataAsOf, nDocs, hasRouter, hasDelta, schemaVersion, compatible}.
         인덱스 부재 시 available=False. ``schemaVersion`` = 받은 인덱스 포맷 버전(없으면 0=legacy),
         ``compatible`` = 코드 INDEX_SCHEMA_VERSION 이상으로 읽을 수 있는지(인덱스 ver ≤ 코드 ver).
 
@@ -822,7 +674,7 @@ def indexInfo() -> dict:
         "available": False,
         "dataAsOf": None,
         "nDocs": 0,
-        "hasMeaning": False,
+        "hasRouter": False,
         "hasDelta": False,
         "schemaVersion": 0,
         "compatible": True,
@@ -839,16 +691,12 @@ def indexInfo() -> dict:
             pass
     # 받은 인덱스가 코드보다 신버전이면 비호환(라이브러리 업그레이드 필요). 동버전 이하는 읽기 가능.
     info["compatible"] = info["schemaVersion"] <= INDEX_SCHEMA_VERSION
-    # hasMeaning 은 파일 *존재* 가 아니라 *비어있지 않음* — 429 사고로 meaning.json={} (0 노드) 가 업로드되면
-    # 의미확장이 죽은 bm25-only degraded 인데 파일은 존재. 존재만 보면 degraded 를 healthy 로 거짓보고한다.
-    meaningPath = base / "meaning.json"
-    hasMeaning = False
-    if meaningPath.exists():
-        try:
-            hasMeaning = bool(json.loads(meaningPath.read_text(encoding="utf-8")))
-        except (OSError, json.JSONDecodeError, ValueError):
-            hasMeaning = False
-    info["hasMeaning"] = hasMeaning
+    # hasRouter 는 파일 *존재* 가 아니라 *이벤트 비어있지 않음* — 빈 산출물이 업로드되면 라우팅이 죽은
+    # plain-only degraded 인데 파일은 존재. 존재만 보면 degraded 를 healthy 로 거짓보고한다(429 사고 교훈).
+    from dartlab.providers.dart.search.router import loadRouterModel
+
+    model = loadRouterModel(base)
+    info["hasRouter"] = bool(model and model.get("events"))
     info["hasDelta"] = (base / "delta.npz").exists()
     return info
 
@@ -884,8 +732,7 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full") -> None:
         "delta_stems.json",
         "delta_meta.parquet",
         "delta_info.json",
-        "meaning.json",
-        "gateRef.json",
+        "router.json",
     ]
     for name in names:
         src = outDir / name
@@ -936,8 +783,7 @@ def pullContentIndex(tier: str = "full") -> int:
         "delta_stems.json",
         "delta_meta.parquet",
         "delta_info.json",
-        "meaning.json",
-        "gateRef.json",
+        "router.json",
     ]
     ok = 0
     from dartlab.core.hfRetry import retryHfCall

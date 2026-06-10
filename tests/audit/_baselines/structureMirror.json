@@ -10,7 +10,6 @@
     "dart/panel/canonical/canonicalData.py",
     "dart/panel/spine/spineData.py",
     "dart/parse/htmlTableParser.py",
-    "dart/search/semantic.py",
     "dart/sectionPeriod.py",
     "dart/sectionTopic.py",
     "dart/sectionXml.py",

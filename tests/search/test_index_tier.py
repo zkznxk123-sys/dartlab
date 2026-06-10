@@ -171,16 +171,18 @@ def test_lite_sincedate_keeps_recent_panel(synthRoot):
     assert (FI._contentIndexDir("lite") / "main.npz").exists()
 
 
-def test_index_info_hasmeaning_nonempty(synthRoot):
-    """meaning.json={} (degraded) 면 hasMeaning=False — 파일 존재만으로 healthy 거짓보고 금지."""
+def test_index_info_hasrouter_nonempty(synthRoot):
+    """router.json 이벤트 0 (degraded) 면 hasRouter=False — 파일 존재만으로 healthy 거짓보고 금지."""
     from dartlab.providers.dart.search import fieldIndex as FI
     from dartlab.providers.dart.search import fieldIndexRebuild as FIR
 
     base = FI._contentIndexDir()
     (base / "main_info.json").write_text(
-        '{"nDocs": 10, "avgDocLength": 5.0, "builtAt": "2026-06-02", "schemaVersion": 1}', encoding="utf-8"
+        '{"nDocs": 10, "avgDocLength": 5.0, "builtAt": "2026-06-02", "schemaVersion": 2}', encoding="utf-8"
     )
-    (base / "meaning.json").write_text("{}", encoding="utf-8")  # degraded — 0 노드
-    assert FIR.indexInfo()["hasMeaning"] is False
-    (base / "meaning.json").write_text('{"유상증자결정": {"신주": 1.2}}', encoding="utf-8")
-    assert FIR.indexInfo()["hasMeaning"] is True
+    (base / "router.json").write_text('{"v": 1, "events": {}}', encoding="utf-8")  # degraded — 0 이벤트
+    assert FIR.indexInfo()["hasRouter"] is False
+    (base / "router.json").write_text(
+        '{"v": 1, "events": {"dividend": {"route": {"배당": 1.0}, "canon": ["배당금"]}}}', encoding="utf-8"
+    )
+    assert FIR.indexInfo()["hasRouter"] is True

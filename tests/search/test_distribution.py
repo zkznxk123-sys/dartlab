@@ -45,18 +45,20 @@ def test_index_info_absent(tmp_path, monkeypatch):
 
 
 def test_index_info_present(tmp_path, monkeypatch):
-    """main_info.json + meaning.json 존재 → available·dataAsOf·hasMeaning."""
+    """main_info.json + router.json 존재 → available·dataAsOf·hasRouter."""
     fir = _patch(monkeypatch, tmp_path)
     (tmp_path / "main_info.json").write_text(
         json.dumps({"nDocs": 17438, "avgDocLength": 120.0, "builtAt": "2026-06-02T05:00:00"}), encoding="utf-8"
     )
-    # 비어있지 않은 meaning.json(실 노드) — hasMeaning 은 *존재* 가 아니라 *비어있지 않음* 을 본다(degraded 거짓보고 차단).
-    (tmp_path / "meaning.json").write_text('{"유상증자결정": {"신주": 1.2}}', encoding="utf-8")
+    # 이벤트 비어있지 않은 router.json — hasRouter 는 *존재* 가 아니라 *비어있지 않음* 을 본다(degraded 거짓보고 차단).
+    (tmp_path / "router.json").write_text(
+        '{"v": 1, "events": {"dividend": {"route": {"배당": 1.0}, "canon": ["배당금"]}}}', encoding="utf-8"
+    )
     info = fir.indexInfo()
     assert info["available"] is True
     assert info["dataAsOf"] == "2026-06-02T05:00:00"
     assert info["nDocs"] == 17438
-    assert info["hasMeaning"] is True
+    assert info["hasRouter"] is True
     assert info["hasDelta"] is False
 
 

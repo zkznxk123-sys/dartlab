@@ -20,33 +20,49 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _hfRetry import retryHfCall  # noqa: E402
 
 
+def _buildRouterArtifact(tier: str = "full") -> int:
+    """events.json 시드 → 결정론 라우터 router.json 을 인덱스 디렉터리에 도출 (scope=auto 확장축).
+
+    빌드는 코퍼스 무관(시드만 입력)·수 ms·bounded(~수 KB). 반환 = 이벤트 수 (0 = 퇴행).
+    """
+    import json
+
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.router import buildRouterModel
+
+    eventsPath = Path(__file__).resolve().parent / "questionSet" / "events.json"
+    events = json.loads(eventsPath.read_text(encoding="utf-8"))["events"]
+    model = buildRouterModel(events)
+    outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
+    (outDir / "router.json").write_text(json.dumps(model, ensure_ascii=False), encoding="utf-8")
+    return len(model["events"])
+
+
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
 
     print("[main] content 인덱스 풀리빌드 시작 (allFilings + panel 롤업 + 뉴스)")
-    from dartlab.providers.dart.search import buildGateRef, buildMeaningGraph, rebuildContent
+    from dartlab.providers.dart.search import rebuildContent
 
     t0 = time.perf_counter()
     nDocs = rebuildContent(includePanel=True, includeNews=True, showProgress=True)
     elapsed = time.perf_counter() - t0
     print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
 
-    # 의미검색 artifact — type→본문 경험그래프 + gate 기준값 (scope=auto gated fusion 엔진)
-    print("[main] meaning.json + gateRef.json 빌드")
-    nNodes = buildMeaningGraph(showProgress=True)
-    ref = buildGateRef(showProgress=True)
-    print(f"[main] meaning feature {nNodes:,} 노드, gateRef={ref:.2f}")
+    # 통합검색(R*) artifact — 결정론 라우터 (질의→이벤트 canon 확장. 큐레이션 동의어는 코드 내장)
+    nEvents = _buildRouterArtifact()
+    print(f"[main] router.json {nEvents} 이벤트")
 
     if nDocs == 0:
         print("[main] 빌드된 문서 없음")
         return 1
 
-    # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 allFilings/meaning 이 0 이 된다.
-    # 이 상태로 업로드하면 프로덕션 인덱스를 빈-의미로 *덮어쓰는 퇴행*. 업로드 중단.
+    # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 nDocs/router 가 0 이 된다.
+    # 이 상태로 업로드하면 프로덕션 인덱스를 빈 산출물로 *덮어쓰는 퇴행*. 업로드 중단.
     minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "500000"))
-    if nNodes == 0 or nDocs < minDocs:
+    if nEvents == 0 or nDocs < minDocs:
         print(
-            f"[main] ✗ 퇴행 가드 발동 — meaning {nNodes} 노드 / {nDocs:,} 문서(< {minDocs:,}). "
+            f"[main] ✗ 퇴행 가드 발동 — router {nEvents} 이벤트 / {nDocs:,} 문서(< {minDocs:,}). "
             f"allFilings/panel pull 누락 의심 → 업로드 중단(프로덕션 보호)."
         )
         return 1
@@ -68,8 +84,7 @@ def main() -> int:
         "main_stems.json",
         "main_meta.parquet",
         "main_info.json",
-        "meaning.json",
-        "gateRef.json",
+        "router.json",
     ]
     api = HfApi(token=hfToken)
 
@@ -114,14 +129,12 @@ def _buildAndUploadLite(hfToken: str) -> None:
     sinceDate = (datetime.now() - timedelta(days=int(months * 30.5))).strftime("%Y%m%d")
     print(f"[lite] tier 빌드 시작 — sinceDate={sinceDate} (최근 {months}개월)")
 
-    from dartlab.providers.dart.search import buildGateRef, buildMeaningGraph
     from dartlab.providers.dart.search.fieldIndex import clearCache
     from dartlab.providers.dart.search.fieldIndexRebuild import pushContentIndex, rebuildMain
 
     clearCache()
     nLite = rebuildMain(includePanel=True, includeNews=True, tier="lite", sinceDate=sinceDate, showProgress=True)
-    buildMeaningGraph(tier="lite", showProgress=True)  # 그래프는 코퍼스 전역 — lite 디렉터리에 동거
-    buildGateRef(tier="lite", showProgress=True)
+    _buildRouterArtifact(tier="lite")  # 라우터는 코퍼스 무관 — lite 디렉터리에 동거
 
     # 산출물 실측 크기 — '사용자 첫 다운로드 경량' 가치제안을 숫자로 검증(가정 금지).
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir

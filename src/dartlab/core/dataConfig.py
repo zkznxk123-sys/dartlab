@@ -143,7 +143,7 @@ DATA_RELEASES: dict[str, dict] = {
     },
     "contentIndex": {
         "dir": "dart/contentIndex",
-        "label": "의미검색 content 인덱스 (BM25 CSR + 경험그래프 meaning.json + gateRef) — 런타임 lazy pull",
+        "label": "통합검색 content 인덱스 (음절 bigram BM25 CSR + 결정론 라우터 router.json) — 런타임 lazy pull",
         "public": True,
     },
     "edinetDocs": {

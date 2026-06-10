@@ -297,7 +297,7 @@ def indexInfo() -> dict:
         (없음).
 
     Returns:
-        dict — {available, dataAsOf, nDocs, hasMeaning, hasDelta}.
+        dict — {available, dataAsOf, nDocs, hasRouter, hasDelta}.
 
     Raises:
         없음.
@@ -308,46 +308,6 @@ def indexInfo() -> dict:
     from dartlab.providers.dart.search.fieldIndexRebuild import indexInfo as _info
 
     return _info()
-
-
-def buildMeaningGraph(**kwargs) -> int:
-    """의미검색(scope=auto) 경험그래프 meaning.json build — allFilings type(report_nm)→본문 SPPMI.
-
-    Args:
-        **kwargs: fieldIndexRebuild.buildMeaningGraph 로 forward.
-
-    Returns:
-        int — 그래프 feature 노드 수.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> # buildMeaningGraph()
-    """
-    from dartlab.providers.dart.search.fieldIndexRebuild import buildMeaningGraph as _build
-
-    return _build(**kwargs)
-
-
-def buildGateRef(**kwargs) -> float:
-    """의미검색 gate 기준값 gateRef.json build — 코퍼스 median bm25 top1 (규모 적응).
-
-    Args:
-        **kwargs: fieldIndexRebuild.buildGateRef 로 forward.
-
-    Returns:
-        float — ref (median bm25 top1).
-
-    Raises:
-        없음.
-
-    Example:
-        >>> # buildGateRef()
-    """
-    from dartlab.providers.dart.search.fieldIndexRebuild import buildGateRef as _build
-
-    return _build(**kwargs)
 
 
 def collectMeta(startDate: str, endDate: str, **kwargs) -> int:

@@ -1,11 +1,9 @@
 ﻿{
   "checked_files": 722,
   "total_public_funcs": 3134,
-  "missing_count": 1102,
+  "missing_count": 1100,
   "missing": [
     { "path": "gather/dart/allFilingsCollector.py", "func": "metaSuffix", "line": 52 },
-    { "path": "providers/dart/search/fieldIndexRebuild.py", "func": "buildMeaningGraph", "line": 496 },
-    { "path": "providers/dart/search/fieldIndexRebuild.py", "func": "buildGateRef", "line": 594 },
     { "path": "providers/dart/search/fieldIndexRebuild.py", "func": "feedDf", "line": 128 },
     { "path": "scan/builders/kr/common.py", "func": "say", "line": 221 },
     {
