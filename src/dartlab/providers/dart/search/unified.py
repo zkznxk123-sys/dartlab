@@ -40,7 +40,20 @@ def _expansionWeights(query: str, routerModel: dict | None) -> dict[str, float]:
     weights: dict[str, float] = {t: 1.0 for t in tokenizeContent(query)}
 
     def boost(term: str) -> None:
-        """확장 용어의 bigram 들을 EXPAND_BOOST 가중으로 병합(기존 가중과 max)."""
+        """확장 용어의 bigram 들을 EXPAND_BOOST 가중으로 병합 (기존 가중과 max — 원토큰 1.0 보존).
+
+        Args:
+            term: 확장 용어 (동의어 또는 라우팅 canon 본문어).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> boost("자기주식")  # doctest: +SKIP
+
+        Returns:
+            None — 클로저의 weights dict 를 제자리 갱신.
+        """
         for t in tokenizeContent(term):
             weights[t] = max(weights.get(t, 0.0), EXPAND_BOOST)
 
