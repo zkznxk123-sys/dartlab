@@ -410,7 +410,6 @@ def _runFullRebuild(res: StageResult, *, upload: bool, token: str | None) -> Sta
         res.report.failures.append(f"edgar full-rebuild: {type(exc).__name__}: {exc}")
         print(f"[pipeline] edgarPanel full-rebuild 실패(격리): {exc}", flush=True)
     return res
-    return res
 
 
 def runEdgarPanel(

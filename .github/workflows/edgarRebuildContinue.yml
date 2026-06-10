@@ -1,0 +1,85 @@
+name: EDGAR Panel Rebuild (continue)
+
+# ──────────────────────────────────────────────────────────────
+# EDGAR 전 universe panel 부트스트랩 **이어달리기 cron** (memory: project_edgar_dart_parity).
+#
+# 배경: native cell payload(DARTLAB_EDGAR_NATIVE_CELLS, commit a647c8d4d 이후)가 없는
+#   stale panel(2026-06-06 이전 빌드)은 c.panel("is"/"bs"/...) 가 None — companyfacts 로는
+#   presentation linkbase 부재라 backfill 불가. 유일 정공법 = EDGAR_FULL_REBUILD 전수 재빌드.
+#   universe(7,632, OTC 제외) × SEC 5 req/s = 단일 job(≤360분) 물리적 불가.
+#
+# 설계: `_runFullRebuild`(edgarPanel stage)가 HF ledger(edgar/_rebuildState.json)로 완료 ticker 를
+#   건너뛰며 여러 run 에 누적 — 배치(100)마다 즉시 HF upload + ledger push 라 timeout 손실이
+#   '진행 중 1배치'로 bounded. 본 cron 이 6h 마다 재개해 ~14 run(~3.5일)에 전수 완주한다.
+#   처리 순서 sp500 → exchange tier(가치 큰 종목 우선).
+#
+# 자기제한: 수렴(잔여 ≤30, universe 완전로드+충분진행 가드 충족)하면 마지막 스텝이
+#   `gh workflow disable` 로 본 cron 을 끈다 — 완주 후 영구 no-op·monitor 노이즈 방지.
+#   잔여 tail(영구 fetch 실패 소수)이 남으면 운영자가 originalSync edgar_full_rebuild=true 로 재시도.
+#
+# 일정: cron 0 */6 (00·06·12·18 UTC). run 당 deadline 320분(5.3h)이 다음 트리거(6h) 전 완료 →
+#   일간 edgar job(originalSync 02:00·edgarSync 04:30)이 틈으로 진입. concurrency group
+#   hf-edgar-push 로 그 둘과 직렬화(같은 edgar/ tree HF push → 412 commit-conflict 회피).
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read   # HF push 만(HF_TOKEN)
+  actions: write   # 수렴 시 자기 비활성화(gh workflow disable)
+
+concurrency:
+  group: hf-edgar-push   # edgarSync · originalSync(edgar) 와 직렬(412 회피)
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    # full-rebuild 는 resumable(ledger)+배치 upload 라 timeout 취소돼도 진행분 보존.
+    # 350 = job 한도(360) 근처. 코드 시간가드 EDGAR_REBUILD_DEADLINE_MIN(320)이 이보다 작아
+    # 마감 배치 upload/ledger push 여유 확보.
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Smoke import
+        run: uv run python -c "import dartlab"
+
+      - name: EDGAR 전 universe panel 재빌드 (ledger 재개 + 배치 upload + 시간가드)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          EDGAR_FULL_REBUILD: '1'
+          EDGAR_SINCE_YEAR: '2015'
+        run: uv run python -X utf8 -m dartlab.pipeline edgarPanel
+
+      - name: 수렴 시 cron 자기 비활성화 (완주 후 영구 no-op·monitor 노이즈 방지)
+        if: ${{ success() }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DECISION=$(uv run python -X utf8 -c "
+          import os
+          from dartlab.pipeline.stages.edgarPanel import _priorityTickers, _loadRebuildLedger
+          tickers = _priorityTickers()
+          done = _loadRebuildLedger(os.environ.get('HF_TOKEN'))
+          pending = [t for t in tickers if t not in done]
+          # 거짓 비활성화 가드: universe 완전 로드(>=7000) + 충분 진행(>=5000) + 잔여 소수(<=30) 모두 충족 시에만.
+          # (universe 로드 실패 시 truncated tickers 로 pending 이 거짓-0 될 수 있어 3중 조건 필수.)
+          converged = len(tickers) >= 7000 and len(done) >= 5000 and len(pending) <= 30
+          print('DISABLE' if converged else 'CONTINUE')
+          print(f'pending={len(pending)} done={len(done)} universe={len(tickers)}')
+          ")
+          echo "$DECISION"
+          if echo "$DECISION" | grep -q '^DISABLE'; then
+            echo "전수 재빌드 수렴 → 이어달리기 cron 자기 비활성화"
+            gh workflow disable edgarRebuildContinue.yml
+          fi

@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 # (제외: 코드 CI/CodeQL/Policy·Deploy·Publish·Metrics·EDGAR Safety Gate·Data Audit 자기 자신·mapBuild(cron 없음))
 MONITORED_WORKFLOWS = [
     "Original SSOT Sync",  # dart-zip · allfilings · edgar (cron 0 2) — 핵심 원본/panel 파이프라인
+    "EDGAR Panel Rebuild (continue)",  # EDGAR 전 universe 부트스트랩 이어달리기 (cron 0 */6) — 수렴 시 자기 비활성화
     "Data Sync",
     "DART New Stocks Sync",
     "Data Prebuild (DART)",
