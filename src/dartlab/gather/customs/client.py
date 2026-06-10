@@ -54,6 +54,10 @@ class CustomsClient:
 
         Capabilities: 관세청 품목별 수출입실적 1콜 + XML 파싱 + resultCode 검증.
             cntyCd 생략 → 전 국가 합산. 윈도는 1년 이내 (caller 분할).
+        AIContext: customs series 빌드의 단일 HTTP 진입점 — 월별 국가총계 raw.
+        Guide: hsSgn 2/4/6자리 산업 집계. resultType=json 미지원(XML 전용).
+        When: series.fetchSeries 가 1년 윈도마다 본 메서드 호출.
+        How: rate limit 대기 → GET → XML 파싱 → resultCode/cmmMsgHeader 분류.
 
         Args:
             hsCode: HS 코드 (2/4/6자리). API ``hsSgn`` 파라미터.
@@ -70,8 +74,15 @@ class CustomsClient:
             RateLimitError: 트래픽 한도 초과(returnReasonCode 22).
             httpx.HTTPStatusError: 재시도 후에도 4xx/5xx.
 
+        Requires:
+            DATA_GO_KR_KEY 인증키 + 관세청 API 네트워크(HTTP, 비-TLS).
+
         Example:
             >>> rows = CustomsClient(apiKey=key).get("8542", "202601", "202603")  # doctest: +SKIP
+
+        SeeAlso:
+            series.fetchSeries : 본 raw 를 월별 (date, value) 로 환원.
+            _parseItems : XML → item dict 파싱.
         """
         params = {
             "serviceKey": self._key,

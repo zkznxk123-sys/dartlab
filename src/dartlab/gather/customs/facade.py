@@ -35,6 +35,7 @@ class Customs:
         start: str | None = None,
         end: str | None = None,
         metric: str = "expDlr",
+        limit: int | None = None,
     ) -> pl.DataFrame:
         """HS 품목 월별 국가총계 수출입 시계열 (date, value).
 
@@ -46,6 +47,7 @@ class Customs:
             start: 시작 'YYYY-MM'/'YYYYMM'. None 이면 ``"200001"``.
             end: 종료. None 이면 현재 월.
             metric: ``"expDlr"``(수출 USD, 기본)·``"impDlr"``·``"balPayments"``.
+            limit: 최근 N개월만 반환 (tail). None 이면 전체.
 
         Returns:
             pl.DataFrame — date(Date, 월초)·value(Float64). 빈 결과는 빈 스키마.
@@ -60,7 +62,7 @@ class Customs:
         Example:
             >>> Customs().series("8542", start="2025-01")  # doctest: +SKIP
         """
-        return fetchSeries(self._client, hsCode, start=start, end=end, metric=metric)
+        return fetchSeries(self._client, hsCode, start=start, end=end, metric=metric, limit=limit)
 
     def catalog(self, group: str | None = None) -> pl.DataFrame:
         """등록 HS 품목 카탈로그 (id/label/group/frequency/unit/description).

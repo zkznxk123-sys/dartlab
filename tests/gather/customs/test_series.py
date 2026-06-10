@@ -74,3 +74,15 @@ def test_fetchSeries_invalid_metric() -> None:
 
     with pytest.raises(ValueError):
         fetchSeries(_StubClient([]), "8542", metric="nope")
+
+
+def test_fetchSeries_limit_tail() -> None:
+    from dartlab.gather.customs.series import fetchSeries
+
+    items = [
+        {"year": "2025.10", "expDlr": "100"},
+        {"year": "2025.11", "expDlr": "200"},
+        {"year": "2025.12", "expDlr": "300"},
+    ]
+    df = fetchSeries(_StubClient(items), "8542", start="2025-10", end="2025-12", limit=2)
+    assert df["date"].to_list() == [dt.date(2025, 11, 1), dt.date(2025, 12, 1)]

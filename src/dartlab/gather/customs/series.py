@@ -78,11 +78,16 @@ def fetchSeries(
     start: str | None = None,
     end: str | None = None,
     metric: str = "expDlr",
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """HS 품목의 월별 국가총계 수출입 시계열.
 
     Capabilities: 윈도 분할 호출 + 월별 합산 → (date, value). metric 선택으로
         수출액/수입액/무역수지 중 하나를 value 로.
+    AIContext: customs 산업 시계열의 표준 진입 — FRED/ECOS series 와 동일 반환계약.
+    Guide: 응답이 하위HS·국가 분해라 ``year=총계`` 제외 후 월별 합산해 환원.
+    When: buildCustoms / collectIndustryIndicators / Customs.series 가 호출.
+    How: _monthWindows 로 1년 분할 → client.get → _aggregateMonthly → 정렬 DataFrame.
 
     Args:
         client: CustomsClient.
@@ -90,6 +95,7 @@ def fetchSeries(
         start: 시작 'YYYY-MM'/'YYYYMM'. None 이면 ``"200001"``.
         end: 종료. None 이면 현재 월.
         metric: ``"expDlr"``(수출 USD, 기본) | ``"impDlr"`` | ``"balPayments"``.
+        limit: 최근 N개월만 반환 (tail). None 이면 전체.
 
     Returns:
         pl.DataFrame — date(Date, 월초)·value(Float64). 빈 결과는 빈 스키마.
@@ -98,8 +104,15 @@ def fetchSeries(
         ValueError: metric 이 expDlr/impDlr/balPayments 외.
         CustomsError: API 오류 (client 경유).
 
+    Requires:
+        CustomsClient (DATA_GO_KR_KEY) + 관세청 API 네트워크.
+
     Example:
         >>> df = fetchSeries(client, "8542", start="2025-01")  # doctest: +SKIP
+
+    SeeAlso:
+        transforms.macro.enrichAndCache : (date, value) 후 변화율+캐시.
+        CustomsClient.get : 단일 윈도 raw fetch.
     """
     if metric not in _VALID_METRICS:
         raise ValueError(f"metric 은 {_VALID_METRICS} 중 하나여야 합니다: {metric!r}")
@@ -114,7 +127,8 @@ def fetchSeries(
     if not merged:
         return _EMPTY.clone()
     rows = sorted(merged.items())
-    return pl.DataFrame(
+    df = pl.DataFrame(
         {"date": [m for m, _ in rows], "value": [v for _, v in rows]},
         schema={"date": pl.Date, "value": pl.Float64},
     )
+    return df.tail(limit) if limit else df

@@ -67,6 +67,10 @@ def getAllEntries() -> list[CatalogEntry]:
     """카탈로그 전체 HS 품목 엔트리 (group 순서·정의 순서 보존).
 
     Capabilities: buildCustoms 가 순회하며 각 HS 의 월별 수출 시계열 빌드.
+    AIContext: customs 빌드/수집의 HS universe — FRED catalog.getAllEntries 대응.
+    Guide: CATALOG dict 의 group 순서·정의 순서 그대로 평탄화.
+    When: buildCustoms / collectIndustryIndicators 가 수집 대상 결정 시.
+    How: CATALOG.values() 순회 + extend.
 
     Returns:
         list[CatalogEntry] — 등록 HS 품목 전체.
@@ -74,9 +78,16 @@ def getAllEntries() -> list[CatalogEntry]:
     Raises:
         없음.
 
+    Requires:
+        없음 — 정적 카탈로그(네트워크·인증 불필요).
+
     Example:
         >>> [e.id for e in getAllEntries()][:2]
         ['8542', '8541']
+
+    SeeAlso:
+        getEntry : HS 코드 단건 조회.
+        CATALOG : group → 엔트리 정의 SSOT.
     """
     out: list[CatalogEntry] = []
     for entries in CATALOG.values():
@@ -95,6 +106,9 @@ def getEntry(hsCode: str) -> CatalogEntry | None:
 
     Raises:
         없음.
+
+    Requires:
+        없음 — 정적 카탈로그(네트워크·인증 불필요).
 
     Example:
         >>> getEntry("8542").group
