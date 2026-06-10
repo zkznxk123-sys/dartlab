@@ -133,7 +133,10 @@ jobs:
   edgar:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'edgar' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    # full-rebuild(EDGAR_FULL_REBUILD=1)는 resumable(ledger)+배치 upload 라 timeout 취소돼도 진행분 보존.
+    # 350 = GitHub job 한도(360) 근처로 run 당 처리량↑. 증분(기본)은 수분이라 영향 없음.
+    # 코드 시간가드 EDGAR_REBUILD_DEADLINE_MIN(기본 320)이 이보다 작아 upload/ledger 여유 확보.
+    timeout-minutes: 350
     concurrency:
       group: hf-edgar-push
       cancel-in-progress: false

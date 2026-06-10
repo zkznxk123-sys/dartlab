@@ -22,14 +22,24 @@ dispatch 전용). lookback 은 ``SYNC_LOOKBACK_DAYS``/``EDGAR_LOOKBACK`` env(기
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
+import time
 from datetime import date, timedelta
 from pathlib import Path
 
 from dartlab.pipeline.types import PipelineMode, StageResult
 
 _REGULAR_FORMS = ("10-K", "10-Q", "20-F", "40-F")
+
+# full-rebuild resumable ledger — panel dir 의 *부모*(edgar/)에 둔다. panel dir 동거 시
+# tree 열거(seed._remoteTreeFiles)·prebuild stem 추출이 가짜 code 로 오염(전문에이전트 치명결함).
+_REBUILD_LEDGER_REMOTE = "edgar/_rebuildState.json"
+# 한 배치 빌드 후 1회 HF upload + ledger push. 작을수록 timeout 손실면↓, commit(412)횟수↑ (전문에이전트 권장 100).
+_REBUILD_BATCH = int(os.environ.get("EDGAR_REBUILD_BATCH") or "100")
+# 루프 시간 가드(분) — job timeout 보다 충분히 작게(upload·ledger·412 backoff 여유). 기본 320 (350분 timeout 기준).
+_REBUILD_DEADLINE_MIN = int(os.environ.get("EDGAR_REBUILD_DEADLINE_MIN") or "320")
 
 
 def _recentDates(days: int) -> list[str]:
@@ -221,8 +231,111 @@ def _runIncremental(res: StageResult, *, lookback: int, upload: bool, token: str
     return res
 
 
+def _priorityTickers() -> list[str]:
+    """재빌드 처리 순서 — sp500 먼저, 그 다음 tier="all"(Nasdaq+NYSE+CBOE, OTC 제외). dedup·upper.
+
+    universe 에 시총/거래량 컬럼이 없어(SEC 원본 부재) sp500 교차 + exchange tier 가 '가치 큰 종목
+    우선'의 최선 근사. OTC 는 대부분 재무공시 부재라 제외(tier="all" 이 이미 OTC 제외). 신규 상장
+    반영 위해 호출 전 universe 캐시를 force 갱신한다(_runFullRebuild 가 수행).
+
+    Returns:
+        list[str] — 우선순위 정렬된 대문자 ticker (중복 제거).
+    """
+    from dartlab.core.dataLoader import _loadSp500Tickers, loadEdgarTargetUniverse
+
+    out: list[str] = []
+    seen: set[str] = set()
+
+    def _add(tickers: list) -> None:
+        for t in tickers:
+            u = str(t).strip().upper() if t else ""
+            if u and u not in seen:
+                seen.add(u)
+                out.append(u)
+
+    _add(_loadSp500Tickers() or [])
+    try:
+        _add(loadEdgarTargetUniverse(tier="all")["ticker"].to_list())
+    except (OSError, KeyError, ValueError) as exc:
+        print(f"[pipeline] edgarPanel priority universe 일부 실패(sp500 만): {exc}", flush=True)
+    return out
+
+
+def _loadRebuildLedger(token: str | None) -> set[str]:
+    """HF rebuild 진행 ledger(완료 ticker 집합) 로드. 부재/파손 시 빈 set(처음부터 — 재빌드 idempotent)."""
+    from huggingface_hub import hf_hub_download
+    from huggingface_hub.utils import EntryNotFoundError, RepositoryNotFoundError
+
+    from dartlab.core.dataConfig import HF_REPO
+    from dartlab.core.hfRetry import retryHfCall
+
+    try:
+        p = retryHfCall(
+            hf_hub_download,
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            filename=_REBUILD_LEDGER_REMOTE,
+            token=token,
+        )
+        data = json.loads(Path(p).read_text(encoding="utf-8"))
+        return {str(t).upper() for t in data} if isinstance(data, list) else set()
+    except (EntryNotFoundError, RepositoryNotFoundError):
+        return set()
+    except Exception as exc:  # noqa: BLE001 — 파손/일시 실패 → 빈 set(중복 빌드는 idempotent)
+        print(f"[pipeline] edgarPanel ledger 로드 실패 → 처음부터: {type(exc).__name__}: {exc}", flush=True)
+        return set()
+
+
+def _saveRebuildLedger(done: set[str], token: str | None) -> None:
+    """완료 ticker 집합을 HF ledger(`edgar/_rebuildState.json`)로 push — 다음 run 재개 기준."""
+    from huggingface_hub import HfApi
+
+    from dartlab.core.dataConfig import HF_REPO
+    from dartlab.core.hfRetry import retryHfCall
+    from dartlab.pipeline.hfUpload import _resolveHfToken
+
+    payload = json.dumps(sorted(done), ensure_ascii=False).encode("utf-8")
+    retryHfCall(
+        HfApi().upload_file,
+        path_or_fileobj=payload,
+        path_in_repo=_REBUILD_LEDGER_REMOTE,
+        repo_id=HF_REPO,
+        repo_type="dataset",
+        token=_resolveHfToken(token),
+        commit_message=f"edgar rebuild ledger: {len(done)} done",
+    )
+
+
+def _flushRebuildBatch(
+    uploaded: list[str], processed: list[str], done: set[str], *, upload: bool, token: str | None
+) -> None:
+    """배치 마감 — rows>0 ticker 만 HF upload(+로컬 삭제로 디스크 확보) → processed 전부 ledger 기록·push.
+
+    upload 성공분만 로컬 panel 을 unlink(다음 ticker 빌드는 SEC 에서 새로 받으므로 무손실). ledger 는
+    processed 전부 기록(재무공시 0행도 '처리완료'로 — 매 run 재fetch 방지). 배치 후 짧은 sleep 으로
+    commit rate(412 빈도) 완화.
+    """
+    from dartlab.pipeline.hfUpload import uploadCategoryToHf
+    from dartlab.providers.edgar.panel.build.builder import panelPath
+
+    if upload and uploaded:
+        uploadCategoryToHf("edgarPanel", changedFiles=[f"{t}.parquet" for t in uploaded], token=token)
+        for t in uploaded:
+            panelPath(t).unlink(missing_ok=True)  # 업로드 성공분 로컬 삭제(러너 디스크 floor)
+    done.update(processed)
+    if upload:
+        _saveRebuildLedger(done, token)
+        time.sleep(8)  # commit rate 완화(412 conflict 빈도 ↓)
+
+
 def _runFullRebuild(res: StageResult, *, upload: bool, token: str | None) -> StageResult:
-    """전 universe archive + 재빌드 부트스트랩 — 무겁다(dispatch 전용, 디스크 floor 가드)."""
+    """전 universe 재빌드 부트스트랩 — resumable(ledger) + 배치 upload + 시간가드(dispatch 전용).
+
+    universe(Nasdaq+NYSE+CBOE) × SEC fetch(5 req/s)는 단일 job(≤360분)으로 물리적 불가 → HF ledger
+    (`edgar/_rebuildState.json`)로 완료 ticker 를 건너뛰며 여러 run 에 걸쳐 누적한다. 빌드한 배치마다
+    즉시 HF upload(`changedFiles`) + ledger push 라 timeout(취소) 손실이 '진행 중 1배치'로 bounded
+    (옛 all-at-end = 3시간 전부 손실 회귀 차단). 처리 순서 sp500→exchange tier(가치 우선).
+    """
     import dartlab.config as cfg
 
     floor = float(os.environ.get("EDGAR_DISK_FLOOR_GB") or "5")
@@ -242,35 +355,61 @@ def _runFullRebuild(res: StageResult, *, upload: bool, token: str | None) -> Sta
         from dartlab.gather.original.edgar.submissions import listAllFilings
         from dartlab.providers.edgar.panel.build import buildEdgarPanel
 
-        uni = loadEdgarListedUniverse(forceUpdate=True)  # 전수 재빌드 — universe 도 최신(신규 상장 포함)
-        tickers = [t for t in uni["ticker"].to_list() if t]
+        loadEdgarListedUniverse(forceUpdate=True)  # 신규 상장 반영 — 이후 _priorityTickers 가 캐시 read
+        tickers = _priorityTickers()
+        done = _loadRebuildLedger(token) if upload else set()
+        pending = [t for t in tickers if t not in done]
         sinceYear = int(os.environ.get("EDGAR_SINCE_YEAR") or "2015")
+        deadline = time.monotonic() + _REBUILD_DEADLINE_MIN * 60
+        print(
+            f"[pipeline] edgarPanel full-rebuild: universe {len(tickers)} / 완료 {len(done)} / "
+            f"잔여 {len(pending)} (배치 {_REBUILD_BATCH}, 시간가드 {_REBUILD_DEADLINE_MIN}분)",
+            flush=True,
+        )
+
         totalRows = 0
-        for ticker in tickers:
-            history = listAllFilings(ticker, forms=list(_REGULAR_FORMS), sinceYear=sinceYear)
-            records = _flattenFetched(fetchFilingTexts(history))
-            if len(records) < len(history):
-                res.report.failures.append(f"edgar full {ticker}: fetch {len(records)}/{len(history)} → skip")
+        uploaded: list[str] = []
+        processed: list[str] = []
+        timedOut = False
+        for ticker in pending:
+            if time.monotonic() > deadline:
+                timedOut = True
+                break
+            try:
+                history = listAllFilings(ticker, forms=list(_REGULAR_FORMS), sinceYear=sinceYear)
+                records = _flattenFetched(fetchFilingTexts(history))
+                if len(records) < len(history):  # 불완전 fetch — ledger 기록 안 함(다음 run 재시도)
+                    res.report.failures.append(f"edgar full {ticker}: fetch {len(records)}/{len(history)} → skip")
+                    continue
+                stat = buildEdgarPanel(ticker, records, overwrite=True, verbose=False)
+                totalRows += int(stat.get("rows", 0))
+                processed.append(ticker)  # 재무공시 0행도 '처리완료'(매 run 재fetch 방지)
+                if stat.get("rows"):
+                    uploaded.append(ticker)
+            except Exception as exc:  # noqa: BLE001 — ticker 단위 격리(ledger 기록 안 함 → 재시도)
+                res.report.failures.append(f"edgar full {ticker}: {type(exc).__name__}: {exc}")
                 continue
-            stat = buildEdgarPanel(ticker, records, overwrite=True, verbose=False)
-            totalRows += int(stat.get("rows", 0))
+            if len(processed) >= _REBUILD_BATCH:
+                _flushRebuildBatch(uploaded, processed, done, upload=upload, token=token)
+                uploaded, processed = [], []
+        if processed:  # 잔여 배치
+            _flushRebuildBatch(uploaded, processed, done, upload=upload, token=token)
+
         res.rows = totalRows
         res.report.ok = 1
-    except Exception as exc:  # noqa: BLE001 — build 실패 격리
+        remaining = len([t for t in tickers if t not in done])
+        print(
+            f"[pipeline] edgarPanel full-rebuild {'중단(시간가드)' if timedOut else '완료'}: "
+            f"누적 {len(done)}/{len(tickers)} (잔여 {remaining}, 이번 run +{totalRows:,} rows)",
+            flush=True,
+        )
+        if remaining:
+            res.report.failures.append(f"edgar full-rebuild 잔여 {remaining} — 다음 run/dispatch 재개")
+    except Exception as exc:  # noqa: BLE001 — 전역 격리
         res.report.err = 1
         res.report.failures.append(f"edgar full-rebuild: {type(exc).__name__}: {exc}")
         print(f"[pipeline] edgarPanel full-rebuild 실패(격리): {exc}", flush=True)
-        return res
-
-    if upload:
-        from dartlab.pipeline.hfUpload import uploadCategoryToHf
-
-        for cat in ("edgarPanel",):
-            try:
-                uploadCategoryToHf(cat, token=token)
-            except Exception as exc:  # noqa: BLE001 — deploy 격리
-                res.report.fail = 1
-                res.report.failures.append(f"deploy {cat}: {type(exc).__name__}: {exc}")
+    return res
     return res
 
 
