@@ -461,6 +461,36 @@ def clearCache() -> None:
     _segments = None
 
 
+def _scopeMask(meta: pl.DataFrame, corpCode: str | None, stockCode: str | None) -> np.ndarray | None:
+    """corp/stock 필터를 랭킹 *전* 스코프 마스크로 변환 — "회사 안에서 검색" 의미론.
+
+    사후(top-N 수집 후) 필터는 흔한 질의에서 해당 회사가 전역 상위에 못 들면 0건이 되는
+    결함이 있다 (예: "배당" + 005930). 마스크를 lane 점수에 곱해 랭킹 자체를 스코프한다.
+
+    Args:
+        meta: 세그먼트 meta (corp_code/stock_code 컬럼, 점수 배열과 행 정렬 동일).
+        corpCode: 회사 식별자 corp_code. None 이면 무제한.
+        stockCode: 종목코드 (6 자리). None 이면 무제한.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _scopeMask(meta, None, "005930")  # doctest: +SKIP
+
+    Returns:
+        np.ndarray(bool) — 스코프 내 행 True. 필터가 없으면 None.
+    """
+    if not corpCode and not stockCode:
+        return None
+    mask = np.ones(meta.height, dtype=bool)
+    if corpCode:
+        mask &= (meta["corp_code"] == corpCode).to_numpy()
+    if stockCode:
+        mask &= (meta["stock_code"] == stockCode).to_numpy()
+    return mask
+
+
 def _resolveResultUrl(df: pl.DataFrame) -> pl.DataFrame:
     """결과 DataFrame 에 dartUrl 컬럼 부여 — source 분기.
 
@@ -543,6 +573,9 @@ def searchContent(
     if "delta" in segments:
         dIdx, dMeta = segments["delta"]
         dScores = _scoreBM25(dIdx, tokens)
+        dMask = _scopeMask(dMeta, corpCode, stockCode)
+        if dMask is not None:
+            dScores = np.where(dMask, dScores, 0.0)
         top = np.argsort(-dScores)[: limit * 3]
         for i in top:
             if dScores[i] <= 0:
@@ -554,6 +587,9 @@ def searchContent(
     if "main" in segments:
         mIdx, mMeta = segments["main"]
         mScores = _scoreBM25(mIdx, tokens)
+        mMask = _scopeMask(mMeta, corpCode, stockCode)
+        if mMask is not None:
+            mScores = np.where(mMask, mScores, 0.0)
         top = np.argsort(-mScores)[: limit * 3]
         for i in top:
             if mScores[i] <= 0:
@@ -567,14 +603,8 @@ def searchContent(
     if not allHits:
         return pl.DataFrame()
 
+    # corp/stock 스코프는 _scopeMask 로 랭킹 전 적용 완료 — 사후 필터 불필요.
     df = pl.DataFrame(allHits).sort("score", descending=True)
-
-    # 필터
-    if corpCode:
-        df = df.filter(pl.col("corp_code") == corpCode)
-    if stockCode:
-        df = df.filter(pl.col("stock_code") == stockCode)
-
     df = _resolveResultUrl(df)
     return df.head(limit)
 

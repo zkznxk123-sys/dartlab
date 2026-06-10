@@ -26,13 +26,13 @@ def _buildSegment(fieldIndex, tmp_path, rows):
     fieldIndex.clearCache()
 
 
-def _row(rcept, content, *, source="allFilings", report="공시", title=""):
+def _row(rcept, content, *, source="allFilings", report="공시", title="", corp="00000000", stock="000000"):
     return {
         "rcept_no": rcept,
         "section_order": 0,
-        "corp_code": "00000000",
+        "corp_code": corp,
         "corp_name": "테스트",
-        "stock_code": "000000",
+        "stock_code": stock,
         "rcept_dt": "20260101",
         "report_nm": report,
         "section_title": title,
@@ -138,6 +138,27 @@ def test_edgar_panel_rollup_indexed(tmp_path, monkeypatch):
     assert top["source"] == "edgar-panel"
     assert top["report_nm"] == "10-Q"
     assert top["dartUrl"] == ""  # accession 은 DART 뷰어 URL 조합 불가 — 빈값(정직)
+
+
+def test_company_scope_ranks_within_company(tmp_path, monkeypatch):
+    """회사 필터는 랭킹 *전* 스코프 — 전역 top-N 밖 회사도 회수 (사후 필터 0건 결함 가드).
+
+    풀셋 실측 사고: "배당"+005930 이 0건 — 전역 top30 수집 후 필터라 흔한 질의에서
+    지정 회사가 잘려나감. _scopeMask 가 lane 점수를 스코프해 회사 내 랭킹으로 동작해야 한다.
+    """
+    fieldIndex, unified = _patchIndexDir(monkeypatch, tmp_path)
+    # 노이즈 39건(tf=2, 전역 상위 독점) + 타깃 1건(tf=1, 다른 회사) → 전역 top30(limit 10×3) 밖
+    rows = [_row(f"2026010100{i:04d}", "유상증자 유상증자 결정", corp="11111111", stock="111111") for i in range(39)]
+    rows.append(_row("20260101009999", "유상증자 신주 발행", corp="22222222", stock="222222"))
+    _buildSegment(fieldIndex, tmp_path, rows)
+
+    df = unified.searchUnified("유상증자", stockCode="222222", limit=10)
+    assert df.height == 1
+    assert df.row(0, named=True)["rcept_no"] == "20260101009999"
+
+    dfContent = fieldIndex.searchContent("유상증자", corpCode="22222222", limit=10)
+    assert dfContent.height == 1
+    assert dfContent.row(0, named=True)["rcept_no"] == "20260101009999"
 
 
 def test_expansion_preserves_plain_top(tmp_path, monkeypatch):

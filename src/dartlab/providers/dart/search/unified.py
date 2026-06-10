@@ -24,6 +24,7 @@ from dartlab.providers.dart.search.fieldIndex import (
     _activeIndexDir,
     _getSegments,
     _resolveResultUrl,
+    _scopeMask,
     _scoreBM25,
     tokenizeContent,
 )
@@ -121,9 +122,16 @@ def searchUnified(
         if name not in segments:
             continue
         idx, meta = segments[name]
+        # corp/stock 스코프는 RRF *전* lane 점수에 적용 — "회사 안에서 검색" 의미론.
+        # 사후 필터는 전역 top-N 에 못 들면 0건이 되는 결함 (흔한 질의 + 회사 지정).
+        mask = _scopeMask(meta, corpCode, stockCode)
         plain = _scoreBM25(idx, tokens)
+        if mask is not None:
+            plain = np.where(mask, plain, 0.0)
         if hasExpansion:
             boosted = _scoreBM25(idx, list(weights), weights=weights)
+            if mask is not None:
+                boosted = np.where(mask, boosted, 0.0)
             fused = _rrfFuse(plain, boosted)
         else:
             fused = plain
@@ -142,9 +150,6 @@ def searchUnified(
     if not allHits:
         return pl.DataFrame()
 
+    # corp/stock 스코프는 _scopeMask 로 랭킹 전 적용 완료 — 사후 필터 불필요.
     df = pl.DataFrame(allHits).sort("score", descending=True)
-    if corpCode:
-        df = df.filter(pl.col("corp_code") == corpCode)
-    if stockCode:
-        df = df.filter(pl.col("stock_code") == stockCode)
     return _resolveResultUrl(df).head(limit)
