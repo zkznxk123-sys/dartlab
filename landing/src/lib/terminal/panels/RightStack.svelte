@@ -96,6 +96,15 @@
 	// 최신 기간부터(역순) 표시 — 차트는 오름차순 유지, 표만 reverse.
 	const dispPeriods = $derived(finView ? finView.periods.slice().reverse() : []);
 	const stmtRows = $derived(finView ? (stmt === 'RT' ? finView.ratios : finView.statements[stmt as StmtKind]) : []);
+	// 표 단위 자동 — 값이 작은 회사는 조 표가 전부 0.x 소수점 → 최대 절대값 2조 미만이면 억 전환 (비율 탭 제외)
+	const finUnitEok = $derived.by(() => {
+		if (!finView) return false;
+		let m = 0;
+		for (const k of ['IS', 'BS', 'CF'] as StmtKind[]) for (const r of finView.statements[k]) for (const v of r.values) if (v != null && Math.abs(v) > m) m = Math.abs(v);
+		return m > 0 && m < 2;
+	});
+	const finUnit = $derived(finUnitEok ? '억' : '조');
+	const finVal = (v: number | null): string => (v == null ? '—' : finUnitEok ? fmtNum(v * 1e4, 0) : fmtNum(v, 1));
 
 	// 정기보고서 시계열 (인력·주주환원·타법인출자) — reportSeries.ts, 패널별 독립 로드.
 	// 구역 규칙(Terminal.svelte): 우측 = 테이블·수치·정성만, 그래프 금지 — 시계열 그래프는 중앙 재무 전체화면 탭.
@@ -202,7 +211,7 @@
 {/if}
 
 <!-- FINANCIALS -->
-<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · 조', en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
+<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · ' + finUnit, en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
 	{#snippet right()}
 		{#if finBundle && finBundle.modes.filter((m) => m !== 'ttm').length > 1}
 			<span class="segGroup mini">{#each finBundle.modes.filter((m) => m !== 'ttm') as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
@@ -216,7 +225,7 @@
 				{#each stmtRows as r (r.key)}
 					<tr class={KEY_ROWS.includes(r.key) ? 'finKey' : ''}>
 						<td class="finAcct">{lang === 'en' ? r.en : r.kr}{#if r.unit}<span class="finUnit">{r.unit}</span>{/if}</td>
-						{#each r.values.slice().reverse() as val, i (i)}<td class={'r mono ' + (val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : fmtNum(val, 1)}</td>{/each}
+						{#each r.values.slice().reverse() as val, i (i)}<td class={'r mono ' + (val != null && val < 0 ? 'tDn' : '')}>{val == null ? '—' : stmt === 'RT' ? fmtNum(val, 1) : finVal(val)}</td>{/each}
 					</tr>
 				{/each}
 			</tbody>
@@ -224,7 +233,7 @@
 	{:else}
 		<div class="chartLoad" style="height:90px">{lang === 'en' ? 'loading statements …' : '재무제표 불러오는 중 …'}</div>
 	{/if}
-	<div class="finNote">c.panel · {finView ? finView.periods.length + (lang === 'en' ? 'p' : '기') : '—'} · 조 KRW</div>
+	<div class="finNote">c.panel · {finView ? finView.periods.length + (lang === 'en' ? 'p' : '기') : '—'} · {finUnit} KRW</div>
 </Panel>
 
 <!-- DART 정기보고서 팩트 (배당·자사주·임원·감사·대주주·회사채 — report parquet) -->
