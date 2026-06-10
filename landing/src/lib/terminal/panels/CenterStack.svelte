@@ -4,6 +4,7 @@
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
+	import FinFullscreen from './FinFullscreen.svelte';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
 	import { price as wbPrice, type Candle } from '../data/workbench';
 	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
@@ -72,14 +73,8 @@
 	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
 	loadHfProductIndexMap().then((m) => (corpMeta = m));
 	const product = $derived(corpMeta?.get(co.code)?.product ?? '');
-	// 재무제표 분석 전체화면 토글 (ESC 닫기)
+	// 재무제표 분석 전체화면 (FinFullscreen — 버틀러식 탭, ESC 닫기는 컴포넌트 내부)
 	let finFull = $state(false);
-	$effect(() => {
-		if (!finFull) return;
-		const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') finFull = false; };
-		window.addEventListener('keydown', onKey);
-		return () => window.removeEventListener('keydown', onKey);
-	});
 
 	const p = $derived(co.price);
 	const e = $derived(co.eco);
@@ -253,13 +248,13 @@
 
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
      ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
-<Panel {lang} className={'eAnalysis' + (finFull ? ' finFull' : '')} prov="real" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
+<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
 	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · 조 KRW', en: finMode + ' · ' + finData.periods.length + 'p' } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
 	{#snippet right()}
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
-		<button class="finFullBtn" onclick={() => (finFull = !finFull)} title={finFull ? (lang === 'en' ? 'exit fullscreen (ESC)' : '전체화면 해제 (ESC)') : (lang === 'en' ? 'fullscreen' : '전체화면')} aria-label="fullscreen">{finFull ? '✕' : '⤢'}</button>
+		<button class="finFullBtn" onclick={() => (finFull = true)} title={lang === 'en' ? 'fullscreen analysis' : '전체화면 분석'} aria-label="fullscreen">⤢</button>
 	{/snippet}
 	{#if finState === 'ready' && finData}
 		<div class="finGrid">
@@ -273,6 +268,9 @@
 		<div class="storyEmpty">{lang === 'en' ? 'No quarterly financials for this company.' : '분기 재무 데이터 없음.'}</div>
 	{/if}
 </Panel>
+{#if finFull}
+	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} onClose={() => (finFull = false)} />
+{/if}
 
 <!-- VERDICT (종합 판정 — co.verdict 합성, 동기 tier 즉시 렌더) -->
 <Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '종합 판정', en: 'VERDICT' }} sub={{ kr: 'verdict · 합성', en: 'verdict · synth' }} flush>

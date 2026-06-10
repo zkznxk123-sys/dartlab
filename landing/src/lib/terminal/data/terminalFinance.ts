@@ -35,6 +35,7 @@ export interface TerminalFinance {
 	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
 	freq: 'quarter' | 'annual' | 'ttm';
 	cards: FinCard[];
+	tabCards: { profitability: FinCard[]; cashflow: FinCard[]; debt: FinCard[] }; // 전체화면 탭 심화 카드
 	revYoy: Num[]; // 매출 YoY % (분기=4분기전, 연간=전년)
 	opYoy: Num[]; // 영업이익 YoY %
 	cashQuality: Num[]; // 영업CF / 순이익 배수 (순이익>0 일 때만)
@@ -454,6 +455,91 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			] }
 		];
 
+		// ── 전체화면 탭 심화 카드 (FinFullscreen 전용) — 동일 헬퍼·동일 기간 축, 모드 토글 동작 ──
+		const fc = raw('financeCosts');
+		const taxRaw = raw('incomeTax');
+		const niRaw = raw('netIncome');
+		const oiRaw = raw('operatingIncome');
+		// 실효세율 — 세전이익 = 순이익 + 법인세 (계정 누락에 강건). 세전 ≤ 0 → null.
+		const effTax: Num[] = used.map((_, i) => {
+			const t = taxRaw[i];
+			const ni = niRaw[i];
+			if (t == null || ni == null) return null;
+			const pretax = ni + t;
+			return pretax > 0 ? +((t / pretax) * 100).toFixed(1) : null;
+		});
+		// 현금전환주기 — DSO·DPO 필수, DIO 결측(재고 미계상)은 0 처리. 분기=91일, 연간/TTM=365일.
+		const days = mode === 'quarter' ? 91 : 365;
+		const rcv = raw('receivables');
+		const inv = raw('inventories');
+		const pay = raw('payables');
+		const rev = raw('revenue');
+		const cogs = raw('costOfSales');
+		const dayRatio = (n: Num, d: Num): Num => (n != null && d != null && d > 0 ? +((n / d) * days).toFixed(1) : null);
+		const dso = used.map((_, i) => dayRatio(rcv[i], rev[i]));
+		const dio = used.map((_, i) => dayRatio(inv[i], cogs[i]));
+		const dpo = used.map((_, i) => dayRatio(pay[i], cogs[i]));
+		const ccc = used.map((_, i) => (dso[i] != null && dpo[i] != null ? +(dso[i]! + (dio[i] ?? 0) - dpo[i]!).toFixed(1) : null));
+		const cfoRaw = raw('cfOperating');
+		const tabCards = {
+			profitability: [
+				{ key: 'costStructure', title: '비용구조', unit: '조', stacked: true, series: [
+					{ name: '매출원가', data: ser('costOfSales'), color: C.red, type: 'bar' },
+					{ name: '판관비', data: ser('sga'), color: C.warn, type: 'bar' },
+					{ name: '매출', data: ser('revenue'), color: C.rev, type: 'line' }
+				] },
+				{ key: 'finNet', title: '금융손익', unit: '조', signed: true, series: [
+					{ name: '금융수익', data: ser('financeIncome'), color: C.good, type: 'bar' },
+					{ name: '금융비용(−)', data: compose(['financeCosts', -1]), color: C.red, type: 'bar' },
+					{ name: '순금융', data: compose(['financeIncome', 1], ['financeCosts', -1]), color: C.purple, type: 'line' }
+				] },
+				{ key: 'taxEffective', title: '법인세·실효세율', unit: '조', series: [
+					{ name: '법인세', data: ser('incomeTax'), color: C.dim, type: 'bar' },
+					{ name: '실효세율%', data: effTax, color: C.warn, type: 'line', axis: 'r' }
+				] },
+				{ key: 'dupont', title: 'ROE 분해 (DuPont)', unit: '%', series: [
+					{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'bar' },
+					{ name: '순이익률', data: ratio('netIncome', 'revenue'), color: C.cyan, type: 'line' },
+					{ name: '자산회전(회)', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line', axis: 'r' },
+					{ name: '레버리지(배)', data: ratio('assets', 'equity', 1), color: C.red, type: 'line', axis: 'r' }
+				] }
+			] as FinCard[],
+			cashflow: [
+				{ key: 'cashConversion', title: '이익의 현금화', unit: '조', series: [
+					{ name: '순이익', data: ser('netIncome'), color: C.net, type: 'bar' },
+					{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
+					{ name: 'CFO/NI(배)', data: used.map((_, i) => (cfoRaw[i] != null && niRaw[i] != null && niRaw[i]! > 0 ? +(cfoRaw[i]! / niRaw[i]!).toFixed(2) : null)), color: C.cyan, type: 'line', axis: 'r' }
+				] },
+				{ key: 'workingCapital', title: '운전자본', unit: '조', signed: true, series: [
+					{ name: '순운전자본', data: compose(['receivables', 1], ['inventories', 1], ['payables', -1]), color: C.blue, type: 'bar' },
+					{ name: 'NWC/매출%', data: used.map((_, i) => { const n = (rcv[i] ?? 0) + (inv[i] ?? 0) - (pay[i] ?? 0); return rcv[i] != null && pay[i] != null && rev[i] != null && rev[i]! > 0 ? +((n / rev[i]!) * 100).toFixed(1) : null; }), color: C.warn, type: 'line', axis: 'r' }
+				] },
+				{ key: 'ccc', title: '현금전환주기', unit: '일', signed: true, series: [
+					{ name: 'CCC', data: ccc, color: C.purple, type: 'bar' },
+					{ name: 'DSO', data: dso, color: C.blue, type: 'line' },
+					{ name: 'DIO', data: dio, color: C.warn, type: 'line' },
+					{ name: 'DPO', data: dpo, color: C.good, type: 'line' }
+				] },
+				{ key: 'capexCycle', title: '투자 사이클', unit: '조', series: [
+					{ name: 'CAPEX', data: ser('capex'), color: C.blue, type: 'bar' },
+					{ name: 'CAPEX/매출%', data: ratio('capex', 'revenue'), color: C.warn, type: 'line', axis: 'r' },
+					{ name: 'CAPEX/영업CF%', data: used.map((_, i) => { const cx = raw('capex')[i]; return cx != null && cfoRaw[i] != null && cfoRaw[i]! > 0 ? +((cx / cfoRaw[i]!) * 100).toFixed(1) : null; }), color: C.red, type: 'line', axis: 'r' }
+				] }
+			] as FinCard[],
+			debt: [
+				{ key: 'debtMix', title: '차입 구성 vs 현금', unit: '조', stacked: true, series: [
+					{ name: '단기차입금', data: ser('shortDebt'), color: C.red, type: 'bar' },
+					{ name: '장기차입금·사채', data: ser('longDebt'), color: C.op, type: 'bar' },
+					{ name: '현금성자산', data: ser('cash'), color: C.good, type: 'line' }
+				] },
+				{ key: 'interestCover', title: '이자보상 (영업익/금융비용)', unit: '배', refLines: [1], series: [
+					{ name: '이자보상배율', data: used.map((_, i) => (oiRaw[i] != null && fc[i] != null && fc[i]! > 0 ? +(oiRaw[i]! / fc[i]!).toFixed(2) : null)), color: C.cyan, type: 'bar' },
+					{ name: '영업이익(조)', data: ser('operatingIncome'), color: C.op, type: 'line', axis: 'r' },
+					{ name: '금융비용(조)', data: ser('financeCosts'), color: C.red, type: 'line', axis: 'r' }
+				] }
+			] as FinCard[]
+		};
+
 		// 회사에 데이터 전무(빈 파케이)면 null. 개별 카드 sparse 는 셀 유지 (빈칸 방지).
 		if (!cards.some((c) => c.series.some((s) => s.data.some((v) => v != null)))) return null;
 		// 파생 인사이트 — 실적 모멘텀(YoY) + 현금흐름 품질(영업CF/순익).
@@ -480,7 +566,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			{ key: 'cfoMargin', kr: '영업CF마진', en: 'CFO margin', unit: '%', values: ratio('cfOperating', 'revenue') },
 			{ key: 'earningsQuality', kr: '이익품질(CFO/NI)', en: 'Earnings quality', unit: '배', values: ratio('cfOperating', 'netIncome', 1) }
 		];
-		return { periods, freq: mode, cards, revYoy, opYoy, cashQuality, statements, ratios };
+		return { periods, freq: mode, cards, tabCards, revYoy, opYoy, cashQuality, statements, ratios };
 	};
 
 	const views: Record<FinMode, TerminalFinance | null> = {

@@ -59,7 +59,7 @@
 			if (!cancelled) srs = b ?? [];
 		});
 		loadInvestments(code).then((b) => {
-			if (!cancelled) inv = b;
+			if (!cancelled) inv = b?.latest ?? null;
 		});
 		loadLiveCompanyReportFacts(code).then((f) => {
 			if (cancelled) return;

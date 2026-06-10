@@ -774,14 +774,26 @@
 /* 재무제표 분석 전체화면 */
 .dlTerm .finFullBtn { background: var(--dl-bg-deep); color: var(--dim); border: 1px solid var(--bd); border-radius: 2px; font-size: 11px; line-height: 1; padding: 2px 6px; cursor: pointer; margin-left: 6px; }
 .dlTerm .finFullBtn:hover { color: var(--amber); border-color: var(--amber); }
-.dlTerm .panel.finFull { position: fixed; inset: 0; z-index: 90; margin: 0; border-radius: 0; max-height: 100vh; overflow: auto; box-shadow: 0 0 0 100vmax rgba(4, 6, 10, 0.66); }
-.dlTerm .panel.finFull .finGrid { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 10px; padding: 12px; }
-.dlTerm .panel.finFull .finMini { padding: 10px 10px 8px; }
-.dlTerm .panel.finFull .mfcTitle { font-size: 13.5px; }
-.dlTerm .panel.finFull .mfcVal { font-size: 14px; }
-.dlTerm .panel.finFull .mfcUnit { font-size: 9px; }
-.dlTerm .panel.finFull .mfcLg { font-size: 10px; }
-.dlTerm .panel.finFull .mfcAx { font-size: 5.5px; }
+/* 버틀러식 탭 전체화면 (FinFullscreen.svelte) */
+.dlTerm .finFs { position: fixed; inset: 0; z-index: 90; background: var(--dl-bg-base); display: flex; flex-direction: column; }
+.dlTerm .finFsBar { display: flex; align-items: center; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-deep); flex-shrink: 0; }
+.dlTerm .finFsTitle { font-family: var(--cond); font-size: 13px; font-weight: 700; color: var(--txt); white-space: nowrap; }
+.dlTerm .finFsTitle i { font-family: var(--mono); font-style: normal; color: var(--dim); font-size: 11px; }
+.dlTerm .finFsTabs { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; }
+.dlTerm .finFsTab { background: none; border: 1px solid transparent; border-radius: 2px; color: var(--dim); font-family: var(--cond); font-size: 12px; font-weight: 600; letter-spacing: 0.3px; padding: 4px 12px; cursor: pointer; white-space: nowrap; }
+.dlTerm .finFsTab:hover { color: var(--txt); }
+.dlTerm .finFsTab.on { color: var(--amber); border-color: var(--amber); background: rgba(245, 158, 11, 0.08); }
+.dlTerm .finFsClose { background: var(--dl-bg-deep); color: var(--dim); border: 1px solid var(--bd); border-radius: 2px; font-size: 12px; line-height: 1; padding: 4px 8px; cursor: pointer; }
+.dlTerm .finFsClose:hover { color: var(--amber); border-color: var(--amber); }
+.dlTerm .finFsBody { flex: 1; overflow-y: auto; padding: 12px; }
+.dlTerm .finFsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 10px; }
+.dlTerm .finFsGrid .finMini { padding: 10px 10px 8px; }
+.dlTerm .finFsGrid .mfcTitle { font-size: 13.5px; }
+.dlTerm .finFsGrid .mfcVal { font-size: 14px; }
+.dlTerm .finFsGrid .mfcUnit { font-size: 9px; }
+.dlTerm .finFsGrid .mfcLg { font-size: 10px; }
+.dlTerm .finFsGrid .mfcAx { font-size: 5.5px; }
+.dlTerm .finFsNote { margin-top: 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); }
 
 /* 매크로 순풍/역풍 섹터 리본 (LeftRail 마켓 펄스) */
 .dlTerm .twRibbon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 2px 1px; border-top: 1px solid var(--bd); margin-top: 5px; }
