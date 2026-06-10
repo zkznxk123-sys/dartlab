@@ -159,13 +159,58 @@ def buildEcos(outDir: Path) -> None:
     _write(outDir, observations, manifestRows)
 
 
+def buildCustoms(outDir: Path) -> None:
+    from dartlab.gather.customs import Customs, getAllEntries
+
+    customs = Customs()  # DATA_GO_KR_KEY 자동 해석 (credentials 레지스트리)
+    existingObs, _ = _readExisting(outDir)
+    updatedAt = _utcNow()
+    observations: list[pl.DataFrame] = []
+    manifestRows: list[dict] = []
+
+    for entry in getAllEntries():
+        status = "ok"
+        err = ""
+        try:
+            df = customs.series(entry.id)  # 월별 수출액(expDlr) 전체 이력
+            df = df.with_columns(pl.lit(entry.id).alias("seriesId")).select("seriesId", "date", "value")
+        except Exception as exc:
+            fallback = _fallbackSeries(existingObs, entry.id)
+            df = fallback
+            status = "stale" if not fallback.is_empty() else "error"
+            err = f"{type(exc).__name__}: {exc}"
+            print(f"[customs] {entry.id}: {status} ({err})")
+        observations.append(df)
+        st = _stats(df)
+        manifestRows.append(
+            {
+                "source": "customs",
+                "seriesId": entry.id,
+                "label": entry.label,
+                "group": entry.group,
+                "frequency": entry.frequency,
+                "unit": entry.unit,
+                "description": entry.description,
+                "rowCount": st["rowCount"],
+                "startDate": st["startDate"],
+                "latestDate": st["latestDate"],
+                "providerUpdatedAt": None,
+                "updatedAtUtc": updatedAt,
+                "status": status,
+                "error": err,
+            }
+        )
+    customs.close()
+    _write(outDir, observations, manifestRows)
+
+
 def deploy(localRoot: Path, *, repoId: str) -> None:
     from huggingface_hub import HfApi, create_repo
 
     token = _requireEnv("HF_TOKEN")
     create_repo(repoId, token=token, repo_type="dataset", exist_ok=True)
     api = HfApi(token=token)
-    for subdir in ("fred", "ecos"):
+    for subdir in ("fred", "ecos", "customs"):
         src = localRoot / subdir
         if not src.is_dir():
             continue
@@ -184,7 +229,7 @@ def deploy(localRoot: Path, *, repoId: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", choices=["fred", "ecos", "all"], default="all")
+    parser.add_argument("--source", choices=["fred", "ecos", "customs", "all"], default="all")
     parser.add_argument("--out", default="data/macro")
     parser.add_argument("--repo-id", default="eddmpython/dartlab-data")
     parser.add_argument("--push", action="store_true")
@@ -195,6 +240,8 @@ def main() -> int:
         buildFred(root / "fred")
     if args.source in ("ecos", "all"):
         buildEcos(root / "ecos")
+    if args.source in ("customs", "all"):
+        buildCustoms(root / "customs")
     if args.push:
         deploy(root, repoId=args.repo_id)
     return 0

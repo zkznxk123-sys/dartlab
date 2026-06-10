@@ -130,6 +130,11 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "ECOS 한국은행 거시경제 시계열 (HF 벌크, latest-revised)",
         "public": True,
     },
+    "macroCustoms": {
+        "dir": "macro/customs",
+        "label": "관세청 무역통계 월별 수출입 시계열 (HF 벌크, 산업 선행지표)",
+        "public": True,
+    },
     # ── generated artifact (landing 빌드 시 HF 에서 fetch) ──
     "industryMap": {
         "dir": "landing/map",

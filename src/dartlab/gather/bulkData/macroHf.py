@@ -16,6 +16,14 @@ import polars as pl
 _SOURCE_TO_CATEGORY = {
     "fred": "macroFred",
     "ecos": "macroEcos",
+    "customs": "macroCustoms",
+}
+
+# source → 직접 API 키 env (fetchSeries miss 시 안내 힌트용).
+_SOURCE_TO_ENVKEY = {
+    "fred": "FRED_API_KEY",
+    "ecos": "ECOS_API_KEY",
+    "customs": "DATA_GO_KR_KEY",
 }
 
 
@@ -34,7 +42,7 @@ def _toDate(value: str | _date) -> _date:
 def _category(source: str) -> str:
     key = source.lower()
     if key not in _SOURCE_TO_CATEGORY:
-        raise ValueError("source 는 'fred' 또는 'ecos' 여야 합니다.")
+        raise ValueError("source 는 'fred'·'ecos'·'customs' 중 하나여야 합니다.")
     return _SOURCE_TO_CATEGORY[key]
 
 
@@ -221,7 +229,7 @@ def fetchSeries(
     sourceKey = source.lower()
     supported = availableSeries(sourceKey)
     if seriesId not in supported:
-        envKey = "FRED_API_KEY" if sourceKey == "fred" else "ECOS_API_KEY"
+        envKey = _SOURCE_TO_ENVKEY.get(sourceKey, "FRED_API_KEY")
         raise ValueError(
             f"{sourceKey.upper()} HF 카탈로그에 없는 지표입니다: {seriesId}. "
             f"직접 API 조회가 필요하면 gather('macro', '{seriesId}', apiKey=...) "

@@ -84,7 +84,12 @@ def buildRegistry() -> dict[str, StageSpec]:
         ),
         StageSpec("krx", run=krx.runKrx, uploadCategories=("krxPrices",), label="KRX 일별 가격"),
         StageSpec("krxIndex", run=krx.runKrxIndex, uploadCategories=("krxIndices",), label="KRX 지수"),
-        StageSpec("macro", run=macro.runMacro, uploadCategories=("macroFred", "macroEcos"), label="거시 FRED/ECOS"),
+        StageSpec(
+            "macro",
+            run=macro.runMacro,
+            uploadCategories=("macroFred", "macroEcos", "macroCustoms"),
+            label="거시 FRED/ECOS/관세청",
+        ),
         StageSpec("news", run=news.runNewsHeadlines, uploadCategories=("newsHeadlines",), label="뉴스 헤드라인"),
         StageSpec(
             "newsEnrich",

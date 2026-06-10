@@ -9,13 +9,14 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: 'fred | ecos | all'
+        description: 'fred | ecos | customs | all'
         required: true
         default: 'all'
         type: choice
         options:
           - fred
           - ecos
+          - customs
           - all
 
 permissions:
@@ -76,4 +77,4 @@ jobs:
           echo "| Trigger | ${{ github.event_name }} ${{ github.event.schedule }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Source | ${{ github.event.inputs.source || 'all' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| HF dataset | \`eddmpython/dartlab-data\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 출력 | \`macro/fred/*.parquet\`, \`macro/ecos/*.parquet\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 출력 | \`macro/fred/*.parquet\`, \`macro/ecos/*.parquet\`, \`macro/customs/*.parquet\` |" >> $GITHUB_STEP_SUMMARY

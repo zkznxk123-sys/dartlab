@@ -15,55 +15,55 @@ log = logging.getLogger(__name__)
 # ── 제품 키워드 → 산업 지표 매핑 ──
 
 PRODUCT_INDICATOR_MAP: dict[str, dict] = {
-    # 반도체/전자
-    "반도체": {"fred": ["IPG3344S", "PCU33443344"], "label": "반도체 생산/가격"},
-    "메모리": {"fred": ["IPG3344S", "PCU33443344"], "label": "반도체 생산/가격"},
-    "DRAM": {"fred": ["IPG3344S"], "label": "반도체 생산"},
-    "NAND": {"fred": ["IPG3344S"], "label": "반도체 생산"},
-    "웨이퍼": {"fred": ["IPG3344S"], "label": "반도체 생산"},
-    "파운드리": {"fred": ["IPG3344S"], "label": "반도체 생산"},
-    "디스플레이": {"fred": ["IPG3344S"], "label": "전자부품 생산"},
-    "OLED": {"fred": ["IPG3344S"], "label": "전자부품 생산"},
-    "LCD": {"fred": ["IPG3344S"], "label": "전자부품 생산"},
-    "LED": {"fred": ["IPG3344S"], "label": "전자부품 생산"},
-    # 자동차
-    "자동차": {"fred": ["IPG3361T3S"], "label": "자동차 생산"},
-    "자동차부품": {"fred": ["IPG3361T3S"], "label": "자동차 생산"},
-    "자동차용": {"fred": ["IPG3361T3S"], "label": "자동차 생산"},
-    "차량": {"fred": ["IPG3361T3S"], "label": "자동차 생산"},
-    "타이어": {"fred": ["IPG3361T3S"], "label": "자동차 생산"},
-    # 2차전지/배터리
-    "2차전지": {"fred": ["PCU335911335911"], "label": "배터리 가격"},
-    "이차전지": {"fred": ["PCU335911335911"], "label": "배터리 가격"},
-    "배터리": {"fred": ["PCU335911335911"], "label": "배터리 가격"},
-    "양극재": {"fred": ["PCU335911335911"], "label": "배터리 가격"},
-    "음극재": {"fred": ["PCU335911335911"], "label": "배터리 가격"},
-    "전해질": {"fred": ["PCU335911335911"], "label": "배터리 가격"},
-    # 화학
-    "화학": {"fred": ["IPG325S"], "label": "화학 생산"},
-    "석유화학": {"fred": ["IPG325S", "DCOILWTICO"], "label": "화학 생산/유가"},
-    "합성수지": {"fred": ["IPG325S"], "label": "화학 생산"},
-    "플라스틱": {"fred": ["IPG325S"], "label": "화학 생산"},
-    # 철강/금속
-    "철강": {"fred": ["WPU101"], "label": "금속 가격"},
-    "강판": {"fred": ["WPU101"], "label": "금속 가격"},
-    "주물": {"fred": ["WPU101"], "label": "금속 가격"},
+    # 반도체/전자 (customs: 8542 집적회로 · 8541 소자 · 8524 평판디스플레이)
+    "반도체": {"fred": ["IPG3344S", "PCU33443344"], "customs": ["8542", "8541"], "label": "반도체 생산/가격"},
+    "메모리": {"fred": ["IPG3344S", "PCU33443344"], "customs": ["8542"], "label": "반도체 생산/가격"},
+    "DRAM": {"fred": ["IPG3344S"], "customs": ["8542"], "label": "반도체 생산"},
+    "NAND": {"fred": ["IPG3344S"], "customs": ["8542"], "label": "반도체 생산"},
+    "웨이퍼": {"fred": ["IPG3344S"], "customs": ["8542"], "label": "반도체 생산"},
+    "파운드리": {"fred": ["IPG3344S"], "customs": ["8542"], "label": "반도체 생산"},
+    "디스플레이": {"fred": ["IPG3344S"], "customs": ["8524"], "label": "전자부품 생산"},
+    "OLED": {"fred": ["IPG3344S"], "customs": ["8524"], "label": "전자부품 생산"},
+    "LCD": {"fred": ["IPG3344S"], "customs": ["8524"], "label": "전자부품 생산"},
+    "LED": {"fred": ["IPG3344S"], "customs": ["8541"], "label": "전자부품 생산"},
+    # 자동차 (customs: 8703 승용차 · 8708 부품 · 4011 타이어)
+    "자동차": {"fred": ["IPG3361T3S"], "customs": ["8703", "8708"], "label": "자동차 생산"},
+    "자동차부품": {"fred": ["IPG3361T3S"], "customs": ["8708"], "label": "자동차 생산"},
+    "자동차용": {"fred": ["IPG3361T3S"], "customs": ["8708"], "label": "자동차 생산"},
+    "차량": {"fred": ["IPG3361T3S"], "customs": ["8703"], "label": "자동차 생산"},
+    "타이어": {"fred": ["IPG3361T3S"], "customs": ["4011"], "label": "자동차 생산"},
+    # 2차전지/배터리 (customs: 8507 축전지)
+    "2차전지": {"fred": ["PCU335911335911"], "customs": ["8507"], "label": "배터리 가격"},
+    "이차전지": {"fred": ["PCU335911335911"], "customs": ["8507"], "label": "배터리 가격"},
+    "배터리": {"fred": ["PCU335911335911"], "customs": ["8507"], "label": "배터리 가격"},
+    "양극재": {"fred": ["PCU335911335911"], "customs": ["8507"], "label": "배터리 가격"},
+    "음극재": {"fred": ["PCU335911335911"], "customs": ["8507"], "label": "배터리 가격"},
+    "전해질": {"fred": ["PCU335911335911"], "customs": ["8507"], "label": "배터리 가격"},
+    # 화학 (customs: 39 합성수지·플라스틱 · 29 유기화학)
+    "화학": {"fred": ["IPG325S"], "customs": ["29"], "label": "화학 생산"},
+    "석유화학": {"fred": ["IPG325S", "DCOILWTICO"], "customs": ["39", "29"], "label": "화학 생산/유가"},
+    "합성수지": {"fred": ["IPG325S"], "customs": ["39"], "label": "화학 생산"},
+    "플라스틱": {"fred": ["IPG325S"], "customs": ["39"], "label": "화학 생산"},
+    # 철강/금속 (customs: 72 철강)
+    "철강": {"fred": ["WPU101"], "customs": ["72"], "label": "금속 가격"},
+    "강판": {"fred": ["WPU101"], "customs": ["72"], "label": "금속 가격"},
+    "주물": {"fred": ["WPU101"], "customs": ["72"], "label": "금속 가격"},
     "알루미늄": {"fred": ["WPU101"], "label": "금속 가격"},
     "동박": {"fred": ["WPU101"], "label": "금속 가격"},
-    # 에너지
-    "석유": {"fred": ["DCOILWTICO"], "label": "WTI 유가"},
-    "정유": {"fred": ["DCOILWTICO"], "label": "WTI 유가"},
+    # 에너지 (customs: 2710 석유제품)
+    "석유": {"fred": ["DCOILWTICO"], "customs": ["2710"], "label": "WTI 유가"},
+    "정유": {"fred": ["DCOILWTICO"], "customs": ["2710"], "label": "WTI 유가"},
     "가스": {"fred": ["DCOILWTICO"], "label": "유가"},
     "에너지": {"fred": ["DCOILWTICO"], "label": "유가"},
-    "태양광": {"fred": ["IPG3344S"], "label": "전자부품 생산"},
+    "태양광": {"fred": ["IPG3344S"], "customs": ["8541"], "label": "전자부품 생산"},
     # 식품
     "식품": {"fred": ["IPG311A2S"], "label": "식품 생산"},
     "음료": {"fred": ["IPG311A2S"], "label": "식품 생산"},
     "식료품": {"fred": ["IPG311A2S"], "label": "식품 생산"},
-    # 의약/바이오
-    "의약품": {"fred": ["PCUOMFGOMFG"], "label": "제조업 PPI"},
-    "바이오": {"fred": ["PCUOMFGOMFG"], "label": "제조업 PPI"},
-    "치료제": {"fred": ["PCUOMFGOMFG"], "label": "제조업 PPI"},
+    # 의약/바이오 (customs: 30 의약품)
+    "의약품": {"fred": ["PCUOMFGOMFG"], "customs": ["30"], "label": "제조업 PPI"},
+    "바이오": {"fred": ["PCUOMFGOMFG"], "customs": ["30"], "label": "제조업 PPI"},
+    "치료제": {"fred": ["PCUOMFGOMFG"], "customs": ["30"], "label": "제조업 PPI"},
     "의료기기": {"fred": ["PCUOMFGOMFG"], "label": "제조업 PPI"},
     # 건설
     "건설": {"ecos": ["IPI"], "label": "산업생산"},
@@ -121,7 +121,7 @@ def getProductIndicators(stockCode: str) -> list[dict]:
 
     for keyword, mapping in PRODUCT_INDICATOR_MAP.items():
         if keyword in product:
-            for source_key in ["fred", "ecos"]:
+            for source_key in ["fred", "ecos", "customs"]:
                 for seriesId in mapping.get(source_key, []):
                     if seriesId not in seen:
                         seen.add(seriesId)
