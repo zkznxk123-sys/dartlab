@@ -54,6 +54,9 @@ class Customs:
             ValueError: metric 이 expDlr/impDlr/balPayments 외.
             CustomsError: API 오류.
 
+        Requires:
+            DATA_GO_KR_KEY 인증키 + 관세청 API 네트워크(HTTP).
+
         Example:
             >>> Customs().series("8542", start="2025-01")  # doctest: +SKIP
         """
@@ -72,6 +75,9 @@ class Customs:
 
         Raises:
             없음.
+
+        Requires:
+            없음 — 정적 카탈로그(네트워크·인증 불필요).
 
         Example:
             >>> Customs().catalog("반도체").height
