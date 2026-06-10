@@ -8,6 +8,11 @@
 	import { KRX_MIN_YEAR, type Candle } from '../data/priceSeries';
 	import { price as wbPrice } from '../data/workbench';
 	import type { Lang } from '../data/types';
+	import { runBacktest, BT_PRESETS, type BtParamDef, type BtPresetKey, type BtResult } from '../data/backtest';
+	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
+	import { MACRO_SERIES, loadMacroSeries, MACRO_ATTRIBUTION } from '../data/macroSeries';
+	import { registerEconIndicator, ECON_INDICATOR, ECON_COLORS, type EconExtend } from './econOverlay';
+	import BacktestStrip from './BacktestStrip.svelte';
 
 	interface Props {
 		candles: Candle[]; // 초기(현재+직전 연도)
@@ -18,18 +23,12 @@
 	}
 	let { candles, code, lang, events, valBand }: Props = $props();
 
-	type SubKey = 'VOL' | 'RSI' | 'MACD' | 'STOCH' | 'OBV' | 'CCI' | 'WR';
-	const SUB_ALL: SubKey[] = ['VOL', 'RSI', 'MACD', 'STOCH', 'OBV', 'CCI', 'WR'];
-	const SUB_IND: Record<SubKey, string> = { VOL: 'VOL', RSI: 'RSI', MACD: 'MACD', STOCH: 'KDJ', OBV: 'OBV', CCI: 'CCI', WR: 'WR' };
-	const SUB_LABEL: Record<SubKey, string> = { VOL: 'VOL', RSI: 'RSI', MACD: 'MACD', STOCH: 'KDJ', OBV: 'OBV', CCI: 'CCI', WR: 'WR' };
-	type OverlayKey = 'MA' | 'EMA' | 'BB' | 'SAR' | 'NONE';
-	const OVERLAYS: { k: OverlayKey; ind: string | null; label: string }[] = [
-		{ k: 'MA', ind: 'MA', label: 'MA' },
-		{ k: 'EMA', ind: 'EMA', label: 'EMA' },
-		{ k: 'BB', ind: 'BOLL', label: 'BOLL' },
-		{ k: 'SAR', ind: 'SAR', label: 'SAR' },
-		{ k: 'NONE', ind: null, label: '없음' }
-	];
+	// 보조지표 — klinecharts 내장 페인 지표 전종(21) 노출. 키 = klinecharts 지표명 그대로(매핑표 불필요).
+	type SubKey = 'VOL' | 'MACD' | 'RSI' | 'KDJ' | 'OBV' | 'CCI' | 'WR' | 'DMI' | 'MTM' | 'ROC' | 'TRIX' | 'PSY' | 'VR' | 'BRAR' | 'BIAS' | 'CR' | 'DMA' | 'EMV' | 'AO' | 'PVT' | 'AVP';
+	const SUB_ALL: SubKey[] = ['VOL', 'MACD', 'RSI', 'KDJ', 'OBV', 'CCI', 'WR', 'DMI', 'MTM', 'ROC', 'TRIX', 'PSY', 'VR', 'BRAR', 'BIAS', 'CR', 'DMA', 'EMV', 'AO', 'PVT', 'AVP'];
+	// 주가 오버레이 — 다중 토글(candle_pane 스택). klinecharts 내장 6종 전부.
+	type OverlayKey = 'MA' | 'EMA' | 'SMA' | 'BOLL' | 'BBI' | 'SAR';
+	const OVERLAY_ALL: OverlayKey[] = ['MA', 'EMA', 'SMA', 'BOLL', 'BBI', 'SAR'];
 	const DRAW_TOOLS: { name: string; kr: string; en: string }[] = [
 		{ name: 'segment', kr: '추세선', en: 'Trend' },
 		{ name: 'rayLine', kr: '레이', en: 'Ray' },
@@ -61,16 +60,44 @@
 	let yMode = $state<YMode>('normal');
 	let candleStyle = $state<CandleStyle>('candle_solid');
 	let period = $state<(typeof PERIODS)[number]>('1Y');
-	let overlay = $state<OverlayKey>('MA');
+	let overlays = $state<OverlayKey[]>(['MA']);
 	let subs = $state<SubKey[]>(['VOL', 'RSI']);
 	let showEvents = $state(false);
 	let showBand = $state(false);
 	let magnet = $state(false);
-	let menu = $state<'none' | 'ind' | 'draw' | 'view'>('none');
+	let menu = $state<'none' | 'ind' | 'draw' | 'view' | 'bt'>('none');
+
+	// 백테스트 — 프리셋 sticky(회사전환에도 유지), 계산 <1ms 동기 (워커·debounce 불필요 실측).
+	let btKey = $state<BtPresetKey | null>(null);
+	let btParams = $state<Record<string, number>>({});
+	let btCosts = $state(true);
+	let btResult = $state<BtResult | null>(null);
+	// ⛔ 불변식: chart.applyNewData 를 호출하는 모든 지점은 bumpDataRev() 동행 (현재 2곳:
+	//    회사전환 데이터 적용 effect + backfillForPeriod). pushTick 은 제외.
+	// dataRev++ 직접 사용 금지 — $effect 안 증감은 읽기+쓰기라 self-dep 무한루프(effect_update_depth_exceeded).
+	let dataRev = $state(0);
+	let dataRevSeq = 0; // 비반응 카운터 — bumpDataRev 는 dataRev 를 쓰기만 한다
+	const bumpDataRev = () => (dataRev = ++dataRevSeq);
+	let btRunSeq = 0; // 비반응 — calcParams 재계산 트리거용 단조 증가
+	const activeBt = $derived(btKey ? (BT_PRESETS.find((d) => d.key === btKey) ?? null) : null);
+	function stepParam(pp: BtParamDef, dir: 1 | -1) {
+		const cur = btParams[pp.name] ?? pp.def;
+		const next = Math.max(pp.min, Math.min(pp.max, cur + dir * pp.step));
+		const p = { ...btParams, [pp.name]: next };
+		if (btKey === 'maCross' && p.fast != null && p.slow != null && p.fast >= p.slow) return; // 단기 < 장기 강제
+		btParams = p;
+	}
+
+	// 경제지표 캔들 오버레이 — 최대 3종 (시각·툴팁 밀도 상한, 덕지덕지 방지)
+	const ECON_MAX = 3;
+	let econ = $state<string[]>([]);
+	let econOn = false; // indicator 생성 여부 (비반응)
+	let econToken = 0; // stale async 가드
+	const toggleEcon = (id: string) => (econ = econ.includes(id) ? econ.filter((x) => x !== id) : econ.length >= ECON_MAX ? econ : [...econ, id]);
 
 	let kc: any = null;
 	const subPanes = new Map<SubKey, string>();
-	let mainInd: string | null = null;
+	const mainOn = new Set<OverlayKey>();
 	let bandIds: string[] = [];
 	let eventIds: string[] = [];
 	let drawIds: string[] = [];
@@ -80,6 +107,7 @@
 	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
 	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v });
 	const toggleSub = (k: SubKey) => (subs = subs.includes(k) ? subs.filter((x) => x !== k) : [...subs, k]);
+	const toggleOverlay = (k: OverlayKey) => (overlays = overlays.includes(k) ? overlays.filter((x) => x !== k) : [...overlays, k]);
 
 	const themeStyles = () => ({
 		grid: { horizontal: { color: 'rgba(38,46,62,0.45)' }, vertical: { color: 'rgba(38,46,62,0.32)' } },
@@ -107,6 +135,8 @@
 			const mod: any = await import('klinecharts');
 			if (disposed || !node) return;
 			kc = mod;
+			registerBtIndicators(mod);
+			registerEconIndicator(mod);
 			local = mod.init(node, { styles: themeStyles() });
 			if (!local) return;
 			local.setPriceVolumePrecision(0, 0);
@@ -128,7 +158,8 @@
 			disposed = true;
 			if (local && kc) { try { kc.dispose(local); } catch { /* */ } }
 			subPanes.clear();
-			mainInd = null;
+			mainOn.clear();
+			econOn = false;
 			bandIds = [];
 			eventIds = [];
 			drawIds = [];
@@ -147,6 +178,7 @@
 		hist.loading = false;
 		const hasMore = hist.oldestYear - 1 >= KRX_MIN_YEAR;
 		c.applyNewData(cs.map(toK), hasMore);
+		bumpDataRev();
 		bandIds.forEach((id) => c.removeOverlay(id));
 		eventIds.forEach((id) => c.removeOverlay(id));
 		drawIds.forEach((id) => c.removeOverlay(id));
@@ -184,6 +216,7 @@
 		}
 		if (changed && chart === c && hist.code === code0) {
 			c.applyNewData(wbPrice.loaded(code0).map(toK), hist.oldestYear - 1 >= KRX_MIN_YEAR);
+			bumpDataRev();
 			applySpacing(c);
 		}
 	}
@@ -193,14 +226,16 @@
 		void backfillForPeriod(c);
 	}
 
-	// 메인 오버레이 (MA / EMA / BOLL / SAR)
+	// 메인 오버레이 reconcile (다중 — candle_pane 스택)
 	$effect(() => {
-		const ov = overlay;
+		const want = new Set(overlays);
 		const c = chart;
 		if (!c) return;
-		if (mainInd) { c.removeIndicator('candle_pane', mainInd); mainInd = null; }
-		const def = OVERLAYS.find((o) => o.k === ov);
-		if (def?.ind) mainInd = c.createIndicator(def.ind, true, { id: 'candle_pane' }) ? def.ind : null;
+		for (const k of [...mainOn]) if (!want.has(k)) { c.removeIndicator('candle_pane', k); mainOn.delete(k); }
+		overlays.forEach((k) => {
+			if (mainOn.has(k)) return;
+			if (c.createIndicator(k, true, { id: 'candle_pane' })) mainOn.add(k);
+		});
 	});
 
 	// 보조지표 페인 reconcile
@@ -211,7 +246,7 @@
 		for (const [k, paneId] of [...subPanes]) if (!want.has(k)) { c.removeIndicator(paneId); subPanes.delete(k); }
 		subs.forEach((k) => {
 			if (subPanes.has(k)) return;
-			const id = c.createIndicator(SUB_IND[k], false, { id: `pane_${k}`, height: 78 });
+			const id = c.createIndicator(k, false, { id: `pane_${k}`, height: 78 });
 			if (id) subPanes.set(k, id);
 		});
 	});
@@ -276,6 +311,56 @@
 		if (c && candles.length) applyPeriodFull(c);
 	});
 
+	// 백테스트 — 추가 effect 1개. 의존: 프리셋·파라미터·비용·기간·dataRev(applyNewData 동행).
+	// 기간 변경 → 백필 후 dataRev++ 로 늘어난 이력에서 정확히 1회 재실행. 팬/줌·지표 토글 = 재실행 0회.
+	$effect(() => {
+		const c = chart;
+		const key = btKey;
+		const p = btParams;
+		const wc = btCosts;
+		void dataRev;
+		void period;
+		if (!c) return;
+		if (!key) {
+			clearBt(c);
+			btResult = null;
+			return;
+		}
+		const all = wbPrice.loaded(hist.code);
+		if (!all.length) return;
+		const win = Math.min(PERIOD_N[period] ?? all.length, all.length);
+		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc });
+		btResult = res;
+		publishBt(res, all);
+		if (res) applyBt(c, ++btRunSeq);
+		else clearBt(c);
+	});
+
+	// 경제지표 오버레이 — 선택 → 로드 → 생성/override (figures:[] = 캔들 y축 무왜곡, econOverlay.ts)
+	$effect(() => {
+		const ids = econ;
+		const c = chart;
+		const lg = lang;
+		if (!c) return;
+		if (!ids.length) {
+			if (econOn) {
+				try { c.removeIndicator('candle_pane', ECON_INDICATOR); } catch { /* */ }
+				econOn = false;
+			}
+			return;
+		}
+		const token = ++econToken;
+		Promise.all(ids.map((id) => loadMacroSeries(id))).then((lists) => {
+			if (token !== econToken || chart !== c) return; // 선택 변경·인스턴스 교체 → 폐기
+			const series = ids
+				.map((id, i) => ({ def: MACRO_SERIES.find((s) => s.id === id)!, points: lists[i] ?? [] }))
+				.filter((s) => s.points.length);
+			const extendData: EconExtend = { lang: lg, series }; // 항상 새 참조 → setExtendData 재계산 보장
+			if (econOn) c.overrideIndicator({ name: ECON_INDICATOR, extendData }, 'candle_pane');
+			else econOn = !!c.createIndicator({ name: ECON_INDICATOR, extendData }, true, { id: 'candle_pane' });
+		});
+	});
+
 	// 전체화면 토글 → resize + ESC
 	$effect(() => {
 		if (!browser) return;
@@ -314,13 +399,24 @@
 	<!-- 인-차트 툴바: 지표·드로잉·표시·전체화면 (우상) -->
 	<div class="chartTools" onclick={(e) => e.stopPropagation()}>
 		<div class="ctWrap">
-			<button class={overlay !== 'NONE' || subs.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'ind' ? 'none' : 'ind')} title={T('지표', 'Indicators')}>{T('지표', 'IND')}</button>
+			<button class={overlays.length || subs.length || econ.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'ind' ? 'none' : 'ind')} title={T('지표', 'Indicators')}>{T('지표', 'IND')}</button>
 			{#if menu === 'ind'}
-				<div class="ctMenu">
-					<div class="ctMenuLbl">{T('주가 오버레이', 'Price overlay')}</div>
-					<div class="ctRow ctRowWrap">{#each OVERLAYS as o (o.k)}<button class={overlay === o.k ? 'mItem on' : 'mItem'} onclick={() => (overlay = o.k)}>{o.k === 'NONE' ? T('없음', 'none') : o.label}</button>{/each}</div>
-					<div class="ctMenuLbl">{T('보조 지표', 'Sub indicators')}</div>
-					<div class="ctRow ctRowWrap">{#each SUB_ALL as k (k)}<button class={subs.includes(k) ? 'mItem on' : 'mItem'} onclick={() => toggleSub(k)}>{SUB_LABEL[k]}</button>{/each}</div>
+				<div class="ctMenu ctMenuWide">
+					<div class="ctMenuLbl">{T('주가 오버레이 (다중)', 'Price overlay (multi)')}</div>
+					<div class="ctRow ctRowWrap">{#each OVERLAY_ALL as o (o)}<button class={overlays.includes(o) ? 'mItem on' : 'mItem'} onclick={() => toggleOverlay(o)}>{o}</button>{/each}</div>
+					<div class="ctMenuLbl">{T('보조 지표 (다중)', 'Sub indicators (multi)')}</div>
+					<div class="ctRow ctRowWrap">{#each SUB_ALL as k (k)}<button class={subs.includes(k) ? 'mItem on' : 'mItem'} onclick={() => toggleSub(k)}>{k}</button>{/each}</div>
+					<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
+					<div class="ctRow ctRowWrap">
+						{#each MACRO_SERIES as s (s.id)}
+							<button class={econ.includes(s.id) ? 'mItem on' : 'mItem'}
+								style={econ.includes(s.id) ? `background:transparent;color:${ECON_COLORS[s.id]};border-color:${ECON_COLORS[s.id]};font-weight:600` : ''}
+								onclick={() => toggleEcon(s.id)}>{T(s.kr, s.en)}</button>
+						{/each}
+					</div>
+					{#if overlays.length || subs.length || econ.length}
+						<div class="ctRow"><button class="mItem mClear" onclick={() => { overlays = []; subs = []; econ = []; }}>{T('지표 전체 해제', 'Clear all')}</button></div>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -346,6 +442,42 @@
 				</div>
 			{/if}
 		</div>
+		<div class="ctWrap">
+			<button class={btKey ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'bt' ? 'none' : 'bt')} title={T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
+			{#if menu === 'bt'}
+				<div class="ctMenu">
+					<div class="ctMenuLbl">{T('전략 프리셋 — 클릭 즉시 실행', 'Strategy preset — runs on click')}</div>
+					<div class="ctRow ctRowWrap">
+						{#each BT_PRESETS as pd (pd.key)}
+							<button class={btKey === pd.key ? 'mItem on' : 'mItem'} title={T(pd.descKr, pd.descEn)}
+								onclick={() => { btKey = pd.key; btParams = Object.fromEntries(pd.params.map((x) => [x.name, x.def])); }}>{T(pd.kr, pd.en)}</button>
+						{/each}
+					</div>
+					{#if activeBt && activeBt.params.length}
+						<div class="ctMenuLbl">{T('파라미터', 'Params')}</div>
+						{#each activeBt.params as pp (pp.name)}
+							<div class="ctRow btParamRow">
+								<span class="btParamLbl">{T(pp.kr, pp.en)}</span>
+								<button class="mItem" onclick={() => stepParam(pp, -1)}>−</button>
+								<b class="btParamVal mono">{btParams[pp.name] ?? pp.def}</b>
+								<button class="mItem" onclick={() => stepParam(pp, 1)}>+</button>
+							</div>
+						{/each}
+					{/if}
+					<div class="ctRow">
+						<button class={btCosts ? 'mItem on' : 'mItem'} title={T('수수료 0.015%+거래세 0.15%+슬리피지 0.1%', 'fees+tax+slippage')} onclick={() => (btCosts = !btCosts)}>{T('수수료·세금 포함', 'Costs')}</button>
+						{#if btKey}<button class="mItem mClear" onclick={() => (btKey = null)}>{T('지우기', 'Clear')}</button>{/if}
+					</div>
+				</div>
+			{/if}
+		</div>
 		<button class="chartTool" onclick={() => (full = !full)} title={T('전체화면', 'Fullscreen')} aria-label="fullscreen">{full ? '✕' : '⤢'}</button>
 	</div>
+
+	<!-- 데이터 출처 상시 표기 (공공누리 출처표시 의무, ECON 활성 시 ECOS·FRED 병기) -->
+	<div class="chartSrc">{T('출처: 금융위원회·한국거래소 (공공데이터포털)', 'Source: FSC · KRX (data.go.kr)')}{econ.length ? ' · ' + MACRO_ATTRIBUTION : ''}</div>
+
+	{#if btResult && btKey}
+		<BacktestStrip result={btResult} presetLabel={activeBt ? T(activeBt.kr, activeBt.en) : ''} {period} withCosts={btCosts} {lang} onClear={() => (btKey = null)} />
+	{/if}
 </div>

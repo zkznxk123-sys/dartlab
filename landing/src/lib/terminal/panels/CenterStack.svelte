@@ -202,7 +202,7 @@
 </div>
 
 <!-- GRADE STRIP -->
-<Panel {lang} className="eAnalysis" prov="live" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
+<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
 	{#snippet right()}<span class="dim">{co.grades.length} {lang === 'en' ? 'axes' : '축'}</span>{/snippet}
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},1fr)`}>
@@ -216,7 +216,7 @@
 </Panel>
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
-<Panel {lang} className="eQuant" prov="live" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: 'krx 일별 · EOD', en: 'krx daily · EOD' }} flush>
+<Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
 	{#snippet right()}<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>{/snippet}
 	{#if candleState === 'ready' && candles}
 		<PriceChart {candles} code={co.code} {lang} events={priceEvents} valBand={priceValBand} />
@@ -229,7 +229,7 @@
 
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
      ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
-<Panel {lang} className={'eAnalysis' + (finFull ? ' finFull' : '')} prov="live" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
+<Panel {lang} className={'eAnalysis' + (finFull ? ' finFull' : '')} prov="real" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
 	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · 조 KRW', en: finMode + ' · ' + finData.periods.length + 'p' } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
 	{#snippet right()}
 		{#if finBundle && finBundle.modes.length > 1}

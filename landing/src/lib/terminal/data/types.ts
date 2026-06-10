@@ -7,7 +7,7 @@ export type Num = number | null;
 export type ChartSpec = Record<string, unknown>;
 export type Lang = 'kr' | 'en';
 export type Tone = 'up' | 'down' | 'good' | 'warn' | 'neutral';
-export type Prov = 'live' | 'derived' | 'wire';
+export type Prov = 'real' | 'derived' | 'wire';
 
 // ───────────────────────── raw files ─────────────────────────
 export interface FinanceCompany {

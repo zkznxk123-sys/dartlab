@@ -9,7 +9,9 @@
 	import LeftRail from './panels/LeftRail.svelte';
 	import CenterStack from './panels/CenterStack.svelte';
 	import RightStack from './panels/RightStack.svelte';
+	import SourcesModal from './panels/SourcesModal.svelte';
 	import { prefetch as prefetchCompany } from './data/workbench';
+	import { loadMacroLatest, type MacroLatest } from './data/macroSeries';
 
 	interface Props {
 		eng: Engine;
@@ -20,6 +22,7 @@
 	const first = eng.featured(1)[0] || initial;
 	let sym = $state(eng.buildCompany(initial) ? initial : first);
 	let lang = $state<Lang>('kr');
+	let sourcesOpen = $state(false);
 	let cmd = $state('');
 	let flash = $state<string | null>(null);
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
@@ -64,7 +67,16 @@
 		if (c) prefetchCompany(c.code, +c.price.asOf.slice(0, 4) || new Date().getFullYear());
 	});
 	const tickerCodes = $derived(eng.featured(14));
-	// 경제·시장 KPI (CenterStack 헤더 티커) — 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
+	// 실 경제지표 최신값 (ECOS·FRED 시계열) — 종목명·주가차트 윗단 KPI 티커에 합류.
+	let macroLatest = $state<MacroLatest[]>([]);
+	loadMacroLatest().then((m) => (macroLatest = m));
+	const fmtMacro = (m: MacroLatest): string => {
+		const v = m.v.toLocaleString('en-US', { maximumFractionDigits: m.def.digits ?? 2 });
+		const signed = m.def.yoy && m.v > 0 ? '+' + v : v;
+		const u = m.def.unit;
+		return u === 'pt' || u === '원' ? signed : u === '$/t' ? '$' + signed : signed + u;
+	};
+	// 경제·시장 KPI (CenterStack 헤더 티커) — 실 지표 최신값 + 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
 	const macroKpis = $derived.by<{ l: string; v: string; t: string }[]>(() => {
 		const m = eng.raw.macro;
 		const tw = eng.sectorTailwinds();
@@ -72,6 +84,8 @@
 		const up = r1.length ? (r1.filter((x) => x > 0).length / r1.length) * 100 : null;
 		const avg = r1.length ? r1.reduce((a, b) => a + b, 0) / r1.length : null;
 		const out: { l: string; v: string; t: string }[] = [];
+		for (const ml of macroLatest)
+			out.push({ l: lang === 'en' ? ml.def.en : ml.def.kr, v: fmtMacro(ml), t: ml.chg == null || ml.chg === 0 ? 'tNeu' : ml.chg > 0 ? 'tUp' : 'tDn' });
 		if (m) {
 			const dir = (g: string) => (g === 'rising' || g === '상승' ? 'tUp' : 'tDn');
 			out.push({ l: 'KR', v: lang === 'en' ? m.kr.phase : m.kr.phaseLabel, t: dir(m.kr.quadrant.growth) });
@@ -206,14 +220,18 @@
 		<footer class="statusBar">
 			<span class="sbItem"><b class="tAmber">⌘K</b> {lang === 'en' ? 'SEARCH' : '검색'}</span>
 			<span class="sbItem"><b class="tAmber">/</b> {lang === 'en' ? 'FOCUS' : '검색창'}</span>
+			<button class="sbItem sbSrcBtn" onclick={() => (sourcesOpen = true)} title={lang === 'en' ? 'data sources & licenses' : '데이터 출처·라이선스'}>
+				<b class="tAmber">ⓘ</b> {lang === 'en' ? 'SOURCES' : '데이터 출처'}
+			</button>
 			<span class="sbItem dim">DATA · {eng.source}</span>
 			<span class="sbItem" style="gap:6px">
-				<span class="provTag pLive">LIVE</span><span class="dim">{lang === 'en' ? 'real' : '실데이터'}</span>
+				<span class="provTag pReal">{lang === 'en' ? 'REAL' : '실데이터'}</span><span class="dim">{lang === 'en' ? 'EOD · daily batch' : 'EOD·일배치'}</span>
 				<span class="provTag pDeriv">파생</span><span class="dim">{lang === 'en' ? 'computed' : '계산'}</span>
 			</span>
 			<span class="sbSpacer"></span>
 			<span class="sbItem dim">prices {co.price.asOf} · {eng.raw.index.length} 종목 · KR</span>
 			<span class="sbItem"><b class="tUp">{co.code}</b> {co.name.kr} · {co.marketLabel}</span>
 		</footer>
+		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} />
 	{/if}
 </div>

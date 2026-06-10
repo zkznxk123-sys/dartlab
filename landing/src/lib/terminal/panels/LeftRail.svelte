@@ -88,8 +88,8 @@
 
 <!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
 {#if macro}
-	<Panel {lang} className="eMacro" prov="live" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
-		{#snippet right()}<span class="liveDot">LIVE</span>{/snippet}
+	<Panel {lang} className="eMacro" prov="real" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
+		{#snippet right()}<span class="dim">{lang === 'en' ? 'daily batch' : '일배치'}</span>{/snippet}
 		<div class="quadWrap">
 			{#each [{ side: 'kr', label: 'KR' }, { side: 'us', label: 'US' }] as box (box.side)}
 				{@const m = box.side === 'kr' ? macro.kr : macro.us}
@@ -115,7 +115,7 @@
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {/if}
-<Panel {lang} className="eIndustry" prov="live" title={{ kr: '섹터 히트맵', en: 'SECTOR HEATMAP' }} sub={{ kr: '평균 1M · 클릭=필터', en: 'avg 1M · click to filter' }}>
+<Panel {lang} className="eIndustry" prov="real" title={{ kr: '섹터 히트맵', en: 'SECTOR HEATMAP' }} sub={{ kr: '평균 1M · 클릭=필터', en: 'avg 1M · click to filter' }}>
 	<div class="sectorGrid">
 		{#each sectors as x (x.id)}
 			<div class={'sectorCell' + (sectorFilter === x.id ? ' on' : '')} role="button" tabindex="0"
@@ -129,7 +129,7 @@
 </Panel>
 
 <!-- 통합 스크리너 — 주가(1Y) + 재무(ROE·영업이익률) 한 행, 컬럼 클릭 정렬. 복합 조건은 상세검색 모달. -->
-<Panel {lang} className="eQuant fillCol" prov="live" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} sub={{ kr: nodes.length + '종목 · 정렬 ' + (COLS.find((c) => c.k === sortKey)?.kr ?? ''), en: 'n=' + nodes.length }} flush>
+<Panel {lang} className="eQuant fillCol" prov="real" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} sub={{ kr: nodes.length + '종목 · 정렬 ' + (COLS.find((c) => c.k === sortKey)?.kr ?? ''), en: 'n=' + nodes.length }} flush>
 	{#snippet right()}<button class="scrOpenBtn" onclick={() => (screenerOpen = true)} title="상용급 다조건 검색">{lang === 'en' ? 'SCREEN' : '상세검색'}</button><a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">조건조사 ↗</a>{/snippet}
 	<div class="filtRow">
 		<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />

@@ -160,8 +160,6 @@
 .dlTerm .panelRight { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--dim); flex-shrink: 0; white-space: nowrap; padding-left: 6px; }
 .dlTerm .panelBody { padding: 5px 6px; flex: 1; min-height: 0; }
 .dlTerm .panelBody.flush { padding: 0; }
-.dlTerm .liveDot { color: var(--good); font-family: var(--mono); font-size: 8px; letter-spacing: 1px; }
-.dlTerm .liveDot::before { content: '●'; font-size: 6px; margin-right: 3px; vertical-align: middle; }
 
 /* TABLES */
 .dlTerm table.grid { width: 100%; border-collapse: collapse; font-size: 10px; }
@@ -314,7 +312,7 @@
 .dlTerm .chartWrap { position: relative; width: 100%; min-height: 320px; overflow: hidden; }
 .dlTerm .chartHost { width: 100%; height: 100%; }
 .dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 38px 10px 10px; }
-.dlTerm .chartTools { position: absolute; top: 6px; right: 12px; display: flex; gap: 4px; z-index: 6; }
+.dlTerm .chartTools { position: absolute; top: 6px; right: 12px; display: flex; gap: 4px; z-index: 24; }
 .dlTerm .chartWrap.full .chartTools { top: 10px; right: 16px; }
 .dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
 .dlTerm .chartTool:hover { color: var(--txt); border-color: var(--amber); }
@@ -327,9 +325,39 @@
 .dlTerm .cbtn.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 /* 지표·드로잉 팝오버 */
 .dlTerm .ctWrap { position: relative; }
-.dlTerm .ctMenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 12; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
+.dlTerm .ctMenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
 .dlTerm .ctMenu .ctRow { display: flex; gap: 3px; }
 .dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 208px; }
+.dlTerm .ctMenu.ctMenuWide .ctRow.ctRowWrap { max-width: 252px; }
+.dlTerm .btParamRow { align-items: center; gap: 4px; }
+.dlTerm .btParamLbl { font-size: 9px; color: var(--dim); min-width: 42px; }
+.dlTerm .btParamVal { font-size: 10px; color: var(--txt); min-width: 28px; text-align: center; }
+
+/* 백테스트 결과 스트립 — 차트 하단 도킹 (전체화면 동행) */
+.dlTerm .btStrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: rgba(10, 14, 21, 0.94); border-top: 1px solid var(--bdHi, #2a3142); padding: 4px 10px 3px; backdrop-filter: blur(2px); }
+.dlTerm .btStrip.btLag .btHead { opacity: 0.78; }
+.dlTerm .btHead { display: flex; align-items: baseline; gap: 8px; }
+.dlTerm .btPreset { font-family: var(--cond); font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
+.dlTerm .btRet { font-size: 13px; font-weight: 700; }
+.dlTerm .btVs { font-size: 9px; color: var(--dimmer); }
+.dlTerm .btSpacer { flex: 1; }
+.dlTerm .btWarn { font-family: var(--mono); font-size: 8px; color: var(--amber); border: 1px solid rgba(251, 146, 60, 0.45); border-radius: 2px; padding: 0 4px; line-height: 1.6; }
+.dlTerm .btClose { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 11px; padding: 0 2px; }
+.dlTerm .btClose:hover { color: var(--amber); }
+.dlTerm .btKpis { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 9.5px; color: var(--dim); margin-top: 1px; }
+.dlTerm .btKpis b { color: var(--txt); margin-left: 3px; }
+.dlTerm .btSub { font-style: normal; color: var(--dimmer); margin-left: 2px; font-size: 8.5px; }
+.dlTerm .btTradesBtn { background: none; border: none; color: var(--amber); font-family: var(--mono); font-size: 9.5px; cursor: pointer; padding: 0; }
+.dlTerm .btTrades { max-height: 160px; overflow: auto; margin-top: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
+.dlTerm .btTable { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+.dlTerm .btTable th { text-align: left; color: var(--dimmer); font-weight: 400; padding: 2px 6px 2px 0; }
+.dlTerm .btTable th.r, .dlTerm .btTable td.r { text-align: right; }
+.dlTerm .btTable td { padding: 1px 6px 1px 0; border-bottom: 1px solid rgba(27, 33, 48, 0.6); color: var(--dim); }
+.dlTerm .btFoot { font-size: 8.5px; color: var(--dimmer); margin-top: 2px; line-height: 1.5; }
+
+/* 차트 데이터 출처 상시 표기 (공공누리) */
+.dlTerm .chartSrc { position: absolute; left: 8px; bottom: 4px; font-size: 9px; color: #5c6370; pointer-events: none; z-index: 2; }
+.dlTerm .chartWrap:has(.btStrip) .chartSrc { display: none; }
 .dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .mItem:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
@@ -502,6 +530,19 @@
 .scrTable tbody tr { cursor: pointer; }
 .scrTable tbody tr:hover { background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.04)); }
 .scrTable td.l b { font-weight: 600; }
+
+/* 데이터 출처 모달 */
+.srcModal { width: min(880px, 96vw); }
+.srcBody { overflow: auto; }
+.srcTable tbody tr { cursor: default; }
+.srcTable td { vertical-align: top; line-height: 1.45; }
+.srcPath { font-size: 10px; color: var(--dl-ink-mute, #8a93a3); }
+.srcLic { color: var(--dl-ink-mute, #8a93a3); }
+.srcNotes { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
+.srcNote { font-size: 10px; color: var(--dl-ink-mute, #8a93a3); }
+.srcNote.dim { color: var(--dl-ink-dim, #5b6473); }
+.dlTerm .sbSrcBtn { background: none; border: 1px solid var(--bd); border-radius: 2px; cursor: pointer; color: inherit; font: inherit; padding: 1px 7px; }
+.dlTerm .sbSrcBtn:hover { border-color: var(--amber); color: var(--amber); }
 .scrInd { display: block; font-size: 8.5px; color: var(--dl-ink-dim, #5b6473); }
 .scrEmpty { text-align: center; color: var(--dl-ink-dim); padding: 24px; font-size: 11px; }
 
@@ -650,7 +691,7 @@
 
 /* PROVENANCE TAG */
 .dlTerm .provTag { font-family: var(--mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.4px; padding: 1px 4px; border-radius: 2px; line-height: 1.5; flex-shrink: 0; cursor: help; }
-.dlTerm .provTag.pLive { color: var(--good); background: rgba(52, 211, 153, 0.12); }
+.dlTerm .provTag.pReal { color: var(--good); background: rgba(52, 211, 153, 0.12); }
 .dlTerm .provTag.pDeriv { color: var(--amber); background: rgba(251, 146, 60, 0.12); }
 .dlTerm .provTag.pWire { color: var(--dn); background: rgba(29, 100, 220, 0.12); border: 1px dashed rgba(29, 100, 220, 0.4); }
 
@@ -703,8 +744,13 @@
 .dlTerm .finFullBtn { background: var(--dl-bg-deep); color: var(--dim); border: 1px solid var(--bd); border-radius: 2px; font-size: 11px; line-height: 1; padding: 2px 6px; cursor: pointer; margin-left: 6px; }
 .dlTerm .finFullBtn:hover { color: var(--amber); border-color: var(--amber); }
 .dlTerm .panel.finFull { position: fixed; inset: 0; z-index: 90; margin: 0; border-radius: 0; max-height: 100vh; overflow: auto; box-shadow: 0 0 0 100vmax rgba(4, 6, 10, 0.66); }
-.dlTerm .panel.finFull .finGrid { grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 6px; padding: 8px; }
-.dlTerm .panel.finFull .finMini { padding: 8px 6px 5px; }
+.dlTerm .panel.finFull .finGrid { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 10px; padding: 12px; }
+.dlTerm .panel.finFull .finMini { padding: 10px 10px 8px; }
+.dlTerm .panel.finFull .mfcTitle { font-size: 13.5px; }
+.dlTerm .panel.finFull .mfcVal { font-size: 14px; }
+.dlTerm .panel.finFull .mfcUnit { font-size: 9px; }
+.dlTerm .panel.finFull .mfcLg { font-size: 10px; }
+.dlTerm .panel.finFull .mfcAx { font-size: 5.5px; }
 
 /* 매크로 순풍/역풍 섹터 리본 (LeftRail 마켓 펄스) */
 .dlTerm .twRibbon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 2px 1px; border-top: 1px solid var(--bd); margin-top: 5px; }

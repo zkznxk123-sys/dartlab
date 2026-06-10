@@ -48,8 +48,9 @@ export function heat(v: number, max = 1): string {
 	return `rgba(240, 97, 111, ${0.06 + -t * 0.45})`;
 }
 
+// 'LIVE' 라벨 금지 — 모든 소스가 EOD·일배치·분기공시 캐시(실시간 아님). 실데이터/파생만 구분.
 export const PROV: Record<string, { kr: string; en: string; cls: string; t: Bilingual }> = {
-	live: { kr: 'LIVE', en: 'LIVE', cls: 'pLive', t: { kr: 'HuggingFace 실데이터', en: 'real HF data' } },
+	real: { kr: '실데이터', en: 'REAL', cls: 'pReal', t: { kr: '공시·시세 원천 실데이터 (EOD·일배치)', en: 'real source data (EOD · daily batch)' } },
 	derived: { kr: '파생', en: 'DERIVED', cls: 'pDeriv', t: { kr: '실데이터에서 계산 (엔진출력 아님)', en: 'computed from real data' } },
 	wire: { kr: '재구성', en: 'RECON', cls: 'pWire', t: { kr: '실 지표 기반 재구성', en: 'reconstructed from real metrics' } }
 };
