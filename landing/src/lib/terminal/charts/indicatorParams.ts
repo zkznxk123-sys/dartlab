@@ -1,5 +1,7 @@
 // 지표 파라미터 카탈로그 SSOT — klinecharts 내장 27종 + 커스텀(ICHI·ENV) 의 기본 calcParams 와 편집 규칙.
-// 기본값은 klinecharts dist/index.esm.js 실측 추출값. 편집 적용은 overrideIndicator({name, calcParams}, paneId)
+// 기본값은 klinecharts dist/index.esm.js 실측 추출값. 단 RSI·WR 은 라이브러리 기본(3선 6·12·24/6·10·14)이
+// 비표준·과밀이라 전문가 표준(RSI 14 · WR 14 단선, TradingView/HTS 통용)으로 교정 — 생성 시 본 defaults 를
+// 명시 전달한다(PriceChart reconcile). 편집 적용은 overrideIndicator({name, calcParams}, paneId)
 // 만 사용한다 — override 경로의 minValue/maxValue 는 내부 오배선(setMinValue(maxValue))이라 절대 전달 금지.
 // grow 지표(MA·EMA·RSI·WR·VOL·BIAS)만 라인 개수 가변(1~5 — 기본 팔레트 5색, 6번째부터 색 재사용이라 5 상한).
 // BBI 는 calc 가 합/4 하드코딩 — 개수 잠금(값 편집만 허용).
@@ -32,9 +34,9 @@ export const IND_DEFS: Record<string, IndDef> = {
 	// ── 페인 지표 ──
 	VOL: { defaults: [5, 10, 20], params: [period('기간', 'period'), period('기간', 'period'), period('기간', 'period')], grow: true },
 	MACD: { defaults: [12, 26, 9], params: [{ kr: '단기', en: 'fast', min: 2, max: 60, step: 1 }, { kr: '장기', en: 'slow', min: 5, max: 120, step: 1 }, { kr: '시그널', en: 'sig', min: 2, max: 60, step: 1 }] },
-	RSI: { defaults: [6, 12, 24], params: [period('기간', 'period', 2, 120), period('기간', 'period', 2, 120), period('기간', 'period', 2, 120)], grow: true },
+	RSI: { defaults: [14], params: [period('기간', 'period', 2, 120)], grow: true },
 	KDJ: { defaults: [9, 3, 3], params: [period('K', 'K', 5, 30), period('D', 'D', 1, 10), period('J', 'J', 1, 10)] },
-	WR: { defaults: [6, 10, 14], params: [period('기간', 'period', 2, 120), period('기간', 'period', 2, 120), period('기간', 'period', 2, 120)], grow: true },
+	WR: { defaults: [14], params: [period('기간', 'period', 2, 120)], grow: true },
 	BIAS: { defaults: [6, 12, 24], params: [period('기간', 'period', 2, 120), period('기간', 'period', 2, 120), period('기간', 'period', 2, 120)], grow: true },
 	OBV: { defaults: [30], params: [period('기간', 'period')] },
 	CCI: { defaults: [20], params: [period('기간', 'period')] },

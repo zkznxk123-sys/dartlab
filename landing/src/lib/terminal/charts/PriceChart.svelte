@@ -59,21 +59,39 @@
 		return n >= 2 && candles[n - 2].c ? ((candles[n - 1].c / candles[n - 2].c) - 1) * 100 : null;
 	});
 
+	// 캔들 툴팁 — 한국어 압축형 + 등락률({change} 내장 placeholder, 전일종가 대비 자동색).
+	// 배열은 wholesale 교체(라이브러리 명시 특례) — 기본 6줄을 우리 줄로 완전 대체.
+	const tooltipCustom = (lg: Lang) =>
+		lg === 'en'
+			? [
+					{ title: 'O', value: '{open}' }, { title: 'H', value: '{high}' }, { title: 'L', value: '{low}' },
+					{ title: 'C', value: '{close}' }, { title: 'Vol', value: '{volume}' }, { title: 'Chg', value: '{change}' }
+				]
+			: [
+					{ title: '시', value: '{open}' }, { title: '고', value: '{high}' }, { title: '저', value: '{low}' },
+					{ title: '종', value: '{close}' }, { title: '량', value: '{volume}' }, { title: '등락', value: '{change}' }
+				];
 	const themeStyles = () => ({
-		grid: { horizontal: { color: 'rgba(38,46,62,0.45)' }, vertical: { color: 'rgba(38,46,62,0.32)' } },
+		grid: { horizontal: { color: 'rgba(48,58,78,0.55)' }, vertical: { color: 'rgba(38,46,62,0.3)' } },
 		candle: {
 			type: ctl.candleStyle,
 			bar: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', upBorderColor: '#34d399', downBorderColor: '#f0616f', noChangeBorderColor: '#8b919e', upWickColor: '#5eead4', downWickColor: '#fb7185', noChangeWickColor: '#8b919e' },
 			area: { lineColor: '#5b9bf0', lineSize: 1.4, backgroundColor: [{ offset: 0, color: 'rgba(91,155,240,0.22)' }, { offset: 1, color: 'rgba(91,155,240,0.01)' }] },
 			priceMark: { high: { color: '#8b919e' }, low: { color: '#8b919e' }, last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14' } } },
-			tooltip: { offsetTop: 26, text: { color: '#cfd3dc', size: 11 }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
+			tooltip: { offsetTop: 26, custom: tooltipCustom(lang), text: { color: '#cfd3dc', size: 11 }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
 		},
 		indicator: { tooltip: { text: { color: '#8b919e', size: 10 } } },
 		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e' } },
 		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e' } },
-		separator: { color: '#222b3a', fill: true },
+		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(251,146,60,0.1)' },
 		crosshair: { horizontal: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309' } }, vertical: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309' } } }
 	});
+
+	// 보조 페인 높이 — 컨테이너 비례(16%) 적응. 전체화면 진입 시 78px 고정 납작 페인 방지.
+	function subPaneHeight(): number {
+		const h = el?.clientHeight || 480;
+		return Math.max(72, Math.min(240, Math.round(h * 0.16)));
+	}
 
 	// ── 차트 인스턴스 생성 (mount 1 회, el 기준) ──
 	$effect(() => {
@@ -92,6 +110,21 @@
 			if (!local) return;
 			local.setPriceVolumePrecision(0, 0);
 			local.setOffsetRightDistance(12);
+			// 일봉 날짜 포맷 — 기본 'YYYY-MM-DD HH:mm' 하드코딩이 일봉에 09:00 같은 무의미 시각 노출.
+			// Tooltip(0)·Crosshair(1) 만 날짜로, XAxis 등은 라이브러리 기본 유지.
+			const fmtYmd = (ts: number) => {
+				const d = new Date(ts);
+				const p = (n: number) => String(n).padStart(2, '0');
+				return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}`;
+			};
+			try {
+				local.setCustomApi({
+					formatDate: (dtf: unknown, ts: number, format: string, type: number) => {
+						if (type === 0 || type === 1) return fmtYmd(ts);
+						try { return mod.utils.formatDate(dtf, ts, format); } catch { return fmtYmd(ts); }
+					}
+				});
+			} catch { /* setCustomApi 미지원 빌드 — 기본 포맷 유지 */ }
 			// 전체 이력 lazy 로드 — 좌측(forward) 도달 시 더 오래된 연도 prepend
 			local.setLoadDataCallback((p: any) => {
 				const done = (rows: any[], more: boolean) => { try { p.callback(rows, more); } catch { /* */ } };
@@ -186,7 +219,8 @@
 		for (const k of [...mainOn]) if (!want.has(k)) { c.removeIndicator('candle_pane', k); mainOn.delete(k); delete appliedParams[k]; }
 		ctl.overlays.forEach((k) => {
 			if (mainOn.has(k)) return;
-			const cp = ctl.indParams[k];
+			// 커스텀 없으면 IND_DEFS 기본 명시 전달 — RSI 14 등 전문가 표준 교정값 적용
+			const cp = ctl.indParams[k] ?? (IND_DEFS[k]?.defaults.length ? IND_DEFS[k].defaults : undefined);
 			if (c.createIndicator(cp ? { name: k, calcParams: cp } : k, true, { id: 'candle_pane' })) {
 				mainOn.add(k);
 				if (cp) appliedParams[k] = cp;
@@ -206,8 +240,8 @@
 		for (const [k, paneId] of [...subPanes]) if (!want.has(k)) { c.removeIndicator(paneId); subPanes.delete(k); delete appliedParams[k]; }
 		ctl.subs.forEach((k) => {
 			if (subPanes.has(k)) return;
-			const cp = ctl.indParams[k];
-			const id = c.createIndicator(cp ? { name: k, calcParams: cp } : k, false, { id: `pane_${k}`, height: 78 });
+			const cp = ctl.indParams[k] ?? (IND_DEFS[k]?.defaults.length ? IND_DEFS[k].defaults : undefined);
+			const id = c.createIndicator(cp ? { name: k, calcParams: cp } : k, false, { id: `pane_${k}`, height: subPaneHeight(), minHeight: 48, dragEnabled: true });
 			if (id) {
 				subPanes.set(k, id);
 				if (cp) appliedParams[k] = cp;
@@ -281,9 +315,10 @@
 	});
 	$effect(() => {
 		const t = ctl.candleStyle;
+		const lg = lang;
 		const c = chart;
 		if (!c) return;
-		try { c.setStyles({ candle: { type: t } }); } catch { /* */ }
+		try { c.setStyles({ candle: { type: t, tooltip: { custom: tooltipCustom(lg) } } }); } catch { /* */ }
 	});
 
 	// period 변경 → 가시 봉 수 + 필요 시 과거 백필
@@ -343,12 +378,18 @@
 		});
 	});
 
-	// 전체화면 토글 → resize + ESC
+	// 전체화면 토글 → resize + 보조 페인 비례 재배분 + ESC
 	$effect(() => {
 		if (!browser) return;
 		const c = chart;
 		void ctl.full;
-		requestAnimationFrame(() => { try { c?.resize(); } catch { /* */ } });
+		requestAnimationFrame(() => {
+			try {
+				c?.resize();
+				const ph = subPaneHeight();
+				for (const paneId of subPanes.values()) c?.setPaneOptions({ id: paneId, height: ph });
+			} catch { /* */ }
+		});
 		if (!ctl.full) return;
 		const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') ctl.full = false; };
 		window.addEventListener('keydown', onKey);
