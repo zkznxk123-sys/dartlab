@@ -135,13 +135,14 @@ export function registerExtraIndicators(kc: { registerIndicator: (t: unknown) =>
 		name: 'TVAL',
 		shortName: 'TVAL',
 		series: 'volume',
-		shouldFormatBigNumber: true, // 거래대금(원) — 억 단위 축약 표기
+		// turnover 는 toK 에서 억 단위로 변환 — 축약(K/M) 대신 콤마 정수가 한국 단위 관행
+		shouldFormatBigNumber: false,
 		precision: 0,
 		minValue: 0,
 		figures: [
 			{
 				key: 'tval',
-				title: '대금 ',
+				title: '대금(억) ',
 				type: 'bar',
 				baseValue: 0,
 				styles: (data: { current?: { kLineData?: { close: number; open: number } } }) => {

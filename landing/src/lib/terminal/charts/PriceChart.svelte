@@ -75,7 +75,9 @@
 	let appliedReplay = { on: false, idx: -1 }; // replay effect 중복 재적용 차단 스냅샷
 
 	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
-	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv ?? undefined });
+	// turnover 는 억 단위 — {turnover} 플레이스홀더가 콤마만 붙이고 축약을 안 해 원 단위면
+	// "446,546,135,655" 생짜 노출 (TVAL 페인·매물대 가중치도 동일 단위 공유, 상대값이라 무영향)
+	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv != null ? c.tv / 1e8 : undefined });
 	const chgPct = $derived.by<number | null>(() => {
 		const n = candles.length;
 		return n >= 2 && candles[n - 2].c ? ((candles[n - 1].c / candles[n - 2].c) - 1) * 100 : null;
@@ -87,11 +89,11 @@
 		lg === 'en'
 			? [
 					{ title: 'O', value: '{open}' }, { title: 'H', value: '{high}' }, { title: 'L', value: '{low}' },
-					{ title: 'C', value: '{close}' }, { title: 'Vol', value: '{volume}' }, { title: 'TVal', value: '{turnover}' }, { title: 'Chg', value: '{change}' }
+					{ title: 'C', value: '{close}' }, { title: 'Vol', value: '{volume}' }, { title: 'TVal(100M)', value: '{turnover}' }, { title: 'Chg', value: '{change}' }
 				]
 			: [
 					{ title: '시', value: '{open}' }, { title: '고', value: '{high}' }, { title: '저', value: '{low}' },
-					{ title: '종', value: '{close}' }, { title: '량', value: '{volume}' }, { title: '대금', value: '{turnover}' }, { title: '등락', value: '{change}' }
+					{ title: '종', value: '{close}' }, { title: '량', value: '{volume}' }, { title: '대금(억)', value: '{turnover}' }, { title: '등락', value: '{change}' }
 				];
 	// 'ha'(하이킨아시)는 데이터 변환(reapply) — klinecharts 캔들 타입으로는 candle_solid 로 그린다.
 	const kcCandleType = (t: CandleStyle) => (t === 'ha' ? 'candle_solid' : t);
