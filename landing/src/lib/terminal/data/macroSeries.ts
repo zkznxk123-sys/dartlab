@@ -113,9 +113,20 @@ export interface MacroLatest {
 	v: number;
 	d: string; // YYYYMMDD
 	chg: number | null; // 직전 관측 대비 변화 (단위 동일)
+	spark: number[]; // 최근 ~1년 추세 (KPI 스파크라인용, ≤40점 다운샘플)
 }
 
-/** KPI 티커용 — 화이트리스트 전 시리즈의 최신값+직전 대비 변화를 병렬 로드. */
+// 최근 1년(일별 252·월별 12) 구간을 최대 n 점으로 다운샘플 — 스파크라인 폴리라인용.
+function sparkOf(pts: MacroPoint[], n = 40): number[] {
+	const daily = pts.length > 400; // 일별 시리즈 추정
+	const win = pts.slice(-(daily ? 252 : 12));
+	if (win.length <= n) return win.map((p) => p.v);
+	const out: number[] = [];
+	for (let i = 0; i < n; i++) out.push(win[Math.floor((i / (n - 1)) * (win.length - 1))].v);
+	return out;
+}
+
+/** KPI 티커용 — 화이트리스트 전 시리즈의 최신값+직전 대비 변화+스파크라인을 병렬 로드. */
 export async function loadMacroLatest(): Promise<MacroLatest[]> {
 	const all = await Promise.all(
 		MACRO_SERIES.map(async (def) => {
@@ -123,7 +134,7 @@ export async function loadMacroLatest(): Promise<MacroLatest[]> {
 			if (!pts || !pts.length) return null;
 			const last = pts[pts.length - 1];
 			const prev = pts.length > 1 ? pts[pts.length - 2] : null;
-			return { def, v: last.v, d: last.d, chg: prev ? +(last.v - prev.v).toFixed(4) : null };
+			return { def, v: last.v, d: last.d, chg: prev ? +(last.v - prev.v).toFixed(4) : null, spark: sparkOf(pts) };
 		})
 	);
 	return all.filter((x): x is MacroLatest => x != null);

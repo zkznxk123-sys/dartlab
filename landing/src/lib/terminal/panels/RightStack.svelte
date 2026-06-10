@@ -281,7 +281,7 @@
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'rev / emp' : '1인당 매출'}</span><span class="factV mono">{revPerEmp(wfLast) != null ? revPerEmp(wfLast) + (lang === 'en' ? ' ×0.1B' : '억') : '—'}</span></div>
 		</div>
 		{#if wfCard}
-			<div class="finMini"><MiniFinChart card={wfCard} periods={wf.map((w) => w.year.slice(2))} /></div>
+			<div class="finMini"><MiniFinChart card={wfCard} periods={wf.map((w) => w.year.slice(2))} h={116} /></div>
 		{/if}
 	</Panel>
 {/if}
@@ -298,7 +298,7 @@
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'buyback / disposal' : '취득 / 처분'}</span><span class="factV mono">{fmtShares(srLast.buybackQty)} / {fmtShares(srLast.disposalQty)}</span></div>
 		</div>
 		{#if srCard}
-			<div class="finMini"><MiniFinChart card={srCard} periods={srs.map((s) => s.year.slice(2))} /></div>
+			<div class="finMini"><MiniFinChart card={srCard} periods={srs.map((s) => s.year.slice(2))} h={116} /></div>
 		{/if}
 	</Panel>
 {/if}

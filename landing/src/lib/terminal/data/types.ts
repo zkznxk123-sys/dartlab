@@ -327,6 +327,7 @@ export interface Company {
 	price: {
 		last: number;
 		mktcap: string;
+		mktcapRaw: number; // 원 — 캔들 최신가 기준 시총 보정용
 		ret1m: Num;
 		ret3m: Num;
 		ret1y: Num;

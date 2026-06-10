@@ -19,8 +19,11 @@
 	}
 	let { eng, initial = '005930' }: Props = $props();
 
+	// 마지막 본 종목 복원 — 재접속 시 그 종목으로 (localStorage, SSR 안전 가드)
+	const LAST_SYM_KEY = 'dlTerm.lastSym';
+	const lastSym = typeof localStorage !== 'undefined' ? localStorage.getItem(LAST_SYM_KEY) : null;
 	const first = eng.featured(1)[0] || initial;
-	let sym = $state(eng.buildCompany(initial) ? initial : first);
+	let sym = $state(lastSym && eng.buildCompany(lastSym) ? lastSym : eng.buildCompany(initial) ? initial : first);
 	let lang = $state<Lang>('kr');
 	let sourcesOpen = $state(false);
 	let cmd = $state('');
@@ -76,16 +79,16 @@
 		const u = m.def.unit;
 		return u === 'pt' || u === '원' ? signed : u === '$/t' ? '$' + signed : signed + u;
 	};
-	// 경제·시장 KPI (CenterStack 헤더 티커) — 실 지표 최신값 + 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
-	const macroKpis = $derived.by<{ l: string; v: string; t: string }[]>(() => {
+	// 경제·시장 KPI (CenterStack 헤더 티커) — 실 지표 최신값+스파크라인 + 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
+	const macroKpis = $derived.by<{ l: string; v: string; t: string; s?: number[] }[]>(() => {
 		const m = eng.raw.macro;
 		const tw = eng.sectorTailwinds();
 		const r1 = Object.values(eng.raw.prices.data).map((p) => p.return1m).filter((x): x is number => x != null);
 		const up = r1.length ? (r1.filter((x) => x > 0).length / r1.length) * 100 : null;
 		const avg = r1.length ? r1.reduce((a, b) => a + b, 0) / r1.length : null;
-		const out: { l: string; v: string; t: string }[] = [];
+		const out: { l: string; v: string; t: string; s?: number[] }[] = [];
 		for (const ml of macroLatest)
-			out.push({ l: lang === 'en' ? ml.def.en : ml.def.kr, v: fmtMacro(ml), t: ml.chg == null || ml.chg === 0 ? 'tNeu' : ml.chg > 0 ? 'tUp' : 'tDn' });
+			out.push({ l: lang === 'en' ? ml.def.en : ml.def.kr, v: fmtMacro(ml), t: ml.chg == null || ml.chg === 0 ? 'tNeu' : ml.chg > 0 ? 'tUp' : 'tDn', s: ml.spark });
 		if (m) {
 			const dir = (g: string) => (g === 'rising' || g === '상승' ? 'tUp' : 'tDn');
 			out.push({ l: 'KR', v: lang === 'en' ? m.kr.phase : m.kr.phaseLabel, t: dir(m.kr.quadrant.growth) });
@@ -111,6 +114,7 @@
 			return;
 		}
 		sym = code;
+		try { localStorage.setItem(LAST_SYM_KEY, code); } catch { /* 시크릿 모드 등 */ }
 		setFlash(code + ' · ' + built.name.kr);
 	}
 	function go(e: Event) {

@@ -29,8 +29,9 @@ export interface BtPresetDef {
 	signal: (closes: number[], p: Record<string, number>) => Int8Array;
 }
 
-// 비용 상수 (고정 — v1 필드 편집 없음, withCosts 토글만). 수수료 양측 + 매도 거래세 + 슬리피지.
-export const BT_COSTS = { commissionBp: 1.5, sellTaxBp: 15, slippageBp: 10 } as const;
+// 비용 기본값 (bp) — opts.costsBp 로 편집 가능. 수수료 양측 + 매도 거래세 + 슬리피지.
+export const BT_COSTS = { commissionBp: 1.5, sellTaxBp: 15, slippageBp: 10 };
+export type BtCostsBp = { commissionBp: number; sellTaxBp: number; slippageBp: number };
 
 export const BT_PRESETS: BtPresetDef[] = [
 	{
@@ -56,15 +57,16 @@ export const BT_PRESETS: BtPresetDef[] = [
 		key: 'rsiRevert',
 		kr: 'RSI 과매도 반등',
 		en: 'RSI Revert',
-		descKr: 'RSI14 < 매수선 진입, > 매도선 청산',
-		descEn: 'enter RSI14 < buy, exit > sell',
+		descKr: 'RSI < 매수선 진입, > 매도선 청산',
+		descEn: 'enter RSI < buy, exit > sell',
 		params: [
+			{ name: 'period', kr: '기간', en: 'period', min: 7, max: 28, step: 7, def: 14 },
 			{ name: 'buyTh', kr: '매수선', en: 'buy', min: 10, max: 40, step: 5, def: 30 },
 			{ name: 'sellTh', kr: '매도선', en: 'sell', min: 55, max: 80, step: 5, def: 70 }
 		],
-		warmup: () => 15,
+		warmup: (p) => p.period + 1,
 		signal: (c, p) => {
-			const r = rsi(c, 14);
+			const r = rsi(c, p.period);
 			const t = new Int8Array(c.length);
 			let state = 0;
 			for (let i = 0; i < c.length; i++) {
@@ -81,10 +83,13 @@ export const BT_PRESETS: BtPresetDef[] = [
 		en: 'BB Revert',
 		descKr: '종가 < 하단밴드 진입, ≥ 중심선 청산',
 		descEn: 'enter below lower band, exit at mid',
-		params: [],
-		warmup: () => 20,
-		signal: (c) => {
-			const bb = bollinger(c, 20, 2);
+		params: [
+			{ name: 'period', kr: '기간', en: 'period', min: 10, max: 60, step: 5, def: 20 },
+			{ name: 'mult', kr: '승수', en: 'mult', min: 1, max: 4, step: 0.5, def: 2 }
+		],
+		warmup: (p) => p.period,
+		signal: (c, p) => {
+			const bb = bollinger(c, p.period, p.mult);
 			const t = new Int8Array(c.length);
 			let state = 0;
 			for (let i = 0; i < c.length; i++) {
@@ -100,14 +105,19 @@ export const BT_PRESETS: BtPresetDef[] = [
 		key: 'macdCross',
 		kr: 'MACD 시그널',
 		en: 'MACD Cross',
-		descKr: 'MACD선 > 시그널선이면 보유 (12/26/9)',
-		descEn: 'hold while MACD > signal (12/26/9)',
-		params: [],
-		warmup: () => 35,
-		signal: (c) => {
-			const m = macd(c);
+		descKr: 'MACD선 > 시그널선이면 보유',
+		descEn: 'hold while MACD > signal',
+		params: [
+			{ name: 'fast', kr: '단기', en: 'fast', min: 5, max: 20, step: 1, def: 12 },
+			{ name: 'slow', kr: '장기', en: 'slow', min: 20, max: 60, step: 1, def: 26 },
+			{ name: 'sig', kr: '시그널', en: 'sig', min: 5, max: 15, step: 1, def: 9 }
+		],
+		warmup: (p) => p.slow + p.sig,
+		signal: (c, p) => {
+			const m = macd(c, p.fast, p.slow, p.sig);
 			const t = new Int8Array(c.length);
-			for (let i = 35; i < c.length; i++) t[i] = m.line[i] > m.signal[i] ? 1 : 0;
+			const start = p.slow + p.sig;
+			for (let i = start; i < c.length; i++) t[i] = m.line[i] > m.signal[i] ? 1 : 0;
 			return t;
 		}
 	}
@@ -153,11 +163,7 @@ interface Costs {
 	slip: number;
 }
 const ZERO_COSTS: Costs = { comm: 0, tax: 0, slip: 0 };
-const FULL_COSTS: Costs = {
-	comm: BT_COSTS.commissionBp / 10000,
-	tax: BT_COSTS.sellTaxBp / 10000,
-	slip: BT_COSTS.slippageBp / 10000
-};
+const toCosts = (bp: BtCostsBp = BT_COSTS): Costs => ({ comm: bp.commissionBp / 1e4, tax: bp.sellTaxBp / 1e4, slip: bp.slippageBp / 1e4 });
 
 interface PassOut {
 	equity: (number | null)[];
@@ -268,7 +274,7 @@ export function runBacktest(
 	candles: Candle[],
 	preset: BtPresetKey,
 	params: Record<string, number>,
-	opts: { windowBars: number; withCosts: boolean }
+	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp }
 ): BtResult | null {
 	const def = BT_PRESETS.find((d) => d.key === preset);
 	if (!def) return null;
@@ -279,10 +285,11 @@ export function runBacktest(
 	const target = def.signal(closes, params);
 	const startIdx = Math.max(0, n - Math.max(2, opts.windowBars));
 	const windowBars = n - startIdx;
-	const costs = opts.withCosts ? FULL_COSTS : ZERO_COSTS;
+	const full = toCosts(opts.costsBp);
+	const costs = opts.withCosts ? full : ZERO_COSTS;
 
 	const strat = runPass(candles, target, startIdx, costs);
-	const stratOn = opts.withCosts ? strat : runPass(candles, target, startIdx, FULL_COSTS);
+	const stratOn = opts.withCosts ? strat : runPass(candles, target, startIdx, full);
 	const stratOff = opts.withCosts ? runPass(candles, target, startIdx, ZERO_COSTS) : strat;
 	const hold = new Int8Array(n).fill(1);
 	const bhPass = runPass(candles, hold, startIdx, costs);

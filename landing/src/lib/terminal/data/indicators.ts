@@ -51,11 +51,11 @@ export interface Macd {
 	signal: number[];
 	hist: number[];
 }
-export function macd(a: number[]): Macd {
-	const e12 = ema(a, 12);
-	const e26 = ema(a, 26);
-	const line = e12.map((v, i) => v - e26[i]);
-	const signal = ema(line, 9);
+export function macd(a: number[], fast = 12, slow = 26, sig = 9): Macd {
+	const eFast = ema(a, fast);
+	const eSlow = ema(a, slow);
+	const line = eFast.map((v, i) => v - eSlow[i]);
+	const signal = ema(line, sig);
 	const hist = line.map((v, i) => v - signal[i]);
 	return { line, signal, hist };
 }

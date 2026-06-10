@@ -311,7 +311,7 @@
 /* CHART (trend) */
 .dlTerm .chartWrap { position: relative; width: 100%; min-height: 320px; overflow: hidden; }
 .dlTerm .chartHost { width: 100%; height: 100%; }
-.dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 38px 10px 10px; }
+.dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 64px 10px 10px; }
 .dlTerm .chartTools { position: absolute; top: 6px; right: 12px; display: flex; gap: 4px; z-index: 24; }
 .dlTerm .chartWrap.full .chartTools { top: 10px; right: 16px; }
 .dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
@@ -358,6 +358,36 @@
 /* 차트 데이터 출처 상시 표기 (공공누리) */
 .dlTerm .chartSrc { position: absolute; left: 8px; bottom: 4px; font-size: 9px; color: #5c6370; pointer-events: none; z-index: 2; }
 .dlTerm .chartWrap:has(.btStrip) .chartSrc { display: none; }
+
+/* 전체화면 전문가 리본 (2단) — 캔버스 밖 불투명 overlay, 차트 리플로우 0 */
+.dlTerm .chartRibbon { position: absolute; top: 0; left: 0; right: 0; z-index: 26; display: flex; flex-direction: column; background: var(--dl-bg-modal, #11161f); border-bottom: 1px solid var(--bd); }
+.dlTerm .crRow { display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
+.dlTerm .crRow + .crRow { border-top: 1px solid var(--dl-line, #1b2130); }
+.dlTerm .crGrp { position: relative; display: flex; align-items: center; gap: 3px; flex: none; padding-right: 8px; border-right: 1px solid var(--bd); }
+.dlTerm .crGrp:last-child, .dlTerm .crGrp.crPop:last-of-type { border-right: 0; }
+.dlTerm .crSym { font-size: 11px; gap: 6px; }
+.dlTerm .crSym b { color: var(--txt); }
+.dlTerm .crSym .dim { font-size: 9.5px; }
+.dlTerm .crLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; flex: none; }
+.dlTerm .crChips { flex-wrap: nowrap; }
+.dlTerm .crChipPair { display: inline-flex; align-items: center; }
+.dlTerm .crChip { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px 0 0 2px; padding: 4px 6px; cursor: pointer; white-space: nowrap; }
+.dlTerm .crChip:hover:not(:disabled) { color: var(--txt); border-color: var(--amber); }
+.dlTerm .crChip:disabled { cursor: default; }
+.dlTerm .crChip.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); border-radius: 2px; }
+.dlTerm .crChip.x { border-left: 0; border-radius: 0 2px 2px 0; padding: 4px 5px; }
+.dlTerm .crChip.x:hover { color: var(--dl-red, #f0616f); border-color: var(--dl-red, #f0616f); }
+.dlTerm .crAdd { background: none; color: var(--dim); font-family: var(--mono); font-size: 10px; line-height: 1; border: 1px dashed var(--bd); border-radius: 2px; padding: 3px 7px; cursor: pointer; white-space: nowrap; }
+.dlTerm .crAdd:hover { color: var(--amber); border-color: var(--amber); }
+.dlTerm .crPop { position: relative; }
+.dlTerm .crMenu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); min-width: 180px; }
+.dlTerm .crMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 280px; }
+.dlTerm .crMenuR { left: auto; right: 0; }
+.dlTerm .crMenuWideR { min-width: 280px; }
+.dlTerm .crClose { margin-left: auto; flex: none; }
+.dlTerm .mItem.mGear { padding: 4px 4px; margin-left: -2px; border-left: 0; }
+.dlTerm .btModelNote { font-size: 8.5px; color: var(--dimmer); border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; margin-top: 2px; max-width: 250px; line-height: 1.5; }
+.dlTerm .ipEditor { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; }
 .dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .mItem:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
@@ -728,11 +758,12 @@
 }
 
 /* CENTER KPI TICKER (경제·시장 지표 — 종목/주가 라인 위, 좌우 흐름) */
-.dlTerm .kpiTicker { height: 18px; overflow: hidden; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; display: flex; align-items: center; margin-bottom: 4px; flex: 0 0 auto; }
+.dlTerm .kpiTicker { height: 24px; overflow: hidden; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; display: flex; align-items: center; margin-bottom: 4px; flex: 0 0 auto; }
 .dlTerm .kpiTrack { display: flex; gap: 22px; white-space: nowrap; animation: dlTermScroll 48s linear infinite; padding-left: 10px; }
 .dlTerm .kpiTrack:hover { animation-play-state: paused; }
-.dlTerm .kpiItem { display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; }
-.dlTerm .kpiItem i { font-family: var(--cond); font-style: normal; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.5px; font-size: 8.5px; }
+.dlTerm .kpiItem { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; }
+.dlTerm .kpiSpark { width: 36px; height: 12px; opacity: 0.9; flex-shrink: 0; }
+.dlTerm .kpiItem i { font-family: var(--cond); font-style: normal; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.5px; font-size: 9.5px; }
 .dlTerm .kpiItem b { font-family: var(--mono); font-weight: 600; }
 
 /* 헤더 가운데 주요제품 (빈 공간 채움) */

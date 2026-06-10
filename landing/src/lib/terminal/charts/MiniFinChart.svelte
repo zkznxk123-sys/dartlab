@@ -6,14 +6,15 @@
 	interface Props {
 		card: FinCard;
 		periods: string[];
+		h?: number; // 우측 레일 등 밀도 컨텍스트용 compact 높이 (기본 152)
 	}
-	let { card, periods }: Props = $props();
+	let { card, periods, h = 152 }: Props = $props();
 
 	const W = 300;
-	const H = 152;
+	const H = $derived(h);
 	const M = { t: 6, r: 30, b: 15, l: 34 };
 	const plotW = W - M.l - M.r;
-	const plotH = H - M.t - M.b;
+	const plotH = $derived(H - M.t - M.b);
 
 	const fin = (v: Num): v is number => typeof v === 'number' && Number.isFinite(v);
 	const n = $derived(periods.length);
@@ -57,8 +58,9 @@
 	const yL = (v: number) => yOf(v, leftExt);
 	const yR = (v: number) => yOf(v, rightExt);
 
+	// 바 폭 상한 22px — 기간 수가 적어도(연 5개) 빽빽한 밀도 유지 (뚱뚱한 바 금지)
 	const slotW = $derived(n > 0 ? plotW / n : plotW);
-	const groupW = $derived(slotW * 0.72);
+	const groupW = $derived(Math.min(slotW * 0.72, (card.stacked || barSeries.length <= 1 ? 1 : barSeries.length) * 22));
 	const barW = $derived(card.stacked || barSeries.length <= 1 ? groupW : groupW / barSeries.length);
 
 	// Y 눈금 (상·중·하)

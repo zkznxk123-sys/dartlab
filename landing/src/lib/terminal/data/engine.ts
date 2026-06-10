@@ -560,6 +560,7 @@ export function createEngine(raw: RawData): Engine {
 			price: {
 				last,
 				mktcap: fmtKRW(mktcapKRW),
+				mktcapRaw: mktcapKRW,
 				ret1m: px.return1m, ret3m: px.return3m, ret1y: px.return1y,
 				vol1y: px.volatility1y, hi52: px.week52High, lo52: px.week52Low, vol: px.volumeAvg30d,
 				asOf: fmtDate(px.priceUpdated)

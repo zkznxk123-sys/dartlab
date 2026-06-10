@@ -7,14 +7,22 @@
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
 	import { price as wbPrice, type Candle } from '../data/workbench';
 	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
+	import { fmtKRW } from '../data/engine';
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 
 	interface Props {
 		co: Company;
 		lang: Lang;
-		kpis?: { l: string; v: string; t: string }[];
+		kpis?: { l: string; v: string; t: string; s?: number[] }[];
 	}
 	let { co, lang, kpis = [] }: Props = $props();
+	// KPI 스파크라인 폴리라인 points (최근 1년 추세 — min-max 정규화)
+	function kpiSpark(s: number[], w = 34, h = 11): string {
+		const lo = Math.min(...s);
+		const hi = Math.max(...s);
+		const rng = hi - lo || 1;
+		return s.map((v, i) => `${((i / (s.length - 1)) * w).toFixed(1)},${(h - ((v - lo) / rng) * (h - 1.5) - 0.75).toFixed(1)}`).join(' ');
+	}
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
@@ -75,11 +83,25 @@
 
 	const p = $derived(co.price);
 	const e = $derived(co.eco);
+	// 헤더 가격 정합성 — prices 스냅샷(주배치, 지연 가능)보다 차트 캔들(gov EOD)이 최신이면 캔들 종가 SSOT.
+	// 수익률·시총도 같은 기준으로 재계산(시총 = 스냅샷 주식수 × 최신 종가) — 헤더↔차트 불일치 제거.
+	const lastCandle = $derived(candles && candles.length ? candles[candles.length - 1] : null);
+	const dispLast = $derived(lastCandle ? lastCandle.c : p.last);
+	const candleRet = (bars: number): number | null => {
+		if (!candles || candles.length <= bars || !lastCandle) return null;
+		const prev = candles[candles.length - 1 - bars].c;
+		return prev ? (lastCandle.c / prev - 1) * 100 : null;
+	};
+	const dispRet1m = $derived(candleRet(22) ?? p.ret1m);
+	const dispRet3m = $derived(candleRet(66) ?? p.ret3m);
+	const dispRet1y = $derived(candleRet(252) ?? p.ret1y);
+	const dispAsOf = $derived(lastCandle ? `${lastCandle.t.slice(0, 4)}-${lastCandle.t.slice(4, 6)}-${lastCandle.t.slice(6, 8)}` : p.asOf);
+	const dispMktcap = $derived(lastCandle && p.last && p.mktcapRaw != null ? fmtKRW(p.mktcapRaw * (lastCandle.c / p.last)) : p.mktcap);
 	const stats = $derived([
-		{ l: '1M', v: p.ret1m == null ? '—' : sign(p.ret1m, 1) + '%', t: chgClass(p.ret1m) },
-		{ l: '3M', v: p.ret3m == null ? '—' : sign(p.ret3m, 1) + '%', t: chgClass(p.ret3m) },
-		{ l: '1Y', v: p.ret1y == null ? '—' : sign(p.ret1y, 0) + '%', t: chgClass(p.ret1y) },
-		{ l: lang === 'en' ? 'MKT CAP' : '시가총액', v: p.mktcap, t: '' },
+		{ l: '1M', v: dispRet1m == null ? '—' : sign(dispRet1m, 1) + '%', t: chgClass(dispRet1m) },
+		{ l: '3M', v: dispRet3m == null ? '—' : sign(dispRet3m, 1) + '%', t: chgClass(dispRet3m) },
+		{ l: '1Y', v: dispRet1y == null ? '—' : sign(dispRet1y, 0) + '%', t: chgClass(dispRet1y) },
+		{ l: lang === 'en' ? 'MKT CAP' : '시가총액', v: dispMktcap, t: '' },
 		{ l: lang === 'en' ? 'M.SHARE' : '점유율', v: e.marketShare != null ? e.marketShare.toFixed(1) + '%' : '—', t: '' },
 		{ l: lang === 'en' ? 'RANK' : '산업순위', v: e.industryRank != null ? e.industryRank + '/' + (e.industryPeerCount || '—') : '—', t: '' }
 	]);
@@ -167,7 +189,9 @@
 <!-- 경제·시장 KPI 티커 (종목/주가 라인 위, 좌우 흐름) -->
 {#if kpis.length}
 	<div class="kpiTicker"><div class="kpiTrack">
-		{#each kpis.concat(kpis) as k, i (i)}<span class="kpiItem"><i>{k.l}</i><b class={k.t}>{k.v}</b></span>{/each}
+		{#each kpis.concat(kpis) as k, i (i)}
+			<span class="kpiItem"><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></span>
+		{/each}
 	</div></div>
 {/if}
 
@@ -193,8 +217,8 @@
 		</div>
 	{/if}
 	<div class="symPrice">
-		<span class="symLast mono">{fmtNum(p.last)}</span>
-		<span class={'symChg ' + chgClass(p.ret1m)}>{p.ret1m == null ? '' : sign(p.ret1m, 2) + '% · 1M'}</span>
+		<span class="symLast mono">{fmtNum(dispLast)}</span>
+		<span class={'symChg ' + chgClass(dispRet1m)}>{dispRet1m == null ? '' : sign(dispRet1m, 2) + '% · 1M'}</span>
 	</div>
 	<div class="symStats">
 		{#each stats as s (s.l)}<div class="symStat"><span>{s.l}</span><b class={'mono ' + s.t}>{s.v}</b></div>{/each}
@@ -217,9 +241,9 @@
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
 <Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
-	{#snippet right()}<span class="eodBadge" title="키 발급 전 — 전일 종가까지(EOD)">EOD · {co.price.asOf}</span>{/snippet}
+	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candleState === 'ready' && candles}
-		<PriceChart {candles} code={co.code} {lang} events={priceEvents} valBand={priceValBand} />
+		<PriceChart {candles} code={co.code} name={co.name.kr} {lang} events={priceEvents} valBand={priceValBand} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}
