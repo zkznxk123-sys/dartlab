@@ -21,7 +21,7 @@
 		},
 		{
 			label: 'krx raw current',
-			path: `krx/prices/raw-${new Date().getFullYear()}.parquet`,
+			path: `gov/prices/raw-${new Date().getFullYear()}.parquet`,
 			columns: ['BAS_DD', 'ISU_CD', 'ISU_NM', 'TDD_CLSPRC', 'MKTCAP']
 		}
 	];

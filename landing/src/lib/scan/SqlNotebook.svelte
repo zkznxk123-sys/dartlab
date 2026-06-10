@@ -209,7 +209,7 @@ ORDER BY avg_roe DESC`
 			await db.registerJson('ecosystem', ecosystem);
 			// HF parquet views
 			const lazy: Array<[string, string]> = [
-				['prices', 'krx/prices/raw-' + new Date().getFullYear() + '.parquet'],
+				['prices', 'gov/prices/raw-' + new Date().getFullYear() + '.parquet'],
 				['valuation', 'dart/scan/valuation.parquet'],
 				['changes', 'dart/scan/changes.parquet'],
 				['finance_lite', 'dart/scan/finance-lite.parquet'],

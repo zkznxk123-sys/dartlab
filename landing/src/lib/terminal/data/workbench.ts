@@ -9,7 +9,7 @@
 //
 // 점진 도입(big-bang 금지): 기존 로더를 걷어내지 않고 그대로 위임한다. 패널은 단계적으로
 // 이 표면으로 이전하며, 이전 전에도 prefetch 가 같은 모듈 캐시를 덥혀 이득을 준다.
-import { loadInitialOHLCV, loadOlderYear, loadedCandles, KRX_MIN_YEAR, type Candle } from './priceSeries';
+import { loadInitialOHLCV, loadOlderYear, loadedCandles, seedCandles, KRX_MIN_YEAR, type Candle, type CompanyPrices } from './priceSeries';
 import { loadTerminalFinance, type TerminalFinanceBundle } from './terminalFinance';
 import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 import { loadCompanyRelations, type CompanyRelations } from './relations';
@@ -28,7 +28,13 @@ const CHANGES_LIMIT = 8;
 // 주가 — 데이터 소스 단일 교체 지점. KRX 원자료 정책(유지/교체/게이트) 변경 시 이 세 함수만 바꾼다.
 export const price = {
 	minYear: KRX_MIN_YEAR,
-	initial: (code: string, year: number) => loadInitialOHLCV(code, year),
+	// gov 회사별 parquet(재배포 가능·50KB 전체이력) 우선 → 미캐시/미지원 시 KRX 폴백(무회귀).
+	// gov 캔들은 priceSeries 캐시에 seed → loadedCandles/loadOlderYear 일관.
+	initial: async (code: string, year: number): Promise<CompanyPrices | null> => {
+		const gov = await loadGovCandles(code);
+		if (gov && gov.length) return seedCandles(code, gov);
+		return loadInitialOHLCV(code, year);
+	},
 	older: (code: string, targetYear: number) => loadOlderYear(code, targetYear),
 	loaded: (code: string) => loadedCandles(code)
 };

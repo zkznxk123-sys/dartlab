@@ -87,7 +87,7 @@ export async function loadOneYearPriceTail(
 		options.fetchFn
 	);
 	const rows = [...prev.rows, ...currentRows];
-	const result = buildPriceResult(rows, [prev.sourcePaths[0], `krx/prices/raw-${year}.parquet`], false);
+	const result = buildPriceResult(rows, [prev.sourcePaths[0], `gov/prices/raw-${year}.parquet`], false);
 	return {
 		...result,
 		bytes: prev.bytes,
@@ -103,7 +103,7 @@ async function loadPriceTailYear(
 	fetchFn?: typeof fetch
 ): Promise<PriceRuntimeResult & { rows: NormalizedPriceRow[] }> {
 	const t0 = performance.now();
-	const path = `krx/prices/raw-${year}.parquet`;
+	const path = `gov/prices/raw-${year}.parquet`;
 	const metadata = await readParquetMetadata(path, fetchFn ?? fetch);
 	const rowEnd = metadata.rows;
 	const rowStart = Math.max(0, rowEnd - tailRows);

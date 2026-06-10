@@ -133,53 +133,48 @@ async function fetchGovCandles(code: string, key: string) {
 	return candles;
 }
 
-// HF 데이터셋에 작은 JSON 파일 commit (무의존 — HF commit API NDJSON, 비-LFS base64).
-async function hfCommitJson(repoPath: string, obj: unknown, token: string) {
-	const repo = 'eddmpython/dartlab-data';
-	const content = Buffer.from(JSON.stringify(obj)).toString('base64');
-	const body =
-		JSON.stringify({ key: 'header', value: { summary: `gov price cache ${repoPath}`, description: '' } }) +
-		'\n' +
-		JSON.stringify({ key: 'file', value: { path: repoPath, content, encoding: 'base64' } }) +
-		'\n';
-	const res = await fetch(`https://huggingface.co/api/datasets/${repo}/commit/main`, {
-		method: 'POST',
-		headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/x-ndjson' },
-		body
-	});
-	if (!res.ok) throw new Error(`hf commit ${res.status}: ${(await res.text()).slice(0, 200)}`);
+// save-later: 회사별 parquet 영속화를 buildGovData --stock 로 백그라운드 spawn (응답 후, 차트 비차단).
+// gov 전체이력 fetch + 기존 parquet merge + HF 업로드를 Python(검증된 생산기)에 위임 — Node parquet 쓰기 회피.
+function spawnGovPersist(code: string, server: ViteDevServer): void {
+	import('node:child_process')
+		.then(({ spawn }) => {
+			const child = spawn(
+				'uv',
+				['run', 'python', '-X', 'utf8', '.github/scripts/sync/buildGovData.py', '--stock', code],
+				{ cwd: path.resolve(__dirname, '..'), detached: true, stdio: 'ignore' }
+			);
+			child.on('error', (e) => server.config.logger.warn(`[gov] parquet 저장 spawn 실패 ${code}: ${e}`));
+			child.unref();
+		})
+		.catch(() => {});
 }
 
 // 프론트-먼저 HF 캐시-필 미들웨어 — /__gov?code=XXXXXX (dev only, 토큰 Node 서버측 보관).
+// draw-first-save-later: gov fetch → 캔들 즉시 반환(차트 먼저 그림) → 백그라운드 parquet 영속화.
 function govPriceDevPlugin() {
 	return {
 		name: 'gov-price-dev',
 		configureServer(server: ViteDevServer) {
 			server.middlewares.use('/__gov', async (req, res) => {
 				const send = (status: number, obj: unknown) => {
+					if (res.writableEnded) return;
 					res.statusCode = status;
 					res.setHeader('Content-Type', 'application/json; charset=utf-8');
 					res.end(JSON.stringify(obj));
 				};
+				const url = new URL(req.url ?? '', 'http://localhost');
+				const code = (url.searchParams.get('code') ?? '').replace(/[^0-9A-Za-z]/g, '');
+				if (!code) return send(400, { error: 'code 필요' });
+				const env = readRepoEnv();
+				if (!env.DATA_GO_KR_KEY) return send(503, { error: 'DATA_GO_KR_KEY 미설정(.env)' });
+				let candles: { t: string; o: number; h: number; l: number; c: number; v: number }[] = [];
 				try {
-					const url = new URL(req.url ?? '', 'http://localhost');
-					const code = (url.searchParams.get('code') ?? '').replace(/[^0-9A-Za-z]/g, '');
-					if (!code) return send(400, { error: 'code 필요' });
-					const env = readRepoEnv();
-					if (!env.DATA_GO_KR_KEY) return send(503, { error: 'DATA_GO_KR_KEY 미설정(.env)' });
-					const candles = await fetchGovCandles(code, env.DATA_GO_KR_KEY);
-					const file = { source: 'data.go.kr/금융위원회·한국거래소', code, asOf: candles.at(-1)?.t ?? '', candles };
-					if (env.HF_TOKEN && candles.length) {
-						try {
-							await hfCommitJson(`gov/prices/${code}.json`, file, env.HF_TOKEN);
-						} catch (e) {
-							server.config.logger.warn(`[gov] HF 업로드 실패 ${code}: ${e}`);
-						}
-					}
-					send(200, file);
+					candles = await fetchGovCandles(code, env.DATA_GO_KR_KEY);
 				} catch (e) {
-					send(502, { error: String(e) });
+					return send(502, { error: String(e) });
 				}
+				send(200, { source: 'data.go.kr/금융위원회·한국거래소', code, asOf: candles.at(-1)?.t ?? '', candles });
+				if (candles.length && env.HF_TOKEN) spawnGovPersist(code, server);
 			});
 		}
 	};

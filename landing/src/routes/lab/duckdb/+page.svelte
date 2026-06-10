@@ -93,7 +93,7 @@ LIMIT 10`);
 		const t0 = performance.now();
 		try {
 			const year = new Date().getFullYear();
-			await dartDb.registerHfParquet('hfPrices', `krx/prices/raw-${year}.parquet`);
+			await dartDb.registerHfParquet('hfPrices', `gov/prices/raw-${year}.parquet`);
 			hfTestResult = await dartDb.query<{ BAS_DD: string; TDD_CLSPRC: number; MKTCAP: number }>(
 				`SELECT BAS_DD, TDD_CLSPRC, MKTCAP FROM hfPrices WHERE ISU_CD = '005930' ORDER BY BAS_DD DESC LIMIT 10`
 			);

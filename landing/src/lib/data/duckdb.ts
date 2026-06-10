@@ -19,7 +19,7 @@
  *   const db = await loadDartDb();
  *   if (!db) return; // iOS or 로드 실패 — JS fallback
  *
- *   await db.registerHfParquet('prices2024', 'krx/prices/raw-2024.parquet');
+ *   await db.registerHfParquet('prices2024', 'gov/prices/raw-2024.parquet');
  *   const rows = await db.query<{ ISU_CD: string; close: number }>(
  *     `SELECT ISU_CD, TDD_CLSPRC AS close FROM prices2024 WHERE ISU_CD = '005930' ORDER BY BAS_DD DESC LIMIT 10`
  *   );
@@ -51,7 +51,7 @@ export interface DartDb {
 	 *   }
 	 */
 	queryStream<T = Record<string, unknown>>(sql: string): AsyncGenerator<T[], void, void>;
-	/** HF parquet 을 view 로 등록. hfPath 는 `krx/prices/raw-2024.parquet` 같은 상대 경로 또는 full URL. */
+	/** HF parquet 을 view 로 등록. hfPath 는 `gov/prices/raw-2024.parquet` 같은 상대 경로 또는 full URL. */
 	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
 	/** JS 객체 배열을 임시 테이블로 등록 (작은 메타 JSON 용). */
 	registerJson(tableName: string, rows: unknown[]): Promise<void>;
@@ -66,7 +66,7 @@ let _worker: Worker | null = null;
 let _persisted = false;
 let _opfsRebuilt = false;
 
-/** HF parquet 절대 URL 생성. 상대 경로 (`krx/prices/raw-2024.parquet`) 또는 full URL 모두 받음. */
+/** HF parquet 절대 URL 생성. 상대 경로 (`gov/prices/raw-2024.parquet`) 또는 full URL 모두 받음. */
 export function hfParquetUrl(pathOrUrl: string): string {
 	if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) return pathOrUrl;
 	return HF_RESOLVE + pathOrUrl.replace(/^\/+/, '');

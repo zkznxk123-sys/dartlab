@@ -7,7 +7,7 @@
 //   3. 프로덕션 — 캐시 읽기 전용(미스 시 호출측이 KRX 폴백). 운영자가 로컬에서 열며 공유 HF 캐시를 채운다.
 // 출처표시 의무(공공누리): gov 데이터 표시 시 GOV_ATTRIBUTION 노출.
 import { browser } from '$app/environment';
-import { hfUrl } from '$lib/data/origin';
+import { readParquetRows } from '$lib/data/hfRange';
 import type { Candle } from './priceSeries';
 
 export const GOV_ATTRIBUTION = '출처: 금융위원회·한국거래소 (공공데이터포털)';
@@ -22,6 +22,22 @@ export interface GovCandleFile {
 const cache = new Map<string, Candle[] | null>();
 const inflight = new Map<string, Promise<Candle[] | null>>();
 
+// HF 캐시 = 회사별 parquet (gov/prices/company 동일 schema). 필요한 OHLCV 컬럼만 projection.
+const GOV_PARQUET_COLUMNS = ['date', 'open', 'high', 'low', 'close', 'volume'];
+interface GovRow extends Record<string, unknown> {
+	date?: string | null;
+	open?: number | null;
+	high?: number | null;
+	low?: number | null;
+	close?: number | null;
+	volume?: number | null;
+}
+function rowToCandle(r: GovRow): Candle | null {
+	const c = Number(r.close);
+	const t = r.date == null ? '' : String(r.date);
+	if (!t || !Number.isFinite(c) || c <= 0) return null;
+	return { t, o: Number(r.open) || c, h: Number(r.high) || c, l: Number(r.low) || c, c, v: Number(r.volume) || 0 };
+}
 function pick(j: unknown): Candle[] | null {
 	const f = j as GovCandleFile | null;
 	return f && Array.isArray(f.candles) && f.candles.length ? f.candles : null;
@@ -29,9 +45,9 @@ function pick(j: unknown): Candle[] | null {
 
 async function readHf(code: string): Promise<Candle[] | null> {
 	try {
-		const res = await fetch(hfUrl(`gov/prices/${code}.json`), { headers: { Accept: 'application/json' } });
-		if (!res.ok) return null;
-		return pick(await res.json());
+		const { rows } = await readParquetRows<GovRow>(`gov/prices/company/${code}.parquet`, { columns: GOV_PARQUET_COLUMNS });
+		const candles = rows.map(rowToCandle).filter((x): x is Candle => x != null);
+		return candles.length ? candles : null;
 	} catch {
 		return null;
 	}

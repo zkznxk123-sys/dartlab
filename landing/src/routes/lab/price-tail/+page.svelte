@@ -61,7 +61,7 @@
 		requests = [];
 		const t0 = performance.now();
 		try {
-			const path = `krx/prices/raw-${targetYear}.parquet`;
+			const path = `gov/prices/raw-${targetYear}.parquet`;
 			const meta = await readParquetMetadata(path);
 			const rowEnd = meta.rows;
 			const rowStart = Math.max(0, rowEnd - tailRows);

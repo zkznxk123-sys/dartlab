@@ -1,4 +1,4 @@
-// 일별 OHLCV 시계열 — krx/prices/raw-{year}.parquet 을 hyparquet HTTP-range 로 직독.
+// 일별 OHLCV 시계열 — gov/prices/raw-{year}.parquet 을 hyparquet HTTP-range 로 직독.
 // hyparquet 는 컬럼 projection (7 컬럼) + ISU_CD 필터 pushdown + 병렬 range → 첫 페인트 비차단·sub-second.
 // 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
 import { browser } from '$app/environment';
@@ -16,7 +16,7 @@ export interface Candle {
 // KRX raw 파케이 존재 하한 (HF 실측: raw-2010 ~ raw-2026). 이 아래는 404 → lazy 로드 종료.
 export const KRX_MIN_YEAR = 2010;
 
-interface CompanyPrices {
+export interface CompanyPrices {
 	candles: Candle[]; // 오름차순·일자 dedup
 	oldestYear: number; // 현재까지 로드한 가장 오래된 연도
 }
@@ -67,7 +67,7 @@ function toCandle(r: KrxRow): Candle | null {
 
 // ISU_CD 는 KRX 주식 = 'A' + 6 자리 (예: A005930). 드물게 prefix 없는 경우 대비 $in.
 async function readYearCandles(year: number, isuA: string, isuPlain: string): Promise<Candle[]> {
-	const path = `krx/prices/raw-${year}.parquet`;
+	const path = `gov/prices/raw-${year}.parquet`;
 	try {
 		const { rows } = await readParquetRows<KrxRow>(path, {
 			columns: OHLCV_COLUMNS,
@@ -124,6 +124,14 @@ export function loadInitialOHLCV(stockCode: string, year: number): Promise<Compa
 /** 현재까지 캐시된 전체 캔들(오름차순). 백필 후 차트 재적용·기간 윈도잉에 사용. */
 export function loadedCandles(stockCode: string): Candle[] {
 	return cache.get(stockCode.trim())?.candles ?? [];
+}
+
+/** 외부 소스(gov 회사별 parquet 전체이력)를 차트 캐시에 심는다 — loadedCandles/loadOlderYear 일관 보장. */
+export function seedCandles(stockCode: string, candles: Candle[]): CompanyPrices | null {
+	if (!candles.length) return null;
+	const rec: CompanyPrices = { candles, oldestYear: +candles[0].t.slice(0, 4) };
+	setCache(stockCode.trim(), rec);
+	return rec;
 }
 
 /** 좌측 팬 시 더 오래된 연도 1 개 로드 (prepend 용). 캐시에도 병합. 빈 배열 = 데이터 없음. */

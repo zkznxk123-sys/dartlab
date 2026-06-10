@@ -1,13 +1,13 @@
-"""공공데이터포털 금융위원회_주식시세정보 raw fetch — KRX gather 미러.
+"""공공데이터포털 금융위원회_주식시세정보 raw fetch.
 
-`gather/krx/krxApi.py` 의 gov 판. 두 진입:
+두 진입:
     fetchGovStock — 종목 하나 전체이력 (likeSrtnCd, 차트 SSOT).
     fetchGovBydd  — 하루치 전종목 (basDt, 일별 sync SSOT).
 둘 다 raw gov 컬럼 DataFrame 반환. `normalizeGovFrame` 가 회사 schema 로 정규화
-(KRX `krx/prices/company/{code}.parquet` 와 동일 컬럼).
+(회사별 parquet 표준 컬럼).
 
-라이선스: 공공누리/KOGL — 비상업 + 출처표시 재배포 가능 (KRX OpenAPI 제3자 제공 금지와 차이).
-인증키(`DATA_GO_KR_KEY`, 디코딩 키)는 환경변수 자동 read 없음 — 명시 전달만 (KRX 규약 동일).
+라이선스: 공공누리/KOGL — 비상업 + 출처표시 재배포 가능.
+인증키(`DATA_GO_KR_KEY`, 디코딩 키)는 환경변수 자동 read 없음 — 명시 전달만.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 _GOV_ENDPOINT = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo"
 
-# gov 응답 컬럼 → 회사 표준 schema (krx/prices/company 와 동일 컬럼·의미).
+# gov 응답 컬럼 → 회사 표준 schema.
 GOV_TO_STD = {
     "basDt": "date",
     "srtnCd": "stockCode",
@@ -190,10 +190,10 @@ def fetchGovBydd(
 
 
 def normalizeGovFrame(df: pl.DataFrame) -> pl.DataFrame:
-    """raw gov DataFrame → 회사 표준 schema (krx/prices/company 동일 컬럼).
+    """raw gov DataFrame → 회사 표준 schema.
 
     Capabilities: gov 원본 컬럼을 date/stockCode/name/market/OHLC/.../marketCap 으로 rename+cast.
-    AIContext: 회사별 parquet (gov/prices/{code}.parquet) 의 최종 schema 보장 — KRX 회사 parquet 과 호환.
+    AIContext: 회사별 parquet (gov/prices/{code}.parquet) 의 최종 schema 보장.
 
     Args:
         df: fetchGovStock/fetchGovBydd 의 raw gov DataFrame.
