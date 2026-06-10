@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
-import os
 import time
 
 import httpx
+
+from dartlab.core.providers.dataCredentials import getKey
 
 from .types import AuthenticationError, EcosError, RateLimitError
 
@@ -29,7 +30,7 @@ class EcosClient:
     """
 
     def __init__(self, apiKey: str | None = None) -> None:
-        raw = apiKey or os.environ.get("ECOS_API_KEY", "")
+        raw = getKey("ecos", apiKey) or ""
         if not raw:
             raise AuthenticationError(
                 "ECOS API 키가 없습니다. "

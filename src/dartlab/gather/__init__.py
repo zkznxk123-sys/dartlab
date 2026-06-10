@@ -17,6 +17,13 @@ Usage::
 
 from __future__ import annotations
 
+from .credentials import (
+    credentialStatus,
+    formatStatus,
+    isConfigured,
+    setCredential,
+    writeEnvExample,
+)
 from .engine import Gather
 from .entry import getDefaultGather
 from .types import (
@@ -50,5 +57,10 @@ __all__ = [
     "RevenueConsensus",
     "SectorInfo",
     "SourceUnavailableError",
+    "credentialStatus",
+    "formatStatus",
     "getDefaultGather",
+    "isConfigured",
+    "setCredential",
+    "writeEnvExample",
 ]

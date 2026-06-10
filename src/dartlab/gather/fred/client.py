@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
-import os
 import time
 
 import httpx
+
+from dartlab.core.providers.dataCredentials import getKey
 
 from .types import AuthenticationError, FredError, RateLimitError, SeriesNotFoundError
 
@@ -28,7 +29,7 @@ class FredClient:
     """
 
     def __init__(self, apiKey: str | None = None) -> None:
-        raw = apiKey or os.environ.get("FRED_API_KEY", "")
+        raw = getKey("fred", apiKey) or ""
         self._keys: list[str] = [k.strip() for k in raw.split(",") if k.strip()]
         if not self._keys:
             raise AuthenticationError(
