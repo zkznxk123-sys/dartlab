@@ -25,6 +25,9 @@ const REGULAR_LIMIT = 500;
 const NONREGULAR_LIMIT = 200;
 const CHANGES_LIMIT = 8;
 
+// 마지막 본 종목 localStorage 키 (Terminal.svelte 복원 + 라우트 load 조기 prefetch 공용 SSOT)
+export const LAST_SYM_KEY = 'dlTerm.lastSym';
+
 // 주가 — 데이터 소스 단일 교체 지점. 정책 변경 시 이 세 함수만 바꾼다.
 export const price = {
 	minYear: KRX_MIN_YEAR,

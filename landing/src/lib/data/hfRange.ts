@@ -131,12 +131,26 @@ async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0
 	return await fetchFn(input, { ...init, cache: 'reload' });
 }
 
+// 소형 파일 통파일 임계 — 이하면 range 세션(직렬 메타데이터 왕복 수 회) 대신 1 회 GET.
+// 회사별 gov 주가(~100KB)·소형 report parquet 가 8요청/~2s → 1요청/수백 ms 로 줄어든다.
+// 큰 monolith(3~15MB report·date 파티션)는 projection/필터 range 가 여전히 유리 — 제외.
+const WHOLE_FILE_MAX_BYTES = 1536 * 1024;
+
 export async function openHfParquet(
 	path: string,
 	fetchFn: FetchLike = fetch
 ): Promise<ParquetRangeSession> {
 	const [{ asyncBufferFromUrl }, ref] = await Promise.all([import('hyparquet'), headHfObject(path, fetchFn)]);
 	const requests: RangeRequestStat[] = [];
+	if (ref.size <= WHOLE_FILE_MAX_BYTES) {
+		const t0 = performance.now();
+		const resp = await fetchResilient(fetchFn, ref.url);
+		if (!resp.ok && resp.status !== 206) throw new Error(`${path} 전체 읽기 실패: ${resp.status}`);
+		const buf = await resp.arrayBuffer();
+		requests.push({ url: ref.url, range: null, status: resp.status, bytes: buf.byteLength, durationMs: performance.now() - t0 });
+		const file: AsyncBuffer = { byteLength: buf.byteLength, slice: (start: number, end?: number) => buf.slice(start, end ?? buf.byteLength) };
+		return { ref, file, requests };
+	}
 	const measuredFetch: FetchLike = async (input, init) => {
 		const t0 = performance.now();
 		const resp = await fetchResilient(fetchFn, input, init);

@@ -14,7 +14,7 @@
 	import CenterStack from './panels/CenterStack.svelte';
 	import RightStack from './panels/RightStack.svelte';
 	import SourcesModal from './panels/SourcesModal.svelte';
-	import { prefetch as prefetchCompany } from './data/workbench';
+	import { prefetch as prefetchCompany, LAST_SYM_KEY } from './data/workbench';
 	import { loadMacroLatest, type MacroLatest } from './data/macroSeries';
 
 	interface Props {
@@ -24,7 +24,6 @@
 	let { eng, initial = '005930' }: Props = $props();
 
 	// 마지막 본 종목 복원 — 재접속 시 그 종목으로 (localStorage, SSR 안전 가드)
-	const LAST_SYM_KEY = 'dlTerm.lastSym';
 	const lastSym = typeof localStorage !== 'undefined' ? localStorage.getItem(LAST_SYM_KEY) : null;
 	const first = eng.featured(1)[0] || initial;
 	let sym = $state(lastSym && eng.buildCompany(lastSym) ? lastSym : eng.buildCompany(initial) ? initial : first);
