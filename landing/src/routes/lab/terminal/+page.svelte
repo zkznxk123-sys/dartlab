@@ -1,38 +1,41 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { createEngine } from '$lib/terminal/data/engine';
-	import type { RawData } from '$lib/terminal/data/types';
-	import Terminal from '$lib/terminal/Terminal.svelte';
-	import { loadDartDb } from '$lib/data/duckdb';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 
-	// DuckDB-WASM 프리워밍 — JSON 데이터 로드와 병렬로 미리 인스턴스화 (주가 차트 체감속도↑)
-	void loadDartDb();
-
-	let { data }: { data: PageData } = $props();
-	const eng = $derived(createEngine(data.raw as RawData));
-	const ready = $derived(!!data.raw.finance.years.length && Object.keys(data.raw.prices.data).length > 0);
+	// /lab/terminal → /terminal 본진 승격 (검증 완료).
+	onMount(() => {
+		goto(`${base}/terminal`, { replaceState: true });
+	});
 </script>
 
 <svelte:head>
-	<title>dartlab · /lab/terminal — DartLab Terminal (검증)</title>
+	<title>Terminal 로 이동 중… | dartlab</title>
 	<meta name="robots" content="noindex" />
+	<meta http-equiv="refresh" content="0; url={base}/terminal" />
 </svelte:head>
 
-{#if ready}
-	<Terminal {eng} initial="005930" />
-{:else}
-	<div class="loading">HuggingFace · dartlab-data 연결 중 …</div>
-{/if}
+<main class="redirect">
+	<p>
+		DartLab Terminal (<a href="{base}/terminal">/terminal</a>) 로 이동했습니다. 자동 이동되지
+		않으면 클릭해 주세요.
+	</p>
+</main>
 
 <style>
-	.loading {
-		height: 100vh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--dl-bg-base);
-		color: var(--dl-ink-mute);
-		font-family: var(--dl-font-mono);
-		font-size: 12px;
+	.redirect {
+		max-width: 480px;
+		margin: 80px auto;
+		padding: 24px;
+		text-align: center;
+		font-size: 14px;
+		color: #94a3b8;
+	}
+	.redirect a {
+		color: #60a5fa;
+		text-decoration: none;
+	}
+	.redirect a:hover {
+		text-decoration: underline;
 	}
 </style>

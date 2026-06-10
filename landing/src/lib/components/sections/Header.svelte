@@ -25,7 +25,8 @@
 		{ label: 'Blog', href: `${base}/blog/` },
 		{ label: 'Scan', href: `${base}/scan` },
 		{ label: 'Viewer', href: `${base}/viewer` },
-		{ label: 'Map', href: `${base}/map` }
+		{ label: 'Map', href: `${base}/map` },
+		{ label: 'Terminal', href: `${base}/terminal` }
 	];
 
 	const DASHBOARD_PATHS = ['/dashboard', '/company'];

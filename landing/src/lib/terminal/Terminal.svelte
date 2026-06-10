@@ -1,4 +1,8 @@
 <script lang="ts">
+	// ── 터미널 구역 규칙 (불가침) ──
+	// 좌측 레일 + 상단 헤더 = 네비게이션 (검색·목록·이동·상태)
+	// 중앙 스택            = 시각화 중심 (차트·그래프·전체화면 분석)
+	// 우측 스택            = 테이블·텍스트·수치·정성 — 그래프 배치 금지 (그래프는 중앙으로)
 	import { base } from '$app/paths';
 	import { Github } from 'lucide-svelte';
 	import { brand } from '$lib/brand';

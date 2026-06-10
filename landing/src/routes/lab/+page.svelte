@@ -44,7 +44,7 @@
 			<span class="brand-ctx">lab</span>
 		</a>
 		<nav class="nav-links">
-			<a href="{base}/lab/terminal" class="nav-link">/terminal</a>
+			<a href="{base}/terminal" class="nav-link">/terminal</a>
 			<a href="{base}/lab/dashboard/005930" class="nav-link">/dashboard</a>
 			<a href="{base}/lab/viewer-search" class="nav-link">/viewer-search</a>
 			<a href="{base}/lab/viewer-analyze" class="nav-link">/viewer-analyze</a>

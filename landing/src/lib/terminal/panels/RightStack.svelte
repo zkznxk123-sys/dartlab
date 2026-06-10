@@ -13,11 +13,10 @@
 	import { loadCompanyRelations, type CompanyRelations } from '../data/relations';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 	import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
-	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode, type StmtKind, type FinCard } from '../data/terminalFinance';
+	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode, type StmtKind } from '../data/terminalFinance';
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 	import { loadWorkforce, loadInvestments, loadShareholderReturn, type WorkforceYear, type InvestmentsView, type ShareholderReturnYear } from '../data/reportSeries';
 	import { fmtKRW } from '../data/engine';
-	import MiniFinChart from '../charts/MiniFinChart.svelte';
 
 	interface Props {
 		co: Company;
@@ -98,7 +97,8 @@
 	const dispPeriods = $derived(finView ? finView.periods.slice().reverse() : []);
 	const stmtRows = $derived(finView ? (stmt === 'RT' ? finView.ratios : finView.statements[stmt as StmtKind]) : []);
 
-	// 정기보고서 시계열 (버틀러식 인력·주주환원·타법인출자) — reportSeries.ts, 패널별 독립 로드
+	// 정기보고서 시계열 (인력·주주환원·타법인출자) — reportSeries.ts, 패널별 독립 로드.
+	// 구역 규칙(Terminal.svelte): 우측 = 테이블·수치·정성만, 그래프 금지 — 시계열 그래프는 중앙 재무 전체화면 탭.
 	let wf = $state<WorkforceYear[]>([]);
 	let srs = $state<ShareholderReturnYear[]>([]);
 	let inv = $state<InvestmentsView | null>(null);
@@ -121,29 +121,7 @@
 		const rev = revByYear.get(w.year);
 		return rev != null && w.total ? +((rev * 1e12) / w.total / 1e8).toFixed(1) : null; // 억
 	};
-	const wfCard = $derived.by<FinCard | null>(() => {
-		if (wf.length < 2) return null;
-		return {
-			key: 'workforce', title: lang === 'en' ? 'Headcount · productivity' : '인원 · 생산성', unit: '명', stacked: true,
-			series: [
-				{ name: lang === 'en' ? 'regular' : '정규직', data: wf.map((w) => w.regular), color: '#60a5fa', type: 'bar' },
-				{ name: lang === 'en' ? 'contract' : '계약직', data: wf.map((w) => w.contract), color: '#fbbf24', type: 'bar' },
-				{ name: lang === 'en' ? 'rev/emp (0.1B)' : '1인당매출(억)', data: wf.map(revPerEmp), color: '#34d399', type: 'line', axis: 'r' }
-			]
-		};
-	});
 	const srLast = $derived(srs.length ? srs[srs.length - 1] : null);
-	const srCard = $derived.by<FinCard | null>(() => {
-		if (srs.length < 2) return null;
-		return {
-			key: 'shret', title: lang === 'en' ? 'DPS · payout · yield' : '주당배당 · 성향 · 수익률', unit: '원',
-			series: [
-				{ name: 'DPS', data: srs.map((s) => s.dps), color: '#60a5fa', type: 'bar' },
-				{ name: lang === 'en' ? 'payout%' : '배당성향%', data: srs.map((s) => s.payoutPct), color: '#fb923c', type: 'line', axis: 'r' },
-				{ name: lang === 'en' ? 'yield%' : '수익률%', data: srs.map((s) => s.yieldPct), color: '#34d399', type: 'line', axis: 'r' }
-			]
-		};
-	});
 	const fmtShares = (v: number | null): string => (v == null ? '—' : v >= 1e8 ? (v / 1e8).toFixed(1) + '억주' : v >= 1e4 ? (v / 1e4).toFixed(0) + '만주' : v.toLocaleString() + '주');
 
 	const risks = $derived(co.risks);
@@ -280,9 +258,6 @@
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'tenure' : '평균근속'}</span><span class="factV mono">{wfLast.tenure != null ? wfLast.tenure.toFixed(1) + (lang === 'en' ? 'y' : '년') : '—'}</span></div>
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'rev / emp' : '1인당 매출'}</span><span class="factV mono">{revPerEmp(wfLast) != null ? revPerEmp(wfLast) + (lang === 'en' ? ' ×0.1B' : '억') : '—'}</span></div>
 		</div>
-		{#if wfCard}
-			<div class="finMini"><MiniFinChart card={wfCard} periods={wf.map((w) => w.year.slice(2))} h={116} /></div>
-		{/if}
 	</Panel>
 {/if}
 
@@ -297,9 +272,6 @@
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'treasury (end)' : '자사주 기말'}</span><span class="factV mono">{fmtShares(srLast.treasuryEnd)}</span></div>
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'buyback / disposal' : '취득 / 처분'}</span><span class="factV mono">{fmtShares(srLast.buybackQty)} / {fmtShares(srLast.disposalQty)}</span></div>
 		</div>
-		{#if srCard}
-			<div class="finMini"><MiniFinChart card={srCard} periods={srs.map((s) => s.year.slice(2))} h={116} /></div>
-		{/if}
 	</Panel>
 {/if}
 
