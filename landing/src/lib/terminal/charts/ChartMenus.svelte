@@ -99,7 +99,7 @@
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={ctl.btKey ? 'chartTool on' : 'chartTool'} disabled={ctl.tf !== 'D'} onclick={() => (menu = menu === 'bt' ? 'none' : 'bt')} title={ctl.tf !== 'D' ? T('일봉 전용', 'daily only') : T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
+		<button class={ctl.btKey ? 'chartTool on' : 'chartTool'} onclick={() => { if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } menu = menu === 'bt' ? 'none' : 'bt'; }} title={ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
 		{#if menu === 'bt'}
 			<div class="ctMenu"><BtConfig {ctl} {lang} /></div>
 		{/if}
