@@ -149,14 +149,14 @@ def _searchNews(query, *, corpCode, stockCode, limit):
 
 
 def _searchAuto(query, *, corpCode, stockCode, limit):
-    """auto 모드 — 의미 검색(bm25 + type→본문 경험확장 gated fusion).
+    """auto 모드 — 통합 검색 R* (plain BM25 ⊕ 큐레이션·라우팅 확장 BM25 RRF).
 
-    실험 V233~V240 확정 recipe. 키워드가 못 잡는 동의·관련 공시를 경험확장으로 회복하되 bm25 신뢰도
-    높은 질의는 키워드 신뢰(gated). meaning.json 미빌드 시 bm25 단독으로 graceful degrade.
+    unifiedSearchRecipe honest-gold 실측 확정 레시피. 구어·약어 질의를 동의어/canon 으로 회복하되
+    RRF 가 plain lane 을 보존해 always-safe. 확장 미발화 시 plain BM25 단독으로 graceful degrade.
     """
-    from dartlab.providers.dart.search.semantic import searchSemantic
+    from dartlab.providers.dart.search.unified import searchUnified
 
-    result = searchSemantic(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+    result = searchUnified(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if result.height > 0 and "info" not in result.columns and "scope" not in result.columns:
         result = result.with_columns(pl.lit("auto").alias("scope"))
     return result

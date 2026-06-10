@@ -379,17 +379,32 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
 # ── 검색 ──
 
 
-def _scoreBM25(idx: dict, queryTokens: list[str], k1: float = 1.5, b: float = 0.75) -> np.ndarray:
-    """BM25 벡터화 스코어링."""
+def _scoreBM25(
+    idx: dict,
+    queryTokens: list[str],
+    k1: float = 1.5,
+    b: float = 0.75,
+    weights: dict[str, float] | None = None,
+) -> np.ndarray:
+    """BM25 벡터화 스코어링 — 토큰 dedup + (선택) 확장어 가중.
+
+    bigram 질의는 토큰 중복이 흔해 dedup 필수(중복 가산 차단). ``weights`` 는 확장
+    lane 용 — 질의 원토큰 1.0, 동의어/canon 확장토큰 0.5 식 가중(R* 레시피 parity).
+    """
     scores = np.zeros(idx["nDocs"], dtype=np.float32)
     N = idx["nDocs"]
     if N == 0:
         return scores
     avgDl = max(idx["avgDocLength"], 1.0)
+    seen: set[str] = set()
     for t in queryTokens:
+        if t in seen:
+            continue
+        seen.add(t)
         sid = idx["stemDict"].get(t)
         if sid is None:
             continue
+        qw = 1.0 if weights is None else float(weights.get(t, 1.0))
         s, e = idx["offsets"][sid], idx["offsets"][sid + 1]
         ids = idx["docIds"][s:e]
         tfs = idx["termFreqs"][s:e].astype(np.float32)
@@ -397,7 +412,7 @@ def _scoreBM25(idx: dict, queryTokens: list[str], k1: float = 1.5, b: float = 0.
         idf = math.log((N - df_t + 0.5) / (df_t + 0.5) + 1.0)
         dl = idx["docLengths"][ids].astype(np.float32)
         normTf = tfs * (k1 + 1) / (tfs + k1 * (1 - b + b * dl / avgDl))
-        np.add.at(scores, ids, idf * normTf)
+        np.add.at(scores, ids, qw * idf * normTf)
     return scores
 
 
