@@ -5,7 +5,7 @@
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
-	import { loadInitialOHLCV, type Candle } from '../data/priceSeries';
+	import { price as wbPrice, type Candle } from '../data/workbench';
 	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 
@@ -28,7 +28,7 @@
 		candleState = 'loading';
 		candles = null;
 		let cancelled = false;
-		loadInitialOHLCV(code, yr).then((r) => {
+		wbPrice.initial(code, yr).then((r) => {
 			if (cancelled) return;
 			candles = r ? r.candles : null;
 			candleState = r && r.candles.length ? 'ready' : 'unavail';

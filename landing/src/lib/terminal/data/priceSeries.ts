@@ -24,6 +24,15 @@ interface CompanyPrices {
 const OHLCV_COLUMNS = ['ISU_CD', 'BAS_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL'];
 
 const cache = new Map<string, CompanyPrices | null>();
+// 동시 보관 회사 수 상한 — 많은 회사 탐색 시 캔들 누수 방지(MAX 이력 = 회사당 수 MB). 초과 시 가장 오래된 항목 제거.
+const CACHE_CAP = 16;
+function setCache(code: string, rec: CompanyPrices | null): void {
+	cache.set(code, rec);
+	if (cache.size > CACHE_CAP) {
+		const oldest = cache.keys().next().value;
+		if (oldest !== undefined && oldest !== code) cache.delete(oldest);
+	}
+}
 
 interface KrxRow extends Record<string, unknown> {
 	ISU_CD?: string | null;
@@ -84,22 +93,32 @@ function mergeDedup(...lists: Candle[][]): Candle[] {
 	return out;
 }
 
-/** 초기 로드 — 현재+직전 연도 (빠른 첫 페인트). null = 데이터 없음/실패. */
-export async function loadInitialOHLCV(stockCode: string, year: number): Promise<CompanyPrices | null> {
-	if (!browser) return null;
+// in-flight Promise — prefetch(워크벤치) 와 패널이 같은 회사 주가를 동시 호출해도 스캔은 1 회만
+// (전종목 날짜정렬 스캔이 가장 무거움 → 중복 = 2배 요청·연결경쟁). resolve 후엔 cache 가 응답.
+const inflight = new Map<string, Promise<CompanyPrices | null>>();
+
+/** 초기 로드 — 현재+직전 연도 (빠른 첫 페인트). null = 데이터 없음/실패. 동시 호출 dedup. */
+export function loadInitialOHLCV(stockCode: string, year: number): Promise<CompanyPrices | null> {
+	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
-	if (cache.has(code)) return cache.get(code) ?? null;
-	const c = code.replace(/[^0-9A-Za-z]/g, '');
-	const isuA = `A${c}`;
-	const [curr, prev] = await Promise.all([readYearCandles(year, isuA, c), readYearCandles(year - 1, isuA, c)]);
-	const candles = mergeDedup(prev, curr);
-	if (candles.length === 0) {
-		cache.set(code, null);
-		return null;
-	}
-	const rec: CompanyPrices = { candles, oldestYear: year - 1 };
-	cache.set(code, rec);
-	return rec;
+	if (cache.has(code)) return Promise.resolve(cache.get(code) ?? null);
+	const hit = inflight.get(code);
+	if (hit) return hit;
+	const p = (async () => {
+		const c = code.replace(/[^0-9A-Za-z]/g, '');
+		const isuA = `A${c}`;
+		const [curr, prev] = await Promise.all([readYearCandles(year, isuA, c), readYearCandles(year - 1, isuA, c)]);
+		const candles = mergeDedup(prev, curr);
+		if (candles.length === 0) {
+			setCache(code, null);
+			return null;
+		}
+		const rec: CompanyPrices = { candles, oldestYear: year - 1 };
+		setCache(code, rec);
+		return rec;
+	})().finally(() => inflight.delete(code));
+	inflight.set(code, p);
+	return p;
 }
 
 /** 현재까지 캐시된 전체 캔들(오름차순). 백필 후 차트 재적용·기간 윈도잉에 사용. */

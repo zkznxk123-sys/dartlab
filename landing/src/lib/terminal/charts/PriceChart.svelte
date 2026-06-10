@@ -5,7 +5,8 @@
 	// 전체 이력(2010~) lazy 로드(setLoadDataCallback, 좌측 팬), 인스턴스 영속(회사전환=applyNewData, dispose 안 함).
 	// adapter-static·SSR 안전: $effect 안 동적 import + dispose cleanup. 화면 브랜딩 없음(Apache-2.0).
 	import { browser } from '$app/environment';
-	import { loadOlderYear, loadedCandles, KRX_MIN_YEAR, type Candle } from '../data/priceSeries';
+	import { KRX_MIN_YEAR, type Candle } from '../data/priceSeries';
+	import { price as wbPrice } from '../data/workbench';
 	import type { Lang } from '../data/types';
 
 	interface Props {
@@ -117,7 +118,7 @@
 				const next = hist.oldestYear - 1;
 				if (next < KRX_MIN_YEAR) return done([], false);
 				hist.loading = true;
-				loadOlderYear(hist.code, next)
+				wbPrice.older(hist.code, next)
 					.then((older) => { hist.oldestYear = next; hist.loading = false; done(older.map(toK), next - 1 >= KRX_MIN_YEAR); })
 					.catch(() => { hist.loading = false; done([], false); });
 			});
@@ -157,7 +158,7 @@
 
 	// 가시 봉 수 재배치 — 현재 로드된 전체 캔들 길이 기준(백필 후 늘어난 길이 반영).
 	function applySpacing(c: any) {
-		const len = loadedCandles(hist.code).length || candles.length || 1;
+		const len = wbPrice.loaded(hist.code).length || candles.length || 1;
 		const N = Math.min(PERIOD_N[period] ?? len, len);
 		const w = el?.clientWidth || 800;
 		try { c.setBarSpace(Math.max(0.5, Math.min(30, w / Math.max(1, N)))); c.scrollToRealTime(0); } catch { /* */ }
@@ -175,14 +176,14 @@
 			const y = hist.oldestYear - 1;
 			if (y < KRX_MIN_YEAR) break;
 			hist.loading = true;
-			try { await loadOlderYear(code0, y); } catch { hist.loading = false; break; }
+			try { await wbPrice.older(code0, y); } catch { hist.loading = false; break; }
 			hist.loading = false;
 			if (hist.code !== code0 || chart !== c) return; // 회사 전환·차트 교체 → 중단
 			hist.oldestYear = y;
 			changed = true;
 		}
 		if (changed && chart === c && hist.code === code0) {
-			c.applyNewData(loadedCandles(code0).map(toK), hist.oldestYear - 1 >= KRX_MIN_YEAR);
+			c.applyNewData(wbPrice.loaded(code0).map(toK), hist.oldestYear - 1 >= KRX_MIN_YEAR);
 			applySpacing(c);
 		}
 	}

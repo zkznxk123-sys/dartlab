@@ -9,6 +9,7 @@
 	import LeftRail from './panels/LeftRail.svelte';
 	import CenterStack from './panels/CenterStack.svelte';
 	import RightStack from './panels/RightStack.svelte';
+	import { prefetch as prefetchCompany } from './data/workbench';
 
 	interface Props {
 		eng: Engine;
@@ -57,6 +58,11 @@
 	});
 
 	const co = $derived(eng.buildCompany(sym));
+	// 회사 선택 시 워크벤치로 모든 온디맨드 소스를 병렬 워밍업(패널 effect 전 캐시 준비).
+	$effect(() => {
+		const c = co;
+		if (c) prefetchCompany(c.code, +c.price.asOf.slice(0, 4) || new Date().getFullYear());
+	});
 	const tickerCodes = $derived(eng.featured(14));
 	// 경제·시장 KPI (CenterStack 헤더 티커) — 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
 	const macroKpis = $derived.by<{ l: string; v: string; t: string }[]>(() => {
