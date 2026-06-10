@@ -49,36 +49,34 @@ jobs:
 
       - name: Pull all data from HF
         run: |
-          # HF 429(1000 req/5분 쿼터) 흡수 — 폴더별 backoff 재시도. panel(91941 파일) 열거가 쿼터 부담.
+          # HF 429(1000 req/5분 쿼터) 대응 — 4 폴더 패턴을 *한 번의* snapshot_download 로 통합해
+          # repo tree 열거(91941 파일, 페이지네이션 ~92 req)를 attempt 당 1회로 줄인다. 옛 폴더별
+          # 4회 호출은 열거만으로 쿼터 태반을 태워 마지막 순서 news 가 매번 0 으로 남았다(run 27260308153).
+          # 열거 단계 429 는 예외 없이 "Returning existing local_dir" silent-partial 로 떨어지므로
+          # 완료 판정은 예외가 아니라 폴더별 파일수 하한으로만 한다. snapshot_download 는 local_dir
+          # resume 이라 attempt 마다 단조 진전 — 대기 310s 는 5분 쿼터 윈도우 통과용.
           ok=0
-          for attempt in 1 2 3 4 5; do
+          for attempt in $(seq 1 12); do
             uv run python -c "
-          import time
           from huggingface_hub import snapshot_download
-          from huggingface_hub.errors import HfHubHTTPError
-          # panel·news 는 nested → 재귀 패턴. allFilings 는 flat. news 는 additive(부재 허용).
+          # panel·edgar·news 는 nested → 재귀 패턴. allFilings 는 flat.
           # edgar/panel = 통합검색 풀셋(KO+EN) — DART panel 과 동일 16-col 스키마.
-          for folder, pat in [('dart/allFilings', 'dart/allFilings/*'), ('dart/panel', 'dart/panel/**'), ('edgar/panel', 'edgar/panel/**'), ('news/headlines', 'news/headlines/**')]:
-              for t in range(6):
-                  try:
-                      snapshot_download(repo_id='eddmpython/dartlab-data', repo_type='dataset', allow_patterns=pat, local_dir='data', max_workers=4)
-                      print(f'pulled {folder}'); break
-                  except HfHubHTTPError as e:
-                      if '429' in str(e) and t < 5:
-                          print(f'{folder} 429 — backoff {(t + 1) * 60}s'); time.sleep((t + 1) * 60)
-                      else:
-                          raise
-          " || true
-            # 검증 — 429 가 예외 없이 빈 local_dir 을 반환하는 silent-empty 차단. 폴더별 파일수 확인.
+          try:
+              snapshot_download(repo_id='eddmpython/dartlab-data', repo_type='dataset',
+                                allow_patterns=['dart/allFilings/*', 'dart/panel/**', 'edgar/panel/**', 'news/headlines/**'],
+                                local_dir='data', max_workers=4)
+          except Exception as e:
+              print(f'partial pull: {e}')
+          "
             af=$(find data/dart/allFilings -name '*.parquet' 2>/dev/null | wc -l)
             pn=$(find data/dart/panel -name '*.parquet' 2>/dev/null | wc -l)
             ep=$(find data/edgar/panel -name '*.parquet' 2>/dev/null | wc -l)
             nh=$(find data/news/headlines -name '*.parquet' 2>/dev/null | wc -l)
-            echo "pull 검증: allFilings=$af panel=$pn edgarPanel=$ep news=$nh"
+            echo "pull 검증($attempt/12): allFilings=$af panel=$pn edgarPanel=$ep news=$nh"
             # 하한 = 2026-06 정상 pull(af 347·pn 2929·ep 2529·nh 26)의 ~80% — silent-partial(429)이
             # >0 검사를 통과해 빌드 8분을 낭비하고 퇴행가드에서야 잡힌 실측 사고(run 27258453698) 차단.
             if [ "$af" -ge 300 ] && [ "$pn" -ge 2400 ] && [ "$ep" -ge 2000 ] && [ "$nh" -ge 1 ]; then ok=1; break; fi
-            echo "pull attempt $attempt 미완(빈 폴더) — 120s 후 재시도"; sleep 120
+            echo "pull attempt $attempt 미완 — quota window 경과 대기 310s"; sleep 310
           done
           [ "$ok" = "1" ]
         env:
