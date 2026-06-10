@@ -59,7 +59,10 @@ def main() -> int:
 
     # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 nDocs/router 가 0 이 된다.
     # 이 상태로 업로드하면 프로덕션 인덱스를 빈 산출물로 *덮어쓰는 퇴행*. 업로드 중단.
-    minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "500000"))
+    # 임계 350k 산정(2026-06-10 풀셋 실측 422,558 = panel 98k + EDGAR 56k + allFilings 165k + 뉴스 103k):
+    # panel 누락(→324k)·allFilings 누락(→258k)·뉴스 누락(→319k)을 총량으로 차단. EDGAR/개별 소스
+    # 누락은 워크플로 pull 검증(af/pn/ep>0)이 1차 차단. 옛 500k 는 은퇴한 docs 섹션-행(200만) 기준 유산.
+    minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "350000"))
     if nEvents == 0 or nDocs < minDocs:
         print(
             f"[main] ✗ 퇴행 가드 발동 — router {nEvents} 이벤트 / {nDocs:,} 문서(< {minDocs:,}). "
