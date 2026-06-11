@@ -23,6 +23,7 @@ export interface TabCard {
 export interface FsTab {
 	key: string;
 	label: { kr: string; en: string };
+	q?: string; // 탭이 답하는 질문 — 분석 내러티브 캡션 (body 상단)
 	finKey?: 'profitability' | 'cashflow' | 'debt' | 'shareholder'; // terminalFinance.tabCards 키 (모드 토글 동작)
 	load?: (code: string, bundle: TerminalFinanceBundle) => Promise<TabCard[]>; // report·교차 (연 축)
 	note?: string; // 탭 하단 정직성 캡션
@@ -328,20 +329,20 @@ async function debtReport(code: string, bundle: TerminalFinanceBundle): Promise<
 
 export const FS_TABS: FsTab[] = [
 	{
-		key: 'profitability', label: { kr: '수익성', en: 'PROFIT' }, finKey: 'profitability',
+		key: 'profitability', label: { kr: '수익성', en: 'PROFIT' }, q: '얼마나 잘 버나', finKey: 'profitability',
 		note: '포괄손익 격차 = CIS(포괄손익계산서) 직독. OCI = 환산차이·금융자산평가·확정급여 재측정 등 — 손익계산서 밖에서 자본으로 직행하는 손익.'
 	},
-	{ key: 'cashflow', label: { kr: '현금·투자', en: 'CASH' }, finKey: 'cashflow', load: cashflowReport },
+	{ key: 'cashflow', label: { kr: '현금·투자', en: 'CASH' }, q: '이익이 현금인가, 어디에 쓰나', finKey: 'cashflow', load: cashflowReport },
 	{
-		key: 'shareholder', label: { kr: '주주환원·소유', en: 'RETURN' }, finKey: 'shareholder', load: shareholderReport,
+		key: 'debt', label: { kr: '재무체력', en: 'DEBT' }, q: '버틸 수 있나', finKey: 'debt', load: debtReport,
+		note: '만기 사다리 = 액면 기준 미상환 잔액(report) — 장부가와 소폭 차이. 점선 = 최신 연간 현금성자산. 무사채 회사는 카드 비표시. 감사 이력 = 사업보고서 기준 (사업연도 = 접수연도−1).'
+	},
+	{
+		key: 'shareholder', label: { kr: '주주환원·소유', en: 'RETURN' }, q: '주주에게 무엇을 주나', finKey: 'shareholder', load: shareholderReport,
 		note: '자본변동 브리지 = 최신 연간 자본변동표(SCE) 합계 차원 — 기타 = 기말 대조 잔차(소유주거래·연결범위변동·주식보상 등). 배당·자사주 = 보통주 기준 공시값 · report. 배당여력의 FCF·순이익 = 연간 재무제표 교차. 자사주 가치 = 연평균종가 × 취득수량 추정. 희석 이력 = 증자·전환·감자 공시 이벤트 연 합산 (무상증자·분할 제외).'
 	},
 	{
-		key: 'people', label: { kr: '인력·보수', en: 'PEOPLE' }, load: peopleReport,
+		key: 'people', label: { kr: '인력·보수', en: 'PEOPLE' }, q: '사람과 보상', load: peopleReport,
 		note: '급여 = 직원 급여만(임원·복리후생 제외), 사업보고서 연간 확정값. 보수 = 이사·감사 전체(등기 구분 미공시).'
-	},
-	{
-		key: 'debt', label: { kr: '부채·만기', en: 'DEBT' }, finKey: 'debt', load: debtReport,
-		note: '만기 사다리 = 액면 기준 미상환 잔액(report) — 장부가와 소폭 차이. 점선 = 최신 연간 현금성자산. 무사채 회사는 카드 비표시. 감사 이력 = 사업보고서 기준 (사업연도 = 접수연도−1).'
 	}
 ];

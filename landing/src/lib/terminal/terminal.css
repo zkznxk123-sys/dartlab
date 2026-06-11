@@ -851,6 +851,28 @@
 .dlTerm .finFsGrid .mfcAx { font-size: 5.5px; }
 .dlTerm .finFsGrid .mfcHeatV { font-size: 6px; }
 .dlTerm .finFsNote { margin-top: 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); }
+/* KPI 밴드 — 전 탭 고정, 최신기 핵심 6지표 + 룰 인사이트 */
+.dlTerm .finKpis { display: flex; align-items: center; gap: 22px; padding: 7px 14px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-deep, #0a0f18); overflow-x: auto; scrollbar-width: none; }
+.dlTerm .fkItem { display: flex; flex-direction: column; gap: 1px; flex: none; }
+.dlTerm .fkLbl { font-family: var(--cond); font-size: 9px; letter-spacing: 0.5px; color: var(--dimmer); text-transform: uppercase; }
+.dlTerm .fkRow { display: flex; align-items: baseline; gap: 6px; }
+.dlTerm .fkVal { font-size: 15px; font-weight: 700; color: var(--txt); line-height: 1.1; }
+.dlTerm .fkUnit { font-style: normal; font-size: 9px; color: var(--dimmer); margin-left: 1px; font-weight: 400; }
+.dlTerm .fkDelta { font-size: 9.5px; font-weight: 600; }
+.dlTerm .fkSpark { width: 46px; height: 13px; color: var(--dim); margin-top: 1px; }
+.dlTerm .fkPeriod { margin-left: auto; font-size: 9.5px; color: var(--dim); flex: none; padding-left: 14px; }
+.dlTerm .finFsQ { font-family: var(--cond); font-size: 11px; letter-spacing: 0.4px; color: var(--amber); margin: 0 0 8px; }
+/* 원표 탭 — 전 기간 와이드 테이블 */
+.dlTerm .finTblWrap { margin-bottom: 16px; border: 1px solid var(--bd); border-radius: 3px; background: var(--dl-bg-base); }
+.dlTerm .finTblHead { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--bd); }
+.dlTerm .finTblHead b { font-family: var(--cond); font-size: 12px; color: var(--txt); letter-spacing: 0.3px; }
+.dlTerm .finTblUnit { font-size: 9px; color: var(--dimmer); margin-right: auto; }
+.dlTerm .finTblScroll { overflow-x: auto; }
+.dlTerm .finTbl { border-collapse: collapse; font-size: 10px; white-space: nowrap; }
+.dlTerm .finTbl th, .dlTerm .finTbl td { padding: 3px 8px; text-align: right; border-bottom: 1px solid rgba(30, 36, 51, 0.55); }
+.dlTerm .finTbl thead th { font-family: var(--mono); font-size: 9px; color: var(--dim); position: sticky; top: 0; background: var(--dl-bg-base); }
+.dlTerm .finTbl td { color: var(--txt); }
+.dlTerm .finTblAcct { position: sticky; left: 0; background: var(--dl-bg-base); text-align: left !important; font-weight: 600; color: var(--dim) !important; min-width: 110px; }
 
 /* 매크로 순풍/역풍 섹터 리본 (LeftRail 마켓 펄스) */
 .dlTerm .twRibbon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 2px 1px; border-top: 1px solid var(--bd); margin-top: 5px; }
