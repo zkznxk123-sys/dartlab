@@ -121,25 +121,51 @@ def _appendYearlyRaw(df: pl.DataFrame, dateDir: Path) -> dict[int, int]:
     return out
 
 
-def daily(*, apiKey: str, hfToken: str, basDt: str | None = None) -> int:
-    """어제(또는 basDt) 전종목 1콜 → date/{year} upsert + recent.parquet 갱신 → HF push (cron). 반환: 행수.
+def _lookbackBizDays(endYmd: str, n: int) -> list[str]:
+    """endYmd(YYYYMMDD) 부터 과거로 평일 n 개 (YYYYMMDD, 최신 우선). n<=1 은 endYmd 1개 그대로.
 
-    회사별 company/{code} 전량 갱신은 주간 `--derive-companies` 가 담당 — 일일 신선도는
-    recent.parquet(최근 30거래일 전종목 슬림 1파일)이 메운다(프론트가 회사파일과 병합).
+    n>1 = catch-up: 직전 run 이 놓친 영업일(cron skip·발행 지연)을 다음 run 이 재수집한다.
+    주말만 건너뛴다 — 휴장일은 포함되지만 fetch 시 빈 응답이라 무해(idempotent upsert).
+    """
+    if n <= 1:
+        return [endYmd]
+    end = date(int(endYmd[:4]), int(endYmd[4:6]), int(endYmd[6:8]))
+    out: list[str] = []
+    cur = end
+    while len(out) < n:
+        if cur.weekday() < 5:
+            out.append(cur.strftime("%Y%m%d"))
+        cur -= timedelta(days=1)
+    return out
+
+
+def daily(*, apiKey: str, hfToken: str, basDt: str | None = None, lookbackDays: int = 1) -> int:
+    """어제(또는 basDt) 기준 최근 lookbackDays 영업일 전종목 수집 → date/{year} upsert + recent → HF. 반환: 행수.
+
+    lookbackDays>1 = catch-up: 직전 run 누락(cron skip·미확정)을 다음 run 이 재수집(idempotent upsert).
+    gov 는 전일치를 T+1 오후 발행 → 오전 run 은 직전 영업일 재확인, 저녁 run 이 어제치 확보.
+    회사별 company/{code} 전량 갱신은 주간 `--derive-companies` 담당 — 일일 신선도는 recent.parquet.
     """
     from dartlab.gather.gov.govApi import fetchGovBydd, normalizeGovToKrxRaw
 
-    day = (basDt or (date.today() - timedelta(days=1)).strftime("%Y%m%d")).replace("-", "")
-    raw = normalizeGovToKrxRaw(fetchGovBydd(day, apiKey=apiKey))
-    if raw.is_empty():
-        print(f"[gov/daily] {day}: 데이터 없음(휴장/미확정)")
+    end = (basDt or (date.today() - timedelta(days=1)).strftime("%Y%m%d")).replace("-", "")
+    days = _lookbackBizDays(end, lookbackDays)
+    frames = []
+    for day in days:
+        raw = normalizeGovToKrxRaw(fetchGovBydd(day, apiKey=apiKey))
+        if raw.is_empty():
+            print(f"[gov/daily] {day}: 데이터 없음(휴장/미확정)")
+        else:
+            frames.append(raw)
+            print(f"[gov/daily] {day}: {raw.height}행")
+    if not frames:
         return 0
     dateDir = Path("data/gov/prices/date")
-    counts = _appendYearlyRaw(raw, dateDir)
-    _deployFolder(dateDir, "gov/prices/date", hfToken, f"갱신: 주가 일별 {day}")
+    counts = _appendYearlyRaw(pl.concat(frames, how="diagonal_relaxed"), dateDir)
+    _deployFolder(dateDir, "gov/prices/date", hfToken, f"갱신: 주가 일별 {days[-1]}~{days[0]}")
     buildRecent(hfToken=hfToken)
     total = sum(counts.values())
-    print(f"[gov/daily] {day}: date {len(counts)}개 연도, {total}행")
+    print(f"[gov/daily] {days[-1]}~{days[0]}: date {len(counts)}개 연도, {total}행")
     return total
 
 
@@ -285,23 +311,31 @@ def _appendYearlyIndex(df: pl.DataFrame, dateDir: Path) -> dict[int, int]:
     return out
 
 
-def dailyIndex(*, apiKey: str, hfToken: str, basDt: str | None = None) -> int:
-    """어제(또는 basDt) 전지수 1콜 → date/{year} 1파일만 upsert → HF push (cron). 반환: 행수.
+def dailyIndex(*, apiKey: str, hfToken: str, basDt: str | None = None, lookbackDays: int = 1) -> int:
+    """어제(또는 basDt) 기준 최근 lookbackDays 영업일 전지수 수집 → date/{year} upsert → HF (cron). 반환: 행수.
 
+    lookbackDays>1 = catch-up (주가 daily 와 동일 규약 — cron skip·미확정 재수집, idempotent).
     지수별 index/{key} 는 여기서 안 받는다 — 프론트가 지수 하나를 `--index` 온디맨드로 채운다.
     """
     from dartlab.gather.gov.govApi import fetchGovIndex, normalizeGovIndexFrame
 
-    day = (basDt or (date.today() - timedelta(days=1)).strftime("%Y%m%d")).replace("-", "")
-    norm = normalizeGovIndexFrame(fetchGovIndex(day, apiKey=apiKey))
-    if norm.is_empty():
-        print(f"[gov/daily-index] {day}: 데이터 없음(휴장/미확정)")
+    end = (basDt or (date.today() - timedelta(days=1)).strftime("%Y%m%d")).replace("-", "")
+    days = _lookbackBizDays(end, lookbackDays)
+    frames = []
+    for day in days:
+        norm = normalizeGovIndexFrame(fetchGovIndex(day, apiKey=apiKey))
+        if norm.is_empty():
+            print(f"[gov/daily-index] {day}: 데이터 없음(휴장/미확정)")
+        else:
+            frames.append(norm)
+            print(f"[gov/daily-index] {day}: {norm.height}행")
+    if not frames:
         return 0
     dateDir = Path("data/gov/indices/date")
-    counts = _appendYearlyIndex(norm, dateDir)
-    _deployFolder(dateDir, "gov/indices/date", hfToken, f"갱신: 지수 일별 {day}")
+    counts = _appendYearlyIndex(pl.concat(frames, how="diagonal_relaxed"), dateDir)
+    _deployFolder(dateDir, "gov/indices/date", hfToken, f"갱신: 지수 일별 {days[-1]}~{days[0]}")
     total = sum(counts.values())
-    print(f"[gov/daily-index] {day}: date {len(counts)}개 연도, {total}행")
+    print(f"[gov/daily-index] {days[-1]}~{days[0]}: date {len(counts)}개 연도, {total}행")
     return total
 
 
@@ -338,6 +372,12 @@ def main() -> int:
     ap.add_argument("--index", dest="indexSpec", help='지수 하나 "시장군|지수명" → index/{key} 온디맨드 캐시')
     ap.add_argument("--basDt", help="--daily/--daily-index 기준일자 YYYYMMDD (기본 어제)")
     ap.add_argument(
+        "--lookback",
+        type=int,
+        default=1,
+        help="--daily/--daily-index 최근 N 영업일 catch-up 수집 (기본 1=어제만, cron 은 4 권장)",
+    )
+    ap.add_argument(
         "--derive-companies",
         dest="deriveCompanies",
         action="store_true",
@@ -370,10 +410,10 @@ def main() -> int:
         produceStock(args.stock.strip(), apiKey=apiKey, hfToken=hfToken)
         return 0
     if args.daily:
-        daily(apiKey=apiKey, hfToken=hfToken, basDt=args.basDt)
+        daily(apiKey=apiKey, hfToken=hfToken, basDt=args.basDt, lookbackDays=args.lookback)
         return 0
     if args.dailyIndex:
-        dailyIndex(apiKey=apiKey, hfToken=hfToken, basDt=args.basDt)
+        dailyIndex(apiKey=apiKey, hfToken=hfToken, basDt=args.basDt, lookbackDays=args.lookback)
         return 0
     ap.print_help()
     return 0

@@ -6,9 +6,11 @@ name: Gov Price Sync (Bulk)
 
 on:
   schedule:
-    # '어제' 수집이므로 화~토 실행 = 월~금 장 커버. 기존 월~금 실행은 금요일 데이터를 영원히
+    # '어제' 수집이므로 화~토 실행 = 월~금 장 커버. 월~금 실행은 금요일 데이터를 영원히
     # 누락시키는 off-by-one (date/2026 9거래일 구멍의 근본 원인 — 2026-06-10 정정).
-    - cron: '0 11 * * 2-6'  # KST 20:00 화~토 (UTC 11:00) — 어제 전종목 1콜 upsert + recent.parquet
+    # 하루 2회(오전+저녁): gov 는 전일치를 T+1 오후 발행 → 저녁이 어제치 확보, 오전은 lookback catch-up.
+    - cron: '0 0  * * 2-6'  # KST 09:00 화~토 (UTC 00:00) — 오전 catch-up (lookback 4 영업일 재수집)
+    - cron: '0 11 * * 2-6'  # KST 20:00 화~토 (UTC 11:00) — 어제 전종목 upsert + recent.parquet
     - cron: '0 13 * * 6'    # KST 22:00 토 — 회사별 전종목 파생 리프레시 (date 기수집분 재배치, API 호출 0)
   workflow_dispatch:
     inputs:
@@ -61,7 +63,7 @@ jobs:
           if [ "${{ github.event.schedule }}" = "0 13 * * 6" ] || [ "${{ github.event.inputs.mode }}" = "derive" ]; then
             uv run python -X utf8 .github/scripts/sync/buildGovData.py --derive-companies
           else
-            uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
+            uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily --lookback 4 ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
           fi
 
       - name: Save gov price parquet cache

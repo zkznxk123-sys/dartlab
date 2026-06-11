@@ -5,7 +5,7 @@ name: Data Audit
 #
 # 감사 대상 = scheduled(cron) 데이터/자동화 파이프라인 전체 (목록 SSOT = monitorPipeline.py
 #          MONITORED_WORKFLOWS): Original SSOT Sync · Data Sync · DART New Stocks · Data Prebuild ·
-#          EDGAR · KRX(가격/지수) · Macro · News Archive · Valuation Snapshot · Search Index(delta/main) ·
+#          EDGAR · Gov(가격/지수) · Macro · News Archive · Valuation Snapshot · Search Index(delta/main) ·
 #          Quant Audit · Update KindList. 새 scheduled 워크플로우 추가 시 그 목록에도 등록.
 #
 # 수동 (workflow_dispatch):

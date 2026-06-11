@@ -6,7 +6,10 @@ name: Gov Index Sync (Bulk)
 
 on:
   schedule:
-    - cron: '20 11 * * 1-5'  # KST 20:20 평일 — 어제 전지수 1콜 upsert
+    # 주가와 동일 — '어제' 수집이라 화~토(2-6)여야 금요일 누락 안 됨(옛 1-5 = 금요일 영구누락 off-by-one).
+    # 하루 2회(오전+저녁): 저녁이 어제 전지수 확보, 오전은 lookback catch-up.
+    - cron: '20 0  * * 2-6'  # KST 09:20 화~토 (UTC 00:20) — 오전 catch-up (lookback 4 영업일)
+    - cron: '20 11 * * 2-6'  # KST 20:20 화~토 (UTC 11:20) — 어제 전지수 upsert
   workflow_dispatch:
     inputs:
       basDt:
@@ -48,7 +51,7 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily-index ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
+        run: uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily-index --lookback 4 ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
 
       - name: Save gov index parquet cache
         uses: actions/cache/save@v5
