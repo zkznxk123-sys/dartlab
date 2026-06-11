@@ -7,9 +7,9 @@ name: Gov Index Sync (Bulk)
 on:
   schedule:
     # 주가와 동일 — '어제' 수집이라 화~토(2-6)여야 금요일 누락 안 됨(옛 1-5 = 금요일 영구누락 off-by-one).
-    # 하루 2회(오전+저녁): 저녁이 어제 전지수 확보, 오전은 lookback catch-up.
-    - cron: '20 0  * * 2-6'  # KST 09:20 화~토 (UTC 00:20) — 오전 catch-up (lookback 4 영업일)
-    - cron: '20 11 * * 2-6'  # KST 20:20 화~토 (UTC 11:20) — 어제 전지수 upsert
+    # 하루 2회(오후+저녁): 13시가 어제 전지수 1차 확보(gov 오후 발행), 20시는 backstop+lookback. (2026-06-11 오전→13시)
+    - cron: '20 4  * * 2-6'  # KST 13:20 화~토 (UTC 04:20) — 어제 전지수 1차 수집(gov 오후 발행분)
+    - cron: '20 11 * * 2-6'  # KST 20:20 화~토 (UTC 11:20) — backstop (lookback catch-up)
   workflow_dispatch:
     inputs:
       basDt:
