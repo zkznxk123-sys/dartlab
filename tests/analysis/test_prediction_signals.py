@@ -222,3 +222,71 @@ def test_computeDirection():
     direction, momentum = _computeDirection([105, 102, 100])
     assert direction == "deteriorating"
     assert momentum < 0
+
+
+# ── 관세청 customs 외생후보 연결 (productIndicators → _loadAdaptive greedy 풀) ──
+
+
+def test_loadAdaptive_selects_customs_when_correlated(monkeypatch):
+    """수출업종 회사는 customs HS 가 후보풀에 들어가 corr 최고면 greedy 선택된다.
+
+    강제주입 아닌 corr-greedy 경로 — 합성 데이터로 customs(8542)만 매출과 완전상관,
+    나머지 후보는 무상관 → top-3 에 customs 포함 확인. (분산형 자기보호의 이면 검증.)
+    """
+    import polars as pl
+
+    import dartlab.gather.mapping.exogenousAxes as EA
+    import dartlab.gather.mapping.productIndicators as PI
+    import dartlab.gather.transforms.macro as MAC
+    from dartlab.analysis.financial._signalsMacroSensitivity import _loadAdaptive
+
+    periods = [f"{y}Q{q}" for y in range(2018, 2024) for q in range(1, 5)]  # 24 분기
+    # 연도별 레벨(변동 있음) → YoY 가 변동 → 무상관 후보와 구분.
+    levels = {2017: 100, 2018: 120, 2019: 110, 2020: 140, 2021: 130, 2022: 150, 2023: 145}
+    rev = [(levels[int(c[:4])] - levels[int(c[:4]) - 1]) / abs(levels[int(c[:4]) - 1]) * 100 for c in periods]
+
+    # 무상관 fred/ecos 후보 3 + customs 8542 매핑 (수출업종)
+    monkeypatch.setattr(
+        EA, "getExogenousSeriesIds", lambda stockCode=None: [("A", "ecos"), ("B", "fred"), ("C", "fred")]
+    )
+    monkeypatch.setattr(
+        PI, "getProductIndicators", lambda code: [{"seriesId": "8542", "source": "customs", "label": "반도체"}]
+    )
+    monkeypatch.setattr(MAC, "loadMacroParquet", lambda sid, *, source: pl.DataFrame({"_sid": [sid], "value": [0.0]}))
+
+    def fakeAlign(df, cols):
+        sid = df["_sid"][0]
+        if sid == "8542":  # customs = 연도 레벨 → YoY 가 rev 와 동일(완전상관)
+            vals = [float(levels[int(c[:4])]) for c in cols]
+        else:  # 무상관: 상수 → YoY 0
+            vals = [100.0] * len(cols)
+        return pl.DataFrame({"value": vals})
+
+    monkeypatch.setattr(MAC, "alignToFinancialPeriods", fakeAlign)
+
+    result = _loadAdaptive(rev, periods, stockCode="005930")
+    assert result is not None
+    assert "8542" in result["_usedIndicators"].values()  # customs 가 greedy 선택됨
+
+
+def test_loadAdaptive_no_customs_for_nonexport(monkeypatch):
+    """비수출업종(productIndicators 빈 list)은 customs 후보가 아예 없다 (자연 스코핑)."""
+    import polars as pl
+
+    import dartlab.gather.mapping.exogenousAxes as EA
+    import dartlab.gather.mapping.productIndicators as PI
+    import dartlab.gather.transforms.macro as MAC
+    from dartlab.analysis.financial._signalsMacroSensitivity import _loadAdaptive
+
+    periods = [f"{y}Q{q}" for y in range(2018, 2024) for q in range(1, 5)]
+    rev = [float((i % 5) - 2) for i in range(len(periods))]
+
+    monkeypatch.setattr(EA, "getExogenousSeriesIds", lambda stockCode=None: [("A", "ecos")])
+    monkeypatch.setattr(PI, "getProductIndicators", lambda code: [])  # 서비스업 → 빈 매핑
+    monkeypatch.setattr(MAC, "loadMacroParquet", lambda sid, *, source: pl.DataFrame({"value": [1.0]}))
+    monkeypatch.setattr(MAC, "alignToFinancialPeriods", lambda df, cols: pl.DataFrame({"value": [1.0] * len(cols)}))
+
+    result = _loadAdaptive(rev, periods, stockCode="035420")
+    # customs 코드(숫자 HS)가 선택지표에 없어야 함
+    if result is not None:
+        assert not any(str(v).isdigit() and len(str(v)) <= 4 for v in result["_usedIndicators"].values())

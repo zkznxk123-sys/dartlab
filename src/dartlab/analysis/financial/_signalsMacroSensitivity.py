@@ -412,6 +412,48 @@ def _getFinanceSeries(company):
         return None
 
 
+def _materializeFromHf(seriesId: str, source: str):
+    """로컬 캐시 miss 인 macro 시리즈를 HF 벌크에서 받아 캐시에 적재.
+
+    Capabilities: ``~/.dartlab/cache/macro/`` miss → ``macroHf`` fetch → enrichAndCache
+        적재 → DataFrame. 미materialize 소스(관세청 customs 등) 신호 손실 방지.
+    AIContext: 회귀 macro 후보 로딩의 self-healing — un-cronned 캐시 의존 제거.
+    Guide: 영구 캐시 부수효과(디스크 write). 네트워크/카탈로그 부재는 None 흡수.
+    When: ``_loadAdaptive`` 후보 루프에서 ``loadMacroParquet`` 이 캐시 miss 반환 직후.
+    How: macroHf.fetchSeries → enrichAndCache(addChangeRate + saveMacroParquet).
+
+    Args:
+        seriesId: 지표 ID 또는 HS 코드 (예 ``"8542"``).
+        source: ``"fred"`` | ``"ecos"`` | ``"customs"``.
+
+    Returns:
+        pl.DataFrame | None — date/value(+변화율). HF 에도 없으면 None.
+
+    Raises:
+        없음 — 모든 예외를 None 으로 흡수 (회귀가 해당 후보 조용히 skip).
+
+    Requires:
+        ``macroHf`` HF 네트워크 접근 + ``~/.dartlab/cache/macro/`` write 권한.
+
+    Example:
+        >>> _materializeFromHf("8542", "customs")  # doctest: +SKIP
+
+    SeeAlso:
+        gather.bulkData.macroHf.fetchSeries : HF 벌크 시계열 read.
+        gather.transforms.macro.enrichAndCache : 변화율 + 캐시 적재.
+    """
+    try:
+        from dartlab.gather.bulkData import macroHf
+        from dartlab.gather.transforms.macro import enrichAndCache
+
+        df = macroHf.fetchSeries(source, seriesId)
+        if df is None or df.is_empty():
+            return None
+        return enrichAndCache(seriesId, df, source=source)
+    except Exception:
+        return None
+
+
 def _loadAdaptive(
     revGrowth: list[float | None], periodCols: list[str], stockCode: str | None = None
 ) -> dict[str, list[float | None]] | None:
@@ -442,10 +484,23 @@ def _loadAdaptive(
         ("DGORDER", "fred"),  # 내구재 주문
     ]
 
+    # 관세청 수출 후보 — productIndicators 가 회사→HS 매핑(수출업종만, 비수출업종은 빈 list).
+    # greedy 선택이 HS 집중 수출기업(반도체·자동차 등)에서만 채택, 분산형은 자기보호로 배제.
+    customs: list[tuple[str, str]] = []
+    if stockCode:
+        try:
+            from dartlab.gather.mapping.productIndicators import getProductIndicators
+
+            for ind in getProductIndicators(stockCode):
+                if ind.get("source") == "customs":
+                    customs.append((ind["seriesId"], "customs"))
+        except (ImportError, KeyError):
+            pass
+
     # 중복 제거하며 합치기
     seen: set[str] = set()
     candidates: list[tuple[str, str]] = []
-    for sid, src in mapped + universal:
+    for sid, src in mapped + universal + customs:
         if sid not in seen:
             seen.add(sid)
             candidates.append((sid, src))
@@ -459,6 +514,8 @@ def _loadAdaptive(
 
     for sid, source in candidates:
         df = loadMacroParquet(sid, source=source)
+        if isEmptyDf(df):
+            df = _materializeFromHf(sid, source)  # 캐시 miss → HF 벌크 폴백 + 적재
         if isEmptyDf(df):
             continue
         curVals = alignToFinancialPeriods(df, periodCols).get_column("value").to_list()
