@@ -220,6 +220,36 @@ def test_read_statement_rename_stitch(renameEnv) -> None:
     assert row["2023"] == "10,000" and row["2022"] == "9,000" and row["2021"] == "8,000"  # 전 기간 연속
 
 
+@pytest.fixture
+def cooccurEnv(tmp_path, monkeypatch):
+    """공존 가드 — 한 공시(같은 rceptNo)에 '단기차입금의증가'·'단기차입금의감소' 별개 라인, 2022 금액(5,000) 우연일치."""
+    _ = (tmp_path, monkeypatch)
+    rc = "20240301000000"
+    rows = [
+        {**_oldRow("2023Q4", "단기차입금의증가", 2023, "8,000"), "rceptNo": rc},
+        {**_oldRow("2023Q4", "단기차입금의증가", 2022, "5,000"), "rceptNo": rc},
+        {**_oldRow("2023Q4", "단기차입금의감소", 2023, "3,000"), "rceptNo": rc},
+        {**_oldRow("2023Q4", "단기차입금의감소", 2022, "5,000"), "rceptNo": rc},  # 2022 금액 겹침(우연)
+    ]
+    return pl.DataFrame(rows, schema=CELL_SCHEMA)
+
+
+def test_stitch_cooccurrence_separates_distinct(cooccurEnv) -> None:
+    """공존(한 공시 distinct 라인) 별개계정은 금액 우연일치로도 병합 안 됨 — over-merge 데이터손실 가드.
+
+    가드 없으면 (2022,'5,000') 공유로 stitch 가 증가⊕감소 병합 → 한쪽 2023 값 손실. 가드면 분리 유지.
+    """
+    from dartlab.providers.dart.panel.cell import _statementFromCells
+
+    w = _statementFromCells(cooccurEnv, statement="IS2", freq="year", scope="consolidated")
+    assert w is not None
+    accounts = set(w["account"].to_list())
+    assert "단기차입금의증가" in accounts and "단기차입금의감소" in accounts, "공존 별개계정 분리 유지"
+    inc = w.filter(pl.col("account") == "단기차입금의증가").row(0, named=True)
+    dec = w.filter(pl.col("account") == "단기차입금의감소").row(0, named=True)
+    assert inc["2023"] == "8,000" and dec["2023"] == "3,000"  # 둘 다 2023 값 보존(손실 0)
+
+
 # ── native 재무비율 (소문자 ratios — BS/IS/CF native 항목 → core 공식, panel 자급) ──
 
 

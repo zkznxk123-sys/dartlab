@@ -29,6 +29,7 @@ LLM Specifications:
 from __future__ import annotations
 
 import re
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 
@@ -376,34 +377,64 @@ def _find(parent: dict, x: str) -> str:
 
 
 def _stitchRecentName(df: pl.DataFrame) -> pl.DataFrame:
-    """개명 항목 통합 — 금액 겹침으로 같은 라인 묶어 **최신 filing 이름**(최근 기준) 부여.
+    """개명 항목 통합 — 금액 겹침으로 같은 라인 묶어 **최신 filing 이름** 부여 (공존 별개계정 가드).
 
-    연속 보고서가 당기/전기/전전기로 연도 겹침 → 개명 전후 같은 라인은 **겹친 해의 금액이 같다**.
-    그 금액 동치((ctxYear, valueRaw) 공유)로 `_name` 동치류를 만들고, 각 류 canonical = 최신
-    rceptNo 의 `_name`. 식별력 있는 큰 금액(콤마 보유)만 링크 근거 — 0/소액 우연일치 over-merge 회피.
+    연속 보고서가 당기/전기/전전기로 연도 겹침 → 개명 전후 같은 라인은 **겹친 해의 금액이 같다**. 그 금액
+    동치((ctxYear, valueRaw) 공유, 식별력 있는 콤마 큰금액만)로 ``_name`` 동치류를 만들고, 각 류 canonical =
+    최신 rceptNo 의 ``_name``.
+
+    **공존 불변식**: 한 공시(rceptNo) 내 distinct 라인으로 같이 나오는 두 이름은 *정의상 별개계정*
+    (증가/감소·기본/희석주당·자본총계/지배기업소유주귀속자본) → 우연한 금액일치로도 같은 클러스터 금지.
+    개명(매도가능→기타포괄)은 시대 달라 공존 안 해 통합 보존 → over-merge 데이터손실 제거 + rename 과거연결
+    유지. 충돌맵은 union 대상인 sig 이름(콤마 큰금액)으로 한정(속도). 그룹 정렬 순회로 결정론.
+    tests/_attempts/principledStitch — 471사 distinct 오염칸 8.58%→2.38%(72% 제거)·무손실 fragmentation.
 
     Args:
         df: ``_name``/``ctxYear``/``valueRaw``/``rceptNo`` 보유 cell DataFrame.
 
     Returns:
-        ``_name`` 을 canonical(최근 이름)로 치환한 DataFrame.
+        ``_name`` 을 canonical(최근 이름)로 치환한 DataFrame. 공존(별개계정) 쌍은 분리 유지.
     """
     sig = df.filter(pl.col("valueRaw").str.contains(",", literal=True)).select("_name", "ctxYear", "valueRaw")
-    parent: dict[str, str] = {}
+    if sig.is_empty():
+        return df
+    sigNames = set(sig["_name"].unique().to_list())  # union 후보 = sig 이름뿐
+    # 공존 충돌맵 — 한 공시 내 같이 나오는 sig 이름쌍(별개계정). 멤버가 전부 sig 라 sig 한정으로 충분·빠름.
+    conflict: dict[str, set[str]] = defaultdict(set)
+    cooc = df.filter(pl.col("_name").is_in(sigNames)).group_by("rceptNo").agg(pl.col("_name").unique().alias("ns"))
+    for names in cooc["ns"].to_list():
+        s = set(names)
+        for a in names:
+            conflict[a] |= s - {a}
     groups: dict[tuple, list[str]] = {}
     for name, yr, val in sig.iter_rows():
         groups.setdefault((yr, val), []).append(name)
-    for names in groups.values():
+    parent: dict[str, str] = {}
+    members: dict[str, set[str]] = {}  # root → 클러스터 멤버 전체 (공존 검사용)
+    for key in sorted(groups, key=lambda k: (str(k[0]), str(k[1]))):  # 결정론 순회
+        names = groups[key]
+        rb = _find(parent, names[0])
+        members.setdefault(rb, {rb})
         for n in names[1:]:
-            parent[_find(parent, n)] = _find(parent, names[0])
+            rn = _find(parent, n)
+            if rn == rb:
+                continue
+            cb = members.setdefault(rb, {rb})
+            cn = members.setdefault(rn, {rn})
+            if any(b in conflict.get(a, ()) for a in cb for b in cn):
+                continue  # 두 클러스터 합치면 공존쌍 발생 → 병합 거부 (별개계정)
+            parent[rn] = rb
+            cb |= cn
+            members.pop(rn, None)
+            rb = _find(parent, rb)
     recency: dict[str, str] = dict(df.group_by("_name").agg(pl.col("rceptNo").max().alias("r")).iter_rows())
     comp: dict[str, list[str]] = {}
     for name in recency:
         comp.setdefault(_find(parent, name), []).append(name)
     nameToCanon: dict[str, str] = {}
-    for members in comp.values():
-        best = max(members, key=lambda n: recency.get(n) or "")  # 최신 filing 이름
-        for m in members:
+    for mem in comp.values():
+        best = max(mem, key=lambda n: recency.get(n) or "")  # 최신 filing 이름
+        for m in mem:
             nameToCanon[m] = best
     return df.with_columns(pl.col("_name").replace(nameToCanon).alias("_name"))
 
