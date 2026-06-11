@@ -56,7 +56,8 @@ _NUM_STD = (
 )
 
 # gov getStockPriceInfo 응답 → KRX 전종목 raw schema (date 샤드 = 랜딩 전종목 스캔이 직독).
-# ISU_CD 만 파생 (KRX 컨벤션 'A'+단축코드); SECT_TP_NM 은 gov 미제공 → 빈 컬럼 유지(15-col parity).
+# ISU_CD = srtnCd 6자리 단축코드 (krx/prices·hfBulk·랜딩 duckdb·company/recent 전부 6자리 공통 포맷);
+# SECT_TP_NM 은 gov 미제공 → 빈 컬럼 유지(15-col parity).
 GOV_TO_KRXRAW = {
     "basDt": "BAS_DD",
     "itmsNm": "ISU_NM",
@@ -343,10 +344,12 @@ def normalizeGovToKrxRaw(df: pl.DataFrame) -> pl.DataFrame:
 
     Capabilities: gov 원본 컬럼을 BAS_DD/ISU_CD/TDD_* 등 15-col KRX raw 로 rename+cast.
     AIContext: gov/prices/date/{year}.parquet(랜딩 전종목 스캔 직독)의 schema 보장 —
-        랜딩 priceSeries 는 ISU_CD='A'+코드 + BAS_DD 로 필터하므로 KRX schema 동질 필요.
+        ISU_CD 는 srtnCd 6자리 단축코드(예: "005930"). hfBulk.loadFiltered(ISU_CD==code)·
+        랜딩 duckdb(WHERE ISU_CD='005930')·company/recent 전부 6자리로 필터하므로 접두 없이
+        krx/prices·전 역사와 동질 (접두 'A' 부여 시 최신 구간이 전 소비자에서 누락됨).
     Guide: daily 가 fetchGovBydd 결과를 이 함수로 KRX raw 화 후 date 샤드에 upsert.
     When: 전종목 date 샤드 갱신 직전 (gov bydd → KRX 15-col raw).
-    How: GOV_TO_KRXRAW rename → ISU_CD='A'+srtnCd → Int/Float cast → SECT_TP_NM 빈 컬럼 → 정렬.
+    How: GOV_TO_KRXRAW rename → ISU_CD=srtnCd 6자리 zfill → Int/Float cast → SECT_TP_NM 빈 컬럼 → 정렬.
     Requires: polars (네트워크 불필요 — 순수 변환).
     SeeAlso: fetchGovBydd (입력) · buildGovData._appendYearlyRaw (date 샤드 caller).
 
@@ -354,7 +357,7 @@ def normalizeGovToKrxRaw(df: pl.DataFrame) -> pl.DataFrame:
         df: fetchGovBydd 의 raw gov DataFrame (basDt/srtnCd/clpr/...).
 
     Returns:
-        pl.DataFrame: 15-col KRX raw (BAS_DD·ISU_CD='A'+srtnCd·ISU_NM·MKT_NM·SECT_TP_NM(빈)·
+        pl.DataFrame: 15-col KRX raw (BAS_DD·ISU_CD=srtnCd 6자리·ISU_NM·MKT_NM·SECT_TP_NM(빈)·
             TDD_*·CMPPREVDD_PRC·FLUC_RT·ACC_TRDVOL·ACC_TRDVAL·MKTCAP·LIST_SHRS). BAS_DD+ISU_CD 정렬.
 
     Raises:
@@ -367,7 +370,7 @@ def normalizeGovToKrxRaw(df: pl.DataFrame) -> pl.DataFrame:
         return pl.DataFrame()
     rename = {k: v for k, v in GOV_TO_KRXRAW.items() if k in df.columns}
     out = df.rename(rename).with_columns(
-        ("A" + pl.col("srtnCd").cast(pl.Utf8).str.zfill(6)).alias("ISU_CD"),
+        pl.col("srtnCd").cast(pl.Utf8).str.zfill(6).alias("ISU_CD"),
         *[pl.col(c).cast(pl.Int64, strict=False) for c in _KRXRAW_INT if c in rename.values()],
         *[pl.col(c).cast(pl.Float64, strict=False) for c in _KRXRAW_FLOAT if c in rename.values()],
     )
@@ -375,7 +378,7 @@ def normalizeGovToKrxRaw(df: pl.DataFrame) -> pl.DataFrame:
         out = out.with_columns(pl.col("BAS_DD").cast(pl.Utf8))
     if "SECT_TP_NM" not in out.columns:
         out = out.with_columns(pl.lit(None, dtype=pl.Utf8).alias("SECT_TP_NM"))
-    out = out.filter(pl.col("ISU_CD").str.len_chars() == 7)  # 'A' + 6자리
+    out = out.filter(pl.col("ISU_CD").str.len_chars() == 6)  # 단축코드 6자리 (krx·gov·전 소비자 공통)
     keep = [c for c in _KRXRAW_COLS if c in out.columns]
     return out.select(keep).sort(["BAS_DD", "ISU_CD"])
 

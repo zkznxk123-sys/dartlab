@@ -65,7 +65,7 @@ def test_normalizeGovIndexFrame_to_krx_schema():
 
 
 def test_normalizeGovToKrxRaw_to_15col():
-    """gov 전종목 bydd → KRX 15-col raw + ISU_CD='A'+코드."""
+    """gov 전종목 bydd → KRX 15-col raw + ISU_CD=6자리 단축코드 (krx·전 소비자 공통)."""
     from dartlab.gather.gov.govApi import normalizeGovToKrxRaw
 
     raw = pl.DataFrame(
@@ -90,7 +90,7 @@ def test_normalizeGovToKrxRaw_to_15col():
     )
     out = normalizeGovToKrxRaw(raw)
     row = out.row(0, named=True)
-    assert row["ISU_CD"] == "A005930"
+    assert row["ISU_CD"] == "005930"
     assert row["ISU_NM"] == "삼성전자"
     assert row["TDD_CLSPRC"] == 329000
     assert "SECT_TP_NM" in out.columns
