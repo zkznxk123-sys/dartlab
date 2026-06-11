@@ -1,7 +1,8 @@
 <script lang="ts">
-	// 재무 분석 차트 — 막대+선·이중축·signed·stacked·refLine.
-	// 계정명 범례 + Y축 숫자(좌/우) + X축 기간 + 호버 툴팁 → 해석 가능. 크게.
+	// 재무 분석 차트 — 막대+선·이중축·signed·stacked·refLine·heatmap.
+	// 계정명 범례 + Y축 숫자(좌/우) + X축 기간 + 호버 툴팁 + ! 해석 가이드 → 해석 가능. 크게.
 	import type { FinCard, Num } from '../data/terminalFinance';
+	import { CARD_GUIDE } from '../data/cardGuide';
 
 	interface Props {
 		card: FinCard;
@@ -9,6 +10,10 @@
 		h?: number; // 우측 레일 등 밀도 컨텍스트용 compact 높이 (기본 152)
 	}
 	let { card, periods, h = 152 }: Props = $props();
+
+	// ! 해석 가이드 — 카드 key 큐레이션 텍스트 (일반론 해석 기준, 회사 판단 아님). 클릭 토글.
+	const guide = $derived(CARD_GUIDE[card.key] ?? null);
+	let showGuide = $state(false);
 
 	const W = 300;
 	const H = $derived(h);
@@ -222,13 +227,24 @@
 	});
 </script>
 
-<div class="mfc">
+<div class="mfc" onmouseleave={() => (showGuide = false)}>
 	<div class="mfcHead">
 		<span class="mfcTitle">{card.title}</span>
+		{#if guide}
+			<button class={showGuide ? 'mfcInfo on' : 'mfcInfo'} title="해석 가이드" aria-label="해석 가이드" onclick={(e) => { e.stopPropagation(); showGuide = !showGuide; }}>!</button>
+		{/if}
 		{#if headVal != null}
 			<b class="mfcVal mono">{fmtVal(headVal)}<span class="mfcUnit">{unitScale.unit}{headSuffix}</span></b>
 		{/if}
 	</div>
+	{#if guide && showGuide}
+		<div class="mfcGuide">
+			<div class="mfcGuideRow"><span class="mfcGuideTag">읽는법</span>{guide.what}</div>
+			<div class="mfcGuideRow"><span class="mfcGuideTag gtGood">긍정</span>{guide.good}</div>
+			<div class="mfcGuideRow"><span class="mfcGuideTag gtBad">부정</span>{guide.bad}</div>
+			<div class="mfcGuideFoot">일반적 해석 기준 — 업종·상황에 따라 다를 수 있음</div>
+		</div>
+	{/if}
 	<div class="mfcLegend">
 		{#if isWf}
 			<span class="mfcLg"><i style="background:#34d399"></i>증가</span>

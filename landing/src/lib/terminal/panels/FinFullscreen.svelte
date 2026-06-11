@@ -19,7 +19,7 @@
 		onClose: () => void;
 	}
 	let { co, lang, bundle, mode, onMode, onClose }: Props = $props();
-	const finModeLabel: Record<FinMode, string> = { ttm: '분기 TTM', quarter: '분기', annual: '연간' };
+	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
 
 	let tab = $state('all');
 	// report 카드 lazy 캐시. ⛔ self-dep 가드: 로드 effect 는 reportCards 를 untrack 으로만 읽는다

@@ -487,10 +487,90 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const fcfRaw = used.map((_, i) => { const op = valAtIdx('cfOperating', i); const cx = valAtIdx('capex', i); return op != null ? op - (cx ?? 0) : null; });
 		const ratioOfSeries = (numRaw: Num[], denKey: string, scale = 100): Num[] => { const d = raw(denKey); return used.map((_, i) => (numRaw[i] != null && d[i] ? +((numRaw[i]! / d[i]!) * scale).toFixed(1) : null)); };
 
-		// ── 재무제표 분석 13 카드 (기본 4 + 세트). universal 계정 위주 → 빈칸 0.
-		// 중복 깎기: scale(조달구조 하위호환)·stability(부채비율 역변환)·turnover(ccc·dupont 중복) 삭제. ──
+		// 현금전환주기 — DSO·DPO 필수, DIO 결측(재고 미계상)은 0 처리. 분기=91일, 연간/TTM=365일.
+		// (메인 16카드의 CCC 카드와 현금·투자 탭이 공유 — cards 배열보다 먼저 계산)
+		const days = mode === 'quarter' ? 91 : 365;
+		const rcv = raw('receivables');
+		const inv = raw('inventories');
+		const pay = raw('payables');
+		const revRaw = raw('revenue');
+		const cogsRaw = raw('costOfSales');
+		const dayRatio = (n: Num, d: Num): Num => (n != null && d != null && d > 0 ? +((n / d) * days).toFixed(1) : null);
+		const dso = used.map((_, i) => dayRatio(rcv[i], revRaw[i]));
+		const dio = used.map((_, i) => dayRatio(inv[i], cogsRaw[i]));
+		const dpo = used.map((_, i) => dayRatio(pay[i], cogsRaw[i]));
+		const ccc = used.map((_, i) => (dso[i] != null && dpo[i] != null ? +(dso[i]! + (dio[i] ?? 0) - dpo[i]!).toFixed(1) : null));
+
+		// 메인·탭 공유 카드 3종 — 16카드 승격분 (수익성·현금 탭에도 동일 객체 재사용, 정의 1곳)
+		const costStructureCard: FinCard = { key: 'costStructure', title: '비용구조', unit: '조', stacked: true, series: [
+			{ name: '매출원가', data: ser('costOfSales'), color: C.red, type: 'bar' },
+			{ name: '판관비', data: ser('sga'), color: C.warn, type: 'bar' },
+			{ name: '매출', data: ser('revenue'), color: C.rev, type: 'line' }
+		] };
+		const dupontCard: FinCard = { key: 'dupont', title: 'ROE 분해 (DuPont)', unit: '%', series: [
+			{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'bar' },
+			{ name: '순이익률', data: ratio('netIncome', 'revenue'), color: C.cyan, type: 'line' },
+			{ name: '자산회전(회)', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line', axis: 'r' },
+			{ name: '레버리지(배)', data: ratio('assets', 'equity', 1), color: C.red, type: 'line', axis: 'r' }
+		] };
+		const cccCard: FinCard = { key: 'ccc', title: '현금전환주기', unit: '일', series: [
+			{ name: 'CCC', data: ccc, color: C.purple, type: 'bar' },
+			{ name: 'DSO', data: dso, color: C.blue, type: 'line' },
+			{ name: 'DIO', data: dio, color: C.warn, type: 'line' },
+			{ name: 'DPO', data: dpo, color: C.good, type: 'line' }
+		] };
+
+		// ── 재무제표 분석 핵심 16카드 — 4행×4 분석 내러티브 (행=질문, 좌→우=절대액→분해→비율→변화율).
+		// 1행 손익 "얼마나 버나" · 2행 현금 "이익이 진짜인가" · 3행 효율 "자본을 잘 굴리나" · 4행 체력 "버틸 수 있나".
+		// ⚠ 카드 수 = 4의 배수 불변 (.finGrid 행당 4장 강제 — 운영자 룰: 2장·1장 행 금지). ──
 		const cards: FinCard[] = [
-			// 기본 4 — 자산·조달·손익·현금
+			// 1행 — 손익
+			{ key: 'incomeBreakdown', title: '손익구조', unit: '조', series: [
+				{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
+				{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line', axis: 'r' },
+				{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line', axis: 'r' }
+			] },
+			costStructureCard,
+			{ key: 'marginTrend', title: '이익률', unit: '%', series: [
+				{ name: 'GPM', data: gpRatio(), color: C.warn, type: 'line' },
+				{ name: 'OPM', data: ratio('operatingIncome', 'revenue'), color: C.op, type: 'line' },
+				{ name: 'NPM', data: ratio('netIncome', 'revenue'), color: C.net, type: 'line' }
+			] },
+			{ key: 'growthYoy', title: '성장 YoY', unit: '%', series: [
+				{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
+				{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
+				{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
+			] },
+			// 2행 — 현금
+			{ key: 'cashflowSigned', title: '현금흐름', unit: '조', series: [
+				{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
+				{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
+				{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
+			] },
+			{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
+				{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' }
+			] },
+			{ key: 'cfMargin', title: '현금마진', unit: '%', series: [
+				{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line' },
+				{ name: 'FCF/매출', data: ratioOfSeries(fcfRaw, 'revenue'), color: C.warn, type: 'line' }
+			] },
+			{ key: 'fcfTrend', title: 'FCF', unit: '조', series: [
+				{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
+				{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
+				{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
+			] },
+			// 3행 — 효율
+			{ key: 'returnTrend', title: 'ROE·ROA', unit: '%', series: [
+				{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'line' },
+				{ name: 'ROA', data: ratio('netIncome', 'assets', 100, true), color: C.blue, type: 'line' }
+			] },
+			dupontCard,
+			cccCard,
+			{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', series: [
+				{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
+				{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
+			] },
+			// 4행 — 체력
 			{ key: 'assetComposition', title: '자산구조', unit: '조', stacked: true, series: [
 				{ name: '현금', data: ser('cash'), color: C.good, type: 'bar' },
 				{ name: '매출채권', data: ser('receivables'), color: C.blue, type: 'bar' },
@@ -502,56 +582,12 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				{ name: '비유동부채', data: compose(['liabilities', 1], ['currentLiabilities', -1]), color: C.op, type: 'bar' },
 				{ name: '자본', data: ser('equity'), color: C.good, type: 'bar' }
 			] },
-			{ key: 'incomeBreakdown', title: '손익구조', unit: '조', series: [
-				{ name: '매출', data: ser('revenue'), color: C.rev, type: 'bar' },
-				{ name: '영업익', data: ser('operatingIncome'), color: C.op, type: 'line', axis: 'r' },
-				{ name: '순익', data: ser('netIncome'), color: C.net, type: 'line', axis: 'r' }
-			] },
-			{ key: 'cashflowSigned', title: '현금흐름', unit: '조', series: [
-				{ name: '영업', data: ser('cfOperating'), color: C.good, type: 'bar' },
-				{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
-				{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
-			] },
-			// 수익성
-			{ key: 'marginTrend', title: '이익률', unit: '%', series: [
-				{ name: 'GPM', data: gpRatio(), color: C.warn, type: 'line' },
-				{ name: 'OPM', data: ratio('operatingIncome', 'revenue'), color: C.op, type: 'line' },
-				{ name: 'NPM', data: ratio('netIncome', 'revenue'), color: C.net, type: 'line' }
-			] },
-			{ key: 'returnTrend', title: 'ROE·ROA', unit: '%', series: [
-				{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'line' },
-				{ name: 'ROA', data: ratio('netIncome', 'assets', 100, true), color: C.blue, type: 'line' }
-			] },
-			{ key: 'cfMargin', title: '현금마진', unit: '%', series: [
-				{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line' },
-				{ name: 'FCF/매출', data: ratioOfSeries(fcfRaw, 'revenue'), color: C.warn, type: 'line' }
-			] },
-			// 안정성
 			{ key: 'leverageTrend', title: '레버리지·유동', unit: '%', refLines: [100], series: [
 				{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
 				{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
 			] },
 			{ key: 'netDebt', title: '순차입금', unit: '조', series: [
 				{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' }
-			] },
-			// 현금·효율
-			{ key: 'fcfTrend', title: 'FCF', unit: '조', series: [
-				{ name: 'FCF', data: compose(['cfOperating', 1], ['capex', -1]), color: C.warn, type: 'line' },
-				{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
-				{ name: 'CAPEX', data: compose(['capex', -1]), color: C.dim, type: 'bar' }
-			] },
-			{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
-				{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' }
-			] },
-			// 성장
-			{ key: 'growthYoy', title: '성장 YoY', unit: '%', series: [
-				{ name: '매출', data: yoy('revenue'), color: C.rev, type: 'bar' },
-				{ name: '영업익', data: yoy('operatingIncome'), color: C.op, type: 'line' },
-				{ name: '순익', data: yoy('netIncome'), color: C.net, type: 'line' }
-			] },
-			{ key: 'assetGrowth', title: '자산·자본성장', unit: '%', series: [
-				{ name: '자산', data: yoy('assets'), color: C.blue, type: 'bar' },
-				{ name: '자본', data: yoy('equity'), color: C.good, type: 'line' }
 			] }
 		];
 
@@ -568,18 +604,6 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			const pretax = ni + t;
 			return pretax > 0 ? +((t / pretax) * 100).toFixed(1) : null;
 		});
-		// 현금전환주기 — DSO·DPO 필수, DIO 결측(재고 미계상)은 0 처리. 분기=91일, 연간/TTM=365일.
-		const days = mode === 'quarter' ? 91 : 365;
-		const rcv = raw('receivables');
-		const inv = raw('inventories');
-		const pay = raw('payables');
-		const rev = raw('revenue');
-		const cogs = raw('costOfSales');
-		const dayRatio = (n: Num, d: Num): Num => (n != null && d != null && d > 0 ? +((n / d) * days).toFixed(1) : null);
-		const dso = used.map((_, i) => dayRatio(rcv[i], rev[i]));
-		const dio = used.map((_, i) => dayRatio(inv[i], cogs[i]));
-		const dpo = used.map((_, i) => dayRatio(pay[i], cogs[i]));
-		const ccc = used.map((_, i) => (dso[i] != null && dpo[i] != null ? +(dso[i]! + (dio[i] ?? 0) - dpo[i]!).toFixed(1) : null));
 		const cfoRaw = raw('cfOperating');
 		// ── 워터폴 브리지 2종 (전체화면 탭 선두) — 현재 모드의 최신 유효 기간 1개 스냅샷 ──
 		const lastIdx = (...keys: string[]): number => {
@@ -661,11 +685,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			profitability: [
 				...(plBridge ? [plBridge] : []),
 				...(seasonality ? [seasonality] : []),
-				{ key: 'costStructure', title: '비용구조', unit: '조', stacked: true, series: [
-					{ name: '매출원가', data: ser('costOfSales'), color: C.red, type: 'bar' },
-					{ name: '판관비', data: ser('sga'), color: C.warn, type: 'bar' },
-					{ name: '매출', data: ser('revenue'), color: C.rev, type: 'line' }
-				] },
+				costStructureCard,
 				{ key: 'finNet', title: '금융손익', unit: '조', series: [
 					{ name: '금융수익', data: ser('financeIncome'), color: C.good, type: 'bar' },
 					{ name: '금융비용(−)', data: compose(['financeCosts', -1]), color: C.red, type: 'bar' },
@@ -675,12 +695,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 					{ name: '법인세', data: ser('incomeTax'), color: C.dim, type: 'bar' },
 					{ name: '실효세율%', data: effTax, color: C.warn, type: 'line', axis: 'r' }
 				] },
-				{ key: 'dupont', title: 'ROE 분해 (DuPont)', unit: '%', series: [
-					{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'bar' },
-					{ name: '순이익률', data: ratio('netIncome', 'revenue'), color: C.cyan, type: 'line' },
-					{ name: '자산회전(회)', data: ratio('revenue', 'assets', 1, true), color: C.blue, type: 'line', axis: 'r' },
-					{ name: '레버리지(배)', data: ratio('assets', 'equity', 1), color: C.red, type: 'line', axis: 'r' }
-				] },
+				dupontCard,
 				ociCard
 			] as FinCard[],
 			cashflow: [
@@ -692,14 +707,9 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				] },
 				{ key: 'workingCapital', title: '운전자본', unit: '조', series: [
 					{ name: '순운전자본', data: compose(['receivables', 1], ['inventories', 1], ['payables', -1]), color: C.blue, type: 'bar' },
-					{ name: 'NWC/매출%', data: used.map((_, i) => { const n = (rcv[i] ?? 0) + (inv[i] ?? 0) - (pay[i] ?? 0); return rcv[i] != null && pay[i] != null && rev[i] != null && rev[i]! > 0 ? +((n / rev[i]!) * 100).toFixed(1) : null; }), color: C.warn, type: 'line', axis: 'r' }
+					{ name: 'NWC/매출%', data: used.map((_, i) => { const n = (rcv[i] ?? 0) + (inv[i] ?? 0) - (pay[i] ?? 0); return rcv[i] != null && pay[i] != null && revRaw[i] != null && revRaw[i]! > 0 ? +((n / revRaw[i]!) * 100).toFixed(1) : null; }), color: C.warn, type: 'line', axis: 'r' }
 				] },
-				{ key: 'ccc', title: '현금전환주기', unit: '일', series: [
-					{ name: 'CCC', data: ccc, color: C.purple, type: 'bar' },
-					{ name: 'DSO', data: dso, color: C.blue, type: 'line' },
-					{ name: 'DIO', data: dio, color: C.warn, type: 'line' },
-					{ name: 'DPO', data: dpo, color: C.good, type: 'line' }
-				] },
+				cccCard,
 				{ key: 'capexCycle', title: '투자 사이클', unit: '조', series: [
 					{ name: 'CAPEX', data: ser('capex'), color: C.blue, type: 'bar' },
 					{ name: 'CAPEX/매출%', data: ratio('capex', 'revenue'), color: C.warn, type: 'line', axis: 'r' },
@@ -754,11 +764,12 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		quarter: hasInterim ? buildMode('quarter') : null,
 		ttm: hasInterim ? buildMode('ttm') : null
 	};
+	// 기본 = 분기 (실적 추적의 기본 시간축 — 운영자 결정 2026-06-11). TTM·연간은 버튼 전환.
 	const modes: FinMode[] = [];
-	if (views.ttm) modes.push('ttm');
 	if (views.quarter) modes.push('quarter');
+	if (views.ttm) modes.push('ttm');
 	if (views.annual) modes.push('annual');
 	if (modes.length === 0) return null;
-	const defaultMode: FinMode = views.ttm ? 'ttm' : views.annual ? 'annual' : modes[0];
+	const defaultMode: FinMode = views.quarter ? 'quarter' : views.annual ? 'annual' : modes[0];
 	return { modes, views, defaultMode, filedDates };
 }

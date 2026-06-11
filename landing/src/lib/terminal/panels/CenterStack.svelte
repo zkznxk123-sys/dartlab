@@ -51,10 +51,10 @@
 
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
-	let finMode = $state<FinMode>('ttm');
+	let finMode = $state<FinMode>('quarter');
 	let finState = $state<'loading' | 'ready' | 'empty'>('loading');
 	const finData = $derived(finBundle ? finBundle.views[finMode] ?? null : null);
-	const finModeLabel: Record<FinMode, string> = { ttm: '분기 TTM', quarter: '분기', annual: '연간' };
+	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
 	$effect(() => {
 		const code = co.code;
 		finState = 'loading';
@@ -63,7 +63,7 @@
 		loadTerminalFinance(code).then((b) => {
 			if (cancelled) return;
 			finBundle = b;
-			finMode = b ? b.defaultMode : 'ttm';
+			finMode = b ? b.defaultMode : 'quarter';
 			finState = b && b.modes.length ? 'ready' : 'empty';
 		});
 		return () => {
