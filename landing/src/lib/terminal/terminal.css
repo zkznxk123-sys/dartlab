@@ -404,8 +404,10 @@
 .dlTerm .crAdd { background: none; color: var(--dim); font-family: var(--mono); font-size: 10px; line-height: 1; border: 1px dashed var(--bd); border-radius: 2px; padding: 3px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .crAdd:hover { color: var(--amber); border-color: var(--amber); }
 .dlTerm .crPop { position: relative; }
-.dlTerm .crMenu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); min-width: 180px; }
-.dlTerm .crMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 280px; }
+.dlTerm .crMenu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); min-width: 264px; }
+/* 전역 .ctRow(grid 54px/1fr/26px) 차단 — 리본 메뉴 행은 flex (ctMenu 와 동일 규칙, 누락 시 버튼이 격자에 찌그러짐) */
+.dlTerm .crMenu .ctRow { display: flex; gap: 3px; }
+.dlTerm .crMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 300px; }
 .dlTerm .crMenuR { left: auto; right: 0; }
 .dlTerm .crMenuWideR { min-width: 280px; }
 .dlTerm .crClose { margin-left: auto; flex: none; }
