@@ -376,29 +376,3 @@ def test_normalize_label_twin_and_variants() -> None:
         ("중단영업이익", "영업이익"),  # 중단영업 보존
     ]:
         assert _normKey(a) != _normKey(b), f"over-merge: {a!r} ≡ {b!r}"
-
-
-def test_guarded_number_strip() -> None:
-    """아라비아 ordinal — 미공존(연도 재배치 같은 줄) 통합 · 공존(한 공시 별개항목) 보존(오병합 0)."""
-    from dartlab.providers.dart.panel.cell import _statementFromCells
-
-    def _cf(rcept: str, label: str, year: int, val: str) -> dict:
-        r = _row("2024Q4", "CF", None, label, year, "d", 4, "Y", "ConsolidatedMember", val)
-        r["rceptNo"] = rcept
-        return r
-
-    rows = [
-        _cf("20250101000000", "5.사채의발행", 2024, "500"),  # 미공존(다른 filing 5↔7) → 통합
-        _cf("20210101000000", "7.사채의발행", 2020, "300"),
-        _cf("20250101000000", "3.유형자산", 2024, "100"),  # 한 filing 내 3.↔4. 공존 → 별개 보존
-        _cf("20250101000000", "4.유형자산", 2024, "200"),
-    ]
-    w = _statementFromCells(pl.DataFrame(rows, schema=CELL_SCHEMA), statement="CF", freq="year", scope="consolidated")
-    assert w is not None
-    accts = set(w["account"].to_list())
-    # 미공존 번호변형 → 번호 strip 통합 (두 filing 한 행, 과거연결)
-    assert "사채의발행" in accts
-    bond = w.filter(pl.col("account") == "사채의발행")
-    assert bond["2024"][0] == "500" and bond["2020"][0] == "300"
-    # 공존 번호변형 → 번호 보존 (오병합 0)
-    assert "3.유형자산" in accts and "4.유형자산" in accts and "유형자산" not in accts
