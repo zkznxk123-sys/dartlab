@@ -12,8 +12,9 @@ def test_list_and_describe_stages():
     from dartlab.pipeline import describeStages, listStages
 
     stages = listStages()
-    assert {"finance", "report", "panel", "krx", "macro", "news", "edgar"} <= set(stages)
+    assert {"finance", "report", "panel", "macro", "news", "edgar"} <= set(stages)
     assert "docs" not in stages
+    assert "krx" not in stages  # 운영 OFF (gov 대체) — stages/krx.py 코드는 보존, 레지스트리 미등록
     metas = describeStages()
     assert all({"category", "online", "uploadCategories", "label"} <= set(m) for m in metas)
 

@@ -27,7 +27,8 @@ def buildRegistry() -> dict[str, StageSpec]:
         >>> "finance" in buildRegistry()
         True
     """
-    from dartlab.pipeline.stages import allFilings, dart, dartZip, edgar, edgarPanel, krx, macro, news, reconcile
+    # krx 스테이지는 운영 OFF (gov 로 대체, 저작권). `stages/krx.py` 코드는 보존 — 미import 로 unwire.
+    from dartlab.pipeline.stages import allFilings, dart, dartZip, edgar, edgarPanel, macro, news, reconcile
 
     specs: list[StageSpec] = [
         StageSpec("finance", run=dart.runDartRecent, uploadCategories=("finance",), label="DART 재무 (증분)"),
@@ -82,8 +83,8 @@ def buildRegistry() -> dict[str, StageSpec]:
             uploadCategories=("edgarPanel",),
             label="EDGAR panel 로컬↔HF 양방향 reconcile (운영자 트리거)",
         ),
-        StageSpec("krx", run=krx.runKrx, uploadCategories=("krxPrices",), label="KRX 일별 가격"),
-        StageSpec("krxIndex", run=krx.runKrxIndex, uploadCategories=("krxIndices",), label="KRX 지수"),
+        # krx / krxIndex 스테이지 운영 OFF (2026-06-11, gov 로 완전 대체 — 저작권상 공개 데이터는 gov 소스).
+        # 코드(stages/krx.py·gather/krx/*·buildKrxData.py)는 보존 — 재가동 시 본 2줄 복원이면 끝.
         StageSpec(
             "macro",
             run=macro.runMacro,
