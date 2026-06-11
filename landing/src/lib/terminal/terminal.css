@@ -36,8 +36,9 @@
 	background: var(--bg);
 	color: var(--txt);
 	font-family: var(--sans);
-	font-size: 11px;
-	line-height: 1.25;
+	font-size: 11.5px;
+	/* 한글(Pretendard) 기준 행간 — 1.25 는 영문 condensed 가정이라 한글이 눌림. 표는 로컬 1.3 유지 */
+	line-height: 1.4;
 	-webkit-font-smoothing: antialiased;
 	overflow: hidden;
 }
@@ -100,7 +101,7 @@
 .dlTerm .suggestRow.on { background: rgba(251, 146, 60, 0.1); }
 .dlTerm .sgName { font-family: var(--cond); font-weight: 600; font-size: 11px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .sgCode { font-size: 10px; color: var(--amber); }
-.dlTerm .sgInd { font-family: var(--cond); font-size: 9px; color: var(--dimmer); white-space: nowrap; }
+.dlTerm .sgInd { font-family: var(--cond); font-size: 9.5px; color: var(--dimmer); white-space: nowrap; }
 .dlTerm .cmdBar {
 	flex: 1; display: flex; align-items: center; gap: 8px; background: var(--dl-bg-deep);
 	border: 1px solid var(--bdHi); border-radius: 3px; padding: 3px 8px; max-width: 560px; position: relative;
@@ -121,8 +122,8 @@
 .dlTerm .topRight { display: flex; align-items: center; gap: 14px; margin-left: auto; }
 .dlTerm .langSwitch { display: flex; border: 1px solid var(--bd); border-radius: 3px; overflow: hidden; }
 .dlTerm .langBtn {
-	background: var(--dl-bg-deep); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10px;
-	letter-spacing: 0.5px; border: none; padding: 3px 8px; cursor: pointer; border-right: 1px solid var(--bd);
+	background: var(--dl-bg-deep); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10.5px;
+	letter-spacing: 0.5px; border: none; padding: 4px 9px; cursor: pointer; border-right: 1px solid var(--bd);
 }
 .dlTerm .langBtn:last-child { border-right: none; }
 .dlTerm .langBtn.on { background: var(--amber); color: #1a1206; }
@@ -162,7 +163,7 @@
 .dlTerm .panelBody.flush { padding: 0; }
 
 /* TABLES */
-.dlTerm table.grid { width: 100%; border-collapse: collapse; font-size: 10px; }
+.dlTerm table.grid { width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.3; }
 .dlTerm table.grid th { font-family: var(--cond); font-weight: 600; font-size: 8.5px; letter-spacing: 0.6px; color: var(--dimmer); text-transform: uppercase; text-align: left; padding: 3px 7px; border-bottom: 1px solid var(--bd); position: sticky; top: 0; background: var(--panel); }
 .dlTerm table.grid th.r { text-align: right; }
 .dlTerm table.grid td { padding: 2.5px 7px; border-bottom: 1px solid var(--dl-line); }
@@ -174,7 +175,7 @@
 .dlTerm .quadBox { border: 1px solid var(--bd); border-radius: 3px; padding: 6px 8px; }
 .dlTerm .quadMkt { font-family: var(--cond); font-weight: 700; font-size: 9px; letter-spacing: 0.6px; color: var(--dim); }
 .dlTerm .quadPhase { font-family: var(--cond); font-weight: 700; font-size: 13px; margin: 2px 0; }
-.dlTerm .quadDesc { font-size: 9px; color: var(--dim); line-height: 1.35; text-wrap: pretty; }
+.dlTerm .quadDesc { font-size: 10px; color: var(--dim); line-height: 1.45; text-wrap: pretty; }
 .dlTerm .quadAssets { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
 .dlTerm .assetChip { font-family: var(--mono); font-size: 8px; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--bd); }
 .dlTerm .assetChip.ow { color: var(--up); border-color: rgba(52, 211, 153, 0.3); }
@@ -183,20 +184,20 @@
 
 /* LEFT LENS (scan 축소판: 경제/주가/재무) */
 .dlTerm .lensBar { display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--bd); border-radius: 2px; padding: 2px; }
-.dlTerm .lensTab { flex: 1; background: transparent; color: var(--dim); font-family: var(--cond); font-weight: 700; font-size: 10px; letter-spacing: 0.5px; border: none; border-radius: 2px; padding: 3px 4px; cursor: pointer; }
+.dlTerm .lensTab { flex: 1; background: transparent; color: var(--dim); font-family: var(--cond); font-weight: 700; font-size: 10.5px; letter-spacing: 0.5px; border: none; border-radius: 2px; padding: 4px 4px; cursor: pointer; }
 .dlTerm .lensTab.on { background: rgba(251, 146, 60, 0.14); color: var(--amber); }
 .dlTerm .lensTab:hover:not(.on) { color: var(--txt); }
 .dlTerm .lensScan { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); text-decoration: none; padding: 0 5px; white-space: nowrap; }
 .dlTerm .lensScan:hover { color: var(--amber); }
-.dlTerm .segGroup.mini .seg { font-size: 8px; padding: 1px 4px; }
+.dlTerm .segGroup.mini .seg { font-size: 9px; padding: 1px 5px; }
 /* 통합 스크리너 metric picker (주가 quartet | 재무 quartet) */
 .dlTerm .metricBar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); }
-.dlTerm .metricBar .seg { font-size: 8.5px; padding: 1px 5px; }
+.dlTerm .metricBar .seg { font-size: 9.5px; padding: 1px 6px; }
 .dlTerm .metricDiv { width: 1px; align-self: stretch; background: var(--bd); margin: 1px 2px; }
 .dlTerm .filtChipRow { padding: 3px 6px 0; }
-.dlTerm .filtChip { font-family: var(--cond); font-size: 8.5px; color: var(--amber); background: rgba(251, 146, 60, 0.1); border: 1px solid var(--bdAmber); border-radius: 3px; padding: 1px 6px; cursor: pointer; }
+.dlTerm .filtChip { font-family: var(--cond); font-size: 9.5px; color: var(--amber); background: rgba(251, 146, 60, 0.1); border: 1px solid var(--bdAmber); border-radius: 3px; padding: 1px 6px; cursor: pointer; }
 .dlTerm .filtChip:hover { background: rgba(251, 146, 60, 0.18); }
-.dlTerm .scrOpenBtn { font-family: var(--cond); font-size: 9px; font-weight: 700; letter-spacing: 0.4px; color: #1a1206; background: var(--amber); border: none; border-radius: 3px; padding: 2px 7px; cursor: pointer; margin-right: 6px; }
+.dlTerm .scrOpenBtn { font-family: var(--cond); font-size: 10px; font-weight: 700; letter-spacing: 0.4px; color: #1a1206; background: var(--amber); border: none; border-radius: 3px; padding: 2px 8px; cursor: pointer; margin-right: 6px; }
 .dlTerm .scrOpenBtn:hover { filter: brightness(1.08); }
 /* 렌즈 조건 필터 */
 .dlTerm .filtRow { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); }
@@ -205,7 +206,7 @@
 .dlTerm .filtCond { display: flex; align-items: center; gap: 2px; font-family: var(--cond); font-size: 8px; color: var(--dim); white-space: nowrap; }
 .dlTerm .filtNum { width: 38px; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--amber); font-size: 9px; padding: 2px 3px; outline: none; }
 .dlTerm .filtNum:focus { border-color: var(--amber); }
-.dlTerm .filtSel { background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--dim); font-family: var(--cond); font-size: 8.5px; padding: 2px 2px; outline: none; cursor: pointer; }
+.dlTerm .filtSel { background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--dim); font-family: var(--cond); font-size: 9.5px; padding: 2px 2px; outline: none; cursor: pointer; }
 .dlTerm .rankList { display: flex; flex-direction: column; max-height: 460px; overflow-y: auto; }
 .dlTerm .col > .panel.fillCol { flex: 1 1 auto; min-height: 0; }
 .dlTerm .panel.fillCol .panelBody { display: flex; flex-direction: column; }
@@ -216,15 +217,15 @@
 .dlTerm .rkN { font-size: 8.5px; color: var(--dimmer); text-align: right; }
 .dlTerm .rkName { display: flex; flex-direction: column; min-width: 0; }
 .dlTerm .rkName b { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dlTerm .rkInd { font-family: var(--cond); font-size: 8px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .rkInd { font-family: var(--cond); font-size: 9px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .rkVal { font-size: 10px; text-align: right; white-space: nowrap; }
 .dlTerm .rkMag { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
 .dlTerm .rkBar { width: 28px; height: 4px; background: var(--dl-line); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
 .dlTerm .rkBarFill { display: block; height: 100%; border-radius: 2px; }
 .dlTerm .rkHead { display: grid; grid-template-columns: 16px 1fr 44px 36px 36px; align-items: center; gap: 5px; padding: 3px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); }
 .dlTerm .rkHN { font-size: 8px; color: var(--dimmer); text-align: right; }
-.dlTerm .rkHName { font-family: var(--cond); font-size: 8px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.3px; }
-.dlTerm .rkHCol { font-family: var(--cond); font-size: 8px; color: var(--dim); text-align: right; background: none; border: none; cursor: pointer; padding: 0; white-space: nowrap; }
+.dlTerm .rkHName { font-family: var(--cond); font-size: 9px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.3px; }
+.dlTerm .rkHCol { font-family: var(--cond); font-size: 9px; color: var(--dim); text-align: right; background: none; border: none; cursor: pointer; padding: 0; white-space: nowrap; }
 .dlTerm .rkHCol:hover { color: var(--txt); }
 .dlTerm .rkHCol.on { color: var(--amber); font-weight: 700; }
 .dlTerm .rkCol { font-size: 9.5px; text-align: right; white-space: nowrap; }
@@ -256,8 +257,8 @@
 /* MOVERS */
 .dlTerm .moversWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }
 .dlTerm .moverCol { background: var(--panel); padding: 5px 7px; }
-.dlTerm .moverHd { font-family: var(--cond); font-size: 8px; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 3px; }
-.dlTerm .moverRow { display: flex; justify-content: space-between; gap: 6px; font-size: 9.5px; padding: 1.5px 0; cursor: pointer; }
+.dlTerm .moverHd { font-family: var(--cond); font-size: 9px; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 3px; }
+.dlTerm .moverRow { display: flex; justify-content: space-between; gap: 6px; font-size: 10px; padding: 1.5px 0; cursor: pointer; }
 .dlTerm .moverRow:hover { opacity: 0.8; }
 .dlTerm .moverRow .mn { font-family: var(--cond); color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .moverRow .mv { font-family: var(--mono); flex-shrink: 0; }
@@ -269,7 +270,7 @@
 .dlTerm .symBadge { font-family: var(--cond); font-weight: 700; font-size: 9px; letter-spacing: 1px; padding: 1px 5px; border-radius: 2px; }
 .dlTerm .symBadge.kr { background: rgba(96, 165, 250, 0.15); color: var(--dl-info); border: 1px solid rgba(96, 165, 250, 0.3); }
 .dlTerm .symName { font-family: var(--cond); font-weight: 600; font-size: 13px; color: var(--txt); }
-.dlTerm .symMeta { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); margin-top: 2px; letter-spacing: 0.3px; }
+.dlTerm .symMeta { font-family: var(--mono); font-size: 9px; color: var(--dimmer); margin-top: 2px; letter-spacing: 0.3px; }
 .dlTerm .symLinks { display: flex; gap: 9px; margin-top: 3px; }
 .dlTerm .symLinks a { font-family: var(--mono); font-size: 8.5px; color: var(--amberDim); text-decoration: none; letter-spacing: 0.2px; }
 .dlTerm .symLinks a:hover { color: var(--amber); }
@@ -314,14 +315,15 @@
 .dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 78px 10px 10px 58px; }
 .dlTerm .chartTools { position: absolute; top: 6px; right: 12px; display: flex; gap: 4px; z-index: 24; }
 .dlTerm .chartWrap.full .chartTools { top: 10px; right: 16px; }
-.dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
+/* 버튼류 — 한글 라벨이 mono(한글 글리프 없음→generic 폴백)로 눌리던 것 sans 통일 + 10px 하한 */
+.dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 8px; cursor: pointer; }
 .dlTerm .chartTool:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .chartTool.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .chartTool:disabled { opacity: 0.4; cursor: default; }
 /* 인-차트 툴바 — 기간(좌상) */
 .dlTerm .chartBar { position: absolute; top: 6px; left: 8px; z-index: 6; display: flex; gap: 3px; align-items: center; }
 .dlTerm .cbDiv { width: 1px; height: 12px; background: var(--bd); margin: 0 2px; }
-.dlTerm .cbtn { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
+.dlTerm .cbtn { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 8px; cursor: pointer; }
 .dlTerm .cbtn:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .cbtn.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 /* 다중 토글(수정·실적·밴드·기준·매물대·비교류) — 라디오(segGroup 솔리드)와 시각 위계 분리: tint on */
@@ -351,7 +353,7 @@
 .dlTerm .btKpis { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 9.5px; color: var(--dim); margin-top: 1px; }
 .dlTerm .btKpis b { color: var(--txt); margin-left: 3px; }
 .dlTerm .btSub { font-style: normal; color: var(--dimmer); margin-left: 2px; font-size: 8.5px; }
-.dlTerm .btTradesBtn { background: none; border: none; color: var(--amber); font-family: var(--mono); font-size: 9.5px; cursor: pointer; padding: 0; }
+.dlTerm .btTradesBtn { background: none; border: none; color: var(--amber); font-family: var(--sans); font-size: 10px; cursor: pointer; padding: 0; }
 .dlTerm .btTrades { max-height: 160px; overflow: auto; margin-top: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
 .dlTerm .btTable { width: 100%; border-collapse: collapse; font-size: 9.5px; }
 .dlTerm .btTable th { text-align: left; color: var(--dimmer); font-weight: 400; padding: 2px 6px 2px 0; }
@@ -395,13 +397,13 @@
 .dlTerm .crLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; flex: none; }
 .dlTerm .crChips { flex-wrap: nowrap; }
 .dlTerm .crChipPair { display: inline-flex; align-items: center; }
-.dlTerm .crChip { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px 0 0 2px; padding: 4px 6px; cursor: pointer; white-space: nowrap; }
+.dlTerm .crChip { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px 0 0 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .crChip:hover:not(:disabled) { color: var(--txt); border-color: var(--amber); }
 .dlTerm .crChip:disabled { cursor: default; }
 .dlTerm .crChip.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); border-radius: 2px; }
 .dlTerm .crChip.x { border-left: 0; border-radius: 0 2px 2px 0; padding: 4px 5px; }
 .dlTerm .crChip.x:hover { color: var(--dl-red, #f0616f); border-color: var(--dl-red, #f0616f); }
-.dlTerm .crAdd { background: none; color: var(--dim); font-family: var(--mono); font-size: 10px; line-height: 1; border: 1px dashed var(--bd); border-radius: 2px; padding: 3px 7px; cursor: pointer; white-space: nowrap; }
+.dlTerm .crAdd { background: none; color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px dashed var(--bd); border-radius: 2px; padding: 3px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .crAdd:hover { color: var(--amber); border-color: var(--amber); }
 .dlTerm .crPop { position: relative; }
 .dlTerm .crMenu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); min-width: 264px; }
@@ -414,7 +416,7 @@
 .dlTerm .mItem.mGear { padding: 4px 4px; margin-left: -2px; border-left: 0; }
 .dlTerm .btModelNote { font-size: 8.5px; color: var(--dimmer); border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; margin-top: 2px; max-width: 250px; line-height: 1.5; }
 .dlTerm .ipEditor { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; }
-.dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
+.dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 5px 8px; cursor: pointer; white-space: nowrap; }
 .dlTerm .mItem:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .mItem.mClear { width: 100%; color: var(--dl-red, #f0616f); }
@@ -424,7 +426,7 @@
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }
 .dlTerm .chartCtl { display: flex; gap: 8px; align-items: center; }
 .dlTerm .segGroup { display: flex; border: 1px solid var(--bd); border-radius: 2px; overflow: hidden; }
-.dlTerm .seg { background: var(--dl-bg-deep); color: var(--dim); font-family: var(--mono); font-size: 9px; border: none; padding: 2px 6px; cursor: pointer; border-right: 1px solid var(--bd); }
+.dlTerm .seg { background: var(--dl-bg-deep); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: none; padding: 3px 7px; cursor: pointer; border-right: 1px solid var(--bd); }
 .dlTerm .seg:last-child { border-right: none; }
 .dlTerm .seg.on { background: var(--amber); color: #1a1206; font-weight: 600; }
 .dlTerm .seg:hover:not(.on) { color: var(--txt); }
@@ -441,7 +443,7 @@
 .dlTerm .finChart { padding: 5px 2px; }
 .dlTerm .finChart svg { width: 100%; height: auto; display: block; }
 .dlTerm .finChart figure { margin: 0; }
-.dlTerm .finChart figcaption { font-family: var(--cond); font-size: 9px; color: var(--dimmer); margin-bottom: 3px; }
+.dlTerm .finChart figcaption { font-family: var(--cond); font-size: 9.5px; color: var(--dimmer); margin-bottom: 3px; }
 
 /* 재무제표 분석 — 4열 그리드, 계정명 범례 + Y축 숫자 + X축 기간 (해석 가능·크게) */
 /* 12칸 그리드 = 기본 4열(span 3). 카드 수 나머지(1·2·3)는 마지막 1~2행을 3열/2열로 재배분 —
@@ -464,20 +466,20 @@
 .dlTerm .mfcInfo { width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--bd); background: none; color: var(--dimmer); font-size: 8.5px; font-weight: 700; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; margin-left: 4px; }
 .dlTerm .mfcInfo:hover, .dlTerm .mfcInfo.on { color: var(--amber); border-color: var(--amber); }
 .dlTerm .mfcGuide { position: absolute; top: 18px; left: 4px; right: 4px; z-index: 8; background: rgba(8, 13, 23, 0.97); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; padding: 7px 8px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55); }
-.dlTerm .mfcGuideRow { font-size: 9.5px; line-height: 1.45; color: var(--txt); display: flex; gap: 5px; align-items: flex-start; }
+.dlTerm .mfcGuideRow { font-size: 10.5px; line-height: 1.55; color: var(--txt); display: flex; gap: 5px; align-items: flex-start; }
 .dlTerm .mfcGuideTag { flex-shrink: 0; font-family: var(--cond); font-size: 8px; letter-spacing: 0.4px; color: var(--dim); border: 1px solid var(--bd); border-radius: 2px; padding: 1px 4px; margin-top: 1px; }
 .dlTerm .mfcGuideTag.gtGood { color: #34d399; border-color: rgba(52, 211, 153, 0.45); }
 .dlTerm .mfcGuideTag.gtBad { color: #f0616f; border-color: rgba(240, 97, 111, 0.45); }
-.dlTerm .mfcGuideFoot { font-size: 8px; color: var(--dimmer); }
+.dlTerm .mfcGuideFoot { font-size: 9px; color: var(--dimmer); }
 .dlTerm .finFsGrid .mfcGuideRow { font-size: 11px; }
 .dlTerm .finFsGrid .mfcGuideFoot { font-size: 9px; }
 .dlTerm .finFsGrid .mfcInfo { width: 15px; height: 15px; font-size: 10px; }
 .dlTerm .mfcHead { display: flex; align-items: baseline; gap: 5px; line-height: 1.1; }
-.dlTerm .mfcTitle { font-family: var(--cond); font-size: 11px; font-weight: 700; color: var(--txt); letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .mfcTitle { font-family: var(--cond); font-size: 11.5px; font-weight: 700; color: var(--txt); letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .mfcVal { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--txt); flex-shrink: 0; white-space: nowrap; }
 .dlTerm .mfcUnit { font-size: 7.5px; color: var(--dimmer); margin-left: 1px; font-weight: 400; }
 .dlTerm .mfcLegend { display: flex; flex-wrap: wrap; gap: 1px 8px; margin: 2px 0 1px; }
-.dlTerm .mfcLg { display: inline-flex; align-items: center; gap: 3px; font-size: 8.5px; color: var(--dim); white-space: nowrap; }
+.dlTerm .mfcLg { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; color: var(--dim); white-space: nowrap; }
 .dlTerm .mfcLg i { width: 8px; height: 3px; border-radius: 1px; display: inline-block; }
 .dlTerm .mfcPlot { position: relative; }
 .dlTerm .mfc svg { width: 100%; height: auto; display: block; cursor: crosshair; }
@@ -486,7 +488,7 @@
 .dlTerm .mfcHeatV { fill: #dbe2ec; font-size: 7px; }
 .dlTerm .mfcTip { position: absolute; top: 3px; z-index: 6; background: rgba(8, 13, 23, 0.96); border: 1px solid var(--bd); border-radius: 3px; padding: 3px 5px; pointer-events: none; min-width: 76px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); }
 .dlTerm .mfcTipP { font-family: var(--mono); font-size: 8.5px; color: var(--amber); font-weight: 700; margin-bottom: 2px; letter-spacing: 0.3px; }
-.dlTerm .mfcTipR { display: flex; align-items: center; gap: 4px; font-size: 9px; line-height: 1.4; }
+.dlTerm .mfcTipR { display: flex; align-items: center; gap: 4px; font-size: 9.5px; line-height: 1.4; }
 .dlTerm .mfcTipR i { width: 7px; height: 3px; border-radius: 1px; flex-shrink: 0; }
 .dlTerm .mfcTipN { color: var(--dim); flex: 1; white-space: nowrap; padding-right: 4px; }
 .dlTerm .mfcTipR b { color: var(--txt); }
@@ -521,12 +523,12 @@
 .dlTerm .fundV { font-size: 13px; font-weight: 600; color: var(--txt); }
 
 /* ANALYSIS */
-.dlTerm .anSummary { font-size: 10px; line-height: 1.4; color: var(--txt); padding: 5px 7px; border-bottom: 1px solid var(--bd); text-wrap: pretty; background: rgba(251, 146, 60, 0.03); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dlTerm .anSummary { font-size: 10.5px; line-height: 1.5; color: var(--txt); padding: 5px 7px; border-bottom: 1px solid var(--bd); text-wrap: pretty; background: rgba(251, 146, 60, 0.03); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .dlTerm .anTracks { padding: 4px 7px; display: flex; flex-direction: column; gap: 3px; }
 .dlTerm .anRow { display: grid; grid-template-columns: 58px 60px 1fr; align-items: baseline; gap: 7px; }
 .dlTerm .anName { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--amber); }
 .dlTerm .anDelta { font-size: 10px; font-weight: 600; text-align: right; }
-.dlTerm .anVerdict { font-size: 9.5px; color: var(--dim); line-height: 1.3; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.dlTerm .anVerdict { font-size: 10px; color: var(--dim); line-height: 1.4; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* VALUATION */
 .dlTerm .valTop { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }
@@ -539,7 +541,7 @@
 .dlTerm .fairRange { position: absolute; top: 0; bottom: 0; background: rgba(251, 146, 60, 0.35); border-left: 1px solid var(--amber); border-right: 1px solid var(--amber); }
 .dlTerm .fairNow { position: absolute; top: -5px; width: 2px; height: 18px; background: var(--dl-ink-print); }
 .dlTerm .fairLbl { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--dim); }
-.dlTerm .valVerdict { padding: 4px 7px; border-top: 1px solid var(--bd); font-size: 9.5px; text-wrap: pretty; line-height: 1.35; }
+.dlTerm .valVerdict { padding: 4px 7px; border-top: 1px solid var(--bd); font-size: 10px; text-wrap: pretty; line-height: 1.45; }
 
 /* VERDICT (종합 판정) */
 .dlTerm .vdRisk { font-family: var(--cond); font-size: 9px; color: var(--dim); letter-spacing: 0.4px; }
@@ -549,10 +551,10 @@
 .dlTerm .vdChip { display: inline-flex; align-items: baseline; gap: 4px; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 3px; padding: 2px 6px; }
 .dlTerm .vdChip i { font-family: var(--cond); font-style: normal; font-size: 8px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; }
 .dlTerm .vdChip b { font-family: var(--mono); font-size: 11px; font-weight: 700; }
-.dlTerm .vdChip em { font-family: var(--cond); font-style: normal; font-size: 8.5px; }
-.dlTerm .vdSummary { font-size: 10px; line-height: 1.4; color: var(--txt); padding: 5px 7px; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dlTerm .vdChip em { font-family: var(--cond); font-style: normal; font-size: 9px; }
+.dlTerm .vdSummary { font-size: 10.5px; line-height: 1.5; color: var(--txt); padding: 5px 7px; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .dlTerm .vdSC { display: flex; flex-wrap: wrap; gap: 3px 6px; padding: 0 7px 6px; }
-.dlTerm .vdS, .dlTerm .vdC { font-size: 9px; line-height: 1.3; padding: 1px 5px; border-radius: 2px; }
+.dlTerm .vdS, .dlTerm .vdC { font-size: 9.5px; line-height: 1.4; padding: 1px 5px; border-radius: 2px; }
 .dlTerm .vdS { color: var(--up); background: rgba(52, 211, 153, 0.08); }
 .dlTerm .vdC { color: var(--dn); background: rgba(240, 97, 111, 0.08); }
 
@@ -563,7 +565,7 @@
 .dlTerm .dpVal { font-size: 13px; font-weight: 700; line-height: 1; }
 .dlTerm .dpSpark { width: 100%; height: 13px; display: block; opacity: 0.85; }
 .dlTerm .dpOp { display: flex; align-items: center; font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--dimmer); padding: 0 1px; }
-.dlTerm .dpVerdict { padding: 4px 7px; border-top: 1px solid var(--bd); font-size: 9.5px; text-wrap: pretty; line-height: 1.35; color: var(--txt); }
+.dlTerm .dpVerdict { padding: 4px 7px; border-top: 1px solid var(--bd); font-size: 10px; text-wrap: pretty; line-height: 1.45; color: var(--txt); }
 
 /* 정기공시 목록 */
 .dlTerm .filingList { display: flex; flex-direction: column; max-height: 320px; overflow-y: auto; }
@@ -607,7 +609,7 @@
 .scrDirBtn:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
 .scrShown { margin-left: auto; font-size: 10px; color: var(--dl-ink-dim); }
 .scrResults { flex: 1; overflow-y: auto; }
-.scrTable { width: 100%; border-collapse: collapse; font-size: 11px; }
+.scrTable { width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.35; }
 .scrTable th { position: sticky; top: 0; background: var(--dl-bg-raised, #0e141f); font-family: var(--dl-font-ui); font-size: 9px; font-weight: 600; color: var(--dl-ink-dim, #5b6473); text-transform: uppercase; letter-spacing: 0.4px; padding: 5px 10px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); }
 .scrTable th.l, .scrTable td.l { text-align: left; }
 .scrTable th.r, .scrTable td.r { text-align: right; }
@@ -628,18 +630,18 @@
 .srcNote.dim { color: var(--dl-ink-dim, #5b6473); }
 .dlTerm .sbSrcBtn { background: none; border: 1px solid var(--bd); border-radius: 2px; cursor: pointer; color: inherit; font: inherit; padding: 1px 7px; }
 .dlTerm .sbSrcBtn:hover { border-color: var(--amber); color: var(--amber); }
-.scrInd { display: block; font-size: 8.5px; color: var(--dl-ink-dim, #5b6473); }
+.scrInd { display: block; font-size: 9px; color: var(--dl-ink-dim, #5b6473); }
 .scrEmpty { text-align: center; color: var(--dl-ink-dim); padding: 24px; font-size: 11px; }
 
 /* FINANCIALS */
 .dlTerm .finCtl { display: flex; gap: 0; border: 1px solid var(--bd); border-radius: 2px; overflow: hidden; }
 .dlTerm .finTabs { display: flex; border-bottom: 1px solid var(--bd); }
-.dlTerm .finTab { flex: 1; background: var(--panel2); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10px; letter-spacing: 0.5px; border: none; border-right: 1px solid var(--bd); padding: 4px; cursor: pointer; }
+.dlTerm .finTab { flex: 1; background: var(--panel2); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10.5px; letter-spacing: 0.5px; border: none; border-right: 1px solid var(--bd); padding: 5px 4px; cursor: pointer; }
 .dlTerm .finTab:last-child { border-right: none; }
 .dlTerm .finTab.on { background: rgba(251, 146, 60, 0.1); color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
 .dlTerm .finTab:hover:not(.on) { color: var(--txt); }
 .dlTerm .finScroll { max-height: 248px; overflow-y: auto; }
-.dlTerm .finTable { width: 100%; border-collapse: collapse; font-size: 10px; }
+.dlTerm .finTable { width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.3; }
 .dlTerm .finTable th { font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 7px; text-align: right; border-bottom: 1px solid var(--bd); position: sticky; top: 0; background: var(--panel); }
 .dlTerm .finTable th.finAcct { text-align: left; }
 .dlTerm .finAcct { text-align: left; font-family: var(--sans); color: var(--txt); padding: 2.5px 7px; white-space: nowrap; }
@@ -660,29 +662,29 @@
 .dlTerm .factGrid { display: grid; grid-template-columns: 1fr 1fr; }
 .dlTerm .factRow { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 6px; padding: 3px 8px; border-bottom: 1px solid var(--dl-line); }
 .dlTerm .factRow:nth-child(odd) { border-right: 1px solid var(--dl-line); }
-.dlTerm .factL { font-family: var(--cond); font-weight: 600; font-size: 9.5px; color: var(--amber); white-space: nowrap; }
+.dlTerm .factL { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--amber); white-space: nowrap; }
 .dlTerm .factV { font-size: 10px; color: var(--txt); font-weight: 600; white-space: nowrap; text-align: right; }
-.dlTerm .factD { grid-column: 1 / -1; font-family: var(--cond); font-size: 9px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .factD { grid-column: 1 / -1; font-family: var(--cond); font-size: 9.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* SUPPLY CHAIN */
 .dlTerm .scWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }
 .dlTerm .scCol { background: var(--panel); padding: 4px 6px; min-width: 0; }
-.dlTerm .scHd { font-family: var(--cond); font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 3px; }
+.dlTerm .scHd { font-family: var(--cond); font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 3px; }
 .dlTerm .scRow { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 5px; padding: 1.5px 0; cursor: pointer; }
 .dlTerm .scRow:hover { opacity: 0.8; }
 .dlTerm .scName { min-width: 0; display: flex; flex-direction: column; }
-.dlTerm .scName b { font-family: var(--cond); font-weight: 600; font-size: 9.5px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dlTerm .scProd { font-family: var(--cond); font-size: 8px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .scName b { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .scProd { font-family: var(--cond); font-size: 9px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .scRatio { font-size: 9px; color: var(--amber); white-space: nowrap; }
 
 /* FILING CHANGES FEED */
 .dlTerm .chgFeed { display: flex; flex-direction: column; max-height: 132px; overflow-y: auto; }
-.dlTerm .chgFeedRow { display: grid; grid-template-columns: 34px auto auto 1fr; align-items: baseline; gap: 6px; padding: 2.5px 8px; border-bottom: 1px solid var(--dl-line); font-size: 9px; }
+.dlTerm .chgFeedRow { display: grid; grid-template-columns: 34px auto auto 1fr; align-items: baseline; gap: 6px; padding: 2.5px 8px; border-bottom: 1px solid var(--dl-line); font-size: 9.5px; }
 .dlTerm .chgType { font-family: var(--cond); font-weight: 700; font-size: 7.5px; padding: 0 3px; border-radius: 2px; text-align: center; white-space: nowrap; }
 .dlTerm .chgType.st { color: var(--industry); background: rgba(167, 139, 250, 0.14); }
 .dlTerm .chgType.nu { color: var(--good); background: rgba(52, 211, 153, 0.12); }
 .dlTerm .chgSec { font-family: var(--cond); font-weight: 600; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
-.dlTerm .chgPer { font-size: 8.5px; color: var(--dimmer); white-space: nowrap; }
+.dlTerm .chgPer { font-size: 9px; color: var(--dimmer); white-space: nowrap; }
 .dlTerm .chgPrev { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* CREDIT */
@@ -697,7 +699,7 @@
 .dlTerm .ctTrack { height: 6px; background: var(--dl-bg-overlay); border-radius: 2px; overflow: hidden; }
 .dlTerm .ctFill { height: 100%; background: linear-gradient(90deg, var(--amberDim), var(--amber)); }
 .dlTerm .ctVal { font-family: var(--mono); font-size: 10px; text-align: right; color: var(--txt); }
-.dlTerm .creditDiv { font-size: 9px; color: var(--dim); line-height: 1.35; padding: 4px 7px; border-top: 1px solid var(--bd); text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dlTerm .creditDiv { font-size: 10px; color: var(--dim); line-height: 1.45; padding: 4px 7px; border-top: 1px solid var(--bd); text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* CHANGES */
 .dlTerm .chgList { display: flex; flex-direction: column; }
@@ -712,7 +714,7 @@
 .dlTerm .peerList { display: flex; flex-direction: column; }
 .dlTerm .peerRow { display: flex; flex-direction: column; gap: 1px; padding: 3px 7px; border-bottom: 1px solid var(--dl-line); cursor: pointer; font-size: 10px; }
 .dlTerm .peerTop { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
-.dlTerm .peerProd { font-size: 8px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.dlTerm .peerProd { font-size: 9px; color: var(--dimmer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
 .dlTerm .peerRow:hover { background: var(--dl-bg-overlay); }
 .dlTerm .peerRow.self { background: rgba(251, 146, 60, 0.08); box-shadow: inset 2px 0 0 var(--amber); }
 .dlTerm .peerName { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -726,7 +728,7 @@
 /* GOVERNANCE */
 .dlTerm .govGrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--bd); }
 .dlTerm .govCell { background: var(--panel); padding: 4px 7px; display: flex; flex-direction: column; gap: 1px; }
-.dlTerm .govCell span { font-family: var(--cond); font-size: 8px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; }
+.dlTerm .govCell span { font-family: var(--cond); font-size: 9px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; }
 .dlTerm .govCell b { font-family: var(--mono); font-size: 12px; color: var(--txt); }
 .dlTerm .patBig { padding: 5px; text-align: center; }
 .dlTerm .patBig .pv { font-family: var(--cond); font-weight: 700; font-size: 16px; color: var(--industry); }
@@ -746,9 +748,9 @@
 .dlTerm .aiSteps { padding: 4px 7px; display: flex; flex-direction: column; gap: 1px; border-bottom: 1px solid var(--bd); }
 .dlTerm .aiStep { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: 6px; font-size: 9px; }
 .dlTerm .aiTool { font-family: var(--cond); font-weight: 700; font-size: 9px; color: var(--good); letter-spacing: 0.3px; }
-.dlTerm .aiCall { font-size: 9px; color: var(--txt); }
+.dlTerm .aiCall { font-size: 9.5px; color: var(--txt); }
 .dlTerm .aiRef { font-family: var(--mono); font-size: 8px; color: var(--dimmer); }
-.dlTerm .aiAnswer { font-size: 9.5px; line-height: 1.4; color: var(--txt); padding: 5px 7px; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.dlTerm .aiAnswer { font-size: 10px; line-height: 1.5; color: var(--txt); padding: 5px 7px; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* PERCENTILE */
 .dlTerm .pctList { display: flex; flex-direction: column; }
@@ -854,21 +856,21 @@
 /* KPI 밴드 — 전 탭 고정, 최신기 핵심 6지표 + 룰 인사이트 */
 .dlTerm .finKpis { display: flex; align-items: center; gap: 22px; padding: 7px 14px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-deep, #0a0f18); overflow-x: auto; scrollbar-width: none; }
 .dlTerm .fkItem { display: flex; flex-direction: column; gap: 1px; flex: none; }
-.dlTerm .fkLbl { font-family: var(--cond); font-size: 9px; letter-spacing: 0.5px; color: var(--dimmer); text-transform: uppercase; }
+.dlTerm .fkLbl { font-family: var(--cond); font-size: 10px; letter-spacing: 0.5px; color: var(--dimmer); text-transform: uppercase; }
 .dlTerm .fkRow { display: flex; align-items: baseline; gap: 6px; }
 .dlTerm .fkVal { font-size: 15px; font-weight: 700; color: var(--txt); line-height: 1.1; }
 .dlTerm .fkUnit { font-style: normal; font-size: 9px; color: var(--dimmer); margin-left: 1px; font-weight: 400; }
 .dlTerm .fkDelta { font-size: 9.5px; font-weight: 600; }
 .dlTerm .fkSpark { width: 46px; height: 13px; color: var(--dim); margin-top: 1px; }
-.dlTerm .fkPeriod { margin-left: auto; font-size: 9.5px; color: var(--dim); flex: none; padding-left: 14px; }
-.dlTerm .finFsQ { font-family: var(--cond); font-size: 11px; letter-spacing: 0.4px; color: var(--amber); margin: 0 0 8px; }
+.dlTerm .fkPeriod { margin-left: auto; font-size: 10.5px; color: var(--dim); flex: none; padding-left: 14px; }
+.dlTerm .finFsQ { font-family: var(--cond); font-size: 11.5px; letter-spacing: 0.4px; color: var(--amber); margin: 0 0 8px; }
 /* 원표 탭 — 전 기간 와이드 테이블 */
 .dlTerm .finTblWrap { margin-bottom: 16px; border: 1px solid var(--bd); border-radius: 3px; background: var(--dl-bg-base); }
 .dlTerm .finTblHead { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--bd); }
 .dlTerm .finTblHead b { font-family: var(--cond); font-size: 12px; color: var(--txt); letter-spacing: 0.3px; }
 .dlTerm .finTblUnit { font-size: 9px; color: var(--dimmer); margin-right: auto; }
 .dlTerm .finTblScroll { overflow-x: auto; }
-.dlTerm .finTbl { border-collapse: collapse; font-size: 10px; white-space: nowrap; }
+.dlTerm .finTbl { border-collapse: collapse; font-size: 10px; line-height: 1.3; white-space: nowrap; }
 .dlTerm .finTbl th, .dlTerm .finTbl td { padding: 3px 8px; text-align: right; border-bottom: 1px solid rgba(30, 36, 51, 0.55); }
 .dlTerm .finTbl thead th { font-family: var(--mono); font-size: 9px; color: var(--dim); position: sticky; top: 0; background: var(--dl-bg-base); }
 .dlTerm .finTbl td { color: var(--txt); }
@@ -877,7 +879,7 @@
 /* 매크로 순풍/역풍 섹터 리본 (LeftRail 마켓 펄스) */
 .dlTerm .twRibbon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 2px 1px; border-top: 1px solid var(--bd); margin-top: 5px; }
 .dlTerm .twHd { font-family: var(--cond); font-size: 8px; letter-spacing: 0.6px; text-transform: uppercase; }
-.dlTerm .twChip { font-family: var(--mono); font-size: 8.5px; padding: 1px 5px; border-radius: 2px; border: 1px solid var(--bd); background: var(--dl-bg-deep); color: var(--dim); cursor: pointer; }
+.dlTerm .twChip { font-family: var(--sans); font-size: 9.5px; padding: 1px 6px; border-radius: 2px; border: 1px solid var(--bd); background: var(--dl-bg-deep); color: var(--dim); cursor: pointer; }
 .dlTerm .twChip.up { border-color: rgba(52, 211, 153, 0.3); color: var(--up); }
 .dlTerm .twChip.dn { border-color: rgba(240, 97, 111, 0.3); color: var(--dn); }
 .dlTerm .twChip.on { outline: 1px solid var(--amber); outline-offset: -1px; }
