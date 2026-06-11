@@ -92,472 +92,640 @@
 ],
 "blog": {
 "000660": {
-"slug": "01-000660-skhynix",
+"slug": "000660-skhynix",
 "title": "SK하이닉스 (000660) — 한국 반도체 30년의 미스터리, 그리고 영업이익률 58%",
 "date": "2026-04-01",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "003230": {
-"slug": "02-003230-samyang-foods",
+"slug": "003230-samyang-foods",
 "title": "삼양식품 (003230) — 라면 빅3 꼴등이 매출 2.3조 글로벌 식품 거인이 되기까지",
 "date": "2026-04-03",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "034020": {
-"slug": "03-034020-doosan-enerbility",
+"slug": "034020-doosan-enerbility",
 "title": "두산에너빌리티 (034020) — 부채비율 305%에서 129%까지, 9년 다이어트의 진짜 모습",
 "date": "2026-04-05",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "196170": {
-"slug": "04-196170-alteogen",
+"slug": "196170-alteogen",
 "title": "알테오젠 (196170) — 9년 적자 바이오텍이 한 건의 라이선스로 영업이익 +1,069억까지",
 "date": "2026-04-08",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "011200": {
-"slug": "05-011200-hmm",
+"slug": "011200-hmm",
 "title": "HMM (011200) — 시장이 아니라 사이클이 주가를 결정하는 회사, dartlab quant 베타 0.37 R² 10%",
 "date": "2026-04-08",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "068270": {
-"slug": "06-068270-celltrion",
+"slug": "068270-celltrion",
 "title": "셀트리온 (068270) — IMF로 직장 잃은 41세가 5천만원으로 시작한 회사, 25년 후 무형자산 13.78조",
 "date": "2026-04-08",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "012450": {
-"slug": "07-012450-hanwha-aerospace",
+"slug": "012450-hanwha-aerospace",
 "title": "한화에어로스페이스 (012450) — 삼성이 8,400억에 버린 무기가 수주잔고 37조가 됐다",
 "date": "2026-04-09",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "267260": {
-"slug": "08-267260-hd-hyundai-electric",
+"slug": "267260-hd-hyundai-electric",
 "title": "HD현대일렉트릭 (267260) — 7년 전 적자 1,006억이 올해 1조가 됐다, 변압기 하나로",
 "date": "2026-04-09",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "010130": {
-"slug": "09-010130-korea-zinc",
+"slug": "010130-korea-zinc",
 "title": "고려아연 (010130) — 50년 만에 첫 순손실 2,457억, 그런데 영업이익은 사상 최대",
 "date": "2026-04-09",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "278470": {
-"slug": "10-278470-apr",
+"slug": "278470-apr",
 "title": "에이피알 (278470) — 화장품 회사가 가전을 4,070억 팔았다, 그게 시작이었다",
 "date": "2026-04-09",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "259960": {
-"slug": "11-259960-krafton",
+"slug": "259960-krafton",
 "title": "크래프톤 (259960) — PUBG가 5년간 3조를 벌었다, 그 돈은 어디로 갔는가",
 "date": "2026-04-09",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "483650": {
-"slug": "12-483650-dalba-global",
+"slug": "483650-dalba-global",
 "title": "달바글로벌 (483650) — 2,700개 종목을 스캔했더니 영업이익률 26%짜리 화장품 회사가 걸렸다",
 "date": "2026-04-09",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "009450": {
-"slug": "13-009450-kyungdong-navien",
+"slug": "009450-kyungdong-navien",
 "title": "경동나비엔 (009450) — 민둥산의 연탄회사가 미국 온수기 시장 절반을 먹었다",
 "date": "2026-04-10",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "439260": {
-"slug": "14-439260-daehan-shipbuilding",
+"slug": "439260-daehan-shipbuilding",
 "title": "대한조선 (439260) — 3번 죽은 조선소가 OPM 24%를 찍었다",
 "date": "2026-04-11",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "086280": {
-"slug": "15-086280-hyundai-glovis",
+"slug": "086280-hyundai-glovis",
 "title": "현대글로비스 (086280) — 물류회사 장부에 로봇과 경쟁사의 차가 숨어있다",
 "date": "2026-04-11",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "004370": {
-"slug": "16-004370-nongshim",
+"slug": "004370-nongshim",
 "title": "농심 (004370) — 라면 1위인데 왜 마진은 삼양의 1/4인가",
 "date": "2026-04-11",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "018880": {
-"slug": "17-018880-hanon-systems",
+"slug": "018880-hanon-systems",
 "title": "한온시스템 (018880) — 순이익의 7배를 배당으로 쥐어짜면 회사에 무슨 일이 생기는가",
 "date": "2026-04-11",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "011070": {
-"slug": "18-011070-lg-innotek",
+"slug": "011070-lg-innotek",
 "title": "LG이노텍 (011070) — 애플 카메라를 독점하는데 왜 마진이 3%인가",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "011780": {
-"slug": "19-011780-kumho-petrochemical",
+"slug": "011780-kumho-petrochemical",
 "title": "금호석유화학 (011780) — 빅4 중 유일하게 흑자인 이유",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "294870": {
-"slug": "20-294870-hdc-hyundai-dev",
+"slug": "294870-hdc-hyundai-dev",
 "title": "HDC현대산업개발 (294870) — 계약금 2,500억 날리고 6명이 죽은 사고까지 낸 회사가 살아남은 이유",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "012330": {
-"slug": "21-012330-hyundai-mobis",
+"slug": "012330-hyundai-mobis",
 "title": "현대모비스 (012330) — 연결 마진 5.5%인데 별도는 21%, 15%p 갭의 정체",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "017670": {
-"slug": "22-017670-skt",
+"slug": "017670-skt",
 "title": "SK텔레콤 (017670) — 해킹 한 번이 어떻게 OPM 10%를 6%로 만들었는가",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "006360": {
-"slug": "23-006360-gs-engineering",
+"slug": "006360-gs-engineering",
 "title": "GS건설 (006360) — 5,524억 손실을 한 분기에 몰아낸 건설사의 빅배스 전략",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "011760": {
-"slug": "24-011760-hyundai-corp",
+"slug": "011760-hyundai-corp",
 "title": "현대코퍼레이션 (011760) — 종합상사가 영업이익 4배? 이 회사는 무역회사가 아니다",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "015760": {
-"slug": "25-015760-kepco",
-"title": "한국전력 — 전기요금 1원이 5,600억을 만드는 회사",
+"slug": "015760-kepco",
+"title": "한국전력 (015760) — 전기요금 1원이 5,600억을 만드는 회사",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "086520": {
-"slug": "26-086520-ecopro",
-"title": "에코프로 — 시총 78조를 찍은 회사의 영업이익은 864억이었다",
+"slug": "086520-ecopro",
+"title": "에코프로 (086520) — 시총 78조를 찍은 회사의 영업이익은 864억이었다",
 "date": "2026-04-12",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "CPNG": {
-"slug": "27-CPNG-coupang",
-"title": "쿠팡 — 매출 49조인데 이익 $208M, 마진 0.6%의 비밀",
+"slug": "CPNG-coupang",
+"title": "쿠팡 (CPNG) — 매출 49조인데 이익 $208M, 마진 0.6%의 비밀",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "005380": {
-"slug": "28-005380-hyundai-motor",
-"title": "현대자동차 — 매출 186조, 세계 3위인데 왜 BYD보다 싼가",
+"slug": "005380-hyundai-motor",
+"title": "현대자동차 (005380) — 매출 186조, 세계 3위인데 왜 BYD보다 싼가",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "NKE": {
-"slug": "29-NKE-nike",
-"title": "Nike — 세계 1위가 매출 -10%, 주가 -55%, CEO가 버린 선반의 대가",
+"slug": "NKE-nike",
+"title": "Nike (NKE) — 세계 1위가 매출 -10%, 주가 -55%, CEO가 버린 선반의 대가",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "005930": {
-"slug": "30-005930-samsung",
-"title": "삼성전자 — 매출 334조, 반도체 빼면 영업이익률 7%",
+"slug": "005930-samsung",
+"title": "삼성전자 (005930) — 매출 334조, 반도체 빼면 영업이익률 7%",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "OKLO": {
-"slug": "31-OKLO-oklo",
-"title": "Oklo — 매출 0원, 직원 120명, 시총 18조원의 원자력 유니콘",
+"slug": "OKLO-oklo",
+"title": "Oklo (OKLO) — 매출 0원, 직원 120명, 시총 18조원의 원자력 유니콘",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "000270": {
-"slug": "32-000270-kia",
-"title": "기아 — 매출은 형의 60%인데 이익은 90%, 왜 동생이 더 잘 버는가",
+"slug": "000270-kia",
+"title": "기아 (000270) — 매출은 형의 60%인데 이익은 90%, 왜 동생이 더 잘 버는가",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "INTC": {
-"slug": "33-INTC-intel",
-"title": "Intel — 파운드리 적자 100억달러인데 주가 213% 급등, 반도체를 발명한 회사의 마지막 베팅",
+"slug": "INTC-intel",
+"title": "Intel (INTC) — 파운드리 적자 100억달러인데 주가 213% 급등, 반도체를 발명한 회사의 마지막 베팅",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "066570": {
-"slug": "34-066570-lg-electronics",
-"title": "LG전자 — 매출 89조, 영업이익률 2.8%, 스마트폰을 버리고 전장을 얻은 대가",
+"slug": "066570-lg-electronics",
+"title": "LG전자 (066570) — 매출 89조, 영업이익률 2.8%, 스마트폰을 버리고 전장을 얻은 대가",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "UAA": {
-"slug": "35-UAA-under-armour",
-"title": "Under Armour — CEO 3명이 바뀌는 동안 매출이 줄었다, 할머니 지하실의 창업자가 돌아온 이유",
+"slug": "UAA-under-armour",
+"title": "Under Armour (UAA) — CEO 3명이 바뀌는 동안 매출이 줄었다, 할머니 지하실의 창업자가 돌아온 이유",
 "date": "2026-04-13",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "MNST": {
-"slug": "36-MNST-monster-beverage",
-"title": "Monster Beverage — 매출 2.5배인데 CAPEX는 그대로, 코카콜라가 지분 산 회사",
+"slug": "MNST-monster-beverage",
+"title": "Monster Beverage (MNST) — 매출 2.5배인데 CAPEX는 그대로, 코카콜라가 지분 산 회사",
 "date": "2026-04-15",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "META": {
-"slug": "37-META-meta-platforms",
+"slug": "META-meta-platforms",
 "title": "Meta Platforms (META) — CAPEX 697억 달러를 AI에 쏟아부으면서 영업이익률 41%를 유지하는 회사",
 "date": "2026-04-16",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "TSLA": {
-"slug": "38-TSLA-tesla",
+"slug": "TSLA-tesla",
 "title": "Tesla (TSLA) — 매출 10년 만의 역성장, EVA 마이너스로 돌아선 회사가 시총 1조 달러인 이유",
 "date": "2026-04-16",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "352820": {
-"slug": "39-352820-hybe",
+"slug": "352820-hybe",
 "title": "하이브 (352820) — 매출 사상 최대 2.65조인데 당기순손실 2,566억, BTS 없는 2년의 명과 암",
 "date": "2026-04-16",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "IONQ": {
-"slug": "40-IONQ-ionq",
+"slug": "IONQ-ionq",
 "title": "IonQ (IONQ) — 첫 $100M 양자 컴퓨팅 회사가 영업손실 $634M, 분기 순이익 ±10억 달러 요동하는 이유",
 "date": "2026-04-16",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "207940": {
-"slug": "41-207940-samsung-biologics",
+"slug": "207940-samsung-biologics",
 "title": "삼성바이오로직스 (207940) — 남의 약 만드는 공장이 제약사보다 마진이 높다",
 "date": "2026-04-17",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "064350": {
-"slug": "42-064350-hyundai-rotem",
+"slug": "064350-hyundai-rotem",
 "title": "현대로템 (064350) — 팔수록 적자였던 전차 공장이 영업이익률 17%가 된 이유",
 "date": "2026-04-17",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "035720": {
-"slug": "43-035720-kakao",
+"slug": "035720-kakao",
 "title": "카카오 (035720) — 3,000만 DAU가 매일 열어도 마진이 한 자릿수인 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "SMR": {
-"slug": "44-SMR-nuscale-power",
+"slug": "SMR-nuscale-power",
 "title": "뉴스케일파워 (SMR) — 매출 $31M, 현금 $1.25B, 원전 0기",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "083790": {
-"slug": "45-083790-cg-invites",
+"slug": "083790-cg-invites",
 "title": "CG인바이츠 (083790) — 7년 연속 적자, 매출 73억까지 추락한 게임사가 아직 살아있는 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "035420": {
-"slug": "46-035420-naver",
+"slug": "035420-naver",
 "title": "네이버 (035420) — 별도 영업이익률 75%인 회사가 연결하면 18%가 되는 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "288620": {
-"slug": "47-288620-sfuelcell",
+"slug": "288620-sfuelcell",
 "title": "에스퓨얼셀 (288620) — 같은 탈탄소 적자인데 하나는 현금 6억, 하나는 1.8조인 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "042660": {
-"slug": "48-042660-hanwha-ocean",
+"slug": "042660-hanwha-ocean",
 "title": "한화오션 (042660) — 방산을 하는 조선소인데 OPM이 상선 전문의 절반인 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "007310": {
-"slug": "49-007310-ottogi",
+"slug": "007310-ottogi",
 "title": "오뚜기 (007310) — 같은 라면인데 OPM 22%, 5%, 5%가 되는 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "NVDA": {
-"slug": "50-NVDA-nvidia",
+"slug": "NVDA-nvidia",
 "title": "엔비디아 (NVDA) — 공장 없는 반도체 회사가 OPM 62%를 찍은 구조",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "302440": {
-"slug": "51-302440-sk-bioscience",
+"slug": "302440-sk-bioscience",
 "title": "SK바이오사이언스 (302440) — 매출이 2.4배 뛰었는데 적자가 안 줄어드는 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "189300": {
-"slug": "52-189300-intellian",
+"slug": "189300-intellian",
 "title": "인텔리안테크 (189300) — 연간 OPM 3.7%인데 Q4 혼자 16%인 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "041510": {
-"slug": "53-041510-sm-entertainment",
+"slug": "041510-sm-entertainment",
 "title": "SM엔터테인먼트 (041510) — 카카오가 4조에 사고 -1.82조 찍었는데, SM은 OPM 15.6%",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "PLTR": {
-"slug": "54-PLTR-palantir",
+"slug": "PLTR-palantir",
 "title": "팔란티어 (PLTR) — 영업이익률 31%인데 이익의 절반이 현금이 아닌 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "RKLB": {
-"slug": "55-RKLB-rocket-lab",
+"slug": "RKLB-rocket-lab",
 "title": "로켓랩 (RKLB) — 매출 2.8배 늘었는데 영업손실도 70% 커진 이유",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "298000": {
-"slug": "56-298000-hyosung-chemical",
+"slug": "298000-hyosung-chemical",
 "title": "효성화학 (298000) — 팔수록 적자 4년, 그런데 순이익 +3,260억의 진실",
 "date": "2026-04-18",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "128940": {
-"slug": "57-128940-hanmi-pharm",
+"slug": "128940-hanmi-pharm",
 "title": "한미약품 (128940) — 4번 기술수출 반환당한 회사가 영업이익 사상 최대 2,578억을 찍기까지",
 "date": "2026-04-19",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "036570": {
-"slug": "58-036570-ncsoft",
+"slug": "036570-ncsoft",
 "title": "엔씨소프트 (036570) — 28년 흑자 게임사가 왜 2024년 첫 적자를, 2025년엔 영업 161억에 순이익 3,474억을 냈는가",
 "date": "2026-04-19",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "003490": {
-"slug": "59-003490-korean-air",
+"slug": "003490-korean-air",
 "title": "대한항공 (003490) — 10년을 걸어 아시아나를 삼켰는데 왜 영업이익이 반토막 났는가",
 "date": "2026-04-19",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "ARM": {
-"slug": "60-ARM-arm-holdings",
+"slug": "ARM-arm-holdings",
 "title": "ARM (ARM) — 반도체를 한 개도 직접 만들지 않는 회사가 어떻게 세계의 99%를 지배하는가",
 "date": "2026-04-20",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "139480": {
-"slug": "61-139480-emart",
+"slug": "139480-emart",
 "title": "이마트 (139480) — 매출 2배 성장한 회사가 왜 영업이익은 반토막, 2024년 순이익 -5,734억이 된 이유",
 "date": "2026-04-21",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "138040": {
-"slug": "62-138040-meritz-financial",
+"slug": "138040-meritz-financial",
 "title": "메리츠금융지주 (138040) — PBR 0.5 최악이 1.8배 최고로, 주가 3.5배가 된 3년의 오너 결단",
 "date": "2026-04-21",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "042700": {
-"slug": "63-042700-hanmi-semi",
+"slug": "042700-hanmi-semi",
 "title": "한미반도체 (042700) — 매출 반토막까지 떨어진 회사가 1년 만에 영업이익률 46%를 찍은 이유",
 "date": "2026-04-21",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "058470": {
-"slug": "64-058470-rino-industrial",
+"slug": "058470-rino-industrial",
 "title": "리노공업 (058470) — 길이 5mm 금속 핀 하나로 10년 연속 영업이익률 40%+ 지킨 회사",
 "date": "2026-04-21",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "010120": {
-"slug": "65-010120-ls-electric",
+"slug": "010120-ls-electric",
 "title": "LS ELECTRIC (010120) — 매출 5조·영업이익률 8.6%에 주가 3배, HD현대일렉트릭의 1/3 마진으로도 AI 수혜",
 "date": "2026-04-21",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "009540": {
-"slug": "66-009540-hd-ksoe",
+"slug": "009540-hd-ksoe",
 "title": "HD한국조선해양 (009540) — 영업이익 3.9조 사상 최대, 이익의 주인은 누구인가",
 "date": "2026-04-22",
 "excerpt": "<script>",
 "readTime": "10분"
 },
 "000120": {
-"slug": "67-000120-cj-logistics",
+"slug": "000120-cj-logistics",
 "title": "CJ대한통운 (000120) — 매출 3년 정체, 영업이익은 23% 증가한다",
 "date": "2026-04-22",
 "excerpt": "<script>",
+"readTime": "10분"
+},
+"006400": {
+"slug": "006400-samsung-sdi",
+"title": "삼성SDI (006400) — 2년 만에 이익이 3.3조 사라졌다",
+"date": "2026-04-22",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"373220": {
+"slug": "373220-lg-energy-solution",
+"title": "LG에너지솔루션 (373220) — 매출 30% 줄었는데 영업이익은 2배. 순이익은 왜 800억인가",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"336260": {
+"slug": "336260-doosan-fuel-cell",
+"title": "두산퓨얼셀 (336260) — 매출 +10% 늘었는데 영업적자 62배. 매출원가율 113.7%가 된 해",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"000100": {
+"slug": "000100-yuhan",
+"title": "유한양행 (000100) — 영업이익 1,044억인데 순이익은 1,853억. 렉라자 FDA 승인은 어디에 찍혔나",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"257720": {
+"slug": "257720-silicon2",
+"title": "실리콘투 (257720) — 매출 3년 17배·영업이익 2,054억인데 영업현금흐름은 11억, 이익이 어디에 갇혔나",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"112610": {
+"slug": "112610-cs-wind",
+"title": "씨에스윈드 (112610) — 매출 -4.6%·영업이익 +25%·현금흐름 10배·순이익 -72%, 한 회사 4방향의 해",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"001440": {
+"slug": "001440-taihan-cable",
+"title": "대한전선 (001440) — 영업이익 1,286억인데 이자비용은 2,124억. 이자보상 0.6배의 의미",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"008930": {
+"slug": "008930-hanmi-science",
+"title": "한미사이언스 (008930) — 한미약품(#57) 41% 지주회사의 5년 경영권 다큐와 2025년 OPM 10.22% 사상 최대",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"LMT": {
+"slug": "LMT-lockheed-martin",
+"title": "록히드마틴 (LMT) — 매출 100조 세계 1위 방산이 영업이익률 10.3%인 이유",
+"date": "2026-04-23",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"power": {
+"slug": "power-equipment-supercycle",
+"title": "같은 AI 전력 슈퍼사이클인데 영업이익률이 3배 다른 이유 — 전력기기 4사 비교",
+"date": "2026-04-25",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"271560": {
+"slug": "271560-orion",
+"title": "오리온 (271560) — 초코파이는 왜 내수 식품의 5% 마진 천장을 넘었나",
+"date": "2026-04-28",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"011170": {
+"slug": "011170-lotte-chemical",
+"title": "롯데케미칼 (011170) — 매출 18조 회사가 왜 3년째 적자인가",
+"date": "2026-04-28",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"096770": {
+"slug": "096770-sk-on",
+"title": "SK온 (096770) — 11조 합작공장을 접자 5.6조 순손실이 찍혔다",
+"date": "2026-04-28",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"082740": {
+"slug": "082740-hanwha-engine",
+"title": "한화엔진 (082740) — 배 엔진은 왜 AI 데이터센터 앞으로 불려갔나",
+"date": "2026-04-29",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"MSTR": {
+"slug": "MSTR-strategy",
+"title": "Strategy (MSTR) — 비트코인이 손익계산서를 먹었다",
+"date": "2026-04-29",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"DELL": {
+"slug": "DELL-dell-technologies",
+"title": "Dell (DELL) — AI 서버 주문 $64B인데 마진은 왜 내려갔나",
+"date": "2026-04-29",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"003670": {
+"slug": "003670-posco-future-m",
+"title": "포스코퓨처엠 (003670) — 영업이익 328억인데 CAPEX는 1.5조, 양극재 베팅의 가격",
+"date": "2026-04-29",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"402340": {
+"slug": "402340-sk-square",
+"title": "SK스퀘어 (402340) — 매출 1.4조 회사가 영업이익 8.8조를 낸 이유",
+"date": "2026-04-29",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"161890": {
+"slug": "161890-kolmar",
+"title": "한국콜마 (161890) — 매년 사상최대 영업이익이 영업외에서 새던 8년, 처음 본업이 이겼다",
+"date": "2026-05-06",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"ON": {
+"slug": "ON-onsemi-sic-cycle-bill",
+"title": "PEAK 에 19% 박았더니 1 년 만에 회색지대 — 온세미의 SiC 청구서",
+"date": "2026-05-07",
+"excerpt": "2025 년 1 월 14 일 화요일 오전, 애리조나 피닉스. 같은 날 같은 회의실에서 두 통의 발표가 나갔다. 한 통은 인수 — Qorvo US 로부터 SiC JFET (Silicon Carbide Junction Field-Effect Transistor) 기술 사업을 현금 1억 1,",
+"readTime": "10분"
+},
+"003410": {
+"slug": "003410-ssangyong-lbo-exit",
+"title": "9 년 들고 있던 시멘트 1 위는 왜 모회사를 거꾸로 삼켰나",
+"date": "2026-05-07",
+"excerpt": "2025 년 10 월 27 일 월요일 오후, 서울 중구 본사 회의실. 이사회 결의서가 한 장 회람되고 있었다. \"당사가 한앤코시멘트홀딩스 주식회사를 흡수합병한다.\" 한 줄을 읽기 위해 9 년이 필요했다. 모회사가 자회사를 흡수하는 일반적 LBO 청산 구조를 거꾸로 뒤집어, 자회사가 모회",
+"readTime": "10분"
+},
+"263750": {
+"slug": "263750-pearlabyss-two-ips-meet",
+"title": "펄어비스 263750 — 9 년 단일 IP 가 만난 한 분기",
+"date": "2026-05-07",
+"excerpt": "2026 년 3 월 19 일, 경기도 안양시 동안구. 펄어비스 사옥 회의실에 한 장의 일정표가 붙어 있었다. 같은 분기에 두 개의 사건이 적혀 있었다 — 붉은사막 글로벌 출시 (3 월 19 일), 그리고 CCP Games 매각 종결 (4 월). 한쪽은 6 년을 들인 자체 IP 의 첫 출",
+"readTime": "10분"
+},
+"051900": {
+"slug": "051900-lg-h-and-h",
+"title": "LG생활건강 (051900) — 1.29조 → 1,707억, 영업이익이 8분의 1로 줄어든 해",
+"date": "2026-05-07",
+"excerpt": "<script>",
+"readTime": "10분"
+},
+"247540": {
+"slug": "247540-ecopro-bm",
+"title": "에코프로비엠 매출 6.9 조에서 2.7 조로, CAPEX 1 조의 무게",
+"date": "2026-05-07",
+"excerpt": "2024 년 어느 날, 충북 청주 오창산업단지. 양극재 분말이 회전로 안에서 800℃ 로 소성되고 있었다. 같은 회전로가 2 년 전 2023 년에는 24 시간 풀가동, 출하를 못 따라가던 라인이었다. 그 사이 달라진 건 회전로가 아니라 회전로 밖이었다 — 탄산리튬 톤당 60 만 위안이 ",
 "readTime": "10분"
 }
 },
