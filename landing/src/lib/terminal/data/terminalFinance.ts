@@ -378,7 +378,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		// 값: BS = 시점. flow(IS·CF) = annual 연간 / quarter 단일분기 / ttm 직전 4분기 합.
 		const flowAt = (key: string, i: number): Num => {
 			const p = used[i];
-			if (isAnnual) return standalone(key, p.y, 4);
+			if (isAnnual) return rawV(key, p.y, 4); // 사업보고서 flow = 연간 누계 원본 (standalone 은 Q4 석달치라 FY 라벨과 불일치)
 			if (mode === 'quarter') return standalone(key, p.y, p.q);
 			let s = 0;
 			for (let k = 0; k < 4; k++) {
