@@ -107,8 +107,8 @@
 			tooltip: { offsetTop: 26, custom: tooltipCustom(lang), text: { color: '#cfd3dc', size: 11 }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
 		},
 		indicator: { tooltip: { text: { color: '#8b919e', size: 10 } } },
-		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e' } },
-		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e' } },
+		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10 } },
+		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10 } },
 		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(251,146,60,0.1)' },
 		crosshair: { horizontal: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309' } }, vertical: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309' } } }
 	});
@@ -139,6 +139,9 @@
 			if (!local) return;
 			local.setPriceVolumePrecision(0, 0);
 			local.setOffsetRightDistance(12);
+			// 줌·드래그 시 마지막 봉 우측의 미래(데이터 없는) 빈 영역이 끝없이 보이던 것 차단 —
+			// 우측 여백 상한 12px 고정 (EOD 차트에 미래 축은 무의미).
+			try { local.setMaxOffsetRightDistance(12); } catch { /* 구버전 무시 */ }
 			// timestamp 는 Date.UTC 자정 — timezone 미설정 시 XAxis 라벨이 브라우저 로컬 TZ 로 풀려
 			// 미주 사용자에게 하루 전 날짜로 표시되는 조용한 오류. 명시 고정.
 			try { local.setTimezone('UTC'); } catch { /* */ }

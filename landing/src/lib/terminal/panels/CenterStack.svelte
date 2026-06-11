@@ -89,7 +89,8 @@
 	// 회사 주요제품 (corpList) — 헤더 빈 가운데 채움. 전역 캐시 공유(중복 다운로드 없음).
 	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
 	loadHfProductIndexMap().then((m) => (corpMeta = m));
-	const product = $derived(corpMeta?.get(co.code)?.product ?? '');
+	const corpInfo = $derived(corpMeta?.get(co.code) ?? null);
+	const product = $derived(corpInfo?.product ?? '');
 	// 재무제표 분석 전체화면 (FinFullscreen — 버틀러식 탭, ESC 닫기는 컴포넌트 내부)
 	let finFull = $state(false);
 
@@ -254,10 +255,19 @@
 			<a href="{base}/company/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'company ↗' : '회사 ↗'}</a>
 		</nav>
 	</div>
-	{#if product}
+	{#if product || corpInfo}
 		<div class="symProd" title={product}>
+			{#if corpInfo}
+				<div class="symInfoRow">
+					{#if corpInfo.ceo}<span class="sif"><i>{lang === 'en' ? 'CEO' : '대표'}</i><b>{corpInfo.ceo}</b></span>{/if}
+					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
+					{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
+					{#if corpInfo.region}<span class="sif"><i>{lang === 'en' ? 'HQ' : '본사'}</i><b>{corpInfo.region}</b></span>{/if}
+					{#if corpInfo.homepage}<a class="sifLink" href={corpInfo.homepage} target="_blank" rel="noopener">{lang === 'en' ? 'website ↗' : '홈페이지 ↗'}</a>{/if}
+				</div>
+			{/if}
 			<span class="symProdLbl">{lang === 'en' ? 'PRODUCTS' : '주요제품'}</span>
-			<span class="symProdV">{product}</span>
+			{#if product}<span class="symProdV">{product}</span>{/if}
 		</div>
 	{/if}
 	<div class="symPrice">

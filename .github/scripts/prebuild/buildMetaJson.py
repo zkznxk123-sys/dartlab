@@ -145,7 +145,9 @@ def _loadBlogIndex() -> dict[str, dict]:
         except (OSError, UnicodeDecodeError):
             continue
         index[code] = {
-            "slug": dir_.name,
+            # 공개 슬러그 = 폴더명에서 정렬용 "NN-" 접두 제거 — landing /blog/[slug] 의
+            # normalizePath(`\d+-(...)`) 와 동일 규칙. 폴더명 그대로 쓰면 존재하지 않는 URL.
+            "slug": dir_.name.split("-", 1)[1],
             "title": title or f"{code} 심층분석",
             "date": date or "2026-01-01",
             "excerpt": excerpt or "",

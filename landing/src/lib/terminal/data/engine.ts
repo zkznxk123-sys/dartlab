@@ -58,6 +58,10 @@ const GROUP_COLOR: Record<string, string> = {
 	valuation: '#34d399', disclosure: '#c084fc'
 };
 const MARKET_LABEL: Record<string, string> = { 유가증권: 'KOSPI', 코스닥: 'KOSDAQ', 코넥스: 'KONEX' };
+// 블로그 공개 슬러그 정규화 — 옛 meta.json(6h 캐시 잔존)은 폴더명 그대로(정렬용 "NN-" 접두 포함)를
+// 슬러그로 실었다. 공개 슬러그는 6자리 종목코드로 시작하므로, 코드 앞 1~3자리 접두일 때만 벗긴다
+// (새 슬러그 "005930-…" 는 \d{1,3}- 패턴에 안 걸려 무변 — 멱등).
+const normalizeBlogSlug = (s: string): string => s.replace(/^\d{1,3}-(?=[0-9A-Z]{6}-)/, '');
 // industry → macro.sectorTailwind 키 (실 macro.json 키와 검증 일치)
 const TAILWIND_MAP: Record<string, string> = {
 	auto: 'automotive', pharma: 'biotech', chemical: 'chemicals', construction: 'construction',
@@ -571,7 +575,7 @@ export function createEngine(raw: RawData): Engine {
 			trendQuarter: trendFromQuarters(code),
 			income, balance, cashflow, ratios, credit, analysis,
 			peers: derivePeers(code, industry),
-			story: blog ? { title: blog.title, date: blog.date, readTime: blog.readTime, slug: blog.slug } : null,
+			story: blog ? { title: blog.title, date: blog.date, readTime: blog.readTime, slug: normalizeBlogSlug(blog.slug) } : null,
 			percentile: null, valuation: null, risks: [], tailwind: null,
 			verdict: {} as Verdict
 		};

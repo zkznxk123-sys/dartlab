@@ -8,6 +8,10 @@ export interface ProductIndexItem {
 	latestPeriod: string;
 	homepage?: string;
 	industry?: string;
+	ceo?: string; // 대표자명 (KIND)
+	fiscalMonth?: string; // 결산월 (예: '12월')
+	listedDate?: string; // 상장일 (YYYY-MM-DD)
+	region?: string; // 본사 지역 (예: '경기도')
 }
 
 interface ProductIndexRow extends Record<string, unknown> {
@@ -18,6 +22,10 @@ interface ProductIndexRow extends Record<string, unknown> {
 	주요제품?: unknown;
 	홈페이지?: unknown;
 	업종?: unknown;
+	대표자명?: unknown;
+	결산월?: unknown;
+	상장일?: unknown;
+	지역?: unknown;
 }
 
 let productIndexPromise: Promise<Map<string, ProductIndexItem>> | null = null;
@@ -32,23 +40,27 @@ export async function loadHfProductIndexMap(fetchFn: FetchLike = fetch): Promise
 
 async function readHfProductIndexMap(fetchFn: FetchLike): Promise<Map<string, ProductIndexItem>> {
 	const data = await readParquetRows<ProductIndexRow>(PRODUCT_INDEX_PATH, {
-		columns: ['종목코드', '주요제품', '홈페이지', '업종'],
+		columns: ['종목코드', '주요제품', '홈페이지', '업종', '대표자명', '결산월', '상장일', '지역'],
 		fetchFn
 	});
 	const map = new Map<string, ProductIndexItem>();
+	const opt = (v: unknown): string | undefined => String(v ?? '').trim() || undefined;
 	for (const row of data.rows) {
 		const stockCode = String(row.종목코드 ?? row.stockCode ?? '').trim();
 		if (!stockCode) continue;
 		const productRaw = cleanProduct(row.주요제품 ?? row.product);
 		const product = summarizeProduct(productRaw);
 		const homepage = normalizeHomepage(row.홈페이지);
-		const industry = String(row.업종 ?? '').trim() || undefined;
 		map.set(stockCode, {
 			product,
 			productRaw,
 			latestPeriod: String(row.latestPeriod ?? '').trim(),
 			homepage,
-			industry
+			industry: opt(row.업종),
+			ceo: opt(row.대표자명),
+			fiscalMonth: opt(row.결산월),
+			listedDate: opt(row.상장일),
+			region: opt(row.지역)
 		});
 	}
 	return map;

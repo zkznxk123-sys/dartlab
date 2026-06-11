@@ -71,7 +71,7 @@
 .dlTerm .brand { display: flex; align-items: center; gap: 6px; text-decoration: none; flex-shrink: 0; }
 .dlTerm .brandLogo { width: 22px; height: 22px; border-radius: 50%; display: block; }
 .dlTerm .brandName { font-family: var(--cond); font-weight: 700; font-size: 14px; letter-spacing: -0.01em; color: var(--dl-ink-print); }
-.dlTerm .brandSlash { color: var(--dl-ink-faint); font-weight: 300; font-size: 13px; }
+.dlTerm .brandSlash { color: #8a93a3; font-weight: 300; font-size: 13px; }
 .dlTerm .brandTag {
 	font-family: var(--mono); font-weight: 600; font-size: 10px; letter-spacing: 0.16em; color: var(--amber);
 	text-transform: uppercase;
@@ -80,12 +80,12 @@
 .dlTerm .sns { display: flex; align-items: center; gap: 1px; }
 .dlTerm .snsBtn {
 	width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
-	color: var(--dimmer); text-decoration: none; transition: color 0.15s, background 0.15s;
+	color: #e2e8f0; text-decoration: none; transition: color 0.15s, background 0.15s;
 }
-.dlTerm .snsBtn:hover { color: var(--txt); background: rgba(255, 255, 255, 0.06); }
+.dlTerm .snsBtn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
 /* 검색 ⌘K + 자동완성 드롭다운 (viewer 식) */
 .dlTerm .cmdKbd {
-	font-family: var(--mono); font-size: 9px; color: var(--dimmer); background: var(--dl-bg-deep);
+	font-family: var(--mono); font-size: 9px; color: #cbd5e1; background: var(--dl-bg-deep);
 	border: 1px solid var(--bd); border-radius: 3px; padding: 1px 4px; line-height: 1.3; flex-shrink: 0;
 }
 .dlTerm .suggest {
@@ -122,17 +122,17 @@
 .dlTerm .topRight { display: flex; align-items: center; gap: 14px; margin-left: auto; }
 .dlTerm .langSwitch { display: flex; border: 1px solid var(--bd); border-radius: 3px; overflow: hidden; }
 .dlTerm .langBtn {
-	background: var(--dl-bg-deep); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10.5px;
+	background: var(--dl-bg-deep); color: #f1f5f9; font-family: var(--cond); font-weight: 600; font-size: 10.5px;
 	letter-spacing: 0.5px; border: none; padding: 4px 9px; cursor: pointer; border-right: 1px solid var(--bd);
 }
 .dlTerm .langBtn:last-child { border-right: none; }
 .dlTerm .langBtn.on { background: var(--amber); color: #1a1206; }
 .dlTerm .langBtn:hover:not(.on) { color: var(--txt); }
-.dlTerm .clock { font-size: 10px; color: var(--txt); letter-spacing: 0.5px; }
-.dlTerm .connDot { display: flex; align-items: center; gap: 5px; font-family: var(--cond); font-size: 10px; color: var(--dim); letter-spacing: 0.5px; }
+.dlTerm .clock { font-size: 10px; color: #f1f5f9; letter-spacing: 0.5px; }
+.dlTerm .connDot { display: flex; align-items: center; gap: 5px; font-family: var(--cond); font-size: 10px; color: #f1f5f9; letter-spacing: 0.5px; }
 .dlTerm .connDot .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); box-shadow: 0 0 6px var(--good); animation: dlTermPulse 2s infinite; }
 .dlTerm .hdrLinks { display: flex; gap: 4px; }
-.dlTerm .hdrLink { font-family: var(--cond); font-size: 10px; font-weight: 600; color: var(--dim); text-decoration: none; border: 1px solid var(--bd); border-radius: 3px; padding: 2px 8px; letter-spacing: 0.3px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+.dlTerm .hdrLink { font-family: var(--cond); font-size: 10px; font-weight: 600; color: #f1f5f9; text-decoration: none; border: 1px solid var(--bd); border-radius: 3px; padding: 2px 8px; letter-spacing: 0.3px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
 .dlTerm .hdrLink:hover { color: var(--amber); border-color: var(--bdAmber); background: rgba(251, 146, 60, 0.08); }
 @keyframes dlTermPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
@@ -310,9 +310,10 @@
 .dlTerm .vRiskline b { font-family: var(--mono); }
 
 /* CHART (trend) */
-.dlTerm .chartWrap { position: relative; width: 100%; min-height: 320px; overflow: hidden; }
+/* 하단 15px = 출처 캡션 전용 띠 — 캔버스(X축 날짜)와 출처 텍스트 겹침 방지(캔버스가 그만큼 위에서 끝남) */
+.dlTerm .chartWrap { position: relative; width: 100%; min-height: 320px; overflow: hidden; padding-bottom: 15px; }
 .dlTerm .chartHost { width: 100%; height: 100%; }
-.dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 78px 10px 10px 58px; }
+.dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: 78px 10px 22px 58px; }
 .dlTerm .chartTools { position: absolute; top: 6px; right: 12px; display: flex; gap: 4px; z-index: 24; }
 .dlTerm .chartWrap.full .chartTools { top: 10px; right: 16px; }
 /* 버튼류 — 한글 라벨이 mono(한글 글리프 없음→generic 폴백)로 눌리던 것 sans 통일 + 10px 하한 */
@@ -362,7 +363,7 @@
 .dlTerm .btFoot { font-size: 8.5px; color: var(--dimmer); margin-top: 2px; line-height: 1.5; }
 
 /* 차트 데이터 출처 상시 표기 (공공누리) */
-.dlTerm .chartSrc { position: absolute; left: 8px; bottom: 4px; font-size: 9px; color: #5c6370; pointer-events: none; z-index: 2; }
+.dlTerm .chartSrc { position: absolute; left: 8px; bottom: 1px; font-size: 9px; line-height: 13px; color: #5c6370; pointer-events: none; z-index: 2; }
 .dlTerm .chartWrap:has(.btStrip) .chartSrc { display: none; }
 
 /* 전체화면 전문가 리본 (2단) — 캔버스 밖 불투명 overlay, 차트 리플로우 0.
@@ -797,6 +798,13 @@
 .dlTerm .panel.eValuation .panelTitle { color: var(--valuation); }
 .dlTerm .panel.eChanges .panelTitle { color: var(--amber); }
 
+/* 공시뷰어 인터미널 오버레이 — ViewerStudio(embedded) 호스트. 스튜디오 스타일은 component-scoped 라 충돌 없음 */
+.dlViewerFs { position: fixed; inset: 0; z-index: 120; background: #050811; display: flex; flex-direction: column; }
+.dlViewerFs > main.viewer-page { flex: 1; min-height: 0; }
+.dlViewerLoad { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--dim); }
+.dlViewerSpin { width: 18px; height: 18px; border: 2px solid #1e2433; border-top-color: var(--amber); border-radius: 50%; animation: dlTermBoot2 0.8s linear infinite; }
+@keyframes dlTermBoot2 { to { transform: rotate(360deg); } }
+
 /* BOOT */
 .dlTerm .bootScreen { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 50; }
 .dlTerm .bootMark { font-family: var(--cond); font-weight: 800; font-size: 30px; letter-spacing: 1px; color: var(--dl-ink-print); }
@@ -824,8 +832,14 @@
 .dlTerm .kpiItem i { font-family: var(--cond); font-style: normal; color: #aab2c0; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
 .dlTerm .kpiItem b { font-family: var(--mono); font-weight: 600; }
 
-/* 헤더 가운데 주요제품 (빈 공간 채움) */
+/* 헤더 가운데 주요제품 + 회사 기본정보 (빈 공간 채움) */
 .dlTerm .symProd { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 0 10px; border-left: 1px solid var(--bd); }
+.dlTerm .symInfoRow { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; overflow: hidden; margin-bottom: 1px; }
+.dlTerm .sif { display: inline-flex; align-items: baseline; gap: 4px; min-width: 0; }
+.dlTerm .sif i { font-style: normal; font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0; }
+.dlTerm .sif b { font-size: 10px; font-weight: 500; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .sifLink { margin-left: auto; flex-shrink: 0; font-family: var(--cond); font-size: 9.5px; color: var(--amberDim); text-decoration: none; }
+.dlTerm .sifLink:hover { color: var(--amber); }
 .dlTerm .symProdLbl { font-family: var(--cond); font-size: 8px; color: var(--dimmer); letter-spacing: 0.6px; text-transform: uppercase; }
 .dlTerm .symProdV { font-size: 10.5px; color: var(--dim); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
