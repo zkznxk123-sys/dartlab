@@ -76,11 +76,13 @@
 
 	const finData = $derived(bundle ? (bundle.views[mode] ?? null) : null);
 	const activeDef = $derived(FS_TABS.find((d) => d.key === tab) ?? null);
-	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps 기준)
+	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps, heatmap 은 heat 기준)
 	const finCards = $derived.by(() => {
 		if (tab === 'all' || !finData || !activeDef?.finKey) return [];
 		return finData.tabCards[activeDef.finKey].filter((c) =>
-			c.kind === 'waterfall' ? (c.steps?.some((s) => s.value != null) ?? false) : c.series.some((s) => s.data.some((v) => v != null))
+			c.kind === 'waterfall' ? (c.steps?.some((s) => s.value != null) ?? false)
+			: c.kind === 'heatmap' ? (c.heat?.vals.some((r) => r.some((v) => v != null)) ?? false)
+			: c.series.some((s) => s.data.some((v) => v != null))
 		);
 	});
 	const reportPart = $derived(tab === 'all' ? null : reportCards[tab]);

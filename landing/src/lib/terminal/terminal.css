@@ -460,6 +460,7 @@
 .dlTerm .mfc svg { width: 100%; height: auto; display: block; cursor: crosshair; }
 .dlTerm .mfcAx { fill: var(--dimmer); font-size: 7px; font-family: var(--mono); }
 .dlTerm .mfcAxR { fill: var(--dim); }
+.dlTerm .mfcHeatV { fill: #dbe2ec; font-size: 7px; }
 .dlTerm .mfcTip { position: absolute; top: 3px; z-index: 6; background: rgba(8, 13, 23, 0.96); border: 1px solid var(--bd); border-radius: 3px; padding: 3px 5px; pointer-events: none; min-width: 76px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); }
 .dlTerm .mfcTipP { font-family: var(--mono); font-size: 8.5px; color: var(--amber); font-weight: 700; margin-bottom: 2px; letter-spacing: 0.3px; }
 .dlTerm .mfcTipR { display: flex; align-items: center; gap: 4px; font-size: 9px; line-height: 1.4; }
@@ -825,6 +826,7 @@
 .dlTerm .finFsGrid .mfcUnit { font-size: 9px; }
 .dlTerm .finFsGrid .mfcLg { font-size: 10px; }
 .dlTerm .finFsGrid .mfcAx { font-size: 5.5px; }
+.dlTerm .finFsGrid .mfcHeatV { font-size: 6px; }
 .dlTerm .finFsNote { margin-top: 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); }
 
 /* 매크로 순풍/역풍 섹터 리본 (LeftRail 마켓 펄스) */

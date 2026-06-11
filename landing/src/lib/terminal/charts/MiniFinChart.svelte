@@ -18,6 +18,22 @@
 
 	const fin = (v: Num): v is number => typeof v === 'number' && Number.isFinite(v);
 
+	// ── 히트맵 (kind='heatmap') — heat 기반 (연도행×분기열, 셀 값 + 색=YoY) ──
+	const isHeat = $derived(card.kind === 'heatmap');
+	const heat = $derived(isHeat ? (card.heat ?? { rows: [], cols: [], vals: [], yoy: [] }) : { rows: [], cols: [], vals: [], yoy: [] });
+	// 히트맵 전용 지오메트리 — 우축 없음, 좌 라벨 + 하단 열 라벨
+	const heatL = 34;
+	const heatR = 6;
+	const cellW = $derived(heat.cols.length ? (W - heatL - heatR) / heat.cols.length : 0);
+	const cellH = $derived(heat.rows.length ? plotH / heat.rows.length : 0);
+	const heatFill = (g: Num): string => {
+		if (g == null) return 'rgba(100,116,139,0.10)';
+		const t = Math.min(Math.abs(g), 40) / 40;
+		return g >= 0 ? `rgba(52,211,153,${(0.12 + 0.5 * t).toFixed(3)})` : `rgba(240,97,111,${(0.12 + 0.5 * t).toFixed(3)})`;
+	};
+	let hoverR = $state(-1);
+	let hoverC = $state(-1);
+
 	// ── 워터폴 (kind='waterfall') — steps 기반, series/periods 미사용 ──
 	const isWf = $derived(card.kind === 'waterfall');
 	const wfSteps = $derived(isWf ? ((card.steps ?? []).filter((s) => s.value != null) as { name: string; value: number; total?: boolean }[]) : []);
@@ -87,6 +103,8 @@
 		let m = 0;
 		if (isWf) {
 			for (const b of wfBars) m = Math.max(m, Math.abs(b.from), Math.abs(b.to));
+		} else if (isHeat) {
+			for (const row of heat.vals) for (const v of row) if (fin(v)) m = Math.max(m, Math.abs(v));
 		} else {
 			for (const s of leftSeries) for (const v of s.data) if (fin(v)) m = Math.max(m, Math.abs(v));
 		}
@@ -165,21 +183,43 @@
 	let svgEl = $state<SVGSVGElement | null>(null);
 	let hoverI = $state(-1);
 	function onMove(e: MouseEvent) {
-		if (!svgEl || n === 0) return;
+		if (!svgEl) return;
 		const r = svgEl.getBoundingClientRect();
+		if (isHeat) {
+			if (!heat.rows.length) return;
+			const px = ((e.clientX - r.left) / (r.width || 1)) * W;
+			const py = ((e.clientY - r.top) / (r.height || 1)) * H;
+			const c = Math.floor((px - heatL) / (cellW || 1));
+			const rr = Math.floor((py - M.t) / (cellH || 1));
+			hoverC = c >= 0 && c < heat.cols.length ? c : -1;
+			hoverR = rr >= 0 && rr < heat.rows.length ? rr : -1;
+			return;
+		}
+		if (n === 0) return;
 		const plotL = r.left + (M.l / W) * r.width;
 		const plotR = r.left + ((W - M.r) / W) * r.width;
 		const frac = (e.clientX - plotL) / (plotR - plotL || 1);
 		hoverI = Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1))));
 	}
-	function onLeave() { hoverI = -1; }
+	function onLeave() { hoverI = -1; hoverR = -1; hoverC = -1; }
+	// 히트맵 최신 셀 = 최신 연도(0행) 마지막 유효 분기
+	const heatLatest = $derived.by<{ r: number; c: number } | null>(() => {
+		if (!isHeat || !heat.vals.length) return null;
+		for (let c = heat.cols.length - 1; c >= 0; c--) if (fin(heat.vals[0][c])) return { r: 0, c };
+		return null;
+	});
+	const heatHead = $derived(hoverR >= 0 && hoverC >= 0 ? { r: hoverR, c: hoverC } : heatLatest);
 	const headI = $derived(hoverI >= 0 ? hoverI : latestI);
 	const headVal = $derived.by(() => {
+		if (isHeat) { const h = heatHead; const v = h ? heat.vals[h.r][h.c] : null; return fin(v) ? v : null; }
 		if (headI < 0) return null;
 		if (isWf) return wfBars[headI]?.value ?? null;
 		return primary && fin(primary.data[headI]) ? (primary.data[headI] as number) : null;
 	});
-	const headSuffix = $derived(hoverI >= 0 ? ' · ' + (isWf ? (wfBars[hoverI]?.name ?? '') : periods[hoverI]) : '');
+	const headSuffix = $derived.by(() => {
+		if (isHeat) { const h = heatHead; return h ? ` · ${heat.rows[h.r]} ${heat.cols[h.c]}` : ''; }
+		return hoverI >= 0 ? ' · ' + (isWf ? (wfBars[hoverI]?.name ?? '') : periods[hoverI]) : '';
+	});
 </script>
 
 <div class="mfc">
@@ -194,6 +234,10 @@
 			<span class="mfcLg"><i style="background:#34d399"></i>증가</span>
 			<span class="mfcLg"><i style="background:#f0616f"></i>감소</span>
 			<span class="mfcLg"><i style="background:#5b9bf0"></i>소계</span>
+		{:else if isHeat}
+			<span class="mfcLg"><i style="background:#34d399"></i>전년동기↑</span>
+			<span class="mfcLg"><i style="background:#f0616f"></i>전년동기↓</span>
+			<span class="mfcLg"><i style="background:#64748b"></i>비교불가</span>
 		{:else}
 			{#each card.series as s (s.name)}
 				<span class="mfcLg"><i style={`background:${s.color}`}></i>{s.name}{s.axis === 'r' ? '↗' : ''}</span>
@@ -202,22 +246,41 @@
 	</div>
 	<div class="mfcPlot">
 		<svg bind:this={svgEl} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={card.title} onmousemove={onMove} onmouseleave={onLeave}>
-			<!-- Y grid + 좌 눈금 숫자 -->
-			{#each leftTicks as t (t)}
-				<line x1={M.l} x2={W - M.r} y1={yL(t)} y2={yL(t)} stroke="#222a3a" stroke-width="0.6" />
-				<text x={M.l - 3} y={yL(t) + 2.5} text-anchor="end" class="mfcAx">{fmtTick(t * unitScale.k)}</text>
-			{/each}
-			<!-- 우 눈금 숫자 -->
-			{#each rightTicks as t (t)}
-				<text x={W - M.r + 3} y={yR(t) + 2.5} text-anchor="start" class="mfcAx mfcAxR">{fmtTick(t)}</text>
-			{/each}
-			<!-- refLines -->
-			{#each card.refLines ?? [] as rl (rl)}
-				{#if rl >= leftExt[0] && rl <= leftExt[1]}<line x1={M.l} x2={W - M.r} y1={yL(rl)} y2={yL(rl)} stroke="#5b6b86" stroke-width="0.7" stroke-dasharray="3 2" />{/if}
-			{/each}
-			{#if zeroY != null}<line x1={M.l} x2={W - M.r} y1={zeroY} y2={zeroY} stroke="#3a4660" stroke-width="0.8" />{/if}
-			{#if hoverI >= 0}<line x1={isWf ? xw(hoverI) : x(hoverI)} x2={isWf ? xw(hoverI) : x(hoverI)} y1={M.t} y2={M.t + plotH} stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2" />{/if}
-			{#if isWf}
+			{#if !isHeat}
+				<!-- Y grid + 좌 눈금 숫자 -->
+				{#each leftTicks as t (t)}
+					<line x1={M.l} x2={W - M.r} y1={yL(t)} y2={yL(t)} stroke="#222a3a" stroke-width="0.6" />
+					<text x={M.l - 3} y={yL(t) + 2.5} text-anchor="end" class="mfcAx">{fmtTick(t * unitScale.k)}</text>
+				{/each}
+				<!-- 우 눈금 숫자 -->
+				{#each rightTicks as t (t)}
+					<text x={W - M.r + 3} y={yR(t) + 2.5} text-anchor="start" class="mfcAx mfcAxR">{fmtTick(t)}</text>
+				{/each}
+				<!-- refLines -->
+				{#each card.refLines ?? [] as rl (rl)}
+					{#if rl >= leftExt[0] && rl <= leftExt[1]}<line x1={M.l} x2={W - M.r} y1={yL(rl)} y2={yL(rl)} stroke="#5b6b86" stroke-width="0.7" stroke-dasharray="3 2" />{/if}
+				{/each}
+				{#if zeroY != null}<line x1={M.l} x2={W - M.r} y1={zeroY} y2={zeroY} stroke="#3a4660" stroke-width="0.8" />{/if}
+				{#if hoverI >= 0}<line x1={isWf ? xw(hoverI) : x(hoverI)} x2={isWf ? xw(hoverI) : x(hoverI)} y1={M.t} y2={M.t + plotH} stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2" />{/if}
+			{/if}
+			{#if isHeat}
+				<!-- 히트맵 — 연도행(최신 위) × 분기열, 셀 텍스트 = 값, 색 = 전년동기比 -->
+				{#each heat.rows as ry, r (ry)}
+					<text x={heatL - 3} y={M.t + r * cellH + cellH / 2 + 2.5} text-anchor="end" class="mfcAx">{ry}</text>
+					{#each heat.cols as cl, c (cl)}
+						{@const v = heat.vals[r][c]}
+						<rect x={heatL + c * cellW + 0.7} y={M.t + r * cellH + 0.7} width={Math.max(1, cellW - 1.4)} height={Math.max(1, cellH - 1.4)} rx="1"
+							fill={fin(v) ? heatFill(heat.yoy[r][c]) : 'rgba(100,116,139,0.05)'}
+							stroke={hoverR === r && hoverC === c ? '#94a3b8' : 'none'} stroke-width="0.8" />
+						{#if fin(v) && cellH >= 9}
+							<text x={heatL + c * cellW + cellW / 2} y={M.t + r * cellH + cellH / 2 + 2.6} text-anchor="middle" class="mfcHeatV mono">{fmtVal(v)}</text>
+						{/if}
+					{/each}
+				{/each}
+				{#each heat.cols as cl, c (cl)}
+					<text x={heatL + c * cellW + cellW / 2} y={H - 4} text-anchor="middle" class="mfcAx">{cl}</text>
+				{/each}
+			{:else if isWf}
 				<!-- 워터폴 — floating rect (total 은 0 부터) + 점선 connector + step name 라벨 -->
 				{#each wfBars as b, i (i)}
 					<rect x={xw(i) - wfBarW / 2} y={Math.min(yL(b.from), yL(b.to))} width={wfBarW} height={Math.max(0.8, Math.abs(yL(b.to) - yL(b.from)))} fill={wfColor(b)} fill-opacity={hoverI < 0 || hoverI === i ? 0.9 : 0.45} />
@@ -269,6 +332,15 @@
 				{#each xLabels as i (i)}<text x={x(i)} y={H - 4} text-anchor="middle" class="mfcAx">{periods[i]}</text>{/each}
 			{/if}
 		</svg>
+		{#if isHeat && hoverR >= 0 && hoverC >= 0}
+			{@const hv = heat.vals[hoverR][hoverC]}
+			{@const hg = heat.yoy[hoverR][hoverC]}
+			<div class="mfcTip" style={hoverC >= 2 ? 'left:3px' : 'right:3px'}>
+				<div class="mfcTipP mono">{heat.rows[hoverR]} {heat.cols[hoverC]}</div>
+				<div class="mfcTipR"><i style={`background:${fin(hv) ? heatFill(hg) : '#64748b'}`}></i><span class="mfcTipN">매출</span><b class="mono">{fin(hv) ? fmtTip(hv) + unitScale.unit : '—'}</b></div>
+				<div class="mfcTipR"><i style={`background:${hg == null ? '#64748b' : hg >= 0 ? '#34d399' : '#f0616f'}`}></i><span class="mfcTipN">YoY</span><b class="mono">{hg == null ? '—' : (hg > 0 ? '+' : '') + hg.toFixed(1) + '%'}</b></div>
+			</div>
+		{/if}
 		{#if hoverI >= 0}
 			<div class="mfcTip" style={n > 1 && hoverI / (n - 1) > 0.5 ? 'left:3px' : 'right:3px'}>
 				{#if isWf}

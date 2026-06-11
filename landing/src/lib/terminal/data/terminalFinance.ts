@@ -22,8 +22,9 @@ export interface FinCard {
 	refLines?: number[];
 	stacked?: boolean;
 	signed?: boolean; // stacked 와 조합 시: 양수는 0 위로, 음수는 0 아래로 부호별 누적 (희석 이력 카드)
-	kind?: 'waterfall'; // 워터폴 브리지 — steps 사용, series/periods 무시
+	kind?: 'waterfall' | 'heatmap'; // 워터폴 브리지(steps) · 히트맵(heat) — series/periods 무시
 	steps?: { name: string; value: number | null; total?: boolean }[]; // waterfall 전용 (total = 0 기준 소계 막대)
+	heat?: { rows: string[]; cols: string[]; vals: Num[][]; yoy: Num[][] }; // heatmap 전용 — 셀 값(조) + 색용 전년동기比 %
 }
 export interface StmtRow {
 	key: string;
@@ -367,6 +368,32 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	};
 	const sceBridge = buildSceBridge(rows, fs, ociFromCis);
 
+	// 분기 시즌성 히트맵 — 연도(최신 위)×분기 standalone 매출 격자, 색 = 전년동기比 (모드 무관 스냅샷).
+	// YoY 첫 비교 연도를 살리기 위해 값은 최근 8년 표시·비교는 9년째까지 본다.
+	const seasonality = ((): FinCard | null => {
+		if (!hasInterim) return null;
+		const years = [...new Set(allPk.map((p) => p.y))].sort((a, b) => a - b);
+		const vq = (y: number, q: number): Num => {
+			const v = standalone('revenue', y, q);
+			return v == null ? null : +(v / TRILLION).toFixed(3);
+		};
+		const heatRows: string[] = [];
+		const vals: Num[][] = [];
+		const yoyG: Num[][] = [];
+		for (const y of years.slice(-8).reverse()) {
+			const rv = [1, 2, 3, 4].map((q) => vq(y, q));
+			if (!rv.some((v) => v != null)) continue;
+			heatRows.push(`FY${String(y).slice(2)}`);
+			vals.push(rv);
+			yoyG.push(rv.map((cur, i) => {
+				const prev = vq(y - 1, i + 1);
+				return cur != null && prev != null && Math.abs(prev) > 1e-9 ? +(((cur - prev) / Math.abs(prev)) * 100).toFixed(1) : null;
+			}));
+		}
+		if (heatRows.length < 2) return null;
+		return { key: 'seasonality', title: '분기 매출 히트맵 (색=YoY)', unit: '조', kind: 'heatmap', series: [], heat: { rows: heatRows, cols: ['Q1', 'Q2', 'Q3', 'Q4'], vals, yoy: yoyG } };
+	})();
+
 	// ── 모드별(연간/분기/TTM) 뷰 빌드 ──
 	const buildMode = (mode: FinMode): TerminalFinance | null => {
 		const isAnnual = mode === 'annual';
@@ -633,6 +660,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const tabCards = {
 			profitability: [
 				...(plBridge ? [plBridge] : []),
+				...(seasonality ? [seasonality] : []),
 				{ key: 'costStructure', title: '비용구조', unit: '조', stacked: true, series: [
 					{ name: '매출원가', data: ser('costOfSales'), color: C.red, type: 'bar' },
 					{ name: '판관비', data: ser('sga'), color: C.warn, type: 'bar' },
