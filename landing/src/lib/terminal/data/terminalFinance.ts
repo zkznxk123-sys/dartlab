@@ -169,6 +169,7 @@ export interface TerminalFinanceBundle {
 	modes: FinMode[]; // 데이터상 가능한 모드 (분기 없으면 annual 만)
 	views: Record<FinMode, TerminalFinance | null>;
 	defaultMode: FinMode;
+	filedDates: Record<string, string>; // `${year}-${q}` → 보고서 접수일 YYYYMMDD (rcept_no 앞 8자리, 정정 중 최초)
 }
 
 // in-flight Promise 캐시 — CenterStack·RightStack 가 같은 회사 재무를 동시 호출해도
@@ -260,7 +261,17 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	// 손익 출처: IS(별도 손익계산서) 있으면 IS, 없으면 CIS(단일 포괄손익계산서·카카오류) 를 IS 로 채택.
 	const incomeSrc = rows.some((r) => (r.fs_div || '') === fs && r.sj_div === 'IS') ? 'IS' : 'CIS';
 	const parsed: Parsed[] = [];
+	const filedDates: Record<string, string> = {}; // (year,q) → 최초 접수일 — 실적 발표 마커용
 	for (const r of rows) {
+		{
+			const q0 = Q_BY_CODE[String(r.reprt_code || '')];
+			const y0 = Number(r.bsns_year);
+			const rc = String(r.rcept_no || '').replace(/\D/g, '').slice(0, 8);
+			if (q0 && Number.isFinite(y0) && rc.length === 8) {
+				const k = `${y0}-${q0}`;
+				if (!filedDates[k] || rc < filedDates[k]) filedDates[k] = rc;
+			}
+		}
 		if ((r.fs_div || '') !== fs) continue;
 		const q = Q_BY_CODE[String(r.reprt_code || '')];
 		const year = Number(r.bsns_year);
@@ -721,5 +732,5 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	if (views.annual) modes.push('annual');
 	if (modes.length === 0) return null;
 	const defaultMode: FinMode = views.ttm ? 'ttm' : views.annual ? 'annual' : modes[0];
-	return { modes, views, defaultMode };
+	return { modes, views, defaultMode, filedDates };
 }

@@ -196,17 +196,18 @@
 		};
 	});
 
-	// 주가차트 재무 오버레이: 실적 시점(분기말) 마커 + 증자·감자 마커 + 적정주가 밴드
+	// 주가차트 재무 오버레이: 실적 발표 마커(보고서 실제 접수일, 결측 시 분기말 폴백) + 증자·감자 마커 + 적정주가 밴드
 	const priceEvents = $derived.by(() => {
 		const src = finBundle?.views.quarter ?? finBundle?.views.ttm ?? finBundle?.views.annual;
+		const filed = finBundle?.filedDates ?? {};
 		const out: { date: string; label: string }[] = [];
 		if (src) {
 			const QEND: Record<string, string> = { '1': '0331', '2': '0630', '3': '0930', '4': '1231' };
 			for (const p of src.periods) {
 				const mq = p.match(/^(\d{2})Q(\d)$/);
-				if (mq) { out.push({ date: '20' + mq[1] + QEND[mq[2]], label: p }); continue; }
+				if (mq) { out.push({ date: filed[`20${mq[1]}-${mq[2]}`] ?? '20' + mq[1] + QEND[mq[2]], label: p }); continue; }
 				const fy = p.match(/^FY(\d{2})$/);
-				if (fy) out.push({ date: '20' + fy[1] + '1231', label: p });
+				if (fy) out.push({ date: filed[`20${fy[1]}-4`] ?? '20' + fy[1] + '1231', label: p });
 			}
 		}
 		return [...out, ...capEvents];
