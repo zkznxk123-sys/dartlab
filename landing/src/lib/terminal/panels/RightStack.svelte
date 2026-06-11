@@ -3,6 +3,7 @@
 	import type { Company, Lang } from '../data/types';
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
+	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 내부 dynamic import
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import {
 		loadLiveCompanyReportFacts,
@@ -24,6 +25,7 @@
 		onPick: (code: string) => void;
 	}
 	let { co, lang, onPick }: Props = $props();
+	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
@@ -387,7 +389,7 @@
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할 -->
 <div class="rowSplit">
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
-		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기">뷰어 ↗</a>{/snippet}
+		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기 (새 탭)">뷰어 ↗</a><button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
 		{#if regFilings.length}
 			<div class="filingList">
 				{#each regFilings as f (f.rceptNo)}
@@ -459,7 +461,7 @@
 	<!-- STORY -->
 	<Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART · 스토리', en: 'DART · STORY' }} sub={{ kr: 'story · 공시', en: 'filings' }} flush>
 		{#if s}
-			<div class="storyCard"><span class="storyTag">DARTLAB STORY</span><div class="storyTitle">{s.title}</div><div class="storyMeta">{s.date} · {s.readTime ?? ''} · <a class="storyLink" href={'https://eddmpython.github.io/dartlab/blog/' + s.slug} target="_blank" rel="noopener">read ↗</a></div></div>
+			<div class="storyCard"><span class="storyTag">DARTLAB STORY</span><div class="storyTitle">{s.title}</div><div class="storyMeta">{s.date} · {s.readTime ?? ''} · <a class="storyLink" href="{base}/blog/{s.slug}" target="_blank" rel="noopener">read ↗</a></div></div>
 		{:else}
 			<div class="storyEmpty">{lang === 'en' ? 'No published dartlab story yet.' : '발간된 dartlab 스토리는 아직 없습니다.'}</div>
 		{/if}
@@ -479,3 +481,7 @@
 			: `dartlab 파생 신용 ${cr.grade} (건전도 ${cr.healthScore}/100, PD ${cr.pd}). 영업이익률 ${co.fundamentals.opm != null ? co.fundamentals.opm.toFixed(1) + '%' : '—'}, ROE ${co.fundamentals.roe != null ? co.fundamentals.roe.toFixed(1) + '%' : '—'}, 부채비율 ${co.fundamentals.dr != null ? co.fundamentals.dr.toFixed(0) + '%' : '—'}. 모두 finance/ecosystem/prices 실데이터 산출.`}</div>
 	</Panel>
 </div>
+
+{#if viewerOpen}
+	<ViewerOverlay code={co.code} onclose={() => (viewerOpen = false)} />
+{/if}
