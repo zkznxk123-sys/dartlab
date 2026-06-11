@@ -324,6 +324,9 @@
 .dlTerm .cbtn { background: var(--dl-bg-base); color: var(--dim); font-family: var(--mono); font-size: 9px; line-height: 1; border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; cursor: pointer; }
 .dlTerm .cbtn:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .cbtn.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
+/* 다중 토글(수정·실적·밴드·기준·매물대·비교류) — 라디오(segGroup 솔리드)와 시각 위계 분리: tint on */
+.dlTerm .cbtn.tg.on { background: rgba(251, 146, 60, 0.14); color: var(--amber); font-weight: 600; border-color: var(--amber); }
+.dlTerm .cbtn.cIco { display: inline-flex; align-items: center; justify-content: center; padding: 3px 5px; }
 /* 지표·드로잉 팝오버 */
 .dlTerm .ctWrap { position: relative; }
 .dlTerm .ctMenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
@@ -363,8 +366,12 @@
 /* 전체화면 전문가 리본 (2단) — 캔버스 밖 불투명 overlay, 차트 리플로우 0.
    전체화면 = 작업 화면이라 일반 모드보다 한 단계 큰 타이포·히트영역 (행 34px·버튼 10.5px). */
 .dlTerm .chartRibbon { position: absolute; top: 0; left: 0; right: 0; z-index: 26; display: flex; flex-direction: column; background: var(--dl-bg-modal, #11161f); border-bottom: 1px solid var(--bd); }
-.dlTerm .crRow { display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 12px; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
+/* overflow-x:auto 금지 — 스크롤 컨테이너가 되면 .crMenu 드롭다운이 행 밖에서 클리핑·클릭 불가 (elementFromPoint=crRow 실측) */
+.dlTerm .crRow { display: flex; align-items: center; gap: 9px; min-height: 34px; flex-wrap: wrap; padding: 2px 12px; overflow: visible; }
 .dlTerm .chartRibbon .cbtn { font-size: 10.5px; padding: 5px 9px; }
+.dlTerm .chartRibbon .seg { font-size: 10.5px; padding: 5px 9px; background: var(--dl-bg-base); }
+.dlTerm .chartRibbon .seg.on { background: var(--amber); }
+.dlTerm .chartRibbon .cIco { padding: 4px 6px; }
 .dlTerm .chartRibbon .crChip { font-size: 10.5px; padding: 6px 8px; }
 .dlTerm .chartRibbon .crChip.x { padding: 6px 6px; }
 .dlTerm .chartRibbon .crAdd { font-size: 11px; padding: 4px 9px; }

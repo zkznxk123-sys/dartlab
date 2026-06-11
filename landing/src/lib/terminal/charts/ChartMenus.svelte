@@ -18,7 +18,7 @@
 	}
 	let { ctl, lang, hasBand, onDraw, onClearDraw }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
-	let menu = $state<'none' | 'ind' | 'draw' | 'view' | 'bt'>('none');
+	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt'>('none');
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
 	const hasParams = (k: string) => (IND_DEFS[k]?.params.length ?? 0) > 0;
 	$effect(() => {
@@ -28,17 +28,17 @@
 
 <svelte:window onclick={() => (menu !== 'none' ? (menu = 'none') : null)} />
 
-<!-- 기간 + 봉 주기 (좌상) -->
+<!-- 기간 + 봉 주기 (좌상) — segGroup 자체 위젯 (리본과 동일 패턴) -->
 <div class="chartBar">
-	{#each PERIODS as p (p)}<button class={ctl.period === p ? 'cbtn on' : 'cbtn'} onclick={() => (ctl.period = p)}>{p}</button>{/each}
+	<span class="segGroup" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'seg on' : 'seg'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</span>
 	<span class="cbDiv"></span>
-	{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'cbtn on' : 'cbtn'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}
+	<span class="segGroup" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'seg on' : 'seg'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</span>
 </div>
 
 <!-- 우상 도구 -->
 <div class="chartTools" onclick={(e) => e.stopPropagation()}>
 	<div class="ctWrap">
-		<button class={ctl.overlays.length || ctl.subs.length || ctl.econ.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'ind' ? 'none' : 'ind')} title={T('지표', 'Indicators')}>{T('지표', 'IND')}</button>
+		<button class={ctl.overlays.length || ctl.subs.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'ind' ? 'none' : 'ind')} title={T('보조지표 — 주가 오버레이 + 하단 페인', 'Indicators')}>{T('보조지표', 'IND')}</button>
 		{#if menu === 'ind'}
 			<div class="ctMenu ctMenuWide">
 				<div class="ctMenuLbl">{T('주가 오버레이 (다중)', 'Price overlay (multi)')}</div>
@@ -60,6 +60,16 @@
 				{#if editing}
 					<IndParamEditor {ctl} {lang} name={editing} />
 				{/if}
+				{#if ctl.overlays.length || ctl.subs.length || ctl.econ.length}
+					<div class="ctRow"><button class="mItem mClear" onclick={() => ctl.clearAllIndicators()}>{T('지표 전체 해제', 'Clear all')}</button></div>
+				{/if}
+			</div>
+		{/if}
+	</div>
+	<div class="ctWrap">
+		<button class={ctl.econ.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'econ' ? 'none' : 'econ')} title={T('경제지표 겹쳐보기', 'Economy overlay')}>{T('경제지표', 'ECON')}</button>
+		{#if menu === 'econ'}
+			<div class="ctMenu">
 				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
 				<div class="ctRow ctRowWrap">
 					{#each MACRO_SERIES as s (s.id)}
@@ -68,9 +78,6 @@
 							onclick={() => ctl.toggleEcon(s.id)}>{T(s.kr, s.en)}</button>
 					{/each}
 				</div>
-				{#if ctl.overlays.length || ctl.subs.length || ctl.econ.length}
-					<div class="ctRow"><button class="mItem mClear" onclick={() => ctl.clearAllIndicators()}>{T('지표 전체 해제', 'Clear all')}</button></div>
-				{/if}
 			</div>
 		{/if}
 	</div>
