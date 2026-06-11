@@ -555,6 +555,42 @@ def _resolveStatement(
     return None
 
 
+# 아라비아 ordinal prefix (1./2)/12. — _normalizeLabel 후(공백 0). 한 공시 내 번호변형 *미공존* stem 만 strip.
+_NUM_ORD = r"^(?:\d{1,2}[.)]|\(\d{1,2}\))"
+
+
+def _guardedNormName(df: pl.DataFrame) -> pl.DataFrame:
+    """``_name`` = ``_normalizeLabel`` + (번호변형이 한 공시 내 *미공존*인 stem 만) 아라비아 ordinal strip.
+
+    "5.사채의발행"↔"7.사채의발행"(연도 재배치 같은 줄, 미공존) → "사채의발행" 통합(과거연결). 단 "3.유형자산"·
+    "4.유형자산"이 한 공시(rceptNo) 내 공존(별개 리스트항목)이면 번호 보존(오병합 회피). 데이터가 가부 결정 —
+    아라비아 ordinal flat-strip 의 16% 오병합(공존)을 가드로 제거. tests/_attempts/pastAxisConnection coOccurCheck.
+
+    Args:
+        df: ``label``/``rceptNo`` 보유 cell DataFrame (statement/scope/depth-1 필터 후).
+
+    Returns:
+        ``_name`` 컬럼 부여 DataFrame (미공존 numbered stem 만 번호 strip, 나머지 _normalizeLabel 그대로).
+    """
+    df = df.with_columns(_normalizeLabel(pl.col("label")).alias("_name"))
+    df = df.with_columns(pl.col("_name").str.replace_all(_NUM_ORD, "").alias("_stem"))
+    numbered = df.filter(pl.col("_name") != pl.col("_stem"))
+    unsafe: list[str] = []
+    if not numbered.is_empty():
+        co = (
+            numbered.group_by(["rceptNo", "_stem"])
+            .agg(pl.col("_name").n_unique().alias("_nv"))
+            .filter(pl.col("_nv") >= 2)  # 한 공시 내 2+ 번호변형 공존 = 별개항목
+        )
+        unsafe = co["_stem"].unique().to_list()
+    return df.with_columns(
+        pl.when((pl.col("_name") != pl.col("_stem")) & ~pl.col("_stem").is_in(unsafe))
+        .then(pl.col("_stem"))  # 미공존 = 같은 줄 재배치 → 번호 strip 통합
+        .otherwise(pl.col("_name"))
+        .alias("_name")
+    ).drop("_stem")
+
+
 def _statementFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: str) -> pl.DataFrame | None:
     """셀 DataFrame → 정규화 항목명×period statement (XBRL+옛 통합). 소스-중립 순수 함수."""
     df = df.filter(
@@ -566,10 +602,10 @@ def _statementFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: s
     if df.is_empty():
         return None
 
-    df = df.with_columns(
-        _normalizeLabel(pl.col("label")).alias("_name"),
-        _periodLabelExpr(freq).alias("_period"),
-    ).sort("rceptNo", descending=True)  # 최신 filing(=XBRL) 우선
+    df = df.with_columns(_periodLabelExpr(freq).alias("_period")).sort(
+        "rceptNo", descending=True
+    )  # 최신 filing(=XBRL) 우선
+    df = _guardedNormName(df)  # _name = _normalizeLabel + 미공존 stem 아라비아 ordinal strip(과거연결·오병합 0)
     df = _stitchRecentName(df)  # 개명 항목 → 금액 겹침으로 최근 이름 통합
     deduped = df.unique(subset=["_name", "_period"], keep="first", maintain_order=True)
     meta = df.group_by("_name", maintain_order=True).agg(
