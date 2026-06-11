@@ -5,6 +5,7 @@ import { browser } from '$app/environment';
 export interface SavedDraw {
 	name: string;
 	points: { timestamp?: number; value?: number }[];
+	text?: string; // TEXTNOTE 전용 — extendData 문자열
 }
 
 const KEY = (code: string) => `dlTerm.draw.${code}`;

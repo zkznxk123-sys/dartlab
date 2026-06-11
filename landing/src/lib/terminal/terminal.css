@@ -389,6 +389,8 @@
 .dlTerm .dbBtn.on { background: rgba(251, 146, 60, 0.14); color: var(--amber); border-color: var(--amber); }
 .dlTerm .dbBtn:disabled { opacity: 0.35; cursor: default; }
 .dlTerm .dbDiv { height: 1px; background: var(--bd); margin: 2px 3px; }
+.dlTerm .drawTextIn { position: absolute; z-index: 30; width: 180px; background: var(--dl-bg-modal, #11161f); color: var(--amber); font-size: 11px; border: 1px solid var(--amber); border-radius: 3px; padding: 4px 7px; outline: none; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); }
+.dlTerm .drawTextIn::placeholder { color: var(--dimmer); }
 .dlTerm .dbCount { position: absolute; top: -3px; right: -3px; font-style: normal; font-family: var(--mono); font-size: 8px; line-height: 1; color: #1a1206; background: var(--amber); border-radius: 2px; padding: 1px 3px; }
 .dlTerm .crLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; flex: none; }
 .dlTerm .crChips { flex-wrap: nowrap; }

@@ -7,6 +7,7 @@ import { viewCandles, viewIndexOf } from './seriesBus';
 export const AVWAP_NAME = 'anchoredVWAP';
 export const MEASURE_NAME = 'MEASURE';
 export const POSITION_NAME = 'positionTool';
+export const TEXT_NAME = 'TEXTNOTE';
 
 let registered = false;
 export function registerWorkOverlays(kc: { registerOverlay: (t: unknown) => void }): void {
@@ -75,6 +76,27 @@ export function registerWorkOverlays(kc: { registerOverlay: (t: unknown) => void
 				},
 				{ type: 'text', attrs: { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - 5, text: label, align: 'center', baseline: 'bottom' }, ignoreEvent: true, styles: { color: '#0b0e14', backgroundColor: col } }
 			];
+		}
+	});
+
+	// 텍스트 주석 — 1점 + extendData 문자열. 입력·수정은 PriceChart 인라인 에디터(onDrawEnd/더블클릭 → 팝오버).
+	kc.registerOverlay({
+		name: TEXT_NAME,
+		totalStep: 2, // 1점이면 완성
+		needDefaultPointFigure: true,
+		createPointFigures: ({ overlay, coordinates }: any) => {
+			const c0 = coordinates?.[0];
+			if (!c0) return [];
+			const t = typeof overlay.extendData === 'string' && overlay.extendData ? overlay.extendData : '…';
+			return [{
+				type: 'text',
+				attrs: { x: c0.x, y: c0.y - 6, text: t, align: 'center', baseline: 'bottom' },
+				styles: {
+					color: '#fbbf24', size: 12, family: 'var(--mono, monospace)', weight: 600,
+					backgroundColor: 'rgba(11,14,20,0.88)', borderColor: 'rgba(251,191,36,0.5)', borderSize: 1, borderRadius: 3,
+					paddingLeft: 6, paddingRight: 6, paddingTop: 3, paddingBottom: 3
+				}
+			}];
 		}
 	});
 

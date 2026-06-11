@@ -16,7 +16,7 @@
 	import { ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
 	import { loadDraws, saveDraws, type SavedDraw } from './drawStore';
 	import { publishView } from './seriesBus';
-	import { registerWorkOverlays, MEASURE_NAME } from './avwapOverlay';
+	import { registerWorkOverlays, MEASURE_NAME, TEXT_NAME } from './avwapOverlay';
 	import { registerVolumeProfile, VP_INDICATOR } from './volumeProfile';
 	import { registerCmpIndicator, CMP_INDICATOR, type CmpExtend } from './compareOverlay';
 	import { downloadSnapshot } from './snapshot';
@@ -692,14 +692,44 @@
 	});
 
 	// ── 드로잉 — 완성 시점 카운트·우클릭/Delete 삭제·드래그 편집 재저장·회사별 localStorage 영속 ──
-	const serializeDraw = (o: any): SavedDraw => ({ name: o.name, points: (o.points ?? []).map((p: any) => ({ timestamp: p.timestamp, value: p.value })) });
+	const serializeDraw = (o: any): SavedDraw => ({
+		name: o.name,
+		points: (o.points ?? []).map((p: any) => ({ timestamp: p.timestamp, value: p.value })),
+		...(typeof o.extendData === 'string' && o.extendData ? { text: o.extendData } : {})
+	});
 	function persistDraws() { saveDraws(hist.code, [...drawMap.values()]); }
-	function drawOpts(toolName: string, points?: SavedDraw['points']) {
+	// 텍스트 주석 인라인 에디터 — 배치/더블클릭 시 점 위에 입력창. Enter 확정·Esc/빈값 취소(도형 제거).
+	let textEdit = $state<{ id: string; x: number; y: number; value: string } | null>(null);
+	function openTextEditor(o: any) {
+		if (!chart || !o?.id) return;
+		let x = 90;
+		let y = 60;
+		try {
+			const p0 = o.points?.[0];
+			const px = chart.convertToPixel({ timestamp: p0?.timestamp, value: p0?.value }, { paneId: 'candle_pane' });
+			const p = Array.isArray(px) ? px[0] : px;
+			if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) { x = p.x; y = p.y; }
+		} catch { /* 좌표 실패 — 기본 위치 */ }
+		textEdit = { id: o.id, x, y, value: typeof o.extendData === 'string' ? o.extendData : '' };
+	}
+	function commitText(save: boolean) {
+		const te = textEdit;
+		textEdit = null;
+		if (!te) return;
+		const val = save ? te.value.trim() : '';
+		if (!val) { removeDraw(te.id); return; }
+		try { chart?.overrideOverlay({ id: te.id, extendData: val }); } catch { /* */ }
+		const d = drawMap.get(te.id);
+		if (d) { drawMap.set(te.id, { ...d, text: val }); persistDraws(); }
+	}
+	const focusOnMount = (el: HTMLInputElement) => { el.focus(); el.select(); };
+	function drawOpts(toolName: string, points?: SavedDraw['points'], text?: string) {
 		const ephemeral = toolName === MEASURE_NAME; // 측정룰러 — 영속 제외, 선택 해제 시 자동 제거
 		return {
 			name: toolName,
 			groupId: 'draw',
 			...(points ? { points } : {}),
+			...(text ? { extendData: text } : {}),
 			mode: ctl.magnet ? 'weak_magnet' : 'normal',
 			onDrawEnd: (e: any) => {
 				const o = e.overlay;
@@ -709,9 +739,15 @@
 				drawMap.set(o.id, serializeDraw(o));
 				ctl.drawCount = drawMap.size;
 				persistDraws();
+				// 텍스트 주석 — 배치 직후 인라인 입력 (연속 그리기 재시작 없음)
+				if (toolName === TEXT_NAME && typeof o.extendData !== 'string') { setTimeout(() => openTextEditor(o), 0); return; }
 				// 연속 그리기 — 같은 도구 즉시 재시작. setTimeout 0 = klinecharts 클릭 이벤트 재진입 회피.
 				// 복원(points 사전 채움)은 onDrawEnd 미발화라 회사전환 시 유령 도구가 생기지 않는다.
 				if (ctl.stayDraw) setTimeout(() => startDraw(toolName), 0);
+			},
+			onDoubleClick: (e: any) => {
+				if (toolName === TEXT_NAME) { openTextEditor(e.overlay); return true; }
+				return false;
 			},
 			onPressedMoveEnd: (e: any) => {
 				const o = e.overlay;
@@ -744,7 +780,7 @@
 	}
 	function restoreDraws(c: any) {
 		for (const d of loadDraws(hist.code)) {
-			const id = c.createOverlay(drawOpts(d.name, d.points));
+			const id = c.createOverlay(drawOpts(d.name, d.points, d.text));
 			if (id) drawMap.set(id as string, d);
 		}
 		ctl.drawCount = drawMap.size;
@@ -787,6 +823,23 @@
 
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	<div class="chartHost" bind:this={el}></div>
+
+	{#if textEdit}
+		<input
+			class="drawTextIn mono"
+			style={`left:${Math.round(Math.max(4, textEdit.x - 80))}px; top:${Math.round(Math.max(4, textEdit.y - 38))}px`}
+			bind:value={textEdit.value}
+			use:focusOnMount
+			placeholder={T('메모 입력 후 Enter', 'note + Enter')}
+			maxlength="80"
+			onkeydown={(e) => {
+				e.stopPropagation();
+				if (e.key === 'Enter' && !e.isComposing) commitText(true);
+				else if (e.key === 'Escape') commitText(false);
+			}}
+			onblur={() => commitText(true)}
+		/>
+	{/if}
 
 	{#if ctl.full}
 		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} {chgPct} {peers} onSnapshot={snapshot} onReplay={enterReplay} />

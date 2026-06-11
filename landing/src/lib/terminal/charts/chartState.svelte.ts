@@ -61,7 +61,8 @@ export const DRAW_TOOLS: { name: string; icon: string; kr: string; en: string }[
 	{ name: 'priceChannelLine', icon: '⫻', kr: '가격채널', en: 'PriceCh' },
 	{ name: 'anchoredVWAP', icon: '⚓', kr: '앵커VWAP', en: 'AVWAP' },
 	{ name: 'positionTool', icon: '⚖', kr: '포지션', en: 'R:R' },
-	{ name: 'MEASURE', icon: '📏', kr: '측정', en: 'Measure' }
+	{ name: 'MEASURE', icon: '📏', kr: '측정', en: 'Measure' },
+	{ name: 'TEXTNOTE', icon: 'T', kr: '텍스트', en: 'Text' }
 ];
 
 export const ECON_MAX = 3; // 경제지표 동시 표시 상한 (시각·툴팁 밀도)
