@@ -164,19 +164,7 @@
 		return out.slice(0, 2);
 	});
 
-	// ── 원표 탭 — IS/BS/CF·비율 전 기간 와이드 테이블 + CSV 복사 ──
-	const STMT_TITLES: [string, 'IS' | 'BS' | 'CF'][] = [['손익계산서', 'IS'], ['재무상태표', 'BS'], ['현금흐름표', 'CF']];
-	const fmtCell = (v: number | null): string => (v == null ? '—' : Math.abs(v) >= 100 ? v.toFixed(1) : Math.abs(v) >= 1 ? v.toFixed(2) : v.toFixed(3));
-	let copied = $state('');
-	function copyCsv(title: string, rows: { kr: string; values: (number | null)[]; unit?: string }[]) {
-		if (!finData) return;
-		const head = ['계정', ...finData.periods].join(',');
-		const body = rows.map((r) => [r.kr, ...r.values.map((v) => (v == null ? '' : String(v)))].join(',')).join('\n');
-		navigator.clipboard?.writeText(`${head}\n${body}`).then(() => {
-			copied = title;
-			setTimeout(() => (copied = ''), 1500);
-		});
-	}
+	// 원표(전 기간 와이드 테이블)는 우측 재무 패널 ⤢ → FinTablesModal 로 이동 (운영자 결정 — 전체화면 탭 아님)
 	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps, heatmap 은 heat 기준)
 	const finCards = $derived.by(() => {
 		if (tab === 'all' || !finData || !activeDef?.finKey) return [];
@@ -190,7 +178,7 @@
 	const reportLoading = $derived(activeDef?.load != null && (reportPart === 'loading' || reportPart === undefined));
 	const reportList = $derived(Array.isArray(reportPart) ? reportPart : []);
 	const tabEmpty = $derived(
-		tab !== 'all' && tab !== 'tables' && !finCards.length && !reportLoading && !reportList.length &&
+		tab !== 'all' && !finCards.length && !reportLoading && !reportList.length &&
 		!(tab === 'debt' && (auditList || auditTrail === 'loading')) &&
 		!(tab === 'people' && (execTopData || execTop === 'loading'))
 	);
@@ -212,7 +200,6 @@
 			{#each FS_TABS as t (t.key)}
 				<button class={'finFsTab ' + (tab === t.key ? 'on' : '')} onclick={() => (tab = t.key)}>{lang === 'en' ? t.label.en : t.label.kr}</button>
 			{/each}
-			<button class={'finFsTab ' + (tab === 'tables' ? 'on' : '')} onclick={() => (tab = 'tables')}>{lang === 'en' ? 'TABLES' : '원표'}</button>
 		</nav>
 		{#if (tab === 'all' || activeDef?.finKey) && bundle && bundle.modes.length > 1}
 			<span class="segGroup mini">{#each bundle.modes as m (m)}<button class={mode === m ? 'seg on' : 'seg'} onclick={() => onMode(m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
@@ -240,40 +227,7 @@
 		{#if activeDef?.q}
 			<div class="finFsQ">{activeDef.q}</div>
 		{/if}
-		{#if tab === 'tables'}
-			{#if finData}
-				{#each STMT_TITLES as [title, kind] (kind)}
-					<div class="finTblWrap">
-						<div class="finTblHead"><b>{title}</b><span class="finTblUnit">조 KRW</span><button class="cbtn" onclick={() => copyCsv(title, finData!.statements[kind])}>{copied === title ? '복사됨 ✓' : 'CSV 복사'}</button></div>
-						<div class="finTblScroll">
-							<table class="finTbl">
-								<thead><tr><th class="finTblAcct"></th>{#each finData.periods as p (p)}<th>{p}</th>{/each}</tr></thead>
-								<tbody>
-									{#each finData.statements[kind] as r (r.key)}
-										<tr><th class="finTblAcct">{r.kr}</th>{#each r.values as v, i (i)}<td class="mono">{fmtCell(v)}</td>{/each}</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				{/each}
-				<div class="finTblWrap">
-					<div class="finTblHead"><b>핵심 비율</b><span class="finTblUnit">% · 배</span><button class="cbtn" onclick={() => copyCsv('비율', finData!.ratios)}>{copied === '비율' ? '복사됨 ✓' : 'CSV 복사'}</button></div>
-					<div class="finTblScroll">
-						<table class="finTbl">
-							<thead><tr><th class="finTblAcct"></th>{#each finData.periods as p (p)}<th>{p}</th>{/each}</tr></thead>
-							<tbody>
-								{#each finData.ratios as r (r.key)}
-									<tr><th class="finTblAcct">{r.kr}{r.unit ? ` (${r.unit})` : ''}</th>{#each r.values as v, i (i)}<td class="mono">{fmtCell(v)}</td>{/each}</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			{:else}
-				<div class="chartLoad" style="height:140px">재무제표 불러오는 중 …</div>
-			{/if}
-		{:else if tab === 'all'}
+		{#if tab === 'all'}
 			{#if finData}
 				<div class="finFsGrid">
 					{#each finData.cards as card (card.key)}

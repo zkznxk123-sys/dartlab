@@ -51,7 +51,7 @@
 
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
-	let finMode = $state<FinMode>('quarter');
+	let finMode = $state<FinMode>('ttm'); // 그래프 기본 = TTM (추세) — 표는 분기 원값 (우측 패널·다이얼로그)
 	let finState = $state<'loading' | 'ready' | 'empty'>('loading');
 	const finData = $derived(finBundle ? finBundle.views[finMode] ?? null : null);
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
@@ -63,7 +63,7 @@
 		loadTerminalFinance(code).then((b) => {
 			if (cancelled) return;
 			finBundle = b;
-			finMode = b ? b.defaultMode : 'quarter';
+			finMode = b ? (b.views.ttm ? 'ttm' : b.defaultMode) : 'quarter'; // TTM 우선 — 분기 부족(신규상장 등)이면 defaultMode 폴백
 			finState = b && b.modes.length ? 'ready' : 'empty';
 		});
 		return () => {

@@ -192,6 +192,24 @@ async function shareholderReport(code: string, bundle: TerminalFinanceBundle): P
 			});
 		}
 	}
+	// 자사주 수량 흐름 — 취득(+)·처분/소각(−) signed stack + 기말 보유 우축. dilution(증자·감자)과 소스·축 별개.
+	// disposalQty/buybackCancel 은 양수 카운트 공시값이라 표시 시 명시 부호 반전.
+	{
+		const tq = (sr ?? []).filter((s) => s.buybackQty != null || s.disposalQty != null || s.buybackCancel != null || s.treasuryEnd != null);
+		if (tq.length) {
+			cards.push({
+				periods: tq.map((s) => fyLabel(s.year)),
+				card: {
+					key: 'treasuryFlow', title: '자사주 수량 흐름 · 연', unit: '만주', stacked: true, signed: true, series: [
+						{ name: '취득', data: tq.map((s) => (s.buybackQty != null ? +(s.buybackQty / 1e4).toFixed(1) : null)), color: C.good, type: 'bar' },
+						{ name: '처분(−)', data: tq.map((s) => (s.disposalQty != null ? +(-s.disposalQty / 1e4).toFixed(1) : null)), color: C.warn, type: 'bar' },
+						{ name: '소각(−)', data: tq.map((s) => (s.buybackCancel != null ? +(-s.buybackCancel / 1e4).toFixed(1) : null)), color: C.red, type: 'bar' },
+						{ name: '기말 보유', data: tq.map((s) => (s.treasuryEnd != null ? +(s.treasuryEnd / 1e4).toFixed(0) : null)), color: C.cyan, type: 'line', axis: 'r' }
+					]
+				}
+			});
+		}
+	}
 	if (own && own.length) {
 		cards.push({
 			periods: own.map((o) => fyLabel(o.year)),
@@ -220,6 +238,17 @@ async function peopleReport(code: string, bundle: TerminalFinanceBundle): Promis
 					{ name: '정규직', data: wf.map((w) => w.regular), color: C.blue, type: 'bar' },
 					{ name: '계약직', data: wf.map((w) => w.contract), color: C.warn, type: 'bar' },
 					{ name: '계약직 비중%', data: wf.map((w) => (w.regular != null && w.contract != null && w.regular + w.contract > 0 ? +((w.contract / (w.regular + w.contract)) * 100).toFixed(1) : null)), color: C.red, type: 'line', axis: 'r' }
+				]
+			}
+		});
+		// 남녀 인원 구성 — 우측 레일 스냅샷(남/여)의 시계열판. employee.parquet 성별합계 기집계, 추가 fetch 0.
+		cards.push({
+			periods: wfP,
+			card: {
+				key: 'genderMix', title: '남녀 인원 구성 · 연', unit: '명', stacked: true, series: [
+					{ name: '남', data: wf.map((w) => w.male), color: C.blue, type: 'bar' },
+					{ name: '여', data: wf.map((w) => w.female), color: C.purple, type: 'bar' },
+					{ name: '여성 비중%', data: wf.map((w) => (w.male != null && w.female != null && w.male + w.female > 0 ? +((w.female / (w.male + w.female)) * 100).toFixed(1) : null)), color: C.cyan, type: 'line', axis: 'r' }
 				]
 			}
 		});
@@ -273,6 +302,16 @@ async function peopleReport(code: string, bundle: TerminalFinanceBundle): Promis
 		}
 	}
 	if (eb && eb.length) {
+		// 보수총액·인원 — execPay(1인평균)와 축이 다른 별개 정보 (사업보고서 4분기 확정값, 추가 fetch 0)
+		cards.push({
+			periods: eb.map((e) => fyLabel(e.year)),
+			card: {
+				key: 'execTotal', title: '이사·감사 보수총액·인원 · 연', unit: '억', series: [
+					{ name: '보수총액', data: eb.map((e) => (e.execTotalPay != null ? +(e.execTotalPay / 1e8).toFixed(1) : null)), color: C.warn, type: 'bar' },
+					{ name: '인원(명)', data: eb.map((e) => e.execCount), color: C.cyan, type: 'line', axis: 'r' }
+				]
+			}
+		});
 		cards.push({
 			periods: eb.map((e) => fyLabel(e.year)),
 			card: {

@@ -4,6 +4,7 @@
 	import type { Engine } from '../data/engine';
 	import type { EcoNode, Lang } from '../data/types';
 	import { chgClass } from '../ui/helpers';
+	import { finTypeOf } from '../data/finType'; // 재무 유형 라벨 SSOT — 좌측 레일과 동일 판정
 
 	interface Props {
 		eng: Engine;
@@ -47,6 +48,7 @@
 		// 등급·범주
 		{ key: 'market', kr: '시장', en: 'market', group: 'cat', unit: '', cat: (n) => (n.market === '유가증권' ? 'KOSPI' : n.market === '코스닥' ? 'KOSDAQ' : n.market ?? null) },
 		{ key: 'sector', kr: '업종', en: 'sector', group: 'cat', unit: '', cat: (n) => n.industryName ?? null },
+		{ key: 'finType', kr: '재무 유형', en: 'fin type', group: 'cat', unit: '', cat: (n) => finTypeOf(n, eng.raw.finance.companies[n.id]).primary?.name ?? null },
 		{ key: 'profGrade', kr: '수익성 등급', en: 'profitability', group: 'cat', unit: '', cat: (n) => n.profGrade ?? null },
 		{ key: 'growthGrade', kr: '성장성 등급', en: 'growth', group: 'cat', unit: '', cat: (n) => n.growthGrade ?? null },
 		{ key: 'govGrade', kr: '거버넌스 등급', en: 'governance', group: 'cat', unit: '', cat: (n) => n.govGrade ?? null },

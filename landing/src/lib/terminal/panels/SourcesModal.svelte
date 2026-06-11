@@ -3,13 +3,18 @@
 	import type { Lang } from '../data/types';
 	import { GOV_ATTRIBUTION } from '../data/govPrice';
 	import { MACRO_ATTRIBUTION } from '../data/macroSeries';
+	import { FIN_TYPES } from '../data/finType'; // 재무 유형 라벨 기준 — SSOT 에서 직접 렌더(손코딩 문안 금지)
 
 	interface Props {
 		lang: Lang;
 		open: boolean;
 		onClose: () => void;
+		// 최근 일자 — 이미 로드된 데이터에서만 (추가 fetch 0). 모르는 원천은 '—' 정직 표기.
+		pricesAsOf?: string; // 주가 스냅샷 기준일
+		macroAsOf?: string; // 매크로 빌드 기준일
+		financeLatest?: string; // 현재 종목 재무 최신 분기 (예: 26Q1)
 	}
-	let { lang, open, onClose }: Props = $props();
+	let { lang, open, onClose, pricesAsOf = '', macroAsOf = '', financeLatest = '' }: Props = $props();
 
 	interface SourceRow {
 		data: { kr: string; en: string };
@@ -17,6 +22,7 @@
 		path: string; // HF 산출물 경로 (mono)
 		cadence: { kr: string; en: string };
 		license: { kr: string; en: string };
+		latest?: () => string; // 최근 일자 (가용한 원천만)
 	}
 	const ROWS: SourceRow[] = [
 		{
@@ -24,7 +30,8 @@
 			org: { kr: '금융위원회·한국거래소 — 공공데이터포털', en: 'FSC · KRX — data.go.kr' },
 			path: 'gov/prices · gov/indices',
 			cadence: { kr: '매 영업일 EOD', en: 'EOD each trading day' },
-			license: { kr: '공공누리 — 출처표시', en: 'KOGL — attribution' }
+			license: { kr: '공공누리 — 출처표시', en: 'KOGL — attribution' },
+			latest: () => pricesAsOf
 		},
 		{
 			data: { kr: '공시 원문·목록 (정기·수시)', en: 'Filings (regular · non-regular)' },
@@ -38,7 +45,8 @@
 			org: { kr: 'DART 정기보고서 XBRL', en: 'DART XBRL filings' },
 			path: 'dart/finance/{code}',
 			cadence: { kr: '분기 (공시 후)', en: 'quarterly (post-filing)' },
-			license: { kr: 'DART 이용약관', en: 'DART terms' }
+			license: { kr: 'DART 이용약관', en: 'DART terms' },
+			latest: () => (financeLatest ? `${financeLatest} (현재 종목)` : '')
 		},
 		{
 			data: { kr: '정기보고서 팩트 (배당·자사주·임원·대주주·회사채)', en: 'Report facts (dividends · buyback · officers · owners · bonds)' },
@@ -52,14 +60,16 @@
 			org: { kr: '한국은행 ECOS', en: 'Bank of Korea ECOS' },
 			path: 'macro/ecos',
 			cadence: { kr: '일·월 (지표별)', en: 'daily · monthly' },
-			license: { kr: 'ECOS 오픈API', en: 'ECOS open API' }
+			license: { kr: 'ECOS 오픈API', en: 'ECOS open API' },
+			latest: () => macroAsOf
 		},
 		{
 			data: { kr: '미국 매크로 (국채금리·연방금리·CPI·고용)', en: 'US macro (UST · Fed funds · CPI · labor)' },
 			org: { kr: 'FRED (세인트루이스 연준)', en: 'FRED (St. Louis Fed)' },
 			path: 'macro/fred',
 			cadence: { kr: '일·주·월 (지표별)', en: 'daily · weekly · monthly' },
-			license: { kr: 'FRED API 약관', en: 'FRED API terms' }
+			license: { kr: 'FRED API 약관', en: 'FRED API terms' },
+			latest: () => macroAsOf
 		},
 		{
 			data: { kr: '생태계·등급·산업분류·공급망', en: 'Ecosystem · grades · industry map · supply chain' },
@@ -99,6 +109,7 @@
 						<th class="l">{T('원천 기관', 'SOURCE')}</th>
 						<th class="l">{T('산출물', 'ARTIFACT')}</th>
 						<th class="l">{T('갱신', 'CADENCE')}</th>
+						<th class="l">{T('최근 일자', 'LATEST')}</th>
 						<th class="l">{T('라이선스·조건', 'LICENSE')}</th>
 					</tr></thead>
 					<tbody>
@@ -108,11 +119,26 @@
 								<td class="l">{T(r.org.kr, r.org.en)}</td>
 								<td class="l mono srcPath">{r.path}</td>
 								<td class="l">{T(r.cadence.kr, r.cadence.en)}</td>
+								<td class="l mono srcLatest">{r.latest?.() || '—'}</td>
 								<td class="l srcLic">{T(r.license.kr, r.license.en)}</td>
 							</tr>
 						{/each}
 					</tbody>
 				</table>
+				<div class="srcCrit">
+					<div class="srcCritTitle">{T('파생 라벨 — 재무 유형 기준', 'DERIVED LABELS — FINANCIAL TYPE CRITERIA')}</div>
+					<p class="srcCritIntro">
+						{T(
+							'재무 유형 라벨(주의형·회복형·성장형·수익형·우량형)은 DART 공시 기반 dartlab scan 지표(최신 사업연도 연결 기준 · 분기 갱신, 우량형의 부채비율만 최신 연간 재무제표) 위에서 아래 임계값이 고정된 결정론 규칙으로 기계 판정한 파생 산출물입니다. 추정·예측·점수화가 아니며 아래 기준식이 전부입니다. 복수 충족 시 주의형 > 회복형 > 성장형 > 수익형 > 우량형 순으로 1개만 표시합니다. 기준에 필요한 값이 결측이면 그 라벨은 판정하지 않습니다 — 무라벨은 해당 없음(중립)이지 부정 신호가 아닙니다. 금융업 등 일부 업종은 영업이익률·유동성 지표가 구조적으로 산출되지 않아 라벨이 제한적이며, ROE 등 수치는 최신 보고기간 기준이라 통상의 연간 지표보다 낮게 보일 수 있습니다. 본 라벨은 정보 제공 목적이며 투자 권유가 아닙니다.',
+							'Financial type labels are deterministic, fixed-threshold rules over dartlab scan metrics from DART filings — not estimates or scores. When multiple match, one label is shown by fixed priority. Missing inputs mean no label (neutral, not negative). Informational only — not investment advice.'
+						)}
+					</p>
+					<div class="srcCritRows">
+						{#each FIN_TYPES as t (t.name)}
+							<div class="srcCritRow"><b class={'ft-' + t.tone}>{t.name}</b><span>{T(t.criteriaKr, t.criteriaEn)}</span></div>
+						{/each}
+					</div>
+				</div>
 				<div class="srcNotes">
 					<div class="srcNote">{GOV_ATTRIBUTION} · {MACRO_ATTRIBUTION}</div>
 					<div class="srcNote">{T('호스팅: HuggingFace dataset', 'Hosting: HuggingFace dataset')} <span class="mono">eddmpython/dartlab-data</span> ({T('공개', 'public')})</div>

@@ -16,6 +16,7 @@
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import { prefetch as prefetchCompany, LAST_SYM_KEY } from './data/workbench';
 	import { loadMacroLatest, type MacroLatest } from './data/macroSeries';
+	import { loadTerminalFinance } from './data/terminalFinance';
 	import { loadGovRecent } from './data/govPrice';
 	import type { Candle } from './data/priceSeries';
 
@@ -31,6 +32,17 @@
 	let sym = $state(lastSym && eng.buildCompany(lastSym) ? lastSym : eng.buildCompany(initial) ? initial : first);
 	let lang = $state<Lang>('kr');
 	let sourcesOpen = $state(false);
+	// 출처 모달 "최근 일자" — 라이브 재무 최신 분기 (loadTerminalFinance in-flight dedup, 추가 다운로드 0)
+	let finLatest = $state('');
+	$effect(() => {
+		const c = co?.code;
+		finLatest = '';
+		if (!c) return;
+		void loadTerminalFinance(c).then((b) => {
+			if (co?.code !== c) return;
+			finLatest = b?.views.quarter?.periods.at(-1) ?? b?.views.annual?.periods.at(-1) ?? '';
+		});
+	});
 	let cmd = $state('');
 	let flash = $state<string | null>(null);
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
@@ -253,6 +265,6 @@
 			<span class="sbItem dim">prices {co.price.asOf} · {eng.raw.index.length} 종목 · KR</span>
 			<span class="sbItem"><b class="tUp">{co.code}</b> {co.name.kr} · {co.marketLabel}</span>
 		</footer>
-		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} />
+		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} pricesAsOf={co.price.asOf} macroAsOf={eng.raw.macro?.asOf ?? ''} financeLatest={finLatest || (co.trendQuarter?.periods.at(-1) ?? '')} />
 	{/if}
 </div>

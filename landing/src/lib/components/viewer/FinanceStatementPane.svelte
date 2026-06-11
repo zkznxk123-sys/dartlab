@@ -39,7 +39,7 @@
 	const UNITS: FinanceUnit[] = ['원', '백만', '억'];
 
 	let kind = $state<FinanceKind>('IS');
-	let freq = $state<FinanceFreq>('annual');
+	let freq = $state<FinanceFreq>('quarter'); // 기본 분기 — 표는 최신 보고 원값 우선 (연간·누적은 토글)
 	let scope = $state<FinanceScope>('CFS');
 	let unit = $state<FinanceUnit>('백만');
 	let avail = $state<FinanceAvailability | null>(null);

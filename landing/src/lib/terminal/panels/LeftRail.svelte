@@ -5,6 +5,7 @@
 	import type { EcoNode, Lang } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
+	import { finTypeOf } from '../data/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { txc, chgClass, sign, heat } from '../ui/helpers';
 
 	interface Props {
@@ -149,9 +150,10 @@
 	<div class="rankList">
 		{#each rows as r, i (r.n.id)}
 			{@const pill = finPillOf(r.n)}
+			{@const ft = finTypeOf(r.n, eng.raw.finance.companies[r.n.id]).primary}
 			<div class={'rankRow' + (active === r.n.id ? ' on' : '')} role="button" tabindex="0" onclick={() => onPick(r.n.id)} onkeydown={(e) => e.key === 'Enter' && onPick(r.n.id)}>
 				<span class="rkN mono">{i + 1}</span>
-				<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}{pill.v ? ' · ' + pill.v : ''}</span></span>
+				<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}{#if ft}<span class={'rkType ' + tcls(ft.tone)} title={ft.criteriaKr}> · {ft.name}</span>{/if}</span></span>
 				<span class={'rkCol mono ' + chgClass(r.r1y)}>{r.r1y == null ? '—' : sign(r.r1y, 0) + '%'}</span>
 				<span class={'rkCol mono ' + (sortKey === 'roe' ? tcls(pill.t) : 'tNeu')}>{fmtPct(r.roe)}</span>
 				<span class="rkCol mono tNeu">{fmtPct(r.opm)}</span>

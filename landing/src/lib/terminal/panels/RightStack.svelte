@@ -4,6 +4,7 @@
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 내부 dynamic import
+	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — dynamic import lazy, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import {
 		loadLiveCompanyReportFacts,
@@ -26,6 +27,7 @@
 	}
 	let { co, lang, onPick }: Props = $props();
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
+	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
@@ -219,6 +221,7 @@
 		{#if finBundle && finBundle.modes.filter((m) => m !== 'ttm').length > 1}
 			<span class="segGroup mini">{#each finBundle.modes.filter((m) => m !== 'ttm') as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
+		<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'quantitative statements (viewer dialog)' : '정량재무제표 — 공시뷰어와 동일 (IS/BS/CF/CIS/자본변동 · 연결/개별)'}>⤢</button>
 	{/snippet}
 	<div class="finTabs">{#each tabs as t (t.k)}<button class={'finTab ' + (stmt === t.k ? 'on' : '')} onclick={() => (stmt = t.k)}>{lang === 'en' ? t.en : t.kr}</button>{/each}</div>
 	{#if finView}
@@ -389,7 +392,7 @@
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할 -->
 <div class="rowSplit">
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
-		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기 (새 탭)">뷰어 ↗</a><button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
+		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
 		{#if regFilings.length}
 			<div class="filingList">
 				{#each regFilings as f (f.rceptNo)}
@@ -484,4 +487,11 @@
 
 {#if viewerOpen}
 	<ViewerOverlay code={co.code} onclose={() => (viewerOpen = false)} />
+{/if}
+
+{#if tablesOpen}
+	{#await import('$lib/components/viewer/FinanceDialog.svelte') then m}
+		{@const FinanceDialog = m.default}
+		<FinanceDialog code={co.code} corpName={co.name.kr} open={tablesOpen} onclose={() => (tablesOpen = false)} />
+	{/await}
 {/if}
