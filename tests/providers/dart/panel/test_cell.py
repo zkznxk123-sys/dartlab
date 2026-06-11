@@ -346,3 +346,33 @@ def test_read_note_statement_reuses_engine(monkeypatch) -> None:
     assert tot.height == 1 and tot["2024"][0] == "268,144,942" and tot["2023"][0] == "252,368,518"
     sal = w.filter(pl.col("account") == "급여")
     assert sal["2024"][0] == "32,877,167" and sal["2020"][0] == "25,054,684"  # XBRL+옛 한 행
+
+
+# ── 라벨 정규화 — era 표기변형 흡수 + over-merge 안전 + 쌍둥이 계약 (_attempts/pastAxisConnection 100사 검증) ──
+
+
+def test_normalize_label_twin_and_variants() -> None:
+    """``_normalizeLabel``(polars) ≡ ``_normKey``(scalar) 쌍둥이 + 표기변형 흡수 + over-merge 안전."""
+    from dartlab.providers.dart.panel.cell import _normalizeLabel, _normKey
+
+    # 표기변형 흡수 — 같은 항목이 같은 키로 (과거 era 연결)
+    for raw, expect in [
+        ("매출액 (주30)", "매출액"),  # (주N) strip
+        ("Ⅰ.매출액", "매출액"),  # 로마numeral 섹션 prefix
+        ("Ⅲ. 영업이익", "영업이익"),  # 로마 + 공백
+        ("주당이익(단위:원)", "주당이익"),  # (단위) annotation
+        ("기본주당이익(손실)(단위:원)", "기본주당이익(손실)"),  # (단위)만, (손실) 보존
+        ("자산ㆍ부채의변동", "자산부채의변동"),  # 중점 strip
+    ]:
+        assert _normKey(raw) == expect, f"normKey({raw!r})={_normKey(raw)!r} != {expect!r}"
+        got = pl.DataFrame({"label": [raw]}).select(_normalizeLabel(pl.col("label")))["label"][0]
+        assert got == expect == _normKey(raw), f"normalizeLabel({raw!r})={got!r} (쌍둥이 불일치)"
+
+    # over-merge 안전 — 의미 qualifier·아라비아 ordinal 은 *구별 보존*(다른 키)
+    for a, b in [
+        ("단기금융자산", "장기금융자산"),  # 단기↔장기
+        ("유형자산의처분", "무형자산의처분"),  # 유형↔무형
+        ("1.수입보증금", "2.수입보증금"),  # 아라비아 ordinal 보존(리스트항목 오병합 회피)
+        ("중단영업이익", "영업이익"),  # 중단영업 보존
+    ]:
+        assert _normKey(a) != _normKey(b), f"over-merge: {a!r} ≡ {b!r}"

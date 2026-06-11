@@ -346,13 +346,22 @@ def _cellWideFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: st
     return wide.select([*CELL_PIVOT_INDEX, "label", *periodCols])
 
 
-# 정규화 매칭 키: (주N) 주석참조 제거 + 공백 제거 (XBRL label ↔ 옛 항목명 통합).
-_NOTE_PAT = r"\(주[\s\d,]+\)"
+# 정규화 매칭 키 — era 표기변형 흡수해 같은 항목 통합 (XBRL label ↔ 옛 항목명):
+#   (1) (주N)·(단위) 주석/단위 annotation 제거  (2) 로마numeral 섹션 prefix(Ⅰ.~Ⅹ.) 제거  (3) 중점ㆍ·공백 제거.
+# 아라비아/한글 ordinal(1./가.)은 *보존* — CF 리스트항목 번호만 다른 별개행 오병합 위험(로마만 섹션마커라 안전).
+# tests/_attempts/pastAxisConnection 100사 over-merge 0 검증. _normKey 가 본 함수의 스칼라 쌍둥이(동일 3패스).
+_NOTE_PAT = r"\((?:주[\s\d,]+|단위[^)]*)\)"
+_ROMAN_PREFIX = r"^\s*[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]\s*[.)]\s*"
+_DOT_WS = r"[ㆍ·∙•\s]+"
 
 
 def _normalizeLabel(col: pl.Expr) -> pl.Expr:
-    """label → 매칭 키: ``(주N)`` strip + 전 공백 제거. ("매출액 (주30)"→"매출액")."""
-    return col.str.replace_all(_NOTE_PAT, "").str.replace_all(r"\s+", "")
+    """label → 매칭 키: (주N)·(단위) strip + 로마numeral prefix strip + 중점·공백 제거.
+
+    "매출액 (주30)"→"매출액" · "Ⅰ.매출액"→"매출액" · "주당이익(단위:원)"→"주당이익" · "자산ㆍ부채"→"자산부채".
+    아라비아/한글 ordinal 보존. ``_normKey`` 와 동일 정규화(쌍둥이 — ratio snakeId 매칭 정합).
+    """
+    return col.str.replace_all(_NOTE_PAT, "").str.replace_all(_ROMAN_PREFIX, "").str.replace_all(_DOT_WS, "")
 
 
 def _find(parent: dict, x: str) -> str:
@@ -580,12 +589,15 @@ def _statementFromCells(df: pl.DataFrame, *, statement: str, freq: str, scope: s
 _RATIO_SOURCE: dict[str, str] = {"BS": "bs", "IS": "is", "CF": "cf"}
 
 _NOTE_RE = re.compile(_NOTE_PAT)
-_WS_RE = re.compile(r"\s+")
+_ROMAN_RE = re.compile(_ROMAN_PREFIX)
+_DOTWS_RE = re.compile(_DOT_WS)
 
 
 def _normKey(s: str) -> str:
-    """항목명 → 매칭 키 — ``_normalizeLabel`` 의 스칼라 짝 ((주N) strip + 전 공백 제거)."""
-    return _WS_RE.sub("", _NOTE_RE.sub("", s or ""))
+    """항목명 → 매칭 키 — ``_normalizeLabel`` 의 스칼라 쌍둥이 (동일 3패스: 주N·단위 / 로마prefix / 중점·공백)."""
+    s = _NOTE_RE.sub("", s or "")
+    s = _ROMAN_RE.sub("", s)
+    return _DOTWS_RE.sub("", s)
 
 
 @lru_cache(maxsize=1)
