@@ -704,6 +704,14 @@ def sectionLeafConvergeExpr() -> pl.Expr:
 
     Returns:
         ``sectionLeaf`` 별칭 Utf8 Expr.
+
+    Raises:
+        없음 — 순수 Expr 빌더. 미매칭 라벨은 예외 없이 원본 유지(honest)이며,
+        ``chapter``/``sectionLeaf`` 컬럼 부재는 적용 시점에 polars ColumnNotFoundError.
+
+    Example:
+        >>> from dartlab.providers.dart.panel.read import sectionLeafConvergeExpr
+        >>> frame.with_columns(sectionLeafConvergeExpr())  # doctest: +SKIP
     """
     from .canonical import _canonLabelExpr
 
