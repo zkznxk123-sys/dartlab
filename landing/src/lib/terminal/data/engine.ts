@@ -80,11 +80,6 @@ function lastNonNull(arr: Num[] | undefined): { v: number; i: number } | null {
 	}
 	return null;
 }
-function firstNonNull(arr: Num[] | undefined): number | null {
-	if (!arr) return null;
-	for (const x of arr) if (x != null) return x;
-	return null;
-}
 function median(a: Num[]): number | null {
 	const s = a.filter((x): x is number => x != null && Number.isFinite(x)).sort((x, y) => x - y);
 	return s.length ? s[Math.floor(s.length / 2)] : null;

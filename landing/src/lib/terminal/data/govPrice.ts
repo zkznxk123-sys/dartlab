@@ -9,6 +9,7 @@
 import { browser } from '$app/environment';
 import { readParquetWholeFile } from '$lib/data/hfRange';
 import type { Candle } from './priceSeries';
+import { localTerminalAdapter } from './localAdapter';
 
 export const GOV_ATTRIBUTION = '출처: 금융위원회·한국거래소 (공공데이터포털)';
 
@@ -79,6 +80,8 @@ const RECENT_COLUMNS = ['stockCode', 'date', 'open', 'high', 'low', 'close', 'vo
 /** 최근 거래일 tail (code → 캔들 오름차순). null = recent 파일 미존재. */
 export function loadGovRecent(): Promise<Map<string, Candle[]> | null> {
 	if (!browser) return Promise.resolve(null);
+	const local = localTerminalAdapter()?.loadGovRecent;
+	if (local) return local();
 	if (recentPromise) return recentPromise;
 	recentPromise = (async () => {
 		try {
@@ -106,6 +109,8 @@ export function loadGovRecent(): Promise<Map<string, Candle[]> | null> {
 export function loadGovCandles(code: string): Promise<Candle[] | null> {
 	if (!browser) return Promise.resolve(null);
 	const c = code.trim();
+	const local = localTerminalAdapter()?.loadGovCandles;
+	if (local) return local(c);
 	if (cache.has(c)) return Promise.resolve(cache.get(c) ?? null);
 	const hit = inflight.get(c);
 	if (hit) return hit;

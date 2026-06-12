@@ -3,6 +3,7 @@
 // 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
 import { browser } from '$app/environment';
 import { readParquetRows } from '$lib/data/hfRange';
+import { localTerminalAdapter } from './localAdapter';
 
 export interface Candle {
 	t: string; // YYYYMMDD
@@ -195,6 +196,8 @@ const inflight = new Map<string, Promise<CompanyPrices | null>>();
 export function loadInitialOHLCV(stockCode: string, year: number): Promise<CompanyPrices | null> {
 	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
+	const local = localTerminalAdapter()?.loadPriceInitial;
+	if (local) return local(code, year);
 	if (cache.has(code)) return Promise.resolve(cache.get(code) ?? null);
 	const hit = inflight.get(code);
 	if (hit) return hit;
@@ -217,6 +220,8 @@ export function loadInitialOHLCV(stockCode: string, year: number): Promise<Compa
 
 /** 현재까지 캐시된 전체 캔들(오름차순). 백필 후 차트 재적용·기간 윈도잉에 사용. */
 export function loadedCandles(stockCode: string): Candle[] {
+	const local = localTerminalAdapter()?.loadedCandles;
+	if (local) return local(stockCode);
 	return cache.get(stockCode.trim())?.candles ?? [];
 }
 
@@ -231,6 +236,8 @@ export function seedCandles(stockCode: string, candles: Candle[]): CompanyPrices
 /** 좌측 팬 시 더 오래된 연도 1 개 로드 (prepend 용). 캐시에도 병합. 빈 배열 = 데이터 없음. */
 export async function loadOlderYear(stockCode: string, targetYear: number): Promise<Candle[]> {
 	if (!browser || targetYear < KRX_MIN_YEAR) return [];
+	const local = localTerminalAdapter()?.loadPriceOlder;
+	if (local) return local(stockCode, targetYear);
 	const code = stockCode.trim();
 	const c = code.replace(/[^0-9A-Za-z]/g, '');
 	const rows = await readYearCandles(targetYear, `A${c}`, c);

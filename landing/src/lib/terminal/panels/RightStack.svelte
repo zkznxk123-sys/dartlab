@@ -19,6 +19,7 @@
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 	import { loadWorkforce, loadInvestments, loadShareholderReturn, type WorkforceYear, type InvestmentsView, type ShareholderReturnYear } from '../data/reportSeries';
 	import { fmtKRW } from '../data/engine';
+	import { localTerminalAdapter } from '../data/localAdapter';
 
 	interface Props {
 		co: Company;
@@ -28,6 +29,10 @@
 	let { co, lang, onPick }: Props = $props();
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
+	const localViewerHref = $derived(localTerminalAdapter()?.viewerUrl?.(co.code) ?? null);
+	const viewerHref = $derived(localViewerHref ?? `${base}/viewer/company/${co.code}`);
+	const externalTarget = $derived(localViewerHref ? undefined : '_blank');
+	const externalRel = $derived(localViewerHref ? undefined : 'noopener');
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
@@ -375,7 +380,7 @@
 <!-- 공시 변경 내역 (changes parquet — 섹션별 수치/구조 변경) -->
 {#if disclChanges.length}
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: "공시 변경 추적", en: "WHAT CHANGED" }} sub={{ kr: "직전 공시 대비 바뀐 섹션·내용", en: "vs prior filing" }} flush>
-		{#snippet right()}<a class="lensScan" href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener" title="공시 뷰어에서 보기">뷰어 ↗</a><span class="dim">{disclChanges.length}</span>{/snippet}
+		{#snippet right()}<a class="lensScan" href={viewerHref} target={externalTarget} rel={externalRel} title="공시 뷰어에서 보기">뷰어 ↗</a><span class="dim">{disclChanges.length}</span>{/snippet}
 		<div class="chgFeed">
 			{#each disclChanges as c, i (i)}
 				<div class="chgFeedRow">

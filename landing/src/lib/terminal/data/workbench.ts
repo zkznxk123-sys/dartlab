@@ -18,6 +18,7 @@ import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/c
 import { loadLiveCompanyReportFacts, loadLiveCompanyChanges, type LiveCompanyReportFact } from '$lib/browser/companyLive';
 import { loadGovCandles, loadGovRecent } from './govPrice';
 import type { CompanyChange } from '$lib/scan/duckSql';
+import { localTerminalAdapter } from './localAdapter';
 
 export type { Candle, TerminalFinanceBundle, ProductIndexItem, CompanyRelations, RegularFiling, NonRegularFiling, LiveCompanyReportFact, CompanyChange };
 
@@ -35,36 +36,45 @@ export const price = {
 	// 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을 보장. 둘 다 미스(신규상장 직후)면
 	// date/ 파티션 폴백. dev 미스는 /__gov 라이브 채움 경로가 govPrice 안에서 동작.
 	initial: async (code: string, year: number): Promise<CompanyPrices | null> => {
+		const local = localTerminalAdapter()?.loadPriceInitial;
+		if (local) return local(code, year);
 		const [gov, recent] = await Promise.all([loadGovCandles(code), loadGovRecent()]);
 		const tail = recent?.get(code.trim()) ?? [];
 		if ((gov && gov.length) || tail.length) return seedCandles(code, mergeDedup(gov ?? [], tail));
 		return loadInitialOHLCV(code, year);
 	},
-	older: (code: string, targetYear: number) => loadOlderYear(code, targetYear),
-	loaded: (code: string) => loadedCandles(code)
+	older: (code: string, targetYear: number) => localTerminalAdapter()?.loadPriceOlder?.(code, targetYear) ?? loadOlderYear(code, targetYear),
+	loaded: (code: string) => localTerminalAdapter()?.loadedCandles?.(code) ?? loadedCandles(code)
 };
 
 // 공공데이터포털 회사별 단일 parquet 온디맨드 로더(차트 SSOT). 미스 시 /__gov 가 라이브 채움.
-export const govPrice = (code: string) => loadGovCandles(code);
+export const govPrice = (code: string) => localTerminalAdapter()?.loadGovCandles?.(code) ?? loadGovCandles(code);
 
-export const finance = (code: string): Promise<TerminalFinanceBundle | null> => loadTerminalFinance(code);
+export const finance = (code: string): Promise<TerminalFinanceBundle | null> => localTerminalAdapter()?.loadTerminalFinance?.(code) ?? loadTerminalFinance(code);
 
 export async function products(code: string): Promise<ProductIndexItem | null> {
+	const local = localTerminalAdapter()?.products;
+	if (local) return local(code);
 	const m = await loadHfProductIndexMap();
 	return m?.get(code) ?? null;
 }
-export const productIndex = (): Promise<Map<string, ProductIndexItem> | null> => loadHfProductIndexMap();
+export const productIndex = (): Promise<Map<string, ProductIndexItem> | null> => localTerminalAdapter()?.productIndex?.() ?? loadHfProductIndexMap();
 
-export const relations = (code: string): Promise<CompanyRelations | null> => loadCompanyRelations(code);
-export const regularFilings = (code: string): Promise<RegularFiling[]> => loadCompanyRegularFilings(code, REGULAR_LIMIT);
-export const nonRegularFilings = (code: string): Promise<NonRegularFiling[]> => loadCompanyNonRegularFilings(code, { limit: NONREGULAR_LIMIT });
-export const reportFacts = (code: string): Promise<LiveCompanyReportFact[]> => loadLiveCompanyReportFacts(code);
-export const changes = (code: string): Promise<CompanyChange[]> => loadLiveCompanyChanges(code, CHANGES_LIMIT);
+export const relations = (code: string): Promise<CompanyRelations | null> => localTerminalAdapter()?.relations?.(code) ?? loadCompanyRelations(code);
+export const regularFilings = (code: string): Promise<RegularFiling[]> => localTerminalAdapter()?.regularFilings?.(code) ?? loadCompanyRegularFilings(code, REGULAR_LIMIT);
+export const nonRegularFilings = (code: string): Promise<NonRegularFiling[]> => localTerminalAdapter()?.nonRegularFilings?.(code) ?? loadCompanyNonRegularFilings(code, { limit: NONREGULAR_LIMIT });
+export const reportFacts = (code: string): Promise<LiveCompanyReportFact[]> => localTerminalAdapter()?.reportFacts?.(code) ?? loadLiveCompanyReportFacts(code);
+export const changes = (code: string): Promise<CompanyChange[]> => localTerminalAdapter()?.changes?.(code, CHANGES_LIMIT) ?? loadLiveCompanyChanges(code, CHANGES_LIMIT);
 
 // 회사 선택 시 1 회 호출 — 무거운 두 소스(주가·재무)를 병렬로 미리 덥힌다(fire-and-forget).
 // 두 로더는 in-flight dedup 이 있어 패널의 같은 호출과 스캔을 공유(중복 fetch 없음).
 // 나머지 경량 로더(relations/filings/facts/changes)는 패널이 단일 호출 — 여기서 중복 발사하지 않음.
 export function prefetch(code: string, priceYear: number): void {
+	const local = localTerminalAdapter()?.prefetch;
+	if (local) {
+		local(code, priceYear);
+		return;
+	}
 	void loadGovCandles(code); // 회사별 gov 캐시 워밍 — dev: 라이브 fetch+HF 저장, prod: 캐시 읽기(미스=date/ 폴백)
 	void loadGovRecent(); // 최근 거래일 tail — 전 종목 공유 1파일, 세션 1회
 	void loadTerminalFinance(code);

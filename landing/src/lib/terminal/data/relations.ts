@@ -2,6 +2,7 @@
 // dartlab 고유: 공급사·고객사(제품·매출비중), ego, blogPosts(강점/약점/verdict).
 import { browser } from '$app/environment';
 import { loadJson } from '$lib/data/dartlabData';
+import { localTerminalAdapter } from './localAdapter';
 
 export interface RelEdge {
 	stockCode: string;
@@ -39,6 +40,8 @@ const cache = new Map<string, CompanyRelations | null>();
 export async function loadCompanyRelations(stockCode: string): Promise<CompanyRelations | null> {
 	if (!browser) return null;
 	const code = stockCode.trim();
+	const local = localTerminalAdapter()?.relations;
+	if (local) return local(code);
 	if (cache.has(code)) return cache.get(code) ?? null;
 	const d = await loadJson<RawCompanyFile>(`map/companies/${code}.json`, { fetchFn: fetch });
 	if (!d) {
