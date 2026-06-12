@@ -69,6 +69,32 @@ def test_canonical_chapter_absorbs_dividend_and_securities() -> None:
     assert out == ["III. 재무에 관한 사항"] * 3  # 셋 다 III 흡수 (stray 챕터로 새지 않음)
 
 
+def test_canonical_chapter_nt_orphan_recovers_to_finance() -> None:
+    """구조신호 0(chapter·sectionPath 공백) NT_ 주석 orphan → III 복원, front-matter(키 ∅)는 honest-gap 보존.
+
+    (첨부)재무제표 flat <P ID> 주석은 SECTION 부재로 chapter·sectionPath 둘 다 공백으로 새는 회귀
+    (2025+ 35사 15,217행 실측). NT_ 표준코드 = 정의상 재무제표 주석이라 III 복원은 honest(추측 0).
+    같은 공백이라도 disclosureKey 없는 front-matter(표지·정정)는 그대로(강제 배정 금지).
+    """
+    from dartlab.providers.dart.panel.canonical import canonicalChapterExpr
+
+    df = pl.DataFrame(
+        {
+            "chapter": ["", "", "", "II. 사업의 내용"],
+            "sectionPath": ["", "", "", "II. 사업의 내용␟V. 회계감사인의 감사의견 등"],
+            "disclosureKey": ["NT_D838000", None, "CF_X", "NT_D838000"],
+        }
+    )
+    out = df.select(canonicalChapterExpr(noteKeyCol="disclosureKey"))["canonicalChapter"].to_list()
+    assert out[0] == "III. 재무에 관한 사항"  # NT_ orphan → III 복원
+    assert out[1] == ""  # front-matter(키 ∅) → 원본 보존 (honest-gap, 강제 0)
+    assert out[2] == ""  # NT_ 외 키 → 보존 (NT_ 한정, 추측 배정 금지)
+    assert out[3] == "V. 회계감사인의 감사의견 등"  # 구조신호(경로) 가 NT_ 복원보다 우선
+    # noteKeyCol 미지정(기본) = 복원 비활성 — 기존 호출 계약 불변
+    legacy = df.select(canonicalChapterExpr())["canonicalChapter"].to_list()
+    assert legacy[0] == ""
+
+
 def test_report_chapter_labels_exclude_certs() -> None:
     """REPORT_CHAPTER_LABELS = navigable 보고서 챕터(I~XII) — cert 노드(cover/expert) 제외, I~XII 전부 포함."""
     from dartlab.providers.dart.panel.canonical import CERT_NODE_IDS, REPORT_CHAPTER_LABELS

@@ -959,12 +959,15 @@ def readWide(
     long = anchorLatest(long)
     long = dedupKeyed(long)  # 본문+첨부 중복 keyed 행 → (key,scope,leafType,period) 당 1개 (collapse 증식 차단)
     # canonical L1 챕터 복원·접기 — sectionPath 깊은 canonical 원소로 **붕괴된 chapter 복원**(DART era 가 III~XII
-    # 를 II 아래 mis-nesting → walker chapter 붕괴) + (첨부)→III 흡수. 회사간 비교축. READ 파생(재빌드 무관).
+    # 를 II 아래 mis-nesting → walker chapter 붕괴) + (첨부)→III 흡수 + 구조신호 0 인 NT_ 주석 orphan III 복원
+    # ((첨부) flat <P ID> 주석은 SECTION 부재로 chapter·sectionPath 공백 — NT_ 표준코드가 정의상 재무주석).
+    # 회사간 비교축. READ 파생(재빌드 무관).
     from .canonical import canonicalChapterExpr
 
     if "chapter" in long.columns:
         pathCol = "sectionPath" if "sectionPath" in long.columns else "chapter"
-        long = long.with_columns(canonicalChapterExpr("chapter", pathCol).alias("chapter"))
+        noteKeyCol = "disclosureKey" if "disclosureKey" in long.columns else None
+        long = long.with_columns(canonicalChapterExpr("chapter", pathCol, noteKeyCol=noteKeyCol).alias("chapter"))
     # (첨부) 물리 재무첨부((첨부)연결재무제표·(첨부)재무제표) → 정규 재무섹션(2.연결재무제표/4.재무제표 …)으로 흡수.
     # 옛 연차본 물리첨부(XBRL 태깅 0 → anchor 못 잡음)가 ghost 섹션·spine 부유로 남는 것을 read-time 정규화.
     long = absorbAttached(long)

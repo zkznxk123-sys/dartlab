@@ -50,6 +50,9 @@ def _normKeyword(kw: str) -> str:
 # SECTION-N 경로 구분자 (walker._SECTION_SEP 와 동일). sectionPath = "II␟IV␟2..." depth join.
 _SECTION_SEP = "␟"
 
+# III(재무) 라벨 — NT_ 주석키 복원 타깃 (CANONICAL_L1 SSOT 파생, 하드코딩 0).
+_FINANCE_LABEL: str = next(label for nid, label, _kw in CANONICAL_L1 if nid == "L3_finance")
+
 
 def _canonLabelExpr(e: pl.Expr) -> pl.Expr:
     """단일 원소(chapter/sectionPath 원소) Expr → canonical L1 라벨 또는 **null**(미매칭).
@@ -70,21 +73,26 @@ def _canonLabelExpr(e: pl.Expr) -> pl.Expr:
     return expr.otherwise(None) if expr is not None else pl.lit(None, dtype=pl.Utf8)
 
 
-def canonicalChapterExpr(chapterCol: str = "chapter", pathCol: str = "sectionPath") -> pl.Expr:
+def canonicalChapterExpr(
+    chapterCol: str = "chapter", pathCol: str = "sectionPath", noteKeyCol: str | None = None
+) -> pl.Expr:
     """드리프트·붕괴 chapter → canonical L1 라벨 Expr. **sectionPath 깊은 canonical 원소 우선**.
 
     DART XML 은 era 별로 챕터 III~XII 를 "II. 사업의 내용" 아래 SECTION-2 로 mis-nesting 해 walker 의
     chapter(SECTION-1)가 붕괴(전 narrative 가 II 로 몰림). 그러나 ``sectionPath``(전 깊이 truth)의 **가장 깊은
     canonical 매치 원소가 진짜 챕터**(예 ``II␟IV. 감사의견`` → IV). 따라서 sectionPath 를 ␟로 쪼개 원소별
-    canonical 라벨 → drop_nulls → **last(deepest)**. sectionPath 에 canonical 원소 없으면 chapter 컬럼 직접,
-    그래도 없으면 원본 chapter(honest). (첨부)재무제표 → III 흡수도 동일 경로(sectionPath 단일 원소 매치).
+    canonical 라벨 → drop_nulls → **last(deepest)**. sectionPath 에 canonical 원소 없으면 chapter 컬럼 직접.
+    ``noteKeyCol`` 지정 시 그래도 미해소인 **NT_ 주석행은 III 복원** — (첨부)재무제표 flat ``<P ID>`` 주석은
+    SECTION 이 없어 chapter·sectionPath 둘 다 공백으로 새는데(2025+ 35사 15,217행 실측), NT_ 표준코드가
+    재무제표 주석임을 정의상 식별하므로 honest 복원(추측 0). 끝까지 미해소면 원본 chapter(honest).
 
     Args:
         chapterCol: 붕괴 가능 chapter 컬럼명 (fallback).
         pathCol: SECTION-N 전 깊이 sectionPath 컬럼명 (1순위 truth).
+        noteKeyCol: 주석 표준코드 컬럼명(보통 "disclosureKey"). None(기본)이면 NT_ 복원 비활성.
 
     Returns:
-        ``canonicalChapter`` 별칭 Utf8 Expr — sectionPath 복원 canonical 라벨 / chapter fallback / 원본.
+        ``canonicalChapter`` 별칭 Utf8 Expr — sectionPath 복원 / chapter 키워드 / NT_→III / 원본.
 
     Raises:
         없음.
@@ -96,7 +104,7 @@ def canonicalChapterExpr(chapterCol: str = "chapter", pathCol: str = "sectionPat
         ['III. 재무에 관한 사항']
 
     SeeAlso:
-        - ``read.readWide`` — pivot 전 본 Expr 로 챕터 복원·접기.
+        - ``read.readWide`` — pivot 전 본 Expr 로 챕터 복원·접기 (noteKeyCol="disclosureKey").
         - ``canonicalRankExpr`` — canonical 라벨 → rank.
 
     Requires:
@@ -104,6 +112,7 @@ def canonicalChapterExpr(chapterCol: str = "chapter", pathCol: str = "sectionPat
 
     Capabilities:
         - 붕괴된 chapter 를 sectionPath 깊은 canonical 원소로 복원 — chapter collapse(전 narrative II 몰림) 해소.
+        - 구조신호 0 인 NT_ 주석 orphan 을 III 로 honest 복원 — (첨부) flat 주석 챕터 탈락 회귀 흡수.
 
     Guide:
         - readWide 가 anchorLatest·dedupKeyed 후 호출. 직접 호출 가능(순수 Expr).
@@ -114,15 +123,16 @@ def canonicalChapterExpr(chapterCol: str = "chapter", pathCol: str = "sectionPat
     LLM Specifications:
         AntiPatterns:
             - 붕괴된 chapter 컬럼 직접 신뢰 금지 — sectionPath 깊은 canonical 원소가 truth.
-            - 미매칭에 None 강제 금지 — chapter→원본 coalesce(honest).
+            - 미매칭에 None 강제 금지 — chapter→원본 coalesce(honest). NT_ 복원은 *정의상 III*(주석 표준코드)라 예외.
+            - NT_ 외 키(front-matter ∅ 등) 추측 배정 금지 — honest-gap 유지.
         OutputSchema:
             - ``pl.Expr`` (alias "canonicalChapter", Utf8).
         Prerequisites:
-            - polars. sectionPath/chapter 컬럼.
+            - polars. sectionPath/chapter 컬럼 (+선택 disclosureKey).
         Freshness:
             - READ 파생.
         Dataflow:
-            - sectionPath split → 원소별 canonical → drop_nulls → last → (fallback) chapter → 원본.
+            - sectionPath split → 원소별 canonical → last → chapter 키워드 → NT_→III → 원본.
         TargetMarkets:
             - KR (DART).
     """
@@ -134,7 +144,12 @@ def canonicalChapterExpr(chapterCol: str = "chapter", pathCol: str = "sectionPat
         .list.drop_nulls()
         .list.last()
     )
-    return pl.coalesce([fromPath, _canonLabelExpr(pl.col(chapterCol)), pl.col(chapterCol)]).alias("canonicalChapter")
+    chain: list[pl.Expr] = [fromPath, _canonLabelExpr(pl.col(chapterCol))]
+    if noteKeyCol is not None:
+        # NT_ 표준코드 = 재무제표 주석(정의상 III). 구조신호(경로·키워드) 전무한 (첨부) flat 주석만 닿는다 —
+        # 경로/키워드 해소가 chain 앞이라 front-matter(키 ∅)는 본 분기 미적용(honest-gap 보존).
+        chain.append(pl.when(pl.col(noteKeyCol).str.starts_with("NT_")).then(pl.lit(_FINANCE_LABEL)).otherwise(None))
+    return pl.coalesce([*chain, pl.col(chapterCol)]).alias("canonicalChapter")
 
 
 def canonicalRankExpr(col: str = "chapter") -> pl.Expr:
