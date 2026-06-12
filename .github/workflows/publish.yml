@@ -104,8 +104,13 @@ jobs:
       - name: Build Svelte UI
         # tsc 는 routeTree.gen.ts 가 미존재 상태에서 fail (TanStackRouterVite 가 vite 시작 시
         # 자동 생성). v0.10.0 시점 build script 가 'vite build' 만이었음 — 그 동작 재현.
+        # landing npm ci 선행 필수 — ui/web 터미널이 landing/src/lib/terminal 을 cross-package
+        # import 하고, esbuild 가 landing/tsconfig.json 의 extends(./.svelte-kit/tsconfig.json,
+        # prepare=svelte-kit sync 생성물)를 읽는다. 미설치 시 resolveExtends 빌드 실패.
         run: |
-          cd ui/web
+          cd landing
+          npm ci
+          cd ../ui/web
           npm ci
           npx vite build
 
