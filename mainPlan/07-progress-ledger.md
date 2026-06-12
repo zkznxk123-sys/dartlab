@@ -10,15 +10,18 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-1a (npm 워크스페이스 기반) — 04 단계-1a 절차대로.
-선행 조건 (충족 현황):
-  ① 활성 세션: site-signals 세션 잔존 — 1a는 landing/package-lock.json·vite.config.ts를 만지므로
-     착수 전 해당 세션 종료 또는 비충돌 확인 필수 (06 §1)
-  ② PyPI freeze: ✅ 충족 — v0.10.7 (tag=e3e296bd5, publish run 27432180934 success 2026-06-12 18:09Z)
-  ③ 스트레이: 삭제 결정 완료 (ui/node_modules·ui/build = gitignored 고아) — 집행은 1a 첫 수
-1a 착수 시 첫 수: ① 스트레이 삭제 ② 루트 package.json workspaces ③ deploy-landing.yml·dependabot.yml 개정
-   ④ landing d3 alias 핵 제거 ⑤ 검증(landing build + Pages artifact + ui/web 단독 재현 + OneDrive junction/npm ci 2회)
-재개 지점: 단계-0 완료 (entry #5) — 실측 원자료는 06 §10
+다음 작업: 단계-1a 본체 (npm 워크스페이스) — 1세션 1단위로 집행. 운영자 go 기득(2026-06-13 "멈추지말고 끝까지", 리밋으로 분할만).
+선행 조건: ② PyPI freeze ✅ v0.10.7 / ③ 스트레이 ✅ 삭제 집행 완료(ui/node_modules·ui/build, entry #6) / ① site-signals 비충돌 = 운영자 go로 해제
+1a 본체 순서 (사전 조사 완료분 포함):
+  ① 루트 package.json 신설 — private, workspaces=["landing","ui/packages/*","ui/apps/*"], overrides.svelte="5.56.3"
+  ② landing/package.json svelte "^5.56.3"→"5.56.3" 정확 고정 (이름="dartlab-landing", prepare="svelte-kit sync" 있음 — 워크스페이스 install 시 sync 자동)
+  ③ landing/package-lock.json 삭제 → 루트 npm install(lockfile 생성) → npm ci 2회(재현성·junction 확인)
+  ④ landing/vite.config.ts d3 alias 핵 4줄 제거(호이스팅이 해소)
+  ⑤ 워크플로 3종 동시 개정 ⚠: deploy-landing.yml(루트 npm ci + npm run build -w landing + 캐시 경로) ·
+     **publish.yml(`cd landing && npm ci`가 lockfile 부재로 즉사 — 루트 npm ci로 교체 필수)** · dependabot.yml(/landing→/)
+     + ci-fast/ci-full 등 다른 워크플로의 landing npm ci 사용처 grep 후 동일 교체
+  ⑥ 검증: npm ls svelte 단일·landing build(-w)·landing check·ui/web 단독 npm ci+vite build·OneDrive 동기화 제외 확인
+재개 지점: entry #6 — 이 NEXT만 보고 ①부터 실행
 ```
 
 ---
@@ -139,3 +142,10 @@ commit: (이 변경의 커밋)
 
 검증: 04 단계-0 기준 — 코드 변경 0(mainPlan 문서만), build 영향 없음, landing 공개 route 목록 보존(분류만 확정). ✅  
 rollback: 이 commit revert.
+
+### [6] 단계-1a 부분 집행 — 스트레이 삭제 + 본체 분할 (사용 리밋 96%)
+일시: 2026-06-13  
+commit: (이 변경의 커밋 — 원장 갱신만, repo 코드 무변경)  
+내용: 운영자 "멈추지말고 끝까지" go로 1a 착수 → 사용 리밋 96% 통지로 **비가역 구간(lockfile 삭제·워크플로 개정) 직전에서 의도적 분할**. 집행분 = ui/node_modules·ui/build 스트레이 삭제(gitignored 고아 — repo 무영향, 검증 True/True). 사전 조사 확정분 = landing/package.json 전문(이름 dartlab-landing·prepare sync 존재·svelte ^5.56.3) + **publish.yml `cd landing && npm ci` 즉사 경로 발견**(1a 동시 개정 필수 — NEXT ⑤ 반영).  
+중단 지점/다음 행동: NEXT ①(루트 package.json 신설)부터 — NEXT만 보고 재개 가능.  
+rollback: 스트레이는 gitignored라 rollback 불요(재생성 가능).
