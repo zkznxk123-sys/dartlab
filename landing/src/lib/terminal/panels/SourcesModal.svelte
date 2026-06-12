@@ -4,6 +4,7 @@
 	import { GOV_ATTRIBUTION } from '../data/govPrice';
 	import { MACRO_ATTRIBUTION } from '../data/macroSeries';
 	import { FIN_TYPES } from '../data/finType'; // 재무 유형 라벨 기준 — SSOT 에서 직접 렌더(손코딩 문안 금지)
+	import { fetchLastSync, fmtSync, syncTone } from '../data/syncStatus'; // 동기화 실측 (HF lastCommit)
 
 	interface Props {
 		lang: Lang;
@@ -22,7 +23,10 @@
 		path: string; // HF 산출물 경로 (mono)
 		cadence: { kr: string; en: string };
 		license: { kr: string; en: string };
-		latest?: () => string; // 최근 일자 (가용한 원천만)
+		latest?: () => string; // 최근 일자 — 데이터 자체의 기준일 (가용한 원천만)
+		// 동기화 실측 — HF tree lastCommit (선언 주기가 아니라 마지막 실제 push 시각).
+		// expectDays = 기대 주기(일) — 신선도 톤 판정 기준. cron 생존 모니터를 겸한다.
+		sync?: { dir: string; file?: string; expectDays: number };
 	}
 	const ROWS: SourceRow[] = [
 		{
@@ -31,14 +35,16 @@
 			path: 'gov/prices · gov/indices',
 			cadence: { kr: '매 영업일 EOD', en: 'EOD each trading day' },
 			license: { kr: '공공누리 — 출처표시', en: 'KOGL — attribution' },
-			latest: () => pricesAsOf
+			latest: () => pricesAsOf,
+			sync: { dir: 'gov/prices', file: 'recent.parquet', expectDays: 1 }
 		},
 		{
 			data: { kr: '공시 원문·목록 (정기·수시)', en: 'Filings (regular · non-regular)' },
 			org: { kr: '금융감독원 DART (OpenDART)', en: 'FSS DART (OpenDART)' },
 			path: 'panel · allFilings',
 			cadence: { kr: '매일 동기화', en: 'daily sync' },
-			license: { kr: 'DART 이용약관', en: 'DART terms' }
+			license: { kr: 'DART 이용약관', en: 'DART terms' },
+			sync: { dir: 'dart/allFilings', file: 'recent.parquet', expectDays: 1 }
 		},
 		{
 			data: { kr: '재무제표 (분기·연간·TTM)', en: 'Financial statements (Q · FY · TTM)' },
@@ -53,7 +59,8 @@
 			org: { kr: 'DART OpenAPI 정기보고서', en: 'DART OpenAPI report' },
 			path: 'report',
 			cadence: { kr: '분기', en: 'quarterly' },
-			license: { kr: 'DART 이용약관', en: 'DART terms' }
+			license: { kr: 'DART 이용약관', en: 'DART terms' },
+			sync: { dir: 'dart/scan/report', expectDays: 7 }
 		},
 		{
 			data: { kr: '한국 매크로 (환율·기준금리·CPI·수출·경기지수)', en: 'KR macro (FX · base rate · CPI · exports · CLI)' },
@@ -61,7 +68,8 @@
 			path: 'macro/ecos',
 			cadence: { kr: '일·월 (지표별)', en: 'daily · monthly' },
 			license: { kr: 'ECOS 오픈API', en: 'ECOS open API' },
-			latest: () => macroAsOf
+			latest: () => macroAsOf,
+			sync: { dir: 'macro/ecos', expectDays: 1 }
 		},
 		{
 			data: { kr: '미국 매크로 (국채금리·연방금리·CPI·고용)', en: 'US macro (UST · Fed funds · CPI · labor)' },
@@ -69,14 +77,16 @@
 			path: 'macro/fred',
 			cadence: { kr: '일·주·월 (지표별)', en: 'daily · weekly · monthly' },
 			license: { kr: 'FRED API 약관', en: 'FRED API terms' },
-			latest: () => macroAsOf
+			latest: () => macroAsOf,
+			sync: { dir: 'macro/fred', expectDays: 1 }
 		},
 		{
 			data: { kr: '생태계·등급·산업분류·공급망', en: 'Ecosystem · grades · industry map · supply chain' },
 			org: { kr: 'dartlab 자체 구축 (공시 파싱)', en: 'dartlab-built (parsed filings)' },
 			path: 'ecosystem · map',
 			cadence: { kr: '분기', en: 'quarterly' },
-			license: { kr: '파생 산출물', en: 'derived artifact' }
+			license: { kr: '파생 산출물', en: 'derived artifact' },
+			sync: { dir: 'landing/map', file: 'ecosystem.json', expectDays: 2 }
 		},
 		{
 			data: { kr: '신용 dCR·적정주가·종합판정·백테스트', en: 'dCR credit · fair value · verdict · backtest' },
@@ -90,6 +100,22 @@
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
 	}
+
+	// 동기화 실측 — 모달 첫 오픈 시 1회 (syncStatus 세션 캐시), 행별 독립 스트림-인.
+	// undefined=조회 중(…) / null=실패('—' 정직) / ISO=실측 시각.
+	let syncAt = $state<Record<string, string | null>>({});
+	let probed = false;
+	$effect(() => {
+		if (!open || probed) return;
+		probed = true;
+		for (const r of ROWS) {
+			if (!r.sync) continue;
+			const key = r.path;
+			void fetchLastSync(r.sync.dir, r.sync.file).then((iso) => {
+				syncAt = { ...syncAt, [key]: iso };
+			});
+		}
+	});
 </script>
 
 <svelte:window onkeydown={open ? onKey : undefined} />
@@ -109,7 +135,8 @@
 						<th class="l">{T('원천 기관', 'SOURCE')}</th>
 						<th class="l">{T('산출물', 'ARTIFACT')}</th>
 						<th class="l">{T('갱신', 'CADENCE')}</th>
-						<th class="l">{T('최근 일자', 'LATEST')}</th>
+						<th class="l">{T('데이터 기준일', 'DATA AS-OF')}</th>
+						<th class="l" title={T('HF dataset 마지막 실제 push 시각 (tree lastCommit) — 선언 주기가 아니라 실측. cron 생존 모니터.', 'measured last push to HF dataset (tree lastCommit) — doubles as pipeline liveness monitor')}>{T('동기화 실측', 'LAST SYNC')}</th>
 						<th class="l">{T('라이선스·조건', 'LICENSE')}</th>
 					</tr></thead>
 					<tbody>
@@ -120,6 +147,14 @@
 								<td class="l mono srcPath">{r.path}</td>
 								<td class="l">{T(r.cadence.kr, r.cadence.en)}</td>
 								<td class="l mono srcLatest">{r.latest?.() || '—'}</td>
+								<td class="l mono srcSync">
+									{#if r.sync}
+										{@const iso = syncAt[r.path]}
+										{#if iso === undefined}<span class="dim">…</span>
+										{:else if iso === null}—
+										{:else}<span class={'syncDot ' + syncTone(iso, r.sync.expectDays)}>●</span> {fmtSync(iso, lang)}{/if}
+									{:else}—{/if}
+								</td>
 								<td class="l srcLic">{T(r.license.kr, r.license.en)}</td>
 							</tr>
 						{/each}
