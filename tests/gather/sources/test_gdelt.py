@@ -261,3 +261,4 @@ def test_fetch_gdelt_404_returns_empty(monkeypatch: pytest.MonkeyPatch) -> None:
     df = gdelt.fetchGdeltGkg(datetime(2021, 1, 1, 0, 0, tzinfo=timezone.utc))
     assert df.height == 0
     assert "sentiment_score" in df.columns
+    assert "description" in df.columns  # canonical 17컬럼 통일

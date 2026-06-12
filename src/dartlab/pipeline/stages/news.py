@@ -68,7 +68,7 @@ def runNewsEnrich(
 
     ``runNewsHeadlines`` 직후 같은 잡에서 호출(headlines 가 로컬). KR/US 각각 ``enrichNewsHeadlines.py
     --since 86400`` 으로 최근 raw 를 sentiment(lm_dict fallback)+topic(query-proxy fallback) 부착해
-    ``data/news/enriched`` 에 쓰고 ``bulkUploadHf newsEnriched --since 86400`` 으로 변경분만 push.
+    ``data/news/public/rss_enriched`` 에 쓰고 ``bulkUploadHf newsEnriched --since 86400`` 으로 변경분만 push.
 
     Args:
         category: 카테고리 라벨.

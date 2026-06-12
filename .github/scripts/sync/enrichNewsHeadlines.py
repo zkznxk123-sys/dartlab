@@ -1,7 +1,7 @@
 """news headlines enrich cron — Phase B (sentiment + topic).
 
-`data/news/headlines/{market}/{date}.parquet` raw archive 읽기 → sentiment +
-topic enrichment → `data/news/enriched/{market}/{date}.parquet` 별도 dir 저장.
+`data/news/public/rss/{market}/{date}.parquet` raw archive 읽기 → sentiment +
+topic enrichment → `data/news/public/rss_enriched/{market}/{date}.parquet` 형제 dir 저장.
 
 실행::
 
@@ -27,8 +27,9 @@ import polars as pl
 REPO_ROOT = Path(__file__).resolve().parents[3]
 _log = logging.getLogger("enrichNewsHeadlines")
 
-_RAW_ROOT = REPO_ROOT / "data" / "news" / "headlines"
-_OUT_ROOT = REPO_ROOT / "data" / "news" / "enriched"
+# 경로 = visibility-first taxonomy (dataConfig newsHeadlines/newsEnriched dir 과 일치).
+_RAW_ROOT = REPO_ROOT / "data" / "news" / "public" / "rss"
+_OUT_ROOT = REPO_ROOT / "data" / "news" / "public" / "rss_enriched"
 
 
 def _findRawFiles(market: str, since_seconds: float, start: str | None, end: str | None) -> list[Path]:

@@ -1,0 +1,144 @@
+"""뉴스 archive 공유 IO — 일별 parquet write/load 단일 구현.
+
+옛 구조는 upsert 로직이 `syncNewsHeadlines._writeDailyParquet` 와
+`syncGdeltBackfill._writeDayParquet` 에 byte 단위 중복, 읽기 로더가
+`newsHeadlines._loadDay`(rss)·`_loadGdeltDay`(gdelt) 로 분리돼 있었다. 본 모듈이
+소스-무관 단일 구현으로 흡수한다 (레지스트리 `dir` 로 경로 결정).
+
+물리 경로: ``data/{spec.dir}/{MARKET}/{YYYY-MM-DD}.parquet`` (일별 sharding, upsert).
+저장 파일은 항상 canonical 17컬럼 (`coerceToCanonical` 적용 후 write).
+
+See Also:
+    sources/newsSources.py — dir SSOT.
+    sources/newsSchema.py — canonical 스키마.
+    bulkData/newsHeadlines.py — loadSourceDay 를 순회 호출하는 read 진입점.
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import date as _date
+from functools import lru_cache
+from pathlib import Path
+
+import polars as pl
+
+from .newsSchema import coerceToCanonical
+from .newsSources import getNewsSource
+
+log = logging.getLogger(__name__)
+
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+_DATA_ROOT = _REPO_ROOT / "data"  # 테스트는 이 심볼을 patch + loadSourceDay.cache_clear()
+
+
+def _dayIso(day: str | _date) -> str:
+    """day(str|date) → 'YYYY-MM-DD' 파일명."""
+    return day.isoformat() if isinstance(day, _date) else str(day)
+
+
+def writeDailyParquet(
+    df: pl.DataFrame,
+    *,
+    dir: str,
+    market: str,
+    day: str | _date,
+) -> tuple[Path, int, int]:
+    """일별 parquet upsert (url unique) — 전 소스 공유 write.
+
+    Sig: ``writeDailyParquet(df, *, dir, market, day) -> (path, total, added)``
+
+    Capabilities:
+        - ``data/{dir}/{MARKET}/{day}.parquet`` 경로에 upsert
+        - 기존 파일 있으면 concat(diagonal_relaxed) + url unique(첫 매치 유지)
+        - 저장 직전 canonical 17컬럼 강제
+
+    AIContext:
+        syncNewsHeadlines·syncGdeltBackfill·syncNaverNews 가 공유 호출. 같은 날짜
+        재실행 안전(url dedup).
+
+    Args:
+        df: 저장할 DataFrame (canonical 권장; 아니어도 coerce 됨).
+        dir: 레지스트리 물리 경로 (예 ``"news/public/rss"``).
+        market: 시장 코드 (대문자 정규화).
+        day: 일자 (``"YYYY-MM-DD"`` 또는 date).
+
+    Returns:
+        (path, total, added) — 저장 경로, 최종 행수, 신규 추가 행수.
+
+    Raises:
+        없음 — IO 실패는 호출자에 전파(폴백 없음, 정공법).
+
+    Example:
+        >>> # writeDailyParquet(df, dir="news/public/rss", market="KR", day="2026-06-08")
+    """
+    dayIso = _dayIso(day)
+    outDir = _DATA_ROOT / dir / market.upper()
+    outDir.mkdir(parents=True, exist_ok=True)
+    target = outDir / f"{dayIso}.parquet"
+
+    incoming = coerceToCanonical(df)
+    before = 0
+    if target.exists():
+        existing = pl.read_parquet(target)
+        before = existing.height
+        merged = pl.concat([existing, incoming], how="diagonal_relaxed")
+    else:
+        merged = incoming
+    merged = coerceToCanonical(merged).unique(subset=["url"], keep="first")
+    merged.write_parquet(target)
+    return target, merged.height, merged.height - before
+
+
+@lru_cache(maxsize=256)
+def loadSourceDay(sourceId: str, market: str, dayIso: str) -> pl.DataFrame | None:
+    """단일 소스·일자 parquet 로드 — 로컬 우선, public 이면 HF lazy 폴백.
+
+    Sig: ``loadSourceDay(sourceId, market, dayIso) -> pl.DataFrame | None``
+
+    Capabilities:
+        - 로컬 ``data/{spec.dir}/{MARKET}/{day}.parquet`` 우선
+        - public 소스: 미존재 시 `dataLoader.loadData(category=spec.hfCategory)` HF 폴백
+        - private 소스: 로컬 only (저작권 — HF private read 는 서버사이드 별도 훅)
+        - LRU 캐시 (256). 테스트는 ``loadSourceDay.cache_clear()``.
+
+    AIContext:
+        loadNewsArchive 가 (소스×일자) 격자로 순회 호출. 미존재는 None silent.
+
+    Args:
+        sourceId: 레지스트리 소스 id (``"rss"``|``"gdelt"``|``"naver"``).
+        market: 시장 코드 (대문자 정규화).
+        dayIso: ``"YYYY-MM-DD"``.
+
+    Returns:
+        pl.DataFrame | None — 해당 소스·일자 archive. 미존재 시 None.
+
+    Raises:
+        KeyError: 미등록 sourceId (getNewsSource 경유).
+
+    Example:
+        >>> # loadSourceDay("rss", "KR", "2026-06-08")
+    """
+    spec = getNewsSource(sourceId)
+    marketU = market.upper()
+    local = _DATA_ROOT / spec.dir / marketU / f"{dayIso}.parquet"
+    if local.exists():
+        try:
+            return pl.read_parquet(local)
+        except (OSError, pl.exceptions.ComputeError) as exc:
+            log.debug("news %s local read 실패 %s: %s", sourceId, local, exc)
+            return None
+
+    if spec.visibility != "public":
+        return None  # private = 로컬 only (저작권 비공개 캐시)
+
+    try:
+        from dartlab.core.dataLoader import loadData
+
+        return loadData(f"{marketU}/{dayIso}", category=spec.hfCategory)
+    except Exception as exc:  # noqa: BLE001 — 미가용은 None
+        log.debug("news %s/%s/%s 미가용: %s", sourceId, marketU, dayIso, type(exc).__name__)
+        return None
+
+
+__all__ = ["loadSourceDay", "writeDailyParquet"]

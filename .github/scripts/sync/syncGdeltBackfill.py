@@ -38,26 +38,7 @@ import polars as pl
 REPO_ROOT = Path(__file__).resolve().parents[3]
 _log = logging.getLogger("syncGdeltBackfill")
 
-_OUT_ROOT = REPO_ROOT / "data" / "news" / "gdelt"
-
-
-def _writeDayParquet(df: pl.DataFrame, market: str, day: _date) -> tuple[Path, int, int]:
-    """일자별 parquet upsert (url unique) — (path, total, added) 반환."""
-    outDir = _OUT_ROOT / market.upper()
-    outDir.mkdir(parents=True, exist_ok=True)
-    target = outDir / f"{day.isoformat()}.parquet"
-
-    if target.exists():
-        existing = pl.read_parquet(target)
-        before = existing.height
-        merged = pl.concat([existing, df], how="diagonal_relaxed").unique(subset=["url"], keep="first")
-        added = merged.height - before
-    else:
-        merged = df.unique(subset=["url"], keep="first")
-        added = merged.height
-
-    merged.write_parquet(target)
-    return target, merged.height, added
+# 저장 경로·upsert 는 gather.sources.newsIo.writeDailyParquet 공유 (dir SSOT=newsSources).
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -125,10 +106,14 @@ def main(argv: list[str] | None = None) -> int:
         time.sleep(args.sleep)
 
     # 일자별 flush
+    from dartlab.gather.sources.newsIo import writeDailyParquet
+    from dartlab.gather.sources.newsSources import getNewsSource
+
+    gdeltDir = getNewsSource("gdelt").dir
     totalAdded = 0
     for (m, d), frames in dayBuffer.items():
         combined = pl.concat(frames, how="diagonal_relaxed")
-        target, total, added = _writeDayParquet(combined, m, d)
+        target, total, added = writeDailyParquet(combined, dir=gdeltDir, market=m, day=d)
         totalAdded += added
         _log.info("저장 %s — total=%d added=%d", target, total, added)
 

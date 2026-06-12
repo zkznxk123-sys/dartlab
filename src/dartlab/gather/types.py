@@ -229,12 +229,16 @@ class NewsItem:
         언론사/출처.
     url : str
         기사 URL.
+    description : str
+        기사 요약/스니펫. naver 검색 API 가 채우고, rss/gdelt 는 빈 문자열
+        (기본값 → 하위호환). 언론사 저작권 본문 발췌이므로 공개 재배포 금지.
     """
 
     date: str = ""  # ISO date (YYYY-MM-DD)
     title: str = ""
     source: str = ""
     url: str = ""
+    description: str = ""
 
 
 @dataclass

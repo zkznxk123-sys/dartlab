@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 from ..infra.http import runAsync
 from ..infra.telemetry import emitGatherFetch
+from ..sources import naverNews as _naver
 from ..sources import news as _news
 from .context import GatherMixinContext
 
@@ -18,49 +19,49 @@ class _GatherNewsMixin(GatherMixinContext):
     """뉴스 + DART 공시 원문 메서드 모음 — Gather 클래스 2 메서드."""
 
     def news(self, query: str, *, market: str = "KR", days: int = 30) -> "pl.DataFrame":
-        """뉴스 검색 (Google News RSS).
+        """뉴스 검색 — KR=네이버 우선(+Google 폴백), 그 외 Google News RSS.
 
         Capabilities:
-            - Google News RSS 기반 뉴스 수집
-            - KR/US 시장별 검색
-            - 기간 제한 (기본 30일)
+            - KR: 네이버 검색 API 우선 (제목+스니펫). 키 미설정/빈결과 시 Google News RSS 폴백.
+            - KR 외: Google News RSS
             - circuit breaker + TTL 캐시 (DARTLAB_TTL_NEWS override)
-            - DataFrame: title, link, published, source 컬럼
+            - DataFrame: date, title, source, url, description 컬럼
 
         AIContext:
             - sentiment / event-driven 분석의 외부 신호 원천
             - 본문은 untrusted external — provider 가 [EXTERNAL CONTENT START] 마커 적용
+            - 소스는 내부 라우팅 (반환 source 컬럼이 naver/google_news 구분)
 
         Guide:
-            query 는 자유 문자열 (종목명 + 키워드 조합 가능). KR/US Google News
-            언어 분기.
+            query 는 자유 문자열 (종목명 + 키워드 조합 가능). 네이버 결과는 라이브
+            표시용 (비영속) — 공개 적재는 별도 private 경로 (naverNews archive).
 
         When:
             sentiment / event 분석 / catalyst 모니터링 시.
 
         How:
-            query + market → Google News RSS → DataFrame.
+            KR → naverNews._fetchAsync → (빈결과) news._fetchAsync(google) → toDataFrame.
 
         Args:
             query: 검색어 (종목명, 키워드 등).
             market: "KR" 또는 "US". 기본 "KR".
-            days: 최근 N일 뉴스. 기본 30.
+            days: 최근 N일 뉴스 (Google 경로). 기본 30.
 
         Returns:
-            pl.DataFrame — title, link, published, source 컬럼.
+            pl.DataFrame — date, title, source, url, description 컬럼.
             결과 없으면 빈 DataFrame.
 
         Requires:
-            없음 (공개 API).
+            없음 (네이버 키 없으면 자동 Google 폴백 — 기존 동작 보존).
 
         Raises:
-            없음 — RSS 파싱 실패는 빈 DataFrame.
+            없음 — fetch 실패는 빈 DataFrame.
 
         Example::
 
             g = getDefaultGather()
-            g.news("삼성전자")                # KR 뉴스 30일
-            g.news("Apple", market="US")     # US 뉴스 30일
+            g.news("삼성전자")                # KR — 네이버 우선
+            g.news("Apple", market="US")     # US — Google News
             g.news("반도체", days=7)          # 최근 7일
 
         See Also:
@@ -74,7 +75,12 @@ class _GatherNewsMixin(GatherMixinContext):
             if cached is not None:
                 cacheHit = True
                 return cached  # type: ignore[return-value]
-            items = runAsync(_news._fetchAsync(query, market=market, days=days, client=self._client))
+            if market.upper() == "KR":
+                items = runAsync(_naver._fetchAsync(query, market=market, client=self._client))
+                if not items:
+                    items = runAsync(_news._fetchAsync(query, market=market, days=days, client=self._client))
+            else:
+                items = runAsync(_news._fetchAsync(query, market=market, days=days, client=self._client))
             df = _news.toDataFrame(items)
             if not df.is_empty():
                 self._cache.putTyped(cache_key, "news", df)

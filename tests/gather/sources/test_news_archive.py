@@ -9,16 +9,18 @@ import polars as pl
 import pytest
 
 from dartlab.gather.sources import news as newsMod
+from dartlab.gather.sources.newsSchema import NEWS_ARCHIVE_SCHEMA
 from dartlab.gather.types import NewsItem
 
 pytestmark = pytest.mark.unit
 
 
 def test_archive_schema_columns() -> None:
-    """빈 쿼리 → 빈 DataFrame 7 컬럼 schema 유지."""
+    """빈 쿼리 → 빈 DataFrame canonical 17 컬럼 schema 유지."""
     df = newsMod.fetchHeadlinesForArchive([])
     assert df.height == 0
-    assert set(df.columns) == {"date", "title", "source", "url", "market", "query", "captured_at"}
+    assert set(df.columns) == set(NEWS_ARCHIVE_SCHEMA.keys())
+    assert "description" in df.columns  # 신규 canonical 컬럼
 
 
 def test_archive_dedup_by_url(monkeypatch: pytest.MonkeyPatch) -> None:

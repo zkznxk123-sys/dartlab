@@ -12,12 +12,18 @@ import polars as pl
 import pytest
 
 from dartlab.gather.bulkData import newsHeadlines
+from dartlab.gather.sources import newsIo
+from dartlab.gather.sources.newsSchema import NEWS_ARCHIVE_SCHEMA
+from dartlab.gather.sources.newsSources import getNewsSource
 
 pytestmark = pytest.mark.unit
 
+_RSS_DIR = getNewsSource("rss").dir  # "news/public/rss"
+_NAVER_DIR = getNewsSource("naver").dir  # "news/private/naver"
 
-def _writeDay(root: Path, market: str, day: str, rows: list[dict]) -> None:
-    p = root / market / f"{day}.parquet"
+
+def _writeDay(root: Path, market: str, day: str, rows: list[dict], *, sourceDir: str = _RSS_DIR) -> None:
+    p = root / sourceDir / market / f"{day}.parquet"
     p.parent.mkdir(parents=True, exist_ok=True)
     df = pl.DataFrame(rows).with_columns(
         pl.col("date").cast(pl.Date),
@@ -28,22 +34,20 @@ def _writeDay(root: Path, market: str, day: str, rows: list[dict]) -> None:
 
 @pytest.fixture
 def isolatedArchive(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """LOCAL_ROOT 를 tmp 로 격리 + lru_cache 초기화."""
-    monkeypatch.setattr(newsHeadlines, "_LOCAL_ROOT", tmp_path)
-    monkeypatch.setattr(newsHeadlines, "_GDELT_ROOT", tmp_path)  # GDELT 백필 경로도 격리(실데이터 누수 차단)
-    # 로컬 부재 시 _loadDay/_loadGdeltDay 가 HF loadData 로 실데이터 auto-download → 격리 깨짐.
+    """newsIo._DATA_ROOT 를 tmp 로 격리 + loadSourceDay lru_cache 초기화."""
+    monkeypatch.setattr(newsIo, "_DATA_ROOT", tmp_path)
+    # 로컬 부재 시 public 소스가 HF loadData 로 실데이터 auto-download → 격리 깨짐.
     # loadData 를 None 으로 막아 로컬(tmp)만 보게 한다(완전 오프라인 단위 테스트).
     monkeypatch.setattr("dartlab.core.dataLoader.loadData", lambda *a, **k: None)
-    newsHeadlines._loadDay.cache_clear()
-    newsHeadlines._loadGdeltDay.cache_clear()
+    newsIo.loadSourceDay.cache_clear()
     return tmp_path
 
 
 def test_loader_empty_returns_schema(isolatedArchive: Path) -> None:
-    """archive 0 일 → 빈 DataFrame + 7 컬럼 schema 유지."""
+    """archive 0 일 → 빈 DataFrame + canonical 17 컬럼 schema 유지."""
     df = newsHeadlines.loadNewsArchive("2026-05-01", "2026-05-03", "KR")
     assert df.height == 0
-    assert set(df.columns) == set(newsHeadlines._EMPTY_SCHEMA.keys())
+    assert set(df.columns) == set(NEWS_ARCHIVE_SCHEMA.keys())
 
 
 def test_loader_concat_range(isolatedArchive: Path) -> None:
@@ -166,3 +170,40 @@ def test_loader_market_isolation(isolatedArchive: Path) -> None:
     df = newsHeadlines.loadNewsArchive("2026-05-01", "2026-05-01", "KR")
     assert df.height == 1
     assert df["url"][0] == "u-kr"
+
+
+def test_loader_includes_naver_and_sources_filter(isolatedArchive: Path) -> None:
+    """private naver 로컬 parquet 포함 + sources=["rss"] 선택 시 naver 제외."""
+    cap = datetime(2026, 5, 4, 0, 0, tzinfo=timezone.utc)
+    rssRow = {
+        "date": "2026-05-01",
+        "title": "rss",
+        "source": "s",
+        "url": "u-rss",
+        "market": "KR",
+        "query": "q",
+        "captured_at": cap,
+    }
+    naverRow = {
+        "date": "2026-05-01",
+        "title": "naver",
+        "source": "naver.com",
+        "url": "u-naver",
+        "market": "KR",
+        "query": "q",
+        "captured_at": cap,
+        "description": "스니펫",
+    }
+    _writeDay(isolatedArchive, "KR", "2026-05-01", [rssRow], sourceDir=_RSS_DIR)
+    _writeDay(isolatedArchive, "KR", "2026-05-01", [naverRow], sourceDir=_NAVER_DIR)
+
+    # 기본 — rss + naver 둘 다
+    both = newsHeadlines.loadNewsArchive("2026-05-01", "2026-05-01", "KR")
+    assert set(both["url"].to_list()) == {"u-rss", "u-naver"}
+    # naver description 보존
+    naverDesc = both.filter(pl.col("url") == "u-naver")["description"].to_list()
+    assert naverDesc == ["스니펫"]
+
+    # sources=["rss"] — naver 제외
+    rssOnly = newsHeadlines.loadNewsArchive("2026-05-01", "2026-05-01", "KR", sources=["rss"])
+    assert rssOnly["url"].to_list() == ["u-rss"]

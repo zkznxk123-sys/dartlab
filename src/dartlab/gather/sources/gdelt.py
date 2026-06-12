@@ -22,6 +22,8 @@ from datetime import datetime, timedelta, timezone
 
 import polars as pl
 
+from .newsSchema import NEWS_ARCHIVE_SCHEMA
+
 log = logging.getLogger(__name__)
 
 _BASE_URL = "http://data.gdeltproject.org/gdeltv2"
@@ -58,24 +60,8 @@ _GKG_COLUMNS = [
     "Extras",
 ]
 
-_ARCHIVE_SCHEMA = {
-    "date": pl.Date,
-    "title": pl.Utf8,
-    "source": pl.Utf8,
-    "url": pl.Utf8,
-    "market": pl.Utf8,
-    "query": pl.Utf8,
-    "captured_at": pl.Datetime("us", time_zone="UTC"),
-    "sentiment_score": pl.Float64,
-    "sentiment_label": pl.Utf8,
-    "model_version": pl.Utf8,
-    "topic_id": pl.Int32,
-    "topic_label": pl.Utf8,
-    "topic_prob": pl.Float64,
-    "themes": pl.List(pl.Utf8),
-    "language": pl.Utf8,
-    "tone_raw": pl.Float64,
-}
+# archive 스키마 = newsSchema.NEWS_ARCHIVE_SCHEMA(17 canonical). gdelt 는 description 만
+# null 추가하면 정확히 일치 (옛 16컬럼 로컬 _ARCHIVE_SCHEMA 폐기).
 
 
 def _toneToSentiment(toneRaw: float) -> tuple[float, str]:
@@ -230,9 +216,10 @@ def fetchGdeltGkg(
         limit: 반환 행 상한 (date·url 정렬 후 head). None=전체 (1 슬롯 ≈ 5만 row).
 
     Returns:
-        pl.DataFrame — 16 컬럼 (date/title/source/url/market/query/captured_at/
-        sentiment_score/sentiment_label/model_version/topic_id/topic_label/topic_prob/
-        themes/language/tone_raw). title 은 None (GKG 미보유).
+        pl.DataFrame — newsSchema.NEWS_ARCHIVE_SCHEMA canonical 17 컬럼 (date/title/
+        source/url/market/query/captured_at/description/sentiment_score/sentiment_label/
+        model_version/topic_id/topic_label/topic_prob/themes/language/tone_raw).
+        title·description 은 None (GKG 미보유).
 
     Raises:
         없음 — HTTP/parse 실패 시 빈 DataFrame.
@@ -263,23 +250,23 @@ def fetchGdeltGkg(
             resp = client.get(url)
             if resp.status_code == 404:
                 log.debug("GDELT 슬롯 %s 미존재 (아직 publish 안 됨 또는 옛 데이터)", tsStr)
-                return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+                return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
             resp.raise_for_status()
             data = resp.content
     except Exception as exc:
         log.warning("GDELT 다운로드 실패 %s: %s", tsStr, exc)
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+        return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
 
     # unzip in-memory
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
             names = zf.namelist()
             if not names:
-                return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+                return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
             csvBytes = zf.read(names[0])
     except (zipfile.BadZipFile, OSError) as exc:
         log.warning("GDELT zip 파싱 실패 %s: %s", tsStr, exc)
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+        return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
 
     # parse CSV — tab-separated, no header
     try:
@@ -294,10 +281,10 @@ def fetchGdeltGkg(
         )
     except Exception as exc:
         log.warning("GDELT CSV 파싱 실패 %s: %s", tsStr, exc)
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+        return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
 
     if rawDf.is_empty():
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+        return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
 
     # row-wise 변환 (V2Tone/V2Themes parse 가 Python 함수라 to_dicts)
     rows: list[dict] = []
@@ -329,6 +316,7 @@ def fetchGdeltGkg(
                 "market": market,
                 "query": "gdelt_gkg",
                 "captured_at": capturedAt,
+                "description": None,
                 "sentiment_score": sentScore,
                 "sentiment_label": sentLabel,
                 "model_version": "gdelt_v2tone",
@@ -342,8 +330,8 @@ def fetchGdeltGkg(
         )
 
     if not rows:
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
-    df = pl.DataFrame(rows, schema=_ARCHIVE_SCHEMA)
+        return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
+    df = pl.DataFrame(rows, schema=NEWS_ARCHIVE_SCHEMA)
     # url dedup (같은 article 이 여러 record 로 분리될 수 있음)
     df = df.unique(subset=["url"], keep="first")
     df = df.sort(["date", "url"])

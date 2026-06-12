@@ -17,7 +17,10 @@ from huggingface_hub import CommitOperationAdd, HfApi
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # _hfRetry (scripts/) import 경로
 from _hfRetry import retryHfCall  # noqa: E402 — 429/503/504 에 "retry in X min" 파싱해 윈도우만큼 대기(공용 SSOT)
 
-from dartlab.core.dataConfig import repoFor  # noqa: E402 — 카테고리별 전용 repo 라우팅(미등록은 기본 repo)
+from dartlab.core.dataConfig import (  # noqa: E402 — 카테고리별 전용 repo 라우팅(미등록은 기본 repo)
+    DATA_RELEASES,
+    repoFor,
+)
 
 REPO = "eddmpython/dartlab-data"  # 기본/fallback (repoFor 가 미등록 카테고리에 반환하는 값과 동일)
 BATCH_SIZE = 300  # 큰 배치 = 적은 commit = rate-limit 압력 감소 (HF 무료 1000 req/5min)
@@ -47,21 +50,23 @@ def _saveExistingCache(category: str, existing: set) -> None:
     p.write_text(json.dumps(sorted(existing)), encoding="utf-8")
 
 
+# 뉴스 카테고리 dir 은 dataConfig SSOT 에서 파생 (drift 차단 — newsSources/dataConfig 와 일치).
+# naver(private) 는 repoFor 가 자동으로 전용 private repo 로 라우팅 → 공개 dartlab-data 안 감.
+_NEWS_CATEGORIES = ("newsHeadlines", "newsEnriched", "newsGdelt", "newsNaver", "newsNaverEnriched")
+
 CATEGORY_DIR = {
     "finance": "dart/finance",
     "report": "dart/report",
     "panel": "dart/panel",
     "krxPricesV2": "krx/prices/v2",
-    "newsHeadlines": "news/headlines",
-    "newsEnriched": "news/enriched",
-    "newsGdelt": "news/gdelt",
+    **{c: DATA_RELEASES[c]["dir"] for c in _NEWS_CATEGORIES},
 }
 
-# nested=True 카테고리는 sub-dir (예: news/headlines/{market}/ · dart/panel/{code}/) 까지 rglob 으로 수집,
+# nested=True 카테고리는 sub-dir (예: news/public/rss/{market}/ · dart/panel/{code}/) 까지 rglob 으로 수집,
 # HF path_in_repo 도 dirPath + relpath 형태로 유지. nested=False 는 flat dirPath/*.parquet.
 # panel: period-sharded {code}/{period}.parquet ~92k 파일 — list_repo_tree 로 미업로드만 골라 resumable·
 # 배치 재시도(실패 배치 건너뜀, 재실행시 이어감)로 한도 내 점진 업로드(uploadData 의 one-shot upload_large_folder 대체).
-NESTED_CATEGORIES = {"newsHeadlines", "newsEnriched", "newsGdelt", "panel"}
+NESTED_CATEGORIES = {"panel", *_NEWS_CATEGORIES}
 
 
 def main():

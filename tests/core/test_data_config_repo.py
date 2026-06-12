@@ -20,6 +20,17 @@ def test_repofor_default_is_hf_repo():
     assert repoFor("newsGdelt") == HF_REPO
 
 
+def test_repofor_naver_private_repo():
+    """newsNaver/newsNaverEnriched → 전용 private repo (저작권 비공개 캐시 전용)."""
+    from dartlab.core.dataConfig import HF_REPO, repoFor
+
+    assert repoFor("newsNaver") == "eddmpython/dartlab-news-private"
+    assert repoFor("newsNaverEnriched") == "eddmpython/dartlab-news-private"
+    # public 뉴스(rss/gdelt)는 기본 repo 유지
+    assert repoFor("newsHeadlines") == HF_REPO
+    assert repoFor("newsGdelt") == HF_REPO
+
+
 def test_repofor_unknown_category_graceful():
     """미등록 카테고리도 KeyError 없이 기본 repo (bulkUploadHf krxPricesV2 등)."""
     from dartlab.core.dataConfig import HF_REPO, repoFor

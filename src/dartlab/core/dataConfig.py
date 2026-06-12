@@ -187,36 +187,58 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "AI 분석 지식 (인사이트/스킬/에러패턴)",
         "public": False,
     },
+    # ── 뉴스 archive — visibility-first taxonomy `news/{public,private}/{source}/`.
+    #    `dir` 은 gather.sources.newsSources.NewsSourceSpec.dir 과 1:1 일치해야 함
+    #    (drift 회귀: tests/gather/sources/test_news_symmetry.py). public 서브트리는
+    #    기본 repo, private(naver)는 전용 private repo (저작권 비공개 캐시).
     "newsHeadlines": {
         # Phase A — Google News RSS 일별 헤드라인 archive (forward-only).
-        # `data/news/headlines/{market}/{YYYY}-{MM}-{DD}.parquet` 일별 sharding.
+        # `data/news/public/rss/{market}/{YYYY}-{MM}-{DD}.parquet` 일별 sharding.
         # 본문 archive 영구 제외 (ToS) — headline + url + source + date 메타데이터만.
         # syncNewsHeadlines.py cron 박제, enrichNewsHeadlines.py (Phase B) 가 sentiment/topic 추가.
-        "dir": "news/headlines",
+        "dir": "news/public/rss",
         "label": "Google News RSS 일별 헤드라인 archive (forward-only, 메타데이터만)",
         "public": True,
         "nested": True,
     },
     "newsEnriched": {
-        # Phase B — sentiment + topic enrichment 결과.
-        # `data/news/enriched/{market}/{YYYY}-{MM}-{DD}.parquet` raw 와 동일 sharding.
+        # Phase B — sentiment + topic enrichment 결과 (rss 파생).
+        # `data/news/public/rss_enriched/{market}/{YYYY}-{MM}-{DD}.parquet` 형제 dir.
         # raw 컬럼 + (sentiment_score, sentiment_label, model_version, topic_id, topic_label, topic_prob).
         # enrichNewsHeadlines.py cron, narrativePulse.buildNarrativePulse 가 입력.
-        "dir": "news/enriched",
+        "dir": "news/public/rss_enriched",
         "label": "news headlines enriched (sentiment + topic, Phase B 산출)",
         "public": True,
         "nested": True,
     },
     "newsGdelt": {
         # Phase D — GDELT 2.0 GKG 글로벌 5 년 백필.
-        # `data/news/gdelt/{market}/{YYYY}-{MM}-{DD}.parquet` 일별 sharding.
-        # newsEnriched 와 호환 schema + (themes list, language, tone_raw) 추가.
+        # `data/news/public/gdelt/{market}/{YYYY}-{MM}-{DD}.parquet` 일별 sharding.
+        # canonical 17컬럼 + (themes list, language, tone_raw).
         # syncGdeltBackfill.py 가 GDELT 슬롯 15-min 부터 일별 통합.
-        # narrativePulse 호환 (sentiment_score + topic_label 동일 의미).
-        "dir": "news/gdelt",
+        "dir": "news/public/gdelt",
         "label": "GDELT 2.0 GKG 글로벌 뉴스 archive (URL + sentiment + themes, Phase D 백필)",
         "public": True,
         "nested": True,
+    },
+    "newsNaver": {
+        # 네이버 검색 API 뉴스 (제목+스니펫) — 언론사 저작권, 비공개 캐시 전용.
+        # `data/news/private/naver/{market}/{YYYY}-{MM}-{DD}.parquet`. KRX 선례 동형.
+        # 공개 dartlab-data 안 감 → 전용 private repo. syncNaverNews.py cron.
+        "dir": "news/private/naver",
+        "label": "네이버 검색 API 뉴스 (제목+스니펫, private — 언론사 저작권)",
+        "public": False,
+        "nested": True,
+        "repo": "eddmpython/dartlab-news-private",
+    },
+    "newsNaverEnriched": {
+        # 네이버 파생 sentiment+topic (여전히 저작권 — private).
+        # `data/news/private/naver_enriched/{market}/{YYYY}-{MM}-{DD}.parquet`.
+        "dir": "news/private/naver_enriched",
+        "label": "네이버 뉴스 enriched (sentiment + topic, private)",
+        "public": False,
+        "nested": True,
+        "repo": "eddmpython/dartlab-news-private",
     },
 }
 

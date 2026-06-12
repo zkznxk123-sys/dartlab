@@ -14,6 +14,7 @@ import polars as pl
 from ..infra.resilience import circuitBreaker as _circuit_breaker
 from ..infra.resilience import healthTracker as _health_tracker
 from ..types import NewsItem
+from .newsSchema import coerceToCanonical
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +23,14 @@ _US_RSS = "https://news.google.com/rss/search?q={query}+stock+when:{days}d&hl=en
 
 _SOURCE_NAME = "google_news"
 
-_EMPTY_SCHEMA = {"date": pl.Date, "title": pl.Utf8, "source": pl.Utf8, "url": pl.Utf8}
+# 라이브 verb 표면 (lean) — archive 는 newsSchema.NEWS_ARCHIVE_SCHEMA(17) canonical.
+_EMPTY_SCHEMA = {
+    "date": pl.Date,
+    "title": pl.Utf8,
+    "source": pl.Utf8,
+    "url": pl.Utf8,
+    "description": pl.Utf8,
+}
 
 
 def _parseDate(dateStr: str) -> datetime | None:
@@ -207,7 +215,16 @@ def toDataFrame(items: list[NewsItem]) -> pl.DataFrame:
     """
     if not items:
         return pl.DataFrame(schema=_EMPTY_SCHEMA)
-    rows = [{"date": i.date, "title": i.title, "source": i.source, "url": i.url} for i in items]
+    rows = [
+        {
+            "date": i.date,
+            "title": i.title,
+            "source": i.source,
+            "url": i.url,
+            "description": i.description,
+        }
+        for i in items
+    ]
     df = pl.DataFrame(rows)
     if "date" in df.columns:
         df = df.with_columns(pl.col("date").cast(pl.Date))
@@ -270,15 +287,7 @@ def fetchNews(
     return df
 
 
-_ARCHIVE_SCHEMA = {
-    "date": pl.Date,
-    "title": pl.Utf8,
-    "source": pl.Utf8,
-    "url": pl.Utf8,
-    "market": pl.Utf8,
-    "query": pl.Utf8,
-    "captured_at": pl.Datetime("us", time_zone="UTC"),
-}
+# archive 스키마는 newsSchema.NEWS_ARCHIVE_SCHEMA(17 canonical) — 옛 _ARCHIVE_SCHEMA 폐기.
 
 
 def fetchHeadlinesForArchive(
@@ -299,7 +308,7 @@ def fetchHeadlinesForArchive(
 
     AIContext:
         Phase A (news archive forward-only) 의 daily cron 단일 진입점.
-        결과 DataFrame 을 `data/news/headlines/{market}/{YYYY}-{MM}-{DD}.parquet`
+        결과 DataFrame 을 `data/news/public/rss/{market}/{YYYY}-{MM}-{DD}.parquet`
         upsert 하는 caller (`syncNewsHeadlines.main`) 가 사용.
 
     Guide:
@@ -323,8 +332,8 @@ def fetchHeadlinesForArchive(
         limit: 반환 행 상한 (date desc 정렬 후 head). None=전체.
 
     Returns:
-        pl.DataFrame — (date, title, source, url, market, query, captured_at).
-        빈 결과 시 동일 schema 빈 DataFrame.
+        pl.DataFrame — newsSchema.NEWS_ARCHIVE_SCHEMA canonical 17컬럼
+        (description=빈값, enrichment=null). 빈 결과 시 동일 schema 빈 DataFrame.
 
     Raises:
         없음 — 개별 쿼리 실패는 빈 결과로 흡수 (circuit breaker 가드).
@@ -342,7 +351,7 @@ def fetchHeadlinesForArchive(
         ``toDataFrame``: 단일 쿼리 결과 변환.
     """
     if not queries:
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+        return coerceToCanonical(None)
 
     from ..infra.http import runAsync
 
@@ -375,14 +384,16 @@ def fetchHeadlinesForArchive(
                     "market": market.upper(),
                     "query": q,
                     "captured_at": capturedAt,
+                    "description": it.description,
                 }
             )
 
     if not rows:
-        return pl.DataFrame(schema=_ARCHIVE_SCHEMA)
+        return coerceToCanonical(None)
     df = pl.DataFrame(rows)
     df = df.with_columns(pl.col("date").cast(pl.Date))
     df = df.sort(["date", "url"], descending=[True, False])
+    df = coerceToCanonical(df)
     return df.head(limit) if limit is not None else df
 
 

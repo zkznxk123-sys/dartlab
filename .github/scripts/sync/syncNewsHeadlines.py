@@ -28,7 +28,7 @@ import polars as pl
 REPO_ROOT = Path(__file__).resolve().parents[3]
 _log = logging.getLogger("syncNewsHeadlines")
 
-_OUT_ROOT = REPO_ROOT / "data" / "news" / "headlines"
+# 저장 경로·upsert 는 gather.sources.newsIo.writeDailyParquet 공유 (dir SSOT=newsSources).
 
 # 매크로 키워드 — 시장 무관 narrative 시그널 (반복 fetch 안전, RSS 검색 결과 차별화).
 _MACRO_KEYWORDS_KR = [
@@ -201,26 +201,6 @@ def _stockSeedUS(limit: int) -> list[str]:
     return SP_TOP30[:limit]
 
 
-def _writeDailyParquet(df: pl.DataFrame, market: str) -> tuple[Path, int, int]:
-    """오늘 날짜 parquet upsert (url unique) — (path, rows_after, rows_added) 반환."""
-    today = _date.today().isoformat()
-    outDir = _OUT_ROOT / market.upper()
-    outDir.mkdir(parents=True, exist_ok=True)
-    target = outDir / f"{today}.parquet"
-
-    if target.exists():
-        existing = pl.read_parquet(target)
-        before = existing.height
-        merged = pl.concat([existing, df], how="diagonal_relaxed").unique(subset=["url"], keep="first")
-        added = merged.height - before
-    else:
-        merged = df.unique(subset=["url"], keep="first")
-        added = merged.height
-
-    merged.write_parquet(target)
-    return target, merged.height, added
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="news headlines daily archive cron")
     parser.add_argument("--market", choices=["KR", "US"], required=True)
@@ -264,7 +244,10 @@ def main(argv: list[str] | None = None) -> int:
         _log.warning("결과 0 — cache 무변경")
         return 0
 
-    target, total, added = _writeDailyParquet(df, market)
+    from dartlab.gather.sources.newsIo import writeDailyParquet
+    from dartlab.gather.sources.newsSources import getNewsSource
+
+    target, total, added = writeDailyParquet(df, dir=getNewsSource("rss").dir, market=market, day=_date.today())
     _log.info("저장 완료 — %s (total=%d, added=%d)", target, total, added)
 
     # uploadData.py 호환 changed 리스트

@@ -1,46 +1,34 @@
-"""news headlines archive 부분 액세스 — 엔진 내부용 (Mode 2).
+"""news archive 부분 액세스 — 엔진 내부용 (Mode 2).
 
-Phase A (news archive forward-only) 의 read-side. `data/news/headlines/{market}/`
-일별 parquet 을 기간으로 합쳐 단일 DataFrame 반환. PIT (asof) 옵션 동행 —
-Sprint 4 bitemporal 패턴 따라 `business_time=date`/`knowledge_time=captured_at`.
+기간 [start..end] 일별 parquet 을 전 소스(rss·gdelt·naver) 레지스트리 순회로 합쳐
+단일 DataFrame 반환. PIT (asof) 옵션 동행 — bitemporal
+`business_time=date`/`knowledge_time=captured_at`.
 
-데이터 흐름 (dartlab 표준):
-    1. 로컬 `data/news/headlines/{market}/{YYYY}-{MM}-{DD}.parquet` 확인
-    2. 없으면 HF (`eddmpython/dartlab-data` / `news/headlines/{market}/...`) lazy 다운로드
-    3. LRU 캐시 (32 일분) — 같은 세션 재호출 메모리 hit
-    4. 결과 concat + asof 필터 + 시간 정렬
+데이터 흐름 (소스-무관):
+    1. `newsSources.allNewsSources()` 순회 (sources= 로 선택 가능)
+    2. 각 (소스×일자) → `newsIo.loadSourceDay(sourceId, market, day)`
+       (로컬 우선, public 이면 HF lazy / private 는 로컬 only)
+    3. 결과 concat(diagonal_relaxed) → canonical 17컬럼 coerce → asof 필터 → url dedup
 
-본 모듈은 read-only — write 는 `.github/scripts/sync/syncNewsHeadlines.py` 가 SSOT.
+본 모듈은 read-only. write 는 `.github/scripts/sync/sync{NewsHeadlines,GdeltBackfill,
+NaverNews}.py` 가 `newsIo.writeDailyParquet` 로 수행 (SSOT).
 """
 
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from datetime import date as _date
 from datetime import datetime, timedelta
-from functools import lru_cache
-from pathlib import Path
 
 import polars as pl
 
+from ..sources.newsIo import loadSourceDay
+from ..sources.newsSchema import NEWS_ARCHIVE_SCHEMA, coerceToCanonical
+from ..sources.newsSources import allNewsSources
 from ..transforms.pit import applyAsOf
 
 log = logging.getLogger(__name__)
-
-_CATEGORY = "newsHeadlines"
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_LOCAL_ROOT = _REPO_ROOT / "data" / "news" / "headlines"
-_GDELT_ROOT = _REPO_ROOT / "data" / "news" / "gdelt"
-
-_EMPTY_SCHEMA = {
-    "date": pl.Date,
-    "title": pl.Utf8,
-    "source": pl.Utf8,
-    "url": pl.Utf8,
-    "market": pl.Utf8,
-    "query": pl.Utf8,
-    "captured_at": pl.Datetime("us", time_zone="UTC"),
-}
 
 
 def _toDate(d: str | _date) -> _date:
@@ -63,130 +51,31 @@ def _dayRange(start: _date, end: _date) -> list[_date]:
     return [start + timedelta(days=i) for i in range(span + 1)]
 
 
-@lru_cache(maxsize=128)
-def _loadDay(market: str, dayIso: str) -> pl.DataFrame | None:
-    """단일 일자 parquet 로드 — 로컬 우선, 없으면 HF lazy 다운로드.
-
-    Sig: ``_loadDay(market: str, dayIso: str) -> pl.DataFrame | None``
-
-    Capabilities: 일별 1 파일 로드 + LRU 캐시 (128 일).
-    AIContext: loadNewsArchive 가 일자 루프로 호출. 미존재 시 None silent.
-    Guide: 로컬 우선, 없으면 dataLoader 통해 HF download.
-    When: 일자별 archive parquet 1 회 로드 필요 시.
-    How: 로컬 path 확인 → pl.read_parquet → 미존재 시 dataLoader.loadData.
-
-    Args:
-        market: "KR" | "US" (대문자 정규화).
-        dayIso: "YYYY-MM-DD".
-
-    Returns:
-        pl.DataFrame | None — 해당 일자 archive. 미존재 시 None.
-
-    Raises:
-        없음 — 모든 IO 에러 silent debug log.
-
-    Example::
-
-        df = _loadDay("KR", "2026-05-28")
-
-    Requires:
-        로컬 parquet 또는 HF 네트워크.
-
-    See Also:
-        ``loadNewsArchive``: 본 함수의 일자 루프 caller.
-    """
-    marketU = market.upper()
-    local = _LOCAL_ROOT / marketU / f"{dayIso}.parquet"
-    if local.exists():
-        try:
-            return pl.read_parquet(local)
-        except (OSError, pl.exceptions.ComputeError) as exc:
-            log.debug("newsHeadlines local read 실패 %s: %s", local, exc)
-            return None
-
-    # HF lazy fetch
-    try:
-        from dartlab.core.dataLoader import loadData
-
-        stockCode = f"{marketU}/{dayIso}"
-        return loadData(stockCode, category=_CATEGORY)
-    except Exception as exc:
-        log.debug("newsHeadlines/%s/%s.parquet 미가용: %s", marketU, dayIso, type(exc).__name__)
-        return None
-
-
-@lru_cache(maxsize=128)
-def _loadGdeltDay(market: str, dayIso: str) -> pl.DataFrame | None:
-    """GDELT 일자별 parquet 로드 — Phase D backfill 결과 통합.
-
-    Sig: ``_loadGdeltDay(market, dayIso) -> pl.DataFrame | None``
-
-    Capabilities: 로컬 GDELT parquet 우선, 없으면 HF newsGdelt 카테고리 lazy fetch.
-    AIContext: loadNewsArchive 가 RSS + GDELT 두 source 통합 시 호출.
-    Guide: GDELT 와 RSS 는 schema 호환 (diagonal_relaxed concat).
-    When: loadNewsArchive 일자 루프.
-    How: 로컬 path 확인 → 없으면 dataLoader newsGdelt.
-
-    Args:
-        market: 대문자 정규화.
-        dayIso: YYYY-MM-DD.
-
-    Returns:
-        pl.DataFrame | None.
-
-    Raises:
-        없음.
-
-    Example::
-
-        df = _loadGdeltDay("KR", "2026-05-28")
-
-    Requires:
-        Phase D backfill 실행 또는 HF newsGdelt 카테고리.
-
-    See Also:
-        ``loadNewsArchive``: caller.
-    """
-    marketU = market.upper()
-    local = _GDELT_ROOT / marketU / f"{dayIso}.parquet"
-    if local.exists():
-        try:
-            return pl.read_parquet(local)
-        except (OSError, pl.exceptions.ComputeError) as exc:
-            log.debug("gdelt local read 실패 %s: %s", local, exc)
-            return None
-    try:
-        from dartlab.core.dataLoader import loadData
-
-        stockCode = f"{marketU}/{dayIso}"
-        return loadData(stockCode, category="newsGdelt")
-    except Exception as exc:
-        log.debug("newsGdelt/%s/%s.parquet 미가용: %s", marketU, dayIso, type(exc).__name__)
-        return None
-
-
 def loadNewsArchive(
     start: str | _date,
     end: str | _date,
     market: str = "KR",
     *,
     asof: str | _date | None = None,
+    sources: Iterable[str] | None = None,
 ) -> pl.DataFrame:
-    """news headlines archive 기간 로드 + 옵션 PIT 필터.
+    """news archive 기간 로드 (전 소스 레지스트리 순회) + 옵션 PIT 필터.
 
     Capabilities:
-        - 기간 [start..end] 일별 parquet concat
+        - 기간 [start..end] × 전 소스(rss·gdelt·naver) 일별 parquet concat
+        - sources= 로 소스 선택 (예 ["rss"] → gdelt/naver 제외)
         - asof 지정 시 PIT 필터 (date ≤ asof AND captured_at ≤ asof)
-        - 빈 결과는 동일 schema 빈 DataFrame
-        - LRU 캐시 (`_loadDay` 128 일) — 반복 호출 메모리 hit
+        - canonical 17컬럼 출력 + url dedup
+        - `newsIo.loadSourceDay` LRU 캐시 (256) — 반복 호출 메모리 hit
 
     AIContext:
-        Phase B `narrativePulse.buildNarrativePulse` + Phase C `analyzeNarrative`
-        의 입력 SSOT. 모든 narrative downstream 이 본 함수 경유.
+        Phase B `narrativePulse` + Phase C `analyzeNarrative` + priceEvents API 의
+        입력 SSOT. 모든 narrative downstream 이 본 함수 경유.
 
     Guide:
-        forward-only archive — 시작 시점 (T0) 이전 일자는 비어 있음.
-        backtest 시 asof= 사용으로 look-ahead bias 차단.
+        forward-only archive — 시작 시점(T0) 이전 일자는 비어 있음. backtest 시
+        asof= 사용으로 look-ahead bias 차단. private 소스(naver)는 로컬 데이터가
+        있는 환경(sync/서버)에서만 행이 잡힌다.
 
     When:
         - dartlab.macro("내러티브") 진입점
@@ -194,52 +83,55 @@ def loadNewsArchive(
         - 사용자 직접: `loadNewsArchive("2026-04-01","2026-05-01","KR")`
 
     How:
-        start..end 일자 루프 → `_loadDay(market, day)` → pl.concat → asof 필터.
+        start..end 일자 루프 × allNewsSources() → loadSourceDay → concat → coerce →
+        asof → dedup.
 
     Args:
         start: 시작일 (포함). YYYY-MM-DD 또는 date.
         end: 종료일 (포함). YYYY-MM-DD 또는 date.
-        market: "KR" | "US". 기본 "KR".
-        asof: PIT 시점 (포함). None 이면 필터 0 — 모든 archive 반환.
+        market: "KR" | "US" | ... 기본 "KR".
+        asof: PIT 시점 (포함). None 이면 필터 0.
+        sources: 로드할 소스 id 집합. None=전체 (allNewsSources).
 
     Returns:
-        pl.DataFrame — (date, title, source, url, market, query, captured_at)
+        pl.DataFrame — newsSchema.NEWS_ARCHIVE_SCHEMA canonical 17컬럼,
         date desc + url 정렬. 빈 결과도 동일 schema.
 
     Raises:
-        없음 — 미존재 일자는 silent skip.
+        없음 — 미존재 일자/소스는 silent skip.
 
     Example::
 
         df = loadNewsArchive("2026-05-01", "2026-05-28", "KR")
-        dfPit = loadNewsArchive("2026-05-01", "2026-05-28", "KR", asof="2026-05-15")
-
-    Requires:
-        Phase A archive cron (syncNewsHeadlines.py) 가 1 회 이상 실행되어
-        `data/news/headlines/{market}/*.parquet` 가 존재 또는 HF 보유.
+        rssOnly = loadNewsArchive("2026-05-01", "2026-05-28", "KR", sources=["rss"])
 
     See Also:
-        ``_loadDay``: 단일 일자 로더.
+        ``gather.sources.newsIo.loadSourceDay``: 단일 소스·일자 로더.
         ``gather.transforms.pit.applyAsOf``: PIT 필터 SSOT.
-        ``.github/scripts/sync/syncNewsHeadlines.py``: archive write-side.
     """
     s = _toDate(start)
     e = _toDate(end)
     marketU = market.upper()
 
+    specs = allNewsSources()
+    if sources is not None:
+        wanted = set(sources)
+        specs = [sp for sp in specs if sp.id in wanted]
+
     frames: list[pl.DataFrame] = []
     for day in _dayRange(s, e):
-        df = _loadDay(marketU, day.isoformat())
-        if df is not None and df.height > 0:
-            frames.append(df)
-        gdelt_df = _loadGdeltDay(marketU, day.isoformat())
-        if gdelt_df is not None and gdelt_df.height > 0:
-            frames.append(gdelt_df)
+        dayIso = day.isoformat()
+        for sp in specs:
+            if marketU not in sp.markets:
+                continue
+            df = loadSourceDay(sp.id, marketU, dayIso)
+            if df is not None and df.height > 0:
+                frames.append(df)
 
     if not frames:
-        return pl.DataFrame(schema=_EMPTY_SCHEMA)
+        return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
 
-    out = pl.concat(frames, how="diagonal_relaxed")
+    out = coerceToCanonical(pl.concat(frames, how="diagonal_relaxed"))
     if asof is not None:
         asofIso = _toDate(asof).isoformat()
         out = applyAsOf(

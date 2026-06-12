@@ -4,8 +4,8 @@ name: News Archive Sync
 # news headlines forward-only archive cron (Phase A).
 #
 # Google News RSS 일별 수집 (KOSPI200 시총 상위 + 매크로 키워드) →
-# `data/news/headlines/{market}/{YYYY}-{MM}-{DD}.parquet` upsert →
-# HF push (`eddmpython/dartlab-data/news/headlines/...`).
+# `data/news/public/rss/{market}/{YYYY}-{MM}-{DD}.parquet` upsert →
+# HF push (`eddmpython/dartlab-data/news/public/rss/...`).
 #
 # 본문 archive 영구 제외 (ToS) — 메타데이터 (title/source/url/date +
 # market/query/captured_at) 만 박는다.
@@ -56,7 +56,7 @@ jobs:
       - name: Restore news headlines cache
         uses: actions/cache/restore@v5
         with:
-          path: data/news/headlines
+          path: data/news/public/rss
           key: dartlab-news-headlines-${{ github.run_id }}
           restore-keys: dartlab-news-headlines-
 
@@ -81,5 +81,5 @@ jobs:
         if: always()
         uses: actions/cache/save@v5
         with:
-          path: data/news/headlines
+          path: data/news/public/rss
           key: dartlab-news-headlines-${{ github.run_id }}

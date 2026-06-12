@@ -443,9 +443,11 @@ def _feedPanelRollup(
 
 
 def _newsHeadlinesDir():
+    # dataConfig SSOT 파생 — visibility-first taxonomy (news/public/rss) drift 차단.
+    from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _getDataRoot
 
-    return _getDataRoot() / "news" / "headlines"
+    return _getDataRoot() / DATA_RELEASES["newsHeadlines"]["dir"]
 
 
 def _newsKey(url: str, date: str) -> tuple[str, int]:

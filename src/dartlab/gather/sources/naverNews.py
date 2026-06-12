@@ -1,0 +1,225 @@
+"""네이버 검색 API 뉴스 소스 — 제목+스니펫 (private, 언론사 저작권).
+
+네이버 오픈 '검색' API (``https://openapi.naver.com/v1/search/news.json``). 헤더
+``X-Naver-Client-Id`` / ``X-Naver-Client-Secret`` 인증 (dataCredentials naver/
+naverSecret 공급자). 응답 ``items[]``: title·description(둘 다 ``<b>`` 하이라이트
+태그 + HTML 엔티티 포함)·originallink·link·pubDate.
+
+⚠ 라이선스: 결과는 **언론사 저작권**. 공개 재배포 금지 → private 캐시 전용
+(``news/private/naver``, KRX 시세 선례와 동형, newsSources.naver.visibility="private").
+라이브 표시·서버사이드 read 는 의도된 용도라 OK — 공개 HF 벌크 적재만 금지.
+
+rss(news.py)와 동형: ``_fetchAsync`` (query) + ``fetchHeadlinesForArchive`` (팬아웃).
+인증 헤더 + 별도 host 라 shared GatherHttpClient 대신 격리된 httpx 를 쓴다
+(``client`` 인자는 시그니처 대칭 목적 — 내부 미사용).
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import re
+import time
+from datetime import datetime, timedelta, timezone
+from html import unescape
+from urllib.parse import urlparse
+
+import polars as pl
+
+from dartlab.core.providers.dataCredentials import getKey
+
+from ..infra.resilience import circuitBreaker as _circuit_breaker
+from ..infra.resilience import healthTracker as _health_tracker
+from ..types import NewsItem
+from .newsSchema import coerceToCanonical
+
+log = logging.getLogger(__name__)
+
+_SOURCE_NAME = "naver_news"
+_ENDPOINT = "https://openapi.naver.com/v1/search/news.json"
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _clean(s: str | None) -> str:
+    """``<b>`` 등 태그 제거 + HTML 엔티티 unescape + strip."""
+    if not s:
+        return ""
+    return unescape(_TAG_RE.sub("", s)).strip()
+
+
+def _parsePubDate(s: str) -> str | None:
+    """네이버 pubDate (RFC822 ``+0900``) → ``'YYYY-MM-DD'`` (실패 None)."""
+    try:
+        return str(datetime.strptime(s, "%a, %d %b %Y %H:%M:%S %z").date())
+    except (ValueError, TypeError):
+        return None
+
+
+def _parseItems(data: dict) -> list[NewsItem]:
+    """네이버 검색 응답 JSON → list[NewsItem] (url=originallink, description=스니펫)."""
+    items: list[NewsItem] = []
+    for it in data.get("items", []):
+        link = (it.get("originallink") or it.get("link") or "").strip()
+        if not link:
+            continue
+        netloc = urlparse(link).netloc
+        source = netloc[4:] if netloc.startswith("www.") else netloc
+        items.append(
+            NewsItem(
+                date=_parsePubDate(it.get("pubDate", "")) or "",
+                title=_clean(it.get("title")),
+                source=source or "naver",
+                url=link,
+                description=_clean(it.get("description")),
+            )
+        )
+    return items
+
+
+async def _fetchAsync(
+    query: str,
+    *,
+    market: str = "KR",
+    display: int = 100,
+    sort: str = "date",
+    client=None,
+) -> list[NewsItem]:
+    """네이버 뉴스 검색 (async) — 인증 헤더 + circuit breaker. KR 전용.
+
+    Parameters
+    ----------
+    query : str
+        검색어 (기업명/키워드).
+    market : str
+        시장. ``"KR"`` 외에는 빈 리스트 (네이버=국내 전용).
+    display : int
+        반환 건수 (1~100, 네이버 상한 100).
+    sort : str
+        ``"date"`` (최신순) | ``"sim"`` (정확도순).
+    client
+        시그니처 대칭용 — 내부 미사용 (격리 httpx).
+
+    Returns
+    -------
+    list[NewsItem]
+        date·title·source·url·description. 키 미설정/실패/circuit open 시 빈 리스트.
+    """
+    if market.upper() != "KR":
+        return []
+    clientId = getKey("naver")
+    clientSecret = getKey("naverSecret")
+    if not clientId or not clientSecret:
+        log.debug("naver 자격증명 미설정 — skip")
+        return []
+    if _circuit_breaker.isOpen(_SOURCE_NAME):
+        log.debug("naver circuit breaker open — skip")
+        return []
+
+    params = {"query": query, "display": min(max(display, 1), 100), "sort": sort}
+    headers = {"X-Naver-Client-Id": clientId, "X-Naver-Client-Secret": clientSecret}
+
+    t0 = time.monotonic()
+    try:
+        import httpx
+
+        async with httpx.AsyncClient() as ac:
+            resp = await ac.get(_ENDPOINT, params=params, headers=headers, timeout=10.0)
+            resp.raise_for_status()
+            data = resp.json()
+        items = _parseItems(data)
+        latency = time.monotonic() - t0
+        _circuit_breaker.recordSuccess(_SOURCE_NAME)
+        _health_tracker.record(_SOURCE_NAME, success=True, latency=latency)
+        return items
+    except Exception as exc:  # noqa: BLE001 — 네트워크/인증(401)/rate(429)/파싱은 graceful []
+        latency = time.monotonic() - t0
+        _circuit_breaker.recordFailure(_SOURCE_NAME)
+        _health_tracker.record(_SOURCE_NAME, success=False, latency=latency)
+        log.debug("naver fetch 실패: %s", exc)
+        return []
+
+
+def fetchHeadlinesForArchive(
+    queries: list[str],
+    *,
+    market: str = "KR",
+    days: int = 1,
+    concurrency: int = 8,
+    limit: int | None = None,
+) -> pl.DataFrame:
+    """네이버 뉴스 다중 쿼리 fan-out — archive 진입점 (rss 와 동형 시그니처).
+
+    Sig: ``fetchHeadlinesForArchive(queries, *, market, days, concurrency, limit) -> pl.DataFrame``
+
+    Capabilities:
+        - N 쿼리 비동기 fan-out (Semaphore 제한)
+        - url dedup (첫 매치 query 유지)
+        - days 윈도우 cutoff 필터 (date ≥ today-days)
+        - canonical 17컬럼 (description=스니펫 채움, enrichment=null)
+
+    AIContext:
+        syncNaverNews.py 의 일별 cron 단일 진입점. private 경로(news/private/naver)
+        로만 적재 — 공개 dartlab-data 안 감.
+
+    Args:
+        queries: 검색 시드 (종목명+키워드).
+        market: ``"KR"`` 외 빈 DataFrame.
+        days: 최근 N일 윈도우. 기본 1.
+        concurrency: 동시 fetch 상한.
+        limit: 반환 행 상한 (date desc 정렬 후). None=전체.
+
+    Returns:
+        pl.DataFrame — newsSchema.NEWS_ARCHIVE_SCHEMA canonical 17컬럼. 빈 결과 동일 schema.
+
+    Raises:
+        없음 — 개별 쿼리 실패는 빈 결과로 흡수 (circuit breaker).
+
+    Example:
+        >>> # fetchHeadlinesForArchive(["삼성전자","SK하이닉스"], market="KR", days=1)
+    """
+    if not queries or market.upper() != "KR":
+        return coerceToCanonical(None)
+
+    from ..infra.http import runAsync
+
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def _one(q: str) -> tuple[str, list[NewsItem]]:
+        async with sem:
+            return q, await _fetchAsync(q, market=market)
+
+    async def _gatherAll() -> list[tuple[str, list[NewsItem]]]:
+        return await asyncio.gather(*(_one(q) for q in queries))
+
+    pairs = runAsync(_gatherAll())
+    capturedAt = datetime.now(tz=timezone.utc)
+
+    rows: list[dict] = []
+    seen: set[str] = set()
+    for q, items in pairs:
+        for it in items:
+            if not it.url or it.url in seen:
+                continue
+            seen.add(it.url)
+            rows.append(
+                {
+                    "date": it.date,
+                    "title": it.title,
+                    "source": it.source,
+                    "url": it.url,
+                    "market": market.upper(),
+                    "query": q,
+                    "captured_at": capturedAt,
+                    "description": it.description,
+                }
+            )
+
+    if not rows:
+        return coerceToCanonical(None)
+    df = pl.DataFrame(rows).with_columns(pl.col("date").cast(pl.Date, strict=False))
+    if days and days > 0:
+        cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=days)).date()
+        df = df.filter(pl.col("date").is_not_null() & (pl.col("date") >= cutoff))
+    df = df.sort(["date", "url"], descending=[True, False])
+    df = coerceToCanonical(df)
+    return df.head(limit) if limit is not None else df

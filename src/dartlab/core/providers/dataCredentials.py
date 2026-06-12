@@ -127,6 +127,27 @@ _DATA_PROVIDERS: dict[str, DataProviderSpec] = {
         signupUrl="https://www.openfigi.com/api",
         sources=("symbology",),
     ),
+    # 네이버 검색 API 는 ID+Secret 2 키 → provider 2개로 국소 등록 (전역 secretEnvKey
+    # 필드 신설은 모든 provider 영향이라 회피). naverNews.py 만 둘을 함께 안다.
+    "naver": DataProviderSpec(
+        id="naver",
+        label="네이버 검색 API (Client ID)",
+        envKey="NAVER_CLIENT_ID",
+        purpose="네이버 뉴스 검색 (제목+스니펫) — 언론사 저작권, 비공개 캐시 전용",
+        signupUrl="https://developers.naver.com/apps/",
+        sources=("naverNews",),
+        keyHint="개발자센터 '검색' API 등록 시 발급. Client Secret 은 naverSecret 공급자.",
+        operatorOnly=False,
+    ),
+    "naverSecret": DataProviderSpec(
+        id="naverSecret",
+        label="네이버 검색 API (Client Secret)",
+        envKey="NAVER_CLIENT_SECRET",
+        purpose="네이버 검색 API 시크릿 (naver 공급자와 쌍)",
+        signupUrl="https://developers.naver.com/apps/",
+        sources=("naverNews",),
+        operatorOnly=False,
+    ),
 }
 
 

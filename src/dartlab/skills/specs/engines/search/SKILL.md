@@ -135,7 +135,7 @@ recent = c.liveFilings()        # 라이브
 
 `scope="both"`: title(ngram) + content(bm25) 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 title·content 단순합산은 품질 저하). auto 의 RRF 융합은 이와 다른 메커니즘(content lane 내 plain⊕확장).
 
-`scope="news"`: gather 뉴스 헤드라인(`news/headlines`)만 검색(공시 제외). 뉴스는 `rcept_no` 없음 → `news:`+url해시로 식별, `dartUrl` = 기사 url. corp 지정 시 0 건(뉴스는 종목 매핑 없음 — title 매칭만). allFilings+panel+뉴스가 한 인덱스에 통합되어 `includeNews=True` 빌드 시 auto 결과에도 자연 노출.
+`scope="news"`: gather 뉴스 헤드라인(`news/public/rss`)만 검색(공시 제외). 뉴스는 `rcept_no` 없음 → `news:`+url해시로 식별, `dartUrl` = 기사 url. corp 지정 시 0 건(뉴스는 종목 매핑 없음 — title 매칭만). allFilings+panel+뉴스가 한 인덱스에 통합되어 `includeNews=True` 빌드 시 auto 결과에도 자연 노출.
 
 `corp` 는 종목코드 ("005930") 또는 회사명 ("삼성전자"), `start`/`end` 는 YYYYMMDD, `topK` 기본 10.
 

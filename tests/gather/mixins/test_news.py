@@ -22,14 +22,20 @@ def test_news_emits_gather_fetch(monkeypatch: pytest.MonkeyPatch) -> None:
     """news() 가 fetch 완료 시 emitGatherFetch 신호."""
     from dartlab.gather.engine import Gather
     from dartlab.gather.infra import telemetry as telemetryMod
+    from dartlab.gather.sources import naverNews as naverMod
     from dartlab.gather.sources import news as newsMod
 
     captured: list = []
     monkeypatch.setattr(telemetryMod, "_coreEmit", lambda k, **kw: captured.append((k, kw)))
 
+    # KR=네이버 우선 → 네트워크 격리 위해 naver stub([])로 google 폴백 경로 강제.
+    async def fakeNaver(query, *, market="KR", client=None, **kw):
+        return []
+
     async def fakeFetchAsync(query, *, market, days, client):
         return []
 
+    monkeypatch.setattr(naverMod, "_fetchAsync", fakeNaver)
     monkeypatch.setattr(newsMod, "_fetchAsync", fakeFetchAsync)
     monkeypatch.setattr(newsMod, "toDataFrame", lambda items: pl.DataFrame())
 
