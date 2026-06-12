@@ -99,12 +99,13 @@ _REQUIRED_SCAN_ROOT_FILES: tuple[str, ...] = (
     "sharesOutstanding.parquet",
 )
 
-# scan/report/ 안 필수 prebuild — scanner 들이 호출하는 apiType 들 SSOT.
+# scan/report/ 안 필수 prebuild — 실소비자(scan 엔진 + landing 터미널)가 쓰는 apiType 들 SSOT.
 # 빌더 `scan/builders/kr/report/build.SCAN_API_TYPES` 와 1:1 일치해야 한다 — 정합성은
 # `tests/scan/test_prebuild_contract.py::test_required_report_matches_builder` 가 강제.
 # 한쪽 추가 시 다른 쪽도 동시 갱신 (회귀 사례: shortTermBond/commercialPaper/investedCompany
 # 누락 → dartlab.scan("debt") silent thrift error, 2026-05-17 점검).
 _REQUIRED_REPORT_FILES: tuple[str, ...] = (
+    "auditContract.parquet",
     "auditOpinion.parquet",
     "capitalChange.parquet",
     "commercialPaper.parquet",
@@ -117,6 +118,7 @@ _REQUIRED_REPORT_FILES: tuple[str, ...] = (
     "investedCompany.parquet",
     "majorHolder.parquet",
     "minorityHolder.parquet",
+    "nonAuditContract.parquet",
     "outsideDirector.parquet",
     "shortTermBond.parquet",
     "treasuryStock.parquet",

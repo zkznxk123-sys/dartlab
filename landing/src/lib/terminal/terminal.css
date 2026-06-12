@@ -882,16 +882,6 @@
 .dlTerm .finFsGrid .mfcAx { font-size: 5.5px; }
 .dlTerm .finFsGrid .mfcHeatV { font-size: 6px; }
 .dlTerm .finFsNote { margin-top: 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); }
-/* KPI 밴드 — 전 탭 고정, 최신기 핵심 6지표 + 룰 인사이트 */
-.dlTerm .finKpis { display: flex; align-items: center; gap: 22px; padding: 7px 14px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-deep, #0a0f18); overflow-x: auto; scrollbar-width: none; }
-.dlTerm .fkItem { display: flex; flex-direction: column; gap: 1px; flex: none; }
-.dlTerm .fkLbl { font-family: var(--cond); font-size: 10px; letter-spacing: 0.5px; color: var(--dimmer); text-transform: uppercase; }
-.dlTerm .fkRow { display: flex; align-items: baseline; gap: 6px; }
-.dlTerm .fkVal { font-size: 15px; font-weight: 700; color: var(--txt); line-height: 1.1; }
-.dlTerm .fkUnit { font-style: normal; font-size: 9px; color: var(--dimmer); margin-left: 1px; font-weight: 400; }
-.dlTerm .fkDelta { font-size: 9.5px; font-weight: 600; }
-.dlTerm .fkSpark { width: 46px; height: 13px; color: var(--dim); margin-top: 1px; }
-.dlTerm .fkPeriod { margin-left: auto; font-size: 10.5px; color: var(--dim); flex: none; padding-left: 14px; }
 .dlTerm .finFsQ { font-family: var(--cond); font-size: 11.5px; letter-spacing: 0.4px; color: var(--amber); margin: 0 0 8px; }
 /* 원표 와이드 테이블 CSS 는 정량재무제표(공시뷰어 FinanceDialog 마운트)로 대체되며 제거됨 */
 

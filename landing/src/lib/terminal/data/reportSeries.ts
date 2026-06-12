@@ -5,6 +5,7 @@
 // 실측 구조: employee 는 fo_bbm='성별합계' 행이 성별 합계+급여 보유, treasuryStock 은 acqs_mth1='총계' 행이 총계.
 import { browser } from '$app/environment';
 import { readParquetRows } from '$lib/data/hfRange';
+import { localTerminalAdapter } from './localAdapter';
 
 export type Num = number | null;
 
@@ -124,6 +125,12 @@ export interface TopExecPay {
 	avgPay: Num; // 같은 연도 이사·감사 1인평균 보수 (원) — 배수 병치용
 	rows: TopExecPayRow[]; // 보수 내림차순 top 8
 }
+// ── 감사보수·독립성 — auditContract(감사용역) + nonAuditContract(비감사용역) ──
+export interface AuditFeeYear {
+	year: number; // 사업연도 = stlm_dt 연도 − 상대기수(당기·당분기 0 / 전기 1 / 전전기 2). 마커 행만 채택
+	auditFee: Num; // 감사용역 계약보수 (원) — 실집행은 분기 YTD 오염이라 계약값 고정
+	nonAuditFee: Num; // 비감사용역 보수 합 (원) — 같은 연도 최신 공시 그룹 합산, 계약 없으면 0
+}
 // 패널 3종은 독립 로더 — Promise.all 로 묶으면 가장 무거운 investedCompany(16MB)가
 // 가벼운 인력·배당 패널까지 지연시킨다. 각자 캐시·각자 스트림-인.
 
@@ -192,44 +199,68 @@ const dpCache = new Map<string, Promise<DebtProfileBundle | null>>();
 const ccCache = new Map<string, Promise<CapitalChangesBundle | null>>();
 const atCache = new Map<string, Promise<AuditYear[] | null>>();
 const tpCache = new Map<string, Promise<TopExecPay | null>>();
+const afCache = new Map<string, Promise<AuditFeeYear[] | null>>();
 
 /** 인력·생산성 연도 시계열 (employee.parquet 단독 — 가볍고 먼저 도착). */
 export function loadWorkforce(stockCode: string): Promise<WorkforceYear[] | null> {
+	const local = localTerminalAdapter()?.loadWorkforce;
+	if (local) return local(stockCode.trim());
 	return cached(wfCache, stockCode, buildWorkforce);
 }
 /** 타법인출자 — 최신 연도 top 12 + 연도별 장부가 합계 추이 (investedCompany.parquet — 가장 무거움, 단일 패스). */
 export function loadInvestments(stockCode: string): Promise<InvestmentsBundle | null> {
+	const local = localTerminalAdapter()?.loadInvestments;
+	if (local) return local(stockCode.trim());
 	return cached(invCache, stockCode, buildInvestments);
 }
 /** 주주환원 연도 시계열 (dividend + treasuryStock). */
 export function loadShareholderReturn(stockCode: string): Promise<ShareholderReturnYear[] | null> {
+	const local = localTerminalAdapter()?.loadShareholderReturn;
+	if (local) return local(stockCode.trim());
 	return cached(srCache, stockCode, buildShareholderReturn);
 }
 /** 소유구조 연도 시계열 (majorHolder 계행 + minorityHolder). */
 export function loadOwnership(stockCode: string): Promise<OwnershipYear[] | null> {
+	const local = localTerminalAdapter()?.loadOwnership;
+	if (local) return local(stockCode.trim());
 	return cached(ownCache, stockCode, buildOwnership);
 }
 /** 이사·감사 보수 + 이사회 구성 연도 시계열 (executivePayAllTotal + outsideDirector). */
 export function loadExecBoard(stockCode: string): Promise<ExecBoardYear[] | null> {
+	const local = localTerminalAdapter()?.loadExecBoard;
+	if (local) return local(stockCode.trim());
 	return cached(ebCache, stockCode, buildExecBoard);
 }
 /** 사채 잔액 추이 + 전방 만기 사다리 + 초단기물 (corporateBond + shortTermBond + commercialPaper). */
 export function loadDebtProfile(stockCode: string): Promise<DebtProfileBundle | null> {
+	const local = localTerminalAdapter()?.loadDebtProfile;
+	if (local) return local(stockCode.trim());
 	return cached(dpCache, stockCode, buildDebtProfile);
 }
 /** 자본금 변동 이벤트 + 연도 합산 (capitalChange) — 희석 이력 카드 · 주가차트 마커 공용. */
 export function loadCapitalChanges(stockCode: string): Promise<CapitalChangesBundle | null> {
+	const local = localTerminalAdapter()?.loadCapitalChanges;
+	if (local) return local(stockCode.trim());
 	return cached(ccCache, stockCode, buildCapitalChanges);
 }
 /** 감사 이력 연도 시계열 (auditOpinion) — 감사인·의견·특기사항. */
 export function loadAuditTrail(stockCode: string): Promise<AuditYear[] | null> {
+	const local = localTerminalAdapter()?.loadAuditTrail;
+	if (local) return local(stockCode.trim());
 	return cached(atCache, stockCode, buildAuditTrail);
 }
 /** 개별 임원 보수 top 8 (executivePayIndividual, 최신 사업보고서). */
 export function loadTopExecPay(stockCode: string): Promise<TopExecPay | null> {
+	const local = localTerminalAdapter()?.loadTopExecPay;
+	if (local) return local(stockCode.trim());
 	return cached(tpCache, stockCode, buildTopExecPay);
 }
-
+/** 감사보수·독립성 연도 시계열 (auditContract + nonAuditContract). */
+export function loadAuditFees(stockCode: string): Promise<AuditFeeYear[] | null> {
+	const local = localTerminalAdapter()?.loadAuditFees;
+	if (local) return local(stockCode.trim());
+	return cached(afCache, stockCode, buildAuditFees);
+}
 async function buildWorkforce(code: string): Promise<WorkforceYear[] | null> {
 	const emp = await read('employee', code, ['fo_bbm', 'sexdstn', 'rgllbr_co', 'cnttk_co', 'sm', 'avrg_cnwk_sdytrn', 'fyer_salary_totamt']);
 	// ── workforce: 성별합계 행 우선, 없으면(기아 등 단일부문 공시) 부문×성별 행 합산 → 연도 1행 ──
@@ -633,4 +664,72 @@ async function buildTopExecPay(code: string): Promise<TopExecPay | null> {
 	const eb = await loadExecBoard(code); // 캐시 공유 — 추가 fetch 없음 (1인평균 배수 병치용)
 	const avgPay = eb?.find((e) => e.year === year)?.execAvgPay ?? null;
 	return { year, avgPay, rows: list };
+}
+
+// 상대 기수 라벨 → 사업연도 offset. 한 보고서에 당기·전기·전전기 3개 연도 표가 같이 실린다.
+// ⚠ '전전기' 가 '전기' 를 포함하므로 검사 순서 고정. '당분기/당반기' 도 0 — 감사 계약보수는 연간
+// 단일 계약값이라 분기 시점에도 동일 (하이닉스 1분기 2,975 = 4분기 확정 2,975 실측).
+const relOffset = (label: string): number | null => {
+	const s = label.replace(/\s/g, '');
+	if (s.includes('전전기')) return 2;
+	if (s.includes('전기')) return 1;
+	if (s.includes('당기') || s.includes('당분기') || s.includes('당반기')) return 0;
+	return null;
+};
+// '4,219(주1)' 류 주석 꼬리 제거 후 수치화 (감사시간·보수 필드 실측 오염 패턴)
+const numClean = (v: unknown): Num => num(typeof v === 'string' ? v.replace(/\(.*?\)/g, '') : v);
+
+async function buildAuditFees(code: string): Promise<AuditFeeYear[] | null> {
+	const [ac, nac] = await Promise.all([
+		read('auditContract', code, ['bsns_year', 'stlm_dt', 'mendng', 'adt_cntrct_dtls_mendng', 'rcept_no']),
+		read('nonAuditContract', code, ['bsns_year', 'stlm_dt', 'servc_mendng', 'rcept_no'])
+	]);
+	// 사업연도 = stlm_dt(보고서 결산 기준일) 연도 − 상대기수. 상대 마커 없는 행은 버린다 —
+	// 기수 숫자(제N기)는 회사·문서 간 불일치 실측(현대차 59기↔2025 vs 56기↔2023 모순)이라 신뢰 불가.
+	// 부정확한 장기 시계열보다 정확한 단기가 정직.
+	const fyOf = (r: Row): number | null => {
+		const m = str(r.stlm_dt).match(/^(\d{4})/);
+		const off = relOffset(str(r.bsns_year));
+		if (!m || off == null) return null;
+		const fy = Number(m[1]) - off;
+		return fy >= 1990 ? fy : null;
+	};
+	// 감사보수 — 같은 연도가 여러 보고서에 재수록(당기→전기→전전기) → 최신 접수 우선.
+	// 신필드(adt_cntrct_dtls_mendng, 2020 신외감법 양식) 우선, 구필드(mendng) 폴백. 단위 백만원 → 원.
+	const acBest = new Map<number, { rc: string; fee: number }>();
+	for (const r of ac) {
+		const fy = fyOf(r);
+		if (fy == null) continue;
+		const fee = numClean(r.adt_cntrct_dtls_mendng) ?? numClean(r.mendng);
+		if (fee == null || fee <= 0) continue;
+		const rc = str(r.rcept_no);
+		const cur = acBest.get(fy);
+		if (!cur || rc > cur.rc) acBest.set(fy, { rc, fee });
+	}
+	if (!acBest.size) return null;
+	// 비감사보수 — 같은 연도 최신 접수 공시 그룹의 용역 행 합산 (분기 반복 수록 dedup).
+	// 그룹은 있는데 유효 보수 0 = 비감사용역 없음('-' 행) → 0. 그룹 자체 부재 → null (미공시 구분).
+	const nacGrp = new Map<number, Row[]>();
+	for (const r of nac) {
+		const fy = fyOf(r);
+		if (fy == null) continue;
+		let arr = nacGrp.get(fy);
+		if (!arr) nacGrp.set(fy, (arr = []));
+		arr.push(r);
+	}
+	const out: AuditFeeYear[] = [];
+	for (const [fy, { fee }] of acBest) {
+		const grp = nacGrp.get(fy);
+		let nonAudit: Num = null;
+		if (grp) {
+			nonAudit = 0;
+			for (const r of latestRcept(grp)) {
+				const v = numClean(r.servc_mendng);
+				if (v != null && v > 0) nonAudit += v;
+			}
+		}
+		out.push({ year: fy, auditFee: fee * 1e6, nonAuditFee: nonAudit != null ? nonAudit * 1e6 : null });
+	}
+	out.sort((a, b) => a.year - b.year);
+	return out;
 }

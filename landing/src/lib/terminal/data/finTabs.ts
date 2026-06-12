@@ -12,9 +12,8 @@ import {
 	loadExecBoard,
 	loadDebtProfile,
 	loadCapitalChanges,
-	type ShareholderReturnYear
+	loadAuditFees
 } from './reportSeries';
-import { price } from './workbench';
 
 export interface TabCard {
 	card: FinCard;
@@ -50,34 +49,6 @@ function annualMap(bundle: TerminalFinanceBundle, stmt: 'IS' | 'BS' | 'CF', key:
 	return out;
 }
 
-// 연도별 평균 종가 (원) — workbench price 모듈(회사 전이력 캔들)로 산출. 자사주 취득가치 추정용.
-// price.initial 은 in-flight dedup·LRU 캐시가 있어 차트와 같은 스캔을 공유한다 (중복 fetch 없음).
-const avgCloseCache = new Map<string, Promise<Map<number, number>>>();
-function yearAvgClose(code: string): Promise<Map<number, number>> {
-	const c = code.trim();
-	const hit = avgCloseCache.get(c);
-	if (hit) return hit;
-	const p = price
-		.initial(c, price.minYear)
-		.then((cp) => {
-			const sum = new Map<number, { s: number; n: number }>();
-			for (const k of cp?.candles ?? []) {
-				const y = Number(k.t.slice(0, 4));
-				if (!Number.isFinite(y) || !(k.c > 0)) continue;
-				let e = sum.get(y);
-				if (!e) sum.set(y, (e = { s: 0, n: 0 }));
-				e.s += k.c;
-				e.n++;
-			}
-			const out = new Map<number, number>();
-			for (const [y, { s, n }] of sum) if (n > 0) out.set(y, s / n);
-			return out;
-		})
-		.catch(() => new Map<number, number>());
-	avgCloseCache.set(c, p);
-	return p;
-}
-
 async function cashflowReport(code: string): Promise<TabCard[]> {
 	const inv = await loadInvestments(code);
 	if (!inv || inv.trend.length < 2) return [];
@@ -95,11 +66,10 @@ async function cashflowReport(code: string): Promise<TabCard[]> {
 }
 
 async function shareholderReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
-	const [sr, own, dil, avgClose] = await Promise.all([
+	const [sr, own, dil] = await Promise.all([
 		loadShareholderReturn(code),
 		loadOwnership(code),
-		loadCapitalChanges(code),
-		yearAvgClose(code)
+		loadCapitalChanges(code)
 	]);
 	const cards: TabCard[] = [];
 	const ownBy = new Map((own ?? []).map((o) => [o.year, o]));
@@ -107,40 +77,13 @@ async function shareholderReport(code: string, bundle: TerminalFinanceBundle): P
 		const srYears = sr.map((s) => s.year);
 		const srP = srYears.map(fyLabel);
 		const niBy = annualMap(bundle, 'IS', 'netIncome');
-		// 자사주 취득가치 추정 (원) = 취득수량 × 해당연도 평균종가 — 공시에 취득금액이 없어 추정치
-		const buyVal = (s: ShareholderReturnYear): Num => {
-			const px = avgClose.get(Number(s.year));
-			return s.buybackQty != null && s.buybackQty > 0 && px != null ? s.buybackQty * px : null;
-		};
-		// ① 총주주환원 — 배당총액 + 자사주 취득가치 스택 + 총환원율(순이익 대비)
+		// 배당수익률 — 공시값(DPS/주가) 단일 시리즈. 자사주 취득가치는 공시에 금액이 없어
+		// 연평균종가 추정에 의존하므로(진짜 공시값 아님) 총주주환원·자사주수익률 추정 카드는 제외.
 		cards.push({
 			periods: srP,
 			card: {
-				key: 'totalReturn', title: '총주주환원 (배당+자사주) · 연', unit: '조', stacked: true, series: [
-					{ name: '배당총액', data: sr.map((s) => (s.totalDividend != null ? +(s.totalDividend / 1e12).toFixed(3) : null)), color: C.blue, type: 'bar' },
-					{ name: '자사주취득(추정)', data: sr.map((s) => { const v = buyVal(s); return v != null ? +(v / 1e12).toFixed(3) : null; }), color: C.good, type: 'bar' },
-					{ name: '총환원율%', data: sr.map((s) => {
-						const ni = niBy.get(s.year);
-						if (ni == null || ni <= 0 || (s.totalDividend == null && buyVal(s) == null)) return null;
-						return +((((s.totalDividend ?? 0) + (buyVal(s) ?? 0)) / 1e12 / ni) * 100).toFixed(1);
-					}), color: C.purple, type: 'line', axis: 'r' }
-				]
-			}
-		});
-		// ② 주주수익률 — 배당수익률(공시값) + 자사주수익률(취득가치/시총 추정) + 합계
-		const buyYield = (s: ShareholderReturnYear): Num => {
-			const px = avgClose.get(Number(s.year));
-			const tot = ownBy.get(s.year)?.stockTotal;
-			const v = buyVal(s);
-			return v != null && px != null && tot != null && tot > 0 ? +((v / (px * tot)) * 100).toFixed(2) : null;
-		};
-		cards.push({
-			periods: srP,
-			card: {
-				key: 'tsrYield', title: '주주수익률 (배당+자사주) · 연', unit: '%', series: [
-					{ name: '배당수익률', data: sr.map((s) => s.yieldPct), color: C.blue, type: 'line' },
-					{ name: '자사주수익률(추정)', data: sr.map(buyYield), color: C.good, type: 'line' },
-					{ name: '합계', data: sr.map((s) => { const b = buyYield(s); return s.yieldPct != null || b != null ? +((s.yieldPct ?? 0) + (b ?? 0)).toFixed(2) : null; }), color: C.purple, type: 'line' }
+				key: 'divYield', title: '배당수익률 · 연', unit: '%', series: [
+					{ name: '배당수익률', data: sr.map((s) => s.yieldPct), color: C.blue, type: 'line' }
 				]
 			}
 		});
@@ -327,10 +270,24 @@ async function peopleReport(code: string, bundle: TerminalFinanceBundle): Promis
 }
 
 async function debtReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
-	const dp = await loadDebtProfile(code);
-	if (!dp || !dp.years.length) return [];
-	const dpr = dp.years;
+	const [dp, af] = await Promise.all([loadDebtProfile(code), loadAuditFees(code)]);
 	const cards: TabCard[] = [];
+	// ⚠ 채무증권 발행 실적(debtSecurities) 카드는 기각 — 외화채 분기 환산 변동이 dedup 을 뚫어
+	// 중복 합산(삼성 2015 Harman "26.74조" 허구)·인수 전 이력 유입·CP 차환 롤오버 지배 3중 오염 실측.
+	// 감사보수·독립성 — 비감사/감사 보수 비율 = 감사인 독립성 고전 지표 (높을수록 적신호)
+	const auditFeeCard: TabCard | null = af && af.length >= 2 ? {
+		periods: af.map((a) => fyLabel(String(a.year))),
+		card: {
+			key: 'auditFees', title: '감사보수·독립성 · 연', unit: '억', series: [
+				{ name: '감사보수', data: af.map((a) => (a.auditFee != null ? +(a.auditFee / 1e8).toFixed(1) : null)), color: C.blue, type: 'bar' },
+				{ name: '비감사보수', data: af.map((a) => (a.nonAuditFee != null ? +(a.nonAuditFee / 1e8).toFixed(1) : null)), color: C.warn, type: 'bar' },
+				{ name: '비감사/감사%', data: af.map((a) => (a.auditFee != null && a.auditFee > 0 && a.nonAuditFee != null ? +((a.nonAuditFee / a.auditFee) * 100).toFixed(1) : null)), color: C.red, type: 'line', axis: 'r' }
+			]
+		}
+	} : null;
+	const tail = [auditFeeCard].filter((c): c is TabCard => c != null);
+	if (!dp || !dp.years.length) return [...tail].filter(alive); // 무사채 회사도 감사보수는 노출
+	const dpr = dp.years;
 	// 전방 만기 사다리 — 최신 연도 잔존만기 7버킷 (x축 = 만기 버킷). 점선 = 최신 연간 현금성자산.
 	if (dp.ladder) {
 		const cashBy = annualMap(bundle, 'BS', 'cash');
@@ -363,7 +320,7 @@ async function debtReport(code: string, bundle: TerminalFinanceBundle): Promise<
 		periods: dpr.map((d) => fyLabel(d.year)),
 		card: { key: 'bondMaturity', title: '사채 잔액 추이 · 연', unit: '조', stacked: true, series }
 	});
-	return cards.filter(alive);
+	return [...cards, ...tail].filter(alive); // 사다리 → 잔액 → 감사보수 순
 }
 
 export const FS_TABS: FsTab[] = [
@@ -374,7 +331,7 @@ export const FS_TABS: FsTab[] = [
 	{ key: 'cashflow', label: { kr: '현금·투자', en: 'CASH' }, q: '이익이 현금인가, 어디에 쓰나', finKey: 'cashflow', load: cashflowReport },
 	{
 		key: 'debt', label: { kr: '재무체력', en: 'DEBT' }, q: '버틸 수 있나', finKey: 'debt', load: debtReport,
-		note: '만기 사다리 = 액면 기준 미상환 잔액(report) — 장부가와 소폭 차이. 점선 = 최신 연간 현금성자산. 무사채 회사는 카드 비표시. 감사 이력 = 사업보고서 기준 (사업연도 = 접수연도−1).'
+		note: '만기 사다리 = 액면 기준 미상환 잔액(report) — 장부가와 소폭 차이. 점선 = 최신 연간 현금성자산. 무사채 회사는 카드 비표시. 감사보수 = 감사용역 계약보수(연간 계약값), 비감사 = 같은 연도 용역 보수 합 — 비감사/감사 비율이 높을수록 감사인 독립성 적신호. 감사 이력 = 사업보고서 기준 (사업연도 = 접수연도−1).'
 	},
 	{
 		key: 'shareholder', label: { kr: '주주환원·소유', en: 'RETURN' }, q: '주주에게 무엇을 주나', finKey: 'shareholder', load: shareholderReport,

@@ -7,7 +7,9 @@ dartlab.scan("debt") · network axis 가 silent thrift error 로 실패.
 본 테스트는 세 SSOT 가 어긋나는 순간 즉시 fail 한다:
 1. 빌더 `SCAN_API_TYPES` (scan/builders/kr/report/build.py)
 2. 다운로드 무결성 `_REQUIRED_REPORT_FILES` (scan/io/parquet.py)
-3. 소비자 `scanParquets(apiType, ...)` (scan/{debt,capital,governance,workforce,...})
+3. 실소비자 — scan 엔진 `scanParquets(apiType, ...)` (scan/{debt,capital,governance,...})
+   + landing 터미널 `read('apiType', ...)` (landing/src/lib/terminal/data/reportSeries.ts,
+   HF `dart/scan/report/*.parquet` hyparquet 직독 — 2026-06-12 부터 동급 소비 표면).
 """
 
 from __future__ import annotations
@@ -22,11 +24,15 @@ from dartlab.scan.io.parquet import _REQUIRED_REPORT_FILES
 
 pytestmark = pytest.mark.unit
 
-_SCAN_DIR = Path(__file__).resolve().parents[2] / "src" / "dartlab" / "scan"
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_SCAN_DIR = _REPO_ROOT / "src" / "dartlab" / "scan"
+_REPORT_SERIES_TS = _REPO_ROOT / "landing" / "src" / "lib" / "terminal" / "data" / "reportSeries.ts"
 _CALL_RE = re.compile(r"scanParquets\(\s*['\"]([a-zA-Z][a-zA-Z0-9_]*)['\"]")
+# reportSeries.ts 내부 read('apiType', code, cols) — dart/scan/report/{apiType}.parquet 직독 호출
+_TS_CALL_RE = re.compile(r"\bread\(\s*'([a-zA-Z][a-zA-Z0-9_]*)'")
 
 
-def _consumerApiTypes() -> set[str]:
+def _scanConsumerApiTypes() -> set[str]:
     """scan/ 디렉토리 안 scanParquets() 첫 인자로 호출되는 apiType set."""
     found: set[str] = set()
     for py in _SCAN_DIR.rglob("*.py"):
@@ -43,6 +49,20 @@ def _consumerApiTypes() -> set[str]:
                 continue
             found.add(apiType)
     return found
+
+
+def _terminalConsumerApiTypes() -> set[str]:
+    """landing 터미널 reportSeries.ts 가 read() 로 직독하는 apiType set."""
+    try:
+        text = _REPORT_SERIES_TS.read_text(encoding="utf-8")
+    except OSError:
+        return set()
+    return {m.group(1) for m in _TS_CALL_RE.finditer(text)}
+
+
+def _consumerApiTypes() -> set[str]:
+    """실소비자 전체 — scan 엔진 + landing 터미널 합집합."""
+    return _scanConsumerApiTypes() | _terminalConsumerApiTypes()
 
 
 def test_required_report_matches_builder() -> None:
@@ -68,10 +88,10 @@ def test_builder_covers_all_consumers() -> None:
 
 
 def test_no_orphan_apitype_in_builder() -> None:
-    """빌더에는 있는데 scanner 가 부르지 않는 apiType 0 (cruft 차단)."""
+    """빌더에는 있는데 실소비자(scan 엔진·터미널 모두)가 안 쓰는 apiType 0 (cruft 차단)."""
     consumers = _consumerApiTypes()
     orphan = set(SCAN_API_TYPES) - consumers
     assert not orphan, (
-        f"빌더에는 있지만 scanner 가 호출하지 않는 apiType (cruft): {sorted(orphan)}. "
-        f"실제 호출이 있다면 _CALL_RE 정규식 점검, 아니면 빌더에서 제거."
+        f"빌더에는 있지만 scan 엔진·landing 터미널 어디서도 쓰지 않는 apiType (cruft): {sorted(orphan)}. "
+        f"실제 호출이 있다면 _CALL_RE/_TS_CALL_RE 정규식 점검, 아니면 빌더에서 제거."
     )

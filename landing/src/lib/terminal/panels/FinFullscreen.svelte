@@ -77,93 +77,6 @@
 	const finData = $derived(bundle ? (bundle.views[mode] ?? null) : null);
 	const activeDef = $derived(FS_TABS.find((d) => d.key === tab) ?? null);
 
-	// ── KPI 밴드 — 최신기 핵심 6지표 + 전년동기 화살표 + 스파크라인 (전 탭 고정, 모드 연동) ──
-	const stmtVals = (kind: 'IS' | 'BS' | 'CF', key: string): (number | null)[] =>
-		finData?.statements[kind].find((r) => r.key === key)?.values ?? [];
-	const ratioVals = (key: string): (number | null)[] => finData?.ratios.find((r) => r.key === key)?.values ?? [];
-	const sparkPath = (arr: (number | null)[]): string => {
-		const tail = arr.slice(-12);
-		const vals = tail.filter((x): x is number => x != null);
-		if (vals.length < 2) return '';
-		const lo = Math.min(...vals);
-		const hi = Math.max(...vals);
-		const rng = hi - lo || 1;
-		const n = tail.length;
-		let d = '';
-		let pen = false;
-		tail.forEach((v, i) => {
-			if (v == null) { pen = false; return; }
-			const x = n <= 1 ? 23 : (i / (n - 1)) * 46;
-			const y = 12 - ((v - lo) / rng) * 11;
-			d += `${pen ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)} `;
-			pen = true;
-		});
-		return d.trim();
-	};
-	interface Kpi { label: string; val: string; unit: string; delta: number | null; deltaUnit: string; deltaBad: boolean; spark: string; period: string }
-	const kpis = $derived.by<Kpi[]>(() => {
-		if (!finData) return [];
-		const lag = finData.freq === 'annual' ? 1 : 4;
-		const mk = (label: string, vals: (number | null)[], unit: '조' | '%', deltaMode: 'pct' | 'pp', invert = false): Kpi | null => {
-			let i = vals.length - 1;
-			while (i >= 0 && vals[i] == null) i--;
-			if (i < 0) return null;
-			const cur = vals[i]!;
-			const prev = i >= lag && vals[i - lag] != null ? vals[i - lag]! : null;
-			const delta = prev == null ? null : deltaMode === 'pct' ? (prev !== 0 ? +(((cur - prev) / Math.abs(prev)) * 100).toFixed(1) : null) : +(cur - prev).toFixed(1);
-			// 조 카드 자동 강등 — |값| < 0.5조면 억 표기 (소형사 0.00조 방지)
-			const eok = unit === '조' && Math.abs(cur) < 0.5;
-			const val = eok ? Math.round(cur * 1e4).toLocaleString() : unit === '조' ? (Math.abs(cur) >= 100 ? cur.toFixed(1) : cur.toFixed(2)) : cur.toFixed(1);
-			return { label, val, unit: eok ? '억' : unit, delta, deltaUnit: deltaMode === 'pct' ? '%' : '%p', deltaBad: invert, spark: sparkPath(vals), period: finData!.periods[i] };
-		};
-		const cfo = stmtVals('CF', 'cfOperating');
-		const cx = stmtVals('CF', 'capex');
-		const fcf = cfo.map((v, i) => (v != null ? +(v - (cx[i] ?? 0)).toFixed(3) : null));
-		return [
-			mk('매출', stmtVals('IS', 'revenue'), '조', 'pct'),
-			mk('영업이익', stmtVals('IS', 'operatingIncome'), '조', 'pct'),
-			mk('순이익', stmtVals('IS', 'netIncome'), '조', 'pct'),
-			mk('ROE', ratioVals('roe'), '%', 'pp'),
-			mk('부채비율', ratioVals('debtRatio'), '%', 'pp', true),
-			mk('FCF', fcf, '조', 'pct')
-		].filter((k): k is Kpi => k != null);
-	});
-	const kpiPeriod = $derived(kpis.length ? kpis[0].period : '');
-
-	// ── 룰 기반 자동 인사이트 (최대 2건) — 결정론 조건만, 미충족 시 비표시 (환각 0) ──
-	const insights = $derived.by<string[]>(() => {
-		if (!finData) return [];
-		const out: string[] = [];
-		const unitKo = finData.freq === 'annual' ? '년' : '분기';
-		const streak = (cond: (i: number) => boolean, len: number): number => {
-			let n = 0;
-			for (let i = len - 1; i >= 0; i--) { if (cond(i)) n++; else break; }
-			return n;
-		};
-		const cfo = stmtVals('CF', 'cfOperating');
-		const ni = stmtVals('IS', 'netIncome');
-		const L = finData.periods.length;
-		const qStreak = streak((i) => cfo[i] != null && ni[i] != null && ni[i]! > 0 && cfo[i]! >= ni[i]!, L);
-		if (qStreak >= 4) out.push(`영업현금흐름이 순이익을 ${qStreak}${unitKo} 연속 상회 — 이익의 현금 전환 양호`);
-		const rv = finData.revYoy;
-		const gStreak = streak((i) => rv[i] != null && rv[i]! > 0, L);
-		if (gStreak >= 4) out.push(`매출 ${gStreak}${unitKo} 연속 전년동기 대비 증가`);
-		const cx = stmtVals('CF', 'capex');
-		const fcf = cfo.map((v, i) => (v != null ? v - (cx[i] ?? 0) : null));
-		const fStreak = streak((i) => fcf[i] != null && fcf[i]! > 0, L);
-		if (fStreak >= 4 && out.length < 2) out.push(`잉여현금흐름(FCF) ${fStreak}${unitKo} 연속 플러스`);
-		const dr = ratioVals('debtRatio');
-		let di = dr.length - 1;
-		while (di >= 0 && dr[di] == null) di--;
-		const lag = finData.freq === 'annual' ? 1 : 4;
-		if (di >= lag && dr[di] != null && dr[di - lag] != null && out.length < 2) {
-			const dd = dr[di]! - dr[di - lag]!;
-			if (dd <= -10) out.push(`부채비율 전년동기 대비 ${Math.abs(dd).toFixed(0)}%p 하락 — 재무구조 개선`);
-			else if (dd >= 20) out.push(`부채비율 전년동기 대비 ${dd.toFixed(0)}%p 상승 — 레버리지 확대 주시`);
-		}
-		return out.slice(0, 2);
-	});
-
 	// 원표(전 기간 와이드 테이블)는 우측 재무 패널 ⤢ → FinTablesModal 로 이동 (운영자 결정 — 전체화면 탭 아님)
 	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps, heatmap 은 heat 기준)
 	const finCards = $derived.by(() => {
@@ -206,23 +119,6 @@
 		{/if}
 		<button class="finFsClose" onclick={onClose} title={lang === 'en' ? 'close (ESC)' : '닫기 (ESC)'}>✕</button>
 	</div>
-	{#if kpis.length}
-		<div class="finKpis">
-			{#each kpis as k (k.label)}
-				<div class="fkItem">
-					<span class="fkLbl">{k.label}</span>
-					<span class="fkRow">
-						<b class="fkVal mono">{k.val}<i class="fkUnit">{k.unit}</i></b>
-						{#if k.delta != null}
-							<span class={'fkDelta mono ' + (k.delta >= 0 === !k.deltaBad ? 'tUp' : 'tDn')}>{k.delta >= 0 ? '▲' : '▼'}{Math.abs(k.delta).toFixed(1)}{k.deltaUnit}</span>
-						{/if}
-					</span>
-					{#if k.spark}<svg class="fkSpark" viewBox="0 0 46 13" aria-hidden="true"><path d={k.spark} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}
-				</div>
-			{/each}
-			<span class="fkPeriod mono">{kpiPeriod} · {finModeLabel[mode]}{insights.length ? ' · ' + insights.join(' · ') : ''}</span>
-		</div>
-	{/if}
 	<div class="finFsBody">
 		{#if activeDef?.q}
 			<div class="finFsQ">{activeDef.q}</div>

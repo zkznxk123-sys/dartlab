@@ -4,6 +4,7 @@
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
 import { browser } from '$app/environment';
 import { readParquetRows } from '$lib/data/hfRange';
+import { localTerminalAdapter } from './localAdapter';
 
 export type Num = number | null;
 
@@ -180,6 +181,8 @@ const cache = new Map<string, Promise<TerminalFinanceBundle | null>>();
 export function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceBundle | null> {
 	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
+	const local = localTerminalAdapter()?.loadTerminalFinance;
+	if (local) return local(code);
 	const hit = cache.get(code);
 	if (hit) return hit;
 	const p = (async () => {
@@ -501,11 +504,19 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const dpo = used.map((_, i) => dayRatio(pay[i], cogsRaw[i]));
 		const ccc = used.map((_, i) => (dso[i] != null && dpo[i] != null ? +(dso[i]! + (dio[i] ?? 0) - dpo[i]!).toFixed(1) : null));
 
-		// 메인·탭 공유 카드 3종 — 16카드 승격분 (수익성·현금 탭에도 동일 객체 재사용, 정의 1곳)
+		// 메인·탭 공유 카드 4종 — 16카드 승격분 (수익성·현금 탭에도 동일 객체 재사용, 정의 1곳)
 		const costStructureCard: FinCard = { key: 'costStructure', title: '비용구조', unit: '조', stacked: true, series: [
 			{ name: '매출원가', data: ser('costOfSales'), color: C.red, type: 'bar' },
 			{ name: '판관비', data: ser('sga'), color: C.warn, type: 'bar' },
 			{ name: '매출', data: ser('revenue'), color: C.rev, type: 'line' }
+		] };
+		// 이익의 현금화 — 옛 이익품질(CFO/NI 단일 바) 상위호환 대체: 절대액 병치 + 배율 우축
+		const cfoRaw = raw('cfOperating');
+		const niRaw = raw('netIncome');
+		const cashConversionCard: FinCard = { key: 'cashConversion', title: '이익의 현금화', unit: '조', series: [
+			{ name: '순이익', data: ser('netIncome'), color: C.net, type: 'bar' },
+			{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
+			{ name: 'CFO/NI(배)', data: used.map((_, i) => (cfoRaw[i] != null && niRaw[i] != null && niRaw[i]! > 0 ? +(cfoRaw[i]! / niRaw[i]!).toFixed(2) : null)), color: C.cyan, type: 'line', axis: 'r' }
 		] };
 		const dupontCard: FinCard = { key: 'dupont', title: 'ROE 분해 (DuPont)', unit: '%', series: [
 			{ name: 'ROE', data: ratio('netIncome', 'equity', 100, true), color: C.net, type: 'bar' },
@@ -547,9 +558,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				{ name: '투자', data: ser('cfInvesting'), color: C.blue, type: 'bar' },
 				{ name: '재무', data: ser('cfFinancing'), color: C.op, type: 'bar' }
 			] },
-			{ key: 'earningsQuality', title: '이익품질', unit: '배', refLines: [1], series: [
-				{ name: 'CFO/NI', data: ratio('cfOperating', 'netIncome', 1), color: C.cyan, type: 'bar' }
-			] },
+			cashConversionCard,
 			{ key: 'cfMargin', title: '현금마진', unit: '%', series: [
 				{ name: 'CFO/매출', data: ratio('cfOperating', 'revenue'), color: C.good, type: 'line' },
 				{ name: 'FCF/매출', data: ratioOfSeries(fcfRaw, 'revenue'), color: C.warn, type: 'line' }
@@ -594,7 +603,6 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		// ── 전체화면 탭 심화 카드 (FinFullscreen 전용) — 동일 헬퍼·동일 기간 축, 모드 토글 동작 ──
 		const fc = raw('financeCosts');
 		const taxRaw = raw('incomeTax');
-		const niRaw = raw('netIncome');
 		const oiRaw = raw('operatingIncome');
 		// 실효세율 — 세전이익 = 순이익 + 법인세 (계정 누락에 강건). 세전 ≤ 0 → null.
 		const effTax: Num[] = used.map((_, i) => {
@@ -604,7 +612,6 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			const pretax = ni + t;
 			return pretax > 0 ? +((t / pretax) * 100).toFixed(1) : null;
 		});
-		const cfoRaw = raw('cfOperating');
 		// ── 워터폴 브리지 2종 (전체화면 탭 선두) — 현재 모드의 최신 유효 기간 1개 스냅샷 ──
 		const lastIdx = (...keys: string[]): number => {
 			for (let i = used.length - 1; i >= 0; i--) if (keys.every((k) => valAtIdx(k, i) != null)) return i;
@@ -700,11 +707,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			] as FinCard[],
 			cashflow: [
 				...(cashBridge ? [cashBridge] : []),
-				{ key: 'cashConversion', title: '이익의 현금화', unit: '조', series: [
-					{ name: '순이익', data: ser('netIncome'), color: C.net, type: 'bar' },
-					{ name: '영업CF', data: ser('cfOperating'), color: C.good, type: 'bar' },
-					{ name: 'CFO/NI(배)', data: used.map((_, i) => (cfoRaw[i] != null && niRaw[i] != null && niRaw[i]! > 0 ? +(cfoRaw[i]! / niRaw[i]!).toFixed(2) : null)), color: C.cyan, type: 'line', axis: 'r' }
-				] },
+				cashConversionCard,
 				{ key: 'workingCapital', title: '운전자본', unit: '조', series: [
 					{ name: '순운전자본', data: compose(['receivables', 1], ['inventories', 1], ['payables', -1]), color: C.blue, type: 'bar' },
 					{ name: 'NWC/매출%', data: used.map((_, i) => { const n = (rcv[i] ?? 0) + (inv[i] ?? 0) - (pay[i] ?? 0); return rcv[i] != null && pay[i] != null && revRaw[i] != null && revRaw[i]! > 0 ? +((n / revRaw[i]!) * 100).toFixed(1) : null; }), color: C.warn, type: 'line', axis: 'r' }
