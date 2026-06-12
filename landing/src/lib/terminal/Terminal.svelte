@@ -15,7 +15,6 @@
 	import RightStack from './panels/RightStack.svelte';
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import GiscusPanel from './panels/GiscusPanel.svelte';
-	import { downloadBoardSnapshot } from './boardCapture';
 	import { prefetch as prefetchCompany, LAST_SYM_KEY } from './data/workbench';
 	import { loadMacroLatest, type MacroLatest } from './data/macroSeries';
 	import { loadTerminalFinance } from './data/terminalFinance';
@@ -40,24 +39,6 @@
 	let lang = $state<Lang>('kr');
 	let sourcesOpen = $state(false);
 	let discussOpen = $state(false); // 종목 토론 드로어 (giscus)
-	// 보드 전체 캡처 — 좌/중/우 3열 스크롤 펼쳐 한 장 PNG (boardCapture.ts)
-	let boardEl = $state<HTMLElement | null>(null);
-	let capturing = $state(false);
-	async function captureBoard() {
-		if (!boardEl || capturing || !co) return;
-		capturing = true;
-		try {
-			await downloadBoardSnapshot(boardEl, {
-				fileTag: `terminal_${co.code}_${co.price.asOf.replace(/-/g, '')}`,
-				srcLine: `dartlab /terminal · ${co.code} ${co.name.kr} · prices ${co.price.asOf} · 출처: 금융위원회·한국거래소(공공누리), DART`
-			});
-			setFlash(lang === 'en' ? 'snapshot saved' : '캡처 저장 완료');
-		} catch {
-			setFlash(lang === 'en' ? 'snapshot failed' : '캡처 실패', 1400);
-		} finally {
-			capturing = false;
-		}
-	}
 	// 출처 모달 "최근 일자" — 라이브 재무 최신 분기 (loadTerminalFinance in-flight dedup, 추가 다운로드 0)
 	let finLatest = $state('');
 	$effect(() => {
@@ -231,7 +212,6 @@
 				<span class="clock mono">{clock}</span>
 				<span class="connDot"><span class="dot"></span>HF</span>
 				<div class="hdrLinks">
-					<button class="hdrLink" onclick={captureBoard} disabled={capturing} title={lang === 'en' ? 'capture full board as PNG (all panels to bottom)' : '터미널 전체 PNG 캡처 — 전 패널 아래 끝까지'}>{capturing ? '…' : lang === 'en' ? 'Shot' : '캡처'}</button>
 					<button class={'hdrLink' + (discussOpen ? ' on' : '')} onclick={() => (discussOpen = !discussOpen)} title="종목 토론 — giscus(GitHub Discussions) 인-터미널">{lang === 'en' ? 'Discuss' : '토론'}</button>
 					<a class="hdrLink" href="{brand.repo}/issues/new" target="_blank" rel="noopener" title="GitHub 이슈 등록 — 버그·요청">{lang === 'en' ? 'Issue' : '이슈'}</a>
 				</div>
@@ -268,7 +248,7 @@
 			{/each}
 		</div></div>
 
-		<main class="board" bind:this={boardEl}>
+		<main class="board">
 			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} /></div>
 			<div class="col colC"><CenterStack {co} {lang} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} /></div>
 			<div class="col colR"><RightStack {co} {lang} onPick={pick} /></div>

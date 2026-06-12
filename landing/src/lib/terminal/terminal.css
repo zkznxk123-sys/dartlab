@@ -248,17 +248,6 @@
 .dlTerm .rkChips { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; min-width: 0; }
 .dlTerm .rkChip { font-family: var(--cond); font-size: 8.5px; line-height: 1.15; white-space: nowrap; }
 
-/* 보드 전체 캡처 임시 펼침 (boardCapture.ts 가 토글) — 스크롤 컨테이너 전수의 잘림 해제.
-   .dlTerm 자체가 overflow:hidden 이라 펼침 중 레이아웃 점프는 화면에 클립되어 안 보인다. */
-.dlTerm.dlCapture .board { height: auto; flex: none; }
-.dlTerm.dlCapture .col { overflow: visible; height: auto; min-height: 0; }
-.dlTerm.dlCapture .rankList,
-.dlTerm.dlCapture .finScroll,
-.dlTerm.dlCapture .finScrollX,
-.dlTerm.dlCapture .filingList,
-.dlTerm.dlCapture .chgFeed,
-.dlTerm.dlCapture .btTrades { max-height: none; overflow: visible; }
-
 /* 정량재무제표 다이얼로그 터미널 스킨 — viewer FinanceDialog/Pane/Table 의 --fin-* 토큰 오버라이드.
    렌더러는 viewer 와 한몸(두 입구) — 여기서는 색·각·폰트만 터미널 문법으로 바꾼다. */
 .dlTermFinSkin {
