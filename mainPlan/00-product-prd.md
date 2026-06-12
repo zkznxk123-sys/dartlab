@@ -12,7 +12,9 @@
 - `landing`은 공개 사이트이면서 가장 완성된 terminal, viewer, chart, company UI 자산을 갖고 있다.
 - `ui/web`은 로컬 React 앱으로 Ask, provider 설정, 기존 dashboard, 로컬 API 배선을 갖고 있다.
 - 사용자가 원하는 장기 방향은 로컬 UI가 `landing`의 터미널 UX를 100% 미러링하면서도 로컬 데이터, 로컬 공시 cache, 로컬 AI provider를 쓰는 것이다.
-- 단기 bridge로 React 안에 Svelte terminal을 붙일 수는 있지만, 장기적으로는 접착 코드와 중복 상태가 늘어난다.
+- 단기 bridge로 React 안에 Svelte terminal을 붙일 수는 있지만(현행 `ui/web` terminalSvelte가 이미 그 상태다), 장기적으로는 접착 코드와 중복 상태가 늘어난다.
+- 두 배포면의 AI는 본질적으로 다르다 — 로컬은 `src/dartlab/ai` 고급 Ask 엔진 + AI provider 직접 연결로 다양한 고급 분석이 가능하고, 공개(GitHub Pages)는 WebGPU 온디바이스 + 결정론 Q&A의 열화 티어다. 데이터 호출 방식도 다르다(로컬 API/cache vs static/HF).
+- 로컬에 터미널을 두는 이유는 단순 미러링이 아니다 — **로컬에서 먼저 개발하고, 좋은 것은 공개에도 승격하고, 공개 사용자를 로컬로 유입시키는 funnel**이 목적이다. 이것이 제품력을 강화한다.
 
 따라서 목표는 `landing` UI를 로컬에 복사하는 것이 아니다. 제품 UI 원본을 공용 UI 플랫폼으로 승격하고 public/local 배선을 같은 계약으로 통제하는 것이다.
 
@@ -24,10 +26,12 @@
 2. public/local terminal은 같은 `TerminalSurface`를 렌더한다.
 3. public/local viewer는 같은 `ViewerSurface`를 렌더한다.
 4. 로컬 앱은 terminal UX를 그대로 쓰면서 local DB/cache/API와 AI provider를 연결한다.
-5. 공개 앱은 같은 surface를 쓰되 static/HF/GitHub Pages 데이터와 public-safe runtime을 쓴다.
+5. 공개면은 `landing`이 영구 shell로 담당하며, 같은 surface를 쓰되 static/HF/GitHub Pages 데이터와 public-safe runtime을 쓴다.
 6. 로컬에는 챗모드와 터미널모드가 있다.
 7. 터미널모드는 단순 dashboard가 아니라 가격, 재무, 공시, viewer, screener, export, evidence, cache, AI tool을 다루는 운영 화면이다.
 8. 공시뷰어, terminal, company, chart, evidence UI 구현은 한 벌만 존재한다.
+9. 공개 AI는 결정론 Q&A(항상) + WebGPU 온디바이스(가용 기기) 티어로 동작한다. 이미 출시된 공개 AskDrawer의 회귀는 금지다.
+10. 기능 승격 경로가 존재한다 — 로컬 선개발 → 승격 게이트(02 §10) → 공개 반영. 공개에서는 로컬 전용 상위 기능을 숨기지 않고 tier 표시 + 업그레이드 hint로 보여준다.
 
 ---
 
@@ -45,12 +49,13 @@
 
 ## 4. 운영 목표
 
-1. 대형 리팩토링 시작 전 현재 안정 상태를 PyPI에 한 번 올리고 기준 commit/tag를 기록한다.
-2. 리팩토링 기간 중 `ui/web`은 legacy fallback으로 유지한다.
+1. 대형 리팩토링 시작 전 현재 안정 상태를 PyPI에 한 번 올리고 기준 commit/tag를 기록한다. 기간 중 제품 릴리스가 발생하면 기준을 07 원장에 재기록한다.
+2. 리팩토링 기간 중 `ui/web`은 legacy fallback으로 유지한다. `ui/web` 로컬 터미널도 무중단 대상이다.
 3. `landing`은 리팩토링 완료 전까지 무중단이어야 한다.
-4. 각 작업 단위는 독립 검증 가능해야 한다.
+4. 각 작업 단위는 독립 검증 가능해야 하고, 07 원장에 기록되어 끊긴 세션이 NEXT 포인터만 읽고 재개할 수 있어야 한다.
 5. 실패 시 이전 기준 commit 또는 fallback UI로 되돌릴 수 있어야 한다.
 6. 계획 문서는 `mainPlan` 문서 세트 안에서만 관리한다.
+7. 활성 제품 작업과의 공존은 04 §2.5를 따른다 — 리팩토링이 제품 속도를 죽이지 않는다.
 
 ---
 
@@ -66,6 +71,8 @@
 8. AI provider key, provider SDK, local file permission을 surface에 노출하지 않는다.
 9. public route에 local-only API 또는 secret 설정을 노출하지 않는다.
 10. 대형 파일 이동과 동작 변경을 같은 작업 단위에 섞지 않는다.
+11. `ui/apps/public`을 신설하지 않는다 — landing이 영구 public shell이다(별도 도메인/배포 분리 필요가 실제 발생하기 전까지).
+12. 승격 가능(또는 로컬 전용 상위) 기능을 공개에서 숨기지 않는다 — 숨기면 funnel이 끊긴다. 완전 숨김은 cache refresh 같은 시스템 명령에만 허용한다.
 
 ---
 
@@ -79,8 +86,8 @@
 
 - 같은 terminal layout을 본다.
 - static/HF/public-safe 데이터만 사용한다.
-- AI는 disabled 또는 public-safe explain/demo 상태로 표시된다.
-- local-only service command는 숨김 또는 disabled 상태다.
+- AI는 결정론 Q&A가 항상 동작하고, WebGPU 가용 기기에서는 온디바이스 추론으로 승급한다. secret과 서버 호출은 없다.
+- local-only service command는 disabled + "로컬에서 사용 가능" hint로 표시된다(완전 숨김은 시스템 명령만).
 - 기존 공개 URL과 deep link가 유지된다.
 
 ### 6.2 Local Chat Mode
@@ -125,7 +132,8 @@
 2. 로컬에서 AI provider를 연결해 챗모드와 터미널모드를 모두 쓸 수 있다.
 3. terminal mode에서 주요 로컬 서비스가 command palette 또는 service panel로 접근 가능하다.
 4. viewer와 terminal이 같은 evidence와 source 표시 규칙을 쓴다.
-5. 공개 사이트 사용자는 리팩토링 기간 동안 중단을 경험하지 않는다.
+5. 공개 사이트 사용자와 `ui/web` 로컬 사용자는 리팩토링 기간 동안 중단을 경험하지 않는다.
+6. 공개 터미널/뷰어에 로컬 업그레이드 안내 지점이 존재하고, 설치 경로 유입을 추적할 수 있다(예: docs 설치 페이지 Cloudflare Analytics) — funnel 선행지표.
 
 엔지니어링 성공:
 

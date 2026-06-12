@@ -35,6 +35,7 @@
 - 네트워크 없이 실행
 - fake runtime fixture green
 - public/local type conformance green
+- **전 포트 메서드의 public/local 구현 존재 기계 검사** — optional 메서드/silent fallback 금지(02 §3)의 강제 장치. 미지원 기능은 명시적 unavailable 반환만 허용.
 
 ---
 
@@ -45,9 +46,11 @@
 - public runtime + `TerminalSurface`
 - local runtime + `TerminalSurface`
 - local runtime + `ViewerSurface`
-- public runtime + disabled AI
-- local runtime + enabled AI
+- public runtime + deterministic AI (항상 동작)
+- public runtime + onDevice AI (WebGPU 가용 기기 / 미지원 기기 graceful — 헛다운로드 0)
+- local runtime + advanced AI
 - local terminal mode + services command
+- public terminal + localOnly descriptor 렌더 (upgradeHint 표시, 실행 불가)
 - chat mode -> terminal mode 전환
 
 합격:
@@ -144,6 +147,8 @@ Viewport:
 - GitHub Pages base path
 - asset path
 - deep link refresh
+- **`ui/web` 로컬 터미널 smoke** (landing styles/terminal/viewer 경로를 만진 작업 단위)
+- **`deploy-landing.yml` paths 필터 점검** — 이동된 경로(`ui/packages/**`)가 필터에 포함되어 있는가 (누락 = 공개 사이트 silent 동결)
 
 실패 시:
 
@@ -170,8 +175,10 @@ Viewport:
 ```text
 uv run python -X utf8 tests/run.py preflight
 Guard strict/full
+루트 워크스페이스 npm ci + 전 패키지 build (단계-1a 이후)
 ui app typecheck/build/test
 landing check/build
+ui/web 단독 npm ci + build 재현 (legacy 오염 차단)
 필요한 Playwright
 wheel bundle smoke
 ```

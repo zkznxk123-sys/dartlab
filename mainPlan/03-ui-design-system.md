@@ -25,6 +25,7 @@ Surface는 사용자에게 하나의 독립 화면 경험을 제공하는 UI 단
 4. 모든 surface는 host 앱 없이 fake runtime fixture로 렌더 가능해야 한다.
 5. public/local 차이로 surface를 fork하지 않는다.
 6. route, server, static host, local API, provider, workspace 권한을 직접 알지 않는다.
+7. **열화 티어 표시 원칙** — 승격 가능(또는 로컬 전용 상위) 기능은 public에서 숨기지 않는다. tier badge + `upgradeHint`("로컬에서 더 강력함") + 설치 CTA로 표시한다. 완전 숨김은 cache refresh 같은 시스템 명령에만 허용한다. funnel은 공개 사용자가 로컬의 우위를 "봐야" 작동한다.
 
 ---
 
@@ -132,8 +133,9 @@ export interface ViewerSurfaceProps {
 
 AI 동작:
 
-- `runtime.ai.capabilities()`가 enabled일 때만 Ask drawer 활성화
-- disabled이면 숨김 또는 read-only evidence tools만 표시
+- `runtime.ai.capabilities().tier`에 따라 단계적으로 렌더한다 — `deterministic`: 결정론 Q&A(항상, public 포함) / `onDevice`: + WebGPU 온디바이스 대화 / `advanced`: + 로컬 엔진 스트리밍·tool calling.
+- `advanced` 미만 tier에서는 `upgradeHint`로 로컬 업그레이드를 안내한다 — Ask drawer 를 숨기지 않는다.
+- 이미 출시된 공개 AskDrawer(Tier0 + WebGPU) 동작의 회귀 금지.
 - selected paragraph/table/period를 evidence로 전달
 
 ---

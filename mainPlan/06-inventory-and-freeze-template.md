@@ -22,10 +22,14 @@ PyPI 업로드 시간:
 dirty file 소유자:
 dirty file 처리 방식:
 landing 현재 build 상태:
-local UI 현재 build 상태:
+local UI 현재 build 상태 (ui/web 단독 npm ci + build 재현):
 Python package 현재 상태:
 rollback 기준 commit:
+ui/node_modules·ui/build 스트레이 처분:
+node_modules OneDrive 동기화 제외 확인:
 ```
+
+기간 중 재기록 규칙: 리팩토링 기간 중 제품 릴리스가 발생하면 freeze 기준 commit/tag를 07 원장에 재기록하는 entry를 남긴다. 단계 진행 중이면 해당 작업 단위 완료 후에만 재기록한다.
 
 통과 조건:
 
@@ -56,10 +60,12 @@ rollback 기준 commit:
 
 | 앱 | 현재 역할 | build 명령 | 산출물 | 배포/패키징 경로 | 유지/이동/제거 |
 |---|---|---|---|---|---|
-| landing | public content + product UI |  |  | GitHub Pages | 유지 + product 분리 |
-| ui/web | local React legacy |  |  | Python server SPA | fallback 후 제거 |
+| landing | public content + product UI |  |  | GitHub Pages | 유지 — 영구 public shell (원본은 packages로 승격) |
+| ui/web | local React legacy |  |  | Python server SPA | 제자리 동결 → fallback 후 제거 (물리 이동 금지) |
 | ui/apps/local | new local SvelteKit |  |  | wheel UI build | 신규 |
-| ui/apps/public | public product shell |  |  | GitHub Pages composition | 필요 시 신규 |
+| ui/shared | 무소속 공유 코드 (chart 16·api 3·markdown 2) |  |  | 없음 — 실사용 0 실측(2026-06-13) | 단계-0 census 후 운영자 처분 결정 |
+
+> `ui/apps/public`은 비채택(01 §3.2) — 표에서 제외.
 
 ---
 
@@ -79,11 +85,14 @@ rollback 기준 commit:
 
 | 현재 경로 | 책임 | 목표 경로 | 단계 | 임시 alias 필요 | 제거 조건 |
 |---|---|---|---|---|---|
-| landing/src/lib/terminal/** | TerminalSurface | ui/packages/surfaces/src/terminal/** | 단계-4 | 필요 시 | public/local render green |
+| landing/src/lib/terminal/** (54파일) | TerminalSurface | ui/packages/surfaces/src/terminal/** | 단계-4a/4b | 필요 시 | public/local render green |
+| landing/src/lib/data/hfRange + dartlabData + {productIndex,companyFilings,companyNonRegular}Runtime | terminal 데이터 폐쇄 | ui/packages/runtime adapters | 단계-4a | 필요 시 | silent fallback 0 |
+| landing/src/lib/browser/companyLive · lib/scan/duckSql | terminal 데이터 폐쇄 | ui/packages/runtime adapters | 단계-4a | 필요 시 | port 경유만 |
+| landing/src/lib/components/viewer/{ViewerStudio,FinanceDialog} | terminal→viewer 역의존 | 주입 계약(ViewerHost)으로 역전 | 단계-4a | 불필요 | surfaces→landing/src 0 |
 | landing/src/lib/viewer/** | ViewerSurface | ui/packages/surfaces/src/viewer/** | 단계-6 | 필요 시 | overlay/standalone green |
-| landing/src/lib/chart/** | charting | ui/packages/surfaces/src/charting/** | 단계-8 | 필요 시 | chart visual green |
-| landing/src/lib/styles/** | design token | ui/packages/design/src/styles/** | 단계-3 | 최소 | landing build green |
-| ui/web/src/** | local legacy | ui/apps/web-legacy 또는 제거 | 단계-11 | 없음 | fallback call 0 |
+| landing/src/lib/styles/{v2-tokens,tokens}.css 외 | design token | ui/packages/design/src/styles/** | 단계-3 | 최소 | landing build green + ui/web smoke (deep import 재배선) |
+| ui/shared/{chart,api,markdown} | 실사용 0 실측 | 단계-0 census 후 운영자 처분 | 단계-0 결정 · 단계-8 집행 | — | ChartRenderer 참조 문서 동시 갱신 |
+| ui/web/src/** | local legacy | 제자리 동결 → 제거 | 단계-11 | 없음 | fallback call 0 |
 
 ---
 
@@ -95,8 +104,8 @@ rollback 기준 commit:
 | price | static/HF | local API/cache | fixture | stale/coverage |  |
 | filing | static metadata | local cache/API | fixture | source/asOf |  |
 | viewer | public route | component/local route | fixture | source |  |
-| AI | disabled/demo | provider via Ask engine | fake stream | evidence |  |
-| services | public-safe | full local registry | fake registry | availability |  |
+| AI | deterministic(항상) + onDevice(WebGPU 게이트) | advanced — provider via Ask engine | fake stream | evidence, tier | 공개 AskDrawer 무회귀 |
+| services | public-safe + localOnly descriptor | full local registry | fake registry | availability, upgradeHint |  |
 
 ---
 
@@ -119,32 +128,15 @@ rollback 기준 commit:
 | company.search | market | both | available | available | company.search | query |
 | filing.regularList | filing | terminal | available/limited | available | filing.openRegularList | code |
 | viewer.open | viewer | terminal | available | available | viewer.openFiling | filing |
-| finance.export | export | terminal | disabled/limited | available | finance.exportCsv | code/period |
-| ai.explain | ai | both | disabled/demo | available | ai.explainEvidence | evidence |
-| cache.refresh | system | terminal | disabled | available | cache.refreshCompany | code |
+| finance.export | export | terminal | localOnly (+upgradeHint) | available | finance.exportCsv | code/period |
+| ai.explain | ai | both | deterministic/onDevice tier | available (advanced) | ai.explainEvidence | evidence |
+| cache.refresh | system | terminal | 숨김 (시스템 명령 — 완전 숨김 허용 예외) | available | cache.refreshCompany | code |
 
 ---
 
 ## 9. 단계 완료 로그
 
-각 작업 단위 완료 시 아래 양식으로 기록한다.
-
-```text
-단계:
-완료 commit:
-변경 파일:
-영향 범위:
-landing 영향:
-local 영향:
-public 영향:
-새 alias:
-제거 예정 alias:
-실행 테스트:
-실행하지 못한 테스트:
-스크린샷 위치:
-rollback 방법:
-남은 위험:
-```
+> `07-progress-ledger.md`로 이관됨 — 완료·중단·예약 entry는 07 원장이 SSOT다. 이 문서에는 착수 전 freeze/inventory 템플릿만 남는다.
 
 ---
 

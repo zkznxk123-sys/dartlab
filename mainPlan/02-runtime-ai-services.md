@@ -137,6 +137,7 @@ export interface RuntimeDataEnvelope<T> {
 - stale 데이터를 정상 최신 데이터처럼 표시하지 않는다.
 - public static 데이터와 local cache 데이터의 출처를 UI에서 구분 가능하게 한다.
 - AI 답변은 원천 데이터가 아니며 evidence와 별도로 표시한다.
+- **Port 메서드는 required다.** 어댑터가 지원하지 못하는 기능은 명시적 `unavailable` 상태로 반환한다. optional 메서드(`x?:`) + 조용한 fallback(`localAdapter()?.x() ?? HF로드()`) 구조를 금지한다 — 현행 terminal 코드의 기본 패턴이 바로 이것이며, 로컬 패리티 누락을 컴파일도 테스트도 못 잡게 만든다. conformance test 가 전 포트 메서드의 public/local 구현 존재를 기계 검사한다(05 §2).
 
 ---
 
@@ -157,14 +158,17 @@ export interface AiPort {
   getMode(): Promise<AiModeId>;
 }
 
+export type AiTier = 'advanced' | 'onDevice' | 'deterministic' | 'none';
+
 export interface AiCapabilities {
-  enabled: boolean;
+  tier: AiTier;                  // advanced=로컬 엔진, onDevice=WebGPU, deterministic=결정론 Q&A
   streaming: boolean;
   toolCalling: boolean;
   localWorkspace: boolean;
+  deterministicAnswers: boolean; // 결정론 Q&A — public에서도 항상 true
   providerLabel?: string;
   modelLabel?: string;
-  disabledReason?: string;
+  upgradeHint?: string;          // advanced 미만 tier에서 로컬 업그레이드 안내 문구
 }
 
 export type AiModeId = 'chat' | 'terminal';
@@ -179,10 +183,11 @@ export interface AiMode {
 
 Public adapter:
 
-- `enabled: false` 또는 제한된 explain/demo만 허용
-- secret 없음
-- server-side agent gateway 없음
-- local-only tool call 없음
+- `tier: 'deterministic'` 기본 — 결정론 Q&A(Tier0)는 항상 동작한다.
+- WebGPU 가용 기기(`webgpuUsable` 실측 게이트 — requestAdapter 검사, 작동 어댑터 없는 기기의 헛다운로드 차단)에서는 `tier: 'onDevice'`로 승급 — 온디바이스 추론(@mlc-ai/web-llm), 서버 0, secret 0.
+- **이미 출시된 공개 AskDrawer(Tier0 + WebGPU)의 회귀를 금지한다.**
+- server-side agent gateway 없음, local-only tool call 없음.
+- `upgradeHint`로 로컬 고급 엔진의 존재를 알린다 — 숨기지 않는다.
 
 Local adapter:
 
@@ -282,8 +287,9 @@ export interface ServiceDescriptor {
   id: string;
   label: string;
   group: 'market' | 'filing' | 'finance' | 'viewer' | 'ai' | 'workspace' | 'export' | 'system';
-  availability: 'available' | 'disabled' | 'loading' | 'error';
+  availability: 'available' | 'localOnly' | 'disabled' | 'loading' | 'error';
   reason?: string;
+  upgradeHint?: string; // localOnly 일 때 "로컬에서 사용 가능" 안내 — command palette 가 렌더
 }
 
 export interface ServiceCommand {
@@ -322,7 +328,8 @@ Public registry:
 
 - TerminalSurface 내부에서 service별 API endpoint 분기
 - provider SDK 또는 API key를 descriptor에 노출
-- public registry에 local-only command 노출
+- public registry에서 local-only command를 **실행 가능하게** 노출 (단, `localOnly` descriptor 로 존재는 보여준다 — funnel)
+- 승격 가능(또는 로컬 전용 상위) 기능의 완전 숨김 — 완전 숨김은 cache refresh 같은 시스템 명령에만 허용
 - service 실패를 정상 데이터처럼 렌더
 
 ---
@@ -367,12 +374,12 @@ export type RuntimeStorageKey =
 책임:
 
 - GitHub Pages base path 처리
-- static JSON/parquet/HF dataset 접근
+- static JSON/parquet/HF dataset 접근 — hyparquet, hfProxy worker, static JSON 은 어댑터 내부 구현 detail 이며 surface 는 모른다
 - 공개 viewer route href 생성
 - read-only storage
 - public-safe telemetry
-- AI disabled 또는 demo-only
-- public-safe service registry 제공
+- AI tier 'deterministic' 기본 + WebGPU 가용 시 'onDevice' 승급 (§4)
+- public-safe service registry 제공 (localOnly descriptor 포함)
 
 금지:
 
@@ -414,3 +421,30 @@ export type RuntimeStorageKey =
 - unit/integration test
 - 네트워크 없이 surface 렌더 검증
 - public/local fixture conformance
+
+---
+
+## 10. 기능 승격 경로 (local → public)
+
+기능은 로컬에서 먼저 개발한다. 공개 승격은 게이트를 통과한 것만 한다.
+
+절차:
+
+1. 트리거 — 로컬 기능이 1회 릴리스 동안 안정된 뒤 운영자가 발의한다. AI 세션은 체크리스트를 채워 제안만 한다.
+2. 판정자 — 운영자 단독.
+3. 기록 — 판정 결과를 07 원장에 `승격(기능명)` entry로 남긴다.
+
+승격 체크리스트:
+
+1. 공개 데이터 가용성 — static/HF만으로 해당 기능의 데이터가 충족되는가.
+2. AI tier 매핑 — deterministic으로 동작 / onDevice로 동작 / 승격 불가(advanced 전용) 중 어디인가.
+3. 열화 UX 문구 — 공개판에서 무엇이 빠지고, `upgradeHint`는 뭐라고 쓰는가.
+4. 성능·번들 예산 — Pages 번들 무게와 콜드 fetch 시간이 예산 안인가.
+5. SEO/llms.txt 영향 — 공개 route·메타데이터 변경이 있는가.
+6. 무중단 smoke — landing build + 기존 공개 route 검증 통과.
+
+원칙:
+
+- surface는 capability 검사로 렌더한다 — public/local 분기 코드를 만들지 않는다.
+- 승격 가능(또는 로컬 전용 상위) 기능은 public에서 숨기지 않는다. tier 표시 + `upgradeHint` + 설치 CTA로 보여준다.
+- 승격은 어댑터에 capability 구현을 추가하는 일이지, surface를 고치는 일이 아니어야 한다. surface 수정이 필요하면 설계 위반 신호다.
