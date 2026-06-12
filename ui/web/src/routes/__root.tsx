@@ -1,5 +1,5 @@
 // 모든 라우트 공통 — SidebarProvider + AppSidebar + SidebarInset(헤더 + Outlet).
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import { createRootRouteWithContext, Outlet, useLocation } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 
 import { AppSidebar } from '@/shell/AppSidebar';
@@ -15,6 +15,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootLayout() {
+	const location = useLocation();
+	const search = location.search as Record<string, unknown>;
+	const terminalSurface = /^\/analysis\/[^/]+\/?$/.test(location.pathname) || /^\/analysis\/[^/]+\/terminal\/?$/.test(location.pathname);
+	const embeddedViewer = /^\/analysis\/[^/]+\/viewer\/?$/.test(location.pathname) && search.terminalEmbed === '1';
+
+	if (terminalSurface || embeddedViewer) return <Outlet />;
+
 	return (
 		<SidebarProvider>
 			<AppSidebar />

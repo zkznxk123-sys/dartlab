@@ -41,9 +41,9 @@ function AnalysisIndexPage() {
 		push(stockCode, corpName);
 		setQ('');
 		navigate({
-			to: '/analysis/$code/financial',
+			to: '/analysis/$code',
 			params: { code: stockCode },
-			search: { period: 'quarterly', view: 'snowflake' },
+			search: { period: 'quarterly' },
 		});
 	}
 
@@ -74,7 +74,7 @@ function AnalysisIndexPage() {
 					</Avatar>
 					<h2 className="text-2xl font-semibold tracking-tight">회사를 선택하세요</h2>
 					<p className="text-sm text-muted-foreground">
-						종목명 또는 종목코드를 입력하면 8 분야 분석 (재무 · 사업포트폴리오 · 가치평가 · 거버넌스 · 동종 · 생애주기 · 거시 · Viewer) 이 한 번에 열립니다.
+						종목명 또는 종목코드를 입력하면 로컬 데이터 기반 터미널이 전체화면으로 열립니다.
 					</p>
 				</div>
 
@@ -118,9 +118,9 @@ function AnalysisIndexPage() {
 						{items.map((r) => (
 							<Button key={r.stockCode} variant="outline" size="sm" asChild>
 								<Link
-									to="/analysis/$code/financial"
+									to="/analysis/$code"
 									params={{ code: r.stockCode }}
-									search={{ period: 'quarterly', view: 'snowflake' }}
+									search={{ period: 'quarterly' }}
 									className="text-xs font-normal text-muted-foreground"
 								>
 									{r.corpName}

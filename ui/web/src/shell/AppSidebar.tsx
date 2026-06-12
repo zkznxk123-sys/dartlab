@@ -6,11 +6,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import {
-	BookOpen,
-	CandlestickChart,
 	Download,
-	FileText,
-	LayoutDashboard,
 	MessageSquare,
 	MessageSquarePlus,
 	MoreHorizontal,
@@ -21,7 +17,6 @@ import {
 	Search,
 	Settings,
 	Sun,
-	Telescope,
 	Terminal as TerminalIcon,
 	Trash2,
 } from 'lucide-react';
@@ -59,9 +54,6 @@ import {
 	SidebarMenuAction,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarMenuSub,
-	SidebarMenuSubButton,
-	SidebarMenuSubItem,
 	SidebarRail,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -72,6 +64,7 @@ import { useChat, type Conversation } from '@/features/chat/store/chat';
 import { downloadMarkdown } from '@/features/chat/store/export';
 import { CompanySearch } from '@/features/dashboard/sidebar/CompanySearch';
 import { RecentCompanies } from '@/features/dashboard/sidebar/RecentCompanies';
+import { useRecentCompanies } from '@/features/dashboard/hooks/useRecentCompanies';
 
 interface ProviderStatusResp {
 	providers: Record<
@@ -94,6 +87,7 @@ export function AppSidebar() {
 	const { pathname } = useLocation();
 	const navigate = useNavigate();
 	const { theme, setTheme } = useTheme();
+	const { items: recentCompanies } = useRecentCompanies();
 
 	const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/analysis');
 	const isDark =
@@ -107,6 +101,19 @@ export function AppSidebar() {
 		queryFn: fetchProviderBadge,
 		staleTime: 30_000,
 	});
+
+	function toggleMode() {
+		if (isDashboard) {
+			void navigate({ to: '/ask' });
+			return;
+		}
+		const code = recentCompanies[0]?.stockCode;
+		if (code) {
+			void navigate({ to: '/analysis/$code', params: { code }, search: { period: 'quarterly' } });
+			return;
+		}
+		void navigate({ to: '/analysis' });
+	}
 
 	return (
 		<Sidebar collapsible="icon">
@@ -129,13 +136,13 @@ export function AppSidebar() {
 									variant="ghost"
 									size="icon"
 									className="size-7"
-									onClick={() => navigate({ to: isDashboard ? '/ask' : '/analysis' })}
-									aria-label={isDashboard ? 'Ask 모드' : '기업분석 모드'}
+									onClick={toggleMode}
+									aria-label={isDashboard ? 'Ask 모드' : '터미널 모드'}
 								>
-									{isDashboard ? <MessageSquare /> : <LayoutDashboard />}
+									{isDashboard ? <MessageSquare /> : <TerminalIcon />}
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent>{isDashboard ? 'Ask 모드' : '기업분석 모드'}</TooltipContent>
+							<TooltipContent>{isDashboard ? 'Ask 모드' : '터미널 모드'}</TooltipContent>
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -197,65 +204,31 @@ export function AppSidebar() {
 	);
 }
 
-// 사이드바 — 기업분석 모드:
-//   회사 검색 + 2 그룹 (기업분석 / 스크리너).
-//   기업분석 = 재무제표분석 (7 분석 방법론 sub) + 공시뷰어 + 터미널.
-//   스크리너 = placeholder (실제 로직 후속 PR).
-//   재무제표분석 7 sub = 7 가지 서로 다른 재무 분석 방법론 (lens).
-//   같은 회사를 그레이엄·린치·S&P·Sloan 식 다른 학파 시각으로 본다.
-// v3-r6 — 7 sub view 일시 폐기 (운영자 명시). 1 메뉴 "재무분석" 만 활성. 나중에 카테고리 다시 추가.
-import type { FinancialSubCategory } from '@/features/dashboard/api/client';
-
-const FINANCIAL_SUBS: ReadonlyArray<{
-	key: FinancialSubCategory;
-	label: string;
-	title: string;
-	icon: typeof BookOpen;
-	hint: string;
-}> = [];
-
 function DashboardNav() {
 	const { pathname } = useLocation();
-	const search = useLocation({ select: (l) => l.search }) as { view?: string };
 
 	// /analysis/{code}/{tab} 또는 /dashboard/{code} 에서 code 추출
 	const codeMatch = pathname.match(/^\/(?:analysis|dashboard)\/([^/]+)/);
 	const code = codeMatch?.[1];
+	const isTerminal = !!code && (pathname === `/analysis/${code}` || pathname === `/analysis/${code}/` || pathname.startsWith(`/analysis/${code}/terminal`));
 
-	const isFinancial = !!code && pathname.startsWith(`/analysis/${code}/financial`);
-	// v3-r6 — view 없으면 OVERVIEW_KEYS curated 노출 (재무분석 1 view).
-	const activeSubView = isFinancial ? (search?.view ?? null) : null;
-	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
-	const isEvents = !!code && pathname.startsWith(`/analysis/${code}/events`);
-	const isTerminal = !!code && pathname.startsWith(`/analysis/${code}/terminal`);
-
-	// 기업분석 그룹 — 단일 기업 심층 분석. 4 항목 (재무제표분석 / 공시뷰어 / 터미널 / 주가+이벤트).
-	// quant 는 응답성 회귀 (viz catalog cold + 카드 다수) 가 정리되기 전까지 사이드바에서 제거.
-	// 라우트 + backend 는 유지 — 항목 한 줄 복귀 시 즉시 노출.
-	const corpItems = [
-		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial' },
-		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer' },
-		{ id: 'terminal', title: '터미널', icon: TerminalIcon, isActive: isTerminal, route: '/analysis/$code/terminal' },
-		{ id: 'events', title: '주가+이벤트', icon: CandlestickChart, isActive: isEvents, route: '/analysis/$code/events' },
-	] as const;
-
-	const renderCorpButton = (t: (typeof corpItems)[number]) => {
+	const renderTerminalButton = () => {
 		return code ? (
-			<SidebarMenuButton asChild isActive={t.isActive} tooltip={t.title}>
+			<SidebarMenuButton asChild isActive={isTerminal} tooltip="터미널">
 				<Link
-					to={t.route}
+					to="/analysis/$code"
 					params={{ code }}
 					search={{ period: 'quarterly' }}
 				>
-					<t.icon />
-					<span>{t.title}</span>
+					<TerminalIcon />
+					<span>터미널</span>
 				</Link>
 			</SidebarMenuButton>
 		) : (
-			<SidebarMenuButton asChild tooltip={`${t.title} (회사 선택 필요)`} className="opacity-50">
+			<SidebarMenuButton asChild tooltip="터미널 (회사 선택 필요)" className="opacity-50">
 				<Link to="/analysis">
-					<t.icon />
-					<span>{t.title}</span>
+					<TerminalIcon />
+					<span>터미널</span>
 				</Link>
 			</SidebarMenuButton>
 		);
@@ -265,34 +238,10 @@ function DashboardNav() {
 		<>
 			<CompanySearch />
 			<SidebarGroup>
-				<SidebarGroupLabel>기업분석</SidebarGroupLabel>
+				<SidebarGroupLabel>터미널</SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
-						{corpItems.map((t) => (
-							<SidebarMenuItem key={t.id}>
-								{renderCorpButton(t)}
-								{t.id === 'financial' && code && isFinancial && (
-									<SidebarMenuSub>
-										{FINANCIAL_SUBS.map((s) => (
-											<SidebarMenuSubItem key={s.key}>
-												<SidebarMenuSubButton asChild isActive={activeSubView === s.key}>
-													<Link
-														to="/analysis/$code/financial"
-														params={{ code }}
-														search={{ period: 'quarterly', view: s.key }}
-														title={s.hint}
-													>
-														<s.icon className="size-3 opacity-70" />
-														<span className="font-mono text-[10px] uppercase opacity-60 mr-1">{s.label}</span>
-														<span>{s.title}</span>
-													</Link>
-												</SidebarMenuSubButton>
-											</SidebarMenuSubItem>
-										))}
-									</SidebarMenuSub>
-								)}
-							</SidebarMenuItem>
-						))}
+						<SidebarMenuItem>{renderTerminalButton()}</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>
@@ -441,6 +390,7 @@ function CollapsedActionMenu() {
 	const { pathname } = useLocation();
 	const navigate = useNavigate();
 	const { theme, setTheme } = useTheme();
+	const { items: recentCompanies } = useRecentCompanies();
 
 	const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/analysis');
 	const isDark =
@@ -449,17 +399,30 @@ function CollapsedActionMenu() {
 			typeof window !== 'undefined' &&
 			window.matchMedia('(prefers-color-scheme: dark)').matches);
 
+	function toggleMode() {
+		if (isDashboard) {
+			void navigate({ to: '/ask' });
+			return;
+		}
+		const code = recentCompanies[0]?.stockCode;
+		if (code) {
+			void navigate({ to: '/analysis/$code', params: { code }, search: { period: 'quarterly' } });
+			return;
+		}
+		void navigate({ to: '/analysis' });
+	}
+
 	return (
 		<SidebarGroup className="hidden group-data-[collapsible=icon]:block">
 			<SidebarGroupContent>
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
-							onClick={() => navigate({ to: isDashboard ? '/ask' : '/analysis' })}
-							tooltip={isDashboard ? 'Ask 모드' : '기업분석 모드'}
+							onClick={toggleMode}
+							tooltip={isDashboard ? 'Ask 모드' : '터미널 모드'}
 						>
-							{isDashboard ? <MessageSquare /> : <LayoutDashboard />}
-							<span>{isDashboard ? 'Ask' : '기업분석'}</span>
+							{isDashboard ? <MessageSquare /> : <TerminalIcon />}
+							<span>{isDashboard ? 'Ask' : '터미널'}</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 					<SidebarMenuItem>

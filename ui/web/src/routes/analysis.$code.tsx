@@ -44,6 +44,9 @@ function AnalysisLayout() {
 	const isViewerTab = location.pathname.endsWith('/viewer');
 	const isTerminalTab = location.pathname.endsWith('/terminal');
 	const isFinancialTab = location.pathname.endsWith('/financial');
+	const isTerminalSurface = location.pathname === `/analysis/${code}` || location.pathname === `/analysis/${code}/` || isTerminalTab;
+	const isEmbeddedViewer =
+		isViewerTab && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('terminalEmbed') === '1';
 
 	// URL 과 state 동기화 — financial 탭에서 periodView 도 URL 에 동기 (bookmark).
 	useEffect(() => {
@@ -81,6 +84,8 @@ function AnalysisLayout() {
 
 	// sticky CompanyHeader + 자식 scroll area. 부모 flex-1 이지만 min-h-0 박아야
 	// 자식 overflow 가 동작. 헤더는 sticky top-0 + bg/blur 로 카드 위에 떠 있음.
+	if (isTerminalSurface || isEmbeddedViewer) return <Outlet />;
+
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<div className="sticky top-0 z-20 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/65">

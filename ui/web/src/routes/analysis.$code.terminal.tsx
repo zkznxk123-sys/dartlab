@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
-import { TerminalTab } from '@/features/dashboard/terminal/TerminalTab';
+import { LandingTerminalSurface } from '@/features/terminalSvelte/LandingTerminalSurface';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
 
 export const Route = createFileRoute('/analysis/$code/terminal')({
@@ -19,5 +19,5 @@ function TerminalRoute() {
 		setLastMode('terminal');
 	}, [setLastMode]);
 
-	return <TerminalTab code={code} />;
+	return <LandingTerminalSurface code={code} />;
 }

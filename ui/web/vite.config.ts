@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 
@@ -10,6 +11,11 @@ const pyprojectText = fs.readFileSync(pyprojectPath, 'utf-8');
 const versionMatch = pyprojectText.match(/^version\s*=\s*"([^"]+)"/m);
 if (!versionMatch) throw new Error(`pyproject.toml version not found: ${pyprojectPath}`);
 const dartlabVersion = versionMatch[1];
+const repoRoot = path.resolve(__dirname, '../..');
+const landingLib = path.resolve(repoRoot, 'landing/src/lib');
+const sharedChartDir = path.resolve(repoRoot, 'ui/shared/chart');
+const terminalShimDir = path.resolve(__dirname, './src/features/terminalSvelte');
+const svelteCompatDir = path.resolve(__dirname, './src/svelteKitCompat');
 
 // dartlab UI 빌드 — Python wheel 안에 박혀서 dartlab 서버 (FastAPI) 가 정적 서빙
 //   - 빌드 출력: ui/web/build/  ← pyproject hatch include 패턴과 호환
@@ -18,16 +24,31 @@ const dartlabVersion = versionMatch[1];
 export default defineConfig({
 	plugins: [
 		TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),
+		svelte(),
 		react(),
 		tailwindcss(),
 	],
 	resolve: {
 		alias: {
+			'$app/paths': path.resolve(svelteCompatDir, 'paths.ts'),
+			'$app/environment': path.resolve(svelteCompatDir, 'environment.ts'),
+			'$lib/components/viewer/ViewerStudio.svelte': path.resolve(terminalShimDir, 'ViewerStudioShim.svelte'),
+			'$lib/components/viewer/FinanceDialog.svelte': path.resolve(terminalShimDir, 'FinanceDialogShim.svelte'),
+			'$lib/browser/companyLive': path.resolve(terminalShimDir, 'landingDataShims.ts'),
+			'$lib/data/companyFilingsRuntime': path.resolve(terminalShimDir, 'landingDataShims.ts'),
+			'$lib/data/companyNonRegularFilings': path.resolve(terminalShimDir, 'landingDataShims.ts'),
+			'$lib/data/productIndexRuntime': path.resolve(terminalShimDir, 'landingDataShims.ts'),
+			'$lib/scan/duckSql': path.resolve(terminalShimDir, 'landingDataShims.ts'),
+			'$chart': sharedChartDir,
+			'$lib': landingLib,
 			'@': path.resolve(__dirname, './src'),
 		},
 	},
 	server: {
 		port: 5400,
+		fs: {
+			allow: [repoRoot],
+		},
 		proxy: {
 			'/api': { target: 'http://localhost:8400', changeOrigin: true },
 			'/ws': { target: 'ws://localhost:8400', ws: true },
