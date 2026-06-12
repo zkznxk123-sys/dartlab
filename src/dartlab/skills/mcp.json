@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 303,
+    "skillCount": 294,
     "categories": [
       {
         "id": "start",
@@ -26,13 +26,13 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 78
+        "count": 73
       },
       {
         "id": "recipes",
         "title": "Recipes",
         "description": "엔진을 엮어 특정 분석 질문을 푸는 재사용 절차.",
-        "count": 165
+        "count": 161
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -190,9 +190,9 @@
     },
     {
       "id": "engines.company.flow",
-      "title": "Company KRX Flow (외국인/기관/개인)",
+      "title": "Gather KRX Flow (외국인/기관/개인)",
       "category": "engines",
-      "purpose": "Company.flow — KRX 외국인/기관/개인 종목별 일별 net-buy. 한국 unique disclosure (US 시장은 종목별 net-buy 공개 X). Company.gather(\"flow\") wrapper. KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal.",
+      "purpose": "dartlab.gather(\"flow\", ...) — KRX 외국인/기관/개인 종목별 일별 net-buy. 한국 unique disclosure (US 시장은 종목별 net-buy 공개 X). KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal.",
       "whenToUse": [
         "외국인 net-buy",
         "외국인 매수세",
@@ -210,7 +210,7 @@
         "KRX flow"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\n# 일별 외국인/기관/개인 net-buy\nflow = c.flow()\nif not flow.is_empty():\n    print(flow.head(30))            # 최근 30 일\n    # 누적\n    import polars as pl\n    cumulative = flow.with_columns([\n        pl.col(\"foreignNet\").cum_sum().alias(\"foreignCum\"),\n        pl.col(\"institutionNet\").cum_sum().alias(\"institutionCum\"),\n    ])\n```\n\n## 호출 동작\n\n- target = DART 종목코드 (KOSPI/KOSDAQ). KR 한정 — 외 시장 target 은 빈 DataFrame.\n- Company.gather(\"flow\") delegate — 본체 = gather(\"flow\", ...) handler (handleFlow).\n- Naver flow API 자동 호출 — daily reshape 후 pl.Da"
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 일별 외국인/기관/개인 net-buy\nflow = dartlab.gather(\"flow\", \"005930\")\nif not flow.is_empty():\n    print(flow.head(30))            # 최근 30 일\n    # 누적\n    import polars as pl\n    cumulative = flow.with_columns([\n        pl.col(\"foreignNet\").cum_sum().alias(\"foreignCum\"),\n        pl.col(\"institutionNet\").cum_sum().alias(\"institutionCum\"),\n    ])\n\n# 백필/프록시 옵션은 공개 gather 엔진 경유:\ndartlab.gather(\"flow\", \"005930\", start=\"2010-01-04\", sleepSec=1.0)\ndartlab.gather(\"flow\", \"005930\", all=True, proxy=\"http://user:pass@host:port\")\ndartlab.gather(\"flow\", targets=[\"005930\", \"000"
     },
     {
       "id": "engines.company.governance",
@@ -475,106 +475,6 @@
       "bodyPreview": "## 기본 판단\n\n- 단일 종목의 재무, 공시, 사업, 하위 엔진 라우팅은 `Company`가 먼저다. scan prebuild는 peer 위치, universe ranking, Company 원자료 부재 시의 보조 경로다.\n- 최신 주가, 수급, 뉴스, 거시 원자료처럼 외부 데이터 신선도가 핵심이면 `gather`가 먼저다.\n- 후보 발굴, 순위, peer 위치, 시장 전체 분포가 핵심이면 `scan`이 먼저다.\n- 질문이 섞여 있으면 `Company`로 target을 고정하고, `gather`로 최신 raw data를 보강하고, `scan`으로 상대 위치를 확인한다.\n\n## 응용 Skill 작성 시작점\n\n- 응용 skill은 먼저 `knowledgeRefs`의 `engines.company`, `engines.gather`, `engines.scan`을 참조한다.\n- 단일 엔진의 기본 사용법은 각 엔진의 `SKILL.md`를 본다. capability/docstring은 스킬의 공개 호출과 반환 설명을 검산하는 원천 자료다.\n- 응용 skill은 이 skill의 requiredEvidence 중 자기 질문에 필요한 항목을 줄이지 말고 구체화한다.\n- 응용"
     },
     {
-      "id": "engines.derivatives",
-      "title": "Derivatives (KOSPI200 옵션 + 파생상품)",
-      "category": "engines",
-      "purpose": "KOSPI200 옵션 시장 4 축 (IV surface · put-call skew · VKOSPI · risk-neutral density) + 파생상품 분석 엔진. **status=drafted — D-track KRX `opt` API 권한 인프라 선결**. 트리거 — '옵션', '파생', 'derivatives', 'KOSPI200 옵션', 'IV', 'VKOSPI'.",
-      "whenToUse": [
-        "파생",
-        "derivatives",
-        "옵션",
-        "KOSPI200 옵션",
-        "IV surface",
-        "put-call skew",
-        "VKOSPI",
-        "risk-neutral density",
-        "옵션 flow"
-      ],
-      "nextSkills": [
-        "engines.quant",
-        "engines.macro",
-        "engines.derivatives.vkospi",
-        "engines.derivatives.putCallSkew",
-        "engines.derivatives.ivSurface"
-      ],
-      "bodyPreview": "## 엔진 역할\n\n`derivatives` 는 KOSPI200 옵션 시장 forward-looking 신호 4 축 + 파생상품 분석. 한국 시장 세계 최고 옵션 유동성인데 dartlab quant 엔진 0 축 (quantGap Tier 1) — 본 엔진이 그 구멍 메움.\n\n**status=drafted**: KRX OpenAPI `opt` 카테고리 권한 + HF backfill (`krx/options/`) 인프라 선결. velvet-hatching-puffin 플랜 Phase 2.C D-track 완료 시 status → tested.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 단일 axis (D-track 활성 시)\niv = dartlab.derivatives(\"ivSurface\", date=\"2026-05-28\")\nskew = dartlab.derivatives(\"putCallSkew\", date=\"2026-05-28\")\nvkospi = dartlab.derivatives(\"vkospi\", date=\"2026-05-28\")\nrnd = dartlab.derivatives(\"riskNeutralDensity\", date"
-    },
-    {
-      "id": "engines.derivatives.ivSurface",
-      "title": "Derivatives — IV Surface (strike × expiry)",
-      "category": "engines",
-      "purpose": "KOSPI200 옵션 IV (implied volatility) surface — strike × expiry 2 차원 격자. ATM IV term structure + smile/skew 분석 SSOT. **status=drafted — D-track 인프라 선결**.",
-      "whenToUse": [
-        "IV surface",
-        "implied volatility",
-        "ATM IV",
-        "term structure",
-        "volatility smile",
-        "옵션 IV"
-      ],
-      "nextSkills": [
-        "engines.derivatives",
-        "engines.derivatives.putCallSkew"
-      ],
-      "bodyPreview": "## 엔진 역할\n\nKOSPI200 옵션 IV surface — strike × expiry 2 차원. ATM IV 항을 forward-looking volatility 측정 정공.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\niv = dartlab.derivatives(\"ivSurface\", date=\"2026-05-28\", expiry=\"all\")\n# → DataFrame: expiry · strike · ivCall · ivPut · midIV\n```\n\n## 호출 동작\n\nKRX 옵션 일별 데이터에서 strike × expiry 격자 추출 + Black-Scholes inverse 로 IV 산출 (옵션 가격 → IV).\n\n- ATM strike 자동 식별 (forward 기준)\n- 외삽 금지 — 실거래 strike 만\n- expiry weekly/monthly/quarterly 분리\n\n## 대표 반환 형태\n\n```text\npl.DataFrame\n  expiry : str          # YYYY-MM-DD\n  strike : float        # 행사가\n  ivCall : float        # 콜 IV (%)\n  iv"
-    },
-    {
-      "id": "engines.derivatives.putCallSkew",
-      "title": "Derivatives — Put-Call Skew (25Δ)",
-      "category": "engines",
-      "purpose": "25Δ put-call skew (25Δ put IV - 25Δ call IV) — 하방 헷지 수요 z-score. 시장 fear gauge forward-looking. **status=drafted — D-track 선결**.",
-      "whenToUse": [
-        "put-call skew",
-        "25Δ skew",
-        "하방 헷지",
-        "fear gauge",
-        "volatility smile"
-      ],
-      "nextSkills": [
-        "engines.derivatives",
-        "engines.derivatives.ivSurface",
-        "engines.derivatives.vkospi"
-      ],
-      "bodyPreview": "## 엔진 역할\n\n25Δ skew = 25Δ put IV − 25Δ call IV. 하방 헷지 수요 시장 측정. skew ↑ = 풋 비싸 = 하방 우려 ↑. VIX/VKOSPI 와 직교 신호 (VKOSPI 는 ATM IV 합산, skew 는 OTM IV 비대칭).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nskew = dartlab.derivatives(\"putCallSkew\", date=\"2026-05-28\", expiry=\"30d\")\n# → dict: skew25d · skewZ · regime · smileMetrics\n```\n\n## 호출 동작\n\nivSurface 에서 25Δ 행사가 추출 (forward 대비 25Δ moneyness) → put IV - call IV. 252 일 z-score 동행.\n\n- 만기 표준: 30d / 60d / 90d (3 종 동시)\n- z-score baseline = 252 일 rolling\n- regime: low (z < -1) / normal / elevated (z > 1) / extreme (z > 2)\n\n## 대표 반환 형태\n\n```text\ndict\n  skew25d_30d : fl"
-    },
-    {
-      "id": "engines.derivatives.riskNeutralDensity",
-      "title": "Derivatives — Risk-Neutral Density (Breeden-Litzenberger)",
-      "category": "engines",
-      "purpose": "옵션 가격 → 위험중립확률밀도 (Breeden-Litzenberger 1978). 시장 implied 기초자산 분포 SSOT. 시장 기대 분포 + tail risk 정량화. **status=drafted — D-track 선결**.",
-      "whenToUse": [
-        "risk-neutral density",
-        "Breeden-Litzenberger",
-        "implied 분포",
-        "tail risk",
-        "시장 기대 분포"
-      ],
-      "nextSkills": [
-        "engines.derivatives",
-        "engines.derivatives.ivSurface"
-      ],
-      "bodyPreview": "## 엔진 역할\n\nBreeden-Litzenberger 1978 정통 — 옵션 가격 C(K) 2 차 미분 = 위험중립 확률밀도. 시장이 implied 기초자산 분포 직접 노출.\n\n본 spec 은 산출 절차 + smoothing 방법 (cubic spline IV interpolation) + tail percentile (p1/p5/p95/p99) SSOT.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nrnd = dartlab.derivatives(\"riskNeutralDensity\", date=\"2026-05-28\", expiry=\"30d\")\n# → DataFrame: strike · density · cdf · percentile\n```\n\n## 호출 동작\n\n1. ivSurface → strike × IV (해당 expiry)\n2. cubic spline IV interpolation (smooth surface)\n3. Black-Scholes → C(K) 재계산 (smooth)\n4. Breeden-Litzenberger: f(K) = e^(rT) × ∂²C/∂K²\n5. tail percentile + skewness / kurto"
-    },
-    {
-      "id": "engines.derivatives.vkospi",
-      "title": "Derivatives — VKOSPI Regime",
-      "category": "engines",
-      "purpose": "VKOSPI (KOSPI200 옵션 implied volatility index) regime 분류 — KR 시장 fear gauge. 4 regime (calm/normal/elevated/panic) + macro regime 정합. **status=drafted — D-track 선결**.",
-      "whenToUse": [
-        "VKOSPI",
-        "V-KOSPI",
-        "KOSPI200 IV",
-        "fear gauge",
-        "변동성 regime",
-        "옵션 변동성"
-      ],
-      "nextSkills": [
-        "engines.derivatives",
-        "engines.macro.regimes"
-      ],
-      "bodyPreview": "## 엔진 역할\n\nVKOSPI = KOSPI200 옵션 30 일 model-free implied volatility (VIX 한국판). 시장 fear gauge forward-looking. 본 spec 은 VKOSPI level 의 regime 분류 SSOT + macro regime (engines.macro.regimes 5 enum) 정합 매핑.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nvk = dartlab.derivatives(\"vkospi\", date=\"2026-05-28\")\n# → dict: level · regime · macroAlignment\n```\n\n## 호출 동작\n\nKRX VKOSPI 일별 데이터 (또는 옵션 chain 으로부터 자체 산출). 4 regime 분류:\n\n- **calm** : level < 15 (variance crush)\n- **normal** : 15 ≤ level < 25\n- **elevated** : 25 ≤ level < 40\n- **panic** : level ≥ 40 (위기)\n\nmacroAlignment: macro regime (expansion/slowdown/contrac"
-    },
-    {
       "id": "engines.edgar",
       "title": "EDGAR (US 공시·재무)",
       "category": "engines",
@@ -780,7 +680,7 @@
         "engines.analysis",
         "engines.scan"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`gather`는 분석 엔진이 쓰는 외부/보조 데이터를 가져오는 L1 성격의 실행 엔진이다. 가격, 컨센서스, 수급, 뉴스, 배당/분할, 섹터, 내부자거래, 주요주주, 기관 보유, peer, 매크로 원자료를 다룬다.\n\n`gather`는 원자료 수집과 snapshot 생성이 목적이다. 재무 해석은 `analysis`, 시장 매크로 해석은 `macro`, 후보 발굴은 `scan`이 담당한다.\n\n## 공개 호출 방식\n\n`dartlab.gather` 는 두 가지 형태로 쓴다 — 형태 A 가 권장 진입점, 형태 B 는 Gather 클래스 메서드를 직접 부를 때.\n\n```python\n# 형태 A — 모듈 callable (권장). dartlab.gather 는 GatherEntry 인스턴스라 axis 디스패치.\nimport dartlab\n\ndartlab.gather()                              # 가이드 DataFrame (전체 axis 목록)\ndartlab.gather(\"price\", \"005930\")             # KR OHLCV\ndartlab.gather(\"price\", \"AAPL\", market=\"US\") "
+      "bodyPreview": "## 엔진 역할\n\n`gather`는 분석 엔진이 쓰는 외부/보조 데이터를 가져오는 L1 성격의 실행 엔진이다. 가격, 컨센서스, 수급, 뉴스, 배당/분할, 섹터, 내부자거래, 주요주주, 기관 보유, peer, 매크로 원자료를 다룬다.\n\n`gather`는 원자료 수집과 snapshot 생성이 목적이다. 재무 해석은 `analysis`, 시장 매크로 해석은 `macro`, 후보 발굴은 `scan`이 담당한다.\n\n## 공개 호출 방식\n\n`dartlab.gather` 는 두 가지 형태로 쓴다 — 형태 A 가 권장 진입점, 형태 B 는 Gather 클래스 메서드를 직접 부를 때.\n\n```python\n# 형태 A — 모듈 callable (권장). dartlab.gather 는 GatherEntry 인스턴스라 axis 디스패치.\nimport dartlab\n\ndartlab.gather()                              # 가이드 DataFrame (전체 axis 목록)\ndartlab.gather(\"price\", \"005930\")             # KR OHLCV\ndartlab.gather(\"price\", \"AAPL\")              "
     },
     {
       "id": "engines.gather.listing",
@@ -1030,8 +930,7 @@
         "small spec"
       ],
       "nextSkills": [
-        "engines.macro",
-        "engines.derivatives"
+        "engines.macro"
       ],
       "bodyPreview": "## 엔진 역할\n\nCFTC COT 주간 보고서 — 선물 시장 포지션 3 그룹 (commercial = hedger / non-commercial = speculator / small spec). non-commercial net long z 가 sentiment 측정 표준.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\npos = dartlab.macro(\"positioning\", contract=\"DXY\", weeks=52)\n# → dict: longShort · z52 · regime\n```\n\n## 호출 동작\n\nCFTC 주간 endpoint → contract 별 long/short + net + z-score (52 주 baseline).\n\n## 대표 반환 형태\n\n```text\ndict\n  contract : str\n  commercialNet : int\n  nonCommercialNet : int\n  smallSpecNet : int\n  z52_nonCommercial : float\n  regime : str               # extreme_short / short / neutral / long / extreme_lo"
     },
@@ -1309,7 +1208,7 @@
       "id": "engines.search",
       "title": "Search (공시 의미·본문·제목 검색)",
       "category": "engines",
-      "purpose": "Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope=\"auto\"(기본)는 *의미 검색* — bm25 키워드 + type(report_nm)→본문 경험확장 gated fusion 으로 키워드가 못 잡는 동의·관련 공시까지 회수(임베딩·GPU 0). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '의미 검색', '제목 매칭', '본문 BM25', 'search'.",
+      "purpose": "Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope=\"auto\"(기본)는 *통합 검색* — 음절 bigram BM25 에 큐레이션 동의어·결정론 라우팅 canon 확장 lane 을 RRF 융합해 구어·약어 질의도 회수(임베딩·GPU 0, always-safe). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '통합 검색', '제목 매칭', '본문 BM25', 'search'.",
       "whenToUse": [
         "search",
         "공시 검색",
@@ -1324,7 +1223,7 @@
         "engines.company",
         "engines.scan"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 \"완전한 문서\" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — numpy 역인덱스 + 경험그래프(meaning.json)만으로 의미 검색. scope=\"auto\" 가 키워드(bm25)와 의미확장을 신뢰도 gated 융합해, 단어가 달라도 같은 의미의 공시를 회수한다. 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.\n\n단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — \"어떤 회사가 유상증자했나\" 같은 질문 한정.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 제목 검색 (default scope=\"auto\" 가 자동 판별)\nresult = dartl"
+      "bodyPreview": "## 엔진 역할\n\n`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 \"완전한 문서\" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색. scope=\"auto\" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe). 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.\n\n단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — \"어떤 회사가 유상증자했나\" 같은 질문 한정.\n\n## 공개 호출 방식\n\n```python\nimport dartla"
     },
     {
       "id": "engines.search.disclosureSearch",
@@ -2143,77 +2042,6 @@
       ],
       "nextSkills": [],
       "bodyPreview": "## Skill OS 흡수 규칙\n\n- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.\n- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.\n- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.\n\n## AI 채팅 UI 계약\n\n- AI 제품 바탕 교체의 상세 SSOT는 `operation.aiProductReplatform`이다. `operation.ui`는 UI 표현 계층 규칙만 보완한다.\n- 공식 제품 경로는 `DartLab App → /api/ask stream → DartLabResearchGraph → Skill OS/Data/Verifier/Evidence`다.\n- UI 표면은 LibreChat식 conversation/message parts 모델을 따른다. DartLab 브랜드, workspace, evidence, artifact viewer는 유지하되 채팅 본문은 message parts만 렌더한다.\n- UI와 엔진 사이의 공개 stream은 AG-UI compatible event allowlist만 허용한다. 내부 "
-    },
-    {
-      "id": "recipes.derivatives.kospi200ImpliedVol",
-      "title": "KOSPI200 Implied Volatility — ATM IV term structure",
-      "category": "recipes",
-      "purpose": "KOSPI200 옵션 ATM IV term structure (30d/60d/90d) + VKOSPI 비교. forward-looking volatility 측정. **status=drafted — D-track 선결**. 트리거 — 'KOSPI200 IV', 'implied volatility', 'IV term structure'.",
-      "whenToUse": [
-        "KOSPI200 IV",
-        "implied volatility",
-        "IV term structure",
-        "ATM IV"
-      ],
-      "nextSkills": [
-        "engines.derivatives",
-        "engines.derivatives.ivSurface",
-        "engines.derivatives.vkospi"
-      ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\niv = dartlab.derivatives(\"ivSurface\", date=\"2026-05-28\")\natm_30d = iv.filter((pl.col(\"expiry_days\") == 30) & (pl.col(\"moneyness\") == \"ATM\"))\natm_60d = iv.filter((pl.col(\"expiry_days\") == 60) & (pl.col(\"moneyness\") == \"ATM\"))\natm_90d = iv.filter((pl.col(\"expiry_days\") == 90) & (pl.col(\"moneyness\") == \"ATM\"))\n\nvkospi = dartlab.derivatives(\"vkospi\", date=\"2026-05-28\")\n```\n\n## 호출 동작\n\nATM IV (콜·풋 mid) 만기별 추출 + VKOSPI 비교 + term slope 산출. slope > 0 = contango (forward higher), < 0 = backwardation (panic).\n\n## 대표 반환 형태\n\ndict — `ivAtm30d/60d/90d` + `vkospi` + `term"
-    },
-    {
-      "id": "recipes.derivatives.optionFlowDetector",
-      "title": "Option Flow Detector — unusual volume / open interest jump",
-      "category": "recipes",
-      "purpose": "옵션 거래량 / 미결제약정 (open interest) z-score 급증 detection — 정보 비대칭 신호. unusual options activity 학술 (Pan-Poteshman 2006). **status=drafted**. 트리거 — '옵션 flow', 'unusual options', '옵션 OI 급증', 'option flow detector'.",
-      "whenToUse": [
-        "option flow",
-        "unusual options",
-        "open interest jump",
-        "옵션 거래량",
-        "옵션 OI"
-      ],
-      "nextSkills": [
-        "engines.derivatives.ivSurface",
-        "engines.derivatives"
-      ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\niv = dartlab.derivatives(\"ivSurface\", date=\"2026-05-28\")\n# volume_z / oi_z 컬럼 추출 + |z| > 2 strike cluster 식별\nunusual = iv.filter(pl.col(\"volume_z\") > 2)\n```\n\n## 호출 동작\n\nstrike × expiry 격자에서 volume z-score (252 일 baseline) + OI z 산출. |z| > 2 cluster 분류 (같은 strike 근처 5 행사가 동시 z↑ = cluster).\n\n## 대표 반환 형태\n\nDataFrame — `strike + expiry + volumeZ + oiZ + clusterFlag`.\n\n## 연계 절차\n\n1. 본 recipe → unusual flow detection.\n2. cluster 발견 → underlying 종목 deep dive.\n3. directional bias (콜 vs 풋) → `recipes.derivatives.putCallSkewSignal` 결합."
-    },
-    {
-      "id": "recipes.derivatives.putCallSkewSignal",
-      "title": "Put-Call Skew Signal — extreme z 신호",
-      "category": "recipes",
-      "purpose": "25Δ put-call skew z-score extreme (|z| > 2) 진입 시 시장 turning point 후보 — extreme high (z > 2) = 극단적 하방 우려 (contrarian long 신호), extreme low (z < -2) = 안일 (contrarian short). **status=drafted**. 트리거 — 'skew extreme', 'put-call skew', 'fear extreme', 'complacency 신호'.",
-      "whenToUse": [
-        "put-call skew signal",
-        "25Δ skew extreme",
-        "contrarian signal",
-        "fear extreme",
-        "complacency"
-      ],
-      "nextSkills": [
-        "engines.derivatives.putCallSkew",
-        "engines.derivatives.vkospi"
-      ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nsk = dartlab.derivatives(\"putCallSkew\", date=\"2026-05-28\", expiry=\"30d\")\nif abs(sk[\"skewZ_30d\"]) > 2:\n    signal = \"extreme_fear\" if sk[\"skewZ_30d\"] > 0 else \"extreme_complacency\"\n```\n\n## 호출 동작\n\nskewZ 절댓값 > 2 시 extreme regime 진입 + historical 30d 시장 reverse rate 비교.\n\n## 대표 반환 형태\n\ndict — `skewZ + regime + signal + historicalReverseRate`.\n\n## 연계 절차\n\n1. 본 recipe → extreme z 신호 detection.\n2. extreme fear → `recipes.meta.screen.qualityValueScreen` (flight to quality).\n3. extreme complacency → 위험 자산 비중 감소 후보."
-    },
-    {
-      "id": "recipes.derivatives.vkospiRegime",
-      "title": "VKOSPI Regime × Macro Cycle 정합",
-      "category": "recipes",
-      "purpose": "VKOSPI 4 regime × macro cycle 5 regime 정합 — calm/normal/elevated/panic vs expansion/slowdown/contraction/recovery/crisis. 시장 fear 와 macro cycle 일치성 진단. **status=drafted**. 트리거 — 'VKOSPI regime', '변동성 regime', 'fear gauge regime', 'macro cycle 정합'.",
-      "whenToUse": [
-        "VKOSPI regime",
-        "macro cycle 정합",
-        "fear gauge regime",
-        "volatility regime"
-      ],
-      "nextSkills": [
-        "engines.derivatives.vkospi",
-        "engines.macro.regimes"
-      ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nvk = dartlab.derivatives(\"vkospi\", date=\"2026-05-28\")\nmr = dartlab.macro(\"cycle\", market=\"KR\")\nalignment = (vk[\"regime\"] == \"panic\" and mr[\"regime\"] == \"crisis\")\n```\n\n## 호출 동작\n\nVKOSPI regime (4) × macro regime (5) cross-tab + alignment 정량화 + 직교 mismatch 패턴 (calm + crisis 또는 panic + expansion) 표기.\n\n## 대표 반환 형태\n\ndict — `vkospiRegime/macroRegime/alignment/divergenceFlag`.\n\n## 연계 절차\n\n1. 본 recipe → 두 regime 정합성.\n2. divergence → `recipes.macro.scenarioDiagram` 시나리오 평가.\n3. panic 지속 → flight to quality (recipes.meta.screen.qualityValueScreen)."
     },
     {
       "id": "recipes.fundamental.credit.creditRatingMigration",
@@ -3775,7 +3603,7 @@
         "engines.company",
         "engines.analysis"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport statistics\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rd_series(code):\n    try:\n        rows = dartlab.Company(code).analysis(\"rdSummary\").to_dicts()\n        return [(str(r.get(\"year\"))[:4], (float(r.get(\"rdExpense\") or 0)) / max(float(r.get(\"revenue\") or 1), 1)) for r in rows if r.get(\"year\")]\n    except Exception:\n        return []\n\nown = dict(rd_series(target))\nyears = sorted(own.keys())\nif len(years) >= 3:\n    # 5y trend slope\n    recent = [own[y] for y in years[-5:]]\n    n = len(recent)\n    if n >= 3:\n        x = li"
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport statistics\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rd_series(code):\n    # 비용구조 축의 calcRndExpense — IS 별도라인 → 판관비명세 주석 2-tier (rdSummary 축은 미존재였음).\n    try:\n        rnd = (dartlab.Company(code).analysis(\"비용구조\") or {}).get(\"rndExpense\") or {}\n        return [(h[\"period\"], (h[\"rndIntensity\"] or 0) / 100) for h in rnd.get(\"history\", []) if h.get(\"rndIntensity\") is not None]\n    except Exception:\n        return []\n\nown = dict(rd_series(target))\nyears = sorted(own.keys())\nif len(years) >= 3:\n    # 5y trend slope\n    recent "
     },
     {
       "id": "recipes.industry.sectorFlowConcentration",

@@ -93,9 +93,9 @@
     },
     {
       "id": "engines.company.flow",
-      "title": "Company KRX Flow (외국인/기관/개인)",
+      "title": "Gather KRX Flow (외국인/기관/개인)",
       "category": "engines",
-      "purpose": "Company.flow — KRX 외국인/기관/개인 종목별 일별 net-buy. 한국 unique disclosure (US 시장은 종목별 net-buy 공개 X). Company.gather(\"flow\") wrapper. KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal.",
+      "purpose": "dartlab.gather(\"flow\", ...) — KRX 외국인/기관/개인 종목별 일별 net-buy. 한국 unique disclosure (US 시장은 종목별 net-buy 공개 X). KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal.",
       "inDegree": 0,
       "outDegree": 3,
       "cluster": "company",
@@ -255,71 +255,6 @@
       "inDegree": 6,
       "outDegree": 3,
       "cluster": "data",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": false,
-      "audiences": []
-    },
-    {
-      "id": "engines.derivatives",
-      "title": "Derivatives (KOSPI200 옵션 + 파생상품)",
-      "category": "engines",
-      "purpose": "KOSPI200 옵션 시장 4 축 (IV surface · put-call skew · VKOSPI · risk-neutral density) + 파생상품 분석 엔진. **status=drafted — D-track KRX `opt` API 권한 인프라 선결**. 트리거 — '옵션', '파생', 'derivatives', 'KOSPI200 옵션', 'IV', 'VKOSPI'.",
-      "inDegree": 11,
-      "outDegree": 9,
-      "cluster": "derivatives",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": false,
-      "audiences": []
-    },
-    {
-      "id": "engines.derivatives.ivSurface",
-      "title": "Derivatives — IV Surface (strike × expiry)",
-      "category": "engines",
-      "purpose": "KOSPI200 옵션 IV (implied volatility) surface — strike × expiry 2 차원 격자. ATM IV term structure + smile/skew 분석 SSOT. **status=drafted — D-track 인프라 선결**.",
-      "inDegree": 5,
-      "outDegree": 3,
-      "cluster": "derivatives",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": false,
-      "audiences": []
-    },
-    {
-      "id": "engines.derivatives.putCallSkew",
-      "title": "Derivatives — Put-Call Skew (25Δ)",
-      "category": "engines",
-      "purpose": "25Δ put-call skew (25Δ put IV - 25Δ call IV) — 하방 헷지 수요 z-score. 시장 fear gauge forward-looking. **status=drafted — D-track 선결**.",
-      "inDegree": 3,
-      "outDegree": 4,
-      "cluster": "derivatives",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": false,
-      "audiences": []
-    },
-    {
-      "id": "engines.derivatives.riskNeutralDensity",
-      "title": "Derivatives — Risk-Neutral Density (Breeden-Litzenberger)",
-      "category": "engines",
-      "purpose": "옵션 가격 → 위험중립확률밀도 (Breeden-Litzenberger 1978). 시장 implied 기초자산 분포 SSOT. 시장 기대 분포 + tail risk 정량화. **status=drafted — D-track 선결**.",
-      "inDegree": 1,
-      "outDegree": 3,
-      "cluster": "derivatives",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": false,
-      "audiences": []
-    },
-    {
-      "id": "engines.derivatives.vkospi",
-      "title": "Derivatives — VKOSPI Regime",
-      "category": "engines",
-      "purpose": "VKOSPI (KOSPI200 옵션 implied volatility index) regime 분류 — KR 시장 fear gauge. 4 regime (calm/normal/elevated/panic) + macro regime 정합. **status=drafted — D-track 선결**.",
-      "inDegree": 5,
-      "outDegree": 4,
-      "cluster": "derivatives",
       "isEntry": false,
       "isLeaf": false,
       "isOrphan": false,
@@ -538,7 +473,7 @@
       "title": "Macro",
       "category": "engines",
       "purpose": "Macro 엔진은 경기, 정책, 유동성, 위기, 자산, 심리, 예측을 6막 구조로 읽는 시장 레벨 분석 스킬이다. 트리거 — '매크로', '거시', '금리', '환율'.",
-      "inDegree": 48,
+      "inDegree": 46,
       "outDegree": 5,
       "cluster": "macro",
       "isEntry": false,
@@ -604,7 +539,7 @@
       "category": "engines",
       "purpose": "CFTC Commitments of Traders (COT) 보고서 — 상품/통화/금리 선물 포지셔닝 (commercial vs non-commercial vs small spec) z-score. 시장 sentiment 측정.",
       "inDegree": 0,
-      "outDegree": 3,
+      "outDegree": 2,
       "cluster": "macro",
       "isEntry": false,
       "isLeaf": false,
@@ -616,7 +551,7 @@
       "title": "Macro — Regime 분류 (regimes)",
       "category": "engines",
       "purpose": "매크로 regime 분류 SSOT — 시장 상태를 4~5 regime (확장·둔화·수축·회복 + 위기) 으로 자동 라벨링. Hamilton 1989 HMM 패러다임 + dartlab 자체 cycle · liquidity · crisis axis 결합 결과의 단일 어휘 정의.",
-      "inDegree": 6,
+      "inDegree": 3,
       "outDegree": 5,
       "cluster": "macro",
       "isEntry": false,
@@ -694,7 +629,7 @@
       "title": "Quant",
       "category": "engines",
       "purpose": "Quant 엔진은 가격, 기술적 신호, 팩터, 리스크, 텍스트/공시, 횡단면 랭킹, 포트폴리오, 백테스트를 46개 축으로 실행하는 정량 분석 스킬이다. 트리거 — '퀀트', '팩터', '백테스트', '모멘텀', '기술적 신호'.",
-      "inDegree": 36,
+      "inDegree": 34,
       "outDegree": 5,
       "cluster": "quant",
       "isEntry": false,
@@ -810,7 +745,7 @@
       "id": "engines.search",
       "title": "Search (공시 의미·본문·제목 검색)",
       "category": "engines",
-      "purpose": "Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope=\"auto\"(기본)는 *의미 검색* — bm25 키워드 + type(report_nm)→본문 경험확장 gated fusion 으로 키워드가 못 잡는 동의·관련 공시까지 회수(임베딩·GPU 0). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '의미 검색', '제목 매칭', '본문 BM25', 'search'.",
+      "purpose": "Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope=\"auto\"(기본)는 *통합 검색* — 음절 bigram BM25 에 큐레이션 동의어·결정론 라우팅 canon 확장 lane 을 RRF 융합해 구어·약어 질의도 회수(임베딩·GPU 0, always-safe). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '통합 검색', '제목 매칭', '본문 BM25', 'search'.",
       "inDegree": 6,
       "outDegree": 4,
       "cluster": "search",
@@ -1432,58 +1367,6 @@
       "isEntry": false,
       "isLeaf": false,
       "isOrphan": false,
-      "audiences": []
-    },
-    {
-      "id": "recipes.derivatives.kospi200ImpliedVol",
-      "title": "KOSPI200 Implied Volatility — ATM IV term structure",
-      "category": "recipes",
-      "purpose": "KOSPI200 옵션 ATM IV term structure (30d/60d/90d) + VKOSPI 비교. forward-looking volatility 측정. **status=drafted — D-track 선결**. 트리거 — 'KOSPI200 IV', 'implied volatility', 'IV term structure'.",
-      "inDegree": 0,
-      "outDegree": 3,
-      "cluster": "recipes",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": true,
-      "audiences": []
-    },
-    {
-      "id": "recipes.derivatives.optionFlowDetector",
-      "title": "Option Flow Detector — unusual volume / open interest jump",
-      "category": "recipes",
-      "purpose": "옵션 거래량 / 미결제약정 (open interest) z-score 급증 detection — 정보 비대칭 신호. unusual options activity 학술 (Pan-Poteshman 2006). **status=drafted**. 트리거 — '옵션 flow', 'unusual options', '옵션 OI 급증', 'option flow detector'.",
-      "inDegree": 0,
-      "outDegree": 2,
-      "cluster": "recipes",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": true,
-      "audiences": []
-    },
-    {
-      "id": "recipes.derivatives.putCallSkewSignal",
-      "title": "Put-Call Skew Signal — extreme z 신호",
-      "category": "recipes",
-      "purpose": "25Δ put-call skew z-score extreme (|z| > 2) 진입 시 시장 turning point 후보 — extreme high (z > 2) = 극단적 하방 우려 (contrarian long 신호), extreme low (z < -2) = 안일 (contrarian short). **status=drafted**. 트리거 — 'skew extreme', 'put-call skew', 'fear extreme', 'complacency 신호'.",
-      "inDegree": 0,
-      "outDegree": 2,
-      "cluster": "recipes",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": true,
-      "audiences": []
-    },
-    {
-      "id": "recipes.derivatives.vkospiRegime",
-      "title": "VKOSPI Regime × Macro Cycle 정합",
-      "category": "recipes",
-      "purpose": "VKOSPI 4 regime × macro cycle 5 regime 정합 — calm/normal/elevated/panic vs expansion/slowdown/contraction/recovery/crisis. 시장 fear 와 macro cycle 일치성 진단. **status=drafted**. 트리거 — 'VKOSPI regime', '변동성 regime', 'fear gauge regime', 'macro cycle 정합'.",
-      "inDegree": 0,
-      "outDegree": 2,
-      "cluster": "recipes",
-      "isEntry": false,
-      "isLeaf": false,
-      "isOrphan": true,
       "audiences": []
     },
     {
@@ -3988,7 +3871,7 @@
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
       "purpose": "사람과 LLM 이 DartLab 을 처음 볼 때 Skills 카탈로그 하나에서 분석 · 엔진 능력 · 운영 규칙 · 확장 절차를 찾는 공식 시작점이다. 외부 API 문서나 흩어진 ops 폴더 대신 skill 검색 → frontmatter 확인 → 본문 절차 → 검증 게이트 순서를 따른다.",
-      "inDegree": 48,
+      "inDegree": 47,
       "outDegree": 7,
       "cluster": "start",
       "isEntry": true,
@@ -4485,121 +4368,6 @@
       "kind": "knowledge"
     },
     {
-      "src": "engines.derivatives",
-      "dst": "engines.quant",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.macro",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.derivatives.vkospi",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.derivatives.putCallSkew",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.derivatives.ivSurface",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.derivatives.riskNeutralDensity",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "start.dartlabSkillOs",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.quant",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives",
-      "dst": "engines.macro",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives.ivSurface",
-      "dst": "engines.derivatives",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.ivSurface",
-      "dst": "engines.derivatives.putCallSkew",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.ivSurface",
-      "dst": "engines.derivatives",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives.putCallSkew",
-      "dst": "engines.derivatives",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.putCallSkew",
-      "dst": "engines.derivatives.ivSurface",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.putCallSkew",
-      "dst": "engines.derivatives.vkospi",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.putCallSkew",
-      "dst": "engines.derivatives",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives.riskNeutralDensity",
-      "dst": "engines.derivatives",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.riskNeutralDensity",
-      "dst": "engines.derivatives.ivSurface",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.riskNeutralDensity",
-      "dst": "engines.derivatives",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives.vkospi",
-      "dst": "engines.derivatives",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.vkospi",
-      "dst": "engines.macro.regimes",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.derivatives.vkospi",
-      "dst": "engines.derivatives",
-      "kind": "knowledge"
-    },
-    {
-      "src": "engines.derivatives.vkospi",
-      "dst": "engines.macro.regimes",
-      "kind": "knowledge"
-    },
-    {
       "src": "engines.edgar",
       "dst": "engines.company",
       "kind": "linkedRecipe"
@@ -5037,11 +4805,6 @@
     {
       "src": "engines.macro.positioning",
       "dst": "engines.macro",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "engines.macro.positioning",
-      "dst": "engines.derivatives",
       "kind": "linkedRecipe"
     },
     {
@@ -5943,51 +5706,6 @@
       "src": "operation.ui",
       "dst": "operation.aiProductReplatform",
       "kind": "source"
-    },
-    {
-      "src": "recipes.derivatives.kospi200ImpliedVol",
-      "dst": "engines.derivatives",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.kospi200ImpliedVol",
-      "dst": "engines.derivatives.ivSurface",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.kospi200ImpliedVol",
-      "dst": "engines.derivatives.vkospi",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.optionFlowDetector",
-      "dst": "engines.derivatives.ivSurface",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.optionFlowDetector",
-      "dst": "engines.derivatives",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.putCallSkewSignal",
-      "dst": "engines.derivatives.putCallSkew",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.putCallSkewSignal",
-      "dst": "engines.derivatives.vkospi",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.vkospiRegime",
-      "dst": "engines.derivatives.vkospi",
-      "kind": "linkedRecipe"
-    },
-    {
-      "src": "recipes.derivatives.vkospiRegime",
-      "dst": "engines.macro.regimes",
-      "kind": "linkedRecipe"
     },
     {
       "src": "recipes.fundamental.credit.creditRatingMigration",
@@ -9881,13 +9599,6 @@
       "engines.viz.scenarioVisuals"
     ],
     [
-      "engines.derivatives",
-      "engines.derivatives.ivSurface",
-      "engines.derivatives.putCallSkew",
-      "engines.derivatives.riskNeutralDensity",
-      "engines.derivatives.vkospi"
-    ],
-    [
       "engines.fixedIncome",
       "engines.fixedIncome.kgbYieldCurve",
       "engines.fixedIncome.krCorporateSpread"
@@ -9999,10 +9710,6 @@
     "operation.sixActsAnalysis",
     "operation.skillMarket",
     "operation.stability",
-    "recipes.derivatives.kospi200ImpliedVol",
-    "recipes.derivatives.optionFlowDetector",
-    "recipes.derivatives.putCallSkewSignal",
-    "recipes.derivatives.vkospiRegime",
     "recipes.fundamental.credit.creditRatingMigration",
     "recipes.fundamental.credit.krCorporateSpreadWidening",
     "recipes.fundamental.credit.usHighYieldSpread",
@@ -10101,11 +9808,6 @@
     "engines.dashboard",
     "engines.dashboard.cardCatalog",
     "engines.dashboard.viewerSpec",
-    "engines.derivatives",
-    "engines.derivatives.ivSurface",
-    "engines.derivatives.putCallSkew",
-    "engines.derivatives.riskNeutralDensity",
-    "engines.derivatives.vkospi",
     "engines.edgar",
     "engines.edgar.docs",
     "engines.fixedIncome",
@@ -10180,10 +9882,6 @@
     "operation.stability",
     "operation.testing",
     "operation.ui",
-    "recipes.derivatives.kospi200ImpliedVol",
-    "recipes.derivatives.optionFlowDetector",
-    "recipes.derivatives.putCallSkewSignal",
-    "recipes.derivatives.vkospiRegime",
     "recipes.fundamental.credit.creditRatingMigration",
     "recipes.fundamental.credit.krCorporateSpreadWidening",
     "recipes.fundamental.credit.usHighYieldSpread",

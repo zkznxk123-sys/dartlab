@@ -65,7 +65,7 @@
     },
     {
       "id": "engines.company.flow",
-      "title": "Company KRX Flow (외국인/기관/개인)",
+      "title": "Gather KRX Flow (외국인/기관/개인)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -184,51 +184,6 @@
       "limitations": [
         "live EDGAR, 외부 market provider, full scan 축은 서버와 coverage가 다를 수 있다."
       ]
-    },
-    {
-      "id": "engines.derivatives",
-      "title": "Derivatives (KOSPI200 옵션 + 파생상품)",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.derivatives.ivSurface",
-      "title": "Derivatives — IV Surface (strike × expiry)",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.derivatives.putCallSkew",
-      "title": "Derivatives — Put-Call Skew (25Δ)",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.derivatives.riskNeutralDensity",
-      "title": "Derivatives — Risk-Neutral Density (Breeden-Litzenberger)",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "engines.derivatives.vkospi",
-      "title": "Derivatives — VKOSPI Regime",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
     },
     {
       "id": "engines.edgar",
@@ -975,42 +930,6 @@
       "title": "UI 엔진 (L4 표현 계층)",
       "category": "operation",
       "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.derivatives.kospi200ImpliedVol",
-      "title": "KOSPI200 Implied Volatility — ATM IV term structure",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.derivatives.optionFlowDetector",
-      "title": "Option Flow Detector — unusual volume / open interest jump",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.derivatives.putCallSkewSignal",
-      "title": "Put-Call Skew Signal — extreme z 신호",
-      "category": "recipes",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
-      "id": "recipes.derivatives.vkospiRegime",
-      "title": "VKOSPI Regime × Macro Cycle 정합",
-      "category": "recipes",
-      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
