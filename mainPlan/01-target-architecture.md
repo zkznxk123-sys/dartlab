@@ -205,6 +205,8 @@ ui/packages/
       price.ts
       finance.ts
       viewer.ts
+      macro.ts
+      report.ts
       scan.ts
       map.ts
       search.ts
@@ -229,6 +231,8 @@ ui/packages/
         filingPort.ts
         financePort.ts
         viewerPort.ts
+        macroPort.ts
+        reportPort.ts
         scanPort.ts
         mapPort.ts
         searchPort.ts
@@ -327,18 +331,20 @@ ui/packages/
 
 | 작업면 | 공개 route | surface | 주 port | 추출 단계 |
 |---|---|---|---|---|
-| 터미널 | /terminal/[code] | TerminalSurface | company·price·filing·finance | 4a/4b |
+| 터미널 | /terminal/[code] | TerminalSurface | company·price·filing·finance·macro·report | 4a/4b |
 | 공시뷰어 | /viewer/company/[code] | ViewerSurface | filing·viewer | 6 |
 | 뷰어 N사 비교 | /compare, ?vs= | ViewerSurface(compare) | filing | 6 |
 | Ask(챗·drawer) | 뷰어/터미널 내 + 로컬 /chat | AskSurface | ai | 7 |
-| 회사 | terminal/viewer 연계 | CompanySurface | company | 8 |
-| 스캔(탐색기·SQL 노트북) | /scan | ScanSurface | scan | 8 |
-| 스크리너 | /screener | ScanSurface(ScreenBuilder) | scan | 8 |
-| 맵/산업 | /map, /industry/[code] | MapSurface | map | 8 |
-| 통합 검색 | /search | SearchSurface | search | 8 |
-| 변경 피드 | /changes | 단계-0 분류 | filing | 8 |
-| 인사이트 피드 | /insights | 단계-0 분류 | scan | 8 |
-| embed/lab/playground/site-signals/cheatsheet/health | 각 route | 단계-0 분류 (site-signals=타 세션 작업 중, 소유자 확인) | — | 단계-0 결정 |
+| 회사 | terminal/viewer 연계 (자체 route 없음 — 단계-0 실측) | CompanySurface | company | 8 |
+| 스캔(탐색기·SQL 노트북) | /scan (+/screener는 /scan redirect stub — 실측) | ScanSurface | scan | 8 |
+| 맵/산업 | /map, /industry/[id] | MapSurface | map | 8 |
+| 검색(회사 인덱스·본문) | 전용 route 없음 — terminal LeftRail·map·viewer 내장 (단계-0 실측: /search는 블로그 검색=콘텐츠) | SearchSurface(내장형) | search | 8 |
+| 변경 피드 | /changes (map 산출물 movers.json prerender) | 제품(경량) — 잔여 그룹 | map | 8 |
+| 인사이트 피드 | /insights (map/insights.json prerender) | 제품(경량) — 잔여 그룹 | map | 8 |
+| 임베드 위젯 | /embed/company/[code] (iframe CompanyCard) | 제품(위젯) — 잔여 그룹 | company | 8 |
+| 파이썬 데모 | /playground (Pyodide 콘솔) | 제품(데모) — landing 유지(wrapper 不要 검토) | — | 단계-8 재확인 |
+| 콘텐츠·시스템 확정 | /search(블로그 검색)·/cheatsheet=콘텐츠, /health·/lab/*=시스템(실험실) — landing 고유 잔존 | — | — | 이동 없음 |
+| site-signals | /site-signals | 보류 — 타 세션 작업 중, 종료 후 분류 | — | 보류 |
 
 ---
 

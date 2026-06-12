@@ -46,6 +46,8 @@ export interface DartLabRuntime {
   filing: FilingPort;
   finance: FinancePort;
   viewer: ViewerPort;
+  macro: MacroPort;
+  report: ReportPort;
   scan: ScanPort;
   map: MapPort;
   search: SearchPort;
@@ -142,9 +144,24 @@ export interface MapPort {
 }
 
 export interface SearchPort {
-  query(input: SearchQuery): Promise<SearchResultPage>;
+  query(input: SearchQuery): Promise<SearchResultPage>; // 실체 두 갈래(단계-0 실측): 회사 검색 인덱스(search-index.json, terminal LeftRail·map 소비) + viewer 본문 인덱스
+}
+
+export interface MacroPort {
+  // 단계-0 실측: macroSeries.ts — 회사 무관 시리즈(macro/{fred,ecos}/observations.parquet)라 PricePort에 넣으면 회사-스코프 계약 오염 → 신설
+  listSeries(): Promise<MacroSeriesMeta[]>;       // MACRO_SERIES + 출처 attribution
+  getSeries(id: string): Promise<MacroSeriesData>;
+  getLatest(ids: string[]): Promise<MacroLatestMap>;
+}
+
+export interface ReportPort {
+  // 단계-0 실측: reportSeries 10종(workforce·investments·shareholderReturn·ownership·execBoard·debtProfile·capitalChanges·auditTrail·topExecPay·auditFees)
+  // 현행은 workbench 미경유 패널 직호출 — 4a에서 port 경유로 단일화. CompanyPort 14메서드 비대 방지를 위해 분리.
+  load<K extends ReportSeriesKind>(code: string, kind: K): Promise<ReportSeriesData[K] | null>;
 }
 ```
+
+bootstrap 7종 JSON(routeLoad: finance·macro·meta·prices·search-index·ecosystem·quarters → engine)은 god-port(BootstrapPort)로 묶지 않는다 — 각 데이터는 해당 port 경유, 초기 로드 orchestration은 terminal 내부 헬퍼로 유지(단계-0 결정).
 
 FinancePort 메서드 표면은 단계-0 census(`workbench.ts` export + `localAdapter.ts` 25메서드 합집합)로 확정하며, 확정 시 본 문서 개정 entry를 07 원장에 남긴다.
 

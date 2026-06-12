@@ -10,12 +10,15 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 착수 대기 — 운영자 go 신호 후 단계-0(Inventory) 부터. 코드 변경 없는 단계라 지금도 가능.
-선행 조건 (단계-1a 이후 착수용):
-  ① 활성 세션 종료 + dirty file 분류 (06 §1 Freeze 체크리스트)
-  ② PyPI 기준 릴리스 1회 + 기준 commit/tag 기록
-  ③ ui/node_modules · ui/build 스트레이 처분 결정
-재개 지점: mainPlan v2 개정 commit (entry #1)
+다음 작업: 단계-1a (npm 워크스페이스 기반) — 04 단계-1a 절차대로.
+선행 조건 (충족 현황):
+  ① 활성 세션: site-signals 세션 잔존 — 1a는 landing/package-lock.json·vite.config.ts를 만지므로
+     착수 전 해당 세션 종료 또는 비충돌 확인 필수 (06 §1)
+  ② PyPI freeze: ✅ 충족 — v0.10.7 (tag=e3e296bd5, publish run 27432180934 success 2026-06-12 18:09Z)
+  ③ 스트레이: 삭제 결정 완료 (ui/node_modules·ui/build = gitignored 고아) — 집행은 1a 첫 수
+1a 착수 시 첫 수: ① 스트레이 삭제 ② 루트 package.json workspaces ③ deploy-landing.yml·dependabot.yml 개정
+   ④ landing d3 alias 핵 제거 ⑤ 검증(landing build + Pages artifact + ui/web 단독 재현 + OneDrive junction/npm ci 2회)
+재개 지점: 단계-0 완료 (entry #5) — 실측 원자료는 06 §10
 ```
 
 ---
@@ -119,4 +122,20 @@ commit: (이 변경의 커밋)
 - 잔여 주의(허점 아님, 인지 항목): landing 빌드 비용은 수용 부채(01 §3.1), 차트 3스택 통합(단계-8)은 과소평가 주의, 우월성은 단계-4b/5 완주 후 실현 — 중도 포기 시 현행보다 나쁨(원장 NEXT가 보험)
 
 검증: 문서 변경만 — build 영향 없음.  
+rollback: 이 commit revert.
+
+### [5] 단계-0 Inventory and Boundary Map — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+내용: 개발 착수(운영자 go). 에이전트 2병렬(의존 폐쇄 실측 / route·운영 실사)로 단계-0 산출 완료 — 원자료는 06 §10, 표 채움은 06 §1~§6, 지도 확정은 01 §4.1.
+
+- terminal 폐쇄 실측(55파일): 외부 표면 좁음 — $lib 데이터 모듈 7종+viewer 컴포넌트 2(주입 역전)+$app 2종(15파일)+klinecharts+tokens.css CSS 변수 상속. 나머지 ~40파일 자급
+- 포트 초안 확정: localAdapter 25메서드가 합집합 95% — 4a 본질은 "optional+전역 locator(6파일)+silent fallback(13파일/33개소) → 필수 계약+주입" 기계적 치환, ~25파일 2~3세션
+- 설계 결정 3건: **MacroPort 신설**(회사 무관 시리즈 — PricePort 오염 방지) / **ReportPort 분리**(reportSeries 10종 패널 직호출 → port 단일화, CompanyPort 비대 방지) / bootstrap 7종 JSON은 god-port 금지 — port별 분해 (02 §2·§3.5 반영)
+- route 분류 확정: changes·insights=제품(경량, map 파생), embed=제품(위젯), playground=제품(데모), cheatsheet=콘텐츠, health·lab=시스템, **/search=블로그 검색(콘텐츠) — 전수 지도 정정**(회사 검색 실체=terminal/map 내장 인덱스+viewer 본문, 전용 route 없음), /screener=/scan redirect stub, site-signals=보류(타 세션)
+- ui/shared census 확정: 20파일(chart 15·api 3·markdown 2)·실 import 0. 단 Skill OS viz 계약이 ChartRenderer 경로 정본 참조 — 처분 권고: api·markdown 폐기 / chart=viz SKILL.md+산출물 JSON+alias 3곳 동시 갱신 조건부, **운영자 결정 대기**, 집행=단계-8
+- freeze ② 충족 실측: v0.10.7 PyPI 발행 성공(run 27432180934, 2026-06-12 18:09Z), pyproject=tag=CHANGELOG 3자 일치. 기준 commit=e3e296bd5
+- 스트레이 판정·결정: ui/node_modules(2026-04-04 stale 169폴더)·ui/build(옛 "DartLab AI" 웹챗 SPA 빌드) 둘 다 gitignored 고아 — 삭제 결정, 집행=단계-1a
+
+검증: 04 단계-0 기준 — 코드 변경 0(mainPlan 문서만), build 영향 없음, landing 공개 route 목록 보존(분류만 확정). ✅  
 rollback: 이 commit revert.
