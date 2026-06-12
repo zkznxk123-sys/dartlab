@@ -8,11 +8,15 @@ on:
   schedule:
     # '어제' 수집이므로 화~토 실행 = 월~금 장 커버. 월~금 실행은 금요일 데이터를 영원히
     # 누락시키는 off-by-one (date/2026 9거래일 구멍의 근본 원인 — 2026-06-10 정정).
-    # 하루 2회(오후+저녁): gov 는 전일치를 T+1 오후(~13:30 관측, 2026-06-11 6/10이 13:33 발행) 발행 →
-    # 13시가 어제치 1차 확보, 20시는 backstop(13시 미발행분 + lookback catch-up). (2026-06-11 오전→13시 이동)
-    - cron: '0 4  * * 2-6'  # KST 13:00 화~토 (UTC 04:00) — 어제 전종목 1차 수집(gov 오후 발행분) + recent
-    - cron: '0 11 * * 2-6'  # KST 20:00 화~토 (UTC 11:00) — backstop (13시 미발행 시 catch-up) + recent
-    - cron: '0 13 * * 6'    # KST 22:00 토 — 회사별 전종목 파생 리프레시 (date 기수집분 재배치, API 호출 0)
+    # gov 는 전일치를 T+1 오후(~13:33 관측, 2026-06-11) 발행. 2026-06-12 재설계 —
+    # ① 정각(:00) cron 은 GH 최대 혼잡 슬롯이라 미발화·수시간 지연 실측(6/12 13:00 미발화,
+    #    6/11 20:00 이 23:43 발화). 전 슬롯 정각 회피.
+    # ② 13:00 은 발행(13:33) 전이라 떠도 빈손 → 1차를 13:40 으로, 14:40 catch-up 추가
+    #    (idempotent — 기수집 시 skip ~44s 라 추가 슬롯 비용 무시 가능). 20:10 은 최종 backstop.
+    - cron: '40 4  * * 2-6'  # KST 13:40 화~토 — 어제 전종목 1차 수집(gov ~13:33 발행 직후)
+    - cron: '40 5  * * 2-6'  # KST 14:40 화~토 — 발행 지연일·1차 미발화 catch-up
+    - cron: '10 11 * * 2-6'  # KST 20:10 화~토 — backstop (잔여 + lookback catch-up)
+    - cron: '10 13 * * 6'    # KST 22:10 토 — 회사별 전종목 파생 리프레시 (date 기수집분 재배치, API 호출 0)
   workflow_dispatch:
     inputs:
       basDt:
@@ -61,7 +65,7 @@ jobs:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          if [ "${{ github.event.schedule }}" = "0 13 * * 6" ] || [ "${{ github.event.inputs.mode }}" = "derive" ]; then
+          if [ "${{ github.event.schedule }}" = "10 13 * * 6" ] || [ "${{ github.event.inputs.mode }}" = "derive" ]; then
             uv run python -X utf8 .github/scripts/sync/buildGovData.py --derive-companies
           else
             uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily --lookback 4 ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
