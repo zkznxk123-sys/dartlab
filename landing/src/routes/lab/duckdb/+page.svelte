@@ -159,7 +159,7 @@ LIMIT 10`);
 		<div class="nav-actions">
 			<Button variant="ghost" size="sm" href="{base}/lab">/lab</Button>
 			<Button variant="ghost" size="sm" href="{base}/lab/map">/lab/map</Button>
-			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/005930">/lab/dashboard</Button>
+			<Button variant="ghost" size="sm" href="{base}/terminal">/terminal</Button>
 		</div>
 	</div>
 </header>

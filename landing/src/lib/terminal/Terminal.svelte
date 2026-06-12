@@ -26,10 +26,15 @@
 	}
 	let { eng, initial = '005930' }: Props = $props();
 
-	// 마지막 본 종목 복원 — 재접속 시 그 종목으로 (localStorage, SSR 안전 가드)
+	// 종목 결정 우선순위: ?sym= 딥링크(산업·인사이트 등 내부 링크) > 마지막 본 종목(localStorage) > initial
+	const urlSym = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('sym') : null;
 	const lastSym = typeof localStorage !== 'undefined' ? localStorage.getItem(LAST_SYM_KEY) : null;
 	const first = eng.featured(1)[0] || initial;
-	let sym = $state(lastSym && eng.buildCompany(lastSym) ? lastSym : eng.buildCompany(initial) ? initial : first);
+	let sym = $state(
+		urlSym && eng.buildCompany(urlSym) ? urlSym
+		: lastSym && eng.buildCompany(lastSym) ? lastSym
+		: eng.buildCompany(initial) ? initial : first
+	);
 	let lang = $state<Lang>('kr');
 	let sourcesOpen = $state(false);
 	// 출처 모달 "최근 일자" — 라이브 재무 최신 분기 (loadTerminalFinance in-flight dedup, 추가 다운로드 0)

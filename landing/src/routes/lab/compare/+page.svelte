@@ -122,7 +122,7 @@
 		</a>
 		<div class="nav-actions">
 			<Button variant="ghost" size="sm" href="{base}/lab/map">/map</Button>
-			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/005930">/dashboard</Button>
+			<Button variant="ghost" size="sm" href="{base}/terminal">/terminal</Button>
 			<Button variant="ghost" size="sm" href="{base}/lab/duckdb">/duckdb</Button>
 		</div>
 	</div>
@@ -278,7 +278,7 @@
 						{/each}
 					</dl>
 					<div style="margin-top: var(--dl-s-3); padding-top: var(--dl-s-3); border-top: 1px solid var(--dl-line);">
-						<Button href="{base}/lab/dashboard/{n.id}" variant="ghost" size="sm" fullWidth>대시보드 →</Button>
+						<Button href="{base}/terminal?sym={n.id}" variant="ghost" size="sm" fullWidth>터미널 →</Button>
 					</div>
 				</Card>
 			{/each}

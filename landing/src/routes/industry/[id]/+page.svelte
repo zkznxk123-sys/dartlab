@@ -247,7 +247,7 @@
 						<ul class="stage-list">
 							{#each (stage.nodes || []).slice(0, 8) as n}
 								<li>
-									<a href="{base}/company/{n.stockCode}" class="stage-company">
+									<a href="{base}/terminal?sym={n.stockCode}" class="stage-company">
 										<span class="c-name">{n.corpName}</span>
 										<span class="c-rev">{formatRev(n.revenue)}</span>
 									</a>
@@ -281,7 +281,7 @@
 							{#each (stage.nodes || []).slice(0, 5) as n, i}
 								<li>
 									<span class="rank-num">{i + 1}</span>
-									<a href="{base}/company/{n.stockCode}" class="rank-link">
+									<a href="{base}/terminal?sym={n.stockCode}" class="rank-link">
 										<span>{n.corpName}</span>
 										<span class="rank-rev">{formatRev(n.revenue)}</span>
 									</a>
@@ -313,13 +313,13 @@
 						{#each preciseEdges as e}
 							<tr>
 								<td>
-									<a href="{base}/company/{e.from}" class="e-link">
+									<a href="{base}/terminal?sym={e.from}" class="e-link">
 										{nameMap[e.from] || e.from}
 									</a>
 								</td>
 								<td class="arrow">→</td>
 								<td>
-									<a href="{base}/company/{e.to}" class="e-link">
+									<a href="{base}/terminal?sym={e.to}" class="e-link">
 										{nameMap[e.to] || e.to}
 									</a>
 								</td>

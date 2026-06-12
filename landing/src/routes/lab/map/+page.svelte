@@ -76,7 +76,7 @@
 		if (e.key === 'ArrowDown') { e.preventDefault(); searchSel = Math.min(searchSel + 1, searchResults.length - 1); }
 		else if (e.key === 'ArrowUp') { e.preventDefault(); searchSel = Math.max(searchSel - 1, 0); }
 		else if (e.key === 'Enter' && searchResults[searchSel]) {
-			window.location.href = `${base}/lab/dashboard/${searchResults[searchSel].id}`;
+			window.location.href = `${base}/terminal?sym=${searchResults[searchSel].id}`;
 		} else if (e.key === 'Escape') {
 			searchOpen = false;
 			searchQ = '';
@@ -132,7 +132,7 @@
 				<kbd class="dl-kbd">/</kbd>
 			</button>
 			<Button variant="ghost" size="sm" href="{base}/lab">/lab</Button>
-			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/005930">005930</Button>
+			<Button variant="ghost" size="sm" href="{base}/terminal">005930</Button>
 		</div>
 	</div>
 </header>
@@ -166,7 +166,7 @@
 					{#each searchResults as r, i}
 						<li>
 							<a
-								href="{base}/lab/dashboard/{r.id}"
+								href="{base}/terminal?sym={r.id}"
 								class="search-item"
 								class:active={i === searchSel}
 								onmouseenter={() => (searchSel = i)}
@@ -262,7 +262,7 @@
 			<ol class="ins-list">
 				{#each selectedEntries.slice(0, 12) as e, i}
 					<li>
-						<a href="{base}/lab/dashboard/{e.stockCode}" class="ins-item">
+						<a href="{base}/terminal?sym={e.stockCode}" class="ins-item">
 							<span class="ins-rank dl-mono">{(i + 1).toString().padStart(2, '0')}</span>
 							<span class="ins-name">{e.corpName ?? e.stockCode}</span>
 							<span class="ins-rev dl-mono">{e.revenue ? fmtKrwFromEok(e.revenue / 1e8) : '—'}</span>

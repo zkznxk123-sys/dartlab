@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import type { Company, Lang, Tone, Num } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
@@ -12,6 +11,7 @@
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 	import { loadCompanyRelations } from '../data/relations';
 	import { loadCapitalChanges } from '../data/reportSeries';
+	import { localTerminalAdapter } from '../data/localAdapter';
 
 	interface Props {
 		co: Company;
@@ -19,6 +19,8 @@
 		kpis?: { l: string; v: string; t: string; s?: number[] }[];
 	}
 	let { co, lang, kpis = [] }: Props = $props();
+	const localViewerHref = $derived(localTerminalAdapter()?.viewerUrl?.(co.code) ?? null);
+	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	// KPI 스파크라인 폴리라인 points (최근 1년 추세 — min-max 정규화)
 	function kpiSpark(s: number[], w = 34, h = 11): string {
 		const lo = Math.min(...s);
@@ -249,11 +251,10 @@
 			<span class="symName">{co.name.kr}</span>
 		</div>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
-		<nav class="symLinks">
-			<a href="{base}/viewer/company/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'viewer ↗' : '공시뷰어 ↗'}</a>
-			<a href="{base}/lab/dashboard/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'dashboard ↗' : '대시보드 ↗'}</a>
-			<a href="{base}/company/{co.code}" target="_blank" rel="noopener">{lang === 'en' ? 'company ↗' : '회사 ↗'}</a>
-		</nav>
+		{#if localViewerHref}
+			<!-- ui/web 임베드 한정 — 로컬 어댑터가 있을 때만 /analysis 터미널 링크 노출 -->
+			<nav class="symLinks"><a href={localTerminalHref}>{lang === 'en' ? 'terminal' : '터미널'}</a></nav>
+		{/if}
 	</div>
 	{#if product || corpInfo}
 		<div class="symProd" title={product}>
@@ -406,4 +407,3 @@
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션', en: 'VALUATION' }} flush><div class="storyEmpty">{lang === 'en' ? 'Insufficient data.' : '데이터 부족.'}</div></Panel>
 	{/if}
 </div>
-

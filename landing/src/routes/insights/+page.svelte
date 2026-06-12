@@ -57,7 +57,7 @@
 				</header>
 				<div class="rank-list">
 					{#each rankings[key].entries as e, i}
-						<a href="{base}/company/{e.stockCode}" class="rank-item">
+						<a href="{base}/terminal?sym={e.stockCode}" class="rank-item">
 							<div class="rank-num">{i + 1}</div>
 							<div class="rank-body">
 								<div class="rank-name">{e.corpName}</div>

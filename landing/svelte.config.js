@@ -9,17 +9,15 @@ const basePath = process.env.BASE_PATH || '';
 const projectRoot = resolve('..');
 const repoBlobBase = 'https://github.com/eddmpython/dartlab/blob/master';
 
-// 산업지도: static/map/companies/*.json 이 있으면 해당 경로 prerender
-const mapCompaniesDir = resolve('./static/map/companies');
-const companyEntries = existsSync(mapCompaniesDir)
-	? readdirSync(mapCompaniesDir)
-			.filter((f) => f.endsWith('.json'))
-			.map((f) => `/company/${f.replace('.json', '')}`)
-	: [];
-
 // 공시뷰어 동적 라우트(/viewer/company/[code]) prerender — 없으면 GitHub Pages 가 404.html(404 status) 로 fallback
 // 해 콘솔 404 + 캐시 꼬임(ERR_CACHE) + 로드 실패 유발. 회사별 정적 shell(ssr=false) 로 200 응답.
-const viewerEntries = companyEntries.map((p) => `/viewer${p}`);
+// (옛 /company/[code] 회사 내러티브 페이지는 폐기 — 터미널 체계 일원화. map/companies 목록은 뷰어 prerender 에만 사용)
+const mapCompaniesDir = resolve('./static/map/companies');
+const viewerEntries = existsSync(mapCompaniesDir)
+	? readdirSync(mapCompaniesDir)
+			.filter((f) => f.endsWith('.json'))
+			.map((f) => `/viewer/company/${f.replace('.json', '')}`)
+	: [];
 const mapIndustriesDir = resolve('./static/map/industries');
 const industryEntries = existsSync(mapIndustriesDir)
 	? readdirSync(mapIndustriesDir)
@@ -163,7 +161,7 @@ const config = {
 			strict: false
 		}),
 		prerender: {
-			entries: ['*', '/docs/', '/blog/', '/cheatsheet', ...companyEntries, ...viewerEntries, ...industryEntries],
+			entries: ['*', '/docs/', '/blog/', '/cheatsheet', ...viewerEntries, ...industryEntries],
 			handleHttpError: ({ path, referrer, message }) => {
 				// basePath prefix 제거 후 검사 (CI에서 path는 /dartlab/... 형태)
 				const stripped = basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
@@ -171,8 +169,8 @@ const config = {
 				if (stripped.startsWith('/industry/')) {
 					return;
 				}
-				// /company/ 중 top 200에 없는 회사 링크 + JSON fetch 실패는 무시
-				if (stripped.startsWith('/company/') || stripped.startsWith('/map/companies/')) {
+				// /map/companies/ JSON fetch 실패는 무시 (뷰어 prerender 데이터)
+				if (stripped.startsWith('/map/companies/')) {
 					return;
 				}
 				// /feed/ RSS/iCal 링크 — 정적 파일이라 prerender 불필요
