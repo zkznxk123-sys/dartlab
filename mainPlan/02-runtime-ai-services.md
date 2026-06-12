@@ -46,6 +46,9 @@ export interface DartLabRuntime {
   filing: FilingPort;
   finance: FinancePort;
   viewer: ViewerPort;
+  scan: ScanPort;
+  map: MapPort;
+  search: SearchPort;
   ai: AiPort;
   services: ServicesPort;
   navigation: NavigationPort;
@@ -118,7 +121,28 @@ export interface ViewerPort {
 }
 ```
 
-### 3.5 Adapter Response Metadata
+### 3.5 ScanPort / MapPort / SearchPort
+
+```ts
+export interface ScanPort {
+  listTableSources(): Promise<ScanTableSource[]>; // parquet/duck 테이블 소스 공급 — public=static/HF, local=로컬 캐시/API
+  getPresets(): Promise<ScanPreset[]>;
+  savePreset(preset: ScanPreset): Promise<void>;
+}
+
+export interface MapPort {
+  listIndustries(): Promise<IndustrySummary[]>;
+  getIndustryMap(id: string): Promise<IndustryMapData>; // public=static map JSON(HF seed), local=로컬 API
+}
+
+export interface SearchPort {
+  query(input: SearchQuery): Promise<SearchResultPage>;
+}
+```
+
+원칙: 쿼리 실행 엔진(duckdb-wasm 등)은 surface 내부 구현 detail이다 — port는 데이터 소스 공급과 저장만 담당한다.
+
+### 3.6 Adapter Response Metadata
 
 데이터 adapter 반환값은 가능한 한 다음 metadata를 포함한다.
 

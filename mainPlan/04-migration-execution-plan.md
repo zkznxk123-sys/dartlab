@@ -97,7 +97,7 @@
 
 목표:
 
-- `landing` 제품 UI와 content UI를 분류한다.
+- `landing` 전 route를 제품/콘텐츠로 분류한다 — 경계 원칙(00 §2-11): 콘텐츠 자산 빼고 전부 제품. 01 §4.1 전수 지도의 "단계-0 분류" 행(changes·insights·embed·lab·playground·site-signals)을 확정한다. site-signals 등 타 세션 작업 중 route는 소유자 확인 후 분류.
 - 옮길 파일 목록과 유지할 파일 목록을 확정한다.
 - **terminal 의존 폐쇄(closure)를 실측으로 확정한다.** 알려진 최소 폐쇄(사전 실측): `$lib/data/hfRange`(govPrice·macroSeries·priceSeries·reportSeries·terminalFinance 5파일), `$lib/data/dartlabData`(2), `$lib/data/{productIndexRuntime,companyFilingsRuntime,companyNonRegularFilings}`, `$lib/browser/companyLive`, `$lib/scan/duckSql`, `$lib/components/viewer/{ViewerStudio,FinanceDialog}`, `$lib/brand`(2), `$lib/components/GithubIcon.svelte`, `$app/paths`(3) + `$app/environment`(10), `lib/styles/{v2-tokens,tokens}.css`(ui/web 직접 import).
 - **포트 설계 초안 = `terminal/data/workbench.ts` export 표면 + `localAdapter.ts` 25메서드의 합집합**으로 잡는다. ui/web vite shim 목록은 보조 증거일 뿐 — shim은 5모듈뿐이고 hfRange/dartlabData는 블랭킷 `$lib` alias로 landing 원본이 로컬에서 그대로 실행되는 비가시 경로다.
@@ -318,11 +318,12 @@ python server static frontend 선택 flag
 - AG-UI allowlist 외 이벤트 렌더 금지
 - 챗모드와 터미널모드가 같은 Ask engine contract 사용
 
-### 단계-8: Services and Company/Chart Surface Extraction (이동 원자 윈도우 — §2.5)
+### 단계-8: Services + 잔여 제품 Surface 추출 (이동 원자 윈도우 — §2.5)
 
 목표:
 
 - 회사 화면, charting, evidence UI 공용화
+- **scan(탐색기·SQL 노트북·ScreenBuilder)·screener·map/industry·search + 단계-0 분류 확정분(changes·insights 등) surface 추출** — 01 §4.1 전수 지도의 잔여 제품 작업면 전부. 터미널·뷰어만 옮기고 끝나지 않는다.
 - terminal/chart/viewer 간 상태 규칙 정리
 - `ServicesPort` command registry 구현 (localOnly descriptor + upgradeHint 포함)
 - ChartSpec -> ChartRenderer 단일 경로
@@ -429,7 +430,8 @@ tests/ wheel smoke 스크립트         # testWheelSmoke/verifyWheel 류 — loc
 단계-5   local SvelteKit scaffold             (병행 가능) ← 가치 V1: 로컬 SvelteKit 터미널
 단계-6   viewer surface extraction            [이동 원자 윈도우]
 단계-7   AI runtime integration               (병행 가능) ← 가치 V2: 로컬 고급 Ask
-단계-8   services, company, chart, evidence   [이동 원자 윈도우]
+단계-8   services + 잔여 제품 surface 전부      [이동 원자 윈도우]
+         (company·chart·evidence·scan·screener·map·search·changes·insights)
 단계-9   landing public shell 전환 완료        [이동 원자 윈도우]
 단계-10  local app default switch
 단계-11  ui/web legacy removal

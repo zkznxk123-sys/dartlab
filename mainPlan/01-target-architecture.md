@@ -297,6 +297,8 @@ ui/packages/
       terminal/
       viewer/
       company/
+      scan/        # DataExplorer · SQL 노트북 · ScreenBuilder (landing lib/scan 36파일)
+      map/         # industry map (/map, /industry/[code])
       charting/
       evidence/
       search/
@@ -309,6 +311,25 @@ ui/packages/
       assertions/
       visual/
 ```
+
+### 4.1 제품 작업면 전수 지도 (헷갈림 방지 단일 표)
+
+> 경계 원칙(00 §2-11): 콘텐츠 자산(blog/docs/about/skills/legal/SEO/static) 빼고 전부 제품. 이 표가 "무엇이 어디로 가는가"의 단일 참조다. 단계-0 인벤토리에서 빈칸·분류 미정 행을 확정한다.
+
+| 작업면 | 공개 route | surface | 주 port | 추출 단계 |
+|---|---|---|---|---|
+| 터미널 | /terminal/[code] | TerminalSurface | company·price·filing·finance | 4a/4b |
+| 공시뷰어 | /viewer/company/[code] | ViewerSurface | filing·viewer | 6 |
+| 뷰어 N사 비교 | /compare, ?vs= | ViewerSurface(compare) | filing | 6 |
+| Ask(챗·drawer) | 뷰어/터미널 내 + 로컬 /chat | AskSurface | ai | 7 |
+| 회사 | terminal/viewer 연계 | CompanySurface | company | 8 |
+| 스캔(탐색기·SQL 노트북) | /scan | ScanSurface | scan | 8 |
+| 스크리너 | /screener | ScanSurface(ScreenBuilder) | scan | 8 |
+| 맵/산업 | /map, /industry/[code] | MapSurface | map | 8 |
+| 통합 검색 | /search | SearchSurface | search | 8 |
+| 변경 피드 | /changes | 단계-0 분류 | filing | 8 |
+| 인사이트 피드 | /insights | 단계-0 분류 | scan | 8 |
+| embed/lab/playground/site-signals | 각 route | 단계-0 분류 (site-signals=타 세션 작업 중, 소유자 확인) | — | 단계-0 결정 |
 
 ---
 

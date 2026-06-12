@@ -32,6 +32,7 @@
 8. 공시뷰어, terminal, company, chart, evidence UI 구현은 한 벌만 존재한다.
 9. 공개 AI는 결정론 Q&A(항상) + WebGPU 온디바이스(가용 기기) 티어로 동작한다. 이미 출시된 공개 AskDrawer의 회귀는 금지다.
 10. 기능 승격 경로가 존재한다 — 로컬 선개발 → 승격 게이트(02 §10) → 공개 반영. 공개에서는 로컬 전용 상위 기능을 숨기지 않고 tier 표시 + 업그레이드 hint로 보여준다.
+11. **제품 작업면 경계 원칙** — 터미널·뷰어만이 아니다. landing에서 콘텐츠 자산(blog, docs, about, skills 마켓, legal, SEO/sitemap, static content)을 뺀 **전부가 제품 작업면**이다: terminal, viewer, company, scan(DataExplorer·SQL 노트북·ScreenBuilder), screener, map/industry, compare, changes, search, insights, ask. 전부 공용 surface 후보이고 로컬 앱에도 배선된다. route별 최종 분류는 단계-0 인벤토리에서 확정한다.
 
 ---
 

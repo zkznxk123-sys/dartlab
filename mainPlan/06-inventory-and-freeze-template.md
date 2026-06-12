@@ -74,10 +74,15 @@ node_modules OneDrive 동기화 제외 확인:
 | route | 현재 owner | 사용자 영향 | 새 owner | 전환 방식 | smoke 필요 | 무중단 기준 |
 |---|---|---|---|---|---|---|
 | / | landing | 높음 | landing | 유지 | yes | 200 + metadata |
-| /blog/* | landing | 높음 | landing | 유지 | yes | 200 |
-| /docs/* | landing | 높음 | landing | 유지 | yes | 200 |
-| /terminal/* | landing/product | 높음 | public wrapper/surface | wrapper 후 전환 | yes | no 404 |
-| /viewer/* | landing/product | 높음 | public wrapper/surface | wrapper 후 전환 | yes | no blank |
+| /blog/* · /docs/* · /about · /skills/* | landing(콘텐츠) | 높음 | landing | 유지 | yes | 200 |
+| /terminal/* | landing/product | 높음 | landing wrapper + surface | wrapper 후 전환 | yes | no 404 |
+| /viewer/* | landing/product | 높음 | landing wrapper + surface | wrapper 후 전환 | yes | no blank |
+| /scan · /screener | landing/product | 높음 | landing wrapper + ScanSurface | 단계-8 | yes | no blank |
+| /map · /industry/* | landing/product | 높음 | landing wrapper + MapSurface | 단계-8 | yes | prerender 보존 |
+| /compare | landing/product | 중간 | ViewerSurface(compare) | 단계-6 | yes | no 404 |
+| /search | landing/product | 중간 | SearchSurface | 단계-8 | yes | no blank |
+| /changes · /insights | landing/product | 중간 | 단계-0 분류 | 단계-8 | yes | no 404 |
+| /embed · /lab/* · /playground · /site-signals | 단계-0 분류 (site-signals=타 세션) | — | 단계-0 결정 | — | — | — |
 
 ---
 
@@ -91,6 +96,9 @@ node_modules OneDrive 동기화 제외 확인:
 | landing/src/lib/components/viewer/{ViewerStudio,FinanceDialog} | terminal→viewer 역의존 | 주입 계약(ViewerHost)으로 역전 | 단계-4a | 불필요 | surfaces→landing/src 0 |
 | landing/src/lib/viewer/** | ViewerSurface | ui/packages/surfaces/src/viewer/** | 단계-6 | 필요 시 | overlay/standalone green |
 | landing/src/lib/styles/{v2-tokens,tokens}.css 외 | design token | ui/packages/design/src/styles/** | 단계-3 | 최소 | landing build green + ui/web smoke (deep import 재배선) |
+| landing/src/lib/scan/** (36파일 — DataExplorer·SQL노트북·ScreenBuilder·duckSql·presets) | ScanSurface | ui/packages/surfaces/src/scan/** | 단계-8 | 필요 시 | scan/screener route green |
+| landing map 자산 (routes/map·industry + static/map 로더) | MapSurface | ui/packages/surfaces/src/map/** | 단계-8 | 필요 시 | industry prerender 보존 |
+| landing/src/routes/search + 검색 인덱스 로더 | SearchSurface | ui/packages/surfaces/src/search/** | 단계-8 | 필요 시 | search route green |
 | ui/shared/{chart,api,markdown} | 실사용 0 실측 | 단계-0 census 후 운영자 처분 | 단계-0 결정 · 단계-8 집행 | — | ChartRenderer 참조 문서 동시 갱신 |
 | ui/web/src/** | local legacy | 제자리 동결 → 제거 | 단계-11 | 없음 | fallback call 0 |
 

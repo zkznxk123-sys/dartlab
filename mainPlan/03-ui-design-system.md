@@ -9,12 +9,14 @@
 
 Surface는 사용자에게 하나의 독립 화면 경험을 제공하는 UI 단위다.
 
-예:
+예 (전수 지도는 01 §4.1):
 
 - `TerminalSurface`
 - `ViewerSurface`
 - `CompanySurface`
-- `ScreenerSurface`
+- `ScanSurface` (탐색기·SQL 노트북·ScreenBuilder)
+- `MapSurface` (industry map)
+- `SearchSurface`
 - `AskSurface`
 
 규칙:
