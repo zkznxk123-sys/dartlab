@@ -225,23 +225,7 @@ ui/packages/
       index.ts
       createRuntime.ts
       runtimeContext.svelte.ts
-      ports/
-        companyPort.ts
-        pricePort.ts
-        filingPort.ts
-        financePort.ts
-        viewerPort.ts
-        macroPort.ts
-        reportPort.ts
-        scanPort.ts
-        mapPort.ts
-        searchPort.ts
-        aiPort.ts
-        servicesPort.ts
-        navigationPort.ts
-        storagePort.ts
-        telemetryPort.ts
-        featureFlagPort.ts
+      # port 인터페이스 정의는 contracts 가 SSOT (단계-2 결정: runtime/ports/ 중복 폴더 비채택 — 덕지덕지 방지)
       services/
         serviceRegistry.ts
         toolRegistry.ts

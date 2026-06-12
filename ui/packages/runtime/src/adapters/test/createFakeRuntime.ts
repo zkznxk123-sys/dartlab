@@ -1,0 +1,426 @@
+// test adapter — 네트워크 0, 전 포트 fixture 구현 (02 §9.3).
+// DartLabRuntime 타입을 통째로 구현하므로, tsc 가 "전 포트 required 메서드 구현 존재"를
+// 기계 검사한다 (05 §2 conformance 의 컴파일 타임 절반 — 런타임 fixture 대조는 첫 surface 테스트와 동행).
+import type {
+	AiPort,
+	Candle,
+	CompanyPort,
+	DartLabRuntime,
+	FilingPort,
+	FinancePort,
+	MacroPort,
+	MapPort,
+	NavigationPort,
+	PricePort,
+	ReportPort,
+	RuntimeEnvironment,
+	RuntimeStorageKey,
+	ScanPort,
+	SearchPort,
+	StoragePort,
+	ViewerPort
+} from '@dartlab/ui-contracts';
+import { createServiceRegistry } from '../../services/serviceRegistry';
+
+const FIXTURE_CODE = '005930';
+
+function fixtureCandles(): Candle[] {
+	// 5영업일 고정 fixture — 시각 회귀·렌더 검증용 (난수·현재시각 금지: 결정론).
+	return [
+		{ t: '20260601', o: 100, h: 110, l: 95, c: 105, v: 1000 },
+		{ t: '20260602', o: 105, h: 115, l: 100, c: 110, v: 1200 },
+		{ t: '20260603', o: 110, h: 112, l: 101, c: 102, v: 900 },
+		{ t: '20260604', o: 102, h: 108, l: 99, c: 107, v: 1100 },
+		{ t: '20260605', o: 107, h: 120, l: 106, c: 118, v: 1500 }
+	];
+}
+
+function fakeCompany(): CompanyPort {
+	return {
+		async products(code) {
+			if (code !== FIXTURE_CODE) return null;
+			return { product: '메모리 반도체', productRaw: 'DRAM·NAND', latestPeriod: '2026Q1', industry: '반도체' };
+		},
+		async productIndex() {
+			return { [FIXTURE_CODE]: { product: '메모리 반도체', productRaw: 'DRAM·NAND', latestPeriod: '2026Q1' } };
+		},
+		async relations(code) {
+			if (code !== FIXTURE_CODE) return null;
+			return { suppliers: [], customers: [], peers: [], neighborCount: 0, blog: null };
+		},
+		async reportFacts() {
+			return [];
+		}
+	};
+}
+
+function fakePrice(): PricePort {
+	const candles = fixtureCandles();
+	return {
+		async initial(code) {
+			if (code !== FIXTURE_CODE) return null;
+			return { candles, oldestYear: 2026 };
+		},
+		async older() {
+			return [];
+		},
+		loaded(code) {
+			return code === FIXTURE_CODE ? candles : [];
+		},
+		async govCandles(code) {
+			return code === FIXTURE_CODE ? candles : null;
+		},
+		async govRecent() {
+			return { [FIXTURE_CODE]: candles };
+		}
+	};
+}
+
+function fakeFiling(): FilingPort {
+	return {
+		async regular(code) {
+			if (code !== FIXTURE_CODE) return [];
+			return [
+				{
+					rceptNo: '20260331000001',
+					rceptDate: '2026-03-31',
+					reportType: '사업보고서',
+					year: '2025',
+					url: 'https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260331000001'
+				}
+			];
+		},
+		async nonRegular() {
+			return [];
+		},
+		async panelToc(code) {
+			if (code !== FIXTURE_CODE) return null;
+			return {
+				stockCode: code,
+				corpName: '픽스처전자',
+				chapters: [
+					{
+						chapter: 'I. 회사의 개요',
+						sections: [
+							{
+								sectionLeaf: '1. 회사의 개요',
+								sectionKey: 'I. 회사의 개요␟1. 회사의 개요',
+								blocks: [{ blockLeaf: '개요', leafType: 'narrative', disclosureKey: null }]
+							}
+						]
+					}
+				],
+				periods: ['2025']
+			};
+		},
+		async panelInit(code) {
+			const toc = await this.panelToc(code);
+			const grid = await this.panelGrid(code, 'I. 회사의 개요␟1. 회사의 개요');
+			if (!toc || !grid) return null;
+			return {
+				stockCode: code,
+				corpName: toc.corpName,
+				toc,
+				firstChapter: 'I. 회사의 개요',
+				firstSectionKey: 'I. 회사의 개요␟1. 회사의 개요',
+				grid
+			};
+		},
+		async panelGrid(code, sectionKey) {
+			if (code !== FIXTURE_CODE) return null;
+			return {
+				stockCode: code,
+				corpName: '픽스처전자',
+				chapter: 'I. 회사의 개요',
+				sectionLeaf: '1. 회사의 개요',
+				sectionKey,
+				periods: ['2025'],
+				rows: [
+					{
+						chapter: 'I. 회사의 개요',
+						sectionLeaf: '1. 회사의 개요',
+						blockLeaf: '개요',
+						leafType: 'narrative',
+						disclosureKey: null,
+						scope: null,
+						blockType: 'text',
+						cells: { '2025': '<p>픽스처 본문</p>' }
+					}
+				]
+			};
+		}
+	};
+}
+
+function fakeFinance(): FinancePort {
+	return {
+		async bundle(code) {
+			if (code !== FIXTURE_CODE) return null;
+			return {
+				modes: ['annual'],
+				views: {
+					annual: {
+						periods: ['FY24', 'FY25'],
+						freq: 'annual',
+						cards: [],
+						tabCards: { profitability: [], cashflow: [], debt: [], shareholder: [] },
+						revYoy: [null, 10],
+						opYoy: [null, 12],
+						cashQuality: [1.1, 1.2],
+						statements: { IS: [], BS: [], CF: [] },
+						ratios: []
+					},
+					quarter: null,
+					ttm: null
+				},
+				defaultMode: 'annual',
+				filedDates: {}
+			};
+		}
+	};
+}
+
+function fakeMacro(): MacroPort {
+	const def = { id: 'USDKRW', src: 'ecos' as const, kr: '원/달러 환율', en: 'USD/KRW', unit: '원' };
+	return {
+		async listSeries() {
+			return [def];
+		},
+		async getSeries(id) {
+			if (id !== 'USDKRW') return null;
+			return [
+				{ d: '20260601', v: 1350 },
+				{ d: '20260602', v: 1355 }
+			];
+		},
+		async getLatest() {
+			return [{ def, v: 1355, d: '20260602', chg: 5, spark: [1350, 1355] }];
+		}
+	};
+}
+
+function fakeReport(): ReportPort {
+	return {
+		async workforce(code) {
+			if (code !== FIXTURE_CODE) return null;
+			return [
+				{
+					year: '2025',
+					total: 1000,
+					male: 600,
+					female: 400,
+					regular: 950,
+					contract: 50,
+					avgSalary: 80_000_000,
+					totalSalary: 80_000_000_000,
+					tenure: 10
+				}
+			];
+		},
+		async investments() {
+			return null;
+		},
+		async shareholderReturn() {
+			return null;
+		},
+		async ownership() {
+			return null;
+		},
+		async execBoard() {
+			return null;
+		},
+		async debtProfile() {
+			return null;
+		},
+		async capitalChanges() {
+			return null;
+		},
+		async auditTrail() {
+			return null;
+		},
+		async topExecPay() {
+			return null;
+		},
+		async auditFees() {
+			return null;
+		}
+	};
+}
+
+function fakeScan(): ScanPort {
+	return {
+		async changes() {
+			return [];
+		},
+		async listTableSources() {
+			return [{ id: 'financeLite', label: '재무 라이트', url: 'fixture://financeLite.parquet', kind: 'parquet' }];
+		},
+		async getPresets() {
+			return [];
+		},
+		async savePreset() {
+			// fixture — no-op
+		}
+	};
+}
+
+function fakeMap(): MapPort {
+	return {
+		async listIndustries() {
+			return [{ id: 'semis', name: '반도체' }];
+		},
+		async getIndustryMap(id) {
+			if (id !== 'semis') return null;
+			return { id, payload: {} };
+		}
+	};
+}
+
+function fakeSearch(): SearchPort {
+	const universe = [{ stockCode: FIXTURE_CODE, corpName: '픽스처전자', industry: '반도체', revenue: 100 }];
+	return {
+		async universe() {
+			return universe;
+		},
+		async query(input) {
+			const hits = universe.filter((r) => r.corpName.includes(input.text) || r.stockCode === input.text);
+			return { hits, total: hits.length };
+		}
+	};
+}
+
+function fakeViewer(): ViewerPort {
+	return {
+		mode: 'component',
+		urlForCompany(code) {
+			return `/viewer/company/${code}`;
+		},
+		async openCompany() {
+			// fixture — host 앱이 onNavigate 로 검증
+		},
+		async openFiling() {
+			// fixture — no-op
+		}
+	};
+}
+
+function fakeAi(): AiPort {
+	return {
+		async capabilities() {
+			return {
+				tier: 'deterministic',
+				streaming: false,
+				toolCalling: false,
+				localWorkspace: false,
+				deterministicAnswers: true,
+				upgradeHint: '로컬 설치 시 고급 분석 엔진 사용 가능'
+			};
+		},
+		async ask(input) {
+			return { text: `fixture 답변: ${input.prompt}`, refs: [] };
+		},
+		async *streamAsk(input) {
+			yield { type: 'TEXT_MESSAGE_CONTENT', messageId: 'm1', delta: `fixture: ${input.prompt}` };
+			yield { type: 'RUN_FINISHED', runId: 'r1', status: 'ok', refs: [], suggestedQuestions: [] };
+		},
+		async runTool(input) {
+			return { status: 'done', summary: `fixture tool: ${input.toolName}`, refs: [], error: null };
+		},
+		async explainEvidence() {
+			return { text: 'fixture 근거 설명', refs: [] };
+		},
+		async listModes() {
+			return [
+				{ id: 'chat', label: '챗', description: '일반 질의', available: true },
+				{ id: 'terminal', label: '터미널', description: '운영 화면', available: true }
+			];
+		},
+		async setMode() {
+			// fixture — no-op
+		},
+		async getMode() {
+			return 'chat';
+		}
+	};
+}
+
+function fakeNavigation(calls: string[]): NavigationPort {
+	return {
+		async toTerminal(code) {
+			calls.push(`terminal:${code}`);
+		},
+		async toViewer(code) {
+			calls.push(`viewer:${code}`);
+		},
+		async toCompany(code) {
+			calls.push(`company:${code}`);
+		},
+		async toAsk() {
+			calls.push('ask');
+		},
+		href(route) {
+			return `/${route.kind}`;
+		}
+	};
+}
+
+function fakeStorage(): StoragePort {
+	const store = new Map<string, unknown>();
+	const subs = new Map<string, Set<(v: unknown) => void>>();
+	return {
+		async get<T>(key: RuntimeStorageKey) {
+			return (store.get(key) as T | undefined) ?? null;
+		},
+		async set<T>(key: RuntimeStorageKey, value: T) {
+			store.set(key, value);
+			subs.get(key)?.forEach((cb) => cb(value));
+		},
+		async remove(key) {
+			store.delete(key);
+			subs.get(key)?.forEach((cb) => cb(null));
+		},
+		subscribe<T>(key: RuntimeStorageKey, cb: (value: T | null) => void) {
+			const set = subs.get(key) ?? new Set();
+			set.add(cb as (v: unknown) => void);
+			subs.set(key, set);
+			return () => set.delete(cb as (v: unknown) => void);
+		}
+	};
+}
+
+export interface FakeRuntimeOptions {
+	env?: Partial<RuntimeEnvironment>;
+}
+
+/** 호스트 앱 없이 surface 를 렌더·검증하기 위한 결정론 fixture runtime. */
+export function createFakeRuntime(options: FakeRuntimeOptions = {}): DartLabRuntime & { navigationCalls: string[] } {
+	const navigationCalls: string[] = [];
+	const runtime: DartLabRuntime = {
+		env: {
+			kind: 'test',
+			basePath: '',
+			locale: 'ko',
+			marketDefault: 'KR',
+			buildVersion: 'test',
+			readonly: false,
+			...options.env
+		},
+		company: fakeCompany(),
+		price: fakePrice(),
+		filing: fakeFiling(),
+		finance: fakeFinance(),
+		viewer: fakeViewer(),
+		macro: fakeMacro(),
+		report: fakeReport(),
+		scan: fakeScan(),
+		map: fakeMap(),
+		search: fakeSearch(),
+		ai: fakeAi(),
+		services: createServiceRegistry([]),
+		navigation: fakeNavigation(navigationCalls),
+		storage: fakeStorage(),
+		telemetry: { event() {} },
+		featureFlags: { isEnabled: () => false }
+	};
+	return Object.assign(runtime, { navigationCalls });
+}

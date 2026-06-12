@@ -10,12 +10,12 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-2 (ui/packages/runtime) — "3단계 쭉"(1a✓→1b✓→2) 중 마지막.
-  · runtime 패키지 신설: createRuntime/runtimeContext + fake runtime(test adapter — 전 포트 fixture 구현)
-  · public/local adapter skeleton (구현은 4a에서 — 여기선 형태만, silent fallback 금지 구조)
-  · serviceRegistry/toolRegistry skeleton + 1b 이월분 "fixture type conformance" 테스트
-  · 검증: tsc·fake runtime unit·전 포트 메서드 구현 존재 기계 검사(05 §2)
-재개 지점: entry #8 (1b 완료) — contracts = 타입 SSOT 가동, 02 §3 스케치는 초안 지위(확정본=contracts)
+다음 작업: 단계-3 (ui/packages/design — landing 토큰 승격 + primitive 최소 세트). "3단계 쭉" 승인분(1a·1b·2)은 완료 — 단계-3 착수 전 운영자 확인 권장(landing styles 이동은 ui/web smoke 동반, 04 단계-3).
+  · landing lib/styles의 --dl-* 토큰 → ui/packages/design/src/styles (tokens/semantic/aliases 계층화)
+  · primitive 최소 세트(Button·Panel·IconButton…)는 실소비 등장 시점에 — 빈 스캐폴딩 금지
+  · 검증: landing build + visual smoke + inline hex 신규 0 + **ui/web 로컬 터미널 smoke**(styles deep import 재배선 동반)
+잔여 이월(단계-2발): vitest 기반 fake runtime unit test + adapter fixture conformance 런타임 대조 — 첫 surface 소비(단계-3/4a)와 동행
+재개 지점: entry #9 (단계-2 완료) — contracts+runtime 패키지 가동, fake runtime으로 surface 단독 렌더 가능
 ```
 
 ---
@@ -173,3 +173,16 @@ commit: (이 변경의 커밋)
 
 검증: npm install 워크스페이스 등록 ✓ / tsc strict(noUncheckedIndexedAccess·verbatimModuleSyntax) exit 0 ✓ / 외부 import 0 (no-dependency 기계 확인) ✓ / fixture type conformance 는 fake runtime(단계-2 산출) 전제 — **단계-2로 이월(정직 기록)**  
 rollback: 이 commit revert (신설 파일만 — 기존 코드 무접촉).
+
+### [9] 단계-2 ui/packages/runtime — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경 파일: ui/packages/runtime/{package.json,tsconfig.json,src/9파일}(신설)·package-lock.json(등록)·mainPlan/01(트리 교정 1건)
+
+- **createFakeRuntime — 전 16포트 결정론 fixture 전구현**(난수·현재시각 금지). DartLabRuntime 타입 통째 구현이므로 tsc가 "전 포트 required 메서드 구현 존재"를 컴파일 타임에 기계 강제 — 05 §2 conformance의 절반이 구조적으로 달성. navigationCalls 기록으로 surface 테스트에서 이동 검증 가능
+- public/local adapter skeleton — **미구현 포트 접근 = 명시적 throw**("단계-4a에서 구현 — 보이면 배선 순서 위반"). silent fallback 금지 구조를 골격부터 강제
+- createRuntime kind 디스패처(앱 shell 1곳 전용) + runtimeContext.svelte.ts(getContext 주입 — 전역 locator 대체) + createServiceRegistry(localOnly/disabled 실행 거부 + descriptor 렌더 분리) + RuntimeCache(상한 필수 LRU+TTL)·RequestDedup
+- 트리 교정(01 §4): runtime/ports/ 중복 폴더 비채택 — port 정의 SSOT는 contracts (덕지덕지 방지)
+
+검증: tsc strict exit 0 ✓ / 전역 직접 참조($app/·window.·localStorage) grep 0 ✓ / 워크스페이스 등록 ✓. vitest unit + 런타임 fixture 대조는 첫 surface 소비와 동행(NEXT 이월 기록)  
+rollback: 이 commit revert (신설 파일만).
