@@ -1,0 +1,18 @@
+{
+	"name": "@dartlab/ui-contracts",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"check": "tsc -p tsconfig.json"
+	},
+	"devDependencies": {
+		"typescript": "^6.0.3"
+	}
+}

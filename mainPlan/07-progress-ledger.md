@@ -10,12 +10,12 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-1b (ui/packages/contracts) — 운영자 승인 범위 "3단계 쭉"(1a→1b→2) 중 두 번째.
-  · contracts 패키지 신설(타입만, 의존 0): 02 §2~§3 계약 + AiCapabilities 3-티어 + port required 원칙
-  · ui/tsconfig.base.json 신설, 워크스페이스 lockfile 재생성(npm install — 새 워크스페이스 등록)
-  · 검증: tsc build·no-dependency 검사·fixture type conformance
-그다음: 단계-2 (runtime ports + fake runtime + adapter skeleton + ServicesPort skeleton)
-재개 지점: entry #7 (1a 완료) — 1a 검증 전부 green, 워크스페이스 가동 중
+다음 작업: 단계-2 (ui/packages/runtime) — "3단계 쭉"(1a✓→1b✓→2) 중 마지막.
+  · runtime 패키지 신설: createRuntime/runtimeContext + fake runtime(test adapter — 전 포트 fixture 구현)
+  · public/local adapter skeleton (구현은 4a에서 — 여기선 형태만, silent fallback 금지 구조)
+  · serviceRegistry/toolRegistry skeleton + 1b 이월분 "fixture type conformance" 테스트
+  · 검증: tsc·fake runtime unit·전 포트 메서드 구현 존재 기계 검사(05 §2)
+재개 지점: entry #8 (1b 완료) — contracts = 타입 SSOT 가동, 02 §3 스케치는 초안 지위(확정본=contracts)
 ```
 
 ---
@@ -158,3 +158,18 @@ commit: (이 변경의 커밋)
 
 남은 위험: publish.yml 개정분은 다음 릴리스 태그에서 실검증(다음 publish 1회 주시). deploy-landing은 이 push로 즉시 실검증됨.  
 rollback: 이 commit revert + `cd landing && npm install`로 구 lockfile 재생성.
+
+### [8] 단계-1b ui/packages/contracts — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경 파일: ui/tsconfig.base.json(신설)·ui/packages/contracts/{package.json,tsconfig.json,src/19파일}(신설)·package-lock.json(워크스페이스 등록)
+
+내용: 타입 계약을 **발명 0, 기존 코드 승격**으로 작성 — 사전 census(landing 실타입 12파일 + AG-UI 이벤트 emitter/수신 SSOT 대조 + viewer panel 타입 인벤토리) 기반.
+
+- 도메인 계약 14: company(ProductIndexItem·CompanyRelations·LiveCompanyReportFact)·price(Candle·CompanyPrices)·filing(Regular/NonRegular + panel Toc/Grid/Init — ui/web HTTP판 기준 + leafType superset로 양앱 발산 해소)·finance(TerminalFinanceBundle 전계층)·macro(MacroPort 신설분)·report(10종 + ReportPort 분리분)·scan·map·search(IndexRow 승격)·viewer·ai·services·navigation·storage
+- AG-UI allowlist 15종 박제(ai.ts) — emitter SSOT=server/agentGateway.py `_ALLOWED_EVENTS`, 발행 12종 + reserved 3종(TOOL_CALL_ARGS·MESSAGES_SNAPSHOT·ACTIVITY_SNAPSHOT) 주석 명시. refDetails 실형태 = EvidenceRef(evidence.ts)
+- 계약 위생 결정: `Num` 1회 정의 수렴(옛 3중 재정의)·parquet 원어 행(한글 컬럼·snake)은 어댑터 내부 비밀로 계약 제외·Map→Record(JSON-safe)·port 메서드 전부 required·빈값 규약 주석 박제([]=해당없음 / null=미존재)·StoragePort 네임스페이스 키·잠정 표면(ScanTableSource/Preset·IndustryMapData)은 단계-8 전 확정 주석
+- 02 §3 스케치와의 의도적 발산(현실 우선): CompanyPort recent 메서드 제외(storage 키로)·MacroPort.getLatest() 무인자(실표면)·liveQuote 미포함(미실측 — 4a에서 추가). **02 §3 스케치는 초안 지위 — 확정 SSOT = contracts**
+
+검증: npm install 워크스페이스 등록 ✓ / tsc strict(noUncheckedIndexedAccess·verbatimModuleSyntax) exit 0 ✓ / 외부 import 0 (no-dependency 기계 확인) ✓ / fixture type conformance 는 fake runtime(단계-2 산출) 전제 — **단계-2로 이월(정직 기록)**  
+rollback: 이 commit revert (신설 파일만 — 기존 코드 무접촉).

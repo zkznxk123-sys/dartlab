@@ -1,0 +1,192 @@
+// AI 계약 — 3-티어 (02 §4) + AG-UI allowlist 15종 (단계-1b census: emitter SSOT = server/agentGateway.py
+// `_ALLOWED_EVENTS`, 수신 SSOT = ui/web streamAsk.ts). allowlist 가 계약이고 emit 은 부분집합(12종 발행).
+import type { EvidenceRef, EvidenceSelection } from './evidence';
+
+export type AiTier = 'advanced' | 'onDevice' | 'deterministic' | 'none';
+// none = test fake 초기화 전 전용 — public 은 항상 deterministic 이상, local 무provider 도 deterministic.
+
+export interface AiCapabilities {
+	tier: AiTier;
+	streaming: boolean;
+	toolCalling: boolean;
+	localWorkspace: boolean;
+	deterministicAnswers: boolean; // 결정론 Q&A — public 에서도 항상 true
+	providerLabel?: string;
+	modelLabel?: string;
+	upgradeHint?: string; // advanced 미만 tier 에서 로컬 업그레이드 안내 문구
+}
+
+export type AiModeId = 'chat' | 'terminal';
+
+export interface AiMode {
+	id: AiModeId;
+	label: string;
+	description: string;
+	available: boolean;
+}
+
+// ── AG-UI allowlist (15종 — TOOL_CALL_ARGS·MESSAGES_SNAPSHOT·ACTIVITY_SNAPSHOT 은 reserved, 현재 미발행) ──
+
+export type AgUiEventType =
+	| 'TEXT_MESSAGE_START'
+	| 'TEXT_MESSAGE_CONTENT'
+	| 'TEXT_MESSAGE_END'
+	| 'TOOL_CALL_START'
+	| 'TOOL_CALL_ARGS' // reserved
+	| 'TOOL_CALL_RESULT'
+	| 'TOOL_CALL_END'
+	| 'STATE_SNAPSHOT'
+	| 'STATE_DELTA'
+	| 'MESSAGES_SNAPSHOT' // reserved
+	| 'ACTIVITY_SNAPSHOT' // reserved
+	| 'ACTIVITY_DELTA'
+	| 'VIEW_SPEC'
+	| 'RUN_FINISHED'
+	| 'RUN_ERROR';
+
+export interface ToolResultBody {
+	markdown?: string;
+	stdout?: string;
+	stderr?: string;
+	values?: unknown;
+	tableHead?: string[];
+	tableRows?: unknown[][];
+	body?: string;
+	path?: string;
+	durationMs?: number;
+}
+
+export interface AiStreamTextDelta {
+	type: 'TEXT_MESSAGE_CONTENT';
+	messageId: string;
+	delta: string;
+}
+
+export interface AiStreamToolStart {
+	type: 'TOOL_CALL_START';
+	runId: string;
+	messageId: string;
+	toolCallId: string;
+	toolName: string;
+	args: Record<string, unknown>;
+	status: 'running';
+	passLabel?: string;
+}
+
+export interface AiStreamToolResult {
+	type: 'TOOL_CALL_RESULT';
+	runId: string;
+	messageId: string;
+	toolCallId: string;
+	toolName: string;
+	status: 'done' | 'error';
+	summary: string;
+	refs: string[];
+	refDetails: EvidenceRef[];
+	artifacts: Record<string, unknown>[];
+	result: ToolResultBody | null;
+	error: string | null;
+	passLabel?: string;
+}
+
+export interface AiStreamActivity {
+	type: 'ACTIVITY_DELTA';
+	status: 'done' | 'running';
+	summary: string;
+	refs: string[];
+	passLabel?: string;
+}
+
+export interface AiStreamViewSpec {
+	type: 'VIEW_SPEC';
+	runId: string;
+	messageId: string;
+	id?: string;
+	spec: unknown;
+	title?: string;
+	source?: string;
+}
+
+export interface AiStreamRunFinished {
+	type: 'RUN_FINISHED';
+	runId: string;
+	status: 'ok' | 'failed';
+	refs: string[];
+	suggestedQuestions: string[];
+}
+
+export interface AiStreamRunError {
+	type: 'RUN_ERROR';
+	runId: string;
+	message: string;
+	code?: string;
+}
+
+/** 기타 allowlist 이벤트(START/END/SNAPSHOT/DELTA 등)는 렌더 무관 — surface 는 드롭. */
+export interface AiStreamOther {
+	type: Exclude<
+		AgUiEventType,
+		| 'TEXT_MESSAGE_CONTENT'
+		| 'TOOL_CALL_START'
+		| 'TOOL_CALL_RESULT'
+		| 'ACTIVITY_DELTA'
+		| 'VIEW_SPEC'
+		| 'RUN_FINISHED'
+		| 'RUN_ERROR'
+	>;
+	[key: string]: unknown;
+}
+
+export type AiStreamEvent =
+	| AiStreamTextDelta
+	| AiStreamToolStart
+	| AiStreamToolResult
+	| AiStreamActivity
+	| AiStreamViewSpec
+	| AiStreamRunFinished
+	| AiStreamRunError
+	| AiStreamOther;
+
+export interface AiAskInput {
+	prompt: string;
+	mode: AiModeId;
+	code?: string;
+	evidence?: EvidenceSelection[];
+}
+
+export interface AiAskResult {
+	text: string;
+	refs: EvidenceRef[];
+}
+
+export interface AiToolRunInput {
+	toolName: string;
+	args: Record<string, unknown>;
+}
+
+export interface AiToolRunResult {
+	status: 'done' | 'error';
+	summary: string;
+	refs: EvidenceRef[];
+	error: string | null;
+}
+
+export interface EvidenceExplainInput {
+	selection: EvidenceSelection;
+}
+
+export interface EvidenceExplainResult {
+	text: string;
+	refs: EvidenceRef[];
+}
+
+export interface AiPort {
+	capabilities(): Promise<AiCapabilities>;
+	ask(input: AiAskInput): Promise<AiAskResult>;
+	streamAsk(input: AiAskInput): AsyncIterable<AiStreamEvent>;
+	runTool(input: AiToolRunInput): Promise<AiToolRunResult>;
+	explainEvidence(input: EvidenceExplainInput): Promise<EvidenceExplainResult>;
+	listModes(): Promise<AiMode[]>;
+	setMode(mode: AiModeId): Promise<void>;
+	getMode(): Promise<AiModeId>;
+}
