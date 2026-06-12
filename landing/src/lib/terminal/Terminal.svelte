@@ -4,7 +4,7 @@
 	// 중앙 스택            = 시각화 중심 (차트·그래프·전체화면 분석)
 	// 우측 스택            = 테이블·텍스트·수치·정성 — 그래프 배치 금지 (그래프는 중앙으로)
 	import { base } from '$app/paths';
-	import { Github } from 'lucide-svelte';
+	import GithubIcon from '$lib/components/GithubIcon.svelte';
 	import { brand } from '$lib/brand';
 	import './terminal.css';
 	import type { Engine } from './data/engine';
@@ -217,7 +217,7 @@
 					<a class="hdrLink" href="{brand.repo}/issues/new" target="_blank" rel="noopener" title="GitHub 이슈 등록 — 버그·요청">{lang === 'en' ? 'Issue' : '이슈'}</a>
 				</div>
 				<nav class="sns">
-					<a class="snsBtn" href={brand.repo} target="_blank" rel="noopener" title="GitHub"><Github size={15} /></a>
+					<a class="snsBtn" href={brand.repo} target="_blank" rel="noopener" title="GitHub"><GithubIcon size={15} /></a>
 					<a class="snsBtn" href={brand.coffee} target="_blank" rel="noopener" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">
 						<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" /><line x1="6" y1="2" x2="6" y2="4" /><line x1="10" y1="2" x2="10" y2="4" /><line x1="14" y1="2" x2="14" y2="4" /></svg>
 					</a>

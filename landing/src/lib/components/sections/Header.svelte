@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { brand } from '$lib/brand';
-	import { Github, Search, Menu, X, Construction } from 'lucide-svelte';
+	import { Search, Menu, X, Construction } from 'lucide-svelte';
+	import GithubIcon from '$lib/components/GithubIcon.svelte';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -87,7 +88,7 @@
 			<a href={brand.repo} target="_blank" rel="noopener"
 				class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors no-underline"
 				title="GitHub">
-				<Github class="w-[15px] h-[15px]" />
+				<GithubIcon class="w-[15px] h-[15px]" />
 			</a>
 			<a href={brand.coffee} target="_blank" rel="noopener"
 				class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors no-underline"
