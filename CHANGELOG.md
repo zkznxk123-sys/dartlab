@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-(다음 release 작업 누적)
+### Added
+
+- 네이버 검색 API 뉴스 소스 — `gather.news()` KR 시장 우선 backend(제목+스니펫, `description` 컬럼 신설). 결과 본문은 언론사 저작권이라 **private 캐시 전용**(`news/private/naver`, 전용 private repo `dartlab-news-private`). Google News RSS 폴백 유지(키 없으면 자동) — 기존 동작 보존.
+- 뉴스 소스 레지스트리(`gather.sources.newsSources.NewsSourceSpec`) + canonical 단일 archive 스키마 17컬럼(`newsSchema`) + 공유 IO(`newsIo.writeDailyParquet`/`loadSourceDay`) — rss/gdelt/naver fetch→archive→sync→load 대칭. `loadNewsArchive` 에 소스 선택 `sources=` 키워드(비파괴).
+
+### Changed
+
+- **뉴스 데이터 경로 재편(breaking — HF 레이아웃)** — visibility-first taxonomy `news/{public,private}/{source}/` 로 라이선스 경계를 폴더 구조로 분기: `news/headlines`→`news/public/rss`, `news/enriched`→`news/public/rss_enriched`, `news/gdelt`→`news/public/gdelt`, 신규 `news/private/naver`. 공개 archive 를 읽는 코드(엔진·검색 인덱스·sync)는 본 버전부터 신규 경로를 사용한다 — 구버전 핀은 업그레이드 필요.
+- 중복 제거 — 옛 `news.py`(7컬럼)·`gdelt.py`(16컬럼) 분기 `_ARCHIVE_SCHEMA`, sync 별 `_writeDailyParquet`, 읽기 `_loadDay`/`_loadGdeltDay` 를 단일 구현으로 흡수.
 
 ## [0.10.6] - 2026-06-09
 
