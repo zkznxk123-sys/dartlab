@@ -6,8 +6,9 @@ robots.txt 준수, 도메인당 30RPM 이하.
 
 from __future__ import annotations
 
+import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from ..types import (
     FlowData,
@@ -21,6 +22,10 @@ log = logging.getLogger(__name__)
 
 # NaverPay 증권 API (JSON)
 _API_BASE = "https://m.stock.naver.com/api/stock"
+# NaverPay 증권 front-api — 투자자별 매매동향 페이지네이션.
+_FLOW_TREND_URL = "https://m.stock.naver.com/front-api/stock/domestic/trend"
+_FLOW_DEFAULT_LATEST_LIMIT = 5
+_FLOW_MAX_SERVER_PAGE_SIZE = 50
 # 네이버 차트 API (XML) — FDR 방식, 한번에 6000일
 _CHART_URL = "https://fchart.stock.naver.com/sise.nhn"
 # 네이버 분봉 API (JSON) — 당일 1분봉 OHLCV
@@ -49,6 +54,131 @@ def _cleanNumber(text: str | None) -> float | None:
         return float(cleaned)
     except ValueError:
         return None
+
+
+def _normalizeDateToken(value: str | date | None) -> str | None:
+    """날짜 입력을 Naver flow cursor용 ``YYYYMMDD`` 문자열로 정규화."""
+    if value is None:
+        return None
+    if isinstance(value, date):
+        return value.strftime("%Y%m%d")
+    token = str(value).strip().replace("-", "")
+    if len(token) != 8 or not token.isdigit():
+        raise ValueError(f"날짜 포맷 오류: {value!r} (YYYYMMDD 또는 YYYY-MM-DD)")
+    return token
+
+
+def _nextDateToken(token: str | None) -> str | None:
+    """Naver flow cursor는 해당 날짜 이전을 반환하므로 end+1일을 사용한다."""
+    if token is None:
+        return None
+    d = datetime.strptime(token, "%Y%m%d").date()
+    return (d + timedelta(days=1)).strftime("%Y%m%d")
+
+
+def _parseFlowTrendRows(items: list[dict]) -> list[dict]:
+    """Naver flow raw row → dartlab 표준 flow row."""
+    result = []
+    for item in items:
+        fn = _cleanNumber(item.get("foreignerPureBuyQuant"))
+        on = _cleanNumber(item.get("organPureBuyQuant"))
+        ind = _cleanNumber(item.get("individualPureBuyQuant"))
+        ratio_str = item.get("foreignerHoldRatio", "")
+        ratio = None
+        if ratio_str:
+            ratio = _cleanNumber(str(ratio_str).replace("%", ""))
+        result.append(
+            {
+                "date": item.get("bizdate", ""),
+                "foreignNet": fn or 0.0,
+                "institutionNet": on or 0.0,
+                "individualNet": ind or 0.0,
+                "foreignHoldingRatio": ratio or 0.0,
+            }
+        )
+    return result
+
+
+async def _fetchFlowTrend(
+    stockCode: str,
+    client,
+    *,
+    start: str | date | None = None,
+    end: str | date | None = None,
+    limit: int | None = None,
+    pageSize: int | None = None,
+    sleepSec: float = 0.0,
+    marketType: str = "KRX",
+    maxPages: int | None = None,
+    full: bool = False,
+) -> list[dict] | None:
+    """Naver front-api 투자자별 매매동향 페이지네이션."""
+    startToken = _normalizeDateToken(start)
+    endToken = _normalizeDateToken(end)
+    cursor = _nextDateToken(endToken)
+    effectiveLimit = limit
+    parsedPageSize = int(pageSize) if pageSize is not None else 0
+    explicitPageSize = parsedPageSize if parsedPageSize > 0 else None
+
+    if startToken is None and endToken is None and effectiveLimit is None and not full:
+        effectiveLimit = explicitPageSize or _FLOW_DEFAULT_LATEST_LIMIT
+    serverPageSize = _FLOW_MAX_SERVER_PAGE_SIZE
+    if explicitPageSize is not None and explicitPageSize > 0:
+        serverPageSize = min(explicitPageSize, _FLOW_MAX_SERVER_PAGE_SIZE)
+    if effectiveLimit is not None and effectiveLimit > 0:
+        serverPageSize = min(serverPageSize, max(1, int(effectiveLimit)), _FLOW_MAX_SERVER_PAGE_SIZE)
+
+    result: list[dict] = []
+    reachedStart = False
+    pages = 0
+    while True:
+        params: dict[str, str | int] = {
+            "code": stockCode,
+            "marketType": marketType,
+            "pageSize": serverPageSize,
+        }
+        if cursor:
+            params["bizdate"] = cursor
+
+        resp = await client.get(
+            _FLOW_TREND_URL,
+            params=params,
+            headers={
+                "Accept": "application/json, text/plain, */*",
+                "Referer": f"https://m.stock.naver.com/domestic/stock/{stockCode}/total",
+            },
+        )
+        data = resp.json()
+        rows = data.get("result") if isinstance(data, dict) else data
+        if not rows or not isinstance(rows, list):
+            break
+
+        pages += 1
+        for row in _parseFlowTrendRows(rows):
+            rowDate = row.get("date") or ""
+            if endToken is not None and rowDate > endToken:
+                continue
+            if startToken is not None and rowDate < startToken:
+                reachedStart = True
+                continue
+            result.append(row)
+            if effectiveLimit is not None and effectiveLimit > 0 and len(result) >= effectiveLimit:
+                return result
+
+        if reachedStart:
+            break
+        if len(rows) < serverPageSize:
+            break
+        if maxPages is not None and pages >= maxPages:
+            break
+
+        cursor = str(rows[-1].get("bizdate") or "")
+        if not cursor:
+            break
+        if sleepSec > 0:
+            await asyncio.sleep(sleepSec)
+
+    return result or None
 
 
 # ══════════════════════════════════════
@@ -251,7 +381,14 @@ async def fetchFlow(
     stockCode: str,
     client,
     *,
+    start: str | date | None = None,
+    end: str | date | None = None,
     limit: int | None = None,
+    pageSize: int | None = None,
+    sleepSec: float = 0.0,
+    marketType: str = "KRX",
+    maxPages: int | None = None,
+    full: bool = False,
 ) -> list[dict] | None:
     """네이버 → 외국인/기관 수급 시계열.
 
@@ -267,8 +404,17 @@ async def fetchFlow(
         종목코드 (예: ``"005930"``).
     client
         비동기 HTTP 클라이언트.
+    start, end : str | date | None
+        조회 기간. 지정 시 Naver front-api 페이지네이션으로 과거 구간까지 조회.
     limit : int | None
-        반환 행수 상한 (가장 최근 N건). None이면 전체.
+        반환 행수 상한 (가장 최근 N건). None이면 기간 조건까지 조회.
+    pageSize : int | None
+        호환용 고급 옵션. None이면 최신 조회는 5건, 기간/limit 조회는 내부에서
+        Naver 최대 단위(50건)로 자동 페이지네이션한다.
+    sleepSec : float
+        페이지 호출 사이 대기 시간.
+    full : bool
+        True면 가능한 전체 이력을 끝까지 자동 수집한다.
 
     Returns
     -------
@@ -294,8 +440,8 @@ async def fetchFlow(
 
     Requires
     --------
-    네트워크 (``m.stock.naver.com``) + KR 6 자리 종목코드. v2 (dealTrendInfos) 우선,
-    v1 (foreignSummary 스냅샷) fallback.
+    네트워크 (``m.stock.naver.com``) + KR 6 자리 종목코드.
+    ``front-api/stock/domestic/trend`` 페이지네이션 우선, integration fallback.
 
     See Also
     --------
@@ -305,6 +451,26 @@ async def fetchFlow(
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return None
+
+    _normalizeDateToken(start)
+    _normalizeDateToken(end)
+    try:
+        trend = await _fetchFlowTrend(
+            stockCode,
+            client,
+            start=start,
+            end=end,
+            limit=limit,
+            pageSize=pageSize,
+            sleepSec=sleepSec,
+            marketType=marketType,
+            maxPages=maxPages,
+            full=full,
+        )
+        if trend:
+            return trend
+    except (SourceUnavailableError, ValueError, KeyError, TypeError) as exc:
+        log.warning("naver flow trend API 실패 (%s): %s", stockCode, exc)
 
     url = f"{_API_BASE}/{stockCode}/integration"
     try:
@@ -317,23 +483,7 @@ async def fetchFlow(
     # v2: dealTrendInfos 배열 전체 활용 (최신순)
     deal_trends = data.get("dealTrendInfos") or []
     if deal_trends and isinstance(deal_trends, list):
-        result = []
-        for item in deal_trends:
-            fn = _cleanNumber(item.get("foreignerPureBuyQuant"))
-            on = _cleanNumber(item.get("organPureBuyQuant"))
-            ind = _cleanNumber(item.get("individualPureBuyQuant"))
-            ratio_str = item.get("foreignerHoldRatio", "")
-            ratio = None
-            if ratio_str:
-                ratio = _cleanNumber(str(ratio_str).replace("%", ""))
-            row = {
-                "date": item.get("bizdate", ""),
-                "foreignNet": fn or 0.0,
-                "institutionNet": on or 0.0,
-                "individualNet": ind or 0.0,
-                "foreignHoldingRatio": ratio or 0.0,
-            }
-            result.append(row)
+        result = _parseFlowTrendRows(deal_trends)
         if result:
             if limit is not None and limit > 0:
                 return result[:limit]

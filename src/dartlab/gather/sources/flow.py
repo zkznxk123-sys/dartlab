@@ -15,7 +15,14 @@ async def fetch(
     *,
     market: str = "KR",
     client=None,
+    start: str | None = None,
+    end: str | None = None,
     limit: int | None = None,
+    pageSize: int | None = None,
+    sleepSec: float = 0.0,
+    marketType: str = "KRX",
+    maxPages: int | None = None,
+    full: bool = False,
 ) -> list[dict] | None:
     """수급 시계열 — fallback 체인 (async). KR만 지원.
 
@@ -43,8 +50,16 @@ async def fetch(
         시장 코드. "KR"만 지원, 그 외 None 반환.
     client : httpx.AsyncClient | None
         HTTP 클라이언트. None이면 도메인 내부에서 생성.
+    start, end : str | None
+        조회 기간. 지정 시 Naver 페이지네이션으로 과거 구간까지 조회.
     limit : int | None
-        반환 행수 상한 (가장 최근 N개). None이면 전체.
+        반환 행수 상한 (가장 최근 N개). None이면 기간 조건까지 조회.
+    pageSize : int | None
+        호환용 고급 옵션. None이면 source 제한에 맞춰 자동 페이지네이션.
+    sleepSec : float
+        페이지 호출 사이 대기 시간.
+    full : bool
+        True면 가능한 전체 이력을 끝까지 자동 수집.
 
     Returns
     -------
@@ -79,7 +94,18 @@ async def fetch(
     for domainName in FLOW_FALLBACK:
         try:
             module = loadDomain(domainName)
-            result = await module.fetchFlow(stockCode, client)
+            result = await module.fetchFlow(
+                stockCode,
+                client,
+                start=start,
+                end=end,
+                limit=limit,
+                pageSize=pageSize,
+                sleepSec=sleepSec,
+                marketType=marketType,
+                maxPages=maxPages,
+                full=full,
+            )
             if result:
                 if limit is not None and limit > 0:
                     return result[:limit]

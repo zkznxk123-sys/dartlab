@@ -141,7 +141,21 @@ class _GatherPriceMixin(GatherMixinContext):
         finally:
             emitGatherFetch("price", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
-    def flow(self, stockCode: str, *, market: str = "KR") -> "pl.DataFrame | None":
+    def flow(
+        self,
+        stockCode: str,
+        *,
+        market: str = "KR",
+        start: str | None = None,
+        end: str | None = None,
+        limit: int | None = None,
+        pageSize: int | None = None,
+        sleepSec: float = 0.0,
+        marketType: str = "KRX",
+        maxPages: int | None = None,
+        all: bool = False,
+        full: bool = False,
+    ) -> "pl.DataFrame | None":
         """투자자별 수급 시계열 조회 (KR 전용).
 
         Capabilities:
@@ -165,6 +179,11 @@ class _GatherPriceMixin(GatherMixinContext):
         Args:
             stock_code: 종목코드 ("005930").
             market: "KR"만 지원. "US"이면 None 반환.
+            start/end: 조회 기간. 지정 시 Naver trend 페이지를 과거로 순회.
+            limit: 반환 행수 상한.
+            pageSize: 호환용 고급 옵션. None이면 내부에서 자동 결정.
+            sleepSec: 페이지 호출 사이 대기 시간.
+            all/full: True면 가능한 전체 이력을 끝까지 자동 수집.
 
         Returns:
             pl.DataFrame | None — date, foreignNet, institutionNet,
@@ -179,7 +198,9 @@ class _GatherPriceMixin(GatherMixinContext):
         Example::
 
             g = getDefaultGather()
-            g.flow("005930")   # 삼성전자 수급 시계열
+            g.flow("005930")              # 최근 5거래일
+            g.flow("005930", limit=30)    # 최근 30거래일
+            g.flow("005930", all=True)    # 가능한 전체 이력
 
         See Also:
             ``price`` — 같은 종목의 OHLCV.
@@ -196,15 +217,34 @@ class _GatherPriceMixin(GatherMixinContext):
         market = resolveMarket(stockCode, market)
         import polars as pl
 
+        fullHistory = bool(all or full)
+
         try:
             if market != "KR":
                 return None
-            cache_key = f"{stockCode}:flow_series"
+            cache_key = (
+                f"{stockCode}:flow_series:"
+                f"{start or ''}:{end or ''}:{limit or ''}:{pageSize}:{marketType}:{maxPages or ''}:{int(fullHistory)}"
+            )
             cached = self._cache.getTyped(cache_key, "flow")
             if cached is not None:
                 cacheHit = True
                 return cached  # type: ignore[return-value]
-            raw = runAsync(_flow.fetch(stockCode, market=market, client=self._client))
+            raw = runAsync(
+                _flow.fetch(
+                    stockCode,
+                    market=market,
+                    client=self._client,
+                    start=start,
+                    end=end,
+                    limit=limit,
+                    pageSize=pageSize,
+                    sleepSec=sleepSec,
+                    marketType=marketType,
+                    maxPages=maxPages,
+                    full=fullHistory,
+                )
+            )
             if not raw:
                 return None
             df = pl.DataFrame(raw)

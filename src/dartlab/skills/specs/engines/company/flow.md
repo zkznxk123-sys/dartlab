@@ -94,13 +94,18 @@ if not flow.is_empty():
         pl.col("foreignNet").cum_sum().alias("foreignCum"),
         pl.col("institutionNet").cum_sum().alias("institutionCum"),
     ])
+
+# 최근 30거래일 / 기간 / 가능한 전체 이력
+c.flow(limit=30)
+c.flow(start="2010-01-04", end="2010-01-08", sleepSec=1.0)
+c.flow(all=True, sleepSec=1.0)
 ```
 
 ## 호출 동작
 
 - target = DART 종목코드 (KOSPI/KOSDAQ). KR 한정 — 외 시장 target 은 빈 DataFrame.
 - Company.gather("flow") delegate — 본체 = gather("flow", ...) handler (handleFlow).
-- Naver flow API 자동 호출 — daily reshape 후 pl.DataFrame 반환.
+- NaverPay 증권 flow API 자동 호출 — 기간 조회 시 내부 페이지네이션 후 pl.DataFrame 반환.
 - 빈 결과 (KR 외 시장 · 신생 종목 · Naver API 부재) → 빈 DataFrame.
 - 일별 EOD (T+1) freshness.
 
@@ -109,9 +114,9 @@ if not flow.is_empty():
 ```
 pl.DataFrame:
   date : Date
-  foreignNet : Int64        # 외국인 일별 순매수 (원)
-  institutionNet : Int64    # 기관 일별 순매수 (원)
-  individualNet : Int64     # 개인 일별 순매수 (원)
+  foreignNet : Int64        # 외국인 일별 순매수 (주)
+  institutionNet : Int64    # 기관 일별 순매수 (주)
+  individualNet : Int64     # 개인 일별 순매수 (주)
   (또는 시장 변경 시 추가 컬럼)
 ```
 

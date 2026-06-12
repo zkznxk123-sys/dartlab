@@ -248,10 +248,10 @@ def handleFlow(
     target: str | None,
     *,
     market: str,
-    start: str | None,  # noqa: ARG001
-    end: str | None,  # noqa: ARG001
+    start: str | None,
+    end: str | None,
     marketExplicit: bool,  # noqa: ARG001
-    **kwargs: Any,  # noqa: ARG001
+    **kwargs: Any,
 ) -> pl.DataFrame:
     """flow axis dispatch — 외국인/기관 수급.
 
@@ -265,7 +265,8 @@ def handleFlow(
         g: Gather 싱글턴.
         target: 종목코드/티커.
         market: "KR" 만 지원 (Naver 한정).
-        start/end/marketExplicit/**kwargs: 무시.
+        start/end: 조회 기간. 지정 시 Naver trend 페이지네이션 사용.
+        marketExplicit/**kwargs: limit/sleepSec/full(all) 등 flow 옵션.
 
     Returns:
         pl.DataFrame — 외국인/기관 순매수 시계열.
@@ -284,7 +285,23 @@ def handleFlow(
         main.GatherEntry._run : dispatch caller.
         mixins/info.flow : 본 handler 가 호출하는 backend.
     """
-    return g.flow(target, market=market)
+    full = kwargs.pop("full", None)
+    if full is None:
+        full = kwargs.pop("all", False)
+    else:
+        kwargs.pop("all", None)
+    return g.flow(
+        target,
+        market=market,
+        start=start,
+        end=end,
+        limit=kwargs.pop("limit", None),
+        pageSize=kwargs.pop("pageSize", None),
+        sleepSec=kwargs.pop("sleepSec", 0.0),
+        marketType=kwargs.pop("marketType", "KRX"),
+        maxPages=kwargs.pop("maxPages", None),
+        full=bool(full),
+    )
 
 
 def handleMacro(

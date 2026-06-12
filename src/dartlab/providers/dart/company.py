@@ -4301,7 +4301,16 @@ class Company:
         hit = p(keyword)
         return hit if hit is not None else p.search(keyword)
 
-    def flow(self):
+    def flow(
+        self,
+        *,
+        start: str | None = None,
+        end: str | None = None,
+        limit: int | None = None,
+        sleepSec: float = 0.0,
+        all: bool = False,
+        full: bool = False,
+    ):
         """KRX 외국인/기관 일별 net-buy (Company.gather("flow") wrapper).
 
         Capabilities:
@@ -4310,7 +4319,10 @@ class Company:
             - 개인 net-buy 일별
 
         Args:
-            없음 (self 바인딩).
+            start/end: 조회 기간. 지정 시 과거 구간까지 자동 페이지네이션.
+            limit: 최근 N거래일만 반환.
+            sleepSec: 페이지 호출 사이 대기 시간.
+            all/full: True면 가능한 전체 이력을 끝까지 자동 수집.
 
         Returns:
             pl.DataFrame — 외국인/기관/개인 net-buy 시계열. 빈 결과면 빈 DataFrame.
@@ -4321,7 +4333,10 @@ class Company:
         Example::
 
             c = Company("005930")
-            f = c.flow()           # 일별 외국인/기관/개인 순매수
+            f = c.flow()                       # 최근 5거래일
+            f30 = c.flow(limit=30)              # 최근 30거래일
+            old = c.flow(start="2010-01-04", end="2010-01-08")
+            allFlow = c.flow(all=True, sleepSec=1.0)
 
         AIContext:
             - KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal
@@ -4344,9 +4359,9 @@ class Company:
                 - KR 외 시장에 호출 (빈 결과 정상 — 시장 제한 명시)
             OutputSchema:
                 - date : Date
-                - foreignNet : Int64 (단위 = 원)
-                - institutionNet : Int64
-                - individualNet : Int64
+                - foreignNet : Int64 (단위 = 주)
+                - institutionNet : Int64 (단위 = 주)
+                - individualNet : Int64 (단위 = 주)
             Prerequisites:
                 - KR 시장 + Naver flow API 박힘
             Freshness:
@@ -4357,7 +4372,14 @@ class Company:
         Raises:
             없음.
         """
-        return self.gather("flow")
+        return self.gather(
+            "flow",
+            start=start,
+            end=end,
+            limit=limit,
+            sleepSec=sleepSec,
+            full=bool(all or full),
+        )
 
     @property
     def market(self) -> str:

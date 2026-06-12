@@ -126,8 +126,21 @@ NOTEBOOKS: dict[str, list[dict]] = {
             'dartlab.gather("macro")',
         ),
         code(
-            "# 수급 (KR 전용)",
+            "# 최근 수급 (기본 5거래일)",
             'dartlab.gather("flow", "005930")',
+        ),
+        code(
+            "# 2010년부터 최신 거래일까지 — 자동 페이지네이션",
+            'dartlab.gather(',
+            '    "flow",',
+            '    "005930",',
+            '    start="2010-01-04",',
+            "    sleepSec=1.0,",
+            ")",
+        ),
+        code(
+            "# 가능한 전체 이력은 오래 걸릴 수 있어 필요할 때만 실행:",
+            '# dartlab.gather("flow", "005930", all=True, sleepSec=1.0)',
         ),
         code(
             "# 뉴스",

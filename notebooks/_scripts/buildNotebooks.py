@@ -36,7 +36,15 @@ NOTEBOOKS = {
         ("md", "## 매크로"),
         ("code", 'dartlab.gather("macro")'),
         ("md", "## 수급 (KR 전용)"),
-        ("code", 'dartlab.gather("flow", "005930")'),
+        ("code", '# 최근 수급 (기본 5거래일)\ndartlab.gather("flow", "005930")'),
+        (
+            "code",
+            '# 2010년부터 최신 거래일까지 — 자동 페이지네이션\ndartlab.gather(\n    "flow",\n    "005930",\n    start="2010-01-04",\n    sleepSec=1.0,\n)',
+        ),
+        (
+            "code",
+            '# 가능한 전체 이력은 오래 걸릴 수 있어 필요할 때만 실행:\n# dartlab.gather("flow", "005930", all=True, sleepSec=1.0)',
+        ),
         ("md", "## 뉴스"),
         ("code", 'dartlab.gather("news", "삼성전자")'),
     ],

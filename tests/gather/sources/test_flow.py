@@ -37,7 +37,7 @@ def test_flow_fallback_chain_first_success(monkeypatch: pytest.MonkeyPatch) -> N
         {"date": "2026-01-02", "foreignNet": 200.0, "institutionNet": -50.0, "individualNet": -150.0},
     ]
 
-    async def fakeFetchFlow(stockCode, client):
+    async def fakeFetchFlow(stockCode, client, **kwargs):
         return fakeRows
 
     fakeModule = types.SimpleNamespace(fetchFlow=fakeFetchFlow)
@@ -53,7 +53,7 @@ def test_flow_all_fail_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
     from dartlab.gather.sources import flow as flowMod
     from dartlab.gather.types import GatherError
 
-    async def boom(stockCode, client):
+    async def boom(stockCode, client, **kwargs):
         raise GatherError("source down")
 
     fakeModule = types.SimpleNamespace(fetchFlow=boom)
@@ -70,7 +70,7 @@ def test_flow_limit_slices(monkeypatch: pytest.MonkeyPatch) -> None:
 
     fakeRows = [{"date": f"2026-01-{i:02d}", "foreignNet": float(i)} for i in range(1, 11)]
 
-    async def fakeFetchFlow(stockCode, client):
+    async def fakeFetchFlow(stockCode, client, **kwargs):
         return fakeRows
 
     fakeModule = types.SimpleNamespace(fetchFlow=fakeFetchFlow)
@@ -80,3 +80,41 @@ def test_flow_limit_slices(monkeypatch: pytest.MonkeyPatch) -> None:
     result = asyncio.run(flowMod.fetch("005930", market="KR", limit=3))
     assert len(result) == 3
     assert result[0]["date"] == "2026-01-01"
+
+
+def test_flow_passes_backfill_options(monkeypatch: pytest.MonkeyPatch) -> None:
+    """start/end/full 옵션을 source domain 으로 전달한다."""
+    from dartlab.gather.sources import flow as flowMod
+
+    seen = {}
+
+    async def fakeFetchFlow(stockCode, client, **kwargs):
+        seen.update(kwargs)
+        return [{"date": "20200131", "foreignNet": -1.0}]
+
+    fakeModule = types.SimpleNamespace(fetchFlow=fakeFetchFlow)
+    monkeypatch.setattr(flowMod, "FLOW_FALLBACK", ["naver"])
+    monkeypatch.setattr(flowMod, "loadDomain", lambda name: fakeModule)
+
+    result = asyncio.run(
+        flowMod.fetch(
+            "005930",
+            market="KR",
+            start="2020-01-01",
+            end="2020-01-31",
+            pageSize=50,
+            sleepSec=1.0,
+            marketType="KRX",
+            maxPages=2,
+            full=True,
+        )
+    )
+
+    assert result == [{"date": "20200131", "foreignNet": -1.0}]
+    assert seen["start"] == "2020-01-01"
+    assert seen["end"] == "2020-01-31"
+    assert seen["pageSize"] == 50
+    assert seen["sleepSec"] == 1.0
+    assert seen["marketType"] == "KRX"
+    assert seen["maxPages"] == 2
+    assert seen["full"] is True

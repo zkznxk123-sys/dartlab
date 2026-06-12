@@ -67,3 +67,32 @@ def test_dartDoc_handler_requires_target() -> None:
         handleDartDoc(None, None, market="KR", start=None, end=None, marketExplicit=False)
     with pytest.raises(ValueError, match="rcept_no"):
         handleDartDoc(None, "", market="KR", start=None, end=None, marketExplicit=False)
+
+
+def test_flow_handler_accepts_all_alias() -> None:
+    """handleFlow 는 공개 kwargs all=True 를 Gather.flow(full=True) 로 변환한다."""
+    from dartlab.gather.entry.handlers import handleFlow
+
+    seen = {}
+
+    class FakeGather:
+        def flow(self, target, **kwargs):
+            seen["target"] = target
+            seen.update(kwargs)
+            return "flow-result"
+
+    result = handleFlow(
+        FakeGather(),
+        "005930",
+        market="KR",
+        start=None,
+        end=None,
+        marketExplicit=False,
+        all=True,
+        sleepSec=0.5,
+    )
+
+    assert result == "flow-result"
+    assert seen["target"] == "005930"
+    assert seen["full"] is True
+    assert seen["sleepSec"] == 0.5
