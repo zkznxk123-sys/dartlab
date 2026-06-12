@@ -137,20 +137,24 @@
 				];
 	// 'ha'(하이킨아시)는 데이터 변환(reapply) — klinecharts 캔들 타입으로는 candle_solid 로 그린다.
 	const kcCandleType = (t: CandleStyle) => (t === 'ha' ? 'candle_solid' : t);
+	// 차트 캔버스 활자 — 터미널 본체와 동일 스택. 기본 'Helvetica Neue' 는 한글이 없어 거래량
+	// 축의 만·억 이 시스템 폰트(맑은 고딕)로 폴백돼 숫자와 다른 활자·다른 덩치로 렌더됐다.
+	// 숫자 = JetBrains Mono(터미널 .mono 와 동일), 한글 = Pretendard 폴백으로 전 페인 통일.
+	const CHART_FONT = "'JetBrains Mono', 'Pretendard Variable', ui-monospace, monospace";
 	const themeStyles = () => ({
 		grid: { horizontal: { color: 'rgba(48,58,78,0.55)' }, vertical: { color: 'rgba(38,46,62,0.3)' } },
 		candle: {
 			type: kcCandleType(ctl.candleStyle),
 			bar: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', upBorderColor: '#34d399', downBorderColor: '#f0616f', noChangeBorderColor: '#8b919e', upWickColor: '#5eead4', downWickColor: '#fb7185', noChangeWickColor: '#8b919e' },
 			area: { lineColor: '#5b9bf0', lineSize: 1.4, backgroundColor: [{ offset: 0, color: 'rgba(91,155,240,0.22)' }, { offset: 1, color: 'rgba(91,155,240,0.01)' }] },
-			priceMark: { high: { color: '#8b919e' }, low: { color: '#8b919e' }, last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14' } } },
-			tooltip: { offsetTop: 26, custom: tooltipCustom(lang), text: { color: '#cfd3dc', size: 11 }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
+			priceMark: { high: { color: '#8b919e', textFamily: CHART_FONT }, low: { color: '#8b919e', textFamily: CHART_FONT }, last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14', family: CHART_FONT } } },
+			tooltip: { offsetTop: 26, custom: tooltipCustom(lang), text: { color: '#cfd3dc', size: 11, family: CHART_FONT }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
 		},
-		indicator: { tooltip: { text: { color: '#8b919e', size: 10 } } },
-		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10 } },
-		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10 } },
+		indicator: { tooltip: { text: { color: '#8b919e', size: 10, family: CHART_FONT } } },
+		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
+		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
 		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(251,146,60,0.1)' },
-		crosshair: { horizontal: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309' } }, vertical: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309' } } }
+		crosshair: { horizontal: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } }, vertical: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } } }
 	});
 
 	// 보조 페인 높이 — 컨테이너 비례(16%) 적응. 전체화면 진입 시 78px 고정 납작 페인 방지.
