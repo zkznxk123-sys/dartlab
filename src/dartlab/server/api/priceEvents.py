@@ -14,7 +14,7 @@ schema 확장.
     regime_band : list[{start, end, label, score}]
 
 메모리 가드:
-    @withMemoryBudget(400) + BoundedCache _price_events_ (LRU 50/300MB).
+    @withMemoryBudget(1500) + BoundedCache _price_events_ (LRU 50/300MB).
 """
 
 from __future__ import annotations
@@ -165,7 +165,7 @@ def _fetchEvents(
     return events
 
 
-@withMemoryBudget(400)
+@withMemoryBudget(1500)
 def buildPriceEventsPayload(
     stockCode: str,
     start: str | _date | None = None,

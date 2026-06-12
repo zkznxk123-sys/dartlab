@@ -21,4 +21,10 @@ export const dashKeys = {
 		['dash', 'card', cardKey, code, periodKind] as const,
 	catalog: () => ['dash', 'catalog'] as const,
 	companyMeta: (code: string) => ['dash', 'companyMeta', code] as const,
+	companyIndex: (code: string) => ['dash', 'companyIndex', code] as const,
+	companyTopic: (code: string, topic: string) => ['dash', 'companyTopic', code, topic] as const,
+	companyScanAll: (code: string) => ['dash', 'companyScanAll', code] as const,
+	companyInsights: (code: string) => ['dash', 'companyInsights', code] as const,
+	companyNetwork: (code: string, hops = 1) => ['dash', 'companyNetwork', code, hops] as const,
+	terminalBundle: (code: string) => ['dash', 'terminalBundle', code] as const,
 };

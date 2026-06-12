@@ -22,6 +22,7 @@ import {
 	Settings,
 	Sun,
 	Telescope,
+	Terminal as TerminalIcon,
 	Trash2,
 } from 'lucide-react';
 
@@ -198,7 +199,7 @@ export function AppSidebar() {
 
 // 사이드바 — 기업분석 모드:
 //   회사 검색 + 2 그룹 (기업분석 / 스크리너).
-//   기업분석 = 재무제표분석 (7 분석 방법론 sub) + 공시뷰어.
+//   기업분석 = 재무제표분석 (7 분석 방법론 sub) + 공시뷰어 + 터미널.
 //   스크리너 = placeholder (실제 로직 후속 PR).
 //   재무제표분석 7 sub = 7 가지 서로 다른 재무 분석 방법론 (lens).
 //   같은 회사를 그레이엄·린치·S&P·Sloan 식 다른 학파 시각으로 본다.
@@ -226,13 +227,15 @@ function DashboardNav() {
 	const activeSubView = isFinancial ? (search?.view ?? null) : null;
 	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
 	const isEvents = !!code && pathname.startsWith(`/analysis/${code}/events`);
+	const isTerminal = !!code && pathname.startsWith(`/analysis/${code}/terminal`);
 
-	// 기업분석 그룹 — 단일 기업 심층 분석. 3 항목 (재무제표분석 / 공시뷰어 / 주가+이벤트).
+	// 기업분석 그룹 — 단일 기업 심층 분석. 4 항목 (재무제표분석 / 공시뷰어 / 터미널 / 주가+이벤트).
 	// quant 는 응답성 회귀 (viz catalog cold + 카드 다수) 가 정리되기 전까지 사이드바에서 제거.
 	// 라우트 + backend 는 유지 — 항목 한 줄 복귀 시 즉시 노출.
 	const corpItems = [
 		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial' },
 		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer' },
+		{ id: 'terminal', title: '터미널', icon: TerminalIcon, isActive: isTerminal, route: '/analysis/$code/terminal' },
 		{ id: 'events', title: '주가+이벤트', icon: CandlestickChart, isActive: isEvents, route: '/analysis/$code/events' },
 	] as const;
 

@@ -15,18 +15,27 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import DOMPurify from 'dompurify';
-import { ChevronLeft, ChevronRight, Columns3, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
-import { Fragment, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { Bot, ChevronLeft, ChevronRight, Columns3, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import {
 	fetchPanelGrid,
+	fetchPanelFull,
 	fetchPanelInit,
 	fetchPanelToc,
 	type PanelRow,
 	type PanelTocResponse,
 } from '@/features/dashboard/api/client';
 import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
+import { ViewerAskDrawer } from '@/features/dashboard/viewer/ViewerAskDrawer';
+import { ViewerCommandPalette } from '@/features/dashboard/viewer/ViewerCommandPalette';
+import {
+	buildViewerSearchIndex,
+	type ViewerSearchHit,
+	type ViewerSearchIndex,
+} from '@/features/dashboard/viewer/searchIndex';
+import type { ViewerActionApi } from '@/features/dashboard/viewer/viewerActions';
 import { cn } from '@/lib/utils';
 
 interface ViewerSearch {
@@ -47,6 +56,10 @@ export const Route = createFileRoute('/analysis/$code/viewer')({
 const DEFAULT_COLS = 3; // 표시 기간 컬럼 수 기본값 (사용자가 3/6/9 로 가로 폭 확장)
 const COL_CHOICES = [3, 6, 9] as const;
 const SECTION_KEY_SEP = '␟';
+
+function isAnnualLikePeriod(period: string): boolean {
+	return /^\d{4}$/.test(period) || /(?:Q4|FY)$/i.test(period);
+}
 
 // ── panel 셀 렌더 (raw DART XML → sanitize) ──
 
@@ -385,14 +398,18 @@ interface PanelMatrixProps {
 	allPeriods: string[]; // diff 용 (인접셀 prev 조회) — fetchPeriods (window+1)
 	dartUrlByPeriod: Record<string, string | null>;
 	changedSet: Set<string>;
+	glowCell?: { rowIndex: number; period: string } | null;
 }
 
 // 수평화 매트릭스 — 한 절 전체를 양축 고정 격자로. 행=panel 항목(truth, 재조인 0),
 // 열=기간. 상단 기간 헤더 sticky(top), 좌측 항목 레이블 sticky(left), 기간 컬럼이
 // 전 항목에 걸쳐 일직선. 가로 스크롤로 더 많은 기간을 펼친다 (수평화의 극치).
 // 셀은 원본 그대로(CellContent) — 합치거나 재계산하지 않는다.
-function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changedSet }: PanelMatrixProps) {
-	const visible = useMemo(() => rows.filter((r) => hasVisibleContent(r, windowPeriods)), [rows, windowPeriods]);
+function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changedSet, glowCell }: PanelMatrixProps) {
+	const visible = useMemo(
+		() => rows.map((row, index) => ({ row, index })).filter(({ row }) => hasVisibleContent(row, windowPeriods)),
+		[rows, windowPeriods],
+	);
 	if (windowPeriods.length === 0) return null;
 	if (visible.length === 0) {
 		return (
@@ -403,7 +420,7 @@ function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changed
 	}
 	// 좌측 항목 레일은 "여러 항목을 구분"할 때만 의미가 있다. 서술형 절(회사의 개요 등)처럼
 	// 서로 다른 라벨이 0~1 개면 빈 거터로 읽기 폭만 잡아먹으므로 생략 — distinct 라벨 ≥ 2 일 때만.
-	const distinctLabels = new Set(visible.map(rowLabel).filter(Boolean));
+	const distinctLabels = new Set(visible.map(({ row }) => rowLabel(row)).filter(Boolean));
 	const hasLabel = distinctLabels.size >= 2;
 	const labelTrack = hasLabel ? 'minmax(120px, 200px) ' : '';
 	const template = `${labelTrack}repeat(${windowPeriods.length}, minmax(260px, 1fr))`;
@@ -441,10 +458,10 @@ function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changed
 				})}
 
 				{/* ── 본문 행 (항목 × 기간) ── */}
-				{visible.map((r) => {
+				{visible.map(({ row: r, index: rowIndex }) => {
 					const label = rowLabel(r);
 					return (
-						<Fragment key={rowKey(r)}>
+						<Fragment key={`${rowIndex}:${rowKey(r)}`}>
 							{hasLabel && (
 								<div
 									className="sticky left-0 z-10 border-b border-r bg-card/70 px-2 py-2 text-[11px] font-medium text-foreground backdrop-blur-sm"
@@ -457,12 +474,15 @@ function PanelMatrix({ rows, windowPeriods, allPeriods, dartUrlByPeriod, changed
 								const st = cellStatus(r, p, allPeriods);
 								return (
 									<div
-										key={p}
+										key={`${rowIndex}:${p}`}
 										data-block={r.blockLeaf || undefined}
 										className={cn(
 											'min-w-0 border-b px-2 py-2',
 											st === 'changed' && 'bg-[var(--chart-2)]/5',
 											st === 'new' && 'bg-accent/20',
+											glowCell?.rowIndex === rowIndex &&
+												glowCell.period === p &&
+												'outline outline-2 outline-offset-[-2px] outline-primary bg-primary/10',
 										)}
 									>
 										<CellContent value={r.cells?.[p] ?? ''} />
@@ -564,6 +584,11 @@ function ViewerTab() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const setLastMode = useDashboardMode((s) => s.setLastMode);
+	const [askOpen, setAskOpen] = useState(false);
+	const [searchIndex, setSearchIndex] = useState<ViewerSearchIndex | null>(null);
+	const [indexing, setIndexing] = useState(false);
+	const indexPromiseRef = useRef<Promise<ViewerSearchIndex | null> | null>(null);
+	const [glowCell, setGlowCell] = useState<{ rowIndex: number; period: string } | null>(null);
 
 	useEffect(() => {
 		setLastMode('viewer');
@@ -622,21 +647,27 @@ function ViewerTab() {
 
 	// 표시 기간 컬럼 수 — 사용자가 3/6/9 로 가로 폭 확장 (수평화 정도 조절).
 	const [cols, setCols] = useState<number>(DEFAULT_COLS);
+	const [annualOnly, setAnnualOnly] = useState(false);
 
 	// 전체 기간 축 — toc.periods (panel 이 최신좌측 정렬, timeline SSOT).
 	const allPeriods = useMemo<string[]>(() => toc?.periods ?? [], [toc]);
+	const visiblePeriods = useMemo<string[]>(() => {
+		if (!annualOnly) return allPeriods;
+		const annuals = allPeriods.filter(isAnnualLikePeriod);
+		return annuals.length > 0 ? annuals : allPeriods;
+	}, [allPeriods, annualOnly]);
 
-	const effectiveWindowEnd = windowEnd && allPeriods.includes(windowEnd) ? windowEnd : allPeriods[0];
-	const windowEndIdx = effectiveWindowEnd ? allPeriods.indexOf(effectiveWindowEnd) : -1;
+	const effectiveWindowEnd = windowEnd && visiblePeriods.includes(windowEnd) ? windowEnd : visiblePeriods[0];
+	const windowEndIdx = effectiveWindowEnd ? visiblePeriods.indexOf(effectiveWindowEnd) : -1;
 	// 표시 cols 기간. fetchPeriods = +1 (직전 인접셀 diff 용). full-period(수MB) 대신 window 만 fetch.
 	const windowPeriods = useMemo<string[]>(() => {
 		if (windowEndIdx < 0) return [];
-		return allPeriods.slice(windowEndIdx, windowEndIdx + cols);
-	}, [allPeriods, windowEndIdx, cols]);
+		return visiblePeriods.slice(windowEndIdx, windowEndIdx + cols);
+	}, [visiblePeriods, windowEndIdx, cols]);
 	const fetchPeriods = useMemo<string[]>(() => {
 		if (windowEndIdx < 0) return [];
-		return allPeriods.slice(windowEndIdx, windowEndIdx + cols + 1);
-	}, [allPeriods, windowEndIdx, cols]);
+		return visiblePeriods.slice(windowEndIdx, windowEndIdx + cols + 1);
+	}, [visiblePeriods, windowEndIdx, cols]);
 
 	// window 단위 grid fetch — windowEnd 이동 시 fetchPeriods 가 바뀌어 재fetch. 초기
 	// (windowEnd 없음)는 /panel/init 이 동봉한 최신 window grid 를 seed 로 재사용 (fetch 0).
@@ -661,19 +692,95 @@ function ViewerTab() {
 		});
 	};
 
+	const focusEvidence = useCallback(
+		(hit: ViewerSearchHit) => {
+			if (annualOnly && !isAnnualLikePeriod(hit.period)) setAnnualOnly(false);
+			navigate({
+				to: '/analysis/$code/viewer',
+				params: { code },
+				search: (prev) => ({
+					period: prev?.period ?? 'quarterly',
+					section: hit.sectionKey,
+					block: undefined,
+					windowEnd: hit.period === visiblePeriods[0] ? undefined : hit.period,
+				}),
+				replace: false,
+			});
+			setGlowCell({ rowIndex: hit.rowIndex, period: hit.period });
+		},
+		[annualOnly, code, navigate, visiblePeriods],
+	);
+
+	const ensureIndex = useCallback(async (): Promise<ViewerSearchIndex | null> => {
+		if (searchIndex) return searchIndex;
+		if (indexPromiseRef.current) return indexPromiseRef.current;
+		setIndexing(true);
+		const promise = fetchPanelFull(code)
+			.then((full) => buildViewerSearchIndex(full))
+			.then((idx) => {
+				setSearchIndex(idx);
+				return idx;
+			})
+			.catch(() => null)
+			.finally(() => {
+				indexPromiseRef.current = null;
+				setIndexing(false);
+			});
+		indexPromiseRef.current = promise;
+		return promise;
+	}, [code, searchIndex]);
+
+	useEffect(() => {
+		setSearchIndex(null);
+		indexPromiseRef.current = null;
+		setGlowCell(null);
+	}, [code]);
+
 	const moveOlder = () => {
-		if (windowEndIdx < 0 || windowEndIdx + 1 >= allPeriods.length) return;
-		setWindowEnd(allPeriods[windowEndIdx + 1]);
+		if (windowEndIdx < 0 || windowEndIdx + 1 >= visiblePeriods.length) return;
+		setWindowEnd(visiblePeriods[windowEndIdx + 1]);
 	};
 	const moveNewer = () => {
 		if (windowEndIdx <= 0) return;
-		setWindowEnd(windowEndIdx === 1 ? undefined : allPeriods[windowEndIdx - 1]);
+		setWindowEnd(windowEndIdx === 1 ? undefined : visiblePeriods[windowEndIdx - 1]);
 	};
-	const canOlder = windowEndIdx >= 0 && windowEndIdx + 1 < allPeriods.length;
+	const canOlder = windowEndIdx >= 0 && windowEndIdx + 1 < visiblePeriods.length;
 	const canNewer = windowEndIdx > 0;
 
 	const rows = grid?.rows ?? [];
 	const dartUrlByPeriod = grid?.dartUrlByPeriod ?? {};
+	const validSections = useMemo(() => new Set(toc?.chapters.flatMap((ch) => ch.sections.map((sec) => sec.sectionKey)) ?? []), [toc]);
+	const viewerActionApi = useMemo<ViewerActionApi>(
+		() => ({
+			navigateCompany: (nextCode) => {
+				navigate({
+					to: '/analysis/$code/viewer',
+					params: { code: nextCode },
+					search: { period: 'quarterly' },
+				});
+			},
+			focusEvidence,
+			setSection: (sectionKey) => {
+				navigate({
+					to: '/analysis/$code/viewer',
+					params: { code },
+					search: (prev) => ({ period: prev?.period ?? 'quarterly', section: sectionKey, windowEnd: prev?.windowEnd }),
+				});
+			},
+			setPeriod: (period) => {
+				if (annualOnly && !isAnnualLikePeriod(period)) setAnnualOnly(false);
+				setWindowEnd(period === visiblePeriods[0] ? undefined : period);
+			},
+			moveNewer,
+			moveOlder,
+			setCols: (count) => setCols(count),
+			toggleAnnual: () => setAnnualOnly((v) => !v),
+			hasSection: (sectionKey) => validSections.has(sectionKey),
+			hasPeriod: (period) => allPeriods.includes(period),
+			knownCode: (nextCode) => /^[A-Za-z0-9]{1,20}$/.test(nextCode) && nextCode !== code,
+		}),
+		[allPeriods, annualOnly, code, focusEvidence, moveNewer, moveOlder, navigate, validSections, visiblePeriods],
+	);
 
 	// 헤더 시간축 — 인접 period 셀이 다른 row 가 하나라도 있으면 변경 표시 (프론트 계산).
 	const changedSet = useMemo(() => {
@@ -739,8 +846,28 @@ function ViewerTab() {
 									</div>
 									<div className="flex items-center gap-3">
 										<div className="text-[11px] text-muted-foreground">
-											항목 {rows.length} · 전체 기간 {allPeriods.length}
+											항목 {rows.length} · 표시 기간 {visiblePeriods.length}/{allPeriods.length}
 										</div>
+										<ViewerCommandPalette
+											index={searchIndex}
+											indexing={indexing}
+											onEnsureIndex={() => void ensureIndex()}
+											onPick={focusEvidence}
+										/>
+										<button
+											type="button"
+											onClick={() => {
+												setAskOpen((v) => !v);
+												void ensureIndex();
+											}}
+											title="AI 공시 Q&A"
+											className={cn(
+												'inline-flex h-8 items-center gap-1 rounded border px-2 text-xs text-muted-foreground hover:bg-accent',
+												askOpen && 'border-primary/60 bg-primary/10 text-foreground',
+											)}
+										>
+											<Bot className="size-3.5" /> AI
+										</button>
 										<div className="flex items-center gap-1 rounded border p-0.5" title="동시 표시 기간 수 (가로 폭)">
 											<Columns3 className="ml-1 size-3 text-muted-foreground" />
 											{COL_CHOICES.map((n) => (
@@ -759,6 +886,17 @@ function ViewerTab() {
 										</div>
 										<button
 											type="button"
+											onClick={() => setAnnualOnly((v) => !v)}
+											title="연간 보고서 기간만 보기"
+											className={cn(
+												'inline-flex h-8 items-center rounded border px-2 text-xs text-muted-foreground hover:bg-accent',
+												annualOnly && 'border-primary/60 bg-primary/10 text-foreground',
+											)}
+										>
+											연간
+										</button>
+										<button
+											type="button"
 											onClick={() => setIsFullscreen((v) => !v)}
 											title={isFullscreen ? '전체보기 해제 (Esc)' : '전체보기'}
 											className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-accent"
@@ -770,10 +908,10 @@ function ViewerTab() {
 								</div>
 
 								<TimelineRibbon
-									periods={allPeriods}
+									periods={visiblePeriods}
 									changedSet={changedSet}
 									windowPeriods={windowPeriods}
-									onPick={(p) => setWindowEnd(p === allPeriods[0] ? undefined : p)}
+									onPick={(p) => setWindowEnd(p === visiblePeriods[0] ? undefined : p)}
 									onNewer={moveNewer}
 									onOlder={moveOlder}
 									canNewer={canNewer}
@@ -789,11 +927,23 @@ function ViewerTab() {
 								allPeriods={fetchPeriods}
 								dartUrlByPeriod={dartUrlByPeriod}
 								changedSet={changedSet}
+								glowCell={glowCell}
 							/>
 						</div>
 					</>
 				)}
 			</main>
+			{askOpen && (
+				<ViewerAskDrawer
+					code={code}
+					corpName={corpName}
+					index={searchIndex}
+					indexing={indexing}
+					onEnsureIndex={ensureIndex}
+					actionApi={viewerActionApi}
+					onClose={() => setAskOpen(false)}
+				/>
+			)}
 		</div>
 	);
 }

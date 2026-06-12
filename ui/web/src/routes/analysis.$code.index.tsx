@@ -1,8 +1,8 @@
 // /analysis/$code/ — 종목 선택 직후 진입하는 허브 화면.
 //
 // 모델: 사이드바에서 종목을 누르면 사이드바가 바로 financial 카드 로딩을
-// 시작하지 않고 본 허브로 navigate. 허브는 중앙에 아바타 + 회사명 + 2 큰
-// 버튼 (재무제표분석 / 공시뷰어). 사용자가 명시적으로 어디로 갈지 선택할
+// 시작하지 않고 본 허브로 navigate. 허브는 중앙에 아바타 + 회사명 + 3 큰
+// 버튼 (재무제표분석 / 공시뷰어 / 터미널). 사용자가 명시적으로 어디로 갈지 선택할
 // 때까지 카드 로딩 폭주 X.
 //
 // 마운트 시점에 두 모드 데이터를 idle queue 로 background prefetch:
@@ -14,7 +14,7 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { FileText, Telescope } from 'lucide-react';
+import { FileText, Telescope, Terminal as TerminalIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +87,7 @@ function AnalysisHub() {
 					</p>
 				</div>
 
-				<div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+				<div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
 					<HubButton
 						icon={<FileText className="size-6" />}
 						title="재무제표분석"
@@ -111,6 +111,19 @@ function AnalysisHub() {
 								to: '/analysis/$code/viewer',
 								params: { code },
 								search: { period, section: undefined, windowEnd: undefined },
+							})
+						}
+					/>
+					<HubButton
+						icon={<TerminalIcon className="size-6" />}
+						title="터미널"
+						subtitle="가격 · 공시 · 재무 한 화면"
+						recommended={recommendKey === 'terminal'}
+						onClick={() =>
+							navigate({
+								to: '/analysis/$code/terminal',
+								params: { code },
+								search: { period },
 							})
 						}
 					/>
@@ -148,4 +161,3 @@ function HubButton({ icon, title, subtitle, recommended, onClick }: HubButtonPro
 		</button>
 	);
 }
-

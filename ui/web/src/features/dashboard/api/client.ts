@@ -151,10 +151,10 @@ export interface DashboardResponse {
 	order: string[];
 }
 
-// 기업분석 3 탭 (financial / quant / viewer). 옛 6 탭 (portfolio/valuation/
+// 기업분석 탭 (financial / quant / viewer / terminal). 옛 6 탭 (portfolio/valuation/
 // governance/peer/lifecycle/macro) 은 financial 안의 분석 방법론별 view 로 흡수.
 // quant = 가격 시계열 + 기술/모멘텀/변동성/베타/예측/백테스트 (재무 알파 X).
-export type AnalysisTab = 'financial' | 'quant' | 'viewer';
+export type AnalysisTab = 'financial' | 'quant' | 'viewer' | 'terminal';
 
 // 재무제표분석 7 분석 방법론 — 같은 회사를 그레이엄·린치·S&P·Sloan 식
 // 다른 학파 시각으로 보는 lens. legacy 6 (performance/...) 은 redirect 용.
@@ -230,6 +230,132 @@ export interface CompanyMeta {
 
 export function fetchCompanyMeta(stockCode: string): Promise<CompanyMeta> {
 	return fetchJson<CompanyMeta>(`/api/company/${stockCode}/meta`);
+}
+
+export interface SerializedTablePayload {
+	type: 'table';
+	columns: string[];
+	rows: Record<string, unknown>[];
+	totalRows: number;
+	truncated: boolean;
+}
+
+export interface SerializedDictPayload {
+	type: 'dict';
+	data: Record<string, unknown>;
+}
+
+export interface SerializedTextPayload {
+	type: 'text';
+	data: string;
+}
+
+export interface SerializedNonePayload {
+	type: 'none';
+	data: null;
+}
+
+export interface SerializedUnknownPayload {
+	type: 'unknown';
+	data: string;
+}
+
+export type SerializedPayload =
+	| SerializedTablePayload
+	| SerializedDictPayload
+	| SerializedTextPayload
+	| SerializedNonePayload
+	| SerializedUnknownPayload;
+
+export interface CompanyIndexRow {
+	chapter?: string;
+	topic?: string;
+	label?: string;
+	kind?: string;
+	source?: string;
+	periods?: string | number;
+	shape?: string;
+	preview?: string;
+}
+
+export interface CompanyIndexResponse {
+	stockCode: string;
+	corpName: string;
+	payload: SerializedPayload;
+}
+
+export interface CompanyTopicResponse {
+	stockCode: string;
+	corpName: string;
+	topic: string;
+	block?: number | null;
+	payload: SerializedPayload;
+}
+
+export interface CompanyScanAllResponse {
+	stockCode: string;
+	corpName: string;
+	available: boolean;
+	scans?: Record<string, SerializedPayload>;
+}
+
+export interface CompanyInsightFlag {
+	level?: string;
+	severity?: string;
+	category?: string;
+	text: string;
+	value?: number | string | null;
+}
+
+export interface CompanyInsightArea {
+	grade?: string;
+	summary?: string;
+	details?: string[];
+	risks?: CompanyInsightFlag[];
+	opportunities?: CompanyInsightFlag[];
+}
+
+export interface CompanyInsightsResponse {
+	stockCode: string;
+	corpName: string;
+	available: boolean;
+	isFinancial?: boolean;
+	grades?: Record<string, string>;
+	areas?: Record<string, CompanyInsightArea>;
+	anomalies?: CompanyInsightFlag[];
+	summary?: string;
+	profile?: Record<string, unknown>;
+}
+
+export interface CompanyNetworkResponse {
+	stockCode: string;
+	corpName: string;
+	available: boolean;
+	nodes?: unknown[];
+	links?: unknown[];
+	edges?: unknown[];
+	[key: string]: unknown;
+}
+
+export function fetchCompanyIndex(stockCode: string): Promise<CompanyIndexResponse> {
+	return fetchJson<CompanyIndexResponse>(`/api/company/${stockCode}/index`);
+}
+
+export function fetchCompanyTopic(stockCode: string, topic: string): Promise<CompanyTopicResponse> {
+	return fetchJson<CompanyTopicResponse>(`/api/company/${stockCode}/show/${encodeURIComponent(topic)}`);
+}
+
+export function fetchCompanyScanAll(stockCode: string): Promise<CompanyScanAllResponse> {
+	return fetchJson<CompanyScanAllResponse>(`/api/company/${stockCode}/scan/all`);
+}
+
+export function fetchCompanyInsights(stockCode: string): Promise<CompanyInsightsResponse> {
+	return fetchJson<CompanyInsightsResponse>(`/api/company/${stockCode}/insights`);
+}
+
+export function fetchCompanyNetwork(stockCode: string, hops = 1): Promise<CompanyNetworkResponse> {
+	const qs = new URLSearchParams({ hops: String(hops) });
+	return fetchJson<CompanyNetworkResponse>(`/api/company/${stockCode}/network?${qs}`);
 }
 
 export interface TabDashboardResponse {
@@ -379,4 +505,8 @@ export function fetchPanelGrid(
 	if (periods?.length) qs.set('periods', periods.join(','));
 	if (block) qs.set('block', block);
 	return fetchJson<PanelGridResponse>(`/api/company/${stockCode}/panel?${qs}`);
+}
+
+export function fetchPanelFull(stockCode: string): Promise<PanelGridResponse> {
+	return fetchJson<PanelGridResponse>(`/api/company/${stockCode}/panel`);
 }

@@ -42,6 +42,7 @@ function AnalysisLayout() {
 	const ttmAvail = useFinancialView((s) => s.ttmAvail);
 	const setTtmAvail = useFinancialView((s) => s.setTtmAvail);
 	const isViewerTab = location.pathname.endsWith('/viewer');
+	const isTerminalTab = location.pathname.endsWith('/terminal');
 	const isFinancialTab = location.pathname.endsWith('/financial');
 
 	// URL 과 state 동기화 — financial 탭에서 periodView 도 URL 에 동기 (bookmark).
@@ -92,13 +93,13 @@ function AnalysisLayout() {
 					onPeriodViewChange={setPeriodView}
 					showPeriodView={isFinancialTab}
 					ttmAvail={isFinancialTab ? ttmAvail : null}
-					hidePeriodToggle={isViewerTab}
+					hidePeriodToggle={isViewerTab || isTerminalTab}
 				/>
 			</div>
-			{/* viewer 탭은 own scroll container (sticky timeline + body-only scroll) — 부모는
+			{/* viewer/terminal 탭은 own scroll container — 부모는
 			   overflow-hidden 으로 outer scroll 흡수 차단. 그 외 탭 (financial/quant/index) 은
 			   기존 outer scroll 유지. */}
-			<div className={isViewerTab ? 'min-h-0 flex-1 overflow-hidden' : 'min-h-0 flex-1 overflow-y-auto tiny-scroll'}>
+			<div className={isViewerTab || isTerminalTab ? 'min-h-0 flex-1 overflow-hidden' : 'min-h-0 flex-1 overflow-y-auto tiny-scroll'}>
 				<Outlet />
 			</div>
 		</div>
