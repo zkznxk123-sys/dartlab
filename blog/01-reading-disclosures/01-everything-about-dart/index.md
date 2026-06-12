@@ -6,7 +6,14 @@ category: reading-disclosures
 series: dart-foundations
 seriesOrder: 1
 thumbnail: /avatar-study.png
+youtubeId: "-Y3kY1zs62I"
 ---
+
+<script>
+  import YouTube from '$lib/components/YouTube.svelte';
+</script>
+
+<YouTube id="-Y3kY1zs62I" title="DartLab — 공시를 비교 가능한 데이터로" />
 
 # DART의 모든 것
 
