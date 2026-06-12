@@ -71,6 +71,14 @@ jobs:
             uv run python -X utf8 .github/scripts/sync/buildGovData.py --daily --lookback 4 ${{ github.event.inputs.basDt && format('--basDt {0}', github.event.inputs.basDt) || '' }}
           fi
 
+      - name: Build prices-snapshot.json + push to HF (daily only)
+        # date 샤드 upsert 직후 같은 러너 로컬 캐시 재사용 — landing 시세 스냅샷 신선도 동기화.
+        # derive 분기는 가격 신규 수집이 없으므로 제외.
+        if: ${{ github.event.schedule != '10 13 * * 6' && github.event.inputs.mode != 'derive' }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run python -X utf8 .github/scripts/prebuild/buildPricesSnapshot.py
+
       - name: Save gov price parquet cache
         uses: actions/cache/save@v5
         if: always()

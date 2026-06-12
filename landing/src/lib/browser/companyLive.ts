@@ -200,7 +200,8 @@ export async function loadLiveCompany(stockCode: string): Promise<LiveCompanyBun
 			preferLocal: true
 		}),
 		loadJson<any>('map/meta.json', { fetchFn: fetch, preferLocal: true }),
-		loadJson<PriceSnapshotFile>('map/prices-snapshot.json', { fetchFn: fetch, preferLocal: true })
+		// 시세 스냅샷만 HF-first — 일배치 HF 갱신을 정적 사본이 가리는 동결 방지 (terminal routeLoad 동일)
+		loadJson<PriceSnapshotFile>('map/prices-snapshot.json', { fetchFn: fetch })
 	]);
 	const valuation = await withTimeout(valuationPromise, 1200, null);
 

@@ -26,7 +26,9 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 		loadJson<FinanceFile>('dashboards/finance.json', opt),
 		loadJson<MacroFile>('dashboards/macro.json', opt),
 		loadJson<MetaFile>('dashboards/meta.json', opt),
-		loadJson<PricesFile>('map/prices-snapshot.json', opt),
+		// 시세 스냅샷만 HF-first — 일배치(buildPricesSnapshot.py)가 매 영업일 HF 를 갱신하는데
+		// preferLocal 이면 배포 시점 정적 사본이 영원히 이겨 asOf 가 동결된다 (4/24 사고).
+		loadJson<PricesFile>('map/prices-snapshot.json', { fetchFn }),
 		loadJson<IndexRow[]>('map/search-index.json', opt),
 		loadJson<EcosystemFile>('map/ecosystem.json', opt),
 		loadJson<QuartersFile>('dashboards/quarters.json', opt)
