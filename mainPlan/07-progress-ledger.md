@@ -84,3 +84,16 @@ commit: (이 변경의 커밋)
 
 검증: 문서 변경만 — build 영향 없음.  
 rollback: 이 commit revert.
+
+### [3] 문서 정합화 — 이름 대칭 규칙 (운영자 원칙: 트리가 지도다)
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+내용: "폴더 구조를 잘 설계하고 직관적 트리 체계를 만들면 헷갈릴 수 없다" 원칙을 강행 규칙으로 명문화(01 §8.1).
+
+- 이름 대칭: 작업면 한 단어가 route → surfaces 폴더 → Surface 컴포넌트 → runtime port → service command → 커밋·원장 표기까지 관통
+- 한 작업면 = 한 폴더, 공개 API = index.ts 하나, 내부 깊이 ≤ 2, 내부 형태 표준화(index/XxxSurface.svelte/components/lib)
+- 새 작업면 추가 레시피 5수 고정(contracts → port+adapter 2 → surfaces 폴더 → wrapper 2) — "어디에 두지?" 질문 발생 = 설계 위반 신호
+- 01 §4 surfaces 트리에 route·port 대응 주석 부착 — 트리만 보고 전체 지도 파악 가능
+
+검증: 문서 변경만 — build 영향 없음.  
+rollback: 이 commit revert.
