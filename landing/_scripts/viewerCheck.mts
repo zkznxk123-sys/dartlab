@@ -8,7 +8,7 @@ import { computePeriodKind } from '../src/lib/viewer/periodKind.ts';
 import { userMarkClass } from '../src/lib/viewer/cell.ts';
 import { mergeDriftVariants, accountDepth, accountIsTotal, accountLabel, sceComponent, buildSceMatrix, buildSql } from '../src/lib/viewer/finance/financePivot.ts';
 import { viewerUrl, marketForCode } from '../src/lib/viewer/dartUrl.ts';
-import { buildCompareBoard, compareRows, detectFinanceUnit, normalizeCompareTargets } from '../src/lib/viewer/compare/index.ts';
+import { buildCompareBoard, compareRows, normalizeCompareTargets } from '../src/lib/viewer/compare/index.ts';
 import type { PanelBundle, PanelRow } from '../src/lib/viewer/types.ts';
 
 let fail = 0;
@@ -24,6 +24,11 @@ eq(canonicalChapter('6. 배당에 관한 사항', '6. 배당에 관한 사항'),
 eq(canonicalChapter('7. 증권의 발행을 통한 자금조달에 관한 사항', '7. 증권의 발행을 통한 자금조달에 관한 사항'), 'III. 재무에 관한 사항', '증권발행→III');
 eq(canonicalChapter('별난 챕터', '별난 챕터'), '별난 챕터', 'honest fallback');
 eq(canonicalChapter('II. 사업의 내용', 'II. 사업의 내용␟V. 회계감사인의 감사의견 등␟외부감사'), 'V. 회계감사인의 감사의견 등', 'depth V');
+// NT_ 주석 orphan 복원 — 구조신호 0(chapter·sectionPath 공백) + NT_ 키 → III (Python noteKeyCol 대조).
+eq(canonicalChapter('', '', 'NT_D838000'), 'III. 재무에 관한 사항', 'NT_ orphan→III');
+eq(canonicalChapter('', '', null), '', 'front-matter(키∅) 보존');
+eq(canonicalChapter('', '', 'CF_X'), '', 'NT_ 외 키 보존');
+eq(canonicalChapter('II. 사업의 내용', 'II. 사업의 내용␟V. 회계감사인의 감사의견 등', 'NT_D838000'), 'V. 회계감사인의 감사의견 등', '구조신호가 NT_ 보다 우선');
 
 // isReportChapter — navigable 보고서 챕터(I~XII)만, cert(cover/expert)·EDGAR form·stray 제외 (Python REPORT_CHAPTER_LABELS).
 eq(isReportChapter('III. 재무에 관한 사항'), true, 'isReport III');
@@ -159,8 +164,9 @@ const narrCmp = compareRows(
 	'III. 재무에 관한 사항␟2. 연결재무제표',
 	'2026Q1'
 ).rows;
-eq(narrCmp.length, 2, 'compare narrative 회사행 분리');
-eq(narrCmp.every((r) => r.cells.filter((c) => c != null).length === 1), true, 'compare narrative false-merge 금지');
+// dfaf55e5c 리팩토링: 비교 = 한 행(회사=열), 셀 = 그 회사 섹션 콘텐츠 통째(계정 분해·행 정렬 0).
+eq(narrCmp.length, 1, 'compare narrative 단일행(회사=열)');
+eq(narrCmp[0].cells, ['삼성 서술 1', 'SK 서술 1'], 'compare narrative 회사별 통째 셀(false-merge 0)');
 eq(
 	buildCompareBoard(
 		[
@@ -184,22 +190,13 @@ const leafCmp = compareRows(
 	'III. 재무에 관한 사항␟2. 연결재무제표',
 	'2026Q1'
 ).rows;
-eq(leafCmp.length, 2, 'compare key leafType 분리');
+eq(leafCmp.length, 1, 'compare 단일행 — leafType 도 회사 셀 안에서 결합');
+eq(leafCmp[0].cells, ['A\nB', null], 'compare 회사 셀 = leaf 결합 + 부재사 null(honest-gap)');
 
-const unitRows = [
-	cmpRow({
-		blockType: 'table',
-		cells: {
-			'2026Q1':
-				'<P>(단위:백만원)</P><TABLE><TR><TE ACODE="ifrs-full_Revenue" ACONTEXT="CFY2026dFQ_ifrs-full_ConsolidatedMember">1,234</TE></TR><TR><TE>기본주당이익(손실)(단위:원)</TE><TE ACODE="ifrs-full_BasicEarningsLossPerShare" ACONTEXT="CFY2026dFQ_ifrs-full_ConsolidatedMember">10</TE></TR></TABLE>'
-		}
-	})
-];
-eq(detectFinanceUnit(unitRows, '2026Q1').label, '백만원', 'finance unit 캡션이 EPS 원보다 우선');
-eq(detectFinanceUnit([cmpRow({ cells: { '2026Q1': '<TE ACODE="ifrs-full_Assets">2,000,000,000,000</TE>' } })], '2026Q1').label, '원', 'finance unit 캡션부재 magnitude 원');
+// detectFinanceUnit 단위검출 케이스는 셀모드 dead 코드 제거(a8d0d0044)와 함께 함수 삭제로 폐기.
 eq(normalizeCompareTargets('005930', '000660,005930,AAPL,000660').vs, ['000660'], 'compare targets self/dup/cross-market 제거');
 eq(normalizeCompareTargets('005930', '000001,000002,000003,000004,000005,000006').vs.length, 5, 'compare targets 총 6사 제한');
 eq(normalizeCompareTargets('AAPL', 'msft,aapl').vs, ['MSFT'], 'compare targets US ticker 대문자 정규화');
 
-console.log(fail === 0 ? 'viewerCheck: ALL OK (75/75)' : `viewerCheck: ${fail} FAIL`);
+console.log(fail === 0 ? 'viewerCheck: ALL OK' : `viewerCheck: ${fail} FAIL`);
 process.exit(fail === 0 ? 0 : 1);
