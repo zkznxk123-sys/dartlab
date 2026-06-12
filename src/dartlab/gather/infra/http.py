@@ -7,6 +7,8 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import contextvars
 import logging
 import random
 import time
@@ -59,6 +61,7 @@ _USER_AGENTS = [
 
 _threadLoop: asyncio.AbstractEventLoop | None = None
 _threadPool = ThreadPoolExecutor(max_workers=1)
+_activeProxy: contextvars.ContextVar[str | None] = contextvars.ContextVar("dartlabGatherProxy", default=None)
 
 
 def _getThreadLoop() -> asyncio.AbstractEventLoop:
@@ -140,14 +143,15 @@ def runAsync(coro):
     """
     # coro 누수 차단 — 어떤 경로로 raise 되든 coro.close() 보장.
     # (이전: _getThreadLoop / threadPool 실패 시 coro 가 await 안 되어 RuntimeWarning 발생)
+    ctx = contextvars.copy_context()
     try:
         try:
             asyncio.get_running_loop()
         except RuntimeError:
             # loop 없음 — 직접 실행 (persistent loop 사용)
-            return _runInThreadLoop(coro)
+            return ctx.run(_runInThreadLoop, coro)
         # 이미 loop 실행 중 → 별도 스레드의 persistent loop
-        return _threadPool.submit(_runInThreadLoop, coro).result()
+        return _threadPool.submit(lambda: ctx.run(_runInThreadLoop, coro)).result()
     except BaseException:
         # coro 가 await 됐다면 close 는 no-op. await 전 raise 면 cleanup.
         try:
@@ -252,7 +256,14 @@ class GatherHttpClient:
     """
 
     def __init__(self) -> None:
-        self._client = httpx.AsyncClient(
+        self._client = self._makeClient()
+        self._proxyClients: dict[str, httpx.AsyncClient] = {}
+        self._limiters: dict[str, _AsyncRateLimiter] = {}
+        self._semaphores: dict[str, asyncio.Semaphore] = {}
+
+    def _makeClient(self, *, proxy: str | None = None) -> httpx.AsyncClient:
+        """공통 옵션으로 httpx AsyncClient 생성."""
+        return httpx.AsyncClient(
             timeout=httpx.Timeout(10.0, connect=5.0),
             limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
             headers={
@@ -261,9 +272,102 @@ class GatherHttpClient:
                 "User-Agent": random.choice(_USER_AGENTS),
             },
             follow_redirects=True,
+            proxy=proxy,
         )
-        self._limiters: dict[str, _AsyncRateLimiter] = {}
-        self._semaphores: dict[str, asyncio.Semaphore] = {}
+
+    def _getClientForProxy(self, proxy: str | None) -> httpx.AsyncClient:
+        """proxy 별 connection pool 재사용. None 이면 기본 client."""
+        if not proxy:
+            return self._client
+        if proxy not in self._proxyClients:
+            self._proxyClients[proxy] = self._makeClient(proxy=proxy)
+        return self._proxyClients[proxy]
+
+    @contextlib.contextmanager
+    def useProxy(self, proxy: str | None):
+        """현재 gather 호출 범위에 사용자 프록시를 적용한다.
+
+        Capabilities:
+            - ``dartlab.gather(..., proxy=...)`` 의 공통 HTTP 적용 범위 제공.
+            - ``contextvars`` 로 proxy URL 을 저장해 nested async 호출과
+              ``runAsync`` thread-loop 경로까지 전파.
+            - proxy URL 별 ``httpx.AsyncClient`` connection pool 재사용.
+
+        AIContext:
+            AI 역할: 공개 답변에서는 ``dartlab.gather`` 의 공통 옵션으로만
+            설명한다. 내부 HTTP client 를 직접 열거나 ``requests`` 호출로
+            우회하는 안내는 하지 않는다.
+
+        Guide:
+            이 context manager 는 네트워크 경로 선택만 담당한다. rate-limit,
+            semaphore, jitter, retry, quota guard 는 ``get``/``post`` 경로에서
+            기존과 동일하게 적용된다.
+
+        When:
+            ``GatherEntry._run`` 이 ``proxy`` kwarg 를 받은 gather 호출 범위를
+            실행할 때.
+
+        How:
+            ``_activeProxy`` contextvar 에 URL 을 기록하고, ``get``/``post`` 가
+            명시 proxy 가 없을 때 ``_resolveProxy`` 로 현재 값을 읽는다.
+
+        Args:
+            proxy: 사용자 제공 HTTP(S) 프록시 URL. None 또는 빈 값이면 기본
+                direct client 를 그대로 사용한다.
+
+        Returns:
+            context manager — ``with client.useProxy(proxy): ...`` 블록 안에서
+            GatherHttpClient GET/POST 요청에 proxy context 를 제공한다.
+
+        Raises:
+            없음. contextvar set/reset 만 수행하며, 실제 네트워크 오류는
+            ``get``/``post`` 호출에서 ``SourceUnavailableError`` 로 처리된다.
+
+        Example:
+            >>> client = GatherHttpClient()
+            >>> with client.useProxy("http://user:pass@host:port"):
+            ...     response = runAsync(client.get("https://example.com"))
+
+        Requires:
+            ``contextvars`` 런타임 + ``GatherHttpClient`` 인스턴스. proxy URL 의
+            유효성 검증과 인증 실패 처리는 httpx transport 에 위임한다.
+
+        SeeAlso:
+            GatherEntry._run : public ``proxy`` kwarg 를 이 context 로 연결.
+            get : context proxy 를 적용하는 GET 요청.
+            post : context proxy 를 적용하는 POST 요청.
+
+        LLM Specifications:
+            AntiPatterns:
+                - proxy 를 rate-limit 우회 기능으로 설명.
+                - 프록시 인증정보를 로그/답변/문서에 그대로 노출.
+                - ``dartlab.gather`` 를 거치지 않고 내부 client 사용법을 공개 계약으로 안내.
+            OutputSchema:
+                - context manager : object — with 블록에서 proxy context 제공
+            Prerequisites:
+                - 사용자 제공 HTTP(S) proxy URL.
+                - 요청 경로가 ``GatherHttpClient.get/post`` 를 사용해야 함.
+            Freshness:
+                데이터 freshness 를 바꾸지 않는다. 네트워크 경로만 변경한다.
+            Dataflow:
+                GatherEntry._run(proxy=...) → useProxy → GatherHttpClient.get/post → httpx.AsyncClient(proxy=...).
+            TargetMarkets:
+                - KR
+                - US
+                - GLOBAL (GatherHttpClient 경유 source 한정)
+        """
+        if not proxy:
+            yield
+            return
+        token = _activeProxy.set(proxy)
+        try:
+            yield
+        finally:
+            _activeProxy.reset(token)
+
+    def _resolveProxy(self, proxy: str | None) -> str | None:
+        """요청별 proxy가 없으면 현재 gather 호출 범위의 proxy를 사용한다."""
+        return proxy or _activeProxy.get()
 
     def _getPolicy(self, domain: str) -> DomainConfig:
         """도메인별 정책 반환. 미등록 도메인은 기본 정책 사용.
@@ -328,6 +432,7 @@ class GatherHttpClient:
         headers: dict | None = None,
         timeout: float | None = None,
         maxRetries: int = 3,
+        proxy: str | None = None,
     ) -> httpx.Response:
         """GET 요청 — rate limit + semaphore + 재시도 (async).
 
@@ -349,6 +454,8 @@ class GatherHttpClient:
             요청 타임아웃 (초). None이면 도메인 정책 기본값.
         max_retries : int
             최대 재시도 횟수 (회). 기본 3.
+        proxy : str | None
+            사용자 제공 HTTP(S) 프록시 URL. 예: ``"http://user:pass@host:port"``.
 
         Returns
         -------
@@ -378,6 +485,7 @@ class GatherHttpClient:
         limiter = self._getLimiter(domain)
         semaphore = self._getSemaphore(domain)
         req_timeout = timeout or policy.timeout
+        req_client = self._getClientForProxy(self._resolveProxy(proxy))
 
         # Sprint 1 PR2 — 일일 quota 사전 차단 (80% 도달 시 fallback chain 으로 즉시 전환)
         if not quota.checkDaily(domain):
@@ -396,7 +504,7 @@ class GatherHttpClient:
                     req_headers = {"User-Agent": random.choice(_USER_AGENTS)}
                     if headers:
                         req_headers.update(headers)
-                    resp = await self._client.get(
+                    resp = await req_client.get(
                         url,
                         params=params,
                         headers=req_headers,
@@ -433,6 +541,7 @@ class GatherHttpClient:
         headers: dict | None = None,
         timeout: float | None = None,
         maxRetries: int = 3,
+        proxy: str | None = None,
     ) -> httpx.Response:
         """POST 요청 -- rate limit + semaphore + 재시도 (async).
 
@@ -456,6 +565,8 @@ class GatherHttpClient:
             요청 타임아웃 (초). None이면 도메인 정책 기본값.
         max_retries : int
             최대 재시도 횟수 (회). 기본 3.
+        proxy : str | None
+            사용자 제공 HTTP(S) 프록시 URL.
 
         Returns
         -------
@@ -484,6 +595,7 @@ class GatherHttpClient:
         limiter = self._getLimiter(domain)
         semaphore = self._getSemaphore(domain)
         req_timeout = timeout or policy.timeout
+        req_client = self._getClientForProxy(self._resolveProxy(proxy))
 
         # Sprint 1 PR2 — 일일 quota 사전 차단 (POST 동행)
         if not quota.checkDaily(domain):
@@ -501,7 +613,7 @@ class GatherHttpClient:
                     req_headers = {"User-Agent": random.choice(_USER_AGENTS)}
                     if headers:
                         req_headers.update(headers)
-                    resp = await self._client.post(
+                    resp = await req_client.post(
                         url,
                         data=data,
                         json=json,
@@ -561,3 +673,6 @@ class GatherHttpClient:
         engine.Gather.close : 본 메서드 caller.
         """
         await self._client.aclose()
+        for client in self._proxyClients.values():
+            await client.aclose()
+        self._proxyClients.clear()

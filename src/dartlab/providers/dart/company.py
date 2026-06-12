@@ -4301,16 +4301,7 @@ class Company:
         hit = p(keyword)
         return hit if hit is not None else p.search(keyword)
 
-    def flow(
-        self,
-        *,
-        start: str | None = None,
-        end: str | None = None,
-        limit: int | None = None,
-        sleepSec: float = 0.0,
-        all: bool = False,
-        full: bool = False,
-    ):
+    def flow(self):
         """KRX 외국인/기관 일별 net-buy (Company.gather("flow") wrapper).
 
         Capabilities:
@@ -4319,10 +4310,8 @@ class Company:
             - 개인 net-buy 일별
 
         Args:
-            start/end: 조회 기간. 지정 시 과거 구간까지 자동 페이지네이션.
-            limit: 최근 N거래일만 반환.
-            sleepSec: 페이지 호출 사이 대기 시간.
-            all/full: True면 가능한 전체 이력을 끝까지 자동 수집.
+            없음 (self 바인딩). 백필/프록시 옵션은 공개 엔진
+            ``dartlab.gather("flow", ...)`` 경유만 지원.
 
         Returns:
             pl.DataFrame — 외국인/기관/개인 net-buy 시계열. 빈 결과면 빈 DataFrame.
@@ -4333,10 +4322,7 @@ class Company:
         Example::
 
             c = Company("005930")
-            f = c.flow()                       # 최근 5거래일
-            f30 = c.flow(limit=30)              # 최근 30거래일
-            old = c.flow(start="2010-01-04", end="2010-01-08")
-            allFlow = c.flow(all=True, sleepSec=1.0)
+            f = c.flow()           # 일별 외국인/기관/개인 순매수
 
         AIContext:
             - KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal
@@ -4372,14 +4358,7 @@ class Company:
         Raises:
             없음.
         """
-        return self.gather(
-            "flow",
-            start=start,
-            end=end,
-            limit=limit,
-            sleepSec=sleepSec,
-            full=bool(all or full),
-        )
+        return self.gather("flow")
 
     @property
     def market(self) -> str:

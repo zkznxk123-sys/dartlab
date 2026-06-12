@@ -77,7 +77,7 @@ class _GatherPriceMixin(GatherMixinContext):
 
             g = getDefaultGather()
             g.price("005930")                    # 삼성전자 1년
-            g.price("AAPL", market="US")         # Apple 1년
+            g.price("AAPL")                      # Apple 1년 (자동 US 판정)
             g.price("005930", snapshot=True)     # 현재가 스냅샷
 
         See Also:
@@ -155,6 +155,7 @@ class _GatherPriceMixin(GatherMixinContext):
         maxPages: int | None = None,
         all: bool = False,
         full: bool = False,
+        proxy: str | None = None,
     ) -> "pl.DataFrame | None":
         """투자자별 수급 시계열 조회 (KR 전용).
 
@@ -184,6 +185,7 @@ class _GatherPriceMixin(GatherMixinContext):
             pageSize: 호환용 고급 옵션. None이면 내부에서 자동 결정.
             sleepSec: 페이지 호출 사이 대기 시간.
             all/full: True면 가능한 전체 이력을 끝까지 자동 수집.
+            proxy: 사용자 제공 HTTP(S) 프록시 URL.
 
         Returns:
             pl.DataFrame | None — date, foreignNet, institutionNet,
@@ -197,10 +199,10 @@ class _GatherPriceMixin(GatherMixinContext):
 
         Example::
 
-            g = getDefaultGather()
-            g.flow("005930")              # 최근 5거래일
-            g.flow("005930", limit=30)    # 최근 30거래일
-            g.flow("005930", all=True)    # 가능한 전체 이력
+            import dartlab
+            dartlab.gather("flow", "005930")              # 최근 5거래일
+            dartlab.gather("flow", "005930", limit=30)    # 최근 30거래일
+            dartlab.gather("flow", "005930", all=True)    # 가능한 전체 이력
 
         See Also:
             ``price`` — 같은 종목의 OHLCV.
@@ -243,6 +245,7 @@ class _GatherPriceMixin(GatherMixinContext):
                     marketType=marketType,
                     maxPages=maxPages,
                     full=fullHistory,
+                    proxy=proxy,
                 )
             )
             if not raw:

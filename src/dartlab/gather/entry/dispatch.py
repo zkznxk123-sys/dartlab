@@ -46,13 +46,13 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
             "KR: Naver, US: Yahoo. 기본 1년, 최대 6000거래일. "
             "시장 지수 (KOSPI/KOSDAQ/KPI200) 도 자동 인식."
         ),
-        example='gather("price", "005930") / gather("price", "AAPL", market="US")',
+        example='gather("price", "005930") / gather("price", "AAPL")',
         targetType="stockCode",
     ),
     "flow": GatherAxisEntry(
         label="수급",
         description="외국인/기관 순매수 시계열 (KR 전용, Naver).",
-        example='gather("flow", "005930")',
+        example='gather("flow", "005930") / gather("flow", targets=["005930", "000660"], parallel=2)',
         targetType="stockCode",
     ),
     "macro": GatherAxisEntry(

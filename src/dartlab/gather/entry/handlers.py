@@ -301,7 +301,162 @@ def handleFlow(
         marketType=kwargs.pop("marketType", "KRX"),
         maxPages=kwargs.pop("maxPages", None),
         full=bool(full),
+        proxy=kwargs.pop("proxy", None),
     )
+
+
+def handleFlowMany(
+    g: Any,
+    targets: list[str],
+    *,
+    market: str,
+    start: str | None,
+    end: str | None,
+    **kwargs: Any,
+) -> pl.DataFrame:
+    """flow 다중 종목 batch — gather 엔진 경유 병렬 수집.
+
+    Capabilities:
+        - ``dartlab.gather("flow", targets=[...])`` 공개 계약의 실행 본체.
+        - 종목 단위 async 병렬 수집 + 결과별 ``stockCode`` 컬럼 부착.
+        - ``parallel`` 생략 시 ``min(종목수, 4)`` 자동 적용.
+        - ``proxy`` 와 ``sleepSec`` 를 각 종목 fetch 로 전달하되 기존 도메인
+          rate-limit/semaphore 정책은 ``GatherHttpClient`` 가 유지.
+
+    AIContext:
+        AI 역할: 사용자가 여러 KR 종목의 수급을 한 번에 요청할 때 단일
+        gather 엔진 호출로 evidence table 을 만든다. 공개 surface 는
+        ``dartlab.gather`` 뿐이며 내부 ``g.flow`` 계약을 노출하지 않는다.
+
+    Guide:
+        단일 종목 내부 페이지네이션은 순서를 보존해야 하므로 병렬화하지 않는다.
+        병렬은 종목 단위로만 적용한다. 프록시는 같은 gather 호출 범위에서
+        모든 flow 요청에 동일하게 전달된다.
+
+    When:
+        ``GatherEntry._run`` 이 axis="flow" 이고 ``targets`` 리스트를 받은 경우.
+
+    How:
+        ``targets`` → ``asyncio.Semaphore(parallel)`` → ``flowSource.fetch`` fan-out
+        → 빈 결과 제거 → diagonal concat → ``stockCode/date`` 정렬.
+
+    Args:
+        g: ``Gather`` 싱글턴. ``g._client`` 는 공통 HTTP client 로 재사용한다.
+        targets: 수집할 KR 종목코드 목록. 빈 문자열은 entry 단계에서 제거된다.
+        market: 시장 코드. flow source 는 KR 만 의미 있다.
+        start/end: 조회 기간. ``end`` 생략 시 최신 거래일까지 수집한다.
+        **kwargs: ``limit``, ``pageSize``, ``sleepSec``, ``marketType``,
+            ``maxPages``, ``all``/``full``, ``proxy``, ``parallel``.
+
+    Returns:
+        pl.DataFrame — 최신순 수급 시계열.
+
+        - stockCode : str — 종목코드
+        - date : Date — 거래일
+        - foreignNet : float — 외국인 순매수 (주)
+        - institutionNet : float — 기관 순매수 (주)
+        - individualNet : float — 개인 순매수 (주)
+        - foreignHoldingRatio : float — 외국인 보유 비율 (%)
+
+    Raises:
+        없음. source-level 실패는 각 fallback 이 흡수하며, 모든 종목이 빈 결과면
+        빈 ``pl.DataFrame`` 을 반환한다.
+
+    Example::
+
+        df = dartlab.gather(
+            "flow",
+            targets=["005930", "000660"],
+            limit=30,
+            parallel=2,
+            proxy="http://user:pass@host:port",
+        )
+
+    Requires:
+        ``Gather`` 인스턴스 + ``GatherHttpClient`` + KR Naver flow API 네트워크.
+        proxy 는 사용자 제공 HTTP(S) URL 이며 인증정보는 로그/답변에 노출하지 않는다.
+
+    SeeAlso:
+        GatherEntry._run : ``targets`` 공개 계약 dispatch.
+        handleFlow : 단일 종목 flow dispatch.
+        dartlab.gather.infra.http.GatherHttpClient.useProxy : 호출 범위 proxy context.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 한 종목 내부 페이지를 병렬로 가져오도록 요구해 일자 cursor 순서를 깨뜨림.
+            - ``targets`` 를 flow 외 axis 에 적용 가능하다고 안내.
+            - proxy 사용 시 rate-limit 이 사라진다고 설명.
+        OutputSchema:
+            - stockCode : str — 종목코드
+            - date : Date — 거래일
+            - foreignNet : float — 외국인 순매수 (주)
+            - institutionNet : float — 기관 순매수 (주)
+            - individualNet : float — 개인 순매수 (주)
+            - foreignHoldingRatio : float — 외국인 보유 비율 (%)
+        Prerequisites:
+            - KR 6 자리 종목코드 목록.
+            - 공개 호출은 ``dartlab.gather("flow", targets=[...])`` 만 사용.
+        Freshness:
+            Naver flow 일별 EOD 기준. 최신 거래일은 외부 공급자 갱신 시점에 따른다.
+        Dataflow:
+            GatherEntry._run → handleFlowMany → sources.flow.fetch → domains.naver.fetchFlow.
+        TargetMarkets:
+            - KR
+    """
+    import asyncio
+
+    from ..infra.http import runAsync
+    from ..sources import flow as flowSource
+
+    limit = kwargs.pop("limit", None)
+    pageSize = kwargs.pop("pageSize", None)
+    sleepSec = kwargs.pop("sleepSec", 0.0)
+    marketType = kwargs.pop("marketType", "KRX")
+    maxPages = kwargs.pop("maxPages", None)
+    full = kwargs.pop("full", None)
+    if full is None:
+        full = kwargs.pop("all", False)
+    else:
+        kwargs.pop("all", None)
+    proxy = kwargs.pop("proxy", None)
+    parallelRaw = kwargs.pop("parallel", None)
+    parallel = min(len(targets), 4) if parallelRaw is None else max(1, int(parallelRaw) or 1)
+
+    async def _fetchOne(stockCode: str, semaphore: asyncio.Semaphore) -> pl.DataFrame:
+        async with semaphore:
+            raw = await flowSource.fetch(
+                stockCode,
+                market=market,
+                client=g._client,
+                start=start,
+                end=end,
+                limit=limit,
+                pageSize=pageSize,
+                sleepSec=sleepSec,
+                marketType=marketType,
+                maxPages=maxPages,
+                full=bool(full),
+                proxy=proxy,
+            )
+        if not raw:
+            return pl.DataFrame()
+        df = pl.DataFrame(raw).with_columns(pl.lit(stockCode).alias("stockCode"))
+        if "date" in df.columns and df["date"].dtype == pl.Utf8:
+            df = df.with_columns(pl.col("date").str.to_date("%Y%m%d").alias("date"))
+        return df.select(["stockCode", *[col for col in df.columns if col != "stockCode"]])
+
+    async def _runMany() -> pl.DataFrame:
+        semaphore = asyncio.Semaphore(parallel)
+        frames = await asyncio.gather(*(_fetchOne(stockCode, semaphore) for stockCode in targets))
+        frames = [frame for frame in frames if not frame.is_empty()]
+        if not frames:
+            return pl.DataFrame()
+        result = pl.concat(frames, how="diagonal")
+        if "date" in result.columns:
+            return result.sort(["stockCode", "date"], descending=[False, True])
+        return result.sort("stockCode")
+
+    return runAsync(_runMany())
 
 
 def handleMacro(

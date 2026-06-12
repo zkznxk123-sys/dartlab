@@ -1,11 +1,11 @@
 ---
 id: engines.company.flow
-title: Company KRX Flow (외국인/기관/개인)
+title: Gather KRX Flow (외국인/기관/개인)
 kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Company.flow — KRX 외국인/기관/개인 종목별 일별 net-buy. 한국 unique disclosure (US 시장은 종목별 net-buy 공개 X). Company.gather("flow") wrapper. KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal.
+purpose: dartlab.gather("flow", ...) — KRX 외국인/기관/개인 종목별 일별 net-buy. 한국 unique disclosure (US 시장은 종목별 net-buy 공개 X). KOSPI/KOSDAQ 외국인 수급의 가장 중요한 daily signal.
 whenToUse:
   - 외국인 net-buy
   - 외국인 매수세
@@ -26,8 +26,8 @@ inputs:
 outputs:
   - pl.DataFrame (date · foreignNet · institutionNet · individualNet)
 capabilityRefs:
-  - Company.flow
-  - Company.gather
+  - dartlab.gather
+  - gather.flow
 knowledgeRefs:
   - engines.company
   - engines.company.koreanDisclosure
@@ -63,15 +63,15 @@ forbidden:
   - tableRef 또는 sourceRef 없이 수급 수치 인용 금지
   - 일별 raw 데이터 전체 dump 금지 (답변 본문 상위 5~30 일 + 누적만)
 examples:
-  - 삼성전자 외국인 매수세 - Company.flow
-  - 005930 기관 vs 외국인 추세 - Company.flow + 두 컬럼 비교
-  - 외국인 순매수 누적 - Company.flow + foreignNet cumsum
-  - 최근 30 일 외국인 net-buy - Company.flow + date head 30
-  - 외국인 매수 + 기관 매도 분리 신호 - Company.flow + foreignNet vs institutionNet 부호
-  - SK하이닉스 일별 수급 - Company.flow + 일별 raw
+  - 삼성전자 외국인 매수세 - dartlab.gather("flow")
+  - 005930 기관 vs 외국인 추세 - dartlab.gather("flow") + 두 컬럼 비교
+  - 외국인 순매수 누적 - dartlab.gather("flow") + foreignNet cumsum
+  - 최근 30 일 외국인 net-buy - dartlab.gather("flow", limit=30)
+  - 외국인 매수 + 기관 매도 분리 신호 - dartlab.gather("flow") + foreignNet vs institutionNet 부호
+  - SK하이닉스 일별 수급 - dartlab.gather("flow") + 일별 raw
 procedure:
-  - 종목코드 - Company 객체 생성 (KR 한정)
-  - c.flow() 호출 - Naver flow API 자동
+  - 종목코드 확인 (KR 한정)
+  - dartlab.gather("flow", stockCode) 호출 - Naver flow API 자동
   - 일별 외국인/기관/개인 net-buy DataFrame 확인
   - 누적 추세 (cumsum) 계산
   - 외국인 매수/매도 + 기관 동조/역행 context 동반 분석
@@ -82,10 +82,8 @@ procedure:
 ```python
 import dartlab
 
-c = dartlab.Company("005930")
-
 # 일별 외국인/기관/개인 net-buy
-flow = c.flow()
+flow = dartlab.gather("flow", "005930")
 if not flow.is_empty():
     print(flow.head(30))            # 최근 30 일
     # 누적
@@ -95,17 +93,19 @@ if not flow.is_empty():
         pl.col("institutionNet").cum_sum().alias("institutionCum"),
     ])
 
-# 최근 30거래일 / 기간 / 가능한 전체 이력
-c.flow(limit=30)
-c.flow(start="2010-01-04", end="2010-01-08", sleepSec=1.0)
-c.flow(all=True, sleepSec=1.0)
+# 백필/프록시 옵션은 공개 gather 엔진 경유:
+dartlab.gather("flow", "005930", start="2010-01-04", sleepSec=1.0)
+dartlab.gather("flow", "005930", all=True, proxy="http://user:pass@host:port")
+dartlab.gather("flow", targets=["005930", "000660"], limit=30, parallel=2, proxy="http://user:pass@host:port")
 ```
 
 ## 호출 동작
 
 - target = DART 종목코드 (KOSPI/KOSDAQ). KR 한정 — 외 시장 target 은 빈 DataFrame.
-- Company.gather("flow") delegate — 본체 = gather("flow", ...) handler (handleFlow).
-- NaverPay 증권 flow API 자동 호출 — 기간 조회 시 내부 페이지네이션 후 pl.DataFrame 반환.
+- 공개 호출계약은 `dartlab.gather("flow", ...)` 만 사용한다.
+- NaverPay 증권 flow API 자동 호출. 백필/프록시 옵션은 `dartlab.gather("flow", ...)` 공개 계약에서만 사용.
+- 여러 종목은 `targets=[...]` 로 넘기며, `parallel` 생략 시 `min(종목수, 4)` 로 자동 병렬 처리한다.
+- `proxy` 는 gather HTTP client 공통 호출 범위에 적용된다. 병렬 수집도 같은 프록시 경로를 사용한다.
 - 빈 결과 (KR 외 시장 · 신생 종목 · Naver API 부재) → 빈 DataFrame.
 - 일별 EOD (T+1) freshness.
 
@@ -127,4 +127,4 @@ pl.DataFrame:
 - 외국인 net-buy 단독 답변 금지 — 기관 동조/역행 context 동반 (둘 다 매수 = 강한 신호 · 외국인 매수+기관 매도 = 분리).
 - KR 외 시장 target 호출 시 빈 결과 — 답변 본문에서 "시장 제한 (KR 한정)" 명시.
 - 종목 펀더멘털 (실적 · 공시) context 없이 수급만 보고 매매 결론 금지.
-- Company.flow() docstring 변경 시 본 skill 의 capabilityRefs · examples · 반환 형태 동기화.
+- 백필/프록시/병렬 호출계약은 `dartlab.gather("flow", ...)` 로만 공개한다.

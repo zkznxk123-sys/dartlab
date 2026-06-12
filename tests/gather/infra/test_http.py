@@ -67,3 +67,37 @@ def test_GatherHttpClient_close_idempotent() -> None:
     closeAttr = getattr(client, "close", None) or getattr(client, "aclose", None)
     assert closeAttr is not None
     # 객체 자체 생성/소멸 가능 검증 — close 가 idempotent 또는 미존재 모두 통과
+
+
+def test_GatherHttpClient_proxy_client_reuse() -> None:
+    """proxy URL 별 httpx client pool 을 재사용한다."""
+    from dartlab.gather.infra.http import GatherHttpClient, runAsync
+
+    client = GatherHttpClient()
+    defaultClient = client._getClientForProxy(None)
+    proxyClient1 = client._getClientForProxy("http://proxy.example:8080")
+    proxyClient2 = client._getClientForProxy("http://proxy.example:8080")
+
+    assert defaultClient is client._client
+    assert proxyClient1 is proxyClient2
+    assert proxyClient1 is not defaultClient
+
+    runAsync(client.close())
+
+
+def test_GatherHttpClient_proxy_context_propagates_through_runAsync() -> None:
+    """gather 호출 범위 proxy 는 runAsync thread loop 안에서도 유지된다."""
+    from dartlab.gather.infra.http import GatherHttpClient, runAsync
+
+    client = GatherHttpClient()
+
+    async def readProxy():
+        return client._resolveProxy(None)
+
+    with client.useProxy("http://proxy.example:8080"):
+        assert client._resolveProxy(None) == "http://proxy.example:8080"
+        assert client._resolveProxy("http://override.example:8080") == "http://override.example:8080"
+        assert runAsync(readProxy()) == "http://proxy.example:8080"
+
+    assert client._resolveProxy(None) is None
+    runAsync(client.close())

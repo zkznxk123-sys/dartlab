@@ -23,6 +23,7 @@ async def fetch(
     marketType: str = "KRX",
     maxPages: int | None = None,
     full: bool = False,
+    proxy: str | None = None,
 ) -> list[dict] | None:
     """수급 시계열 — fallback 체인 (async). KR만 지원.
 
@@ -60,6 +61,8 @@ async def fetch(
         페이지 호출 사이 대기 시간.
     full : bool
         True면 가능한 전체 이력을 끝까지 자동 수집.
+    proxy : str | None
+        사용자 제공 HTTP(S) 프록시 URL.
 
     Returns
     -------
@@ -105,6 +108,7 @@ async def fetch(
                 marketType=marketType,
                 maxPages=maxPages,
                 full=full,
+                proxy=proxy,
             )
             if result:
                 if limit is not None and limit > 0:

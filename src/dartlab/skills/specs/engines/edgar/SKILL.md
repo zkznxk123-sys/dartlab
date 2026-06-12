@@ -88,7 +88,7 @@ procedure:
   - dartlab.Company("AAPL") — Company facade 가 ticker 인식해 EDGAR provider 자동 라우팅.
   - c.panel("BS") / c.panel("IS") — DART 와 동일 topic (XBRL 자동 정규화).
   - 라이브 공시는 c.liveFilings() (최근), 본문은 c.readFiling(accession).
-  - 가격은 dartlab.gather("price", "AAPL", market="US"), 거시는 gather("macro", "FEDFUNDS") (FRED).
+  - 가격은 dartlab.gather("price", "AAPL") 로 ticker 자동 판정, 거시는 gather("macro", "FEDFUNDS") (FRED).
   - 한글 회사명 검색은 dartlab.searchName("인텔") — resolveEnglishAlias 가 EDGAR 재검색 트리거.
 linkedSkills:
   - engines.company
@@ -157,8 +157,8 @@ analysis = c.analysis("financial", "수익성")
 credit = c.credit()
 quant = c.quant("모멘텀")
 
-# 5. 시장 데이터 (gather market="US")
-price = dartlab.gather("price", "AAPL", market="US")
+# 5. 시장 데이터 (gather ticker 자동 판정)
+price = dartlab.gather("price", "AAPL")
 macro = dartlab.gather("macro", "FEDFUNDS")
 news = dartlab.gather("news", "Apple", market="US")
 

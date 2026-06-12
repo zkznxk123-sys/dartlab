@@ -141,6 +141,10 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "# 가능한 전체 이력은 오래 걸릴 수 있어 필요할 때만 실행:",
             '# dartlab.gather("flow", "005930", all=True, sleepSec=1.0)',
+            "# 여러 종목은 종목 단위 병렬 수집:",
+            '# dartlab.gather("flow", targets=["005930", "000660"], limit=30, parallel=2)',
+            "# 사용자 프록시가 필요하면 병렬 수집에도 같은 호출 범위로 적용:",
+            '# dartlab.gather("flow", targets=["005930", "000660"], limit=30, parallel=2, proxy="http://user:pass@host:port")',
         ),
         code(
             "# 뉴스",

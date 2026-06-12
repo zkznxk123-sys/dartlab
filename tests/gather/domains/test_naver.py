@@ -181,6 +181,40 @@ def test_fetch_flow_default_latest_stays_small() -> None:
     assert client.calls[0][1]["pageSize"] == 5
 
 
+def test_fetch_flow_trend_passes_proxy_to_http_client() -> None:
+    """proxy 옵션은 Naver trend HTTP 호출로 전달한다."""
+    from dartlab.gather.domains import naver
+
+    class FakeResponse:
+        def json(self):
+            return {
+                "isSuccess": True,
+                "result": [
+                    {
+                        "bizdate": "20260611",
+                        "foreignerPureBuyQuant": "1",
+                        "foreignerHoldRatio": "50.00%",
+                        "organPureBuyQuant": "0",
+                        "individualPureBuyQuant": "0",
+                    }
+                ],
+            }
+
+    class FakeClient:
+        def __init__(self):
+            self.calls = []
+
+        async def get(self, url, **kwargs):
+            self.calls.append((url, kwargs))
+            return FakeResponse()
+
+    client = FakeClient()
+    rows = asyncio.run(naver.fetchFlow("005930", client, proxy="http://proxy.example:8080"))
+
+    assert len(rows) == 1
+    assert client.calls[0][1]["proxy"] == "http://proxy.example:8080"
+
+
 def test_fetch_flow_trend_large_page_size_splits_to_server_cap() -> None:
     """큰 pageSize 요청은 서버 한도 50건 단위로 나눠 최신 N건을 채운다."""
     from dartlab.gather.domains import naver

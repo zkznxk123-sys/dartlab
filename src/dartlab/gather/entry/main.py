@@ -7,6 +7,7 @@ Gather 싱글턴 메서드 (price/flow/macro/news/sector/insider/ownership/peers
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 import polars as pl
@@ -20,6 +21,7 @@ from .handlers import (
     handleCalendar,
     handleDartDoc,
     handleFlow,
+    handleFlowMany,
     handleInsider,
     handleKrx,
     handleKrxIndex,
@@ -73,7 +75,9 @@ class GatherEntry:
 
     Guide:
         - "주가 추이 보여줘" -> gather("price", "005930")
+        - "미국 주가 보여줘" -> gather("price", "AAPL")  # market 자동 판정
         - "외국인 매매 동향" -> gather("flow", "005930")
+        - "여러 종목 수급" -> gather("flow", targets=["005930", "000660"], parallel=2)
         - "금리 추이 알려줘" -> gather("macro", "BASE_RATE") 또는 gather("macro", "FEDFUNDS")
         - "최근 뉴스 찾아줘" -> gather("news", "삼성전자")
         - "업종 알려줘" -> gather("sector", "005930")
@@ -83,6 +87,16 @@ class GatherEntry:
         - "미국 거시지표 전체" -> gather("macro", market="US") 또는 gather("US")
         - 주가+수급은 scan과 다름. scan은 재무 기반 횡단, gather는 시장 실시간.
 
+    When:
+        외부 시장 데이터가 필요하지만 사용자가 provider/API endpoint 를 직접 고르고
+        싶지 않은 경우. 분석·quant·notebook 에 넣을 price/flow/macro/news 등
+        보조 raw table 이 필요할 때.
+
+    How:
+        axis 정규화 → ``AXIS_REGISTRY`` 계약 확인 → ``GatherHttpClient.useProxy``
+        호출 범위 설정 → axis handler 위임. ``targets`` batch 는 flow 에서만
+        허용하며, flow batch 는 종목 단위 병렬 후 ``stockCode`` 를 붙인다.
+
     SeeAlso:
         - scan: 재무 기반 전종목 횡단분석 (거버넌스, 현금흐름 등)
         - Company: 개별 종목 공시/재무 데이터
@@ -91,7 +105,7 @@ class GatherEntry:
     Args:
         axis: 축 이름 ("price", "flow", "macro", "news"). None이면 가이드 반환.
         target: 종목코드/지표코드/검색어. 축별로 다름.
-        **kwargs: market ("KR"/"US"), start, end, days 등 축별 옵션.
+        **kwargs: market ("KR"/"US"), start, end, days, proxy 등 축별/공통 옵션.
 
     Returns:
         pl.DataFrame — 축별 시계열 데이터. axis=None이면 4축 가이드 DataFrame.
@@ -100,15 +114,44 @@ class GatherEntry:
         price/flow/news: 없음 (공개 API)
         macro: 불필요 — apiKey 명시 시 ECOS/FRED 직접 API 호출
 
+    Raises:
+        ValueError — 알 수 없는 axis, 필수 target 누락, flow 외 axis 에
+        ``targets`` batch 를 준 경우.
+
     Example::
 
         import dartlab
         dartlab.gather()                              # 가이드
         dartlab.gather("price", "005930")             # 삼성전자 1년 OHLCV
         dartlab.gather("flow", "005930")              # 수급
+        dartlab.gather("flow", targets=["005930", "000660"], parallel=2)  # 여러 종목 수급
         dartlab.gather("macro")                       # KR 거시 전체
         dartlab.gather("macro", "FEDFUNDS")           # 자동 US 감지
         dartlab.gather("news", "삼성전자")             # 뉴스
+
+    LLM Specifications:
+        AntiPatterns:
+            - ``dartlab.gather("price", "AAPL", market="US")`` 를 필수처럼 안내.
+            - Company 단축 메서드나 내부 Gather 메서드 옵션을 공개 flow 계약으로 노출.
+            - flow 외 axis 에 ``targets`` 병렬 batch 가 된다고 안내.
+            - proxy 가 rate-limit/공급자 제한을 우회한다고 설명.
+        OutputSchema:
+            - axis=None : axis/label/description/example/apiKey 가이드 DataFrame
+            - price : date/open/high/low/close/volume DataFrame
+            - flow : date/foreignNet/institutionNet/individualNet/foreignHoldingRatio DataFrame
+            - flow targets : stockCode/date/foreignNet/institutionNet/individualNet/foreignHoldingRatio DataFrame
+        Prerequisites:
+            - 공개 호출은 ``dartlab.gather(axis, target?, **kwargs)``.
+            - proxy 는 사용자 제공 HTTP(S) URL 이 있을 때만 지정.
+        Freshness:
+            외부 공급자별 갱신 주기를 따른다. price/flow/news 는 호출 시점 네트워크
+            결과 또는 TTL cache 상태에 따라 달라진다.
+        Dataflow:
+            dartlab.gather → GatherEntry → axis handler → Gather singleton/source/domain.
+        TargetMarkets:
+            - KR
+            - US
+            - GLOBAL (macro/HF 또는 해당 source 지원 범위)
     """
 
     def __call__(
@@ -129,7 +172,7 @@ class GatherEntry:
         target : str, optional
             종목코드/지표코드/검색어. 축에 따라 필수.
         **kwargs
-            market ("KR"/"US"), start, end, days 등 축별 옵션.
+            market ("KR"/"US"), start, end, days, proxy 등 축별/공통 옵션.
 
         Returns
         -------
@@ -180,7 +223,8 @@ class GatherEntry:
         --------
         >>> dartlab.gather()                              # 가이드
         >>> dartlab.gather("price", "005930")              # KR OHLCV
-        >>> dartlab.gather("price", "AAPL", market="US")   # US 주가
+        >>> dartlab.gather("price", "AAPL")                # US 주가 (자동 판정)
+        >>> dartlab.gather("flow", targets=["005930", "000660"], parallel=2)
         >>> dartlab.gather("macro", "FEDFUNDS")            # 미국 기준금리
         >>> dartlab.gather("news", "삼성전자")              # Google News
 
@@ -215,7 +259,11 @@ class GatherEntry:
         resolved = _resolveAxis(axis)
         entry = AXIS_REGISTRY[resolved]
 
-        if entry.targetRequired and target is None:
+        if isinstance(target, (list, tuple, set)):
+            kwargs["targets"] = list(target)
+            target = None
+
+        if entry.targetRequired and target is None and "targets" not in kwargs:
             raise ValueError(f'gather("{resolved}")에는 대상이 필요합니다.\n  예: {entry.example}')
 
         return self._run(resolved, target, **kwargs)
@@ -258,16 +306,36 @@ class GatherEntry:
         market = kwargs.pop("market", "KR")
         start = kwargs.pop("start", None)
         end = kwargs.pop("end", None)
+        proxyScope = getattr(getattr(g, "_client", None), "useProxy", None)
+        proxyContext = proxyScope(kwargs.get("proxy")) if callable(proxyScope) else contextlib.nullcontext()
 
-        return handler(
-            g,
-            target,
-            market=market,
-            start=start,
-            end=end,
-            marketExplicit=marketExplicit,
-            **kwargs,
-        )
+        with proxyContext:
+            targets = kwargs.pop("targets", None)
+
+            if targets is not None:
+                targetList = [str(item).strip() for item in targets if str(item).strip()]
+                if not targetList:
+                    raise ValueError(f'gather("{axis}") targets 가 비어 있습니다.')
+                if axis != "flow":
+                    raise ValueError('다중 targets 병렬 수집은 현재 gather("flow", targets=[...]) 에서만 지원합니다.')
+                return handleFlowMany(
+                    g,
+                    targetList,
+                    market=market,
+                    start=start,
+                    end=end,
+                    **kwargs,
+                )
+
+            return handler(
+                g,
+                target,
+                market=market,
+                start=start,
+                end=end,
+                marketExplicit=marketExplicit,
+                **kwargs,
+            )
 
     def _guide(self) -> pl.DataFrame:
         """가이드 DataFrame — 축 목록 + 설명 + 사용 예시 + API 키 안내.
@@ -333,7 +401,7 @@ class GatherEntry:
         lines.append("━━━ 빠른 시작 ━━━")
         lines.append("  dartlab.gather()                        # 이 가이드")
         lines.append('  dartlab.gather("price", "005930")       # 삼성전자 주가')
-        lines.append('  dartlab.gather("price", "AAPL", market="US")  # 미국 주가')
+        lines.append('  dartlab.gather("price", "AAPL")        # 미국 주가 자동 판정')
         lines.append('  dartlab.gather("macro")                 # KR 거시지표 전체')
         lines.append('  dartlab.gather("news", "삼성전자")       # 뉴스')
         lines.append("")

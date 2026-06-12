@@ -111,6 +111,7 @@ async def _fetchFlowTrend(
     marketType: str = "KRX",
     maxPages: int | None = None,
     full: bool = False,
+    proxy: str | None = None,
 ) -> list[dict] | None:
     """Naver front-api 투자자별 매매동향 페이지네이션."""
     startToken = _normalizeDateToken(start)
@@ -147,6 +148,7 @@ async def _fetchFlowTrend(
                 "Accept": "application/json, text/plain, */*",
                 "Referer": f"https://m.stock.naver.com/domestic/stock/{stockCode}/total",
             },
+            proxy=proxy,
         )
         data = resp.json()
         rows = data.get("result") if isinstance(data, dict) else data
@@ -389,6 +391,7 @@ async def fetchFlow(
     marketType: str = "KRX",
     maxPages: int | None = None,
     full: bool = False,
+    proxy: str | None = None,
 ) -> list[dict] | None:
     """네이버 → 외국인/기관 수급 시계열.
 
@@ -415,6 +418,8 @@ async def fetchFlow(
         페이지 호출 사이 대기 시간.
     full : bool
         True면 가능한 전체 이력을 끝까지 자동 수집한다.
+    proxy : str | None
+        사용자 제공 HTTP(S) 프록시 URL.
 
     Returns
     -------
@@ -466,6 +471,7 @@ async def fetchFlow(
             marketType=marketType,
             maxPages=maxPages,
             full=full,
+            proxy=proxy,
         )
         if trend:
             return trend
@@ -474,7 +480,7 @@ async def fetchFlow(
 
     url = f"{_API_BASE}/{stockCode}/integration"
     try:
-        resp = await client.get(url, headers={"Accept": "application/json"})
+        resp = await client.get(url, headers={"Accept": "application/json"}, proxy=proxy)
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
         log.warning("naver flow API 실패 (%s): %s", stockCode, exc)

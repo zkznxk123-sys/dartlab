@@ -107,6 +107,7 @@ def test_flow_passes_backfill_options(monkeypatch: pytest.MonkeyPatch) -> None:
             marketType="KRX",
             maxPages=2,
             full=True,
+            proxy="http://proxy.example:8080",
         )
     )
 
@@ -118,3 +119,4 @@ def test_flow_passes_backfill_options(monkeypatch: pytest.MonkeyPatch) -> None:
     assert seen["marketType"] == "KRX"
     assert seen["maxPages"] == 2
     assert seen["full"] is True
+    assert seen["proxy"] == "http://proxy.example:8080"
