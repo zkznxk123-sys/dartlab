@@ -1,6 +1,6 @@
 # 04. Migration Execution Plan
 
-상태: v1 확정 기준 문서  
+상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
 범위: 로컬 `master` 순차 작업, landing 무중단, 단계별 실행 계획
 
 ---
@@ -258,6 +258,7 @@ ui/packages/runtime public/local adapter 구현
 - `ui/apps/local` 생성 — landing과 동일 툴체인(Vite 8 계열, svelte 정확 고정)
 - local runtime adapter 연결 (AI는 `/api/agent/*` 경유)
 - `/chat`, `/terminal/[code]`, `/ask`, `/analysis/[code]`, `/analysis/[code]/viewer` skeleton
+- `/settings/providers`, `/settings/workspace` skeleton — provider 설정 화면 (단계-10 검증·05 §8의 전제)
 - `TerminalSurface` full screen mount
 - 챗모드에서 터미널모드로 별도 탭 없이 진입
 - 정기공시 리스트와 viewer를 terminal 우측 패널/fullscreen 흐름에 연결
@@ -336,9 +337,11 @@ python server static frontend 선택 flag
 - price chart controls
 - chart state persistence
 - no duplicated chart CSS
-- service command palette
+- service command palette (localOnly descriptor + upgradeHint 렌더 포함)
 - chart toolbar, tooltip, axis 표시
 - tabular-nums와 단위 표시 일관성
+- scan/screener/map/search route green + industry prerender entry 보존
+- 단계-0 분류 확정분(changes·insights 등) route green
 
 ### 단계-9: Landing Public Shell 전환 완료 (이동 원자 윈도우 — §2.5)
 
@@ -346,7 +349,7 @@ python server static frontend 선택 flag
 
 목표:
 
-- landing의 모든 제품 route(terminal/viewer/company)가 `ui/packages/surfaces` + public adapter wrapper로 동작
+- landing의 모든 제품 route(01 §4.1 전수 지도 기준 — landing에 `/company` route는 없음, CompanySurface는 terminal/viewer 연계)가 `ui/packages/surfaces` + public adapter wrapper로 동작
 - `landing/src/lib`에 제품 UI 원본 잔재 0 (content/seo/publicShell만 잔존)
 - `landing` content route는 그대로 유지
 - 공개 URL 안정성을 확인한 뒤에만 기본 route 변경

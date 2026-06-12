@@ -1,6 +1,6 @@
 # 02. Runtime, AI, Services
 
-상태: v1 확정 기준 문서  
+상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
 범위: runtime contract, public/local adapter, AI provider 직접 연결, Ask 엔진, 챗모드, 터미널모드, 서비스 registry
 
 ---
@@ -11,7 +11,7 @@
 2. Surface는 runtime에 데이터를 요청한다.
 3. Runtime은 public/local/test adapter를 통해 실제 데이터를 가져온다.
 4. Surface는 route, server, static host, local API, provider, workspace 권한을 직접 알지 않는다.
-5. public/local 차이는 `runtime.env.kind` 분기보다 adapter polymorphism으로 해결한다.
+5. public/local 차이는 adapter polymorphism으로만 해결한다 — surface 안의 `runtime.env.kind` 분기 코드를 금지한다(§10과 동일 강도).
 
 Surface 내부 금지:
 
@@ -121,9 +121,15 @@ export interface ViewerPort {
 }
 ```
 
-### 3.5 ScanPort / MapPort / SearchPort
+### 3.5 FinancePort / ScanPort / MapPort / SearchPort
 
 ```ts
+export interface FinancePort {
+  getFinanceBundle(code: string): Promise<TerminalFinanceBundle>;          // terminal 중앙 재무 요약·시계열
+  getStatementTable(input: StatementTableRequest): Promise<StatementTable>; // IS/BS/CF 표 (기간·scope)
+  exportCsv(input: FinanceExportRequest): Promise<Blob>;
+}
+
 export interface ScanPort {
   listTableSources(): Promise<ScanTableSource[]>; // parquet/duck 테이블 소스 공급 — public=static/HF, local=로컬 캐시/API
   getPresets(): Promise<ScanPreset[]>;
@@ -140,7 +146,11 @@ export interface SearchPort {
 }
 ```
 
+FinancePort 메서드 표면은 단계-0 census(`workbench.ts` export + `localAdapter.ts` 25메서드 합집합)로 확정하며, 확정 시 본 문서 개정 entry를 07 원장에 남긴다.
+
 원칙: 쿼리 실행 엔진(duckdb-wasm 등)은 surface 내부 구현 detail이다 — port는 데이터 소스 공급과 저장만 담당한다.
+
+ScanPort 진화 경로(예약): 로컬 1차 경로는 local adapter가 로컬 서버 parquet URL을 소스로 공급한다(엔진=duckdb-wasm 유지, 계약 무변경). 서버측 질의가 필요해지면 `ScanPort.query()` 승격을 예약한다 — 그때 wasm은 public adapter 내부 구현으로 내려가며, 이 역전은 계약 개정 작업 단위로만 한다.
 
 ### 3.6 Adapter Response Metadata
 
@@ -162,6 +172,7 @@ export interface RuntimeDataEnvelope<T> {
 - public static 데이터와 local cache 데이터의 출처를 UI에서 구분 가능하게 한다.
 - AI 답변은 원천 데이터가 아니며 evidence와 별도로 표시한다.
 - **Port 메서드는 required다.** 어댑터가 지원하지 못하는 기능은 명시적 `unavailable` 상태로 반환한다. optional 메서드(`x?:`) + 조용한 fallback(`localAdapter()?.x() ?? HF로드()`) 구조를 금지한다 — 현행 terminal 코드의 기본 패턴이 바로 이것이며, 로컬 패리티 누락을 컴파일도 테스트도 못 잡게 만든다. conformance test 가 전 포트 메서드의 public/local 구현 존재를 기계 검사한다(05 §2).
+- **시장 고유 식별자는 source-namespace + discriminated union으로만** 계약에 들어간다 — `dart:${rceptNo}` / `edgar:${accessionNo}`. KR 전용 필드를 계약 타입에 직박지 않는다(US/EDGAR 확장 대비).
 
 ---
 
@@ -183,6 +194,7 @@ export interface AiPort {
 }
 
 export type AiTier = 'advanced' | 'onDevice' | 'deterministic' | 'none';
+// none = test fake 초기화 전 전용 — public은 항상 deterministic 이상, local 무provider도 deterministic으로 동작한다.
 
 export interface AiCapabilities {
   tier: AiTier;                  // advanced=로컬 엔진, onDevice=WebGPU, deterministic=결정론 Q&A
@@ -239,6 +251,7 @@ Ask 엔진은 로컬 AI 상호작용의 관문이다.
 6. provider error, rate limit, timeout 표시 규칙
 7. local workspace permission 확인
 8. terminal service command 실행 요청
+9. AG-UI allowlist 소유 — 렌더 허용 이벤트 목록은 단계-1b에서 현행 `ui/web` agent gateway 이벤트 스키마 census로 확정해 `contracts/ai.ts`에 박는다(07 원장 entry 동반). 목록 밖 이벤트는 렌더하지 않고 드롭한다.
 
 금지:
 
@@ -293,7 +306,7 @@ Ask 엔진은 로컬 AI 상호작용의 관문이다.
 - TerminalSurface는 서비스 구현을 import하지 않는다.
 - `ServicesPort`의 descriptor와 command만 렌더한다.
 - command 실행 결과는 status, toast, panel update, Ask event 중 하나로 normalize한다.
-- public에서는 local-only command를 숨기거나 disabled 상태로 표시한다.
+- public에서는 local-only command를 `localOnly` descriptor + `upgradeHint`로 표시한다. 완전 숨김은 시스템 명령만 허용한다(03 §1-7).
 
 ---
 
@@ -345,8 +358,8 @@ Public registry:
 - static/HF market data
 - static disclosure metadata
 - public viewer link
-- disabled AI descriptor
-- public-safe export only
+- deterministic/onDevice tier AI descriptor (`upgradeHint` 포함 — disabled 아님, §4)
+- public-safe export only + localOnly descriptor (실행 불가·upgradeHint 표시)
 
 금지:
 
@@ -377,16 +390,24 @@ export interface StoragePort {
 }
 ```
 
-Storage key 예:
+Storage key 규칙 — surface 네임스페이스 키 기본:
 
 ```ts
-export type RuntimeStorageKey =
-  | 'lastCompany'
-  | 'recentCompanies'
-  | 'terminalChartState'
-  | 'terminalLanguage'
-  | 'viewerLayout'
-  | 'askDraft';
+export type RuntimeStorageKey = `${DartLabSurfaceId}.${string}` | GlobalStorageKey;
+export type GlobalStorageKey = 'lastCompany' | 'recentCompanies' | 'locale';
+// 예: 'terminal.chartState', 'terminal.backtestConfig', 'viewer.layout', 'ask.draft'
+```
+
+surface 내부 기능 추가가 contracts 개정을 강제하지 않도록 네임스페이스 템플릿 키를 기본으로 한다. 닫힌 union은 전역 키만.
+
+```ts
+export interface TelemetryPort {
+  event(name: string, props?: Record<string, string | number>): void; // public=무PII 집계만, local=옵트인 로컬 로그
+}
+
+export interface FeatureFlagPort {
+  isEnabled(flag: DartLabFeatureFlag): boolean;
+}
 ```
 
 ---
@@ -400,8 +421,8 @@ export type RuntimeStorageKey =
 - GitHub Pages base path 처리
 - static JSON/parquet/HF dataset 접근 — hyparquet, hfProxy worker, static JSON 은 어댑터 내부 구현 detail 이며 surface 는 모른다
 - 공개 viewer route href 생성
-- read-only storage
-- public-safe telemetry
+- 서버측 쓰기 없음 — storage 쓰기는 브라우저(localStorage 등) 한정
+- public-safe telemetry (무PII 집계만)
 - AI tier 'deterministic' 기본 + WebGPU 가용 시 'onDevice' 승급 (§4)
 - public-safe service registry 제공 (localOnly descriptor 포함)
 

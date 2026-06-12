@@ -1,6 +1,6 @@
 # DartLab UI Platform Refactor PRD
 
-상태: v1 확정 기준 문서  
+상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
 위치: `mainPlan/ui-platform-refactor-prd.md`  
 목적: GitHub Pages 공개 UI와 로컬 AI UI를 하나의 UI 플랫폼 자산 체계로 관리하기 위한 리팩토링 기준  
 운영 전제: 로컬 `master`에서 순차 작업 단위로 진행한다. 별도 분기 작업, 작업 복제본, 병합 절차, 원격 코드리뷰 절차를 이 계획의 기본 전제로 두지 않는다.  
@@ -32,7 +32,7 @@
 
 1. 장기 기준점은 `landing`도 `ui/web`도 아니다. 기준점은 새 `ui/packages` 계층이다.
 2. `landing`은 공개 콘텐츠 앱이면서 **영구 public shell**이다. blog, docs, SEO, sitemap, static asset, GitHub Pages 책임에 더해 제품 route의 얇은 wrapper(+public adapter 배선)를 소유한다. `ui/apps/public`은 신설하지 않는다(비채택) — 두 SvelteKit 정적 빌드를 한 Pages artifact로 합성하는 복잡성을 회피한다. 별도 도메인/배포 분리 필요가 실제 발생할 때만 재개한다.
-3. terminal, viewer, company, chart, evidence, ask 작업면은 `ui/packages/surfaces`의 공용 Svelte surface로 승격한다.
+3. 제품 작업면 전부를 `ui/packages/surfaces`의 공용 Svelte surface로 승격한다 — terminal·viewer·company·scan·screener·map·search·ask + 공용 부품 charting·evidence. 전수는 01 §4.1 지도가 단일 참조다.
 4. public/local 차이는 컴포넌트 fork가 아니라 adapter 차이로만 만든다. Port 메서드는 required로 선언하고 미지원은 명시적 unavailable 상태로 드러낸다 — optional 메서드 + 조용한 public fallback(현행 `localTerminalAdapter()?.x() ?? HF로드()` 패턴)을 금지한다.
 5. AI는 3-티어다 — local = server-engine(`/api/agent/*`, `src/dartlab/ai` Ask 엔진, 고급 분석) / public = onDevice(WebGPU, `webgpuUsable` 실측 게이트) + deterministic(결정론 Q&A, 항상) / test = fake. "public AI = disabled"는 폐기한다 — 이미 출시된 공개 AskDrawer(Tier0 결정론 + WebGPU)의 회귀를 금지한다.
 6. 로컬 앱은 AI provider를 직접 붙인다. 단 provider SDK, API key, model 선택, tool execution은 `localAiAdapter`와 Ask 엔진 뒤에 둔다.
@@ -57,7 +57,7 @@
 `01-target-architecture.md`:
 
 - 최종 폴더 구조
-- `landing`, `ui/apps/public`, `ui/apps/local`, `ui/web legacy` 역할
+- `landing`, `ui/apps/local`, `ui/web legacy` 역할 + `ui/apps/public` 비채택 결정
 - `contracts`, `runtime`, `design`, `surfaces`, `testing` 패키지 경계
 - import 방향, package export, alias, naming 규칙
 
@@ -108,7 +108,7 @@
 
 1. 시작 전 `06-inventory-and-freeze-template.md`의 Freeze 체크리스트를 채운다.
 2. 현재 진행 중인 다른 작업 세션이 종료되기 전에는 리팩토링을 시작하지 않는다. 단 04 §2.5 공존 규칙에 따라 landing 제품 코드를 이동하지 않는 단계는 병행할 수 있다.
-3. PyPI 릴리스 1회와 릴리스 기준 commit/tag 기록 이후 시작한다.
+3. PyPI 릴리스 1회와 릴리스 기준 commit/tag 기록 이후 시작한다. 단 코드 무변경인 단계-0(인벤토리)은 릴리스 전에도 착수 가능하다(07 NEXT 기준).
 4. 매 작업 단위 시작 전 `git status`를 확인하고 기존 dirty file 소유자를 분류한다.
 5. 다른 세션이 만진 파일과 겹치면 해당 작업 단위는 시작하지 않는다.
 6. 대량 이동과 기능 변경을 같은 작업 단위에 섞지 않는다.

@@ -1,6 +1,6 @@
 # 06. Inventory and Freeze Template
 
-상태: v1 확정 기준 문서  
+상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
 범위: 착수 전 작성할 inventory, freeze, 단계 완료 기록 템플릿
 
 ---
@@ -82,7 +82,7 @@ node_modules OneDrive 동기화 제외 확인:
 | /compare | landing/product | 중간 | ViewerSurface(compare) | 단계-6 | yes | no 404 |
 | /search | landing/product | 중간 | SearchSurface | 단계-8 | yes | no blank |
 | /changes · /insights | landing/product | 중간 | 단계-0 분류 | 단계-8 | yes | no 404 |
-| /embed · /lab/* · /playground · /site-signals | 단계-0 분류 (site-signals=타 세션) | — | 단계-0 결정 | — | — | — |
+| /embed · /lab/* · /playground · /site-signals · /cheatsheet · /health | 단계-0 분류 (site-signals=타 세션) | — | 단계-0 결정 | — | — | — |
 
 ---
 
@@ -111,6 +111,10 @@ node_modules OneDrive 동기화 제외 확인:
 | company search | static/HF | local API | fixture | provenance/asOf |  |
 | price | static/HF | local API/cache | fixture | stale/coverage |  |
 | filing | static metadata | local cache/API | fixture | source/asOf |  |
+| finance | static/HF | local API/cache | fixture | stale/coverage | FinancePort 표면=단계-0 census |
+| scan | static/HF parquet 소스 | 로컬 parquet URL 소스 | fixture | coverage | 엔진=duckdb-wasm(surface 내부) |
+| map | static map JSON(HF seed) | local API | fixture | asOf |  |
+| search | static 인덱스(R*) | local API/인덱스 | fixture | asOf |  |
 | viewer | public route | component/local route | fixture | source |  |
 | AI | deterministic(항상) + onDevice(WebGPU 게이트) | advanced — provider via Ask engine | fake stream | evidence, tier | 공개 AskDrawer 무회귀 |
 | services | public-safe + localOnly descriptor | full local registry | fake registry | availability, upgradeHint |  |
@@ -134,7 +138,7 @@ node_modules OneDrive 동기화 제외 확인:
 | service id | group | mode | public 상태 | local 상태 | command 예 | 요구 context |
 |---|---|---|---|---|---|---|
 | company.search | market | both | available | available | company.search | query |
-| filing.regularList | filing | terminal | available/limited | available | filing.openRegularList | code |
+| filing.regularList | filing | terminal | available | available | filing.openRegularList | code |
 | viewer.open | viewer | terminal | available | available | viewer.openFiling | filing |
 | finance.export | export | terminal | localOnly (+upgradeHint) | available | finance.exportCsv | code/period |
 | ai.explain | ai | both | deterministic/onDevice tier | available (advanced) | ai.explainEvidence | evidence |

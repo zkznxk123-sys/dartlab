@@ -1,6 +1,6 @@
 # 05. Validation, Release, Rollback
 
-상태: v1 확정 기준 문서  
+상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
 범위: 테스트, 시각 검증, PyPI 릴리스, GitHub Pages 검증, rollback/fix-forward, legacy 제거
 
 ---
@@ -56,8 +56,8 @@
 합격:
 
 - route 직접 참조 없음
-- local-only command public 노출 없음
-- provider 없는 상태 graceful disabled
+- local-only command는 public에서 localOnly descriptor로만 노출(실행 불가 + upgradeHint)
+- provider 없음: deterministic tier로 동작 + upgradeHint 표시 (disabled 아님)
 - provider 있는 상태 stream response 가능
 - tool call 실패 표시
 
@@ -205,6 +205,7 @@ local server boot
 local UI serve
 asset loading
 /chat
+/ask
 /terminal/005930
 /analysis/005930
 /analysis/005930/viewer
@@ -256,7 +257,7 @@ provider settings 화면
 3. `$lib` migration alias 0
 4. `.svelte` React mount 참조 0
 5. React-only terminal route 호출 경로 0
-6. `/chat`, `/terminal/:code`, `/analysis/:code`, `/analysis/:code/viewer` parity 통과
+6. `/chat`, `/ask`, `/terminal/:code`, `/analysis/:code`, `/analysis/:code/viewer` parity 통과
 7. publish workflow와 server UI build 경로가 새 local app을 기준으로 동작
 8. PyPI 후검증 1회 이상 green
 9. fallback 실제 호출 경로 0

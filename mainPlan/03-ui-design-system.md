@@ -1,6 +1,6 @@
 # 03. UI Design System
 
-상태: v1 확정 기준 문서  
+상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
 범위: 공용 Svelte surface, terminal/viewer UX, 디자인 토큰, CSS 경계, 접근성, 시각 회귀
 
 ---
@@ -28,6 +28,7 @@ Surface는 사용자에게 하나의 독립 화면 경험을 제공하는 UI 단
 5. public/local 차이로 surface를 fork하지 않는다.
 6. route, server, static host, local API, provider, workspace 권한을 직접 알지 않는다.
 7. **열화 티어 표시 원칙** — 승격 가능(또는 로컬 전용 상위) 기능은 public에서 숨기지 않는다. tier badge + `upgradeHint`("로컬에서 더 강력함") + 설치 CTA로 표시한다. 완전 숨김은 cache refresh 같은 시스템 명령에만 허용한다. funnel은 공개 사용자가 로컬의 우위를 "봐야" 작동한다.
+8. AskSurface·ScanSurface·MapSurface·SearchSurface의 props/책임 계약은 해당 단계(7/8) 착수 전에 본 문서 개정으로 확정한다 — 07 원장 entry 의무. 미확정 상태로 구현 착수 금지.
 
 ---
 
@@ -119,6 +120,7 @@ export interface ViewerSurfaceProps {
   embedded?: boolean;
   initialPeriod?: string;
   initialSectionKey?: string;
+  initialCompare?: string[]; // ?vs= — N사 비교 모드 (route state = controlled prop 규칙 §2-2)
 }
 ```
 
@@ -148,7 +150,7 @@ CompanySurface 책임:
 
 - 공개 회사 페이지와 로컬 회사 summary가 같은 구조를 공유
 - terminal과 viewer로 자연스럽게 이동
-- SEO는 public app wrapper가 처리
+- SEO는 landing shell wrapper가 처리
 
 Charting 책임:
 
@@ -164,6 +166,7 @@ Charting 원칙:
 - chart state는 runtime storage key로 저장
 - chart library는 surface 내부 구현 detail
 - data는 `PricePort`/`FinancePort`를 통해 공급
+- economic/macro overlay 시리즈의 port 귀속은 단계-0 census(workbench + localAdapter 합집합)로 확정
 - ChartSpec -> ChartRenderer 단일 경로를 유지
 - canvas chart는 nonblank pixel 검사 대상
 
@@ -318,9 +321,10 @@ surface token
 - viewer compare mode
 - viewer ask drawer open
 - chat to terminal transition
-- provider disabled public mode
-- provider enabled local mode
-- command palette
+- public deterministic tier (upgradeHint 표시)
+- public onDevice tier (WebGPU 가용 기기)
+- provider enabled local mode (advanced tier)
+- command palette (localOnly descriptor 포함)
 
 합격 기준:
 

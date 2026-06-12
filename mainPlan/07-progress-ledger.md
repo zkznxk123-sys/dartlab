@@ -29,7 +29,7 @@
 5. 각 단계 완료 entry는 04 §3 완료 공통 기준(1~14)의 체크 결과를 포함한다.
 6. 이동 원자 윈도우(단계-4b·6·8·9)는 사전 예약 entry를 먼저 남긴다(04 §2.5).
 7. 리팩토링 기간 중 제품 릴리스 발생 시 freeze 기준 commit/tag 재기록 entry를 남긴다.
-8. 기준 문서(00~06) 개정 시에도 개정 entry를 남긴다.
+8. 기준 문서(인덱스 ui-platform-refactor-prd.md + 00~06) 개정 시에도 개정 entry를 남긴다.
 
 ## Entry 양식
 
@@ -94,6 +94,29 @@ commit: (이 변경의 커밋)
 - 한 작업면 = 한 폴더, 공개 API = index.ts 하나, 내부 깊이 ≤ 2, 내부 형태 표준화(index/XxxSurface.svelte/components/lib)
 - 새 작업면 추가 레시피 5수 고정(contracts → port+adapter 2 → surfaces 폴더 → wrapper 2) — "어디에 두지?" 질문 발생 = 설계 위반 신호
 - 01 §4 surfaces 트리에 route·port 대응 주석 부착 — 트리만 보고 전체 지도 파악 가능
+
+검증: 문서 변경만 — build 영향 없음.  
+rollback: 이 commit revert.
+
+### [4] 문서 정합화 — 최종본 이중 점검 반영 (정합성 감사 31건 + 스트레스 테스트 5건)
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+내용: 최종 문서 cold-read 정합성 감사(결함 31건 전수)와 10개 미래 시나리오 스트레스 테스트(허점 5건)를 2차 에이전트 검증으로 수행, 전부 반영. 구조 판정 = "균열은 전부 계약 확장형, 구조 재설계형 아님 — 채택 타당".
+
+핵심 교정 ("지시된 사고" 경로 2건 포함):
+- 02 §7 public registry의 v1 잔재 "disabled AI descriptor" 제거(그대로 구현 시 공개 AskDrawer 회귀) + 02 §6.2 "숨기거나 disabled" 잔재 + 05 §3 "graceful disabled" 잔재 동시 교정 — deterministic/onDevice tier + localOnly/upgradeHint로 통일
+- FinancePort 계약 스케치 신설(02 §3.5) — 표면은 단계-0 census로 확정, 개정 entry 의무
+- 착수 게이트 3원 불일치 해소 — "단계-0은 PyPI 릴리스 전 착수 가능" 단서를 인덱스 §4-3·00 §4-1에 명문화
+- 이름 대칭 자기모순 해소(01 §8.1): 의도된 비대칭 2건만 허용(screener→scan·compare→viewer 보조 route / ask↔ai port) + "route 없는 기능은 작업면 아님"(백테스팅=terminal 내부) 명문
+- 트리 정합: contracts에 scan/map/search/evidence.ts, runtime ports에 scanPort/mapPort/searchPort/featureFlagPort 추가, 01 §2 주석·04 단계-9 "/company" 오기 교정(landing에 /company route 없음 실측)
+- 미정의 계약 보충: TelemetryPort·FeatureFlagPort 스케치, AiTier 'none'=test 전용 정의, AG-UI allowlist=단계-1b에서 현행 ui/web agent gateway 스키마 census로 확정(02 §5-9)
+- StoragePort 키를 surface 네임스페이스 템플릿(`terminal.backtestConfig` 등)으로 개정 — surface 기능 추가가 contracts 개정을 강제하지 않게
+- 시장 축 규칙(02 §3 원칙): 시장 고유 식별자는 source-namespace(`dart:`/`edgar:`) + discriminated union으로만 — KR 필드 직박기 금지
+- ui/web 생존 기간 svelte 메이저 업그레이드 금지(01 §3.4) — 파일경로 alias가 surfaces를 구식 컴파일러에 결합
+- ScanPort 진화 경로 예약(02 §3.5): 로컬 1차=parquet URL 소스 공급(wasm 유지) → 필요 시 query() 승격은 계약 개정 단위로만
+- 공용 부품 신설 게이트(01 §8.1-7): 2-surface 실소비·도메인 명명·design 선판정·원장 entry 4조건
+- 누락 보충: 단계-5에 settings route, 단계-8 검증에 scan/map/search/prerender, 05 §8·§10에 /ask, 06 §6에 finance/scan/map/search 행, /cheatsheet·/health 분류 행, 'limited'→enum 정합, 03 ViewerSurfaceProps에 initialCompare, 03 §10 tier 스크린샷, 전 문서 헤더 v1→v2
+- 잔여 주의(허점 아님, 인지 항목): landing 빌드 비용은 수용 부채(01 §3.1), 차트 3스택 통합(단계-8)은 과소평가 주의, 우월성은 단계-4b/5 완주 후 실현 — 중도 포기 시 현행보다 나쁨(원장 NEXT가 보험)
 
 검증: 문서 변경만 — build 영향 없음.  
 rollback: 이 commit revert.
