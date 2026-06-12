@@ -42,6 +42,8 @@
 		background: rgba(2, 4, 9, 0.66);
 		cursor: default;
 	}
+	/* --fin-* 토큰: 미정의 시 fallback = 기존 viewer 값 (픽셀 무변화).
+	   터미널은 .dlTermFinSkin 래퍼가 terminal.css 토큰으로 오버라이드 — 렌더러 한몸두입구. */
 	.modal {
 		position: fixed;
 		top: 50%;
@@ -52,9 +54,9 @@
 		height: min(86vh, 920px);
 		display: flex;
 		flex-direction: column;
-		background: #0a0e18;
-		border: 1px solid #263145;
-		border-radius: 10px;
+		background: var(--fin-modal-bg, #0a0e18);
+		border: 1px solid var(--fin-modal-bd, #263145);
+		border-radius: var(--fin-radius-lg, 10px);
 		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
 		overflow: hidden;
 	}
@@ -65,7 +67,7 @@
 		justify-content: space-between;
 		gap: 12px;
 		padding: 11px 14px;
-		border-bottom: 1px solid #1e2433;
+		border-bottom: 1px solid var(--fin-bd, #1e2433);
 	}
 	.mh-title {
 		display: flex;
@@ -76,11 +78,11 @@
 	.mh-corp {
 		font-size: 15px;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: var(--fin-txt, #f1f5f9);
 	}
 	.mh-sub {
 		font-size: 11px;
-		color: #94a3b8;
+		color: var(--fin-dim, #94a3b8);
 	}
 	.mh-sub::before {
 		content: '·';
@@ -94,10 +96,10 @@
 		justify-content: center;
 		width: 28px;
 		height: 28px;
-		border: 1px solid #1e2433;
-		border-radius: 6px;
+		border: 1px solid var(--fin-bd, #1e2433);
+		border-radius: var(--fin-radius, 6px);
 		background: transparent;
-		color: #94a3b8;
+		color: var(--fin-dim, #94a3b8);
 		cursor: pointer;
 	}
 	.mh-close:hover {

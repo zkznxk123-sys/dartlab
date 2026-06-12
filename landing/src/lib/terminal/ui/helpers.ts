@@ -41,6 +41,14 @@ export function sign(n: number | null | undefined, d = 2): string {
 	if (n == null || Number.isNaN(n)) return '—';
 	return (n > 0 ? '+' : '') + fmtNum(n, d);
 }
+// 미니 스파크라인 polyline points (min-max 정규화) — 티커 스트립·KPI·좌측 레일 공유
+export function sparkPts(s: number[], w = 34, h = 11): string {
+	const lo = Math.min(...s);
+	const hi = Math.max(...s);
+	const rng = hi - lo || 1;
+	return s.map((v, i) => `${((i / (s.length - 1)) * w).toFixed(1)},${(h - ((v - lo) / rng) * (h - 1.5) - 0.75).toFixed(1)}`).join(' ');
+}
+
 // heat color for sector/change cells (zip 팔레트: 상승=초록, 하락=빨강)
 export function heat(v: number, max = 1): string {
 	const t = Math.max(-1, Math.min(1, v / max));

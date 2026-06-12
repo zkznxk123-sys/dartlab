@@ -9,7 +9,7 @@
 	import './terminal.css';
 	import type { Engine } from './data/engine';
 	import type { Lang } from './data/types';
-	import { chgClass, fmtNum, sign } from './ui/helpers';
+	import { chgClass, fmtNum, sign, sparkPts } from './ui/helpers';
 	import LeftRail from './panels/LeftRail.svelte';
 	import CenterStack from './panels/CenterStack.svelte';
 	import RightStack from './panels/RightStack.svelte';
@@ -95,12 +95,6 @@
 	// 회사 티커 스파크라인 — recent.parquet(최근 30거래일 전종목) 재사용, 추가 다운로드 0 (모듈 캐시 공유)
 	let recentMap = $state<Map<string, Candle[]> | null>(null);
 	loadGovRecent().then((m) => (recentMap = m));
-	const sparkPts = (s: number[], w = 34, hh = 11): string => {
-		const lo = Math.min(...s);
-		const hi = Math.max(...s);
-		const rng = hi - lo || 1;
-		return s.map((v, i) => `${((i / (s.length - 1)) * w).toFixed(1)},${(hh - ((v - lo) / rng) * (hh - 1.5) - 0.75).toFixed(1)}`).join(' ');
-	};
 	// 실 경제지표 최신값 (ECOS·FRED 시계열) — 종목명·주가차트 윗단 KPI 티커에 합류.
 	let macroLatest = $state<MacroLatest[]>([]);
 	loadMacroLatest().then((m) => (macroLatest = m));

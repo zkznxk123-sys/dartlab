@@ -233,16 +233,19 @@
 </section>
 
 <style>
+	/* --fin-* 토큰: 미정의 시 fallback = 기존 viewer 값 (픽셀 무변화).
+	   터미널은 .dlTermFinSkin 래퍼가 terminal.css 토큰으로 오버라이드. */
 	.finance-pane {
 		height: 100%;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		background: #050811;
-		color: #f1f5f9;
-		border: 1px solid #1e2433;
-		border-radius: 8px;
+		background: var(--fin-bg, #050811);
+		color: var(--fin-txt, #f1f5f9);
+		border: 1px solid var(--fin-bd, #1e2433);
+		border-radius: var(--fin-radius-lg, 8px);
 		overflow: hidden;
+		font-family: var(--fin-font, inherit);
 	}
 	.finance-pane.frameless {
 		border: 0;
@@ -255,7 +258,7 @@
 		justify-content: space-between;
 		gap: 12px;
 		padding: 8px 10px;
-		border-bottom: 1px solid #1e2433;
+		border-bottom: 1px solid var(--fin-bd, #1e2433);
 	}
 	.fp-title,
 	.fp-meta {
@@ -302,7 +305,7 @@
 		flex-wrap: wrap;
 		gap: 10px;
 		padding: 8px 10px;
-		border-bottom: 1px solid #1e2433;
+		border-bottom: 1px solid var(--fin-bd, #1e2433);
 	}
 	.tabs,
 	.segs {
@@ -314,9 +317,9 @@
 	.tab {
 		padding: 5px 10px;
 		border: 1px solid transparent;
-		border-radius: 6px;
+		border-radius: var(--fin-radius, 6px);
 		background: transparent;
-		color: #94a3b8;
+		color: var(--fin-dim, #94a3b8);
 		font: inherit;
 		font-size: 12px;
 		cursor: pointer;
@@ -334,15 +337,15 @@
 		display: inline-flex;
 		gap: 2px;
 		padding: 2px;
-		border: 1px solid #1e2433;
-		border-radius: 6px;
+		border: 1px solid var(--fin-bd, #1e2433);
+		border-radius: var(--fin-radius, 6px);
 	}
 	.seg-btn {
 		padding: 3px 8px;
 		border: none;
-		border-radius: 4px;
+		border-radius: var(--fin-radius, 4px);
 		background: transparent;
-		color: #94a3b8;
+		color: var(--fin-dim, #94a3b8);
 		font: inherit;
 		font-size: 11px;
 		cursor: pointer;
@@ -367,7 +370,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 12px;
-		color: #94a3b8;
+		color: var(--fin-dim, #94a3b8);
 		text-align: center;
 	}
 	.state p {
@@ -377,7 +380,7 @@
 	.spinner {
 		width: 26px;
 		height: 26px;
-		border: 2px solid #1e2433;
+		border: 2px solid var(--fin-bd, #1e2433);
 		border-top-color: #fb923c;
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;

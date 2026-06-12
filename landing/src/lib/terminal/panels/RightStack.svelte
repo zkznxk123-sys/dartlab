@@ -223,8 +223,8 @@
 <!-- FINANCIALS -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · ' + finUnit, en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
 	{#snippet right()}
-		{#if finBundle && finBundle.modes.filter((m) => m !== 'ttm').length > 1}
-			<span class="segGroup mini">{#each finBundle.modes.filter((m) => m !== 'ttm') as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
+		{#if finBundle && finBundle.modes.length > 1}
+			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
 		<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'quantitative statements (viewer dialog)' : '정량재무제표 — 공시뷰어와 동일 (IS/BS/CF/CIS/자본변동 · 연결/개별)'}>⤢</button>
 	{/snippet}
@@ -436,6 +436,7 @@
 <div class="rowSplit">
 	<!-- PEERS -->
 	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '동종업종', en: 'INDUSTRY PEERS' }} sub={{ kr: 'industry:peers', en: 'peers' }} flush>
+		{#snippet right()}<a class="lensScan" href="{base}/map?focus={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'industry map — full ecosystem view' : '산업지도 — 업종 생태계 전체 보기'}>{lang === 'en' ? 'map ↗' : '맵 ↗'}</a>{/snippet}
 		<div class="peerList">
 			{#each peers as p (p.code)}
 				<div class={'peerRow' + (p.self ? ' self' : '')} role="button" tabindex="0" onclick={() => onPick(p.code)} onkeydown={(ev) => ev.key === 'Enter' && onPick(p.code)}>
@@ -497,6 +498,9 @@
 {#if tablesOpen}
 	{#await import('$lib/components/viewer/FinanceDialog.svelte') then m}
 		{@const FinanceDialog = m.default}
-		<FinanceDialog code={co.code} corpName={co.name.kr} open={tablesOpen} onclose={() => (tablesOpen = false)} />
+		<!-- .dlTermFinSkin: --fin-* 토큰 오버라이드 (terminal.css) — CSS 변수는 fixed 모달에도 DOM 상속으로 관통 -->
+		<div class="dlTermFinSkin">
+			<FinanceDialog code={co.code} corpName={co.name.kr} open={tablesOpen} onclose={() => (tablesOpen = false)} />
+		</div>
 	{/await}
 {/if}

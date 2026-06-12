@@ -31,10 +31,11 @@
 </div>
 
 <style>
+	/* --fin-* 토큰: 미정의 시 fallback = 기존 viewer 값. 터미널은 .dlTermFinSkin 오버라이드. */
 	.ftable-scroll {
 		height: 100%;
 		overflow: auto;
-		background: #050811;
+		background: var(--fin-bg, #050811);
 	}
 	.ftable {
 		border-collapse: separate;
@@ -44,8 +45,8 @@
 	}
 	.ftable th,
 	.ftable td {
-		border-right: 1px solid #161c2b;
-		border-bottom: 1px solid #161c2b;
+		border-right: 1px solid var(--fin-bd-soft, #161c2b);
+		border-bottom: 1px solid var(--fin-bd-soft, #161c2b);
 		padding: 4px 10px;
 		white-space: nowrap;
 	}
@@ -54,22 +55,23 @@
 		position: sticky;
 		top: 0;
 		z-index: 20;
-		background: #0d1320;
-		color: #cbd5e1;
+		background: var(--fin-bg-raised, #0d1320);
+		color: var(--fin-txt-soft, #cbd5e1);
 		font-weight: 600;
 		text-align: right;
 	}
 	.period-h {
 		min-width: 104px;
 		font-variant-numeric: tabular-nums;
+		font-family: var(--fin-mono, inherit);
 	}
 	/* sticky 첫 열(계정) */
 	.acct-c {
 		position: sticky;
 		left: 0;
 		z-index: 10;
-		background: #070b15;
-		color: #cbd5e1;
+		background: var(--fin-bg-acct, #070b15);
+		color: var(--fin-txt-soft, #cbd5e1);
 		font-weight: 400;
 		text-align: left;
 		max-width: 280px;
@@ -86,12 +88,13 @@
 		text-align: left;
 		min-width: 200px;
 		max-width: 280px;
-		background: #0d1320;
+		background: var(--fin-bg-raised, #0d1320);
 	}
 	.val {
 		text-align: right;
 		font-variant-numeric: tabular-nums;
-		color: #e2e8f0;
+		font-family: var(--fin-mono, inherit);
+		color: var(--fin-val, #e2e8f0);
 	}
 	.val.neg {
 		color: #f87171;

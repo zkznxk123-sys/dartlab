@@ -6,7 +6,7 @@
 	import FinFullscreen from './FinFullscreen.svelte';
 	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
 	import { price as wbPrice, type Candle } from '../data/workbench';
-	import { tx, txc, chgClass, sign, fmtNum } from '../ui/helpers';
+	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../data/engine';
 	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
 	import { loadCompanyRelations } from '../data/relations';
@@ -21,13 +21,6 @@
 	let { co, lang, kpis = [] }: Props = $props();
 	const localViewerHref = $derived(localTerminalAdapter()?.viewerUrl?.(co.code) ?? null);
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
-	// KPI 스파크라인 폴리라인 points (최근 1년 추세 — min-max 정규화)
-	function kpiSpark(s: number[], w = 34, h = 11): string {
-		const lo = Math.min(...s);
-		const hi = Math.max(...s);
-		const rng = hi - lo || 1;
-		return s.map((v, i) => `${((i / (s.length - 1)) * w).toFixed(1)},${(h - ((v - lo) / rng) * (h - 1.5) - 0.75).toFixed(1)}`).join(' ');
-	}
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
