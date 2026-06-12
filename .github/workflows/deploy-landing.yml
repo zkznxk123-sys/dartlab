@@ -101,7 +101,8 @@ jobs:
           node-version: "20"
 
       - name: Build site
-        working-directory: landing
+        # 루트 npm 워크스페이스 (플랫폼 단계-1a): 설치는 repo 루트 lockfile 단일,
+        # landing 빌드는 -w 로 실행. heap 옵션은 landing build 스크립트(viteHeap.mjs)에 내장.
         env:
           # 공시 Q&A 질문 수집 Worker(공개 URL, secret 아님) — 빌드에 심어야 prod 토글 노출.
           VITE_FEEDBACK_URL: https://dartlab-question-collector.eddmpython.workers.dev
@@ -112,7 +113,7 @@ jobs:
           VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
         run: |
           npm ci
-          BASE_PATH=/dartlab npm run build
+          BASE_PATH=/dartlab npm run build -w landing
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

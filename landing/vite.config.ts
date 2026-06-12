@@ -195,14 +195,7 @@ export default defineConfig({
 		alias: {
 			'@blog': blogDir,
 			'$chart': sharedChartDir,
-			'$skills': skillsDir,
-			// ui/shared/chart 의 svelte 컴포넌트가 d3 모듈을 import. ui/ 트리에는 node_modules 가 없어
-			// rollup module resolution 이 landing/node_modules 까지 도달 못 하는 케이스 (CI npm ci 환경) —
-			// landing/node_modules 의 절대 경로를 alias 로 강제.
-			'd3-scale': path.resolve(__dirname, 'node_modules/d3-scale'),
-			'd3-selection': path.resolve(__dirname, 'node_modules/d3-selection'),
-			'd3-shape': path.resolve(__dirname, 'node_modules/d3-shape'),
-			'd3-array': path.resolve(__dirname, 'node_modules/d3-array')
+			'$skills': skillsDir
 		}
 	},
 	ssr: {

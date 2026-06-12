@@ -10,18 +10,12 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-1a 본체 (npm 워크스페이스) — 1세션 1단위로 집행. 운영자 go 기득(2026-06-13 "멈추지말고 끝까지", 리밋으로 분할만).
-선행 조건: ② PyPI freeze ✅ v0.10.7 / ③ 스트레이 ✅ 삭제 집행 완료(ui/node_modules·ui/build, entry #6) / ① site-signals 비충돌 = 운영자 go로 해제
-1a 본체 순서 (사전 조사 완료분 포함):
-  ① 루트 package.json 신설 — private, workspaces=["landing","ui/packages/*","ui/apps/*"], overrides.svelte="5.56.3"
-  ② landing/package.json svelte "^5.56.3"→"5.56.3" 정확 고정 (이름="dartlab-landing", prepare="svelte-kit sync" 있음 — 워크스페이스 install 시 sync 자동)
-  ③ landing/package-lock.json 삭제 → 루트 npm install(lockfile 생성) → npm ci 2회(재현성·junction 확인)
-  ④ landing/vite.config.ts d3 alias 핵 4줄 제거(호이스팅이 해소)
-  ⑤ 워크플로 3종 동시 개정 ⚠: deploy-landing.yml(루트 npm ci + npm run build -w landing + 캐시 경로) ·
-     **publish.yml(`cd landing && npm ci`가 lockfile 부재로 즉사 — 루트 npm ci로 교체 필수)** · dependabot.yml(/landing→/)
-     + ci-fast/ci-full 등 다른 워크플로의 landing npm ci 사용처 grep 후 동일 교체
-  ⑥ 검증: npm ls svelte 단일·landing build(-w)·landing check·ui/web 단독 npm ci+vite build·OneDrive 동기화 제외 확인
-재개 지점: entry #6 — 이 NEXT만 보고 ①부터 실행
+다음 작업: 단계-1b (ui/packages/contracts) — 운영자 승인 범위 "3단계 쭉"(1a→1b→2) 중 두 번째.
+  · contracts 패키지 신설(타입만, 의존 0): 02 §2~§3 계약 + AiCapabilities 3-티어 + port required 원칙
+  · ui/tsconfig.base.json 신설, 워크스페이스 lockfile 재생성(npm install — 새 워크스페이스 등록)
+  · 검증: tsc build·no-dependency 검사·fixture type conformance
+그다음: 단계-2 (runtime ports + fake runtime + adapter skeleton + ServicesPort skeleton)
+재개 지점: entry #7 (1a 완료) — 1a 검증 전부 green, 워크스페이스 가동 중
 ```
 
 ---
@@ -149,3 +143,18 @@ commit: (이 변경의 커밋 — 원장 갱신만, repo 코드 무변경)
 내용: 운영자 "멈추지말고 끝까지" go로 1a 착수 → 사용 리밋 96% 통지로 **비가역 구간(lockfile 삭제·워크플로 개정) 직전에서 의도적 분할**. 집행분 = ui/node_modules·ui/build 스트레이 삭제(gitignored 고아 — repo 무영향, 검증 True/True). 사전 조사 확정분 = landing/package.json 전문(이름 dartlab-landing·prepare sync 존재·svelte ^5.56.3) + **publish.yml `cd landing && npm ci` 즉사 경로 발견**(1a 동시 개정 필수 — NEXT ⑤ 반영).  
 중단 지점/다음 행동: NEXT ①(루트 package.json 신설)부터 — NEXT만 보고 재개 가능.  
 rollback: 스트레이는 gitignored라 rollback 불요(재생성 가능).
+
+### [7] 단계-1a npm 워크스페이스 기반 — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경 파일: package.json(신설)·package-lock.json(신설)·landing/package.json(svelte 5.56.3 정확 고정 + build 스크립트 viteHeap 래퍼)·landing/scripts/viteHeap.mjs(신설 — 옛 `./node_modules/vite/bin/vite.js` 고정 경로가 호이스팅으로 소멸, require.resolve 우회)·landing/package-lock.json(삭제)·landing/vite.config.ts(d3 alias 핵 4줄 제거)·.github/workflows/deploy-landing.yml(루트 npm ci + `build -w landing`)·.github/workflows/publish.yml(landing 단독 npm ci 즉사 경로 → 루트 npm ci)·.github/dependabot.yml(npm directory /landing→/)
+
+검증 (04 단계-1a 기준 전부 green):
+- npm install ✓(345pkg·50s·lockfile 생성) / **npm ci 2회 연속 ✓**(각 40s) / junction ✓(node_modules/dartlab-landing) / svelte 5.56.3 단일 deduped ✓ / vite 8.0.16 단일 ✓
+- landing check ✓(4365파일·에러 0) / **landing 풀빌드 ✓**(viteHeap 실전, pre/post 파이프라인 정상) / **ui/web 단독 npm ci+build ✓**(522pkg·22s — 워크스페이스 오염 0, cross-import가 루트 호이스팅 위에서 정상)
+- 스트레이 ui/node_modules·ui/build 삭제 집행 ✓(entry #6)
+
+실측 사건 1건 (Windows/OneDrive 검증 항목의 실현): 첫 npm ci에서 lightningcss 네이티브 .node EPERM — 원인은 OneDrive 동기화 아님(프로세스 미실행 확인), 고아 delete-pending 핸들(Defender/인덱서 추정·고아 SID ACL 동반). takeown·icacls 무효 → **잠긴 디렉토리 rename-aside로 해소**, 이후 ci 2연속 무재발. 프로토콜 박제: 로컬 EPERM 시 잔여 `.{pkg}-{hash}` 임시 디렉토리를 repo 밖으로 rename 후 재시도.
+
+남은 위험: publish.yml 개정분은 다음 릴리스 태그에서 실검증(다음 publish 1회 주시). deploy-landing은 이 push로 즉시 실검증됨.  
+rollback: 이 commit revert + `cd landing && npm install`로 구 lockfile 재생성.

@@ -62,7 +62,7 @@ updates:
           - "*"
 
   - package-ecosystem: "npm"
-    directory: "/landing"
+    directory: "/"
     schedule:
       interval: "monthly"
       day: "monday"
