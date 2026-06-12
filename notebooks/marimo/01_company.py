@@ -6,7 +6,7 @@
 import marimo
 
 __generated_with = "0.23.8"
-app = marimo.App(width="medium")
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -28,7 +28,7 @@ def _(c):
 @app.cell
 def _(c):
     # 항목명 행 검색 (raw 공시)
-    c.panel("매출")
+    c.panel("수주")
     return
 
 
