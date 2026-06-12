@@ -53,8 +53,25 @@ function norm(s: string | null | undefined): string {
 	return (s ?? '').replace(ROMAN_RE, '').replace(WS_RE, '');
 }
 
+// narrative 섹션 서식개정 era-alias — 옛 제목코어 → 현행 제목코어 (chapter scope). Python
+// canonicalData.NARRATIVE_ERA_ALIASES 1:1. 같은 항목임이 명백한 정부 서식개정 쌍만(census 38사+ 공통) —
+// 같은 번호의 다른 항목(옛 I.5 의결권현황 vs 현행 I.5 정관)은 절대 금지(오정렬).
+export const NARRATIVE_ERA_ALIASES: Record<string, Record<string, string>> = {
+	'V. 회계감사인의 감사의견 등': {
+		감사대상업무: '외부감사에관한사항',
+		감사참여자구분별인원수및감사시간: '외부감사에관한사항',
+		주요감사실시내용: '외부감사에관한사항',
+		감사감사위원회와의커뮤니케이션: '외부감사에관한사항',
+		외부감사실시내용: '외부감사에관한사항',
+		내부회계관리제도검토의견: '내부통제에관한사항',
+		내부회계관리제도감사또는검토의견: '내부통제에관한사항'
+	},
+	'VIII. 임원 및 직원 등에 관한 사항': { 임원및직원의현황: '임원및직원등의현황' },
+	'VI. 이사회 등 회사의 기관에 관한 사항': { 주주의의결권행사에관한사항: '주주총회등에관한사항' }
+};
+
 // 단일 원소(chapter/sectionPath 원소) → canonical L1 라벨 또는 null (CANONICAL_L1 순서 첫 키워드 매치).
-function canonLabel(element: string | null | undefined): string | null {
+export function canonLabel(element: string | null | undefined): string | null {
 	const n = norm(element);
 	for (const [, label, kws] of CANONICAL_L1) {
 		for (const kw of kws) {

@@ -38,6 +38,21 @@ eq(isReportChapter('【 전문가의 확인 】'), false, 'isReport expert=false
 eq(isReportChapter('10-K'), false, 'isReport form=false');
 eq(isReportChapter('6. 배당에 관한 사항'), false, 'isReport stray=false');
 
+// anchorNarrativeToSpineRow — 3중 수렴 (Python anchorNarrativeToSpine 대조): 자기행 변형·era-alias(keyed 포함)·다른항목 분리.
+import { anchorNarrativeToSpineRow } from '../src/lib/viewer/pipeline/narrativeSpine.ts';
+const anchorOf = (chapter: string, sectionLeaf: string, disclosureKey: string | null = null) => {
+	const r = { chapter, sectionLeaf, disclosureKey } as Parameters<typeof anchorNarrativeToSpineRow>[0];
+	anchorNarrativeToSpineRow(r);
+	return r.sectionLeaf;
+};
+eq(anchorOf('V. 회계감사인의 감사의견 등', '1. 감사대상업무', 'INS_SUB'), '1. 외부감사에 관한 사항', 'alias keyed 단종키 수렴');
+eq(anchorOf('V. 회계감사인의 감사의견 등', '내부회계관리제도 검토의견'), '2. 내부통제에 관한 사항', 'alias 내부통제');
+eq(anchorOf('V. 회계감사인의 감사의견 등', 'IV. 감사인의 감사의견 등'), 'V. 회계감사인의 감사의견 등', '자기행 변형→canonical');
+eq(anchorOf('V. 회계감사인의 감사의견 등', '독립된 감사인의 감사보고서'), '독립된 감사인의 감사보고서', '대응물 없음 분리유지');
+eq(anchorOf('VIII. 임원 및 직원 등에 관한 사항', '1. 임원 및 직원의 현황'), '1. 임원 및 직원 등의 현황', 'alias 중간등');
+eq(anchorOf('I. 회사의 개요', '5. 의결권 현황'), '5. 의결권 현황', '다른 항목 분리유지');
+eq(anchorOf('III. 재무에 관한 사항', '6. 배당에 관한 사항 등', 'BS_C'), '6. 배당에 관한 사항', 'keyed 표면 정규화');
+
 // narrativeCore — 번호·'등' strip + NOTE_TITLE_NORM 정규화 (Python read._narrativeCore 대조). era 변종이 같은 코어로.
 eq(narrativeCore('6. 배당에 관한 사항 등'), '배당에관한사항', 'core 배당 등');
 eq(narrativeCore('6. 배당에 관한 사항'), '배당에관한사항', 'core 배당');
