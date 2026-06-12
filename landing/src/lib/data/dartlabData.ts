@@ -21,6 +21,11 @@ function normalizePath(path: string): string {
 
 function hasHfLandingJson(path: string): boolean {
 	return (
+		// dashboards — mapBuild 가 매일 HF publish (git 정적 사본 4/22 동결 사고 후 신설 경로)
+		path === 'dashboards/finance.json' ||
+		path === 'dashboards/quarters.json' ||
+		path === 'dashboards/macro.json' ||
+		path === 'dashboards/meta.json' ||
 		path === 'map/atlas.json' ||
 		path === 'map/ecosystem.json' ||
 		path === 'map/industryStats.json' ||

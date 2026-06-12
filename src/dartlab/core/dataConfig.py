@@ -141,6 +141,13 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "산업지도 JSON (landing/ SvelteKit 정적 asset)",
         "public": True,
     },
+    "dashboards": {
+        # mapBuild 가 매일 빌드·HF push, docs 배포가 seed — git 사본은 최후 폴백.
+        # (옛 구조: git 커밋 사본만 서빙 → 2026-04-22 동결 사고의 근본 원인)
+        "dir": "landing/dashboards",
+        "label": "대시보드 JSON (finance·quarters·macro·meta — landing 정적 asset)",
+        "public": True,
+    },
     # ── 내부용 (brand.ts 동기화 불필요) ──
     "edgarScan": {
         "dir": "edgar/scan",

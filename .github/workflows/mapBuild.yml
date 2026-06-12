@@ -63,6 +63,30 @@ jobs:
       - name: Build story manifest
         run: uv run python -X utf8 .github/scripts/prebuild/buildStoryManifest.py
 
+      # dashboards JSON 은 git 사본만 서빙돼 4/22 에 동결됐던 축 — 빌드 산출물을 HF 로
+      # publish 해야 docs 배포 seed + 클라이언트 HF 폴백이 신선해진다 (map/ 과 동일 구조).
+      - name: Upload dashboards JSON to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          uv run python -X utf8 - <<'EOF'
+          import os, sys
+          sys.path.insert(0, ".github/scripts")
+          from _hfRetry import retryHfCall
+          from huggingface_hub import HfApi
+
+          retryHfCall(
+              HfApi(token=os.environ["HF_TOKEN"]).upload_folder,
+              folder_path="landing/static/dashboards",
+              path_in_repo="landing/dashboards",
+              repo_id="eddmpython/dartlab-data",
+              repo_type="dataset",
+              allow_patterns=["*.json"],
+              commit_message="갱신: dashboards JSON (mapBuild)",
+          )
+          print("uploaded landing/static/dashboards -> landing/dashboards")
+          EOF
+
       - name: Validate map output
         run: |
           set -euo pipefail

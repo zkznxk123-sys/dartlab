@@ -52,10 +52,12 @@ jobs:
 
       # 통합 진입점(dartlab.pipeline) — macro stage 가 buildMacroData(--source --push) +
       # buildMacroCycle(--push) 를 동형 호출. source 는 MACRO_SOURCE env 로 전달.
-      - name: Build macro (FRED/ECOS + cycle) → HF
+      - name: Build macro (FRED/ECOS/customs + cycle) → HF
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          # customs(관세청) 합류 후 필수 — 누락 시 CredentialError 로 전체 크래시 (6/11 연속 실패 원인)
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           MACRO_SOURCE: ${{ github.event.inputs.source || 'all' }}
         run: uv run python -X utf8 -m dartlab.pipeline macro

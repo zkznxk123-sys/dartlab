@@ -24,7 +24,8 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 	const opt = { fetchFn, preferLocal: true };
 	const [finance, macro, meta, prices, index, eco, quarters] = await Promise.all([
 		loadJson<FinanceFile>('dashboards/finance.json', opt),
-		loadJson<MacroFile>('dashboards/macro.json', opt),
+		// macro 도 HF-first — mapBuild 가 매일 publish 하는 소형 파일 (git 정적 사본 동결 사고 재발 방지)
+		loadJson<MacroFile>('dashboards/macro.json', { fetchFn }),
 		loadJson<MetaFile>('dashboards/meta.json', opt),
 		// 시세 스냅샷만 HF-first — 일배치(buildPricesSnapshot.py)가 매 영업일 HF 를 갱신하는데
 		// preferLocal 이면 배포 시점 정적 사본이 영원히 이겨 asOf 가 동결된다 (4/24 사고).

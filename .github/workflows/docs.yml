@@ -50,21 +50,30 @@ jobs:
 
       # HF SSoT: map JSON 은 git 에 없음 (.gitignore). 빌드 전 HF 에서 내려받아
       # landing/static/map/ 에 풀어둠 → SvelteKit static adapter 가 build/ 에 복사.
-      - name: Seed industry map from HF
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category industryMap
+      # dashboards 는 git 사본이 최후 폴백 — HF seed 가 있으면 덮어써 신선화 (mapBuild 가 매일 publish).
+      - name: Seed industry map + dashboards from HF
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category industryMap,dashboards
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           DARTLAB_DATA_DIR: ${{ github.workspace }}
 
-      - name: Move HF seed to landing/static/map
+      - name: Move HF seed to landing/static
         run: |
           set -euo pipefail
-          # seedFromHf 는 HF 의 dir (landing/map/) 을 $DARTLAB_DATA_DIR 아래에 그대로 복제.
-          # landing/map/ → landing/static/map/ 으로 이동 (SvelteKit static path).
+          # seedFromHf 는 HF 의 dir (landing/map/ · landing/dashboards/) 을 $DARTLAB_DATA_DIR 아래에 그대로 복제.
+          # landing/{map,dashboards}/ → landing/static/ 으로 이동 (SvelteKit static path).
           if [ -d landing/map ]; then
             mkdir -p landing/static/map
             cp -r landing/map/. landing/static/map/
             rm -rf landing/map
+          fi
+          if [ -d landing/dashboards ]; then
+            mkdir -p landing/static/dashboards
+            cp -r landing/dashboards/. landing/static/dashboards/
+            rm -rf landing/dashboards
+            echo "dashboards seeded: $(ls landing/static/dashboards)"
+          else
+            echo "WARN: HF dashboards seed 없음 — git 사본으로 빌드 (mapBuild publish 전 과도기)"
           fi
           count=$(find landing/static/map/companies -maxdepth 1 -name '*.json' 2>/dev/null | wc -l)
           echo "map companies count: $count"
@@ -88,6 +97,8 @@ jobs:
           VITE_FEEDBACK_URL: https://dartlab-question-collector.eddmpython.workers.dev
           # HF parquet 레인지 프록시(콜드 403 흡수 + range 헤더 보존, infra/workers/hfProxy). 비우면 HF 직결로 가역.
           VITE_DARTLAB_HF_RESOLVE: https://dartlab-hf-proxy.eddmpython.workers.dev/hf
+          # Cloudflare Web Analytics 공개 beacon site token. 비우면 analytics beacon 을 로드하지 않음.
+          VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
         run: |
           npm ci
           BASE_PATH=/dartlab npm run build
