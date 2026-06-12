@@ -24,6 +24,8 @@ eq(canonicalChapter('6. 배당에 관한 사항', '6. 배당에 관한 사항'),
 eq(canonicalChapter('7. 증권의 발행을 통한 자금조달에 관한 사항', '7. 증권의 발행을 통한 자금조달에 관한 사항'), 'III. 재무에 관한 사항', '증권발행→III');
 eq(canonicalChapter('별난 챕터', '별난 챕터'), '별난 챕터', 'honest fallback');
 eq(canonicalChapter('II. 사업의 내용', 'II. 사업의 내용␟V. 회계감사인의 감사의견 등␟외부감사'), 'V. 회계감사인의 감사의견 등', 'depth V');
+eq(canonicalChapter('XII. 상세표', 'XII. 상세표␟2. 계열회사 현황(상세)'), 'XII. 상세표', 'XII 상세 자식 키워드 오배정 차단');
+eq(canonicalChapter('XII. 상세표', 'XII. 상세표␟5. 대주주와의 영업거래(상세)'), 'XII. 상세표', 'XII 대주주 상세 유지');
 // NT_ 주석 orphan 복원 — 구조신호 0(chapter·sectionPath 공백) + NT_ 키 → III (Python noteKeyCol 대조).
 eq(canonicalChapter('', '', 'NT_D838000'), 'III. 재무에 관한 사항', 'NT_ orphan→III');
 eq(canonicalChapter('', '', null), '', 'front-matter(키∅) 보존');

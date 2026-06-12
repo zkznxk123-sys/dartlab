@@ -88,6 +88,9 @@ const FINANCE_LABEL = CANONICAL_L1.find(([id]) => id === 'L3_finance')![1];
 // (noteKey 지정 시) NT_→III → 원본. Python canonicalChapterExpr(noteKeyCol=) 1:1: (첨부)재무제표 flat
 // <P ID> 주석은 SECTION 부재로 chapter·sectionPath 공백으로 새는데(2025+ 회귀), NT_ 표준코드 = 정의상
 // 재무제표 주석이라 III 복원은 honest(추측 0). front-matter(키 없음)는 원본 보존(honest-gap).
+// XII(상세표) 라벨 — 부록 컨테이너 우선 (CANONICAL_L1 파생). Python _DETAIL_LABEL 1:1.
+const DETAIL_LABEL = CANONICAL_L1.find(([id]) => id === 'L12_detail')![1];
+
 export function canonicalChapter(
 	chapter: string | null | undefined,
 	sectionPath: string | null | undefined,
@@ -96,6 +99,7 @@ export function canonicalChapter(
 	let deepest: string | null = null;
 	for (const e of (sectionPath ?? '').split(SECTION_SEP)) {
 		const lbl = canonLabel(e);
+		if (lbl === DETAIL_LABEL) return DETAIL_LABEL; // 상세표 자식의 챕터 키워드(계열회사 등) 오배정 차단
 		if (lbl !== null) deepest = lbl; // last non-null = deepest
 	}
 	if (deepest !== null) return deepest;
