@@ -1,0 +1,66 @@
+name: Naver News Sync
+
+# ──────────────────────────────────────────────────────────────
+# 네이버 뉴스 forward-only archive cron (private — 언론사 저작권).
+#
+# 네이버 검색 API 일별 fan-out (KR 시총상위 + 매크로 키워드, 제목+스니펫) →
+# `data/news/private/naver/KR/{YYYY}-{MM}-{DD}.parquet` upsert →
+# private HF push (`eddmpython/dartlab-news-private/news/private/naver/...`).
+#
+# ⚠ 공개 dartlab-data 에 절대 안 감 — 결과는 언론사 저작권이라 비공개 캐시 전용.
+# 서버사이드 read / 라이브 표시는 의도된 용도. 공개 재배포만 금지.
+#
+# 자격증명: secrets NAVER_CLIENT_ID / NAVER_CLIENT_SECRET (X-Naver-Client-*).
+# 미설정이면 syncNaverNews 가 무해 종료(rc=0, 업로드 0) → green-noop (배선 자체는 안전).
+#
+# concurrency group `hf-naver-push` — private repo 라 공개 news (`hf-news-push`) 와
+# 별도 버킷. rate 보호는 naverNews concurrency=4 + asyncio.Semaphore.
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '30 9 * * *'  # UTC 09:30 = KST 18:30 (장 마감 후 그날 KR 뉴스 — 08:00 news / 11:20 gov 사이 빈 구간)
+  workflow_dispatch:
+    inputs:
+      max_queries:
+        description: '쿼리 상한 (smoke 테스트용)'
+        default: '50'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-naver-push
+  cancel-in-progress: false
+
+jobs:
+  sync-naver-kr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Smoke import
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
+      # 통합 진입점(dartlab.pipeline naverNews) — syncNaverNews(--once, --max-queries) +
+      # bulkUploadHf(newsNaver --since 86400, private repo) 를 동형 호출. bulkUploadHf 는
+      # env>.env 토큰 해석. NAVER 키 미설정 시 fetch 0 → green-noop.
+      - name: Fetch naver headlines (KR) + private HF push
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          NAVER_MAX_QUERIES: ${{ github.event.inputs.max_queries || '200' }}
+        run: uv run python -X utf8 -m dartlab.pipeline naverNews

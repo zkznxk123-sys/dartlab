@@ -32,6 +32,7 @@ MONITORED_WORKFLOWS = [
     "Macro Data Sync (Bulk)",
     "News Archive Sync",
     "GDELT Sync",
+    "Naver News Sync",  # 네이버 뉴스 private archive (cron 30 9) — 무키 시 green-noop, 키 설정 시 실데이터
     "Valuation Snapshot",
     "Search Index Delta (daily)",
     "Search Index Main (monthly)",

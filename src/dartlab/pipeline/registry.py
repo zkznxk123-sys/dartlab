@@ -105,6 +105,12 @@ def buildRegistry() -> dict[str, StageSpec]:
             label="GDELT GKG forward 일별 (Phase D, yesterday 까지 lookback upsert)",
         ),
         StageSpec(
+            "naverNews",
+            run=news.runNaverNews,
+            uploadCategories=("newsNaver",),
+            label="네이버 뉴스 (private, KR 제목+스니펫 → 비공개 캐시 repo)",
+        ),
+        StageSpec(
             "edgar",
             run=edgar.runEdgar,
             uploadCategories=("edgar", "edgarMeta"),

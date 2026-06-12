@@ -120,16 +120,29 @@ def test_gdelt_forward_faithful(monkeypatch):
     assert res.report.ok == 1
 
 
+def test_naver_faithful(monkeypatch):
+    """naverNews — syncNaverNews(--once --max-queries) + bulkUploadHf(newsNaver --since 86400)."""
+    monkeypatch.setenv("NAVER_MAX_QUERIES", "200")
+    mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.news")
+    res = mod.runNaverNews(upload=True)
+    scripts = [c[0] for c in calls]
+    assert scripts[0] == (".github/scripts/sync/syncNaverNews.py", "--once", "--max-queries", "200")
+    assert scripts[1] == (".github/scripts/sync/bulkUploadHf.py", "newsNaver", "--since", "86400")
+    assert res.report.ok == 1
+
+
 def test_news_enrich_gdelt_registered():
-    """buildRegistry 에 newsEnrich·gdeltForward 등록 + run 바인딩 + uploadCategories."""
+    """buildRegistry 에 newsEnrich·gdeltForward·naverNews 등록 + run 바인딩 + uploadCategories."""
     from dartlab.pipeline.registry import buildRegistry
-    from dartlab.pipeline.stages.news import runGdeltForward, runNewsEnrich
+    from dartlab.pipeline.stages.news import runGdeltForward, runNaverNews, runNewsEnrich
 
     reg = buildRegistry()
     assert reg["newsEnrich"].run is runNewsEnrich
     assert reg["gdeltForward"].run is runGdeltForward
+    assert reg["naverNews"].run is runNaverNews
     assert "newsEnriched" in reg["newsEnrich"].uploadCategories
     assert "newsGdelt" in reg["gdeltForward"].uploadCategories
+    assert "newsNaver" in reg["naverNews"].uploadCategories
 
 
 def test_edgar_four_quarters():

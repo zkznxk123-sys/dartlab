@@ -1,4 +1,4 @@
-"""News stage — 헤드라인 아카이브(A) + 감성/토픽 enrich(B) + GDELT forward(D).
+"""News stage — 헤드라인 아카이브(A) + 감성/토픽 enrich(B) + GDELT forward(D) + 네이버(N).
 
 워크플로 충실 재현:
 - ``runNewsHeadlines``(A): ``syncNewsHeadlines.py --market KR/US --once --max-queries`` +
@@ -9,6 +9,9 @@
 - ``runGdeltForward``(D): ``syncGdeltBackfill.py --start <today-N> --end <yesterday> --step-minutes
   <s> --markets ...`` + ``bulkUploadHf.py newsGdelt --since 86400``. yesterday(완성된 UTC 일) 까지
   N일 lookback upsert(누락 자가복구). N=env GDELT_LOOKBACK_DAYS(2), s=GDELT_STEP_MINUTES(360).
+- ``runNaverNews``(N): ``syncNaverNews.py --once --max-queries`` + ``bulkUploadHf.py newsNaver
+  --since 86400``. KR 제목+스니펫 → **private** repo. 무키 시 green-noop. max-queries=env
+  NAVER_MAX_QUERIES(200). 언론사 저작권 비공개 캐시 전용(공개 dartlab-data 안 감).
 """
 
 from __future__ import annotations
@@ -159,4 +162,48 @@ def runGdeltForward(
         if rc2 != 0:
             res.report.fail = 1
             res.report.failures.append(f"gdelt upload rc={rc2}")
+    return res
+
+
+def runNaverNews(
+    *, category: str = "naverNews", mode: PipelineMode = "recent", codes=None, upload: bool = True, token=None
+) -> StageResult:
+    """네이버 뉴스 (private) — KR fetch + bulk since-upload(newsNaver, private repo).
+
+    ``syncNaverNews.py --once --max-queries`` (KR 시총상위+매크로 시드, 제목+스니펫) →
+    ``data/news/private/naver`` upsert → ``bulkUploadHf.py newsNaver --since 86400`` 로
+    **private** repo(`eddmpython/dartlab-news-private`) push. 언론사 저작권 비공개 캐시 전용 —
+    공개 dartlab-data 안 감. NAVER 자격증명 미설정 시 syncNaverNews 가 무해 종료(rc=0,
+    업로드 0) → green-noop. max-queries=env NAVER_MAX_QUERIES(200).
+
+    Args:
+        category: 카테고리 라벨.
+        mode: 미사용.
+        codes: 미사용.
+        upload: bulkUploadHf 수행 여부.
+        token: 미사용(bulkUploadHf 가 env>.env 해석).
+
+    Returns:
+        StageResult (무키/결과 0 이면 ok·업로드 0).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> runNaverNews(upload=False)  # doctest: +SKIP
+        StageResult(category='newsNaver', ...)
+    """
+    maxQ = os.environ.get("NAVER_MAX_QUERIES", "200")
+    rc1 = runScript(".github/scripts/sync/syncNaverNews.py", "--once", "--max-queries", maxQ)
+    res = StageResult(category="newsNaver")
+    if rc1 != 0:
+        res.report.err = 1
+        res.report.failures.append(f"naver fetch rc={rc1}")
+        return res
+    res.report.ok = 1
+    if upload:
+        rc2 = runScript(".github/scripts/sync/bulkUploadHf.py", "newsNaver", "--since", "86400")
+        if rc2 != 0:
+            res.report.fail = 1
+            res.report.failures.append(f"naver upload rc={rc2}")
     return res
