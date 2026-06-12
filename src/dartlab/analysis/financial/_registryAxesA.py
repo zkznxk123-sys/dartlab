@@ -243,6 +243,7 @@ _AXES_A: dict[str, _AxisEntry] = {
                 "rawMaterialBreakdown",
                 "원재료 매입 비중",
             ),
+            _CalcEntry("calcRndExpense", "dartlab.analysis.financial.costStructure", "rndExpense", "연구개발비"),
             _CalcEntry(
                 "calcCostStructureFlags",
                 "dartlab.analysis.financial.costStructure",

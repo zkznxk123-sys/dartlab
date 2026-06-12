@@ -9,13 +9,21 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
+import re
 from typing import Any
+
+import polars as pl
 
 from dartlab.analysis.financial.accountSums import sumCostOfSales, sumSGA
 from dartlab.core.memory import memoizedCalc
-from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
+from dartlab.core.utils.helpers import annualColsFromPeriods, parseNumStr, toDictBySnakeId
 
 _MAX_YEARS = 8
+
+# R&D 항목 라벨 패턴 (판관비명세 주석) + 노트 단위 추론 (build.cell._UNIT_SCALE 기본 백만원).
+_RND_NOTE_PAT = re.compile(r"연구개발|경상개발|기술개척")
+_RND_NOTE_SKIP = ("판관비",)  # "경상개발비, 판관비" 같은 중복/소계 라벨 후순위
+_YEAR4 = re.compile(r"(\d{4})")
 
 
 # ── 유틸 ──
@@ -385,6 +393,171 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
         )
 
     return {"history": history} if history else None
+
+
+# ── 연구개발비 ──
+
+
+def _year4(period: object) -> str | None:
+    m = _YEAR4.search(str(period))
+    return m.group(1) if m else None
+
+
+def _inferNoteUnitScale(rawByYear: dict[str, float], revByYear: dict[str, float]) -> int:
+    """판관비명세 주석 raw 값 → 원 배율 추론. R&D/매출 집약도 (0.05~50%) 가 sane 한 배율 채택.
+
+    KR 주석 표준은 백만원이나 원/천원 회사를 방어한다 (build.cell._UNIT_SCALE = {백만원,천원,원}).
+    """
+    for y, raw in rawByYear.items():
+        rev = revByYear.get(y)
+        if rev and raw:
+            for sc in (1_000_000, 1_000, 1):
+                if 0.0005 <= raw * sc / rev <= 0.5:
+                    return sc
+            break
+    return 1_000_000  # 미추론 = 백만원 (codebase 기본)
+
+
+@memoizedCalc
+def calcRndExpense(company, *, basePeriod: str | None = None) -> dict | None:
+    """연구개발비 시계열 + R&D 집약도 — IS 별도라인 → 판관비명세 주석 2-tier.
+
+    Capabilities:
+        R&D 비용 연도 시계열 + R&D/매출 집약도(%). Tier 1 = 손익계산서 별도
+        라인(``research_and_development``, 표준계정 정규화·원 단위, 분기 가능).
+        Tier 1 부재(삼성류 SG&A 매몰) 시 Tier 2 = 판관비명세 주석
+        (NT_D834310/834315) 의 '연구개발 총지출액/경상연구개발비' 행 (raw →
+        단위 추론 환산). 어느 경로도 없으면 ``available: False`` (환각 0).
+
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``available`` (bool): R&D 추출 성공 여부.
+            - ``history`` (list[dict]): 연도별 (period + rnd[원] + revenue[원]
+              + rndIntensity[%]). 최신 좌측.
+            - ``latest`` (dict | None): history[0].
+            - ``source`` (str | None): "IS-line" | "SGA-note/NT_D834310" 등.
+            - ``label`` (str | None): 원천 항목명.
+        매출 자체 부재 시 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcRndExpense(Company("005930"))
+        >>> r["source"], r["latest"]["rndIntensity"]  # doctest: +SKIP
+        ('SGA-note/NT_D834310', 9.8)
+
+    Guide:
+        ``available: False`` 는 R&D 미공시(개발비 자산화·금융사)지 0 이 아님 —
+        "데이터 없음"으로 답하라. R&D 별도공시 회사(제약/IT)는 Tier 1 분기까지.
+        집약도는 동종업종 비교 + 추세로 해석 (절대값 단독 금지).
+
+    When:
+        R&D 강도·혁신 투자 추세 진단, 비용구조 분석의 R&D 분해 입력.
+
+    How:
+        IS select(매출 + research_and_development) → 라인 있으면 Tier 1 →
+        없으면 panel("NT_D834310"/"NT_D834315") 연구개발 행 → 단위 추론 환산 →
+        연도 정렬 + 집약도.
+
+    SeeAlso:
+        - ``calcCostBreakdown``: 비용 3 종 비중 (R&D 포함 판관비 상위)
+        - ``calcCostByNatureAnalysis``: 비용 성격별 (경상연구개발비 보조 경로)
+
+    Requires:
+        IS (매출액). R&D 는 IS 라인 또는 판관비명세 주석 중 하나.
+
+    AIContext:
+        source 와 함께 인용 — IS-line 은 정규화 정밀, SGA-note 는 총지출액(자본화
+        포함) 개념. available False 면 "R&D 비용 별도 미공시"로 정직히.
+
+    LLM Specifications:
+        AntiPatterns:
+            - available False → R&D 0 단정 금지 (미공시 ≠ 0).
+            - SGA-note 총지출액을 IS 비용과 동일시 — 자본화분 포함 가능.
+        OutputSchema:
+            ``{available: bool, history: list[dict 4키], latest?, source?, label?}``.
+        Prerequisites:
+            IS 매출 시계열 + (IS R&D 라인 또는 판관비명세 주석).
+        Freshness:
+            IS-line 분기 가능, SGA-note 연간.
+        Dataflow:
+            IS(매출+R&D) → Tier1 → 없으면 NT_D834310/834315 연구개발 행 →
+            단위 추론(_inferNoteUnitScale) → 원 환산 → 연도 + R&D/매출 집약도.
+        TargetMarkets: KR (DART). R&D 별도공시·판관비명세 공시 회사.
+    """
+    revResult = company.select("IS", ["매출액"], strict=False)
+    revParsed = toDictBySnakeId(revResult)
+    if revParsed is None:
+        return None
+    revData, revPeriods = revParsed
+    revRow = revData.get("sales") or revData.get("매출액") or {}
+    yCols = annualColsFromPeriods(revPeriods, basePeriod, _MAX_YEARS)
+    if not yCols:
+        return None
+    revByYear = {_year4(c): revRow.get(c) for c in yCols if _year4(c)}
+
+    # Tier 1 — IS 별도 라인 (원, 정규화 완료)
+    rndByYear: dict[str, float] = {}
+    source = label = None
+    rndParsed = toDictBySnakeId(company.select("IS", ["research_and_development"], strict=False))
+    if rndParsed:
+        rndData, _ = rndParsed
+        rndRow = next((v for v in rndData.values() if v), {})  # 회사별 snakeId 변형 흡수
+        rndByYear = {_year4(c): rndRow.get(c) for c in yCols if _year4(c) and rndRow.get(c) is not None}
+        if rndByYear:
+            source, label = "IS-line", "연구개발비"
+
+    # Tier 2 — 판관비명세 주석 (raw → 단위 추론 환산)
+    if not rndByYear:
+        for nt in ("NT_D834310", "NT_D834315"):
+            try:
+                note = company.panel(nt, freq="year")
+            except Exception:  # noqa: BLE001
+                continue
+            if note is None or not hasattr(note, "columns"):
+                continue
+            labcol = "label" if "label" in note.columns else note.columns[0]
+            rd = note.filter(pl.col(labcol).cast(pl.Utf8).str.contains(_RND_NOTE_PAT.pattern))
+            if rd.is_empty():
+                continue
+            yearCols = [c for c in note.columns if _YEAR4.fullmatch(c)]
+            rows = rd.to_dicts()
+            # 중복("…, 판관비") 후순위 + 최다 데이터 행
+            rows.sort(
+                key=lambda r: (
+                    any(s in str(r.get(labcol)) for s in _RND_NOTE_SKIP),
+                    -sum(parseNumStr(r.get(c)) is not None for c in yearCols),
+                )
+            )
+            best = rows[0]
+            raw = {c: parseNumStr(best.get(c)) for c in yearCols}
+            raw = {c: v for c, v in raw.items() if v is not None}
+            if not raw:
+                continue
+            scale = _inferNoteUnitScale(raw, revByYear)
+            rndByYear = {c: v * scale for c, v in raw.items()}
+            source, label = f"SGA-note/{nt}", str(best.get(labcol))
+            break
+
+    if not rndByYear:
+        return {"available": False, "history": [], "latest": None, "source": None, "label": None}
+
+    years = sorted({y for y in (set(rndByYear) | set(revByYear)) if y}, reverse=True)[:_MAX_YEARS]
+    history = []
+    for y in years:
+        rnd = rndByYear.get(y)
+        if rnd is None:
+            continue
+        rev = revByYear.get(y)
+        history.append({"period": y, "rnd": rnd, "revenue": rev, "rndIntensity": _pct(rnd, rev) if rev else None})
+    if not history:
+        return {"available": False, "history": [], "latest": None, "source": source, "label": label}
+    return {"available": True, "history": history, "latest": history[0], "source": source, "label": label}
 
 
 # ── calcCostByNatureAnalysis + calcRawMaterialBreakdown → _costStructureDeep.py 분리 ──

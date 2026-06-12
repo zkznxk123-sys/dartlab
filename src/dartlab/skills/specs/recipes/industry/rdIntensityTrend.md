@@ -74,9 +74,10 @@ target = "005930"
 c = dartlab.Company(target)
 
 def rd_series(code):
+    # 비용구조 축의 calcRndExpense — IS 별도라인 → 판관비명세 주석 2-tier (rdSummary 축은 미존재였음).
     try:
-        rows = dartlab.Company(code).analysis("rdSummary").to_dicts()
-        return [(str(r.get("year"))[:4], (float(r.get("rdExpense") or 0)) / max(float(r.get("revenue") or 1), 1)) for r in rows if r.get("year")]
+        rnd = (dartlab.Company(code).analysis("비용구조") or {}).get("rndExpense") or {}
+        return [(h["period"], (h["rndIntensity"] or 0) / 100) for h in rnd.get("history", []) if h.get("rndIntensity") is not None]
     except Exception:
         return []
 
@@ -132,7 +133,7 @@ emit_result(
     table=table,
     values={"rdIntensity": my_recent, "rank": rank, "slope": slope},
     date=years[-1] if years else None,
-    sources=["dartlab://analysis/rdSummary", "dartlab://industry/peers"],
+    sources=["dartlab://analysis/비용구조/rndExpense", "dartlab://industry/peers"],
 )
 ```
 

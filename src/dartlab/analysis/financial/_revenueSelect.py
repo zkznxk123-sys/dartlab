@@ -6,17 +6,23 @@ revenue.py facade + _revenueSegment / _revenueGrowth / _revenueQuality 가 본 �
 
 from __future__ import annotations
 
-from dartlab.core.utils.helpers import (
-    annualColsFromPeriods as _annualColsFromPeriods,
-)
+import re
+
 from dartlab.core.utils.helpers import (
     parseNumStr as _parseNumStr,
+)
+from dartlab.core.utils.helpers import (
+    toDictBySnakeId as _toDictBySnakeId,
 )
 
 _MAX_SEGMENTS = 8
 _MAX_YEARS = 8
 
 _SKIP_KEYWORDS = {"합계", "조정", "내부", "소계", "총계", "부문계", "기타", "국내외"}
+
+# 부문 주석(NT_D871100) raw(백만원) → 원 (build.cell._UNIT_SCALE 기본). axisPath 멤버 토큰 추출.
+_NOTE_UNIT_SCALE = 1_000_000
+_SEG_TOKEN_RE = re.compile(r"entity\d+_([A-Za-z0-9]+?)Member", re.I)
 
 
 def _getRatios(company):
@@ -33,115 +39,172 @@ def _getRatios(company):
         return None
 
 
-def _selectDocsRevenue(
-    company, *, basePeriod: str | None = None
-) -> tuple[dict[str, dict[str, float]], list[str]] | None:
-    """productService/salesOrder 토픽에서 부문별 매출 시계열을 추출.
+def _segNameFromAxis(axisPath: str | None) -> str | None:
+    """NT_D871100 axisPath → 영업부문 멤버 토큰. ``OperatingSegmentsMember`` 하위 멤버만.
 
-    DART 전용 경로. EDGAR(US) 는 SEC companyfacts API 가 XBRL segment
-    dimension(axis/member) 을 제공하지 않아 segment 분해 불가 — None 반환.
-    (EDGAR segment 지원은 10-K 본문 파싱 별도 파이프라인 필요.)
-
-    Returns
-    -------
-    tuple[dict[str, dict[str, float]], list[str]] | None
-        ``(segData, annualCols)`` 튜플.
-        segData : dict — ``{부문명: {period: 매출액(원)}}`` 매핑.
-        annualCols : list[str] — 최신순 정렬된 연간 컬럼 목록.
-        데이터 없으면 None.
+    ``...|OperatingSegmentsMember|entity00126380_DxDivisionMemberOf...`` → ``"DxDivision"``.
+    조정행(MaterialReconcilingItemsMember)·총계(ConsolidatedMember)·부문축 없는 단일축 = None.
     """
-    for topic in ("productService", "salesOrder"):
-        try:
-            result = company.select(topic, ["매출액"])
-        except (ValueError, KeyError):
-            result = None
-        if result is None:
-            continue
-        parsed = _parseDocsRevenueResult(result, basePeriod=basePeriod)
-        if parsed is not None:
-            return parsed
+    if not axisPath or "OperatingSegmentsMember|" not in axisPath:
+        return None
+    last = axisPath.split("|")[-1]
+    m = _SEG_TOKEN_RE.search(last)
+    if m:
+        return m.group(1)
+    name = re.sub(r"Member.*$", "", last)
+    return name or None
 
+
+def _isRevenueForYear(company, year4: str) -> float | None:
+    """IS 매출(원) — 단위 추론 기준값. year4 = "YYYY"."""
+    try:
+        parsed = _toDictBySnakeId(company.select("IS", ["매출액"], strict=False))
+    except (ValueError, KeyError, AttributeError):
+        return None
+    if not parsed:
+        return None
+    data, _ = parsed
+    row = data.get("sales") or data.get("매출액") or {}
+    for k, v in row.items():
+        m = re.search(r"(\d{4})", str(k))
+        if v and m and m.group(1) == year4:
+            return v
     return None
 
 
-def _parseDocsRevenueResult(
-    result, *, basePeriod: str | None = None
-) -> tuple[dict[str, dict[str, float]], list[str]] | None:
-    """docs select 결과에서 부문별 매출 시계열 파싱.
+def _inferSegUnitScale(company, cells) -> int:
+    """부문 주석 raw → 원 배율 추론. 노트 단위가 회사마다 백만원/천원/원으로 달라 magnitude 로 결정.
 
-    Returns
-    -------
-    tuple[dict[str, dict[str, float]], list[str]] | None
-        ``(segData, annualCols)`` 튜플. 파싱 실패 시 None.
+    최신연도 부문 매출 합 raw × scale 이 IS 총매출의 0.3~5 배(부문합은 내부거래로 연결매출 ±) 면 채택.
+    미추론 = 백만원 (codebase 기본).
     """
-    df = result.df
-    if df.is_empty():
+    revByYear: dict[int, float] = {}
+    for r in cells.iter_rows(named=True):
+        if (r.get("scope") or "consolidated") != "consolidated":
+            continue
+        if not _segNameFromAxis(r.get("axisPath")):
+            continue
+        label = str(r.get("label") or "")
+        if not (
+            ("매출" in label or "수익" in label)
+            and not any(k in label for k in ("이익", "원가", "비용", "자산", "부채"))
+        ):
+            continue
+        year, val = r.get("ctxYear"), _parseNumStr(r.get("valueRaw"))
+        if year is not None and val and val > 0:
+            revByYear[int(year)] = revByYear.get(int(year), 0.0) + val
+    if not revByYear:
+        return _NOTE_UNIT_SCALE
+    ly = max(revByYear)
+    rawSum = revByYear[ly]
+    totalRev = _isRevenueForYear(company, str(ly))
+    if not totalRev or rawSum <= 0:
+        return _NOTE_UNIT_SCALE
+    for sc in (1, 1_000, 1_000_000):
+        if 0.3 <= rawSum * sc / totalRev <= 5:
+            return sc
+    return _NOTE_UNIT_SCALE
+
+
+def _segmentSeriesFromNote(
+    company, kind: str, *, basePeriod: str | None = None
+) -> tuple[dict[str, dict[str, float]], list[str]] | None:
+    """NT_D871100(부문별정보) 주석 셀 → ``{부문: {연도: 값(원)}}`` + 연도목록.
+
+    구 ``productService``/``salesOrder`` select 경로는 ``showImpl`` finance-only dispatch 로
+    항상 None (사망) 이므로, panel 주석 셀(``_noteCellsFromPanel``) 의 ``axisPath`` 부문멤버를
+    피벗한다. **축-태깅(OperatingSegmentsMember) 회사만** — 행-라벨/지역별/자회사별/단일축/
+    EDGAR(US) 는 None (정직). 노트 단위(백만원/천원)는 IS 매출 대비 magnitude 로 추론 → 원 환산.
+
+    Args:
+        company: Company 객체.
+        kind: "revenue"(매출/수익) | "opincome"(영업이익/영업손익).
+        basePeriod: 기준 연도 — 이후 연도 제외. None 시 전체.
+
+    Returns:
+        ``(segData, years)`` 또는 None. segData = ``{부문: {"YYYY": 값(원)}}``,
+        years = 최신순 연도 문자열 목록.
+    """
+    if getattr(company, "market", "KR") != "KR":
+        return None  # EDGAR(US) = segment XBRL dimension 부재
+    code = getattr(company, "stockCode", None)
+    if not code:
+        return None
+    from dartlab.providers.dart.panel.cell import _noteCellsFromPanel
+
+    cells = _noteCellsFromPanel(code, "NT_D871100")
+    if cells is None or not hasattr(cells, "is_empty") or cells.is_empty():
         return None
 
-    itemCol = df.columns[0]
-    pCols = [c for c in df.columns if c != itemCol]
-    yCols = _annualColsFromPeriods(pCols, basePeriod, _MAX_YEARS)
-    if not yCols:
-        return None
+    scale = _inferSegUnitScale(company, cells)  # 매출·영업이익 동일 단위
+    baseYear = None
+    if basePeriod:
+        m = re.search(r"(\d{4})", str(basePeriod))
+        baseYear = int(m.group(1)) if m else None
 
     segData: dict[str, dict[str, float]] = {}
-    for row in df.iter_rows(named=True):
-        rawItem = str(row.get(itemCol, ""))
-        if any(kw in rawItem for kw in _SKIP_KEYWORDS):
+    for r in cells.iter_rows(named=True):
+        if (r.get("scope") or "consolidated") != "consolidated":
             continue
-        segName = rawItem.replace("_매출액", "").strip()
-        if not segName:
+        seg = _segNameFromAxis(r.get("axisPath"))
+        if not seg:
             continue
-
-        vals: dict[str, float] = {}
-        for yc in yCols:
-            v = _parseNumStr(row.get(yc))
-            if v is not None and v > 0:
-                vals[yc] = v
-        if vals:
-            segData[segName] = vals
+        label = str(r.get("label") or "")
+        if kind == "revenue":
+            isRev = ("매출" in label or "수익" in label) and not any(
+                k in label for k in ("이익", "원가", "비용", "자산", "부채")
+            )
+            if not isRev:
+                continue
+        elif "영업이익" not in label and "영업손익" not in label:
+            continue
+        year = r.get("ctxYear")
+        if year is None or (baseYear is not None and int(year) > baseYear):
+            continue
+        val = _parseNumStr(r.get("valueRaw"))
+        if val is None:
+            continue
+        val *= scale
+        if kind == "revenue" and val <= 0:
+            continue
+        ys = str(year)
+        cur = segData.setdefault(seg, {})
+        if ys not in cur or abs(val) > abs(cur[ys]):  # (부문,연도) 중복 시 전체 연간(절대값 큰 값)
+            cur[ys] = val
 
     if not segData:
         return None
-    return segData, yCols
+    years = sorted({y for vals in segData.values() for y in vals}, reverse=True)[:_MAX_YEARS]
+    return segData, years
+
+
+def _selectDocsRevenue(
+    company, *, basePeriod: str | None = None
+) -> tuple[dict[str, dict[str, float]], list[str]] | None:
+    """부문별 매출 시계열 — NT_D871100 주석 셀(축-태깅) axisPath 피벗.
+
+    축-태깅 DART 회사만 (``_segmentSeriesFromNote`` 위임). 행-라벨/지역/자회사/단일축/EDGAR = None.
+
+    Returns:
+        ``(segData={부문:{"YYYY":매출(원)}}, years)`` 또는 None.
+    """
+    return _segmentSeriesFromNote(company, "revenue", basePeriod=basePeriod)
 
 
 def _selectDocsOpIncome(company, yCols: list[str]) -> dict[str, dict[str, float]] | None:
-    """productService/salesOrder에서 부문별 영업이익 시계열을 추출 (있는 기업만).
+    """부문별 영업이익 시계열 — NT_D871100 주석 셀 (매출 yCols 정합).
 
-    Returns
-    -------
-    dict[str, dict[str, float]] | None
-        ``{부문명: {period: 영업이익(원)}}`` 매핑. 데이터 없으면 None.
+    Returns:
+        ``{부문: {"YYYY": 영업이익(원)}}`` 또는 None.
     """
-    for topic in ("productService", "salesOrder"):
-        result = company.select(topic, ["영업이익", "영업손익"], strict=False)
-        if result is None:
-            continue
-        df = result.df
-        if df.is_empty():
-            continue
-
-        itemCol = df.columns[0]
-        opData: dict[str, dict[str, float]] = {}
-        for row in df.iter_rows(named=True):
-            rawItem = str(row.get(itemCol, ""))
-            if any(kw in rawItem for kw in _SKIP_KEYWORDS):
-                continue
-            segName = rawItem.replace("_영업이익", "").replace("_영업손익", "").strip()
-            if not segName:
-                continue
-            vals: dict[str, float] = {}
-            for yc in yCols:
-                v = _parseNumStr(row.get(yc))
-                if v is not None:
-                    vals[yc] = v
-            if vals:
-                opData[segName] = vals
-
-        if opData:
-            return opData
-    return None
+    res = _segmentSeriesFromNote(company, "opincome")
+    if res is None:
+        return None
+    opData, _ = res
+    if yCols:  # 매출 연도에 맞춰 필터 (계약 유지)
+        opData = {seg: {y: v for y, v in vals.items() if y in yCols} for seg, vals in opData.items()}
+        opData = {seg: vals for seg, vals in opData.items() if vals}
+    return opData or None
 
 
 def _selectDocsSalesOrder(company, keyword: str | None = None):
