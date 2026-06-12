@@ -137,6 +137,16 @@ wide 로 수평화**하는 엔진이다. 양식(era)·회사마다 흔들리는 
   표지→I→II→III→재무→주석 정부순서(챕터 단위 그룹핑, '(첨부)' 본문 중간 삽입도 자기 챕터로 모음).
   회사간 비교는 `disclosureKey`(같은 항목 같은 키)로 — 회사간 순서 표준화/합의는 panel 책임 밖(scan
   엔진의 cross-market 일). `parentKey` 트리는 Phase 2 셀 세분화 토대.
+- **TOC 표준 = SPINE 수렴 (라벨 통일)** — TOC 는 최신 골격(SPINE)으로 고정하고, 과거 era 의 비슷한 섹션
+  명칭 변형을 표준 노드로 수렴한다. `read.anchorNarrativeToSpine` 3중 수렴(전부 bounded, 자유 fuzzy 0):
+  ① 챕터-자기행 변형(로마/【 헤더, canonical 라벨=자기 chapter)→canonical 챕터 라벨 ② SPINE 제목코어
+  일치 = 표면 표기 정규화("6.배당 등"→"6.배당", 옛 번호→현행 번호) ③ 서식개정 era-alias
+  (`canonical/canonicalData.NARRATIVE_ERA_ALIASES`, 운영자 수동 — 2018 외감법 V 재편: 옛 INS_* keyed
+  감사절 포함 "감사대상업무"→"1. 외부감사에 관한 사항" 등). keyed/narrative 균일 적용 — sectionLeaf 는
+  그룹핑 라벨(wide 식별=disclosureKey)이라 셀 식별 무손실(non-null 셀수 불변 게이트 실측). **같은 번호의
+  다른 항목**(옛 I.5 의결권현황 vs 현행 I.5 정관)·**1:N 구조분할**(옛 "7. 증권의발행" vs 현행 7-1/7-2)·
+  **현행 대응물 없는 단종 섹션**(독립된 감사인의 감사보고서)은 등재 금지 — 분리 유지(honest, 병합=진짜
+  정보손실). 뷰어 TS 미러 `viewer/pipeline/narrativeSpine.ts`·`viewer/canonical.ts` 1:1 동기.
 - **단일 패키지 자급** — schema·mapper·spine·build·read 가 `providers/dart/panel/` 한 곳. 수집
   (OpenDART API)은 이미 `providers/dart/openapi` 라 build 도 providers 가 자급 (gather panel 폐기).
 - **BUILD/READ import 격리** — build(`build/`, lxml/zipfile)는 무거운 zip→16col·spine 생산, read 표면

@@ -28,7 +28,7 @@ def test_scope_expr_consolidated_standalone() -> None:
 
 
 def test_anchor_narrative_to_spine_unifies_era_variants() -> None:
-    """narrative era 변종 → SPINE(최신 골격=핵) 라벨 통일. 'X 등'·옛 번호 → 현행, keyed 불변.
+    """era 변종 → SPINE(최신 골격=핵) 라벨 통일. 'X 등'·옛 번호 → 현행. keyed 도 표면 정규화(코어동일=같은항목).
 
     SPINE 화이트리스트 bounded 매핑 (실 SPINE: '6. 배당에 관한 사항'·'8. 기타 재무에 관한 사항' 등재).
     """
@@ -41,7 +41,7 @@ def test_anchor_narrative_to_spine_unifies_era_variants() -> None:
                 "6. 배당에 관한 사항 등",  # 옛 '등' 변종
                 "6. 기타 재무에 관한 사항",  # 옛 번호 (현행 8)
                 "6. 배당에 관한 사항",  # 이미 현행
-                "6. 배당에 관한 사항 등",  # keyed (불변 확인)
+                "6. 배당에 관한 사항 등",  # keyed — era 별 키 단절 시 라벨 못 합쳐지므로 표면 정규화 동참
             ],
             "disclosureKey": [None, None, None, "BS_C"],
         }
@@ -50,7 +50,40 @@ def test_anchor_narrative_to_spine_unifies_era_variants() -> None:
     assert out[0] == "6. 배당에 관한 사항"  # '등' 변종 → 현행 SPINE 라벨
     assert out[1] == "8. 기타 재무에 관한 사항"  # 옛 번호 → 현행 번호 (SPINE 라벨 통째)
     assert out[2] == "6. 배당에 관한 사항"  # 이미 현행 = 불변
-    assert out[3] == "6. 배당에 관한 사항 등"  # keyed = 불변 (anchorLatest 담당)
+    assert out[3] == "6. 배당에 관한 사항"  # keyed 표면 정규화(같은 코어 = 같은 항목 정의, 그룹핑 라벨만)
+
+
+def test_anchor_narrative_era_alias_and_self_header() -> None:
+    """서식개정 수렴 3룰 — ① 챕터자기행 변형→canonical 챕터 ② era-alias(keyed 단종키 포함) ③ 다른항목 분리유지.
+
+    2018 외감법 V 재편: 옛 INS_* keyed 절(감사대상업무 등)·옛 명칭들이 현행 '1. 외부감사에 관한 사항'/
+    '2. 내부통제에 관한 사항' 으로. 옛 챕터자기명(IV. 감사인의~)은 canonical 챕터 라벨로. 같은 번호의
+    다른 항목(I.5 의결권현황 vs 정관)은 alias 미등재라 분리 유지(honest).
+    """
+    from dartlab.providers.dart.panel.read import anchorNarrativeToSpine
+
+    chV = "V. 회계감사인의 감사의견 등"
+    df = pl.DataFrame(
+        {
+            "chapter": [chV, chV, chV, chV, "VIII. 임원 및 직원 등에 관한 사항", "I. 회사의 개요"],
+            "sectionLeaf": [
+                "1. 감사대상업무",  # 옛 keyed 절 → alias → 현행 1절
+                "내부회계관리제도 검토의견",  # 옛 narrative → alias → 현행 2절
+                "IV. 감사인의 감사의견 등",  # 옛 챕터자기명 → canonical 챕터 라벨
+                "독립된 감사인의 감사보고서",  # 현행 대응물 없음 → 분리 유지(honest)
+                "1. 임원 및 직원의 현황",  # 중간 '등' 변형 → alias → 현행
+                "5. 의결권 현황",  # 같은 번호 다른 항목(현행 I.5=정관) → 분리 유지
+            ],
+            "disclosureKey": ["INS_SUB", None, None, None, None, None],
+        }
+    )
+    out = anchorNarrativeToSpine(df)["sectionLeaf"].to_list()
+    assert out[0] == "1. 외부감사에 관한 사항"  # keyed 단종키(INS_SUB)도 alias 수렴
+    assert out[1] == "2. 내부통제에 관한 사항"
+    assert out[2] == chV  # 자기행 변형 → canonical 챕터 라벨
+    assert out[3] == "독립된 감사인의 감사보고서"  # honest 분리
+    assert out[4] == "1. 임원 및 직원 등의 현황"
+    assert out[5] == "5. 의결권 현황"  # 다른 항목 — 병합 금지
 
 
 def test_anchor_latest_propagates_latest_label() -> None:
