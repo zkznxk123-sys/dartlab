@@ -46,9 +46,10 @@ export function buildPanelBundle(
 	anchorLatest(rows);
 	const deduped = dedupKeyed(rows);
 
-	// canonicalChapter (sectionPath 깊은 canonical 원소 우선) + (첨부) 흡수 + narrative era 변종 SPINE 통일.
+	// canonicalChapter (sectionPath 깊은 canonical 원소 우선 + 구조신호 0 NT_ 주석 → III 복원) + (첨부) 흡수
+	// + narrative era 변종 SPINE 통일.
 	for (const r of deduped) {
-		r.chapter = canonicalChapter(r.chapter, r.sectionPath);
+		r.chapter = canonicalChapter(r.chapter, r.sectionPath, r.disclosureKey);
 		absorbAttachedRow(r);
 		anchorNarrativeToSpineRow(r); // chapter 확정·(첨부) 흡수 후 = SPINE 룩업 키 정합 (read.py 1:1)
 	}

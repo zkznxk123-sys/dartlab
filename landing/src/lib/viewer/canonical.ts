@@ -64,10 +64,18 @@ function canonLabel(element: string | null | undefined): string | null {
 	return null;
 }
 
-// 드리프트·붕괴 chapter → canonical L1 라벨. sectionPath 깊은 canonical 원소 우선 → chapter fallback → 원본.
-// Python canonicalChapterExpr 1:1: sectionPath split → 원소별 canonical → drop_nulls → last(deepest) →
-// (없으면) chapter 직접 매치 → (없으면) 원본 chapter(honest).
-export function canonicalChapter(chapter: string | null | undefined, sectionPath: string | null | undefined): string {
+// III(재무) 라벨 — NT_ 주석키 복원 타깃 (CANONICAL_L1 SSOT 파생, 하드코딩 0).
+const FINANCE_LABEL = CANONICAL_L1.find(([id]) => id === 'L3_finance')![1];
+
+// 드리프트·붕괴 chapter → canonical L1 라벨. sectionPath 깊은 canonical 원소 우선 → chapter fallback →
+// (noteKey 지정 시) NT_→III → 원본. Python canonicalChapterExpr(noteKeyCol=) 1:1: (첨부)재무제표 flat
+// <P ID> 주석은 SECTION 부재로 chapter·sectionPath 공백으로 새는데(2025+ 회귀), NT_ 표준코드 = 정의상
+// 재무제표 주석이라 III 복원은 honest(추측 0). front-matter(키 없음)는 원본 보존(honest-gap).
+export function canonicalChapter(
+	chapter: string | null | undefined,
+	sectionPath: string | null | undefined,
+	noteKey?: string | null
+): string {
 	let deepest: string | null = null;
 	for (const e of (sectionPath ?? '').split(SECTION_SEP)) {
 		const lbl = canonLabel(e);
@@ -76,6 +84,7 @@ export function canonicalChapter(chapter: string | null | undefined, sectionPath
 	if (deepest !== null) return deepest;
 	const fromChapter = canonLabel(chapter);
 	if (fromChapter !== null) return fromChapter;
+	if (noteKey != null && noteKey.startsWith('NT_')) return FINANCE_LABEL; // 구조신호 0 NT_ 주석 → III 복원
 	return chapter ?? '';
 }
 
