@@ -18,12 +18,13 @@
 	let { code, name, lang, open, onClose }: Props = $props();
 
 	const GISCUS_ORIGIN = 'https://giscus.app';
-	// giscus 식별자 — GitHub GraphQL 실측 (public repo 메타, 비밀 아님). 카테고리는 General 로
-	// 시작 — 운영자가 'Terminal'(Announcement 포맷) 카테고리 신설 시 여기 두 줄만 교체.
+	// giscus 식별자 — GitHub GraphQL 실측 (public repo 메타, 비밀 아님).
+	// Terminal 카테고리 = Announcement 포맷: giscus 봇·메인테이너만 스레드 생성, 댓글은 누구나
+	// — 일반 사용자가 종목 스레드 사이에 잡담 Discussion 을 직접 만드는 오염을 구조 차단.
 	const REPO = 'eddmpython/dartlab';
 	const REPO_ID = 'R_kgDORgID2A';
-	const CATEGORY = 'General';
-	const CATEGORY_ID = 'DIC_kwDORgID2M4C38mI';
+	const CATEGORY = 'Terminal';
+	const CATEGORY_ID = 'DIC_kwDORgID2M4C_Bt_';
 
 	let host = $state<HTMLDivElement | null>(null);
 	let injected = false; // 최초 오픈 1회만 script 주입 — 미사용 사용자 iframe 비용 0
