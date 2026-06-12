@@ -50,9 +50,17 @@ jobs:
 
       # HF SSoT: map JSON 은 git 에 없음 (.gitignore). 빌드 전 HF 에서 내려받아
       # landing/static/map/ 에 풀어둠 → SvelteKit static adapter 가 build/ 에 복사.
+      - name: Seed industry map from HF
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category industryMap
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_DATA_DIR: ${{ github.workspace }}
+
       # dashboards 는 git 사본이 최후 폴백 — HF seed 가 있으면 덮어써 신선화 (mapBuild 가 매일 publish).
-      - name: Seed industry map + dashboards from HF
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category industryMap,dashboards
+      # ⚠ seedFromHf 는 HF 에 dir 부재 시 EntryNotFoundError 크래시 (로컬 실측) — mapBuild 첫 publish
+      # 전·HF 장애 시에도 배포가 죽지 않도록 본 스텝만 내성형 (실패 = git 사본으로 빌드).
+      - name: Seed dashboards from HF (tolerant)
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category dashboards || echo "WARN: dashboards HF seed 실패 — git 사본으로 빌드"
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           DARTLAB_DATA_DIR: ${{ github.workspace }}
