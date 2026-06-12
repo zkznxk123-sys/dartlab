@@ -1,13 +1,13 @@
-"""뉴스 소스 대칭성 회귀 가드 — canonical 스키마·dir drift·repo 라우팅.
+"""newsSources 레지스트리 단위 + 뉴스 소스 대칭성 회귀 가드.
 
 rss/gdelt/naver 가 fetch→archive→sync→load 대칭을 유지하는지 검증.
-핵심 invariant 4종: ① archive 출력 컬럼 통일 ② newsSources.dir == dataConfig.dir
-③ coerce null 채움 ④ private 소스 전용 repo 라우팅.
+핵심 invariant: ① archive 출력 컬럼 통일 ② newsSources.dir == dataConfig.dir
+③ private 소스 전용 repo 라우팅 ④ 미등록 id KeyError.
+(coerceToCanonical 단위는 test_newsSchema.py.)
 """
 
 from __future__ import annotations
 
-import polars as pl
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -50,13 +50,10 @@ def test_private_sources_route_to_private_repo() -> None:
             assert repoFor(s.hfCategory) == HF_REPO, s.id
 
 
-def test_coerce_fills_nulls_and_orders() -> None:
-    """coerceToCanonical — 누락 컬럼 null 채움 + 컬럼 순서/존재값 보존."""
-    from dartlab.gather.sources.newsSchema import NEWS_ARCHIVE_SCHEMA, coerceToCanonical
+def test_get_news_source_unknown_raises() -> None:
+    """미등록 소스 id → KeyError (등록 목록 안내 포함)."""
+    from dartlab.gather.sources.newsSources import getNewsSource
 
-    out = coerceToCanonical(pl.DataFrame({"url": ["u"], "title": ["t"]}))
-    assert list(out.columns) == list(NEWS_ARCHIVE_SCHEMA.keys())
-    assert out["url"][0] == "u"
-    assert out["description"][0] is None
-    assert out["sentiment_score"][0] is None
-    assert out["themes"][0] is None  # List(Utf8) null 안전
+    assert getNewsSource("rss").id == "rss"
+    with pytest.raises(KeyError, match="미등록"):
+        getNewsSource("nope")

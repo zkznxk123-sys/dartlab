@@ -86,6 +86,9 @@ def loadNewsArchive(
         start..end 일자 루프 × allNewsSources() → loadSourceDay → concat → coerce →
         asof → dedup.
 
+    Requires:
+        없음 — 로컬 parquet 우선. public 소스 미존재분만 HF lazy 폴백 (네트워크 선택).
+
     Args:
         start: 시작일 (포함). YYYY-MM-DD 또는 date.
         end: 종료일 (포함). YYYY-MM-DD 또는 date.

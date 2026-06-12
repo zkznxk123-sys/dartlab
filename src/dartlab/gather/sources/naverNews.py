@@ -161,6 +161,21 @@ def fetchHeadlinesForArchive(
         syncNaverNews.py 의 일별 cron 단일 진입점. private 경로(news/private/naver)
         로만 적재 — 공개 dartlab-data 안 감.
 
+    Guide:
+        KR 전용 — 타 시장은 네트워크 미접근 빈 결과. days 윈도우는 pubDate 기준
+        cutoff. 결과는 언론사 저작권 — 공개 재배포 금지 (private 캐시 전용).
+
+    When:
+        syncNaverNews 일별 cron + 운영자 수동 백필.
+
+    How:
+        쿼리별 _fetchAsync 비동기 fan-out → url dedup → days cutoff →
+        coerceToCanonical 1회.
+
+    Requires:
+        dataCredentials naver/naverSecret 쌍 (X-Naver-Client-Id/Secret) + 네트워크.
+        무키 → 빈 결과 (예외 없음).
+
     Args:
         queries: 검색 시드 (종목명+키워드).
         market: ``"KR"`` 외 빈 DataFrame.
@@ -176,6 +191,10 @@ def fetchHeadlinesForArchive(
 
     Example:
         >>> # fetchHeadlinesForArchive(["삼성전자","SK하이닉스"], market="KR", days=1)
+
+    See Also:
+        ``gather.sources.news.fetchHeadlinesForArchive``: rss 동형 진입점.
+        ``gather.sources.newsIo.writeDailyParquet``: 적재 공유 IO.
     """
     if not queries or market.upper() != "KR":
         return coerceToCanonical(None)

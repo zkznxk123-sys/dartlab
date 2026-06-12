@@ -10,7 +10,7 @@
       `fetchKind` 로 분기하고 구체 함수를 직접 호출한다.
     - `dir` 은 데이터 물리 경로 SSOT. `core/dataConfig.py` 의 동명 카테고리 `dir` 과
       일치해야 한다 (L0 dataConfig 를 L1 본 모듈에서 파생하면 import 역방향 위반 →
-      문자열 일치 + `test_news_symmetry` 회귀로 drift 차단).
+      문자열 일치 + `test_newsSources` 회귀로 drift 차단).
 
 See Also:
     core/providers/dataCredentials.py — 자격증명 레지스트리(동일 패턴).
@@ -94,6 +94,27 @@ def getNewsSource(sourceId: str) -> NewsSourceSpec:
 
     Sig: ``getNewsSource(sourceId) -> NewsSourceSpec``
 
+    Capabilities:
+        - 소스 id → NewsSourceSpec 1:1 조회
+        - 미등록 id 는 등록 목록 안내와 함께 명시 에러
+
+    AIContext:
+        newsIo·sync 계열이 소스별 if-분기 없이 메타(dir·visibility·hfCategory)에
+        접근하는 단일 관문.
+
+    Guide:
+        등록 id = rss·gdelt·naver. 새 소스는 _NEWS_SOURCES 1엔트리 +
+        dataConfig 카테고리 쌍으로 추가 (둘의 dir 문자열 일치 필수).
+
+    When:
+        loadSourceDay 등 소스 메타가 필요한 모든 지점.
+
+    How:
+        레지스트리 dict get — 미스 시 KeyError (등록 목록 포함).
+
+    Requires:
+        없음.
+
     Args:
         sourceId: 정식 소스 id (예 ``"rss"``).
 
@@ -106,6 +127,10 @@ def getNewsSource(sourceId: str) -> NewsSourceSpec:
     Example:
         >>> getNewsSource("naver").visibility
         'private'
+
+    See Also:
+        ``allNewsSources``: 전체 순회.
+        ``publicNewsSources``: 재배포 가능 소스만.
     """
     spec = _NEWS_SOURCES.get(sourceId)
     if spec is None:
@@ -118,6 +143,9 @@ def allNewsSources() -> list[NewsSourceSpec]:
     """등록된 모든 뉴스 소스 spec (id 정렬).
 
     Sig: ``allNewsSources() -> list[NewsSourceSpec]``
+
+    Requires:
+        없음.
 
     Returns:
         list[NewsSourceSpec] — 레지스트리 전체. 읽기(loadNewsArchive)가 순회.
@@ -136,6 +164,9 @@ def publicNewsSources() -> list[NewsSourceSpec]:
     """public(재배포 가능) 소스만 (id 정렬).
 
     Sig: ``publicNewsSources() -> list[NewsSourceSpec]``
+
+    Requires:
+        없음.
 
     Returns:
         list[NewsSourceSpec] — visibility=="public". bulkUploadHf 공개 카테고리 파생용.

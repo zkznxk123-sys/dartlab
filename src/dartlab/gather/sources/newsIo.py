@@ -57,6 +57,19 @@ def writeDailyParquet(
         syncNewsHeadlines·syncGdeltBackfill·syncNaverNews 가 공유 호출. 같은 날짜
         재실행 안전(url dedup).
 
+    Guide:
+        dir 은 레지스트리 spec.dir 그대로 전달 — 직접 문자열 조립 금지 (drift).
+        기존 행과 url 충돌 시 기존 우선 (keep="first").
+
+    When:
+        sync 계열 스크립트의 일별 적재 마지막 단계.
+
+    How:
+        coerceToCanonical → 기존 파일 concat(diagonal_relaxed) → url unique → write.
+
+    Requires:
+        없음 — 로컬 디스크만.
+
     Args:
         df: 저장할 DataFrame (canonical 권장; 아니어도 coerce 됨).
         dir: 레지스트리 물리 경로 (예 ``"news/public/rss"``).
@@ -71,6 +84,10 @@ def writeDailyParquet(
 
     Example:
         >>> # writeDailyParquet(df, dir="news/public/rss", market="KR", day="2026-06-08")
+
+    See Also:
+        ``loadSourceDay``: 읽기 대칭 (소스 id 경유).
+        ``gather.sources.newsSources.getNewsSource``: dir SSOT 레지스트리.
     """
     dayIso = _dayIso(day)
     outDir = _DATA_ROOT / dir / market.upper()
@@ -105,6 +122,20 @@ def loadSourceDay(sourceId: str, market: str, dayIso: str) -> pl.DataFrame | Non
     AIContext:
         loadNewsArchive 가 (소스×일자) 격자로 순회 호출. 미존재는 None silent.
 
+    Guide:
+        쓰기 직후 같은 키 재조회는 LRU 잔상 가능 — ``loadSourceDay.cache_clear()``
+        후 조회 (테스트 패턴 동일).
+
+    When:
+        loadNewsArchive 의 (소스×일자) 격자 순회 — 직접 호출은 단일 일자 점검용.
+
+    How:
+        로컬 ``data/{spec.dir}/{MARKET}/{day}.parquet`` read → 미존재 + public 이면
+        dataLoader.loadData HF 폴백 → 그 외 None.
+
+    Requires:
+        없음 — 로컬 우선. public 소스 HF 폴백 경로만 네트워크 (실패 시 None).
+
     Args:
         sourceId: 레지스트리 소스 id (``"rss"``|``"gdelt"``|``"naver"``).
         market: 시장 코드 (대문자 정규화).
@@ -118,6 +149,10 @@ def loadSourceDay(sourceId: str, market: str, dayIso: str) -> pl.DataFrame | Non
 
     Example:
         >>> # loadSourceDay("rss", "KR", "2026-06-08")
+
+    See Also:
+        ``writeDailyParquet``: 쓰기 대칭.
+        ``gather.bulkData.newsHeadlines.loadNewsArchive``: 기간 로드 caller.
     """
     spec = getNewsSource(sourceId)
     marketU = market.upper()

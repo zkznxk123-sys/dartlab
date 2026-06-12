@@ -124,7 +124,9 @@ def test_nested_full_upload_gated(monkeypatch, tmp_path) -> None:
     monkeypatch.delenv("DARTLAB_HF_ALLOW_FULL", raising=False)
     monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, *a, **k: fn(*a, **k))
 
-    d = tmp_path / "news" / "headlines" / "kr"
+    from dartlab.core.dataConfig import DATA_RELEASES
+
+    d = tmp_path / DATA_RELEASES["newsHeadlines"]["dir"] / "KR"
     d.mkdir(parents=True)
     (d / "2026-06-01.parquet").write_bytes(b"x")
 

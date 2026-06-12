@@ -189,7 +189,7 @@ DATA_RELEASES: dict[str, dict] = {
     },
     # ── 뉴스 archive — visibility-first taxonomy `news/{public,private}/{source}/`.
     #    `dir` 은 gather.sources.newsSources.NewsSourceSpec.dir 과 1:1 일치해야 함
-    #    (drift 회귀: tests/gather/sources/test_news_symmetry.py). public 서브트리는
+    #    (drift 회귀: tests/gather/sources/test_newsSources.py). public 서브트리는
     #    기본 repo, private(naver)는 전용 private repo (저작권 비공개 캐시).
     "newsHeadlines": {
         # Phase A — Google News RSS 일별 헤드라인 archive (forward-only).

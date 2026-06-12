@@ -67,6 +67,19 @@ def coerceToCanonical(df: pl.DataFrame | None) -> pl.DataFrame:
         각 소스 archive 진입점(`fetchHeadlinesForArchive`·`fetchGdeltGkg`)이 마지막에
         1회 호출 → 세 소스 출력 컬럼셋을 byte 단위 동일하게 만든다 (대칭의 실질).
 
+    Guide:
+        입력은 일부 컬럼만 있어도 된다 — 누락은 null, cast 불가 값도 null
+        (strict=False). 스키마 외 컬럼은 drop.
+
+    When:
+        소스 archive 진입점 마지막 + writeDailyParquet 저장 직전 (이중 안전).
+
+    How:
+        NEWS_ARCHIVE_SCHEMA 순회 select — 보유 컬럼 cast, 미보유 pl.lit(None) cast.
+
+    Requires:
+        없음.
+
     Args:
         df: 임의 뉴스 DataFrame (일부 컬럼만 보유 가능). None/빈 허용.
 
@@ -80,6 +93,10 @@ def coerceToCanonical(df: pl.DataFrame | None) -> pl.DataFrame:
         >>> import polars as pl
         >>> coerceToCanonical(pl.DataFrame({"url": ["u"], "title": ["t"]})).columns[:2]
         ['date', 'title']
+
+    See Also:
+        ``NEWS_ARCHIVE_SCHEMA``: canonical 17컬럼 SSOT.
+        ``gather.sources.newsIo.writeDailyParquet``: 저장 직전 호출자.
     """
     if df is None or df.is_empty():
         return pl.DataFrame(schema=NEWS_ARCHIVE_SCHEMA)
