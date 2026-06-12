@@ -30,7 +30,6 @@ runtimeCompatibility:
     status: limited
 linkedSkills:
   - engines.macro
-  - engines.derivatives
 ---
 
 ## 엔진 역할
@@ -71,4 +70,3 @@ dict
 ## 관련
 
 - [engines.macro](/skills/engines.macro) — base SKILL
-- [engines.derivatives](/skills/engines.derivatives) — 옵션 positioning 직교 신호
