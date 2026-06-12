@@ -72,10 +72,16 @@ def _env(name: str) -> str:
 
 
 def _loadYearShard(year: int) -> pl.DataFrame | None:
-    """date 샤드 1개 — 러너 로컬 캐시 우선, 없으면 HF (retryHfCall SSOT)."""
+    """date 샤드 1개 — 과거 연도는 로컬 캐시 우선(불변), 현재 연도는 로컬+HF 병합.
+
+    러너는 actions/cache 가 방금 upsert 한 파일이라 로컬=최신이지만, 운영자 로컬의
+    data/ 는 며칠 묵을 수 있다(6/11 누락 실측). 현재 연도만 HF 와 dedup-merge 해
+    어느 환경에서든 둘 중 신선한 쪽이 이긴다 (buildGovData upsert 와 동일 규약).
+    """
     local = LOCAL_DATE_DIR / f"{year}.parquet"
-    if local.exists():
-        return pl.read_parquet(local)
+    localDf = pl.read_parquet(local) if local.exists() else None
+    if localDf is not None and year < date.today().year:
+        return localDf
     try:
         from huggingface_hub import hf_hub_download
 
@@ -85,11 +91,17 @@ def _loadYearShard(year: int) -> pl.DataFrame | None:
             repo_type="dataset",
             filename=f"gov/prices/date/{year}.parquet",
             token=_env("HF_TOKEN") or None,
+            # Windows 비심링크 열화 캐시가 같은 ref 의 옛 blob 을 재서빙(6/11 누락 실측) — 신선도가
+            # 본 스크립트의 존재 이유라 강제 재다운로드. 러너는 로컬 캐시 우선이라 이 경로 자체가 드묾.
+            force_download=True,
         )
-        return pl.read_parquet(cached)
-    except Exception as exc:  # noqa: BLE001 — 연초 등 미존재 연도는 정상
-        print(f"[snapshot] {year} 샤드 없음/실패 — 건너뜀 ({type(exc).__name__})")
-        return None
+        hfDf = pl.read_parquet(cached)
+        if localDf is None or localDf.is_empty():
+            return hfDf
+        return pl.concat([localDf, hfDf], how="diagonal_relaxed").unique(subset=["BAS_DD", "ISU_CD"], keep="last")
+    except Exception as exc:  # noqa: BLE001 — 연초 등 미존재 연도는 정상 (로컬 있으면 로컬로)
+        print(f"[snapshot] {year} HF 실패 — 로컬 폴백 ({type(exc).__name__})")
+        return localDf
 
 
 def loadWindow(asOf: date) -> pl.DataFrame:
