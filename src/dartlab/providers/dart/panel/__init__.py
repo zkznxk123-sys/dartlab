@@ -6,10 +6,12 @@ import 0 (R2, BUILD=gather 와 물리 분리). 한 회사 공시를 항목 × pe
 공개표면 SSOT (deep leaf import 금지, R6):
     - ``Panel`` — 한 회사 수평화 wide (``pl.DataFrame`` subclass) + ``__call__`` 섹션 검색.
     - ``compare`` — N 회사 panel 을 회사 간 시점 비교 wide 로 정렬 (모듈 레벨, Company facade 밖).
+    - ``auditToc`` — 전종목 TOC 수평화 불변식 검열 (lazy 스캔, read 와 동일 수렴 Expr 공용).
 """
 
 from __future__ import annotations
 
+from .audit import auditToc
 from .compare import compare
 from .panel import Panel
 from .text import (
@@ -22,6 +24,7 @@ from .text import (
 
 __all__ = [
     "Panel",
+    "auditToc",
     "compare",
     "panelTableRows",
     "panelTextRows",

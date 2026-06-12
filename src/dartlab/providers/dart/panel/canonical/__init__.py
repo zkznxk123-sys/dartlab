@@ -52,6 +52,9 @@ _SECTION_SEP = "␟"
 
 # III(재무) 라벨 — NT_ 주석키 복원 타깃 (CANONICAL_L1 SSOT 파생, 하드코딩 0).
 _FINANCE_LABEL: str = next(label for nid, label, _kw in CANONICAL_L1 if nid == "L3_finance")
+# XII(상세표) 라벨 — 부록 컨테이너. 그 안 상세표 제목이 챕터 키워드를 포함해도("2. 계열회사 현황(상세)")
+# 소속은 XII — deepest-match 가 IX/X 로 오배정하던 것을 XII-우선으로 차단.
+_DETAIL_LABEL: str = next(label for nid, label, _kw in CANONICAL_L1 if nid == "L12_detail")
 
 
 def _canonLabelExpr(e: pl.Expr) -> pl.Expr:
@@ -136,13 +139,13 @@ def canonicalChapterExpr(
         TargetMarkets:
             - KR (DART).
     """
+    pathLabels = (
+        pl.col(pathCol).fill_null("").str.split(_SECTION_SEP).list.eval(_canonLabelExpr(pl.element())).list.drop_nulls()
+    )
+    # XII(상세표) 우선 — 부록 컨테이너 안 상세표 제목의 챕터 키워드(계열회사·대주주 등)가 deepest 를 가로채
+    # IX/X 로 오배정되는 것 차단. 그 외엔 가장 깊은 canonical 원소가 진짜 챕터.
     fromPath = (
-        pl.col(pathCol)
-        .fill_null("")
-        .str.split(_SECTION_SEP)
-        .list.eval(_canonLabelExpr(pl.element()))
-        .list.drop_nulls()
-        .list.last()
+        pl.when(pathLabels.list.contains(_DETAIL_LABEL)).then(pl.lit(_DETAIL_LABEL)).otherwise(pathLabels.list.last())
     )
     chain: list[pl.Expr] = [fromPath, _canonLabelExpr(pl.col(chapterCol))]
     if noteKeyCol is not None:

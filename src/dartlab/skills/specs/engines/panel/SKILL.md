@@ -147,6 +147,14 @@ wide 로 수평화**하는 엔진이다. 양식(era)·회사마다 흔들리는 
   다른 항목**(옛 I.5 의결권현황 vs 현행 I.5 정관)·**1:N 구조분할**(옛 "7. 증권의발행" vs 현행 7-1/7-2)·
   **현행 대응물 없는 단종 섹션**(독립된 감사인의 감사보고서)은 등재 금지 — 분리 유지(honest, 병합=진짜
   정보손실). 뷰어 TS 미러 `viewer/pipeline/narrativeSpine.ts`·`viewer/canonical.ts` 1:1 동기.
+- **매퍼 체계 (파일·구분·순서)** — 수렴 매퍼는 새 파서 신설 없이 이 체계 안에서만 자란다:
+  ① 데이터 SSOT = `canonical/canonicalData.py` (운영자 수동: CANONICAL_L1 14챕터 키워드 ·
+  NARRATIVE_ERA_ALIASES 서식개정 alias · CERT_NODE_IDS) ② 챕터 수렴 = `canonical.canonicalChapterExpr`
+  (sectionPath deepest + **XII(상세표) 우선**[상세표 자식 제목의 챕터 키워드 오배정 차단] + NT_→III)
+  ③ 섹션 수렴 = `read.sectionLeafConvergeExpr` (단일 Expr SSOT — 자기행·SPINE 코어·era-alias)
+  ④ 검열 = `audit.auditToc` — **전종목 lazy 스캔**(projection 5컬럼)으로 ②③ 적용 후 잔존 불변식 위반
+  (misplacedDetail·duplicateNumber·selfVariant·coreVariant) 탐지. read 와 같은 Expr 공용이라 검열
+  결과 = 사용자가 보는 TOC 와 동형. 새 위반 발견 → 운영자가 ① 에 등재(자동 수정 금지).
 - **단일 패키지 자급** — schema·mapper·spine·build·read 가 `providers/dart/panel/` 한 곳. 수집
   (OpenDART API)은 이미 `providers/dart/openapi` 라 build 도 providers 가 자급 (gather panel 폐기).
 - **BUILD/READ import 격리** — build(`build/`, lxml/zipfile)는 무거운 zip→16col·spine 생산, read 표면

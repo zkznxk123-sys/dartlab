@@ -680,18 +680,40 @@ def _narrativeCore(leaf: str) -> str:
     return re.sub(NOTE_TITLE_NORM_PATTERN, "", s)
 
 
-def _narrativeCoreExpr(col: str = "sectionLeaf") -> pl.Expr:
-    """섹션 라벨 컬럼 → 제목 코어 Expr (``_narrativeCore`` 의 polars 짝). 번호·'등' strip + 정규화."""
+def _narrativeCoreExpr(col: str | pl.Expr = "sectionLeaf") -> pl.Expr:
+    """섹션 라벨(컬럼명 또는 Expr) → 제목 코어 Expr (``_narrativeCore`` 의 polars 짝). 번호·'등' strip + 정규화."""
     from .mapper import NOTE_TITLE_NORM_PATTERN
 
+    e = pl.col(col) if isinstance(col, str) else col
     return (
-        pl.col(col)
-        .fill_null("")
+        e.fill_null("")
         .str.replace(_NARR_NUM_RE, "")
         .str.strip_chars()
         .str.replace(_NARR_ETC_RE, "")
         .str.replace_all(NOTE_TITLE_NORM_PATTERN, "")
     )
+
+
+def sectionLeafConvergeExpr() -> pl.Expr:
+    """TOC 표준 수렴 3룰의 **단일 Expr** — read(``anchorNarrativeToSpine``)·검열(``audit``) 공용 SSOT.
+
+    chapter 가 canonical 로 확정된 frame 위에서 ``sectionLeaf`` 를 표준 라벨로 접는다:
+    ① 챕터-자기행(로마/【 헤더 + canonical 라벨=자기 chapter) → chapter 라벨
+    ② SPINE 코어 일치 = 표면 표기 정규화 ③ era-alias(서식개정, 운영자 수동). 미매칭 원본(honest).
+    Expr 라 lazy frame 전종목 스캔에도 그대로 적용 가능(검열기 전제).
+
+    Returns:
+        ``sectionLeaf`` 별칭 Utf8 Expr.
+    """
+    from .canonical import _canonLabelExpr
+
+    leaf = pl.col("sectionLeaf")
+    isHdr = leaf.fill_null("").str.contains(_SELF_HDR_RE)
+    selfFixed = pl.when(isHdr & (_canonLabelExpr(leaf) == pl.col("chapter"))).then(pl.col("chapter")).otherwise(leaf)
+    key = pl.col("chapter").fill_null("") + pl.lit(_NARR_SEP) + _narrativeCoreExpr(selfFixed)
+    canon = key.replace_strict(_spineNarrativeMap(), default=None, return_dtype=pl.Utf8)
+    alias = key.replace_strict(_eraAliasMap(), default=None, return_dtype=pl.Utf8)
+    return pl.coalesce([canon, alias, selfFixed]).alias("sectionLeaf")
 
 
 def _spineNarrativeMap() -> dict[str, str]:
@@ -815,25 +837,8 @@ def anchorNarrativeToSpine(df: pl.DataFrame) -> pl.DataFrame:
         return df
     # 세 룰 모두 *항목 동일성이 구조적으로 보장*되는 bounded 수렴이라 keyed/narrative 구분 없이 전 행 균일 적용
     # — keyed 의 sectionLeaf 는 순수 그룹핑 라벨(wide 식별 = disclosureKey)이라 셀 식별·anchorLatest 와 무충돌.
-    # ① 챕터-자기행(로마/【 헤더) 옛 변형 수렴 — "IV. 감사인의 감사의견 등"(옛 챕터명) 류는 chapter 가 canonical
-    # 키워드로 이미 수렴했는데 sectionLeaf 엔 옛 챕터명이 남아 부유한다. 헤더형(로마numeral·【 prefix)이면서
-    # canonical 라벨이 자기 chapter 와 일치하는 행만 chapter 라벨로 — 번호절(1.외부감사…)은 비대상(오접합 차단).
-    from .canonical import _canonLabelExpr
-
-    isHdr = pl.col("sectionLeaf").fill_null("").str.contains(_SELF_HDR_RE)
-    df = df.with_columns(
-        pl.when(isHdr & (_canonLabelExpr(pl.col("sectionLeaf")) == pl.col("chapter")))
-        .then(pl.col("chapter"))
-        .otherwise(pl.col("sectionLeaf"))
-        .alias("sectionLeaf")
-    )
-    # ② SPINE 코어 일치 = 표면 표기 정규화(같은 chapter·같은 코어 = 같은 항목 정의) — keyed 도 era 별 키 단절
-    # ("6.배당 등"[옛 keyed] vs "6.배당"[현행]) 시 라벨이 못 합쳐지므로 표준 라벨로 통일.
-    # ③ era-alias(서식개정 실질 명칭변경, 운영자 수동) — 단종 키 가족(옛 INS_* 감사표)의 좀비 섹션 수렴 포함.
-    key = pl.col("chapter").fill_null("") + pl.lit(_NARR_SEP) + _narrativeCoreExpr("sectionLeaf")
-    canon = key.replace_strict(spineMap, default=None, return_dtype=pl.Utf8)
-    aliasCanon = key.replace_strict(_eraAliasMap(), default=None, return_dtype=pl.Utf8)
-    return df.with_columns(pl.coalesce([canon, aliasCanon, pl.col("sectionLeaf")]).alias("sectionLeaf"))
+    # 룰 본체 = ``sectionLeafConvergeExpr``(단일 Expr SSOT — 검열기 ``audit`` 와 공용).
+    return df.with_columns(sectionLeafConvergeExpr())
 
 
 def readLong(code: str, *, marketNs: str = "kr", periods: list[str] | None = None) -> pl.DataFrame | None:

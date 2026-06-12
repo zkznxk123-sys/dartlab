@@ -69,6 +69,24 @@ def test_canonical_chapter_absorbs_dividend_and_securities() -> None:
     assert out == ["III. 재무에 관한 사항"] * 3  # 셋 다 III 흡수 (stray 챕터로 새지 않음)
 
 
+def test_canonical_chapter_detail_table_stays_xii() -> None:
+    """XII(상세표) 안 상세표 제목이 챕터 키워드를 포함해도 XII 유지 — deepest 오배정(IX/X) 차단."""
+    from dartlab.providers.dart.panel.canonical import canonicalChapterExpr
+
+    df = pl.DataFrame(
+        {
+            "chapter": ["XII. 상세표"] * 3,
+            "sectionPath": [
+                "XII. 상세표␟2. 계열회사 현황(상세)",  # '계열회사' 키워드 → 옛 로직은 IX 오배정
+                "XII. 상세표␟5. 대주주와의 영업거래(상세)",  # '대주주' → 옛 로직은 X 오배정
+                "XII. 상세표␟1. 연결대상 종속회사 현황(상세)",
+            ],
+        }
+    )
+    out = df.select(canonicalChapterExpr())["canonicalChapter"].to_list()
+    assert out == ["XII. 상세표"] * 3  # 부록 컨테이너 우선 — 상세표 자식은 항상 XII
+
+
 def test_canonical_chapter_nt_orphan_recovers_to_finance() -> None:
     """구조신호 0(chapter·sectionPath 공백) NT_ 주석 orphan → III 복원, front-matter(키 ∅)는 honest-gap 보존.
 
