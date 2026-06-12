@@ -88,6 +88,7 @@ export class ChartCtl {
 	// 바 리플레이 (TV Bar Replay, 일·집계봉 EOD) — 영속 제외 (세션·시점 한정 모드).
 	// idx = 현재 봉(표시 시계열 인덱스), start/len 은 PriceChart.enterReplay 가 진입 시점에 기록.
 	replay = $state<{ on: boolean; idx: number; playing: boolean; start: number; len: number }>({ on: false, idx: 0, playing: false, start: 0, len: 0 });
+	replayMs = $state<400 | 150>(400); // 자동재생 간격 — 1×(400ms) / 2.5×(150ms) 2단
 	btKey = $state<BtPresetKey | null>(null);
 	btParams = $state<Record<string, number>>({});
 	btCosts = $state(true);
@@ -160,6 +161,12 @@ export class ChartCtl {
 			return;
 		}
 		this.replay.idx++;
+	}
+	/** 리플레이 한 봉 뒤로 — 가설→확인→되감기 학습 루프의 절반. 최소 1봉(빈 차트 방지). */
+	replayStepBack() {
+		if (!this.replay.on || this.replay.idx <= 1) return;
+		this.replay.playing = false; // 되감는 순간 자동재생 정지 (수동 검토 모드)
+		this.replay.idx--;
 	}
 	/** 리플레이 시작점 복귀 (⏮) — 자동재생 정지 동행. */
 	replayRestart() {

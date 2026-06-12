@@ -34,8 +34,11 @@
 		events?: { date: string; label: string }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
+		// 전체화면 심볼 점프 — 검색은 엔진(suggest), 전환은 onPick (터미널 pick 관통)
+		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
+		onPick?: (code: string) => void;
 	}
-	let { candles, code, name = '', lang, events, valBand, peers = [] }: Props = $props();
+	let { candles, code, name = '', lang, events, valBand, peers = [], suggest, onPick }: Props = $props();
 
 	const ctl = new ChartCtl();
 	let el: HTMLDivElement | null = $state(null);
@@ -78,10 +81,47 @@
 	// turnover 는 억 단위 — {turnover} 플레이스홀더가 콤마만 붙이고 축약을 안 해 원 단위면
 	// "446,546,135,655" 생짜 노출 (TVAL 페인·매물대 가중치도 동일 단위 공유, 상대값이라 무영향)
 	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv != null ? c.tv / 1e8 : undefined });
-	const chgPct = $derived.by<number | null>(() => {
-		const n = candles.length;
-		return n >= 2 && candles[n - 2].c ? ((candles[n - 1].c / candles[n - 2].c) - 1) * 100 : null;
+	// 리본 Row1 정보 — 표시 시계열(리플레이 절단·수정주가 반영) 기준이라 리플레이 중에도 정직.
+	// dataRev = reapply 동행 신호 (displaySeries 내부 untrack 읽기를 대신 깨운다).
+	const ribbonInfo = $derived.by<{ last: number; prev: number | null; date: string; hi: number; lo: number } | null>(() => {
+		void dataRev;
+		if (!candles.length) return null;
+		const s = displaySeries();
+		if (!s.length) {
+			const n = candles.length;
+			return { last: candles[n - 1].c, prev: n >= 2 ? candles[n - 2].c : null, date: candles[n - 1].t, hi: candles[n - 1].h, lo: candles[n - 1].l };
+		}
+		const lastK = s[s.length - 1];
+		const win = s.slice(-252);
+		let hi = -Infinity;
+		let lo = Infinity;
+		for (const k of win) {
+			if (k.h > hi) hi = k.h;
+			if (k.l < lo) lo = k.l;
+		}
+		return { last: lastK.c, prev: s.length >= 2 ? s[s.length - 2].c : null, date: lastK.t, hi, lo };
 	});
+	// 상태 피드백 1줄 — 자동 tf 상향·과거 백필 침묵 동작을 리본에 노출 ("버그처럼 보이는 정상동작" 제거)
+	let notice = $state<string | null>(null);
+	let noticeTimer: ReturnType<typeof setTimeout> | null = null;
+	function setNotice(msg: string, ms = 2400) {
+		notice = msg;
+		if (noticeTimer) clearTimeout(noticeTimer);
+		noticeTimer = setTimeout(() => (notice = null), ms);
+	}
+	// 전체화면 오버레이 2종 — 심볼 점프 팔레트(⌘K·/) + 단축키 도움말(?)
+	let jumpOpen = $state(false);
+	let jumpQ = $state('');
+	let jumpIdx = $state(0);
+	let jumpInput = $state<HTMLInputElement | null>(null);
+	const jumpList = $derived(jumpOpen && suggest ? suggest(jumpQ, 8) : []);
+	let helpOpen = $state(false);
+	function jumpTo(c: string) {
+		jumpOpen = false;
+		jumpQ = '';
+		jumpIdx = 0;
+		onPick?.(c);
+	}
 
 	// 캔들 툴팁 — 한국어 압축형 + 등락률({change} 내장 placeholder, 전일종가 대비 자동색).
 	// 배열은 wholesale 교체(라이브러리 명시 특례) — 기본 6줄을 우리 줄로 완전 대체.
@@ -309,7 +349,9 @@
 		const w = el?.clientWidth || 800;
 		const space = w / Math.max(1, N);
 		if (space < 1 && (tfv === 'D' || tfv === 'W')) {
-			ctl.tf = tfv === 'D' ? 'W' : 'M'; // tf effect 가 재적용+재배치 이어받음 (분기·년은 수동 전용 — 자동 상향 제외)
+			const next = tfv === 'D' ? 'W' : 'M';
+			setNotice(T(`봉 ${N.toLocaleString()}개 — 1px 미달, ${next === 'W' ? '주봉' : '월봉'} 자동 전환`, `${N.toLocaleString()} bars — auto ${next} timeframe`));
+			ctl.tf = next; // tf effect 가 재적용+재배치 이어받음 (분기·년은 수동 전용 — 자동 상향 제외)
 			return;
 		}
 		try { c.setBarSpace(Math.max(1, Math.min(30, space))); c.scrollToRealTime(0); } catch { /* */ }
@@ -323,12 +365,14 @@
 		while (hist.oldestYear > Math.max(target, KRX_MIN_YEAR) && !hist.loading) {
 			const y = hist.oldestYear - 1;
 			hist.loading = true;
+			notice = T(`과거 시세 불러오는 중 … ${y}`, `loading history … ${y}`); // 진행 중 상시 — 완료 시 해제
 			try { await wbPrice.older(code0, y); } catch { hist.loading = false; break; }
 			hist.loading = false;
-			if (hist.code !== code0 || chart !== c) return; // 회사 전환·차트 교체 → 중단
+			if (hist.code !== code0 || chart !== c) { notice = null; return; } // 회사 전환·차트 교체 → 중단
 			hist.oldestYear = y;
 			changed = true;
 		}
+		notice = null;
 		if (changed && chart === c && hist.code === code0) {
 			reapply(c);
 			applySpacing(c);
@@ -384,10 +428,10 @@
 		reapply(c);
 	});
 
-	// 자동재생 — 400ms 간격 한 봉 전진. 끝 봉 도달 시 replayStep 이 playing 을 끄면 cleanup.
+	// 자동재생 — replayMs(400/150ms 2단) 간격 한 봉 전진. 끝 봉 도달 시 replayStep 이 playing 을 끄면 cleanup.
 	$effect(() => {
 		if (!ctl.replay.on || !ctl.replay.playing) return;
-		const t = setInterval(() => ctl.replayStep(), 400);
+		const t = setInterval(() => ctl.replayStep(), ctl.replayMs);
 		return () => clearInterval(t);
 	});
 
@@ -618,7 +662,21 @@
 			const extendData: CmpExtend = { peers: loaded };
 			if (cmpOn) c.overrideIndicator({ name: CMP_INDICATOR, extendData }, 'candle_pane');
 			else cmpOn = !!c.createIndicator({ name: CMP_INDICATOR, extendData }, true, { id: 'candle_pane' });
+			// 기간 수익률 미니표 (VS 팝오버) — 이미 로드한 피어 캔들 재사용, 추가 다운로드 0
+			const mainAll = untrack(() => fullSeries());
+			cmpRows = [
+				{ name, code, r: CMP_RET_BARS.map((n) => retOf(mainAll.length ? mainAll : candles, n)) },
+				...loaded.map((p) => ({ name: p.name, code: p.code, r: CMP_RET_BARS.map((n) => retOf(p.candles, n)) }))
+			];
 		});
+	});
+	// 본주+비교종목 기간 수익률 (1M/3M/6M/1Y) — VS 팝오버 미니표 데이터
+	const CMP_RET_BARS = [21, 63, 132, 252];
+	const retOf = (cs: Candle[], n: number): number | null =>
+		cs.length > n && cs[cs.length - 1 - n].c ? (cs[cs.length - 1].c / cs[cs.length - 1 - n].c - 1) * 100 : null;
+	let cmpRows = $state<{ name: string; code: string; r: (number | null)[] }[]>([]);
+	$effect(() => {
+		if (!ctl.compares.length) cmpRows = [];
 	});
 
 	// 경제지표 오버레이 — 선택 → 로드 → 생성/override (figures:[] = 캔들 y축 무왜곡, econOverlay.ts)
@@ -663,26 +721,53 @@
 		if (!ctl.full) {
 			// 전체화면 닫힘 — 리플레이 컨트롤(리본)이 사라지므로 동행 종료 (replay effect 가 전체 복원)
 			untrack(() => { if (ctl.replay.on) ctl.replayExit(); });
-			return;
+			jumpOpen = false;
+			helpOpen = false;
+			// 일반 모드 — Shift+F 전체화면 진입 (그 외 단일 키는 페이지 스크롤·검색과 충돌하므로 추가 금지)
+			const onKeyMini = (e: KeyboardEvent) => {
+				const tgt = e.target as HTMLElement | null;
+				if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+				if (e.shiftKey && (e.key === 'F' || e.key === 'f') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+					e.preventDefault();
+					ctl.full = true;
+				}
+			};
+			window.addEventListener('keydown', onKeyMini);
+			return () => window.removeEventListener('keydown', onKeyMini);
 		}
 		const PERIOD_KEYS = ['1M', '3M', '6M', '1Y', '3Y', 'MAX'] as const;
 		const onKey = (e: KeyboardEvent) => {
+			const k = e.key;
+			// 심볼 점프 — ⌘K·/ (TV 관행). input 가드보다 먼저: Terminal 전역 핸들러는 전체화면을
+			// 감지해 양보한다 (보이지 않는 검색창 포커스 트랩 버그 수정 짝).
+			if (((e.metaKey || e.ctrlKey) && k.toLowerCase() === 'k') || (k === '/' && !(e.target as HTMLElement | null)?.closest?.('input,textarea'))) {
+				if (suggest && onPick) {
+					e.preventDefault();
+					jumpOpen = !jumpOpen;
+					helpOpen = false;
+					if (jumpOpen) requestAnimationFrame(() => jumpInput?.focus());
+					return;
+				}
+			}
 			const tgt = e.target as HTMLElement | null;
 			if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
-			const k = e.key;
 			if (k === 'Escape') {
-				// 우선순위: 진행중 드로잉 취소 → 리플레이 종료 → 전체화면 닫기
+				// 우선순위: 점프/도움말 닫기 → 진행중 드로잉 취소 → 리플레이 종료 → 전체화면 닫기
+				if (jumpOpen || helpOpen) { jumpOpen = false; helpOpen = false; return; }
 				if (cancelPendingDraw()) return;
 				if (ctl.replay.on) { ctl.replayExit(); return; }
 				ctl.full = false;
+			} else if (k === '?') {
+				helpOpen = !helpOpen;
+				jumpOpen = false;
 			} else if (k === ' ' && ctl.replay.on) {
-				e.preventDefault(); // 리플레이 — 스페이스 = 한 봉 전진
-				ctl.replayStep();
+				e.preventDefault(); // 리플레이 — 스페이스 = 재생/정지 (동영상 멘탈모델)
+				ctl.replay.playing = !ctl.replay.playing;
 			} else if (k === 'Delete' || k === 'Backspace') {
 				removeDraw(selectedDrawId);
 			} else if (k === 'ArrowLeft' || k === 'ArrowRight') {
 				e.preventDefault();
-				if (k === 'ArrowRight' && ctl.replay.on) { ctl.replayStep(); return; } // 리플레이 — → = 한 봉 전진
+				if (ctl.replay.on) { if (k === 'ArrowRight') ctl.replayStep(); else ctl.replayStepBack(); return; } // 리플레이 — →/← 한 봉 전·후진
 				const bs = (() => { try { return c?.getBarSpace?.() ?? 8; } catch { return 8; } })();
 				const w = el?.clientWidth || 800;
 				const step = e.shiftKey ? w : bs * 8;
@@ -699,6 +784,21 @@
 				ctl.tf = 'W';
 			} else if ((k === 'm' || k === 'M') && !e.metaKey && !e.ctrlKey) {
 				ctl.tf = 'M';
+			} else if ((k === 'q' || k === 'Q') && !e.metaKey && !e.ctrlKey) {
+				ctl.tf = 'Q';
+			} else if ((k === 'y' || k === 'Y') && !e.metaKey && !e.ctrlKey) {
+				ctl.tf = 'Y';
+			} else if ((k === 'r' || k === 'R') && !e.metaKey && !e.ctrlKey) {
+				if (ctl.replay.on) ctl.replayExit();
+				else enterReplay(); // 리플레이 토글
+			} else if ((k === 'a' || k === 'A') && !e.metaKey && !e.ctrlKey) {
+				ctl.adj = !ctl.adj; // 수정주가
+			} else if ((k === 'l' || k === 'L') && !e.metaKey && !e.ctrlKey) {
+				ctl.yMode = ctl.yMode === 'log' ? 'normal' : 'log'; // 로그축
+			} else if ((k === 'g' || k === 'G') && !e.metaKey && !e.ctrlKey) {
+				ctl.showRefs = !ctl.showRefs; // 52주·전일 기준선
+			} else if ((k === 'f' || k === 'F') && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+				ctl.full = false; // 진입(Shift+F)과 대칭
 			} else if ((k === 's' || k === 'S') && !e.metaKey && !e.ctrlKey) {
 				snapshot();
 			}
@@ -858,10 +958,82 @@
 	{/if}
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} {chgPct} {peers} onSnapshot={snapshot} onReplay={enterReplay} />
+		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
 		<DrawToolbar {ctl} {lang} onDraw={startDraw} onClearDraw={clearDraw} />
+
+		{#if jumpOpen}
+			<!-- 심볼 점프 팔레트 (⌘K · /) — 전체화면을 떠나지 않는 종목 전환 -->
+			<div class="chartJump" role="dialog" aria-label={T('종목 점프', 'symbol jump')}>
+				<input
+					class="cjInput mono"
+					bind:this={jumpInput}
+					bind:value={jumpQ}
+					spellcheck={false}
+					placeholder={T('종목코드 · 회사명 — Enter 전환', 'code or name — Enter to switch')}
+					oninput={() => (jumpIdx = 0)}
+					onkeydown={(e) => {
+						e.stopPropagation();
+						if (e.key === 'Escape') { jumpOpen = false; return; }
+						if (!jumpList.length) return;
+						if (e.key === 'ArrowDown') { e.preventDefault(); jumpIdx = (jumpIdx + 1) % jumpList.length; }
+						else if (e.key === 'ArrowUp') { e.preventDefault(); jumpIdx = (jumpIdx - 1 + jumpList.length) % jumpList.length; }
+						else if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); jumpTo(jumpList[Math.max(0, jumpIdx)].code); }
+					}}
+				/>
+				{#if jumpList.length}
+					<div class="cjList">
+						{#each jumpList as s, i (s.code)}
+							<button type="button" class={'cjRow' + (i === jumpIdx ? ' on' : '')} onmousedown={() => jumpTo(s.code)} onmouseenter={() => (jumpIdx = i)}>
+								<b>{s.name}</b><span class="mono">{s.code}</span><i>{s.industry}</i>
+							</button>
+						{/each}
+					</div>
+				{:else if jumpQ.trim()}
+					<div class="cjEmpty">{T('검색 결과 없음', 'no match')}</div>
+				{/if}
+			</div>
+		{/if}
+
+		{#if helpOpen}
+			<!-- 단축키·숨은기능 도움말 (?) — 발견성: 만들어 둔 기능을 "존재하게" 만드는 1장 -->
+			<div class="chartHelp" role="dialog" aria-label={T('단축키 도움말', 'shortcuts')}>
+				<div class="chHd">{T('단축키 · 숨은 기능', 'SHORTCUTS & HIDDEN GEMS')}<button class="cbtn cIco" onclick={() => (helpOpen = false)} title="ESC">✕</button></div>
+				<div class="chCols">
+					<div>
+						<div class="chLbl">{T('탐색', 'NAVIGATE')}</div>
+						<div class="chRow"><kbd>⌘K</kbd><kbd>/</kbd><span>{T('종목 점프 (전체화면 유지)', 'symbol jump')}</span></div>
+						<div class="chRow"><kbd>1</kbd>–<kbd>6</kbd><span>{T('기간 1M·3M·6M·1Y·3Y·MAX', 'period presets')}</span></div>
+						<div class="chRow"><kbd>D</kbd><kbd>W</kbd><kbd>M</kbd><kbd>Q</kbd><kbd>Y</kbd><span>{T('봉 주기', 'timeframe')}</span></div>
+						<div class="chRow"><kbd>←</kbd><kbd>→</kbd><span>{T('스크롤 · Shift=한 화면', 'scroll · Shift=page')}</span></div>
+						<div class="chRow"><kbd>+</kbd><kbd>−</kbd><span>{T('줌', 'zoom')}</span></div>
+						<div class="chRow"><kbd>F</kbd><kbd>ESC</kbd><span>{T('전체화면 닫기 (일반 모드 Shift+F 진입)', 'exit fullscreen (Shift+F to enter)')}</span></div>
+					</div>
+					<div>
+						<div class="chLbl">{T('보기 토글', 'VIEW')}</div>
+						<div class="chRow"><kbd>A</kbd><span>{T('수정주가', 'adjusted price')}</span></div>
+						<div class="chRow"><kbd>L</kbd><span>{T('로그축', 'log axis')}</span></div>
+						<div class="chRow"><kbd>G</kbd><span>{T('52주 고저·전일 기준선', '52w/prev refs')}</span></div>
+						<div class="chRow"><kbd>S</kbd><span>{T('차트 PNG 저장 (출처 띠 포함)', 'save PNG')}</span></div>
+						<div class="chLbl">{T('리플레이', 'REPLAY')}</div>
+						<div class="chRow"><kbd>R</kbd><span>{T('리플레이 시작/종료', 'toggle replay')}</span></div>
+						<div class="chRow"><kbd>Space</kbd><span>{T('재생/정지', 'play/pause')}</span></div>
+						<div class="chRow"><kbd>→</kbd><kbd>←</kbd><span>{T('한 봉 전진/후진', 'step fwd/back')}</span></div>
+					</div>
+					<div>
+						<div class="chLbl">{T('드로잉', 'DRAW')}</div>
+						<div class="chRow"><kbd>{T('우클릭', 'R-click')}</kbd><span>{T('도형 삭제', 'delete shape')}</span></div>
+						<div class="chRow"><kbd>Del</kbd><span>{T('선택 도형 삭제', 'delete selected')}</span></div>
+						<div class="chRow"><kbd>{T('더블클릭', 'Dbl-click')}</kbd><span>{T('텍스트 주석 편집', 'edit text note')}</span></div>
+						<div class="chLbl">{T('숨은 기능', 'HIDDEN')}</div>
+						<div class="chRow"><span>{T('페인 경계 드래그 = 높이 조절', 'drag pane divider = resize')}</span></div>
+						<div class="chRow"><span>{T('드로잉·지표·차트틀은 자동 저장', 'drawings/indicators auto-saved')}</span></div>
+						<div class="chRow"><span>{T('차트 좌측 끝 = 과거 자동 로드(2010~)', 'scroll left = auto backfill')}</span></div>
+					</div>
+				</div>
+			</div>
+		{/if}
 	{:else}
-		<ChartMenus {ctl} {lang} hasBand={!!valBand} onDraw={startDraw} onClearDraw={clearDraw} />
+		<ChartMenus {ctl} {lang} hasBand={!!valBand} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 
 	<!-- 데이터 출처 상시 표기 (공공누리 출처표시 의무, ECON·수정주가 병기 — 스냅샷 띠와 SSOT) -->

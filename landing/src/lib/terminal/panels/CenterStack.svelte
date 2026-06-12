@@ -17,26 +17,37 @@
 		co: Company;
 		lang: Lang;
 		kpis?: { l: string; v: string; t: string; s?: number[] }[];
+		// 전체화면 심볼 점프 (PriceChart ⌘K·/) — 검색·전환은 터미널 엔진 관통
+		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
+		onPick?: (code: string) => void;
 	}
-	let { co, lang, kpis = [] }: Props = $props();
+	let { co, lang, kpis = [], suggest, onPick }: Props = $props();
 	const localViewerHref = $derived(localTerminalAdapter()?.viewerUrl?.(co.code) ?? null);
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
 	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
+	// ★소프트 스왑 — 전환 중 candles 를 비우지 않아 PriceChart(klinecharts 인스턴스·전체화면 상태)가
+	// 언마운트되지 않는다 (전체화면 심볼 점프의 전제 + 깜빡임 제거, viewer soft-swap 동일 패턴).
+	// chartCode 는 candles 와 *원자적으로* 갱신 — 전환 중 "새 code + 옛 candles" 불일치가 PriceChart
+	// 데이터 effect(드로잉 복원·lazy 백필 키)에 새는 것을 차단.
 	let candles = $state<Candle[] | null>(null);
+	let chartCode = $state('');
+	let chartName = $state('');
 	let candleState = $state<'loading' | 'ready' | 'unavail'>('loading');
 	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
 	$effect(() => {
 		const code = co.code;
+		const nm = co.name.kr;
 		const yr = priceYear;
 		candleState = 'loading';
-		candles = null;
 		let cancelled = false;
 		wbPrice.initial(code, yr).then((r) => {
 			if (cancelled) return;
-			candles = r ? r.candles : null;
+			candles = r && r.candles.length ? r.candles : null;
+			chartCode = code;
+			chartName = nm;
 			candleState = r && r.candles.length ? 'ready' : 'unavail';
 		});
 		return () => {
@@ -93,7 +104,8 @@
 	const e = $derived(co.eco);
 	// 헤더 가격 정합성 — prices 스냅샷(주배치, 지연 가능)보다 차트 캔들(gov EOD)이 최신이면 캔들 종가 SSOT.
 	// 수익률·시총도 같은 기준으로 재계산(시총 = 스냅샷 주식수 × 최신 종가) — 헤더↔차트 불일치 제거.
-	const lastCandle = $derived(candles && candles.length ? candles[candles.length - 1] : null);
+	// 소프트 스왑 중(chartCode ≠ co.code)엔 옛 회사 캔들이므로 헤더 계산에서 제외 (스냅샷 폴백).
+	const lastCandle = $derived(chartCode === co.code && candles && candles.length ? candles[candles.length - 1] : null);
 	const dispLast = $derived(lastCandle ? lastCandle.c : p.last);
 	const candleRet = (bars: number): number | null => {
 		if (!candles || candles.length <= bars || !lastCandle) return null;
@@ -290,8 +302,9 @@
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
 <Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
 	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
-	{#if candleState === 'ready' && candles}
-		<PriceChart {candles} code={co.code} name={co.name.kr} {lang} events={priceEvents} valBand={priceValBand} peers={chartPeers} />
+	{#if candles && chartCode}
+		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신) -->
+		<PriceChart {candles} code={chartCode} name={chartName} {lang} events={priceEvents} valBand={priceValBand} peers={chartPeers} {suggest} {onPick} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}
