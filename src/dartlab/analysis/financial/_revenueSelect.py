@@ -20,7 +20,7 @@ _MAX_YEARS = 8
 
 _SKIP_KEYWORDS = {"합계", "조정", "내부", "소계", "총계", "부문계", "기타", "국내외"}
 
-# 부문 주석(NT_D871100) raw(백만원) → 원 (build.cell._UNIT_SCALE 기본). axisPath 멤버 토큰 추출.
+# 부문 주석 단위 추론 실패 시 fallback 배율 (백만원 = build.cell._UNIT_SCALE 기본). axisPath 멤버 토큰.
 _NOTE_UNIT_SCALE = 1_000_000
 _SEG_TOKEN_RE = re.compile(r"entity\d+_([A-Za-z0-9]+?)Member", re.I)
 
@@ -55,6 +55,13 @@ def _segNameFromAxis(axisPath: str | None) -> str | None:
     return name or None
 
 
+def _isRevenueLabel(label: str) -> bool:
+    """부문 주석 행 label 이 '매출/수익' 행인가 (이익·원가·비용·자산·부채 행 제외)."""
+    return ("매출" in label or "수익" in label) and not any(
+        k in label for k in ("이익", "원가", "비용", "자산", "부채")
+    )
+
+
 def _isRevenueForYear(company, year4: str) -> float | None:
     """IS 매출(원) — 단위 추론 기준값. year4 = "YYYY"."""
     try:
@@ -84,11 +91,7 @@ def _inferSegUnitScale(company, cells) -> int:
             continue
         if not _segNameFromAxis(r.get("axisPath")):
             continue
-        label = str(r.get("label") or "")
-        if not (
-            ("매출" in label or "수익" in label)
-            and not any(k in label for k in ("이익", "원가", "비용", "자산", "부채"))
-        ):
+        if not _isRevenueLabel(str(r.get("label") or "")):
             continue
         year, val = r.get("ctxYear"), _parseNumStr(r.get("valueRaw"))
         if year is not None and val and val > 0:
@@ -151,10 +154,7 @@ def _segmentSeriesFromNote(
             continue
         label = str(r.get("label") or "")
         if kind == "revenue":
-            isRev = ("매출" in label or "수익" in label) and not any(
-                k in label for k in ("이익", "원가", "비용", "자산", "부채")
-            )
-            if not isRev:
+            if not _isRevenueLabel(label):
                 continue
         elif "영업이익" not in label and "영업손익" not in label:
             continue
