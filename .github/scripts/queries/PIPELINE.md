@@ -61,7 +61,7 @@ Tier 2  주기적 재도출 (GitHub Action, offline)
 ## 수집 메커니즘 — 배포됨 (시뮬레이션 근거)
 
 > **상태(2026-06-09): 라이브.** 수신단 Worker 배포 완료 — `https://dartlab-question-collector.eddmpython.workers.dev`.
-> 프론트 `VITE_FEEDBACK_URL`(landing/.env=로컬 · docs.yml Build env=프로덕션) 설정 시 opt-in 토글 노출(기본 OFF).
+> 프론트 `VITE_FEEDBACK_URL`(landing/.env=로컬 · deploy-landing.yml Build env=프로덕션) 설정 시 opt-in 토글 노출(기본 OFF).
 > 배포·재배포 절차: `infra/workers/questionCollector/README.md`. 수집물 review: `reviewRawQueries.py`.
 
 **시뮬레이션 결과(heldoutB 로 측정)**: 검증된 질문 42개(같은 스타일)를 확정시드로 병합해도 *새 질문(held-out)* 성능 무변(라우팅 82→80%). **볼륨은 포화 — 단순 누적은 일반화 못 키운다.** 반면 *다양한 레지스터/어휘* 117개 추가하니 held-out 라우팅 80→**90%**, 섹션 84→**93%** (실측 개선). ⇒ **수집의 가치 = 양이 아니라 모델이 약한 곳(misroute·low-confidence)의 신규 패턴/어휘.**

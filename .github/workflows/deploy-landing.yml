@@ -1,4 +1,4 @@
-name: Deploy Site
+name: Deploy Landing
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - 'landing/**'
       - 'src/dartlab/skills/**'
       - 'blog/**'
-      - '.github/workflows/docs.yml'
+      - '.github/workflows/deploy-landing.yml'
       - '.github/scripts/search/buildSkillMarket.py'
   discussion:
     types: [created, edited, answered, unanswered, labeled, unlabeled]
@@ -60,7 +60,9 @@ jobs:
       # ⚠ seedFromHf 는 HF 에 dir 부재 시 EntryNotFoundError 크래시 (로컬 실측) — mapBuild 첫 publish
       # 전·HF 장애 시에도 배포가 죽지 않도록 본 스텝만 내성형 (실패 = git 사본으로 빌드).
       - name: Seed dashboards from HF (tolerant)
-        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category dashboards || echo "WARN: dashboards HF seed 실패 — git 사본으로 빌드"
+        # block scalar 필수 — plain scalar 는 'WARN:' 콜론에서 YAML 파싱이 깨진다 (0초 워크플로 failure 실측)
+        run: |
+          uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category dashboards || echo "WARN: dashboards HF seed 실패 — git 사본으로 빌드"
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           DARTLAB_DATA_DIR: ${{ github.workspace }}
@@ -105,7 +107,8 @@ jobs:
           VITE_FEEDBACK_URL: https://dartlab-question-collector.eddmpython.workers.dev
           # HF parquet 레인지 프록시(콜드 403 흡수 + range 헤더 보존, infra/workers/hfProxy). 비우면 HF 직결로 가역.
           VITE_DARTLAB_HF_RESOLVE: https://dartlab-hf-proxy.eddmpython.workers.dev/hf
-          # Cloudflare Web Analytics 공개 beacon site token. 비우면 analytics beacon 을 로드하지 않음.
+          # Cloudflare Web Analytics 공개 beacon site token 또는 Cloudflare 제공 script snippet.
+          # 비우면 analytics beacon 을 로드하지 않음.
           VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
         run: |
           npm ci

@@ -4,11 +4,13 @@
 	import '$lib/styles/tokens.css';
 	import '$lib/styles/typography.css';
 	import type { Snippet } from 'svelte';
+	import CloudflareWebAnalytics from '$lib/components/CloudflareWebAnalytics.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 
 	let { children }: { children: Snippet } = $props();
 </script>
 
+<CloudflareWebAnalytics />
 <CommandPalette />
 {@render children()}
 

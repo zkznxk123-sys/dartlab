@@ -28,7 +28,7 @@
 ```
 
 ## 배포
-- GitHub Actions (`docs.yml`) → GitHub Pages
+- GitHub Actions (`deploy-landing.yml`) → GitHub Pages
 - BASE_PATH: `/dartlab`
 - URL: https://eddmpython.github.io/dartlab/
 

@@ -22,7 +22,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 
 | 스크립트 | 역할 | 호출 workflow |
 |---|---|---|
-| [sync/seedFromHf.py](sync/seedFromHf.py) | HF→로컬 idempotent seed (size 다른 파일 다운로드) | `dataSync.yml`, `dataPrebuild.yml`, `docs.yml` |
+| [sync/seedFromHf.py](sync/seedFromHf.py) | HF→로컬 idempotent seed (size 다른 파일 다운로드) | `dataSync.yml`, `dataPrebuild.yml`, `deploy-landing.yml` |
 | [sync/syncRecent.py](sync/syncRecent.py) | DART list.json 기반 정기공시 누락분 수집 + HF 업로드 트리거 | `dataSync.yml` |
 | [sync/syncData.py](sync/syncData.py) | 88분기 차집합 full collect (heavy fallback) | `dataSync.yml` (workflow_dispatch full 모드) |
 | [sync/syncNewStocks.py](sync/syncNewStocks.py) | KindList 신규 상장 종목 초기 수집 | `dartNewStocks.yml` |
@@ -61,7 +61,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 |---|---|---|
 | [search/buildSearchDelta.py](search/buildSearchDelta.py) | 최근 N 일 content delta 인덱스 빌드 + HF 업로드 | `searchIndexDelta.yml` |
 | [search/buildSearchMain.py](search/buildSearchMain.py) | content main 인덱스 빌드 + HF 업로드 | `searchIndexMain.yml` |
-| [search/buildSkillMarket.py](search/buildSkillMarket.py) | GitHub Discussion → Skill Market 정적 인덱스 | `docs.yml` |
+| [search/buildSkillMarket.py](search/buildSkillMarket.py) | GitHub Discussion → Skill Market 정적 인덱스 | `deploy-landing.yml` |
 
 ### ops/ — operational
 
