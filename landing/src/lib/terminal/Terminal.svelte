@@ -120,9 +120,10 @@
 		for (const ml of macroLatest)
 			out.push({ l: lang === 'en' ? ml.def.en : ml.def.kr, v: fmtMacro(ml), t: ml.chg == null || ml.chg === 0 ? 'tNeu' : ml.chg > 0 ? 'tUp' : 'tDn', s: ml.spark });
 		if (m) {
-			const dir = (g: string) => (g === 'rising' || g === '상승' ? 'tUp' : 'tDn');
-			out.push({ l: 'KR', v: lang === 'en' ? m.kr.phase : m.kr.phaseLabel, t: dir(m.kr.quadrant.growth) });
-			out.push({ l: 'US', v: lang === 'en' ? m.us.phase : m.us.phaseLabel, t: dir(m.us.quadrant.growth) });
+			// quadrant 결측(빌더 입력 부족) 방어 — 방향 미상은 중립 톤 (크래시 금지)
+			const dir = (g?: string) => (g == null ? 'tNeu' : g === 'rising' || g === '상승' ? 'tUp' : 'tDn');
+			out.push({ l: 'KR', v: lang === 'en' ? m.kr.phase : m.kr.phaseLabel, t: dir(m.kr.quadrant?.growth) });
+			out.push({ l: 'US', v: lang === 'en' ? m.us.phase : m.us.phaseLabel, t: dir(m.us.quadrant?.growth) });
 		}
 		if (tw[0]) out.push({ l: lang === 'en' ? 'tailwind' : '순풍', v: (lang === 'en' ? tw[0].en : tw[0].kr) + ' +' + tw[0].blended.toFixed(2), t: 'tUp' });
 		if (tw.length > 1) { const lo = tw[tw.length - 1]; out.push({ l: lang === 'en' ? 'headwind' : '역풍', v: (lang === 'en' ? lo.en : lo.kr) + ' ' + lo.blended.toFixed(2), t: 'tDn' }); }

@@ -44,8 +44,11 @@ function shouldCacheJson(path: string): boolean {
 	return (
 		path !== 'map/ecosystem.json' &&
 		path !== 'map/prices-snapshot.json' &&
+		// macro 도 캐시 제외 — HF-first 신선본이 6h 캐시에 가려지는 지연 차단 (소형 파일이라 비용 0)
+		path !== 'dashboards/macro.json' &&
 		path !== 'landing/map/ecosystem.json' &&
-		path !== 'landing/map/prices-snapshot.json'
+		path !== 'landing/map/prices-snapshot.json' &&
+		path !== 'landing/dashboards/macro.json'
 	);
 }
 

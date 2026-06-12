@@ -54,7 +54,7 @@ export interface MacroQuadrant {
 export interface MacroSide {
 	phase: string;
 	phaseLabel: string;
-	quadrant: MacroQuadrant;
+	quadrant?: MacroQuadrant; // 빌더 입력 부족(cycle 결측) 시 부재 가능 — 소비처 옵셔널 접근 강제
 }
 export interface TailwindEntry {
 	kr: number;

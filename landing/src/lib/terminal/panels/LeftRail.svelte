@@ -89,12 +89,17 @@
 				{@const m = box.side === 'kr' ? macro.kr : macro.us}
 				{@const q = m.quadrant}
 				<div class="quadBox">
-					<div class="quadMkt">{box.label} · {lang === 'en' ? m.phase.toUpperCase() : m.phaseLabel}{q.inflation ? ' · ' + (lang === 'en' ? 'infl ' + q.inflation : '물가 ' + q.inflation) : ''}</div>
-					<div class={'quadPhase ' + (q.growth === 'rising' || q.growth === '상승' ? 'tUp' : 'tDn')}>{lang === 'en' ? q.quadrant : q.quadrantLabel}</div>
-					<div class="quadDesc">{q.description}</div>
-					<div class="quadAssets">
-						{#each assetChips as [kr, key] (key)}<span class={'assetChip ' + wcls(q.assetImplication?.[key])}>{lang === 'en' ? key.slice(0, 4) : kr}</span>{/each}
-					</div>
+					<div class="quadMkt">{box.label} · {lang === 'en' ? m.phase.toUpperCase() : m.phaseLabel}{q?.inflation ? ' · ' + (lang === 'en' ? 'infl ' + q.inflation : '물가 ' + q.inflation) : ''}</div>
+					{#if q}
+						<div class={'quadPhase ' + (q.growth === 'rising' || q.growth === '상승' ? 'tUp' : 'tDn')}>{lang === 'en' ? q.quadrant : q.quadrantLabel}</div>
+						<div class="quadDesc">{q.description}</div>
+						<div class="quadAssets">
+							{#each assetChips as [kr, key] (key)}<span class={'assetChip ' + wcls(q.assetImplication?.[key])}>{lang === 'en' ? key.slice(0, 4) : kr}</span>{/each}
+						</div>
+					{:else}
+						<!-- quadrant 결측(빌더 입력 부족 등) — 국면 라벨만 정직 표시, 크래시 금지 -->
+						<div class="quadDesc">{lang === 'en' ? 'quadrant data unavailable' : '국면 상세 데이터 없음'}</div>
+					{/if}
 				</div>
 			{/each}
 		</div>
