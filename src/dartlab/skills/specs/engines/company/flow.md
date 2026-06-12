@@ -26,7 +26,7 @@ inputs:
 outputs:
   - pl.DataFrame (date · foreignNet · institutionNet · individualNet)
 capabilityRefs:
-  - dartlab.gather
+  - gather
   - gather.flow
 knowledgeRefs:
   - engines.company
