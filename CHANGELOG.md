@@ -5,17 +5,34 @@ All notable changes to DartLab will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.7] - 2026-06-13
+
+뉴스·주가 데이터 소스 재편 + 정기보고서 TOC 표준 수렴(과거 수평화) 릴리즈.
 
 ### Added
 
 - 네이버 검색 API 뉴스 소스 — `gather.news()` KR 시장 우선 backend(제목+스니펫, `description` 컬럼 신설). 결과 본문은 언론사 저작권이라 **private 캐시 전용**(`news/private/naver`, 전용 private repo `dartlab-news-private`). Google News RSS 폴백 유지(키 없으면 자동) — 기존 동작 보존.
 - 뉴스 소스 레지스트리(`gather.sources.newsSources.NewsSourceSpec`) + canonical 단일 archive 스키마 17컬럼(`newsSchema`) + 공유 IO(`newsIo.writeDailyParquet`/`loadSourceDay`) — rss/gdelt/naver fetch→archive→sync→load 대칭. `loadNewsArchive` 에 소스 선택 `sources=` 키워드(비파괴).
+- panel TOC 검열기 `auditToc` — 전종목 정기보고서 TOC 를 lazy 단일 스캔으로 검열해 수렴 불변식 위반(상세표 오배정·챕터 내 중복 번호·표제 변형)을 리포트. 보고 전용, 자동 수정 없음.
+- 재무제표 주석 격자 — `c.panel("NT_D######")` 로 주석 표준코드를 5표(재무제표)와 동일한 시계열 격자로 조회.
+- 관세청 무역통계 gather 소스(customs) — 월별 HS 코드 수출입 `.series(hsCode, metric)` (FRED 동일 계약), 매크로 회귀 외생 후보로 연결.
+- 데이터 공급자 자격증명 단일 진입점 — 공급자 단위 키 레지스트리(`DATA_GO_KR_KEY` 1키 = 주가·관세청 공유)·doctor 진단·`.env.example` 안내.
+- 세그먼트·연구개발비 정량 추출 — 수익구조(사업부문별 매출)·비용구조(R&D) 축 신설.
+- 통합검색 색인 풀셋 — EDGAR panel 포함(allFilings + DART panel + EDGAR panel + 뉴스). 회사 필터는 랭킹 전 스코프 마스크로 적용해 정확도 개선.
+- 투자자 수급(외인·기관) 자동 백필 호출계약.
 
 ### Changed
 
 - **뉴스 데이터 경로 재편(breaking — HF 레이아웃)** — visibility-first taxonomy `news/{public,private}/{source}/` 로 라이선스 경계를 폴더 구조로 분기: `news/headlines`→`news/public/rss`, `news/enriched`→`news/public/rss_enriched`, `news/gdelt`→`news/public/gdelt`, 신규 `news/private/naver`. 공개 archive 를 읽는 코드(엔진·검색 인덱스·sync)는 본 버전부터 신규 경로를 사용한다 — 구버전 핀은 업그레이드 필요.
+- **주가·지수 소스 krx → 공공데이터포털(gov) 완전 대체** — 라이선스(KOGL) 정합. gov 는 T+1 익일 제공·2020년 이후 범위(이전 구간은 기존 시계열 유지).
+- **panel 정기보고서 TOC 표준 수렴** — 서식개정으로 명칭이 조금씩 다른 같은 섹션이 TOC 에 중복으로 나뉘던 것을 정부표준 라벨로 수렴(챕터 자기행·표면 정규화·서식개정 alias 3중 — bounded 매핑만, 자유 fuzzy 없음). XII 상세표 자식의 챕터 오배정, (첨부)재무제표 주석의 챕터 탈락(NT_→III 복원)도 함께 해소.
+- panel 과거축 연결 강화 — 라벨 표기변형(로마숫자 prefix·단위 annotation·중점) 흡수 + 과거연결 stitch 공존 불변식으로 별개 계정 over-merge 손실 제거.
+- scan 정기보고서 프리빌드 시계열을 2016년부터 전 기간 노출.
 - 중복 제거 — 옛 `news.py`(7컬럼)·`gdelt.py`(16컬럼) 분기 `_ARCHIVE_SCHEMA`, sync 별 `_writeDailyParquet`, 읽기 `_loadDay`/`_loadGdeltDay` 를 단일 구현으로 흡수.
+
+### Fixed
+
+- mcp 의존성 1.27.1 명시 제외 — 알려진 회귀 버전이 설치 범위에 들어오던 것 차단.
 
 ## [0.10.6] - 2026-06-09
 
