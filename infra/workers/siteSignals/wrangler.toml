@@ -1,0 +1,14 @@
+name = "dartlab-site-signals"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# D1 binding 생성 후 database_id 를 채운다.
+# wrangler d1 create dartlab-site-signals
+# wrangler d1 execute dartlab-site-signals --remote --file schema.sql
+[[d1_databases]]
+binding = "SITE_SIGNALS_DB"
+database_name = "dartlab-site-signals"
+database_id = "replace-with-cloudflare-d1-database-id"
+
+[vars]
+ALLOW_ORIGIN = "https://eddmpython.github.io"
