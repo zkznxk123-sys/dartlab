@@ -138,10 +138,10 @@
 			local = mod.init(node, { styles: themeStyles() });
 			if (!local) return;
 			local.setPriceVolumePrecision(0, 0);
-			local.setOffsetRightDistance(12);
-			// 줌·드래그 시 마지막 봉 우측의 미래(데이터 없는) 빈 영역이 끝없이 보이던 것 차단 —
-			// 우측 여백 상한 12px 고정 (EOD 차트에 미래 축은 무의미).
-			try { local.setMaxOffsetRightDistance(12); } catch { /* 구버전 무시 */ }
+			// 미래(데이터 없는) 우측 영역 0 — 차트는 반드시 마지막 봉까지만. 옛 12px 여백이
+			// 줌아웃 시 ~3봉의 미래 축으로 보이던 것 제거 (EOD 차트에 미래 축은 무의미).
+			local.setOffsetRightDistance(0);
+			try { local.setMaxOffsetRightDistance(0); } catch { /* 구버전 무시 */ }
 			// timestamp 는 Date.UTC 자정 — timezone 미설정 시 XAxis 라벨이 브라우저 로컬 TZ 로 풀려
 			// 미주 사용자에게 하루 전 날짜로 표시되는 조용한 오류. 명시 고정.
 			try { local.setTimezone('UTC'); } catch { /* */ }
@@ -152,12 +152,24 @@
 				const p = (n: number) => String(n).padStart(2, '0');
 				return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}`;
 			};
+			// 큰 수 표기 — 라이브러리 기본 K/M/B(서양식) 대신 만·억·조. 거래량(주)·거래대금(원)
+			// 축 라벨·툴팁 공통. 자릿수 규칙 고정: 조·억 = 소수 2자리, 만 = 정수, 만 미만 = 정수 콤마.
+			const fmtBigKr = (value: string | number): string => {
+				const v = Number(value);
+				if (!Number.isFinite(v)) return String(value);
+				const a = Math.abs(v);
+				if (a >= 1e12) return (v / 1e12).toFixed(2) + '조';
+				if (a >= 1e8) return (v / 1e8).toFixed(2) + '억';
+				if (a >= 1e4) return Math.round(v / 1e4).toLocaleString() + '만';
+				return Math.round(v).toLocaleString();
+			};
 			try {
 				local.setCustomApi({
 					formatDate: (dtf: unknown, ts: number, format: string, type: number) => {
 						if (type === 0 || type === 1) return fmtYmd(ts);
 						try { return mod.utils.formatDate(dtf, ts, format); } catch { return fmtYmd(ts); }
-					}
+					},
+					formatBigNumber: fmtBigKr
 				});
 			} catch { /* setCustomApi 미지원 빌드 — 기본 포맷 유지 */ }
 			// 전체 이력 lazy 로드 — 좌측(forward) 도달 시 더 오래된 연도 prepend.
@@ -415,10 +427,8 @@
 				if (cp) appliedParams[k] = cp;
 			}
 		});
-		try {
-			if (want.has('ICHI')) c.setOffsetRightDistance(Math.max(12, Math.ceil((ctl.indParams.ICHI?.[1] ?? 26) * c.getBarSpace())));
-			else c.setOffsetRightDistance(12);
-		} catch { /* */ }
+		// 우측 여백은 항상 0 — 일목(ICHI) 구름 미래연장도 미래 축을 열지 않는다 (데이터 끝 = 차트 끝 불변).
+		try { c.setOffsetRightDistance(0); } catch { /* */ }
 	});
 
 	// 보조지표 페인 reconcile
@@ -430,7 +440,10 @@
 		ctl.subs.forEach((k) => {
 			if (subPanes.has(k)) return;
 			const cp = ctl.indParams[k] ?? (IND_DEFS[k]?.defaults.length ? IND_DEFS[k].defaults : undefined);
-			const id = c.createIndicator(cp ? { name: k, calcParams: cp } : k, false, { id: `pane_${k}`, height: subPaneHeight(), minHeight: 48, dragEnabled: true });
+			// 자릿수 통일 — 라이브러리 기본 precision 4(RSI 64.7436 류) 과잉. 수량 페인(VOL·TVAL·OBV·PVT)은
+			// 정수 + 만·억 단위, 그 외 오실레이터는 소수 2자리 고정.
+			const precision = k === 'VOL' || k === 'TVAL' || k === 'OBV' || k === 'PVT' ? 0 : 2;
+			const id = c.createIndicator({ name: k, precision, ...(cp ? { calcParams: cp } : {}) }, false, { id: `pane_${k}`, height: subPaneHeight(), minHeight: 48, dragEnabled: true });
 			if (id) {
 				subPanes.set(k, id);
 				if (cp) appliedParams[k] = cp;
@@ -454,7 +467,7 @@
 			try { c.overrideIndicator({ name: k, calcParams: next }, paneId); } catch { /* */ }
 			if (ip[k]) appliedParams[k] = next;
 			else delete appliedParams[k];
-			if (k === 'ICHI') { try { c.setOffsetRightDistance(Math.max(12, Math.ceil((next[1] ?? 26) * c.getBarSpace()))); } catch { /* */ } }
+			// ICHI 파라미터 변경도 우측 여백 불변(0) — 미래 축 금지 룰과 동일
 		}
 	});
 
