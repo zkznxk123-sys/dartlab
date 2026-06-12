@@ -36,34 +36,38 @@ class DefaultMacroProvider:
     """MacroDataProvider 기본 구현 — gather/entry + macro/seriesFetch 우회."""
 
     def getDefaultGather(self) -> Any:
-        """현재 기본 GatherEntry 인스턴스.
+        """``.macro()`` 메서드를 가진 Gather 싱글턴.
 
-        Capabilities: MacroDataProvider Protocol — GatherEntry lazy import + 인스턴스화.
+        Capabilities: MacroDataProvider Protocol — engine Gather 싱글턴 lazy 반환.
         AIContext: macro engine 이 gather 본체 직접 의존 회피 — F3 Protocol DIP 의 macro 측 본체.
-        Guide: 매 호출마다 new GatherEntry — singleton 아님 (cache 공유는 entry 안 Gather singleton).
-        When: macro engine 이 시리즈 fetch 위해 gather entry 필요 시.
-        How: lazy ``from dartlab.gather.entry import GatherEntry`` → 인스턴스 반환.
+        Guide: 반환 객체는 ``.macro(seriesId)`` 메서드 계약 (L2 macro seriesFetch 전제).
+            ⚠ GatherEntry(축 callable)로 바꾸면 ``.macro`` 부재 AttributeError 가 L2 전역의
+            예외 흡수에 삼켜져 cycle/quadrant 가 조용히 열화된다 (2026-06-12 실측 회귀).
+        When: macro engine 이 시리즈 fetch 위해 gather 필요 시.
+        How: ``entry.providerAdapter.getDefaultGather()`` 위임 — engine.Gather 싱글턴
+            (캐시·HTTP 클라이언트 재사용).
 
         Returns:
-            새로 생성된 GatherEntry 인스턴스 — caller 가 macro 시리즈 fetch 에 사용.
+            engine.Gather 싱글턴 — ``.macro(seriesId)`` 시계열 fetch 에 사용.
 
         Raises:
-            ImportError: gather.entry import 실패.
+            ImportError: gather import 실패.
 
         Requires:
-            ``dartlab.gather.entry`` import 가능.
+            ``dartlab.gather.entry.providerAdapter`` import 가능.
 
         Example:
             >>> p = DefaultMacroProvider()
             >>> g = p.getDefaultGather()
+            >>> df = g.macro("CPI")
 
         See Also:
-            entry.GatherEntry : 위임 대상.
+            entry.providerAdapter.getDefaultGather : 위임 대상 singleton.
             core.macroProvider.MacroDataProvider : 본 메서드의 Protocol 정의.
         """
-        from dartlab.gather.entry import GatherEntry
+        from dartlab.gather.entry.providerAdapter import getDefaultGather
 
-        return GatherEntry()
+        return getDefaultGather()
 
     def applyAsOf(self, dataFrame: pl.DataFrame, asOf: str) -> pl.DataFrame:
         """as-of 필터링 — ``date <= asOf`` 행만 유지.
