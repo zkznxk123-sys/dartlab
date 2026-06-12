@@ -3,7 +3,7 @@
     "scenario": "public.access.all",
     "ok": true,
     "package": {
-      "version": "0.10.5",
+      "version": "0.10.6",
       "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
     },
     "details": {
@@ -22,11 +22,11 @@
         "dartlab.capabilities"
       ]
     },
-    "elapsedSec": 0.953,
-    "rssBeforeMb": 23.3,
-    "rssAfterMb": 93.6,
-    "rssDeltaMb": 70.2,
-    "rssPeakMb": 98.4,
+    "elapsedSec": 5.5,
+    "rssBeforeMb": 23.6,
+    "rssAfterMb": 93.1,
+    "rssDeltaMb": 69.5,
+    "rssPeakMb": 97.4,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 20.0,
@@ -41,7 +41,7 @@
     "scenario": "capabilities.index",
     "ok": true,
     "package": {
-      "version": "0.10.5",
+      "version": "0.10.6",
       "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
     },
     "details": {
@@ -50,11 +50,11 @@
       "width": null,
       "columns": []
     },
-    "elapsedSec": 0.953,
-    "rssBeforeMb": 23.5,
-    "rssAfterMb": 93.4,
-    "rssDeltaMb": 69.9,
-    "rssPeakMb": 93.4,
+    "elapsedSec": 5.015,
+    "rssBeforeMb": 23.7,
+    "rssAfterMb": 93.7,
+    "rssDeltaMb": 70.0,
+    "rssPeakMb": 93.7,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 20.0,
@@ -69,7 +69,7 @@
     "scenario": "scan.guide",
     "ok": true,
     "package": {
-      "version": "0.10.5",
+      "version": "0.10.6",
       "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
     },
     "details": {
@@ -85,11 +85,11 @@
         "apiKey"
       ]
     },
-    "elapsedSec": 0.656,
-    "rssBeforeMb": 23.6,
-    "rssAfterMb": 73.0,
-    "rssDeltaMb": 49.4,
-    "rssPeakMb": 73.0,
+    "elapsedSec": 4.5,
+    "rssBeforeMb": 23.5,
+    "rssAfterMb": 72.7,
+    "rssDeltaMb": 49.3,
+    "rssPeakMb": 72.7,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 20.0,
@@ -104,18 +104,18 @@
     "scenario": "company.create",
     "ok": true,
     "package": {
-      "version": "0.10.5",
+      "version": "0.10.6",
       "file": "C:\\Users\\MSI\\OneDrive\\Desktop\\sideProject\\dartlab\\src\\dartlab\\__init__.py"
     },
     "details": {
       "type": "Company",
       "height": 1
     },
-    "elapsedSec": 0.813,
-    "rssBeforeMb": 23.5,
-    "rssAfterMb": 92.5,
-    "rssDeltaMb": 69.0,
-    "rssPeakMb": 92.5,
+    "elapsedSec": 3.953,
+    "rssBeforeMb": 23.7,
+    "rssAfterMb": 93.3,
+    "rssDeltaMb": 69.6,
+    "rssPeakMb": 93.3,
     "returnCode": 0,
     "budget": {
       "maxElapsedSec": 30.0,
