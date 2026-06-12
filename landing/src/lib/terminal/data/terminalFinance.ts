@@ -86,6 +86,7 @@ interface StdAcct {
 	sj: 'IS' | 'BS' | 'CF' | 'CIS';
 	ids: string[]; // account_id (IFRS) 우선
 	kw: string[]; // account_nm 키워드 fallback
+	ex?: string[]; // nm 매칭 제외 키워드 — includes 포함매칭의 오선택 차단 (예: longDebt 가 '유동성장기차입금'을 잡는 사고)
 }
 const STD: StdAcct[] = [
 	// IS
@@ -107,10 +108,14 @@ const STD: StdAcct[] = [
 	{ key: 'liabilities', sj: 'BS', ids: ['ifrs-full_Liabilities', 'ifrs_Liabilities'], kw: ['부채총계'] },
 	{ key: 'currentLiabilities', sj: 'BS', ids: ['ifrs-full_CurrentLiabilities', 'ifrs_CurrentLiabilities'], kw: ['유동부채'] },
 	{ key: 'payables', sj: 'BS', ids: ['ifrs-full_TradeAndOtherCurrentPayables', 'dart_ShortTermTradePayables'], kw: ['매입채무'] },
-	{ key: 'shortDebt', sj: 'BS', ids: ['ifrs-full_ShorttermBorrowings', 'ifrs_ShorttermBorrowings'], kw: ['단기차입금'] },
-	{ key: 'longDebt', sj: 'BS', ids: ['ifrs-full_LongtermBorrowings', 'ifrs_LongtermBorrowings'], kw: ['장기차입금', '사채'] },
+	{ key: 'shortDebt', sj: 'BS', ids: ['ifrs-full_ShorttermBorrowings', 'ifrs_ShorttermBorrowings'], kw: ['단기차입금'], ex: ['유동성'] },
+	// '유동성장기차입금'.includes('장기차입금')=true 라 ex 가드 없이는 longDebt 가 유동성 행을
+	// 오선택/이중계상 — 차입 3분해(shortDebt·currentLtDebt·longDebt)의 정합 전제.
+	{ key: 'longDebt', sj: 'BS', ids: ['ifrs-full_LongtermBorrowings', 'ifrs_LongtermBorrowings'], kw: ['장기차입금', '사채'], ex: ['유동성'] },
+	{ key: 'currentLtDebt', sj: 'BS', ids: [], kw: ['유동성장기차입금', '유동성장기부채', '유동성사채'] },
 	{ key: 'equity', sj: 'BS', ids: ['ifrs-full_Equity', 'ifrs_Equity'], kw: ['자본총계'] },
-	{ key: 'capitalStock', sj: 'BS', ids: ['ifrs-full_IssuedCapital', 'ifrs_IssuedCapital', 'dart_IssuedCapital'], kw: ['자본금'] },
+	{ key: 'capitalStock', sj: 'BS', ids: ['ifrs-full_IssuedCapital', 'ifrs_IssuedCapital', 'dart_IssuedCapital'], kw: ['자본금'], ex: ['잉여금'] },
+	{ key: 'capitalSurplus', sj: 'BS', ids: ['ifrs-full_SharePremium', 'dart_AdditionalPaidInCapital', 'ifrs_SharePremium'], kw: ['자본잉여금', '주식발행초과금'] },
 	{ key: 'retainedEarnings', sj: 'BS', ids: ['ifrs-full_RetainedEarnings', 'ifrs_RetainedEarnings'], kw: ['이익잉여금'] },
 	// CF
 	{ key: 'cfOperating', sj: 'CF', ids: ['ifrs-full_CashFlowsFromUsedInOperatingActivities', 'ifrs_CashFlowsFromUsedInOperatingActivities'], kw: ['영업활동현금흐름', '영업활동'] },
@@ -311,7 +316,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		for (const p of parsed) {
 			if (p.sj !== s.sj) continue;
 			const idHit = s.ids.length > 0 && s.ids.includes(p.id);
-			const nmHit = !idHit && s.kw.some((k) => p.nm.includes(k));
+			const nmHit = !idHit && s.kw.some((k) => p.nm.includes(k)) && !s.ex?.some((x) => p.nm.includes(x));
 			if (!idHit && !nmHit) continue;
 			const pk = `${p.year}-${p.q}`;
 			const cur = m.get(pk);
@@ -531,6 +536,46 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			{ name: 'DPO', data: dpo, color: C.good, type: 'line' }
 		] };
 
+		// ── 조달구조 — 유동/비유동 대신 조달 *원천* 분해: 이자 내는 차입(빨강) vs 거래에서 생긴
+		// 영업·기타부채(파랑 — 충당·리스·법인세 포함이라 '기타' 동반 정직 라벨) vs 주주가 준
+		// 납입자본(주황) vs 스스로 번 이익잉여금(초록) vs 잔차 기타자본(회색).
+		// 잔차 2종(영업·기타부채, 기타자본)이 합=자산총계 항등식을 구조적으로 보장하고, signed 가
+		// 결손금·병리 잔차를 0 아래로 숨김없이 노출. liabilities=null 게이트 = "BS 미파싱" 증거 —
+		// 게이트 통과 시 차입 계정 null 은 0(무차입)으로 읽는다 (결측을 잔차로 흘려 공짜 레버리지를
+		// 과대평가하는 편향이 더 위험). ──
+		const t3 = (v: Num): Num => (v == null ? null : +(v / TRILLION).toFixed(3));
+		const borrowAt = (i: number): Num => {
+			if (valAtIdx('liabilities', i) == null) return null;
+			return (valAtIdx('shortDebt', i) ?? 0) + (valAtIdx('currentLtDebt', i) ?? 0) + (valAtIdx('longDebt', i) ?? 0);
+		};
+		const borrowSer: Num[] = used.map((_, i) => t3(borrowAt(i)));
+		const opLiabSer: Num[] = used.map((_, i) => {
+			const liab = valAtIdx('liabilities', i);
+			const b = borrowAt(i);
+			return liab == null || b == null ? null : t3(liab - b);
+		});
+		const paidInSer: Num[] = used.map((_, i) => {
+			const cs = valAtIdx('capitalStock', i);
+			const sp = valAtIdx('capitalSurplus', i);
+			return cs == null && sp == null ? null : t3((cs ?? 0) + (sp ?? 0));
+		});
+		const otherEqSer: Num[] = used.map((_, i) => {
+			const eq = valAtIdx('equity', i);
+			if (eq == null) return null;
+			return t3(eq - (valAtIdx('capitalStock', i) ?? 0) - (valAtIdx('capitalSurplus', i) ?? 0) - (valAtIdx('retainedEarnings', i) ?? 0));
+		});
+		// 자본측 매핑 전멸(자본금·이익잉여금 전 기간 null) 회사는 단일 '자본' 으로 강등 — 잔차가 자본 전체를 삼키는 왜곡 방지
+		const hasEquitySplit = used.some((_, i) => valAtIdx('capitalStock', i) != null || valAtIdx('retainedEarnings', i) != null);
+		const fundingEquity: FinSeries[] = hasEquitySplit
+			? [
+					{ name: '납입자본', data: paidInSer, color: C.op, type: 'bar' },
+					{ name: '이익잉여금', data: ser('retainedEarnings'), color: C.good, type: 'bar' },
+					{ name: '기타자본', data: otherEqSer, color: C.dim, type: 'bar' }
+				]
+			: [{ name: '자본', data: ser('equity'), color: C.good, type: 'bar' }];
+		// 순상거래신용(매입채무−매출채권, 좌축 공유 라인) — 양수 = 거래상대 돈으로 영업하는 힘의 직접 측정
+		const netTradeSer: Num[] = used.map((_, i) => (pay[i] != null && rcv[i] != null ? t3(pay[i]! - rcv[i]!) : null));
+
 		// ── 재무제표 분석 핵심 16카드 — 4행×4 분석 내러티브 (행=질문, 좌→우=절대액→분해→비율→변화율).
 		// 1행 손익 "얼마나 버나" · 2행 현금 "이익이 진짜인가" · 3행 효율 "자본을 잘 굴리나" · 4행 체력 "버틸 수 있나".
 		// ⚠ 카드 수 = 4의 배수 불변 (.finGrid 행당 4장 강제 — 운영자 룰: 2장·1장 행 금지). ──
@@ -586,17 +631,18 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				{ name: '재고', data: ser('inventories'), color: C.warn, type: 'bar' },
 				{ name: '기타', data: compose(['assets', 1], ['cash', -1], ['receivables', -1], ['inventories', -1]), color: C.dim, type: 'bar' }
 			] },
-			{ key: 'fundingStructure', title: '조달구조', unit: '조', stacked: true, series: [
-				{ name: '유동부채', data: ser('currentLiabilities'), color: C.red, type: 'bar' },
-				{ name: '비유동부채', data: compose(['liabilities', 1], ['currentLiabilities', -1]), color: C.op, type: 'bar' },
-				{ name: '자본', data: ser('equity'), color: C.good, type: 'bar' }
+			{ key: 'fundingStructure', title: '조달구조', unit: '조', stacked: true, signed: true, series: [
+				{ name: '차입부채', data: borrowSer, color: C.red, type: 'bar' },
+				{ name: '영업·기타부채', data: opLiabSer, color: C.blue, type: 'bar' },
+				...fundingEquity,
+				{ name: '순상거래신용', data: netTradeSer, color: C.cyan, type: 'line' }
 			] },
 			{ key: 'leverageTrend', title: '레버리지·유동', unit: '%', refLines: [100], series: [
 				{ name: '부채비율', data: ratio('liabilities', 'equity'), color: C.red, type: 'bar' },
 				{ name: '유동비율', data: ratio('currentAssets', 'currentLiabilities'), color: C.blue, type: 'line', axis: 'r' }
 			] },
 			{ key: 'netDebt', title: '순차입금', unit: '조', series: [
-				{ name: '순차입', data: compose(['shortDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' }
+				{ name: '순차입', data: compose(['shortDebt', 1], ['currentLtDebt', 1], ['longDebt', 1], ['cash', -1]), color: C.red, type: 'bar' }
 			] }
 		];
 
@@ -721,7 +767,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			] as FinCard[],
 			debt: [
 				{ key: 'debtMix', title: '차입 구성 vs 현금', unit: '조', stacked: true, series: [
-					{ name: '단기차입금', data: ser('shortDebt'), color: C.red, type: 'bar' },
+					{ name: '단기성차입(1년내)', data: compose(['shortDebt', 1], ['currentLtDebt', 1]), color: C.red, type: 'bar' },
 					{ name: '장기차입금·사채', data: ser('longDebt'), color: C.op, type: 'bar' },
 					{ name: '현금성자산', data: ser('cash'), color: C.good, type: 'line' }
 				] },
