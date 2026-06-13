@@ -34,9 +34,11 @@
   map/search 포트 실구현) → 단계-9(landing public shell 전환) → 단계-10(Python server 기본 UI=ui/apps/local).
 잔여 이월(누적): vitest unit+fixture 런타임 대조 · publish.yml:108 prose 경로 · ui/apps/local 라이브 dev 클릭스루(dartlab
   ai 서버 구동 후, 단계-10 확증) · finance.bundle 로컬 엔드포인트(현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #24(단계-6-1 viewer 원자 이동 완료, green) 직후 — push 후 6-3(로컬앱 /analysis/[code]/viewer
-  스켈레톤 → ViewerStudio 마운트 + local provideDuckDb + 터미널 오버레이 basePath 스레딩) → 단계-7 완성(viewer
-  AskDrawer + terminal AI command 를 AiPort 뒤로 통합) → 단계-8(scan/map/search 추출). 6-2 생략 확정(소비자 0).
+재개 지점: entry #25(단계-6 전체 종료 — viewer 추출+로컬 마운트+basePath, green) 직후 — 6-3 2커밋 push(이전
+  ci-fast 완료 후) → **단계-8**(Services + scan/map/search·changes/insights 잔여 제품 surface 추출, 이동 원자 윈도우 —
+  4b/6 패턴 재사용: census + 적대 토론 → 예약 entry → git mv → 재배선) 또는 **단계-7 완성**(viewer AskDrawer +
+  terminal AI command 를 AiPort 뒤로 통합, 공개 AskDrawer 무회귀 — 위험 높아 후순위 검토). → 단계-9(landing shell 전환)
+  → 단계-10(Python 기본 UI=ui/apps/local). 명시 목표(챗+터미널 모드)=달성, 잔여=리팩터 "전부 완성" 꼬리.
 ```
 
 ---
@@ -527,3 +529,21 @@ commit: 9dfde877e (75 files)
   basePath=runtime.env.basePath, 현재 embedded basePath='' 라 임베드 AskDrawer 아바타만 경미 — 비차단).
 rollback: 9dfde877e revert (git mv·결합수술·index·재배선 단일 원자 커밋).
 중단 지점/다음 행동: push(chat+[23]+6-1+[24]) 후 6-3(로컬 viewer 마운트) → 단계-7 완성(AskDrawer/terminal AI AiPort 통합) → 단계-8.
+
+### [25] 단계-6-3 viewer 배선 완료 — 단계-6 전체 종료 (terminal overlay + standalone + local 3입구 동일 ViewerStudio)
+일시: 2026-06-13
+commit: 6-3a = 821c97c94 / 6-3b = 0d5afc7a7
+- **6-3a**(821c97c94): 로컬앱 `/analysis/[code]/viewer` 스켈레톤 → **ViewerStudio 마운트**. 패널/TOC/검색/비교/AskDrawer
+  는 @dartlab/ui-runtime/data/hfRange(HF parquet 직접 read, 브라우저)로 landing 공개 뷰어와 **동일 동작** — 로컬도
+  서버 무관 뷰어. 터미널 오버레이 iframe 타깃(viewer.urlForCompany → ?terminalEmbed=1 → embedded 헤더/title 숨김·
+  100% 높이). onNavigate=goto 딥링크. 정량재무(DuckDB)는 local provideDuckDb 미주입 → 빈값 graceful(로컬 터미널
+  재무 패리티, 회귀 아님). 검증: local check 0·build green(webllmWorker 별도 worker 청크 격리).
+- **6-3b**(0d5afc7a7): 터미널 오버레이 embedded viewer **basePath 무회귀** — ViewerOverlay 가 rt.env.basePath 를
+  ViewerStudio 에 주입(이동 전 $app/paths base 동작 복원, 임베드 AskDrawer/empty-state 아바타 GitHub Pages 경로).
+  ViewerStudioHostProps basePath? 추가. 검증: surfaces check 0·landing 풀빌드 green.
+**단계-6 종료**: terminal overlay(landing·local·ui/web iframe) + standalone(/viewer/company·local /analysis viewer) +
+  lab/viewer-* 가 **단일 ViewerSurface(ViewerStudio)** 소비. 6-2(FilingPort 공개) 생략 확정(포트 소비자 0).
+잔여(후속): local provideDuckDb(로컬 정량재무 — duckdb runtime 승격 시, 단계-8) · 터미널 오버레이 repoUrl(임베드
+  이슈링크, 경미) · ui/web 임베드 승급 검토.
+rollback: 821c97c94·0d5afc7a7 각 revert.
+중단 지점/다음 행동: push(6-3 2커밋, 이전 ci-fast 완료 후) → 단계-7 완성 또는 단계-8(scan/map/search 추출, 이동 원자 윈도우).
