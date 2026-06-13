@@ -8,8 +8,9 @@ dartlab.scan("debt") · network axis 가 silent thrift error 로 실패.
 1. 빌더 `SCAN_API_TYPES` (scan/builders/kr/report/build.py)
 2. 다운로드 무결성 `_REQUIRED_REPORT_FILES` (scan/io/parquet.py)
 3. 실소비자 — scan 엔진 `scanParquets(apiType, ...)` (scan/{debt,capital,governance,...})
-   + landing 터미널 `read('apiType', ...)` (landing/src/lib/terminal/data/reportSeries.ts,
-   HF `dart/scan/report/*.parquet` hyparquet 직독 — 2026-06-12 부터 동급 소비 표면).
+   + 터미널 런타임 어댑터 `read('apiType', ...)` (ui/packages/runtime/src/adapters/public/sources/reportSource.ts,
+   HF `dart/scan/report/*.parquet` hyparquet 직독 — 2026-06-12 동급 소비 표면, 플랫폼 단계-4a-2 에서
+   landing/src/lib/terminal/data/reportSeries.ts → runtime sources 로 승격).
 """
 
 from __future__ import annotations
@@ -26,9 +27,11 @@ pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _SCAN_DIR = _REPO_ROOT / "src" / "dartlab" / "scan"
-_REPORT_SERIES_TS = _REPO_ROOT / "landing" / "src" / "lib" / "terminal" / "data" / "reportSeries.ts"
+# 터미널 런타임 어댑터 데이터 소스 (플랫폼 단계-4a-2 승격 위치). reportSource.ts 의 read() 호출이 SSOT.
+# 디렉토리 전체 스캔 — 향후 소스 파일 rename/분할에도 견딘다 (scan 엔진 스캔과 동형).
+_RUNTIME_SOURCES_DIR = _REPO_ROOT / "ui" / "packages" / "runtime" / "src" / "adapters" / "public" / "sources"
 _CALL_RE = re.compile(r"scanParquets\(\s*['\"]([a-zA-Z][a-zA-Z0-9_]*)['\"]")
-# reportSeries.ts 내부 read('apiType', code, cols) — dart/scan/report/{apiType}.parquet 직독 호출
+# reportSource.ts 내부 read('apiType', code, cols) — dart/scan/report/{apiType}.parquet 직독 호출
 _TS_CALL_RE = re.compile(r"\bread\(\s*'([a-zA-Z][a-zA-Z0-9_]*)'")
 
 
@@ -52,12 +55,17 @@ def _scanConsumerApiTypes() -> set[str]:
 
 
 def _terminalConsumerApiTypes() -> set[str]:
-    """landing 터미널 reportSeries.ts 가 read() 로 직독하는 apiType set."""
-    try:
-        text = _REPORT_SERIES_TS.read_text(encoding="utf-8")
-    except OSError:
-        return set()
-    return {m.group(1) for m in _TS_CALL_RE.finditer(text)}
+    """터미널 런타임 어댑터 sources 가 read() 로 직독하는 apiType set (reportSource.ts 등)."""
+    found: set[str] = set()
+    if not _RUNTIME_SOURCES_DIR.is_dir():
+        return found
+    for ts in _RUNTIME_SOURCES_DIR.rglob("*.ts"):
+        try:
+            text = ts.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        found.update(m.group(1) for m in _TS_CALL_RE.finditer(text))
+    return found
 
 
 def _consumerApiTypes() -> set[str]:
