@@ -11,6 +11,7 @@ import type {
 	RuntimeEnvironment
 } from '@dartlab/ui-contracts';
 import { createHfMacroPort } from '../public/sources/macroSource';
+import { loadTerminalFinance } from '../public/sources/financeSource';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { notWiredYet } from './fetchJson';
 import type { ClientPanelInit, CompanyMeta, LocalCaches, PriceEventsPayload } from './localTypes';
@@ -30,14 +31,11 @@ export interface LocalRuntimeOptions {
 	navigation: NavigationPort;
 }
 
-// 로컬 서버는 정규화 재무 번들 엔드포인트 미보유 — null = 데이터셋 미존재 정직 표기.
-// (공개 어댑터는 HF parquet; 로컬은 후속 단계에서 /api 재무 엔드포인트 신설 시 배선.)
+// 터미널 재무 번들의 SSOT 는 발행 HF parquet(dart/finance/{code}.parquet) 이다 — 로컬 /api 엔드포인트가
+// 아니라 macro 포트와 동일하게 공개 HF 소스를 공유한다(곧 "로컬이 깃헙페이지 자산을 공유"하는 공통 배선).
+// 28 표준계정 정규화·10 카드 계산이 financeSource 한곳에 있어 공개/로컬이 동일 결과 — silent fallback 아닌 단일 경로.
 function localFinancePort(): FinancePort {
-	return {
-		async bundle() {
-			return null;
-		}
-	};
+	return { bundle: loadTerminalFinance };
 }
 
 export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime {
