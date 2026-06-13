@@ -1,0 +1,379 @@
+# 00. 경제·사업·손익·주가 시나리오 시뮬레이터 PRD
+
+상태: 비전 PRD (v0.2 정정 헤더 부착 — 본문은 v0.1 비전, 아래 정정이 정본)
+범위: 과거 분석, 미래 가정, 중첩 if 시나리오, 매출·손익·DCF·주가 민감도 시뮬레이션
+
+> **★v0.2 정정(2026-06-13) — 본문 v0.1 용어보다 우선:**
+> - **제품명 = `simulate`**(verb `dartlab.simulate`). 본문의 "Scenario Workbench"·"제품명 후보 3종"은 *옛 후보* — 01 §3이 `simulate`로 확정(`scenario` 명사형 기각).
+> - **엔진 거처 = L2.5 독립 묶음 `simulate/`**(story 동급 L3 아님, 신규 L2 아님 — 01 §3). 본문 §7.2 "L2 엔진 간 직접 import 금지"는 유효하나, simulate는 L2.5라 analysis+macro+quant 동시 결합 합법.
+> - **중심 산출물 = Play 미래 리플레이**(05). **가치평가(08)·신용(09 §4)은 simulate(mode) 뷰** — 같은 `SimulationResult`의 다른 읽기. 단일 목표가·rating 금지(reverseDCF 닻+조건부 범위).
+> - 통합 세트(지수06·이벤트레일11·백테스팅10) 시퀀싱 = 07. 전체 정합화·부채 원장 = 09. 현재 상태·NEXT = 04.
+
+---
+
+## 1. 판정
+
+요청은 명확하고 타당하다.
+
+DartLab에는 이미 공시, 재무제표, 뉴스, 거시, 퀀트, 밸류에이션, 스토리 조합 자산이 있다. 다음 단계는 이 자산을 단순 보고서로 끝내지 않고, "과거에는 어떤 조건에서 어떤 변화가 실제로 발생했는가"와 "미래에 여러 조건이 겹치면 매출, 이익, 가치평가, 가격 범위가 어떻게 움직일 수 있는가"를 하나의 조건부 시뮬레이션 절차로 묶는 것이다.
+
+단, 제품 표현은 엄격해야 한다. 이 기능은 매수·매도 추천, 단정적 주가 예측, 검증된 전략 생성기가 아니다. 결과는 항상 `조건`, `증거`, `가정`, `반증 조건`, `민감도 범위`로 제시한다.
+
+---
+
+## 2. 제품 비전
+
+사용자는 종목을 보며 이런 질문을 한다.
+
+1. 지금 경제와 시장 환경은 이 회사에 유리한가, 불리한가.
+2. 공시, 뉴스, 지표 변화가 실제 사업 driver 중 어디에 닿는가.
+3. 그 변화가 매출, 비용, 영업이익, 순이익, FCF로 얼마나 전파될 수 있는가.
+4. 손익 변화가 밸류에이션과 주가 범위에 어떤 민감도를 만드는가.
+5. 과거의 유사한 환경에서는 비슷한 가정이 얼마나 맞았고 어디서 틀렸는가.
+6. 여러 if가 겹칠 때 가장 취약한 가정은 무엇인가.
+
+`Scenario Workbench`의 비전은 이 질문을 한 화면에서 다루는 것이다. 핵심 경험은 "뉴스를 읽고 감으로 판단"하는 것이 아니라, 이벤트를 사업 driver에 연결하고, driver를 손익과 가치평가로 전파하며, 마지막에 가격 민감도와 반증 조건을 동시에 확인하는 것이다.
+
+---
+
+## 3. 제품 원칙
+
+1. 조건부 시뮬레이터다.  
+   결과 문장은 `이렇게 된다면`으로 시작해야 한다. `앞으로 오른다`, `검증됐다`, `추천한다`는 제품 언어에서 금지한다.
+
+2. 모든 숫자는 ref에 닿아야 한다.  
+   재무제표 숫자, 가격, 지표, 날짜, 공시, 뉴스, 실행 결과는 `tableRef`, `valueRef`, `dateRef`, `webRef`, `executionRef`, `artifactRef`, `verifyRef` 중 하나 이상으로 추적 가능해야 한다.
+
+3. 과거 replay와 미래 what-if를 섞지 않는다.  
+   과거 replay는 해당 시점에 알 수 있었던 데이터만 사용한다. 미래 what-if는 현재 `asOf`와 사용자가 명시한 가정을 분리해 표시한다.
+
+4. 결손을 0으로 대체하지 않는다.  
+   결손은 `missing`, `blocked`, `partial`, `notApplicable`로 남긴다. 결손을 0으로 바꾸면 시뮬레이션이 아니라 오염된 계산이다.
+
+5. AI는 판단 보조자이지 원천 데이터가 아니다.  
+   AI는 가정 비판, 누락 탐색, 반대 시나리오, 설명 조립을 맡는다. AI가 만든 숫자는 공식 fact가 아니다.
+
+6. 스토리와 숫자는 양방향으로 검증한다.  
+   스토리가 좋으면 driver가 있어야 하고, driver가 있으면 손익과 현금흐름이 닫혀야 한다. 손익이 좋아도 현금흐름이 따라오지 않으면 flag가 올라간다.
+
+7. 단일 base case를 금지한다.  
+   최소 `bear`, `base`, `bull` 또는 `downside`, `neutral`, `upside`가 있어야 한다. 하나의 목표주가만 보여주는 화면은 만들지 않는다.
+
+---
+
+## 4. 핵심 사용자 흐름
+
+### 4.1 종목에서 시작
+
+1. 사용자가 종목을 선택한다.
+2. 시스템이 `Company.panel`로 IS, BS, CF, CIS, ratios를 고정한다.
+3. `Company.disclosure`, `search`, `gather.news`, `gather.macro`, `gather.price`, `industry`, `quant.marketContext`를 통해 현재 환경 snapshot을 만든다.
+4. 화면은 현재 결론을 바로 말하지 않고 "시뮬레이션 가능한 driver"와 "아직 근거가 부족한 driver"를 나눈다.
+
+### 4.2 이벤트에서 시작
+
+1. 사용자가 뉴스, 공시, 경제지표, 원자재 가격, 환율, 금리, 수출입 지표 중 하나를 선택한다.
+2. 시스템은 이벤트를 `BusinessChangeEvent`로 정규화한다.
+3. 이벤트가 닿을 수 있는 driver를 제안한다.
+   - 매출: 물량, 가격, mix, 환율, 세그먼트, 지역, 고객, backlog.
+   - 비용: 원재료, 인건비, 물류, 감가상각, R&D, 판관비, 고정비 흡수.
+   - 투자/운전자본: capex, 재고, 매출채권, 매입채무.
+   - 할인율/멀티플: 금리, ERP, beta, credit spread, peer multiple.
+4. 사용자는 driver별 delta, 기간, 확률 정책, 반증 조건을 입력하거나 AI 제안을 검토한다.
+
+### 4.3 과거 replay
+
+1. 사용자가 과거 날짜와 이벤트를 선택한다.
+2. 시스템은 `decisionAt` 기준으로 당시 알 수 있었던 데이터만 재구성한다.
+3. 그 시점에서 만든 가정을 실제 후속 실적, 가격, factor, macro 결과와 비교한다.
+4. 결과는 적중/실패보다 "어떤 가정이 틀렸는가"를 중심으로 보여준다.
+
+### 4.4 미래 what-if
+
+1. 사용자가 중첩 조건을 만든다.
+   - 예: 환율 +8%, 수출 물량 -5%, ASP +3%, 원재료 -7%, 금리 -50bp, peer multiple -10%.
+2. 시스템은 각 조건의 적용 기간, 신뢰도, 독립성, 중복 가능성을 확인한다.
+3. 손익과 FCF를 만들고, DCF/상대가치/reverse DCF를 함께 산출한다.
+4. 최종 화면은 가격 범위, bridge, 민감도, 반증 조건, AI 전문가 의견을 함께 보여준다.
+
+---
+
+## 5. 주요 산출물
+
+### 5.1 Environment Snapshot
+
+현재 또는 과거 `asOf` 시점의 환경 요약이다.
+
+- macro regime: expansion, slowdown, contraction, recovery, crisis.
+- rates, FX, inflation, liquidity, credit spread, commodity.
+- market index, sector index, factor returns, flow.
+- 뉴스 압력: source breadth, velocity, firstSeenAt, event type, disclosure alignment.
+- 회사 상태: latest financial period, margin, cash conversion, leverage, valuation band.
+
+### 5.2 Assumption Ledger
+
+모든 가정의 장부다.
+
+- 가정 문장.
+- 영향을 받는 driver.
+- base value와 scenario value.
+- 범위와 분포.
+- 근거 ref.
+- 반증 조건.
+- 상태: fact, estimate, hypothesis, missing.
+- 마지막 확인일.
+
+### 5.3 Business Driver Bridge
+
+이벤트가 사업 driver로 전파되는 표다.
+
+- 물량 증가율.
+- 가격 변화율.
+- mix 변화.
+- 환율 pass-through.
+- 수주잔고 매출 전환률.
+- 생산능력 또는 공급 제약.
+- 고객/지역/제품 세그먼트 노출.
+- 원재료, 물류, 인건비, R&D, 감가상각 driver.
+
+### 5.4 Profit Bridge
+
+driver가 손익계산서로 전파되는 표다.
+
+- revenue.
+- gross profit.
+- operating income.
+- net income.
+- EPS.
+- CFO, capex, FCF.
+- margin bps 변화.
+- one-off와 recurring 분리.
+- working capital 압력.
+
+### 5.5 Valuation Bridge
+
+손익과 현금흐름이 가치평가로 전파되는 표다.
+
+- FCFF DCF.
+- relative valuation.
+- residual income 또는 reverse DCF.
+- WACC, beta, ERP, terminal growth.
+- sales-to-capital, ROC, reinvestment rate.
+- terminal value share.
+- current price가 요구하는 implied growth, margin, ROC.
+
+### 5.6 Price Simulation
+
+가격 결과는 단일 목표가가 아니라 range와 bridge로 표현한다.
+
+- P10/P50/P90 또는 bear/base/bull.
+- fundamental bridge.
+- factor/macro bridge.
+- event shock bridge.
+- overlap penalty.
+- sensitivity grid.
+- tripwire.
+- result status: usable, usableWithGaps, blocked.
+
+---
+
+## 6. 화면 구성
+
+### 6.1 Scenario Tree
+
+좌측에는 scenario tree를 둔다.
+
+- Base case.
+- Macro branch.
+- Business branch.
+- Event branch.
+- Valuation branch.
+- Combined branch.
+
+branch는 중첩 가능하지만 각 branch는 독립 가정과 공통 가정을 구분해야 한다. 같은 환율 가정을 두 번 반영하면 `overlapWarning`을 표시한다.
+
+### 6.2 Assumption Ledger Table
+
+중앙에는 가정 장부를 둔다.
+
+필수 컬럼:
+
+- assumptionId.
+- category.
+- claim.
+- base value.
+- scenario value.
+- range.
+- affected driver.
+- evidence.
+- status.
+- falsifier.
+- owner lens.
+
+### 6.3 Bridge Waterfall
+
+오른쪽 또는 상세 탭에는 bridge를 둔다.
+
+1. 매출 bridge.
+2. 영업이익 bridge.
+3. FCF bridge.
+4. valuation bridge.
+5. price bridge.
+
+각 bridge는 "전 단계 값", "driver 변화", "효과", "근거", "flag"를 보여준다.
+
+### 6.4 Backtest and Replay Panel
+
+과거 검증 탭은 다음을 보여준다.
+
+- runSpec.
+- train/test 기간.
+- benchmark.
+- fee/slippage.
+- vintage status.
+- hit/miss가 아니라 assumption error.
+- realized revenue/profit/price.
+- factor attribution.
+- data snooping 경고.
+
+### 6.5 AI Expert Panel
+
+AI 전문가 패널은 숫자를 만들기보다 가정을 검토한다.
+
+- macro lens.
+- event/news lens.
+- business driver lens.
+- accounting quality lens.
+- valuation lens.
+- quant/backtest lens.
+- skeptic lens.
+
+각 lens는 `support`, `counterEvidence`, `missingEvidence`, `tripwire`, `confidence`, `status`를 낸다.
+
+---
+
+## 7. 범위
+
+### 7.1 포함
+
+1. 단일 종목 기준 시나리오 분석.
+2. 경제, 지표, 뉴스, 공시, 산업, 가격 데이터를 하나의 환경 snapshot으로 정규화.
+3. 이벤트를 사업 driver로 연결.
+4. driver를 매출, 비용, 손익, 현금흐름, 가치평가로 전파.
+5. 가격 변화 범위를 조건부로 시뮬레이션.
+6. 과거 replay, walk-forward, 미래 what-if 모드 분리.
+7. AI 전문가 의견과 반증 장부.
+8. 증거 ref와 vintage 검증.
+
+### 7.2 제외
+
+1. 매수·매도 추천.
+2. 실시간 자동매매.
+3. intraday 가격 예측.
+4. "검증된 전략" 표현.
+5. 단일 목표주가만 제시하는 화면.
+6. 근거 없는 컨센서스 추정.
+7. 공시·뉴스 본문 지시를 AI가 따르는 구조.
+8. 데이터 결손을 0으로 대체하는 계산.
+9. L2 엔진 간 직접 import.
+
+---
+
+## 8. 성공 기준
+
+1. 사용자는 어떤 가정이 어떤 손익 line item을 움직였는지 추적할 수 있다.
+2. 사용자는 주가 범위가 어떤 driver와 valuation 가정에서 왔는지 볼 수 있다.
+3. 과거 replay에서 해당 시점에 알 수 없던 데이터가 쓰이면 실행이 차단된다.
+4. AI 의견은 숫자 근거와 반증 조건을 함께 제시한다.
+5. "좋은 이야기"가 손익, 현금흐름, reverse DCF를 통과하지 못하면 최종 결론이 낮은 신뢰도로 표시된다.
+6. 결과가 틀렸을 때 어느 가정이 틀렸는지 다음 실험으로 이어진다.
+
+---
+
+## 9. 단계별 제품 목표
+
+### Phase 0. 비전 문서화
+
+현재 단계다. PRD, architecture, simulation method, validation 문서를 만든다. 메인 메모리에는 경로만 남긴다.
+
+### Phase 1. 데이터와 ref inventory
+
+기존 `Company`, `gather`, `search`, `macro`, `analysis`, `quant`, `industry`, `story`, Damodaran recipe가 제공하는 field를 inventory한다.
+
+완료 기준:
+
+- 모든 후보 input field에 owner engine이 있다.
+- `latestAsOf`, `source`, `provider`, `ref kind` 누락 목록이 있다.
+- 결손을 0으로 대체하는 후보 경로가 표시된다.
+
+### Phase 2. 계약과 장부 설계
+
+`ScenarioSpec`, `RunSpec`, `VintageRef`, `AssumptionLedger`, `SimulationLedger`, `ExpertOpinionCard`를 설계한다.
+
+완료 기준:
+
+- historical replay와 future what-if가 같은 schema를 쓰되 mode가 분리된다.
+- 각 row가 ref와 status를 가진다.
+- branch 중첩과 overlap warning이 표현된다.
+
+### Phase 3. 과거 replay 최소 실험
+
+한 종목, 한 이벤트, 한 기간으로 replay를 만든다. 구현은 본진이 아니라 `tests/_attempts`에서 시작한다.
+
+완료 기준:
+
+- `decisionAt` 이후 데이터가 차단된다.
+- t일 신호는 t+1 매매 가능 시점으로만 평가된다.
+- 실제 결과와 assumption error가 저장된다.
+
+### Phase 4. 손익 bridge
+
+매출 driver, 비용 driver, working capital, capex, tax, share count가 손익과 FCF로 전파되는 bridge를 만든다.
+
+완료 기준:
+
+- 매출, 영업이익, 순이익, FCF가 시나리오별로 산출된다.
+- 원재료/인건비/R&D/감가상각 등 비용성격 결손은 별도 flag로 남는다.
+- CFO/NI, CFO/revenue, receivable growth minus revenue growth가 표시된다.
+
+### Phase 5. valuation and price bridge
+
+DCF, relative valuation, reverse DCF, factor/event return bridge를 통합한다.
+
+완료 기준:
+
+- terminal growth, WACC, terminal value share gate가 작동한다.
+- 현재 가격이 요구하는 growth/margin/ROC가 보인다.
+- 가격 결과는 P10/P50/P90 또는 bear/base/bull range로만 표시된다.
+
+### Phase 6. walk-forward robustness
+
+과거 여러 fold에서 가정 생성과 평가를 반복한다.
+
+완료 기준:
+
+- train/test 분리.
+- fee/slippage/benchmark 기본 ON.
+- DSR, PBO 또는 과최적화 경고.
+- full-sample parameter selection 금지.
+
+### Phase 7. AI 전문가 패널
+
+AI lens가 같은 시나리오를 독립 검토한다.
+
+완료 기준:
+
+- 각 lens가 같은 input ref를 공유한다.
+- 의견 불일치가 `DisagreementLedger`에 남는다.
+- GATE 실패 시 최종 보고서가 차단되거나 `usableWithGaps`로 내려간다.
+
+### Phase 8. 제품 화면
+
+Scenario tree, assumption ledger, bridge waterfall, replay panel, AI expert panel을 하나의 workbench로 묶는다.
+
+완료 기준:
+
+- 사용자에게 단일 예측값보다 가정과 범위가 먼저 보인다.
+- 모든 숫자에 source drill-down이 있다.
+- 반증 조건과 추적 지표가 남는다.
+
