@@ -196,7 +196,7 @@ c.select("IS", ["당기순이익"], freq="Q")  # NPM 계산
 | 회복기 매출 2.46배(10.96→26.92) vs 영업이익 3.53배(2.50→8.82), OPM 22.8%→32.8% | IS 합산 | ✓ 실측 |
 | 2025 OPM↑(31.8→32.8%) vs NPM↓(24.8→20.1%, 순이익 5.88→5.40B) | 영업이익·순이익÷매출 | ✓ 실측 |
 | 영업CF/영업이익 1.07~1.28배 (2022 1.28·2024 1.10·2025 1.07) | `c.select("CF",["영업활동현금흐름"])` | ✓ 실측 |
-| 2025 OPM 32.8% < 2018 36.8%·2019 35.4% 정점 (완전 회복 아님) | IS 합산 | ✓ 실측 |
+| 2025 OPM 32.8% &lt; 2018 36.8%·2019 35.4% 정점 (완전 회복 아님) | IS 합산 | ✓ 실측 |
 | 마케팅비 매출의 약 31%(2024 $7.3B)·성과형 광고 구성 | [BKNG 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001075531&type=10-K) · [Phocuswire](https://www.phocuswire.com/) | 외부 인용 |
 | 2023 구글 광고 추정 약 $3.2B (2023·구글 단일 추정, 내부 총액과 차감 관계 아님) | [Statista](https://www.statista.com/) | 외부 인용·추정 |
 | 직접·앱 트래픽 mid-60%·Genius 로열티(예약의 약 40%) | [Booking Holdings IR](https://www.bookingholdings.com/) | 외부 인용 |
