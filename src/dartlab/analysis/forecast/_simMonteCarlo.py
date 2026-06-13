@@ -141,8 +141,8 @@ def monteCarloForecast(
     AIContext:
         AI 답변 시 P50/P95 백분위 + 상승확률 표로 인용 — VaR 함께 표시.
     """
-    if seed is not None:
-        random.seed(seed)
+    # 로컬 RNG 인스턴스 — 전역 random 상태 미오염 (동일 seed → 동일 시퀀스, 동작 무변경).
+    rng = random.Random(seed)
 
     warnings: list[str] = []
 
@@ -199,8 +199,8 @@ def monteCarloForecast(
         simMargin = margin
         for yr in range(len(meanRevPath)):
             # 평균 경로에 노이즈 추가
-            revNoise = random.gauss(0, revCv)
-            marginNoise = random.gauss(0, marginStd)
+            revNoise = rng.gauss(0, revCv)
+            marginNoise = rng.gauss(0, marginStd)
 
             simRev = meanRevPath[yr] * (1 + revNoise)
             simMargin = meanMarginPath[yr] + marginNoise

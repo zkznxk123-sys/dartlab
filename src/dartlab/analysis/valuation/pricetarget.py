@@ -274,8 +274,8 @@ def _monteCarloPriceDistribution(
     Returns:
         (percentiles, probability_above_current, all_values)
     """
-    if seed is not None:
-        random.seed(seed)
+    # 로컬 RNG 인스턴스 — 전역 random 상태 미오염 (동일 seed → 동일 시퀀스, 동작 무변경).
+    rng = random.Random(seed)
 
     ratios = extractHistoricalRatios(series)
     base = {
@@ -315,7 +315,7 @@ def _monteCarloPriceDistribution(
 
     for _ in range(iterations):
         # v3: Cholesky 기반 상관 noise
-        z = [random.gauss(0, 1) for _ in range(5)]
+        z = [rng.gauss(0, 1) for _ in range(5)]
         correlated = _choleskyMultiply(chol, z)
         growth_noise = correlated[0] * sigmas[0]
         margin_noise = correlated[1] * sigmas[1]
