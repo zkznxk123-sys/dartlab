@@ -1,0 +1,275 @@
+"""End-to-end deterministic scenario run (L2.5, internal) — `runScenario`.
+
+Per `mainPlan/scenario-simulator/01-engine-architecture.md` §3, a simulate result is always a set
+of node values each carrying ``ref + quality gate status + provenance + asOf``. This module wires
+the born-clean foundation into one run:
+
+    buildSnapshot(company)             # read base metrics ONCE (§13b-5)
+      -> buildScenarioSheet(snapshot)  # macro -> rev -> proforma -> dcf (registry §5)
+        -> evaluateSheet(sheet)        # deterministic topo executor (§6.2)
+          -> SimulationResult          # ref + quality status + provenance + asOf (§3)
+
+`runScenario` is INTERNAL — not yet a public `Company.simulate(...)` verb. The apiContract /
+EngineCall registration, the lens path, Play, and DriverRegistry convergence are later phases
+(see the ledger). honest-gap (§3): a missing leaf or absent base metric leaves the corresponding
+field None and downgrades the node's quality status to ``partial`` — never silently 0.
+
+Born-clean (§10): imports forward only — L2.5 `registry`/`sheet` (which themselves import L0/L1.5/
+L2). The legacy `analysis/forecast/simulation.py` flow is never touched.
+
+Layer: L2.5.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any
+
+from dartlab.simulate.registry import (
+    DRIVER_DCF,
+    DRIVER_MACRO,
+    DRIVER_PROFORMA,
+    DRIVER_REV,
+    buildScenarioSheet,
+    buildSnapshot,
+)
+from dartlab.simulate.sheet import NodeValue, evaluateSheet
+
+
+@dataclass(frozen=True)
+class NodeAudit:
+    """Per-node audit record surfaced on a SimulationResult (§3).
+
+    driverId   : the node's driver id (``macro.path`` / ``rev.path`` / ``proforma`` / ``dcf``).
+    status     : ``"ok"`` when the node produced a value, ``"partial"`` on an honest data gap.
+    provenance : the node's formula tag (``preset:..`` / ``transfer:..`` / ``proforma:..`` / ``dcf:..``).
+    refs       : grounding ref addresses (leaf refs).
+    inputsHash : the deterministic memoization key (stable across re-runs on identical inputs).
+    asOf       : data vintage used.
+    latestAsOf : latest available vintage.
+    """
+
+    driverId: str
+    status: str
+    provenance: str
+    refs: tuple[str, ...]
+    inputsHash: str
+    asOf: str
+    latestAsOf: str
+
+
+@dataclass(frozen=True)
+class SimulationResult:
+    """One deterministic scenario run's result — values + ref/quality/provenance per node (§3).
+
+    Capabilities:
+        Carries the scenario's revenue / margin / proforma-FCF paths, the dcf per-share value, and
+        a per-node `NodeAudit` (status / provenance / refs / inputsHash / asOf). honest-gap: any
+        field that depended on an absent leaf or base metric is None and its node `status` is
+        ``"partial"``.
+
+    Fields:
+        scenarioName  : the scenario id this run used.
+        horizon       : number of forecast years.
+        revenuePath   : per-year absolute revenue (None when base revenue absent).
+        marginPath    : per-year operating margin (%) — carried from the transfer node frozen input.
+        fcfPath       : per-year proforma FCF (None on a proforma gap).
+        proformaYears : number of ProFormaYear projections the L2 leaf produced.
+        terminalRevenue : the proforma terminal-year revenue (the proforma node value).
+        dcfPerShare   : the dcf node's per-share value (None when shares / FCF absent).
+        enterpriseValue : the dcf node's enterprise value (PV of FCF + terminal value).
+        nodes         : driverId -> NodeAudit (provenance / refs / quality status / asOf).
+        asOf          : the run's data vintage.
+        latestAsOf    : latest available vintage.
+        quality       : overall ``"ok"`` if every node is ok, else ``"partial"``.
+    """
+
+    scenarioName: str
+    horizon: int
+    revenuePath: tuple[float, ...] | None
+    marginPath: tuple[float, ...] | None
+    fcfPath: tuple[float, ...] | None
+    proformaYears: int
+    terminalRevenue: float | None
+    dcfPerShare: float | None
+    enterpriseValue: float | None
+    nodes: dict[str, NodeAudit]
+    asOf: str
+    latestAsOf: str
+    quality: str = "ok"
+    warnings: tuple[str, ...] = field(default_factory=tuple)
+
+
+def _audit(driverId: str, nv: NodeValue) -> NodeAudit:
+    """Wrap a NodeValue into a NodeAudit, marking status partial on an honest gap."""
+    status = "ok" if nv.value is not None else "partial"
+    return NodeAudit(
+        driverId=driverId,
+        status=status,
+        provenance=nv.provenance,
+        refs=nv.refs,
+        inputsHash=nv.inputsHash,
+        asOf=nv.asOf,
+        latestAsOf=nv.latestAsOf,
+    )
+
+
+def runScenario(
+    company: Any,
+    *,
+    scenario: str = "baseline",
+    horizon: int = 3,
+    asOf: str | None = None,
+) -> SimulationResult:
+    """Run one deterministic scenario on a company, end to end (§3 internal driver).
+
+    Capabilities:
+        Reads the company's base metrics ONCE into a frozen snapshot, wires the deterministic
+        ``macro.path -> rev.path -> proforma -> dcf`` DriverSheet for the named scenario, evaluates
+        it with the topological executor, and assembles a `SimulationResult` carrying the
+        revenue / margin / FCF paths, the dcf per-share value, and a per-node audit
+        (provenance / refs / quality status / inputsHash / asOf). honest-gap: a missing leaf or
+        absent base metric leaves the field None and downgrades the node status to ``partial`` —
+        never 0. Deterministic by construction: re-running on the same company / scenario yields
+        identical per-node `inputsHash`es (no RNG on this path).
+
+    Args:
+        company: a `Company` (DART/EDGAR) instance to simulate. Read forward via the L2 finance
+            accessors (`_buildFinanceSeries`, `sector`, `sectorParams`).
+        scenario: the scenario id — a key of `synth.scenario.getPresetScenarios("KR")` (e.g.
+            ``"baseline"``, ``"adverse"``, ``"semiconductor_down"``). Unknown ids fall back to the
+            baseline preset.
+        horizon: number of forecast years (default 3; macro paths are truncated to this length).
+        asOf: explicit data-vintage label; when None, the company's latest finance period is used.
+
+    Returns:
+        SimulationResult: the scenario's paths + dcf per-share value + per-node audit + overall
+        quality status (``"ok"`` / ``"partial"``).
+
+    Raises:
+        ValueError: only from the executor on a malformed sheet (cycle / missing dep) — the wiring
+            built here is acyclic, so this is a programming-error guard, not a data condition.
+
+    Example:
+        >>> from dartlab.providers.dart.company import Company  # doctest: +SKIP
+        >>> r = runScenario(Company("005930"), scenario="baseline")  # doctest: +SKIP
+        >>> r.scenarioName, len(r.revenuePath)  # doctest: +SKIP
+        ('baseline', 3)
+
+    Guide:
+        This is the deterministic (lens=None) path. To compare scenarios, call once per scenario
+        over the same company; baseline vs adverse differ only in the macro preset, so a lower
+        adverse revenue path is the expected qualitative signal. The result is the audit object —
+        read each node's provenance / refs to explain the number.
+
+    When:
+        Internally, to compute a deterministic scenario answer before the public `simulate` verb,
+        lens path, and Play exist.
+
+    How:
+        buildSnapshot (read once) -> buildScenarioSheet -> evaluateSheet -> assemble
+        SimulationResult from the four node values.
+
+    SeeAlso:
+        - ``dartlab.simulate.registry.buildScenarioSheet``: the node wiring.
+        - ``dartlab.simulate.sheet.evaluateSheet``: the deterministic executor.
+        - ``dartlab.synth.scenario.getPresetScenarios``: valid scenario ids.
+
+    Requires:
+        A constructed `Company`. The proforma node needs a finance series with IS/BS/CF ≥ ~3 years
+        for a non-partial result.
+
+    AIContext:
+        The output is a deterministic transform of frozen assumptions, not a forecast — always
+        surface the scenario id, the per-node provenance/refs, and `asOf`. A ``partial`` quality
+        means a data gap (a None field), not a zero value; report the gap, do not impute 0.
+
+    LLM Specifications:
+        AntiPatterns:
+            - Quoting `dcfPerShare` as a target price — it is a scenario-conditioned transform.
+            - Treating a None `revenuePath` as 0 — it is an honest base-revenue gap.
+            - Re-running with a different `asOf` and comparing inputsHashes — vintage is part of
+              the hash.
+        OutputSchema: ``SimulationResult`` (see its field docstring).
+        Prerequisites: a `Company` with a finance series.
+        Freshness: inherits the company's latest finance period as `asOf`/`latestAsOf`.
+        Dataflow: company -> snapshot -> sheet -> evaluateSheet -> SimulationResult.
+        TargetMarkets: KR (getPresetScenarios("KR") + KR elasticity); US needs US presets.
+    """
+    snapshot = buildSnapshot(company, asOf=asOf)
+    sheet = buildScenarioSheet(snapshot, scenario=scenario, horizon=horizon)
+    out = evaluateSheet(sheet)
+
+    macroId = f"{DRIVER_MACRO}@{scenario}#all"
+    revId = f"{DRIVER_REV}@{scenario}#all"
+    proformaId = f"{DRIVER_PROFORMA}@{scenario}#all"
+    dcfId = f"{DRIVER_DCF}@{scenario}#all"
+
+    revNv = out[revId]
+    proformaNv = out[proformaId]
+    dcfNv = out[dcfId]
+
+    # margin path rides in the rev node's frozen input, which is not surfaced on the NodeValue;
+    # recompute it deterministically from the same snapshot transfer for the result (the audit
+    # node still carries the authoritative provenance/refs/hash).
+    marginPath = _marginPathFromSnapshot(snapshot, scenario, horizon)
+
+    nodes = {
+        DRIVER_MACRO: _audit(DRIVER_MACRO, out[macroId]),
+        DRIVER_REV: _audit(DRIVER_REV, revNv),
+        DRIVER_PROFORMA: _audit(DRIVER_PROFORMA, proformaNv),
+        DRIVER_DCF: _audit(DRIVER_DCF, dcfNv),
+    }
+    quality = "ok" if all(a.status == "ok" for a in nodes.values()) else "partial"
+
+    warnings: list[str] = []
+    if snapshot.get("baseRevenue") is None:
+        warnings.append("base revenue absent — scenario path unavailable (honest-gap)")
+    if snapshot.get("shares") in (None, 0):
+        warnings.append("shares unavailable — dcf per-share unavailable (honest-gap)")
+
+    return SimulationResult(
+        scenarioName=scenario,
+        horizon=horizon,
+        revenuePath=revNv.vector,
+        marginPath=marginPath,
+        fcfPath=proformaNv.vector,
+        proformaYears=len(proformaNv.vector) if proformaNv.vector else 0,
+        terminalRevenue=proformaNv.value,
+        dcfPerShare=dcfNv.value,
+        enterpriseValue=dcfNv.vector[0] if dcfNv.vector else None,
+        nodes=nodes,
+        asOf=snapshot["asOf"],
+        latestAsOf=snapshot["latestAsOf"],
+        quality=quality,
+        warnings=tuple(warnings),
+    )
+
+
+def _marginPathFromSnapshot(snapshot: dict, scenario: str, horizon: int) -> tuple[float, ...] | None:
+    """Deterministically recompute the margin path for the result (same transfer as the rev node).
+
+    The rev node carries the margin path in its frozen input (hashed, audited), but the executor
+    does not surface frozen inputs on `NodeValue`. The result recomputes it from the same snapshot
+    + preset via the same transfer, so the number shown matches the audited node byte-for-byte.
+    Returns None on an honest base-revenue gap.
+    """
+    from dartlab.simulate.transfer import transferRevenuePath
+    from dartlab.synth.scenario import getPresetScenarios
+
+    baseRevenue = snapshot.get("baseRevenue")
+    if baseRevenue is None:
+        return None
+    baseMargin = snapshot["baseMargin"] if snapshot.get("baseMargin") is not None else 10.0
+    presets = getPresetScenarios("KR")
+    sc = presets.get(scenario) or presets["baseline"]
+    _rev, marginPath, _wacc = transferRevenuePath(
+        baseRevenue,
+        baseMargin,
+        list(sc.gdpGrowth[:horizon]),
+        list(sc.interestRate[:horizon]),
+        list(sc.krwUsd[:horizon]),
+        snapshot["elasticity"],
+        snapshot["baseWacc"],
+    )
+    return tuple(marginPath)
