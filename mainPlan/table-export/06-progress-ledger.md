@@ -58,9 +58,13 @@
 
 ✅ **Phase 2a 공개 브라우저 writer 코어 — 완료(2026-06-14)**: `ui/packages/surfaces/src/viewer/lib/xlsx/`(PRD의 landing 경로 stale → surfaces 재그라운딩) = `zipStore.ts`(STORE ZIP+CRC32 0xEDB88320 PKWARE 바이트레이아웃)·`tableGrid.ts`(엔진 cellGrid TS 포팅, DOM-free, 병합셀=동일 인스턴스, XML 개행정규화·implicit-td-close 정합)·`tableExtract.ts`(coerceCell/detectUnit 미러)·`workbook.ts`(OOXML 파트 inlineStr·t=n·mergeCells)·`buildWorkbook.ts`(병합 앵커 1회·시트명 규칙·honest-gap)·`browserXlsxParity.mts`(스탠드얼론 게이트). 검증: 격자 패리티 3 골든픽스처(2384·2482셀 정확일치)·coerce 패리티·ZIP 유효성(CRC32 재계산 + **openpyxl 독립 리더 무경고 오픈**·mergeCell·honest-gap)·svelte-check 0 ERROR.
 
+✅ **Phase 2b 공개 브라우저 UI — 완료(2026-06-14, 시각 검증 포함)**: `viewer/lib/export/selection.svelte.ts`(Svelte5 rune store, 정체성=섹션 절대 인덱스) + `viewer/components/ExportDrawer.svelte`(AskDrawer 슬롯 공유·상호배타) + `PanelMatrix`(셀 absolute 체크박스 오버레이·`.picked` steady glow) + `ViewerStudio`([표 내보내기] 버튼·드로어 마운트·회사전환 clear) + `dataExport.downloadBlob`. 흐름: 버튼→선택모드→셀 체크→드로어(정렬/이름/모드)→buildWorkbook→.xlsx. 
+  - ★**screenshot 검증이 실버그 적발**(feedback_ui_rules 입증): svelte-check/build/store-test 전부 green 이었으나 Playwright viewer(005930) 실측이 '선택 미반영'을 잡음 — 회사전환 clear effect 가 `clear()→items.splice(0,items.length)` 로 items.length 를 읽어 items 에 의존→선택 add 마다 self-clear. fix=`untrack(()=>clear())`. 재검증: `.body-cell.picked=6`(glow on)·드로어 2개·[내보내기] 3시트·콘솔 0·드로어/격자 시각 정상.
+  - **터미널 자동 상속**: viewer(ViewerStudio)가 `ui/packages/surfaces` 공유라 터미널 오버레이(ViewerOverlay)도 같은 export UI 를 자동 수령 → Phase 3 의 '같은 selection UX 3표면' 대부분 자연 달성.
+
 다음:
-3. **Phase 2b — 공개 브라우저 UI**: `selection.svelte.ts`(Svelte5 rune 선택 store) + `ExportDrawer.svelte`(AskDrawer 슬롯 공유) + `PanelMatrix`/`PanelTocTree`/`ViewerStudio` 배선(체크박스 오버레이·steady glow·[표 내보내기] 헤더). ⚠ **screenshot 검증 필수**(feedback_ui_rules) — viewer 스택 구동 UI 세션. `dataExport.ts` downloadBlob + financeToExcel(.xls) deprecate.
-4. **Phase 3 — 터미널**: `ExportPort`(contracts) + public/local 어댑터 + command palette.
+4. **Phase 3 — 터미널 잔여**: `ExportPort`(contracts) public/local 어댑터(로컬 터미널이 엔진 openpyxl 완전판 .xlsx 선택 — 공개=zero-dep, 로컬=엔진 tier) + command palette. 브라우저 export 는 이미 3표면 작동(공유 surface). 이건 로컬 tier 고도화·자연어 `exportSelection` 경로.
+5. **(선택) PanelTocTree 섹션/블록 체크박스** + 회사이식(N사) — Phase 2b 이연분.
 
 ## 6. 열린 질문 (deferred, 착수 시 판단)
 
