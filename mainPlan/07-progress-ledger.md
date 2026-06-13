@@ -10,12 +10,14 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-5 (로컬 SvelteKit App Scaffold — 가치 도달점 V1). 단계-4b 완료(4b-1 #16 + 4b-2 #17).
+다음 작업: 단계-5 (로컬 SvelteKit App Scaffold — 가치 도달점 V1) **착수 — sub-unit 분해 선언 완료(entry #18)**.
+  단계-4b 완료·원격 종료(4b-1 #16 + 4b-2 #17, ff9099ba0 Deploy green·CI Fast green).
 운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론".
 
-단계-5 윤곽 (04 §단계-5): ui/apps/local 생성(landing 동일 툴체인 Vite 8·svelte 정확고정)·local runtime
-  adapter 연결(AI=/api/agent/*)·/chat·/terminal/[code]·/ask·/analysis 라우트 skeleton·/settings/providers·
-  TerminalSurface 풀스크린 마운트·챗→터미널 모드 전환. 큰 신규 단위 — 착수 전 sub-unit 분해 검토.
+단계-5 진입점 = **5-1**(ui/apps/local scaffold + 7 라우트 placeholder, surface 무import·runtime 무호출 컴파일).
+  설계·포트계약·게이트 전부 entry #18 박제(재조사 불필요). 이후 5-2(createLocalRuntime fetch /api/* 채움)→
+  5-3(라우트 배선+TerminalSurface 마운트+chat→terminal+viewer overlay). adapter-static fallback:'index.html'+ssr=false,
+  dev proxy /api→127.0.0.1:8400, AiPort 정직 강등, viewer=hosts null+URL-embed, Python _ui_path 무변경(전환=단계-10).
   ⚠ 로컬 풀빌드 검증 환경 주의: landing 풀 prerender 는 HF seed(산업맵·피드) 미보유 시 로컬 404
     (CI 의 'Seed from HF' 단계가 제공) — 로컬 게이트 = check/단위 compile, 풀 prerender 는 CI 권위.
 §8.1 내부구조 결정(전문 아키텍트 A1 채택): 4b-2 = data/→lib/ 만 적용(§8.1 lib/ 충족·depth 보존 저위험).
@@ -24,7 +26,7 @@
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
 잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 동행) · scan 프리셋류 포트(단계-8) · navigation/storage
   포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신
-재개 지점: entry #17 (4b-2 완료) — 단계-4b 종료, surface 패키지 §8.1 lib/ 정렬·양쪽 무중단. 단계-5 진입
+재개 지점: entry #18 (단계-5 예약·분해 선언) — 5-1 scaffold 부터. 설계 전부 #18 에 박제됨.
 ```
 
 ---
@@ -286,3 +288,51 @@ client+server 컴파일 ✓(33.75s) / ui/web build 0 ✓ / `'./data/`·`'../data
 ※ landing 풀 prerender 는 로컬 HF seed(산업맵·피드 데이터) 미보유로 blog WIP·`/feed/industry/*.xml` 404
   (CI 'Seed from HF' 단계가 제공 — 터미널 무관·환경 한계, CI 권위 빌드가 검증. 4b-1 Deploy 64768487a green 으로 이동 자체는 프로덕션 확증).  
 rollback: 이 commit revert (단일 git mv + import sed).
+
+### [18] 단계-5 Local SvelteKit App Scaffold — 예약 + sub-unit 분해 선언 (07 규칙 3)
+일시: 2026-06-13
+commit: (예약 — 본 entry 자체는 문서)
+사전 설계: 전문 에이전트 2인 토론(아키텍트 분해·포트계약 + 적대 무중단 파괴자) 수행. 핵심 합의·실측 확정:
+- **포트 계약 SSOT = 코드**(`@dartlab/ui-contracts`), 02 문서 이상형 아님. 터미널 surface 가 렌더 중 실제 호출하는 포트
+  실측(grep): `finance.bundle`·`price.{initial,older,loaded,govCandles,govRecent}`·`company.productIndex`·
+  `viewer.urlForCompany(code,{vs})`(CenterStack·RightStack·ViewerOverlay)·`report.{capitalChanges,auditTrail,
+  topExecPay,workforce,shareholderReturn,investments}`·`scan.changes(code,8)`(RightStack:83)·`filing.{regular,nonRegular}`.
+  → 이들은 throw 금지(honest-empty/null 또는 실구현). **호출 안 됨 = throw 정당**(배선순서 트립와이어): `scan.{listTableSources,
+  getPresets,savePreset}`·`map.*`·`search.*`(LeftRail 검색은 eng.suggest, search 포트 무호출).
+- **createLocalRuntime = FRESH 구현**(fetch `/api/*`, apiBase 주입). ui/web `buildBridgeRuntime` 은 React 결합
+  (`@/features/dashboard/api/client`)·동결이라 비이식 — 같은 /api 계약을 새로 구현(정규화기 tocToContract/gridToContract/
+  initToContract 는 로직만 미러). macro=`createHfMacroPort()` 재사용(회사무관 HF 공용).
+- **서버 게이트웨이 실측**: 라우터 13종 등록(`__init__.py:226~238`) — `/api/agent`(AG-UI SSE `POST /api/agent/runs`)·
+  `/api/company`·`/api/data`·`/api/macro`·`/api/dartlab`(price-events)·`/api/ai`·`/api/ask`·`/api/dart`·`/api/dl` 등.
+  **dev 포트 = 8400**(기본, HF Spaces 7860; `__main__.py:21`), CORSMiddleware 존재 → vite proxy `/api`→127.0.0.1:8400.
+- **adapter = adapter-static + `fallback:'index.html'`(SPA)** + 루트 `+layout.ts ssr=false` — `[code]` 동적 라우트는
+  prerender 불가(3000+사)라 SPA fallback 필수(적대 R2). landing(adapter-static·fallback 404.html) 툴체인 미러(Vite 8·
+  kit ^2.65·vite-plugin-svelte ^7.1.2·svelte 5.56.3 루트 override·svelte-check ^4.6·ts ^6).
+- **AiPort 정직 강등**(적대 R5): `capabilities()` 는 provider 상태 probe → 설정 시 `tier:'advanced'`, 미설정 시
+  `tier:'deterministic'`+`upgradeHint`(throw 금지). `streamAsk`→`POST /api/agent/runs` SSE→AiStreamEvent.
+  `runTool`/`explainEvidence` 는 V1 에서 honest error 결과 반환(throw 아님, surface-safe). 깊은 advanced Ask UX=단계-7.
+- **viewer = hosts.viewerStudio:null + ViewerPort URL-embed**(ui/web 기출시 패턴): 로컬앱은 hosts 양 로더 null 주입,
+  `viewer.urlForCompany(code)`→`${base}/analysis/${code}/viewer?...&terminalEmbed=1`(iframe). 단계-6(viewer 추출) 선점 안 함.
+- **Python `_ui_path.py` 무변경**(적대 R6 교정 — 기본 UI 전환은 단계-**10**, 단계-9 아님). DARTLAB_UI_DIR 이미 임의경로 지원.
+  ui/web fallback flag = 아무것도 안 건드림으로 보존.
+
+sub-unit 분해 (각 1커밋, 비순환 — 5-1 placeholder 라우트는 surface 무import·runtime 무호출로 컴파일):
+- **5-1 scaffold + workspace**: `ui/apps/local` 생성(package.json `@dartlab/ui-local`·svelte.config adapter-static fallback·
+  vite.config sveltekit+proxy·tsconfig(`.svelte-kit` 확장·ui/web 배제 적대 R7)·app.html·app.d.ts·+layout ssr=false·
+  7 라우트 placeholder `<h1>` 스텁). 루트 package.json 무편집(workspaces `ui/apps/*`·svelte override 이미 정합).
+  게이트: 루트 `npm ci` **2연속 결정성**(적대 R1/R8 OneDrive junction)·svelte 단일버전 증명·ui/apps/local build+check 0·
+  landing build green(무영향)·ui/web 단독 build green(무영향).
+- **5-2 createLocalRuntime 채움**: runtime/adapters/local/ 에 localApiClient + sources/ (company·price·filing·finance·ai)
+  — public sources/ 구조 미러. 포트별 매핑(위 계약대로): 호출 포트 실구현/honest-empty, scan-presets/map/search throw.
+  AiPort 정직 강등. 게이트: runtime tsc strict 0(필수 메서드 컴파일 강제)·landing build green(같은 패키지 공유)·ui/web build green.
+- **5-3 라우트 배선 + TerminalSurface 마운트 + chat→terminal + viewer overlay**: lib/runtime/localRuntime(getLocalRuntime
+  컴포지션 루트)·lib/shell/{terminalShell(hosts null+links),routeLoad(RawData 조립)}·/terminal/[code] 풀스크린 마운트+컨텍스트·
+  /chat·/ask 네비(navigation.toTerminal goto·recentCompanies=storage)·/analysis/[code]/viewer 스켈레톤(overlay iframe 대상).
+  게이트: ui/apps/local build+dev server·검증 매트릭스(chat→terminal·Ask→recent company·filing viewer overlay)·console 0·
+  landing+ui/web 무영향.
+
+미해소 구현세부(블로커 아님, 각 sub-unit 내 해소): finance.bundle 명세표 엔드포인트(company.py 확인 — 없으면 honest null,
+  V1 재무카드 열화 수용)·capabilities provider 상태 필드(api/ai.py)·createEngine 최소 RawData 허용(ui/web 브리지가 입증).
+무중단 = landing(공유 runtime 패키지 변경분) + ui/web(동결) 양쪽 동시 green.
+착수 게이트: 4b-2 (ff9099ba0) Deploy green ✓·CI Fast green ✓(landing 무중단 프로덕션 확정). CI Full in-progress 는 설계 무관.
+rollback: 각 sub-unit 단일 커밋 revert (5-1 디렉토리 삭제·5-2 skeleton 복원·5-3 배선 revert).
