@@ -301,10 +301,11 @@
 		if (idx < 0) return;
 		selStore.toggle({ sectionKey: activeSectionKey, indexInSection: idx, row, periods: 'all' });
 	}
-	// 회사 전환 시 선택 비움(타 회사 선택 잔존 방지) — code 변경 감지.
+	// 회사 전환 시 선택 비움(타 회사 선택 잔존 방지) — code 변경에만 반응. clear() 는 items.length 를
+	// 읽으므로 untrack 으로 감싸지 않으면 effect 가 items 에도 의존 → 선택 add 마다 즉시 self-clear 버그.
 	$effect(() => {
 		void code;
-		selStore.clear();
+		untrack(() => selStore.clear());
 	});
 
 	// ── 비교 모드 파생 (compareMode·allBundles 는 위에서 선언) ──
