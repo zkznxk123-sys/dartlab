@@ -34,12 +34,12 @@
   map/search 포트 실구현) → 단계-9(landing public shell 전환) → 단계-10(Python server 기본 UI=ui/apps/local).
 잔여 이월(누적): vitest unit+fixture 런타임 대조 · publish.yml:108 prose 경로 · ui/apps/local 라이브 dev 클릭스루(dartlab
   ai 서버 구동 후, 단계-10 확증) · finance.bundle 로컬 엔드포인트(현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #26(단계-6 CI 회귀 수정 push f6dd430e3 + 단계-8 census·예약) 직후 — f6dd430e3 ci-fast green 확인
-  후 **단계-8 Phase1**(map/industry + insights + changes surface 추출, LOW 위험 — duckdb·포트·worker 0, 순수 file
-  move + d3 deps + 재배선·industryEntries prerender 보존) 착수. census=[26] 실행 SSOT(재조사 불필요). git mv
-  `landing/src/lib/components/industry/`(14파일) → `ui/packages/surfaces/src/map/` + 라우트(/map·/industry/[id]·/lab/map·
-  /compare·/embed/company) 재배선 + map index.ts. ⚠ surface 이동 시 tests/·.github/ 하드코딩 cross-lang 경로 grep 필수
-  (accountOrder.ts 교훈). Phase2(scan, duckdb seam·worker 3, HIGH)·단계-9·10 후속. 명시 목표(챗+터미널)=달성.
+재개 지점: entry #27(단계-8 Phase1 map 추출 완료, green) 직후 — push(map 3946a3c62 + ledger, 이전 ci-fast green 후)
+  → **단계-8 Phase2**(scan 추출, HIGH — `landing/src/lib/scan/` ~11.6k LOC: duckdb `$lib/data/duckdb` provideDuckDb
+  seam[viewer financeQuery 패턴 재사용]·worker 3[scanRuntime/price/changes 상대경로 동반]·@codemirror 6 deps·format
+  krw/pct 인라인or공유·결합 Header/publicRuntime). census [26] = 설계, 착수 직전 scan 결합 재grep + tests/.github
+  하드코딩 경로 grep 필수(accountOrder.ts 교훈). → 단계-9(landing public shell 전환) → 단계-10(Python 기본 UI=ui/apps/
+  local). 명시 목표(챗+터미널)=달성, 단계-8~10=리팩터 "전부 완성" 꼬리.
 ```
 
 ---
@@ -578,3 +578,24 @@ commit: CI fix = f6dd430e3
 착수: f6dd430e3 ci-fast green 확인 후 단계-8 Phase1(map/insights/changes) — census(본 entry)=실행 SSOT, 4b/6 패턴(예약→
   git mv→재배선→게이트). Phase2(scan) 별도 예약. 명시 목표(챗+터미널)=달성, 단계-8~10=리팩터 "전부 완성" 꼬리.
 rollback: f6dd430e3 revert(테스트·생성기 경로만, 비기능).
+
+### [27] 단계-8 Phase1 Map Surface Extraction — 완료 (이동 원자 윈도우 단일 커밋 green)
+일시: 2026-06-13
+commit: 3946a3c62 (24 files)
+**이동(git mv)**: `landing/src/lib/components/industry/`(14 컴포넌트 ~6.2k LOC) → `ui/packages/surfaces/src/map/
+  components`. 내부 cross-ref(CompanyCard→RadarChart/Sparkline/FreshnessBadge)는 상대경로라 무재작성.
+**★결합 직접 재검증(census 보강)**: 컴포넌트 결합 = **CompanyCard `base`($app/paths) 1곳뿐**(블로그 링크) → basePath
+  prop(viewer 패턴). **`$lib/` import 0**(컴포넌트 자급). d3-force/hierarchy/scale·@cosmograph/cosmos(EcosystemMap 동적
+  import 유지)는 외부 npm. createDartlabBrowser(marketMap 로더)=landing 잔류(라우트가 prop 주입, 컴포넌트는 dumb).
+**★importer 7곳**(census 4곳에서 재grep 보강 — changes·scan·lab/map의 FreshnessBadge/IndustryAtlas 누락 적발):
+  map(12)·embed/company(CompanyCard)·compare·industry/[id]·changes·scan(FreshnessBadge)·lab/map(IndustryAtlas) →
+  default→named 재배선(Python regex). CompanyCard 마운트 4곳(map 3·embed 1) basePath={base} 주입(블로그링크 무회귀).
+  map index.ts(14 export)·surfaces ./map export·deps 추가.
+**★tests/.github 하드코딩 0**(accountOrder.ts 교훈 — 직접 grep 확인: industry 컴포넌트 참조 tests/.github 전무.
+  buildIndustryMap.py 출력=landing/static/map 불변). createDartlabBrowser·prerender industryEntries=landing 잔류 무변경.
+검증 (양쪽+신규 무중단): surfaces svelte-check 0에러 3908파일 ✓ / landing check 0에러 4407파일 ✓ / landing 풀빌드 green
+  (map·d3/cosmograph 번들·industry prerender entries) ✓ / local build green ✓ / ui/web build green ✓.
+잔여(Phase2): scan(11.6k LOC, duckdb provideDuckDb seam[viewer 재사용]·worker 3·@codemirror, HIGH) 별도 예약.
+  insights/changes 라우트=정적 JSON 소비(industry 컴포넌트 FreshnessBadge만 — 이동됨), 라우트 자체는 landing 잔류 적정.
+rollback: 3946a3c62 revert(git mv·basePath·index·재배선 단일 원자).
+중단 지점/다음 행동: push(map + 본 ledger, 이전 ci-fast 완료 후) → 단계-8 Phase2(scan 추출) 또는 단계-9.
