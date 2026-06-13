@@ -34,7 +34,9 @@
   map/search 포트 실구현) → 단계-9(landing public shell 전환) → 단계-10(Python server 기본 UI=ui/apps/local).
 잔여 이월(누적): vitest unit+fixture 런타임 대조 · publish.yml:108 prose 경로 · ui/apps/local 라이브 dev 클릭스루(dartlab
   ai 서버 구동 후, 단계-10 확증) · finance.bundle 로컬 엔드포인트(현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #23(단계-7 챗모드) 직후 — 단계-6 6-1 git mv 실행부터([22]/[22-b] = 실행 SSOT, 6-0a 생략).
+재개 지점: entry #24(단계-6-1 viewer 원자 이동 완료, green) 직후 — push 후 6-3(로컬앱 /analysis/[code]/viewer
+  스켈레톤 → ViewerStudio 마운트 + local provideDuckDb + 터미널 오버레이 basePath 스레딩) → 단계-7 완성(viewer
+  AskDrawer + terminal AI command 를 AiPort 뒤로 통합) → 단계-8(scan/map/search 추출). 6-2 생략 확정(소비자 0).
 ```
 
 ---
@@ -498,3 +500,30 @@ commit: c94eff4e7
     디스시플린), 실서버 통합은 단계-10 확증.
 rollback: c94eff4e7 revert (챗 신규 2파일 삭제 + 인덱스 안내 복원).
 중단 지점/다음 행동: 단계-6 6-1(viewer git mv 원자 이동) 착수 — [22]/[22-b] 실행 SSOT, 6-0a 생략.
+
+### [24] 단계-6-1 Viewer Surface Extraction 원자 이동 — 완료 (이동 원자 윈도우 단일 커밋 green)
+일시: 2026-06-13
+commit: 9dfde877e (75 files)
+**이동(git mv, rename 보존)**: `landing/src/lib/components/viewer`(14 컴포넌트) → `ui/packages/surfaces/src/viewer/
+  components`, `landing/src/lib/viewer`(데이터레이어 29파일+finance/compare/toc/pipeline 서브폴더+intentModel/noteTaxonomy/
+  spineData.json) → `…/viewer/lib`. **dev/ 잔류**(viewer-dev 전용·격리, [22-b]) — 이동된 모듈 참조는 @dartlab/ui-surfaces/
+  viewer re-export 로 재배선.
+**결합수술(census+적대가 예측 + 6-1 신규발견)**: ① ViewerStudio basePath(에셋)·repoUrl(brand.repo)·**header=Snippet
+  prop**(★신규발견 — `$lib/components/sections/Header.svelte` 직수입, surface 비이식 → 셸이 Header 스니펫 주입) ②
+  AskDrawer basePath ③ CompanySearch **onpick 필수화**(goto/base fallback 제거) ④ financeQuery **provideDuckDb 주입
+  seam**(`$lib/data/duckdb` = $app/environment·@vite-ignore SvelteKit 전용 → 구조적 타입 ViewerDuckDb·셸이 loadDartDb
+  주입·미주입=null 정직 빈재무)·sqlEscape 인라인 ⑤ AskDrawer `import.meta.env` 안전캐스트(vite/client 타입 무의존).
+**공개표면 index.ts**(컴포넌트 9 + 데이터심볼 ~40, 외부 import 로 검증된 심볼만). **외부 재배선**: viewer/company 라우트
+  (ViewerStudio named + Header 스니펫·basePath·repoUrl 주입)·terminalShell hosts(lazy `.then(m=>({default:m.ViewerStudio}))`
+  R1)·lab/viewer-{search,dev,analyze} 3·CompanyQuickSearch(companyNames)·dev/{askSession,AskDrawer}·**+layout provideDuckDb
+  (loadDartDb) 1회 주입**(전 landing viewer 컨텍스트 커버). buildIntentModel.py BUNDLE_PATH 경로 갱신. surfaces deps +3
+  (@mlc-ai/web-llm·dompurify·lucide-svelte) + @types/dompurify·exports `./viewer`.
+검증 (양쪽+신규 무중단, 게이트 순서 싼것부터): surfaces svelte-check **0에러** 3887파일 ✓ / landing check **0에러** 4406
+  파일 ✓ / ui/apps/local build green ✓ / ui/web build green(tsc -b) ✓ / **landing 풀빌드 green**(prebuild dev-isolation
+  guard OK, 404는 pre-existing feed/industry HF seed 한계뿐 — viewer 무관) ✓. **번들 격리 확인**: webllmWorker 6MB =
+  별도 worker 청크(lazy), provideDuckDb 루트레이아웃 주입이 webllm 을 공통청크로 끌지 않음(tree-shaking OK).
+잔여(6-2/6-3): 6-2 FilingPort 공개구현 = 생략 확정(소비자 0). 6-3 = ① 로컬앱 viewer 라우트(/analysis/[code]/viewer
+  스켈레톤 → ViewerStudio 마운트, local provideDuckDb) ② 터미널 오버레이 basePath 스레딩(ViewerOverlay→ViewerStudio
+  basePath=runtime.env.basePath, 현재 embedded basePath='' 라 임베드 AskDrawer 아바타만 경미 — 비차단).
+rollback: 9dfde877e revert (git mv·결합수술·index·재배선 단일 원자 커밋).
+중단 지점/다음 행동: push(chat+[23]+6-1+[24]) 후 6-3(로컬 viewer 마운트) → 단계-7 완성(AskDrawer/terminal AI AiPort 통합) → 단계-8.
