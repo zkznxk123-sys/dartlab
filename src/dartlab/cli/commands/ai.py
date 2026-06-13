@@ -106,9 +106,11 @@ def _runDevMode(url: str) -> None:
         if result.returncode != 0:
             printWarning("Svelte dev 서버가 비정상 종료되었습니다.")
 
+    legacy = bool(os.environ.get("DARTLAB_UI_LEGACY"))
+    ui_label, ui_port = ("React (legacy)", 5400) if legacy else ("Svelte", 5174)
     print("\n  DartLab AI (개발 모드)")
     print(f"  API:     {url}")
-    print("  Svelte:  http://localhost:5400")
+    print(f"  {ui_label}:  http://localhost:{ui_port}")
     print()
 
     threading.Thread(target=_vite, daemon=True).start()
