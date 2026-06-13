@@ -6,10 +6,10 @@
 		{ href: `${base}/chat`, label: 'chat', note: '챗 모드 — Ask 엔진 대화·근거 표시' },
 		{ href: `${base}/terminal/005930`, label: 'terminal/[code]', note: '터미널 모드 (TerminalSurface 풀스크린)' },
 		{ href: `${base}/ask`, label: 'ask', note: 'Ask → 최근 회사 터미널' },
-		{ href: `${base}/analysis/005930`, label: 'analysis/[code]', note: '회사 분석' },
+		{ href: `${base}/analysis/005930`, label: 'analysis/[code]', note: '회사 분석 (→ 터미널 합류)' },
 		{ href: `${base}/analysis/005930/viewer`, label: 'analysis/[code]/viewer', note: '공시 뷰어 (터미널 overlay 대상)' },
-		{ href: `${base}/settings/providers`, label: 'settings/providers', note: 'AI provider 설정' },
-		{ href: `${base}/settings/workspace`, label: 'settings/workspace', note: 'workspace 설정' }
+		{ href: `${base}/settings/providers`, label: 'settings/providers', note: '공급자 선택·키 설정' },
+		{ href: `${base}/settings/workspace`, label: 'settings/workspace', note: '연결·활성 컨텍스트 상태' }
 	];
 </script>
 
