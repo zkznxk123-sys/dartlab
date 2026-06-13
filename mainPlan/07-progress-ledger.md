@@ -723,3 +723,16 @@ commit: af596be63
 **goal 달성 평가**: 로컬 UI(dev SvelteKit 앱)의 챗·터미널 모드 = 완성·검증(빌드·SSE·데이터흐름·dartlab 로컬 서버 dev 서빙).
   pip wheel 배포 전환은 "로컬 UI 완성"을 넘는 별도 릴리즈 결정 — 위 parity 감사 게이트.
 rollback: 단일 파일(settings/providers/+page.svelte) revert → 29줄 스텁 복귀.
+
+### [34] 검증 후속 — 적대적 verify 가 단계-10 dev 자기모순 회귀 적발·수정
+일시: 2026-06-13
+commit: 6eb54a56a
+**적발(adversarial workflow)**: 세션 작업 "완전히 깔끔한가" 적대 검증(4 검증자+종합)이 내 a69d41092 의 진짜 결함 1건 적발 —
+  dev 기본 UI 를 SvelteKit(5174)로 전환하고 _runDevMode 안내 메시지는 갱신했으나 `run()` 의 `target`(브라우저 자동 열기
+  대상)이 옛 React 포트 5400 하드코딩으로 남아, 기본 `--dev` 흐름에서 서버는 5174 인데 브라우저는 죽은 5400 을 여는
+  자기모순(커밋이 고치려던 불변식을 스스로 깸). dev 전용·기본 svelte 경로만(legacy 는 우연히 일치)·prod/pip 무관.
+**수정**: dev UI 포트를 helper `_devUiPort()` 단일 SSOT(기본 5174·DARTLAB_UI_LEGACY=1 시 5400)로 통합, target·메시지 공유 —
+  중복(드리프트 근원) 제거. 검증: repo 전역 5400 잔재 0(helper 본체뿐)·ruff·py_compile·포트 로직(default 5174·legacy 5400).
+교훈: 기본값 전환은 *눈에 보이는 메시지*뿐 아니라 *모든 파생 참조*(여기선 webbrowser.open target)를 동반 갱신해야 한다.
+  컴파일 게이트(tsc/check)는 이 런타임 포트 드리프트를 못 잡음 — worker 번들 회귀([30])와 같은 "검증 사각" 부류.
+  적대적 verify 가 컴파일·빌드가 통과한 코드에서 자기모순 회귀를 잡은 사례.
