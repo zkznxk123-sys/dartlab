@@ -14,10 +14,14 @@
   단계-4b 완료·원격 종료(4b-1 #16 + 4b-2 #17, ff9099ba0 Deploy green·CI Fast green).
 운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론".
 
-단계-5 진입점 = **5-1**(ui/apps/local scaffold + 7 라우트 placeholder, surface 무import·runtime 무호출 컴파일).
-  설계·포트계약·게이트 전부 entry #18 박제(재조사 불필요). 이후 5-2(createLocalRuntime fetch /api/* 채움)→
-  5-3(라우트 배선+TerminalSurface 마운트+chat→terminal+viewer overlay). adapter-static fallback:'index.html'+ssr=false,
-  dev proxy /api→127.0.0.1:8400, AiPort 정직 강등, viewer=hosts null+URL-embed, Python _ui_path 무변경(전환=단계-10).
+단계-5 진입점 = **5-2b**(AiPort SSE 배선). 5-1(scaffold 4fae2d536)·5-2a(createLocalRuntime 데이터 포트, entry #19)
+  완료. 5-2b = `adapters/local/sources/aiSource.ts` — capabilities() /api/status probe(provider 있으면 advanced,
+  없으면 deterministic+upgradeHint·throw 금지)·streamAsk POST /api/agent/runs SSE→AiStreamEvent(mapAgUiEvent,
+  ui/web chat/streaming/streamAsk.ts 파서 미러)·ask 수집·runTool/explainEvidence honest-error(throw 아님)·
+  listModes/setMode/getMode 로컬상태. createLocalRuntime 의 `get ai()` throw 를 localAiPort(apiBase) 로 치환.
+  이후 **5-3**(라우트 배선: getLocalRuntime 컴포지션 루트+navigation 주입(LocalRuntimeOptions 확장)+storage(localStorage)+
+  services(createServiceRegistry)+TerminalSurface 마운트+chat→terminal+viewer overlay iframe). 설계 전부 entry #18·#19.
+  AiPort 구현스펙 상세는 직전 세션 전문에이전트 산출(엔드포인트 6·7·AG-UI 이벤트 매핑) — 재확인은 api/agent.py·ai.py.
   ⚠ 로컬 풀빌드 검증 환경 주의: landing 풀 prerender 는 HF seed(산업맵·피드) 미보유 시 로컬 404
     (CI 의 'Seed from HF' 단계가 제공) — 로컬 게이트 = check/단위 compile, 풀 prerender 는 CI 권위.
 §8.1 내부구조 결정(전문 아키텍트 A1 채택): 4b-2 = data/→lib/ 만 적용(§8.1 lib/ 충족·depth 보존 저위험).
@@ -26,7 +30,7 @@
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
 잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 동행) · scan 프리셋류 포트(단계-8) · navigation/storage
   포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신
-재개 지점: entry #18 (단계-5 예약·분해 선언) — 5-1 scaffold 부터. 설계 전부 #18 에 박제됨.
+재개 지점: entry #19 (5-1+5-2a 완료) — 5-2b(AiPort SSE)부터. 설계 전부 #18·#19 에 박제됨.
 ```
 
 ---
@@ -336,3 +340,28 @@ sub-unit 분해 (각 1커밋, 비순환 — 5-1 placeholder 라우트는 surface
 무중단 = landing(공유 runtime 패키지 변경분) + ui/web(동결) 양쪽 동시 green.
 착수 게이트: 4b-2 (ff9099ba0) Deploy green ✓·CI Fast green ✓(landing 무중단 프로덕션 확정). CI Full in-progress 는 설계 무관.
 rollback: 각 sub-unit 단일 커밋 revert (5-1 디렉토리 삭제·5-2 skeleton 복원·5-3 배선 revert).
+
+### [19] 단계-5-1 + 5-2a 완료 — 로컬앱 scaffold + createLocalRuntime 데이터 포트
+일시: 2026-06-13
+commit: 5-1 = 4fae2d536 / 5-2a = (이 변경의 커밋)
+정정(entry #18 분해 세분): 5-2 를 5-2a(터미널 데이터 포트) + 5-2b(AiPort SSE)로 분할 — AiPort 는 chat/ask(5-3)
+  소비라 분리, 5-2a 만으로 터미널은 완전 작동(렌더 중 ai 무호출 실측). 또 전문 에이전트 구현스펙으로 확정한 핵심:
+  **createLocalRuntime = 얇은 lazy-fetch 포트 객체**(RuntimeSeed 프리로드 기계 아님 — RawData/createEngine seed 는
+  5-3 셸 책임). **finance.bundle = null**(로컬 서버 정규화 재무 엔드포인트 부재; ui/web 브리지도 tables={} 라 실질
+  null) → 781줄 재무 재조립 비포팅. report.* 전부 null·scan.changes []·map/search/ai/services/navigation/storage throw.
+- **5-1**(4fae2d536): ui/apps/local 신설(SPA·adapter-static fallback:index.html·ssr=false·7 라우트 placeholder·
+  dev proxy /api→8400·디자인토큰 import·tailwind 불요). 게이트: npm install +1·svelte 5.56.3 단일·lockfile +25줄
+  idempotent·local check 0/build green·landing check 0·ui/web build 0.
+- **5-2a**(이 커밋): `runtime/src/adapters/local/` 채움 — fetchJson(getJson+notWiredYet)·localTypes(서버응답
+  CompanyMeta·PriceEventsPayload·ClientPanel* + LocalCaches)·sources/{company,price,filing,report,scan,viewer}Source·
+  createLocalRuntime 조립. 포트 매핑: company.products/relations=/api/company/{code}/meta(productIndex=null 미지원)·
+  price.initial/loaded/govCandles=/api/dartlab/price-events OHLC(govRecent=null·older=[])·filing.regular/panelInit=
+  /panel/init·panelToc=/panel/toc·panelGrid=/panel?section·nonRegular=price-events events(정규화기 tocToContract/
+  gridToContract/initToContract/regularFilingsFromPanel/nonRegularFromEvents 를 ui/web 브리지서 verbatim 포팅,
+  단 합성캔들 fallback 제거)·finance.bundle=null·report.* null·scan.changes []·viewer external-url(/analysis/[code]/
+  viewer). 회사단위 fetch 1회 공유 캐시(priceEvents·loadedCandles·panelInit·meta, 런타임 인스턴스 범위).
+  LocalRuntimeOptions={env,apiBase} 유지(shared/navigation 주입 불요 — 5-2b/5-3). 호출처 없음(셸 배선=5-3)이라
+  컴파일만 검증.
+검증 (양쪽+신규 무중단): runtime tsc strict 0 ✓(전 포트 계약 정합 컴파일 강제) / landing check 0에러 4404파일 ✓
+  (신규 어댑터 8파일 graph 포함·전부 통과) / ui/web build EXIT0 ✓(동결).
+rollback: 5-2a 커밋 revert (adapters/local 신규 8파일 삭제 + createLocalRuntime skeleton 복원).
