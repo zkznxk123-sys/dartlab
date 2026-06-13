@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Candle, FinMode, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Company, Lang, Tone, Num } from '../data/types';
+	import type { Company, Lang, Tone, Num } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
-	import { fmtKRW } from '../data/engine';
+	import { fmtKRW } from '../lib/engine';
 
 	interface Props {
 		co: Company;

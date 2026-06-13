@@ -1,5 +1,5 @@
 // DartLab Terminal — 공유 UI 헬퍼 (bilingual 해석 · tone 클래스 · 포맷).
-import type { Bilingual, Lang, Tone } from '../data/types';
+import type { Bilingual, Lang, Tone } from '../lib/types';
 
 type MaybeBilingual = Bilingual | { kr?: string; en?: string } | string | null | undefined;
 

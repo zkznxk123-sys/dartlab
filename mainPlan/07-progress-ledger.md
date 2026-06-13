@@ -10,19 +10,21 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-4b-2 (§8.1 내부 정규화) → 그 후 단계-5(로컬 SvelteKit scaffold). 4b-1 완료(entry #16).
+다음 작업: 단계-5 (로컬 SvelteKit App Scaffold — 가치 도달점 V1). 단계-4b 완료(4b-1 #16 + 4b-2 #17).
 운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론".
 
-단계-4b-2 범위 (순수 cosmetic·무행위변경, 첫 surface §8.1 완전 준수 확정 → viewer/scan/map 선례):
-  · ui/packages/surfaces/src/terminal/ 내부: data/→lib/ · panels+charts+ui→components/ (git mv) +
-    내부 상대 import sed(`/data/`→`/lib/`, `../panels/`→`../components/panels/` 등) + index.ts 경로 갱신.
-  · 추가 하드닝 후보(이연 결정): surface tsconfig 의 noUncheckedIndexedAccess·verbatimModuleSyntax
-    override(현재 landing 동등 강도)를 base 강도로 올릴지 — 245건 수술이라 4b-2 와 별개 단위 검토.
-  · 검증: surfaces svelte-check·landing check/build·ui/web build (무행위변경이라 전부 무변).
+단계-5 윤곽 (04 §단계-5): ui/apps/local 생성(landing 동일 툴체인 Vite 8·svelte 정확고정)·local runtime
+  adapter 연결(AI=/api/agent/*)·/chat·/terminal/[code]·/ask·/analysis 라우트 skeleton·/settings/providers·
+  TerminalSurface 풀스크린 마운트·챗→터미널 모드 전환. 큰 신규 단위 — 착수 전 sub-unit 분해 검토.
+  ⚠ 로컬 풀빌드 검증 환경 주의: landing 풀 prerender 는 HF seed(산업맵·피드) 미보유 시 로컬 404
+    (CI 의 'Seed from HF' 단계가 제공) — 로컬 게이트 = check/단위 compile, 풀 prerender 는 CI 권위.
+§8.1 내부구조 결정(전문 아키텍트 A1 채택): 4b-2 = data/→lib/ 만 적용(§8.1 lib/ 충족·depth 보존 저위험).
+  panels/charts/ui 는 top-level 유지(명료한 컴포넌트 버킷, components/ 중첩은 depth 민감 66 import 재작성
+  = 명료성 이득 없는 churn 이라 이연·viewer surface 등장 시 재검토). tsconfig 하드닝(noUncheckedIndexedAccess)도 이연.
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
 잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 동행) · scan 프리셋류 포트(단계-8) · navigation/storage
   포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신
-재개 지점: entry #16 (4b-1 완료) — surface 패키지 가동·양쪽 무중단 green. 4b-2 또는 단계-5 진입
+재개 지점: entry #17 (4b-2 완료) — 단계-4b 종료, surface 패키지 §8.1 lib/ 정렬·양쪽 무중단. 단계-5 진입
 ```
 
 ---
@@ -268,3 +270,19 @@ commit: (이 변경의 커밋)
 
 검증 (양쪽 무중단 green): surfaces svelte-check 0에러·173파일 ✓(신규 패키지 자체 check, R8 — landing 작성계약 동등 강도) / landing check 0에러·4396파일 ✓(surface 를 패키지 심볼릭링크로 graph 포함) / runtime tsc strict 0 ✓ / landing 풀빌드+prerender ✓(prebuild dev-isolation guard OK) / ui/web build(tsc -b 포함) ✓ / dev guard standalone OK ✓ / grep `$lib/terminal` 실 import 잔재 0(주석·contracts prose 제외) ✓  
 rollback: 이 commit revert (git mv·패키지 신설·배선 단일 커밋).
+
+### [17] 단계-4b-2 §8.1 lib/ 정렬 (data/→lib/) — 완료 (단계-4b 종료)
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+내용: 전문 아키텍트 A1 채택 — surface 내부 `data/` → `lib/` git mv(§8.1 "lib/(로직·셀렉터·정규화)" 충족,
+depth 보존 저위험). 내부 상대 import 25파일 sed(`'./data/`·`'../data/` → `lib/`, index.ts 포함). **panels/charts/ui
+top-level 유지** — components/ 중첩(A2)은 depth 민감 66 import 재작성인데 panels/charts/ui 가 flat components/
+보다 명료한 버킷이라 명료성 이득 0·churn 만 — 전문가 권고대로 이연(viewer surface 등장 시 components/ wrapper
+교차 surface 가치 재검토). surface tsconfig 의 noUncheckedIndexedAccess·verbatimModuleSyntax override(landing
+작성계약 동등 강도) → base 강도 하드닝(245건)도 별개 단위 이연.
+
+검증: surfaces svelte-check 0에러·173파일 ✓ / landing check 0에러·4396파일 ✓ / terminal surface landing vite
+client+server 컴파일 ✓(33.75s) / ui/web build 0 ✓ / `'./data/`·`'../data/` import 잔재 grep 0 ✓.  
+※ landing 풀 prerender 는 로컬 HF seed(산업맵·피드 데이터) 미보유로 blog WIP·`/feed/industry/*.xml` 404
+  (CI 'Seed from HF' 단계가 제공 — 터미널 무관·환경 한계, CI 권위 빌드가 검증. 4b-1 Deploy 64768487a green 으로 이동 자체는 프로덕션 확증).  
+rollback: 이 commit revert (단일 git mv + import sed).

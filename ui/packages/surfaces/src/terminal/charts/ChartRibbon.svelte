@@ -2,7 +2,7 @@
 	// 전체화면 전문가 리본 (증권사 HTS 상단 툴바 표준) — 2단 상시 노출.
 	// Row1 = 보는 방법(종목·기간·캔들·축·마커·ECON), Row2 = 분석 작업대(오버레이/페인 활성 칩+카탈로그·그리기·BT).
 	// 상태 = ChartCtl 단일 SSOT (일반 메뉴와 공유 — 리본에서 켠 지표가 일반 메뉴에도 켜져 있다).
-	import type { Lang } from '../data/types';
+	import type { Lang } from '../lib/types';
 	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';

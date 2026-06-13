@@ -4,7 +4,7 @@
 	// 로더(hosts.viewerStudio — 동적 import 리터럴은 셸 소유)로 청크 분리 유지 — ⤢ 클릭 전엔 1바이트도
 	// 안 내려온다. 회사 이동·비교는 내부 state(URL 불변).
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { TerminalHosts } from '../data/hosts';
+	import type { TerminalHosts } from '../lib/hosts';
 
 	let { code, studio, onclose }: { code: string; studio: TerminalHosts['viewerStudio']; onclose: () => void } = $props();
 	const rt = useDartLabRuntime();

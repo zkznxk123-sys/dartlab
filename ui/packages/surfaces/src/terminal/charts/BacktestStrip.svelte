@@ -1,9 +1,9 @@
 <script lang="ts">
 	// 백테스트 결과 스트립 — 차트 하단 도킹 (전체화면 동행). 헤드라인 = 전략 vs 보유 비교,
 	// 전략 열위 시 전체 dim (초록 축포 금지). 상시 고지 푸터 + 출처 — 닫기 불가.
-	import type { BtResult, BtWarning } from '../data/backtest';
+	import type { BtResult, BtWarning } from '../lib/backtest';
 	import { GOV_ATTRIBUTION } from '@dartlab/ui-contracts';
-	import type { Lang } from '../data/types';
+	import type { Lang } from '../lib/types';
 
 	interface Props {
 		result: BtResult;

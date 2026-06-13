@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Lang, TrendSeries } from '../data/types';
+	import type { Lang, TrendSeries } from '../lib/types';
 	import { fmtNum } from '../ui/helpers';
 
 	interface Props {

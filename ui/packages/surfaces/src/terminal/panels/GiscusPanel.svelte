@@ -5,7 +5,7 @@
 	// 'terminal:005930' vs 'terminal:005935' 류 유사 term 의 fuzzy 매칭 오염 차단.
 	// 드로어는 mount 유지 + 표시 토글 — iframe 을 회사 전환·재오픈에도 보존(재주입 0),
 	// 전환은 postMessage setConfig 만 보낸다 (giscus ADVANCED-USAGE 공식 API).
-	import type { Lang } from '../data/types';
+	import type { Lang } from '../lib/types';
 
 	interface Props {
 		code: string;

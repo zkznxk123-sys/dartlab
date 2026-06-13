@@ -7,8 +7,8 @@
 	import { KRX_MIN_YEAR, MACRO_SERIES, MACRO_ATTRIBUTION, type Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
-	import type { Lang } from '../data/types';
-	import { runBacktest, type BtResult } from '../data/backtest';
+	import type { Lang } from '../lib/types';
+	import { runBacktest, type BtResult } from '../lib/backtest';
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';

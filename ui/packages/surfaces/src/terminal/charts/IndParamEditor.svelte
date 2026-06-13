@@ -1,7 +1,7 @@
 <script lang="ts">
 	// 지표 파라미터 generic 에디터 — IND_DEFS 카탈로그 기반, 29종 전부 한 컴포넌트.
 	// 확인 버튼 없음(즉시 반영 = HTS 감각). 적용은 ChartCtl.setIndParams → PriceChart diff effect 가 overrideIndicator.
-	import type { Lang } from '../data/types';
+	import type { Lang } from '../lib/types';
 	import type { ChartCtl } from './chartState.svelte';
 	import { IND_DEFS } from './indicatorParams';
 

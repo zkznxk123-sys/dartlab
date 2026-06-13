@@ -1,10 +1,10 @@
 <script lang="ts">
 	// 상용급 조건검색 — 주가·재무·등급 프리빌드 전필드 다조건 AND 스크리너 (eco + prices).
 	// scan 보드 이동 없이 터미널 안에서 즉시. 결과 클릭 → 종목 로드.
-	import type { Engine } from '../data/engine';
-	import type { EcoNode, Lang } from '../data/types';
+	import type { Engine } from '../lib/engine';
+	import type { EcoNode, Lang } from '../lib/types';
 	import { chgClass } from '../ui/helpers';
-	import { finTypeOf } from '../data/finType'; // 재무 유형 라벨 SSOT — 좌측 레일과 동일 판정
+	import { finTypeOf } from '../lib/finType'; // 재무 유형 라벨 SSOT — 좌측 레일과 동일 판정
 
 	interface Props {
 		eng: Engine;

@@ -4,7 +4,7 @@
 //   BT_EQUITY: 서브 페인 에쿼티 라인 2본 (전략 vs B&H, 시작=100).
 // 결과는 모듈 Map 으로 publish — calc 가 timestamp 로 조회. applyBt 의 calcParams:[rev] 가 재계산 트리거.
 import type { Candle } from '@dartlab/ui-contracts';
-import type { BtResult } from '../data/backtest';
+import type { BtResult } from '../lib/backtest';
 
 export const BT_TRADES = 'BT_TRADES';
 export const BT_EQUITY = 'BT_EQUITY';

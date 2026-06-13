@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { Bilingual, Lang, Prov } from '../data/types';
+	import type { Bilingual, Lang, Prov } from '../lib/types';
 	import { tx, PROV } from './helpers';
 
 	interface Props {

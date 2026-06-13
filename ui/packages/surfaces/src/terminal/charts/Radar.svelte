@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Lang, RadarAxis } from '../data/types';
+	import type { Lang, RadarAxis } from '../lib/types';
 
 	interface Props {
 		data: RadarAxis[];

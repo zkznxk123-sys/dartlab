@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Engine } from '../data/engine';
-	import type { EcoNode, Lang } from '../data/types';
+	import type { Engine } from '../lib/engine';
+	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
-	import { finTypeOf, displayPair } from '../data/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
+	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
 
 	interface Props {

@@ -5,10 +5,10 @@
 	import { untrack } from 'svelte';
 	import type { AuditYear, FinMode, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Company, Lang } from '../data/types';
+	import type { Company, Lang } from '../lib/types';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import AuditStrip from '../charts/AuditStrip.svelte';
-	import { FS_TABS, type TabCard } from '../data/finTabs';
+	import { FS_TABS, type TabCard } from '../lib/finTabs';
 
 	interface Props {
 		co: Company;

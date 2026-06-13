@@ -1,9 +1,9 @@
 <script lang="ts">
 	// 백테스트 설정 — 전략 프리셋·파라미터·비용(bp 편집). 일반 메뉴·전체화면 리본 양쪽이 공유.
 	// 체결 모델 캡션 상시 노출 = 신뢰 표면. 결과 표시는 BacktestStrip (설정/결과 분리).
-	import type { Lang } from '../data/types';
+	import type { Lang } from '../lib/types';
 	import type { ChartCtl } from './chartState.svelte';
-	import { BT_PRESETS, BT_COSTS } from '../data/backtest';
+	import { BT_PRESETS, BT_COSTS } from '../lib/backtest';
 
 	interface Props {
 		ctl: ChartCtl;

@@ -2,7 +2,7 @@
 	// 재무 분석 차트 — 막대+선·이중축·signed·stacked·refLine·heatmap.
 	// 계정명 범례 + Y축 숫자(좌/우) + X축 기간 + 호버 툴팁 + ! 해석 가이드 → 해석 가능. 크게.
 	import type { FinCard, Num } from '@dartlab/ui-contracts';
-	import { CARD_GUIDE } from '../data/cardGuide';
+	import { CARD_GUIDE } from '../lib/cardGuide';
 
 	interface Props {
 		card: FinCard;

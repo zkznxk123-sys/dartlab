@@ -2,7 +2,7 @@
 	// 전체화면 좌측 세로 그리기 툴바 (TradingView 좌측 툴바 멘탈모델) — 상시 노출 위젯.
 	// 상태는 ChartCtl 공유, 도형 생성은 onDraw 콜백 (chartState "명령은 콜백" 규약).
 	// 아이콘 = 모노크롬 인라인 SVG 단일 세트 (이모지 금지 — OS 컬러 렌더로 터미널 톤 파괴).
-	import type { Lang } from '../data/types';
+	import type { Lang } from '../lib/types';
 	import { type ChartCtl, DRAW_TOOLS } from './chartState.svelte';
 
 	interface Props {

@@ -6,17 +6,17 @@
 	import './terminal.css';
 	import type { Candle, DartLabRuntime, MacroLatest } from '@dartlab/ui-contracts';
 	import { setDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Engine } from './data/engine';
-	import type { TerminalHosts, TerminalBrandLinks } from './data/hosts';
-	import type { Lang } from './data/types';
+	import type { Engine } from './lib/engine';
+	import type { TerminalHosts, TerminalBrandLinks } from './lib/hosts';
+	import type { Lang } from './lib/types';
 	import { chgClass, fmtNum, sign, sparkPts } from './ui/helpers';
 	import LeftRail from './panels/LeftRail.svelte';
 	import CenterStack from './panels/CenterStack.svelte';
 	import RightStack from './panels/RightStack.svelte';
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import GiscusPanel from './panels/GiscusPanel.svelte';
-	import { LAST_SYM_KEY } from './data/lastSymbol';
-	import { warmCompany } from './data/warmup';
+	import { LAST_SYM_KEY } from './lib/lastSymbol';
+	import { warmCompany } from './lib/warmup';
 
 	interface Props {
 		eng: Engine;

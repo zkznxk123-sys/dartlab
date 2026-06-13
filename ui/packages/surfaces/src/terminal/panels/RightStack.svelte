@@ -14,14 +14,14 @@
 		WorkforceYear
 	} from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Company, Lang } from '../data/types';
-	import type { TerminalHosts } from '../data/hosts';
-	import { gradeTone } from '../data/engine';
+	import type { Company, Lang } from '../lib/types';
+	import type { TerminalHosts } from '../lib/hosts';
+	import { gradeTone } from '../lib/engine';
 	import Panel from '../ui/Panel.svelte';
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 셸 주입 lazy 로더
 	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — 셸 주입 lazy 로더, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
-	import { fmtKRW } from '../data/engine';
+	import { fmtKRW } from '../lib/engine';
 
 	interface Props {
 		co: Company;
