@@ -26,6 +26,13 @@ def configureParser(subparsers) -> None:
     parser.set_defaults(handler=run)
 
 
+def _devUiPort() -> int:
+    """dev 모드에서 띄우는 UI dev 서버 포트 — 기본 SvelteKit(ui/apps/local) 5174,
+    DARTLAB_UI_LEGACY=1 면 옛 React(ui/web) 5400. resolveUiSourceDir 분기와 1:1 대응.
+    target(브라우저 자동 열기)과 안내 메시지가 같은 포트를 쓰도록 SSOT."""
+    return 5400 if os.environ.get("DARTLAB_UI_LEGACY") else 5174
+
+
 def run(args) -> int:
     """FastAPI 서버 + SPA를 시작하고 브라우저를 연다."""
     port = args.port
@@ -44,7 +51,8 @@ def run(args) -> int:
     from dartlab.server import ensurePort, runServer
 
     shouldOpen = not args.no_browser and not os.environ.get("DARTLAB_NO_BROWSER")
-    target = "http://localhost:5400" if args.dev else url
+    # dev 모드는 UI dev 서버(_runDevMode 가 띄움)를 열고, 그 외엔 API(SPA 서빙) url 을 연다.
+    target = f"http://localhost:{_devUiPort()}" if args.dev else url
 
     status = ensurePort(port, keepExisting=args.keep_existing)
     if status == "already_running":
@@ -106,11 +114,10 @@ def _runDevMode(url: str) -> None:
         if result.returncode != 0:
             printWarning("Svelte dev 서버가 비정상 종료되었습니다.")
 
-    legacy = bool(os.environ.get("DARTLAB_UI_LEGACY"))
-    ui_label, ui_port = ("React (legacy)", 5400) if legacy else ("Svelte", 5174)
+    ui_label = "React (legacy)" if os.environ.get("DARTLAB_UI_LEGACY") else "Svelte"
     print("\n  DartLab AI (개발 모드)")
     print(f"  API:     {url}")
-    print(f"  {ui_label}:  http://localhost:{ui_port}")
+    print(f"  {ui_label}:  http://localhost:{_devUiPort()}")
     print()
 
     threading.Thread(target=_vite, daemon=True).start()
