@@ -1,0 +1,61 @@
+# 06. 진행 원장 — 결정 · 토론 기록 · NEXT
+
+상태: 비전 PRD v0.1 (2026-06-14)
+범위: 결정 SSOT, 전문에이전트 토론 기록, 문서 상태, NEXT, 착수 게이트.
+
+---
+
+## 1. 핵심 결정 (확정)
+
+1. **"블룸버그식" = 수평 OS 레이어, 수직 분석 아님.** dartlab 은 비싼 절반(분석)을 이미 초과 수준으로 끝냈고 싼 절반(OS 직조)을 비웠다 — OS 레이어 ROI 가 비정상적으로 높다.
+2. **이 PRD 의 고유 신설 = 워치리스트(공시 워치) 1 개.** 어떤 기존 PRD 도 미claim(코드·PRD grep 0). 가격 워치가 아니라 *공시 델타*가 우리 사용자·우리 데이터·우리 제약에 맞는 유일한 monitor.
+3. **함수문법은 *약화*(섹션 점프)로만.** 풀 mnemonic 백과사전 KILL.
+4. **알림 = 정직 한정 생존.** 푸시 KILL(서버 0). 기기독립 신선도(Tier 1)가 핵심, 재방문 델타(Tier 2)는 완결성 주장 금지·기기/시점 명시로만.
+5. **멀티패널 Launchpad·멀티심볼·reverseDCF 함수승격·크로스에셋 instrument = KILL/DEFER.** 구역규칙·cargo-cult·기존 PRD 소유권·재발명 위험.
+6. **본 PRD 는 *연결* 레이어** — JUDGE(fin-stmt-lab)·시뮬(scenario-simulator)·egress(table-export)·포트(ui-platform-refactor)를 claim 하지 않고 monitor 루프로 묶는다.
+
+---
+
+## 2. 전문에이전트 토론 기록 (방향을 박은 근거)
+
+4 렌즈 토론(2 웨이브, OOM 가드로 병렬 ≤ 2) + 운영자(메인) 코드 실측 검증:
+
+- **Wave 1-A (블룸버그 개념지도)**: 블룸버그 = OS 레이어 가설 강하게 지지. dartlab 은 분석 초과·OS 빈약. Top 7 빠진 원시요소 + 포기선(실시간·컨센서스·풀 런치패드). 절제선 = Koyfin/TIKR.
+- **Wave 1-B (자산·아키텍처 감사)**: ★`services`/`storage`/`navigation` 포트 계약 실재 but 미배선. 터미널은 단일 `sym`·raw localStorage. 멀티패널만 진짜 신규, 크로스에셋 DEFER 권고. 기존 PRD 커버리지 맵.
+- **Wave 2-C (적대검증/덕지덕지 사냥)**: 무자비 KILL. "포트 배선만=싸다"는 *터미널 트리엔 포트 소비 0* 이라 반박. 알림 KILL(확신오정렬), 멀티패널 KILL(구역규칙), 함수문법 DE-SCOPE, reverseDCF KILL(라벨갈이). **최소집합 = 워치리스트 1 개.**
+- **Wave 2-D (사용자 워크플로·차별화)**: monitor 루프 5 단계(WATCH→SURFACE→DIG→JUDGE→RECORD), ③DIG 만 완성·①②비어 루프 안 닫힘. ★"공시 워치 ≠ 가격 워치"가 우리만의 monitor. reverseDCF 엔진 실재·미배선 발견(단 fin-stmt-lab 소유).
+- **운영자 코드 실측 판정**: (a) landing = adapter-static·백엔드 0·인증 0 → 푸시·동기화 불가 확정. (b) 포트 계약 실재(B 맞음) but public 어댑터 `notWiredYet` throw + 터미널 미소비(C 맞음) → "신설 아님 but 공짜도 아님". (c) `reverseImpliedGrowth` 엔진 실재(D 맞음). (d) 워치리스트 미claim·reverseDCF/compare = fin-stmt-lab killer #1/#2 소유 확정 → non-encroachment map.
+
+**C vs D 핵심 충돌 해소**: 알림은 *기기독립 신선도(Tier 1) 핵심 + 정직 라벨 재방문 델타(Tier 2) 선택*으로 분리 — D 의 killer 가치를 C 의 확신오정렬 위험 없이 흡수. reverseDCF 는 *표시(연결)하되 함수승격 안 함* — D 의 surfacing 가치 + C 의 라벨갈이 KILL 양립.
+
+---
+
+## 3. 문서 상태
+
+| 문서 | 상태 |
+|---|---|
+| README | v0.1 — 인덱스·한줄결정·개념지도·문서지도·정직척추 |
+| 00-product-vision | v0.1 — 문제·사용자·monitor 루프·공시워치≠가격워치·ROI |
+| 01-bloomberg-concept-gap | v0.1 — 원시요소 카탈로그·OS vs 분석 가설·리테일 절제선 |
+| 02-watchlist-disclosure-watch | v0.1 — ★핵심. 3 층 구조·정직 가드·storage 계약·거처·비목표 |
+| 03-command-and-architecture | v0.1 — 섹션점프·포트 실태·거처·non-encroachment·instrument DEFER |
+| 04-killlist-and-non-goals | v0.1 — KILL/DEFER 판정표·정체성 가드·덕지덕지 차단 |
+| 05-scope-phasing-guardrails | v0.1 — Phase 0-3·정직 가드·성공기준·착수 게이트 |
+| 06-progress-ledger | v0.1 — 본 문서 |
+
+---
+
+## 4. NEXT (다음 세션이 닫을 것)
+
+- [ ] **운영자 리뷰** — 방향(공시 워치 = monitor 핵심, 나머지 KILL/DEFER)에 대한 운영자 승인 또는 정정.
+- [ ] **메모리 포인터 등록** — `MEMORY.md` §6.2 에 `[[project_terminal_os_layer]]` 1 줄(본 PRD = 포인터, 내용복제 금지).
+- [ ] **(승인 시) Phase 0 선행 가능성 확인** — 워치리스트 Tier 0 가 raw localStorage 로 mainPlan 무관 선행 가능한지 ui-platform-refactor 진척과 1 회 정합 확인.
+- [ ] **fin-stmt-lab 경계 1 회 동기화** — (a) 워치/섹션점프가 reverseDCF·compare 뷰로 *점프*시키는 접점, (b) ★워치 가격 보조컬럼 ↔ fin-stmt-lab "가격↔기초체력 지수 오버레이·PER/PBR 시계열"(둘 다 `gov/prices × 주가차트` 거처) 충돌 점검 — 워치 가격은 *행 텍스트*지 *차트 오버레이 아님* 경계 재확인. 소유는 fin-stmt-lab.
+- [ ] **(StoragePort 정합) 기존 raw 4 키 이관 부채 인지** — 워치리스트는 `terminal.watchlist` 1 키로, 기존 4 raw 키(`dlTerm.*`) StoragePort 이관은 ui-platform-refactor 단계-4a-3 범위로 위임.
+
+---
+
+## 5. 착수 게이트
+
+- **코딩 아님** — 방향 확정 문서. 착수 = mainPlan(ui/packages 정착, 이미 이관) + **운영자 go** 후.
+- **충돌 시 기존 4 PRD 가 정본**, 본 PRD 는 연결 레이어로서 양보.
