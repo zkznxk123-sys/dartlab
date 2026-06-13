@@ -1,8 +1,10 @@
 // /terminal(본진) · /lab/terminal-dev(격리 개발) 공용 라우트 로더 SSOT — 복사 드리프트 차단.
-// 씨데이터 JSON 7종 병렬 로드 + 마지막 본 종목 prefetch(주가·재무·제품맵 워밍업).
+// 씨데이터 JSON 7종 병렬 로드 + 마지막 본 종목 워밍업(주가·재무·제품맵 — public runtime 포트 경유).
 import { browser } from '$app/environment';
 import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
-import { prefetch, LAST_SYM_KEY } from '$lib/terminal/data/workbench';
+import { getPublicRuntime } from '$lib/runtime/publicRuntime';
+import { LAST_SYM_KEY } from '$lib/terminal/data/lastSymbol';
+import { warmCompany } from '$lib/terminal/data/warmup';
 import type {
 	FinanceFile,
 	MacroFile,
@@ -19,7 +21,7 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 	// 병렬로 시작 (in-flight dedup 이라 패널 호출과 중복 fetch 0). 차트 첫 페인트 ~2s 단축.
 	if (browser) {
 		const last = localStorage.getItem(LAST_SYM_KEY) || '005930';
-		prefetch(last, new Date().getFullYear());
+		warmCompany(getPublicRuntime(), last);
 	}
 	const opt = { fetchFn, preferLocal: true };
 	const [finance, macro, meta, prices, index, eco, quarters] = await Promise.all([

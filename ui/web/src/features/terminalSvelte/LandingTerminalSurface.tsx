@@ -23,23 +23,22 @@ export function LandingTerminalSurface({ code }: LandingTerminalSurfaceProps) {
 		if (!target) return;
 		let cancelled = false;
 		let instance: SvelteInstance | null = null;
-		const previous = window.__DARTLAB_LOCAL_TERMINAL__;
 
 		setStatus('loading');
 		setMessage(`${code} 로컬 데이터 로딩 중`);
 		target.replaceChildren();
 
 		(async () => {
-			const runtime = await loadLocalTerminalRuntime(code);
+			const local = await loadLocalTerminalRuntime(code);
 			if (cancelled) return;
-			window.__DARTLAB_LOCAL_TERMINAL__ = runtime.adapter;
 			const [{ default: Terminal }, { createEngine }] = await Promise.all([
 				import('../../../../../landing/src/lib/terminal/Terminal.svelte'),
 				import('../../../../../landing/src/lib/terminal/data/engine'),
 			]);
 			if (cancelled) return;
-			const eng = createEngine(runtime.raw);
-			instance = mount(Terminal, { target, props: { eng, initial: code } }) as SvelteInstance;
+			const eng = createEngine(local.raw);
+			// runtime 은 prop 주입 — Terminal 이 컨텍스트로 하위 패널에 배포 (전역 locator 철거, 4a-2)
+			instance = mount(Terminal, { target, props: { eng, runtime: local.runtime, initial: code } }) as SvelteInstance;
 			setStatus('ready');
 		})().catch((err: unknown) => {
 			if (cancelled) return;
@@ -51,8 +50,6 @@ export function LandingTerminalSurface({ code }: LandingTerminalSurfaceProps) {
 		return () => {
 			cancelled = true;
 			if (instance) void unmount(instance);
-			if (previous) window.__DARTLAB_LOCAL_TERMINAL__ = previous;
-			else delete window.__DARTLAB_LOCAL_TERMINAL__;
 			target.replaceChildren();
 		};
 	}, [code]);

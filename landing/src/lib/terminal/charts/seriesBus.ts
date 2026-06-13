@@ -1,6 +1,6 @@
 // 차트 적용 시계열 버스 — PriceChart.reapply() 가 publish, AVWAP·측정룰러 overlay 가 구독.
 // 보정(수정주가)·집계(주/월봉) 후 시리즈라 토글·전환을 자동 추종. btLayer publishBt 와 동일 패턴.
-import type { Candle } from '../data/priceSeries';
+import type { Candle } from '@dartlab/ui-contracts';
 
 let view: Candle[] = [];
 let idxByTs = new Map<number, number>();

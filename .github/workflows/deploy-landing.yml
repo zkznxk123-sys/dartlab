@@ -5,6 +5,11 @@ on:
     branches: [master]
     paths:
       - 'landing/**'
+      # 워크스페이스 패키지·루트 lockfile — landing 빌드 의존 (단계-3부터, 4a-2에서 paths 편입.
+      # 누락 시 패키지만 바뀐 push 가 deploy 를 건너뛰어 고장난 lock/패키지가 다음 배포까지 잠복)
+      - 'ui/packages/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'src/dartlab/skills/**'
       - 'blog/**'
       - '.github/workflows/deploy-landing.yml'

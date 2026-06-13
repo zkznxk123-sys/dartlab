@@ -6,10 +6,14 @@
 	import { createEngine } from '$lib/terminal/data/engine';
 	import type { RawData } from '$lib/terminal/data/types';
 	import DevTerminal from '$lib/terminal/dev/DevTerminal.svelte';
+	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import { loadDartDb } from '$lib/data/duckdb';
 
 	// DuckDB-WASM 프리워밍 — 본진과 동일 (주가 차트 체감속도).
 	void loadDartDb();
+
+	// 본진과 동일한 공개 셸 runtime 주입 (dev 셸도 포트만 본다)
+	const runtime = getPublicRuntime();
 
 	let { data }: { data: PageData } = $props();
 	const eng = $derived(createEngine(data.raw as RawData));
@@ -22,7 +26,7 @@
 </svelte:head>
 
 {#if ready}
-	<DevTerminal {eng} initial="005930" />
+	<DevTerminal {eng} {runtime} initial="005930" />
 {:else}
 	<main class="devEmpty">
 		<p>터미널 씨데이터를 불러오지 못했습니다. 본진은 <a href="../terminal">/terminal</a>.</p>

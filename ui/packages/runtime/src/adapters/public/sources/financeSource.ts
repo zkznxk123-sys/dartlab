@@ -2,50 +2,11 @@
 // DuckDB-WASM 불필요 (per-company 파일 작음 → 전 row 읽고 JS 정규화). 28 표준계정 매핑은
 // src/dartlab/viz/display/finance/accounts.py(_STANDARDS) 포팅. 분기 누적(YTD)→TTM 환산.
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
-import { browser } from '$app/environment';
-import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
-import { localTerminalAdapter } from './localAdapter';
+// 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
+import type { FinCard, FinMode, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+import { readParquetRows } from '../../../data/hfRange';
 
-export type Num = number | null;
-
-export interface FinSeries {
-	name: string;
-	data: Num[];
-	color: string;
-	type: 'bar' | 'line';
-	axis?: 'r'; // 우측 축 (비율 등)
-}
-export interface FinCard {
-	key: string;
-	title: string;
-	unit: string; // '조' | '%' | '배' | '일'
-	series: FinSeries[];
-	refLines?: number[];
-	stacked?: boolean;
-	signed?: boolean; // stacked 와 조합 시: 양수는 0 위로, 음수는 0 아래로 부호별 누적 (희석 이력 카드)
-	kind?: 'waterfall' | 'heatmap'; // 워터폴 브리지(steps) · 히트맵(heat) — series/periods 무시
-	steps?: { name: string; value: number | null; total?: boolean }[]; // waterfall 전용 (total = 0 기준 소계 막대)
-	heat?: { rows: string[]; cols: string[]; vals: Num[][]; yoy: Num[][] }; // heatmap 전용 — 셀 값(조) + 색용 전년동기比 %
-}
-export interface StmtRow {
-	key: string;
-	kr: string;
-	en: string;
-	values: Num[]; // 기간별 조 KRW (비율 표는 % · 배)
-	unit?: string; // 비율 표 단위 표기 ('%' · '배'); 재무제표 본문은 생략(조)
-}
-export type StmtKind = 'IS' | 'BS' | 'CF';
-export interface TerminalFinance {
-	periods: string[]; // 표시용 압축 라벨 (예: '23Q4' · 'FY23')
-	freq: 'quarter' | 'annual' | 'ttm';
-	cards: FinCard[];
-	tabCards: { profitability: FinCard[]; cashflow: FinCard[]; debt: FinCard[]; shareholder: FinCard[] }; // 전체화면 탭 심화 카드
-	revYoy: Num[]; // 매출 YoY % (분기=4분기전, 연간=전년)
-	opYoy: Num[]; // 영업이익 YoY %
-	cashQuality: Num[]; // 영업CF / 순이익 배수 (순이익>0 일 때만)
-	statements: Record<StmtKind, StmtRow[]>; // 손익·재무상태·현금흐름 — 전 기간 계정×기간 표
-	ratios: StmtRow[]; // 핵심 비율 시계열 — 동일 기간 축 (% · 배)
-}
+const browser = typeof window !== 'undefined';
 
 // 재무제표 표(손익/재무상태/현금흐름) 행 정의 — STD key + 표시 라벨.
 const STMT_DEF: Record<StmtKind, { key: string; kr: string; en: string }[]> = {
@@ -170,14 +131,7 @@ function num(v: unknown): number | null {
 
 const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'ord'];
 
-// 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = TTM.
-export type FinMode = 'annual' | 'quarter' | 'ttm';
-export interface TerminalFinanceBundle {
-	modes: FinMode[]; // 데이터상 가능한 모드 (분기 없으면 annual 만)
-	views: Record<FinMode, TerminalFinance | null>;
-	defaultMode: FinMode;
-	filedDates: Record<string, string>; // `${year}-${q}` → 보고서 접수일 YYYYMMDD (rcept_no 앞 8자리, 정정 중 최초)
-}
+// 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = 분기 (계약 FinMode·번들 정의는 contracts).
 
 // in-flight Promise 캐시 — CenterStack·RightStack 가 같은 회사 재무를 동시 호출해도
 // 다운로드는 1 회만(중복 fetch 경쟁 제거). 해소 후엔 같은 Promise 가 즉시 resolve.
@@ -186,8 +140,6 @@ const cache = new Map<string, Promise<TerminalFinanceBundle | null>>();
 export function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceBundle | null> {
 	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
-	const local = localTerminalAdapter()?.loadTerminalFinance;
-	if (local) return local(code);
 	const hit = cache.get(code);
 	if (hit) return hit;
 	const p = (async () => {
@@ -328,10 +280,13 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	// 사용 가능한 (year,q) 모음 (자산총계 또는 매출 존재 기준) — 분기 우선
 	const pkSet = new Set<string>();
 	for (const key of ['revenue', 'assets', 'cfOperating', 'netIncome']) {
-		for (const pk of grid[key].keys()) pkSet.add(pk);
+		for (const pk of grid[key]?.keys() ?? []) pkSet.add(pk);
 	}
 	const allPk = Array.from(pkSet)
-		.map((pk) => { const [y, q] = pk.split('-').map(Number); return { pk, y, q }; })
+		.map((pk) => {
+			const parts = pk.split('-').map(Number); // pk = `${year}-${q}` 구성이라 두 토큰 항상 존재
+			return { pk, y: parts[0] ?? 0, q: parts[1] ?? 0 };
+		})
 		.sort((a, b) => a.y - b.y || a.q - b.q);
 	if (allPk.length === 0) return null;
 
@@ -339,7 +294,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	const hasInterim = allPk.some((p) => p.q !== 4);
 	const hasAnnual = allPk.some((p) => p.q === 4);
 
-	const rawV = (key: string, y: number, q: number): Num => grid[key].get(`${y}-${q}`)?.amt ?? null;
+	const rawV = (key: string, y: number, q: number): Num => grid[key]?.get(`${y}-${q}`)?.amt ?? null;
 
 	// IS/CF flow standalone(단일분기) — DART 분기 규약 혼합 자동판정.
 	// 연도 Σ(Q1..Q3) > annual 이면 YTD 누적(차분), 아니면 standalone(Q4 = annual − Σ).
@@ -424,6 +379,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		// 값: BS = 시점. flow(IS·CF) = annual 연간 / quarter 단일분기 / ttm 직전 4분기 합.
 		const flowAt = (key: string, i: number): Num => {
 			const p = used[i];
+			if (!p) return null;
 			if (isAnnual) return rawV(key, p.y, 4); // 사업보고서 flow = 연간 누계 원본 (standalone 은 Q4 석달치라 FY 라벨과 불일치)
 			if (mode === 'quarter') return standalone(key, p.y, p.q);
 			let s = 0;
@@ -431,6 +387,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 				const gi = p.gi - k;
 				if (gi < 0) return null;
 				const a = allPk[gi];
+				if (!a) return null;
 				const v = standalone(key, a.y, a.q);
 				if (v == null) return null;
 				s += v;
@@ -438,7 +395,10 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 			return s;
 		};
 		const valAtIdx = (key: string, i: number): Num => {
-			if (isStock(key)) { const p = used[i]; return rawV(key, p.y, p.q); }
+			if (isStock(key)) {
+				const p = used[i];
+				return p ? rawV(key, p.y, p.q) : null;
+			}
 			return flowAt(key, i);
 		};
 		const lag = isAnnual ? 1 : 4; // YoY: 연간 1년 전, 분기/TTM 4분기 전
@@ -504,9 +464,9 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 		const revRaw = raw('revenue');
 		const cogsRaw = raw('costOfSales');
 		const dayRatio = (n: Num, d: Num): Num => (n != null && d != null && d > 0 ? +((n / d) * days).toFixed(1) : null);
-		const dso = used.map((_, i) => dayRatio(rcv[i], revRaw[i]));
-		const dio = used.map((_, i) => dayRatio(inv[i], cogsRaw[i]));
-		const dpo = used.map((_, i) => dayRatio(pay[i], cogsRaw[i]));
+		const dso = used.map((_, i) => dayRatio(rcv[i] ?? null, revRaw[i] ?? null));
+		const dio = used.map((_, i) => dayRatio(inv[i] ?? null, cogsRaw[i] ?? null));
+		const dpo = used.map((_, i) => dayRatio(pay[i] ?? null, cogsRaw[i] ?? null));
 		const ccc = used.map((_, i) => (dso[i] != null && dpo[i] != null ? +(dso[i]! + (dio[i] ?? 0) - dpo[i]!).toFixed(1) : null));
 
 		// 메인·탭 공유 카드 4종 — 16카드 승격분 (수익성·현금 탭에도 동일 객체 재사용, 정의 1곳)
@@ -819,6 +779,7 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	if (views.ttm) modes.push('ttm');
 	if (views.annual) modes.push('annual');
 	if (modes.length === 0) return null;
-	const defaultMode: FinMode = views.quarter ? 'quarter' : views.annual ? 'annual' : modes[0];
+	const defaultMode: FinMode = views.quarter ? 'quarter' : views.annual ? 'annual' : modes[0]!; // 윗줄 length 가드로 항상 존재
+
 	return { modes, views, defaultMode, filedDates };
 }

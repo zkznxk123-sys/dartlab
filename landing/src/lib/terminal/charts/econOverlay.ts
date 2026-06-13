@@ -4,7 +4,7 @@
 //   tooltip: 리베이스 허구 숫자가 아닌 원시값(1,385원 · 3.50%) 표기.
 // 비율 rebase(v/v₀·close₀)는 0 교차 시리즈(T10Y2Y·YoY)에서 수학적으로 붕괴 — 기각 근거.
 // 날짜 정렬: 캔들 날짜축에 two-pointer forward-fill (첫 관측 전 = 결측, look-ahead 방지).
-import type { MacroPoint, MacroSeriesDef } from '../data/macroSeries';
+import type { MacroPoint, MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { Lang } from '../data/types';
 
 export const ECON_INDICATOR = 'ECON';

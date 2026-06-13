@@ -22,7 +22,10 @@
 		"noUncheckedSideEffectImports": true,
 
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@dartlab/ui-contracts": ["../packages/contracts/src/index.ts"],
+			"@dartlab/ui-runtime": ["../packages/runtime/src/index.ts"],
+			"@dartlab/ui-runtime/*": ["../packages/runtime/src/*"]
 		},
 
 		"resolveJsonModule": true,

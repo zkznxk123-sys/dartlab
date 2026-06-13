@@ -1,8 +1,7 @@
 <script lang="ts">
 	// 데이터 출처 모달 — 터미널 전 패널의 원천·갱신주기·라이선스를 한 표로 명시 (공공누리 출처표시 의무 포함).
 	import type { Lang } from '../data/types';
-	import { GOV_ATTRIBUTION } from '../data/govPrice';
-	import { MACRO_ATTRIBUTION } from '../data/macroSeries';
+	import { GOV_ATTRIBUTION, MACRO_ATTRIBUTION } from '@dartlab/ui-contracts';
 	import { FIN_TYPES } from '../data/finType'; // 재무 유형 라벨 기준 — SSOT 에서 직접 렌더(손코딩 문안 금지)
 	import { fetchLastSync, fmtSync, syncTone } from '../data/syncStatus'; // 동기화 실측 (HF lastCommit)
 

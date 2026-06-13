@@ -4,7 +4,7 @@
 // B&H = 같은 엔진에 target≡1 주입 — 체결·비용·이연 로직이 동등해 공정 비교가 코드로 보장된다.
 // 수량은 자본 비례 연속 수량(정수 반올림 생략) — % 수익률 비교 목적.
 import { sma, rsi, macd, bollinger } from './indicators';
-import type { Candle } from './priceSeries';
+import type { Candle } from '@dartlab/ui-contracts';
 
 export type BtPresetKey = 'maCross' | 'rsiRevert' | 'bbRevert' | 'macdCross' | 'donchian' | 'momentum';
 

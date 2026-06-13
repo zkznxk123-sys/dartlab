@@ -1,39 +1,11 @@
 // 매크로 경제지표 시계열 — macro/{fred,ecos}/observations.parquet (HF) hyparquet 직독.
 // (seriesId, date, value) 가 seriesId+date 정렬이라 seriesId 필터로 row-group pruning.
-// 차트 오버레이(PriceChart ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
-import { browser } from '$app/environment';
-import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
+// 차트 오버레이(ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
+// 화이트리스트·출처표시 정본은 contracts (MACRO_SERIES·MACRO_ATTRIBUTION).
+import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort } from '@dartlab/ui-contracts';
+import { readParquetRows } from '../../../data/hfRange';
 
-export interface MacroPoint {
-	d: string; // YYYYMMDD
-	v: number;
-}
-
-export interface MacroSeriesDef {
-	id: string;
-	src: 'fred' | 'ecos';
-	kr: string;
-	en: string;
-	unit: string; // 표시 단위 ('원' | '%' | '%p' | 'yoy%' | '$/t' | 'pt')
-	yoy?: boolean; // true = 12개월 전 대비 % 로 변환해 표시 (지수형 월간 시리즈)
-	digits?: number; // 최신값 표시 소수 자리
-}
-
-// 화이트리스트 — 주가와 비교 가치가 큰 핵심 지표만 (덕지덕지 방지).
-export const MACRO_SERIES: MacroSeriesDef[] = [
-	{ id: 'USDKRW', src: 'ecos', kr: '원/달러', en: 'USD/KRW', unit: '원', digits: 0 },
-	{ id: 'BASE_RATE', src: 'ecos', kr: '한은 기준금리', en: 'BOK rate', unit: '%', digits: 2 },
-	{ id: 'CPI', src: 'ecos', kr: '소비자물가 YoY', en: 'KR CPI YoY', unit: '%', yoy: true, digits: 1 },
-	{ id: 'EXPORT', src: 'ecos', kr: '수출 YoY', en: 'Exports YoY', unit: '%', yoy: true, digits: 1 },
-	{ id: 'CLI', src: 'ecos', kr: '경기선행지수', en: 'KR CLI', unit: 'pt', digits: 1 },
-	{ id: 'DGS10', src: 'fred', kr: '미국 10Y 금리', en: 'US 10Y', unit: '%', digits: 2 },
-	{ id: 'FEDFUNDS', src: 'fred', kr: '연준 기준금리', en: 'Fed funds', unit: '%', digits: 2 },
-	{ id: 'T10Y2Y', src: 'fred', kr: '미 장단기차(10Y-2Y)', en: 'US 10Y-2Y', unit: '%p', digits: 2 },
-	{ id: 'CPIAUCSL', src: 'fred', kr: '미 CPI YoY', en: 'US CPI YoY', unit: '%', yoy: true, digits: 1 },
-	{ id: 'PCOPPUSDM', src: 'fred', kr: '구리 가격', en: 'Copper', unit: '$/t', digits: 0 }
-];
-
-export const MACRO_ATTRIBUTION = '출처: 한국은행 ECOS · FRED (St. Louis Fed)';
+const browser = typeof window !== 'undefined';
 
 const defById = new Map(MACRO_SERIES.map((s) => [s.id, s]));
 // 소스 파일(166KB·1.4MB)이 작아 통째 1 회 로드 → seriesId 그룹화가 시리즈별 range-read 10회보다 빠르고 단순.
@@ -108,21 +80,16 @@ export async function loadMacroSeries(id: string): Promise<MacroPoint[] | null> 
 	return pts.length ? pts : null;
 }
 
-export interface MacroLatest {
-	def: MacroSeriesDef;
-	v: number;
-	d: string; // YYYYMMDD
-	chg: number | null; // 직전 관측 대비 변화 (단위 동일)
-	spark: number[]; // 최근 ~1년 추세 (KPI 스파크라인용, ≤40점 다운샘플)
-}
-
 // 최근 1년(일별 252·월별 12) 구간을 최대 n 점으로 다운샘플 — 스파크라인 폴리라인용.
 function sparkOf(pts: MacroPoint[], n = 40): number[] {
 	const daily = pts.length > 400; // 일별 시리즈 추정
 	const win = pts.slice(-(daily ? 252 : 12));
 	if (win.length <= n) return win.map((p) => p.v);
 	const out: number[] = [];
-	for (let i = 0; i < n; i++) out.push(win[Math.floor((i / (n - 1)) * (win.length - 1))].v);
+	for (let i = 0; i < n; i++) {
+		const pt = win[Math.floor((i / (n - 1)) * (win.length - 1))];
+		if (pt) out.push(pt.v);
+	}
 	return out;
 }
 
@@ -133,9 +100,21 @@ export async function loadMacroLatest(): Promise<MacroLatest[]> {
 			const pts = await loadMacroSeries(def.id);
 			if (!pts || !pts.length) return null;
 			const last = pts[pts.length - 1];
+			if (!last) return null;
 			const prev = pts.length > 1 ? pts[pts.length - 2] : null;
 			return { def, v: last.v, d: last.d, chg: prev ? +(last.v - prev.v).toFixed(4) : null, spark: sparkOf(pts) };
 		})
 	);
 	return all.filter((x): x is MacroLatest => x != null);
+}
+
+/** HF 공개 데이터 기반 MacroPort — 거시 시계열은 회사·앱 무관이라 local 셸도 본 포트를 명시적으로 재사용한다. */
+export function createHfMacroPort(): MacroPort {
+	return {
+		async listSeries() {
+			return MACRO_SERIES;
+		},
+		getSeries: loadMacroSeries,
+		getLatest: loadMacroLatest
+	};
 }

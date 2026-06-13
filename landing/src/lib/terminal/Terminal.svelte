@@ -7,6 +7,8 @@
 	import GithubIcon from '$lib/components/GithubIcon.svelte';
 	import { brand } from '$lib/brand';
 	import './terminal.css';
+	import type { Candle, DartLabRuntime, MacroLatest } from '@dartlab/ui-contracts';
+	import { setDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from './data/engine';
 	import type { Lang } from './data/types';
 	import { chgClass, fmtNum, sign, sparkPts } from './ui/helpers';
@@ -15,17 +17,18 @@
 	import RightStack from './panels/RightStack.svelte';
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import GiscusPanel from './panels/GiscusPanel.svelte';
-	import { prefetch as prefetchCompany, LAST_SYM_KEY } from './data/workbench';
-	import { loadMacroLatest, type MacroLatest } from './data/macroSeries';
-	import { loadTerminalFinance } from './data/terminalFinance';
-	import { loadGovRecent } from './data/govPrice';
-	import type { Candle } from './data/priceSeries';
+	import { LAST_SYM_KEY } from './data/lastSymbol';
+	import { warmCompany } from './data/warmup';
 
 	interface Props {
 		eng: Engine;
+		/** 데이터 포트 묶음 — 앱 셸(landing route · ui/web 브리지)이 주입. 전역 locator 금지. */
+		runtime: DartLabRuntime;
 		initial?: string;
 	}
-	let { eng, initial = '005930' }: Props = $props();
+	let { eng, runtime, initial = '005930' }: Props = $props();
+	// 하위 패널 전체가 useDartLabRuntime() 컨텍스트로 같은 인스턴스를 본다 (컴포넌트 init 시 1회).
+	setDartLabRuntime(runtime);
 
 	// 종목 결정 우선순위: ?sym= 딥링크(산업·인사이트 등 내부 링크) > 마지막 본 종목(localStorage) > initial
 	const urlSym = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('sym') : null;
@@ -39,13 +42,13 @@
 	let lang = $state<Lang>('kr');
 	let sourcesOpen = $state(false);
 	let discussOpen = $state(false); // 종목 토론 드로어 (giscus)
-	// 출처 모달 "최근 일자" — 라이브 재무 최신 분기 (loadTerminalFinance in-flight dedup, 추가 다운로드 0)
+	// 출처 모달 "최근 일자" — 라이브 재무 최신 분기 (finance.bundle in-flight dedup, 추가 다운로드 0)
 	let finLatest = $state('');
 	$effect(() => {
 		const c = co?.code;
 		finLatest = '';
 		if (!c) return;
-		void loadTerminalFinance(c).then((b) => {
+		void runtime.finance.bundle(c).then((b) => {
 			if (co?.code !== c) return;
 			finLatest = b?.views.quarter?.periods.at(-1) ?? b?.views.annual?.periods.at(-1) ?? '';
 		});
@@ -91,18 +94,18 @@
 	});
 
 	const co = $derived(eng.buildCompany(sym));
-	// 회사 선택 시 워크벤치로 모든 온디맨드 소스를 병렬 워밍업(패널 effect 전 캐시 준비).
+	// 회사 선택 시 포트 경유로 모든 온디맨드 소스를 병렬 워밍업(패널 effect 전 캐시 준비).
 	$effect(() => {
 		const c = co;
-		if (c) prefetchCompany(c.code, +c.price.asOf.slice(0, 4) || new Date().getFullYear());
+		if (c) warmCompany(runtime, c.code);
 	});
 	const tickerCodes = $derived(eng.featured(14));
-	// 회사 티커 스파크라인 — recent.parquet(최근 30거래일 전종목) 재사용, 추가 다운로드 0 (모듈 캐시 공유)
-	let recentMap = $state<Map<string, Candle[]> | null>(null);
-	loadGovRecent().then((m) => (recentMap = m));
+	// 회사 티커 스파크라인 — recent.parquet(최근 30거래일 전종목) 재사용, 추가 다운로드 0 (어댑터 캐시 공유)
+	let recentMap = $state<Record<string, Candle[]> | null>(null);
+	runtime.price.govRecent().then((m) => (recentMap = m));
 	// 실 경제지표 최신값 (ECOS·FRED 시계열) — 종목명·주가차트 윗단 KPI 티커에 합류.
 	let macroLatest = $state<MacroLatest[]>([]);
-	loadMacroLatest().then((m) => (macroLatest = m));
+	runtime.macro.getLatest().then((m) => (macroLatest = m));
 	const fmtMacro = (m: MacroLatest): string => {
 		const v = m.v.toLocaleString('en-US', { maximumFractionDigits: m.def.digits ?? 2 });
 		const signed = m.def.yoy && m.v > 0 ? '+' + v : v;
@@ -238,7 +241,7 @@
 			{#each tickerCodes.concat(tickerCodes) as c, i (i)}
 				{@const px = eng.priceOf(c)}
 				{#if px}
-					{@const sp = recentMap?.get(c)}
+					{@const sp = recentMap?.[c]}
 					<span class="tickerItem" role="button" tabindex="0" onclick={() => pick(c)} onkeydown={(ev) => ev.key === 'Enter' && pick(c)}>
 						<b>{eng.nameOf(c)}</b>
 						{#if sp && sp.length > 1}<svg class={'kpiSpark ' + chgClass(px.return1m)} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={sparkPts(sp.map((k) => k.c))} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}

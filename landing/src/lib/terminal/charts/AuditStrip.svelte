@@ -1,7 +1,7 @@
 <script lang="ts">
 	// 감사 리스크 스트립 — 연도 가로 세그먼트: 감사인(교체 경계 색 전환) + 의견 뱃지 + 특기사항 도트.
-	// 데이터 규칙은 reportSeries.loadAuditTrail 이 보장 (사업보고서 당기 행 · 사업연도 = 접수연도−1).
-	import type { AuditYear } from '../data/reportSeries';
+	// 데이터 규칙은 ReportPort.auditTrail 구현이 보장 (사업보고서 당기 행 · 사업연도 = 접수연도−1).
+	import type { AuditYear } from '@dartlab/ui-contracts';
 
 	interface Props {
 		trail: AuditYear[]; // 연도 오름차순

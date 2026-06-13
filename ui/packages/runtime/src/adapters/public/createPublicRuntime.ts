@@ -1,61 +1,172 @@
-// public adapter skeleton — 구현은 단계-4a (terminal 데이터 계층 포트화)에서 채운다.
-// 책임 경계(02 §9.1): static/HF/hfProxy 접근·base path·deterministic+onDevice AI·localOnly descriptor.
-// silent fallback 금지 — 미구현 호출은 명시적 오류로 실패한다 (조용히 빈 데이터를 주지 않는다).
-import type { DartLabRuntime, RuntimeEnvironment } from '@dartlab/ui-contracts';
+// public adapter — static/HF 데이터 포트 실구현 조립 (책임 경계 02 §9.1).
+// silent fallback 금지: 모든 포트 메서드는 단일 경로다. 공유 엔진(duckdb-wasm 계열) 의존 메서드는
+// 셸(landing)이 `shared` 로 주입한다 — 어댑터가 landing 을 역방향 import 하지 않기 위한 필수 계약.
+// 아직 surface 가 소비하지 않는 포트(navigation·storage·map·search·ai)는 명시적 throw 게이트 유지.
+import type {
+	CompanyChange,
+	CompanyPort,
+	DartLabRuntime,
+	FilingPort,
+	FinancePort,
+	LiveCompanyReportFact,
+	PricePort,
+	ProductIndexItem,
+	ReportPort,
+	RuntimeEnvironment,
+	ScanPort,
+	ViewerPort
+} from '@dartlab/ui-contracts';
+import { loadGovCandles, loadGovRecent } from './sources/govPriceSource';
+import { loadInitialOHLCV, loadOlderYear, loadedCandles, mergeDedup, seedCandles } from './sources/priceSource';
+import { loadTerminalFinance } from './sources/financeSource';
+import { createHfMacroPort } from './sources/macroSource';
+import { loadCompanyRelations } from './sources/relationsSource';
+import { loadHfProductIndexMap } from './sources/productIndexSource';
+import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
+import { loadCompanyNonRegularFilings } from './sources/nonRegularFilingsSource';
+import {
+	loadAuditFees,
+	loadAuditTrail,
+	loadCapitalChanges,
+	loadDebtProfile,
+	loadExecBoard,
+	loadInvestments,
+	loadOwnership,
+	loadShareholderReturn,
+	loadTopExecPay,
+	loadWorkforce
+} from './sources/reportSource';
+
+/** 공유 엔진 의존 메서드 — companyLive(reportFacts)·duckSql(changes) 는 landing 잔류라 셸이 주입. */
+export interface PublicRuntimeSharedPorts {
+	reportFacts(code: string): Promise<LiveCompanyReportFact[]>;
+	changes(code: string, limit?: number): Promise<CompanyChange[]>;
+}
 
 export interface PublicRuntimeOptions {
 	env: Omit<RuntimeEnvironment, 'kind'>;
+	shared: PublicRuntimeSharedPorts;
+	/** 공개 셸의 뷰어 노출 형태 — landing = 임베드 컴포넌트(urlForCompany → null). */
+	viewer: ViewerPort;
 }
 
-function notImplemented(port: string): never {
-	throw new Error(`[public adapter] ${port} 는 단계-4a에서 구현된다 — 이 호출이 보이면 배선 순서 위반이다.`);
+function notWiredYet(what: string, stage: string): never {
+	throw new Error(`[public adapter] ${what} 는 ${stage}에서 구현된다 — 이 호출이 보이면 배선 순서 위반이다.`);
+}
+
+// 전 종목 productIndex 는 Map 소스를 Record(JSON-safe 계약)로 1 회 변환해 공유.
+let productIndexPromise: Promise<Record<string, ProductIndexItem> | null> | null = null;
+function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | null> {
+	productIndexPromise ??= (async () => {
+		try {
+			const map = await loadHfProductIndexMap();
+			return Object.fromEntries(map);
+		} catch {
+			return null;
+		}
+	})();
+	return productIndexPromise;
+}
+
+function publicPricePort(): PricePort {
+	return {
+		// 회사파일(전종목 주간 파생, 전체 이력) ∥ recent(최근 30거래일 전종목 슬림 1파일) 병렬 → 병합.
+		// 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을 보장. 둘 다 미스(신규상장 직후)면
+		// date/ 파티션 폴백. dev 미스는 /__gov 라이브 채움 경로가 govPriceSource 안에서 동작.
+		async initial(code, year) {
+			const c = code.trim();
+			const [gov, recent] = await Promise.all([loadGovCandles(c), loadGovRecent()]);
+			const tail = recent?.[c] ?? [];
+			if ((gov && gov.length) || tail.length) return seedCandles(c, mergeDedup(gov ?? [], tail));
+			return loadInitialOHLCV(c, year);
+		},
+		older: loadOlderYear,
+		loaded: loadedCandles,
+		govCandles: loadGovCandles,
+		govRecent: loadGovRecent
+	};
+}
+
+function publicCompanyPort(shared: PublicRuntimeSharedPorts): CompanyPort {
+	return {
+		async products(code) {
+			const rec = await loadProductIndexRecord();
+			return rec?.[code.trim()] ?? null;
+		},
+		productIndex: loadProductIndexRecord,
+		relations: loadCompanyRelations,
+		reportFacts: shared.reportFacts
+	};
+}
+
+function publicFilingPort(): FilingPort {
+	return {
+		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
+		nonRegular: (code, limit = 200) => loadCompanyNonRegularFilings(code, { limit }),
+		// panel 격자 3종은 공개 뷰어 코드(landing)가 단계-6(뷰어 추출)에서 어댑터로 들어온다.
+		panelToc: () => notWiredYet('filing.panelToc', '단계-6(viewer 추출)'),
+		panelInit: () => notWiredYet('filing.panelInit', '단계-6(viewer 추출)'),
+		panelGrid: () => notWiredYet('filing.panelGrid', '단계-6(viewer 추출)')
+	};
+}
+
+function publicFinancePort(): FinancePort {
+	return { bundle: loadTerminalFinance };
+}
+
+function publicReportPort(): ReportPort {
+	return {
+		workforce: loadWorkforce,
+		investments: loadInvestments,
+		shareholderReturn: loadShareholderReturn,
+		ownership: loadOwnership,
+		execBoard: loadExecBoard,
+		debtProfile: loadDebtProfile,
+		capitalChanges: loadCapitalChanges,
+		auditTrail: loadAuditTrail,
+		topExecPay: loadTopExecPay,
+		auditFees: loadAuditFees
+	};
+}
+
+function publicScanPort(shared: PublicRuntimeSharedPorts): ScanPort {
+	return {
+		changes: shared.changes,
+		listTableSources: () => notWiredYet('scan.listTableSources', '단계-8(scan 추출)'),
+		getPresets: () => notWiredYet('scan.getPresets', '단계-8(scan 추출)'),
+		savePreset: () => notWiredYet('scan.savePreset', '단계-8(scan 추출)')
+	};
 }
 
 export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRuntime {
 	const env: RuntimeEnvironment = { ...options.env, kind: 'public' };
 	return {
 		env,
-		get company() {
-			return notImplemented('company');
-		},
-		get price() {
-			return notImplemented('price');
-		},
-		get filing() {
-			return notImplemented('filing');
-		},
-		get finance() {
-			return notImplemented('finance');
-		},
-		get viewer() {
-			return notImplemented('viewer');
-		},
-		get macro() {
-			return notImplemented('macro');
-		},
-		get report() {
-			return notImplemented('report');
-		},
-		get scan() {
-			return notImplemented('scan');
-		},
+		company: publicCompanyPort(options.shared),
+		price: publicPricePort(),
+		filing: publicFilingPort(),
+		finance: publicFinancePort(),
+		viewer: options.viewer,
+		macro: createHfMacroPort(),
+		report: publicReportPort(),
+		scan: publicScanPort(options.shared),
 		get map() {
-			return notImplemented('map');
+			return notWiredYet('map', '단계-8(map 추출)');
 		},
 		get search() {
-			return notImplemented('search');
+			return notWiredYet('search', '단계-8(search 추출)');
 		},
 		get ai() {
-			return notImplemented('ai');
+			return notWiredYet('ai', '단계-7(ask 추출)');
 		},
 		get services() {
-			return notImplemented('services');
+			return notWiredYet('services', '단계-5(서비스 레지스트리 배선)');
 		},
 		get navigation() {
-			return notImplemented('navigation');
+			return notWiredYet('navigation', '단계-4a-3(셸 내비 주입)');
 		},
 		get storage() {
-			return notImplemented('storage');
+			return notWiredYet('storage', '단계-4a-3(셸 스토리지 주입)');
 		},
 		telemetry: { event() {} },
 		featureFlags: { isEnabled: () => false }

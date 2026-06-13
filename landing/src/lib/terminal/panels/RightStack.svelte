@@ -1,25 +1,27 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import type {
+		CompanyChange,
+		CompanyRelations,
+		FinMode,
+		InvestmentsView,
+		LiveCompanyReportFact,
+		NonRegularFiling,
+		ProductIndexItem,
+		RegularFiling,
+		ShareholderReturnYear,
+		StmtKind,
+		TerminalFinanceBundle,
+		WorkforceYear
+	} from '@dartlab/ui-contracts';
+	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang } from '../data/types';
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 내부 dynamic import
 	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — dynamic import lazy, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
-	import {
-		loadLiveCompanyReportFacts,
-		loadLiveCompanyChanges,
-		type LiveCompanyReportFact
-	} from '$lib/browser/companyLive';
-	import type { CompanyChange } from '$lib/scan/duckSql';
-	import { loadCompanyRelations, type CompanyRelations } from '../data/relations';
-	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
-	import { loadCompanyNonRegularFilings, type NonRegularFiling } from '$lib/data/companyNonRegularFilings';
-	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode, type StmtKind } from '../data/terminalFinance';
-	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
-	import { loadWorkforce, loadInvestments, loadShareholderReturn, type WorkforceYear, type InvestmentsView, type ShareholderReturnYear } from '../data/reportSeries';
 	import { fmtKRW } from '../data/engine';
-	import { localTerminalAdapter } from '../data/localAdapter';
 
 	interface Props {
 		co: Company;
@@ -27,9 +29,10 @@
 		onPick: (code: string) => void;
 	}
 	let { co, lang, onPick }: Props = $props();
+	const rt = useDartLabRuntime();
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
-	const localViewerHref = $derived(localTerminalAdapter()?.viewerUrl?.(co.code) ?? null);
+	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const viewerHref = $derived(localViewerHref ?? `${base}/viewer/company/${co.code}`);
 	const externalTarget = $derived(localViewerHref ? undefined : '_blank');
 	const externalRel = $derived(localViewerHref ? undefined : 'noopener');
@@ -57,34 +60,34 @@
 		srs = [];
 		inv = null;
 		let cancelled = false;
-		loadTerminalFinance(code).then((b) => {
+		rt.finance.bundle(code).then((b) => {
 			if (!cancelled) finBundle = b;
 		});
 		// 정기보고서 3패널 — 독립 스트림-인 (가벼운 인력·배당 먼저, 무거운 출자 나중)
-		loadWorkforce(code).then((b) => {
+		rt.report.workforce(code).then((b) => {
 			if (!cancelled) wf = b ?? [];
 		});
-		loadShareholderReturn(code).then((b) => {
+		rt.report.shareholderReturn(code).then((b) => {
 			if (!cancelled) srs = b ?? [];
 		});
-		loadInvestments(code).then((b) => {
+		rt.report.investments(code).then((b) => {
 			if (!cancelled) inv = b?.latest ?? null;
 		});
-		loadLiveCompanyReportFacts(code).then((f) => {
+		rt.company.reportFacts(code).then((f) => {
 			if (cancelled) return;
 			reportFacts = f;
 			factsState = f.length ? 'ready' : 'empty';
 		});
-		loadLiveCompanyChanges(code, 8).then((c) => {
+		rt.scan.changes(code, 8).then((c) => {
 			if (!cancelled) disclChanges = c;
 		});
-		loadCompanyRelations(code).then((r) => {
+		rt.company.relations(code).then((r) => {
 			if (!cancelled) relations = r;
 		});
-		loadCompanyRegularFilings(code, 500).then((f) => {
+		rt.filing.regular(code, 500).then((f) => {
 			if (!cancelled) regFilings = f;
 		});
-		loadCompanyNonRegularFilings(code, { limit: 200 }).then((f) => {
+		rt.filing.nonRegular(code, 200).then((f) => {
 			if (cancelled) return;
 			nonRegFilings = f;
 			nonRegState = f.length ? 'ready' : 'empty';
@@ -116,7 +119,7 @@
 	const finUnit = $derived(finUnitEok ? '억' : '조');
 	const finVal = (v: number | null): string => (v == null ? '—' : finUnitEok ? fmtNum(v * 1e4, 0) : fmtNum(v, 1));
 
-	// 정기보고서 시계열 (인력·주주환원·타법인출자) — reportSeries.ts, 패널별 독립 로드.
+	// 정기보고서 시계열 (인력·주주환원·타법인출자) — runtime ReportPort, 패널별 독립 로드.
 	// 구역 규칙(Terminal.svelte): 우측 = 테이블·수치·정성만, 그래프 금지 — 시계열 그래프는 중앙 재무 전체화면 탭.
 	let wf = $state<WorkforceYear[]>([]);
 	let srs = $state<ShareholderReturnYear[]>([]);
@@ -185,9 +188,9 @@
 	);
 	const s = $derived(co.story);
 	const dartUrl = 'https://dart.fss.or.kr/dsab007/main.do';
-	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
-	loadHfProductIndexMap().then((m) => (corpMeta = m));
-	const homepage = $derived(corpMeta?.get(co.code)?.homepage ?? null);
+	let corpMeta = $state<Record<string, ProductIndexItem> | null>(null);
+	rt.company.productIndex().then((m) => (corpMeta = m));
+	const homepage = $derived(corpMeta?.[co.code]?.homepage ?? null);
 	const homepageHost = $derived(homepage ? homepage.replace(/^https?:\/\//, '').replace(/\/$/, '') : '');
 	const lastYr = $derived(co.income.periods[0]);
 	const firstYr = $derived(co.income.periods[co.income.periods.length - 1]);
@@ -444,7 +447,7 @@
 					<span class="peerName"><b>{p.name}</b><span class="pc">{p.code}</span></span>
 					<span class="peerBar"><span class="peerBarTrack"><span class="peerBarFill" style={`width:${((p.revenue || 0) / peerMax) * 100}%`}></span></span><span class="peerRev">{p.revenue != null ? (p.revenue / 10000).toFixed(1) + '조' : '—'}</span></span>
 					</div>
-					{#if corpMeta?.get(p.code)?.product}<span class="peerProd">{corpMeta?.get(p.code)?.product}</span>{/if}
+					{#if corpMeta?.[p.code]?.product}<span class="peerProd">{corpMeta?.[p.code]?.product}</span>{/if}
 				</div>
 			{/each}
 		</div>

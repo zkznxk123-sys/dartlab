@@ -3,134 +3,30 @@
 // DuckDB-WASM 경유 금지 — 단일 워커 직렬 큐에 묶여 첫 표시가 수십 초로 밀린다(실측 40s → 수 초).
 // 버틀러식 인력·생산성 / 주주환원 / 타법인출자 패널의 데이터층. 수치는 콤마 문자열('-'=결측).
 // 실측 구조: employee 는 fo_bbm='성별합계' 행이 성별 합계+급여 보유, treasuryStock 은 acqs_mth1='총계' 행이 총계.
-import { browser } from '$app/environment';
-import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
-import { localTerminalAdapter } from './localAdapter';
+// 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
+import type {
+	AuditFeeYear,
+	AuditYear,
+	CapitalChangeEvent,
+	CapitalChangesBundle,
+	DebtLadder,
+	DebtProfileBundle,
+	DebtProfileYear,
+	DilutionYear,
+	ExecBoardYear,
+	InvestmentsBundle,
+	InvestmentsView,
+	InvestmentTrendYear,
+	Num,
+	OwnershipYear,
+	ShareholderReturnYear,
+	TopExecPay,
+	WorkforceYear
+} from '@dartlab/ui-contracts';
+import { readParquetRows } from '../../../data/hfRange';
 
-export type Num = number | null;
+const browser = typeof window !== 'undefined';
 
-export interface WorkforceYear {
-	year: string;
-	total: Num;
-	male: Num;
-	female: Num;
-	regular: Num;
-	contract: Num;
-	avgSalary: Num; // 원/인 (급여총액/총원)
-	totalSalary: Num; // 원
-	tenure: Num; // 평균 근속연수
-}
-export interface InvestmentRow {
-	name: string;
-	purpose: string;
-	stakePct: Num;
-	bookValue: Num; // 원
-	acquiredAmt: Num; // 원 (최초취득)
-	targetNet: Num; // 피출자사 당기순이익 (원)
-}
-export interface InvestmentsView {
-	year: string;
-	rows: InvestmentRow[]; // 장부가액 top 12
-	moreCount: number;
-	moreBook: number; // top 밖 장부가액 합 (원)
-}
-export interface InvestmentTrendYear {
-	year: string;
-	bookTotal: Num; // 합계행 장부가 (원) — 부재 연도만 개별행 합산 fallback
-	count: number; // 유효 개별 출자사 수
-}
-export interface InvestmentsBundle {
-	latest: InvestmentsView;
-	trend: InvestmentTrendYear[]; // 연도 오름차순
-}
-export interface OwnershipYear {
-	year: string;
-	majorPct: Num; // 최대주주측 합산 지분율 % (계행·보통주 우선)
-	minorPct: Num; // 소액주주 지분율 %
-	minorCount: Num; // 소액주주 수 (명)
-	stockTotal: Num; // 총발행주식수 (주) — minorityHolder stock_tot_co
-}
-export interface ExecBoardYear {
-	year: string;
-	execAvgPay: Num; // 이사·감사 1인평균 보수 (원) — 공시값 우선
-	execTotalPay: Num; // 보수총액 (원)
-	execCount: Num; // 인원
-	directors: Num; // 이사 수
-	outsideDirectors: Num; // 사외이사 수
-}
-export interface DebtProfileYear {
-	year: string;
-	bond1y: Num; // 사채 잔존만기 1년이하 (원)
-	bond1to5: Num;
-	bond5to10: Num;
-	bond10plus: Num;
-	bondTotal: Num; // 사채 미상환 합계 (원)
-	stb: Num; // 단기사채 미상환 (원)
-	cp: Num; // CP 미상환 (원)
-}
-export interface DebtLadder {
-	year: string; // 2% 검산 통과한 최신 연도
-	buckets: Num[]; // 7버킷 (원): ≤1y · 1~2y · 2~3y · 3~4y · 4~5y · 5~10y · 10y+
-	shortTerm: Num; // 전단채+CP 합계 (원) — 만기 ≤1y 버킷에 합산 표시용
-}
-export interface DebtProfileBundle {
-	years: DebtProfileYear[]; // 연도 오름차순
-	ladder: DebtLadder | null; // 전방 만기 사다리 — 검산 통과 연도 없으면 null
-}
-export interface ShareholderReturnYear {
-	year: string;
-	dps: Num; // 주당 현금배당금 (원, 보통주)
-	eps: Num; // 주당순이익 (원) — (연결) 우선
-	totalDividend: Num; // 원 (백만원 → 환산)
-	payoutPct: Num; // (연결)현금배당성향
-	yieldPct: Num; // 현금배당수익률
-	buybackQty: Num; // 자사주 취득 (주, 보통주 총계)
-	disposalQty: Num;
-	buybackCancel: Num; // 소각 (주)
-	treasuryEnd: Num; // 기말 보유 (주)
-}
-// ── 자본금 변동 (증자·감자·전환 이벤트) — capitalChange ──
-export interface CapitalChangeEvent {
-	date: string; // 발행(감소)일자 공시 원문 (예: '2025.08.21')
-	year: number; // date 앞 4자리
-	kind: 'paidIn' | 'conversion' | 'reduction';
-	type: string; // 발행(감소)형태 원문 (유상증자(제3자배정) 등)
-	qty: number; // 주 — 감자·소각은 음수
-}
-export interface DilutionYear {
-	year: number;
-	paidIn: Num; // 유상증자·출자전환·현물출자 (주)
-	conversion: Num; // 전환권·신주인수권·주식매수선택권 행사 (주)
-	reduction: Num; // 감자·소각 (음수, 주)
-}
-export interface CapitalChangesBundle {
-	events: CapitalChangeEvent[]; // 일자 오름차순 — 주가차트 마커 연결용
-	years: DilutionYear[]; // 연도 합산 — 희석 이력 카드용
-}
-// ── 감사 이력 — auditOpinion ──
-export interface AuditYear {
-	year: number; // 사업연도 (= 사업보고서 접수연도 − 1)
-	auditor: string;
-	opinion: string | null; // 적정/한정/부적정/의견거절 표준화 — 미기재 null
-	special: string | null; // 감사보고서 특기사항 ('-'·'해당사항 없음' → null)
-}
-// ── 개별 임원 보수 — executivePayIndividual (5억↑ 공시 대상만) ──
-export interface TopExecPayRow {
-	name: string;
-	title: string; // 직위
-	pay: number; // 보수총액 (원)
-}
-export interface TopExecPay {
-	year: string; // 최신 사업보고서 연도
-	avgPay: Num; // 같은 연도 이사·감사 1인평균 보수 (원) — 배수 병치용
-	rows: TopExecPayRow[]; // 보수 내림차순 top 8
-}
-// ── 감사보수·독립성 — auditContract(감사용역) + nonAuditContract(비감사용역) ──
-export interface AuditFeeYear {
-	year: number; // 사업연도 = stlm_dt 연도 − 상대기수(당기·당분기 0 / 전기 1 / 전전기 2). 마커 행만 채택
-	auditFee: Num; // 감사용역 계약보수 (원) — 실집행은 분기 YTD 오염이라 계약값 고정
-	nonAuditFee: Num; // 비감사용역 보수 합 (원) — 같은 연도 최신 공시 그룹 합산, 계약 없으면 0
-}
 // 패널 3종은 독립 로더 — Promise.all 로 묶으면 가장 무거운 investedCompany(16MB)가
 // 가벼운 인력·배당 패널까지 지연시킨다. 각자 캐시·각자 스트림-인.
 
@@ -203,62 +99,42 @@ const afCache = new Map<string, Promise<AuditFeeYear[] | null>>();
 
 /** 인력·생산성 연도 시계열 (employee.parquet 단독 — 가볍고 먼저 도착). */
 export function loadWorkforce(stockCode: string): Promise<WorkforceYear[] | null> {
-	const local = localTerminalAdapter()?.loadWorkforce;
-	if (local) return local(stockCode.trim());
 	return cached(wfCache, stockCode, buildWorkforce);
 }
 /** 타법인출자 — 최신 연도 top 12 + 연도별 장부가 합계 추이 (investedCompany.parquet — 가장 무거움, 단일 패스). */
 export function loadInvestments(stockCode: string): Promise<InvestmentsBundle | null> {
-	const local = localTerminalAdapter()?.loadInvestments;
-	if (local) return local(stockCode.trim());
 	return cached(invCache, stockCode, buildInvestments);
 }
 /** 주주환원 연도 시계열 (dividend + treasuryStock). */
 export function loadShareholderReturn(stockCode: string): Promise<ShareholderReturnYear[] | null> {
-	const local = localTerminalAdapter()?.loadShareholderReturn;
-	if (local) return local(stockCode.trim());
 	return cached(srCache, stockCode, buildShareholderReturn);
 }
 /** 소유구조 연도 시계열 (majorHolder 계행 + minorityHolder). */
 export function loadOwnership(stockCode: string): Promise<OwnershipYear[] | null> {
-	const local = localTerminalAdapter()?.loadOwnership;
-	if (local) return local(stockCode.trim());
 	return cached(ownCache, stockCode, buildOwnership);
 }
 /** 이사·감사 보수 + 이사회 구성 연도 시계열 (executivePayAllTotal + outsideDirector). */
 export function loadExecBoard(stockCode: string): Promise<ExecBoardYear[] | null> {
-	const local = localTerminalAdapter()?.loadExecBoard;
-	if (local) return local(stockCode.trim());
 	return cached(ebCache, stockCode, buildExecBoard);
 }
 /** 사채 잔액 추이 + 전방 만기 사다리 + 초단기물 (corporateBond + shortTermBond + commercialPaper). */
 export function loadDebtProfile(stockCode: string): Promise<DebtProfileBundle | null> {
-	const local = localTerminalAdapter()?.loadDebtProfile;
-	if (local) return local(stockCode.trim());
 	return cached(dpCache, stockCode, buildDebtProfile);
 }
 /** 자본금 변동 이벤트 + 연도 합산 (capitalChange) — 희석 이력 카드 · 주가차트 마커 공용. */
 export function loadCapitalChanges(stockCode: string): Promise<CapitalChangesBundle | null> {
-	const local = localTerminalAdapter()?.loadCapitalChanges;
-	if (local) return local(stockCode.trim());
 	return cached(ccCache, stockCode, buildCapitalChanges);
 }
 /** 감사 이력 연도 시계열 (auditOpinion) — 감사인·의견·특기사항. */
 export function loadAuditTrail(stockCode: string): Promise<AuditYear[] | null> {
-	const local = localTerminalAdapter()?.loadAuditTrail;
-	if (local) return local(stockCode.trim());
 	return cached(atCache, stockCode, buildAuditTrail);
 }
 /** 개별 임원 보수 top 8 (executivePayIndividual, 최신 사업보고서). */
 export function loadTopExecPay(stockCode: string): Promise<TopExecPay | null> {
-	const local = localTerminalAdapter()?.loadTopExecPay;
-	if (local) return local(stockCode.trim());
 	return cached(tpCache, stockCode, buildTopExecPay);
 }
 /** 감사보수·독립성 연도 시계열 (auditContract + nonAuditContract). */
 export function loadAuditFees(stockCode: string): Promise<AuditFeeYear[] | null> {
-	const local = localTerminalAdapter()?.loadAuditFees;
-	if (local) return local(stockCode.trim());
 	return cached(afCache, stockCode, buildAuditFees);
 }
 async function buildWorkforce(code: string): Promise<WorkforceYear[] | null> {
@@ -416,13 +292,15 @@ async function buildOwnership(code: string): Promise<OwnershipYear[] | null> {
 		const common = sums.filter((r) => str(r.stock_knd).includes('보통'));
 		const voting = sums.filter((r) => { const k = str(r.stock_knd); return k.includes('의결권') && !k.includes('없'); });
 		const pool = common.length ? common : voting.length ? voting : [];
-		if (pool.length) own(year).majorPct = num(latestRcept(pool)[0].trmend_posesn_stock_qota_rt);
+		const top = latestRcept(pool)[0];
+		if (top) own(year).majorPct = num(top.trmend_posesn_stock_qota_rt);
 	}
 	// minorityHolder: se='소액주주' 행만 (se=null 깡통행 제외). hold_stock_rate 가 진짜 지분율 (shrholdr_rate 는 주주수 비율 — 사용 금지).
 	for (const [year, { rows }] of bestQuarterRows(min)) {
 		const valid = rows.filter((r) => str(r.se).trim() === '소액주주');
 		if (!valid.length) continue;
 		const r = latestRcept(valid)[0];
+		if (!r) continue;
 		const o = own(year);
 		o.minorPct = num(r.hold_stock_rate);
 		o.minorCount = num(r.shrholdr_co);
@@ -457,11 +335,12 @@ async function buildExecBoard(code: string): Promise<ExecBoardYear[] | null> {
 	for (const [year, rows] of payByYear) {
 		const grp = latestRcept(rows);
 		const e = eb(year);
-		if (grp.length === 1) {
+		const only = grp.length === 1 ? grp[0] : undefined;
+		if (only) {
 			// 단일행 = 공시값 그대로 — jan_avrg_mendng_am 은 연환산 평균인원 기준이라 totamt/nmpr 재계산 금지
-			e.execAvgPay = num(grp[0].jan_avrg_mendng_am);
-			e.execTotalPay = num(grp[0].mendng_totamt);
-			e.execCount = num(grp[0].nmpr);
+			e.execAvgPay = num(only.jan_avrg_mendng_am);
+			e.execTotalPay = num(only.mendng_totamt);
+			e.execCount = num(only.nmpr);
 		} else {
 			// 다행(동일 rcept_no 유형분리, 카테고리 라벨 부재) = 합산만 가능
 			let tot = 0, cnt = 0, anyTot = false;
@@ -522,7 +401,7 @@ async function buildDebtProfile(code: string): Promise<DebtProfileBundle | null>
 				d.bond1to5 = b15;
 				d.bond5to10 = b510;
 				d.bond10plus = b10p;
-				buckets7.set(year, [b1, mids[0], mids[1], mids[2], mids[3], b510, b10p]);
+				buckets7.set(year, [b1, mids[0] ?? null, mids[1] ?? null, mids[2] ?? null, mids[3] ?? null, b510, b10p]);
 			}
 		} else {
 			// 합계행 sm 결측 — 공모+사모 행 sm 합산 fallback (버킷 null)
@@ -545,11 +424,11 @@ async function buildDebtProfile(code: string): Promise<DebtProfileBundle | null>
 	// 전방 만기 사다리 — 2% 검산 통과한 최신 연도만 발행. 전단채·CP(만기 ≤1y)는 같은 연도 합계.
 	let ladder: DebtLadder | null = null;
 	const ladderYears = [...buckets7.keys()].sort();
-	if (ladderYears.length) {
-		const y = ladderYears[ladderYears.length - 1];
-		const d = byYear.get(y);
+	const latestLadderYear = ladderYears[ladderYears.length - 1];
+	if (latestLadderYear) {
+		const d = byYear.get(latestLadderYear);
 		const shortTerm = d && (d.stb != null || d.cp != null) ? (d.stb ?? 0) + (d.cp ?? 0) : null;
-		ladder = { year: y, buckets: buckets7.get(y)!, shortTerm };
+		ladder = { year: latestLadderYear, buckets: buckets7.get(latestLadderYear)!, shortTerm };
 	}
 	return { years: out, ladder };
 }

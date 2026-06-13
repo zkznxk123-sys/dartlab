@@ -1,18 +1,8 @@
-import { readParquetRows, type FetchLike } from '@dartlab/ui-runtime/data/hfRange';
+// 타입 정본 = contracts (ProductIndexItem 승격 완료 — 중복 정의 금지).
+import type { ProductIndexItem } from '@dartlab/ui-contracts';
+import { readParquetRows, type FetchLike } from '../../../data/hfRange';
 
 const PRODUCT_INDEX_PATH = 'metadata/corpList.parquet';
-
-export interface ProductIndexItem {
-	product: string;
-	productRaw: string;
-	latestPeriod: string;
-	homepage?: string;
-	industry?: string;
-	ceo?: string; // 대표자명 (KIND)
-	fiscalMonth?: string; // 결산월 (예: '12월')
-	listedDate?: string; // 상장일 (YYYY-MM-DD)
-	region?: string; // 본사 지역 (예: '경기도')
-}
 
 interface ProductIndexRow extends Record<string, unknown> {
 	stockCode?: unknown;

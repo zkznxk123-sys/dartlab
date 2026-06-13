@@ -3,12 +3,12 @@
 	// 종합 탭 = 기존 16 재무카드 전부(기본적으로 다 보이게). 나머지 탭 = finance 심화 카드
 	// (terminalFinance.tabCards, 모드 토글 동작) + report·교차 카드(finTabs.ts, 연 축 고정, lazy).
 	import { untrack } from 'svelte';
+	import type { AuditYear, FinMode, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
+	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang } from '../data/types';
-	import type { TerminalFinanceBundle, FinMode } from '../data/terminalFinance';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import AuditStrip from '../charts/AuditStrip.svelte';
 	import { FS_TABS, type TabCard } from '../data/finTabs';
-	import { loadAuditTrail, loadTopExecPay, type AuditYear, type TopExecPay } from '../data/reportSeries';
 
 	interface Props {
 		co: Company;
@@ -19,6 +19,7 @@
 		onClose: () => void;
 	}
 	let { co, lang, bundle, mode, onMode, onClose }: Props = $props();
+	const rt = useDartLabRuntime();
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
 
 	let tab = $state('all');
@@ -46,7 +47,7 @@
 		if (untrack(() => reportCards[t])) return;
 		const myEpoch = untrack(() => epoch);
 		reportCards[t] = 'loading';
-		def.load(code, b).then((cards) => {
+		def.load(code, b, rt.report).then((cards) => {
 			if (epoch !== myEpoch) return; // 회사가 바뀜 — 옛 결과 폐기
 			reportCards[t] = cards;
 		});
@@ -56,7 +57,7 @@
 		if (tab !== 'debt' || untrack(() => auditTrail) != null) return;
 		const myEpoch = untrack(() => epoch);
 		auditTrail = 'loading';
-		loadAuditTrail(code).then((tr) => {
+		rt.report.auditTrail(code).then((tr) => {
 			if (epoch !== myEpoch) return;
 			auditTrail = tr && tr.length ? tr : 'empty';
 		});
@@ -66,7 +67,7 @@
 		if (tab !== 'people' || untrack(() => execTop) != null) return;
 		const myEpoch = untrack(() => epoch);
 		execTop = 'loading';
-		loadTopExecPay(code).then((tp) => {
+		rt.report.topExecPay(code).then((tp) => {
 			if (epoch !== myEpoch) return;
 			execTop = tp && tp.rows.length ? tp : 'empty';
 		});

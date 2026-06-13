@@ -1,28 +1,11 @@
 // 일별 OHLCV 시계열 — gov/prices/date/{year}.parquet 을 hyparquet HTTP-range 로 직독.
 // hyparquet 는 컬럼 projection (7 컬럼) + ISU_CD 필터 pushdown + 병렬 range → 첫 페인트 비차단·sub-second.
 // 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
-import { browser } from '$app/environment';
-import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
-import { localTerminalAdapter } from './localAdapter';
+// 표시용 변환(수정주가·집계·하이킨아시)은 surface 의 candleMath — 본 모듈은 로드·캐시만.
+import { KRX_MIN_YEAR, type Candle, type CompanyPrices } from '@dartlab/ui-contracts';
+import { readParquetRows } from '../../../data/hfRange';
 
-export interface Candle {
-	t: string; // YYYYMMDD
-	o: number;
-	h: number;
-	l: number;
-	c: number;
-	v: number;
-	r?: number | null; // 기준가 대비 등락률(%) — 수정주가 체이닝용 (adjustCandles)
-	tv?: number | null; // 거래대금(원) — klinecharts turnover 로 전달
-}
-
-// date 샤드 파케 존재 하한 (HF 실측: date/2010 ~ date/2026). 이 아래는 404 → lazy 로드 종료.
-export const KRX_MIN_YEAR = 2010;
-
-export interface CompanyPrices {
-	candles: Candle[]; // 오름차순·일자 dedup
-	oldestYear: number; // 현재까지 로드한 가장 오래된 연도
-}
+const browser = typeof window !== 'undefined';
 
 const OHLCV_COLUMNS = ['ISU_CD', 'BAS_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL', 'FLUC_RT', 'ACC_TRDVAL'];
 
@@ -84,97 +67,7 @@ async function readYearCandles(year: number, isuA: string, isuPlain: string): Pr
 	}
 }
 
-// 입력 배열 identity 기준 메모 — reapply·백테스트·이벤트 effect 가 같은 배열로 반복 호출 (백필 merge 시 새 배열 = 자동 무효화)
-const adjCache = new WeakMap<Candle[], Candle[]>();
-
-/** HTS 수정주가 — 등락률(기준가 대비) 체이닝으로 액면분할·병합·감자·권리락 단차 제거.
- *
- * KRX 기준가는 자본 액션 시 조정되므로 `종가/전일종가` 와 `1+등락률` 의 괴리 = 액션 배율.
- * 마지막 봉 기준으로 과거를 누적 보정 (가격 ×factor, 거래량 ÷factor). 괴리 ±3% 미만은
- * 반올림 노이즈로 간주해 무시. 등락률 누락 봉은 보정 불가 → 해당 일 괴리 통과(드묾). */
-export function adjustCandles(daily: Candle[]): Candle[] {
-	const n = daily.length;
-	if (n < 2) return daily;
-	const hit = adjCache.get(daily);
-	if (hit) return hit;
-	let factor = 1;
-	let touched = false;
-	const out: Candle[] = new Array(n);
-	out[n - 1] = daily[n - 1];
-	for (let i = n - 1; i > 0; i--) {
-		const k = daily[i];
-		const prev = daily[i - 1];
-		const r = k.r;
-		if (r != null && prev.c > 0) {
-			const implied = k.c / (1 + r / 100); // 보정 반영된 전일 기준가
-			const ratio = implied / prev.c;
-			if (ratio > 0 && (ratio < 0.97 || ratio > 1.03)) {
-				factor *= ratio;
-				touched = true;
-			}
-		}
-		out[i - 1] = factor === 1 ? prev : { ...prev, o: prev.o * factor, h: prev.h * factor, l: prev.l * factor, c: prev.c * factor, v: prev.v / factor };
-	}
-	const res = touched ? out : daily;
-	adjCache.set(daily, res);
-	return res;
-}
-
-// 월요일 시작 주 키 — YYYYMMDD → 해당 주 월요일 YYYYMMDD (UTC 산술, 시간대 무관)
-function weekKey(t: string): string {
-	const d = new Date(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)));
-	d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
-	return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
-}
-
-/** 일봉 → 주봉('W')·월봉('M')·분기봉('Q')·년봉('Y') 집계. 라벨 t = 버킷 마지막 거래일(HTS 관행), 마지막 버킷 = 진행중 부분봉. */
-export function aggregateCandles(daily: Candle[], tf: 'W' | 'M' | 'Q' | 'Y'): Candle[] {
-	const out: Candle[] = [];
-	let key = '';
-	let cur: Candle | null = null;
-	for (const k of daily) {
-		const kk =
-			tf === 'Y' ? k.t.slice(0, 4)
-			: tf === 'Q' ? `${k.t.slice(0, 4)}Q${Math.floor((+k.t.slice(4, 6) - 1) / 3)}`
-			: tf === 'M' ? k.t.slice(0, 6)
-			: weekKey(k.t);
-		if (kk !== key) {
-			if (cur) out.push(cur);
-			key = kk;
-			cur = { ...k };
-		} else if (cur) {
-			cur.t = k.t;
-			cur.h = Math.max(cur.h, k.h);
-			cur.l = Math.min(cur.l, k.l);
-			cur.c = k.c;
-			cur.v += k.v;
-			if (k.tv != null) cur.tv = (cur.tv ?? 0) + k.tv;
-		}
-	}
-	if (cur) out.push(cur);
-	return out;
-}
-
-/** 하이킨아시 변환 — haC=(o+h+l+c)/4, haO=(전봉haO+전봉haC)/2 (첫 봉 = (o+c)/2),
- * haH=max(h,haO,haC), haL=min(l,haO,haC). 순수함수: 입력 불변, prefix 안정(앞부분 슬라이스 결과 동일).
- * 표시 전용 변형값 — 시계열 버스(publishView)·백테스트는 원본 가격을 유지한다. */
-export function heikinAshi(candles: Candle[]): Candle[] {
-	if (!candles.length) return candles;
-	const out: Candle[] = new Array(candles.length);
-	let prevO = 0;
-	let prevC = 0;
-	for (let i = 0; i < candles.length; i++) {
-		const k = candles[i];
-		const haC = (k.o + k.h + k.l + k.c) / 4;
-		const haO = i === 0 ? (k.o + k.c) / 2 : (prevO + prevC) / 2;
-		out[i] = { ...k, o: haO, c: haC, h: Math.max(k.h, haO, haC), l: Math.min(k.l, haO, haC) };
-		prevO = haO;
-		prevC = haC;
-	}
-	return out;
-}
-
-/** 오름차순 병합 + 일자 dedup (연도 경계 안전). 외부(회사파일+recent tail 병합)에서도 사용. */
+/** 오름차순 병합 + 일자 dedup (연도 경계 안전). 어댑터 조립(회사파일+recent tail 병합)에서도 사용. */
 export function mergeDedup(...lists: Candle[][]): Candle[] {
 	const merged = ([] as Candle[]).concat(...lists);
 	merged.sort((a, b) => a.t.localeCompare(b.t));
@@ -188,7 +81,7 @@ export function mergeDedup(...lists: Candle[][]): Candle[] {
 	return out;
 }
 
-// in-flight Promise — prefetch(워크벤치) 와 패널이 같은 회사 주가를 동시 호출해도 스캔은 1 회만
+// in-flight Promise — 워밍업과 패널이 같은 회사 주가를 동시 호출해도 스캔은 1 회만
 // (전종목 날짜정렬 스캔이 가장 무거움 → 중복 = 2배 요청·연결경쟁). resolve 후엔 cache 가 응답.
 const inflight = new Map<string, Promise<CompanyPrices | null>>();
 
@@ -196,8 +89,6 @@ const inflight = new Map<string, Promise<CompanyPrices | null>>();
 export function loadInitialOHLCV(stockCode: string, year: number): Promise<CompanyPrices | null> {
 	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
-	const local = localTerminalAdapter()?.loadPriceInitial;
-	if (local) return local(code, year);
 	if (cache.has(code)) return Promise.resolve(cache.get(code) ?? null);
 	const hit = inflight.get(code);
 	if (hit) return hit;
@@ -220,15 +111,14 @@ export function loadInitialOHLCV(stockCode: string, year: number): Promise<Compa
 
 /** 현재까지 캐시된 전체 캔들(오름차순). 백필 후 차트 재적용·기간 윈도잉에 사용. */
 export function loadedCandles(stockCode: string): Candle[] {
-	const local = localTerminalAdapter()?.loadedCandles;
-	if (local) return local(stockCode);
 	return cache.get(stockCode.trim())?.candles ?? [];
 }
 
 /** 외부 소스(gov 회사별 parquet 전체이력)를 차트 캐시에 심는다 — loadedCandles/loadOlderYear 일관 보장. */
 export function seedCandles(stockCode: string, candles: Candle[]): CompanyPrices | null {
-	if (!candles.length) return null;
-	const rec: CompanyPrices = { candles, oldestYear: +candles[0].t.slice(0, 4) };
+	const first = candles[0];
+	if (!first) return null;
+	const rec: CompanyPrices = { candles, oldestYear: +first.t.slice(0, 4) };
 	setCache(stockCode.trim(), rec);
 	return rec;
 }
@@ -236,8 +126,6 @@ export function seedCandles(stockCode: string, candles: Candle[]): CompanyPrices
 /** 좌측 팬 시 더 오래된 연도 1 개 로드 (prepend 용). 캐시에도 병합. 빈 배열 = 데이터 없음. */
 export async function loadOlderYear(stockCode: string, targetYear: number): Promise<Candle[]> {
 	if (!browser || targetYear < KRX_MIN_YEAR) return [];
-	const local = localTerminalAdapter()?.loadPriceOlder;
-	if (local) return local(stockCode, targetYear);
 	const code = stockCode.trim();
 	const c = code.replace(/[^0-9A-Za-z]/g, '');
 	const rows = await readYearCandles(targetYear, `A${c}`, c);

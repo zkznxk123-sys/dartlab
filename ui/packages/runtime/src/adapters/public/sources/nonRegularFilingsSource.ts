@@ -2,15 +2,9 @@
 // 필터로 단건 읽기. 일자 date-scan(휴일 404 콘솔오염) 폐기 — 통합파일은 stock_code 정렬이라
 // filter pushdown 이 회사 row-group 만 읽음. content_raw 없음(빌드시 메타만). per-code 캐시.
 // 통합파일 생성: .github/scripts/sync/buildAllFilingsRecent.py (정기보고서는 이미 제외됨).
-import { readParquetRows, type FetchLike } from '@dartlab/ui-runtime/data/hfRange';
-
-export interface NonRegularFiling {
-	rceptNo: string;
-	rceptDate: string; // YYYY-MM-DD
-	reportNm: string;
-	filer: string;
-	url: string;
-}
+// 타입 정본 = contracts (NonRegularFiling 승격 완료 — 중복 정의 금지).
+import type { NonRegularFiling } from '@dartlab/ui-contracts';
+import { readParquetRows, type FetchLike } from '../../../data/hfRange';
 
 interface RecentRow extends Record<string, unknown> {
 	stock_code?: unknown;

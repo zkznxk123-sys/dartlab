@@ -1,12 +1,6 @@
-import { readParquetRows, type FetchLike } from '@dartlab/ui-runtime/data/hfRange';
-
-export interface RegularFiling {
-	rceptNo: string;
-	rceptDate: string;
-	reportType: string;
-	year: string;
-	url: string;
-}
+// 정기공시 목록 — dart/panel/{code}.parquet 의 (period, rceptNo) 직독. 타입 정본 = contracts.
+import type { RegularFiling } from '@dartlab/ui-contracts';
+import { readParquetRows, type FetchLike } from '../../../data/hfRange';
 
 interface DocsRow extends Record<string, unknown> {
 	period?: unknown;

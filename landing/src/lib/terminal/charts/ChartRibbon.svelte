@@ -4,7 +4,7 @@
 	// 상태 = ChartCtl 단일 SSOT (일반 메뉴와 공유 — 리본에서 켠 지표가 일반 메뉴에도 켜져 있다).
 	import type { Lang } from '../data/types';
 	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
-	import { MACRO_SERIES } from '../data/macroSeries';
+	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
 	import { CMP_COLORS } from './compareOverlay';
 	import { paramSummary, IND_DEFS } from './indicatorParams';

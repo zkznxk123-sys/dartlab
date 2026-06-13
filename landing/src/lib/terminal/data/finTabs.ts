@@ -1,19 +1,9 @@
-// 재무 전체화면 탭 레지스트리 — finance 심화 카드(terminalFinance.tabCards, 모드 토글 동작)
-// + report·교차 카드(연 축 고정, 카드 제목에 '· 연' 표기). 데이터 규칙은 전부 reportSeries.ts
-// 로더가 보장 — 본 모듈은 로더 출력 → FinCard 매핑만 한다 (집계·재계산 없음).
+// 재무 전체화면 탭 레지스트리 — finance 심화 카드(TerminalFinance.tabCards, 모드 토글 동작)
+// + report·교차 카드(연 축 고정, 카드 제목에 '· 연' 표기). 데이터 규칙은 전부 runtime ReportPort
+// 구현이 보장 — 본 모듈은 포트 출력 → FinCard 매핑만 한다 (집계·재계산 없음).
 // 교차 카드(배당여력·생산성·인건비)는 finBundle.views.annual.statements 의 조 단위 값을
 // report 연도와 union 축으로 정렬한다 (결측 = null → MiniFinChart pen-up).
-import type { FinCard, Num, TerminalFinanceBundle } from './terminalFinance';
-import {
-	loadWorkforce,
-	loadShareholderReturn,
-	loadInvestments,
-	loadOwnership,
-	loadExecBoard,
-	loadDebtProfile,
-	loadCapitalChanges,
-	loadAuditFees
-} from './reportSeries';
+import type { FinCard, Num, ReportPort, TerminalFinanceBundle } from '@dartlab/ui-contracts';
 
 export interface TabCard {
 	card: FinCard;
@@ -24,7 +14,7 @@ export interface FsTab {
 	label: { kr: string; en: string };
 	q?: string; // 탭이 답하는 질문 — 분석 내러티브 캡션 (body 상단)
 	finKey?: 'profitability' | 'cashflow' | 'debt' | 'shareholder'; // terminalFinance.tabCards 키 (모드 토글 동작)
-	load?: (code: string, bundle: TerminalFinanceBundle) => Promise<TabCard[]>; // report·교차 (연 축)
+	load?: (code: string, bundle: TerminalFinanceBundle, report: ReportPort) => Promise<TabCard[]>; // report·교차 (연 축) — 포트는 호출측(FinFullscreen)이 runtime 컨텍스트에서 주입
 	note?: string; // 탭 하단 정직성 캡션
 }
 
@@ -49,8 +39,8 @@ function annualMap(bundle: TerminalFinanceBundle, stmt: 'IS' | 'BS' | 'CF', key:
 	return out;
 }
 
-async function cashflowReport(code: string): Promise<TabCard[]> {
-	const inv = await loadInvestments(code);
+async function cashflowReport(code: string, _bundle: TerminalFinanceBundle, report: ReportPort): Promise<TabCard[]> {
+	const inv = await report.investments(code);
 	if (!inv || inv.trend.length < 2) return [];
 	const years = inv.trend.map((t) => t.year);
 	const tc: TabCard = {
@@ -65,11 +55,11 @@ async function cashflowReport(code: string): Promise<TabCard[]> {
 	return [tc].filter(alive);
 }
 
-async function shareholderReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
+async function shareholderReport(code: string, bundle: TerminalFinanceBundle, report: ReportPort): Promise<TabCard[]> {
 	const [sr, own, dil] = await Promise.all([
-		loadShareholderReturn(code),
-		loadOwnership(code),
-		loadCapitalChanges(code)
+		report.shareholderReturn(code),
+		report.ownership(code),
+		report.capitalChanges(code)
 	]);
 	const cards: TabCard[] = [];
 	const ownBy = new Map((own ?? []).map((o) => [o.year, o]));
@@ -168,8 +158,8 @@ async function shareholderReport(code: string, bundle: TerminalFinanceBundle): P
 	return cards.filter(alive);
 }
 
-async function peopleReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
-	const [wf, eb] = await Promise.all([loadWorkforce(code), loadExecBoard(code)]);
+async function peopleReport(code: string, bundle: TerminalFinanceBundle, report: ReportPort): Promise<TabCard[]> {
+	const [wf, eb] = await Promise.all([report.workforce(code), report.execBoard(code)]);
 	const cards: TabCard[] = [];
 	if (wf && wf.length) {
 		const wfYears = wf.map((w) => w.year);
@@ -269,8 +259,8 @@ async function peopleReport(code: string, bundle: TerminalFinanceBundle): Promis
 	return cards.filter(alive);
 }
 
-async function debtReport(code: string, bundle: TerminalFinanceBundle): Promise<TabCard[]> {
-	const [dp, af] = await Promise.all([loadDebtProfile(code), loadAuditFees(code)]);
+async function debtReport(code: string, bundle: TerminalFinanceBundle, report: ReportPort): Promise<TabCard[]> {
+	const [dp, af] = await Promise.all([report.debtProfile(code), report.auditFees(code)]);
 	const cards: TabCard[] = [];
 	// ⚠ 채무증권 발행 실적(debtSecurities) 카드는 기각 — 외화채 분기 환산 변동이 dedup 을 뚫어
 	// 중복 합산(삼성 2015 Harman "26.74조" 허구)·인수 전 이력 유입·CP 차환 롤오버 지배 3중 오염 실측.

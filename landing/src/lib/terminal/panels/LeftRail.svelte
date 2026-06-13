@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import type { Candle } from '@dartlab/ui-contracts';
+	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from '../data/engine';
 	import type { EcoNode, Lang } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
 	import { finTypeOf, displayPair } from '../data/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
-	import { loadGovRecent } from '../data/govPrice';
-	import type { Candle } from '../data/priceSeries';
 	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
 
 	interface Props {
@@ -16,6 +16,7 @@
 		onPick: (code: string) => void;
 	}
 	let { eng, lang, active, onPick }: Props = $props();
+	const rt = useDartLabRuntime();
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// scan 와 동일 universe: finance+prices 보유 회사 (eng 불변 → 1 회 산출 후 캐시)
@@ -28,9 +29,9 @@
 	// ── 통합 스크리너: 스파크라인(30거래일) + 1Y 수익률 + 유형 라벨 2칩 한 행 (제품급 조건검색기).
 	// ROE·영업이익 수치 컬럼은 라벨(finType 체인)로 대체 — 수치 다조건은 상세검색 모달 소관. ──
 	let screenerOpen = $state(false);
-	// 30거래일 스파크 — recent.parquet 전종목 1파일 (티커 스트립과 모듈 캐시 공유, 추가 다운로드 0)
-	let recentMap = $state<Map<string, Candle[]> | null>(null);
-	loadGovRecent().then((m) => (recentMap = m));
+	// 30거래일 스파크 — recent.parquet 전종목 1파일 (티커 스트립과 어댑터 캐시 공유, 추가 다운로드 0)
+	let recentMap = $state<Record<string, Candle[]> | null>(null);
+	rt.price.govRecent().then((m) => (recentMap = m));
 
 	// 조건 검색 — query 즉시 반영(입력 반응성) + queryD 140ms 디바운스(무거운 rows 재계산 억제)
 	let query = $state('');
@@ -148,7 +149,7 @@
 	<div class="rankList">
 		{#each rows as r, i (r.n.id)}
 			{@const fts = displayPair(finTypeOf(r.n, eng.raw.finance.companies[r.n.id], eng.priceOf(r.n.id)))}
-			{@const sp = recentMap?.get(r.n.id)}
+			{@const sp = recentMap?.[r.n.id]}
 			<div class={'rankRow' + (active === r.n.id ? ' on' : '')} role="button" tabindex="0" onclick={() => onPick(r.n.id)} onkeydown={(e) => e.key === 'Enter' && onPick(r.n.id)}>
 				<span class="rkN mono">{i + 1}</span>
 				<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}</span></span>

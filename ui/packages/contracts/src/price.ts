@@ -19,6 +19,9 @@ export interface CompanyPrices {
 
 export const KRX_MIN_YEAR = 2010;
 
+/** 공공누리(KOGL) 출처표시 의무 — gov 주가 데이터를 표시하는 모든 surface 가 노출해야 하는 계약 상수. */
+export const GOV_ATTRIBUTION = '출처: 금융위원회·한국거래소 (공공데이터포털)';
+
 export interface PricePort {
 	/** 초기 로드 — 해당 연도부터 현재까지. 미존재 회사는 null. */
 	initial(code: string, year: number): Promise<CompanyPrices | null>;

@@ -3,7 +3,7 @@
 	// 상태는 ChartCtl 단일 SSOT 공유 — 전체화면 리본(ChartRibbon)과 같은 인스턴스.
 	import type { Lang } from '../data/types';
 	import { type ChartCtl, OVERLAY_ALL, SUB_ALL, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
-	import { MACRO_SERIES } from '../data/macroSeries';
+	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
 	import { IND_DEFS, paramSummary } from './indicatorParams';
 	import IndParamEditor from './IndParamEditor.svelte';

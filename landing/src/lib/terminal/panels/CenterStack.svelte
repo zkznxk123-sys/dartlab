@@ -1,17 +1,13 @@
 <script lang="ts">
+	import type { Candle, FinMode, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang, Tone, Num } from '../data/types';
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import FinFullscreen from './FinFullscreen.svelte';
-	import { loadTerminalFinance, type TerminalFinanceBundle, type FinMode } from '../data/terminalFinance';
-	import { price as wbPrice, type Candle } from '../data/workbench';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../data/engine';
-	import { loadHfProductIndexMap, type ProductIndexItem } from '$lib/data/productIndexRuntime';
-	import { loadCompanyRelations } from '../data/relations';
-	import { loadCapitalChanges } from '../data/reportSeries';
-	import { localTerminalAdapter } from '../data/localAdapter';
 
 	interface Props {
 		co: Company;
@@ -22,7 +18,8 @@
 		onPick?: (code: string) => void;
 	}
 	let { co, lang, kpis = [], suggest, onPick }: Props = $props();
-	const localViewerHref = $derived(localTerminalAdapter()?.viewerUrl?.(co.code) ?? null);
+	const rt = useDartLabRuntime();
+	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
@@ -43,7 +40,7 @@
 		const yr = priceYear;
 		candleState = 'loading';
 		let cancelled = false;
-		wbPrice.initial(code, yr).then((r) => {
+		rt.price.initial(code, yr).then((r) => {
 			if (cancelled) return;
 			candles = r && r.candles.length ? r.candles : null;
 			chartCode = code;
@@ -66,7 +63,7 @@
 		finState = 'loading';
 		finBundle = null;
 		let cancelled = false;
-		loadTerminalFinance(code).then((b) => {
+		rt.finance.bundle(code).then((b) => {
 			if (cancelled) return;
 			finBundle = b;
 			finMode = b ? (b.views.ttm ? 'ttm' : b.defaultMode) : 'quarter'; // TTM 우선 — 분기 부족(신규상장 등)이면 defaultMode 폴백
@@ -83,7 +80,7 @@
 		const code = co.code;
 		let cancelled = false;
 		chartPeers = [];
-		loadCompanyRelations(code).then((r) => {
+		rt.company.relations(code).then((r) => {
 			if (cancelled) return;
 			chartPeers = (r?.peers ?? []).filter((p) => p.stockCode && p.stockCode !== code).map((p) => ({ code: p.stockCode, name: p.corpName }));
 		});
@@ -92,10 +89,10 @@
 		};
 	});
 
-	// 회사 주요제품 (corpList) — 헤더 빈 가운데 채움. 전역 캐시 공유(중복 다운로드 없음).
-	let corpMeta = $state<Map<string, ProductIndexItem> | null>(null);
-	loadHfProductIndexMap().then((m) => (corpMeta = m));
-	const corpInfo = $derived(corpMeta?.get(co.code) ?? null);
+	// 회사 주요제품 (corpList) — 헤더 빈 가운데 채움. 어댑터 캐시 공유(중복 다운로드 없음).
+	let corpMeta = $state<Record<string, ProductIndexItem> | null>(null);
+	rt.company.productIndex().then((m) => (corpMeta = m));
+	const corpInfo = $derived(corpMeta?.[co.code] ?? null);
 	const product = $derived(corpInfo?.product ?? '');
 	// 재무제표 분석 전체화면 (FinFullscreen — 버틀러식 탭, ESC 닫기는 컴포넌트 내부)
 	let finFull = $state(false);
@@ -181,7 +178,7 @@
 		const code = co.code;
 		let cancelled = false;
 		capEvents = [];
-		loadCapitalChanges(code).then((b) => {
+		rt.report.capitalChanges(code).then((b) => {
 			if (cancelled || !b) return;
 			const byDate = new Map<string, { kind: string; qty: number }>();
 			for (const ev of b.events) {

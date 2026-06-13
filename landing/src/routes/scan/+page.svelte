@@ -19,7 +19,7 @@
 	import type { Preset, RuntimeLoader } from '$lib/scan/presets';
 	import { PRESETS_BY_ID } from '$lib/scan/presets';
 	import { HF_RESOLVE, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
-	import type { ProductIndexItem } from '$lib/data/productIndexRuntime';
+	import type { ProductIndexItem } from '@dartlab/ui-contracts';
 	import type { ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
 	import type { ChangeMetrics } from '$lib/data/changesRuntime';
 	import type { PriceMetrics, ValuationMetrics, DbState } from '$lib/scan/duckSql';
@@ -796,8 +796,9 @@
 
 	async function bootProductIndexRuntime() {
 		try {
-			const { loadHfProductIndexMap } = await import('$lib/data/productIndexRuntime');
-			productMap = await loadHfProductIndexMap(fetch);
+			const { getPublicRuntime } = await import('$lib/runtime/publicRuntime');
+			const rec = await getPublicRuntime().company.productIndex();
+			productMap = new Map(Object.entries(rec ?? {}));
 		} catch {
 			productMap = new Map();
 		}

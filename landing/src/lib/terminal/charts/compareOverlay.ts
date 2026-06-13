@@ -3,7 +3,7 @@
 //   yAxis.convertToPixel(본주기준가 × 피어상대비) 라 일반·로그·% 축 전부 정확 정렬 — % 축 기준점이
 //   가시 첫 봉 종가이므로 본주 캔들과 같은 % 자를 공유하고, 팬/줌마다 자동 재기준(구독 불필요).
 // 피어 캔들은 호출측이 수정주가 보정을 마친 시계열을 넣는다 — 피어 분할이 상대수익률을 왜곡하지 않게.
-import type { Candle } from '../data/priceSeries';
+import type { Candle } from '@dartlab/ui-contracts';
 
 export const CMP_INDICATOR = 'CMP';
 // 캔들 상승/하락·ECON 팔레트와 충돌하지 않는 고정 3색 (compares 상한 3)

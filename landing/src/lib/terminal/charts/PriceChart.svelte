@@ -5,12 +5,12 @@
 	// 전체 이력(2010~) lazy 로드, 인스턴스 영속(회사전환=applyNewData, dispose 안 함). SSR 안전.
 	import { browser } from '$app/environment';
 	import { untrack } from 'svelte';
-	import { KRX_MIN_YEAR, aggregateCandles, adjustCandles, heikinAshi, type Candle } from '../data/priceSeries';
-	import { price as wbPrice } from '../data/workbench';
+	import { KRX_MIN_YEAR, MACRO_SERIES, MACRO_ATTRIBUTION, type Candle } from '@dartlab/ui-contracts';
+	import { useDartLabRuntime } from '@dartlab/ui-runtime';
+	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../data/types';
 	import { runBacktest, type BtResult } from '../data/backtest';
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
-	import { MACRO_SERIES, loadMacroSeries, MACRO_ATTRIBUTION } from '../data/macroSeries';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
 	import { ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
@@ -39,6 +39,7 @@
 		onPick?: (code: string) => void;
 	}
 	let { candles, code, name = '', lang, events, valBand, peers = [], suggest, onPick }: Props = $props();
+	const rt = useDartLabRuntime();
 
 	const ctl = new ChartCtl();
 	let el: HTMLDivElement | null = $state(null);
@@ -229,7 +230,7 @@
 				const next = hist.oldestYear - 1;
 				if (next < KRX_MIN_YEAR) return done([], false);
 				hist.loading = true;
-				wbPrice.older(hist.code, next)
+				rt.price.older(hist.code, next)
 					.then((older) => {
 						hist.oldestYear = next;
 						hist.loading = false;
@@ -237,7 +238,7 @@
 						// 수정주가 ON — prepend 분도 전체 체이닝 재계산의 선두 슬라이스로 보정
 						// (원본 그대로 붙이면 분할 이전 연도가 보정 스케일과 어긋난 절벽을 만든다)
 						if (ctl.adj && older.length) {
-							const adj = adjustCandles(wbPrice.loaded(hist.code));
+							const adj = adjustCandles(rt.price.loaded(hist.code));
 							if (adj.length >= older.length) rows = adj.slice(0, older.length);
 						}
 						done(rows.map(toK), next - 1 >= KRX_MIN_YEAR);
@@ -267,7 +268,7 @@
 
 	// 전체 표시 시계열 = 원본 일봉 → (수정주가 보정). reapply 내부 전용 (리플레이 절단 이전 원본).
 	function fullSeries(): Candle[] {
-		const all = wbPrice.loaded(hist.code);
+		const all = rt.price.loaded(hist.code);
 		const base = all.length ? all : candles; // 캐시 미시드 방어 — prop 직접 적용
 		if (!base.length) return base;
 		return untrack(() => ctl.adj) ? adjustCandles(base) : base;
@@ -370,7 +371,7 @@
 			const y = hist.oldestYear - 1;
 			hist.loading = true;
 			notice = T(`과거 시세 불러오는 중 … ${y}`, `loading history … ${y}`); // 진행 중 상시 — 완료 시 해제
-			try { await wbPrice.older(code0, y); } catch { hist.loading = false; break; }
+			try { await rt.price.older(code0, y); } catch { hist.loading = false; break; }
 			hist.loading = false;
 			if (hist.code !== code0 || chart !== c) { notice = null; return; } // 회사 전환·차트 교체 → 중단
 			hist.oldestYear = y;
@@ -655,7 +656,7 @@
 		}
 		const token = ++cmpToken;
 		const yr = new Date().getFullYear();
-		Promise.all(list.map((p) => wbPrice.initial(p.code, yr))).then((rs) => {
+		Promise.all(list.map((p) => rt.price.initial(p.code, yr))).then((rs) => {
 			if (token !== cmpToken || chart !== c) return;
 			const loaded = list
 				.map((p, i) => {
@@ -697,7 +698,7 @@
 			return;
 		}
 		const token = ++econToken;
-		Promise.all(ids.map((id) => loadMacroSeries(id))).then((lists) => {
+		Promise.all(ids.map((id) => rt.macro.getSeries(id))).then((lists) => {
 			if (token !== econToken || chart !== c) return; // 선택 변경·인스턴스 교체 → 폐기
 			const series = ids
 				.map((id, i) => ({ def: MACRO_SERIES.find((s) => s.id === id)!, points: lists[i] ?? [] }))

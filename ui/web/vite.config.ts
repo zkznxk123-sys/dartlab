@@ -34,11 +34,7 @@ export default defineConfig({
 			'$app/environment': path.resolve(svelteCompatDir, 'environment.ts'),
 			'$lib/components/viewer/ViewerStudio.svelte': path.resolve(terminalShimDir, 'ViewerStudioShim.svelte'),
 			'$lib/components/viewer/FinanceDialog.svelte': path.resolve(terminalShimDir, 'FinanceDialogShim.svelte'),
-			'$lib/browser/companyLive': path.resolve(terminalShimDir, 'landingDataShims.ts'),
-			'$lib/data/companyFilingsRuntime': path.resolve(terminalShimDir, 'landingDataShims.ts'),
-			'$lib/data/companyNonRegularFilings': path.resolve(terminalShimDir, 'landingDataShims.ts'),
-			'$lib/data/productIndexRuntime': path.resolve(terminalShimDir, 'landingDataShims.ts'),
-			'$lib/scan/duckSql': path.resolve(terminalShimDir, 'landingDataShims.ts'),
+			// 옛 $lib 데이터 shim 5종은 4a-2 포트화로 소멸 — Terminal 은 runtime prop 만 본다
 			'$chart': sharedChartDir,
 			'$lib': landingLib,
 			// 워크스페이스 패키지 — ui/web 은 워크스페이스 밖이라 패키지명 해석 불가, 파일경로 alias 로 소비 (01 §3.4)

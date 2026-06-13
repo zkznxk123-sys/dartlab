@@ -10,24 +10,18 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-3 마감(검증 중) → 단계-4a. 운영자 승인 "5단계정도"(3→4a→4b→5→6).
+다음 작업: 단계-4a-3 (잔여 결합 해소). 운영자 승인 "5단계정도"(3→4a→4b→5→6) — 잔여 4a-3→4b→5→6.
 
-단계-4a sub-unit 분해 선언 (07 규칙 3 — 1세션 초과 예상):
-  · **4a-1 데이터 클라이언트 이관**: hfRange·origin·cacheStore·dartlabData(loadJson)를 `@dartlab/ui-runtime/data`
-    공개 subpath로 이동(과도기 표면 — viewer/scan도 과도기 소비, 단계-8 후 비공개화 검토).
-    priceSeries·govPrice·macroSeries·reportSeries·terminalFinance·relations·productIndexRuntime·
-    companyFilings 2종 로더를 runtime public adapter 구현으로 이관. landing viewer/scan의 hfRange
-    참조는 runtime/data로 재배선. 검증: landing check/build + ui/web build.
-  · **4a-2 포트 조립 + 호출부 치환**: createPublicRuntime 포트 실구현 조립(공유 엔진 의존 포트
-    reportFacts·changes는 wrapper 주입 오버라이드 — companyLive·duckSql은 landing 잔류라 의존 방향 보존).
-    terminal 13파일/33개소 silent fallback → runtime context. landing terminal route wrapper가
-    createPublicRuntime 주입. ui/web 브리지는 localTerminalData를 DartLabRuntime 형태로 재조립해
-    mount context 주입(전역 locator 철거 — landing localAdapter.ts 삭제).
-  · **4a-3 잔여 결합 해소**: viewer 컴포넌트 2종 주입 역전(ViewerHost snippet)·$app/environment 12파일
-    헬퍼 치환·$app/paths 3파일 basePath 주입·livePrice 설정 주입. 검증: 전역 locator 0·silent fallback 0
-    grep + landing/ui-web 양쪽 터미널 smoke.
+단계-4a-3 범위 (4a sub-unit 분해 선언의 마지막 단위):
+  · viewer 컴포넌트 2종 주입 역전(ViewerHost snippet — RightStack FinanceDialog·ViewerOverlay ViewerStudio
+    dynamic import + ui/web shim alias 2종 제거)
+  · $app/environment 잔여 헬퍼 치환($lib 잔존 소비처 재실측 — 4a-2 이관으로 5파일 감소) ·
+    $app/paths basePath 주입 · livePrice VITE_DARTLAB_QUOTE_WORKER 설정 주입
+  · 검증: 전역 locator 0·silent fallback 0 grep + landing/ui-web 양쪽 터미널 smoke
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
-재개 지점: entry #11 (4a-1 완료) — runtime/data 가동, 4a-2(포트 조립+호출부 33개소 치환+브리지 재조립)부터. 위 4a sub-unit 분해 선언 참조
+잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 viewer 추출과 동행) · scan 프리셋류 포트(단계-8) ·
+  navigation/storage 포트 실구현(4a-3 셸 주입)
+재개 지점: entry #13 (4a-2 완료) — 포트 가동·locator 철거 완료, 4a-3부터
 ```
 
 ---
@@ -213,3 +207,22 @@ commit: (이 변경의 커밋)
 변경: hfRange·origin·cacheStore·dartlabData 4파일 git mv → `@dartlab/ui-runtime/data/*` 공개 subpath(과도기 표면 — viewer/scan도 과도기 소비, 단계-8 후 비공개화 검토). 수술 3건 — ① origin `import.meta.env` 안전 캐스트(런타임 tsc는 vite/client 무의존) ② cacheStore `$app/environment`→`typeof window` ③ dartlabData `$app/paths base`→`setStaticBase()` 주입(landing +layout 1회 호출, 4a-2에서 RuntimeEnvironment.basePath 정식화). 소비처 **26파일** 기계 재배선(sed — terminal 로더·viewer panelLoad/queryCanon/companyNames·scan financeLiteRuntime·browser 4종·lib/data 잔존 6종·lab route 3종·ViewerStudio). runtime deps에 hyparquet 2종. landing fs.allow에 ui/packages 추가(dev 차단 방지). ui/web vite alias 3종(@dartlab/ui-{runtime,design,contracts} → packages src 파일경로 — 워크스페이스 밖 해석).  
 검증: runtime tsc strict 0 ✓(이관 파일 무수정 통과) / landing check 에러0 ✓ / landing 풀빌드 ✓ / ui/web build ✓ / 옛 `$lib/data/{4종}` 참조 grep 0 ✓  
 rollback: 이 commit revert.
+
+### [12] 복구 — 단계-3 커밋 누락분(ui-design package.json) + deploy red 해소
+일시: 2026-06-13  
+commit: 634c09b75  
+내용: 단계-3 path 명시 커밋(5f4f78d5a)에서 **신설 `ui/packages/design/package.json` 이 누락**됨 — 로컬 검증은 파일 존재로 전부 통과해 사각. 원격은 워크스페이스 미해석 → `@dartlab/ui-design/styles/*` import 해석 실패 → **Deploy Landing 2연속 failure**(run 27450780309·27451313133, GH Pages 는 직전 성공 배포로 잔존 = 사이트 무중단 유지). 누락 파일 단독 복구 커밋·push.  
+교훈(룰 강화): ① path 명시 커밋은 staging 후 `git status --short` 로 신설 파일 ?? 잔존 0 을 기계 확인 ② 원격 paths 트리거 점검 — 복구 push 가 deploy 를 못 깨운 2차 사각 발견(entry #13 에서 paths 편입).  
+rollback: 해당 없음(누락 복구).
+
+### [13] 단계-4a-2 포트 조립 + 호출부 치환 + 브리지 재조립 — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경 (3축):
+- **어댑터**: 로더 9종 git mv → `runtime/src/adapters/public/sources/`(priceSource·govPriceSource·financeSource·reportSource·macroSource·relationsSource·productIndexSource·regularFilingsSource·nonRegularFilingsSource — localTerminalAdapter fallback 가지 전부 절제, `$app/environment`→`typeof window`, 타입은 contracts 소비로 로컬 재정의 제거). createPublicRuntime 실구현 조립 — **shared 필수 주입 계약**(reportFacts=companyLive·changes=duckSql, landing 잔류라 의존 방향 보존) + viewer 포트 셸 주입. 옛 workbench price.initial 합성(gov∥recent 병합→seed→date 폴백)은 PricePort.initial 로 승격. filing.panel*(단계-6)·scan 프리셋류(단계-8)·navigation/storage/map/search/ai 는 명시 throw 게이트 유지. createRuntime kind 디스패처는 discriminated union 으로 개정. contracts 보강: GOV_ATTRIBUTION(price)·MACRO_SERIES+MACRO_ATTRIBUTION(macro) 상수 승격. govRecent·productIndex Map→Record(JSON-safe 계약 정합).
+- **landing**: 컴포지션 루트 `lib/runtime/publicRuntime.ts` 신설(getPublicRuntime 싱글턴 — route·scan 글루 전용, 컴포넌트는 컨텍스트). Terminal.svelte `runtime` 필수 prop + setDartLabRuntime 컨텍스트 배포. 패널 6종(CenterStack·RightStack·LeftRail·FinFullscreen·ViewerOverlay·SourcesModal)·PriceChart·finTabs(ReportPort 파라미터 주입)·routeLoad(warmup)·scan 2곳(Detail·+page) 호출부 전부 포트 치환. 차트 순수수학은 `charts/candleMath.ts` 분리(어댑터 아님). lastSymbol·warmup 신설. **workbench.ts·localAdapter.ts 삭제**. /terminal·/lab/terminal-dev 라우트가 runtime 주입.
+- **ui/web**: localTerminalData 를 **DartLabRuntime 재조립**(price/finance/company/filing(panel* HTTP 정규화기 — toc 메타 null 정직·sectionKey 파생)·report=null 정직·scan.changes=[]·viewer=external-url·macro=createHfMacroPort 명시 재사용). LandingTerminalSurface 가 runtime 을 mount prop 주입 — **`window.__DARTLAB_LOCAL_TERMINAL__` 전역 locator 철거**. landingDataShims.ts 삭제 + vite 데이터 alias 5종 제거. tsconfig paths 에 @dartlab 2종.
+- **배포 가드(entry #12 후속)**: deploy-landing.yml paths 에 `ui/packages/**`+루트 package.json/lock 편입(원래 4b 예정 — 단계-3부터 빌드 의존이라 앞당김. 누락 시 패키지만 바뀐 push 가 deploy 를 건너뜀).
+
+검증: runtime tsc strict 0 ✓(noUncheckedIndexedAccess 마찰 40건 → 근원 수정: pk 파싱 destructuring·grid 조회·인덱스 가드 — 전부 동작 불변 보강) / landing check 0 에러·4395파일 ✓ / landing 풀빌드+prerender ✓ / ui/web build(tsc -b 포함) ✓ — 로컬 HTTP 패널 타입과 계약의 실제 발산 3건(toc block 메타·chapter null·init first 포인터)을 tsc 가 적발, 정규화기로 해소 / `localTerminalAdapter`·`__DARTLAB_LOCAL_TERMINAL__`·옛 모듈 경로 grep 0 ✓ / 신설 파일 staging 후 ?? 잔존 0 확인 ✓(entry #12 룰)  
+rollback: 이 commit revert (이동·삭제·신설 모두 단일 커밋).

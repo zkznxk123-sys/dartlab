@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { fmtPct } from '$lib/format/pct';
-	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
+	import type { RegularFiling } from '@dartlab/ui-contracts';
+	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import type { DartDb } from '$lib/data/duckdb';
 	import { FINANCE_COMPLETED_YEARS, financeMetricKey } from './financeAccounts';
 	import { loadCompanyFinanceLitePeriods, type CompanyFinancePeriodRow } from './financeLiteRuntime';
@@ -30,7 +31,7 @@
 	$effect(() => {
 		const code = node.id;
 		filingsLoading = true;
-		void loadCompanyRegularFilings(code, 40)
+		void getPublicRuntime().filing.regular(code, 40)
 			.then((rows) => {
 				if (node.id === code) filings = rows;
 			})

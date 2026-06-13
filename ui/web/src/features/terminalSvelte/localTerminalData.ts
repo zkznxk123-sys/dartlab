@@ -1,179 +1,49 @@
 import {
 	fetchCompanyInsights,
 	fetchCompanyMeta,
+	fetchPanelGrid,
 	fetchPanelInit,
+	fetchPanelToc,
 	type CompanyInsightsResponse,
 	type CompanyMeta,
-	type PanelInitResponse,
+	type PanelGridResponse as ClientPanelGrid,
+	type PanelInitResponse as ClientPanelInit,
+	type PanelTocResponse as ClientPanelToc,
 	type SerializedTablePayload,
 } from '@/features/dashboard/api/client';
 import { fetchPriceEvents, type PriceEventsPayload } from '@/features/dashboard/api/priceEvents';
+// 계약 타입 정본 = @dartlab/ui-contracts (옛 로컬 재정의 제거 — 4a-2 포트화)
+import type {
+	Candle,
+	CompanyPrices,
+	DartLabRuntime,
+	FinCard,
+	FinMode,
+	NonRegularFiling,
+	PanelGridResponse,
+	PanelInitResponse,
+	PanelTocResponse,
+	ProductIndexItem,
+	RegularFiling,
+	RuntimeEnvironment,
+	StmtKind,
+	StmtRow,
+	TerminalFinance,
+	TerminalFinanceBundle,
+} from '@dartlab/ui-contracts';
+import { createHfMacroPort } from '@dartlab/ui-runtime';
 import type { FinanceCompany, IndexRow, MetaFile, RawData } from '../../../../../landing/src/lib/terminal/data/types';
 
 type Num = number | null;
-type StmtKind = 'IS' | 'BS' | 'CF';
-type FinMode = 'annual' | 'quarter' | 'ttm';
-type FinFreq = 'annual' | 'quarter' | 'ttm';
-type SeriesType = 'bar' | 'line';
-
-interface Candle {
-	t: string;
-	o: number;
-	h: number;
-	l: number;
-	c: number;
-	v: number;
-	r?: Num;
-	tv?: Num;
-}
-
-interface CompanyPrices {
-	candles: Candle[];
-	oldestYear: number;
-}
-
-interface FinSeries {
-	name: string;
-	data: Num[];
-	color: string;
-	type: SeriesType;
-	axis?: 'r';
-}
-
-interface FinCard {
-	key: string;
-	title: string;
-	unit: string;
-	series: FinSeries[];
-	refLines?: number[];
-	stacked?: boolean;
-	signed?: boolean;
-	kind?: 'waterfall' | 'heatmap';
-	steps?: { name: string; value: Num; total?: boolean }[];
-}
-
-interface StmtRow {
-	key: string;
-	kr: string;
-	en: string;
-	values: Num[];
-	unit?: string;
-}
-
-interface TerminalFinance {
-	periods: string[];
-	freq: FinFreq;
-	cards: FinCard[];
-	tabCards: { profitability: FinCard[]; cashflow: FinCard[]; debt: FinCard[]; shareholder: FinCard[] };
-	revYoy: Num[];
-	opYoy: Num[];
-	cashQuality: Num[];
-	statements: Record<StmtKind, StmtRow[]>;
-	ratios: StmtRow[];
-}
-
-interface TerminalFinanceBundle {
-	modes: FinMode[];
-	views: Record<FinMode, TerminalFinance | null>;
-	defaultMode: FinMode;
-	filedDates: Record<string, string>;
-}
-
-interface ProductIndexItem {
-	code?: string;
-	stockCode?: string;
-	corpName?: string;
-	products?: string[];
-	keywords?: string[];
-	summary?: string;
-}
-
-interface RegularFiling {
-	rceptNo: string;
-	rceptDate: string;
-	reportType: string;
-	year: string;
-	url: string;
-}
-
-interface NonRegularFiling {
-	rceptNo: string;
-	rceptDate: string;
-	reportNm: string;
-	filer: string;
-	url: string;
-}
-
-interface LiveCompanyReportFact {
-	label: string;
-	value: string;
-	source?: string;
-	period?: string;
-}
-
-interface CompanyChange {
-	date?: string;
-	kind?: string;
-	title?: string;
-	description?: string;
-}
-
-interface CompanyRelations {
-	suppliers: RelEdge[];
-	customers: RelEdge[];
-	peers: RelEdge[];
-	neighborCount: number;
-	blog: null;
-}
-
-interface RelEdge {
-	stockCode: string;
-	corpName: string;
-	product?: string;
-	ratio?: Num;
-	amount?: Num;
-	confidence?: Num;
-}
-
-interface LocalTerminalAdapter {
-	loadPriceInitial: (code: string, year: number) => Promise<CompanyPrices | null>;
-	loadPriceOlder: (code: string, targetYear: number) => Promise<Candle[]>;
-	loadedCandles: (code: string) => Candle[];
-	loadGovCandles: (code: string) => Promise<Candle[] | null>;
-	loadGovRecent: () => Promise<Map<string, Candle[]> | null>;
-	loadTerminalFinance: (code: string) => Promise<TerminalFinanceBundle | null>;
-	productIndex: () => Promise<Map<string, ProductIndexItem> | null>;
-	products: (code: string) => Promise<ProductIndexItem | null>;
-	relations: (code: string) => Promise<CompanyRelations | null>;
-	regularFilings: (code: string) => Promise<RegularFiling[]>;
-	nonRegularFilings: (code: string) => Promise<NonRegularFiling[]>;
-	reportFacts: (code: string) => Promise<LiveCompanyReportFact[]>;
-	changes: (code: string, limit?: number) => Promise<CompanyChange[]>;
-	loadWorkforce: () => Promise<null>;
-	loadInvestments: () => Promise<null>;
-	loadShareholderReturn: () => Promise<null>;
-	loadOwnership: () => Promise<null>;
-	loadExecBoard: () => Promise<null>;
-	loadDebtProfile: () => Promise<null>;
-	loadCapitalChanges: () => Promise<null>;
-	loadAuditTrail: () => Promise<null>;
-	loadTopExecPay: () => Promise<null>;
-	viewerUrl: (code: string, vs?: string[]) => string;
-	prefetch: (code: string, priceYear: number) => void;
-}
+type FinFreq = TerminalFinance['freq'];
 
 export interface LocalTerminalRuntime {
 	raw: RawData;
-	adapter: LocalTerminalAdapter;
+	/** DartLabRuntime 포트 묶음 — Terminal.svelte 에 prop 으로 주입 (전역 locator 철거, 4a-2). */
+	runtime: DartLabRuntime;
 }
 
 type LocalRawData = RawData & { __localCandles?: Candle[] };
-
-declare global {
-	interface Window {
-		__DARTLAB_LOCAL_TERMINAL__?: LocalTerminalAdapter;
-	}
-}
 
 interface PeriodInfo {
 	column: string;
@@ -228,21 +98,74 @@ async function buildRuntime(code: string): Promise<LocalTerminalRuntime> {
 		tables: {},
 	};
 	const raw = buildRaw(seed);
-	return { raw, adapter: createAdapter(seed, raw) };
+	return { raw, runtime: buildBridgeRuntime(seed, raw) };
 }
 
-function createAdapter(seed: RuntimeSeed, raw: RawData): LocalTerminalAdapter {
-	let panelPromise: Promise<PanelInitResponse | null> | null = null;
+function notWiredYet(what: string, stage: string): never {
+	throw new Error(`[local 브리지] ${what} 는 ${stage}에서 구현된다 — 이 호출이 보이면 배선 순서 위반이다.`);
+}
+
+// ── 로컬 HTTP 응답 → 계약 정규화 ──
+// 로컬 panel toc 는 leafType/disclosureKey 메타를 싣지 않는다 — 미제공 = null 정직 표기 (위조 금지).
+function tocToContract(toc: ClientPanelToc): PanelTocResponse {
+	return {
+		stockCode: toc.stockCode,
+		corpName: toc.corpName,
+		periods: toc.periods,
+		chapters: toc.chapters.map((ch) => ({
+			chapter: ch.chapter,
+			sections: ch.sections.map((s) => ({
+				sectionLeaf: s.sectionLeaf,
+				sectionKey: s.sectionKey,
+				blocks: s.blocks.map((b) => ({ blockLeaf: b.blockLeaf, leafType: null, disclosureKey: null })),
+			})),
+		})),
+	};
+}
+
+// chapter/sectionLeaf 가 null 인 응답은 sectionKey(`${chapter}␟${sectionLeaf}`)에서 파생 — 키가 SSOT.
+function gridToContract(g: ClientPanelGrid): PanelGridResponse {
+	const [keyChapter = '', keyLeaf = ''] = g.sectionKey.split('␟');
+	const dartUrlByPeriod = g.dartUrlByPeriod
+		? Object.fromEntries(Object.entries(g.dartUrlByPeriod).filter((e): e is [string, string] => e[1] != null))
+		: undefined;
+	return {
+		stockCode: g.stockCode,
+		corpName: g.corpName,
+		chapter: g.chapter ?? keyChapter,
+		sectionLeaf: g.sectionLeaf ?? keyLeaf,
+		sectionKey: g.sectionKey,
+		periods: g.periods,
+		rows: g.rows.map((r) => ({ ...r, leafType: null })),
+		dartUrlByPeriod,
+	};
+}
+
+// init 필수 구성(grid·first 포인터) 결손 = 사용 가능한 패널 없음 → null 정직 표기.
+function initToContract(init: ClientPanelInit | null): PanelInitResponse | null {
+	if (!init || !init.grid || init.firstChapter == null || init.firstSectionKey == null) return null;
+	return {
+		stockCode: init.stockCode,
+		corpName: init.corpName,
+		toc: tocToContract(init.toc),
+		firstChapter: init.firstChapter,
+		firstSectionKey: init.firstSectionKey,
+		grid: gridToContract(init.grid),
+	};
+}
+
+// 로컬 서버(/api) 씨드 1개 회사 범위의 DartLabRuntime — Terminal 임베드 전용.
+// 빈값 규약 준수: 씨드 밖 회사 = null/[], 로컬 미보유 데이터셋(report 시계열) = null 정직 표기.
+function buildBridgeRuntime(seed: RuntimeSeed, raw: RawData): DartLabRuntime {
+	let panelPromise: Promise<ClientPanelInit | null> | null = null;
 	let eventPromise: Promise<PriceEventsPayload | null> | null = null;
 	const candles = (raw as LocalRawData).__localCandles ?? [];
 	const financeBundle = buildTerminalFinance(seed.tables, raw);
 	const productItem: ProductIndexItem = {
-		code: seed.code,
-		stockCode: seed.code,
-		corpName: seed.meta.corpName,
-		products: seed.meta.products,
-		keywords: seed.meta.products,
-		summary: seed.meta.products.join(' · '),
+		product: seed.meta.products.slice(0, 4).join(', '),
+		productRaw: seed.meta.products.join(', '),
+		latestPeriod: '',
+		industry: seed.meta.sector || undefined,
 	};
 
 	const loadPanel = () => {
@@ -253,88 +176,138 @@ function createAdapter(seed: RuntimeSeed, raw: RawData): LocalTerminalAdapter {
 		eventPromise ??= optional(fetchPriceEvents({ stockCode: seed.code, sources: 'disclosure', includeRegime: false, includeShocks: false }));
 		return eventPromise;
 	};
+	const isSeed = (code: string) => code.trim() === seed.code;
+
+	const env: RuntimeEnvironment = {
+		kind: 'local',
+		basePath: '',
+		locale: 'ko',
+		marketDefault: 'KR',
+		buildVersion: __DARTLAB_VERSION__,
+		readonly: false,
+	};
 
 	return {
-		async loadPriceInitial(code, year) {
-			if (code.trim() !== seed.code || !candles.length) return null;
-			return { candles, oldestYear: Math.min(year - 1, Number(candles[0]?.t.slice(0, 4)) || year) };
+		env,
+		company: {
+			async products(code) {
+				return isSeed(code) ? productItem : null;
+			},
+			async productIndex() {
+				return { [seed.code]: productItem };
+			},
+			async relations(code) {
+				if (!isSeed(code)) return null;
+				return { suppliers: [], customers: [], peers: [], neighborCount: 0, blog: null };
+			},
+			async reportFacts() {
+				return [];
+			},
 		},
-		async loadPriceOlder() {
-			return [];
+		price: {
+			async initial(code, year) {
+				if (!isSeed(code) || !candles.length) return null;
+				return { candles, oldestYear: Math.min(year - 1, Number(candles[0]?.t.slice(0, 4)) || year) } satisfies CompanyPrices;
+			},
+			async older() {
+				return [];
+			},
+			loaded(code) {
+				return isSeed(code) ? candles : [];
+			},
+			async govCandles(code) {
+				return isSeed(code) ? candles : null;
+			},
+			async govRecent() {
+				return { [seed.code]: candles.slice(-40) };
+			},
 		},
-		loadedCandles(code) {
-			return code.trim() === seed.code ? candles : [];
+		filing: {
+			async regular(code, limit = 500) {
+				if (!isSeed(code)) return [];
+				return regularFilingsFromPanel(await loadPanel()).slice(0, limit);
+			},
+			async nonRegular(code, limit = 200) {
+				if (!isSeed(code)) return [];
+				return nonRegularFromEvents(await loadEvents()).slice(0, limit);
+			},
+			async panelToc(code) {
+				if (!isSeed(code)) return null;
+				const toc = await optional(fetchPanelToc(code));
+				return toc ? tocToContract(toc) : null;
+			},
+			async panelInit(code) {
+				if (!isSeed(code)) return null;
+				return initToContract(await loadPanel());
+			},
+			async panelGrid(code, sectionKey) {
+				if (!isSeed(code)) return null;
+				const grid = await optional(fetchPanelGrid(code, sectionKey));
+				return grid ? gridToContract(grid) : null;
+			},
 		},
-		async loadGovCandles(code) {
-			return code.trim() === seed.code ? candles : null;
+		finance: {
+			async bundle(code) {
+				return isSeed(code) ? financeBundle : null;
+			},
 		},
-		async loadGovRecent() {
-			return new Map([[seed.code, candles.slice(-40)]]);
+		viewer: {
+			mode: 'external-url',
+			urlForCompany(code, options) {
+				const qs = new URLSearchParams({ period: 'quarterly', terminalEmbed: '1' });
+				if (options?.vs?.length) qs.set('vs', options.vs.join(','));
+				return `/analysis/${encodeURIComponent(code)}/viewer?${qs.toString()}`;
+			},
+			async openCompany(code, options) {
+				const url = this.urlForCompany(code, options);
+				if (url) location.assign(url);
+			},
+			async openFiling(filing) {
+				window.open(filing.url, '_blank', 'noopener');
+			},
 		},
-		async loadTerminalFinance(code) {
-			return code.trim() === seed.code ? financeBundle : null;
+		macro: createHfMacroPort(), // 거시 시계열은 회사 무관 HF 공개 데이터 — 명시적 공용 포트 재사용
+		report: {
+			// 로컬 서버는 정기보고서 파생 시계열 미보유 — null = 데이터셋 미존재 정직 표기 (옛 동작 동일)
+			workforce: async () => null,
+			investments: async () => null,
+			shareholderReturn: async () => null,
+			ownership: async () => null,
+			execBoard: async () => null,
+			debtProfile: async () => null,
+			capitalChanges: async () => null,
+			auditTrail: async () => null,
+			topExecPay: async () => null,
+			auditFees: async () => null,
 		},
-		async productIndex() {
-			return new Map([[seed.code, productItem]]);
+		scan: {
+			async changes() {
+				return [];
+			},
+			listTableSources: () => notWiredYet('scan.listTableSources', '단계-8(scan 추출)'),
+			getPresets: () => notWiredYet('scan.getPresets', '단계-8(scan 추출)'),
+			savePreset: () => notWiredYet('scan.savePreset', '단계-8(scan 추출)'),
 		},
-		async products(code) {
-			return code.trim() === seed.code ? productItem : null;
+		get map() {
+			return notWiredYet('map', '단계-8(map 추출)');
 		},
-		async relations(code) {
-			if (code.trim() !== seed.code) return null;
-			return { suppliers: [], customers: [], peers: [], neighborCount: 0, blog: null };
+		get search() {
+			return notWiredYet('search', '단계-8(search 추출)');
 		},
-		async regularFilings(code) {
-			if (code.trim() !== seed.code) return [];
-			return regularFilingsFromPanel(await loadPanel());
+		get ai() {
+			return notWiredYet('ai', '단계-7(ask 추출)');
 		},
-		async nonRegularFilings(code) {
-			if (code.trim() !== seed.code) return [];
-			return nonRegularFromEvents(await loadEvents());
+		get services() {
+			return notWiredYet('services', '단계-5(서비스 레지스트리 배선)');
 		},
-		async reportFacts(code) {
-			if (code.trim() !== seed.code) return [];
-			return [];
+		get navigation() {
+			return notWiredYet('navigation', '단계-4a-3(셸 내비 주입)');
 		},
-		async changes() {
-			return [];
+		get storage() {
+			return notWiredYet('storage', '단계-4a-3(셸 스토리지 주입)');
 		},
-		async loadWorkforce() {
-			return null;
-		},
-		async loadInvestments() {
-			return null;
-		},
-		async loadShareholderReturn() {
-			return null;
-		},
-		async loadOwnership() {
-			return null;
-		},
-		async loadExecBoard() {
-			return null;
-		},
-		async loadDebtProfile() {
-			return null;
-		},
-		async loadCapitalChanges() {
-			return null;
-		},
-		async loadAuditTrail() {
-			return null;
-		},
-		async loadTopExecPay() {
-			return null;
-		},
-		viewerUrl(code, vs) {
-			const qs = new URLSearchParams({ period: 'quarterly', terminalEmbed: '1' });
-			if (vs?.length) qs.set('vs', vs.join(','));
-			return `/analysis/${encodeURIComponent(code)}/viewer?${qs.toString()}`;
-		},
-		prefetch() {
-			void loadPanel();
-			void loadEvents();
-		},
+		telemetry: { event() {} },
+		featureFlags: { isEnabled: () => false },
 	};
 }
 
@@ -884,7 +857,7 @@ function fallbackYearRange(): string[] {
 	return [4, 3, 2, 1, 0].map((d) => String(y - d));
 }
 
-function regularFilingsFromPanel(panel: PanelInitResponse | null): RegularFiling[] {
+function regularFilingsFromPanel(panel: ClientPanelInit | null): RegularFiling[] {
 	const periods = panel?.toc.periods ?? [];
 	const urlByPeriod = panel?.grid?.dartUrlByPeriod ?? {};
 	return periods.flatMap((period) => {
