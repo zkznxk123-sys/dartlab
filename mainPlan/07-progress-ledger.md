@@ -791,3 +791,21 @@ rollback: e42eaf5fb revert(analysis +page.ts 삭제·+page.svelte/workspace/홈 
 rollback: 본 commit revert → pip=React 복귀. 또는 배포 단위로 `DARTLAB_UI_LEGACY=1`.
 교훈: 정적-서빙 경로는 dev(vite proxy)가 우회해 테스트 사각이 됐다 — 번들 구조(assets/↔_app/) 차이가 startup
   크래시로 직결. "기본 UI 전환"은 빌드뿐 아니라 *서버 서빙 계약*(자산 경로·mount)까지 동반 검증 대상.
+
+### [37] 정정 — 로컬 터미널 시장 데이터 parity (★[36] "공유자산 완수" 주장의 실제 갭)
+일시: 2026-06-14
+commit: 873c02fd3
+**운영자 적발(실사용)**: "원래(랜딩) 터미널이랑 로컬 서버 터미널이 다른 걸 모르냐". [36] 은 *같은 컴포넌트*
+  (TerminalSurface)를 *같은 터미널*로 착각했다 — **런타임 데이터 배선이 달랐다**. 로컬 `loadTerminalRaw` 가
+  씨드를 단일회사 빈 껍데기(`emptyFinanceCompany` 전부 빈 배열·macro/eco/quarters null·단일 index)로 조립해
+  ("/api 전종목 미보유" 가정), createEngine 이 시장 데이터를 못 받아 **스크리너·생태계맵·매크로 오버레이·
+  동종비교·전종목검색이 전부 죽은** degraded 터미널이었다. 랜딩은 같은 7종을 HF/정적에서 로드해 다 작동.
+**정정**: 로컬 로더를 랜딩과 동일하게 전체 시장 7종(finance·macro·meta·prices-snapshot·search-index·ecosystem·
+  quarters)을 `loadJson` 으로 HF 로드(`hasHfLandingJson`→`HF_RESOLVE/landing/*`, 로컬앱은 정적 사본 없어
+  preferLocal 생략=HF 직행). 회사 실시간 상세(차트·패널·대화)는 /api 포트 유지. 이로써 로컬 터미널 = 랜딩과
+  동일 데이터 + /api 라이브 superset → **터미널이 진짜 공유자산**(코드+데이터 배선 둘 다).
+**검증**: 7종 HF 200 실데이터(finance 3.4MB·eco 5.1MB·prices 725KB·search 306KB·macro 2.5KB)·로컬앱 풀빌드
+  green·단일 caller(terminal/[code]) fetch 전달.
+**교훈(중대)**: "공유 surface" ≠ "공유 experience". 같은 컴포넌트라도 *런타임 포트·씨드 데이터 배선*이 다르면
+  사용자에겐 다른 제품이다. 공유자산 검증은 컴포넌트 동일성이 아니라 *실제 렌더되는 데이터·기능*으로 한다.
+rollback: 873c02fd3 revert(옛 단일회사 빈 씨드 복귀).
