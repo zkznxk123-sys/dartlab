@@ -33,6 +33,11 @@
 			"types": "./src/scan/index.ts",
 			"svelte": "./src/scan/index.ts",
 			"default": "./src/scan/index.ts"
+		},
+		"./scan/runtime": {
+			"types": "./src/scan/financeLiteRuntime.ts",
+			"svelte": "./src/scan/financeLiteRuntime.ts",
+			"default": "./src/scan/financeLiteRuntime.ts"
 		}
 	},
 	"scripts": {
