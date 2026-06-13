@@ -2,7 +2,7 @@
 // hyparquet 는 컬럼 projection (7 컬럼) + ISU_CD 필터 pushdown + 병렬 range → 첫 페인트 비차단·sub-second.
 // 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
 import { browser } from '$app/environment';
-import { readParquetRows } from '$lib/data/hfRange';
+import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
 import { localTerminalAdapter } from './localAdapter';
 
 export interface Candle {

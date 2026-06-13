@@ -2,7 +2,7 @@
 // (seriesId, date, value) 가 seriesId+date 정렬이라 seriesId 필터로 row-group pruning.
 // 차트 오버레이(PriceChart ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
 import { browser } from '$app/environment';
-import { readParquetRows } from '$lib/data/hfRange';
+import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
 
 export interface MacroPoint {
 	d: string; // YYYYMMDD

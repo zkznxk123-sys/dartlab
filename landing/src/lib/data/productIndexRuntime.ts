@@ -1,4 +1,4 @@
-import { readParquetRows, type FetchLike } from './hfRange';
+import { readParquetRows, type FetchLike } from '@dartlab/ui-runtime/data/hfRange';
 
 const PRODUCT_INDEX_PATH = 'metadata/corpList.parquet';
 

@@ -34,6 +34,7 @@
 	},
 	"dependencies": {
 		"@dartlab/ui-design": "*",
+		"@dartlab/ui-runtime": "*",
 		"@codemirror/autocomplete": "^6.20.3",
 		"@codemirror/commands": "^6.10.3",
 		"@codemirror/lang-sql": "^6.10.0",

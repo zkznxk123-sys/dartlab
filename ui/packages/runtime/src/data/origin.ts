@@ -8,7 +8,9 @@
 //       (infra/workers/hfProxy — 콜드 HF CDN 403 흡수 + range 보존). 비우면 HF 직결로 즉시 롤백.
 const DEFAULT_HF_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
 
-export const HF_RESOLVE = (import.meta.env.VITE_DARTLAB_HF_RESOLVE ?? DEFAULT_HF_RESOLVE).replace(/\/+$/, '');
+// vite env 안전 접근 — runtime 패키지 tsc 는 vite/client 타입 없이 검사된다 (소비 앱이 번들 시 치환).
+const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env;
+export const HF_RESOLVE = (viteEnv?.VITE_DARTLAB_HF_RESOLVE ?? DEFAULT_HF_RESOLVE).replace(/\/+$/, '');
 
 /** 데이터셋 상대 경로 → 절대 resolve URL. (선행 슬래시 정규화) */
 export const hfUrl = (path: string): string => `${HF_RESOLVE}/${String(path).replace(/^\/+/, '')}`;

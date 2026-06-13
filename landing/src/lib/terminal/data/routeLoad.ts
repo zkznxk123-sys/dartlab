@@ -1,7 +1,7 @@
 // /terminal(본진) · /lab/terminal-dev(격리 개발) 공용 라우트 로더 SSOT — 복사 드리프트 차단.
 // 씨데이터 JSON 7종 병렬 로드 + 마지막 본 종목 prefetch(주가·재무·제품맵 워밍업).
 import { browser } from '$app/environment';
-import { loadJson } from '$lib/data/dartlabData';
+import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import { prefetch, LAST_SYM_KEY } from '$lib/terminal/data/workbench';
 import type {
 	FinanceFile,

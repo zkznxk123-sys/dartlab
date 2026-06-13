@@ -1,4 +1,4 @@
-import { loadJson, prewarmJson } from '$lib/data/dartlabData';
+import { loadJson, prewarmJson } from '@dartlab/ui-runtime/data/dartlabData';
 import { BrowserCompany } from './company';
 import type { DartlabBrowserOptions, MarketMapBundle, ScanBundle } from './types';
 

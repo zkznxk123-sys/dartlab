@@ -27,7 +27,7 @@
     헬퍼 치환·$app/paths 3파일 basePath 주입·livePrice 설정 주입. 검증: 전역 locator 0·silent fallback 0
     grep + landing/ui-web 양쪽 터미널 smoke.
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
-재개 지점: entry #10 (단계-3) — design 패키지 가동
+재개 지점: entry #11 (4a-1 완료) — runtime/data 가동, 4a-2(포트 조립+호출부 33개소 치환+브리지 재조립)부터. 위 4a sub-unit 분해 선언 참조
 ```
 
 ---
@@ -205,4 +205,11 @@ commit: (이 변경의 커밋)
 변경: landing lib/styles 3종(tokens·typography·v2-tokens, --dl-* 원천) → ui/packages/design/src/styles **git mv 순수 이동(내용 불변)**. landing +layout 2곳 → `@dartlab/ui-design/styles/*` 재배선(+의존 명시). ui/web deep import 2줄 → packages 파일경로 재배선(워크스페이스 밖 — 01 §3.4).  
 범위 결정: semantic/aliases 계층화·primitive 세트는 **실소비 등장 시점**(빈 스캐폴딩 금지, 4b/6에서 terminal.css 흡수와 동행). 시각 회귀 스크린샷은 내용 불변 이동이라 구조적 비대상 — 토큰 내용 변경이 생기는 첫 단위부터 baseline 운영.  
 검증: landing check 에러0 ✓ / landing 풀빌드 ✓ / ui/web build ✓ (양 무중단 대상 green)  
+rollback: 이 commit revert.
+
+### [11] 단계-4a-1 데이터 클라이언트 runtime/data 이관 — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경: hfRange·origin·cacheStore·dartlabData 4파일 git mv → `@dartlab/ui-runtime/data/*` 공개 subpath(과도기 표면 — viewer/scan도 과도기 소비, 단계-8 후 비공개화 검토). 수술 3건 — ① origin `import.meta.env` 안전 캐스트(런타임 tsc는 vite/client 무의존) ② cacheStore `$app/environment`→`typeof window` ③ dartlabData `$app/paths base`→`setStaticBase()` 주입(landing +layout 1회 호출, 4a-2에서 RuntimeEnvironment.basePath 정식화). 소비처 **26파일** 기계 재배선(sed — terminal 로더·viewer panelLoad/queryCanon/companyNames·scan financeLiteRuntime·browser 4종·lib/data 잔존 6종·lab route 3종·ViewerStudio). runtime deps에 hyparquet 2종. landing fs.allow에 ui/packages 추가(dev 차단 방지). ui/web vite alias 3종(@dartlab/ui-{runtime,design,contracts} → packages src 파일경로 — 워크스페이스 밖 해석).  
+검증: runtime tsc strict 0 ✓(이관 파일 무수정 통과) / landing check 에러0 ✓ / landing 풀빌드 ✓ / ui/web build ✓ / 옛 `$lib/data/{4종}` 참조 grep 0 ✓  
 rollback: 이 commit revert.

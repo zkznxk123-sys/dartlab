@@ -1,4 +1,4 @@
-import type { FetchLike } from '$lib/data/dartlabData';
+import type { FetchLike } from '@dartlab/ui-runtime/data/dartlabData';
 
 export interface DartlabBrowserOptions {
 	fetchFn: FetchLike;

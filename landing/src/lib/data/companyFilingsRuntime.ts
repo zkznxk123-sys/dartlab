@@ -1,4 +1,4 @@
-import { readParquetRows, type FetchLike } from './hfRange';
+import { readParquetRows, type FetchLike } from '@dartlab/ui-runtime/data/hfRange';
 
 export interface RegularFiling {
 	rceptNo: string;

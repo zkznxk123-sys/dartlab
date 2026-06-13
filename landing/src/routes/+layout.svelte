@@ -3,7 +3,12 @@
 	import '@dartlab/ui-design/styles/v2-tokens.css';
 	import '@dartlab/ui-design/styles/tokens.css';
 	import '@dartlab/ui-design/styles/typography.css';
+	import { base } from '$app/paths';
+	import { setStaticBase } from '@dartlab/ui-runtime/data/dartlabData';
 	import type { Snippet } from 'svelte';
+
+	// runtime/data 의 static 경로 base 주입 (과도기 — 4a-2 에서 RuntimeEnvironment.basePath 로 정식화)
+	setStaticBase(base);
 	import CloudflareWebAnalytics from '$lib/components/CloudflareWebAnalytics.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 

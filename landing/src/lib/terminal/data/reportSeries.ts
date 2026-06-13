@@ -4,7 +4,7 @@
 // 버틀러식 인력·생산성 / 주주환원 / 타법인출자 패널의 데이터층. 수치는 콤마 문자열('-'=결측).
 // 실측 구조: employee 는 fo_bbm='성별합계' 행이 성별 합계+급여 보유, treasuryStock 은 acqs_mth1='총계' 행이 총계.
 import { browser } from '$app/environment';
-import { readParquetRows } from '$lib/data/hfRange';
+import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
 import { localTerminalAdapter } from './localAdapter';
 
 export type Num = number | null;

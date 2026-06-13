@@ -1,4 +1,4 @@
-import { loadJson } from '$lib/data/dartlabData';
+import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import { tryBuildLiveFinanceTable } from './hfFinance';
 import type {
 	BrowserShowOptions,

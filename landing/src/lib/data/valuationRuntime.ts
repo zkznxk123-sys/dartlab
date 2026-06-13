@@ -1,5 +1,5 @@
-import { readParquetRows } from './hfRange';
-import type { FetchLike } from './dartlabData';
+import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
+import type { FetchLike } from '@dartlab/ui-runtime/data/dartlabData';
 
 const VALUATION_PATH = 'dart/scan/valuation.parquet';
 

@@ -1,9 +1,15 @@
-import { base } from '$app/paths';
 import { readJsonCache, writeJsonCache } from './cacheStore';
 
 // HF resolve base URL 은 origin.ts SSOT 에서 (내부 사용 + consumers 호환 위해 re-export).
 import { HF_RESOLVE } from './origin';
 export { HF_RESOLVE };
+
+// static 경로 base — 옛 `$app/paths base` 의존을 주입으로 대체 (runtime 패키지는 SvelteKit 을 모른다).
+// 과도기: 앱 shell(landing +layout)이 1회 호출. 4a-2 에서 RuntimeEnvironment.basePath 로 정식화.
+let base = '';
+export function setStaticBase(value: string): void {
+	base = value.replace(/\/+$/, '');
+}
 const DEFAULT_TTL_MS = 6 * 60 * 60 * 1000;
 
 export type FetchLike = typeof fetch;

@@ -1,5 +1,5 @@
 import { loadDartDb, sqlEscape } from '$lib/data/duckdb';
-import { loadHfJson, loadJson } from '$lib/data/dartlabData';
+import { loadHfJson, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import { loadHfValuationFor, type ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
 import { loadCompanyChanges, type CompanyChange } from '$lib/scan/duckSql';
 import { BrowserCompany } from './company';

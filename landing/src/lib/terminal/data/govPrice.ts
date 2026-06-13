@@ -7,7 +7,7 @@
 //   3. 프로덕션 — 캐시 읽기 전용(미스 시 호출측이 KRX 폴백). 운영자가 로컬에서 열며 공유 HF 캐시를 채운다.
 // 출처표시 의무(공공누리): gov 데이터 표시 시 GOV_ATTRIBUTION 노출.
 import { browser } from '$app/environment';
-import { readParquetWholeFile } from '$lib/data/hfRange';
+import { readParquetWholeFile } from '@dartlab/ui-runtime/data/hfRange';
 import type { Candle } from './priceSeries';
 import { localTerminalAdapter } from './localAdapter';
 
@@ -85,7 +85,7 @@ export function loadGovRecent(): Promise<Map<string, Candle[]> | null> {
 	if (recentPromise) return recentPromise;
 	recentPromise = (async () => {
 		try {
-			const { readParquetWholeFile } = await import('$lib/data/hfRange');
+			const { readParquetWholeFile } = await import('@dartlab/ui-runtime/data/hfRange');
 			const rows = await readParquetWholeFile<GovRow & { stockCode?: string | null }>('gov/prices/recent.parquet', { columns: RECENT_COLUMNS });
 			if (!rows) return null;
 			const map = new Map<string, Candle[]>();

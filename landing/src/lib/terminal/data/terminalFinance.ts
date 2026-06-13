@@ -3,7 +3,7 @@
 // src/dartlab/viz/display/finance/accounts.py(_STANDARDS) 포팅. 분기 누적(YTD)→TTM 환산.
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
 import { browser } from '$app/environment';
-import { readParquetRows } from '$lib/data/hfRange';
+import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
 import { localTerminalAdapter } from './localAdapter';
 
 export type Num = number | null;

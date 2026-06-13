@@ -1,6 +1,6 @@
 // 회사 유니버스(code → 회사명) — panel 엔 회사명 컬럼이 없어 ecosystem(scan 과 동일 소스)에서 해석.
 // module-level promise 캐시 — 검색·뷰어가 공유(중복 fetch 0).
-import { loadJson } from '$lib/data/dartlabData';
+import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 
 export interface Co {
 	code: string;

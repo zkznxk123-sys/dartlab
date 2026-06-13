@@ -1,4 +1,4 @@
-import { readParquetRows, type FetchLike, type RangeRequestStat } from './hfRange';
+import { readParquetRows, type FetchLike, type RangeRequestStat } from '@dartlab/ui-runtime/data/hfRange';
 
 const CHANGES_PATH = 'dart/scan/changes.parquet';
 

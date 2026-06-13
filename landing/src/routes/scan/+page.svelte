@@ -18,7 +18,7 @@
 	import type { ScanNode, FilterCond, SortKey } from '$lib/scan/types';
 	import type { Preset, RuntimeLoader } from '$lib/scan/presets';
 	import { PRESETS_BY_ID } from '$lib/scan/presets';
-	import { HF_RESOLVE, loadJson } from '$lib/data/dartlabData';
+	import { HF_RESOLVE, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 	import type { ProductIndexItem } from '$lib/data/productIndexRuntime';
 	import type { ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
 	import type { ChangeMetrics } from '$lib/data/changesRuntime';

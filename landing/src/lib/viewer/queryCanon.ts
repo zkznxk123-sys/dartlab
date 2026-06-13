@@ -10,7 +10,7 @@
 // dev 단계: 모델을 번들 import(네트워크 0, HF 연결 전 self-contained 테스트). 이관 시 HF fetch + 사용자질문 누적 재도출.
 
 import intentModelJson from './intentModel.json';
-import { hfUrl } from '$lib/data/hfRange';
+import { hfUrl } from '@dartlab/ui-runtime/data/hfRange';
 import { tokenizeBigram } from './searchIndex';
 
 export interface IntentEntry {

@@ -41,6 +41,10 @@ export default defineConfig({
 			'$lib/scan/duckSql': path.resolve(terminalShimDir, 'landingDataShims.ts'),
 			'$chart': sharedChartDir,
 			'$lib': landingLib,
+			// 워크스페이스 패키지 — ui/web 은 워크스페이스 밖이라 패키지명 해석 불가, 파일경로 alias 로 소비 (01 §3.4)
+			'@dartlab/ui-runtime': path.resolve(repoRoot, 'ui/packages/runtime/src'),
+			'@dartlab/ui-design': path.resolve(repoRoot, 'ui/packages/design/src'),
+			'@dartlab/ui-contracts': path.resolve(repoRoot, 'ui/packages/contracts/src'),
 			'@': path.resolve(__dirname, './src'),
 		},
 	},
