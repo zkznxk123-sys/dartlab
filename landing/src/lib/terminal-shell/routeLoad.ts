@@ -1,20 +1,21 @@
 // /terminal(본진) · /lab/terminal-dev(격리 개발) 공용 라우트 로더 SSOT — 복사 드리프트 차단.
+// landing 셸 글루: getPublicRuntime(컴포지션 루트)·$app 의존이라 surface 패키지로 못 옮긴다 (단계-4b).
 // 씨데이터 JSON 7종 병렬 로드 + 마지막 본 종목 워밍업(주가·재무·제품맵 — public runtime 포트 경유).
 import { browser } from '$app/environment';
 import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import { getPublicRuntime } from '$lib/runtime/publicRuntime';
-import { LAST_SYM_KEY } from '$lib/terminal/data/lastSymbol';
-import { warmCompany } from '$lib/terminal/data/warmup';
-import type {
-	FinanceFile,
-	MacroFile,
-	MetaFile,
-	PricesFile,
-	IndexRow,
-	EcosystemFile,
-	QuartersFile,
-	RawData
-} from '$lib/terminal/data/types';
+import {
+	LAST_SYM_KEY,
+	warmCompany,
+	type FinanceFile,
+	type MacroFile,
+	type MetaFile,
+	type PricesFile,
+	type IndexRow,
+	type EcosystemFile,
+	type QuartersFile,
+	type RawData
+} from '@dartlab/ui-surfaces/terminal';
 
 export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: RawData }> {
 	// 일별시세 조기 워밍 — 마지막 본 종목(없으면 기본 005930)의 주가·재무를 씨데이터 JSON 로드와

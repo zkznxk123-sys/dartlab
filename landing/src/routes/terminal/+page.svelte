@@ -1,21 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { createEngine } from '$lib/terminal/data/engine';
-	import type { RawData } from '$lib/terminal/data/types';
-	import Terminal from '$lib/terminal/Terminal.svelte';
+	import { createEngine, TerminalSurface, type RawData } from '@dartlab/ui-surfaces/terminal';
 	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
+	import { terminalHosts, terminalLinks } from '$lib/terminal-shell/terminalShell';
 	import { loadDartDb } from '$lib/data/duckdb';
 
 	// DuckDB-WASM 프리워밍 — JSON 데이터 로드와 병렬로 미리 인스턴스화 (주가 차트 체감속도↑)
 	void loadDartDb();
 
-	// 공개 셸 runtime 주입 — Terminal 은 포트만 본다 (전역 locator·silent fallback 철거, 4a-2)
+	// 공개 셸 runtime 주입 — surface 는 포트만 본다 (전역 locator·silent fallback 철거, 4a-2)
 	const runtime = getPublicRuntime();
-	// 뷰어 컴포넌트 lazy 로더 주입 — 동적 import 리터럴은 셸 소유 (청크 분리 유지, 4a-3 역의존 제거)
-	const hosts = {
-		viewerStudio: () => import('$lib/components/viewer/ViewerStudio.svelte'),
-		financeDialog: () => import('$lib/components/viewer/FinanceDialog.svelte')
-	};
 
 	let { data }: { data: PageData } = $props();
 	const eng = $derived(createEngine(data.raw as RawData));
@@ -31,7 +25,7 @@
 </svelte:head>
 
 {#if ready}
-	<Terminal {eng} {runtime} {hosts} initial="005930" />
+	<TerminalSurface {eng} {runtime} hosts={terminalHosts} links={terminalLinks} initial="005930" />
 {:else}
 	<div class="loading">HuggingFace · dartlab-data 연결 중 …</div>
 {/if}

@@ -10,29 +10,19 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-4b-1 (Terminal surface 이동+배선). 예약 entry #15 박음. 단계-4a 전체 완료.
+다음 작업: 단계-4b-2 (§8.1 내부 정규화) → 그 후 단계-5(로컬 SvelteKit scaffold). 4b-1 완료(entry #16).
 운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론".
-전문 에이전트 2인(아키텍트+적대 안전검토) 토론으로 4b 설계 확정 → 4b-1/4b-2 분해(07 규칙 3).
 
-단계-4b sub-unit 분해 선언 (이동 원자 윈도우 §2.5 + 1세션 초과 예상):
-  · **4b-1 이동+배선**(내부구조 보존): ① GiscusPanel brand→기존 REPO 상수(1줄) ② TerminalSurface
-    GithubIcon SVG 인라인+brand→`links` 데이터 prop(양쪽 셸이 자기 brand subset 주입=무행위변경,
-    Snippet은 ui/web React경계서 null→SNS바 소실이라 기각) → $lib import 0 ③ routeLoad →
-    landing/src/lib/terminal-shell/ 분리(getPublicRuntime·$app 의존이라 잔류, 2 라우트 공용) ④ git mv
-    landing/src/lib/terminal → ui/packages/surfaces/src/terminal, Terminal.svelte→TerminalSurface.svelte,
-    내부 data/panels/charts/ui/dev 구조 보존(import 재작성 0) ⑤ surfaces 패키지 신설(package.json
-    deps=contracts+runtime+design·svelte-check check 스크립트·src/index.ts·terminal/index.ts 공개표면) ⑥
-    landing 2 라우트+page.ts 재배선(@dartlab/ui-surfaces/terminal·terminal-shell routeLoad·links 주입) ⑦
-    ui/web alias+tsconfig path 추가·딥임포트 3곳(LandingTerminalSurface ×2·localTerminalData ×1) 재배선·
-    $lib→landing alias 제거(타 소비처 grep 선확인)·links 주입 ⑧ checkDevIsolation.js 경로 갱신(R6 조용한
-    파괴자) ⑨ 검증: runtime tsc·surfaces svelte-check(신규·R8 landing check 미커버분)·landing check/풀빌드·
-    ui/web build·dev guard·양쪽 터미널 smoke + grep $lib/terminal 잔재 0
-  · **4b-2 §8.1 내부 정규화**(순수 cosmetic·무행위변경): data/→lib/·panels/charts/ui→components/ +
-    내부 import sed. 첫 surface §8.1 완전 준수 확정(이후 viewer/scan/map 선례).
+단계-4b-2 범위 (순수 cosmetic·무행위변경, 첫 surface §8.1 완전 준수 확정 → viewer/scan/map 선례):
+  · ui/packages/surfaces/src/terminal/ 내부: data/→lib/ · panels+charts+ui→components/ (git mv) +
+    내부 상대 import sed(`/data/`→`/lib/`, `../panels/`→`../components/panels/` 등) + index.ts 경로 갱신.
+  · 추가 하드닝 후보(이연 결정): surface tsconfig 의 noUncheckedIndexedAccess·verbatimModuleSyntax
+    override(현재 landing 동등 강도)를 base 강도로 올릴지 — 245건 수술이라 4b-2 와 별개 단위 검토.
+  · 검증: surfaces svelte-check·landing check/build·ui/web build (무행위변경이라 전부 무변).
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
 잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 동행) · scan 프리셋류 포트(단계-8) · navigation/storage
-  포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신(4b 동행)
-재개 지점: entry #15 (4b 예약) — CI Fast e90699a9e green 확인 후 4b-1 ①부터
+  포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신
+재개 지점: entry #16 (4b-1 완료) — surface 패키지 가동·양쪽 무중단 green. 4b-2 또는 단계-5 진입
 ```
 
 ---
@@ -263,3 +253,18 @@ commit: (예약 — 본 entry 자체는 문서)
 범위/검증: NEXT 블록 4b-1 ①~⑨ 참조. 무중단 = landing + ui/web 양쪽 동시 green(이동 원자 윈도우라 타 제품 PRD 격리).  
 착수 게이트: CI Fast e90699a9e green 확인 후 4b-1 착수.  
 rollback: 4b-1 단일 커밋 revert(git mv 이동·패키지 신설·배선 모두 1커밋).
+
+### [16] 단계-4b-1 Terminal Surface 이동+배선 — 완료
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경 (이동 원자 윈도우, 단일 커밋):
+- **결합 제거 3종**: ① GiscusPanel `$lib/brand`→기존 `REPO` 상수(discussions 링크 1줄) ② TerminalSurface
+  `$lib/components/GithubIcon`→인라인 SVG(의존0)·`$lib/brand`→`links: TerminalBrandLinks` 데이터 prop → **TerminalSurface $lib import 0** ③ routeLoad → `landing/src/lib/terminal-shell/routeLoad.ts` 분리(getPublicRuntime·$app 의존이라 잔류, 2 라우트 공용 SSOT).
+- **이동**: `git mv landing/src/lib/terminal → ui/packages/surfaces/src/terminal`(rename 보존), `Terminal.svelte→TerminalSurface.svelte`. **내부 data/panels/charts/ui/dev 구조 보존**(상대 import 재작성 0 — 무행위변경). dev/ 는 패키지 유지 + 전용 subpath `@dartlab/ui-surfaces/terminal/dev`(본진 ./terminal 과 export 경로 분리 = 격리 보강).
+- **패키지 신설 `@dartlab/ui-surfaces`**: package.json(exports `./terminal`+`./terminal/dev`·deps contracts/runtime/klinecharts·svelte-check check)·tsconfig(base 확장, noUncheckedIndexedAccess·verbatimModuleSyntax override=landing 작성계약 동등 강도, 하드닝은 이연)·src/index.ts·terminal/index.ts(공개표면)·terminal/dev/index.ts·ambient.d.ts(css). 루트 워크스페이스 등록.
+- **landing 셸**: terminal-shell/terminalShell.ts 신설(hosts lazy 로더+links brand 파생, 2 라우트 DRY). /terminal·/lab/terminal-dev +page.svelte·+page.ts 재배선(@dartlab/ui-surfaces/terminal·/terminal/dev·terminal-shell routeLoad·links 주입).
+- **ui/web**: vite alias `@dartlab/ui-surfaces`+tsconfig path 추가·`$lib→landing` alias 제거(소비처 grep 0 선확인)·딥임포트 3곳(LandingTerminalSurface Terminal→TerminalSurface·engine 통합 import·localTerminalData types) 재배선·links=자체 brand subset 주입.
+- **R6**: checkDevIsolation.js 경로를 surface 트리(ui/packages/surfaces/src/terminal)+공개 라우트로 갱신, terminal/dev 서브패스·내부 ./dev/ 위반 검출. (`landing/src/lib/terminal` 소멸 ENOENT/vacuous-pass 무력화 방지)
+
+검증 (양쪽 무중단 green): surfaces svelte-check 0에러·173파일 ✓(신규 패키지 자체 check, R8 — landing 작성계약 동등 강도) / landing check 0에러·4396파일 ✓(surface 를 패키지 심볼릭링크로 graph 포함) / runtime tsc strict 0 ✓ / landing 풀빌드+prerender ✓(prebuild dev-isolation guard OK) / ui/web build(tsc -b 포함) ✓ / dev guard standalone OK ✓ / grep `$lib/terminal` 실 import 잔재 0(주석·contracts prose 제외) ✓  
+rollback: 이 commit revert (git mv·패키지 신설·배선 단일 커밋).

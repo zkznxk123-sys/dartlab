@@ -6,7 +6,6 @@
 	// 드로어는 mount 유지 + 표시 토글 — iframe 을 회사 전환·재오픈에도 보존(재주입 0),
 	// 전환은 postMessage setConfig 만 보낸다 (giscus ADVANCED-USAGE 공식 API).
 	import type { Lang } from '../data/types';
-	import { brand } from '$lib/brand';
 
 	interface Props {
 		code: string;
@@ -95,7 +94,7 @@
 	<header class="dscHead">
 		<span class="dscTitle">{lang === 'en' ? 'DISCUSS' : '종목 토론'} · <b>{name}</b> <span class="dscCode mono">{code}</span></span>
 		<span class="dscActs">
-			<a class="lensScan" href="{brand.repo}/discussions" target="_blank" rel="noopener" title="GitHub Discussions">GitHub ↗</a>
+			<a class="lensScan" href="https://github.com/{REPO}/discussions" target="_blank" rel="noopener" title="GitHub Discussions">GitHub ↗</a>
 			<button class="finFullBtn" onclick={onClose} title={lang === 'en' ? 'close (Esc)' : '닫기 (Esc)'}>✕</button>
 		</span>
 	</header>

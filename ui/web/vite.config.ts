@@ -12,7 +12,6 @@ const versionMatch = pyprojectText.match(/^version\s*=\s*"([^"]+)"/m);
 if (!versionMatch) throw new Error(`pyproject.toml version not found: ${pyprojectPath}`);
 const dartlabVersion = versionMatch[1];
 const repoRoot = path.resolve(__dirname, '../..');
-const landingLib = path.resolve(repoRoot, 'landing/src/lib');
 const sharedChartDir = path.resolve(repoRoot, 'ui/shared/chart');
 const svelteCompatDir = path.resolve(__dirname, './src/svelteKitCompat');
 
@@ -31,10 +30,11 @@ export default defineConfig({
 		alias: {
 			'$app/paths': path.resolve(svelteCompatDir, 'paths.ts'),
 			'$app/environment': path.resolve(svelteCompatDir, 'environment.ts'),
-			// 옛 viewer shim 2종은 4a-3 주입 역전으로 소멸(hosts=null), 데이터 shim 5종은 4a-2 포트화로 소멸
+			// 옛 viewer shim 2종은 4a-3 주입 역전으로 소멸(hosts=null), 데이터 shim 5종은 4a-2 포트화로 소멸,
+			// $lib→landing 브리지는 4b 터미널 surface 패키지화로 소멸(이제 surface 는 @dartlab/ui-surfaces).
 			'$chart': sharedChartDir,
-			'$lib': landingLib,
 			// 워크스페이스 패키지 — ui/web 은 워크스페이스 밖이라 패키지명 해석 불가, 파일경로 alias 로 소비 (01 §3.4)
+			'@dartlab/ui-surfaces': path.resolve(repoRoot, 'ui/packages/surfaces/src'),
 			'@dartlab/ui-runtime': path.resolve(repoRoot, 'ui/packages/runtime/src'),
 			'@dartlab/ui-design': path.resolve(repoRoot, 'ui/packages/design/src'),
 			'@dartlab/ui-contracts': path.resolve(repoRoot, 'ui/packages/contracts/src'),

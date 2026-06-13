@@ -25,7 +25,10 @@
 			"@/*": ["./src/*"],
 			"@dartlab/ui-contracts": ["../packages/contracts/src/index.ts"],
 			"@dartlab/ui-runtime": ["../packages/runtime/src/index.ts"],
-			"@dartlab/ui-runtime/*": ["../packages/runtime/src/*"]
+			"@dartlab/ui-runtime/*": ["../packages/runtime/src/*"],
+			"@dartlab/ui-surfaces/terminal": ["../packages/surfaces/src/terminal/index.ts"],
+			"@dartlab/ui-surfaces/terminal/dev": ["../packages/surfaces/src/terminal/dev/index.ts"],
+			"@dartlab/ui-surfaces/*": ["../packages/surfaces/src/*"]
 		},
 
 		"resolveJsonModule": true,

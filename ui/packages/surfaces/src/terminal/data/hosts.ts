@@ -25,3 +25,13 @@ export interface TerminalHosts {
 	/** 정량 재무제표 모달(FinanceDialog) lazy 로더 — null 이면 열화 안내 모달. */
 	financeDialog: (() => Promise<{ default: Component<FinanceDialogHostProps> }>) | null;
 }
+
+/** 셸 식별 외부 링크 — 헤더 SNS·이슈·후원 칩. 셸(landing·ui/web)이 자기 brand 에서 주입한다.
+ * surface 가 brand 정체성을 소유하지 않게 하는 주입 계약(역의존 제거, 단계-4b). 값은 공개 URL. */
+export interface TerminalBrandLinks {
+	repo: string;
+	coffee: string;
+	youtube: string;
+	threads: string;
+	instagram: string;
+}

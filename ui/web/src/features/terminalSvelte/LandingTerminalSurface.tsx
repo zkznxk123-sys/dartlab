@@ -1,11 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { mount, unmount } from 'svelte';
 
+import { brand } from '@/lib/brand';
 import { loadLocalTerminalRuntime } from './localTerminalData';
 
 // 디자인 토큰 — @dartlab/ui-design (ui/web 은 워크스페이스 밖이라 파일경로로 소비, 01 §3.4)
 import '../../../../packages/design/src/styles/v2-tokens.css';
 import '../../../../packages/design/src/styles/tokens.css';
+
+// 헤더 SNS 링크 — ui/web 자체 brand 에서 주입 (surface 가 brand 소유 안 함, 단계-4b).
+const TERMINAL_LINKS = {
+	repo: brand.repo,
+	coffee: brand.coffee,
+	youtube: brand.youtube,
+	threads: brand.threads,
+	instagram: brand.instagram,
+};
 
 interface LandingTerminalSurfaceProps {
 	code: string;
@@ -31,16 +41,17 @@ export function LandingTerminalSurface({ code }: LandingTerminalSurfaceProps) {
 		(async () => {
 			const local = await loadLocalTerminalRuntime(code);
 			if (cancelled) return;
-			const [{ default: Terminal }, { createEngine }] = await Promise.all([
-				import('../../../../../landing/src/lib/terminal/Terminal.svelte'),
-				import('../../../../../landing/src/lib/terminal/data/engine'),
-			]);
+			// 단계-4b: 터미널 surface 는 @dartlab/ui-surfaces 패키지 (옛 landing deep import 소멸).
+			const { TerminalSurface, createEngine } = await import('@dartlab/ui-surfaces/terminal');
 			if (cancelled) return;
 			const eng = createEngine(local.raw);
-			// runtime 은 prop 주입 — Terminal 이 컨텍스트로 하위 패널에 배포 (전역 locator 철거, 4a-2).
+			// runtime 은 prop 주입 — TerminalSurface 가 컨텍스트로 하위 패널에 배포 (전역 locator 철거, 4a-2).
 			// hosts = null: 이 셸은 viewer 임베드 미지원 — 뷰어는 iframe(viewer port URL), 재무모달은 열화 안내 (4a-3)
 			const hosts = { viewerStudio: null, financeDialog: null };
-			instance = mount(Terminal, { target, props: { eng, runtime: local.runtime, hosts, initial: code } }) as SvelteInstance;
+			instance = mount(TerminalSurface, {
+				target,
+				props: { eng, runtime: local.runtime, hosts, links: TERMINAL_LINKS, initial: code },
+			}) as SvelteInstance;
 			setStatus('ready');
 		})().catch((err: unknown) => {
 			if (cancelled) return;

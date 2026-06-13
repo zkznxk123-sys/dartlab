@@ -1,0 +1,13 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"resolveJsonModule": true,
+		// surface 는 landing SvelteKit tsconfig(strict, but noUncheckedIndexedAccess·verbatimModuleSyntax 미설정)
+		// 하에서 작성·검증된 대규모 UI 코드다. 단계-4b 는 무행위변경 기계 이동이라 작성 계약과 동등 강도로 검증한다.
+		// base 의 추가 강제 2종을 surface 코드 전수 하드닝하는 건 별도 단위(이연) — 이동에 섞지 않는다.
+		"noUncheckedIndexedAccess": false,
+		"verbatimModuleSyntax": false
+	},
+	"include": ["src/**/*.ts", "src/**/*.svelte"]
+}

@@ -32,7 +32,7 @@ import type {
 	TerminalFinanceBundle,
 } from '@dartlab/ui-contracts';
 import { createHfMacroPort } from '@dartlab/ui-runtime';
-import type { FinanceCompany, IndexRow, MetaFile, RawData } from '../../../../../landing/src/lib/terminal/data/types';
+import type { FinanceCompany, IndexRow, MetaFile, RawData } from '@dartlab/ui-surfaces/terminal';
 
 type Num = number | null;
 type FinFreq = TerminalFinance['freq'];
