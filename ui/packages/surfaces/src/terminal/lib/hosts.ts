@@ -8,6 +8,7 @@ export interface ViewerStudioHostProps {
 	code: string;
 	vs: string[];
 	embedded: boolean;
+	basePath?: string; // 셸 base 경로(에셋 — 임베드 뷰어 아바타) — ViewerOverlay 가 runtime.env.basePath 주입.
 	onNavigate: (code: string, vs: string[]) => void;
 	onclose: () => void;
 }
