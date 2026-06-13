@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 
-	// 5-1 scaffold 진입 셸 — 스켈레톤 라우트 네비게이션 맵. 기본 진입(→/chat)·실 배선은 5-3.
+	// 로컬 SvelteKit 셸 — 챗·터미널 두 모드(같은 Ask engine 계약)가 1급 진입점.
 	const routes: { href: string; label: string; note: string }[] = [
-		{ href: `${base}/chat`, label: 'chat', note: '챗 모드 (Ask 엔진 진입점)' },
+		{ href: `${base}/chat`, label: 'chat', note: '챗 모드 — Ask 엔진 대화·근거 표시' },
 		{ href: `${base}/terminal/005930`, label: 'terminal/[code]', note: '터미널 모드 (TerminalSurface 풀스크린)' },
 		{ href: `${base}/ask`, label: 'ask', note: 'Ask → 최근 회사 터미널' },
 		{ href: `${base}/analysis/005930`, label: 'analysis/[code]', note: '회사 분석' },
@@ -15,7 +15,7 @@
 
 <main>
 	<h1>DartLab <span>Local</span></h1>
-	<p class="sub">로컬 SvelteKit 앱 — scaffold (단계-5-1). 라우트 스켈레톤·배선은 5-3.</p>
+	<p class="sub">로컬 SvelteKit 앱 — 챗 모드와 터미널 모드. 데이터·AI는 dartlab 로컬 서버(/api).</p>
 	<nav>
 		{#each routes as r (r.href)}
 			<a href={r.href}>
