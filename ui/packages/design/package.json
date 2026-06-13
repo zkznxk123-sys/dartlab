@@ -1,0 +1,9 @@
+{
+	"name": "@dartlab/ui-design",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./styles/*": "./src/styles/*"
+	}
+}
