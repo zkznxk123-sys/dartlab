@@ -9,13 +9,23 @@
 		periods,
 		dartUrlByPeriod,
 		glow = null,
-		highlight = null
+		highlight = null,
+		selecting = false,
+		rowIds = [],
+		selectedIds = null,
+		onToggleCell
 	}: {
 		rows: PanelRow[];
 		periods: string[];
 		dartUrlByPeriod: Record<string, string | null>;
 		glow?: { rowIndex: number; period: string } | null;
 		highlight?: { rowIndex: number; period: string; terms: string[] } | null;
+		// ── table-export 선택 모드 ── selecting=true 면 셀 좌상단 체크박스 오버레이(레이아웃 시프트 0).
+		// rowIds[i] = 표시 행 i 의 섹션 절대 selection id (ViewerStudio 가 환산해 주입). selectedIds 에 있으면 steady glow.
+		selecting?: boolean;
+		rowIds?: string[]; // visible 매핑 전 원본 rows 인덱스 기준 — 부모가 rows 와 같은 순서로 제공
+		selectedIds?: Set<string> | null;
+		onToggleCell?: (rowId: string, row: PanelRow, period: string) => void;
 	} = $props();
 
 	// 섹션 내 build-order 인덱스 보존 — 행 식별(disclosureKey/NARR)은 leafSeq 미포함이라 EDGAR 동명 narrative
@@ -93,8 +103,27 @@
 
 			<!-- 본문 -->
 			{#each visible as { r, i } (i)}
+				{@const rid = rowIds[i] ?? null}
+				{@const picked = !!(rid && selectedIds?.has(rid))}
 				{#each periods as p (p)}
-					<div class="cell body-cell" class:glow={glowKey === `${i}|${p}`} data-cell={`${i}|${p}`}>
+					<div
+						class="cell body-cell"
+						class:glow={glowKey === `${i}|${p}`}
+						class:picked={selecting && picked}
+						data-cell={`${i}|${p}`}
+					>
+						{#if selecting && rid}
+							<button
+								type="button"
+								class="pick-box"
+								class:on={picked}
+								aria-pressed={picked}
+								title={picked ? '선택 해제' : '이 표를 내보내기에 추가'}
+								onclick={() => onToggleCell?.(rid, r, p)}
+							>
+								{#if picked}✓{/if}
+							</button>
+						{/if}
 						<CellContent value={r.cells?.[p] ?? ''} highlightTerms={highlight && highlight.rowIndex === i && highlight.period === p ? highlight.terms : []} />
 					</div>
 				{/each}
@@ -160,12 +189,57 @@
 		color: #fb923c;
 	}
 	.body-cell {
+		position: relative; /* pick-box 오버레이 앵커 (체크박스 absolute, 레이아웃 시프트 0). */
 		color: #cbd5e1;
 	}
 	/* steady 강조 + 펄스 — 스크롤 도착 시점에 확실히 보이게(옛 t0 fade 레이스 제거). 수명은 JS(glowKey)가 제어. */
 	.body-cell.glow {
 		box-shadow: inset 0 0 0 2px #fb923c;
 		animation: cellglow 1.1s ease-in-out infinite;
+	}
+	/* table-export 선택 — steady 보더(펄스 없음, glow 와 구분). 선택 유지 상시. */
+	.body-cell.picked {
+		box-shadow: inset 0 0 0 2px #fb923c;
+		background: rgba(251, 146, 60, 0.08);
+	}
+	/* 셀 좌상단 체크박스 — fade-in, position:absolute(격자 레이아웃 시프트 0). */
+	.pick-box {
+		position: absolute;
+		top: 5px;
+		left: 5px;
+		z-index: 10;
+		display: grid;
+		place-items: center;
+		width: 20px;
+		height: 20px;
+		padding: 0;
+		border: 1px solid #475569;
+		border-radius: 4px;
+		background: rgba(5, 8, 17, 0.82);
+		color: #fb923c;
+		font-size: 12px;
+		font-weight: 700;
+		line-height: 1;
+		cursor: pointer;
+		animation: pickfade 0.16s ease-out;
+	}
+	.pick-box:hover {
+		border-color: #fb923c;
+	}
+	.pick-box.on {
+		border-color: #fb923c;
+		background: rgba(251, 146, 60, 0.9);
+		color: #1a1206;
+	}
+	@keyframes pickfade {
+		from {
+			opacity: 0;
+			transform: scale(0.85);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
 	}
 	@keyframes cellglow {
 		0%,

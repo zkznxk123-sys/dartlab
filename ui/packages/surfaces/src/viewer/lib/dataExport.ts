@@ -73,9 +73,8 @@ export function financeToExcel(sheets: Array<{ name: string; statement: FinanceS
 	return `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">${ws}</Workbook>`;
 }
 
-// 브라우저 다운로드 트리거 (Blob).
-export function downloadText(content: string, filename: string, mime: string): void {
-	const blob = new Blob([content], { type: mime });
+// 브라우저 다운로드 트리거 (Blob) — 이름·revoke 정리 단일 출처.
+function triggerDownload(blob: Blob, filename: string): void {
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url;
@@ -84,4 +83,17 @@ export function downloadText(content: string, filename: string, mime: string): v
 	a.click();
 	a.remove();
 	setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// 텍스트(CSV/.xls SpreadsheetML) 다운로드.
+export function downloadText(content: string, filename: string, mime: string): void {
+	triggerDownload(new Blob([content], { type: mime }), filename);
+}
+
+// 바이너리(진짜 .xlsx 등 Uint8Array) 다운로드 — buildWorkbook 산출 바이트용.
+export function downloadBlob(bytes: Uint8Array, filename: string, mime: string): void {
+	// lib.dom BlobPart 는 ArrayBufferView<ArrayBuffer> 를 요구하는데 Uint8Array 의 buffer 는 ArrayBufferLike
+	// (SharedArrayBuffer 가능)로 추론돼 거부된다. slice() 로 정확히 크기맞춘 새 ArrayBuffer 사본을 만들어 그 buffer 전달.
+	const copy = bytes.slice();
+	triggerDownload(new Blob([copy.buffer as ArrayBuffer], { type: mime }), filename);
 }

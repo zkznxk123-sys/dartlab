@@ -4,7 +4,7 @@
 	// 한몸두입구: /viewer/company/[stockCode] 라우트(URL 어댑터)와 터미널 오버레이(embedded)가 같은 본체를 마운트.
 	// 라우팅 의존 0 — 회사 이동·비교 변경은 전부 onNavigate 콜백으로 위임(라우트=goto, 터미널=내부 state).
 	import { onMount, untrack, type Snippet } from 'svelte';
-	import { Maximize2, Minimize2, Columns3, MessageSquare, Bug, Table2, X, Plus, Search, Download } from 'lucide-svelte';
+	import { Maximize2, Minimize2, Columns3, MessageSquare, Bug, Table2, X, Plus, Search, Download, FileSpreadsheet } from 'lucide-svelte';
 	import { loadPanelBundle } from '../lib/panelLoad';
 	import PanelTocTree from './PanelTocTree.svelte';
 	import PanelMatrix from './PanelMatrix.svelte';
@@ -15,11 +15,13 @@
 	import GiscusPanel from './GiscusPanel.svelte';
 	import FinanceDialog from './FinanceDialog.svelte';
 	import AskDrawer from './AskDrawer.svelte';
+	import ExportDrawer from './ExportDrawer.svelte';
+	import { createSelectionStore, selectionId } from '../lib/export/selection.svelte';
 	import { executeAction, type ViewerAction, type ViewerApi } from '../lib/viewerActions';
 	import { loadCompanies } from '../lib/companyNames';
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '../lib/searchIndex';
 	import { buildCompareBoard, commonPeriods } from '../lib/compare';
-	import type { PanelBundle } from '../lib/types';
+	import type { PanelBundle, PanelRow } from '../lib/types';
 	import { hfUrl } from '@dartlab/ui-runtime/data/hfRange';
 	import { marketForCode } from '../lib/dartUrl';
 	import { panelToCsv, financeToExcel, downloadText } from '../lib/dataExport';
@@ -77,6 +79,9 @@
 	let stockSearchOpen = $state(false); // 종목검색 팝오버 (화면내검색 ⌘K 와 분리된 회사전환 입력)
 	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
 	let askCarryQ = $state(''); // AI 가 타 회사 감지 → 이동 후 새 회사 index 준비되면 운반·자동 ask 할 질문
+	// ── table-export 선택 모드 ── 헤더 [표 내보내기] 토글. 우측 380px 슬롯을 AskDrawer 와 공유(상호배타).
+	let exportOpen = $state(false); // ExportDrawer 열림 = 선택 모드 on (체크박스 오버레이 + 드로어)
+	const selStore = createSelectionStore();
 	let annualOnly = $state(false); // 연간만(사업보고서) 필터 — period 축을 회사별 결산보정 annual 로 거름
 	let searchIndex = $state<SearchIndex | null>(null);
 	let indexing = $state(false);
@@ -237,6 +242,14 @@
 		const base = bundle.gridBySection.get(activeSectionKey) ?? [];
 		return activeBlock ? base.filter((r) => r.blockLeaf === activeBlock) : base;
 	});
+	// table-export — 표시 행마다 섹션 절대 selection id(=`${sectionKey}|${절대인덱스}`). PanelMatrix 체크박스/glow 매칭용.
+	// 객체 참조로 base 절대 인덱스를 역산(activeBlock 필터 시에도 안정). PanelMatrix 의 rowIds[i] 와 1:1.
+	const rowIds = $derived.by(() => {
+		if (!activeSectionKey || !bundle) return [] as string[];
+		const base = bundle.gridBySection.get(activeSectionKey) ?? [];
+		return rows.map((r) => selectionId(activeSectionKey!, base.indexOf(r)));
+	});
+	const selectedIds = $derived(selStore.idSet());
 	const dartUrls = $derived(bundle?.dartUrlByPeriod ?? {});
 	const sectionLabel = $derived.by(() => {
 		const s = activeSectionKey?.split('␟').pop() ?? '';
@@ -269,6 +282,30 @@
 			financeDownloading = false;
 		}
 	}
+
+	// ── table-export — 선택 모드 토글(드로어 mount) + 셀 토글 핸들러 ──
+	// 우측 380px 슬롯은 AskDrawer 와 1개 공유 → 상호배타. 표 내보내기 켜면 AI 닫고, AI 켜면 표 내보내기 닫는다.
+	function toggleExport() {
+		exportOpen = !exportOpen;
+		if (exportOpen) askOpen = false;
+	}
+	function openAsk() {
+		askOpen = !askOpen;
+		if (askOpen) exportOpen = false;
+	}
+	// PanelMatrix 셀 체크박스 → 그 행(테이블/텍스트 블록)을 클릭한 기간 1개로 선택 토글. rowId 는 이미 섹션 절대 id.
+	function onToggleCell(rowId: string, row: PanelRow, period: string) {
+		if (!activeSectionKey || !bundle) return;
+		const base = bundle.gridBySection.get(activeSectionKey) ?? [];
+		const idx = base.indexOf(row);
+		if (idx < 0) return;
+		selStore.toggle({ sectionKey: activeSectionKey, indexInSection: idx, row, periods: 'all' });
+	}
+	// 회사 전환 시 선택 비움(타 회사 선택 잔존 방지) — code 변경 감지.
+	$effect(() => {
+		void code;
+		selStore.clear();
+	});
 
 	// ── 비교 모드 파생 (compareMode·allBundles 는 위에서 선언) ──
 	const cmpCompanies = $derived(
@@ -431,12 +468,17 @@
 				{/if}
 			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
-			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={() => (askOpen = !askOpen)} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
+			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={openAsk} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
 				<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
 			</button>
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
+			{#if bundle && !compareMode}
+				<button type="button" class="fs-btn" class:active={exportOpen} onclick={toggleExport} title="표 내보내기 — 격자에서 표를 골라 진짜 엑셀(.xlsx)로">
+					<FileSpreadsheet size={13} /> 표 내보내기
+				</button>
+			{/if}
 			<div class="data-dl">
 				<button type="button" class="fs-btn"><Download size={13} /> 데이터</button>
 				<div class="data-pop">
@@ -541,7 +583,7 @@
 			<p>{errorMsg}</p>
 		</div>
 	{:else if bundle}
-		<div class="studio" class:ask-open={askOpen} class:swapping>
+		<div class="studio" class:ask-open={askOpen} class:export-open={exportOpen} class:swapping>
 			<aside class="toc">
 				<PanelTocTree toc={bundle.toc} {activeSectionKey} {activeBlock} onpick={pickSection} onpickBlock={pickBlock} />
 			</aside>
@@ -563,7 +605,7 @@
 						/>
 					{/if}
 				{:else}
-					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} />
+					<PanelMatrix {rows} periods={windowPeriods} dartUrlByPeriod={dartUrls} glow={glowCell} selecting={exportOpen} {rowIds} {selectedIds} {onToggleCell} />
 				{/if}
 			</section>
 			{#if askOpen}
@@ -577,6 +619,8 @@
 					{onAction}
 					onclose={() => (askOpen = false)}
 				/>
+			{:else if exportOpen}
+				<ExportDrawer store={selStore} {bundle} {corpName} {basePath} onclose={() => (exportOpen = false)} />
 			{/if}
 		</div>
 	{/if}
@@ -1044,7 +1088,8 @@
 		display: grid;
 		grid-template-columns: 240px 1fr;
 	}
-	.studio.ask-open {
+	.studio.ask-open,
+	.studio.export-open {
 		grid-template-columns: 240px minmax(0, 1fr) 380px;
 	}
 	/* soft swap — 전환 중 문서영역(TOC·격자)만 살짝 죽여 "로딩 중" 신호 + 묵은 클릭 차단. 드로어는 또렷이 유지. */
@@ -1067,19 +1112,23 @@
 		background: rgba(251, 146, 60, 0.1);
 	}
 	@media (max-width: 1120px) {
-		.studio.ask-open {
+		.studio.ask-open,
+		.studio.export-open {
 			grid-template-columns: minmax(0, 1fr) 360px;
 		}
-		.studio.ask-open .toc {
+		.studio.ask-open .toc,
+		.studio.export-open .toc {
 			display: none;
 		}
 	}
 	@media (max-width: 720px) {
-		.studio.ask-open {
+		.studio.ask-open,
+		.studio.export-open {
 			position: relative;
 			grid-template-columns: 1fr;
 		}
-		.studio.ask-open :global(.ask-drawer) {
+		.studio.ask-open :global(.ask-drawer),
+		.studio.export-open :global(.export-drawer) {
 			position: absolute;
 			inset: 0;
 			z-index: 90;

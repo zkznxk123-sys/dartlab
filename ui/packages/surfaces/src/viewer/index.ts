@@ -49,6 +49,6 @@ export { scanDeepRowsChunked, type DeepSearchRow } from './lib/deepSearch';
 export { checkBrowserAiAvailability, runBrowserAiPrompt, type BrowserAiStatus } from './lib/browserAi';
 export { analyzeEvidencePack, attachBrowserAiText, type ViewerAnalysis } from './lib/viewerAnalyst';
 export { marketForCode } from './lib/dartUrl';
-export { panelToCsv, financeToExcel, downloadText } from './lib/dataExport';
+export { panelToCsv, financeToExcel, downloadText, downloadBlob } from './lib/dataExport';
 export { loadFinanceStatement, financeAvailability, provideDuckDb, type ViewerDuckDb } from './lib/finance/financeQuery';
 export { KIND_LABELS, type FinanceKind, type FinanceScope, type FinanceStatement } from './lib/finance/types';
