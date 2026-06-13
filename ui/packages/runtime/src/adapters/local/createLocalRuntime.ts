@@ -1,12 +1,13 @@
 // local adapter — 로컬 Python 서버(/api) 데이터 포트 실구현 조립 (책임 경계 02 §9.2).
 // silent fallback 금지: 모든 포트 메서드는 단일 경로다 — 부재는 null/[] 정직 표기, 다른 소스 우회 없음.
-// 단계-5-2a 범위 = 터미널이 소비하는 데이터 포트(company·price·filing·finance·viewer·macro·report·scan.changes).
-// ai 는 단계-5-2b(SSE), services·navigation·storage 는 단계-5-3(셸 주입), map·search 는 단계-8 —
+// 데이터 포트(company·price·filing·finance·viewer·macro·report·scan.changes)=단계-5-2a, AiPort(SSE)=단계-5-2b.
+// services·navigation·storage 는 단계-5-3(셸 주입), map·search 는 단계-8 —
 // 미배선은 명시적 throw 게이트(공개 어댑터와 동일 패턴, 호출 시 배선순서 위반 즉시 노출).
 import type { Candle, DartLabRuntime, FinancePort, RuntimeEnvironment } from '@dartlab/ui-contracts';
 import { createHfMacroPort } from '../public/sources/macroSource';
 import { notWiredYet } from './fetchJson';
 import type { ClientPanelInit, CompanyMeta, LocalCaches, PriceEventsPayload } from './localTypes';
+import { localAiPort } from './sources/aiSource';
 import { localCompanyPort } from './sources/companySource';
 import { localFilingPort } from './sources/filingSource';
 import { localPricePort } from './sources/priceSource';
@@ -55,9 +56,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		get search() {
 			return notWiredYet('search', '단계-8(search 추출)');
 		},
-		get ai() {
-			return notWiredYet('ai', '단계-5-2b(ai SSE 배선)');
-		},
+		ai: localAiPort(apiBase),
 		get services() {
 			return notWiredYet('services', '단계-5-3(서비스 레지스트리 배선)');
 		},
