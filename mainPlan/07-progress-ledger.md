@@ -708,3 +708,18 @@ commit: a69d41092
 잔여 NEXT: 단계-5-3(provider 설정 Svelte 배선 — ui/web ProviderSettingsDialog 356줄 참조, /api/ai/profile·secrets·validate)
   → chat advanced tier 완성 + wheel 전환 차단 해소. 이후 publish.yml ui/apps/local 전환 + wheel smoke. Skill OS operation/ui.md·
   aiProductReplatform.md dev build 경로 서술 갱신(+ 카탈로그 재생성, 운영자).
+
+### [33] 단계-5-3 — 로컬앱 공급자 설정 Svelte 배선 (챗 advanced tier 전제 완성)
+일시: 2026-06-13
+commit: af596be63
+**배선**: ui/web `ProviderSettingsDialog`(React 356줄) → Svelte 5 runes 충실 포팅(로컬 `settings/providers` 29줄 스텁 대체).
+  공급자 카드(SELECTED/AVAILABLE/NEEDS SETUP 배지)·api_key 입력+저장(자동 선택)·OAuth 로그인/폴링(150×2s=5분)/로그아웃·
+  공급자 선택. 공급자 설정은 로컬 서버 admin(공개 GitHub Pages 환경엔 서버 없음 → DartLabRuntime 포트 계약 밖)이라 로컬 셸
+  라우트가 직접 /api(status·공통 프로필·secrets·oauth) 호출 — surface 우회 아님(surface 만 포트 강제). 검증: svelte-check 0에러
+  4118파일·로컬앱 풀빌드 green(settings/providers 1.13kB 컴파일).
+**효과**: 로컬 챗 advanced tier(고급 분석 엔진) 전제 충족 — 옛 [32] wheel 보류 사유(스텁 회귀)가 **해소**. 단, wheel(publish.yml)
+  전환은 여전히 미실행 — 2차 admin 기능(channels·ollama pull·model 관리·codex/dart-key) parity 감사 + live `dartlab` 로컬 서버
+  클릭스루 + 운영자 sign-off 후가 정공(pip 사용자는 DARTLAB_UI_LEGACY 가 dev 체크아웃 전용이라 wheel 전환 후 fallback 불가).
+**goal 달성 평가**: 로컬 UI(dev SvelteKit 앱)의 챗·터미널 모드 = 완성·검증(빌드·SSE·데이터흐름·dartlab 로컬 서버 dev 서빙).
+  pip wheel 배포 전환은 "로컬 UI 완성"을 넘는 별도 릴리즈 결정 — 위 parity 감사 게이트.
+rollback: 단일 파일(settings/providers/+page.svelte) revert → 29줄 스텁 복귀.
