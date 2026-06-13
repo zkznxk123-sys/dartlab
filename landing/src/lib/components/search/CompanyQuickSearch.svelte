@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { ArrowRight, Search } from 'lucide-svelte';
-	import { loadCompanies, type Co } from '$lib/viewer/companyNames';
+	import { loadCompanies, type Co } from '@dartlab/ui-surfaces/viewer';
 
 	let {
 		onpick,

@@ -2,8 +2,7 @@
 // bundle=null → studio 언마운트)로 AskDrawer 가 언마운트돼도 대화·모델·Ollama 상태가 생존해야 "AI 화면
 // 그대로(크로스-회사 대화 유지)" 요구가 성립한다. 컴포넌트 내부 $state 는 언마운트 시 소실되므로 여기로 올린다.
 // 초기화 시점 = 전체 새로고침(F5)뿐. (탭당 뷰어 1개 — 싱글턴 오염 없음. 대화는 회사 배지로 구분된다.)
-import type { SearchHit } from '$lib/viewer/searchIndex';
-import { DEFAULT_MODEL_ID, isKnownModel } from '$lib/viewer/webllm';
+import { DEFAULT_MODEL_ID, isKnownModel, type SearchHit } from '@dartlab/ui-surfaces/viewer';
 
 // 선택 WebLLM 모델 영속(localStorage) — 저장값이 카탈로그에 없으면(버전 변경·오염) 기본으로 폴백. SSR 가드.
 function initialModel(): string {

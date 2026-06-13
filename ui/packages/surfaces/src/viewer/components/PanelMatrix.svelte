@@ -1,8 +1,8 @@
 <script lang="ts">
 	// 수평화 매트릭스 — 행=panel 항목, 열=period. landing 디자인 언어(다크 네이비 + 오렌지).
 	import CellContent from './CellContent.svelte';
-	import { hasVisibleContent } from '$lib/viewer/diff';
-	import type { PanelRow } from '$lib/viewer/types';
+	import { hasVisibleContent } from '../lib/diff';
+	import type { PanelRow } from '../lib/types';
 
 	let {
 		rows,

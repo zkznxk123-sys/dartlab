@@ -5,8 +5,8 @@ import { brand } from '$lib/brand';
 import type { TerminalBrandLinks, TerminalHosts } from '@dartlab/ui-surfaces/terminal';
 
 export const terminalHosts: TerminalHosts = {
-	viewerStudio: () => import('$lib/components/viewer/ViewerStudio.svelte'),
-	financeDialog: () => import('$lib/components/viewer/FinanceDialog.svelte')
+	viewerStudio: () => import('@dartlab/ui-surfaces/viewer').then((m) => ({ default: m.ViewerStudio })),
+	financeDialog: () => import('@dartlab/ui-surfaces/viewer').then((m) => ({ default: m.FinanceDialog }))
 };
 
 export const terminalLinks: TerminalBrandLinks = {

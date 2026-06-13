@@ -31,9 +31,7 @@ sys.modules.setdefault("dartlab.scan", types.ModuleType("dartlab.scan"))
 from dartlab.providers.dart.panel.read import readWide  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))  # SSOT 입력(intentSpec·curatedQuestions·heldoutB) 이 스크립트 옆
-BUNDLE_PATH = (
-    "landing/src/lib/viewer/intentModel.json"  # 프론트 fallback 번들(repo 루트 기준). HF 가 주경로, 이건 fallback
-)
+BUNDLE_PATH = "ui/packages/surfaces/src/viewer/lib/intentModel.json"  # 프론트 fallback 번들(repo 루트 기준, 단계-6 viewer surface 승격). HF 가 주경로, 이건 fallback
 RECENT, CELL_CAP, K1, B, RRF_K, TOPK, GLUE_FRAC = 6, 500, 1.5, 0.75, 60, 120, 0.34
 TAG, WS, PRE = re.compile(r"<[^>]+>"), re.compile(r"\s+"), re.compile(r"^\d{4}Q\d$")
 HANGUL, ASCII = re.compile(r"[가-힣]+"), re.compile(r"[A-Za-z]{2,20}")

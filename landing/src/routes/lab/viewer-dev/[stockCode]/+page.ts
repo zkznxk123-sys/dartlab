@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import { normalizeCompareTargets } from '$lib/viewer/compare/targets';
+import { normalizeCompareTargets } from '@dartlab/ui-surfaces/viewer';
 
 // 공시뷰어 — 브라우저가 HF panel 하나를 직접 읽어 온더플라이 렌더 (서버 0). 동적 종목.
 export const prerender = 'auto';

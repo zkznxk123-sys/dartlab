@@ -1,6 +1,6 @@
 <script lang="ts">
 	// 정량재무제표 순수 표 — 계정 행 × 기간 열. sticky 첫 열(계정)+sticky 헤더(기간), 숫자 우측정렬·천단위 콤마·음수 빨강.
-	import type { FinanceStatement } from '$lib/viewer/finance/types';
+	import type { FinanceStatement } from '../lib/finance/types';
 
 	let { statement, divisor = 1 }: { statement: FinanceStatement; divisor?: number } = $props();
 

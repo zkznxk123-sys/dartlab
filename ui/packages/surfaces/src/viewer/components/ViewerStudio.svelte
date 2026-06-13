@@ -3,42 +3,45 @@
 	// 디자인 = scan 방식(flat #050811 · #1e2433 보더 · 오렌지 단일 액센트). 풀블리드(좌우 패딩 0 · 갭 0).
 	// 한몸두입구: /viewer/company/[stockCode] 라우트(URL 어댑터)와 터미널 오버레이(embedded)가 같은 본체를 마운트.
 	// 라우팅 의존 0 — 회사 이동·비교 변경은 전부 onNavigate 콜백으로 위임(라우트=goto, 터미널=내부 state).
-	import { onMount, untrack } from 'svelte';
-	import { base } from '$app/paths';
+	import { onMount, untrack, type Snippet } from 'svelte';
 	import { Maximize2, Minimize2, Columns3, MessageSquare, Bug, Table2, X, Plus, Search, Download } from 'lucide-svelte';
-	import { brand } from '$lib/brand';
-	import Header from '$lib/components/sections/Header.svelte';
-	import { loadPanelBundle } from '$lib/viewer/panelLoad';
-	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
-	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
-	import ComparisonMatrix from '$lib/components/viewer/ComparisonMatrix.svelte';
-	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
-	import CommandPalette from '$lib/components/viewer/CommandPalette.svelte';
-	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
-	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
-	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
-	import AskDrawer from '$lib/components/viewer/AskDrawer.svelte';
-	import { executeAction, type ViewerAction, type ViewerApi } from '$lib/viewer/viewerActions';
-	import { loadCompanies } from '$lib/viewer/companyNames';
-	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
-	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
-	import type { PanelBundle } from '$lib/viewer/types';
+	import { loadPanelBundle } from '../lib/panelLoad';
+	import PanelTocTree from './PanelTocTree.svelte';
+	import PanelMatrix from './PanelMatrix.svelte';
+	import ComparisonMatrix from './ComparisonMatrix.svelte';
+	import TimelineRibbon from './TimelineRibbon.svelte';
+	import CommandPalette from './CommandPalette.svelte';
+	import CompanySearch from './CompanySearch.svelte';
+	import GiscusPanel from './GiscusPanel.svelte';
+	import FinanceDialog from './FinanceDialog.svelte';
+	import AskDrawer from './AskDrawer.svelte';
+	import { executeAction, type ViewerAction, type ViewerApi } from '../lib/viewerActions';
+	import { loadCompanies } from '../lib/companyNames';
+	import { buildIndexChunked, type SearchIndex, type SearchHit } from '../lib/searchIndex';
+	import { buildCompareBoard, commonPeriods } from '../lib/compare';
+	import type { PanelBundle } from '../lib/types';
 	import { hfUrl } from '@dartlab/ui-runtime/data/hfRange';
-	import { marketForCode } from '$lib/viewer/dartUrl';
-	import { panelToCsv, financeToExcel, downloadText } from '$lib/viewer/dataExport';
-	import { loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
-	import { KIND_LABELS, type FinanceKind, type FinanceStatement } from '$lib/viewer/finance/types';
+	import { marketForCode } from '../lib/dartUrl';
+	import { panelToCsv, financeToExcel, downloadText } from '../lib/dataExport';
+	import { loadFinanceStatement } from '../lib/finance/financeQuery';
+	import { KIND_LABELS, type FinanceKind, type FinanceStatement } from '../lib/finance/types';
 
 	let {
 		code,
 		vs = [],
 		embedded = false,
+		basePath = '',
+		repoUrl = '',
+		header,
 		onNavigate,
 		onclose
 	}: {
 		code: string;
 		vs?: string[];
 		embedded?: boolean; // 터미널 오버레이 모드 — Header·title·전체보기 숨김, 높이 100%
+		basePath?: string; // 공개 라우트가 base($app/paths) 주입 — surface 는 SvelteKit 무결합(에셋 경로용).
+		repoUrl?: string; // 이슈 링크 repo URL(옛 brand.repo) — 셸 주입.
+		header?: Snippet; // 비embedded·비fullscreen 표준 헤더 — 셸 주입(landing=사이트 Header). 미주입=헤더 없음(터미널 오버레이).
 		onNavigate: (code: string, vs: string[]) => void | Promise<void>;
 		onclose?: () => void; // embedded 전용 — 헤더 우측 닫기 버튼
 	} = $props();
@@ -276,7 +279,7 @@
 			isRef: b.stockCode === code // 기준 회사 = 빼기 불가
 		}))
 	);
-	// compare 본진은 $lib/viewer/compare. route 는 section/period/bundle 만 넘기고 정렬 계약은 모듈이 담당.
+	// compare 본진은 ../lib/compare. route 는 section/period/bundle 만 넘기고 정렬 계약은 모듈이 담당.
 	const compareBoard = $derived(
 		compareMode && activeSectionKey && lockedPeriod && allBundles.length >= 2
 			? buildCompareBoard(allBundles, { sectionKey: activeSectionKey, period: lockedPeriod, block: activeBlock })
@@ -393,7 +396,7 @@
 <svelte:head>{#if !embedded}<title>{corpName || code} 공시뷰어 · dartlab</title>{/if}</svelte:head>
 
 {#if !embedded && !isFullscreen}
-	<Header context="landing" />
+	{@render header?.()}
 {/if}
 
 <main class="viewer-page" class:fullscreen={isFullscreen} class:embedded>
@@ -429,7 +432,7 @@
 			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
 			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={() => (askOpen = !askOpen)} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
-				<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{base}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
+				<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
 			</button>
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
@@ -460,7 +463,7 @@
 			<button type="button" class="fs-btn" onclick={() => (discussOpen = true)} title="공시 토론 (GitHub Discussions)">
 				<MessageSquare size={13} /> 토론
 			</button>
-			<a class="fs-btn" href="{brand.repo}/issues/new" target="_blank" rel="noopener" title="이슈 등록 — 버그·요청 (GitHub)">
+			<a class="fs-btn" href="{repoUrl}/issues/new" target="_blank" rel="noopener" title="이슈 등록 — 버그·요청 (GitHub)">
 				<Bug size={13} /> 이슈
 			</a>
 			{#if bundle}
@@ -523,8 +526,8 @@
 	{#if loading}
 		<div class="state">
 			<picture>
-				<source srcset="{base}/avatar-study.webp" type="image/webp" />
-				<img class="state-avatar" src="{base}/avatar-study.png" alt="" width="72" height="72" />
+				<source srcset="{basePath}/avatar-study.webp" type="image/webp" />
+				<img class="state-avatar" src="{basePath}/avatar-study.png" alt="" width="72" height="72" />
 			</picture>
 			<div class="spinner"></div>
 			<p>{corpName || code} 공시 본문을 여는 중</p>
@@ -532,8 +535,8 @@
 	{:else if errorMsg}
 		<div class="state">
 			<picture>
-				<source srcset="{base}/avatar-curious.webp" type="image/webp" />
-				<img class="state-avatar" src="{base}/avatar-curious.png" alt="" width="72" height="72" />
+				<source srcset="{basePath}/avatar-curious.webp" type="image/webp" />
+				<img class="state-avatar" src="{basePath}/avatar-curious.png" alt="" width="72" height="72" />
 			</picture>
 			<p>{errorMsg}</p>
 		</div>

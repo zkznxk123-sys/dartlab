@@ -4,7 +4,7 @@
 	// 헤더 = 회사명·코드 + 원본(DART) 링크 + ✕(비교에서 빼기). 기간은 상단 타임라인이 담당하므로 헤더에 없음.
 	import { X } from 'lucide-svelte';
 	import CellContent from './CellContent.svelte';
-	import type { AlignedRow } from '$lib/viewer/compare';
+	import type { AlignedRow } from '../lib/compare';
 
 	interface CompareCol {
 		code: string;

@@ -2,16 +2,15 @@
 	// 본진 공시뷰어 우측 AI Q&A 채팅 드로어 — 헤더 아바타 버튼으로 열리고 격자를 밀고 나온다(push).
 	// 모델은 명시적 [받기] 버튼+프로그래스바로 1회 다운로드(상태 가시화). 받기 전에도 결정론 답·근거는 즉시(다운로드 0).
 	// 받은 뒤엔 질문하면 그 위에서 대화로 자동 응답(멀티턴). 근거 칩 → 부모 onSearchResult(셀 glow) 재사용.
-	import { base } from '$app/paths';
 	import { Download, Send, Sparkles, X } from 'lucide-svelte';
-	import { plainText, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
-	import { loadIntentModel, queryScope, type IntentModel } from '$lib/viewer/queryCanon';
-	import { composeAnswer } from '$lib/viewer/answerCompose';
-	import { resolveCompanies } from '$lib/viewer/companyNames';
-	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
-	import { ask, type EvRef, type NavOption } from '$lib/viewer/askSession.svelte';
-	import { translateAnswer, translatorSupported, TARGET_LANGS, type TargetLang } from '$lib/viewer/translate';
-	import { deriveActions, type ViewerAction } from '$lib/viewer/viewerActions';
+	import { plainText, search, type SearchHit, type SearchIndex } from '../lib/searchIndex';
+	import { loadIntentModel, queryScope, type IntentModel } from '../lib/queryCanon';
+	import { composeAnswer } from '../lib/answerCompose';
+	import { resolveCompanies } from '../lib/companyNames';
+	import { loadCompanyFinanceSignals } from '../lib/financeAsk';
+	import { ask, type EvRef, type NavOption } from '../lib/askSession.svelte';
+	import { translateAnswer, translatorSupported, TARGET_LANGS, type TargetLang } from '../lib/translate';
+	import { deriveActions, type ViewerAction } from '../lib/viewerActions';
 	import {
 		isModelCached,
 		routeChat,
@@ -22,10 +21,10 @@
 		type AskEvidence,
 		type ChatTurn,
 		type Provider
-	} from '$lib/viewer/webllm';
-	import { detectOllama } from '$lib/viewer/ollama';
-	import type { FinanceSignal } from '$lib/viewer/diff';
-	import type { PanelBundle } from '$lib/viewer/types';
+	} from '../lib/webllm';
+	import { detectOllama } from '../lib/ollama';
+	import type { FinanceSignal } from '../lib/diff';
+	import type { PanelBundle } from '../lib/types';
 
 	// 로컬 Ollama 설치 4단계 — 인라인 렌더(blocked/no-model 에서도 항상 보임, 툴팁 클리핑 0). origin 은 실배포처 고정(환각 URL 금지).
 	// {cmd:true} 줄은 monospace 코드 박스로 렌더해 명령을 복사·식별 가능하게 한다.
@@ -50,6 +49,7 @@
 		searchIndex,
 		corpName,
 		carryQ = '',
+		basePath = '',
 		onAction,
 		onclose
 	}: {
@@ -58,6 +58,7 @@
 		searchIndex: SearchIndex | null;
 		indexing?: boolean;
 		corpName: string;
+		basePath?: string; // 에셋 경로용 — 셸이 base($app/paths) 주입.
 		carryQ?: string; // 이동 후 부모가 운반한 질문(새 회사 index 준비되면 1회 자동 ask)
 		onAction: (a: ViewerAction) => void; // 챗→백뷰 제어 단일 채널(executeAction 으로 검증·실행)
 		onclose: () => void;
@@ -69,7 +70,9 @@
 	let intentModel = $state<IntentModel | null>(null); // intentModel(HF 라이브, 번들 fallback) — query→intent 라우팅→섹션 scoping. 1회 로드.
 
 	// opt-in 질문 수집 — 수신단(Cloudflare Worker) URL 이 설정된 경우만 활성(미설정=완전 비활성, UI 숨김). 기본 off, PII 0.
-	const FEEDBACK_URL: string = import.meta.env.VITE_FEEDBACK_URL ?? '';
+	// surfaces tsconfig 는 vite/client 타입 무의존 — import.meta.env 안전 캐스트(터미널 origin.ts 패턴).
+	const FEEDBACK_URL: string =
+		(import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_FEEDBACK_URL ?? '';
 	let contribute = $state(false);
 	$effect(() => {
 		try {
@@ -409,8 +412,8 @@
 <aside class="ask-drawer">
 	<header class="ad-head">
 		<picture>
-			<source srcset="{base}/avatar-detective.webp" type="image/webp" />
-			<img src="{base}/avatar-detective.png" alt="" width="22" height="22" />
+			<source srcset="{basePath}/avatar-detective.webp" type="image/webp" />
+			<img src="{basePath}/avatar-detective.png" alt="" width="22" height="22" />
 		</picture>
 		<strong>공시 Q&A</strong>
 		{#if ask.ollamaState === 'ready'}<span class="hd-badge" title="로컬 Ollama 사용 중 · 외부 전송 없음">Ollama · {ask.ollamaModel}</span>{/if}
@@ -421,8 +424,8 @@
 		{#if ask.chat.length === 0}
 			<div class="onboard">
 				<picture>
-					<source srcset="{base}/avatar.webp" type="image/webp" />
-					<img class="onboard-ava" src="{base}/avatar.png" alt="" width="76" height="76" />
+					<source srcset="{basePath}/avatar.webp" type="image/webp" />
+					<img class="onboard-ava" src="{basePath}/avatar.png" alt="" width="76" height="76" />
 				</picture>
 
 				<!-- 온디바이스 모델 영역 — 자식 폭을 한 컬럼(.ob-block)으로 묶어 좌우 정렬 일치 -->

@@ -7,8 +7,8 @@
 		splitHtmlAndText,
 		absorbCaptionUnitFromText,
 		stripInlineTags
-	} from '$lib/viewer/cell';
-	import { highlightParts } from '$lib/viewer/searchEvidence';
+	} from '../lib/cell';
+	import { highlightParts } from '../lib/searchEvidence';
 
 	let { value, highlightTerms = [] }: { value: string; highlightTerms?: string[] } = $props();
 

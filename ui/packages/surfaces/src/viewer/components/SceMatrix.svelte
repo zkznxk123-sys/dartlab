@@ -1,6 +1,6 @@
 <script lang="ts">
 	// 자본변동표 — 변동유형(행) × 자본구성요소(열), 선택 기간 1개. account×period 표로는 2D 를 못 담아 전용.
-	import type { SceMatrixData } from '$lib/viewer/finance/types';
+	import type { SceMatrixData } from '../lib/finance/types';
 
 	let { data, period, divisor }: { data: SceMatrixData; period: string; divisor: number } = $props();
 

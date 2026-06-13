@@ -4,17 +4,29 @@
 	import { base } from '$app/paths';
 	import { Activity, Database, Search, Sparkles, Table2 } from 'lucide-svelte';
 	import CompanyQuickSearch from '$lib/components/search/CompanyQuickSearch.svelte';
-	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
-	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
-	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
-	import { checkBrowserAiAvailability, runBrowserAiPrompt, type BrowserAiStatus } from '$lib/viewer/browserAi';
-	import { scanDeepRowsChunked, type DeepSearchRow } from '$lib/viewer/deepSearch';
-	import { loadPanelBundle } from '$lib/viewer/panelLoad';
-	import { buildIndexChunked, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
-	import { buildEvidencePack, highlightParts, type EvidenceItem } from '$lib/viewer/searchEvidence';
-	import { analyzeEvidencePack, attachBrowserAiText, type ViewerAnalysis } from '$lib/viewer/viewerAnalyst';
-	import { loadCompanies } from '$lib/viewer/companyNames';
-	import type { PanelBundle } from '$lib/viewer/types';
+	import {
+		PanelMatrix,
+		PanelTocTree,
+		TimelineRibbon,
+		checkBrowserAiAvailability,
+		runBrowserAiPrompt,
+		type BrowserAiStatus,
+		scanDeepRowsChunked,
+		type DeepSearchRow,
+		loadPanelBundle,
+		buildIndexChunked,
+		search,
+		type SearchHit,
+		type SearchIndex,
+		buildEvidencePack,
+		highlightParts,
+		type EvidenceItem,
+		analyzeEvidencePack,
+		attachBrowserAiText,
+		type ViewerAnalysis,
+		loadCompanies,
+		type PanelBundle
+	} from '@dartlab/ui-surfaces/viewer';
 
 	let { data }: { data: { code: string } } = $props();
 	const code = $derived(data.code);

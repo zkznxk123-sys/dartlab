@@ -3,16 +3,24 @@
 	import { base } from '$app/paths';
 	import { Activity, Hash, Percent, Search, Sparkles, TrendingDown, TrendingUp } from 'lucide-svelte';
 	import CompanyQuickSearch from '$lib/components/search/CompanyQuickSearch.svelte';
-	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
-	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
-	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
-	import { loadPanelBundle } from '$lib/viewer/panelLoad';
-	import { loadCompanies } from '$lib/viewer/companyNames';
-	import { analyzeViewport, financeSignals, type CellFacet, type FinanceSignal } from '$lib/viewer/diff';
-	import { financeAvailability, loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
-	import { narrateSignals, webgpuAvailable } from '$lib/viewer/webllm';
-	import type { FinanceKind, FinanceScope } from '$lib/viewer/finance/types';
-	import type { PanelBundle } from '$lib/viewer/types';
+	import {
+		PanelMatrix,
+		PanelTocTree,
+		TimelineRibbon,
+		loadPanelBundle,
+		loadCompanies,
+		analyzeViewport,
+		financeSignals,
+		type CellFacet,
+		type FinanceSignal,
+		financeAvailability,
+		loadFinanceStatement,
+		narrateSignals,
+		webgpuAvailable,
+		type FinanceKind,
+		type FinanceScope,
+		type PanelBundle
+	} from '@dartlab/ui-surfaces/viewer';
 
 	let { data }: { data: { code: string } } = $props();
 	const code = $derived(data.code);

@@ -4,15 +4,23 @@
 	// 받은 뒤엔 질문하면 그 위에서 대화로 자동 응답(멀티턴). 근거 칩 → 부모 onSearchResult(셀 glow) 재사용.
 	import { base } from '$app/paths';
 	import { Download, Send, Sparkles, X } from 'lucide-svelte';
-	import { plainText, search, type SearchHit, type SearchIndex } from '$lib/viewer/searchIndex';
-	import { loadIntentModel, queryScope, type IntentModel } from '$lib/viewer/queryCanon';
-	import { composeAnswer } from '$lib/viewer/answerCompose';
-	import { resolveCompanies } from '$lib/viewer/companyNames';
-	import { loadCompanyFinanceSignals } from '$lib/viewer/financeAsk';
-	import { ask, type EvRef, type NavOption } from './askSession.svelte';
-	import { translateAnswer, translatorSupported, TARGET_LANGS, type TargetLang } from '$lib/viewer/translate';
-	import { deriveActions, type ViewerAction } from '$lib/viewer/viewerActions';
 	import {
+		plainText,
+		search,
+		type SearchHit,
+		type SearchIndex,
+		loadIntentModel,
+		queryScope,
+		type IntentModel,
+		composeAnswer,
+		resolveCompanies,
+		loadCompanyFinanceSignals,
+		translateAnswer,
+		translatorSupported,
+		TARGET_LANGS,
+		type TargetLang,
+		deriveActions,
+		type ViewerAction,
 		isModelCached,
 		routeChat,
 		stripEcho,
@@ -21,11 +29,12 @@
 		WEBLLM_MODELS,
 		type AskEvidence,
 		type ChatTurn,
-		type Provider
-	} from '$lib/viewer/webllm';
-	import { detectOllama } from '$lib/viewer/ollama';
-	import type { FinanceSignal } from '$lib/viewer/diff';
-	import type { PanelBundle } from '$lib/viewer/types';
+		type Provider,
+		detectOllama,
+		type FinanceSignal,
+		type PanelBundle
+	} from '@dartlab/ui-surfaces/viewer';
+	import { ask, type EvRef, type NavOption } from './askSession.svelte';
 
 	// 로컬 Ollama 설치 4단계 — 인라인 렌더(blocked/no-model 에서도 항상 보임, 툴팁 클리핑 0). origin 은 실배포처 고정(환각 URL 금지).
 	// {cmd:true} 줄은 monospace 코드 박스로 렌더해 명령을 복사·식별 가능하게 한다.

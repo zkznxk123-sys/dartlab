@@ -4,8 +4,8 @@
 	// scan 검색 디자인 언어(다크 #050811 · 오렌지 #fb923c).
 	import { onMount } from 'svelte';
 	import { Search } from 'lucide-svelte';
-	import { search, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
-	import type { PanelTocResponse } from '$lib/viewer/types';
+	import { search, type SearchIndex, type SearchHit } from '../lib/searchIndex';
+	import type { PanelTocResponse } from '../lib/types';
 
 	let {
 		index,

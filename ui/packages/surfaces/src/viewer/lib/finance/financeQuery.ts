@@ -1,8 +1,26 @@
 // 정량재무제표 IO — 공식 dart/finance/{code}.parquet 을 DuckDB-WASM(워커)으로 query → financePivot 로 pivot.
 // 순수 SQL빌더·pivot·merge 는 financePivot.ts(테스트 가능). 본 모듈은 duckdb 등록+query 만.
 
-import { loadDartDb, sqlEscape } from '$lib/data/duckdb';
 import { buildSceMatrix, buildSql, num, pivot, sceComponent, type QueryRow, type SceQueryRow } from './financePivot';
+
+// duckdb 접근은 셸이 주입한다 — surfaces(vanilla svelte)는 SvelteKit/Vite 전용 $lib/data/duckdb
+// ($app/environment·@vite-ignore·OPFS)에 직접 결합하지 않는다. landing 컴포지션 루트가 provideDuckDb(loadDartDb)로
+// 주입. 미주입(또는 기기 제약) = null → 정직 빈 재무(throw 금지, 02 §3 silent fallback 아님 — 단일 경로 + 명시 null).
+export interface ViewerDuckDb {
+	query<T = Record<string, unknown>>(sql: string): Promise<T[]>;
+	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
+}
+let duckDbProvider: (() => Promise<ViewerDuckDb | null>) | null = null;
+export function provideDuckDb(provider: () => Promise<ViewerDuckDb | null>): void {
+	duckDbProvider = provider;
+}
+function loadDartDb(): Promise<ViewerDuckDb | null> {
+	return duckDbProvider ? duckDbProvider() : Promise.resolve(null);
+}
+// SQL 단일인용 escape — 1줄 순수 유틸(옛 $lib/data/duckdb.sqlEscape 인라인 — 결합 절제).
+function sqlEscape(value: string): string {
+	return value.replace(/'/g, "''");
+}
 import type { FinanceFreq, FinanceKind, FinanceScope, FinanceStatement, SceMatrixData } from './types';
 
 const ALL_KINDS: FinanceKind[] = ['IS', 'BS', 'CF', 'CIS', 'SCE'];

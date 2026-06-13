@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { marketForCode } from '$lib/viewer/dartUrl';
+	import { marketForCode } from '../lib/dartUrl';
 	import {
 		financeAvailability,
 		loadFinanceStatement,
 		loadSceMatrix,
 		type FinanceAvailability
-	} from '$lib/viewer/finance/financeQuery';
+	} from '../lib/finance/financeQuery';
 	import {
 		FREQ_BY_KIND,
 		FREQ_LABELS,
@@ -19,7 +19,7 @@
 		type FinanceStatement,
 		type FinanceUnit,
 		type SceMatrixData
-	} from '$lib/viewer/finance/types';
+	} from '../lib/finance/types';
 	import FinanceTable from './FinanceTable.svelte';
 	import SceMatrix from './SceMatrix.svelte';
 

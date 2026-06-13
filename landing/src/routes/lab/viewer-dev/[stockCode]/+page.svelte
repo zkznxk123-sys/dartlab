@@ -7,26 +7,37 @@
 	import { Maximize2, Minimize2, Columns3, MessageSquare, Bug, Table2, X, Plus, Search, Download } from 'lucide-svelte';
 	import { brand } from '$lib/brand';
 	import Header from '$lib/components/sections/Header.svelte';
-	import { loadPanelBundle } from '$lib/viewer/panelLoad';
-	import PanelTocTree from '$lib/components/viewer/PanelTocTree.svelte';
-	import PanelMatrix from '$lib/components/viewer/PanelMatrix.svelte';
-	import ComparisonMatrix from '$lib/components/viewer/ComparisonMatrix.svelte';
-	import TimelineRibbon from '$lib/components/viewer/TimelineRibbon.svelte';
-	import CommandPalette from '$lib/components/viewer/CommandPalette.svelte';
-	import CompanySearch from '$lib/components/viewer/CompanySearch.svelte';
-	import GiscusPanel from '$lib/components/viewer/GiscusPanel.svelte';
-	import FinanceDialog from '$lib/components/viewer/FinanceDialog.svelte';
 	import AskDrawer from '$lib/viewer/dev/AskDrawer.svelte';
-	import { executeAction, type ViewerAction, type ViewerApi } from '$lib/viewer/viewerActions';
-	import { loadCompanies } from '$lib/viewer/companyNames';
-	import { buildIndexChunked, type SearchIndex, type SearchHit } from '$lib/viewer/searchIndex';
-	import { buildCompareBoard, commonPeriods } from '$lib/viewer/compare';
-	import type { PanelBundle } from '$lib/viewer/types';
 	import { hfUrl } from '@dartlab/ui-runtime/data/hfRange';
-	import { marketForCode } from '$lib/viewer/dartUrl';
-	import { panelToCsv, financeToExcel, downloadText } from '$lib/viewer/dataExport';
-	import { loadFinanceStatement } from '$lib/viewer/finance/financeQuery';
-	import { KIND_LABELS, type FinanceKind, type FinanceStatement } from '$lib/viewer/finance/types';
+	import {
+		loadPanelBundle,
+		PanelTocTree,
+		PanelMatrix,
+		ComparisonMatrix,
+		TimelineRibbon,
+		CommandPalette,
+		CompanySearch,
+		GiscusPanel,
+		FinanceDialog,
+		executeAction,
+		type ViewerAction,
+		type ViewerApi,
+		loadCompanies,
+		buildIndexChunked,
+		type SearchIndex,
+		type SearchHit,
+		buildCompareBoard,
+		commonPeriods,
+		type PanelBundle,
+		marketForCode,
+		panelToCsv,
+		financeToExcel,
+		downloadText,
+		loadFinanceStatement,
+		KIND_LABELS,
+		type FinanceKind,
+		type FinanceStatement
+	} from '@dartlab/ui-surfaces/viewer';
 
 	let { data }: { data: { code: string; vs?: string[]; vsRejected?: Array<{ code: string; reason: string }> } } = $props();
 	const code = $derived(data.code);
