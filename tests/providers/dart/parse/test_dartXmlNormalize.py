@@ -25,7 +25,8 @@ from dartlab.providers.dart.parse.dartXmlNormalize import (
 )
 from dartlab.providers.dart.parse.htmlTableParser import cellGrid
 
-_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "xmlTables"
+# tests/providers/dart/parse/ → parents[3] = tests/ → tests/fixtures/xmlTables (엔진·브라우저 공유 골든).
+_FIXTURES = Path(__file__).resolve().parents[3] / "fixtures" / "xmlTables"
 _GOLDEN = [
     "small_merged",
     "samsung_3_타법인출자_현황_상세_0",
@@ -270,7 +271,8 @@ def test_real_company_panelTable_export(tmp_path):
     from openpyxl.cell.cell import MergedCell
 
     from dartlab.providers.dart.panel.read import readWide
-    from dartlab.viz.export.excel import _selectPanelRow, _writePanelTableSheet
+    from dartlab.providers.dart.parse.panelExportGrid import _selectRow
+    from dartlab.viz.export.excel import _writePanelTableSheet
     from dartlab.viz.export.template import PanelTableSource
 
     wide = readWide("005930", marketNs="kr", tag=True)
@@ -305,8 +307,17 @@ def test_real_company_panelTable_export(tmp_path):
         periodMode="asFiled",
         period=period,
     )
-    # _selectPanelRow 가 같은 행을 다시 찾는지 확인 (식별 계약).
-    picked = _selectPanelRow(wide, spec)
+    # provider _selectRow 가 같은 행을 다시 찾는지 확인 (식별 계약, DIP 이전 후).
+    ids = {
+        "chapter": spec.chapter,
+        "sectionLeaf": spec.sectionLeaf,
+        "blockLeaf": spec.blockLeaf,
+        "leafType": spec.leafType,
+        "disclosureKey": spec.disclosureKey,
+        "scope": spec.scope,
+        "leafSeq": spec.leafSeq,
+    }
+    picked = _selectRow(wide, ids)
     assert picked is not None
 
     wb = openpyxl.Workbook()

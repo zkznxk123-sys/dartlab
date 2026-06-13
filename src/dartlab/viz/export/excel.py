@@ -29,11 +29,11 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from dartlab.core.financeDocAccessor import getFinanceDocAccessor
+from dartlab.core.panelTableAccessor import PanelExportSheet, getPanelTableAccessor
 from dartlab.synth.ratioCategories import RATIO_CATEGORIES
 
 if TYPE_CHECKING:
     from dartlab.core.protocols import CompanyProtocol as Company
-    from dartlab.providers.dart.parse.htmlTableParser import HtmlTableCell
     from dartlab.viz.export.template import ExcelTemplate, PanelTableSource
 
 
@@ -359,132 +359,29 @@ def _resolveData(c: Company, moduleName: str) -> pl.DataFrame | None:
     return None
 
 
-# ── 공시 panel 표 (병합 보존 격자) export ──
-
-# panel wide 행을 유일 식별하는 7-필드 (실측: 005930 1627행 0충돌). disclosureKey/scope/leafSeq 는
-# 대부분의 공시 표에서 None 이라 선택 — 제공된(non-None) 필드만으로 필터한다.
-_PANEL_ID_FIELDS = ("chapter", "sectionLeaf", "blockLeaf", "leafType", "disclosureKey", "scope", "leafSeq")
+# ── 공시 panel 표 (병합 보존 격자) export — provider 격자(DIP)를 openpyxl 로 쓴다 ──
 
 _NOTE_FMT = Font(italic=True, size=9, color="808080")
 
 
-def _loadPanelWide(c: Company) -> "pl.DataFrame | None":
-    """회사 panel wide DataFrame (raw XML 셀) 로드 — c.panel 우선, 없으면 readWide.
+def _writeGridSheet(wb: Workbook, label: str, sheet: PanelExportSheet) -> None:
+    """PanelExportSheet(앵커 셀+병합+단위/노트) → openpyxl 시트.
 
-    Args:
-        c: Company 인스턴스 (stockCode 필요).
-
-    Returns:
-        wide pl.DataFrame (index 컬럼 + period 컬럼, 셀=raw XML) 또는 None.
-
-    Example:
-        >>> w = _loadPanelWide(c)  # doctest: +SKIP
-
-    Raises:
-        없음 — 로드 실패는 None.
-    """
-    from dartlab.providers.dart.panel.read import readWide
-
-    marketNs = getattr(c, "marketNs", "kr") or "kr"
-    try:
-        return readWide(c.stockCode, marketNs=marketNs, tag=True)
-    except (RuntimeError, ValueError, OSError):
-        return None
-
-
-def _selectPanelRow(wide: "pl.DataFrame", spec: PanelTableSource) -> dict | None:
-    """panel wide 에서 spec 이 가리키는 단일 표 행 1개 선택 (제공 필드만 매칭 + leafSeq 디스앰비그).
-
-    spec 의 non-None 식별 필드(_PANEL_ID_FIELDS)로 필터한다. disclosureKey/scope/leafSeq 가
-    None 이면 그 필드는 매칭에서 제외(best-effort). 여러 행이 남으면 leafSeq 오름차순 첫 행.
-
-    Args:
-        wide: panel wide DataFrame (index 컬럼 + period 컬럼).
-        spec: PanelTableSource (식별 필드 보유).
-
-    Returns:
-        선택된 행 dict (named) 또는 매칭 0 이면 None.
-
-    Example:
-        >>> row = _selectPanelRow(wide, spec)  # doctest: +SKIP
-
-    Raises:
-        없음 — 매칭 실패는 None.
-    """
-    flt = wide
-    for fld in _PANEL_ID_FIELDS:
-        val = getattr(spec, fld, None)
-        if val is None or fld not in wide.columns:
-            continue
-        flt = flt.filter(pl.col(fld) == val)
-    if flt.height == 0:
-        return None
-    if flt.height > 1 and "leafSeq" in flt.columns:
-        flt = flt.sort("leafSeq")
-    return flt.head(1).to_dicts()[0]
-
-
-def _mergeRanges(grid: "list[list[HtmlTableCell]]") -> "dict[int, tuple[int, int, int, int]]":
-    """격자에서 병합 범위 추출 — 셀 인스턴스 id() → (minRow, minCol, maxRow, maxCol).
-
-    병합셀은 cellGrid 가 같은 HtmlTableCell 인스턴스를 여러 좌표에 둔다. id() 로 dedup 해 각
-    병합의 경계(extent)를 구한다 — 극단 rowspan(683) 도 단일 범위 1개로 (N회 쓰기 아님).
-
-    Args:
-        grid: cellGrid 결과 (병합셀 = 동일 인스턴스 공유).
-
-    Returns:
-        ``{id(cell): (minR, minC, maxR, maxC)}`` — 모든 셀(병합·단일 공통).
-
-    Example:
-        >>> ext = _mergeRanges(grid)  # doctest: +SKIP
-
-    Raises:
-        없음.
-    """
-    coords: dict[int, list[tuple[int, int]]] = {}
-    for r, row in enumerate(grid):
-        for cIdx, cell in enumerate(row):
-            if cell is None:
-                continue
-            coords.setdefault(id(cell), []).append((r, cIdx))
-    ext: dict[int, tuple[int, int, int, int]] = {}
-    for cid, cl in coords.items():
-        rs = [r for r, _ in cl]
-        cs = [c for _, c in cl]
-        ext[cid] = (min(rs), min(cs), max(rs), max(cs))
-    return ext
-
-
-def _writeGridSheet(
-    wb: Workbook,
-    label: str,
-    grid: "list[list[HtmlTableCell]]",
-    *,
-    unit: str = "",
-    note: str = "",
-) -> None:
-    """병합 보존 격자를 openpyxl 시트로 — 앵커 1회 쓰기 + merge_cells, 값=coerceCell.
+    값 = 정합값(Number/text/None), 병합 = anchor 1회 쓰기 + merge_cells. 결손(None)은
+    셀을 안 써 빈셀(0 금지 — honest-gap). 단위/노트는 상단 라벨 행(값 환산 0).
 
     Args:
         wb: openpyxl Workbook.
         label: 시트 라벨 (31자 trim, 충돌 회피).
-        grid: cellGrid 결과 (병합셀 = 동일 인스턴스).
-        unit: 단위 토큰 (detectUnit, 캡션 텍스트에서 — 셀 아님). 비면 단위 행 생략.
-        note: 시트 노트 (예 "수평화 미지원(원본 구조)") — 비면 생략. 값 환산 0.
+        sheet: provider 가 만든 PanelExportSheet (앵커 셀 + 병합 span).
 
     Returns:
-        None — wb 에 시트 추가 (부작용).
+        None — wb 에 시트 추가 (빈 격자는 시트 생성 안 함).
 
     Example:
-        >>> _writeGridSheet(wb, "개요표", grid, unit="백만원")  # doctest: +SKIP
-
-    Raises:
-        없음 — 빈 격자는 빈 시트 생성 안 함(early return).
+        >>> _writeGridSheet(wb, "개요표", sheet)  # doctest: +SKIP
     """
-    from dartlab.providers.dart.parse.dartXmlNormalize import coerceCell
-
-    if not grid:
+    if not sheet.cells:
         return
     safeTitle = (label or "표")[:31]
     existing = {ws.title for ws in wb.worksheets}
@@ -493,53 +390,45 @@ def _writeGridSheet(
     ws = wb.create_sheet(title=safeTitle)
 
     startRow = 1  # openpyxl 1-base
-    # 단위·노트 머리 행 (값 환산 없음 — 라벨만).
-    if unit:
-        cell = ws.cell(row=startRow, column=1, value=f"(단위: {unit})")
+    if sheet.unit:
+        cell = ws.cell(row=startRow, column=1, value=f"(단위: {sheet.unit})")
         cell.font = _NOTE_FMT
         startRow += 1
-    if note:
-        cell = ws.cell(row=startRow, column=1, value=note)
+    if sheet.note:
+        cell = ws.cell(row=startRow, column=1, value=sheet.note)
         cell.font = _NOTE_FMT
         startRow += 1
 
-    ext = _mergeRanges(grid)
-    written: set[int] = set()
-    nCols = max((len(r) for r in grid), default=0)
-    for r, row in enumerate(grid):
-        for cIdx in range(nCols):
-            cell = row[cIdx] if cIdx < len(row) else None
-            if cell is None:
-                continue
-            cid = id(cell)
-            if cid in written:
-                continue  # 병합셀 — 앵커에만 1회 쓰기
-            written.add(cid)
-            minR, minC, maxR, maxC = ext[cid]
-            value = coerceCell(cell.text)
-            xlRow = startRow + minR
-            xlCol = minC + 1
-            oc = ws.cell(row=xlRow, column=xlCol, value=value)
-            if isinstance(value, (int, float)) and not isinstance(value, bool):
+    for pc in sheet.cells:
+        xlRow = startRow + pc.row
+        xlCol = pc.col + 1
+        # honest-gap: 결손(None)은 셀 자체를 안 쓴다(blank, 0 금지). 단 병합 범위는 그대로 emit.
+        if pc.value is not None:
+            oc = ws.cell(row=xlRow, column=xlCol, value=pc.value)
+            isNum = isinstance(pc.value, (int, float)) and not isinstance(pc.value, bool)
+            if isNum:
                 oc.number_format = _NEGATIVE_FMT
-            if cell.isHeader:
+            if pc.isHeader:
                 oc.font = _ACCOUNT_FONT
-            align = "right" if (cell.align == "right" or isinstance(value, (int, float))) else (cell.align or "left")
-            wrap = "\n" in cell.text if isinstance(cell.text, str) else False
+            align = "right" if (pc.align == "right" or isNum) else (pc.align or "left")
+            wrap = isinstance(pc.value, str) and "\n" in pc.value
             oc.alignment = Alignment(horizontal=align, vertical="center", wrap_text=wrap)
-            # 극단 rowspan(683) 포함 — 단일 merge 범위 1개.
-            if maxR > minR or maxC > minC:
-                ws.merge_cells(
-                    start_row=startRow + minR,
-                    start_column=minC + 1,
-                    end_row=startRow + maxR,
-                    end_column=maxC + 1,
-                )
+        # 극단 rowspan(683) 포함 — 단일 merge 범위 1개.
+        if pc.rowspan > 1 or pc.colspan > 1:
+            ws.merge_cells(
+                start_row=xlRow,
+                start_column=xlCol,
+                end_row=xlRow + pc.rowspan - 1,
+                end_column=xlCol + pc.colspan - 1,
+            )
     _autoWidth(ws)
 
 
 def _writePanelTableSheet(wb: Workbook, spec: PanelTableSource, c: Company, *, label: str) -> None:
-    """PanelTableSource → 시트. asFiled=단일 기간 격자, horizontalized=항목×기간/폴백.
+    """PanelTableSource → 시트. provider 격자(DIP, getPanelTableAccessor)를 openpyxl 로.
+
+    viz 는 provider 직접 import 금지(F1.7) — core PanelTableAccessor 경유. accessor/행/기간
+    부재는 graceful skip(회귀 0). asFiled/horizontalized 분기·격자 빌드는 provider 가 처리.
 
     Args:
         wb: openpyxl Workbook.
@@ -548,90 +437,30 @@ def _writePanelTableSheet(wb: Workbook, spec: PanelTableSource, c: Company, *, l
         label: 시트 라벨.
 
     Returns:
-        None — wb 에 시트 추가. 행/기간 부재면 무동작(회귀 0).
+        None — wb 에 시트 추가 또는 graceful skip.
 
     Example:
         >>> _writePanelTableSheet(wb, spec, c, label="개요표")  # doctest: +SKIP
-
-    Raises:
-        없음 — panel/행/기간 부재는 graceful skip.
     """
-    from dartlab.providers.dart.parse.dartXmlNormalize import detectUnit, normalizeDartXml
-    from dartlab.providers.dart.parse.htmlTableParser import cellGrid
-
-    wide = _loadPanelWide(c)
-    if wide is None:
+    accessor = getPanelTableAccessor()
+    if accessor is None:
         return
-    row = _selectPanelRow(wide, spec)
-    if row is None:
-        return
-
-    if spec.periodMode == "horizontalized":
-        _writeHorizontalizedSheet(wb, label, wide, row, spec)
-        return
-
-    # asFiled — 단일 기간 원본 격자.
-    period = spec.period
-    if not period or period not in row or not row[period]:
-        # 기간 미지정/부재 → 셀이 있는 최신 기간 자동 선택.
-        idxCols = set(_PANEL_ID_FIELDS) | {"leafSeq"}
-        periodCols = [c2 for c2 in wide.columns if c2 not in idxCols]
-        period = next((p for p in periodCols if row.get(p)), None)
-    if not period or not row.get(period):
-        return
-    rawXml = row[period]
-    grid = cellGrid(normalizeDartXml(rawXml))
-    unit = detectUnit(rawXml)
-    _writeGridSheet(wb, label, grid, unit=unit)
-
-
-def _writeHorizontalizedSheet(
-    wb: Workbook,
-    label: str,
-    wide: "pl.DataFrame",
-    row: dict,
-    spec: PanelTableSource,
-) -> None:
-    """horizontalized 표 — 일반 공시 표는 라벨 정렬 불확실 → as-filed 폴백 + 노트 (honest-gap).
-
-    일반 공시 표는 canonical account_id 가 없어 기간 간 행 라벨 정렬이 불확실하다. 거짓 정렬을
-    만들지 않고 최신 기간의 as-filed 격자를 쓰되 "수평화 미지원(원본 구조)" 노트를 단다. finance
-    정량(IS/BS/CF)은 ModuleSource 경로(_writeFinanceSheet)가 이미 항목×기간을 다룬다.
-
-    Args:
-        wb: openpyxl Workbook.
-        label: 시트 라벨.
-        wide: panel wide DataFrame.
-        row: _selectPanelRow 결과 행.
-        spec: PanelTableSource.
-
-    Returns:
-        None — wb 에 시트 추가 (as-filed 격자 + 노트).
-
-    Example:
-        >>> _writeHorizontalizedSheet(wb, "표", wide, row, spec)  # doctest: +SKIP
-
-    Raises:
-        없음.
-    """
-    from dartlab.providers.dart.parse.dartXmlNormalize import detectUnit, normalizeDartXml
-    from dartlab.providers.dart.parse.htmlTableParser import cellGrid
-
-    idxCols = set(_PANEL_ID_FIELDS) | {"leafSeq"}
-    periodCols = [c2 for c2 in wide.columns if c2 not in idxCols]
-    period = next((p for p in periodCols if row.get(p)), None)
-    if not period or not row.get(period):
-        return
-    rawXml = row[period]
-    grid = cellGrid(normalizeDartXml(rawXml))
-    unit = detectUnit(rawXml)
-    _writeGridSheet(
-        wb,
-        label,
-        grid,
-        unit=unit,
-        note=f"수평화 미지원(원본 구조) — as-filed {period}",
+    sheet = accessor.panelTableGrid(
+        c.stockCode,
+        marketNs=getattr(c, "marketNs", "kr") or "kr",
+        chapter=spec.chapter,
+        sectionLeaf=spec.sectionLeaf,
+        blockLeaf=spec.blockLeaf,
+        leafType=spec.leafType,
+        disclosureKey=spec.disclosureKey,
+        scope=spec.scope,
+        leafSeq=spec.leafSeq,
+        periodMode=spec.periodMode,
+        period=spec.period,
     )
+    if sheet is None:
+        return
+    _writeGridSheet(wb, label, sheet)
 
 
 def exportToExcel(

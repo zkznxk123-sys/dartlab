@@ -417,21 +417,19 @@ def _batchExportToZip(codes: list[str], templateDict: dict, zipPath: Path) -> tu
     failed: list[str] = []
     with zipfile.ZipFile(str(zipPath), "w", zipfile.ZIP_DEFLATED) as zf:
         for code in codes:
-            c = None
             tmpXlsx = None
             try:
-                c = Company(code)
-                tmpl = ExcelTemplate.fromDict(templateDict)
-                safeName = c.corpName.replace("/", "_").replace("\\", "_")
-                tmpXlsx = Path(tempfile.gettempdir()) / f"_batch_{c.stockCode}_{safeName}.xlsx"
-                exportWithTemplate(c, tmpl, tmpXlsx)
-                zf.write(str(tmpXlsx), arcname=f"{c.stockCode}_{safeName}.xlsx")
-                ok += 1
+                # with Company → __exit__ 가 다음 회사 전 자동 cleanup (룰 11, OOM 규율).
+                with Company(code) as c:
+                    tmpl = ExcelTemplate.fromDict(templateDict)
+                    safeName = c.corpName.replace("/", "_").replace("\\", "_")
+                    tmpXlsx = Path(tempfile.gettempdir()) / f"_batch_{c.stockCode}_{safeName}.xlsx"
+                    exportWithTemplate(c, tmpl, tmpXlsx)
+                    zf.write(str(tmpXlsx), arcname=f"{c.stockCode}_{safeName}.xlsx")
+                    ok += 1
             except (ValueError, OSError, KeyError, TypeError):
                 failed.append(code)
             finally:
-                if c is not None:
-                    del c  # 다음 회사 전 참조 해제 (Rust 힙)
                 if tmpXlsx is not None and tmpXlsx.exists():
                     try:
                         tmpXlsx.unlink()
