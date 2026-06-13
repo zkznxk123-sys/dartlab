@@ -197,13 +197,19 @@ def monteCarloForecast(
     for _ in range(iterations):
         simRev = rev
         simMargin = margin
+        # 연도별 노이즈를 *누적*(rev=성장계수 cumprod, margin=가산 random-walk)해 호라이즌이
+        # 길수록 불확실성이 커지게 한다 — 옛 :205 는 매년 simRev 를 덮어써 마지막 해 노이즈만
+        # 반영(호라이즌 무관 cone 일정 = 버그). 평균 경로(meanRevPath)는 보존하고 노이즈만 누적.
+        cumRevFactor = 1.0
+        cumMarginNoise = 0.0
         for yr in range(len(meanRevPath)):
-            # 평균 경로에 노이즈 추가
             revNoise = rng.gauss(0, revCv)
             marginNoise = rng.gauss(0, marginStd)
+            cumRevFactor *= 1 + revNoise
+            cumMarginNoise += marginNoise
 
-            simRev = meanRevPath[yr] * (1 + revNoise)
-            simMargin = meanMarginPath[yr] + marginNoise
+            simRev = meanRevPath[yr] * cumRevFactor
+            simMargin = meanMarginPath[yr] + cumMarginNoise
 
         simOi = simRev * max(simMargin, -50) / 100
         simFcf = simOi * (1 - taxRate) - simRev * capexRatio

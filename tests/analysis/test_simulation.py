@@ -353,6 +353,36 @@ class TestMonteCarlo:
         assert result.expectedValue > 0
         assert result.stdDev > 0
 
+    def test_horizon_widens_cone(self, sectorParams):
+        # 회귀 가드(시뮬레이터 P1 ②): 호라이즌이 길수록 상대 불확실성(CV=stdDev/평균)이 커져야
+        # 한다 — 미래 불확실성은 누적된다. 옛 :205 버그(내부 루프가 simRev 를 매년 *덮어써*
+        # 마지막 해 노이즈만 반영)는 호라이즌 무관 CV 거의 일정 → 본 단언 FAIL. 연도별 성장계수
+        # cumprod 수정 후 PASS. (동일 seed·iterations 로 결정론.)
+        from dartlab.analysis.forecast.simulation import monteCarloForecast
+
+        r1 = monteCarloForecast(
+            HEALTHY_SERIES,
+            sectorKey="반도체",
+            sectorParams=sectorParams,
+            scenario="baseline",
+            horizon=1,
+            iterations=4000,
+            seed=7,
+        )
+        r3 = monteCarloForecast(
+            HEALTHY_SERIES,
+            sectorKey="반도체",
+            sectorParams=sectorParams,
+            scenario="baseline",
+            horizon=3,
+            iterations=4000,
+            seed=7,
+        )
+        cv1 = r1.stdDev / r1.expectedValue
+        cv3 = r3.stdDev / r3.expectedValue
+        assert cv1 > 0
+        assert cv3 > cv1 * 1.3, f"호라이즌 cone 미확대 (cv1={cv1:.4f}, cv3={cv3:.4f}) — :205 누적 버그"
+
     def test_percentile_ordering(self, sectorParams):
         from dartlab.analysis.forecast.simulation import monteCarloForecast as monte_carlo_forecast
 
