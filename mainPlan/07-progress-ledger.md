@@ -34,11 +34,12 @@
   map/search 포트 실구현) → 단계-9(landing public shell 전환) → 단계-10(Python server 기본 UI=ui/apps/local).
 잔여 이월(누적): vitest unit+fixture 런타임 대조 · publish.yml:108 prose 경로 · ui/apps/local 라이브 dev 클릭스루(dartlab
   ai 서버 구동 후, 단계-10 확증) · finance.bundle 로컬 엔드포인트(현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #25(단계-6 전체 종료 — viewer 추출+로컬 마운트+basePath, green) 직후 — 6-3 2커밋 push(이전
-  ci-fast 완료 후) → **단계-8**(Services + scan/map/search·changes/insights 잔여 제품 surface 추출, 이동 원자 윈도우 —
-  4b/6 패턴 재사용: census + 적대 토론 → 예약 entry → git mv → 재배선) 또는 **단계-7 완성**(viewer AskDrawer +
-  terminal AI command 를 AiPort 뒤로 통합, 공개 AskDrawer 무회귀 — 위험 높아 후순위 검토). → 단계-9(landing shell 전환)
-  → 단계-10(Python 기본 UI=ui/apps/local). 명시 목표(챗+터미널 모드)=달성, 잔여=리팩터 "전부 완성" 꼬리.
+재개 지점: entry #26(단계-6 CI 회귀 수정 push f6dd430e3 + 단계-8 census·예약) 직후 — f6dd430e3 ci-fast green 확인
+  후 **단계-8 Phase1**(map/industry + insights + changes surface 추출, LOW 위험 — duckdb·포트·worker 0, 순수 file
+  move + d3 deps + 재배선·industryEntries prerender 보존) 착수. census=[26] 실행 SSOT(재조사 불필요). git mv
+  `landing/src/lib/components/industry/`(14파일) → `ui/packages/surfaces/src/map/` + 라우트(/map·/industry/[id]·/lab/map·
+  /compare·/embed/company) 재배선 + map index.ts. ⚠ surface 이동 시 tests/·.github/ 하드코딩 cross-lang 경로 grep 필수
+  (accountOrder.ts 교훈). Phase2(scan, duckdb seam·worker 3, HIGH)·단계-9·10 후속. 명시 목표(챗+터미널)=달성.
 ```
 
 ---
@@ -547,3 +548,33 @@ commit: 6-3a = 821c97c94 / 6-3b = 0d5afc7a7
   이슈링크, 경미) · ui/web 임베드 승급 검토.
 rollback: 821c97c94·0d5afc7a7 각 revert.
 중단 지점/다음 행동: push(6-3 2커밋, 이전 ci-fast 완료 후) → 단계-7 완성 또는 단계-8(scan/map/search 추출, 이동 원자 윈도우).
+
+### [26] 단계-6-1 CI 회귀 수정 (accountOrder.ts sync 경로) + 단계-8 census·예약
+일시: 2026-06-13
+commit: CI fix = f6dd430e3
+**CI 회귀(6-1 후속, 진짜 결함)**: 6-1 push(7bed61eb3) ci-fast `test-fast` gate FAIL — `tests/landing/
+  test_finance_account_order.py::test_account_order_ts_is_synced` FileNotFoundError(옛 `landing/src/lib/viewer/finance/
+  accountOrder.ts`). cross-language sync 테스트(Python이 TS mirror 검증)가 census·.py grep 미포착(경로가 path-parts
+  조립이라 `src/lib/viewer` 문자열 grep 회피). **다른 17 gate(lint·typecheck·architecture·format·wheel 등) 전부 green**
+  = JS/TS 이동 정상, Python 테스트 하드코딩 경로만 stale. 수정: 생성기 `landing/_scripts/buildFinanceAccountOrder.py`
+  TARGET_PATH + 테스트 _TARGET_PATH → `ui/packages/surfaces/src/viewer/lib/finance/accountOrder.ts` + buildIntentModel
+  독스트링. 검증: test-lock 6/6 pass. **교훈**: surface 이동 시 tests/·.github/ 의 **하드코딩 cross-lang 경로**(path-
+  parts 조립 포함)를 grep — JS 게이트만으론 안 잡힘. (단, tests/_attempts/** 의 옛 경로 참조는 CI `--ignore=tests/
+  _attempts`라 비차단·스크래치, 미수정.)
+**단계-8 census 완료**(Explore, 다음 이동 원자 윈도우 사전 설계 — 07 규칙 6):
+- **★3 포트(Scan/Map/Search) 전부 surface 미소비**(viewer panel* 동일 패턴) — scan은 `getPublicRuntime().company.
+  productIndex()`·`filing.regular()` 만 소비(scan 포트 아님), map은 `createDartlabBrowser().marketMap()` 직접, search는
+  순수 로컬. → **seam 배선 불요, surface 자급**(viewer 선례).
+- **규모/위험**: scan `landing/src/lib/scan/` ~11.6k LOC(TS 18+컴포넌트 18) **HIGH**(★duckdb `$lib/data/duckdb` 직접
+  import 5곳 = viewer financeQuery 동일 provideDuckDb seam 필요 + worker 3개[scanRuntime.worker·price·changes] + @codemirror
+  6) · map/industry `landing/src/lib/components/industry/` ~6.2k LOC 14파일 **LOW**(duckdb·포트·worker 0, d3-force/
+  hierarchy, 정적 JSON marketMap) · insights/changes 라우트 각 ~100 LOC **LOW**(정적 JSON) · search=블로그/skill 검색
+  (콘텐츠, 제품 아님 — 스킵) · ui/shared(chart/api/markdown) 실사용 0(dead, $chart alias만 — 별도 정리).
+- **권장 분해**: **Phase1 = map + insights + changes**(LOW, duckdb·seam·worker 0 = 순수 file move + d3 deps + 재배선,
+  industryEntries prerender 보존) → **Phase2 = scan**(duckdb provideDuckDb seam[viewer 패턴 재사용]·worker 3 동반·
+  @codemirror deps·format util krw/pct 인라인or공유) → search 스킵. 결합: scan→`$lib/format/{krw,pct}`·`$lib/data/duckdb`·
+  `$lib/components/sections/Header`·`$lib/runtime/publicRuntime`(Detail). map→d3만(결합 0). terminal ScreenerModal=scan
+  무관 독립 재구현(이동 무관).
+착수: f6dd430e3 ci-fast green 확인 후 단계-8 Phase1(map/insights/changes) — census(본 entry)=실행 SSOT, 4b/6 패턴(예약→
+  git mv→재배선→게이트). Phase2(scan) 별도 예약. 명시 목표(챗+터미널)=달성, 단계-8~10=리팩터 "전부 완성" 꼬리.
+rollback: f6dd430e3 revert(테스트·생성기 경로만, 비기능).
