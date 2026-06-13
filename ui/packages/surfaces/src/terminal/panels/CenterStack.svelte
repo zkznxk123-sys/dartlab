@@ -218,7 +218,7 @@
 			const byDate = new Map<string, { labels: string[]; url: string }>();
 			for (const f of non ?? []) {
 				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
-				if (d.length !== 8 || !f.url) continue;
+				if (d.length !== 8 || !f.url || !f.reportNm?.trim()) continue; // 빈 라벨 마커 방지(anti-clutter)
 				const cur = byDate.get(d);
 				if (cur) cur.labels.push(f.reportNm);
 				else byDate.set(d, { labels: [f.reportNm], url: f.url });
