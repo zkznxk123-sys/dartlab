@@ -10,18 +10,29 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-4b (이동 원자 윈도우 — $lib/terminal → ui/packages 승격). 단계-4a 전체 완료(4a-1·4a-2·4a-3).
-운영자 승인 "5단계정도"(3→4a→4b→5→6) — 잔여 4b→5→6.
+다음 작업: 단계-4b-1 (Terminal surface 이동+배선). 예약 entry #15 박음. 단계-4a 전체 완료.
+운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론".
+전문 에이전트 2인(아키텍트+적대 안전검토) 토론으로 4b 설계 확정 → 4b-1/4b-2 분해(07 규칙 3).
 
-단계-4b 착수 전 예약 entry 필수(07 규칙 6 — 이동 원자 윈도우). 범위 윤곽:
-  · $lib/terminal 본 트리 → ui/packages/surfaces(또는 합의된 경로)로 git mv 승격. routeLoad.ts 는
-    landing 셸 글루(getPublicRuntime·$app/paths 의존)라 동반 이동 불가 — landing 라우트 폴더로 분리 선행.
-  · ui/web vite alias(landingLib·landing Terminal deep import 경로) 재배선 + deploy-landing/publish 경로 점검.
-  · 무중단 = landing + ui/web 양쪽 터미널 동시 green (이동 원자 윈도우라 타 제품 PRD 작업과 격리).
+단계-4b sub-unit 분해 선언 (이동 원자 윈도우 §2.5 + 1세션 초과 예상):
+  · **4b-1 이동+배선**(내부구조 보존): ① GiscusPanel brand→기존 REPO 상수(1줄) ② TerminalSurface
+    GithubIcon SVG 인라인+brand→`links` 데이터 prop(양쪽 셸이 자기 brand subset 주입=무행위변경,
+    Snippet은 ui/web React경계서 null→SNS바 소실이라 기각) → $lib import 0 ③ routeLoad →
+    landing/src/lib/terminal-shell/ 분리(getPublicRuntime·$app 의존이라 잔류, 2 라우트 공용) ④ git mv
+    landing/src/lib/terminal → ui/packages/surfaces/src/terminal, Terminal.svelte→TerminalSurface.svelte,
+    내부 data/panels/charts/ui/dev 구조 보존(import 재작성 0) ⑤ surfaces 패키지 신설(package.json
+    deps=contracts+runtime+design·svelte-check check 스크립트·src/index.ts·terminal/index.ts 공개표면) ⑥
+    landing 2 라우트+page.ts 재배선(@dartlab/ui-surfaces/terminal·terminal-shell routeLoad·links 주입) ⑦
+    ui/web alias+tsconfig path 추가·딥임포트 3곳(LandingTerminalSurface ×2·localTerminalData ×1) 재배선·
+    $lib→landing alias 제거(타 소비처 grep 선확인)·links 주입 ⑧ checkDevIsolation.js 경로 갱신(R6 조용한
+    파괴자) ⑨ 검증: runtime tsc·surfaces svelte-check(신규·R8 landing check 미커버분)·landing check/풀빌드·
+    ui/web build·dev guard·양쪽 터미널 smoke + grep $lib/terminal 잔재 0
+  · **4b-2 §8.1 내부 정규화**(순수 cosmetic·무행위변경): data/→lib/·panels/charts/ui→components/ +
+    내부 import sed. 첫 surface §8.1 완전 준수 확정(이후 viewer/scan/map 선례).
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
-잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 viewer 추출 동행) · scan 프리셋류 포트(단계-8) ·
-  navigation/storage 포트 실구현(소비처 등장 시점 — Terminal 은 아직 미소비)
-재개 지점: entry #14 (4a-3 완료) — 4a 전체 종료, locator·$app 결합 제거 완료. 4b 예약 entry부터
+잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 동행) · scan 프리셋류 포트(단계-8) · navigation/storage
+  포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신(4b 동행)
+재개 지점: entry #15 (4b 예약) — CI Fast e90699a9e green 확인 후 4b-1 ①부터
 ```
 
 ---
@@ -237,3 +248,18 @@ commit: (이 변경의 커밋)
 
 검증: `$app/environment|$app/paths|__DARTLAB_LOCAL_TERMINAL__|localTerminalAdapter|*Shim|landingDataShims` grep — 포터블 트리 0(주석·routeLoad 셸글루 제외) ✓ / ui/web 전역 locator·shim grep 0 ✓ / landing check 0 에러·4396파일 ✓ / landing 풀빌드+prerender ✓ / ui/web build ✓  
 rollback: 이 commit revert (hosts.ts 신설 + shim 2종 삭제 + 컴포넌트 prop 배선 — 단일 커밋).
+
+### [15] 단계-4b Terminal Surface 이동 — 예약 (이동 원자 윈도우 §2.5, 07 규칙 6)
+일시: 2026-06-13  
+commit: (예약 — 본 entry 자체는 문서)  
+사전 설계: 전문 에이전트 2인 토론(아키텍트 surface 경계 설계 + 적대 이동안전 검토) 수행. 핵심 합의·결정:
+- **landing 결합 정확히 3종**(터미널 트리 grep 실측): Terminal.svelte(GithubIcon·brand)·GiscusPanel(brand, 단 이미 REPO 상수 보유라 1줄 제거)·routeLoad(getPublicRuntime+$app, 이동 불가).
+- **brand 처분 = `links` 데이터 prop**(셸이 자기 brand subset 주입). Snippet 슬롯(아키텍트 1안)은 ui/web React→Svelte 경계서 null→SNS바 소실=행위변경이라 기각. 양쪽 brand.ts SNS URL 동일 실측 → 무행위변경. GithubIcon=인라인 SVG 흡수(의존0, 패키지 승격·design primitive 불요).
+- **폴더 = §8.1 mandate(components/+lib/) vs 원자윈도우**: 4b-1(이동, 내부구조 보존)·4b-2(§8.1 정규화) 분해. NEXT 참조.
+- **ui/web 딥임포트 3곳**(에이전트2 발견 — localTerminalData.ts:35 `data/types` 가 2곳 통념의 누락분). 파일경로 alias로 재배선.
+- **R6 checkDevIsolation.js = 조용한 파괴자**: `landing/src/lib/terminal` 소멸 시 ENOENT crash 또는 vacuous-pass로 dev 격리 가드(무중단 #10) 무력화 → 경로 갱신 필수.
+- **R7 prebuild contract test = 이미 방어됨**(entry #13 후속 e90699a9e가 디렉토리 glob화). 4a-2 재발 위험 사전 차단 확인. repo 전수 grep: tests/.github 에 `lib/terminal` 하드코딩 경로 0(publish.yml:108 prose 주석 1건만, 비차단).
+- **R8 svelte-check = CI 부재**: 어느 워크플로도 svelte-check 안 함(운영자 로컬 게이트). landing check include=`../src/**` 라 이동분 미커버 → surfaces 자체 check 스크립트 필수 + 로컬 pre-push 동반.
+범위/검증: NEXT 블록 4b-1 ①~⑨ 참조. 무중단 = landing + ui/web 양쪽 동시 green(이동 원자 윈도우라 타 제품 PRD 격리).  
+착수 게이트: CI Fast e90699a9e green 확인 후 4b-1 착수.  
+rollback: 4b-1 단일 커밋 revert(git mv 이동·패키지 신설·배선 모두 1커밋).
