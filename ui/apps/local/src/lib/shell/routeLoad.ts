@@ -1,68 +1,51 @@
 // 로컬 터미널 RawData 조립(createEngine 씨드) — 셸 글루.
-// 시장 전체 데이터셋(전 종목 finance/prices/eco/search-index)은 로컬 /api 미보유 → 단일 회사로 조립한다
-// (ui/web 브리지 패리티). 실시간 상세(차트 캔들·패널 격자·재무 카드)는 runtime 포트가 공급하므로 씨드는 최소.
+// 랜딩(공표) 터미널과 동일한 전체 시장 데이터셋 7종(전 종목 finance·prices·eco·macro·quarters·search-index·
+// meta)을 HF 에서 로드한다 — loadJson 이 hasHfLandingJson 으로 HF_RESOLVE/landing/* 를 해석하므로 로컬도
+// 같은 공유 자산을 받는다. 그 결과 스크리너·생태계맵·매크로 오버레이·동종비교·전종목 검색이 랜딩과 동일하게
+// 동작한다(옛 단일회사 빈 씨드는 이 시장 기능을 전부 죽였다 — 로컬 터미널이 랜딩과 "달라" 보이던 근본 원인).
+// 회사 단위 실시간 상세(차트 캔들·패널 격자·AI)는 /api 포트가, 시장 씨드는 HF 가 공급 — 각자 단일 경로
+// (silent fallback 없음). 로컬앱엔 정적 사본이 없으니 preferLocal 생략(= HF 직행, same-origin 404 회피).
 import { getLocalRuntime } from '$lib/runtime/localRuntime';
-import type { FinanceCompany, IndexRow, PriceRow, RawData } from '@dartlab/ui-surfaces/terminal';
+import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
+import {
+	warmCompany,
+	type FinanceFile,
+	type MacroFile,
+	type MetaFile,
+	type PricesFile,
+	type IndexRow,
+	type EcosystemFile,
+	type QuartersFile,
+	type RawData
+} from '@dartlab/ui-surfaces/terminal';
 
-function emptyFinanceCompany(): FinanceCompany {
-	return {
-		is: { sales: [], op: [], net: [], opMargin: [] },
-		bs: { totals: { totalAsset: [], totalLiab: [], totalEquity: [], currAsset: [], currLiab: [] } },
-		cf: { op: null, inv: null, fin: null, opening: null, closing: null, fx: null },
-		ratios: { roe: [], debtRatio: [] }
-	};
-}
+export async function loadTerminalRaw(
+	code: string,
+	fetchFn: typeof fetch
+): Promise<{ raw: RawData; code: string }> {
+	// 현재 종목 주가·재무 조기 워밍 — /api price 포트 + HF finance 포트 (씨드 로드와 병렬, in-flight dedup).
+	warmCompany(getLocalRuntime(), code);
 
-function fallbackYears(): string[] {
-	const y = new Date().getFullYear() - 1;
-	return [4, 3, 2, 1, 0].map((d) => String(y - d));
-}
-
-interface MetaLite {
-	corpName?: string;
-	sector?: string;
-}
-
-export async function loadTerminalRaw(code: string): Promise<{ raw: RawData; code: string }> {
-	const runtime = getLocalRuntime();
-	// 회사명/업종은 /api meta, 초기 캔들은 price 포트(price-events 캐시 워밍 동시) — 병렬.
-	const [meta, prices] = await Promise.all([
-		fetch(`/api/company/${encodeURIComponent(code)}/meta`)
-			.then((r) => (r.ok ? (r.json() as Promise<MetaLite>) : null))
-			.catch(() => null),
-		runtime.price.initial(code, new Date().getFullYear())
+	const [finance, macro, meta, prices, index, eco, quarters] = await Promise.all([
+		loadJson<FinanceFile>('dashboards/finance.json', { fetchFn }),
+		loadJson<MacroFile>('dashboards/macro.json', { fetchFn }),
+		loadJson<MetaFile>('dashboards/meta.json', { fetchFn }),
+		loadJson<PricesFile>('map/prices-snapshot.json', { fetchFn }),
+		loadJson<IndexRow[]>('map/search-index.json', { fetchFn }),
+		loadJson<EcosystemFile>('map/ecosystem.json', { fetchFn }),
+		loadJson<QuartersFile>('dashboards/quarters.json', { fetchFn })
 	]);
 
-	const corpName = meta?.corpName ?? code;
-	const industry = meta?.sector ?? '';
-	const candles = prices?.candles ?? [];
-	const last = candles.at(-1);
-
-	const priceRow: PriceRow = {
-		currentPrice: last?.c ?? 0,
-		marketCap: 0,
-		return1m: null,
-		return3m: null,
-		return1y: null,
-		volatility1y: null,
-		week52High: null,
-		week52Low: null,
-		volumeAvg30d: null,
-		foreignPct: null,
-		beta: null,
-		priceUpdated: last?.t ?? ''
+	return {
+		code,
+		raw: {
+			finance: finance ?? { years: [], companies: {} },
+			macro: macro ?? null,
+			meta: meta ?? null,
+			prices: prices ?? { data: {} },
+			index: index ?? [],
+			eco: eco ?? null,
+			quarters: quarters ?? null
+		} as RawData
 	};
-
-	const indexRow: IndexRow = { stockCode: code, corpName, industry, revenue: null };
-
-	const raw: RawData = {
-		finance: { years: fallbackYears(), companies: { [code]: emptyFinanceCompany() } },
-		macro: null,
-		meta: null,
-		prices: { data: { [code]: priceRow } },
-		index: [indexRow],
-		eco: null,
-		quarters: null
-	};
-	return { raw, code };
 }

@@ -2,4 +2,4 @@
 import { loadTerminalRaw } from '$lib/shell/routeLoad';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ params }) => loadTerminalRaw(params.code);
+export const load: PageLoad = ({ params, fetch }) => loadTerminalRaw(params.code, fetch);
