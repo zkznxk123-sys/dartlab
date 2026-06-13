@@ -380,7 +380,7 @@
 	{/if}
 </Panel>
 {#if finFull}
-	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} onClose={() => (finFull = false)} />
+	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} candles={chartCode === co.code ? candles : null} onClose={() => (finFull = false)} />
 {/if}
 
 <!-- VERDICT (종합 판정 — co.verdict 합성, 동기 tier 즉시 렌더) -->

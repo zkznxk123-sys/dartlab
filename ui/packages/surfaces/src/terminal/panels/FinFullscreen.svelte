@@ -3,12 +3,13 @@
 	// 종합 탭 = 기존 16 재무카드 전부(기본적으로 다 보이게). 나머지 탭 = finance 심화 카드
 	// (terminalFinance.tabCards, 모드 토글 동작) + report·교차 카드(finTabs.ts, 연 축 고정, lazy).
 	import { untrack } from 'svelte';
-	import type { AuditYear, FinMode, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
+	import type { AuditYear, Candle, FinMode, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang } from '../lib/types';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import AuditStrip from '../charts/AuditStrip.svelte';
 	import { FS_TABS, type TabCard } from '../lib/finTabs';
+	import { buildPriceFundamentalCard } from '../lib/priceFundamental';
 
 	interface Props {
 		co: Company;
@@ -16,9 +17,10 @@
 		bundle: TerminalFinanceBundle | null;
 		mode: FinMode;
 		onMode: (m: FinMode) => void;
+		candles: Candle[] | null; // 가격↔기초체력 오버레이용 (CenterStack 로드분 — 소프트스왑 가드 후 주입)
 		onClose: () => void;
 	}
-	let { co, lang, bundle, mode, onMode, onClose }: Props = $props();
+	let { co, lang, bundle, mode, onMode, candles, onClose }: Props = $props();
 	const rt = useDartLabRuntime();
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
 
@@ -77,6 +79,8 @@
 
 	const finData = $derived(bundle ? (bundle.views[mode] ?? null) : null);
 	const activeDef = $derived(FS_TABS.find((d) => d.key === tab) ?? null);
+	// 가격↔기초체력 (=100 오버레이) — 종합 탭 선두 히어로. 캔들·번들 둘 다 있을 때만(없으면 null=비표시).
+	const priceCard = $derived(finData ? buildPriceFundamentalCard(finData, bundle?.filedDates ?? {}, candles) : null);
 
 	// 원표(전 기간 와이드 테이블)는 우측 재무 패널 ⤢ → FinTablesModal 로 이동 (운영자 결정 — 전체화면 탭 아님)
 	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps, heatmap 은 heat 기준)
@@ -126,6 +130,9 @@
 		{/if}
 		{#if tab === 'all'}
 			{#if finData}
+				{#if priceCard}
+					<div class="finFsHero"><div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} h={188} /></div></div>
+				{/if}
 				<div class="finFsGrid">
 					{#each finData.cards as card (card.key)}
 						<div class="finMini"><MiniFinChart {card} periods={finData.periods} /></div>
