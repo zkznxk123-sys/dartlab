@@ -1987,6 +1987,88 @@ class Company:
 
         return applyPeriodFilter(payload, period)
 
+    def simulate(
+        self,
+        *,
+        scenario: str = "baseline",
+        horizon: int = 3,
+        asOf: str | None = None,
+    ) -> Any:
+        """이 회사에 시나리오 하나를 결정론적으로 돌려 경로·가치를 낸다 (시뮬레이터 엔진).
+
+        매크로 프리셋(baseline/adverse/...) 하나로 ``macro.path -> rev.path -> proforma -> dcf``
+        결정론 드라이버 시트를 평가해 시나리오-조건부 매출·마진·FCF 경로 + dcf 주당가치 +
+        노드별 근거(provenance/refs/품질/asOf)를 담은 `SimulationResult` 를 낸다. honest-gap:
+        결손 leaf·부재 base 지표는 0 이 아니라 None 으로 두고 노드 품질을 ``partial`` 로
+        낮춘다. 결정론: 같은 시나리오·asOf 재실행 시 inputsHash 동일.
+
+        Args:
+            scenario: 시나리오 id — ``synth.scenario.getPresetScenarios("KR")`` 의 키
+                (``"baseline"`` / ``"adverse"`` / ``"severelyAdverse"`` 등). 모르는 id 는 baseline 폴백.
+            horizon: 예측 연수 (기본 3). 매크로 경로가 이 길이로 잘린다.
+            asOf: 명시 데이터 기준시점. None 이면 최신 재무 기간 사용.
+
+        Returns:
+            ``SimulationResult`` — 시나리오 경로 + dcf 주당가치 + 노드별 audit + 전체 품질
+            (``"ok"`` / ``"partial"``).
+
+        Raises:
+            ValueError: 평가기가 잘못 배선된 시트(순환/누락 의존)를 만났을 때만 — 여기 배선은
+                비순환이라 데이터 조건이 아닌 프로그래밍 오류 가드.
+
+        Example:
+            >>> c = Company("005930")
+            >>> r = c.simulate(scenario="baseline")              # doctest: +SKIP
+            >>> r.scenarioName, len(r.revenuePath)               # doctest: +SKIP
+            ('baseline', 3)
+            >>> c.simulate(scenario="adverse").revenuePath[-1] < r.revenuePath[-1]  # doctest: +SKIP
+            True
+
+        SeeAlso:
+            - ``dartlab.simulate``: 같은 동작의 톱레벨 verb (``dartlab.simulate(code, scenario=...)``).
+            - ``dartlab.simulate.run.runScenario``: 내부 end-to-end 드라이버.
+            - ``dartlab.synth.scenario.getPresetScenarios``: 유효한 시나리오 id.
+
+        Requires:
+            proforma 노드가 ``partial`` 이 아니려면 IS/BS/CF 가 ~3 년 이상인 재무 시계열이 필요.
+
+        Capabilities:
+            - 한 회사의 시나리오-조건부 결정론 경로·가치를 Company 흐름에서 바로 얻는다.
+
+        Guide:
+            - 시나리오 비교는 시나리오마다 한 번씩 호출 (baseline vs adverse 는 매크로만 다름).
+              결과는 audit 객체 — 노드 provenance/refs 로 숫자를 설명.
+
+        AIContext:
+            - 출력은 예측이 아니라 고정 가정의 결정론 변환 — 시나리오 id·노드 provenance/refs·asOf
+              를 같이 노출. ``partial`` 은 데이터 갭(None)이지 0 아님. lens(비결정론)·다중
+              드라이버·Play 는 후속 단계.
+
+        When:
+            - 한 회사의 시나리오-조건부 경로·가치가 Company 흐름에서 필요할 때.
+
+        How:
+            - self → simulate.run.runScenario(self, scenario, horizon, asOf).
+
+        LLM Specifications:
+            AntiPatterns:
+                - ``dcfPerShare`` 를 목표주가로 인용 — 시나리오-조건부 변환이다.
+                - None ``revenuePath`` 를 0 으로 취급 — 정직한 base 매출 갭.
+            OutputSchema:
+                - ``SimulationResult`` (paths + dcf + 노드 audit + 품질).
+            Prerequisites:
+                - 재무 시계열을 가진 KR Company.
+            Freshness:
+                - 회사 최신 재무 기간을 asOf/latestAsOf 로 상속.
+            Dataflow:
+                - self -> snapshot -> sheet -> evaluateSheet -> SimulationResult.
+            TargetMarkets:
+                - KR (getPresetScenarios("KR") + KR elasticity).
+        """
+        from dartlab.simulate.run import runScenario
+
+        return runScenario(self, scenario=scenario, horizon=horizon, asOf=asOf)
+
     @property
     def panel(self):
         """공시 수평화 보드 — 잡는 순간 항목 × 기간 wide DataFrame (panel 엔진).

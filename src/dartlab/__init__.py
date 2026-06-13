@@ -55,6 +55,7 @@ _LAZY_ATTRS: dict[str, tuple[str, str | None]] = {
     "ChartResult": ("dartlab.frame.select", "ChartResult"),
     "SelectResult": ("dartlab.frame.select", "SelectResult"),
     "compare": ("dartlab.providers.dart.panel", "compare"),
+    "simulate": ("dartlab.simulate.entry", "simulate"),
 }
 if not _IS_PYODIDE:
     _LAZY_ATTRS.update(
@@ -883,6 +884,14 @@ if not _IS_PYODIDE:
 
         return Industry()
 
+    def _simulateFactory():
+        # `dartlab.simulate` 는 서브패키지(L2.5 엔진)이자 톱레벨 verb 다. 어떤 import 체인이
+        # 서브모듈을 먼저 로드하면 PEP 562 lazy attr 가 가려지므로 (scan/macro 와 동일 회귀),
+        # 모듈 자체를 callable 로 패치해 verb 함수로 위임한다. instance = verb 함수 그 자체.
+        from dartlab.simulate.entry import simulate as _simulate
+
+        return _simulate
+
     # scan/analysis/quant/macro/industry — 모듈 자체를 callable 로 변환.
     # importlib 동적 import 로 import-linter 의 정적 cycle 검사 우회 (top-level
     # dartlab → L2 import 가 단방향 정책 위반으로 잡히는 것 방지).
@@ -893,6 +902,7 @@ if not _IS_PYODIDE:
     importlib.import_module("dartlab.macro")
     importlib.import_module("dartlab.quant")
     importlib.import_module("dartlab.scan")
+    importlib.import_module("dartlab.simulate")
 
     _makeCallableModule("dartlab.gather", _gatherFactory)
     _makeCallableModule("dartlab.scan", _scanFactory)
@@ -901,6 +911,7 @@ if not _IS_PYODIDE:
     _makeCallableModule("dartlab.quant", _quantFactory)
     _makeCallableModule("dartlab.macro", _macroFactory)
     _makeCallableModule("dartlab.industry", _industryFactory)
+    _makeCallableModule("dartlab.simulate", _simulateFactory)
     sys.modules[__name__].gather = sys.modules["dartlab.gather"]
 
     # credit은 함수형 (이미 callable)
@@ -940,6 +951,7 @@ __all__ = [
     "SelectResult",
     "ChartResult",
     "compare",
+    "simulate",
     "capabilities",
 ]
 

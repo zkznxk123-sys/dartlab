@@ -67,6 +67,7 @@ FROZEN_PROVIDER_COMPANY_SURFACE = {
         "sector",
         "sectorParams",
         "select",
+        "simulate",
         "sources",
         "status",
         "story",
