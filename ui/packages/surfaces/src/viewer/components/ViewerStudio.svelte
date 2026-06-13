@@ -618,6 +618,7 @@
 					{searchIndex}
 					{indexing}
 					{corpName}
+					{basePath}
 					carryQ={askCarryQ}
 					{onAction}
 					onclose={() => (askOpen = false)}
