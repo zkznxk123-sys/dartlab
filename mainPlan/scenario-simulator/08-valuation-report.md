@@ -43,12 +43,16 @@
 ### 2.2 단일점·rating 차단 (적대검증 B-1·B-2 — 규제선 실제 구멍)
 
 - **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. `underpriced`/`overpriced` 단어 자체가 금지어 lint 대상.
+- **★`computePriceTarget` rating·단일목표가 차단(B-1', 평가 P0):** `pricetarget.py`의 `weighted_target`(단일 목표가)+`signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644`)도 동일 금지 출력 — **§2.3 어댑터가 두 필드를 drop**하고 P10~P90 분포+reverseDCF 닻만 발간. 금지어 lint **3파일**(`priceImplied.py`+`_valuationOther.py`+**`pricetarget.py`** — signal enum·`weighted_target`/`strong_buy`/`strong_sell` 차단). 09 P12 범위 확대.
 - **priceP50 단독 금지(B-2):** `PriceSimulationResult.priceP50`/`perShare`(02 §2.8-9) 단독 표시는 목표가로 읽힌다. **발간 게이트 기계 규칙: perShare/P50 단독 출력 시 build fail — 항상 P10·P90 + reverseDCF 닻 동반.** 무료 공개 발간이 더 위험(불특정 다수).
 - `verdict`(저평가/적정/고평가) = 조건부 *분류*이지 Buy/Sell *rating* 아님 — 단 §7 가드로 강제.
 
-### 2.3 leaf (전부 실재, 이름 정정)
+### 2.3 leaf (전부 실재 — 단 ★computePriceTarget rating 정면충돌, 어댑터 필수)
 
-범위(A): `calcDFV`(`dFV.py:56`, 4엔진 통합 quality-WACC)·`computePriceTarget`(`pricetarget.py:460`, 5시나리오×proforma×DCF + `_monteCarloPriceDistribution` P10~P90 — **PRD §5.6 거의 선구현**). 닻(B): `reverseImpliedGrowth`+`computeGap`. WACC: `computeCompanyWacc`(`_proformaCore.py:145`)+`calcQualityWACC`. **한국기업 CRP 토글**을 DriverCard로(지정학 악화→CRP +1.5pp).
+범위(A): `calcDFV`(`dFV.py:56`, 4엔진 통합 quality-WACC)·`computePriceTarget`(`pricetarget.py:460`, 5시나리오×proforma×DCF + `_monteCarloPriceDistribution` P10~P90). 닻(B): `reverseImpliedGrowth`+`computeGap`. WACC: `computeCompanyWacc`(`_proformaCore.py:145`)+`calcQualityWACC`. **한국기업 CRP 토글**을 DriverCard로(지정학 악화→CRP +1.5pp).
+
+> **★평가 P0 정정 — computePriceTarget는 "거의 선구현"이 아니라 금지 출력 반환체다:** `computePriceTarget`은 P10~P90 분포 외에 **`weighted_target: float`(단일 목표가) + `signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644` = 매수/매도 rating)**을 함께 반환한다 — 00·§2가 가장 강하게 금지한 바로 그것. §2.2 금지어 lint이 `priceImplied.py`만 잡고 *이 중추 함수를 놓쳤다*. ⟹ 발간에 그대로 쓰면 안 되고, **발간 어댑터(P10/P50/P90 분포 + reverseDCF 닻만 추출, `weighted_target`·`signal` 필드 drop)**를 거친다. 졸업 AC = "calc 직접호출 0"과 **동급으로 "rating/단일목표가 필드 누출 0"** 명문화. (~80% 재사용 자평은 실재하나 *그대로는 못 씀* — 어댑터가 추가 작업.)
+> **★구현 정합(2026-06-14):** deterministic core의 dcf 노드(`registry._fnDcf`)는 **proforma-FCFF**를 쓰고 `calcDFV`를 의도적으로 회피(외부 proforma 무시→scenario-coherence 깨짐, 09 P3). 발간 ⑤ Numbers→value도 *시나리오 일관성*을 위해 simulate dcf 노드(proforma-FCFF) 결과를 ref로 받아야지 calcDFV/computePriceTarget을 재호출하면 SSOT 분열(§1 ⑤ 표는 정적 가치평가용 calcDFV — scenario 발간과 구분).
 
 ---
 

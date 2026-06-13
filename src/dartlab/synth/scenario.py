@@ -299,9 +299,11 @@ def getElasticity(sectorKey: Optional[str]) -> SectorElasticity:
         (1.8, 'high')  # 자동차는 GDP 1.8 배 탄성, 시클리컬
 
     Guide:
-        탄성치 source: dartlab 자체 회귀 분석 (2010~2024 KR 11 업종 패널).
-        cyclicality 기반 자산배분 (regimeToAllocation) 에 전파. defensive 업종
-        (utility/필수소비재) 의 GDP 탄성 0.3 이하.
+        탄성치 source: scenario.py 의 inline 하드코딩 prior (무출처 preset —
+        회귀 fit 아님, seed/CI 0). "검증된 추정" 으로 오인 금지. DriverRegistry
+        pooled-panel β 로 대체 예정 (02 §2B.4-B). cyclicality 기반 자산배분
+        (regimeToAllocation) 에 전파. defensive 업종 (utility/필수소비재) 의
+        GDP 탄성 0.3 이하.
 
     SeeAlso:
         - ``simulateScenario``: 본 elasticity 사용
@@ -309,7 +311,8 @@ def getElasticity(sectorKey: Optional[str]) -> SectorElasticity:
         - ``classifyCycle``: cyclicality 사용
 
     Requires:
-        ``SECTOR_ELASTICITY`` dict 로드 (data/synth/sectorElasticity.json).
+        ``SECTOR_ELASTICITY`` — 본 모듈 inline dict (외부 파일 아님; 35 키 =
+        KR 23 + US 12).
 
     AIContext:
         DEFAULT_ELASTICITY 결과는 "업종 미식별" 신호 — 호출자 분기 권장
@@ -324,13 +327,14 @@ def getElasticity(sectorKey: Optional[str]) -> SectorElasticity:
         OutputSchema:
             SectorElasticity (5 필드 dataclass).
         Prerequisites:
-            data/synth/sectorElasticity.json 로드 가능.
+            없음 — SECTOR_ELASTICITY 는 본 모듈 inline 상수(외부 파일 로드 없음).
         Freshness:
-            정적 — 운영자 연 1 회 회귀 업데이트.
+            정적 inline prior — 자동 갱신 없음. 운영자 수기 수정 또는
+            DriverRegistry pooled-panel 학습으로 대체(02 §2B.4-B).
         Dataflow:
             sectorKey → SECTOR_ELASTICITY dict 룩업 → SectorElasticity 인스턴스.
-        TargetMarkets: KR (WICS 11 업종). US 적용 시 별도 SECTOR_ELASTICITY
-            (GICS 11) 정의 필요.
+        TargetMarkets: KR 23 업종(WICS류) + US 12 업종(GICS류) = 35 키 모두
+            inline 실재. US 도 별도 정의 불필요(같은 dict).
     """
     if sectorKey is None:
         return DEFAULT_ELASTICITY

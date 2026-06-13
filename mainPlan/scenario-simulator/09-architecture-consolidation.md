@@ -20,8 +20,8 @@
 
 **★정정(평가) — 설계 §0의 사실 오류 3건(거짓 정정 전파 차단):**
 - **P14 위치 오류:** `qualityGate.py`는 **미존재**(Glob 0). 실제 `scripts/` 위반자 = `skills/measureProgress.py:68-69`(`_BASELINE_DIR=_REPO/"scripts"/"audit"`) + `core/observability/mapping_ledger.py:22` stale docstring.
-- **P13 과소평가:** `SECTOR_ELASTICITY`는 **WICS 11업종**(설계 "36" 오류). `getElasticity` 9섹션 docstring 전체가 **가짜 데이터 파이프라인**: Guide "2010~2024 KR 11업종 패널 회귀"(미존재 회귀)·Requires/Prerequisites/Dataflow/OutputSchema "`data/synth/sectorElasticity.json` 로드"(파일 미존재, 값은 모듈 하드코딩)·Freshness "연1회 회귀 업데이트"(가짜)·Example `1.8`(실제값과 다름). **"확신 오정렬 > 정렬 실패"의 교과서** — 단순 값 mismatch 아닌 가짜 출처 6섹션 동시 정정 + 업종수 11 통일.
-- **금지어 lint 범위:** `underpriced/overpriced`가 `priceImplied.py:23,222` + `_valuationOther.py` **2파일**(설계는 1파일만). lint 범위에 둘 다.
+- **P13 — ✅ docstring 정정 완료(2026-06-14):** `SECTOR_ELASTICITY` 실측 **35키(KR 23 + US 12, `scenario.py:229` inline)** — 설계 "36"·이전 정정 "11" **둘 다 오류**(평가가 짚은 "정정이 새 오류를 박음"; 11은 US 12키 누락). `getElasticity` 9섹션 docstring 전체가 **가짜 데이터 파이프라인이었음**: Guide "2010~2024 KR 11업종 패널 회귀"(미존재 회귀)·Requires/Prerequisites "`data/synth/sectorElasticity.json` 로드"(파일 미존재, 값은 모듈 inline)·Freshness "연1회 회귀 업데이트"(가짜)·TargetMarkets "KR 11/US 별도필요"(실제 35키 inline). **"확신 오정렬 > 정렬 실패"의 교과서.** → Guide/Requires/Prerequisites/Freshness/TargetMarkets honest 라벨 + 35키 명시로 정정 완료(`synth/scenario.py` docstring). 잔여 = Example 실제값 동기화(코어 구현 시).
+- **금지어 lint 범위:** `underpriced/overpriced`가 `priceImplied.py:23,222` + `_valuationOther.py`, **★+ `pricetarget.py` `weighted_target`/`signal:strong_buy~strong_sell`(평가 P0, 중추 함수 — 설계가 놓침)** = **3파일**. lint 범위에 셋 다(signal enum·단일목표가 필드 차단).
 
 **★워크스페이스 변동(이 세션 중 실측):** mainPlan 리팩토링이 이 세션 동안 단계-4b~5로 진척 → **터미널 전체가 `landing/src/lib/terminal/` → `ui/packages/surfaces/src/terminal/`로 이동**(commit ff9099ba0). `landing`엔 `terminal-shell/{routeLoad,terminalShell}.ts`만 잔존. **PRD의 모든 `landing/.../terminal/...` UI 경로는 stale** — 새 SSOT = `ui/packages/surfaces/src/terminal/`(charts/PriceChart.svelte·chartState.svelte.ts 실재) + 포트 = `ui/packages/contracts`. 엔진 측(`src/dartlab/*`) 경로는 불변. 본 09는 엔진 중심이라 영향 미미하나, 05(Play)·06(지수)는 새 토폴로지로 재기반 필수.
 
@@ -57,9 +57,9 @@ D=3=코어 척추(이걸 안 풀면 simulate 못 짐) / D=1=독립.
 
 | # | 위치 | 문제 | 정본·정리방향 | 검증 | S×D | 게이트 |
 |---|---|---|---|---|---|---|
-| **P1** | `_simMonteCarlo.py:145`·`pricetarget.py:278` 전역 `random.seed`+`:205` 덮어쓰기 | Play 결정론·URL공유·TS패리티 붕괴 | numpy PCG64 노드-로컬, kill-test 후 `=`→`*=` | `mcSeedReproKill.py`·`reproSeedAudit.py` GATES | 9 | **P0** |
+| **P1** ✅ **완료(2026-06-14)** | `_simMonteCarlo.py:145`·`pricetarget.py:278` 전역 `random.seed`+`:205` 덮어쓰기 | Play 결정론·URL공유·TS패리티 붕괴 | **구현: ① 전역 seed→로컬 `random.Random(seed)`**(`fe9e66c0a`, stdlib·외부의존0·pyodide안전 — numpy PCG64는 simulate 엔진이 jumpable stream 필요 시 재방문) **② `:205` `=`→연도별 cumprod**(`ad112b171`, `*=` 단순수정은 **평균경로 소실이라 기각**, cumRevFactor×(1+revNoise)·margin random-walk·mean path 보존) | ✅ `test_horizon_widens_cone` kill-test PASS(옛 cv h1≈h3 버그 증명→cone 확대), MC 30 PASS | 9 | **P0** |
 | **P2** | lazy-proxy 4파일(`_simScenario:35`·`_simMonteCarlo:36`·`_simHistorical:34`·`simulation:240`) | no_import_evasion·양방향 cycle | `_applyMacroShock`→`simulate/transfer.py` 이사, `_extract*`→`_simExtract.py` | `test_import_direction` 함수내부 import AST 확장 | 9 | **P2** |
-| **P3** | DCF 5중+WACC 4진입 | TV/exit/FCF<0 폴백 silent 발산 | `multiStageDcf`+`calcDFV`+`computeCompanyWacc`, DAG 노드 호출 | `test_no_duplicate_dcf` census 5→1 단조 | 9 | **P3** |
+| **P3** ★정합 정정(구현) | DCF 5중+WACC 4진입 | TV/exit/FCF<0 폴백 silent 발산 | **시나리오 DCF = `registry._fnDcf` proforma-FCFF**(구현 `096e84c43` — ★`calcDFV` 회피: calcDFV는 외부 proforma 무시→scenario-coherence 깨짐) / 정적 가치평가 = `calcDFV`(삼각검증). 둘은 *중복 아닌 2 정당 경로* — census 5→**2**(proforma-FCFF·calcDFV)로 정정, 나머지 3(`_scenarioDCF`·인라인·`_dcfFromProforma`)만 흡수 | `test_no_duplicate_dcf` census 5→2 단조 | 9 | **P3** |
 | **P4** | 회귀 4중+OLS 3+동명 3 | 같은 OLS 3구현 | calcMacroRegression+scanMacroBeta+olsMulti, macroExposure 폐기, crossRegression 별개유지 | `test_no_duplicate_regression` census | 9 | **P4** |
 | **P5** | 축 이중화 predictionSpace↔exogenousAxes | 매크로 축 2 SSOT·impactOn 마법상수 | exogenousAxes=driver SSOT, predictionSpace=state 뷰 | `test_axis_ssot` | 6 | **P4** |
 | **P6** | distress 이중 7모델+zone 산재 | 부실판정 3엔진 각자 | `synth.distress`, analysis 7모델·quant 호출 일원화, zone enum 1곳 | lint-imports: solvency leaf→synth.distress+credit.scoring만 | 6 | **P5(credit)** |
@@ -68,8 +68,8 @@ D=3=코어 척추(이걸 안 풀면 simulate 못 짐) / D=1=독립.
 | **P9** | ★forwardTest **write 함수 부재**(신설) / credit transition **cron만 부재**(배선) | Brier ledger 영구 빈 | forwardTest=`recordForecast` 신설+OutcomeLog / credit=`recordGrade` cron 배선 | `test_outcomelog_roundtrip` | 4 | **P4(G5)** |
 | **P10** | multipleTesting 미배선+t-stat 미산출 | β 우연유의 거를 장치 0 | `admission.py` critical-t+진짜 Holm 독립구현, scanMacroBeta t-stat 추가(leaf 확장) | `test_admission_gate` | 6 | **P4** |
 | **P11** | crossRegression pre-fit cron 0+calibrator dead+dead-branch | loadModel 영구 miss·optimistic no-op | DriverRegistry G0~G5 결정·"재활성 or 정직폐기" 졸업판정·optimistic 키 제거 | `vulture` baseline | 2 | **P5(졸업)** |
-| **P12** | `signal` underpriced/overpriced 노출(`priceImplied.py:23,222`+`_valuationOther.py` **2파일**) | 사실상 매수/매도 rating | 발간 표면 제거→"consistent/optimistic/pessimistic" | 금지어 lint 신설(2파일) | 2 | **P6(발간)** |
-| **P13** | getElasticity 가짜 docstring 6섹션+업종수 36→**11** | folk-stat을 검증된 양 위장 | "하드코딩 prior 출처부재" 정직표기·업종 11 통일·Example 실제값 | `docstring9Section.py` AC "데이터 정합" | 2 | **P7** |
+| **P12** ★범위 확대(평가) | `signal` underpriced/overpriced(`priceImplied.py:23,222`+`_valuationOther.py`) **+ ★`pricetarget.py` `weighted_target`(단일 목표가)+`signal:strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644`)** = **3파일** | 사실상 매수/매도 rating — pricetarget.py는 08 §2.3이 채택한 *중추* 함수인데 기존 lint이 놓침(평가 P0) | 발간 표면 제거→"consistent/optimistic/pessimistic" + pricetarget.py는 발간 어댑터(P10/P50/P90만 추출, weighted_target/signal drop) | 금지어 lint 신설(**3파일**, signal enum+weighted_target 필드 차단) | 3 | **P6(발간)** |
+| **P13** ✅ docstring 정정 완료(2026-06-14) | getElasticity provenance 날조(회귀패널·json 로드 단정, 실제 inline)+업종수 오기(문서 36/11, 실측 **35=KR 23+US 12**) | folk-stat을 검증된 양 위장 | "inline 하드코딩 prior 무출처(seed/CI 0)" 정직표기·**35키 통일**·json 로드 주장 제거(✅ `synth/scenario.py`)·Example 실제값(잔여=코어 구현 시) | `docstring9Section.py` AC "데이터 정합" | 2 | **Phase −1(부분 완료)** |
 | **P14** | ★`skills/measureProgress.py:68-69` `scripts/audit`(NOT qualityGate.py) | CLAUDE.md scripts/ 금지 | `tests/audit/_baselines/` 이동 | `noScriptsDir.py` | 1 | **선행(무관)** |
 | **P15** | publisher fossil docstring(`story/publisher.py`·`credit/_calcsAdvanced.py:187,282`) | 미존재 모듈 참조 | fossil 정정(story/publisher.py 단독) | `stale_references.py` | 1 | **선행(무관)** |
 
@@ -131,11 +131,11 @@ CHS/Merton/survival은 **이미 회사 비의존 순수함수**(`calcCHS(netInco
 
 ## 7. 실행 Phase 시퀀스 (코어 졸업 ⨉ 부채 청산 인터리빙)
 
-- **Phase −1 (즉시·무위험·simulate 무관):** P14(`measureProgress.py:68-69` `scripts/`→`tests/audit/_baselines/`)·P15(publisher fossil docstring)·P13 부분(getElasticity·PRESET 거짓 docstring 즉시 정정)·죽은코드(`_loadMacroAligned` 등). 검증=`stale_references.py`·`vulture`. 독립 commit.
-- **Phase 0 (kill-test):** P1 `mcSeedReproKill.py` 전역 seed→numpy PCG64, 후 `:205` `=`→`*=`. 검증=`reproSeedAudit.py` GATES + metamorphic(horizon↑→분산 단조↑).
+- **Phase −1 (즉시·무위험·simulate 무관):** P14(`measureProgress.py:68-69` `scripts/`→`tests/audit/_baselines/`)·P15(publisher fossil docstring)·**✅ P13 부분 완료(getElasticity provenance 날조 docstring 정정·35키 명시, 2026-06-14)**·죽은코드(`_loadMacroAligned` 등). 검증=`stale_references.py`·`vulture`. 독립 commit.
+- **Phase 0 (kill-test) — ✅ 완료(2026-06-14):** P1 전역 seed→**로컬 `random.Random(seed)`**(`fe9e66c0a`, numpy PCG64 아님 — stdlib·pyodide안전·동작무변경, jumpable stream은 엔진 필요 시 재방문), `:205` →**연도별 cumprod**(`ad112b171`, `*=` 단순수정은 평균경로 소실이라 기각). 검증=`test_horizon_widens_cone` kill-test PASS(옛 cv h1≈h3 버그 증명→cone 확대) + MC 30 PASS.
 - **Phase 1 (계약 동결, 코드 0줄):** §6 레이어·importlinter·census 3종을 현 baseline(DCF=5·회귀=4)으로 동결(이후 감소만).
 - **Phase 2 (졸업 ②③):** P2 transfer 적출+`_extract*` 하강→lazy-proxy 4파일 소멸. 2~3사 byte-identical 골든.
-- **Phase 3 (졸업 ④):** P3 DAG value/wacc 노드가 `calcDFV`/`computeCompanyWacc` 호출, census 5→1 PR마다. 노드 입자도 실측 확정.
+- **Phase 3 (졸업 ④) — ✅ 부분 완료(2026-06-14):** ✅ DAG dcf 노드 `registry._fnDcf` = proforma-FCFF(`096e84c43`, calcDFV 회피=scenario-coherence). 잔여 = census 5→2 단조(나머지 3 DCF 경로 흡수)·wacc 노드 `computeCompanyWacc` 통합·노드 입자도 실측 확정.
 - **Phase 4 (회귀 수렴+게이트):** P4 macroExposure 폐기·OLS→olsMulti·동명 disambiguate. P5 exogenousAxes=driver SSOT. P10 admission.py+scanMacroBeta t-stat. P9 forwardTest recordForecast 신설+OutcomeLog / credit cron 배선.
 - **Phase 5 (졸업 ⑤⑥⑦⑧ + 신용):** 덕지덕지(봉합·calibrator dead-branch 제거·중복 단일화). P11 crossRegression/calibrator 재활성 or 정직폐기. 9섹션 docstring. 본진 `simulate/`+`ai/tools/lens.py`. P6+P7 신용(extractChsFeatures proforma 주입 일점 수술, 7모델 호출 일원화, zone enum 1곳). 검증=engine-add 5점+skill-os-add 4단계+lint-imports.
 - **Phase 6 (발간, 코어 졸업 후):** P8 story sixAct/narrative 자체계산 외과이전. P12 금지어 lint(2파일). builders 렌더러 2개+`type="simulation"`+14키 ref 치환(가치평가)+credit 14키. ReportDock valuation→credit mode. `reportType`+`asOf` frontmatter(company-reports 충돌 해소). **UI 측은 새 `ui/packages/surfaces/src/terminal/` 토폴로지** 기준.
