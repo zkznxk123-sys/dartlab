@@ -25,7 +25,13 @@ _UI_DIR = resolveUiBuildDir()
 def registerSpa(app: FastAPI) -> None:
     """Svelte SPA 정적 파일 서빙과 fallback 라우트를 등록한다."""
     if _UI_DIR.exists():
-        app.mount("/assets", StaticFiles(directory=str(_UI_DIR / "assets")), name="assets")
+        # React(ui/web)는 자산을 assets/, SvelteKit(ui/apps/local)은 _app/에 둔다.
+        # StaticFiles 는 디렉토리 부재 시 등록 시점에 RuntimeError 를 던지므로 assets/가 실재할
+        # 때만 mount 한다 (Svelte 번들은 assets/가 없어 옛 무조건 mount 가 서버 startup 크래시였다).
+        # _app/* 등 나머지 정적 파일은 아래 catch-all serveSpa 의 FileResponse 가 서빙한다.
+        assets_dir = _UI_DIR / "assets"
+        if assets_dir.is_dir():
+            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
     app.add_api_route("/{path:path}", serveSpa, methods=["GET"])
 
 

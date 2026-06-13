@@ -5,6 +5,13 @@ All notable changes to DartLab will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **pip 번들 웹 UI를 공유 터미널 앱으로 전환** — `dartlab ai` 로컬 서버가 서빙하는 웹 UI가 SvelteKit 앱(`ui/apps/local`)으로 바뀐다. 이 앱은 공개 사이트와 동일한 `@dartlab/ui-surfaces` 공유 surface 를 소비하므로, 터미널이 공개(공표)와 로컬(pip·개발)의 단일 공유 자산이 된다 — 같은 코드를 환경별 런타임 포트로 주입한다(로컬=서버 `/api`·AI, 공개=HF·브라우저). 옛 React UI(`ui/web`)는 `DARTLAB_UI_LEGACY=1` 환경변수로 가역 복귀한다.
+- 옛 React UI 전용이던 재무 35카드 대시보드·퀀트 대시보드(`/analysis/{code}/financial`·`/quant`, `/api/viz` 스트리밍)는 공유 터미널로 아직 이관되지 않았다 — 해당 화면이 필요하면 `DARTLAB_UI_LEGACY=1` 로 옛 UI 를 쓴다. 터미널은 자체 재무 심화뷰·스크리너·공시 위치 레일을 제공한다.
+
 ## [0.10.7] - 2026-06-13
 
 뉴스·주가 데이터 소스 재편 + 정기보고서 TOC 표준 수렴(과거 수평화) 릴리즈.

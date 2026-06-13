@@ -3,9 +3,10 @@
 기본 UI = ui/apps/local (SvelteKit 챗·터미널 셸, 단계-10 전환). 옛 ui/web(React) 는
 DARTLAB_UI_LEGACY=1 로 명시 fallback 한다(가역, 한 줄 escape).
 
-pip wheel 번들(publish.yml → site-packages/dartlab/ui/build/)은 provider 설정 배선(단계-5-3)
-완료·패리티 확인 후 ui/apps/local 로 전환한다 — 그 전까지 번들 UI 는 옛 React UI 다. dev 체크아웃은
-이미 svelte 로 전환(아래 4번)되어 `dartlab ai` 가 로컬 SvelteKit 앱을 서빙한다.
+pip wheel 번들(publish.yml → site-packages/dartlab/ui/build/)도 ui/apps/local 로 전환 완료 —
+번들 UI = 공유 surface(@dartlab/ui-surfaces) 소비 SvelteKit 앱이라 랜딩(공표)과 로컬(pip·dev)이
+같은 터미널을 쓴다. dev 체크아웃(아래 4번)·pip(아래 3번) 모두 svelte 로컬 앱을 서빙한다.
+옛 React ui/web 은 financial/quant bento 대시보드(/api/viz, 미이관) 보존용 가역 escape 로 잔존.
 
 resolveUiBuildDir 우선순위:
 1. DARTLAB_UI_DIR 환경변수 (dartlab-desktop 등 외부 소비자가 명시)

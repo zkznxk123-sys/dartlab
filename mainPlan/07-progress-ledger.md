@@ -10,12 +10,13 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-6 (Viewer Surface Extraction — 이동 원자 윈도우 §2.5, 6-1 직접). **단계-5 전체 완료**(V1) +
-  **단계-7 챗모드 기본 완료**(entry #23, c94eff4e7) = 로컬 /chat 실제 대화 UI(AiPort.streamAsk(mode:chat)·스트리밍·
-  근거칩·tier 배지·추천질문·종목 컨텍스트). 터미널 모드와 같은 Ask engine 계약 공유.
-/goal 갱신(2026-06-13): "mainPlan **폴더 제외**, ui플랫폼 리펙터 **전부** 완성 — 깃헙페이지 SvelteKit 터미널 로컬+
-  공통배선 + 로컬UI Svelte 전환으로 챗모드·터미널모드 완성. 멈추지 말고 완벽하게". 명시 종점=챗+터미널(달성),
-  "전부 완성"=잔여 단계(6 viewer·8 scan/map/search·9 shell·10 default switch)까지. ⚠ mainPlan/scenario-simulator·
+다음 작업: **터미널 공유자산 목표 완수**([36], 2026-06-13). 단계 6(viewer)·8(scan/map/search)·9(shell)·
+  10(default switch) 모두 완료 — 4 surface(terminal·viewer·scan·map) 전부 @dartlab/ui-surfaces 추출, 랜딩(공표)·
+  ui/apps/local·**pip wheel** 3 경로가 같은 공유 터미널 소비. /goal "터미널이 공표·로컬 단일 공유자산" = 달성.
+  잔여(운영자 판단·비차단): ① 재무 35카드 bento·퀀트 대시보드 surface 이관(현재 React ui/web 전용 = DARTLAB_UI_LEGACY,
+  pip 기본은 터미널 자체 재무뷰). 원하면 /api/viz layout-stream 의 svelte surface 화가 별도 작업. ② Skill OS
+  operation/{dashboardDesign,ui,aiProductReplatform}.md ui/web 경로 서술 정정(운영자 카탈로그 재생성).
+  ③ embed.js 위젯은 옛 publish 도 build:widget 미실행이라 이미 dormant(범위 밖). ⚠ mainPlan/scenario-simulator·
   financial-statement-lab·table-export = 운영자 별도 작업, 절대 미접촉. 운영자 동일 repo 병행 push 중 — git 주의.
 
 ★ 6-0a(FilingPort 공개 배선) **생략 확정** — 6-1 착수 직전 재grep(플랜 [22-b] 명시 허가) 결과: 포트 filing.panel*
@@ -751,3 +752,42 @@ commit: e42eaf5fb
   $effect 무의존 1회·/api/status 필드(selected/available/label/model) 서버 실재 일치·env 필드 RuntimeEnvironment 일치·
   포트 SSOT(_devUiPort) ↔ resolveUiSourceDir 1:1. 빌드 green. [34] 포트 드리프트 같은 부류 잔존 0.
 rollback: e42eaf5fb revert(analysis +page.ts 삭제·+page.svelte/workspace/홈 스텁 복귀).
+
+### [36] 단계-10 완성 — pip wheel UI 를 공유 터미널 앱으로 전환 (터미널 = 공표·로컬 단일 공유자산 완수)
+일시: 2026-06-13
+**목적**: /goal "dartlab 터미널이 랜딩과 로컬의 공유자산 — 로컬은 로컬대로 공표는 공표대로" 의 마지막 한 조각.
+  랜딩+로컬-dev 는 이미 공유 surface(@dartlab/ui-surfaces/terminal) 소비 확인([29]~[35])했으나 **pip 사용자만 옛
+  React ui/web** 수령 → pip 로컬엔 터미널이 아직 공유자산 아님. wheel 번들 UI 를 ui/apps/local(SvelteKit, 공유
+  surface 소비)로 전환해 pip 도 같은 터미널을 받게 한다.
+**변경(논리단위)**:
+- `publish.yml` — Build UI 스텝 `cd ui/web; npm ci; vite build` → `npm ci; npm run build -w @dartlab/ui-local`
+  (ui/apps/local 은 워크스페이스 멤버라 별도 npm ci 불요·@dartlab/* source 소비, surfaces 선빌드 불요). copy 는
+  `build/.`(dotfile 포함) → src/dartlab/ui/build. 다른 UI 빌드 워크플로 없음(ci.yml UI 빌드 0).
+- **로컬 UI 첫 화면 = 터미널 직행**(`routes/+page.ts` redirect 307 → /terminal/005930, `+page.svelte` 옛
+  개발용 라우트 목록 메뉴 폐기→부팅 로더). 운영자 실사용 보고 "로컬 ui 켰는데 dev 메뉴가 뜸" 즉시 수정 —
+  공표 /terminal 진입과 동일하게 절차 없이 곧장 제품(서버 :8400 정적 서빙, 새로고침 반영·재시작 불요).
+- `_ui_path.py` — 독스트링 정정(pip 번들 = svelte 전환 완료). 해석 로직 불변(step3 site-packages/dartlab/ui/build).
+- `web.py` — **registerSpa /assets mount 를 assets/ 실재 시에만**(StaticFiles 는 디렉토리 부재 시 startup
+  RuntimeError). React=assets/, Svelte=_app/(top-level assets/ 없음). _app/* 는 catch-all serveSpa FileResponse
+  가 서빙. ★옛 무조건 mount 는 svelte 번들 서빙 시 서버가 아예 안 뜨는 잠재 크래시였다(dev=vite proxy 라 정적
+  서빙 경로 미발화로 잠복).
+- `tests/server/test_web_spa.py`(신규) — React(assets/)·Svelte(_app/) 양 번들 구조 회귀 가드(등록 무크래시·
+  index/자산/SPA fallback/누락404). SPA 서빙 테스트 커버리지 0 이 위 크래시의 잠복 원인이라 동반.
+- `.gitignore` — `src/dartlab/ui/build/`(CI 산출 위치, 루트 ui/build 패턴은 미포착) 추가. `README_EN.md` L4 정정.
+  `CHANGELOG.md` [Unreleased] 전환+가역 escape 기록.
+**검증**: ① ui/apps/local 풀빌드 green(terminal.js 209kB)·svelte-check 0 ERROR(4120파일) ② **런타임 서빙 실증** —
+  minimal FastAPI+TestClient 로 web._UI_DIR=svelte build 가리켜 startup 무크래시·index 200·_app/*.js 200
+  (application/javascript)·SPA /terminal/005930 200·누락 js 404 ③ test_web_spa 2 passed ④ ruff/py_compile pass
+  ⑤ CI 빌드 명령 `npm run build -w @dartlab/ui-local` 루트 실행 green.
+**적대적 검증 워크플로(4 독립 검증자)**: build-ci·serving-runtime·feature-regression·leftover-refs.
+  - blocker "package-lock.json 삭제" = **오탐**(직접 git status 확인: 추적·존재·미수정 — 검증자 stale git 읽음). 기각.
+  - serving-runtime = CLEAN(라우트 순서·MIME·base=root·404·path traversal 전부 정합 재확인).
+  - web.py 크래시는 워크플로 *전에* 정독으로 잡아 수정 완료(컴파일·빌드 통과 코드의 런타임 사각 — [30][34] 동류).
+  - stray `src/dartlab/ui/build`(검증자 copy 흔적) 정리 + gitignore 동반.
+**의도적 trade-off(정직)**: pip 기본 UI 에서 옛 React 전용 **재무 35카드 bento·퀀트 대시보드**(/api/viz layout-stream)는
+  공유 surface 미이관이라 빠진다 → `DARTLAB_UI_LEGACY=1` 가역. 터미널은 자체 FinFullscreen 재무 심화·ScreenerModal·
+  공시 레일 보유. events 탭(뉴스/shock/regime 혼합)은 공시 레일이 상위호환 대체(PRD 혼합금지). /api/viz 엔드포인트는
+  legacy 전용 dead 표면으로 잔존. publish.yml 편집은 발행 아님 — 다음 릴리즈(운영자 tag) 가 자연 sign-off 체크포인트.
+rollback: 본 commit revert → pip=React 복귀. 또는 배포 단위로 `DARTLAB_UI_LEGACY=1`.
+교훈: 정적-서빙 경로는 dev(vite proxy)가 우회해 테스트 사각이 됐다 — 번들 구조(assets/↔_app/) 차이가 startup
+  크래시로 직결. "기본 UI 전환"은 빌드뿐 아니라 *서버 서빙 계약*(자산 경로·mount)까지 동반 검증 대상.

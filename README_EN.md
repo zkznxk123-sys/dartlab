@@ -403,7 +403,7 @@ L2  analysis/    Financial + forecast + valuation — analysis("group", "axis")
     macro/       Market-level macro — dartlab.macro()
     story/       5-engine composition (analysis + credit + scan + quant + macro)
 L3  ai/          Active analyst — dartlab.ask()
-L4  ui/web/      Web interface (React + shadcn SPA)
+L4  ui/apps/local/  Web interface (SvelteKit, shared @dartlab/ui-surfaces; ui/web = legacy fallback)
 ```
 
 Import direction enforced by CI. Adding a new country means one provider package — zero core changes.

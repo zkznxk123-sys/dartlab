@@ -61,6 +61,7 @@ node_modules/
 # UI build artifacts
 ui/build/
 ui/web/build/
+src/dartlab/ui/build/
 ui/node_modules/
 ui/web/node_modules/
 

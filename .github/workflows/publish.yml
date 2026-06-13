@@ -101,24 +101,23 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Build Svelte UI
-        # tsc 는 routeTree.gen.ts 가 미존재 상태에서 fail (TanStackRouterVite 가 vite 시작 시
-        # 자동 생성). v0.10.0 시점 build script 가 'vite build' 만이었음 — 그 동작 재현.
-        # 루트 npm ci 선행 필수 (플랫폼 단계-1a: landing lockfile 은 루트로 단일화 — landing 디렉토리
-        # 단독 npm ci 는 lockfile 부재로 실패한다). ui/web 터미널이 landing/src/lib/terminal 을
-        # cross-package import 하고, esbuild 가 landing/tsconfig.json 의 extends
-        # (./.svelte-kit/tsconfig.json, prepare=svelte-kit sync 생성물)를 읽는다.
-        # ui/web 은 워크스페이스 밖 — 자체 lockfile 로 별도 npm ci.
+      - name: Build local UI (shared surfaces)
+        # 단계-10 wheel 전환: pip 번들 UI = ui/apps/local (SvelteKit 챗·터미널 셸, @dartlab/ui-surfaces
+        # 공유 surface 를 landing 과 동일 소비 — 터미널이 랜딩·로컬 단일 공유자산). 루트 npm ci 가
+        # 워크스페이스(landing·ui/packages/*·ui/apps/*) 전체를 설치하고 @dartlab/* 를 symlink 하므로
+        # ui/apps/local 는 워크스페이스 멤버라 별도 npm ci 불요 (옛 ui/web 은 워크스페이스 밖이라 별도
+        # npm ci 가 필요했다). adapter-static + vite 플러그인이 svelte-kit sync 자동 수행 →
+        # build/{index.html,_app}. 옛 React ui/web 은 DARTLAB_UI_LEGACY=1 가역 escape 로 잔존(_ui_path).
         run: |
           npm ci
-          cd ui/web
-          npm ci
-          npx vite build
+          npm run build -w @dartlab/ui-local
 
       - name: Copy UI build into package
         run: |
           mkdir -p src/dartlab/ui/build
-          cp -r ui/web/build/* src/dartlab/ui/build/
+          # 'build/.' 로 복사 — dotfile(.gitkeep 등)·중첩 _app/immutable 트리까지 누락 없이 옮긴다
+          # ('build/*' glob 은 dotfile 을 빠뜨린다).
+          cp -r ui/apps/local/build/. src/dartlab/ui/build/
 
       - name: Install uv
         run: pip install uv
