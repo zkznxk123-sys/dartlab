@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
-	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
+	import { CompanyCard } from '@dartlab/ui-surfaces/map';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -40,6 +40,7 @@
 <div class="embed-root" class:light={theme === 'light'}>
 	{#if (data as any).node}
 		<CompanyCard
+			basePath={base}
 			node={(data as any).node}
 			detail={(data as any).detail}
 			loading={false}

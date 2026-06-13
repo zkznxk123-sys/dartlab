@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
-	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
+	import { FreshnessBadge } from '@dartlab/ui-surfaces/map';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

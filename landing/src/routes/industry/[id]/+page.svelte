@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
-	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
+	import { FreshnessBadge } from '@dartlab/ui-surfaces/map';
 
 	let { data }: { data: PageData } = $props();
 	let ind = $derived(data.data);

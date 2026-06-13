@@ -1,16 +1,16 @@
 <script lang="ts">
-	import EcosystemMap from '$lib/components/industry/EcosystemMap.svelte';
-	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
-	import IndustryDrilldown from '$lib/components/industry/IndustryDrilldown.svelte';
-	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
-	import TutorialTour from '$lib/components/industry/TutorialTour.svelte';
-	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
-	import CompareTray from '$lib/components/industry/CompareTray.svelte';
-	import FloatingCard from '$lib/components/industry/FloatingCard.svelte';
-	import MapCommandPalette from '$lib/components/industry/MapCommandPalette.svelte';
-	import TreemapView from '$lib/components/industry/TreemapView.svelte';
-	import SectorHealthCard from '$lib/components/industry/SectorHealthCard.svelte';
-	import ShockSimulator from '$lib/components/industry/ShockSimulator.svelte';
+	import { EcosystemMap } from '@dartlab/ui-surfaces/map';
+	import { IndustryAtlas } from '@dartlab/ui-surfaces/map';
+	import { IndustryDrilldown } from '@dartlab/ui-surfaces/map';
+	import { CompanyCard } from '@dartlab/ui-surfaces/map';
+	import { TutorialTour } from '@dartlab/ui-surfaces/map';
+	import { FreshnessBadge } from '@dartlab/ui-surfaces/map';
+	import { CompareTray } from '@dartlab/ui-surfaces/map';
+	import { FloatingCard } from '@dartlab/ui-surfaces/map';
+	import { MapCommandPalette } from '@dartlab/ui-surfaces/map';
+	import { TreemapView } from '@dartlab/ui-surfaces/map';
+	import { SectorHealthCard } from '@dartlab/ui-surfaces/map';
+	import { ShockSimulator } from '@dartlab/ui-surfaces/map';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -1465,6 +1465,7 @@
 		<aside class="detail-panel" class:wide={comparing}>
 			<div class="card-slot">
 				<CompanyCard
+					basePath={base}
 					node={selectedNode}
 					detail={selectedDetail}
 					loading={selectedDetailLoading}
@@ -1481,6 +1482,7 @@
 			{#if comparing && compareB}
 				<div class="card-slot">
 					<CompanyCard
+						basePath={base}
 						node={compareB}
 						detail={compareBDetail}
 						loading={false}
@@ -1546,6 +1548,7 @@
 		onResize={(w, h) => resizeFloating(fc.id, w, h)}
 	>
 		<CompanyCard
+			basePath={base}
 			node={fc.node}
 			detail={fc.detail}
 			loading={false}

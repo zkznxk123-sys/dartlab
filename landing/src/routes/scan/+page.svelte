@@ -4,7 +4,7 @@
 	import { base } from '$app/paths';
 	import { SlidersHorizontal } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
-	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
+	import { FreshnessBadge } from '@dartlab/ui-surfaces/map';
 	import Grid from '$lib/scan/Grid.svelte';
 	import ColumnGroupBar from '$lib/scan/ColumnGroupBar.svelte';
 	import PresetModal from '$lib/scan/PresetModal.svelte';

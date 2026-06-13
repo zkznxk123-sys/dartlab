@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
+	import { IndustryAtlas } from '@dartlab/ui-surfaces/map';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Eyebrow from '$lib/components/ui/Eyebrow.svelte';
 	import MonoNumber from '$lib/components/ui/MonoNumber.svelte';

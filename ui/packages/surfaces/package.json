@@ -23,20 +23,32 @@
 			"types": "./src/viewer/index.ts",
 			"svelte": "./src/viewer/index.ts",
 			"default": "./src/viewer/index.ts"
+		},
+		"./map": {
+			"types": "./src/map/index.ts",
+			"svelte": "./src/map/index.ts",
+			"default": "./src/map/index.ts"
 		}
 	},
 	"scripts": {
 		"check": "svelte-check --tsconfig ./tsconfig.json"
 	},
 	"dependencies": {
+		"@cosmograph/cosmos": "^1.6.1",
 		"@dartlab/ui-contracts": "*",
 		"@dartlab/ui-runtime": "*",
 		"@mlc-ai/web-llm": "^0.2.84",
+		"d3-force": "^3.0.0",
+		"d3-hierarchy": "^3.1.2",
+		"d3-scale": "^4.0.2",
 		"dompurify": "^3.4.10",
 		"klinecharts": "^9.8.12",
 		"lucide-svelte": "^1.0.1"
 	},
 	"devDependencies": {
+		"@types/d3-force": "^3.0.10",
+		"@types/d3-hierarchy": "^3.1.7",
+		"@types/d3-scale": "^4.0.9",
 		"@types/dompurify": "^3.2.0",
 		"svelte": "5.56.3",
 		"svelte-check": "^4.6.0",

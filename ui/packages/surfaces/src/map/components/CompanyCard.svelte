@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import Sparkline from './Sparkline.svelte';
 	import RadarChart from './RadarChart.svelte';
 	import FreshnessBadge from './FreshnessBadge.svelte';
@@ -27,6 +26,8 @@
 		onShock?: (stockCode: string) => void;
 		// movers 이상 신호 (이 회사에 해당하면)
 		moverSignal?: string | null;
+		// 셸 base 경로(블로그 링크 등 에셋) — $app/paths 무결합(포터블 surface). 셸이 주입.
+		basePath?: string;
 	}
 
 	let {
@@ -41,7 +42,8 @@
 		compareDisabled = false,
 		detached = false,
 		onShock,
-		moverSignal = null
+		moverSignal = null,
+		basePath = ''
 	}: Props = $props();
 
 	let aiExpanded = $state(false);
@@ -335,7 +337,7 @@
 		<div class="blog-banner">
 			<div class="banner-title">📝 이 회사 심층 분석 글</div>
 			{#each blogPosts.slice(0, 2) as post}
-				<a class="blog-card featured" href="{base}/blog/{post.slug}" target="_blank" rel="noopener">
+				<a class="blog-card featured" href="{basePath}/blog/{post.slug}" target="_blank" rel="noopener">
 					<div class="blog-title">{post.title}</div>
 					{#if post.verdict}
 						<div class="blog-verdict">{post.verdict}</div>
@@ -636,7 +638,7 @@
 		<div class="section">
 			<h3>다른 분석 글 ({blogPosts.length - 2})</h3>
 			{#each blogPosts.slice(2) as post}
-				<a class="blog-card" href="{base}/blog/{post.slug}" target="_blank" rel="noopener">
+				<a class="blog-card" href="{basePath}/blog/{post.slug}" target="_blank" rel="noopener">
 					<div class="blog-title">{post.title}</div>
 					{#if post.verdict}
 						<div class="blog-verdict">{post.verdict}</div>
