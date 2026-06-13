@@ -13,7 +13,9 @@ pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _SCRIPT_PATH = _REPO_ROOT / "landing" / "_scripts" / "buildFinanceAccountOrder.py"
-_TARGET_PATH = _REPO_ROOT / "landing" / "src" / "lib" / "viewer" / "finance" / "accountOrder.ts"
+_TARGET_PATH = (
+    _REPO_ROOT / "ui" / "packages" / "surfaces" / "src" / "viewer" / "lib" / "finance" / "accountOrder.ts"
+)  # 단계-6 viewer surface 승격(옛 landing/src/lib/viewer/finance)
 _PREFIX_RE = re.compile(r"^(?:ifrs-full_|ifrs_|dart_|ifrs-smes_)")
 
 

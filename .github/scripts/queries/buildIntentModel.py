@@ -9,7 +9,7 @@
   uv run python -X utf8 .github/scripts/queries/buildIntentModel.py query 051910 "배당 주나?" ...  # 정성 점검(실제 도달 섹션)
 
 입력(SSOT): curatedQuestions.json(라우팅 학습원) · intentSpec.json(섹션 target + canon) — 본 스크립트 옆.
-출력: intentModel.json + landing/src/lib/viewer/intentModel.json(프론트 fallback 번들). HF dart/queries/intentModel.json 가 라이브 주경로.
+출력: intentModel.json + ui/packages/surfaces/src/viewer/lib/intentModel.json(프론트 fallback 번들, 단계-6 승격). HF dart/queries/intentModel.json 가 라이브 주경로.
 검증: heldoutB.json(병합 안 한 held-out) 로 일반화 측정 + 회귀게이트(baseline 하락 시 FAIL).
 메커니즘: query→intent(IDF route, glue 제거)→target 섹션 scope + canon 어휘보강→RRF(plain 보존). 매퍼0·모델0·dense0.
 """

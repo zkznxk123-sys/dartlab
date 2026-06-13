@@ -12,7 +12,9 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SORT_ORDER_PATH = REPO_ROOT / "src" / "dartlab" / "core" / "utils" / "sortOrder.json"
 ACCOUNT_MAPPINGS_PATH = REPO_ROOT / "src" / "dartlab" / "reference" / "data" / "accountMappings.json"
-TARGET_PATH = REPO_ROOT / "landing" / "src" / "lib" / "viewer" / "finance" / "accountOrder.ts"
+TARGET_PATH = (
+    REPO_ROOT / "ui" / "packages" / "surfaces" / "src" / "viewer" / "lib" / "finance" / "accountOrder.ts"
+)  # 단계-6 viewer surface 승격(옛 landing/src/lib/viewer/finance)
 
 STATEMENTS = ("BS", "IS", "CF")
 IDLIKE_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
