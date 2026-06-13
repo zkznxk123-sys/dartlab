@@ -736,3 +736,18 @@ commit: 6eb54a56a
 교훈: 기본값 전환은 *눈에 보이는 메시지*뿐 아니라 *모든 파생 참조*(여기선 webbrowser.open target)를 동반 갱신해야 한다.
   컴파일 게이트(tsc/check)는 이 런타임 포트 드리프트를 못 잡음 — worker 번들 회귀([30])와 같은 "검증 사각" 부류.
   적대적 verify 가 컴파일·빌드가 통과한 코드에서 자기모순 회귀를 잡은 사례.
+
+### [35] 완성도 — 로컬앱 마지막 placeholder 스텁 2종 실기능화 (모든 라우트 기능)
+일시: 2026-06-13
+commit: e42eaf5fb
+**변경**: 로컬앱에 남아있던 placeholder 스텁 2개 제거 → 전 라우트 기능화.
+- `analysis/[code]`: '배선=단계-5-3' placeholder → `+page.ts` redirect(307) `/terminal/[code]`. ui/web `/analysis/$code`
+  (=LandingTerminalSurface 풀스크린) 정합 — /terminal/[code] 가 정본이라 영구 합류(딥링크·viewer 하위 보존, 터미널 중복 0).
+- `settings/workspace`: 'workspace 설정' placeholder → 실제 상태 진단(발명 기능 아님, 기존 상태 표면화): /api 연결 상태·
+  활성 공급자/모델(/api/status selected)·런타임 env(시장·로케일·빌드·런타임·readonly). 공급자 선택/키는 providers 소관.
+- 홈 nav 표기 정정. map/search 포트 throw 게이트는 유지(로컬앱에 해당 라우트 없음 — 추가는 덕지덕지, tripwire 보존).
+**독립 적대 검증(CLEAN)**: 새 변경 3종(redirect·workspace·포트fix)을 적대 reviewer 가 런타임/계약/루프 관점 재검증 —
+  redirect 루프 0(/terminal 역방향 없음)·CSR(prerender=false)이라 static 빌드 안전·load 는 leaf 만(viewer 미발화)·
+  $effect 무의존 1회·/api/status 필드(selected/available/label/model) 서버 실재 일치·env 필드 RuntimeEnvironment 일치·
+  포트 SSOT(_devUiPort) ↔ resolveUiSourceDir 1:1. 빌드 green. [34] 포트 드리프트 같은 부류 잔존 0.
+rollback: e42eaf5fb revert(analysis +page.ts 삭제·+page.svelte/workspace/홈 스텁 복귀).
