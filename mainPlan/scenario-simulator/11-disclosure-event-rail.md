@@ -1,7 +1,7 @@
 # 11. Disclosure Event Rail — /terminal 공시 위치 찾기 레일
 
 상태: PRD v0.2 (메모리 `project_terminal_disclosure_event_rail_prd`에서 repo 이관 — 종합 시뮬레이터 PRD 세트의 컴포넌트)
-지위: 통합 시퀀스(07: 지수→**이벤트레일**→백테스팅→시뮬)의 이벤트레일 컴포넌트. 본 PRD는 *과거 공시 위치 찾기*만 완결. **미래 공시 마커(예측 정기공시 점선)는 시뮬 코어(미래 캔버스)에 의존 → 시뮬 트랙(4)으로 이관**(07 §의존성). ⚠UI 경로: 본문의 `landing/src/lib/terminal/...`는 stale → 새 토폴로지 `ui/packages/surfaces/src/terminal/`(04 §3).
+지위: 통합 시퀀스(07: 지수→**이벤트레일**→백테스팅→시뮬)의 이벤트레일 컴포넌트. 본 PRD는 *과거 공시 위치 찾기*만 완결. **미래 공시 마커(예측 정기공시 점선)는 시뮬 코어(미래 캔버스)에 의존 → 시뮬 트랙(4)으로 이관**(07 §의존성). ⚠**UI 경로 전수 stale — 기계적 매핑 강행**: 본문의 *모든* `landing/src/lib/terminal/<rest>`(본문 :49-51 `panels/CenterStack`·`charts/PriceChart`·`charts/chartState.svelte.ts`·:60 `panels/RightStack`·:66 `data/workbench.ts`·:68 `panels/ViewerOverlay`·:324·:366 `data/disclosureEvents.ts`·:370 `charts/DisclosureEventRail.svelte` 등)를 `ui/packages/surfaces/src/terminal/<rest>` 로 1:1 치환해 읽는다(터미널 전체 이동, commit ff9099ba0, 04 §3). 포트=`ui/packages/contracts`. 엔진 경로(`src/dartlab/*`)는 불변. `ui/shared/chart/PriceChart.svelte`(별개 SVG)와 혼동 금지.
 
 ## 0. 판정과 최종 결론
 

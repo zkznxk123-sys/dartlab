@@ -1,7 +1,7 @@
 # 10. Backtesting Strategy Tester — /terminal 전체화면 차트 중심 EOD 전략 검증
 
 상태: PRD v0.2 (메모리 `project_terminal_backtesting_prd`에서 repo 이관 — 종합 시뮬레이터 PRD 세트의 컴포넌트)
-지위: 통합 시퀀스(07: 지수→이벤트레일→**백테스팅**→시뮬)의 백테스팅 컴포넌트. 백테스팅 엔진은 시뮬레이터와 **RunSpec·ReportDock·look-ahead 가드 DNA 공유**(09 §1, 08 §5 — ReportDock backtest mode). "전문가급"=품질 기준(방법 엄밀함). ⚠UI 경로: 본문의 `landing/src/lib/terminal/...`는 stale → 새 토폴로지 `ui/packages/surfaces/src/terminal/`(04 §3).
+지위: 통합 시퀀스(07: 지수→이벤트레일→**백테스팅**→시뮬)의 백테스팅 컴포넌트. 백테스팅 엔진은 시뮬레이터와 **RunSpec·ReportDock·look-ahead 가드 DNA 공유**(09 §1, 08 §5 — ReportDock backtest mode). "전문가급"=품질 기준(방법 엄밀함). ⚠**UI 경로 전수 stale — 기계적 매핑 강행**: 본문의 *모든* `landing/src/lib/terminal/<rest>`(본문 :135 `data/backtest.ts`·:158 `charts/btLayer.ts`·:797·:810·:825·:1118 등)를 `ui/packages/surfaces/src/terminal/<rest>` 로 1:1 치환해 읽는다(터미널 전체 이동, commit ff9099ba0, 04 §3). 포트=`ui/packages/contracts`, 데이터 소스=`ui/packages/runtime/src/adapters/{public,local,test}/`. 엔진 경로(`src/dartlab/*`)는 불변. `ui/shared/chart/PriceChart.svelte`(별개 SVG)와 혼동 금지.
 
 ## 0. 판정과 확정 결론
 
