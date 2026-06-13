@@ -17,7 +17,7 @@
 - **중심 산출물**: ★Play 미래 리플레이 — 기존 터미널 replay 상태기계(과거 되감기)의 미래 방향 대칭 확장. 새 재생 엔진 0. 미래 캔버스는 사전 계산된 결정론 path를 *드러내는 것*(매 프레임 재계산 아님). → [05-play-future-replay.md](05-play-future-replay.md).
 - **데이터 모델**: AssumptionLedger(if 토글 SSOT) + ScenarioTree(분기) + EvidenceGraph(근거-드라이버, 인과 단정 금지). 분기 생성 싸게·가지치기는 결정론 엔진(회계 항등식·과거 베타). Morphological Field/CIB는 다축 확장(Phase 5+)으로 deferred.
 - **AI 의견**: 결정론 엔진 = SSOT, AI = `ai/tools/` lens 도구가 내는 ref 첨부 의견 카드. 채택 판정 = 결정론 gate(순수 함수). graph/node/pass 0 추가(no-graph-regression). → [03-validation-ai-review.md](03-validation-ai-review.md).
-- **지수 차트(v0.3)**: 안3(center 탭 주가/지수) + 안4(picker) + CMP. PriceChart `subject` 모드(둘째 차트 0, soft-swap). subject 소유권 = CenterStack-local `$state`(ChartCtl 미상향 — 코드 그라운드 정정). 새 IndexPort(`catalog/search/series`). **★US 지수(SP500/NASDAQ)는 ui 데이터 전무 → KR gov 지수 우선 + US는 운영자 결정(04 §5 OQ12)**. → [06-index-chart.md](06-index-chart.md).
+- **지수 차트(v0.4)**: 안3(center 탭 주가/지수) + 안4(picker) + CMP. PriceChart `subject` 모드(둘째 차트 0, soft-swap). subject 소유권 = CenterStack-local `$state`(ChartCtl 미상향). IndexPort(`catalog/search/series`). **KR gov 지수=OHLCV 캔들 + US FRED 지수=종가 라인(SP500·NASDAQ·다우·VIX) 평행 통합**(운영자 결정 '미국 지수는 FRED 고려' — FRED 데이터 라이브 실측, 새 차트·포트 0·`candleStyle='area'` degenerate candle, 종가전용 지표 3분기 매트릭스). → [06-index-chart.md](06-index-chart.md).
 - **통합 시퀀싱**: 지수(1) → 공시 이벤트 레일(2) → 백테스팅 Strategy Tester(3) → 시뮬레이션+Play(4). mainPlan(ui/packages 승격) 이후 착수. 단 지수 차트는 mainPlan 무관 선행 가능. → [07-integration-roadmap.md](07-integration-roadmap.md).
 - **착수 전 선결 kill-test**: ★MC 재현성(`_simMonteCarlo.py` 전역 `random.seed` → numpy Generator). Play 결정론·URL 공유·TS 패리티의 척추가 현 코드와 충돌. Phase 0에서 먼저 죽인다.
 
@@ -34,7 +34,7 @@
 
 **제품 경험 (UI 단면):**
 6. [05-play-future-replay.md](05-play-future-replay.md) — ★중심 산출물. Play 미래 리플레이·미래 캔버스·다중분기·if 토글 실시간·근거 인벤토리·graceful degradation.
-7. [06-index-chart.md](06-index-chart.md) — 지수 차트 v0.3(안3 center 탭 subject-swap + 안4 picker + CMP, IndexPort catalog/search/series, KR gov/indices 105종 OHLCV 완전체, subject 소유권 seam, US 지수 부재 정직 가드).
+7. [06-index-chart.md](06-index-chart.md) — 지수 차트 v0.4(안3 center 탭 subject-swap + 안4 picker + CMP, IndexPort catalog/search/series, **KR gov OHLCV 캔들 + US FRED 종가 라인 평행 subject**, candleStyle='area' degenerate·종가전용 지표 3분기, subject 소유권 seam, FRED 데이터 라이브 실측).
 8. [07-integration-roadmap.md](07-integration-roadmap.md) — 통합 시퀀싱(지수→이벤트레일→백테스팅→시뮬), 공유 DNA, mainPlan 의존, Phase −1~7.
 
 **발간·정합화 (시뮬의 읽기 방식):**
