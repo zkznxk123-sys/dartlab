@@ -17,6 +17,7 @@
 	import GiscusPanel from './panels/GiscusPanel.svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
 	import { warmCompany } from './lib/warmup';
+	import { requestAsk } from './lib/askEntry.svelte'; // 헤더 "AI" 진입 → 뷰어 AskDrawer 챗 모드
 
 	interface Props {
 		eng: Engine;
@@ -220,6 +221,9 @@
 				<span class="clock mono">{clock}</span>
 				<span class="connDot"><span class="dot"></span>HF</span>
 				<div class="hdrLinks">
+					<button class="hdrLink hdrAsk" onclick={requestAsk} title="AI 공시 분석 — 챗으로 질문 (공시뷰어 AI 드로어 직행)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
+						<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img src="{base}/avatar-detective.png" alt="" width="14" height="14" style="border-radius:50%" /></picture>AI
+					</button>
 					<button class={'hdrLink' + (discussOpen ? ' on' : '')} onclick={() => (discussOpen = !discussOpen)} title="종목 토론 — giscus(GitHub Discussions) 인-터미널">{lang === 'en' ? 'Discuss' : '토론'}</button>
 					<a class="hdrLink" href="{links.repo}/issues/new" target="_blank" rel="noopener" title="GitHub 이슈 등록 — 버그·요청">{lang === 'en' ? 'Issue' : '이슈'}</a>
 				</div>
