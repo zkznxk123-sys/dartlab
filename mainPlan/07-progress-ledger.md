@@ -659,3 +659,52 @@ commit: ced70faca (45 files) · push 1a527d851..ced70faca
 잔여(후속): @dartlab/ui-format 공유패키지(scan/landing format 중복 해소) · scan worker 를 surface factory 로(저위험).
 rollback: ced70faca revert(git mv·seam·prop·복사·재배선 단일 원자).
 중단 지점/다음 행동: CI(bz246psgg) green 확인 → 단계-9(Landing public shell 전환 완료 — lib 제품원본 잔재 0 검증) → 단계-10.
+
+### [30] 단계-8 Phase2 후속 — scan worker svelte 번들 회귀 수정 + 로컬 터미널 finance HF 배선
+일시: 2026-06-13
+commit: 20c226cc2 (worker) · f201fdd19 (finance)
+**worker 회귀(CI 권위 검증이 노출)**: ced70faca Deploy Landing 풀빌드가 **운영자 블로그가 아니라 scan worker 번들링**에서
+  실패(PARSE_ERROR 9 — scan/*.svelte). 원인: scanRuntime.worker 가 배럴(`@dartlab/ui-surfaces/scan`)에서 loadFinanceLiteRuntime
+  import → 배럴이 .svelte 9종 static re-export → Vite worker 번들러(svelte 플러그인 없음)가 .svelte 파싱 불가. worker 는 순수
+  TS만 소비 가능. **수정**: surfaces 에 svelte-free sub-export `./scan/runtime`(→ financeLiteRuntime.ts, 전이그래프 hfRange·
+  financeAccounts·format 전부 TS 확인) 추가, worker 를 그 진입점으로 재배선. companyLive·priceRuntime·changesRuntime worker 무영향
+  (배럴 미사용 확인). 검증: 로컬 landing 빌드가 worker 번들링 통과(PARSE_ERROR 0), 이후 운영자 블로그 MDX 에서만 실패.
+**로컬 터미널 finance**: 로컬 어댑터 finance 포트가 null 스텁 → TerminalSurface(warmup·CenterStack)의 finance.bundle 항상 null
+  → 로컬 터미널 재무 패널 빈 상태. 터미널 재무 번들 SSOT=발행 HF parquet(dart/finance/{code}.parquet)이므로 macro 포트와 동일하게
+  public financeSource(loadTerminalFinance) 공유 — 곧 "로컬이 깃헙페이지 자산 공유"하는 공통 배선. 검증: runtime tsc 0·로컬앱 빌드 green.
+교훈: CI 권위 검증(clean tree)이 로컬 빌드가 운영자 untracked WIP 에 가려 못 본 worker 번들 회귀를 노출 — 컴파일 4게이트(check)가
+  worker bundling(vite build 시점)을 못 잡는 사각. surface 배럴이 .svelte 를 재export 하면 worker 소비자는 반드시 순수 TS sub-export 경유.
+rollback: 두 커밋 각각 단일 파일/소수 라인 revert.
+
+### [31] 단계-9 Landing Public Shell 전환 — 완료(대부분 surface 추출로 자연 달성) + GitHub Pages 전수 검증
+일시: 2026-06-13
+**shell 전환 검증(census)**: `landing/src/lib/components/` 하위 = blog·cheatsheet·search·sections·siteSignals·skills·ui 만 —
+  **제품 feature surface 원본 잔재 0**(terminal·viewer·map·scan 전부 surfaces 패키지로 이관 완료, 단계-4b/6/8). landing 라우트 =
+  surface wrapper(컴포지션 루트, 포트/prop 주입). 잔여 = 콘텐츠(blog/docs)·chrome(CommandPalette·CloudflareWebAnalytics)·shell glue
+  (publicRuntime·duckdb 로더·basePath)·shared(format/ui — 후속 @dartlab/ui-format). 즉 landing = 영구 공개 shell 로 안정화.
+**GitHub Pages 모두 체크(라이브 배포 1a527d851=map move)**: 18 prerender 라우트 200(/, /terminal, /viewer, /scan, /map, /search,
+  /about, /changes, /cheatsheet, /docs, /blog, /insights, /lab, /playground, /screener, /skills, /health, /viewer/company/[code],
+  /lab/terminal). /compare = 의도적 CSR(prerender=false·ssr=false, 404 status지만 404.html SPA 셸 서빙 → ?vs= client route 정상).
+  /lab/viewer-ask = 라우트 부재(AskDrawer 가 viewer/company 헤더로 본진 통합됨, 정상 404). trailingSlash:never 라 canonical=슬래시
+  없는 URL. **공통 배선 확인**: landing(GitHub Pages) + ui/apps/local 둘 다 동일 surface 패키지 소비 = "로컬·깃헙페이지 자산 통합" 달성.
+  ⚠라이브 /scan 은 scan 이동 전(1a527d851) 버전 — 동작 동일(refactor), 내 fix(20c226cc2) push·Deploy 후 surface 소스로 전환.
+잔여(후속): ui/shared dead code 정리 · @dartlab/ui-format 공유패키지(scan/landing format 중복 해소).
+
+### [32] 단계-10 dev — 기본 UI를 SvelteKit 로컬앱으로 전환(dev) · wheel 전환 보류(단계-5-3 의존)
+일시: 2026-06-13
+commit: a69d41092
+**dev 전환**: `_ui_path.resolveUiBuildDir/SourceDir` 가 dev 체크아웃에서 ui/apps/local(SvelteKit 챗·터미널 셸) 우선 →
+  dartlab 로컬 서버가 svelte 앱 서빙(build 또는 dev :5174). 옛 React ui/web 은 `DARTLAB_UI_LEGACY=1` 한 줄로 가역 복귀.
+  DARTLAB_UI_DIR 외부 명시 최우선 유지. dev 모드 안내 포트/라벨 정정(5400→5174, legacy 분기). 검증: importlib 경로 해석 —
+  dev build=ui/apps/local/build(존재)·legacy=ui/web·env override 정확.
+**wheel(publish.yml) 미전환 — 의도적 hold(규칙#1, 근거 있는 반대)**: 로컬앱 `/settings/providers` 가 아직 29줄 스텁(/api 배선 0,
+  "배선 = 단계-5-3"). publish.yml 을 ui/apps/local 로 바꾸면 pip 사용자가 공급자 설정 불가 → chat advanced tier 회귀(deterministic
+  강등). "최고로정공법"=회귀 발행 금지. 번들 전환은 **단계-5-3(provider 설정 배선) + 패리티 확인 후**. 그 전까지 pip=React·dev=Svelte
+  과도기(가역). publish.yml·pyproject artifacts 무변경.
+**push 블로커(중요)**: 운영자가 블로그 5편을 커밋(664bdcea6, ktng/index.md:192 MDX RolldownError — sync_financials.py AUTO 블록).
+  이 커밋이 내 fix 커밋들 사이에 끼어(origin=ced70faca → 716d32688 → 664bdcea6 → 20c226cc2 → f201fdd19 → a69d41092), push 하면
+  CI Deploy Landing 이 **운영자 블로그에서** 실패(내 scan worker fix 와 무관). 현재 unpushed local-only → CI 엔 아직 없음. "블로그무시
+  하고 니할것만해" 지시 = 내가 고치지 않음. **블로커 해소(운영자 블로그 빌드 통과) 후 5커밋 일괄 push → scan Deploy green 확인**.
+잔여 NEXT: 단계-5-3(provider 설정 Svelte 배선 — ui/web ProviderSettingsDialog 356줄 참조, /api/ai/profile·secrets·validate)
+  → chat advanced tier 완성 + wheel 전환 차단 해소. 이후 publish.yml ui/apps/local 전환 + wheel smoke. Skill OS operation/ui.md·
+  aiProductReplatform.md dev build 경로 서술 갱신(+ 카탈로그 재생성, 운영자).
