@@ -4,7 +4,8 @@
     "edgar.executivePay (dart.executivePay)",
     "edgar.flow (dart.flow)",
     "edgar.notesDetail (dart.notesDetail)",
-    "edgar.relatedPartyTx (dart.relatedPartyTx)"
+    "edgar.relatedPartyTx (dart.relatedPartyTx)",
+    "edgar.simulate (dart.simulate)"
   ],
   "shallow": []
 }

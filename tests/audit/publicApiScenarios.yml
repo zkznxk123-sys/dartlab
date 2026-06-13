@@ -35,6 +35,7 @@ public_api:
     - searchName
     - sectorInsights
     - setup
+    - simulate
     - verbose
   dartlab_api_symbols:
     - analysis
@@ -111,6 +112,7 @@ scenarios:
       - dartlab.searchName
       - dartlab.sectorInsights
       - dartlab.setup
+      - dartlab.simulate
       - dartlab.verbose
       - dartlab.api.analysis
       - dartlab.api.credit

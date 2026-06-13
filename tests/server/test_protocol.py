@@ -137,6 +137,7 @@ _DART_ONLY_EXEMPT: set[str] = {
     "topicSummaries",  # topic 요약 (DART panel 전용 구조)
     "sector",  # KRX 섹터 벤치마크 (US 별도 인프라 필요)
     "sectorParams",  # KRX 섹터 파라미터
+    "simulate",  # 시나리오 시뮬레이터 — 매크로 프리셋·탄력성이 KR 기준 (US 프리셋 합류 전까지 KR 전용)
     # ── 데이터 구조 차이 (DART XBRL vs EDGAR XBRL 형태 상이) ──
     "sceMatrix",  # DART SCE matrix (EDGAR SCE 구조 다름)
     # ── 산업엔진 (DART panel 공정/거래처 텍스트 기반, SEC에 동등 구조 없음) ──
