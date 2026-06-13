@@ -2,7 +2,8 @@
 // landing 셸 글루: getPublicRuntime(컴포지션 루트)·$app 의존이라 surface 패키지로 못 옮긴다 (단계-4b).
 // 씨데이터 JSON 7종 병렬 로드 + 마지막 본 종목 워밍업(주가·재무·제품맵 — public runtime 포트 경유).
 import { browser } from '$app/environment';
-import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
+import { base } from '$app/paths';
+import { loadJson, setStaticBase } from '@dartlab/ui-runtime/data/dartlabData';
 import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 import {
 	LAST_SYM_KEY,
@@ -16,6 +17,13 @@ import {
 	type QuartersFile,
 	type RawData
 } from '@dartlab/ui-surfaces/terminal';
+
+// ⚠ base 주입을 모듈 평가 시점에 강제한다. +layout.svelte 의 setStaticBase 는 컴포넌트 스크립트라
+// +page.ts 의 load(=loadTerminalRaw) 보다 늦게 돈다 — 그 사이 runtime base='' 라 GitHub Pages 에서
+// `${base}/map/ecosystem.json` 이 `/map/ecosystem.json`(앞 슬래시) 로 나가 404 → HF 폴백(다른/느린
+// 씨데이터)으로 빠졌다. 이 모듈은 +page.ts 가 import 하는 순간(=load 호출 전) 평가되므로 여기서
+// 한 번 박으면 터미널 load 가 항상 deploy 된 정적 씨데이터를 먼저 맞힌다.
+setStaticBase(base);
 
 export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: RawData }> {
 	// 일별시세 조기 워밍 — 마지막 본 종목(없으면 기본 005930)의 주가·재무를 씨데이터 JSON 로드와
