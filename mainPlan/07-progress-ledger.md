@@ -34,13 +34,11 @@
   map/search 포트 실구현) → 단계-9(landing public shell 전환) → 단계-10(Python server 기본 UI=ui/apps/local).
 잔여 이월(누적): vitest unit+fixture 런타임 대조 · publish.yml:108 prose 경로 · ui/apps/local 라이브 dev 클릭스루(dartlab
   ai 서버 구동 후, 단계-10 확증) · finance.bundle 로컬 엔드포인트(현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #28(단계-8 Phase2 scan 추출 — **완전 실행 설계 예약 완료**) 직후 — **scan 이동 실행**. entry [28] =
-  실행 SSOT(재조사 0): git mv `landing/src/lib/scan`→`ui/packages/surfaces/src/scan`(scanRuntime.worker.ts 는 landing 잔류
-  되돌림) · duckSql provideScanDuckDb seam(query+queryStream) · Detail basePath+filing prop · format/Sparkline 복사 · 라우트+
-  companyLive 재배선 · scan index.ts · surfaces deps(@codemirror 6·hyparquet 2·d3-scale)+./scan export · +layout
-  provideScanDuckDb 주입 · gates(surfaces→landing→풀빌드→local→ui/web) · 가역 프로토콜(게이트 후 커밋). ⚠착수 직전
-  `$lib/scan` importer·tests/.github 재grep(map 4→7 누락 교훈). → 단계-9(landing public shell 전환 완료) → 단계-10
-  (Python 기본 UI=ui/apps/local). 명시 목표(챗+터미널 모드)=달성·공개 LIVE, 단계-8~10=리팩터 "전부 완성" 꼬리.
+재개 지점: entry #29(단계-8 종료 — scan·map 제품 surface 추출 완료, scan push ced70faca·CI bz246psgg 검증중) 직후 —
+  CI green 확인 후 **단계-9**(Landing Public Shell 전환 완료 — landing/src/lib 제품 UI 원본 잔재 0 검증[terminal·viewer·
+  map·scan 이미 surface 이관, content/seo/publicShell만 잔존해야]·공개 URL 안정성·viewer/company·industry prerender entry
+  보존). 대부분 surface 추출로 자연 달성됐을 가능성 — 잔재 census 선행. → 단계-10(Python 기본 UI=ui/apps/local: _ui_path.py·
+  publish.yml·pyproject·wheel smoke). 명시 목표(챗+터미널 모드)=달성·공개 LIVE, 단계-9·10=리팩터 "전부 완성" 마무리.
 ```
 
 ---
@@ -636,3 +634,28 @@ commit: (예약 — 상세 census[a7c…] + 내 직접 grep 검증 = 실행 SSOT
 착수: 신선 컨텍스트에서 본 entry = 실행 SSOT. git mv lib/scan→surfaces/scan(worker 잔류 되돌림)·seam·prop 수술·format/Sparkline
   복사·라우트+companyLive 재배선·index·deps·+layout provideScanDuckDb·gates·commit(가역 프로토콜).
 rollback: 해당 없음(예약 문서).
+
+### [29] 단계-8 Phase2 Scan Surface Extraction — 완료 (이동 원자 윈도우 단일 커밋) · 단계-8 종료
+일시: 2026-06-13
+commit: ced70faca (45 files) · push 1a527d851..ced70faca
+**이동(git mv)**: `landing/src/lib/scan/` 36파일(TS+Svelte ~11.6k LOC) → `ui/packages/surfaces/src/scan/`. scanRuntime.
+  worker.ts 는 landing 잔류(라우트가 `new URL('../../lib/scan/scanRuntime.worker.ts')` 생성 — cross-package worker URL 회피).
+**결합수술(설계 [28] 그대로)**: ① duckSql `provideScanDuckDb` seam — `DartDb` 구조타입(query+**queryStream**+persisted 등
+  landing shape 전체)·sqlEscape 인라인. type DartDb 소비 5파일 → './duckSql'. ② Detail `base`→basePath prop·
+  `getPublicRuntime().filing.regular`→**filing prop**(FilingPort, 라우트 주입 — surface→landing 역결합 제거). ③ format
+  krw/pct → scan/format 복사 + 상대 재배선(5파일). ④ Sparkline → scan 복사(CellTooltip·Grid). ⑤ scanRuntime.worker
+  `./financeLiteRuntime`→`@dartlab/ui-surfaces/scan`. ⑥ 라우트 정적(7컴포넌트+url/types/metrics/presets/duckSql named)+동적
+  (Detail/DataExplorer .default→.named·duckSql·financeLiteRuntime path)·Detail 마운트 filing/basePath 주입. ⑦ companyLive.ts
+  loadCompanyChanges → surface. scan index.ts(9컴포넌트+seam+util)·surfaces ./scan export·deps(@codemirror 6)·+layout
+  provideScanDuckDb(loadDartDb) 주입(companyLive 라우트밖 사용 대비 전역).
+**importer 직접 재grep**: routes/scan·companyLive 2곳(census 확인). terminal ScreenerModal=독립(scan 무관). **tests/.github
+  scan 하드코딩 0**(동적 import라 accountOrder.ts식 sync 테스트 없음 — _attempts/companyDashboard PLAN.md doc 참조뿐, CI 제외).
+검증: surfaces check 0에러 3958파일 ✓ / landing check 0에러 4409파일 ✓ / local build green ✓ / ui/web build green ✓.
+  ⚠landing 풀빌드는 **운영자 untracked WIP 블로그**(98~101 company-reports MDX 문법오류, 내 커밋·CI 미포함)에 차단 —
+  scan 무관(compile 4게이트 통과). **CI(clean tree·운영자 WIP 없음)가 풀빌드+worker 번들링 권위 검증**(watch bz246psgg).
+  운영자 "블로그무시하고 니할것만해" 지시 = scan 작업만 진행 확정.
+**단계-8 종료**: scan·map 제품 surface 추출 완료. search=콘텐츠(스킵)·ui/shared=dead(별도 정리)·changes/insights 라우트=
+  정적 JSON(FreshnessBadge 이동됨, 라우트 landing 잔류 적정). 포트 scan.*/map.* 미소비 throw 게이트 유지(트립와이어).
+잔여(후속): @dartlab/ui-format 공유패키지(scan/landing format 중복 해소) · scan worker 를 surface factory 로(저위험).
+rollback: ced70faca revert(git mv·seam·prop·복사·재배선 단일 원자).
+중단 지점/다음 행동: CI(bz246psgg) green 확인 → 단계-9(Landing public shell 전환 완료 — lib 제품원본 잔재 0 검증) → 단계-10.
