@@ -20,6 +20,7 @@ export type {
 	MacroFile,
 	MetaFile,
 	PricesFile,
+	PriceRow,
 	IndexRow,
 	EcosystemFile,
 	QuartersFile

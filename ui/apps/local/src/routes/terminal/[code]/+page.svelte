@@ -1,36 +1,38 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-	import { page } from '$app/state';
+	import { createEngine, TerminalSurface, type RawData } from '@dartlab/ui-surfaces/terminal';
+	import { getLocalRuntime } from '$lib/runtime/localRuntime';
+	import { localHosts, localLinks } from '$lib/shell/terminalShell';
+	import type { PageData } from './$types';
 
-	const code = $derived(page.params.code);
+	let { data }: { data: PageData } = $props();
+
+	// 로컬 셸 runtime 주입 — surface 는 포트만 본다(전역 locator 없음). 데이터는 /api, AI 는 /api/agent.
+	const runtime = getLocalRuntime();
+	const eng = $derived(createEngine(data.raw as RawData));
+	const ready = $derived(
+		!!data.raw.finance.years.length && Object.keys(data.raw.prices.data).length > 0
+	);
 </script>
 
-<section>
-	<a class="back" href={base || '/'}>← local</a>
-	<h1>terminal / <code>{code}</code></h1>
-	<p>터미널 모드 — TerminalSurface 풀스크린 마운트 = 단계-5-3 (createLocalRuntime 주입).</p>
-</section>
+<svelte:head>
+	<title>Terminal · {data.code} — dartlab local</title>
+</svelte:head>
+
+{#if ready}
+	<TerminalSurface {eng} {runtime} hosts={localHosts} links={localLinks} initial={data.code} />
+{:else}
+	<div class="loading">로컬 서버(/api) 연결 중 …</div>
+{/if}
 
 <style>
-	section {
-		max-width: 720px;
-		margin: 0 auto;
-		padding: 3rem 1.5rem;
-	}
-	.back {
-		color: var(--dl-ink-dim, #9aa0aa);
-		text-decoration: none;
-		font-size: 0.85rem;
-	}
-	h1 {
-		font-size: 1.5rem;
-		margin: 1rem 0 0.5rem;
-	}
-	h1 code {
+	.loading {
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--dl-bg-base, #0f0f10);
+		color: var(--dl-ink-mute, #6b7280);
 		font-family: var(--dl-font-mono, ui-monospace, monospace);
-		color: var(--dl-info, #6ab0ff);
-	}
-	p {
-		color: var(--dl-ink-dim, #9aa0aa);
+		font-size: 12px;
 	}
 </style>

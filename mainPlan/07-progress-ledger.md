@@ -10,32 +10,23 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-5 (로컬 SvelteKit App Scaffold — 가치 도달점 V1) **착수 — sub-unit 분해 선언 완료(entry #18)**.
-  단계-4b 완료·원격 종료(4b-1 #16 + 4b-2 #17, ff9099ba0 Deploy green·CI Fast green).
-운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론".
+다음 작업: 단계-6 (Viewer Surface Extraction — 이동 원자 윈도우 §2.5). **단계-5 전체 완료**(5-1·5-2a·5-2b·5-3a·5-3b,
+  entry #16~#21). 가치 도달점 V1 달성 = 로컬 SvelteKit 터미널 첫 구동(ui/apps/local /terminal/[code] 마운트).
+운영자 승인 "5단계정도"(3→4a→4b→5→6) + /goal "mainPlan 완벽한 완성·정공법·난제는 전문에이전트 토론" + "나머지 끝까지".
 
-단계-5 진입점 = **5-3**(라우트 배선 + TerminalSurface 마운트). 5-1(scaffold 4fae2d536)·5-2a(데이터 포트 eccfcab25
-  entry #19)·5-2b(AiPort SSE, entry #20) 완료 — createLocalRuntime 16포트 전부 실구현/honest(map·search·services·
-  navigation·storage 만 throw, 그 중 services·navigation·storage 는 5-3 셸 주입). 5-3 작업:
-  ① `ui/apps/local/src/lib/runtime/localRuntime.ts` — getLocalRuntime() 컴포지션 루트(createLocalRuntime{env,apiBase:''}
-     호출, NavigationPort 주입 위해 LocalRuntimeOptions 에 navigation 추가 + StoragePort(localStorage)·ServicesPort
-     (createServiceRegistry, 런타임 패키지에 있는지 확인 — 없으면 fake 참조) 도 createLocalRuntime 에 배선).
-  ② `lib/shell/terminalShell.ts`(localHosts{viewerStudio:null,financeDialog:null}+localLinks brand) + `lib/shell/
-     routeLoad.ts`(RawData 조립 — landing routeLoad.ts 미러, 단 로컬은 포트에서 price/finance/meta 조립).
-  ③ /terminal/[code]/+page.{ts,svelte} — TerminalSurface 풀스크린 마운트(eng=createEngine(raw)·runtime·hosts·links·
-     initial). /chat·/ask 네비(navigation.toTerminal goto·recentCompanies=storage). /analysis/[code]/viewer 스켈레톤
-     (overlay iframe 대상). 게이트: ui/apps/local build+dev 검증 매트릭스(chat→terminal·Ask→recent·filing viewer
-     overlay)·console 0·landing+ui/web 무영향. ⚠ NavigationPort 주입으로 LocalRuntimeOptions 변경 = createLocalRuntime
-     호출처 추가(5-3 셸이 유일 호출처). 설계 전부 entry #18·#19·#20.
-  ⚠ 로컬 풀빌드 검증 환경 주의: landing 풀 prerender 는 HF seed(산업맵·피드) 미보유 시 로컬 404
-    (CI 의 'Seed from HF' 단계가 제공) — 로컬 게이트 = check/단위 compile, 풀 prerender 는 CI 권위.
-§8.1 내부구조 결정(전문 아키텍트 A1 채택): 4b-2 = data/→lib/ 만 적용(§8.1 lib/ 충족·depth 보존 저위험).
-  panels/charts/ui 는 top-level 유지(명료한 컴포넌트 버킷, components/ 중첩은 depth 민감 66 import 재작성
-  = 명료성 이득 없는 churn 이라 이연·viewer surface 등장 시 재검토). tsconfig 하드닝(noUncheckedIndexedAccess)도 이연.
-잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
-잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 동행) · scan 프리셋류 포트(단계-8) · navigation/storage
-  포트 실구현(소비처 등장 시점) · publish.yml:108 prose 경로 주석 갱신
-재개 지점: entry #20 (5-2b 완료) — 5-3(라우트 배선+마운트)부터. 설계 전부 #18·#19·#20 에 박제됨.
+단계-6 = 공시뷰어를 `ui/packages/surfaces/src/viewer` 로 승격(04 §단계-6, 이동 원자 윈도우 — 착수 전 예약 entry 필수,
+  07 규칙 6). 목표: terminal overlay + standalone viewer 가 같은 ViewerSurface 사용·local/public viewer adapter 분리·
+  TOC/period timeline/panel matrix/compare matrix/ask drawer 통합. filing.panel* 공개 구현 동행(현재 createPublicRuntime
+  panelToc/panelInit/panelGrid 가 단계-6 throw 게이트). 착수 시 4b 패턴 재사용(전문 에이전트 surface 경계+적대 이동안전
+  토론 → 예약 entry → 무행위변경 git mv → §8.1 정규화). 뷰어는 landing 의 거대 자산이라 결합 census 선행 필수.
+  ⚠ 단계-6 후 ui/apps/local·ui/web 의 viewer=external-url(iframe) → embedded-component 승급 검토(terminalShell hosts
+    viewerStudio 로더 채움). ⚠ 로컬앱 viewer 라우트(/analysis/[code]/viewer)는 현재 스켈레톤 — 단계-6 에서 ViewerSurface 마운트.
+  ⚠ landing 풀 prerender 로컬 환경한계(HF seed 미보유 404) — 로컬 게이트 = check/단위 compile/build, 풀 prerender 는 CI 권위.
+잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — surface 소비 검증과 동행
+잔여 이월(누적): scan 프리셋류 포트(단계-8) · map/search 포트 실구현(단계-8) · publish.yml:108 prose 경로 주석 갱신 ·
+  ui/apps/local 라이브 dev 클릭스루(dartlab ai 서버 구동 후, 단계-10 Python 전환서 확증) · finance.bundle 로컬 엔드포인트
+  (서버 /api 재무 번들 신설 시 — 현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
+재개 지점: entry #21 (단계-5 종료) — 단계-6(viewer 추출) 예약부터. 설계 전부 #18~#21 에 박제됨.
 ```
 
 ---
@@ -387,4 +378,29 @@ commit: (이 변경의 커밋)
 검증 (양쪽+신규 무중단): runtime tsc strict 0 ✓(AiPort 전 메서드 계약 정합) / landing check 0에러 4405파일 ✓
   (신규 aiSource graph 포함) / ui/web build EXIT0 ✓(동결). 호출처 없음(셸 배선=5-3)이라 컴파일 검증.
   push 는 5-2a (eccfcab25) CI Fast 완료 후(concurrency cancel-in-progress 취소가드).
-rollback: 이 커밋 revert (aiSource 삭제 + createLocalRuntime ai getter throw 복원).
+rollback: 이 커밋 revert (aiSource 삭제 + createLocalRuntime AiPort getter throw 복원).
+
+### [21] 단계-5-3 완료 — 라우트 배선 + TerminalSurface 마운트 (가치 도달점 V1) · 단계-5 종료
+일시: 2026-06-13
+commit: 5-3a = d2a585425 / 5-3b = (이 변경의 커밋)
+- **5-3a**(d2a585425): createLocalRuntime 셸-주입 계약 완성 — storageSource(localStorage StoragePort·네임스페이스·
+  비브라우저 in-memory 폴백)·services=createServiceRegistry([])·navigation=options.navigation(LocalRuntimeOptions 에
+  navigation: NavigationPort 추가, 어댑터 framework-agnostic 유지). 16포트 전부 확정 — map·search 만 단계-8 throw.
+- **5-3b**(이 커밋): ui/apps/local 셸 + 마운트.
+  · `lib/runtime/localRuntime.ts` — getLocalRuntime() 컴포지션 루트(createLocalRuntime{env,apiBase:'',navigation}).
+    NavigationPort 를 $app/navigation goto + $app/paths base 로 구현(toTerminal/toViewer/toCompany/toAsk/href).
+  · `lib/shell/terminalShell.ts` — localHosts{viewerStudio:null,financeDialog:null}(→ViewerOverlay 가 viewer 포트
+    URL iframe)·localLinks(brand SNS).
+  · `lib/shell/routeLoad.ts` — **단일 회사 최소 RawData 조립**(시장 전체 데이터셋은 로컬 /api 미보유 → ui/web 패리티):
+    빈 FinanceCompany + price.initial 캔들 기반 PriceRow + /api meta corpName/sector → index 1행, eco/quarters/macro
+    null, finance.years=fallback 5년. 실시간 상세(차트·패널·재무)는 runtime 포트 공급. 270줄 buildRaw 포팅 대신 ~50줄
+    (타입 정합·마운트·ready 가드 충족).
+  · `/terminal/[code]/+page.{ts,svelte}` — TerminalSurface 풀스크린 마운트(eng=createEngine(raw)·runtime·hosts·links·
+    initial). `/chat` 종목코드 입력 → navigation.toTerminal(chat→터미널 전환). `/ask` 최근종목(LAST_SYM_KEY 재사용)
+    → toTerminal. 깊은 Ask 엔진 대화·근거 코파일럿은 단계-7.
+  · surface index 에 PriceRow 타입 export 추가(FinanceCompany/IndexRow 와 동일 카테고리 — 셸 RawData 조립 소비, additive).
+검증 (양쪽+신규 무중단): ui/apps/local svelte-check 0에러 414파일 / ui/apps/local build green(adapter-static SPA·터미널
+  surface 번들) / landing check 0에러 4406파일(surface PriceRow additive 무영향) / ui/web build EXIT0(동결).
+  ※ 라이브 dev 클릭스루(chat→terminal·Ask→recent·filing viewer overlay 실동작)는 `dartlab ai` 로컬 서버(/api·8400)
+    구동 필요 — 빌드/체크가 로컬 게이트(landing prerender 와 동일 디스시플린), 실서버 통합은 단계-10 Python 전환서 확증.
+rollback: 5-3b 커밋 revert(ui/apps/local 셸·라우트 + surface PriceRow export) / 5-3a 커밋 revert.
