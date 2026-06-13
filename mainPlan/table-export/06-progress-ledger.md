@@ -54,8 +54,12 @@
   - `server/api/data.py` = `POST /api/export/excel`(selection→임시 양식→.xlsx) + `/batch`(회사당 순차·`del c`·디스크 ZIP·≤50·to_thread 직렬화, OOM 규율).
   - 검증: 38 유닛(격자 패리티·source round-trip) + 1 realData + 12 htmlTableParser 회귀 PASS(test-lock), 실회사 export(merge 9범위·음수 13·Number) 입증, 독립 재검증 통과. AC(05 §1) 충족.
 
+✅ **엔진 아키텍처 정합 — F1.7 DIP(2026-06-14, master red 해소)**: ★Phase 1 엔진의 `viz/export/excel.py` 가 `from dartlab.providers` 직접 import → `test_export_module_does_not_depend_on_root_company_internals` 위반(viz→providers 역의존 금지). 정공법 = **신 `core/panelTableAccessor.py`**(Protocol+auto-discovery register) DIP. 격자 빌드(readWide·select·cellGrid·coerce·병합 extent)를 **`providers/dart/parse/panelExportGrid.py`**(register-side)로 이전, excel.py 는 `getPanelTableAccessor()` → `PanelExportSheet`(앵커 셀+병합 span)를 openpyxl 로 쓰기만. 동반 수정: 테스트 미러 `tests/providers/dart/parse/`, batch `with Company(code) as c`(cleanup audit M8). **교훈: 엔진 변경은 test-lock 단일파일이 아니라 `dartlabGuard strict --scope l0-l15`(architecture/audit 게이트)까지 로컬 선행.**
+
+✅ **Phase 2a 공개 브라우저 writer 코어 — 완료(2026-06-14)**: `ui/packages/surfaces/src/viewer/lib/xlsx/`(PRD의 landing 경로 stale → surfaces 재그라운딩) = `zipStore.ts`(STORE ZIP+CRC32 0xEDB88320 PKWARE 바이트레이아웃)·`tableGrid.ts`(엔진 cellGrid TS 포팅, DOM-free, 병합셀=동일 인스턴스, XML 개행정규화·implicit-td-close 정합)·`tableExtract.ts`(coerceCell/detectUnit 미러)·`workbook.ts`(OOXML 파트 inlineStr·t=n·mergeCells)·`buildWorkbook.ts`(병합 앵커 1회·시트명 규칙·honest-gap)·`browserXlsxParity.mts`(스탠드얼론 게이트). 검증: 격자 패리티 3 골든픽스처(2384·2482셀 정확일치)·coerce 패리티·ZIP 유효성(CRC32 재계산 + **openpyxl 독립 리더 무경고 오픈**·mergeCell·honest-gap)·svelte-check 0 ERROR.
+
 다음:
-3. **Phase 2 — 공개 브라우저**: zero-dep OOXML writer(`xlsx/{zipStore,workbook,tableGrid,tableExtract,buildWorkbook}`) + ExportDrawer + selection. ⚠ viewer 가 `ui/packages/surfaces/src/viewer/` 로 이관됨 — PRD의 `landing/src/lib/viewer/xlsx/` 경로 stale, 신 거처로 재그라운딩. 같은 골든 픽스처로 엔진↔브라우저 패리티.
+3. **Phase 2b — 공개 브라우저 UI**: `selection.svelte.ts`(Svelte5 rune 선택 store) + `ExportDrawer.svelte`(AskDrawer 슬롯 공유) + `PanelMatrix`/`PanelTocTree`/`ViewerStudio` 배선(체크박스 오버레이·steady glow·[표 내보내기] 헤더). ⚠ **screenshot 검증 필수**(feedback_ui_rules) — viewer 스택 구동 UI 세션. `dataExport.ts` downloadBlob + financeToExcel(.xls) deprecate.
 4. **Phase 3 — 터미널**: `ExportPort`(contracts) + public/local 어댑터 + command palette.
 
 ## 6. 열린 질문 (deferred, 착수 시 판단)
