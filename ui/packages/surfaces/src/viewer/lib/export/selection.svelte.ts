@@ -10,9 +10,10 @@
 // (표 행은 라벨 정렬 불확실 → as-filed 자동 폴백 + 시트 노트, honest-gap).
 
 import { normalizeDartXml, splitHtmlAndText, stripInlineTags } from '../cell';
-import { tableGrid, type GridCell, type SheetInput } from '../xlsx';
+import { tableGrid, buildWorkbook, type GridCell, type SheetInput } from '../xlsx';
 import { detectUnit } from '../xlsx/tableExtract';
 import type { PanelBundle, PanelRow } from '../types';
+import type { ExportInput, SheetSelectionDTO } from '@dartlab/ui-contracts';
 
 export type ExportMode = 'asFiled' | 'horizontalized';
 
@@ -316,4 +317,67 @@ export function deriveWorkbookInput(
 	}
 	if (includeSource && sheets.length) sheets.push(sourceSheet(selections, bundle));
 	return sheets;
+}
+
+// ── ExportPort 다리 — 직렬화 DTO(SheetSelectionDTO) → 내부 SheetSelection → buildWorkbook 바이트 ──
+// public 어댑터(runtime)는 surfaces 를 import 못 하므로(역방향 금지), 셸이 이 함수로 ExportInput 을 .xlsx 바이트로
+// 변환해 publicExportPort 의 exportShared.buildWorkbookBytes 로 주입한다. 직접 ViewerStudio 경로(deriveWorkbookInput
+// →buildWorkbook)와 *동일* 격자/writer 라 산출 .xlsx 동형(패리티).
+
+/** DTO 의 sectionKey 내 행 절대 인덱스 해석 — store id(`${sectionKey}|${index}`) 우선, 폴백은 (blockLeaf,disclosureKey,scope) 매칭. */
+function resolveIndexInSection(sel: SheetSelectionDTO, rows: PanelRow[]): number {
+	// store 생성 id 는 끝에 정수 인덱스(selectionId). id 가 `${sectionKey}|${n}` 이면 그 n 사용.
+	const tail = sel.id.slice(sel.sectionKey.length + 1);
+	const n = Number(tail);
+	if (Number.isInteger(n) && n >= 0 && n < rows.length) return n;
+	// 폴백 — 동일 식별자 첫 매칭(같은 blockLeaf 다중행은 disclosureKey/scope 로 좁힘).
+	return rows.findIndex(
+		(r) => r.blockLeaf === sel.blockLeaf && r.disclosureKey === sel.disclosureKey && r.scope === sel.scope
+	);
+}
+
+/** SheetSelectionDTO → 내부 SheetSelection(bundle 행 해석). 행 미발견이면 null. */
+function dtoToSelection(sel: SheetSelectionDTO, bundle: PanelBundle): SheetSelection | null {
+	const rows = bundle.gridBySection.get(sel.sectionKey);
+	if (!rows) return null;
+	const idx = resolveIndexInSection(sel, rows);
+	if (idx < 0) return null;
+	const row = rows[idx];
+	return {
+		id: selectionId(sel.sectionKey, idx),
+		sectionKey: sel.sectionKey,
+		indexInSection: idx,
+		blockLeaf: row.blockLeaf,
+		disclosureKey: row.disclosureKey,
+		scope: row.scope,
+		blockType: row.blockType,
+		label: trimLabel(sel.label || row.blockLeaf),
+		mode: sel.mode,
+		periods: sel.periods,
+		order: sel.order
+	};
+}
+
+/**
+ * ExportInput(직렬화 DTO) + bundle → 진짜 .xlsx 바이트. publicExportPort 주입(03 §3 패리티 다리).
+ *
+ * @param input ExportInput(code·selections·includeProvenance).
+ * @param bundle 현재 회사 PanelBundle(loadPanelBundle LRU 캐시 — 재다운로드 0).
+ * @returns .xlsx Uint8Array 또는 null(내보낼 데이터 없음).
+ *
+ * @example
+ * const bytes = exportInputToWorkbookBytes(input, bundle);
+ */
+export function exportInputToWorkbookBytes(input: ExportInput, bundle: PanelBundle): Uint8Array | null {
+	const ordered = [...input.selections].sort((a, b) => a.order - b.order);
+	const selections: SheetSelection[] = [];
+	for (const dto of ordered) {
+		const s = dtoToSelection(dto, bundle);
+		if (s) selections.push(s);
+	}
+	if (!selections.length) return null;
+	const includeSource = input.includeProvenance !== false;
+	const sheets = deriveWorkbookInput(selections, bundle, includeSource);
+	if (!sheets.length) return null;
+	return buildWorkbook(sheets);
 }

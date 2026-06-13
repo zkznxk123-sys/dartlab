@@ -13,12 +13,14 @@
 		bundle,
 		corpName,
 		basePath = '',
+		tier = 'public',
 		onclose
 	}: {
 		store: SelectionStore;
 		bundle: PanelBundle | null;
 		corpName: string;
 		basePath?: string;
+		tier?: 'public' | 'local'; // 03 §7 — public 은 [설치 ↗] hint, local 은 완전판(hint 없음). 숨기지 않고 라벨만.
 		onclose: () => void;
 	} = $props();
 
@@ -215,7 +217,14 @@
 				{/if}
 			</span>
 		</div>
-		<p class="ed-note">브라우저에서 바로 만드는 진짜 .xlsx · 서버 전송 0</p>
+		{#if tier === 'local'}
+			<p class="ed-note">엔진 완전판 .xlsx — 자동너비·음수 빨강·풍부한 서식</p>
+		{:else}
+			<p class="ed-note ed-tier">
+				이 브라우저 내보내기 = 빠른 .xlsx · 서버 전송 0. 자동너비·음수 빨강·풍부한 서식의 완전판은 로컬 터미널 dartlab.
+				<a class="ed-install" href="https://eddmpython.github.io/dartlab" target="_blank" rel="noopener">설치 ↗</a>
+			</p>
+		{/if}
 	</footer>
 </aside>
 
@@ -515,6 +524,19 @@
 		font-size: 10px;
 		color: #475569;
 		line-height: 1.4;
+	}
+	.ed-tier {
+		color: #64748b;
+		line-height: 1.5;
+	}
+	.ed-install {
+		color: #fb923c;
+		text-decoration: none;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+	.ed-install:hover {
+		text-decoration: underline;
 	}
 
 	/* 모바일 — 드로어가 부모(+page @media)에서 전체화면 오버레이. 터치 타깃 확대. */

@@ -34,6 +34,7 @@
 		embedded = false,
 		basePath = '',
 		repoUrl = '',
+		tier = 'public',
 		header,
 		onNavigate,
 		onclose
@@ -43,6 +44,7 @@
 		embedded?: boolean; // 터미널 오버레이 모드 — Header·title·전체보기 숨김, 높이 100%
 		basePath?: string; // 공개 라우트가 base($app/paths) 주입 — surface 는 SvelteKit 무결합(에셋 경로용).
 		repoUrl?: string; // 이슈 링크 repo URL(옛 brand.repo) — 셸 주입.
+		tier?: 'public' | 'local'; // export tier 라벨(03 §7) — public=[설치 ↗] hint / local=완전판. ExportDrawer 로 전달.
 		header?: Snippet; // 비embedded·비fullscreen 표준 헤더 — 셸 주입(landing=사이트 Header). 미주입=헤더 없음(터미널 오버레이).
 		onNavigate: (code: string, vs: string[]) => void | Promise<void>;
 		onclose?: () => void; // embedded 전용 — 헤더 우측 닫기 버튼
@@ -621,7 +623,7 @@
 					onclose={() => (askOpen = false)}
 				/>
 			{:else if exportOpen}
-				<ExportDrawer store={selStore} {bundle} {corpName} {basePath} onclose={() => (exportOpen = false)} />
+				<ExportDrawer store={selStore} {bundle} {corpName} {basePath} {tier} onclose={() => (exportOpen = false)} />
 			{/if}
 		</div>
 	{/if}

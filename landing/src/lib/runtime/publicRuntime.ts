@@ -3,9 +3,10 @@
 // 보존한다 (packages → landing 역참조 금지). 컴포넌트는 setDartLabRuntime/useDartLabRuntime 컨텍스트로,
 // 라우트 load·scan 글루 같은 비컴포넌트 셸 코드만 getPublicRuntime() 을 직접 부른다.
 import { base } from '$app/paths';
-import type { DartLabRuntime, ViewerPort } from '@dartlab/ui-contracts';
-import { createPublicRuntime } from '@dartlab/ui-runtime';
+import type { DartLabRuntime, ExportInput, ViewerPort } from '@dartlab/ui-contracts';
+import { createPublicRuntime, type PublicExportShared } from '@dartlab/ui-runtime';
 import { loadLiveCompanyReportFacts, loadLiveCompanyChanges } from '$lib/browser/companyLive';
+import { loadPanelBundle, exportInputToWorkbookBytes } from '@dartlab/ui-surfaces/viewer';
 
 // 공개 셸의 뷰어 = 임베드 컴포넌트 (터미널 오버레이가 ViewerStudio 를 lazy 마운트).
 // urlForCompany = null → 오버레이가 iframe 대신 컴포넌트 임베드를 선택한다 (옛 localAdapter 의미 보존).
@@ -26,6 +27,18 @@ function publicViewerPort(): ViewerPort {
 	};
 }
 
+// table-export — public ExportPort.generate 가 wrap 할 브라우저 워크북 빌더. ViewerStudio 직접 경로와 *동일*
+// loadPanelBundle(LRU 캐시 — 재다운로드 0) + exportInputToWorkbookBytes(deriveWorkbookInput+buildWorkbook) 라 산출 동형.
+const exportShared: PublicExportShared = {
+	async buildWorkbookBytes(input: ExportInput) {
+		const bundle = await loadPanelBundle(input.code);
+		return exportInputToWorkbookBytes(input, bundle);
+	},
+	corpName(code: string) {
+		return code; // 회사명은 bundle 에 있으나 파일명 폴백은 code 로 충분(generate 가 safeFilename 처리).
+	}
+};
+
 let instance: DartLabRuntime | null = null;
 
 export function getPublicRuntime(): DartLabRuntime {
@@ -41,7 +54,8 @@ export function getPublicRuntime(): DartLabRuntime {
 			reportFacts: loadLiveCompanyReportFacts,
 			changes: loadLiveCompanyChanges
 		},
-		viewer: publicViewerPort()
+		viewer: publicViewerPort(),
+		exportShared
 	});
 	return instance;
 }

@@ -50,5 +50,15 @@ export { checkBrowserAiAvailability, runBrowserAiPrompt, type BrowserAiStatus } 
 export { analyzeEvidencePack, attachBrowserAiText, type ViewerAnalysis } from './lib/viewerAnalyst';
 export { marketForCode } from './lib/dartUrl';
 export { panelToCsv, financeToExcel, downloadText, downloadBlob } from './lib/dataExport';
+// table-export — ExportPort 다리(셸이 publicExportPort.exportShared 로 주입) + 선택 스토어 타입.
+export {
+	createSelectionStore,
+	deriveWorkbookInput,
+	exportInputToWorkbookBytes,
+	type SelectionStore,
+	type SheetSelection,
+	type ExportMode
+} from './lib/export/selection.svelte';
+export { buildWorkbook, type SheetInput } from './lib/xlsx';
 export { loadFinanceStatement, financeAvailability, provideDuckDb, type ViewerDuckDb } from './lib/finance/financeQuery';
 export { KIND_LABELS, type FinanceKind, type FinanceScope, type FinanceStatement } from './lib/finance/types';

@@ -41,7 +41,7 @@
 			<div class="dlViewerLoad"><span class="dlViewerSpin"></span>공시뷰어 여는 중…</div>
 		{:then m}
 			{@const Studio = m.default}
-			<Studio code={view.code} vs={view.vs} embedded basePath={rt.env.basePath} {onNavigate} {onclose} />
+			<Studio code={view.code} vs={view.vs} embedded basePath={rt.env.basePath} tier={rt.env.kind === 'local' ? 'local' : 'public'} {onNavigate} {onclose} />
 		{:catch}
 			<div class="dlViewerLoad">뷰어 모듈 로드 실패 — 네트워크 확인 후 다시 열어주세요.</div>
 		{/await}

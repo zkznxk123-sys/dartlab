@@ -6,6 +6,11 @@ import type {
 	Candle,
 	CompanyPort,
 	DartLabRuntime,
+	ExportArtifact,
+	ExportableTable,
+	ExportBundleLike,
+	ExportInput,
+	ExportPort,
 	FilingPort,
 	FinancePort,
 	MacroPort,
@@ -21,6 +26,7 @@ import type {
 	ViewerPort
 } from '@dartlab/ui-contracts';
 import { createServiceRegistry } from '../../services/serviceRegistry';
+import { listExportableTables } from '../export/exportShared';
 
 const FIXTURE_CODE = '005930';
 
@@ -364,6 +370,31 @@ function fakeNavigation(calls: string[]): NavigationPort {
 	};
 }
 
+function fakeExport(): ExportPort {
+	return {
+		listExportableTables(bundle: ExportBundleLike): ExportableTable[] {
+			return listExportableTables(bundle);
+		},
+		async listTemplates() {
+			return [];
+		},
+		async saveTemplate(template) {
+			return template.templateId || 't_fixture';
+		},
+		async deleteTemplate() {
+			return true;
+		},
+		async generate(input: ExportInput): Promise<ExportArtifact> {
+			// fixture — 결정론 빈 .xlsx 자리표시자 Blob(실 writer 는 surfaces/엔진).
+			return {
+				filename: `${input.code}_공시표.xlsx`,
+				mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				blob: new Blob([], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+			};
+		}
+	};
+}
+
 function fakeStorage(): StoragePort {
 	const store = new Map<string, unknown>();
 	const subs = new Map<string, Set<(v: unknown) => void>>();
@@ -417,6 +448,7 @@ export function createFakeRuntime(options: FakeRuntimeOptions = {}): DartLabRunt
 		search: fakeSearch(),
 		ai: fakeAi(),
 		services: createServiceRegistry([]),
+		export: fakeExport(),
 		navigation: fakeNavigation(navigationCalls),
 		storage: fakeStorage(),
 		telemetry: { event() {} },

@@ -13,6 +13,8 @@ import type {
 import { createHfMacroPort } from '../public/sources/macroSource';
 import { loadTerminalFinance } from '../public/sources/financeSource';
 import { createServiceRegistry } from '../../services/serviceRegistry';
+import { exportServiceRegistration } from '../../services/exportCommand';
+import { localExportPort } from './sources/exportSource';
 import { notWiredYet } from './fetchJson';
 import type { ClientPanelInit, CompanyMeta, LocalCaches, PriceEventsPayload } from './localTypes';
 import { localAiPort } from './sources/aiSource';
@@ -48,6 +50,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		panelInit: new Map<string, Promise<ClientPanelInit | null>>(),
 		meta: new Map<string, Promise<CompanyMeta | null>>()
 	};
+	// export Port 를 먼저 만들어 서비스 레지스트리(command)와 runtime.export 양쪽이 같은 인스턴스를 공유.
+	const exportPort = localExportPort(apiBase);
 	return {
 		env,
 		company: localCompanyPort(apiBase, caches),
@@ -58,6 +62,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		macro: createHfMacroPort(),
 		report: localReportPort(),
 		scan: localScanPort(),
+		export: exportPort,
 		get map() {
 			return notWiredYet('map', '단계-8(map 추출)');
 		},
@@ -65,7 +70,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 			return notWiredYet('search', '단계-8(search 추출)');
 		},
 		ai: localAiPort(apiBase),
-		services: createServiceRegistry([]), // 로컬 명령 레지스트리 — 등록은 후속(빈 레지스트리=명령 없음 정직)
+		// 로컬 명령 레지스트리 — export.tablesToExcel 등록(엔진 완전판 .xlsx). 다운로드 트리거는 surface 가 toast.payload 로.
+		services: createServiceRegistry([exportServiceRegistration(exportPort)]),
 		navigation: options.navigation, // 셸 주입 (framework-agnostic 유지)
 		storage: localStoragePort(),
 		telemetry: { event() {} },

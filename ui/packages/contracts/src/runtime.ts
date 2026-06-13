@@ -12,6 +12,7 @@ import type { MapPort } from './map';
 import type { SearchPort } from './search';
 import type { AiPort } from './ai';
 import type { ServicesPort } from './services';
+import type { ExportPort } from './export';
 import type { NavigationPort } from './navigation';
 import type { StoragePort } from './storage';
 
@@ -81,6 +82,7 @@ export interface DartLabRuntime {
 	search: SearchPort;
 	ai: AiPort;
 	services: ServicesPort;
+	export: ExportPort;
 	navigation: NavigationPort;
 	storage: StoragePort;
 	telemetry: TelemetryPort;
