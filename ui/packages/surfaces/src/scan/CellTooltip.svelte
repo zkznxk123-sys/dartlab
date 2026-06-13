@@ -5,7 +5,7 @@
 	 * Grid.svelte 가 마우스 dwell 200ms 후 이 컴포넌트 렌더. position 은 호버한 셀의
 	 * bounding rect 기준 (top/left absolute).
 	 */
-	import Sparkline from '$lib/components/ui/Sparkline.svelte';
+	import Sparkline from './Sparkline.svelte';
 	import { METRICS_BY_KEY } from './metrics';
 
 	interface Props {

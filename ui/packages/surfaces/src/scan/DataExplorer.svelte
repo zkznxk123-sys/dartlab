@@ -16,7 +16,7 @@
 	import ScreenBuilder from './ScreenBuilder.svelte';
 	import { TABLE_SOURCES, TABLE_SOURCES_BY_ID, resolveHfPath } from './tableSources';
 	import type { TableSource } from './tableSources';
-	import type { DartDb } from '$lib/data/duckdb';
+	import type { DartDb } from './duckSql';
 	import type { PriceMetrics, ValuationMetrics, ChangeMetrics } from './duckSql';
 	import type { FilterCond, ScanNode, SortKey } from './types';
 

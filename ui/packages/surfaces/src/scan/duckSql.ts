@@ -13,7 +13,29 @@
  * 시계열은 PR-D 디테일 패널에서. PR-B 는 60일 sparkline 만 활용.
  */
 
-import { loadDartDb, sqlEscape, type DartDb } from '$lib/data/duckdb';
+// duckdb 접근은 셸이 주입한다 — surfaces(vanilla svelte)는 SvelteKit/Vite 전용 $lib/data/duckdb
+// ($app/environment·@vite-ignore·OPFS)에 직접 결합하지 않는다(viewer financeQuery seam 동형, queryStream/persisted 등
+// scan 사용 멤버 포함). landing 컴포지션 루트가 provideScanDuckDb(loadDartDb) 주입. 미주입(또는 기기 제약) = null → 정직 강등.
+export interface DartDb {
+	readonly persisted: boolean;
+	readonly opfsRebuilt: boolean;
+	query<T = Record<string, unknown>>(sql: string): Promise<T[]>;
+	queryStream<T = Record<string, unknown>>(sql: string): AsyncGenerator<T[], void, void>;
+	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
+	registerJson(tableName: string, rows: unknown[]): Promise<void>;
+	close(): Promise<void>;
+}
+let scanDuckDbProvider: (() => Promise<DartDb | null>) | null = null;
+export function provideScanDuckDb(provider: () => Promise<DartDb | null>): void {
+	scanDuckDbProvider = provider;
+}
+function loadDartDb(): Promise<DartDb | null> {
+	return scanDuckDbProvider ? scanDuckDbProvider() : Promise.resolve(null);
+}
+// SQL 단일인용 escape — 1줄 순수 유틸(옛 $lib/data/duckdb.sqlEscape 인라인 — 결합 절제).
+function sqlEscape(value: string): string {
+	return value.replace(/'/g, "''");
+}
 
 /** persisted DB 의 특정 테이블 존재 여부. db.persisted 가 true 일 때만 의미. */
 async function persistedHas(db: DartDb, tableName: string): Promise<boolean> {

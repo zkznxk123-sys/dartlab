@@ -1,5 +1,5 @@
 import type { MetricDef } from './types';
-import { fmtPct } from '$lib/format/pct';
+import { fmtPct } from './format/pct';
 
 export type FinanceMetricGroup =
 	| 'financeIncome'

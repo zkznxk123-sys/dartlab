@@ -5,24 +5,36 @@
 	import { SlidersHorizontal } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import { FreshnessBadge } from '@dartlab/ui-surfaces/map';
-	import Grid from '$lib/scan/Grid.svelte';
-	import ColumnGroupBar from '$lib/scan/ColumnGroupBar.svelte';
-	import PresetModal from '$lib/scan/PresetModal.svelte';
-	import CellTooltip from '$lib/scan/CellTooltip.svelte';
-	import Distribution from '$lib/scan/Distribution.svelte';
-	import InsightsFeed from '$lib/scan/InsightsFeed.svelte';
-	import SavedSets from '$lib/scan/SavedSets.svelte';
-	import { encodeScanPayload, decodeScanPayload } from '$lib/scan/url';
-	import type { SavedColumnSet } from '$lib/scan/types';
-	import { DEFAULT_COLUMNS, METRICS_BY_KEY, PINNED_COLUMNS, type MetricGroup } from '$lib/scan/metrics';
-	import type { ScanNode, FilterCond, SortKey } from '$lib/scan/types';
-	import type { Preset, RuntimeLoader } from '$lib/scan/presets';
-	import { PRESETS_BY_ID } from '$lib/scan/presets';
+	import {
+		Grid,
+		ColumnGroupBar,
+		PresetModal,
+		CellTooltip,
+		Distribution,
+		InsightsFeed,
+		SavedSets,
+		encodeScanPayload,
+		decodeScanPayload,
+		DEFAULT_COLUMNS,
+		METRICS_BY_KEY,
+		PINNED_COLUMNS,
+		PRESETS_BY_ID,
+		type SavedColumnSet,
+		type ScanNode,
+		type FilterCond,
+		type SortKey,
+		type MetricGroup,
+		type Preset,
+		type RuntimeLoader,
+		type PriceMetrics,
+		type ValuationMetrics,
+		type DbState
+	} from '@dartlab/ui-surfaces/scan';
+	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import { HF_RESOLVE, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 	import type { ProductIndexItem } from '@dartlab/ui-contracts';
 	import type { ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
 	import type { ChangeMetrics } from '$lib/data/changesRuntime';
-	import type { PriceMetrics, ValuationMetrics, DbState } from '$lib/scan/duckSql';
 	import type { DartDb } from '$lib/data/duckdb';
 
 	let { data } = $props();
@@ -630,18 +642,18 @@
 	}
 
 	async function loadDetailComponent() {
-		DetailComponent = (await import('$lib/scan/Detail.svelte')).default;
+		DetailComponent = (await import('@dartlab/ui-surfaces/scan')).Detail;
 	}
 
 	async function loadDataExplorerComponent() {
-		DataExplorerComponent = (await import('$lib/scan/DataExplorer.svelte')).default;
+		DataExplorerComponent = (await import('@dartlab/ui-surfaces/scan')).DataExplorer;
 	}
 
 	async function bootDuckDbForExplorer() {
 		if (dbBootStarted || dartDb) return;
 		dbBootStarted = true;
 		dbState = 'loading';
-		const { ensureDuckDb } = await import('$lib/scan/duckSql');
+		const { ensureDuckDb } = await import('@dartlab/ui-surfaces/scan');
 		const ensure = await ensureDuckDb();
 		if (ensure.error) dbError = ensure.error;
 		dbState = ensure.state;
@@ -738,7 +750,7 @@
 			return;
 		}
 		try {
-			const { loadFinanceLiteRuntime } = await import('$lib/scan/financeLiteRuntime');
+			const { loadFinanceLiteRuntime } = await import('@dartlab/ui-surfaces/scan');
 			const result = await loadFinanceLiteRuntime(fetch);
 			financeMap = financeRowsToMap(result.rows);
 			markLoaderReady('finance5y');
@@ -1204,6 +1216,8 @@
 				<DetailComponent
 					{node}
 					db={dartDb}
+					filing={getPublicRuntime().filing}
+					basePath={base}
 					financeLoading={loaderLoading.has('finance5y')}
 					onClose={() => (selectedRow = null)}
 				/>

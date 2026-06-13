@@ -1,4 +1,6 @@
-import { loadFinanceLiteRuntime } from './financeLiteRuntime';
+// scan surface 승격(단계-8 Phase2) — financeLiteRuntime 은 surface 로 이동, 본 worker 는 라우트가 생성(URL 상대경로)
+// 하므로 landing 잔류. surface 공개 표면으로 재배선.
+import { loadFinanceLiteRuntime } from '@dartlab/ui-surfaces/scan';
 
 const DEFAULT_HF_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
 

@@ -16,7 +16,7 @@
 	import TableView from './TableView.svelte';
 	import { mountCodemirror } from './codemirror';
 	import type { EditorView } from '@codemirror/view';
-	import type { DartDb } from '$lib/data/duckdb';
+	import type { DartDb } from './duckSql';
 
 	interface Props {
 		id: string;

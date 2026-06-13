@@ -11,8 +11,8 @@
 	 * 카드 → 클릭 = 자동 필터 + 정렬 적용 (onApply).
 	 */
 	import type { ScanNode, FilterCond, SortKey } from './types';
-	import { fmtPct } from '$lib/format/pct';
-	import { fmtKrw } from '$lib/format/krw';
+	import { fmtPct } from './format/pct';
+	import { fmtKrw } from './format/krw';
 
 	interface Props {
 		nodes: ScanNode[];

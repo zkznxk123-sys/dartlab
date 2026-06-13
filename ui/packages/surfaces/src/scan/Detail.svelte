@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-	import { fmtPct } from '$lib/format/pct';
-	import type { RegularFiling } from '@dartlab/ui-contracts';
-	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
-	import type { DartDb } from '$lib/data/duckdb';
+	import { fmtPct } from './format/pct';
+	import type { FilingPort, RegularFiling } from '@dartlab/ui-contracts';
+	import type { DartDb } from './duckSql';
 	import { FINANCE_COMPLETED_YEARS, financeMetricKey } from './financeAccounts';
 	import { loadCompanyFinanceLitePeriods, type CompanyFinancePeriodRow } from './financeLiteRuntime';
 	import { gradeTone, toneColor } from './grade';
@@ -14,6 +12,9 @@
 		db: DartDb | null;
 		financeLoading?: boolean;
 		onClose: () => void;
+		// 셸 주입 — surface 는 $app/paths·publicRuntime 무결합(포터블). filing=공시 포트(정기공시), basePath=뷰어 링크.
+		filing: FilingPort;
+		basePath?: string;
 	}
 
 	type Point = { year: string; label: string; [key: string]: number | string | null };
@@ -21,7 +22,7 @@
 
 	const DETAIL_PERIOD_LIMIT = 12;
 
-	let { node, db: _db, financeLoading = false, onClose }: Props = $props();
+	let { node, db: _db, financeLoading = false, onClose, filing, basePath = '' }: Props = $props();
 	let filings = $state<RegularFiling[]>([]);
 	let financePeriods = $state<CompanyFinancePeriodRow[]>([]);
 	let filingsLoading = $state(false);
@@ -31,7 +32,7 @@
 	$effect(() => {
 		const code = node.id;
 		filingsLoading = true;
-		void getPublicRuntime().filing.regular(code, 40)
+		void filing.regular(code, 40)
 			.then((rows) => {
 				if (node.id === code) filings = rows;
 			})
@@ -449,7 +450,7 @@
 		<section class="d-section filings">
 			<div class="filings-head">
 				<span class="sec-title">최근 정기공시</span>
-				<a class="viewer-btn" href={`${base}/viewer/company/${node.id}`} target="_blank" rel="noreferrer" title="공시뷰어로 열기 — panel 항목×기간 격자·정량재무제표">공시뷰어 ↗</a>
+				<a class="viewer-btn" href={`${basePath}/viewer/company/${node.id}`} target="_blank" rel="noreferrer" title="공시뷰어로 열기 — panel 항목×기간 격자·정량재무제표">공시뷰어 ↗</a>
 			</div>
 			{#if filingsLoading}
 				<div class="loading">로드 중...</div>

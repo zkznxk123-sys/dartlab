@@ -23,7 +23,7 @@
 	 *   - 5초 timeout
 	 *   - 결과 1만 row cap
 	 */
-	import type { DartDb } from '$lib/data/duckdb';
+	import type { DartDb } from './duckSql';
 	import type { PriceMetrics, ValuationMetrics, ChangeMetrics } from './duckSql';
 
 	interface Props {

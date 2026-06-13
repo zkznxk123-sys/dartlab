@@ -23,7 +23,7 @@
 		type NotebookCell
 	} from './notebookStore';
 	import { decodeNotebook, buildShareUrl } from './notebookUrl';
-	import type { DartDb } from '$lib/data/duckdb';
+	import type { DartDb } from './duckSql';
 
 	type Cell = NotebookCell;
 

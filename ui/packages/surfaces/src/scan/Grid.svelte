@@ -16,7 +16,7 @@
 	 */
 	import HeaderTooltip from './HeaderTooltip.svelte';
 	import HeaderFilterPopover from './HeaderFilterPopover.svelte';
-	import Sparkline from '$lib/components/ui/Sparkline.svelte';
+	import Sparkline from './Sparkline.svelte';
 	import { METRICS_BY_KEY, PINNED_COLUMNS } from './metrics';
 	import type { FilterCond, ScanNode, SeriesMetric, SortKey } from './types';
 	import { gradeTone, rowTintColor, toneColor } from './grade';

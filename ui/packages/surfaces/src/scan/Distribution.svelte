@@ -11,8 +11,8 @@
 	import type { DistributionData } from './binning';
 	import { METRICS_BY_KEY } from './metrics';
 	import type { ScanNode } from './types';
-	import { fmtKrw } from '$lib/format/krw';
-	import { fmtPct, fmtMul } from '$lib/format/pct';
+	import { fmtKrw } from './format/krw';
+	import { fmtPct, fmtMul } from './format/pct';
 
 	interface Props {
 		nodes: ScanNode[];
