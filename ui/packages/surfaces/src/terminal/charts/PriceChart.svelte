@@ -30,7 +30,7 @@
 		code: string;
 		name?: string;
 		lang: Lang;
-		events?: { date: string; label: string }[];
+		events?: { date: string; label: string; url?: string; kind?: 'report' | 'capital' | 'disclosure' }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
 		// 전체화면 심볼 점프 — 검색은 엔진(suggest), 전환은 onPick (터미널 pick 관통)
@@ -577,7 +577,25 @@
 		for (const ev of evs) {
 			if (ev.date < first || ev.date > last) continue;
 			const k = snap(ev.date);
-			const id = c.createOverlay({ name: 'simpleAnnotation', extendData: ev.label, points: [{ timestamp: toMs(k.t), value: k.h }], styles: { text: { color: '#fb923c', backgroundColor: 'rgba(251,146,60,0.12)', borderColor: 'rgba(251,146,60,0.5)' } } });
+			// 공시 시점 = dartlab 고유 강점. 비정기 material 공시(disclosure)는 cyan, 실적·증자(report·capital)는 orange.
+			// url 보유 마커는 클릭 시 해당 DART 공시를 새 탭으로 — 가격차트가 곧 네비게이션 가능한 공시 타임라인.
+			const disc = ev.kind === 'disclosure';
+			const fg = disc ? '#22d3ee' : '#fb923c';
+			const bg = disc ? 'rgba(34,211,238,0.12)' : 'rgba(251,146,60,0.12)';
+			const bd = disc ? 'rgba(34,211,238,0.5)' : 'rgba(251,146,60,0.5)';
+			const evUrl = ev.url;
+			const id = c.createOverlay({
+				name: 'simpleAnnotation',
+				extendData: ev.label,
+				points: [{ timestamp: toMs(k.t), value: k.h }],
+				styles: { text: { color: fg, backgroundColor: bg, borderColor: bd } },
+				onClick: evUrl
+					? () => {
+							window.open(evUrl, '_blank', 'noopener,noreferrer');
+							return false;
+						}
+					: null
+			});
 			if (id) ids.push(id as string);
 		}
 		eventIds = ids;

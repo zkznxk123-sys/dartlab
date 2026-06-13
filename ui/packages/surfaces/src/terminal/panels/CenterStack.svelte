@@ -201,21 +201,69 @@
 		};
 	});
 
-	// 주가차트 재무 오버레이: 실적 발표 마커(보고서 실제 접수일, 결측 시 분기말 폴백) + 증자·감자 마커 + 적정주가 밴드
+	// 공시 이벤트 레일 (dartlab 고유 강점) — 정기보고서 url(접수일별) + 비정기 material 공시(날짜 그룹·클릭 시 DART).
+	// 가격차트 마커가 곧 네비게이션 가능한 공시 타임라인. 같은 날 다수 공시는 1마커로 묶고 '외 N건' 표기(마커 폭주 방지).
+	let regularUrlByDate = $state<Record<string, string>>({});
+	let disclosureEvents = $state<{ date: string; label: string; url: string; kind: 'disclosure' }[]>([]);
+	$effect(() => {
+		const code = co.code;
+		let cancelled = false;
+		regularUrlByDate = {};
+		disclosureEvents = [];
+		void Promise.all([rt.filing.regular(code), rt.filing.nonRegular(code, 200)]).then(([reg, non]) => {
+			if (cancelled) return;
+			const rmap: Record<string, string> = {};
+			for (const f of reg ?? []) if (f.rceptDate && f.url) rmap[f.rceptDate.replace(/\D/g, '').slice(0, 8)] = f.url;
+			regularUrlByDate = rmap;
+			const byDate = new Map<string, { labels: string[]; url: string }>();
+			for (const f of non ?? []) {
+				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
+				if (d.length !== 8 || !f.url) continue;
+				const cur = byDate.get(d);
+				if (cur) cur.labels.push(f.reportNm);
+				else byDate.set(d, { labels: [f.reportNm], url: f.url });
+			}
+			// 최근 60개 날짜로 캡 — wide window 에서도 마커 폭주 방지(anti-clutter). 같은 날 다수는 이미 1마커로 묶임.
+			disclosureEvents = [...byDate.entries()]
+				.sort((a, b) => (a[0] < b[0] ? 1 : -1))
+				.slice(0, 60)
+				.map(([d, v]) => ({
+					date: d,
+					label: v.labels.length > 1 ? `${v.labels[0]} 외 ${v.labels.length - 1}건` : v.labels[0],
+					url: v.url,
+					kind: 'disclosure' as const
+				}));
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	// 주가차트 재무 오버레이: 실적 발표 마커(보고서 접수일·클릭 시 DART) + 증자·감자 + 비정기 공시 레일 + 적정주가 밴드
 	const priceEvents = $derived.by(() => {
 		const src = finBundle?.views.quarter ?? finBundle?.views.ttm ?? finBundle?.views.annual;
 		const filed = finBundle?.filedDates ?? {};
-		const out: { date: string; label: string }[] = [];
+		type Ev = { date: string; label: string; url?: string; kind?: 'report' | 'capital' | 'disclosure' };
+		const out: Ev[] = [];
 		if (src) {
 			const QEND: Record<string, string> = { '1': '0331', '2': '0630', '3': '0930', '4': '1231' };
+			const urlFor = (d: string) => regularUrlByDate[d.replace(/\D/g, '').slice(0, 8)];
 			for (const p of src.periods) {
 				const mq = p.match(/^(\d{2})Q(\d)$/);
-				if (mq) { out.push({ date: filed[`20${mq[1]}-${mq[2]}`] ?? '20' + mq[1] + QEND[mq[2]], label: p }); continue; }
+				if (mq) {
+					const d = filed[`20${mq[1]}-${mq[2]}`] ?? '20' + mq[1] + QEND[mq[2]];
+					out.push({ date: d, label: p, url: urlFor(d), kind: 'report' });
+					continue;
+				}
 				const fy = p.match(/^FY(\d{2})$/);
-				if (fy) out.push({ date: filed[`20${fy[1]}-4`] ?? '20' + fy[1] + '1231', label: p });
+				if (fy) {
+					const d = filed[`20${fy[1]}-4`] ?? '20' + fy[1] + '1231';
+					out.push({ date: d, label: p, url: urlFor(d), kind: 'report' });
+				}
 			}
 		}
-		return [...out, ...capEvents];
+		const caps: Ev[] = capEvents.map((e) => ({ ...e, kind: 'capital' as const }));
+		return [...out, ...caps, ...disclosureEvents];
 	});
 	const v = $derived(co.valuation);
 	const priceValBand = $derived(
