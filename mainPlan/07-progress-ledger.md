@@ -10,12 +10,24 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-3 (ui/packages/design — landing 토큰 승격 + primitive 최소 세트). "3단계 쭉" 승인분(1a·1b·2)은 완료 — 단계-3 착수 전 운영자 확인 권장(landing styles 이동은 ui/web smoke 동반, 04 단계-3).
-  · landing lib/styles의 --dl-* 토큰 → ui/packages/design/src/styles (tokens/semantic/aliases 계층화)
-  · primitive 최소 세트(Button·Panel·IconButton…)는 실소비 등장 시점에 — 빈 스캐폴딩 금지
-  · 검증: landing build + visual smoke + inline hex 신규 0 + **ui/web 로컬 터미널 smoke**(styles deep import 재배선 동반)
-잔여 이월(단계-2발): vitest 기반 fake runtime unit test + adapter fixture conformance 런타임 대조 — 첫 surface 소비(단계-3/4a)와 동행
-재개 지점: entry #9 (단계-2 완료) — contracts+runtime 패키지 가동, fake runtime으로 surface 단독 렌더 가능
+다음 작업: 단계-3 마감(검증 중) → 단계-4a. 운영자 승인 "5단계정도"(3→4a→4b→5→6).
+
+단계-4a sub-unit 분해 선언 (07 규칙 3 — 1세션 초과 예상):
+  · **4a-1 데이터 클라이언트 이관**: hfRange·origin·cacheStore·dartlabData(loadJson)를 `@dartlab/ui-runtime/data`
+    공개 subpath로 이동(과도기 표면 — viewer/scan도 과도기 소비, 단계-8 후 비공개화 검토).
+    priceSeries·govPrice·macroSeries·reportSeries·terminalFinance·relations·productIndexRuntime·
+    companyFilings 2종 로더를 runtime public adapter 구현으로 이관. landing viewer/scan의 hfRange
+    참조는 runtime/data로 재배선. 검증: landing check/build + ui/web build.
+  · **4a-2 포트 조립 + 호출부 치환**: createPublicRuntime 포트 실구현 조립(공유 엔진 의존 포트
+    reportFacts·changes는 wrapper 주입 오버라이드 — companyLive·duckSql은 landing 잔류라 의존 방향 보존).
+    terminal 13파일/33개소 silent fallback → runtime context. landing terminal route wrapper가
+    createPublicRuntime 주입. ui/web 브리지는 localTerminalData를 DartLabRuntime 형태로 재조립해
+    mount context 주입(전역 locator 철거 — landing localAdapter.ts 삭제).
+  · **4a-3 잔여 결합 해소**: viewer 컴포넌트 2종 주입 역전(ViewerHost snippet)·$app/environment 12파일
+    헬퍼 치환·$app/paths 3파일 basePath 주입·livePrice 설정 주입. 검증: 전역 locator 0·silent fallback 0
+    grep + landing/ui-web 양쪽 터미널 smoke.
+잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
+재개 지점: entry #10 (단계-3) — design 패키지 가동
 ```
 
 ---
@@ -186,3 +198,11 @@ commit: (이 변경의 커밋)
 
 검증: tsc strict exit 0 ✓ / 전역 직접 참조($app/·window.·localStorage) grep 0 ✓ / 워크스페이스 등록 ✓. vitest unit + 런타임 fixture 대조는 첫 surface 소비와 동행(NEXT 이월 기록)  
 rollback: 이 commit revert (신설 파일만).
+
+### [10] 단계-3 ui/packages/design — 완료 (토큰 1:1 이동)
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+변경: landing lib/styles 3종(tokens·typography·v2-tokens, --dl-* 원천) → ui/packages/design/src/styles **git mv 순수 이동(내용 불변)**. landing +layout 2곳 → `@dartlab/ui-design/styles/*` 재배선(+의존 명시). ui/web deep import 2줄 → packages 파일경로 재배선(워크스페이스 밖 — 01 §3.4).  
+범위 결정: semantic/aliases 계층화·primitive 세트는 **실소비 등장 시점**(빈 스캐폴딩 금지, 4b/6에서 terminal.css 흡수와 동행). 시각 회귀 스크린샷은 내용 불변 이동이라 구조적 비대상 — 토큰 내용 변경이 생기는 첫 단위부터 baseline 운영.  
+검증: landing check 에러0 ✓ / landing 풀빌드 ✓ / ui/web build ✓ (양 무중단 대상 green)  
+rollback: 이 commit revert.

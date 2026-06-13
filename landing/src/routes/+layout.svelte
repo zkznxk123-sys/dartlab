@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '../app.css';
-	import '$lib/styles/v2-tokens.css';
-	import '$lib/styles/tokens.css';
-	import '$lib/styles/typography.css';
+	import '@dartlab/ui-design/styles/v2-tokens.css';
+	import '@dartlab/ui-design/styles/tokens.css';
+	import '@dartlab/ui-design/styles/typography.css';
 	import type { Snippet } from 'svelte';
 	import CloudflareWebAnalytics from '$lib/components/CloudflareWebAnalytics.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';

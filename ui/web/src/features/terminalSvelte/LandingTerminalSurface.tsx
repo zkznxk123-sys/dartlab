@@ -3,8 +3,9 @@ import { mount, unmount } from 'svelte';
 
 import { loadLocalTerminalRuntime } from './localTerminalData';
 
-import '../../../../../landing/src/lib/styles/v2-tokens.css';
-import '../../../../../landing/src/lib/styles/tokens.css';
+// 디자인 토큰 — @dartlab/ui-design (ui/web 은 워크스페이스 밖이라 파일경로로 소비, 01 §3.4)
+import '../../../../packages/design/src/styles/v2-tokens.css';
+import '../../../../packages/design/src/styles/tokens.css';
 
 interface LandingTerminalSurfaceProps {
 	code: string;
