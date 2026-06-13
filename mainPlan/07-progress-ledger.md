@@ -34,12 +34,13 @@
   map/search 포트 실구현) → 단계-9(landing public shell 전환) → 단계-10(Python server 기본 UI=ui/apps/local).
 잔여 이월(누적): vitest unit+fixture 런타임 대조 · publish.yml:108 prose 경로 · ui/apps/local 라이브 dev 클릭스루(dartlab
   ai 서버 구동 후, 단계-10 확증) · finance.bundle 로컬 엔드포인트(현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #27(단계-8 Phase1 map 추출 완료, green) 직후 — push(map 3946a3c62 + ledger, 이전 ci-fast green 후)
-  → **단계-8 Phase2**(scan 추출, HIGH — `landing/src/lib/scan/` ~11.6k LOC: duckdb `$lib/data/duckdb` provideDuckDb
-  seam[viewer financeQuery 패턴 재사용]·worker 3[scanRuntime/price/changes 상대경로 동반]·@codemirror 6 deps·format
-  krw/pct 인라인or공유·결합 Header/publicRuntime). census [26] = 설계, 착수 직전 scan 결합 재grep + tests/.github
-  하드코딩 경로 grep 필수(accountOrder.ts 교훈). → 단계-9(landing public shell 전환) → 단계-10(Python 기본 UI=ui/apps/
-  local). 명시 목표(챗+터미널)=달성, 단계-8~10=리팩터 "전부 완성" 꼬리.
+재개 지점: entry #28(단계-8 Phase2 scan 추출 — **완전 실행 설계 예약 완료**) 직후 — **scan 이동 실행**. entry [28] =
+  실행 SSOT(재조사 0): git mv `landing/src/lib/scan`→`ui/packages/surfaces/src/scan`(scanRuntime.worker.ts 는 landing 잔류
+  되돌림) · duckSql provideScanDuckDb seam(query+queryStream) · Detail basePath+filing prop · format/Sparkline 복사 · 라우트+
+  companyLive 재배선 · scan index.ts · surfaces deps(@codemirror 6·hyparquet 2·d3-scale)+./scan export · +layout
+  provideScanDuckDb 주입 · gates(surfaces→landing→풀빌드→local→ui/web) · 가역 프로토콜(게이트 후 커밋). ⚠착수 직전
+  `$lib/scan` importer·tests/.github 재grep(map 4→7 누락 교훈). → 단계-9(landing public shell 전환 완료) → 단계-10
+  (Python 기본 UI=ui/apps/local). 명시 목표(챗+터미널 모드)=달성·공개 LIVE, 단계-8~10=리팩터 "전부 완성" 꼬리.
 ```
 
 ---
@@ -599,3 +600,39 @@ commit: 3946a3c62 (24 files)
   insights/changes 라우트=정적 JSON 소비(industry 컴포넌트 FreshnessBadge만 — 이동됨), 라우트 자체는 landing 잔류 적정.
 rollback: 3946a3c62 revert(git mv·basePath·index·재배선 단일 원자).
 중단 지점/다음 행동: push(map + 본 ledger, 이전 ci-fast 완료 후) → 단계-8 Phase2(scan 추출) 또는 단계-9.
+
+### [28] 단계-8 Phase2 Scan Surface Extraction — 예약 + 완전 실행 설계 (이동 원자 윈도우 §2.5, 규칙 6)
+일시: 2026-06-13
+commit: (예약 — 상세 census[a7c…] + 내 직접 grep 검증 = 실행 SSOT, 재조사 불필요. 신선 컨텍스트 권장 — 최대·최다결합 이동)
+**규모**: `landing/src/lib/scan/` 36파일 ~11.6k LOC(TS 18 core/util + 컴포넌트 18) + 라우트 `routes/scan/+page.svelte`
+  (~1000 LOC, landing 잔류 = 컴포지션 루트). → `ui/packages/surfaces/src/scan/`.
+**결합(내 직접 grep 확정)**:
+- ★duckdb: `duckSql.ts:16` `loadDartDb·sqlEscape·DartDb`($lib/data/duckdb) — **유일 value 소비**. 나머지(DataExplorer·
+  Detail·SqlNotebook·SqlEditor·SqlCell:type만 DartDb). duckSql 은 **queryStream 도 사용**(viewer financeQuery 엔 없음) →
+  seam=`ScanDuckDb extends {query,queryStream,registerHfParquet,registerJson}` + `provideScanDuckDb`. sqlEscape 인라인.
+  type DartDb 소비 5파일 → ScanDuckDb 타입 import('./duckSql').
+- ★Detail.svelte: `base`($app/paths:2)→basePath prop · `getPublicRuntime().filing.regular(code,40)`(line 5,34)→**filing
+  prop**(라우트가 getPublicRuntime().filing 주입, surface→landing 역결합 제거). runtime 컨텍스트 셋업 불요(prop 1개).
+- format: `$lib/format/{krw,pct}` 5파일(Detail·Distribution·InsightsFeed·metrics·financeAccounts) → **scan/format/{krw,pct}.ts
+  복사**(krw=조/억/만 ~70 LOC·pct ~40 LOC, 비trivial) + 상대 재배선. ⚠임시 중복 — 후속 @dartlab/ui-format 공유패키지 추출
+  (landing 광범위 사용이라 별도 단위). [[feedback_always_check_clutter]] 부채 인지.
+- Sparkline: `$lib/components/ui/Sparkline.svelte`(CellTooltip:8·Grid:19) → scan 으로 **복사** + 상대 재배선(map industry/
+  Sparkline 과 다른 ui/Sparkline).
+- ★worker: 라우트가 `new Worker(new URL('../../lib/scan/scanRuntime.worker.ts',import.meta.url))`(+page.svelte:549) 생성.
+  priceRuntime·changesRuntime worker 는 lib/data(landing, 무관). → **scanRuntime.worker.ts 는 landing/lib/scan/ 잔류**(라우트
+  worker URL 유지, cross-package worker URL 회피 — priceRuntime/changesRuntime 패턴 일관). 단 worker 의 `./financeLiteRuntime`
+  import → `@dartlab/ui-surfaces/scan` 재배선(financeLiteRuntime 는 이동).
+- companyLive.ts: `landing/src/lib/browser/companyLive.ts:4` `$lib/scan/duckSql`(loadCompanyChanges) → `@dartlab/ui-surfaces/
+  scan` 재배선(landing→surface 정방향, OK).
+- deps: @codemirror/{state,view,lang-sql,autocomplete,commands,theme-one-dark}(landing 버전)·hyparquet·hyparquet-compressors·
+  d3-scale → surfaces package.json + `./scan` export. provideScanDuckDb(loadDartDb) 주입 = landing +layout(companyLive 가
+  scan duckSql 를 라우트 밖에서도 쓰므로 전역 주입, provideDuckDb 옆).
+**포트**: scan.* 미소비(changes 는 loadCompanyChanges 직접) — seam 불요(viewer panel*·map 동일 패턴).
+**importer(직접 grep)**: routes/scan/+page.svelte(주 소비, 다수 동적 import)·companyLive.ts. terminal ScreenerModal=scan
+  무관 독립(재확인). **tests/.github 하드코딩 0**(직접 grep — 동적 import라 accountOrder.ts식 sync 테스트 없음). screener=redirect stub.
+**난이도**: 깊이 아닌 **넓이**(수술 패턴은 viewer/map서 마스터: basePath/filing prop·duckdb seam·copy·import 재배선·worker
+  잔류). 게이트: surfaces check→landing check→landing 풀빌드→local→ui/web build. ⚠착수 직전 `$lib/scan` importer·tests/.github
+  재grep(map서 4→7 누락 적발 교훈).
+착수: 신선 컨텍스트에서 본 entry = 실행 SSOT. git mv lib/scan→surfaces/scan(worker 잔류 되돌림)·seam·prop 수술·format/Sparkline
+  복사·라우트+companyLive 재배선·index·deps·+layout provideScanDuckDb·gates·commit(가역 프로토콜).
+rollback: 해당 없음(예약 문서).
