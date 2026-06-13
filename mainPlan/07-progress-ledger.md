@@ -26,7 +26,8 @@
 잔여 이월(누적): scan 프리셋류 포트(단계-8) · map/search 포트 실구현(단계-8) · publish.yml:108 prose 경로 주석 갱신 ·
   ui/apps/local 라이브 dev 클릭스루(dartlab ai 서버 구동 후, 단계-10 Python 전환서 확증) · finance.bundle 로컬 엔드포인트
   (서버 /api 재무 번들 신설 시 — 현재 로컬 터미널 재무카드 빈값, ui/web 패리티)
-재개 지점: entry #21 (단계-5 종료) — 단계-6(viewer 추출) 예약부터. 설계 전부 #18~#21 에 박제됨.
+재개 지점: entry #22 (단계-6 예약·census 완료) — 추출 착수 토론(아키텍트+적대)부터. census·결합 C1~C12·sub-unit
+  분해·FilingPort 공개 구현 방식 전부 #22 에 박제됨. ⚠ 15k LOC 이동이라 신선 컨텍스트에서 6-1 git mv 실행 권장.
 ```
 
 ---
@@ -404,3 +405,36 @@ commit: 5-3a = d2a585425 / 5-3b = (이 변경의 커밋)
   ※ 라이브 dev 클릭스루(chat→terminal·Ask→recent·filing viewer overlay 실동작)는 `dartlab ai` 로컬 서버(/api·8400)
     구동 필요 — 빌드/체크가 로컬 게이트(landing prerender 와 동일 디스시플린), 실서버 통합은 단계-10 Python 전환서 확증.
 rollback: 5-3b 커밋 revert(ui/apps/local 셸·라우트 + surface PriceRow export) / 5-3a 커밋 revert.
+
+### [22] 단계-6 Viewer Surface Extraction — 예약 + 결합 census (이동 원자 윈도우 §2.5, 07 규칙 6)
+일시: 2026-06-13
+commit: (예약 — 본 entry 자체는 문서. 추출은 신선 컨텍스트 실행 단위)
+**규모 실측(census)**: 뷰어 = **15,219 LOC 이동 대상** — 컴포넌트 14개 4,482(`landing/src/lib/components/viewer/`:
+  ViewerStudio 1150·AskDrawer 1038·FinanceStatementPane 480·PanelMatrix 280·CellContent 250·나머지 TOC/timeline/
+  compare/companySearch/commandPalette/finance/giscus) + 데이터레이어 45파일 10,737(`landing/src/lib/viewer/`: panelLoad·
+  panelWide·search·compare/engine·finance/financeQuery(DuckDB)·askSession·webllm·ollama·answerCompose 등). **터미널의 ~22배** —
+  단일 턴 불가, 다중 턴 이동 윈도우. 라우트 4파일(`routes/viewer/`)은 landing 잔류(goto 글루).
+**결합 census(C1~C12)**:
+- EASY: C1 `$app/paths base`→basePath 데이터 prop(ViewerStudio·AskDrawer·CompanySearch) / C2 `$app/navigation goto`→
+  onNavigate 콜백(CompanySearch, ViewerStudio 이미 onNavigate 보유=대부분 완료) / C3 `$lib/brand`→links 데이터 prop(터미널 패턴).
+- MEDIUM: C4 localStorage 4키(`dartlab:cmpHint`·`dartlab:lastViewer`·`contributeQuestions`·`webllmModel`)→storage 추상화
+  (createLocalRuntime 에 이미 StoragePort 있음·landing 셸은 localStorage 래퍼 주입). try/catch 우아한 강등 유지.
+- SAFE(무변경): C5 matchMedia·C6 window/document 리스너(Esc·Cmd+K)=브라우저 전용 surface라 그대로.
+- ZERO-break(surface 와 함께 이동): C7 hfRange·C8 panelLoad/panelWide/compare/finance 데이터함수·C10 compare/engine·
+  C11 finance/DuckDB — 전부 순수 계산, shell 무의존. `$lib/viewer/*` 45파일은 **복사(import 아님)** = surface 자급(터미널 선례).
+- **HARD: C9 AskDrawer(1038 LOC) WebGPU+web-llm+Worker+IndexedDB** — surface 잔류(전역 결합 과다). iframe 임베드 시
+  열화 계약 필요(sameOrigin=WebGPU 작동, cross-origin=Tier-0 결정론 검색만+"메인창서 모델 다운로드" 안내). 터미널엔 없던 신영역.
+- C12 라우트 param/vs 정규화=landing 잔류(goto 글루).
+**FilingPort 공개 구현(단계-6 동행)**: 현재 createPublicRuntime panelToc/panelInit/panelGrid = throw 게이트. 공개 구현 =
+  **landing buildPanelBundle(브라우저 parquet read=panelLoad+panelWide) 래핑** — `/api` 서버 아님(공개 landing 무서버),
+  shared 주입 패턴(reportFacts/changes 처럼 landing 잔류 모듈 주입). 로컬 어댑터는 이미 /api 로 구현됨(filingSource).
+**주입 표면(props)**: code·vs·embedded(터미널=헤더숨김·100%높이)·onNavigate·onclose·basePath·brand·storage.
+**추출 sub-unit 분해(4b 패턴)**: ①예약(본 entry) ②전문 에이전트 2인 토론(아키텍트 surface 경계 + 적대 이동안전 R1~Rn —
+  AskDrawer iframe 계약·DuckDB wasm 싱글턴·compare 분기 lockstep·checkDevIsolation 감사) ③6-1 git mv 59파일+EASY 결합 C1~C4
+  +§8.1(무행위변경) ④6-2 FilingPort 공개 구현(buildPanelBundle 래핑) ⑤6-3 터미널 hosts viewerStudio 로더 재배선(현 lazy import
+  경로 갱신)+ui/apps/local viewer 라우트 ViewerSurface 마운트(현 스켈레톤). 무중단=landing 표준 뷰어+터미널 오버레이+ui/web iframe.
+**top 위험**: ① AskDrawer WebGPU/Worker iframe 시나리오(선례 없음) ② DuckDB.wasm 싱글턴 공유 vs 인스턴스별 로드 ③ compare/engine
+  landing↔surface 분기 방지(복사 후 lockstep). **미해소 open Q**: SceMatrix 사용처·ui/web React 뷰어 병렬 구현 통합 여부·
+  Ollama origin CORS·checkDevIsolation 최상위 가드 유무 — 추출 착수 토론서 확정.
+착수 게이트: 단계-5 전체 원격 green(c680c96e3 CI Fast) 확인 후 추출 토론·예약 갱신. 신선 컨텍스트 권장(15k LOC 이동).
+rollback: 해당 없음(예약 문서). 추출은 6-1/6-2/6-3 각 단일 커밋 revert.
