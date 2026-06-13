@@ -110,10 +110,18 @@ export async function probeHfRange(
 async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0], init?: RequestInit): Promise<Response> {
 	// 전이적 CDN 전파(갓 업로드/콜드 캐시)는 403/429/5xx 로 반환되거나 네트워크 throw → 짧은 백오프 재시도.
 	// (lazy 이력 로드 시 콜드 parquet 의 transient 403 이 hyparquet throw → unhandled 로 새던 것 차단.)
+	//
+	// ⚠ Range 요청(206 Partial)은 프록시가 `Cache-Control: public` 을 줄 때 브라우저 HTTP 캐시가 부분응답을
+	// 저장하려다 net::ERR_CACHE_OPERATION_NOT_SUPPORTED 로 throw 한다 → hyparquet range read 실패 → 회사별
+	// parquet(정기공시·우측패널 등) 빈값. 과거 폴백 cache:'reload' 는 여전히 캐시에 WRITE 하므로 같은 에러가
+	// 재발했다. 캐시를 읽지도 쓰지도 않는 'no-store' 만이 회피한다. 그래서 Range 요청은 처음부터 no-store,
+	// 그 외(통파일 GET 등)는 캐시 이득을 살리되 실패 시 no-store 로 폴백한다.
 	const LAST = 3;
+	const rangeReq = !!new Headers(init?.headers).get('range');
+	const noStore: RequestInit = { ...init, cache: 'no-store' };
 	for (let attempt = 0; attempt <= LAST; attempt++) {
 		try {
-			const resp = await fetchFn(input, attempt === 0 ? init : { ...init, cache: 'reload' });
+			const resp = await fetchFn(input, attempt === 0 && !rangeReq ? init : noStore);
 			if (resp.ok || resp.status === 206) return resp;
 			if (attempt < LAST && (resp.status === 403 || resp.status === 429 || resp.status >= 500)) {
 				await new Promise((r) => setTimeout(r, 200 + 280 * attempt));
@@ -125,10 +133,10 @@ async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0
 				await new Promise((r) => setTimeout(r, 200 + 280 * attempt));
 				continue;
 			}
-			return await fetchFn(input, { ...init, cache: 'reload' });
+			return await fetchFn(input, noStore);
 		}
 	}
-	return await fetchFn(input, { ...init, cache: 'reload' });
+	return await fetchFn(input, noStore);
 }
 
 // 소형 파일 통파일 임계 — 이하면 range 세션(직렬 메타데이터 왕복 수 회) 대신 1 회 GET.
