@@ -1,7 +1,9 @@
 # 01. Engine Architecture
 
-상태: PRD v0.2 (2026-06-13 엔진 거처 토론 — 거처 3안 경합 + 경합 메커니즘 설계 + 적대 검증 후 확정)
+상태: PRD v0.4 (2026-06-14 구현 정합 — 결정론 코어 졸업[4노드 DAG·random.Random·proforma-FCFF·공개 verb] 반영, §3/§5/§6/§7/§12/§15/§16 코드 정본으로 정정. v0.2 본문 = 거처 3안 경합·경합 메커니즘 설계)
 범위: 시뮬레이션 계산의 거처, AI 경합 메커니즘, 계층 경계, 기존 자산 매핑, 외과 추출 범위, 공개 계약
+
+> **★구현 정합 표기 규약:** 본 문서는 *설계*(거처·경합·gate·lens)와 *구현*(4노드 결정론 코어)이 섞여 있다. 구현 완료 = `§5a`·`§6.1`(자료구조)·`§6.2`(단일 실행기). 미구현/후속 = `§5b`(mc/macro.beta/reverseDcf/credit/lens 노드)·`§6.3`(gate.py)·`§6.2`(dirty recompute)·DisagreementLedger(ledger.py)·Brier(recordForecast). **코드가 정본** — 충돌 시 코드 기준으로 읽는다.
 
 ---
 
@@ -52,14 +54,25 @@
 
 **정체성**: 안B(별도 엔진, leaf 소유)가 아니라 **안C(L2 leaf 호출 래퍼)**. leaf를 재구현하면 SSOT 분열(터미널 카드 proforma ≠ 시뮬 proforma)이므로, 묶음은 leaf를 호출만 한다.
 
-**공개 계약 (verb 1개, public-contract-only):**
+**공개 계약 (verb 1개, public-contract-only) — ★구현 정합(2026-06-14):**
+
+(1) **현재 구현 시그니처**(`simulate/entry.py`, 졸업 완료 `ac3905fd9`):
 ```python
-dartlab.simulate(company, *, scenario, drivers=None, lens=None, mode="whatif"|"replay"|"walkforward", horizon, asOf) -> SimulationResult
-Company.simulate(*, scenario, lens=None, ...) -> SimulationResult
+dartlab.simulate(code: str, *, scenario="baseline", horizon=3, asOf=None) -> SimulationResult
+Company.simulate(*, scenario="baseline", horizon=3, asOf=None) -> SimulationResult   # company.py:1990
+```
+- 첫 인자 = **`code: str`**(종목코드 "005930" 또는 한글명 "삼성전자") — Company 객체 아님. `dartlab.Company(code)`로 내부 해소.
+- **KR 전용 가드**: `market != "KR"`(US ticker → EDGAR)면 `ValueError`(KR 매크로 프리셋만 존재 — US 프리셋 합류 전까지 차단, §9 / 비전 차단 항목).
+- `drivers`/`lens`/`mode` **인자 부재**: inert stub은 clutter라 *추가하지 않고* 후속 단계로 deferred(entry.py docstring AntiPatterns "drivers/lens/mode 인자를 기대 — 현재 결정론 subset만"). 따라서 현 verb는 **결정론 경로 단독**(lens 분기 없음).
+- 결과는 항상 ref + per-node 품질 상태(`NodeAudit.status` ok/partial) + provenance(asOf·latestAsOf) 동반. honest-gap: 결손은 None·partial(0 대체 금지).
+
+(2) **후속 단계 목표 시그니처**(미구현 — lens/Play/다중드라이버 phase):
+```python
+dartlab.simulate(code, *, scenario, drivers=None, lens=None, mode="whatif"|"replay"|"walkforward", horizon, asOf) -> SimulationResult
 ```
 - `lens=None` → 순수 결정론(불변1). `lens="annotate"|"judge"` → AI 경합 on(불변2).
-- 결과는 항상 ref + quality gate status + provenance(asOf·latestAsOf) 동반.
 - verb 후보 평가: `simulate`(동사 1개, scan/compare 결, mode 흡수) 채택. `scenario`(명사형, `macro.scenarios`/`ScenarioOverlay`/`ScenarioCompareN` 충돌) 기각.
+- ⚠ EngineCall/MCP 등록: `__init__.py` 라이브 capability 카탈로그(=`__all__`+Company public methods)로 **자동 등록됨**(별도 allowlist 파일 0). AI 3-티어 공개계약이 verb 호출에 의존하므로 등록 상태는 07에서 검증.
 
 ---
 
@@ -83,25 +96,49 @@ Company.simulate(*, scenario, lens=None, ...) -> SimulationResult
 
 **노드 키 = (driverId, scenarioId, periodKey) 3중 좌표.** revenuePath는 *시나리오당 1노드*(연도/분기당 1노드가 아님). 연도·분기 축은 `NodeValue.vector`(tuple)로 노드 *내부*가 흡수한다.
 
-- 노드 수 = **O(드라이버종류 × 시나리오)** ≈ 8 driver × 3 branch ≈ 24 노드. **O(드라이버 × 시나리오 × 연도 × 분기)**(폭발)가 *아님*.
+- 노드 수 = **O(드라이버종류 × 시나리오)**. *설계 상한* ≈ 8 driver × 3 branch ≈ 24 노드(모든 후속 노드 포함 시); **현 구현은 시나리오당 4노드**(§5a) — 차원폭발 차단 원리는 동일(연도·분기는 vector 흡수). **O(드라이버 × 시나리오 × 연도 × 분기)**(폭발)가 *아님*.
 - 근거(실측): leaf 자체가 시계열을 반환(`buildProforma`→연도별 ProFormaYear[], `monteCarloForecast`→분기 백분위, `_applyMacroShock`→연도 loop). 노드는 leaf를 1회 호출해 vector를 받는 **얇은 어댑터**. 연도를 노드로 쪼개면 leaf를 연도별 N회 호출 = OOM(§13 'leaf N회 금지').
 - 단면 노드(periodKey="2025Q1")는 Play가 *특정 분기에서* 단면 비교(신용 등급·BS 항등식)가 필요할 때만 vector를 slice해 *파생*(저장 아님).
 
-**노드다:** 주소(driverId) 가질 가치 + AI 의견 가능 + Brier 사후채점 단위. **노드 아니다:** ① leaf 내부 중간(cash plug 3회 이자수렴은 buildProforma 내부 — 쪼개기 금지) ② `_extractBaseMetrics`(입력 준비) ③ BRIEF/WORK식 고정단계(금지).
+**노드다:** 주소(driverId) 가질 가치 + AI 의견 가능 + Brier 사후채점 단위. **노드 아니다:** ① leaf 내부 중간(cash plug 3회 이자수렴은 buildProforma 내부 — 쪼개기 금지) ② `_baseMetrics`(입력 준비) ③ BRIEF/WORK식 고정단계(금지).
 
-| 노드 (driverId) | fn → L2 leaf | det provenance | vector 차원 | AI 의견 |
+### §5a 구현 완료 코어 — 4노드 (`registry.py` 와이어링, `096e84c43` 졸업)
+
+`buildScenarioSheet`가 와이어링하는 결정론 DAG는 정확히 4노드: `macro.path → rev.path → proforma → dcf`. 모두 `DRIVER_MACRO`/`DRIVER_REV`/`DRIVER_PROFORMA`/`DRIVER_DCF` 상수로 등록.
+
+| 노드 (driverId) | fn (registry) | det provenance (실측) | vector 차원 | AI 의견 |
 |---|---|---|---|---|
-| `macro.path` | preset 상수 승격(§9 자리만) | `preset:baseline` | 연도(3) | △(자리만) |
-| `macro.gdp.beta` | `calcMacroRegression`/pooled | `ols:R²` / `pooled:fe` / `preset` | 스칼라 | O |
-| `rev.path` | `transferMacroToFundamentals` | transfer식 명시 | 연도(3) | O |
-| `proforma` | `buildProforma` | `proforma:cashplug` | 연도×3statement | △(회계 lens) |
-| `mc.distribution` | `monteCarloForecast`(PCG64) | `mc:pcg64,iter=N` | 백분위(P5~P95) | X |
-| `dcf` | `calcDFV`/`multiStageDcf` | `dcf:nstage` | 시나리오 perShare | △(WACC lens) |
-| `reverseDcf` | `reverseImpliedGrowth` | `reverseDcf:bisect` | 스칼라(내재성장) | X |
+| `macro.path` | `_fnMacroPath` → `getPresetScenarios("KR")` 프리셋 | `preset:{scenarioId}` | 연도(horizon) | △(후속) |
+| `rev.path` | `_fnRevPath` → `transferRevenuePath`(엣지, 자기 소유 산수) | `transfer:rev*(1+bgdp*gdp+bfx*fxDelta),...` | 연도(horizon) | O(후속) |
+| `proforma` | `_fnProforma` → L2 leaf `buildProforma`(불가침) | `proforma:cashplug,wacc=..,years=..` | 연도별 FCF | △(후속) |
+| `dcf` | `_fnDcf` → **proforma-FCFF 직접할인**(Gordon TV, `calcDFV` 회피) | `dcf:fcff,wacc=..,g=..` | perShare + EV(1-tuple) | △(후속) |
 
-**⚠ 졸업 데모 확정(게이트 ②④):** 위 7노드는 가설. 삼성/카카오/현대 실측으로 (a) rev.path 시나리오당 1노드 vector 여부 (b) macro.gdp.beta 단일/분기별 노드 (c) **mc.distribution이 proforma 노드에 deps 거는가(연결, OOM 위험) vs 평균경로 직접 계산(현 `_simMonteCarlo`는 `_applyMacroShock` 직접 호출, SSOT 분열 위험)** — byte-패리티로 위상 확정(잔여 OQ, 04 §5).
+> **★dcf 노드 = proforma-FCFF, `calcDFV` 회피(09 P3·08 §2.3 정합):** `_fnDcf`는 proforma 노드의 per-year FCF 벡터를 WACC로 직접 할인 + Gordon TV(섹터 terminalGrowth 캡) + netDebt 차감 + shares 분배로 주당가치를 낸다. `calcDFV`/`multiStageDcf`를 **호출하지 않는다** — calcDFV는 자체 내부 proforma를 다시 돌려 *이 시나리오의* proforma FCF를 무시하므로 scenario-coherence가 깨진다(외부 proforma 무시). 정적 가치평가용 calcDFV(08 §1 ⑤ 표)와 시나리오 dcf 노드는 *중복 아닌 2 정당 경로*다.
 
-**명명(no-graph-regression):** `DriverNode`/`DriverSheet`. `*Graph`/`*Loop`/`*Kernel`/`*Dag` 금지. 모듈 = `simulate/{sheet,transfer,eval,gate,ledger,registry,admission}.py`.
+### §5b 후속 단계 노드 — 미구현 가설 (4노드 코어에 미포함)
+
+아래는 *설계 가설*이며 `simulate/` DAG에 **아직 와이어링되지 않았다.** 졸업 데모 byte-패리티로 위상 확정 후 추가.
+
+| 노드 (driverId) | fn → leaf (후속) | 상태 | 비고 |
+|---|---|---|---|
+| `macro.gdp.beta` | `calcMacroRegression`/pooled-panel | 미구현 | OLS R² provenance 자체가 아직 없음(02 §2B pooled-β SSOT 선결) |
+| `mc.distribution` | `monteCarloForecast` (legacy, `random.Random`) | 미구현 | ⚠ OQ8: proforma 노드에 deps 거는가(연결, OOM 위험) vs 평균경로 직접 계산(SSOT 분열). **NodeValue가 frozenInputs를 노출 안 해(아래) deps 경로가 막혀 있음** — OQ8 해소는 NodeValue 계약 확장 또는 recompute 패턴 수용에 종속 |
+| `reverseDcf` | `reverseImpliedGrowth`+`computeGap` | 미구현 | story에 배선 있으나 simulate/ 노드 미등록 |
+| `credit.rating` / `ai.lens` | `synth.distress` / `ai/tools/lens.py` | 미구현 | 신용=09 §4 solvency 뷰, lens=§6.4 후속. 07 로드맵에 phase 미배정 |
+
+**⚠ 졸업 데모(게이트 ②④):** §5b 노드는 가설. 삼성/카카오/현대 실측으로 (a) macro.gdp.beta 단일/분기별 (b) mc.distribution 위상(OQ8) — byte-패리티로 확정(04 §5).
+
+**★NodeValue 계약 갭(구현 정직, OQ8 핵심):** 실행기는 노드의 frozenInputs를 `NodeValue`에 노출하지 않는다(`sheet.py` NodeValue에 frozenInputs 필드 없음). 그 결과 *두 개의 recompute 우회*가 현재 코드에 실재한다 — `registry._macroFrozen`(rev 노드가 rate/FX 경로를 프리셋에서 재유도)과 `run._marginPathFromSnapshot`(결과 marginPath를 같은 transfer로 재계산). 둘 다 "감사 노드는 권위 provenance/refs/hash를 그대로 들고, 표시 숫자만 byte-동일하게 재산출"하는 정직 패턴이지만, **mc.distribution 노드가 dep에서 macro 분포를 소비하려면 이 갭을 먼저 메워야 한다**(NodeValue에 frozenInputs 추가) 아니면 프리셋에서 재유도(OQ8가 우려하는 SSOT 분열을 그대로 답습). 이 두 우회는 종전 PRD에 미기재 — 본 절이 정직 기록.
+
+**명명(no-graph-regression):** `DriverNode`/`DriverSheet`. `*Graph`/`*Loop`/`*Kernel`/`*Dag` 금지.
+
+**모듈 (실측):**
+- **구현 완료**: `simulate/{sheet,transfer,registry,run,entry,__init__}.py`.
+  - `sheet.py` = NodeValue/DriverNode/DriverSheet + `computeInputsHash` + `buildOrder`(Kahn) + `evaluateSheet`(단일 결정론 실행기).
+  - `registry.py` = `buildSnapshot`(read-once) + 4 노드 fn + `buildScenarioSheet`.
+  - `run.py` = `runScenario`(내부 end-to-end) + `SimulationResult` + `NodeAudit`.
+  - `entry.py` = 공개 verb `dartlab.simulate`(thin wrapper).
+- **후속 단계(미생성)**: `simulate/{gate,ledger,admission}.py`. (`eval.py`는 신설하지 않고 실행기를 `sheet.py`로 통합 — 아래 §6.2.)
 
 ---
 
@@ -121,30 +158,34 @@ class NodeValue:
     latestAsOf: str                  # 최신 가용 vintage(staleness 판정)
 
 @dataclass(frozen=True)
-class DriverNode:
-    nodeId: str        # f"{driverId}@{scenarioId}#{periodKey}" — 3중 좌표 SSOT
-    driverId: str; scenarioId: str; periodKey: str   # "all"=시계열 노드 / "2025Q1"=단면
-    det: NodeValue | None    # L2 leaf 출력. 항상 채워짐(lens 무관).
-    ai: NodeValue | None     # AI 의견. 기본 None. lens on + fork/gap 노드만.
-    deps: tuple[str, ...]; fn: str   # fn = FN_REGISTRY 디스패치 키
+class DriverNode:                       # ★실제 필드 순서(sheet.py) = deps/fn 이 det/ai 보다 앞
+    nodeId: str                          # f"{driverId}@{scenarioId}#{periodKey}" — 3중 좌표 SSOT
+    driverId: str                        # "macro.path" / "rev.path" / "proforma" / "dcf"
+    scenarioId: str                      # "baseline" / "adverse" / ...
+    periodKey: str                       # "all"=시계열 노드 / (후속) "2025Q1"=단면
+    deps: tuple[str, ...]                # 상류 nodeId
+    fn: str                              # registry 디스패치 키 (예 "simulate.dcf")
+    det: NodeValue | None = None         # L2 leaf 출력. 실행기가 항상 채움(lens 무관).
+    ai: NodeValue | None = None          # AI 의견. 기본 None. (후속) lens on + fork/gap 노드만.
 ```
+⚠ frozen dataclass라 선언 순서 = 생성자 순서다. 이전 문서가 `det`/`ai`를 `periodKey` 바로 뒤에 둔 것은 코드와 어긋났다 — 실제로는 `deps`/`fn`이 먼저고 `det`/`ai`가 마지막(기본값 None).
 
 `inputsHash = blake2b(sorted([parent.inputsHash …], node.fn, _normalize(frozenInputs)))`. `_normalize` = float round(1e-9) 정규화(부동소수 비결정성·TS 패리티 차단). **메모이제이션 키 SSOT.**
 
-### 6.2 위상정렬 실행기 — 불변1을 *구조적으로* 증명 (simulate/eval.py)
+### 6.2 위상정렬 실행기 — 불변1을 *구조적으로* 증명 (simulate/sheet.py) — ★구현 정합
 
-`evaluateSheet`를 **두 함수로 물리 분리**해 불변1을 런타임 조건분기가 아니라 *코드 지점 부재*로 증명한다:
+**구현 완료**(`sheet.py`, eval.py 신설 안 함): 실행기는 `evaluateSheet` **단일 함수**다. `lens` 파라미터·`_evalDet`/`_evalWithLens` 물리 분리·`_dirtyClosure`는 **미구현**(lens 단계 계획). 현재 함수 2개:
 ```python
-def buildOrder(sheet) -> tuple[str, ...]:   # Kahn 위상정렬. deps cycle → 빌드시 ValueError. 결과 캐시.
-def _evalDet(sheet, *, dirty=None, memo=None) -> dict:    # ★ LENS_REGISTRY 심볼 미참조. lens 경로 물리 부재.
-def _evalWithLens(sheet, lens, ...) -> dict:              # _evalDet 결과 위에 fork/gap 노드만 ai 주입.
-def evaluateSheet(sheet, *, lens=None, ...):
-    return _evalDet(...) if lens is None else _evalWithLens(...)
+def buildOrder(sheet) -> tuple[str, ...]:   # Kahn 위상정렬. deps cycle/누락 → ValueError. (캐시는 미구현 — 매 호출 재계산)
+def evaluateSheet(sheet) -> dict[str, NodeValue]:   # topo 순서로 각 노드 registry fn 호출 → NodeValue 포장 → det 기록.
 ```
-- **불변1 증명**: `lens=None` → `_evalDet`만 도달. `_evalDet` 본문에 `LENS_REGISTRY` 심볼이 *문법적으로 없으므로* AI 토큰 진입점 물리 부재(런타임 if 아님). `_evalWithLens` 진입 시 `assert lens is not None` 박제.
-- **증분 dirty recompute**(§13b-1, Play if토글 1차 엔진): `_dirtyClosure`가 dirty 노드의 transitive descendants(deps 역방향 BFS)만 수집. 부모 inputsHash 불변 → 자식 inputsHash 불변 → memo 히트 → leaf 재호출 0. 토글이 안 건드린 가지는 자동 skip. 순수함수(동결 snapshot만 read)라 메모이제이션 안전.
+- **불변1 증명(현재, 더 강함)**: `evaluateSheet` 본문에 `lens`/AI 심볼이 *문법적으로 전혀 없다* → "deterministic without AI"가 런타임 if가 아니라 **AI 진입점의 물리 부재**로 보장(`sheet.py` 모듈 상단 docstring 박제). lens 파라미터 자체가 없으므로 `lens=None` 분기조차 불필요. 단일 함수가 곧 결정론 경로.
+- **후속 단계(미구현)**: lens 도입 시 `_evalWithLens`(det 결과 위에 fork/gap 노드만 ai 주입) + `ai/tools/lens.py` 신설. 이때 lens 경로 물리 부재를 유지하려면 `_evalDet`/`_evalWithLens` 분리 또는 `assert lens is not None` 박제(§6.4).
+- **★증분 dirty recompute = 미구현(§13b-1, Play if토글 1차 엔진 — 후속)**: 현 `evaluateSheet`는 dirty/memo 파라미터가 없어 **항상 전체 sheet를 처음부터 평가**한다. inputsHash는 모든 노드에 계산되어 *재현·향후 메모이제이션의 키*로 이미 실재하나, sub-DAG만 재계산하는 `_dirtyClosure`는 Play if-토글 단계에서 신설 예정. (설계: dirty 노드의 transitive descendants만 deps 역방향 BFS로 수집 → 부모 inputsHash 불변이면 memo 히트 → leaf 재호출 0. 순수함수라 안전.)
 
-### 6.3 결정론 gate 4분기 (simulate/gate.py 순수함수)
+### 6.3 결정론 gate 4분기 (simulate/gate.py 순수함수) — ★미구현(후속, AI lens 단계 신설)
+
+> **★현재 구현엔 gate 없음.** `gate.py`는 `simulate/`에 *존재하지 않는다*(`gateUsable`/`_isStrongDet`/`groundingCheck`/`DisagreementLedger` 미구현). 현 4노드 결정론 코어는 강도 분류 없이 모두 deterministic으로 처리되고(provenance = `preset:`/`transfer:`/`proforma:`/`dcf:fcff`), 품질은 `run._audit`이 `det.value is None ? "partial" : "ok"`로만 판정한다(honest-gap). 아래 설계는 **AI lens(`.ai` 슬롯) 도입 시 신설**할 후속 단계다 — gate의 *근거*(SimulationResult→gate source)가 아직 배선되지 않았으므로 03 §9.3 게이트 매트릭스·08 §11 발간 게이팅의 "gate 기계강제"도 그때까지 설계 상태다.
 
 ```python
 def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
@@ -162,9 +203,9 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 **보완 ≠ 블렌딩**: gate `ai` = 그 노드 채택값을 *통째* 교체(토글로 det 복원). `0.6det+0.4ai` 함수 *부재*(블렌더 미정의 = 섞임 물리 불가) → 재현성·추적·Brier 유지. 근거: `project_account_struct_disambig_killtest` "확신 오정렬 > 정렬 실패".
 
-**DisagreementLedger**(simulate/ledger.py): fork/큰-gap 노드 자동 수집 {nodeId, det.value, ai.value, gap, provenance, ai.refs, resolution} → 터미널 '엔진 vs AI 갈린 지점' 표. 어긋남 미삼킴(`feedback_silent_swallow`). Play 근거 인벤토리(05 §6) cross-link.
+**DisagreementLedger**(simulate/ledger.py) — ★미구현(lens 단계 신설): fork/큰-gap 노드 자동 수집 {nodeId, det.value, ai.value, gap, provenance, ai.refs, resolution} → 터미널 '엔진 vs AI 갈린 지점' 표. 어긋남 미삼킴(`feedback_silent_swallow`). Play 근거 인벤토리(05 §6) cross-link. **현재**: `run.SimulationResult.warnings`(tuple[str,...])가 base revenue/shares 결손을 honest-gap으로 표면화하나, fork/gap 수집 로직(`ledger.py`)은 ai 슬롯과 함께 후속 단계다.
 
-**사후 채점(Brier)**: `scenarioSim.py::judgeQuarter`를 노드 단위 일반화 → `OutcomeLog`(MCP 실재)에 asOf+det+ai 박제 → N분기 후 노드별 Brier. ⚠ judgeQuarter `int(quarter[-1])` → `re.search(r'Q(\d+)', quarter)` 교체(2025Q10 가드, BC표면 golden 동행). folk-stat 회피(held-out·충분표본, 3점·CI0·seed0 금지). 'AI가 엔진보다 낫다'는 *증명 대상*이지 *전제*가 아님 — 분기 누적 후에야 신호.
+**사후 채점(Brier)** — ★미구현(lens 단계): `scenarioSim.py::judgeQuarter`를 노드 단위 일반화 → `OutcomeLog`(MCP 실재) + **forwardTest write 함수 `recordForecast`(현재 부재 — 신설 필요, 09 P9·02 §2B.5)** 에 asOf+det+ai 박제 → N분기 후 노드별 Brier. ⚠ judgeQuarter `int(quarter[-1])` → `re.search(r'Q(\d+)', quarter)` 교체(2025Q10 가드, BC표면 golden 동행). folk-stat 회피(held-out·충분표본, 3점·CI0·seed0 금지). 'AI가 엔진보다 낫다'는 *증명 대상*이지 *전제*가 아님 — 분기 누적 후에야 신호. **단 forward-test 루프는 write 끝단(recordForecast·models HF 배포)이 아직 없어 물리적으로 닫히지 않는다**(09 §0 #5·02 §2B.5).
 
 ### 6.4 두 lens 모드 + HypothesisNode (보존)
 
@@ -175,7 +216,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 ## 7. 두 불변 요구 — 명시 입증
 
-- **불변1 (AI 없이 결정론):** `evaluateSheet(sheet, lens=None)`는 AI 호출 0. 모든 노드 `det`=L2 leaf 순수함수 출력, MC는 PCG64 로컬 → 같은 sheetSeed면 byte-identical 재현. **증명 = lens=None 경로에 AI 토큰이 들어갈 코드 지점이 물리적으로 없음.**
+- **불변1 (AI 없이 결정론):** `evaluateSheet(sheet)`는 AI 호출 0(lens 파라미터 자체가 없음). 모든 노드 `det`=L2 leaf 순수함수 출력 → 같은 회사·시나리오·asOf면 노드별 `inputsHash` byte-identical(현 경로에 **난수 0** — MC 노드 미구현). **증명 = 실행기 경로에 AI 토큰·RNG가 들어갈 코드 지점이 물리적으로 없음.** ⚠ `sheetSeed`/PCG64는 *후속* mc.distribution 노드 전제 — 현 결정론 코어는 seed 없이도 순수함수라 재현 보장(레거시 MC의 `random.Random(seed)`는 별개 경로, §12).
 - **불변2 (AI 경합, 통제):** AI는 노드 `.ai` 슬롯(모드 N) 또는 `judgeSheet`(모드 J) 두 통제 표면으로만 진입. `.det` 못 바꾸고, gate는 순수함수, 블렌더 부재로 섞임 불가, 어긋남은 ledger 보존·Brier 사후채점. **증명 = AI 진입이 입력/메타판단으로만 제한, 평가 제어흐름 미지배(no-graph-regression 선).**
 
 ---
@@ -229,16 +270,16 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 ## 12. MC 재현성 — byte-parity 범위 명문화 (과대주장 분리, 적대검증 수정 3)
 
 **byte-identical 헤드라인을 둘로 분리**(requiredFix):
-- **(a) 결정론 경로 = 자명참**: transfer/gate/eval은 순수 산술이라 byte-identical이 *정의상* 보장. 골든 byte 테스트의 *강제 검증 범위 = `inputsHash` 정규화 규칙*(blake2b + float round)에 한정 명문화. TS(V8) 포팅도 동일 정규화 규칙으로 패리티.
-- **(b) MC 경로 = byte-parity 제외**: Play fan-band 핵심인 MC는 PCG64가 TS 표준 구현 부재 → byte-parity 불가. MC는 *분포통계 패리티(평균·분위 ±ε)만*. 05 §5 'TS=격자 lookup만, RNG 미사용'으로 회피.
+- **(a) 결정론 경로 = 자명참(구현 실재)**: transfer + 4노드 실행기(`evaluateSheet`)는 순수 산술이라 byte-identical이 *정의상* 보장 — 현 코어엔 RNG가 없다. 골든 byte 테스트의 *강제 검증 범위 = `inputsHash` 정규화 규칙*(blake2b + float round, `computeInputsHash` 실재)에 한정 명문화. TS(V8) 포팅도 동일 정규화 규칙으로 패리티.
+- **(b) MC 경로 = byte-parity 제외(후속 mc.distribution)**: Play fan-band 핵심인 레거시 MC는 stdlib `random.Random`(Mersenne)이 TS 표준 구현 부재 → byte-parity 불가. MC는 *분포통계 패리티(평균·분위 ±ε)만*. 05 §5 'TS=격자 lookup만, RNG 미사용'으로 회피. ⚠ 현 `simulate/` 코어엔 MC 노드 자체가 없다(§5b) — 이 절은 mc.distribution 합류 시 적용.
 
-**전역시드 → PCG64 노드-로컬(2곳)**: `_simMonteCarlo.py:145`+`:202` / `pricetarget.py:278`+`:318` → `numpy.random.Generator(PCG64(seed=int(blake2b(f"{nodeId}{sheetSeed}").hexdigest()[:16],16)))`. sheetSeed 하나 → 모든 MC 노드 시드 결정론 파생.
+**전역시드 → 로컬 `random.Random(seed)`(2곳) — ✅ 완료(2026-06-14, 09 P1)**: `_simMonteCarlo.py:145` / `pricetarget.py:278`의 전역 `random.seed`/`random.gauss` → 로컬 `rng = random.Random(seed)` 인스턴스(`fe9e66c0a`). **★PCG64/numpy 아님** — stdlib `random.Random` 채택(동작 무변경=같은 seed→같은 Mersenne 시퀀스, **외부 의존성 0·pyodide 안전**, jumpable stream은 simulate 엔진이 필요할 때 재방문). 이전 문서의 "PCG64 노드-로컬"·`numpy.random.Generator(PCG64(...))`는 코드와 어긋난 stale 주장이다. ⚠ 이 수정은 *레거시 MC 경로* 한정 — 신생 `simulate/` 결정론 코어엔 MC 노드가 아예 없다(§5b). mc.distribution이 후속에 생기면 그 노드-로컬 RNG도 `random.Random(blake2b(...))`로 파생.
 
-**:205 덮어쓰기 버그 — ★수식 정정(requiredFix, fatal 근접)**: 이전 제안 `=`→`*=`(`simRev *= (1+revNoise)`)는 **틀렸다.** `simRev=rev`에서 시작하면 `meanRevPath`(이미 `_simMonteCarlo.py:183-187` `prevR=ar` 캐리로 복리 적용된 평균경로)를 곱하지 않아 거시충격 평균경로를 *통째 소실*시킨다(반대 방향 회귀). 진짜 누적 노이즈는 **per-year 성장계수**(`meanRevPath[yr]/meanRevPath[yr-1]`)에 노이즈를 곱해 `numpy.cumprod`해야 한다. ⚠ 그 *전에*, 현 `simRev = meanRevPath[yr]*(1+revNoise)`가 '하라이즌-끝 단년 노이즈 분포'라는 *정당한 해석*일 수 있음을 kill-test로 먼저 반증 — 아니면 누적 전환이 회귀 도입. '기존은 버그'를 증명한 *후에만* 정당화(과대약속 금지).
+**:205 덮어쓰기 버그 — ✅ 수정 완료(09 P1)**: 이전 제안 `=`→`*=`는 **평균경로 소실로 기각**(`simRev=rev` 시작이면 `meanRevPath` 복리 곱이 빠져 거시충격 경로를 통째 소실). 채택 = **연도별 성장계수 cumprod**(`cumRevFactor *= (1+revNoise)` × mean path 보존 + margin random-walk, `ad112b171`). 정당화 순서 준수 = `test_horizon_widens_cone` kill-test가 옛 코드의 '호라이즌-끝 단년 노이즈' 버그를 먼저 *증명*(cv h1≈h3=cone 일정)한 뒤 전환(cone 확대). '기존은 버그'를 증명한 후에만 전환한 정공법.
 
 - 순수함수 leaf는 전역 가변 상태를 못 만지므로 이 수정은 §6 leaf 순수함수 계약의 강제 따름.
 
-**Phase 0 선결 kill-test `mcSeedReproKill.py`**: PCG64 전환 *전에* 전역시드 재현성을 먼저 죽인다(Play 결정론·URL 공유·TS 패리티 척추).
+**Phase 0 선결 kill-test — ✅ 완료**: 레거시 MC 전역시드 재현성·cone 버그를 로컬 RNG·cumprod 전환 *전에* 먼저 죽였다(Play 결정론·URL 공유·TS 패리티 척추). 신생 `simulate/` 코어는 RNG가 없어 이 kill-test 대상 밖.
 
 ---
 
@@ -254,7 +295,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 깊이(전 노드 3-statement·MC·다중분기·수백 근거)와 속도(토글·Play·스크럽 즉답)를 5장치로 동시 달성. **안C의 순수함수 DAG가 이 모두의 전제**다.
 
-1. **증분 재계산 (dirty recompute — 핵심):** 노드는 `inputsHash`(부모 노드값 결정론 해시)를 갖는다 → if 토글 1개 변경 시 *그 하류 sub-DAG만* 재계산(메모이제이션). 수백 노드 sheet에서 가정 하나 끄면 전체가 아니라 영향받은 가지만 다시 돈다. 순수함수라 메모이제이션이 안전(부작용 0). **인터랙티브 토글·Play 즉답의 1차 엔진.**
+1. **증분 재계산 (dirty recompute — 핵심, ★현재 미구현/후속):** 노드는 `inputsHash`(부모 노드값 결정론 해시)를 *이미* 갖는다(`computeInputsHash` 실재) → if 토글 1개 변경 시 *그 하류 sub-DAG만* 재계산(메모이제이션) 설계. 단 현 `evaluateSheet`는 dirty/memo 파라미터가 없어 **항상 전체 sheet를 처음부터 평가**한다 — `_dirtyClosure`는 Play if-토글 단계 신설 예정(§6.2). 순수함수라 메모이제이션은 안전(부작용 0). **인터랙티브 토글·Play 즉답의 1차 엔진(후속).**
 2. **사전계산 + 동결 (precompute & freeze):** 대표 분기 격자(baseline/adverse/severe × 주요 토글 조합)를 Python이 오프라인 사전계산 → 정적 artifact 발간(`?sim=`). 브라우저 토글 = *격자 lookup*(재계산 0). Play = 사전계산된 path를 시간순으로 *드러내기*(매 프레임 재계산 아님). 기존 `crossRegression` pre-fit JSON 캐시 패턴과 동형.
 3. **벡터화 (heavy bits):** MC(현 1만 iter × `_applyMacroShock` Python 루프 = 느림·OOM) → numpy 벡터화(leaf 1회 + 벡터 노이즈, §13). 민감도 격자도 벡터 연산. **Python 루프로 leaf N회 호출 금지.**
 4. **AI는 hot path 밖:** lens는 opt-in·비동기, 결정론 Play/토글 루프를 *절대 블록하지 않음*. 불변1(AI 없이 빠른 det)이 곧 hot path. AI 의견은 fork/gap 노드만, 백그라운드로 채워 ledger 갱신.
@@ -291,6 +332,8 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 ## 15. _attempts 졸업 게이트 → 본진 진입
 
+> **★진척(2026-06-14):** 결정론 코어가 이미 졸업해 본진 `src/dartlab/simulate/`에 실재한다 — foundation(`sheet`/`transfer`, LAYER_OF simulate:2.5 등록) + deterministic core(4노드 `registry`/`run`, `096e84c43`) + 공개 verb(`entry`, `ac3905fd9`). 아래 8단계 중 1~4·6~8의 *결정론 부분*은 완료(transfer byte-identical 골든·9섹션 docstring·dartlabGuard exit 0). **잔여 = MC·lens·DriverRegistry·Play 단계**(§5b 노드, §6.3 gate, 02 §2B admission). 아래 원본 게이트는 그 잔여 단계의 척추로 유지.
+
 `tests/_attempts/scenarioSimulator/`에서:
 1. 카테고리 scenarioSimulator
 2. **개념확립:** 삼성/카카오/현대 2~3사로 노드 분해가 현 `createSimulation`/`simulateScenario` 출력과 **byte-identical 재현**(§12: 결정론 경로만, MC는 분포 패리티) + `transferMacroToFundamentals` 적출 골든
@@ -301,12 +344,22 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 7. 9섹션 docstring(`docstring4Section.py` hook 강제, §11 키워드 회피)
 8. 본진: `simulate/` + `ai/tools/lens.py` (`engine-add` 5점 + `skill-os-add` 4단계 `specs/engines/simulate/SKILL.md`)
 
-**착수 전 선결 kill-test (Phase 0):** `mcSeedReproKill.py` — MC 전역시드 재현성(§12)을 numpy Generator 전환 *전에* 먼저 죽인다(Play 결정론·URL 공유·TS 패리티 척추).
+**착수 전 선결 kill-test (Phase 0) — ✅ 완료(09 P1):** MC 전역시드 재현성·cone 버그(§12)를 로컬 `random.Random(seed)`·cumprod 전환 *전에* 먼저 죽였다(numpy Generator 아님 — stdlib). Play 결정론·URL 공유·TS 패리티 척추.
 
 ---
 
 ## 16. 확인한 핵심 파일 (절대경로, 재조사 불필요)
 
+**구현 완료 `simulate/` (본진 졸업, 정본):**
+- `src/dartlab/simulate/sheet.py` (NodeValue/DriverNode/DriverSheet + computeInputsHash + buildOrder + evaluateSheet — 단일 결정론 실행기, lens 심볼 부재)
+- `src/dartlab/simulate/transfer.py` (transferMacroToFundamentals/transferRevenuePath — 자기 소유 엣지 산수)
+- `src/dartlab/simulate/registry.py` (buildSnapshot + 4 노드 fn `_fnMacroPath/_fnRevPath/_fnProforma/_fnDcf` + buildScenarioSheet; `_fnDcf`=proforma-FCFF, `_macroFrozen` recompute 우회 실재)
+- `src/dartlab/simulate/run.py` (runScenario + SimulationResult + NodeAudit + `_marginPathFromSnapshot` recompute 우회 + warnings honest-gap)
+- `src/dartlab/simulate/entry.py` (공개 verb `dartlab.simulate(code,*,scenario,horizon,asOf)`, KR 전용 가드)
+- `src/dartlab/providers/dart/company.py:1990` (`Company.simulate` 메서드 — 실재)
+- ⚠ 미생성: `simulate/{gate,ledger,admission}.py` (후속 단계)
+
+**레거시·불가침(엔진 경로 불변):**
 - `src/dartlab/analysis/forecast/simulation.py` (244줄, `_applyMacroShock:180-235` 적출 대상, `:240-244` E402 re-export)
 - `src/dartlab/analysis/forecast/_simScenario.py:35-38` · `_simMonteCarlo.py:36-40` · `_simHistorical.py:34-47` (lazy proxy 4파일)
 - `src/dartlab/analysis/forecast/_simMonteCarlo.py:145` (전역 seed) · `:205` (덮어쓰기 버그) · `:197-213` (MC 1만회 호출 — OOM 근거)

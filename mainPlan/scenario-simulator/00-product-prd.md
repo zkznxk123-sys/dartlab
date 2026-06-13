@@ -3,10 +3,11 @@
 상태: 비전 PRD (v0.2 정정 헤더 부착 — 본문은 v0.1 비전, 아래 정정이 정본)
 범위: 과거 분석, 미래 가정, 중첩 if 시나리오, 매출·손익·DCF·주가 민감도 시뮬레이션
 
-> **★v0.2 정정(2026-06-13) — 본문 v0.1 용어보다 우선:**
-> - **제품명 = `simulate`**(verb `dartlab.simulate`). 본문의 "Scenario Workbench"·"제품명 후보 3종"은 *옛 후보* — 01 §3이 `simulate`로 확정(`scenario` 명사형 기각).
-> - **엔진 거처 = L2.5 독립 묶음 `simulate/`**(story 동급 L3 아님, 신규 L2 아님 — 01 §3). 본문 §7.2 "L2 엔진 간 직접 import 금지"는 유효하나, simulate는 L2.5라 analysis+macro+quant 동시 결합 합법.
-> - **중심 산출물 = Play 미래 리플레이**(05). **가치평가(08)·신용(09 §4)은 simulate(mode) 뷰** — 같은 `SimulationResult`의 다른 읽기. 단일 목표가·rating 금지(reverseDCF 닻+조건부 범위).
+> **★v0.2 정정(2026-06-13) + v0.3 구현 정합(2026-06-14) — 본문 v0.1 용어보다 우선:**
+> - **제품명 = `simulate`**(verb `dartlab.simulate(code, *, scenario, horizon, asOf)`, 결정론 코어 졸업 `ac3905fd9`). 본문의 "Scenario Workbench"·"제품명 후보 3종"·§9 Phase 8 "workbench로 묶는다"는 *옛 후보·옛 Phase 서술* — 01 §3이 `simulate`로 확정(`scenario` 명사형 기각). 본문 §9 Phase 0~8은 v0.1 비전 순서지 현 구현 시퀀스(04 §4·07)가 아니다.
+> - **엔진 거처 = L2.5 독립 묶음 `simulate/`**(story 동급 L3 아님, 신규 L2 아님 — 01 §3). 본문 §7.2 "L2 엔진 간 직접 import 금지"는 유효하나, simulate는 L2.5라 analysis+macro+quant 동시 결합 합법(§7.2 #9 본문 이미 반영).
+> - **중심 산출물 = Play 미래 리플레이**(05). **가치평가(08)·신용(09 §4)은 simulate(mode) 뷰** — 같은 `SimulationResult`의 다른 읽기. 단일 목표가·rating 금지(reverseDCF 닻+조건부 범위). §5 주요 산출물(Environment/Assumption/Bridge/Price)은 이 단면의 화면 표면이다.
+> - **★KR 전용(구현 현실 — 비전 정직):** 현 verb는 `market != "KR"`면 `ValueError`(US ticker → EDGAR, 매크로 프리셋이 KR 기준). 본문 §2 비전("경제·시장 환경")이 시사하는 cross-market 도달은 **US 프리셋·US elasticity가 없어 아직 구조적으로 KR-only**다. US 해제는 07 로드맵에 명시 phase로 두기 전까지 비전 주장이지 가용 기능 아님(01 §3·§9).
 > - 통합 세트(지수06·이벤트레일11·백테스팅10) 시퀀싱 = 07. 전체 정합화·부채 원장 = 09. 현재 상태·NEXT = 04.
 
 ---

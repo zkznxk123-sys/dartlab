@@ -1,6 +1,6 @@
 # 09. Architecture Consolidation — 시뮬레이터-앵커 부채 원장 + 외과 청산 시퀀스
 
-상태: PRD v0.2 (2026-06-13 SSOT 5종 감사 + 클린 아키텍처 설계 + PRD 적대 평가(Glob+Read 재검증) 후 확정)
+상태: PRD v0.3 (2026-06-13 SSOT 5종 감사 + 클린 아키텍처 / 2026-06-14 구현 정합: P1·P3·P13 ✅·P14 위치·금지어 lint 3파일 내부 일관화[§7·§8]·recordForecast/models dead chain 정직표기[§0 #5·P9])
 지위: 08(발간 단면)과 자매 — **정합성 단면**. 부채 청산은 simulate 코어 졸업과 인터리빙(§7), 실행은 운영자 go 후.
 
 ---
@@ -138,7 +138,7 @@ CHS/Merton/survival은 **이미 회사 비의존 순수함수**(`calcCHS(netInco
 - **Phase 3 (졸업 ④) — ✅ 부분 완료(2026-06-14):** ✅ DAG dcf 노드 `registry._fnDcf` = proforma-FCFF(`096e84c43`, calcDFV 회피=scenario-coherence). 잔여 = census 5→2 단조(나머지 3 DCF 경로 흡수)·wacc 노드 `computeCompanyWacc` 통합·노드 입자도 실측 확정.
 - **Phase 4 (회귀 수렴+게이트):** P4 macroExposure 폐기·OLS→olsMulti·동명 disambiguate. P5 exogenousAxes=driver SSOT. P10 admission.py+scanMacroBeta t-stat. P9 forwardTest recordForecast 신설+OutcomeLog / credit cron 배선.
 - **Phase 5 (졸업 ⑤⑥⑦⑧ + 신용):** 덕지덕지(봉합·calibrator dead-branch 제거·중복 단일화). P11 crossRegression/calibrator 재활성 or 정직폐기. 9섹션 docstring. 본진 `simulate/`+`ai/tools/lens.py`. P6+P7 신용(extractChsFeatures proforma 주입 일점 수술, 7모델 호출 일원화, zone enum 1곳). 검증=engine-add 5점+skill-os-add 4단계+lint-imports.
-- **Phase 6 (발간, 코어 졸업 후):** P8 story sixAct/narrative 자체계산 외과이전. P12 금지어 lint(2파일). builders 렌더러 2개+`type="simulation"`+14키 ref 치환(가치평가)+credit 14키. ReportDock valuation→credit mode. `reportType`+`asOf` frontmatter(company-reports 충돌 해소). **UI 측은 새 `ui/packages/surfaces/src/terminal/` 토폴로지** 기준.
+- **Phase 6 (발간, 코어 졸업 후):** P8 story sixAct/narrative 자체계산 외과이전. **P12 금지어 lint 신설(3파일** — `priceImplied.py`+`_valuationOther.py`+`pricetarget.py`; **현재 미존재** — `tests/audit/`에 매치 0건, 2026-06-14 실측). builders 렌더러 2개+`type="simulation"`+14키 ref 치환(가치평가)+credit 14키. ReportDock valuation→credit mode. `reportType`+`asOf` frontmatter(company-reports 충돌 해소). **UI 측은 새 `ui/packages/surfaces/src/terminal/` 토폴로지** 기준.
 - **Phase 7 (잔여 9섹션 격상, 만질 때만):** §5 격상 대상 함수단위. P13 데이터 정합.
 
 ---
@@ -150,6 +150,6 @@ CHS/Merton/survival은 **이미 회사 비의존 순수함수**(`calcCHS(netInco
 ### 산출/정정 대상 (절대경로)
 - 신규(본 문서): `mainPlan/scenario-simulator/09-architecture-consolidation.md`
 - 정정: `01`(§15 "3→5중"·§1 가짜 docstring), `02`(§2B "3→4중"·동명3·forwardTest write 부재), `04`(v0.1→v0.2 전면), `08`(§3.3 신용 14키·§5 credit mode), `00`(§5 1줄), `README`(09 추가)
-- 신규 테스트: `tests/architecture/{test_simulate_leaf_ssot,test_no_duplicate_dcf,test_no_duplicate_regression,test_axis_ssot,test_story_no_self_calc}.py`, `tests/audit/`(admission critical-t+Holm·금지어 lint 2파일), `tests/_attempts/scenarioSimulator/mcSeedReproKill.py`
+- 신규 테스트: `tests/architecture/{test_simulate_leaf_ssot,test_no_duplicate_dcf,test_no_duplicate_regression,test_axis_ssot,test_story_no_self_calc}.py`, `tests/audit/`(admission critical-t+Holm·**금지어 lint 3파일** `priceImplied`+`_valuationOther`+`pricetarget` — 현재 미존재, 신설 필요), `tests/_attempts/scenarioSimulator/mcSeedReproKill.py`
 - 엔진 SSOT(불가침): `analysis/financial/_proformaCore.py`·`_signalsMacroSensitivity.py:244`, `analysis/valuation/dcf.py:46`, `synth/distress/*`
 - UI 새 토폴로지: `ui/packages/surfaces/src/terminal/charts/{PriceChart.svelte,chartState.svelte.ts}`, `ui/packages/contracts`

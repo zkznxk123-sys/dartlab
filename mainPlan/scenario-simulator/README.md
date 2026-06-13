@@ -1,6 +1,6 @@
 # Simulate — 미래 리플레이 시뮬레이터 PRD Index
 
-상태: 비전 PRD v0.3 (2026-06-13 — 12-에이전트 워크플로 심화: 지수 차트 완전 명세 + 시뮬 backbone/데이터배선 코드-그라운드 재설계 + 적대검증)
+상태: 비전 PRD v0.4 (스위트 버전 — 2026-06-14 구현 정합 정정: simulate/ 결정론 코어 졸업[4노드 DAG·random.Random·proforma-FCFF·공개 verb] 반영 + 문서↔코드 발산 정합)
 범위: 과거 근거 → 미래 시뮬레이션. 거시·지수·뉴스·공시·재무를 미래로 투영하고, if(가정)를 켜고/끄며, **재생버튼으로 미래가 시간순으로 펼쳐지는 퍼포먼스**를 결과물로 내는 DartLab의 정점 기능.
 
 ---
@@ -19,7 +19,7 @@
 - **AI 의견**: 결정론 엔진 = SSOT, AI = `ai/tools/` lens 도구가 내는 ref 첨부 의견 카드. 채택 판정 = 결정론 gate(순수 함수). graph/node/pass 0 추가(no-graph-regression). → [03-validation-ai-review.md](03-validation-ai-review.md).
 - **지수 차트(v0.4)**: 안3(center 탭 주가/지수) + 안4(picker) + CMP. PriceChart `subject` 모드(둘째 차트 0, soft-swap). subject 소유권 = CenterStack-local `$state`(ChartCtl 미상향). IndexPort(`catalog/search/series`). **KR gov 지수=OHLCV 캔들 + US FRED 지수=종가 라인(SP500·NASDAQ·다우·VIX) 평행 통합**(운영자 결정 '미국 지수는 FRED 고려' — FRED 데이터 라이브 실측, 새 차트·포트 0·`candleStyle='area'` degenerate candle, 종가전용 지표 3분기 매트릭스). → [06-index-chart.md](06-index-chart.md).
 - **통합 시퀀싱**: 지수(1) → 공시 이벤트 레일(2) → 백테스팅 Strategy Tester(3) → 시뮬레이션+Play(4). mainPlan(ui/packages 승격) 이후 착수. 단 지수 차트는 mainPlan 무관 선행 가능. → [07-integration-roadmap.md](07-integration-roadmap.md).
-- **착수 전 선결 kill-test**: ★MC 재현성(`_simMonteCarlo.py` 전역 `random.seed` → numpy Generator). Play 결정론·URL 공유·TS 패리티의 척추가 현 코드와 충돌. Phase 0에서 먼저 죽인다.
+- **착수 전 선결 kill-test — ✅ 완료(2026-06-14)**: ★MC 재현성(`_simMonteCarlo.py:145`·`pricetarget.py:278` 전역 `random.seed` → 로컬 `random.Random(seed)`, **stdlib·pyodide 안전 — numpy PCG64 아님**) + `:205` 덮어쓰기 버그 → 연도별 cumprod(`test_horizon_widens_cone` kill-test로 옛 버그 증명 후 전환). 단 이 수정은 *레거시 MC 경로*(`analysis/forecast/_simMonteCarlo`) 한정 — **신생 `simulate/` 결정론 코어에는 MC 노드가 아직 없다**(mc.distribution 후속 단계, 01 §5b). Play 결정론·URL 공유·TS 패리티의 척추. 09 P1.
 
 ---
 
@@ -46,6 +46,17 @@
 12. [11-disclosure-event-rail.md](11-disclosure-event-rail.md) — 공시 위치 찾기 레일(전 `project_terminal_disclosure_event_rail_prd`).
 
 > ⚠ UI 토폴로지: 본 세션 중 터미널이 `landing/src/lib/terminal/` → **`ui/packages/surfaces/src/terminal/`로 이동**. 일부 컴포넌트 스펙(10·11) 본문의 `landing/.../terminal/...` 경로는 stale — 새 SSOT는 `ui/packages/surfaces`. v0.3 워크플로가 토폴로지 코드-그라운드 전수 확정(04 §3). 02 mode enum 본문 통일 완료. 남은 v0.1 잔재: 00(제품명). 상세 = 04 §4.
+
+---
+
+## 버전 정책 + 스위트 버전
+
+문서별 버전이 어긋나 혼란을 막기 위한 단일 규칙:
+
+- **스위트 버전 = `v0.4`**(2026-06-14). 개별 문서 헤더는 그 문서가 마지막으로 *내용 개정*된 시점의 minor를 단다(README/01/02/04/06 = v0.4 수준, 05 = v0.3, 08/09 = v0.2, 00/03 = v0.1 본문 + v0.2 정정 헤더). 스위트 버전이 정본 — 개별 헤더는 *그 문서가 어디까지 따라왔나*의 표식이다.
+- **minor 범프(0.x→0.x+1)** = 코드-그라운드 사실 정정 또는 새 결정이 한 문서 이상에 반영될 때. **patch(문구·오타)** = 헤더 갱신 없이 본문만 수정. **major(1.0)** = 본진 `simulate/` 졸업 + 발간 게이트가 *기계 강제*로 검증된 뒤(현 미충족, 아래 100점 차단 항목 참조).
+- **2층 헤더(v0.1 본문 + v0.2 정정)** = 정정 헤더가 본문보다 우선(00·03). 정정 헤더가 정본, 본문은 미개정 잔재로 읽는다.
+- **구현 정합 = 코드가 정본.** 문서 주장이 `src/dartlab/simulate/` 구현과 어긋나면 코드를 정본으로 문서를 고친다(반대 아님). "구현 완료"는 헤더 오버레이가 아니라 본문 텍스트까지 코드와 일치할 때만 ✅.
 
 ---
 

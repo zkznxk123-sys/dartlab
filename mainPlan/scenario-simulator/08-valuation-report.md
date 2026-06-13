@@ -1,7 +1,7 @@
 # 08. Valuation Report — 시뮬레이터 = 가치평가 엔진, 프로급 보고서 발간 계약
 
-상태: PRD v0.2 (2026-06-13 다모다란 융합 리서치 + dartlab 자산 감사 + 적대 검증 후 확정)
-**지위: 발간 *계약* 문서 — 구현은 `simulate/` 코어가 `tests/_attempts/scenarioSimulator/` 졸업한 *후*에 착수(§11 게이팅).** 코어가 0줄인 지금 보고서 파이프라인을 먼저 짓는 것은 우선순위 역전(적대검증 C-1).
+상태: PRD v0.3 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 미구현 정직표기[§2.2])
+**지위: 발간 *계약* 문서 — 발간 모드는 `simulate/` 코어 졸업 *후*에 착수(§11 게이팅).** ★결정론 코어는 이미 졸업(4노드 DAG·공개 verb, 01 §5a) — 그러나 발간이 의존하는 **금지어 lint·gate.py·reportDock·14키 ref 치환·렌더러 2개는 전부 미구현**(아래 ⚠ 표기). 코어 졸업 ≠ 발간 가동.
 
 ---
 
@@ -21,7 +21,7 @@
 | ② Story → drivers | `DriverNode`/`DriverSheet` (01 §5) | `transfer.transferMacroToFundamentals` |
 | ③ 3P test (possible/plausible/probable) | DriverRegistry 6게이트 (02 §2B) | `calcMacroRegression`(pooled-panel OOS) |
 | ④ Drivers → numbers | `DriverSheet` leaf 노드 | `buildProforma` (불가침) |
-| ⑤ Numbers → value | ValuationBridge (02 §2.8) | **`calcDFV`/`dFV`**(quality-WACC 삼각검증, *not* deprecated `fullValuation`) |
+| ⑤ Numbers → value | ValuationBridge (02 §2.8) | **정적 가치평가** = `calcDFV`/`dFV`(quality-WACC 삼각검증). **시나리오 발간** = simulate `dcf` 노드(`registry._fnDcf` = proforma-FCFF, calcDFV 회피=scenario-coherence, §2.3) — 둘은 *2 정당 경로*, 발간은 후자 ref |
 | ⑥ **현재가가 요구하는 믿음** | reverseDCF 닻 (§2) | **`reverseImpliedGrowth`+`computeGap`** |
 | ⑦ Story break | `HypothesisNode`·`tripwireMonitor`·`DisagreementLedger` | `synth/thesisKillChain.py` |
 | ⑧ Feedback loop open | AI `.ai` 평행 슬롯 + Brier | `ai/tools/lens.py`(신설)·`OutcomeLog`(MCP) |
@@ -44,6 +44,7 @@
 
 - **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. `underpriced`/`overpriced` 단어 자체가 금지어 lint 대상.
 - **★`computePriceTarget` rating·단일목표가 차단(B-1', 평가 P0):** `pricetarget.py`의 `weighted_target`(단일 목표가)+`signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644`)도 동일 금지 출력 — **§2.3 어댑터가 두 필드를 drop**하고 P10~P90 분포+reverseDCF 닻만 발간. 금지어 lint **3파일**(`priceImplied.py`+`_valuationOther.py`+**`pricetarget.py`** — signal enum·`weighted_target`/`strong_buy`/`strong_sell` 차단). 09 P12 범위 확대.
+  > **★미구현 경고(평가 fatal — 정직):** 이 금지어 lint **스크립트는 아직 존재하지 않는다**(`tests/audit/`에 `underpriced`/`overpriced`/`weighted_target` 매치 파일 0건 — 2026-06-14 실측 확인). §4는 lint를 "선신설"(yet to be created)로 명시하지만, 그 사이 §2.2/§6/§7의 "기계 강제"·"3파일 차단" 표현이 *이미 가동 중인 가드*처럼 읽혀선 안 된다. **단일 목표가·rating 금지는 본 PRD에서 가장 규제적으로 중대한 규율(불특정 다수 무료 발간)인데, 이를 강제할 스크립트가 없는 동안은 설계 상태다.** 100점·major(1.0)의 차단 항목 1순위 — `tests/audit/<valuationWordLint>.py`(3파일 커버)를 *신설하고 publish/CI 게이트에 배선*해야 "기계 강제" 주장이 참이 된다.
 - **priceP50 단독 금지(B-2):** `PriceSimulationResult.priceP50`/`perShare`(02 §2.8-9) 단독 표시는 목표가로 읽힌다. **발간 게이트 기계 규칙: perShare/P50 단독 출력 시 build fail — 항상 P10·P90 + reverseDCF 닻 동반.** 무료 공개 발간이 더 위험(불특정 다수).
 - `verdict`(저평가/적정/고평가) = 조건부 *분류*이지 Buy/Sell *rating* 아님 — 단 §7 가드로 강제.
 
@@ -93,7 +94,7 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 
 ## 6. 프로급 품질 체크리스트 (= "전문가급" 라벨의 정의, 발간 게이트)
 
-전 항목 PASS여야 발간(`thesisKillChain.premortemQualityGate` + 03 Gate Matrix가 기계 강제):
+전 항목 PASS여야 발간(`thesisKillChain.premortemQualityGate` + 03 Gate Matrix). ⚠ **"기계 강제" = 목표 상태**: 금지어 lint(§2.2·§7)·gate source(01 §6.3 gate.py)가 둘 다 *미구현*이라 현재는 사람-체크리스트다. 발간 모드 착수(§11) 시 lint 신설 + gate 배선이 선결.
 1. ☐ 단일 목표가 부재 — 범위로만 (§2) 2. ☐ reverseDCF 닻 노출 + 충돌 판정 (03 §6.2) 3. ☐ 최소 3시나리오 (bear/base/bull) 4. ☐ 모든 숫자→ref 5. ☐ 모든 가정→falsifier 6. ☐ terminal 규율 통과 (g≤Rf, reinvest=g/ROC, ROC→WACC 수렴 or 명시 moat) 7. ☐ 결손=결손(0대체 0건) 8. ☐ provenance asOf 일치(look-ahead 0) 9. ☐ DisagreementLedger 노출 10. ☐ qualityGateStatus 표시 11. ☐ 라이프사이클 인지(young/mature/금융/cyclical leaf 분기) 12. ☐ 면책+금지어 가드 통과.
 
 "전문가급" = **방법 엄밀함**(독점 데이터 아님). 컨센서스 부재(감사 확정) → "방법 투명성" 라벨이 정직. AI 3-티어(advanced/onDevice/deterministic)는 *기능 가용성*(어디서 도나)이지 과금 아님 — 공개 GH Pages=결정론 reverseDCF+3시나리오 토글(WebGPU 열화·숨김 금지), 로컬=multiStageDcf·thesisKillChain 전체·특수경로.
@@ -117,9 +118,9 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 
 ## 8. 재현성 (적대검증 F-1)
 
-- 같은 입력→같은 출력. 순수함수 DAG+메모이제이션(01 §0). RunSpec(03 §4.1)=scenario+drivers+asOf+vintage+fee/slippage.
-- **선결 kill-test: 전역 `random.seed` 2곳(`pricetarget.py:278`·`_simMonteCarlo.py:145`)→`numpy.random.default_rng(seed)` 주입**(Phase 0).
-- **★브라우저 패리티 정정(F-1):** numpy Generator(PCG64)와 JS RNG는 다른 알고리즘 → TS 패리티 자동 보장 *안 됨*. **결정론 path는 엔진이 사전계산, 브라우저는 *드러내기만*(RNG 미사용)** — 05 Play 전제와 일관. **AI lens(`.ai` 슬롯)는 비결정론 → fact 미승격·재현성 보증 밖(hypothesis 라벨), 보고서 면책에 명시.**
+- 같은 입력→같은 출력. 순수함수 DAG(01 §0). 현 결정론 코어(`simulate/`)는 **난수 0** — 같은 회사·시나리오·asOf면 노드별 inputsHash byte-identical(메모이제이션은 후속). RunSpec(03 §4.1)=scenario+drivers+asOf+vintage+fee/slippage.
+- **선결 kill-test — ✅ 완료(09 P1, 2026-06-14): 전역 `random.seed` 2곳(`pricetarget.py:278`·`_simMonteCarlo.py:145`)→로컬 `random.Random(seed)`**(stdlib·pyodide 안전, **numpy/PCG64 아님**) + `:205` 덮어쓰기 버그 → 연도별 cumprod. *레거시 MC 경로* 한정 — `simulate/` 코어엔 MC 노드 부재.
+- **★브라우저 패리티 정정(F-1):** 레거시 MC는 stdlib `random.Random`(Mersenne) — JS RNG와 다른 알고리즘이라 TS byte-패리티 자동 보장 *안 됨*. **결정론 path는 엔진이 사전계산, 브라우저는 *드러내기만*(RNG 미사용)** — 05 Play 전제와 일관. MC 노드가 후속에 생기면 분포통계 패리티(±ε)만(01 §12). **AI lens(`.ai` 슬롯)는 비결정론 → fact 미승격·재현성 보증 밖(hypothesis 라벨), 보고서 면책에 명시.**
 
 ---
 
