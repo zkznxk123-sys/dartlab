@@ -333,6 +333,163 @@ async def apiExportExcel(
     )
 
 
+_XLSX_MEDIA = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+@router.post("/api/export/excel")
+async def apiExportExcelSelection(req: dict):
+    """선택(selection) → 임시 ExcelTemplate → .xlsx 다운로드 (저장 없이).
+
+    뷰어가 고른 시트/공시 표 selection 을 임시 양식으로 받아 즉시 .xlsx 생성. ``templateId``
+    없이 selection→``ExcelTemplate`` 직변환 — store 에 저장하지 않는다. source 는 문자열
+    (ModuleSource 정규화) 또는 ``{"kind":"panelTable", ...}`` dict 둘 다 허용 (fromDict 흡수).
+
+    요청 본문::
+
+        {"code": "005930",
+         "template": {"name": "선택", "sheets": [{"source": "IS"},
+                      {"source": {"kind": "panelTable", "chapter": "...", ...}}]}}
+    """
+    import tempfile
+
+    from dartlab.viz.export.excel import exportWithTemplate
+    from dartlab.viz.export.template import ExcelTemplate
+
+    code = str(req.get("code") or "").strip()
+    templateReq = req.get("template")
+    if not code or not isinstance(templateReq, dict):
+        raise HTTPException(status_code=400, detail="code 와 template(dict) 이 필요합니다")
+
+    try:
+        tmpl = ExcelTemplate.fromDict(templateReq)
+    except (KeyError, TypeError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=f"template 형식 오류: {e}")
+
+    try:
+        c = await asyncio.to_thread(Company, code)
+    except (ValueError, OSError) as e:
+        raise HTTPException(status_code=404, detail=guideDetail(e))
+
+    tmpDir = Path(tempfile.gettempdir())
+    safeName = c.corpName.replace("/", "_").replace("\\", "_")
+    templateSafe = tmpl.name.replace("/", "_").replace("\\", "_")
+    outPath = tmpDir / f"{c.stockCode}_{safeName}_{templateSafe}.xlsx"
+    try:
+        await asyncio.to_thread(exportWithTemplate, c, tmpl, outPath)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=guideDetail(e))
+    finally:
+        del c
+    return FileResponse(
+        path=str(outPath),
+        filename=f"{outPath.name}",
+        media_type=_XLSX_MEDIA,
+    )
+
+
+def _batchExportToZip(codes: list[str], templateDict: dict, zipPath: Path) -> tuple[int, list[str]]:
+    """codes → 회사당 개별 .xlsx → ZIP (순차, 회사당 ``del c`` flush). OOM 규율 (01 §6).
+
+    한 워크북에 N사 누적 금지 (openpyxl 전사 메모리 = Rust 힙 OOM). 회사당 개별 워크북 →
+    즉시 임시 .xlsx flush → ZIP 에 디스크 레벨 추가 → ``del c``. 실패 회사는 skip + 기록.
+
+    Args:
+        codes: 종목코드 리스트.
+        templateDict: ExcelTemplate.fromDict 입력 (selection 또는 저장 양식 dict).
+        zipPath: 결과 ZIP 경로.
+
+    Returns:
+        ``(성공 회사 수, 실패 코드 리스트)``.
+
+    Example:
+        >>> n, failed = _batchExportToZip(["005930"], {"name": "x", "sheets": [{"source": "IS"}]}, Path("/tmp/o.zip"))  # doctest: +SKIP
+
+    Raises:
+        없음 — 회사별 실패는 흡수(skip), 전체 0 성공이어도 빈 ZIP 반환.
+    """
+    import tempfile
+    import zipfile
+
+    from dartlab.viz.export.excel import exportWithTemplate
+    from dartlab.viz.export.template import ExcelTemplate
+
+    ok = 0
+    failed: list[str] = []
+    with zipfile.ZipFile(str(zipPath), "w", zipfile.ZIP_DEFLATED) as zf:
+        for code in codes:
+            c = None
+            tmpXlsx = None
+            try:
+                c = Company(code)
+                tmpl = ExcelTemplate.fromDict(templateDict)
+                safeName = c.corpName.replace("/", "_").replace("\\", "_")
+                tmpXlsx = Path(tempfile.gettempdir()) / f"_batch_{c.stockCode}_{safeName}.xlsx"
+                exportWithTemplate(c, tmpl, tmpXlsx)
+                zf.write(str(tmpXlsx), arcname=f"{c.stockCode}_{safeName}.xlsx")
+                ok += 1
+            except (ValueError, OSError, KeyError, TypeError):
+                failed.append(code)
+            finally:
+                if c is not None:
+                    del c  # 다음 회사 전 참조 해제 (Rust 힙)
+                if tmpXlsx is not None and tmpXlsx.exists():
+                    try:
+                        tmpXlsx.unlink()
+                    except OSError:
+                        pass
+    return ok, failed
+
+
+@router.post("/api/export/excel/batch")
+async def apiExportExcelBatch(req: dict):
+    """코드 리스트 + 양식 → 회사당 .xlsx → ZIP FileResponse (순차, 동시 ≤2, 회사당 flush).
+
+    회사 간 양식 이식 (00 §3-b). OOM 규율 (01 §6): 회사당 개별 워크북·즉시 flush·``del c``.
+    ``asyncio.to_thread`` 로 단일 스레드 직렬화 (동시 ≤2 절대 — 병렬 폭주 = Rust 힙 OOM).
+
+    요청 본문::
+
+        {"codes": ["005930", "000660"],
+         "template": {"name": "선택", "sheets": [...]}}   # 또는
+        {"codes": [...], "templateId": "preset_summary"}
+    """
+    import tempfile
+
+    codes = req.get("codes")
+    if not isinstance(codes, list) or not codes:
+        raise HTTPException(status_code=400, detail="codes(list) 가 필요합니다")
+    codes = [str(x).strip() for x in codes if str(x).strip()]
+    if not codes:
+        raise HTTPException(status_code=400, detail="유효한 code 가 없습니다")
+    if len(codes) > 50:
+        raise HTTPException(status_code=400, detail="일괄 내보내기는 최대 50개까지 가능합니다")
+
+    templateDict = req.get("template")
+    templateId = req.get("templateId")
+    if templateDict is None and templateId:
+        from dartlab.viz.export.store import TemplateStore
+
+        store = TemplateStore()
+        tmpl = store.get(templateId)
+        if tmpl is None:
+            raise HTTPException(status_code=404, detail=f"템플릿 '{templateId}'을 찾을 수 없습니다")
+        templateDict = tmpl.toDict()
+    if not isinstance(templateDict, dict):
+        raise HTTPException(status_code=400, detail="template(dict) 또는 templateId 가 필요합니다")
+
+    zipPath = Path(tempfile.gettempdir()) / f"_batch_export_{abs(hash(tuple(codes))) & 0xFFFFFF:06x}.zip"
+    # 단일 스레드 직렬화 — 회사당 순차 로드/flush (동시 ≤2 보장).
+    ok, failed = await asyncio.to_thread(_batchExportToZip, codes, templateDict, zipPath)
+    if ok == 0:
+        raise HTTPException(status_code=400, detail=f"내보낼 데이터 없음 (실패: {failed})")
+    return FileResponse(
+        path=str(zipPath),
+        filename="dartlab_export.zip",
+        media_type="application/zip",
+        headers={"X-Export-Ok": str(ok), "X-Export-Failed": ",".join(failed)},
+    )
+
+
 # ── Internal Helpers ──
 
 
