@@ -1,7 +1,7 @@
 ---
 title: "마스터카드 (MA) — 매출이 1.9배 되는 동안 안 깎인 마진, 그리고 끝까지 못 말하는 것들"
 date: 2026-06-14
-description: "마스터카드 매출은 2019→2025 $16.88B에서 $32.79B로 +94% 커졌는데 영업이익률은 52.8~57.6% 밴드를 한 번도 벗어나지 않았다. 외형이 1.9배가 돼도 마진이 안 깎인 망. 2020년엔 매출·OPM·NPM이 함께 꺾였다가 1년 만에 복원됐다. 무엇이 꺾였다 돌아왔는지는 숫자가 말하고, 왜 그랬는지(리스크 비보유·국경간 거래)는 회사의 자기기술이 말한다 — 그 둘을 끝까지 갈라 적는다."
+description: "마스터카드 매출은 2019~2025 +94% 커졌는데 영업이익률은 52.8~57.6% 밴드를 한 번도 안 벗어났다. 외형 1.9배에도 안 깎인 마진. 무엇이 꺾였다 돌아왔는지는 숫자가, 왜 그랬는지(리스크 비보유·국경간 거래)는 회사의 자기기술이 말한다 — 그 둘을 끝까지 가른다."
 category: company-reports
 series: company-reports
 seriesOrder: 113
@@ -187,7 +187,7 @@ c.select("IS", ["당기순이익"], freq="Q")
 | 영업현금흐름 8.18B → 17.65B, OCF/OP 2024 95%·2025 93% | `c.select("CF",["영업활동현금흐름"])` | ✓ 실측 |
 | 비자 OPM 60~66%, 2024→2025 65.7→60.0% (마스터카드 55.3→57.6%) | [비자 글](/blog/V-visa) 연결 실측 | 직전 글 실측 |
 | 카드 미발급·신용 비보유·four-party·스위칭 / 대손은 발급은행 | [MA 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001141391&type=10-K) | 외부 인용 |
-| interchange MDL 1720: 2024.3 합의안→2024.6 기각→2025.11 수정안(약 10bp), NRF 반대 | [Reuters](https://www.reuters.com/) · [법원 기록](https://www.govinfo.gov/) | 외부 인용 |
+| interchange MDL 1720: 2024.3 합의안→2024.6 기각→2025.11 수정안(약 10bp), NRF 반대 | [Reuters](https://www.reuters.com/) · [법원 기록](https://www.govinfo.gov/) · [Bloomberg](https://www.bloomberg.com/) | 외부 인용 |
 | 2020 국경간 볼륨 -30%대·여행 봉쇄(신용손실 아님), 세그먼트(결제망/부가서비스) | [MA IR](https://investor.mastercard.com/) | 외부 인용 |
 | 2020 dip 원인이 국경간 거래량인지 / 마진이 왜 비자보다 낮은지 | 세그먼트·거래량(연결 미세분) | 증명 불가·외부 |
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |

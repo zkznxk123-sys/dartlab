@@ -1,7 +1,7 @@
 ---
 title: "넷플릭스 (NFLX) — 영업이익률은 두 배가 됐는데, 2021년엔 마진이 올라도 현금은 주저앉았다"
 date: 2026-06-14
-description: "넷플릭스 영업이익률은 12.9%에서 29.5%로 두 배 넘게 벌어졌다. 그런데 같은 회사가 2021년엔 영업이익률을 18.4%에서 20.8%로 끌어올리고도 영업현금흐름은 +2.43B에서 +0.39B로 주저앉았다. 차트 안 실측만으로 잡히는 이 어긋남을 시작으로, 콘텐츠 자본화 회계가 만든 '장부이익'과 '현금'의 시차를 손익이 증명하는 범위 안에서만 따라 읽는다."
+description: "넷플릭스 영업이익률은 12.9→29.5%로 두 배가 됐다. 그런데 2021년엔 마진을 올리고도 영업현금흐름은 +2.43B에서 +0.39B로 주저앉았다. 콘텐츠 자본화가 만든 '장부이익'과 '현금'의 시차를 손익이 증명하는 범위 안에서만 따라 읽는다."
 category: company-reports
 series: company-reports
 seriesOrder: 114
@@ -193,7 +193,7 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 | OCF 2022 +2.03 → 2023 +7.27 → 2025 +10.15 | `c.select("CF",[...])` | ✓ 실측 |
 | 2019 OCF -1.43B는 3분기 부분치(차트·표 미사용) | dartlab 집계 미완 | 부분치·제외 |
 | 정확한 FY2019 영업현금흐름 약 -2.9B | [NFLX 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001065280&type=10-K) | 외부 인용 |
-| 광고요금제·유료 계정공유 다축 전환 / 2025.12 워너 인수 합의 | [Netflix IR](https://ir.netflix.net/) · [Reuters](https://www.reuters.com/) | 외부 인용 |
+| 광고요금제·유료 계정공유 다축 전환 / 2025.12 워너 인수 합의 | [Netflix IR](https://ir.netflix.net/) · [Reuters](https://www.reuters.com/) · [Bloomberg](https://www.bloomberg.com/) | 외부 인용 |
 | 브라질 세무 비용·구독자 공시 중단·콘텐츠 상각 세부·하반기 OPM 가이던스 | [Netflix IR](https://ir.netflix.net/) · 공시 | 외부 인용 |
 | 마진이 '왜' 올랐는지(가격·믹스·상각·마케팅) | 손익 항목별(연결 미세분) | 분해 불가 |
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |
