@@ -10,18 +10,18 @@
 > 끊긴 세션이 가장 먼저 읽는 단일 포인터. 항상 최신 상태로 유지한다.
 
 ```text
-다음 작업: 단계-4a-3 (잔여 결합 해소). 운영자 승인 "5단계정도"(3→4a→4b→5→6) — 잔여 4a-3→4b→5→6.
+다음 작업: 단계-4b (이동 원자 윈도우 — $lib/terminal → ui/packages 승격). 단계-4a 전체 완료(4a-1·4a-2·4a-3).
+운영자 승인 "5단계정도"(3→4a→4b→5→6) — 잔여 4b→5→6.
 
-단계-4a-3 범위 (4a sub-unit 분해 선언의 마지막 단위):
-  · viewer 컴포넌트 2종 주입 역전(ViewerHost snippet — RightStack FinanceDialog·ViewerOverlay ViewerStudio
-    dynamic import + ui/web shim alias 2종 제거)
-  · $app/environment 잔여 헬퍼 치환($lib 잔존 소비처 재실측 — 4a-2 이관으로 5파일 감소) ·
-    $app/paths basePath 주입 · livePrice VITE_DARTLAB_QUOTE_WORKER 설정 주입
-  · 검증: 전역 locator 0·silent fallback 0 grep + landing/ui-web 양쪽 터미널 smoke
+단계-4b 착수 전 예약 entry 필수(07 규칙 6 — 이동 원자 윈도우). 범위 윤곽:
+  · $lib/terminal 본 트리 → ui/packages/surfaces(또는 합의된 경로)로 git mv 승격. routeLoad.ts 는
+    landing 셸 글루(getPublicRuntime·$app/paths 의존)라 동반 이동 불가 — landing 라우트 폴더로 분리 선행.
+  · ui/web vite alias(landingLib·landing Terminal deep import 경로) 재배선 + deploy-landing/publish 경로 점검.
+  · 무중단 = landing + ui/web 양쪽 터미널 동시 green (이동 원자 윈도우라 타 제품 PRD 작업과 격리).
 잔여 이월(단계-2발): vitest unit + fixture 런타임 대조 — 첫 surface 소비와 동행
-잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 viewer 추출과 동행) · scan 프리셋류 포트(단계-8) ·
-  navigation/storage 포트 실구현(4a-3 셸 주입)
-재개 지점: entry #13 (4a-2 완료) — 포트 가동·locator 철거 완료, 4a-3부터
+잔여 이월(4a-2발): filing.panel* 공개 구현(단계-6 viewer 추출 동행) · scan 프리셋류 포트(단계-8) ·
+  navigation/storage 포트 실구현(소비처 등장 시점 — Terminal 은 아직 미소비)
+재개 지점: entry #14 (4a-3 완료) — 4a 전체 종료, locator·$app 결합 제거 완료. 4b 예약 entry부터
 ```
 
 ---
@@ -226,3 +226,14 @@ commit: (이 변경의 커밋)
 
 검증: runtime tsc strict 0 ✓(noUncheckedIndexedAccess 마찰 40건 → 근원 수정: pk 파싱 destructuring·grid 조회·인덱스 가드 — 전부 동작 불변 보강) / landing check 0 에러·4395파일 ✓ / landing 풀빌드+prerender ✓ / ui/web build(tsc -b 포함) ✓ — 로컬 HTTP 패널 타입과 계약의 실제 발산 3건(toc block 메타·chapter null·init first 포인터)을 tsc 가 적발, 정규화기로 해소 / `localTerminalAdapter`·`__DARTLAB_LOCAL_TERMINAL__`·옛 모듈 경로 grep 0 ✓ / 신설 파일 staging 후 ?? 잔존 0 확인 ✓(entry #12 룰)  
 rollback: 이 commit revert (이동·삭제·신설 모두 단일 커밋).
+
+### [14] 단계-4a-3 viewer 주입 역전 + $app 결합 제거 — 완료 (4a 전체 종료)
+일시: 2026-06-13  
+commit: (이 변경의 커밋)  
+내용: 4a 마지막 sub-unit. terminal → viewer **역의존 주입 역전** + 포터블 surface 트리의 SvelteKit 전역 결합 제거.
+- **viewer 주입 역전**: `data/hosts.ts` 신설(TerminalHosts 계약 — viewerStudio·financeDialog lazy 로더, 둘 다 nullable). Terminal.svelte `hosts` 필수 prop → RightStack·ViewerOverlay 로 전달. 동적 import 리터럴(`$lib/components/viewer/*`)은 **셸 소유**로 이동(landing 두 라우트가 주입) — 청크 분리 유지(⤢ 클릭 전 0바이트 불변). ui/web 셸은 `hosts={viewerStudio:null,financeDialog:null}` 주입 → 뷰어=viewer port URL(iframe)·재무모달=열화 안내(숨김 금지 원칙). **ViewerStudioShim·FinanceDialogShim 2종 삭제** + vite alias 2종·terminalShimDir 제거.
+- **$app 결합 제거**: 포터블 트리 6파일 `$app/environment browser` → `typeof window` (chartState·drawStore·templateStore·PriceChart·livePrice + 4a-2 stores). `$app/paths base` → `runtime.env.basePath`(Terminal·LeftRail·RightStack). livePrice `import.meta.env` 안전 캐스트(origin.ts 패턴). **routeLoad.ts 는 의도적 잔류** — getPublicRuntime·$app/paths 에 이미 묶인 landing 셸 글루(이식 surface 아님)라 $app/environment 정당, 4b 에서 라우트 폴더로 분리.
+- 경계 판정: 포터블 surface(charts·panels·livePrice·stores)는 $app·전역 locator·shim 전부 0 / 셸 글루(routeLoad·publicRuntime)만 $app 정당 보유.
+
+검증: `$app/environment|$app/paths|__DARTLAB_LOCAL_TERMINAL__|localTerminalAdapter|*Shim|landingDataShims` grep — 포터블 트리 0(주석·routeLoad 셸글루 제외) ✓ / ui/web 전역 locator·shim grep 0 ✓ / landing check 0 에러·4396파일 ✓ / landing 풀빌드+prerender ✓ / ui/web build ✓  
+rollback: 이 commit revert (hosts.ts 신설 + shim 2종 삭제 + 컴포넌트 prop 배선 — 단일 커밋).

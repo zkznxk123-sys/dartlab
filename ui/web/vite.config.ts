@@ -14,7 +14,6 @@ const dartlabVersion = versionMatch[1];
 const repoRoot = path.resolve(__dirname, '../..');
 const landingLib = path.resolve(repoRoot, 'landing/src/lib');
 const sharedChartDir = path.resolve(repoRoot, 'ui/shared/chart');
-const terminalShimDir = path.resolve(__dirname, './src/features/terminalSvelte');
 const svelteCompatDir = path.resolve(__dirname, './src/svelteKitCompat');
 
 // dartlab UI 빌드 — Python wheel 안에 박혀서 dartlab 서버 (FastAPI) 가 정적 서빙
@@ -32,9 +31,7 @@ export default defineConfig({
 		alias: {
 			'$app/paths': path.resolve(svelteCompatDir, 'paths.ts'),
 			'$app/environment': path.resolve(svelteCompatDir, 'environment.ts'),
-			'$lib/components/viewer/ViewerStudio.svelte': path.resolve(terminalShimDir, 'ViewerStudioShim.svelte'),
-			'$lib/components/viewer/FinanceDialog.svelte': path.resolve(terminalShimDir, 'FinanceDialogShim.svelte'),
-			// 옛 $lib 데이터 shim 5종은 4a-2 포트화로 소멸 — Terminal 은 runtime prop 만 본다
+			// 옛 viewer shim 2종은 4a-3 주입 역전으로 소멸(hosts=null), 데이터 shim 5종은 4a-2 포트화로 소멸
 			'$chart': sharedChartDir,
 			'$lib': landingLib,
 			// 워크스페이스 패키지 — ui/web 은 워크스페이스 밖이라 패키지명 해석 불가, 파일경로 alias 로 소비 (01 §3.4)

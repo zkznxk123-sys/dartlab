@@ -14,6 +14,11 @@
 
 	// 본진과 동일한 공개 셸 runtime 주입 (dev 셸도 포트만 본다)
 	const runtime = getPublicRuntime();
+	// 뷰어 컴포넌트 lazy 로더 주입 — 본진 route 와 동일 (4a-3 역의존 제거)
+	const hosts = {
+		viewerStudio: () => import('$lib/components/viewer/ViewerStudio.svelte'),
+		financeDialog: () => import('$lib/components/viewer/FinanceDialog.svelte')
+	};
 
 	let { data }: { data: PageData } = $props();
 	const eng = $derived(createEngine(data.raw as RawData));
@@ -26,7 +31,7 @@
 </svelte:head>
 
 {#if ready}
-	<DevTerminal {eng} {runtime} initial="005930" />
+	<DevTerminal {eng} {runtime} {hosts} initial="005930" />
 {:else}
 	<main class="devEmpty">
 		<p>터미널 씨데이터를 불러오지 못했습니다. 본진은 <a href="../terminal">/terminal</a>.</p>

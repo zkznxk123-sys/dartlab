@@ -3,7 +3,6 @@
 	//   일반 = ChartMenus(칩+드롭다운) / 전체화면 = ChartRibbon(2단 전문 리본). 상태는 ChartCtl 단일 SSOT.
 	// 본 컴포넌트 = 차트 인스턴스 수명주기 + 데이터(lazy 백필) + 상태→차트 반영 effect 들만.
 	// 전체 이력(2010~) lazy 로드, 인스턴스 영속(회사전환=applyNewData, dispose 안 함). SSR 안전.
-	import { browser } from '$app/environment';
 	import { untrack } from 'svelte';
 	import { KRX_MIN_YEAR, MACRO_SERIES, MACRO_ATTRIBUTION, type Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
@@ -40,6 +39,7 @@
 	}
 	let { candles, code, name = '', lang, events, valBand, peers = [], suggest, onPick }: Props = $props();
 	const rt = useDartLabRuntime();
+	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
 	const ctl = new ChartCtl();
 	let el: HTMLDivElement | null = $state(null);

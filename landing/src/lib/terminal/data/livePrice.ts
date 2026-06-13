@@ -5,9 +5,11 @@
 //   VITE_DARTLAB_QUOTE_WORKER = https://<your-worker>.workers.dev   (미설정 시 라이브 비활성)
 //
 // 키 발급 전(또는 미설정) → null 반환 → 호출측은 EOD(전일 종가)까지만 표시. ("키 없으면 어제까지")
-import { browser } from '$app/environment';
+const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
-const WORKER_URL = import.meta.env.VITE_DARTLAB_QUOTE_WORKER ?? '';
+// vite 환경 안전 캐스트 — 빌드타임 설정(셸 무관 이식성, origin.ts VITE_DARTLAB_HF_RESOLVE 동일 패턴)
+const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env;
+const WORKER_URL = viteEnv?.VITE_DARTLAB_QUOTE_WORKER ?? '';
 
 export interface LiveQuote {
 	code: string;

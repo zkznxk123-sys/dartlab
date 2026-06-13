@@ -11,11 +11,11 @@
 	import type { ComponentProps } from 'svelte';
 	import Terminal from '../Terminal.svelte';
 
-	let { eng, runtime, initial = '005930' }: ComponentProps<typeof Terminal> = $props();
+	let { eng, runtime, hosts, initial = '005930' }: ComponentProps<typeof Terminal> = $props();
 </script>
 
 <div class="devBanner mono">DEV 작업대 — 본진은 /terminal · 본 라우트는 noindex · WIP 는 $lib/terminal/dev/</div>
-<Terminal {eng} {runtime} {initial} />
+<Terminal {eng} {runtime} {hosts} {initial} />
 
 <style>
 	.devBanner {

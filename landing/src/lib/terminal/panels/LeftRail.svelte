@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import type { Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from '../data/engine';
@@ -17,6 +16,7 @@
 	}
 	let { eng, lang, active, onPick }: Props = $props();
 	const rt = useDartLabRuntime();
+	const base = rt.env.basePath;
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	// scan 와 동일 universe: finance+prices 보유 회사 (eng 불변 → 1 회 산출 후 캐시)

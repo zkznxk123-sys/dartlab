@@ -11,6 +11,11 @@
 
 	// 공개 셸 runtime 주입 — Terminal 은 포트만 본다 (전역 locator·silent fallback 철거, 4a-2)
 	const runtime = getPublicRuntime();
+	// 뷰어 컴포넌트 lazy 로더 주입 — 동적 import 리터럴은 셸 소유 (청크 분리 유지, 4a-3 역의존 제거)
+	const hosts = {
+		viewerStudio: () => import('$lib/components/viewer/ViewerStudio.svelte'),
+		financeDialog: () => import('$lib/components/viewer/FinanceDialog.svelte')
+	};
 
 	let { data }: { data: PageData } = $props();
 	const eng = $derived(createEngine(data.raw as RawData));
@@ -26,7 +31,7 @@
 </svelte:head>
 
 {#if ready}
-	<Terminal {eng} {runtime} initial="005930" />
+	<Terminal {eng} {runtime} {hosts} initial="005930" />
 {:else}
 	<div class="loading">HuggingFace · dartlab-data 연결 중 …</div>
 {/if}

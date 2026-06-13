@@ -3,13 +3,13 @@
 	// 좌측 레일 + 상단 헤더 = 네비게이션 (검색·목록·이동·상태)
 	// 중앙 스택            = 시각화 중심 (차트·그래프·전체화면 분석)
 	// 우측 스택            = 테이블·텍스트·수치·정성 — 그래프 배치 금지 (그래프는 중앙으로)
-	import { base } from '$app/paths';
 	import GithubIcon from '$lib/components/GithubIcon.svelte';
 	import { brand } from '$lib/brand';
 	import './terminal.css';
 	import type { Candle, DartLabRuntime, MacroLatest } from '@dartlab/ui-contracts';
 	import { setDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from './data/engine';
+	import type { TerminalHosts } from './data/hosts';
 	import type { Lang } from './data/types';
 	import { chgClass, fmtNum, sign, sparkPts } from './ui/helpers';
 	import LeftRail from './panels/LeftRail.svelte';
@@ -24,11 +24,15 @@
 		eng: Engine;
 		/** 데이터 포트 묶음 — 앱 셸(landing route · ui/web 브리지)이 주입. 전역 locator 금지. */
 		runtime: DartLabRuntime;
+		/** 뷰어 컴포넌트 주입 — 셸이 lazy 로더 제공 (terminal → viewer 역의존 제거, 4a-3). */
+		hosts: TerminalHosts;
 		initial?: string;
 	}
-	let { eng, runtime, initial = '005930' }: Props = $props();
+	let { eng, runtime, hosts, initial = '005930' }: Props = $props();
 	// 하위 패널 전체가 useDartLabRuntime() 컨텍스트로 같은 인스턴스를 본다 (컴포넌트 init 시 1회).
 	setDartLabRuntime(runtime);
+	// base path — $app/paths 대신 runtime 환경 계약 (ui/web 셸에서도 동작)
+	const base = runtime.env.basePath;
 
 	// 종목 결정 우선순위: ?sym= 딥링크(산업·인사이트 등 내부 링크) > 마지막 본 종목(localStorage) > initial
 	const urlSym = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('sym') : null;
@@ -255,7 +259,7 @@
 		<main class="board">
 			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} /></div>
 			<div class="col colC"><CenterStack {co} {lang} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} /></div>
-			<div class="col colR"><RightStack {co} {lang} onPick={pick} /></div>
+			<div class="col colR"><RightStack {co} {lang} {hosts} onPick={pick} /></div>
 		</main>
 
 		<footer class="statusBar">

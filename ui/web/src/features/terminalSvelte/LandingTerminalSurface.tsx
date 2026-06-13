@@ -37,8 +37,10 @@ export function LandingTerminalSurface({ code }: LandingTerminalSurfaceProps) {
 			]);
 			if (cancelled) return;
 			const eng = createEngine(local.raw);
-			// runtime 은 prop 주입 — Terminal 이 컨텍스트로 하위 패널에 배포 (전역 locator 철거, 4a-2)
-			instance = mount(Terminal, { target, props: { eng, runtime: local.runtime, initial: code } }) as SvelteInstance;
+			// runtime 은 prop 주입 — Terminal 이 컨텍스트로 하위 패널에 배포 (전역 locator 철거, 4a-2).
+			// hosts = null: 이 셸은 viewer 임베드 미지원 — 뷰어는 iframe(viewer port URL), 재무모달은 열화 안내 (4a-3)
+			const hosts = { viewerStudio: null, financeDialog: null };
+			instance = mount(Terminal, { target, props: { eng, runtime: local.runtime, hosts, initial: code } }) as SvelteInstance;
 			setStatus('ready');
 		})().catch((err: unknown) => {
 			if (cancelled) return;

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import type {
 		CompanyChange,
 		CompanyRelations,
@@ -16,20 +15,23 @@
 	} from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang } from '../data/types';
+	import type { TerminalHosts } from '../data/hosts';
 	import { gradeTone } from '../data/engine';
 	import Panel from '../ui/Panel.svelte';
-	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 내부 dynamic import
-	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — dynamic import lazy, 터미널 청크 무증가
+	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 셸 주입 lazy 로더
+	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — 셸 주입 lazy 로더, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../data/engine';
 
 	interface Props {
 		co: Company;
 		lang: Lang;
+		hosts: TerminalHosts;
 		onPick: (code: string) => void;
 	}
-	let { co, lang, onPick }: Props = $props();
+	let { co, lang, hosts, onPick }: Props = $props();
 	const rt = useDartLabRuntime();
+	const base = rt.env.basePath;
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
@@ -495,15 +497,67 @@
 </div>
 
 {#if viewerOpen}
-	<ViewerOverlay code={co.code} onclose={() => (viewerOpen = false)} />
+	<ViewerOverlay code={co.code} studio={hosts.viewerStudio} onclose={() => (viewerOpen = false)} />
 {/if}
 
 {#if tablesOpen}
-	{#await import('$lib/components/viewer/FinanceDialog.svelte') then m}
-		{@const FinanceDialog = m.default}
-		<!-- .dlTermFinSkin: --fin-* 토큰 오버라이드 (terminal.css) — CSS 변수는 fixed 모달에도 DOM 상속으로 관통 -->
-		<div class="dlTermFinSkin">
-			<FinanceDialog code={co.code} corpName={co.name.kr} open={tablesOpen} onclose={() => (tablesOpen = false)} />
+	{#if hosts.financeDialog}
+		{#await hosts.financeDialog() then m}
+			{@const FinanceDialog = m.default}
+			<!-- .dlTermFinSkin: --fin-* 토큰 오버라이드 (terminal.css) — CSS 변수는 fixed 모달에도 DOM 상속으로 관통 -->
+			<div class="dlTermFinSkin">
+				<FinanceDialog code={co.code} corpName={co.name.kr} open={tablesOpen} onclose={() => (tablesOpen = false)} />
+			</div>
+		{/await}
+	{:else}
+		<!-- 열화 안내 — 이 셸은 정량 재무제표 모달 미지원 (숨김 금지 원칙: 기능 존재는 보이고 한계를 안내) -->
+		<div class="hostFallback" role="presentation" onclick={() => (tablesOpen = false)}>
+			<div class="hostFallbackPanel" role="dialog" aria-modal="true" tabindex="-1" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.key === 'Escape' && (tablesOpen = false)}>
+				<div class="hostFallbackBar"><span>재무제표</span><button type="button" onclick={() => (tablesOpen = false)}>×</button></div>
+				<div class="hostFallbackBody">{lang === 'en' ? 'Quantitative statements modal is not available in this shell — use the finance panel.' : '이 셸에선 정량 재무제표 모달을 지원하지 않습니다 — 재무 패널에서 확인하세요.'}</div>
+			</div>
 		</div>
-	{/await}
+	{/if}
 {/if}
+
+<style>
+	/* 열화 안내 모달 — hosts.financeDialog 미주입 셸 전용 (component-scoped, 터미널 스킨 토큰) */
+	.hostFallback {
+		position: fixed;
+		inset: 0;
+		z-index: 120;
+		display: grid;
+		place-items: center;
+		background: rgba(0, 0, 0, 0.66);
+	}
+	.hostFallbackPanel {
+		width: min(420px, calc(100vw - 32px));
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		background: #0f0f10;
+		color: #e8eaef;
+		border-radius: 4px;
+		overflow: hidden;
+	}
+	.hostFallbackBar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 9px 12px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		font: 700 11px/1 var(--dl-font-mono, ui-monospace, monospace);
+		color: #fb923c;
+	}
+	.hostFallbackBar button {
+		border: 0;
+		background: transparent;
+		color: #a3a8b3;
+		font-size: 18px;
+		cursor: pointer;
+	}
+	.hostFallbackBody {
+		padding: 18px 12px;
+		font-size: 13px;
+		line-height: 1.5;
+		color: #a3a8b3;
+	}
+</style>

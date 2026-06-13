@@ -1,6 +1,6 @@
 // 드로잉 영속 — localStorage 회사별 1키. klinecharts overlay 는 points(timestamp,value) 사전 채움
 // 시 생성 즉시 FINISHED 라 복원 = createOverlay 1호출. 상한 40개(초과 시 오래된 것부터 탈락).
-import { browser } from '$app/environment';
+const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
 export interface SavedDraw {
 	name: string;

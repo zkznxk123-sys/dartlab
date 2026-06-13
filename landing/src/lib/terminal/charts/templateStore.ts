@@ -1,7 +1,7 @@
 // 차트틀 (인디케이터 템플릿) 다중 저장 — 현재 차트 설정(지표·파라미터·축·캔들·봉주기·표시)을
 // 이름 슬롯으로 저장/적용. localStorage 1키(상한 12, drawStore 무해 영속 패턴). 적용은 ChartCtl
 // 필드 일괄 대입만 — PriceChart 의 기존 reconcile effect 들이 차트 반영을 이어받는다 (명령 0).
-import { browser } from '$app/environment';
+const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 import { OVERLAY_ALL, SUB_ALL, TFS, YMODES, CANDLES, type ChartCtl, type OverlayKey, type SubKey, type YMode, type CandleStyle, type TfKey } from './chartState.svelte';
 import { IND_DEFS } from './indicatorParams';
 
