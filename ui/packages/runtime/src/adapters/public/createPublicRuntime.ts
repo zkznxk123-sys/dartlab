@@ -17,6 +17,7 @@ import type {
 	ViewerPort
 } from '@dartlab/ui-contracts';
 import { loadGovCandles, loadGovRecent } from './sources/govPriceSource';
+import { loadNaverFresh } from './sources/naverPriceSource';
 import { loadInitialOHLCV, loadOlderYear, loadedCandles, mergeDedup, seedCandles } from './sources/priceSource';
 import { loadTerminalFinance } from './sources/financeSource';
 import { createHfMacroPort } from './sources/macroSource';
@@ -36,6 +37,8 @@ import {
 	loadTopExecPay,
 	loadWorkforce
 } from './sources/reportSource';
+import { publicExportPort, type PublicExportShared } from './sources/exportSource';
+import { localStoragePort } from '../local/sources/storageSource';
 
 /** 공유 엔진 의존 메서드 — companyLive(reportFacts)·duckSql(changes) 는 landing 잔류라 셸이 주입. */
 export interface PublicRuntimeSharedPorts {
@@ -48,6 +51,9 @@ export interface PublicRuntimeOptions {
 	shared: PublicRuntimeSharedPorts;
 	/** 공개 셸의 뷰어 노출 형태 — landing = 임베드 컴포넌트(urlForCompany → null). */
 	viewer: ViewerPort;
+	/** table-export — generate 가 wrap 할 브라우저 워크북 빌더(surfaces buildWorkbook, bundle-bound). 셸 주입.
+	 *  미주입이면 listExportableTables·양식 CRUD 는 동작, generate 만 정직히 throw(배선 순서 가드). */
+	exportShared?: PublicExportShared;
 }
 
 function notWiredYet(what: string, stage: string): never {
@@ -70,14 +76,16 @@ function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | nu
 
 function publicPricePort(): PricePort {
 	return {
-		// 회사파일(전종목 주간 파생, 전체 이력) ∥ recent(최근 30거래일 전종목 슬림 1파일) 병렬 → 병합.
-		// 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을 보장. 둘 다 미스(신규상장 직후)면
-		// date/ 파티션 폴백. dev 미스는 /__gov 라이브 채움 경로가 govPriceSource 안에서 동작.
+		// 회사파일(전종목 주간 파생, 전체 이력) ∥ recent(최근 30거래일 전종목 슬림 1파일) ∥ 네이버 fresh tail
+		// 병렬 → 병합. 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을, 네이버 fresh 가 gov 미발행
+		// 최신일(금요일치=월요일 발행)을 보장. mergeDedup 은 stable sort + 선두 우선이라 겹치는 날은 gov 가
+		// 이기고 네이버는 gap(미발행일)만 채움 — gov=네이버 동일값이라 점프 없음. 둘 다 미스면 date/ 폴백.
+		// dev 미스는 /__gov 라이브 채움, 네이버 fresh 는 /__naver(dev)·CF 프록시(프로덕션) 경로.
 		async initial(code, year) {
 			const c = code.trim();
-			const [gov, recent] = await Promise.all([loadGovCandles(c), loadGovRecent()]);
+			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c), loadGovRecent(), loadNaverFresh(c)]);
 			const tail = recent?.[c] ?? [];
-			if ((gov && gov.length) || tail.length) return seedCandles(c, mergeDedup(gov ?? [], tail));
+			if ((gov && gov.length) || tail.length || fresh.length) return seedCandles(c, mergeDedup(gov ?? [], tail, fresh));
 			return loadInitialOHLCV(c, year);
 		},
 		older: loadOlderYear,
@@ -150,6 +158,7 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		macro: createHfMacroPort(),
 		report: publicReportPort(),
 		scan: publicScanPort(options.shared),
+		export: publicExportPort(localStoragePort(), options.exportShared),
 		get map() {
 			return notWiredYet('map', '단계-8(map 추출)');
 		},

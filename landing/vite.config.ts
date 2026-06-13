@@ -181,8 +181,53 @@ function govPriceDevPlugin() {
 	};
 }
 
+// 네이버 fchart fresh-tail 미들웨어 — /__naver?code=XXXXXX (dev only). gov(T+1 지연)가 아직 발행 안 한
+// 최신 거래일을 표시용으로 채운다(재배포 아님, 사용자 세션 표시용 fetch). 서버측 fetch라 브라우저 CORS 우회.
+const NAVER_FCHART = 'https://fchart.stock.naver.com/sise.nhn';
+async function fetchNaverCandles(code: string) {
+	const url = `${NAVER_FCHART}?symbol=${encodeURIComponent(code)}&timeframe=day&count=30&requestType=0`;
+	const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+	if (!res.ok) throw new Error(`naver fchart ${res.status}`);
+	const txt = await res.text(); // EUC-KR XML — 단, data="..." 필드는 순수 ASCII 라 regex 안전
+	const candles: { t: string; o: number; h: number; l: number; c: number; v: number }[] = [];
+	for (const m of txt.matchAll(/data="([^"]+)"/g)) {
+		const p = m[1].split('|');
+		if (p.length < 6) continue;
+		const c = Number(p[4]);
+		if (!Number.isFinite(c) || c <= 0) continue;
+		candles.push({ t: p[0], o: Number(p[1]) || c, h: Number(p[2]) || c, l: Number(p[3]) || c, c, v: Number(p[5]) || 0 });
+	}
+	candles.sort((a, b) => a.t.localeCompare(b.t));
+	return candles;
+}
+
+function naverPriceDevPlugin() {
+	return {
+		name: 'naver-price-dev',
+		configureServer(server: ViteDevServer) {
+			server.middlewares.use('/__naver', async (req, res) => {
+				const send = (status: number, obj: unknown) => {
+					if (res.writableEnded) return;
+					res.statusCode = status;
+					res.setHeader('Content-Type', 'application/json; charset=utf-8');
+					res.end(JSON.stringify(obj));
+				};
+				const url = new URL(req.url ?? '', 'http://localhost');
+				const code = (url.searchParams.get('code') ?? '').replace(/[^0-9A-Za-z]/g, '');
+				if (!code) return send(400, { error: 'code 필요' });
+				try {
+					const candles = await fetchNaverCandles(code);
+					send(200, { source: 'fchart.stock.naver.com', code, asOf: candles.at(-1)?.t ?? '', candles });
+				} catch (e) {
+					send(502, { error: String(e) });
+				}
+			});
+		}
+	};
+}
+
 export default defineConfig({
-	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), govPriceDevPlugin(), sveltekit()],
+	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), govPriceDevPlugin(), naverPriceDevPlugin(), sveltekit()],
 	define: {
 		__DARTLAB_VERSION__: JSON.stringify(dartlabVersion)
 	},

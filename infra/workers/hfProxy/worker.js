@@ -46,6 +46,40 @@ export default {
 		if (req.method !== 'GET' && req.method !== 'HEAD') return new Response('method not allowed', { status: 405, headers: cors });
 
 		const url = new URL(req.url);
+
+		// /naver?code=XXXXXX — 네이버 fchart 일별 OHLCV 프록시. gov(공공데이터, T+1 영업일 지연)가 아직
+		// 발행 안 한 최신 거래일(금요일치=월요일 발행)을 프론트가 표시용 fresh-tail 로 채우게 한다. 정적
+		// 사이트는 브라우저 CORS 로 네이버를 직접 못 부르므로 서버측(엣지) fetch 가 우회. 키 불필요(공개
+		// 차트 API), 재배포 아님(사용자 세션 표시용). 10분 캐시 — EOD 갭 채움이라 분 단위 신선도면 충분.
+		if (url.pathname === '/naver') {
+			const jsonHeaders = { ...cors, 'Content-Type': 'application/json; charset=utf-8' };
+			const code = (url.searchParams.get('code') || '').replace(/[^0-9A-Za-z]/g, '');
+			if (!code) return new Response(JSON.stringify({ error: 'code required' }), { status: 400, headers: jsonHeaders });
+			let txt = '';
+			try {
+				const fr = await fetch(
+					`https://fchart.stock.naver.com/sise.nhn?symbol=${code}&timeframe=day&count=30&requestType=0`,
+					{ headers: { 'User-Agent': 'Mozilla/5.0' } }
+				);
+				if (!fr.ok) throw new Error(`naver ${fr.status}`);
+				txt = await fr.text(); // EUC-KR XML — data="..." 필드는 ASCII 라 regex 안전
+			} catch (e) {
+				return new Response(JSON.stringify({ error: String(e) }), { status: 502, headers: jsonHeaders });
+			}
+			const candles = [];
+			for (const it of txt.matchAll(/data="([^"]+)"/g)) {
+				const p = it[1].split('|');
+				if (p.length < 6) continue;
+				const c = Number(p[4]);
+				if (!Number.isFinite(c) || c <= 0) continue;
+				candles.push({ t: p[0], o: Number(p[1]) || c, h: Number(p[2]) || c, l: Number(p[3]) || c, c, v: Number(p[5]) || 0 });
+			}
+			candles.sort((a, b) => a.t.localeCompare(b.t));
+			return new Response(
+				JSON.stringify({ source: 'fchart.stock.naver.com', code, asOf: candles.at(-1)?.t ?? '', candles }),
+				{ headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' } }
+			);
+		}
 		const m = url.pathname.match(/^\/hf\/(.+)$/);
 		if (!m) return new Response('not found — use /hf/<dataset-path>', { status: 404, headers: cors });
 		const path = m[1].replace(/^\/+/, '').replace(/\.\.+/g, ''); // 경로 정규화 (상위 디렉터리 탈출 차단)

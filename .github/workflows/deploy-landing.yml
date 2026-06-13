@@ -113,6 +113,9 @@ jobs:
           VITE_FEEDBACK_URL: https://dartlab-question-collector.eddmpython.workers.dev
           # HF parquet 레인지 프록시(콜드 403 흡수 + range 헤더 보존, infra/workers/hfProxy). 비우면 HF 직결로 가역.
           VITE_DARTLAB_HF_RESOLVE: https://dartlab-hf-proxy.eddmpython.workers.dev/hf
+          # 네이버 fchart fresh-tail 프록시(같은 hfProxy 워커 /naver 라우트). gov(T+1 지연) 미발행 최신 거래일을
+          # 표시용으로 채움. 비우면 미동작(EOD 까지만)으로 가역. infra/workers/hfProxy worker.js /naver.
+          VITE_DARTLAB_NAVER_PROXY: https://dartlab-hf-proxy.eddmpython.workers.dev/naver
           # Cloudflare Web Analytics 공개 beacon site token 또는 Cloudflare 제공 script snippet.
           # 비우면 analytics beacon 을 로드하지 않음.
           VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
