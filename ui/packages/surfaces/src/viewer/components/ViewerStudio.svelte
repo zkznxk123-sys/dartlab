@@ -79,12 +79,10 @@
 	let discussOpen = $state(false);
 	let financeOpen = $state(false); // 정량재무제표 다이얼로그
 	let stockSearchOpen = $state(false); // 종목검색 팝오버 (화면내검색 ⌘K 와 분리된 회사전환 입력)
-	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
-	const askAvailable = $derived(!(embedded && tier === 'public'));
+	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push).
+	// ⛔ 공시뷰어 질의응답(WebGPU 온디바이스 Q&A)은 뷰어 핵심 기능 — 공개/로컬·임베드/단독 전부 항상 노출.
+	// (터미널 *헤더* AI 만 public 에서 숨김 = TerminalSurface allowTerminalAsk. 뷰어 AI 와 별개.)
 	let askCarryQ = $state(''); // AI 가 타 회사 감지 → 이동 후 새 회사 index 준비되면 운반·자동 ask 할 질문
-	$effect(() => {
-		if (!askAvailable && askOpen) askOpen = false;
-	});
 	// ── table-export 선택 모드 ── 헤더 [표 내보내기] 토글. 우측 380px 슬롯을 AskDrawer 와 공유(상호배타).
 	let exportOpen = $state(false); // ExportDrawer 열림 = 선택 모드 on (체크박스 오버레이 + 드로어)
 	const selStore = createSelectionStore();
@@ -296,7 +294,6 @@
 		if (exportOpen) askOpen = false;
 	}
 	function openAsk() {
-		if (!askAvailable) return;
 		askOpen = !askOpen;
 		if (askOpen) exportOpen = false;
 	}
@@ -476,11 +473,9 @@
 				{/if}
 			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
-			{#if askAvailable}
-				<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={openAsk} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
-					<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
-				</button>
-			{/if}
+			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={openAsk} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
+				<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
+			</button>
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
