@@ -368,6 +368,10 @@ def _loadScanMetrics() -> dict[str, dict]:
                 continue
             metrics.setdefault(code, {})
             metrics[code]["liqGrade"] = r.get("등급") or r.get("grade") or ""
+            cr = r.get("유동비율")
+            if cr is None:
+                cr = r.get("currentRatio")
+            metrics[code]["currentRatio"] = cr
     except Exception as e:
         print(f"  ⚠ liquidity 로드 실패: {e}")
 
@@ -830,6 +834,7 @@ def buildEcosystem(
                 "opMargin": _roundOrNone(m.get("opMargin")),
                 "debtRatio": _roundOrNone(m.get("debtRatio")),
                 "icr": _roundOrNone(m.get("icr")),
+                "currentRatio": _roundOrNone(m.get("currentRatio")),
                 "revCagr": _roundOrNone(m.get("revCagr")),
                 "profGrade": m.get("profGrade") or "",
                 "debtGrade": m.get("debtGrade") or "",
@@ -1022,6 +1027,8 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
                 "opMargin": m.get("opMargin"),
                 "debtRatio": m.get("debtRatio"),
                 "revCagr": m.get("revCagr"),
+                "icr": m.get("icr"),
+                "currentRatio": m.get("currentRatio"),
                 "profGrade": m.get("profGrade") or "",
                 "debtGrade": m.get("debtGrade") or "",
                 "growthGrade": m.get("growthGrade") or "",
@@ -1119,6 +1126,8 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
             "opMargin": _distribution([m["opMargin"] for m in members]),
             "debtRatio": _distribution([m["debtRatio"] for m in members]),
             "revCagr": _distribution([m["revCagr"] for m in members]),
+            "icr": _distribution([m.get("icr") for m in members]),
+            "currentRatio": _distribution([m.get("currentRatio") for m in members]),
         }
 
         out[indId] = {

@@ -121,6 +121,8 @@ export interface EcoNode {
 	roe?: Num;
 	opMargin?: Num;
 	debtRatio?: Num;
+	icr?: Num;
+	currentRatio?: Num;
 	revCagr?: Num;
 	industryRank?: Num;
 	industryPeerCount?: Num;

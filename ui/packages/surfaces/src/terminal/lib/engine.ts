@@ -305,7 +305,7 @@ export function createEngine(raw: RawData): Engine {
 		if (!node) return null;
 		const peers = industryNodes(node.industry);
 		const col = (f: keyof EcoNode): Num[] => peers.map((n) => (n[f] as Num) ?? null);
-		// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사) 은 null. distribution 키 = roe/opMargin/revCagr/debtRatio.
+		// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사) 은 null. distribution 키 = roe/opMargin/revCagr/debtRatio/icr/currentRatio.
 		const statsRec = raw.industryStats as Record<string, IndustryStat> | null;
 		const dist = statsRec?.[node.industry]?.distribution;
 		const bandOf = (key: string): PercentileMetric['band'] => {
@@ -317,8 +317,8 @@ export function createEngine(raw: RawData): Engine {
 			{ kr: 'ROE', en: 'ROE', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
 			{ kr: '매출성장', en: 'Rev growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
 			{ kr: '부채비율', en: 'Debt ratio', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
-			{ kr: '매출규모', en: 'Revenue', v: node.revenue ?? null, p: pctRank(col('revenue'), node.revenue ?? null), unit: 'rev', band: null },
-			{ kr: '점유율', en: 'Mkt share', v: node.marketShare ?? null, p: pctRank(col('marketShare'), node.marketShare ?? null), unit: '%', band: null }
+			{ kr: '이자보상배율', en: 'Int. coverage', v: node.icr ?? null, p: pctRank(col('icr'), node.icr ?? null), unit: '배', band: bandOf('icr') },
+			{ kr: '유동비율', en: 'Current ratio', v: node.currentRatio ?? null, p: pctRank(col('currentRatio'), node.currentRatio ?? null), unit: '%', band: bandOf('currentRatio') }
 		].filter((m): m is PercentileMetric => m.p != null);
 		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics };
 	}

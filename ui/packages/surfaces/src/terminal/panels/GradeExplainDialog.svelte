@@ -75,7 +75,7 @@
 							{@const top = Math.max(1, 100 - (m.p ?? 0))}
 							<div class="gePctRow">
 								<span class="gePctName">{txc(m, lang)}</span>
-								<span class="gePctVal mono">{m.unit === '%' && m.v != null ? m.v.toFixed(1) + '%' : ''}</span>
+								<span class="gePctVal mono">{m.v != null ? m.v.toFixed(1) + (m.unit === '배' ? (lang === 'en' ? 'x' : '배') : '%') : '—'}</span>
 								<span class="gePctRank mono">{lang === 'en' ? 'top ' : '상위 '}{top}%</span>
 								{#if m.band}
 									<span class="gePctDist mono">{lang === 'en' ? 'peers' : '업종'} p10 {m.band.p10.toFixed(1)} · {lang === 'en' ? 'med' : '중앙'} {m.band.median.toFixed(1)} · p90 {m.band.p90.toFixed(1)}</span>
