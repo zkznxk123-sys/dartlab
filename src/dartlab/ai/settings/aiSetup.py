@@ -26,7 +26,13 @@ _DISPLAY_ORDER = DISPLAY_ORDER
 
 
 def _checkProviderAvailable(providerId: str) -> bool:
-    """provider 사용 가능 여부를 빠르게 체크 (네트워크 최소화)."""
+    """provider 사용 가능 여부를 빠르게 체크 (네트워크 최소화).
+
+    best-effort probe — 계약상 bool 만 반환하고 절대 예외를 전파하지 않는다.
+    개별 provider client 초기화가 어떤 이유로든 실패하면 (미설치·키 오류·SDK
+    시그니처 변경 등) "사용 불가" 로 간주한다. 한 provider 의 오류가 status
+    테이블 전체(providersStatus)나 dartlab.setup() 진입을 깨뜨리면 안 된다.
+    """
     try:
         from dartlab.ai.providers import createProvider
         from dartlab.ai.settings.types import LLMConfig
@@ -34,7 +40,7 @@ def _checkProviderAvailable(providerId: str) -> bool:
         config = LLMConfig(provider=providerId)
         prov = createProvider(config)
         return prov.checkAvailable()
-    except (ImportError, RuntimeError, ConnectionError, OSError, ValueError):
+    except Exception:  # noqa: BLE001 — 가용성 probe 는 어떤 오류도 "사용 불가" 로 흡수
         return False
 
 

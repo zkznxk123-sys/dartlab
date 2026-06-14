@@ -509,14 +509,17 @@ def checkFreshness(stockCode: str, *, forceCheck: bool = False):
 
 
 def setup(provider: str | None = None):
-    """AI provider 설정 안내 + 인터랙티브 설정.
+    """키 설정 단일 진입점 — AI provider(추론) + 데이터 provider(수집) 한 곳.
 
     Capabilities:
-        - 전체 AI provider 설정 현황 테이블 표시
-        - provider별 대화형 설정 (키 입력 → .env 저장)
-        - ChatGPT OAuth 브라우저 로그인
-        - OpenAI/Gemini/Groq/Cerebras/Mistral API 키 설정
-        - Ollama 로컬 LLM 설치 안내
+        - 인자 없이: AI provider 현황 + 데이터 provider 자격증명 현황을 한 화면에 표시
+        - AI provider 설정 — ChatGPT OAuth, OpenAI/Gemini/Groq/Cerebras/Mistral 키,
+          Ollama 로컬 LLM 안내 (키 → .env 저장)
+        - 데이터 provider 설정 — DART·FRED·ECOS·공공데이터포털(dataGoKr)·KRX·HF 등
+          발급/설정 안내 (이름으로 라우팅). 저장은 setCredential(암호화) 또는 .env
+        - SSOT — AI 키는 core/providers 레지스트리, 데이터 키는
+          core/providers/dataCredentials 레지스트리. 본 함수는 두 레지스트리를 읽는
+          단일 진입점일 뿐 키 정보를 복제하지 않는다.
 
     Requires:
         없음
@@ -538,9 +541,10 @@ def setup(provider: str | None = None):
         - llm.configure: 프로그래밍 방식 provider 설정
 
     Args:
-        provider: provider명 또는 alias. None이면 전체 현황 표시.
-            지원: "chatgpt", "openai", "gemini", "groq", "cerebras",
-            "mistral", "ollama", "codex", "custom".
+        provider: provider명 또는 alias. None이면 AI+데이터 전체 현황 표시.
+            AI — "chatgpt", "openai", "gemini", "groq", "cerebras", "mistral",
+            "ollama", "codex", "custom".
+            데이터 — "dart", "fred", "ecos", "dataGoKr", "krx", "hf", "openfigi".
 
     Returns:
         None (터미널/노트북에 안내 출력).
@@ -548,22 +552,39 @@ def setup(provider: str | None = None):
     Example::
 
         import dartlab
-        dartlab.setup()              # 전체 provider 현황
+        dartlab.setup()              # AI + 데이터 키 전체 현황 (한 화면)
         dartlab.setup("chatgpt")     # ChatGPT OAuth 브라우저 로그인
         dartlab.setup("openai")      # OpenAI API 키 설정
-        dartlab.setup("ollama")      # Ollama 설치 안내
+        dartlab.setup("fred")        # FRED(데이터) 키 발급/설정 안내
+        dartlab.setup("dataGoKr")    # 공공데이터포털 키 안내 (주가·관세·연금 공통)
     """
     from dartlab.ai.settings.aiSetup import (
         providersStatus,
         resolveAlias,
     )
+    from dartlab.gather.credentials import (
+        allSpecs,
+        formatStatus,
+        isConfigured,
+        missingKeyMessage,
+    )
 
     if provider is None:
+        # 단일 진입점 — 추론용 AI provider 키 + 수집용 데이터 provider 키를 한 화면에.
         print(providersStatus())
+        print(formatStatus())
         return
 
-    provider = resolveAlias(provider)
+    # 데이터 provider(DART·FRED·ECOS·공공데이터포털·KRX·HF 등) 라우팅 — gather 자격증명.
+    if provider in {spec.id for spec in allSpecs()}:
+        if isConfigured(provider):
+            print(f"\n  ✓ {provider} 데이터 자격증명이 이미 설정되어 있습니다.\n")
+        else:
+            print("\n" + missingKeyMessage(provider) + "\n")
+        return
 
+    # AI provider 경로.
+    provider = resolveAlias(provider)
     if provider == "oauth-codex":
         _setupOauthInteractive()
     else:
