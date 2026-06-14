@@ -266,7 +266,9 @@
 			}
 		}
 		const caps: Ev[] = capEvents.map((e) => ({ ...e, kind: 'capital' as const }));
-		return [...out, ...caps, ...disclosureEvents];
+		// ★공시(disclosure)는 캔들 고가 annotation 에서 제거 — 텍스트 폭주로 가격 차폐(PRD 02 §2.2/§11/§13 금지).
+		// 실적(report)·증자(capital)만 캔들 위 유지(가격 옆 위치가 맞음). 공시는 하단 레일(DisclosureEventRail)로 분리.
+		return [...out, ...caps];
 	});
 	const v = $derived(co.valuation);
 	const priceValBand = $derived(
