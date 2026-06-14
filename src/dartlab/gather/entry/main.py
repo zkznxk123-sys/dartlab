@@ -399,7 +399,7 @@ class GatherEntry:
         keyed = [(k, API_KEY_INFO[k]) for k, _ in visibleAxes if "불필요" not in API_KEY_INFO.get(k, "불필요")]
         for key, info in keyed:
             lines.append(f"  {key}: {info}")
-        lines.append("  → dartlab.gather.doctor() 로 공급자별 설정 상태 + 발급 링크 확인")
+        lines.append("  → print(dartlab.gather.formatStatus()) 로 공급자별 설정 상태 + 발급 링크 확인")
         lines.append('  → dartlab.gather.setCredential("dart", "<키>") 로 암호화 저장 (.env 편집 불필요)')
         lines.append("")
         lines.append("━━━ 고급 (Form B — 축이 아닌 수집기) ━━━")

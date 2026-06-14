@@ -12,7 +12,7 @@ import dartlab
 dartlab.gather()                       # 공개 축 가이드 DataFrame (정본)
 dartlab.gather("price", "005930")      # KR OHLCV
 dartlab.gather("macro", "FEDFUNDS")    # 거시지표 (시장 자동 감지)
-dartlab.gather.doctor()                # 데이터 공급자 키 설정 상태 + 발급 링크 (첫 사용자)
+print(dartlab.gather.formatStatus())   # 데이터 공급자 키 설정 상태 + 발급 링크 (첫 사용자)
 
 g = dartlab.gather.getDefaultGather()  # Form B — 축이 아닌 고급 수집기
 g.dividends("005930"); g.collect("005930")
@@ -37,7 +37,7 @@ g.dividends("005930"); g.collect("005930")
 | `bulkData/` | HF 벌크 로더 (`macroHf` 등) |
 | `mapping/` | 코드 매핑 (티커 ↔ 종목코드 · productIndicators) |
 | `infra/` | http client · cache · `sdmxClient` · circuit breaker · telemetry |
-| `credentials.py` | 자격증명 facade (`core/providers/dataCredentials.py` re-export + doctor) |
+| `credentials.py` | 자격증명 facade (`core/providers/dataCredentials.py` re-export) |
 | `accessors.py` · `types.py` · `macroProvider.py` · `marketConfig.py` | 지원 모듈 |
 
 ## 자격증명 · env (단일 진입점)
@@ -45,7 +45,7 @@ g.dividends("005930"); g.collect("005930")
 키는 **공급자(provider) 단위** 로 관리 (`core/providers/dataCredentials.py` 레지스트리).
 
 ```python
-dartlab.gather.doctor()                          # ✓/✗ 상태 + 미설정 발급 링크
+print(dartlab.gather.formatStatus())             # ✓/✗ 상태 + 미설정 발급 링크
 dartlab.gather.setCredential("dataGoKr", "<키>") # 암호화 저장 (.env 편집 불필요)
 dartlab.gather.writeEnvExample()                 # .env.example 생성 (레지스트리 파생)
 ```

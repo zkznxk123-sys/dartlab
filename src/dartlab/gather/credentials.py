@@ -37,11 +37,6 @@ from dartlab.core.providers.dataCredentials import (
     setCredential,
 )
 
-# 첫 사용자 온보딩 진입점 — `dartlab.gather.doctor()`. formatStatus 의 친숙한 별칭
-# (로직 중복 없음): 공급자별 키 설정 여부 ✓/✗ + 출처 + 미설정 발급 링크를 한 화면에.
-# "키 없이 되는 것 / 키 필요한 것" 을 보려면 `dartlab.gather()` 가이드의 apiKey 열 참조.
-doctor = formatStatus
-
 
 def writeEnvExample(path: str | Path = ".env.example") -> Path:
     """레지스트리 기반 `.env.example` 파일 생성/갱신.
@@ -89,7 +84,6 @@ __all__ = [
     "DataProviderSpec",
     "allSpecs",
     "credentialStatus",
-    "doctor",
     "envTemplate",
     "formatStatus",
     "getKey",
