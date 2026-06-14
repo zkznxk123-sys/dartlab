@@ -9,7 +9,7 @@
 
 ## 1. 왜 이것만 정당한가
 
-블룸버그 OS 레이어 후보 중 우리 제약(정적 호스팅·서버 0·계정 0·EOD·컨센서스 0)을 *온전히* 견디는 유일 원시요소:
+블룸버그의 묶는 층(수평 개념) 후보 중 우리 제약(퍼블릭 정적 호스팅·서버 0·계정 0·EOD·컨센서스 0)을 *온전히* 견디는 유일 원시요소:
 
 - **정적 데이터로 충분** — EOD 가격·기존 공시 parquet 이 이미 라이브. 신규 데이터 파이프라인 0.
 - **서버 불필요** — localStorage 로 충분(터미널은 이미 raw localStorage 4 키 패밀리 `dlTerm.lastSym`·`dlTerm.chart`·`dlTerm.tmpl`·`dlTerm.draw.{code}` 로 같은 패턴 가동 중 — 신규 인프라 0).
@@ -55,7 +55,7 @@
 ## 4. storage 계약 (코드 실측 기반)
 
 - contracts 에 `storage.ts` 실재: `RuntimeStorageKey = `${DartLabSurfaceId}.${string}` | GlobalStorageKey`, `DartLabSurfaceId` 에 `'terminal'` 포함 → **`'terminal.watchlist'` 키가 계약상 합법**(주석에 `terminal.chartState`·`terminal.backtestConfig`·`viewer.layout` 예시 명시).
-- 단 public 어댑터(`createPublicRuntime.ts`)는 `storage` getter 가 `notWiredYet('storage','단계-4a-3')` throw, 그리고 **터미널 트리는 현재 StoragePort 를 소비하지 않는다**(raw localStorage 직접 — 4 키 패밀리). → 03 §포트. **단 localStorage 포트 *구현체*(`localStoragePort()`)는 이미 존재해 export 포트에 배선됨**(`createPublicRuntime.ts:161` `export: publicExportPort(localStoragePort(), ...)`) — `storage` getter 만 게이트라 배선은 "거의 다 된" 중간 비용이지 신규 구축이 아니다.
+- **로컬 어댑터(`createLocalRuntime.ts`)는 `storage: localStoragePort()` 로 이미 배선** — 로컬에선 StoragePort 가 오늘 동작. 단 퍼블릭 어댑터(`createPublicRuntime.ts`)는 `storage` getter 가 `notWiredYet('storage','단계-4a-3')` throw, 그리고 **공유 터미널 surface 는 현재 StoragePort 를 소비하지 않는다**(raw localStorage 직접 — 4 키 패밀리). → 03 §2·§7. **localStorage 포트 *구현체*(`localStoragePort()`)는 퍼블릭에서도 이미 export 포트에 배선됨**(`createPublicRuntime.ts:161`) — 퍼블릭 `storage` getter 만 게이트라 "거의 다 된" 중간 비용이지 신규 구축이 아니다.
 - **정공법 = StoragePort 배선에 정합**(ui-platform-refactor 단계-4a-3 이 이미 storage 주입 예정). 터미널은 *이미* raw localStorage 4 키 패밀리(`dlTerm.lastSym`·`dlTerm.chart`·`dlTerm.tmpl`·`dlTerm.draw.{code}`)로 분열돼 있고, 워치리스트가 *다섯 번째* raw 키를 더하면 분열이 깊어진다 → StoragePort 경유가 옳다(기존 4 키의 StoragePort 이관도 ui-platform-refactor 단계-4a-3 의 미해결 부채임을 함께 기록).
 - **단 워치리스트 *가치*는 StoragePort 에 의존하지 않는다** — Tier 0/1 은 raw localStorage(현 패턴)로 선출시 *가능*하다. ⚠그러나 raw 선출시는 *다섯 번째 키를 늘리는 부채*라, ui-platform-refactor 가 raw localStorage 청산·port required 를 결정한 방향과 역행한다. **단계-4a-3 이 임박했다면 raw 선출시를 건너뛰고 StoragePort 를 기다리는 게 정합** — 선출시 여부는 단계-4a-3 진척과 1 회 정합 확인 후 결정(06 NEXT). "의존 순서 강제 안 함"을 *무조건 raw 허용*으로 읽지 말 것.
 
