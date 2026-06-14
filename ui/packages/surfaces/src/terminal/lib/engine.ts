@@ -41,7 +41,7 @@ const SECTOR_KR: Record<string, string> = {
 	realestate: '부동산', education: '교육', medicalDevice: '의료기기', environment: '환경',
 	buildingMaterials: '건자재', railroad: '철도', consulting: '지주', agriculture: '농업', misc: '기타'
 };
-const GRADE_SCALE: Record<string, string[]> = {
+export const GRADE_SCALE: Record<string, string[]> = {
 	prof: ['우수', '양호', '보통', '저수익', '적자'],
 	debt: ['안전', '관찰', '주의', '고위험'],
 	growth: ['고성장', '성장', '정체', '역성장', '급감'],
