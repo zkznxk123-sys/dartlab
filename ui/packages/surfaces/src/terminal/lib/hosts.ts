@@ -10,7 +10,6 @@ export interface ViewerStudioHostProps {
 	embedded: boolean;
 	basePath?: string; // 셸 base 경로(에셋 — 임베드 뷰어 아바타) — ViewerOverlay 가 runtime.env.basePath 주입.
 	tier?: 'public' | 'local'; // export tier 라벨(03 §7) — ViewerOverlay 가 runtime.env.kind 로 주입.
-	focusAsk?: boolean; // 터미널 "AI" 진입 → 마운트 시 AskDrawer 자동 오픈(컴포넌트 임베드 경로).
 	onNavigate: (code: string, vs: string[]) => void;
 	onclose: () => void;
 }

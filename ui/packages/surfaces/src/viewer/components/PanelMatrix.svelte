@@ -33,6 +33,7 @@
 	const visible = $derived(rows.map((r, i) => ({ r, i })).filter(({ r }) => hasVisibleContent(r, periods)));
 	// 항목 라벨 열 없음 — 셀 본문(표 제목 내장)이 자기 식별. 격자는 기간 열만.
 	const template = $derived(`repeat(${periods.length}, minmax(260px, 1fr))`);
+	const minMatrixWidth = $derived(`${periods.length * 260}px`);
 
 	// 검색 점프 셀 글로우 — 표시 수명을 여기서 소유한다(부모 타이머 아님). 옛 방식은 glow 설정 즉시 2.2s
 	// fade 애니메이션 + 클리어 타이머가 돌아, 먼 거리 smooth 스크롤이 끝나기 전에 강조가 꺼졌다. 이제:
@@ -88,7 +89,7 @@
 	<div class="empty">선택한 기간에는 이 절의 본문이 없습니다.</div>
 {:else}
 	<div class="matrix-scroll">
-		<div class="matrix" style="grid-template-columns: {template}">
+		<div class="matrix" style="grid-template-columns: {template}; min-width: max(100%, {minMatrixWidth})">
 			<!-- 헤더 -->
 			{#each periods as p (p)}
 				<div class="cell head period-head">
@@ -146,6 +147,7 @@
 	.matrix {
 		display: grid;
 		align-items: stretch;
+		width: 100%;
 	}
 	.cell {
 		border-bottom: 1px solid #1e2433;

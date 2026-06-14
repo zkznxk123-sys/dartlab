@@ -17,7 +17,6 @@
 			.filter((c) => /^\d{6}$/.test(c))
 	);
 	const embedded = $derived(page.url.searchParams.get('terminalEmbed') === '1');
-	const focusAsk = $derived(page.url.searchParams.get('ask') === '1'); // 터미널 "AI" 진입 → AskDrawer 자동 오픈(iframe 경로)
 
 	// 회사 이동·비교 변경 → 같은 viewer 라우트 URL 로 되비춤(딥링크 보존). 라우팅 의존은 셸이 소유.
 	function onNavigate(next: string, nextVs: string[]) {
@@ -30,4 +29,4 @@
 
 <svelte:head><title>Viewer · {code} — dartlab local</title></svelte:head>
 
-<ViewerStudio {code} {vs} {embedded} {focusAsk} {onNavigate} basePath={base} repoUrl={localLinks.repo} />
+<ViewerStudio {code} {vs} {embedded} {onNavigate} basePath={base} repoUrl={localLinks.repo} />

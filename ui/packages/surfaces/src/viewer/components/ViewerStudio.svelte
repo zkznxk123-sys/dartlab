@@ -35,7 +35,6 @@
 		basePath = '',
 		repoUrl = '',
 		tier = 'public',
-		focusAsk = false,
 		header,
 		onNavigate,
 		onclose
@@ -46,7 +45,6 @@
 		basePath?: string; // 공개 라우트가 base($app/paths) 주입 — surface 는 SvelteKit 무결합(에셋 경로용).
 		repoUrl?: string; // 이슈 링크 repo URL(옛 brand.repo) — 셸 주입.
 		tier?: 'public' | 'local'; // export tier 라벨(03 §7) — public=[설치 ↗] hint / local=완전판. ExportDrawer 로 전달.
-		focusAsk?: boolean; // 마운트 시 AskDrawer 자동 오픈 — 터미널 "AI" 진입(헤더 버튼/라우트 ?ask)이 챗 모드로 직행.
 		header?: Snippet; // 비embedded·비fullscreen 표준 헤더 — 셸 주입(landing=사이트 Header). 미주입=헤더 없음(터미널 오버레이).
 		onNavigate: (code: string, vs: string[]) => void | Promise<void>;
 		onclose?: () => void; // embedded 전용 — 헤더 우측 닫기 버튼
@@ -82,11 +80,10 @@
 	let financeOpen = $state(false); // 정량재무제표 다이얼로그
 	let stockSearchOpen = $state(false); // 종목검색 팝오버 (화면내검색 ⌘K 와 분리된 회사전환 입력)
 	let askOpen = $state(false); // AI 공시 Q&A 드로어 (헤더 아바타 버튼 → 우측 push)
+	const askAvailable = $derived(!(embedded && tier === 'public'));
 	let askCarryQ = $state(''); // AI 가 타 회사 감지 → 이동 후 새 회사 index 준비되면 운반·자동 ask 할 질문
-	// 터미널 "AI" 진입 → 마운트 시 챗 드로어 직행. onMount(1회)라 사용자가 닫은 뒤 재오픈되지 않는다
-	// (focusAsk 는 오버레이/라우트가 매 진입마다 본체를 새로 마운트하므로 진입마다 정상 동작).
-	onMount(() => {
-		if (focusAsk) askOpen = true;
+	$effect(() => {
+		if (!askAvailable && askOpen) askOpen = false;
 	});
 	// ── table-export 선택 모드 ── 헤더 [표 내보내기] 토글. 우측 380px 슬롯을 AskDrawer 와 공유(상호배타).
 	let exportOpen = $state(false); // ExportDrawer 열림 = 선택 모드 on (체크박스 오버레이 + 드로어)
@@ -299,6 +296,7 @@
 		if (exportOpen) askOpen = false;
 	}
 	function openAsk() {
+		if (!askAvailable) return;
 		askOpen = !askOpen;
 		if (askOpen) exportOpen = false;
 	}
@@ -478,9 +476,11 @@
 				{/if}
 			</div>
 			<CommandPalette index={searchIndex} toc={bundle?.toc ?? null} {indexing} onResult={onSearchResult} onSection={pickSection} />
-			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={openAsk} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
-				<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
-			</button>
+			{#if askAvailable}
+				<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={openAsk} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
+					<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
+				</button>
+			{/if}
 			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
