@@ -98,7 +98,7 @@
 						{#each co.credit.tracks as t (t.en)}
 							<div class="geCt">
 								<span class="geCtL">{txc(t, lang)}</span>
-								<div class="geCtTrack"><div class="geCtBar" style={`width:${Math.max(2, t.score)}%;background:${t.score >= 66 ? '#3fb950' : t.score >= 45 ? '#d29922' : '#f85149'}`}></div></div>
+								<div class="geCtTrack"><div class="geCtBar" style={`width:${Math.max(2, t.score)}%`}></div></div>
 								<span class="geCtV mono">{t.score}</span>
 							</div>
 						{/each}
@@ -142,7 +142,7 @@
 								<div class="geDist">
 									{#each g.dist ?? [] as d (d.step)}
 										<div class={'geDc' + (d.step === g.v ? ' on' : '')} title={`${d.step} · 업종 ${d.share}%`}>
-											<div class="geDcTrack"><div class="geDcBar" style={`height:${d.share === 0 ? 0 : Math.max(10, Math.round((d.share / maxShare) * 100))}%;background:${TONE_COL[d.tone] ?? '#8b949e'}`}></div></div>
+											<div class="geDcTrack"><div class="geDcBar" style={`height:${d.share === 0 ? 0 : Math.max(10, Math.round((d.share / maxShare) * 100))}%${d.step === g.v ? `;background:${TONE_COL[d.tone] ?? '#8b949e'}` : ''}`}></div></div>
 											<span class="geDcStep">{d.step}</span>
 											<span class="geDcPct mono">{d.share}%</span>
 										</div>
@@ -363,13 +363,9 @@
 	.geDcBar {
 		width: 100%;
 		min-width: 0;
-		background: rgba(139, 148, 158, 0.4);
+		background: rgba(139, 148, 158, 0.26); /* 기본 = 회색(분포 형태만) — 회사 칼럼만 톤색(인라인)으로 구분 */
 		border-radius: 2px 2px 0 0;
 		transition: height 0.2s;
-	}
-	.geDc.on .geDcBar {
-		/* 막대는 등급 톤 색(인라인) — 회사 칼럼은 외곽선 링으로 구분(색 위에 위치 표시) */
-		box-shadow: 0 0 0 1.5px var(--dl-ink, #c8cfdb);
 	}
 	.geDcStep {
 		font-size: 9px;
@@ -389,7 +385,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.geDc.on .geDcPct {
-		color: var(--color-dl-primary, #ea4647);
+		color: var(--dl-ink, #c8cfdb);
 		font-weight: 700;
 	}
 	.geCred {
@@ -441,6 +437,7 @@
 	.geCtBar {
 		height: 100%;
 		border-radius: 4px;
+		background: rgba(139, 148, 158, 0.5); /* 단색(정돈) — 점수 값으로 크기 표현 */
 	}
 	.geCtV {
 		flex: 0 0 22px;
