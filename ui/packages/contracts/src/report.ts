@@ -25,9 +25,9 @@ export interface InvestmentRow {
 
 export interface InvestmentsView {
 	year: string;
-	rows: InvestmentRow[]; // 장부가액 top 12
-	moreCount: number;
-	moreBook: number; // top 밖 장부가액 합 (원)
+	rows: InvestmentRow[]; // 전체 출자사 (장부가 desc) — 인라인 스크롤·출자 다이얼로그 단일 소스
+	moreCount: number; // 현재 0 (rows 가 전체) — 계약 호환 유지
+	moreBook: number; // 현재 0 (원) — 계약 호환 유지
 }
 
 export interface InvestmentTrendYear {

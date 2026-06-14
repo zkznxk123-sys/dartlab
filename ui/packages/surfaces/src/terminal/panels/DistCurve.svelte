@@ -63,19 +63,19 @@
 	);
 </script>
 
-<svg class="dc" width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tip}>
+<svg class="dc" width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={tip} style={`height:${H}px`}>
 	<title>{tip}</title>
-	<path class="dcArea" d={areaPath} />
-	<line class="dcMed" x1={sx(band.median)} x2={sx(band.median)} y1={PAD} y2={H - PAD} />
+	<path class="dcArea" d={areaPath} vector-effect="non-scaling-stroke" />
+	<line class="dcMed" x1={sx(band.median)} x2={sx(band.median)} y1={PAD} y2={H - PAD} vector-effect="non-scaling-stroke" />
 	{#if markX != null}
-		<line class={'dcMark ' + tone} x1={markX} x2={markX} y1="1" y2={H - PAD} />
-		<circle class={'dcDot ' + tone} cx={markX} cy="3" r="2.6" />
+		<line class={'dcMark ' + tone} x1={markX} x2={markX} y1="0" y2={H} vector-effect="non-scaling-stroke" />
 	{/if}
 </svg>
 
 <style>
 	.dc {
 		display: block;
+		width: 100%;
 		overflow: visible;
 	}
 	.dcArea {
@@ -89,21 +89,15 @@
 		stroke-dasharray: 2 2;
 	}
 	.dcMark {
-		stroke-width: 1.5;
+		stroke-width: 2;
 	}
-	.dcMark.up,
-	.dcDot.up {
+	.dcMark.up {
 		stroke: #3fb950;
-		fill: #3fb950;
 	}
-	.dcMark.dn,
-	.dcDot.dn {
+	.dcMark.dn {
 		stroke: #f85149;
-		fill: #f85149;
 	}
-	.dcMark.mid,
-	.dcDot.mid {
+	.dcMark.mid {
 		stroke: #d29922;
-		fill: #d29922;
 	}
 </style>

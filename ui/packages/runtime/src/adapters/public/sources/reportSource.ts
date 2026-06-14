@@ -173,7 +173,7 @@ async function buildWorkforce(code: string): Promise<WorkforceYear[] | null> {
 
 async function buildInvestments(code: string): Promise<InvestmentsBundle | null> {
 	const inv = await read('investedCompany', code, ['inv_prm', 'invstmnt_purps', 'frst_acqs_amount', 'trmend_blce_qota_rt', 'trmend_blce_acntbk_amount', 'recent_bsns_year_fnnr_sttus_thstrm_ntpf']);
-	// ── latest: 최신 유효 (year, quarter) 의 장부가액 top 12 ──
+	// ── latest: 최신 유효 (year, quarter) 의 전체 출자사 (장부가 desc) — 우측 패널 스크롤·출자 다이얼로그 단일 소스 ──
 	let latest: InvestmentsView | null = null;
 	const isSumRow = (r: Row) => str(r.inv_prm).replace(/\s/g, '').includes('합계');
 	const invValid = inv.filter((r) => {
@@ -199,9 +199,9 @@ async function buildInvestments(code: string): Promise<InvestmentsBundle | null>
 				targetNet: num(r.recent_bsns_year_fnnr_sttus_thstrm_ntpf)
 			}))
 			.sort((a, b) => (b.bookValue ?? 0) - (a.bookValue ?? 0));
-		const top = rows.slice(0, 12);
-		const rest = rows.slice(12);
-		latest = { year: bestYear, rows: top, moreCount: rest.length, moreBook: rest.reduce((a, r) => a + (r.bookValue ?? 0), 0) };
+		// 전체 반환 — 우측 패널 finScroll(248px) 가 73개사 전부 스크롤, 출자 다이얼로그도 동일 rows 소비(단일 소스).
+		// moreCount/moreBook 은 계약 호환 위해 0 유지 (헤더 카운트 = rows.length + 0 = 정합, 각주 자동 비표시).
+		latest = { year: bestYear, rows, moreCount: 0, moreBook: 0 };
 	}
 	if (!latest) return null;
 	// ── trend: 연도별 장부가 합계 — 합계행 직접 채택(개별행 '-' 결측에 강건), 부재 연도만 개별 합산 ──

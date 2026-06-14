@@ -3,6 +3,7 @@
 		CompanyChange,
 		CompanyRelations,
 		FinMode,
+		InvestmentTrendYear,
 		InvestmentsView,
 		LiveCompanyReportFact,
 		NonRegularFiling,
@@ -20,9 +21,11 @@
 	import Panel from '../ui/Panel.svelte';
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 셸 주입 lazy 로더
 	import { viewerEntry } from '../lib/viewerEntry.svelte'; // 중앙 "공시뷰어" 버튼 신호 구독
+	import { disclosureFocus } from '../lib/disclosureFocus.svelte'; // 주가차트 공시 dot 클릭 → 그 날짜 행 스크롤+하이라이트
 	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — 셸 주입 lazy 로더, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
+	import type { ListedLookup } from '../lib/holdings'; // 피출자사명→상장 종목 해소 hook 타입
 
 	interface Props {
 		co: Company;
@@ -30,11 +33,13 @@
 		hosts: TerminalHosts;
 		repoUrl: string; // 셸 brand repo URL — 공시뷰어 오버레이(임베드 이슈링크)로 관통.
 		onPick: (code: string) => void;
+		lookupListed: ListedLookup; // 피출자사명→상장 종목 해소(출자 다이얼로그 시가 환산·클릭 이동)
 	}
-	let { co, lang, hosts, repoUrl, onPick }: Props = $props();
+	let { co, lang, hosts, repoUrl, onPick, lookupListed }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
+	let holdingsOpen = $state(false); // 출자 관계 분석 전체화면 (타법인 출자 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
 	// 중앙 "공시뷰어" 버튼 신호(viewerEntry.pulse) 구독 — pulse 변할 때만 오버레이를 연다. seenPulse 는
 	// 비반응 plain let(추적 0)이라 viewerOpen 쓰기가 effect 를 재발화시키지 않음(루프 없음).
@@ -45,6 +50,28 @@
 			seenViewerPulse = p;
 			viewerOpen = true;
 		}
+	});
+	// 주가차트 공시 dot 클릭(disclosureFocus.pulse) → 그 날짜 행을 정기/비정기 공시목록에서 스크롤·하이라이트(원문 링크 아님).
+	// seenFocusPulse = 비반응 plain let — flashDate 쓰기가 effect 를 재발화시키지 않음(viewerEntry 동일 패턴, 루프 없음).
+	const fdate = (s: string) => s.replace(/\D/g, '').slice(0, 8); // YYYY-MM-DD → YYYYMMDD (행 data-fdate 와 비교 키)
+	let filingWrap = $state<HTMLElement | null>(null); // 정기‖비정기 공시 2분할 컨테이너 — querySelector 범위 한정
+	let flashDate = $state<string | null>(null);
+	let seenFocusPulse = disclosureFocus.pulse;
+	let flashTimer: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => {
+		const p = disclosureFocus.pulse;
+		if (p === seenFocusPulse) return;
+		seenFocusPulse = p;
+		const d = disclosureFocus.date;
+		if (!d) return;
+		if (flashTimer) clearTimeout(flashTimer);
+		flashDate = null; // 같은 날짜 재클릭도 class off→on 으로 애니메이션 재생되도록 먼저 해제
+		requestAnimationFrame(() => {
+			flashDate = d;
+			const row = filingWrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
+			row?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+			flashTimer = setTimeout(() => (flashDate = null), 1800);
+		});
 	});
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const viewerHref = $derived(localViewerHref ?? `${base}/viewer/company/${co.code}`);
@@ -73,6 +100,7 @@
 		wf = [];
 		srs = [];
 		inv = null;
+		invTrend = [];
 		let cancelled = false;
 		rt.finance.bundle(code).then((b) => {
 			if (!cancelled) finBundle = b;
@@ -85,7 +113,9 @@
 			if (!cancelled) srs = b ?? [];
 		});
 		rt.report.investments(code).then((b) => {
-			if (!cancelled) inv = b?.latest ?? null;
+			if (cancelled) return;
+			inv = b?.latest ?? null;
+			invTrend = b?.trend ?? [];
 		});
 		rt.company.reportFacts(code).then((f) => {
 			if (cancelled) return;
@@ -138,6 +168,7 @@
 	let wf = $state<WorkforceYear[]>([]);
 	let srs = $state<ShareholderReturnYear[]>([]);
 	let inv = $state<InvestmentsView | null>(null);
+	let invTrend = $state<InvestmentTrendYear[]>([]); // 출자 추이 — 다이얼로그 보조(자본 잠김 방향)
 	const wfLast = $derived(wf.length ? wf[wf.length - 1] : null);
 	// 연간 매출(조) ÷ 인원 = 1인당 매출(억) — finBundle annual 과 연도 매칭 (추가 fetch 없음)
 	const revByYear = $derived.by<Map<string, number>>(() => {
@@ -164,7 +195,17 @@
 	const pc = $derived(co.percentile);
 	const pcCol = (p: number) => (p >= 80 ? 'var(--up)' : p >= 55 ? 'var(--good)' : p >= 35 ? 'var(--warn)' : 'var(--dn)');
 	const pcFmtV = (m: { unit: string; v: number | null }) =>
-		m.unit === 'rev' ? (m.v != null ? (m.v / 1e12).toFixed(1) + '조' : '—') : m.v != null ? m.v.toFixed(1) + (m.unit === '%' ? '%' : '') : '—';
+		m.v == null
+			? '—'
+			: m.unit === 'rev'
+				? (m.v / 1e12).toFixed(1) + '조'
+				: m.unit === '배'
+					? m.v.toFixed(1) + '배'
+					: m.unit === '일'
+						? m.v.toFixed(0) + '일'
+						: m.unit === ''
+							? m.v.toFixed(2)
+							: m.v.toFixed(1) + (m.unit === '%' ? '%' : '');
 
 	const cr = $derived(co.credit);
 	const ch = $derived(co.changes);
@@ -225,7 +266,7 @@
 {#if pc && pc.metrics.length}
 	<Panel {lang} className="eQuant" prov="real" title={{ kr: '업종 내 백분위', en: 'INDUSTRY PERCENTILE' }} sub={{ kr: pc.industry + ' ' + pc.n + '사', en: pc.industry + ' n=' + pc.n }} flush>
 		<div class="pctList">
-			{#each pc.metrics as m (m.en)}
+			{#each pc.metrics.filter((m) => m.axis !== 'gov') as m (m.en)}
 				<div class="pctRow">
 					<span class="pctName">{txc(m, lang)}</span>
 					<div class="pctTrack"><div class="pctFill" style={`width:${m.p}%;background:${pcCol(m.p)}`}></div><div class="pctMark" style="left:50%"></div></div>
@@ -314,8 +355,8 @@
 
 <!-- 타법인 출자 (자회사·투자 — 장부가액 상위) -->
 {#if inv && inv.rows.length}
-	<Panel {lang} className="eCredit" prov="real" title={{ kr: '타법인 출자', en: 'HOLDINGS' }} sub={{ kr: 'report · ' + inv.year + ' · 장부가 상위', en: 'report · ' + inv.year + ' · by book value' }} flush>
-		{#snippet right()}<span class="dim">{(inv?.rows.length ?? 0) + (inv?.moreCount ?? 0)}{lang === 'en' ? '' : '개사'}</span>{/snippet}
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '타법인 출자', en: 'HOLDINGS' }} sub={{ kr: 'report · ' + inv.year + ' · 장부가순', en: 'report · ' + inv.year + ' · by book value' }} flush>
+		{#snippet right()}<span class="dim">{(inv?.rows.length ?? 0) + (inv?.moreCount ?? 0)}{lang === 'en' ? '' : '개사'}</span><button class="finFullBtn" onclick={() => (holdingsOpen = true)} title={lang === 'en' ? 'Relationship analysis (fullscreen)' : '출자 관계 분석 — 전체화면'}>⤢</button>{/snippet}
 		<div class="finScroll"><table class="finTable">
 			<thead><tr>
 				<th class="finAcct">{lang === 'en' ? 'COMPANY' : '법인명'}</th>
@@ -340,6 +381,13 @@
 			<div class="finNote">{lang === 'en' ? `+${inv.moreCount} more · book ${fmtKRW(inv.moreBook)}` : `외 ${inv.moreCount}개사 · 장부가 합계 ${fmtKRW(inv.moreBook)}`}</div>
 		{/if}
 	</Panel>
+{/if}
+
+<!-- 출자 관계 분석 전체화면 — 성격·위계 / 가치 / 효율 3축 진단 (lazy: 닫혀 있으면 청크 무증가) -->
+{#if holdingsOpen && inv}
+	{#await import('./HoldingsDialog.svelte') then { default: HoldingsDialog }}
+		<HoldingsDialog {co} year={inv.year} rows={inv.rows} trend={invTrend} {lang} {lookupListed} {onPick} onClose={() => (holdingsOpen = false)} />
+	{/await}
 {/if}
 
 <!-- 공급망 (dartlab 고유 — 공급사·고객사 제품·매출비중) -->
@@ -411,14 +459,14 @@
 	</Panel>
 {/if}
 
-<!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할 -->
-<div class="rowSplit">
+<!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할. data-fdate = 주가차트 공시 dot 클릭 시 스크롤·하이라이트 대상 키(YYYYMMDD). -->
+<div class="rowSplit" bind:this={filingWrap}>
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
 		{#if regFilings.length}
 			<div class="filingList">
 				{#each regFilings as f (f.rceptNo)}
-					<a class="filingRow" href={f.url} target="_blank" rel="noopener">
+					<a class="filingRow" class:flash={flashDate === fdate(f.rceptDate)} data-fdate={fdate(f.rceptDate)} href={f.url} target="_blank" rel="noopener">
 						<span class="flType">{f.reportType}</span>
 						<span class="flYear mono">{f.year}</span>
 						<span class="flDate mono">{f.rceptDate}</span>
@@ -435,7 +483,7 @@
 		{#if nonRegState === 'ready'}
 			<div class="filingList">
 				{#each nonRegFilings as f (f.rceptNo)}
-					<a class="filingRow nonreg" href={f.url} target="_blank" rel="noopener" title={f.reportNm + (f.filer ? ' · ' + f.filer : '')}>
+					<a class="filingRow nonreg" class:flash={flashDate === fdate(f.rceptDate)} data-fdate={fdate(f.rceptDate)} href={f.url} target="_blank" rel="noopener" title={f.reportNm + (f.filer ? ' · ' + f.filer : '')}>
 						<span class="flType">{f.reportNm}</span>
 						<span class="flDate mono">{f.rceptDate.slice(2)}</span>
 						<span class="flArrow">↗</span>
@@ -538,6 +586,22 @@
 {/if}
 
 <style>
+	/* 공시 dot 클릭 동기화 — 그 날짜 공시 행 일시 하이라이트(주가차트 공시 레일 → 위치 찾기). 1.8s 후 자동 소거. */
+	.filingRow.flash {
+		animation: filingFlash 1.8s ease-out;
+	}
+	@keyframes filingFlash {
+		0%,
+		15% {
+			background: rgba(91, 155, 240, 0.28);
+			box-shadow: inset 2px 0 0 var(--amber, #fb923c);
+		}
+		100% {
+			background: transparent;
+			box-shadow: inset 2px 0 0 transparent;
+		}
+	}
+
 	/* 열화 안내 모달 — hosts.financeDialog 미주입 셸 전용 (component-scoped, 터미널 스킨 토큰) */
 	.hostFallback {
 		position: fixed;

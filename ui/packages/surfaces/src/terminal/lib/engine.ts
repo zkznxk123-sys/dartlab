@@ -103,6 +103,12 @@ const TAILWIND_MAP: Record<string, string> = {
 };
 
 const rev = <T>(a: T[] | undefined): T[] => (a || []).slice().reverse();
+
+// 법인명 정규화 — ㈜·(주)·주식회사·공백 제거 + 소문자. 출자 다이얼로그의 피출자사명→상장코드 exact 해소용.
+// 영문약칭↔한글표기(예: 삼성SDS↔삼성에스디에스) 차이는 정규화로 못 풀어 미해소(=비상장 취급, 보수적).
+function normalizeCorpName(s: string): string {
+	return (s || '').replace(/㈜/g, '').replace(/\(주\)/g, '').replace(/주식회사/g, '').replace(/\s+/g, '').toLowerCase();
+}
 const num = (v: Num): Num => (v == null || Number.isNaN(v) ? null : v);
 function lastNonNull(arr: Num[] | undefined): { v: number; i: number } | null {
 	if (!arr) return null;
@@ -160,11 +166,18 @@ export interface Engine {
 	sectorTailwinds(): { id: string; kr: string; en: string; blended: number }[];
 	priceOf(code: string): RawData['prices']['data'][string] | undefined;
 	nameOf(code: string): string;
+	// 피출자사명 → 상장 종목 해소(시총·최근 순익). 정규화 exact + 시총·재무 존재 게이트 — 미해소 = null(비상장 취급).
+	lookupListed(name: string): { code: string; marketCap: number; net: number | null } | null;
 }
 
 export function createEngine(raw: RawData): Engine {
 	const byCode: Record<string, RawData['index'][number]> = {};
-	for (const r of raw.index) byCode[r.stockCode] = r;
+	const normByName: Record<string, string> = {}; // 정규화 법인명 → stockCode (lookupListed). 첫 매칭 우선.
+	for (const r of raw.index) {
+		byCode[r.stockCode] = r;
+		const k = normalizeCorpName(r.corpName);
+		if (k && !(k in normByName)) normByName[k] = r.stockCode;
+	}
 	const ecoByCode: Record<string, EcoNode> = {};
 	for (const n of raw.eco?.nodes || []) ecoByCode[n.id] = n;
 	const years = raw.finance?.years || ['2021', '2022', '2023', '2024', '2025'];
@@ -674,6 +687,20 @@ export function createEngine(raw: RawData): Engine {
 		return null;
 	}
 
+	// 출자 다이얼로그 — 피출자사명을 상장 종목으로 해소(보유지분 시가 환산용). 정규화 exact 매칭 +
+	// 시총·재무 존재(=buildCompany 전제) 게이트. 미해소는 null → 호출측이 비상장으로 처리(보수적).
+	function lookupListed(name: string): { code: string; marketCap: number; net: number | null } | null {
+		const k = normalizeCorpName(name);
+		if (!k) return null;
+		const code = normByName[k];
+		if (!code) return null;
+		const px = raw.prices.data[code];
+		const fin = raw.finance.companies[code];
+		if (!px || !px.marketCap || !fin) return null;
+		const netLatest = lastNonNull(fin.is.net); // 조 단위 → 원 환산
+		return { code, marketCap: px.marketCap, net: netLatest ? netLatest.v * 1e12 : null };
+	}
+
 	// 자동완성: 코드/이름 부분일치 (viewer식 검색 드롭다운용)
 	function suggest(q: string, n = 8): { code: string; name: string; industry: string }[] {
 		q = (q || '').trim();
@@ -738,7 +765,7 @@ export function createEngine(raw: RawData): Engine {
 
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds,
+		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};
