@@ -120,10 +120,16 @@ export interface EcoNode {
 	marketShare?: Num;
 	roe?: Num;
 	opMargin?: Num;
+	netMargin?: Num;
+	roa?: Num;
 	debtRatio?: Num;
 	icr?: Num;
 	currentRatio?: Num;
+	assetTurnover?: Num;
+	ccc?: Num;
+	accrualRatio?: Num;
 	revCagr?: Num;
+	netIncomeCagr?: Num;
 	industryRank?: Num;
 	industryPeerCount?: Num;
 	holderPct?: Num;
@@ -247,7 +253,8 @@ export interface PercentileMetric {
 	p: number;
 	unit: string;
 	// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사 seed)·분포 부재 = null(다이얼로그 생략).
-	band: { p10: number; median: number; p90: number } | null;
+	// p10~p90 5분위점 = 분포곡선(skew 반영, 정규가정 아님)·회사 위치 마커 렌더용.
+	band: { p10: number; p25: number; median: number; p75: number; p90: number } | null;
 }
 export interface Valuation {
 	per: Num;

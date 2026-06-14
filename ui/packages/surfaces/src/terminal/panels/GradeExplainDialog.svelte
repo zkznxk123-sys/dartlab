@@ -8,6 +8,7 @@
 	import { GRADE_GUIDE } from '../lib/gradeGuide';
 	import { txc } from '../ui/helpers';
 	import RadarChart from '../../map/components/RadarChart.svelte';
+	import DistCurve from './DistCurve.svelte';
 
 	interface Props {
 		co: Company;
@@ -15,6 +16,15 @@
 		onClose: () => void;
 	}
 	let { co, lang, onClose }: Props = $props();
+
+	// 단위 인식 숫자 포맷 — % / 배(times) / 일(days) / 무단위(발생액비율, 소수 2자리). 결손 = "—".
+	function fmtNum(v: number | null, unit: string): string {
+		if (v == null) return '—';
+		if (unit === '배') return v.toFixed(1) + (lang === 'en' ? 'x' : '배');
+		if (unit === '일') return v.toFixed(0) + (lang === 'en' ? 'd' : '일');
+		if (unit === '') return v.toFixed(2);
+		return v.toFixed(1) + '%';
+	}
 
 	const tcls = (t: string) =>
 		(({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
@@ -75,10 +85,10 @@
 							{@const top = Math.max(1, 100 - (m.p ?? 0))}
 							<div class="gePctRow">
 								<span class="gePctName">{txc(m, lang)}</span>
-								<span class="gePctVal mono">{m.v != null ? m.v.toFixed(1) + (m.unit === '배' ? (lang === 'en' ? 'x' : '배') : '%') : '—'}</span>
+								<span class="gePctVal mono">{fmtNum(m.v, m.unit)}</span>
 								<span class="gePctRank mono">{lang === 'en' ? 'top ' : '상위 '}{top}%</span>
 								{#if m.band}
-									<span class="gePctDist mono">{lang === 'en' ? 'peers' : '업종'} p10 {m.band.p10.toFixed(1)} · {lang === 'en' ? 'med' : '중앙'} {m.band.median.toFixed(1)} · p90 {m.band.p90.toFixed(1)}</span>
+									<div class="gePctCurve"><DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} /></div>
 								{/if}
 							</div>
 						{/each}
@@ -300,12 +310,9 @@
 		color: var(--dl-ink-dim, #5b6473);
 		font-variant-numeric: tabular-nums;
 	}
-	.gePctDist {
+	.gePctCurve {
 		flex-basis: 100%;
-		font-size: 9px;
-		color: var(--dl-ink-dim, #5b6473);
-		opacity: 0.85;
-		font-variant-numeric: tabular-nums;
+		margin: 1px 0 3px;
 	}
 	.geCred {
 		display: flex;
