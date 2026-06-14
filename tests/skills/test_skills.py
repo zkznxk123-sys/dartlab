@@ -125,7 +125,7 @@ def test_gather_and_company_skills_cover_public_methods() -> None:
     for method in {
         "price",
         "flow",
-        "revenue_consensus",
+        "revenueConsensus",
         "history",
         "news",
         "dividends",
