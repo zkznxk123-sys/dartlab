@@ -339,7 +339,7 @@
 
 <!-- GRADE STRIP -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
-	{#snippet right()}<button class="gradeWhyBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'analysis detail' : '분석 내용'}>⊕ {lang === 'en' ? 'analysis' : '분석내용'}</button>{/snippet}
+	{#snippet right()}<button class="finFullBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'analysis detail' : '분석 내용'}>{lang === 'en' ? 'analysis' : '분석내용'}</button>{/snippet}
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},1fr)`}>
 		{#each co.grades as g (g.key)}
@@ -466,23 +466,3 @@
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션', en: 'VALUATION' }} flush><div class="storyEmpty">{lang === 'en' ? 'Insufficient data.' : '데이터 부족.'}</div></Panel>
 	{/if}
 </div>
-
-<style>
-	/* 스캔등급 헤더 '왜 이 등급' 버튼 — 설명 다이얼로그 진입점 (전역 terminal.css 미오염, scoped) */
-	.gradeWhyBtn {
-		background: none;
-		border: 1px solid var(--bd, #1b2130);
-		color: var(--dim, #5b6473);
-		font-family: var(--sans, inherit);
-		font-size: 9.5px;
-		line-height: 1.2;
-		padding: 2px 7px;
-		margin-right: 6px;
-		border-radius: 10px;
-		cursor: pointer;
-	}
-	.gradeWhyBtn:hover {
-		color: var(--dl-ink, #c8cfdb);
-		border-color: var(--color-dl-primary, #ea4647);
-	}
-</style>
