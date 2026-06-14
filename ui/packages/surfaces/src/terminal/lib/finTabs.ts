@@ -330,5 +330,11 @@ export const FS_TABS: FsTab[] = [
 	{
 		key: 'people', label: { kr: '인력·보수', en: 'PEOPLE' }, q: '사람과 보상', load: peopleReport,
 		note: '급여 = 직원 급여만(임원·복리후생 제외), 사업보고서 연간 확정값. 보수 = 이사·감사 전체(등기 구분 미공시).'
+	},
+	// 가격↔기초체력 (=100 오버레이) — finKey/load 없는 메타 전용 탭. 카드는 FinFullscreen 이 candles 와
+	// buildPriceFundamentalCard 로 직접 빌드(특수 분기). 종합 히어로에서 강등된 단일 카드 거처.
+	{
+		key: 'price', label: { kr: '가격', en: 'PRICE' }, q: '주가가 기초체력과 함께 움직였나',
+		note: '주가·매출·자본을 첫 공통 기간 = 100 으로 리베이스해 겹친다. 주가는 각 기간 공시 접수일 종가(미리보기 가격 아님). 선이 크게 벌어지면 기대 선반영(비싸 보임)·시장 회의 — 어느 쪽도 적정주가 판정은 아니다. 주가 데이터가 없으면 비표시.'
 	}
 ];

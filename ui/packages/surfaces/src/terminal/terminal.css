@@ -961,14 +961,14 @@
 .dlTerm .finFsClose { background: var(--dl-bg-deep); color: var(--dim); border: 1px solid var(--bd); border-radius: 2px; font-size: 12px; line-height: 1; padding: 4px 8px; cursor: pointer; }
 .dlTerm .finFsClose:hover { color: var(--amber); border-color: var(--amber); }
 .dlTerm .finFsBody { flex: 1; overflow-y: auto; padding: 12px; }
-/* 가격↔기초체력 히어로 — 종합 탭 선두 단일 카드(16카드 격자와 분리, 4의 배수 룰 무관) */
-.dlTerm .finFsHero { margin: 0 0 12px; }
-.dlTerm .finFsHero .finMini { border: 1px solid var(--amber); border-radius: 2px; background: var(--dl-bg-base); padding: 10px 12px 8px; max-width: 640px; }
-.dlTerm .finFsHero .mfcTitle { font-size: 13.5px; }
-.dlTerm .finFsHero .mfcVal { font-size: 14px; }
-.dlTerm .finFsHero .mfcUnit { font-size: 9px; }
-.dlTerm .finFsHero .mfcLg { font-size: 10px; }
-.dlTerm .finFsHero .mfcAx { font-size: 6px; }
+/* 가격↔기초체력 — 전용 '가격' 탭 단일 카드 (종합 16카드 격자와 분리) */
+.dlTerm .finFsPrice { margin: 0 0 12px; }
+.dlTerm .finFsPrice .finMini { border: 1px solid var(--amber); border-radius: 2px; background: var(--dl-bg-base); padding: 10px 12px 8px; max-width: 860px; }
+.dlTerm .finFsPrice .mfcTitle { font-size: 13.5px; }
+.dlTerm .finFsPrice .mfcVal { font-size: 14px; }
+.dlTerm .finFsPrice .mfcUnit { font-size: 9px; }
+.dlTerm .finFsPrice .mfcLg { font-size: 10px; }
+.dlTerm .finFsPrice .mfcAx { font-size: 6px; }
 .dlTerm .finFsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 10px; }
 .dlTerm .finFsGrid .finMini { padding: 10px 10px 8px; }
 .dlTerm .finFsGrid .mfcTitle { font-size: 13.5px; }

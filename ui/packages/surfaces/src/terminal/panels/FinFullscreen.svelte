@@ -79,7 +79,7 @@
 
 	const finData = $derived(bundle ? (bundle.views[mode] ?? null) : null);
 	const activeDef = $derived(FS_TABS.find((d) => d.key === tab) ?? null);
-	// 가격↔기초체력 (=100 오버레이) — 종합 탭 선두 히어로. 캔들·번들 둘 다 있을 때만(없으면 null=비표시).
+	// 가격↔기초체력 (=100 오버레이) — 전용 '가격' 탭. 캔들·번들 둘 다 있을 때만(없으면 null=비표시).
 	const priceCard = $derived(finData ? buildPriceFundamentalCard(finData, bundle?.filedDates ?? {}, candles) : null);
 
 	// 원표(전 기간 와이드 테이블)는 우측 재무 패널 ⤢ → FinTablesModal 로 이동 (운영자 결정 — 전체화면 탭 아님)
@@ -119,7 +119,7 @@
 				<button class={'finFsTab ' + (tab === t.key ? 'on' : '')} onclick={() => (tab = t.key)}>{lang === 'en' ? t.label.en : t.label.kr}</button>
 			{/each}
 		</nav>
-		{#if (tab === 'all' || activeDef?.finKey) && bundle && bundle.modes.length > 1}
+		{#if (tab === 'all' || tab === 'price' || activeDef?.finKey) && bundle && bundle.modes.length > 1}
 			<span class="segGroup mini">{#each bundle.modes as m (m)}<button class={mode === m ? 'seg on' : 'seg'} onclick={() => onMode(m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
 		<button class="finFsClose" onclick={onClose} title={lang === 'en' ? 'close (ESC)' : '닫기 (ESC)'}>✕</button>
@@ -130,9 +130,6 @@
 		{/if}
 		{#if tab === 'all'}
 			{#if finData}
-				{#if priceCard}
-					<div class="finFsHero"><div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} h={188} /></div></div>
-				{/if}
 				<div class="finFsGrid">
 					{#each finData.cards as card (card.key)}
 						<div class="finMini"><MiniFinChart {card} periods={finData.periods} /></div>
@@ -141,6 +138,15 @@
 			{:else}
 				<div class="chartLoad" style="height:140px">{lang === 'en' ? 'loading financials …' : '재무제표 불러오는 중 …'}</div>
 			{/if}
+		{:else if tab === 'price'}
+			{#if !finData}
+				<div class="chartLoad" style="height:140px">{lang === 'en' ? 'loading financials …' : '재무제표 불러오는 중 …'}</div>
+			{:else if priceCard}
+				<div class="finFsPrice"><div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} h={188} /></div></div>
+			{:else}
+				<div class="storyEmpty">{lang === 'en' ? 'No price overlay — price history unavailable for this company.' : '주가 데이터가 없어 가격↔기초체력 오버레이를 만들 수 없습니다.'}</div>
+			{/if}
+			{#if activeDef?.note}<div class="finFsNote">{activeDef.note}</div>{/if}
 		{:else if tabEmpty}
 			<div class="storyEmpty">{lang === 'en' ? 'No data for this tab.' : '이 회사는 해당 탭 데이터가 없습니다.'}</div>
 		{:else}
