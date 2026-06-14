@@ -7,8 +7,8 @@
 | 유니버스 | 판정 | 빌드 경로 | 분포곡선(band) |
 |---|---|---|---|
 | ① 업종 (industry / KSIC 섹터) | **✅ 이미 라이브** | 현 `industryPercentile` 그대로 | ✅ industryStats |
-| ② 소속시장 (KOSPI/KOSDAQ) | **✅ 라이브 (새 데이터 0)** | `EcoNode.market` 필터 | ❌ → Phase 2 prebuild |
-| ③ 전체상장사 (all listed) | **✅ 라이브 (cross-sector caveat 강제)** | `raw.eco.nodes` 전체 | ❌ → Phase 2 prebuild |
+| ② 소속시장 (KOSPI/KOSDAQ) | **✅ 라이브 (새 데이터 0)** | `EcoNode.market` 필터 | ✅ 노드 배열에서 라이브 5분위 |
+| ③ 전체상장사 (all listed) | **✅ 라이브 (cross-sector caveat 강제)** | `raw.eco.nodes` 전체 | ✅ 노드 배열에서 라이브 5분위 |
 | ④ 소속지수 (KOSPI200·코스닥150 등) | **❌ BLOCKED** | 구성종목 멤버십 데이터 부재 | — |
 
 ---
@@ -33,10 +33,10 @@ const col = (f) => peers.map(n => n[f] ?? null);
 ### 비용
 약 2,664 노드 × 13축 × 3유니버스 = O(10만) 정수 비교. 회사 전환마다 즉시(이미 `byIndustry` 인덱스 1회 구축 패턴 존재, engine.ts:142-144). **백분위 자체는 프리빌드 불필요.**
 
-### 분포곡선(DistCurve band)의 한계 — 정직
-`raw.industryStats`(types.ts:169-174)는 **산업 단위 분포(p10~p90)만** 담는다. 따라서:
-- 업종 유니버스: band 있음 → DistCurve 곡선 정상.
-- 시장/전체 유니버스: band 없음 → **Phase 1 은 백분위 막대 + 값만**(막대가 위치를 이미 전달). 곡선은 Phase 2 에서 `marketStats`/`allStats` 분포를 빌드(`buildIndustryMap.py` 의 `_distribution` 헬퍼를 시장/전체 단위로 1회 사전계산)해 채운다.
+### 분포곡선(DistCurve band) — 전 유니버스 라이브 (prebuild 불필요)
+`raw.industryStats`(types.ts:169-174)는 산업 단위 분포(p10~p90)를 *미리* 담지만, **시장/전체 분포곡선은 사전계산이 필요 없다.** DistCurve 는 `{p10,p25,median,p75,p90}` 만 받는데, 백분위 계산에 쓰는 *바로 그 모집단 배열*(market 필터/전체 노드)을 정렬해 5분위를 그 자리에서 뽑으면 된다. 비용 = 정렬 ~2664값 × 지표 × 유니버스, 다이얼로그 열 때 1회 → 무시 가능.
+- 업종 유니버스: 기존 `industryStats` 밴드 유지(scan-grade 다이얼로그 미회귀).
+- 시장/전체 유니버스: **같은 모집단에서 라이브 5분위 산출** → 백분위와 자기일관. 백분위·곡선이 한 빌드에 함께 나온다(단계 분할 없음).
 
 ---
 
@@ -62,7 +62,7 @@ KRX 지수 데이터는 **OHLCV 전용**이다 — `IDX_NM`(지수명) + 종가/
 |---|---|---|
 | `pctRank` | engine.ts:88 | 4유니버스 전부(유니버스 무관 순수함수) |
 | `industryPercentile` 패턴 | engine.ts:303 | 모집단 필터만 교체해 일반화 |
-| `_distribution` (p10~p90) | `industry/.../buildIndustryMap.py:1112` | 시장/전체 band 사전계산(Phase 2) |
+| 5분위 산출 로직 | `_distribution`(`industry/.../buildIndustryMap.py:1112`) 동형 | 시장/전체 band 라이브 산출 — 브라우저에서 정렬+인덱스 |
 | `gradeScore` (등급→0~1) | engine.ts:104 | 정성 지표 서열 |
 | `DistCurve` | terminal/panels/DistCurve.svelte | 분포곡선(band 있는 유니버스) |
 

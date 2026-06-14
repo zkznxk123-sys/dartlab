@@ -11,12 +11,11 @@
 ## 핵심 사실 (재조사 불필요)
 - 백분위 산식 `pctRank`(engine.ts:88) + 전종목 raw `EcoNode`(types.ts:111-152, market 필드 포함) 이미 클라이언트. → `percentileIn(code, universe)` 모집단 필터만 분기(03).
 - 셸·DistCurve·띠 마크업·다이얼로그 개폐 패턴(CenterStack:342,353) 전부 라이브.
-- 시장/전체 분포곡선 band 는 Phase 2 prebuild(`_distribution`) 전까지 막대만.
+- **완성형 = 한 빌드**: 시장/전체 분포곡선도 같은 모집단 배열에서 라이브 5분위로 산출 → prebuild 불필요(단계 분할 없음, 04 정정).
 
 ## NEXT
-- 운영자 go → Phase 1 착수(engine.ts `percentileIn` 일반화 + `PercentileCrossDialog.svelte` + RightStack 버튼 배선).
+- 운영자 go → **완성형 착수**(engine.ts `percentileIn` 일반화 + `quantileBand` 라이브 5분위 + `PercentileCrossDialog.svelte`(3유니버스 백분위+곡선+정성 칩비중+가격격리) + RightStack 버튼 배선).
 - UI 변경 → 자동 push 금지, 운영자 눈검수 + 명시 승인 후 push(feedback_ui_rules).
 
-## 미해결 / 후속
-- Phase 3 소속지수: 구성종목 멤버십 데이터 소스 조사(별도 졸업게이트). KRX OpenAPI 미제공 확인됨 → 외부 소스 필요.
-- Phase 2 시장/전체 band prebuild 위치(빌드 산출물에 marketStats/allStats 추가) 설계.
+## 미해결 / 후속 (완성형 *밖*, 데이터 게이트)
+- 소속지수: 구성종목 멤버십 데이터 소스 조사(별도 졸업게이트). KRX OpenAPI 미제공 확인됨 → 외부 소스 필요. 확보 전 link-only. *단계가 아니라 데이터 부재로 막힌 확장.*

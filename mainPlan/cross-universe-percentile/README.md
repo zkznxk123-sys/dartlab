@@ -39,14 +39,14 @@
 2. [01-mechanism-decision.md](01-mechanism-decision.md) — 시각화 메커니즘 결정: 히트맵 reject → **축별 행 × 유니버스 열 백분위 띠 + 행클릭 DistCurve 드릴다운**. 정성 처리. ASCII 목업.
 3. [02-honesty-kill-list.md](02-honesty-kill-list.md) — KILL 목록 + 필수 정직 가드(가격격리·범주형 가짜백분위·허위정밀·cross-sector·판정금지·n<10·분포출처).
 4. [03-architecture-and-reuse.md](03-architecture-and-reuse.md) — 영향 파일/함수/테스트/롤백. `percentileIn` 일반화, 다이얼로그 컴포넌트, 셸/DistCurve 재사용, 공유 SSOT.
-5. [04-scope-phasing-boundaries.md](04-scope-phasing-boundaries.md) — Phase 1~4, 경계 연결 맵(재구현 0), 정직 성공지표, 인접 PRD 침범 KILL.
+5. [04-scope-phasing-boundaries.md](04-scope-phasing-boundaries.md) — **완성 범위(한 빌드)** + 단일 정직 제외(소속지수, 데이터 게이트), 경계 연결 맵(재구현 0), 정직 성공지표, 인접 PRD 침범 KILL.
 6. [05-progress-ledger.md](05-progress-ledger.md) — 상태·결정 로그·NEXT 포인터.
 
 ---
 
 ## 이중 평가
 
-- **전문 개발자**: 위험은 낮다. 백분위는 `EcoNode` 클라이언트 배열 재필터(새 데이터 0), 분포곡선·셸·띠 마크업 전부 라이브. 유일 신설 = 일반화 함수(~30줄) + 다이얼로그 1개. 핵심 함정 = ① 시장/전체 유니버스는 industryStats 밴드가 없어 DistCurve 곡선이 Phase 2 prebuild 전까지 막대만(설계에 반영) ② 소속지수는 멤버십 데이터 부재로 BLOCKED — 우회 위조 금지.
+- **전문 개발자**: 위험은 낮다. 백분위는 `EcoNode` 클라이언트 배열 재필터(새 데이터 0), 분포곡선·셸·띠 마크업 전부 라이브. 유일 신설 = 일반화 함수(~30줄) + 다이얼로그 1개. **완성형이 한 빌드에 다 들어간다** — 시장/전체 분포곡선도 같은 모집단 배열에서 라이브 5분위로 뽑아 prebuild 불필요. 유일 제외 = 소속지수, 그러나 이건 단계가 아니라 **멤버십 데이터 부재로 물리적으로 막힌 것**(우회 위조 금지) — 데이터 확보 시 같은 격자에 열 자동 추가.
 - **PM**: 킬러는 "유니버스를 바꾸니 순위가 뒤집힌다" 한 통찰. 성공지표는 셀 개수가 아니라 *뒤집힘 발견 빈도 + 연결 클릭률*. scan-grade 와 레인이 갈렸으므로(MAP vs JUDGE) 중복 우려 해소. 과욕(컨센서스·목표주가·멀티심볼보드)은 인접 PRD 소유 → KILL.
 
 ---
@@ -57,4 +57,4 @@
 
 ## 착수 게이트
 
-운영자 go 후 착수. 다이얼로그는 기존 자산 조합이라 경량·선행 가능. Phase 1 = 업종+시장+전체 라이브.
+운영자 go 후 착수. 다이얼로그는 기존 자산 조합이라 경량·선행 가능. **완성형 = 한 빌드** — 업종+시장+전체 백분위 + 전 유니버스 분포곡선(라이브) + 정성 칩비중 + 가격 격리. 소속지수만 데이터 게이트로 정직 제외.

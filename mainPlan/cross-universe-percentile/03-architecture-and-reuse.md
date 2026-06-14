@@ -25,10 +25,13 @@ function percentileIn(code: string, universe: Universe): Company['percentile'] {
     universe === 'industry' ? industryNodes(node.industry)        // 현행(engine.ts:144)
     : universe === 'market' ? allNodes.filter(n => n.market === node.market)
     : allNodes;                                                   // 'all'
-  // ↓ 이하 col/bandOf/metrics 구성은 현행과 100% 동일.
-  // band: industry 만 industryStats 보유 → market/all 은 bandOf 가 null 반환(DistCurve 생략, 막대만).
+  // ↓ 이하 col/pctRank/metrics 구성은 현행과 100% 동일.
+  // band: industry = raw.industryStats(기존). market/all = 같은 peers 배열에서 라이브 5분위
+  //   (quantile(col(f), [.10,.25,.50,.75,.90])) → 전 유니버스 DistCurve 곡선. prebuild 0.
   ...
 }
+// 라이브 5분위 헬퍼(신규, ~8줄) — 정렬된 값 배열에서 p10~p90 선형보간.
+function quantileBand(vals: number[]): PercentileMetric['band'] { /* sort + index */ }
 // 기존 호출부(engine.ts:600) 동작 불변:
 co.percentile = percentileIn(code, 'industry');
 ```
@@ -54,7 +57,7 @@ let crossOpen = $state(false);
 
 ## 테스트
 
-- **단위(engine)**: `percentileIn` 3유니버스 — (a) 결과 `metrics.length` > 0 (b) `p ∈ [0,100]` (c) `universe='market'` 모집단이 `market` 일치만 (d) `'all'` = 전 노드 (e) market/all 의 `band === null` (f) 회귀: `percentileIn(code,'industry')` === 기존 `industryPercentile` 출력(업종내 백분위 섹션 미회귀).
+- **단위(engine)**: `percentileIn` 3유니버스 — (a) 결과 `metrics.length` > 0 (b) `p ∈ [0,100]` (c) `universe='market'` 모집단이 `market` 일치만 (d) `'all'` = 전 노드 (e) market/all `band` 라이브 산출: p10≤median≤p90 단조 + 모집단 5분위와 일치 (f) `quantileBand` 단위 테스트(정렬·선형보간) (g) 회귀: `percentileIn(code,'industry')` === 기존 `industryPercentile` 출력(업종내 백분위 섹션 미회귀).
 - **svelte-check** 0 error + **build** 통과.
 - **★UI 눈검수**: Playwright 정량(버튼·다이얼로그·띠·드릴다운·닫기·콘솔 0) + **푸시 전 스크린샷 전수 눈검수**(정량 PASS 가 디자인 디테일 못 봄, feedback_ui_rules). 자동 push 금지.
 
