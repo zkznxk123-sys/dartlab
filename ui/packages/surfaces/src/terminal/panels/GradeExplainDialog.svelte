@@ -5,7 +5,7 @@
 	// 정직: 매수/매도 신호·목표주가·인과 금지. 결손 축은 채우지 않고 뺀다(0대체 금지). 등급 = 판정(근거+기준 동반).
 	import type { Company, Lang } from '../lib/types';
 	import { GRADE_SCALE } from '../lib/engine';
-	import { GRADE_GUIDE, CF_PATTERN_GUIDE } from '../lib/gradeGuide';
+	import { GRADE_GUIDE, CF_PATTERN_GUIDE, CF_PATTERN_SIGNS } from '../lib/gradeGuide';
 	import { txc } from '../ui/helpers';
 	import RadarChart from '../../map/components/RadarChart.svelte';
 
@@ -128,6 +128,18 @@
 							{/if}
 						</div>
 						{#if isClass}
+							{@const signs = CF_PATTERN_SIGNS[g.v]}
+							<!-- 영업·투자·재무 현금흐름 부호(+유입 / −유출) — 패턴을 정의하는 직관적 표기 -->
+							{#if signs}
+								<div class="geCfFlow">
+									{#each [['영업', 'Op'], ['투자', 'Inv'], ['재무', 'Fin']] as lbl, i (i)}
+										<div class={'geCfCell ' + (signs[i] === '+' ? 'pos' : 'neg')}>
+											<span class="geCfL">{lang === 'en' ? lbl[1] : lbl[0]}</span>
+											<span class="geCfS">{signs[i]}</span>
+										</div>
+									{/each}
+								</div>
+							{/if}
 							<!-- C(분류): 순서 없음 → 사다리·순위 금지. 패턴 설명 + 유형 표기만(거짓 순서 방지). -->
 							{#if cfg}<div class="geCrWhat">{lang === 'en' ? cfg.en : cfg.kr}</div>{/if}
 							<div class="geCrType">{lang === 'en' ? `category · not a ranking${g.peerN ? ` · ${g.peerN} peers` : ''}` : `유형 · 순위 아님${g.peerN ? ` · 업종 ${g.peerN}개사` : ''}`}</div>
@@ -328,6 +340,38 @@
 		font-size: 9px;
 		font-style: italic;
 		color: var(--dl-ink-dim, #5b6473);
+	}
+	/* 현금흐름 부호 행 — 영업/투자/재무 +유입(--up)/−유출(--dn) 직관 표기(터미널 토큰) */
+	.geCfFlow {
+		display: flex;
+		gap: 5px;
+		margin-top: 3px;
+	}
+	.geCfCell {
+		flex: 1 1 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1px;
+		padding: 4px 0;
+		border-radius: 4px;
+		background: rgba(139, 148, 158, 0.1);
+		border: 1px solid var(--dl-line, #1b2130);
+	}
+	.geCfL {
+		font-size: 8.5px;
+		color: var(--dl-ink-dim, #5b6473);
+	}
+	.geCfS {
+		font-size: 15px;
+		font-weight: 700;
+		line-height: 1;
+	}
+	.geCfCell.pos .geCfS {
+		color: var(--up);
+	}
+	.geCfCell.neg .geCfS {
+		color: var(--dn);
 	}
 	/* 등급레벨별 동종사 분포 막대 — 막대높이 = 동종사 비중%, 회사 등급 칼럼 하이라이트 */
 	.geDist {

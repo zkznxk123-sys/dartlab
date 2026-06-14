@@ -89,3 +89,16 @@ export const CF_PATTERN_GUIDE: Record<string, { kr: string; en: string }> = {
 		en: 'Cash flows out across operating, investing and financing (−/−/−).'
 	}
 };
+
+// 현금흐름 패턴 → [영업(OCF), 투자(ICF), 재무(FINCF)] 부호. 패턴은 이 부호 3개로 정의되므로 역도출이 정확.
+// '+' = 현금 유입, '−' = 유출(방향 표기 — 좋고 나쁨 아님). scan financial/cashflow.py _PATTERNS 와 1:1.
+export const CF_PATTERN_SIGNS: Record<string, ['+' | '−', '+' | '−', '+' | '−']> = {
+	성장투자형: ['+', '−', '−'],
+	공격성장형: ['+', '−', '+'],
+	구조재편형: ['+', '+', '−'],
+	현금축적형: ['+', '+', '+'],
+	외부의존형: ['−', '−', '+'],
+	축소정리형: ['−', '+', '−'],
+	위기대응형: ['−', '+', '+'],
+	현금위기형: ['−', '−', '−']
+};
