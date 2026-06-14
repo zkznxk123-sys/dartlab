@@ -5,6 +5,7 @@
 	import { type ChartCtl, OVERLAY_ALL, SUB_ALL, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
+	import { EVENT_CATS } from '../lib/eventRail';
 	import { IND_DEFS, paramSummary } from './indicatorParams';
 	import IndParamEditor from './IndParamEditor.svelte';
 	import BtConfig from './BtConfig.svelte';
@@ -13,13 +14,14 @@
 		ctl: ChartCtl;
 		lang: Lang;
 		hasBand: boolean;
+		railCatCounts?: Record<string, number>; // 이벤트 레일 카테고리별 건수 (필터 드롭다운 — 0 카테고리 숨김·카운트 표기)
 		onDraw: (name: string) => void;
 		onClearDraw: () => void;
 		onSnapshot?: () => void; // PNG 저장 — 전체화면 전용 잠금 해제 (발견성)
 	}
-	let { ctl, lang, hasBand, onDraw, onClearDraw, onSnapshot }: Props = $props();
+	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
-	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt'>('none');
+	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt' | 'rail'>('none');
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
 	const hasParams = (k: string) => (IND_DEFS[k]?.params.length ?? 0) > 0;
 	$effect(() => {
@@ -103,6 +105,23 @@
 				<div class="ctRow"><button class={ctl.adj ? 'mItem on' : 'mItem'} onclick={() => (ctl.adj = !ctl.adj)}>{T('수정주가', 'Adjusted')}</button><button class={ctl.showRefs ? 'mItem on' : 'mItem'} onclick={() => (ctl.showRefs = !ctl.showRefs)}>{T('52주·전일 기준선', '52w/prev refs')}</button><button class={ctl.showVP ? 'mItem on' : 'mItem'} onclick={() => (ctl.showVP = !ctl.showVP)}>{T('매물대', 'Vol Profile')}</button></div>
 				<div class="ctMenuLbl">{T('마커', 'Markers')}</div>
 				<div class="ctRow"><button class={ctl.showEvents ? 'mItem on' : 'mItem'} onclick={() => (ctl.showEvents = !ctl.showEvents)}>{T('실적 발표', 'Earnings')}</button><button class={ctl.showBand ? 'mItem on' : 'mItem'} disabled={!hasBand} onclick={() => hasBand && (ctl.showBand = !ctl.showBand)}>{T('적정주가 밴드', 'Fair band')}</button></div>
+			</div>
+		{/if}
+	</div>
+	<div class="ctWrap">
+		<button class={!ctl.railAllOn ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'rail' ? 'none' : 'rail')} title={T('이벤트 레일 — 차트 하단 공시 종류 필터', 'Event rail — filter disclosures shown under the chart')}>{T('이벤트레일', 'RAIL')}</button>
+		{#if menu === 'rail'}
+			<div class="ctMenu">
+				<div class="ctMenuLbl">{T('이벤트 레일 — 표시할 공시 종류', 'Event rail — types to show')}</div>
+				<div class="ctRow ctRowWrap">
+					<button class={ctl.railAllOn ? 'mItem on' : 'mItem'} onclick={() => ctl.showAllRailCats()}>{T('전체', 'All')}</button>
+					{#each EVENT_CATS as c (c.key)}
+						{#if (railCatCounts[c.key] ?? 0) > 0}
+							<button class={ctl.railCatOn(c.key) ? 'mItem on' : 'mItem'} onclick={() => ctl.toggleRailCat(c.key)}>{T(c.kr, c.en)} <span class="dim">{railCatCounts[c.key]}</span></button>
+						{/if}
+					{/each}
+				</div>
+				<div class="ctMenuLbl">{T('· DART 공시그룹 근사 분류. 뉴스·다른 이벤트는 추후 추가', '· approx DART groups · news & more later')}</div>
 			</div>
 		{/if}
 	</div>

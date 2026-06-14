@@ -4,6 +4,7 @@
 const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp } from '../lib/backtest';
 import { IND_DEFS } from './indicatorParams';
+import { EVENT_CAT_KEYS } from '../lib/eventRail';
 
 export type SubKey = 'VOL' | 'TVAL' | 'MACD' | 'RSI' | 'KDJ' | 'OBV' | 'CCI' | 'WR' | 'DMI' | 'MTM' | 'ROC' | 'TRIX' | 'PSY' | 'VR' | 'BRAR' | 'BIAS' | 'CR' | 'DMA' | 'EMV' | 'AO' | 'PVT' | 'AVP';
 export const SUB_ALL: SubKey[] = ['VOL', 'TVAL', 'MACD', 'RSI', 'KDJ', 'OBV', 'CCI', 'WR', 'DMI', 'MTM', 'ROC', 'TRIX', 'PSY', 'VR', 'BRAR', 'BIAS', 'CR', 'DMA', 'EMV', 'AO', 'PVT', 'AVP'];
@@ -82,6 +83,9 @@ export class ChartCtl {
 	showBand = $state(false);
 	showRefs = $state(false); // 52주 고가·저가·전일종가 기준선
 	showVP = $state(false); // 매물대 (Volume Profile)
+	// 이벤트 레일(하단 공시 dot) 카테고리 필터 — 끈 카테고리 집합(eventRail.EVENT_CATS 키). 기본 [] = 전부 ON.
+	// off-set 모델 = 향후 추가될 이벤트타입(뉴스 등)도 기본 노출(enabled-set 이면 신규는 기본 숨김 = 발견성 손해).
+	railCatsOff = $state<string[]>([]);
 	magnet = $state(false);
 	stayDraw = $state(false); // 연속 그리기 — 도형 완성 후 같은 도구 자동 재시작 (TV Stay in Drawing Mode)
 	full = $state(false);
@@ -122,6 +126,7 @@ export class ChartCtl {
 			if (typeof p.showEvents === 'boolean') this.showEvents = p.showEvents;
 			if (typeof p.showRefs === 'boolean') this.showRefs = p.showRefs;
 			if (typeof p.showVP === 'boolean') this.showVP = p.showVP;
+			if (Array.isArray(p.railCatsOff)) this.railCatsOff = p.railCatsOff.filter((x): x is string => typeof x === 'string' && EVENT_CAT_KEYS.includes(x));
 			if (typeof p.magnet === 'boolean') this.magnet = p.magnet;
 			if (typeof p.stayDraw === 'boolean') this.stayDraw = p.stayDraw;
 			if (p.indParams && typeof p.indParams === 'object') {
@@ -145,7 +150,7 @@ export class ChartCtl {
 				JSON.stringify({
 					overlays: this.overlays, subs: this.subs, econ: this.econ, period: this.period, tf: this.tf,
 					yMode: this.yMode, candleStyle: this.candleStyle, indParams: this.indParams,
-					adj: this.adj, showEvents: this.showEvents, showRefs: this.showRefs, showVP: this.showVP, magnet: this.magnet, stayDraw: this.stayDraw
+					adj: this.adj, showEvents: this.showEvents, showRefs: this.showRefs, showVP: this.showVP, railCatsOff: this.railCatsOff, magnet: this.magnet, stayDraw: this.stayDraw
 				})
 			);
 		} catch {
@@ -187,6 +192,21 @@ export class ChartCtl {
 	}
 	toggleEcon(id: string) {
 		this.econ = this.econ.includes(id) ? this.econ.filter((x) => x !== id) : this.econ.length >= ECON_MAX ? this.econ : [...this.econ, id];
+	}
+	/** 이벤트 레일 카테고리가 켜져 있나 (off-set 에 없으면 ON). */
+	railCatOn(key: string): boolean {
+		return !this.railCatsOff.includes(key);
+	}
+	/** 전체(모든 카테고리 ON) 상태인가 — 드롭다운 "전체" 활성 표시용. */
+	get railAllOn(): boolean {
+		return this.railCatsOff.length === 0;
+	}
+	toggleRailCat(key: string) {
+		this.railCatsOff = this.railCatsOff.includes(key) ? this.railCatsOff.filter((k) => k !== key) : [...this.railCatsOff, key];
+	}
+	/** 전체 보기 — 끈 카테고리 모두 해제. */
+	showAllRailCats() {
+		this.railCatsOff = [];
 	}
 	/** 비교 전체 해제 — 회사 전환 시 호출 (이전 회사 기준 비교는 무의미). */
 	clearCompares() {

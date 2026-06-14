@@ -10,6 +10,7 @@
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
 	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
+	import { classifyFiling } from '../lib/eventRail'; // 비정기 공시 원문명 → DART 공시그룹 근사 분류(이벤트 레일 필터)
 
 	interface Props {
 		co: Company;
@@ -208,7 +209,7 @@
 
 	// 공시 이벤트 레일 (dartlab 고유 강점) — 정기보고서 url(접수일별) + 비정기 material 공시(날짜 그룹·클릭 시 DART).
 	// 가격차트 마커가 곧 네비게이션 가능한 공시 타임라인. 같은 날 다수 공시는 1마커로 묶고 '외 N건' 표기(마커 폭주 방지).
-	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' };
+	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg'; category: string };
 	let regularUrlByDate = $state<Record<string, string>>({});
 	let disclosureEvents = $state<{ date: string; items: RailItem[] }[]>([]);
 	$effect(() => {
@@ -232,13 +233,13 @@
 			for (const f of reg ?? []) {
 				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
 				if (d.length !== 8 || !f.url || !f.reportType?.trim()) continue;
-				add(d, { title: f.reportType.trim() + (f.year ? ' ' + f.year : ''), rceptNo: f.rceptNo, url: f.url, kind: 'regular' });
+				add(d, { title: f.reportType.trim() + (f.year ? ' ' + f.year : ''), rceptNo: f.rceptNo, url: f.url, kind: 'regular', category: 'regular' });
 			}
 			// 비정기(수시) 공시
 			for (const f of non ?? []) {
 				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
 				if (d.length !== 8 || !f.url || !f.reportNm?.trim()) continue; // 빈 항목 방지(anti-clutter)
-				add(d, { title: f.reportNm.trim(), rceptNo: f.rceptNo, url: f.url, kind: 'nonreg' });
+				add(d, { title: f.reportNm.trim(), rceptNo: f.rceptNo, url: f.url, kind: 'nonreg', category: classifyFiling(f.reportNm) });
 			}
 			// 최근 60개 날짜로 캡 — wide window 에서도 dot 폭주 방지(anti-clutter). 같은 날 다수는 1 dot + 툴팁 전체 나열.
 			disclosureEvents = [...byDate.entries()]

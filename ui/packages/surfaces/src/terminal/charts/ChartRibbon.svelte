@@ -6,6 +6,7 @@
 	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
+	import { EVENT_CATS } from '../lib/eventRail';
 	import { CMP_COLORS } from './compareOverlay';
 	import { paramSummary, IND_DEFS } from './indicatorParams';
 	import { loadTemplates, saveTemplate, deleteTemplate, applyTemplate } from './templateStore';
@@ -23,13 +24,14 @@
 		notice?: string | null; // 자동 tf 상향·백필 진행 등 상태 피드백 1줄
 		peers?: { code: string; name: string }[];
 		cmpRows?: { name: string; code: string; r: (number | null)[] }[]; // VS 팝오버 기간 수익률 (1M/3M/6M/1Y)
+		railCatCounts?: Record<string, number>; // 이벤트 레일 카테고리별 건수 (필터 팝오버)
 		canJump?: boolean;
 		onSnapshot?: () => void;
 		onReplay?: () => void; // 바 리플레이 진입 (시작점 환산은 PriceChart — viewLen 보유 주체)
 		onJump?: () => void; // 심볼 점프 팔레트 열기 (⌘K·/)
 		onHelp?: () => void; // 단축키 도움말 (?)
 	}
-	let { ctl, lang, hasBand, name, code, info, notice = null, peers = [], cmpRows = [], canJump = false, onSnapshot, onReplay, onJump, onHelp }: Props = $props();
+	let { ctl, lang, hasBand, name, code, info, notice = null, peers = [], cmpRows = [], railCatCounts = {}, canJump = false, onSnapshot, onReplay, onJump, onHelp }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const fmtN = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 0 });
 	const fmtD = (t: string) => `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}`;
@@ -128,6 +130,23 @@
 								onclick={() => ctl.toggleEcon(s.id)}>{T(s.kr, s.en)}</button>
 						{/each}
 					</div>
+				</div>
+			{/if}
+		</div>
+		<div class="crGrp crPop">
+			<button class={!ctl.railAllOn ? 'cbtn tg on' : 'cbtn tg'} onclick={() => (pop = pop === 'rail' ? 'none' : 'rail')} title={T('이벤트 레일 — 하단 공시 종류 필터', 'event rail — filter disclosures')}>{T('이벤트레일', 'RAIL')} ▾</button>
+			{#if pop === 'rail'}
+				<div class="crMenu">
+					<div class="ctMenuLbl">{T('이벤트 레일 — 표시할 공시 종류', 'Event rail — types to show')}</div>
+					<div class="ctRow ctRowWrap">
+						<button class={ctl.railAllOn ? 'mItem on' : 'mItem'} onclick={() => ctl.showAllRailCats()}>{T('전체', 'All')}</button>
+						{#each EVENT_CATS as c (c.key)}
+							{#if (railCatCounts[c.key] ?? 0) > 0}
+								<button class={ctl.railCatOn(c.key) ? 'mItem on' : 'mItem'} onclick={() => ctl.toggleRailCat(c.key)}>{T(c.kr, c.en)} <span class="dim">{railCatCounts[c.key]}</span></button>
+							{/if}
+						{/each}
+					</div>
+					<div class="ctMenuLbl">{T('· DART 공시그룹 근사 분류. 뉴스·다른 이벤트는 추후 추가', '· approx DART groups · news & more later')}</div>
 				</div>
 			{/if}
 		</div>

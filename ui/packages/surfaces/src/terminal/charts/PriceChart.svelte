@@ -34,7 +34,7 @@
 		events?: { date: string; label: string; url?: string; kind?: 'report' | 'capital' | 'disclosure' }[];
 		// 공시 레일(02 §4) — 날짜 그룹별 그날 공시 전부(items). 캔들 고가 텍스트 아님 = x축 라벨 아래 전용 dot 레일.
 		// 호버=그날 공시 전 항목 툴팁, 클릭=우측 정기/비정기 공시목록 그 날짜로(원문 링크 아님).
-		disclosures?: { date: string; items: { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' }[] }[];
+		disclosures?: { date: string; items: { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg'; category: string }[] }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
 		// 전체화면 심볼 점프 — 검색은 엔진(suggest), 전환은 onPick (터미널 pick 관통)
@@ -102,8 +102,14 @@
 	// (terminal.css .chartWrap padding-bottom — 출처 자리를 레일 lane 으로 전용). 좌표/폭은 el(캔버스) geometry 기준이라
 	// 일반·전체화면(좌 58·하 22 padding) 모두 정렬. pan/zoom·resize 는 onScroll/onZoom·ResizeObserver 로 재계산.
 	// 좌표 실패/범위 밖은 graceful skip(렌더 0·crash 0).
-	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' };
+	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg'; category: string };
 	type RailDot = { x: number; date: string; items: RailItem[] };
+	// 이벤트 레일 카테고리별 건수(전체 disclosures 기준 — 드롭다운 필터에 카운트 표기·0 카테고리 숨김)
+	const railCatCounts = $derived.by<Record<string, number>>(() => {
+		const c: Record<string, number> = {};
+		for (const d of disclosures) for (const it of d.items) c[it.category] = (c[it.category] ?? 0) + 1;
+		return c;
+	});
 	let railBox = $state<{ left: number; top: number; width: number; canvasTop: number } | null>(null);
 	let railDots = $state<RailDot[]>([]);
 	let hoverRail = $state<{ x: number; date: string; items: RailItem[] } | null>(null); // 호버 = 그날 공시 전부 툴팁(일자 헤더 포함)
@@ -116,16 +122,20 @@
 		railBox = { left: el.offsetLeft, top: el.offsetTop + el.offsetHeight, width: el.offsetWidth, canvasTop: el.offsetTop };
 		if (!disclosures.length) { railDots = []; return; }
 		const w = el.offsetWidth;
+		const off = ctl.railCatsOff;
 		const out: RailDot[] = [];
 		for (const d of disclosures) {
-			if (!/^\d{8}$/.test(d.date) || !d.items.length) continue;
+			if (!/^\d{8}$/.test(d.date)) continue;
+			// 이벤트 레일 카테고리 필터 — 끈 카테고리 항목 제외. 남은 항목 0 이면 dot 자체 숨김(개수·툴팁도 필터 반영).
+			const items = off.length ? d.items.filter((it) => !off.includes(it.category)) : d.items;
+			if (!items.length) continue;
 			let x: number | undefined;
 			try {
 				const px = c.convertToPixel({ timestamp: toMs(d.date), value: 0 }, { paneId: 'candle_pane' });
 				x = Array.isArray(px) ? px[0]?.x : px?.x;
 			} catch { continue; }
 			if (typeof x !== 'number' || !Number.isFinite(x) || x < -4 || x > w + 4) continue;
-			out.push({ x, date: d.date, items: d.items });
+			out.push({ x, date: d.date, items });
 		}
 		railDots = out;
 		if (hoverRail && !out.length) hoverRail = null;
@@ -136,6 +146,7 @@
 		void ctl.period;
 		void ctl.tf;
 		void ctl.full;
+		void ctl.railCatsOff;
 		void disclosures;
 		if (browser) requestAnimationFrame(recomputeRail);
 	});
@@ -1100,7 +1111,7 @@
 	{/if}
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
+		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
 		<DrawToolbar {ctl} {lang} onDraw={startDraw} onClearDraw={clearDraw} />
 
 		{#if jumpOpen}
@@ -1175,7 +1186,7 @@
 			</div>
 		{/if}
 	{:else}
-		<ChartMenus {ctl} {lang} hasBand={!!valBand} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartMenus {ctl} {lang} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 
 	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->
