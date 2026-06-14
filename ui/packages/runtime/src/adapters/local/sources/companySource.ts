@@ -1,6 +1,9 @@
-// 로컬 company 포트 — /api/company/{code}/meta. 단일회사 lazy fetch (전 종목 인덱스 미보유 = null).
+// 로컬 company 포트 — relations 는 /api(로컬 Python 서버)/meta, 전 종목 product·회사정보 인덱스는
+// 공개 HF corpList.parquet 공유(macro·finance 와 동일한 "로컬이 깃헙페이지 자산을 공유"하는 단일 경로).
+// 이 데이터의 SSOT 자체가 HF parquet 이라 silent fallback 이 아니다 — 공개 어댑터와 동일 결과 = 미러.
 import type { CompanyPort, CompanyRelations, ProductIndexItem } from '@dartlab/ui-contracts';
 import { getJson } from '../fetchJson';
+import { loadHfProductIndexMap } from '../../public/sources/productIndexSource';
 import type { CompanyMeta, LocalCaches } from '../localTypes';
 
 function loadMeta(apiBase: string, caches: LocalCaches, code: string): Promise<CompanyMeta | null> {
@@ -13,22 +16,28 @@ function loadMeta(apiBase: string, caches: LocalCaches, code: string): Promise<C
 	return p;
 }
 
+// 전 종목 product/회사정보 인덱스 = 공개 HF 소스를 Record(JSON-safe 계약)로 1 회 변환·공유 (공개 어댑터와 동일).
+let productIndexPromise: Promise<Record<string, ProductIndexItem> | null> | null = null;
+function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | null> {
+	productIndexPromise ??= (async () => {
+		try {
+			return Object.fromEntries(await loadHfProductIndexMap());
+		} catch {
+			return null;
+		}
+	})();
+	return productIndexPromise;
+}
+
 export function localCompanyPort(apiBase: string, caches: LocalCaches): CompanyPort {
 	return {
+		// 단일 회사 제품/프로필 = 공개 HF 인덱스 조회 (공개 products(code) 와 동일 — ceo/결산/상장/본사/홈페이지 포함).
 		async products(code) {
-			const meta = await loadMeta(apiBase, caches, code);
-			if (!meta) return null;
-			return {
-				product: meta.products.slice(0, 4).join(', '),
-				productRaw: meta.products.join(', '),
-				latestPeriod: '',
-				industry: meta.sector || undefined
-			} satisfies ProductIndexItem;
+			const rec = await loadProductIndexRecord();
+			return rec?.[code.trim()] ?? null;
 		},
-		// 로컬 서버는 전 종목 product 인덱스 미보유 — null = 미지원 정직 표기.
-		async productIndex() {
-			return null;
-		},
+		// 전 종목 인덱스 = 공개 HF 자산 공유 (옛 null = 미보유 표기는 미러 깨짐 → 깃헙페이지 자산 직접 로드로 정정).
+		productIndex: loadProductIndexRecord,
 		async relations(code) {
 			const meta = await loadMeta(apiBase, caches, code);
 			if (!meta || !meta.corpName) return null;

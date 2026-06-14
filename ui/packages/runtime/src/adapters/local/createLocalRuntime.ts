@@ -4,7 +4,6 @@
 // services(빈 레지스트리)·storage(localStorage)=자족 실구현, navigation=셸 주입(LocalRuntimeOptions)=단계-5-3a.
 // map·search 만 단계-8 throw 게이트(호출 시 배선순서 위반 즉시 노출 — 공개 어댑터와 동일 패턴).
 import type {
-	Candle,
 	DartLabRuntime,
 	FinancePort,
 	NavigationPort,
@@ -12,6 +11,7 @@ import type {
 } from '@dartlab/ui-contracts';
 import { createHfMacroPort } from '../public/sources/macroSource';
 import { loadTerminalFinance } from '../public/sources/financeSource';
+import { publicPricePort } from '../public/createPublicRuntime';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { exportServiceRegistration } from '../../services/exportCommand';
 import { localExportPort } from './sources/exportSource';
@@ -21,7 +21,6 @@ import { localAiPort } from './sources/aiSource';
 import { localStoragePort } from './sources/storageSource';
 import { localCompanyPort } from './sources/companySource';
 import { localFilingPort } from './sources/filingSource';
-import { localPricePort } from './sources/priceSource';
 import { localReportPort } from './sources/reportSource';
 import { localScanPort } from './sources/scanSource';
 import { localViewerPort } from './sources/viewerSource';
@@ -46,7 +45,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 	// 회사 단위 fetch 1회 공유 (런타임 인스턴스 범위) — price·filing·company 포트가 같은 응답 재사용.
 	const caches: LocalCaches = {
 		priceEvents: new Map<string, Promise<PriceEventsPayload | null>>(),
-		loadedCandles: new Map<string, Candle[]>(),
 		panelInit: new Map<string, Promise<ClientPanelInit | null>>(),
 		meta: new Map<string, Promise<CompanyMeta | null>>()
 	};
@@ -55,7 +53,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 	return {
 		env,
 		company: localCompanyPort(apiBase, caches),
-		price: localPricePort(apiBase, caches),
+		// 주가 = 공개 gov HF 포트 재사용 (백엔드 0, 브라우저 단일 경로) — 로컬 :8400 미가동에도 차트가 퍼블릭과 동일.
+		price: publicPricePort(),
 		filing: localFilingPort(apiBase, caches),
 		finance: localFinancePort(),
 		viewer: localViewerPort(),

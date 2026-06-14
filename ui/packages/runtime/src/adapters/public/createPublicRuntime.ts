@@ -74,7 +74,9 @@ function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | nu
 	return productIndexPromise;
 }
 
-function publicPricePort(): PricePort {
+// 로컬 어댑터도 이 포트를 그대로 재사용한다 — gov HF + recent + naver fresh 는 백엔드 0(브라우저 단일 경로)
+// 라, 로컬 :8400 미가동이어도 차트가 퍼블릭과 동일하게 뜬다(finance·macro·company 와 같은 "깃헙페이지 자산 공유").
+export function publicPricePort(): PricePort {
 	return {
 		// 회사파일(전종목 주간 파생, 전체 이력) ∥ recent(최근 30거래일 전종목 슬림 1파일) ∥ 네이버 fresh tail
 		// 병렬 → 병합. 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을, 네이버 fresh 가 gov 미발행
