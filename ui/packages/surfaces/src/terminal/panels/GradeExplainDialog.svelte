@@ -20,6 +20,8 @@
 		(({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 	// 등급 톤 → 막대 색. ★터미널 기존 토큰만 사용(신규 색 금지) — --up/good/warn/dn 은 .tUp 등과 동일 팔레트.
 	const TONE_COL: Record<string, string> = { up: 'var(--up)', good: 'var(--good)', neutral: 'var(--dim)', warn: 'var(--warn)', down: 'var(--dn)' };
+	// 신용 구성 점수(0~100) → 같은 터미널 토큰 색(높을수록 양호). credit.tone 임계(70/49)와 정합.
+	const creditCol = (s: number): string => (s >= 70 ? 'var(--up)' : s >= 50 ? 'var(--good)' : s >= 30 ? 'var(--warn)' : 'var(--dn)');
 
 	const vd = $derived(co.verdict);
 	const pct = $derived(co.percentile);
@@ -64,11 +66,6 @@
 				{:else}
 					<div class="geRadarEmpty">{lang === 'en' ? 'not enough graded axes for a radar' : '레이더를 그릴 등급 축 부족'}</div>
 				{/if}
-				<div class="geRadarNote">
-					{lang === 'en'
-						? 'cash flow is a category (no ranking) — shown below, off the radar'
-						: '현금흐름은 순서 없는 유형이라 레이더 제외 · 아래 기준에 별도'}
-				</div>
 			</div>
 
 			<!-- 우: 왜 이 등급(근거) — 신용 + 강점/우려. 백분위·분포곡선은 아래 등급기준의 각 축으로 이동. -->
@@ -98,7 +95,7 @@
 						{#each co.credit.tracks as t (t.en)}
 							<div class="geCt">
 								<span class="geCtL">{txc(t, lang)}</span>
-								<div class="geCtTrack"><div class="geCtBar" style={`width:${Math.max(2, t.score)}%`}></div></div>
+								<div class="geCtTrack"><div class="geCtBar" style={`width:${Math.max(2, t.score)}%;background:${creditCol(t.score)}`}></div></div>
 								<span class="geCtV mono">{t.score}</span>
 							</div>
 						{/each}
@@ -169,7 +166,7 @@
 
 <style>
 	.geModal {
-		width: min(940px, 96vw);
+		width: min(810px, 96vw);
 	}
 	.geBand {
 		font-size: 11px;
@@ -213,12 +210,6 @@
 		color: var(--dl-ink-dim, #5b6473);
 		border: 1px dashed var(--dl-line, #1b2130);
 		border-radius: 6px;
-	}
-	.geRadarNote {
-		font-size: 9.5px;
-		color: var(--dl-ink-dim, #5b6473);
-		text-align: center;
-		line-height: 1.4;
 	}
 	.geWhy {
 		flex: 1 1 auto;
@@ -268,7 +259,7 @@
 	}
 	.geCrGrid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
 		gap: 12px 14px;
 		align-items: start;
 	}
@@ -436,8 +427,7 @@
 	}
 	.geCtBar {
 		height: 100%;
-		border-radius: 4px;
-		background: rgba(139, 148, 158, 0.5); /* 단색(정돈) — 점수 값으로 크기 표현 */
+		border-radius: 4px; /* 색은 점수 톤(인라인, 터미널 토큰) */
 	}
 	.geCtV {
 		flex: 0 0 22px;
