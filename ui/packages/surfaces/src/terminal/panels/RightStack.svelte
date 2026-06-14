@@ -68,8 +68,9 @@
 		flashDate = null; // 같은 날짜 재클릭도 class off→on 으로 애니메이션 재생되도록 먼저 해제
 		requestAnimationFrame(() => {
 			flashDate = d;
+			// block:'center' = 내부 filingList(자체 스크롤) + 외부 우측 컬럼 둘 다 스크롤해 그 공시 행을 우측 패널 뷰포트 정중앙으로.
 			const row = filingWrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
-			row?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+			row?.scrollIntoView({ block: 'center', behavior: 'smooth' });
 			flashTimer = setTimeout(() => (flashDate = null), 1800);
 		});
 	});
