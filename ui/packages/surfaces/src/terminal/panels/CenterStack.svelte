@@ -6,6 +6,7 @@
 	import PriceChart from '../charts/PriceChart.svelte';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import FinFullscreen from './FinFullscreen.svelte';
+	import GradeExplainDialog from './GradeExplainDialog.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
 	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
@@ -23,6 +24,7 @@
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
+	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
 	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
@@ -337,7 +339,7 @@
 
 <!-- GRADE STRIP -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
-	{#snippet right()}<span class="dim">{co.grades.length} {lang === 'en' ? 'axes' : '축'}</span>{/snippet}
+	{#snippet right()}<button class="gradeWhyBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'why this grade' : '왜 이 등급인가'}>⊕ {lang === 'en' ? 'why' : '왜 이 등급'}</button><span class="dim">{co.grades.length} {lang === 'en' ? 'axes' : '축'}</span>{/snippet}
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},1fr)`}>
 		{#each co.grades as g (g.key)}
@@ -348,6 +350,7 @@
 		{/each}
 	</div>
 </Panel>
+{#if gradeOpen}<GradeExplainDialog {co} {lang} onClose={() => (gradeOpen = false)} />{/if}
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
 <Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
@@ -463,3 +466,23 @@
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션', en: 'VALUATION' }} flush><div class="storyEmpty">{lang === 'en' ? 'Insufficient data.' : '데이터 부족.'}</div></Panel>
 	{/if}
 </div>
+
+<style>
+	/* 스캔등급 헤더 '왜 이 등급' 버튼 — 설명 다이얼로그 진입점 (전역 terminal.css 미오염, scoped) */
+	.gradeWhyBtn {
+		background: none;
+		border: 1px solid var(--bd, #1b2130);
+		color: var(--dim, #5b6473);
+		font-family: var(--sans, inherit);
+		font-size: 9.5px;
+		line-height: 1.2;
+		padding: 2px 7px;
+		margin-right: 6px;
+		border-radius: 10px;
+		cursor: pointer;
+	}
+	.gradeWhyBtn:hover {
+		color: var(--dl-ink, #c8cfdb);
+		border-color: var(--color-dl-primary, #ea4647);
+	}
+</style>
