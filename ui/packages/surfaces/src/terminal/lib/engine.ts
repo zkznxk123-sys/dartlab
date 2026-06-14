@@ -20,6 +20,7 @@ import type {
 	Financials,
 	StackSeg,
 	FinanceCompany,
+	IndustryStat,
 } from './types';
 
 const SECTOR_EN: Record<string, string> = {
@@ -304,12 +305,19 @@ export function createEngine(raw: RawData): Engine {
 		if (!node) return null;
 		const peers = industryNodes(node.industry);
 		const col = (f: keyof EcoNode): Num[] => peers.map((n) => (n[f] as Num) ?? null);
+		// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사) 은 null. distribution 키 = roe/opMargin/revCagr/debtRatio.
+		const statsRec = raw.industryStats as Record<string, IndustryStat> | null;
+		const dist = statsRec?.[node.industry]?.distribution;
+		const bandOf = (key: string): PercentileMetric['band'] => {
+			const d = dist?.[key];
+			return d && d.p10 != null && d.p90 != null ? { p10: d.p10, median: d.median ?? d.p10, p90: d.p90 } : null;
+		};
 		const metrics = [
-			{ kr: '영업이익률', en: 'OP margin', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%' },
-			{ kr: 'ROE', en: 'ROE', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%' },
-			{ kr: '매출성장', en: 'Rev growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%' },
-			{ kr: '매출규모', en: 'Revenue', v: node.revenue ?? null, p: pctRank(col('revenue'), node.revenue ?? null), unit: 'rev' },
-			{ kr: '점유율', en: 'Mkt share', v: node.marketShare ?? null, p: pctRank(col('marketShare'), node.marketShare ?? null), unit: '%' }
+			{ kr: '영업이익률', en: 'OP margin', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
+			{ kr: 'ROE', en: 'ROE', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
+			{ kr: '매출성장', en: 'Rev growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
+			{ kr: '매출규모', en: 'Revenue', v: node.revenue ?? null, p: pctRank(col('revenue'), node.revenue ?? null), unit: 'rev', band: null },
+			{ kr: '점유율', en: 'Mkt share', v: node.marketShare ?? null, p: pctRank(col('marketShare'), node.marketShare ?? null), unit: '%', band: null }
 		].filter((m): m is PercentileMetric => m.p != null);
 		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics };
 	}

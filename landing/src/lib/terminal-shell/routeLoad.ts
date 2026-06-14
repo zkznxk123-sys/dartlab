@@ -15,6 +15,7 @@ import {
 	type IndexRow,
 	type EcosystemFile,
 	type QuartersFile,
+	type IndustryStatsFile,
 	type RawData
 } from '@dartlab/ui-surfaces/terminal';
 
@@ -33,7 +34,7 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 		warmCompany(getPublicRuntime(), last);
 	}
 	const opt = { fetchFn, preferLocal: true };
-	const [finance, macro, meta, prices, index, eco, quarters] = await Promise.all([
+	const [finance, macro, meta, prices, index, eco, quarters, industryStats] = await Promise.all([
 		loadJson<FinanceFile>('dashboards/finance.json', opt),
 		// macro 도 HF-first — mapBuild 가 매일 publish 하는 소형 파일 (git 정적 사본 동결 사고 재발 방지)
 		loadJson<MacroFile>('dashboards/macro.json', { fetchFn }),
@@ -43,7 +44,9 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 		loadJson<PricesFile>('map/prices-snapshot.json', { fetchFn }),
 		loadJson<IndexRow[]>('map/search-index.json', opt),
 		loadJson<EcosystemFile>('map/ecosystem.json', opt),
-		loadJson<QuartersFile>('dashboards/quarters.json', opt)
+		loadJson<QuartersFile>('dashboards/quarters.json', opt),
+		// 업종 분포 밴드 — map 이 쓰던 자산(p10~p90), 스캔등급 다이얼로그 분포 컨텍스트용. 정적 동결 OK(일배치 무관).
+		loadJson<IndustryStatsFile>('map/industryStats.json', opt)
 	]);
 	return {
 		raw: {
@@ -53,7 +56,8 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 			prices: prices ?? { data: {} },
 			index: index ?? [],
 			eco: eco ?? null,
-			quarters: quarters ?? null
+			quarters: quarters ?? null,
+			industryStats: industryStats ?? null
 		} as RawData
 	};
 }

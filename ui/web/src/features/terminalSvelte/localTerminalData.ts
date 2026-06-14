@@ -374,6 +374,8 @@ function buildRaw(seed: RuntimeSeed): RawData {
 		index: [indexRow],
 		eco: { version: 'local', nodes: [ecoNode] },
 		quarters,
+		// 로컬 단일사 seed — 업종 분포(industryStats) 미보유, null 정직 표기(밴드 미표시). public 셸만 로드.
+		industryStats: null,
 	} satisfies RawData;
 	return Object.assign(raw, { __localCandles: candles }) as RawData;
 }

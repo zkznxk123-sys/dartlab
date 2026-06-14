@@ -6,7 +6,7 @@
 	import type { Company, Lang } from '../lib/types';
 	import { GRADE_SCALE } from '../lib/engine';
 	import { GRADE_GUIDE } from '../lib/gradeGuide';
-	import { tx, txc } from '../ui/helpers';
+	import { txc } from '../ui/helpers';
 	import RadarChart from '../../map/components/RadarChart.svelte';
 
 	interface Props {
@@ -66,7 +66,7 @@
 
 			<!-- 우: 왜 이 등급(근거) — 실측 지표(업종 백분위) + 원수치 + 신용 -->
 			<div class="geWhy">
-				{#if co.percentile && co.percentile.metrics.length}
+				{#if co.percentile && co.percentile.n >= 5 && co.percentile.metrics.length}
 					<div class="gePct">
 						<div class="gePctHead">
 							{lang === 'en' ? `vs ${co.percentile.n} industry peers` : `업종 ${co.percentile.n}개사 내 백분위`}{#if co.eco.industryRank != null} · {lang === 'en' ? `rank ${co.eco.industryRank}` : `${co.eco.industryRank}위`}{/if}
@@ -76,20 +76,14 @@
 							<div class="gePctRow">
 								<span class="gePctName">{txc(m, lang)}</span>
 								<span class="gePctVal mono">{m.unit === '%' && m.v != null ? m.v.toFixed(1) + '%' : ''}</span>
-								<span class="gePctBar"><i style={`width:${m.p ?? 0}%`}></i></span>
 								<span class="gePctRank mono">{lang === 'en' ? 'top ' : '상위 '}{top}%</span>
+								{#if m.band}
+									<span class="gePctDist mono">{lang === 'en' ? 'peers' : '업종'} p10 {m.band.p10.toFixed(1)} · {lang === 'en' ? 'med' : '중앙'} {m.band.median.toFixed(1)} · p90 {m.band.p90.toFixed(1)}</span>
+								{/if}
 							</div>
 						{/each}
 					</div>
 				{/if}
-				<div class="geCells">
-					{#each co.analysis.tracks as t}
-						<div class="geCell">
-							<span class={'geCk ' + tcls(t.tone)}>{txc(t, lang)}</span>
-							<b>{tx(t.verdict, lang)}</b>
-						</div>
-					{/each}
-				</div>
 				<div class="geCred">
 					<span class="geCredK">{lang === 'en' ? 'credit' : '신용'}</span>
 					<b class="tCredit mono">{co.credit.grade}</b>
@@ -222,29 +216,6 @@
 	.geTag.dn {
 		border-color: rgba(234, 70, 71, 0.35);
 	}
-	.geCells {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 6px 14px;
-		margin-top: 2px;
-	}
-	.geCell {
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
-		border-left: 2px solid var(--dl-line, #1b2130);
-		padding-left: 8px;
-	}
-	.geCk {
-		font-size: 10px;
-		font-weight: 600;
-	}
-	.geCell b {
-		font-size: 11px;
-		font-weight: 500;
-		color: var(--dl-ink, #c8cfdb);
-		font-variant-numeric: tabular-nums;
-	}
 	.geCriteria {
 		border-top: 1px solid var(--dl-line, #1b2130);
 		padding: 10px 14px 14px;
@@ -322,10 +293,10 @@
 		color: var(--dl-ink-dim, #5b6473);
 	}
 	.gePctRow {
-		display: grid;
-		grid-template-columns: 64px 52px 1fr 52px;
-		align-items: center;
-		gap: 7px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 3px 8px;
 	}
 	.gePctName {
 		font-size: 10.5px;
@@ -333,26 +304,20 @@
 	}
 	.gePctVal {
 		font-size: 10.5px;
-		text-align: right;
 		font-variant-numeric: tabular-nums;
 		color: var(--dl-ink, #c8cfdb);
 	}
-	.gePctBar {
-		height: 6px;
-		border-radius: 3px;
-		background: rgba(148, 163, 184, 0.12);
-		overflow: hidden;
-	}
-	.gePctBar i {
-		display: block;
-		height: 100%;
-		background: var(--color-dl-primary, #ea4647);
-		opacity: 0.8;
-	}
 	.gePctRank {
 		font-size: 10px;
-		text-align: right;
+		margin-left: auto;
 		color: var(--dl-ink-dim, #5b6473);
+		font-variant-numeric: tabular-nums;
+	}
+	.gePctDist {
+		flex-basis: 100%;
+		font-size: 9px;
+		color: var(--dl-ink-dim, #5b6473);
+		opacity: 0.85;
 		font-variant-numeric: tabular-nums;
 	}
 	.geCred {

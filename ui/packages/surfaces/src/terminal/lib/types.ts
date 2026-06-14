@@ -172,6 +172,8 @@ export interface RawData {
 	index: IndexRow[];
 	eco: EcosystemFile | null;
 	quarters: QuartersFile | null;
+	// 업종 분포 통계(p10~p90 밴드) — map 이 쓰던 자산. public 셸은 로드, local 단일사 브리지는 null(정직). 필수=공동배선 강제.
+	industryStats: IndustryStatsFile | null;
 }
 
 // ───────────────────────── built company ─────────────────────────
@@ -242,6 +244,8 @@ export interface PercentileMetric {
 	v: Num;
 	p: number;
 	unit: string;
+	// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사 seed)·분포 부재 = null(다이얼로그 생략).
+	band: { p10: number; median: number; p90: number } | null;
 }
 export interface Valuation {
 	per: Num;

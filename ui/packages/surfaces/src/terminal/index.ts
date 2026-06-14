@@ -23,5 +23,6 @@ export type {
 	PriceRow,
 	IndexRow,
 	EcosystemFile,
-	QuartersFile
+	QuartersFile,
+	IndustryStatsFile
 } from './lib/types';
