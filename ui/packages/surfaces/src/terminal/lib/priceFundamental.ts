@@ -77,6 +77,9 @@ export function buildPriceFundamentalCard(
 		title: '가격 vs 기초체력 (=100)',
 		unit: '=100',
 		refLines: [100],
+		// 세 선 모두 단일 좌축(이중축 금지 — 독립 오토스케일은 괴리 신호를 숨긴다). 로그 눈금으로
+		// 자릿수 차(주가 급등 등)를 흡수: 같은 기울기 = 같은 성장률이라 한 선이 치솟아도 비교 가능.
+		logLeft: true,
 		series: [
 			{ name: '주가', data: priceIdx, color: '#e879a6', type: 'line' },
 			{ name: '매출', data: idx(rev), color: '#5b9bf0', type: 'line' },

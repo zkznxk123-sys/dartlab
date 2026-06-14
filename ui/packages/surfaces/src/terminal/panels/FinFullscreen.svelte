@@ -142,7 +142,7 @@
 			{#if !finData}
 				<div class="chartLoad" style="height:140px">{lang === 'en' ? 'loading financials …' : '재무제표 불러오는 중 …'}</div>
 			{:else if priceCard}
-				<div class="finFsPrice"><div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} h={188} /></div></div>
+				<div class="finFsGrid"><div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} /></div></div>
 			{:else}
 				<div class="storyEmpty">{lang === 'en' ? 'No price overlay — price history unavailable for this company.' : '주가 데이터가 없어 가격↔기초체력 오버레이를 만들 수 없습니다.'}</div>
 			{/if}

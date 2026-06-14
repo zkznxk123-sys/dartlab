@@ -21,6 +21,7 @@ export interface FinCard {
 	kind?: 'waterfall' | 'heatmap'; // 지정 시 series/periods 무시
 	steps?: { name: string; value: number | null; total?: boolean }[]; // waterfall 전용
 	heat?: { rows: string[]; cols: string[]; vals: Num[][]; yoy: Num[][] }; // heatmap 전용
+	logLeft?: boolean; // 좌축 로그 눈금 — 지수(=100) 다중 시계열처럼 시리즈 간 자릿수 차가 큰 경우 (같은 기울기=같은 성장률)
 }
 
 export interface StmtRow {

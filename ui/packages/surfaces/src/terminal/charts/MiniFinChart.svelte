@@ -59,6 +59,8 @@
 	const rightSeries = $derived(card.series.filter((s) => s.axis === 'r'));
 	const barSeries = $derived(leftSeries.filter((s) => s.type === 'bar'));
 	const leftLineSeries = $derived(leftSeries.filter((s) => s.type === 'line'));
+	// 좌축 로그 눈금 — 지수(=100) 다중 시계열 등 자릿수 차 큰 시리즈 비교용. 양수만 표시(≤0 은 pen-up).
+	const logLeft = $derived(!!card.logLeft);
 
 	function extent(vals: number[], incl0: boolean): [number, number] {
 		const arr = incl0 ? [...vals, 0] : vals;
@@ -69,11 +71,21 @@
 		const pad = (hi - lo) * 0.1;
 		return [lo - (lo < 0 ? pad : 0), hi + pad];
 	}
+	// 로그 좌축 범위 — 양수만, 로그 공간 8% 패딩 후 raw 경계 반환 (ticks/yL 는 raw 값으로 동작).
+	function extentLog(vals: number[]): [number, number] {
+		const pos = vals.filter((v) => v > 0);
+		if (!pos.length) return [1, 10];
+		const loL = Math.log10(Math.min(...pos));
+		let hiL = Math.log10(Math.max(...pos));
+		if (loL === hiL) hiL = loL + 1;
+		const pad = (hiL - loL) * 0.08;
+		return [10 ** (loL - pad), 10 ** (hiL + pad)];
+	}
 	const leftExt = $derived.by<[number, number]>(() => {
 		const vals: number[] = [];
 		if (isWf) {
 			for (const b of wfBars) vals.push(b.from, b.to);
-			return extent(vals, true);
+			return logLeft ? extentLog(vals) : extent(vals, true);
 		}
 		if (card.stacked && card.signed) {
 			// signed 스택 — 양수합·음수합이 각각 위/아래 경계
@@ -93,7 +105,7 @@
 			for (const b of barSeries) for (const v of b.data) if (fin(v)) vals.push(v);
 		}
 		for (const l of leftLineSeries) for (const v of l.data) if (fin(v)) vals.push(v);
-		return extent(vals, true);
+		return logLeft ? extentLog(vals) : extent(vals, true);
 	});
 	const rightExt = $derived.by<[number, number]>(() => {
 		const vals: number[] = [];
@@ -120,7 +132,15 @@
 	// 워터폴 전용 — 슬롯 중앙 배치 (양끝 클리핑 없음, step name 라벨 공간)
 	const xw = (i: number) => M.l + ((i + 0.5) / Math.max(1, n)) * plotW;
 	const yOf = (v: number, [lo, hi]: [number, number]) => M.t + plotH - ((v - lo) / (hi - lo || 1)) * plotH;
-	const yL = (v: number) => yOf(v, leftExt);
+	const yL = (v: number) => {
+		if (logLeft) {
+			if (!(v > 0)) return NaN; // 로그축은 양수만 — ≤0 은 선 끊김(pen-up)
+			const loL = Math.log10(leftExt[0]);
+			const hiL = Math.log10(leftExt[1]);
+			return M.t + plotH - ((Math.log10(v) - loL) / ((hiL - loL) || 1)) * plotH;
+		}
+		return yOf(v, leftExt);
+	};
 	const yR = (v: number) => yOf(v, rightExt);
 
 	// 바 폭 상한 22px — 기간 수가 적어도(연 5개) 빽빽한 밀도 유지 (뚱뚱한 바 금지)
@@ -133,6 +153,7 @@
 	// Y 눈금 (상·중·하)
 	function ticks([lo, hi]: [number, number]): number[] {
 		if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo === hi) return [];
+		if (logLeft) return [hi, Math.sqrt(lo * hi), lo]; // 로그축 중간 눈금 = 기하평균
 		const mid = (lo + hi) / 2;
 		return [hi, mid, lo];
 	}
@@ -160,7 +181,9 @@
 		let pen = false;
 		data.forEach((v, i) => {
 			if (!fin(v)) { pen = false; return; }
-			d += `${pen ? 'L' : 'M'}${x(i).toFixed(1)},${yfn(v).toFixed(1)} `;
+			const y = yfn(v);
+			if (!Number.isFinite(y)) { pen = false; return; } // 로그축 ≤0 등 — 선 끊김
+			d += `${pen ? 'L' : 'M'}${x(i).toFixed(1)},${y.toFixed(1)} `;
 			pen = true;
 		});
 		return d.trim();
@@ -171,7 +194,8 @@
 	const fmtVal = (v0: number) => {
 		const v = v0 * unitScale.k;
 		const a = Math.abs(v);
-		if (unitScale.unit === '억') return a >= 1000 ? Math.round(v).toLocaleString() : a >= 100 ? v.toFixed(0) : v.toFixed(1);
+		if (a >= 1000) return Math.round(v).toLocaleString(); // 천단위 콤마 — 축(fmtTick)·툴팁(fmtTip)과 일관
+		if (unitScale.unit === '억') return a >= 100 ? v.toFixed(0) : v.toFixed(1);
 		if (card.unit === '조' || card.unit === '배') return a >= 100 ? v.toFixed(1) : v.toFixed(2);
 		return a >= 100 ? v.toFixed(0) : v.toFixed(1);
 	};
@@ -182,7 +206,7 @@
 		if (a >= 1000) return Math.round(v).toLocaleString();
 		return a >= 100 ? v.toFixed(0) : a >= 10 ? v.toFixed(1) : v.toFixed(2);
 	};
-	const zeroY = $derived(leftExt[0] < 0 && leftExt[1] > 0 ? yL(0) : null);
+	const zeroY = $derived(!logLeft && leftExt[0] < 0 && leftExt[1] > 0 ? yL(0) : null);
 
 	// 호버
 	let svgEl = $state<SVGSVGElement | null>(null);
@@ -341,7 +365,7 @@
 				{#if hoverI >= 0}
 					{#each card.series as s (s.name)}
 						{@const v = s.data[hoverI]}
-						{#if fin(v)}<circle cx={x(hoverI)} cy={(s.axis === 'r' ? yR : yL)(v)} r="2.4" fill={s.color} stroke="#0b1220" stroke-width="0.7" />{/if}
+						{#if fin(v) && Number.isFinite((s.axis === 'r' ? yR : yL)(v))}<circle cx={x(hoverI)} cy={(s.axis === 'r' ? yR : yL)(v)} r="2.4" fill={s.color} stroke="#0b1220" stroke-width="0.7" />{/if}
 					{/each}
 				{/if}
 				<!-- X 라벨 -->
