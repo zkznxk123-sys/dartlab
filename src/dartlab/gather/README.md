@@ -26,9 +26,11 @@ g.dividends("005930"); g.collect("005930")
 | 경로 | 역할 |
 |------|------|
 | `entry/` | `dartlab.gather()` 콜러블 — `GatherEntry`(main) · `AXIS_REGISTRY`/dispatch · axis `handlers` |
-| `engine.py` + `mixins/` | `Gather` 클래스 (Form B). mixin = price · info · news · macro · collect |
-| `sources/` | L1 fetcher — `price.py` · `flow.py` · `news.py` · `history.py` · `insider.py` · `ownership.py` · `sector.py` · `naverNews.py` · `gdelt.py` |
+| `engine.py` + `mixins/` | `Gather` 클래스 (Form B). mixin = price · info · news · macro · collect · context |
+| `sources/` | L1 fetcher — `price.py` · `flow.py` · `news.py`(+ `naverNews`·`newsIo`·`newsSchema`·`newsSources`) · `history.py` · `insider.py` · `ownership.py` · `sector.py` · `gdelt.py` · `reader.py` · `search.py` |
 | `domains/` | provider 도메인 — `fdr` · `fmp` · `krx` · `naver` · `naverGlobal` · `yahooChart` · `fallback` |
+| `transforms/` | 수집 후 가공 — `adjustPrice`(수정주가) · `indicatorDispatch`(기술지표) · `corporateAction` · `pit` · `macro` |
+| `original/` | DART 정기+비정기 document.xml zip 원본 백업 (gather 자체포함, `data/original/` 로컬, HF 미공개) |
 | `fred/` · `ecos/` · `customs/` | 거시·무역 소스 facade (production — HF 벌크 sync + 테스트) |
 | `ecb/` · `bis/` · `imf/` · `oecd/` | EU/GLOBAL 거시 SDMX facade (live, HF 캐시 없음 — `market="EU"`/`"GLOBAL"`) |
 | `gov/` | 공공데이터포털 주가·지수 (KOGL) |

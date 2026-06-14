@@ -109,8 +109,9 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         targetRequired=False,
         targetType="columnName",
     ),
-    # 미공개 — 데이터 준비 중. _guide() / __repr__ 에서 숨김. 내부 dispatch 는 동작.
-    # 정식 표기: krxIndex (camelCase, dartlab 표준 — 모듈/함수명과 일관).
+    # 공개 축 (hidden=False) — HF SSOT 일별 지수 패키지. 정식 표기 krxIndex
+    # (camelCase, dartlab 표준 — 모듈/함수명과 일관). 직접 KRX idx OpenAPI 경로는
+    # sto 종목 키와 분리된 idx 카테고리 권한을 별도 신청해야 한다.
     "krxIndex": GatherAxisEntry(
         label="KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
         description=(
