@@ -307,6 +307,8 @@ if 조건 하나 또는 조건 묶음이다.
 
 **driver는 코드 `if`가 아니라 `simulate/registry.py`가 소유하는 *데이터 카드(DriverCard)*다. 새 데이터는 카드 1줄 등록으로 들어오고 코드 분기는 0개 는다. 카드는 6단계 입장 게이트를 통과해야 `active`가 되어 시나리오 sheet 엣지가 된다. 수렴 = 후보가 늘수록 입장 허들이 자동 상승하는 게이트, 확장 = 모든 데이터가 동일 카드·동일 게이트를 타는 단일 파이프라인. if 상한 = 시리즈 수가 아니라 검증된 축 수(현재 6~8).** 01 §0(L2.5 `simulate/`·det/ai 평행·순수함수 DAG)을 0줄 바꾸지 않고, 본 절이 driver가 *어떻게 자격을 얻는가*를 채운다.
 
+> **★엔진계약-차원 쌍둥이(데이터 자동흡수 ↔ 계약 자동인식).** DriverRegistry 의 "데이터=카드 1줄, 코드 분기 0"은 *데이터* 차원의 자동흡수 선례다. 그 *엔진계약* 차원 등가물 = simulate 노드가 호출하는 외부 leaf 의 시그니처·반환 shape drift 를 잡는 순방향 binding 게이트(`test_simulate_leaf_binding`, 09 §6·§0 6행 표). 운영자 급소("엔진이 변환되면 simulate 수동변경 순환")의 정본 해법으로, leaf 계약이 *BC-additive* 로 늘면(선택인자·superset 반환) subset 단언이 자동 통과(코드 분기 0), *깨지면*(제거/rename/arity 변경) CI red 로 단일 노드 fn 지목. **단 binding 을 별도 선언 카드로 승격하는 것은 현 4노드(외부 leaf 6표면) 단계엔 중복 — `registry.py` 호출부+체크인 baseline 으로 충분, 카드화는 노드 N>~8 superset 일 때 조건부 졸업**(`feedback_always_check_clutter` — 강함은 깎아서).
+
 ### 2B.1 ★표본 결정 — pooled-panel 우선 (치명상 4 해소, 가장 중요)
 
 회사별 분기 OLS(`calcMacroRegression`, T=6~36)는 stability selection·Bai-Ng IC·purged walk-forward에 **표본이 근본적으로 부족**하다(T=20에서 purge+embargo 후 train fold 3~4분기 → 3변수 OLS 자유도 0). 대형 기법 이름만 빌리면 거짓발견을 *못 막는* 게이트가 된다(horizonMeaning folk-stat 함정과 동형). 정공법:

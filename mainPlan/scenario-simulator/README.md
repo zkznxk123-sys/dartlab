@@ -39,7 +39,7 @@
 
 **발간·정합화 (시뮬의 읽기 방식):**
 9. [08-valuation-report.md](08-valuation-report.md) — 시뮬레이터=가치평가 엔진 동형, 적정주가(reverseDCF 닻+조건부 범위), 프로급 보고서, 규제선 가드. 발간은 코어 졸업 후.
-10. [09-architecture-consolidation.md](09-architecture-consolidation.md) — 시뮬레이터-앵커 부채 원장(DCF 5중·회귀 4중 등 15행)·신용=solvency 뷰·외과 청산 Phase 시퀀스.
+10. [09-architecture-consolidation.md](09-architecture-consolidation.md) — 시뮬레이터-앵커 부채 원장(DCF 5중·회귀 4중 등 16행)·신용=solvency 뷰·외과 청산 Phase 시퀀스. **앵커 양방향**: 역=leaf 수학 금지(`test_simulate_leaf_ssot`), 순=leaf 계약 drift CI red(`test_simulate_leaf_binding`, P16).
 
 **컴포넌트 스펙 (메모리에서 이관):**
 11. [10-backtesting-strategy-tester.md](10-backtesting-strategy-tester.md) — 차트 중심 EOD 백테스팅(전 `project_terminal_backtesting_prd`).
@@ -54,7 +54,7 @@
 문서별 버전이 어긋나 혼란을 막기 위한 단일 규칙:
 
 - **스위트 버전 = `v0.4`**(2026-06-14). 개별 문서 헤더는 그 문서가 마지막으로 *내용 개정*된 시점의 minor를 단다(README/01/02/04/06/08 = v0.4 수준, 03/05/09 = v0.3, 00 = v0.1 본문 + v0.2/v0.4 정정 헤더). 스위트 버전이 정본 — 개별 헤더는 *그 문서가 어디까지 따라왔나*의 표식이다.
-- **minor 범프(0.x→0.x+1)** = 코드-그라운드 사실 정정 또는 새 결정이 한 문서 이상에 반영될 때. **patch(문구·오타)** = 헤더 갱신 없이 본문만 수정. **major(1.0)** = 본진 `simulate/` 졸업 + 발간 게이트가 *기계 강제*로 검증된 뒤(현 미충족 → 09 §10 fatal①~④: 발간표면 투자권유 lint[★T1 빌드·배선 완료]·forward-test write 끝단·gate/ledger/admission/lens·US 해금).
+- **minor 범프(0.x→0.x+1)** = 코드-그라운드 사실 정정 또는 새 결정이 한 문서 이상에 반영될 때. **patch(문구·오타)** = 헤더 갱신 없이 본문만 수정. **major(1.0)** = 본진 `simulate/` 졸업 + 발간 게이트가 *기계 강제*로 검증된 뒤(현 미충족 → 09 §10 fatal①~④: 발간표면 투자권유 lint[★T1 빌드·배선 완료]·forward-test write 끝단·gate/ledger/admission/lens·US 해금) **+ ⑤ simulate↔leaf 계약 drift 자동인식(`test_simulate_leaf_binding`, 앵커 순방향, 09 §6·P16)** — 엔진 변환 시 simulate silent 깨짐 0 의 5번째 conformance 표면.
 - **2층 헤더(v0.1 본문 + v0.2 정정)** = 정정 헤더가 본문보다 우선(00·03). 정정 헤더가 정본, 본문은 미개정 잔재로 읽는다.
 - **구현 정합 = 코드가 정본.** 문서 주장이 `src/dartlab/simulate/` 구현과 어긋나면 코드를 정본으로 문서를 고친다(반대 아님). "구현 완료"는 헤더 오버레이가 아니라 본문 텍스트까지 코드와 일치할 때만 ✅.
 

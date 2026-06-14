@@ -155,7 +155,7 @@ class NodeValue:
     value: float | None              # 대표 스칼라(시계열이면 vector 끝값). None = 데이터 부재(block).
     vector: tuple[float | None, ...] | None   # ★원소별 None 허용 — horizon 중간 분기 결손 시 0 대체 금지(missing!=0 불변). Play fan-band가 None 구간을 끊어 그림.
     provenance: str                  # "ols:R²=0.41,gdp,fx" | "pooled:sector,fe" | "preset:baseline" | "elasticity:반도체" | "ai-hypothesis"
-    refs: tuple[str, ...]            # 근거 ref 주소(grounding check 대상). det=leaf ref, ai=AI 인용 ref.
+    refs: tuple[str, ...]            # 근거 ref 주소(grounding check 대상). det=leaf ref, ai=AI 인용 ref. ★이중용도: leaf-binding 매니페스트 보조 — `test_simulate_leaf_binding`(09 §6, 순방향 계약 게이트)이 callable 로 해석되는 ref(`buildProforma`·`transferRevenuePath` 2건)를 baseline cross-check 에 쓴다. 단 `synth.scenario:PRESET_SCENARIOS_KR/{name}`·`simulate.registry:fcffDiscount` 는 데이터/합성 라벨이라 callable 아님 → 게이트 SSOT 는 refs 자동파싱 아닌 체크인 `_EXPECTED_BINDINGS`(09 §0 6행 표).
     inputsHash: str                  # 부모 inputsHash들 + fn ref + 동결 input 정규화의 blake2b 16hex
     asOf: str                        # 사용 데이터 vintage
     latestAsOf: str                  # 최신 가용 vintage(staleness 판정)
@@ -233,7 +233,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 | L1.5 synth/scenario | `synth/scenario.py` | preset·elasticity 상수 SSOT | 형제(scan/frame/reference) import |
 | L2 analysis/financial | `_proformaCore.py`·`_signalsMacroSensitivity.py` | leaf 결정론 계산(proforma·OLS beta) SSOT | L2 형제 import |
 | L2 macro/quant/credit | macro·quant·credit/distress | 거시 시그널·beta·생존 leaf | L2 형제 import |
-| **L2.5 simulate (신규)** | `src/dartlab/simulate/` | **드라이버 sheet·실행기·엣지 transfer 소유, L2 leaf 호출 결합** | leaf 재구현·panel 변형. ★역방향(analysis/macro/quant→simulate) 차단 = `test_import_direction.py` downward-only(LIVE pytest 정본, `LAYER_OF["simulate"]=2.5`:26) + importlinter forbidden(미배선·09 §6② Phase1 신설예정, continue-on-error 가시화 only) |
+| **L2.5 simulate (신규)** | `src/dartlab/simulate/` | **드라이버 sheet·실행기·엣지 transfer 소유, L2 leaf 호출 결합** | leaf 재구현·panel 변형. ★역방향(analysis/macro/quant→simulate) 차단 = `test_import_direction.py` downward-only(LIVE pytest 정본, `LAYER_OF["simulate"]=2.5`:26) + importlinter forbidden(미배선·09 §6② Phase1 신설예정, continue-on-error 가시화 only). **★순방향 계약 보존 = `test_simulate_leaf_binding.py`**(09 §6, Phase1 신설): 호출하는 외부 leaf 의 시그니처·반환 shape drift 시 CI red(역방향=레이어 가드, 순방향=계약 가드, 한 쌍). **모든 EXTERNAL leaf 호출은 키워드 호출 강제**(위치인자 금지 → 선택인자 추가에 구조적 면역; `buildProforma` 키워드 호출이 BC 흡수 전제, `registry.py:368`). 단 `transferRevenuePath`·`_getSeriesAndShares` 의 positional **tuple 반환** 은 키워드강제 면제 대신 *arity 동결* 대상(이름 없음, §6 honestLimit ⓐ) |
 | L3 story | `story/` | `simulate` 결과 ref → 서사 조립 | 자체 숫자 계산 |
 | L4 ai/mcp | `ai/tools/lens.py` | 노드 의견(annotate)·sheet 판단(judge) | `agent.py` 본체 오염·고정노드 |
 

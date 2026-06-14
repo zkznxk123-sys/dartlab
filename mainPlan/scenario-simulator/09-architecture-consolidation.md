@@ -25,6 +25,19 @@
 
 **★워크스페이스 변동(이 세션 중 실측):** mainPlan 리팩토링이 이 세션 동안 단계-4b~5로 진척 → **터미널 전체가 `landing/src/lib/terminal/` → `ui/packages/surfaces/src/terminal/`로 이동**(commit ff9099ba0). `landing`엔 `terminal-shell/{routeLoad,terminalShell}.ts`만 잔존. **PRD의 모든 `landing/.../terminal/...` UI 경로는 stale** — 새 SSOT = `ui/packages/surfaces/src/terminal/`(charts/PriceChart.svelte·chartState.svelte.ts 실재) + 포트 = `ui/packages/contracts`. 엔진 측(`src/dartlab/*`) 경로는 불변. 본 09는 엔진 중심이라 영향 미미하나, 05(Play)·06(지수)는 새 토폴로지로 재기반 필수.
 
+**★simulate↔leaf 계약 결합 표면 전수표 (registry.py 실측 2026-06-14 — 순방향 binding 게이트 `_EXPECTED_BINDINGS` 의 정본 6행).** 운영자 급소("엔진 변환 시 simulate 수동 변경 순환")의 실제 결합점이 정확히 이 6 표면이다. ref kind 컬럼이 honestLimit 을 가시화 — refs 는 audit-provenance 지 clean callable registry 가 아니므로 게이트는 *resolvable-callable 만* `inspect.signature` 하고 나머지는 반환 형상별로 분기한다.
+
+| # | 노드 fn / 호출부 | 외부 leaf | 계층 | simulate 가 읽는 것 | 반환 형상 | ref 문자열 (registry.py) | ref=callable? | 게이트 검사 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `_fnProforma` (`:368`) | `buildProforma`(def `_proformaCore.py:376`, re-export `analysis.financial.proforma`) | L2 | kwargs `series`(pos)/`revenueGrowthPath=`/`scenarioName=`; attrs `pf.projections`·`pf.wacc`·`y.fcf`·`y.revenue` | @dataclass `ProFormaResult`/`ProFormaYear` | `analysis.financial.proforma:buildProforma`(`:377`) | ✅ (re-export 가 가리킴) | sig kwarg-name+default-set ⊆ ; `__dataclass_fields__` ⊆ |
+| 2 | `buildSnapshot` (`:172`) | `_getSeriesAndShares`(`_valuationHelpers.py:104`) | L2 | 3-tuple `(series, shares, currency)` **positional 언팩** | `tuple[dict\|None, int\|None, str]` | **미발급**(refs 에 없음) | ✅ (curated 추가) | **arity=3 동결(equality, subset 아님)** + slot annotation repr |
+| 3 | `_fnMacroPath`(`:256`)·`_macroFrozen`(`:459`) | `getPresetScenarios`(`synth/scenario.py`) | L1.5 | `dict[str,MacroScenario]`; value attrs `.gdpGrowth`·`.interestRate`·`.krwUsd` | dict-of-@dataclass `MacroScenario` | `synth.scenario:PRESET_SCENARIOS_KR/{sc.name}`(`:262`) | ❌ **dict-member 라벨**(callable 아님) | value-type `MacroScenario.__dataclass_fields__` ⊆ |
+| 4 | `_fnRevPath` (`:309`) | `transferRevenuePath`(`transfer.py:132`) | **simulate-OWNED** | 3-tuple `(revPath, marginPath, waccPath)` **positional 언팩** | `tuple[list,list,list]` | `simulate.transfer:transferRevenuePath`(`:320`) | ✅ (self-owned) | arity=3 동결; **키워드강제 AC 면제**(내부 엣지) |
+| 5 | `buildSnapshot` (`:183-184`) | `company.sectorParams.{discountRate,growthRate}` | facade 속성 | `getattr` 속성 존재 | 속성(스칼라) | 미발급 | n/a | 속성 존재 + None-tolerant(이미 폴백, 검사 약) |
+| 6 | `_fnDcf` 내부 (`:427-434`) | **(없음 — INLINE 재유도)** | simulate-OWNED | terminal-value DCF 공식 | 스칼라 | `simulate.registry:fcffDiscount`(`:448`=**합성 라벨, 심볼 부재**) | ❌ | **fingerprint 불가**(정직 예외 ⓑ, §6) |
+
+> ref kind 가 honestLimit 을 강제: 6 표면 중 refs 가 callable 로 *해석되는* 것은 #1·#4 둘 뿐(#3=dict 라벨, #6=합성 라벨, #2·#5=미발급). 따라서 게이트 SSOT 는 refs 자동파싱이 아니라 체크인된 `_EXPECTED_BINDINGS` baseline 이고, refs 는 #1·#4 의 보조 cross-check 로만 쓴다("refs=매니페스트, 신규 선언 0" 우아함은 #1 한 건에만 깨끗이 성립 — 정직 강등). #1 의 def 는 `_proformaCore.py:376`, ref 는 `proforma.py` re-export 를 가리킴(BC 표면, 09 §3 불가침) — 구현자가 `proforma.py` 에서 def 를 grep 하다 헷갈리지 않게 박제.
+
 ---
 
 ## 1. 시뮬레이터-앵커 원리
@@ -32,6 +45,8 @@
 ### 1.1 메커니즘 (한 문장)
 
 **simulate는 노드 평가를 "L2 공개 계약 호출 + 결과 포장"으로만 정의하고, `simulate/` 안에 어떤 수학(DCF/WACC/OLS/terminal value/`random.gauss`)도 *정의*될 수 없게 lint(`test_simulate_leaf_ssot.py`)로 금지한다.** 그 결과 모든 시뮬 숫자가 정확히 하나의 L2 SSOT leaf에 닿고, 중복 구현은 죽은 코드로 노출되어 외과 제거된다. 노드는 얇은 어댑터(L2 leaf 호출 + NodeValue 포장)지 계산 본체가 아니다(01 §5).
+
+**★앵커는 양방향이다 — 값 변경(자동흡수, 이미 설계)과 계약 변경(자동인식, 순방향 게이트)을 분리한다.** (1) **값 변경 = 이미 자동흡수(재발명 금지, 재확인만).** simulate 가 leaf 수학을 0줄 소유하고(`registry.py` 노드 fn 은 `pf.projections`/`pf.wacc`/`y.fcf`/`y.revenue` 를 *읽기만* 함) SSOT 호출만 하므로, 엔진이 *같은 시그니처로* WACC/마진 계산을 개선하면 다음 호출에서 새 값을 자동 수신한다. **유일 예외 = `_fnDcf` 의 terminal-value INLINE 재유도**(`registry.py:427-434`, P3 scenario-coherence)는 엔진 DCF 공식 변경을 자동 추종 못 하는 value-drift 표면(§6 정직 한계 ⓑ). (2) **진짜 급소 = 계약 변경(시그니처/반환 shape).** leaf 가 어댑터가 호출하는 키워드를 rename 하거나 읽는 반환 필드를 제거하면 어댑터가 silent 깨진다 — 이를 §6 의 순방향 binding 게이트(`test_simulate_leaf_binding`)가 CI Fast 에서 큰소리 red 로 자동인식하고 단일 노드 fn 을 지목한다. 역방향(`test_simulate_leaf_ssot`: simulate 가 leaf 수학 못 짓는다) + 순방향(`test_simulate_leaf_binding`: leaf 계약 깨지면 simulate 가 운다) = 앵커의 대칭 두 가드.
 
 ### 1.2 각 중복의 정본 SSOT 확정표
 
@@ -72,8 +87,9 @@ D=3=코어 척추(이걸 안 풀면 simulate 못 짐) / D=1=독립.
 | **P13** ✅ docstring 정정 완료(2026-06-14) | getElasticity provenance 날조(회귀패널·json 로드 단정, 실제 inline)+업종수 오기(문서 36/11, 실측 **35=KR 23+US 12**) | folk-stat을 검증된 양 위장 | "inline 하드코딩 prior 무출처(seed/CI 0)" 정직표기·**35키 통일**·json 로드 주장 제거(✅ `synth/scenario.py`)·Example 실제값(잔여=코어 구현 시) | `docstring9Section.py` AC "데이터 정합" | 2 | **Phase −1(부분 완료)** |
 | **P14** | ★`skills/measureProgress.py:68-69` `scripts/audit`(NOT qualityGate.py) | CLAUDE.md scripts/ 금지 | `tests/audit/_baselines/` 이동 | `noScriptsDir.py` | 1 | **선행(무관)** |
 | **P15** | publisher fossil docstring(`story/publisher.py`·`credit/_calcsAdvanced.py:187,282`) | 미존재 모듈 참조 | fossil 정정(story/publisher.py 단독) | `stale_references.py` | 1 | **선행(무관)** |
+| **P16** ★순방향 계약 무가드 | `registry.py` 외부 leaf 결합 6표면(§0 표) **순방향 계약 drift 무가드** — leaf 시그니처/반환 shape 변경 시 simulate 어댑터 silent 깨짐 | 엔진→simulate 수동변경 유지보수 순환(운영자 급소) | `test_simulate_leaf_binding.py` subset-fingerprint(§6) — 현 `test_run.py:107,112` 는 refs 문자열 equality 만, 카탈로그 `builder.py` 는 `inspect.signature` 미호출+`buildProforma` `__all__` 부재라 못 잡음 | `test_simulate_leaf_binding` baseline 단조(추가=흡수, 제거/rename=red) | 6 | **Phase 1(동결)** |
 
-P1~P4(S×D=9)=코어 척추. P14·P15=즉시 청산(무위험). P5~P10=코어 옳게 지으면 함께 풀림.
+P1~P4(S×D=9)=코어 척추. P14·P15=즉시 청산(무위험). P5~P10=코어 옳게 지으면 함께 풀림. P16=Phase 1 계약 동결(코드 0줄, src 무변경).
 
 ---
 
@@ -123,7 +139,13 @@ CHS/Merton/survival은 **이미 회사 비의존 순수함수**(`calcCHS(netInco
 
 **Phase 1 계약 동결(코드 0줄):** ① `test_import_direction.py LAYER_OF`에 `simulate:2.5` **✅ 등록 완료**(`:26`, downward-only 검사 = 역방향 차단 LIVE pytest 정본; SINK_HELPERS·STRICT_L0_L15 미추가) ② importlinter Contract `layers` story 아래 simulate + 신규 forbidden(`source=[analysis,credit,macro,quant,industry] forbidden=[dartlab.simulate]`=역방향 차단). 단 import-linter는 continue-on-error 가시화 도구, **진짜 강제=pytest** ③ L2 cross 이중룰 정합: credit이 analysis import 아니라 **둘 다 simulate DAG 구독**(공통 transfer는 simulate/synth로 올림) ④ guard census L2.5 규칙 추가(full census).
 
-**신규 강제 계약 3종:** `test_simulate_leaf_ssot.py`(simulate 안 DCF/WACC/회귀/`random.gauss` 정의 0)·`test_no_duplicate_{dcf,regression}.py`(census 단조)·`reproSeedAudit.py` GATES(simulate 전역 seed 0).
+**신규 강제 계약 4종:** `test_simulate_leaf_ssot.py`(simulate 안 DCF/WACC/회귀/`random.gauss` 정의 0)·`test_no_duplicate_{dcf,regression}.py`(census 단조)·`reproSeedAudit.py` GATES(simulate 전역 seed 0)·**★`test_simulate_leaf_binding.py`(순방향 계약-drift 자동인식 — 아래).**
+
+**★4번째 = 앵커의 순방향 짝(leaf 계약이 깨지면 simulate 가 CI 에서 큰소리).** `test_simulate_leaf_ssot`(역: simulate 가 leaf 수학을 *못 짓는다*)와 대칭쌍이다 — `test_simulate_leaf_binding`(순: simulate 가 *호출하는* 외부 leaf 의 시그니처·반환 형상이 drift 하면 CI Fast red). `tests/architecture/test_simulate_leaf_binding.py`(신설), `test_import_direction.py`(`LAYER_OF["simulate"]=2.5`, `:26`)의 형제 패턴 — pure AST/introspection·`@pytest.mark.unit`·**Company 생성 0줄(import-only = Polars-OOM 안전)**·baseline=파일 내부 frozen dict 리터럴(별도 src 구조 0). 동작: registry.py 가 닿는 외부 leaf 6행을 `inspect.signature`(파라미터 이름+default 보유여부) + 반환 형상(@dataclass=`__dataclass_fields__` / tuple=arity+slot annotation)으로 fingerprint → 체크인 baseline(`_EXPECTED_BINDINGS`, 부채원장)과 **부분집합(⊆) 단언**. subset(equality 아님)이라 선택인자 추가·superset 반환 필드는 자동 통과(BC 흡수), 필수키워드/필드 rename·제거·필수화·tuple arity 변경만 loud fail. 실행 = test-fast 게이트(`tests/run.py` 전트리 `-m 'unit and not requires_data'` 자동수집, **GATES 편집 0**).
+
+**운영자 3-목표 1:1 정합:** ① **자동인식** = drift 시 CI Fast red, silent break 0(현 `tests/simulate/test_run.py:107,112` 는 `rev.refs==(...)`/`pf.refs==(...)` 하드코딩 *문자열 라벨* equality 만 검사 — `buildProforma` 가 `revenueGrowthPath` 를 rename 해도 통과하고 어댑터가 런타임 TypeError 로 죽되 그 죽음을 '계약 drift'로 진단 못 함; capability 카탈로그도 `builder.py` 가 `inspect.signature` 미호출[`inspect.getdoc` 텍스트만]+`buildProforma` 가 `dartlab.__all__` 부재라 원리상 못 잡음 — 실측 2026-06-14). ② **단일점** = leaf 를 만지는 곳은 `registry.py` 단 1파일(`sheet.py` docstring "the ONLY place that touches an L2 leaf"), blast radius=1, 실패 메시지가 어느 노드 fn 1곳을 어느 leaf 변경 때문에 고칠지 지목. ③ **BC-additive 자동흡수** = subset 단언이 인코딩.
+
+**정직 한계(과대약속 금지, CLAUDE.md fallback 금지):** "깨지는 변경 100% 인간 0개입 흡수"는 정의상 불가 — leaf 가 *필수 인자 추가* 또는 *읽는 필드 rename/제거* 하면 Python 에 키워드를 자동 재바인딩할 메커니즘이 없다. 게이트의 올바른 행동 = 그 변경을 큰소리 red 시키고 단일 registry fn 을 지목하는 것이지 fallback 으로 덮는 게 아니다. ⓐ tuple 반환 2종(`_getSeriesAndShares`·`transferRevenuePath`)은 **이름이 없어** 필드-*의미* drift(arity 유지한 순서 swap)를 못 잡는다 — arity+slot-annotation 동결이 천장이며, leaf 반환을 NamedTuple/dataclass 로 승격하면 자동 해소(정공법, fallback 아님). ⓑ `_fnDcf` 는 `calcDFV` 를 부르지 않고 terminal-value 공식을 `registry.py:427-434` 에 INLINE 재유도(P3 scenario-coherence 의도) — 엔진이 DCF 공식 *자체* 를 바꾸면 `_fnDcf` 가 자동 추종 못 하는 유일한 value-drift 예외 표면이며, 본 게이트가 fingerprint 못 한다(엔진이 simulate 에 노출 안 함, simulate-소유 수학).
 
 **준수:** no-graph-regression(`DriverNode`/`DriverSheet`, `*Graph/*Dag` 금지, AI=`ai/tools/lens.py` 1종, agent.py 불변)·public-contract-only(`dartlab.simulate(...)` verb 1개, universe로 횡단면 흡수)·panel wide 불가침(동결 snapshot만).
 
@@ -133,7 +155,7 @@ CHS/Merton/survival은 **이미 회사 비의존 순수함수**(`calcCHS(netInco
 
 - **Phase −1 (즉시·무위험·simulate 무관):** P14(`measureProgress.py:68-69` `scripts/`→`tests/audit/_baselines/`)·P15(publisher fossil docstring)·**✅ P13 부분 완료(getElasticity provenance 날조 docstring 정정·35키 명시, 2026-06-14)**·죽은코드(`_loadMacroAligned` 등). 검증=`stale_references.py`·`vulture`. 독립 commit.
 - **Phase 0 (kill-test) — ✅ 완료(2026-06-14):** P1 전역 seed→**로컬 `random.Random(seed)`**(`fe9e66c0a`, numpy PCG64 아님 — stdlib·pyodide안전·동작무변경, jumpable stream은 엔진 필요 시 재방문), `:205` →**연도별 cumprod**(`ad112b171`, `*=` 단순수정은 평균경로 소실이라 기각). 검증=`test_horizon_widens_cone` kill-test PASS(옛 cv h1≈h3 버그 증명→cone 확대) + MC 30 PASS.
-- **Phase 1 (계약 동결, 코드 0줄):** §6 레이어·importlinter·census 3종을 현 baseline(DCF=5·회귀=4)으로 동결(이후 감소만).
+- **Phase 1 (계약 동결, 코드 0줄):** §6 레이어·importlinter·census 3종을 현 baseline(DCF=5·회귀=4)으로 동결(이후 감소만). **★+ P16 순방향 leaf-binding baseline 동결**: `test_simulate_leaf_binding.py` 의 `_EXPECTED_BINDINGS` 를 §0 표 6행 현 계약(#1 buildProforma 8-param/kwarg{revenueGrowthPath,scenarioName}/ProFormaResult{projections,wacc}/ProFormaYear{fcf,revenue} · #2 _getSeriesAndShares 3-arity · #3 getPresetScenarios→MacroScenario{gdpGrowth,interestRate,krwUsd} · #4 transferRevenuePath 3-arity)으로 동결. 이후 leaf 계약은 *추가만*(BC) 자동흡수, *제거/rename/arity 변경* 은 red. **test-time 1차(import-time assert 는 deferred 가 아니라 불요** — `registry.py:42-54` top-level import 가 이미 import seam 이므로 leaf 이동/삭제는 테스트 collection 시 ImportError 로 free 하게 red; 별도 import-time assert 는 cold-import 비용만 추가, conformance-compile 원리의 Python 등가는 test-time).
 - **Phase 2 (졸업 ②③):** P2 transfer 적출+`_extract*` 하강→lazy-proxy 4파일 소멸. 2~3사 byte-identical 골든.
 - **Phase 3 (졸업 ④) — ✅ 부분 완료(2026-06-14):** ✅ DAG dcf 노드 `registry._fnDcf` = proforma-FCFF(`096e84c43`, calcDFV 회피=scenario-coherence). 잔여 = census 5→2 단조(나머지 3 DCF 경로 흡수)·wacc 노드 `computeCompanyWacc` 통합·노드 입자도 실측 확정.
 - **Phase 4 (회귀 수렴+게이트):** P4 macroExposure 폐기·OLS→olsMulti·동명 disambiguate. P5 exogenousAxes=driver SSOT. P10 admission.py+scanMacroBeta t-stat. P9 forwardTest recordForecast 신설+OutcomeLog / credit cron 배선.
@@ -150,7 +172,8 @@ CHS/Merton/survival은 **이미 회사 비의존 순수함수**(`calcCHS(netInco
 ### 산출/정정 대상 (절대경로)
 - 신규(본 문서): `mainPlan/scenario-simulator/09-architecture-consolidation.md`
 - 정정: `01`(§15 "3→5중"·§1 가짜 docstring), `02`(§2B "3→4중"·동명3·forwardTest write 부재), `04`(v0.1→v0.2 전면), `08`(§3.3 신용 14키·§5 credit mode), `00`(§5 1줄), `README`(09 추가)
-- 신규 테스트: `tests/architecture/{test_simulate_leaf_ssot,test_no_duplicate_dcf,test_no_duplicate_regression,test_axis_ssot,test_story_no_self_calc}.py`, `tests/audit/`(admission critical-t+Holm·**금지어 lint = `tests/audit/valuationPublishLint.py`+`test_valuationPublishLint.py` 신설**[§10.1 — leaf src 미스캔, 발간 표면 한정. ⚠§P12 의 "3파일" 은 leaf *소스* 위치 참조용일 뿐 스캔 대상 아님; `_valuationOther.py` 는 `analysis/**financial**/` 에 실재, `analysis/valuation/` 아님 — 경로 표기 정정]), `tests/_attempts/scenarioSimulator/mcSeedReproKill.py`
+- 신규 테스트: `tests/architecture/{test_simulate_leaf_ssot,test_simulate_leaf_binding,test_no_duplicate_dcf,test_no_duplicate_regression,test_axis_ssot,test_story_no_self_calc}.py`, `tests/audit/`(admission critical-t+Holm·**금지어 lint = `tests/audit/valuationPublishLint.py`+`test_valuationPublishLint.py` 신설**[§10.1 — leaf src 미스캔, 발간 표면 한정. ⚠§P12 의 "3파일" 은 leaf *소스* 위치 참조용일 뿐 스캔 대상 아님; `_valuationOther.py` 는 `analysis/**financial**/` 에 실재, `analysis/valuation/` 아님 — 경로 표기 정정]), `tests/_attempts/scenarioSimulator/mcSeedReproKill.py`
+  - **★`test_simulate_leaf_binding.py`(P16, 순방향 계약-drift)**: `test_import_direction.py`(`:26` `simulate:2.5`) 형제 — import-only·`@pytest.mark.unit`·Company 0줄(OOM 안전)·`_EXPECTED_BINDINGS` frozen dict 베이스라인(별도 src 구조 0). 반환 형상 3분기(@dataclass=`__dataclass_fields__` ⊆ / plain tuple=arity equality 동결 / dict-of-dataclass=value-type fields ⊆). `test_proforma.py:218`·`test_pricetarget.py:109` 의 leaf-측 호출 검증과 **중복 아님** — 저들은 leaf 작성자가 같은 commit 에서 갱신 가능, 본 게이트는 *소비처(simulate)-소유* forward 핀. 실행 = test-fast(`tests/run.py` 전트리 자동수집, GATES 편집 0).
 - **★fatal 빌드 티켓 신규/수정 파일(§10 SSOT, 절대경로)**: 신설 `tests/audit/valuationPublishLint.py`·`tests/audit/test_valuationPublishLint.py`(①T1) / `src/dartlab/simulate/{ledger,admission,gate}.py`·`tests/simulate/{test_ledger,test_admission,test_gate}.py`·`src/dartlab/ai/tools/lens.py`(③ T-B) / `.github/workflows/driverDecay.yml`·`tests/analysis/forecast/{__init__,test_forwardTestWrite}.py`(②P9e/f). 수정 `tests/run.py`(①1줄), `core/dataConfig.py`·`analysis/valuation/_crossRegressionIo.py`·`analysis/valuation/crossRegression.py`(★FIX-1 _MODEL_CACHE_DIR re-export)·`analysis/forecast/forwardTest.py`(②), `simulate/{entry,registry,run,transfer,sheet}.py`·`synth/scenario.py`·`tests/simulate/{test_verb,test_run}.py`(③T-A1·④). **04-progress-ledger.md = 편집 금지(동시세션).**
 - 엔진 SSOT(불가침): `analysis/financial/_proformaCore.py`·`_signalsMacroSensitivity.py:244`, `analysis/valuation/dcf.py:46`, `synth/distress/*`
 - UI 새 토폴로지: `ui/packages/surfaces/src/terminal/charts/{PriceChart.svelte,chartState.svelte.ts}`, `ui/packages/contracts`
