@@ -316,6 +316,7 @@ export function createEngine(raw: RawData): Engine {
 			{ kr: '영업이익률', en: 'OP margin', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
 			{ kr: 'ROE', en: 'ROE', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
 			{ kr: '매출성장', en: 'Rev growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
+			{ kr: '부채비율', en: 'Debt ratio', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
 			{ kr: '매출규모', en: 'Revenue', v: node.revenue ?? null, p: pctRank(col('revenue'), node.revenue ?? null), unit: 'rev', band: null },
 			{ kr: '점유율', en: 'Mkt share', v: node.marketShare ?? null, p: pctRank(col('marketShare'), node.marketShare ?? null), unit: '%', band: null }
 		].filter((m): m is PercentileMetric => m.p != null);

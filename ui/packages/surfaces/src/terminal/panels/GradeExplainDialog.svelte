@@ -90,18 +90,6 @@
 					<span class="geCredX">{lang === 'en' ? 'health' : '건전도'} <b class="mono">{co.credit.healthScore}/100</b></span>
 					<span class="geCredX">PD <b class="mono">{co.credit.pd}</b></span>
 				</div>
-				{#if vd.strengths.length}
-					<div class="geGroup">
-						<span class="geGl tUp">{lang === 'en' ? 'Strengths' : '강점'}</span>
-						{#each vd.strengths as s}<span class="geTag up">{txc(s, lang)}</span>{/each}
-					</div>
-				{/if}
-				{#if vd.concerns.length}
-					<div class="geGroup">
-						<span class="geGl tDn">{lang === 'en' ? 'Concerns' : '우려'}</span>
-						{#each vd.concerns as c}<span class="geTag dn">{txc(c, lang)}</span>{/each}
-					</div>
-				{/if}
 			</div>
 		</div>
 
@@ -191,30 +179,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 9px;
-	}
-	.geGroup {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 5px;
-	}
-	.geGl {
-		font-size: 10px;
-		font-weight: 700;
-		margin-right: 2px;
-	}
-	.geTag {
-		font-size: 11px;
-		padding: 2px 7px;
-		border-radius: 10px;
-		border: 1px solid var(--dl-line, #1b2130);
-		background: rgba(255, 255, 255, 0.02);
-	}
-	.geTag.up {
-		border-color: rgba(52, 211, 153, 0.35);
-	}
-	.geTag.dn {
-		border-color: rgba(234, 70, 71, 0.35);
 	}
 	.geCriteria {
 		border-top: 1px solid var(--dl-line, #1b2130);
