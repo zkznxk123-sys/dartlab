@@ -1,7 +1,7 @@
 # DartLab UI Platform Refactor PRD
 
-상태: v2 확정 기준 문서 (개정 이력은 07 원장)  
-위치: `mainPlan/ui-platform-refactor-prd.md`  
+상태: ✅ 완료(단계 1~10, 2026-06-13) — 완료 격리됨. 개정 이력은 07 원장.  
+위치: `mainPlan/_done/ui-platform-refactor/ui-platform-refactor-prd.md`  
 목적: GitHub Pages 공개 UI와 로컬 AI UI를 하나의 UI 플랫폼 자산 체계로 관리하기 위한 리팩토링 기준  
 운영 전제: 로컬 `master`에서 순차 작업 단위로 진행한다. 별도 분기 작업, 작업 복제본, 병합 절차, 원격 코드리뷰 절차를 이 계획의 기본 전제로 두지 않는다.  
 무중단 전제: 리팩토링 완료 전까지 `landing`의 공개 URL, GitHub Pages build, blog/docs/SEO/static route는 무중단이다.
