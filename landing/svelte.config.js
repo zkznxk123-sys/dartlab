@@ -25,6 +25,20 @@ const industryEntries = existsSync(mapIndustriesDir)
 			.map((f) => `/industry/${f.replace('.json', '')}`)
 	: [];
 
+// 블로그 자산 폴백 — 아직 못 만든 이미지(FLUX webp 등)를 같은 글의 첫 SVG 로 대체한다. prerender 가 없는
+// 자산을 404 로 만나면 handleHttpError 가 throw 해 deploy 가 중단되는데, 이 폴백이 src 를 실재 파일로 바꿔
+// (1) 404 차단 + (2) 깨진 이미지 대신 그 글 다이어그램 노출. 파일명 `{글번호}-*` 규약 기반, 빌드 1회 스캔.
+const blogAssetsDir = resolve('./static/blog/assets');
+const blogAssetFiles = existsSync(blogAssetsDir) ? readdirSync(blogAssetsDir) : [];
+function blogAssetFallback(fileName) {
+	if (existsSync(resolve(blogAssetsDir, fileName))) return fileName; // 있으면 그대로 참조
+	const m = fileName.match(/^(\d+)-/);
+	if (!m) return fileName;
+	const prefix = m[1] + '-';
+	const svg = blogAssetFiles.filter((f) => f.startsWith(prefix) && f.endsWith('.svg')).sort()[0];
+	return svg ?? fileName; // 같은 글 첫 SVG, 없으면 원본 유지(그 글에 SVG 도 없는 경우)
+}
+
 function rehypeBaseUrl() {
 	return (tree, file) => {
 		// 호출 컨텍스트 식별: skill 본문이면 ./assets/foo → /skills/assets/foo,
@@ -40,7 +54,9 @@ function rehypeBaseUrl() {
 				// 1) 본문의 ./assets/foo.svg|webp|png 상대경로 →
 				//    평면 구조 (skills 본문은 /skills/assets/, 그 외는 /blog/assets/) 로 변환.
 				if (src.startsWith('./assets/')) {
-					const fileName = src.slice('./assets/'.length);
+					const raw = src.slice('./assets/'.length);
+					// 블로그만 누락 자산 폴백(skill 자산은 평면 변환만) — 없는 파일은 같은 글 첫 SVG 로.
+					const fileName = isSkillFile ? raw : blogAssetFallback(raw);
 					node.properties.src = `${basePath}${assetsBase}${fileName}`;
 					return;
 				}
