@@ -60,7 +60,6 @@
 					<div class="geRadarEmpty">{lang === 'en' ? 'not enough graded axes for a radar' : '레이더를 그릴 등급 축 부족'}</div>
 				{/if}
 				<div class="geRadarNote">
-					{radarAxes.length}{lang === 'en' ? ' axes' : '축'} ·
 					{lang === 'en' ? 'audit risk shown at right (3-tier scale)' : '감사위험은 3단이라 우측 별도'}
 				</div>
 			</div>

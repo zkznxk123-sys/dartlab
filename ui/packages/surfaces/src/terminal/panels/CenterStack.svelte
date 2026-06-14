@@ -339,7 +339,7 @@
 
 <!-- GRADE STRIP -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
-	{#snippet right()}<button class="gradeWhyBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'why this grade' : '왜 이 등급인가'}>⊕ {lang === 'en' ? 'why' : '왜 이 등급'}</button><span class="dim">{co.grades.length} {lang === 'en' ? 'axes' : '축'}</span>{/snippet}
+	{#snippet right()}<button class="gradeWhyBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'analysis detail' : '분석 내용'}>⊕ {lang === 'en' ? 'analysis' : '분석내용'}</button>{/snippet}
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},1fr)`}>
 		{#each co.grades as g (g.key)}
