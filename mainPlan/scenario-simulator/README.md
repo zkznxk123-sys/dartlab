@@ -17,8 +17,8 @@
 - **중심 산출물**: ★Play 미래 리플레이 — 기존 터미널 replay 상태기계(과거 되감기)의 미래 방향 대칭 확장. 새 재생 엔진 0. 미래 캔버스는 사전 계산된 결정론 path를 *드러내는 것*(매 프레임 재계산 아님). → [05-play-future-replay.md](05-play-future-replay.md).
 - **데이터 모델**: AssumptionLedger(if 토글 SSOT) + ScenarioTree(분기) + EvidenceGraph(근거-드라이버, 인과 단정 금지). 분기 생성 싸게·가지치기는 결정론 엔진(회계 항등식·과거 베타). Morphological Field/CIB는 다축 확장(Phase 5+)으로 deferred.
 - **AI 의견**: 결정론 엔진 = SSOT, AI = `ai/tools/` lens 도구가 내는 ref 첨부 의견 카드. 채택 판정 = 결정론 gate(순수 함수). graph/node/pass 0 추가(no-graph-regression). → [03-validation-ai-review.md](03-validation-ai-review.md).
-- **지수 차트(v0.4)**: 안3(center 탭 주가/지수) + 안4(picker) + CMP. PriceChart `subject` 모드(둘째 차트 0, soft-swap). subject 소유권 = CenterStack-local `$state`(ChartCtl 미상향). IndexPort(`catalog/search/series`). **KR gov 지수=OHLCV 캔들 + US FRED 지수=종가 라인(SP500·NASDAQ·다우·VIX) 평행 통합**(운영자 결정 '미국 지수는 FRED 고려' — FRED 데이터 라이브 실측, 새 차트·포트 0·`candleStyle='area'` degenerate candle, 종가전용 지표 3분기 매트릭스). → [06-index-chart.md](06-index-chart.md).
-- **통합 시퀀싱**: 지수(1) → 공시 이벤트 레일(2) → 백테스팅 Strategy Tester(3) → 시뮬레이션+Play(4). mainPlan(ui/packages 승격) 이후 착수. 단 지수 차트는 mainPlan 무관 선행 가능. → [07-integration-roadmap.md](07-integration-roadmap.md).
+- **★차트 suite 분리(2026-06-14)**: 현재/과거 차트 3 컴포넌트(주가/지수 차트·공시 이벤트 레일·백테스팅)는 **`../terminal-chart-suite/`로 분리**(시간축 절단면 — 현재/과거=suite, 미래=시뮬). 셋은 시뮬 미완 게이트와 무관하게 독립 출시 가능. 시뮬 Play(05)가 suite를 **단방향 소비**(역참조 0). → [../terminal-chart-suite/README.md](../terminal-chart-suite/README.md).
+- **통합 시퀀싱(브리지)**: 지수(suite/01) → 공시 이벤트 레일(suite/02) → 백테스팅 Strategy Tester(suite/03) → 시뮬레이션+Play(시뮬 코어, 4). 07이 cross-category 브리지(시퀀스·공유 DNA·미래마커 이관). mainPlan(ui/packages 승격) 이후 착수. 단 차트는 mainPlan 무관 선행 가능. → [07-integration-roadmap.md](07-integration-roadmap.md).
 - **착수 전 선결 kill-test — ✅ 완료(2026-06-14)**: ★MC 재현성(`_simMonteCarlo.py:145`·`pricetarget.py:278` 전역 `random.seed` → 로컬 `random.Random(seed)`, **stdlib·pyodide 안전 — numpy PCG64 아님**) + `:205` 덮어쓰기 버그 → 연도별 cumprod(`test_horizon_widens_cone` kill-test로 옛 버그 증명 후 전환). 단 이 수정은 *레거시 MC 경로*(`analysis/forecast/_simMonteCarlo`) 한정 — **신생 `simulate/` 결정론 코어에는 MC 노드가 아직 없다**(mc.distribution 후속 단계, 01 §5b). Play 결정론·URL 공유·TS 패리티의 척추. 09 P1.
 - **경쟁 지형 + 시그니처 판정(2026-06-14, 웹검증 6서비스 + 12 agent 토론)**: 단일 제품도 우리 4축 조립(텍스트=untrusted 드라이버증거→결정론 pro-forma + det/ai 평행경합+Brier + forward-replay + reverseDCF 닻)을 다 안 함 — 단 부품(특히 융합)은 commodity라 **차별은 기술이 아니라 "조립+규율"**. 시그니처 = **`conditional-signature`(합의 61, KEEP 조건부)**: wedge는 실재(reverseDCF 닻+L2.5 앵커=코드, 경쟁 교집합 비어있음)하나 검증 루프가 미완이라 "strong-signature가 아니라 될 설계". 타사 개념 흡수 = **absorb-as-defer 4종**(A1 명명프리셋·A2 충격전파·A4 라이브레버·A7 Brier리더보드) + reject 잔여가드(A5 점확률·A6 fan σ) — 전부 *새 기능 0, 정직-라벨/defer-게이트*로만("깎아서 강함"). 전문 = 00 §8b, 흡수 거처 = 02·01·05·03·04.
 
@@ -35,18 +35,17 @@
 
 **제품 경험 (UI 단면):**
 6. [05-play-future-replay.md](05-play-future-replay.md) — ★중심 산출물. Play 미래 리플레이·미래 캔버스·다중분기·if 토글 실시간·근거 인벤토리·graceful degradation.
-7. [06-index-chart.md](06-index-chart.md) — 지수 차트 v0.4(안3 center 탭 subject-swap + 안4 picker + CMP, IndexPort catalog/search/series, **KR gov OHLCV 캔들 + US FRED 종가 라인 평행 subject**, candleStyle='area' degenerate·종가전용 지표 3분기, subject 소유권 seam, FRED 데이터 라이브 실측).
-8. [07-integration-roadmap.md](07-integration-roadmap.md) — 통합 시퀀싱(지수→이벤트레일→백테스팅→시뮬), 공유 DNA, mainPlan 의존, Phase −1~7.
+7. [07-integration-roadmap.md](07-integration-roadmap.md) — 통합 시퀀싱 **브리지**(suite/01 지수→suite/02 이벤트레일→suite/03 백테스팅→시뮬+Play), 공유 DNA, 미래마커 이관, mainPlan 의존, Phase −1~7.
 
 **발간·정합화 (시뮬의 읽기 방식):**
-9. [08-valuation-report.md](08-valuation-report.md) — 시뮬레이터=가치평가 엔진 동형, 적정주가(reverseDCF 닻+조건부 범위), 프로급 보고서, 규제선 가드. 발간은 코어 졸업 후.
-10. [09-architecture-consolidation.md](09-architecture-consolidation.md) — 시뮬레이터-앵커 부채 원장(DCF 5중·회귀 4중 등 16행)·신용=solvency 뷰·외과 청산 Phase 시퀀스. **앵커 양방향**: 역=leaf 수학 금지(`test_simulate_leaf_ssot`), 순=leaf 계약 drift CI red(`test_simulate_leaf_binding`, P16).
+8. [08-valuation-report.md](08-valuation-report.md) — 시뮬레이터=가치평가 엔진 동형, 적정주가(reverseDCF 닻+조건부 범위), 프로급 보고서, 규제선 가드. 발간은 코어 졸업 후.
+9. [09-architecture-consolidation.md](09-architecture-consolidation.md) — 시뮬레이터-앵커 부채 원장(DCF 5중·회귀 4중 등 16행)·신용=solvency 뷰·외과 청산 Phase 시퀀스. **앵커 양방향**: 역=leaf 수학 금지(`test_simulate_leaf_ssot`), 순=leaf 계약 drift CI red(`test_simulate_leaf_binding`, P16).
 
-**컴포넌트 스펙 (메모리에서 이관):**
-11. [10-backtesting-strategy-tester.md](10-backtesting-strategy-tester.md) — 차트 중심 EOD 백테스팅(전 `project_terminal_backtesting_prd`).
-12. [11-disclosure-event-rail.md](11-disclosure-event-rail.md) — 공시 위치 찾기 레일(전 `project_terminal_disclosure_event_rail_prd`).
+**★분리 (차트 suite — 현재/과거, 별도 폴더):**
+- [../terminal-chart-suite/](../terminal-chart-suite/README.md) — 주가/지수 차트(01)·공시 이벤트 레일(02)·백테스팅(03). 전 06/11/10. 시뮬이 단방향 소비, 07 브리지가 시퀀싱.
+- **★레거시 참조 별칭(분리 후):** 본 시뮬 문서 곳곳의 `06 §X`(특히 04 §5 OQ12·13의 `06 §3·§4.2·§7`, 04 §3 워크스페이스 "06(지수)", 00 §6.4)는 **`terminal-chart-suite/01 §X`**로 읽는다. 마찬가지로 `11 §X`=`suite/02 §X`, `10 §X`=`suite/03 §X`. (dense OQ 라인 surgery 대신 별칭 1줄로 해소 — 의미 불변, churn 0.)
 
-> ⚠ UI 토폴로지: 본 세션 중 터미널이 `landing/src/lib/terminal/` → **`ui/packages/surfaces/src/terminal/`로 이동**. 일부 컴포넌트 스펙(10·11) 본문의 `landing/.../terminal/...` 경로는 stale — 새 SSOT는 `ui/packages/surfaces`. v0.3 워크플로가 토폴로지 코드-그라운드 전수 확정(04 §3). 02 mode enum 본문 통일 완료. 남은 v0.1 잔재: 00(제품명). 상세 = 04 §4.
+> ⚠ UI 토폴로지: 본 세션 중 터미널이 `landing/src/lib/terminal/` → **`ui/packages/surfaces/src/terminal/`로 이동**. 차트 suite 문서(특히 02·03) 본문의 `landing/.../terminal/...` 경로는 stale — 새 SSOT는 `ui/packages/surfaces`. v0.3 워크플로가 토폴로지 코드-그라운드 전수 확정(04 §3). 02 mode enum 본문 통일 완료. 남은 v0.1 잔재: 00(제품명). 상세 = 04 §4.
 
 ---
 

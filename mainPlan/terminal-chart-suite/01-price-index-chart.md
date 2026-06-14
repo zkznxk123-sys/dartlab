@@ -1,4 +1,6 @@
-# 06. Index Chart — 지수 차트 (KR gov OHLCV subject + US FRED 종가 라인 subject + picker + CMP)
+# 01. Price/Index Chart — 주가/지수 차트 (KR gov OHLCV subject + US FRED 종가 라인 subject + picker + CMP)
+
+> **참조 규약(분리 후):** 본 문서는 `mainPlan/terminal-chart-suite/`(현재/과거 차트 suite)에 속한다. suite 내부 = 01(차트)/02(레일)/03(백테스팅). **시뮬 PRD 참조(05 Play·07 통합로드맵·08 valuation·09 정합화 등 바 번호)는 `../scenario-simulator/NN`을 가리킨다**(단방향: suite ⟶ 시뮬, 역참조 없음).
 
 상태: PRD v0.4 (US=FRED 종가 라인 subject 통합 — 운영자 결정 '미국 지수는 FRED 고려' 반영 + 로컬 FRED 데이터 실측·적대검증 정정, 2026-06-13)
 범위: 메인 주가차트에 KR gov 지수(OHLCV 캔들) + US FRED 지수(종가 라인)를 subject로 그리는 기능.
@@ -258,7 +260,7 @@ PriceChart가 `subject`/`indexLine` prop으로 판단. SubKey 22종(`chartState.
 
 **4.3 BT graceful**: subject='index'(KR·US 공통)일 때 BacktestStrip preset `disabled` + 사유 칩("지수는 거래 대상 아님"). btKey 보존(복귀 시 종목 BT 복원). v0.3 불변.
 
-**4.4 이벤트레일(11)·백테스팅 도크(10)**: subject 토글 무관. 지수 모드 공시 레일 자연히 빔(정상). v0.3 불변.
+**4.4 이벤트레일(02)·백테스팅 도크(03)**: subject 토글 무관. 지수 모드 공시 레일 자연히 빔(정상). v0.3 불변.
 
 ---
 
