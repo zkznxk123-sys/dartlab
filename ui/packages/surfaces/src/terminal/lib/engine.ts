@@ -110,9 +110,10 @@ function gradeScore(scaleKey: string, val?: string): Num {
 
 export function fmtKRW(v: Num): string {
 	if (v == null) return '—';
-	if (v >= 1e12) return (v / 1e12).toFixed(1) + '조';
-	if (v >= 1e8) return (v / 1e8).toFixed(0) + '억';
-	return v.toLocaleString();
+	// 천단위 콤마 — 조/억 환산값도 콤마 적용(타법인 출자 장부가·시총 등 큰 금액 가독성).
+	if (v >= 1e12) return (v / 1e12).toLocaleString('en-US', { maximumFractionDigits: 1 }) + '조';
+	if (v >= 1e8) return Math.round(v / 1e8).toLocaleString('en-US') + '억';
+	return v.toLocaleString('en-US');
 }
 
 export interface Engine {

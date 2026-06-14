@@ -8,6 +8,7 @@
 	import FinFullscreen from './FinFullscreen.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
+	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
 
 	interface Props {
 		co: Company;
@@ -305,6 +306,12 @@
 			<!-- ui/web 임베드 한정 — 로컬 어댑터가 있을 때만 /analysis 터미널 링크 노출 -->
 			<nav class="symLinks"><a href={localTerminalHref}>{lang === 'en' ? 'terminal' : '터미널'}</a></nav>
 		{/if}
+		<!-- 회사 네비 액션 (수직 스택) — 홈페이지 / 전자공시(DART 전체공시) / 공시뷰어(전체화면, 우측 ⤢ 동일) -->
+		<div class="symActions">
+			{#if corpInfo?.homepage}<a class="symAct" href={corpInfo.homepage} target="_blank" rel="noopener">{lang === 'en' ? 'website ↗' : '홈페이지 ↗'}</a>{/if}
+			<a class="symAct" href={`https://dart.fss.or.kr/dsab007/main.do?textCrpNm=${co.code}`} target="_blank" rel="noopener" title={lang === 'en' ? 'DART — company filings (search prefilled)' : '전자공시(DART) — 회사 전체 공시 보기'}>{lang === 'en' ? 'DART filings ↗' : '전자공시 ↗'}</a>
+			<button type="button" class="symAct" onclick={requestViewer} title={lang === 'en' ? 'disclosure viewer — fullscreen' : '공시뷰어 — 전체화면 (우측 정기공시 ⤢ 동일)'}>{lang === 'en' ? 'disclosure viewer ⤢' : '공시뷰어 ⤢'}</button>
+		</div>
 	</div>
 	{#if product || corpInfo}
 		<div class="symProd" title={product}>
@@ -314,7 +321,6 @@
 					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
 					{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
 					{#if corpInfo.region}<span class="sif"><i>{lang === 'en' ? 'HQ' : '본사'}</i><b>{corpInfo.region}</b></span>{/if}
-					{#if corpInfo.homepage}<a class="sifLink" href={corpInfo.homepage} target="_blank" rel="noopener">{lang === 'en' ? 'website ↗' : '홈페이지 ↗'}</a>{/if}
 				</div>
 			{/if}
 			<span class="symProdLbl">{lang === 'en' ? 'PRODUCTS' : '주요제품'}</span>

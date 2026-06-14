@@ -9,13 +9,11 @@
 	let {
 		code,
 		studio,
-		onclose,
-		focusAsk = false
+		onclose
 	}: {
 		code: string;
 		studio: TerminalHosts['viewerStudio'];
 		onclose: () => void;
-		focusAsk?: boolean; // 터미널 "AI" 진입 — 컴포넌트 임베드(landing)=Studio focusAsk, iframe(로컬)=URL ?ask=1
 	} = $props();
 	const rt = useDartLabRuntime();
 
@@ -28,10 +26,6 @@
 
 	// viewer port: URL 반환(ui/web 로컬) = iframe / null(landing 공개) = ViewerStudio 컴포넌트 임베드
 	const viewerUrl = $derived(rt.viewer.urlForCompany(view.code, { vs: view.vs }));
-	// iframe(로컬) 경로는 AskDrawer 자동오픈을 URL ?ask=1 로 전달 — 뷰어 라우트가 읽어 focusAsk 주입.
-	const framedUrl = $derived(
-		viewerUrl && focusAsk ? viewerUrl + (viewerUrl.includes('?') ? '&' : '?') + 'ask=1' : viewerUrl
-	);
 	const mod = $derived(viewerUrl || !studio ? null : studio());
 
 	// ESC 닫기 — 입력 필드(검색·질문) 안의 Esc 는 그 위젯 몫(팝오버 닫기)이라 오버레이는 무시.
@@ -49,13 +43,13 @@
 
 <div class="dlViewerFs">
 	{#if viewerUrl}
-		<iframe class="dlViewerFrame" src={framedUrl} title="DartLab local viewer"></iframe>
+		<iframe class="dlViewerFrame" src={viewerUrl} title="DartLab local viewer"></iframe>
 	{:else if mod}
 		{#await mod}
 			<div class="dlViewerLoad"><span class="dlViewerSpin"></span>공시뷰어 여는 중…</div>
 		{:then m}
 			{@const Studio = m.default}
-			<Studio code={view.code} vs={view.vs} embedded basePath={rt.env.basePath} tier={rt.env.kind === 'local' ? 'local' : 'public'} {focusAsk} {onNavigate} {onclose} />
+			<Studio code={view.code} vs={view.vs} embedded basePath={rt.env.basePath} tier={rt.env.kind === 'local' ? 'local' : 'public'} {onNavigate} {onclose} />
 		{:catch}
 			<div class="dlViewerLoad">뷰어 모듈 로드 실패 — 네트워크 확인 후 다시 열어주세요.</div>
 		{/await}

@@ -938,6 +938,10 @@
 .dlTerm .sif b { font-size: 10px; font-weight: 500; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .sifLink { margin-left: auto; flex-shrink: 0; font-family: var(--cond); font-size: 9.5px; color: var(--amberDim); text-decoration: none; }
 .dlTerm .sifLink:hover { color: var(--amber); }
+/* 회사 네비 액션 수직 스택 (홈페이지·전자공시·공시뷰어) — 좌측 symHead 하단 */
+.dlTerm .symActions { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 4px; }
+.dlTerm .symAct { font-family: var(--cond); font-size: 9.5px; color: var(--amberDim); text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.35; letter-spacing: 0.2px; }
+.dlTerm .symAct:hover { color: var(--amber); }
 .dlTerm .symProdLbl { font-family: var(--cond); font-size: 8px; color: var(--dimmer); letter-spacing: 0.6px; text-transform: uppercase; }
 .dlTerm .symProdV { font-size: 10.5px; color: var(--dim); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 

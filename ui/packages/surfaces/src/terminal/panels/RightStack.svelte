@@ -19,7 +19,7 @@
 	import { gradeTone } from '../lib/engine';
 	import Panel from '../ui/Panel.svelte';
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 셸 주입 lazy 로더
-	import { askEntry } from '../lib/askEntry.svelte'; // 헤더 "AI" 진입 신호 구독
+	import { viewerEntry } from '../lib/viewerEntry.svelte'; // 중앙 "공시뷰어" 버튼 신호 구독
 	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — 셸 주입 lazy 로더, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
@@ -34,17 +34,15 @@
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
-	let askFocus = $state(false); // 헤더 "AI" 진입 — 오버레이를 AskDrawer 포커스로 연다
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
-	// 헤더 "AI" 버튼 신호(askEntry.pulse) 구독 — pulse 변할 때만 오버레이를 챗 모드로 연다. seenPulse 는
-	// 비반응 plain let(추적 0)이라 viewerOpen/askFocus 쓰기가 effect 를 재발화시키지 않음(루프 없음).
-	let seenAskPulse = askEntry.pulse;
+	// 중앙 "공시뷰어" 버튼 신호(viewerEntry.pulse) 구독 — pulse 변할 때만 오버레이를 연다. seenPulse 는
+	// 비반응 plain let(추적 0)이라 viewerOpen 쓰기가 effect 를 재발화시키지 않음(루프 없음).
+	let seenViewerPulse = viewerEntry.pulse;
 	$effect(() => {
-		const p = askEntry.pulse;
-		if (p !== seenAskPulse) {
-			seenAskPulse = p;
+		const p = viewerEntry.pulse;
+		if (p !== seenViewerPulse) {
+			seenViewerPulse = p;
 			viewerOpen = true;
-			askFocus = true;
 		}
 	});
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
@@ -513,11 +511,7 @@
 	<ViewerOverlay
 		code={co.code}
 		studio={hosts.viewerStudio}
-		focusAsk={askFocus}
-		onclose={() => {
-			viewerOpen = false;
-			askFocus = false;
-		}}
+		onclose={() => (viewerOpen = false)}
 	/>
 {/if}
 

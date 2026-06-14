@@ -17,7 +17,6 @@
 	import GiscusPanel from './panels/GiscusPanel.svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
 	import { warmCompany } from './lib/warmup';
-	import { requestAsk } from './lib/askEntry.svelte'; // 헤더 "AI" 진입 → 뷰어 AskDrawer 챗 모드
 
 	interface Props {
 		eng: Engine;
@@ -34,6 +33,7 @@
 	setDartLabRuntime(runtime);
 	// base path — $app/paths 대신 runtime 환경 계약 (ui/web 셸에서도 동작)
 	const base = runtime.env.basePath;
+	const allowTerminalAsk = $derived(runtime.env.kind === 'local');
 
 	// 종목 결정 우선순위: ?sym= 딥링크(산업·인사이트 등 내부 링크) > 마지막 본 종목(localStorage) > initial
 	const urlSym = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('sym') : null;
@@ -221,9 +221,11 @@
 				<span class="clock mono">{clock}</span>
 				<span class="connDot"><span class="dot"></span>HF</span>
 				<div class="hdrLinks">
-					<button class="hdrLink hdrAsk" onclick={requestAsk} title="AI 공시 분석 — 챗으로 질문 (공시뷰어 AI 드로어 직행)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
-						<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img src="{base}/avatar-detective.png" alt="" width="14" height="14" style="border-radius:50%" /></picture>AI
-					</button>
+					{#if allowTerminalAsk}
+						<button class="hdrLink hdrAsk" onclick={() => co && runtime.navigation.toAsk({ code: co.code })} title="AI에게 직접 질문 — 로컬 LLM 질의(/ask)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
+							<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img src="{base}/avatar-detective.png" alt="" width="14" height="14" style="border-radius:50%" /></picture>AI
+						</button>
+					{/if}
 					<button class={'hdrLink' + (discussOpen ? ' on' : '')} onclick={() => (discussOpen = !discussOpen)} title="종목 토론 — giscus(GitHub Discussions) 인-터미널">{lang === 'en' ? 'Discuss' : '토론'}</button>
 					<a class="hdrLink" href="{links.repo}/issues/new" target="_blank" rel="noopener" title="GitHub 이슈 등록 — 버그·요청">{lang === 'en' ? 'Issue' : '이슈'}</a>
 				</div>
