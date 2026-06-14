@@ -359,7 +359,7 @@
 	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candles && chartCode}
 		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신) -->
-		<PriceChart {candles} code={chartCode} name={chartName} {lang} events={priceEvents} valBand={priceValBand} peers={chartPeers} {suggest} {onPick} />
+		<PriceChart {candles} code={chartCode} name={chartName} {lang} events={priceEvents} disclosures={disclosureEvents} valBand={priceValBand} peers={chartPeers} {suggest} {onPick} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}

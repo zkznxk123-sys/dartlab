@@ -31,13 +31,15 @@
 		name?: string;
 		lang: Lang;
 		events?: { date: string; label: string; url?: string; kind?: 'report' | 'capital' | 'disclosure' }[];
+		// 공시 레일(02) — 날짜 그룹별 1항목. 캔들 고가 텍스트 아님 = x축 아래 하단 dot 레일.
+		disclosures?: { date: string; label: string; url: string }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
 		// 전체화면 심볼 점프 — 검색은 엔진(suggest), 전환은 onPick (터미널 pick 관통)
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
 	}
-	let { candles, code, name = '', lang, events, valBand, peers = [], suggest, onPick }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
@@ -82,6 +84,36 @@
 	// turnover 는 억 단위 — {turnover} 플레이스홀더가 콤마만 붙이고 축약을 안 해 원 단위면
 	// "446,546,135,655" 생짜 노출 (TVAL 페인·매물대 가중치도 동일 단위 공유, 상대값이라 무영향)
 	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv != null ? c.tv / 1e8 : undefined });
+
+	// 공시 레일(02 §4) — disclosures(날짜 그룹) 각 날짜를 timestamp→x 픽셀(convertToPixel)로 변환해 차트 하단 dot 배치.
+	// 캔들 고가 텍스트 annotation(폭주·가격 차폐, §2.2 금지) 대신 x축 아래 전용 레일. pan/zoom 은 onScroll/onZoom 재계산.
+	// 좌표 실패/범위 밖은 graceful skip(렌더 0·crash 0). 정렬·y 위치는 운영자 시각 검수 대상.
+	let railDots = $state<{ x: number; label: string; url: string; multi: boolean }[]>([]);
+	function recomputeRail() {
+		const c = chart;
+		if (!c || !disclosures.length || !el) { railDots = []; return; }
+		const w = el.clientWidth;
+		const out: { x: number; label: string; url: string; multi: boolean }[] = [];
+		for (const d of disclosures) {
+			if (!/^\d{8}$/.test(d.date)) continue;
+			let x: number | undefined;
+			try {
+				const px = c.convertToPixel({ timestamp: toMs(d.date), value: 0 }, { paneId: 'candle_pane' });
+				x = Array.isArray(px) ? px[0]?.x : px?.x;
+			} catch { continue; }
+			if (typeof x !== 'number' || !Number.isFinite(x) || x < -4 || x > w + 4) continue;
+			out.push({ x, label: d.label, url: d.url, multi: d.label.includes('외') });
+		}
+		railDots = out;
+	}
+	// 데이터/기간/봉주기/disclosures 변경 시 재계산 (rAF = 차트 렌더 후 좌표 안정).
+	$effect(() => {
+		void dataRev;
+		void ctl.period;
+		void ctl.tf;
+		void disclosures;
+		if (browser) requestAnimationFrame(recomputeRail);
+	});
 	// 리본 Row1 정보 — 표시 시계열(리플레이 절단·수정주가 반영) 기준이라 리플레이 중에도 정직.
 	// dataRev = reapply 동행 신호 (displaySeries 내부 untrack 읽기를 대신 깨운다).
 	const ribbonInfo = $derived.by<{ last: number; prev: number | null; date: string; hi: number; lo: number } | null>(() => {
@@ -187,6 +219,11 @@
 			// 줌아웃 시 ~3봉의 미래 축으로 보이던 것 제거 (EOD 차트에 미래 축은 무의미).
 			local.setOffsetRightDistance(0);
 			try { local.setMaxOffsetRightDistance(0); } catch { /* 구버전 무시 */ }
+			// 공시 레일 — pan/zoom 시 dot x 재정렬 (rAF 디바운스). 미지원 버전은 데이터 effect 재계산만.
+			try {
+				local.subscribeAction('onScroll', () => requestAnimationFrame(recomputeRail));
+				local.subscribeAction('onZoom', () => requestAnimationFrame(recomputeRail));
+			} catch { /* 구버전 무시 */ }
 			// timestamp 는 Date.UTC 자정 — timezone 미설정 시 XAxis 라벨이 브라우저 로컬 TZ 로 풀려
 			// 미주 사용자에게 하루 전 날짜로 표시되는 조용한 오류. 명시 고정.
 			try { local.setTimezone('UTC'); } catch { /* */ }
@@ -963,6 +1000,22 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	<div class="chartHost" bind:this={el}></div>
 
+	{#if railDots.length}
+		<!-- 공시 위치 레일 — x축 아래 날짜별 dot. 호버=공시 제목 툴팁, 클릭=원문(우측 패널 스크롤은 RightStack 정착 후). -->
+		<div class="discRail" aria-label={T('공시 위치', 'disclosure markers')}>
+			{#each railDots as d (d.x + '|' + d.label)}
+				<button
+					class="discDot"
+					class:multi={d.multi}
+					style={`left:${d.x}px`}
+					title={d.label}
+					aria-label={d.label}
+					onclick={() => d.url && window.open(d.url, '_blank', 'noopener')}
+				></button>
+			{/each}
+		</div>
+	{/if}
+
 	{#if textEdit}
 		<input
 			class="drawTextIn mono"
@@ -1066,3 +1119,40 @@
 		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClear={() => (ctl.btKey = null)} />
 	{/if}
 </div>
+
+<style>
+	/* 공시 위치 레일 — x축 라벨 위(bottom 오프셋)에 날짜별 dot. y 위치/dot 크기는 운영자 시각 검수 후 미세조정. */
+	.discRail {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 24px;
+		height: 10px;
+		pointer-events: none;
+		z-index: 3;
+	}
+	.discDot {
+		position: absolute;
+		bottom: 0;
+		width: 7px;
+		height: 7px;
+		margin-left: -3.5px;
+		padding: 0;
+		border: none;
+		border-radius: 50%;
+		background: #22d3ee;
+		opacity: 0.8;
+		cursor: pointer;
+		pointer-events: auto;
+		transition: opacity 0.1s;
+	}
+	.discDot.multi {
+		width: 9px;
+		height: 9px;
+		margin-left: -4.5px;
+		box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.25);
+	}
+	.discDot:hover {
+		opacity: 1;
+	}
+</style>
