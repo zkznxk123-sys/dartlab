@@ -45,7 +45,9 @@ g.dividends("005930"); g.collect("005930")
 키는 **공급자(provider) 단위** 로 관리 (`core/providers/dataCredentials.py` 레지스트리).
 
 ```python
-print(dartlab.gather.formatStatus())             # ✓/✗ 상태 + 미설정 발급 링크
+dartlab.setup()                                  # ★ 단일 진입점 — 모든 키(추론+데이터) 현황
+dartlab.setup("dataGoKr")                        # 특정 데이터 공급자 발급/설정 안내
+print(dartlab.gather.formatStatus())             # 데이터 공급자만 ✓/✗ + 발급 링크
 dartlab.gather.setCredential("dataGoKr", "<키>") # 암호화 저장 (.env 편집 불필요)
 dartlab.gather.writeEnvExample()                 # .env.example 생성 (레지스트리 파생)
 ```
