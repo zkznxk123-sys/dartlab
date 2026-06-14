@@ -2,7 +2,7 @@
 
 > **참조 규약(분리 후):** 본 문서는 `mainPlan/terminal-chart-suite/`(현재/과거 차트 suite)에 속한다. suite 내부 = 01(차트)/02(레일)/03(백테스팅)/04(본 문서). **시뮬 PRD 참조(05 Play·07 통합로드맵 등 바 번호)는 `../scenario-simulator/NN`을 가리킨다**(단방향: suite ⟶ 시뮬, 역참조 없음).
 
-상태: PRD v0.1 (2026-06-14, 4-ground 코드 실측 + 4렌즈 토론 + 적대검증 5)
+상태: PRD v0.1 (2026-06-14, 4-ground 코드 실측 + 4렌즈 토론 + 적대검증 5). **2026-06-14 현재기준 재검증** — J~Q claim 전부 TRUE 확인. 미세 정정 2건: `MacroSeriesDef.yoy`·`digits` 는 *optional*(`yoy?`/`digits?`, `macro.ts:8-16`), 마퀴 파생은 *5~6 push*(KR·US 국면·순풍·역풍·시장폭·평균1M, 데이터 부재 시 가변). 본 F1 은 econ 오버레이(`rt.macro.getSeries`)를 소비 — public=`createHfMacroPort`/local 동일 공유라 **로컬/퍼블릭 공동배선 추가 작업 0**(HF 거시 데이터 회사 무관).
 범위: 메인 주가차트에 경제지표/보조지표를 오버레이하는 *발견성·배선·조직* 개선. 상단 KPI 마퀴 클릭 → 차트 오버레이.
 
 ---
@@ -21,7 +21,7 @@
 |---|---|---|
 | **econ 오버레이 엔진** | `charts/econOverlay.ts` | ★라이브 — klinecharts `'ECON'` indicator, `figures:[]`로 캔들 y축 무왜곡 + 가시범위 자기정규화 폴리라인 + `ECON_COLORS` 10종 + 원시값 툴팁 |
 | econ 차트 배선 | `charts/PriceChart.svelte:705-726` | ★라이브 — `ctl.econ` effect → 로드 → 생성/override |
-| 경제지표 카탈로그 SSOT | `ui/packages/contracts/src/macro.ts` `MACRO_SERIES`(10종) | ★라이브 — `MacroSeriesDef{id,src,kr,en,unit,yoy,digits}` |
+| 경제지표 카탈로그 SSOT | `ui/packages/contracts/src/macro.ts` `MACRO_SERIES`(10종) | ★라이브 — `MacroSeriesDef{id,src,kr,en,unit,yoy?,digits?}`(yoy·digits optional) + `MACRO_ATTRIBUTION`(`macro.ts:41`, ECOS·FRED) |
 | 데이터 로더 | `runtime/.../sources/macroSource.ts` | ★라이브 — observations.parquet HF 직독 |
 | **전수 팔레트(일반)** | `charts/ChartMenus.svelte:42-83` | ★라이브 — `OVERLAY_ALL`+`SUB_ALL`+`MACRO_SERIES` 전량 버튼 |
 | **전수 팔레트+조직(전체화면)** | `charts/ChartRibbon.svelte:119-198` | ★라이브 — `SUB_GROUPS` 3분류 칩 + `MACRO_SERIES` econ 팝오버 |

@@ -2,7 +2,7 @@
 
 > **참조 규약(분리 후):** 본 문서는 `mainPlan/terminal-chart-suite/`(현재/과거 차트 suite)에 속한다. suite 내부 = 01(차트)/02(레일)/03(백테스팅). **시뮬 PRD 참조(05 Play·07 통합로드맵·08 valuation·09 정합화 등 바 번호)는 `../scenario-simulator/NN`을 가리킨다**(단방향: suite ⟶ 시뮬, 역참조 없음).
 
-상태: PRD v0.4 (US=FRED 종가 라인 subject 통합 — 운영자 결정 '미국 지수는 FRED 고려' 반영 + 로컬 FRED 데이터 실측·적대검증 정정, 2026-06-13)
+상태: PRD v0.4 (US=FRED 종가 라인 subject 통합 — 운영자 결정 '미국 지수는 FRED 고려' 반영 + 로컬 FRED 데이터 실측·적대검증 정정, 2026-06-13). **2026-06-14 현재기준 코드 재검증** — A~I 9개 claim 전부 TRUE 확인(IndexPort/govIndexSource/fredIndexSource 신규 확정·3어댑터 conformance 유효), CenterStack 데이터 effect 라인범위만 L43-59 soft-swap 으로 정정(아래 §0 ⚠). 본 PRD 는 공통배선(포트/어댑터) 이후 기준에 이미 정합 — suite 의 로컬/퍼블릭 공동배선 *예시 문서*다(§3.5 IndexPort 3어댑터).
 범위: 메인 주가차트에 KR gov 지수(OHLCV 캔들) + US FRED 지수(종가 라인)를 subject로 그리는 기능.
        배치·IndexPort 계약·subject-swap 배선 seam·render 모드 격리·종가전용 지표 매트릭스·시뮬레이터 관계.
 UI 토폴로지: `ui/packages/surfaces/src/terminal/`, 포트=`ui/packages/contracts`, 데이터 소스=`ui/packages/runtime/src/adapters/{public,local,test}/`.
@@ -17,7 +17,7 @@ soft-swap의 PriceChart측 재적용 메커니즘은 **실재 확증**됨 — `P
 
 > **US 지수(S&P500·NASDAQ·다우·VIX)는 FRED 종가 라인 subject로 06 범위 내 통합**(v0.3 §6.1 'US 범위 밖' 정정 — 운영자 결정 '미국 지수는 FRED 고려'). KR=OHLCV 캔들, US=종가(value) 1컬럼 라인. 둘 다 `IndexPort.series()→Candle[]` 단일 계약, `IndexRef.market` 분기. **새 차트·새 포트 0** — US는 `candleStyle='area'` 모드 + degenerate candle(o=h=l=c=value, v=0) 변환 1함수.
 
-> **⚠ 선행 의존 순서(필수)**: 본 v0.4는 v0.3의 KR subject 본체(PriceChart `subject` prop·CenterStack subject/indexRef `$state`·picker·데이터 effect 분기·IndexPort KR 경로)가 **선행 구현된 위에 US 델타를 얹는다**. 현 코드 실측: `PriceChart.svelte` Props(L28-40)에 `subject` 없음, `CenterStack.svelte` 데이터 effect(L37-53)는 `co.code` 단일 키 `rt.price.initial` 하드코딩, subject/indexRef/picker/PriceChart 하향 전무. ⟹ v0.4를 독립 착수하면 컴파일 실패. 구현 순서 = v0.3 KR subject → v0.4 US 델타.
+> **⚠ 선행 의존 순서(필수)**: 본 v0.4는 v0.3의 KR subject 본체(PriceChart `subject` prop·CenterStack subject/indexRef `$state`·picker·데이터 effect 분기·IndexPort KR 경로)가 **선행 구현된 위에 US 델타를 얹는다**. 현 코드 실측(2026-06-14 재검증): `PriceChart.svelte` Props(L28-40)에 `subject`/`indexLine` 없음, `CenterStack.svelte` 데이터 effect(**L43-59**)는 `co.code` 단일 키로 `rt.price.initial(code, yr)` 를 soft-swap(candles/chartCode/chartName/candleState 원자적 갱신) 호출 — subject/indexRef/picker state 부재·PriceChart 하향 전무. ⟹ v0.4를 독립 착수하면 컴파일 실패. 구현 순서 = v0.3 KR subject → v0.4 US 델타.
 
 ---
 

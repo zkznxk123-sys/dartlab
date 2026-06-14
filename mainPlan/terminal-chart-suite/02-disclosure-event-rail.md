@@ -2,7 +2,7 @@
 
 > **참조 규약(분리 후):** 본 문서는 `mainPlan/terminal-chart-suite/`(현재/과거 차트 suite)에 속한다. suite 내부 = 01(차트)/02(레일)/03(백테스팅). **시뮬 PRD 참조(바 번호 05·07·08·09 등)는 `../scenario-simulator/NN`을 가리킨다**(단방향: suite ⟶ 시뮬, 역참조 없음).
 
-상태: PRD v0.2 (메모리 `project_terminal_disclosure_event_rail_prd`에서 repo 이관 — terminal-chart-suite 컴포넌트)
+상태: PRD v0.3 (2026-06-14 공통배선 이후 현재기준 정합 — **§1.5 가 경로·아키텍처·타입·sync·페이즈 SSOT**. v0.2 본문은 제품 행동 규약 참조로 유지. 4-렌즈 토론 확정). 옛 v0.2: 메모리 `project_terminal_disclosure_event_rail_prd`에서 repo 이관.
 지위: 차트 suite의 이벤트레일 컴포넌트. 통합 시퀀스(시뮬 07 통합로드맵: 지수→**이벤트레일**→백테스팅→시뮬)에서 2번. 본 PRD는 *과거 공시 위치 찾기*만 완결. **미래 공시 마커(예측 정기공시 점선)는 시뮬 코어(미래 캔버스)에 의존 → 시뮬 트랙(4)으로 이관**(시뮬 07 §의존성). ⚠**UI 경로 전수 stale — 기계적 매핑 강행**: 본문의 *모든* `landing/src/lib/terminal/<rest>`(본문 :49-51 `panels/CenterStack`·`charts/PriceChart`·`charts/chartState.svelte.ts`·:60 `panels/RightStack`·:66 `data/workbench.ts`·:68 `panels/ViewerOverlay`·:324·:366 `data/disclosureEvents.ts`·:370 `charts/DisclosureEventRail.svelte` 등)를 `ui/packages/surfaces/src/terminal/<rest>` 로 1:1 치환해 읽는다(터미널 전체 이동, commit ff9099ba0, 04 §3). 포트=`ui/packages/contracts`. 엔진 경로(`src/dartlab/*`)는 불변. `ui/shared/chart/PriceChart.svelte`(별개 SVG)와 혼동 금지.
 
 ## 0. 판정과 최종 결론
@@ -43,7 +43,82 @@
 6. 같은 날짜 다중 공시는 점 여러 개가 아니라 count 배지 하나로 접는다.
 7. 없는 데이터를 포장하지 않는다. allFilings recent 범위 밖은 "최근 비정기공시 범위"로 정직하게 표시한다.
 
+## 1.5 현재기준 정합 + 설계 확정 (공통배선 이후 — 본 절이 경로·아키텍처·타입·스코프 SSOT)
+
+> 본 PRD §2~§15 는 *공통배선(포트/어댑터 공유 surface) 이전* 아이디어로 작성돼 경로·일부 스코프가 stale 하다. **본 절이 경로·데이터 접근·타입 필드수·파일 후보·sync 메커니즘·페이즈의 SSOT** 다. §2~§15 의 *제품 행동 규약*(UX 흐름·시각 문법·인과/신호 금지·테스트 케이스·실패 기준·전문 검토)은 경로/구현과 무관하게 그대로 유효한 참조다. 2026-06-14 전문 4-렌즈 토론(아키텍트·declutter 비평·ground-truth 2)로 확정.
+
+### 1.5.1 경로 정합 (stale → 실측 ui/packages)
+터미널 전체가 `landing/src/lib/terminal/` → `ui/packages/surfaces/src/terminal/` 로 이동(commit ff9099ba0). **단순 prefix 치환 아님 — 옛 `data/` 폴더가 `lib/` 로 재편**. 데이터는 옛 `landing/src/lib/data/*` 로더 직접 호출이 아니라 **포트/어댑터 런타임**(`rt.filing.*`)으로 흐른다.
+
+| 옛 PRD 경로(본문 표기) | 실측 현재 경로 / 대체 |
+|---|---|
+| `landing/src/lib/data/companyFilingsRuntime.ts` | `rt.filing.regular(code, limit)` (FilingPort, `contracts/src/filing.ts:79`). public 구현 `runtime/.../public/sources/regularFilingsSource.ts`(`dart/panel/{code}.parquet` 직독, rceptNo·rceptDate=rceptNo[:8]) |
+| `landing/src/lib/data/companyNonRegularFilings.ts` | `rt.filing.nonRegular(code, limit)` (`filing.ts:81`). public 구현 `nonRegularFilingsSource.ts`(`dart/allFilings/recent.parquet`, `stock_code` 필터, rcept_no/rcept_dt/report_nm/flr_nm) |
+| `terminal/data/workbench.ts` (집계 helper) | **대체 없음** — 집계는 `lib/disclosureEvents.ts`(신설 *순수함수*, §1.5.4). `lib/engine.ts` 는 `createEngine(raw)` 동기 스냅샷 전용이라 async 포트 호출 부적합 |
+| `terminal/data/disclosureEvents.ts` | `lib/disclosureEvents.ts` (신설, 순수함수 모듈) |
+| `terminal/charts/DisclosureEventRail.svelte` | `charts/DisclosureEventRail.svelte` (신설) |
+| `terminal/panels/{CenterStack,RightStack}.svelte` · `charts/{PriceChart,chartState.svelte.ts}` | `panels/...` · `charts/...` (동일 하위경로) |
+
+### 1.5.2 ★실측: 공시 마커는 이미 ~70% 라이브 (그러나 §2.2 가 "하지 말라"던 방식)
+- `CenterStack.svelte:214-246` 가 이미 `Promise.all([rt.filing.regular(code), rt.filing.nonRegular(code,200)])` → `disclosureEvents {date,label,url,kind:'disclosure'}` 빌드(같은날 "외 N건" collapse·최근 60일 cap), `priceEvents` $derived(:249-273)로 report/capital 마커와 **혼합**, PriceChart `events` prop 하향.
+- `PriceChart.svelte:563-602` 가 각 이벤트를 **캔들 고가 위 `simpleAnnotation`**(disclosure=cyan #22d3ee)으로 렌더, 클릭→`window.open(url)`, `ctl.showEvents`(`chartState:81`) 토글.
+- **이건 정확히 §2.2 가 "금지"한 방식**(캔들 위 annotation + showEvents 혼합). 그리고 **rceptNo 를 collapse 단계에서 버려** click→우측행 연결이 *구조적으로 불가*. `RightStack.svelte:418-444` 행엔 `data-rcept-no` 부재.
+
+### 1.5.3 ★설계 확정 — 하단 레일 채택 + disclosure 의 캔들고가 경로 *완전 제거* (one-system)
+**결정(정공법)**: 본 PRD 의 별도 하단 레일 방향을 채택하되, **disclosure 를 `priceEvents`/`simpleAnnotation` 경로에서 완전히 빼낸다**. report(실적)·capital(증자) 마커만 캔들 고가 + `showEvents` 잔류. disclosure 는 **레일이 유일 거처** + 새 `showDisclosureEvents` 토글(기본 ON). → 두 disclosure 시각화 병존(덕지덕지) 차단.
+- **왜 레일인가**: (a) 캔들 고가 텍스트 라벨은 가격 액션을 가림(밀집 공시일수록·60일 cap 으로 *옛 공시 은폐*). 하단 레일은 점+배지로 비차폐·더 많이 표시. (b) **같은날 다중 공시 popover 선택**이 click→우측행의 *어느 rceptNo* 인지 고르는 데 필수(현재 collapse 라벨로는 첫 건만 도달). (c) 전용 공시 레인 = 발견성.
+- **고려한 더 작은 대안(기록)**: 캔들고가 마커 유지 + onClick 만 우측행 이동으로 바꾸는 최소안(좌표 정확·신규 컴포넌트 0). 채택 안 함 — 같은날 다중 공시 선택 상실 + 밀집 차폐 잔존. *운영자가 절대 최소를 원하면 이 마커-진화안이 문서화된 fallback.*
+- **좌표 정확성(§5.2 격상)**: 레일은 klinecharts 좌표변환 API(`timestamp→x`)로 캔들과 *정확* 정렬. index fallback 은 API 실패 시 degraded 모드만(§5.2 "균등 위치 1차"를 정공법으로 격상).
+- **report/capital 잔류 처리**: `CenterStack:272` `priceEvents` 반환에서 `disclosureEvents` 제거(`...out, ...caps` 만). `regularUrlByDate`(:221-223)는 report 마커 url 에 여전히 쓰이므로 effect 분할해 보존. `PriceChart:582-585` `kind==='disclosure'` cyan 분기 제거 → `events` prop 타입 `kind?: 'report'|'capital'` 로 좁힘.
+
+### 1.5.4 DisclosureEvent 타입 — surfaces-local + 필드 de-bloat (18→핵심 6)
+- **거처**: `contracts` 아님 **surfaces-local**(`lib/disclosureEvents.ts`). candle 배열(`Candle.t[]`) 의존 view-model 이라 어댑터가 생산 불가 — 포트층에 넣으면 차트 좌표를 어댑터가 알아야 하는 층 역전. `filing.ts:1-2` 주석이 이미 "이벤트화 시 `dart:${rceptNo}`"로 *소비층 명명* 예고.
+- **필드(제품 행동에 필요한 것만 6)**: `rceptNo`(우측행 join 키·click payload)·`rceptDate`(YYYY-MM-DD, 툴팁+dateKey 파생)·`title`(reportType/reportNm 툴팁 라벨)·`kind`('regular'|'nonRegular', 색+어느 우측 패널)·`url`(↗)·`xDateKey`(매핑 거래일). `eventId`=`dart:${rceptNo}` 파생(저장 안 함). **CUT**: corpCode/corpName/stockCode(단일 회사=`co.code`)·subtitle/filer/year(미사용)·source/sourceDataset·**중첩 `sourceRef{path,etag,hfCommit,...}`**(UI 클릭 타깃에 엔진 lineage = bloat). `DisclosureEventGroup` → `{xDateKey, rceptDate, events[]}` + count 인라인.
+- **집계 = 순수함수**(class 금지, `no-graph-regression` 가드): `buildDisclosureEvents(reg, nonReg)`(rceptNo dedupe·정기 우선) · `groupByMappedDate(events, candleDateKeys)`(거래일 매핑+그룹+범위클립) · `nextTradingDateOnOrAfter(dateKey, candleDateKeys)`(기존 `snap()` nearest 대체, §3.5). CenterStack *기존* `Promise.all` 재사용(신규 fetch 0).
+
+### 1.5.5 우측행 sync — 형제 펄스 스토어 (prop drilling 아님)
+§4.6 "상위 상태 관통" 선호를 **정정**: CenterStack/RightStack 은 `TerminalSurface.svelte:269-270` 형제라 코드베이스 기존 패턴 **terminal-scoped rune 스토어**가 정공법. 선례 `lib/viewerEntry.svelte.ts`(`viewerEntry=$state({pulse:0})`/`requestViewer()`) 가 *동형*(CenterStack→RightStack ViewerOverlay 신호).
+```ts
+// lib/disclosureFocus.svelte.ts — terminal 전용, package index 미export(전역 이벤트버스 아님·class 아님)
+export const disclosureFocus = $state<{ rceptNo: string; pulse: number }>({ rceptNo: '', pulse: 0 });
+export function requestDisclosureFocus(rceptNo: string) { disclosureFocus.rceptNo = rceptNo; disclosureFocus.pulse++; }
+```
+- 레일/popover 클릭→`requestDisclosureFocus(rceptNo)`. `RightStack` `$effect`(pulse 의존)→`data-rcept-no` 행 `scrollIntoView`+`.focused` 1.5s.
+- **전체화면**: `ctl.full` 가 true 면 `ctl.full=false` 먼저, 다음 틱 focus(§4.7). 신규 메커니즘 0.
+- `DisclosureFocusRequest{source,mode}` 는 hover-preview 빌드 시에만(1차=click sync, §4.4) → 1차 `{rceptNo,pulse}` 만.
+
+### 1.5.6 ★로컬/퍼블릭 공동배선 (운영자 우선순위)
+레일은 `rt.filing.regular`+`rt.filing.nonRegular` 만 소비 → **4 구현 전부 rceptNo 보유, 어댑터 변경 0**:
+- **public**(static·브라우저 parquet): regular/nonRegularFilingsSource, rceptNo 보존. **변경 0**.
+- **local**(:8400): `adapters/local/sources/filingSource.ts` — regular=panel init `dartUrlByPeriod` 에서 rceptNo 파싱, nonRegular=`/api/dartlab/price-events`. **변경 0**. (정직: local nonRegular=30 cap·price-events 파생이라 밀도 < public — "범위" 라벨 반영, 패리티 위장 금지.)
+- **ui/web bridge**(`ui/web/.../localTerminalData.ts`): 동일 filing 구현. 신규 포트 메서드 0 → **변경 0**(§5.1 ui/web optional-method 후보 = 무의미·삭제).
+- **fake**(`adapters/test/createFakeRuntime.ts`): regular 1행 있음, **nonRegular `[]` → fixture 1~2행 추가**(005930·fixture candle 날짜대 `20260601~05`)로 다중공시일·on-or-after 매핑 surface 테스트. **유일 어댑터 편집**.
+- 포트 메서드 신설 0(§5.1 `localAdapter.ts disclosureEvents?` 후보 = 기각 유지).
+
+### 1.5.7 페이즈 정합 (70% 기빌드 반영)
+- **Phase 1 데이터밀도 감사**: 60일 cap·"외 N건" collapse 가 *이미 프로덕션* → 20종목 정식 연구는 과정연극, **경량 sanity(005930 + 고밀도 filer 1개 눈검수)**로 축약.
+- **Phase 2 dev 격리**: `landing/src/routes/lab/terminal-dev` → `DevTerminal`(`@dartlab/ui-surfaces/terminal/dev`, `checkDevIsolation.js` 가드)에서 레일 격리 실측. 본진 미연결.
+- **Phase 3 레일 렌더 → Phase 4 우측 sync → Phase 5 본진 승격**: §9 유지. 승격 = `feedback_ui_rules` 스크린샷 전수 눈검수 + 공개 터미널 무중단 + **운영자 명시 push 승인 후에만**(UI 변경).
+
+### 1.5.8 실측 파일 변경 집계 (신규 최소)
+| 파일 | 변경 |
+|---|---|
+| `lib/disclosureEvents.ts` (신설) | `DisclosureEvent`/`DisclosureEventGroup` 타입 + `buildDisclosureEvents`/`groupByMappedDate`/`nextTradingDateOnOrAfter` 순수함수 |
+| `lib/disclosureFocus.svelte.ts` (신설) | 형제 펄스 스토어(viewerEntry 동형) |
+| `charts/DisclosureEventRail.svelte` (신설) | 하단 레일 DOM/SVG·툴팁·다중 popover·좌표 API |
+| `panels/CenterStack.svelte` | disclosure 집계를 순수함수 호출로·`priceEvents` 에서 disclosure 제거·`disclosureGroups` prop 하향 |
+| `charts/PriceChart.svelte` | 레일 마운트·`disclosureGroups` prop·`kind:'disclosure'` cyan 분기 제거·`events` 타입 narrow |
+| `panels/RightStack.svelte` | 행 `data-rcept-no` + `.focused` + pulse `$effect` scrollIntoView |
+| `charts/chartState.svelte.ts` | `showDisclosureEvents=$state(true)` + persist 화이트리스트 |
+| `charts/{ChartMenus,ChartRibbon}.svelte` | `공시` 토글(기존 `showEvents` 와 분리) |
+| `runtime/.../test/createFakeRuntime.ts` | nonRegular fixture 1~2행(유일 어댑터 편집) |
+| `terminal.css` | 레일·툴팁·popover·`.focused` 스타일 |
+
+---
+
 ## 2. 현재 자산과 구현 경계
+
+> **→ §1.5.1·1.5.2 정합 적용**: 아래 경로는 옛 `landing/src/lib/*` 표기다. 실제 거처는 `ui/packages/surfaces/src/terminal/*` + 데이터는 `rt.filing.*` 포트. 공시 마커는 이미 인라인 라이브(§1.5.2) — 본 절의 "신규" 전제는 §1.5.3 (캔들고가 경로 제거 + 레일 신설)으로 읽는다.
 
 ### 2.1 이미 있는 자산
 
@@ -363,6 +438,8 @@ export interface DisclosureFocusRequest {
 
 ### 5.1 신규/변경 파일 후보
 
+> **→ §1.5.8 실측 파일 변경 집계가 SSOT.** 아래는 옛 `landing` 경로 표기 + ui/web optional-method 후보(§1.5.6 에서 무의미로 삭제) 포함 — 정합본은 §1.5.8 표를 따른다.
+
 신규 후보:
 
 - `landing/src/lib/terminal/data/disclosureEvents.ts`
@@ -520,6 +597,8 @@ UI 변경이므로 push 전 운영자 검수 게이트 대상이다.
 정량 PASS만으로 완료 처리 금지. 레일이 x축/출처/BT strip과 겹치면 실패다.
 
 ## 9. 구현 순서
+
+> **→ §1.5.7 페이즈 정합 적용**: Phase 1 은 경량 sanity(20종목 정식 감사 아님 — 60일 cap·collapse 이미 프로덕션), Phase 2 dev 격리는 `DevTerminal`(checkDevIsolation 가드). 본진 승격은 운영자 명시 push 승인 후.
 
 ### Phase 0 - PRD 확정
 

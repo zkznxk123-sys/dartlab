@@ -2,7 +2,7 @@
 
 > **참조 규약(분리 후):** 본 문서는 `mainPlan/terminal-chart-suite/`(현재/과거 차트 suite)에 속한다. suite 내부 = 01(차트)/02(레일)/03(백테스팅). **시뮬 PRD 참조(바 번호 05·07·08·09 등)는 `../scenario-simulator/NN`을 가리킨다**(단방향: suite ⟶ 시뮬, 역참조 없음).
 
-상태: PRD v0.2 (메모리 `project_terminal_backtesting_prd`에서 repo 이관 — terminal-chart-suite 컴포넌트)
+상태: PRD v0.3 (2026-06-14 공통배선 이후 현재기준 정합 + v1 스코프 확정 — **§0.5 가 경로·모듈구조·원장깊이·v1 스코프·결과계약 SSOT**. v0.2 본문 중 §14 법적가드·§19 타입계약·§20 지표공식·§21 테스트매트릭스·§5 리포트·§18 상태매트릭스는 유효 참조로 유지. 4-렌즈 토론 확정). 옛 v0.2: 메모리 `project_terminal_backtesting_prd`에서 repo 이관.
 지위: 차트 suite의 백테스팅 컴포넌트. 통합 시퀀스(시뮬 07 통합로드맵: 지수→이벤트레일→**백테스팅**→시뮬)에서 3번. 백테스팅 엔진은 시뮬레이터와 **RunSpec·ReportDock·look-ahead 가드 DNA 공유**(시뮬 09 §1, 08 §5 — ReportDock backtest mode). "전문가급"=품질 기준(방법 엄밀함). ⚠**UI 경로 전수 stale — 기계적 매핑 강행**: 본문의 *모든* `landing/src/lib/terminal/<rest>`(본문 :135 `data/backtest.ts`·:158 `charts/btLayer.ts`·:797·:810·:825·:1118 등)를 `ui/packages/surfaces/src/terminal/<rest>` 로 1:1 치환해 읽는다(터미널 전체 이동, commit ff9099ba0, 04 §3). 포트=`ui/packages/contracts`, 데이터 소스=`ui/packages/runtime/src/adapters/{public,local,test}/`. 엔진 경로(`src/dartlab/*`)는 불변. `ui/shared/chart/PriceChart.svelte`(별개 SVG)와 혼동 금지.
 
 ## 0. 판정과 확정 결론
@@ -19,6 +19,83 @@
 - 상세 보고서는 차트 아래에 붙는 스크롤 리포트로 제공한다.
 - 일반 모드와 전체화면은 같은 `ChartCtl` 상태를 공유한다.
 - 결과 문구는 "이 전략이 좋다"가 아니라 "이 기간과 이 가정에서는 이렇게 계산됐다"로 고정한다.
+
+## 0.5 현재기준 정합 + v1 스코프 확정 (공통배선 이후 — 본 절이 경로·구조·원장·스코프·계약 SSOT)
+
+> 본 PRD §1~§23 은 *공통배선 이전* 아이디어로 작성돼 경로·모듈구조·스코프가 stale/과설계 하다. **본 절이 경로·파일구조·원장깊이·v1 스코프·결과계약의 SSOT** 다. §14(법적·표현 가드)·§19(타입 계약)·§20(지표 공식 정본)·§21(테스트 매트릭스)·§5(리포트 상세)·§18(상태 매트릭스)는 *수학·법률·UX 규약*으로 경로 무관하게 유효한 참조다. 2026-06-14 전문 4-렌즈 토론(스코프 아키텍트·과설계 비평·ground-truth 2)로 확정.
+
+### 0.5.1 경로 정합 (stale → 실측)
+| 옛 PRD 경로 | 실측 현재 경로 |
+|---|---|
+| `landing/src/lib/terminal/data/backtest.ts` | **`ui/packages/surfaces/src/terminal/lib/backtest.ts`** (`data/` 아님 `lib/`. 440줄 *단일* 순수파일) |
+| `landing/src/lib/terminal/charts/btLayer.ts` | `ui/packages/surfaces/src/terminal/charts/btLayer.ts` (순수 렌더) |
+| 신설 `landing/src/lib/terminal/backtest/*` | `ui/packages/surfaces/src/terminal/lib/backtest/*` (§0.5.3) |
+| `/lab/terminal-dev` | `landing/src/routes/lab/terminal-dev/+page.svelte` → `DevTerminal`(`@dartlab/ui-surfaces/terminal/dev`, `checkDevIsolation.js` 가드) |
+| Python `src/dartlab/quant/strategy/{backtest,_backtestAdvanced}.py` | 동일(불변 — 별개 L2 엔진, DEFER P5만) |
+
+### 0.5.2 ★실측: 정확성 척추는 이미 라이브 (Phase 1-2 의 "구축" 대상 아님)
+`lib/backtest.ts:runBacktest`(440줄)이 이미 구현:
+- **t종가→t+1시가 체결**(`target[i-1]` 1봉 shift, `:239`) → look-ahead *구조적 불가*.
+- v=0/o=0 봉 체결 이연(`:240`)·**B&H 동일 `runPass`+동일 비용**(`:392-393`)·비용 기본 ON(commission 1.5/sellTax 15/slippage 10 bp).
+- split-suspect(`:357`)·CAGR null `<252`(`:350`)·Sharpe/Sortino null `<60`(`:334`)·**3-pass cost-drag**(`:389-393`)·open position 가상청산 mark(`:269-282`).
+- `btLayer.ts` = 순수 렌더(`BT_TRADES` 캔들페인 figures:[] 무왜곡 + `BT_EQUITY` 서브페인 strat/bh + **MDD 음영 peak→recover**, `:74-92`). `BacktestStrip.svelte` = props 표시 + **상시 면책 footer**(`:87-91`). ChartCtl bt state(btKey/btParams/btCosts/btCostsBp, `:92-95`, 세션 전용 비영속)·일봉 전용.
+- **⟹ v1 의 일은 "엔진 구축"이 아니라 *계약 경화 + 리포트 도크*.** PRD §16 Phase 1-2(원장화/계약)는 *이미 옳은 엔진을 재유도*하는 부분이 큼.
+
+### 0.5.3 모듈 구조 — 11파일 과설계 → ~4파일 (변경이유별 분할)
+440줄(≈130줄이 preset 정의)을 11파일(`types/strategies/engine/ledger/metrics/validation/robustness/cache/runner/worker/chartAdapter`)로 쪼개는 건 미빌드 기능용 빈 seam·import 의식. **유일한 실제 결합 문제 = preset registry 와 실행 커널이 한 파일**(변경 이유 다름: 전략 추가 vs 체결 의미). 정합:
+```
+ui/packages/surfaces/src/terminal/lib/backtest/
+  index.ts    # compat barrel — runBacktest·BT_PRESETS·BT_COSTS·전 타입 re-export. 기존 7 importer 무수정
+  types.ts    # BtPresetKey/Def·BtParamDef·BtTrade·BtWarning·BtMetrics·BtResult·BtCostsBp (+ RunSpec/provenance)
+  presets.ts  # BT_PRESETS registry + signal fns (~130줄)
+  engine.ts   # runPass·runBacktest·mdd·riskRatios·cagr·findSplitSuspect·BT_COSTS·reconcile 가드
+```
+- 마이그레이션: `lib/backtest.ts` → `lib/backtest/` 디렉터리 + `index.ts` barrel 이 현 export 전량 재노출 → 7 importer(PriceChart·btLayer·BtConfig·BacktestStrip·chartState·SourcesModal·seriesBus) **무수정**. `cd landing && npm run check && npm run build` 검증. 무동작변경.
+- **CUT**: `ledger/robustness/cache/runner/worker/chartAdapter/metrics/validation` 독립 파일. `chartAdapter` 로직은 이미 `btLayer.publishBt`(compact→Map)에 옳게 있음. `worker.ts`/`sensitivityRunner.ts` 는 Sensitivity 출시 때만(DEFER).
+
+### 0.5.4 원장 깊이 — 6원장 과모델 → 2구조 + reconcile 가드
+6원장(Order/Fill/Position/Cash/Trade/Equity)은 multi-asset·partial-fill·margin·pyramiding 어휘. 본 제품은 **long/flat·단일종목·fractional·전액**(`shares=cash/entryPx`, cash=0) — order book·부분체결·평단·현금/포지션 분리 부기 없음. PRD §20 의 *실제* 품질 목표 = **3 불변**(trade-PnL↔equity-PnL reconcile · B&H 동일경로[이미 참] · open-position convention 명시[이미 구현]). 정합:
+- **최소 원장 = `runPass` 가 이미 만드는 2 배열**: `equity:(number|null)[]`(= cash+shares·close, 전 지표가 여기서 계산) + `trades:BtTrade[]`.
+- **ADD(소·고가치)**: ① **reconciliation 가드**(Σ trade 기여 ≈ 최종 equity 수익률, rel-tol 1e-8 — 불일치 시 status invalid·UI 지표 미노출) ② `deferredBars`/`deferredReason`(v=0 이연 감사) ③ `exitReason:'signal'|'finalMark'|'finalLiquidation'`(현 `open:true` 암묵 → 명시).
+- **REJECT**: 독립 OrderLedger/CashLedger/PositionLedger 배열(long/flat 에선 equity+trades 의 파생 view, §15 short/margin/pyramiding 제외 제품에 multi-asset 부기 = 과모델).
+
+### 0.5.5 결과 계약 — 평행 `BacktestResult`+adapter 대신 `BtResult` 확장
+- PRD §8.1-8.2 의 `BacktestRunSpec`/`BacktestResult` 평행 신설 + `BtResult→Result` adapter 는 불필요 indirection. **`BtResult` 를 *확장*** + **flat `RunSpec` 레코드**(symbol·range·strategy·params·costs·dataAsOf·adjusted·dividend) + `provenance`(source/as-of/adjusted — strip footer 이미 보유) ADD. export/Assumptions 탭 재현성 확보.
+- `specHash`/`runId` 는 **DEFER**(worker/cache/async 도입 시) — 동기 sub-ms 실행엔 stale-result race·캐시 키 부재. `orders[]`/`fills[]`/`cash[]` series·중첩 RunSpec 의 `partialFillPolicy`/`impactModel`/`targetWeight`(엔진에 없는 상수 필드) = flatten/CUT.
+
+### 0.5.6 ★v1 스코프 — CORE(P1-3) vs DEFER(별도 PRD)
+정직한 제품 가치 = **차트 마커 + equity/MDD 페인 + 가정·경고가 숫자 옆에 붙은 스크롤 리포트**. 파라미터 *탐색*·통계적 *과최적화 기계*·전략 *저작*·Python parity 는 각자 독립 정확성 부담 → 별도 PRD.
+
+| Phase / 항목 | 판정 | 근거 |
+|---|---|---|
+| **P1** flat RunSpec + provenance + `BtResult` 확장(reconcile/exit/deferred 필드) | **CORE** | 재현성·export. 평행 Result+adapter 아님(§0.5.5) |
+| **P2** ~4파일 분할 + reconciliation 가드 | **CORE** | preset↔커널 seam(§0.5.3) + §20 reconcile(§0.5.4). 6원장 reject |
+| **P3** 전체화면 리포트 도크 **4탭(Overview/Trades/Drawdown/Assumptions)** + row→chart sync | **CORE** | 실제 제품 업그레이드. mddWindow→btLayer 음영 재사용. Assumptions=footer(`:87-91`) 승격 |
+| P3.5 날짜범위 + replay-cut **입력** | **CORE(소)** | 유일 데이터역량 갭(현 windowBars만). look-ahead 가드라 cut slice 자명 정확 |
+| **P4** Calendar(월/연 heatmap) | **DEFER(선택 CORE-lite)** | equity 후처리·엔진변경 0. P3 정착·눈검수 후 |
+| **P4** Sensitivity grid + worker + cache | **DEFER(별도 PRD)** | 파라미터 *탐색* = 다른 제품 모드(data-snooping). worker/cache/stability/overfit-언어 일괄 동반. §10.2 "스윕 보이면 Robustness 필요"로 P5 견인 |
+| **P5** Robustness(walk-forward/CPCV/DSR/PBO) + TS↔Python parity | **DEFER(별도 PRD)** | Python L2 엔진 영역(`_backtestAdvanced.py`). §2.4 가 그 엔진 원장 미정합 명시 → synthetic golden parity 선결. **★빈 Robustness 탭 금지 — §5.6 "미계산=검증안됨"이 모든 v1 run 에 '검증 안 됨' 낙인 = 가치없는 surface. 탭 자체를 안 만드는 게 더 정직** |
+| **P6** Strategy Builder(AND/OR·JSON I/O) | **DEFER(별도 PRD)** | 저작 제품 층. 6 preset 이 v1 탐색 표면(교육용, "추천" 아님) |
+
+**컷 라인 한 문장**: CORE=P1-3(타입화 재현 결과 + ~4파일 + reconcile 가드 + 리포트 도크 4탭 + row→chart sync + 날짜/replay 입력). 파라미터탐색(Sensitivity)·통계검증(Robustness/Python parity)·전략저작(Builder)은 각자 독립 PRD. Calendar 만 회색지대(P3 후 CORE-lite 가능).
+
+### 0.5.7 ★로컬/퍼블릭 공동배선 (운영자 우선순위)
+TS 엔진은 `Candle[]` 입력·Svelte/DOM/network import 0(`backtest.ts:1-7`)·결정론 순수 → **어댑터 무관**. `displaySeries()`=`rt.price.loaded(code)`(PricePort, public/local/test 공급). 동일 패리티 2 불변:
+1. **PricePort 캔들+조정(`ctl.adj`) 패리티**: public(static·브라우저 parquet)과 local(:8400)이 같은 code/range 에 같은 `Candle{t,o,h,l,c,v}`(+동일 조정) 반환하면 결과 byte-동일. **백테스트 코드는 `env.kind` 분기 절대 금지**.
+2. **CORE(P1-3) 동기·in-thread·브라우저 전용 유지**(현 `:635-659` 처럼) — public floor 엔 서버 없음. local :8400 은 *bonus*(빠름/장기이력), 요구 아님.
+- **Python 의 합법 진입 = DEFER P5(Robustness)만**, **TS↔Python synthetic golden fixture 통과 후에만** 공식 수치(미통과 시 `research/robustness reference` 라벨 + `pythonParityMissing` 경고). Python=parity-gate bonus·floor 아님.
+
+### 0.5.8 실측 변경 집계 (CORE v1)
+| 파일 | 변경 |
+|---|---|
+| `lib/backtest/{index,types,presets,engine}.ts` | 단일 `lib/backtest.ts` → 4파일(barrel 무수정 마이그레이션) + reconcile 가드·RunSpec/provenance·exit/deferred 필드 |
+| `charts/BacktestReport.svelte` 외 4탭 컴포넌트 (신설) | Overview/Trades/Drawdown/Assumptions(카드더미 금지·full-width band) |
+| `charts/PriceChart.svelte` | 전체화면 도크 마운트·row→chart sync(기존 `$effect:635-659`·mddWindow 재사용) |
+| `charts/BacktestStrip.svelte` | summary strip 으로 축소(상시 가정 footer 유지) + 도크와 result 공유 |
+| `charts/chartState.svelte.ts` | 날짜범위/replay-cut 입력 state(btKey 류처럼 세션 전용) |
+| (DEFER) worker/sensitivity/robustness/builder | 별도 PRD |
+
+---
 
 ## 1. 외부 벤치마크 흡수 결론
 
@@ -133,6 +210,8 @@ DartLab 적용:
 ## 2. 현재 DartLab 자산 기준선
 
 ### 2.1 landing TS 엔진
+
+> **→ §0.5.1 경로 정합**: 실측 거처는 `ui/packages/surfaces/src/terminal/lib/backtest.ts`(`data/` 아님). 아래 자산 목록은 *이미 라이브*이며 §0.5.2 가 정확성 척추 실측 SSOT.
 
 현재 `landing/src/lib/terminal/data/backtest.ts`는 순수 TypeScript 백테스트 엔진이다.
 
@@ -668,6 +747,8 @@ export interface BacktestResult {
 
 ### 8.3 Ledger model
 
+> **→ §0.5.4 정합(SSOT)**: 아래 6원장은 multi-asset 어휘 — long/flat 단일종목엔 과모델. v1 = **2구조(equity+trades) + reconciliation 가드 + deferred/exitReason 필드**. 독립 Order/Cash/Position 원장 REJECT. 아래 6원장 서술은 *개념 참조*로만.
+
 전문가급 기준은 equity curve만 만드는 것이 아니다. 다음 원장을 분리한다.
 
 - `OrderLedger`: 전략이 어느 시점에 어떤 target/order를 냈는지.
@@ -792,6 +873,8 @@ Builder 모델:
 ## 11. 아키텍처 계획
 
 ### 11.1 모듈 구조
+
+> **→ §0.5.3 정합(SSOT)**: 거처는 `ui/packages/surfaces/src/terminal/lib/backtest/`(landing 아님). 11파일 → **~4파일**(index barrel + types + presets + engine). ledger/robustness/cache/runner/worker/chartAdapter/metrics/validation 독립 파일 CUT — chartAdapter 는 이미 `btLayer.publishBt`. 아래 11파일 목록은 *최대 가정* 참조.
 
 권장:
 
@@ -1010,6 +1093,8 @@ Cache:
 - strategy marketplace/templates.
 
 ## 16. 구현 순서
+
+> **→ §0.5.6 v1 스코프 확정(SSOT)**: **CORE = Phase 1-3**(타입화 재현 결과 + ~4파일 + reconcile 가드 + 리포트 도크 4탭 Overview/Trades/Drawdown/Assumptions + row→chart sync + 날짜/replay 입력). **Phase 4 Sensitivity·Phase 5 Robustness/Python parity·Phase 6 Strategy Builder = 각자 별도 PRD DEFER**(Calendar 만 P3 후 선택 CORE-lite). ★빈 Robustness 탭 금지. 아래 6-phase 상세는 *그 분리된 PRD들의 설계 자산*으로 보존.
 
 MVP로 축소하지 않는다. 다만 위험을 낮추기 위해 계약부터 단계적으로 고정한다.
 

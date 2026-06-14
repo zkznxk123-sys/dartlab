@@ -1,6 +1,6 @@
 # Terminal Chart Suite — 차트 중심 터미널 PRD Index
 
-상태: v0.1 (2026-06-14 scenario-simulator 에서 분리 신설 — 차트의 *현재/과거* 3 컴포넌트를 독립 트랙으로)
+상태: v0.2 (2026-06-14 — scenario-simulator 에서 분리 신설 후 **4 문서 전부 공통배선(포트/어댑터) 이후 현재기준 정합 완료**. 01·04 는 이미 ui/packages 기준; 02·03 은 v0.3 정합 섹션(02 §1.5 / 03 §0.5)으로 경로·아키텍처·스코프 확정. 전문 4-렌즈 토론 + ground-truth 실측. **착수 = 운영자 go 대기**(코딩 아님 — 본 트랙은 *플랜 완성*까지))
 범위: 메인 주가 차트 위에서 동작하는 **현재/과거** 터미널 기능 — 주가/지수 차트·공시 위치 타임라인·EOD 백테스팅. 미래 방향(Play 시뮬레이션)은 `../scenario-simulator/`가 소유한다.
 
 ---
@@ -33,11 +33,22 @@ terminal-chart-suite (현재/과거)  ──(소비)──▶  scenario-simulato
 
 ---
 
+## ★로컬/퍼블릭 공동배선 (suite 공통 불가침)
+
+세 기능 모두 **공유 surface**(`ui/packages/surfaces/src/terminal/`)에 살고, 데이터는 **포트/어댑터 런타임**으로 흐른다. 따라서 **퍼블릭 floor 에 설계, 로컬은 bonus**(메모리 `project_terminal_improvement` 2타깃 원칙).
+
+- **퍼블릭(landing, adapter-static·서버 0·브라우저)** = floor. 세 기능 전부 브라우저에서 완결돼야 한다 — 01 지수=브라우저 parquet 직독, 02 공시=`rt.filing.*`(브라우저 parquet), 03 백테스트=브라우저 TS 엔진(`rt.price.loaded` 캔들).
+- **로컬(:8400 백엔드·포트 배선됨)** = bonus(빠름·장기이력·Python). floor 기능을 *대체하지 않고 보강*만.
+- **불변**: 어느 기능도 `env.kind` 로 분기해 floor 에서 사라지면 안 된다. 포트가 같은 형(01=IndexPort·02=FilingPort·03=PricePort) 을 public/local/fake 3 어댑터에서 동시 만족(01 §3.5 가 IndexPort 3어댑터 conformance 의 *예시 정본*).
+- **신규 어댑터 작업**: 01=IndexPort 3어댑터 신규(govIndex/fredIndex/fake) · 02=어댑터 변경 0(fake nonRegular fixture 1건만) · 03=어댑터 변경 0(엔진 순수·캔들 패리티만). Python(03 Robustness)은 별도 PRD·parity-gate 뒤 local 전용.
+
+---
+
 ## 문서 지도
 
 1. [01-price-index-chart.md](01-price-index-chart.md) — 주가/지수 차트(center subject-swap, IndexPort catalog/search/series, KR gov OHLCV 캔들 + US FRED 종가 라인 평행 subject, candleStyle='area' degenerate, 종가전용 지표 3분기, subject 소유권 seam).
-2. [02-disclosure-event-rail.md](02-disclosure-event-rail.md) — 공시 위치 찾기 레일(x축 아래 과거 공시 위치, `rceptNo` 중심 `DisclosureEvent` 정규화, 호버 메타·클릭→우측 행 스크롤. 미래 마커는 시뮬로 이관).
-3. [03-backtesting-strategy-tester.md](03-backtesting-strategy-tester.md) — 차트 중심 EOD 백테스팅 Strategy Tester(look-ahead 차단·t종가→t+1시가 체결·비용 기본 ON·RunSpec/ledger/provenance·DSR/PBO 과최적화 가드. 리포트 도크 스크롤).
+2. [02-disclosure-event-rail.md](02-disclosure-event-rail.md) — 공시 위치 찾기 레일(x축 아래 과거 공시 위치, `rceptNo` 중심 `DisclosureEvent` 정규화, 호버 메타·클릭→우측 행 스크롤. 미래 마커는 시뮬로 이관). **v0.3 정합(§1.5 SSOT): 마커 ~70% 기빌드 실측 → 하단 레일 채택 + disclosure 캔들고가 경로 제거(one-system)·rt.filing.\* 포트 소비(어댑터 변경 0)·형제 펄스 스토어 sync·타입 18→6 필드.**
+3. [03-backtesting-strategy-tester.md](03-backtesting-strategy-tester.md) — 차트 중심 EOD 백테스팅 Strategy Tester(look-ahead 차단·t종가→t+1시가 체결·비용 기본 ON·RunSpec/ledger/provenance·DSR/PBO 과최적화 가드. 리포트 도크 스크롤). **v0.3 정합(§0.5 SSOT): 엔진 정확성 척추 이미 라이브 실측 → v1 CORE=리포트 도크 4탭+계약 경화(~4파일·2원장+reconcile)·Sensitivity/Robustness/Builder/Python parity 는 별도 PRD DEFER·빈 Robustness 탭 금지.**
 4. [04-indicator-overlay-palette.md](04-indicator-overlay-palette.md) — 경제·보조지표 오버레이 + 팔레트 조직(2026-06-14, F1). **신규 능력 0** — econOverlay·MACRO_SERIES·ChartMenus/ChartRibbon 전수 팔레트·SUB_GROUPS 이미 라이브. 작업 3건 = SUB_GROUPS 조직 이식·ECON 우선 순서·마퀴 클릭→toggleEcon 배선(정직 분기).
 
 > **참조 규약**: suite 내부 = 01/02/03/04. **시뮬 PRD 바 번호(05 Play·07 통합로드맵·08 valuation·09 정합화 등) = `../scenario-simulator/NN`.** 통합 시퀀싱은 시뮬 07(브리지 문서)이 소유.
@@ -54,4 +65,8 @@ terminal-chart-suite (현재/과거)  ──(소비)──▶  scenario-simulato
 
 ## 착수 게이트
 
-mainPlan(터미널 ui/packages 정착) 완료 + 운영자 go 후 착수. 단 **01 주가/지수 차트는 mainPlan 무관 선행 가능**(IndexPort 충돌 1회 확인). 셋은 시뮬 미완과 무관하게 독립 진행 가능 — 그것이 분리의 핵심 이득.
+mainPlan(터미널 ui/packages 정착) 완료 + 운영자 go 후 착수. 단 **01 주가/지수 차트·04 지표 팔레트(F1)는 mainPlan 무관 선행 가능**(01=IndexPort 충돌 1회 확인 / 04=기존 자산 배선). 넷은 시뮬 미완과 무관하게 독립 진행 가능 — 그것이 분리의 핵심 이득.
+
+- **이 트랙(플랜 완성)은 코딩이 아니다** — 4 문서를 *재조사 없이 구현 가능한 완전 설계*로 확정하는 것이 범위. 구현 착수는 운영자 go.
+- **UI 변경이므로 push 는 운영자 명시 승인 후에만**(`feedback_ui_rules`: 스크린샷 전수 눈검수 + 공개 터미널 무중단 + 완결 단위만). 본 트랙은 *문서만* 변경하므로 commit 자율·push 보류는 운영자 지시.
+- **구현 순서**(시뮬 07 통합로드맵): 01 지수 → 02 레일 → 03 백테스팅. 04 는 차트 크롬 개선이라 어디든 선행 가능.
