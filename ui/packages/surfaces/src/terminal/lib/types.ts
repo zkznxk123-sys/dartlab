@@ -222,7 +222,7 @@ export interface GradeChip {
 	// 종합 축의 동종업종 백분위 — 등급 근거(다이얼로그). 원시지표 백분위 아님(그건 우측 패널·다른 세션).
 	topPct?: number | null; // 상위 N% = 동급 이상 동종사 비율(순서형만). 표본<5 → null.
 	peerN?: number; // 동종사 표본 수(순서형=등급 보유사, 분류=값 보유사).
-	dist?: { step: string; share: number }[]; // 등급레벨별 동종사 비중 % (순서형 분포 막대).
+	dist?: { step: string; share: number; tone: Tone }[]; // 등급레벨별 동종사 비중 % + 톤(좋음→나쁨 색). 순서형 분포 막대.
 	sameShare?: number | null; // 분류(cf) 전용 — 동종사 내 같은 유형 비중 %(순위 아님).
 }
 export interface RadarAxis {

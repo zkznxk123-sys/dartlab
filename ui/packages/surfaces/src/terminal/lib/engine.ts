@@ -567,7 +567,7 @@ export function createEngine(raw: RawData): Engine {
 		// gradeScore(0~1)로 환산해 회사 순위를 낸다. "이 축에서 업종 상위 N%" = 그 등급의 근거.
 		// (원시지표 백분위는 우측 패널 = 다른 세션 담당 — 여긴 축 종합만.)
 		const peers = industryNodes(industry);
-		const axisStat = (a: CompositeAxis): { score: Num; topPct: number | null; n: number; dist: { step: string; share: number }[]; sameShare: number | null } => {
+		const axisStat = (a: CompositeAxis): { score: Num; topPct: number | null; n: number; dist: { step: string; share: number; tone: Tone }[]; sameShare: number | null } => {
 			const myVal = eco[a.field] as string | undefined;
 			if (a.kind === 'class') {
 				// 분류(현금흐름) — 순서 없음 → 순위·사다리 금지. 동종사 내 *같은 유형 비중*(빈도)만(순위 아님).
@@ -587,7 +587,7 @@ export function createEngine(raw: RawData): Engine {
 				if (v && scale.includes(v)) counts[v] = (counts[v] || 0) + 1;
 			}
 			const scored = scores.length;
-			const dist = scale.map((step) => ({ step, share: scored ? Math.round(((counts[step] || 0) / scored) * 100) : 0 }));
+			const dist = scale.map((step) => ({ step, share: scored ? Math.round(((counts[step] || 0) / scored) * 100) : 0, tone: gradeTone(a.key, step) }));
 			// 상위 N% = midrank 백분위(더 우수한 동종사 + 동급의 절반). 동률(같은 등급 다수)을 대칭 처리해
 			// 다수가 몰린 등급에서 "바닥처럼 보이는" 왜곡을 막는다(순서형 ordinal 표준). 표본<5 → null(폴백).
 			const better = scores.filter((x) => x > (myScore as number)).length;

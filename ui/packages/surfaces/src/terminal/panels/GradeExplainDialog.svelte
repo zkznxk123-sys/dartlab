@@ -18,6 +18,8 @@
 
 	const tcls = (t: string) =>
 		(({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
+	// 등급 톤 → 막대 색(좋음→나쁨). 분포 막대를 색으로 즉시 읽히게 한다.
+	const TONE_COL: Record<string, string> = { up: '#3fb950', good: '#2ea043', neutral: '#8b949e', warn: '#d29922', down: '#f85149' };
 
 	const vd = $derived(co.verdict);
 	const pct = $derived(co.percentile);
@@ -89,6 +91,19 @@
 						{#each vd.concerns as c}<span class="geTag dn">{txc(c, lang)}</span>{/each}
 					</div>
 				{/if}
+				<!-- 신용등급(dCR) 구성 — 레이더 우측 여백 채움 + 헤더 신용등급의 근거(5요소 0~100). -->
+				{#if co.credit.tracks?.length}
+					<div class="geCredTracks">
+						<span class="geGl">{lang === 'en' ? 'Credit factors' : '신용 구성'}</span>
+						{#each co.credit.tracks as t (t.en)}
+							<div class="geCt">
+								<span class="geCtL">{txc(t, lang)}</span>
+								<div class="geCtTrack"><div class="geCtBar" style={`width:${Math.max(2, t.score)}%;background:${t.score >= 66 ? '#3fb950' : t.score >= 45 ? '#d29922' : '#f85149'}`}></div></div>
+								<span class="geCtV mono">{t.score}</span>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -108,11 +123,11 @@
 						<!-- 타이틀 = 종합 축명. 우측 = 등급 pill + "업종 상위 N%"(축 자체의 동종사 백분위 = 등급 근거). -->
 						<div class="geCrTop">
 							<span class="geCrTitle">{txc(g, lang)}</span>
-							<span class={'geCrPill ' + tcls(g.tone)}>{g.v}</span>
-							{#if !isClass && g.topPct != null}
+							{#if isClass}
+								<span class={'geCrPill ' + tcls(g.tone)}>{g.v}</span>
+								{#if g.sameShare != null}<span class="geCrRank mono">{lang === 'en' ? `${g.sameShare}% of peers` : `같은 유형 ${g.sameShare}%`}</span>{/if}
+							{:else if g.topPct != null}
 								<span class="geCrRank mono">{lang === 'en' ? 'top ' : '업종 상위 '}{g.topPct}%</span>
-							{:else if isClass && g.sameShare != null}
-								<span class="geCrRank mono">{lang === 'en' ? `${g.sameShare}% of peers` : `같은 유형 ${g.sameShare}%`}</span>
 							{/if}
 						</div>
 						{#if isClass}
@@ -122,11 +137,12 @@
 						{:else}
 							{#if guide}<div class="geCrWhat">{lang === 'en' ? guide.en.what : guide.kr.what}</div>{/if}
 							{#if hasDist}
-								<!-- 등급레벨별 동종사 분포 막대 + 회사 위치(하이라이트) = 이 축에서 어느 정도 위치인지 -->
+								{@const maxShare = Math.max(...(g.dist ?? []).map((d) => d.share), 1)}
+								<!-- 등급레벨별 동종사 분포 막대(최댓값 기준 정규화) + 회사 등급 칼럼 하이라이트 -->
 								<div class="geDist">
 									{#each g.dist ?? [] as d (d.step)}
 										<div class={'geDc' + (d.step === g.v ? ' on' : '')} title={`${d.step} · 업종 ${d.share}%`}>
-											<div class="geDcTrack"><div class="geDcBar" style={`height:${Math.max(3, d.share)}%`}></div></div>
+											<div class="geDcTrack"><div class="geDcBar" style={`height:${d.share === 0 ? 0 : Math.max(10, Math.round((d.share / maxShare) * 100))}%;background:${TONE_COL[d.tone] ?? '#8b949e'}`}></div></div>
 											<span class="geDcStep">{d.step}</span>
 											<span class="geDcPct mono">{d.share}%</span>
 										</div>
@@ -153,7 +169,7 @@
 
 <style>
 	.geModal {
-		width: min(840px, 96vw);
+		width: min(940px, 96vw);
 	}
 	.geBand {
 		font-size: 11px;
@@ -177,6 +193,7 @@
 		gap: 16px;
 		padding: 14px 14px 6px;
 		align-items: flex-start;
+		flex: 0 0 auto; /* 헤더·레이더·신용 구성은 고정 — 아래 등급기준만 스크롤 */
 	}
 	.geRadar {
 		flex: 0 0 224px;
@@ -238,6 +255,9 @@
 		border-top: 1px solid var(--dl-line, #1b2130);
 		padding: 10px 14px 14px;
 		background: rgba(255, 255, 255, 0.012);
+		flex: 1 1 auto; /* 남은 높이 차지 + 넘치면 스크롤(모달 잘림 방지) */
+		min-height: 0;
+		overflow-y: auto;
 	}
 	.geCrHead {
 		font-size: 10px;
@@ -248,7 +268,7 @@
 	}
 	.geCrGrid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 		gap: 12px 14px;
 		align-items: start;
 	}
@@ -335,22 +355,24 @@
 	}
 	.geDcTrack {
 		width: 100%;
-		height: 26px;
+		height: 44px;
 		display: flex;
 		align-items: flex-end;
 		border-bottom: 1px solid var(--dl-line, #1b2130);
 	}
 	.geDcBar {
 		width: 100%;
-		background: rgba(139, 148, 158, 0.35);
+		min-width: 0;
+		background: rgba(139, 148, 158, 0.4);
 		border-radius: 2px 2px 0 0;
 		transition: height 0.2s;
 	}
 	.geDc.on .geDcBar {
-		background: var(--color-dl-primary, #ea4647);
+		/* 막대는 등급 톤 색(인라인) — 회사 칼럼은 외곽선 링으로 구분(색 위에 위치 표시) */
+		box-shadow: 0 0 0 1.5px var(--dl-ink, #c8cfdb);
 	}
 	.geDcStep {
-		font-size: 8px;
+		font-size: 9px;
 		color: var(--dl-ink-dim, #5b6473);
 		max-width: 100%;
 		overflow: hidden;
@@ -362,9 +384,13 @@
 		font-weight: 700;
 	}
 	.geDcPct {
-		font-size: 8px;
+		font-size: 9px;
 		color: var(--dl-ink-dim, #5b6473);
 		font-variant-numeric: tabular-nums;
+	}
+	.geDc.on .geDcPct {
+		color: var(--color-dl-primary, #ea4647);
+		font-weight: 700;
 	}
 	.geCred {
 		display: flex;
@@ -385,5 +411,42 @@
 	}
 	.geCredX b {
 		color: var(--dl-ink, #c8cfdb);
+	}
+	/* 신용 구성 — 레이더 우측 여백 채움(dCR 등급 근거 5요소 0~100) */
+	.geCredTracks {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		margin-top: 2px;
+		padding-top: 6px;
+		border-top: 1px dashed var(--dl-line, #1b2130);
+	}
+	.geCt {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+	}
+	.geCtL {
+		flex: 0 0 64px;
+		font-size: 10px;
+		color: var(--dl-ink-dim, #5b6473);
+	}
+	.geCtTrack {
+		flex: 1 1 auto;
+		height: 7px;
+		border-radius: 4px;
+		background: rgba(139, 148, 158, 0.14);
+		overflow: hidden;
+	}
+	.geCtBar {
+		height: 100%;
+		border-radius: 4px;
+	}
+	.geCtV {
+		flex: 0 0 22px;
+		text-align: right;
+		font-size: 10px;
+		color: var(--dl-ink, #c8cfdb);
+		font-variant-numeric: tabular-nums;
 	}
 </style>
