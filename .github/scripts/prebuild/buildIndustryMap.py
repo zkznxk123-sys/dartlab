@@ -356,7 +356,8 @@ def _loadScanMetrics() -> dict[str, dict]:
             if not code:
                 continue
             metrics.setdefault(code, {})
-            metrics[code]["auditRisk"] = r.get("위험등급") or r.get("riskGrade") or ""
+            # scanAudit 출력 컬럼은 riskLevel(안전/관찰/주의/고위험 4단) — 옛 위험등급/riskGrade 는 부재(silent-null 0%).
+            metrics[code]["auditRisk"] = r.get("riskLevel") or r.get("위험등급") or r.get("riskGrade") or ""
     except Exception as e:
         print(f"  ⚠ audit 로드 실패: {e}")
 
@@ -405,6 +406,8 @@ def _loadScanMetrics() -> dict[str, dict]:
             metrics.setdefault(code, {})
             metrics[code]["assetTurnover"] = _pick(r, "자산회전율", "assetTurnover")
             metrics[code]["ccc"] = _pick(r, "현금전환주기", "ccc")
+            # scanEfficiency 출력 등급 컬럼 = grade(우수/양호/보통/비효율/해당없음) — 종합 효율성 축 값.
+            metrics[code]["effGrade"] = r.get("grade") or r.get("등급") or ""
     except Exception as e:
         print(f"  ⚠ efficiency 로드 실패: {e}")
 
@@ -418,7 +421,8 @@ def _loadScanMetrics() -> dict[str, dict]:
             if not code:
                 continue
             metrics.setdefault(code, {})
-            metrics[code]["capClass"] = r.get("환원분류") or r.get("returnClass") or ""
+            # scanCapital 출력 컬럼은 분류(적극환원/환원형/중립/희석형) — 옛 환원분류/returnClass 는 부재(silent-null 0%).
+            metrics[code]["capClass"] = r.get("분류") or r.get("환원분류") or r.get("returnClass") or ""
     except Exception as e:
         print(f"  ⚠ capital 로드 실패: {e}")
 
@@ -895,6 +899,7 @@ def buildEcosystem(
                 "auditRisk": m.get("auditRisk") or "",
                 "qualGrade": m.get("qualGrade") or "",
                 "liqGrade": m.get("liqGrade") or "",
+                "effGrade": m.get("effGrade") or "",
                 "capClass": m.get("capClass") or "",
                 "empCount": m.get("empCount"),
                 "size": rev_log,
@@ -1033,7 +1038,7 @@ def buildEcosystem(
     }
 
 
-def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
+def buildIndustryStats(scanMetrics: dict[str, dict], insiderMetrics: dict[str, dict] | None = None) -> dict:
     """산업별 사전 집계 — `industryStats.json` 산출.
 
     각 산업에 대해:
@@ -1053,17 +1058,20 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
     taxonomy = loadTaxonomy()
 
     # 산업 → primary 노드 + scan 지표 결합
+    insiderMetrics = insiderMetrics or {}
     byIndustry: dict[str, list[dict]] = {}
     for n in nodes:
         if not n.primary:
             continue
         m = scanMetrics.get(n.stockCode, {})
+        ins = insiderMetrics.get(n.stockCode, {})
         byIndustry.setdefault(n.industry, []).append(
             {
                 "stockCode": n.stockCode,
                 "corpName": n.corpName,
                 "revenue": n.revenue or 0,
                 "roe": m.get("roe"),
+                "holderPct": ins.get("holderPct"),
                 "opMargin": m.get("opMargin"),
                 "netMargin": m.get("netMargin"),
                 "roa": m.get("roa"),
@@ -1182,6 +1190,7 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
             "ccc": _distribution([m.get("ccc") for m in members]),
             "accrualRatio": _distribution([m.get("accrualRatio") for m in members]),
             "govScore": _distribution([m.get("govScore") for m in members]),
+            "holderPct": _distribution([m.get("holderPct") for m in members]),
         }
 
         out[indId] = {
@@ -1535,7 +1544,7 @@ def main() -> None:
 
     # 산업 통계 (사용자 가치 인사이트)
     print("[산업 통계] industryStats.json")
-    indStats = buildIndustryStats(scanMetrics)
+    indStats = buildIndustryStats(scanMetrics, insiderMetrics)
     (OUT_DIR / "industryStats.json").write_text(json.dumps(indStats, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"  - {len(indStats)}개 산업 (avgRoe + topN + supply flows)")
 

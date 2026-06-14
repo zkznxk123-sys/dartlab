@@ -42,16 +42,47 @@ const SECTOR_KR: Record<string, string> = {
 	realestate: '부동산', education: '교육', medicalDevice: '의료기기', environment: '환경',
 	buildingMaterials: '건자재', railroad: '철도', consulting: '지주', agriculture: '농업', misc: '기타'
 };
+// 등급 사다리 SSOT — gradeTone/gradeScore 가 위치(좋음→나쁨)로 톤·점수(0~1)를 도출. scan 엔진 실제 출력값과 일치.
+// 미수록 값(eff '해당없음'=N/A, stab '미확인')은 indexOf<0 → gradeScore null(레이더 스포크 생략)·gradeTone neutral(중립칩) — 거짓 순서 방지.
 export const GRADE_SCALE: Record<string, string[]> = {
 	prof: ['우수', '양호', '보통', '저수익', '적자'],
-	debt: ['안전', '관찰', '주의', '고위험'],
 	growth: ['고성장', '성장', '정체', '역성장', '급감'],
-	gov: ['A', 'B', 'C', 'D', 'E'],
-	qual: ['우수', '양호', '보통', '주의', '위험'],
+	debt: ['안전', '관찰', '주의', '고위험'],
 	liq: ['우수', '양호', '보통', '주의', '위험'],
-	audit: ['저위험', '중위험', '고위험'],
-	stab: ['안정', '보통', '불안정', '취약', '경고', '위험']
+	eff: ['우수', '양호', '보통', '비효율'], // scanEfficiency grade — '해당없음'(N/A)은 척도 밖(중립)
+	qual: ['우수', '양호', '보통', '주의', '위험'],
+	gov: ['A', 'B', 'C', 'D', 'E'],
+	stab: ['안정', '보통', '취약', '경고', '위험'], // scan insider stability 실제 출력(옛 '불안정' 미발생·'미확인'은 척도 밖)
+	audit: ['안전', '관찰', '주의', '고위험'], // scanAudit riskLevel 4단 (옛 3단 저/중/고 교체)
+	cap: ['적극환원', '환원형', '중립', '희석형'] // scanCapital 분류 — 주주환원 강도
 };
+
+// ── 종합(composite) 축 SSOT ──
+// 중간패널 칩·다이얼로그 블록·레이더 스포크를 *모두* 이 한 배열에서 파생한다(3-way 축 불일치 근절).
+// 순서 = 분석가 읽기 흐름. kind='ordered' 만 레이더 스포크(gradeScore)·등급 사다리 대상.
+// kind='class'(현금흐름 8패턴)은 순서가 없으므로 색·사다리·레이더에서 제외(거짓 순서 방지).
+export interface CompositeAxis {
+	key: string; // GRADE_SCALE·gradeTone·gradeScore·GRADE_GUIDE 공용 키
+	kr: string;
+	en: string;
+	short: string; // 레이더 스포크 짧은 라벨(겹침 완화)
+	group: string; // GROUP_COLOR 카테고리 색
+	field: keyof EcoNode; // 등급 문자열이 담긴 EcoNode 필드
+	kind: 'ordered' | 'class';
+}
+export const COMPOSITE_AXES: CompositeAxis[] = [
+	{ key: 'prof', kr: '수익성', en: 'Profit', short: '수익', group: 'health', field: 'profGrade', kind: 'ordered' },
+	{ key: 'growth', kr: '성장성', en: 'Growth', short: '성장', group: 'income', field: 'growthGrade', kind: 'ordered' },
+	{ key: 'debt', kr: '재무안정', en: 'Solvency', short: '안정', group: 'health', field: 'debtGrade', kind: 'ordered' },
+	{ key: 'liq', kr: '유동성', en: 'Liquidity', short: '유동', group: 'quality', field: 'liqGrade', kind: 'ordered' },
+	{ key: 'eff', kr: '효율성', en: 'Efficiency', short: '효율', group: 'changes', field: 'effGrade', kind: 'ordered' },
+	{ key: 'qual', kr: '이익질', en: 'Quality', short: '이익질', group: 'quality', field: 'qualGrade', kind: 'ordered' },
+	{ key: 'gov', kr: '거버넌스', en: 'Govern', short: '거버넌스', group: 'governance', field: 'govGrade', kind: 'ordered' },
+	{ key: 'stab', kr: '경영권안정', en: 'Control', short: '경영권', group: 'governance', field: 'stability', kind: 'ordered' },
+	{ key: 'audit', kr: '감사', en: 'Audit', short: '감사', group: 'quality', field: 'auditRisk', kind: 'ordered' },
+	{ key: 'cap', kr: '주주환원', en: 'Capital return', short: '환원', group: 'disclosure', field: 'capClass', kind: 'ordered' },
+	{ key: 'cf', kr: '현금흐름', en: 'Cash flow', short: '현금', group: 'price', field: 'cfPattern', kind: 'class' }
+];
 // dartlab scan group colors — dartlab 토큰 계열로 정렬
 const GROUP_COLOR: Record<string, string> = {
 	identity: '#a3a8b3', income: '#60a5fa', health: '#34d399', governance: '#a78bfa',
@@ -237,7 +268,7 @@ export function createEngine(raw: RawData): Engine {
 		else if (e.growthGrade === '역성장')
 			add('yellow', '매출 역성장', 'Revenue decline', e.revCagr != null ? e.revCagr.toFixed(0) + '%' : '');
 		if (e.auditRisk === '고위험') add('red', '감사 고위험', 'Audit high risk');
-		else if (e.auditRisk === '중위험') add('yellow', '감사 위험', 'Audit risk');
+		else if (e.auditRisk === '주의') add('yellow', '감사 주의', 'Audit watch');
 		if (e.qualGrade === '위험') add('red', '이익질 위험', 'Earnings quality risk');
 		else if (e.qualGrade === '주의') add('yellow', '이익질 주의', 'Earnings quality watch');
 		if (e.liqGrade === '위험') add('red', '유동성 위험', 'Liquidity risk');
@@ -314,9 +345,9 @@ export function createEngine(raw: RawData): Engine {
 			const med = d.median ?? d.p10;
 			return { p10: d.p10, p25: d.p25 ?? med, median: med, p75: d.p75 ?? med, p90: d.p90 };
 		};
-		// 12 축 — 수익성(4)·성장(2)·안정성(2)·유동성(1)·효율성(2)·이익질(1).
+		// 원시지표 백분위 — *우측 패널(크로스 유니버스, 다른 세션) 전용*. 다이얼로그 등급기준은 이걸 쓰지 않고
+		// 종합 축 백분위(grades[].topPct)를 쓴다. 수익성(4)·성장(2)·재무안정(2)·유동성(1)·효율성(2)·이익질(1)·거버넌스(1).
 		// lowerBetter=true (부채비율·CCC·발생액비율) 는 pctRank 가 p 를 뒤집어 "상위 N%" 가 항상 우수를 뜻함.
-		// axis = 등급축 key(다이얼로그 등급기준·중간패널 그루핑용). 각 축 첫 지표 = 대표(중간패널 미니곡선).
 		const metrics = [
 			{ kr: '영업이익률', en: 'OP margin', axis: 'prof', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
 			{ kr: '순이익률', en: 'Net margin', axis: 'prof', v: node.netMargin ?? null, p: pctRank(col('netMargin'), node.netMargin ?? null), unit: '%', band: bandOf('netMargin') },
@@ -324,8 +355,8 @@ export function createEngine(raw: RawData): Engine {
 			{ kr: 'ROA', en: 'ROA', axis: 'prof', v: node.roa ?? null, p: pctRank(col('roa'), node.roa ?? null), unit: '%', band: bandOf('roa') },
 			{ kr: '매출성장', en: 'Rev growth', axis: 'growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
 			{ kr: '순이익성장', en: 'Net growth', axis: 'growth', v: node.netIncomeCagr ?? null, p: pctRank(col('netIncomeCagr'), node.netIncomeCagr ?? null), unit: '%', band: bandOf('netIncomeCagr') },
-			{ kr: '부채비율', en: 'Debt ratio', axis: 'stab', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
-			{ kr: '이자보상배율', en: 'Int. coverage', axis: 'stab', v: node.icr ?? null, p: pctRank(col('icr'), node.icr ?? null), unit: '배', band: bandOf('icr') },
+			{ kr: '부채비율', en: 'Debt ratio', axis: 'debt', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
+			{ kr: '이자보상배율', en: 'Int. coverage', axis: 'debt', v: node.icr ?? null, p: pctRank(col('icr'), node.icr ?? null), unit: '배', band: bandOf('icr') },
 			{ kr: '유동비율', en: 'Current ratio', axis: 'liq', v: node.currentRatio ?? null, p: pctRank(col('currentRatio'), node.currentRatio ?? null), unit: '%', band: bandOf('currentRatio') },
 			{ kr: '자산회전율', en: 'Asset turn', axis: 'eff', v: node.assetTurnover ?? null, p: pctRank(col('assetTurnover'), node.assetTurnover ?? null), unit: '배', band: bandOf('assetTurnover') },
 			{ kr: '현금전환주기', en: 'Cash cycle', axis: 'eff', v: node.ccc ?? null, p: pctRank(col('ccc'), node.ccc ?? null, true), unit: '일', band: bandOf('ccc') },
@@ -531,25 +562,52 @@ export function createEngine(raw: RawData): Engine {
 
 		const blog = raw.meta?.blog ? raw.meta.blog[code] : undefined;
 		const marketLabel = MARKET_LABEL[eco.market || ''] || 'KRX';
-		const grades = [
-			{ key: 'prof', kr: '수익성', en: 'Profit', group: 'health', v: eco.profGrade },
-			{ key: 'growth', kr: '성장성', en: 'Growth', group: 'income', v: eco.growthGrade },
-			{ key: 'gov', kr: '거버넌스', en: 'Govern', group: 'governance', v: eco.govGrade },
-			{ key: 'qual', kr: '이익질', en: 'Quality', group: 'quality', v: eco.qualGrade },
-			{ key: 'liq', kr: '유동성', en: 'Liquid', group: 'quality', v: eco.liqGrade },
-			{ key: 'audit', kr: '감사위험', en: 'Audit', group: 'quality', v: eco.auditRisk },
-			{ key: 'stab', kr: '경영안정', en: 'Stable', group: 'governance', v: eco.stability }
-		]
-			.filter((g): g is typeof g & { v: string } => !!g.v)
-			.map((g) => ({ key: g.key, kr: g.kr, en: g.en, v: g.v, tone: gradeTone(g.key, g.v), color: GROUP_COLOR[g.group] }));
-		const radar = [
-			{ kr: '수익성', en: 'Profit', s: gradeScore('prof', eco.profGrade) },
-			{ kr: '성장성', en: 'Growth', s: gradeScore('growth', eco.growthGrade) },
-			{ kr: '안정성', en: 'Stability', s: gradeScore('stab', eco.stability) },
-			{ kr: '이익질', en: 'Quality', s: gradeScore('qual', eco.qualGrade) },
-			{ kr: '유동성', en: 'Liquidity', s: gradeScore('liq', eco.liqGrade) },
-			{ kr: '거버넌스', en: 'Govern', s: gradeScore('gov', eco.govGrade) }
-		];
+		// ── 종합(composite) 축의 동종업종 백분위 — 등급을 매긴 *근거* ──
+		// 핵심: 원시지표(영업이익률 등) 백분위가 아니라 *축 자체*를 백분위한다. 같은 축에서 동종사들의 등급을
+		// gradeScore(0~1)로 환산해 회사 순위를 낸다. "이 축에서 업종 상위 N%" = 그 등급의 근거.
+		// (원시지표 백분위는 우측 패널 = 다른 세션 담당 — 여긴 축 종합만.)
+		const peers = industryNodes(industry);
+		const axisStat = (a: CompositeAxis): { score: Num; topPct: number | null; n: number; dist: { step: string; share: number }[]; sameShare: number | null } => {
+			const myVal = eco[a.field] as string | undefined;
+			if (a.kind === 'class') {
+				// 분류(현금흐름) — 순서 없음 → 순위·사다리 금지. 동종사 내 *같은 유형 비중*(빈도)만(순위 아님).
+				const valued = peers.filter((pn) => !!(pn[a.field] as string | undefined));
+				const same = myVal ? valued.filter((pn) => (pn[a.field] as string) === myVal).length : 0;
+				const vn = valued.length;
+				return { score: null, topPct: null, n: vn, dist: [], sameShare: vn && myVal ? Math.round((same / vn) * 100) : null };
+			}
+			const scale = GRADE_SCALE[a.key] || [];
+			const myScore = gradeScore(a.key, myVal);
+			const counts: Record<string, number> = {};
+			const scores: number[] = [];
+			for (const pn of peers) {
+				const v = pn[a.field] as string | undefined;
+				const s = gradeScore(a.key, v);
+				if (s != null) scores.push(s);
+				if (v && scale.includes(v)) counts[v] = (counts[v] || 0) + 1;
+			}
+			const scored = scores.length;
+			const dist = scale.map((step) => ({ step, share: scored ? Math.round(((counts[step] || 0) / scored) * 100) : 0 }));
+			// 상위 N% = midrank 백분위(더 우수한 동종사 + 동급의 절반). 동률(같은 등급 다수)을 대칭 처리해
+			// 다수가 몰린 등급에서 "바닥처럼 보이는" 왜곡을 막는다(순서형 ordinal 표준). 표본<5 → null(폴백).
+			const better = scores.filter((x) => x > (myScore as number)).length;
+			const tie = scores.filter((x) => x === myScore).length;
+			const topPct = myScore == null || scored < 5 ? null : Math.max(1, Math.min(100, Math.round(((better + tie / 2) / scored) * 100)));
+			return { score: myScore, topPct, n: scored, dist, sameShare: null };
+		};
+		// 종합 축 칩 — COMPOSITE_AXES SSOT 에서 파생(중간패널·다이얼로그·레이더 단일 출처). 결손 축은 누락(0대체 금지).
+		// cf(kind='class')는 GRADE_SCALE 에 없어 gradeTone='neutral' → 중립칩(거짓 순서 색 방지). 각 칩에 축 백분위(topPct)·분포(dist) 동봉.
+		const grades = COMPOSITE_AXES.map((a) => ({ a, v: (eco[a.field] as string | undefined) || '' }))
+			.filter((x) => !!x.v)
+			.map(({ a, v }) => {
+				const st = axisStat(a);
+				return { key: a.key, kr: a.kr, en: a.en, v, kind: a.kind, tone: gradeTone(a.key, v), color: GROUP_COLOR[a.group] || '#a3a8b3', topPct: st.topPct, peerN: st.n, dist: st.dist, sameShare: st.sameShare };
+			});
+		// 레이더 = 순서형 종합 축만(cf 제외). 스포크 = *축 백분위*(피어 상대, 상위일수록 큼). 피어 부족 시 등급점수 폴백.
+		const radar = COMPOSITE_AXES.filter((a) => a.kind === 'ordered').map((a) => {
+			const st = axisStat(a);
+			return { kr: a.kr, en: a.en, short: a.short, s: st.topPct != null ? (100 - st.topPct) / 100 : st.score };
+		});
 
 		// YoY 변화 — ecosystem delta 가 99% null 이므로 finance 5Y 배열에서 직접 계산 (실데이터).
 		const yoyDelta = (arr: Num[]): Num => {

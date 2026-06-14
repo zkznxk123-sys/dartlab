@@ -32,6 +32,11 @@
 		const angle = (Math.PI * 2 * i) / N - Math.PI / 2;
 		return cy + r * Math.sin(angle);
 	}
+	// 라벨 정렬 — 스포크 다수(10+)일 때 겹침 완화: 우측은 start(밖으로), 좌측은 end, 상·하는 middle.
+	function anchorFor(i: number): 'start' | 'middle' | 'end' {
+		const c = Math.cos((Math.PI * 2 * i) / N - Math.PI / 2);
+		return c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
+	}
 
 	// Grid rings (20%, 40%, 60%, 80%, 100%)
 	let rings = $derived([0.2, 0.4, 0.6, 0.8, 1.0].map((p) => p * maxR));
@@ -105,7 +110,7 @@
 		<text
 			x={lx}
 			y={ly}
-			text-anchor="middle"
+			text-anchor={anchorFor(i)}
 			dominant-baseline="central"
 			class="radar-label"
 		>{a.label}</text>
@@ -115,6 +120,7 @@
 <style>
 	.radar {
 		display: block;
+		overflow: visible; /* 스포크 라벨이 viewBox 밖으로 나가도 클립되지 않게(겹침 완화 anchor-flip 보완) */
 	}
 	.radar-label {
 		fill: var(--color-dl-text-muted);

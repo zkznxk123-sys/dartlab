@@ -138,11 +138,14 @@ export interface EcoNode {
 	empCount?: Num;
 	profGrade?: string;
 	growthGrade?: string;
+	debtGrade?: string;
 	govGrade?: string;
 	qualGrade?: string;
 	liqGrade?: string;
+	effGrade?: string;
 	auditRisk?: string;
 	stability?: string;
+	capClass?: string;
 	cfPattern?: string;
 	roeDelta?: Num;
 	opMarginDelta?: Num;
@@ -215,10 +218,17 @@ export interface GradeChip {
 	v: string;
 	tone: Tone;
 	color: string;
+	kind?: 'ordered' | 'class'; // 'class'(현금흐름)=순서 없음 → 다이얼로그 분류 변형(사다리·색·곡선 없음).
+	// 종합 축의 동종업종 백분위 — 등급 근거(다이얼로그). 원시지표 백분위 아님(그건 우측 패널·다른 세션).
+	topPct?: number | null; // 상위 N% = 동급 이상 동종사 비율(순서형만). 표본<5 → null.
+	peerN?: number; // 동종사 표본 수(순서형=등급 보유사, 분류=값 보유사).
+	dist?: { step: string; share: number }[]; // 등급레벨별 동종사 비중 % (순서형 분포 막대).
+	sameShare?: number | null; // 분류(cf) 전용 — 동종사 내 같은 유형 비중 %(순위 아님).
 }
 export interface RadarAxis {
 	kr: string;
 	en: string;
+	short?: string; // 레이더 스포크 짧은 라벨(겹침 완화)
 	s: Num;
 }
 export interface ChangeRow {

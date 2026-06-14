@@ -5,10 +5,9 @@
 	// 정직: 매수/매도 신호·목표주가·인과 금지. 결손 축은 채우지 않고 뺀다(0대체 금지). 등급 = 판정(근거+기준 동반).
 	import type { Company, Lang } from '../lib/types';
 	import { GRADE_SCALE } from '../lib/engine';
-	import { GRADE_GUIDE } from '../lib/gradeGuide';
+	import { GRADE_GUIDE, CF_PATTERN_GUIDE } from '../lib/gradeGuide';
 	import { txc } from '../ui/helpers';
 	import RadarChart from '../../map/components/RadarChart.svelte';
-	import DistCurve from './DistCurve.svelte';
 
 	interface Props {
 		co: Company;
@@ -17,33 +16,19 @@
 	}
 	let { co, lang, onClose }: Props = $props();
 
-	// 단위 인식 숫자 포맷 — % / 배(times) / 일(days) / 무단위(발생액비율, 소수 2자리). 결손 = "—".
-	function fmtNum(v: number | null, unit: string): string {
-		if (v == null) return '—';
-		if (unit === '배') return v.toFixed(1) + (lang === 'en' ? 'x' : '배');
-		if (unit === '일') return v.toFixed(0) + (lang === 'en' ? 'd' : '일');
-		if (unit === '점') return v.toFixed(0) + (lang === 'en' ? '' : '점');
-		if (unit === '') return v.toFixed(2);
-		return v.toFixed(1) + '%';
-	}
-
 	const tcls = (t: string) =>
 		(({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
 	const vd = $derived(co.verdict);
-	// 좌측 스파이더 — co.radar 6축(0~1)만, 결손 축 제외(0대체 금지). audit(3단)는 radar 에 애초 부재.
+	const pct = $derived(co.percentile);
+	const hasPct = $derived(!!pct && pct.n >= 5);
+	// 좌측 레이더 = 순서형 종합 축 스포크. s = *축 백분위*(피어 상대, 상위일수록 큼) — 등급을 매긴 근거를 시각화.
+	// cf(분류)는 엔진에서 이미 제외. 결손 축(s=null)은 스포크 생략(0대체 금지). 짧은 라벨로 겹침 완화.
 	const radarAxes = $derived(
 		co.radar
 			.filter((r) => r.s != null)
-			.map((r) => ({ label: lang === 'en' ? r.en : r.kr, value: (r.s as number) * 100 }))
+			.map((r) => ({ label: lang === 'en' ? r.en : r.short ?? r.kr, value: (r.s as number) * 100 }))
 	);
-	// 등급기준 섹션 그루핑 — 각 등급축 아래에 그 축의 백분위 지표(분포곡선) 동반. eff(효율성)는 등급축 부재라 별도 그룹.
-	const pct = $derived(co.percentile);
-	const hasPct = $derived(!!pct && pct.n >= 5);
-	function axisMetrics(key: string) {
-		return pct ? pct.metrics.filter((m) => m.axis === key) : [];
-	}
-	const effMetrics = $derived(pct ? pct.metrics.filter((m) => m.axis === 'eff') : []);
 
 	$effect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -78,7 +63,9 @@
 					<div class="geRadarEmpty">{lang === 'en' ? 'not enough graded axes for a radar' : '레이더를 그릴 등급 축 부족'}</div>
 				{/if}
 				<div class="geRadarNote">
-					{lang === 'en' ? 'audit risk shown at right (3-tier scale)' : '감사위험은 3단이라 우측 별도'}
+					{lang === 'en'
+						? 'cash flow is a category (no ranking) — shown below, off the radar'
+						: '현금흐름은 순서 없는 유형이라 레이더 제외 · 아래 기준에 별도'}
 				</div>
 			</div>
 
@@ -105,61 +92,60 @@
 			</div>
 		</div>
 
-		<!-- 아래: 등급 기준 — 각 축 아래에 그 축 지표의 업종 분포곡선 + 회사 위치. -->
+		<!-- 아래: 등급 기준 — 각 종합 축의 동종업종 백분위(상위 N%) + 등급레벨 분포 막대 = 그 등급을 매긴 근거. -->
 		<div class="geCriteria">
 			<div class="geCrHead">
 				{lang === 'en' ? 'Grade criteria' : '등급 기준'}{#if hasPct && pct} · {lang === 'en' ? `vs ${pct.n} peers` : `업종 ${pct.n}개사 내 위치`}{#if co.eco.industryRank != null} ({co.eco.industryRank}{lang === 'en' ? '' : '위'}){/if}{/if}
 			</div>
 			<div class="geCrGrid">
 				{#each co.grades as g (g.key)}
+					{@const isClass = g.kind === 'class'}
 					{@const scale = GRADE_SCALE[g.key] || []}
 					{@const guide = GRADE_GUIDE[g.key]}
-					{@const ms = axisMetrics(g.key)}
+					{@const cfg = isClass ? CF_PATTERN_GUIDE[g.v] : null}
+					{@const hasDist = !isClass && (g.peerN ?? 0) >= 5 && !!(g.dist && g.dist.length)}
 					<div class="geCr">
-						<span class="geCrLabel">{txc(g, lang)}</span>
-						{#if ms.length}
-							<div class="geMxRow">
-								{#each ms as m}
-									<div class="geMx">
-										<div class="geMxTop">
-											<span class="geMxName">{txc(m, lang)}</span>
-											<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
-											<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
-										</div>
-										{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
-									</div>
-								{/each}
-							</div>
-						{/if}
-						{#if guide}<div class="geCrWhat">{lang === 'en' ? guide.en.what : guide.kr.what}</div>{/if}
-						<div class="geLadder">
-							{#each scale as step}<span class={'geStep' + (step === g.v ? ' on' : '')}>{step}</span>{/each}
+						<!-- 타이틀 = 종합 축명. 우측 = 등급 pill + "업종 상위 N%"(축 자체의 동종사 백분위 = 등급 근거). -->
+						<div class="geCrTop">
+							<span class="geCrTitle">{txc(g, lang)}</span>
+							<span class={'geCrPill ' + tcls(g.tone)}>{g.v}</span>
+							{#if !isClass && g.topPct != null}
+								<span class="geCrRank mono">{lang === 'en' ? 'top ' : '업종 상위 '}{g.topPct}%</span>
+							{:else if isClass && g.sameShare != null}
+								<span class="geCrRank mono">{lang === 'en' ? `${g.sameShare}% of peers` : `같은 유형 ${g.sameShare}%`}</span>
+							{/if}
 						</div>
+						{#if isClass}
+							<!-- C(분류): 순서 없음 → 사다리·순위 금지. 패턴 설명 + 유형 표기만(거짓 순서 방지). -->
+							{#if cfg}<div class="geCrWhat">{lang === 'en' ? cfg.en : cfg.kr}</div>{/if}
+							<div class="geCrType">{lang === 'en' ? `category · not a ranking${g.peerN ? ` · ${g.peerN} peers` : ''}` : `유형 · 순위 아님${g.peerN ? ` · 업종 ${g.peerN}개사` : ''}`}</div>
+						{:else}
+							{#if guide}<div class="geCrWhat">{lang === 'en' ? guide.en.what : guide.kr.what}</div>{/if}
+							{#if hasDist}
+								<!-- 등급레벨별 동종사 분포 막대 + 회사 위치(하이라이트) = 이 축에서 어느 정도 위치인지 -->
+								<div class="geDist">
+									{#each g.dist ?? [] as d (d.step)}
+										<div class={'geDc' + (d.step === g.v ? ' on' : '')} title={`${d.step} · 업종 ${d.share}%`}>
+											<div class="geDcTrack"><div class="geDcBar" style={`height:${Math.max(3, d.share)}%`}></div></div>
+											<span class="geDcStep">{d.step}</span>
+											<span class="geDcPct mono">{d.share}%</span>
+										</div>
+									{/each}
+								</div>
+							{:else}
+								<!-- 피어 부족(로컬 단일사 등) — 단순 사다리 폴백 -->
+								<div class="geLadder">
+									{#each scale as step}<span class={'geStep' + (step === g.v ? ' on' : '')}>{step}</span>{/each}
+								</div>
+							{/if}
+						{/if}
 					</div>
 				{/each}
-				{#if effMetrics.length}
-					<div class="geCr">
-						<span class="geCrLabel">{lang === 'en' ? 'Efficiency' : '효율성'}</span>
-						<div class="geMxRow">
-							{#each effMetrics as m}
-								<div class="geMx">
-									<div class="geMxTop">
-										<span class="geMxName">{txc(m, lang)}</span>
-										<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
-										<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
-									</div>
-									{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
-								</div>
-							{/each}
-						</div>
-						<div class="geCrWhat">{lang === 'en' ? 'Asset activity — turnover & cash cycle' : '자산 활동성 — 자산회전율·현금전환주기'}</div>
-					</div>
-				{/if}
 			</div>
 			<div class="geNote">
 				{lang === 'en'
-					? '※ "—" means that figure is absent from this company’s filings (not filled with 0). The composite verdict uses 5 bands plus a continuous 0–100 score (top). Audit risk (3 tiers) and credit dCR (14 bands) are separate scales. A grade is an assessment with criteria — not a buy/sell signal.'
-					: '※ "—" 는 해당 수치가 이 회사 공시에 없다는 뜻(0으로 채우지 않음). 종합 판정은 5밴드 + 연속 0~100 점수(상단). 감사위험(3단)·신용 dCR(14단)은 별도 스케일. 등급은 기준에 따른 판정이며 매수/매도 신호가 아니다.'}
+					? '※ "—" means that figure is absent from this company’s filings (not filled with 0). The composite verdict uses 5 bands plus a continuous 0–100 score (top); credit dCR (14 bands) is a separate scale. Cash flow is a category (8 patterns), so it has no ladder or ranking. A grade is an assessment with criteria — not a buy/sell signal.'
+					: '※ "—" 는 해당 수치가 이 회사 공시에 없다는 뜻(0으로 채우지 않음). 종합 판정은 5밴드 + 연속 0~100 점수(상단)·신용 dCR(14단)은 별도 스케일. 현금흐름은 8가지 유형(순서 없음)이라 등급 사다리·순위가 없다. 등급은 기준에 따른 판정이며 매수/매도 신호가 아니다.'}
 			</div>
 		</div>
 	</div>
@@ -261,19 +247,15 @@
 		margin-bottom: 8px;
 	}
 	.geCrGrid {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 12px 14px;
+		align-items: start;
 	}
 	.geCr {
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
-	}
-	.geCrLabel {
-		font-size: 11px;
-		font-weight: 700;
-		letter-spacing: 0.02em;
 	}
 	.geCrWhat {
 		font-size: 10px;
@@ -304,36 +286,83 @@
 		line-height: 1.5;
 		margin-top: 10px;
 	}
-	/* 등급기준 — 각 축 지표 행(이름·값·상위% + 분포곡선) */
-	/* 일관 격자 — 모든 지표 셀 동일 폭(152px) → 축 간 컬럼이 딱 맞아떨어짐 */
-	.geMxRow {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px 12px;
-	}
-	.geMx {
-		width: 152px;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-	.geMxTop {
+	/* 등급기준 — 종합 축 1개당 1블록(축명 · 등급 pill · 업종 상위 N% + 등급레벨 분포 막대) */
+	.geCrTop {
 		display: flex;
 		align-items: baseline;
-		gap: 4px;
+		gap: 6px;
 	}
-	.geMxName {
-		font-size: 10px;
-		font-weight: 600;
+	.geCrTitle {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.02em;
 	}
-	.geMxVal {
+	.geCrRank {
 		font-size: 10px;
-		color: var(--dl-ink, #c8cfdb);
+		color: var(--dl-ink-dim, #5b6473);
 		font-variant-numeric: tabular-nums;
 	}
-	.geMxRank {
-		font-size: 9px;
+	/* 등급 pill — 축의 현재 등급(톤 색). 우측 정렬(상위% 가 뒤따름) */
+	.geCrPill {
 		margin-left: auto;
+		font-size: 10.5px;
+		font-weight: 700;
+		padding: 1px 7px;
+		border-radius: 9px;
+		border: 1px solid var(--dl-line, #1b2130);
+		background: rgba(255, 255, 255, 0.03);
+		white-space: nowrap;
+	}
+	.geCrType {
+		font-size: 9px;
+		font-style: italic;
+		color: var(--dl-ink-dim, #5b6473);
+	}
+	/* 등급레벨별 동종사 분포 막대 — 막대높이 = 동종사 비중%, 회사 등급 칼럼 하이라이트 */
+	.geDist {
+		display: flex;
+		align-items: flex-end;
+		gap: 3px;
+		margin-top: 2px;
+	}
+	.geDc {
+		flex: 1 1 0;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2px;
+	}
+	.geDcTrack {
+		width: 100%;
+		height: 26px;
+		display: flex;
+		align-items: flex-end;
+		border-bottom: 1px solid var(--dl-line, #1b2130);
+	}
+	.geDcBar {
+		width: 100%;
+		background: rgba(139, 148, 158, 0.35);
+		border-radius: 2px 2px 0 0;
+		transition: height 0.2s;
+	}
+	.geDc.on .geDcBar {
+		background: var(--color-dl-primary, #ea4647);
+	}
+	.geDcStep {
+		font-size: 8px;
+		color: var(--dl-ink-dim, #5b6473);
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.geDc.on .geDcStep {
+		color: var(--dl-ink, #c8cfdb);
+		font-weight: 700;
+	}
+	.geDcPct {
+		font-size: 8px;
 		color: var(--dl-ink-dim, #5b6473);
 		font-variant-numeric: tabular-nums;
 	}
