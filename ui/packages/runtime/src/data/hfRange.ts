@@ -1,5 +1,5 @@
 import type { AsyncBuffer, FileMetaData, ParquetQueryFilter } from 'hyparquet';
-import { HF_RESOLVE } from './origin';
+import { HF_RESOLVE, hfRangeUrl } from './origin';
 
 export type FetchLike = typeof fetch;
 
@@ -63,7 +63,8 @@ export function headHfObject(path: string, fetchFn: FetchLike = fetch): Promise<
 }
 
 async function headHfObjectFresh(path: string, fetchFn: FetchLike): Promise<HfObjectRef> {
-	const url = hfUrl(path);
+	// range probe·세션은 HF 직결(hfRangeUrl) — 프록시 206 은 엣지캐시 불가라 7~9배 느림(origin.ts 참조).
+	const url = hfRangeUrl(path);
 	const resp = await fetchResilient(fetchFn, url, { headers: { Range: 'bytes=0-0' } });
 	if (!resp.ok && resp.status !== 206) throw new Error(`${path} range probe 실패: ${resp.status}`);
 	const linkedSize = Number(resp.headers.get('x-linked-size'));
@@ -80,7 +81,9 @@ async function headHfObjectFresh(path: string, fetchFn: FetchLike): Promise<HfOb
 	await resp.arrayBuffer();
 	return {
 		path,
-		url: resp.url || url,
+		// 안정 resolve URL 보관(서명된 cas-bridge 리다이렉트 URL 아님) — refCache 가 세션 내내 ref 를 재사용하므로
+		// 서명 URL 캐시 시 만료 후 range 읽기가 깨진다. 매 요청이 stable URL 로 재해석된다(직결 redirect 비용은 측정 ~0.38s 에 포함).
+		url,
 		size,
 		etag: resp.headers.get('etag') ?? resp.headers.get('x-linked-etag'),
 		commit: resp.headers.get('x-repo-commit'),
@@ -151,11 +154,14 @@ export async function openHfParquet(
 	const [{ asyncBufferFromUrl }, ref] = await Promise.all([import('hyparquet'), headHfObject(path, fetchFn)]);
 	const requests: RangeRequestStat[] = [];
 	if (ref.size <= WHOLE_FILE_MAX_BYTES) {
+		// 소형 통파일(Range 없는 GET)은 프록시(hfUrl) — 엣지캐시(cross-user)·per-file cache-control(recent=600s
+		// 신선도)·403 흡수 이득이 살아있다. range(>임계)만 직결로 갔다(ref.url=hfRangeUrl). 책임경계 분리.
+		const wholeUrl = hfUrl(path);
 		const t0 = performance.now();
-		const resp = await fetchResilient(fetchFn, ref.url);
+		const resp = await fetchResilient(fetchFn, wholeUrl);
 		if (!resp.ok && resp.status !== 206) throw new Error(`${path} 전체 읽기 실패: ${resp.status}`);
 		const buf = await resp.arrayBuffer();
-		requests.push({ url: ref.url, range: null, status: resp.status, bytes: buf.byteLength, durationMs: performance.now() - t0 });
+		requests.push({ url: wholeUrl, range: null, status: resp.status, bytes: buf.byteLength, durationMs: performance.now() - t0 });
 		const file: AsyncBuffer = { byteLength: buf.byteLength, slice: (start: number, end?: number) => buf.slice(start, end ?? buf.byteLength) };
 		return { ref, file, requests };
 	}
