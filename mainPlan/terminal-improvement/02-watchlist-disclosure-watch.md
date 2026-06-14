@@ -65,9 +65,11 @@
 
 > 완전성 비평이 잡은 차단 결함: "데이터는 전부 기존 포트"라는 초안 주장은 *작동하지 않는 조합*이었다. 공시 델타의 실제 계산 경로를 못박고, "신규 포트 0"을 **정직하게 철회**한다.
 
-**왜 기존 포트로 안 되나 (코드 실측):**
-- `FilingPort.regular(code, limit?)`·`nonRegular(code, limit?)`(`contracts/src/filing.ts:79·81`)는 **per-company**(code 인자 필수). 워치 10~30 사면 회사당 호출 = **20~60 fetch** → "추가 다운로드 0"과 충돌.
-- `syncStatus.fetchLastSync(dir, file?)`(`lib/syncStatus.ts:17`)는 **데이터셋 경로 단위**(HF dir/file 의 마지막 push)지 *회사별*이 아니다 → "이 회사에 최근 공시"를 못 잰다.
+**왜 기존 *포트*로 안 되나 — 단 능력은 이미 *소스*에 있다 (코드 실측):**
+- 공개 `FilingPort.regular(code, limit?)`·`nonRegular(code, limit?)`(`contracts/src/filing.ts:79·81`)는 **per-company**(code 인자 필수). 즉 포트엔 *다중코드* 메서드가 없다 → 워치 N 사를 회사당 호출 = N 회.
+- **그러나 그 아래 소스는 이미 cross-company 파일을 읽는다**: `nonRegularFilingsSource.ts:35-37` 가 `dart/allFilings/recent.parquet`(전종목 통합 1 파일)를 `readParquetRows({ filter: { stock_code: { $in: [code] } } })` 로 읽는다 — **배열 `$in` 필터 + stock_code 정렬 row-group pushdown**(파일 sorted, 회사 row-group 만 읽음·per-code 캐시). 컬럼 = `stock_code`·**`rcept_dt`**·`report_nm`·`rcept_no`·`flr_nm`.
+- 정정: 따라서 "회사당 풀다운로드"가 아니라 *회사당 필터 read*(N 회). 진짜 결손은 **포트에 다중코드 변형이 없다**는 것 — `$in: [code]` 를 `$in: [watchCodes]` 로 한 read 에 묶는 메서드가 공개 포트에 없다.
+- `syncStatus.fetchLastSync(dir, file?)`(`lib/syncStatus.ts:17`)는 **데이터셋 경로 단위**(HF dir/file 의 마지막 push)지 *회사별*이 아니다 → "이 회사에 최근 공시"를 못 잰다(워치 신선도에 부적합).
 - `report.*`는 **연 단위 시계열**(`WorkforceYear[]` 등)이지 *날짜 찍힌 공시 이벤트*가 아니다 → "최근 7 일 신규"를 못 만든다.
 
 **진짜 데이터 경로:**
@@ -75,15 +77,15 @@
 |---|---|---|---|
 | 가격(전일대비/1Y·30 거래일 스파크) | `gov/prices/recent.parquet`(전종목 1 파일) | `priceOf`·`govRecent`(기존) | 0 |
 | 재무유형 칩 | finance bundle(기존 캐시) | `finType`(기존) | 0 |
-| **Tier 1 신선도("최근 N 일 신규 N 건")** | **`dart/allFilings/recent.parquet`**(전종목 최근 공시 1 파일·EOD 일배치, `SourcesModal.svelte:46` 실재) | **★신규 FilingPort 메서드**(cross-company recent reader, 예: `recentFilings(limit)`/`recentSince(date)`) | **1 메서드** |
-| **Tier 2 재방문 델타** | 위 allFilings + localStorage 방문 timestamp | 위 메서드 + 클라 필터(`rceptDate` > lastVisit) | 0(메서드 재사용) |
+| **Tier 1 신선도("최근 N 일 신규 N 건")** | **`dart/allFilings/recent.parquet`**(전종목 최근 공시 1 파일·EOD, `SourcesModal.svelte:46`·`nonRegularFilingsSource.ts` 실재) | **★신규 FilingPort *다중코드* 메서드**(예: `recentForCodes(codes[])` — 기존 `readParquetRows({filter:{stock_code:{$in:[…]}}})` 재사용) | **1 메서드(얇은 래퍼)** |
+| **Tier 2 재방문 델타** | 위 allFilings + localStorage 방문 timestamp | 위 메서드 + 클라 필터(`rcept_dt` > lastVisit) | 0(메서드 재사용) |
 
-- **계산 필드 = `rceptDate`(접수일).** "최근 N 일" = `현재시각 − rceptDate ≤ N`(절대시간, 기기독립). Tier 2 델타 = `rceptDate > 이 기기 마지막 방문 timestamp`(기기종속, 정직 가드 §3).
-- **per-company `nonRegular(code)` N 회 = 기각**(N fetch). cross-company 단일 파일이 정공법(워치 30 사라도 1 fetch).
+- **계산 필드 = `rcept_dt`(접수일, 소스가 `rceptDate` 로 매핑).** "최근 N 일" = `현재시각 − rcept_dt ≤ N`(절대시간, 기기독립). Tier 2 델타 = `rcept_dt > 이 기기 마지막 방문 timestamp`(기기종속, 정직 가드 §3).
+- **per-company `nonRegular(code)` N 회 = 기각**(N 필터 read). `$in: [watchCodes]` 한 read 가 정공법(워치 30 사를 한 번에).
 
-**★정직한 포트 회계(초안 "신규 포트 0" 철회):**
-- **신규 데이터셋 0**(allFilings/recent.parquet 이미 cron 라이브)·**신규 인프라 0**·가격/큐레이션/재무칩 신규 0.
-- **신규 포트 *메서드* 1 개** = `dart/allFilings/recent.parquet` 를 cross-company 로 읽는 FilingPort 리더. *기존 parquet 위 얇은 리더*라 여전히 싸지만 *0 은 아니다*. ROI 논거("싼 절반")는 유지되되 "공짜"가 아니라 "거의 공짜(포트 메서드 1)"로 정정(00 §5).
+**★정직한 포트 회계(초안 "신규 포트 0" 철회 — 단 v0.2 가 본 것보다도 갭이 작다):**
+- **신규 데이터셋 0**·**신규 인프라 0**·**신규 데이터 접근 패턴 0**(cross-company `$in` 필터 read 는 `nonRegularFilingsSource` 가 이미 사용 중)·가격/큐레이션/재무칩 신규 0.
+- **신규 = 공개 FilingPort 의 *다중코드 메서드* 1 개**(기존 단건 `nonRegular(code)` 를 `$in:[codes]` 로 묶는 얇은 래퍼). 능력은 소스에 이미 있고 *포트 표면*만 없다. ROI 논거("싼 절반")는 유지되되 "공짜"가 아니라 "거의 공짜(포트 표면 1 메서드)"로 정정(00 §5).
 
 ---
 

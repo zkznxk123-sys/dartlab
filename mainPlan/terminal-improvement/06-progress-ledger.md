@@ -31,11 +31,16 @@
 **C vs D 핵심 충돌 해소**: 알림은 *기기독립 신선도(Tier 1) 핵심 + 정직 라벨 재방문 델타(Tier 2) 선택*으로 분리 — D 의 killer 가치를 C 의 확신오정렬 위험 없이 흡수. reverseDCF 는 *표시(연결)하되 함수승격 안 함* — D 의 surfacing 가치 + C 의 라벨갈이 KILL 양립.
 
 **Wave 3 — 완전성 비평(v0.2 "완벽 완성" 라운드, 운영자 코드 실측 동반)**: ★차단 결함 3 + 누락 개념 1 + 사실 정밀화 2 를 정정.
-- **C1(치명, 정정)**: 워치리스트 데이터 계약이 비어 있었고 "신규 포트 0" 주장이 *틀림*. `FilingPort.regular/nonRegular` = per-code, `syncStatus` = 데이터셋 경로 단위 → 회사별 공시 델타 불가. 진짜 소스 = `dart/allFilings/recent.parquet`(전종목 1 파일·EOD, 실재)를 cross-company 로 읽는 **신규 FilingPort 메서드 1** 필요. → 02 §5 데이터 계약 신설·"신규 포트 0" 철회("거의 공짜").
+- **C1(완성 차단·정확성 정정 — "치명" 아님)**: 워치리스트 데이터 계약이 비어 있었고 "신규 포트 0" 주장이 *틀림*. 단 *방향 오류가 아니라* 내 비용 주장의 정확성 결함 — 방향(공시 워치)은 무관하게 섬. `FilingPort.regular/nonRegular` = per-code, `syncStatus` = 데이터셋 경로 단위 → 회사별 공시 델타를 *포트로* 못 잼. → 02 §5 데이터 계약 신설·"신규 포트 0" 철회.
 - **C2(차단, 정정)**: 섹션 점프 타깃이 *주소 불가능*(RightStack 패널 id 0) + 3 메커니즘 분산 + 모호(손익=RightStack IS vs FinFullscreen). → 03 §1 토큰→타깃 매핑표 + 식별자 부여 = Phase 2 절반.
 - **C3(차단, 정정)**: Phase AC 가 추상적 → 05 §1 정량 AC(워치 30 사 fetch ≤ 1·DOM "알림" 문자열 0 등).
 - **누락 개념(정정)**: `recentCompanies`(전역 계약 키 기존재·ui/web 사용) 미언급 → 02 §7 경계(자동 이력 ≠ 수동 큐레이션, 흡수 안 함).
 - **사실 정밀화**: W1 `priceEvents` = 터미널 CenterStack 실재(비평 과오류) → PriceChart `events` prop 정밀화. W2 `localStoragePort()` = export 포트 소비지 storage 배선 아님 → 명확화.
+
+**Wave 4 — 최종 결함 확인 + 완성도(운영자 직접 코드 적대 검증, 전문에이전트 rate-limit 로 인라인 수행)**:
+- **C1 재검증으로 갭이 *더 작아짐***: `nonRegularFilingsSource.ts:35-37` 가 이미 `dart/allFilings/recent.parquet` 를 `readParquetRows({filter:{stock_code:{$in:[code]}}})`(배열 `$in`·row-group pushdown·컬럼 `rcept_dt`) 로 읽는다 → cross-company 읽기 *능력은 소스에 이미 존재*, 결손은 *공개 포트의 다중코드 메서드 표면*뿐(얇은 래퍼). 02 §5 정밀화. "치명" 아님 재확인.
+- **C2 토큰표 라인 전수 검증 통과**: RightStack `:177`(거버넌스 칩)·`:346`(공급망 Panel)·`:471`(거버넌스 Panel — 모호성 실재)·finTabs FS_TABS `profitability`/`shareholder` 모두 실측 일치.
+- **완성도 자평(5 축 ×20)**: 방향 건전성 19 / 주장 정확성 18(C1 정밀화로 상향) / 경계 명확성 19 / 정직성 20 / 착수 가능성 17(신규 포트 메서드 시그니처는 구현 시 확정) = **93/100**. 착수 임계(≥85) 충족 — *재조사 없이 Phase 0 착수 가능*. 잔여 −7 = 포트 메서드 정확 시그니처·toc별 식별자 부여(Phase 2 선결)는 *의도적으로 구현 단계 결정*으로 남김(vision PRD 적정 깊이).
 
 ---
 
