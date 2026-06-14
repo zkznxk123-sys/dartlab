@@ -38,8 +38,9 @@ terminal-chart-suite (현재/과거)  ──(소비)──▶  scenario-simulato
 1. [01-price-index-chart.md](01-price-index-chart.md) — 주가/지수 차트(center subject-swap, IndexPort catalog/search/series, KR gov OHLCV 캔들 + US FRED 종가 라인 평행 subject, candleStyle='area' degenerate, 종가전용 지표 3분기, subject 소유권 seam).
 2. [02-disclosure-event-rail.md](02-disclosure-event-rail.md) — 공시 위치 찾기 레일(x축 아래 과거 공시 위치, `rceptNo` 중심 `DisclosureEvent` 정규화, 호버 메타·클릭→우측 행 스크롤. 미래 마커는 시뮬로 이관).
 3. [03-backtesting-strategy-tester.md](03-backtesting-strategy-tester.md) — 차트 중심 EOD 백테스팅 Strategy Tester(look-ahead 차단·t종가→t+1시가 체결·비용 기본 ON·RunSpec/ledger/provenance·DSR/PBO 과최적화 가드. 리포트 도크 스크롤).
+4. [04-indicator-overlay-palette.md](04-indicator-overlay-palette.md) — 경제·보조지표 오버레이 + 팔레트 조직(2026-06-14, F1). **신규 능력 0** — econOverlay·MACRO_SERIES·ChartMenus/ChartRibbon 전수 팔레트·SUB_GROUPS 이미 라이브. 작업 3건 = SUB_GROUPS 조직 이식·ECON 우선 순서·마퀴 클릭→toggleEcon 배선(정직 분기).
 
-> **참조 규약**: suite 내부 = 01/02/03. **시뮬 PRD 바 번호(05 Play·07 통합로드맵·08 valuation·09 정합화 등) = `../scenario-simulator/NN`.** 통합 시퀀싱은 시뮬 07(브리지 문서)이 소유.
+> **참조 규약**: suite 내부 = 01/02/03/04. **시뮬 PRD 바 번호(05 Play·07 통합로드맵·08 valuation·09 정합화 등) = `../scenario-simulator/NN`.** 통합 시퀀싱은 시뮬 07(브리지 문서)이 소유.
 
 ---
 
