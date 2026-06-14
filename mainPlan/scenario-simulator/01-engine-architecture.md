@@ -125,13 +125,13 @@ dartlab.simulate(code, *, scenario, drivers=None, lens=None, mode="whatif"|"repl
 | 노드 (driverId) | fn → leaf (후속) | 상태 | 비고 |
 |---|---|---|---|
 | `macro.gdp.beta` | `calcMacroRegression`/pooled-panel | 미구현 | OLS R² provenance 자체가 아직 없음(02 §2B pooled-β SSOT 선결) |
-| `mc.distribution` | `monteCarloForecast` (legacy, `random.Random`) | 미구현 | ⚠ OQ8: proforma 노드에 deps 거는가(연결, OOM 위험) vs 평균경로 직접 계산(SSOT 분열). **NodeValue가 frozenInputs를 노출 안 해(아래) deps 경로가 막혀 있음** — OQ8 해소는 NodeValue 계약 확장 또는 recompute 패턴 수용에 종속 |
+| `mc.distribution` | `monteCarloForecast` (legacy, `random.Random`) | 미구현 | ✅ OQ8 결정: `deps=(proformaId,)` — proforma 노드의 **FCF 벡터(`NodeValue.vector`)** 소비(leaf 아님), mean path=proformaNv.vector(단일 SSOT)+noise σ=snapshot elasticity, 벡터화(buildProforma 재호출 0=OOM 없음, `_simMonteCarlo.py:203-211` cumprod). **frozenInputs 확장 불필요**(macro 분포 파라미터 아닌 proforma vector 소비 → '직접계산 vs deps' 이분법 해소). byte-parity 제외, 분포통계 ±ε(04 §5 OQ8) |
 | `reverseDcf` | `reverseImpliedGrowth`+`computeGap` | 미구현 | story에 배선 있으나 simulate/ 노드 미등록 |
 | `credit.rating` / `ai.lens` | `synth.distress` / `ai/tools/lens.py` | 미구현 | 신용=09 §4 solvency 뷰, lens=§6.4 후속. 07 로드맵에 phase 미배정 |
 
 **⚠ 졸업 데모(게이트 ②④):** §5b 노드는 가설. 삼성/카카오/현대 실측으로 (a) macro.gdp.beta 단일/분기별 (b) mc.distribution 위상(OQ8) — byte-패리티로 확정(04 §5).
 
-**★NodeValue 계약 갭(구현 정직, OQ8 핵심):** 실행기는 노드의 frozenInputs를 `NodeValue`에 노출하지 않는다(`sheet.py` NodeValue에 frozenInputs 필드 없음). 그 결과 *두 개의 recompute 우회*가 현재 코드에 실재한다 — `registry._macroFrozen`(rev 노드가 rate/FX 경로를 프리셋에서 재유도)과 `run._marginPathFromSnapshot`(결과 marginPath를 같은 transfer로 재계산). 둘 다 "감사 노드는 권위 provenance/refs/hash를 그대로 들고, 표시 숫자만 byte-동일하게 재산출"하는 정직 패턴이지만, **mc.distribution 노드가 dep에서 macro 분포를 소비하려면 이 갭을 먼저 메워야 한다**(NodeValue에 frozenInputs 추가) 아니면 프리셋에서 재유도(OQ8가 우려하는 SSOT 분열을 그대로 답습). 이 두 우회는 종전 PRD에 미기재 — 본 절이 정직 기록.
+**★NodeValue 계약 갭 + frozenInputs 형상 핀(구현 정직):** 현 `NodeValue`(sheet.py:50-56, 7필드)는 frozenInputs를 노출하지 않고, `evaluateSheet`(sheet.py:361-363)는 fn 반환 7-튜플의 frozenInputs를 `computeInputsHash` 에만 쓰고 *저장 안 한다*. 그 결과 *두 개의 recompute 우회*가 실재 — `registry._macroFrozen`(rev 노드가 rate/FX 경로 프리셋 재유도)·`run._marginPathFromSnapshot`(marginPath 같은 transfer 재계산). 둘 다 "감사 노드는 권위 provenance/refs/hash 그대로, 표시 숫자만 byte-동일 재산출"하는 정직 패턴이나 우회다. **★형상 핀(09 §10.3 T-A1 미결 해소): NodeValue에 frozenInputs 추가 시 = RAW pre-normalize 수치값 저장(소비 전용)** + 해시는 `evaluateSheet`가 `_normalize(frozenInputs)`로 *별도* 산출(해시 전용) — 한 필드 두 파생, 경쟁 두 타입 아님. `_freezeInputs`(09 T-A1의 `tuple((k,_normalize(v))...)`)는 해시 경로 한정. **이 추가의 목적 = *우회 삭제*(엔진트랙)지 mc.distribution 아니다**(mc 는 proforma vector 소비라 frozenInputs 불필요 — 위 §5b 표·OQ8). 두 우회는 종전 PRD 미기재 — 본 절이 정직 기록.
 
 **명명(no-graph-regression):** `DriverNode`/`DriverSheet`. `*Graph`/`*Loop`/`*Kernel`/`*Dag` 금지.
 
@@ -202,7 +202,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 **`_isStrongDet` — ★in-sample folk-stat 가드(requiredFix):** provenance `ols:R²≥0.3` 단독 화이트리스트는 **확신오정렬을 만든다**. `calcMacroRegression`은 nObs~36 분기에 gdp/rate/fx × lag0/1/2(≤9 후보)에서 best-R²를 고르는 *in-sample 적합* → 스퓨리어스 고-R²가 약한 driver를 '강함→AI 못 이김'으로 잠가 fork를 억제. 강함 판정은 다음 중 **최소 하나 강제**: adjusted-R² / held-out OOS R² / 관측치 대비 변수수(자유도) 하한 / lag 다중비교 보정. `R²≥0.3` 임계는 졸업 데모에서 held-out으로 재보정. `preset:`/`elasticity:`(무출처 35키) = 약함.
 
-**`groundingCheck(aiNV, snapshot)` 4단 AND(순수함수):** (a) refs 실재 = `all(r in snapshot.refIndex …)` (b) 주장 지지 = aiNV.value가 refs 수치 범위([rangeLow,rangeHigh] from AssumptionLedgerRow §2.5 또는 baseValue±tol) 안 (c) 단위·기간 정합(§2.5 '단위없는 숫자 invalid' 재사용) (d) untrusted 미실행(sourceType=external 본문은 데이터, 산수만 — untrusted-wrap-check). 하나라도 실패 = fork. ⚠ 잔여 OQ(04 §5): (b)의 수치 범위 출처가 약한 det 분포면 순환(약한 det를 grounded AI로 교체하려는데 grounding 기준이 그 약한 det 자신) — 범위는 AssumptionLedgerRow 우선.
+**`groundingCheck(aiNV, snapshot)` 4단 AND(순수함수) — 출처 핀(코드 정합):** (a) refs 실재 = `ai.refs ⊆ detRefSet`. ⚠ `snapshot.refIndex`는 코드 **부재**(registry.py:188 snapshot=11키, refIndex 없음) → 정합: `evaluateSheet`가 전 det 노드 `NodeValue.refs`를 `frozenset`으로 모아 `SimulationResult`에 1필드 표면화(또는 buildSnapshot refIndex 키, T-A1 형상동결 편입), (a)=그 집합 부분집합 검사. (b) 주장 지지 = aiNV.value가 **snapshot 실측 base metrics ± 고정 tol**(`snapshot.baseRevenue/baseMargin`, registry.py:188 실측) 안 — ✅ OQ10 결정: 약한 det 자체분포 금지(순환), `AssumptionLedgerRow`(코드 0건) 제거, ledger 없는 노드는 (b) 기권→fork(det 폴백 아님)=abstention-over-circular. (c) 단위·기간 정합(§2.5 '단위없는 숫자 invalid' 재사용) (d) untrusted 미실행(sourceType=external 본문은 데이터, 산수만 — untrusted-wrap-check). 하나라도 실패 = fork.
 
 **보완 ≠ 블렌딩**: gate `ai` = 그 노드 채택값을 *통째* 교체(토글로 det 복원). `0.6det+0.4ai` 함수 *부재*(블렌더 미정의 = 섞임 물리 불가) → 재현성·추적·Brier 유지. 근거: `project_account_struct_disambig_killtest` "확신 오정렬 > 정렬 실패".
 
