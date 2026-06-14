@@ -87,6 +87,6 @@
 	<div class="btFoot">
 		⚠ {T('과거 시뮬레이션 — 미래 수익 보장 없음 · 익일 시가 체결', 'historical simulation — no guarantee · next-open fills')}
 		· {withCosts ? T('수수료 0.015%+거래세 0.15%+슬리피지 0.1%', 'fees 0.015%+tax 0.15%+slip 0.1%') : T('비용 미포함', 'costs excluded')}
-		· {adjusted ? T('배당 미반영 · 수정주가 반영', 'dividends excluded · split-adjusted') : T('배당 미반영 · 무수정주가', 'dividends excluded · unadjusted')} │ {GOV_ATTRIBUTION}
+		· {adjusted ? T('배당 미반영 · 수정주가 반영', 'dividends excluded · split-adjusted') : T('배당 미반영 · 무수정주가', 'dividends excluded · unadjusted')}{#if result.runSpec} · {T('기준일', 'as of')} {fmtDate(result.runSpec.dataAsOf)} ({fmtDate(result.runSpec.range.from)}~{fmtDate(result.runSpec.range.to)} · {result.runSpec.range.bars}{T('봉', 'bars')}){/if} │ {GOV_ATTRIBUTION}
 	</div>
 </div>

@@ -196,6 +196,26 @@ export interface BtMetrics {
 	exposurePct: number;
 	costDragPct: number; // 비용 ON 수익률 − 비용 OFF 수익률 (≤0)
 }
+// 엔진 계산 계약 버전 — 체결/비용 모델이 바뀌면 올린다(결과 재현·캐시 무효화 기준).
+export const BT_ENGINE_VERSION = 'bt-1';
+
+/**
+ * 결과 재현 메타(03 §3 "모든 결과에 RunSpec·기준일·원천·수정주가·배당·비용·벤치마크 부착").
+ * 순수 데이터 조립(Date 미사용 — generatedAt 은 export 시 호출측이 부여). 호출측이 opts.spec 으로 입력 주입.
+ */
+export interface BtRunSpec {
+	engineVersion: string;
+	symbol: { code: string; name?: string; market?: 'KR' | 'US' };
+	dataSource: string; // 예: 'gov/prices'
+	dataAsOf: string; // 평가창 마지막 캔들 YYYYMMDD
+	adjusted: boolean; // 수정주가 입력 여부
+	dividend: 'excluded'; // 배당 미반영(데이터 한계 — totalReturn 미지원)
+	range: { from: string; to: string; bars: number }; // 평가창 거래일 범위
+	strategy: { id: BtPresetKey; params: Record<string, number> };
+	costs: { enabled: boolean; commissionBp: number; sellTaxBp: number; slippageBp: number };
+	benchmark: { kind: 'buyAndHold'; sameCosts: true };
+}
+
 export interface BtResult {
 	startIdx: number; // 평가창 시작 (candles 인덱스)
 	equity: (number | null)[]; // candles 와 같은 길이, 창 밖 = null, equity[startIdx]=100
@@ -205,6 +225,17 @@ export interface BtResult {
 	bh: { retPct: number; cagrPct: number | null; mddPct: number; sharpe: number | null };
 	mddWindow: { peakIdx: number; troughIdx: number; recoverIdx: number | null } | null; // 에쿼티 페인 음영용
 	warnings: BtWarning[];
+	runSpec?: BtRunSpec; // opts.spec 주입 시 — 재현·푸터·export 용 (미주입이면 undefined)
+}
+
+/** runBacktest opts.spec 입력 — 호출측(PriceChart)이 아는 종목/데이터 메타. */
+export interface BtSpecInput {
+	code: string;
+	name?: string;
+	market?: 'KR' | 'US';
+	dataSource?: string; // 기본 'gov/prices'
+	adjusted?: boolean;
+	dividend?: 'excluded';
 }
 
 interface Costs {
@@ -372,7 +403,7 @@ export function runBacktest(
 	candles: Candle[],
 	preset: BtPresetKey,
 	params: Record<string, number>,
-	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp }
+	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput }
 ): BtResult | null {
 	const def = BT_PRESETS.find((d) => d.key === preset);
 	if (!def) return null;
@@ -410,6 +441,21 @@ export function runBacktest(
 	if (!opts.withCosts) warnings.push({ kind: 'costsOff' });
 
 	const bhRet = endRet(bhPass.equity);
+	const fullBp = opts.costsBp ?? BT_COSTS;
+	const runSpec: BtRunSpec | undefined = opts.spec
+		? {
+				engineVersion: BT_ENGINE_VERSION,
+				symbol: { code: opts.spec.code, name: opts.spec.name, market: opts.spec.market },
+				dataSource: opts.spec.dataSource ?? 'gov/prices',
+				dataAsOf: candles[n - 1].t,
+				adjusted: opts.spec.adjusted ?? false,
+				dividend: 'excluded',
+				range: { from: candles[startIdx].t, to: candles[n - 1].t, bars: windowBars },
+				strategy: { id: preset, params },
+				costs: { enabled: opts.withCosts, commissionBp: fullBp.commissionBp, sellTaxBp: fullBp.sellTaxBp, slippageBp: fullBp.slippageBp },
+				benchmark: { kind: 'buyAndHold', sameCosts: true }
+			}
+		: undefined;
 	return {
 		startIdx,
 		equity: strat.equity,
@@ -434,6 +480,7 @@ export function runBacktest(
 		},
 		bh: { retPct: bhRet, cagrPct: cagr(bhRet, windowBars), mddPct: mdd(bhPass.equity), sharpe: bhRatios.sharpe },
 		mddWindow: ddWin ? { peakIdx: ddWin.peakIdx, troughIdx: ddWin.troughIdx, recoverIdx: ddWin.recoverIdx } : null,
-		warnings
+		warnings,
+		runSpec
 	};
 }

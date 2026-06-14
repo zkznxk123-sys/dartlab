@@ -651,7 +651,7 @@
 		const all = displaySeries();
 		if (!all.length) return;
 		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
-		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc, costsBp: bp });
+		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc, costsBp: bp, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btResult = res;
 		publishBt(res, all);
 		if (res) applyBt(c, ++btRunSeq);
