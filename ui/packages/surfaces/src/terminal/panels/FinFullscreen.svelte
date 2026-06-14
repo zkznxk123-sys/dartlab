@@ -3,13 +3,13 @@
 	// 종합 탭 = 기존 16 재무카드 전부(기본적으로 다 보이게). 나머지 탭 = finance 심화 카드
 	// (terminalFinance.tabCards, 모드 토글 동작) + report·교차 카드(finTabs.ts, 연 축 고정, lazy).
 	import { untrack } from 'svelte';
-	import type { AuditYear, Candle, FinMode, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
+	import type { AuditYear, Candle, FinMode, OwnershipYear, ShareholderReturnYear, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang } from '../lib/types';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import AuditStrip from '../charts/AuditStrip.svelte';
 	import { FS_TABS, type TabCard } from '../lib/finTabs';
-	import { buildPriceFundamentalCard } from '../lib/priceFundamental';
+	import { buildPerPbrCard, buildPriceFundamentalCard } from '../lib/priceFundamental';
 
 	interface Props {
 		co: Company;
@@ -31,6 +31,8 @@
 	// 부가 패널 (감사 스트립 · 임원 보수 표) — reportCards 와 동일한 epoch 가드·lazy 패턴
 	let auditTrail = $state<AuditYear[] | 'loading' | 'empty' | null>(null);
 	let execTop = $state<TopExecPay | 'loading' | 'empty' | null>(null);
+	// 가격 탭 PER·PBR — EPS(shareholderReturn)·발행주식수(ownership) lazy fetch (연 축). 동일 epoch 가드.
+	let valuationData = $state<{ sr: ShareholderReturnYear[] | null; own: OwnershipYear[] | null } | 'loading' | null>(null);
 	let epoch = 0; // 비반응 — 회사 전환 세대
 	$effect(() => {
 		void co.code;
@@ -39,6 +41,7 @@
 		reportCards = {};
 		auditTrail = null;
 		execTop = null;
+		valuationData = null;
 	});
 	$effect(() => {
 		const t = tab;
@@ -74,6 +77,16 @@
 			execTop = tp && tp.rows.length ? tp : 'empty';
 		});
 	});
+	$effect(() => {
+		const code = co.code;
+		if (tab !== 'price' || untrack(() => valuationData) != null) return;
+		const myEpoch = untrack(() => epoch);
+		valuationData = 'loading';
+		Promise.all([rt.report.shareholderReturn(code), rt.report.ownership(code)]).then(([sr, own]) => {
+			if (epoch !== myEpoch) return;
+			valuationData = { sr, own };
+		});
+	});
 	const auditList = $derived(Array.isArray(auditTrail) ? auditTrail : null);
 	const execTopData = $derived(execTop !== null && execTop !== 'loading' && execTop !== 'empty' ? execTop : null);
 
@@ -81,6 +94,11 @@
 	const activeDef = $derived(FS_TABS.find((d) => d.key === tab) ?? null);
 	// 가격↔기초체력 (=100 오버레이) — 전용 '가격' 탭. 캔들·번들 둘 다 있을 때만(없으면 null=비표시).
 	const priceCard = $derived(finData ? buildPriceFundamentalCard(finData, bundle?.filedDates ?? {}, candles) : null);
+	// PER·PBR 추이 — 연 축. lazy EPS·발행주식수 + 연간 자본(statements) + 주가 캔들 조인 (신규 데이터 0).
+	const valRaw = $derived(valuationData && valuationData !== 'loading' ? valuationData : null);
+	const perPbrCard = $derived(
+		valRaw && bundle ? buildPerPbrCard(bundle.views.annual ?? null, bundle.filedDates ?? {}, candles, valRaw.sr, valRaw.own) : null
+	);
 
 	// 원표(전 기간 와이드 테이블)는 우측 재무 패널 ⤢ → FinTablesModal 로 이동 (운영자 결정 — 전체화면 탭 아님)
 	// finance 심화 카드 (동기·모드 반응) — 전 시리즈 null 카드는 숨김 (waterfall 은 steps, heatmap 은 heat 기준)
@@ -141,8 +159,14 @@
 		{:else if tab === 'price'}
 			{#if !finData}
 				<div class="chartLoad" style="height:140px">{lang === 'en' ? 'loading financials …' : '재무제표 불러오는 중 …'}</div>
-			{:else if priceCard}
-				<div class="finFsGrid"><div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} /></div></div>
+			{:else if priceCard || perPbrCard}
+				<div class="finFsGrid">
+					{#if priceCard}<div class="finMini"><MiniFinChart card={priceCard} periods={finData.periods} /></div>{/if}
+					{#if perPbrCard}<div class="finMini"><MiniFinChart card={perPbrCard.card} periods={perPbrCard.periods} /></div>{/if}
+				</div>
+				{#if valuationData === 'loading' && !perPbrCard}
+					<div class="chartLoad" style="height:60px">{lang === 'en' ? 'loading PER·PBR trend …' : 'PER·PBR 추이 불러오는 중 …'}</div>
+				{/if}
 			{:else}
 				<div class="storyEmpty">{lang === 'en' ? 'No price overlay — price history unavailable for this company.' : '주가 데이터가 없어 가격↔기초체력 오버레이를 만들 수 없습니다.'}</div>
 			{/if}

@@ -331,10 +331,10 @@ export const FS_TABS: FsTab[] = [
 		key: 'people', label: { kr: '인력·보수', en: 'PEOPLE' }, q: '사람과 보상', load: peopleReport,
 		note: '급여 = 직원 급여만(임원·복리후생 제외), 사업보고서 연간 확정값. 보수 = 이사·감사 전체(등기 구분 미공시).'
 	},
-	// 가격↔기초체력 (=100 오버레이) — finKey/load 없는 메타 전용 탭. 카드는 FinFullscreen 이 candles 와
-	// buildPriceFundamentalCard 로 직접 빌드(특수 분기). 종합 히어로에서 강등된 단일 카드 거처.
+	// 가격↔기초체력 + PER·PBR 추이 — finKey/load 없는 메타 전용 탭. 카드는 FinFullscreen 이 candles·EPS·
+	// 발행주식수와 buildPriceFundamentalCard / buildPerPbrCard 로 직접 빌드(특수 분기, lazy report).
 	{
-		key: 'price', label: { kr: '가격', en: 'PRICE' }, q: '주가가 기초체력과 함께 움직였나',
-		note: '주가·매출·자본을 첫 공통 기간 = 100 으로 리베이스해 한 축에 겹친다(세로축 로그 눈금 — 같은 기울기 = 같은 성장률이라 한 선이 치솟아도 셋을 함께 비교 가능). 주가는 각 기간 공시 접수일 종가(미리보기 가격 아님). 주가 선이 매출·자본 위로 크게 벌어지면 기대 선반영(비싸 보임)·아래면 시장 회의 — 어느 쪽도 적정주가 판정은 아니다. 주가 데이터가 없으면 비표시.'
+		key: 'price', label: { kr: '가격', en: 'PRICE' }, q: '주가가 기초체력과 함께, 그리고 합당한 값에 거래됐나',
+		note: '시장가격을 펀더멘털에 비추는 탭. 위 = 주가·매출·자본을 =100 으로 리베이스(로그축)해 함께 갔는지, 아래 = PER·PBR 추이로 자기 이력 대비 밸류에이션 수준. 주가는 각 기간 공시 접수일 종가(미리보기 아님), PER·PBR 은 연 축. 어느 것도 적정주가 판정은 아니다 — 각 카드의 ! 로 해석 기준 참조.'
 	}
 ];
