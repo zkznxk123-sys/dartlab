@@ -2,6 +2,7 @@
 // 빈값 규약: `[]` = 조회 성공·해당 없음 / `null` = 데이터셋 자체 미존재·미공시. 어댑터는 이 의미를 섞지 않는다.
 import type { CompanyPort } from './company';
 import type { PricePort } from './price';
+import type { IndexPort } from './indexPort';
 import type { FilingPort } from './filing';
 import type { FinancePort } from './finance';
 import type { ViewerPort } from './viewer';
@@ -72,6 +73,7 @@ export interface DartLabRuntime {
 	env: RuntimeEnvironment;
 	company: CompanyPort;
 	price: PricePort;
+	index: IndexPort;
 	filing: FilingPort;
 	finance: FinancePort;
 	viewer: ViewerPort;

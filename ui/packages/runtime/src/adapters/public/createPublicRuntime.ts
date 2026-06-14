@@ -19,6 +19,7 @@ import type {
 import { loadGovCandles, loadGovRecent } from './sources/govPriceSource';
 import { loadNaverFresh } from './sources/naverPriceSource';
 import { loadInitialOHLCV, loadOlderYear, loadedCandles, mergeDedup, seedCandles } from './sources/priceSource';
+import { createPublicIndexPort } from './sources/indexSource';
 import { loadTerminalFinance } from './sources/financeSource';
 import { createHfMacroPort } from './sources/macroSource';
 import { loadCompanyRelations } from './sources/relationsSource';
@@ -154,6 +155,7 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		env,
 		company: publicCompanyPort(options.shared),
 		price: publicPricePort(),
+		index: createPublicIndexPort(),
 		filing: publicFilingPort(),
 		finance: publicFinancePort(),
 		viewer: options.viewer,

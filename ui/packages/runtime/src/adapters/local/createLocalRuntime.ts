@@ -10,6 +10,7 @@ import type {
 	RuntimeEnvironment
 } from '@dartlab/ui-contracts';
 import { createHfMacroPort } from '../public/sources/macroSource';
+import { createPublicIndexPort } from '../public/sources/indexSource';
 import { loadTerminalFinance } from '../public/sources/financeSource';
 import { publicPricePort } from '../public/createPublicRuntime';
 import { createServiceRegistry } from '../../services/serviceRegistry';
@@ -55,6 +56,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		company: localCompanyPort(apiBase, caches),
 		// 주가 = 공개 gov HF 포트 재사용 (백엔드 0, 브라우저 단일 경로) — 로컬 :8400 미가동에도 차트가 퍼블릭과 동일.
 		price: publicPricePort(),
+		// 지수 = gov/indices + FRED 모두 HF 브라우저 직독 → price·macro 와 동일하게 공개 포트 그대로 재사용(백엔드 0).
+		index: createPublicIndexPort(),
 		filing: localFilingPort(apiBase, caches),
 		finance: localFinancePort(),
 		viewer: localViewerPort(),

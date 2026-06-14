@@ -80,7 +80,18 @@ export interface IndexPort {
 }
 ```
 
-### 3.1 KR 경로 (v0.3 §3 불변)
+### 3.0 ★구현 정정 (2026-06-15 데이터레이어 구현 + 실측 — 본 절이 §3.1/§3.2/§3.5 KR 경로 SSOT)
+
+데이터레이어 구현(contracts `indexPort.ts` + runtime `fred/gov/indexSource.ts` + 3어댑터 + ui/web bridge, contracts·runtime **tsc GREEN**, 적대 리뷰 통과) 중 KR gov 지수 데이터 파이프라인 실측으로 §3.1/§3.2 의 일부가 **무효 — 본 절로 정정**:
+
+- **§3.1 "gov/indices/date/{YYYY}.parquet 직독, IDX_NM filter" = 폐기**: date/ 는 *전지수 횡단*(연 1.1MB, BAS_DD 우선 정렬)이라 한 지수 전이력 추출에 17 연도파일(~18MB) 다운로드 = 브라우저 비현실. 정공법 = **per-index `gov/indices/index/{key}.parquet`(전이력, 작음) ∪ date/ 최근 N년(daily-fresh tail) `mergeDedup`** — `govPriceSource`(회사파일+recent tail 병합) 동형. `key = indexKey(market, IDX_NM)` = `{market}-{안전이름}`(buildGovData.py `indexKey` 1:1, byte-identical 검증). raw 컬럼 `{t:BAS_DD,o:OPNPRC_IDX,h:HGPRC_IDX,l:LWPRC_IDX,c:CLSPRC_IDX,v:ACC_TRDVOL,r:FLUC_RT,tv:ACC_TRDVAL}` (실측 일치).
+- **§3.2 "KR gov 지수는 카탈로그 자동수집이라 preset 1줄로 충분" = 부정확**: cron `dailyIndex` 는 date/(전지수)만 유지, **per-index `index/{key}` 는 자동 생성 안 됨**(`--index` 온디맨드). ⟹ KR 전이력은 per-index **seed 필요**(아래). preset 추가만으론 *date/ 최근 N년 fallback* 만 산다(전이력 없음).
+- **v1 데이터 상태(정직)**: per-index seed 전엔 **date/ 최근 2년만 live**(`FALLBACK_YEARS=2`). 전이력 = per-index seed 후. US(FRED)는 즉시 전이력 live(observations.parquet 실재). KR 5 presets·MARKET_GROUP·IDX_NM 실측 정확 일치 확인.
+- **per-index seed = follow-up(운영자 게이트, HF 토큰 필요)**: 기존 `buildGovData.py produceIndex(market, idxNm)` (`--index`) 가 date/→index/{key} 추출. 큐레이트 5종을 *가끔*(주간/수동) 재seed → 전이력. 매일 date/ fresh tail 이 seed 이후 갭을 메우므로 daily seed 불요(중복 HF read 회피). 운영자 1-command 편의 `--seed-curated`(produceΙndex 루프)는 후속 소추가.
+- **§3.5 local = 정정**: "KR=null 정직" 폐기 → **local 도 `createPublicIndexPort()` 전체 재사용**(gov/indices·FRED 둘 다 HF 브라우저 직독 = `publicPricePort`/`createHfMacroPort` 재사용과 동형, 백엔드 0). KR·US 둘 다 local 에서 동작. ui/web bridge 도 동일(`index: createPublicIndexPort()`).
+- **fake** = `fakeIndex()` 결정론 fixture(코스피 OHLCV 3봉 + SP500 degenerate 3봉). **검증 보강**: scanGovIndexNames 빈-universe 캐시 poisoning 방지(성공 시만 캐시) + search 이중-limit KR 압착 방지(`limit - us.length`).
+
+### 3.1 KR 경로 (v0.3 §3 불변 — ★단 데이터 읽기 경로는 §3.0 으로 정정)
 `gov/indices/date/{YYYY}.parquet` 직독, OHLCV 완전체(`{t:BAS_DD, o:OPNPRC_IDX, h:HGPRC_IDX, l:LWPRC_IDX, c:CLSPRC_IDX, v:ACC_TRDVOL, r:FLUC_RT, tv:ACC_TRDVAL}`), `ohlc:'candle'`. filter `{IDX_NM=ref.name, MARKET_GROUP=ref.market}`. 검색=최신 1~2 parquet IDX_NM unique 스캔. drift 가드(`gov/indices/date`·`_CATEGORY="govIndices"` 정본, `krx/indices` 아님; benchmarkMap 빈-캐시 silent-true 폴백 우회). v0.3 그대로.
 
 ### 3.2 큐레이트 화이트리스트 (KR 5 + US 4 = 9)

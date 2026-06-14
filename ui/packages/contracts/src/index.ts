@@ -2,6 +2,7 @@
 export * from './runtime';
 export * from './company';
 export * from './price';
+export * from './indexPort';
 export * from './filing';
 export * from './finance';
 export * from './viewer';

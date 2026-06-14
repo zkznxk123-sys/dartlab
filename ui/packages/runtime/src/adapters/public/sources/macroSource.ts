@@ -80,6 +80,18 @@ export async function loadMacroSeries(id: string): Promise<MacroPoint[] | null> 
 	return pts.length ? pts : null;
 }
 
+/**
+ * IndexPort 전용 raw 채널 — fred seriesId 의 원시 (d,v) 점을 yoy 변환·MACRO_SERIES 화이트리스트 *없이* 반환.
+ * loadSource('fred') srcCache 를 ECON 오버레이와 공유(파일 1 회 로드) — SP500 등 지수는 yoy 무의미라 raw.
+ * 화이트리스트 게이팅은 호출측(fredIndexSource 의 US_INDEX_PRESETS)이 담당 — 임의 ID dump 아님.
+ */
+export async function loadFredSeriesPoints(seriesId: string): Promise<MacroPoint[] | null> {
+	if (!browser) return null;
+	const bySeries = await loadSource('fred');
+	const pts = bySeries.get(seriesId);
+	return pts && pts.length ? pts : null;
+}
+
 // 최근 1년(일별 252·월별 12) 구간을 최대 n 점으로 다운샘플 — 스파크라인 폴리라인용.
 function sparkOf(pts: MacroPoint[], n = 40): number[] {
 	const daily = pts.length > 400; // 일별 시리즈 추정

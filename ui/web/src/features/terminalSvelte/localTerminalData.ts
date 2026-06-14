@@ -31,7 +31,7 @@ import type {
 	TerminalFinance,
 	TerminalFinanceBundle,
 } from '@dartlab/ui-contracts';
-import { createHfMacroPort } from '@dartlab/ui-runtime';
+import { createHfMacroPort, createPublicIndexPort } from '@dartlab/ui-runtime';
 import type { FinanceCompany, IndexRow, MetaFile, RawData } from '@dartlab/ui-surfaces/terminal';
 
 type Num = number | null;
@@ -266,6 +266,7 @@ function buildBridgeRuntime(seed: RuntimeSeed, raw: RawData): DartLabRuntime {
 				window.open(filing.url, '_blank', 'noopener');
 			},
 		},
+		index: createPublicIndexPort(), // 지수도 회사 무관 HF 공개 데이터(gov/indices+FRED) — 공용 포트 재사용
 		macro: createHfMacroPort(), // 거시 시계열은 회사 무관 HF 공개 데이터 — 명시적 공용 포트 재사용
 		report: {
 			// 로컬 서버는 정기보고서 파생 시계열 미보유 — null = 데이터셋 미존재 정직 표기 (옛 동작 동일)

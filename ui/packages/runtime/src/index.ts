@@ -3,6 +3,7 @@ export { createRuntime, type CreateRuntimeOptions } from './createRuntime';
 export { setDartLabRuntime, useDartLabRuntime } from './runtimeContext.svelte';
 export { createPublicRuntime, type PublicRuntimeOptions, type PublicRuntimeSharedPorts } from './adapters/public/createPublicRuntime';
 export { createHfMacroPort } from './adapters/public/sources/macroSource';
+export { createPublicIndexPort } from './adapters/public/sources/indexSource';
 export { createLocalRuntime, type LocalRuntimeOptions } from './adapters/local/createLocalRuntime';
 export { createFakeRuntime, type FakeRuntimeOptions } from './adapters/test/createFakeRuntime';
 export { createServiceRegistry, type ServiceRegistration } from './services/serviceRegistry';

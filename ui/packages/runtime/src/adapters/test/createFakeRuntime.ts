@@ -13,6 +13,7 @@ import type {
 	ExportPort,
 	FilingPort,
 	FinancePort,
+	IndexPort,
 	MacroPort,
 	MapPort,
 	NavigationPort,
@@ -25,6 +26,7 @@ import type {
 	StoragePort,
 	ViewerPort
 } from '@dartlab/ui-contracts';
+import { INDEX_PRESETS } from '@dartlab/ui-contracts';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { listExportableTables } from '../export/exportShared';
 
@@ -78,6 +80,34 @@ function fakePrice(): PricePort {
 		},
 		async govRecent() {
 			return { [FIXTURE_CODE]: candles };
+		}
+	};
+}
+
+function fakeIndex(): IndexPort {
+	// 결정론 fixture — KR 코스피(OHLCV) + US SP500(degenerate o=h=l=c·v=0). 그 외 null. 난수·현재시각 금지.
+	const krCandles: Candle[] = [
+		{ t: '20260601', o: 2700, h: 2720, l: 2690, c: 2710, v: 500_000 },
+		{ t: '20260602', o: 2710, h: 2735, l: 2705, c: 2730, v: 520_000 },
+		{ t: '20260603', o: 2730, h: 2740, l: 2715, c: 2725, v: 480_000 }
+	];
+	const usCandles: Candle[] = [
+		{ t: '20260601', o: 5300, h: 5300, l: 5300, c: 5300, v: 0 },
+		{ t: '20260602', o: 5320, h: 5320, l: 5320, c: 5320, v: 0 },
+		{ t: '20260603', o: 5310, h: 5310, l: 5310, c: 5310, v: 0 }
+	];
+	return {
+		async catalog() {
+			return INDEX_PRESETS;
+		},
+		async search(query) {
+			const q = query.trim();
+			return q ? INDEX_PRESETS.filter((r) => r.name.includes(q)) : [];
+		},
+		async series(ref) {
+			if (ref.code === 'idx:KOSPI/코스피') return krCandles;
+			if (ref.code === 'idx:US/SP500') return usCandles;
+			return null;
 		}
 	};
 }
@@ -438,6 +468,7 @@ export function createFakeRuntime(options: FakeRuntimeOptions = {}): DartLabRunt
 		},
 		company: fakeCompany(),
 		price: fakePrice(),
+		index: fakeIndex(),
 		filing: fakeFiling(),
 		finance: fakeFinance(),
 		viewer: fakeViewer(),
