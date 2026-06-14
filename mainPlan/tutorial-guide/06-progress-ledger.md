@@ -47,6 +47,14 @@
 
 **4 렌즈 수렴점**: 4 렌즈가 독립적으로 동일 결론 도달 — ① 재발명 금지(기존 자산 추출) ② SSOT=env.kind ③ 자동파싱·게임화·비디오·텔레메트리·별도 패널 KILL ④ 정직 모델(완결성·열등 프레이밍 금지) ⑤ 경계(5 PRD 가리키기만, 미머지 광고 금지).
 
+## v0.1 트림 (2026-06-14, 운영자 "깎자")
+
+폴더 트리 덕지덕지 self-check([[feedback_always_check_clutter]]) 결과 3건 정리:
+1. **`tourStore.svelte.ts` 제거** — `?` 버튼·오버레이가 같은 surface 컴포넌트라 module store 불필요(YAGNI). open 상태는 surface 로컬 `$state`(map 기존 패턴). cross-component 트리거 생기면 그때 추가. → `_shared/tour/` 5→4파일([01](01-shared-tour-engine-architecture.md) §1.1).
+2. **`content/` 폴더 평탄화** — `map/content/map.tour.ts` → `map/map.tour.ts`, `terminal/content/{…}` → `terminal/{…}`. 파일 1개 위해 폴더 파지 않음.
+3. **`whatsNew.ts`는 `tour/` 유지** — 폴더 하나 더 파는 게 오히려 덕지덕지(규모 작음). 재검토 보류.
+핵심 골격(엔진/콘텐츠/배선 3분리·Panel tourId 1 prop·env.kind SSOT)은 *순감산*이라 무변경.
+
 ## NEXT
 
 1. 운영자 PRD 리뷰 → v0.1 확정 또는 보강 지시.
@@ -56,7 +64,7 @@
 ## 미해결 (착수 전 결정 불요, 구현 중 정공법)
 
 - 투어 z-index 토큰값(터미널 `.scrimWrap=200` 위 배치) — 구현 시 실측.
-- `tourStore`를 `_shared`에 두되 `?` 키 바인딩은 surface별 소유(한 페이지 1 surface라 충돌 없음) — [01](01-shared-tour-engine-architecture.md) 미해결 1점.
+- (해소) `tourStore` 모듈 신설 안 함 — open 상태는 surface 로컬 `$state`. `?` 키 바인딩도 surface별 소유(한 페이지 1 surface라 충돌 없음). v0.1 트림 § 참조.
 - 터미널 챕터 카피 큐레이션(퀵4 + 4챕터 본문) — Phase 0 착수 시 사람 작성.
 
 ## 착수 게이트
