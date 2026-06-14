@@ -293,6 +293,32 @@ AI 전문가 패널은 숫자를 만들기보다 가정을 검토한다.
 
 ---
 
+## 8b. 경쟁 지형 + 시그니처 판정 (웹검증 mid-2026 + 12 agent 토론)
+
+**똑같이 하는 곳은 없으나 빈 땅도 아니다.** 단일 제품도 우리의 4축 조립(텍스트=untrusted 드라이버증거→결정론 pro-forma + det/ai 평행경합+Brier + forward-replay + reverseDCF 닻)을 다 하지 않는다. 그러나 *부품*은 전부 실재 제품에 있고 특히 **숫자+비정형 융합은 이미 commodity**(AlphaSense·BloombergGPT·RavenPack)다 — 따라서 **차별은 "기술"이 아니라 "조립 + 규율"**이다.
+
+가장 가까운 6 실서비스와 결정적 갭(각자 *다른 축*에서만 가까움):
+
+| 서비스 | 가까운 축 | 결정적 갭 |
+|---|---|---|
+| Bloomberg MAC3/MARS + BloombergGPT | 드라이버-DAG 충격 전파 | 포트폴리오 팩터 재평가지 회사 pro-forma 아님·순간 재평가지 시간 replay 아님·NLP와 시나리오 엔진 별개 |
+| Moody's Scenario Studio | 결정론 드라이버→pro-forma 척추 | 거시→신용/은행 층(주식-기업 아님)·horizon 투영이지 replay 아님 |
+| AlphaSense Financial Data(2025-10) | 숫자+비정형 융합(최강) | AI가 곧 답(블렌딩)·드라이버-DAG/replay/경합 없음 |
+| Causal / LucaNet | 드라이버-DAG + MC forward fan + 편집 레버 | 숫자 전용(텍스트0)·예산 FP&A지 주식 밸류에이션 아님 |
+| FinChat.io / Fiscal.ai | 주식 밸류에이션 + 편집 DCF + AI 융합 | 단일점 DCF지 드라이버 캐스케이드 아님·AI 블렌딩·reverseDCF 척추 없음 |
+| FinGPT-Forecaster | AI 예측을 벤치마크된 주장으로(에토스) | 경합할 결정론 척추 자체가 없음 |
+
+**시그니처 판정 = `conditional-signature`(합의 61/100, KEEP 조건부).** 시그니처 한 문장 = *"텍스트=untrusted 드라이버증거 → 결정론 pro-forma 캐스케이드 → det/ai 평행(블렌딩 물리 불가) → 사후 Brier 채점, 이 4축 전체를 reverseDCF 닻 위에 얹어 '미래 성장률 얼마?'(추측)를 '시장이 박은 g/margin/ROIC가 plausible한가?'(판정)로 뒤집는 것 — 단 현재 절반이 설계지 증명이 아니다."*
+
+- **가장 날카로운 wedge 3**: ① reverseDCF 닻을 시뮬레이터 *안에* 박은 것(컨센서스 부재=약점→priced-in 믿음 해부=강점, honesty spine과 wedge가 같은 메커니즘) ② 드라이버-DAG 충격을 회사 pro-forma 시간축까지 내림(MAC3가 못 닿는 자리, L2.5 앵커가 공짜 제공) ③ leaf-binding 앵커 + DriverRegistry의 유지보수 비대칭("데이터=카드 1줄, 코드 0" ↔ "엔진 계약 깨지면 CI red가 단일 노드 지목") = **anti-velocity 해자**(추가가 아니라 제약이라 경쟁자의 기능-출하 속도와 정반대 방향).
+- **가장 큰 위협 3**: ① 텍스트/이벤트→driver 결정론 매핑 커버리지 미실증(메모리 segmentRnd 2/10·incomeExpense 66.9% 천장이 같은 데이터-부재 벽) ② 검증 루프 구조적 미완(`recordForecast`/`gate.py`/`ledger.py`/`admission.py`/`lens.py` 전부 src 부재) ③ 조립-속도 vs 규율-속도 역전(빠른 경쟁자가 4축 융합을 우리가 게이트를 다 짓기 전에 완성).
+- **honest caution**: 9 흡수후보 중 5개가 이미 있거나 honesty 위반 = 토론이 발굴한 "새로움"의 절반은 환상. 융합은 commodity라 차별 못 되고, 차별을 강제하는 lint·게이트·admission이 *대부분 PRD 문구로만* 존재 → 규율이 기계 강제 안 되면 메모리가 반복 기록한 "확신오정렬"(horizonMeaning·accountStructDisambig: 검증 전 성공 주장)의 재현. **지금은 strong-signature가 아니라 "될 설계"다 — 새로움≠검증.**
+- **KEEP 순서**: ① 규율 게이트 먼저(`test_simulate_leaf_binding`·`recordForecast` write-end은 코드 0줄~소량 → 조립보다 먼저 박아 anti-velocity 해자 실재화) ② 텍스트→driver 매핑 커버리지를 held-out으로 정직 측정(design target→proven wedge 승격 단일 분기점) ③ A5(점확률)·A7(공개 리더보드) 정밀 외피는 write-end 라이브 전까지 defer/reject로 honesty spine 보호. **"미검증을 정직히 라벨하는 것이 가치지 우월 증명이 가치가 아니다"를 끝까지 지키는 조건에서만 KEEP.**
+
+> 타사 개념 흡수(absorb-as-defer 4종 A1·A2·A4·A7 + reject 잔여 가드 A5·A6) 상세 = 02 §2.3·§2B.3 / 01 §4·§5b / 05 §4·§3 / 03 §9.3 / 04 §4(12·13). 전부 *새 기능 추가가 아니라 정직-라벨·defer-게이트*로만 흡수("깎아서 강함").
+
+---
+
 ## 9. 단계별 제품 목표
 
 ### Phase 0. 비전 문서화

@@ -426,6 +426,8 @@ Propagation 예:
 - AI opinion card schema 테스트 존재.
 - story/report 소비 경로가 숫자를 재계산하지 않음.
 
+> **★A7 흡수(FinGPT-Forecaster 공개 Brier 리더보드 + rationale, absorb-as-defer):** det/ai 경합·블렌딩 물리 차단·Brier 사후채점 규율·DisagreementLedger·rationale grounding의 *골격*은 이미 01 §6.3·02 §2B·본 문서 §7에 설계로 존재(redundant) — 새 흡수 0, 포인터만. 진짜 신규 = **공개 리더보드 규율 + rationale 첨부**인데 이는 *공개 발간 표면*이라 미검증 위험(`recordForecast`/`gate.py`/`ledger.py`/`lens.py` 전부 src 부재, grep 0건 = 09 §10 fatal②③)이다. 따라서 **공개 Brier 리더보드·벤치마크된 AI 예측 발간 표면은 `recordForecast`+forwardTest write-end 라이브 + N분기 누적 + held-out·seed/CI 강제(folk-stat 회피, horizonMeaning 교훈: 3점·CI0·seed0 금지) 전까지 금지**(02 §2B.3 DriverCard dormant 상한과 동형). 그 전엔 DisagreementLedger(내부 fork/gap)·rationale(groundingCheck 4단 AND: refs⊆detRefSet·snapshot base metrics±tol·단위정합·untrusted 미실행) 첨부만 **내부** 노출. 리더보드는 노드별 det-vs-ai Brier(예측 순위 아님), AI 숫자 = hypothesis 라벨·fact 미승격, 00 kill-list(목표주가·추천·예측기) 불가침. **lens 채택 게이트 명시 반례 = `accountStructDisambig` kill-test**(타기업 표준패턴을 비표준 행에 확신 override = 확신오정렬 → 흡수 거부)를 박제.
+
 ---
 
 ## 10. 실패 기준

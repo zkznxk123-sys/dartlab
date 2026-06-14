@@ -113,13 +113,14 @@
 - `valuationAssumptions`.
 - `branches`.
 - `probabilityPolicy`: none, subjective, empirical, hybrid.
-- `sourceRefs`.
+- `sourceRefs`. — 명명 프리셋의 **출처-정직 라벨 SSOT**. preset description이 규제 stress인 척하면(예: `synth/scenario.py`의 "CCAR 스타일"/"CCAR-style severe recession" 문구) 여기에 `curated-prior, not DFAST/CCAR-blessed`를 **강제 노출**해 검증된 stress 오인을 차단한다(00 §7.2-6 컨센서스 금지·kill-list 정합).
 - `createdAt`.
 
 규칙:
 
-- 미래 what-if에서는 subjective probability를 객관 확률처럼 표시하지 않는다.
+- 미래 what-if에서는 subjective probability를 객관 확률처럼 표시하지 않는다. **`P(event)=NN%` 형태 점확률 발간 금지**(A5 reject 잔여 가드) — 가격 밴드는 결정론 매핑이라 진짜 확률 분포가 아니고(05 §3.1), 펀더멘털 분포를 emit하는 `mc.distribution`은 미구현(01 §5b)이며 held-out calibration을 닫을 `recordForecast` write-end가 부재(09 §17)다. 점확률을 박으면 un-calibrated folk-stat(메모리 horizonMeaning: 3점·CI0·seed0 금지)의 재발이다. 표시 시 `run.warnings`에 `subjective_probability_not_objective` 표면화. 미래 격하(reject→defer) 선결 3조건 = `mc.distribution` 라이브 + `recordForecast` write-end + held-out Brier calibration 통과, 그 후에도 점확률이 아닌 *조건부 펀더멘털 진술*("이 가정 하 매출이 X 넘는 분포 비율")로만.
 - branch는 중첩 가능하지만 같은 driver가 중복 반영되면 overlap warning이 필요하다.
+- **명명 프리셋 흡수(A1, absorb-as-defer)**: baseline/adverse 등 명명 시나리오는 이미 `_fnMacroPath → getPresetScenarios("KR")`로 1급 소비되며 `provenance=preset:{scenarioId}`로 출처 태깅됨(01 §5a) — **새 라이브러리 자료구조·카탈로그 패널·`version`/`falsifier` 필드 신설 0**(falsifier는 AssumptionLedgerRow 레벨에만 존재, 시나리오로 끌어올리면 SSOT 분열). 실제 KR 프리셋명 = baseline/adverse/china_slowdown/rate_hike/semiconductor_down이며 "severe" 단일 명칭은 코드에 없다(권위 환각 가드). 흡수할 단 하나의 다듬기 = `DriverCard.warnings`의 `elasticity_prior_unvalidated`가 명명 프리셋 결과 `SimulationResult.warnings`에도 실리도록 전파(현재 미배선, §2B.5 forwardTest write-end dead chain이라 active 승격 자체 불가 = 졸업 AC와 동일 선결).
 
 ### 2.4 ScenarioBranch
 
@@ -335,6 +336,8 @@ if 조건 하나 또는 조건 묶음이다.
 `candidate → (G0~G4) → dormant ⇄ active → (G5) → retired`. 데이터 추가 = `candidate` 카드(코드 0줄). 카드 필드: `driverId·sourceRef(VintageRef)·axis·tier(core|exploratory)·transferSpec{leaf,lag,transform}·admission{state,nTrials,oosPartialR2,adjustedTStat,selectionFreq,eVBound,sTotal}·liveScore{directionHitRate,driftStat,lastCheckedAt}·warnings`. 동일 데이터 종류 무관 동일 카드·동일 게이트 → **if 폭발이 코드 분기 폭발이 아니라 후보 풀 통계 필터링으로 전환**(손 큐레이팅 0).
 
 > **★active 진입 선결(write-end 게이트):** `forwardTest` write 끝단(recordForecast + data/models persistence + driverDecay cron, §2B.5 item 4)이 라이브가 되기 *전까지* `DriverCard.state` 는 **dormant 가 상한**이다 — 어떤 카드도 `active` 로 승격될 수 없다. 1회성 admission(G0~G4 prefit OOS)은 in-sample 시점 결정이라 시간축 silent degradation 을 막지 못하고, `active→retired`(G5)만이 누적 false discovery 를 bound 하는데 그 G5 의 쇠퇴 스트림(forwardTest)이 없기 때문이다(factor-zoo). write-end 라이브 후에만 active 승격 허용. **새 게이트가 아니라 기존 candidate→active 전이의 precondition.**
+
+> **★A2 흡수(Bloomberg MAC3 충격 전파, absorb-as-defer):** *결정론 단일-충격 캐스케이드*(macro→rev→proforma→dcf, preset scenario 주입)는 이미 본진 졸업(`096e84c43`)되어 `simulate/transfer.py`(L2.5-OWNED 엣지, leaf 0줄)가 소유 = **already-have**(01 §4, 신규 항목 추가 0). MAC3 대비 갭이 가장 날카로운 자리 = MAC3는 포트폴리오 팩터 재평가/순간 재평가에 멈추지만 우리는 회사 pro-forma·시간 replay까지 내린다. A2가 더하는 *진짜 신규* = **임의/다중 사용자 충격 주입 UX**(유가+20%·금리+100bp 자유 주입)인데, 이것은 미검증 magic-constant β(`SECTOR_ELASTICITY` 35키 inline·seed/CI 0, WACC×0.5 하드코딩 `transfer.py:111-127`)를 *침묵 증폭*한다. 따라서 이 신규 부분은 위 write-end 게이트(DriverRegistry pooled-β admission 라이브) + warning 실배선 *후로* defer한다. 그 전까지 모든 충격 결과에 강제: ⓐ provenance `elasticity_prior_unvalidated`·`default:no-sector`/`default:no-wacc` 접두, ⓑ `SimulationResult.warnings`에 `sector elasticity defaulted — approximation(honest-gap)`(01 §5a footnote·§3 silent 값-대체 표면화 계약을 졸업 AC에서 **실배선**으로 승격), ⓒ 라벨은 `transfer`(전달) 고정(cause 금지, §2B.5 #1)·fan band 필수·scenario≠forecast·overlap penalty(§3.11, 다중충격 UX와 **동시 신설** 선결).
 
 ### 2B.3a DriverCard 자료구조 스펙 (형 수준 — admission.py/DriverRegistry 구현자용, 재조사 0)
 

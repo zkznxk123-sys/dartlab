@@ -83,6 +83,8 @@ dartlab.simulate(code, *, scenario, drivers=None, lens=None, mode="whatif"|"repl
 - `_applyMacroShock`(`simulation.py:180-235`, 선형 1차식 `rev×(1+βgdp·gdp+βfx·fxΔ)`+마진 가산+wacc 0.5) → `simulate/transfer.py::transferMacroToFundamentals` 순수함수로 **이사(복제 아님, 원위치 삭제)**. 시뮬 전용(`_simScenario`·`_simMonteCarlo`만 호출)이라 SSOT 분열 표면 0.
 - **부수효과 = cycle 해소**: 적출하면 `_simScenario.py`·`_simMonteCarlo.py`·`_simHistorical.py`의 함수내부 재import 프록시(§1.2)가 사라진다. `no_import_evasion` 부채를 갚으면서 transfer 노출을 얻는 1석2조.
 
+> **★A2 흡수(Bloomberg MAC3 충격→pro-forma 전파) = already-have:** 결정론 단일-충격 캐스케이드(macro→rev→proforma→dcf, preset scenario 주입)는 이 적출로 이미 본진 졸업(`096e84c43`)되어 `simulate/transfer.py`(L2.5-OWNED 엣지, leaf 0줄)가 소유한다 — **신규 항목 추가 0**. MAC3는 포트폴리오 팩터 재평가/순간 재평가에 멈추지만 우리는 회사 pro-forma·시간 replay까지 내리는 게 갭(=가장 날카로운 wedge). A2가 더하는 *진짜 신규*(임의 다중 사용자 충격 주입 UX)는 미검증 magic-constant β를 침묵 증폭하므로 02 §2B.3 write-end 게이트 후로 defer(거처·정직 라벨 ⓐⓑⓒ = 02 §2B.3).
+
 **삭제:**
 - `scenarioSim.py`의 simulation↔proforma 수동 봉합(`createSimulation:380` buildProforma 직접 호출 + `_scenarioDCF` 손배선). DAG 엣지가 봉합을 흡수하면 자연 소멸(`feedback_always_check_clutter`).
 
@@ -130,6 +132,8 @@ dartlab.simulate(code, *, scenario, drivers=None, lens=None, mode="whatif"|"repl
 | `credit.rating` / `ai.lens` | `synth.distress` / `ai/tools/lens.py` | 미구현 | 신용=09 §4 solvency 뷰, lens=§6.4 후속. 07 로드맵에 phase 미배정 |
 
 **⚠ 졸업 데모(게이트 ②④):** §5b 노드는 가설. 삼성/카카오/현대 실측으로 (a) macro.gdp.beta 단일/분기별 (b) mc.distribution 위상(OQ8) — byte-패리티로 확정(04 §5).
+
+> **★A6 흡수(Causal/LucaNet MC forward fan) = already(deferred 노드의 졸업 다듬기 1문장):** 드라이버-불확실성 MC fan은 이미 위 `mc.distribution`(OQ8)으로 명시 deferred라 **새 흡수 0**. cosmetic 가우시안 fan=통계적 연극 리스크는 σ 무출처면 `SimulationResult.warnings` 표면화 + S_T≈0 driver 토글 제거(02 §2B.4-C)로 이미 가드됨. 유일 다듬기 = **fan band σ provenance 시각 규율**: σ가 pooled-OOS residual(검증)에서 오면 **실선 fan**, elasticity prior(`elasticity_prior_unvalidated`, 미검증)에서 오면 **점선·회색 근사 fan**으로 그려 LucaNet/Causal의 매끈한 단일 fan과 정직하게 가른다(honest-gap warning의 시각화 확장, 05 §3.1 동기). 가격 밴드는 결정론 매핑(가격 MC 금지)·`NodeValue.vector` 원소별 None 끊김(missing≠0) 규율 불변.
 
 **★NodeValue 계약 갭 + frozenInputs 형상 핀(구현 정직):** 현 `NodeValue`(sheet.py:50-56, 7필드)는 frozenInputs를 노출하지 않고, `evaluateSheet`(sheet.py:361-363)는 fn 반환 7-튜플의 frozenInputs를 `computeInputsHash` 에만 쓰고 *저장 안 한다*. 그 결과 *두 개의 recompute 우회*가 실재 — `registry._macroFrozen`(rev 노드가 rate/FX 경로 프리셋 재유도)·`run._marginPathFromSnapshot`(marginPath 같은 transfer 재계산). 둘 다 "감사 노드는 권위 provenance/refs/hash 그대로, 표시 숫자만 byte-동일 재산출"하는 정직 패턴이나 우회다. **★형상 핀(09 §10.3 T-A1 미결 해소): NodeValue에 frozenInputs 추가 시 = RAW pre-normalize 수치값 저장(소비 전용)** + 해시는 `evaluateSheet`가 `_normalize(frozenInputs)`로 *별도* 산출(해시 전용) — 한 필드 두 파생, 경쟁 두 타입 아님. `_freezeInputs`(09 T-A1의 `tuple((k,_normalize(v))...)`)는 해시 경로 한정. **이 추가의 목적 = *우회 삭제*(엔진트랙)지 mc.distribution 아니다**(mc 는 proforma vector 소비라 frozenInputs 불필요 — 위 §5b 표·OQ8). 두 우회는 종전 PRD 미기재 — 본 절이 정직 기록.
 
