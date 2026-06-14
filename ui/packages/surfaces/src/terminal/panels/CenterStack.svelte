@@ -302,37 +302,36 @@
 			<span class="symName">{co.name.kr}</span>
 		</div>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
-		<!-- 회사 네비 (가로 한 줄) — 터미널(로컬 임베드 한정) · 홈페이지 · 전자공시(DART 전체공시) · 공시뷰어(전체화면, 우측 ⤢ 동일) -->
+	</div>
+	<!-- 중간 — 회사 기본정보(대표·결산월·상장일·본사) 위 / 주요제품 아래(좌), 회사 네비 세로 스택(우). 우측은 가격관련만(밀도↑·헤더 ~3줄). -->
+	<div class="symProd">
+		<div class="symProdInfo">
+			{#if corpInfo}
+				<div class="symInfoRow">
+					{#if corpInfo.ceo}<span class="sif"><i>{lang === 'en' ? 'CEO' : '대표'}</i><b>{corpInfo.ceo}</b></span>{/if}
+					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산월'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
+					{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장일'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
+					{#if corpInfo.region}<span class="sif"><i>{lang === 'en' ? 'HQ' : '본사'}</i><b>{corpInfo.region}</b></span>{/if}
+				</div>
+			{/if}
+			{#if product}
+				<div class="symProdLine" title={product}><span class="symProdLbl">{lang === 'en' ? 'PRODUCTS' : '주요제품'}</span><span class="symProdV">{product}</span></div>
+			{/if}
+		</div>
+		<!-- 회사 네비 세로 스택 — 터미널(로컬 임베드 한정) · 홈페이지 · 전자공시(DART 전체공시) · 공시뷰어(전체화면, 우측 ⤢ 동일) -->
 		<nav class="symLinks">
 			{#if localViewerHref}<a href={localTerminalHref}>{lang === 'en' ? 'terminal' : '터미널'}</a>{/if}
 			{#if corpInfo?.homepage}<a href={corpInfo.homepage} target="_blank" rel="noopener">{lang === 'en' ? 'website ↗' : '홈페이지 ↗'}</a>{/if}
-			<a href={`https://dart.fss.or.kr/dsab007/main.do?textCrpNm=${co.code}`} target="_blank" rel="noopener" title={lang === 'en' ? 'DART — company filings (search prefilled)' : '전자공시(DART) — 회사 전체 공시 보기'}>{lang === 'en' ? 'DART ↗' : '전자공시 ↗'}</a>
+			<a href={`https://dart.fss.or.kr/dsab001/main.do?autoSearch=true&textCrpNm=${encodeURIComponent(co.name.kr)}`} target="_blank" rel="noopener" title={lang === 'en' ? 'DART — company filings (auto-search by name)' : '전자공시(DART) — 회사별 공시 자동검색'}>{lang === 'en' ? 'DART ↗' : '전자공시 ↗'}</a>
 			<button type="button" onclick={requestViewer} title={lang === 'en' ? 'disclosure viewer — fullscreen' : '공시뷰어 — 전체화면 (우측 정기공시 ⤢ 동일)'}>{lang === 'en' ? 'viewer ⤢' : '공시뷰어 ⤢'}</button>
 		</nav>
 	</div>
-	{#if product}
-		<div class="symProd" title={product}>
-			<span class="symProdLbl">{lang === 'en' ? 'PRODUCTS' : '주요제품'}</span>
-			<span class="symProdV">{product}</span>
-		</div>
-	{/if}
 	<div class="symPrice">
 		<span class="symLast mono">{fmtNum(dispLast)}</span>
 		<span class={'symChg ' + chgClass(dispRet1m)}>{dispRet1m == null ? '' : sign(dispRet1m, 2) + '% · 1M'}</span>
 	</div>
-	<!-- 우측 메타 — 대표/결산/상장/본사(회사 기본정보) + 스탯 격자 -->
-	<div class="symAside">
-		{#if corpInfo}
-			<div class="symInfoRow">
-				{#if corpInfo.ceo}<span class="sif"><i>{lang === 'en' ? 'CEO' : '대표'}</i><b>{corpInfo.ceo}</b></span>{/if}
-				{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
-				{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
-				{#if corpInfo.region}<span class="sif"><i>{lang === 'en' ? 'HQ' : '본사'}</i><b>{corpInfo.region}</b></span>{/if}
-			</div>
-		{/if}
-		<div class="symStats">
-			{#each stats as s (s.l)}<div class="symStat"><span>{s.l}</span><b class={'mono ' + s.t}>{s.v}</b></div>{/each}
-		</div>
+	<div class="symStats">
+		{#each stats as s (s.l)}<div class="symStat"><span>{s.l}</span><b class={'mono ' + s.t}>{s.v}</b></div>{/each}
 	</div>
 </div>
 

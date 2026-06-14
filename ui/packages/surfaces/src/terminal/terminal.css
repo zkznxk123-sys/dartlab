@@ -316,13 +316,12 @@
 .dlTerm .symName { font-family: var(--cond); font-weight: 600; font-size: 13px; color: var(--txt); }
 .dlTerm .symMeta { font-family: var(--mono); font-size: 9px; color: var(--dimmer); margin-top: 2px; letter-spacing: 0.3px; }
 .dlTerm .symId { flex: 0 0 auto; }
-.dlTerm .symLinks { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 4px; }
-.dlTerm .symLinks a, .dlTerm .symLinks button { font-family: var(--mono); font-size: 8.5px; color: var(--amberDim); text-decoration: none; letter-spacing: 0.2px; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.2; }
+.dlTerm .symLinks { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; flex-shrink: 0; }
+.dlTerm .symLinks a, .dlTerm .symLinks button { font-family: var(--mono); font-size: 8.5px; color: var(--amberDim); text-decoration: none; letter-spacing: 0.2px; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.35; white-space: nowrap; }
 .dlTerm .symLinks a:hover, .dlTerm .symLinks button:hover { color: var(--amber); }
 .dlTerm .symPrice { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; }
 .dlTerm .symLast { font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1; }
 .dlTerm .symChg { font-family: var(--mono); font-size: 11px; margin-top: 2px; }
-.dlTerm .symAside { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 0; }
 .dlTerm .symStats { display: grid; grid-template-columns: repeat(6, auto); gap: 2px 16px; }
 .dlTerm .symStat { display: flex; flex-direction: column; }
 .dlTerm .symStat span { font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.6px; text-transform: uppercase; }
@@ -934,10 +933,12 @@
 .dlTerm .kpiItem i { font-family: var(--cond); font-style: normal; color: #aab2c0; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
 .dlTerm .kpiItem b { font-family: var(--mono); font-weight: 600; }
 
-/* 헤더 가운데 주요제품 — 한 줄(줄바꿈 금지), 길면 말줄임. */
-.dlTerm .symProd { flex: 0 1 auto; min-width: 0; display: flex; align-items: baseline; gap: 6px; padding: 0 10px; border-left: 1px solid var(--bd); white-space: nowrap; overflow: hidden; }
-/* 우측 회사 기본정보 (대표·결산·상장·본사) — symAside 안, 우측 정렬 */
-.dlTerm .symInfoRow { display: flex; align-items: baseline; justify-content: flex-end; gap: 12px; white-space: nowrap; overflow: hidden; }
+/* 헤더 가운데 — 주요제품+회사정보(좌, 세로) / 회사 네비(우, 세로). 우측=가격관련만. 헤더 ~3줄 밀도. */
+.dlTerm .symProd { flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: 14px; padding: 0 10px; border-left: 1px solid var(--bd); overflow: hidden; }
+.dlTerm .symProdInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dlTerm .symProdLine { display: flex; align-items: baseline; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
+/* 회사 기본정보 (대표·결산·상장·본사) — 좌측 정렬 */
+.dlTerm .symInfoRow { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; overflow: hidden; }
 .dlTerm .sif { display: inline-flex; align-items: baseline; gap: 4px; min-width: 0; }
 .dlTerm .sif i { font-style: normal; font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0; }
 .dlTerm .sif b { font-size: 10px; font-weight: 500; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
