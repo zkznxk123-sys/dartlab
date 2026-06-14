@@ -180,6 +180,8 @@ driver가 손익계산서로 전파되는 표다.
 
 ## 6. 화면 구성
 
+> **★v0.4 화면 토폴로지 정정** — 아래 6.1~6.5 는 v0.1 비전 레이아웃이다(별도 워크벤치 화면 신설 0). 확정 거처 = **기존 터미널**(`ui/packages/surfaces/src/terminal/`). 각 pane 은 신설이 아니라 기존 표면 흡수: §6.1 Scenario Tree·§6.2 Assumption Ledger → 차트-스코프 인셋 + `if` 토글(05 §4); §6.3 Bridge Waterfall·§6.5 AI Expert Panel → ReportDock 탭(08 §3.2·§5, valuation 단일 모드로 시작); §6.4 Replay → PriceChart sim/Play 모드(05 §1·§8); Backtest → ReportDock backtest 모드(10, 엔진 졸업 시 추가 = 08 §5 deferred). **별도 셸·라우트·둘째 차트 인스턴스 0.** 정본 = 06 §0·§5 / 05 §8 / 08 §5. 06·05 의 "새 패널·차트 인스턴스 0" 규율이 본 절 레이아웃보다 우선.
+
 ### 6.1 Scenario Tree
 
 좌측에는 scenario tree를 둔다.
@@ -370,7 +372,7 @@ AI lens가 같은 시나리오를 독립 검토한다.
 
 ### Phase 8. 제품 화면
 
-Scenario tree, assumption ledger, bridge waterfall, replay panel, AI expert panel을 하나의 workbench로 묶는다.
+Scenario tree, assumption ledger, bridge waterfall, replay panel, AI expert panel을 **기존 터미널 차트(subject/sim 모드) + ReportDock 안에 통합**한다(별도 셸·워크벤치 화면 신설 없음 — §6 정정 박스·06 §0).
 
 완료 기준:
 

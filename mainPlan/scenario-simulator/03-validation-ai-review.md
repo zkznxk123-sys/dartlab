@@ -7,7 +7,7 @@
 > - **발간 게이팅 추가(§9.3 본진 승격)**: 가치평가·신용 보고서 발간은 **simulate 코어 졸업 *후***(08 §11 우선순위 역전 가드). 본문 §9.3 "story/report가 숫자 재계산 안 함"에 더해, "발간 모드는 코어 `SimulationResult` 실측 확정 후"를 본진 승격 기준에 추가. ★결정론 코어는 졸업했으나(01 §5a) **gate source(SimulationResult→gate)가 미배선**이라 아래 §2 Gate Matrix는 *설계*다(gate.py 미존재, 01 §6.3).
 > - **MC seed kill-test — ✅ 완료(09 P1)**: 전역 `random.seed`(`_simMonteCarlo.py:145`+`pricetarget.py:278`)→**로컬 `random.Random(seed)`**(stdlib·pyodide 안전, **numpy/PCG64 아님**) + `:205` cumprod. *레거시 MC* 한정 — `simulate/` 코어엔 MC 노드 부재.
 > - **AI lens 가드**: lens는 `ai/tools/lens.py` 1종(no-graph-regression, 01 §6·11). 채택 판정=결정론 gate 순수함수(보완은 약한 노드만, 강한 det 고수). `_REGRESSION_KEYWORDS` 한국어 substring 회피. ⚠ lens/gate 둘 다 미구현 — §7 AI 패널은 후속 단계.
-> - **금지어 lint 범위 = 3파일(★정정)**: `underpriced`/`overpriced` + `weighted_target`/`signal:strong_buy~strong_sell`가 `priceImplied.py` + `_valuationOther.py` + **`pricetarget.py`**(08 §2.3 채택 중추 함수, 09 P12). ⚠ **lint 스크립트 자체가 아직 미존재**(`tests/audit/` 매치 0건, 2026-06-14 실측) → §2 G15 Output Safety·§10 #10의 "추천/단정 표현 차단"은 스크립트 신설+CI 배선 전까지 사람-체크. 100점 차단 항목.
+> - **금지어 lint = ✅ 신설·CI배선 완료(2026-06-14)**: `tests/audit/valuationPublishLint.py`(+companion `test_valuationPublishLint.py`), `tests/run.py:140` lint 게이트 `--strict` 배선·green no-op·6 unit PASS. **발간 표면(frontmatter `reportType: simulation` 마크다운) 한정** 스캔이라 현재 0파일=green no-op, src `.py`(`priceImplied`/`_valuationOther`/`pricetarget` 의 정당한 `signal`/`weighted_target`)는 `_isSimulationReport` 가 영원히 미스캔(leaf CI red 회피). ⟹ §2 G15 Output Safety·§10 #10의 "추천/단정 표현 차단"은 **발간 표면 ship(T2, Phase 6) 시 자동 기계 강제**. ★잔여 100 천장 = lint 이 아니라 `gate.py`(SimulationResult→gate) 미배선(01 §6.3) → §2 Gate Matrix 는 여전히 *설계*. 정본 명세=09 §10.1 T1.
 
 ---
 

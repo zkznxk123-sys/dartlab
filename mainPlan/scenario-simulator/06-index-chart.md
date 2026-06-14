@@ -106,6 +106,7 @@ export const INDEX_PRESETS: IndexRef[] = [...KR_INDEX_PRESETS, ...US_INDEX_PRESE
 
 - **US 4종 선정 근거(코드 실측)**: `gather/fred/catalog.py` markets 그룹 9종 — 그중 주가지수 단위('Index')이며 '시장 지수'인 것만 4종. WILL5000IND는 §6.4 제외(assets.py 부채·시장전체 혼동), DTWEXBGS/DCOILWTICO/IR14270/CBBTCUSD는 자산가격·환율·암호화폐이지 시장지수가 아니라 비채택(`search()`로도 0건 — 있는 척 금지). 후속 운영자가 원자재 subject를 원하면 별 PRESET으로 확장(범위 분리).
 - **VIX 라벨 정직**: VIXCLS는 가격이 아니라 변동성 지수(CBOE) → 라벨 'VIX(변동성)'로 가격 오인 차단(§6.3).
+- **★US 지수 *증분*(데이터 추가 핵심 배선)**: 새 US 지수(예: Russell 2000/RUT)는 **2곳** 등록 — ① `US_INDEX_PRESETS`(contracts) 1줄 ② `gather/fred/catalog.py` markets 그룹 `CatalogEntry`. `buildFred`(`getAllEntries` 전수)가 parquet 에 넣어야 `loadSource('fred')` 우회(§3.3)가 꺼낼 수 있다 — 현 4종은 markets catalog 기존재라 즉시 라이브(§6.5)지만, **`US_INDEX_PRESETS` 1줄만 추가하면 catalog 부재로 빈 시리즈**(KR gov 지수는 gov 카탈로그 자동 수집이라 preset 1줄로 충분 — 비대칭 명시).
 
 ### 3.3 US 데이터 소스 — fredIndexSource (배선갭 정공 해소)
 

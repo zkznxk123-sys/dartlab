@@ -62,9 +62,10 @@ dartlab.simulate(code: str, *, scenario="baseline", horizon=3, asOf=None) -> Sim
 Company.simulate(*, scenario="baseline", horizon=3, asOf=None) -> SimulationResult   # company.py:1990
 ```
 - 첫 인자 = **`code: str`**(종목코드 "005930" 또는 한글명 "삼성전자") — Company 객체 아님. `dartlab.Company(code)`로 내부 해소.
-- **KR 전용 가드**: `market != "KR"`(US ticker → EDGAR)면 `ValueError`(KR 매크로 프리셋만 존재 — US 프리셋 합류 전까지 차단, §9 / 비전 차단 항목).
+- **KR 전용 가드**: `market != "KR"`(US ticker → EDGAR)면 `entry.py:111` `ValueError`. ⚠ US 프리셋(`PRESET_SCENARIOS_US` 5종)·elasticity(US 12키)는 `scenario.py`에 *실재*하나 (a) 이 가드 (b) `getPresetScenarios("KR")` 하드코딩(registry/run) (c) EDGAR sector 도달경로 부재로 *정책 차단* — US 해금 = 데이터 신설 아닌 market threading(09 §10.4 fatal④). 또한 가드는 `entry` 에만 — `Company.simulate`(`company.py:1990`)는 `runScenario(self)` 직접 호출이라 가드 우회(실 KR-only 강제 = `buildSnapshot` market threading 부재, 09 §10.4 FIX 일관).
 - `drivers`/`lens`/`mode` **인자 부재**: inert stub은 clutter라 *추가하지 않고* 후속 단계로 deferred(entry.py docstring AntiPatterns "drivers/lens/mode 인자를 기대 — 현재 결정론 subset만"). 따라서 현 verb는 **결정론 경로 단독**(lens 분기 없음).
 - 결과는 항상 ref + per-node 품질 상태(`NodeAudit.status` ok/partial) + provenance(asOf·latestAsOf) 동반. honest-gap: 결손은 None·partial(0 대체 금지).
+- **★silent 값-대체 표면화 계약(honest-gap 확장):** honest-gap 교리는 None 결손뿐 아니라 *값 대체*에도 적용한다 — `buildSnapshot`이 `sectorKey` 부재로 `DEFAULT_ELASTICITY`를, `sectorParams.discountRate` 부재로 `_DEFAULT_BASE_WACC`를 대체하면 (a) 해당 노드 provenance 에 `default:no-sector`/`default:no-wacc` 접두(provenance 문자열 재사용), (b) `run.warnings`에 `"sector elasticity defaulted — approximation(honest-gap)"` 추가(baseRevenue/shares 결손과 동일 채널). KR 신규상장사·US Phase A(09 §10.4 ① DEFAULT_ELASTICITY) 공통 — 09 §10.4 ①의 'US=DEFAULT 근사'를 docstring 넘어 `run.warnings`(사용자용)로 끌어올린다.
 
 (2) **후속 단계 목표 시그니처**(미구현 — lens/Play/다중드라이버 phase):
 ```python
@@ -109,11 +110,13 @@ dartlab.simulate(code, *, scenario, drivers=None, lens=None, mode="whatif"|"repl
 | 노드 (driverId) | fn (registry) | det provenance (실측) | vector 차원 | AI 의견 |
 |---|---|---|---|---|
 | `macro.path` | `_fnMacroPath` → `getPresetScenarios("KR")` 프리셋 | `preset:{scenarioId}` | 연도(horizon) | △(후속) |
-| `rev.path` | `_fnRevPath` → `transferRevenuePath`(엣지, 자기 소유 산수) | `transfer:rev*(1+bgdp*gdp+bfx*fxDelta),...` | 연도(horizon) | O(후속) |
+| `rev.path` | `_fnRevPath` → `transferRevenuePath`(엣지, 자기 소유 산수) | `transfer:rev*(1+bgdp*gdp+bfx*fxDelta);elasticity=<sector>(curated prior, seed/CI=0, NOT regression-identified)` | 연도(horizon) | O(후속) |
 | `proforma` | `_fnProforma` → L2 leaf `buildProforma`(불가침) | `proforma:cashplug,wacc=..,years=..` | 연도별 FCF | △(후속) |
 | `dcf` | `_fnDcf` → **proforma-FCFF 직접할인**(Gordon TV, `calcDFV` 회피) | `dcf:fcff,wacc=..,g=..` | perShare + EV(1-tuple) | △(후속) |
 
 > **★dcf 노드 = proforma-FCFF, `calcDFV` 회피(09 P3·08 §2.3 정합):** `_fnDcf`는 proforma 노드의 per-year FCF 벡터를 WACC로 직접 할인 + Gordon TV(섹터 terminalGrowth 캡) + netDebt 차감 + shares 분배로 주당가치를 낸다. `calcDFV`/`multiStageDcf`를 **호출하지 않는다** — calcDFV는 자체 내부 proforma를 다시 돌려 *이 시나리오의* proforma FCF를 무시하므로 scenario-coherence가 깨진다(외부 proforma 무시). 정적 가치평가용 calcDFV(08 §1 ⑤ 표)와 시나리오 dcf 노드는 *중복 아닌 2 정당 경로*다.
+
+> **★rev.path elasticity provenance 정직(졸업 AC):** `rev.path` 노드의 elasticity 계수는 curated `SECTOR_ELASTICITY` priors(`synth/scenario.py:229`, 35키, OOS provenance 없음·seed/CI 0)다. DriverRegistry pooled-β(02 §2B.4-B)가 pooled-OOS partial-R² 를 공급하기 *전까지* `SimulationResult.warnings` 가 `"elasticity_prior_unvalidated"` 를 싣는다(`run.py` warnings 튜플의 base-revenue/shares honest-gap 동일 패턴) — 결과 표면에서 magic-constant fan-out 이 *침묵*하지 않게.
 
 ### §5b 후속 단계 노드 — 미구현 가설 (4노드 코어에 미포함)
 
@@ -205,7 +208,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 **DisagreementLedger**(simulate/ledger.py) — ★미구현(lens 단계 신설): fork/큰-gap 노드 자동 수집 {nodeId, det.value, ai.value, gap, provenance, ai.refs, resolution} → 터미널 '엔진 vs AI 갈린 지점' 표. 어긋남 미삼킴(`feedback_silent_swallow`). Play 근거 인벤토리(05 §6) cross-link. **현재**: `run.SimulationResult.warnings`(tuple[str,...])가 base revenue/shares 결손을 honest-gap으로 표면화하나, fork/gap 수집 로직(`ledger.py`)은 ai 슬롯과 함께 후속 단계다.
 
-**사후 채점(Brier)** — ★미구현(lens 단계): `scenarioSim.py::judgeQuarter`를 노드 단위 일반화 → `OutcomeLog`(MCP 실재) + **forwardTest write 함수 `recordForecast`(현재 부재 — 신설 필요, 09 P9·02 §2B.5)** 에 asOf+det+ai 박제 → N분기 후 노드별 Brier. ⚠ judgeQuarter `int(quarter[-1])` → `re.search(r'Q(\d+)', quarter)` 교체(2025Q10 가드, BC표면 golden 동행). folk-stat 회피(held-out·충분표본, 3점·CI0·seed0 금지). 'AI가 엔진보다 낫다'는 *증명 대상*이지 *전제*가 아님 — 분기 누적 후에야 신호. **단 forward-test 루프는 write 끝단(recordForecast·models HF 배포)이 아직 없어 물리적으로 닫히지 않는다**(09 §0 #5·02 §2B.5).
+**사후 채점(Brier)** — ★미구현(lens 단계): `scenarioSim.py::judgeQuarter`를 노드 단위 일반화 → `OutcomeLog`(MCP 실재) + **forwardTest write 함수 `recordForecast`(현재 부재 — 신설 필요, 09 P9·02 §2B.5)** 에 asOf+det+ai 박제 → N분기 후 노드별 Brier. ⚠ judgeQuarter `int(quarter[-1])` → `re.search(r'Q(\d+)', quarter)` 교체(2025Q10 가드, BC표면 golden 동행). folk-stat 회피(held-out·충분표본, 3점·CI0·seed0 금지). 'AI가 엔진보다 낫다'는 *증명 대상*이지 *전제*가 아님 — 분기 누적 후에야 신호. **단 forward-test 루프는 write 끝단(recordForecast·models HF 배포)이 아직 없어 물리적으로 닫히지 않는다**(09 §0 #5·02 §2B.5). 따라서 write-end 라이브 전 `DriverCard.state` 는 dormant 상한(02 §2B.3) — active 승격은 decay 스트림이 false discovery 를 bound 할 수 있을 때만.
 
 ### 6.4 두 lens 모드 + HypothesisNode (보존)
 
@@ -230,7 +233,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 | L1.5 synth/scenario | `synth/scenario.py` | preset·elasticity 상수 SSOT | 형제(scan/frame/reference) import |
 | L2 analysis/financial | `_proformaCore.py`·`_signalsMacroSensitivity.py` | leaf 결정론 계산(proforma·OLS beta) SSOT | L2 형제 import |
 | L2 macro/quant/credit | macro·quant·credit/distress | 거시 시그널·beta·생존 leaf | L2 형제 import |
-| **L2.5 simulate (신규)** | `src/dartlab/simulate/` | **드라이버 sheet·실행기·엣지 transfer 소유, L2 leaf 호출 결합** | leaf 재구현·panel 변형 |
+| **L2.5 simulate (신규)** | `src/dartlab/simulate/` | **드라이버 sheet·실행기·엣지 transfer 소유, L2 leaf 호출 결합** | leaf 재구현·panel 변형. ★역방향(analysis/macro/quant→simulate) 차단 = `test_import_direction.py` downward-only(LIVE pytest 정본, `LAYER_OF["simulate"]=2.5`:26) + importlinter forbidden(미배선·09 §6② Phase1 신설예정, continue-on-error 가시화 only) |
 | L3 story | `story/` | `simulate` 결과 ref → 서사 조립 | 자체 숫자 계산 |
 | L4 ai/mcp | `ai/tools/lens.py` | 노드 의견(annotate)·sheet 판단(judge) | `agent.py` 본체 오염·고정노드 |
 
@@ -332,7 +335,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 ## 15. _attempts 졸업 게이트 → 본진 진입
 
-> **★진척(2026-06-14):** 결정론 코어가 이미 졸업해 본진 `src/dartlab/simulate/`에 실재한다 — foundation(`sheet`/`transfer`, LAYER_OF simulate:2.5 등록) + deterministic core(4노드 `registry`/`run`, `096e84c43`) + 공개 verb(`entry`, `ac3905fd9`). 아래 8단계 중 1~4·6~8의 *결정론 부분*은 완료(transfer byte-identical 골든·9섹션 docstring·dartlabGuard exit 0). **잔여 = MC·lens·DriverRegistry·Play 단계**(§5b 노드, §6.3 gate, 02 §2B admission). 아래 원본 게이트는 그 잔여 단계의 척추로 유지.
+> **★진척(2026-06-14):** 결정론 코어가 이미 졸업해 본진 `src/dartlab/simulate/`에 실재한다 — foundation(`sheet`/`transfer`, LAYER_OF simulate:2.5 등록) + deterministic core(4노드 `registry`/`run`, `096e84c43`) + 공개 verb(`entry`, `ac3905fd9`). 아래 8단계 중 1~4·6~8의 *결정론 부분*은 완료(transfer byte-identical 골든·9섹션 docstring·dartlabGuard exit 0). **잔여 = MC·lens·DriverRegistry·Play 단계**(§5b 노드, §6.3 gate, 02 §2B admission). 아래 원본 게이트는 그 잔여 단계의 척추로 유지. ★졸업 AC(추가): `rev.path` 노드가 pooled-panel transfer provenance(pooled-OOS partial-R², 02 §2B.1) *또는* `SimulationResult.warnings=["elasticity_prior_unvalidated"]` 중 하나를 보장 — 결과 표면에서 silent magic-constant fan-out 금지.
 
 `tests/_attempts/scenarioSimulator/`에서:
 1. 카테고리 scenarioSimulator
@@ -371,4 +374,5 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 - `src/dartlab/synth/scenario.py` (preset+SECTOR_ELASTICITY, simulateScenario docstring만 언급·import 0 — L1.5→L2 가드 준수)
 - `src/dartlab/macro/forecast/nowcast.py` (gdpNowcast Kalman 현재국면 — 경로예측 부재 확정)
 - `tests/architecture/test_l2_no_cross_import.py` (`L2_PEERS` 5개 — `simulate/` 묶음 자동 합법 근거)
+- `tests/architecture/test_import_direction.py` (`LAYER_OF["simulate"]=2.5`:26 + downward-only 검사 — L2→L2.5 역방향 차단 LIVE pytest 정본)
 - `tests/audit/checkAgentBoundary.py:158` (`_check_regression_keywords` SRC 전체 스캔 — §11 근거)

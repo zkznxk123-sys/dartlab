@@ -1,7 +1,7 @@
 # 08. Valuation Report — 시뮬레이터 = 가치평가 엔진, 프로급 보고서 발간 계약
 
-상태: PRD v0.3 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 미구현 정직표기[§2.2])
-**지위: 발간 *계약* 문서 — 발간 모드는 `simulate/` 코어 졸업 *후*에 착수(§11 게이팅).** ★결정론 코어는 이미 졸업(4노드 DAG·공개 verb, 01 §5a) — 그러나 발간이 의존하는 **금지어 lint·gate.py·reportDock·14키 ref 치환·렌더러 2개는 전부 미구현**(아래 ⚠ 표기). 코어 졸업 ≠ 발간 가동.
+상태: PRD v0.4 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 신설·CI배선 완료[§2.2·09 §10.1])
+**지위: 발간 *계약* 문서 — 발간 모드는 `simulate/` 코어 졸업 *후*에 착수(§11 게이팅).** ★결정론 코어는 이미 졸업(4노드 DAG·공개 verb, 01 §5a) — 그러나 발간이 의존하는 **gate.py·reportDock·14키 ref 치환·렌더러 2개는 미구현**(금지어 lint 은 신설·CI배선 완료, 09 §10.1; 아래 ⚠ 표기). 코어 졸업 ≠ 발간 가동.
 
 ---
 
@@ -42,9 +42,9 @@
 
 ### 2.2 단일점·rating 차단 (적대검증 B-1·B-2 — 규제선 실제 구멍)
 
-- **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. `underpriced`/`overpriced` 단어 자체가 금지어 lint 대상.
-- **★`computePriceTarget` rating·단일목표가 차단(B-1', 평가 P0):** `pricetarget.py`의 `weighted_target`(단일 목표가)+`signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644`)도 동일 금지 출력 — **§2.3 어댑터가 두 필드를 drop**하고 P10~P90 분포+reverseDCF 닻만 발간. 금지어 lint **3파일**(`priceImplied.py`+`_valuationOther.py`+**`pricetarget.py`** — signal enum·`weighted_target`/`strong_buy`/`strong_sell` 차단). 09 P12 범위 확대.
-  > **★미구현 경고(평가 fatal — 정직):** 이 금지어 lint **스크립트는 아직 존재하지 않는다**(`tests/audit/`에 `underpriced`/`overpriced`/`weighted_target` 매치 파일 0건 — 2026-06-14 실측 확인). §4는 lint를 "선신설"(yet to be created)로 명시하지만, 그 사이 §2.2/§6/§7의 "기계 강제"·"3파일 차단" 표현이 *이미 가동 중인 가드*처럼 읽혀선 안 된다. **단일 목표가·rating 금지는 본 PRD에서 가장 규제적으로 중대한 규율(불특정 다수 무료 발간)인데, 이를 강제할 스크립트가 없는 동안은 설계 상태다.** 100점·major(1.0)의 차단 항목 1순위 — `tests/audit/<valuationWordLint>.py`(3파일 커버)를 *신설하고 publish/CI 게이트에 배선*해야 "기계 강제" 주장이 참이 된다.
+- **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. 단 lint 은 *발간 표면 마크다운*만 스캔 — `priceImplied.py` 의 `signal` enum(leaf 정의)은 정당 사용이라 미스캔(§2.3·아래 §2.2 박스).
+- **★`computePriceTarget` rating·단일목표가 차단(B-1', 평가 P0):** `pricetarget.py`의 `weighted_target`(단일 목표가)+`signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644`)도 동일 금지 출력 — **§2.3 어댑터가 두 필드를 drop**하고 P10~P90 분포+reverseDCF 닻만 발간. 금지어 lint = **발간 표면(frontmatter `reportType: simulation` 마크다운) 한정** — leaf src 3파일(`priceImplied`/`_valuationOther`/`pricetarget`)은 `_isSimulationReport()` 가 `.py` 를 영원히 False 로 막아 미스캔(=leaf 의 정당한 `signal`/`weighted_target` 안 잡음, CI red 0). 그 3파일 값의 발간 누출은 §2.3 어댑터(weighted_target/signal drop)가, 마크다운에 쓴 매수/목표가 어휘는 lint 가 차단 — 책임 다른 두 메커니즘. 09 P12.
+  > **★구현 정합(2026-06-14):** 발간 표면 한정 금지어 lint = `tests/audit/valuationPublishLint.py`(+companion `test_valuationPublishLint.py`) **신설·CI배선 완료**(`tests/run.py:140` fast 게이트 `--strict`, green no-op·6 unit PASS 실측). 스캔 대상이 발간 표면(frontmatter `reportType: simulation` 마크다운)뿐이라 leaf src `.py` 는 영원히 미스캔(=leaf 의 정당한 `signal`/`weighted_target` 사용 안 잡음, CI red 0). 발간 표면 0파일이라 현재 green no-op — 표면 ship 시 자동 발화. 정본 명세=09 §10.1 T1. **잔여=T2 발간 표면 신설(Phase 6).**
 - **priceP50 단독 금지(B-2):** `PriceSimulationResult.priceP50`/`perShare`(02 §2.8-9) 단독 표시는 목표가로 읽힌다. **발간 게이트 기계 규칙: perShare/P50 단독 출력 시 build fail — 항상 P10·P90 + reverseDCF 닻 동반.** 무료 공개 발간이 더 위험(불특정 다수).
 - `verdict`(저평가/적정/고평가) = 조건부 *분류*이지 Buy/Sell *rating* 아님 — 단 §7 가드로 강제.
 
@@ -52,7 +52,7 @@
 
 범위(A): `calcDFV`(`dFV.py:56`, 4엔진 통합 quality-WACC)·`computePriceTarget`(`pricetarget.py:460`, 5시나리오×proforma×DCF + `_monteCarloPriceDistribution` P10~P90). 닻(B): `reverseImpliedGrowth`+`computeGap`. WACC: `computeCompanyWacc`(`_proformaCore.py:145`)+`calcQualityWACC`. **한국기업 CRP 토글**을 DriverCard로(지정학 악화→CRP +1.5pp).
 
-> **★평가 P0 정정 — computePriceTarget는 "거의 선구현"이 아니라 금지 출력 반환체다:** `computePriceTarget`은 P10~P90 분포 외에 **`weighted_target: float`(단일 목표가) + `signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644` = 매수/매도 rating)**을 함께 반환한다 — 00·§2가 가장 강하게 금지한 바로 그것. §2.2 금지어 lint이 `priceImplied.py`만 잡고 *이 중추 함수를 놓쳤다*. ⟹ 발간에 그대로 쓰면 안 되고, **발간 어댑터(P10/P50/P90 분포 + reverseDCF 닻만 추출, `weighted_target`·`signal` 필드 drop)**를 거친다. 졸업 AC = "calc 직접호출 0"과 **동급으로 "rating/단일목표가 필드 누출 0"** 명문화. (~80% 재사용 자평은 실재하나 *그대로는 못 씀* — 어댑터가 추가 작업.)
+> **★평가 P0 정정 — computePriceTarget는 "거의 선구현"이 아니라 금지 출력 반환체다:** `computePriceTarget`은 P10~P90 분포 외에 **`weighted_target: float`(단일 목표가) + `signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644` = 매수/매도 rating)**을 함께 반환한다 — 00·§2가 가장 강하게 금지한 바로 그것. §2.2 금지어 lint 은 *어느 `.py` 도 안 잡는다*(발간 표면 마크다운 한정) — `weighted_target`/`signal` 의 발간 누출 차단은 lint 이 아니라 발간 어댑터의 *필드 drop* 책임이다. ⟹ 발간에 그대로 쓰면 안 되고, **발간 어댑터(P10/P50/P90 분포 + reverseDCF 닻만 추출, `weighted_target`·`signal` 필드 drop)**를 거친다. 졸업 AC = "calc 직접호출 0"과 **동급으로 "rating/단일목표가 필드 누출 0"** 명문화. (~80% 재사용 자평은 실재하나 *그대로는 못 씀* — 어댑터가 추가 작업.)
 > **★구현 정합(2026-06-14):** deterministic core의 dcf 노드(`registry._fnDcf`)는 **proforma-FCFF**를 쓰고 `calcDFV`를 의도적으로 회피(외부 proforma 무시→scenario-coherence 깨짐, 09 P3). 발간 ⑤ Numbers→value도 *시나리오 일관성*을 위해 simulate dcf 노드(proforma-FCFF) 결과를 ref로 받아야지 calcDFV/computePriceTarget을 재호출하면 SSOT 분열(§1 ⑤ 표는 정적 가치평가용 calcDFV — scenario 발간과 구분).
 
 ---
@@ -88,13 +88,13 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 
 세 보고서(가치평가·백테스트·시뮬)는 같은 정직 골격 공유(RunSpec·provenance·assumption ledger·quality gate·면책·look-ahead 차단). 그러나 **백테스트·시뮬 모드는 둘 다 미존재 → 2-mode 추상화 선투자는 YAGNI.** ReportDock은 **valuation 단일 모드로 시작**, backtest/sim 모드는 그 엔진 졸업 시 추가. ReportDock은 landing 측 *셸*(렌더만, 계산기 아님). 백테스팅 PRD([[project_terminal_backtesting_prd]])와 교차참조.
 
-**금지어 lint(B-3):** "백테스팅 PRD와 SSOT 공유"는 거짓(둘 다 미존재) → **본 작업이 `tests/audit/` 투자권유 금지어 lint를 *선신설***하고, 백테스팅이 나중에 import. 의존 방향: 본 작업이 선행 정의자.
+**금지어 lint(B-3):** "백테스팅 PRD와 SSOT 공유"는 거짓(백테스트 모드 미존재) → **본 작업이 `tests/audit/valuationPublishLint.py` 투자권유 금지어 lint 를 신설·CI배선 완료**(발간표면 한정 green no-op, 09 §10.1), 백테스팅이 나중에 import. 의존 방향: 본 작업이 선행 정의자.
 
 ---
 
 ## 6. 프로급 품질 체크리스트 (= "전문가급" 라벨의 정의, 발간 게이트)
 
-전 항목 PASS여야 발간(`thesisKillChain.premortemQualityGate` + 03 Gate Matrix). ⚠ **"기계 강제" = 목표 상태**: 금지어 lint(§2.2·§7)·gate source(01 §6.3 gate.py)가 둘 다 *미구현*이라 현재는 사람-체크리스트다. 발간 모드 착수(§11) 시 lint 신설 + gate 배선이 선결.
+전 항목 PASS여야 발간(`thesisKillChain.premortemQualityGate` + 03 Gate Matrix). ⚠ **부분 기계 강제**: 금지어 lint(§2.2·§7)는 **신설·CI배선 완료**(09 §10.1, 발간 표면 ship 즉시 자동 강제), 그러나 gate source(01 §6.3 `gate.py`)는 여전히 *미구현*(fatal③ AI-lens phase) → 그 항목만 발간 모드 착수(§11) 시 사람-체크.
 1. ☐ 단일 목표가 부재 — 범위로만 (§2) 2. ☐ reverseDCF 닻 노출 + 충돌 판정 (03 §6.2) 3. ☐ 최소 3시나리오 (bear/base/bull) 4. ☐ 모든 숫자→ref 5. ☐ 모든 가정→falsifier 6. ☐ terminal 규율 통과 (g≤Rf, reinvest=g/ROC, ROC→WACC 수렴 or 명시 moat) 7. ☐ 결손=결손(0대체 0건) 8. ☐ provenance asOf 일치(look-ahead 0) 9. ☐ DisagreementLedger 노출 10. ☐ qualityGateStatus 표시 11. ☐ 라이프사이클 인지(young/mature/금융/cyclical leaf 분기) 12. ☐ 면책+금지어 가드 통과.
 
 "전문가급" = **방법 엄밀함**(독점 데이터 아님). 컨센서스 부재(감사 확정) → "방법 투명성" 라벨이 정직. AI 3-티어(advanced/onDevice/deterministic)는 *기능 가용성*(어디서 도나)이지 과금 아님 — 공개 GH Pages=결정론 reverseDCF+3시나리오 토글(WebGPU 열화·숨김 금지), 로컬=multiStageDcf·thesisKillChain 전체·특수경로.
@@ -112,7 +112,7 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 | reverseDCF 함의 노출 | 단일 target + Buy/Hold/Sell rating, `signal` 노출 |
 | 확률가중 bear/base/bull | "예상 수익률 N%" 약속 |
 
-가드 구현(테스트 강제): ① **금지어 lint 신설**(매수/매도/추천/목표가단일점/예상수익률/검증된전략/Buy·Hold·Sell/underpriced·overpriced/"당신의 상황에서"→발간 차단) ② 대체 어휘 강제("조건부 perShare 범위"/"현재가 함의"/"시나리오 분석"/"반증 조건") ③ 면책 자동삽입 확장(`publisher.py:169` 기존 "투자 권유 아님"에 "hypothetical scenario analysis, not a forecast" + criteria·assumptions·falsifier 명시 = SEC Marketing Rule·FINRA 2210 hypothetical performance 충족) ④ FINRA 2241 형식 차용(rating 미발행이라 본체 비적용, 형식만: reasonable basis=panel ref+ledger / valuation method 명시=어느 leaf / risks=falsifierLedger). 네 규제가 *모두* 같은 것(criteria/assumptions 노출+risk 명시+reasonable basis)을 요구 → 가정-노출이 곧 규제 안전 + 전문가급.
+가드 구현(테스트 강제): ① **금지어 lint(`valuationPublishLint.py`, 신설·CI배선 완료, 발간 표면 마크다운 한정)**(매수/매도/추천/목표가단일점/예상수익률/검증된전략/Buy·Hold·Sell/underpriced·overpriced/"당신의 상황에서"[개인화]→발간 마크다운에서 차단; leaf src 는 미스캔. `_BANNED` 6패턴 완비 — 개인화 추천 포함) ② 대체 어휘 강제("조건부 perShare 범위"/"현재가 함의"/"시나리오 분석"/"반증 조건") ③ 면책 자동삽입 확장(`publisher.py:169` 기존 "투자 권유 아님"에 "hypothetical scenario analysis, not a forecast" + criteria·assumptions·falsifier 명시 = SEC Marketing Rule·FINRA 2210 hypothetical performance 충족) ④ FINRA 2241 형식 차용(rating 미발행이라 본체 비적용, 형식만: reasonable basis=panel ref+ledger / valuation method 명시=어느 leaf / risks=falsifierLedger). 네 규제가 *모두* 같은 것(criteria/assumptions 노출+risk 명시+reasonable basis)을 요구 → 가정-노출이 곧 규제 안전 + 전문가급.
 
 ---
 
@@ -139,9 +139,9 @@ leaf=L2 SSOT 불변(`analysis/valuation/*`·`analysis/financial/calc*`·`buildPr
 
 ## 11. ★우선순위 게이팅 (적대검증 C-1 — 가장 중요)
 
-`src/dartlab/simulate/`·`dartlab.simulate` verb·`tests/_attempts/scenarioSimulator/` 전부 **현재 0줄**. 보고서 발간을 코어보다 먼저 짓는 것은 우선순위 역전. 순서 강제:
+`src/dartlab/simulate/` 결정론 코어(sheet/transfer/registry/run/entry)·`dartlab.simulate`/`Company.simulate` verb 는 **이미 졸업·실재**(01 §5a, `ac3905fd9`). **미구현 = 발간 의존부**(렌더러 2개·14키 ref 치환·ReportDock·gate.py·T2 발간표면). 보고서 발간 단면을 그 의존부보다 앞세우는 것은 우선순위 역전 — 코어는 섰으나 발간 단면은 아직. 순서:
 
-1. **Phase 0:** MC seed kill-test(`mcSeedReproKill.py`, 전역 random→numpy Generator).
+1. **Phase 0 ✅ 완료(09 P1):** MC seed kill-test — 전역 `random.seed`(`_simMonteCarlo.py:145`·`pricetarget.py:278`)→로컬 `random.Random(seed)`(stdlib, numpy/PCG64 아님) + `:205` cumprod(`test_horizon_widens_cone`).
 2. **simulate 코어 _attempts 졸업**(01 §15) — DriverSheet·DriverRegistry·`SimulationResult` 실측 확정.
 3. **그 후에야** 본 08의 보고서 모드(렌더러 2개·14키 ref 치환·ReportDock·lint)를 착수.
 
