@@ -1,9 +1,9 @@
 """gather entry — `dartlab.gather()` 콜러블 진입점 패키지.
 
 thin facade. 구현:
-    - `dispatch.py` — AXIS_REGISTRY (12 axis 메타), AXIS_ALIASES, API_KEY_INFO,
-      INDEX_SYMBOLS, _resolveAxis, _fetchNaverIndex, TargetType, GatherAxisEntry
-    - `main.py` — GatherEntry 클래스 (__call__ / _run / _guide / _apiKeyGuide / __repr__)
+    - `dispatch.py` — AXIS_REGISTRY (13 axis 메타: 공개 11 + 베타 hidden 2), AXIS_ALIASES,
+      API_KEY_INFO, INDEX_SYMBOLS, _resolveAxis, _fetchNaverIndex, TargetType, GatherAxisEntry
+    - `main.py` — GatherEntry 클래스 (__call__ / _run / _guide / __repr__)
     - `providerAdapter.py` — _GatherProviderAdapter + getDefaultGather + 자동 register
 
 외부 caller (10+ 호출부):

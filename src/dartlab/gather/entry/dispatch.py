@@ -58,9 +58,11 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
     "macro": GatherAxisEntry(
         label="거시지표",
         description=(
-            "ECOS(KR) / FRED(US) 거시지표 시계열. 기본 HF 벌크 (apiKey 없음), apiKey 명시 시 ECOS/FRED 직접 API."
+            "거시지표 시계열. KR(ECOS)/US(FRED) 는 HF 벌크 (키 불필요, apiKey 명시 시 직접 API), "
+            "EU(ECB)·GLOBAL(BIS/OECD/IMF) 는 live SDMX (키 불필요). ID prefix 로 시장 자동 감지: "
+            "ECOS/FRED 코드 → KR/US, ECB_ → EU, BIS_/OECD_/IMF_ → GLOBAL."
         ),
-        example='gather("macro") / gather("macro", "CPI") / gather("macro", "FEDFUNDS")',
+        example='gather("macro", "CPI") / gather("macro", "FEDFUNDS") / gather("macro", "ECB_HICP") / gather("macro", "IMF_OIL_BRENT")',
         targetRequired=False,
         targetType="indicator",
     ),
@@ -149,14 +151,14 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         hidden=True,
     ),
     "calendar": GatherAxisEntry(
-        label="catalyst 일정",
+        label="catalyst 일정 (폐기 → Company.calendar)",
         description=(
-            "다가오는 정기공시 (사업/반기/분기보고서) due date 추론. "
-            "한국 fiscal cycle (FY=calendar year) 가정 + DART disclosure 시계열에서 last 보고서 → next due. "
-            "P0: KR 정기공시만. AGM·만기·컨센서스·EDGAR 8-K 미포함 (P1+). "
-            "API 키: DART_API_KEY (Company.disclosure 사용)."
+            "[0.10 폐기] gather('calendar') 는 ValueError 로 막힘 — gather→providers "
+            "cycle 회피 위해 책임 분리. 다가오는 정기공시 due date 는 "
+            "Company.calendar(horizonDays=30) 로 조회 (한국 fiscal cycle 가정 + "
+            "DART disclosure 시계열에서 last 보고서 → next due). API 키: DART_API_KEY."
         ),
-        example='gather("calendar", "005930", horizon_days=30) / gather("calendar", ["005930", "000660"])',
+        example='Company("005930").calendar(horizonDays=30)  # gather("calendar") 는 0.10 폐기',
         targetType="stockCode",
         hidden=True,
     ),

@@ -1,8 +1,12 @@
-"""GatherEntry — 외부 시장 데이터 통합 수집 콜러블 (8축 dispatch).
+"""GatherEntry — 외부 시장 데이터 통합 수집 콜러블 (axis dispatch).
 
-dartlab.gather() callable 의 본체. 축별 위임은 getDefaultGather() 의
-Gather 싱글턴 메서드 (price/flow/macro/news/sector/insider/ownership/peers
-/krx/krxIndex/calendar/dartDoc) 또는 정적 헬퍼 (네이버 지수 fetch) 로 위임.
+dartlab.gather() callable 의 본체. 공개 11 축 (price·flow·macro·news·sector·
+insider·ownership·peers·krx·krxIndex·narrative) + 베타 2 축 (dartDoc·calendar,
+hidden) = 13 축. 축 정의 SSOT 는 ``dispatch.AXIS_REGISTRY`` 한 곳 — 본 docstring
+은 설명용이며 가용 축의 정본은 ``dartlab.gather()`` 가이드 / ``AXIS_REGISTRY``.
+
+축별 위임은 getDefaultGather() 의 Gather 싱글턴 메서드 또는 정적 헬퍼
+(네이버 지수 fetch) 로 간다.
 """
 
 from __future__ import annotations
@@ -56,17 +60,20 @@ _AXIS_DISPATCH: dict[str, Any] = {
 
 
 class GatherEntry:
-    """외부 시장 데이터 통합 수집 — 8축, 전부 Polars DataFrame.
+    """외부 시장 데이터 통합 수집 — 공개 11축, 전부 Polars DataFrame.
 
-    Capabilities:
+    Capabilities (가용 축의 정본 = ``dispatch.AXIS_REGISTRY`` / ``dartlab.gather()`` 가이드):
         - price: OHLCV 시계열 (KR Naver/US Yahoo, 기본 1년, 최대 6000거래일)
         - flow: 외국인/기관 수급 동향 (KR 전용, Naver)
-        - macro: ECOS(KR) / FRED(US) 거시지표 시계열 (기본 HF 벌크)
+        - macro: ECOS(KR) / FRED(US) / customs(KR 무역) + ECB(EU) · BIS/OECD/IMF(GLOBAL) 거시지표
         - news: Google News RSS 뉴스 수집 (최근 30일)
         - sector: 업종 분류 (KR KIND+Naver)
         - insider: 내부자 거래 (KR DART)
         - ownership: 기관/외국인 지분 보유 (KR Naver)
         - peers: 동종업종 피어 종목 (시총 포함, KR Naver)
+        - krx / krxIndex: KRX 회사별·시장군 지수 wide (HF SSOT)
+        - narrative: 뉴스 내러티브 archive (RSS+GDELT)
+        - 베타(hidden): dartDoc(공시 원문) · calendar(정기공시 due)
         - 자동 fallback 체인, circuit breaker, TTL 캐시
 
     AIContext:
@@ -108,7 +115,7 @@ class GatherEntry:
         **kwargs: market ("KR"/"US"), start, end, days, proxy 등 축별/공통 옵션.
 
     Returns:
-        pl.DataFrame — 축별 시계열 데이터. axis=None이면 4축 가이드 DataFrame.
+        pl.DataFrame — 축별 시계열 데이터. axis=None이면 공개 축 가이드 DataFrame.
 
     Requires:
         price/flow/news: 없음 (공개 API)
@@ -160,15 +167,18 @@ class GatherEntry:
         target: str | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame:
-        """외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축.
+        """외부 시장 데이터 수집 — 공개 11 축 (핵심 4: 주가·수급·거시·뉴스 + 보조 7).
 
         Parameters
         ----------
         axis : str, optional
-            수집 축. None 이면 가이드 DataFrame 반환.
-            "price" — OHLCV 주가, "flow" — 투자자별 수급,
-            "macro" — FRED/ECOS 거시지표, "news" — Google News,
-            "sector" — 업종/산업 분류, "insider" — 내부자 거래.
+            수집 축. None 이면 가이드 DataFrame 반환. 가용 축 정본 = AXIS_REGISTRY.
+            핵심 — "price" OHLCV 주가, "flow" 투자자별 수급,
+            "macro" 거시지표 (ECOS/FRED/customs/ECB/BIS/OECD/IMF), "news" Google News.
+            보조 — "sector" 업종, "insider" 내부자거래, "ownership" 지분,
+            "peers" 피어, "krx"/"krxIndex" KRX wide, "narrative" 뉴스 내러티브.
+            고급 수집기 (dividends/splits/majorShareholders/collect 등) 는 축이 아니라
+            ``getDefaultGather()`` 메서드 — 본 docstring 하단 "Form A vs Form B" 참조.
         target : str, optional
             종목코드/지표코드/검색어. 축에 따라 필수.
         **kwargs
@@ -364,30 +374,6 @@ class GatherEntry:
         ]
         return pl.DataFrame(rows)
 
-    def _apiKeyGuide(self) -> str:
-        """API 키 설정 안내 문자열.
-
-        Returns
-        -------
-        str
-            .env 설정 방법 + 발급 링크.
-        """
-        return (
-            "━━━ API 키 설정 안내 ━━━\n"
-            "\n"
-            "거시지표(macro)는 기본 HF 데이터셋 경로에서 API 키가 필요 없습니다.\n"
-            "직접 API 호출이나 내부자거래(insider)를 쓸 때는 .env 파일에 아래 키를 추가하세요:\n"
-            "\n"
-            "  ECOS_API_KEY=발급키     # 한국은행 ECOS (KR 거시지표)\n"
-            "  FRED_API_KEY=발급키     # 미국 연준 FRED (US 거시지표)\n"
-            "  DART_API_KEY=발급키     # 금융감독원 DART (내부자거래)\n"
-            "\n"
-            "발급 링크:\n"
-            "  ECOS: https://ecos.bok.or.kr/api/#/DevGuide/StatisticalCodeSearch\n"
-            "  FRED: https://fred.stlouisfed.org/docs/api/api_key.html\n"
-            "  DART: https://opendart.fss.or.kr/uss/uia/egovLoginUss498.do\n"
-        )
-
     def __repr__(self) -> str:
         visibleAxes = [(k, e) for k, e in AXIS_REGISTRY.items() if not e.hidden]
         lines = [
@@ -409,10 +395,16 @@ class GatherEntry:
         lines.append('  dartlab.gather("price", "KOSPI")        # 코스피 지수')
         lines.append('  dartlab.gather("price", "KOSDAQ")       # 코스닥 지수')
         lines.append("")
-        lines.append("━━━ API 키 ━━━")
-        lines.append("  macro: 기본 불필요 (apiKey 명시 시 ECOS/FRED 직접 호출)")
-        lines.append("  insider: DART_API_KEY")
-        lines.append("  → dartlab.gather._apiKeyGuide() 로 발급 링크 확인")
+        lines.append("━━━ API 키 (대부분 불필요) ━━━")
+        keyed = [(k, API_KEY_INFO[k]) for k, _ in visibleAxes if "불필요" not in API_KEY_INFO.get(k, "불필요")]
+        for key, info in keyed:
+            lines.append(f"  {key}: {info}")
+        lines.append("  → dartlab.gather.doctor() 로 공급자별 설정 상태 + 발급 링크 확인")
+        lines.append('  → dartlab.gather.setCredential("dart", "<키>") 로 암호화 저장 (.env 편집 불필요)')
+        lines.append("")
+        lines.append("━━━ 고급 (Form B — 축이 아닌 수집기) ━━━")
+        lines.append("  g = dartlab.gather.getDefaultGather()")
+        lines.append("  g.dividends / g.splits / g.majorShareholders / g.collect ...")
         lines.append("")
         lines.append(
             "노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py"

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from .credentials import (
     credentialStatus,
+    doctor,
     formatStatus,
     isConfigured,
     setCredential,
@@ -58,6 +59,7 @@ __all__ = [
     "SectorInfo",
     "SourceUnavailableError",
     "credentialStatus",
+    "doctor",
     "formatStatus",
     "getDefaultGather",
     "isConfigured",

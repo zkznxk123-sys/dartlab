@@ -142,3 +142,63 @@ def test_callableAcceptsKnownAxes():
     # self, axis, target, **kwargs
     assert "axis" in params
     assert "target" in params
+
+
+# ── Form A (축) ↔ Form B (Gather 메서드) 경계 감사 ──────────────────────────
+# 회귀 차단: Gather 에 public 메서드를 추가하면 반드시 (1) Form A 축으로 노출하거나
+# (2) 아래 allowlist 에 "축 아닌 고급 수집기/lifecycle" 로 명시 등록해야 한다. 둘 다
+# 아니면 ``dartlab.gather()`` 가이드로 발견 못 하는 orphan 메서드가 된다 (Form A/B
+# drift). ``_METHOD_TO_AXIS`` 는 이름이 다른 매핑 (insiderTrading↔insider 등).
+
+_METHOD_TO_AXIS: dict[str, str] = {
+    "price": "price",
+    "flow": "flow",
+    "macro": "macro",
+    "news": "news",
+    "sector": "sector",
+    "insiderTrading": "insider",
+    "ownership": "ownership",
+    "industryPeers": "peers",
+    "dartDoc": "dartDoc",
+}
+
+# 축이 아닌 의도된 Form B 표면 — 고급 수집기 + lifecycle. 새 항목 추가 = 의도 표명.
+_FORM_B_ALLOWLIST: frozenset = frozenset(
+    {
+        # 고급 수집기 (단일 호출, getDefaultGather() 로만 노출)
+        "dividends",
+        "splits",
+        "majorShareholders",
+        "revenueConsensus",
+        "history",
+        "collect",
+        # lifecycle / infra
+        "invalidate",
+        "close",
+    }
+)
+
+
+def test_methodToAxisMappingValid():
+    """``_METHOD_TO_AXIS`` 의 모든 축이 실제 registry 키 (오타·삭제 차단)."""
+    invalid = {m: a for m, a in _METHOD_TO_AXIS.items() if a not in AXIS_REGISTRY}
+    assert not invalid, f"_METHOD_TO_AXIS 가 미등록 축을 가리킴: {invalid}"
+
+
+def test_noOrphanPublicGatherMethod():
+    """Gather 의 모든 public 메서드는 Form A 축 또는 Form B allowlist 에 속함.
+
+    회귀 차단: 새 public 메서드가 축으로도 노출 안 되고 allowlist 에도 없으면
+    ``dartlab.gather()`` 가이드로 발견 불가 (Form A/B drift). 새 메서드 추가 시 이
+    테스트가 "축으로 노출할지 / 고급 수집기로 문서화할지" 결정을 강제한다.
+    """
+    from dartlab.gather.engine import Gather
+
+    publicMethods = {name for name in dir(Gather) if not name.startswith("_") and callable(getattr(Gather, name))}
+    classified = set(_METHOD_TO_AXIS) | _FORM_B_ALLOWLIST
+    orphans = publicMethods - classified
+    assert not orphans, (
+        f"분류 안 된 Gather public 메서드: {sorted(orphans)}. "
+        f"Form A 축으로 노출 (handler + AXIS_REGISTRY + _METHOD_TO_AXIS) 하거나 "
+        f"_FORM_B_ALLOWLIST 에 고급 수집기/lifecycle 로 등록하세요."
+    )
