@@ -654,10 +654,9 @@
 .dlTerm .dpVerdict { padding: 4px 7px; border-top: 1px solid var(--bd); font-size: 10px; text-wrap: pretty; line-height: 1.45; color: var(--txt); }
 
 /* 정기공시 목록 */
-/* 공시 목록 = 내부 스크롤 제거(단일 우측 컬럼 스크롤) — 이중스크롤 폐지 + dot 클릭 센터링이 정기/비정기 동일하게 정중앙. */
-.dlTerm .filingList { display: flex; flex-direction: column; }
-/* 공시 2분할은 자연 높이(stretch 시 짧은 정기 패널에 빈 공간) — 각 패널 상단 정렬. */
-.dlTerm .rowSplit.filingsRow { align-items: start; }
+/* 공시 목록 = 내부 300px 스크롤. dot 클릭 시 우측 컬럼을 스크롤해 그 공시 패널 헤더를 상단에 맞추고(정기/비정기 동일 헤더 Y),
+   내부 300px 스크롤로 그 날짜 행을 박스 중앙에 보인다. */
+.dlTerm .filingList { display: flex; flex-direction: column; max-height: 300px; overflow-y: auto; }
 .dlTerm .filingRow { display: grid; grid-template-columns: 1fr auto auto 12px; align-items: center; gap: 7px; padding: 3px 8px; border-bottom: 1px solid var(--dl-line); text-decoration: none; cursor: pointer; }
 .dlTerm .filingRow:hover { background: var(--dl-bg-overlay); }
 .dlTerm .flType { font-family: var(--cond); font-size: 10px; font-weight: 600; color: var(--txt); white-space: nowrap; }

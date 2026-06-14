@@ -70,15 +70,20 @@
 			flashDate = d;
 			const row = filingWrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
 			if (row) {
-				// 단일 우측 컬럼 스크롤(filingList 내부 스크롤 제거) — rect 기반으로 행을 컬럼 뷰포트 정중앙으로.
-				// 정기·비정기가 같은 스크롤 컨텍스트라 동일하게 가운데로 온다(옛 이중스크롤의 클램핑 비대칭 해소).
-				const col = row.closest('.col') as HTMLElement | null;
-				if (col) {
-					const cr = col.getBoundingClientRect();
+				// ① 내부 300px filingList 를 스크롤해 그 날짜 행을 박스 중앙에 보이게(즉시) — 패널 outer 위치는 안 변함.
+				const list = row.closest('.filingList') as HTMLElement | null;
+				if (list) {
+					const lr = list.getBoundingClientRect();
 					const rr = row.getBoundingClientRect();
-					col.scrollBy({ top: rr.top + rr.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
-				} else {
-					row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+					list.scrollTop += rr.top + rr.height / 2 - (lr.top + lr.height / 2);
+				}
+				// ② 우측 컬럼 자체를 스크롤해 그 공시 패널(2분할 블록) 헤더를 컬럼 상단에 맞춘다 — 정기/비정기 동일 헤더 Y라 위치 일관.
+				const col = row.closest('.col') as HTMLElement | null;
+				const panel = row.closest('.rowSplit') as HTMLElement | null;
+				if (col && panel) {
+					const cr = col.getBoundingClientRect();
+					const pr = panel.getBoundingClientRect();
+					col.scrollBy({ top: pr.top - cr.top, behavior: 'smooth' });
 				}
 			}
 			flashTimer = setTimeout(() => (flashDate = null), 1800);
@@ -471,7 +476,7 @@
 {/if}
 
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할. data-fdate = 주가차트 공시 dot 클릭 시 스크롤·하이라이트 대상 키(YYYYMMDD). -->
-<div class="rowSplit filingsRow" bind:this={filingWrap}>
+<div class="rowSplit" bind:this={filingWrap}>
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
 		{#if regFilings.length}
