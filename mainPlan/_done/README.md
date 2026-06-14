@@ -15,3 +15,4 @@
 | 폴더 | 완료 | 한 줄 |
 |---|---|---|
 | `ui-platform-refactor/` | 2026-06-13 | public(GitHub Pages)·local(pip) 단일 UI 자산 공유 리팩토링(단계 1~10). ⚠ `08-shared-wiring-parity-maintenance.md` 는 현역 런북. |
+| `scan-grade-explainer/` | 2026-06-15 | 스캔등급 설명 다이얼로그. as-built 는 PRD 확장 — 10~12 종합축 SSOT(`COMPOSITE_AXES`) 통일 + 등급 근거 = 축 자체 동종업종 백분위(midrank)+분포 막대 + 현금흐름 부호 표기. 구현 SSOT=`ui/packages/surfaces/src/terminal/`. |
