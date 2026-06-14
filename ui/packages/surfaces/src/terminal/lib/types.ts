@@ -128,6 +128,7 @@ export interface EcoNode {
 	assetTurnover?: Num;
 	ccc?: Num;
 	accrualRatio?: Num;
+	govScore?: Num;
 	revCagr?: Num;
 	netIncomeCagr?: Num;
 	industryRank?: Num;

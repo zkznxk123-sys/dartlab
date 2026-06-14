@@ -22,6 +22,7 @@
 		if (v == null) return '—';
 		if (unit === '배') return v.toFixed(1) + (lang === 'en' ? 'x' : '배');
 		if (unit === '일') return v.toFixed(0) + (lang === 'en' ? 'd' : '일');
+		if (unit === '점') return v.toFixed(0) + (lang === 'en' ? '' : '점');
 		if (unit === '') return v.toFixed(2);
 		return v.toFixed(1) + '%';
 	}
@@ -116,14 +117,20 @@
 					{@const ms = axisMetrics(g.key)}
 					<div class="geCr">
 						<span class="geCrLabel">{txc(g, lang)}</span>
-						{#each ms as m}
-							<div class="geMx">
-								<span class="geMxName">{txc(m, lang)}</span>
-								<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
-								<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
-								{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
+						{#if ms.length}
+							<div class="geMxRow">
+								{#each ms as m}
+									<div class="geMx">
+										<div class="geMxTop">
+											<span class="geMxName">{txc(m, lang)}</span>
+											<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
+											<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
+										</div>
+										{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
+									</div>
+								{/each}
 							</div>
-						{/each}
+						{/if}
 						{#if guide}<div class="geCrWhat">{lang === 'en' ? guide.en.what : guide.kr.what}</div>{/if}
 						<div class="geLadder">
 							{#each scale as step}<span class={'geStep' + (step === g.v ? ' on' : '')}>{step}</span>{/each}
@@ -133,14 +140,18 @@
 				{#if effMetrics.length}
 					<div class="geCr">
 						<span class="geCrLabel">{lang === 'en' ? 'Efficiency' : '효율성'}</span>
-						{#each effMetrics as m}
-							<div class="geMx">
-								<span class="geMxName">{txc(m, lang)}</span>
-								<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
-								<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
-								{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
-							</div>
-						{/each}
+						<div class="geMxRow">
+							{#each effMetrics as m}
+								<div class="geMx">
+									<div class="geMxTop">
+										<span class="geMxName">{txc(m, lang)}</span>
+										<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
+										<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
+									</div>
+									{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
+								</div>
+							{/each}
+						</div>
 						<div class="geCrWhat">{lang === 'en' ? 'Asset activity — turnover & cash cycle' : '자산 활동성 — 자산회전율·현금전환주기'}</div>
 					</div>
 				{/if}
@@ -250,18 +261,19 @@
 		margin-bottom: 8px;
 	}
 	.geCrGrid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
-		gap: 8px 14px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
 	.geCr {
 		display: flex;
 		flex-direction: column;
-		gap: 3px;
+		gap: 4px;
 	}
 	.geCrLabel {
 		font-size: 11px;
-		font-weight: 600;
+		font-weight: 700;
+		letter-spacing: 0.02em;
 	}
 	.geCrWhat {
 		font-size: 10px;
@@ -293,12 +305,22 @@
 		margin-top: 10px;
 	}
 	/* 등급기준 — 각 축 지표 행(이름·값·상위% + 분포곡선) */
-	.geMx {
+	/* 일관 격자 — 모든 지표 셀 동일 폭(152px) → 축 간 컬럼이 딱 맞아떨어짐 */
+	.geMxRow {
 		display: flex;
 		flex-wrap: wrap;
+		gap: 8px 12px;
+	}
+	.geMx {
+		width: 152px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.geMxTop {
+		display: flex;
 		align-items: baseline;
-		gap: 1px 6px;
-		margin: 2px 0 1px;
+		gap: 4px;
 	}
 	.geMxName {
 		font-size: 10px;
@@ -314,10 +336,6 @@
 		margin-left: auto;
 		color: var(--dl-ink-dim, #5b6473);
 		font-variant-numeric: tabular-nums;
-	}
-	.geMx :global(.dc) {
-		flex-basis: 100%;
-		margin-top: 1px;
 	}
 	.geCred {
 		display: flex;

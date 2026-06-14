@@ -329,7 +329,8 @@ export function createEngine(raw: RawData): Engine {
 			{ kr: '유동비율', en: 'Current ratio', axis: 'liq', v: node.currentRatio ?? null, p: pctRank(col('currentRatio'), node.currentRatio ?? null), unit: '%', band: bandOf('currentRatio') },
 			{ kr: '자산회전율', en: 'Asset turn', axis: 'eff', v: node.assetTurnover ?? null, p: pctRank(col('assetTurnover'), node.assetTurnover ?? null), unit: '배', band: bandOf('assetTurnover') },
 			{ kr: '현금전환주기', en: 'Cash cycle', axis: 'eff', v: node.ccc ?? null, p: pctRank(col('ccc'), node.ccc ?? null, true), unit: '일', band: bandOf('ccc') },
-			{ kr: '발생액비율', en: 'Accruals', axis: 'qual', v: node.accrualRatio ?? null, p: pctRank(col('accrualRatio'), node.accrualRatio ?? null, true), unit: '', band: bandOf('accrualRatio') }
+			{ kr: '발생액비율', en: 'Accruals', axis: 'qual', v: node.accrualRatio ?? null, p: pctRank(col('accrualRatio'), node.accrualRatio ?? null, true), unit: '', band: bandOf('accrualRatio') },
+			{ kr: '종합점수', en: 'Gov score', axis: 'gov', v: node.govScore ?? null, p: pctRank(col('govScore'), node.govScore ?? null), unit: '점', band: bandOf('govScore') }
 		].filter((m): m is PercentileMetric => m.p != null);
 		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics };
 	}
