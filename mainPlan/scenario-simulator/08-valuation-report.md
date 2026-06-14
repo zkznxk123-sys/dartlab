@@ -112,7 +112,7 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 | reverseDCF 함의 노출 | 단일 target + Buy/Hold/Sell rating, `signal` 노출 |
 | 확률가중 bear/base/bull | "예상 수익률 N%" 약속 |
 
-가드 구현(테스트 강제): ① **금지어 lint(`valuationPublishLint.py`, 신설·CI배선 완료, 발간 표면 마크다운 한정)**(매수/매도/추천/목표가단일점/예상수익률/검증된전략/Buy·Hold·Sell/underpriced·overpriced/"당신의 상황에서"[개인화]→발간 마크다운에서 차단; leaf src 는 미스캔. `_BANNED` 6패턴 완비 — 개인화 추천 포함) ② 대체 어휘 강제("조건부 perShare 범위"/"현재가 함의"/"시나리오 분석"/"반증 조건") ③ 면책 자동삽입 확장(`publisher.py:169` 기존 "투자 권유 아님"에 "hypothetical scenario analysis, not a forecast" + criteria·assumptions·falsifier 명시 = SEC Marketing Rule·FINRA 2210 hypothetical performance 충족) ④ FINRA 2241 형식 차용(rating 미발행이라 본체 비적용, 형식만: reasonable basis=panel ref+ledger / valuation method 명시=어느 leaf / risks=falsifierLedger). 네 규제가 *모두* 같은 것(criteria/assumptions 노출+risk 명시+reasonable basis)을 요구 → 가정-노출이 곧 규제 안전 + 전문가급.
+가드 구현(테스트 강제): ① **금지어 lint(`valuationPublishLint.py`, 신설·CI배선 완료, 발간 표면 마크다운 한정 — `_BANNED` 6패턴 실측)**(매수의견/매도의견·적극매수·비중확대/축소, strong buy/sell·buy/sell rating, underpriced/overpriced, 목표주가 점추정(NNNNN원), 예상수익률 약속(NN%), 개인화 어휘("귀하의 포트폴리오/상황"·회원님) → 발간 마크다운에서 차단; leaf src 는 미스캔. ⚠"추천"·"검증된전략"·bare Buy/Hold/Sell 단독 어휘는 현 6패턴 미포함 — 위 RISK 표(line 110~113)는 규제 *의도*, lint 은 이 6패턴만 실제 강제) ② 대체 어휘 강제("조건부 perShare 범위"/"현재가 함의"/"시나리오 분석"/"반증 조건") ③ 면책 자동삽입 확장(`publisher.py:169` 기존 "투자 권유 아님"에 "hypothetical scenario analysis, not a forecast" + criteria·assumptions·falsifier 명시 = SEC Marketing Rule·FINRA 2210 hypothetical performance 충족) ④ FINRA 2241 형식 차용(rating 미발행이라 본체 비적용, 형식만: reasonable basis=panel ref+ledger / valuation method 명시=어느 leaf / risks=falsifierLedger). 네 규제가 *모두* 같은 것(criteria/assumptions 노출+risk 명시+reasonable basis)을 요구 → 가정-노출이 곧 규제 안전 + 전문가급.
 
 ---
 

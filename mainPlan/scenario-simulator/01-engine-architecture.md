@@ -65,7 +65,7 @@ Company.simulate(*, scenario="baseline", horizon=3, asOf=None) -> SimulationResu
 - **KR 전용 가드**: `market != "KR"`(US ticker → EDGAR)면 `entry.py:111` `ValueError`. ⚠ US 프리셋(`PRESET_SCENARIOS_US` 5종)·elasticity(US 12키)는 `scenario.py`에 *실재*하나 (a) 이 가드 (b) `getPresetScenarios("KR")` 하드코딩(registry/run) (c) EDGAR sector 도달경로 부재로 *정책 차단* — US 해금 = 데이터 신설 아닌 market threading(09 §10.4 fatal④). 또한 가드는 `entry` 에만 — `Company.simulate`(`company.py:1990`)는 `runScenario(self)` 직접 호출이라 가드 우회(실 KR-only 강제 = `buildSnapshot` market threading 부재, 09 §10.4 FIX 일관).
 - `drivers`/`lens`/`mode` **인자 부재**: inert stub은 clutter라 *추가하지 않고* 후속 단계로 deferred(entry.py docstring AntiPatterns "drivers/lens/mode 인자를 기대 — 현재 결정론 subset만"). 따라서 현 verb는 **결정론 경로 단독**(lens 분기 없음).
 - 결과는 항상 ref + per-node 품질 상태(`NodeAudit.status` ok/partial) + provenance(asOf·latestAsOf) 동반. honest-gap: 결손은 None·partial(0 대체 금지).
-- **★silent 값-대체 표면화 계약(honest-gap 확장):** honest-gap 교리는 None 결손뿐 아니라 *값 대체*에도 적용한다 — `buildSnapshot`이 `sectorKey` 부재로 `DEFAULT_ELASTICITY`를, `sectorParams.discountRate` 부재로 `_DEFAULT_BASE_WACC`를 대체하면 (a) 해당 노드 provenance 에 `default:no-sector`/`default:no-wacc` 접두(provenance 문자열 재사용), (b) `run.warnings`에 `"sector elasticity defaulted — approximation(honest-gap)"` 추가(baseRevenue/shares 결손과 동일 채널). KR 신규상장사·US Phase A(09 §10.4 ① DEFAULT_ELASTICITY) 공통 — 09 §10.4 ①의 'US=DEFAULT 근사'를 docstring 넘어 `run.warnings`(사용자용)로 끌어올린다.
+- **★silent 값-대체 표면화 계약(honest-gap 확장 — ★졸업 AC, 현재 미배선; run.warnings 는 base-revenue/shares 2건만 실측):** honest-gap 교리는 None 결손뿐 아니라 *값 대체*에도 적용한다 — `buildSnapshot`이 `sectorKey` 부재로 `DEFAULT_ELASTICITY`를, `sectorParams.discountRate` 부재로 `_DEFAULT_BASE_WACC`를 대체하면 (a) 해당 노드 provenance 에 `default:no-sector`/`default:no-wacc` 접두(provenance 문자열 재사용), (b) `run.warnings`에 `"sector elasticity defaulted — approximation(honest-gap)"` 추가(baseRevenue/shares 결손과 동일 채널). KR 신규상장사·US Phase A(09 §10.4 ① DEFAULT_ELASTICITY) 공통 — 09 §10.4 ①의 'US=DEFAULT 근사'를 docstring 넘어 `run.warnings`(사용자용)로 끌어올린다.
 
 (2) **후속 단계 목표 시그니처**(미구현 — lens/Play/다중드라이버 phase):
 ```python
@@ -110,7 +110,7 @@ dartlab.simulate(code, *, scenario, drivers=None, lens=None, mode="whatif"|"repl
 | 노드 (driverId) | fn (registry) | det provenance (실측) | vector 차원 | AI 의견 |
 |---|---|---|---|---|
 | `macro.path` | `_fnMacroPath` → `getPresetScenarios("KR")` 프리셋 | `preset:{scenarioId}` | 연도(horizon) | △(후속) |
-| `rev.path` | `_fnRevPath` → `transferRevenuePath`(엣지, 자기 소유 산수) | `transfer:rev*(1+bgdp*gdp+bfx*fxDelta);elasticity=<sector>(curated prior, seed/CI=0, NOT regression-identified)` | 연도(horizon) | O(후속) |
+| `rev.path` | `_fnRevPath` → `transferRevenuePath`(엣지, 자기 소유 산수) | `transfer:rev*(1+bgdp*gdp+bfx*fxDelta),...`(실측, `registry.py:319`) †elasticity=curated prior seed/CI 0 — provenance 라벨·warnings 는 **졸업 AC(현재 미배선)**, 아래 footnote | 연도(horizon) | O(후속) |
 | `proforma` | `_fnProforma` → L2 leaf `buildProforma`(불가침) | `proforma:cashplug,wacc=..,years=..` | 연도별 FCF | △(후속) |
 | `dcf` | `_fnDcf` → **proforma-FCFF 직접할인**(Gordon TV, `calcDFV` 회피) | `dcf:fcff,wacc=..,g=..` | perShare + EV(1-tuple) | △(후속) |
 
@@ -200,7 +200,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
     return "ai" if groundingCheck(node.ai, snapshot) else "fork"   # 약한 det → grounded AI로 통째 교체
 ```
 
-**`_isStrongDet` — ★in-sample folk-stat 가드(requiredFix):** provenance `ols:R²≥0.3` 단독 화이트리스트는 **확신오정렬을 만든다**. `calcMacroRegression`은 nObs~36 분기에 gdp/rate/fx × lag0/1/2(≤9 후보)에서 best-R²를 고르는 *in-sample 적합* → 스퓨리어스 고-R²가 약한 driver를 '강함→AI 못 이김'으로 잠가 fork를 억제. 강함 판정은 다음 중 **최소 하나 강제**: adjusted-R² / held-out OOS R² / 관측치 대비 변수수(자유도) 하한 / lag 다중비교 보정. `R²≥0.3` 임계는 졸업 데모에서 held-out으로 재보정. `preset:`/`elasticity:`(무출처 36업종) = 약함.
+**`_isStrongDet` — ★in-sample folk-stat 가드(requiredFix):** provenance `ols:R²≥0.3` 단독 화이트리스트는 **확신오정렬을 만든다**. `calcMacroRegression`은 nObs~36 분기에 gdp/rate/fx × lag0/1/2(≤9 후보)에서 best-R²를 고르는 *in-sample 적합* → 스퓨리어스 고-R²가 약한 driver를 '강함→AI 못 이김'으로 잠가 fork를 억제. 강함 판정은 다음 중 **최소 하나 강제**: adjusted-R² / held-out OOS R² / 관측치 대비 변수수(자유도) 하한 / lag 다중비교 보정. `R²≥0.3` 임계는 졸업 데모에서 held-out으로 재보정. `preset:`/`elasticity:`(무출처 35키) = 약함.
 
 **`groundingCheck(aiNV, snapshot)` 4단 AND(순수함수):** (a) refs 실재 = `all(r in snapshot.refIndex …)` (b) 주장 지지 = aiNV.value가 refs 수치 범위([rangeLow,rangeHigh] from AssumptionLedgerRow §2.5 또는 baseValue±tol) 안 (c) 단위·기간 정합(§2.5 '단위없는 숫자 invalid' 재사용) (d) untrusted 미실행(sourceType=external 본문은 데이터, 산수만 — untrusted-wrap-check). 하나라도 실패 = fork. ⚠ 잔여 OQ(04 §5): (b)의 수치 범위 출처가 약한 det 분포면 순환(약한 det를 grounded AI로 교체하려는데 grounding 기준이 그 약한 det 자신) — 범위는 AssumptionLedgerRow 우선.
 
@@ -219,7 +219,7 @@ def gateUsable(node, snapshot) -> Literal["det","ai","fork","block"]:
 
 ## 7. 두 불변 요구 — 명시 입증
 
-- **불변1 (AI 없이 결정론):** `evaluateSheet(sheet)`는 AI 호출 0(lens 파라미터 자체가 없음). 모든 노드 `det`=L2 leaf 순수함수 출력 → 같은 회사·시나리오·asOf면 노드별 `inputsHash` byte-identical(현 경로에 **난수 0** — MC 노드 미구현). **증명 = 실행기 경로에 AI 토큰·RNG가 들어갈 코드 지점이 물리적으로 없음.** ⚠ `sheetSeed`/PCG64는 *후속* mc.distribution 노드 전제 — 현 결정론 코어는 seed 없이도 순수함수라 재현 보장(레거시 MC의 `random.Random(seed)`는 별개 경로, §12).
+- **불변1 (AI 없이 결정론):** `evaluateSheet(sheet)`는 AI 호출 0(lens 파라미터 자체가 없음). 모든 노드 `det`=L2 leaf 순수함수 출력 → 같은 회사·시나리오·asOf면 노드별 `inputsHash` byte-identical(현 경로에 **난수 0** — MC 노드 미구현). **증명 = 실행기 경로에 AI 토큰·RNG가 들어갈 코드 지점이 물리적으로 없음.** ⚠ `sheetSeed`/`random.Random(blake2b(...))`는 *후속* mc.distribution 노드 전제 — 현 결정론 코어는 seed 없이도 순수함수라 재현 보장(레거시 MC의 `random.Random(seed)`는 별개 경로, §12).
 - **불변2 (AI 경합, 통제):** AI는 노드 `.ai` 슬롯(모드 N) 또는 `judgeSheet`(모드 J) 두 통제 표면으로만 진입. `.det` 못 바꾸고, gate는 순수함수, 블렌더 부재로 섞임 불가, 어긋남은 ledger 보존·Brier 사후채점. **증명 = AI 진입이 입력/메타판단으로만 제한, 평가 제어흐름 미지배(no-graph-regression 선).**
 
 ---
