@@ -24,6 +24,39 @@ from pathlib import Path
 from dartlab.pipeline.types import PipelineMode, StageResult
 
 
+def _hfFileSet(repo: str, *, token: str | None) -> set[str] | None:
+    """HF repo 전체 파일 경로 집합 — *spurious 404* 와 *진짜 신규* 구분 oracle.
+
+    seed 단계의 핵심 데이터손실 가드: ``hf_hub_download`` 가 EntryNotFoundError 를 던져도
+    그게 (a) 파일이 repo 에 *진짜 없음*(신규 종목) 인지 (b) 존재하는데 LFS 전파/고부하로 *일시
+    404* 인지 구분해야 한다. repo 파일 목록에 있으면 (b)=transient → 덮어쓰기 금지. 본 함수가
+    그 권위 있는 목록을 1회 조회해 호출부에 넘긴다.
+
+    Args:
+        repo: HF dataset repo id.
+        token: HF 토큰.
+
+    Returns:
+        repo 내 전 파일 경로 ``set``. listing 실패 시 ``None`` (호출부는 보수적으로 *모든* 404 를
+        transient 취급 → 신규 종목 seed 가 1 run 지연될 뿐 데이터손실 0).
+
+    Raises:
+        없음 (listing 실패는 None 으로 격리).
+
+    Example:
+        >>> _hfFileSet("eddmpython/dartlab-data", token=None)  # doctest: +SKIP
+        {'dart/panel/005930.parquet', ...}
+    """
+    from huggingface_hub import HfApi
+
+    from dartlab.core.hfRetry import retryHfCall
+
+    try:
+        return set(retryHfCall(HfApi(token=token).list_repo_files, repo_id=repo, repo_type="dataset"))
+    except Exception:  # noqa: BLE001 — listing 실패 → None(호출부: 모든 404 transient 취급, 보수적)
+        return None
+
+
 def _seedChangedFromHf(codes: list[str], *, token: str | None) -> tuple[int, set[str]]:
     """변경 종목의 회사 tar 를 dartlab-dart-original 에서 받아 추출 — CI panel 빌드 전제.
 
@@ -62,6 +95,7 @@ def _seedChangedFromHf(codes: list[str], *, token: str | None) -> tuple[int, set
     base = Path(cfg.dataDir) / "original" / "dart" / "docs"
     repo = repoFor("dartOriginal")
     tok = _resolveHfToken(token)
+    remote = _hfFileSet(repo, token=tok)  # spurious 404 vs 진짜 신규 구분 oracle
     n = 0
     safe: set[str] = set()
     for code in codes:
@@ -70,7 +104,10 @@ def _seedChangedFromHf(codes: list[str], *, token: str | None) -> tuple[int, set
                 hf_hub_download, repo_id=repo, repo_type="dataset", filename=f"docs/{code}.tar", token=tok
             )
         except (EntryNotFoundError, RepositoryNotFoundError):
-            safe.add(code)  # 신규 종목 — HF 미존재(404) → archive 분만으로 빌드 정당
+            # listing 에 *진짜 없음*(신규) 일 때만 safe → archive 분 빌드 정당. listing 엔 있는데
+            # 404(spurious/전파지연)면 unsafe → 제외(부분 tar 가 원본 SSOT 를 truncate 하는 손실 가드).
+            if remote is not None and f"docs/{code}.tar" not in remote:
+                safe.add(code)
             continue
         except Exception:  # noqa: BLE001 — 일시 실패(네트워크/5xx) → 이력 불완전, build/upload 제외
             continue
@@ -135,6 +172,7 @@ def _seedPanelFromHf(codes: list[str], *, token: str | None) -> tuple[int, set[s
     relDir = DATA_RELEASES["panel"]["dir"]  # "dart/panel" — local_dir 하위로 풀려 merge base 위치와 일치
     repo = repoFor("panel")
     tok = _resolveHfToken(token)
+    remote = _hfFileSet(repo, token=tok)  # spurious 404 vs 진짜 신규 구분 oracle
     n = 0
     safe: set[str] = set()
     for code in codes:
@@ -148,7 +186,11 @@ def _seedPanelFromHf(codes: list[str], *, token: str | None) -> tuple[int, set[s
                 token=tok,
             )
         except (EntryNotFoundError, RepositoryNotFoundError):
-            safe.add(code)  # 신규 종목 — HF panel 미존재(404) → base 없이 merge=신규 전부 write 정당
+            # listing 에 *진짜 없음*(신규) 일 때만 safe → base 없이 신규 write 정당. listing 엔 있는데
+            # 404(spurious/전파지연)면 merge base 부재로 overwrite=신규만 → 정상 HF panel 파괴적
+            # 덮어쓰기(history 소실, 043260-class). 그 경우 unsafe → 제외(다음 run 회복).
+            if remote is not None and f"{relDir}/{code}.parquet" not in remote:
+                safe.add(code)
             continue
         except Exception:  # noqa: BLE001 — 일시 실패(네트워크/5xx): merge base 부재 → 파괴적 덮어쓰기 가드로 제외
             continue
@@ -393,4 +435,252 @@ def runDartZip(
             except Exception as exc:  # noqa: BLE001 — panel 업로드 실패 격리
                 res.report.fail = 1
                 res.report.failures.append(f"dartZip panel upload: {type(exc).__name__}: {exc}")
+    return res
+
+
+# 정기보고서명 매칭(정정 prefix 허용) — syncRecent 와 동일 필터(panel 이 커버하는 보고서 한정).
+_PERIODIC_RE = r"^(?:\[(?:기재정정|첨부정정|첨부추가)\]\s*)*(사업보고서|반기보고서|분기보고서)"
+
+
+def _panelRceptsFromHf(repo: str, relDir: str, code: str, *, token: str | None) -> set[str] | None:
+    """HF panel parquet 의 ``rceptNo`` 컬럼만 range-read → 보유 rcept 집합 (full download 회피).
+
+    ``HfFileSystem`` 파일핸들 위에서 pyarrow 컬럼 projection → footer + ``rceptNo`` 컬럼 청크만
+    HTTP Range 로 읽는다(회사 panel 이 수만 row·MB 라도 수백 KB 만 전송). reconcile 탐지(수천 종목)
+    를 싸게 만드는 핵심.
+
+    Args:
+        repo: HF dataset repo id (``repoFor("panel")``).
+        relDir: panel 카테고리 상대 디렉터리 (``dart/panel``).
+        code: 종목코드.
+        token: HF 토큰.
+
+    Returns:
+        보유 rcept 집합. panel 미존재(404)·일시 실패면 ``None`` (탐지 대상 제외 = 안전 skip).
+
+    Raises:
+        없음 (모든 예외 None 으로 격리 — 한 종목 실패가 reconcile 전체를 막지 않음).
+
+    Example:
+        >>> _panelRceptsFromHf("eddmpython/dartlab-data", "dart/panel", "005930", token=None)  # doctest: +SKIP
+        {'20240514001234', ...}
+    """
+    import pyarrow.parquet as pq
+    from huggingface_hub import HfFileSystem
+
+    path = f"datasets/{repo}/{relDir}/{code}.parquet"
+    try:
+        fs = HfFileSystem(token=token)
+        with fs.open(path, "rb") as fh:
+            tbl = pq.read_table(fh, columns=["rceptNo"])
+    except FileNotFoundError:
+        return None  # 신규 종목 — panel 미존재(파일집합 reconcile 영역, 본 rcept reconcile 대상 아님)
+    except Exception:  # noqa: BLE001 — 일시 실패(네트워크/5xx/스키마) → skip(다음 run 회복)
+        return None
+    return {str(x) for x in tbl.column("rceptNo").to_pylist() if x}
+
+
+def _fullPeriodicRcepts(client, code: str) -> set[str]:
+    """종목 전이력 정기보고서(사업/반기/분기) rcept 집합 — listFilings corp 지정 전기간 조회.
+
+    truncation(history 파괴) 회복용: 85일 윈도로는 못 보는 옛 분기까지 "있어야 할 rcept" 전체.
+    corp 지정 시 DART list.json 이 전 기간(3개월 cap 우회) 조회 가능 → 단일 호출 누적 매니페스트.
+    report_nm 필터로 비정기 A 공시 제외. 개별 조회 실패는 빈 set(다음 run 재시도).
+
+    Args:
+        client: 인증된 DartClient.
+        code: 종목코드.
+
+    Returns:
+        전이력 정기 rcept ``set`` (조회/필터 실패 시 빈 set).
+
+    Raises:
+        없음 (개별 종목 조회 실패는 빈 set 으로 격리).
+
+    Example:
+        >>> _fullPeriodicRcepts(client, "043260")  # doctest: +SKIP
+        {'20160330002098', ...}
+    """
+    import polars as pl
+
+    from dartlab.gather.dart.disclosure import listFilings
+
+    try:
+        df = listFilings(client, code, start="20110101", filingType="A", fetchAll=True)
+    except Exception:  # noqa: BLE001 — 개별 종목 조회 실패 → 빈 set(다음 run 회복)
+        return set()
+    if df.is_empty() or "report_nm" not in df.columns or "rcept_no" not in df.columns:
+        return set()
+    return set(df.filter(pl.col("report_nm").str.contains(_PERIODIC_RE)).select("rcept_no").to_series().to_list())
+
+
+def runPanelRceptReconcile(
+    *,
+    category: str = "dartOriginal",
+    mode: PipelineMode = "incremental",
+    codes: list[str] | None = None,
+    upload: bool = True,
+    token: str | None = None,
+) -> StageResult:
+    """rcept 단위(파일 내) panel reconcile — DART 에 있는 정기 rcept 가 panel 에 빠졌으면 자가치유.
+
+    forward ``dartZip`` 은 7일 전진 윈도만 본다 → 그 윈도 안에 run 실패/타임아웃이면 해당 zip 이
+    영구 누락된다(finance 의 60일+rcept 대조 자가치유와의 구조적 비대칭). 기존 ``panelReconcile``
+    은 *파일집합* 차분뿐이라 "파일은 있는데 안에 분기 rcept 만 빠진" 갭을 못 잡는다. 본 stage 가
+    그 갭을 메운다:
+
+        listFilings(A, 윈도) "있어야 할 정기 rcept" − HF panel ``rceptNo`` "보유 rcept"
+          = 누락 rcept → 그것만 fetch → 검증된 dartZip 헬퍼로 merge·번들·push.
+
+    ``_seedChangedFromHf``(원본 tar full 이력 복원 후 superset 재번들)·``_buildPanelIncremental``
+    (panel HF merge base seed 후 신규 분기만 merge)·``_bundleAndUpload`` 를 그대로 재사용해
+    forward 와 동일한 데이터손실 가드(404 vs 일시실패 분기·부분추출 차단)를 상속한다. 탐지는
+    HfFileSystem 컬럼 range-read 라 싸고, heal 은 누락 rcept 만 fetch 한다.
+
+    Args:
+        category: 미사용("dartOriginal" 고정).
+        mode: 미사용.
+        codes: 한정할 종목코드(없으면 윈도 내 전 정기 filer 후보). 지정 시 그 종목만 점검.
+        upload: HF 업로드 여부.
+        token: HF 토큰.
+
+    Returns:
+        StageResult (changedFiles=재빌드된 panel 종목, uploaded=원본 tar 수).
+
+    Raises:
+        없음 (listFilings/탐지/heal 예외는 StageResult 로 격리).
+
+    Example:
+        >>> runPanelRceptReconcile(upload=False)  # doctest: +SKIP
+        StageResult(category='dartOriginal', ...)
+    """
+    import polars as pl
+
+    import dartlab.config as cfg
+    from dartlab.core.dataConfig import DATA_RELEASES, repoFor
+    from dartlab.gather.dart.client import DartClient
+    from dartlab.gather.dart.disclosure import listFilings
+    from dartlab.gather.dart.document import iterZipsParallel
+    from dartlab.pipeline.hfUpload import _resolveHfToken, uploadCategoryToHf
+
+    # corp 생략 list.json 은 DART 가 3개월(~92일) 윈도 제한 → 기본 85 일(현 백로그 커버·cap 안쪽).
+    days = int(os.environ.get("DART_PANEL_RECONCILE_DAYS") or "85")
+    today = date.today()
+    start = (today - timedelta(days=days - 1)).strftime("%Y%m%d")
+    end = today.strftime("%Y%m%d")
+    res = StageResult(category="dartOriginal")
+    codeFilter = set(codes) if codes else None
+
+    client = DartClient()
+    try:
+        df = listFilings(client, corp=None, start=start, end=end, filingType="A", fetchAll=True)
+    except Exception as exc:  # noqa: BLE001 — 공시목록 조회 실패 격리
+        res.report.err = 1
+        res.report.failures.append(f"panelRceptReconcile listFilings: {type(exc).__name__}: {exc}")
+        return res
+
+    if df.is_empty() or "rcept_no" not in df.columns or "stock_code" not in df.columns:
+        res.report.ok = 1
+        print(f"[pipeline] panelRceptReconcile {start}~{end}: 정기공시 0", flush=True)
+        return res
+
+    filt = df.filter(
+        pl.col("report_nm").str.contains(_PERIODIC_RE)
+        & pl.col("stock_code").is_not_null()
+        & (pl.col("stock_code").str.strip_chars() != "")
+    )
+    cand: dict[str, set[str]] = {}
+    for sc, rc in filt.select(["stock_code", "rcept_no"]).iter_rows():
+        sc = (sc or "").strip()
+        if not sc or not rc:
+            continue
+        if codeFilter is not None and sc not in codeFilter:
+            continue
+        cand.setdefault(sc, set()).add(str(rc))
+
+    if not cand:
+        res.report.ok = 1
+        print(f"[pipeline] panelRceptReconcile {start}~{end}: 후보 0", flush=True)
+        return res
+
+    # 탐지 1 — HF panel rceptNo 컬럼만 병렬 range-read → 종목별 보유 rcept.
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    repo = repoFor("panel")
+    relDir = DATA_RELEASES["panel"]["dir"]
+    tok = _resolveHfToken(token)
+    truncSuspect = int(os.environ.get("DART_PANEL_TRUNC_SUSPECT") or "6")
+    panelHave: dict[str, set[str]] = {}
+    newOrFlaky = 0
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futs = {ex.submit(_panelRceptsFromHf, repo, relDir, sc, token=tok): sc for sc in cand}
+        for fut in as_completed(futs):
+            sc = futs[fut]
+            have = fut.result()
+            if have is None:
+                newOrFlaky += 1  # panel 미존재(신규) — 파일집합 reconcile 영역
+                continue
+            panelHave[sc] = have
+
+    missingByCode: dict[str, set[str]] = {}
+    # ② 최신 분기 누락(025560-class) — 윈도 정기 rcept − panel 보유.
+    for sc, have in panelHave.items():
+        miss = cand[sc] - have
+        if miss:
+            missingByCode[sc] = set(miss)
+    # ③ history 파괴(043260-class) — panel 보유 rcept 가 비정상적으로 적은 종목은 전이력 대조
+    #    (윈도로는 옛 분기를 못 봄). 신규 상장은 전이력도 적어 fullMiss≈∅ → 오회복 0.
+    suspects = sorted(sc for sc, have in panelHave.items() if len(have) <= truncSuspect)
+    truncated = 0
+    for sc in suspects:
+        fullMiss = _fullPeriodicRcepts(client, sc) - panelHave[sc]
+        if len(fullMiss) > len(missingByCode.get(sc, set())):
+            truncated += 1
+        if fullMiss:
+            missingByCode.setdefault(sc, set()).update(fullMiss)
+    res.report.ok = 1
+    missRcepts = sum(len(v) for v in missingByCode.values())
+    print(
+        f"[pipeline] panelRceptReconcile {start}~{end}: 후보 {len(cand)}종목 · panel미존재/실패 {newOrFlaky} · "
+        f"truncation의심 {len(suspects)}(회복 {truncated}) · 누락 {len(missingByCode)}종목 {missRcepts}rcept",
+        flush=True,
+    )
+    if not missingByCode:
+        return res
+
+    # heal — 누락 rcept zip 만 fetch (full 이력 아님).
+    docsBase = Path(cfg.dataDir) / "original" / "dart" / "docs"
+    workers = int(os.environ.get("PANEL_WORKERS") or "4")
+    targets = [(sc, rc) for sc, rcs in missingByCode.items() for rc in sorted(rcs)]
+    newZipsByCode: dict[str, list[Path]] = {}
+    for sc, rc, ok, _n in iterZipsParallel(client, targets, outDir=docsBase, workers=workers):
+        if ok:
+            newZipsByCode.setdefault(sc, []).append(docsBase / sc / f"{rc}.zip")
+    fetched = sum(len(v) for v in newZipsByCode.values())
+    print(f"[pipeline] panelRceptReconcile: 누락 zip fetch {fetched}/{len(targets)}", flush=True)
+
+    healCodes = sorted(newZipsByCode)
+    if not healCodes:
+        res.report.fail = 1
+        res.report.failures.append(f"panelRceptReconcile: zip fetch 0/{len(targets)} (다음 run 재시도)")
+        return res
+
+    # 빌드 — forward 와 동일 within-company 증분(panel HF merge base seed → 신규 분기만 merge).
+    built = _buildPanelIncremental(healCodes, newZipsByCode, res, token=token)
+    res.changedFiles = built
+    print(f"[pipeline] panelRceptReconcile: panel 재빌드 {len(built)}/{len(healCodes)}종목", flush=True)
+
+    if upload and built:
+        # 원본 tar: full 이력 복원(_seedChangedFromHf) 후 superset 재번들 — 부분이력 truncation 가드.
+        try:
+            _seeded, archiveSafe = _seedChangedFromHf(built, token=token)
+            res.uploaded = _bundleAndUpload(sorted(set(built) & archiveSafe), token=token)
+        except Exception as exc:  # noqa: BLE001 — 원본 업로드 실패 격리(panel 은 별도 push)
+            res.report.fail = 1
+            res.report.failures.append(f"panelRceptReconcile original upload: {type(exc).__name__}: {exc}")
+        try:
+            uploadCategoryToHf("panel", changedFiles=[f"{c}.parquet" for c in built], token=token)
+        except Exception as exc:  # noqa: BLE001 — panel 업로드 실패 격리
+            res.report.fail = 1
+            res.report.failures.append(f"panelRceptReconcile panel upload: {type(exc).__name__}: {exc}")
     return res

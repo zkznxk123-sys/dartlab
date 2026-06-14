@@ -66,6 +66,12 @@ def buildRegistry() -> dict[str, StageSpec]:
             label="DART 정기 원본 zip archive + panel 빌드 (Job 1, 증분)",
         ),
         StageSpec(
+            "panelRceptReconcile",
+            run=dartZip.runPanelRceptReconcile,
+            uploadCategories=("dartOriginal", "panel"),
+            label="DART panel rcept 단위(파일내) 자가치유 — DART 정기 rcept vs panel 누락분 fetch+merge",
+        ),
+        StageSpec(
             "edgarPanel",
             run=edgarPanel.runEdgarPanel,
             uploadCategories=("edgarPanel",),

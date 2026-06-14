@@ -23,7 +23,11 @@ def _makeTar(path, zipNames: list[str]) -> None:
 
 
 def test_dartzip_seed_safe_set_404_vs_transient(monkeypatch, tmp_path) -> None:
-    """_seedChangedFromHf — 성공·404 는 safe, *일시 실패*·부분추출은 제외(데이터손실 가드)."""
+    """_seedChangedFromHf — 성공·*진짜 신규 404*(listing 부재) 만 safe, 일시 실패·부분추출 제외.
+
+    404 는 listing 에 *진짜 없을 때만* 신규=safe. listing 엔 있는데 404(spurious)는 일시 실패와
+    같이 제외(원본 tar truncate 데이터손실 가드 — 043260-class).
+    """
     import huggingface_hub
 
     import dartlab.config as cfg
@@ -34,6 +38,8 @@ def test_dartzip_seed_safe_set_404_vs_transient(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(hfUpload, "_resolveHfToken", lambda token=None: "x")
     # retryHfCall 패스스루(재시도 로직 우회 — 예외 즉시 전파)
     monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, *a, **k: fn(*a, **k))
+    # listing: AAA 존재 · BBB 부재(진짜 신규) — CCC 는 일시 실패라 listing 무관 제외.
+    monkeypatch.setattr(dartZip, "_hfFileSet", lambda repo, *, token=None: {"docs/AAA.tar"})
 
     from huggingface_hub.utils import EntryNotFoundError
 
@@ -45,13 +51,13 @@ def test_dartzip_seed_safe_set_404_vs_transient(monkeypatch, tmp_path) -> None:
         if code == "AAA":
             return str(tarDir / "AAA.tar")
         if code == "BBB":
-            raise EntryNotFoundError("404")  # 신규 종목
+            raise EntryNotFoundError("404")  # 신규 종목(listing 에도 없음)
         raise RuntimeError("transient 5xx")  # 일시 실패 → 제외
 
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", fakeDownload)
 
     n, safe = dartZip._seedChangedFromHf(["AAA", "BBB", "CCC"], token="x")
-    assert safe == {"AAA", "BBB"}  # CCC(일시 실패) 제외
+    assert safe == {"AAA", "BBB"}  # CCC(일시 실패) 제외 · BBB(listing 부재) 신규 safe
     assert n == 1  # AAA 만 실제 추출
     extracted = sorted(p.name for p in (tmp_path / "original" / "dart" / "docs" / "AAA").glob("*.zip"))
     assert extracted == ["r1.zip", "r2.zip"]  # 완전 추출
@@ -417,7 +423,11 @@ def test_allfilings_backfill_registered() -> None:
 
 
 def test_seed_panel_from_hf_404_vs_transient(monkeypatch, tmp_path) -> None:
-    """_seedPanelFromHf — 성공·404(신규) 는 safe, *일시 실패* 는 제외(merge base 부재 → 파괴적 덮어쓰기 가드)."""
+    """_seedPanelFromHf — 성공·*진짜 신규 404*(listing 부재) 만 safe, 일시 실패·spurious 404 제외.
+
+    404 가 listing 에 *진짜 없을 때만* 신규=safe(base 없이 merge 정당). listing 엔 있는데 404(spurious)
+    면 merge base 부재로 overwrite=신규만 → 정상 HF panel 파괴(history 소실, 043260-class) → 제외.
+    """
     from pathlib import Path
 
     import huggingface_hub
@@ -430,6 +440,8 @@ def test_seed_panel_from_hf_404_vs_transient(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
     monkeypatch.setattr(hfUpload, "_resolveHfToken", lambda token=None: "x")
     monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, *a, **k: fn(*a, **k))
+    # listing: AAA 존재 · BBB 부재(진짜 신규) — 네트워크 0(실제 list_repo_files 대체).
+    monkeypatch.setattr(dartZip, "_hfFileSet", lambda repo, *, token=None: {"dart/panel/AAA.parquet"})
 
     def fakeDownload(*, repo_id, repo_type, filename, local_dir, token):
         code = filename.split("/")[-1][: -len(".parquet")]

@@ -5,6 +5,10 @@ name: Original SSOT Sync
 #  ① dart-zip   : 정기보고서 원본 zip archive(증분) → 변경 종목 tar seed → panel within-company
 #                 증분 빌드(신규 zip만 merge=True period upsert) → dartOriginal(tar) + panel HF push.
 #                 dart_full_rebuild=true 시에만 전이력 재빌드(self-heal).  (dartlab.pipeline dartZip)
+#  ①' dart-reconcile : panel rcept 단위(파일내) 자가치유 — DART 정기 rcept(85일 윈도) vs HF panel
+#                 rceptNo 차집합 = 누락 분기만 fetch+merge+push. forward 7일 윈도가 run 실패/
+#                 타임아웃으로 놓친 분기보고서를 회복(finance 의 60일+rcept 대조 자가치유와 대칭).
+#                 (dartlab.pipeline panelRceptReconcile)
 #  ② allfilings : 비정기 공시 일별 parquet forward 7일 증분.  (dartlab.pipeline allFilings)
 #  ②' allfilings-backfill : 과거 커버리지를 2개월/run 으로 늘림 — 현 최오래 일자 직전 달부터
 #                 과거로 collect+push, floor 201501 도달 시 no-op.  (dartlab.pipeline allFilingsBackfill)
@@ -27,10 +31,10 @@ on:
   workflow_dispatch:
     inputs:
       jobs:
-        description: 'all | dart-zip | allfilings | allfilings-backfill | edgar'
+        description: 'all | dart-zip | dart-reconcile | allfilings | allfilings-backfill | edgar'
         default: 'all'
         type: choice
-        options: [all, dart-zip, allfilings, allfilings-backfill, edgar]
+        options: [all, dart-zip, dart-reconcile, allfilings, allfilings-backfill, edgar]
       lookback_days:
         description: 'archive/allFilings forward 윈도 (일)'
         default: '7'
@@ -74,6 +78,33 @@ jobs:
           # 기본 within-company 증분(신규 zip만 merge). full-rebuild(self-heal)는 dispatch 시에만.
           DART_PANEL_FULL_REBUILD: ${{ github.event.inputs.dart_full_rebuild == 'true' && '1' || '0' }}
         run: uv run python -X utf8 -m dartlab.pipeline dartZip
+
+  dart-reconcile:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'dart-reconcile' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    concurrency:
+      group: hf-dart-push  # 메인 public repo(panel) + private(dartOriginal) push → dart-zip 와 직렬(412 회피)
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Smoke import
+        run: uv run python -c "import dartlab"
+      - name: panel rcept 단위 자가치유 (DART 정기 rcept vs panel 누락분 fetch+merge+HF)
+        # forward dartZip 7일 윈도가 놓친 분기보고서를 85일 윈도 reconcile 로 회복.
+        # 탐지=HF panel rceptNo 컬럼 range-read(싸다), heal=누락 rcept zip 만 fetch.
+        env:
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DART_PANEL_RECONCILE_DAYS: '85'  # corp 생략 list.json 3개월(~92일) cap 안쪽 + 현 백로그 커버
+          PANEL_WORKERS: '2'
+        run: uv run python -X utf8 -m dartlab.pipeline panelRceptReconcile
 
   allfilings:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings' }}
