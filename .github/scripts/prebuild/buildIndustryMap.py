@@ -263,7 +263,7 @@ def _loadScanMetrics() -> dict[str, dict]:
                      "revCagr": float|None, "profGrade": str,
                      "debtGrade": str, "growthGrade": str}
     """
-    from dartlab.scan import debt, growth, profitability
+    from dartlab.scan import growth, profitability
 
     # scan 축 모듈은 facade(한글 rename) 또는 raw(영문) 양쪽 가능 — silent null 방지 위해
     # 한글·영문 키를 둘 다 시도하고 0.0/음수도 보존(None 만 건너뜀).
@@ -290,9 +290,13 @@ def _loadScanMetrics() -> dict[str, dict]:
         print(f"  ⚠ profitability 로드 실패: {e}")
 
     try:
-        ddf = debt()
+        from dartlab.scan.debt import scanDebt  # 명시 함수 import — facade 'debt' 는 동명 서브모듈에 가려질 수 있음
+
+        ddf = scanDebt()
         for r in ddf.iter_rows(named=True):
-            code = r["종목코드"]
+            code = r.get("종목코드") or r.get("stockCode")  # scanDebt 는 stockCode(영문)+필드 한글 혼합
+            if not code:
+                continue
             metrics.setdefault(code, {})
             metrics[code]["debtRatio"] = r.get("부채비율")
             metrics[code]["icr"] = r.get("ICR")
@@ -324,6 +328,7 @@ def _loadScanMetrics() -> dict[str, dict]:
                 continue
             metrics.setdefault(code, {})
             metrics[code]["govGrade"] = r.get("등급") or r.get("grade") or ""
+            metrics[code]["govScore"] = _pick(r, "총점", "score", "totalScore")
     except Exception as e:
         print(f"  ⚠ governance 로드 실패: {e}")
 
@@ -868,6 +873,7 @@ def buildEcosystem(
                 "assetTurnover": _roundOrNone(m.get("assetTurnover")),
                 "ccc": _roundOrNone(m.get("ccc")),
                 "accrualRatio": _roundOrNone(m.get("accrualRatio")),
+                "govScore": _roundOrNone(m.get("govScore")),
                 "revCagr": _roundOrNone(m.get("revCagr")),
                 "netIncomeCagr": _roundOrNone(m.get("netIncomeCagr")),
                 "profGrade": m.get("profGrade") or "",
@@ -1069,6 +1075,7 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
                 "assetTurnover": m.get("assetTurnover"),
                 "ccc": m.get("ccc"),
                 "accrualRatio": m.get("accrualRatio"),
+                "govScore": m.get("govScore"),
                 "profGrade": m.get("profGrade") or "",
                 "debtGrade": m.get("debtGrade") or "",
                 "growthGrade": m.get("growthGrade") or "",
@@ -1174,6 +1181,7 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
             "assetTurnover": _distribution([m.get("assetTurnover") for m in members]),
             "ccc": _distribution([m.get("ccc") for m in members]),
             "accrualRatio": _distribution([m.get("accrualRatio") for m in members]),
+            "govScore": _distribution([m.get("govScore") for m in members]),
         }
 
         out[indId] = {
