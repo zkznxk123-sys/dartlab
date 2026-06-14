@@ -24,7 +24,7 @@ class XAIProvider(OpenAIProvider):
         apiKey = self.config.apiKey or os.getenv("XAI_API_KEY")
         if not apiKey:
             raise RuntimeError("XAI_API_KEY 가 없다")
-        return OpenAI(apiKey=apiKey, baseUrl=self.config.baseUrl or XAI_BASE_URL)
+        return OpenAI(api_key=apiKey, base_url=self.config.baseUrl or XAI_BASE_URL)
 
     def checkAvailable(self) -> bool:
         """XAI_API_KEY + openai SDK 동시 보유 여부."""

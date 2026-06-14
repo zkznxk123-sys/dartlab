@@ -23,7 +23,7 @@ class GoogleProvider(BaseProvider):
         apiKey = self.config.apiKey or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
         if not apiKey:
             raise RuntimeError("GOOGLE_API_KEY 가 없다")
-        return genai.Client(apiKey=apiKey)
+        return genai.Client(api_key=apiKey)
 
     def checkAvailable(self) -> bool:
         """GOOGLE_API_KEY/GEMINI_API_KEY + google-genai SDK 동시 보유 여부."""

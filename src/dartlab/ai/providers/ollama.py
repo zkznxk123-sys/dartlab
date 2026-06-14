@@ -165,7 +165,7 @@ class OllamaProvider(BaseProvider):
                 from openai import OpenAI
             except ImportError:
                 raise ImportError("openai 패키지가 필요합니다.\n  pip install --upgrade dartlab")
-            self._client = OpenAI(baseUrl=self._base_url, apiKey="ollama")
+            self._client = OpenAI(base_url=self._base_url, api_key="ollama")
         return self._client
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:

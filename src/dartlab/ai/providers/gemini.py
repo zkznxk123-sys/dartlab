@@ -44,7 +44,7 @@ class GeminiProvider(BaseProvider):
                 "  설정: GEMINI_API_KEY 환경변수 또는 설정 패널에서 입력"
             )
 
-        self._client = genai.Client(apiKey=apiKey)
+        self._client = genai.Client(api_key=apiKey)
         return self._client
 
     @property

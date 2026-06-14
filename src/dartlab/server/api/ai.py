@@ -473,7 +473,7 @@ def _fetchOpenaiModels() -> list[str]:
     try:
         from openai import OpenAI
 
-        client = OpenAI(apiKey=apiKey)
+        client = OpenAI(api_key=apiKey)
         raw = client.models.list()
         models = []
         for model in raw:

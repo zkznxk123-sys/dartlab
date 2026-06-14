@@ -24,7 +24,7 @@ class OpenAIProvider(BaseProvider):
         apiKey = self.config.apiKey or os.getenv("OPENAI_API_KEY")
         if not apiKey:
             raise RuntimeError("OPENAI_API_KEY 가 없다")
-        return OpenAI(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
+        return OpenAI(api_key=apiKey, base_url=self.config.baseUrl or None)
 
     def checkAvailable(self) -> bool:
         """OPENAI_API_KEY + openai SDK 동시 보유 여부."""

@@ -38,7 +38,7 @@ class AnthropicProvider(BaseProvider):
         apiKey = self.config.apiKey or os.getenv("ANTHROPIC_API_KEY")
         if not apiKey:
             raise RuntimeError("ANTHROPIC_API_KEY 가 없다")
-        return Anthropic(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
+        return Anthropic(api_key=apiKey, base_url=self.config.baseUrl or None)
 
     def checkAvailable(self) -> bool:
         """ANTHROPIC_API_KEY + anthropic SDK 동시 보유 여부."""
