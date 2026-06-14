@@ -108,7 +108,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each m.rows as h (h.name)}
+						{#each m.rows as h, i (h.name + '#' + i)}
 							<tr class={h.tier === 'consolidated' ? 'finKey' : ''}>
 								<td class="finAcct" title={h.purpose}>
 									{#if h.code}
