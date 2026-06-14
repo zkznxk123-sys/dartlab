@@ -1065,7 +1065,8 @@
 			{/each}
 			{#if hoverRail}
 				{@const ht = hoverRail}
-				<div class="discTip mono" style={`left:${Math.min(Math.max(ht.x, 132), railBox.width - 132)}px`} role="tooltip">
+				{@const half = Math.min(132, railBox.width / 2)}
+				<div class="discTip mono" style={`left:${Math.min(Math.max(ht.x, half), railBox.width - half)}px`} role="tooltip">
 					<div class="discTipHd"><b class="discTipDate">{ymdDash(ht.date)}</b> · {T('공시', 'filings')} {ht.items.length}{T('건', '')}</div>
 					{#each ht.items.slice(0, 12) as it (it.rceptNo)}
 						<div class="discTipRow">{#if it.kind === 'regular'}<span class="discTipTag">{T('정기', 'REG')}</span>{/if}{it.title}</div>
