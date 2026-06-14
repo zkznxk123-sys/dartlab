@@ -70,21 +70,15 @@
 			flashDate = d;
 			const row = filingWrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
 			if (row) {
-				// rect 기반 수동 2단 센터링 — 정기(짧음)·비정기(긺) 내부 filingList 스크롤 범위차에도 컬럼 뷰포트 정중앙 일관
-				// (중첩 scrollIntoView{block:center} 의 smooth 타이밍 편차로 정기만 약간 어긋나던 것 해소).
-				// 1) 내부 filingList 가 자체 스크롤이면 행을 그 박스 중앙으로(즉시).
-				const list = row.closest('.filingList') as HTMLElement | null;
-				if (list && list.scrollHeight > list.clientHeight + 1) {
-					const lr = list.getBoundingClientRect();
-					const rr = row.getBoundingClientRect();
-					list.scrollTop += rr.top + rr.height / 2 - (lr.top + lr.height / 2);
-				}
-				// 2) 외부 우측 컬럼에서 행을 뷰포트 정중앙으로(내부 스크롤 반영 후 rect 재측정 → 부드럽게).
+				// 단일 우측 컬럼 스크롤(filingList 내부 스크롤 제거) — rect 기반으로 행을 컬럼 뷰포트 정중앙으로.
+				// 정기·비정기가 같은 스크롤 컨텍스트라 동일하게 가운데로 온다(옛 이중스크롤의 클램핑 비대칭 해소).
 				const col = row.closest('.col') as HTMLElement | null;
 				if (col) {
 					const cr = col.getBoundingClientRect();
-					const rr2 = row.getBoundingClientRect();
-					col.scrollBy({ top: rr2.top + rr2.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
+					const rr = row.getBoundingClientRect();
+					col.scrollBy({ top: rr.top + rr.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
+				} else {
+					row.scrollIntoView({ block: 'center', behavior: 'smooth' });
 				}
 			}
 			flashTimer = setTimeout(() => (flashDate = null), 1800);
@@ -477,7 +471,7 @@
 {/if}
 
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할. data-fdate = 주가차트 공시 dot 클릭 시 스크롤·하이라이트 대상 키(YYYYMMDD). -->
-<div class="rowSplit" bind:this={filingWrap}>
+<div class="rowSplit filingsRow" bind:this={filingWrap}>
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
 		{#if regFilings.length}
