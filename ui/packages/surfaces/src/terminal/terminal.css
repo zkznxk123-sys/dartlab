@@ -355,7 +355,7 @@
 .dlTerm .vRiskline b { font-family: var(--mono); }
 
 /* CHART (trend) */
-/* 하단 15px = 출처 캡션 전용 띠 — 캔버스(X축 날짜)와 출처 텍스트 겹침 방지(캔버스가 그만큼 위에서 끝남) */
+/* 하단 15px = 공시 위치 레일(.discRail) 전용 띠 — 캔버스(X축 날짜)가 그만큼 위에서 끝나, 레일 dot 이 타임라인 "아래"에 놓인다. (출처는 패널 헤더로 이동) */
 .dlTerm .chartWrap { position: relative; width: 100%; min-height: 320px; overflow: hidden; padding-bottom: 15px; }
 .dlTerm .chartHost { width: 100%; height: 100%; }
 /* 상단 패딩 = 리본 실측 높이(--crH, ChartRibbon bind:clientHeight) — 좁은 창에서 리본이 3~4줄로 늘어도 차트를 덮지 않는다 */
@@ -408,9 +408,8 @@
 .dlTerm .btTable td { padding: 1px 6px 1px 0; border-bottom: 1px solid rgba(27, 33, 48, 0.6); color: var(--dim); }
 .dlTerm .btFoot { font-size: 8.5px; color: var(--dimmer); margin-top: 2px; line-height: 1.5; }
 
-/* 차트 데이터 출처 상시 표기 (공공누리) */
-.dlTerm .chartSrc { position: absolute; left: 8px; bottom: 1px; font-size: 9px; line-height: 13px; color: #5c6370; pointer-events: none; z-index: 2; }
-.dlTerm .chartWrap:has(.btStrip) .chartSrc { display: none; }
+/* 백테스트 스트립(.btStrip, 하단 도킹)이 뜨면 공시 레일 숨김 — 같은 하단 띠 점유 겹침 방지. (출처는 패널 헤더 sub 로 이동) */
+.dlTerm .chartWrap:has(.btStrip) .discRail { display: none; }
 
 /* 전체화면 전문가 리본 (2단) — 캔버스 밖 불투명 overlay, 차트 리플로우 0.
    전체화면 = 작업 화면이라 일반 모드보다 한 단계 큰 타이포·히트영역 (행 34px·버튼 10.5px). */

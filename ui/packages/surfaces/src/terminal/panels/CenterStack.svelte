@@ -99,6 +99,8 @@
 	const product = $derived(corpInfo?.product ?? '');
 	// 재무제표 분석 전체화면 (FinFullscreen — 버틀러식 탭, ESC 닫기는 컴포넌트 내부)
 	let finFull = $state(false);
+	// 차트 출처(공공누리) — PriceChart 가 onSrc 로 올려줌(econ/수정주가/HA 반응). 차트 하단 대신 패널 헤더에 표기.
+	let chartSrcLine = $state('');
 
 	const p = $derived(co.price);
 	const e = $derived(co.eco);
@@ -206,8 +208,9 @@
 
 	// 공시 이벤트 레일 (dartlab 고유 강점) — 정기보고서 url(접수일별) + 비정기 material 공시(날짜 그룹·클릭 시 DART).
 	// 가격차트 마커가 곧 네비게이션 가능한 공시 타임라인. 같은 날 다수 공시는 1마커로 묶고 '외 N건' 표기(마커 폭주 방지).
+	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' };
 	let regularUrlByDate = $state<Record<string, string>>({});
-	let disclosureEvents = $state<{ date: string; label: string; url: string; kind: 'disclosure' }[]>([]);
+	let disclosureEvents = $state<{ date: string; items: RailItem[] }[]>([]);
 	$effect(() => {
 		const code = co.code;
 		let cancelled = false;
@@ -218,24 +221,30 @@
 			const rmap: Record<string, string> = {};
 			for (const f of reg ?? []) if (f.rceptDate && f.url) rmap[f.rceptDate.replace(/\D/g, '').slice(0, 8)] = f.url;
 			regularUrlByDate = rmap;
-			const byDate = new Map<string, { labels: string[]; url: string }>();
+			// 레일 = 정기공시 + 비정기공시 통합 위치 타임라인. 날짜별로 그날 공시 전부 수집(호버 툴팁이 전부 나열, 클릭은 날짜로 우측 동기).
+			const byDate = new Map<string, RailItem[]>();
+			const add = (d8: string, item: RailItem) => {
+				const cur = byDate.get(d8);
+				if (cur) cur.push(item);
+				else byDate.set(d8, [item]);
+			};
+			// 정기공시 — 사업/반기/분기보고서(그 분기 실적 공시). 캔들 실적 마커와 별개로 레일에도 = "공시 위치"의 완결성.
+			for (const f of reg ?? []) {
+				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
+				if (d.length !== 8 || !f.url || !f.reportType?.trim()) continue;
+				add(d, { title: f.reportType.trim() + (f.year ? ' ' + f.year : ''), rceptNo: f.rceptNo, url: f.url, kind: 'regular' });
+			}
+			// 비정기(수시) 공시
 			for (const f of non ?? []) {
 				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
-				if (d.length !== 8 || !f.url || !f.reportNm?.trim()) continue; // 빈 라벨 마커 방지(anti-clutter)
-				const cur = byDate.get(d);
-				if (cur) cur.labels.push(f.reportNm);
-				else byDate.set(d, { labels: [f.reportNm], url: f.url });
+				if (d.length !== 8 || !f.url || !f.reportNm?.trim()) continue; // 빈 항목 방지(anti-clutter)
+				add(d, { title: f.reportNm.trim(), rceptNo: f.rceptNo, url: f.url, kind: 'nonreg' });
 			}
-			// 최근 60개 날짜로 캡 — wide window 에서도 마커 폭주 방지(anti-clutter). 같은 날 다수는 이미 1마커로 묶임.
+			// 최근 60개 날짜로 캡 — wide window 에서도 dot 폭주 방지(anti-clutter). 같은 날 다수는 1 dot + 툴팁 전체 나열.
 			disclosureEvents = [...byDate.entries()]
 				.sort((a, b) => (a[0] < b[0] ? 1 : -1))
 				.slice(0, 60)
-				.map(([d, v]) => ({
-					date: d,
-					label: v.labels.length > 1 ? `${v.labels[0]} 외 ${v.labels.length - 1}건` : v.labels[0],
-					url: v.url,
-					kind: 'disclosure' as const
-				}));
+				.map(([d, items]) => ({ date: d, items }));
 		});
 		return () => {
 			cancelled = true;
@@ -355,11 +364,11 @@
 {#if gradeOpen}<GradeExplainDialog {co} {lang} onClose={() => (gradeOpen = false)} />{/if}
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
-<Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={{ kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
+<Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={chartSrcLine ? { kr: chartSrcLine, en: chartSrcLine } : { kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
 	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candles && chartCode}
 		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신) -->
-		<PriceChart {candles} code={chartCode} name={chartName} {lang} events={priceEvents} disclosures={disclosureEvents} valBand={priceValBand} peers={chartPeers} {suggest} {onPick} />
+		<PriceChart {candles} code={chartCode} name={chartName} {lang} events={priceEvents} disclosures={disclosureEvents} valBand={priceValBand} peers={chartPeers} {suggest} {onPick} onSrc={(s) => (chartSrcLine = s)} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
 	{:else}

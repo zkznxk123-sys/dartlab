@@ -9,6 +9,7 @@
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
 	import { runBacktest, type BtResult } from '../lib/backtest';
+	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
@@ -31,15 +32,17 @@
 		name?: string;
 		lang: Lang;
 		events?: { date: string; label: string; url?: string; kind?: 'report' | 'capital' | 'disclosure' }[];
-		// 공시 레일(02) — 날짜 그룹별 1항목. 캔들 고가 텍스트 아님 = x축 아래 하단 dot 레일.
-		disclosures?: { date: string; label: string; url: string }[];
+		// 공시 레일(02 §4) — 날짜 그룹별 그날 공시 전부(items). 캔들 고가 텍스트 아님 = x축 라벨 아래 전용 dot 레일.
+		// 호버=그날 공시 전 항목 툴팁, 클릭=우측 정기/비정기 공시목록 그 날짜로(원문 링크 아님).
+		disclosures?: { date: string; items: { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' }[] }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
 		// 전체화면 심볼 점프 — 검색은 엔진(suggest), 전환은 onPick (터미널 pick 관통)
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
+		onSrc?: (line: string) => void; // 출처(공공누리)를 차트 하단 대신 패널 헤더에 표기하도록 부모로 끌어올림(econ/adj 반응 유지)
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
@@ -81,38 +84,71 @@
 	let appliedReplay = { on: false, idx: -1 }; // replay effect 중복 재적용 차단 스냅샷
 
 	const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
+	// x축 날짜 라벨을 한국식 간단 표기로 압축 — 라이브러리 기본(YYYY-MM·MM-DD·YYYY)을 YY.MM·MM.DD·YYYY 로.
+	// registerXAxis 가 이미 계산된 ticks 의 text 만 치환(틱 산출·간격 로직은 라이브러리 그대로 — 회귀 0).
+	function compactAxisText(s: string): string {
+		let m: RegExpExecArray | null;
+		if ((m = /^(\d{2})(\d{2})-(\d{2})-(\d{2})/.exec(s))) return `${m[2]}.${m[3]}`; // YYYY-MM-DD(앵커) → YY.MM
+		if ((m = /^(\d{2})(\d{2})-(\d{2})$/.exec(s))) return `${m[2]}.${m[3]}`; // YYYY-MM → YY.MM
+		if (/^\d{2}-\d{2}$/.test(s)) return s.replace('-', '.'); // MM-DD → MM.DD
+		return s; // YYYY · HH:mm 등 그대로
+	}
 	// turnover 는 억 단위 — {turnover} 플레이스홀더가 콤마만 붙이고 축약을 안 해 원 단위면
 	// "446,546,135,655" 생짜 노출 (TVAL 페인·매물대 가중치도 동일 단위 공유, 상대값이라 무영향)
 	const toK = (c: Candle) => ({ timestamp: toMs(c.t), open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v, turnover: c.tv != null ? c.tv / 1e8 : undefined });
 
-	// 공시 레일(02 §4) — disclosures(날짜 그룹) 각 날짜를 timestamp→x 픽셀(convertToPixel)로 변환해 차트 하단 dot 배치.
-	// 캔들 고가 텍스트 annotation(폭주·가격 차폐, §2.2 금지) 대신 x축 아래 전용 레일. pan/zoom 은 onScroll/onZoom 재계산.
-	// 좌표 실패/범위 밖은 graceful skip(렌더 0·crash 0). 정렬·y 위치는 운영자 시각 검수 대상.
-	let railDots = $state<{ x: number; label: string; url: string; multi: boolean }[]>([]);
+	// 공시 레일(02 §4) — disclosures(날짜 그룹) 각 날짜를 convertToPixel 로 x 픽셀화해 x축 날짜라벨 "아래" 전용 띠에 dot 배치.
+	// 캔들 고가 텍스트 annotation(폭주·가격 차폐, §2.2 금지) 폐기. 레일 띠 = 캔버스가 끝나는 chartWrap 하단 padding 영역
+	// (terminal.css .chartWrap padding-bottom — 출처 자리를 레일 lane 으로 전용). 좌표/폭은 el(캔버스) geometry 기준이라
+	// 일반·전체화면(좌 58·하 22 padding) 모두 정렬. pan/zoom·resize 는 onScroll/onZoom·ResizeObserver 로 재계산.
+	// 좌표 실패/범위 밖은 graceful skip(렌더 0·crash 0).
+	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' };
+	type RailDot = { x: number; date: string; items: RailItem[] };
+	let railBox = $state<{ left: number; top: number; width: number; canvasTop: number } | null>(null);
+	let railDots = $state<RailDot[]>([]);
+	let hoverRail = $state<{ x: number; date: string; items: RailItem[] } | null>(null); // 호버 = 그날 공시 전부 툴팁(일자 헤더 포함)
+	const ymdDash = (d: string) => `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`; // YYYYMMDD → YYYY-MM-DD
 	function recomputeRail() {
 		const c = chart;
-		if (!c || !disclosures.length || !el) { railDots = []; return; }
-		const w = el.clientWidth;
-		const out: { x: number; label: string; url: string; multi: boolean }[] = [];
+		if (!c || !el) { railDots = []; railBox = null; return; }
+		// 레일 띠 = 캔버스 바로 아래(canvas bottom → chartWrap 하단). offsetLeft/Top 이 전체화면 padding 을 자동 반영.
+		// canvasTop = 캔버스 상단 — dot 호버 시 그 날짜 세로 가이드선을 캔버스 전 높이로 그릴 때 사용.
+		railBox = { left: el.offsetLeft, top: el.offsetTop + el.offsetHeight, width: el.offsetWidth, canvasTop: el.offsetTop };
+		if (!disclosures.length) { railDots = []; return; }
+		const w = el.offsetWidth;
+		const out: RailDot[] = [];
 		for (const d of disclosures) {
-			if (!/^\d{8}$/.test(d.date)) continue;
+			if (!/^\d{8}$/.test(d.date) || !d.items.length) continue;
 			let x: number | undefined;
 			try {
 				const px = c.convertToPixel({ timestamp: toMs(d.date), value: 0 }, { paneId: 'candle_pane' });
 				x = Array.isArray(px) ? px[0]?.x : px?.x;
 			} catch { continue; }
 			if (typeof x !== 'number' || !Number.isFinite(x) || x < -4 || x > w + 4) continue;
-			out.push({ x, label: d.label, url: d.url, multi: d.label.includes('외') });
+			out.push({ x, date: d.date, items: d.items });
 		}
 		railDots = out;
+		if (hoverRail && !out.length) hoverRail = null;
 	}
-	// 데이터/기간/봉주기/disclosures 변경 시 재계산 (rAF = 차트 렌더 후 좌표 안정).
+	// 데이터/기간/봉주기/disclosures/전체화면 변경 시 재계산 (rAF = 차트 렌더 후 좌표 안정).
 	$effect(() => {
 		void dataRev;
 		void ctl.period;
 		void ctl.tf;
+		void ctl.full;
 		void disclosures;
 		if (browser) requestAnimationFrame(recomputeRail);
+	});
+	// 캔버스 크기 변화(전체화면 토글·창 리사이즈·페인 경계 드래그) → 레일 geometry·dot x 재정렬.
+	$effect(() => {
+		if (!browser || !el) return;
+		const ro = new ResizeObserver(() => requestAnimationFrame(recomputeRail));
+		ro.observe(el);
+		return () => ro.disconnect();
+	});
+	// 출처(공공누리)를 차트 하단 캡션 대신 패널 헤더로 — econ/수정주가/HA 변화에 반응(srcText 가 ctl 읽음).
+	$effect(() => {
+		onSrc?.(srcText());
 	});
 	// 리본 Row1 정보 — 표시 시계열(리플레이 절단·수정주가 반영) 기준이라 리플레이 중에도 정직.
 	// dataRev = reapply 동행 신호 (displaySeries 내부 untrack 읽기를 대신 깨운다).
@@ -212,6 +248,15 @@
 			registerWorkOverlays(mod);
 			registerVolumeProfile(mod);
 			registerCmpIndicator(mod);
+			// x축 날짜 라벨 간단화 — 기본 축('default')의 createTicks 가 받는 defaultTicks 의 text 만 YY.MM 으로 재포맷.
+			// 패턴 미일치(HH:mm 등)는 그대로 통과(타 차트 무해). init 전 등록해야 차트가 픽업. 재등록은 idempotent.
+			try {
+				mod.registerXAxis({
+					name: 'default',
+					createTicks: ({ defaultTicks }: { defaultTicks: { coord: number; value: number | string; text: string }[] }) =>
+						defaultTicks.map((t) => ({ ...t, text: compactAxisText(t.text) }))
+				});
+			} catch { /* registerXAxis 미지원 빌드 — 기본 라벨 유지 */ }
 			local = mod.init(node, { styles: themeStyles() });
 			if (!local) return;
 			local.setPriceVolumePrecision(0, 0);
@@ -1000,20 +1045,40 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	<div class="chartHost" bind:this={el}></div>
 
-	{#if railDots.length}
-		<!-- 공시 위치 레일 — x축 아래 날짜별 dot. 호버=공시 제목 툴팁, 클릭=원문(우측 패널 스크롤은 RightStack 정착 후). -->
-		<div class="discRail" aria-label={T('공시 위치', 'disclosure markers')}>
-			{#each railDots as d (d.x + '|' + d.label)}
+	{#if railBox && railDots.length}
+		<!-- 공시 위치 레일(02 §4) — x축 날짜라벨 아래 전용 띠. left/top/width=캔버스 geometry(전체화면 padding 자동 반영).
+		     호버=그날 공시 전부 툴팁, 클릭=우측 정기/비정기 공시목록 그 날짜로(focusDisclosure — 원문 링크 아님). -->
+		<div class="discRail" style={`left:${railBox.left}px;top:${railBox.top}px;width:${railBox.width}px`} aria-label={T('공시 위치', 'disclosure markers')}>
+			{#each railDots as d (d.date)}
 				<button
 					class="discDot"
-					class:multi={d.multi}
-					style={`left:${d.x}px`}
-					title={d.label}
-					aria-label={d.label}
-					onclick={() => d.url && window.open(d.url, '_blank', 'noopener')}
+					class:multi={d.items.length > 1}
+					class:hasReg={d.items.some((i) => i.kind === 'regular')}
+					style={`left:${d.x}px;opacity:${Math.min(0.4 + d.items.length * 0.12, 0.92)}`}
+					aria-label={`${d.date.slice(0, 4)}-${d.date.slice(4, 6)}-${d.date.slice(6, 8)} ${T('공시', 'filings')} ${d.items.length}`}
+					onmouseenter={() => (hoverRail = { x: d.x, date: d.date, items: d.items })}
+					onmouseleave={() => (hoverRail = null)}
+					onfocus={() => (hoverRail = { x: d.x, date: d.date, items: d.items })}
+					onblur={() => (hoverRail = null)}
+					onclick={() => focusDisclosure(d.date)}
 				></button>
 			{/each}
+			{#if hoverRail}
+				{@const ht = hoverRail}
+				<div class="discTip mono" style={`left:${Math.min(Math.max(ht.x, 132), railBox.width - 132)}px`} role="tooltip">
+					<div class="discTipHd"><b class="discTipDate">{ymdDash(ht.date)}</b> · {T('공시', 'filings')} {ht.items.length}{T('건', '')}</div>
+					{#each ht.items.slice(0, 12) as it (it.rceptNo)}
+						<div class="discTipRow">{#if it.kind === 'regular'}<span class="discTipTag">{T('정기', 'REG')}</span>{/if}{it.title}</div>
+					{/each}
+					{#if ht.items.length > 12}<div class="discTipMore">{T('외 ', '+')}{ht.items.length - 12}{T('건', '')}</div>{/if}
+					<div class="discTipFoot">{T('클릭 → 우측 공시목록', 'click → filings list')}</div>
+				</div>
+			{/if}
 		</div>
+		{#if hoverRail}
+			<!-- 그 공시일 세로 가이드선 — 캔버스 전 높이(차트 크로스헤어 결). dot↔캔들 x 일치 확인 + 위치 강조. -->
+			<div class="discGuide" style={`left:${railBox.left + hoverRail.x}px;top:${railBox.canvasTop}px;height:${railBox.top - railBox.canvasTop}px`}></div>
+		{/if}
 	{/if}
 
 	{#if textEdit}
@@ -1112,8 +1177,7 @@
 		<ChartMenus {ctl} {lang} hasBand={!!valBand} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 
-	<!-- 데이터 출처 상시 표기 (공공누리 출처표시 의무, ECON·수정주가 병기 — 스냅샷 띠와 SSOT) -->
-	<div class="chartSrc">{srcText()}</div>
+	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->
 
 	{#if btResult && ctl.btKey}
 		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClear={() => (ctl.btKey = null)} />
@@ -1121,38 +1185,105 @@
 </div>
 
 <style>
-	/* 공시 위치 레일 — x축 라벨 위(bottom 오프셋)에 날짜별 dot. y 위치/dot 크기는 운영자 시각 검수 후 미세조정. */
+	/* 공시 위치 레일 — x축 날짜라벨 "아래" 전용 띠(캔버스 하단 padding 영역). left/top/width 는 인라인(캔버스 geometry),
+	   bottom:0 으로 띠 높이를 chartWrap 하단까지 채운다. dot 은 중립 슬레이트(축 furniture 처럼 — 알람색 아님). */
 	.discRail {
 		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 24px;
-		height: 10px;
+		bottom: 0;
 		pointer-events: none;
 		z-index: 3;
 	}
 	.discDot {
 		position: absolute;
-		bottom: 0;
-		width: 7px;
-		height: 7px;
-		margin-left: -3.5px;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 6px;
+		height: 6px;
 		padding: 0;
 		border: none;
 		border-radius: 50%;
-		background: #22d3ee;
-		opacity: 0.8;
+		background: #8b97ad; /* 건수=opacity(인라인) */
 		cursor: pointer;
 		pointer-events: auto;
-		transition: opacity 0.1s;
+		transition: transform 0.1s, background 0.1s;
 	}
 	.discDot.multi {
-		width: 9px;
-		height: 9px;
-		margin-left: -4.5px;
-		box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.25);
+		width: 8px;
+		height: 8px;
+		background: #aeb9cc;
 	}
-	.discDot:hover {
-		opacity: 1;
+	/* 정기보고서(사업/반기/분기) 포함 날짜 — 한눈에 찾도록 amber 링 (캔들 실적 마커와 같은 계열색) */
+	.discDot.hasReg {
+		box-shadow: 0 0 0 1.5px rgba(251, 146, 60, 0.7);
+	}
+	.discDot:hover,
+	.discDot:focus-visible {
+		transform: translate(-50%, -50%) scale(1.5);
+		background: #cfe0ff;
+		outline: none;
+	}
+	/* 호버 툴팁 — 그날 공시 전부. 레일 위로 띄움(chartWrap overflow:hidden 안이라 위로는 안 잘림). pointer-events:none. */
+	.discTip {
+		position: absolute;
+		bottom: calc(100% + 4px);
+		transform: translateX(-50%);
+		min-width: 180px;
+		max-width: 264px;
+		pointer-events: none;
+		background: rgba(12, 16, 24, 0.96);
+		border: 1px solid #2a3142;
+		border-radius: 4px;
+		padding: 5px 7px;
+		z-index: 12;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+	}
+	.discTipHd {
+		font-size: 9px;
+		color: #8b919e;
+		letter-spacing: 0.4px;
+		margin-bottom: 3px;
+	}
+	.discTipDate {
+		color: #e2e8f5;
+		font-weight: 700;
+		font-size: 10px;
+	}
+	.discTipRow {
+		font-size: 10.5px;
+		line-height: 1.45;
+		color: #cfd3dc;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.discTipTag {
+		display: inline-block;
+		font-size: 8px;
+		color: #fb923c;
+		border: 1px solid rgba(251, 146, 60, 0.5);
+		border-radius: 2px;
+		padding: 0 3px;
+		margin-right: 4px;
+		vertical-align: 1px;
+	}
+	.discTipMore {
+		font-size: 9.5px;
+		color: #6b7280;
+		margin-top: 2px;
+	}
+	.discTipFoot {
+		font-size: 9px;
+		color: #5b8aa0;
+		margin-top: 4px;
+		border-top: 1px solid #1c2330;
+		padding-top: 3px;
+	}
+	/* 공시일 세로 가이드선 — dot 호버 시 캔버스 전 높이. 차트 크로스헤어(amber)와 같은 결, 살짝 옅게. */
+	.discGuide {
+		position: absolute;
+		width: 1px;
+		pointer-events: none;
+		background: rgba(174, 185, 204, 0.5);
+		z-index: 4;
 	}
 </style>
