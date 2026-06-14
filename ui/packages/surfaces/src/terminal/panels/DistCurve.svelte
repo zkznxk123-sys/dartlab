@@ -9,18 +9,22 @@
 		value,
 		p,
 		unit = '',
-		lang = 'kr'
+		lang = 'kr',
+		w = 150,
+		h = 30
 	}: {
 		band: { p10: number; p25: number; median: number; p75: number; p90: number };
 		value: number | null;
 		p: number; // 0~100 백분위 (lowerBetter 이미 반영 — 높을수록 우수)
 		unit?: string;
 		lang?: Lang;
+		w?: number; // 너비(중간패널 컴팩트 = 작게)
+		h?: number;
 	} = $props();
 
-	const W = 150;
-	const H = 30;
-	const PAD = 4;
+	const W = $derived(w);
+	const H = $derived(h);
+	const PAD = 3;
 
 	const lo = $derived(Math.min(band.p10, value ?? band.p10));
 	const hi = $derived(Math.max(band.p90, value ?? band.p90));

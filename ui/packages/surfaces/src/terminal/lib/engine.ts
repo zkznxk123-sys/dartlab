@@ -316,19 +316,20 @@ export function createEngine(raw: RawData): Engine {
 		};
 		// 12 축 — 수익성(4)·성장(2)·안정성(2)·유동성(1)·효율성(2)·이익질(1).
 		// lowerBetter=true (부채비율·CCC·발생액비율) 는 pctRank 가 p 를 뒤집어 "상위 N%" 가 항상 우수를 뜻함.
+		// axis = 등급축 key(다이얼로그 등급기준·중간패널 그루핑용). 각 축 첫 지표 = 대표(중간패널 미니곡선).
 		const metrics = [
-			{ kr: '영업이익률', en: 'OP margin', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
-			{ kr: '순이익률', en: 'Net margin', v: node.netMargin ?? null, p: pctRank(col('netMargin'), node.netMargin ?? null), unit: '%', band: bandOf('netMargin') },
-			{ kr: 'ROE', en: 'ROE', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
-			{ kr: 'ROA', en: 'ROA', v: node.roa ?? null, p: pctRank(col('roa'), node.roa ?? null), unit: '%', band: bandOf('roa') },
-			{ kr: '매출성장', en: 'Rev growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
-			{ kr: '순이익성장', en: 'Net growth', v: node.netIncomeCagr ?? null, p: pctRank(col('netIncomeCagr'), node.netIncomeCagr ?? null), unit: '%', band: bandOf('netIncomeCagr') },
-			{ kr: '부채비율', en: 'Debt ratio', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
-			{ kr: '이자보상배율', en: 'Int. coverage', v: node.icr ?? null, p: pctRank(col('icr'), node.icr ?? null), unit: '배', band: bandOf('icr') },
-			{ kr: '유동비율', en: 'Current ratio', v: node.currentRatio ?? null, p: pctRank(col('currentRatio'), node.currentRatio ?? null), unit: '%', band: bandOf('currentRatio') },
-			{ kr: '자산회전율', en: 'Asset turn', v: node.assetTurnover ?? null, p: pctRank(col('assetTurnover'), node.assetTurnover ?? null), unit: '배', band: bandOf('assetTurnover') },
-			{ kr: '현금전환주기', en: 'Cash cycle', v: node.ccc ?? null, p: pctRank(col('ccc'), node.ccc ?? null, true), unit: '일', band: bandOf('ccc') },
-			{ kr: '발생액비율', en: 'Accruals', v: node.accrualRatio ?? null, p: pctRank(col('accrualRatio'), node.accrualRatio ?? null, true), unit: '', band: bandOf('accrualRatio') }
+			{ kr: '영업이익률', en: 'OP margin', axis: 'prof', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
+			{ kr: '순이익률', en: 'Net margin', axis: 'prof', v: node.netMargin ?? null, p: pctRank(col('netMargin'), node.netMargin ?? null), unit: '%', band: bandOf('netMargin') },
+			{ kr: 'ROE', en: 'ROE', axis: 'prof', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
+			{ kr: 'ROA', en: 'ROA', axis: 'prof', v: node.roa ?? null, p: pctRank(col('roa'), node.roa ?? null), unit: '%', band: bandOf('roa') },
+			{ kr: '매출성장', en: 'Rev growth', axis: 'growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
+			{ kr: '순이익성장', en: 'Net growth', axis: 'growth', v: node.netIncomeCagr ?? null, p: pctRank(col('netIncomeCagr'), node.netIncomeCagr ?? null), unit: '%', band: bandOf('netIncomeCagr') },
+			{ kr: '부채비율', en: 'Debt ratio', axis: 'stab', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
+			{ kr: '이자보상배율', en: 'Int. coverage', axis: 'stab', v: node.icr ?? null, p: pctRank(col('icr'), node.icr ?? null), unit: '배', band: bandOf('icr') },
+			{ kr: '유동비율', en: 'Current ratio', axis: 'liq', v: node.currentRatio ?? null, p: pctRank(col('currentRatio'), node.currentRatio ?? null), unit: '%', band: bandOf('currentRatio') },
+			{ kr: '자산회전율', en: 'Asset turn', axis: 'eff', v: node.assetTurnover ?? null, p: pctRank(col('assetTurnover'), node.assetTurnover ?? null), unit: '배', band: bandOf('assetTurnover') },
+			{ kr: '현금전환주기', en: 'Cash cycle', axis: 'eff', v: node.ccc ?? null, p: pctRank(col('ccc'), node.ccc ?? null, true), unit: '일', band: bandOf('ccc') },
+			{ kr: '발생액비율', en: 'Accruals', axis: 'qual', v: node.accrualRatio ?? null, p: pctRank(col('accrualRatio'), node.accrualRatio ?? null, true), unit: '', band: bandOf('accrualRatio') }
 		].filter((m): m is PercentileMetric => m.p != null);
 		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics };
 	}

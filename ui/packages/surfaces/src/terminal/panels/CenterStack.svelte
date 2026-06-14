@@ -7,6 +7,7 @@
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
+	import DistCurve from './DistCurve.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
 	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
@@ -25,6 +26,8 @@
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
+	// 등급칩 대표 분포 — 그 축 첫 백분위 지표(밴드 보유). gov/audit 등 연속지표 부재 축은 null(곡선 생략).
+	const repMetric = (key: string) => co.percentile?.metrics.find((m) => m.axis === key && m.band != null) ?? null;
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
 	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
@@ -343,9 +346,11 @@
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},1fr)`}>
 		{#each co.grades as g (g.key)}
+			{@const rm = repMetric(g.key)}
 			<div class="gradeChip" style={`--gc:${g.color}`}>
 				<span class="gcLabel">{txc(g, lang)}</span>
 				<span class={'gcVal ' + tcls(g.tone)}>{g.v}</span>
+				{#if rm && rm.band}<DistCurve band={rm.band} value={rm.v} p={rm.p ?? 50} unit={rm.unit} {lang} w={64} h={15} />{/if}
 			</div>
 		{/each}
 	</div>

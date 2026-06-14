@@ -36,6 +36,13 @@
 			.filter((r) => r.s != null)
 			.map((r) => ({ label: lang === 'en' ? r.en : r.kr, value: (r.s as number) * 100 }))
 	);
+	// 등급기준 섹션 그루핑 — 각 등급축 아래에 그 축의 백분위 지표(분포곡선) 동반. eff(효율성)는 등급축 부재라 별도 그룹.
+	const pct = $derived(co.percentile);
+	const hasPct = $derived(!!pct && pct.n >= 5);
+	function axisMetrics(key: string) {
+		return pct ? pct.metrics.filter((m) => m.axis === key) : [];
+	}
+	const effMetrics = $derived(pct ? pct.metrics.filter((m) => m.axis === 'eff') : []);
 
 	$effect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -74,26 +81,8 @@
 				</div>
 			</div>
 
-			<!-- 우: 왜 이 등급(근거) — 실측 지표(업종 백분위) + 원수치 + 신용 -->
+			<!-- 우: 왜 이 등급(근거) — 신용 + 강점/우려. 백분위·분포곡선은 아래 등급기준의 각 축으로 이동. -->
 			<div class="geWhy">
-				{#if co.percentile && co.percentile.n >= 5 && co.percentile.metrics.length}
-					<div class="gePct">
-						<div class="gePctHead">
-							{lang === 'en' ? `vs ${co.percentile.n} industry peers` : `업종 ${co.percentile.n}개사 내 백분위`}{#if co.eco.industryRank != null} · {lang === 'en' ? `rank ${co.eco.industryRank}` : `${co.eco.industryRank}위`}{/if}
-						</div>
-						{#each co.percentile.metrics as m}
-							{@const top = Math.max(1, 100 - (m.p ?? 0))}
-							<div class="gePctRow">
-								<span class="gePctName">{txc(m, lang)}</span>
-								<span class="gePctVal mono">{fmtNum(m.v, m.unit)}</span>
-								<span class="gePctRank mono">{lang === 'en' ? 'top ' : '상위 '}{top}%</span>
-								{#if m.band}
-									<div class="gePctCurve"><DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} /></div>
-								{/if}
-							</div>
-						{/each}
-					</div>
-				{/if}
 				<div class="geCred">
 					<span class="geCredK">{lang === 'en' ? 'credit' : '신용'}</span>
 					<b class="tCredit mono">{co.credit.grade}</b>
@@ -115,21 +104,46 @@
 			</div>
 		</div>
 
-		<!-- 아래: 등급 기준(주석) -->
+		<!-- 아래: 등급 기준 — 각 축 아래에 그 축 지표의 업종 분포곡선 + 회사 위치. -->
 		<div class="geCriteria">
-			<div class="geCrHead">{lang === 'en' ? 'Grade criteria' : '등급 기준'}</div>
+			<div class="geCrHead">
+				{lang === 'en' ? 'Grade criteria' : '등급 기준'}{#if hasPct && pct} · {lang === 'en' ? `vs ${pct.n} peers` : `업종 ${pct.n}개사 내 위치`}{#if co.eco.industryRank != null} ({co.eco.industryRank}{lang === 'en' ? '' : '위'}){/if}{/if}
+			</div>
 			<div class="geCrGrid">
 				{#each co.grades as g (g.key)}
 					{@const scale = GRADE_SCALE[g.key] || []}
 					{@const guide = GRADE_GUIDE[g.key]}
+					{@const ms = axisMetrics(g.key)}
 					<div class="geCr">
 						<span class="geCrLabel">{txc(g, lang)}</span>
+						{#each ms as m}
+							<div class="geMx">
+								<span class="geMxName">{txc(m, lang)}</span>
+								<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
+								<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
+								{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
+							</div>
+						{/each}
 						{#if guide}<div class="geCrWhat">{lang === 'en' ? guide.en.what : guide.kr.what}</div>{/if}
 						<div class="geLadder">
 							{#each scale as step}<span class={'geStep' + (step === g.v ? ' on' : '')}>{step}</span>{/each}
 						</div>
 					</div>
 				{/each}
+				{#if effMetrics.length}
+					<div class="geCr">
+						<span class="geCrLabel">{lang === 'en' ? 'Efficiency' : '효율성'}</span>
+						{#each effMetrics as m}
+							<div class="geMx">
+								<span class="geMxName">{txc(m, lang)}</span>
+								<span class="geMxVal mono">{fmtNum(m.v, m.unit)}</span>
+								<span class="geMxRank mono">{lang === 'en' ? 'top ' : '상위 '}{Math.max(1, 100 - (m.p ?? 0))}%</span>
+								{#if m.band}<DistCurve band={m.band} value={m.v} p={m.p ?? 50} unit={m.unit} {lang} />{/if}
+							</div>
+						{/each}
+						<div class="geCrWhat">{lang === 'en' ? 'Asset activity — turnover & cash cycle' : '자산 활동성 — 자산회전율·현금전환주기'}</div>
+					</div>
+				{/if}
 			</div>
 			<div class="geNote">
 				{lang === 'en'
@@ -278,41 +292,32 @@
 		line-height: 1.5;
 		margin-top: 10px;
 	}
-	/* 실측 지표 — 업종 백분위(co.percentile, 실데이터·정확한 숫자) */
-	.gePct {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
-	.gePctHead {
-		font-size: 10px;
-		font-weight: 700;
-		color: var(--dl-ink-dim, #5b6473);
-	}
-	.gePctRow {
+	/* 등급기준 — 각 축 지표 행(이름·값·상위% + 분포곡선) */
+	.geMx {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: baseline;
-		gap: 3px 8px;
+		gap: 1px 6px;
+		margin: 2px 0 1px;
 	}
-	.gePctName {
-		font-size: 10.5px;
+	.geMxName {
+		font-size: 10px;
 		font-weight: 600;
 	}
-	.gePctVal {
-		font-size: 10.5px;
-		font-variant-numeric: tabular-nums;
-		color: var(--dl-ink, #c8cfdb);
-	}
-	.gePctRank {
+	.geMxVal {
 		font-size: 10px;
+		color: var(--dl-ink, #c8cfdb);
+		font-variant-numeric: tabular-nums;
+	}
+	.geMxRank {
+		font-size: 9px;
 		margin-left: auto;
 		color: var(--dl-ink-dim, #5b6473);
 		font-variant-numeric: tabular-nums;
 	}
-	.gePctCurve {
+	.geMx :global(.dc) {
 		flex-basis: 100%;
-		margin: 1px 0 3px;
+		margin-top: 1px;
 	}
 	.geCred {
 		display: flex;
