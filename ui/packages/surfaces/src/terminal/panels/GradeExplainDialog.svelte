@@ -18,8 +18,8 @@
 
 	const tcls = (t: string) =>
 		(({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
-	// 등급 톤 → 막대 색(좋음→나쁨). 분포 막대를 색으로 즉시 읽히게 한다.
-	const TONE_COL: Record<string, string> = { up: '#3fb950', good: '#2ea043', neutral: '#8b949e', warn: '#d29922', down: '#f85149' };
+	// 등급 톤 → 막대 색. ★터미널 기존 토큰만 사용(신규 색 금지) — --up/good/warn/dn 은 .tUp 등과 동일 팔레트.
+	const TONE_COL: Record<string, string> = { up: 'var(--up)', good: 'var(--good)', neutral: 'var(--dim)', warn: 'var(--warn)', down: 'var(--dn)' };
 
 	const vd = $derived(co.verdict);
 	const pct = $derived(co.percentile);
