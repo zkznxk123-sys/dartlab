@@ -64,8 +64,38 @@
 				</div>
 			</div>
 
-			<!-- 우: 왜 이 등급(근거) -->
+			<!-- 우: 왜 이 등급(근거) — 실측 지표(업종 백분위) + 원수치 + 신용 -->
 			<div class="geWhy">
+				{#if co.percentile && co.percentile.metrics.length}
+					<div class="gePct">
+						<div class="gePctHead">
+							{lang === 'en' ? `vs ${co.percentile.n} industry peers` : `업종 ${co.percentile.n}개사 내 백분위`}{#if co.eco.industryRank != null} · {lang === 'en' ? `rank ${co.eco.industryRank}` : `${co.eco.industryRank}위`}{/if}
+						</div>
+						{#each co.percentile.metrics as m}
+							{@const top = Math.max(1, 100 - (m.p ?? 0))}
+							<div class="gePctRow">
+								<span class="gePctName">{txc(m, lang)}</span>
+								<span class="gePctVal mono">{m.unit === '%' && m.v != null ? m.v.toFixed(1) + '%' : ''}</span>
+								<span class="gePctBar"><i style={`width:${m.p ?? 0}%`}></i></span>
+								<span class="gePctRank mono">{lang === 'en' ? 'top ' : '상위 '}{top}%</span>
+							</div>
+						{/each}
+					</div>
+				{/if}
+				<div class="geCells">
+					{#each co.analysis.tracks as t}
+						<div class="geCell">
+							<span class={'geCk ' + tcls(t.tone)}>{txc(t, lang)}</span>
+							<b>{tx(t.verdict, lang)}</b>
+						</div>
+					{/each}
+				</div>
+				<div class="geCred">
+					<span class="geCredK">{lang === 'en' ? 'credit' : '신용'}</span>
+					<b class="tCredit mono">{co.credit.grade}</b>
+					<span class="geCredX">{lang === 'en' ? 'health' : '건전도'} <b class="mono">{co.credit.healthScore}/100</b></span>
+					<span class="geCredX">PD <b class="mono">{co.credit.pd}</b></span>
+				</div>
 				{#if vd.strengths.length}
 					<div class="geGroup">
 						<span class="geGl tUp">{lang === 'en' ? 'Strengths' : '강점'}</span>
@@ -78,14 +108,6 @@
 						{#each vd.concerns as c}<span class="geTag dn">{txc(c, lang)}</span>{/each}
 					</div>
 				{/if}
-				<div class="geCells">
-					{#each co.analysis.tracks as t}
-						<div class="geCell">
-							<span class={'geCk ' + tcls(t.tone)}>{txc(t, lang)}</span>
-							<b>{tx(t.verdict, lang)}</b>
-						</div>
-					{/each}
-				</div>
 			</div>
 		</div>
 
@@ -110,8 +132,8 @@
 			</div>
 			<div class="geNote">
 				{lang === 'en'
-					? '※ The composite verdict uses 5 bands plus a continuous 0–100 score (top). Audit risk (3 tiers) and credit dCR (14 bands) are separate scales. A grade is an assessment with criteria — not a buy/sell signal.'
-					: '※ 종합 판정은 5밴드 + 연속 0~100 점수(상단). 감사위험(3단)·신용 dCR(14단)은 별도 스케일. 등급은 기준에 따른 판정이며 매수/매도 신호가 아니다.'}
+					? '※ "—" means that figure is absent from this company’s filings (not filled with 0). The composite verdict uses 5 bands plus a continuous 0–100 score (top). Audit risk (3 tiers) and credit dCR (14 bands) are separate scales. A grade is an assessment with criteria — not a buy/sell signal.'
+					: '※ "—" 는 해당 수치가 이 회사 공시에 없다는 뜻(0으로 채우지 않음). 종합 판정은 5밴드 + 연속 0~100 점수(상단). 감사위험(3단)·신용 dCR(14단)은 별도 스케일. 등급은 기준에 따른 판정이며 매수/매도 신호가 아니다.'}
 			</div>
 		</div>
 	</div>
@@ -287,5 +309,70 @@
 		color: var(--dl-ink-dim, #5b6473);
 		line-height: 1.5;
 		margin-top: 10px;
+	}
+	/* 실측 지표 — 업종 백분위(co.percentile, 실데이터·정확한 숫자) */
+	.gePct {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.gePctHead {
+		font-size: 10px;
+		font-weight: 700;
+		color: var(--dl-ink-dim, #5b6473);
+	}
+	.gePctRow {
+		display: grid;
+		grid-template-columns: 64px 52px 1fr 52px;
+		align-items: center;
+		gap: 7px;
+	}
+	.gePctName {
+		font-size: 10.5px;
+		font-weight: 600;
+	}
+	.gePctVal {
+		font-size: 10.5px;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		color: var(--dl-ink, #c8cfdb);
+	}
+	.gePctBar {
+		height: 6px;
+		border-radius: 3px;
+		background: rgba(148, 163, 184, 0.12);
+		overflow: hidden;
+	}
+	.gePctBar i {
+		display: block;
+		height: 100%;
+		background: var(--color-dl-primary, #ea4647);
+		opacity: 0.8;
+	}
+	.gePctRank {
+		font-size: 10px;
+		text-align: right;
+		color: var(--dl-ink-dim, #5b6473);
+		font-variant-numeric: tabular-nums;
+	}
+	.geCred {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 10.5px;
+		padding-top: 2px;
+		border-top: 1px dashed var(--dl-line, #1b2130);
+	}
+	.geCredK {
+		font-size: 10px;
+		color: var(--dl-ink-dim, #5b6473);
+	}
+	.geCredX {
+		font-size: 10px;
+		color: var(--dl-ink-dim, #5b6473);
+		font-variant-numeric: tabular-nums;
+	}
+	.geCredX b {
+		color: var(--dl-ink, #c8cfdb);
 	}
 </style>
