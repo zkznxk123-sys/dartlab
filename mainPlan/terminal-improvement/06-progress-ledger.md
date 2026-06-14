@@ -30,6 +30,13 @@
 
 **C vs D 핵심 충돌 해소**: 알림은 *기기독립 신선도(Tier 1) 핵심 + 정직 라벨 재방문 델타(Tier 2) 선택*으로 분리 — D 의 killer 가치를 C 의 확신오정렬 위험 없이 흡수. reverseDCF 는 *표시(연결)하되 함수승격 안 함* — D 의 surfacing 가치 + C 의 라벨갈이 KILL 양립.
 
+**Wave 3 — 완전성 비평(v0.2 "완벽 완성" 라운드, 운영자 코드 실측 동반)**: ★차단 결함 3 + 누락 개념 1 + 사실 정밀화 2 를 정정.
+- **C1(치명, 정정)**: 워치리스트 데이터 계약이 비어 있었고 "신규 포트 0" 주장이 *틀림*. `FilingPort.regular/nonRegular` = per-code, `syncStatus` = 데이터셋 경로 단위 → 회사별 공시 델타 불가. 진짜 소스 = `dart/allFilings/recent.parquet`(전종목 1 파일·EOD, 실재)를 cross-company 로 읽는 **신규 FilingPort 메서드 1** 필요. → 02 §5 데이터 계약 신설·"신규 포트 0" 철회("거의 공짜").
+- **C2(차단, 정정)**: 섹션 점프 타깃이 *주소 불가능*(RightStack 패널 id 0) + 3 메커니즘 분산 + 모호(손익=RightStack IS vs FinFullscreen). → 03 §1 토큰→타깃 매핑표 + 식별자 부여 = Phase 2 절반.
+- **C3(차단, 정정)**: Phase AC 가 추상적 → 05 §1 정량 AC(워치 30 사 fetch ≤ 1·DOM "알림" 문자열 0 등).
+- **누락 개념(정정)**: `recentCompanies`(전역 계약 키 기존재·ui/web 사용) 미언급 → 02 §7 경계(자동 이력 ≠ 수동 큐레이션, 흡수 안 함).
+- **사실 정밀화**: W1 `priceEvents` = 터미널 CenterStack 실재(비평 과오류) → PriceChart `events` prop 정밀화. W2 `localStoragePort()` = export 포트 소비지 storage 배선 아님 → 명확화.
+
 ---
 
 ## 3. 문서 상태
@@ -39,10 +46,10 @@
 | README | v0.2 — "기존 터미널 개선" 틀(추가할 개념 A + 박을 개념 B)·로컬/퍼블릭·문서지도·정직척추 |
 | 00-product-vision | v0.2 — 문제(묶는 층 결손)·사용자·monitor 루프·공시워치≠가격워치·ROI |
 | 01-bloomberg-concept-gap | v0.2 — 원시요소 카탈로그·"묶는 층 vs 분석" 가설·리테일 절제선 |
-| 02-watchlist-disclosure-watch | v0.2 — ★핵심. 3 층 구조·정직 가드·storage 계약(로컬 배선)·거처·비목표 |
-| 03-command-and-architecture | v0.2 — 섹션점프·포트 실태(로컬/퍼블릭)·non-encroachment·instrument DEFER·★§7 2 타깃 |
+| 02-watchlist-disclosure-watch | v0.2 — ★핵심. 3 층·정직 가드·storage 계약·**§5 데이터 계약**·거처·비목표(recentCompanies 경계) |
+| 03-command-and-architecture | v0.2 — 섹션점프(**토큰 매핑표**)·포트 실태(로컬/퍼블릭)·non-encroachment·instrument DEFER·§7 2 타깃 |
 | 04-killlist-and-non-goals | v0.2 — KILL/DEFER 판정표·정체성 가드·덕지덕지 차단 |
-| 05-scope-phasing-guardrails | v0.1 — Phase 0-3·정직 가드·성공기준·착수 게이트 |
+| 05-scope-phasing-guardrails | v0.2 — Phase 0-3·**정량 AC**·정직 가드·성공기준·착수 게이트 |
 | 06-progress-ledger | v0.2 — 본 문서 |
 
 ---
