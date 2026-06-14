@@ -28,9 +28,10 @@
 		co: Company;
 		lang: Lang;
 		hosts: TerminalHosts;
+		repoUrl: string; // 셸 brand repo URL — 공시뷰어 오버레이(임베드 이슈링크)로 관통.
 		onPick: (code: string) => void;
 	}
-	let { co, lang, hosts, onPick }: Props = $props();
+	let { co, lang, hosts, repoUrl, onPick }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
@@ -511,6 +512,7 @@
 	<ViewerOverlay
 		code={co.code}
 		studio={hosts.viewerStudio}
+		{repoUrl}
 		onclose={() => (viewerOpen = false)}
 	/>
 {/if}

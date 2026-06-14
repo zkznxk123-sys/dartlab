@@ -9,6 +9,7 @@ export interface ViewerStudioHostProps {
 	vs: string[];
 	embedded: boolean;
 	basePath?: string; // 셸 base 경로(에셋 — 임베드 뷰어 아바타) — ViewerOverlay 가 runtime.env.basePath 주입.
+	repoUrl?: string; // 이슈 링크 repo URL — 셸 brand(links.repo)에서 ViewerOverlay 가 주입(임베드 경로도 관통).
 	tier?: 'public' | 'local'; // export tier 라벨(03 §7) — ViewerOverlay 가 runtime.env.kind 로 주입.
 	onNavigate: (code: string, vs: string[]) => void;
 	onclose: () => void;

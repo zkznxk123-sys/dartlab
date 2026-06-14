@@ -9,10 +9,12 @@
 	let {
 		code,
 		studio,
+		repoUrl = '',
 		onclose
 	}: {
 		code: string;
 		studio: TerminalHosts['viewerStudio'];
+		repoUrl?: string; // 셸 brand repo URL — 컴포넌트 임베드 ViewerStudio 의 이슈 링크용(미주입 시 깨진 /issues/new 방지).
 		onclose: () => void;
 	} = $props();
 	const rt = useDartLabRuntime();
@@ -49,7 +51,7 @@
 			<div class="dlViewerLoad"><span class="dlViewerSpin"></span>공시뷰어 여는 중…</div>
 		{:then m}
 			{@const Studio = m.default}
-			<Studio code={view.code} vs={view.vs} embedded basePath={rt.env.basePath} tier={rt.env.kind === 'local' ? 'local' : 'public'} {onNavigate} {onclose} />
+			<Studio code={view.code} vs={view.vs} embedded basePath={rt.env.basePath} {repoUrl} tier={rt.env.kind === 'local' ? 'local' : 'public'} {onNavigate} {onclose} />
 		{:catch}
 			<div class="dlViewerLoad">뷰어 모듈 로드 실패 — 네트워크 확인 후 다시 열어주세요.</div>
 		{/await}

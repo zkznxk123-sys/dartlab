@@ -29,4 +29,6 @@
 
 <svelte:head><title>Viewer · {code} — dartlab local</title></svelte:head>
 
-<ViewerStudio {code} {vs} {embedded} {onNavigate} basePath={base} repoUrl={localLinks.repo} />
+<!-- tier="local": 이 라우트는 local 셸 전용 — 터미널 오버레이 iframe(terminalEmbed=1)으로 열려도 full 티어
+	 유지(AI 드로어 노출 + ExportDrawer 완전판). tier 기본값 'public' 이 local 을 덮던 drift 차단. -->
+<ViewerStudio {code} {vs} {embedded} tier="local" {onNavigate} basePath={base} repoUrl={localLinks.repo} />
