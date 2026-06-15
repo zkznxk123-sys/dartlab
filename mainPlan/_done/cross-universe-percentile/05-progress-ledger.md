@@ -1,6 +1,27 @@
 # 05 — 진행 원장
 
-상태: **구현 착수 (2026-06-15)** · 운영자 go(goal) 수신 → 완성형 한 빌드
+상태: **✅ 구현 완료 (2026-06-15)** · 커밋 5건 master · push 만 잔여(다른 세션/운영자 명시 승인) · `_done` 이관
+
+## as-built (PRD 대비 진화)
+완성형 한 빌드 후 운영자 눈검수 반복으로 표현이 진화 — PRD의 "막대 띠 + DistCurve 드릴다운"을 넘어섰다:
+- **거처**: `ui/packages/surfaces/src/terminal/` — `panels/PercentileCrossDialog.svelte`(신규) + `lib/engine.ts`(`percentileIn`·`buildFundMetrics`·`buildQualShares`·`buildPriceStats`·`histOf`·`quantileBand`) + `lib/types.ts`(`Universe`·`UniversePercentile`·`CategoricalShare`·`PriceStat`·`Hist`) + `panels/DistCurve.svelte`(히스토그램+핀+neutral) + `RightStack.svelte`(상세보기 버튼·동적 import) + `TerminalSurface.svelte`(prop).
+- **1차 시각 = 실도수 히스토그램**(막대 띠/5점곡선 폐기): 동종사 전체 값 배열 robust(p2~p98) 22빈, 봉우리·gap·왜도 그대로. 박스/KDE 기각(다봉성 은폐/bandwidth 자의).
+- **회사 위치 = ▼ 핀(꼭지)** + 백분위 톤색. **하단 0라인 방향 색띠**(초록=좋은 방향, lowerBetter 반전, 가격 제외).
+- 정성=등급레벨 분포 스택바(동급비중), 가격=중립 히스토그램 별격자, 값=지표명 인라인, 컬럼헤더 sticky, dim 글자 밝게(#aeb6c2), 폭 720.
+- **prebuild 0 · 새 데이터 0**: 전부 브라우저 라이브(다이얼로그 open 시). 핫패스(co.percentile)는 `withHist=false`로 콜드비용 0. HF/cron/parquet 무관.
+- 정직 가드 유지: 판정 0(방향 색띠=지표 의미지 회사 판정 아님)·결손 '—'·n<10 숨김·유니버스 출처칩·cross-sector caveat·소속지수 BLOCKED.
+
+## 커밋 (master, 미push)
+`4cc6f2f83` 신설 → `7244cb103` 분포곡선 1차화 → `74b1c3ef1` baseline·값인라인·sticky → `523169d5c` 실도수 히스토그램 → `88d97bae2` 방향 색띠·핀.
+
+## NEXT
+- **push 만 잔여** — UI 변경이라 운영자 명시 승인("푸시해") 후 다른 세션/운영자가 origin/master 반영. landing dev(5173) HMR 반영 상태.
+- 미해결(완성형 밖): 소속지수(구성종목 멤버십 데이터 부재 BLOCKED) · strip/beeswarm(소표본 유니버스 개별점, 선택적).
+
+---
+## (옛 기록)
+
+상태: ~~구현 착수 (2026-06-15)~~ · 운영자 go(goal) 수신 → 완성형 한 빌드
 
 ## 결정 로그
 - 2026-06-15 **구현 토론(3렌즈 병렬: 정보설계·터미널UX일관성·적대정직가드) + 코드 실측**. 확정 표현:
