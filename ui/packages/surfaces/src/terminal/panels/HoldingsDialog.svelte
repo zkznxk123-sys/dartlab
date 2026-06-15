@@ -4,7 +4,7 @@
 	// 정직: 매수/매도·목표주가·인과 금지. 결손(null)은 0 으로 뭉개지 않고 '—'/분리. parentNet 미상이면 contribShare 생략.
 	import type { Company, Lang } from '../lib/types';
 	import type { InvestmentRow, InvestmentTrendYear } from '@dartlab/ui-contracts';
-	import { scaleSqrt } from 'd3-scale';
+	import { scaleLog } from 'd3-scale';
 	import { buildHoldingsModel, type ListedLookup, type HoldingTier, type HoldingsRow } from '../lib/holdings';
 	import { fmtKRW } from '../lib/engine';
 
@@ -43,44 +43,42 @@
 		return c.length > n ? c.slice(0, n - 1) + '…' : c;
 	};
 
-	// 위계 맵 packed 레이아웃 — 결정론(physics 0) 레인별 노드 배치. 레인 = 회계 경계, 노드 = 출자처.
+	// 출자 관계망 — 결정론 radial(physics 0, dartwings 구조 복원): 중앙=본체, 동심원 거리=지분 위계,
+	// parent→child 엣지(굵기=지분%), 노드 크기=장부가(log — 1000배 편차 변별), 색=이익기여 부호·강도.
 	let mapW = $state(0);
-	const sizeScale = $derived(scaleSqrt().domain([0, Math.max(m.maxBook, 1)]).range([5, 24]));
+	let hoverName = $state<string | null>(null);
+	const MAP_H = 620;
 	const TIER_ORDER: HoldingTier[] = ['consolidated', 'equity', 'simple', 'unknown'];
-	const mapLanes = $derived.by(() => {
+	const RING: Record<HoldingTier, number> = { consolidated: 0.4, equity: 0.66, simple: 0.92, unknown: 0.92 };
+	const edgeW = (pct: number | null) => (pct == null ? 0.5 : 0.5 + (pct / 100) * 2.5);
+	const radial = $derived.by(() => {
 		const W = mapW;
-		if (!W) return { lanes: [] as { key: HoldingTier; count: number; book: number; headerY: number; nodes: { h: HoldingsRow; cx: number; cy: number; r: number }[] }[], totalH: 0 };
-		const headerH = 22;
-		const pad = 9;
-		const gap = 6;
-		let y = 0;
-		const lanes = [];
+		if (!W) return null;
+		const H = MAP_H;
+		const cx0 = W / 2;
+		const cy0 = H / 2;
+		const Rbase = Math.min(W, H) / 2 - 56;
+		const posBooks = m.rows.map((r) => r.bookValue).filter((v): v is number => v != null && v > 0);
+		const bMin = Math.max(posBooks.length ? Math.min(...posBooks) : 1, 1e7);
+		const size = scaleLog().domain([bMin, Math.max(m.maxBook, bMin * 10)]).range([5, 30]).clamp(true);
+		const maxEarn = Math.max(...m.rows.map((r) => Math.abs(r.equityEarn ?? 0)), 1);
+		const nodes: { h: HoldingsRow; cx: number; cy: number; r: number; ei: number; ang: number }[] = [];
+		const ringsOut: { key: HoldingTier; R: number }[] = [];
 		for (const key of TIER_ORDER) {
-			const items = m.rows.filter((h) => h.tier === key);
-			if (!items.length) continue;
-			const headerY = y;
-			y += headerH;
-			let x = pad;
-			let rowMax = 0;
-			let top = y;
-			const nodes = [];
-			for (const h of items) {
-				const r = sizeScale(h.bookValue ?? 0);
-				const d = r * 2;
-				if (x + d + pad > W) {
-					x = pad;
-					top += rowMax + gap;
-					rowMax = 0;
-				}
-				nodes.push({ h, cx: x + r, cy: top + r, r });
-				x += d + gap;
-				if (d > rowMax) rowMax = d;
-			}
-			y = top + rowMax + pad;
-			lanes.push({ key, count: items.length, book: items.reduce((a, h) => a + (h.bookValue ?? 0), 0), headerY, nodes });
-			y += gap;
+			const items = m.rows.filter((h) => h.tier === key); // 이미 장부가 desc
+			const n = items.length;
+			if (!n) continue;
+			const R = RING[key] * Rbase;
+			ringsOut.push({ key, R });
+			const cap = Math.max(Math.floor((2 * Math.PI * R) / 28), 1); // 균등각 수용량 — 초과시 2겹
+			items.forEach((h, i) => {
+				const ang = -Math.PI / 2 + (2 * Math.PI * (i + 0.5)) / n;
+				const RR = R + (n > cap ? (i % 2) * 22 : 0);
+				nodes.push({ h, cx: cx0 + RR * Math.cos(ang), cy: cy0 + RR * Math.sin(ang), r: size(h.bookValue ?? bMin), ei: Math.min(Math.abs(h.equityEarn ?? 0) / maxEarn, 1), ang });
+			});
 		}
-		return { lanes, totalH: y };
+		const labelSet = new Set(m.rows.slice(0, 8).map((h) => h.name)); // 장부가 상위 8 상시 라벨(나머지는 호버)
+		return { W, H, cx0, cy0, nodes, ringsOut, labelSet };
 	});
 
 	$effect(() => {
@@ -125,28 +123,41 @@
 				</div>
 			</div>
 
-			<!-- 지배력 위계 맵 — 관계 구조 시각화(radial 폐기, 결정론 레인 packed). 아래 표 = 정밀 수치. -->
+			<!-- 출자 관계망 — 중앙 본체 + 방사형 엣지 + 동심원 지분 위계(dartwings 구조, physics 0 결정론). 노드 호버 → 아래 표 해당 행 강조. -->
 			<div class="hdMapSec">
-				<div class="hdMapTitle dim">{T('지배력 위계 맵 — 크기=장부가 · 색=이익기여(녹 흑자 / 적 적자 / 회 미상) · 실선=상장(클릭 이동) · ★굵은테두리=경영참여', 'Control hierarchy — size=book · color=earnings(green/red) · solid ring=listed(click) · bold ring=intent')}</div>
+				<div class="hdMapTitle dim">{T('출자 관계망 — 중앙=본체 · 거리=지분 위계(안 연결≥50 / 중 지분법 20~50 / 밖 단순<20) · 크기=장부가(log) · 색=이익기여(녹 흑자 / 적 적자 / 회 미상) · 선=지분% · 실선/채움=상장(클릭 이동) · ★=경영참여', 'Holdings network — center=parent · ring=stake tier · size=book(log) · color=equity earnings · edge=stake% · solid=listed(click) · ★=intent')}</div>
 				<div class="hdMapCanvas" bind:clientWidth={mapW}>
-					{#if mapW}
-						<svg width={mapW} height={mapLanes.totalH} role="img" aria-label={T('출자 위계 맵', 'holdings hierarchy map')}>
-							{#each mapLanes.lanes as lane (lane.key)}
-								<text class="hdLaneLab" x="3" y={lane.headerY + 15}>{T(TIER_LABEL[lane.key].kr, TIER_LABEL[lane.key].en)} · {lane.count}{T('사', '')} · {krw(lane.book)}</text>
-								{#each lane.nodes as n (n.h.name + '@' + n.cx)}
-									{@const tt = n.h.name + ' · ' + (n.h.stakePct != null ? n.h.stakePct.toFixed(1) + '%' : '—') + ' · ' + T('장부', 'book') + ' ' + krw(n.h.bookValue) + (n.h.marketStake != null ? ' · ' + T('시가', 'mkt') + ' ' + krw(n.h.marketStake) : '') + (n.h.equityEarn != null ? ' · ' + T('이익기여', 'earn') + ' ' + (n.h.equityEarn < 0 ? '-' : '') + fmtKRW(Math.abs(n.h.equityEarn)) : '')}
-									{#if n.h.code}
-										<!-- 상장 해소 노드 = 클릭/키보드로 종목 이동 (role=button·tabindex 정적 보장). -->
-										<circle class="hdMapNode click" cx={n.cx} cy={n.cy} r={n.r} fill={signColor(n.h.equityEarn)} fill-opacity="0.9" stroke="var(--txt)" stroke-width={n.h.intent ? 2.2 : 1} role="button" tabindex={0} aria-label={n.h.name} onclick={() => onPick(n.h.code!)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(n.h.code!); } }}><title>{tt}</title></circle>
-									{:else}
-										<circle class="hdMapNode" cx={n.cx} cy={n.cy} r={n.r} fill={signColor(n.h.equityEarn)} fill-opacity="0.45" stroke="var(--bd)" stroke-width={n.h.intent ? 2.2 : 1} stroke-dasharray="2 2" aria-label={n.h.name}><title>{tt}</title></circle>
-									{/if}
-									{#if n.r >= 13}<text class="hdMapNodeLab" x={n.cx} y={n.cy + 3} text-anchor="middle">{clip(n.h.name, 6)}</text>{/if}
-								{/each}
+					{#if radial}
+						<svg width={radial.W} height={radial.H} role="img" aria-label={T('출자 관계망', 'holdings network')}>
+							{#each radial.ringsOut as ring (ring.key)}
+								<circle cx={radial.cx0} cy={radial.cy0} r={ring.R} fill="none" stroke="var(--bd)" stroke-width="1" stroke-dasharray="2 5" opacity="0.45" />
+								<text class="hdRingLab" x={radial.cx0} y={radial.cy0 - ring.R - 5} text-anchor="middle">{T(TIER_LABEL[ring.key].kr, TIER_LABEL[ring.key].en)}</text>
 							{/each}
+							{#each radial.nodes as n (n.h.name + '@e')}
+								<line x1={radial.cx0} y1={radial.cy0} x2={n.cx} y2={n.cy} stroke={hoverName === n.h.name ? 'var(--amber)' : 'var(--bd)'} stroke-width={edgeW(n.h.stakePct)} stroke-opacity={hoverName === n.h.name ? 0.95 : hoverName ? 0.1 : 0.3} stroke-dasharray={n.h.stakePct == null ? '2 2' : 'none'} />
+							{/each}
+							{#each radial.nodes as n (n.h.name + '@n')}
+								{@const tt = n.h.name + ' · ' + (n.h.stakePct != null ? n.h.stakePct.toFixed(1) + '%' : '—') + ' · ' + T('장부', 'book') + ' ' + krw(n.h.bookValue) + (n.h.marketStake != null ? ' · ' + T('시가', 'mkt') + ' ' + krw(n.h.marketStake) : '') + (n.h.equityEarn != null ? ' · ' + T('이익기여', 'earn') + ' ' + (n.h.equityEarn < 0 ? '-' : '') + fmtKRW(Math.abs(n.h.equityEarn)) : '')}
+								{#if n.h.code}
+									<circle class="hdNode click" cx={n.cx} cy={n.cy} r={n.r} fill={signColor(n.h.equityEarn)} fill-opacity={hoverName && hoverName !== n.h.name ? 0.2 : 0.5 + 0.45 * n.ei} stroke="var(--txt)" stroke-width={n.h.intent ? 2.4 : 1} role="button" tabindex={0} aria-label={n.h.name} onmouseenter={() => (hoverName = n.h.name)} onmouseleave={() => (hoverName = null)} onclick={() => onPick(n.h.code!)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(n.h.code!); } }}><title>{tt}</title></circle>
+								{:else}
+									<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+									<circle class="hdNode" cx={n.cx} cy={n.cy} r={n.r} fill={signColor(n.h.equityEarn)} fill-opacity={hoverName && hoverName !== n.h.name ? 0.15 : 0.4 + 0.4 * n.ei} stroke="var(--bd)" stroke-width={n.h.intent ? 2.4 : 1} stroke-dasharray="2 2" role="img" aria-label={n.h.name} onmouseenter={() => (hoverName = n.h.name)} onmouseleave={() => (hoverName = null)}><title>{tt}</title></circle>
+								{/if}
+							{/each}
+							{#each radial.nodes as n (n.h.name + '@l')}
+								{#if radial.labelSet.has(n.h.name) || hoverName === n.h.name}
+									<text class={'hdNodeLab' + (hoverName === n.h.name ? ' hl' : '')} x={n.cx + (n.r + 6) * Math.cos(n.ang)} y={n.cy + (n.r + 6) * Math.sin(n.ang) + 3} text-anchor={Math.cos(n.ang) >= 0 ? 'start' : 'end'}>{clip(n.h.name, 9)}</text>
+								{/if}
+							{/each}
+							<circle cx={radial.cx0} cy={radial.cy0} r="26" fill="var(--panel)" stroke="var(--amber)" stroke-width="2" />
+							<text class="hdParentLab" x={radial.cx0} y={radial.cy0 + 3} text-anchor="middle">{clip(co.name.kr, 7)}</text>
 						</svg>
 					{/if}
 				</div>
+				{#if m.counts.listed === 0}
+					<div class="hdMapNote dim">{T('상장 피출자사 0 — 시가 환산·노드 클릭 이동 해당 없음(전부 비상장 종속). 색=이익기여 근사(확정손익 아님).', 'No listed investees — market value & click-through N/A (all unlisted). Color = approx equity earnings (not realized P/L).')}</div>
+				{/if}
 			</div>
 
 			{#if trend.length > 1}
@@ -180,7 +191,7 @@
 					</thead>
 					<tbody>
 						{#each m.rows as h, i (h.name + '#' + i)}
-							<tr class={h.tier === 'consolidated' ? 'finKey' : ''}>
+							<tr class={(h.tier === 'consolidated' ? 'finKey ' : '') + (hoverName === h.name ? 'hlRow' : '')}>
 								<td class="finAcct" title={h.purpose}>
 									{#if h.code}
 										<button type="button" class="hdLink" onclick={() => onPick(h.code!)}>{h.name}</button>
@@ -355,27 +366,47 @@
 		border: 1px solid var(--bd);
 		border-radius: 3px;
 		padding: 2px;
-		max-height: 300px;
-		overflow-y: auto;
+		display: flex;
+		justify-content: center;
 	}
-	.hdLaneLab {
-		font-size: 10.5px;
-		font-weight: 700;
-		fill: var(--txt);
+	.hdNode {
+		transition: fill-opacity 0.12s;
 	}
-	.hdMapNode {
-		transition: fill-opacity 0.1s;
-	}
-	.hdMapNode.click {
+	.hdNode.click {
 		cursor: pointer;
 	}
-	.hdMapNode.click:hover {
-		fill-opacity: 1;
+	.hdNode.click:hover {
 		stroke: var(--amber, #fb923c);
 	}
-	.hdMapNodeLab {
-		font-size: 8px;
-		fill: var(--dl-bg-deep, #05070d);
+	.hdNodeLab {
+		font-size: 9px;
+		fill: var(--txt);
+		paint-order: stroke;
+		stroke: var(--dl-bg-base, #05070d);
+		stroke-width: 2.5px;
+		pointer-events: none;
+	}
+	.hdNodeLab.hl {
+		fill: var(--amber, #fb923c);
 		font-weight: 700;
+	}
+	.hdRingLab {
+		font-size: 8.5px;
+		fill: var(--dimmer, #6b7280);
+		font-weight: 600;
+	}
+	.hdParentLab {
+		font-size: 10px;
+		fill: var(--txt);
+		font-weight: 700;
+		pointer-events: none;
+	}
+	.hdMapNote {
+		font-size: 9px;
+		margin-top: 5px;
+		line-height: 1.4;
+	}
+	.hdTable tbody tr.hlRow {
+		background: rgba(251, 146, 60, 0.13);
 	}
 </style>
