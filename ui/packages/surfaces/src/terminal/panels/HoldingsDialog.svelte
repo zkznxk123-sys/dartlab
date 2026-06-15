@@ -62,6 +62,21 @@
 	const m = $derived(buildHoldingsModel(sel?.label ?? year, selRows, lookupListed, isLatest ? parentMktcap : null, isLatest ? parentNet : null, isLatest));
 	// 회사 전환 시 기간/재생 리셋
 	$effect(() => { void co.code; periodIdx = -1; playing = false; });
+	const togglePlay = () => {
+		if (playing) { playing = false; return; }
+		if (selIdx >= timeline.length - 1) periodIdx = 0; // 끝이면 처음(과거)부터
+		playing = true;
+	};
+	// 재생 — 기간 자동 스텝(끝에서 정지). effect 본문 tracked read 는 playing/timeline 뿐(periodIdx 는 콜백 내부라 매 스텝 effect 재실행 안 함).
+	$effect(() => {
+		if (!playing || timeline.length === 0) return;
+		const id = setInterval(() => {
+			const cur = periodIdx < 0 ? timeline.length - 1 : periodIdx;
+			if (cur >= timeline.length - 1) { playing = false; return; }
+			periodIdx = cur + 1;
+		}, 900);
+		return () => clearInterval(id);
+	});
 
 	const TIER_LABEL: Record<HoldingTier, { kr: string; en: string; cls: string }> = {
 		consolidated: { kr: '연결', en: 'CONS', cls: 'tUp' },
@@ -174,6 +189,7 @@
 			{#if timeline.length > 1}
 				<!-- 공통 기간 컨트롤 — 관계망·표 탭 공유. 연도(각 연도 사업보고서 우선)/분기(보고된 것만) 토글 + 칩. -->
 				<div class="hdPeriodBar">
+					<button class={'hdPlay ' + (playing ? 'on' : '')} onclick={togglePlay} aria-label={T('재생 — 기간 자동 변화', 'play — auto-step periods')} title={T('재생 — 기간 자동 변화', 'play — auto-step periods')}>{playing ? '⏸' : '▶'}</button>
 					<span class="hdGran">
 						<button class={'hdGranBtn ' + (gran === 'year' ? 'on' : '')} onclick={() => (gran = 'year')}>{T('연도', 'Year')}</button>
 						<button class={'hdGranBtn ' + (gran === 'quarter' ? 'on' : '')} onclick={() => (gran = 'quarter')}>{T('분기', 'Qtr')}</button>
@@ -537,6 +553,26 @@
 	.hdPbNote {
 		font-size: 9px;
 	}
+	.hdPlay {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 20px;
+		border: 1px solid var(--bd);
+		border-radius: 3px;
+		background: none;
+		color: var(--dim);
+		font-size: 10px;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.hdPlay:hover,
+	.hdPlay.on {
+		color: var(--amber);
+		border-color: var(--amber);
+		background: rgba(245, 158, 11, 0.08);
+	}
 	.hdPane {
 		flex: 1;
 		min-height: 0;
@@ -671,7 +707,15 @@
 	}
 	.hdNode circle,
 	.hdNode rect {
-		transition: fill-opacity 0.12s;
+		/* 기간 전환·재생 시 노드가 미끄러지듯 이동(Chromium: cx/cy/r/x/y 트랜지션; 미지원 브라우저는 snap — 기능 동일). physics 0. */
+		transition: fill-opacity 0.12s, cx 0.5s ease, cy 0.5s ease, r 0.5s ease, x 0.5s ease, y 0.5s ease, width 0.5s ease, height 0.5s ease;
+	}
+	.hdNetCanvas line {
+		transition: x1 0.5s ease, y1 0.5s ease, x2 0.5s ease, y2 0.5s ease;
+	}
+	.hdNodeLab,
+	.hdNodeSub {
+		transition: x 0.45s ease, y 0.45s ease;
 	}
 	.hdLaneLab {
 		font-size: 10px;
