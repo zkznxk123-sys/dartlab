@@ -10,15 +10,42 @@ import type { Lang } from '../lib/types';
 export const ECON_INDICATOR = 'ECON';
 // 캔들 상승 #34d399 / 하락 #f0616f / 마커 amber #fb923c 와 충돌하지 않는 고정 팔레트.
 export const ECON_COLORS: Record<string, string> = {
+	// 한국 (ECOS)
 	USDKRW: '#60a5fa',
+	JPYKRW: '#5eead4',
+	EURKRW: '#7dd3fc',
 	BASE_RATE: '#c084fc',
 	CPI: '#f472b6',
 	EXPORT: '#a3e635',
+	EXPORT_PRICE: '#bef264',
+	IPI: '#fda4af',
 	CLI: '#2dd4bf',
-	DGS10: '#818cf8',
+	CSI: '#d8b4fe',
+	M2: '#fcd34d',
+	HOUSE_PRICE: '#f9a8d4',
+	PPI_SEMI: '#6ee7b7',
+	// 미국 (FRED)
 	FEDFUNDS: '#38bdf8',
+	DGS2: '#a5b4fc',
+	DGS10: '#818cf8',
+	DGS30: '#c4b5fd',
 	T10Y2Y: '#94a3b8',
+	T10Y3M: '#cbd5e1',
+	T10YIE: '#f0abfc',
 	CPIAUCSL: '#e879f9',
+	CPILFESL: '#f5d0fe',
+	PCEPI: '#ddd6fe',
+	UNRATE: '#fde68a',
+	PAYEMS: '#86efac',
+	INDPRO: '#99f6e4',
+	BAMLH0A0HYM2: '#fbcfe8',
+	BAA10Y: '#cffafe',
+	NFCI: '#e9d5ff',
+	DTWEXBGS: '#bae6fd',
+	SP500: '#93c5fd',
+	NASDAQCOM: '#a78bfa',
+	VIXCLS: '#fca5a5',
+	DCOILWTICO: '#fed7aa',
 	PCOPPUSDM: '#facc15'
 };
 

@@ -23,17 +23,45 @@ export interface MacroLatest {
 	spark: number[]; // 최근 ~1년 추세 (≤40점 다운샘플)
 }
 
-/** 화이트리스트 — 주가와 비교 가치가 큰 핵심 지표만 (덕지덕지 방지). MacroPort.listSeries() 의 정본 카탈로그. */
+/** 카탈로그 — 주가와 비교 가치가 큰 거시 지표 (HF observations 에 데이터가 실재하는 것만 노출).
+ *  MacroPort.listSeries() 정본. 한국(ECOS) → 미국(FRED) 순. ECON_MAX(3) 가 동시표시를 막아 카탈로그가 커도 차트는 깨끗. */
 export const MACRO_SERIES: MacroSeriesDef[] = [
+	// 한국 (ECOS)
 	{ id: 'USDKRW', src: 'ecos', kr: '원/달러', en: 'USD/KRW', unit: '원', digits: 0 },
+	{ id: 'JPYKRW', src: 'ecos', kr: '원/100엔', en: 'KRW/100JPY', unit: '원', digits: 1 },
+	{ id: 'EURKRW', src: 'ecos', kr: '원/유로', en: 'KRW/EUR', unit: '원', digits: 1 },
 	{ id: 'BASE_RATE', src: 'ecos', kr: '한은 기준금리', en: 'BOK rate', unit: '%', digits: 2 },
 	{ id: 'CPI', src: 'ecos', kr: '소비자물가 YoY', en: 'KR CPI YoY', unit: '%', yoy: true, digits: 1 },
 	{ id: 'EXPORT', src: 'ecos', kr: '수출 YoY', en: 'Exports YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'EXPORT_PRICE', src: 'ecos', kr: '수출물가 YoY', en: 'Export px YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'IPI', src: 'ecos', kr: '산업생산 YoY', en: 'KR IP YoY', unit: '%', yoy: true, digits: 1 },
 	{ id: 'CLI', src: 'ecos', kr: '경기선행지수', en: 'KR CLI', unit: 'pt', digits: 1 },
-	{ id: 'DGS10', src: 'fred', kr: '미국 10Y 금리', en: 'US 10Y', unit: '%', digits: 2 },
+	{ id: 'CSI', src: 'ecos', kr: '소비자심리', en: 'KR consumer sentiment', unit: 'pt', digits: 1 },
+	{ id: 'M2', src: 'ecos', kr: 'M2 YoY', en: 'KR M2 YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'HOUSE_PRICE', src: 'ecos', kr: '주택가격 YoY', en: 'KR house px YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_SEMI', src: 'ecos', kr: '반도체 PPI YoY', en: 'KR semi PPI YoY', unit: '%', yoy: true, digits: 1 },
+	// 미국 (FRED)
 	{ id: 'FEDFUNDS', src: 'fred', kr: '연준 기준금리', en: 'Fed funds', unit: '%', digits: 2 },
+	{ id: 'DGS2', src: 'fred', kr: '미 2년 금리', en: 'US 2Y', unit: '%', digits: 2 },
+	{ id: 'DGS10', src: 'fred', kr: '미 10년 금리', en: 'US 10Y', unit: '%', digits: 2 },
+	{ id: 'DGS30', src: 'fred', kr: '미 30년 금리', en: 'US 30Y', unit: '%', digits: 2 },
 	{ id: 'T10Y2Y', src: 'fred', kr: '미 장단기차(10Y-2Y)', en: 'US 10Y-2Y', unit: '%p', digits: 2 },
+	{ id: 'T10Y3M', src: 'fred', kr: '미 장단기차(10Y-3M)', en: 'US 10Y-3M', unit: '%p', digits: 2 },
+	{ id: 'T10YIE', src: 'fred', kr: '미 기대인플레(10Y)', en: 'US 10Y breakeven', unit: '%', digits: 2 },
 	{ id: 'CPIAUCSL', src: 'fred', kr: '미 CPI YoY', en: 'US CPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'CPILFESL', src: 'fred', kr: '미 근원CPI YoY', en: 'US core CPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PCEPI', src: 'fred', kr: '미 PCE YoY', en: 'US PCE YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'UNRATE', src: 'fred', kr: '미 실업률', en: 'US unemployment', unit: '%', digits: 1 },
+	{ id: 'PAYEMS', src: 'fred', kr: '미 고용 YoY', en: 'US payrolls YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'INDPRO', src: 'fred', kr: '미 산업생산 YoY', en: 'US IP YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'BAMLH0A0HYM2', src: 'fred', kr: '미 하이일드 스프레드', en: 'US HY spread', unit: '%p', digits: 2 },
+	{ id: 'BAA10Y', src: 'fred', kr: '미 BAA-10Y 스프레드', en: 'US BAA-10Y', unit: '%p', digits: 2 },
+	{ id: 'NFCI', src: 'fred', kr: '미 금융상황지수', en: 'US NFCI', unit: 'pt', digits: 2 },
+	{ id: 'DTWEXBGS', src: 'fred', kr: '달러지수', en: 'US dollar index', unit: 'pt', digits: 1 },
+	{ id: 'SP500', src: 'fred', kr: 'S&P 500', en: 'S&P 500', unit: 'pt', digits: 0 },
+	{ id: 'NASDAQCOM', src: 'fred', kr: '나스닥 종합', en: 'Nasdaq Comp', unit: 'pt', digits: 0 },
+	{ id: 'VIXCLS', src: 'fred', kr: 'VIX 변동성', en: 'VIX', unit: 'pt', digits: 1 },
+	{ id: 'DCOILWTICO', src: 'fred', kr: 'WTI 유가', en: 'WTI oil', unit: '$', digits: 1 },
 	{ id: 'PCOPPUSDM', src: 'fred', kr: '구리 가격', en: 'Copper', unit: '$/t', digits: 0 }
 ];
 
