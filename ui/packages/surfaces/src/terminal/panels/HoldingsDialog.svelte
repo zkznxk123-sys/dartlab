@@ -4,7 +4,7 @@
 	// 좌표는 holdings.ts buildNetworkLayout(순수). 정직: 매수/목표주가·인과 금지, 개인주주 익명, 근사 명기, null '—' 분리.
 	import type { Company, Lang } from '../lib/types';
 	import type { InvestmentPeriod, InvestmentRow, InvestmentTrendYear, ShareholderKind, ShareholdersView } from '@dartlab/ui-contracts';
-	import { buildHoldingsModel, buildNetworkLayout, type ListedLookup, type HoldingTier, type HoldingsRow } from '../lib/holdings';
+	import { buildHoldingsModel, buildNetworkLayout, mutualCodes, type ListedLookup, type HoldingTier, type HoldingsRow, type NetNode } from '../lib/holdings';
 	import { fmtKRW } from '../lib/engine';
 
 	interface Props {
@@ -140,6 +140,27 @@
 	// 그래프 탭은 본문을 가득 채운다(탭 분리 → 스크롤 제거 → 그래프 확대 → 회사명 상시 라벨 수용). 높이는 캔버스 실측, 미측정 시 460.
 	const NET_H = $derived(mapH || 460);
 	const layout = $derived(mapW ? buildNetworkLayout(m.rows, m.maxBook, reverseNamed, selSh?.person ?? null, mapW, NET_H) : null);
+	// 상호출자(2-cycle) — 선택 기간에서 forward∩reverse 종목코드 교집합(상장 상호보유만). 노드 배지 + 닫힌 고리 커넥터.
+	const mutual = $derived(mutualCodes(m.rows, reverseNamed));
+	const mutualLinks = $derived.by(() => {
+		if (!layout || !mutual.size) return [] as { code: string; x1: number; y1: number; x2: number; y2: number; cx: number; cy: number }[];
+		const fwd = new Map<string, NetNode>();
+		const rev = new Map<string, NetNode>();
+		for (const n of layout.nodes) {
+			if (n.kind === 'forward' && n.h?.code) fwd.set(n.h.code, n);
+			else if (n.kind === 'reverseNamed' && n.sh?.code) rev.set(n.sh.code, n);
+		}
+		const out: { code: string; x1: number; y1: number; x2: number; y2: number; cx: number; cy: number }[] = [];
+		for (const code of mutual) {
+			const f = fwd.get(code);
+			const r = rev.get(code);
+			if (!f || !r) continue;
+			const avg = (f.x + r.x) / 2;
+			const side = avg < mapW / 2 ? -1 : 1; // 가까운 바깥쪽으로 볼록(닫힌 고리)
+			out.push({ code, x1: r.x, y1: r.y, x2: f.x, y2: f.y, cx: Math.max(14, Math.min(mapW - 14, avg + side * 80)), cy: (r.y + f.y) / 2 });
+		}
+		return out;
+	});
 	// 호버 툴팁 — 상시 라벨 대신 회사명 + 기본정보. hoverName 으로 forward/reverse 노드 데이터 조회.
 	const hoverFwd = $derived(hoverName ? (m.rows.find((h) => h.name === hoverName) ?? null) : null);
 	const hoverRev = $derived(hoverName && !hoverFwd ? (reverseNamed.find((s) => s.name === hoverName) ?? null) : null);
@@ -225,7 +246,7 @@
 								<li>{T('아래 레인 = 회계 관계: 연결(지분 ≥50%) · 지분법(20~50%) · 단순(<20%)', 'lanes = consolidated (≥50%) · equity (20–50%) · simple (<20%)')}</li>
 								<li>{T('노드 크기 = 장부가 · 색 = 이익기여 흑자(녹)/적자(적) · ★ = 경영참여', 'size = book value · color = profit(green)/loss(red) · ★ = mgmt intent')}</li>
 								<li>{T('굵은 테두리 = 시가>장부(숨은가치)·시가<장부(잠재손상) · 실선 노드 = 상장(클릭 → 종목 이동)', 'thick border = mkt vs book gap · solid node = listed (click to open)')}</li>
-								<li>{T('엣지 굵기 = 지분율', 'edge width = stake %')}</li>
+								<li>{T('엣지 굵기 = 지분율 · ↔ = 상호출자(서로 지분 보유, 상장 상호보유만)', 'edge width = stake % · ↔ = cross-holding (mutual, listed only)')}</li>
 							</ul>
 							<div class="hdHelpH">{T('데이터 품질 · 한계', 'Data quality · limits')}</div>
 							<ul>
@@ -234,6 +255,7 @@
 								<li>{T('피출자 순익 = 최근 1기 단일값 · 본체 순익 연결/별도 미구분(참고)', 'target net = latest single period only')}</li>
 								<li>{T('개인주주 익명 집계 · 미해소·null 은 0 대체 없이 분리', 'individuals aggregated · nulls kept separate')}</li>
 								<li>{T('과거 기간 = 출자 구조 변화(시가 아님) · 분기 = 보고된 것만', 'past periods = structure change (not market value) · quarters = reported only')}</li>
+							<li>{T('상호출자는 상장 상호보유만 · 다단계 순환(A→B→C→A)은 미지원', 'cross-holding = listed mutual only · multi-hop cycles unsupported')}</li>
 								<li>{T('판정·목표주가 아님 — 관계 사실 기술', 'not a verdict or price target')}</li>
 							</ul>
 						</div>
@@ -252,6 +274,10 @@
 							{#each layout.edges as e (e.key)}
 								<line x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke={(hoverName && layout.nodes.some((n) => (n.h?.name === hoverName || n.sh?.name === hoverName) && (n.x === e.x2 || n.x === e.x1))) ? 'var(--amber)' : e.up ? '#8b5cf6' : 'var(--dim)'} stroke-width={e.w} stroke-opacity={hoverName ? 0.12 : e.up ? 0.4 : 0.28} stroke-dasharray={e.dashed ? '2 2' : 'none'} />
 							{/each}
+							<!-- 상호출자 닫힌 고리 — 위(주주) 인스턴스 ↔ 아래(피출자) 인스턴스 곡선 연결 -->
+							{#each mutualLinks as ml (ml.code)}
+								<path d={`M ${ml.x1} ${ml.y1} Q ${ml.cx} ${ml.cy} ${ml.x2} ${ml.y2}`} fill="none" stroke="var(--amber)" stroke-width="1.6" stroke-opacity={hoverName ? 0.2 : 0.6} stroke-dasharray="4 3" />
+							{/each}
 							<!-- 노드 -->
 							{#each layout.nodes as n (n.key)}
 								{#if n.kind === 'forward' && n.h}
@@ -262,6 +288,7 @@
 										<g class="hdNode click" role="button" tabindex={0} aria-label={h.name} onmouseenter={() => (hoverName = h.name)} onmouseleave={() => (hoverName = null)} onclick={() => onPick(h.code!)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(h.code!); } }}>
 											<circle cx={n.x} cy={n.y} r={n.r} fill={signColor(h.equityEarn)} fill-opacity={dim ? 0.25 : 0.9} stroke={hoverName === h.name ? 'var(--amber)' : h.gapRatio != null && h.gapRatio > 1.15 ? 'var(--up)' : h.gapRatio != null && h.gapRatio < 0.85 ? 'var(--dn)' : 'rgba(255,255,255,0.6)'} stroke-width={hoverName === h.name || (h.gapRatio != null && (h.gapRatio > 1.15 || h.gapRatio < 0.85)) ? 2.4 : 1.2} />
 											{#if h.intent}<circle cx={n.x + n.r * 0.66} cy={n.y - n.r * 0.66} r="2.4" fill="var(--amber)" />{/if}
+											{#if h.code && mutual.has(h.code)}<text class="hdMutual" x={n.x - n.r * 0.7} y={n.y - n.r * 0.4} text-anchor="middle">↔</text>{/if}
 											<title>{tt}</title>
 										</g>
 									{:else}
@@ -281,6 +308,7 @@
 									{#if n.code}
 										<g class="hdNode click" role="button" tabindex={0} aria-label={sh.name} onmouseenter={() => (hoverName = sh.name)} onmouseleave={() => (hoverName = null)} onclick={() => onPick(n.code!)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(n.code!); } }}>
 											<rect x={n.x - n.r} y={n.y - n.r} width={n.r * 2} height={n.r * 2} rx="3" fill={HOLDER_COLOR[sh.kind]} fill-opacity={dim ? 0.25 : 0.9} stroke={hoverName === sh.name ? 'var(--amber)' : 'rgba(255,255,255,0.6)'} stroke-width={hoverName === sh.name ? 2.4 : 1.2} />
+											{#if n.code && mutual.has(n.code)}<text class="hdMutual" x={n.x + n.r * 0.7} y={n.y - n.r * 0.45} text-anchor="middle">↔</text>{/if}
 											<title>{tt}</title>
 										</g>
 									{:else}
@@ -343,6 +371,7 @@
 					<span><i class="lg sq" style:background="#5b9bf0"></i>{T('법인', 'corp')}</span>
 					<span><i class="lg dia"></i>{T('개인(익명)', 'person')}</span>
 					<span>{T('★=경영참여 · 굵은 테두리=시가/장부 괴리', '★=intent · thick border=mkt/book gap')}</span>
+					{#if mutual.size}<span><i class="lg" style:background="var(--amber)"></i>{T('↔ 상호출자(상장 상호보유)', '↔ cross-holding (listed)')}</span>{/if}
 				</div>
 				{#if !selSh}<div class="hdMapNote dim">{T('이 기간 주주 데이터 없음 — 위쪽(소유 구조) 생략.', 'No holder data for this period — upstream omitted.')}</div>{/if}
 			</div>
@@ -744,6 +773,15 @@
 		font-size: 7.5px;
 		fill: var(--dimmer, #6b7280);
 		font-family: var(--mono);
+		paint-order: stroke;
+		stroke: var(--dl-bg-base, #05070d);
+		stroke-width: 2px;
+		pointer-events: none;
+	}
+	.hdMutual {
+		font-size: 11px;
+		font-weight: 700;
+		fill: var(--amber);
 		paint-order: stroke;
 		stroke: var(--dl-bg-base, #05070d);
 		stroke-width: 2px;

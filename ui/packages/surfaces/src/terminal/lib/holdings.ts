@@ -250,3 +250,13 @@ export function buildNetworkLayout(
 
 	return { focal, nodes, edges, capsules, lanes };
 }
+
+// 상호출자(2-cycle) — focal 이 출자한 피출자사 ∩ focal 을 소유한 주주를 종목코드로 교집합.
+// 상장 상호보유만 신뢰표시(양쪽 code 해소 필요). 멀티홉 순환(A→B→C→A)은 전역 엣지가 필요해 미지원.
+export function mutualCodes(rows: HoldingsRow[], reverseNamed: ShareholderRow[]): Set<string> {
+	const fwd = new Set<string>();
+	for (const h of rows) if (h.code) fwd.add(h.code);
+	const out = new Set<string>();
+	for (const s of reverseNamed) if (s.code && fwd.has(s.code)) out.add(s.code);
+	return out;
+}
