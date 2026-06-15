@@ -25,9 +25,13 @@
 	}
 	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false, indexCtl, coMovers = [] }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
-	// 동행 상위 — |corr|≥0.3 상위 4종(잡음 차단). MACRO_SERIES 라벨 매핑.
-	const topCoMovers = $derived(coMovers.filter((c) => Math.abs(c.corr) >= 0.3).slice(0, 4));
-	const macroById = new Map(MACRO_SERIES.map((s) => [s.id, s]));
+	// 동행(상관) 우선순위 — coMovers 있으면 전 목록을 |corr| 내림차순 재배치(없으면 선언순). corr 없는 시리즈는 -1 로 하단.
+	const corrById = $derived(new Map(coMovers.map((c) => [c.id, c])));
+	const econOrdered = $derived.by(() => {
+		const list = MACRO_SERIES.map((s) => ({ s, cm: corrById.get(s.id) ?? null }));
+		if (!coMovers.length) return list;
+		return list.sort((a, b) => (b.cm ? Math.abs(b.cm.corr) : -1) - (a.cm ? Math.abs(a.cm.corr) : -1));
+	});
 	// 지수 카탈로그 → 시장군 그룹(select optgroup, KOSPI/KOSDAQ/KRX/US 순) — "뭐가 있는지" 브라우징.
 	const idxGroups = $derived.by(() => {
 		const cat = indexCtl?.catalog ?? [];
@@ -86,29 +90,18 @@
 		{#if menu === 'econ'}
 			<div class="ctMenu ctMenuWide">
 				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
-					{#if topCoMovers.length}
-						<!-- 동행 상위 — 이 종목 월수익률과 상관 높은 거시. ⚠ 상관일 뿐 인과(견인) 아님. -->
-						<div class="ctMenuLbl ctMenuGrp">{T('이 종목과 동행 상위 · 상관(인과 아님)', 'Top co-movers · correlation (not causation)')}</div>
-						<div class="ctRow ctRowWrap">
-							{#each topCoMovers as cm (cm.id)}
-								{@const def = macroById.get(cm.id)}
-								{@const con = ctl.econ.includes(cm.id)}
-								{@const cblocked = !con && ctl.econ.length >= ECON_MAX}
-								<button class={con ? 'mItem on' : 'mItem'} disabled={cblocked}
-									style={con ? `background:transparent;color:${ECON_COLORS[cm.id]};border-color:${ECON_COLORS[cm.id]};font-weight:600` : ''}
-									title={cblocked ? T('경제지표는 동시 3개까지', 'up to 3 economy series') : T(`최근 ${cm.n}개월 상관 ${cm.corr}`, `${cm.n}mo corr ${cm.corr}`)}
-									onclick={() => ctl.toggleEcon(cm.id)}>{T(def?.kr ?? cm.id, def?.en ?? cm.id)} <span class="coCorr" class:neg={cm.corr < 0}>{cm.corr > 0 ? '+' : ''}{cm.corr.toFixed(2)}</span></button>
-							{/each}
-						</div>
+					{#if coMovers.length}
+						<!-- 이 종목 월수익률과 상관 높은 순. ⚠ 상관일 뿐 인과(견인) 아님 — 가까운 봉 구간 기준. -->
+						<div class="ctMenuLbl ctMenuGrp">{T('· 이 종목과 동행 상관 높은 순 (인과 아님)', '· ordered by co-movement with this stock (not causation)')}</div>
 					{/if}
 				<div class="ctRow ctRowWrap">
-					{#each MACRO_SERIES as s (s.id)}
-						{@const on = ctl.econ.includes(s.id)}
+					{#each econOrdered as e (e.s.id)}
+						{@const on = ctl.econ.includes(e.s.id)}
 						{@const blocked = !on && ctl.econ.length >= ECON_MAX}
 						<button class={on ? 'mItem on' : 'mItem'} disabled={blocked}
-							style={on ? `background:transparent;color:${ECON_COLORS[s.id]};border-color:${ECON_COLORS[s.id]};font-weight:600` : ''}
-							title={blocked ? T('경제지표는 동시 3개까지', 'up to 3 economy series') : ''}
-							onclick={() => ctl.toggleEcon(s.id)}>{T(s.kr, s.en)}</button>
+							style={on ? `background:transparent;color:${ECON_COLORS[e.s.id]};border-color:${ECON_COLORS[e.s.id]};font-weight:600` : ''}
+							title={blocked ? T('경제지표는 동시 3개까지', 'up to 3 economy series') : e.cm ? T(`최근 ${e.cm.n}개월 상관 ${e.cm.corr}`, `${e.cm.n}mo corr ${e.cm.corr}`) : ''}
+							onclick={() => ctl.toggleEcon(e.s.id)}>{T(e.s.kr, e.s.en)}{#if e.cm && Math.abs(e.cm.corr) >= 0.2} <span class="coCorr" class:neg={e.cm.corr < 0}>{e.cm.corr > 0 ? '+' : ''}{e.cm.corr.toFixed(2)}</span>{/if}</button>
 					{/each}
 				</div>
 				{#if ctl.econ.length >= ECON_MAX}<div class="ctMenuLbl ctMenuGrp">{T('· 동시 3개까지 — 해제 후 추가', '· max 3 at once — remove one to add')}</div>{/if}
