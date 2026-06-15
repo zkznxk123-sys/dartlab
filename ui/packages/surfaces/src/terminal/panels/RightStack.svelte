@@ -77,16 +77,16 @@
 					const rr = row.getBoundingClientRect();
 					list.scrollTop += rr.top + rr.height / 2 - (lr.top + lr.height / 2);
 				}
-				// ② 우측 컬럼 자체를 스크롤해 그 공시 패널(2분할 블록) 헤더를 컬럼 상단에 맞춘다 — 정기/비정기 동일 헤더 Y라 위치 일관.
+				// ② 우측 컬럼을 스크롤해 그 300px 박스(filingList)를 컬럼 뷰포트 세로 중앙에 둔다 — 정기/비정기 동일 Y라 위치 일관.
 				const col = row.closest('.col') as HTMLElement | null;
-				const panel = row.closest('.rowSplit') as HTMLElement | null;
-				if (col && panel) {
+				// 300px 박스 자체 = list (위 ①에서 이미 해소) — 컬럼 중앙 정렬에 재사용
+				if (col && list) {
 					const cr = col.getBoundingClientRect();
-					const pr = panel.getBoundingClientRect();
-					col.scrollBy({ top: pr.top - cr.top, behavior: 'smooth' });
+					const lr2 = list.getBoundingClientRect();
+					col.scrollBy({ top: lr2.top + lr2.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
 				}
 			}
-			flashTimer = setTimeout(() => (flashDate = null), 1800);
+			flashTimer = setTimeout(() => (flashDate = null), 3600);
 		});
 	});
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
@@ -602,13 +602,13 @@
 {/if}
 
 <style>
-	/* 공시 dot 클릭 동기화 — 그 날짜 공시 행 일시 하이라이트(주가차트 공시 레일 → 위치 찾기). 1.8s 후 자동 소거. */
+	/* 공시 dot 클릭 동기화 — 그 날짜 공시 행 일시 하이라이트(주가차트 공시 레일 → 위치 찾기). 3.6s 후 자동 소거(스포트라이트 길게). */
 	.filingRow.flash {
-		animation: filingFlash 1.8s ease-out;
+		animation: filingFlash 3.6s ease-out;
 	}
 	@keyframes filingFlash {
 		0%,
-		15% {
+		55% {
 			background: rgba(91, 155, 240, 0.28);
 			box-shadow: inset 2px 0 0 var(--amber, #fb923c);
 		}
