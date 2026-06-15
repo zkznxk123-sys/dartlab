@@ -14,6 +14,7 @@ export interface IndexControl {
 	indexRef: IndexRef | null;
 	query: string;
 	results: IndexRef[];
+	catalog: IndexRef[]; // 전체 지수 카탈로그(시장군 그룹 select 브라우징 — "뭐가 있는지" 발견)
 	setSubject: (s: 'price' | 'index') => void;
 	pick: (r: IndexRef) => void;
 	search: (q: string) => void;

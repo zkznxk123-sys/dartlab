@@ -131,37 +131,43 @@ export function loadGovIndexCandles(ref: IndexRef): Promise<Candle[] | null> {
 	return p;
 }
 
-/** gov 지수 이름 부분일치 검색 — 최신 date/ 파일의 distinct (MARKET_GROUP, IDX_NM) 스캔. */
+/** gov 지수 전체 universe — 최신 date/ 파일의 distinct (MARKET_GROUP, IDX_NM). 회사 무관·세션 1회 캐시.
+ *  카탈로그 select(전체 브라우징)·검색이 공유. 빈 결과는 캐시 안 함(일시 404 poisoning 방지). */
+export async function loadGovIndexUniverse(): Promise<IndexRef[]> {
+	if (!browser) return [];
+	const cached = nameScanCache.get('all');
+	if (cached && cached.length) return cached;
+	const universe: IndexRef[] = [];
+	for (const y of recentYears(2)) {
+		let rows: IdxRow[] | null = null;
+		try {
+			rows = await readParquetWholeFile<IdxRow>(`gov/indices/date/${y}.parquet`, { columns: ['MARKET_GROUP', 'IDX_NM'] });
+		} catch {
+			rows = null;
+		}
+		if (!rows) continue;
+		const seen = new Set<string>();
+		for (const r of rows) {
+			const m = String(r.MARKET_GROUP ?? '');
+			const nm = String(r.IDX_NM ?? '');
+			if (!m || !nm) continue;
+			const k = `${m}/${nm}`;
+			if (seen.has(k)) continue;
+			seen.add(k);
+			universe.push({ market: m as IndexRef['market'], name: nm, code: `idx:${m}/${nm}`, ohlc: 'candle' });
+		}
+		if (universe.length) break; // 최신 연도에서 채웠으면 끝
+	}
+	if (universe.length) nameScanCache.set('all', universe); // 성공 시에만 캐시(빈 결과 캐시 금지)
+	return universe;
+}
+
+/** gov 지수 이름 부분일치 검색 — universe 스캔(큐레이트 우선). */
 export async function scanGovIndexNames(query: string, limit = 12): Promise<IndexRef[]> {
 	if (!browser) return [];
 	const q = query.trim();
 	if (!q) return [];
-	// 최신 연도 파일 1개의 distinct (market, name) 캐시 — 회사 무관·세션 1회. *비어있으면 캐시 안 함*(일시 404 poisoning 방지).
-	let universe = nameScanCache.get('all');
-	if (!universe || !universe.length) {
-		universe = [];
-		for (const y of recentYears(2)) {
-			let rows: IdxRow[] | null = null;
-			try {
-				rows = await readParquetWholeFile<IdxRow>(`gov/indices/date/${y}.parquet`, { columns: ['MARKET_GROUP', 'IDX_NM'] });
-			} catch {
-				rows = null;
-			}
-			if (!rows) continue;
-			const seen = new Set<string>();
-			for (const r of rows) {
-				const m = String(r.MARKET_GROUP ?? '');
-				const nm = String(r.IDX_NM ?? '');
-				if (!m || !nm) continue;
-				const k = `${m}/${nm}`;
-				if (seen.has(k)) continue;
-				seen.add(k);
-				universe.push({ market: m as IndexRef['market'], name: nm, code: `idx:${m}/${nm}`, ohlc: 'candle' });
-			}
-			if (universe.length) break; // 최신 연도에서 채웠으면 끝
-		}
-		if (universe.length) nameScanCache.set('all', universe); // 성공 시에만 캐시(빈 결과 캐시 금지)
-	}
+	const universe = await loadGovIndexUniverse();
 	// 큐레이트 우선 노출(부분일치) → 나머지.
 	const matches = universe.filter((r) => r.name.includes(q));
 	const curatedFirst = [

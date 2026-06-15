@@ -532,8 +532,11 @@
 /* CHART CONTROL ROW (price/fin) */
 .dlTerm .chartCtlRow { display: flex; align-items: center; gap: 7px; padding: 3px 7px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); flex-wrap: wrap; }
 .dlTerm .eodBadge { margin-left: auto; font-family: var(--mono); font-size: 8px; color: var(--dimmer); border: 1px solid var(--bd); border-radius: 2px; padding: 1px 5px; letter-spacing: 0.3px; white-space: nowrap; }
-/* 지수 picker(01) — 주가/지수 토글 + 큐레이트 9 인라인 칩. 차트 컨트롤 바(.chartTopBar) 한 줄에 통합(운영자 결정 — 별도 행·absolute 오버레이 금지). */
+/* 지수 picker(01) — 주가/지수 토글 + 전체 지수 select(시장군 그룹). 차트 컨트롤 바 한 줄 통합. */
 .dlTerm .idxToggle { flex-shrink: 0; }
+/* 지수 select — 전체 카탈로그(KR 165+US) 시장군 optgroup 브라우징(운영자: 뭐가 있는지 목록). */
+.dlTerm .idxSelect { max-width: 180px; flex-shrink: 0; background: var(--dl-bg-deep); color: var(--txt); border: 1px solid var(--bd); border-radius: 2px; padding: 2px 6px; font-size: 10px; line-height: 1.2; cursor: pointer; outline: none; }
+.dlTerm .idxSelect:hover, .dlTerm .idxSelect:focus { border-color: var(--amber); }
 .dlTerm .idxChips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .dlTerm .idxSearch { width: 112px; flex-shrink: 0; background: var(--dl-bg-deep); color: var(--txt); border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; font-size: 10px; outline: none; }
 .dlTerm .idxSearch:focus { border-color: var(--amber); }

@@ -2,13 +2,16 @@
 // gov·fred 모두 HF 공개 데이터 브라우저 직독(백엔드 0)이라 local 셸도 그대로 재사용(createLocalRuntime).
 import type { Candle, IndexPort, IndexRef } from '@dartlab/ui-contracts';
 import { KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts';
-import { loadGovIndexCandles, scanGovIndexNames } from './govIndexSource';
+import { loadGovIndexCandles, scanGovIndexNames, loadGovIndexUniverse } from './govIndexSource';
 import { loadFredIndexCandles, searchUsIndexPresets } from './fredIndexSource';
 
 export function createPublicIndexPort(): IndexPort {
 	return {
 		async catalog(): Promise<IndexRef[]> {
-			return [...KR_INDEX_PRESETS, ...US_INDEX_PRESETS]; // 화이트리스트 9종(상시)
+			// 전체 카탈로그 — KR gov 전 지수(universe, 165종) + US preset. picker select 가 시장군 그룹으로 브라우징.
+			// universe 로드 실패(404·오프라인) 시 큐레이트 presets 로 폴백(빈 select 방지).
+			const kr = await loadGovIndexUniverse();
+			return [...(kr.length ? kr : KR_INDEX_PRESETS), ...US_INDEX_PRESETS];
 		},
 		async search(query: string, limit = 12): Promise<IndexRef[]> {
 			const q = query.trim();

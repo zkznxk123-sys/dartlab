@@ -49,6 +49,8 @@
 	const indexLine = $derived(subject === 'index' && indexRef?.market === 'US'); // US 지수=종가전용 라인(PriceChart 렌더 격리)
 	let idxQuery = $state('');
 	let idxResults = $state<IndexRef[]>([]);
+	let idxCatalog = $state<IndexRef[]>([]); // 전체 지수 카탈로그(select 브라우징) — 세션 1회 로드
+	rt.index.catalog().then((c) => (idxCatalog = c ?? []));
 	let idxSearchToken = 0;
 	function onIdxSearch() {
 		const q = idxQuery.trim();
@@ -71,7 +73,7 @@
 		onIdxSearch();
 	}
 	// 컨트롤 번들 — 차트 컨트롤 바(ChartMenus)가 한 줄에서 주가/지수 토글·지수 picker 를 렌더하도록 내려보냄(idxBar 폐기).
-	const indexCtl = $derived({ subject, indexRef, query: idxQuery, results: idxResults, setSubject, pick: pickIndex, search: searchIndex });
+	const indexCtl = $derived({ subject, indexRef, query: idxQuery, results: idxResults, catalog: idxCatalog, setSubject, pick: pickIndex, search: searchIndex });
 	const onPickWrapped = $derived(onPick ? (c: string) => { subject = 'price'; onPick?.(c); } : undefined); // 심볼 점프 = 회사 → 주가 주체 복귀
 	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
 	$effect(() => {

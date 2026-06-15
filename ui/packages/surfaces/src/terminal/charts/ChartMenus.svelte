@@ -3,7 +3,7 @@
 	// 상태는 ChartCtl 단일 SSOT 공유 — 전체화면 리본(ChartRibbon)과 같은 인스턴스.
 	import type { Lang } from '../lib/types';
 	import { type ChartCtl, type IndexControl, OVERLAY_ALL, SUB_GROUPS, ECON_MAX, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
-	import { MACRO_SERIES, KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts';
+	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
 	import { EVENT_CATS } from '../lib/eventRail';
 	import { IND_DEFS, paramSummary } from './indicatorParams';
@@ -28,6 +28,16 @@
 	// 동행 상위 — |corr|≥0.3 상위 4종(잡음 차단). MACRO_SERIES 라벨 매핑.
 	const topCoMovers = $derived(coMovers.filter((c) => Math.abs(c.corr) >= 0.3).slice(0, 4));
 	const macroById = new Map(MACRO_SERIES.map((s) => [s.id, s]));
+	// 지수 카탈로그 → 시장군 그룹(select optgroup, KOSPI/KOSDAQ/KRX/US 순) — "뭐가 있는지" 브라우징.
+	const idxGroups = $derived.by(() => {
+		const cat = indexCtl?.catalog ?? [];
+		const order = ['KOSPI', 'KOSDAQ', 'KRX', 'US'];
+		const lbl: Record<string, string> = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', KRX: 'KRX', US: lang === 'en' ? 'US' : '미국' };
+		const by = new Map<string, typeof cat>();
+		for (const r of cat) { const m = String(r.market); if (!by.has(m)) by.set(m, []); by.get(m)!.push(r); }
+		const keys = [...order.filter((m) => by.has(m)), ...[...by.keys()].filter((m) => !order.includes(m))];
+		return keys.map((m) => ({ market: m, label: lbl[m] ?? m, items: [...by.get(m)!].sort((a, b) => a.name.localeCompare(b.name)) }));
+	});
 	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
 	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt' | 'rail'>('none');
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
@@ -48,12 +58,16 @@
 		<button class={indexCtl.subject === 'index' ? 'seg on' : 'seg'} onclick={() => indexCtl.setSubject('index')}>{T('지수', 'Index')}</button>
 	</span>
 	{#if indexCtl.subject === 'index'}
-		<input class="idxSearch mono" placeholder={T('지수 검색…', 'search…')} value={indexCtl.query} oninput={(e) => indexCtl.search(e.currentTarget.value)} />
-		{#if indexCtl.results.length}
-			<span class="idxChips">{#each indexCtl.results as r (r.code)}<button class={indexCtl.indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => indexCtl.pick(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</span>
-		{:else}
-			<span class="idxChips"><span class="idxGrpLbl">{T('한국', 'KR')}</span>{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexCtl.indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => indexCtl.pick(r)}>{r.name}</button>{/each}<span class="idxGrpLbl">{T('미국', 'US')}</span>{#each US_INDEX_PRESETS as r (r.code)}<button class={indexCtl.indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => indexCtl.pick(r)}>{r.name}</button>{/each}</span>
-		{/if}
+		<!-- 지수 select — 시장군 그룹으로 전체(KR 165 + US) 브라우징(운영자: 뭐가 있는지 모름 → 목록). -->
+		<select class="idxSelect mono" title={T('지수 선택', 'pick index')} onchange={(e) => { const r = indexCtl.catalog.find((x) => x.code === e.currentTarget.value); if (r) indexCtl.pick(r); }}>
+			{#each idxGroups as g (g.market)}
+				<optgroup label={g.label}>
+					{#each g.items as r (r.code)}
+						<option value={r.code} selected={indexCtl.indexRef?.code === r.code}>{r.name}</option>
+					{/each}
+				</optgroup>
+			{/each}
+		</select>
 		<span class="cbDiv"></span>
 	{/if}
 {/if}
