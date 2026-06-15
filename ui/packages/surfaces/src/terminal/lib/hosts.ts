@@ -37,4 +37,8 @@ export interface TerminalBrandLinks {
 	youtube: string;
 	threads: string;
 	instagram: string;
+	/** GitHub Sponsors 후원 URL — 미설정 셸은 생략(후원 박스에서 해당 줄 숨김). */
+	sponsors?: string;
+	/** 계좌 후원 — 미설정 셸은 생략(후원 박스에서 해당 줄 숨김). 값은 공개 후원 계좌. */
+	account?: { bank: string; number: string; holder: string };
 }

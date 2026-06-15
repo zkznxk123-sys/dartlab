@@ -14,5 +14,8 @@ export const localLinks: TerminalBrandLinks = {
 	coffee: 'https://buymeacoffee.com/eddmpython',
 	youtube: 'https://www.youtube.com/@eddmpython',
 	threads: 'https://www.threads.net/@dartlab.ai',
-	instagram: 'https://www.instagram.com/dartlab.ai/'
+	instagram: 'https://www.instagram.com/dartlab.ai/',
+	// 후원 — GitHub Sponsors + 계좌(공개 후원 계좌).
+	sponsors: 'https://github.com/sponsors/eddmpython',
+	account: { bank: '토스뱅크', number: '1002-0421-4626', holder: '김주현' }
 };

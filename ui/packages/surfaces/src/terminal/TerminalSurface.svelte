@@ -15,8 +15,11 @@
 	import RightStack from './panels/RightStack.svelte';
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import GiscusPanel from './panels/GiscusPanel.svelte';
+	import SupportDialog from './panels/SupportDialog.svelte';
+	import { Heart } from 'lucide-svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
 	import { warmCompany } from './lib/warmup';
+	import { fetchGithubStars, fmtStars } from './lib/githubStars';
 
 	interface Props {
 		eng: Engine;
@@ -47,6 +50,10 @@
 	let lang = $state<Lang>('kr');
 	let sourcesOpen = $state(false);
 	let discussOpen = $state(false); // 종목 토론 드로어 (giscus)
+	let supportOpen = $state(false); // 후원·기여 센터 다이얼로그
+	// GitHub 스타 수 — SNS 버튼 옆 라이브 배지(사회적 증명). null = 미조회/실패(배지 숨김).
+	let ghStars = $state<number | null>(null);
+	fetchGithubStars(links.repo).then((n) => (ghStars = n));
 	// 출처 모달 "최근 일자" — 라이브 재무 최신 분기 (finance.bundle in-flight dedup, 추가 다운로드 0)
 	let finLatest = $state('');
 	$effect(() => {
@@ -234,9 +241,12 @@
 					<a class="snsBtn" href={links.repo} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
 						<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" /><path d="M9 18c-4.51 2-5-2-7-2" /></svg>
 					</a>
-					<a class="snsBtn" href={links.coffee} target="_blank" rel="noopener" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">
-						<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" /><line x1="6" y1="2" x2="6" y2="4" /><line x1="10" y1="2" x2="10" y2="4" /><line x1="14" y1="2" x2="14" y2="4" /></svg>
-					</a>
+					{#if ghStars != null}
+						<a class="ghStars" href={links.repo} target="_blank" rel="noopener" title={lang === 'en' ? 'Star on GitHub' : 'GitHub 스타로 응원'}><span class="ghStar">★</span>{fmtStars(ghStars)}</a>
+					{/if}
+					<button class="snsBtn snsHeart" onclick={() => (supportOpen = true)} title={lang === 'en' ? 'Support & contribute' : '후원·기여'} aria-label={lang === 'en' ? 'Support & contribute' : '후원·기여'}>
+						<Heart size={15} fill="rgba(251, 113, 133, 0.32)" />
+					</button>
 					<a class="snsBtn" href={links.youtube} target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
 						<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
 					</a>
@@ -288,5 +298,6 @@
 		</footer>
 		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} pricesAsOf={co.price.asOf} macroAsOf={eng.raw.macro?.asOf ?? ''} financeLatest={finLatest || (co.trendQuarter?.periods.at(-1) ?? '')} />
 		<GiscusPanel code={co.code} name={co.name.kr} {lang} open={discussOpen} onClose={() => (discussOpen = false)} />
+		<SupportDialog {lang} {links} {base} open={supportOpen} onClose={() => (supportOpen = false)} />
 	{/if}
 </div>
