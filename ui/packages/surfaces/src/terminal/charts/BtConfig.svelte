@@ -1,6 +1,9 @@
 <script lang="ts">
-	// 백테스트 설정 — 전략 프리셋·파라미터·비용(bp 편집). 일반 메뉴·전체화면 리본 양쪽이 공유.
-	// 체결 모델 캡션 상시 노출 = 신뢰 표면. 결과 표시는 BacktestStrip (설정/결과 분리).
+	// 백테스트 전략 콘솔 — 전략(드롭다운 셀렉터+설명)·파라미터·비용(bp 편집). 일반 메뉴·전체화면 리본 공유.
+	// 칩 6개 평면나열 폐기 → 셀렉터로 "지표 토글"이 아닌 "전략 실행" 위계 부여(03 §0.5.9-E "버튼 약함" 직격).
+	// 선택 즉시 자동 실행(PriceChart $effect) — 초보 1클릭 보존 + 즉시 피드백(수동 실행 버튼보다 우수).
+	// 벤치마크(B&H 동일비용)는 끌 수 없는 읽기전용 라벨 = 공정 비교가 제품 약속임을 컨트롤에서 전달.
+	// 체결 모델 캡션 상시 노출 = 신뢰 표면. 결과 표시는 BacktestStrip/리포트 도크(설정/결과 분리).
 	import type { Lang } from '../lib/types';
 	import type { ChartCtl } from './chartState.svelte';
 	import { BT_PRESETS, BT_COSTS } from '../lib/backtest';
@@ -20,46 +23,68 @@
 		const next = Math.max(k.min, Math.min(k.max, +(ctl.btCostsBp[k.k] + dir * k.step).toFixed(1)));
 		ctl.btCostsBp = { ...ctl.btCostsBp, [k.k]: next };
 	}
+	function pickPreset(key: string) {
+		if (!key) { ctl.btKey = null; return; }
+		const pd = BT_PRESETS.find((d) => d.key === key);
+		if (pd) ctl.setPreset(pd);
+	}
 	const costsDefault = $derived(
 		ctl.btCostsBp.commissionBp === BT_COSTS.commissionBp && ctl.btCostsBp.sellTaxBp === BT_COSTS.sellTaxBp && ctl.btCostsBp.slippageBp === BT_COSTS.slippageBp
 	);
 </script>
 
 <div class="btConfig">
-	<div class="ctMenuLbl">{T('전략 프리셋 — 클릭 즉시 실행', 'Strategy preset — runs on click')}</div>
-	<div class="ctRow ctRowWrap">
-		{#each BT_PRESETS as pd (pd.key)}
-			<button class={ctl.btKey === pd.key ? 'mItem on' : 'mItem'} title={T(pd.descKr, pd.descEn)} onclick={() => ctl.setPreset(pd)}>{T(pd.kr, pd.en)}</button>
-		{/each}
+	<!-- ① 전략 — 셀렉터 + 설명 (칩 그리드 폐기) -->
+	<div class="btSection">
+		<div class="ctMenuLbl">{T('① 전략', '① Strategy')}</div>
+		<select class="btSelect mono" value={ctl.btKey ?? ''} onchange={(e) => pickPreset(e.currentTarget.value)} title={T('전략 프리셋 — 선택 즉시 실행', 'strategy preset — runs on select')}>
+			<option value="">{T('전략 선택…', 'pick strategy…')}</option>
+			{#each BT_PRESETS as pd (pd.key)}
+				<option value={pd.key}>{T(pd.kr, pd.en)}</option>
+			{/each}
+		</select>
+		{#if ctl.activeBt}<div class="btDesc">{T(ctl.activeBt.descKr, ctl.activeBt.descEn)} · {T('교육·탐색용 (추천 아님)', 'educational (not advice)')}</div>{/if}
 	</div>
+
+	<!-- ② 파라미터 -->
 	{#if ctl.activeBt && ctl.activeBt.params.length}
-		<div class="ctMenuLbl">{T('파라미터', 'Params')}</div>
-		{#each ctl.activeBt.params as pp (pp.name)}
-			<div class="ctRow btParamRow">
-				<span class="btParamLbl">{T(pp.kr, pp.en)}</span>
-				<button class="mItem" onclick={() => ctl.stepBtParam(pp, -1)}>−</button>
-				<b class="btParamVal mono">{ctl.btParams[pp.name] ?? pp.def}</b>
-				<button class="mItem" onclick={() => ctl.stepBtParam(pp, 1)}>+</button>
-			</div>
-		{/each}
+		<div class="btSection">
+			<div class="ctMenuLbl">{T('② 파라미터', '② Parameters')}</div>
+			{#each ctl.activeBt.params as pp (pp.name)}
+				<div class="ctRow btParamRow">
+					<span class="btParamLbl">{T(pp.kr, pp.en)}</span>
+					<button class="mItem" onclick={() => ctl.stepBtParam(pp, -1)}>−</button>
+					<b class="btParamVal mono">{ctl.btParams[pp.name] ?? pp.def}</b>
+					<button class="mItem" onclick={() => ctl.stepBtParam(pp, 1)}>+</button>
+				</div>
+			{/each}
+		</div>
 	{/if}
-	<div class="ctRow">
-		<button class={ctl.btCosts ? 'mItem on' : 'mItem'} onclick={() => (ctl.btCosts = !ctl.btCosts)}>{T('수수료·세금 포함', 'Costs')}</button>
-		{#if ctl.btKey}<button class="mItem mClear" onclick={() => (ctl.btKey = null)}>{T('전략 해제', 'Clear')}</button>{/if}
-	</div>
-	{#if ctl.btCosts}
-		{#each COST_FIELDS as cf (cf.k)}
-			<div class="ctRow btParamRow">
-				<span class="btParamLbl">{T(cf.kr, cf.en)}</span>
-				<button class="mItem" onclick={() => stepCost(cf, -1)}>−</button>
-				<b class="btParamVal mono">{ctl.btCostsBp[cf.k]}</b>
-				<span class="btParamLbl">bp</span>
-				<button class="mItem" onclick={() => stepCost(cf, 1)}>+</button>
-			</div>
-		{/each}
-		{#if !costsDefault}
-			<div class="ctRow"><button class="mItem" onclick={() => (ctl.btCostsBp = { ...BT_COSTS })}>{T('비용 기본값', 'reset costs')}</button></div>
+
+	<!-- ③ 비용 -->
+	<div class="btSection">
+		<div class="ctMenuLbl">{T('③ 비용', '③ Costs')}</div>
+		<div class="ctRow">
+			<button class={ctl.btCosts ? 'mItem on' : 'mItem'} onclick={() => (ctl.btCosts = !ctl.btCosts)}>{T('수수료·세금 포함', 'include costs')}</button>
+			{#if ctl.btKey}<button class="mItem mClear" onclick={() => (ctl.btKey = null)}>{T('전략 해제', 'clear')}</button>{/if}
+		</div>
+		{#if ctl.btCosts}
+			{#each COST_FIELDS as cf (cf.k)}
+				<div class="ctRow btParamRow">
+					<span class="btParamLbl">{T(cf.kr, cf.en)}</span>
+					<button class="mItem" onclick={() => stepCost(cf, -1)}>−</button>
+					<b class="btParamVal mono">{ctl.btCostsBp[cf.k]}</b>
+					<span class="btParamLbl">bp</span>
+					<button class="mItem" onclick={() => stepCost(cf, 1)}>+</button>
+				</div>
+			{/each}
+			{#if !costsDefault}
+				<div class="ctRow"><button class="mItem" onclick={() => (ctl.btCostsBp = { ...BT_COSTS })}>{T('비용 기본값', 'reset costs')}</button></div>
+			{/if}
 		{/if}
-	{/if}
-	<div class="btModelNote">{T('신호 t일 종가 → t+1일 시가 체결 · 미래참조 차단 · B&H 동일비용 비교', 'signal close(t) → fill open(t+1) · no look-ahead · B&H same costs')}</div>
+	</div>
+
+	<!-- 벤치마크 — 읽기전용(끌 수 없음 = 공정 비교 약속 노출) -->
+	<div class="btBench">{T('비교 기준 · 보유(B&H) · 동일 비용 적용', 'benchmark · buy & hold · same costs')}</div>
+	<div class="btModelNote">{T('신호 t일 종가 → t+1일 시가 체결 · 미래참조 차단 · 과거 가정 노출형 시뮬레이션(추천 아님)', 'signal close(t) → fill open(t+1) · no look-ahead · assumption-exposed simulation (not advice)')}</div>
 </div>
