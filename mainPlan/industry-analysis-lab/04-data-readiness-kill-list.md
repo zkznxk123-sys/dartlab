@@ -13,10 +13,10 @@
 | profit-pool 격자 (stage 매출×이익률) | `buildIndustrySummary` 출력 + `industries/{id}.json` stages[].nodes[] | **READY** | revenue 100%·opMargin 82.4%(2561노드). 신규 fetch 0 |
 | 공정/밸류체인 위치 | nodes.json (stage·stream·role) | **READY** | 2664노드·34산업·96% 공정매칭 |
 | lifecycle phase | `classifyLifecycle` 매출 YoY | **READY(thin)** | ★surface 5-phase(backend 4 emit 도입·성장·성숙·쇠퇴 + industryContext.py 재도약 합성). **LIVE — industryBadge.phase 자동 부착, 화면 미노출 아님**. thin=전산업 공통 임계 |
-| 매출처 의존도 ratio | edges.json ratio (type=supplier) | **THIN** | ratio 19건 전부 type=supplier(「주요 매출처」 의존도) |
-| 공급망 amount | edges.json amount | **POOR** | amount 132/18,418 (0.7%) |
-| customer 거래 | edges.json `type`=customer | **NEAR-EMPTY** | 7건 전원 ratio=None·amount=None·source=docs (디스크 필드는 `type`, in-memory만 `edgeType`) |
-| hop2 전파 | hop2.json / computeHop2 | **READY(count만)** | supplier 3191로 인접리스트 충분, amount 가중은 4.1%만 |
+| 매출처 의존도 ratio | edges.json ratio (type=supplier) | **THIN→추출천장** | ratio 19건은 `r.get("비중")` exact 매칭 산물 — 실측 헤더는 「비율」·합쳐진셀 「제53기매입액 (비율)」이라 퍼지매칭 시 행의 ~43% 복구([_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md)) |
+| 공급망 amount | edges.json amount | **추출천장(공시부재 아님)** | amount 132/18,418 (0.7%)은 *상장필터 드롭 + 취약헤더* 이중 인공물. amount 행의 87.3%가 비상장 매입처라 버려짐 — **레버 A**(buyer-centric 미드롭)로 amount 행 7.9x·제조업 매입집중도 산출가능사 2.0x(표본 150). 단 원재료 매입처 표 자체가 ~21%사(제조업 편중)=잔존천장 |
+| customer 거래 | edges.json `type`=customer | **NEAR-EMPTY→매출처표 미파싱** | 7건 전원 ratio/amount=None은 매출처가 *텍스트 경로*로만 추출돼서 — 원재료 매입처 표 파싱 기계(`findTableByHeaders`)를 「주요 매출처」 표에 재사용 시 ratio 채움 가능(레버 C). 익명 매출처(「국내 1개사」)는 영구 불가. 디스크 필드는 `type`, in-memory만 `edgeType` |
+| hop2 전파 | hop2.json / computeHop2 | **READY(count만)** | supplier 3191로 인접리스트 충분, amount 가중은 4.1%만(레버 A 적용 시 상향) |
 | CR4/top1 비중 | nodes revenue | **CONDITIONAL** | "상장사 매출 기준"만 (시장점유율 raw 부재) |
 | 산업 분포 밴드 | industryStats.json p10~p90 | **READY** | 34산업 roe/opMargin/revCagr monotone |
 | 시장점유율 (raw) | — | **EXCLUDED** | 어디에도 없음 |
@@ -65,7 +65,7 @@
 1. **opMargin 결손 노드는 격자 제외 + coverageRatio 노출** (0 채움 금지).
 2. **ratio 없는 엣지는 굵기 균일** (amount 0을 가는 선으로 거짓 표현 금지).
 3. **HHI/CR4는 "상장사 매출 기준, 진짜 시장점유율 아님" 강제 캡션.**
-4. **공급망 amount는 "추출 누락분 존재" 캡션 + amount 132/18,418 빈곤을 화면 1급시민으로.**
+4. **공급망 amount는 "추출 누락분 존재" 캡션 + 빈곤을 화면 1급시민으로.** 단 132/18,418(0.7%)을 *공시 빈곤*으로 단정 금지 — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md) 실측상 0.7%는 상장필터 드롭(amount 행 87.3% 폐기)+취약헤더 이중 *추출* 인공물이다. 정직 라벨은 "현 추출 0.7%, 미드롭+퍼지헤더로 제조업 한정 상향 여지" — 추출 보강 후엔 그 시점 커버리지를 1급시민으로(빈곤이든 개선이든 실측값).
 5. **분포 밴드는 n<10 *분포(metric)* 숨김 + "n=N" 노출, mean±std 금지** (industryStats는 산업당 metric별 독립 distribution+각자 n; mean은 outlier로 밴드 밖 자주 — percentile만).
 6. **lifecycle phase는 advisory confidence + 단일 YoY 점추정 한계 명시 + 백테스트 없음**(quant.walkForward가 backtest SSOT).
 7. **모든 새 surface → sourceRef/as-of + confidence/source 칩.** provenance 없는 카드 = 회귀.

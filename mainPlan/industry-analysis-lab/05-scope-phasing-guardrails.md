@@ -7,7 +7,7 @@
 
 ## 1. "안 해도 되는가" — steelman과 생존 조건
 
-**반론(steelman)**: industry 엔진은 이미 lifecycle·summary·edges·HHI·hop2를 다 가졌다. "강화"는 대부분 *이미 있는 걸 화면에 꺼내는 배선*이지 새 능력이 아니다. 한계 노력은 데이터가 진짜 빈약한 곳(공급망 amount 0.7%·세그먼트 2/10·가동률 미추출)을 메우는 데 가야 한다. profit-pool도 "셀 1줄 변환"으로 보이면 덕지덕지다.
+**반론(steelman)**: industry 엔진은 이미 lifecycle·summary·edges·HHI·hop2를 다 가졌다. "강화"는 대부분 *이미 있는 걸 화면에 꺼내는 배선*이지 새 능력이 아니다. 한계 노력은 데이터가 진짜 빈약한 곳(세그먼트 2/10·가동률 미추출·익명 매출처)을 메우는 데 가야 한다. (★공급망 amount 0.7%는 "진짜 빈약"이 아니라 *추출 천장* — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md)로 제조업 한정 7.9x 상향 확인, 보강 ROI 있음.) profit-pool도 "셀 1줄 변환"으로 보이면 덕지덕지다.
 
 **생존 조건**: 이 업그레이드는 *세계 메커니즘 매칭*이 아니라 **(a) 못 풀던 질문 1개를 답하거나 (b) 묻어둔 함수를 배선하거나 (c) 분기 통일·inert dead 정리를 하는 곳**에서만 산다.
 - (a) profit-pool 격자 = 회사별 사일로 제품이 구조적으로 못 푸는 "이익은 어느 단계가 버나". 신규 데이터 0이라 싸고, born-structured 격자라 우리만.
@@ -36,7 +36,7 @@
 3. **engine.ts:312 marketShare inert dead 컬럼 선제 제거**(Phase C 일부, 단독으로도 가치 — 데이터 전무로 filter 드롭돼 현재 렌더 0, user harm 0, 미래 활성화 선제 청소).
 
 ### SHOULD (MUST 후 — 데이터 천장 인지하고)
-4. **공급망 evidence(Phase B)**: `Industry.edges()` ratio/amount 2컬럼 + hop2/insights 인자 배선 + confidence/source 칩. edges.json 재빌드 선결. *천장 낮음 인지.*
+4. **공급망 evidence(Phase B)**: `Industry.edges()` ratio/amount 2컬럼 + hop2/insights 인자 배선 + confidence/source 칩. edges.json 재빌드 선결. *천장은 "낮음"이 아니라 "제조업 한정·추출 보강 여지"* — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md) 실측: amount 0.7%는 상장필터 드롭+취약헤더 인공물, buyer-centric 미드롭으로 amount 행 7.9x. 단 원재료 매입처 표 보유사 ~21%(제조업 편중)는 진짜 잔존천장.
 5. **백분위 통일(Phase C)**: industryStats 분포 밴드 + compare funnel. SSOT 경계 문서화 선결.
 6. **회사→산업 점프**: industryBadge/섹터필터 클릭이 산업뷰 띄움(`/map` 이탈 해소).
 
@@ -54,7 +54,7 @@
 
 - **Phase 0 — 비전 문서화(현재).** 본 PRD. 메모리엔 경로만.
 - **Phase A — profit-pool(선결 없음, 신규 데이터 0).** ① 위생 commit(유령 API 청소). ② `buildIndustrySummary` 파생 컬럼(영업이익률·coverageRatio). ③ 퍼블릭 `/industry/[id]` stage 2D 격자(브라우저 롤업). ④ 로컬 CenterStack 버블. 즉시 출시·사용 관측. 다른 mainPlan과 무관하게 선행 가능.
-- **Phase B — 공급망 evidence(edges.json 재빌드 선결).** ① "정리: edges 재빌드" commit. ② `Industry.edges()` ratio/amount 컬럼 + hop=2/insights 인자. ③ 퍼블릭 공급망 섹션 ratio/confidence 칩. ④ 로컬 RightStack hop walk. *빈곤을 1급시민으로.*
+- **Phase B — 공급망 evidence(추출 보강 + edges.json 재빌드 선결).** ① **레버 A — `extractRawMaterialEdges` 추출 보강**: (a) 비상장 매입처 미드롭 → buyer별 leaf supply fact + 공급집중도(HHI/CR3, `calcHHI`는 이미 상장무관) (b) 헤더 퍼지화(`매입액`/`비중` exact → `주요매입처`/`비율`/`제NN기매입액(비율)`/합쳐진셀 대응). _attempts 졸업 게이트 후 본진(테스트 동행·edges.json 재빌드). ② `Industry.edges()` ratio/amount 컬럼 + hop=2/insights 인자. ③ 퍼블릭 공급망 섹션 ratio/confidence 칩 + "제조업 매입집중도, 상장사 그래프 아님" 라벨. ④ 로컬 RightStack hop walk. ⑤ **레버 C(선택)** — 매출처 표 동일 기계 재사용으로 customer ratio 채움. *제조업은 두껍게, 비제조업(표 부재)은 honest-gap으로 1급시민.*
 - **Phase C — 백분위 통일(경계 문서화 선결).** ① 백분위 SSOT 경계를 본 PRD/엔진 docstring에 확정(industry=섹터분포 / compare+fin-stmt-lab=peer 정밀). ② engine.ts:312 inert `marketShare` 제거 + industryPercentile 정의 통일. ③ 퍼블릭 industryStats 분포 밴드 + compare funnel. ④ 회사→산업 점프.
 - **Phase D — 차단(착수 금지·재방문 게이트).** 적응형 lifecycle 임계(`_attempts` 졸업) · 가동률 셀 추출 · 세그먼트 · US 산업.
 
