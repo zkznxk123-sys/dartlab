@@ -34,7 +34,9 @@
 
 <svelte:window onclick={() => (menu !== 'none' ? (menu = 'none') : null)} />
 
-<!-- 기간 + 봉 주기 (좌상) — segGroup 자체 위젯 (리본과 동일 패턴) -->
+<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 폐기, 밀도 배치). 좌=기간·봉주기, 우=지표·표시·BT 도구. -->
+<div class="chartTopBar">
+<!-- 기간 + 봉 주기 (좌) — segGroup 자체 위젯 (리본과 동일 패턴) -->
 <div class="chartBar">
 	<span class="segGroup" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'seg on' : 'seg'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</span>
 	<span class="cbDiv"></span>
@@ -138,4 +140,5 @@
 		<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h2.4L6 3.2h4L11.6 5H14v8H2z"/><circle cx="8" cy="8.6" r="2.5"/></svg>
 	</button>
 	<button class="chartTool" onclick={() => (ctl.full = true)} title={T('전체화면 (Shift+F)', 'Fullscreen (Shift+F)')} aria-label="fullscreen">⤢</button>
+</div>
 </div>

@@ -1070,6 +1070,10 @@
 </script>
 
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
+	{#if !ctl.full}
+		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
+		<ChartMenus {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+	{/if}
 	<div class="chartHost" bind:this={el}></div>
 
 	{#if railBox && railDots.length}
@@ -1201,8 +1205,6 @@
 				</div>
 			</div>
 		{/if}
-	{:else}
-		<ChartMenus {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 
 	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->
