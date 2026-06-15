@@ -45,6 +45,18 @@ FAILURE_LABEL = "pipeline-failure"
 RECENT_N = 3
 _OK_CONCLUSIONS = ("success", "skipped")
 
+# 스케줄 누락(cron drop) 감지 — 최신 run 이 성공이어도 이 시간(h)보다 오래됐으면 stale(드랍된 cron)로 판정.
+# GitHub Actions 스케줄은 best-effort 라 혼잡 시 run 기록 없이 건너뛴다 → 실패 0 인데 데이터가 안 들어오는
+# 조용한 갭(2026-06-15 실측: 월요일 gov price·index cron 둘 다 미발화, 다른 워크플로는 정상 발화).
+# **opt-in** — 여기 등록된 워크플로우만 staleness 검사(미등록=실패 감지만). 값 = 정상 최대 간격(주말 포함)+여유.
+# 새 등록 시 그 cron 의 정상 최대 간격을 넘겨 잡아야 정상 주말 갭 오탐(false-positive)이 없다.
+STALE_AFTER_HOURS: dict[str, float] = {
+    # gov = 평일(1-5) 발행 + 토 derive. 정상 최대 간격 = 토 run(~22:10 KST) → 월 13:40 KST ≈ 39.5h. 42h=+2.5h 여유.
+    # 월 cron 드랍 시 화 05:00 KST 감사에서 age ~55h>42h → stale 감지+자동 트리거. 월 05:00 정상치(~31h)는 미탐.
+    "Gov Price Sync (Bulk)": 42,
+    "Gov Index Sync (Bulk)": 42,
+}
+
 # 실패 원인 분류 시그니처 (gh run view 출력 = 잡 목록 + ANNOTATIONS, 소문자 매칭).
 _SIG = {
     "메모리/디스크 (runner)": ("lost communication", "out of memory", "killed", "no space left", "oom"),
@@ -125,15 +137,46 @@ def _rerunFailed(runId: int) -> bool:
     return True
 
 
-def _triage(runs: list[dict]) -> dict:
+def _triggerWorkflow(name: str) -> bool:
+    """stale(드랍된 cron) 워크플로우를 새로 트리거 (gh workflow run, actions:write). 성공 시 True.
+
+    실패 run 재실행(_rerunFailed)과 달리 stale 은 run 기록 자체가 없어 fresh dispatch 가 필요하다.
+    워크플로우에 workflow_dispatch 트리거가 있어야 한다(감시 대상 데이터 파이프라인은 모두 보유).
+    """
+    result = subprocess.run(
+        ["gh", "workflow", "run", name],
+        capture_output=True,
+        text=True,
+        env={**os.environ},
+    )
+    if result.returncode != 0:
+        print(f"[monitor] workflow run 트리거 실패 ({name}): {result.stderr.strip()}")
+        return False
+    return True
+
+
+def _ageHours(createdAt: str | None, now: datetime) -> float | None:
+    """ISO8601 createdAt → 경과 시간(h). 없음·파싱 실패면 None(=staleness 검사 스킵)."""
+    if not createdAt:
+        return None
+    try:
+        ts = datetime.fromisoformat(createdAt.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return (now - ts).total_seconds() / 3600
+
+
+def _triage(runs: list[dict], *, maxGapHours: float | None = None, now: datetime | None = None) -> dict:
     """최근 실행 목록 → 상태 판정 (부작용 없는 순수 함수, 테스트 대상).
 
     Args:
         runs: ``_recentRuns`` 결과 (최신순). 빈 목록 허용.
+        maxGapHours: 설정 시 최신 성공 run 이 이보다 오래되면 stale(드랍된 cron) 판정. None=검사 안 함(opt-in).
+        now: staleness 기준 시각(테스트 주입용). None=현재 UTC.
 
     Returns:
         ``{"state": ..., "conclusion": ..., "url": ..., "runId": ...}`` —
-        state ∈ no_runs / running / ok / transient(첫 실패) / persistent(연속 2회+).
+        state ∈ no_runs / running / ok / stale(성공이나 cron 누락) / transient(첫 실패) / persistent(연속 2회+).
 
     Raises:
         없음.
@@ -154,6 +197,11 @@ def _triage(runs: list[dict]) -> dict:
     if status == "in_progress" or conclusion == "":
         return {"state": "running", "conclusion": status or "in_progress", "url": url, "runId": runId}
     if conclusion in _OK_CONCLUSIONS:
+        # 최신이 성공이어도 cron cadence 보다 오래됐으면 stale(GitHub 가 스케줄 run 을 기록없이 드랍 — 조용한 갭).
+        if maxGapHours is not None:
+            age = _ageHours(latest.get("createdAt"), now or datetime.now(timezone.utc))
+            if age is not None and age > maxGapHours:
+                return {"state": "stale", "conclusion": f"{conclusion} · {age:.0f}h 경과", "url": url, "runId": runId}
         return {"state": "ok", "conclusion": conclusion, "url": url, "runId": runId}
 
     # 최신 실패 — 직전 실행도 실패면 persistent, 아니면 첫 실패(transient).
@@ -186,12 +234,13 @@ def _findOpenIssue() -> int | None:
         return None
 
 
-def _issueTitle(persistent: list[dict], retried: list[dict]) -> str:
-    """실패 Issue 제목 — 연속 실패가 있으면 'Pipeline failure', 단발뿐이면 '(자동 재실행 중)' 표기.
+def _issueTitle(persistent: list[dict], retried: list[dict], stale: list[dict] | None = None) -> str:
+    """실패 Issue 제목 — 연속 실패가 있으면 'Pipeline failure', 단발·누락뿐이면 '(자동 재실행 중)' 표기.
 
     Args:
         persistent: 연속 2회+ 실패 entry list.
         retried: 단발 실패(자동 재실행) entry list.
+        stale: 스케줄 누락(cron drop, 자동 트리거) entry list.
 
     Returns:
         100자 이내 Issue 제목. 워크플로우가 많아 길면 개수 요약으로 축약.
@@ -204,12 +253,15 @@ def _issueTitle(persistent: list[dict], retried: list[dict]) -> str:
         'Pipeline failure: Original SSOT Sync'
         >>> _issueTitle([], [{"name": "Macro Data Sync (Bulk)"}])
         'Pipeline failure (자동 재실행 중): Macro Data Sync (Bulk)'
+        >>> _issueTitle([], [], [{"name": "Gov Price Sync (Bulk)"}])
+        'Pipeline failure (자동 재실행 중): Gov Price Sync (Bulk)'
     """
-    names = ", ".join(f["name"] for f in (persistent + retried))
+    stale = stale or []
+    names = ", ".join(f["name"] for f in (persistent + retried + stale))
     prefix = "Pipeline failure" if persistent else "Pipeline failure (자동 재실행 중)"
     title = f"{prefix}: {names}"
     if len(title) > 100:
-        title = f"{prefix}: {len(persistent) + len(retried)}개 워크플로우"
+        title = f"{prefix}: {len(persistent) + len(retried) + len(stale)}개 워크플로우"
     return title
 
 
@@ -219,10 +271,11 @@ def main():
     statuses: list[dict] = []
     persistent: list[dict] = []  # 연속 2회+ 실패 → Issue 알림
     retried: list[dict] = []  # 첫 실패 → 자동 rerun, 알림 보류
+    stale: list[dict] = []  # 스케줄 누락(cron drop) → 자동 트리거 + 알림
 
     for name in MONITORED_WORKFLOWS:
         runs = _recentRuns(name)
-        triage = _triage(runs)
+        triage = _triage(runs, maxGapHours=STALE_AFTER_HOURS.get(name))
         entry = {"name": name, **triage}
 
         if triage["state"] in ("persistent", "transient"):
@@ -235,6 +288,10 @@ def main():
             entry["reran"] = _rerunFailed(triage["runId"]) if triage["runId"] else False
             retried.append(entry)
             icon = "retry" if entry["reran"] else "FAIL×1"
+        elif triage["state"] == "stale":
+            entry["triggered"] = _triggerWorkflow(name)  # run 기록 부재 → fresh dispatch (rerun 불가)
+            stale.append(entry)
+            icon = "stale→trig" if entry["triggered"] else "STALE"
         elif triage["state"] == "running":
             icon = "running"
         elif triage["state"] == "ok":
@@ -251,27 +308,32 @@ def main():
     _ensureLabel()
     openIssue = _findOpenIssue()
 
-    failing = persistent + retried  # 단발이든 연속이든 모든 실패를 알린다(가시성 우선 — 조용한 실패 0)
+    failing = persistent + retried + stale  # 실패(단발·연속)+스케줄 누락 모두 알린다(가시성 우선 — 조용한 갭 0)
     if failing:
-        body = _buildIssueBody(statuses, persistent, retried)
+        body = _buildIssueBody(statuses, persistent, retried, stale)
         if openIssue:
             _gh(["issue", "comment", str(openIssue), "--body", body])
-            print(f"[monitor] 기존 Issue #{openIssue} 갱신 (연속 {len(persistent)} · 단발 {len(retried)})")
+            print(
+                f"[monitor] 기존 Issue #{openIssue} 갱신 (연속 {len(persistent)} · 단발 {len(retried)} · 누락 {len(stale)})"
+            )
         else:
-            title = _issueTitle(persistent, retried)
+            title = _issueTitle(persistent, retried, stale)
             out = _gh(["issue", "create", "--title", title, "--body", body, "--label", FAILURE_LABEL])
-            print(f"[monitor] Issue 생성 (연속 {len(persistent)} · 단발 {len(retried)}): {out}")
+            print(f"[monitor] Issue 생성 (연속 {len(persistent)} · 단발 {len(retried)} · 누락 {len(stale)}): {out}")
     elif openIssue:
         _gh(["issue", "close", str(openIssue), "--comment", "모든 파이프라인 정상 복구 — 자동 닫기."])
         print(f"[monitor] Issue #{openIssue} 자동 닫기 (실패 0)")
     else:
         print("[monitor] 전부 정상, 열린 Issue 없음")
 
-    _writeSummary(statuses, persistent, retried)
+    _writeSummary(statuses, persistent, retried, stale)
 
 
-def _buildIssueBody(statuses: list[dict], persistent: list[dict], retried: list[dict]) -> str:
-    """Issue 본문 생성 — 연속 실패 + 원인 분류 + 자동 재실행 현황."""
+def _buildIssueBody(
+    statuses: list[dict], persistent: list[dict], retried: list[dict], stale: list[dict] | None = None
+) -> str:
+    """Issue 본문 생성 — 연속 실패 + 스케줄 누락 + 원인 분류 + 자동 재실행/트리거 현황."""
+    stale = stale or []
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     lines = [
         f"## Pipeline Monitor Report ({now})\n",
@@ -284,6 +346,7 @@ def _buildIssueBody(statuses: list[dict], persistent: list[dict], retried: list[
             "running": ":hourglass:",
             "persistent": ":x:",
             "transient": ":warning:",
+            "stale": ":fast_forward:",
         }.get(s["state"], ":grey_question:")
         cls = s.get("classification", "-")
         lines.append(f"| {s['name']} | {icon} {s['conclusion']} | {cls} | [보기]({s['url']}) |")
@@ -294,6 +357,14 @@ def _buildIssueBody(statuses: list[dict], persistent: list[dict], retried: list[
             f"- **{f['name']}**: `{f['conclusion']}` — 원인: **{f.get('classification', 'unknown')}** — [로그]({f['url']})"
         )
 
+    if stale:
+        lines.append("\n### 스케줄 누락 (cron drop — 자동 트리거)")
+        for s in stale:
+            mark = "트리거됨" if s.get("triggered") else "트리거 실패"
+            lines.append(
+                f"- {s['name']}: `{s['conclusion']}` ({mark}) — GitHub 가 스케줄 run 을 드랍 — [최근]({s['url']})"
+            )
+
     if retried:
         lines.append("\n### 단발 실패 — 자동 재실행 중 (알림 보류)")
         for r in retried:
@@ -301,14 +372,17 @@ def _buildIssueBody(statuses: list[dict], persistent: list[dict], retried: list[
             lines.append(f"- {r['name']}: {r.get('classification', '-')} ({mark}) — [로그]({r['url']})")
 
     lines.append(
-        f"\n> 자동 생성 by Pipeline Monitor ({now}). 모든 실패 알림 — 단발은 자동 재실행 병행(blip 이면 자가치유), "
-        "연속 2회+ 는 조치 필요. 복구되면 자동 닫힘."
+        f"\n> 자동 생성 by Pipeline Monitor ({now}). 모든 실패 알림 — 단발은 자동 재실행, 스케줄 누락(cron drop)은 "
+        "자동 트리거 병행(자가치유), 연속 2회+ 는 조치 필요. 복구되면 자동 닫힘."
     )
     return "\n".join(lines)
 
 
-def _writeSummary(statuses: list[dict], persistent: list[dict], retried: list[dict]) -> None:
+def _writeSummary(
+    statuses: list[dict], persistent: list[dict], retried: list[dict], stale: list[dict] | None = None
+) -> None:
     """GitHub Actions step summary."""
+    stale = stale or []
     summaryPath = os.environ.get("GITHUB_STEP_SUMMARY")
     if not summaryPath:
         return
@@ -317,13 +391,15 @@ def _writeSummary(statuses: list[dict], persistent: list[dict], retried: list[di
         f.write("## Pipeline Health\n\n")
         f.write("| 워크플로우 | 상태 | 원인 |\n|-----------|------|------|\n")
         for s in statuses:
-            icon = (
-                ":white_check_mark:" if s["state"] == "ok" else (":x:" if s["state"] == "persistent" else ":warning:")
+            icon = {"ok": ":white_check_mark:", "persistent": ":x:", "stale": ":fast_forward:"}.get(
+                s["state"], ":warning:"
             )
             f.write(f"| {s['name']} | {icon} {s['conclusion']} | {s.get('classification', '-')} |\n")
 
         if persistent:
             f.write(f"\n**{len(persistent)}개 연속 실패** → Issue 생성/갱신됨\n")
+        elif stale:
+            f.write(f"\n**{len(stale)}개 스케줄 누락(cron drop)** → 자동 트리거\n")
         elif retried:
             f.write(f"\n**{len(retried)}개 단발 실패** → 자동 재실행 (알림 보류)\n")
         else:

@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import importlib.util
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -74,6 +75,64 @@ def test_triage_single_run_failure_is_transient():
     mod = _loadMonitor()
     runs = [{"conclusion": "failure", "status": "completed", "databaseId": 5, "url": "u"}]
     assert mod._triage(runs)["state"] == "transient"
+
+
+# ─── staleness (cron drop — opt-in cadence 감지) ──────────────────────
+
+_NOW = datetime(2026, 6, 16, 5, 0, tzinfo=timezone.utc)  # 화 05:00 KST 감사 시점 가정
+
+
+def test_triage_stale_when_latest_success_too_old():
+    """최신이 success 라도 maxGapHours 초과(GitHub cron drop)면 stale → 자동 트리거 대상."""
+    mod = _loadMonitor()
+    runs = [
+        {
+            "conclusion": "success",
+            "status": "completed",
+            "databaseId": 9,
+            "url": "u",
+            "createdAt": "2026-06-13T15:06:27Z",
+        }
+    ]
+    # 6/13 15:06 → 6/16 05:00 ≈ 61.9h > 42
+    assert mod._triage(runs, maxGapHours=42, now=_NOW)["state"] == "stale"
+
+
+def test_triage_fresh_success_not_stale():
+    """최신 success 가 임계 이내면 ok — 정상 주말 갭 오탐 없음."""
+    mod = _loadMonitor()
+    runs = [
+        {
+            "conclusion": "success",
+            "status": "completed",
+            "databaseId": 9,
+            "url": "u",
+            "createdAt": "2026-06-16T00:00:00Z",
+        }
+    ]
+    assert mod._triage(runs, maxGapHours=42, now=_NOW)["state"] == "ok"  # 5h 경과
+
+
+def test_triage_opt_in_no_maxgap_never_stale():
+    """maxGapHours 미지정(opt-in 아님)이면 아무리 오래돼도 ok — 기존 동작 보존."""
+    mod = _loadMonitor()
+    runs = [
+        {
+            "conclusion": "success",
+            "status": "completed",
+            "databaseId": 9,
+            "url": "u",
+            "createdAt": "2020-01-01T00:00:00Z",
+        }
+    ]
+    assert mod._triage(runs, now=_NOW)["state"] == "ok"
+
+
+def test_stale_after_hours_covers_gov():
+    """gov price·index 가 staleness opt-in 에 등록 (2026-06-15 월요일 cron drop 갭 가드)."""
+    mod = _loadMonitor()
+    assert "Gov Price Sync (Bulk)" in mod.STALE_AFTER_HOURS
+    assert "Gov Index Sync (Bulk)" in mod.STALE_AFTER_HOURS
 
 
 # ─── _classifyFailure (시그니처 매칭) ─────────────────────────────────
