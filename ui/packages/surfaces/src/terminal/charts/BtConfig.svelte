@@ -84,6 +84,19 @@
 		{/if}
 	</div>
 
+	<!-- ④ 검증(OOS) — 학습/검증 분할. 고정 파라미터를 안 본 구간에 적용 (walk-forward 아님, §0.5.9-A) -->
+	{#if ctl.btKey}
+		<div class="btSection">
+			<div class="ctMenuLbl">{T('④ 검증 (학습/검증 분할)', '④ Validation (train/test)')}</div>
+			<div class="ctRow ctRowWrap">
+				{#each [{ v: 0, kr: '없음', en: 'off' }, { v: 0.7, kr: '70:30', en: '70:30' }, { v: 0.6, kr: '60:40', en: '60:40' }] as o (o.v)}
+					<button class={ctl.btOosSplit === o.v ? 'mItem on' : 'mItem'} onclick={() => (ctl.btOosSplit = o.v)}>{T(o.kr, o.en)}</button>
+				{/each}
+			</div>
+			{#if ctl.btOosSplit > 0}<div class="btDesc">{T('파란 구간 = 검증(out-of-sample). 검증 성과가 학습보다 나쁘면 과최적화 신호', 'blue = out-of-sample; worse than train = overfit signal')}</div>{/if}
+		</div>
+	{/if}
+
 	<!-- 벤치마크 — 읽기전용(끌 수 없음 = 공정 비교 약속 노출) -->
 	<div class="btBench">{T('비교 기준 · 보유(B&H) · 동일 비용 적용', 'benchmark · buy & hold · same costs')}</div>
 	<div class="btModelNote">{T('신호 t일 종가 → t+1일 시가 체결 · 미래참조 차단 · 과거 가정 노출형 시뮬레이션(추천 아님)', 'signal close(t) → fill open(t+1) · no look-ahead · assumption-exposed simulation (not advice)')}</div>

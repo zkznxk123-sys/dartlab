@@ -793,11 +793,12 @@
 			return;
 		}
 		void ctl.adj;
+		const oos = ctl.btOosSplit;
 		// 표시 시계열(수정주가 기본 ON)로 백테스트 — 원본이면 분할 절벽을 -98% 폭락으로 오인한다.
 		const all = displaySeries();
 		if (!all.length) return;
 		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
-		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc, costsBp: bp, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
+		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btResult = res;
 		publishBt(res, all);
 		if (res) applyBt(c, ++btRunSeq);

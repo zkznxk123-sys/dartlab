@@ -3,7 +3,7 @@
 // 거래정지(v=0/o=0) 봉은 체결 자동 이연. B&H = 같은 엔진에 target≡1 주입(공정 비교 코드 보장).
 import { BT_PRESETS } from './presets';
 import { BT_COSTS, BT_ENGINE_VERSION } from './types';
-import type { BtCostsBp, BtPresetKey, BtResult, BtRunSpec, BtSpecInput, BtTrade, BtWarning, Candle } from './types';
+import type { BtCostsBp, BtPresetKey, BtResult, BtRunSpec, BtSplitMetrics, BtSpecInput, BtTrade, BtWarning, Candle } from './types';
 
 interface Costs {
 	comm: number;
@@ -184,12 +184,50 @@ function reconcileOk(equity: (number | null)[], trades: BtTrade[], retPct: numbe
 	return true;
 }
 
+// equity 하위슬라이스 [fromIdx..toIdx] 의 재기준 성과 — base-independent 헬퍼 재사용(03 §0.5.9-A).
+function splitMetrics(equity: (number | null)[], fromIdx: number, toIdx: number, tradeCount: number): BtSplitMetrics {
+	let first: number | null = null;
+	let last: number | null = null;
+	for (let i = fromIdx; i <= toIdx; i++) {
+		const e = equity[i];
+		if (e == null) continue;
+		if (first == null) first = e;
+		last = e;
+	}
+	const sub = equity.slice(fromIdx, toIdx + 1);
+	const retPct = first != null && last != null && first > 0 ? (last / first - 1) * 100 : 0;
+	return { retPct, sharpe: riskRatios(sub).sharpe, mddPct: mdd(sub), tradeCount, bars: toIdx - fromIdx };
+}
+
+// OOS 학습/검증 분할 — 고정 전략을 split 지점 전후로 나눠 성과 산출(walk-forward 아님, §0.5.9-A).
+function computeOos(
+	equity: (number | null)[],
+	trades: BtTrade[],
+	candles: Candle[],
+	startIdx: number,
+	n: number,
+	frac: number
+): { splitIdx: number; splitT: string; train: BtSplitMetrics; test: BtSplitMetrics } | null {
+	if (!(frac > 0 && frac < 1)) return null;
+	const splitIdx = startIdx + Math.floor((n - 1 - startIdx) * frac);
+	if (splitIdx <= startIdx || splitIdx >= n - 1) return null;
+	const splitT = candles[splitIdx].t;
+	const trainCount = trades.filter((t) => t.entryT <= splitT).length;
+	const testCount = trades.filter((t) => t.entryT > splitT).length;
+	return {
+		splitIdx,
+		splitT,
+		train: splitMetrics(equity, startIdx, splitIdx, trainCount),
+		test: splitMetrics(equity, splitIdx, n - 1, testCount)
+	};
+}
+
 /** 백테스트 실행 — 전략(선택 비용)·전략(비용 OFF, 비용드래그용)·B&H(동일 비용) 3패스. null = candles 부족. */
 export function runBacktest(
 	candles: Candle[],
 	preset: BtPresetKey,
 	params: Record<string, number>,
-	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput }
+	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number }
 ): BtResult | null {
 	const def = BT_PRESETS.find((d) => d.key === preset);
 	if (!def) return null;
@@ -270,6 +308,7 @@ export function runBacktest(
 		mddWindow: ddWin ? { peakIdx: ddWin.peakIdx, troughIdx: ddWin.troughIdx, recoverIdx: ddWin.recoverIdx } : null,
 		deferredBars: strat.deferredBars,
 		warnings,
-		runSpec
+		runSpec,
+		oos: opts.oosSplit ? computeOos(strat.equity, closedAndOpen, candles, startIdx, n, opts.oosSplit) : null
 	};
 }

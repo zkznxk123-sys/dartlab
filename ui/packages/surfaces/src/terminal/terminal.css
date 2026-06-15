@@ -417,6 +417,12 @@
 .dlTerm .btKpis { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 9.5px; color: var(--dim); margin-top: 1px; }
 .dlTerm .btKpis b { color: var(--txt); margin-left: 3px; }
 .dlTerm .btSub { font-style: normal; color: var(--dimmer); margin-left: 2px; font-size: 8.5px; }
+/* OOS 학습/검증 2열 (03 §0.5.9-E) — 검증=파란 톤(차트 음영과 일치) */
+.dlTerm .btOos { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 9.5px; color: var(--dim); margin-top: 3px; padding-top: 3px; border-top: 1px dashed var(--dl-line, #1b2130); }
+.dlTerm .btOos b { color: var(--txt); }
+.dlTerm .btOosLbl { color: var(--dim); }
+.dlTerm .btOosLbl.test { color: #60a5fa; }
+.dlTerm .btOosArrow { color: var(--dimmer); margin: 0 2px; }
 .dlTerm .btTradesBtn { background: none; border: none; color: var(--amber); font-family: var(--sans); font-size: 10px; cursor: pointer; padding: 0; }
 .dlTerm .btTrades { max-height: 160px; overflow: auto; margin-top: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
 .dlTerm .btTable { width: 100%; border-collapse: collapse; font-size: 9.5px; }

@@ -111,6 +111,7 @@ export class ChartCtl {
 	btParams = $state<Record<string, number>>({});
 	btCosts = $state(true);
 	btCostsBp = $state<BtCostsBp>({ ...BT_COSTS });
+	btOosSplit = $state<number>(0); // OOS 학습/검증 분할 비율 (0=없음, 0.7=70:30, 0.6=60:40). 세션 한정.
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀

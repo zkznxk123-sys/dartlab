@@ -67,6 +67,20 @@ export interface BtMetrics {
 }
 
 /**
+ * OOS 분할 검산(03 §0.5.9-A floor 승격) — 같은 전략을 학습/검증 구간에 나눠 성과 비교.
+ * ⚠ walk-forward(refit) 아님 — *고정* 파라미터를 학습 구간 밖(test)에 적용했을 때의 성과.
+ * p값/DSR 주장이 아니라 "이 파라미터를 안 본 구간에 적용하니 이랬다"는 서술 → 단일종목 표본이 받친다(§0.6.1).
+ * 메트릭은 base-independent(riskRatios·mdd) 헬퍼라 equity 하위슬라이스에 그대로 산출.
+ */
+export interface BtSplitMetrics {
+	retPct: number; // 구간 시작→끝 누적 수익률(재기준)
+	sharpe: number | null; // 구간 일수익률 연환산 (표본<60봉 → null)
+	mddPct: number; // 구간 내 최대 낙폭
+	tradeCount: number; // 구간 내 진입 거래 수
+	bars: number; // 구간 거래일 수
+}
+
+/**
  * 결과 재현 메타(03 §3 "모든 결과에 RunSpec·기준일·원천·수정주가·배당·비용·벤치마크 부착").
  * 순수 데이터 조립(Date 미사용 — generatedAt 은 export 시 호출측이 부여). 호출측이 opts.spec 으로 입력 주입.
  */
@@ -95,6 +109,7 @@ export interface BtResult {
 	deferredBars: number; // 평가창 전체 v=0 체결 이연 봉 수(감사·경고 근거)
 	warnings: BtWarning[];
 	runSpec?: BtRunSpec; // opts.spec 주입 시 — 재현·푸터·export 용 (미주입이면 undefined)
+	oos?: { splitIdx: number; splitT: string; train: BtSplitMetrics; test: BtSplitMetrics } | null; // opts.oosSplit ∈ (0,1) 시 — 학습/검증 분할 성과
 }
 
 /** runBacktest opts.spec 입력 — 호출측(PriceChart)이 아는 종목/데이터 메타. */

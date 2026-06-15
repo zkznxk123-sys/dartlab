@@ -12,6 +12,7 @@ export const BT_EQUITY = 'BT_EQUITY';
 const tradeMap = new Map<number, { side: 'B' | 'S'; px: number }>();
 const eqMap = new Map<number, { eq: number | null; bh: number | null }>();
 let mddTs: { peak: number; recover: number | null } | null = null; // 최대낙폭 창 (timestamp) — 에쿼티 페인 음영
+let oosSplitTs: number | null = null; // OOS 학습/검증 분할 지점 (timestamp) — 검증 구간 음영 + 분할선 (03 §0.5.9-E)
 
 const toMs = (t: string) => Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8));
 
@@ -25,7 +26,25 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 		shortName: 'BT',
 		figures: [],
 		calc: (list: { timestamp: number }[]) => list.map(() => ({})),
-		draw: ({ ctx, kLineDataList, visibleRange, barSpace, xAxis, yAxis }: any): boolean => {
+		draw: ({ ctx, kLineDataList, visibleRange, barSpace, xAxis, yAxis, bounding }: any): boolean => {
+			// OOS 검증 구간 음영 + 분할선 — 검증 구간 성과가 눈으로 나쁘면 그 자체가 정직한 경고(§0.5.9-E). 배경이라 마커보다 먼저.
+			if (oosSplitTs != null && bounding) {
+				const f0 = Math.max(0, visibleRange.from);
+				const t0 = Math.min(kLineDataList.length, visibleRange.to);
+				let splitX = null;
+				for (let i = f0; i < t0; i++) { if (kLineDataList[i]?.timestamp >= oosSplitTs) { splitX = xAxis.convertToPixel(i); break; } }
+				if (splitX != null) {
+					ctx.fillStyle = 'rgba(96,165,250,0.06)';
+					ctx.fillRect(splitX, 0, Math.max(1, bounding.width - splitX), bounding.height);
+					ctx.save();
+					ctx.strokeStyle = 'rgba(96,165,250,0.55)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+					ctx.beginPath(); ctx.moveTo(splitX, 0); ctx.lineTo(splitX, bounding.height); ctx.stroke(); ctx.setLineDash([]);
+					ctx.font = '9px monospace';
+					ctx.fillStyle = '#8b919e'; ctx.textAlign = 'right'; ctx.fillText('학습', splitX - 4, 11);
+					ctx.fillStyle = '#60a5fa'; ctx.textAlign = 'left'; ctx.fillText('검증', splitX + 4, 11);
+					ctx.restore();
+				}
+			}
 			if (!tradeMap.size || barSpace.bar < 2) return true; // LOD-1: 초줌아웃 = 마커 생략 (에쿼티가 성과 전달)
 			const label = barSpace.bar >= 8; // LOD-2: 가격 라벨은 가시 ≤ ~200봉에서만
 			const from = Math.max(0, visibleRange.from);
@@ -98,7 +117,9 @@ export function publishBt(result: BtResult | null, candles: Candle[]): void {
 	tradeMap.clear();
 	eqMap.clear();
 	mddTs = null;
+	oosSplitTs = null;
 	if (!result) return;
+	if (result.oos) oosSplitTs = toMs(result.oos.splitT);
 	for (const tr of result.trades) {
 		tradeMap.set(toMs(tr.entryT), { side: 'B', px: tr.entryPx });
 		if (tr.exitT && tr.exitPx != null) tradeMap.set(toMs(tr.exitT), { side: 'S', px: tr.exitPx });

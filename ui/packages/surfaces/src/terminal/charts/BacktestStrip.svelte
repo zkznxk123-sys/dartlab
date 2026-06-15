@@ -22,6 +22,7 @@
 	const sgn = (v: number, d = 1) => (v >= 0 ? '+' : '') + v.toFixed(d);
 	const cls = (v: number) => (v > 0 ? 'tUp' : v < 0 ? 'tDn' : 'tNeu');
 	const beats = $derived(m.retPct >= result.bh.retPct);
+	const oos = $derived(result.oos);
 	const fmtDate = (t: string) => `${t.slice(2, 4)}.${t.slice(4, 6)}.${t.slice(6, 8)}`;
 	// 누적 P&L — 시간순 (1+r) 누적곱 −1 (%). 표시는 역순 테이블이라 원본 인덱스로 매핑.
 	const cumPct = $derived.by(() => {
@@ -63,6 +64,19 @@
 		<span>{T('비용', 'cost')} <b class="tDn">{m.costDragPct.toFixed(1)}%p</b></span>
 		<button class="btTradesBtn" onclick={() => (showTrades = !showTrades)}>{T('거래', 'trades')} {m.tradeCount} {showTrades ? '▾' : '▸'}</button>
 	</div>
+	{#if oos}
+		<!-- OOS 학습/검증 2열 — 고정 파라미터를 안 본 구간에 적용(walk-forward 아님). 검증<학습 = 과최적화 신호. -->
+		<div class="btOos mono">
+			<span class="btOosLbl" title={fmtDate(result.startIdx >= 0 && result.runSpec ? result.runSpec.range.from : '') + ' ~ ' + fmtDate(oos.splitT)}>{T('학습', 'train')}</span>
+			<b class={cls(oos.train.retPct)}>{sgn(oos.train.retPct)}%</b>
+			<i class="btSub">Sh {oos.train.sharpe != null ? oos.train.sharpe.toFixed(2) : '—'} · MDD {oos.train.mddPct.toFixed(0)}% · {oos.train.tradeCount}{T('거래', 'tr')}</i>
+			<span class="btOosArrow">→</span>
+			<span class="btOosLbl test" title={fmtDate(oos.splitT) + ' ~ ' + (result.runSpec ? fmtDate(result.runSpec.range.to) : '')}>{T('검증(OOS)', 'test(OOS)')}</span>
+			<b class={cls(oos.test.retPct)}>{sgn(oos.test.retPct)}%</b>
+			<i class="btSub">Sh {oos.test.sharpe != null ? oos.test.sharpe.toFixed(2) : '—'} · MDD {oos.test.mddPct.toFixed(0)}% · {oos.test.tradeCount}{T('거래', 'tr')}</i>
+			{#if oos.test.retPct < oos.train.retPct}<span class="btWarn">{T('검증 열위 — 과최적화 주의', 'test underperforms — overfit risk')}</span>{/if}
+		</div>
+	{/if}
 	{#if showTrades && result.trades.length}
 		<div class="btTrades">
 			<table class="btTable mono">
