@@ -76,6 +76,9 @@
 				<div class="btCell"><span>{T('평균 거래', 'avg trade')}</span><b class={m.avgTradePct != null ? cls(m.avgTradePct) : 'tNeu'}>{m.avgTradePct != null ? sgn(m.avgTradePct) + '%' : '—'}</b></div>
 				<div class="btCell"><span>{T('노출', 'exposure')}</span><b>{m.exposurePct.toFixed(0)}%</b></div>
 				<div class="btCell"><span>{T('비용 드래그', 'cost drag')}</span><b class="tDn">{m.costDragPct.toFixed(1)}%p</b></div>
+				<div class="btCell" title={T('전략 일수익률의 보유(B&H) 대비 민감도', 'sensitivity to buy & hold')}><span>{T('베타(vs B&H)', 'beta')}</span><b>{m.beta != null ? m.beta.toFixed(2) : '—'}</b></div>
+				<div class="btCell" title={T('베타 설명분 초과 수익 (연환산)', 'beta-adjusted excess return, annualized')}><span>{T('알파(연)', 'alpha p.a.')}</span><b class={m.alphaPct != null ? cls(m.alphaPct) : 'tNeu'}>{m.alphaPct != null ? sgn(m.alphaPct) + '%' : '—'}</b></div>
+				<div class="btCell" title={T('액티브 수익 / 추적오차 (연환산)', 'active return / tracking error')}><span>{T('정보비율', 'info ratio')}</span><b class={m.infoRatio != null ? cls(m.infoRatio) : 'tNeu'}>{m.infoRatio != null ? m.infoRatio.toFixed(2) : '—'}</b></div>
 			</div>
 			{#if result.oos}
 				<div class="btSubHead">{T('학습 / 검증 (OOS) — 고정 파라미터, walk-forward 아님', 'train / test (OOS) — fixed params, not walk-forward')}</div>

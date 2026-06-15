@@ -64,6 +64,10 @@ export interface BtMetrics {
 	avgHoldDays: number | null;
 	exposurePct: number;
 	costDragPct: number; // 비용 ON 수익률 − 비용 OFF 수익률 (≤0)
+	// 벤치마크(B&H) 상대 — 서술적(단일창)이라 표본이 받침(§0.5.9-C #2). 표본<60봉 → null.
+	beta: number | null; // 전략 일수익률의 B&H 대비 베타(노출 민감도, long/flat 이라 보통 ≤1)
+	alphaPct: number | null; // 연환산 알파(베타 설명분 초과 수익, %)
+	infoRatio: number | null; // 정보비율 = 액티브수익 평균 / 추적오차 (연환산)
 }
 
 /**

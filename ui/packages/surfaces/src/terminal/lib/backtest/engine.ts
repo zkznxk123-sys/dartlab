@@ -151,6 +151,39 @@ function riskRatios(equity: (number | null)[]): { sharpe: number | null; sortino
 	return { sharpe, sortino };
 }
 
+// 벤치마크(B&H) 상대 통계 — 베타·연환산 알파·정보비율. 같은 인덱스에서 둘 다 유효한 일수익률 쌍만.
+// 서술적(단일창) 지표라 표본이 받침(§0.5.9-C). 표본 < 60봉 → 전부 null(소표본 거짓말 차단, riskRatios 와 동일 하한).
+function benchmarkStats(stratEq: (number | null)[], bhEq: (number | null)[]): { beta: number | null; alphaPct: number | null; infoRatio: number | null } {
+	const s: number[] = [];
+	const b: number[] = [];
+	let ps: number | null = null;
+	let pb: number | null = null;
+	for (let i = 0; i < stratEq.length; i++) {
+		const es = stratEq[i];
+		const eb = bhEq[i];
+		if (es != null && eb != null) {
+			if (ps != null && pb != null && ps > 0 && pb > 0) { s.push(es / ps - 1); b.push(eb / pb - 1); }
+			ps = es;
+			pb = eb;
+		} else { ps = es ?? ps; pb = eb ?? pb; }
+	}
+	if (s.length < 60) return { beta: null, alphaPct: null, infoRatio: null };
+	const n = s.length;
+	const ms = s.reduce((a, x) => a + x, 0) / n;
+	const mb = b.reduce((a, x) => a + x, 0) / n;
+	let cov = 0;
+	let varb = 0;
+	for (let i = 0; i < n; i++) { cov += (s[i] - ms) * (b[i] - mb); varb += (b[i] - mb) * (b[i] - mb); }
+	const beta = varb > 0 ? cov / varb : null;
+	const alphaPct = beta != null ? (ms - beta * mb) * 252 * 100 : null;
+	// 정보비율 — 액티브 일수익률(전략 − B&H) 평균 / 표준편차 × √252
+	const act = s.map((x, i) => x - b[i]);
+	const ma = act.reduce((a, x) => a + x, 0) / n;
+	const va = act.reduce((a, x) => a + (x - ma) * (x - ma), 0) / n;
+	const infoRatio = va > 0 ? (ma / Math.sqrt(va)) * Math.sqrt(252) : null;
+	return { beta, alphaPct, infoRatio };
+}
+
 function endRet(equity: (number | null)[]): number {
 	for (let i = equity.length - 1; i >= 0; i--) if (equity[i] != null) return (equity[i]! / 100 - 1) * 100;
 	return 0;
@@ -256,6 +289,7 @@ export function runBacktest(
 	const ddWin = mddWindowOf(strat.equity);
 	const ratios = riskRatios(strat.equity);
 	const bhRatios = riskRatios(bhPass.equity);
+	const ben = benchmarkStats(strat.equity, bhPass.equity);
 
 	const warnings: BtWarning[] = [];
 	if (closedAndOpen.length < 10) warnings.push({ kind: 'fewTrades' });
@@ -302,7 +336,10 @@ export function runBacktest(
 			worstTradePct: closedAndOpen.length ? Math.min(...closedAndOpen.map((t) => t.retPct)) : null,
 			avgHoldDays: closedAndOpen.length ? closedAndOpen.reduce((a, t) => a + t.holdDays, 0) / closedAndOpen.length : null,
 			exposurePct: (strat.heldBars / Math.max(1, windowBars - 1)) * 100,
-			costDragPct: endRet(stratOn.equity) - endRet(stratOff.equity)
+			costDragPct: endRet(stratOn.equity) - endRet(stratOff.equity),
+			beta: ben.beta,
+			alphaPct: ben.alphaPct,
+			infoRatio: ben.infoRatio
 		},
 		bh: { retPct: bhRet, cagrPct: cagr(bhRet, windowBars), mddPct: mdd(bhPass.equity), sharpe: bhRatios.sharpe },
 		mddWindow: ddWin ? { peakIdx: ddWin.peakIdx, troughIdx: ddWin.troughIdx, recoverIdx: ddWin.recoverIdx } : null,
