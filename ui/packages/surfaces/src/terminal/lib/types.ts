@@ -268,6 +268,34 @@ export interface PercentileMetric {
 	// p10~p90 5분위점 = 분포곡선(skew 반영, 정규가정 아님)·회사 위치 마커 렌더용.
 	band: { p10: number; p25: number; median: number; p75: number; p90: number } | null;
 }
+// ── 유니버스 교차 백분위 (PercentileCrossDialog) ──
+// co.percentile(업종 고정, Company['percentile'])과 별개. percentileIn(code, universe) 가 반환.
+// 소속지수('index')는 구성종목 멤버십 데이터 부재로 BLOCKED — union 미포함(00 ④ · 02 KILL#5).
+export type Universe = 'industry' | 'market' | 'all';
+export interface CategoricalShare {
+	key: string;
+	kr: string;
+	en: string;
+	v: string; // 회사 등급(범주형) — 0~100 백분위로 칠하지 않음(02 KILL#3).
+	tone: Tone;
+	sameShare: number | null; // 이 유니버스 내 같은 등급 비중 %(순위 아님).
+	peerN: number; // 등급 보유 동종사 수.
+}
+export interface PriceStat {
+	v: number | null;
+	// 분포 내 위치(낮을수록 작은 p) — lowerBetter 미적용. 가격 우열 모호(저PER=저평가 vs 우려)라 톤·우수 프레이밍 금지(02 KILL#2).
+	p: number | null;
+	band: { p10: number; p25: number; median: number; p75: number; p90: number } | null;
+	n: number;
+}
+export interface UniversePercentile {
+	universe: Universe;
+	label: string; // 유니버스 라벨(업종명 / KOSPI·KOSDAQ / 전체상장사).
+	n: number; // 모집단 표본 수(n<10 = 띠·곡선 숨김, 02 정직 가드).
+	metrics: PercentileMetric[]; // 정량 13지표 — 업종=industryStats 밴드, 시장/전체=라이브 5분위.
+	grades: CategoricalShare[]; // 정성 등급 동급비중(거버넌스·경영권·감사·주주환원·현금흐름).
+	price: { per: PriceStat; pbr: PriceStat }; // 가격(펀더와 분리 격자).
+}
 export interface Valuation {
 	per: Num;
 	pbr: Num;

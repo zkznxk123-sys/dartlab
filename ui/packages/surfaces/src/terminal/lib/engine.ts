@@ -21,6 +21,10 @@ import type {
 	StackSeg,
 	FinanceCompany,
 	IndustryStat,
+	Universe,
+	UniversePercentile,
+	CategoricalShare,
+	PriceStat,
 } from './types';
 
 const SECTOR_EN: Record<string, string> = {
@@ -122,6 +126,19 @@ function median(a: Num[]): number | null {
 	const s = a.filter((x): x is number => x != null && Number.isFinite(x)).sort((x, y) => x - y);
 	return s.length ? s[Math.floor(s.length / 2)] : null;
 }
+// 정렬값 배열 5분위(p10~p90) 선형보간 — 시장/전체 유니버스 분포곡선을 모집단 배열에서 라이브 산출(prebuild 불필요).
+// 표본 < 10 이면 null — 분포 신뢰 부족(02 정직 가드 "n<10 분포 숨김"). DistCurve 는 band null 이면 미렌더.
+function quantileBand(arr: Num[]): { p10: number; p25: number; median: number; p75: number; p90: number } | null {
+	const xs = arr.filter((x): x is number => x != null && Number.isFinite(x)).sort((a, b) => a - b);
+	if (xs.length < 10) return null;
+	const q = (f: number): number => {
+		const idx = (xs.length - 1) * f;
+		const lo = Math.floor(idx);
+		const hi = Math.ceil(idx);
+		return lo === hi ? xs[lo] : xs[lo] + (xs[hi] - xs[lo]) * (idx - lo);
+	};
+	return { p10: q(0.1), p25: q(0.25), median: q(0.5), p75: q(0.75), p90: q(0.9) };
+}
 function pctRank(arr: Num[], v: Num, lowerBetter?: boolean): number | null {
 	const xs = arr.filter((x): x is number => x != null && Number.isFinite(x));
 	if (!xs.length || v == null) return null;
@@ -168,6 +185,8 @@ export interface Engine {
 	nameOf(code: string): string;
 	// 피출자사명 → 상장 종목 해소(시총·최근 순익). 정규화 exact + 시총·재무 존재 게이트 — 미해소 = null(비상장 취급).
 	lookupListed(name: string): { code: string; marketCap: number; net: number | null } | null;
+	// 유니버스 교차 백분위 — co.percentile(업종 고정)과 달리 모집단(업종/시장/전체) 선택. 다이얼로그 전용(콜드 비용 0).
+	percentileIn(code: string, universe: Universe): UniversePercentile | null;
 }
 
 export function createEngine(raw: RawData): Engine {
@@ -344,24 +363,25 @@ export function createEngine(raw: RawData): Engine {
 		};
 	}
 
-	function industryPercentile(code: string): Company['percentile'] {
-		const node = ecoByCode[code];
-		if (!node) return null;
-		const peers = industryNodes(node.industry);
+	// ── 유니버스 교차 백분위 (engine 내부, raw 클로저) ──
+	// buildFundMetrics: 정량 13지표 백분위. peers(모집단)만 바꾸면 같은 산식이 업종/시장/전체로 — pctRank 는
+	//   유니버스 무관 순수함수(로직 복제 0). band: useStatsBand=업종 industryStats(prebuilt), 아니면 peers 라이브 5분위.
+	//   lowerBetter=true (부채비율·CCC·발생액비율) 는 pctRank 가 p 를 뒤집어 "상위 N%" 가 항상 우수를 뜻함.
+	function buildFundMetrics(node: EcoNode, peers: EcoNode[], useStatsBand: boolean): PercentileMetric[] {
 		const col = (f: keyof EcoNode): Num[] => peers.map((n) => (n[f] as Num) ?? null);
-		// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사) 은 null. distribution 키 12종(아래 metrics 와 1:1).
 		const statsRec = raw.industryStats as Record<string, IndustryStat> | null;
 		const dist = statsRec?.[node.industry]?.distribution;
-		const bandOf = (key: string): PercentileMetric['band'] => {
-			const d = dist?.[key];
-			if (!d || d.p10 == null || d.p90 == null) return null;
-			const med = d.median ?? d.p10;
-			return { p10: d.p10, p25: d.p25 ?? med, median: med, p75: d.p75 ?? med, p90: d.p90 };
+		const bandOf = (field: keyof EcoNode): PercentileMetric['band'] => {
+			if (useStatsBand) {
+				// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사) 은 null. distribution 키 = metric field 와 1:1.
+				const d = dist?.[field as string];
+				if (!d || d.p10 == null || d.p90 == null) return null;
+				const med = d.median ?? d.p10;
+				return { p10: d.p10, p25: d.p25 ?? med, median: med, p75: d.p75 ?? med, p90: d.p90 };
+			}
+			return quantileBand(col(field)); // 시장/전체 = 같은 모집단 배열 라이브 5분위(표본<10 → null, 백분위와 자기일관)
 		};
-		// 원시지표 백분위 — *우측 패널(크로스 유니버스, 다른 세션) 전용*. 다이얼로그 등급기준은 이걸 쓰지 않고
-		// 종합 축 백분위(grades[].topPct)를 쓴다. 수익성(4)·성장(2)·재무안정(2)·유동성(1)·효율성(2)·이익질(1)·거버넌스(1).
-		// lowerBetter=true (부채비율·CCC·발생액비율) 는 pctRank 가 p 를 뒤집어 "상위 N%" 가 항상 우수를 뜻함.
-		const metrics = [
+		return [
 			{ kr: '영업이익률', en: 'OP margin', axis: 'prof', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
 			{ kr: '순이익률', en: 'Net margin', axis: 'prof', v: node.netMargin ?? null, p: pctRank(col('netMargin'), node.netMargin ?? null), unit: '%', band: bandOf('netMargin') },
 			{ kr: 'ROE', en: 'ROE', axis: 'prof', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
@@ -376,7 +396,81 @@ export function createEngine(raw: RawData): Engine {
 			{ kr: '발생액비율', en: 'Accruals', axis: 'qual', v: node.accrualRatio ?? null, p: pctRank(col('accrualRatio'), node.accrualRatio ?? null, true), unit: '', band: bandOf('accrualRatio') },
 			{ kr: '종합점수', en: 'Gov score', axis: 'gov', v: node.govScore ?? null, p: pctRank(col('govScore'), node.govScore ?? null), unit: '점', band: bandOf('govScore') }
 		].filter((m): m is PercentileMetric => m.p != null);
-		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics };
+	}
+
+	// 정성(범주형) 등급 — 유니버스 내 *같은 등급 비중*(순위 아님, 가짜 백분위 금지 02 KILL#3). 거버넌스·경영권·감사·주주환원·현금흐름.
+	const QUAL_KEYS = ['gov', 'stab', 'audit', 'cap', 'cf'];
+	function buildQualShares(node: EcoNode, peers: EcoNode[]): CategoricalShare[] {
+		return COMPOSITE_AXES.filter((a) => QUAL_KEYS.includes(a.key))
+			.map((a) => {
+				const myVal = (node[a.field] as string | undefined) || '';
+				const valued = peers.filter((pn) => !!(pn[a.field] as string | undefined));
+				const vn = valued.length;
+				const same = myVal ? valued.filter((pn) => (pn[a.field] as string) === myVal).length : 0;
+				return { key: a.key, kr: a.kr, en: a.en, v: myVal, tone: gradeTone(a.key, myVal), sameShare: vn && myVal ? Math.round((same / vn) * 100) : null, peerN: vn };
+			})
+			.filter((g) => !!g.v);
+	}
+
+	// 가격(PER/PBR) — EcoNode 에 없어 raw.finance+prices 에서 노드별 산출(valuationOf 동일 식·이상치 가드). 펀더와 *분리* 격자(02 KILL#2).
+	function priceRatios(id: string): { per: number | null; pbr: number | null } {
+		const f = raw.finance.companies[id];
+		const p = raw.prices.data[id];
+		if (!f || !p || !p.marketCap) return { per: null, pbr: null };
+		const nn = lastNonNull(f.is.net);
+		const ee = lastNonNull(f.bs.totals.totalEquity);
+		let per: number | null = null;
+		let pbr: number | null = null;
+		if (nn && nn.v > 0) { const x = p.marketCap / (nn.v * 1e12); if (x > 0 && x < 200) per = x; }
+		if (ee && ee.v > 0) { const x = p.marketCap / (ee.v * 1e12); if (x > 0 && x < 60) pbr = x; }
+		return { per, pbr };
+	}
+	// 가격은 lowerBetter 모호(저PER=저평가 vs 우려) → 톤·우수 프레이밍 없이 분포 내 위치(p)만. quantileBand 로 곡선.
+	function buildPriceStats(code: string, peers: EcoNode[]): { per: PriceStat; pbr: PriceStat } {
+		const mine = priceRatios(code);
+		const perCol: Num[] = [];
+		const pbrCol: Num[] = [];
+		for (const pn of peers) {
+			const r = priceRatios(pn.id);
+			if (r.per != null) perCol.push(r.per);
+			if (r.pbr != null) pbrCol.push(r.pbr);
+		}
+		return {
+			per: { v: mine.per, p: pctRank(perCol, mine.per), band: quantileBand(perCol), n: perCol.length },
+			pbr: { v: mine.pbr, p: pctRank(pbrCol, mine.pbr), band: quantileBand(pbrCol), n: pbrCol.length }
+		};
+	}
+
+	// co.percentile (업종 고정) — buildCompany 가 매번 호출하는 핫패스. 무손상 유지(grades/price 미산출=콜드비용 0).
+	function industryPercentile(code: string): Company['percentile'] {
+		const node = ecoByCode[code];
+		if (!node) return null;
+		const peers = industryNodes(node.industry);
+		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics: buildFundMetrics(node, peers, true) };
+	}
+
+	// 유니버스 교차 백분위 — 다이얼로그 전용(buildCompany 비경유 → 콜드비용 0). 모집단(업종/시장/전체) 선택만 분기.
+	// 소속지수('index')는 구성종목 멤버십 데이터 부재로 BLOCKED(00 ④) — union 미포함, "시총상위N=KOSPI200" 위조 금지(02 KILL#5).
+	function percentileIn(code: string, universe: Universe): UniversePercentile | null {
+		const node = ecoByCode[code];
+		if (!node) return null;
+		const allNodes = raw.eco?.nodes ?? [];
+		const peers =
+			universe === 'industry' ? industryNodes(node.industry)
+			: universe === 'market' ? allNodes.filter((n) => n.market === node.market)
+			: allNodes;
+		const label =
+			universe === 'industry' ? (node.industryName || SECTOR_KR[node.industry] || node.industry)
+			: universe === 'market' ? (MARKET_LABEL[node.market || ''] || node.market || 'KRX')
+			: '전체상장사';
+		return {
+			universe,
+			label,
+			n: peers.length,
+			metrics: buildFundMetrics(node, peers, universe === 'industry'),
+			grades: buildQualShares(node, peers),
+			price: buildPriceStats(code, peers)
+		};
 	}
 
 	function derivePeers(code: string, industry: string): Company['peers'] {
@@ -765,7 +859,7 @@ export function createEngine(raw: RawData): Engine {
 
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed,
+		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};

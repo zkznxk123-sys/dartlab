@@ -15,7 +15,7 @@
 		WorkforceYear
 	} from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Company, Lang } from '../lib/types';
+	import type { Company, Lang, Universe, UniversePercentile } from '../lib/types';
 	import type { TerminalHosts } from '../lib/hosts';
 	import { gradeTone } from '../lib/engine';
 	import Panel from '../ui/Panel.svelte';
@@ -34,13 +34,15 @@
 		repoUrl: string; // 셸 brand repo URL — 공시뷰어 오버레이(임베드 이슈링크)로 관통.
 		onPick: (code: string) => void;
 		lookupListed: ListedLookup; // 피출자사명→상장 종목 해소(출자 다이얼로그 시가 환산·클릭 이동)
+		percentileIn: (code: string, universe: Universe) => UniversePercentile | null; // 유니버스 교차 백분위(상세보기 다이얼로그)
 	}
-	let { co, lang, hosts, repoUrl, onPick, lookupListed }: Props = $props();
+	let { co, lang, hosts, repoUrl, onPick, lookupListed, percentileIn }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	let viewerOpen = $state(false); // 공시뷰어 인터미널 오버레이 (정기공시 패널 ⤢)
 	let holdingsOpen = $state(false); // 출자 관계 분석 전체화면 (타법인 출자 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
+	let pctCrossOpen = $state(false); // 유니버스 교차 백분위 다이얼로그 (업종 내 백분위 패널 → 상세보기)
 	// 중앙 "공시뷰어" 버튼 신호(viewerEntry.pulse) 구독 — pulse 변할 때만 오버레이를 연다. seenPulse 는
 	// 비반응 plain let(추적 0)이라 viewerOpen 쓰기가 effect 를 재발화시키지 않음(루프 없음).
 	let seenViewerPulse = viewerEntry.pulse;
@@ -281,6 +283,7 @@
 <!-- PERCENTILE -->
 {#if pc && pc.metrics.length}
 	<Panel {lang} className="eQuant" prov="real" title={{ kr: '업종 내 백분위', en: 'INDUSTRY PERCENTILE' }} sub={{ kr: pc.industry + ' ' + pc.n + '사', en: pc.industry + ' n=' + pc.n }} flush>
+		{#snippet right()}<button class="finFullBtn" onclick={() => (pctCrossOpen = true)} title={lang === 'en' ? 'cross-universe percentile (industry · market · all listed)' : '유니버스 교차 백분위 — 업종·시장·전체상장사'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		<div class="pctList">
 			{#each pc.metrics.filter((m) => m.axis !== 'gov') as m (m.en)}
 				<div class="pctRow">
@@ -292,6 +295,13 @@
 		</div>
 		<div class="pctNote">{lang === 'en' ? 'percentile across industry peers · ecosystem' : '동종업종 전 종목 대비 위치 · ecosystem'}</div>
 	</Panel>
+{/if}
+
+<!-- 유니버스 교차 백분위 — 업종/시장/전체상장사 한 좌표(분포 사실만, 판정 0). lazy: 닫혀 있으면 청크 무증가 -->
+{#if pctCrossOpen}
+	{#await import('./PercentileCrossDialog.svelte') then { default: PercentileCrossDialog }}
+		<PercentileCrossDialog {co} {lang} {percentileIn} onClose={() => (pctCrossOpen = false)} />
+	{/await}
 {/if}
 
 <!-- FINANCIALS -->

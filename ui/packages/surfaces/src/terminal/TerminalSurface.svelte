@@ -267,7 +267,7 @@
 		<main class="board">
 			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} /></div>
 			<div class="col colC"><CenterStack {co} {lang} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} /></div>
-			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} /></div>
+			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} percentileIn={eng.percentileIn} /></div>
 		</main>
 
 		<footer class="statusBar">

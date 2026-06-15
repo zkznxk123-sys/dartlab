@@ -1,8 +1,16 @@
 # 05 — 진행 원장
 
-상태: **v0.1 PRD 확정 (2026-06-14)** · 착수 = 운영자 go 대기
+상태: **구현 착수 (2026-06-15)** · 운영자 go(goal) 수신 → 완성형 한 빌드
 
 ## 결정 로그
+- 2026-06-15 **구현 토론(3렌즈 병렬: 정보설계·터미널UX일관성·적대정직가드) + 코드 실측**. 확정 표현:
+  - 메커니즘 확정 그대로(행=지표 × 열=3유니버스 띠 + 행클릭 DistCurve 3개 세로스택). **뒤집힘 = 띠 길이차 + 분산≥30 행 중립 `⇄` 표식**(Δ숫자·화살표·색인코딩 KILL — 허위정밀/판정).
+  - 엔진: `industryPercentile` **무손상 유지**(co.percentile 회귀 0) + 신규 `percentileIn(code,universe)` **다이얼로그 전용**(buildCompany 비경유=콜드비용 0). 공유 `buildFundMetrics`(13지표)로 로직 복제 0. market/all band=`quantileBand` 라이브 5분위(표본<10 → null).
+  - 정성(거버넌스·경영권·감사·주주환원·현금흐름)=등급칩+동급비중(`buildQualShares`, 가짜백분위 금지). 가격(PER/PBR)=raw.finance+prices 노드별 산출(valuationOf 식 재사용) 별 격자·톤색 없음·캡션(KILL#2).
+  - CSS: 모달 셸만 전역(`.scrimWrap/.scrModal/.scrHead/.scrClose`) 재사용, 나머지 컴포넌트 스코프 `pcx*`(전역 `.pct*`는 `.dlTerm` 1열 격자라 부적합). 다이얼로그 **동적 import**(HoldingsDialog 패턴, 청크 무증가).
+  - 배선 4지점: engine.ts(percentileIn 신설+인터페이스+반환) → TerminalSurface(prop) → RightStack(prop+버튼+동적 마운트) → PercentileCrossDialog.svelte(신규).
+  - 정직가드 박음: n<10 띠/곡선 숨김, 결손='—'(0금지), 유니버스별 출처칩, cross-sector caveat, 소속지수 BLOCKED 명시 노트.
+
 - 2026-06-14: PRD v0.1 작성. 4-ground 코드 실측 + 4렌즈 토론(정보설계·실현가능성·정직가드·PM) + 적대검증.
 - 2026-06-14 **운영자 레인 분리 확정**: scan-grade-explainer = 종합평가(큰그림·판정)로 독립 개선. 본 화면 = 유니버스 교차 *분포 사실*(판정 0). → 흡수 거부, **별도 카테고리 + 공유 SSOT** 확정.
 - 메커니즘: 히트맵 reject → 축별 행 × 유니버스 열 띠 + DistCurve 드릴다운.
