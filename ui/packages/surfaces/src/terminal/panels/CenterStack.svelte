@@ -43,7 +43,6 @@
 	let subject = $state<'price' | 'index'>('price');
 	let indexRef = $state<IndexRef | null>(null);
 	const indexLine = $derived(subject === 'index' && indexRef?.market === 'US'); // US 지수=종가전용 라인(PriceChart 렌더 격리)
-	let pickerOpen = $state(false);
 	let idxQuery = $state('');
 	let idxResults = $state<IndexRef[]>([]);
 	let idxSearchToken = 0;
@@ -56,7 +55,6 @@
 	function pickIndex(r: IndexRef) {
 		indexRef = r;
 		subject = 'index';
-		pickerOpen = false;
 		idxQuery = '';
 		idxResults = [];
 	}
@@ -97,7 +95,7 @@
 	// 회사 전환 = 그 회사 주가로 복귀 — 지수 주체는 center-local 이라 회사 바뀌면 해제(클릭한 회사가 안 보이는 혼동 차단).
 	$effect(() => {
 		void co.code; // 회사 전환 추적
-		untrack(() => { subject = 'price'; pickerOpen = false; }); // subject 읽기 의존 차단(자기루프 방지) — mount 시 'price' 재설정은 no-op
+		untrack(() => { subject = 'price'; }); // subject 읽기 의존 차단(자기루프 방지) — mount 시 'price' 재설정은 no-op
 	});
 
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
@@ -422,22 +420,13 @@
 				<button class={subject === 'index' ? 'seg on' : 'seg'} onclick={() => { subject = 'index'; if (!indexRef) indexRef = KR_INDEX_PRESETS[0]; }}>{lang === 'en' ? 'Index' : '지수'}</button>
 			</span>
 			{#if subject === 'index'}
-				<div class="idxPick">
-					<button class="idxPickBtn" onclick={() => (pickerOpen = !pickerOpen)} title={lang === 'en' ? 'choose index' : '지수 선택'}>{indexRef?.name ?? (lang === 'en' ? 'choose' : '선택')} ▾</button>
-					{#if pickerOpen}
-						<div class="idxMenu">
-							<input class="idxSearch mono" placeholder={lang === 'en' ? 'search index…' : '지수 검색… (예: 반도체)'} bind:value={idxQuery} oninput={onIdxSearch} />
-							{#if idxResults.length}
-								<div class="idxGrp">{#each idxResults as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</div>
-							{:else}
-								<div class="idxGrpLbl">{lang === 'en' ? 'Korea' : '한국'}</div>
-								<div class="idxGrp">{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
-								<div class="idxGrpLbl">{lang === 'en' ? 'US' : '미국'}</div>
-								<div class="idxGrp">{#each US_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
-							{/if}
-						</div>
-					{/if}
-				</div>
+				<!-- 인라인 칩 — absolute 드롭다운 폐기(운영자: 그래프 위 오버레이 말고 차트 위 정상 배치). 검색 시 결과 칩, 비었으면 큐레이트 9 그룹 칩. -->
+				<input class="idxSearch mono" placeholder={lang === 'en' ? 'search…' : '지수 검색…'} bind:value={idxQuery} oninput={onIdxSearch} />
+				{#if idxResults.length}
+					<span class="idxChips">{#each idxResults as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</span>
+				{:else}
+					<span class="idxChips"><span class="idxGrpLbl">{lang === 'en' ? 'KR' : '한국'}</span>{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}<span class="idxGrpLbl">{lang === 'en' ? 'US' : '미국'}</span>{#each US_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</span>
+				{/if}
 			{/if}
 		</div>
 		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신). 지수 주체면 회사 오버레이(공시·실적·밴드·피어) 비움. -->
