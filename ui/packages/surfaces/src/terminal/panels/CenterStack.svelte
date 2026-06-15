@@ -217,7 +217,7 @@
 		let cancelled = false;
 		regularUrlByDate = {};
 		disclosureEvents = [];
-		void Promise.all([rt.filing.regular(code), rt.filing.nonRegular(code, 200)]).then(([reg, non]) => {
+		void Promise.all([rt.filing.regular(code), rt.filing.nonRegular(code)]).then(([reg, non]) => {
 			if (cancelled) return;
 			const rmap: Record<string, string> = {};
 			for (const f of reg ?? []) if (f.rceptDate && f.url) rmap[f.rceptDate.replace(/\D/g, '').slice(0, 8)] = f.url;

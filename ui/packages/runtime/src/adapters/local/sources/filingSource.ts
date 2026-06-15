@@ -115,7 +115,7 @@ function nonRegularFromEvents(payload: PriceEventsPayload | null): NonRegularFil
 			out.push({ rceptNo: d.rceptNo, rceptDate: date, reportNm: d.title, filer: payload?.corpName ?? '', url: d.url });
 		}
 	}
-	return out.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate)).slice(0, 30);
+	return out.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate)); // 캡 없음 — price-events 커버리지만큼 전부(딥 심화는 백엔드 후속)
 }
 
 function loadPanelInit(apiBase: string, caches: LocalCaches, code: string): Promise<ClientPanelInit | null> {
@@ -133,8 +133,8 @@ export function localFilingPort(apiBase: string, caches: LocalCaches): FilingPor
 		async regular(code, limit = 500) {
 			return regularFilingsFromPanel(await loadPanelInit(apiBase, caches, code)).slice(0, limit);
 		},
-		async nonRegular(code, limit = 200) {
-			return nonRegularFromEvents(await loadPriceEvents(apiBase, caches, code)).slice(0, limit);
+		async nonRegular(code) {
+			return nonRegularFromEvents(await loadPriceEvents(apiBase, caches, code));
 		},
 		async panelToc(code) {
 			const toc = await getJson<ClientPanelToc>(

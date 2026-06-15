@@ -1,4 +1,4 @@
-// 비정기(수시)공시 — dart/allFilings/recent.parquet (HF, 최근 통합 롤링 1파일) 을 stock_code
+// 비정기(수시)공시 — dart/allFilings/recent.parquet (HF, 전 이력 통합 1파일) 을 stock_code
 // 필터로 단건 읽기. 일자 date-scan(휴일 404 콘솔오염) 폐기 — 통합파일은 stock_code 정렬이라
 // filter pushdown 이 회사 row-group 만 읽음. content_raw 없음(빌드시 메타만). per-code 캐시.
 // 통합파일 생성: .github/scripts/sync/buildAllFilingsRecent.py (정기보고서는 이미 제외됨).
@@ -26,7 +26,7 @@ const cache = new Map<string, NonRegularFiling[]>();
 
 export async function loadCompanyNonRegularFilings(
 	stockCode: string,
-	{ limit = 30, fetchFn = fetch as FetchLike }: { limit?: number; fetchFn?: FetchLike } = {}
+	{ fetchFn = fetch as FetchLike }: { fetchFn?: FetchLike } = {}
 ): Promise<NonRegularFiling[]> {
 	const code = stockCode.trim();
 	if (!/^\d{6}$/.test(code)) return [];
@@ -53,9 +53,8 @@ export async function loadCompanyNonRegularFilings(
 			});
 		}
 		result.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate) || b.rceptNo.localeCompare(a.rceptNo));
-		const out = result.slice(0, limit);
-		cache.set(code, out);
-		return out;
+		cache.set(code, result); // 전 이력 — slice 캡 없음(레일/우측패널 완결성). 폭주는 PriceChart 가시범위 skip 이 담당.
+		return result;
 	} catch {
 		cache.set(code, []);
 		return [];

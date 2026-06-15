@@ -147,7 +147,7 @@
 		rt.filing.regular(code, 500).then((f) => {
 			if (!cancelled) regFilings = f;
 		});
-		rt.filing.nonRegular(code, 200).then((f) => {
+		rt.filing.nonRegular(code).then((f) => {
 			if (cancelled) return;
 			nonRegFilings = f;
 			nonRegState = f.length ? 'ready' : 'empty';

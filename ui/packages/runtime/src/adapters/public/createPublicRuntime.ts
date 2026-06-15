@@ -113,7 +113,7 @@ function publicCompanyPort(shared: PublicRuntimeSharedPorts): CompanyPort {
 function publicFilingPort(): FilingPort {
 	return {
 		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
-		nonRegular: (code, limit = 200) => loadCompanyNonRegularFilings(code, { limit }),
+		nonRegular: (code) => loadCompanyNonRegularFilings(code), // 전 이력 — limit 캡 제거(전역 1파일 stock_code 필터)
 		// panel 격자 3종은 공개 뷰어 코드(landing)가 단계-6(뷰어 추출)에서 어댑터로 들어온다.
 		panelToc: () => notWiredYet('filing.panelToc', '단계-6(viewer 추출)'),
 		panelInit: () => notWiredYet('filing.panelInit', '단계-6(viewer 추출)'),
