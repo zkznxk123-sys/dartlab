@@ -23,7 +23,7 @@
 | 방향 | 의미 | 왜 혁신인가 |
 |---|---|---|
 | Typed SourceRef Graph | 모든 결과를 source/type/section/date 를 가진 ref 로 고정 | LLM 이 "문서"가 아니라 검증 가능한 근거 노드를 기억한다 |
-| Intent Kernel | source, entity, date, report, event 를 먼저 구조화 | 의미검색을 dense vector 유사도에만 맡기지 않는다 |
+| Intent Kernel | 질의 1건을 source, entity, date, report, event 의 runtime plan 으로 해석 | prebuild 사전 없이 의미 제약을 검색 실행 계획으로 바꾼다 |
 | Sparse-First Hybrid | R* sparse + facet anchor 를 기본, embedding 은 evidence sidecar | 속도와 설명가능성을 유지하면서 의미 보강 가능 |
 | Incremental Knowledge Fabric | `doc_key/text_hash` delta + manifest + compaction | 데이터가 늘수록 더 강해지고 운영비는 선형으로 억제 |
 | Quality Flywheel | query-log miss 를 taxonomy 로 쌓고 정책만 승격 | 덕지덕지 특수 mapper 없이 품질이 누적된다 |
@@ -32,7 +32,9 @@
 
 ## 3. 의미검색을 잘하게 만드는 구조
 
-의미검색은 "비슷한 문장 찾기"가 아니라 "질문의 제약을 만족하는 근거 찾기"다.
+의미검색은 "비슷한 문장 찾기"가 아니라 "질문의 제약을 만족하는 근거 찾기"다. 여기서 구조화는 prebuild artifact 가 아니다. 질의가 들어온 순간 생성되고 검색이 끝나면 버려지는 runtime plan 이다.
+
+관리해야 하는 것은 별도 매퍼가 아니라 이미 존재하는 공개 metadata 와 문서 sourceRef 규칙이다. 회사 코드, 접수번호, accession, 날짜, 보고서 유형처럼 데이터에 원래 있는 필드만 쓴다. 새로운 "의미 사전"을 계속 손으로 관리하는 방식이면 이 방향은 폐기한다.
 
 질의는 먼저 작은 의미 구조로 바뀐다.
 
@@ -47,6 +49,8 @@ query
 ```
 
 랭킹은 이 구조를 만족하는 후보 안에서 작동한다. 따라서 "삼성전자 2024년 유상증자 공시 원문", "Apple 10-K risk factor supply chain", "뉴스 말고 공시로만" 같은 질의가 같은 검색 surface 에서 처리된다.
+
+이 plan 은 저장하지 않는다. query-log 에 남기는 것은 plan 자체가 아니라 실패 유형과 개선 근거다. 반복 실패가 생겨도 특정 쿼리 전용 규칙을 붙이지 않고, sourceRef policy 나 facet parser 같은 일반 정책으로만 승격한다.
 
 ---
 
@@ -104,6 +108,7 @@ news:{urlHash}
 
 금지:
 
+- 별도 prebuild intent dictionary 또는 사람이 계속 관리해야 하는 구조화 mapper.
 - 특정 회사명, 특정 제목, 특정 날짜만 맞추는 mapper.
 - dense score 하나로 source intent 를 덮어쓰는 fallback.
 - no-answer 를 top result 없음과 같은 상태로 처리.

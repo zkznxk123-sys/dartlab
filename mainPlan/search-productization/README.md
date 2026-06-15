@@ -57,4 +57,4 @@ dartlab.search("대표이사 변경", corp="005930", start="20240101")
 - 제품 졸업은 실제 query-log gold 100~300 rows 통과 후에만. curatedDraft, stratifiedSynthetic 은 압박 실험일 뿐이다.
 - 본진 이식은 가능하다. 단 이식 대상은 runtime 구조와 gate 이며, 제품 완성 선언은 실제 query-log gold 이후다.
 - HF 증분은 source별 `doc_key/text_hash` catalog diff 로 처리한다. allFilings, panel, news 정상 갱신은 delta CSR 로 흡수하고, full rebuild 는 schema/tokenizer/normalizer/sourceRef 의미 변경 때만 한다.
-- 혁신의 핵심은 typed sourceRef graph, intent kernel, sparse-first hybrid, incremental knowledge fabric, quality flywheel 이다. 새 API 나 특수 mapper 를 늘리는 방식이 아니다.
+- 혁신의 핵심은 typed sourceRef graph, runtime intent kernel, sparse-first hybrid, incremental knowledge fabric, quality flywheel 이다. 새 API, prebuild intent dictionary, 계속 관리해야 하는 특수 mapper 를 늘리는 방식이 아니다.

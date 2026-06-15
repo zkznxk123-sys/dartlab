@@ -16,7 +16,7 @@
 7. 제품 졸업은 실제 query-log gold 통과 후에만.
 8. 전문 검토 결론: 본진 이식 착수는 가능하나 release graduation 은 실제 query-log gold 로 차단한다.
 9. HF 증분은 source별 catalog diff 로 간다. allFilings, panel, news 정상 갱신은 delta CSR 이며, full rebuild 는 schema/tokenizer/normalizer/sourceRef 의미 변경 때만 한다.
-10. 혁신 방향은 typed sourceRef graph, intent kernel, sparse-first hybrid, incremental knowledge fabric, quality flywheel 로 묶는다. 덕지덕지 mapper 와 새 public API 는 금지한다.
+10. 혁신 방향은 typed sourceRef graph, runtime intent kernel, sparse-first hybrid, incremental knowledge fabric, quality flywheel 로 묶는다. prebuild intent dictionary, 덕지덕지 mapper, 새 public API 는 금지한다.
 
 ---
 
