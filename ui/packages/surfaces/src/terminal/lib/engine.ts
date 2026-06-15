@@ -25,6 +25,7 @@ import type {
 	UniversePercentile,
 	CategoricalShare,
 	PriceStat,
+	Hist,
 } from './types';
 
 const SECTOR_EN: Record<string, string> = {
@@ -138,6 +139,42 @@ function quantileBand(arr: Num[]): { p10: number; p25: number; median: number; p
 		return lo === hi ? xs[lo] : xs[lo] + (xs[hi] - xs[lo]) * (idx - lo);
 	};
 	return { p10: q(0.1), p25: q(0.25), median: q(0.5), p75: q(0.75), p90: q(0.9) };
+}
+// 실도수 히스토그램 — 동종사 전체 값 배열을 robust 범위(p2~p98)로 클리핑해 N빈으로 집계(outlier 무력화).
+// 5분위 보간(quantileBand)보다 정직: 실제 봉우리·gap·왜도를 그대로. 회사값은 범위 클램프 + 초과 표식.
+function histOf(arr: Num[], companyVal: Num, bins = 22): Hist | null {
+	const xs = arr.filter((x): x is number => x != null && Number.isFinite(x)).sort((a, b) => a - b);
+	if (xs.length < 12) return null;
+	const q = (f: number): number => {
+		const idx = (xs.length - 1) * f;
+		const lo = Math.floor(idx);
+		const hi = Math.ceil(idx);
+		return lo === hi ? xs[lo] : xs[lo] + (xs[hi] - xs[lo]) * (idx - lo);
+	};
+	let lo = q(0.02);
+	let hi = q(0.98);
+	if (!(hi > lo)) { lo = xs[0]; hi = xs[xs.length - 1]; } // 분포 폭 0(동일값 다수) 폴백
+	if (!(hi > lo)) return null;
+	const counts = new Array(bins).fill(0);
+	for (const x of xs) {
+		const c = Math.min(hi, Math.max(lo, x));
+		let b = Math.floor(((c - lo) / (hi - lo)) * bins);
+		if (b >= bins) b = bins - 1;
+		if (b < 0) b = 0;
+		counts[b]++;
+	}
+	const maxC = Math.max(...counts, 1);
+	const frac = (v: number): number => Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
+	const cv = companyVal != null && Number.isFinite(companyVal) ? companyVal : null;
+	return {
+		bins: counts.map((c) => c / maxC),
+		companyFrac: cv == null ? null : frac(cv),
+		companyOver: cv == null ? 0 : cv < lo ? -1 : cv > hi ? 1 : 0,
+		medianFrac: frac(q(0.5)),
+		lo,
+		hi,
+		n: xs.length
+	};
 }
 function pctRank(arr: Num[], v: Num, lowerBetter?: boolean): number | null {
 	const xs = arr.filter((x): x is number => x != null && Number.isFinite(x));
@@ -367,7 +404,7 @@ export function createEngine(raw: RawData): Engine {
 	// buildFundMetrics: 정량 13지표 백분위. peers(모집단)만 바꾸면 같은 산식이 업종/시장/전체로 — pctRank 는
 	//   유니버스 무관 순수함수(로직 복제 0). band: useStatsBand=업종 industryStats(prebuilt), 아니면 peers 라이브 5분위.
 	//   lowerBetter=true (부채비율·CCC·발생액비율) 는 pctRank 가 p 를 뒤집어 "상위 N%" 가 항상 우수를 뜻함.
-	function buildFundMetrics(node: EcoNode, peers: EcoNode[], useStatsBand: boolean): PercentileMetric[] {
+	function buildFundMetrics(node: EcoNode, peers: EcoNode[], useStatsBand: boolean, withHist: boolean): PercentileMetric[] {
 		const col = (f: keyof EcoNode): Num[] => peers.map((n) => (n[f] as Num) ?? null);
 		const statsRec = raw.industryStats as Record<string, IndustryStat> | null;
 		const dist = statsRec?.[node.industry]?.distribution;
@@ -381,20 +418,25 @@ export function createEngine(raw: RawData): Engine {
 			}
 			return quantileBand(col(field)); // 시장/전체 = 같은 모집단 배열 라이브 5분위(표본<10 → null, 백분위와 자기일관)
 		};
+		// 히스토그램은 모든 유니버스에서 *실제 peer 값 배열*로 산출(industryStats 보간 아님 → 더 정직). hot path(co.percentile)는 withHist=false 로 생략.
+		const mk = (kr: string, en: string, axis: string, field: keyof EcoNode, unit: string, lower?: boolean): PercentileMetric | { p: null } => ({
+			kr, en, axis, unit, v: node[field] as Num ?? null, p: pctRank(col(field), (node[field] as Num) ?? null, lower),
+			band: bandOf(field), hist: withHist ? histOf(col(field), (node[field] as Num) ?? null) : null
+		});
 		return [
-			{ kr: '영업이익률', en: 'OP margin', axis: 'prof', v: node.opMargin ?? null, p: pctRank(col('opMargin'), node.opMargin ?? null), unit: '%', band: bandOf('opMargin') },
-			{ kr: '순이익률', en: 'Net margin', axis: 'prof', v: node.netMargin ?? null, p: pctRank(col('netMargin'), node.netMargin ?? null), unit: '%', band: bandOf('netMargin') },
-			{ kr: 'ROE', en: 'ROE', axis: 'prof', v: node.roe ?? null, p: pctRank(col('roe'), node.roe ?? null), unit: '%', band: bandOf('roe') },
-			{ kr: 'ROA', en: 'ROA', axis: 'prof', v: node.roa ?? null, p: pctRank(col('roa'), node.roa ?? null), unit: '%', band: bandOf('roa') },
-			{ kr: '매출성장', en: 'Rev growth', axis: 'growth', v: node.revCagr ?? null, p: pctRank(col('revCagr'), node.revCagr ?? null), unit: '%', band: bandOf('revCagr') },
-			{ kr: '순이익성장', en: 'Net growth', axis: 'growth', v: node.netIncomeCagr ?? null, p: pctRank(col('netIncomeCagr'), node.netIncomeCagr ?? null), unit: '%', band: bandOf('netIncomeCagr') },
-			{ kr: '부채비율', en: 'Debt ratio', axis: 'debt', v: node.debtRatio ?? null, p: pctRank(col('debtRatio'), node.debtRatio ?? null, true), unit: '%', band: bandOf('debtRatio') },
-			{ kr: '이자보상배율', en: 'Int. coverage', axis: 'debt', v: node.icr ?? null, p: pctRank(col('icr'), node.icr ?? null), unit: '배', band: bandOf('icr') },
-			{ kr: '유동비율', en: 'Current ratio', axis: 'liq', v: node.currentRatio ?? null, p: pctRank(col('currentRatio'), node.currentRatio ?? null), unit: '%', band: bandOf('currentRatio') },
-			{ kr: '자산회전율', en: 'Asset turn', axis: 'eff', v: node.assetTurnover ?? null, p: pctRank(col('assetTurnover'), node.assetTurnover ?? null), unit: '배', band: bandOf('assetTurnover') },
-			{ kr: '현금전환주기', en: 'Cash cycle', axis: 'eff', v: node.ccc ?? null, p: pctRank(col('ccc'), node.ccc ?? null, true), unit: '일', band: bandOf('ccc') },
-			{ kr: '발생액비율', en: 'Accruals', axis: 'qual', v: node.accrualRatio ?? null, p: pctRank(col('accrualRatio'), node.accrualRatio ?? null, true), unit: '', band: bandOf('accrualRatio') },
-			{ kr: '종합점수', en: 'Gov score', axis: 'gov', v: node.govScore ?? null, p: pctRank(col('govScore'), node.govScore ?? null), unit: '점', band: bandOf('govScore') }
+			mk('영업이익률', 'OP margin', 'prof', 'opMargin', '%'),
+			mk('순이익률', 'Net margin', 'prof', 'netMargin', '%'),
+			mk('ROE', 'ROE', 'prof', 'roe', '%'),
+			mk('ROA', 'ROA', 'prof', 'roa', '%'),
+			mk('매출성장', 'Rev growth', 'growth', 'revCagr', '%'),
+			mk('순이익성장', 'Net growth', 'growth', 'netIncomeCagr', '%'),
+			mk('부채비율', 'Debt ratio', 'debt', 'debtRatio', '%', true),
+			mk('이자보상배율', 'Int. coverage', 'debt', 'icr', '배'),
+			mk('유동비율', 'Current ratio', 'liq', 'currentRatio', '%'),
+			mk('자산회전율', 'Asset turn', 'eff', 'assetTurnover', '배'),
+			mk('현금전환주기', 'Cash cycle', 'eff', 'ccc', '일', true),
+			mk('발생액비율', 'Accruals', 'qual', 'accrualRatio', '', true),
+			mk('종합점수', 'Gov score', 'gov', 'govScore', '점')
 		].filter((m): m is PercentileMetric => m.p != null);
 	}
 
@@ -441,8 +483,8 @@ export function createEngine(raw: RawData): Engine {
 			if (r.pbr != null) pbrCol.push(r.pbr);
 		}
 		return {
-			per: { v: mine.per, p: pctRank(perCol, mine.per), band: quantileBand(perCol), n: perCol.length },
-			pbr: { v: mine.pbr, p: pctRank(pbrCol, mine.pbr), band: quantileBand(pbrCol), n: pbrCol.length }
+			per: { v: mine.per, p: pctRank(perCol, mine.per), band: quantileBand(perCol), hist: histOf(perCol, mine.per), n: perCol.length },
+			pbr: { v: mine.pbr, p: pctRank(pbrCol, mine.pbr), band: quantileBand(pbrCol), hist: histOf(pbrCol, mine.pbr), n: pbrCol.length }
 		};
 	}
 
@@ -451,7 +493,7 @@ export function createEngine(raw: RawData): Engine {
 		const node = ecoByCode[code];
 		if (!node) return null;
 		const peers = industryNodes(node.industry);
-		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics: buildFundMetrics(node, peers, true) };
+		return { industry: node.industryName || SECTOR_KR[node.industry] || node.industry, n: peers.length, metrics: buildFundMetrics(node, peers, true, false) };
 	}
 
 	// 유니버스 교차 백분위 — 다이얼로그 전용(buildCompany 비경유 → 콜드비용 0). 모집단(업종/시장/전체) 선택만 분기.
@@ -472,7 +514,7 @@ export function createEngine(raw: RawData): Engine {
 			universe,
 			label,
 			n: peers.length,
-			metrics: buildFundMetrics(node, peers, universe === 'industry'),
+			metrics: buildFundMetrics(node, peers, universe === 'industry', true),
 			grades: buildQualShares(node, peers),
 			price: buildPriceStats(code, peers)
 		};

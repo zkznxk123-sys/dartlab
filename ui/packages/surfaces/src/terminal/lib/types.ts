@@ -257,6 +257,17 @@ export interface RiskFlag {
 	en: string;
 	d: string;
 }
+// 히스토그램 — 동종사 전체 값 배열의 실도수(막대 높이=몰린 정도). robust 범위(p2~p98)로 outlier 클리핑.
+// 5분위 보간 곡선(band)보다 정직: 실제 봉우리·gap·왜도를 그대로 보인다.
+export interface Hist {
+	bins: number[]; // 막대 높이 0~1(최댓값 정규화). 길이 = 빈 개수.
+	companyFrac: number | null; // [lo,hi] 내 회사 위치 0~1(클램프). null = 회사값 없음.
+	companyOver: -1 | 0 | 1; // -1 범위 미만 / 0 범위 내 / 1 범위 초과(이상치 표식).
+	medianFrac: number; // 중앙값 위치 0~1.
+	lo: number;
+	hi: number; // robust 범위(p2~p98).
+	n: number; // 표본 수.
+}
 export interface PercentileMetric {
 	kr: string;
 	en: string;
@@ -267,6 +278,7 @@ export interface PercentileMetric {
 	// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사 seed)·분포 부재 = null(다이얼로그 생략).
 	// p10~p90 5분위점 = 분포곡선(skew 반영, 정규가정 아님)·회사 위치 마커 렌더용.
 	band: { p10: number; p25: number; median: number; p75: number; p90: number } | null;
+	hist?: Hist | null; // 실도수 히스토그램(다이얼로그 1차 시각). null = 표본<12 또는 미산출.
 }
 // ── 유니버스 교차 백분위 (PercentileCrossDialog) ──
 // co.percentile(업종 고정, Company['percentile'])과 별개. percentileIn(code, universe) 가 반환.
@@ -287,6 +299,7 @@ export interface PriceStat {
 	// 분포 내 위치(낮을수록 작은 p) — lowerBetter 미적용. 가격 우열 모호(저PER=저평가 vs 우려)라 톤·우수 프레이밍 금지(02 KILL#2).
 	p: number | null;
 	band: { p10: number; p25: number; median: number; p75: number; p90: number } | null;
+	hist?: Hist | null; // 가격 분포 히스토그램(중립 마커).
 	n: number;
 }
 export interface UniversePercentile {

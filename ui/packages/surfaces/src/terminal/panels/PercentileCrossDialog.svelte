@@ -96,8 +96,8 @@
 			{:else}
 				<!-- 정량 격자: 행=지표 × 열=유니버스 *분포곡선*(동종사 밀집 위치 + 이 회사 마커). 막대 아닌 분포가 1차 시각. 업종(앵커) 좌측 강조. -->
 				<div class="pcxLegend">{lang === 'en'
-					? 'curve = peer distribution (thick = where many cluster) · vertical line = this company · dashed = median · ⇄ = rank flips by universe'
-					: '곡선 = 동종사 분포 (두꺼운 곳 = 많이 몰림) · 세로 실선 = 이 회사 · 점선 = 중앙값 · ⇄ = 잣대 따라 순위 뒤집힘'}</div>
+					? 'bars = peer distribution / count (taller = more peers in that range, p2–p98) · vertical line = this company · dashed = median · ⇄ = rank flips by universe'
+					: '막대 = 동종사 분포(높을수록 그 구간에 많이 몰림, p2~p98) · 세로 실선 = 이 회사 · 점선 = 중앙값 · ⇄ = 잣대 따라 순위 뒤집힘'}</div>
 				<!-- 컬럼 헤더 — pcxBody 직속 + sticky 라 정성/가격까지 스크롤해도 유니버스 열이 상단 고정. -->
 				<div class="pcxHead">
 					<span class="pcxNameH">{lang === 'en' ? 'metric · value' : '지표 · 값'}</span>
@@ -118,8 +118,8 @@
 								<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
 									{#if d.n < MIN_N}
 										<span class="pcxThin">{lang === 'en' ? 'n<10' : '표본부족'}</span>
-									{:else if m && m.p != null && m.band && m.v != null}
-										<span class="pcxCurve"><DistCurve band={m.band} value={m.v} p={m.p} unit={m.unit} {lang} h={32} /></span>
+									{:else if m && m.p != null && (m.hist || m.band)}
+										<span class="pcxCurve"><DistCurve hist={m.hist} band={m.band} value={m.v} p={m.p} unit={m.unit} {lang} h={36} /></span>
 										<span class="pcxP" style={`color:${pcCol(m.p)}`}>{topPct(m.p)}</span>
 									{:else if m && m.p != null}
 										<span class="pcxTrack"><span class="pcxFill" style={`width:${m.p}%;background:${pcCol(m.p)}`}></span></span>
@@ -173,8 +173,8 @@
 								{#each data as d, i (d.universe)}
 									{@const ps = pr.k === 'per' ? d.price.per : d.price.pbr}
 									<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
-										{#if ps.v != null && ps.p != null && ps.band && ps.n >= MIN_N}
-											<span class="pcxCurve"><DistCurve band={ps.band} value={ps.v} p={ps.p} unit={lang === 'en' ? 'x' : '배'} {lang} h={32} neutral /></span>
+										{#if ps.v != null && ps.p != null && (ps.hist || ps.band) && ps.n >= MIN_N}
+											<span class="pcxCurve"><DistCurve hist={ps.hist} band={ps.band} value={ps.v} p={ps.p} unit={lang === 'en' ? 'x' : '배'} {lang} h={36} neutral /></span>
 											<span class="pcxP dim">{lang === 'en' ? ps.p + '%ile' : '분포 ' + ps.p + '%'}</span>
 										{:else if ps.v != null && ps.p != null && ps.n >= MIN_N}
 											<span class="pcxTrack"><span class="pcxFill priceFill" style={`width:${ps.p}%`}></span></span>
