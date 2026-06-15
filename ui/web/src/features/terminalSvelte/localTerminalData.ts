@@ -275,6 +275,7 @@ function buildBridgeRuntime(seed: RuntimeSeed, raw: RawData): DartLabRuntime {
 			shareholderReturn: async () => null,
 			ownership: async () => null,
 			shareholders: async () => null,
+			shareholderPeriods: async () => null,
 			execBoard: async () => null,
 			debtProfile: async () => null,
 			capitalChanges: async () => null,

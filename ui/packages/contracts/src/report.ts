@@ -36,9 +36,17 @@ export interface InvestmentTrendYear {
 	count: number; // 유효 개별 출자사 수
 }
 
+// 기간별 피출자사 스냅샷 — 시간축(연도/분기) 그래프·재생용. latest 와 동일 소스(보고된 (year,quarter)).
+export interface InvestmentPeriod {
+	year: string;
+	quarter: string; // '1분기'|'2분기'|'3분기'|'4분기' (보고서종류; 4분기=사업보고서). 소비처가 year+quarter 로 라벨 포맷
+	rows: InvestmentRow[]; // 그 기간 전체 피출자사 (장부가 desc)
+}
+
 export interface InvestmentsBundle {
 	latest: InvestmentsView;
 	trend: InvestmentTrendYear[]; // 연도 오름차순
+	periods: InvestmentPeriod[]; // 보고된 (year,quarter) 오름차순 — 시간축. latest/trend 와 동일 소스
 }
 
 export interface OwnershipYear {
@@ -66,6 +74,7 @@ export interface PersonAggregate {
 }
 export interface ShareholdersView {
 	year: string;
+	quarter: string; // '1분기'|'2분기'|'3분기'|'4분기' — year 와 함께 기간키(시간축 매칭). 기존 단일 뷰는 최신기
 	named: ShareholderRow[]; // 기관·법인·정부·자기주식 (실명, 지분 desc)
 	person: PersonAggregate | null; // 개인 익명 집계 (1줄). 개인 없으면 null
 	totalPct: Num; // 최대주주측 합산 지분율 (계행) — 정합 검증용
@@ -167,6 +176,8 @@ export interface ReportPort {
 	ownership(code: string): Promise<OwnershipYear[] | null>;
 	/** 최대주주 개별 — 역방향 소유("누가 이 회사를 소유하나"). 개인 익명 집계. 미지원/미존재는 null. */
 	shareholders(code: string): Promise<ShareholdersView | null>;
+	/** 최대주주 기간 시계열 — shareholders() 의 전(全) (year,quarter) 버전(오름차순). shareholders() 는 이 결과의 최신. 미지원은 null. */
+	shareholderPeriods(code: string): Promise<ShareholdersView[] | null>;
 	execBoard(code: string): Promise<ExecBoardYear[] | null>;
 	debtProfile(code: string): Promise<DebtProfileBundle | null>;
 	capitalChanges(code: string): Promise<CapitalChangesBundle | null>;

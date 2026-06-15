@@ -10,6 +10,7 @@ export function localReportPort(): ReportPort {
 		shareholderReturn: none,
 		ownership: none,
 		shareholders: none,
+		shareholderPeriods: none,
 		execBoard: none,
 		debtProfile: none,
 		capitalChanges: none,

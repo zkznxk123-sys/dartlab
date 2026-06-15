@@ -242,6 +242,9 @@ function fakeReport(): ReportPort {
 		async shareholders() {
 			return null;
 		},
+		async shareholderPeriods() {
+			return null;
+		},
 		async workforce(code) {
 			if (code !== FIXTURE_CODE) return null;
 			return [

@@ -14,6 +14,8 @@ import type {
 	DebtProfileYear,
 	DilutionYear,
 	ExecBoardYear,
+	InvestmentPeriod,
+	InvestmentRow,
 	InvestmentsBundle,
 	InvestmentsView,
 	InvestmentTrendYear,
@@ -92,7 +94,7 @@ const wfCache = new Map<string, Promise<WorkforceYear[] | null>>();
 const invCache = new Map<string, Promise<InvestmentsBundle | null>>();
 const srCache = new Map<string, Promise<ShareholderReturnYear[] | null>>();
 const ownCache = new Map<string, Promise<OwnershipYear[] | null>>();
-const shCache = new Map<string, Promise<ShareholdersView | null>>();
+const shpCache = new Map<string, Promise<ShareholdersView[] | null>>();
 const ebCache = new Map<string, Promise<ExecBoardYear[] | null>>();
 const dpCache = new Map<string, Promise<DebtProfileBundle | null>>();
 const ccCache = new Map<string, Promise<CapitalChangesBundle | null>>();
@@ -116,9 +118,13 @@ export function loadShareholderReturn(stockCode: string): Promise<ShareholderRet
 export function loadOwnership(stockCode: string): Promise<OwnershipYear[] | null> {
 	return cached(ownCache, stockCode, buildOwnership);
 }
-/** 최대주주 개별 (역방향 소유) — 기관·법인·정부·자기주식 실명, 개인 익명 집계 (majorHolder.parquet). */
+/** 최대주주 기간 시계열 (역방향 소유) — (year,quarter)별 실명·개인집계 오름차순 (majorHolder.parquet). 시간축 그래프·재생. */
+export function loadShareholderPeriods(stockCode: string): Promise<ShareholdersView[] | null> {
+	return cached(shpCache, stockCode, buildShareholderPeriods);
+}
+/** 최대주주 개별 (역방향 소유) 최신기 — loadShareholderPeriods 의 마지막(최신)으로 파생(단일 read 공유). */
 export function loadShareholders(stockCode: string): Promise<ShareholdersView | null> {
-	return cached(shCache, stockCode, buildShareholders);
+	return loadShareholderPeriods(stockCode).then((a) => a?.at(-1) ?? null);
 }
 /** 이사·감사 보수 + 이사회 구성 연도 시계열 (executivePayAllTotal + outsideDirector). */
 export function loadExecBoard(stockCode: string): Promise<ExecBoardYear[] | null> {
@@ -227,7 +233,29 @@ async function buildInvestments(code: string): Promise<InvestmentsBundle | null>
 		if (bookTotal != null) trend.push({ year, bookTotal, count: valid.length });
 	}
 	trend.sort((a, b) => a.year.localeCompare(b.year));
-	return { latest, trend };
+	// ── periods: 보고된 (year, quarter)별 전체 피출자사 — 시간축 그래프·재생. latest 와 동일 유효필터·매핑이라 periods 의 마지막 = latest ──
+	const toRow = (r: Row): InvestmentRow => ({
+		name: str(r.inv_prm),
+		purpose: str(r.invstmnt_purps) === '-' ? '' : str(r.invstmnt_purps),
+		stakePct: num(r.trmend_blce_qota_rt),
+		bookValue: num(r.trmend_blce_acntbk_amount),
+		acquiredAmt: num(r.frst_acqs_amount),
+		targetNet: num(r.recent_bsns_year_fnnr_sttus_thstrm_ntpf)
+	});
+	const periodMap = new Map<string, { year: string; quarter: string; rows: InvestmentRow[] }>();
+	for (const r of invValid) {
+		const year = str(r.year);
+		if (!year) continue;
+		const quarter = str(r.quarter);
+		const key = year + '|' + quarter;
+		let e = periodMap.get(key);
+		if (!e) periodMap.set(key, (e = { year, quarter, rows: [] }));
+		e.rows.push(toRow(r));
+	}
+	const periods: InvestmentPeriod[] = [...periodMap.values()]
+		.map((p) => ({ year: p.year, quarter: p.quarter, rows: p.rows.sort((a, b) => (b.bookValue ?? 0) - (a.bookValue ?? 0)) }))
+		.sort((a, b) => a.year.localeCompare(b.year) || qRank(a.quarter) - qRank(b.quarter));
+	return { latest, trend, periods };
 }
 
 async function buildShareholderReturn(code: string): Promise<ShareholderReturnYear[] | null> {
@@ -349,17 +377,12 @@ function canonRelate(raw: string): string {
 	return s.length > 12 ? s.slice(0, 11) + '…' : s;
 }
 
-// 최신 연도 최대주주 개별 (역방향: 누가 이 회사를 소유하나) — ownership 과 별도 read·캐시(계약 비파괴).
-// 기관·법인·정부·자기주식 = 실명, 개인 = 익명 집계. 보통주 우선·의결권 없는 주식 배제·계행 제외.
-async function buildShareholders(code: string): Promise<ShareholdersView | null> {
-	const maj = await read('majorHolder', code, ['nm', 'relate', 'stock_knd', 'trmend_posesn_stock_qota_rt', 'trmend_posesn_stock_co']);
-	const byYear = bestQuarterRows(maj);
-	const latestYear = [...byYear.keys()].sort().pop();
-	if (!latestYear) return null;
-	const yrRows = byYear.get(latestYear)!.rows;
+// 한 (year, quarter) 최대주주 개별 → ShareholdersView (순수). 기관·법인·정부·자기주식 = 실명, 개인 = 익명 집계.
+// 보통주 우선·의결권 없는 주식 배제·계행 제외·정정공시(rcept_no) 최신만.
+function shViewFrom(year: string, quarter: string, rawRows: Row[]): ShareholdersView | null {
 	const isCommon = (r: Row) => str(r.stock_knd).includes('보통');
-	const hasCommon = yrRows.some(isCommon);
-	const pool = latestRcept(yrRows.filter(hasCommon ? isCommon : (r) => !str(r.stock_knd).includes('없')));
+	const hasCommon = rawRows.some(isCommon);
+	const pool = latestRcept(rawRows.filter(hasCommon ? isCommon : (r) => !str(r.stock_knd).includes('없')));
 	const isSum = (r: Row) => { const n = str(r.nm).trim(); return !n || n === '계' || n === '합계' || n === '소계' || n === '-'; };
 	const totalRow = pool.find((r) => str(r.nm).trim() === '계' && num(r.trmend_posesn_stock_qota_rt) != null);
 	const indiv = pool.filter((r) => !isSum(r) && num(r.trmend_posesn_stock_qota_rt) != null);
@@ -382,11 +405,35 @@ async function buildShareholders(code: string): Promise<ShareholdersView | null>
 	}
 	named.sort((a, b) => (b.ratio ?? 0) - (a.ratio ?? 0));
 	return {
-		year: latestYear,
+		year,
+		quarter,
 		named: named.slice(0, 12),
 		person: pn ? { count: pn, ratio: pc || null, shares: ps || null } : null,
 		totalPct: totalRow ? num(totalRow.trmend_posesn_stock_qota_rt) : null
 	};
+}
+
+// 최대주주 (year, quarter) 전(全) 기간 — 역방향 소유 시계열. ownership 과 별도 read·캐시(계약 비파괴).
+async function buildShareholderPeriods(code: string): Promise<ShareholdersView[] | null> {
+	const maj = await read('majorHolder', code, ['nm', 'relate', 'stock_knd', 'trmend_posesn_stock_qota_rt', 'trmend_posesn_stock_co', 'rcept_no']);
+	if (!maj.length) return null;
+	const byPeriod = new Map<string, { year: string; quarter: string; rows: Row[] }>();
+	for (const r of maj) {
+		const year = str(r.year);
+		if (!year) continue;
+		const quarter = str(r.quarter);
+		const key = year + '|' + quarter;
+		let e = byPeriod.get(key);
+		if (!e) byPeriod.set(key, (e = { year, quarter, rows: [] }));
+		e.rows.push(r);
+	}
+	const out: ShareholdersView[] = [];
+	for (const { year, quarter, rows } of byPeriod.values()) {
+		const v = shViewFrom(year, quarter, rows);
+		if (v) out.push(v);
+	}
+	out.sort((a, b) => a.year.localeCompare(b.year) || qRank(a.quarter) - qRank(b.quarter));
+	return out.length ? out : null;
 }
 
 async function buildExecBoard(code: string): Promise<ExecBoardYear[] | null> {
