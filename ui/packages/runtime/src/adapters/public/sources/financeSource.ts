@@ -104,6 +104,7 @@ interface RawRow extends Record<string, unknown> {
 	account_nm?: string | null;
 	account_detail?: string | null;
 	thstrm_amount?: string | number | null;
+	thstrm_add_amount?: string | number | null;
 	ord?: string | number | null;
 }
 interface Parsed {
@@ -129,7 +130,9 @@ function num(v: unknown): number | null {
 	return null;
 }
 
-const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'ord'];
+// thstrm_add_amount = 누적(YTD) 금액 — 정량재무제표 표(분기단독 Q4=연간−Q3누적·누적freq)가 쓴다. 차트 번들엔
+// 불요지만 같은 rowsCache 를 공유(표·차트 1회 다운로드)하려 컬럼셋 통일.
+const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'thstrm_add_amount', 'ord'];
 
 // 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = 분기 (계약 FinMode·번들 정의는 contracts).
 
@@ -153,6 +156,13 @@ function loadRows(code: string): Promise<RawRow[] | null> {
 	})();
 	rowsCache.set(code, p);
 	return p;
+}
+
+// 정량재무제표 표(viewer FinanceDialog)용 raw 행 — bundle()(차트)과 같은 rowsCache 공유라 회사당 1회만
+// 다운로드. DuckDB-WASM 제거 후 표가 이 행으로 JS 집계(financeQuery). 미존재/실패 = null.
+export function loadFinanceRows(stockCode: string): Promise<RawRow[] | null> {
+	if (!browser) return Promise.resolve(null);
+	return loadRows(stockCode.trim());
 }
 
 // 범위에 파싱 가능한 데이터(분기·금액)가 있는지 — 가용 범위 판정용.

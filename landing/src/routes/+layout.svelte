@@ -5,17 +5,17 @@
 	import '@dartlab/ui-design/styles/typography.css';
 	import { base } from '$app/paths';
 	import { setStaticBase } from '@dartlab/ui-runtime/data/dartlabData';
+	import { loadFinanceRows } from '@dartlab/ui-runtime/data/financeRows';
 	import { loadDartDb } from '$lib/data/duckdb';
-	import { provideDuckDb } from '@dartlab/ui-surfaces/viewer';
+	import { provideFinanceRows } from '@dartlab/ui-surfaces/viewer';
 	import { provideScanDuckDb } from '@dartlab/ui-surfaces/scan';
 	import type { Snippet } from 'svelte';
 
 	// runtime/data 의 static 경로 base 주입 (과도기 — 4a-2 에서 RuntimeEnvironment.basePath 로 정식화)
 	setStaticBase(base);
-	// viewer·scan surface 의 duckdb 의존(financeQuery·duckSql)에 landing 의 DuckDB-WASM 로더 주입 — surface 는
-	// SvelteKit/Vite 전용 duckdb($app/environment·@vite-ignore)에 직접 결합하지 않는다(단계-6/8 seam). loadDartDb 는
-	// lazy(등록만, 인스턴스화 0). scan duckSql 은 companyLive 경유로 라우트 밖에서도 쓰여 전역 주입.
-	provideDuckDb(loadDartDb);
+	// 정량재무제표 표(viewer FinanceDialog)는 DuckDB-WASM 대신 hyparquet raw 행으로 JS 집계 — 차트(bundle)와
+	// 같은 rowsCache 공유라 회사당 1회 다운로드·엔진 콜드스타트 0. scan 은 여전히 DuckDB-WASM(duckSql) — 전역 주입.
+	provideFinanceRows(loadFinanceRows);
 	provideScanDuckDb(loadDartDb);
 	import CloudflareWebAnalytics from '$lib/components/CloudflareWebAnalytics.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';

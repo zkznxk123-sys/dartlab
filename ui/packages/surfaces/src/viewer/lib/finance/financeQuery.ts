@@ -1,97 +1,78 @@
-// 정량재무제표 IO — 공식 dart/finance/{code}.parquet 을 DuckDB-WASM(워커)으로 query → financePivot 로 pivot.
-// 순수 SQL빌더·pivot·merge 는 financePivot.ts(테스트 가능). 본 모듈은 duckdb 등록+query 만.
+// 정량재무제표 IO — 회사 parquet(dart/finance/{code}.parquet)을 차트(hyparquet)가 이미 받아 캐시한 raw 행으로
+// JS 집계. DuckDB-WASM 제거(수십 MB SQL 엔진 콜드스타트·HF 직결 range 왕복 0): 셸이 provideFinanceRows 로
+// 행 로더(런타임 hyparquet, 차트와 캐시 공유)를 주입한다. 순수 SQL등가 로직(queryRowsFromRaw·pivot·
+// buildSceMatrix)은 financePivot.ts — 테스트 가능. 미주입(또는 행 미가용) = 정직 빈 재무(throw 금지).
 
-import { buildSceMatrix, buildSql, num, pivot, sceComponent, type QueryRow, type SceQueryRow } from './financePivot';
-
-// duckdb 접근은 셸이 주입한다 — surfaces(vanilla svelte)는 SvelteKit/Vite 전용 $lib/data/duckdb
-// ($app/environment·@vite-ignore·OPFS)에 직접 결합하지 않는다. landing 컴포지션 루트가 provideDuckDb(loadDartDb)로
-// 주입. 미주입(또는 기기 제약) = null → 정직 빈 재무(throw 금지, 02 §3 silent fallback 아님 — 단일 경로 + 명시 null).
-export interface ViewerDuckDb {
-	query<T = Record<string, unknown>>(sql: string): Promise<T[]>;
-	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
-	// 소형 parquet 통파일 1회 GET(프록시·엣지캐시) → DuckDB 버퍼 등록. 회사 재무처럼 작은 파일 + 같은 파일
-	// 여러 쿼리(avail·탭 전환) 시 httpfs 매 쿼리 원격 range 왕복·콜드403 을 제거. 미주입 셸은 registerHfParquet 폴백.
-	registerHfParquetBuffer?(viewName: string, hfPath: string): Promise<void>;
-}
-let duckDbProvider: (() => Promise<ViewerDuckDb | null>) | null = null;
-export function provideDuckDb(provider: () => Promise<ViewerDuckDb | null>): void {
-	duckDbProvider = provider;
-}
-function loadDartDb(): Promise<ViewerDuckDb | null> {
-	return duckDbProvider ? duckDbProvider() : Promise.resolve(null);
-}
-// 회사 재무 parquet 등록 — 통파일 버퍼(1회 GET·프록시·로컬쿼리) 우선, 미지원 셸은 httpfs 원격 view 폴백.
-function registerFinance(db: ViewerDuckDb, stockCode: string): Promise<void> {
-	const path = `dart/finance/${stockCode}.parquet`;
-	return db.registerHfParquetBuffer ? db.registerHfParquetBuffer('companyFinance', path) : db.registerHfParquet('companyFinance', path);
-}
-// SQL 단일인용 escape — 1줄 순수 유틸(옛 $lib/data/duckdb.sqlEscape 인라인 — 결합 절제).
-function sqlEscape(value: string): string {
-	return value.replace(/'/g, "''");
-}
+import { buildSceMatrix, pivot, queryRowsFromRaw, sceComponent, type RawFinanceRow, type SceQueryRow } from './financePivot';
 import type { FinanceFreq, FinanceKind, FinanceScope, FinanceStatement, SceMatrixData } from './types';
 
 const ALL_KINDS: FinanceKind[] = ['IS', 'BS', 'CF', 'CIS', 'SCE'];
 
-// DuckDB-WASM 단일 연결은 동시 query 시 hang — finance 의 모든 DuckDB 접근(probe + 각 statement load)을
-// 직렬화. 한 호출이 끝나야 다음이 _conn 을 쓴다(register+query 쌍이 안 겹침).
-let dbQueue: Promise<unknown> = Promise.resolve();
-function serialize<T>(fn: () => Promise<T>): Promise<T> {
-	const run = dbQueue.then(fn, fn);
-	dbQueue = run.then(
-		() => undefined,
-		() => undefined
-	);
-	return run;
+// 회사 재무 raw 행 주입 — surfaces 는 hyparquet/런타임에 직접 결합하지 않는다(셸이 주입). 미주입·실패 = null.
+// landing 컴포지션 루트가 provideFinanceRows(loadFinanceRows)로 주입 — bundle()(차트)과 같은 rowsCache 공유.
+let rowsProvider: ((code: string) => Promise<RawFinanceRow[] | null>) | null = null;
+export function provideFinanceRows(loader: (code: string) => Promise<RawFinanceRow[] | null>): void {
+	rowsProvider = loader;
 }
+function loadRows(code: string): Promise<RawFinanceRow[] | null> {
+	return rowsProvider ? rowsProvider(code) : Promise.resolve(null);
+}
+
+// 숫자 파싱 — financePivot 의 SQL등가 파서와 동일 규약(콤마 제거 후 실수, 실패 null). SCE 매핑 전용.
+function toNum(v: unknown): number | null {
+	if (v == null) return null;
+	if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+	if (typeof v === 'bigint') return Number(v);
+	const n = Number(String(v).replace(/,/g, ''));
+	return Number.isFinite(n) ? n : null;
+}
+const toInt = (v: unknown): number | null => { const n = toNum(v); return n == null ? null : Math.trunc(n); };
 
 export interface FinanceAvailability {
 	scopes: FinanceScope[]; // 실제 보고된 범위(CFS/OFS) — 별도 없는 회사는 OFS 토글 숨김. CFS 우선 정렬 = 연결 우선 기본.
 	byScope: Record<string, FinanceKind[]>; // scope → 가용 statement (단일 포괄손익 회사는 IS 없음)
 }
 
-// 회사의 (scope × statement) 가용 조합을 한 번에 probe — 빈 scope 토글·빈 statement 탭 제거. dart/finance 인코딩이
-// 회사별로 다른 현실 반영(연결/별도 유무 + 별도 2표 vs 단일 포괄손익). scopes 는 CFS 우선 정렬이라 기본 = 연결 우선.
+// 회사의 (scope × statement) 가용 조합 — 빈 scope 토글·빈 statement 탭 제거. dart/finance 인코딩이 회사별로
+// 다른 현실 반영(연결/별도 유무 + 별도 2표 vs 단일 포괄손익). scopes 는 CFS 우선 정렬이라 기본 = 연결 우선.
 export async function financeAvailability(stockCode: string, market: 'KR' | 'US'): Promise<FinanceAvailability> {
 	const fallback: FinanceAvailability = { scopes: ['CFS', 'OFS'], byScope: { CFS: ALL_KINDS, OFS: ALL_KINDS } };
 	if (market !== 'KR') return { scopes: [], byScope: {} };
-	return serialize(async () => {
-		const db = await loadDartDb();
-		if (!db) return fallback; // 기기 제약 — 일단 전부 노출
-		await registerFinance(db, stockCode);
-		const rows = await db.query<{ fs_div: string; sj_div: string }>(
-			`SELECT DISTINCT fs_div, sj_div FROM companyFinance WHERE stock_code = '${sqlEscape(stockCode)}' AND fs_div IS NOT NULL AND sj_div IS NOT NULL`
-		);
-		const present: Record<string, Set<string>> = {};
-		for (const r of rows) (present[r.fs_div] ??= new Set()).add(r.sj_div);
-		const scopes = (['CFS', 'OFS'] as FinanceScope[]).filter((s) => present[s]?.size); // CFS 우선 정렬 유지
-		const byScope: Record<string, FinanceKind[]> = {};
-		for (const s of scopes) byScope[s] = ALL_KINDS.filter((k) => present[s].has(k));
-		return scopes.length ? { scopes, byScope } : fallback;
-	});
+	const rows = await loadRows(stockCode);
+	if (!rows) return fallback; // 행 미가용(미주입·로드 실패) — 토글 노출, 로드에서 정직 안내
+	const present: Record<string, Set<string>> = {};
+	for (const r of rows) {
+		const fs = String(r.fs_div ?? ''), sj = String(r.sj_div ?? '');
+		if (!fs || !sj) continue;
+		(present[fs] ??= new Set()).add(sj);
+	}
+	const scopes = (['CFS', 'OFS'] as FinanceScope[]).filter((s) => present[s]?.size); // CFS 우선 정렬 유지
+	const byScope: Record<string, FinanceKind[]> = {};
+	for (const s of scopes) byScope[s] = ALL_KINDS.filter((k) => present[s].has(k));
+	return scopes.length ? { scopes, byScope } : fallback;
 }
 
 // 자본변동표(SCE) — 변동유형×자본구성요소 matrix (연간 11011). account×period 표가 아닌 전용.
 export async function loadSceMatrix(stockCode: string, market: 'KR' | 'US', scope: FinanceScope): Promise<SceMatrixData | null> {
 	if (market !== 'KR') return null;
-	return serialize(async () => {
-		const db = await loadDartDb();
-		if (!db) return null;
-		await registerFinance(db, stockCode);
-		const raw = await db.query<{ period: string; label: string; detail: string | null; val: number | null; ord: number | null }>(
-			`SELECT bsns_year AS period, account_nm AS label, CAST(account_detail AS VARCHAR) AS detail,
-			        ${num('thstrm_amount')} AS val, TRY_CAST(ord AS INTEGER) AS ord
-			 FROM companyFinance
-			 WHERE stock_code = '${sqlEscape(stockCode)}' AND sj_div = 'SCE' AND fs_div = '${sqlEscape(scope)}'
-			   AND reprt_code = '11011' AND account_nm IS NOT NULL`
-		);
-		if (raw.length === 0) return { scope, periods: [], components: [], byPeriod: {}, unit: 'KRW' };
-		const rows: SceQueryRow[] = raw.map((r) => ({ period: r.period, label: r.label, comp: sceComponent(r.detail), val: r.val, ord: r.ord }));
-		return buildSceMatrix(rows, scope);
-	});
+	const rows = await loadRows(stockCode);
+	if (!rows) return null;
+	const raw: SceQueryRow[] = [];
+	for (const r of rows) {
+		if (String(r.sj_div ?? '') !== 'SCE' || String(r.fs_div ?? '') !== scope || String(r.reprt_code ?? '') !== '11011' || r.account_nm == null) continue;
+		raw.push({
+			period: String(r.bsns_year ?? ''),
+			label: String(r.account_nm),
+			comp: sceComponent(r.account_detail == null ? null : String(r.account_detail)),
+			val: toNum(r.thstrm_amount),
+			ord: toInt(r.ord)
+		});
+	}
+	if (raw.length === 0) return { scope, periods: [], components: [], byPeriod: {}, unit: 'KRW' };
+	return buildSceMatrix(raw, scope);
 }
 
-// DuckDB 로 dart/finance/{code}.parquet 등록 후 한 statement(연결/별도·freq) pivot. EDGAR(us)는 v1 미지원(null).
+// 한 statement(연결/별도·freq) — raw 행 → QueryRow(JS) → pivot. EDGAR(us)는 v1 미지원(null).
 export async function loadFinanceStatement(
 	stockCode: string,
 	market: 'KR' | 'US',
@@ -100,12 +81,9 @@ export async function loadFinanceStatement(
 	scope: FinanceScope
 ): Promise<FinanceStatement | null> {
 	if (market !== 'KR') return null; // EDGAR companyfacts → statement 매핑은 후속(별도 스키마)
-	return serialize(async () => {
-		const db = await loadDartDb();
-		if (!db) return null; // iOS Safari 등 — 호출측이 안내
-		await registerFinance(db, stockCode);
-		const rows = await db.query<QueryRow>(buildSql(stockCode, kind, freq, scope));
-		if (rows.length === 0) return { kind, scope, freq, periods: [], rows: [], unit: 'KRW' };
-		return pivot(rows, kind, scope, freq);
-	});
+	const rows = await loadRows(stockCode);
+	if (!rows) return null; // 행 미가용 — 호출측이 안내
+	const qrows = queryRowsFromRaw(rows, kind, freq, scope);
+	if (qrows.length === 0) return { kind, scope, freq, periods: [], rows: [], unit: 'KRW' };
+	return pivot(qrows, kind, scope, freq);
 }
