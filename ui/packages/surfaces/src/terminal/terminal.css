@@ -385,9 +385,10 @@
 .dlTerm .ctWrap { position: relative; }
 .dlTerm .ctMenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
 .dlTerm .ctMenu .ctRow { display: flex; gap: 3px; }
-/* 넓은 그리드 — 칩을 가로로 빽빽하게 채워 드롭다운이 세로로 길어지지 않게(운영자: 세로 열거 금지). 팝오버라 차트 위로 좌측 확장 무해. */
-.dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 340px; }
-.dlTerm .ctMenu.ctMenuWide .ctRow.ctRowWrap { max-width: 440px; }
+/* 넓은 그리드 — 칩을 가로로 빽빽하게 채워 드롭다운이 세로로 길어지지 않게(운영자: 세로 열거 금지). 팝오버라 차트 위로 좌측 확장 무해.
+   ⚠ width 강제 필수 — absolute 메뉴는 폭이 내용에 맞춰 수축(가장 넓은 버튼)해서, max-width 만으론 1개씩 세로 줄바꿈. width 로 그리드 폭 고정. */
+.dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; width: 340px; }
+.dlTerm .ctMenu.ctMenuWide .ctRow.ctRowWrap { width: 440px; }
 .dlTerm .btParamRow { align-items: center; gap: 4px; }
 .dlTerm .btParamLbl { font-size: 9px; color: var(--dim); min-width: 42px; }
 .dlTerm .btParamVal { font-size: 10px; color: var(--txt); min-width: 28px; text-align: center; }
