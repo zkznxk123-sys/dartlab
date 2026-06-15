@@ -413,34 +413,33 @@
 	sub={subject === 'index'
 		? (indexRef?.market === 'US' ? { kr: '미국 지수 · FRED (종가)', en: 'US index · FRED (close)' } : { kr: 'KR 지수 · 거래소 (EOD)', en: 'KR index · KRX (EOD)' })
 		: (chartSrcLine ? { kr: chartSrcLine, en: chartSrcLine } : { kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' })} flush>
-	{#snippet right()}
-		<!-- 주체 토글(안3) — 회사 주가 ↔ KR gov/US FRED 지수. 지수 선택 시 picker(안4: 큐레이트 9 + 검색). -->
-		<span class="segGroup mini idxToggle">
-			<button class={subject === 'price' ? 'seg on' : 'seg'} onclick={() => (subject = 'price')}>{lang === 'en' ? 'Price' : '주가'}</button>
-			<button class={subject === 'index' ? 'seg on' : 'seg'} onclick={() => { subject = 'index'; if (!indexRef) indexRef = KR_INDEX_PRESETS[0]; }}>{lang === 'en' ? 'Index' : '지수'}</button>
-		</span>
-		{#if subject === 'index'}
-			<div class="idxPick">
-				<button class="idxPickBtn" onclick={() => (pickerOpen = !pickerOpen)} title={lang === 'en' ? 'choose index' : '지수 선택'}>{indexRef?.name ?? (lang === 'en' ? 'choose' : '선택')} ▾</button>
-				{#if pickerOpen}
-					<div class="idxMenu">
-						<input class="idxSearch mono" placeholder={lang === 'en' ? 'search index…' : '지수 검색…'} bind:value={idxQuery} oninput={onIdxSearch} />
-						{#if idxResults.length}
-							<div class="idxGrp">{#each idxResults as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</div>
-						{:else}
-							<div class="idxGrpLbl">{lang === 'en' ? 'Korea' : '한국'}</div>
-							<div class="idxGrp">{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
-							<div class="idxGrpLbl">{lang === 'en' ? 'US' : '미국'}</div>
-							<div class="idxGrp">{#each US_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
-						{/if}
-					</div>
-				{/if}
-			</div>
-		{:else}
-			<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>
-		{/if}
-	{/snippet}
+	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candles && chartCode}
+		<!-- 차트 주체 컨트롤 바(안3·안4) — 16px 패널헤더는 overflow:hidden 라 토글·드롭다운이 잘려, 본문 상단 전용 행으로 분리(발견성↑·드롭다운 클립 해소). 회사 주가 ↔ KR gov/US FRED 지수 + picker(큐레이트 9 + 검색). -->
+		<div class="idxBar">
+			<span class="segGroup idxToggle">
+				<button class={subject === 'price' ? 'seg on' : 'seg'} onclick={() => (subject = 'price')}>{lang === 'en' ? 'Price' : '주가'}</button>
+				<button class={subject === 'index' ? 'seg on' : 'seg'} onclick={() => { subject = 'index'; if (!indexRef) indexRef = KR_INDEX_PRESETS[0]; }}>{lang === 'en' ? 'Index' : '지수'}</button>
+			</span>
+			{#if subject === 'index'}
+				<div class="idxPick">
+					<button class="idxPickBtn" onclick={() => (pickerOpen = !pickerOpen)} title={lang === 'en' ? 'choose index' : '지수 선택'}>{indexRef?.name ?? (lang === 'en' ? 'choose' : '선택')} ▾</button>
+					{#if pickerOpen}
+						<div class="idxMenu">
+							<input class="idxSearch mono" placeholder={lang === 'en' ? 'search index…' : '지수 검색… (예: 반도체)'} bind:value={idxQuery} oninput={onIdxSearch} />
+							{#if idxResults.length}
+								<div class="idxGrp">{#each idxResults as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</div>
+							{:else}
+								<div class="idxGrpLbl">{lang === 'en' ? 'Korea' : '한국'}</div>
+								<div class="idxGrp">{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
+								<div class="idxGrpLbl">{lang === 'en' ? 'US' : '미국'}</div>
+								<div class="idxGrp">{#each US_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/if}
+		</div>
 		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신). 지수 주체면 회사 오버레이(공시·실적·밴드·피어) 비움. -->
 		<PriceChart {candles} code={chartCode} name={chartName} {lang} {subject} {indexLine}
 			events={subject === 'index' ? [] : priceEvents}
