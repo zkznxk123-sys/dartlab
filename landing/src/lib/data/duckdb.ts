@@ -51,8 +51,11 @@ export interface DartDb {
 	 *   }
 	 */
 	queryStream<T = Record<string, unknown>>(sql: string): AsyncGenerator<T[], void, void>;
-	/** HF parquet 을 view 로 등록. hfPath 는 `gov/prices/date/2024.parquet` 같은 상대 경로 또는 full URL. */
+	/** HF parquet 을 view 로 등록 (httpfs 원격 range 직독). 대형·범위읽기용. */
 	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
+	/** 소형 parquet(회사 재무 등 ~수백KB)을 통파일 1회 GET(프록시·엣지캐시·403 흡수)으로 받아 DuckDB
+	 *  버퍼로 등록 → 이후 모든 쿼리를 로컬에서. httpfs 매 쿼리 원격 range 왕복·콜드403 회피. */
+	registerHfParquetBuffer(viewName: string, hfPath: string): Promise<void>;
 	/** JS 객체 배열을 임시 테이블로 등록 (작은 메타 JSON 용). */
 	registerJson(tableName: string, rows: unknown[]): Promise<void>;
 	/** 연결 종료 (페이지 unmount 시 호출 권장, optional). */
@@ -70,6 +73,34 @@ let _opfsRebuilt = false;
 export function hfParquetUrl(pathOrUrl: string): string {
 	if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) return pathOrUrl;
 	return HF_RESOLVE + pathOrUrl.replace(/^\/+/, '');
+}
+
+// 소형 통파일 GET 용 base — CF 프록시(VITE_DARTLAB_HF_RESOLVE) 우선(엣지캐시·콜드403 흡수·CORS echo),
+// 미설정 시 HF 직결. 통파일 GET 은 origin.ts 가 명시한 "프록시의 강점" 경로(206 range 아님).
+const _viteHfResolve = (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_DARTLAB_HF_RESOLVE;
+const WHOLE_BASE = (_viteHfResolve || HF_RESOLVE).replace(/\/+$/, '');
+
+// 소형 parquet(회사 재무 ~수백KB) 통파일 캐시 — httpfs 매 쿼리 원격 range 왕복·콜드403 대신 1회 GET 후
+// DuckDB 버퍼 등록. path 별 바이트 캐시(재방문 무네트워크) + DuckDB 파일 누적 캡(LRU drop).
+const _bufBytes = new Map<string, Uint8Array>();
+const _bufFiles = new Set<string>();
+const _BUF_CAP = 12;
+const _bufFileName = (hfPath: string): string => `dlbuf_${hfPath.replace(/[^A-Za-z0-9]/g, '_')}`;
+
+async function _fetchWholeParquet(hfPath: string): Promise<Uint8Array> {
+	const url = `${WHOLE_BASE}/${hfPath.replace(/^\/+/, '')}`;
+	let lastErr: unknown;
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			const res = await fetch(url, { cache: 'force-cache' });
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return new Uint8Array(await res.arrayBuffer());
+		} catch (err) {
+			lastErr = err;
+			await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+		}
+	}
+	throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
 
 /** SQL 문자열 escape — 단일 인용부 안전. */
@@ -175,6 +206,32 @@ async function _instantiate(): Promise<DartDb | null> {
 			await _conn.query(
 				`CREATE OR REPLACE VIEW ${safeView} AS SELECT * FROM read_parquet('${sqlEscape(url)}')`
 			);
+		},
+
+		async registerHfParquetBuffer(viewName: string, hfPath: string) {
+			if (!_db || !_conn) throw new Error('DuckDB 연결이 없습니다');
+			const fileName = _bufFileName(hfPath);
+			let bytes = _bufBytes.get(hfPath);
+			if (!bytes) {
+				bytes = await _fetchWholeParquet(hfPath);
+				_bufBytes.set(hfPath, bytes);
+			}
+			if (!_bufFiles.has(fileName)) {
+				await _db.registerFileBuffer(fileName, bytes);
+				_bufFiles.add(fileName);
+			}
+			// 캡 초과 → 가장 오래된 버퍼 drop (현재 path 제외) — WASM 메모리 누적 가드
+			while (_bufBytes.size > _BUF_CAP) {
+				const oldest = _bufBytes.keys().next().value;
+				if (!oldest || oldest === hfPath) break;
+				_bufBytes.delete(oldest);
+				const f = _bufFileName(oldest);
+				if (_bufFiles.delete(f)) {
+					try { await _db.dropFile(f); } catch { /* view 가 참조 중이면 무시 */ }
+				}
+			}
+			const safeView = _safeIdent(viewName);
+			await _conn.query(`CREATE OR REPLACE VIEW ${safeView} AS SELECT * FROM read_parquet('${sqlEscape(fileName)}')`);
 		},
 
 		async registerJson(tableName: string, rows: unknown[]) {

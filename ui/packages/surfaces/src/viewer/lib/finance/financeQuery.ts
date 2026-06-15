@@ -9,6 +9,9 @@ import { buildSceMatrix, buildSql, num, pivot, sceComponent, type QueryRow, type
 export interface ViewerDuckDb {
 	query<T = Record<string, unknown>>(sql: string): Promise<T[]>;
 	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
+	// 소형 parquet 통파일 1회 GET(프록시·엣지캐시) → DuckDB 버퍼 등록. 회사 재무처럼 작은 파일 + 같은 파일
+	// 여러 쿼리(avail·탭 전환) 시 httpfs 매 쿼리 원격 range 왕복·콜드403 을 제거. 미주입 셸은 registerHfParquet 폴백.
+	registerHfParquetBuffer?(viewName: string, hfPath: string): Promise<void>;
 }
 let duckDbProvider: (() => Promise<ViewerDuckDb | null>) | null = null;
 export function provideDuckDb(provider: () => Promise<ViewerDuckDb | null>): void {
@@ -16,6 +19,11 @@ export function provideDuckDb(provider: () => Promise<ViewerDuckDb | null>): voi
 }
 function loadDartDb(): Promise<ViewerDuckDb | null> {
 	return duckDbProvider ? duckDbProvider() : Promise.resolve(null);
+}
+// 회사 재무 parquet 등록 — 통파일 버퍼(1회 GET·프록시·로컬쿼리) 우선, 미지원 셸은 httpfs 원격 view 폴백.
+function registerFinance(db: ViewerDuckDb, stockCode: string): Promise<void> {
+	const path = `dart/finance/${stockCode}.parquet`;
+	return db.registerHfParquetBuffer ? db.registerHfParquetBuffer('companyFinance', path) : db.registerHfParquet('companyFinance', path);
 }
 // SQL 단일인용 escape — 1줄 순수 유틸(옛 $lib/data/duckdb.sqlEscape 인라인 — 결합 절제).
 function sqlEscape(value: string): string {
@@ -50,7 +58,7 @@ export async function financeAvailability(stockCode: string, market: 'KR' | 'US'
 	return serialize(async () => {
 		const db = await loadDartDb();
 		if (!db) return fallback; // 기기 제약 — 일단 전부 노출
-		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
+		await registerFinance(db, stockCode);
 		const rows = await db.query<{ fs_div: string; sj_div: string }>(
 			`SELECT DISTINCT fs_div, sj_div FROM companyFinance WHERE stock_code = '${sqlEscape(stockCode)}' AND fs_div IS NOT NULL AND sj_div IS NOT NULL`
 		);
@@ -69,7 +77,7 @@ export async function loadSceMatrix(stockCode: string, market: 'KR' | 'US', scop
 	return serialize(async () => {
 		const db = await loadDartDb();
 		if (!db) return null;
-		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
+		await registerFinance(db, stockCode);
 		const raw = await db.query<{ period: string; label: string; detail: string | null; val: number | null; ord: number | null }>(
 			`SELECT bsns_year AS period, account_nm AS label, CAST(account_detail AS VARCHAR) AS detail,
 			        ${num('thstrm_amount')} AS val, TRY_CAST(ord AS INTEGER) AS ord
@@ -95,7 +103,7 @@ export async function loadFinanceStatement(
 	return serialize(async () => {
 		const db = await loadDartDb();
 		if (!db) return null; // iOS Safari 등 — 호출측이 안내
-		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
+		await registerFinance(db, stockCode);
 		const rows = await db.query<QueryRow>(buildSql(stockCode, kind, freq, scope));
 		if (rows.length === 0) return { kind, scope, freq, periods: [], rows: [], unit: 'KRW' };
 		return pivot(rows, kind, scope, freq);
