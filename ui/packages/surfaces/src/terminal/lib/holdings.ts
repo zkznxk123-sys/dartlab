@@ -52,10 +52,11 @@ export function classifyTier(stakePct: Num): HoldingTier {
 	return 'simple';
 }
 
-export function enrichHoldingRow(r: InvestmentRow, lookupListed: ListedLookup): HoldingsRow {
+// withMarket=false (과거 기간) → 시가지분/gapRatio 미산출(현재가 기반이라 과거엔 왜곡). code 는 항상 해소(클릭 이동·상호출자).
+export function enrichHoldingRow(r: InvestmentRow, lookupListed: ListedLookup, withMarket = true): HoldingsRow {
 	const listed = lookupListed(r.name);
 	const code = listed ? listed.code : null;
-	const marketStake = listed && r.stakePct != null ? (r.stakePct / 100) * listed.marketCap : null;
+	const marketStake = withMarket && listed && r.stakePct != null ? (r.stakePct / 100) * listed.marketCap : null;
 	const equityEarn = r.stakePct != null && r.targetNet != null ? (r.stakePct / 100) * r.targetNet : null;
 	const investROIC = equityEarn != null && r.bookValue ? equityEarn / r.bookValue : null;
 	const gapRatio = marketStake != null && r.bookValue ? marketStake / r.bookValue : null;
@@ -78,9 +79,10 @@ export function buildHoldingsModel(
 	rows: InvestmentRow[],
 	lookupListed: ListedLookup,
 	parentMktcap: number | null,
-	parentNet: number | null
+	parentNet: number | null,
+	withMarket = true
 ): HoldingsModel {
-	const er = rows.map((r) => enrichHoldingRow(r, lookupListed));
+	const er = rows.map((r) => enrichHoldingRow(r, lookupListed, withMarket));
 	const counts: HoldingsCounts = {
 		consolidated: 0,
 		equity: 0,

@@ -3,7 +3,7 @@
 	// 모든 변수를 채널에 배정: 크기=장부가/지분, 색=이익기여(forward)·주주유형(reverse), 테두리=상장, 모양=법인/개인, 엣지=지분%·방향.
 	// 좌표는 holdings.ts buildNetworkLayout(순수). 정직: 매수/목표주가·인과 금지, 개인주주 익명, 근사 명기, null '—' 분리.
 	import type { Company, Lang } from '../lib/types';
-	import type { InvestmentRow, InvestmentTrendYear, ShareholderKind, ShareholdersView } from '@dartlab/ui-contracts';
+	import type { InvestmentPeriod, InvestmentRow, InvestmentTrendYear, ShareholderKind, ShareholdersView } from '@dartlab/ui-contracts';
 	import { buildHoldingsModel, buildNetworkLayout, type ListedLookup, type HoldingTier, type HoldingsRow } from '../lib/holdings';
 	import { fmtKRW } from '../lib/engine';
 
@@ -12,19 +12,56 @@
 		year: string;
 		rows: InvestmentRow[];
 		trend: InvestmentTrendYear[];
-		shareholders: ShareholdersView | null;
+		periods: InvestmentPeriod[]; // forward 시계열 (year,quarter)
+		shareholders: ShareholdersView | null; // 최신기 (timeline 비었을 때 fallback)
+		shPeriods: ShareholdersView[]; // reverse 시계열
 		lang: Lang;
 		lookupListed: ListedLookup;
 		onPick: (code: string) => void;
 		onClose: () => void;
 	}
-	let { co, year, rows, shareholders, lang, lookupListed, onPick, onClose }: Props = $props();
+	let { co, year, rows, periods, shareholders, shPeriods, lang, lookupListed, onPick, onClose }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	// 본체 재무 주입(원) — 시총 = mktcapRaw, 순익 = 시총/PER 근사(둘 다 원). PER null·≤0 → parentNet=null → contribShare 생략.
 	const parentMktcap = $derived(co.price.mktcapRaw ?? null);
 	const parentNet = $derived(co.fundamentals.per && co.fundamentals.per > 0 && co.price.mktcapRaw ? co.price.mktcapRaw / co.fundamentals.per : null);
-	const m = $derived(buildHoldingsModel(year, rows, lookupListed, parentMktcap, parentNet));
+
+	// ── 기간 시계열 (연도/분기) — 관계망·표 탭이 공유하는 단일 기간 컨트롤 ──
+	const qr = (q: string) => (q === '4분기' ? 4 : q === '3분기' ? 3 : q === '2분기' ? 2 : 1);
+	let gran = $state<'year' | 'quarter'>('year');
+	let periodIdx = $state(-1); // -1 = 최신(기본). selIdx 에서 보정
+	let playing = $state(false);
+	interface TLEntry { year: string; quarter: string; label: string; fwdRows: InvestmentRow[]; sh: ShareholdersView | null; }
+	const timeline = $derived.by<TLEntry[]>(() => {
+		const fwd = new Map<string, InvestmentPeriod>();
+		for (const p of periods) fwd.set(p.year + '|' + p.quarter, p);
+		const rev = new Map<string, ShareholdersView>();
+		for (const s of shPeriods) rev.set(s.year + '|' + s.quarter, s);
+		if (gran === 'quarter') {
+			const keys = new Set<string>([...fwd.keys(), ...rev.keys()]);
+			return [...keys]
+				.map((k) => { const [y, q] = k.split('|'); return { year: y, quarter: q, label: y + ' ' + q.replace('분기', 'Q'), fwdRows: fwd.get(k)?.rows ?? [], sh: rev.get(k) ?? null }; })
+				.sort((a, b) => a.year.localeCompare(b.year) || qr(a.quarter) - qr(b.quarter));
+		}
+		const years = new Set<string>([...periods.map((p) => p.year), ...shPeriods.map((s) => s.year)]);
+		return [...years]
+			.map((y) => {
+				const f = periods.filter((p) => p.year === y).sort((a, b) => qr(b.quarter) - qr(a.quarter))[0];
+				const s = shPeriods.filter((x) => x.year === y).sort((a, b) => qr(b.quarter) - qr(a.quarter))[0];
+				return { year: y, quarter: f?.quarter ?? s?.quarter ?? '', label: y, fwdRows: f?.rows ?? [], sh: s ?? null };
+			})
+			.sort((a, b) => a.year.localeCompare(b.year));
+	});
+	const selIdx = $derived(timeline.length ? (periodIdx < 0 || periodIdx >= timeline.length ? timeline.length - 1 : periodIdx) : -1);
+	const sel = $derived(selIdx >= 0 ? timeline[selIdx] : null);
+	const isLatest = $derived(selIdx === timeline.length - 1); // 시가 채널은 최신기만(현재가 기반)
+	const selRows = $derived(timeline.length ? (sel?.fwdRows ?? []) : rows);
+	const selSh = $derived(timeline.length ? (sel?.sh ?? null) : shareholders);
+
+	const m = $derived(buildHoldingsModel(sel?.label ?? year, selRows, lookupListed, isLatest ? parentMktcap : null, isLatest ? parentNet : null, isLatest));
+	// 회사 전환 시 기간/재생 리셋
+	$effect(() => { void co.code; periodIdx = -1; playing = false; });
 
 	const TIER_LABEL: Record<HoldingTier, { kr: string; en: string; cls: string }> = {
 		consolidated: { kr: '연결', en: 'CONS', cls: 'tUp' },
@@ -69,7 +106,7 @@
 
 	// reverse 법인·기관 주주 — 상장 해소(클릭 이동용). 개인은 익명 집계라 named 에 없음.
 	const reverseNamed = $derived(
-		(shareholders?.named ?? []).map((sh) => {
+		(selSh?.named ?? []).map((sh) => {
 			if (sh.kind === 'corp' || sh.kind === 'institution') {
 				const lk = lookupListed(sh.name);
 				if (lk) return { ...sh, code: lk.code };
@@ -87,7 +124,7 @@
 	let hy = $state(0);
 	// 그래프 탭은 본문을 가득 채운다(탭 분리 → 스크롤 제거 → 그래프 확대 → 회사명 상시 라벨 수용). 높이는 캔버스 실측, 미측정 시 460.
 	const NET_H = $derived(mapH || 460);
-	const layout = $derived(mapW ? buildNetworkLayout(m.rows, m.maxBook, reverseNamed, shareholders?.person ?? null, mapW, NET_H) : null);
+	const layout = $derived(mapW ? buildNetworkLayout(m.rows, m.maxBook, reverseNamed, selSh?.person ?? null, mapW, NET_H) : null);
 	// 호버 툴팁 — 상시 라벨 대신 회사명 + 기본정보. hoverName 으로 forward/reverse 노드 데이터 조회.
 	const hoverFwd = $derived(hoverName ? (m.rows.find((h) => h.name === hoverName) ?? null) : null);
 	const hoverRev = $derived(hoverName && !hoverFwd ? (reverseNamed.find((s) => s.name === hoverName) ?? null) : null);
@@ -105,7 +142,7 @@
 	<div class="scrModal hdModal" role="dialog" aria-modal="true" aria-label={T('출자 관계', 'holdings relationship')} onclick={(e) => e.stopPropagation()}>
 		<div class="scrHead">
 			<span class="scrTitle">{T('출자 관계', 'HOLDINGS — relationship')} · {co.name.kr} · {m.year}</span>
-			<span class="hdSub dim">{T('피출자사', 'holdings')} {m.rows.length}{T('개', '')}{#if shareholders} · {T('주주', 'holders')} {reverseNamed.length + (shareholders.person ? 1 : 0)}{/if}</span>
+			<span class="hdSub dim">{T('피출자사', 'holdings')} {m.rows.length}{T('개', '')}{#if selSh} · {T('주주', 'holders')} {reverseNamed.length + (selSh.person ? 1 : 0)}{/if}</span>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
 
@@ -124,8 +161,8 @@
 				</div>
 				<div class="hdSumCard">
 					<div class="hdSumLbl">{T('가치 — 상장 보유지분 시가', 'VALUE — listed stake')}</div>
-					<div class="hdSumV mono">{krw(m.listedStakeSum)}</div>
-					<div class="hdSumSub dim">{m.pctOfParentCap != null ? T('본체 시총 대비 ', 'of parent cap ') + m.pctOfParentCap.toFixed(1) + '%' : T('본체 시총 대비 — (미산출)', 'parent cap n/a')}</div>
+					<div class="hdSumV mono">{isLatest ? krw(m.listedStakeSum) : '—'}</div>
+					<div class="hdSumSub dim">{isLatest ? (m.pctOfParentCap != null ? T('본체 시총 대비 ', 'of parent cap ') + m.pctOfParentCap.toFixed(1) + '%' : T('본체 시총 대비 — (미산출)', 'parent cap n/a')) : T('현재가 기반 — 최신기만', 'current price — latest only')}</div>
 				</div>
 				<div class="hdSumCard">
 					<div class="hdSumLbl">{T('효율 — 지분법 이익기여(근사)', 'EFFICIENCY — equity earnings (approx)')}</div>
@@ -134,9 +171,25 @@
 				</div>
 			</div>
 
+			{#if timeline.length > 1}
+				<!-- 공통 기간 컨트롤 — 관계망·표 탭 공유. 연도(각 연도 사업보고서 우선)/분기(보고된 것만) 토글 + 칩. -->
+				<div class="hdPeriodBar">
+					<span class="hdGran">
+						<button class={'hdGranBtn ' + (gran === 'year' ? 'on' : '')} onclick={() => (gran = 'year')}>{T('연도', 'Year')}</button>
+						<button class={'hdGranBtn ' + (gran === 'quarter' ? 'on' : '')} onclick={() => (gran = 'quarter')}>{T('분기', 'Qtr')}</button>
+					</span>
+					<span class="hdChips">
+						{#each timeline as t, i (t.label)}
+							<button class={'hdChip ' + (i === selIdx ? 'on' : '')} onclick={() => (periodIdx = i)}>{t.label}</button>
+						{/each}
+					</span>
+					{#if !isLatest}<span class="hdPbNote dim">{T('과거 — 출자 구조 변화(시가 아님)', 'past — structure change, not market value')}</span>{/if}
+				</div>
+			{/if}
+
 			<nav class="hdTabs" aria-label={T('관계망/표 전환', 'network/table')}>
 				<button class={'hdTab ' + (tab === 'net' ? 'on' : '')} onclick={() => (tab = 'net')}>{T('관계망', 'NETWORK')}</button>
-				<button class={'hdTab ' + (tab === 'table' ? 'on' : '')} onclick={() => (tab = 'table')}>{T('표', 'TABLE')} <span class="hdTabN">{m.rows.length}{#if shareholders} · {reverseNamed.length + (shareholders.person ? 1 : 0)}{/if}</span></button>
+				<button class={'hdTab ' + (tab === 'table' ? 'on' : '')} onclick={() => (tab = 'table')}>{T('표', 'TABLE')} <span class="hdTabN">{m.rows.length}{#if selSh} · {reverseNamed.length + (selSh.person ? 1 : 0)}{/if}</span></button>
 			</nav>
 
 			{#if tab === 'net'}
@@ -164,6 +217,7 @@
 								<li>{T('시가지분 = 상장 해소 피출자사만 · 비상장은 장부가만', 'market stake covers listed investees only')}</li>
 								<li>{T('피출자 순익 = 최근 1기 단일값 · 본체 순익 연결/별도 미구분(참고)', 'target net = latest single period only')}</li>
 								<li>{T('개인주주 익명 집계 · 미해소·null 은 0 대체 없이 분리', 'individuals aggregated · nulls kept separate')}</li>
+								<li>{T('과거 기간 = 출자 구조 변화(시가 아님) · 분기 = 보고된 것만', 'past periods = structure change (not market value) · quarters = reported only')}</li>
 								<li>{T('판정·목표주가 아님 — 관계 사실 기술', 'not a verdict or price target')}</li>
 							</ul>
 						</div>
@@ -274,7 +328,7 @@
 					<span><i class="lg dia"></i>{T('개인(익명)', 'person')}</span>
 					<span>{T('★=경영참여 · 굵은 테두리=시가/장부 괴리', '★=intent · thick border=mkt/book gap')}</span>
 				</div>
-				{#if !shareholders}<div class="hdMapNote dim">{T('주주 데이터 미수집 — 위쪽(소유 구조) 생략.', 'Holder data unavailable — upstream omitted.')}</div>{/if}
+				{#if !selSh}<div class="hdMapNote dim">{T('이 기간 주주 데이터 없음 — 위쪽(소유 구조) 생략.', 'No holder data for this period — upstream omitted.')}</div>{/if}
 			</div>
 			{:else}
 			<div class="hdPane hdTablePane">
@@ -320,9 +374,9 @@
 			</div>
 
 			<!-- reverse 최대주주 표 (누가 이 회사를 소유) — 개인 익명 집계 -->
-			{#if shareholders && (reverseNamed.length || shareholders.person)}
+			{#if selSh && (reverseNamed.length || selSh.person)}
 				<div class="hdScroll hdOwners">
-					<div class="hdOwnTitle dim">{T('최대주주 — 누가 이 회사를 소유하나', 'OWNERS — who owns this company')} · {shareholders.year}{#if shareholders.totalPct != null} · {T('합산', 'total')} {shareholders.totalPct.toFixed(1)}%{/if}</div>
+					<div class="hdOwnTitle dim">{T('최대주주 — 누가 이 회사를 소유하나', 'OWNERS — who owns this company')} · {sel?.label ?? selSh.year}{#if selSh.totalPct != null} · {T('합산', 'total')} {selSh.totalPct.toFixed(1)}%{/if}</div>
 					<table class="finTable hdTable">
 						<thead>
 							<tr><th class="finAcct">{T('주주', 'HOLDER')}</th><th>{T('유형', 'KIND')}</th><th>{T('관계', 'RELATE')}</th><th class="r">{T('지분', 'STAKE')}</th><th class="r">{T('주식수', 'SHARES')}</th></tr>
@@ -337,13 +391,13 @@
 									<td class="r mono">{h.shares != null ? h.shares.toLocaleString('en-US') : '—'}</td>
 								</tr>
 							{/each}
-							{#if shareholders.person}
+							{#if selSh.person}
 								<tr>
-									<td class="finAcct dim">{T('특수관계인 개인', 'related individuals')} {shareholders.person.count}{T('인', '')}</td>
+									<td class="finAcct dim">{T('특수관계인 개인', 'related individuals')} {selSh.person.count}{T('인', '')}</td>
 									<td><span class="hdTierMini">{T('개인', 'person')}</span></td>
 									<td class="dim">{T('익명 집계', 'aggregated')}</td>
-									<td class="r mono">{shareholders.person.ratio != null ? shareholders.person.ratio.toFixed(2) + '%' : '—'}</td>
-									<td class="r mono">{shareholders.person.shares != null ? shareholders.person.shares.toLocaleString('en-US') : '—'}</td>
+									<td class="r mono">{selSh.person.ratio != null ? selSh.person.ratio.toFixed(2) + '%' : '—'}</td>
+									<td class="r mono">{selSh.person.shares != null ? selSh.person.shares.toLocaleString('en-US') : '—'}</td>
 								</tr>
 							{/if}
 						</tbody>
@@ -426,6 +480,62 @@
 		font-size: 9.5px;
 		color: var(--dimmer, #6b7280);
 		font-weight: 400;
+	}
+	/* 공통 기간 컨트롤 — 관계망·표 공유. 연/분기 토글 + 기간 칩(+ P3 재생). */
+	.hdPeriodBar {
+		flex: none;
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 6px 10px;
+		margin-bottom: 8px;
+	}
+	.hdGran {
+		display: inline-flex;
+		gap: 2px;
+	}
+	.hdGranBtn {
+		background: none;
+		border: 1px solid var(--bd);
+		border-radius: 3px;
+		color: var(--dim);
+		font-family: var(--cond, inherit);
+		font-size: 10px;
+		font-weight: 600;
+		padding: 2px 8px;
+		cursor: pointer;
+	}
+	.hdGranBtn.on {
+		color: var(--amber);
+		border-color: var(--amber);
+		background: rgba(245, 158, 11, 0.08);
+	}
+	.hdChips {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: 3px;
+	}
+	.hdChip {
+		background: none;
+		border: 1px solid var(--bd);
+		border-radius: 3px;
+		color: var(--dim);
+		font-family: var(--mono);
+		font-size: 10px;
+		padding: 2px 7px;
+		cursor: pointer;
+	}
+	.hdChip:hover {
+		color: var(--txt);
+	}
+	.hdChip.on {
+		color: var(--amber);
+		border-color: var(--amber);
+		background: rgba(245, 158, 11, 0.1);
+		font-weight: 700;
+	}
+	.hdPbNote {
+		font-size: 9px;
 	}
 	.hdPane {
 		flex: 1;
