@@ -2,7 +2,7 @@
 
 > **참조 규약(분리 후):** 본 문서는 `mainPlan/terminal-chart-suite/`(현재/과거 차트 suite)에 속한다. suite 내부 = 01(차트)/02(레일)/03(백테스팅). **시뮬 PRD 참조(바 번호 05·07·08·09 등)는 `../scenario-simulator/NN`을 가리킨다**(단방향: suite ⟶ 시뮬, 역참조 없음).
 
-상태: PRD v0.3 (2026-06-14 공통배선 이후 현재기준 정합 + v1 스코프 확정 — **§0.5 가 경로·모듈구조·원장깊이·v1 스코프·결과계약 SSOT**. v0.2 본문 중 §14 법적가드·§19 타입계약·§20 지표공식·§21 테스트매트릭스·§5 리포트·§18 상태매트릭스는 유효 참조로 유지. 4-렌즈 토론 확정). 옛 v0.2: 메모리 `project_terminal_backtesting_prd`에서 repo 이관.
+상태: PRD v0.4 (2026-06-16 — "엔진을 SSOT로 퍼블릭+로컬 터미널에 전문가급으로 박기" 4-렌즈 적대 토론 확정. **§0.5.9 + §0.6 이 엔진 SSOT·floor 경계·정직 가드 SSOT**. v0.3 §0.5.1~0.5.8 유효 유지). v0.3 (2026-06-14 공통배선 이후 현재기준 정합 + v1 스코프 확정 — **§0.5 가 경로·모듈구조·원장깊이·v1 스코프·결과계약 SSOT**. v0.2 본문 중 §14 법적가드·§19 타입계약·§20 지표공식·§21 테스트매트릭스·§5 리포트·§18 상태매트릭스는 유효 참조로 유지. 4-렌즈 토론 확정). 옛 v0.2: 메모리 `project_terminal_backtesting_prd`에서 repo 이관.
 지위: 차트 suite의 백테스팅 컴포넌트. 통합 시퀀스(시뮬 07 통합로드맵: 지수→이벤트레일→**백테스팅**→시뮬)에서 3번. 백테스팅 엔진은 시뮬레이터와 **RunSpec·ReportDock·look-ahead 가드 DNA 공유**(시뮬 09 §1, 08 §5 — ReportDock backtest mode). "전문가급"=품질 기준(방법 엄밀함). ⚠**UI 경로 전수 stale — 기계적 매핑 강행**: 본문의 *모든* `landing/src/lib/terminal/<rest>`(본문 :135 `data/backtest.ts`·:158 `charts/btLayer.ts`·:797·:810·:825·:1118 등)를 `ui/packages/surfaces/src/terminal/<rest>` 로 1:1 치환해 읽는다(터미널 전체 이동, commit ff9099ba0, 04 §3). 포트=`ui/packages/contracts`, 데이터 소스=`ui/packages/runtime/src/adapters/{public,local,test}/`. 엔진 경로(`src/dartlab/*`)는 불변. `ui/shared/chart/PriceChart.svelte`(별개 SVG)와 혼동 금지.
 
 ## 0. 판정과 확정 결론
@@ -94,6 +94,72 @@ TS 엔진은 `Candle[]` 입력·Svelte/DOM/network import 0(`backtest.ts:1-7`)·
 | `charts/BacktestStrip.svelte` | summary strip 으로 축소(상시 가정 footer 유지) + 도크와 result 공유 |
 | `charts/chartState.svelte.ts` | 날짜범위/replay-cut 입력 state(btKey 류처럼 세션 전용) |
 | (DEFER) worker/sensitivity/robustness/builder | 별도 PRD |
+
+### 0.5.9 v0.4 — "엔진을 SSOT로 전문가급으로 박기" 토론 확정 (2026-06-16, 4-렌즈 적대 토론)
+
+> 계기: 운영자 — "백테스트가 약하다(버튼·개념). 엔진을 SSOT로 퍼블릭+로컬 터미널에 전문가급으로 제대로 박고, 부족하면 엔진 개선." rigor 아키텍트·아키텍처/패리티·UI/UX·적대 레드팀 4 렌즈가 코드 실측 후 토론. **본 절 + §0.6 이 엔진 SSOT·floor 경계·정직 가드 SSOT.**
+
+**A. 핵심 판정 — "전문가급"의 floor 경계 (rigor ≠ 통계 수치)**
+
+전문가급 척추 대부분은 *이미 라이브*다(TS `engine.ts`: look-ahead 1봉 shift·t+1 체결·동일비용 B&H를 같은 `runPass`에 `target≡1` 주입·`reconcileOk`·표본 null 게이트 / Python `_backtestAdvanced.py`: walkForward·cpcv·dsr·pbo / `multipleTesting.haircutSharpe·realityCheck`). 갭은 "기능 부재"가 아니라 *배선·정합·노출*이다.
+
+⚠ **floor 경계 = 표본이 지탱하는 것만 floor에 정직하게**:
+- **floor 승격(브라우저, 표본이 받침)**: OOS train/test **분할 + 시각화 + 인샘플/아웃샘플 2열 비교**. p값 주장이 아니라 "실제로 무슨 일이 있었나"라 단일종목 표본이 버틴다.
+- **floor 금지(folk-stat)**: DSR/PBO/CPCV/haircut **수치**를 단일종목·6프리셋·2020+(`gov/prices` T+1·5년) 표면에 노출 금지. `nTrials≈6`이면 `dsr` 보정 off, 5년 6분할 PBO=노이즈. 이 통계는 quantGap **횡단면 다전략** 자산이지 단일종목 표면 아님. → Python 정본 + 표본/nTrials 게이트 + parity 통과 시에만, "로컬 정밀 모드" 라벨.
+
+**B. 엔진 SSOT 정의 (통합 금지 · 책임 분리)**
+
+| 표면 | SSOT | 비고 |
+|---|---|---|
+| 터미널 단일종목 long/flat 실행 | **TS `runBacktest`** (floor·동기·브라우저) | metrics 정의(Sharpe rf=0·ann√252·<60봉 null·CAGR<252봉 null) 정본 |
+| robustness/연구(walk-forward·CPCV·DSR·PBO·multi-asset) | **Python `quant/strategy`** | universe-scale·장기 = local bonus |
+| *겹치는* 표면(단일 long/flat next-open) | **golden parity fixture** | TS·Python byte 동의(rel 1e-8). 미통과 Python 수치 = `pythonParityMissing` 라벨 |
+
+Python `_backtestAdvanced.py` 폐기 아님 — **parity 레퍼런스(정답지) + universe-scale bonus**.
+
+**C. 진짜 엔진 갭 3개 (신규 엔진 0 — 배선/정합)**
+
+| # | 갭 | 처치 | 분류 |
+|---|---|---|---|
+| 1 | Python `vectorBacktest` equity↔trade 비용 불일치(`daily_ret`=무비용 close-to-close vs `trade.pnl`=비용반영) — §2.4 "공식 통계 엔진 아님" 실체 | equity를 trade-cash 원장서 재구성 or daily_ret에 진입/청산 비용 반영 + reconcile(TS `reconcileOk` 미러) | P5 선결(DEFER) |
+| 2 | 벤치마크 상대 통계(alpha/beta/IR/tracking error) 전무 | 신설 `_metricsBenchmark.py`(`_metricsBasic` 패턴·B&H 페어 이미 존재→데이터 0). 기초(alpha/beta/IR vs B&H 단일창)는 서술적이라 **floor 후보** | CORE-lite 후보 |
+| 3 | TS↔Python golden parity fixture 부재 | `tests/.../btParity.fixture.json` 1개, 양쪽 테스트 소비, `BT_ENGINE_VERSION` 박음 | P5 게이트(DEFER) |
+
+**D. floor / bonus 경계 (env.kind 분기로 floor에서 사라지는 기능 = 0)**
+
+| 기능 | 퍼블릭 floor | 로컬 bonus | 정직 라벨 |
+|---|---|---|---|
+| 단일 백테스트·equity·trades·마커·핵심 metrics·RunSpec | ✅ TS 동기 | (동일) | costsOff·splitSuspect·fewTrades |
+| 날짜범위·replay-cut·OOS train/test **분할 음영+2열** | ✅ (캔들 slice·후처리, 엔진변경 0~소) | (동일) | replayCut 이후 미반영 명시 |
+| DSR/PBO/CPCV/walk-forward **수치** | ⊘ (folk-stat, A 참조) | parity+nTrials 충족 시 | `로컬 정밀 모드`·`research reference` |
+| 멀티종목 포트(`multiAssetBacktest`) | ⚠ N≤~30 in-thread, 초과 worker | 전종목 universe·risk-parity | 표본 제한 표기 |
+
+UI: bonus는 **숨김 아니라 비활성+이유 라벨**(자물쇠 "로컬 정밀 모드"). "열등 아니라 헤드룸" 프레이밍(`project_terminal_improvement` floor/bonus).
+
+**E. UI/UX — 운영자 불만 직격 (CORE 반영)**
+
+- **"버튼 약함" → `BtConfig`를 "전략 콘솔"로 재설계(CORE 승격 — §0.5.8 누락 항목 추가)**: 6프리셋 칩→라벨 드롭다운(+설명), 명시적 `▶ 백테스트 실행` 버튼(첫 선택은 자동 1회=초보 1클릭 보존), ③기간·검증 행(P3.5 날짜+replay-cut+train/test 분할 슬라이더), ⑤벤치마크 읽기전용 라벨(끌 수 없음=공정성 약속 노출). 리본 활성 칩=스펙 요약(`골든크로스·3Y·▲비용`).
+- **"개념 약함" → 리포트 도크 4탭 + OOS**: Overview(RunSpec+KPI그리드+equity/underwater+**인샘플/아웃샘플 2열**)·Trades(MAE/MFE/exitReason+필터+CSV)·Drawdown(underwater+top-N표+row→차트)·Assumptions(footer 승격+상시 고지). strip→요약(헤드라인+5지표+`도크 열기`).
+- **차트**: 기존 마커/equity/MDD 음영 + **신규 OOS train/test 세로 음영**(검증 구간이 눈으로 나쁘면 그 자체가 정직한 경고).
+- **빈 Robustness 탭 금지의 대체**: 회색 빈 탭 대신 Overview 하단 **정직 배너** — "단일 구간 in-sample 결과 · 다구간 교차검증(walk-forward·DSR)은 로컬 정밀 모드."
+
+**F. v1 스코프 재분류 (§0.5.6 표 보강)**
+
+| 항목 | v0.3 | v0.4 정정 |
+|---|---|---|
+| OOS train/test 분할 시각+2열 | (P5 안) | **CORE-lite(floor, TS, 엔진변경 0~소)** — folk-stat 아님 |
+| BtConfig "전략 콘솔" 재설계 | (누락) | **CORE(P3 동반)** — 운영자 "버튼 약함" 직격 |
+| alpha/beta/IR 기초(vs B&H 단일창) | 없음 | **CORE-lite 후보(floor, TS 소)** — 서술적 |
+| DSR/PBO/CPCV/walk-forward **수치** | P5 DEFER | **P5 DEFER 유지** + 표본/nTrials 게이트 + parity 선결(§0.6.1) |
+| Python reconcile 정합 + parity fixture | (P5 묶음) | **P5 선결 명문화** |
+
+## 0.6 레드팀 정직 가드 (v0.4 신설 — CORE 동반 강행, DEFER 불가)
+
+- **§0.6.1 통계 노출 천장**: 단일종목·6프리셋·2020+ 표본에 DSR/PBO/CPCV/haircut Sharpe **수치 노출 금지**(folk-stat). `cpcvSplits` n-가드는 실행가능성만 보장하지 통계 유효성 아님(`_metricsOverfitting.py`). DEFER P5 + parity gate + nTrials 충분 동시 충족 시에만.
+- **§0.6.2 "전문가급" 문구 봉인**: UI·툴팁·마케팅 노출 금지. 내부 품질 기준어 한정(§0.12·§0 판정). 사용자 표면 = "과거 일별 데이터 기반 가정 노출형 시뮬레이션". 위반 = `horizonMeaning §8` "확신오정렬 > 정렬실패" 재현.
+- **§0.6.3 탐색 = 과적합경고 강제**: 파라미터를 바꿔 돌리는 모든 표면은 과최적화 경고 없이 출시 금지(§10.2). v1은 grid 탐색 표면을 *안 만듦*으로 의무 회피. 슬라이더 재실행 = "단일 run 재계산"이지 "grid 탐색" 아님을 코드/문구로 분리. `best`/`optimal` 단어 금지.
+- **§0.6.4 벤치마크 편향 상시 고지**: 배당 미반영(`dividend:'excluded'`)·무수정주가 기본(`adjusted ?? false`)은 B&H를 체계적으로 깎아 전략이 *상대적으로* 좋아 보이게 함. `splitSuspect`처럼 일회 경고가 아니라 Assumptions+strip **상시 고지**. `costDrag`는 "동일 신호·비용만 차이" 가정 라벨 동반(부호 음수 보장 아님).
+- **§0.6.5 엔진 개선 게이트 (factor-zoo 차단)**: "부족하면 엔진 개선"이 들어올 때 `finance_slm G1/G2` 차용 — **G1 정직 held-out**(미래 구간 + 미학습 회사 split) → **G2 zero-train 강baseline**(동일비용 B&H가 이미 강baseline; 신규 프리셋/지표는 이걸 못 이기면 추가 금지) 통과 전 새 프리셋·지표·통계 추가 금지. `horizonMeaning §8` factor-zoo·동어반복 gold 재발 차단.
 
 ---
 
