@@ -156,10 +156,17 @@
 		void disclosures;
 		if (browser) requestAnimationFrame(recomputeRail);
 	});
-	// 캔버스 크기 변화(전체화면 토글·창 리사이즈·페인 경계 드래그) → 레일 geometry·dot x 재정렬.
+	// 캔버스 크기 변화(전체화면 토글·창 리사이즈·페인 경계 드래그·툴바 줄바꿈) → 차트 캔버스 resize + 레일 geometry·dot x 재정렬.
+	// klinecharts 는 컨테이너 크기를 자동 추적하지 않아(전체화면 토글이 c.resize() 를 명시 호출하는 이유) host(el) 가
+	// flex:1 로 커질 때 캔버스가 따라오지 않는다 — 같은 observer 에서 chart.resize() 동행해 작았다→커졌을 때 안 커지는 회귀 차단.
 	$effect(() => {
 		if (!browser || !el) return;
-		const ro = new ResizeObserver(() => requestAnimationFrame(recomputeRail));
+		const ro = new ResizeObserver(() =>
+			requestAnimationFrame(() => {
+				try { chart?.resize(); } catch { /* */ }
+				recomputeRail();
+			})
+		);
 		ro.observe(el);
 		return () => ro.disconnect();
 	});
