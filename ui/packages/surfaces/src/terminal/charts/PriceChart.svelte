@@ -295,6 +295,10 @@
 			// 줌아웃 시 ~3봉의 미래 축으로 보이던 것 제거 (EOD 차트에 미래 축은 무의미).
 			local.setOffsetRightDistance(0);
 			try { local.setMaxOffsetRightDistance(0); } catch { /* 구버전 무시 */ }
+			// 캔들 페인 상단 여백 축소 — 기본 top gap(~0.2=20%)은 옛 absolute 버튼이 덮던 자리.
+			// 버튼이 그래프 위 행으로 빠진 뒤 그 띠가 빈 공간으로 노출돼 "위에 안 그린다"는 회귀가 됐다.
+			// 봉이 위로 차오르고 레전드(시/고/저/MA) 텍스트는 그 위에 겹쳐 그려진다(TradingView 식·밀도↑).
+			try { local.setPaneOptions({ id: 'candle_pane', gap: { top: 0.06, bottom: 0.06 } }); } catch { /* 구버전 무시 */ }
 			// 공시 레일 — pan/zoom 시 dot x 재정렬 (rAF 디바운스). 미지원 버전은 데이터 effect 재계산만.
 			try {
 				local.subscribeAction('onScroll', () => requestAnimationFrame(recomputeRail));
