@@ -49,7 +49,7 @@
 
 > 이 터미널은 [@youngchangjo](https://www.threads.com/@youngchangjo) 님의 [스레드](https://www.threads.com/@youngchangjo/post/DZC_jobCfO6)에서 받은 영감으로 시작됐습니다.
 
-## 무엇을 해주는가
+## DartLab 무엇을 해주는가
 
 DartLab은 DART와 EDGAR 공시를 **종목코드 하나로 비교 가능한 데이터**로 바꾸는 Python 라이브러리다. 재무제표, 사업보고서 본문, 공시 목록, 비율, 신용위험, 산업 맵, 매크로 맥락을 같은 `Company` 인터페이스로 읽는다.
 
