@@ -248,7 +248,7 @@
 			bar: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', upBorderColor: '#34d399', downBorderColor: '#f0616f', noChangeBorderColor: '#8b919e', upWickColor: '#5eead4', downWickColor: '#fb7185', noChangeWickColor: '#8b919e' },
 			area: { lineColor: '#5b9bf0', lineSize: 1.4, backgroundColor: [{ offset: 0, color: 'rgba(91,155,240,0.22)' }, { offset: 1, color: 'rgba(91,155,240,0.01)' }] },
 			priceMark: { high: { color: '#8b919e', textFamily: CHART_FONT }, low: { color: '#8b919e', textFamily: CHART_FONT }, last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14', family: CHART_FONT } } },
-			tooltip: { offsetTop: 26, custom: tooltipCustom(lang), text: { color: '#cfd3dc', size: 11, family: CHART_FONT }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
+			tooltip: { offsetTop: 4, custom: tooltipCustom(lang), text: { color: '#cfd3dc', size: 11, family: CHART_FONT }, rect: { color: 'rgba(14,17,23,0.85)', borderColor: '#222b3a' } }
 		},
 		indicator: { tooltip: { text: { color: '#8b919e', size: 10, family: CHART_FONT } } },
 		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
