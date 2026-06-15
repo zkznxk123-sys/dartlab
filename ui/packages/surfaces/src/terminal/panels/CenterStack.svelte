@@ -241,10 +241,9 @@
 				if (d.length !== 8 || !f.url || !f.reportNm?.trim()) continue; // 빈 항목 방지(anti-clutter)
 				add(d, { title: f.reportNm.trim(), rceptNo: f.rceptNo, url: f.url, kind: 'nonreg', category: classifyFiling(f.reportNm) });
 			}
-			// 최근 60개 날짜로 캡 — wide window 에서도 dot 폭주 방지(anti-clutter). 같은 날 다수는 1 dot + 툴팁 전체 나열.
+			// 전 기간 공시 날짜 전부 전달 — dot 폭주 방지는 PriceChart 의 "보이는 x 범위 밖 skip"이 담당. 전역 캡(옛 60) 제거: 줌아웃해도 옛 공시(예: 2015) dot 보존. 같은 날 다수는 1 dot + 툴팁 전체 나열.
 			disclosureEvents = [...byDate.entries()]
 				.sort((a, b) => (a[0] < b[0] ? 1 : -1))
-				.slice(0, 60)
 				.map(([d, items]) => ({ date: d, items }));
 		});
 		return () => {
