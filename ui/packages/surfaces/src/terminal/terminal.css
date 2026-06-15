@@ -364,11 +364,11 @@
 /* 상단 패딩 = 리본 실측 높이(--crH, ChartRibbon bind:clientHeight) — 좁은 창에서 리본이 3~4줄로 늘어도 차트를 덮지 않는다 */
 .dlTerm .chartWrap.full { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 100vh; z-index: 9000; background: var(--dl-bg-deep); padding: calc(var(--crH, 70px) + 8px) 10px 22px 58px; }
 /* 차트 컨트롤 바 — 그래프 위 전용 행(normal flow·밀도). 좌 chartBar + 우 chartTools 한 줄, z-index>캔버스(드롭다운 비클립). */
-.dlTerm .chartTopBar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 4px 7px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); position: relative; z-index: 10; }
+.dlTerm .chartTopBar { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 6px; padding: 2px 6px; border-bottom: 1px solid var(--bd); background: var(--dl-bg-base); position: relative; z-index: 10; }
 .dlTerm .chartTools { display: flex; gap: 4px; align-items: center; margin-left: auto; }
 .dlTerm .chartWrap.full .chartTools { top: 10px; right: 16px; }
 /* 버튼류 — 한글 라벨이 mono(한글 글리프 없음→generic 폴백)로 눌리던 것 sans 통일 + 10px 하한 */
-.dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 8px; cursor: pointer; }
+.dlTerm .chartTool { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 2px 7px; cursor: pointer; }
 .dlTerm .chartTool:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .chartTool.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .chartTool:disabled { opacity: 0.4; cursor: default; }
@@ -524,7 +524,7 @@
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }
 .dlTerm .chartCtl { display: flex; gap: 8px; align-items: center; }
 .dlTerm .segGroup { display: flex; border: 1px solid var(--bd); border-radius: 2px; overflow: hidden; }
-.dlTerm .seg { background: var(--dl-bg-deep); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: none; padding: 3px 7px; cursor: pointer; border-right: 1px solid var(--bd); }
+.dlTerm .seg { background: var(--dl-bg-deep); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: none; padding: 2px 7px; cursor: pointer; border-right: 1px solid var(--bd); }
 .dlTerm .seg:last-child { border-right: none; }
 .dlTerm .seg.on { background: var(--amber); color: #1a1206; font-weight: 600; }
 .dlTerm .seg:hover:not(.on) { color: var(--txt); }
