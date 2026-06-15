@@ -98,19 +98,21 @@
 				<div class="pcxLegend">{lang === 'en'
 					? 'curve = peer distribution (thick = where many cluster) · vertical line = this company · dashed = median · ⇄ = rank flips by universe'
 					: '곡선 = 동종사 분포 (두꺼운 곳 = 많이 몰림) · 세로 실선 = 이 회사 · 점선 = 중앙값 · ⇄ = 잣대 따라 순위 뒤집힘'}</div>
+				<!-- 컬럼 헤더 — pcxBody 직속 + sticky 라 정성/가격까지 스크롤해도 유니버스 열이 상단 고정. -->
+				<div class="pcxHead">
+					<span class="pcxNameH">{lang === 'en' ? 'metric · value' : '지표 · 값'}</span>
+					{#each data as d, i (d.universe)}
+						<span class={'pcxColH' + (d.universe === 'industry' ? ' anchor' : '')}>{uniName(d)}<i>n={d.n}</i></span>
+					{/each}
+				</div>
 				<div class="pcxTable">
-					<div class="pcxHead">
-						<span class="pcxNameH">{lang === 'en' ? 'metric' : '지표'}</span>
-						{#each data as d, i (d.universe)}
-							<span class={'pcxColH' + (d.universe === 'industry' ? ' anchor' : '')}>{uniName(d)}<i>n={d.n}</i></span>
-						{/each}
-						<span class="pcxValH">{lang === 'en' ? 'value' : '값'}</span>
-					</div>
-
 					{#each rowDefs as row (row.en)}
 						{@const flip = spreadOf(row.en) >= SPREAD_FLIP}
 						<div class="pcxRow">
-							<span class="pcxName">{#if flip}<span class="pcxFlip" title={lang === 'en' ? 'lens-sensitive (rank flips by universe)' : '잣대 민감 — 유니버스 따라 순위 뒤집힘'}>⇄</span>{/if}{lang === 'en' ? row.en : row.kr}</span>
+							<span class="pcxNameCell">
+								<span class="pcxName">{#if flip}<span class="pcxFlip" title={lang === 'en' ? 'lens-sensitive (rank flips by universe)' : '잣대 민감 — 유니버스 따라 순위 뒤집힘'}>⇄</span>{/if}{lang === 'en' ? row.en : row.kr}</span>
+								<span class="pcxNameVal mono">{valOf(row.en)}</span>
+							</span>
 							{#each data as d, i (d.universe)}
 								{@const m = uniMaps[i].get(row.en)}
 								<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
@@ -127,7 +129,6 @@
 									{/if}
 								</span>
 							{/each}
-							<span class="pcxVal mono">{valOf(row.en)}</span>
 						</div>
 					{/each}
 				</div>
@@ -138,7 +139,7 @@
 					<div class="pcxTable">
 						{#each qualKeys as q (q.key)}
 							<div class="pcxRow qual">
-								<span class="pcxName">{lang === 'en' ? q.en : q.kr}</span>
+								<span class="pcxNameCell"><span class="pcxName">{lang === 'en' ? q.en : q.kr}</span></span>
 								{#each data as d, i (d.universe)}
 									{@const g = qualMaps[i].get(q.key)}
 									<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
@@ -154,7 +155,6 @@
 										{/if}
 									</span>
 								{/each}
-								<span class="pcxVal"></span>
 							</div>
 						{/each}
 					</div>
@@ -166,7 +166,10 @@
 					<div class="pcxTable">
 						{#each [{ k: 'per', kr: 'PER', en: 'PER' }, { k: 'pbr', kr: 'PBR', en: 'PBR' }] as pr (pr.k)}
 							<div class="pcxRow price">
-								<span class="pcxName">{lang === 'en' ? pr.en : pr.kr}</span>
+								<span class="pcxNameCell">
+									<span class="pcxName">{lang === 'en' ? pr.en : pr.kr}</span>
+									<span class="pcxNameVal mono">{fmtX(pr.k === 'per' ? data[0]?.price.per.v ?? null : data[0]?.price.pbr.v ?? null)}</span>
+								</span>
 								{#each data as d, i (d.universe)}
 									{@const ps = pr.k === 'per' ? d.price.per : d.price.pbr}
 									<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
@@ -181,7 +184,6 @@
 										{/if}
 									</span>
 								{/each}
-								<span class="pcxVal mono">{fmtX(pr.k === 'per' ? data[0]?.price.per.v ?? null : data[0]?.price.pbr.v ?? null)}</span>
 							</div>
 						{/each}
 					</div>
@@ -244,18 +246,22 @@
 	.pcxHead,
 	.pcxRow {
 		display: grid;
-		grid-template-columns: minmax(78px, 0.85fr) repeat(var(--ucols, 3), minmax(0, 1fr)) 62px;
+		grid-template-columns: minmax(94px, 1fr) repeat(var(--ucols, 3), minmax(0, 1fr));
 		gap: 10px;
 		align-items: center;
 	}
+	/* 컬럼 헤더 — 스크롤 고정. pcxBody 직속이라 정성/가격 섹션까지 유니버스 열이 상단에 유지된다. */
 	.pcxHead {
-		padding: 0 6px 5px;
-		border-bottom: 1px solid var(--dl-line, #1b2130);
+		position: sticky;
+		top: 0;
+		z-index: 3;
+		background: var(--dl-bg-raised, #0e141f);
+		padding: 7px 6px 6px;
+		border-bottom: 1px solid var(--dl-line-strong, #2a3142);
 		margin-bottom: 2px;
 	}
 	.pcxNameH,
-	.pcxColH,
-	.pcxValH {
+	.pcxColH {
 		font-size: 9.5px;
 		font-weight: 700;
 		letter-spacing: 0.03em;
@@ -277,9 +283,6 @@
 		font-variant-numeric: tabular-nums;
 		color: #aeb6c2;
 	}
-	.pcxValH {
-		text-align: right;
-	}
 	/* 분포 곡선 범례 */
 	.pcxLegend {
 		font-size: 9.5px;
@@ -290,6 +293,19 @@
 	.pcxRow {
 		border-bottom: 1px solid var(--dl-line, #1b2130);
 		padding: 7px 6px;
+	}
+	/* 지표 셀 = 지표명 + 그 아래 실측값(별도 값 컬럼 폐지). */
+	.pcxNameCell {
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+		min-width: 0;
+	}
+	.pcxNameVal {
+		font-size: 10.5px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		color: var(--dl-ink, #c8cfdb);
 	}
 	.pcxName {
 		font-size: 11px;
@@ -352,13 +368,6 @@
 		font-size: 9.5px;
 		color: #aeb6c2;
 		font-style: italic;
-	}
-	.pcxVal {
-		font-size: 10px;
-		text-align: right;
-		font-variant-numeric: tabular-nums;
-		color: var(--dl-ink, #c8cfdb);
-		white-space: nowrap;
 	}
 	/* 정성 칩 + 동급비중 */
 	.pcxQualHead,

@@ -67,6 +67,8 @@
 
 <svg class="dc" width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={tip} style={`height:${H}px`}>
 	<title>{tip}</title>
+	<!-- 바닥축 — 곡선(동종사 분포)과 회사 마커가 *같은 축* 위임을 명시(이상치라 마커가 봉우리에서 떨어져도 동일 분포 위 위치로 읽힘). -->
+	<line class="dcBase" x1="0" x2={W} y1={H - PAD} y2={H - PAD} vector-effect="non-scaling-stroke" />
 	<path class="dcArea" d={areaPath} vector-effect="non-scaling-stroke" />
 	<line class="dcMed" x1={sx(band.median)} x2={sx(band.median)} y1={PAD} y2={H - PAD} vector-effect="non-scaling-stroke" />
 	{#if markX != null}
@@ -83,6 +85,10 @@
 	.dcArea {
 		fill: rgba(139, 148, 158, 0.18);
 		stroke: rgba(139, 148, 158, 0.5);
+		stroke-width: 1;
+	}
+	.dcBase {
+		stroke: rgba(139, 148, 158, 0.3);
 		stroke-width: 1;
 	}
 	.dcMed {
