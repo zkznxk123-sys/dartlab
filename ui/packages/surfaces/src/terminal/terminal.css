@@ -423,6 +423,30 @@
 .dlTerm .btOosLbl { color: var(--dim); }
 .dlTerm .btOosLbl.test { color: #60a5fa; }
 .dlTerm .btOosArrow { color: var(--dimmer); margin: 0 2px; }
+/* 백테스트 리포트 도크 — 요약 strip 위로 확장하는 스크롤 드로어 4탭 (03 §0.5.6 P3·§0.5.9-E) */
+.dlTerm .btStrip.btOpen { max-height: 62vh; display: flex; flex-direction: column; }
+.dlTerm .btReport { flex: 1 1 auto; min-height: 0; overflow-y: auto; border-bottom: 1px solid var(--bdHi, #2a3142); margin-bottom: 3px; padding-bottom: 4px; }
+.dlTerm .btTabs { display: flex; gap: 2px; position: sticky; top: 0; background: rgba(10, 14, 21, 0.97); padding: 2px 0 4px; z-index: 1; }
+.dlTerm .btTab { background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--dim); font-size: 10px; padding: 3px 9px; cursor: pointer; font-family: inherit; }
+.dlTerm .btTab:hover { color: var(--txt); }
+.dlTerm .btTab.on { color: var(--amber); border-bottom-color: var(--amber); }
+.dlTerm .btTabN { color: var(--dimmer); font-size: 9px; }
+.dlTerm .btPane { display: flex; flex-direction: column; gap: 5px; padding: 2px 2px 0; }
+.dlTerm .btBanner { font-size: 9px; color: #93c5fd; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 3px; padding: 3px 7px; line-height: 1.5; }
+.dlTerm .btGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 2px 10px; }
+.dlTerm .btCell { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); padding: 1px 0; border-bottom: 1px dotted var(--dl-line, #1b2130); }
+.dlTerm .btCell b { color: var(--txt); }
+.dlTerm .btCell.test span, .dlTerm .btCell.test { color: #60a5fa; }
+.dlTerm .btSubHead { font-size: 9px; color: var(--dimmer); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.dlTerm .btPaneBar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dlTerm .btHint { font-size: 9px; color: var(--dimmer); }
+.dlTerm .btRow { cursor: pointer; }
+.dlTerm .btRow:hover td { background: rgba(96, 165, 250, 0.1); }
+.dlTerm .btAssume ul { margin: 2px 0; padding-left: 14px; display: flex; flex-direction: column; gap: 2px; }
+.dlTerm .btAssume li { font-size: 9.5px; color: var(--dim); line-height: 1.5; }
+.dlTerm .btAssume li.warn { color: var(--amber); }
+.dlTerm .btSpec { display: flex; flex-direction: column; gap: 1px; font-size: 9px; color: var(--dim); }
+.dlTerm .btFootNote { font-size: 8.5px; color: var(--dimmer); margin-top: 4px; line-height: 1.5; }
 .dlTerm .btTradesBtn { background: none; border: none; color: var(--amber); font-family: var(--sans); font-size: 10px; cursor: pointer; padding: 0; }
 .dlTerm .btTrades { max-height: 160px; overflow: auto; margin-top: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
 .dlTerm .btTable { width: 100%; border-collapse: collapse; font-size: 9.5px; }

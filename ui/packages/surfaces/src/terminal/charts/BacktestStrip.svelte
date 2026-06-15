@@ -4,6 +4,7 @@
 	import type { BtResult, BtWarning } from '../lib/backtest';
 	import { GOV_ATTRIBUTION } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
+	import BacktestReport from './BacktestReport.svelte';
 
 	interface Props {
 		result: BtResult;
@@ -13,10 +14,11 @@
 		adjusted: boolean; // 수정주가 입력 여부 — 각주 정확성
 		lang: Lang;
 		onClear: () => void;
+		onFocusBar?: (t: string) => void; // 리포트 거래/낙폭 행 클릭 → 차트 해당 봉 (PriceChart 가 scrollToTimestamp)
 	}
-	let { result, presetLabel, period, withCosts, adjusted, lang, onClear }: Props = $props();
+	let { result, presetLabel, period, withCosts, adjusted, lang, onClear, onFocusBar }: Props = $props();
 
-	let showTrades = $state(false);
+	let showReport = $state(false); // 리포트 도크 4탭 펼침 (요약 strip 위로 확장 드로어)
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const m = $derived(result.metrics);
 	const sgn = (v: number, d = 1) => (v >= 0 ? '+' : '') + v.toFixed(d);
@@ -24,14 +26,6 @@
 	const beats = $derived(m.retPct >= result.bh.retPct);
 	const oos = $derived(result.oos);
 	const fmtDate = (t: string) => `${t.slice(2, 4)}.${t.slice(4, 6)}.${t.slice(6, 8)}`;
-	// 누적 P&L — 시간순 (1+r) 누적곱 −1 (%). 표시는 역순 테이블이라 원본 인덱스로 매핑.
-	const cumPct = $derived.by(() => {
-		let acc = 1;
-		return result.trades.map((t) => {
-			acc *= 1 + t.retPct / 100;
-			return (acc - 1) * 100;
-		});
-	});
 	const WARN_LABEL: Record<BtWarning['kind'], { kr: string; en: string }> = {
 		fewTrades: { kr: '표본 부족', en: 'few trades' },
 		shortRange: { kr: '기간 부족 — 참고용', en: 'short range' },
@@ -40,7 +34,10 @@
 	};
 </script>
 
-<div class="btStrip" class:btLag={!beats}>
+<div class="btStrip" class:btLag={!beats} class:btOpen={showReport}>
+	{#if showReport}
+		<BacktestReport {result} {adjusted} {withCosts} {lang} {onFocusBar} />
+	{/if}
 	<div class="btHead">
 		<span class="btPreset">{presetLabel} · {period}</span>
 		<b class={'btRet mono ' + cls(m.retPct)}>{T('전략', 'BT')} {sgn(m.retPct)}%</b>
@@ -62,7 +59,7 @@
 		<span title={T('거래당 평균 (최고/최악)', 'avg per trade (best/worst)')}>{T('평균거래', 'avg')} <b class={m.avgTradePct != null ? cls(m.avgTradePct) : 'tNeu'}>{m.avgTradePct != null ? sgn(m.avgTradePct) + '%' : '—'}</b>{#if m.bestTradePct != null && m.worstTradePct != null}<i class="btSub">({sgn(m.bestTradePct, 0)}/{sgn(m.worstTradePct, 0)})</i>{/if}</span>
 		<span>{T('노출', 'expo')} <b>{m.exposurePct.toFixed(0)}%</b></span>
 		<span>{T('비용', 'cost')} <b class="tDn">{m.costDragPct.toFixed(1)}%p</b></span>
-		<button class="btTradesBtn" onclick={() => (showTrades = !showTrades)}>{T('거래', 'trades')} {m.tradeCount} {showTrades ? '▾' : '▸'}</button>
+		<button class="btTradesBtn" onclick={() => (showReport = !showReport)} title={T('상세 리포트 — 개요·거래·낙폭·가정', 'detailed report')}>{T('리포트', 'report')} {showReport ? '▾' : '▸'}</button>
 	</div>
 	{#if oos}
 		<!-- OOS 학습/검증 2열 — 고정 파라미터를 안 본 구간에 적용(walk-forward 아님). 검증<학습 = 과최적화 신호. -->
@@ -75,27 +72,6 @@
 			<b class={cls(oos.test.retPct)}>{sgn(oos.test.retPct)}%</b>
 			<i class="btSub">Sh {oos.test.sharpe != null ? oos.test.sharpe.toFixed(2) : '—'} · MDD {oos.test.mddPct.toFixed(0)}% · {oos.test.tradeCount}{T('거래', 'tr')}</i>
 			{#if oos.test.retPct < oos.train.retPct}<span class="btWarn">{T('검증 열위 — 과최적화 주의', 'test underperforms — overfit risk')}</span>{/if}
-		</div>
-	{/if}
-	{#if showTrades && result.trades.length}
-		<div class="btTrades">
-			<table class="btTable mono">
-				<thead><tr><th>{T('진입', 'entry')}</th><th class="r">{T('진입가', 'px')}</th><th>{T('청산', 'exit')}</th><th class="r">{T('청산가', 'px')}</th><th class="r">{T('수익률', 'ret')}</th><th class="r" title={T('해당 거래까지 (1+r) 누적곱 −1', 'cumulative (1+r) product −1')}>{T('누적%', 'cum%')}</th><th class="r">{T('보유일', 'days')}</th></tr></thead>
-				<tbody>
-					{#each result.trades.slice().reverse() as t, i (t.entryT)}
-						{@const cum = cumPct[result.trades.length - 1 - i]}
-						<tr>
-							<td>{fmtDate(t.entryT)}</td>
-							<td class="r">{t.entryPx.toLocaleString('en-US', { maximumFractionDigits: 0 })}</td>
-							<td>{t.exitT ? fmtDate(t.exitT) : T('보유중', 'open')}</td>
-							<td class="r">{t.exitPx != null ? t.exitPx.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—'}</td>
-							<td class={'r ' + cls(t.retPct)}>{sgn(t.retPct)}%</td>
-							<td class={'r ' + cls(cum)}>{sgn(cum)}%</td>
-							<td class="r">{t.holdDays}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
 		</div>
 	{/if}
 	<div class="btFoot">
