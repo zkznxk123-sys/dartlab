@@ -11,7 +11,8 @@
 		unit = '',
 		lang = 'kr',
 		w = 150,
-		h = 30
+		h = 30,
+		neutral = false
 	}: {
 		band: { p10: number; p25: number; median: number; p75: number; p90: number };
 		value: number | null;
@@ -20,6 +21,7 @@
 		lang?: Lang;
 		w?: number; // 너비(중간패널 컴팩트 = 작게)
 		h?: number;
+		neutral?: boolean; // true = 회사 마커 회색(우열 프레이밍 금지 — 가격 등 lowerBetter 모호 지표용)
 	} = $props();
 
 	const W = $derived(w);
@@ -57,7 +59,7 @@
 	});
 
 	const markX = $derived(value != null ? sx(value) : null);
-	const tone = $derived(p >= 66 ? 'up' : p <= 33 ? 'dn' : 'mid');
+	const tone = $derived(neutral ? 'neu' : p >= 66 ? 'up' : p <= 33 ? 'dn' : 'mid');
 	const tip = $derived(
 		`${lang === 'en' ? 'peers' : '업종'} p10 ${band.p10.toFixed(1)} · ${lang === 'en' ? 'med' : '중앙'} ${band.median.toFixed(1)} · p90 ${band.p90.toFixed(1)}${unit && unit !== '%' ? '' : unit}`
 	);
@@ -99,5 +101,8 @@
 	}
 	.dcMark.mid {
 		stroke: #d29922;
+	}
+	.dcMark.neu {
+		stroke: rgba(160, 168, 179, 0.9);
 	}
 </style>

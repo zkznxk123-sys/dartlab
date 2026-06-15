@@ -39,10 +39,6 @@
 	});
 	const qualMaps = $derived(data.map((d) => new Map(d.grades.map((g) => [g.key, g] as const))));
 
-	// 드릴다운 — 한 번에 한 지표만(36 곡선 동시 = 허위정밀 격자판 방지).
-	let openRow = $state<string | null>(null);
-	const toggleRow = (en: string) => (openRow = openRow === en ? null : en);
-
 	// 뒤집힘 표식 — 유니버스 백분위 max-min(분포 사실, 판정 아님). n<10 유니버스는 제외.
 	const spreadOf = (en: string): number => {
 		const ps = data
@@ -53,6 +49,8 @@
 
 	const pcCol = (p: number): string => (p >= 80 ? 'var(--up)' : p >= 55 ? 'var(--good)' : p >= 35 ? 'var(--warn)' : 'var(--dn)');
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
+	// 등급 톤 → 막대 색(터미널 토큰, 신규 색 0) — 정성 등급 분포 스택바.
+	const TONE_COL: Record<string, string> = { up: 'var(--up)', good: 'var(--good)', neutral: 'var(--dim)', warn: 'var(--warn)', down: 'var(--dn)' };
 	const topPct = (p: number): string => (lang === 'en' ? 'top ' + (100 - p + 1) + '%' : '상위 ' + (100 - p + 1) + '%');
 	const fmtVal = (m: { unit: string; v: number | null } | undefined): string => {
 		if (!m || m.v == null) return '—';
@@ -96,7 +94,10 @@
 			{#if !data.length}
 				<div class="pcxNone">{lang === 'en' ? 'No ecosystem node for this company.' : '이 회사의 ecosystem 노드가 없습니다.'}</div>
 			{:else}
-				<!-- 정량 격자: 행=지표 × 열=유니버스 백분위 띠. 업종(앵커) 좌측 강조, 시장/전체는 넓은 잣대. -->
+				<!-- 정량 격자: 행=지표 × 열=유니버스 *분포곡선*(동종사 밀집 위치 + 이 회사 마커). 막대 아닌 분포가 1차 시각. 업종(앵커) 좌측 강조. -->
+				<div class="pcxLegend">{lang === 'en'
+					? 'curve = peer distribution (thick = where many cluster) · vertical line = this company · dashed = median · ⇄ = rank flips by universe'
+					: '곡선 = 동종사 분포 (두꺼운 곳 = 많이 몰림) · 세로 실선 = 이 회사 · 점선 = 중앙값 · ⇄ = 잣대 따라 순위 뒤집힘'}</div>
 				<div class="pcxTable">
 					<div class="pcxHead">
 						<span class="pcxNameH">{lang === 'en' ? 'metric' : '지표'}</span>
@@ -107,43 +108,27 @@
 					</div>
 
 					{#each rowDefs as row (row.en)}
-						{@const spread = spreadOf(row.en)}
-						{@const flip = spread >= SPREAD_FLIP}
-						<button class={'pcxRow' + (openRow === row.en ? ' open' : '')} onclick={() => toggleRow(row.en)} aria-expanded={openRow === row.en}>
+						{@const flip = spreadOf(row.en) >= SPREAD_FLIP}
+						<div class="pcxRow">
 							<span class="pcxName">{#if flip}<span class="pcxFlip" title={lang === 'en' ? 'lens-sensitive (rank flips by universe)' : '잣대 민감 — 유니버스 따라 순위 뒤집힘'}>⇄</span>{/if}{lang === 'en' ? row.en : row.kr}</span>
 							{#each data as d, i (d.universe)}
 								{@const m = uniMaps[i].get(row.en)}
 								<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
 									{#if d.n < MIN_N}
 										<span class="pcxThin">{lang === 'en' ? 'n<10' : '표본부족'}</span>
+									{:else if m && m.p != null && m.band && m.v != null}
+										<span class="pcxCurve"><DistCurve band={m.band} value={m.v} p={m.p} unit={m.unit} {lang} h={32} /></span>
+										<span class="pcxP" style={`color:${pcCol(m.p)}`}>{topPct(m.p)}</span>
 									{:else if m && m.p != null}
 										<span class="pcxTrack"><span class="pcxFill" style={`width:${m.p}%;background:${pcCol(m.p)}`}></span></span>
-										<span class="pcxP" style={`color:${pcCol(m.p)}`}>{topPct(m.p)}</span>
+										<span class="pcxP" style={`color:${pcCol(m.p)}`}>{topPct(m.p)} <i class="pcxNoDist">{lang === 'en' ? 'rank only' : '분포없음'}</i></span>
 									{:else}
 										<span class="pcxDash">—</span>
 									{/if}
 								</span>
 							{/each}
 							<span class="pcxVal mono">{valOf(row.en)}</span>
-						</button>
-
-						{#if openRow === row.en}
-							<!-- 드릴다운: 유니버스별 분포곡선 세로 스택(같은 회사값, 곡선마다 마크 위치가 달라 = 뒤집힘을 분포로 재확인). -->
-							<div class="pcxDrill">
-								{#each data as d, i (d.universe)}
-									{@const m = uniMaps[i].get(row.en)}
-									<div class="pcxDc">
-										<span class="pcxDcL">{uniName(d)} <i>n={d.n}</i></span>
-										{#if d.n >= MIN_N && m && m.band && m.p != null && m.v != null}
-											<div class="pcxDcCurve"><DistCurve band={m.band} value={m.v} p={m.p} unit={m.unit} {lang} w={280} h={28} /></div>
-											<span class="pcxDcP mono" style={`color:${pcCol(m.p)}`}>{topPct(m.p)}</span>
-										{:else}
-											<span class="pcxDcEmpty">{lang === 'en' ? 'distribution hidden (n<10)' : '분포 숨김 (n<10)'}</span>
-										{/if}
-									</div>
-								{/each}
-							</div>
-						{/if}
+						</div>
 					{/each}
 				</div>
 
@@ -158,8 +143,12 @@
 									{@const g = qualMaps[i].get(q.key)}
 									<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
 										{#if g}
-											<span class={'pcxChip ' + tcls(g.tone)}>{g.v}</span>
-											{#if g.sameShare != null}<span class="pcxShare">{lang === 'en' ? g.sameShare + '%' : '동급 ' + g.sameShare + '%'}</span>{/if}
+											<span class="pcxQTop"><span class={'pcxChip ' + tcls(g.tone)}>{g.v}</span>{#if g.sameShare != null}<span class="pcxShare">{lang === 'en' ? g.sameShare + '%' : '동급 ' + g.sameShare + '%'}</span>{/if}</span>
+											{#if g.dist.length}
+												<span class="pcxQStack" title={g.dist.filter((x) => x.share > 0).map((x) => `${x.step} ${x.share}%`).join(' · ')}>
+													{#each g.dist as x (x.step)}{#if x.share > 0}<span class={'pcxQSeg' + (x.step === g.v ? ' on' : '')} style={`width:${x.share}%;background:${TONE_COL[x.tone] ?? 'var(--dim)'}`}></span>{/if}{/each}
+												</span>
+											{/if}
 										{:else}
 											<span class="pcxDash">—</span>
 										{/if}
@@ -181,7 +170,10 @@
 								{#each data as d, i (d.universe)}
 									{@const ps = pr.k === 'per' ? d.price.per : d.price.pbr}
 									<span class={'pcxCell' + (d.universe === 'industry' ? ' anchor' : '')}>
-										{#if d.n >= MIN_N && ps.v != null && ps.p != null && ps.n >= MIN_N}
+										{#if ps.v != null && ps.p != null && ps.band && ps.n >= MIN_N}
+											<span class="pcxCurve"><DistCurve band={ps.band} value={ps.v} p={ps.p} unit={lang === 'en' ? 'x' : '배'} {lang} h={32} neutral /></span>
+											<span class="pcxP dim">{lang === 'en' ? ps.p + '%ile' : '분포 ' + ps.p + '%'}</span>
+										{:else if ps.v != null && ps.p != null && ps.n >= MIN_N}
 											<span class="pcxTrack"><span class="pcxFill priceFill" style={`width:${ps.p}%`}></span></span>
 											<span class="pcxP dim">{lang === 'en' ? ps.p + '%ile' : '분포 ' + ps.p + '%'}</span>
 										{:else}
@@ -217,7 +209,7 @@
 
 <style>
 	.pcxModal {
-		width: min(940px, 96vw);
+		width: min(720px, 94vw);
 	}
 	.pcxWho {
 		font-size: 12px;
@@ -229,11 +221,11 @@
 		font-weight: 400;
 		margin-left: 7px;
 		font-size: 10.5px;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 	}
 	.pcxLens {
 		font-size: 10px;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 		font-style: italic;
 	}
 	.pcxBody {
@@ -246,7 +238,7 @@
 		padding: 40px 0;
 		text-align: center;
 		font-size: 12px;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 	}
 	/* 행×열 격자 — head·row 동일 grid template (지표명 | 유니버스 N칸 | 값). */
 	.pcxHead,
@@ -267,7 +259,7 @@
 		font-size: 9.5px;
 		font-weight: 700;
 		letter-spacing: 0.03em;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 		text-transform: uppercase;
 	}
 	.pcxColH {
@@ -283,32 +275,21 @@
 		font-weight: 400;
 		font-size: 9px;
 		font-variant-numeric: tabular-nums;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 	}
 	.pcxValH {
 		text-align: right;
 	}
-	/* 행 = 클릭 가능(드릴다운 토글). 버튼 리셋. */
+	/* 분포 곡선 범례 */
+	.pcxLegend {
+		font-size: 9.5px;
+		color: #aeb6c2;
+		padding: 2px 6px 8px;
+		line-height: 1.4;
+	}
 	.pcxRow {
-		width: 100%;
-		background: none;
-		border: 0;
 		border-bottom: 1px solid var(--dl-line, #1b2130);
-		padding: 6px 6px;
-		cursor: pointer;
-		text-align: left;
-		font: inherit;
-		color: inherit;
-	}
-	.pcxRow.qual,
-	.pcxRow.price {
-		cursor: default;
-	}
-	.pcxRow:hover:not(.qual):not(.price) {
-		background: rgba(255, 255, 255, 0.022);
-	}
-	.pcxRow.open {
-		background: rgba(255, 255, 255, 0.03);
+		padding: 7px 6px;
 	}
 	.pcxName {
 		font-size: 11px;
@@ -320,7 +301,7 @@
 		min-width: 0;
 	}
 	.pcxFlip {
-		color: var(--dl-ink-dim, #8a93a3);
+		color: #aeb6c2;
 		font-size: 11px;
 		font-weight: 700;
 		flex: 0 0 auto;
@@ -328,8 +309,18 @@
 	.pcxCell {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 1px;
 		min-width: 0;
+	}
+	/* 분포 곡선 = 1차 시각(동종사 밀집 + 회사 마커). DistCurve 가 width:100% 로 셀 채움. */
+	.pcxCurve {
+		width: 100%;
+		line-height: 0;
+	}
+	.pcxNoDist {
+		font-style: italic;
+		font-weight: 400;
+		color: #aeb6c2;
 	}
 	.pcxTrack {
 		height: 8px;
@@ -353,13 +344,13 @@
 		font-weight: 700;
 	}
 	.pcxP.dim {
-		color: var(--dl-ink-dim, #5b6473) !important;
+		color: #aeb6c2 !important;
 		font-weight: 400;
 	}
 	.pcxThin,
 	.pcxDash {
 		font-size: 9.5px;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 		font-style: italic;
 	}
 	.pcxVal {
@@ -369,44 +360,6 @@
 		color: var(--dl-ink, #c8cfdb);
 		white-space: nowrap;
 	}
-	/* 드릴다운 — 유니버스별 분포곡선 세로 스택 */
-	.pcxDrill {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-		padding: 8px 6px 10px;
-		border-bottom: 1px solid var(--dl-line, #1b2130);
-		background: rgba(255, 255, 255, 0.012);
-	}
-	.pcxDc {
-		display: grid;
-		grid-template-columns: 96px 1fr 64px;
-		align-items: center;
-		gap: 8px;
-	}
-	.pcxDcL {
-		font-size: 10px;
-		color: var(--dl-ink-dim, #5b6473);
-	}
-	.pcxDcL i {
-		font-style: normal;
-		font-variant-numeric: tabular-nums;
-	}
-	.pcxDcCurve {
-		min-width: 0;
-	}
-	.pcxDcP {
-		font-size: 9.5px;
-		text-align: right;
-		font-variant-numeric: tabular-nums;
-		font-weight: 700;
-	}
-	.pcxDcEmpty {
-		grid-column: 2 / 4;
-		font-size: 9.5px;
-		font-style: italic;
-		color: var(--dl-ink-dim, #5b6473);
-	}
 	/* 정성 칩 + 동급비중 */
 	.pcxQualHead,
 	.pcxPriceHead {
@@ -415,8 +368,13 @@
 		font-size: 9.5px;
 		font-weight: 700;
 		letter-spacing: 0.02em;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 		border-top: 1px dashed var(--dl-line, #1b2130);
+	}
+	.pcxQTop {
+		display: flex;
+		align-items: center;
+		gap: 6px;
 	}
 	.pcxChip {
 		font-size: 10.5px;
@@ -425,13 +383,32 @@
 		border-radius: 9px;
 		border: 1px solid var(--dl-line, #1b2130);
 		background: rgba(255, 255, 255, 0.03);
-		align-self: flex-start;
 		white-space: nowrap;
 	}
 	.pcxShare {
 		font-size: 9px;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 		font-variant-numeric: tabular-nums;
+	}
+	/* 정성 등급 분포 스택바 — 등급레벨별 동종사 비중(넓은 칸 = 많이 몰림). 회사 등급 = 불투명+테두리. */
+	.pcxQStack {
+		display: flex;
+		width: 100%;
+		height: 7px;
+		border-radius: 2px;
+		overflow: hidden;
+		background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.05));
+		margin-top: 2px;
+	}
+	.pcxQSeg {
+		height: 100%;
+		min-width: 1px;
+		opacity: 0.45;
+	}
+	.pcxQSeg.on {
+		opacity: 1;
+		outline: 1px solid rgba(255, 255, 255, 0.65);
+		outline-offset: -1px;
 	}
 	.pcxNotes {
 		margin-top: 12px;
@@ -444,7 +421,7 @@
 	.pcxNotes div {
 		font-size: 9px;
 		line-height: 1.45;
-		color: var(--dl-ink-dim, #5b6473);
+		color: #aeb6c2;
 	}
 	/* 톤 색 — 터미널 토큰(신규 색 0) */
 	.tUp {
@@ -454,7 +431,7 @@
 		color: var(--good);
 	}
 	.tNeu {
-		color: var(--dl-ink-dim, #8a93a3);
+		color: #aeb6c2;
 	}
 	.tWarn {
 		color: var(--warn);

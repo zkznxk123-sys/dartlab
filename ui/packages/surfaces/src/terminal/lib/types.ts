@@ -280,6 +280,7 @@ export interface CategoricalShare {
 	tone: Tone;
 	sameShare: number | null; // 이 유니버스 내 같은 등급 비중 %(순위 아님).
 	peerN: number; // 등급 보유 동종사 수.
+	dist: { step: string; share: number; tone: Tone }[]; // 등급레벨별 동종사 비중(어느 등급에 많이 몰렸나). cf(class)는 빈 배열.
 }
 export interface PriceStat {
 	v: number | null;

@@ -403,11 +403,16 @@ export function createEngine(raw: RawData): Engine {
 	function buildQualShares(node: EcoNode, peers: EcoNode[]): CategoricalShare[] {
 		return COMPOSITE_AXES.filter((a) => QUAL_KEYS.includes(a.key))
 			.map((a) => {
+				const scale = GRADE_SCALE[a.key] || []; // cf(class)는 척도 없음 → dist 비고(순서 없음, 막대 금지)
 				const myVal = (node[a.field] as string | undefined) || '';
 				const valued = peers.filter((pn) => !!(pn[a.field] as string | undefined));
 				const vn = valued.length;
+				const counts: Record<string, number> = {};
+				for (const pn of valued) { const v = pn[a.field] as string; if (scale.includes(v)) counts[v] = (counts[v] || 0) + 1; }
 				const same = myVal ? valued.filter((pn) => (pn[a.field] as string) === myVal).length : 0;
-				return { key: a.key, kr: a.kr, en: a.en, v: myVal, tone: gradeTone(a.key, myVal), sameShare: vn && myVal ? Math.round((same / vn) * 100) : null, peerN: vn };
+				// 등급레벨별 동종사 비중 — "이 잣대에서 어느 등급에 많이 몰렸나"(분포). 회사 등급은 cell 에서 하이라이트.
+				const dist = scale.map((step) => ({ step, share: vn ? Math.round(((counts[step] || 0) / vn) * 100) : 0, tone: gradeTone(a.key, step) }));
+				return { key: a.key, kr: a.kr, en: a.en, v: myVal, tone: gradeTone(a.key, myVal), sameShare: vn && myVal ? Math.round((same / vn) * 100) : null, peerN: vn, dist };
 			})
 			.filter((g) => !!g.v);
 	}
