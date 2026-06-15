@@ -42,7 +42,7 @@ dartlab.search(
 기존 검색기는 유지하고 내부를 보강한다.
 
 1. `api.py` 는 공개 `search/prefetch/indexInfo` facade 로 남긴다.
-2. `fieldIndex.py` 는 CSR main/delta load, source-aware metadata, dedup 을 책임진다.
+2. `fieldIndex.py` 는 본문 content CSR main/delta load, source-aware metadata, dedup 을 책임진다.
 3. `unified.py` 는 R* fusion 과 router expansion 을 맡는다.
 4. `sourceIntent.py` 가 source hard isolation 을 먼저 결정한다.
 5. `facetPlanner.py` 가 corp/date/report/receipt/news-title anchor 를 만든다.
@@ -52,7 +52,7 @@ dartlab.search(
 9. `memoryCard.py` 가 LLM 소비용 card 를 만든다.
 10. `manifest.py` 가 index compatibility, sourceDataAsOf, tier, delta 상태를 노출한다.
 
-이 구조에서 embedding 은 7번 evidence 선택 sidecar 로만 들어간다. 전역 후보 검색과 source isolation 은 sparse R* 가 담당한다.
+이 구조에서 기본 recall 은 본문 검색이다. 제목/보고서명/section title 은 보조 anchor 로만 쓰고, `scope="content"` 와 `scope="both"` 는 공시 원문·panel 롤업 본문·뉴스 본문을 검색해야 한다. embedding 은 7번 evidence 선택 sidecar 로만 들어간다. 전역 후보 검색과 source isolation 은 sparse R* 가 담당한다.
 
 ---
 
@@ -223,4 +223,3 @@ manifest 필수 필드:
 6. library result row 에 `sourceRef/dataAsOf/answerable` 을 노출한다.
 7. local/public/shared surface 는 같은 result schema 를 소비하게 한다.
 8. 실제 query-log gold 100~300 rows 를 확보해 졸업 gate 를 실행한다.
-

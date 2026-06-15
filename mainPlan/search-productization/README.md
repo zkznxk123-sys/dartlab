@@ -51,7 +51,7 @@ dartlab.search("대표이사 변경", corp="005930", start="20240101")
 
 - `dartlab.search(...)` 단일 공개계약 유지.
 - DuckDB 는 런타임 검색 엔진이 아니라 수집 카탈로그·변경 감지·증분 export 레이어.
-- 기본 랭킹은 R* sparse CSR main+delta. dense embedding 은 전역 랭킹이 아니라 evidence sidecar 후보로만.
+- 기본 랭킹은 본문 content R* sparse CSR main+delta. 제목/보고서명/section title 은 보조 anchor 이고, dense embedding 은 전역 랭킹이 아니라 evidence sidecar 후보로만.
 - source intent 는 soft preference 가 아니라 hard isolation. `공시 말고 뉴스`, `뉴스 말고 공시`는 fallback 하지 않는다.
 - LLM 용 지식화는 전체 본문 주입이 아니라 `sourceRef set + snippet + field card + dataAsOf` memory-card 반복 주입.
 - 제품 졸업은 실제 query-log gold 100~300 rows 통과 후에만. curatedDraft, stratifiedSynthetic 은 압박 실험일 뿐이다.

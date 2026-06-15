@@ -52,6 +52,8 @@ query
 
 이 plan 은 저장하지 않는다. query-log 에 남기는 것은 plan 자체가 아니라 실패 유형과 개선 근거다. 반복 실패가 생겨도 특정 쿼리 전용 규칙을 붙이지 않고, sourceRef policy 나 facet parser 같은 일반 정책으로만 승격한다.
 
+본문 검색은 필수다. title/report/section title 은 빠른 anchor 이지만 의미검색의 본체는 filing body, panel rolled body, EDGAR item body, news body 를 대상으로 한 content lane 이다. 제목만 맞는 결과는 evidence-card 에서 탈락할 수 있어야 한다.
+
 ---
 
 ## 4. 속도 혁신
@@ -62,8 +64,9 @@ query
 2. **Source shard** — `sourceIntent` 가 명확하면 해당 source CSR 만 탐색한다.
 3. **Facet prefilter** — corp/date/report/receipt/accession 이 있으면 row mask 를 먼저 좁힌다.
 4. **R* candidate pool** — sparse BM25/router/RRF 로 후보를 작게 만든다.
-5. **Evidence sidecar** — embedding 또는 chunk rerank 는 후보 50~200개 안에서만 실행한다.
-6. **Memory-card reuse** — 후속 질문은 이미 찾은 sourceRef set 을 먼저 검증하고 필요할 때만 재검색한다.
+5. **Body evidence window** — 후보 문서의 본문 chunk 를 열어 실제 근거가 있는지 확인한다.
+6. **Evidence sidecar** — embedding 또는 chunk rerank 는 후보 50~200개 안에서만 실행한다.
+7. **Memory-card reuse** — 후속 질문은 이미 찾은 sourceRef set 을 먼저 검증하고 필요할 때만 재검색한다.
 
 이 방식이면 문서가 늘어도 전체를 매번 의미 임베딩으로 훑지 않는다. full corpus 는 넓은 recall 을 담당하고, 의미 비용은 좁은 후보에만 쓴다.
 

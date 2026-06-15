@@ -44,16 +44,19 @@ DuckDB 는 "검색 런타임"이 아니다.
 
 기본 랭킹은 R* sparse 이다.
 
-1. plain BM25 lane.
+1. content/body BM25 lane. 공시 원문, panel 롤업 본문, 뉴스 본문/요약을 기본 검색 대상으로 둔다.
 2. curated synonym + deterministic router canon lane.
 3. RRF fusion.
 4. source intent hard isolation.
 5. filing 은 entity/date/event/report facet recall 로 보강.
-6. news 는 content R* + title anchor + source filter.
-7. exact receipt number 가 질의에 있으면 metadata anchor.
-8. evidence pack 은 랭킹을 바꾸는 메인 엔진이 아니라 근거 조각 선택기.
+6. title/report name/section title 은 recall 보조 anchor 이며, 본문 검색을 대체하지 않는다.
+7. news 는 content R* + title anchor + source filter.
+8. exact receipt number 가 질의에 있으면 metadata anchor.
+9. evidence pack 은 랭킹을 바꾸는 메인 엔진이 아니라 근거 조각 선택기.
 
 dense embedding 은 전역 검색을 대체하지 않는다. 쓰려면 R* 후보 안에서 chunk evidence 를 고르는 sidecar 로만 쓴다.
+
+제품 검색의 기본은 제목 검색이 아니다. 제목, 보고서명, section title 은 빠른 anchor 로 쓰되, 답변 가능한 검색은 본문 content lane 과 sourceRef evidence 를 반드시 통과해야 한다.
 
 ---
 
@@ -103,4 +106,3 @@ dense embedding 은 전역 검색을 대체하지 않는다. 쓰려면 R* 후보
 - probe 전용 aggregate 출력.
 - corpus proxy gold 를 제품 ready 로 취급하는 옵션.
 - narrow template 의 특수 case 분기.
-
