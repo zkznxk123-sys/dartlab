@@ -29,7 +29,8 @@
 	// 영감·후원 = Threads 등 큐레이션. (Threads 프로필 사진은 빌드타임 self-host 후 image 채움 — 핫링크 금지)
 	const CURATED: Person[] = [
 		{ handle: '@youngchangjo', url: 'https://www.threads.com/@youngchangjo', kind: 'insp', postUrl: 'https://www.threads.com/@youngchangjo/post/DZC_jobCfO6' },
-		{ handle: '@wannabewrit', url: 'https://www.threads.com/@wannabewrit', kind: 'support' }
+		{ handle: '@wannabewrit', url: 'https://www.threads.com/@wannabewrit', kind: 'support' },
+		{ handle: '@ryusw007', url: 'https://www.threads.com/@ryusw007', kind: 'support' }
 	];
 	// 후원해주신 분 — 동의하신 분 닉네임만. 비어 있으면 섹션 숨김.
 	interface Donor { name: string; url?: string }
