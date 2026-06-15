@@ -59,9 +59,11 @@ def _hfBaseFrame() -> pl.DataFrame | None:
     """기존 HF recent.parquet (있으면) — CI 증분 merge 의 baseline."""
     relDir = DATA_RELEASES[_ALLFILINGS_DIR_KEY]["dir"]
     url = f"https://huggingface.co/datasets/{repoFor(_ALLFILINGS_DIR_KEY)}/resolve/main/{relDir}/{_RECENT_NAME}"
+    from dartlab.core.hfRetry import retryHfCall  # HF read SSOT — transient 429/timeout 재시도(thin-publish 창 제거)
+
     try:
-        return pl.read_parquet(url, columns=_KEEP)
-    except Exception:  # noqa: BLE001 — 최초 빌드(파일 부재)·네트워크 실패면 None
+        return retryHfCall(pl.read_parquet, url, columns=_KEEP)
+    except Exception:  # noqa: BLE001 — 최초 빌드(파일 부재)·영구 실패면 None(다음 cron 자가복구)
         return None
 
 
