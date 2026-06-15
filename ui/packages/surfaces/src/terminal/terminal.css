@@ -949,7 +949,8 @@
 
 /* CENTER KPI TICKER (경제·시장 지표 — 종목/주가 라인 위, 좌우 흐름) */
 .dlTerm .kpiTicker { height: 24px; overflow: hidden; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; display: flex; align-items: center; margin-bottom: 4px; flex: 0 0 auto; }
-.dlTerm .kpiTrack { display: flex; gap: 22px; white-space: nowrap; animation: dlTermScroll 48s linear infinite; padding-left: 10px; }
+/* 흐름 속도 — 지표 35종으로 트랙이 길어져 48s 면 px/s 가 빨라졌다. 150s 로 늦춰 차분히 읽히게(운영자). hover=정지. */
+.dlTerm .kpiTrack { display: flex; gap: 22px; white-space: nowrap; animation: dlTermScroll 150s linear infinite; padding-left: 10px; }
 .dlTerm .kpiTrack:hover { animation-play-state: paused; }
 .dlTerm .kpiItem { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; }
 .dlTerm .kpiSpark { width: 36px; height: 12px; opacity: 0.9; flex-shrink: 0; }
