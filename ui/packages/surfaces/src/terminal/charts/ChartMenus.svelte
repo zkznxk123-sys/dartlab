@@ -21,9 +21,13 @@
 		subject?: 'price' | 'index'; // 'index' = BT·매물대 비활성(지수는 거래 대상 아님, 01 §4.2-4.3)
 		indexLine?: boolean; // US 지수(종가전용) = candleStyle 'area' 고정(세그먼트 disabled, 01 §3.6)
 		indexCtl?: IndexControl; // 주가/지수 토글 + 지수 picker (CenterStack 소유 → 컨트롤 바 한 줄에 통합)
+		coMovers?: { id: string; corr: number; n: number }[]; // 종목↔거시 동행(상관) 순위 — ECON 메뉴 "동행 상위" (인과 아님)
 	}
-	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false, indexCtl }: Props = $props();
+	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false, indexCtl, coMovers = [] }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
+	// 동행 상위 — |corr|≥0.3 상위 4종(잡음 차단). MACRO_SERIES 라벨 매핑.
+	const topCoMovers = $derived(coMovers.filter((c) => Math.abs(c.corr) >= 0.3).slice(0, 4));
+	const macroById = new Map(MACRO_SERIES.map((s) => [s.id, s]));
 	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
 	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt' | 'rail'>('none');
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
@@ -68,6 +72,21 @@
 		{#if menu === 'econ'}
 			<div class="ctMenu ctMenuWide">
 				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
+					{#if topCoMovers.length}
+						<!-- 동행 상위 — 이 종목 월수익률과 상관 높은 거시. ⚠ 상관일 뿐 인과(견인) 아님. -->
+						<div class="ctMenuLbl ctMenuGrp">{T('이 종목과 동행 상위 · 상관(인과 아님)', 'Top co-movers · correlation (not causation)')}</div>
+						<div class="ctRow ctRowWrap">
+							{#each topCoMovers as cm (cm.id)}
+								{@const def = macroById.get(cm.id)}
+								{@const con = ctl.econ.includes(cm.id)}
+								{@const cblocked = !con && ctl.econ.length >= ECON_MAX}
+								<button class={con ? 'mItem on' : 'mItem'} disabled={cblocked}
+									style={con ? `background:transparent;color:${ECON_COLORS[cm.id]};border-color:${ECON_COLORS[cm.id]};font-weight:600` : ''}
+									title={cblocked ? T('경제지표는 동시 3개까지', 'up to 3 economy series') : T(`최근 ${cm.n}개월 상관 ${cm.corr}`, `${cm.n}mo corr ${cm.corr}`)}
+									onclick={() => ctl.toggleEcon(cm.id)}>{T(def?.kr ?? cm.id, def?.en ?? cm.id)} <span class="coCorr" class:neg={cm.corr < 0}>{cm.corr > 0 ? '+' : ''}{cm.corr.toFixed(2)}</span></button>
+							{/each}
+						</div>
+					{/if}
 				<div class="ctRow ctRowWrap">
 					{#each MACRO_SERIES as s (s.id)}
 						{@const on = ctl.econ.includes(s.id)}

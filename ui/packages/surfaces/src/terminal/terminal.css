@@ -516,6 +516,9 @@
 .dlTerm .ctMenuLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; margin: 3px 1px 0; }
 /* 지표 그룹 sub-라벨 (추세/모멘텀/거래량 + ECON 상한 안내, 04 §3-4) — 그룹 구분 강조 표지 */
 .dlTerm .ctMenuLbl.ctMenuGrp { color: var(--amber); opacity: 0.7; margin-top: 5px; }
+/* 동행 상관 배지 — 거시 칩 옆 corr 값(정=초록·역=빨강). 인과 아님(라벨로 명시). */
+.dlTerm .coCorr { font-family: var(--mono); font-size: 9px; margin-left: 3px; color: #34d399; }
+.dlTerm .coCorr.neg { color: #f0616f; }
 .dlTerm .ohlcTag { position: absolute; top: 5px; left: 8px; z-index: 5; display: flex; gap: 11px; font-family: var(--mono); font-size: 10px; color: var(--dim); pointer-events: none; }
 .dlTerm .ohlcTag b { color: var(--txt); font-weight: 600; }
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }

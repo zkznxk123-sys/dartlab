@@ -40,6 +40,15 @@ export const MACRO_SERIES: MacroSeriesDef[] = [
 	{ id: 'M2', src: 'ecos', kr: 'M2 YoY', en: 'KR M2 YoY', unit: '%', yoy: true, digits: 1 },
 	{ id: 'HOUSE_PRICE', src: 'ecos', kr: '주택가격 YoY', en: 'KR house px YoY', unit: '%', yoy: true, digits: 1 },
 	{ id: 'PPI_SEMI', src: 'ecos', kr: '반도체 PPI YoY', en: 'KR semi PPI YoY', unit: '%', yoy: true, digits: 1 },
+	// 업종별 생산자물가 (ECOS) — 종목 업종에 따라 가장 직접적인 가격 드라이버
+	{ id: 'PPI_MFG', src: 'ecos', kr: '제조업 PPI YoY', en: 'KR mfg PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_CHEM', src: 'ecos', kr: '화학 PPI YoY', en: 'KR chem PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_STEEL', src: 'ecos', kr: '철강 PPI YoY', en: 'KR steel PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_AUTO', src: 'ecos', kr: '자동차 PPI YoY', en: 'KR auto PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_DISPLAY', src: 'ecos', kr: '디스플레이 PPI YoY', en: 'KR display PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_ELEC', src: 'ecos', kr: '전기전자 PPI YoY', en: 'KR electronics PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_MACHINE', src: 'ecos', kr: '기계 PPI YoY', en: 'KR machinery PPI YoY', unit: '%', yoy: true, digits: 1 },
+	{ id: 'PPI_OIL', src: 'ecos', kr: '석유 PPI YoY', en: 'KR oil PPI YoY', unit: '%', yoy: true, digits: 1 },
 	// 미국 (FRED)
 	{ id: 'FEDFUNDS', src: 'fred', kr: '연준 기준금리', en: 'Fed funds', unit: '%', digits: 2 },
 	{ id: 'DGS2', src: 'fred', kr: '미 2년 금리', en: 'US 2Y', unit: '%', digits: 2 },

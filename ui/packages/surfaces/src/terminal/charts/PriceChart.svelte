@@ -10,6 +10,7 @@
 	import type { Lang } from '../lib/types';
 	import { runBacktest, type BtResult } from '../lib/backtest';
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
+	import { rankCoMovers, type CoMover } from '../lib/coMovement';
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
@@ -56,6 +57,21 @@
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
 	let btResult = $state<BtResult | null>(null);
+	// 종목↔거시 동행(상관) — "어떤 거시가 이 종목과 같이 움직였나"(04 §5, 인과 아님). 회사전환 시 캔들 기준 재계산.
+	let coMovers = $state<CoMover[]>([]);
+	$effect(() => {
+		if (!browser) return;
+		const cs = candles;
+		if (subject === 'index' || !cs || cs.length < 14) { coMovers = []; return; }
+		let alive = true;
+		(async () => {
+			// 거시 시리즈는 srcCache(파일 1회 로드) 공유라 N개 getSeries 도 저렴. yoy 정의 시 변환된 시리즈로 동행 측정(오버레이와 일치).
+			const series = await Promise.all(MACRO_SERIES.map(async (d) => ({ id: d.id, points: (await rt.macro.getSeries(d.id)) ?? [] })));
+			if (!alive) return;
+			coMovers = rankCoMovers(cs, series.filter((s) => s.points.length));
+		})();
+		return () => { alive = false; };
+	});
 	// ⛔ 불변식: chart.applyNewData 는 reapply() 단일 지점 (bumpDataRev 동행). pushTick 은 제외.
 	// dataRev++ 직접 사용 금지 — $effect 안 증감은 읽기+쓰기라 self-dep 무한루프(effect_update_depth_exceeded).
 	let dataRev = $state(0);
@@ -1085,7 +1101,7 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
-		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 	<div class="chartHost" bind:this={el}></div>
 
