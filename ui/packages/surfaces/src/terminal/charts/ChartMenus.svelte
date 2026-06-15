@@ -66,7 +66,7 @@
 	<div class="ctWrap">
 		<button class={ctl.econ.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'econ' ? 'none' : 'econ')} title={T('경제지표 겹쳐보기', 'Economy overlay')}>{T('경제지표', 'ECON')}</button>
 		{#if menu === 'econ'}
-			<div class="ctMenu">
+			<div class="ctMenu ctMenuWide">
 				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
 				<div class="ctRow ctRowWrap">
 					{#each MACRO_SERIES as s (s.id)}

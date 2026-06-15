@@ -385,8 +385,9 @@
 .dlTerm .ctWrap { position: relative; }
 .dlTerm .ctMenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--dl-bg-modal, #11161f); border: 1px solid var(--bdHi, #2a3142); border-radius: 4px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
 .dlTerm .ctMenu .ctRow { display: flex; gap: 3px; }
-.dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 208px; }
-.dlTerm .ctMenu.ctMenuWide .ctRow.ctRowWrap { max-width: 252px; }
+/* 넓은 그리드 — 칩을 가로로 빽빽하게 채워 드롭다운이 세로로 길어지지 않게(운영자: 세로 열거 금지). 팝오버라 차트 위로 좌측 확장 무해. */
+.dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; max-width: 340px; }
+.dlTerm .ctMenu.ctMenuWide .ctRow.ctRowWrap { max-width: 440px; }
 .dlTerm .btParamRow { align-items: center; gap: 4px; }
 .dlTerm .btParamLbl { font-size: 9px; color: var(--dim); min-width: 42px; }
 .dlTerm .btParamVal { font-size: 10px; color: var(--txt); min-width: 28px; text-align: center; }
@@ -507,7 +508,7 @@
 .dlTerm .mItem.mGear { padding: 4px 4px; margin-left: -2px; border-left: 0; }
 .dlTerm .btModelNote { font-size: 8.5px; color: var(--dimmer); border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; margin-top: 2px; max-width: 250px; line-height: 1.5; }
 .dlTerm .ipEditor { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; }
-.dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 5px 8px; cursor: pointer; white-space: nowrap; }
+.dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .mItem:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .mItem.mClear { width: 100%; color: var(--dl-red, #f0616f); }
