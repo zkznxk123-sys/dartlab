@@ -11,6 +11,7 @@
 	import { runBacktest, type BtResult } from '../lib/backtest';
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { rankCoMovers, type CoMover } from '../lib/coMovement';
+	import { loadMarketIndexSeries, MARKET_INDEX_REFS, marketIndexDef } from '../lib/marketIndex';
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
@@ -59,16 +60,23 @@
 	let btResult = $state<BtResult | null>(null);
 	// 종목↔거시 동행(상관) — "어떤 거시가 이 종목과 같이 움직였나"(04 §5, 인과 아님). 회사전환 시 캔들 기준 재계산.
 	let coMovers = $state<CoMover[]>([]);
+	// 종목↔국내 시장지수 동행(베타) — 거시와 별도 행(지수 상관은 거의 항상 최상위라 섞으면 거시 발견을 가림).
+	let marketCoMovers = $state<{ id: string; name: string; corr: number; n: number }[]>([]);
 	$effect(() => {
 		if (!browser) return;
 		const cs = candles;
-		if (subject === 'index' || !cs || cs.length < 14) { coMovers = []; return; }
+		if (subject === 'index' || !cs || cs.length < 14) { coMovers = []; marketCoMovers = []; return; }
 		let alive = true;
 		(async () => {
 			// 거시 시리즈는 srcCache(파일 1회 로드) 공유라 N개 getSeries 도 저렴. yoy 정의 시 변환된 시리즈로 동행 측정(오버레이와 일치).
 			const series = await Promise.all(MACRO_SERIES.map(async (d) => ({ id: d.id, points: (await rt.macro.getSeries(d.id)) ?? [] })));
 			if (!alive) return;
 			coMovers = rankCoMovers(cs, series.filter((s) => s.points.length));
+			// 시장지수 동행 — 모듈 캐시(회사 무관) 1회 로드. 코스피/코스닥 종가 vs 종목 월수익률.
+			const mkt = await loadMarketIndexSeries(rt.index);
+			if (!alive) return;
+			const mc = rankCoMovers(cs, mkt.map((m) => ({ id: m.ref.code, points: m.points })).filter((s) => s.points.length));
+			marketCoMovers = mc.map((c) => ({ ...c, name: MARKET_INDEX_REFS.find((r) => r.code === c.id)?.name ?? c.id }));
 		})();
 		return () => { alive = false; };
 	});
@@ -854,15 +862,25 @@
 			return;
 		}
 		const token = ++econToken;
-		Promise.all(ids.map((id) => rt.macro.getSeries(id))).then((lists) => {
+		(async () => {
+			// 듀얼 소스 — id 가 'idx:' 면 시장지수(인덱스 포트), 아니면 거시(macro 포트). def 은 둘 다 econOverlay 가 동일 소비.
+			const mkt = await loadMarketIndexSeries(rt.index);
+			const resolved = await Promise.all(
+				ids.map(async (id) => {
+					if (id.startsWith('idx:')) {
+						const m = mkt.find((x) => x.ref.code === id);
+						return m ? { def: marketIndexDef(m.ref), points: m.points } : null;
+					}
+					const def = MACRO_SERIES.find((s) => s.id === id);
+					return def ? { def, points: (await rt.macro.getSeries(id)) ?? [] } : null;
+				})
+			);
 			if (token !== econToken || chart !== c) return; // 선택 변경·인스턴스 교체 → 폐기
-			const series = ids
-				.map((id, i) => ({ def: MACRO_SERIES.find((s) => s.id === id)!, points: lists[i] ?? [] }))
-				.filter((s) => s.points.length);
+			const series = resolved.filter((s): s is NonNullable<typeof s> => !!s && s.points.length > 0);
 			const extendData: EconExtend = { lang: lg, series }; // 항상 새 참조 → setExtendData 재계산 보장
 			if (econOn) c.overrideIndicator({ name: ECON_INDICATOR, extendData }, 'candle_pane');
 			else econOn = !!c.createIndicator({ name: ECON_INDICATOR, extendData }, true, { id: 'candle_pane' });
-		});
+		})();
 	});
 
 	// 전체화면 토글 → resize + 보조 페인 비례 재배분 + 전문가 단축키 레이어.
@@ -1101,7 +1119,7 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
-		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 	<div class="chartHost" bind:this={el}></div>
 

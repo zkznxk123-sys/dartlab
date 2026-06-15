@@ -6,6 +6,7 @@
 	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
+	import { MARKET_INDEX_REFS, MARKET_INDEX_COLORS } from '../lib/marketIndex';
 	import { EVENT_CATS } from '../lib/eventRail';
 	import { CMP_COLORS } from './compareOverlay';
 	import { paramSummary, IND_DEFS } from './indicatorParams';
@@ -126,6 +127,14 @@
 			{#if pop === 'econ'}
 				<div class="crMenu">
 					<div class="ctMenuLbl">{T('경제지표 (최대 3 · 자기정규화)', 'Economy (max 3 · self-scaled)')}</div>
+					<div class="ctMenuLbl ctMenuGrp">{T('국내 시장 동행 (베타 · 인과 아님)', 'Domestic market beta (not causation)')}</div>
+					<div class="ctRow ctRowWrap">
+						{#each MARKET_INDEX_REFS as r (r.code)}
+							<button class={ctl.econ.includes(r.code) ? 'mItem on' : 'mItem'}
+								style={ctl.econ.includes(r.code) ? `background:transparent;color:${MARKET_INDEX_COLORS[r.code]};border-color:${MARKET_INDEX_COLORS[r.code]};font-weight:600` : ''}
+								onclick={() => ctl.toggleEcon(r.code)}>{r.name}</button>
+						{/each}
+					</div>
 					<div class="ctRow ctRowWrap">
 						{#each MACRO_SERIES as s (s.id)}
 							<button class={ctl.econ.includes(s.id) ? 'mItem on' : 'mItem'}

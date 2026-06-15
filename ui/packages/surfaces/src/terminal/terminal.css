@@ -519,6 +519,8 @@
 /* 동행 상관 배지 — 거시 칩 옆 corr 값(정=초록·역=빨강). 인과 아님(라벨로 명시). */
 .dlTerm .coCorr { font-family: var(--mono); font-size: 9px; margin-left: 3px; color: #34d399; }
 .dlTerm .coCorr.neg { color: #f0616f; }
+/* 요인군 태그 — 강상관 거시(환율·금리 등) "같은 요인" 오독 차단(정적, 데이터 군집 아님). */
+.dlTerm .coGrp { font-size: 8px; margin-left: 3px; padding: 0 3px; border-radius: 3px; background: rgba(255,255,255,0.06); color: var(--dim); opacity: 0.75; vertical-align: middle; }
 .dlTerm .ohlcTag { position: absolute; top: 5px; left: 8px; z-index: 5; display: flex; gap: 11px; font-family: var(--mono); font-size: 10px; color: var(--dim); pointer-events: none; }
 .dlTerm .ohlcTag b { color: var(--txt); font-weight: 600; }
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }
