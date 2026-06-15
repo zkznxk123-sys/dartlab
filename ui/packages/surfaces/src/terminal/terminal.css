@@ -512,6 +512,8 @@
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .mItem.mClear { width: 100%; color: var(--dl-red, #f0616f); }
 .dlTerm .ctMenuLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; margin: 3px 1px 0; }
+/* 지표 그룹 sub-라벨 (추세/모멘텀/거래량 + ECON 상한 안내, 04 §3-4) — 그룹 구분 강조 표지 */
+.dlTerm .ctMenuLbl.ctMenuGrp { color: var(--amber); opacity: 0.7; margin-top: 5px; }
 .dlTerm .ohlcTag { position: absolute; top: 5px; left: 8px; z-index: 5; display: flex; gap: 11px; font-family: var(--mono); font-size: 10px; color: var(--dim); pointer-events: none; }
 .dlTerm .ohlcTag b { color: var(--txt); font-weight: 600; }
 .dlTerm .legendTag { position: absolute; top: 5px; right: 12px; display: flex; gap: 12px; font-family: var(--mono); font-size: 9px; pointer-events: none; }
@@ -952,6 +954,11 @@
 /* 지표명 — dimmer 는 다크 배경에서 식별 불가 (운영자 지적). 본문 한 단계 아래 명도로. */
 .dlTerm .kpiItem i { font-family: var(--cond); font-style: normal; color: #aab2c0; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
 .dlTerm .kpiItem b { font-family: var(--mono); font-weight: 600; }
+/* 클릭 가능 KPI (id 보유 경제지표) — 마퀴 클릭→차트 econ 오버레이(04 §5). 버튼 기본스킨 리셋 + hover/활성/비활성. */
+.dlTerm button.kpiBtn { border: none; background: transparent; padding: 1px 4px; margin: -1px 0; border-radius: 2px; cursor: pointer; transition: background 0.12s, box-shadow 0.12s; }
+.dlTerm button.kpiBtn:hover:not(:disabled) { background: rgba(251, 146, 60, 0.12); }
+.dlTerm button.kpiBtn.on { background: rgba(251, 146, 60, 0.16); box-shadow: inset 0 -1.5px 0 var(--amber); }
+.dlTerm button.kpiBtn:disabled { cursor: default; opacity: 0.4; }
 
 /* 헤더 가운데 — 주요제품+회사정보(좌, 세로) / 회사 네비(우, 세로). 우측=가격관련만. 헤더 ~3줄 밀도. */
 .dlTerm .symProd { flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: 14px; padding: 0 10px; border-left: 1px solid var(--bd); overflow: hidden; }

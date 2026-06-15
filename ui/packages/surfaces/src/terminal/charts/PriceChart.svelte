@@ -13,7 +13,7 @@
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
-	import { ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type IndexControl, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
+	import { type ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type IndexControl, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
 	import { loadDraws, saveDraws, type SavedDraw } from './drawStore';
 	import { publishView } from './seriesBus';
 	import { registerWorkOverlays, MEASURE_NAME, TEXT_NAME } from './avwapOverlay';
@@ -47,12 +47,12 @@
 		indexLine?: boolean;
 		// 주가/지수 토글 + 지수 picker 번들 — ChartMenus(컨트롤 바)로 패스스루(PriceChart 자체는 미사용).
 		indexCtl?: IndexControl;
+		// 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유, 04 §5). PriceChart 가 new 하지 않고 받는다.
+		ctl: ChartCtl;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, subject = 'price', indexLine = false, indexCtl }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
-
-	const ctl = new ChartCtl();
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
 	let btResult = $state<BtResult | null>(null);

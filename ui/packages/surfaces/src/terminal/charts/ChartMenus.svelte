@@ -2,7 +2,7 @@
 	// 일반(비전체화면) 모드 차트 크롬 — 기간 칩(좌상) + 드롭다운 4개(지표·그리기·표시·백테스트) + 전체화면.
 	// 상태는 ChartCtl 단일 SSOT 공유 — 전체화면 리본(ChartRibbon)과 같은 인스턴스.
 	import type { Lang } from '../lib/types';
-	import { type ChartCtl, type IndexControl, OVERLAY_ALL, SUB_ALL, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
+	import { type ChartCtl, type IndexControl, OVERLAY_ALL, SUB_GROUPS, ECON_MAX, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES, KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
 	import { EVENT_CATS } from '../lib/eventRail';
@@ -62,6 +62,26 @@
 
 <!-- 우상 도구 -->
 <div class="chartTools" onclick={(e) => e.stopPropagation()}>
+	<!-- 경제지표(ECON) 를 보조지표(IND) 앞에 — 발견성 위계 우선(04 §4: 거시 맥락 먼저). econ=candle_pane 내부 indicator, sub=별도 pane 라 그리기 충돌 0. -->
+	<div class="ctWrap">
+		<button class={ctl.econ.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'econ' ? 'none' : 'econ')} title={T('경제지표 겹쳐보기', 'Economy overlay')}>{T('경제지표', 'ECON')}</button>
+		{#if menu === 'econ'}
+			<div class="ctMenu">
+				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
+				<div class="ctRow ctRowWrap">
+					{#each MACRO_SERIES as s (s.id)}
+						{@const on = ctl.econ.includes(s.id)}
+						{@const blocked = !on && ctl.econ.length >= ECON_MAX}
+						<button class={on ? 'mItem on' : 'mItem'} disabled={blocked}
+							style={on ? `background:transparent;color:${ECON_COLORS[s.id]};border-color:${ECON_COLORS[s.id]};font-weight:600` : ''}
+							title={blocked ? T('경제지표는 동시 3개까지', 'up to 3 economy series') : ''}
+							onclick={() => ctl.toggleEcon(s.id)}>{T(s.kr, s.en)}</button>
+					{/each}
+				</div>
+				{#if ctl.econ.length >= ECON_MAX}<div class="ctMenuLbl ctMenuGrp">{T('· 동시 3개까지 — 해제 후 추가', '· max 3 at once — remove one to add')}</div>{/if}
+			</div>
+		{/if}
+	</div>
 	<div class="ctWrap">
 		<button class={ctl.overlays.length || ctl.subs.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'ind' ? 'none' : 'ind')} title={T('보조지표 — 주가 오버레이 + 하단 페인', 'Indicators')}>{T('보조지표', 'IND')}</button>
 		{#if menu === 'ind'}
@@ -75,34 +95,32 @@
 					{/each}
 				</div>
 				<div class="ctMenuLbl">{T('보조 지표 (다중)', 'Sub indicators (multi)')}</div>
-				<div class="ctRow ctRowWrap">
-					{#each SUB_ALL as k (k)}
-						{@const on = ctl.subs.includes(k)}
-						<button class={on ? 'mItem on' : 'mItem'} title={SUB_HINT[k] ?? ''} onclick={() => ctl.toggleSub(k)}>{k}</button>
-						{#if on && hasParams(k)}<button class="mItem mGear" title={T('파라미터', 'params')} onclick={() => (editing = editing === k ? null : k)}>⚙</button>{/if}
-					{/each}
-				</div>
+				<!-- 활성 지표 상단 고정 (ON 칩 + ⚙ 파라미터) — 22종 평면벽 대신 SUB_GROUPS 조직(ChartRibbon:210-217 동일 패턴 이식, 04 §3). -->
+				{#if ctl.subs.length}
+					<div class="ctRow ctRowWrap">
+						{#each ctl.subs as k (k)}
+							<button class="mItem on" title={SUB_HINT[k] ?? ''} onclick={() => ctl.toggleSub(k)}>{k}</button>
+							{#if hasParams(k)}<button class="mItem mGear" title={T('파라미터', 'params')} onclick={() => (editing = editing === k ? null : k)}>⚙</button>{/if}
+						{/each}
+					</div>
+				{/if}
+				{#each SUB_GROUPS as g (g.kr)}
+					{@const avail = g.keys.filter((k) => !ctl.subs.includes(k))}
+					{#if avail.length}
+						<div class="ctMenuLbl ctMenuGrp">{T(g.kr, g.en)}</div>
+						<div class="ctRow ctRowWrap">
+							{#each avail as k (k)}
+								<button class="mItem" title={SUB_HINT[k] ?? ''} onclick={() => ctl.toggleSub(k)}>{k}</button>
+							{/each}
+						</div>
+					{/if}
+				{/each}
 				{#if editing}
 					<IndParamEditor {ctl} {lang} name={editing} />
 				{/if}
 				{#if ctl.overlays.length || ctl.subs.length || ctl.econ.length}
 					<div class="ctRow"><button class="mItem mClear" onclick={() => ctl.clearAllIndicators()}>{T('지표 전체 해제', 'Clear all')}</button></div>
 				{/if}
-			</div>
-		{/if}
-	</div>
-	<div class="ctWrap">
-		<button class={ctl.econ.length ? 'chartTool on' : 'chartTool'} onclick={() => (menu = menu === 'econ' ? 'none' : 'econ')} title={T('경제지표 겹쳐보기', 'Economy overlay')}>{T('경제지표', 'ECON')}</button>
-		{#if menu === 'econ'}
-			<div class="ctMenu">
-				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
-				<div class="ctRow ctRowWrap">
-					{#each MACRO_SERIES as s (s.id)}
-						<button class={ctl.econ.includes(s.id) ? 'mItem on' : 'mItem'}
-							style={ctl.econ.includes(s.id) ? `background:transparent;color:${ECON_COLORS[s.id]};border-color:${ECON_COLORS[s.id]};font-weight:600` : ''}
-							onclick={() => ctl.toggleEcon(s.id)}>{T(s.kr, s.en)}</button>
-					{/each}
-				</div>
 			</div>
 		{/if}
 	</div>

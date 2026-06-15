@@ -6,6 +6,7 @@
 	import type { Company, Lang, Tone, Num } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
+	import { ChartCtl, ECON_MAX } from '../charts/chartState.svelte'; // 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유)
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
@@ -17,7 +18,8 @@
 	interface Props {
 		co: Company;
 		lang: Lang;
-		kpis?: { l: string; v: string; t: string; s?: number[] }[];
+		// id 보유 항목(MACRO_SERIES 시계열)은 마퀴 클릭→차트 econ 오버레이. 파생 항목(국면·순풍 등 시계열 부재)은 id 없음 = 비클릭(04 §5).
+		kpis?: { l: string; v: string; t: string; s?: number[]; id?: string }[];
 		// 전체화면 심볼 점프 (PriceChart ⌘K·/) — 검색·전환은 터미널 엔진 관통
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
@@ -28,6 +30,8 @@
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
+	// 차트 상태 — 여기서 생성해 PriceChart 로 내린다(01 §2.5 subject seam 과 동근). 상단 macro 마퀴 클릭→ctl.toggleEcon 공유의 전제.
+	const ctl = new ChartCtl();
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
 	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
@@ -357,11 +361,18 @@
 	);
 </script>
 
-<!-- 경제·시장 KPI 티커 (종목/주가 라인 위, 좌우 흐름) -->
+<!-- 경제·시장 KPI 티커 (종목/주가 라인 위, 좌우 흐름) — id 보유(시계열) 항목은 클릭→차트 econ 오버레이(04 §5).
+     파생 항목(국면·순풍 등)은 시계열 부재 = 비클릭(허위 오버레이 금지·정직 분기). 안정키 = id/label+절반. -->
 {#if kpis.length}
 	<div class="kpiTicker"><div class="kpiTrack">
-		{#each kpis.concat(kpis) as k, i (i)}
-			<span class="kpiItem"><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></span>
+		{#each kpis.concat(kpis) as k, i (`${k.id ?? k.l}__${i < kpis.length ? 0 : 1}`)}
+			{@const on = !!k.id && ctl.econ.includes(k.id)}
+			{@const blocked = !!k.id && !on && ctl.econ.length >= ECON_MAX}
+			{#if k.id}
+				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'click → overlay on chart' : '클릭 → 차트에 겹쳐보기'} onclick={() => k.id && ctl.toggleEcon(k.id)}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
+			{:else}
+				<span class="kpiItem"><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></span>
+			{/if}
 		{/each}
 	</div></div>
 {/if}
@@ -432,7 +443,7 @@
 	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candles && chartCode}
 <!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신). 지수 주체면 회사 오버레이(공시·실적·밴드·피어) 비움. -->
-		<PriceChart {candles} code={chartCode} name={chartName} {lang} {subject} {indexLine} {indexCtl}
+		<PriceChart {ctl} {candles} code={chartCode} name={chartName} {lang} {subject} {indexLine} {indexCtl}
 			events={subject === 'index' ? [] : priceEvents}
 			disclosures={subject === 'index' ? [] : disclosureEvents}
 			valBand={subject === 'index' ? null : priceValBand}

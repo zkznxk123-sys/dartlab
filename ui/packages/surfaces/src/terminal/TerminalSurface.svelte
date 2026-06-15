@@ -118,15 +118,16 @@
 		return u === 'pt' || u === '원' ? signed : u === '$/t' ? '$' + signed : signed + u;
 	};
 	// 경제·시장 KPI (CenterStack 헤더 티커) — 실 지표 최신값+스파크라인 + 매크로 국면 KR/US + 섹터 순풍·역풍 + 시장폭/평균.
-	const macroKpis = $derived.by<{ l: string; v: string; t: string; s?: number[] }[]>(() => {
+	const macroKpis = $derived.by<{ l: string; v: string; t: string; s?: number[]; id?: string }[]>(() => {
 		const m = eng.raw.macro;
 		const tw = eng.sectorTailwinds();
 		const r1 = Object.values(eng.raw.prices.data).map((p) => p.return1m).filter((x): x is number => x != null);
 		const up = r1.length ? (r1.filter((x) => x > 0).length / r1.length) * 100 : null;
 		const avg = r1.length ? r1.reduce((a, b) => a + b, 0) / r1.length : null;
-		const out: { l: string; v: string; t: string; s?: number[] }[] = [];
+		const out: { l: string; v: string; t: string; s?: number[]; id?: string }[] = [];
+		// id = MACRO_SERIES 시계열 식별자 → 마퀴 클릭 시 차트 econ 오버레이 토글(04 §5). 아래 파생 항목은 id 없음(비클릭).
 		for (const ml of macroLatest)
-			out.push({ l: lang === 'en' ? ml.def.en : ml.def.kr, v: fmtMacro(ml), t: ml.chg == null || ml.chg === 0 ? 'tNeu' : ml.chg > 0 ? 'tUp' : 'tDn', s: ml.spark });
+			out.push({ l: lang === 'en' ? ml.def.en : ml.def.kr, v: fmtMacro(ml), t: ml.chg == null || ml.chg === 0 ? 'tNeu' : ml.chg > 0 ? 'tUp' : 'tDn', s: ml.spark, id: ml.def.id });
 		if (m) {
 			// quadrant 결측(빌더 입력 부족) 방어 — 방향 미상은 중립 톤 (크래시 금지)
 			const dir = (g?: string) => (g == null ? 'tNeu' : g === 'rising' || g === '상승' ? 'tUp' : 'tDn');
