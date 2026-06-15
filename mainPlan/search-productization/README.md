@@ -41,6 +41,8 @@ dartlab.search("대표이사 변경", corp="005930", start="20240101")
 5. [04-rag-memory-contract.md](04-rag-memory-contract.md) — LLM 이 자기 지식처럼 쓰는 evidence card 계약.
 6. [05-scope-phasing-guardrails.md](05-scope-phasing-guardrails.md) — Phase, kill list, 착수·중단 기준.
 7. [06-progress-ledger.md](06-progress-ledger.md) — 현재 실측, 결정, NEXT.
+8. [07-specialist-review.md](07-specialist-review.md) — runtime, HF 증분, surface, 품질 gate 전문 검토 결론.
+9. [08-completion-design.md](08-completion-design.md) — HF 증분과 local/public/library 완성 설계.
 
 ---
 
@@ -53,3 +55,4 @@ dartlab.search("대표이사 변경", corp="005930", start="20240101")
 - LLM 용 지식화는 전체 본문 주입이 아니라 `sourceRef set + snippet + field card + dataAsOf` memory-card 반복 주입.
 - 제품 졸업은 실제 query-log gold 100~300 rows 통과 후에만. curatedDraft, stratifiedSynthetic 은 압박 실험일 뿐이다.
 - 본진 이식은 가능하다. 단 이식 대상은 runtime 구조와 gate 이며, 제품 완성 선언은 실제 query-log gold 이후다.
+- HF 증분은 source별 `doc_key/text_hash` catalog diff 로 처리한다. allFilings, panel, news 정상 갱신은 delta CSR 로 흡수하고, full rebuild 는 schema/tokenizer/normalizer/sourceRef 의미 변경 때만 한다.

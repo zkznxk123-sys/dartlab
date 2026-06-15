@@ -14,6 +14,8 @@
 5. source intent 는 hard isolation.
 6. RAG memory 는 전체 문서 주입이 아니라 sourceRef set 기반 memory-card.
 7. 제품 졸업은 실제 query-log gold 통과 후에만.
+8. 전문 검토 결론: 본진 이식 착수는 가능하나 release graduation 은 실제 query-log gold 로 차단한다.
+9. HF 증분은 source별 catalog diff 로 간다. allFilings, panel, news 정상 갱신은 delta CSR 이며, full rebuild 는 schema/tokenizer/normalizer/sourceRef 의미 변경 때만 한다.
 
 ---
 
@@ -47,6 +49,8 @@
 2. 실험 코드가 probe 중심이라 본진 모듈 경계로 아직 분해되지 않음.
 3. 제품 UI/API 에서 evidence card 와 answerable 상태 노출 계약이 아직 없음.
 4. 초기 load/build 가 무겁다. 본진에서는 prebuilt main+delta artifact 로 넘겨야 한다.
+5. 현재 daily delta 는 allFilings 중심이라 panel/news 최신성이 월간 main 전까지 지연된다.
+6. CLI `dartlab search`, public `/search`, viewer in-page search 가 서로 다른 검색이라 surface 명칭 충돌이 있다.
 
 ---
 
@@ -56,7 +60,10 @@
 - [x] `_attempts` 에 multi-seed random pressure runner 추가. (`productRandomPressureSweep.py`)
 - [x] 실제 데모 운영형 ceiling run 실행. 301579 docs, 300 queries, readyRate 0.9867, p95 157.9ms.
 - [ ] 실제 query-log gold 저장 위치와 review status 절차 확정.
-- [ ] 본진 이식 파일 지도 작성: planner/evidence/memory/sourcePolicy/test slots.
+- [x] 전문 검토 반영: runtime/HF 증분/local-public-library/품질 gate 설계 문서화. (`07-specialist-review.md`, `08-completion-design.md`)
+- [x] 본진 이식 파일 지도 작성: planner/evidence/memory/sourcePolicy/test slots.
+- [ ] result schema 와 manifest/indexInfo 계약을 본진 변경 전 확정.
+- [ ] allFilings/panel/news catalog delta 설계를 `_attempts` 졸업 산출물과 맞춰 본진 이식 단위로 쪼갬.
 - [ ] targeted regression test 목록을 `tests/search` 기준으로 쪼갬.
 - [ ] 실제 query-log 100~300 rows 확보 후 졸업 gate 실행.
 

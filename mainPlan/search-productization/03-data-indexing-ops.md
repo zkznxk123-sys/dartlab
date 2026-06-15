@@ -36,6 +36,8 @@
 - index schemaVersion 변경.
 - sourceRef 정책 변경으로 기존 metadata 의미가 바뀜.
 
+증분 catalog 는 source 별 manifest 를 소비한다. search index workflow 는 allFilings, panel, news row 를 DuckDB catalog 에 stage 하고 `doc_key/text_hash/metadata_hash/deleted` 로 changed set 을 만든다. daily delta 는 allFilings 만이 아니라 panel changed rcept 와 news changed row 도 포함해야 한다.
+
 ---
 
 ## 3. main + delta 운영
@@ -69,7 +71,7 @@
 필수 산출물:
 
 - catalog snapshot: staged docs, source counts, changed/new/unchanged.
-- index manifest: schemaVersion, dataAsOf, source counts, build command.
+- index manifest: artifactVersion, schemaVersion, builtAt, mainDataAsOf, deltaDataAsOf, sourceDataAsOf, source counts, tier, changed/new/deleted/unchanged counts, build command.
 - quality report: readiness, query-log gold, random pressure.
 - miss ledger: miss query, target, topDocs, 판단.
 
