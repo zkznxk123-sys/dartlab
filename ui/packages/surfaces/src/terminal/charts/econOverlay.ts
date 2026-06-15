@@ -95,30 +95,42 @@ export function registerEconIndicator(kc: { registerIndicator: (t: unknown) => v
 			const padY = bounding.height * 0.08;
 			const top = bounding.top + padY;
 			const h = bounding.height - padY * 2;
+			ctx.save();
+			ctx.font = '10px ui-sans-serif, system-ui, sans-serif';
+			ctx.textBaseline = 'middle';
 			for (const { def } of ext.series) {
-				let lo = Infinity;
-				let hi = -Infinity;
-				for (let i = from; i < to; i++) {
-					const v = result[i]?.[def.id];
-					if (v != null) { if (v < lo) lo = v; if (v > hi) hi = v; }
-				}
-				if (lo === Infinity) continue;
-				const span = hi - lo; // 평탄 구간(기준금리 동결) = 페인 중앙 수평선
-				ctx.strokeStyle = ECON_COLORS[def.id] ?? '#8b919e';
-				ctx.lineWidth = 1.5;
-				ctx.setLineDash([]);
-				ctx.beginPath();
-				let started = false;
+				// 관측 정점만 수집 — 월간 forward-fill 의 계단(square wave) 제거. 값이 바뀌는 지점 + 마지막 가시 인덱스를
+				// 경사로 연결해 추세선으로 (저빈도 시리즈를 일봉 축에 얹을 때의 표준 표현). 일봉 시리즈는 매 봉 달라 동일 동작.
+				const verts: { x: number; v: number }[] = [];
+				let lastV: number | null = null;
+				let lastX = 0;
 				for (let i = from; i < to; i++) {
 					const v = result[i]?.[def.id];
 					if (v == null) continue;
-					const x = xAxis.convertToPixel(i);
-					const y = span === 0 ? top + h / 2 : top + ((hi - v) / span) * h;
-					if (started) ctx.lineTo(x, y);
-					else { ctx.moveTo(x, y); started = true; }
+					lastX = xAxis.convertToPixel(i);
+					if (v !== lastV) { verts.push({ x: lastX, v }); lastV = v; }
 				}
+				if (!verts.length) continue;
+				if (lastV != null && verts[verts.length - 1].x !== lastX) verts.push({ x: lastX, v: lastV }); // 현재값까지 평탄 연장
+				let lo = Infinity;
+				let hi = -Infinity;
+				for (const p of verts) { if (p.v < lo) lo = p.v; if (p.v > hi) hi = p.v; }
+				const span = hi - lo;
+				const yOf = (v: number): number => (span === 0 ? top + h / 2 : top + ((hi - v) / span) * h);
+				const color = ECON_COLORS[def.id] ?? '#8b919e';
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 1.4;
+				ctx.setLineDash([]);
+				ctx.beginPath();
+				verts.forEach((p, k) => (k ? ctx.lineTo(p.x, yOf(p.v)) : ctx.moveTo(p.x, yOf(p.v))));
 				ctx.stroke();
+				// 선 끝(현재)에 값 라벨 — 정규화 선의 높이가 무슨 값인지 읽히게(주가축 아님을 명시·"보이지 않는 축" → 읽히는 축).
+				const tip = verts[verts.length - 1];
+				ctx.fillStyle = color;
+				ctx.textAlign = 'right';
+				ctx.fillText(fmt(tip.v, def), tip.x - 3, yOf(tip.v) - 6);
 			}
+			ctx.restore();
 			return true; // 기본 figure 렌더 생략 (그릴 figure 도 없음)
 		},
 		createTooltipDataSource: ({ indicator, crosshair }: any) => {
