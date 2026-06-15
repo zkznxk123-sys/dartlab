@@ -26,6 +26,7 @@ large corpus 기준:
 - product readiness: pass.
 - random curatedDraft 300: readyRate 0.99.
 - miss: 3.
+- demo-ops ceiling: 301579 docs, 3 seeds × 100 rows, readyRate 0.9867, warm p95 157.9ms, max 173.9ms.
 - known residual:
   - receipt-number-only filing 의 answer field 완성도 1건.
   - 제목/출처가 매우 비슷한 news 2건.

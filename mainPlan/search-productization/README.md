@@ -11,6 +11,8 @@
 
 실험은 충분히 강하다. 57337 docs large gate 에서 combined product readiness 는 통과했고, seeded random curatedDraft 300 rows 는 readyRate 0.99 까지 나왔다. 하지만 실제 사용자 query-log gold 가 아직 없으므로 제품 졸업이라고 부르지는 않는다. 제품화 준비의 핵심은 이 경계를 코드·문서·gate 로 고정하고, 실제 로그가 들어오면 같은 표면에서 졸업 여부를 자동 판정하게 만드는 것이다.
 
+2026-06-15 demo-ops ceiling run 에서는 로컬 최대에 가까운 301579 docs(allFilings 191827 + panel 104752 + news 5000)를 한 번 로드·인덱싱한 뒤 3 seeds × 100 운영형 질의를 처리했다. 결과는 readyRate 0.9867, filing memoryAnswerReady 0.98, news sourcePrecision10 0.9867, noAnswer falseAcceptRate 0.0, warm query p95 157.9ms, max 173.9ms 였다. 즉 본진 이식 착수 기준은 확보됐고, 릴리즈 졸업만 실제 query-log gold 로 남는다.
+
 ---
 
 ## 제품 계약
@@ -50,4 +52,4 @@ dartlab.search("대표이사 변경", corp="005930", start="20240101")
 - source intent 는 soft preference 가 아니라 hard isolation. `공시 말고 뉴스`, `뉴스 말고 공시`는 fallback 하지 않는다.
 - LLM 용 지식화는 전체 본문 주입이 아니라 `sourceRef set + snippet + field card + dataAsOf` memory-card 반복 주입.
 - 제품 졸업은 실제 query-log gold 100~300 rows 통과 후에만. curatedDraft, stratifiedSynthetic 은 압박 실험일 뿐이다.
-
+- 본진 이식은 가능하다. 단 이식 대상은 runtime 구조와 gate 이며, 제품 완성 선언은 실제 query-log gold 이후다.

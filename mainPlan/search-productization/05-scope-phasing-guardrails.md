@@ -35,6 +35,7 @@
 - 새 public API 0.
 - L1/L1.5 import 경계 위반 0.
 - 테스트 목록과 fixture 전략 확정.
+- demo-ops ceiling 기준 readyRate >= 0.98, warm p95 < 200ms 수준을 유지.
 
 ---
 
@@ -52,6 +53,7 @@
 - 기존 `tests/search/*` green.
 - 신규 targeted tests green.
 - product readiness proxy 재실행.
+- 300k docs demo-ops ceiling 재실행에서 품질·속도 회귀 없음.
 
 ---
 
@@ -97,4 +99,3 @@
 - 실제 query-log gold 없이 제품 완성 선언.
 - miss 1건마다 특수 mapper 추가.
 - 전체 재색인을 일상 운영으로 전제.
-

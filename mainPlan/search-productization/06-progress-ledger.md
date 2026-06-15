@@ -31,6 +31,11 @@
 | filing memoryAnswerReady / fieldCoverage | 0.9929 / 0.9976 |
 | news exactHit10 / sourcePrecision10 / targetSourceTop1 | 0.975 / 0.975 / 0.975 |
 | noAnswer falseAcceptRate | 0.0 |
+| demo-ops ceiling corpus | 301579 docs = allFilings 191827 + panel 104752 + news 5000 |
+| demo-ops 3 seeds × 100 rows | readyRate 0.9867 |
+| demo-ops filing / news / noAnswer | memoryAnswerReady 0.98 / sourcePrecision10 0.9867 / falseAcceptRate 0.0 |
+| demo-ops warm latency | p50 123.1ms, p95 157.9ms, max 173.9ms |
+| demo-ops sparse memory | content CSR 약 591MB, metadata CSR 약 36.9MB |
 
 주의: random curatedDraft 는 제품 졸업 증거가 아니라 압박 실험이다.
 
@@ -39,10 +44,9 @@
 ## 3. 남은 약점
 
 1. 실제 query-log gold 부재.
-2. multi-seed random pressure runner 는 생겼지만 large 5-seed 본실행은 아직 안 함.
-3. 300-row miss 3건의 반복성 미확인.
-4. 실험 코드가 probe 중심이라 본진 모듈 경계로 아직 분해되지 않음.
-5. 제품 UI/API 에서 evidence card 와 answerable 상태 노출 계약이 아직 없음.
+2. 실험 코드가 probe 중심이라 본진 모듈 경계로 아직 분해되지 않음.
+3. 제품 UI/API 에서 evidence card 와 answerable 상태 노출 계약이 아직 없음.
+4. 초기 load/build 가 무겁다. 본진에서는 prebuilt main+delta artifact 로 넘겨야 한다.
 
 ---
 
@@ -50,6 +54,7 @@
 
 - [ ] Phase 0 리뷰: 이 PRD 가 제품화 방향으로 충분한지 확인.
 - [x] `_attempts` 에 multi-seed random pressure runner 추가. (`productRandomPressureSweep.py`)
+- [x] 실제 데모 운영형 ceiling run 실행. 301579 docs, 300 queries, readyRate 0.9867, p95 157.9ms.
 - [ ] 실제 query-log gold 저장 위치와 review status 절차 확정.
 - [ ] 본진 이식 파일 지도 작성: planner/evidence/memory/sourcePolicy/test slots.
 - [ ] targeted regression test 목록을 `tests/search` 기준으로 쪼갬.
