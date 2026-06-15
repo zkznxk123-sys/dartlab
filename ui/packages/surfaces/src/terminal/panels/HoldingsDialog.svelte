@@ -4,7 +4,8 @@
 	// 정직: 매수/매도·목표주가·인과 금지. 결손(null)은 0 으로 뭉개지 않고 '—'/분리. parentNet 미상이면 contribShare 생략.
 	import type { Company, Lang } from '../lib/types';
 	import type { InvestmentRow, InvestmentTrendYear } from '@dartlab/ui-contracts';
-	import { buildHoldingsModel, type ListedLookup, type HoldingTier } from '../lib/holdings';
+	import { scaleSqrt } from 'd3-scale';
+	import { buildHoldingsModel, type ListedLookup, type HoldingTier, type HoldingsRow } from '../lib/holdings';
 	import { fmtKRW } from '../lib/engine';
 
 	interface Props {
@@ -35,6 +36,52 @@
 	const krw = (v: number | null) => (v == null ? '—' : fmtKRW(v));
 	const ratioCls = (r: number | null, mid = 1) => (r == null ? 'tNeu' : r > mid ? 'tUp' : r < mid ? 'tDn' : 'tNeu');
 	const trendMax = $derived(Math.max(...trend.map((t) => t.bookTotal ?? 0), 1));
+	// 위계 맵 — 이익기여 부호 색(흑자 녹/적자 적/미상 회) + 법인명 축약.
+	const signColor = (v: number | null) => (v == null ? 'var(--dim)' : v > 0 ? 'var(--up)' : v < 0 ? 'var(--dn)' : 'var(--dim)');
+	const clip = (s: string, n = 6) => {
+		const c = (s || '').replace(/\(주\)|㈜|주식회사/g, '').trim();
+		return c.length > n ? c.slice(0, n - 1) + '…' : c;
+	};
+
+	// 위계 맵 packed 레이아웃 — 결정론(physics 0) 레인별 노드 배치. 레인 = 회계 경계, 노드 = 출자처.
+	let mapW = $state(0);
+	const sizeScale = $derived(scaleSqrt().domain([0, Math.max(m.maxBook, 1)]).range([5, 24]));
+	const TIER_ORDER: HoldingTier[] = ['consolidated', 'equity', 'simple', 'unknown'];
+	const mapLanes = $derived.by(() => {
+		const W = mapW;
+		if (!W) return { lanes: [] as { key: HoldingTier; count: number; book: number; headerY: number; nodes: { h: HoldingsRow; cx: number; cy: number; r: number }[] }[], totalH: 0 };
+		const headerH = 22;
+		const pad = 9;
+		const gap = 6;
+		let y = 0;
+		const lanes = [];
+		for (const key of TIER_ORDER) {
+			const items = m.rows.filter((h) => h.tier === key);
+			if (!items.length) continue;
+			const headerY = y;
+			y += headerH;
+			let x = pad;
+			let rowMax = 0;
+			let top = y;
+			const nodes = [];
+			for (const h of items) {
+				const r = sizeScale(h.bookValue ?? 0);
+				const d = r * 2;
+				if (x + d + pad > W) {
+					x = pad;
+					top += rowMax + gap;
+					rowMax = 0;
+				}
+				nodes.push({ h, cx: x + r, cy: top + r, r });
+				x += d + gap;
+				if (d > rowMax) rowMax = d;
+			}
+			y = top + rowMax + pad;
+			lanes.push({ key, count: items.length, book: items.reduce((a, h) => a + (h.bookValue ?? 0), 0), headerY, nodes });
+			y += gap;
+		}
+		return { lanes, totalH: y };
+	});
 
 	$effect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -75,6 +122,30 @@
 					<div class="hdSumLbl">{T('효율 — 지분법 이익기여(근사)', 'EFFICIENCY — equity earnings (approx)')}</div>
 					<div class={'hdSumV mono ' + (m.sumEquityEarn > 0 ? 'tUp' : m.sumEquityEarn < 0 ? 'tDn' : 'tNeu')}>{krw(m.sumEquityEarn)}</div>
 					<div class="hdSumSub dim">{m.contribShare != null ? T('본체 순익 대비 ', 'of parent net ') + m.contribShare.toFixed(1) + '%' : T('본체 순익 대비 — (참고·미산출)', 'parent net n/a')}</div>
+				</div>
+			</div>
+
+			<!-- 지배력 위계 맵 — 관계 구조 시각화(radial 폐기, 결정론 레인 packed). 아래 표 = 정밀 수치. -->
+			<div class="hdMapSec">
+				<div class="hdMapTitle dim">{T('지배력 위계 맵 — 크기=장부가 · 색=이익기여(녹 흑자 / 적 적자 / 회 미상) · 실선=상장(클릭 이동) · ★굵은테두리=경영참여', 'Control hierarchy — size=book · color=earnings(green/red) · solid ring=listed(click) · bold ring=intent')}</div>
+				<div class="hdMapCanvas" bind:clientWidth={mapW}>
+					{#if mapW}
+						<svg width={mapW} height={mapLanes.totalH} role="img" aria-label={T('출자 위계 맵', 'holdings hierarchy map')}>
+							{#each mapLanes.lanes as lane (lane.key)}
+								<text class="hdLaneLab" x="3" y={lane.headerY + 15}>{T(TIER_LABEL[lane.key].kr, TIER_LABEL[lane.key].en)} · {lane.count}{T('사', '')} · {krw(lane.book)}</text>
+								{#each lane.nodes as n (n.h.name + '@' + n.cx)}
+									{@const tt = n.h.name + ' · ' + (n.h.stakePct != null ? n.h.stakePct.toFixed(1) + '%' : '—') + ' · ' + T('장부', 'book') + ' ' + krw(n.h.bookValue) + (n.h.marketStake != null ? ' · ' + T('시가', 'mkt') + ' ' + krw(n.h.marketStake) : '') + (n.h.equityEarn != null ? ' · ' + T('이익기여', 'earn') + ' ' + (n.h.equityEarn < 0 ? '-' : '') + fmtKRW(Math.abs(n.h.equityEarn)) : '')}
+									{#if n.h.code}
+										<!-- 상장 해소 노드 = 클릭/키보드로 종목 이동 (role=button·tabindex 정적 보장). -->
+										<circle class="hdMapNode click" cx={n.cx} cy={n.cy} r={n.r} fill={signColor(n.h.equityEarn)} fill-opacity="0.9" stroke="var(--txt)" stroke-width={n.h.intent ? 2.2 : 1} role="button" tabindex={0} aria-label={n.h.name} onclick={() => onPick(n.h.code!)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(n.h.code!); } }}><title>{tt}</title></circle>
+									{:else}
+										<circle class="hdMapNode" cx={n.cx} cy={n.cy} r={n.r} fill={signColor(n.h.equityEarn)} fill-opacity="0.45" stroke="var(--bd)" stroke-width={n.h.intent ? 2.2 : 1} stroke-dasharray="2 2" aria-label={n.h.name}><title>{tt}</title></circle>
+									{/if}
+									{#if n.r >= 13}<text class="hdMapNodeLab" x={n.cx} y={n.cy + 3} text-anchor="middle">{clip(n.h.name, 6)}</text>{/if}
+								{/each}
+							{/each}
+						</svg>
+					{/if}
 				</div>
 			</div>
 
@@ -270,5 +341,41 @@
 		margin-top: 8px;
 		padding-top: 6px;
 		border-top: 1px solid var(--bd);
+	}
+	.hdMapSec {
+		margin-bottom: 10px;
+	}
+	.hdMapTitle {
+		font-size: 9px;
+		margin-bottom: 5px;
+		line-height: 1.35;
+	}
+	.hdMapCanvas {
+		background: var(--dl-bg-base, rgba(255, 255, 255, 0.02));
+		border: 1px solid var(--bd);
+		border-radius: 3px;
+		padding: 2px;
+		max-height: 300px;
+		overflow-y: auto;
+	}
+	.hdLaneLab {
+		font-size: 10.5px;
+		font-weight: 700;
+		fill: var(--txt);
+	}
+	.hdMapNode {
+		transition: fill-opacity 0.1s;
+	}
+	.hdMapNode.click {
+		cursor: pointer;
+	}
+	.hdMapNode.click:hover {
+		fill-opacity: 1;
+		stroke: var(--amber, #fb923c);
+	}
+	.hdMapNodeLab {
+		font-size: 8px;
+		fill: var(--dl-bg-deep, #05070d);
+		font-weight: 700;
 	}
 </style>
