@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { Candle, FinMode, FinScope, IndexRef, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
-	import { KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts'; // 지수 picker(01) — KR 5·US 4 큐레이트
+	import { KR_INDEX_PRESETS } from '@dartlab/ui-contracts'; // 지수 기본값(코스피) — picker 칩은 ChartMenus 가 렌더
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang, Tone, Num } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
@@ -58,6 +58,16 @@
 		idxQuery = '';
 		idxResults = [];
 	}
+	function setSubject(s: 'price' | 'index') {
+		subject = s;
+		if (s === 'index' && !indexRef) indexRef = KR_INDEX_PRESETS[0];
+	}
+	function searchIndex(q: string) {
+		idxQuery = q;
+		onIdxSearch();
+	}
+	// 컨트롤 번들 — 차트 컨트롤 바(ChartMenus)가 한 줄에서 주가/지수 토글·지수 picker 를 렌더하도록 내려보냄(idxBar 폐기).
+	const indexCtl = $derived({ subject, indexRef, query: idxQuery, results: idxResults, setSubject, pick: pickIndex, search: searchIndex });
 	const onPickWrapped = $derived(onPick ? (c: string) => { subject = 'price'; onPick?.(c); } : undefined); // 심볼 점프 = 회사 → 주가 주체 복귀
 	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
 	$effect(() => {
@@ -421,24 +431,8 @@
 		: (chartSrcLine ? { kr: chartSrcLine, en: chartSrcLine } : { kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' })} flush>
 	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
 	{#if candles && chartCode}
-		<!-- 차트 주체 컨트롤 바(안3·안4) — 16px 패널헤더는 overflow:hidden 라 토글·드롭다운이 잘려, 본문 상단 전용 행으로 분리(발견성↑·드롭다운 클립 해소). 회사 주가 ↔ KR gov/US FRED 지수 + picker(큐레이트 9 + 검색). -->
-		<div class="idxBar">
-			<span class="segGroup idxToggle">
-				<button class={subject === 'price' ? 'seg on' : 'seg'} onclick={() => (subject = 'price')}>{lang === 'en' ? 'Price' : '주가'}</button>
-				<button class={subject === 'index' ? 'seg on' : 'seg'} onclick={() => { subject = 'index'; if (!indexRef) indexRef = KR_INDEX_PRESETS[0]; }}>{lang === 'en' ? 'Index' : '지수'}</button>
-			</span>
-			{#if subject === 'index'}
-				<!-- 인라인 칩 — absolute 드롭다운 폐기(운영자: 그래프 위 오버레이 말고 차트 위 정상 배치). 검색 시 결과 칩, 비었으면 큐레이트 9 그룹 칩. -->
-				<input class="idxSearch mono" placeholder={lang === 'en' ? 'search…' : '지수 검색…'} bind:value={idxQuery} oninput={onIdxSearch} />
-				{#if idxResults.length}
-					<span class="idxChips">{#each idxResults as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</span>
-				{:else}
-					<span class="idxChips"><span class="idxGrpLbl">{lang === 'en' ? 'KR' : '한국'}</span>{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}<span class="idxGrpLbl">{lang === 'en' ? 'US' : '미국'}</span>{#each US_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</span>
-				{/if}
-			{/if}
-		</div>
-		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신). 지수 주체면 회사 오버레이(공시·실적·밴드·피어) 비움. -->
-		<PriceChart {candles} code={chartCode} name={chartName} {lang} {subject} {indexLine}
+<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신). 지수 주체면 회사 오버레이(공시·실적·밴드·피어) 비움. -->
+		<PriceChart {candles} code={chartCode} name={chartName} {lang} {subject} {indexLine} {indexCtl}
 			events={subject === 'index' ? [] : priceEvents}
 			disclosures={subject === 'index' ? [] : disclosureEvents}
 			valBand={subject === 'index' ? null : priceValBand}

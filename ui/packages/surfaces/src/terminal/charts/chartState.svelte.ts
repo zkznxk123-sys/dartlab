@@ -5,6 +5,19 @@ const browser = typeof window !== 'undefined'; // $app/environment 결합 제거
 import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp } from '../lib/backtest';
 import { IND_DEFS } from './indicatorParams';
 import { EVENT_CAT_KEYS } from '../lib/eventRail';
+import type { IndexRef } from '@dartlab/ui-contracts';
+
+// 차트 주체(subject) 토글 + 지수 picker 컨트롤 번들 — subject 는 데이터 로드 때문에 CenterStack 소유(ctl 미상향, 01 §2.5)라
+// CenterStack → PriceChart → ChartMenus 로 내려 한 줄(.chartTopBar)에서 렌더한다. 값은 라이브, setter 는 CenterStack 상태 변경.
+export interface IndexControl {
+	subject: 'price' | 'index';
+	indexRef: IndexRef | null;
+	query: string;
+	results: IndexRef[];
+	setSubject: (s: 'price' | 'index') => void;
+	pick: (r: IndexRef) => void;
+	search: (q: string) => void;
+}
 
 export type SubKey = 'VOL' | 'TVAL' | 'MACD' | 'RSI' | 'KDJ' | 'OBV' | 'CCI' | 'WR' | 'DMI' | 'MTM' | 'ROC' | 'TRIX' | 'PSY' | 'VR' | 'BRAR' | 'BIAS' | 'CR' | 'DMA' | 'EMV' | 'AO' | 'PVT' | 'AVP';
 export const SUB_ALL: SubKey[] = ['VOL', 'TVAL', 'MACD', 'RSI', 'KDJ', 'OBV', 'CCI', 'WR', 'DMI', 'MTM', 'ROC', 'TRIX', 'PSY', 'VR', 'BRAR', 'BIAS', 'CR', 'DMA', 'EMV', 'AO', 'PVT', 'AVP'];

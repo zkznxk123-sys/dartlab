@@ -2,8 +2,8 @@
 	// 일반(비전체화면) 모드 차트 크롬 — 기간 칩(좌상) + 드롭다운 4개(지표·그리기·표시·백테스트) + 전체화면.
 	// 상태는 ChartCtl 단일 SSOT 공유 — 전체화면 리본(ChartRibbon)과 같은 인스턴스.
 	import type { Lang } from '../lib/types';
-	import { type ChartCtl, OVERLAY_ALL, SUB_ALL, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
-	import { MACRO_SERIES } from '@dartlab/ui-contracts';
+	import { type ChartCtl, type IndexControl, OVERLAY_ALL, SUB_ALL, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
+	import { MACRO_SERIES, KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
 	import { EVENT_CATS } from '../lib/eventRail';
 	import { IND_DEFS, paramSummary } from './indicatorParams';
@@ -20,8 +20,9 @@
 		onSnapshot?: () => void; // PNG 저장 — 전체화면 전용 잠금 해제 (발견성)
 		subject?: 'price' | 'index'; // 'index' = BT·매물대 비활성(지수는 거래 대상 아님, 01 §4.2-4.3)
 		indexLine?: boolean; // US 지수(종가전용) = candleStyle 'area' 고정(세그먼트 disabled, 01 §3.6)
+		indexCtl?: IndexControl; // 주가/지수 토글 + 지수 picker (CenterStack 소유 → 컨트롤 바 한 줄에 통합)
 	}
-	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false }: Props = $props();
+	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false, indexCtl }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
 	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt' | 'rail'>('none');
@@ -36,6 +37,22 @@
 
 <!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 폐기, 밀도 배치). 좌=기간·봉주기, 우=지표·표시·BT 도구. -->
 <div class="chartTopBar">
+{#if indexCtl}
+	<!-- 주체 토글 + 지수 picker — CenterStack indexCtl (한 줄 통합). 지수 시 검색 결과 칩 / 비면 큐레이트 9 그룹 칩. -->
+	<span class="segGroup idxToggle">
+		<button class={indexCtl.subject === 'price' ? 'seg on' : 'seg'} onclick={() => indexCtl.setSubject('price')}>{T('주가', 'Price')}</button>
+		<button class={indexCtl.subject === 'index' ? 'seg on' : 'seg'} onclick={() => indexCtl.setSubject('index')}>{T('지수', 'Index')}</button>
+	</span>
+	{#if indexCtl.subject === 'index'}
+		<input class="idxSearch mono" placeholder={T('지수 검색…', 'search…')} value={indexCtl.query} oninput={(e) => indexCtl.search(e.currentTarget.value)} />
+		{#if indexCtl.results.length}
+			<span class="idxChips">{#each indexCtl.results as r (r.code)}<button class={indexCtl.indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => indexCtl.pick(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</span>
+		{:else}
+			<span class="idxChips"><span class="idxGrpLbl">{T('한국', 'KR')}</span>{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexCtl.indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => indexCtl.pick(r)}>{r.name}</button>{/each}<span class="idxGrpLbl">{T('미국', 'US')}</span>{#each US_INDEX_PRESETS as r (r.code)}<button class={indexCtl.indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => indexCtl.pick(r)}>{r.name}</button>{/each}</span>
+		{/if}
+		<span class="cbDiv"></span>
+	{/if}
+{/if}
 <!-- 기간 + 봉 주기 (좌) — segGroup 자체 위젯 (리본과 동일 패턴) -->
 <div class="chartBar">
 	<span class="segGroup" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'seg on' : 'seg'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</span>

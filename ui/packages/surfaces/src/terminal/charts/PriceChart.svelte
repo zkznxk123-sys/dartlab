@@ -13,7 +13,7 @@
 	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
-	import { ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
+	import { ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type IndexControl, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
 	import { loadDraws, saveDraws, type SavedDraw } from './drawStore';
 	import { publishView } from './seriesBus';
 	import { registerWorkOverlays, MEASURE_NAME, TEXT_NAME } from './avwapOverlay';
@@ -45,8 +45,10 @@
 		subject?: 'price' | 'index';
 		// US 지수(FRED 종가전용) = 라인 강제 + 고저 파생지표 degenerate. KR 지수·주가는 false (01 §3.6).
 		indexLine?: boolean;
+		// 주가/지수 토글 + 지수 picker 번들 — ChartMenus(컨트롤 바)로 패스스루(PriceChart 자체는 미사용).
+		indexCtl?: IndexControl;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, subject = 'price', indexLine = false }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, subject = 'price', indexLine = false, indexCtl }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
@@ -1072,7 +1074,7 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
-		<ChartMenus {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 	<div class="chartHost" bind:this={el}></div>
 
