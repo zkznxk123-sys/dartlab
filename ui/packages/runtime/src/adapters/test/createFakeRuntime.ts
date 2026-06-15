@@ -237,6 +237,9 @@ function fakeMacro(): MacroPort {
 
 function fakeReport(): ReportPort {
 	return {
+		async shareholders() {
+			return null;
+		},
 		async workforce(code) {
 			if (code !== FIXTURE_CODE) return null;
 			return [

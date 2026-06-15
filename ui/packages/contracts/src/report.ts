@@ -49,6 +49,28 @@ export interface OwnershipYear {
 	stockTotal: Num; // 총발행주식수 (주)
 }
 
+// 최대주주 개별 행 — 역방향 소유("누가 이 회사를 소유하나"). 개인은 개인정보·동명이인 가드로 익명 집계(실명 미노출).
+export type ShareholderKind = 'institution' | 'corp' | 'gov' | 'treasury' | 'person';
+export interface ShareholderRow {
+	name: string; // 기관·법인·정부·자기주식 실명 (개인은 named 에 넣지 않음 — person 집계로)
+	relate: string; // canonical 관계 라벨 (원문 자유문자열 정규화). 미상 = ''
+	ratio: Num; // 지분율 %
+	shares: Num; // 보유 주식수
+	kind: ShareholderKind;
+	code: string | null; // 법인주주 상장 해소 시 종목코드 (클릭 이동) — 소비처가 lookupListed 로 채움
+}
+export interface PersonAggregate {
+	count: number; // 특수관계인 개인 수
+	ratio: Num; // 개인 지분율 합 %
+	shares: Num; // 개인 보유주식 합
+}
+export interface ShareholdersView {
+	year: string;
+	named: ShareholderRow[]; // 기관·법인·정부·자기주식 (실명, 지분 desc)
+	person: PersonAggregate | null; // 개인 익명 집계 (1줄). 개인 없으면 null
+	totalPct: Num; // 최대주주측 합산 지분율 (계행) — 정합 검증용
+}
+
 export interface ExecBoardYear {
 	year: string;
 	execAvgPay: Num; // 이사·감사 1인평균 보수 (원)
@@ -143,6 +165,8 @@ export interface ReportPort {
 	investments(code: string): Promise<InvestmentsBundle | null>;
 	shareholderReturn(code: string): Promise<ShareholderReturnYear[] | null>;
 	ownership(code: string): Promise<OwnershipYear[] | null>;
+	/** 최대주주 개별 — 역방향 소유("누가 이 회사를 소유하나"). 개인 익명 집계. 미지원/미존재는 null. */
+	shareholders(code: string): Promise<ShareholdersView | null>;
 	execBoard(code: string): Promise<ExecBoardYear[] | null>;
 	debtProfile(code: string): Promise<DebtProfileBundle | null>;
 	capitalChanges(code: string): Promise<CapitalChangesBundle | null>;

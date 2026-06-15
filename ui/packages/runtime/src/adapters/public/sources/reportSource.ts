@@ -20,6 +20,8 @@ import type {
 	Num,
 	OwnershipYear,
 	ShareholderReturnYear,
+	ShareholderRow,
+	ShareholdersView,
 	TopExecPay,
 	WorkforceYear
 } from '@dartlab/ui-contracts';
@@ -90,6 +92,7 @@ const wfCache = new Map<string, Promise<WorkforceYear[] | null>>();
 const invCache = new Map<string, Promise<InvestmentsBundle | null>>();
 const srCache = new Map<string, Promise<ShareholderReturnYear[] | null>>();
 const ownCache = new Map<string, Promise<OwnershipYear[] | null>>();
+const shCache = new Map<string, Promise<ShareholdersView | null>>();
 const ebCache = new Map<string, Promise<ExecBoardYear[] | null>>();
 const dpCache = new Map<string, Promise<DebtProfileBundle | null>>();
 const ccCache = new Map<string, Promise<CapitalChangesBundle | null>>();
@@ -112,6 +115,10 @@ export function loadShareholderReturn(stockCode: string): Promise<ShareholderRet
 /** 소유구조 연도 시계열 (majorHolder 계행 + minorityHolder). */
 export function loadOwnership(stockCode: string): Promise<OwnershipYear[] | null> {
 	return cached(ownCache, stockCode, buildOwnership);
+}
+/** 최대주주 개별 (역방향 소유) — 기관·법인·정부·자기주식 실명, 개인 익명 집계 (majorHolder.parquet). */
+export function loadShareholders(stockCode: string): Promise<ShareholdersView | null> {
+	return cached(shCache, stockCode, buildShareholders);
 }
 /** 이사·감사 보수 + 이사회 구성 연도 시계열 (executivePayAllTotal + outsideDirector). */
 export function loadExecBoard(stockCode: string): Promise<ExecBoardYear[] | null> {
@@ -310,6 +317,76 @@ async function buildOwnership(code: string): Promise<OwnershipYear[] | null> {
 		.filter((o) => o.majorPct != null || o.minorPct != null || o.stockTotal != null)
 		.sort((a, b) => a.year.localeCompare(b.year));
 	return out.length ? out : null;
+}
+
+// ── 역방향 소유(최대주주 개별) 분류·정규화 — 개인은 익명 집계(개인정보·동명이인 가드).
+// 명시 법인/기관/정부/자기주식 신호가 잡힌 것만 실명(named), 나머지는 person 으로 보수 분류(실명 미노출). ──
+const SH_TREASURY = /자기주식|자사주/;
+const SH_GOV = /국민연금|공무원연금|사학연금|군인연금|우정사업본부|예금보험공사|산업은행|연기금|한국은행|정책금융|성장금융/;
+const SH_INST = /자산운용|투자운용|캐피탈|캐피털|은행|증권|생명|화재|손해보험|보험|저축은행|신탁|펀드|연금|공제회|재단|장학|투자회사|벤처|파트너스|에쿼티|fund|trust|asset|capital|securities|bank|insurance/i;
+const SH_CORP = /㈜|\(주\)|주식회사|holdings?|지주|그룹|컴퍼니|co\.?,?\s*ltd|corp|inc\.?|llc|company|[A-Z]{2,}/i;
+function classifyShareholder(name: string): ShareholderRow['kind'] {
+	const n = (name || '').replace(/\s/g, '');
+	if (!n) return 'person';
+	if (SH_TREASURY.test(n)) return 'treasury';
+	if (SH_GOV.test(n)) return 'gov';
+	if (SH_INST.test(n)) return 'institution';
+	if (SH_CORP.test(n)) return 'corp';
+	return 'person';
+}
+const SH_RELATE: [RegExp, string][] = [
+	[/본인|최대주주/, '본인'],
+	[/계열|관계회사|지배회사|종속회사|모회사|자회사/, '계열회사'],
+	[/임원|이사|등기|감사(?!원)/, '임원'],
+	[/자녀|배우자|친인척|친족|특수관계|혈족|인척|형제|자매/, '특수관계인'],
+	[/우리사주|종업원|직원/, '우리사주'],
+	[/재단|기금|장학/, '재단·기금']
+];
+function canonRelate(raw: string): string {
+	const s = (raw || '').replace(/\s+/g, ' ').trim();
+	if (!s || s === '-') return '';
+	for (const [re, label] of SH_RELATE) if (re.test(s)) return label;
+	return s.length > 12 ? s.slice(0, 11) + '…' : s;
+}
+
+// 최신 연도 최대주주 개별 (역방향: 누가 이 회사를 소유하나) — ownership 과 별도 read·캐시(계약 비파괴).
+// 기관·법인·정부·자기주식 = 실명, 개인 = 익명 집계. 보통주 우선·의결권 없는 주식 배제·계행 제외.
+async function buildShareholders(code: string): Promise<ShareholdersView | null> {
+	const maj = await read('majorHolder', code, ['nm', 'relate', 'stock_knd', 'trmend_posesn_stock_qota_rt', 'trmend_posesn_stock_co']);
+	const byYear = bestQuarterRows(maj);
+	const latestYear = [...byYear.keys()].sort().pop();
+	if (!latestYear) return null;
+	const yrRows = byYear.get(latestYear)!.rows;
+	const isCommon = (r: Row) => str(r.stock_knd).includes('보통');
+	const hasCommon = yrRows.some(isCommon);
+	const pool = latestRcept(yrRows.filter(hasCommon ? isCommon : (r) => !str(r.stock_knd).includes('없')));
+	const isSum = (r: Row) => { const n = str(r.nm).trim(); return !n || n === '계' || n === '합계' || n === '소계' || n === '-'; };
+	const totalRow = pool.find((r) => str(r.nm).trim() === '계' && num(r.trmend_posesn_stock_qota_rt) != null);
+	const indiv = pool.filter((r) => !isSum(r) && num(r.trmend_posesn_stock_qota_rt) != null);
+	if (!indiv.length) return null;
+	const named: ShareholderRow[] = [];
+	let pc = 0;
+	let ps = 0;
+	let pn = 0;
+	for (const r of indiv) {
+		const ratio = num(r.trmend_posesn_stock_qota_rt);
+		const shares = num(r.trmend_posesn_stock_co);
+		const kind = classifyShareholder(str(r.nm).trim());
+		if (kind === 'person') {
+			pn++;
+			if (ratio != null) pc += ratio;
+			if (shares != null) ps += shares;
+		} else {
+			named.push({ name: str(r.nm).trim(), relate: canonRelate(str(r.relate)), ratio, shares, kind, code: null });
+		}
+	}
+	named.sort((a, b) => (b.ratio ?? 0) - (a.ratio ?? 0));
+	return {
+		year: latestYear,
+		named: named.slice(0, 12),
+		person: pn ? { count: pn, ratio: pc || null, shares: ps || null } : null,
+		totalPct: totalRow ? num(totalRow.trmend_posesn_stock_qota_rt) : null
+	};
 }
 
 async function buildExecBoard(code: string): Promise<ExecBoardYear[] | null> {

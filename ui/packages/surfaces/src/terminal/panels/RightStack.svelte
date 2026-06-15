@@ -10,6 +10,7 @@
 		ProductIndexItem,
 		RegularFiling,
 		ShareholderReturnYear,
+		ShareholdersView,
 		StmtKind,
 		TerminalFinanceBundle,
 		WorkforceYear
@@ -119,6 +120,7 @@
 		srs = [];
 		inv = null;
 		invTrend = [];
+		shareholders = null;
 		let cancelled = false;
 		rt.finance.bundle(code).then((b) => {
 			if (!cancelled) finBundle = b;
@@ -134,6 +136,9 @@
 			if (cancelled) return;
 			inv = b?.latest ?? null;
 			invTrend = b?.trend ?? [];
+		});
+		rt.report.shareholders(code).then((s) => {
+			if (!cancelled) shareholders = s;
 		});
 		rt.company.reportFacts(code).then((f) => {
 			if (cancelled) return;
@@ -186,6 +191,7 @@
 	let wf = $state<WorkforceYear[]>([]);
 	let srs = $state<ShareholderReturnYear[]>([]);
 	let inv = $state<InvestmentsView | null>(null);
+	let shareholders = $state<ShareholdersView | null>(null); // 역방향 소유 — 누가 이 회사를 소유하나(기관·법인 실명, 개인 익명)
 	let invTrend = $state<InvestmentTrendYear[]>([]); // 출자 추이 — 다이얼로그 보조(자본 잠김 방향)
 	const wfLast = $derived(wf.length ? wf[wf.length - 1] : null);
 	// 연간 매출(조) ÷ 인원 = 1인당 매출(억) — finBundle annual 과 연도 매칭 (추가 fetch 없음)
@@ -412,7 +418,7 @@
 <!-- 출자 관계 분석 전체화면 — 성격·위계 / 가치 / 효율 3축 진단 (lazy: 닫혀 있으면 청크 무증가) -->
 {#if holdingsOpen && inv}
 	{#await import('./HoldingsDialog.svelte') then { default: HoldingsDialog }}
-		<HoldingsDialog {co} year={inv.year} rows={inv.rows} trend={invTrend} {lang} {lookupListed} {onPick} onClose={() => (holdingsOpen = false)} />
+		<HoldingsDialog {co} year={inv.year} rows={inv.rows} trend={invTrend} {shareholders} {lang} {lookupListed} {onPick} onClose={() => (holdingsOpen = false)} />
 	{/await}
 {/if}
 

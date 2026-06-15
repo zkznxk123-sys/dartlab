@@ -35,6 +35,7 @@ import {
 	loadInvestments,
 	loadOwnership,
 	loadShareholderReturn,
+	loadShareholders,
 	loadTopExecPay,
 	loadWorkforce
 } from './sources/reportSource';
@@ -131,6 +132,7 @@ function publicReportPort(): ReportPort {
 		investments: loadInvestments,
 		shareholderReturn: loadShareholderReturn,
 		ownership: loadOwnership,
+		shareholders: loadShareholders,
 		execBoard: loadExecBoard,
 		debtProfile: loadDebtProfile,
 		capitalChanges: loadCapitalChanges,
