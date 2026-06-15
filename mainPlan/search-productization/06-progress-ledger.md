@@ -16,6 +16,7 @@
 7. 제품 졸업은 실제 query-log gold 통과 후에만.
 8. 전문 검토 결론: 본진 이식 착수는 가능하나 release graduation 은 실제 query-log gold 로 차단한다.
 9. HF 증분은 source별 catalog diff 로 간다. allFilings, panel, news 정상 갱신은 delta CSR 이며, full rebuild 는 schema/tokenizer/normalizer/sourceRef 의미 변경 때만 한다.
+10. 혁신 방향은 typed sourceRef graph, intent kernel, sparse-first hybrid, incremental knowledge fabric, quality flywheel 로 묶는다. 덕지덕지 mapper 와 새 public API 는 금지한다.
 
 ---
 
@@ -61,6 +62,7 @@
 - [x] 실제 데모 운영형 ceiling run 실행. 301579 docs, 300 queries, readyRate 0.9867, p95 157.9ms.
 - [ ] 실제 query-log gold 저장 위치와 review status 절차 확정.
 - [x] 전문 검토 반영: runtime/HF 증분/local-public-library/품질 gate 설계 문서화. (`07-specialist-review.md`, `08-completion-design.md`)
+- [x] 혁신 방향 문서화: 빠른 의미검색, sourceRef graph, intent kernel, 증분 운영, 덕지덕지 방지. (`09-innovation-roadmap.md`)
 - [x] 본진 이식 파일 지도 작성: planner/evidence/memory/sourcePolicy/test slots.
 - [ ] result schema 와 manifest/indexInfo 계약을 본진 변경 전 확정.
 - [ ] allFilings/panel/news catalog delta 설계를 `_attempts` 졸업 산출물과 맞춰 본진 이식 단위로 쪼갬.
