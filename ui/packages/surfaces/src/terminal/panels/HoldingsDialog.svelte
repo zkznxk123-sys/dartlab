@@ -34,22 +34,23 @@
 	let playing = $state(false);
 	interface TLEntry { year: string; quarter: string; label: string; fwdRows: InvestmentRow[]; sh: ShareholdersView | null; }
 	const timeline = $derived.by<TLEntry[]>(() => {
-		const fwd = new Map<string, InvestmentPeriod>();
-		for (const p of periods) fwd.set(p.year + '|' + p.quarter, p);
-		const rev = new Map<string, ShareholdersView>();
-		for (const s of shPeriods) rev.set(s.year + '|' + s.quarter, s);
+		// 타법인 출자(forward)가 주체 — forward 보고 기간만 타임라인. 1·3분기 보고서는 출자 상세가 비어(invValid 필터로 제외)
+		// periods 에 애초에 없으므로 빈 기간이 끼지 않는다. reverse(주주)는 같은 (year,quarter) exact → 없으면 같은 연도 best quarter 매칭.
+		const revAt = (year: string, quarter: string): ShareholdersView | null => {
+			const exact = shPeriods.find((s) => s.year === year && s.quarter === quarter);
+			if (exact) return exact;
+			return shPeriods.filter((s) => s.year === year).sort((a, b) => qr(b.quarter) - qr(a.quarter))[0] ?? null;
+		};
 		if (gran === 'quarter') {
-			const keys = new Set<string>([...fwd.keys(), ...rev.keys()]);
-			return [...keys]
-				.map((k) => { const [y, q] = k.split('|'); return { year: y, quarter: q, label: y + ' ' + q.replace('분기', 'Q'), fwdRows: fwd.get(k)?.rows ?? [], sh: rev.get(k) ?? null }; })
+			return periods
+				.map((p) => ({ year: p.year, quarter: p.quarter, label: p.year + ' ' + p.quarter.replace('분기', 'Q'), fwdRows: p.rows, sh: revAt(p.year, p.quarter) }))
 				.sort((a, b) => a.year.localeCompare(b.year) || qr(a.quarter) - qr(b.quarter));
 		}
-		const years = new Set<string>([...periods.map((p) => p.year), ...shPeriods.map((s) => s.year)]);
-		return [...years]
+		const years = [...new Set(periods.map((p) => p.year))];
+		return years
 			.map((y) => {
 				const f = periods.filter((p) => p.year === y).sort((a, b) => qr(b.quarter) - qr(a.quarter))[0];
-				const s = shPeriods.filter((x) => x.year === y).sort((a, b) => qr(b.quarter) - qr(a.quarter))[0];
-				return { year: y, quarter: f?.quarter ?? s?.quarter ?? '', label: y, fwdRows: f?.rows ?? [], sh: s ?? null };
+				return { year: y, quarter: f.quarter, label: y, fwdRows: f.rows, sh: revAt(y, f.quarter) };
 			})
 			.sort((a, b) => a.year.localeCompare(b.year));
 	});
