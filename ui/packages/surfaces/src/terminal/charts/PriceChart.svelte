@@ -41,8 +41,12 @@
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
 		onSrc?: (line: string) => void; // 출처(공공누리)를 차트 하단 대신 패널 헤더에 표기하도록 부모로 끌어올림(econ/adj 반응 유지)
+		// 차트 주체(subject) — 'price'=회사 주가(기본) · 'index'=KR gov/US FRED 지수(01). CenterStack-local 소유(ctl 미상향).
+		subject?: 'price' | 'index';
+		// US 지수(FRED 종가전용) = 라인 강제 + 고저 파생지표 degenerate. KR 지수·주가는 false (01 §3.6).
+		indexLine?: boolean;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, subject = 'price', indexLine = false }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 
@@ -217,6 +221,13 @@
 				];
 	// 'ha'(하이킨아시)는 데이터 변환(reapply) — klinecharts 캔들 타입으로는 candle_solid 로 그린다.
 	const kcCandleType = (t: CandleStyle) => (t === 'ha' ? 'candle_solid' : t);
+	// US 지수(종가전용) = 사용자 candleStyle 무시 'area'(라인) 강제. ctl.candleStyle 영속값 불변(2차 오염 0, 01 §3.6).
+	const effectiveCandleType = $derived(indexLine ? 'area' : kcCandleType(ctl.candleStyle));
+	// US 종가전용 degenerate 지표(고저 부재 → flat/0) — chip 비활성 + 이미 켜진 페인 능동 제거(01 §4.2).
+	const degenerateSubs = $derived(
+		indexLine ? new Set<SubKey>(['KDJ', 'CCI', 'WR', 'DMI', 'BRAR', 'AO', 'CR', 'VOL', 'TVAL', 'OBV', 'PVT', 'EMV', 'VR', 'AVP']) : new Set<SubKey>()
+	);
+	const degenerateOverlays = $derived(indexLine ? new Set<OverlayKey>(['ICHI']) : new Set<OverlayKey>());
 	// 차트 캔버스 활자 — 터미널 본체와 동일 스택. 기본 'Helvetica Neue' 는 한글이 없어 거래량
 	// 축의 만·억 이 시스템 폰트(맑은 고딕)로 폴백돼 숫자와 다른 활자·다른 덩치로 렌더됐다.
 	// 숫자 = JetBrains Mono(터미널 .mono 와 동일), 한글 = Pretendard 폴백으로 전 페인 통일.
@@ -224,7 +235,7 @@
 	const themeStyles = () => ({
 		grid: { horizontal: { color: 'rgba(48,58,78,0.55)' }, vertical: { color: 'rgba(38,46,62,0.3)' } },
 		candle: {
-			type: kcCandleType(ctl.candleStyle),
+			type: effectiveCandleType,
 			bar: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', upBorderColor: '#34d399', downBorderColor: '#f0616f', noChangeBorderColor: '#8b919e', upWickColor: '#5eead4', downWickColor: '#fb7185', noChangeWickColor: '#8b919e' },
 			area: { lineColor: '#5b9bf0', lineSize: 1.4, backgroundColor: [{ offset: 0, color: 'rgba(91,155,240,0.22)' }, { offset: 1, color: 'rgba(91,155,240,0.01)' }] },
 			priceMark: { high: { color: '#8b919e', textFamily: CHART_FONT }, low: { color: '#8b919e', textFamily: CHART_FONT }, last: { upColor: '#34d399', downColor: '#f0616f', noChangeColor: '#8b919e', text: { color: '#0b0e14', family: CHART_FONT } } },
@@ -316,7 +327,8 @@
 				const done = (rows: any[], more: boolean) => { try { p.callback(rows, more); } catch { /* */ } };
 				// ⚠ untrack 필수 — klinecharts 는 applyNewData 안에서 본 콜백을 동기 호출(backward)한다.
 				// 여기 상태 읽기가 reapply 를 부른 effect(회사전환 등)의 의존이 되면 유령 재실행 루프.
-				const s = untrack(() => ({ replayOn: ctl.replay.on, tf: ctl.tf }));
+				const s = untrack(() => ({ replayOn: ctl.replay.on, tf: ctl.tf, subj: subject }));
+				if (s.subj === 'index') return done([], false); // 지수 = series() 전이력 단발 로드 — 좌측 백필 없음(01 §6.6)
 				if (s.replayOn) return done([], false); // 리플레이 — 절단 시계열에 과거 prepend 금지
 				if (s.tf !== 'D') return done([], false);
 				if (p.type !== 'forward' || hist.loading) return done([], hist.oldestYear - 1 >= KRX_MIN_YEAR);
@@ -394,7 +406,7 @@
 			replayCutT = null;
 		}
 		publishView(view, toMs); // AVWAP·측정룰러가 구독하는 표시 시계열 버스 (원본 가격)
-		const out = untrack(() => ctl.candleStyle) === 'ha' ? heikinAshi(view) : view;
+		const out = !indexLine && untrack(() => ctl.candleStyle) === 'ha' ? heikinAshi(view) : view;
 		c.applyNewData(out.map(toK), !rp.on && tfv === 'D' && hist.oldestYear - 1 >= KRX_MIN_YEAR);
 		bumpDataRev();
 	}
@@ -543,7 +555,7 @@
 
 	// ── 매물대 토글 → VPVR indicator 생성/제거 (candle_pane, figures:[] = y축 무왜곡) ──
 	$effect(() => {
-		const on = ctl.showVP;
+		const on = ctl.showVP && subject !== 'index'; // 매물대 = 종목 호가 멘탈모델 전용 — 지수 무의미(01 §4.2)
 		const c = chart;
 		if (!c) return;
 		if (on && !vpOn) {
@@ -556,11 +568,12 @@
 
 	// 메인 오버레이 reconcile (다중 — candle_pane 스택). ICHI 활성 시 선행스팬용 우측 여백 확보.
 	$effect(() => {
-		const want = new Set(ctl.overlays);
+		const dgn = degenerateOverlays; // US 지수 ICHI degenerate 배제(01 §4.2)
+		const want = new Set(ctl.overlays.filter((k) => !dgn.has(k)));
 		const c = chart;
 		if (!c) return;
 		for (const k of [...mainOn]) if (!want.has(k)) { c.removeIndicator('candle_pane', k); mainOn.delete(k); delete appliedParams[k]; }
-		ctl.overlays.forEach((k) => {
+		want.forEach((k) => {
 			if (mainOn.has(k)) return;
 			// 커스텀 없으면 IND_DEFS 기본 명시 전달 — RSI 14 등 전문가 표준 교정값 적용
 			const cp = ctl.indParams[k] ?? (IND_DEFS[k]?.defaults.length ? IND_DEFS[k].defaults : undefined);
@@ -575,11 +588,12 @@
 
 	// 보조지표 페인 reconcile
 	$effect(() => {
-		const want = new Set(ctl.subs);
+		const dgn = degenerateSubs; // US 지수 degenerate 능동 배제 — chip 비활성만으론 이미 켜진 페인 잔존(01 §4.2 ★)
+		const want = new Set(ctl.subs.filter((k) => !dgn.has(k)));
 		const c = chart;
 		if (!c) return;
 		for (const [k, paneId] of [...subPanes]) if (!want.has(k)) { c.removeIndicator(paneId); subPanes.delete(k); delete appliedParams[k]; }
-		ctl.subs.forEach((k) => {
+		want.forEach((k) => {
 			if (subPanes.has(k)) return;
 			const cp = ctl.indParams[k] ?? (IND_DEFS[k]?.defaults.length ? IND_DEFS[k].defaults : undefined);
 			// 자릿수 통일 — 라이브러리 기본 precision 4(RSI 64.7436 류) 과잉. 수량 페인(VOL·TVAL·OBV·PVT)은
@@ -703,12 +717,13 @@
 	});
 	$effect(() => {
 		const t = ctl.candleStyle;
+		const eff = effectiveCandleType; // indexLine(US 지수) → 'area' 강제 (ctl.candleStyle 영속값 불변)
 		const lg = lang;
 		const c = chart;
 		if (!c) return;
-		try { c.setStyles({ candle: { type: kcCandleType(t), tooltip: { custom: tooltipCustom(lg) } } }); } catch { /* */ }
-		// HA ↔ 비HA 전환은 데이터 변환이 바뀌므로 재적용 (스냅샷 가드 — mount·단순 타입 전환은 스킵)
-		if (t !== appliedStyle) {
+		try { c.setStyles({ candle: { type: eff, tooltip: { custom: tooltipCustom(lg) } } }); } catch { /* */ }
+		// HA ↔ 비HA 전환만 데이터 재변환 (스냅샷 가드). US 지수(indexLine)는 HA 무의미 → 재적용 스킵.
+		if (!indexLine && t !== appliedStyle) {
 			const wasHa = appliedStyle === 'ha';
 			appliedStyle = t;
 			if (wasHa || t === 'ha') reapply(c);
@@ -734,7 +749,8 @@
 		void dataRev;
 		void ctl.period;
 		if (!c) return;
-		if (!key) {
+		// 지수 subject = 거래 대상 아님 — BT 비활성(btKey 보존, 종목 복귀 시 복원, 01 §4.3)
+		if (subject === 'index' || !key) {
 			clearBt(c);
 			btResult = null;
 			return;
@@ -1111,7 +1127,7 @@
 	{/if}
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
+		<ChartRibbon {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
 		<DrawToolbar {ctl} {lang} onDraw={startDraw} onClearDraw={clearDraw} />
 
 		{#if jumpOpen}
@@ -1186,7 +1202,7 @@
 			</div>
 		{/if}
 	{:else}
-		<ChartMenus {ctl} {lang} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartMenus {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 
 	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->

@@ -30,9 +30,12 @@
 		onReplay?: () => void; // 바 리플레이 진입 (시작점 환산은 PriceChart — viewLen 보유 주체)
 		onJump?: () => void; // 심볼 점프 팔레트 열기 (⌘K·/)
 		onHelp?: () => void; // 단축키 도움말 (?)
+		subject?: 'price' | 'index'; // 'index' = BT·매물대·VS 비활성(지수, 01 §4.2-4.3·§5.1)
+		indexLine?: boolean; // US 지수(종가전용) = candleStyle 'area' 고정(세그먼트 disabled, 01 §3.6)
 	}
-	let { ctl, lang, hasBand, name, code, info, notice = null, peers = [], cmpRows = [], railCatCounts = {}, canJump = false, onSnapshot, onReplay, onJump, onHelp }: Props = $props();
+	let { ctl, lang, hasBand, name, code, info, notice = null, peers = [], cmpRows = [], railCatCounts = {}, canJump = false, onSnapshot, onReplay, onJump, onHelp, subject = 'price', indexLine = false }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
+	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
 	const fmtN = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 0 });
 	const fmtD = (t: string) => `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}`;
 	const chg = $derived(info && info.prev ? ((info.last / info.prev) - 1) * 100 : null);
@@ -74,17 +77,17 @@
 		</div>
 		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'seg on' : 'seg'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</span></div>
 		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'seg on' : 'seg'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</span></div>
-		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each CANDLES as cs (cs.v)}<button class={ctl.candleStyle === cs.v ? 'seg on' : 'seg'} onclick={() => (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</span></div>
+		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each CANDLES as cs (cs.v)}<button class={styleShown === cs.v ? 'seg on' : 'seg'} disabled={indexLine} title={indexLine ? T('종가 전용 — 라인 고정', 'close-only — line') : ''} onclick={() => !indexLine && (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</span></div>
 		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each YMODES as y (y.v)}<button class={ctl.yMode === y.v ? 'seg on' : 'seg'} onclick={() => (ctl.yMode = y.v)}>{T(y.kr, y.en)}</button>{/each}</span></div>
 		<div class="crGrp">
 			<button class={ctl.adj ? 'cbtn tg on' : 'cbtn tg'} onclick={() => (ctl.adj = !ctl.adj)} title={T('수정주가 (분할·증자 보정)', 'adjusted price')}>{T('수정', 'ADJ')}</button>
 			<button class={ctl.showEvents ? 'cbtn tg on' : 'cbtn tg'} onclick={() => (ctl.showEvents = !ctl.showEvents)} title={T('실적 발표 마커', 'earnings markers')}>{T('실적', 'EARN')}</button>
 			<button class={ctl.showBand ? 'cbtn tg on' : 'cbtn tg'} disabled={!hasBand} onclick={() => hasBand && (ctl.showBand = !ctl.showBand)} title={T('적정주가 밴드', 'fair-value band')}>{T('밴드', 'BAND')}</button>
 			<button class={ctl.showRefs ? 'cbtn tg on' : 'cbtn tg'} onclick={() => (ctl.showRefs = !ctl.showRefs)} title={T('52주 고저·전일종가 기준선', '52w hi/lo · prev close')}>{T('기준', 'REF')}</button>
-			<button class={ctl.showVP ? 'cbtn tg on' : 'cbtn tg'} onclick={() => (ctl.showVP = !ctl.showVP)} title={T('매물대 (가시구간 거래대금 가중 + POC)', 'volume profile (visible range)')}>{T('매물대', 'VP')}</button>
+			<button class={ctl.showVP && subject !== 'index' ? 'cbtn tg on' : 'cbtn tg'} disabled={subject === 'index'} onclick={() => subject !== 'index' && (ctl.showVP = !ctl.showVP)} title={subject === 'index' ? T('지수는 매물대 없음', 'no volume profile for indices') : T('매물대 (가시구간 거래대금 가중 + POC)', 'volume profile (visible range)')}>{T('매물대', 'VP')}</button>
 		</div>
 		<div class="crGrp crPop">
-			<button class={ctl.compares.length ? 'cbtn tg on' : 'cbtn tg'} onclick={() => (pop = pop === 'vs' ? 'none' : 'vs')}>{T('종목비교', 'VS')} ▾</button>
+			<button class={ctl.compares.length && subject !== 'index' ? 'cbtn tg on' : 'cbtn tg'} disabled={subject === 'index'} onclick={() => subject !== 'index' && (pop = pop === 'vs' ? 'none' : 'vs')} title={subject === 'index' ? T('지수 비교는 추후', 'index compare later') : ''}>{T('종목비교', 'VS')} ▾</button>
 			{#if pop === 'vs'}
 				<div class="crMenu">
 					<div class="ctMenuLbl">{T('종목비교 (최대 3 · % 축 자동)', 'Compare (max 3 · % axis)')}</div>
@@ -219,7 +222,7 @@
 		<div class="crGrp crPop">
 			<!-- BT 는 일봉 전용 — disabled 로 막으면 봉주기 영속(주/월) 사용자가 "백테스트 고장"으로 오인.
 			     클릭 시 일봉 자동 전환 후 열기 (도구가 필요한 모드로 전환하는 HTS 관행). -->
-			<button class={ctl.btKey ? 'crChip on' : 'crAdd'} title={ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : ''} onclick={() => { if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } pop = pop === 'bt' ? 'none' : 'bt'; }}>
+			<button class={ctl.btKey && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : ''} onclick={() => { if (subject === 'index') return; if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } pop = pop === 'bt' ? 'none' : 'bt'; }}>
 				{ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : `＋ ${T('전략 백테스트', 'Backtest')}`}
 			</button>
 			{#if pop === 'bt'}<div class="crMenu crMenuR"><BtConfig {ctl} {lang} /></div>{/if}

@@ -1,5 +1,7 @@
 <script lang="ts">
-	import type { Candle, FinMode, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+	import { untrack } from 'svelte';
+	import type { Candle, FinMode, IndexRef, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+	import { KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts'; // 지수 picker(01) — KR 5·US 4 큐레이트
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang, Tone, Num } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
@@ -37,23 +39,65 @@
 	let chartCode = $state('');
 	let chartName = $state('');
 	let candleState = $state<'loading' | 'ready' | 'unavail'>('loading');
+	// 차트 주체(subject, 01) — 'price'=회사 주가 / 'index'=KR gov·US FRED 지수. CenterStack-local 소유(ctl 미상향, §2.5).
+	let subject = $state<'price' | 'index'>('price');
+	let indexRef = $state<IndexRef | null>(null);
+	const indexLine = $derived(subject === 'index' && indexRef?.market === 'US'); // US 지수=종가전용 라인(PriceChart 렌더 격리)
+	let pickerOpen = $state(false);
+	let idxQuery = $state('');
+	let idxResults = $state<IndexRef[]>([]);
+	let idxSearchToken = 0;
+	function onIdxSearch() {
+		const q = idxQuery.trim();
+		if (!q) { idxResults = []; return; }
+		const tk = ++idxSearchToken;
+		void rt.index.search(q, 12).then((rs) => { if (tk === idxSearchToken) idxResults = rs ?? []; });
+	}
+	function pickIndex(r: IndexRef) {
+		indexRef = r;
+		subject = 'index';
+		pickerOpen = false;
+		idxQuery = '';
+		idxResults = [];
+	}
+	const onPickWrapped = $derived(onPick ? (c: string) => { subject = 'price'; onPick?.(c); } : undefined); // 심볼 점프 = 회사 → 주가 주체 복귀
 	const priceYear = $derived(+co.price.asOf.slice(0, 4) || new Date().getFullYear());
 	$effect(() => {
+		const subj = subject;
+		const iref = indexRef;
 		const code = co.code;
 		const nm = co.name.kr;
 		const yr = priceYear;
 		candleState = 'loading';
 		let cancelled = false;
-		rt.price.initial(code, yr).then((r) => {
-			if (cancelled) return;
-			candles = r && r.candles.length ? r.candles : null;
-			chartCode = code;
-			chartName = nm;
-			candleState = r && r.candles.length ? 'ready' : 'unavail';
-		});
+		// 주체 분기 — 'index'면 KR gov/US FRED 지수 시계열(rt.index.series), 그 외 회사 주가(rt.price.initial).
+		// 소프트 스왑 동일: candles+chartCode+chartName 원자 갱신(PriceChart 인스턴스·전체화면 유지).
+		if (subj === 'index' && iref) {
+			rt.index.series(iref).then((cs) => {
+				if (cancelled) return;
+				candles = cs && cs.length ? cs : null;
+				chartCode = iref.code;
+				chartName = iref.name;
+				candleState = cs && cs.length ? 'ready' : 'unavail';
+			});
+		} else {
+			rt.price.initial(code, yr).then((r) => {
+				if (cancelled) return;
+				candles = r && r.candles.length ? r.candles : null;
+				chartCode = code;
+				chartName = nm;
+				candleState = r && r.candles.length ? 'ready' : 'unavail';
+			});
+		}
 		return () => {
 			cancelled = true;
 		};
+	});
+
+	// 회사 전환 = 그 회사 주가로 복귀 — 지수 주체는 center-local 이라 회사 바뀌면 해제(클릭한 회사가 안 보이는 혼동 차단).
+	$effect(() => {
+		void co.code; // 회사 전환 추적
+		untrack(() => { subject = 'price'; pickerOpen = false; }); // subject 읽기 의존 차단(자기루프 방지) — mount 시 'price' 재설정은 no-op
 	});
 
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
@@ -364,13 +408,50 @@
 {#if gradeOpen}<GradeExplainDialog {co} {lang} onClose={() => (gradeOpen = false)} />{/if}
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
-<Panel {lang} className="eQuant" prov="real" title={{ kr: '주가 차트', en: 'PRICE CHART' }} sub={chartSrcLine ? { kr: chartSrcLine, en: chartSrcLine } : { kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' }} flush>
-	{#snippet right()}<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>{/snippet}
+<Panel {lang} className="eQuant" prov="real"
+	title={{ kr: subject === 'index' ? '지수 차트' : '주가 차트', en: subject === 'index' ? 'INDEX CHART' : 'PRICE CHART' }}
+	sub={subject === 'index'
+		? (indexRef?.market === 'US' ? { kr: '미국 지수 · FRED (종가)', en: 'US index · FRED (close)' } : { kr: 'KR 지수 · 거래소 (EOD)', en: 'KR index · KRX (EOD)' })
+		: (chartSrcLine ? { kr: chartSrcLine, en: chartSrcLine } : { kr: '공공데이터 일별 · EOD', en: 'gov daily · EOD' })} flush>
+	{#snippet right()}
+		<!-- 주체 토글(안3) — 회사 주가 ↔ KR gov/US FRED 지수. 지수 선택 시 picker(안4: 큐레이트 9 + 검색). -->
+		<span class="segGroup mini idxToggle">
+			<button class={subject === 'price' ? 'seg on' : 'seg'} onclick={() => (subject = 'price')}>{lang === 'en' ? 'Price' : '주가'}</button>
+			<button class={subject === 'index' ? 'seg on' : 'seg'} onclick={() => { subject = 'index'; if (!indexRef) indexRef = KR_INDEX_PRESETS[0]; }}>{lang === 'en' ? 'Index' : '지수'}</button>
+		</span>
+		{#if subject === 'index'}
+			<div class="idxPick">
+				<button class="idxPickBtn" onclick={() => (pickerOpen = !pickerOpen)} title={lang === 'en' ? 'choose index' : '지수 선택'}>{indexRef?.name ?? (lang === 'en' ? 'choose' : '선택')} ▾</button>
+				{#if pickerOpen}
+					<div class="idxMenu">
+						<input class="idxSearch mono" placeholder={lang === 'en' ? 'search index…' : '지수 검색…'} bind:value={idxQuery} oninput={onIdxSearch} />
+						{#if idxResults.length}
+							<div class="idxGrp">{#each idxResults as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}<span class="idxMkt">{r.market}</span></button>{/each}</div>
+						{:else}
+							<div class="idxGrpLbl">{lang === 'en' ? 'Korea' : '한국'}</div>
+							<div class="idxGrp">{#each KR_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
+							<div class="idxGrpLbl">{lang === 'en' ? 'US' : '미국'}</div>
+							<div class="idxGrp">{#each US_INDEX_PRESETS as r (r.code)}<button class={indexRef?.code === r.code ? 'idxItem on' : 'idxItem'} onclick={() => pickIndex(r)}>{r.name}</button>{/each}</div>
+						{/if}
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<span class="eodBadge" title={lang === 'en' ? 'end-of-day daily data' : '일별 종가 기준(EOD)'}>EOD · {dispAsOf}</span>
+		{/if}
+	{/snippet}
 	{#if candles && chartCode}
-		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신) -->
-		<PriceChart {candles} code={chartCode} name={chartName} {lang} events={priceEvents} disclosures={disclosureEvents} valBand={priceValBand} peers={chartPeers} {suggest} {onPick} onSrc={(s) => (chartSrcLine = s)} />
+		<!-- 소프트 스왑: 전환 중에도 직전 캔들로 마운트 유지 (code·name 은 candles 와 원자 갱신). 지수 주체면 회사 오버레이(공시·실적·밴드·피어) 비움. -->
+		<PriceChart {candles} code={chartCode} name={chartName} {lang} {subject} {indexLine}
+			events={subject === 'index' ? [] : priceEvents}
+			disclosures={subject === 'index' ? [] : disclosureEvents}
+			valBand={subject === 'index' ? null : priceValBand}
+			peers={subject === 'index' ? [] : chartPeers}
+			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} />
 	{:else if candleState === 'loading'}
-		<div class="chartLoad">{lang === 'en' ? 'loading daily prices …' : '일별 시세 불러오는 중 …'}</div>
+		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>
+	{:else if subject === 'index'}
+		<div class="chartLoad">{lang === 'en' ? 'index series unavailable.' : '지수 시계열을 불러올 수 없음.'}</div>
 	{:else}
 		<div class="chartLoad">{lang === 'en' ? 'daily chart unavailable here — snapshot only.' : '이 기기에서 일별 차트 불가 — 스냅샷만.'} 52W {fmtNum(co.price.lo52)}~{fmtNum(co.price.hi52)}</div>
 	{/if}

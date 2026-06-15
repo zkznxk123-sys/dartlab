@@ -18,9 +18,12 @@
 		onDraw: (name: string) => void;
 		onClearDraw: () => void;
 		onSnapshot?: () => void; // PNG 저장 — 전체화면 전용 잠금 해제 (발견성)
+		subject?: 'price' | 'index'; // 'index' = BT·매물대 비활성(지수는 거래 대상 아님, 01 §4.2-4.3)
+		indexLine?: boolean; // US 지수(종가전용) = candleStyle 'area' 고정(세그먼트 disabled, 01 §3.6)
 	}
-	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot }: Props = $props();
+	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
+	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
 	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt' | 'rail'>('none');
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
 	const hasParams = (k: string) => (IND_DEFS[k]?.params.length ?? 0) > 0;
@@ -98,11 +101,11 @@
 		{#if menu === 'view'}
 			<div class="ctMenu">
 				<div class="ctMenuLbl">{T('캔들', 'Candle')}</div>
-				<div class="ctRow">{#each CANDLES as cs (cs.v)}<button class={ctl.candleStyle === cs.v ? 'mItem on' : 'mItem'} onclick={() => (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</div>
+				<div class="ctRow">{#each CANDLES as cs (cs.v)}<button class={styleShown === cs.v ? 'mItem on' : 'mItem'} disabled={indexLine} title={indexLine ? T('종가 전용 — 라인 고정', 'close-only — line') : ''} onclick={() => !indexLine && (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</div>
 				<div class="ctMenuLbl">{T('Y축', 'Y axis')}</div>
 				<div class="ctRow">{#each YMODES as y (y.v)}<button class={ctl.yMode === y.v ? 'mItem on' : 'mItem'} onclick={() => (ctl.yMode = y.v)}>{T(y.kr, y.en)}</button>{/each}</div>
 				<div class="ctMenuLbl">{T('가격', 'Price')}</div>
-				<div class="ctRow"><button class={ctl.adj ? 'mItem on' : 'mItem'} onclick={() => (ctl.adj = !ctl.adj)}>{T('수정주가', 'Adjusted')}</button><button class={ctl.showRefs ? 'mItem on' : 'mItem'} onclick={() => (ctl.showRefs = !ctl.showRefs)}>{T('52주·전일 기준선', '52w/prev refs')}</button><button class={ctl.showVP ? 'mItem on' : 'mItem'} onclick={() => (ctl.showVP = !ctl.showVP)}>{T('매물대', 'Vol Profile')}</button></div>
+				<div class="ctRow"><button class={ctl.adj ? 'mItem on' : 'mItem'} onclick={() => (ctl.adj = !ctl.adj)}>{T('수정주가', 'Adjusted')}</button><button class={ctl.showRefs ? 'mItem on' : 'mItem'} onclick={() => (ctl.showRefs = !ctl.showRefs)}>{T('52주·전일 기준선', '52w/prev refs')}</button><button class={ctl.showVP && subject !== 'index' ? 'mItem on' : 'mItem'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 매물대 없음', 'no volume profile for indices') : ''} onclick={() => subject !== 'index' && (ctl.showVP = !ctl.showVP)}>{T('매물대', 'Vol Profile')}</button></div>
 				<div class="ctMenuLbl">{T('마커', 'Markers')}</div>
 				<div class="ctRow"><button class={ctl.showEvents ? 'mItem on' : 'mItem'} onclick={() => (ctl.showEvents = !ctl.showEvents)}>{T('실적 발표', 'Earnings')}</button><button class={ctl.showBand ? 'mItem on' : 'mItem'} disabled={!hasBand} onclick={() => hasBand && (ctl.showBand = !ctl.showBand)}>{T('적정주가 밴드', 'Fair band')}</button></div>
 			</div>
@@ -126,7 +129,7 @@
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={ctl.btKey ? 'chartTool on' : 'chartTool'} onclick={() => { if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } menu = menu === 'bt' ? 'none' : 'bt'; }} title={ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
+		<button class={ctl.btKey && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } menu = menu === 'bt' ? 'none' : 'bt'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
 		{#if menu === 'bt'}
 			<div class="ctMenu"><BtConfig {ctl} {lang} /></div>
 		{/if}
