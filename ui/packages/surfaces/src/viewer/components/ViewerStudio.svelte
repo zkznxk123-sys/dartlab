@@ -476,7 +476,7 @@
 			<button type="button" class="fs-btn ask-trigger" class:active={askOpen} onclick={openAsk} title="AI 공시 Q&A — 근거 검색 + 즉시 답(다운로드 0)">
 				<picture><source srcset="{basePath}/avatar-detective.webp" type="image/webp" /><img class="ask-ava" src="{basePath}/avatar-detective.png" alt="" width="16" height="16" /></picture> AI
 			</button>
-			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/개별)">
+			<button type="button" class="fs-btn" onclick={() => (financeOpen = true)} title="재무제표 정량 (IS/BS/CF/CIS/자본변동 · 연결/별도)">
 				<Table2 size={13} /> 재무제표(정량)
 			</button>
 			{#if bundle && !compareMode}

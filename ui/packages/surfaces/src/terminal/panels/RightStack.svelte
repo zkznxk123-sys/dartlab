@@ -335,7 +335,7 @@
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
-		<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'quantitative statements (viewer dialog)' : '정량재무제표 — 공시뷰어와 동일 (IS/BS/CF/CIS/자본변동 · 연결/개별)'}>⤢</button>
+		<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'quantitative statements (viewer dialog)' : '정량재무제표 — 공시뷰어와 동일 (IS/BS/CF/CIS/자본변동 · 연결/별도)'}>⤢</button>
 	{/snippet}
 	<div class="finTabs">{#each tabs as t (t.k)}<button class={'finTab ' + (stmt === t.k ? 'on' : '')} onclick={() => (stmt = t.k)}>{lang === 'en' ? t.en : t.kr}</button>{/each}</div>
 	{#if finView}

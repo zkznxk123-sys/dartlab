@@ -155,19 +155,14 @@ function loadRows(code: string): Promise<RawRow[] | null> {
 	return p;
 }
 
-// 범위별 최신 보고 시점(year*10+q) — 기본 범위 선택용. 데이터 없으면 -1.
-// 연결을 중단하고 별도만 내는 회사(예: 종속회사 정리)에서 최신 데이터가 있는 쪽을 기본으로 연다.
-function scopeLatest(rows: RawRow[], fs: FinScope): number {
-	let best = -1;
+// 범위에 파싱 가능한 데이터(분기·금액)가 있는지 — 가용 범위 판정용.
+function scopeHasData(rows: RawRow[], fs: FinScope): boolean {
 	for (const r of rows) {
 		if ((r.fs_div || '') !== fs) continue;
-		const q = Q_BY_CODE[String(r.reprt_code || '')];
-		const y = Number(r.bsns_year);
-		if (!q || !Number.isFinite(y) || num(r.thstrm_amount) == null) continue;
-		const pk = y * 10 + q;
-		if (pk > best) best = pk;
+		if (!Q_BY_CODE[String(r.reprt_code || '')] || !Number.isFinite(Number(r.bsns_year)) || num(r.thstrm_amount) == null) continue;
+		return true;
 	}
-	return best;
+	return false;
 }
 
 export function loadTerminalFinance(stockCode: string, scope?: FinScope): Promise<TerminalFinanceBundle | null> {
@@ -176,11 +171,10 @@ export function loadTerminalFinance(stockCode: string, scope?: FinScope): Promis
 	return (async () => {
 		const rows = await loadRows(code);
 		if (!rows) return null;
-		const latest: Record<FinScope, number> = { CFS: scopeLatest(rows, 'CFS'), OFS: scopeLatest(rows, 'OFS') };
-		const avail: FinScope[] = (['CFS', 'OFS'] as FinScope[]).filter((s) => latest[s] >= 0);
+		const avail: FinScope[] = (['CFS', 'OFS'] as FinScope[]).filter((s) => scopeHasData(rows, s));
 		if (avail.length === 0) return null;
-		// 기본 = 최신 데이터가 있는 범위(동률·단독은 연결 우선). 지정 + 가용 시 그대로.
-		const fallback: FinScope = latest.OFS > latest.CFS ? 'OFS' : 'CFS';
+		// 기본 = 연결 우선(최신성보다 우선) — 연결이 있으면 옛 분기여도 연결, 연결이 아예 없을 때만 별도. 지정 + 가용 시 그대로.
+		const fallback: FinScope = avail.includes('CFS') ? 'CFS' : 'OFS';
 		const useScope: FinScope = scope && avail.includes(scope) ? scope : fallback;
 		const ck = `${code}:${useScope}`;
 		let bp = bundleCache.get(ck);

@@ -2,7 +2,7 @@
 
 export type FinanceKind = 'IS' | 'BS' | 'CF' | 'CIS' | 'SCE'; // 손익·재무상태·현금흐름·포괄손익·자본변동
 export type FinanceFreq = 'annual' | 'quarter' | 'cumulative'; // 연간 / 분기(단독) / 누적(YTD)
-export type FinanceScope = 'CFS' | 'OFS'; // 연결 / 개별(별도)
+export type FinanceScope = 'CFS' | 'OFS'; // 연결 / 별도
 
 export interface FinanceStmtRow {
 	accountId: string; // account_id (기간 정합 pivot 키)
@@ -39,7 +39,7 @@ export const KIND_LABELS: Record<FinanceKind, string> = {
 	SCE: '자본변동표'
 };
 export const FREQ_LABELS: Record<FinanceFreq, string> = { annual: '연간', quarter: '분기', cumulative: '누적' };
-export const SCOPE_LABELS: Record<FinanceScope, string> = { CFS: '연결', OFS: '개별' };
+export const SCOPE_LABELS: Record<FinanceScope, string> = { CFS: '연결', OFS: '별도' };
 
 // 단위 스케일 — 큰 금액 가독성. 백만원 기본(대기업 표준).
 export type FinanceUnit = '원' | '백만' | '억';
