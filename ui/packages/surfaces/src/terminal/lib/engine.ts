@@ -420,7 +420,7 @@ export function createEngine(raw: RawData): Engine {
 		};
 		// 히스토그램은 모든 유니버스에서 *실제 peer 값 배열*로 산출(industryStats 보간 아님 → 더 정직). hot path(co.percentile)는 withHist=false 로 생략.
 		const mk = (kr: string, en: string, axis: string, field: keyof EcoNode, unit: string, lower?: boolean): PercentileMetric | { p: null } => ({
-			kr, en, axis, unit, v: node[field] as Num ?? null, p: pctRank(col(field), (node[field] as Num) ?? null, lower),
+			kr, en, axis, unit, lowerBetter: !!lower, v: node[field] as Num ?? null, p: pctRank(col(field), (node[field] as Num) ?? null, lower),
 			band: bandOf(field), hist: withHist ? histOf(col(field), (node[field] as Num) ?? null) : null
 		});
 		return [

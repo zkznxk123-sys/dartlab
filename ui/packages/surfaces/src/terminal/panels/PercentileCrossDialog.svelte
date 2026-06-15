@@ -96,8 +96,8 @@
 			{:else}
 				<!-- 정량 격자: 행=지표 × 열=유니버스 *분포곡선*(동종사 밀집 위치 + 이 회사 마커). 막대 아닌 분포가 1차 시각. 업종(앵커) 좌측 강조. -->
 				<div class="pcxLegend">{lang === 'en'
-					? 'bars = peer distribution / count (taller = more peers in that range, p2–p98) · vertical line = this company · dashed = median · ⇄ = rank flips by universe'
-					: '막대 = 동종사 분포(높을수록 그 구간에 많이 몰림, p2~p98) · 세로 실선 = 이 회사 · 점선 = 중앙값 · ⇄ = 잣대 따라 순위 뒤집힘'}</div>
+					? 'bars = peer count (taller = more peers, p2–p98) · ▼ pin = this company · dashed = median · bottom strip: green side = better direction (not for price) · ⇄ = rank flips by universe'
+					: '막대 = 동종사 수(높을수록 많이 몰림, p2~p98) · ▼ 핀 = 이 회사 · 점선 = 중앙값 · 하단 색띠: 초록 쪽 = 좋은 방향(가격 제외) · ⇄ = 잣대 따라 순위 뒤집힘'}</div>
 				<!-- 컬럼 헤더 — pcxBody 직속 + sticky 라 정성/가격까지 스크롤해도 유니버스 열이 상단 고정. -->
 				<div class="pcxHead">
 					<span class="pcxNameH">{lang === 'en' ? 'metric · value' : '지표 · 값'}</span>
@@ -119,7 +119,7 @@
 									{#if d.n < MIN_N}
 										<span class="pcxThin">{lang === 'en' ? 'n<10' : '표본부족'}</span>
 									{:else if m && m.p != null && (m.hist || m.band)}
-										<span class="pcxCurve"><DistCurve hist={m.hist} band={m.band} value={m.v} p={m.p} unit={m.unit} {lang} h={36} /></span>
+										<span class="pcxCurve"><DistCurve hist={m.hist} band={m.band} value={m.v} p={m.p} unit={m.unit} {lang} h={36} /><span class="pcxDir" class:low={m.lowerBetter}></span></span>
 										<span class="pcxP" style={`color:${pcCol(m.p)}`}>{topPct(m.p)}</span>
 									{:else if m && m.p != null}
 										<span class="pcxTrack"><span class="pcxFill" style={`width:${m.p}%;background:${pcCol(m.p)}`}></span></span>
@@ -328,10 +328,24 @@
 		gap: 1px;
 		min-width: 0;
 	}
-	/* 분포 곡선 = 1차 시각(동종사 밀집 + 회사 마커). DistCurve 가 width:100% 로 셀 채움. */
+	/* 분포 히스토그램 = 1차 시각(동종사 밀집 + 회사 핀). DistCurve 가 width:100% 로 셀 채움. */
 	.pcxCurve {
+		position: relative;
 		width: 100%;
 		line-height: 0;
+	}
+	/* 하단 0라인 방향 색띠 — 초록 쪽 = 좋은 방향(지표 의미). 회사 핀이 이 띠 위 어디에 있는지로 좋고나쁨이 와닿음. */
+	.pcxDir {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 3px;
+		border-radius: 1px;
+		background: linear-gradient(to right, rgba(248, 81, 73, 0.5), rgba(210, 153, 34, 0.32), rgba(63, 185, 80, 0.5));
+	}
+	.pcxDir.low {
+		background: linear-gradient(to right, rgba(63, 185, 80, 0.5), rgba(210, 153, 34, 0.32), rgba(248, 81, 73, 0.5));
 	}
 	.pcxNoDist {
 		font-style: italic;

@@ -275,6 +275,7 @@ export interface PercentileMetric {
 	p: number;
 	unit: string;
 	axis: string; // 등급축 key(prof/growth/stab/liq/qual/eff) — 등급기준 섹션·중간패널 그루핑용.
+	lowerBetter?: boolean; // 낮을수록 우수(부채비율·CCC·발생액비율) — 방향 색띠(좋은 쪽) 좌우 결정용.
 	// 업종 분포 밴드(industryStats) — public 만 실데이터, local(단일사 seed)·분포 부재 = null(다이얼로그 생략).
 	// p10~p90 5분위점 = 분포곡선(skew 반영, 정규가정 아님)·회사 위치 마커 렌더용.
 	band: { p10: number; p25: number; median: number; p75: number; p90: number } | null;

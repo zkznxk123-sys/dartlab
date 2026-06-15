@@ -94,7 +94,9 @@
 		<line class="dcMed" x1={medX} x2={medX} y1={PAD} y2={H - PAD} vector-effect="non-scaling-stroke" />
 	{/if}
 	{#if markX != null}
-		<line class={'dcMark ' + tone} x1={markX} x2={markX} y1="0" y2={H} vector-effect="non-scaling-stroke" />
+		<line class={'dcMark ' + tone} x1={markX} x2={markX} y1="5" y2={H} vector-effect="non-scaling-stroke" />
+		<!-- 꼭지(핀) — "여기가 이 회사" 가 박히도록 마커 상단에 삼각 헤드. -->
+		<path class={'dcPin ' + tone} d={`M ${(markX - 3.2).toFixed(1)} 0 L ${(markX + 3.2).toFixed(1)} 0 L ${markX.toFixed(1)} 5.5 Z`} />
 	{/if}
 </svg>
 
@@ -135,5 +137,17 @@
 	}
 	.dcMark.neu {
 		stroke: rgba(160, 168, 179, 0.9);
+	}
+	.dcPin.up {
+		fill: #3fb950;
+	}
+	.dcPin.dn {
+		fill: #f85149;
+	}
+	.dcPin.mid {
+		fill: #d29922;
+	}
+	.dcPin.neu {
+		fill: rgba(160, 168, 179, 0.95);
 	}
 </style>
