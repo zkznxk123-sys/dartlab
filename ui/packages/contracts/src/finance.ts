@@ -34,6 +34,7 @@ export interface StmtRow {
 
 export type StmtKind = 'IS' | 'BS' | 'CF';
 export type FinMode = 'annual' | 'quarter' | 'ttm';
+export type FinScope = 'CFS' | 'OFS'; // 연결(CFS) / 별도(OFS)
 
 export interface TerminalFinance {
 	periods: string[]; // 압축 라벨 ('23Q4' · 'FY23')
@@ -48,6 +49,8 @@ export interface TerminalFinance {
 }
 
 export interface TerminalFinanceBundle {
+	scope: FinScope; // 이 번들이 담은 범위 (연결/별도)
+	availScopes: FinScope[]; // 회사가 실제 보고한 범위 — 2개면 연결/별도 토글 노출
 	modes: FinMode[]; // 데이터상 가능한 모드 (분기 없으면 annual 만)
 	views: Record<FinMode, TerminalFinance | null>;
 	defaultMode: FinMode;
@@ -55,6 +58,6 @@ export interface TerminalFinanceBundle {
 }
 
 export interface FinancePort {
-	/** 재무 번들 — 미존재 회사/무데이터는 null. (export 등 추가 표면은 단계-8 전 확정) */
-	bundle(code: string): Promise<TerminalFinanceBundle | null>;
+	/** 재무 번들 — 미존재 회사/무데이터는 null. scope 미지정 = 최신 데이터가 있는 범위 자동 선택. */
+	bundle(code: string, scope?: FinScope): Promise<TerminalFinanceBundle | null>;
 }

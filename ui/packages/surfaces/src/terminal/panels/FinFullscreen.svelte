@@ -3,7 +3,7 @@
 	// 종합 탭 = 기존 16 재무카드 전부(기본적으로 다 보이게). 나머지 탭 = finance 심화 카드
 	// (terminalFinance.tabCards, 모드 토글 동작) + report·교차 카드(finTabs.ts, 연 축 고정, lazy).
 	import { untrack } from 'svelte';
-	import type { AuditYear, Candle, FinMode, OwnershipYear, ShareholderReturnYear, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
+	import type { AuditYear, Candle, FinMode, FinScope, OwnershipYear, ShareholderReturnYear, TerminalFinanceBundle, TopExecPay } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang } from '../lib/types';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
@@ -17,10 +17,12 @@
 		bundle: TerminalFinanceBundle | null;
 		mode: FinMode;
 		onMode: (m: FinMode) => void;
+		onScope: (s: FinScope) => void; // 연결/별도 전환 — 호출측(CenterStack)이 번들 재조회
 		candles: Candle[] | null; // 가격↔기초체력 오버레이용 (CenterStack 로드분 — 소프트스왑 가드 후 주입)
 		onClose: () => void;
 	}
-	let { co, lang, bundle, mode, onMode, candles, onClose }: Props = $props();
+	let { co, lang, bundle, mode, onMode, onScope, candles, onClose }: Props = $props();
+	const finScopeLabel = (s: FinScope): string => (s === 'CFS' ? (lang === 'en' ? 'CONS' : '연결') : lang === 'en' ? 'SEP' : '별도');
 	const rt = useDartLabRuntime();
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
 
@@ -137,6 +139,9 @@
 				<button class={'finFsTab ' + (tab === t.key ? 'on' : '')} onclick={() => (tab = t.key)}>{lang === 'en' ? t.label.en : t.label.kr}</button>
 			{/each}
 		</nav>
+		{#if bundle && bundle.availScopes.length > 1}
+			<span class="segGroup mini">{#each bundle.availScopes as s (s)}<button class={bundle.scope === s ? 'seg on' : 'seg'} onclick={() => onScope(s)} title={s === 'CFS' ? (lang === 'en' ? 'consolidated' : '연결재무제표') : (lang === 'en' ? 'separate' : '별도재무제표')}>{finScopeLabel(s)}</button>{/each}</span>
+		{/if}
 		{#if (tab === 'all' || tab === 'price' || activeDef?.finKey) && bundle && bundle.modes.length > 1}
 			<span class="segGroup mini">{#each bundle.modes as m (m)}<button class={mode === m ? 'seg on' : 'seg'} onclick={() => onMode(m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}

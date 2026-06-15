@@ -3,7 +3,7 @@
 // src/dartlab/viz/display/finance/accounts.py(_STANDARDS) 포팅. 분기 누적(YTD)→TTM 환산.
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
 // 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
-import type { FinCard, FinMode, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+import type { FinCard, FinMode, FinScope, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
 import { readParquetRows } from '../../../data/hfRange';
 
 const browser = typeof window !== 'undefined';
@@ -133,26 +133,63 @@ const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_yea
 
 // 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = 분기 (계약 FinMode·번들 정의는 contracts).
 
-// in-flight Promise 캐시 — CenterStack·RightStack 가 같은 회사 재무를 동시 호출해도
-// 다운로드는 1 회만(중복 fetch 경쟁 제거). 해소 후엔 같은 Promise 가 즉시 resolve.
-const cache = new Map<string, Promise<TerminalFinanceBundle | null>>();
+// raw 행 캐시 — 연결(CFS)·별도(OFS)는 같은 parquet 안이라, 범위 토글 시 재다운로드 0.
+// CenterStack·RightStack 동시 호출도 다운로드 1 회만(중복 fetch 경쟁 제거).
+const rowsCache = new Map<string, Promise<RawRow[] | null>>();
+// (code, scope) 빌드 결과 캐시 — 같은 회사·범위 재요청은 즉시 resolve.
+const bundleCache = new Map<string, Promise<TerminalFinanceBundle | null>>();
 
-export function loadTerminalFinance(stockCode: string): Promise<TerminalFinanceBundle | null> {
-	if (!browser) return Promise.resolve(null);
-	const code = stockCode.trim();
-	const hit = cache.get(code);
+function loadRows(code: string): Promise<RawRow[] | null> {
+	const hit = rowsCache.get(code);
 	if (hit) return hit;
 	const p = (async () => {
 		try {
 			const { rows } = await readParquetRows<RawRow>(`dart/finance/${code}.parquet`, { columns: FINANCE_COLUMNS });
-			return buildBundle(rows);
+			return rows;
 		} catch (e) {
 			console.warn('[terminal/finance] load failed', code, e);
 			return null;
 		}
 	})();
-	cache.set(code, p);
+	rowsCache.set(code, p);
 	return p;
+}
+
+// 범위별 최신 보고 시점(year*10+q) — 기본 범위 선택용. 데이터 없으면 -1.
+// 연결을 중단하고 별도만 내는 회사(예: 종속회사 정리)에서 최신 데이터가 있는 쪽을 기본으로 연다.
+function scopeLatest(rows: RawRow[], fs: FinScope): number {
+	let best = -1;
+	for (const r of rows) {
+		if ((r.fs_div || '') !== fs) continue;
+		const q = Q_BY_CODE[String(r.reprt_code || '')];
+		const y = Number(r.bsns_year);
+		if (!q || !Number.isFinite(y) || num(r.thstrm_amount) == null) continue;
+		const pk = y * 10 + q;
+		if (pk > best) best = pk;
+	}
+	return best;
+}
+
+export function loadTerminalFinance(stockCode: string, scope?: FinScope): Promise<TerminalFinanceBundle | null> {
+	if (!browser) return Promise.resolve(null);
+	const code = stockCode.trim();
+	return (async () => {
+		const rows = await loadRows(code);
+		if (!rows) return null;
+		const latest: Record<FinScope, number> = { CFS: scopeLatest(rows, 'CFS'), OFS: scopeLatest(rows, 'OFS') };
+		const avail: FinScope[] = (['CFS', 'OFS'] as FinScope[]).filter((s) => latest[s] >= 0);
+		if (avail.length === 0) return null;
+		// 기본 = 최신 데이터가 있는 범위(동률·단독은 연결 우선). 지정 + 가용 시 그대로.
+		const fallback: FinScope = latest.OFS > latest.CFS ? 'OFS' : 'CFS';
+		const useScope: FinScope = scope && avail.includes(scope) ? scope : fallback;
+		const ck = `${code}:${useScope}`;
+		let bp = bundleCache.get(ck);
+		if (!bp) {
+			bp = Promise.resolve(buildBundle(rows, useScope, avail));
+			bundleCache.set(ck, bp);
+		}
+		return bp;
+	})();
 }
 
 // ── SCE(자본변동표) 브리지 — 최신 연간(11011)·최신 rcept_no 의 합계 차원에서
@@ -215,10 +252,7 @@ function buildSceBridge(rows: RawRow[], fs: string, ociFromCis: (year: number) =
 	return { key: 'sceBridge', title: `자본변동 브리지 · FY${String(year).slice(2)}`, unit: '조', kind: 'waterfall', steps, series: [] };
 }
 
-function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
-	// fs_div 선호: CFS(연결) → 없으면 OFS(별도)
-	const hasCfs = rows.some((r) => (r.fs_div || '') === 'CFS');
-	const fs = hasCfs ? 'CFS' : 'OFS';
+function buildBundle(rows: RawRow[], fs: FinScope, availScopes: FinScope[]): TerminalFinanceBundle | null {
 	// 손익 출처: IS(별도 손익계산서) 있으면 IS, 없으면 CIS(단일 포괄손익계산서·카카오류) 를 IS 로 채택.
 	const incomeSrc = rows.some((r) => (r.fs_div || '') === fs && r.sj_div === 'IS') ? 'IS' : 'CIS';
 	const parsed: Parsed[] = [];
@@ -781,5 +815,5 @@ function buildBundle(rows: RawRow[]): TerminalFinanceBundle | null {
 	if (modes.length === 0) return null;
 	const defaultMode: FinMode = views.quarter ? 'quarter' : views.annual ? 'annual' : modes[0]!; // 윗줄 length 가드로 항상 존재
 
-	return { modes, views, defaultMode, filedDates };
+	return { scope: fs, availScopes, modes, views, defaultMode, filedDates };
 }

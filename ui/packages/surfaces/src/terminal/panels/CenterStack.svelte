@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import type { Candle, FinMode, IndexRef, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+	import type { Candle, FinMode, FinScope, IndexRef, ProductIndexItem, TerminalFinanceBundle } from '@dartlab/ui-contracts';
 	import { KR_INDEX_PRESETS, US_INDEX_PRESETS } from '@dartlab/ui-contracts'; // 지수 picker(01) — KR 5·US 4 큐레이트
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Company, Lang, Tone, Num } from '../lib/types';
@@ -101,15 +101,23 @@
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
 	let finMode = $state<FinMode>('ttm'); // 그래프 기본 = TTM (추세) — 표는 분기 원값 (우측 패널·다이얼로그)
+	let finScope = $state<FinScope | null>(null); // null = 자동(최신 데이터 범위). 연결/별도 토글 시 명시 범위.
 	let finState = $state<'loading' | 'ready' | 'empty'>('loading');
 	const finData = $derived(finBundle ? finBundle.views[finMode] ?? null : null);
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
+	const finScopeLabel = (s: FinScope): string => (s === 'CFS' ? (lang === 'en' ? 'CONS' : '연결') : lang === 'en' ? 'SEP' : '별도');
+	// 회사 전환 시 범위는 자동으로 (정의 순서상 아래 fetch effect 보다 먼저 — 같은 flush 에서 finScope=null 선반영)
+	$effect(() => {
+		void co.code;
+		finScope = null;
+	});
 	$effect(() => {
 		const code = co.code;
+		const scope = finScope ?? undefined; // tracked → 연결/별도 토글 시 재조회
 		finState = 'loading';
 		finBundle = null;
 		let cancelled = false;
-		rt.finance.bundle(code).then((b) => {
+		rt.finance.bundle(code, scope).then((b) => {
 			if (cancelled) return;
 			finBundle = b;
 			finMode = b ? (b.views.ttm ? 'ttm' : b.defaultMode) : 'quarter'; // TTM 우선 — 분기 부족(신규상장 등)이면 defaultMode 폴백
@@ -450,6 +458,9 @@
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
 	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · 조 KRW', en: finMode + ' · ' + finData.periods.length + 'p' } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
 	{#snippet right()}
+		{#if finBundle && finBundle.availScopes.length > 1}
+			<span class="segGroup mini">{#each finBundle.availScopes as s (s)}<button class={finBundle.scope === s ? 'seg on' : 'seg'} onclick={() => (finScope = s)} title={s === 'CFS' ? (lang === 'en' ? 'consolidated' : '연결재무제표') : (lang === 'en' ? 'separate' : '별도재무제표')}>{finScopeLabel(s)}</button>{/each}</span>
+		{/if}
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
@@ -468,7 +479,7 @@
 	{/if}
 </Panel>
 {#if finFull}
-	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} candles={chartCode === co.code ? candles : null} onClose={() => (finFull = false)} />
+	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} onScope={(s) => (finScope = s)} candles={chartCode === co.code ? candles : null} onClose={() => (finFull = false)} />
 {/if}
 
 <!-- VERDICT (종합 판정 — co.verdict 합성, 동기 tier 즉시 렌더) -->

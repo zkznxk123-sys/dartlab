@@ -190,9 +190,11 @@ function fakeFiling(): FilingPort {
 
 function fakeFinance(): FinancePort {
 	return {
-		async bundle(code) {
+		async bundle(code, scope) {
 			if (code !== FIXTURE_CODE) return null;
 			return {
+				scope: scope ?? 'CFS',
+				availScopes: ['CFS', 'OFS'],
 				modes: ['annual'],
 				views: {
 					annual: {

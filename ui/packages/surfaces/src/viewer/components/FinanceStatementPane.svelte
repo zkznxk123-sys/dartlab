@@ -38,11 +38,12 @@
 	const KINDS: FinanceKind[] = ['IS', 'BS', 'CF', 'CIS', 'SCE'];
 	const UNITS: FinanceUnit[] = ['원', '백만', '억'];
 	// avail probe 실패(파케이 404 등) 시에도 로드는 진행시켜 정직한 에러 메시지를 띄운다 — null 고정 = 영구 스피너 회귀.
-	const AVAIL_FALLBACK: FinanceAvailability = { scopes: ['CFS', 'OFS'], byScope: { CFS: KINDS, OFS: KINDS } };
+	const AVAIL_FALLBACK: FinanceAvailability = { scopes: ['CFS', 'OFS'], byScope: { CFS: KINDS, OFS: KINDS }, defaultScope: 'CFS' };
 
 	let kind = $state<FinanceKind>('IS');
 	let freq = $state<FinanceFreq>('quarter'); // 기본 분기 — 표는 최신 보고 원값 우선 (연간·누적은 토글)
 	let scope = $state<FinanceScope>('CFS');
+	let scopeUserPicked = $state(false); // 사용자가 연결/별도 직접 누르면 자동 기본범위 적용 중단
 	let unit = $state<FinanceUnit>('백만');
 	let avail = $state<FinanceAvailability | null>(null);
 	let statement = $state<FinanceStatement | null>(null);
@@ -100,6 +101,7 @@
 		statement = null;
 		sceData = null;
 		errorMsg = null;
+		scopeUserPicked = false; // 회사 전환 → 다시 최신 데이터 범위 자동 선택
 		void financeAvailability(c, m)
 			.then((a) => {
 				if (code === c) avail = a;
@@ -111,6 +113,11 @@
 
 	$effect(() => {
 		if (!avail) return;
+		// 자동 기본 = 최신 데이터가 있는 범위 (연결 중단·별도전환 회사는 별도로 연다). 사용자가 토글하면 중단.
+		if (!scopeUserPicked && availableScopes.includes(avail.defaultScope) && scope !== avail.defaultScope) {
+			scope = avail.defaultScope;
+			return;
+		}
 		if (!availableScopes.includes(scope)) {
 			scope = availableScopes[0];
 			return;
@@ -208,7 +215,7 @@
 			{#if availableScopes.length > 1}
 				<div class="seg" title="범위">
 					{#each availableScopes as s (s)}
-						<button type="button" class="seg-btn" class:active={scope === s} onclick={() => (scope = s)}>{SCOPE_LABELS[s]}</button>
+						<button type="button" class="seg-btn" class:active={scope === s} onclick={() => { scope = s; scopeUserPicked = true; }}>{SCOPE_LABELS[s]}</button>
 					{/each}
 				</div>
 			{/if}

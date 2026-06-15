@@ -3,6 +3,7 @@
 		CompanyChange,
 		CompanyRelations,
 		FinMode,
+		FinScope,
 		InvestmentTrendYear,
 		InvestmentsView,
 		LiveCompanyReportFact,
@@ -115,16 +116,12 @@
 		regFilings = [];
 		nonRegFilings = [];
 		nonRegState = 'loading';
-		finBundle = null;
 		wf = [];
 		srs = [];
 		inv = null;
 		invTrend = [];
 		shareholders = null;
 		let cancelled = false;
-		rt.finance.bundle(code).then((b) => {
-			if (!cancelled) finBundle = b;
-		});
 		// 정기보고서 3패널 — 독립 스트림-인 (가벼운 인력·배당 먼저, 무거운 출자 나중)
 		rt.report.workforce(code).then((b) => {
 			if (!cancelled) wf = b ?? [];
@@ -167,9 +164,28 @@
 	// 재무제표 — c.panel 전 기간(분기/연간 토글). 요약 탭 폐지, 손익·재무상태·현금흐름·비용·비율.
 	let stmt = $state<StmtKind | 'RT'>('IS');
 	let finMode = $state<FinMode>('quarter');
+	let finScope = $state<FinScope | null>(null); // null = 자동(최신 데이터 범위). 연결/별도 토글 시 명시.
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
+	// 재무 번들은 범위(연결/별도)에 따라 재조회 — 회사 전환 시 자동 범위로 리셋 (정의 순서상 fetch 보다 먼저).
+	$effect(() => {
+		void co.code;
+		finScope = null;
+	});
+	$effect(() => {
+		const code = co.code;
+		const scope = finScope ?? undefined; // tracked → 토글 시 재조회
+		finBundle = null;
+		let cancelled = false;
+		rt.finance.bundle(code, scope).then((b) => {
+			if (!cancelled) finBundle = b;
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
 	const tabs = [{ k: 'IS', kr: '손익', en: 'IS' }, { k: 'BS', kr: '재무상태', en: 'BS' }, { k: 'CF', kr: '현금흐름', en: 'CF' }, { k: 'RT', kr: '비율', en: 'Ratios' }] as const;
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
+	const finScopeLabel = (s: FinScope): string => (s === 'CFS' ? (lang === 'en' ? 'CONS' : '연결') : lang === 'en' ? 'SEP' : '별도');
 	const finView = $derived(finBundle ? (finBundle.views[finMode] ?? finBundle.views[finBundle.defaultMode]) : null);
 	const KEY_ROWS = ['operatingIncome', 'netIncome', 'assets', 'equity', 'liabilities', 'cfOperating'];
 	// 최신 기간부터(역순) 표시 — 차트는 오름차순 유지, 표만 reverse.
@@ -313,6 +329,9 @@
 <!-- FINANCIALS -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · ' + finUnit, en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
 	{#snippet right()}
+		{#if finBundle && finBundle.availScopes.length > 1}
+			<span class="segGroup mini">{#each finBundle.availScopes as s (s)}<button class={finBundle.scope === s ? 'seg on' : 'seg'} onclick={() => (finScope = s)} title={s === 'CFS' ? (lang === 'en' ? 'consolidated' : '연결재무제표') : (lang === 'en' ? 'separate' : '별도재무제표')}>{finScopeLabel(s)}</button>{/each}</span>
+		{/if}
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}

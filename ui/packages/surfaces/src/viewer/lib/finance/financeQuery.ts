@@ -40,26 +40,39 @@ function serialize<T>(fn: () => Promise<T>): Promise<T> {
 export interface FinanceAvailability {
 	scopes: FinanceScope[]; // 실제 보고된 범위(CFS/OFS) — 개별 없는 회사는 OFS 토글 숨김
 	byScope: Record<string, FinanceKind[]>; // scope → 가용 statement (단일 포괄손익 회사는 IS 없음)
+	defaultScope: FinanceScope; // 최신 데이터가 있는 범위 (연결 중단·별도전환 회사는 별도). 동률·단독은 연결.
 }
 
-// 회사의 (scope × statement) 가용 조합을 한 번에 probe — 빈 scope 토글·빈 statement 탭 제거. dart/finance 인코딩이
-// 회사별로 다른 현실 반영(연결/개별 유무 + 별도 2표 vs 단일 포괄손익).
+// period 정렬 정수식 — bsns_year*10 + 분기(Q1<Q2<Q3<Q4). 최신 범위 판정용.
+const PERIOD_RANK_SQL = `TRY_CAST(bsns_year AS INTEGER) * 10 + CASE reprt_code WHEN '11013' THEN 1 WHEN '11012' THEN 2 WHEN '11014' THEN 3 WHEN '11011' THEN 4 ELSE 0 END`;
+
+// 회사의 (scope × statement) 가용 조합 + 범위별 최신 시점을 한 번에 probe — 빈 scope 토글·빈 statement 탭 제거
+// + 최신 데이터가 있는 범위를 기본으로. dart/finance 인코딩이 회사별로 다른 현실 반영(연결/개별 유무 + 단일 포괄손익).
 export async function financeAvailability(stockCode: string, market: 'KR' | 'US'): Promise<FinanceAvailability> {
-	const fallback: FinanceAvailability = { scopes: ['CFS', 'OFS'], byScope: { CFS: ALL_KINDS, OFS: ALL_KINDS } };
-	if (market !== 'KR') return { scopes: [], byScope: {} };
+	const fallback: FinanceAvailability = { scopes: ['CFS', 'OFS'], byScope: { CFS: ALL_KINDS, OFS: ALL_KINDS }, defaultScope: 'CFS' };
+	if (market !== 'KR') return { scopes: [], byScope: {}, defaultScope: 'CFS' };
 	return serialize(async () => {
 		const db = await loadDartDb();
 		if (!db) return fallback; // 기기 제약 — 일단 전부 노출
 		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
-		const rows = await db.query<{ fs_div: string; sj_div: string }>(
-			`SELECT DISTINCT fs_div, sj_div FROM companyFinance WHERE stock_code = '${sqlEscape(stockCode)}' AND fs_div IS NOT NULL AND sj_div IS NOT NULL`
+		const rows = await db.query<{ fs_div: string; sj_div: string; pmax: number | null }>(
+			`SELECT fs_div, sj_div, MAX(${PERIOD_RANK_SQL}) AS pmax FROM companyFinance
+			 WHERE stock_code = '${sqlEscape(stockCode)}' AND fs_div IS NOT NULL AND sj_div IS NOT NULL
+			 GROUP BY fs_div, sj_div`
 		);
 		const present: Record<string, Set<string>> = {};
-		for (const r of rows) (present[r.fs_div] ??= new Set()).add(r.sj_div);
+		const latest: Record<string, number> = { CFS: -1, OFS: -1 };
+		for (const r of rows) {
+			(present[r.fs_div] ??= new Set()).add(r.sj_div);
+			const p = Number(r.pmax ?? -1);
+			if (r.fs_div in latest && p > latest[r.fs_div]!) latest[r.fs_div] = p;
+		}
 		const scopes = (['CFS', 'OFS'] as FinanceScope[]).filter((s) => present[s]?.size);
 		const byScope: Record<string, FinanceKind[]> = {};
 		for (const s of scopes) byScope[s] = ALL_KINDS.filter((k) => present[s].has(k));
-		return scopes.length ? { scopes, byScope } : fallback;
+		// 기본 = 최신 데이터가 있는 범위 (동률·단독은 연결 우선)
+		const defaultScope: FinanceScope = latest.OFS! > latest.CFS! ? 'OFS' : 'CFS';
+		return scopes.length ? { scopes, byScope, defaultScope } : fallback;
 	});
 }
 
