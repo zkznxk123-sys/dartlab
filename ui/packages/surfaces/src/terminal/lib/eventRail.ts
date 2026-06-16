@@ -17,8 +17,9 @@ export const EVENT_CATS: EventCat[] = [
 	{ key: 'issue', kr: '발행공시', en: 'Issuance' },
 	{ key: 'exchange', kr: '거래소공시', en: 'Exchange' },
 	{ key: 'audit', kr: '감사', en: 'Audit' },
+	{ key: 'news', kr: '뉴스', en: 'News' }, // 네이버 헤드라인(공시 아님) — item.kind='news', url=원문. 공시와 색 구분.
 	{ key: 'etc', kr: '기타', en: 'Other' }
-	// 향후 확장 예: { key: 'news', kr: '뉴스', en: 'News' }, { key: 'earnings', kr: '실적', en: 'Earnings' } …
+	// 향후 확장 예: { key: 'earnings', kr: '실적', en: 'Earnings' } …
 	// (레일 item.category 에 해당 key 를 실어 보내고, 분류기/수집기만 추가하면 필터 UI 는 자동 반영)
 ];
 

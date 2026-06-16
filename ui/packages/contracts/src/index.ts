@@ -4,6 +4,7 @@ export * from './company';
 export * from './price';
 export * from './indexPort';
 export * from './filing';
+export * from './news';
 export * from './finance';
 export * from './viewer';
 export * from './macro';

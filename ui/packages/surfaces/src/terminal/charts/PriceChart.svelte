@@ -37,7 +37,7 @@
 		events?: { date: string; label: string; url?: string; kind?: 'report' | 'capital' | 'disclosure' }[];
 		// 공시 레일(02 §4) — 날짜 그룹별 그날 공시 전부(items). 캔들 고가 텍스트 아님 = x축 라벨 아래 전용 dot 레일.
 		// 호버=그날 공시 전 항목 툴팁, 클릭=우측 정기/비정기 공시목록 그 날짜로(원문 링크 아님).
-		disclosures?: { date: string; items: { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg'; category: string }[] }[];
+		disclosures?: { date: string; items: { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' | 'news'; category: string }[] }[];
 		valBand?: { lo: number; mid: number; hi: number } | null;
 		peers?: { code: string; name: string }[]; // 동종업계 — 종목비교(VS) 후보
 		// 전체화면 심볼 점프 — 검색은 엔진(suggest), 전환은 onPick (터미널 pick 관통)
@@ -133,7 +133,7 @@
 	// (terminal.css .chartWrap padding-bottom — 출처 자리를 레일 lane 으로 전용). 좌표/폭은 el(캔버스) geometry 기준이라
 	// 일반·전체화면(좌 58·하 22 padding) 모두 정렬. pan/zoom·resize 는 onScroll/onZoom·ResizeObserver 로 재계산.
 	// 좌표 실패/범위 밖은 graceful skip(렌더 0·crash 0).
-	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg'; category: string };
+	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' | 'news'; category: string };
 	type RailDot = { x: number; date: string; items: RailItem[] };
 	// 이벤트 레일 카테고리별 건수(전체 disclosures 기준 — 드롭다운 필터에 카운트 표기·0 카테고리 숨김)
 	const railCatCounts = $derived.by<Record<string, number>>(() => {
@@ -1136,6 +1136,7 @@
 					class="discDot"
 					class:multi={d.items.length > 1}
 					class:hasReg={d.items.some((i) => i.kind === 'regular')}
+					class:hasNews={d.items.some((i) => i.kind === 'news')}
 					style={`left:${d.x}px;opacity:${Math.min(0.4 + d.items.length * 0.12, 0.92)}`}
 					aria-label={`${d.date.slice(0, 4)}-${d.date.slice(4, 6)}-${d.date.slice(6, 8)} ${T('공시', 'filings')} ${d.items.length}`}
 					onmouseenter={() => (hoverRail = { x: d.x, date: d.date, items: d.items })}
@@ -1151,7 +1152,7 @@
 				<div class="discTip mono" style={`left:${Math.min(Math.max(ht.x, half), railBox.width - half)}px`} role="tooltip">
 					<div class="discTipHd"><b class="discTipDate">{ymdDash(ht.date)}</b> · {T('공시', 'filings')} {ht.items.length}{T('건', '')}</div>
 					{#each ht.items.slice(0, 12) as it (it.rceptNo)}
-						<div class="discTipRow">{#if it.kind === 'regular'}<span class="discTipTag">{T('정기', 'REG')}</span>{/if}{it.title}</div>
+						<div class="discTipRow">{#if it.kind === 'regular'}<span class="discTipTag">{T('정기', 'REG')}</span>{:else if it.kind === 'news'}<span class="discTipTag news">{T('뉴스', 'NEWS')}</span>{/if}{it.title}</div>
 					{/each}
 					{#if ht.items.length > 12}<div class="discTipMore">{T('외 ', '+')}{ht.items.length - 12}{T('건', '')}</div>{/if}
 					<div class="discTipFoot">{T('클릭 → 우측 공시목록', 'click → filings list')}</div>
@@ -1300,6 +1301,10 @@
 	.discDot.hasReg {
 		box-shadow: 0 0 0 1.5px rgba(251, 146, 60, 0.7);
 	}
+	/* 뉴스 포함 날짜 — teal 배경(공시 회색과 구분). hasReg 와 조합 시 amber 링 + teal 점(공시·뉴스 공존 표시). */
+	.discDot.hasNews {
+		background: #2dd4bf;
+	}
 	.discDot:hover,
 	.discDot:focus-visible {
 		transform: translate(-50%, -50%) scale(1.5);
@@ -1349,6 +1354,10 @@
 		padding: 0 3px;
 		margin-right: 4px;
 		vertical-align: 1px;
+	}
+	.discTipTag.news {
+		color: #2dd4bf;
+		border-color: rgba(45, 212, 191, 0.5);
 	}
 	.discTipMore {
 		font-size: 9.5px;

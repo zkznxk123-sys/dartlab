@@ -226,8 +226,37 @@ function naverPriceDevPlugin() {
 	};
 }
 
+// 종목 뉴스 미들웨어 — /__news?code=XXXXXX (dev only). 프로덕션은 CF 워커 /news 라우트(private 토큰 read).
+// dev 는 토큰 없이 로컬 byCompany json(buildNaverCompanyNews 산출)을 직독 — 없으면 빈 섹션(무해).
+function newsDevPlugin() {
+	const byCompanyDir = path.resolve(__dirname, '..', 'data', 'news', 'private', 'naver', 'byCompany');
+	return {
+		name: 'news-dev',
+		configureServer(server: ViteDevServer) {
+			server.middlewares.use('/__news', (req, res) => {
+				const send = (status: number, obj: unknown) => {
+					if (res.writableEnded) return;
+					res.statusCode = status;
+					res.setHeader('Content-Type', 'application/json; charset=utf-8');
+					res.end(JSON.stringify(obj));
+				};
+				const url = new URL(req.url ?? '', 'http://localhost');
+				const code = (url.searchParams.get('code') ?? '').replace(/[^0-9A-Za-z]/g, '').slice(0, 12);
+				if (!code) return send(400, { error: 'code 필요' });
+				const file = path.join(byCompanyDir, `${code}.json`);
+				if (!fs.existsSync(file)) return send(200, { code, items: [] }); // 로컬 인덱스 미빌드 → 빈 섹션
+				try {
+					send(200, JSON.parse(fs.readFileSync(file, 'utf-8')));
+				} catch (e) {
+					send(502, { code, items: [], error: String(e) });
+				}
+			});
+		}
+	};
+}
+
 export default defineConfig({
-	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), govPriceDevPlugin(), naverPriceDevPlugin(), sveltekit()],
+	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), govPriceDevPlugin(), naverPriceDevPlugin(), newsDevPlugin(), sveltekit()],
 	define: {
 		__DARTLAB_VERSION__: JSON.stringify(dartlabVersion)
 	},

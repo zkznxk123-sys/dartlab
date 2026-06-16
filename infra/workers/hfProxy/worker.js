@@ -19,6 +19,9 @@
 // 무료 티어: Workers 10만 req/day. nodejs_compat 불필요(순수 fetch). 배포·전환은 README.md.
 
 const UPSTREAM = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
+// 종목 뉴스(네이버 헤드라인+스니펫) 전용 private 데이터셋 — 언론사 저작권이라 공개 dartlab-data 안 감.
+// 워커가 토큰으로 서버사이드 read 해 화면에 표시하는 것은 "라이브 표시"(의도된 용도) — 공개 벌크 재배포 아님.
+const NEWS_UPSTREAM = 'https://huggingface.co/datasets/eddmpython/dartlab-news-private/resolve/main';
 const PASS_HEADERS = ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges', 'ETag', 'Last-Modified', 'x-linked-size'];
 
 function cacheControlFor(path) {
@@ -79,6 +82,49 @@ export default {
 				JSON.stringify({ source: 'fchart.stock.naver.com', code, asOf: candles.at(-1)?.t ?? '', candles }),
 				{ headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' } }
 			);
+		}
+		// /news?code=XXXXXX — 종목 뉴스 헤드라인(제목+스니펫+원문링크) 프록시. private 데이터셋(언론사 저작권)을
+		// 워커가 read-only 토큰(env.HF_NEWS_TOKEN)으로 서버사이드 read → 화면 표시(라이브 표시 = 의도된 용도).
+		// 가드: ① code 형식 검증(영숫자 ≤12, 경로 주입 차단) ② 10분 엣지 캐시(토큰 달린 공개 엔드포인트라
+		// 같은 종목 반복 호출이 HF·쿼터를 두드리지 않게 — 남용 방어 핵심) ③ 토큰 미설정 시 빈배열 noop(배선 안전).
+		// 토큰은 dartlab-news-private read 전용으로 발급 → 피해 범위 최소.
+		if (url.pathname === '/news') {
+			const jsonHeaders = { ...cors, 'Content-Type': 'application/json; charset=utf-8' };
+			const code = (url.searchParams.get('code') || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 12);
+			if (!code) return new Response(JSON.stringify({ error: 'code required' }), { status: 400, headers: jsonHeaders });
+			const token = env.HF_NEWS_TOKEN || '';
+			if (!token) {
+				// 시크릿 미설정 = 그레이스풀 noop(프론트는 빈 섹션). naver 키 미설정 green-noop 과 동형.
+				return new Response(JSON.stringify({ code, items: [], note: 'news proxy not configured' }), {
+					headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
+				});
+			}
+			const newsUrl = `${NEWS_UPSTREAM}/news/private/naver/byCompany/${code}.json`;
+			const cacheKey = new Request(newsUrl); // auth 헤더 비포함 키 — 우리 데이터·우리 사용자 대상 엣지 캐시
+			const hit = await caches.default.match(cacheKey);
+			if (hit) {
+				const h2 = new Headers(hit.headers);
+				for (const [k, v] of Object.entries(jsonHeaders)) h2.set(k, v);
+				h2.set('x-dl-edge', 'HIT');
+				return new Response(hit.body, { status: hit.status, headers: h2 });
+			}
+			let payload;
+			try {
+				const fr = await fetch(newsUrl, { headers: { Authorization: `Bearer ${token}` } });
+				if (fr.status === 404) {
+					// 뉴스 없는 종목(시총 상위 외) — 정직한 빈배열.
+					payload = JSON.stringify({ code, items: [] });
+				} else if (!fr.ok) {
+					return new Response(JSON.stringify({ code, items: [], error: `upstream ${fr.status}` }), { status: 502, headers: jsonHeaders });
+				} else {
+					payload = await fr.text(); // byCompany json 그대로 — {code, asOf, items:[{date,title,source,url,description}]}
+				}
+			} catch (e) {
+				return new Response(JSON.stringify({ code, items: [], error: String(e) }), { status: 502, headers: jsonHeaders });
+			}
+			const resp = new Response(payload, { headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' } });
+			if (ctx) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
+			return resp;
 		}
 		const m = url.pathname.match(/^\/hf\/(.+)$/);
 		if (!m) return new Response('not found — use /hf/<dataset-path>', { status: 404, headers: cors });

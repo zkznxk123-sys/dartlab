@@ -9,6 +9,7 @@ import type {
 	FilingPort,
 	FinancePort,
 	LiveCompanyReportFact,
+	NewsPort,
 	PricePort,
 	ProductIndexItem,
 	ReportPort,
@@ -26,6 +27,7 @@ import { loadCompanyRelations } from './sources/relationsSource';
 import { loadHfProductIndexMap } from './sources/productIndexSource';
 import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
 import { loadCompanyNonRegularFilings } from './sources/nonRegularFilingsSource';
+import { loadCompanyNews } from './sources/newsSource';
 import {
 	loadAuditFees,
 	loadAuditTrail,
@@ -127,6 +129,11 @@ function publicFinancePort(): FinancePort {
 	return { bundle: loadTerminalFinance };
 }
 
+// 로컬 어댑터도 그대로 재사용 — 뉴스는 private 라 브라우저 직독 불가, 퍼블릭·로컬 모두 워커(/news) 단일 경로.
+export function publicNewsPort(): NewsPort {
+	return { forCompany: loadCompanyNews };
+}
+
 function publicReportPort(): ReportPort {
 	return {
 		workforce: loadWorkforce,
@@ -161,6 +168,7 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		price: publicPricePort(),
 		index: createPublicIndexPort(),
 		filing: publicFilingPort(),
+		news: publicNewsPort(),
 		finance: publicFinancePort(),
 		viewer: options.viewer,
 		macro: createHfMacroPort(),

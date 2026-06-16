@@ -275,7 +275,7 @@
 
 	// 공시 이벤트 레일 (dartlab 고유 강점) — 정기보고서 url(접수일별) + 비정기 material 공시(날짜 그룹·클릭 시 DART).
 	// 가격차트 마커가 곧 네비게이션 가능한 공시 타임라인. 같은 날 다수 공시는 1마커로 묶고 '외 N건' 표기(마커 폭주 방지).
-	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg'; category: string };
+	type RailItem = { title: string; rceptNo: string; url: string; kind: 'regular' | 'nonreg' | 'news'; category: string };
 	let regularUrlByDate = $state<Record<string, string>>({});
 	let disclosureEvents = $state<{ date: string; items: RailItem[] }[]>([]);
 	$effect(() => {
@@ -283,7 +283,7 @@
 		let cancelled = false;
 		regularUrlByDate = {};
 		disclosureEvents = [];
-		void Promise.all([rt.filing.regular(code), rt.filing.nonRegular(code)]).then(([reg, non]) => {
+		void Promise.all([rt.filing.regular(code), rt.filing.nonRegular(code), rt.news.forCompany(code)]).then(([reg, non, news]) => {
 			if (cancelled) return;
 			const rmap: Record<string, string> = {};
 			for (const f of reg ?? []) if (f.rceptDate && f.url) rmap[f.rceptDate.replace(/\D/g, '').slice(0, 8)] = f.url;
@@ -306,6 +306,13 @@
 				const d = (f.rceptDate ?? '').replace(/\D/g, '').slice(0, 8);
 				if (d.length !== 8 || !f.url || !f.reportNm?.trim()) continue; // 빈 항목 방지(anti-clutter)
 				add(d, { title: f.reportNm.trim(), rceptNo: f.rceptNo, url: f.url, kind: 'nonreg', category: classifyFiling(f.reportNm) });
+			}
+			// 종목 뉴스(네이버 헤드라인) — 공시 아닌 이벤트라 category='news'(레일 색·필터 구분). rceptNo 자리에 url(고유키).
+			// 클릭 시 우측 '종목 뉴스' 패널 그 날짜 행 동기(focusDisclosure → newsWrap 스크롤). 원문은 패널에서 ↗.
+			for (const n of news ?? []) {
+				const d = (n.date ?? '').replace(/\D/g, '').slice(0, 8);
+				if (d.length !== 8 || !n.title?.trim()) continue;
+				add(d, { title: n.title.trim(), rceptNo: n.url || `news:${d}:${n.title}`, url: n.url, kind: 'news', category: 'news' });
 			}
 			// 전 기간 공시 날짜 전부 전달 — dot 폭주 방지는 PriceChart 의 "보이는 x 범위 밖 skip"이 담당. 전역 캡(옛 60) 제거: 줌아웃해도 옛 공시(예: 2015) dot 보존. 같은 날 다수는 1 dot + 툴팁 전체 나열.
 			disclosureEvents = [...byDate.entries()]

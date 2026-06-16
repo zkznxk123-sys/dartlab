@@ -4,6 +4,7 @@ import type { CompanyPort } from './company';
 import type { PricePort } from './price';
 import type { IndexPort } from './indexPort';
 import type { FilingPort } from './filing';
+import type { NewsPort } from './news';
 import type { FinancePort } from './finance';
 import type { ViewerPort } from './viewer';
 import type { MacroPort } from './macro';
@@ -75,6 +76,7 @@ export interface DartLabRuntime {
 	price: PricePort;
 	index: IndexPort;
 	filing: FilingPort;
+	news: NewsPort;
 	finance: FinancePort;
 	viewer: ViewerPort;
 	macro: MacroPort;

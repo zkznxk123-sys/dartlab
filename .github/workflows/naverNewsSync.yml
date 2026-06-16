@@ -64,3 +64,13 @@ jobs:
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           NAVER_MAX_QUERIES: ${{ github.event.inputs.max_queries || '200' }}
         run: uv run python -X utf8 -m dartlab.pipeline naverNews
+
+      # 종목별 뉴스 인덱스 — recent.parquet 누적(HF baseline merge) + byCompany/{code}.json.
+      # CF 워커 /news?code= 가 read 토큰으로 byCompany json 을 서버사이드 read → 터미널 우측패널·이벤트레일 표시.
+      # HF_TOKEN 미설정 시 build 만(push skip, rc=1) — 그러나 fetch 가 noop 이면 데이터 부재라 build 도 무해 종료.
+      - name: Build per-company news index + private HF push
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run python -X utf8 .github/scripts/sync/buildNaverCompanyNews.py

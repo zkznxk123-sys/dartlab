@@ -12,7 +12,7 @@ import type {
 import { createHfMacroPort } from '../public/sources/macroSource';
 import { createPublicIndexPort } from '../public/sources/indexSource';
 import { loadTerminalFinance } from '../public/sources/financeSource';
-import { publicPricePort } from '../public/createPublicRuntime';
+import { publicPricePort, publicNewsPort } from '../public/createPublicRuntime';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { exportServiceRegistration } from '../../services/exportCommand';
 import { localExportPort } from './sources/exportSource';
@@ -59,6 +59,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		// 지수 = gov/indices + FRED 모두 HF 브라우저 직독 → price·macro 와 동일하게 공개 포트 그대로 재사용(백엔드 0).
 		index: createPublicIndexPort(),
 		filing: localFilingPort(apiBase, caches),
+		// 뉴스 = private 라 브라우저 직독 불가 → 퍼블릭 워커(/news) 포트 그대로 재사용(price 와 동일 "공유 자산").
+		news: publicNewsPort(),
 		finance: localFinancePort(),
 		viewer: localViewerPort(),
 		macro: createHfMacroPort(),

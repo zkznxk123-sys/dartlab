@@ -8,6 +8,7 @@
 		InvestmentTrendYear,
 		InvestmentsView,
 		LiveCompanyReportFact,
+		NewsItem,
 		NonRegularFiling,
 		ProductIndexItem,
 		RegularFiling,
@@ -60,9 +61,30 @@
 	// seenFocusPulse = 비반응 plain let — flashDate 쓰기가 effect 를 재발화시키지 않음(viewerEntry 동일 패턴, 루프 없음).
 	const fdate = (s: string) => s.replace(/\D/g, '').slice(0, 8); // YYYY-MM-DD → YYYYMMDD (행 data-fdate 와 비교 키)
 	let filingWrap = $state<HTMLElement | null>(null); // 정기‖비정기 공시 2분할 컨테이너 — querySelector 범위 한정
+	let newsWrap = $state<HTMLElement | null>(null); // 종목뉴스 컨테이너 — 뉴스 dot 클릭 시 같은 날짜 행 스크롤·하이라이트
 	let flashDate = $state<string | null>(null);
 	let seenFocusPulse = disclosureFocus.pulse;
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
+	// 한 wrap 안에서 그 날짜(data-fdate) 행을 내부 300px 박스 중앙으로 스크롤. centerCol=true 면 우측 컬럼도
+	// 그 박스를 뷰포트 중앙에 둔다(공시·뉴스 둘 다 같은 .col/.filingList 구조 재사용). 행 없으면 무동작.
+	function scrollWrapToDate(wrap: HTMLElement | null, d: string, centerCol: boolean): void {
+		const row = wrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
+		if (!row) return;
+		const list = row.closest('.filingList') as HTMLElement | null;
+		if (list) {
+			const lr = list.getBoundingClientRect();
+			const rr = row.getBoundingClientRect();
+			list.scrollTop += rr.top + rr.height / 2 - (lr.top + lr.height / 2);
+		}
+		if (centerCol && list) {
+			const col = row.closest('.col') as HTMLElement | null;
+			if (col) {
+				const cr = col.getBoundingClientRect();
+				const lr2 = list.getBoundingClientRect();
+				col.scrollBy({ top: lr2.top + lr2.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
+			}
+		}
+	}
 	$effect(() => {
 		const p = disclosureFocus.pulse;
 		if (p === seenFocusPulse) return;
@@ -72,25 +94,10 @@
 		if (flashTimer) clearTimeout(flashTimer);
 		flashDate = null; // 같은 날짜 재클릭도 class off→on 으로 애니메이션 재생되도록 먼저 해제
 		requestAnimationFrame(() => {
-			flashDate = d;
-			const row = filingWrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
-			if (row) {
-				// ① 내부 300px filingList 를 스크롤해 그 날짜 행을 박스 중앙에 보이게(즉시) — 패널 outer 위치는 안 변함.
-				const list = row.closest('.filingList') as HTMLElement | null;
-				if (list) {
-					const lr = list.getBoundingClientRect();
-					const rr = row.getBoundingClientRect();
-					list.scrollTop += rr.top + rr.height / 2 - (lr.top + lr.height / 2);
-				}
-				// ② 우측 컬럼을 스크롤해 그 300px 박스(filingList)를 컬럼 뷰포트 세로 중앙에 둔다 — 정기/비정기 동일 Y라 위치 일관.
-				const col = row.closest('.col') as HTMLElement | null;
-				// 300px 박스 자체 = list (위 ①에서 이미 해소) — 컬럼 중앙 정렬에 재사용
-				if (col && list) {
-					const cr = col.getBoundingClientRect();
-					const lr2 = list.getBoundingClientRect();
-					col.scrollBy({ top: lr2.top + lr2.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
-				}
-			}
+			flashDate = d; // 공시·뉴스 양쪽 [data-fdate==d] 행이 .flash 로 동시 점멸(클래스 바인딩 공유)
+			// 공시(정기/비정기)는 컬럼 중앙까지, 뉴스는 자기 박스 내부 스크롤만(공시가 주 위치라 컬럼 점프는 1회).
+			scrollWrapToDate(filingWrap, d, true);
+			scrollWrapToDate(newsWrap, d, false);
 			flashTimer = setTimeout(() => (flashDate = null), 3600);
 		});
 	});
@@ -108,6 +115,8 @@
 	let nonRegFilings = $state<NonRegularFiling[]>([]);
 	let nonRegState = $state<'loading' | 'ready' | 'empty'>('loading');
 	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
+	let news = $state<NewsItem[]>([]); // 종목 뉴스(네이버 헤드라인+스니펫) — 워커 /news 서버사이드 read
+	let newsState = $state<'loading' | 'ready' | 'empty'>('loading');
 	$effect(() => {
 		const code = co.code;
 		factsState = 'loading';
@@ -117,6 +126,8 @@
 		regFilings = [];
 		nonRegFilings = [];
 		nonRegState = 'loading';
+		news = [];
+		newsState = 'loading';
 		wf = [];
 		srs = [];
 		inv = null;
@@ -162,9 +173,26 @@
 			nonRegFilings = f;
 			nonRegState = f.length ? 'ready' : 'empty';
 		});
+		rt.news.forCompany(code).then((n) => {
+			if (cancelled) return;
+			news = n;
+			newsState = n.length ? 'ready' : 'empty';
+		});
 		return () => {
 			cancelled = true;
 		};
+	});
+	// 뉴스 날짜별 그룹 — dot 클릭(focusDisclosure) 시 data-fdate 로 행 스크롤·하이라이트. 같은 날 다건은 한 헤더 아래.
+	const newsByDate = $derived.by(() => {
+		const m = new Map<string, NewsItem[]>();
+		for (const it of news) {
+			const d8 = (it.date ?? '').replace(/\D/g, '').slice(0, 8);
+			if (d8.length !== 8) continue;
+			const cur = m.get(d8);
+			if (cur) cur.push(it);
+			else m.set(d8, [it]);
+		}
+		return [...m.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
 	});
 
 	// 재무제표 — c.panel 전 기간(분기/연간 토글). 요약 탭 폐지, 손익·재무상태·현금흐름·비용·비율.
@@ -557,6 +585,31 @@
 	</Panel>
 </div>
 
+<!-- 종목 뉴스 — 네이버 검색 API 헤드라인(제목+스니펫). private(언론사 저작권)을 워커가 서버사이드 read 해
+     표시(라이브 표시 = 의도된 용도, 공개 재배포 아님). 클릭=원문 이동, 주가차트 뉴스 dot 클릭=그 날짜 행 동기. -->
+<div bind:this={newsWrap}>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: '종목 뉴스', en: 'NEWS' }} sub={{ kr: 'naver · 제목+요약', en: 'naver · headlines' }} flush>
+		{#snippet right()}<span class="dim">{newsState === 'ready' ? news.length : ''}</span>{/snippet}
+		{#if newsState === 'ready'}
+			<div class="filingList newsList">
+				{#each newsByDate as [d8, items] (d8)}
+					{#each items as it (it.url)}
+						<a class="newsRow" class:flash={flashDate === d8} data-fdate={d8} href={it.url} target="_blank" rel="noopener" title={it.title + (it.description ? '\n\n' + it.description : '')}>
+							<span class="nwTop"><span class="nwTitle">{it.title}</span><span class="flArrow">↗</span></span>
+							{#if it.description}<span class="nwDesc">{it.description}</span>{/if}
+							<span class="nwMeta mono">{it.source}{it.date ? ' · ' + it.date.slice(2) : ''}</span>
+						</a>
+					{/each}
+				{/each}
+			</div>
+		{:else if newsState === 'loading'}
+			<div class="storyEmpty">{lang === 'en' ? 'loading news …' : '뉴스 불러오는 중 …'}</div>
+		{:else}
+			<div class="storyEmpty">{lang === 'en' ? 'no news for this company' : '해당 종목 뉴스 없음 (시총 상위 위주 수집)'}</div>
+		{/if}
+	</Panel>
+</div>
+
 <div class="rowSplit">
 	<!-- PEERS -->
 	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '동종업종', en: 'INDUSTRY PEERS' }} sub={{ kr: 'industry:peers', en: 'peers' }} flush>
@@ -646,8 +699,55 @@
 
 <style>
 	/* 공시 dot 클릭 동기화 — 그 날짜 공시 행 일시 하이라이트(주가차트 공시 레일 → 위치 찾기). 3.6s 후 자동 소거(스포트라이트 길게). */
-	.filingRow.flash {
+	.filingRow.flash,
+	.newsRow.flash {
 		animation: filingFlash 3.6s ease-out;
+	}
+	/* 종목 뉴스 행 — 제목+스니펫+출처 세로 레이아웃(공시 행과 달리 본문 1줄 노출). filingList 스크롤 박스 재사용. */
+	.newsList {
+		max-height: 360px;
+	}
+	.newsRow {
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+		padding: 5px 6px;
+		border-bottom: 1px solid var(--bd, rgba(48, 58, 78, 0.4));
+		text-decoration: none;
+		color: inherit;
+	}
+	.newsRow:hover {
+		background: rgba(91, 155, 240, 0.08);
+	}
+	.nwTop {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 6px;
+	}
+	.nwTitle {
+		font-size: 11px;
+		line-height: 1.35;
+		color: var(--fg, #cfd3dc);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.nwDesc {
+		font-size: 10px;
+		line-height: 1.3;
+		color: var(--dim, #8b919e);
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.nwMeta {
+		font-size: 9px;
+		color: var(--dimmer, #6b7280);
 	}
 	@keyframes filingFlash {
 		0%,

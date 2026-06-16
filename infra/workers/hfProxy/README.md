@@ -9,6 +9,21 @@ HF URL 을 단일 SSOT 로 묶는 경량 프록시.
 - `Range`/`If-Range`/`If-None-Match` 전달, `Content-Range`/`Accept-Ranges`/`Content-Length`/`x-linked-size`/`206`/`304` 보존·재발급 (hyparquet 의존 헤더).
 - 403/429/5xx 시 서버측 재시도(최대 4회, 지수 백오프).
 - CORS + `Access-Control-Expose-Headers`(range 헤더) 부착.
+- `GET /naver?code=XXXXXX` → 네이버 fchart 일별 OHLCV(가격 fresh-tail). 키 불필요(공개 차트 API).
+- `GET /news?code=XXXXXX` → 종목 뉴스 헤드라인(제목+스니펫+원문링크). private 데이터셋
+  (`dartlab-news-private`)을 read-only 토큰으로 서버사이드 read 해 반환(라이브 표시 = 의도된 용도,
+  공개 벌크 재배포 아님). 가드: code 형식검증(영숫자 ≤12) + 10분 엣지 캐시 + 토큰 미설정 시 빈배열 noop.
+
+### /news 시크릿 (private 데이터셋 read)
+```bash
+cd infra/workers/hfProxy
+CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put HF_NEWS_TOKEN
+# → dartlab-news-private 에 대한 read-only 토큰 입력 (피해 범위 최소화)
+```
+시크릿 없이 배포해도 `/news` 는 빈배열 noop 으로 안전(배선 먼저, 토큰은 나중). 프런트 전환 env:
+```
+VITE_DARTLAB_NEWS_PROXY=https://dartlab-hf-proxy.<subdomain>.workers.dev/news
+```
 
 ## 무엇을 안 하나 (의도적)
 - 부분응답(206)을 CF Cache API 에 직접 put 하지 않는다 — 잘못된 바이트 위험. 레인지 캐시는 브라우저(URL+Range 키, 정확)에 맡긴다.
