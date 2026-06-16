@@ -110,6 +110,42 @@ export interface Bollinger {
 	upper: (number | null)[];
 	lower: (number | null)[];
 }
+// ATR(평균진폭) — Wilder 평활. 고저종 입력. 변동성 손절·채널·필터의 기반(종가만 쓰는 6프리셋의 약점 보강).
+export function atr(highs: number[], lows: number[], closes: number[], p = 14): (number | null)[] {
+	const tr: number[] = [];
+	for (let i = 0; i < closes.length; i++) {
+		if (i === 0) { tr.push(highs[i] - lows[i]); continue; }
+		const pc = closes[i - 1];
+		tr.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - pc), Math.abs(lows[i] - pc)));
+	}
+	const out: (number | null)[] = [];
+	let prev = 0;
+	for (let i = 0; i < tr.length; i++) {
+		if (i < p - 1) { out.push(null); continue; }
+		if (i === p - 1) { let s = 0; for (let j = 0; j < p; j++) s += tr[j]; prev = s / p; out.push(prev); continue; }
+		prev = (prev * (p - 1) + tr[i]) / p; // Wilder
+		out.push(prev);
+	}
+	return out;
+}
+// 거래량 단순이평 — 거래량 확인(fake breakout 제거)용. volRatio = vol / volSma 로 쓴다.
+export function volSma(vols: number[], p = 20): (number | null)[] {
+	return sma(vols, p);
+}
+// 실현 변동성(연환산 %) — 종가 로그수익 표준편차 × √252 × 100. 변동성 필터·저변동 전략.
+export function realizedVol(closes: number[], p = 20): (number | null)[] {
+	const out: (number | null)[] = [];
+	for (let i = 0; i < closes.length; i++) {
+		if (i < p) { out.push(null); continue; }
+		const rets: number[] = [];
+		for (let j = i - p + 1; j <= i; j++) if (closes[j - 1] > 0 && closes[j] > 0) rets.push(Math.log(closes[j] / closes[j - 1]));
+		if (rets.length < 2) { out.push(null); continue; }
+		const m = rets.reduce((a, r) => a + r, 0) / rets.length;
+		const v = rets.reduce((a, r) => a + (r - m) ** 2, 0) / (rets.length - 1);
+		out.push(Math.sqrt(v) * Math.sqrt(252) * 100);
+	}
+	return out;
+}
 export function bollinger(a: number[], p = 20, mult = 2): Bollinger {
 	const mid = sma(a, p);
 	const upper: (number | null)[] = [];

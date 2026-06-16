@@ -2,6 +2,7 @@
 // 체결 모델: 신호 t일 종가 확정 → t+1일 시가 체결(target 1봉 shift = look-ahead 구조적 불가).
 // 거래정지(v=0/o=0) 봉은 체결 자동 이연. B&H = 같은 엔진에 target≡1 주입(공정 비교 코드 보장).
 import { BT_PRESETS } from './presets';
+import { evalRule, ruleWarmup, type StrategyRule } from './conditions';
 import { BT_COSTS, BT_ENGINE_VERSION } from './types';
 import type { BtCostsBp, BtPresetKey, BtResult, BtRunSpec, BtSplitMetrics, BtSpecInput, BtTrade, BtWarning, Candle } from './types';
 
@@ -258,19 +259,26 @@ function computeOos(
 }
 
 /** 백테스트 실행 — 전략(선택 비용)·전략(비용 OFF, 비용드래그용)·B&H(동일 비용) 3패스. null = candles 부족. */
-export function runBacktest(
-	candles: Candle[],
-	preset: BtPresetKey,
-	params: Record<string, number>,
-	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number }
-): BtResult | null {
+interface StrategyForSpec { id: BtPresetKey | 'custom'; params: Record<string, number> }
+type BtOpts = { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number };
+
+/** 6 레거시 프리셋(종가 신호) 경로 — 기존 계약 무변경. */
+export function runBacktest(candles: Candle[], preset: BtPresetKey, params: Record<string, number>, opts: BtOpts): BtResult | null {
 	const def = BT_PRESETS.find((d) => d.key === preset);
 	if (!def) return null;
-	const n = candles.length;
-	if (n < def.warmup(params) + 5) return null;
-	const closes = candles.map((c) => c.c);
+	if (candles.length < def.warmup(params) + 5) return null;
 	// 신호는 전체 이력로 계산(워밍업 자동 확보), 체결·평가는 평가창 안에서만.
-	const target = def.signal(closes, params);
+	return runBacktestCore(candles, def.signal(candles.map((c) => c.c), params), opts, { id: preset, params });
+}
+
+/** 조건 빌더 룰(커스텀 조립 + OHLCV rule 프리셋) 경로 — target 을 evalRule 로 산출(전문가급 패널). */
+export function runBacktestRule(candles: Candle[], rule: StrategyRule, opts: BtOpts): BtResult | null {
+	if (candles.length < ruleWarmup(rule) + 5) return null;
+	return runBacktestCore(candles, evalRule(candles, rule).target, opts, { id: 'custom', params: {} });
+}
+
+function runBacktestCore(candles: Candle[], target: Int8Array, opts: BtOpts, specStrat: StrategyForSpec): BtResult | null {
+	const n = candles.length;
 	const startIdx = Math.max(0, n - Math.max(2, opts.windowBars));
 	const windowBars = n - startIdx;
 	const full = toCosts(opts.costsBp);
@@ -311,7 +319,7 @@ export function runBacktest(
 				adjusted: opts.spec.adjusted ?? false,
 				dividend: 'excluded',
 				range: { from: candles[startIdx].t, to: candles[n - 1].t, bars: windowBars },
-				strategy: { id: preset, params },
+				strategy: { id: specStrat.id, params: specStrat.params },
 				costs: { enabled: opts.withCosts, commissionBp: fullBp.commissionBp, sellTaxBp: fullBp.sellTaxBp, slippageBp: fullBp.slippageBp },
 				benchmark: { kind: 'buyAndHold', sameCosts: true }
 			}

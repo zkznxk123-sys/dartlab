@@ -13,6 +13,9 @@ export type {
 	BtSpecInput
 } from './types';
 export { BT_PRESETS } from './presets';
-export { runBacktest } from './engine';
+export { runBacktest, runBacktestRule } from './engine';
 export { runPortfolioBacktest } from './portfolio';
 export type { StrategySlot, ComboMetrics, ComboResult, PortfolioBtResult } from './portfolio';
+// 조건 빌더(전문가급 커스텀 패널) — 지표 카탈로그·룰 프리셋·평가.
+export { SERIES_CATALOG, RULE_PRESETS, OP_LABEL, evalRule, evalCondition, ruleWarmup } from './conditions';
+export type { SeriesKey, SeriesDef, Op, Condition, StrategyRule, RulePreset, RuleEval } from './conditions';

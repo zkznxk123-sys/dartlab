@@ -6,7 +6,8 @@
 //   "고정가중 보유합성(리밸런싱 없음)"의 정확한 표현.
 // combo 는 체결 개념 0(가중 산술합) → 거래 KPI(승률·PF·노출·거래표·CSV) N.A.(01 §1.2) —
 //   UI 에서 명시적 "—". equity 메트릭(수익·MDD·Sharpe·Calmar·vs B&H)만 산출.
-import { benchmarkStats, cagr, endRet, mdd, mddWindowOf, riskRatios, runBacktest } from './engine';
+import { benchmarkStats, cagr, endRet, mdd, mddWindowOf, riskRatios, runBacktest, runBacktestRule } from './engine';
+import type { StrategyRule } from './conditions';
 import type { BtCostsBp, BtPresetKey, BtResult, BtSpecInput, Candle } from './types';
 
 export interface StrategySlot {
@@ -15,6 +16,7 @@ export interface StrategySlot {
 	params: Record<string, number>;
 	color: string;
 	label: string;
+	rule?: StrategyRule; // 있으면 조건 빌더(커스텀·rule 프리셋) 경로 — preset 무시(전문가급 패널)
 }
 
 // combo 는 거래가 없다 → equity 기반 메트릭만(거래 KPI 는 UI 에서 명시적 "—", 01 §1.2).
@@ -57,7 +59,7 @@ export function runPortfolioBacktest(
 	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number }
 ): PortfolioBtResult {
 	const computed = slots
-		.map((s) => ({ id: s.id, result: runBacktest(candles, s.preset, s.params, opts) }))
+		.map((s) => ({ id: s.id, result: s.rule ? runBacktestRule(candles, s.rule, opts) : runBacktest(candles, s.preset, s.params, opts) }))
 		.filter((x): x is { id: string; result: BtResult } => x.result != null);
 
 	if (computed.length === 0) return { slots: [], combo: null, startIdx: 0, bhEquity: [] };

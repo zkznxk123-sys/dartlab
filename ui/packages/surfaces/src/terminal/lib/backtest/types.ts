@@ -96,7 +96,7 @@ export interface BtRunSpec {
 	adjusted: boolean; // 수정주가 입력 여부
 	dividend: 'excluded'; // 배당 미반영(데이터 한계 — totalReturn 미지원)
 	range: { from: string; to: string; bars: number }; // 평가창 거래일 범위
-	strategy: { id: BtPresetKey; params: Record<string, number> };
+	strategy: { id: BtPresetKey | 'custom'; params: Record<string, number> };
 	costs: { enabled: boolean; commissionBp: number; sellTaxBp: number; slippageBp: number };
 	benchmark: { kind: 'buyAndHold'; sameCosts: true };
 }
