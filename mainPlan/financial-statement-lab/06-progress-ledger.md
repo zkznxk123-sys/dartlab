@@ -75,8 +75,17 @@
 다음(Phase 2부터):
 1. **PER/PBR 시계열** — Phase 2 진입 전 **주식수 정합 census**(분기 stockTotal × 자사주 vintage). clean 안 되면 스냅샷 유지(카드 미생성). 가격↔체력과 같은 (gov/prices × reportSource.stockTotal × panel) 조인 패턴 재사용.
 2. **가격↔체력 라이브 스크린샷 검증** — /api(:8400) 구동 후 FinFullscreen 종합 탭 실데이터 눈검수(삼성·카카오·중소형사 각 1). 현 상태=빌드·타입·로직 green, 라이브 미확인.
-3. Phase 3 진입 전: 동종 universe 정의(업종 코드·시총 밴드) + 분포 prebuild 스키마 → 백분위 밴딩(SHOULD #6).
-4. `tests/_attempts/financialStatementLab/` 카테고리 생성(Python 의존 능력 졸업 게이트 — reverseDCF 함축기대·forensic 사전계산·세그먼트/R&D).
+3. ✅ **Phase 3 백분위 개념검증 — GO(2026-06-14, `tests/_attempts/financialStatementLab/` 졸업 게이트 통과, src/ 무변경)**:
+   - **메모리 안전 cross-sectional 경로** = `scan("profitability")`(ROE/ROA/영업이익률/순이익률) + `scan("valuation")`(시총/PER/PBR) → **회사당 1행, Company 인스턴스화 0**(단일 prebuild parquet 스트림, ~400MB settling vs 40 full load=8~20GB). 40 full Company 로드 절대 금지의 정답.
+   - **universe = WICS `core.sector.classify` → industryGroup**(~40 버킷, **0% unknown**, 29개 n≥12). raw 업종(161 KSIC 난잡)·sector(11 과조) 기각. 배지에 명시+ref 필수.
+   - **coverage** n≥12 IG: ROE 29·영업이익률 30·PBR 30 (~90% 회사). PER 26/1267(적자 null 다수→honest-gap 빈번). **권장 N=12**.
+   - **실증**: 삼성전자 ROE 9.7→반도체IG 202사 **상위 5.9%**(p50=2.0), 영업이익률 42.8→상위 1.0%. "상위 X%"=분포 순위지 합성 등급 아님(02 §3 가드 통과).
+   - **honest-gap**: null 지표는 분포 제외+배지 없음(0-fill 금지). **cross-market**: 단일 KR DART parquet라 KR+US 구조적 비혼합(row key 에 `marketKey`).
+   - **★아티팩트 shape**(production prebuild): `{marketKey, industryGroup, metric, period, n, p10, p25, p50, p75, p90}` ~240행(latestFY)~1200(5yr)·수 KB. 브라우저는 `(marketKey, IG, metric, period)` 단일 lookup 으로 회사 값을 breakpoint 에 슬롯 — **view time peer 다운로드 0**. 빌더 로직 = 데모 `percentileBreakpoints()` verbatim.
+   - **★게이팅 리스크**: 시총 밴드가 대형주 고갈(KRX 전체 ≥10조 71사·IG×band ≥12 = 0개). **해소 = primary universe=industryGroup 단독(시총 분할 X), mcap-band 는 *sector* 단위 옵션 2차 렌즈만**(sector×band 19 viable). 대형주는 구조적 peer 희소(honest-gap, 강제분할 금지).
+   - **production 다음**: ① 아티팩트 빌더(scan→breakpoint JSON, 위치·갱신 경로 확정) ② 터미널 FinCard 밴드 UI(단일 lookup). period toggle(분기/5yr)는 `scan("ratio")` + artifact.period 확장=별도 scope.
+   - ★★**재발명 방지 정정(2026-06-14, production 착수 직전 발견)**: **백분위 밴딩은 터미널에 이미 구현돼 있다** — `engine.ts:300 industryPercentile(code)` 가 회사별 영업이익률/ROE/매출성장/규모/점유율 percentile rank 를 동종 ecosystem peer 로 계산(`pctRank(col(f), v)`), `RightStack.svelte:152-224` 가 "동종업종 상위 X%" 패널(색상+`pctNote`)로 렌더, `CenterStack:152·394` 가 verdict 에 "업종 상위 N%" 칩. **신규 prebuild 아티팩트 빌더 + 신규 밴딩 UI = 순수 재발명이라 기각.** 또 `landing/static/map/industryStats.json`(buildIndustryMap.py 산출, 34산업×{roe/opMargin/debtRatio/revCagr}×{n,p10..p90})이 이미 분포를 담고 `SectorHealthCard`/map 이 박스플롯 렌더. ⟹ killer #1 = **이미 달성**. 잔여 *옵션* depth = 기존 RightStack percentile 에 (a) **N 임계 honest-gap**(n<12 배지 숨김) (b) **universe 명시 라벨+ref** (c) industryStats 분포 띠(SectorHealthCard 박스플롯 재사용) — 셋 다 *기존 패널 보강*이지 신규 아님. PRD "깎아서 강하게·기본뷰 더 작게" 정신상 신규 카드 증식보다 보강만. **FSL 다음 진짜 가치 = Phase 4(forensic 이익품질)·#6(reverseDCF 함축기대) = 미존재 신규.**
+4. `tests/_attempts/financialStatementLab/` 카테고리 생성 ✅ (Phase 3 백분위 검증 완료) — reverseDCF 함축기대·forensic 사전계산·세그먼트/R&D 는 후속.
 
 미작성/후속:
 - 컴포넌트 spec 상세(FinCard `band`/`flags` 필드 계약 확정) = 착수 시 03 §4 기준 구현 문서로.
