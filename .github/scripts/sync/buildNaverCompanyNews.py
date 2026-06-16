@@ -37,14 +37,15 @@ from dartlab.gather.sources.newsSchema import NEWS_BASE_COLS
 _CATEGORY = "newsNaver"
 _DIR = "news/private/naver"  # newsSources.naver.dir 과 일치 (drift 차단)
 _RECENT_REL = f"{_DIR}/recent.parquet"
-_WINDOW_DAYS = 180  # 뉴스는 신선도 감쇠 — 6개월 윈도(과거 dot 완결성보다 표시 관련성 우선). filings 와 정책 다름.
+_WINDOW_DAYS = 365  # 누적창 1년 — 수집된 과거는 "사실상 다" 표시(네이버 forward-only라 깊이는 cron 시작 이후로 한정).
+#                     parquet 은 메타라 1년치도 작고, 레일은 같은날 1 dot 묶음이라 점 폭주 자동 방지. 더 길게도 가능.
 
 # 표시에 쓰는 4컬럼 + dedup 키(url) + 그룹키(query). captured_at·market·enrichment 는 인덱스에 불필요.
 _DISPLAY_COLS = ("date", "title", "source", "url", "description")
 
 
 def buildCompanyIndex(
-    df: pl.DataFrame, nameToCode: dict[str, str], *, perCompany: int = 40
+    df: pl.DataFrame, nameToCode: dict[str, str], *, perCompany: int = 300
 ) -> dict[str, list[dict[str, str]]]:
     """뉴스 archive(query=회사명) → 종목코드별 최근 뉴스 리스트 (순수 변환, HF 무의존).
 
@@ -227,7 +228,7 @@ def _resolveToken() -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="종목별 뉴스 인덱스 빌드 + private HF push")
     ap.add_argument("--no-push", action="store_true", help="빌드만, HF push 생략")
-    ap.add_argument("--per-company", type=int, default=40, help="종목당 최대 뉴스 건수")
+    ap.add_argument("--per-company", type=int, default=300, help="종목당 최대 뉴스 건수(누적창 내 사실상 전량)")
     args = ap.parse_args(argv)
 
     token = _resolveToken()
