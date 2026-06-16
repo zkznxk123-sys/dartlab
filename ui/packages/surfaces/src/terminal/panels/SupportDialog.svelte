@@ -3,7 +3,7 @@
 	// 순서: 소개 → 터미널을 만들게 해준 분들(Threads) → 후원해주신 분들 → 함께하는 법(의견·이슈 + 후원 박스).
 	// 후원금 캡션·계좌/스폰서는 셸 주입(TerminalBrandLinks). 미주입 항목은 줄 숨김(가짜 금지).
 	import type { Lang } from '../lib/types';
-	import type { TerminalBrandLinks } from '../lib/hosts';
+	import type { TerminalBrandLinks, SupportPerson } from '../lib/hosts';
 	import { Heart, Coffee, Landmark, MessageCircle, MessagesSquare, Bug, Copy, Check, ArrowUpRight } from 'lucide-svelte';
 	import { fetchGithubContributors } from '../lib/githubStars';
 
@@ -18,30 +18,19 @@
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	// ── 사람들 (♦ 영감 · ♥ 후원 · ♣ 기여) ──
-	// 영감·후원 = 큐레이션(운영자 직접, 가짜 금지). 기여 = GitHub contributors API 자동(봇·소유자 제외).
-	type Kind = 'insp' | 'support' | 'contrib';
-	interface Person { handle: string; url: string; image?: string; kind: Kind; postUrl?: string }
-	const BADGE: Record<Kind, { sym: string; cls: string; kr: string; en: string }> = {
+	// 영감·후원 = 셸 주입 SSOT(links.people, DARTLAB_BRAND_LINKS 정본). 기여 = GitHub contributors API 자동.
+	const BADGE: Record<SupportPerson['kind'], { sym: string; cls: string; kr: string; en: string }> = {
 		insp: { sym: '♦', cls: 'supRoleInsp', kr: '영감', en: 'inspiration' },
 		support: { sym: '♥', cls: 'supRoleSupport', kr: '후원', en: 'support' },
 		contrib: { sym: '♣', cls: 'supRoleContrib', kr: '기여', en: 'contributor' }
 	};
-	// 영감·후원 = Threads 등 큐레이션. (Threads 프로필 사진은 빌드타임 self-host 후 image 채움 — 핫링크 금지)
-	const CURATED: Person[] = [
-		{ handle: '@youngchangjo', url: 'https://www.threads.com/@youngchangjo', kind: 'insp', postUrl: 'https://www.threads.com/@youngchangjo/post/DZC_jobCfO6' },
-		{ handle: '@wannabewrit', url: 'https://www.threads.com/@wannabewrit', kind: 'support' },
-		{ handle: '@ryusw007', url: 'https://www.threads.com/@ryusw007', kind: 'support' }
-	];
-	// 후원해주신 분 — 동의하신 분 닉네임만. 비어 있으면 섹션 숨김.
-	interface Donor { name: string; url?: string }
-	const DONORS: Donor[] = [
-		// 운영자: 동의받은 Buy Me a Coffee 후원자 2분 기입 — { name: '닉네임', url: '...' }
-	];
+	const curated = $derived(links.people ?? []); // 영감·후원 큐레이션(SSOT)
+	const donors = $derived(links.donors ?? []); // 후원해주신 분 — 비면 섹션 숨김
 
 	const monogram = (h: string) => (h.replace(/^@/, '')[0] ?? '?').toUpperCase();
 
 	// GitHub 기여자 자동 — 다이얼로그 첫 오픈 시 1회(localStorage 6h 캐시). 봇·소유자 제외.
-	let ghPeople = $state<Person[]>([]);
+	let ghPeople = $state<SupportPerson[]>([]);
 	let ghFetched = false;
 	$effect(() => {
 		if (!open || ghFetched) return;
@@ -51,9 +40,9 @@
 		});
 	});
 	// 큐레이션 + GitHub 자동, 핸들 중복 제거(큐레이션 우선).
-	const people = $derived.by<Person[]>(() => {
-		const seen = new Set(CURATED.map((p) => p.handle.toLowerCase()));
-		return [...CURATED, ...ghPeople.filter((p) => !seen.has(p.handle.toLowerCase()))];
+	const people = $derived.by<SupportPerson[]>(() => {
+		const seen = new Set(curated.map((p) => p.handle.toLowerCase()));
+		return [...curated, ...ghPeople.filter((p) => !seen.has(p.handle.toLowerCase()))];
 	});
 
 	let copied = $state(false);
@@ -120,11 +109,11 @@
 				{/if}
 
 				<!-- ③ 후원해주신 분들 -->
-				{#if DONORS.length}
+				{#if donors.length}
 					<section class="supSec">
 						<div class="supSecLabel">{T('후원해주신 분들', 'SUPPORTERS')}</div>
 						<div class="supChips">
-							{#each DONORS as d (d.name)}
+							{#each donors as d (d.name)}
 								{#if d.url}
 									<a class="supDonor" href={d.url} target="_blank" rel="noopener"><Heart size={12} /> {d.name}</a>
 								{:else}

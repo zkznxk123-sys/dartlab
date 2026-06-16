@@ -1,21 +1,12 @@
 // 로컬 셸이 TerminalSurface 에 주입하는 부품 — hosts(뷰어/재무 lazy 로더)·links(헤더 SNS).
 // hosts = null → ViewerOverlay 가 viewer 포트 URL(iframe /analysis/[code]/viewer)을 쓴다. 컴포넌트 임베드는
 // 단계-6(viewer surface 추출) 후 검토 — 그때 viewerStudio 로더를 채운다.
-import type { TerminalBrandLinks, TerminalHosts } from '@dartlab/ui-surfaces/terminal';
+import { DARTLAB_BRAND_LINKS, type TerminalHosts } from '@dartlab/ui-surfaces/terminal';
 
 export const localHosts: TerminalHosts = {
 	viewerStudio: null,
 	financeDialog: null
 };
 
-// 헤더 SNS 외부 링크 — dartlab 공개 정체성(브랜드 링크, 데이터 URL 아님).
-export const localLinks: TerminalBrandLinks = {
-	repo: 'https://github.com/eddmpython/dartlab',
-	coffee: 'https://buymeacoffee.com/eddmpython',
-	youtube: 'https://www.youtube.com/@eddmpython',
-	threads: 'https://www.threads.net/@dartlab.ai',
-	instagram: 'https://www.instagram.com/dartlab.ai/',
-	// 후원 — GitHub Sponsors + 계좌(공개 후원 계좌).
-	sponsors: 'https://github.com/sponsors/eddmpython',
-	account: { bank: '토스뱅크', number: '1002-0421-4626', holder: '김주현' }
-};
+// 헤더 SNS·후원 링크 = dartlab 공통 SSOT(DARTLAB_BRAND_LINKS) 그대로 주입 — landing 셸과 동일 정본.
+export const localLinks = DARTLAB_BRAND_LINKS;

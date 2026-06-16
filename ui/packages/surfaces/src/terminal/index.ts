@@ -7,9 +7,13 @@ export type { Engine } from './lib/engine';
 export type {
 	TerminalHosts,
 	TerminalBrandLinks,
+	SupportPerson,
+	SupportDonor,
 	ViewerStudioHostProps,
 	FinanceDialogHostProps
 } from './lib/hosts';
+// dartlab 브랜드·후원 SSOT — landing·local 셸 공통 주입 정본.
+export { DARTLAB_BRAND_LINKS } from './lib/brandLinks';
 export { LAST_SYM_KEY } from './lib/lastSymbol';
 export { warmCompany } from './lib/warmup';
 // 데이터 형태 — landing 셸 글루(terminal-shell/routeLoad.ts)의 RawData 조립 + ui/web 브리지(localTerminalData) 소비.

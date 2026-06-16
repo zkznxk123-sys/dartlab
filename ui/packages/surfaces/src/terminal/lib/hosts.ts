@@ -29,16 +29,37 @@ export interface TerminalHosts {
 	financeDialog: (() => Promise<{ default: Component<FinanceDialogHostProps> }>) | null;
 }
 
-/** 셸 식별 외부 링크 — 헤더 SNS·이슈·후원 칩. 셸(landing·ui/web)이 자기 brand 에서 주입한다.
- * surface 가 brand 정체성을 소유하지 않게 하는 주입 계약(역의존 제거, 단계-4b). 값은 공개 URL. */
+/** 후원·기여 센터에 표시할 사람. kind = 뱃지(♦영감/♥후원/♣기여). image 없으면 모노그램.
+ * 영감·후원 = 큐레이션(SSOT), 기여 = GitHub contributors 자동(런타임). */
+export interface SupportPerson {
+	handle: string;
+	url: string;
+	image?: string;
+	kind: 'insp' | 'support' | 'contrib';
+	postUrl?: string; // 영감 인물의 "스레드 보기" 링크
+}
+
+/** 후원해주신 분(BMC 등) — 동의분만. */
+export interface SupportDonor {
+	name: string;
+	url?: string;
+}
+
+/** 셸 식별 외부 링크 — 헤더 SNS·이슈·후원 칩. 셸(landing·ui/web·local)이 주입한다.
+ * surface 가 brand 정체성을 소유하지 않게 하는 주입 계약(역의존 제거, 단계-4b). 값은 공개 URL.
+ * 정본 = `brandLinks.ts` 의 DARTLAB_BRAND_LINKS — 셸들이 그 상수를 공통 주입(SSOT). */
 export interface TerminalBrandLinks {
 	repo: string;
 	coffee: string;
 	youtube: string;
 	threads: string;
 	instagram: string;
-	/** GitHub Sponsors 후원 URL — 미설정 셸은 생략(후원 박스에서 해당 줄 숨김). */
+	/** GitHub Sponsors 후원 URL — 미설정이면 후원 박스에서 해당 줄 숨김. */
 	sponsors?: string;
-	/** 계좌 후원 — 미설정 셸은 생략(후원 박스에서 해당 줄 숨김). 값은 공개 후원 계좌. */
+	/** 계좌 후원 — 미설정이면 후원 박스에서 해당 줄 숨김. 값은 공개 후원 계좌. */
 	account?: { bank: string; number: string; holder: string };
+	/** 영감·후원 큐레이션 인물 — 미설정이면 빈 목록. 기여(♣)는 런타임 GitHub 자동이라 여기 없음. */
+	people?: SupportPerson[];
+	/** 후원해주신 분 — 미설정/빈 목록이면 섹션 숨김. */
+	donors?: SupportDonor[];
 }

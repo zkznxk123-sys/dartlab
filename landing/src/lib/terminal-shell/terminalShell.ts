@@ -1,21 +1,12 @@
-// landing 셸이 TerminalSurface 에 주입하는 부품 — /terminal · /lab/terminal-dev 공용 SSOT.
+// landing 셸이 TerminalSurface 에 주입하는 부품 — /terminal · /lab/terminal-dev 공용.
 // hosts = 뷰어 컴포넌트 lazy 로더(동적 import 리터럴은 셸 소유 → 청크 분리 유지, terminal→viewer 역의존 제거).
-// links = 헤더 SNS 외부 링크(셸 brand 에서 파생 → surface 가 brand 정체성 소유 안 함, 단계-4b).
-import { brand } from '$lib/brand';
-import type { TerminalBrandLinks, TerminalHosts } from '@dartlab/ui-surfaces/terminal';
+// links = dartlab 공통 브랜드·후원 SSOT(DARTLAB_BRAND_LINKS) 그대로 주입 — local 셸과 동일 정본.
+import { DARTLAB_BRAND_LINKS, type TerminalHosts } from '@dartlab/ui-surfaces/terminal';
 
 export const terminalHosts: TerminalHosts = {
 	viewerStudio: () => import('@dartlab/ui-surfaces/viewer').then((m) => ({ default: m.ViewerStudio })),
 	financeDialog: () => import('@dartlab/ui-surfaces/viewer').then((m) => ({ default: m.FinanceDialog }))
 };
 
-export const terminalLinks: TerminalBrandLinks = {
-	repo: brand.repo,
-	coffee: brand.coffee,
-	youtube: brand.youtube,
-	threads: brand.threads,
-	instagram: brand.instagram,
-	// 후원 — GitHub Sponsors + 계좌(공개 후원 계좌).
-	sponsors: 'https://github.com/sponsors/eddmpython',
-	account: { bank: '토스뱅크', number: '1002-0421-4626', holder: '김주현' }
-};
+// SNS·후원 링크 = dartlab SSOT 공통 주입(landing·local 동일). 변경은 brandLinks.ts 한 곳.
+export const terminalLinks = DARTLAB_BRAND_LINKS;
