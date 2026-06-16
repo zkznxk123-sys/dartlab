@@ -81,7 +81,7 @@ def _foldTrack(out: dict[str, list[dict[str, str]]], codedDf: pl.DataFrame, trac
 
 
 def buildCompanyIndex(
-    naverDf: pl.DataFrame, nameToCode: dict[str, str], *, gdeltDf: pl.DataFrame | None = None, perCompany: int = 300
+    naverDf: pl.DataFrame, nameToCode: dict[str, str], *, gdeltDf: pl.DataFrame | None = None, perCompany: int = 2000
 ) -> dict[str, list[dict[str, str]]]:
     """두 트랙 뉴스 → 종목코드별 리스트 (순수 변환, HF 무의존). item.track 으로 좌우 구분.
 
@@ -260,7 +260,12 @@ def _resolveToken() -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="종목별 뉴스 인덱스(naver+gdelt) 빌드 + private HF push")
     ap.add_argument("--no-push", action="store_true", help="빌드만, HF push 생략")
-    ap.add_argument("--per-company", type=int, default=300, help="트랙별 종목당 최대 뉴스 건수")
+    ap.add_argument(
+        "--per-company",
+        type=int,
+        default=2000,
+        help="트랙별 종목당 최대 뉴스 건수(안전 backstop — 실데이터는 수집창·DOC 250/질의 한계로 그 아래에서 자연 수렴)",
+    )
     ap.add_argument("--gdelt-years", type=int, default=1, help="GDELT DOC 질의 연도 수(1=올해 증분, 5=과거 backfill)")
     args = ap.parse_args(argv)
 
