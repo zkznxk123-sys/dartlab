@@ -75,6 +75,30 @@ alpha/beta/IR(기존)·up/down capture ratio·tracking error·active return. **a
 ### 4.8 미래/시나리오 — 연결만
 Monte Carlo 전방 투영·스트레스 시나리오 = `scenario-simulator/` 소유. 본 랩은 asOf 포트 상태를 *초기조건으로 넘기는* 연결(P5)만.
 
+### 4.9 ★프리셋 다양화 — close-only 6개 너머 (실측 기반 재사용)
+현 6 프리셋(maCross·rsiRevert·bbRevert·macdCross·donchian·momentum)의 약점 = **전부 종가(close)만 쓴다**(거래량·고저 무시 → fake breakout·고정폭 손절 취약). `synth/indicators`(vatr·vobv·vstochastic 등 38+)·`quant/signal`(volume/momentum/event/flow)·`quant/strategy/styles`(8종) **재사용**으로 다양화:
+| 후보 | 차별 | 입력 | 단계 |
+|---|---|---|---|
+| 거래량 확인 MA(VWMA+OBV) | fake breakout 제거 | close+vol | P1.5 |
+| 변동성 필터(모든 진입 게이팅) | 추세시작 spike 회피 | realized vol | P1.5 |
+| ATR 동적 손절(전 프리셋 옵션) | 고정폭 탈피 | high/low | P2 |
+| Supertrend · Stochastic RSI · ROC | 지표 다양화 | OHLC | P1.5 |
+| 스타일 8종(trendFollow·meanReversion·breakout 등) | 학술 근거 | quant/styles 재사용 | P2 |
+
+### 4.10 ★단일종목 펀더 게이트 — moat (실측 확정, 차선의 한방)
+유니버스 팩터 *랭킹*은 생존편향(§아래)으로 막혔으나, **한 종목의 재무 건강이 좋을 때만 진입**은 단일종목이라 생존편향 무관 + PIT 근사만 하면 정직. 가격 백테스터가 못 하는 panel moat.
+- 예: "Piotroski≥6 **이고** 골든크로스일 때만 매수" · "Altman Z 위험구간이면 진입 금지" · "Beneish 이익조작 의심이면 청산".
+- 재사용: `quant/alphas/` **학술 팩터 9개 이미 구현**(Piotroski F·Altman Z·Beneish M·QMJ·BAB·q-factor·earnings surprise·fundamental momentum·accruals).
+- 시각화 = 가격 페인 **배경 음영**(02 §1.5 ①, 분기 계단·PIT 근사). 백테스트 진입 *게이트*(조건 빌더 항)로 결합 — 단일종목 랭킹 아님.
+
+### 4.11 ★실측 판정 — 유니버스 팩터 한방의 데이터 천장 (정직)
+| 전제 | 판정 | 함의 |
+|---|---|---|
+| PIT(시점 정직) | **부분가능** | panel엔 공시일 없음(`rceptNo`만) → `allFilings.rcept_dt` join 근사. 정정공시 버전 미보존. 펀더 게이트는 공시일 이후만 켜짐. |
+| 생존편향 | **❌ 불가(천장)** | kindList=현재 상장사만, 상폐 panel 없음. **유니버스 팩터 백테스트 = 지금은 거짓**(망한 회사 빠져 수익률 뻥튀기). |
+| 팩터 필드 | **부분가능** | account 축 과거 시계열 재계산 가능. alphas 9개 재사용. |
+→ **유니버스 팩터 랭킹 백테스트는 데이터 인프라(상폐사 재수집+연도별 kindList 스냅샷) 선결 = 별도 트랙**(백테스팅 아님). 단일종목 펀더 게이트(4.10)는 *지금* 정직하게 가능.
+
 ## 5. 성공 지표 (차트 수·KPI 수 아님)
 
 - **눈으로 비교 가능한가**: 두 전략 + 조합이 *공유 절대축*에 그려져 "+30% vs +12% vs 조합 +22%"가 한 자에서 읽히는가(per-series 정규화 함정 회피).

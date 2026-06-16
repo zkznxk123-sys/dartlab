@@ -34,6 +34,27 @@
 
 ---
 
+## P1.5 — 프리셋 다양화 + 조건 빌더 조작 패널 + 펀더 게이트 (★운영자 강조)
+
+> "6 드롭다운"을 깨는 핵심 단계. 프리셋 다양화 + **전문가급 조작 패널(조건 빌더)** + **단일종목 펀더 게이트(moat)** + 조건 레인 시각화(02 §1.5).
+
+### AC
+1. **프리셋 다양화**(close-only 탈피): 거래량 확인 MA(VWMA+OBV)·변동성 필터·Supertrend·Stochastic RSI·ROC + 스타일 8종(`quant/strategy/styles` 재사용). 입력에 high/low/volume 활용.
+2. **조건 빌더 조작 패널**: 진입/청산 조건 다중 조합(AND/OR), 각 조건 = 지표 비교 또는 펀더 게이트. `quant/strategy/rule.py` DSL 브라우저 이식(01 §2.4). best/optimal/추천 단어 금지·OOS 강제·거래<10 수치 숨김(과적합 가드).
+3. **펀더 게이트(moat)**: `quant/alphas` 9개(Piotroski·Altman Z·Beneish 등)를 진입 게이트로. PIT 근사(`rcept_dt` 이후)·계단·단일종목(생존편향 무관) 라벨.
+4. **조건 레인 시각화**(02 §1.5): 조건별 on/off 스트립 서브페인 + 펀더 게이트 배경 음영 + AND 합성↔진입 마커 수직 정렬. 리플레이 동시 절단.
+
+### 영향 파일/함수
+- **엔진**: `lib/backtest/conditions.ts`(신규) — `Condition`/`StrategyRule` 평가, `signal` 일반화(01 §2.4). `synth/indicators` 미러(vatr·vobv·vstochastic) 또는 브라우저 지표 재사용. 펀더 게이트 시계열 = prebuilt(floor) 또는 로컬 라이브.
+- **데이터**: 펀더 게이트용 PIT 시계열 — panel account/alphas를 `rcept_dt` join으로 분기 계단 생성(`rt` PricePort/FilingPort 경유). 생존편향 무관(단일종목).
+- **레이어**: `btLayer` 조건 레인 draw(서브페인 `figures:[]` on/off) + 가격 페인 게이트 배경 음영.
+- **UI**: `StrategyConsole` 조건 빌더 섹션(조건 행 추가/삭제·지표/펀더 선택·연산자·임계·AND/OR).
+
+### 테스트 / 롤백 / 위험
+조건 평가 단위(AND/OR·PIT 게이트 계단)·조건 레인↔진입 정렬·펀더 게이트 PIT(공시일 이전 미적용). 위험: **조건 빌더 UI+엔진(높)**·펀더 PIT 조인 데이터 배선(중). 가역(conditions.ts·레인 draw·빌더 UI 제거→프리셋 select 복원).
+
+---
+
 ## P2 — 포지션·거래 정밀 (`runPass` 확장)
 
 ### AC

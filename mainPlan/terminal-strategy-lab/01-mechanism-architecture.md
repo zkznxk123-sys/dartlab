@@ -50,6 +50,24 @@ BT effect를 N-aware로: `runPortfolioBacktest(displaySeries(), btStrategies, op
 ### 2.3 미래 — mode 토글
 `mode:'live'|'simulate'` 신설(replay·sim.play 상호배타). live=현 동작. simulate=xAxis 미래 패딩 + fan band(CMP draw 변형). asOf 포트 상태(전략별 포지션·자본·가중치) → sim 초기조건. **실제 미래 path는 시뮬 코어 졸업 후**(P5는 계약·토글·anchor까지).
 
+### 2.4 ★조건 빌더 + 펀더 게이트 — 규칙을 시간 레인으로 (02 §1.5 시각화의 데이터 측)
+조작 패널 조건 빌더 = `quant/strategy/rule.py` Rule DSL(`entry/exit` boolean·AND/OR)의 브라우저 이식. 각 조건이 시간축 boolean 배열 → 조건 레인 + AND/OR 합성 → 진입 시그널.
+```ts
+interface Condition {
+  kind: 'indicator' | 'fundamentalGate';
+  // indicator: RSI<30, 가격>MA200 등 — closes/지표 배열에 비교 (브라우저 계산)
+  // fundamentalGate: Piotroski≥6, AltmanZ>안전, Beneish<의심 — panel PIT 조인
+  series: (number|null)[];   // 봉별 값(지표) 또는 분기 계단(펀더, 공시일 rcept_dt 이후만 채움)
+  op: '<'|'>'|'>='|'<='|'crosses'; threshold: number;
+  satisfied: Uint8Array;     // 봉별 0/1 → 조건 레인 렌더
+}
+interface StrategyRule { entry: Condition[]; exit: Condition[]; combine: 'AND'|'OR' }
+// signal[i] = combine(entry conditions satisfied at i)  — 기존 BtPresetDef.signal 일반화
+```
+- **펀더 게이트 데이터**: `quant/alphas`(Piotroski 등 9개)·panel account 필드를 *과거 시점별로* 산출 → `rcept_dt` 이후 봉부터 그 분기 값 적용(PIT 근사·계단). 생존편향 무관(단일종목). 브라우저 floor면 prebuilt 시계열, 로컬이면 라이브 계산.
+- **렌더(02 §1.5)**: 조건별 `satisfied` → 조건 레인 서브페인(`figures:[]` draw, on/off 스트립). 펀더 게이트 = 가격 페인 **배경 음영**(분기 계단). AND 합성 레인이 진입 마커와 수직 정렬. 레인 LOD: 줌아웃=합성만, 줌인=개별 펼침.
+- **정직**: 펀더 게이트는 PIT 근사(공시일 기준)·계단·생존편향 무관 라벨. 유니버스 랭킹 아님(단일종목 게이트).
+
 ## 3. 엔진 계약 (P1, `runPass` 무수정)
 
 ```ts
