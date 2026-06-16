@@ -5246,13 +5246,13 @@
     },
     {
       "id": "engines.search",
-      "bodyPreview": "## 엔진 역할\n\n`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 \"완전한 문서\" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색. scope=\"auto\" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe). 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.\n\n단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — \"어떤 회사가 유상증자했나\" 같은 질문 한정.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 제목 검색 (default scope=\"auto\" 가 자동 판별)\nresult = dartlab.search(\"유상증자\")\n# → DataFrame: score · rcept_no · corp_name · report_nm · scope · dartUrl\n\n# 2. 본문 검색 (개념/내용형 쿼리)\nresult = dartlab.search(\"반도체 HBM 투자\", scope=\"content\")\n\n# 3. 명시적 scope\nresult = dartlab.search(\"환율 리스크\", scope=\"content\")\n\n# 4. 종목/기간 필터\nresult = dartlab.search(\"대표이사 변경\", corp=\"005930\",\n                        start=\"20240101\", end=\"20251231\")\n\n# 5. 단일 종목 공시는 search 가 아니라 Company\nc = dartlab.Company(\"005930\")\ndisclosures = c.disclosure()    # 전체 시계열\nrecent = c.liveFilings()        # 라이브\n```\n\n## 강행 호출 룰 (agent 답변 품질 회귀 차단)\n\n횡단 키워드 검색 한정. 다음 4 룰 강행:\n\n1. **단일 종목 공시 질문에 search 호출 금지** — `Company(code).disclosure()` 또는 `Company(code).liveFilings()` 가 정공. search 는 *어떤 회사가 X 했나* 류 횡단 질문만.\n2. **검색 결과 상위 N (보통 10~20) 만 답변 본문에 인용** — 전체 결과 dump 금지.\n3. **각 결과의 `<docRef:rcept_no>` + `dartUrl` inline 표기 필수**. 인용 형식: `[회사명](dart",
-      "title": "Search (공시 의미·본문·제목 검색)",
+      "bodyPreview": "## 엔진 역할\n\n`search` 는 DART allFilings, DART panel, EDGAR panel, public news 를 sourceRef 보존 본문 인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색한다. scope=\"auto\" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe).\n\n제품화 계약은 `mainPlan/search-productization` 을 따른다. 결과 row 는 `source/sourceRef/dataAsOf/snippet/answerable/notAnswerableReason/fieldCards` 를 가져야 한다. 뉴스와 공시는 같은 표면에 나오지만 source intent 는 hard isolation 이다. 신선도 — 본문 인덱스는 source catalog delta + monthly main compaction 기준이며, 최근 며칠은 `Company.liveFilings()` 또는 source별 live path 병행 권장. canonical source catalog 는 monthly main full HF pull bootstrap 또는 previous-manifest drop guard 를 통과한 source-owner run 으로만 운영 증거가 된다.\n\n단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — \"어떤 회사가 유상증자했나\" 같은 질문 한정.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 제목 검색 (default scope=\"auto\" 가 자동 판별)\nresult = dartlab.search(\"유상증자\")\n# → DataFrame: score · rcept_no · corp_name · report_nm · scope · dartUrl\n\n# 2. 본문 검색 (개념/내용형 쿼리)\nresult = dartlab.search(\"반도체 HBM 투자\", scope=\"content\")\n\n# 3. 명시적 scope\nresult = dartlab.search(\"환율 리스크\", scope=\"content\")\n\n# 4. 뉴스 source hard isolation\nresult = dartlab.search(\"공시 말고 뉴스로 환율 기사\", scope=\"news\")\n\n# 5. 종목/기간 필터\nresult = dartlab.search(\"대표이사 변경\", corp=\"005930\",\n                        start=\"20240101\", end=\"20251231\")\n\n# 6. 단일 종목 공시는 search 가 아니라 Company\nc = dart",
+      "title": "Search (공시·뉴스 의미·본문 검색)",
       "category": "engines",
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope=\"auto\"(기본)는 *통합 검색* — 음절 bigram BM25 에 큐레이션 동의어·결정론 라우팅 canon 확장 lane 을 RRF 융합해 구어·약어 질의도 회수(임베딩·GPU 0, always-safe). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '통합 검색', '제목 매칭', '본문 BM25', 'search'.",
+      "purpose": "Search 는 DART allFilings, DART panel, EDGAR panel, public news 를 sourceRef 보존 본문 인덱스로 검색한다. scope=\"auto\"(기본)는 sparse R* 통합 검색이며, source intent hard isolation 과 answerability/evidence card 를 붙인다. 단일 종목 공시는 `Company.disclosure()` / `Company.liveFilings()` 우선. 트리거 — '공시 검색', '뉴스 검색', '통합 검색', '본문 BM25', 'search'.",
       "whenToUse": [
         "search",
         "공시 검색",
@@ -5261,19 +5261,20 @@
         "유상증자",
         "대표이사 변경",
         "반도체 HBM 투자",
-        "환율 리스크"
+        "환율 리스크",
+        "뉴스 원문"
       ],
       "inputs": [
         "검색어 (한국어)",
         "corp 필터 (종목코드 또는 회사명)",
         "start / end (YYYYMMDD)",
-        "scope (auto / title / content / both)",
+        "scope (auto / title / content / both / news)",
         "topK"
       ],
       "requiredInputs": [],
       "outputs": [
         "검색 결과 DataFrame",
-        "score · rcept_no · corp_name · report_nm · dartUrl"
+        "score · source · sourceRef · dataAsOf · snippet · answerable · notAnswerableReason · fieldCards · dartUrl"
       ],
       "apiRefs": [
         "search"
@@ -5320,12 +5321,17 @@
         "단일 종목 공시 검색에 search 사용 (Company(code).disclosure() / liveFilings 우선)",
         "0 건 반환 시 키워드 변형으로 round 반복 — 인덱스 stale 가능성, 즉시 다른 경로 fallback",
         "title 과 content 가중치 합산 — 실험 116 에서 품질 저하 확인됨, 합산 금지",
-        "최근 N 일 공시 누락 — 매일 자동 증분 미완성"
+        "최근 N 일 공시/뉴스 누락 — source catalog delta 또는 live path 확인",
+        "source owner runner 의 부분 데이터가 full source catalog 로 publish 됨 — previous-manifest drop guard 또는 monthly main canonical bootstrap 확인",
+        "sourceRef/dataAsOf 없는 결과 — 제품 결과로 사용 금지",
+        "no-answer trap 에 answerable 결과 생성 — canary/gold release block"
       ],
       "forbidden": [
         "인덱스 신선도 (dataAsOf) 명시 없이 검색 결과를 *최신* 으로 답변 금지.",
         "title scope 와 content scope 점수 합산 금지 (별도 엔진 — 합산은 품질 저하).",
-        "search 0 건 시 키워드 변형 반복 호출 금지 (즉시 Company.disclosure 또는 scan 으로 전환)."
+        "search 0 건 시 키워드 변형 반복 호출 금지 (즉시 Company.disclosure 또는 scan 으로 전환).",
+        "source intent 를 soft fallback 으로 처리 금지. `뉴스만`, `공시 말고 뉴스`, `뉴스 말고 공시` 는 hard isolation.",
+        "real query-log gold 없이 release graduation 선언 금지."
       ],
       "examples": [
         "유상증자 검색 (제목 매칭, \"유상증자\" 키워드)",
@@ -5353,13 +5359,13 @@
     },
     {
       "id": "engines.search.disclosureSearch",
-      "bodyPreview": "## 엔진 역할\n\n`search` 엔진의 *DART 공시 검색 패턴* SSOT sub-spec. base SKILL `engines.search` 가 BETA 엔진 자체 동작을 정의한다면, 본 sub-spec 은 *언제 어느 진입점을 쓰는지* 분기 룰 단일화. AI 답변 회귀 (`search 단일 종목 호출 사고`) 차단의 1 차 게이트.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# === 경로 A: 단일 종목 공시 (Company-bound) ===\nc = dartlab.Company(\"005930\")\n\n# A1. 전체 시계열\ndisclosures = c.disclosure()\n# → DataFrame: rcept_dt · rcept_no · report_nm · ...\n\n# A2. 라이브 (DART API 직접, 최신성 보장)\nrecent = c.liveFilings()\n# → 최근 N 건 (인덱스 stale 우회)\n\n# A3. 특정 공시 본문\nbody = c.readFiling(rcept_no=\"20240801000123\")\n\n# === 경로 B: 횡단 키워드 검색 (search 엔진) ===\n\n# B1. 제목 검색 (auto 가 자동 분기)\nresult = dartlab.search(\"유상증자\")\n\n# B2. 본문 검색 (개념형 쿼리)\nresult = dartlab.search(\"반도체 HBM 투자\", scope=\"content\")\n\n# B3. 종목/기간 필터\nresult = dartlab.search(\"대표이사 변경\", corp=\"005930\",\n                        start=\"20240101\", end=\"20251231\")\n```\n\n## 호출 동작\n\n### 진입점 분기 룰 (강행)\n\n| 질문 패턴 | 정공 경로 | 금지 경로 |\n|---|---|---|\n| \"삼성전자 최근 공시는?\" | `c.liveFilings()` 또는 `c.disclosure()` | `dartlab.search(\"삼성전자\")` ❌ |\n| \"유상증자한 회사 있어?\" | `dartlab.search(\"유상증자\")` | Company 순회 ❌ |\n| \"삼성전자 유상증자 이력?\" | `c.disclosure()` 필터 또는 `search(corp=\"005930\")` | `search` 전체 검색 후 필터 ❌ |\n| \"반도체 HBM 언급 회사?\" | `dartlab.search(\"반도체 HBM 투자\", scope=\"content\")` | Company 순회 ❌ |\n\n### scope 자동 분기 (auto)\n\n`scope=\"auto\"` (기본) 가 쿼리 길이 + 단어 수로 title/content 자동 분기:\n\n- 짧은 명사구 (1~2 단어, \"유상증자\" / \"대표이사 변경\") → `title`\n- 긴 개념형 (3+ 단어, \"반도체 HBM 투자 트렌드\") → `content`\n- 명시 강제: `scope=\"title\"` 또는 `scope=\"content\"`.\n\n`scope=\"both\"` 는 두 결과 별도 컬럼 ",
+      "bodyPreview": "## 엔진 역할\n\n`search` 엔진의 *DART 공시 검색 패턴* SSOT sub-spec. base SKILL `engines.search` 가 BETA 엔진 자체 동작을 정의한다면, 본 sub-spec 은 *언제 어느 진입점을 쓰는지* 분기 룰 단일화. AI 답변 회귀 (`search 단일 종목 호출 사고`) 차단의 1 차 게이트.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# === 경로 A: 단일 종목 공시 (Company-bound) ===\nc = dartlab.Company(\"005930\")\n\n# A1. 전체 시계열\ndisclosures = c.disclosure()\n# → DataFrame: rcept_dt · rcept_no · report_nm · ...\n\n# A2. 라이브 (DART API 직접, 최신성 보장)\nrecent = c.liveFilings()\n# → 최근 N 건 (인덱스 stale 우회)\n\n# A3. 특정 공시 본문\nbody = c.readFiling(rcept_no=\"20240801000123\")\n\n# === 경로 B: 횡단 키워드 검색 (search 엔진) ===\n\n# B1. 제목 검색 (auto 가 자동 분기)\nresult = dartlab.search(\"유상증자\")\n\n# B2. 본문 검색 (개념형 쿼리)\nresult = dartlab.search(\"반도체 HBM 투자\", scope=\"content\")\n\n# B3. 종목/기간 필터\nresult = dartlab.search(\"대표이사 변경\", corp=\"005930\",\n                        start=\"20240101\", end=\"20251231\")\n```\n\n## 호출 동작\n\n### 진입점 분기 룰 (강행)\n\n| 질문 패턴 | 정공 경로 | 금지 경로 |\n|---|---|---|\n| \"삼성전자 최근 공시는?\" | `c.liveFilings()` 또는 `c.disclosure()` | `dartlab.search(\"삼성전자\")` ❌ |\n| \"유상증자한 회사 있어?\" | `dartlab.search(\"유상증자\")` | Company 순회 ❌ |\n| \"삼성전자 유상증자 이력?\" | `c.disclosure()` 필터 또는 `search(corp=\"005930\")` | `search` 전체 검색 후 필터 ❌ |\n| \"반도체 HBM 언급 회사?\" | `dartlab.search(\"반도체 HBM 투자\", scope=\"content\")` | Company 순회 ❌ |\n\n### scope/source 분기\n\n`scope=\"auto\"` (기본) 가 쿼리 길이 + 단어 수로 title/content 자동 분기:\n\n- 짧은 명사구 (1~2 단어, \"유상증자\" / \"대표이사 변경\") → `title`\n- 긴 개념형 (3+ 단어, \"반도체 HBM 투자 트렌드\") → `content`\n- 명시 강제: `scope=\"title\"` 또는 `scope=\"content\"`.\n\n`scope=\"both\"` 는 두 결과 별도 컬럼 — *",
       "title": "Search — DART 공시 검색 패턴 (disclosureSearch)",
       "category": "engines",
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "DART 공시 검색의 *진입점 분기* SSOT — 단일 종목은 `Company.disclosure()` / `liveFilings()`, 횡단 키워드는 `dartlab.search()`. 두 경로의 강행 룰 + stale 가드 + scope 자동 분기 (title/content/auto/both) 단일 정의.",
+      "purpose": "DART 공시·뉴스 검색의 *진입점 분기* SSOT — 단일 종목은 `Company.disclosure()` / `liveFilings()`, 횡단 키워드와 뉴스 의도는 `dartlab.search()`. 두 경로의 강행 룰 + stale 가드 + scope/source 분기 (title/content/auto/both/news) 단일 정의.",
       "whenToUse": [
         "공시 검색",
         "DART 공시",
@@ -5403,10 +5409,10 @@
         "N > 7: search 결과 신뢰 한계 + `c.liveFilings()` 또는 DART API 직접 권장.",
         "단일 종목 답변에 `dartlab.search()` 호출 0 (회귀 가드 1).",
         "0 건 결과 시 키워드 변형 호출 0 (회귀 가드 2).",
-        "`dataAsOf` 표기 100% (회귀 가드 3).",
+        "`dataAsOf/sourceRef` 표기 100% (회귀 가드 3).",
         "content scope 결과 본문 발췌 시 untrusted 마커 (회귀 가드 4).",
-        "[engines.search](/skills/engines.search) — base SKILL (BETA 엔진 자체 동작)",
-        "[engines.company](/skills/engines.company) — `Company.disclosure` / `liveFilings` / `readFiling` 정공 진입점"
+        "source canary pack 에서 source miss / no-answer false accept 0.",
+        "[engines.search](/skills/engines.search) — base SKILL (BETA 엔진 자체 동작)"
       ],
       "recipeSteps": [],
       "requiredEvidence": [],
@@ -7072,7 +7078,7 @@
     },
     {
       "id": "operation.aiEngine",
-      "bodyPreview": "## 엔진 역할\n\n`src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답.\n\nP1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 진입점 — chat-native\nresult = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None)\n\n# 진입점 — workbench (mode=analyze)\nresult = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\")\n\n# MCP 표면\n# ask · run_python · read_skill · read_capability ·\n# web_search · save_artifact · create_user_skill · compile_visual · run_workbench\n```\n\nLLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate 한다.\n\n## 호출 동작\n\n### 1. 3 층 능력 모델 — 모두 dartlab 전역 자산, AI 는 소비자\n\n| 층 | 위치 | 표현 | 누가 쓰나 |\n|---|---|---|---|\n| **L1 Capability** | `src/dartlab/<engine>/` | Python 함수·클래스 + docstring | 사람·AI·MCP·UI |\n| **L2 Skill** | `src/dartlab/skills/specs/<engine>/<id>.md` | markdown spec + frontmatter | 사람·AI·MCP·UI·audit |\n| **L3 Tool** | `src/dartlab/ai/tools/` | canonical tool whitelist (LLM 이 손에 쥠) | AI 전용 |\n\n- L1·L2 는 본 SSOT 의 범위 밖. 본 SSOT 는 L3 와 작업대 (workbench) 만 정의.\n- L2 는 AI 안에 두지 않는다. `dartlab.skills.*` 가 단일 SSOT 인프라 (SkillSpec / searchSkills / compiler). AI 는 공식 Skill OS 의 *read-only 소비자* 이며 spec 작성자나 승격자가 아니다. 예외적으로 `CreateUserSkill` 은 사용자 요청 시 `.dartlab/skills` local user draft 만 작성하고, 공식 skill 은 운영자 검토를 거친 `kind: curated` 자산으로 관리한다.\n\n### 2. 작업대 5 패스\n\n```\nBRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST\n```\n\n각 패스는 LLM 호출 가능한 별도 단계. system prompt 는 패스별 분리 (`workbench/prompts.py`). 같은 분석",
+      "bodyPreview": "## 엔진 역할\n\n`src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답.\n\nP1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 진입점 — chat-native\nresult = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None)\n\n# 진입점 — workbench (mode=analyze)\nresult = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\")\n\n# MCP 표면\n# ask · run_python · read_skill · read_capability ·\n# web_search · external_reach_doctor · save_artifact · create_user_skill · compile_visual · run_workbench\n```\n\nLLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate 한다.\n\n## 호출 동작\n\n### 1. 3 층 능력 모델 — 모두 dartlab 전역 자산, AI 는 소비자\n\n| 층 | 위치 | 표현 | 누가 쓰나 |\n|---|---|---|---|\n| **L1 Capability** | `src/dartlab/<engine>/` | Python 함수·클래스 + docstring | 사람·AI·MCP·UI |\n| **L2 Skill** | `src/dartlab/skills/specs/<engine>/<id>.md` | markdown spec + frontmatter | 사람·AI·MCP·UI·audit |\n| **L3 Tool** | `src/dartlab/ai/tools/` | canonical tool whitelist (LLM 이 손에 쥠) | AI 전용 |\n\n- L1·L2 는 본 SSOT 의 범위 밖. 본 SSOT 는 L3 와 작업대 (workbench) 만 정의.\n- L2 는 AI 안에 두지 않는다. `dartlab.skills.*` 가 단일 SSOT 인프라 (SkillSpec / searchSkills / compiler). AI 는 공식 Skill OS 의 *read-only 소비자* 이며 spec 작성자나 승격자가 아니다. 예외적으로 `CreateUserSkill` 은 사용자 요청 시 `.dartlab/skills` local user draft 만 작성하고, 공식 skill 은 운영자 검토를 거친 `kind: curated` 자산으로 관리한다.\n\n### 2. 작업대 5 패스\n\n```\nBRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST\n```\n\n각 패스는 LLM 호출 가능한 별도 단계. system prompt 는 패스별 분리 (`workb",
       "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
       "category": "operation",
       "categoryTitle": "Operation",
@@ -7111,6 +7117,7 @@
         "InspectDataset",
         "Read",
         "WebSearch",
+        "ExternalReachDoctor",
         "SaveArtifact",
         "CreateUserSkill",
         "CompileVisual",

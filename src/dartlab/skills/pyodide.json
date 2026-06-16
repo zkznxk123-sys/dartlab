@@ -520,7 +520,7 @@
     },
     {
       "id": "engines.search",
-      "title": "Search (공시 의미·본문·제목 검색)",
+      "title": "Search (공시·뉴스 의미·본문 검색)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],

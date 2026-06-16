@@ -1206,9 +1206,9 @@
     },
     {
       "id": "engines.search",
-      "title": "Search (공시 의미·본문·제목 검색)",
+      "title": "Search (공시·뉴스 의미·본문 검색)",
       "category": "engines",
-      "purpose": "Search 는 DART 공시(allFilings + panel 정규화 본문 통합)를 로컬 역인덱스로 검색한다. scope=\"auto\"(기본)는 *통합 검색* — 음절 bigram BM25 에 큐레이션 동의어·결정론 라우팅 canon 확장 lane 을 RRF 융합해 구어·약어 질의도 회수(임베딩·GPU 0, always-safe). 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '통합 검색', '제목 매칭', '본문 BM25', 'search'.",
+      "purpose": "Search 는 DART allFilings, DART panel, EDGAR panel, public news 를 sourceRef 보존 본문 인덱스로 검색한다. scope=\"auto\"(기본)는 sparse R* 통합 검색이며, source intent hard isolation 과 answerability/evidence card 를 붙인다. 단일 종목 공시는 `Company.disclosure()` / `Company.liveFilings()` 우선. 트리거 — '공시 검색', '뉴스 검색', '통합 검색', '본문 BM25', 'search'.",
       "whenToUse": [
         "search",
         "공시 검색",
@@ -1217,19 +1217,20 @@
         "유상증자",
         "대표이사 변경",
         "반도체 HBM 투자",
-        "환율 리스크"
+        "환율 리스크",
+        "뉴스 원문"
       ],
       "nextSkills": [
         "engines.company",
         "engines.scan"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`search` 는 DART 공시(allFilings + panel 정규화 본문을 filing 단위로 통합한 \"완전한 문서\" 색인)를 로컬 역인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색. scope=\"auto\" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe). 신선도 — 본문 인덱스는 월간(`searchIndexMain`) 풀빌드 + 일간(`searchIndexDelta`) allFilings 증분이라 최근 며칠은 `Company.liveFilings()` 병행 권장.\n\n단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — \"어떤 회사가 유상증자했나\" 같은 질문 한정.\n\n## 공개 호출 방식\n\n```python\nimport dartla"
+      "bodyPreview": "## 엔진 역할\n\n`search` 는 DART allFilings, DART panel, EDGAR panel, public news 를 sourceRef 보존 본문 인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색한다. scope=\"auto\" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe).\n\n제품화 계약은 `mainPlan/search-productization` 을 따른다. 결과 row 는 `source/sourceRef/dataAsOf/snippet/answerable/notAnswerableReason/fieldCards` 를 가져야 한다. 뉴스와 공시는 같은 표면에 나오지만 source intent 는 hard isolation 이다. 신선도 — 본문 인덱스는 source catalog delta + monthly main compaction 기준이며, 최근 며칠은 `Company.liveFiling"
     },
     {
       "id": "engines.search.disclosureSearch",
       "title": "Search — DART 공시 검색 패턴 (disclosureSearch)",
       "category": "engines",
-      "purpose": "DART 공시 검색의 *진입점 분기* SSOT — 단일 종목은 `Company.disclosure()` / `liveFilings()`, 횡단 키워드는 `dartlab.search()`. 두 경로의 강행 룰 + stale 가드 + scope 자동 분기 (title/content/auto/both) 단일 정의.",
+      "purpose": "DART 공시·뉴스 검색의 *진입점 분기* SSOT — 단일 종목은 `Company.disclosure()` / `liveFilings()`, 횡단 키워드와 뉴스 의도는 `dartlab.search()`. 두 경로의 강행 룰 + stale 가드 + scope/source 분기 (title/content/auto/both/news) 단일 정의.",
       "whenToUse": [
         "공시 검색",
         "DART 공시",
@@ -1553,7 +1554,7 @@
         "engines.company",
         "operation.philosophy"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답.\n\nP1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 진입점 — chat-native\nresult = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None)\n\n# 진입점 — workbench (mode=analyze)\nresult = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\")\n\n# MCP 표면\n# ask · run_python · read_skill · read_capability ·\n# web_search · save_artifact · create_user_skill · compile_visual · run_workbench\n```\n\nLLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 ele"
+      "bodyPreview": "## 엔진 역할\n\n`src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답.\n\nP1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 진입점 — chat-native\nresult = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None)\n\n# 진입점 — workbench (mode=analyze)\nresult = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\")\n\n# MCP 표면\n# ask · run_python · read_skill · read_capability ·\n# web_search · external_reach_doctor · save_artifact · create_user_skill · compile_visual · run_workbench\n```\n\nLLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWo"
     },
     {
       "id": "operation.aiProductReplatform",
