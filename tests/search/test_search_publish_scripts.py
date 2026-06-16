@@ -288,6 +288,31 @@ def test_search_delta_script_catalog_mode_requires_current_catalog(tmp_path) -> 
     assert "requires DARTLAB_SEARCH_CURRENT_CATALOG" in proc.stdout
 
 
+def test_search_delta_script_catalog_mode_requires_previous_catalog(tmp_path) -> None:
+    import polars as pl
+
+    curr = tmp_path / "curr.parquet"
+    pl.DataFrame([{"source": "allFilings", "rcept_no": "A", "text": "new"}]).write_parquet(curr)
+    env = {
+        **os.environ,
+        "DARTLAB_SEARCH_DELTA_MODE": "catalog",
+        "DARTLAB_SEARCH_PREVIOUS_CATALOG": "",
+        "DARTLAB_SEARCH_CURRENT_CATALOG": str(curr),
+    }
+    proc = subprocess.run(
+        [sys.executable, "-X", "utf8", ".github/scripts/search/buildSearchDelta.py"],
+        cwd=Path.cwd(),
+        env=env,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+    assert proc.returncode == 2
+    assert "requires DARTLAB_SEARCH_PREVIOUS_CATALOG" in proc.stdout
+
+
 def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     text = Path(".github/workflows/searchIndexDelta.yml").read_text(encoding="utf-8")
     assert "delta_mode" in text
@@ -339,6 +364,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "actions/upload-artifact" in text
     assert "Apply manual catalog delta inputs" in text
     assert "DARTLAB_SEARCH_PREVIOUS_CATALOG: ${{ github.event.inputs.previous_catalog || '' }}" not in text
+    assert "--require-previous-catalog" in text
 
 
 def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:

@@ -19,6 +19,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-manifest-set", default="data/dart/searchCatalog/current.source_manifest_set.json")
     parser.add_argument("--env-file", default=os.environ.get("GITHUB_ENV", ""))
     parser.add_argument(
+        "--require-previous-catalog",
+        action="store_true",
+        help="Fail when catalog delta mode cannot prove the previous catalog snapshot.",
+    )
+    parser.add_argument(
         "--expected-sources",
         default=os.environ.get("DARTLAB_SEARCH_EXPECTED_SOURCES", "allFilings,dartPanel,edgarPanel,newsPublic"),
         help="Comma-separated source set required for catalog mode. Empty disables expected-source enforcement.",
@@ -29,18 +34,33 @@ def main(argv: list[str] | None = None) -> int:
     manifests = sorted(sourceDir.glob("*/*.source_manifest.json"))
     catalogs = sorted(sourceDir.glob("*/*.catalog_snapshot.parquet"))
     if not manifests or not catalogs:
+        if args.require_previous_catalog:
+            print("[search-catalog] source manifests/catalogs missing; catalog delta cannot run")
+            return 2
         print("[search-catalog] source manifests/catalogs missing; keep legacy delta mode")
         return 0
     expectedSources = _parseSources(args.expected_sources)
     eligible = _eligibleArtifacts(manifests, catalogs, expectedSources)
     if not eligible["valid"]:
+        if args.require_previous_catalog:
+            print(f"[search-catalog] {eligible['reason']}; catalog delta cannot run")
+            return 2
         print(f"[search-catalog] {eligible['reason']}; keep legacy delta mode")
         return 0
+
+    previous = Path(args.previous) if args.previous else None
+    previousExists = bool(previous and previous.exists())
+    if args.require_previous_catalog and not previousExists:
+        print(f"[search-catalog] previous catalog missing: {previous}; catalog delta cannot run")
+        return 2
 
     outCurrent = Path(args.out_current)
     outCurrent.parent.mkdir(parents=True, exist_ok=True)
     catalogRows = _writeCombinedCatalogs(eligible["catalogs"], outCurrent)
     if catalogRows <= 0:
+        if args.require_previous_catalog:
+            print("[search-catalog] combined catalog empty; catalog delta cannot run")
+            return 2
         print("[search-catalog] combined catalog empty; keep legacy delta mode")
         return 0
     outManifestSet = Path(args.out_manifest_set) if args.out_manifest_set else None
@@ -54,11 +74,10 @@ def main(argv: list[str] | None = None) -> int:
             combinedCatalogRows=catalogRows,
         )
 
-    previous = Path(args.previous) if args.previous else None
     env = {
         "DARTLAB_SEARCH_DELTA_MODE": "catalog",
         "DARTLAB_SEARCH_MAIN_MODE": "catalog",
-        "DARTLAB_SEARCH_PREVIOUS_CATALOG": str(previous) if previous and previous.exists() else "",
+        "DARTLAB_SEARCH_PREVIOUS_CATALOG": str(previous) if previousExists else "",
         "DARTLAB_SEARCH_CURRENT_CATALOG": str(outCurrent),
         "DARTLAB_SEARCH_SOURCE_MANIFESTS": os.pathsep.join(str(path) for path in eligible["manifests"]),
         "DARTLAB_SEARCH_SOURCE_MANIFEST_SET": str(outManifestSet) if outManifestSet is not None else "",

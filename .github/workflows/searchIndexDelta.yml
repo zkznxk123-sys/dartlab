@@ -121,7 +121,9 @@ jobs:
 
       - name: Prepare catalog delta inputs
         if: ${{ github.event.inputs.current_catalog == '' || github.event.inputs.current_catalog == null }}
-        run: uv run python -X utf8 .github/scripts/search/prepareSearchDeltaInputs.py
+        run: >
+          uv run python -X utf8 .github/scripts/search/prepareSearchDeltaInputs.py
+          --require-previous-catalog
         env:
           DARTLAB_SEARCH_EXPECTED_SOURCES: ${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}
 

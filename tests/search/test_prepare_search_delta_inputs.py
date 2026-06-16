@@ -131,6 +131,61 @@ def test_prepare_search_delta_inputs_keeps_legacy_when_expected_source_missing(t
     assert not envFile.exists()
 
 
+def test_prepare_search_delta_inputs_requires_previous_catalog_for_delta(tmp_path) -> None:
+    sourceDir = tmp_path / "searchCatalog" / "allFilings"
+    sourceDir.mkdir(parents=True)
+    (sourceDir / "allFilings.source_manifest.json").write_text(
+        json.dumps(
+            {
+                "source": "allFilings",
+                "sourceVersion": "v1",
+                "schemaVersion": "2026-06",
+                "snapshotScope": "full",
+                "dataAsOf": "20260615",
+                "builtAt": "2026-06-15T00:00:00",
+                "files": [],
+                "totalRows": 1,
+                "changedRows": 1,
+                "deletedRows": 0,
+                "producer": "test",
+            }
+        ),
+        encoding="utf-8",
+    )
+    pl.DataFrame([{"source": "allFilings", "sourceRef": "dart:x", "searchText": "x"}]).write_parquet(
+        sourceDir / "allFilings.catalog_snapshot.parquet"
+    )
+    envFile = tmp_path / "env.txt"
+    current = tmp_path / "current.parquet"
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/prepareSearchDeltaInputs.py",
+            "--source-dir",
+            str(tmp_path / "searchCatalog"),
+            "--previous",
+            str(tmp_path / "missing.previous.parquet"),
+            "--out-current",
+            str(current),
+            "--env-file",
+            str(envFile),
+            "--expected-sources",
+            "allFilings",
+            "--require-previous-catalog",
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    assert proc.returncode == 2
+    assert "previous catalog missing" in proc.stdout
+    assert not current.exists()
+    assert not envFile.exists()
+
+
 def test_prepare_search_delta_inputs_noops_without_artifacts(tmp_path) -> None:
     proc = subprocess.run(
         [

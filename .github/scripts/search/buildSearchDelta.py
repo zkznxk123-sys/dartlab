@@ -105,6 +105,9 @@ def main() -> int:
             print("[delta] catalog mode requires DARTLAB_SEARCH_CURRENT_CATALOG")
             return 2
         previousCatalog, currentCatalog, manifestPaths, expectedSources = _catalogInputsFromEnv()
+        if not previousCatalog or not Path(previousCatalog).exists():
+            print("[delta] catalog mode requires DARTLAB_SEARCH_PREVIOUS_CATALOG")
+            return 2
         from dartlab.providers.dart.search.pipeline import exportDeltaRowsForContentIndex, runCatalogDeltaDryRun
 
         result = runCatalogDeltaDryRun(
