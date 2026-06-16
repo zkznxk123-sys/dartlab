@@ -2,7 +2,7 @@
 // ChartRibbon(전체화면)이 같은 인스턴스를 공유한다 — 상태 중복 0. 차트 인스턴스 명령(드로잉 생성 등)은
 // 상태가 아니므로 콜백으로 — "상태에 요청 넣고 effect 소비" 안티패턴 금지.
 const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
-import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp, type StrategySlot } from '../lib/backtest';
+import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp, type StrategySlot, type StrategyRule, type RulePreset } from '../lib/backtest';
 import { STRAT_COLORS } from './btLayer';
 import { IND_DEFS } from './indicatorParams';
 import { EVENT_CAT_KEYS } from '../lib/eventRail';
@@ -280,6 +280,31 @@ export class ChartCtl {
 	}
 	setBtFocus(i: number) { if (i >= 0 && i < this.btStrategies.length) this.btFocus = i; }
 	clearBtAll() { this.btStrategies = []; this.btFocus = 0; }
+	/** rule 프리셋 추가(편집 가능 — 빌더에서 조건 수정). 전문가급 조작패널. */
+	addRulePreset(rp: RulePreset) {
+		if (this.btStrategies.length >= 3) return;
+		const color = STRAT_COLORS[this.btStrategies.length] ?? STRAT_COLORS[0];
+		this.btStrategies = [...this.btStrategies, { id: `s${++this.btIdSeq}`, preset: 'maCross', params: {}, color, label: rp.kr, rule: rp.make() }];
+		this.btFocus = this.btStrategies.length - 1;
+	}
+	/** 빈 커스텀 룰(직접 조립) 추가 — 진입 1조건·청산 1조건 시드. */
+	addCustomRule() {
+		if (this.btStrategies.length >= 3) return;
+		const color = STRAT_COLORS[this.btStrategies.length] ?? STRAT_COLORS[0];
+		const seed: StrategyRule = {
+			entry: [{ left: 'rsi', leftParams: { period: 14 }, op: '<', right: { kind: 'const', value: 30 } }],
+			entryCombine: 'AND',
+			exit: [{ left: 'rsi', leftParams: { period: 14 }, op: '>', right: { kind: 'const', value: 70 } }],
+			exitCombine: 'OR'
+		};
+		this.btStrategies = [...this.btStrategies, { id: `s${++this.btIdSeq}`, preset: 'maCross', params: {}, color, label: '커스텀', rule: seed }];
+		this.btFocus = this.btStrategies.length - 1;
+	}
+	/** 슬롯 i 의 룰 교체(조건 빌더가 새 룰 객체 조립 후 호출). */
+	setSlotRule(i: number, rule: StrategyRule) {
+		if (i < 0 || i >= this.btStrategies.length) return;
+		this.btStrategies = this.btStrategies.map((s, k) => (k === i ? { ...s, rule } : s));
+	}
 	// setCalcParams 는 동등성 비교 없이 무조건 전봉 재계산 — same-value 가드 필수.
 	setIndParams(name: string, next: number[]) {
 		const cur = this.indParams[name] ?? IND_DEFS[name]?.defaults;
