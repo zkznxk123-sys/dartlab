@@ -67,6 +67,48 @@ def test_pull_search_current_index_follows_manifest_file_sources(tmp_path) -> No
     assert json.loads(previous.read_text(encoding="utf-8"))["fileSources"]["main.npz"].endswith("main.npz")
 
 
+def test_pull_search_current_index_allows_manifest_already_in_target_dir(tmp_path) -> None:
+    remote = tmp_path / "remote"
+    outDir = remote / "dart/contentIndex"
+    previous = outDir / "previous_manifest.json"
+    _writeJson(
+        outDir / "manifest.json",
+        {
+            "publishMode": "manifestPointer",
+            "requiredFiles": ["main.npz"],
+            "fileSources": {"main.npz": "dart/contentIndex/_staging/full-run/main.npz"},
+        },
+    )
+    stage = remote / "dart/contentIndex/_staging/full-run"
+    stage.mkdir(parents=True)
+    (stage / "main.npz").write_bytes(b"main")
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/pullSearchCurrentIndex.py",
+            "--remote-root",
+            str(remote),
+            "--out-dir",
+            str(outDir),
+            "--previous-manifest",
+            str(previous),
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    assert (outDir / "main.npz").read_bytes() == b"main"
+    assert previous.exists()
+
+
 def test_pull_search_current_index_fails_on_missing_required_file(tmp_path) -> None:
     remote = tmp_path / "remote"
     outDir = tmp_path / "contentIndex"

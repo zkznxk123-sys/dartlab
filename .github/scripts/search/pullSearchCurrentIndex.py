@@ -182,6 +182,11 @@ def _fileSources(manifest: dict[str, Any]) -> dict[str, str]:
 
 def _copyFile(src: Path, dst: Path) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if src.resolve() == dst.resolve():
+            return
+    except OSError:
+        pass
     shutil.copyfile(src, dst)
 
 
