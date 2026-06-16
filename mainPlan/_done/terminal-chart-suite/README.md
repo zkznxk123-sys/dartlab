@@ -1,7 +1,9 @@
 # Terminal Chart Suite — 차트 중심 터미널 PRD Index
 
+> ✅ **DONE · _done 이관 (2026-06-16)**: 01 주가/지수 차트(subject 토글·IndexPort)·02 공시 이벤트 레일(discRail)·04 지표 팔레트(econOverlay·SUB_GROUPS) **전부 구현·출시 완료**. 03 백테스팅은 `mainPlan/terminal-strategy-lab/`로 **재기획·분리**(차트=시간기계 다전략, SUPERSEDED — 본 폴더의 03은 이력 보존). 미래 Play 연속은 `../../scenario-simulator/05`가 본 suite를 단방향 소비. 신규 백테스팅 작업 = `terminal-strategy-lab/`.
+
 상태: v0.2 (2026-06-14 — scenario-simulator 에서 분리 신설 후 **4 문서 전부 공통배선(포트/어댑터) 이후 현재기준 정합 완료**. 01·04 는 이미 ui/packages 기준; 02·03 은 v0.3 정합 섹션(02 §1.5 / 03 §0.5)으로 경로·아키텍처·스코프 확정. 전문 4-렌즈 토론 + ground-truth 실측. **착수 = 운영자 go 대기**(코딩 아님 — 본 트랙은 *플랜 완성*까지))
-범위: 메인 주가 차트 위에서 동작하는 **현재/과거** 터미널 기능 — 주가/지수 차트·공시 위치 타임라인·EOD 백테스팅. 미래 방향(Play 시뮬레이션)은 `../scenario-simulator/`가 소유한다.
+범위: 메인 주가 차트 위에서 동작하는 **현재/과거** 터미널 기능 — 주가/지수 차트·공시 위치 타임라인·EOD 백테스팅. 미래 방향(Play 시뮬레이션)은 `../../scenario-simulator/`가 소유한다.
 
 ---
 
@@ -51,13 +53,13 @@ terminal-chart-suite (현재/과거)  ──(소비)──▶  scenario-simulato
 3. [03-backtesting-strategy-tester.md](03-backtesting-strategy-tester.md) — 차트 중심 EOD 백테스팅 Strategy Tester(look-ahead 차단·t종가→t+1시가 체결·비용 기본 ON·RunSpec/ledger/provenance·DSR/PBO 과최적화 가드. 리포트 도크 스크롤). **v0.3 정합(§0.5 SSOT): 엔진 정확성 척추 이미 라이브 실측 → v1 CORE=리포트 도크 4탭+계약 경화(~4파일·2원장+reconcile)·Sensitivity/Robustness/Builder/Python parity 는 별도 PRD DEFER·빈 Robustness 탭 금지.** **v0.4(§0.5.9+§0.6, 4-렌즈 토론): 엔진 SSOT=TS(터미널 floor 실행)+Python(robustness 정본)·겹치는 표면은 golden parity fixture 중재. floor 경계=OOS train/test 분할 시각+2열은 floor 승격(표본이 받침)·DSR/PBO/CPCV 수치는 folk-stat이라 단일종목 floor 금지(로컬 정밀 모드·게이트). BtConfig→전략 콘솔 CORE(버튼 약함 직격). 엔진 갭 3종(Python reconcile·벤치마크상대·parity fixture)=배선/정합. 레드팀 §0.6 가드 5종(통계천장·문구봉인·탐색=과적합경고·벤치편향고지·G1/G2 엔진개선게이트).**
 4. [04-indicator-overlay-palette.md](04-indicator-overlay-palette.md) — 경제·보조지표 오버레이 + 팔레트 조직(2026-06-14, F1). **신규 능력 0** — econOverlay·MACRO_SERIES·ChartMenus/ChartRibbon 전수 팔레트·SUB_GROUPS 이미 라이브. 작업 3건 = SUB_GROUPS 조직 이식·ECON 우선 순서·마퀴 클릭→toggleEcon 배선(정직 분기).
 
-> **참조 규약**: suite 내부 = 01/02/03/04. **시뮬 PRD 바 번호(05 Play·07 통합로드맵·08 valuation·09 정합화 등) = `../scenario-simulator/NN`.** 통합 시퀀싱은 시뮬 07(브리지 문서)이 소유.
+> **참조 규약**: suite 내부 = 01/02/03/04. **시뮬 PRD 바 번호(05 Play·07 통합로드맵·08 valuation·09 정합화 등) = `../../scenario-simulator/NN`.** 통합 시퀀싱은 시뮬 07(브리지 문서)이 소유.
 
 ---
 
 ## 경계 (불가침)
 
-- **시뮬레이터(미래 Play·드라이버 DAG·valuation·신용·정합화)** = `../scenario-simulator/`. 본 suite는 미래를 그리지 않는다.
+- **시뮬레이터(미래 Play·드라이버 DAG·valuation·신용·정합화)** = `../../scenario-simulator/`. 본 suite는 미래를 그리지 않는다.
 - **`terminal-improvement`**(블룸버그식 수평 직조·워치리스트·커맨드바) = 별개. 그 PRD가 ceding 하던 "지수/이벤트레일"은 이제 본 suite 소유(terminal-improvement 경계 노트 정정 동반).
 - **UI 토폴로지**: 본문의 `landing/src/lib/terminal/<rest>` 경로는 stale — 새 SSOT = `ui/packages/surfaces/src/terminal/<rest>`(터미널 전체 이동 ff9099ba0). 각 문서 헤더의 기계적 매핑 규약대로 읽는다.
 

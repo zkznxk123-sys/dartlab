@@ -1,7 +1,7 @@
 # Terminal Strategy Lab — 주가차트=시간기계 전략 백테스팅 PRD
 
 상태: v0.1 (2026-06-16 — 3라운드 전문 토론 + 적대 검증 수렴. **착수 = 운영자 go**)
-범위: 메인 주가 차트 위에서 동작하는 **전문 백테스팅 전략 랩** — 다전략 동시 시각화·비교·조합·리플레이 walk·(단계적) 커서바인딩 리밸런싱·미래 시뮬 연속. 옛 `terminal-chart-suite/03-backtesting-strategy-tester.md`를 **supersede**(폐기·흡수)한다.
+범위: 메인 주가 차트 위에서 동작하는 **전문 백테스팅 전략 랩** — 다전략 동시 시각화·비교·조합·리플레이 walk·(단계적) 커서바인딩 리밸런싱·미래 시뮬 연속. 옛 `_done/terminal-chart-suite/03-backtesting-strategy-tester.md`를 **supersede**(폐기·흡수)한다.
 
 ---
 
@@ -56,7 +56,7 @@
 ## 6. 경계 (불가침)
 
 - **미래(Play·fan·드라이버 DAG·valuation)** = `scenario-simulator/`. 본 랩은 미래 path를 *생성*하지 않고 mode 전환으로 *연결*만.
-- **공시 레일·지수 차트** = `terminal-chart-suite/01·02`. 본 랩은 백테스팅(옛 03)만 흡수.
+- **공시 레일·지수 차트** = `_done/terminal-chart-suite/01·02`. 본 랩은 백테스팅(옛 03)만 흡수.
 - **DSR/PBO·RunSpec SSOT** = 본 PRD(04)로 이관, 시뮬이 재사용.
 - **UI 토폴로지** = `ui/packages/surfaces/src/terminal/`(포트=contracts·런타임=runtime).
 
