@@ -5,7 +5,7 @@ category: engines
 kind: curated
 scope: builtin
 status: observed
-purpose: DART 공시 검색의 *진입점 분기* SSOT — 단일 종목은 `Company.disclosure()` / `liveFilings()`, 횡단 키워드는 `dartlab.search()`. 두 경로의 강행 룰 + stale 가드 + scope 자동 분기 (title/content/auto/both) 단일 정의.
+purpose: DART 공시·뉴스 검색의 *진입점 분기* SSOT — 단일 종목은 `Company.disclosure()` / `liveFilings()`, 횡단 키워드와 뉴스 의도는 `dartlab.search()`. 두 경로의 강행 룰 + stale 가드 + scope/source 분기 (title/content/auto/both/news) 단일 정의.
 whenToUse:
   - 공시 검색
   - DART 공시
@@ -86,7 +86,7 @@ result = dartlab.search("대표이사 변경", corp="005930",
 | "삼성전자 유상증자 이력?" | `c.disclosure()` 필터 또는 `search(corp="005930")` | `search` 전체 검색 후 필터 ❌ |
 | "반도체 HBM 언급 회사?" | `dartlab.search("반도체 HBM 투자", scope="content")` | Company 순회 ❌ |
 
-### scope 자동 분기 (auto)
+### scope/source 분기
 
 `scope="auto"` (기본) 가 쿼리 길이 + 단어 수로 title/content 자동 분기:
 
@@ -95,6 +95,8 @@ result = dartlab.search("대표이사 변경", corp="005930",
 - 명시 강제: `scope="title"` 또는 `scope="content"`.
 
 `scope="both"` 는 두 결과 별도 컬럼 — **점수 합산 금지** (실험 116 에서 합산 품질 저하 확인).
+
+`scope="news"` 또는 뉴스 의도는 public news source 로 hard isolation 한다. `공시 말고 뉴스`, `뉴스만`, `뉴스 원문` 류 질의는 공시로 fallback 하지 않는다. 반대로 `뉴스 말고 공시`, `공시 원문` 류는 news 로 fallback 하지 않는다.
 
 ### 4 강행 룰 (회귀 가드)
 
@@ -120,7 +122,7 @@ Company("005930").liveFilings()
 
 dartlab.search("유상증자")
 → pl.DataFrame                # base SKILL engines.search 참조
-   score · rcept_no · corp_name · report_nm · scope · dartUrl
+   score · source · sourceRef · dataAsOf · snippet · answerable · fieldCards · dartUrl
 ```
 
 ## stale 가드
@@ -145,8 +147,9 @@ dartlab.search("유상증자")
 
 - 단일 종목 답변에 `dartlab.search()` 호출 0 (회귀 가드 1).
 - 0 건 결과 시 키워드 변형 호출 0 (회귀 가드 2).
-- `dataAsOf` 표기 100% (회귀 가드 3).
+- `dataAsOf/sourceRef` 표기 100% (회귀 가드 3).
 - content scope 결과 본문 발췌 시 untrusted 마커 (회귀 가드 4).
+- source canary pack 에서 source miss / no-answer false accept 0.
 
 ## 관련
 
