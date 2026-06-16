@@ -51,7 +51,8 @@
 - **[01-mechanism-architecture.md](01-mechanism-architecture.md)** — 메커니즘을 차트에 박는 법(extendData draw + 리플레이 절단 척추 + mode 토글)·엔진 재사용·데이터 계약·적대검증 정정 2함정.
 - **[02-ui-ux-design.md](02-ui-ux-design.md)** — 확정 UI/UX(전략 콘솔·차트 오버레이·결과 표면·리밸런싱 UI·미래 연속)·타이포·ASCII 목업(단계별).
 - **[03-staging-roadmap.md](03-staging-roadmap.md)** — 단계별 AC·타입계약·영향파일/함수·테스트·롤백·회귀위험.
-- **[04-honesty-and-rigor.md](04-honesty-and-rigor.md)** — 통계 정직 SSOT(§0.6 승계 + 다전략/리밸런싱/selection 신규 가드)·look-ahead·folk-stat 천장·로컬 bonus 경계.
+- **[04-honesty-and-rigor.md](04-honesty-and-rigor.md)** — 통계 정직 SSOT(§0.6 승계 + 다전략/리밸런싱/selection 신규 가드 + §2.8·2.9 유니버스 가드)·look-ahead·folk-stat 천장·로컬 bonus 경계.
+- **[05-universe-backtest.md](05-universe-backtest.md)** — ★유니버스 백테스터(전종목 크로스섹셔널 랭킹, **별도 객체**·거처 `scan/universe/`). 4렌즈 토론 확정: 신규 엔진·가격팩터 P1/재무랭킹 금지·이중벤치·floor 월말 prebuilt/local 일별·U-G1~8 가드·U1~4 단계.
 
 ## 6. 경계 (불가침)
 
