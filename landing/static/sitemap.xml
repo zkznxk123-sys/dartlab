@@ -116,31 +116,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.derivatives</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.derivatives.ivSurface</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.derivatives.putCallSkew</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.derivatives.riskNeutralDensity</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.derivatives.vkospi</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.edgar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -562,26 +537,6 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/operation.ui</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.derivatives.kospi200ImpliedVol</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.derivatives.optionFlowDetector</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.derivatives.putCallSkewSignal</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.derivatives.vkospiRegime</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -2095,10 +2050,112 @@
     <lastmod>2026-04-09</lastmod>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/033780-ktng</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/383220-fnf</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/047050-posco-international</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/AMZN-amazon</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/COST-costco</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/MCD-mcdonalds</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/KO-coca-cola</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/V-visa</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/PEP-pepsico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/SBUX-starbucks</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/259960-krafton</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-09</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/AAPL-apple</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/WMT-walmart</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/MSFT-microsoft</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/MA-mastercard</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/NFLX-netflix</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/ORCL-oracle</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/ADBE-adobe</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/483650-dalba-global</loc>
@@ -2107,10 +2164,130 @@
     <lastmod>2026-04-09</lastmod>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/PG-procter-gamble</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/BKNG-booking-holdings</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/AXP-american-express</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/051910-lg-chem</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/329180-hd-hyundai-heavy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/UNH-unitedhealth</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/CAT-caterpillar</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/ABBV-abbvie</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/009150-samsung-electro-mechanics</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/000720-hyundai-enc</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/009450-kyungdong-navien</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-10</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/AMD-amd</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/UBER-uber</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/TXN-texas-instruments</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/PM-philip-morris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/HD-home-depot</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/CMG-chipotle</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/MO-altria</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/MDLZ-mondelez</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/TMO-thermo-fisher</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/CL-colgate</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/439260-daehan-shipbuilding</loc>
@@ -2119,10 +2296,100 @@
     <lastmod>2026-04-11</lastmod>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/000080-hite-jinro</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/010950-s-oil</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/192820-cosmax</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/NOW-servicenow</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/PYPL-paypal</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/COIN-coinbase</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/282330-bgf-retail</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/001680-daesang</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/028260-samsung-cnt</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/IBM-ibm</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/086280-hyundai-glovis</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-11</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/MU-micron</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/AVGO-broadcom</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/QCOM-qualcomm</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/AMAT-applied-materials</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/CSCO-cisco</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-14</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/004370-nongshim</loc>
@@ -2579,6 +2846,54 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-05-07</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/090430-amorepacific</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/034220-lg-display</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/008770-hotel-shilla</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/214450-pharmaresearch</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/021240-coway</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/012510-douzone</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/326030-sk-biopharm</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/097950-cj-cheiljedang</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-13</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/04-kr</loc>
