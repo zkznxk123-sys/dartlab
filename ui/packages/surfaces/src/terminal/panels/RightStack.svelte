@@ -65,9 +65,10 @@
 	let seenFocusPulse = disclosureFocus.pulse;
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
 	// wrap 안의 그 날짜(data-fdate) 행을 *모두* 각자 박스 중앙으로 스크롤 — 2분할(정기‖비정기 · 네이버‖GDELT)
-	// 양 컬럼에 같은 날짜가 있으면 둘 다 이동(querySelectorAll). centerCol=true 면 첫 박스를 컬럼 뷰포트 중앙에.
-	function scrollWrapToDate(wrap: HTMLElement | null, d: string, centerCol: boolean): void {
-		if (!wrap) return;
+	// 양 컬럼에 같은 날짜가 있으면 둘 다 이동(querySelectorAll). centerCol=true 면 첫 박스를 컬럼 뷰포트 중앙에
+	// (= 그 패널을 화면 안으로 끌어올림). 반환 = 매치 행 있었는지(호출부 우선순위 분기용).
+	function scrollWrapToDate(wrap: HTMLElement | null, d: string, centerCol: boolean): boolean {
+		if (!wrap) return false;
 		const rows = wrap.querySelectorAll(`[data-fdate="${d}"]`);
 		let firstList: HTMLElement | null = null;
 		rows.forEach((node) => {
@@ -86,6 +87,7 @@
 				col.scrollBy({ top: lr2.top + lr2.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
 			}
 		}
+		return firstList !== null;
 	}
 	$effect(() => {
 		const p = disclosureFocus.pulse;
@@ -97,9 +99,9 @@
 		flashDate = null; // 같은 날짜 재클릭도 class off→on 으로 애니메이션 재생되도록 먼저 해제
 		requestAnimationFrame(() => {
 			flashDate = d; // 공시·뉴스 양쪽 [data-fdate==d] 행이 .flash 로 동시 점멸(클래스 바인딩 공유)
-			// 공시(정기/비정기)는 컬럼 중앙까지, 뉴스는 자기 박스 내부 스크롤만(공시가 주 위치라 컬럼 점프는 1회).
-			scrollWrapToDate(filingWrap, d, true);
-			scrollWrapToDate(newsWrap, d, false);
+			// 공시(정기/비정기) 우선 컬럼 센터링. 그 날짜에 공시가 없으면(뉴스-only) 뉴스 패널을 화면으로 끌어올림.
+			const inFiling = scrollWrapToDate(filingWrap, d, true);
+			scrollWrapToDate(newsWrap, d, !inFiling);
 			flashTimer = setTimeout(() => (flashDate = null), 3600);
 		});
 	});
