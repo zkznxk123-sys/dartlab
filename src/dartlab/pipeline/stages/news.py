@@ -193,7 +193,7 @@ def runNaverNews(
         >>> runNaverNews(upload=False)  # doctest: +SKIP
         StageResult(category='newsNaver', ...)
     """
-    maxQ = os.environ.get("NAVER_MAX_QUERIES", "200")
+    maxQ = os.environ.get("NAVER_MAX_QUERIES", "5000")  # 기본=전체 상장사 커버(옛 200=시총상위 100만)
     rc1 = runScript(".github/scripts/sync/syncNaverNews.py", "--once", "--max-queries", maxQ)
     res = StageResult(category="newsNaver")
     if rc1 != 0:
