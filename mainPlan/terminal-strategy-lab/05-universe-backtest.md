@@ -47,13 +47,20 @@ interface RebalanceSnapshot {
   turnover: number; nHeld: number; nEligible: number;
   delistedExits: number; advBreaches: number;   // 정직 카운터
 }
-interface UniverseBtResult {
-  navByBucket: Record<number, number[]>;        // 분위별 NAV (시작 100)
-  ewBench: number[]; indexBench: number[];      // 동일가중 전체 + 지수 (둘 다)
-  rebalances: RebalanceSnapshot[];
-  metrics: UniverseMetrics;                     // equity 헬퍼 재사용 + 턴오버·집중도
-  cashDragPct: number; status: 'ok'|'invalid';
+interface UniverseRun {                          // 한 청산가정의 1회 실행
+  navByBucket: Record<number, number[]>;         // 분위별 NAV (시작 100)
+  ewBench: number[]; indexBench: number[];       // 동일가중 전체 + 지수 (둘 다)
+  metrics: UniverseMetrics;                      // equity 헬퍼 재사용 + 턴오버·집중도
+  cashDragPct: number;
 }
+interface UniverseBtResult {
+  optimistic: UniverseRun;                       // ⓐ 폐지=0손실(마지막 종가)
+  conservative: UniverseRun;                     // ⓑ 폐지=−100손실(완전손실) — 헤드라인 기준
+  delistDependence: number;                      // 두 실행 종착 차이(%p) = 밴드 폭 = 폐지 의존도(U-G1)
+  rebalances: RebalanceSnapshot[];               // 청산가정 무관(선정·턴오버 동일)
+  status: 'ok' | 'invalid';
+}
+// 엔진은 동일 랭킹·체결 경로를 청산가정 2값으로 2회 — 선정/턴오버는 공유, 소멸 청산만 분기(저비용).
 ```
 - **회계 루프**(일별 마킹 + 리밸일 execute): `nav = cash + Σ shares·close(code,t)`. 리밸일 = 신호는 `decisionT`(직전 거래일) 종가까지로 랭킹 → `fillT`(t+1) 시가 청산·매수, 비용 = `turnover × costBp`. 정지(v=0)·결측 = 체결 이연 + cashDrag(forward-fill 금지).
 - **재사용 vs 신규**: 헬퍼 6종 그대로 / 랭킹·eligibility·분위 버킷·holdings 루프·턴오버·이중 벤치 전부 신규.
@@ -103,7 +110,7 @@ interface UniverseBtResult {
 
 | 가드 | 내용 |
 |---|---|
-| **U-G1 생존 보수 청산** | 멤버 소멸 시 마지막 종가 청산 = **금지**(휴지조각 과대평가). 사유 미구분 → **마지막 유효가 −30%(또는 0) 강제 손실 청산**(기본 보수). 합병 프리미엄 상향 보정 금지. 0손실 옵션 코드에서 *제거*. |
+| **U-G1 생존 = 양극단 이중실행 밴드** | 폐지 청산가는 사유 미구분이라 *알 수 없다* → **임의 숫자(−30% 등) 금지**(folk-stat). 대신 **두 극단으로 백테스트 2회 실행**: ⓐ 0손실(마지막 종가 청산, 낙관) ⓑ −100%(완전손실, 보수). 결과는 **밴드**로 표시 — "전략 +X%(0손실) ~ +Y%(완전손실)". **밴드 폭 = 폐지 종목 의존도**(폐지명 미보유면 폭 0). 단일 hero 숫자 금지(폐지명 보유 시). 헤드라인 정렬·비교는 보수(−100%) 끝 기준. 중간값·합병 프리미엄 상향 보정 없음(사유 미구분 = 양극단 사이 어딘가, 그걸 밴드가 정직히 노출). |
 | **U-G2 PIT 멤버십** | 유니버스·필터(시총/거래대금 컷)는 *그 리밸 시점 그날 date 샤드*로만(코드 assert: 필터 입력 ts ≤ rebalanceT). IPO = 상장+룩백 충족 후만. forward-fill 금지. |
 | **U-G3 턴오버·ADV P1 승격** | 단일종목 P4 아님 — **턴오버율·추정비용·ADV 초과 주문비율 KPI 동급 상시 노출**. 주문>ADV X% = "실거래 불가능" 빨강. bp 고정=소형주 비용 과소 경고. |
 | **U-G4 이중 벤치** | EW 유니버스 + 지수 둘 다 표시 의무. size 틸트 라벨. 필요조건이지 충분조건 아님 명시. |
@@ -122,12 +129,46 @@ interface UniverseBtResult {
 ## 9. 위험 · 선결 의존
 
 1. **floor 라이브 일별 유혹 = iOS 즉사** → prebuilt 월말 패널이 **P1 진짜 선결**(아직 HF/prebuild에 없음). `buildUniversePanel.py` 신설이 코딩 착수 전 1순위.
-2. **생존 청산가 과대평가**(U2 적대 발견 — 00 §4.11 "사유 미구분=무관"은 크로스섹셔널에서 거짓) → U-G1 보수 청산 필수.
+2. **생존 청산가 미지**(U2 적대 발견 — 00 §4.11 "사유 미구분=무관"은 크로스섹셔널에서 거짓) → 임의 숫자 대신 U-G1 **양극단 이중실행 밴드**(0손실/−100%)로 불확실성 자체를 노출. 밴드가 비현실적으로 넓은 전략 = "폐지명 의존 과다" 경고(G-M4).
 3. **자유도 폭발**(팩터×분위×K×주기×필터 = 수천 조합) → U-G7 카운터+OOS+사전규칙.
 4. **OPFS 비활성** → 재방문 재다운로드. 월말 패널 작아 견디나 재활성이 헤드룸.
 5. **floor 월말 vs local 일별 괴리** → U-G6 근사 라벨·계단 곡선·오버레이.
 
-## 10. 경계 (claim 금지)
+## 11. ★실측 게이트 (코딩 착수 = 측정으로 닫음 — 추측 금지)
+
+설계는 확정이나 *현실 수치 전제*는 미측정이다. 구현 1단계 = 아래 게이트를 실측으로 닫고, FAIL이면 *설계에 미리 박힌 분기*로 간다(재토론 없음).
+
+| 게이트 | 측정 | PASS 기준 | FAIL 분기 (사전 명시) |
+|---|---|---|---|
+| **G-M1 prebuild 패널** | `buildUniversePanel.py` 실행 → 행수·parquet MB·DuckDB-wasm 콜드로드 ms (데스크톱+iOS) | <20MB · 콜드로드 <5s · iOS 미충돌 | ① 팩터 컬럼 축소(파생 줄임) → ② 유니버스 시총컷(소형주 제외) → ③ floor=KOSPI만 |
+| **G-M2 floor/local 괴리** | 동일 전략 월말 vs 일별 종착 수익률·MDD 차이 | 종착 괴리 ≤ ~5%p (가독 임계) | floor = "단순 가격전략만(괴리 큼 라벨 강화)" / 정밀은 local 전용 격리 |
+| **G-M3 OPFS 재활성** | `duckdb.ts` OPFS 캐시 검증 | 재방문 0다운로드 | in-memory only 수용(월말 패널 작아 재다운 견딤) |
+| **G-M4 폐지 밴드 폭** | 0손실/−100% 이중실행 밴드 폭 분포(전 전략) | — (관측) | 밴드 >~30%p 전략 = "폐지명 의존 과다" 빨강 경고(차단 아닌 라벨) |
+
+→ **G-M1 = 코딩 착수 첫 스텝**(없으면 floor 67만행 클라 로드로 죽음). G-M1·M2 결과가 floor 범위를 확정한다.
+
+## 12. U1 수용기준 (AC) · 테스트 매트릭스 · 롤백
+
+**U1 AC (전부 충족해야 출시):**
+- N분위 NAV가 *공유 절대축*(공통 lo/hi)에 렌더 — per-series 정규화 0(`btLayer` draw 패턴 회귀 테스트).
+- 이중 벤치(EW+지수) 동시 표시, 택일 불가. 폐지 밴드(0/−100%) 표시, 폐지명 보유 시 단일 hero 숫자 0.
+- 시도 조합 카운터 상존, OOS 분할 끌 수 없음, 정직 라벨(근사·월말·size틸트·추천아님) 상존.
+- `decisionT < fillT` 코드 assert. PIT 필터 입력 ts ≤ rebalanceT assert. 재무 팩터 신호 = 비활성(회색).
+
+**테스트 매트릭스:**
+- **엔진 단위(`universe.engine.test`)**: holdings 회계 보존(Σ가중=1·NAV 연속)·턴오버 산식·`decisionT<fillT`·이중실행이 선정/턴오버 공유하고 청산만 분기·OOS 분할 리밸 단위·헬퍼 6종 재호출 일치.
+- **DuckDB 쿼리**: `NTILE` 크로스섹셔널 랭킹 결정론(동일 입력=동일 분위)·월말 = `MAX(BAS_DD) per (ym,code)`·PIT 필터 미래 행 미접근.
+- **Playwright(`scan/universe`)**: 분위 곡선 N개+이중벤치 렌더·밴드 표시·리밸 walk 점프·Q5행→단일종목 drill·시도카운터 증가·콘솔 0.
+- **정직 회귀(grep)**: "전문가급"·"추천"·"검증된 팩터"·"시장 초과" 0건·IC/팩터 t-stat/분위 단조성 수치 0·시도카운터·이중벤치·폐지밴드 존재.
+
+**롤백**: `scan/universe/` 전체가 신규 폴더 + scan LeftRail 진입 버튼 1개 → 폴더 삭제 + 버튼 제거로 완전 가역. `terminal/lib/backtest`(① 엔진)·기존 scan 무수정이라 회귀 0. prebuild 산출물은 HF 별도 파일(기존 데이터 무영향).
+
+## 13. 평가 (전문 개발자 · PM 이중)
+
+- **개발자**: 위험 집중점 = (a) `buildUniversePanel.py` 산출물 크기/성능(G-M1) (b) DuckDB-wasm 크로스섹셔널 루프 + holdings 회계 신규. 완화 = scan `krxPricesAll`·`btLayer` 공유축 draw·헬퍼 6종 재사용으로 신규 표면 최소화, 회귀는 별 폴더 격리. 이중실행은 월말 패널이 작아(저비용) 부담 없음.
+- **PM**: 킬러 = "분위가 단조롭게 벌어지나"가 한 자에 읽힘 + 폐지 밴드로 *불확실성까지* 정직. 차별 = 가격 백테스터(TradingView 등) 단일종목 한계를 17년 survivorship-clean 유니버스로 넘음 — 단 재무 랭킹 금지를 *제품이 먼저 정직히 답함*(13.9% 회색 비활성)이 신뢰. 위험 = floor/local 괴리(G-M2)가 크면 floor 신뢰 저하 → 범위 축소 분기 대비.
+
+## 14. 경계 (claim 금지)
 
 - JUDGE(reverseDCF·compare) = financial-statement-lab. 시뮬/지수/이벤트레일 = scenario-simulator. egress = table-export. 본 랩 = *전종목 규칙 회계*만.
 - 종목 추천·목표주가·"검증된 팩터"·"시장 초과" 일반화 = 금지(CLAUDE 투자자문 규약).
