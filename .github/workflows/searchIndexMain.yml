@@ -37,7 +37,7 @@ on:
       quality_gold:
         description: 'Release gate gold JSON/JSONL path'
         required: false
-        default: data/search/queryLogGold.real.jsonl
+        default: tests/fixtures/search/queryLogGold.real.jsonl
 
 permissions:
   contents: read
@@ -264,7 +264,7 @@ jobs:
         if: ${{ always() && (inputs.productization_gate || 'ops') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py
-          --gold "${{ inputs.quality_gold || 'data/search/queryLogGold.real.jsonl' }}"
+          --gold "${{ inputs.quality_gold || 'tests/fixtures/search/queryLogGold.real.jsonl' }}"
           --out "$RUNNER_TEMP/searchQuality.main.json"
           --miss-ledger "$RUNNER_TEMP/searchMissLedger.main.jsonl"
           --required-targets filing,news,noAnswer,edgar

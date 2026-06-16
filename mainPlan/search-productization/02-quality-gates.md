@@ -101,7 +101,7 @@ uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py `
   --fail-on-ineligible
 ```
 
-`prepareSearchGold.py` 는 raw query log 와 reviewer label 을 합쳐 canonical JSONL 을 만든다. release graduation 용 canonical path 는 `data/search/queryLogGold.real.jsonl` 이고, raw log 와 label source 는 같은 디렉터리의 `queryLogRaw.jsonl`, `queryLogLabels.reviewed.jsonl` 을 기본 운영 슬롯으로 둔다. answerable row 는 `expectedSourceRef` 또는 `expectedSourceRefs` 를 가져야 하며, noAnswer row 는 `expectedAnswerable=false` 로 보존한다.
+`prepareSearchGold.py` 는 raw query log 와 reviewer label 을 합쳐 canonical JSONL 을 만든다. release graduation 용 운영 canonical path 는 `data/search/queryLogGold.real.jsonl` 이고, raw log 와 label source 는 같은 디렉터리의 `queryLogRaw.jsonl`, `queryLogLabels.reviewed.jsonl` 을 기본 운영 슬롯으로 둔다. GitHub Actions release gate 기본값은 repo에 고정한 `tests/fixtures/search/queryLogGold.real.jsonl` 이며, 운영 gold 를 새로 만들면 workflow `quality_gold` 입력으로 override 한다. answerable row 는 `expectedSourceRef` 또는 `expectedSourceRefs` 를 가져야 하며, noAnswer row 는 `expectedAnswerable=false` 로 보존한다.
 
 ---
 

@@ -50,7 +50,7 @@ on:
         type: string
       quality_gold:
         description: 'release gate gold JSON/JSONL path'
-        default: 'data/search/queryLogGold.real.jsonl'
+        default: 'tests/fixtures/search/queryLogGold.real.jsonl'
         type: string
 
 permissions:
@@ -192,7 +192,7 @@ jobs:
         if: ${{ always() && (github.event.inputs.productization_gate || 'ops') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py
-          --gold "${{ github.event.inputs.quality_gold || 'data/search/queryLogGold.real.jsonl' }}"
+          --gold "${{ github.event.inputs.quality_gold || 'tests/fixtures/search/queryLogGold.real.jsonl' }}"
           --out "$RUNNER_TEMP/searchQuality.delta.json"
           --miss-ledger "$RUNNER_TEMP/searchMissLedger.delta.jsonl"
           --required-targets filing,news,noAnswer,edgar

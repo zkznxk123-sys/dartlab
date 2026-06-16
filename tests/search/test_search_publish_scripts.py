@@ -295,6 +295,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "expected_sources" in text
     assert "productization_gate" in text
     assert "quality_gold" in text
+    assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "DARTLAB_SEARCH_EXPECTED_SOURCES" in text
     assert "DARTLAB_SEARCH_DELTA_MODE" in text
     assert "DARTLAB_SEARCH_CURRENT_CATALOG" in text
@@ -346,6 +347,7 @@ def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     assert "default: catalog" in text
     assert "productization_gate" in text
     assert "quality_gold" in text
+    assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "dart/searchCatalog/**" in text
     assert "prepareSearchDeltaInputs.py" in text
     assert "DARTLAB_SEARCH_MAIN_MODE" in text
