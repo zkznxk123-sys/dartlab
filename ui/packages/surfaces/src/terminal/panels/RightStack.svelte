@@ -176,10 +176,10 @@
 			cancelled = true;
 		};
 	});
-	// 뉴스 날짜별 그룹 — dot 클릭(focusDisclosure) 시 data-fdate 로 행 스크롤·하이라이트. 같은 날 다건은 한 헤더 아래.
-	const newsByDate = $derived.by(() => {
+	// 뉴스 날짜별 그룹 (트랙별) — dot 클릭(focusDisclosure) 시 data-fdate 로 행 스크롤·하이라이트.
+	const groupByDate = (items: NewsItem[]): [string, NewsItem[]][] => {
 		const m = new Map<string, NewsItem[]>();
-		for (const it of news) {
+		for (const it of items) {
 			const d8 = (it.date ?? '').replace(/\D/g, '').slice(0, 8);
 			if (d8.length !== 8) continue;
 			const cur = m.get(d8);
@@ -187,7 +187,12 @@
 			else m.set(d8, [it]);
 		}
 		return [...m.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
-	});
+	};
+	// 좌=네이버(최근·스니펫 O) ‖ 우=GDELT(과거·제목+링크). track 으로 분리(공시 정기‖비정기 동형 2분할).
+	const naverNews = $derived(news.filter((n) => n.track !== 'gdelt'));
+	const gdeltNews = $derived(news.filter((n) => n.track === 'gdelt'));
+	const naverByDate = $derived(groupByDate(naverNews));
+	const gdeltByDate = $derived(groupByDate(gdeltNews));
 
 	// 재무제표 — c.panel 전 기간(분기/연간 토글). 요약 탭 폐지, 손익·재무상태·현금흐름·비용·비율.
 	let stmt = $state<StmtKind | 'RT'>('IS');
@@ -562,27 +567,38 @@
 	</Panel>
 </div>
 
-<!-- 종목 뉴스 — 네이버 검색 API 헤드라인(제목+스니펫). private(언론사 저작권)을 워커가 서버사이드 read 해
-     표시(라이브 표시 = 의도된 용도, 공개 재배포 아님). 클릭=원문 이동, 주가차트 뉴스 dot 클릭=그 날짜 행 동기. -->
-<div bind:this={newsWrap}>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: '종목 뉴스', en: 'NEWS' }} sub={{ kr: 'naver · 제목+요약', en: 'naver · headlines' }} flush>
-		{#snippet right()}<span class="dim">{newsState === 'ready' ? news.length : ''}</span>{/snippet}
-		{#if newsState === 'ready'}
-			<div class="filingList newsList">
-				{#each newsByDate as [d8, items] (d8)}
-					{#each items as it (it.url)}
-						<a class="newsRow" class:flash={flashDate === d8} data-fdate={d8} href={it.url} target="_blank" rel="noopener" title={it.title + (it.description ? '\n\n' + it.description : '')}>
-							<span class="nwTop"><span class="nwTitle">{it.title}</span><span class="flArrow">↗</span></span>
-							{#if it.description}<span class="nwDesc">{it.description}</span>{/if}
-							<span class="nwMeta mono">{it.source}{it.date ? ' · ' + it.date.slice(2) : ''}</span>
-						</a>
-					{/each}
-				{/each}
-			</div>
-		{:else if newsState === 'loading'}
+<!-- 종목 뉴스 — 좌 네이버(최근·스니펫 O) ‖ 우 GDELT(과거·제목+링크). private(언론사 저작권)을 워커가
+     서버사이드 read 해 표시(라이브 표시, 재배포 아님). 클릭=원문 이동, 주가차트 뉴스 dot 클릭=그 날짜 행 동기. -->
+{#snippet newsCol(byDate: [string, NewsItem[]][])}
+	{#each byDate as [d8, items] (d8)}
+		{#each items as it (it.url)}
+			<a class="newsRow" class:flash={flashDate === d8} data-fdate={d8} href={it.url} target="_blank" rel="noopener" title={it.title + (it.description ? '\n\n' + it.description : '')}>
+				<span class="nwTop"><span class="nwTitle">{it.title}</span><span class="flArrow">↗</span></span>
+				{#if it.description}<span class="nwDesc">{it.description}</span>{/if}
+				<span class="nwMeta mono">{it.source}{it.date ? ' · ' + it.date.slice(2) : ''}</span>
+			</a>
+		{/each}
+	{/each}
+{/snippet}
+<div class="rowSplit" bind:this={newsWrap}>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: '종목 뉴스', en: 'NEWS' }} sub={{ kr: 'naver · 최근', en: 'naver · recent' }} flush>
+		{#snippet right()}<span class="dim">{newsState === 'ready' ? naverNews.length : ''}</span>{/snippet}
+		{#if newsState === 'loading'}
 			<div class="storyEmpty">{lang === 'en' ? 'loading news …' : '뉴스 불러오는 중 …'}</div>
+		{:else if naverByDate.length}
+			<div class="filingList newsList">{@render newsCol(naverByDate)}</div>
 		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no news for this company' : '해당 종목 뉴스 없음 (시총 상위 위주 수집)'}</div>
+			<div class="storyEmpty">{lang === 'en' ? 'no recent news (top-cap coverage)' : '최근 뉴스 없음 (시총 상위 위주 수집)'}</div>
+		{/if}
+	</Panel>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: '과거 뉴스', en: 'ARCHIVE' }} sub={{ kr: 'gdelt · 제목+링크', en: 'gdelt · title+link' }} flush>
+		{#snippet right()}<span class="dim">{newsState === 'ready' ? gdeltNews.length : ''}</span>{/snippet}
+		{#if newsState === 'loading'}
+			<div class="storyEmpty">{lang === 'en' ? 'loading …' : '불러오는 중 …'}</div>
+		{:else if gdeltByDate.length}
+			<div class="filingList newsList">{@render newsCol(gdeltByDate)}</div>
+		{:else}
+			<div class="storyEmpty">{lang === 'en' ? 'no archive news (GDELT KR coverage partial)' : '과거 뉴스 없음 (GDELT 한국 커버리지 부분적)'}</div>
 		{/if}
 	</Panel>
 </div>

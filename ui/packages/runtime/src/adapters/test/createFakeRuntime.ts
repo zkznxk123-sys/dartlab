@@ -194,8 +194,9 @@ function fakeNews(): NewsPort {
 		async forCompany(code) {
 			if (code !== FIXTURE_CODE) return [];
 			return [
-				{ date: '2026-06-05', title: '픽스처전자, 신제품 공개', source: '한경', url: 'https://example.com/n1', description: '결정론 fixture 뉴스 스니펫.' },
-				{ date: '2026-06-03', title: '픽스처전자 실적 호조', source: '매경', url: 'https://example.com/n2', description: '' }
+				{ date: '2026-06-05', title: '픽스처전자, 신제품 공개', source: '한경', url: 'https://example.com/n1', description: '결정론 fixture 뉴스 스니펫.', track: 'naver' },
+				{ date: '2026-06-03', title: '픽스처전자 실적 호조', source: '매경', url: 'https://example.com/n2', description: '', track: 'naver' },
+				{ date: '2021-04-02', title: '픽스처전자 과거 기사', source: 'reuters.com', url: 'https://example.com/g1', description: '', track: 'gdelt' }
 			];
 		}
 	};

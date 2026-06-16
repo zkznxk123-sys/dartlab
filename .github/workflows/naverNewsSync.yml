@@ -26,6 +26,10 @@ on:
         description: '쿼리 상한 (smoke 테스트용)'
         default: '50'
         type: string
+      gdelt_years:
+        description: 'GDELT DOC 과거 질의 연도 수 (1=올해 증분, 5=과거 backfill)'
+        default: '1'
+        type: string
 
 permissions:
   contents: read
@@ -65,12 +69,12 @@ jobs:
           NAVER_MAX_QUERIES: ${{ github.event.inputs.max_queries || '200' }}
         run: uv run python -X utf8 -m dartlab.pipeline naverNews
 
-      # 종목별 뉴스 인덱스 — recent.parquet 누적(HF baseline merge) + byCompany/{code}.json.
+      # 종목별 뉴스 인덱스(두 트랙) — naver recent.parquet + gdelt DOC archive(올해 증분) → byCompany/{code}.json.
       # CF 워커 /news?code= 가 read 토큰으로 byCompany json 을 서버사이드 read → 터미널 우측패널·이벤트레일 표시.
-      # HF_TOKEN 미설정 시 build 만(push skip, rc=1) — 그러나 fetch 가 noop 이면 데이터 부재라 build 도 무해 종료.
-      - name: Build per-company news index + private HF push
+      # 과거 deep backfill 은 workflow_dispatch 로 gdelt_years=5 지정. HF_TOKEN 미설정 시 build 만(push skip).
+      - name: Build per-company news index (naver + gdelt) + private HF push
         if: ${{ always() }}
         continue-on-error: true
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run python -X utf8 .github/scripts/sync/buildNaverCompanyNews.py
+        run: uv run python -X utf8 .github/scripts/sync/buildNaverCompanyNews.py --gdelt-years ${{ github.event.inputs.gdelt_years || '1' }}
