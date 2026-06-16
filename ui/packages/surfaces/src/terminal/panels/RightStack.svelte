@@ -594,7 +594,7 @@
 		{:else if naverByDate.length}
 			<div class="filingList newsList">{@render newsCol(naverByDate)}</div>
 		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no naver news (top-cap coverage)' : '네이버 뉴스 없음 (시총 상위 위주 수집)'}</div>
+			<div class="storyEmpty">{lang === 'en' ? 'no naver news yet' : '아직 수집된 네이버 뉴스 없음'}</div>
 		{/if}
 	</Panel>
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: 'GDELT', en: 'GDELT' }} sub={{ kr: 'DOC · 제목+링크', en: 'DOC · title+link' }} flush>
@@ -604,7 +604,7 @@
 		{:else if gdeltByDate.length}
 			<div class="filingList newsList">{@render newsCol(gdeltByDate)}</div>
 		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no GDELT news (KR coverage partial)' : 'GDELT 뉴스 없음 (한국 커버리지 부분적)'}</div>
+			<div class="storyEmpty">{lang === 'en' ? 'no GDELT news yet' : '아직 수집된 GDELT 뉴스 없음'}</div>
 		{/if}
 	</Panel>
 </div>
