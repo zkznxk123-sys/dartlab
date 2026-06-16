@@ -2,7 +2,7 @@
 // 빈값 규약(runtime.ts): [] = 조회 성공·해당 없음(예: 시총 상위 외 종목·미배선·프록시 미설정).
 // 출처: 네이버 검색 API archive(언론사 저작권·private). 어댑터는 워커 서버사이드 read 로만 표시(재배포 아님).
 
-/** 뉴스 트랙 — naver=최근(검색 API, 스니펫 O) · gdelt=과거(GDELT DOC API, 제목+링크, 스니펫 없음). 좌우 분리 표시. */
+/** 뉴스 트랙 — naver=검색 API(스니펫 O) · gdelt=GDELT DOC API(제목+링크, 스니펫 없음). 둘 다 최근까지 유지. 좌우 분리. */
 export type NewsTrack = 'naver' | 'gdelt';
 
 export interface NewsItem {

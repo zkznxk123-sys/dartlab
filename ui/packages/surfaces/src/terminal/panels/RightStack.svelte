@@ -64,22 +64,25 @@
 	let flashDate = $state<string | null>(null);
 	let seenFocusPulse = disclosureFocus.pulse;
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
-	// 한 wrap 안에서 그 날짜(data-fdate) 행을 내부 300px 박스 중앙으로 스크롤. centerCol=true 면 우측 컬럼도
-	// 그 박스를 뷰포트 중앙에 둔다(공시·뉴스 둘 다 같은 .col/.filingList 구조 재사용). 행 없으면 무동작.
+	// wrap 안의 그 날짜(data-fdate) 행을 *모두* 각자 박스 중앙으로 스크롤 — 2분할(정기‖비정기 · 네이버‖GDELT)
+	// 양 컬럼에 같은 날짜가 있으면 둘 다 이동(querySelectorAll). centerCol=true 면 첫 박스를 컬럼 뷰포트 중앙에.
 	function scrollWrapToDate(wrap: HTMLElement | null, d: string, centerCol: boolean): void {
-		const row = wrap?.querySelector(`[data-fdate="${d}"]`) as HTMLElement | null;
-		if (!row) return;
-		const list = row.closest('.filingList') as HTMLElement | null;
-		if (list) {
+		if (!wrap) return;
+		const rows = wrap.querySelectorAll(`[data-fdate="${d}"]`);
+		let firstList: HTMLElement | null = null;
+		rows.forEach((node) => {
+			const list = (node as HTMLElement).closest('.filingList') as HTMLElement | null;
+			if (!list) return;
 			const lr = list.getBoundingClientRect();
-			const rr = row.getBoundingClientRect();
+			const rr = (node as HTMLElement).getBoundingClientRect();
 			list.scrollTop += rr.top + rr.height / 2 - (lr.top + lr.height / 2);
-		}
-		if (centerCol && list) {
-			const col = row.closest('.col') as HTMLElement | null;
+			if (!firstList) firstList = list;
+		});
+		if (centerCol && firstList) {
+			const col = (firstList as HTMLElement).closest('.col') as HTMLElement | null;
 			if (col) {
 				const cr = col.getBoundingClientRect();
-				const lr2 = list.getBoundingClientRect();
+				const lr2 = (firstList as HTMLElement).getBoundingClientRect();
 				col.scrollBy({ top: lr2.top + lr2.height / 2 - (cr.top + cr.height / 2), behavior: 'smooth' });
 			}
 		}
@@ -567,8 +570,9 @@
 	</Panel>
 </div>
 
-<!-- 종목 뉴스 — 좌 네이버(최근·스니펫 O) ‖ 우 GDELT(과거·제목+링크). private(언론사 저작권)을 워커가
-     서버사이드 read 해 표시(라이브 표시, 재배포 아님). 클릭=원문 이동, 주가차트 뉴스 dot 클릭=그 날짜 행 동기. -->
+<!-- 종목 뉴스 — 좌 네이버(검색·스니펫 O) ‖ 우 GDELT(DOC·제목+링크). 둘 다 최근까지 유지(일배치 증분).
+     private(언론사 저작권)을 워커가 서버사이드 read 해 표시(라이브 표시, 재배포 아님). 클릭=원문 이동,
+     주가차트 뉴스 dot 클릭=그 날짜 행(양 컬럼 다) 스크롤·하이라이트 동기. -->
 {#snippet newsCol(byDate: [string, NewsItem[]][])}
 	{#each byDate as [d8, items] (d8)}
 		{#each items as it (it.url)}
@@ -581,24 +585,24 @@
 	{/each}
 {/snippet}
 <div class="rowSplit" bind:this={newsWrap}>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: '종목 뉴스', en: 'NEWS' }} sub={{ kr: 'naver · 최근', en: 'naver · recent' }} flush>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: '네이버', en: 'NAVER' }} sub={{ kr: '검색 · 제목+요약', en: 'search · title+snippet' }} flush>
 		{#snippet right()}<span class="dim">{newsState === 'ready' ? naverNews.length : ''}</span>{/snippet}
 		{#if newsState === 'loading'}
 			<div class="storyEmpty">{lang === 'en' ? 'loading news …' : '뉴스 불러오는 중 …'}</div>
 		{:else if naverByDate.length}
 			<div class="filingList newsList">{@render newsCol(naverByDate)}</div>
 		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no recent news (top-cap coverage)' : '최근 뉴스 없음 (시총 상위 위주 수집)'}</div>
+			<div class="storyEmpty">{lang === 'en' ? 'no naver news (top-cap coverage)' : '네이버 뉴스 없음 (시총 상위 위주 수집)'}</div>
 		{/if}
 	</Panel>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: '과거 뉴스', en: 'ARCHIVE' }} sub={{ kr: 'gdelt · 제목+링크', en: 'gdelt · title+link' }} flush>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: 'GDELT', en: 'GDELT' }} sub={{ kr: 'DOC · 제목+링크', en: 'DOC · title+link' }} flush>
 		{#snippet right()}<span class="dim">{newsState === 'ready' ? gdeltNews.length : ''}</span>{/snippet}
 		{#if newsState === 'loading'}
 			<div class="storyEmpty">{lang === 'en' ? 'loading …' : '불러오는 중 …'}</div>
 		{:else if gdeltByDate.length}
 			<div class="filingList newsList">{@render newsCol(gdeltByDate)}</div>
 		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no archive news (GDELT KR coverage partial)' : '과거 뉴스 없음 (GDELT 한국 커버리지 부분적)'}</div>
+			<div class="storyEmpty">{lang === 'en' ? 'no GDELT news (KR coverage partial)' : 'GDELT 뉴스 없음 (한국 커버리지 부분적)'}</div>
 		{/if}
 	</Panel>
 </div>
