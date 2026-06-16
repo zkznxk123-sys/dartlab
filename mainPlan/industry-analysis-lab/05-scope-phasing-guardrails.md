@@ -11,8 +11,8 @@
 
 **생존 조건**: 이 업그레이드는 *세계 메커니즘 매칭*이 아니라 **(a) 못 풀던 질문 1개를 답하거나 (b) 묻어둔 함수를 배선하거나 (c) 분기 통일·inert dead 정리를 하는 곳**에서만 산다.
 - (a) profit-pool 격자 = 회사별 사일로 제품이 구조적으로 못 푸는 "이익은 어느 단계가 버나". 신규 데이터 0이라 싸고, born-structured 격자라 우리만.
-- (b) hop2·summary·HHI/CR4 *함수*를 Industry verb DataFrame·화면에 꺼내는 배선 + summary/timeline 화면 노출 = "함수는 만들고 화면엔 안 꺼낸 부채" 상환. (★lifecycle은 industryBadge.phase로 이미 런타임 자동 부착·live이라 "화면 노출"만 — orphan 아님. recipe 층 9 curated도 이미 RunPython 런타임 분석 제공 → 중복 신설 금지, [03 §5.1](03-architecture-and-reuse.md).)
-- (c) 백분위 3분기 통일 + engine.ts:312 marketShare *inert dead* 컬럼 선제 제거 = 회귀 차단.
+- (b) hop2·summary·HHI/CR4 *함수*를 Industry verb DataFrame·화면에 꺼내는 배선 + summary/timeline 화면 노출 = "함수는 만들고 화면엔 안 꺼낸 부채" 상환. (★lifecycle은 industryBadge.phase로 이미 런타임 자동 부착·live이라 "화면 노출"만 — orphan 아님. recipe 층 8 curated도 이미 RunPython 런타임 분석 제공 → 중복 신설 금지, [03 §5.1](03-architecture-and-reuse.md).)
+- (c) 백분위 3분기 통일(★post-06-15 cross-universe-percentile 리팩토링 후 잔존 분기 재실측 선결) + `marketShare` *inert dead* 컬럼 선제 제거(현 위치 CenterStack.svelte·ScreenerModal.svelte — engine.ts에선 이미 제거됨) = 회귀 차단.
 
 이게 없으면 "세계 제품 흉내"라 안 하느니만 못하다.
 
@@ -33,7 +33,7 @@
 ### MUST (작고 진짜인 것 — 먼저)
 1. **profit-pool 격자(Phase A)**: `buildIndustrySummary` 파생 2컬럼 + 퍼블릭 stage 섹션 2D + 로컬 CenterStack 버블. revenue-weighted·coverageRatio·listed-only 3게이트.
 2. **stale 정리(선결 위생)**: 유령 API 청소(README 재작성 + 카탈로그 정리) + edges.json 재빌드.
-3. **engine.ts:312 marketShare inert dead 컬럼 선제 제거**(Phase C 일부, 단독으로도 가치 — 데이터 전무로 filter 드롭돼 현재 렌더 0, user harm 0, 미래 활성화 선제 청소).
+3. **`marketShare` inert dead 컬럼 선제 제거**(현 위치 CenterStack.svelte:194/198·ScreenerModal.svelte:42 — engine.ts에선 cross-universe-percentile 리팩토링으로 이미 제거됨. Phase C 일부·단독으로도 가치 — producer 전무로 전부 `null→'—'`, user harm 0, 선제 청소).
 
 ### SHOULD (MUST 후 — 데이터 천장 인지하고)
 4. **공급망 evidence(Phase B)**: `Industry.edges()` ratio/amount 2컬럼 + hop2/insights 인자 배선 + confidence/source 칩. edges.json 재빌드 선결. *천장은 "낮음"이 아니라 "제조업 한정·추출 보강 여지"* — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md) 실측: amount 0.7%는 상장필터 드롭+취약헤더 인공물, buyer-centric 미드롭으로 amount 행 7.9x. 단 원재료 매입처 표 보유사 ~21%(제조업 편중)는 진짜 잔존천장.
@@ -55,7 +55,7 @@
 - **Phase 0 — 비전 문서화(현재).** 본 PRD. 메모리엔 경로만.
 - **Phase A — profit-pool(선결 없음, 신규 데이터 0).** ① 위생 commit(유령 API 청소). ② `buildIndustrySummary` 파생 컬럼(영업이익률·coverageRatio). ③ 퍼블릭 `/industry/[id]` stage 2D 격자(브라우저 롤업). ④ 로컬 CenterStack 버블. 즉시 출시·사용 관측. 다른 mainPlan과 무관하게 선행 가능.
 - **Phase B — 공급망 evidence(추출 보강 + edges.json 재빌드 선결).** ① **레버 A — `extractRawMaterialEdges` 추출 보강**: (a) 비상장 매입처 미드롭 → buyer별 leaf supply fact + 공급집중도(HHI/CR3, `calcHHI`는 이미 상장무관) (b) 헤더 퍼지화(`매입액`/`비중` exact → `주요매입처`/`비율`/`제NN기매입액(비율)`/합쳐진셀 대응). _attempts 졸업 게이트 후 본진(테스트 동행·edges.json 재빌드). ② `Industry.edges()` ratio/amount 컬럼 + hop=2/insights 인자. ③ 퍼블릭 공급망 섹션 ratio/confidence 칩 + "제조업 매입집중도, 상장사 그래프 아님" 라벨. ④ 로컬 RightStack hop walk. ⑤ **레버 C(선택)** — 매출처 표 동일 기계 재사용으로 customer ratio 채움. *제조업은 두껍게, 비제조업(표 부재)은 honest-gap으로 1급시민.*
-- **Phase C — 백분위 통일(경계 문서화 선결).** ① 백분위 SSOT 경계를 본 PRD/엔진 docstring에 확정(industry=섹터분포 / compare+fin-stmt-lab=peer 정밀). ② engine.ts:312 inert `marketShare` 제거 + industryPercentile 정의 통일. ③ 퍼블릭 industryStats 분포 밴드 + compare funnel. ④ 회사→산업 점프.
+- **Phase C — 백분위 통일(경계 문서화 선결).** ① 백분위 SSOT 경계를 본 PRD/엔진 docstring에 확정(industry=섹터분포 / compare+fin-stmt-lab=peer 정밀). ② inert `marketShare` 제거(CenterStack.svelte·ScreenerModal.svelte) + industryPercentile(engine.ts:492) 정의 통일 — post-06-15 잔존 분기 재실측 선결. ③ 퍼블릭 industryStats 분포 밴드 + compare funnel. ④ 회사→산업 점프.
 - **Phase D — 차단(착수 금지·재방문 게이트).** 적응형 lifecycle 임계(`_attempts` 졸업) · 가동률 셀 추출 · 세그먼트 · US 산업.
 
 각 Phase는 *이미 가진 데이터*로 출시하고 막힌 것을 *연기*한다. "세계 메커니즘 N종"이 아니라 "못 풀던 질문 1개 + 묻어둔 능력 배선 + 정직 라벨"이 합격선.

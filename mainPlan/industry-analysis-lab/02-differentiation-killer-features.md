@@ -61,18 +61,18 @@
 
 **질문**: 이 회사가 산업 분포의 어디인가? (그리고 — 지금 3갈래로 분기된 백분위 정의를 하나로.)
 
-**문제**: 산업 컨텍스트가 3갈래다 — RightStack ecosystem pctRank([engine.ts:301-312](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L301)) / compare panel 분포 / industryStats.json 분포. 유니버스가 달라 같은 "업종 백분위"가 화면마다 다른 값을 줄 수 있다. 부수적으로 engine.ts:312의 `점유율(Mkt share)` 메트릭은 `node.marketShare`(types.ts:120 옵셔널, 채우는 producer 없음)가 전무해 line 313 `.filter((m)=>m.p!=null)`에서 드롭 → **절대 렌더 안 되는 inert dead 컬럼**이다(현재 user harm 0, 미래 활성화 대비 선제 청소 가치만 — "노출 중 정직버그"가 아니라 inert dead code 제거).
+**문제**: 산업 컨텍스트가 3갈래다 — RightStack ecosystem pctRank([engine.ts:492 `industryPercentile`](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492)) / compare panel 분포 / industryStats.json 분포. 유니버스가 달라 같은 "업종 백분위"가 화면마다 다른 값을 줄 수 있다. ★**PRD 동결(2026-06-14) 후 cross-universe-percentile(2026-06-15, `percentileIn`/`buildFundMetrics` 공유 산식 신설)이 같은 engine.ts를 리팩토링**했다 — 인용 라인 드리프트(industryPercentile 301-312→492) + 백분위 산식 일부 수렴 가능성 → **Phase C 착수 전 post-06-15 engine.ts 기준 3분기 잔존 여부 재실측 선결**(일부는 이미 통일됐을 수 있음). 부수적으로 `marketShare`(`점유율`/Mkt share) 메트릭은 그 리팩토링으로 **engine.ts에서는 이미 제거**됐고, inert dead 표시 컬럼만 [CenterStack.svelte:194/198](../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42)에 잔존(`node.marketShare` types.ts:120 옵셔널, 채우는 producer 없어 전부 `null→'—'`) → **절대 렌더 안 되는 inert dead 컬럼**이다(user harm 0, 선제 청소만 — 제거 위치는 engine.ts가 아니라 두 svelte 패널).
 
 **우리 우위**: industryStats.json이 34산업 roe/opMargin/revCagr 각각 p10/p25/median/p75/p90/mean/std/n 분포를 이미 보유(monotone 확인). `/industry/[id]`의 [+page.ts](../../landing/src/routes/industry/%5Bid%5D/+page.ts)가 이미 fetch하나 avgRoe/avgOpMargin/avgCagr만 렌더 — 분포 미사용. **신규 분포 계산 0, 표시층 통일.**
 
 **데이터 지원**:
 - 퍼블릭: 회사값을 industryStats p10~p90 밴드 위 마커로(읽기). compare로 funnel 링크.
-- 로컬: engine.ts industryPercentile를 industryStats 분포로 통일(또는 정의 일치) + `점유율` 컬럼 제거.
+- 로컬: engine.ts industryPercentile([engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 표시 컬럼 제거(CenterStack.svelte·ScreenerModal.svelte).
 
 **가드레일 (4선결)**:
 1. **percentile band만** — mean±std 박스 금지(std가 roe 86.44·opMargin 34.71 heavy outlier까지 = fake precision). mean 마커도 밴드 밖 자주 벗어나므로 percentile만.
 2. **n<10 *분포(metric)* 숨김 + "n=N" 노출.** (industryStats는 산업당 metric별 roe/opMargin/revCagr 독립 distribution이고 각자 n을 가짐 — 산업 단위 아님.)
-3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + inert `marketShare` 컬럼 선제 제거**(engine.ts:312). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
+3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + inert `marketShare` 컬럼 선제 제거**(현 위치 CenterStack.svelte:194/198·ScreenerModal.svelte:42 — engine.ts 아님, §문제 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
 4. **SSOT 경계 명문화 선결**: industry = 섹터 분포 위 1점 읽기/깔때기, compare + financial-statement-lab = 큐레이션 peer 정밀 SSOT. 이 경계를 mainPlan 문서로 박기 전 코딩 금지(fin-stmt-lab PRD와 충돌이 아니라 de-risk).
 
 > 적대렌즈가 "또 하나의 백분위 패널 신설"을 kill했다. 이 killer가 생존한 유일한 이유는 **신규 계산이 아니라 표시층 통일 + inert dead 정리**이기 때문. 새 백분위 엔진을 만들면 그 순간 kill 대상으로 회귀한다.

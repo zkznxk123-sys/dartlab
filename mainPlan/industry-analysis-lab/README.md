@@ -7,7 +7,7 @@
 
 ## 한 줄 결정
 
-이 업그레이드의 출발점은 코드실측이 깬 전제다 — **industry 엔진은 "약한" 게 아니라 "만들어 묻어둔" 엔진이다** (단 "묻어둔"은 *함수·화면·DataFrame 노출*에 한정 — 2차 조사 정정). `calcHHI`·`calcTopNRatio`·`calcSupplyInsights`·`computeHop2` *함수*([build/insights.py](../../src/dartlab/industry/build/insights.py)·[build/hop2.py](../../src/dartlab/industry/build/hop2.py))는 live·정확한데 **빌드 산출물(JSON)에만 baked되고 Industry verb·화면 질의로 못 꺼낸다.** `summary`(공정별 이익집계)·`timeline` 능력도 어느 화면에도 안 뜬다(퍼블릭 `/industry/[id]`는 라이브 엔진이 아니라 사전빌드 static JSON만 렌더, 로컬 터미널은 진짜 엔진 미소비). ★단 산업 분석 *능력* 자체는 orphan이 아니다 — `recipes.industry/`에 9개 curated·validated recipe(industryStagePhase·supplyChainConcentration 등)가 이미 RunPython 런타임 가동하고, `lifecycle`은 `industryBadge.phase`로 자동 부착 live다. **중복 신설 금지.**
+이 업그레이드의 출발점은 코드실측이 깬 전제다 — **industry 엔진은 "약한" 게 아니라 "만들어 묻어둔" 엔진이다** (단 "묻어둔"은 *함수·화면·DataFrame 노출*에 한정 — 2차 조사 정정). `calcHHI`·`calcTopNRatio`·`calcSupplyInsights`·`computeHop2` *함수*([build/insights.py](../../src/dartlab/industry/build/insights.py)·[build/hop2.py](../../src/dartlab/industry/build/hop2.py))는 live·정확한데 **빌드 산출물(JSON)에만 baked되고 Industry verb·화면 질의로 못 꺼낸다.** `summary`(공정별 이익집계)·`timeline` 능력도 어느 화면에도 안 뜬다(퍼블릭 `/industry/[id]`는 라이브 엔진이 아니라 사전빌드 static JSON만 렌더, 로컬 터미널은 진짜 엔진 미소비). ★단 산업 분석 *능력* 자체는 orphan이 아니다 — `recipes.industry/`에 8개 curated·validated recipe(industryStagePhase·supplyChainConcentration 등)가 이미 RunPython 런타임 가동하고, `lifecycle`은 `industryBadge.phase`로 자동 부착 live다. **중복 신설 금지.**
 
 > 따라서 목표는 "세계 메커니즘 무더기 추가"가 **아니다.** 1순위는 *이미 만든 능력을 런타임·터미널에 배선하고, 정직 라벨을 붙이고, 분기된 경계를 통일하는 것*이다. 강함은 쌓아서가 아니라 깎아서.
 
