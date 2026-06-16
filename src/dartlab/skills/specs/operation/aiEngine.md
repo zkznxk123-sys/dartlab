@@ -34,6 +34,7 @@ toolRefs:
   - InspectDataset
   - Read
   - WebSearch
+  - ExternalReachDoctor
   - SaveArtifact
   - CreateUserSkill
   - CompileVisual
@@ -100,7 +101,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-17'
+lastUpdated: '2026-06-16'
 testUniverse:
   market: KR
   stockCodes:
@@ -126,7 +127,7 @@ result = dartlab.ask("삼성전자 종합 신용 분석", mode="analyze")
 
 # MCP 표면
 # ask · run_python · read_skill · read_capability ·
-# web_search · save_artifact · create_user_skill · compile_visual · run_workbench
+# web_search · external_reach_doctor · save_artifact · create_user_skill · compile_visual · run_workbench
 ```
 
 LLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate 한다.
@@ -153,7 +154,7 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 각 패스는 LLM 호출 가능한 별도 단계. system prompt 는 패스별 분리 (`workbench/prompts.py`). 같은 분석가 정체성 (외부 목소리) + 다른 인지 단계 (내부 작업).
 
 - **BRIEF** — 질문 해석, `ReadSkill` / `GetSkillBody` / `ReadCapability` / `recall(memory)` 로 작업 계획 수립
-- **WORK** — `RunPython` / `EngineCall` / `InspectDataset` / `WebSearch` / `SaveArtifact` 반복 실행
+- **WORK** — `RunPython` / `EngineCall` / `InspectDataset` / `WebSearch` / `ExternalReachDoctor` / `SaveArtifact` 반복 실행
 - **CRITIQUE** — 반대가설 강제, 누락 lens 점검 → 필요 시 WORK 회귀
 - **COMPOSE** — 답안 + ref 묶음
 - **GATE** — ref 검증 — 미달 시 차단/회귀
@@ -171,6 +172,7 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 | `InspectDataset` | `inspectDataset` | data | dataset schema/최신/샘플 빠른 확인 | 보조 |
 | `Read` | `readFile` | data | 안전 경로 안 텍스트 파일 → docRef | 보조 |
 | `WebSearch` | `webSearch` | data | 외부 최신 정보 → webRef | 외부 한정 |
+| `ExternalReachDoctor` | `externalReachDoctor` | data | 외부 lookup backend 상태표. 설치·로그인·쿠키 저장 없음 | WebSearch 실패 후 |
 | `SaveArtifact` | `saveArtifact` | data | 큰 표 / 차트 / 긴 텍스트 → artifactRef | 산출 |
 | `CreateUserSkill` | `createUserSkill` | write | `.dartlab/skills` local user draft 작성. 공식 specs/ 미변경 | 사용자 요청 시 |
 | `CompileVisual` | `compileVisual` | data | 차트 spec codegen → visualRef | 시각화 |
@@ -285,7 +287,7 @@ src/dartlab/ai/
 │       └── oauth_token.py     ← PKCE / refresh / revoke
 ├── tools/                     ← canonical tool whitelist
 │   ├── registry.py            ← toolSpecs(provider), 화이트리스트 강제
-│   └── runPython.py / readSkill.py / readCapability.py / webSearch.py / saveArtifact.py / createUserSkill.py / compileVisual.py / runWorkbench.py
+│   └── runPython.py / readSkill.py / readCapability.py / webSearch.py / externalReachDoctor.py / saveArtifact.py / createUserSkill.py / compileVisual.py / runWorkbench.py
 ├── workbench/                 ← 5 패스 (LLM 자율 elevate 전용)
 │   ├── loop.py                ← orchestration
 │   ├── state.py / prompts.py
@@ -320,6 +322,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 | `read_skill` | `readSkill` (legacy `skill_search` / `read` 통합) |
 | `read_capability` | `readCapability` (legacy `generated_spec_search` 통합) |
 | `web_search` | `webSearch` |
+| `external_reach_doctor` | `externalReachDoctor` |
 | `save_artifact` | `saveArtifact` |
 | `create_user_skill` | `createUserSkill` |
 | `compile_visual` | `compileVisual` |
@@ -382,3 +385,4 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 - 2026-05-07 — P-revised (AI 직접 spec 작성 경로 제거, outcome ground truth loop 도입 — TauricResearch/TradingAgents v0.2.4 흡수, `runWorkbench` meta-tool, `intent.py` keyword routing 폐기, chat-native HARVEST bridge, 2-tier provider role routing, lookahead bias 가드, canonical 도구 정합).
 - 2026-05-12 — `src/dartlab/ai/SSOT.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격).
 - 2026-05-17 — `CreateUserSkill` 추가. 공식 Skill OS 작성 금지는 유지하고 `.dartlab/skills` local user draft 작성 경로만 허용.
+- 2026-06-16 — `ExternalReachDoctor` 추가. 외부 lookup backend 상태 진단만 수행하며 설치·로그인·쿠키 저장은 금지.

@@ -15,6 +15,7 @@ from .creditScorecard import creditScorecard
 from .dcfValuationTool import dcfValuationTool
 from .engineCall import engineCall
 from .evidenceGate import evidenceGate
+from .externalReachDoctor import externalReachDoctor
 from .groundingCheck import groundingCheck
 from .inspectDataset import inspectDataset
 from .listEngineGaps import listEngineGaps
@@ -189,6 +190,24 @@ _SPECS: dict[str, ToolSpec] = {
             "required": ["query"],
         },
         # 외부 검색 — 결과가 외부 환경 (web) 의존, idempotent 아님, openWorld True.
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+    "ExternalReachDoctor": ToolSpec(
+        "ExternalReachDoctor",
+        "외부 조사 backend 상태 진단. WebSearch 실패/차단/0건 후 재시도 전에 현재 살아있는 WebSearch/Jina/GitHub/optional Exa 경로를 확인한다. 설치·로그인·쿠키 저장은 하지 않는 read-only doctor.",
+        {
+            "type": "object",
+            "properties": {
+                "timeoutSec": {"type": "integer", "description": "backend별 timeout 초. 1..30으로 clamp."},
+                "skipNetwork": {
+                    "type": "boolean",
+                    "description": "True면 HTTP probe를 건너뛰고 로컬 command status만 확인.",
+                },
+            },
+        },
         readOnlyHint=True,
         destructiveHint=False,
         idempotentHint=False,
@@ -728,6 +747,7 @@ _TOOLS: dict[str, ToolFn] = {
     "InspectDataset": inspectDataset,
     "Read": readFile,
     "WebSearch": webSearch,
+    "ExternalReachDoctor": externalReachDoctor,
     "SaveArtifact": saveArtifact,
     "CreateUserSkill": createUserSkill,
     "CompileVisual": compileVisual,
@@ -755,6 +775,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "RunPython",
     "Read",
     "WebSearch",
+    "ExternalReachDoctor",
     "SaveArtifact",
     "CreateUserSkill",
     "CompileVisual",
@@ -791,6 +812,7 @@ _LEGACY_NAME_MAP = {
     "inspect_dataset": "InspectDataset",
     "read": "Read",
     "web_search": "WebSearch",
+    "external_reach_doctor": "ExternalReachDoctor",
     "save_artifact": "SaveArtifact",
     "create_user_skill": "CreateUserSkill",
     "compile_visual": "CompileVisual",
