@@ -27,6 +27,7 @@
 	import ChartRibbon from './ChartRibbon.svelte';
 	import DrawToolbar from './DrawToolbar.svelte';
 	import BacktestStrip from './BacktestStrip.svelte';
+	import BacktestDialog from './BacktestDialog.svelte';
 
 	interface Props {
 		candles: Candle[]; // 초기(현재+직전 연도)
@@ -58,6 +59,7 @@
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
 	let btResult = $state<BtResult | null>(null);
+	let btReportOpen = $state(false); // [백테스팅 상세] → BacktestDialog(전문 화면) 오픈
 	// 종목↔거시 동행(상관) — "어떤 거시가 이 종목과 같이 움직였나"(04 §5, 인과 아님). 회사전환 시 캔들 기준 재계산.
 	let coMovers = $state<CoMover[]>([]);
 	// 종목↔국내 시장지수 동행(베타) — 거시와 별도 행(지수 상관은 거의 항상 최상위라 섞으면 거시 발견을 가림).
@@ -1258,7 +1260,10 @@
 	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->
 
 	{#if btResult && ctl.btKey}
-		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClear={() => (ctl.btKey = null)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
+		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClear={() => (ctl.btKey = null)} onOpenReport={() => (btReportOpen = true)} />
+	{/if}
+	{#if btResult && ctl.btKey && btReportOpen}
+		<BacktestDialog result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
 	{/if}
 </div>
 

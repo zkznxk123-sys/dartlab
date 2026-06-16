@@ -403,57 +403,21 @@
 .dlTerm .btParamLbl { font-size: 9px; color: var(--dim); min-width: 42px; }
 .dlTerm .btParamVal { font-size: 10px; color: var(--txt); min-width: 28px; text-align: center; }
 
-/* 백테스트 결과 스트립 — 차트 하단 도킹 (전체화면 동행) */
-.dlTerm .btStrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: rgba(10, 14, 21, 0.94); border-top: 1px solid var(--bdHi, #2a3142); padding: 4px 10px 3px; backdrop-filter: blur(2px); }
-.dlTerm .btStrip.btLag .btHead { opacity: 0.78; }
-.dlTerm .btHead { display: flex; align-items: baseline; gap: 8px; }
-.dlTerm .btPreset { font-family: var(--cond); font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
-.dlTerm .btRet { font-size: 13px; font-weight: 700; }
-.dlTerm .btVs { font-size: 9px; color: var(--dimmer); }
+/* 백테스트 결과 바 — 차트 하단 슬림 1줄(읽히는 헤드라인만). 상세 전부는 [백테스팅 상세]→BacktestDialog. */
+.dlTerm .btStrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: rgba(10, 14, 21, 0.95); border-top: 1px solid var(--bdHi, #2a3142); padding: 5px 12px 4px; backdrop-filter: blur(2px); }
+.dlTerm .btStrip.btLag .btHead { opacity: 0.8; }
+.dlTerm .btHead { display: flex; align-items: baseline; gap: 9px; }
+.dlTerm .btPreset { font-family: var(--cond); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
+.dlTerm .btRet { font-size: 14px; font-weight: 700; }
+.dlTerm .btVs { font-size: 10px; color: var(--dimmer); }
+.dlTerm .btExcess { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--bd); }
 .dlTerm .btSpacer { flex: 1; }
-.dlTerm .btWarn { font-family: var(--mono); font-size: 8px; color: var(--amber); border: 1px solid rgba(251, 146, 60, 0.45); border-radius: 2px; padding: 0 4px; line-height: 1.6; }
-.dlTerm .btClose { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 11px; padding: 0 2px; }
+.dlTerm .btWarn { font-family: var(--mono); font-size: 9px; color: var(--amber); border: 1px solid rgba(251, 146, 60, 0.45); border-radius: 2px; padding: 0 4px; line-height: 1.6; }
+.dlTerm .btMore { background: rgba(251, 146, 60, 0.12); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber); font-family: var(--sans); font-size: 11px; font-weight: 600; cursor: pointer; padding: 2px 11px; border-radius: 3px; }
+.dlTerm .btMore:hover { background: rgba(251, 146, 60, 0.22); }
+.dlTerm .btClose { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 12px; padding: 0 2px; }
 .dlTerm .btClose:hover { color: var(--amber); }
-.dlTerm .btKpis { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 9.5px; color: var(--dim); margin-top: 1px; }
-.dlTerm .btKpis b { color: var(--txt); margin-left: 3px; }
-.dlTerm .btSub { font-style: normal; color: var(--dimmer); margin-left: 2px; font-size: 8.5px; }
-/* OOS 학습/검증 2열 (03 §0.5.9-E) — 검증=파란 톤(차트 음영과 일치) */
-.dlTerm .btOos { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 9.5px; color: var(--dim); margin-top: 3px; padding-top: 3px; border-top: 1px dashed var(--dl-line, #1b2130); }
-.dlTerm .btOos b { color: var(--txt); }
-.dlTerm .btOosLbl { color: var(--dim); }
-.dlTerm .btOosLbl.test { color: #60a5fa; }
-.dlTerm .btOosArrow { color: var(--dimmer); margin: 0 2px; }
-/* 백테스트 리포트 도크 — 요약 strip 위로 확장하는 스크롤 드로어 4탭 (03 §0.5.6 P3·§0.5.9-E) */
-.dlTerm .btStrip.btOpen { max-height: 62vh; display: flex; flex-direction: column; }
-.dlTerm .btReport { flex: 1 1 auto; min-height: 0; overflow-y: auto; border-bottom: 1px solid var(--bdHi, #2a3142); margin-bottom: 3px; padding-bottom: 4px; }
-.dlTerm .btTabs { display: flex; gap: 2px; position: sticky; top: 0; background: rgba(10, 14, 21, 0.97); padding: 2px 0 4px; z-index: 1; }
-.dlTerm .btTab { background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--dim); font-size: 10px; padding: 3px 9px; cursor: pointer; font-family: inherit; }
-.dlTerm .btTab:hover { color: var(--txt); }
-.dlTerm .btTab.on { color: var(--amber); border-bottom-color: var(--amber); }
-.dlTerm .btTabN { color: var(--dimmer); font-size: 9px; }
-.dlTerm .btPane { display: flex; flex-direction: column; gap: 5px; padding: 2px 2px 0; }
-.dlTerm .btBanner { font-size: 9px; color: #93c5fd; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 3px; padding: 3px 7px; line-height: 1.5; }
-.dlTerm .btGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 2px 10px; }
-.dlTerm .btCell { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); padding: 1px 0; border-bottom: 1px dotted var(--dl-line, #1b2130); }
-.dlTerm .btCell b { color: var(--txt); }
-.dlTerm .btCell.test span, .dlTerm .btCell.test { color: #60a5fa; }
-.dlTerm .btSubHead { font-size: 9px; color: var(--dimmer); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-.dlTerm .btPaneBar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.dlTerm .btHint { font-size: 9px; color: var(--dimmer); }
-.dlTerm .btRow { cursor: pointer; }
-.dlTerm .btRow:hover td { background: rgba(96, 165, 250, 0.1); }
-.dlTerm .btAssume ul { margin: 2px 0; padding-left: 14px; display: flex; flex-direction: column; gap: 2px; }
-.dlTerm .btAssume li { font-size: 9.5px; color: var(--dim); line-height: 1.5; }
-.dlTerm .btAssume li.warn { color: var(--amber); }
-.dlTerm .btSpec { display: flex; flex-direction: column; gap: 1px; font-size: 9px; color: var(--dim); }
-.dlTerm .btFootNote { font-size: 8.5px; color: var(--dimmer); margin-top: 4px; line-height: 1.5; }
-.dlTerm .btTradesBtn { background: none; border: none; color: var(--amber); font-family: var(--sans); font-size: 10px; cursor: pointer; padding: 0; }
-.dlTerm .btTrades { max-height: 160px; overflow: auto; margin-top: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
-.dlTerm .btTable { width: 100%; border-collapse: collapse; font-size: 9.5px; }
-.dlTerm .btTable th { text-align: left; color: var(--dimmer); font-weight: 400; padding: 2px 6px 2px 0; }
-.dlTerm .btTable th.r, .dlTerm .btTable td.r { text-align: right; }
-.dlTerm .btTable td { padding: 1px 6px 1px 0; border-bottom: 1px solid rgba(27, 33, 48, 0.6); color: var(--dim); }
-.dlTerm .btFoot { font-size: 8.5px; color: var(--dimmer); margin-top: 2px; line-height: 1.5; }
+.dlTerm .btFoot { font-size: 9px; color: var(--dimmer); margin-top: 3px; line-height: 1.5; }
 
 /* 백테스트 스트립(.btStrip, 하단 도킹)이 뜨면 공시 레일 숨김 — 같은 하단 띠 점유 겹침 방지. (출처는 패널 헤더 sub 로 이동) */
 .dlTerm .chartWrap:has(.btStrip) .discRail { display: none; }
