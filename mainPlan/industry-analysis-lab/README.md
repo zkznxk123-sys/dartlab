@@ -34,7 +34,8 @@
 4. [03-architecture-and-reuse.md](03-architecture-and-reuse.md) — 자산 인벤토리 판정(REUSE/EXTEND/NEW), 거처(engine·public·local), 코드 touchpoint(file:line), 경계(compare/scan/map/story), orphan 능력 배선, stale 정리.
 5. [04-data-readiness-kill-list.md](04-data-readiness-kill-list.md) — 데이터 가용성 매트릭스, EXCLUDED/BLOCKED/CONDITIONAL 킬리스트, edges.json stale·amount 0.7% 빈곤·시장점유율 부재 honest-gap 규칙.
 6. [05-scope-phasing-guardrails.md](05-scope-phasing-guardrails.md) — MUST/SHOULD/WON'T 단두대, Phase A→B→C(선결조건순), honesty 가드레일, 성공지표·실패모드·단일 최대 리스크.
-7. [06-progress-ledger.md](06-progress-ledger.md) — 현재 결정·토론 출처·문서 상태·NEXT·메모리 포인터.
+7. [06-progress-ledger.md](06-progress-ledger.md) — 현재 결정·토론 출처·문서 상태·정정 이력·NEXT·메모리 포인터.
+8. ★[07-implementation-plan.md](07-implementation-plan.md) — **구현 플랜(착수 가능)**. 비전 PRD 5구멍(로컬 데이터채널·Skill OS 동기화·테스트/롤백·측정 AC·미해결 선결)을 file:line touchpoint + 테스트 매핑 + 롤백 + 측정 AC로 닫음. 11에이전트 토론(조사5·렌즈4·적대1·수렴1) 산물. **00~06과 충돌 시 07이 SSOT**(00~06 사실오류 3건 정정: marketShare 라벨사칭·백분위 단일산식·로컬 신규채널).
 
 ---
 

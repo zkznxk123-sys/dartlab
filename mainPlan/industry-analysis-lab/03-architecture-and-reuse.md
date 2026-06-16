@@ -41,11 +41,11 @@ src/dartlab/industry/build/{stage1_ksic,stage2_product,stage3_docs,stage4_review
 ### EXTEND (확장 — 새 파일·verb 금지)
 | 자산 | 변경 | Phase |
 |---|---|---|
-| `buildIndustrySummary` | 출력에 `영업이익률(%)`(revenue-weighted 파생) + `coverageRatio` 2컬럼 | A |
+| `buildIndustrySummary` | 출력에 `영업이익률(%)`(revenue-weighted 파생) + `coverageRatio` 2컬럼. ★공개 SSOT 동기화 동반(구멍2, [07 §구멍2](07-implementation-plan.md)): SKILL.md 반환 섹션 + financials.py docstring + `syncArtifacts(write=True)` 전수 재생성 | A |
 | `/industry/[id]/+page.svelte` | stage 섹션에 2D(매출규모×영업이익률) 격자 렌더 (브라우저 롤업) | A |
-| `Industry.edges()` DataFrame | [__init__.py:359-371](../../src/dartlab/industry/__init__.py#L359) select에 `의존도(%)`(ratio)·`거래액`(amount) 2컬럼 + `hop`/`insights` 인자. 디스크 필드 `type` 주의 | B |
+| `Industry.edges()` DataFrame | [__init__.py:359-371](../../src/dartlab/industry/__init__.py#L359) select에 `의존도(%)`(ratio)·`거래액`(amount) 2컬럼 + `hop`/`insights` 인자. 디스크 필드 `type` 주의. ★공개 SSOT 동기화 동반(구멍2): SKILL.md 반환/args + `__init__.py` docstring + catalog/agent.json 함께 `syncArtifacts(write=True)` 재생성(컷길이별 부분 재생성 가정 폐기) + apiContract forbidden 점검 | B |
 | `/industry/[id]/+page.svelte` 공급망 섹션 | ratio %·confidence/source 칩 (이미 amount top20 有) | B |
-| `engine.ts industryPercentile` | [engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492)(★PRD 동결 후 cross-universe-percentile 리팩토링으로 301-312→492 이동 + `buildFundMetrics` 공유 산식 신설 → 분포 정의 industryStats 통일은 post-06-15 잔존 분기 재실측 선결). inert `marketShare`(`점유율`) 선제 제거는 engine.ts 아닌 [CenterStack.svelte:194/198](../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42)(producer 없어 `null→'—'`) | C |
+| `engine.ts industryPercentile` | [engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492)·`pctRank`([:179](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L179)) — ★실측상 백분위는 "3갈래 분기"가 아니라 **단일 산식 + 모집단 파라미터화**(cross-universe-percentile이 이미 통일). Phase C = 경계 문서화·compare 범주오류 정정으로 재프레임([07 §구멍5](07-implementation-plan.md)). `marketShare` 표시 제거는 **표시층 한정**([CenterStack.svelte:194/198](../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42)) + `EcoNode.marketShare`(types.ts:120) 필드 **보존**(landing map/compare 공유). 사유=라벨 사칭([buildIndustryMap.py:816/868](../../.github/scripts/prebuild/buildIndustryMap.py#L816) 상장사 상대비중 실생산)+로컬 100 날조([localTerminalData.ts:348](../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)) 시정 | C |
 | `/industry/[id]/+page.svelte` | industryStats 분포 밴드 위 회사 마커 + compare funnel 링크 | C |
 | 로컬 CenterStack / RightStack | profit-pool 버블 · hop walk · 회사→산업 점프 | A/B |
 
@@ -87,7 +87,7 @@ src/dartlab/industry/build/{stage1_ksic,stage2_product,stage3_docs,stage4_review
 
 industry 분석 *능력*은 통째 orphan이 아니다. [recipes/industry/](../../src/dartlab/skills/specs/recipes/industry/)에 8개 curated·validated(2026-05-27) recipe가 RunPython/EngineCall로 런타임 실행되는 *조합 분석*으로 존재한다 — `industryStagePhase`(peer ROIC-WACC spread+CAGR phase)·`marginCompressionScan`(peer GP/OM/NM 3축 z-score)·`peerCapexWave`(capex/매출 wave lead-lag)·`rdIntensityTrend`(R&D/매출 추세+peer rank)·`supplyChainConcentration`(top5 고객/거래처 HHI)·`sectorMomentumLeadership`·`sectorFlowConcentration`·`peerPriceConvergence`.
 
-따라서 본 PRD의 **"만들어 묻어둔 엔진" 프레임은 *화면·DataFrame 노출*에 한정**한다. 진짜 orphan은 (a) `build/insights.py`의 `calcHHI`/`calcTopNRatio`/`calcIndustryConcentration`/`computeHop2`/`calcSupplyInsights` *함수가 Industry verb DataFrame·화면으로 안 나오는 것* + (b) `/industry/[id]` static JSON이 profit-pool 격자·분포 밴드를 안 그리는 것 + (c) `Industry.edges()` amount/ratio 컬럼 누락 + (d) engine.ts marketShare inert dead 일 뿐, 산업 분석 capability *전체*가 아니다. **recipe 층과 기능 중복 신설 금지** — profit-pool 격자는 화면이지 새 recipe가 아니고, `supplyChainConcentration` recipe가 이미 HHI 교섭력을 RunPython으로 답한다. 신규 능력 착수 전 recipes.industry 중복 여부 확인 의무.
+따라서 본 PRD의 **"만들어 묻어둔 엔진" 프레임은 *화면·DataFrame 노출*에 한정**한다. 진짜 orphan은 (a) `build/insights.py`의 `calcHHI`/`calcTopNRatio`/`calcIndustryConcentration`/`computeHop2`/`calcSupplyInsights` *함수가 Industry verb DataFrame·화면으로 안 나오는 것* + (b) `/industry/[id]` static JSON이 profit-pool 격자·분포 밴드를 안 그리는 것 + (c) `Industry.edges()` amount/ratio 컬럼 누락 + (d) marketShare 라벨 사칭(상장사 상대비중을 "점유율"로, 표시층 제거 대상 — [07 §구멍5](07-implementation-plan.md)) 일 뿐, 산업 분석 capability *전체*가 아니다. **recipe 층과 기능 중복 신설 금지** — profit-pool 격자는 화면이지 새 recipe가 아니고, `supplyChainConcentration` recipe가 이미 HHI 교섭력을 RunPython으로 답한다. 신규 능력 착수 전 recipes.industry 중복 여부 확인 의무.
 
 ---
 

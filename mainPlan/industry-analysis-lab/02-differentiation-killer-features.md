@@ -59,9 +59,9 @@
 
 ## Killer #3 — 산업 분포 위 1점 읽기 + 백분위 통일 · Phase C
 
-**질문**: 이 회사가 산업 분포의 어디인가? (그리고 — 지금 3갈래로 분기된 백분위 정의를 하나로.)
+**질문**: 이 회사가 산업 분포의 어디인가? (★백분위 정의는 "3갈래 분기"로 봤으나 실측상 이미 단일 산식 — 아래 문제 참조.)
 
-**문제**: 산업 컨텍스트가 3갈래다 — RightStack ecosystem pctRank([engine.ts:492 `industryPercentile`](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492)) / compare panel 분포 / industryStats.json 분포. 유니버스가 달라 같은 "업종 백분위"가 화면마다 다른 값을 줄 수 있다. ★**PRD 동결(2026-06-14) 후 cross-universe-percentile(2026-06-15, `percentileIn`/`buildFundMetrics` 공유 산식 신설)이 같은 engine.ts를 리팩토링**했다 — 인용 라인 드리프트(industryPercentile 301-312→492) + 백분위 산식 일부 수렴 가능성 → **Phase C 착수 전 post-06-15 engine.ts 기준 3분기 잔존 여부 재실측 선결**(일부는 이미 통일됐을 수 있음). 부수적으로 `marketShare`(`점유율`/Mkt share) 메트릭은 그 리팩토링으로 **engine.ts에서는 이미 제거**됐고, inert dead 표시 컬럼만 [CenterStack.svelte:194/198](../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42)에 잔존(`node.marketShare` types.ts:120 옵셔널, 채우는 producer 없어 전부 `null→'—'`) → **절대 렌더 안 되는 inert dead 컬럼**이다(user harm 0, 선제 청소만 — 제거 위치는 engine.ts가 아니라 두 svelte 패널).
+**문제**(★[07 §구멍5](07-implementation-plan.md) 정정): PRD는 산업 컨텍스트가 RightStack pctRank / compare / industryStats "3갈래 분기"라 봤으나 실측은 **단일 산식 + 모집단 파라미터화**다 — [engine.ts:179 `pctRank`](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L179)는 모집단 무관 순수함수이고 `industryPercentile`([:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))·`percentileIn`(:501) 둘 다 `buildFundMetrics→pctRank` 공유, industryStats는 band 표시용(순위 무참조). cross-universe-percentile(2026-06-15)이 이미 깐 구조다. 따라서 Phase C는 "3갈래 통일"이 아니라 **경계 문서화·compare 범주오류 정정·marketShare 사유 교정**으로 재프레임된다. ★`marketShare`(`점유율`)는 PRD/06-17 1차 정정이 "producer 전무 inert dead"라 했으나 **사실오류** — [buildIndustryMap.py:816/868](../../.github/scripts/prebuild/buildIndustryMap.py#L816)이 상장사 상대비중을 실생산해 ecosystem.json에 싣고, [localTerminalData.ts:348](../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)은 로컬 단일사에 `marketShare:100`을 날조한다. 즉 *상장사 상대비중을 "점유율"로 표기한 라벨 사칭(04 EXCLUDED·§3-8) + 로컬 100 날조*다(engine.ts에선 이미 제거됨). 제거 대상은 표시 컴포넌트([CenterStack.svelte:194/198](../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42))뿐, `EcoNode.marketShare` 필드(types.ts:120)는 landing map/compare 공유라 **보존**.
 
 **우리 우위**: industryStats.json이 34산업 roe/opMargin/revCagr 각각 p10/p25/median/p75/p90/mean/std/n 분포를 이미 보유(monotone 확인). `/industry/[id]`의 [+page.ts](../../landing/src/routes/industry/%5Bid%5D/+page.ts)가 이미 fetch하나 avgRoe/avgOpMargin/avgCagr만 렌더 — 분포 미사용. **신규 분포 계산 0, 표시층 통일.**
 
@@ -72,7 +72,7 @@
 **가드레일 (4선결)**:
 1. **percentile band만** — mean±std 박스 금지(std가 roe 86.44·opMargin 34.71 heavy outlier까지 = fake precision). mean 마커도 밴드 밖 자주 벗어나므로 percentile만.
 2. **n<10 *분포(metric)* 숨김 + "n=N" 노출.** (industryStats는 산업당 metric별 roe/opMargin/revCagr 독립 distribution이고 각자 n을 가짐 — 산업 단위 아님.)
-3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + inert `marketShare` 컬럼 선제 제거**(현 위치 CenterStack.svelte:194/198·ScreenerModal.svelte:42 — engine.ts 아님, §문제 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
+3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + `marketShare` 표시 컬럼 선제 제거**(표시층 한정 CenterStack.svelte:194/198·ScreenerModal.svelte:42, EcoNode 필드 보존 — 라벨 사칭+로컬 날조 시정, §문제·[07 §구멍5](07-implementation-plan.md) 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
 4. **SSOT 경계 명문화 선결**: industry = 섹터 분포 위 1점 읽기/깔때기, compare + financial-statement-lab = 큐레이션 peer 정밀 SSOT. 이 경계를 mainPlan 문서로 박기 전 코딩 금지(fin-stmt-lab PRD와 충돌이 아니라 de-risk).
 
 > 적대렌즈가 "또 하나의 백분위 패널 신설"을 kill했다. 이 killer가 생존한 유일한 이유는 **신규 계산이 아니라 표시층 통일 + inert dead 정리**이기 때문. 새 백분위 엔진을 만들면 그 순간 kill 대상으로 회귀한다.
