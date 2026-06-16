@@ -93,6 +93,8 @@ def _queryForSource(source: str, query: str) -> str:
         return NEWS_SOURCE_LANE_QUERY
     if source in {"edgar-panel", "edgarPanel"}:
         return f"edgar filing {query}"[:120]
+    if source in {"panel", "dartPanel"}:
+        return f"사업보고서 본문 {query}"[:120]
     return f"공시 원문 {query}"[:120]
 
 

@@ -53,6 +53,7 @@ def test_build_source_canary_pack_from_meta_samples_sources() -> None:
     assert pack[2]["query"] == "뉴스 기사"
     assert "expectedSourceRef" not in pack[2]
     assert pack[3]["expectedSource"] == "panel"
+    assert pack[3]["query"].startswith("사업보고서 본문")
     assert "expectedSourceRef" not in pack[3]
     assert pack[-1]["expectedAnswerable"] is False
 
