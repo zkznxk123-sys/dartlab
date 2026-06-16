@@ -14,6 +14,7 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.core.logger import getLogger
+from dartlab.providers.dart.search.sourceIntent import detectSourceIntent
 
 _log = getLogger(__name__)
 
@@ -28,6 +29,7 @@ def search(
     start: str | None = None,
     end: str | None = None,
     limit: int = 10,
+    topK: int | None = None,
     scope: str = "auto",
 ) -> pl.DataFrame:
     """KR DART 공시 검색 — title (ngram) + content (BM25) 스코프 조합 entry.
@@ -44,7 +46,8 @@ def search(
         start: ``rcept_dt`` 시작일 (YYYYMMDD). None → 미적용.
         end: ``rcept_dt`` 종료일 (YYYYMMDD). None → 미적용.
         limit: 결과 최대 row 수. 기본 10.
-        scope: ``"auto"`` (default) / ``"title"`` / ``"content"`` / ``"both"``. 외 값 → ValueError.
+        topK: ``limit`` 호환 alias. 지정하면 ``limit`` 대신 사용.
+        scope: ``"auto"`` (default) / ``"title"`` / ``"content"`` / ``"both"`` / ``"news"``. 외 값 → ValueError.
 
     Returns:
         pl.DataFrame — 검색 결과. 일반 컬럼 = ``rcept_no``/``rcept_dt``/``corp_name``/
@@ -82,7 +85,7 @@ def search(
         TargetMarkets:
             - KR (DART) 한정. EDGAR (US) 는 별도 API. US ticker 입력 시 안내 fallback.
     """
-    if corp and not str(corp).isdigit() and len(corp) <= 6:
+    if _looksLikeUsTicker(corp):
         return pl.DataFrame(
             {
                 "info": [
@@ -93,29 +96,47 @@ def search(
             }
         )
 
+    if topK is not None:
+        limit = int(topK)
+
     if scope not in SEARCH_SCOPES:
         raise ValueError(f"scope는 {SEARCH_SCOPES} 중 하나. 받은 값: {scope!r}")
 
+    from dartlab.providers.dart.search.facetPlanner import planQueryFacets
+
     corpCode, stockCode = _resolveCorp(corp)
+    facets = planQueryFacets(query, corpCode=corpCode, stockCode=stockCode)
+    corpCode = corpCode or facets.corpCode
+    stockCode = stockCode or facets.stockCode
+    sourceIntent = detectSourceIntent(query, explicitScope=scope)
+    sourceKind = sourceIntent.sourceKind
 
     if scope == "title":
         result = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "content":
-        result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+        result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
     elif scope == "news":
         result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "auto":
-        result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
-    else:  # both
-        titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
-        contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
-        titleHits = titleHits.with_columns(pl.lit("title").alias("scope"))
-        contentHits = contentHits.with_columns(pl.lit("content").alias("scope"))
-        commonCols = [c for c in titleHits.columns if c in contentHits.columns]
-        if commonCols:
-            result = pl.concat([titleHits.select(commonCols), contentHits.select(commonCols)])
+        if sourceKind == "news":
+            result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
         else:
-            result = titleHits
+            result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
+    else:  # both
+        if sourceKind == "news":
+            result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+        else:
+            titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+            contentHits = _searchContent(
+                query,
+                corpCode=corpCode,
+                stockCode=stockCode,
+                sourceKind=sourceKind,
+                limit=limit,
+            )
+            titleHits = titleHits.with_columns(pl.lit("title").alias("scope"))
+            contentHits = contentHits.with_columns(pl.lit("content").alias("scope"))
+            result = pl.concat([titleHits, contentHits], how="diagonal_relaxed")
 
     if result.height > 0 and "rcept_dt" in result.columns:
         if start:
@@ -123,7 +144,44 @@ def search(
         if end:
             result = result.filter(pl.col("rcept_dt") <= end)
 
+    if result.height > 0 and "info" not in result.columns:
+        from dartlab.providers.dart.search.answerability import applyAnswerability
+        from dartlab.providers.dart.search.evidencePack import attachEvidenceCards
+        from dartlab.providers.dart.search.resultSchema import normalizeSearchResult
+        from dartlab.providers.dart.search.sourceIntent import sourceMatchesIntent
+
+        result = normalizeSearchResult(result)
+        if sourceKind and "source" in result.columns:
+            result = result.filter(
+                pl.col("source").map_elements(lambda source: sourceMatchesIntent(source, sourceIntent))
+            )
+        result = applyAnswerability(result, sourceIntent=sourceIntent, facets=facets)
+        result = attachEvidenceCards(result, query=query)
+
+    _recordQueryLogCandidate(
+        query=query,
+        corp=corp,
+        start=start,
+        end=end,
+        limit=limit,
+        scope=scope,
+        sourceKind=sourceKind,
+        result=result,
+    )
     return result
+
+
+def _looksLikeUsTicker(corp: str | None) -> bool:
+    """US ticker 안내가 필요한 ASCII ticker 형태인지 판정."""
+    if not corp:
+        return False
+    text = str(corp).strip()
+    if not text or text.isdigit() or len(text) > 6:
+        return False
+    if not text.isascii():
+        return False
+    allowed = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-")
+    return text[0].isalpha() and all(ch in allowed for ch in text)
 
 
 def _searchTitle(query, *, corpCode, stockCode, limit):
@@ -132,23 +190,23 @@ def _searchTitle(query, *, corpCode, stockCode, limit):
     return searchNgram(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
 
 
-def _searchContent(query, *, corpCode, stockCode, limit):
+def _searchContent(query, *, corpCode, stockCode, sourceKind=None, limit):
     from dartlab.providers.dart.search.fieldIndex import searchContent
 
-    return searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+    return searchContent(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
 
 
 def _searchNews(query, *, corpCode, stockCode, limit):
     """뉴스 전용 — content 인덱스에서 source='news' 행만. corp 지정 시 0 건(뉴스 corp 매핑 없음)."""
     from dartlab.providers.dart.search.fieldIndex import searchContent
 
-    df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit * 4)
-    if df is None or df.height == 0 or "source" not in df.columns:
+    df = searchContent(query, corpCode=corpCode, stockCode=stockCode, sourceKind="news", limit=limit)
+    if df is None or df.height == 0:
         return df
-    return df.filter(pl.col("source") == "news").head(limit)
+    return df.head(limit)
 
 
-def _searchAuto(query, *, corpCode, stockCode, limit):
+def _searchAuto(query, *, corpCode, stockCode, sourceKind=None, limit):
     """auto 모드 — 통합 검색 R* (plain BM25 ⊕ 큐레이션·라우팅 확장 BM25 RRF).
 
     unifiedSearchRecipe honest-gold 실측 확정 레시피. 구어·약어 질의를 동의어/canon 으로 회복하되
@@ -156,7 +214,7 @@ def _searchAuto(query, *, corpCode, stockCode, limit):
     """
     from dartlab.providers.dart.search.unified import searchUnified
 
-    result = searchUnified(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+    result = searchUnified(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
     if result.height > 0 and "info" not in result.columns and "scope" not in result.columns:
         result = result.with_columns(pl.lit("auto").alias("scope"))
     return result
@@ -174,12 +232,51 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
         from dartlab.core.listingResolver import getListingResolver
 
         resolver = getListingResolver()
-        match = resolver.search(corp) if resolver else None
+        if resolver is None:
+            return None, None
+        directCode = resolver.nameToCode(corp)
+        if directCode:
+            return None, str(directCode)
+        match = resolver.search(corp)
         if match is not None and match.height > 0:
-            return None, match["stock_code"][0]
+            for column in ("stock_code", "stockCode", "종목코드"):
+                if column in match.columns:
+                    value = str(match[column][0] or "").strip()
+                    if value:
+                        return None, value
     except (ImportError, KeyError, ValueError, AttributeError):
         pass
     return None, None
+
+
+def _recordQueryLogCandidate(
+    *,
+    query: str,
+    corp: str | None,
+    start: str | None,
+    end: str | None,
+    limit: int,
+    scope: str,
+    sourceKind: str | None,
+    result: pl.DataFrame,
+) -> None:
+    try:
+        from dartlab.providers.dart.search.goldLog import recordRawQueryLogEvent
+
+        recordRawQueryLogEvent(
+            query=query,
+            params={
+                "corp": corp,
+                "start": start,
+                "end": end,
+                "limit": limit,
+                "scope": scope,
+                "sourceKind": sourceKind,
+            },
+            results=result.to_dicts() if result is not None else [],
+        )
+    except (OSError, TypeError, ValueError) as exc:
+        _log.info("search query-log write skipped: %s", exc)
 
 
 def buildIndex(parquetPaths: list[str] | None = None, *, includePanel: bool = False, **kwargs) -> int:

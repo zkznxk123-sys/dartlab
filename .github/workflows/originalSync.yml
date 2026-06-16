@@ -47,6 +47,10 @@ on:
         description: 'DART panel 전이력 재빌드 (true=self-heal·전 zip 재파싱, false=신규 zip만 within-company 증분)'
         default: 'false'
         type: string
+      search_catalog_bootstrap:
+        description: '초기 search source catalog 생성 허용 (true=이전 manifest 없이 높은 하한으로 1회 bootstrap)'
+        default: 'false'
+        type: string
 
 permissions:
   contents: read  # HF push 만(HF_TOKEN) — git commit/release 없음. 최소권한.
@@ -78,6 +82,33 @@ jobs:
           # 기본 within-company 증분(신규 zip만 merge). full-rebuild(self-heal)는 dispatch 시에만.
           DART_PANEL_FULL_REBUILD: ${{ github.event.inputs.dart_full_rebuild == 'true' && '1' || '0' }}
         run: uv run python -X utf8 -m dartlab.pipeline dartZip
+      - name: DART panel search source manifest + catalog
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+        run: |
+          extra=()
+          if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
+            extra+=(--require-previous-manifest)
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source dartPanel \
+            --input 'data/dart/panel/*.parquet' \
+            --out-dir data/dart/searchCatalog/dartPanel \
+            --producer originalSync.dart-zip \
+            --compare-remote-manifest \
+            --min-files 2400 \
+            --min-rows 90000 \
+            --min-catalog-rows 90000 \
+            "${extra[@]}" \
+            --upload
+      - name: Upload DART panel search catalog evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-catalog-dartPanel-${{ github.job }}-${{ github.run_id }}
+          path: data/dart/searchCatalog/dartPanel/**
+          if-no-files-found: ignore
 
   dart-reconcile:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'dart-reconcile' }}
@@ -133,6 +164,33 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: uv run python -X utf8 .github/scripts/sync/buildAllFilingsRecent.py
+      - name: allFilings search source manifest + catalog
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+        run: |
+          extra=()
+          if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
+            extra+=(--require-previous-manifest)
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source allFilings \
+            --input 'data/dart/allFilings/**/*.parquet' \
+            --out-dir data/dart/searchCatalog/allFilings \
+            --producer originalSync.allfilings \
+            --compare-remote-manifest \
+            --min-files 300 \
+            --min-rows 150000 \
+            --min-catalog-rows 150000 \
+            "${extra[@]}" \
+            --upload
+      - name: Upload allFilings search catalog evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-catalog-allFilings-${{ github.job }}-${{ github.run_id }}
+          path: data/dart/searchCatalog/allFilings/**
+          if-no-files-found: ignore
 
   allfilings-backfill:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill' }}
@@ -166,6 +224,33 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: uv run python -X utf8 .github/scripts/sync/buildAllFilingsRecent.py
+      - name: allFilings search source manifest + catalog
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+        run: |
+          extra=()
+          if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
+            extra+=(--require-previous-manifest)
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source allFilings \
+            --input 'data/dart/allFilings/**/*.parquet' \
+            --out-dir data/dart/searchCatalog/allFilings \
+            --producer originalSync.allfilings-backfill \
+            --compare-remote-manifest \
+            --min-files 300 \
+            --min-rows 150000 \
+            --min-catalog-rows 150000 \
+            "${extra[@]}" \
+            --upload
+      - name: Upload allFilings search catalog evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-catalog-allFilings-${{ github.job }}-${{ github.run_id }}
+          path: data/dart/searchCatalog/allFilings/**
+          if-no-files-found: ignore
 
   edgar:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'edgar' }}
@@ -197,3 +282,30 @@ jobs:
           EDGAR_FULL_REBUILD: ${{ github.event.inputs.edgar_full_rebuild == 'true' && '1' || '0' }}
           EDGAR_SINCE_YEAR: '2015'
         run: uv run python -X utf8 -m dartlab.pipeline edgarPanel
+      - name: EDGAR panel search source manifest + catalog
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+        run: |
+          extra=()
+          if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
+            extra+=(--require-previous-manifest)
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source edgarPanel \
+            --input 'data/edgar/panel/*.parquet' \
+            --out-dir data/dart/searchCatalog/edgarPanel \
+            --producer originalSync.edgar \
+            --compare-remote-manifest \
+            --min-files 2000 \
+            --min-rows 50000 \
+            --min-catalog-rows 50000 \
+            "${extra[@]}" \
+            --upload
+      - name: Upload EDGAR panel search catalog evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-catalog-edgarPanel-${{ github.job }}-${{ github.run_id }}
+          path: data/dart/searchCatalog/edgarPanel/**
+          if-no-files-found: ignore

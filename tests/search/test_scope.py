@@ -15,6 +15,23 @@ def test_scope_validation():
         dartlab.search("test", scope="invalid")
 
 
+def test_top_level_search_accepts_top_k_alias(monkeypatch):
+    """문서/skill 의 topK alias 는 limit 로 흡수한다."""
+    import dartlab
+    import dartlab.providers.dart.search as searchPkg
+
+    calls = {}
+
+    def fakeSearch(query, *, corp=None, start=None, end=None, limit=10, scope="auto"):
+        calls.update({"query": query, "corp": corp, "start": start, "end": end, "limit": limit, "scope": scope})
+        return "ok"
+
+    monkeypatch.setattr(searchPkg, "search", fakeSearch)
+
+    assert dartlab.search("유상증자", topK=3, scope="title") == "ok"
+    assert calls == {"query": "유상증자", "corp": None, "start": None, "end": None, "limit": 3, "scope": "title"}
+
+
 def test_tokenize_content():
     """content 토크나이저(음절 bigram + ascii 소문자) 동작."""
     from dartlab.providers.dart.search.fieldIndex import tokenizeContent
@@ -147,16 +164,18 @@ def test_load_segment_missing_returns_none(tmp_path):
     assert loadSegment("nonexistent", inDir=tmp_path) is None
 
 
-def test_search_scope_title_works():
+def test_search_scope_title_works(monkeypatch):
     """scope='title'이 기존 방식으로 동작하는지."""
-    import dartlab
-
-    # 인덱스 있는 경우만 동작 — 없으면 스킵
-    try:
-        r = dartlab.search("유상증자", scope="title", topK=3)
-    except Exception:
-        pytest.skip("stemIndex 없음")
-    # 결과가 DataFrame이면 OK (빈 결과 허용)
     import polars as pl
 
+    import dartlab
+    from dartlab.providers.dart.search import api
+
+    monkeypatch.setattr(
+        api,
+        "_searchTitle",
+        lambda query, *, corpCode, stockCode, limit: pl.DataFrame({"info": ["ok"]}),
+    )
+
+    r = dartlab.search("유상증자", scope="title", topK=3)
     assert isinstance(r, pl.DataFrame)

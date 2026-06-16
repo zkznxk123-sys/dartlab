@@ -1,0 +1,102 @@
+"""pullSearchCurrentIndex script tests."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
+def _writeJson(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+
+
+def test_pull_search_current_index_follows_manifest_file_sources(tmp_path) -> None:
+    remote = tmp_path / "remote"
+    outDir = tmp_path / "contentIndex"
+    previous = outDir / "previous_manifest.json"
+    _writeJson(
+        remote / "dart/contentIndex/manifest.json",
+        {
+            "publishMode": "manifestPointer",
+            "requiredFiles": ["main.npz", "main_stems.json"],
+            "fileSources": {
+                "main.npz": "dart/contentIndex/_staging/full-run/main.npz",
+                "main_stems.json": "dart/contentIndex/_staging/full-run/main_stems.json",
+                "catalog_snapshot.parquet": "dart/contentIndex/_staging/full-run/catalog_snapshot.parquet",
+            },
+        },
+    )
+    stage = remote / "dart/contentIndex/_staging/full-run"
+    stage.mkdir(parents=True)
+    (stage / "main.npz").write_bytes(b"main")
+    (stage / "main_stems.json").write_bytes(b"{}")
+    (stage / "catalog_snapshot.parquet").write_bytes(b"PAR1")
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/pullSearchCurrentIndex.py",
+            "--remote-root",
+            str(remote),
+            "--out-dir",
+            str(outDir),
+            "--previous-manifest",
+            str(previous),
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    assert (outDir / "main.npz").read_bytes() == b"main"
+    assert (outDir / "main_stems.json").read_bytes() == b"{}"
+    assert (outDir / "catalog_snapshot.parquet").read_bytes() == b"PAR1"
+    assert json.loads(previous.read_text(encoding="utf-8"))["fileSources"]["main.npz"].endswith("main.npz")
+
+
+def test_pull_search_current_index_fails_on_missing_required_file(tmp_path) -> None:
+    remote = tmp_path / "remote"
+    outDir = tmp_path / "contentIndex"
+    _writeJson(
+        remote / "dart/contentIndex/manifest.json",
+        {
+            "publishMode": "manifestPointer",
+            "requiredFiles": ["main.npz"],
+            "fileSources": {"main.npz": "dart/contentIndex/_staging/full-run/main.npz"},
+        },
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/pullSearchCurrentIndex.py",
+            "--remote-root",
+            str(remote),
+            "--out-dir",
+            str(outDir),
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 1
+    assert "required:main.npz:FileNotFoundError" in proc.stdout

@@ -25,6 +25,10 @@ on:
         description: '쿼리 상한 (smoke 테스트용)'
         default: '150'
         type: string
+      search_catalog_bootstrap:
+        description: '초기 public news search source catalog 생성 허용 (true=이전 manifest 없이 높은 하한으로 1회 bootstrap)'
+        default: 'false'
+        type: string
 
 permissions:
   contents: write
@@ -76,6 +80,33 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: uv run python -X utf8 -m dartlab.pipeline newsEnrich
+      - name: public news search source manifest + catalog
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+        run: |
+          extra=()
+          if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
+            extra+=(--require-previous-manifest)
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source newsPublic \
+            --input 'data/news/public/rss_enriched/**/*.parquet' \
+            --out-dir data/dart/searchCatalog/newsPublic \
+            --producer newsArchiveSync.newsEnrich \
+            --compare-remote-manifest \
+            --min-files 1 \
+            --min-rows 100 \
+            --min-catalog-rows 100 \
+            "${extra[@]}" \
+            --upload
+      - name: Upload public news search catalog evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-catalog-newsPublic-${{ github.job }}-${{ github.run_id }}
+          path: data/dart/searchCatalog/newsPublic/**
+          if-no-files-found: ignore
 
       - name: Save news headlines cache
         if: always()

@@ -21,6 +21,10 @@ on:
         description: '10-K/10-Q docs 수집 (시간 오래 걸림)'
         default: 'false'
         type: string
+      search_catalog_bootstrap:
+        description: '초기 EDGAR panel search source catalog 생성 허용 (true=이전 manifest 없이 높은 하한으로 1회 bootstrap)'
+        default: 'false'
+        type: string
 
 permissions:
   contents: write
@@ -117,6 +121,33 @@ jobs:
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      - name: EDGAR panel search source manifest + catalog
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+        run: |
+          extra=()
+          if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
+            extra+=(--require-previous-manifest)
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source edgarPanel \
+            --input 'data/edgar/panel/*.parquet' \
+            --out-dir data/dart/searchCatalog/edgarPanel \
+            --producer edgarSync.edgarPanel \
+            --compare-remote-manifest \
+            --min-files 2000 \
+            --min-rows 50000 \
+            --min-catalog-rows 50000 \
+            "${extra[@]}" \
+            --upload
+      - name: Upload EDGAR panel search catalog evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-catalog-edgarPanel-${{ github.job }}-${{ github.run_id }}
+          path: data/dart/searchCatalog/edgarPanel/**
+          if-no-files-found: ignore
 
       # ── 4. scan 프리빌드 ──
       - name: Build EDGAR scan prebuild

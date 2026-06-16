@@ -121,6 +121,7 @@ def test_edgar_panel_rollup_indexed(tmp_path, monkeypatch):
         {
             "rceptNo": ["0001090872-15-000032", "0001090872-15-000032"],
             "period": ["2015Q1", "2015Q1"],
+            "filing_date": ["2015-04-28", "2015-04-28"],
             "contentRaw": ["<p>revenue increased due to semiconductor demand</p>", "<p>risk factors include</p>"],
             "sectionLeaf": ["10-Q", "10-Q"],
         }
@@ -137,6 +138,9 @@ def test_edgar_panel_rollup_indexed(tmp_path, monkeypatch):
     assert top["rcept_no"] == "0001090872-15-000032"
     assert top["source"] == "edgar-panel"
     assert top["report_nm"] == "10-Q"
+    assert top["rcept_dt"] == "20150428"
+    assert top["dataAsOf"] == "20150428"
+    assert top["sourceRef"] == "edgar:panel:0001090872-15-000032#section=0"
     assert top["dartUrl"] == ""  # accession 은 DART 뷰어 URL 조합 불가 — 빈값(정직)
 
 

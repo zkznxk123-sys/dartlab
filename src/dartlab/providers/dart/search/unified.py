@@ -80,6 +80,7 @@ def searchUnified(
     *,
     corpCode: str | None = None,
     stockCode: str | None = None,
+    sourceKind: str | None = None,
     limit: int = 10,
 ) -> pl.DataFrame:
     """통합 검색 — plain BM25 ⊕ 확장 BM25 RRF. main+delta 병합 (delta 우선).
@@ -124,7 +125,7 @@ def searchUnified(
         idx, meta = segments[name]
         # corp/stock 스코프는 RRF *전* lane 점수에 적용 — "회사 안에서 검색" 의미론.
         # 사후 필터는 전역 top-N 에 못 들면 0건이 되는 결함 (흔한 질의 + 회사 지정).
-        mask = _scopeMask(meta, corpCode, stockCode)
+        mask = _scopeMask(meta, corpCode, stockCode, sourceKind)
         plain = _scoreBM25(idx, tokens)
         if mask is not None:
             plain = np.where(mask, plain, 0.0)

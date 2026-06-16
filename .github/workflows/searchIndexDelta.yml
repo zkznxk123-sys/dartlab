@@ -16,9 +16,41 @@ on:
     - cron: '0 19 * * *'  # UTC 19:00 = KST 04:00 (dataSync 03:00 다음)
   workflow_dispatch:
     inputs:
+      delta_mode:
+        description: 'delta mode: auto/catalog/legacy'
+        default: 'auto'
+        type: string
       lookback_days:
         description: '증분 대상 일수'
         default: '30'
+        type: string
+      previous_catalog:
+        description: 'optional previous catalog path for catalog mode'
+        default: ''
+        type: string
+      current_catalog:
+        description: 'optional current catalog path for catalog mode'
+        default: ''
+        type: string
+      source_manifests:
+        description: 'optional os.pathsep-separated source manifest paths'
+        default: ''
+        type: string
+      source_manifest_set:
+        description: 'optional source manifest set JSON path for catalog mode'
+        default: ''
+        type: string
+      expected_sources:
+        description: 'comma-separated source set required for catalog mode'
+        default: 'allFilings,dartPanel,edgarPanel,newsPublic'
+        type: string
+      productization_gate:
+        description: 'productization gate: ops/release'
+        default: 'ops'
+        type: string
+      quality_gold:
+        description: 'release gate gold JSON/JSONL path'
+        default: 'data/search/queryLogGold.real.jsonl'
         type: string
 
 permissions:
@@ -45,6 +77,12 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Local search pipeline drill
+        run: >
+          uv run python -X utf8 .github/scripts/search/runSearchPipelineDrill.py
+          --out "$RUNNER_TEMP/searchPipelineDrill.json"
+          --fail-on-error
+
       - name: Restore allFilings cache
         uses: actions/cache@v5
         with:
@@ -54,34 +92,231 @@ jobs:
             dartlab-allFilings-
 
       - name: Pull existing content index from HF
+        run: >
+          uv run python -X utf8 .github/scripts/search/pullSearchCurrentIndex.py
+          --tier full
+          --out-dir data/dart/contentIndex
+          --previous-manifest data/dart/contentIndex/previous_manifest.json
+          --optional-file catalog_snapshot.parquet
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Pull source search catalogs from HF
         run: |
           uv run python -c "
-          from huggingface_hub import HfApi, hf_hub_download
-          from pathlib import Path
-          out = Path('data/dart/contentIndex')
-          out.mkdir(parents=True, exist_ok=True)
-          api = HfApi()
-          for name in ['main.npz', 'main_stems.json', 'main_meta.parquet', 'main_info.json']:
-              try:
-                  p = hf_hub_download(
-                      repo_id='eddmpython/dartlab-data',
-                      repo_type='dataset',
-                      filename=f'dart/contentIndex/{name}',
-                      local_dir='data',
-                  )
-                  print(f'pulled {name}')
-              except Exception as e:
-                  print(f'skip {name}: {e}')
+          from huggingface_hub import snapshot_download
+          try:
+              snapshot_download(
+                  repo_id='eddmpython/dartlab-data',
+                  repo_type='dataset',
+                  allow_patterns='dart/searchCatalog/**',
+                  local_dir='data',
+              )
+              print('pulled searchCatalog artifacts')
+          except Exception as e:
+              print(f'skip searchCatalog artifacts: {e}')
           "
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-      - name: Build content delta + upload
+      - name: Prepare catalog delta inputs
+        if: ${{ github.event.inputs.current_catalog == '' || github.event.inputs.current_catalog == null }}
+        run: uv run python -X utf8 .github/scripts/search/prepareSearchDeltaInputs.py
+        env:
+          DARTLAB_SEARCH_EXPECTED_SOURCES: ${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}
+
+      - name: Apply manual catalog delta inputs
+        if: ${{ github.event.inputs.current_catalog != '' && github.event.inputs.current_catalog != null }}
+        run: |
+          echo "DARTLAB_SEARCH_PREVIOUS_CATALOG=${{ github.event.inputs.previous_catalog }}" >> "$GITHUB_ENV"
+          echo "DARTLAB_SEARCH_CURRENT_CATALOG=${{ github.event.inputs.current_catalog }}" >> "$GITHUB_ENV"
+          echo "DARTLAB_SEARCH_SOURCE_MANIFESTS=${{ github.event.inputs.source_manifests }}" >> "$GITHUB_ENV"
+          echo "DARTLAB_SEARCH_SOURCE_MANIFEST_SET=${{ github.event.inputs.source_manifest_set }}" >> "$GITHUB_ENV"
+
+      - name: Build content delta + stage candidate
         run: uv run python .github/scripts/search/buildSearchDelta.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_SEARCH_DELTA_MODE: ${{ github.event.inputs.delta_mode || 'auto' }}
+          DARTLAB_SEARCH_PROMOTE_CURRENT: "0"
           LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '30' }}
+
+      - name: Verify HF contentIndex candidate round-trip (full)
+        shell: bash
+        run: |
+          args=(--tier full --out "$RUNNER_TEMP/searchHfRoundTrip.delta.full.json" --fail-on-error)
+          if [ -n "${DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST:-}" ]; then
+            args+=(--manifest-repo-path "$DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST")
+          fi
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py "${args[@]}"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Verify HF contentIndex round-trip (lite)
+        run: >
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py
+          --tier lite
+          --out "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Audit search result contract
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchResultContract.py
+          --query "유상증자"
+          --query "공시 말고 뉴스로 환율 기사"
+          --query "HBM 투자 계획"
+          --out "$RUNNER_TEMP/searchResultContract.delta.json"
+          --min-rows 3
+          --fail-on-error
+
+      - name: Audit source/no-answer canary pack
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchCanary.py
+          --manifest data/dart/contentIndex/manifest.json
+          --out "$RUNNER_TEMP/searchCanary.delta.json"
+          --fail-on-error
+
+      - name: Run query-log quality toolchain drill
+        run: >
+          uv run python -X utf8 .github/scripts/search/runSearchQualityDrill.py
+          --out "$RUNNER_TEMP/searchQualityDrill.delta.json"
+          --canonical-gold "$RUNNER_TEMP/searchQualityDrill.delta.gold.jsonl"
+          --label-template "$RUNNER_TEMP/searchQualityDrill.delta.labels.jsonl"
+          --miss-ledger "$RUNNER_TEMP/searchQualityDrill.delta.miss.jsonl"
+          --fail-on-error
+
+      - name: Evaluate real query-log quality
+        if: ${{ always() && (github.event.inputs.productization_gate || 'ops') == 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py
+          --gold "${{ github.event.inputs.quality_gold || 'data/search/queryLogGold.real.jsonl' }}"
+          --out "$RUNNER_TEMP/searchQuality.delta.json"
+          --miss-ledger "$RUNNER_TEMP/searchMissLedger.delta.jsonl"
+          --required-targets filing,news,noAnswer,edgar
+          --fail-on-ineligible
+
+      - name: Promote verified contentIndex candidate (full)
+        shell: bash
+        run: |
+          if [ -z "${DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST:-}" ]; then
+            echo "No full candidate manifest staged; skip promote"
+            exit 0
+          fi
+          uv run python -X utf8 .github/scripts/search/promoteSearchCandidate.py \
+            --tier full \
+            --candidate-manifest-path "$DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST" \
+            --out "$RUNNER_TEMP/searchPromote.delta.full.json" \
+            --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Audit remote search evidence
+        run: >
+          uv run python -X utf8 .github/scripts/search/checkSearchRemoteEvidence.py
+          --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --content-tiers full,lite
+          --out "$RUNNER_TEMP/searchRemoteEvidence.delta.json"
+          --fail-on-missing
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Evaluate search productization status (ops gate)
+        if: ${{ always() && (github.event.inputs.productization_gate || 'ops') != 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
+          --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --remote-evidence "$RUNNER_TEMP/searchRemoteEvidence.delta.json"
+          --result-contract "$RUNNER_TEMP/searchResultContract.delta.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.delta.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --out "$RUNNER_TEMP/searchProductizationStatus.delta.json"
+          --fail-on-ops-not-ready
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Evaluate search productization status (release gate)
+        if: ${{ always() && (github.event.inputs.productization_gate || 'ops') == 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
+          --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --remote-evidence "$RUNNER_TEMP/searchRemoteEvidence.delta.json"
+          --result-contract "$RUNNER_TEMP/searchResultContract.delta.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.delta.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --quality-report "$RUNNER_TEMP/searchQuality.delta.json"
+          --out "$RUNNER_TEMP/searchProductizationStatus.delta.json"
+          --fail-on-release-not-ready
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build search proof bundle (ops gate)
+        if: ${{ always() && (github.event.inputs.productization_gate || 'ops') != 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
+          --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --result-contract-report "$RUNNER_TEMP/searchResultContract.delta.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.delta.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --out-dir "$RUNNER_TEMP/searchProofBundle.delta"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build search proof bundle (release gate)
+        if: ${{ always() && (github.event.inputs.productization_gate || 'ops') == 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
+          --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --result-contract-report "$RUNNER_TEMP/searchResultContract.delta.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.delta.json"
+          --quality-report "$RUNNER_TEMP/searchQuality.delta.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --out-dir "$RUNNER_TEMP/searchProofBundle.delta"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Evaluate search cutover state
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/searchProofBundle.delta/searchProofBundle.json" ]; then
+            uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py \
+              --proof-bundle "$RUNNER_TEMP/searchProofBundle.delta/searchProofBundle.json" \
+              --out "$RUNNER_TEMP/searchCutover.delta.json"
+          else
+            cat > "$RUNNER_TEMP/searchCutover.delta.json" <<'JSON'
+          {"state":"S0_EXPERIMENT","designReady":false,"opsReady":false,"releaseReady":false,"defaultReplacement":false,"blockers":["missingProofBundle"],"valid":false}
+          JSON
+          fi
+
+      - name: Upload search evidence reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-index-delta-evidence-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/searchPipelineDrill.json
+            ${{ runner.temp }}/searchHfRoundTrip.delta.full.json
+            ${{ runner.temp }}/searchHfRoundTrip.delta.lite.json
+            ${{ runner.temp }}/searchResultContract.delta.json
+            ${{ runner.temp }}/searchCanary.delta.json
+            ${{ runner.temp }}/searchQualityDrill.delta.json
+            ${{ runner.temp }}/searchQualityDrill.delta.gold.jsonl
+            ${{ runner.temp }}/searchQualityDrill.delta.labels.jsonl
+            ${{ runner.temp }}/searchQualityDrill.delta.miss.jsonl
+            ${{ runner.temp }}/searchPromote.delta.full.json
+            ${{ runner.temp }}/searchRemoteEvidence.delta.json
+            ${{ runner.temp }}/searchQuality.delta.json
+            ${{ runner.temp }}/searchMissLedger.delta.jsonl
+            ${{ runner.temp }}/searchProductizationStatus.delta.json
+            ${{ runner.temp }}/searchCutover.delta.json
+            ${{ runner.temp }}/searchProofBundle.delta/**
 
       - name: Save allFilings cache
         if: always()

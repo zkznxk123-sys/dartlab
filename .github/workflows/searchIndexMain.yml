@@ -4,8 +4,9 @@ name: Search Index Main (monthly)
 # content 인덱스 main 세그먼트 풀리빌드 + HF 업로드 (full + lite tier).
 #
 # 매월 1일 KST 05:00 실행 (또는 수동):
-#   1. 전체 allFilings + DART panel + EDGAR panel + 뉴스 → full main 세그먼트 풀리빌드
-#   2. HF dart/contentIndex/*  (full = flat) 업로드 + delta 제거 (main에 흡수)
+#   1. source catalog snapshot 우선 → full main 세그먼트 compaction
+#      (catalog 부재 시 legacy raw allFilings + DART panel + EDGAR panel + 뉴스 풀리빌드)
+#   2. HF staging 업로드 후 dart/contentIndex/manifest.json current pointer publish + delta 제거
 #   3. lite tier — 최근 N개월(DARTLAB_LITE_MONTHS, 기본 18) 축소 색인 → dart/contentIndex/lite/ 업로드
 #      (pip 사용자 기본 경량 배포; full 과 별 디렉터리라 공존. lite 빌드 실패해도 full 은 이미 배포됨)
 #
@@ -16,6 +17,28 @@ on:
   schedule:
     - cron: '0 20 1 * *'  # UTC 20:00 on 1st = KST 05:00 on 1st
   workflow_dispatch:
+    inputs:
+      build_mode:
+        description: Search main build mode
+        required: false
+        default: auto
+        type: choice
+        options:
+          - auto
+          - catalog
+          - legacy
+      expected_sources:
+        description: Required source catalog set
+        required: false
+        default: allFilings,dartPanel,edgarPanel,newsPublic
+      productization_gate:
+        description: 'Productization gate: ops/release'
+        required: false
+        default: ops
+      quality_gold:
+        description: 'Release gate gold JSON/JSONL path'
+        required: false
+        default: data/search/queryLogGold.real.jsonl
 
 permissions:
   contents: read
@@ -47,8 +70,46 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Local search pipeline drill
+        run: >
+          uv run python -X utf8 .github/scripts/search/runSearchPipelineDrill.py
+          --out "$RUNNER_TEMP/searchPipelineDrill.json"
+          --fail-on-error
+
+      - name: Pull source search catalogs from HF
+        if: ${{ inputs.build_mode != 'legacy' }}
+        run: |
+          uv run python -c "
+          from huggingface_hub import snapshot_download
+          try:
+              snapshot_download(repo_id='eddmpython/dartlab-data', repo_type='dataset',
+                                allow_patterns=['dart/searchCatalog/**'],
+                                local_dir='data', max_workers=4)
+          except Exception as e:
+              print(f'search catalog pull skipped: {e}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Prepare catalog main inputs
+        if: ${{ inputs.build_mode != 'legacy' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/prepareSearchDeltaInputs.py
+          --previous ""
+          --out-current data/dart/searchCatalog/main.current.catalog_snapshot.parquet
+        env:
+          DARTLAB_SEARCH_EXPECTED_SOURCES: ${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}
+
       - name: Pull all data from HF
         run: |
+          if [ "${DARTLAB_SEARCH_MAIN_MODE:-}" = "catalog" ]; then
+            echo "catalog snapshot prepared; skip legacy raw HF pull"
+            exit 0
+          fi
+          if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-auto}" = "catalog" ]; then
+            echo "catalog mode requested but source catalog inputs were not prepared"
+            exit 1
+          fi
           # HF 429(1000 req/5분 쿼터) 대응 — 4 폴더 패턴을 *한 번의* snapshot_download 로 통합해
           # repo tree 열거(91941 파일, 페이지네이션 ~92 req)를 attempt 당 1회로 줄인다. 옛 폴더별
           # 4회 호출은 열거만으로 쿼터 태반을 태워 마지막 순서 news 가 매번 0 으로 남았다(run 27260308153).
@@ -63,7 +124,13 @@ jobs:
           # edgar/panel = 통합검색 풀셋(KO+EN) — DART panel 과 동일 16-col 스키마.
           try:
               snapshot_download(repo_id='eddmpython/dartlab-data', repo_type='dataset',
-                                allow_patterns=['dart/allFilings/*', 'dart/panel/**', 'edgar/panel/**', 'news/public/rss/**'],
+                                allow_patterns=[
+                                    'dart/allFilings/*',
+                                    'dart/panel/**',
+                                    'edgar/panel/**',
+                                    'news/public/rss/**',
+                                    'news/public/rss_enriched/**',
+                                ],
                                 local_dir='data', max_workers=4)
           except Exception as e:
               print(f'partial pull: {e}')
@@ -72,17 +139,270 @@ jobs:
             pn=$(find data/dart/panel -name '*.parquet' 2>/dev/null | wc -l)
             ep=$(find data/edgar/panel -name '*.parquet' 2>/dev/null | wc -l)
             nh=$(find data/news/public/rss -name '*.parquet' 2>/dev/null | wc -l)
-            echo "pull 검증($attempt/12): allFilings=$af panel=$pn edgarPanel=$ep news=$nh"
+            ne=$(find data/news/public/rss_enriched -name '*.parquet' 2>/dev/null | wc -l)
+            echo "pull 검증($attempt/12): allFilings=$af panel=$pn edgarPanel=$ep news=$nh newsEnriched=$ne"
             # 하한 = 2026-06 정상 pull(af 347·pn 2929·ep 2529·nh 26)의 ~80% — silent-partial(429)이
             # >0 검사를 통과해 빌드 8분을 낭비하고 퇴행가드에서야 잡힌 실측 사고(run 27258453698) 차단.
-            if [ "$af" -ge 300 ] && [ "$pn" -ge 2400 ] && [ "$ep" -ge 2000 ] && [ "$nh" -ge 1 ]; then ok=1; break; fi
+            if [ "$af" -ge 300 ] && [ "$pn" -ge 2400 ] && [ "$ep" -ge 2000 ] && [ "$nh" -ge 1 ] && [ "$ne" -ge 1 ]; then ok=1; break; fi
             echo "pull attempt $attempt 미완 — quota window 경과 대기 310s"; sleep 310
           done
           [ "$ok" = "1" ]
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_SEARCH_MAIN_REQUESTED_MODE: ${{ inputs.build_mode || 'auto' }}
 
-      - name: Build content main + upload
+      - name: Build canonical source search catalogs from full HF pull
+        run: |
+          if [ "${DARTLAB_SEARCH_MAIN_MODE:-}" = "catalog" ]; then
+            echo "catalog snapshot prepared; skip canonical source catalog bootstrap"
+            exit 0
+          fi
+          if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-auto}" = "legacy" ]; then
+            echo "legacy mode requested; skip canonical source catalog bootstrap"
+            exit 0
+          fi
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source allFilings \
+            --input 'data/dart/allFilings/**/*.parquet' \
+            --out-dir data/dart/searchCatalog/allFilings \
+            --producer searchIndexMain.full-pull \
+            --compare-remote-manifest \
+            --upload
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source dartPanel \
+            --input 'data/dart/panel/*.parquet' \
+            --out-dir data/dart/searchCatalog/dartPanel \
+            --producer searchIndexMain.full-pull \
+            --compare-remote-manifest \
+            --upload
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source edgarPanel \
+            --input 'data/edgar/panel/*.parquet' \
+            --out-dir data/dart/searchCatalog/edgarPanel \
+            --producer searchIndexMain.full-pull \
+            --compare-remote-manifest \
+            --upload
+          uv run python -X utf8 .github/scripts/search/buildSearchCatalog.py \
+            --source newsPublic \
+            --input 'data/news/public/rss_enriched/**/*.parquet' \
+            --out-dir data/dart/searchCatalog/newsPublic \
+            --producer searchIndexMain.full-pull \
+            --compare-remote-manifest \
+            --upload
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_SEARCH_MAIN_REQUESTED_MODE: ${{ inputs.build_mode || 'auto' }}
+
+      - name: Prepare canonical catalog main inputs after bootstrap
+        if: ${{ inputs.build_mode != 'legacy' }}
+        run: |
+          if [ "${DARTLAB_SEARCH_MAIN_MODE:-}" = "catalog" ]; then
+            echo "catalog snapshot already prepared"
+            exit 0
+          fi
+          uv run python -X utf8 .github/scripts/search/prepareSearchDeltaInputs.py \
+            --previous "" \
+            --out-current data/dart/searchCatalog/main.current.catalog_snapshot.parquet
+        env:
+          DARTLAB_SEARCH_EXPECTED_SOURCES: ${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}
+
+      - name: Build content main + stage candidate
         run: uv run python .github/scripts/search/buildSearchMain.py
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_SEARCH_EXPECTED_SOURCES: ${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}
+          DARTLAB_SEARCH_PROMOTE_CURRENT: "0"
+
+      - name: Verify HF contentIndex candidate round-trip (full)
+        shell: bash
+        run: |
+          args=(--tier full --out "$RUNNER_TEMP/searchHfRoundTrip.main.full.json" --fail-on-error)
+          if [ -n "${DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST:-}" ]; then
+            args+=(--manifest-repo-path "$DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST")
+          fi
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py "${args[@]}"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Verify HF contentIndex candidate round-trip (lite)
+        shell: bash
+        run: |
+          args=(--tier lite --out "$RUNNER_TEMP/searchHfRoundTrip.main.lite.json" --fail-on-error)
+          if [ -n "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
+            args+=(--manifest-repo-path "$DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST")
+          fi
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py "${args[@]}"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Audit search result contract
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchResultContract.py
+          --query "유상증자"
+          --query "공시 말고 뉴스로 환율 기사"
+          --query "HBM 투자 계획"
+          --out "$RUNNER_TEMP/searchResultContract.main.json"
+          --min-rows 3
+          --fail-on-error
+
+      - name: Audit source/no-answer canary pack
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchCanary.py
+          --manifest data/dart/contentIndex/manifest.json
+          --out "$RUNNER_TEMP/searchCanary.main.json"
+          --fail-on-error
+
+      - name: Run query-log quality toolchain drill
+        run: >
+          uv run python -X utf8 .github/scripts/search/runSearchQualityDrill.py
+          --out "$RUNNER_TEMP/searchQualityDrill.main.json"
+          --canonical-gold "$RUNNER_TEMP/searchQualityDrill.main.gold.jsonl"
+          --label-template "$RUNNER_TEMP/searchQualityDrill.main.labels.jsonl"
+          --miss-ledger "$RUNNER_TEMP/searchQualityDrill.main.miss.jsonl"
+          --fail-on-error
+
+      - name: Evaluate real query-log quality
+        if: ${{ always() && (inputs.productization_gate || 'ops') == 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py
+          --gold "${{ inputs.quality_gold || 'data/search/queryLogGold.real.jsonl' }}"
+          --out "$RUNNER_TEMP/searchQuality.main.json"
+          --miss-ledger "$RUNNER_TEMP/searchMissLedger.main.jsonl"
+          --required-targets filing,news,noAnswer,edgar
+          --fail-on-ineligible
+
+      - name: Promote verified contentIndex candidate (full)
+        shell: bash
+        run: |
+          if [ -z "${DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST:-}" ]; then
+            echo "No full candidate manifest staged; skip promote"
+            exit 0
+          fi
+          uv run python -X utf8 .github/scripts/search/promoteSearchCandidate.py \
+            --tier full \
+            --candidate-manifest-path "$DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST" \
+            --out "$RUNNER_TEMP/searchPromote.main.full.json" \
+            --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Promote verified contentIndex candidate (lite)
+        shell: bash
+        run: |
+          if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
+            echo "No lite candidate manifest staged; skip promote"
+            exit 0
+          fi
+          uv run python -X utf8 .github/scripts/search/promoteSearchCandidate.py \
+            --tier lite \
+            --candidate-manifest-path "$DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST" \
+            --out "$RUNNER_TEMP/searchPromote.main.lite.json" \
+            --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Audit remote search evidence
+        run: >
+          uv run python -X utf8 .github/scripts/search/checkSearchRemoteEvidence.py
+          --expected-sources "${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --content-tiers full,lite
+          --out "$RUNNER_TEMP/searchRemoteEvidence.main.json"
+          --fail-on-missing
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Evaluate search productization status (ops gate)
+        if: ${{ always() && (inputs.productization_gate || 'ops') != 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
+          --expected-sources "${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --remote-evidence "$RUNNER_TEMP/searchRemoteEvidence.main.json"
+          --result-contract "$RUNNER_TEMP/searchResultContract.main.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.main.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.lite.json"
+          --out "$RUNNER_TEMP/searchProductizationStatus.main.json"
+          --fail-on-ops-not-ready
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Evaluate search productization status (release gate)
+        if: ${{ always() && (inputs.productization_gate || 'ops') == 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
+          --expected-sources "${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --remote-evidence "$RUNNER_TEMP/searchRemoteEvidence.main.json"
+          --result-contract "$RUNNER_TEMP/searchResultContract.main.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.main.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.lite.json"
+          --quality-report "$RUNNER_TEMP/searchQuality.main.json"
+          --out "$RUNNER_TEMP/searchProductizationStatus.main.json"
+          --fail-on-release-not-ready
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build search proof bundle (ops gate)
+        if: ${{ always() && (inputs.productization_gate || 'ops') != 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
+          --expected-sources "${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --result-contract-report "$RUNNER_TEMP/searchResultContract.main.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.main.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.lite.json"
+          --out-dir "$RUNNER_TEMP/searchProofBundle.main"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build search proof bundle (release gate)
+        if: ${{ always() && (inputs.productization_gate || 'ops') == 'release' }}
+        run: >
+          uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
+          --expected-sources "${{ inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
+          --result-contract-report "$RUNNER_TEMP/searchResultContract.main.json"
+          --canary-report "$RUNNER_TEMP/searchCanary.main.json"
+          --quality-report "$RUNNER_TEMP/searchQuality.main.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.full.json"
+          --hf-round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.lite.json"
+          --out-dir "$RUNNER_TEMP/searchProofBundle.main"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Evaluate search cutover state
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/searchProofBundle.main/searchProofBundle.json" ]; then
+            uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py \
+              --proof-bundle "$RUNNER_TEMP/searchProofBundle.main/searchProofBundle.json" \
+              --out "$RUNNER_TEMP/searchCutover.main.json"
+          else
+            cat > "$RUNNER_TEMP/searchCutover.main.json" <<'JSON'
+          {"state":"S0_EXPERIMENT","designReady":false,"opsReady":false,"releaseReady":false,"defaultReplacement":false,"blockers":["missingProofBundle"],"valid":false}
+          JSON
+          fi
+
+      - name: Upload search evidence reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: search-index-main-evidence-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/searchPipelineDrill.json
+            ${{ runner.temp }}/searchHfRoundTrip.main.full.json
+            ${{ runner.temp }}/searchHfRoundTrip.main.lite.json
+            ${{ runner.temp }}/searchResultContract.main.json
+            ${{ runner.temp }}/searchCanary.main.json
+            ${{ runner.temp }}/searchQualityDrill.main.json
+            ${{ runner.temp }}/searchQualityDrill.main.gold.jsonl
+            ${{ runner.temp }}/searchQualityDrill.main.labels.jsonl
+            ${{ runner.temp }}/searchQualityDrill.main.miss.jsonl
+            ${{ runner.temp }}/searchPromote.main.full.json
+            ${{ runner.temp }}/searchPromote.main.lite.json
+            ${{ runner.temp }}/searchRemoteEvidence.main.json
+            ${{ runner.temp }}/searchQuality.main.json
+            ${{ runner.temp }}/searchMissLedger.main.jsonl
+            ${{ runner.temp }}/searchProductizationStatus.main.json
+            ${{ runner.temp }}/searchCutover.main.json
+            ${{ runner.temp }}/searchProofBundle.main/**

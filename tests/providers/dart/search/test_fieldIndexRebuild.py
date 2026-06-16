@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -14,3 +16,83 @@ def test_import() -> None:
     import dartlab.providers.dart.search.fieldIndexRebuild as mod
 
     assert mod is not None
+
+
+def test_write_index_manifest_callable() -> None:
+    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+
+    assert callable(writeIndexManifest)
+
+
+def test_rebuild_main_from_catalog_callable() -> None:
+    from dartlab.providers.dart.search.fieldIndexRebuild import rebuildMainFromCatalog
+
+    assert callable(rebuildMainFromCatalog)
+
+
+def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+
+    idx, meta = buildContentSegment(
+        [
+            {
+                "section_content": "유상증자 자금조달 계획",
+                "rcept_no": "20260615000001",
+                "section_order": 0,
+                "corp_code": "00126380",
+                "corp_name": "삼성전자",
+                "stock_code": "005930",
+                "rcept_dt": "20260615",
+                "report_nm": "주요사항보고서",
+                "section_title": "",
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:20260615000001#section=0",
+            }
+        ],
+        showProgress=False,
+    )
+    saveSegment(idx, meta, "main", outDir=tmp_path)
+    (tmp_path / "source_manifest_set.json").write_text(
+        json.dumps(
+            {
+                "schemaVersion": "searchSourceManifestSet.v1",
+                "sourceManifestSetId": "abc123",
+                "expectedSources": ["allFilings"],
+                "combinedCatalogRows": 1,
+                "combinedCatalogSha256": "hash",
+                "sources": [
+                    {
+                        "source": "allFilings",
+                        "dataAsOf": "20260615",
+                        "snapshotScope": "full",
+                        "totalRows": 1,
+                        "catalogRows": 1,
+                        "manifestSha256": "manifest-hash",
+                        "catalogSha256": "catalog-hash",
+                        "producer": "test",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = writeIndexManifest(tmp_path, tier="full", buildCommand="test")
+
+    assert manifest["canaryPackVersion"] == "artifact-source-v3"
+    assert manifest["sourceCanaryPack"][0]["expectedSource"] == "allFilings"
+    assert manifest["sourceCanaryPack"][0]["expectedSourceRef"] == "dart:allFilings:20260615000001#section=0"
+    assert manifest["sourceCanaryPack"][-1]["target"] == "noAnswer"
+    assert "source_manifest_set.json" in manifest["requiredFiles"]
+    assert "source_manifest_set.json" in manifest["fileHashes"]
+    assert manifest["sourceManifestSetId"] == "abc123"
+    assert manifest["sourceManifestSet"]["sources"][0]["source"] == "allFilings"
+
+
+def test_edgar_period_to_data_as_of_uses_quarter_end() -> None:
+    from dartlab.providers.dart.search.freshness import periodToDataAsOf
+
+    assert periodToDataAsOf("2025Q4") == "20251231"
+    assert periodToDataAsOf("2026Q1") == "20260331"
+    assert periodToDataAsOf("bad") == ""

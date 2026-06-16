@@ -45,6 +45,7 @@ import polars as pl
 # ── 상수 ──
 
 CONTENT_LIMIT = 1500  # section_content 인덱싱 최대 글자 수
+EVIDENCE_TEXT_LIMIT = 4000  # LLM/evidence card 용 bounded 원문 후보 텍스트
 
 # 인덱스 직렬화 포맷 버전 — 코드(라이브러리)와 HF 인덱스의 호환 계약.
 # bump 규칙: npz 키 구성·토크나이저(stems 어휘)·meta 스키마가 비호환 변경될 때 +1.
@@ -74,13 +75,19 @@ def _contentIndexDir(tier: str | None = None) -> Path:
 def _activeIndexDir() -> Path:
     """런타임 검색이 읽을 *유효* 인덱스 디렉터리 — flat 우선, 없으면 tier(기본 lite).
 
-    1) flat ``contentIndex/main.npz`` 존재 → flat(기존 배포·dev). 기존 동작 100% 보존.
-    2) 없으면 tier = env ``DARTLAB_SEARCH_TIER`` 또는 ``lite`` → ``contentIndex/{tier}/``.
-    둘 다 없으면 flat(빈 디렉터리 → graceful 빈 결과).
+    1) ``contentIndex/active.json`` 이 유효하면 해당 artifact dir.
+    2) flat ``contentIndex/main.npz`` 존재 → flat(기존 배포·dev). 기존 동작 보존.
+    3) 없으면 tier = env ``DARTLAB_SEARCH_TIER`` 또는 ``lite`` → ``contentIndex/{tier}/``.
+    모두 없으면 flat(빈 디렉터리 → graceful 빈 결과).
     """
     import os
 
     base = _contentIndexDir()
+    from dartlab.providers.dart.search.localUpdate import resolveActiveIndexDir
+
+    active = resolveActiveIndexDir(base)
+    if active is not None:
+        return active
     if (base / "main.npz").exists():
         return base
     tier = (os.environ.get("DARTLAB_SEARCH_TIER") or "lite").strip()
@@ -276,7 +283,16 @@ def buildContentSegment(
                 "report_nm": row.get("report_nm") or "",
                 "section_title": row.get("section_title") or "",
                 "text": content[:500],  # 스니펫용
+                "evidenceText": str(row.get("evidenceText") or row.get("evidence_text") or content)[
+                    :EVIDENCE_TEXT_LIMIT
+                ],
                 "source": row.get("source") or "",
+                "sourceRef": row.get("sourceRef") or row.get("source_ref") or "",
+                "sourceDataAsOf": row.get("sourceDataAsOf")
+                or row.get("source_data_as_of")
+                or row.get("rcept_dt")
+                or "",
+                "contentLen": len(content),
                 "url": row.get("url") or "",  # 뉴스 기사 url (비뉴스는 "")
             }
         )
@@ -461,7 +477,12 @@ def clearCache() -> None:
     _segments = None
 
 
-def _scopeMask(meta: pl.DataFrame, corpCode: str | None, stockCode: str | None) -> np.ndarray | None:
+def _scopeMask(
+    meta: pl.DataFrame,
+    corpCode: str | None,
+    stockCode: str | None,
+    sourceKind: str | None = None,
+) -> np.ndarray | None:
     """corp/stock 필터를 랭킹 *전* 스코프 마스크로 변환 — "회사 안에서 검색" 의미론.
 
     사후(top-N 수집 후) 필터는 흔한 질의에서 해당 회사가 전역 상위에 못 들면 0건이 되는
@@ -481,14 +502,25 @@ def _scopeMask(meta: pl.DataFrame, corpCode: str | None, stockCode: str | None) 
     Returns:
         np.ndarray(bool) — 스코프 내 행 True. 필터가 없으면 None.
     """
-    if not corpCode and not stockCode:
+    if not corpCode and not stockCode and not sourceKind:
         return None
     mask = np.ones(meta.height, dtype=bool)
     if corpCode:
         mask &= (meta["corp_code"] == corpCode).to_numpy()
     if stockCode:
         mask &= (meta["stock_code"] == stockCode).to_numpy()
+    if sourceKind:
+        mask &= _sourceMask(meta, sourceKind)
     return mask
+
+
+def _sourceMask(meta: pl.DataFrame, sourceKind: str) -> np.ndarray:
+    """source family 필터를 랭킹 전 마스크로 변환."""
+    from dartlab.providers.dart.search.sourceIntent import sourceFamily
+
+    if "source" not in meta.columns:
+        return np.ones(meta.height, dtype=bool)
+    return np.array([sourceFamily(value) == sourceKind for value in meta["source"].to_list()], dtype=bool)
 
 
 def _resolveResultUrl(df: pl.DataFrame) -> pl.DataFrame:
@@ -508,18 +540,23 @@ def _resolveResultUrl(df: pl.DataFrame) -> pl.DataFrame:
     Example:
         >>> _resolveResultUrl(pl.DataFrame())  # doctest: +SKIP
     """
+    from dartlab.providers.dart.search.resultSchema import normalizeSearchResult
+
     if df.height == 0:
         return df
     hasUrl = "url" in df.columns
     dartBase = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + pl.col("rcept_no")
+    out = df
     if "source" in df.columns:
         # EDGAR rcept_no = SEC accession — DART 뷰어 URL 조합이 성립하지 않으므로 빈값(정직).
         dartBase = pl.when(pl.col("source") == "edgar-panel").then(pl.lit("")).otherwise(dartBase)
         if hasUrl:
-            return df.with_columns(
+            out = df.with_columns(
                 pl.when(pl.col("source") == "news").then(pl.col("url")).otherwise(dartBase).alias("dartUrl")
             )
-    return df.with_columns(dartBase.alias("dartUrl"))
+            return normalizeSearchResult(out)
+    out = df.with_columns(dartBase.alias("dartUrl"))
+    return normalizeSearchResult(out)
 
 
 def searchContent(
@@ -527,6 +564,7 @@ def searchContent(
     *,
     corpCode: str | None = None,
     stockCode: str | None = None,
+    sourceKind: str | None = None,
     limit: int = 10,
 ) -> pl.DataFrame:
     """content 전용 BM25 검색. main + delta 병합.
@@ -573,7 +611,7 @@ def searchContent(
     if "delta" in segments:
         dIdx, dMeta = segments["delta"]
         dScores = _scoreBM25(dIdx, tokens)
-        dMask = _scopeMask(dMeta, corpCode, stockCode)
+        dMask = _scopeMask(dMeta, corpCode, stockCode, sourceKind)
         if dMask is not None:
             dScores = np.where(dMask, dScores, 0.0)
         top = np.argsort(-dScores)[: limit * 3]
@@ -587,7 +625,7 @@ def searchContent(
     if "main" in segments:
         mIdx, mMeta = segments["main"]
         mScores = _scoreBM25(mIdx, tokens)
-        mMask = _scopeMask(mMeta, corpCode, stockCode)
+        mMask = _scopeMask(mMeta, corpCode, stockCode, sourceKind)
         if mMask is not None:
             mScores = np.where(mMask, mScores, 0.0)
         top = np.argsort(-mScores)[: limit * 3]

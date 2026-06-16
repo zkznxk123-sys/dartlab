@@ -2,7 +2,7 @@
 
 월 1회 실행 (또는 수동):
 1. 전체 allFilings + panel → main 세그먼트 풀리빌드 (rebuildContent)
-2. HF `eddmpython/dartlab-data` 에 `dart/contentIndex/main.*` 업로드
+2. HF staging 업로드 후 `dart/contentIndex/manifest.json` current pointer publish
 3. delta 비움 (main에 흡수되었으므로)
 
 환경:
@@ -17,7 +17,12 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _hfRetry import retryHfCall  # noqa: E402
+
+
+def _catalogInputsFromEnv() -> tuple[str | None, list[str], list[str]]:
+    manifestPaths = [p for p in os.environ.get("DARTLAB_SEARCH_SOURCE_MANIFESTS", "").split(os.pathsep) if p]
+    expectedSources = [p.strip() for p in os.environ.get("DARTLAB_SEARCH_EXPECTED_SOURCES", "").split(",") if p.strip()]
+    return os.environ.get("DARTLAB_SEARCH_CURRENT_CATALOG") or None, manifestPaths, expectedSources
 
 
 def _buildRouterArtifact(tier: str = "full") -> int:
@@ -40,18 +45,32 @@ def _buildRouterArtifact(tier: str = "full") -> int:
 
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
+    mainMode = os.environ.get("DARTLAB_SEARCH_MAIN_MODE", "auto").strip().lower() or "auto"
+    if mainMode not in {"auto", "catalog", "legacy"}:
+        print(f"[main] invalid DARTLAB_SEARCH_MAIN_MODE={mainMode!r}")
+        return 2
 
-    print("[main] content 인덱스 풀리빌드 시작 (allFilings + DART panel + EDGAR panel + 뉴스)")
-    from dartlab.providers.dart.search import rebuildContent
+    nDocs = _buildMainFromCatalog(mainMode)
+    if nDocs is None:
+        print("[main] content 인덱스 풀리빌드 시작 (allFilings + DART panel + EDGAR panel + 뉴스)")
+        from dartlab.providers.dart.search import rebuildContent
 
-    t0 = time.perf_counter()
-    nDocs = rebuildContent(includePanel=True, includeEdgarPanel=True, includeNews=True, showProgress=True)
-    elapsed = time.perf_counter() - t0
-    print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
+        t0 = time.perf_counter()
+        nDocs = rebuildContent(includePanel=True, includeEdgarPanel=True, includeNews=True, showProgress=True)
+        elapsed = time.perf_counter() - t0
+        print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
+    elif nDocs < 0:
+        return abs(nDocs)
 
     # 통합검색(R*) artifact — 결정론 라우터 (질의→이벤트 canon 확장. 큐레이션 동의어는 코드 내장)
     nEvents = _buildRouterArtifact()
     print(f"[main] router.json {nEvents} 이벤트")
+
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+
+    outDir = _contentIndexDir()
+    writeIndexManifest(outDir, tier="full", buildCommand="buildSearchMain")
 
     if nDocs == 0:
         print("[main] 빌드된 문서 없음")
@@ -74,43 +93,33 @@ def main() -> int:
         print("[main] HF_TOKEN 없음 — 업로드 스킵")
         return 0
 
-    print("[main] HF 업로드 (full = flat)")
-    from huggingface_hub import HfApi
+    print("[main] HF staging 업로드 후 current manifest pointer publish (full = flat)")
+    from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
-    from dartlab.core.dataConfig import repoFor
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
-
-    repo = repoFor("contentIndex")
-    outDir = _contentIndexDir()
     files = [
         "main.npz",
         "main_stems.json",
         "main_meta.parquet",
         "main_info.json",
         "router.json",
+        "source_manifest_set.json",
+        "manifest.json",
     ]
-    api = HfApi(token=hfToken)
-
-    for f in files:
-        src = outDir / f
-        if not src.exists():
-            print(f"  [skip] {f} 없음")
-            continue
-        dstPath = f"dart/contentIndex/{f}"
-        retryHfCall(
-            api.upload_file,
-            path_or_fileobj=str(src),
-            path_in_repo=dstPath,
-            repo_id=repo,
-            repo_type="dataset",
-        )
-        print(f"  [ok] {dstPath} ({src.stat().st_size / 1024 / 1024:.1f} MB)")
-
-    # delta는 main에 흡수되었으므로 제거 (로컬). HF에서도 delete 시도.
-    try:
-        api.delete_file(path_in_repo="dart/contentIndex/delta.npz", repo_id=repo, repo_type="dataset")
-    except Exception:
-        pass
+    summary = publishContentIndexFiles(
+        token=hfToken,
+        indexDir=outDir,
+        files=files,
+        tier="full",
+        promoteCurrent=_promoteCurrent(),
+        obsoleteCurrentFiles=[
+            "delta.npz",
+            "delta_stems.json",
+            "delta_meta.parquet",
+            "delta_info.json",
+        ],
+    )
+    _printPublishSummary(summary)
+    _writeCandidateEnv(summary)
 
     # ── lite tier — pip 사용자 기본 경량 배포(최근 N개월). full(flat)과 별 디렉터리라 공존. ──
     # full 업로드를 막지 않는 best-effort: lite 빌드/업로드 실패해도 full 은 이미 배포됨.
@@ -118,6 +127,42 @@ def main() -> int:
 
     print("[main] 완료")
     return 0
+
+
+def _buildMainFromCatalog(mainMode: str) -> int | None:
+    if mainMode == "legacy":
+        return None
+    currentCatalog, manifestPaths, expectedSources = _catalogInputsFromEnv()
+    if not currentCatalog:
+        if mainMode == "catalog":
+            print("[main] catalog mode requires DARTLAB_SEARCH_CURRENT_CATALOG")
+            return -2
+        print("[main] catalog inputs 없음 — legacy raw main rebuild path 사용")
+        return None
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndexRebuild import rebuildMainFromCatalog
+    from dartlab.providers.dart.search.pipeline import _loadCatalog, runCatalogDeltaDryRun
+
+    result = runCatalogDeltaDryRun(
+        previousCatalogPath=None,
+        currentCatalogPath=currentCatalog,
+        sourceManifestPaths=manifestPaths,
+        expectedSources=expectedSources,
+    )
+    if not result.get("valid"):
+        print(f"[main] catalog main input invalid: {result.get('errors')}")
+        return -1
+    t0 = time.perf_counter()
+    catalog = _loadCatalog(currentCatalog)
+    nDocs = rebuildMainFromCatalog(catalog, tier="full", showProgress=True)
+    outDir = _contentIndexDir()
+    import shutil
+
+    shutil.copyfile(currentCatalog, outDir / "catalog_snapshot.parquet")
+    _copySourceManifestSet(outDir)
+    elapsed = time.perf_counter() - t0
+    print(f"[main] catalog snapshot compaction {nDocs:,} 문서, {elapsed / 60:.1f}분")
+    return nDocs
 
 
 def _buildAndUploadLite(hfToken: str) -> None:
@@ -133,16 +178,28 @@ def _buildAndUploadLite(hfToken: str) -> None:
     print(f"[lite] tier 빌드 시작 — sinceDate={sinceDate} (최근 {months}개월)")
 
     from dartlab.providers.dart.search.fieldIndex import clearCache
-    from dartlab.providers.dart.search.fieldIndexRebuild import pushContentIndex, rebuildMain
+    from dartlab.providers.dart.search.fieldIndexRebuild import pushContentIndex, rebuildMain, writeIndexManifest
 
     clearCache()
-    nLite = rebuildMain(includePanel=True, includeNews=True, tier="lite", sinceDate=sinceDate, showProgress=True)
+    currentCatalog, _, _ = _catalogInputsFromEnv()
+    if currentCatalog:
+        nLite = _buildLiteFromCatalog(currentCatalog, sinceDate)
+    else:
+        nLite = rebuildMain(
+            includePanel=True,
+            includeEdgarPanel=True,
+            includeNews=True,
+            tier="lite",
+            sinceDate=sinceDate,
+            showProgress=True,
+        )
     _buildRouterArtifact(tier="lite")  # 라우터는 코퍼스 무관 — lite 디렉터리에 동거
 
     # 산출물 실측 크기 — '사용자 첫 다운로드 경량' 가치제안을 숫자로 검증(가정 금지).
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
     liteDir = _contentIndexDir("lite")
+    _copySourceManifestSet(liteDir)
     liteBytes = sum(p.stat().st_size for p in liteDir.glob("*") if p.is_file())
     liteMb = liteBytes / 1024 / 1024
     print(f"[lite] 산출물 {liteMb:.1f} MB ({nLite:,} 문서)")
@@ -157,9 +214,78 @@ def _buildAndUploadLite(hfToken: str) -> None:
     if nLite < minLite:
         print(f"[lite] ✗ nDocs {nLite:,} < {minLite:,} — lite 업로드 skip (full 은 이미 배포됨)")
         return
+    writeIndexManifest(liteDir, tier="lite", buildCommand="buildSearchMain.lite")
     print(f"[lite] {nLite:,} 문서 / {liteMb:.1f} MB → HF dart/contentIndex/lite/ 업로드")
-    pushContentIndex(hfToken, tier="lite")
+    summary = pushContentIndex(hfToken, tier="lite", promoteCurrent=_promoteCurrent())
+    _printPublishSummary(summary)
+    _writeCandidateEnv(summary)
     print("[lite] 완료")
+
+
+def _buildLiteFromCatalog(currentCatalog: str, sinceDate: str) -> int:
+    import polars as pl
+
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndexRebuild import rebuildMainFromCatalog
+    from dartlab.providers.dart.search.pipeline import _loadCatalog
+
+    catalog = _loadCatalog(currentCatalog)
+    liteCatalog = _filterLiteCatalogRows(catalog, sinceDate)
+    print(f"[lite] catalog mode — {catalog.height:,} rows -> {liteCatalog.height:,} rows")
+    nLite = rebuildMainFromCatalog(liteCatalog, tier="lite", showProgress=True)
+    liteDir = _contentIndexDir("lite")
+    if isinstance(liteCatalog, pl.DataFrame):
+        liteCatalog.write_parquet(liteDir / "catalog_snapshot.parquet")
+    return nLite
+
+
+def _filterLiteCatalogRows(catalogRows, sinceDate: str):
+    import polars as pl
+
+    if catalogRows.is_empty() or "date" not in catalogRows.columns:
+        return catalogRows
+    return (
+        catalogRows.with_columns(
+            pl.col("date").cast(pl.Utf8).str.replace_all("-", "").fill_null("").alias("__liteDate")
+        )
+        .filter(pl.col("__liteDate") >= sinceDate)
+        .drop("__liteDate")
+    )
+
+
+def _copySourceManifestSet(outDir: Path) -> None:
+    src = os.environ.get("DARTLAB_SEARCH_SOURCE_MANIFEST_SET", "").strip()
+    if not src:
+        return
+    path = Path(src)
+    if path.exists():
+        import shutil
+
+        shutil.copyfile(path, outDir / "source_manifest_set.json")
+
+
+def _promoteCurrent() -> bool:
+    raw = os.environ.get("DARTLAB_SEARCH_PROMOTE_CURRENT", "1")
+    return raw.strip().lower() not in {"0", "false", "no", "n"}
+
+
+def _printPublishSummary(summary: dict) -> None:
+    action = "promote" if summary.get("promoted", True) else "stage"
+    print(
+        f"  [{action}] {summary.get('candidateManifestPath', '')} "
+        f"-> {summary['currentPrefix']} {summary['publishMode']} ({len(summary['uploaded'])} uploads)"
+    )
+
+
+def _writeCandidateEnv(summary: dict) -> None:
+    envFile = os.environ.get("GITHUB_ENV", "").strip()
+    candidate = str(summary.get("candidateManifestPath") or "").strip()
+    tier = str(summary.get("tier") or "full").strip().upper()
+    if not envFile or not candidate:
+        return
+    key = f"DARTLAB_SEARCH_{tier}_CANDIDATE_MANIFEST"
+    with Path(envFile).open("a", encoding="utf-8") as f:
+        f.write(f"{key}={candidate}\n")
 
 
 if __name__ == "__main__":

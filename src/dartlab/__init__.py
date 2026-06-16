@@ -221,6 +221,7 @@ def search(
     start: str | None = None,
     end: str | None = None,
     limit: int = 10,
+    topK: int | None = None,
     scope: str = "auto",
 ):
     """공시 검색. **⚠ BETA — AI 사용 비권장**.
@@ -263,7 +264,8 @@ def search(
         start: 시작일 (YYYYMMDD).
         end: 종료일 (YYYYMMDD).
         limit: 반환 건수 (기본 10).
-        scope: ``"auto"`` (기본), ``"title"``, ``"content"``, ``"both"``.
+        topK: ``limit`` 호환 alias. 지정하면 ``limit`` 대신 사용.
+        scope: ``"auto"`` (기본), ``"title"``, ``"content"``, ``"both"``, ``"news"``.
 
     Returns
     -------
@@ -303,9 +305,29 @@ def search(
         raise ValueError(
             "search 의 query 가 비어 있습니다. 검색어를 1자 이상 전달하세요. 예: dartlab.search('유상증자')"
         )
+    if topK is not None:
+        limit = int(topK)
     from dartlab.providers.dart.search import search as _search
 
     return _search(query, corp=corp, start=start, end=end, limit=limit, scope=scope)
+
+
+def _searchPrefetch(*, tier: str | None = None) -> dict:
+    """검색 인덱스 사전 다운로드 helper. `dartlab.search.prefetch()` 로 노출."""
+    from dartlab.providers.dart.search.api import prefetch as _prefetch
+
+    return _prefetch(tier=tier)
+
+
+def _searchIndexInfo() -> dict:
+    """검색 인덱스 신선도 helper. `dartlab.search.indexInfo()` 로 노출."""
+    from dartlab.providers.dart.search.api import indexInfo as _indexInfo
+
+    return _indexInfo()
+
+
+setattr(search, "prefetch", _searchPrefetch)
+setattr(search, "indexInfo", _searchIndexInfo)
 
 
 def searchName(keyword: str):

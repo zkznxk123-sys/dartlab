@@ -11,6 +11,7 @@ import hashlib
 import html
 import json
 import math
+import os
 import re
 import time
 from pathlib import Path
@@ -21,6 +22,7 @@ import polars as pl
 import dartlab.config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.logger import getLogger
+from dartlab.providers.dart.search.freshness import DEFAULT_DATE_COLUMNS, firstSearchDate, periodToDataAsOf
 
 # content_raw(DART XML/HTML) → 검색용 평문. 색인 토큰화엔 정밀 파서(BeautifulSoup, XML당 ~100ms)가
 # 불필요·과부하 — regex tag-strip 으로 222파일/수억 토큰 빌드시간을 시간→분 단위로 단축.
@@ -47,6 +49,9 @@ def _stripTags(raw: str, *, limit: int) -> str:
 # searchContent) 사용은 모두 함수 본문 안 → 각 함수 시작 lazy import.
 
 _log = getLogger(__name__)
+
+EVIDENCE_TEXT_LIMIT = 4000
+EDGAR_DATE_COLUMNS: tuple[str, ...] = DEFAULT_DATE_COLUMNS
 
 
 def rebuildMain(
@@ -179,7 +184,10 @@ def rebuildMain(
                     "report_nm": rnm,
                     "section_title": row.get("section_title") or "",
                     "text": content[:500],
+                    "evidenceText": content[:EVIDENCE_TEXT_LIMIT],
                     "source": source,
+                    "sourceDataAsOf": row.get("sourceDataAsOf") or row.get("source_data_as_of") or rdt,
+                    "contentLen": len(content),
                     "url": "",  # 공시는 빈값 — dartUrl 은 rcept_no 로 조합
                 }
             )
@@ -251,12 +259,93 @@ def rebuildMain(
     saveSegment(idx, meta, "main", saveDir)
     clearCache()
     _clearDelta(saveDir)
+    writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain")
 
     if showProgress:
         elapsed = time.perf_counter() - t0
         _log.info(f"[main] 저장 완료(tier={tier}, {saveDir.name}). 총 {elapsed / 60:.1f}분, {idx['nDocs']:,} 문서.")
 
     return idx["nDocs"]
+
+
+def rebuildMainFromCatalog(
+    catalogRows: pl.DataFrame,
+    *,
+    tier: str = "full",
+    showProgress: bool = True,
+) -> int:
+    """main 세그먼트를 source catalog snapshot 에서 빌드한다.
+
+    Args:
+        catalogRows: Source manifest snapshot 에서 합쳐진 catalog rows.
+        tier: ``"full"`` 또는 ``"lite"`` 출력 tier.
+        showProgress: True 면 progress 로그.
+
+    Returns:
+        int — 인덱스 빌드 건수.
+
+    Raises:
+        OSError: 세그먼트 파일을 저장할 수 없을 때.
+
+    Example:
+        >>> callable(rebuildMainFromCatalog)
+        True
+    """
+    import gc
+
+    from dartlab.providers.dart.search.fieldIndex import (
+        CONTENT_LIMIT,
+        _contentIndexDir,
+        _IncrementalBuilder,
+        clearCache,
+        saveSegment,
+    )
+
+    saveDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
+    builder = _IncrementalBuilder()
+    metaRecs: list[dict] = []
+    for row in catalogRows.iter_rows(named=True):
+        if bool(row.get("deleted")):
+            continue
+        content = str(row.get("searchText") or "")[:CONTENT_LIMIT]
+        builder.addDoc(content)
+        source = str(row.get("source") or "")
+        metaRecs.append(
+            {
+                "rcept_no": str(row.get("rceptNo") or row.get("sourceRef") or ""),
+                "section_order": int(row.get("sectionOrder") or 0),
+                "corp_code": str(row.get("corpCode") or ""),
+                "corp_name": str(row.get("companyName") or ""),
+                "stock_code": str(row.get("stockCode") or row.get("ticker") or ""),
+                "rcept_dt": str(row.get("date") or ""),
+                "report_nm": str(row.get("reportName") or ""),
+                "section_title": str(row.get("title") or row.get("sectionKey") or ""),
+                "text": content[:500],
+                "evidenceText": str(row.get("searchText") or "")[:EVIDENCE_TEXT_LIMIT],
+                "source": _runtimeSourceFromCatalog(source),
+                "sourceRef": str(row.get("sourceRef") or ""),
+                "sourceDataAsOf": str(row.get("sourceDataAsOf") or row.get("date") or ""),
+                "contentLen": len(content),
+                "url": str(row.get("url") or "") if source == "newsPublic" else "",
+            }
+        )
+    if not metaRecs:
+        _clearDelta(saveDir)
+        writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain.catalog.empty")
+        return 0
+    idx = builder.finalize()
+    meta = pl.DataFrame(metaRecs)
+    saveSegment(idx, meta, "main", saveDir)
+    _clearDelta(saveDir)
+    writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain.catalog")
+    clearCache()
+    del metaRecs, meta
+    gc.collect()
+    return idx["nDocs"]
+
+
+def _runtimeSourceFromCatalog(source: str) -> str:
+    return {"dartPanel": "panel", "edgarPanel": "edgar-panel", "newsPublic": "news"}.get(source, source)
 
 
 def _buildAfMeta(*, showProgress: bool = True) -> dict[str, dict]:
@@ -377,7 +466,20 @@ def _feedPanelRollup(
     added = 0
     for ci, (code, files) in enumerate(entries):
         try:
-            df = pl.read_parquet(files, columns=["rceptNo", "period", "contentRaw", "sectionLeaf"])
+            schema = pl.scan_parquet(files).collect_schema().names()
+            schemaSet = set(schema)
+            requiredCols = ["rceptNo", "contentRaw"]
+            if not all(col in schemaSet for col in requiredCols):
+                continue
+            readCols = [
+                col
+                for col in ["rceptNo", "period", "contentRaw", "sectionLeaf", *EDGAR_DATE_COLUMNS]
+                if col in schemaSet
+            ]
+            df = pl.read_parquet(files, columns=readCols)
+            for col in ("period", "sectionLeaf"):
+                if col not in df.columns:
+                    df = df.with_columns(pl.lit("").alias(col))
         except (pl.exceptions.PolarsError, OSError):
             continue
         if df.height == 0:
@@ -392,6 +494,7 @@ def _feedPanelRollup(
                     pl.col("contentRaw").alias("parts"),
                     pl.col("sectionLeaf").first().alias("leaf"),
                     pl.col("period").first().alias("period"),
+                    *[pl.col(col).first().alias(col) for col in EDGAR_DATE_COLUMNS if col in df.columns],
                 )
             )
         except (pl.exceptions.PolarsError, OSError):
@@ -403,8 +506,8 @@ def _feedPanelRollup(
                 continue
             m = afMeta.get(rn, {})
             if market == "us":
-                # EDGAR accession 은 날짜가 아니라서 rcept_dt 유도 불가 — 빈값(정직). period 가 보고서명 대용.
-                rdt = ""
+                # EDGAR accession 은 날짜가 아니므로 date 컬럼 우선, 없으면 period(YYYYQn) 분기말을 freshness 로 쓴다.
+                rdt = firstSearchDate(row, EDGAR_DATE_COLUMNS) or periodToDataAsOf(row.get("period"))
                 reportNm = str(row.get("leaf") or row.get("period") or "")
             else:
                 rdt = str(m.get("rcept_dt") or (rn[:8] if len(rn) >= 8 else ""))
@@ -428,7 +531,10 @@ def _feedPanelRollup(
                     "report_nm": reportNm,
                     "section_title": row.get("leaf") or "",
                     "text": text[:500],
+                    "evidenceText": text[:EVIDENCE_TEXT_LIMIT],
                     "source": source,
+                    "sourceDataAsOf": rdt,
+                    "contentLen": len(text),
                     "url": "",
                 }
             )
@@ -528,7 +634,10 @@ def _feedNews(builder, metaRecs, newsLimit, showProgress, *, sinceDate=None) -> 
                     "report_nm": "",
                     "section_title": row.get("source") or "",
                     "text": title[:500],
+                    "evidenceText": text[:EVIDENCE_TEXT_LIMIT],
                     "source": "news",
+                    "sourceDataAsOf": str(row.get("date") or "").replace("-", ""),
+                    "contentLen": len(text),
                     "url": row.get("url") or "",
                 }
             )
@@ -611,6 +720,9 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
 
     idx, meta = buildContentSegment(rows, showProgress=showProgress)
     saveSegment(idx, meta, "delta")
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+
+    writeIndexManifest(_contentIndexDir(), tier="full", buildCommand="rebuildDelta")
     clearCache()
     return idx["nDocs"]
 
@@ -658,8 +770,11 @@ def ensureContentIndex(tier: str | None = None) -> None:
 
     global _HF_CONTENTINDEX_ATTEMPTED
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.localUpdate import downloadAndActivateContentIndex, resolveActiveIndexDir
 
     base = _contentIndexDir()
+    if resolveActiveIndexDir(base) is not None:
+        return
     if (base / "main.npz").exists():
         return  # flat(legacy/full) 로컬 존재 — no-op
     if os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
@@ -668,6 +783,9 @@ def ensureContentIndex(tier: str | None = None) -> None:
         return
     _HF_CONTENTINDEX_ATTEMPTED = True
     tier = (tier or os.environ.get("DARTLAB_SEARCH_TIER") or "lite").strip()
+    result = downloadAndActivateContentIndex(tier=tier, baseDir=base)
+    if result.get("activated"):
+        return
     try:
         from huggingface_hub import snapshot_download
 
@@ -716,6 +834,7 @@ def indexInfo() -> dict:
         >>> indexInfo()  # doctest: +SKIP
     """
     from dartlab.providers.dart.search.fieldIndex import INDEX_SCHEMA_VERSION, _activeIndexDir
+    from dartlab.providers.dart.search.manifest import indexInfoFromManifest, loadSearchManifest
 
     base = _activeIndexDir()  # 실제 로드되는 인덱스(flat/tier) 기준
     info: dict = {
@@ -726,9 +845,17 @@ def indexInfo() -> dict:
         "hasDelta": False,
         "schemaVersion": 0,
         "compatible": True,
+        "sourceDataAsOf": {},
+        "nDocsBySource": {},
+        "nDocsByTier": {},
+        "manifestValid": False,
+        "manifestErrors": [],
     }
+    manifest = loadSearchManifest(base)
+    if manifest is not None:
+        info.update(indexInfoFromManifest(manifest, codeSchemaVersion=INDEX_SCHEMA_VERSION, indexDir=base))
     mainInfo = base / "main_info.json"
-    if mainInfo.exists():
+    if manifest is None and mainInfo.exists():
         try:
             d = json.loads(mainInfo.read_text(encoding="utf-8"))
             info["available"] = True
@@ -738,23 +865,167 @@ def indexInfo() -> dict:
         except (OSError, json.JSONDecodeError, ValueError):
             pass
     # 받은 인덱스가 코드보다 신버전이면 비호환(라이브러리 업그레이드 필요). 동버전 이하는 읽기 가능.
-    info["compatible"] = info["schemaVersion"] <= INDEX_SCHEMA_VERSION
+    if manifest is None:
+        info["compatible"] = info["schemaVersion"] <= INDEX_SCHEMA_VERSION
     # hasRouter 는 파일 *존재* 가 아니라 *이벤트 비어있지 않음* — 빈 산출물이 업로드되면 라우팅이 죽은
     # plain-only degraded 인데 파일은 존재. 존재만 보면 degraded 를 healthy 로 거짓보고한다(429 사고 교훈).
     from dartlab.providers.dart.search.router import loadRouterModel
 
     model = loadRouterModel(base)
     info["hasRouter"] = bool(model and model.get("events"))
-    info["hasDelta"] = (base / "delta.npz").exists()
+    info["hasDelta"] = bool(info.get("hasDelta")) or (base / "delta.npz").exists()
     return info
 
 
-def pushContentIndex(token: str | None = None, *, tier: str = "full") -> None:
-    """content 인덱스 (main + delta) 를 HF에 업로드 — tier 별 경로 + repoFor 라우팅.
+def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand: str = "") -> dict:
+    """Write `manifest.json` for the current content index directory.
+
+    Args:
+        indexDir: Content index directory containing main/delta segment files.
+        tier: Search artifact tier name.
+        buildCommand: Build command label stored for operator diagnostics.
+
+    Returns:
+        dict: Manifest payload that was written.
+
+    Raises:
+        OSError: If manifest cannot be written.
+
+    Example:
+        >>> callable(writeIndexManifest)
+        True
+    """
+    from dartlab.providers.dart.search.fieldIndex import INDEX_SCHEMA_VERSION
+    from dartlab.providers.dart.search.manifest import writeSearchManifest
+
+    base = Path(indexDir)
+    sourceCounts: dict[str, int] = {}
+    sourceDataAsOf: dict[str, str] = {}
+    requiredFiles: list[str] = []
+    mainDataAsOf = ""
+    deltaDataAsOf = ""
+    mainDocs = 0
+    deltaDocs = 0
+    mainMeta: pl.DataFrame | None = None
+
+    for segment in ("main", "delta"):
+        files = [f"{segment}.npz", f"{segment}_stems.json", f"{segment}_meta.parquet", f"{segment}_info.json"]
+        if not all((base / name).exists() for name in files):
+            continue
+        requiredFiles.extend(files)
+        meta = pl.read_parquet(base / f"{segment}_meta.parquet")
+        info = json.loads((base / f"{segment}_info.json").read_text(encoding="utf-8"))
+        nDocs = int(info.get("nDocs", meta.height) or 0)
+        if segment == "main":
+            mainDocs = nDocs
+            mainMeta = meta
+        else:
+            deltaDocs = nDocs
+        segmentDataAsOf = _segmentDataAsOf(meta)
+        if segment == "main":
+            mainDataAsOf = segmentDataAsOf
+        else:
+            deltaDataAsOf = segmentDataAsOf
+        for source, count in _sourceCounts(meta).items():
+            sourceCounts[source] = sourceCounts.get(source, 0) + count
+        for source, dataAsOf in _sourceDataAsOf(meta).items():
+            if dataAsOf > sourceDataAsOf.get(source, ""):
+                sourceDataAsOf[source] = dataAsOf
+    if (base / "router.json").exists():
+        requiredFiles.append("router.json")
+    sourceManifestSet = _loadSourceManifestSet(base / "source_manifest_set.json")
+    if sourceManifestSet:
+        requiredFiles.append("source_manifest_set.json")
+    sourceCanaryPack = []
+    if mainMeta is not None and mainMeta.height:
+        from dartlab.providers.dart.search.artifactCanary import CANARY_PACK_VERSION, buildSourceCanaryPackFromMeta
+
+        sourceCanaryPack = buildSourceCanaryPackFromMeta(mainMeta)
+        canaryPackVersion = CANARY_PACK_VERSION
+    else:
+        canaryPackVersion = ""
+
+    manifest = {
+        "artifactVersion": 1,
+        "schemaVersion": INDEX_SCHEMA_VERSION,
+        "tokenizerVersion": f"content-bigram-v{INDEX_SCHEMA_VERSION}",
+        "normalizerVersion": "fieldIndexRebuild-v1",
+        "sourceRefVersion": "v1",
+        "builtAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "mainDataAsOf": mainDataAsOf,
+        "deltaDataAsOf": deltaDataAsOf,
+        "sourceDataAsOf": sourceDataAsOf,
+        "nDocsBySource": sourceCounts,
+        "nDocsByTier": {tier: mainDocs + deltaDocs},
+        "newDocs": deltaDocs,
+        "changedDocs": deltaDocs,
+        "deletedDocs": 0,
+        "unchangedDocs": mainDocs,
+        "hasDelta": deltaDocs > 0,
+        "requiredFiles": requiredFiles,
+        "fileHashes": {name: _sha256File(base / name) for name in requiredFiles if (base / name).exists()},
+        "canaryPackVersion": canaryPackVersion,
+        "sourceCanaryPack": sourceCanaryPack,
+        "sourceManifestSetId": sourceManifestSet.get("sourceManifestSetId", ""),
+        "sourceManifestSet": _sourceManifestSetSummary(sourceManifestSet),
+        "qualityReportPath": "",
+        "compatibleMinLibraryVersion": "",
+        "compatibleMaxSchemaVersion": INDEX_SCHEMA_VERSION,
+        "buildCommand": buildCommand,
+        "gitSha": "",
+    }
+    writeSearchManifest(base, manifest)
+    return manifest
+
+
+def _loadSourceManifestSet(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _sourceManifestSetSummary(payload: dict) -> dict:
+    sources = payload.get("sources") if isinstance(payload.get("sources"), list) else []
+    return {
+        "schemaVersion": payload.get("schemaVersion", ""),
+        "sourceManifestSetId": payload.get("sourceManifestSetId", ""),
+        "expectedSources": payload.get("expectedSources") if isinstance(payload.get("expectedSources"), list) else [],
+        "combinedCatalogRows": payload.get("combinedCatalogRows"),
+        "combinedCatalogSha256": payload.get("combinedCatalogSha256", ""),
+        "sources": [
+            {
+                "source": item.get("source", ""),
+                "dataAsOf": item.get("dataAsOf", ""),
+                "snapshotScope": item.get("snapshotScope", ""),
+                "totalRows": item.get("totalRows"),
+                "catalogRows": item.get("catalogRows"),
+                "manifestSha256": item.get("manifestSha256", ""),
+                "catalogSha256": item.get("catalogSha256", ""),
+                "producer": item.get("producer", ""),
+            }
+            for item in sources
+            if isinstance(item, dict)
+        ],
+    }
+
+
+def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCurrent: bool | None = None) -> dict:
+    """content 인덱스 (main + delta) 를 HF staging 후 current manifest pointer 로 publish.
 
     Args:
         token: HF write 토큰.
         tier: ``"full"`` (flat ``dart/contentIndex/``) / ``"lite"`` (``dart/contentIndex/lite/``).
+
+        promoteCurrent: True promotes the current manifest pointer. False
+            stages a candidate manifest only. None reads
+            ``DARTLAB_SEARCH_PROMOTE_CURRENT`` and defaults to True.
+
+    Returns:
+        Publish summary.
 
     Raises:
         없음.
@@ -762,36 +1033,39 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full") -> None:
     Example:
         >>> pushContentIndex(tier="lite")  # doctest: +SKIP
     """
-    from huggingface_hub import HfApi
-
-    from dartlab.core.dataConfig import repoFor
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
     outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
-    ciDir = DATA_RELEASES["contentIndex"]["dir"]
-    repoPrefix = ciDir if tier == "full" else f"{ciDir}/{tier}"
-    api = HfApi(token=token)
     names = [
         "main.npz",
         "main_stems.json",
         "main_meta.parquet",
         "main_info.json",
+        "manifest.json",
         "delta.npz",
         "delta_stems.json",
         "delta_meta.parquet",
         "delta_info.json",
         "router.json",
+        "source_manifest_set.json",
     ]
-    for name in names:
-        src = outDir / name
-        if not src.exists():
-            continue
-        api.upload_file(
-            path_or_fileobj=str(src),
-            path_in_repo=f"{repoPrefix}/{name}",
-            repo_id=repoFor("contentIndex"),
-            repo_type="dataset",
-        )
+    if promoteCurrent is None:
+        promoteCurrent = _envFlag("DARTLAB_SEARCH_PROMOTE_CURRENT", default=True)
+    return publishContentIndexFiles(
+        token=token,
+        indexDir=outDir,
+        files=names,
+        tier=tier,
+        promoteCurrent=promoteCurrent,
+    )
+
+
+def _envFlag(name: str, *, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    return raw.strip().lower() not in {"0", "false", "no", "n"}
 
 
 def pullContentIndex(tier: str = "full") -> int:
@@ -827,6 +1101,7 @@ def pullContentIndex(tier: str = "full") -> int:
         "main_stems.json",
         "main_meta.parquet",
         "main_info.json",
+        "manifest.json",
         "delta.npz",
         "delta_stems.json",
         "delta_meta.parquet",
@@ -853,6 +1128,41 @@ def pullContentIndex(tier: str = "full") -> int:
     clearCache()
     _log.info("[green]✓[/] contentIndex (%d/%d 파일)", ok, len(names))
     return ok
+
+
+def _sourceCounts(meta: pl.DataFrame) -> dict[str, int]:
+    if meta.height == 0 or "source" not in meta.columns:
+        return {}
+    out: dict[str, int] = {}
+    for row in meta.group_by("source").len().iter_rows(named=True):
+        source = str(row.get("source") or "unknown")
+        out[source] = int(row.get("len") or 0)
+    return out
+
+
+def _sourceDataAsOf(meta: pl.DataFrame) -> dict[str, str]:
+    if meta.height == 0:
+        return {}
+    out: dict[str, str] = {}
+    for row in meta.iter_rows(named=True):
+        source = str(row.get("source") or "unknown")
+        dataAsOf = str(row.get("sourceDataAsOf") or row.get("rcept_dt") or "")
+        if dataAsOf > out.get(source, ""):
+            out[source] = dataAsOf
+    return out
+
+
+def _segmentDataAsOf(meta: pl.DataFrame) -> str:
+    values = _sourceDataAsOf(meta).values()
+    return max(values) if values else ""
+
+
+def _sha256File(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 # ── 통계 ──

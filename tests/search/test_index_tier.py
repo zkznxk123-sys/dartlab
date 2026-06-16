@@ -99,6 +99,21 @@ def test_rebuild_main_lite_sincedate_reduces(synthRoot):
     assert (FI._contentIndexDir("lite") / "main.npz").exists()
 
 
+def test_rebuild_main_stores_bounded_evidence_text(synthRoot):
+    """main meta 가 snippet 외 bounded evidenceText 를 보존한다."""
+    import polars as pl
+
+    from dartlab.providers.dart.search import fieldIndex as FI
+    from dartlab.providers.dart.search import fieldIndexRebuild as FIR
+
+    _mkAllFilings(synthRoot)
+    FIR.rebuildMain(includePanel=False, tier="full", showProgress=False)
+    meta = pl.read_parquet(FI._contentIndexDir() / "main_meta.parquet")
+    assert "evidenceText" in meta.columns
+    assert meta["evidenceText"].str.len_chars().max() <= FI.EVIDENCE_TEXT_LIMIT
+    assert any("유상증자" in text for text in meta["evidenceText"].to_list())
+
+
 def test_index_info_schema_version(synthRoot):
     """빌드된 인덱스 info 에 schemaVersion 기록 + indexInfo 노출."""
     from dartlab.providers.dart.search import fieldIndex as FI
@@ -111,6 +126,25 @@ def test_index_info_schema_version(synthRoot):
     assert info["schemaVersion"] == FI.INDEX_SCHEMA_VERSION
     assert info["compatible"] is True
     assert info["nDocs"] == 2
+    assert info["manifestValid"] is True
+    assert info["nDocsBySource"]["allFilings"] == 2
+    assert (FI._contentIndexDir() / "manifest.json").exists()
+
+
+def test_rebuild_delta_updates_manifest(synthRoot):
+    """delta 빌드 후 manifest 에 delta required files 와 hasDelta 가 기록된다."""
+    import json
+
+    from dartlab.providers.dart.search import fieldIndex as FI
+    from dartlab.providers.dart.search import fieldIndexRebuild as FIR
+
+    _mkAllFilings(synthRoot)
+    FIR.rebuildMain(includePanel=False, tier="full", showProgress=False)
+    FIR.rebuildDelta(sinceDate="20241201", showProgress=False)
+    manifest = json.loads((FI._contentIndexDir() / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["hasDelta"] is True
+    assert "delta.npz" in manifest["requiredFiles"]
+    assert manifest["nDocsBySource"]["allFilings"] >= 3
 
 
 def _mkPanel(root):

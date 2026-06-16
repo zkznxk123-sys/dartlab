@@ -1,0 +1,266 @@
+"""Search source catalog script tests."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import types
+from importlib import util
+from pathlib import Path
+
+import polars as pl
+
+
+def _loadBuildSearchCatalogScript():
+    path = Path(".github/scripts/search/buildSearchCatalog.py")
+    spec = util.spec_from_file_location("buildSearchCatalogScript", path)
+    assert spec is not None
+    assert spec.loader is not None
+    module = util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_build_search_catalog_script_subprocess(tmp_path) -> None:
+    source = tmp_path / "news.parquet"
+    outDir = tmp_path / "out"
+    pl.DataFrame(
+        [
+            {
+                "url": "https://n.example/a",
+                "date": "20260615",
+                "title": "뉴스 헤드라인",
+                "content": "반도체 뉴스",
+            }
+        ]
+    ).write_parquet(source)
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/buildSearchCatalog.py",
+            "--source",
+            "newsPublic",
+            "--input",
+            str(source),
+            "--out-dir",
+            str(outDir),
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout)
+    assert Path(result["manifest"]).exists()
+    assert Path(result["catalog"]).exists()
+    manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+    assert manifest["completenessCheck"]["valid"] is True
+
+
+def test_build_search_catalog_script_has_upload_contract() -> None:
+    text = Path(".github/scripts/search/buildSearchCatalog.py").read_text(encoding="utf-8")
+    assert "--upload" in text
+    assert "dart/searchCatalog" in text
+    assert "create_commit" in text
+    assert "CommitOperationAdd" in text
+    assert "api.upload_file" in text
+    assert "--min-files" in text
+    assert "--min-catalog-rows" in text
+    assert "GITHUB_RUN_ID" in text
+    assert "producerRun" in text
+    assert "--compare-remote-manifest" in text
+    assert "--require-previous-manifest" in text
+    assert "previousManifest" in text
+
+
+def test_build_search_catalog_script_reads_github_run_lineage(monkeypatch) -> None:
+    module = _loadBuildSearchCatalogScript()
+    monkeypatch.setenv("GITHUB_WORKFLOW", "Original SSOT Sync")
+    monkeypatch.setenv("GITHUB_JOB", "allfilings")
+    monkeypatch.setenv("GITHUB_RUN_ID", "12345")
+    monkeypatch.setenv("GITHUB_RUN_ATTEMPT", "2")
+    monkeypatch.setenv("GITHUB_SHA", "abc123")
+    monkeypatch.setenv("GITHUB_REF_NAME", "master")
+
+    lineage = module._githubProducerRun("allFilings")
+
+    assert lineage["system"] == "githubActions"
+    assert lineage["workflow"] == "Original SSOT Sync"
+    assert lineage["job"] == "allfilings"
+    assert lineage["runId"] == "12345"
+    assert lineage["artifactName"] == "search-catalog-allFilings-allfilings-12345"
+
+
+def test_build_search_catalog_upload_batches_manifest_and_catalog(tmp_path, monkeypatch) -> None:
+    module = _loadBuildSearchCatalogScript()
+
+    class FakeOperation:
+        def __init__(self, *, path_in_repo: str, path_or_fileobj: str) -> None:
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    monkeypatch.setitem(sys.modules, "huggingface_hub", types.SimpleNamespace(CommitOperationAdd=FakeOperation))
+
+    class FakeApi:
+        def __init__(self) -> None:
+            self.commits: list[dict] = []
+
+        def create_commit(self, *, repo_id: str, repo_type: str, operations: list, commit_message: str) -> None:
+            self.commits.append(
+                {
+                    "repo": repo_id,
+                    "repoType": repo_type,
+                    "message": commit_message,
+                    "paths": [operation.path_in_repo for operation in operations],
+                }
+            )
+
+    manifest = tmp_path / "allFilings.source_manifest.json"
+    catalog = tmp_path / "allFilings.catalog_snapshot.parquet"
+    manifest.write_text("{}", encoding="utf-8")
+    catalog.write_bytes(b"catalog")
+    api = FakeApi()
+
+    uploaded = module._uploadFiles(
+        api,
+        "repo",
+        [
+            (manifest, "dart/searchCatalog/allFilings/allFilings.source_manifest.json"),
+            (catalog, "dart/searchCatalog/allFilings/allFilings.catalog_snapshot.parquet"),
+        ],
+        commitMessage="Publish source catalog",
+    )
+
+    assert uploaded == api.commits[0]["paths"]
+    assert api.commits == [
+        {
+            "repo": "repo",
+            "repoType": "dataset",
+            "message": "Publish source catalog",
+            "paths": [
+                "dart/searchCatalog/allFilings/allFilings.source_manifest.json",
+                "dart/searchCatalog/allFilings/allFilings.catalog_snapshot.parquet",
+            ],
+        }
+    ]
+
+
+def test_build_search_catalog_script_blocks_empty_full_snapshot(tmp_path) -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/buildSearchCatalog.py",
+            "--source",
+            "allFilings",
+            "--input",
+            str(tmp_path / "missing" / "*.parquet"),
+            "--out-dir",
+            str(tmp_path / "out"),
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode != 0
+    assert "source catalog completeness failed" in proc.stderr
+
+
+def test_build_search_catalog_script_requires_previous_manifest(tmp_path) -> None:
+    source = tmp_path / "news.parquet"
+    pl.DataFrame([{"url": "https://n.example/a", "date": "20260615", "title": "뉴스"}]).write_parquet(source)
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/buildSearchCatalog.py",
+            "--source",
+            "newsPublic",
+            "--input",
+            str(source),
+            "--out-dir",
+            str(tmp_path / "out"),
+            "--require-previous-manifest",
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode != 0
+    assert "previous source manifest required" in proc.stderr
+
+
+def test_build_search_catalog_script_blocks_previous_manifest_drop(tmp_path) -> None:
+    current = tmp_path / "current.parquet"
+    previous = tmp_path / "previous.source_manifest.json"
+    pl.DataFrame(
+        [
+            {
+                "url": "https://n.example/a",
+                "date": "20260615",
+                "title": "남은 뉴스",
+            }
+        ]
+    ).write_parquet(current)
+    previous.write_text(
+        json.dumps(
+            {
+                "source": "newsPublic",
+                "snapshotScope": "full",
+                "files": [{"path": f"{idx}.parquet", "rowCount": 1} for idx in range(100)],
+                "totalRows": 100,
+                "completenessCheck": {"catalogRows": 100},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/buildSearchCatalog.py",
+            "--source",
+            "newsPublic",
+            "--input",
+            str(current),
+            "--out-dir",
+            str(tmp_path / "out"),
+            "--previous-manifest",
+            str(previous),
+            "--max-file-drop-ratio",
+            "0.05",
+            "--max-row-drop-ratio",
+            "0.05",
+            "--max-catalog-row-drop-ratio",
+            "0.05",
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode != 0
+    assert "previousFileDrop:1/100:maxDrop=0.05" in proc.stderr
+    assert "previousRowDrop:1/100:maxDrop=0.05" in proc.stderr
