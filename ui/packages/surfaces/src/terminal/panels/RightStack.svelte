@@ -704,7 +704,7 @@
 	}
 	/* 종목 뉴스 행 — 제목+스니펫+출처 세로 레이아웃(공시 행과 달리 본문 1줄 노출). filingList 스크롤 박스 재사용. */
 	.newsList {
-		max-height: 360px;
+		max-height: 230px;
 	}
 	.newsRow {
 		display: flex;
