@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "status": "inactive",
+  "generatedAt": "2026-06-11T00:00:00.000Z",
+  "source": "landing/static/site-signals/rolling.json",
+  "minPublicSample": 10,
+  "windows": [
+    { "key": "7d", "label": "7일", "days": 7 },
+    { "key": "30d", "label": "30일", "days": 30 },
+    { "key": "90d", "label": "90일", "days": 90 },
+    { "key": "all", "label": "전체", "days": null }
+  ],
+  "summaries": {
+    "7d": {},
+    "30d": {},
+    "90d": {},
+    "all": {}
+  }
+}
