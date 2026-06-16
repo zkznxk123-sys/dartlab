@@ -92,7 +92,9 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 	return { equity, trades, heldBars, deferredBars };
 }
 
-function mdd(equity: (number | null)[]): number {
+// 순수 헬퍼(mdd·mddWindowOf·riskRatios·benchmarkStats·endRet·cagr)는 base-independent —
+// portfolio.ts combo equity 가 재호출(03 §3 runPortfolioBacktest). export 는 additive(동작 무변경).
+export function mdd(equity: (number | null)[]): number {
 	let peak = -Infinity;
 	let worst = 0;
 	for (const e of equity) {
@@ -104,7 +106,7 @@ function mdd(equity: (number | null)[]): number {
 }
 
 // 최대 낙폭 창 — 피크·저점·회복(피크 재돌파) 인덱스 + 최장 수면 거래일. 에쿼티 페인 음영·KPI 용.
-function mddWindowOf(equity: (number | null)[]): { peakIdx: number; troughIdx: number; recoverIdx: number | null; days: number } | null {
+export function mddWindowOf(equity: (number | null)[]): { peakIdx: number; troughIdx: number; recoverIdx: number | null; days: number } | null {
 	let peakIdx = -1;
 	let peak = -Infinity;
 	let worst = 0;
@@ -132,7 +134,7 @@ function mddWindowOf(equity: (number | null)[]): { peakIdx: number; troughIdx: n
 }
 
 // 일수익률 기반 연환산 Sharpe(rf=0)·Sortino — 표본 < 60봉이면 null (소표본 거짓말 차단).
-function riskRatios(equity: (number | null)[]): { sharpe: number | null; sortino: number | null } {
+export function riskRatios(equity: (number | null)[]): { sharpe: number | null; sortino: number | null } {
 	const rets: number[] = [];
 	let prev: number | null = null;
 	for (const e of equity) {
@@ -153,7 +155,7 @@ function riskRatios(equity: (number | null)[]): { sharpe: number | null; sortino
 
 // 벤치마크(B&H) 상대 통계 — 베타·연환산 알파·정보비율. 같은 인덱스에서 둘 다 유효한 일수익률 쌍만.
 // 서술적(단일창) 지표라 표본이 받침(§0.5.9-C). 표본 < 60봉 → 전부 null(소표본 거짓말 차단, riskRatios 와 동일 하한).
-function benchmarkStats(stratEq: (number | null)[], bhEq: (number | null)[]): { beta: number | null; alphaPct: number | null; infoRatio: number | null } {
+export function benchmarkStats(stratEq: (number | null)[], bhEq: (number | null)[]): { beta: number | null; alphaPct: number | null; infoRatio: number | null } {
 	const s: number[] = [];
 	const b: number[] = [];
 	let ps: number | null = null;
@@ -184,12 +186,12 @@ function benchmarkStats(stratEq: (number | null)[], bhEq: (number | null)[]): { 
 	return { beta, alphaPct, infoRatio };
 }
 
-function endRet(equity: (number | null)[]): number {
+export function endRet(equity: (number | null)[]): number {
 	for (let i = equity.length - 1; i >= 0; i--) if (equity[i] != null) return (equity[i]! / 100 - 1) * 100;
 	return 0;
 }
 
-function cagr(retPct: number, windowBars: number): number | null {
+export function cagr(retPct: number, windowBars: number): number | null {
 	if (windowBars < 252) return null;
 	return (Math.pow(1 + retPct / 100, 252 / windowBars) - 1) * 100;
 }

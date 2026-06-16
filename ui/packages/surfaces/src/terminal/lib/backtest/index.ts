@@ -14,3 +14,5 @@ export type {
 } from './types';
 export { BT_PRESETS } from './presets';
 export { runBacktest } from './engine';
+export { runPortfolioBacktest } from './portfolio';
+export type { StrategySlot, ComboMetrics, ComboResult, PortfolioBtResult } from './portfolio';
