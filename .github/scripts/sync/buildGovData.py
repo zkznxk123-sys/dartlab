@@ -362,6 +362,29 @@ def produceIndex(market: str, idxNm: str, *, hfToken: str) -> int:
     return out.height
 
 
+# 프론트 IndexPort 큐레이트 화이트리스트 — contracts KR_INDEX_PRESETS 와 1:1 (이름 정확 일치 필수, gov 실측 확인).
+CURATED_INDICES = [
+    ("KOSPI", "코스피"),
+    ("KOSPI", "코스피 200"),
+    ("KOSDAQ", "코스닥"),
+    ("KOSDAQ", "코스닥 150"),
+    ("KRX", "KRX 300"),
+]
+
+
+def seedCuratedIndices(*, hfToken: str) -> int:
+    """큐레이트 5 지수 index/{key} 전이력 일괄 추출(date/ → index/). 프론트 IndexPort 전이력 활성용.
+
+    주간/수동 권장 — 매일 date/ fresh tail(govIndexSource 폴백 병합)이 seed 이후 갭을 메우므로 daily 불요
+    (지수당 17 연도 HF read 라 daily×5 는 과도). 반환: 총 행수.
+    """
+    total = 0
+    for market, idxNm in CURATED_INDICES:
+        total += produceIndex(market, idxNm, hfToken=hfToken)
+    print(f"[gov/seed-curated] {len(CURATED_INDICES)}개 지수, {total}행")
+    return total
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="공공데이터포털 주가·지수 HF 캐시 빌드 (date daily + 엔티티 온디맨드)")
     ap.add_argument("--daily", action="store_true", help="어제 전종목 1콜 → date/{year} (cron)")
@@ -370,6 +393,12 @@ def main() -> int:
     )
     ap.add_argument("--stock", help="종목 하나 → company/{code} 온디맨드 캐시")
     ap.add_argument("--index", dest="indexSpec", help='지수 하나 "시장군|지수명" → index/{key} 온디맨드 캐시')
+    ap.add_argument(
+        "--seed-curated",
+        dest="seedCurated",
+        action="store_true",
+        help="큐레이트 5 지수(코스피·코스피200·코스닥·코스닥150·KRX300) index/{key} 전이력 일괄 추출 (프론트 전이력 활성·주간/수동)",
+    )
     ap.add_argument("--basDt", help="--daily/--daily-index 기준일자 YYYYMMDD (기본 어제)")
     ap.add_argument(
         "--lookback",
