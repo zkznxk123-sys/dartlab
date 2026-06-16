@@ -59,10 +59,23 @@ class TestEmbedSecurity:
         assert not path.startswith("/api/")
 
     def test_embed_registered_in_app(self):
-        """embed 라우터가 앱에 등록되어 있는지 확인."""
+        """embed 라우터가 앱에 등록되어 있는지 확인.
+
+        FastAPI 0.137 / Starlette 1.3 부터 ``include_router`` 는 라우트를 즉시
+        평탄화하지 않고 지연 ``_IncludedRouter`` placeholder (``path=None``) 로
+        보관한다 — 실제 라우트는 ``original_router.routes`` 아래에 있다. 옛
+        평탄 구조와 신 지연 구조 모두에서 ``/embed.js`` 등록을 확인한다.
+        """
         from dartlab.server import app
 
-        routes = [r.path for r in app.routes if hasattr(r, "path")]
+        routes: list[str] = []
+        for r in app.routes:
+            path = getattr(r, "path", None)
+            if path:
+                routes.append(path)
+            included = getattr(r, "original_router", None)  # FastAPI 0.137+ 지연 include
+            if included is not None:
+                routes.extend(sub.path for sub in included.routes if getattr(sub, "path", None))
         assert "/embed.js" in routes
 
 
