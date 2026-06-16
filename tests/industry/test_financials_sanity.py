@@ -105,3 +105,99 @@ class TestSanityGuard:
         )
         out = _applySanityGuard(df, year="2022")
         assert out.row(0, named=True)["revenue"] is None
+
+
+class TestProfitPoolDerived:
+    """buildIndustrySummary 의 profit-pool 파생 컬럼 (영업이익률·coverageRatio) 단언.
+
+    엔진 파생 = dual-source SSOT 캐논 (mainPlan/industry-analysis-lab/07 §구멍1).
+    parquet 무의존 — ``_extractYearly`` monkeypatch + 합성 노드.
+    """
+
+    @staticmethod
+    def _node(stockCode: str, industry: str, stage: str):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(stockCode=stockCode, industry=industry, stage=stage)
+
+    def _run(self, monkeypatch, fin: pl.DataFrame, nodes):
+        from dartlab.industry.build import financials
+
+        monkeypatch.setattr(financials, "_extractYearly", lambda year: fin)
+        # getIndustry("synthIndustry") → None → stageLabels={} → 공정명 None (단언 무관)
+        return financials.buildIndustrySummary(nodes, "synthIndustry", year="2024")
+
+    def test_margin_is_revenue_weighted_not_simple_average(self, monkeypatch):
+        """stage 영업이익률 = Σ영업이익/Σ매출 (revenue-weighted) — 단순평균(30%) 아님."""
+        fin = pl.DataFrame(
+            {
+                "stockCode": ["big", "small"],
+                "revenue": [100e12, 1e12],
+                "opIncome": [10e12, 0.5e12],  # 마진 10% vs 50%
+            }
+        )
+        nodes = [
+            self._node("big", "synthIndustry", "fab"),
+            self._node("small", "synthIndustry", "fab"),
+        ]
+        out = self._run(monkeypatch, fin, nodes)
+        row = out.row(0, named=True)
+        # revenue-weighted = (10+0.5)/(100+1)*100 = 10.396 → 10.4, NOT (10+50)/2 = 30
+        assert row["영업이익률(%)"] == 10.4
+        assert row["영업이익률(%)"] != 30.0
+        assert row["coverageRatio"] == 1.0  # 둘 다 opIncome present
+
+    def test_coverage_ratio_excludes_null_opincome(self, monkeypatch):
+        """coverageRatio = opIncome 산출가능 / stage 회사수, 결손은 0 채움 아닌 제외."""
+        fin = pl.DataFrame(
+            {
+                "stockCode": ["a", "b", "c"],
+                "revenue": [100e12, 1e12, 5e12],
+                "opIncome": [10e12, 0.5e12, None],  # c 결손
+            }
+        )
+        nodes = [
+            self._node("a", "synthIndustry", "fab"),
+            self._node("b", "synthIndustry", "fab"),
+            self._node("c", "synthIndustry", "fab"),
+        ]
+        out = self._run(monkeypatch, fin, nodes)
+        row = out.row(0, named=True)
+        assert row["기업수"] == 3
+        assert row["coverageRatio"] == 0.667  # 2/3, round(3)
+        # 마진은 결손 c 제외하고 a·b 만 revenue-weighted (0 채움 시 마진이 깎였을 것)
+        assert row["영업이익률(%)"] == 10.4
+        # opIncome 합은 c(null) skip → 10.5조
+        assert row["영업이익(조)"] == 10.5
+
+    def test_zero_revenue_margin_is_null_not_zero(self, monkeypatch):
+        """매출 합 0 또는 opIncome 전무 stage → 영업이익률 null (0 채움/division 에러 금지)."""
+        fin = pl.DataFrame(
+            {
+                "stockCode": ["x"],
+                "revenue": [0.0],
+                "opIncome": [None],
+            }
+        )
+        nodes = [self._node("x", "synthIndustry", "fab")]
+        out = self._run(monkeypatch, fin, nodes)
+        row = out.row(0, named=True)
+        assert row["영업이익률(%)"] is None
+        assert row["coverageRatio"] == 0.0
+
+    def test_schema_has_derived_columns(self, monkeypatch):
+        """반환 스키마에 영업이익률(%)·coverageRatio 컬럼 존재 (소비자 계약)."""
+        fin = pl.DataFrame({"stockCode": ["a"], "revenue": [10e12], "opIncome": [1e12]})
+        nodes = [self._node("a", "synthIndustry", "fab")]
+        out = self._run(monkeypatch, fin, nodes)
+        assert "영업이익률(%)" in out.columns
+        assert "coverageRatio" in out.columns
+        assert out.columns == [
+            "stage",
+            "공정명",
+            "매출(조)",
+            "영업이익(조)",
+            "기업수",
+            "영업이익률(%)",
+            "coverageRatio",
+        ]

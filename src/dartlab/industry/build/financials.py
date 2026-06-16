@@ -240,7 +240,15 @@ def buildIndustrySummary(
     Returns
     -------
     pl.DataFrame
-        columns: 공정, 공정명, 매출(조), 영업이익(조), 기업수
+        columns: stage, 공정명, 매출(조), 영업이익(조), 기업수, 영업이익률(%), coverageRatio
+
+        - ``영업이익률(%)``: stage 단위 **revenue-weighted** 마진 = Σ영업이익 / Σ매출 × 100
+          (revenue·opIncome 둘 다 present 인 회사만 집계, 단순평균 아님 — 소형사 극단 마진
+          왜곡 차단). 매출 합 0 이면 null.
+        - ``coverageRatio``: opIncome 산출가능 회사 / stage 내 finance-join 회사수 (0~1).
+          profit-pool 격자의 결손 노출용 — 0 채움 금지. ★dual-source SSOT: 본 엔진 파생이
+          **캐논**, 브라우저 ``industries/{id}.json`` per-node 롤업은 표시용 (커버리지·분모
+          상이, ``mainPlan/industry-analysis-lab/07-implementation-plan.md`` §구멍1).
 
     Raises:
         없음 — finance 데이터 없거나 매칭 0 면 빈 DataFrame.
@@ -300,13 +308,32 @@ def buildIndustrySummary(
     ind = getIndustry(industryId)
     stageLabels = {s.key: s.name for s in ind.stages} if ind else {}
 
+    # revenue·opIncome 둘 다 present 인 행만 revenue-weighted 마진 모집단 (단순평균 왜곡 차단)
+    _bothPresent = pl.col("revenue").is_not_null() & pl.col("opIncome").is_not_null()
+
     result = (
         filtered.group_by("stage")
         .agg(
             [
-                (pl.col("revenue").sum() / 1e12).round(1).alias("매출(조)"),
-                (pl.col("opIncome").sum() / 1e12).round(1).alias("영업이익(조)"),
+                pl.col("revenue").sum().alias("_revSum"),
+                pl.col("opIncome").sum().alias("_opSum"),
                 pl.len().alias("기업수"),
+                pl.col("revenue").filter(_bothPresent).sum().alias("_revBoth"),
+                pl.col("opIncome").filter(_bothPresent).sum().alias("_opBoth"),
+                _bothPresent.sum().alias("_nBoth"),
+            ]
+        )
+        .with_columns(
+            [
+                (pl.col("_revSum") / 1e12).round(1).alias("매출(조)"),
+                (pl.col("_opSum") / 1e12).round(1).alias("영업이익(조)"),
+                # revenue-weighted: Σ영업이익 / Σ매출 × 100 (둘 다 present 인 회사만), Σ매출 0 이면 null
+                pl.when(pl.col("_revBoth") != 0)
+                .then((pl.col("_opBoth") / pl.col("_revBoth") * 100).round(1))
+                .otherwise(None)
+                .alias("영업이익률(%)"),
+                # opIncome 산출가능 회사 / stage finance-join 회사수 (결손 노출, 0 채움 금지)
+                (pl.col("_nBoth") / pl.col("기업수")).round(3).alias("coverageRatio"),
             ]
         )
         .sort("매출(조)", descending=True)
@@ -317,7 +344,7 @@ def buildIndustrySummary(
         pl.col("stage").replace_strict(stageLabels, default=None, return_dtype=pl.Utf8).alias("공정명")
     )
 
-    return result.select(["stage", "공정명", "매출(조)", "영업이익(조)", "기업수"])
+    return result.select(["stage", "공정명", "매출(조)", "영업이익(조)", "기업수", "영업이익률(%)", "coverageRatio"])
 
 
 def buildTimelineSummary(

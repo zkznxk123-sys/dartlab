@@ -125,7 +125,7 @@ fab_only = dartlab.industry("semiconductor", stage="fab")
 
 # 4. 공정별 매출/영업이익 집계 (year 기준)
 summary = dartlab.industry("semiconductor", summary=True, year="2024")
-# → DataFrame: 공정 · 매출합계 · 영업이익합계
+# → DataFrame: stage · 공정명 · 매출(조) · 영업이익(조) · 기업수 · 영업이익률(%) · coverageRatio
 
 # 5. 연도별 공정 매출 추이
 timeline = dartlab.industry("semiconductor", timeline=True)
@@ -174,6 +174,18 @@ dartlab.industry("semiconductor")
    종목명 : str
    역할 : str           # 해당 공정에서의 역할
    위치 : str           # 밸류체인 상 위치
+```
+
+```text
+dartlab.industry("semiconductor", summary=True, year="2024")
+→ DataFrame  # stage 단위 profit-pool 집계
+   stage : str          # 공정 단계 ID (fab, oSat, equipment, ...)
+   공정명 : str         # 한글 공정명
+   매출(조) : float      # stage Σ매출 (조원)
+   영업이익(조) : float  # stage Σ영업이익 (조원)
+   기업수 : int          # stage finance-join 회사수
+   영업이익률(%) : float # revenue-weighted = Σ영업이익/Σ매출×100 (단순평균 아님), Σ매출 0 이면 null
+   coverageRatio : float # opIncome 산출가능 / 기업수 (0~1, 결손 노출 — 0 채움 금지)
 ```
 
 ```text
