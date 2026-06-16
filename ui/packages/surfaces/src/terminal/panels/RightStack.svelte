@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type {
-		CompanyChange,
 		CompanyRelations,
 		FinMode,
 		FinScope,
@@ -109,7 +108,6 @@
 
 	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
 	let reportFacts = $state<LiveCompanyReportFact[]>([]);
-	let disclChanges = $state<CompanyChange[]>([]);
 	let relations = $state<CompanyRelations | null>(null);
 	let regFilings = $state<RegularFiling[]>([]);
 	let nonRegFilings = $state<NonRegularFiling[]>([]);
@@ -121,7 +119,6 @@
 		const code = co.code;
 		factsState = 'loading';
 		reportFacts = [];
-		disclChanges = [];
 		relations = null;
 		regFilings = [];
 		nonRegFilings = [];
@@ -158,9 +155,6 @@
 			if (cancelled) return;
 			reportFacts = f;
 			factsState = f.length ? 'ready' : 'empty';
-		});
-		rt.scan.changes(code, 8).then((c) => {
-			if (!cancelled) disclChanges = c;
 		});
 		rt.company.relations(code).then((r) => {
 			if (!cancelled) relations = r;
@@ -528,23 +522,6 @@
 		<div class="finNote">finance.json · 직전 사업연도 대비</div>
 	</Panel>
 </div>
-
-<!-- 공시 변경 내역 (changes parquet — 섹션별 수치/구조 변경) -->
-{#if disclChanges.length}
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: "공시 변경 추적", en: "WHAT CHANGED" }} sub={{ kr: "직전 공시 대비 바뀐 섹션·내용", en: "vs prior filing" }} flush>
-		{#snippet right()}<a class="lensScan" href={viewerHref} target={externalTarget} rel={externalRel} title="공시 뷰어에서 보기">뷰어 ↗</a><span class="dim">{disclChanges.length}</span>{/snippet}
-		<div class="chgFeed">
-			{#each disclChanges as c, i (i)}
-				<div class="chgFeedRow">
-					<span class={'chgType ' + (c.changeType === 'structural' ? 'st' : 'nu')}>{c.changeType === 'structural' ? (lang === 'en' ? 'STRUCT' : '구조') : (lang === 'en' ? 'NUM' : '수치')}</span>
-					<span class="chgSec">{c.sectionTitle}</span>
-					<span class="chgPer mono">{c.fromPeriod}→{c.toPeriod}</span>
-					{#if c.preview}<span class="chgPrev">{c.preview}</span>{/if}
-				</div>
-			{/each}
-		</div>
-	</Panel>
-{/if}
 
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할. data-fdate = 주가차트 공시 dot 클릭 시 스크롤·하이라이트 대상 키(YYYYMMDD). -->
 <div class="rowSplit" bind:this={filingWrap}>
