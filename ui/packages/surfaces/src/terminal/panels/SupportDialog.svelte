@@ -161,7 +161,16 @@
 {/if}
 
 <style>
-	/* 좁은 편지형 — scrModal(960) 폭만 좁히고 나머지 크롬은 공용 클래스 재사용 */
+	/* 자기완결 모달 크롬 — terminal.css 없는 셸(landing 헤더 등)에서도 동작하도록 베이스 포함(var 폴백 필수).
+	   터미널 안에선 global terminal.css 와 값 동일(중복 무해). */
+	.scrimWrap { position: fixed; inset: 0; z-index: 200; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
+	.scrModal { width: min(960px, 96vw); max-height: 88vh; display: flex; flex-direction: column; background: var(--dl-bg-raised, #0e141f); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); overflow: hidden; font-family: var(--dl-font-ui, 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif); color: var(--dl-ink, #e2e8f0); }
+	.scrHead { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); }
+	.scrTitle { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-weight: 700; font-size: 12px; letter-spacing: 0.14em; color: var(--amber, #fb923c); text-transform: uppercase; }
+	.scrClose { margin-left: auto; background: none; border: none; color: var(--dl-ink-dim, #5b6473); font-size: 14px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 3px; }
+	.scrClose:hover { color: var(--dl-ink, #e2e8f0); background: rgba(255, 255, 255, 0.06); }
+
+	/* 좁은 편지형 — 폭만 560 으로 좁힘(.scrModal 뒤 선언 → 우선) */
 	.supModal { width: min(560px, 94vw); }
 	.supBody { padding: 16px 18px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
 
@@ -173,14 +182,14 @@
 	.supSecCenter { align-items: center; text-align: center; }
 	.supSecCenter .supChips { justify-content: center; }
 	.supSecCenter .supPostLink { align-self: center; }
-	.supSecLabel { font-family: var(--dl-font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dl-ink-mute, #8a93a3); }
+	.supSecLabel { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dl-ink-mute, #8a93a3); }
 	.supSecNote { margin: -2px 0 2px; font-size: 11.5px; line-height: 1.5; color: var(--dl-ink-mute, #8a93a3); }
 
 	.supChips { display: flex; flex-wrap: wrap; gap: 7px; }
 	.supPerson { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; background: var(--dl-bg, #0a0e16); color: var(--dl-ink, #e2e8f0); text-decoration: none; transition: border-color 0.15s, background 0.15s; }
 	.supPerson:hover { border-color: var(--dl-line-strong, #2a3142); background: rgba(255, 255, 255, 0.04); }
 	.supAv { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; object-fit: cover; }
-	.supMono { display: flex; align-items: center; justify-content: center; font-family: var(--dl-font-mono); font-size: 13px; font-weight: 700; color: #0a0e16; background: linear-gradient(135deg, #fdba74, #fb7185); }
+	.supMono { display: flex; align-items: center; justify-content: center; font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 13px; font-weight: 700; color: #0a0e16; background: linear-gradient(135deg, #fdba74, #fb7185); }
 	.supHandle { font-size: 12.5px; display: inline-flex; align-items: center; gap: 4px; }
 	.supRole { font-size: 11px; line-height: 1; }
 	.supRoleInsp { color: var(--amber, #fb923c); }
@@ -206,9 +215,9 @@
 	.supAccount { cursor: default; }
 	.supAccount :global(svg:first-child) { color: var(--amber, #fb923c); }
 	.supAcct { display: inline-flex; align-items: baseline; gap: 7px; flex-wrap: wrap; font-weight: 400; }
-	.supAcct .mono { font-family: var(--dl-font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+	.supAcct .mono { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 	.supAcctHolder { color: var(--dl-ink-mute, #8a93a3); font-size: 11.5px; }
-	.supCopy { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 5px; background: transparent; color: var(--dl-ink-mute, #8a93a3); font-size: 11px; font-family: var(--dl-font-mono); cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+	.supCopy { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 5px; background: transparent; color: var(--dl-ink-mute, #8a93a3); font-size: 11px; font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); cursor: pointer; transition: color 0.15s, border-color 0.15s; }
 	.supCopy:hover { color: var(--dl-ink, #e2e8f0); border-color: var(--dl-ink-dim, #5b6473); }
 	.supDonateNote { margin: 4px 2px 0; font-size: 11px; line-height: 1.55; color: var(--dl-ink-mute, #8a93a3); }
 </style>

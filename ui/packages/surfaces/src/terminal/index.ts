@@ -2,6 +2,8 @@
 // 셸(landing route · ui/web 브리지)이 소비하는 마운트 표면 + 셸 글루(routeLoad)가 쓰는 데이터 형태만 공개.
 // 내부 부품(panels·charts·ui·engine 헬퍼)은 비공개 — 트리 내부 상대 import 로만 접근.
 export { default as TerminalSurface } from './TerminalSurface.svelte';
+// 후원·기여 센터 — 자기완결(terminal.css 불필요) 라 landing 헤더 등 다른 셸에서도 재사용.
+export { default as SupportDialog } from './panels/SupportDialog.svelte';
 export { createEngine } from './lib/engine';
 export type { Engine } from './lib/engine';
 export type {
