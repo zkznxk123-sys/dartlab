@@ -113,7 +113,11 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # search index builders — panel/content index 는 선택적 로컬/HF 산출물.
         # 부재 = 아직 빌드/동기화 대상 0건, 검색 caller 가 "인덱스 없음" 메시지를 반환.
         "providers/dart/search/fieldIndexRebuild.py",
+        # search local activation pointer / previous manifest 는 선택 운영 산출물.
+        # 첫 설치/첫 promote 에서는 부재가 정상이라 loud-fail 하면 bootstrap 이 깨진다.
+        "providers/dart/search/localUpdate.py",
         "providers/dart/search/ngramIndex.py",
+        "providers/dart/search/publishIndex.py",
         "providers/edgar/docs/sections/sectionsStorage.py",
         # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
         "quant/risk/bottomUpBeta.py",
