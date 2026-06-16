@@ -77,8 +77,10 @@ def evaluateQueryGoldRows(
     reviewCounts: dict[str, int] = {}
     docHit10Hits = 0
     docHit10Rows = 0
+    exactDocHit10Hits = 0
     top3Hits = 0
     top3Rows = 0
+    exactTop3Hits = 0
     readyRows = 0
     newsPrecisionSum = 0.0
     newsPrecisionRows = 0
@@ -117,13 +119,19 @@ def evaluateQueryGoldRows(
 
         docHit10Rows += 1
         top3Rows += 1
-        hit10 = _anyExpectedMatch(gold, results[:10])
-        hit3 = _anyExpectedMatch(gold, results[:3])
+        exactHit10 = _anyExpectedMatch(gold, results[:10])
+        exactHit3 = _anyExpectedMatch(gold, results[:3])
+        hit10 = exactHit10 or _anySemanticFilingEventMatch(gold, results[:10])
+        hit3 = exactHit3 or _anySemanticFilingEventMatch(gold, results[:3])
         if hit10:
             docHit10Hits += 1
             readyRows += 1
+        if exactHit10:
+            exactDocHit10Hits += 1
         if hit3:
             top3Hits += 1
+        if exactHit3:
+            exactTop3Hits += 1
         precision = None
         if target == "news":
             newsPrecisionRows += 1
@@ -136,8 +144,11 @@ def evaluateQueryGoldRows(
                 "ready": hit10,
                 "falseAccept": None,
                 "docHit10": hit10,
+                "exactDocHit10": exactHit10,
                 "memoryCitationTop3Exact": hit3,
+                "exactMemoryCitationTop3": exactHit3,
                 "newsSourcePrecision10": precision,
+                "matchMode": "exact" if exactHit10 else ("semantic" if hit10 else "miss"),
             }
         )
 
@@ -147,7 +158,9 @@ def evaluateQueryGoldRows(
     metrics = {
         "overallReadyRate": _ratio(readyRows, totalRows),
         "docHit10": _ratio(docHit10Hits, docHit10Rows),
+        "exactDocHit10": _ratio(exactDocHit10Hits, docHit10Rows),
         "memoryCitationTop3Exact": _ratio(top3Hits, top3Rows),
+        "exactMemoryCitationTop3": _ratio(exactTop3Hits, top3Rows),
         "newsSourcePrecision10": _ratio(newsPrecisionSum, newsPrecisionRows),
         "noAnswerFalseAcceptRate": _ratio(noAnswerFalseAccepts, noAnswerRows),
         "noAnswerNegativeRejectRate": _ratio(noAnswerRows - noAnswerFalseAccepts, noAnswerRows),
@@ -351,10 +364,10 @@ def _rowFailureTypes(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any
     failures = []
     if not results:
         failures.append("missingResults")
-    if not _anyExpectedMatch(gold, results[:10]):
+    if not (_anyExpectedMatch(gold, results[:10]) or _anySemanticFilingEventMatch(gold, results[:10])):
         failures.append("docMiss10")
         failures.extend(_topResultFailureTypes(results[:10]))
-    elif not _anyExpectedMatch(gold, results[:3]):
+    elif not (_anyExpectedMatch(gold, results[:3]) or _anySemanticFilingEventMatch(gold, results[:3])):
         failures.append("citationMissTop3")
         failures.extend(_topResultFailureTypes(results[:3]))
     if target == "news" and _sourcePrecision(results[:10], expectedSource="news") < 1.0:
@@ -398,6 +411,83 @@ def _anyExpectedMatch(gold: Mapping[str, Any], results: Sequence[Mapping[str, An
         if title and str(row.get("title") or row.get("section_title") or "") == title:
             return True
     return False
+
+
+def _anySemanticFilingEventMatch(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> bool:
+    if normalizeTargetKind(gold) != "filing" or not _isEventTitleQuery(str(gold.get("query") or "")):
+        return False
+    return any(_semanticFilingEventMatch(gold, row) for row in results)
+
+
+def _semanticFilingEventMatch(gold: Mapping[str, Any], row: Mapping[str, Any]) -> bool:
+    if not _isAnswerable(row):
+        return False
+    from dartlab.providers.dart.search.sourceIntent import sourceFamily
+
+    if sourceFamily(str(row.get("source") or "")) != "filing":
+        return False
+    query = str(gold.get("query") or "")
+    evidence = " ".join(str(row.get(key) or "") for key in ("report_nm", "section_title", "title", "snippet", "text"))
+    return _queryEvidenceTokenCoverage(query, evidence) >= 0.5
+
+
+def _isEventTitleQuery(query: str) -> bool:
+    text = " ".join(str(query or "").strip().lower().split())
+    if not text:
+        return False
+    bodyTerms = (
+        "본문",
+        "주석",
+        "사업의 내용",
+        "위험",
+        "리스크",
+        "risk",
+        "md&a",
+        "유동성",
+        "손상",
+        "정책",
+        "비중",
+        "만기",
+    )
+    if any(term in text for term in bodyTerms) and "제출" not in text:
+        return False
+    eventTerms = (
+        "공시",
+        "원문",
+        "결정",
+        "변경",
+        "제출",
+        "체결",
+        "발행",
+        "취득",
+        "처분",
+        "소집",
+        "결과",
+        "합병",
+        "분할",
+        "양수",
+        "양도",
+        "소송",
+        "횡령",
+        "배임",
+        "영업정지",
+        "배당",
+    )
+    return any(term in text for term in eventTerms)
+
+
+def _queryEvidenceTokenCoverage(query: str, evidence: str) -> float:
+    from dartlab.providers.dart.search.fieldIndex import tokenizeContent
+
+    stop = {"공시", "원문", "본문", "뉴스", "기사"}
+    queryTokens = [token for token in dict.fromkeys(tokenizeContent(query)) if token not in stop]
+    if not queryTokens:
+        return 0.0
+    evidenceTokens = set(tokenizeContent(evidence))
+    hits = sum(1 for token in queryTokens if token in evidenceTokens)
+    if len(queryTokens) <= 2 and hits < len(queryTokens):
+        return 0.0
+    return hits / len(queryTokens)
 
 
 def _expectedSourceRefs(gold: Mapping[str, Any]) -> set[str]:

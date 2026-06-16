@@ -51,7 +51,9 @@ EVIDENCE_TEXT_LIMIT = 4000  # LLM/evidence card 용 bounded 원문 후보 텍스
 # bump 규칙: npz 키 구성·토크나이저(stems 어휘)·meta 스키마가 비호환 변경될 때 +1.
 # 사용자가 받은 인덱스 schemaVersion > 코드면 best-effort(경고), < 면 재pull 안내(indexInfo.compatible).
 # v2: content 토크나이저 word → 음절 bigram (stems 어휘 전면 교체 — v1 인덱스와 매칭 불가).
-INDEX_SCHEMA_VERSION = 2
+# v3: report_nm/section_title title field 가중 주입 — 공시 유형 질의에서 본문 길이에 제목이 묻히는 문제 보정.
+INDEX_SCHEMA_VERSION = 3
+TITLE_WEIGHT_REPEAT = 4
 
 _HANGUL_RE = re.compile(r"[가-힣]+")
 _ASCII_RE = re.compile(r"[A-Za-z]{2,20}")
@@ -271,7 +273,7 @@ def buildContentSegment(
 
     for row in rows:
         content = (row.get("section_content") or "")[:contentLimit]
-        builder.addDoc(content)
+        builder.addDoc(_weightedIndexText(row, content))
         metaRecs.append(
             {
                 "rcept_no": row.get("rcept_no") or "",
@@ -309,6 +311,25 @@ def buildContentSegment(
             elapsed,
         )
     return idx, meta
+
+
+def _weightedIndexText(row: dict, content: str) -> str:
+    """Build BM25 input text with bounded title/report weighting.
+
+    공시 유형 검색은 대부분 report_nm/section_title 이 정답 신호다. 본문 앞에 제목이 한 번
+    들어가 있어도 1,500자 본문과 BM25 길이 정규화에 묻히므로, build-time 에만 작은 반복
+    prefix 를 넣어 title lane 을 content index 안에 통합한다. 메타의 snippet/evidenceText 는
+    원문 그대로 유지한다.
+    """
+    titleParts = [
+        str(row.get("report_nm") or "").strip(),
+        str(row.get("section_title") or "").strip(),
+    ]
+    title = " ".join(part for part in titleParts if part)
+    if not title:
+        return content
+    weightedTitle = " ".join(title for _ in range(TITLE_WEIGHT_REPEAT))
+    return f"{weightedTitle} {content}".strip()
 
 
 # ── 저장/로드 ──

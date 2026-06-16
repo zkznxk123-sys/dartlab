@@ -165,6 +165,68 @@ def test_evaluate_query_gold_rows_does_not_count_unanswerable_doc_hit() -> None:
     assert report["metrics"]["docHit10"] < 1.0
 
 
+def test_evaluate_query_gold_rows_accepts_semantic_filing_event_hit() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "query": "유상증자 공시 원문",
+            "target": "filing",
+            "expectedSourceRef": "dart:allFilings:reviewed-example#section=0",
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        }
+    ]
+    results = {
+        "유상증자 공시 원문": [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:newer-relevant#section=0",
+                "report_nm": "[기재정정]주요사항보고서(유상증자결정)",
+                "answerable": True,
+            }
+        ]
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=1, requiredTargets=("filing",))
+
+    assert report["releaseEligible"] is True
+    assert report["rows"][0]["matchMode"] == "semantic"
+    assert report["metrics"]["docHit10"] == 1.0
+    assert report["metrics"]["exactDocHit10"] == 0.0
+
+
+def test_evaluate_query_gold_rows_keeps_body_query_exact() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "query": "환율 리스크 사업보고서 본문",
+            "target": "filing",
+            "expectedSourceRef": "dart:panel:expected#section=0",
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        }
+    ]
+    results = {
+        "환율 리스크 사업보고서 본문": [
+            {
+                "source": "panel",
+                "sourceRef": "dart:panel:wrong#section=0",
+                "report_nm": "사업보고서",
+                "text": "환율 리스크",
+                "answerable": True,
+            }
+        ]
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=1, requiredTargets=("filing",))
+
+    assert report["releaseEligible"] is False
+    assert report["rows"][0]["matchMode"] == "miss"
+    assert report["metrics"]["docHit10"] == 0.0
+
+
 def test_evaluate_query_gold_rows_reports_metrics_by_kind_for_edgar() -> None:
     from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
 

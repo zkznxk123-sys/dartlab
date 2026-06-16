@@ -178,3 +178,28 @@ def test_expansion_preserves_plain_top(tmp_path, monkeypatch):
     )
     df = unified.searchUnified("배당", limit=5)  # '배당' 은 큐레이션 키 → 확장 발화
     assert df.row(0, named=True)["rcept_no"] == "20260101000030"
+
+
+def test_title_weighting_prefers_decision_original_for_event_query(tmp_path, monkeypatch):
+    """공시 원문형 질의는 본문 반복어보다 report title 의 사건 정규형을 우선한다."""
+    fieldIndex, unified = _patchIndexDir(monkeypatch, tmp_path)
+    _buildSegment(
+        fieldIndex,
+        tmp_path,
+        [
+            _row(
+                "20260101000040",
+                "유상증자 유상증자 주식관련사채 발행결과 청약결과",
+                report="유상증자또는주식관련사채등의발행결과(자율공시)",
+            ),
+            _row(
+                "20260317000681",
+                "유상증자 결정 신주 발행 자금조달",
+                report="주요사항보고서(유상증자결정)",
+            ),
+        ],
+    )
+
+    df = unified.searchUnified("유상증자 공시 원문", limit=5)
+
+    assert df.row(0, named=True)["rcept_no"] == "20260317000681"
