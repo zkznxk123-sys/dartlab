@@ -256,6 +256,11 @@ def _contentManifestSummary(
     manifestSetPayload = manifestSet.get("payload") if isinstance(manifestSet.get("payload"), dict) else {}
     manifestSetSources = _sourceManifestSetSources(manifestSetPayload or manifest.get("sourceManifestSet"))
     missingProducerRun = _sourceManifestSetProducerRunMissingSources(manifestSetPayload)
+    graphCatalog = _entityGraphCatalogSummary(
+        manifest,
+        repoPrefix=repoPrefix,
+        fileSet=fileSet,
+    )
     return {
         "loadError": manifest.get("_loadError"),
         "artifactVersion": manifest.get("artifactVersion"),
@@ -272,6 +277,7 @@ def _contentManifestSummary(
         "sourceManifestSetLoadError": manifestSet.get("loadError") or "",
         "sourceManifestSetRepoPath": manifestSet.get("repoPath") or "",
         "sourceManifestSetProducerRunMissingSources": missingProducerRun,
+        "entityGraphCatalog": graphCatalog,
         "requiredFiles": requiredFiles,
         "fileSourcesCount": len(fileSources),
         "missingFileSourceMappings": missingMappings,
@@ -300,6 +306,31 @@ def _loadContentSourceManifestSet(
     payload = _loadJsonPath(repoId=repoId, repoPath=repoPath, remoteRoot=remoteRoot)
     loadError = str(payload.get("_loadError") or "") if isinstance(payload, dict) else "notObject"
     return {"repoPath": repoPath, "payload": payload if isinstance(payload, dict) else {}, "loadError": loadError}
+
+
+def _entityGraphCatalogSummary(
+    manifest: dict[str, Any],
+    *,
+    repoPrefix: str,
+    fileSet: set[str],
+) -> dict[str, Any]:
+    requiredFiles = manifest.get("requiredFiles") if isinstance(manifest.get("requiredFiles"), list) else []
+    fileSources = manifest.get("fileSources") if isinstance(manifest.get("fileSources"), dict) else {}
+    meta = manifest.get("entityGraphCatalog") if isinstance(manifest.get("entityGraphCatalog"), dict) else {}
+    rel = "entityGraphCatalog.parquet"
+    if rel not in requiredFiles:
+        return {"present": False, "required": False}
+    repoPath = _repoPathFor(str(fileSources.get(rel) or rel), repoPrefix=repoPrefix)
+    return {
+        "present": True,
+        "required": True,
+        "repoPath": repoPath,
+        "fileSourceExists": repoPath in fileSet,
+        "schemaVersion": meta.get("schemaVersion") or "",
+        "nEntities": meta.get("nEntities"),
+        "stockCodeCount": meta.get("stockCodeCount"),
+        "dataAsOf": meta.get("dataAsOf") or "",
+    }
 
 
 def _sourceManifestSetSources(value: Any) -> list[str]:

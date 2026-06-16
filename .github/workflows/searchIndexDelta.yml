@@ -17,8 +17,8 @@ on:
   workflow_dispatch:
     inputs:
       delta_mode:
-        description: 'delta mode: auto/catalog/legacy'
-        default: 'auto'
+        description: 'delta mode: catalog/legacy'
+        default: 'catalog'
         type: string
       lookback_days:
         description: '증분 대상 일수'
@@ -138,7 +138,7 @@ jobs:
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          DARTLAB_SEARCH_DELTA_MODE: ${{ github.event.inputs.delta_mode || 'auto' }}
+          DARTLAB_SEARCH_DELTA_MODE: ${{ github.event.inputs.delta_mode || 'catalog' }}
           DARTLAB_SEARCH_PROMOTE_CURRENT: "0"
           LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '30' }}
 
@@ -286,14 +286,38 @@ jobs:
         shell: bash
         run: |
           if [ -f "$RUNNER_TEMP/searchProofBundle.delta/searchProofBundle.json" ]; then
-            uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py \
-              --proof-bundle "$RUNNER_TEMP/searchProofBundle.delta/searchProofBundle.json" \
+            replacement_args=(
+              --proof-bundle "$RUNNER_TEMP/searchProofBundle.delta/searchProofBundle.json"
+              --remote-evidence "$RUNNER_TEMP/searchRemoteEvidence.delta.json"
+              --round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.full.json"
+              --round-trip "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+              --workflow .github/workflows/searchIndexMain.yml
+              --workflow .github/workflows/searchIndexDelta.yml
+              --out "$RUNNER_TEMP/searchReplacementEvidence.delta.json"
+            )
+            cutover_args=(
+              --proof-bundle "$RUNNER_TEMP/searchProofBundle.delta/searchProofBundle.json"
+              --replacement-evidence "$RUNNER_TEMP/searchReplacementEvidence.delta.json"
               --out "$RUNNER_TEMP/searchCutover.delta.json"
+            )
+            if [ "${PRODUCTIZATION_GATE:-ops}" = "release" ]; then
+              replacement_args+=(--fail-on-incomplete)
+              cutover_args+=(--fail-on-default-not-ready)
+            else
+              cutover_args+=(--fail-on-ops-not-ready)
+            fi
+            uv run python -X utf8 .github/scripts/search/buildSearchReplacementEvidence.py \
+              "${replacement_args[@]}"
+            uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py \
+              "${cutover_args[@]}"
           else
             cat > "$RUNNER_TEMP/searchCutover.delta.json" <<'JSON'
           {"state":"S0_EXPERIMENT","designReady":false,"opsReady":false,"releaseReady":false,"defaultReplacement":false,"blockers":["missingProofBundle"],"valid":false}
           JSON
+            exit 1
           fi
+        env:
+          PRODUCTIZATION_GATE: ${{ github.event.inputs.productization_gate || 'ops' }}
 
       - name: Upload search evidence reports
         if: always()
@@ -315,6 +339,7 @@ jobs:
             ${{ runner.temp }}/searchQuality.delta.json
             ${{ runner.temp }}/searchMissLedger.delta.jsonl
             ${{ runner.temp }}/searchProductizationStatus.delta.json
+            ${{ runner.temp }}/searchReplacementEvidence.delta.json
             ${{ runner.temp }}/searchCutover.delta.json
             ${{ runner.temp }}/searchProofBundle.delta/**
 

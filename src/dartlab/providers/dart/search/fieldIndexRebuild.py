@@ -895,6 +895,7 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
         >>> callable(writeIndexManifest)
         True
     """
+    from dartlab.providers.dart.search.entityGraph import ENTITY_GRAPH_CATALOG_NAME
     from dartlab.providers.dart.search.fieldIndex import INDEX_SCHEMA_VERSION
     from dartlab.providers.dart.search.manifest import writeSearchManifest
 
@@ -936,6 +937,9 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
     sourceManifestSet = _loadSourceManifestSet(base / "source_manifest_set.json")
     if sourceManifestSet:
         requiredFiles.append("source_manifest_set.json")
+    entityGraphCatalog = _entityGraphCatalogSummary(base / ENTITY_GRAPH_CATALOG_NAME)
+    if entityGraphCatalog:
+        requiredFiles.append(ENTITY_GRAPH_CATALOG_NAME)
     sourceCanaryPack = []
     if mainMeta is not None and mainMeta.height:
         from dartlab.providers.dart.search.artifactCanary import CANARY_PACK_VERSION, buildSourceCanaryPackFromMeta
@@ -968,6 +972,7 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
         "sourceCanaryPack": sourceCanaryPack,
         "sourceManifestSetId": sourceManifestSet.get("sourceManifestSetId", ""),
         "sourceManifestSet": _sourceManifestSetSummary(sourceManifestSet),
+        "entityGraphCatalog": entityGraphCatalog,
         "qualityReportPath": "",
         "compatibleMinLibraryVersion": "",
         "compatibleMaxSchemaVersion": INDEX_SCHEMA_VERSION,
@@ -1013,6 +1018,36 @@ def _sourceManifestSetSummary(payload: dict) -> dict:
     }
 
 
+def _entityGraphCatalogSummary(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    catalog = pl.read_parquet(path)
+    stockCodeCount = 0
+    if catalog.height and "stockCode" in catalog.columns:
+        stockCodeCount = int(catalog.select(pl.col("stockCode").cast(pl.Utf8).n_unique()).item() or 0)
+    return {
+        "schemaVersion": "searchEntityGraphCatalog.v1",
+        "path": path.name,
+        "nEntities": catalog.height,
+        "stockCodeCount": stockCodeCount,
+        "dataAsOf": _entityGraphCatalogDataAsOf(catalog),
+        "columns": catalog.columns,
+    }
+
+
+def _entityGraphCatalogDataAsOf(catalog: pl.DataFrame) -> str:
+    if catalog.height == 0:
+        return ""
+    for column in ("dataAsOf", "generatedAt"):
+        if column not in catalog.columns:
+            continue
+        values = [str(value or "") for value in catalog.get_column(column).to_list()]
+        values = [value for value in values if value]
+        if values:
+            return max(values)
+    return ""
+
+
 def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCurrent: bool | None = None) -> dict:
     """content 인덱스 (main + delta) 를 HF staging 후 current manifest pointer 로 publish.
 
@@ -1033,6 +1068,7 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCur
     Example:
         >>> pushContentIndex(tier="lite")  # doctest: +SKIP
     """
+    from dartlab.providers.dart.search.entityGraph import ENTITY_GRAPH_CATALOG_NAME
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
     from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
@@ -1049,6 +1085,7 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCur
         "delta_info.json",
         "router.json",
         "source_manifest_set.json",
+        ENTITY_GRAPH_CATALOG_NAME,
     ]
     if promoteCurrent is None:
         promoteCurrent = _envFlag("DARTLAB_SEARCH_PROMOTE_CURRENT", default=True)
@@ -1087,6 +1124,7 @@ def pullContentIndex(tier: str = "full") -> int:
 
     from dartlab.core.dataConfig import repoFor
     from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.providers.dart.search.entityGraph import ENTITY_GRAPH_CATALOG_NAME
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, clearCache
 
     outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
@@ -1107,6 +1145,7 @@ def pullContentIndex(tier: str = "full") -> int:
         "delta_meta.parquet",
         "delta_info.json",
         "router.json",
+        ENTITY_GRAPH_CATALOG_NAME,
     ]
     ok = 0
     from dartlab.core.hfRetry import retryHfCall

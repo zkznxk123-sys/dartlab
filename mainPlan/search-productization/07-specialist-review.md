@@ -1,6 +1,6 @@
 # 07. 전문 검토 결론 — 검색 엔진 완성 방향
 
-상태: v0.1 (2026-06-15)
+상태: v0.2 (2026-06-16)
 범위: runtime, HF 증분, local/public/library surface, 품질 gate 를 함께 검토한 최종 설계 판단.
 
 ---
@@ -78,4 +78,31 @@
 - panel/news 증분 없이 "자동 최신" 주장 금지.
 - 실제 query-log gold 없이 제품 완성 선언 금지.
 - miss 1건마다 특수 mapper 를 붙이는 방식 금지.
+
+---
+
+## 7. Graph Catalog Enrichment 추가 검토
+
+`tests/_attempts/okfCompanyWiki/` handoff 는 본진 search 에 흡수할 가치가 있다. 단 형태는
+live GraphRAG/traversal 이 아니라 **prebuilt graph catalog join** 이다.
+
+현재 확인:
+
+- `tests/_attempts/searchGraphCatalog/` 에 tests-only 실험 모듈을 만들었다.
+- catalog builder 는 live `Company.industry()`/`credit()` 을 offline 단계에서만 호출한다.
+- 본진 `entityGraph.py` 와 `api.search()` optional attach 를 추가했다.
+- catalog 가 없으면 search 결과는 기존처럼 동작한다.
+- catalog 가 있으면 검색 row 에 `entityCards` 가 붙고, LLM memory-card 에도 포함된다.
+- `entityGraphCatalog.py` 는 explicit catalog copy 또는 `DARTLAB_SEARCH_ENTITY_GRAPH_BUILD=1` offline build 를 제공한다. 생성된 `entityGraphCatalog.parquet` 는 contentIndex manifest 의 `requiredFiles/fileHashes` 와 `entityGraphCatalog` summary 에 들어가고, main/delta publish 와 pull 후보에 포함된다.
+- 요청 경로에서는 live `Company.industry()`/`credit()` traversal 을 하지 않는다.
+
+판정:
+
+- 관계형 의미검색에는 유망하다. R* 가 원문 entry 를 찾고, graph catalog 가 peer/stage/credit weak axis 를
+  첫 응답에 동봉하면 LLM 의 후속검색 laziness 를 줄일 수 있다.
+- 기본 ranking 교체 근거는 아니다. graph 는 sidecar/evidence/memory card 로만 시작한다.
+- 제품 천장은 graph 자체보다 entity resolution 과 facet planning 이 만든다. `현대차` vs `현대자동차`,
+  뉴스 row 의 회사명 공백, 계열사/약칭 혼동, DART/EDGAR mapping 을 먼저 고정해야 한다.
+- release evidence 는 아니다. 다음 gate 는 query-log-like relation 질문 20~50개에서
+  firstRelationRank, false neighbor rate, citation/sourceRef 보존, answerReadyRate 를 같이 보는 것이다.
 

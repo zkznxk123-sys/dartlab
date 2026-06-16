@@ -18,6 +18,15 @@ def test_plan_query_facets_detects_freshness_intent() -> None:
     assert planQueryFacets("latest semiconductor news").freshnessRequired is True
 
 
+def test_plan_query_facets_extracts_year_and_literal_constraints() -> None:
+    from dartlab.providers.dart.search.facetPlanner import planQueryFacets
+
+    facets = planQueryFacets("zzqwvxnotlistedalpha999 2099년 합병 공시")
+
+    assert facets.years == ("2099",)
+    assert facets.literalTerms == ("zzqwvxnotlistedalpha999",)
+
+
 def test_plan_query_facets_extracts_company_name_from_query(monkeypatch) -> None:
     from dartlab.providers.dart.search.facetPlanner import planQueryFacets
 

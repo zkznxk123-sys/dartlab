@@ -80,3 +80,67 @@ def test_apply_answerability_matches_report_facet_from_evidence_text_when_metada
     out = applyAnswerability(df, facets=QueryFacets(reportTerms=("사업보고서",)))
 
     assert out.row(0, named=True)["answerable"] is True
+
+
+def test_apply_answerability_accepts_title_metadata_as_evidence() -> None:
+    from dartlab.providers.dart.search.answerability import applyAnswerability
+
+    df = pl.DataFrame(
+        [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:20250515001545#section=0",
+                "report_nm": "분기보고서 (2025.03)",
+                "section_title": "3. 제재 등과 관련된 사항",
+                "snippet": "",
+                "dataAsOf": "20250515",
+            }
+        ]
+    )
+
+    out = applyAnswerability(df)
+
+    assert out.row(0, named=True)["answerable"] is True
+
+
+def test_apply_answerability_rejects_year_mismatch() -> None:
+    from dartlab.providers.dart.search.answerability import applyAnswerability
+    from dartlab.providers.dart.search.facetPlanner import QueryFacets
+
+    df = pl.DataFrame(
+        [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:20260312001329#section=0",
+                "snippet": "유상증자 결정",
+                "dataAsOf": "20260312",
+                "rcept_dt": "20260312",
+            }
+        ]
+    )
+
+    out = applyAnswerability(df, facets=QueryFacets(years=("2099",)))
+
+    assert out.row(0, named=True)["answerable"] is False
+    assert out.row(0, named=True)["notAnswerableReason"] == "facetMismatch:year"
+
+
+def test_apply_answerability_rejects_missing_literal() -> None:
+    from dartlab.providers.dart.search.answerability import applyAnswerability
+    from dartlab.providers.dart.search.facetPlanner import QueryFacets
+
+    df = pl.DataFrame(
+        [
+            {
+                "source": "news",
+                "sourceRef": "news:abc",
+                "snippet": "삼성전자 뉴스",
+                "dataAsOf": "20260616",
+            }
+        ]
+    )
+
+    out = applyAnswerability(df, facets=QueryFacets(literalTerms=("zzqwvxnotlistedalpha999",)))
+
+    assert out.row(0, named=True)["answerable"] is False
+    assert out.row(0, named=True)["notAnswerableReason"] == "facetMismatch:literal"

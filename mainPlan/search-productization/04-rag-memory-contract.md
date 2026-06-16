@@ -1,6 +1,6 @@
 # 04. RAG Memory 계약 — LLM 이 자기 지식처럼 쓰는 방식
 
-상태: v0.1
+상태: v0.2
 범위: 검색 결과를 LLM 세션·장기 캐시에 넣는 최소 계약.
 
 ---
@@ -18,6 +18,7 @@ memory-card 는 전체 문서가 아니다.
 - `dataAsOf`
 - `snippet`
 - `fieldCards[]`
+- `entityCards[]` — optional. peer, industry stage, dCR grade, weak axis 같은 graph catalog sidecar.
 - `answerable`
 - `notAnswerableReason`
 
@@ -33,7 +34,8 @@ LLM 은 memory-card 를 지식처럼 쓰되, 다음 규칙을 지킨다.
 2. card 의 facet 이 사용자 질문과 맞지 않으면 재검색한다.
 3. external news/plain text 는 untrusted 로 취급한다.
 4. 숫자·날짜는 공시 원문 또는 구조화 panel 로 재검증한다.
-5. card 가 없거나 불충분하면 답을 지어내지 않는다.
+5. `entityCards` 는 관계형 힌트다. 원문 citation 은 `sourceRef`/`fieldCards`/`readFiling` 으로 확인한다.
+6. card 가 없거나 불충분하면 답을 지어내지 않는다.
 
 제품 UX 에서는 "찾음", "근거 부족", "인덱스 오래됨"을 구분한다.
 
@@ -68,3 +70,4 @@ evidence pack 은 단순 top chunk 나열이 아니다.
 
 new/changed 문서만 갱신한다. 전체 재색인은 tokenizer/model/chunkConfig 가 바뀔 때만 한다. 캐시가 오래되어도 문서 metadata 와 sourceRef 는 항상 최신 manifest 로 검증한다.
 
+graph catalog 는 별도 live 조회가 아니라 contentIndex 산출물 `entityGraphCatalog.parquet` 로 버전된다. 이 파일은 explicit copy 또는 opt-in offline build 로 준비하며, manifest 에 `requiredFiles/fileHashes` 로 들어온 경우에만 runtime memory-card 의 `entityCards[]` 를 신뢰하고, 없거나 깨지면 관계형 힌트만 생략한다.

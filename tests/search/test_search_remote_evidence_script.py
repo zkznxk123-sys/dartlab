@@ -45,10 +45,17 @@ def test_check_search_remote_evidence_script_with_complete_local_remote(tmp_path
             "schemaVersion": 2,
             "builtAt": "2026-06-15T00:00:00",
             "publishMode": "manifestPointer",
-            "requiredFiles": ["main.npz", "source_manifest_set.json"],
+            "requiredFiles": ["main.npz", "source_manifest_set.json", "entityGraphCatalog.parquet"],
             "fileSources": {
                 "main.npz": "dart/contentIndex/_staging/run/main.npz",
                 "source_manifest_set.json": "dart/contentIndex/_staging/run/source_manifest_set.json",
+                "entityGraphCatalog.parquet": "dart/contentIndex/_staging/run/entityGraphCatalog.parquet",
+            },
+            "entityGraphCatalog": {
+                "schemaVersion": "searchEntityGraphCatalog.v1",
+                "nEntities": 3,
+                "stockCodeCount": 3,
+                "dataAsOf": "20260616",
             },
             "sourceDataAsOf": {"allFilings": "20260615"},
             "nDocsBySource": {"allFilings": 1},
@@ -56,6 +63,7 @@ def test_check_search_remote_evidence_script_with_complete_local_remote(tmp_path
     )
     (remote / "dart/contentIndex/_staging/run").mkdir(parents=True, exist_ok=True)
     (remote / "dart/contentIndex/_staging/run/main.npz").write_bytes(b"main")
+    (remote / "dart/contentIndex/_staging/run/entityGraphCatalog.parquet").write_bytes(b"graph")
     _writeJson(
         remote / "dart/contentIndex/_staging/run/source_manifest_set.json",
         {
@@ -107,6 +115,16 @@ def test_check_search_remote_evidence_script_with_complete_local_remote(tmp_path
         "dartPanel",
     ]
     assert report["contentIndex"]["manifests"]["full"]["manifest"]["sourceManifestSetProducerRunMissingSources"] == []
+    assert report["contentIndex"]["manifests"]["full"]["manifest"]["entityGraphCatalog"] == {
+        "present": True,
+        "required": True,
+        "repoPath": "dart/contentIndex/_staging/run/entityGraphCatalog.parquet",
+        "fileSourceExists": True,
+        "schemaVersion": "searchEntityGraphCatalog.v1",
+        "nEntities": 3,
+        "stockCodeCount": 3,
+        "dataAsOf": "20260616",
+    }
 
 
 def test_check_search_remote_evidence_script_reports_missing_file_sources(tmp_path) -> None:

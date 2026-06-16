@@ -9,9 +9,13 @@ pytestmark = pytest.mark.unit
 
 
 def _patchIndexDir(monkeypatch, tmp_path):
-    from dartlab.providers.dart.search import fieldIndex
+    from dartlab.providers.dart.search import api, fieldIndex, unified
 
     monkeypatch.setattr(fieldIndex, "_contentIndexDir", lambda tier=None: tmp_path)
+    monkeypatch.setattr(fieldIndex, "_activeIndexDir", lambda: tmp_path)
+    monkeypatch.setattr(unified, "_activeIndexDir", lambda: tmp_path)
+    monkeypatch.setattr(api, "_prefersTitleLane", lambda query: False)
+    monkeypatch.setenv("DARTLAB_NO_HF_DOWNLOAD", "1")
     return fieldIndex
 
 

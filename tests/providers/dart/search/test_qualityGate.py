@@ -94,6 +94,37 @@ def test_evaluate_query_gold_rows_allows_proxy_only_for_experiment_mode() -> Non
     assert report["realReviewedRows"] == 2
 
 
+def test_evaluate_query_gold_rows_matches_results_by_query_id() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "queryId": "q1",
+            "query": "유상증자 공시",
+            "target": "filing",
+            "expectedSourceRef": "dart:allFilings:1#section=0",
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        },
+        {
+            "queryId": "q2",
+            "query": "없는 공시",
+            "target": "noAnswer",
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        },
+    ]
+    results = {
+        "q1": [{"source": "allFilings", "sourceRef": "dart:allFilings:1#section=0", "answerable": True}],
+        "q2": [{"source": "allFilings", "sourceRef": "dart:allFilings:other#section=0", "answerable": False}],
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=2, requiredTargets=("filing", "noAnswer"))
+
+    assert report["releaseEligible"] is True
+    assert report["metrics"]["overallReadyRate"] == 1.0
+
+
 def test_build_miss_ledger_rows_records_doc_miss_and_false_accept() -> None:
     from dartlab.providers.dart.search.qualityGate import buildMissLedgerRows
 

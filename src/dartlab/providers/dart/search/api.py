@@ -146,6 +146,7 @@ def search(
 
     if result.height > 0 and "info" not in result.columns:
         from dartlab.providers.dart.search.answerability import applyAnswerability
+        from dartlab.providers.dart.search.entityGraph import attachEntityGraphCards
         from dartlab.providers.dart.search.evidencePack import attachEvidenceCards
         from dartlab.providers.dart.search.resultSchema import normalizeSearchResult
         from dartlab.providers.dart.search.sourceIntent import sourceMatchesIntent
@@ -156,7 +157,9 @@ def search(
                 pl.col("source").map_elements(lambda source: sourceMatchesIntent(source, sourceIntent))
             )
         result = applyAnswerability(result, sourceIntent=sourceIntent, facets=facets)
+        result = attachEntityGraphCards(result)
         result = attachEvidenceCards(result, query=query)
+        result = _rankAnswerableFirst(result, limit=limit)
 
     _recordQueryLogCandidate(
         query=query,
@@ -215,9 +218,100 @@ def _searchAuto(query, *, corpCode, stockCode, sourceKind=None, limit):
     from dartlab.providers.dart.search.unified import searchUnified
 
     result = searchUnified(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
-    if result.height > 0 and "info" not in result.columns and "scope" not in result.columns:
+    if _prefersTitleLane(query):
+        titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+        result = _mergeAutoTitleContent(titleHits, result, limit=limit)
+    elif result.height > 0 and "info" not in result.columns and "scope" not in result.columns:
         result = result.with_columns(pl.lit("auto").alias("scope"))
     return result
+
+
+def _rankAnswerableFirst(result: pl.DataFrame, *, limit: int) -> pl.DataFrame:
+    """Keep original ranking, but do not show unanswerable evidence above answerable rows."""
+    if result is None or result.height <= 1 or "answerable" not in result.columns:
+        return result
+    orderColumn = "__dartlab_search_order"
+    ranked = (
+        result.with_row_index(orderColumn).sort(["answerable", orderColumn], descending=[True, False]).drop(orderColumn)
+    )
+    return ranked.head(limit)
+
+
+_TITLE_LANE_TERMS: tuple[str, ...] = (
+    "공시",
+    "결정",
+    "변경",
+    "제출",
+    "체결",
+    "발행",
+    "취득",
+    "처분",
+    "소집",
+    "결과",
+    "합병",
+    "분할",
+    "양수",
+    "양도",
+    "소송",
+    "횡령",
+    "배임",
+    "영업정지",
+    "배당",
+)
+_CONTENT_LANE_TERMS: tuple[str, ...] = (
+    "본문",
+    "주석",
+    "사업의 내용",
+    "위험",
+    "리스크",
+    "risk",
+    "md&a",
+    "management discussion",
+    "유동성",
+    "손상",
+    "정책",
+    "비중",
+    "만기",
+)
+
+
+def _prefersTitleLane(query: str) -> bool:
+    """Return True when a query is asking for a disclosure title/event type."""
+    text = " ".join(str(query or "").strip().lower().split())
+    if not text:
+        return False
+    if any(term in text for term in _CONTENT_LANE_TERMS) and "제출" not in text:
+        return False
+    return any(term in text for term in _TITLE_LANE_TERMS)
+
+
+def _mergeAutoTitleContent(titleHits: pl.DataFrame, contentHits: pl.DataFrame, *, limit: int) -> pl.DataFrame:
+    """Title-first merge for disclosure event/title queries."""
+    frames: list[pl.DataFrame] = []
+    if titleHits is not None and titleHits.height > 0 and "info" not in titleHits.columns:
+        frames.append(titleHits.with_columns(pl.lit("title").alias("scope")))
+    if contentHits is not None and contentHits.height > 0 and "info" not in contentHits.columns:
+        frames.append(contentHits.with_columns(pl.lit("content").alias("scope")))
+    if not frames:
+        if contentHits is not None and contentHits.height > 0:
+            return contentHits
+        return titleHits
+    merged = pl.concat(frames, how="diagonal_relaxed")
+    rows: list[dict] = []
+    seen: set[tuple[str, str, str]] = set()
+    for row in merged.iter_rows(named=True):
+        key = (
+            str(row.get("sourceRef") or ""),
+            str(row.get("rcept_no") or ""),
+            str(row.get("section_order") or ""),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(row)
+        if len(rows) >= limit:
+            break
+    return pl.DataFrame(rows) if rows else pl.DataFrame()
 
 
 def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:

@@ -145,6 +145,8 @@ def test_productization_status_accepts_complete_evidence_bundle(tmp_path: Path) 
     assert report["opsReady"] is True
     assert report["releaseReady"] is True
     assert report["blockers"] == []
+    assert report["evidence"]["remoteEvidence"]["entityGraphCatalog"]["full"]["present"] is True
+    assert report["evidence"]["remoteEvidence"]["entityGraphCatalog"]["full"]["nEntities"] == 4
 
 
 def test_productization_status_revalidates_quality_report_counts(tmp_path: Path) -> None:
@@ -585,15 +587,23 @@ def _writeCompleteRemote(remote: Path) -> None:
                     {"source": "newsPublic"},
                 ]
             },
-            "requiredFiles": ["main.npz", "source_manifest_set.json"],
+            "requiredFiles": ["main.npz", "source_manifest_set.json", "entityGraphCatalog.parquet"],
             "fileSources": {
                 "main.npz": "_staging/run/main.npz",
                 "source_manifest_set.json": "_staging/run/source_manifest_set.json",
+                "entityGraphCatalog.parquet": "_staging/run/entityGraphCatalog.parquet",
+            },
+            "entityGraphCatalog": {
+                "schemaVersion": "searchEntityGraphCatalog.v1",
+                "nEntities": 4,
+                "stockCodeCount": 4,
+                "dataAsOf": "20260616",
             },
         },
     )
     (remote / "dart" / "contentIndex" / "_staging" / "run").mkdir(parents=True, exist_ok=True)
     (remote / "dart" / "contentIndex" / "_staging" / "run" / "main.npz").write_bytes(b"main")
+    (remote / "dart" / "contentIndex" / "_staging" / "run" / "entityGraphCatalog.parquet").write_bytes(b"graph")
     _writeJson(remote / "dart" / "contentIndex" / "_staging" / "run" / "source_manifest_set.json", sourceManifestSet)
     _writeJson(
         remote / "dart" / "contentIndex" / "lite" / "manifest.json",

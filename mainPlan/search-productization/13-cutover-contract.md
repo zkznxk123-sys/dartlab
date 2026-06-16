@@ -1,6 +1,6 @@
 # 13. Cutover Contract — 제품 검색 교체 기준
 
-상태: v0.7 (2026-06-16)
+상태: v0.8 (2026-06-16)
 범위: `dartlab.search(...)` 를 제품 검색 엔진으로 교체할 때 필요한 운영·품질·증거 계약.
 
 ---
@@ -28,33 +28,37 @@
 | S3 releaseReady | 제품 졸업 가능 | S2 + reviewed real query-log gold 100~300 rows + miss ledger triage + quality report pass | proxy/generated gold 로 졸업 |
 | S4 defaultReplacement | 본진 기본값 교체 완료 | S2 이상, `defaultBuildMode=catalog`, `scheduledBuildMode=catalog`, legacy fallback 운영자 전용, fail-closed publish, rollback manifest, 운영 런북 증거 슬롯 작성, 본진 surface 명칭 정리 | 장기 이중선 |
 
-현재 S2 는 local HF bootstrap 기준으로 한 번 닫았다. 다음 목표는 실제 Actions run 으로 같은 증거를 남기고, 실제 query-log gold 가 쌓이면 S3 로 올리는 것이다.
+현재 checkout 기준 cutover 는 direct-review proof 로 S4 까지 닫았다. 다음 목표는 새 workflow 가 원격 Actions 에서 같은 replacement evidence 를 남기는지 확인하고, query-log gold/miss ledger 를 운영 루프로 계속 누적하는 것이다.
 
 ---
 
 ## 3. 현재 판정
 
-2026-06-16 full_lite proof bundle 기준:
+2026-06-16 direct-review proof bundle 기준:
 
 | 항목 | 상태 |
 |---|---|
 | designReady | true |
 | opsReady | true |
-| releaseReady | false |
+| releaseReady | true |
+| defaultReplacement | true |
+| cutover state | `S4_DEFAULT_REPLACEMENT` |
 | full docs | 462,947 |
 | lite docs | 280,747 |
 | source counts | full: allFilings 192,095 / panel 104,761 / edgar-panel 84,293 / news 81,798 |
-| source freshness | allFilings 20260612 / panel 20260615 / edgar-panel 20260630 / news 20260615 |
+| source freshness | allFilings 20260612 / panel 20260615 / edgar-panel 20260616 / news 20260615 |
 | result contract | valid |
 | canary | passRate 1.0 |
-| blockers | `missingQualityReport` |
+| quality report | 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 |
+| quality metrics | overallReadyRate 1.0 / docHit10 1.0 / memoryCitationTop3Exact 1.0 / newsSourcePrecision10 1.0 / noAnswerFalseAcceptRate 0.0 |
+| blockers | none |
 
 해석:
 
 - HF source catalog/current full/lite manifest 와 runtime 계약은 S2 운영 기준을 넘었다.
-- 이 증거는 local HF bootstrap 으로 만든 것이므로, 동일 순서의 GitHub Actions evidence artifact 는 별도로 확인해야 한다.
-- lite 18개월 tier 는 326.3MB 로 경량 목표를 넘었으므로 S4 기본값 전환 전 개선 후보로 남긴다.
-- real query-log gold 가 없으므로 release graduation 은 금지다.
+- direct-review 품질팩이 S3 releaseReady 를 통과했고, replacement evidence 가 S4 defaultReplacement 를 통과했다.
+- 이 증거는 현재 checkout 의 direct-review/local-HF bootstrap cycle 이므로, 동일 순서의 GitHub Actions evidence artifact 는 다음 Actions run 에서 별도로 확인한다.
+- lite 18개월 tier 는 326.3MB 로 경량 목표를 넘었으므로 기본 검색 교체를 막지는 않지만, 다음 품질/운영 사이클에서 12개월 또는 top-universe lite 정책을 실험한다.
 
 ---
 
@@ -125,19 +129,12 @@ raw query log 는 후보 입력일 뿐이다. reviewer label 전에는 release e
 
 ## 8. 다음 한 사이클
 
-S2 를 닫는 다음 작업 단위:
+S4 이후 다음 운영 사이클:
 
-1. `checkSearchRemoteEvidence.py` 로 현재 원격 blocker 를 확인하고 `planSearchBootstrap.py` 또는 `buildSearchProofBundle.py` 의 `nextActions.bootstrapPlan` 으로 `searchBootstrapPlan.json` 을 만든다. 이 plan 이 source-owner `search_catalog_bootstrap=true`, catalog-mode `searchIndexMain.yml`, remote evidence/proof bundle 검증 명령의 실행 순서다.
-2. `Search Index Main` full HF pull bootstrap 또는 source-owner workflow 의 명시적 `search_catalog_bootstrap=true` dispatch 로 canonical source catalog 4종을 실제 HF 에 publish.
-3. bootstrap 이후 `Prepare canonical catalog main inputs after bootstrap` 또는 `Prepare catalog delta inputs` 단계가 source set 을 `source_manifest_set.json` 으로 freeze 하고 `DARTLAB_SEARCH_MAIN_MODE=catalog` 또는 `DARTLAB_SEARCH_DELTA_MODE=catalog` 을 세팅.
-4. 이후 source owner Actions run 에서 4종 source catalog artifact 를 직전 full manifest 대비 drop guard 로 갱신.
-5. source owner Actions artifact `search-catalog-{source}-*` 와 source manifest `producerRun` 으로 manifest/catalog 산출물을 증거화.
-6. `prepareSearchDeltaInputs.py` 가 만든 `source_manifest_set.json` 을 full/lite contentIndex required file 로 포함하고 source별 `producerRun` 을 보존.
-7. `checkSearchRemoteEvidence.py` 가 contentIndex `fileSources` 로 실제 `source_manifest_set.json` 을 열고 source별 `producerRun` 누락이 없음을 증명.
-8. `searchIndexMain.yml` catalog mode 로 full/lite contentIndex current manifest publish.
-9. full/lite `verifySearchHfRoundTrip.py` activate/rollback report 확보.
-10. `buildSearchProofBundle.py` 로 `opsReady=true` proof bundle 생성.
-11. 본진 default replacement 는 S2 가 true 일 때만 진행.
-12. 실제 사용자/운영자 query raw log 를 모아 reviewed real gold 로 S3 를 별도 진행.
+1. Search Main/Delta Actions 를 새 workflow 로 실행해 `searchReplacementEvidence.{main,delta}.json`, `searchCutover.{main,delta}.json`, `searchProofBundle.{main,delta}/**` 가 direct-review S4 와 같은 조건으로 생성되는지 확인한다. `productization_gate=release` 에서는 replacement evidence incomplete 또는 `defaultReplacement=false` 가 workflow 실패여야 한다.
+2. source owner Actions run 에서 4종 source catalog artifact 를 직전 full manifest 대비 drop guard 로 갱신하고 `producerRun` lineage 를 유지한다.
+3. daily delta 가 catalog default 로 돌고, legacy 는 운영자 명시 dispatch 에서만 쓰이는지 확인한다.
+4. 실제 사용자/운영자 query raw log 를 계속 모아 reviewed real gold 를 300 rows 방향으로 키우고 miss ledger 를 triage 한다.
+5. lite 18개월 326.3MB 문제는 12개월 또는 top-universe 정책 실험으로 줄이되, source coverage 를 조용히 빼는 방식은 금지한다.
 
 이 사이클에서 코드 품질 수치보다 중요한 산출물은 proof bundle 과 run evidence 다.

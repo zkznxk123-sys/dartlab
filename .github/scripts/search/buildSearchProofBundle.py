@@ -13,7 +13,7 @@ import json
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
@@ -547,9 +547,20 @@ def _loadResultsByQuery(path: Path | None) -> dict[str, list[dict[str, Any]]] | 
         out: dict[str, list[dict[str, Any]]] = {}
         for item in data:
             if isinstance(item, dict):
-                out[str(item.get("query") or "")] = [dict(row) for row in item.get("results", [])]
+                rows = [dict(row) for row in item.get("results", [])]
+                for key in _resultKeys(item):
+                    out[key] = rows
         return out
     raise ValueError(f"unsupported results-json shape: {path}")
+
+
+def _resultKeys(item: Mapping[str, Any]) -> list[str]:
+    keys: list[str] = []
+    for field in ("query", "queryId", "id"):
+        key = str(item.get(field) or "").strip()
+        if key and key not in keys:
+            keys.append(key)
+    return keys
 
 
 def _loadQueries(path: str) -> list[str]:

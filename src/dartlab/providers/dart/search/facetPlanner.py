@@ -9,6 +9,8 @@ from typing import Any
 _DART_RECEIPT_RE = re.compile(r"\b\d{14}\b")
 _EDGAR_ACCESSION_RE = re.compile(r"\b\d{10}-\d{2}-\d{6}\b")
 _DATE_RE = re.compile(r"\b(20\d{2})[-./년 ]?(0[1-9]|1[0-2])[-./월 ]?(0[1-9]|[12]\d|3[01])일?\b")
+_YEAR_RE = re.compile(r"\b(20\d{2})년?\b")
+_ASCII_LITERAL_RE = re.compile(r"\b[a-z0-9]{12,}\b")
 _FRESHNESS_TERMS: tuple[str, ...] = (
     "최신",
     "최근",
@@ -38,7 +40,9 @@ class QueryFacets:
 
     receiptNumbers: tuple[str, ...] = ()
     dates: tuple[str, ...] = ()
+    years: tuple[str, ...] = ()
     reportTerms: tuple[str, ...] = ()
+    literalTerms: tuple[str, ...] = ()
     stockCode: str | None = None
     corpCode: str | None = None
     companyName: str | None = None
@@ -61,7 +65,9 @@ class QueryFacets:
         return bool(
             self.receiptNumbers
             or self.dates
+            or self.years
             or self.reportTerms
+            or self.literalTerms
             or self.stockCode
             or self.corpCode
             or self.companyName
@@ -90,15 +96,19 @@ def planQueryFacets(query: str, *, corpCode: str | None = None, stockCode: str |
     text = str(query or "").lower()
     receipts = tuple(dict.fromkeys(_DART_RECEIPT_RE.findall(text) + _EDGAR_ACCESSION_RE.findall(text)))
     dates = tuple(dict.fromkeys(_normalizeDate(match) for match in _DATE_RE.findall(text)))
+    years = tuple(dict.fromkeys(_YEAR_RE.findall(text)))
     reports = tuple(label for label, aliases in _REPORT_TERMS if any(alias in text for alias in aliases))
     freshnessRequired = any(term in text for term in _FRESHNESS_TERMS)
+    literals = tuple(dict.fromkeys(_literalTerms(text)))
     queryCompanyName = None
     if not stockCode and not corpCode:
         queryCompanyName, stockCode = _resolveCompanyFromQuery(query)
     return QueryFacets(
         receiptNumbers=receipts,
         dates=dates,
+        years=years,
         reportTerms=reports,
+        literalTerms=literals,
         stockCode=stockCode,
         corpCode=corpCode,
         companyName=queryCompanyName,
@@ -140,8 +150,12 @@ def facetMismatchReason(row: dict[str, Any], facets: QueryFacets | None) -> str:
         return "facetMismatch:company"
     if facets.dates and str(row.get("rcept_dt") or row.get("date") or row.get("dataAsOf") or "") not in facets.dates:
         return "facetMismatch:date"
+    if facets.years and not _rowMatchesYear(row, facets.years):
+        return "facetMismatch:year"
     if facets.reportTerms and not _rowMatchesReport(row, facets.reportTerms):
         return "facetMismatch:report"
+    if facets.literalTerms and not _rowMatchesLiteral(row, facets.literalTerms):
+        return "facetMismatch:literal"
     return ""
 
 
@@ -168,6 +182,46 @@ def _rowMatchesReport(row: dict[str, Any], reportTerms: tuple[str, ...]) -> bool
         if any(alias in text for alias in aliases) or report.lower() in text:
             return True
     return False
+
+
+def _rowMatchesYear(row: dict[str, Any], years: tuple[str, ...]) -> bool:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ("rcept_dt", "date", "dataAsOf", "sourceDataAsOf", "report_nm", "reportName", "title")
+    )
+    return any(year in text for year in years)
+
+
+def _rowMatchesLiteral(row: dict[str, Any], literalTerms: tuple[str, ...]) -> bool:
+    text = " ".join(
+        str(row.get(key) or "").lower()
+        for key in (
+            "rcept_no",
+            "sourceRef",
+            "corp_name",
+            "companyName",
+            "report_nm",
+            "reportName",
+            "title",
+            "section_title",
+            "sectionTitle",
+            "snippet",
+            "evidenceText",
+            "text",
+            "section_content",
+            "contentRaw",
+            "url",
+        )
+    )
+    return all(term in text for term in literalTerms)
+
+
+def _literalTerms(text: str) -> list[str]:
+    terms: list[str] = []
+    for token in _ASCII_LITERAL_RE.findall(text):
+        if any(ch.isdigit() for ch in token) or token.startswith(("nonexistent", "notlisted")):
+            terms.append(token)
+    return terms
 
 
 def _normalizeDate(match: tuple[str, str, str]) -> str:

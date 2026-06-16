@@ -66,10 +66,12 @@ def main() -> int:
     nEvents = _buildRouterArtifact()
     print(f"[main] router.json {nEvents} 이벤트")
 
+    from dartlab.providers.dart.search.entityGraphCatalog import prepareEntityGraphCatalogArtifact
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
     from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
 
     outDir = _contentIndexDir()
+    _printEntityGraphSummary(prepareEntityGraphCatalogArtifact(outDir, sourceCatalogPath=_catalogInputsFromEnv()[0]))
     writeIndexManifest(outDir, tier="full", buildCommand="buildSearchMain")
 
     if nDocs == 0:
@@ -103,6 +105,7 @@ def main() -> int:
         "main_info.json",
         "router.json",
         "source_manifest_set.json",
+        "entityGraphCatalog.parquet",
         "manifest.json",
     ]
     summary = publishContentIndexFiles(
@@ -196,10 +199,12 @@ def _buildAndUploadLite(hfToken: str) -> None:
     _buildRouterArtifact(tier="lite")  # 라우터는 코퍼스 무관 — lite 디렉터리에 동거
 
     # 산출물 실측 크기 — '사용자 첫 다운로드 경량' 가치제안을 숫자로 검증(가정 금지).
+    from dartlab.providers.dart.search.entityGraphCatalog import prepareEntityGraphCatalogArtifact
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
     liteDir = _contentIndexDir("lite")
     _copySourceManifestSet(liteDir)
+    _printEntityGraphSummary(prepareEntityGraphCatalogArtifact(liteDir, sourceCatalogPath=currentCatalog))
     liteBytes = sum(p.stat().st_size for p in liteDir.glob("*") if p.is_file())
     liteMb = liteBytes / 1024 / 1024
     print(f"[lite] 산출물 {liteMb:.1f} MB ({nLite:,} 문서)")
@@ -262,6 +267,13 @@ def _copySourceManifestSet(outDir: Path) -> None:
         import shutil
 
         shutil.copyfile(path, outDir / "source_manifest_set.json")
+
+
+def _printEntityGraphSummary(summary: dict) -> None:
+    mode = str(summary.get("mode") or "")
+    if mode not in {"copied", "built", "missing"}:
+        return
+    print(f"[graph] entityGraphCatalog {mode}: {summary}")
 
 
 def _promoteCurrent() -> bool:

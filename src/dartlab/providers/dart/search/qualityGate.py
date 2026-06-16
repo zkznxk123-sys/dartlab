@@ -94,7 +94,7 @@ def evaluateQueryGoldRows(
         review = str(gold.get("reviewStatus") or "")
         originCounts[origin] = originCounts.get(origin, 0) + 1
         reviewCounts[review] = reviewCounts.get(review, 0) + 1
-        results = [dict(row) for row in resultsByQuery.get(query, [])]
+        results = [dict(row) for row in _resultsForGold(gold, resultsByQuery)]
         if target == "noAnswer":
             noAnswerRows += 1
             falseAccept = any(_isAnswerable(row) for row in results[:10])
@@ -202,7 +202,7 @@ def buildMissLedgerRows(
         row = dict(gold)
         query = str(row.get("query") or "")
         target = normalizeTargetKind(row)
-        results = [dict(result) for result in resultsByQuery.get(query, [])]
+        results = [dict(result) for result in _resultsForGold(row, resultsByQuery)]
         topRefs = [_sourceRef(result) for result in results[:10] if _sourceRef(result)]
         failureTypes = _rowFailureTypes(row, results)
         if not _isRealReviewed(row):
@@ -361,6 +361,24 @@ def _rowFailureTypes(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any
         failures.append("newsSourcePrecision10")
         failures.append("sourceIntentMiss")
     return failures
+
+
+def _resultsForGold(
+    gold: Mapping[str, Any], resultsByQuery: Mapping[str, Sequence[Mapping[str, Any]]]
+) -> Sequence[Mapping[str, Any]]:
+    for key in _goldResultKeys(gold):
+        if key in resultsByQuery:
+            return resultsByQuery.get(key) or []
+    return []
+
+
+def _goldResultKeys(gold: Mapping[str, Any]) -> list[str]:
+    keys: list[str] = []
+    for field in ("query", "queryId", "id"):
+        key = str(gold.get(field) or "").strip()
+        if key and key not in keys:
+            keys.append(key)
+    return keys
 
 
 def _anyExpectedMatch(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> bool:

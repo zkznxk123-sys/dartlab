@@ -12,6 +12,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 SCRIPT = Path(".github/scripts/search/evaluateSearchCutover.py")
+REPLACEMENT_SCRIPT = Path(".github/scripts/search/buildSearchReplacementEvidence.py")
 
 
 def test_cutover_report_keeps_ops_blockers_and_next_actions(tmp_path: Path) -> None:
@@ -222,6 +223,92 @@ def test_cutover_report_accepts_default_replacement_evidence(tmp_path: Path) -> 
     assert report["blockers"] == []
 
 
+def test_replacement_evidence_builder_promotes_release_bundle_to_s4(tmp_path: Path) -> None:
+    status = _writeJson(
+        tmp_path / "status.json",
+        {"designReady": True, "opsReady": True, "releaseReady": True, "blockers": []},
+    )
+    proof = _writeJson(
+        tmp_path / "searchProofBundle.json",
+        {
+            "opsReady": True,
+            "releaseReady": True,
+            "missingEvidence": [],
+            "blockers": [],
+            "reports": {"productizationStatus": str(status)},
+        },
+    )
+    remote = _writeJson(tmp_path / "remote.json", _remoteEvidence())
+    full = _writeJson(tmp_path / "full.json", _roundTrip("full"))
+    lite = _writeJson(tmp_path / "lite.json", _roundTrip("lite"))
+    replacement = tmp_path / "replacement.json"
+    cutover = tmp_path / "cutover.json"
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            str(REPLACEMENT_SCRIPT),
+            "--proof-bundle",
+            str(proof),
+            "--remote-evidence",
+            str(remote),
+            "--round-trip",
+            str(full),
+            "--round-trip",
+            str(lite),
+            "--workflow",
+            ".github/workflows/searchIndexMain.yml",
+            "--workflow",
+            ".github/workflows/searchIndexDelta.yml",
+            "--out",
+            str(replacement),
+            "--fail-on-incomplete",
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            str(SCRIPT),
+            "--proof-bundle",
+            str(proof),
+            "--replacement-evidence",
+            str(replacement),
+            "--out",
+            str(cutover),
+            "--fail-on-default-not-ready",
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    report = json.loads(cutover.read_text(encoding="utf-8"))
+    evidence = json.loads(replacement.read_text(encoding="utf-8"))
+    assert evidence["valid"] is True
+    assert evidence["defaultBuildMode"] == "catalog"
+    assert evidence["scheduledBuildMode"] == "catalog"
+    assert evidence["legacyFallbackOperatorOnly"] is True
+    assert evidence["failClosedPublish"] is True
+    assert report["state"] == "S4_DEFAULT_REPLACEMENT"
+    assert report["defaultReplacement"] is True
+
+
 def test_cutover_report_rejects_ambiguous_default_replacement_evidence(tmp_path: Path) -> None:
     status = _writeJson(
         tmp_path / "status.json",
@@ -289,3 +376,61 @@ def _writeJson(path: Path, payload: dict) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
     return path
+
+
+def _remoteEvidence() -> dict:
+    producer = {
+        "workflow": "Search Index Main (monthly)",
+        "job": "build-main",
+        "runId": "123",
+        "sha": "abcdef",
+        "artifactName": "search-catalog-test",
+    }
+    sources = {
+        source: {
+            "manifest": {
+                "source": source,
+                "producerRun": producer,
+                "totalRows": 1,
+            }
+        }
+        for source in ("allFilings", "dartPanel", "edgarPanel", "newsPublic")
+    }
+    return {
+        "valid": True,
+        "sourceCatalog": {"sources": sources},
+        "contentIndex": {
+            "manifests": {
+                "full": {
+                    "manifest": {
+                        "artifactVersion": 1,
+                        "schemaVersion": 2,
+                        "builtAt": "2026-06-16T00:00:00",
+                        "sourceManifestSetId": "source-set",
+                        "stagingPrefix": "dart/contentIndex/_staging/full",
+                    }
+                }
+            }
+        },
+    }
+
+
+def _roundTrip(tier: str) -> dict:
+    return {
+        "valid": True,
+        "tier": tier,
+        "activation": {"activated": True},
+        "rollback": {"rolledBack": True},
+        "activatedManifest": {
+            "artifactVersion": 1,
+            "schemaVersion": 2,
+            "builtAt": f"2026-06-16T00:00:00-{tier}",
+            "stagingPrefix": f"dart/contentIndex/_staging/{tier}",
+        },
+        "restoredManifest": {
+            "artifactVersion": 1,
+            "schemaVersion": 2,
+            "builtAt": "2026-06-15T00:00:00",
+            "stagingPrefix": f"dart/contentIndex/_staging/previous-{tier}",
+        },
+    }

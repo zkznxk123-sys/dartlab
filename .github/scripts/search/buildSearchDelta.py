@@ -52,6 +52,7 @@ def _uploadDeltaFiles(hfToken: str) -> None:
         "manifest.json",
         "catalog_snapshot.parquet",
         "source_manifest_set.json",
+        "entityGraphCatalog.parquet",
     ]
     previousManifest = outDir / "previous_manifest.json"
     summary = publishContentIndexFiles(
@@ -122,6 +123,7 @@ def main() -> int:
         if rows.height == 0:
             print("[delta] catalog changed-set 없음 — 업로드 스킵")
             return 0
+        from dartlab.providers.dart.search.entityGraphCatalog import prepareEntityGraphCatalogArtifact
         from dartlab.providers.dart.search.fieldIndex import (
             _contentIndexDir,
             buildContentSegment,
@@ -135,6 +137,7 @@ def main() -> int:
         saveSegment(idx, meta, "delta", outDir=outDir)
         shutil.copyfile(currentCatalog, outDir / "catalog_snapshot.parquet")
         _copySourceManifestSet(outDir)
+        _printEntityGraphSummary(prepareEntityGraphCatalogArtifact(outDir, sourceCatalogPath=currentCatalog))
         writeIndexManifest(outDir, tier="full", buildCommand="buildSearchDelta.catalog")
         clearCache()
         print(f"[delta] catalog changed-set {idx['nDocs']:,} 문서")
@@ -201,6 +204,13 @@ def _copySourceManifestSet(outDir: Path) -> None:
     path = Path(src)
     if path.exists():
         shutil.copyfile(path, outDir / "source_manifest_set.json")
+
+
+def _printEntityGraphSummary(summary: dict) -> None:
+    mode = str(summary.get("mode") or "")
+    if mode not in {"copied", "built", "missing"}:
+        return
+    print(f"[graph] entityGraphCatalog {mode}: {summary}")
 
 
 def _promoteCurrent() -> bool:

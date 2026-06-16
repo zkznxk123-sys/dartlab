@@ -24,7 +24,7 @@ inputs:
   - topK
 outputs:
   - 검색 결과 DataFrame
-  - score · source · sourceRef · dataAsOf · snippet · answerable · notAnswerableReason · fieldCards · dartUrl
+  - score · source · sourceRef · dataAsOf · snippet · answerable · notAnswerableReason · fieldCards · entityCards · dartUrl
 capabilityRefs:
   - search
 knowledgeRefs:
@@ -95,7 +95,7 @@ testUniverse:
 
 `search` 는 DART allFilings, DART panel, EDGAR panel, public news 를 sourceRef 보존 본문 인덱스로 검색하는 엔진이다. 외부 모델/서버·GPU·임베딩 0 — 음절 bigram BM25 numpy 역인덱스 + 큐레이션 동의어 + 결정론 라우터(router.json)만으로 통합 검색한다. scope="auto" 가 plain BM25 lane 과 확장 lane 을 RRF 융합해, 구어·약어 질의도 회수하되 확장이 틀려도 plain 순위가 보존된다(always-safe).
 
-제품화 계약은 `mainPlan/search-productization` 을 따른다. 결과 row 는 `source/sourceRef/dataAsOf/snippet/answerable/notAnswerableReason/fieldCards` 를 가져야 한다. 뉴스와 공시는 같은 표면에 나오지만 source intent 는 hard isolation 이다. 신선도 — 본문 인덱스는 source catalog delta + monthly main compaction 기준이며, 최근 며칠은 `Company.liveFilings()` 또는 source별 live path 병행 권장. canonical source catalog 는 monthly main full HF pull bootstrap 또는 previous-manifest drop guard 를 통과한 source-owner run 으로만 운영 증거가 된다.
+제품화 계약은 `mainPlan/search-productization` 을 따른다. 결과 row 는 `source/sourceRef/dataAsOf/snippet/answerable/notAnswerableReason/fieldCards` 를 가져야 한다. graph catalog 가 배포된 환경에서는 optional `entityCards` 로 peer/stage/credit weak-axis 컨텍스트가 붙는다. 운영 산출물명은 contentIndex 와 동거하는 `entityGraphCatalog.parquet` 이고, explicit copy 또는 opt-in offline build 후 manifest required file 로 내려온 경우에만 runtime 이 붙인다. 뉴스와 공시는 같은 표면에 나오지만 source intent 는 hard isolation 이다. 신선도 — 본문 인덱스는 source catalog delta + monthly main compaction 기준이며, 최근 며칠은 `Company.liveFilings()` 또는 source별 live path 병행 권장. canonical source catalog 는 monthly main full HF pull bootstrap 또는 previous-manifest drop guard 를 통과한 source-owner run 으로만 운영 증거가 된다.
 
 단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — "어떤 회사가 유상증자했나" 같은 질문 한정.
 
@@ -173,6 +173,7 @@ dartlab.search("유상증자")
    answerable : bool
    notAnswerableReason : str
    fieldCards : str     # evidence-card JSON
+   entityCards : str    # optional graph-catalog JSON cards
    rcept_no : str       # 공시 접수번호 (Company.readFiling 입력용)
    corp_name : str
    report_nm : str      # 공시 유형명
@@ -182,7 +183,7 @@ dartlab.search("유상증자")
 
 ## evidence 기준
 
-검색 답변은 `query` · `scope` · `dataAsOf` · `sourceRef` 를 남긴다. **`dataAsOf` 가 최근 N 일 전이면 stale 가능성 답변에 명시**. 최신 공시 확인은 `Company(code).liveFilings()` (DART API 직접) 우선. LLM 이 후속 질문에서 기억할 것은 본문 전체가 아니라 `sourceRef set + fieldCards + snippet + dataAsOf` memory-card 다.
+검색 답변은 `query` · `scope` · `dataAsOf` · `sourceRef` 를 남긴다. **`dataAsOf` 가 최근 N 일 전이면 stale 가능성 답변에 명시**. 최신 공시 확인은 `Company(code).liveFilings()` (DART API 직접) 우선. LLM 이 후속 질문에서 기억할 것은 본문 전체가 아니라 `sourceRef set + fieldCards + entityCards + snippet + dataAsOf` memory-card 다. `entityCards` 는 랭킹 근거가 아니라 검색 hit 에 붙는 관계형 sidecar 이며, `entityGraphCatalog.parquet` catalog 부재 시 비어 있거나 컬럼이 없을 수 있다.
 
 ## 제품 gate / 운영 품질
 
@@ -229,6 +230,7 @@ canary pack 은 source intent, source coverage, expected sourceRef, no-answer fa
 
 - **저장면 ≠ 배포면**: HF 의 원천 raw(panel ~9 만·docs·allFilings·뉴스, 수십 GB)는 *빌드 입력*이고, 사용자가 받는 건 그로부터 파생된 작은 **검색 인덱스(contentIndex)** 한 줌. 검색 사용자는 raw 를 받지 않는다(단일 종목 분석만 `Company(code)` 가 per-code raw lazy pull).
 - **tier (경량/전량)**: `lite`(기본, 최근 ~18개월 축소, `dart/contentIndex/lite/`) / `full`(전량, flat `dart/contentIndex/`). 첫 검색은 lite 자동 pull → 빠른 시작. flat(기존 배포)이 로컬에 있으면 그대로 사용(무효화 0). `DARTLAB_SEARCH_TIER=full` 로 전량 선택. tier 미배포 전환기엔 flat 으로 자동 fallback.
+- **graph sidecar**: `entityGraphCatalog.parquet` 가 contentIndex manifest 의 `requiredFiles/fileHashes` 로 배포되면 `entityCards` 를 붙인다. 없으면 검색은 기존 row 계약으로 degrade 한다.
 - **첫 검색 자동 fetch**: `dartlab.search()` 첫 호출 시 로컬 인덱스 부재면 tier(기본 lite)를 HF 에서 자동 다운로드(세션 1회, graceful). 로컬 있으면 no-op.
 - **사전 워밍**: `prefetch(tier="lite"|"full")` — cold start 완화용 선다운로드.
 - **캐시 위치**: pip 설치 사용자는 쓰기 가능한 사용자 캐시(`~/.cache/dartlab` 류, 플랫폼별)에 저장. dev 체크아웃·`DARTLAB_DATA_DIR`·`.dartlab.yml` 은 그 경로 우선.
@@ -238,4 +240,4 @@ canary pack 은 source intent, source coverage, expected sourceRef, no-answer fa
 
 ## 기본 검증
 
-`dartlab.search()` 시그니처 (query · corp · start · end · limit/topK · scope) 가 변경되거나 인덱스 빌드 워크플로우 (`stemIndex` · `contentIndex`) 가 바뀌면 본 skill 갱신. scope 5 종(auto/title/content/both/news) + `prefetch`/`indexInfo` public 표면. query 회사명 facet, `sourceRef/dataAsOf/answerable/fieldCards`, source catalog bootstrap/drop guard, query-log gold, source canary pack, local updater rollback 정책이 바뀌어도 본 skill 을 갱신한다.
+`dartlab.search()` 시그니처 (query · corp · start · end · limit/topK · scope) 가 변경되거나 인덱스 빌드 워크플로우 (`stemIndex` · `contentIndex`) 가 바뀌면 본 skill 갱신. scope 5 종(auto/title/content/both/news) + `prefetch`/`indexInfo` public 표면. query 회사명 facet, `sourceRef/dataAsOf/answerable/fieldCards/entityCards`, source catalog bootstrap/drop guard, query-log gold, source canary pack, local updater rollback 정책이 바뀌어도 본 skill 을 갱신한다.

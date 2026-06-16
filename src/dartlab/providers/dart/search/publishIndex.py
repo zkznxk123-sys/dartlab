@@ -233,6 +233,10 @@ def promoteCandidateManifest(
     Raises:
         FileNotFoundError: If the candidate manifest is missing.
         ValueError: If the candidate manifest is not object JSON.
+
+    Example:
+        >>> callable(promoteCandidateManifest)
+        True
     """
     candidate = str(candidateManifestPath or "").replace("\\", "/").strip("/")
     if not candidate:

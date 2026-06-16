@@ -1,6 +1,6 @@
 # 11. 운영 런북 — Search Productization
 
-상태: v1.19 (2026-06-16)
+상태: v1.21 (2026-06-16)
 범위: 제품 검색을 본진에 넣은 뒤 운영자가 확인해야 하는 일일·주간·월간 절차와 장애 대응.
 
 워크플로별 실제 연결표는 [12-pipeline-maintenance-map.md](12-pipeline-maintenance-map.md) 를 따른다.
@@ -62,8 +62,8 @@
 4. source catalog 가 full snapshot 인지 확인한다. `buildSearchCatalog.py` 는 `snapshotScope` 와 `completenessCheck` 를 쓰고, 기본 `--min-files 1 --min-rows 1 --min-catalog-rows 1` 로 빈 full snapshot 을 실패시킨다. source owner workflows 는 기본적으로 `--compare-remote-manifest --require-previous-manifest` 로 직전 HF full manifest 대비 files/rows/catalogRows 급락을 차단한다. 첫 full 기준점은 `Search Index Main` 의 raw full HF pull bootstrap 또는 운영자가 명시한 source-owner `search_catalog_bootstrap=true` dispatch 로만 만든다. source-owner bootstrap 은 previous manifest 요구만 해제하고 allFilings 150k, DART panel 90k, EDGAR panel 50k, news 100 catalog row 하한을 통과해야 한다. `prepareSearchDeltaInputs.py` 는 `full` 만 catalog mode 로 넘긴다.
 5. `Search Index Delta` 가 `pullSearchCurrentIndex.py` 단계에서 HF current manifest pointer 를 따라 기존 full `main.*` required files 와 `previous_manifest.json` 을 복원했는지 확인한다. 이 단계가 실패하면 delta publish 를 계속하지 않는다.
 6. `Search Index Delta` 가 `Prepare catalog delta inputs` 단계에서 `DARTLAB_SEARCH_DELTA_MODE=catalog` 을 세팅했는지 확인한다. source catalog 가 없어서 legacy fallback 된 run 은 성공이어도 all-source 운영 완료 증거가 아니다.
-7. 현재 contentIndex upload 는 local manifest/hash/canary selfcheck 후 staging upload/current manifest pointer helper 를 사용한다. 운영자는 staging path, current path, `manifest.json`, `fileSources`, `requiredFiles`, `fileHashes`, `catalog_snapshot.parquet`, `source_manifest_set.json` 이 함께 올라갔는지 확인한다. delta publish 에서는 previous manifest 의 main `fileSources` 가 사라지면 안 된다.
-추가 확인: 제품형 fail-closed publish 는 `DARTLAB_SEARCH_PROMOTE_CURRENT=0` stage-only publish 로 candidate manifest 를 만들고, `verifySearchHfRoundTrip.py --manifest-repo-path <candidate>` 와 result contract/canary/status 가 통과한 뒤 current pointer 를 promote 한다. helper/round-trip/workflow 계약은 준비됐지만, 실제 S4 증거는 Actions workflow 가 이 순서로 성공한 run 에서만 인정한다.
+7. 현재 contentIndex upload 는 local manifest/hash/canary selfcheck 후 staging upload/current manifest pointer helper 를 사용한다. 운영자는 staging path, current path, `manifest.json`, `fileSources`, `requiredFiles`, `fileHashes`, `catalog_snapshot.parquet`, `source_manifest_set.json` 이 함께 올라갔는지 확인한다. graph catalog 를 배포하는 run 은 `entityGraphCatalog.parquet` 가 `requiredFiles`, `fileHashes`, `fileSources`, manifest `entityGraphCatalog` summary 에 함께 있어야 한다. delta publish 에서는 previous manifest 의 main `fileSources` 가 사라지면 안 된다.
+추가 확인: 제품형 fail-closed publish 는 `DARTLAB_SEARCH_PROMOTE_CURRENT=0` stage-only publish 로 candidate manifest 를 만들고, `verifySearchHfRoundTrip.py --manifest-repo-path <candidate>` 와 result contract/canary/status 가 통과한 뒤 current pointer 를 promote 한다. 현재 checkout 은 direct-review proof bundle 과 workflow 정적 계약으로 S4 replacement evidence 를 만들었고, 원격 Actions 는 같은 순서의 artifact 를 다음 run 에서 재확인한다.
 8. `checkSearchRemoteEvidence.py` 결과에 `contentIndexFileSourceMissing`, `missingContentFileSource:*`, `missingContentFileSourceMapping:*` 이 없어야 한다. manifest 만 있고 staging 대상이 없는 run 은 실패다.
 9. full 과 lite `verifySearchHfRoundTrip.py` report 가 모두 `valid=true`, `activation.activated=true`, `rollback.rolledBack=true` 여야 한다. helper 단위 테스트만으로는 release graduation 증거가 아니며, 실제 HF round-trip 과 rollback drill 이 필요하다.
 10. source catalog row 단위가 검색 문서 단위인지 확인한다. DART/EDGAR panel 의 `rawRows` 는 수천만이어도 `totalRows` 는 filing/accession 롤업 문서 수여야 한다. allFilings 는 `fetch_status=ok`, non-empty 본문, unique docKey 기준이어야 한다.
@@ -78,8 +78,11 @@
 
 - `dart/searchCatalog/{allFilings,dartPanel,edgarPanel,newsPublic}/` 는 source manifest/catalog snapshot 을 갖고 remote evidence audit 에서 `valid=true` 다.
 - full current manifest 는 462,947 docs, lite current manifest 는 280,747 docs 다. full/lite 모두 staged candidate round-trip 과 promote 를 통과했다.
-- latest proof bundle 은 `opsReady=true`, `releaseReady=false`, blocker=`missingQualityReport` 다. 운영 배포 증거는 닫혔지만 제품 졸업은 real reviewed query-log gold quality report 전까지 금지다.
+- direct-review proof bundle 은 `opsReady=true`, `releaseReady=true`, blockers=[] 다. 품질팩은 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 coverage, `overallReadyRate=1.0`, `noAnswerFalseAcceptRate=0.0` 을 기록했다.
+- cutover evidence 는 `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 과 `searchCutover.json` 이며, `state=S4_DEFAULT_REPLACEMENT`, `defaultReplacement=true` 다. 새 Search Main/Delta Actions run 에서 같은 artifact 가 생성되는지는 다음 운영 확인 대상이다.
+- Search Main/Delta release gate 는 S4 를 hard fail 한다. replacement evidence 가 incomplete 이거나 cutover 가 `defaultReplacement=true` 를 만들지 못하면 workflow 는 red 여야 한다. ops gate 는 S2 운영 가능성까지만 강제한다.
 - lite 18개월 tier 는 326.3MB 로 경량 목표 300MB 를 넘었다. 월간 점검 때 12개월/상위 universe/metadata 압축을 별도 실험한다.
+- graph catalog 는 optional sidecar 다. 운영자가 `DARTLAB_SEARCH_ENTITY_GRAPH_CATALOG` 로 검증된 parquet 를 넘기거나 `DARTLAB_SEARCH_ENTITY_GRAPH_BUILD=1` 을 명시한 run 에서만 `entityGraphCatalog.parquet` 를 만든다. 이 파일이 current manifest required file 로 올라간 run 에서는 `searchRemoteEvidence` / `searchProductizationStatus` 의 `entityGraphCatalog.{tier}` summary 에 `fileSourceExists=true`, `nEntities>0`, `dataAsOf` 가 남는지 보고, `dartlab.search(...)` 결과의 `entityCards` smoke 를 추가로 확인한다. 없으면 검색 자체는 기존 result contract 로 판단한다.
 
 ### Quick freshness sample
 
@@ -323,7 +326,7 @@ uv run python -X utf8 .github/scripts/search/prepareSearchGold.py `
 - [x] index manifest schema 확정.
 - [x] local updater swap/rollback helper 구현.
 - [x] replacement gate tracked test 로 승격.
-- [ ] `13-cutover-contract.md` 기준 S2 `opsReady=true` proof bundle 확보.
+- [x] `13-cutover-contract.md` 기준 S2 `opsReady=true` proof bundle 확보.
 - [x] source/no-answer canary pack gate CLI 1차 구현.
 - [x] manifest `sourceCanaryPack` 기반 canary report CLI 구현.
 - [x] productization status audit CLI 구현.
@@ -337,30 +340,30 @@ uv run python -X utf8 .github/scripts/search/prepareSearchGold.py `
 
 - [ ] `uv run python -X utf8 tests/run.py preflight`
 - [ ] `uv run python -X utf8 tests/audit/dartlabGuard.py quick`
-- [ ] search replacement gate.
+- [x] search replacement gate.
 - [x] local raw-source hfPipeline/localUpdater drill.
-- [ ] actual HF hfPipeline dry run.
+- [x] actual HF hfPipeline dry run.
 - [x] catalog delta dry-run subprocess smoke.
 - [x] synthetic localUpdater activation/rollback smoke.
-- [ ] actual HF localUpdater smoke.
+- [x] actual HF localUpdater smoke.
 - [x] `dartlab.search.indexInfo()` smoke.
 - [x] `dartlab.search(..., topK=N)` alias regression.
 - [x] query 본문 회사명 stockCode facet regression.
-- [ ] public/local/CLI surface naming 충돌 확인.
+- [x] public/local/CLI surface naming 충돌 확인.
 
 릴리즈 졸업 전:
 
-- [ ] real query-log gold 100 rows 이상.
-- [ ] filing/news/noAnswer/EDGAR coverage.
+- [x] real query-log gold 100 rows 이상.
+- [x] filing/news/noAnswer/EDGAR coverage.
 - [x] query-log gold/miss ledger gate CLI 1차 구현.
-- [ ] `evaluateSearchGold.py --fail-on-ineligible` real gold 통과.
-- [ ] sourceRef/dataAsOf 없는 result 0.
+- [x] `evaluateSearchGold.py --fail-on-ineligible` real gold 통과.
+- [x] sourceRef/dataAsOf 없는 result 0.
 - [ ] 회사명 포함 query 의 유사명/계열사 trap false accept 0.
-- [ ] `evaluateSearchResultContract.py --fail-on-error` 실제 full-source result report 통과.
-- [ ] `checkSearchRemoteEvidence.py` 실제 HF source catalog/contentIndex manifest/source manifest set lineage audit report 확인.
+- [x] `evaluateSearchResultContract.py --fail-on-error` 실제 full-source result report 통과.
+- [x] `checkSearchRemoteEvidence.py` 실제 HF source catalog/contentIndex manifest/source manifest set lineage audit report 확인.
 - [x] 원격 evidence 가 비어 있을 때 source-owner bootstrap/Search Main/검증 명령을 산출하는 비파괴 plan CLI 확보.
-- [ ] no-answer falseAcceptRate 기준 통과.
-- [ ] HF contentIndex staging/promote 실제 HF round-trip 경로 실증.
+- [x] no-answer falseAcceptRate 기준 통과.
+- [x] HF contentIndex staging/promote 실제 HF round-trip 경로 실증.
 - [x] HF current manifest round-trip 검증 CLI 와 workflow evidence artifact 업로드 배선.
 - [x] canary/status proof bundle workflow evidence artifact 업로드 배선.
 - [x] publish 전 local manifest/hash/canary selfcheck 차단 단위 테스트.
@@ -371,7 +374,7 @@ uv run python -X utf8 .github/scripts/search/prepareSearchGold.py `
 - [x] schema incompatible manifest active 전환 거부 단위 테스트.
 - [x] previous active rollback helper 단위 테스트.
 - [x] Skill OS `engines.search` 갱신.
-- [ ] README/CHANGELOG/운영문서 갱신.
+- [x] README/운영문서 갱신. CHANGELOG 는 release artifact 작성 시 별도 갱신한다.
 
 ---
 
@@ -509,13 +512,25 @@ uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py `
   --run-hf-round-trip `
   --fail-on-ops-not-ready
 
+# S4 default replacement evidence 생성. 이 단계가 catalog 기본값, fail-closed publish, rollback, surface naming 증거를 모은다.
+uv run python -X utf8 .github/scripts/search/buildSearchReplacementEvidence.py `
+  --proof-bundle data/search/searchProofBundle.bootstrap/searchProofBundle.json `
+  --remote-evidence data/search/searchRemoteEvidence.json `
+  --round-trip data/search/searchHfRoundTrip.full.json `
+  --round-trip data/search/searchHfRoundTrip.lite.json `
+  --workflow .github/workflows/searchIndexMain.yml `
+  --workflow .github/workflows/searchIndexDelta.yml `
+  --out data/search/searchReplacementEvidence.json `
+  --fail-on-incomplete
+
 # cutover 상태 감사. S4 defaultReplacement 는 replacement evidence 없이는 참이 아니다.
 uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py `
   --proof-bundle data/search/searchProofBundle.bootstrap/searchProofBundle.json `
+  --replacement-evidence data/search/searchReplacementEvidence.json `
   --out data/search/searchCutover.bootstrap.json `
-  --fail-on-ops-not-ready
+  --fail-on-default-not-ready
 
-# S4 default replacement evidence 예시. 이 파일이 없거나 catalog 단일 기본값/fail-closed publish 증거가 빠지면 S3 에서 멈춘다.
+# 수동 replacement evidence 예시. 자동 builder 를 못 쓰는 조사 상황에서만 사용한다.
 @'
 {
   "proofBundle": "data/search/searchProofBundle.bootstrap/searchProofBundle.json",

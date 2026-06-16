@@ -333,6 +333,7 @@ def _remoteBlockers(report: dict[str, Any]) -> list[str]:
 def _remoteSummary(report: dict[str, Any]) -> dict[str, Any]:
     sourceCatalog = report.get("sourceCatalog") if isinstance(report.get("sourceCatalog"), dict) else {}
     contentIndex = report.get("contentIndex") if isinstance(report.get("contentIndex"), dict) else {}
+    manifests = contentIndex.get("manifests") if isinstance(contentIndex.get("manifests"), dict) else {}
     return {
         "valid": report.get("valid"),
         "blockers": report.get("blockers") or [],
@@ -340,6 +341,11 @@ def _remoteSummary(report: dict[str, Any]) -> dict[str, Any]:
         "fileCount": report.get("fileCount"),
         "missingSources": sourceCatalog.get("missingSources") or [],
         "contentErrors": contentIndex.get("errors") or [],
+        "entityGraphCatalog": {
+            tier: (item.get("manifest") or {}).get("entityGraphCatalog") or {}
+            for tier, item in manifests.items()
+            if isinstance(item, dict)
+        },
     }
 
 

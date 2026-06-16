@@ -42,7 +42,9 @@ def normalizeSearchResult(df: pl.DataFrame) -> pl.DataFrame:
         out = dict(row)
         source = str(out.get("source") or _inferSource(out))
         sourceRef = str(out.get("sourceRef") or _makeSourceRef(source, out))
-        dataAsOf = str(out.get("dataAsOf") or out.get("sourceDataAsOf") or out.get("rcept_dt") or "")
+        dataAsOf = str(
+            out.get("dataAsOf") or out.get("sourceDataAsOf") or out.get("rcept_dt") or _dateFromRcept(out) or ""
+        )
         snippet = str(out.get("snippet") or out.get("text") or out.get("section_content") or out.get("title") or "")
         out["source"] = source
         out["sourceRef"] = sourceRef
@@ -78,6 +80,13 @@ def _makeSourceRef(source: str, row: dict[str, Any]) -> str:
     if source:
         return f"{source}:{rcept}#section={section}"
     return rcept
+
+
+def _dateFromRcept(row: dict[str, Any]) -> str:
+    rcept = str(row.get("rcept_no") or "")
+    if len(rcept) >= 8 and rcept[:8].isdigit():
+        return rcept[:8]
+    return ""
 
 
 def _fieldCardsJson(row: dict[str, Any]) -> str:

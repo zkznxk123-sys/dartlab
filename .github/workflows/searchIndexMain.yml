@@ -6,7 +6,7 @@ name: Search Index Main (monthly)
 # 매월 1일 KST 05:00 실행 (또는 수동):
 #   1. source catalog snapshot 우선 → full main 세그먼트 compaction
 #      (catalog 부재 시 legacy raw allFilings + DART panel + EDGAR panel + 뉴스 풀리빌드)
-#   2. HF staging 업로드 후 dart/contentIndex/manifest.json current pointer publish + delta 제거
+#   2. HF staging 업로드 후 candidate 검증 → current pointer promote + delta 제거
 #   3. lite tier — 최근 N개월(DARTLAB_LITE_MONTHS, 기본 18) 축소 색인 → dart/contentIndex/lite/ 업로드
 #      (pip 사용자 기본 경량 배포; full 과 별 디렉터리라 공존. lite 빌드 실패해도 full 은 이미 배포됨)
 #
@@ -21,10 +21,9 @@ on:
       build_mode:
         description: Search main build mode
         required: false
-        default: auto
+        default: catalog
         type: choice
         options:
-          - auto
           - catalog
           - legacy
       expected_sources:
@@ -106,7 +105,7 @@ jobs:
             echo "catalog snapshot prepared; skip legacy raw HF pull"
             exit 0
           fi
-          if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-auto}" = "catalog" ]; then
+          if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-catalog}" = "catalog" ]; then
             echo "catalog mode requested but source catalog inputs were not prepared"
             exit 1
           fi
@@ -149,7 +148,7 @@ jobs:
           [ "$ok" = "1" ]
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          DARTLAB_SEARCH_MAIN_REQUESTED_MODE: ${{ inputs.build_mode || 'auto' }}
+          DARTLAB_SEARCH_MAIN_REQUESTED_MODE: ${{ inputs.build_mode || 'catalog' }}
 
       - name: Build canonical source search catalogs from full HF pull
         run: |
@@ -157,7 +156,7 @@ jobs:
             echo "catalog snapshot prepared; skip canonical source catalog bootstrap"
             exit 0
           fi
-          if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-auto}" = "legacy" ]; then
+          if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-catalog}" = "legacy" ]; then
             echo "legacy mode requested; skip canonical source catalog bootstrap"
             exit 0
           fi
@@ -191,7 +190,7 @@ jobs:
             --upload
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          DARTLAB_SEARCH_MAIN_REQUESTED_MODE: ${{ inputs.build_mode || 'auto' }}
+          DARTLAB_SEARCH_MAIN_REQUESTED_MODE: ${{ inputs.build_mode || 'catalog' }}
 
       - name: Prepare canonical catalog main inputs after bootstrap
         if: ${{ inputs.build_mode != 'legacy' }}
@@ -374,14 +373,38 @@ jobs:
         shell: bash
         run: |
           if [ -f "$RUNNER_TEMP/searchProofBundle.main/searchProofBundle.json" ]; then
-            uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py \
-              --proof-bundle "$RUNNER_TEMP/searchProofBundle.main/searchProofBundle.json" \
+            replacement_args=(
+              --proof-bundle "$RUNNER_TEMP/searchProofBundle.main/searchProofBundle.json"
+              --remote-evidence "$RUNNER_TEMP/searchRemoteEvidence.main.json"
+              --round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.full.json"
+              --round-trip "$RUNNER_TEMP/searchHfRoundTrip.main.lite.json"
+              --workflow .github/workflows/searchIndexMain.yml
+              --workflow .github/workflows/searchIndexDelta.yml
+              --out "$RUNNER_TEMP/searchReplacementEvidence.main.json"
+            )
+            cutover_args=(
+              --proof-bundle "$RUNNER_TEMP/searchProofBundle.main/searchProofBundle.json"
+              --replacement-evidence "$RUNNER_TEMP/searchReplacementEvidence.main.json"
               --out "$RUNNER_TEMP/searchCutover.main.json"
+            )
+            if [ "${PRODUCTIZATION_GATE:-ops}" = "release" ]; then
+              replacement_args+=(--fail-on-incomplete)
+              cutover_args+=(--fail-on-default-not-ready)
+            else
+              cutover_args+=(--fail-on-ops-not-ready)
+            fi
+            uv run python -X utf8 .github/scripts/search/buildSearchReplacementEvidence.py \
+              "${replacement_args[@]}"
+            uv run python -X utf8 .github/scripts/search/evaluateSearchCutover.py \
+              "${cutover_args[@]}"
           else
             cat > "$RUNNER_TEMP/searchCutover.main.json" <<'JSON'
           {"state":"S0_EXPERIMENT","designReady":false,"opsReady":false,"releaseReady":false,"defaultReplacement":false,"blockers":["missingProofBundle"],"valid":false}
           JSON
+            exit 1
           fi
+        env:
+          PRODUCTIZATION_GATE: ${{ inputs.productization_gate || 'ops' }}
 
       - name: Upload search evidence reports
         if: always()
@@ -404,5 +427,6 @@ jobs:
             ${{ runner.temp }}/searchQuality.main.json
             ${{ runner.temp }}/searchMissLedger.main.jsonl
             ${{ runner.temp }}/searchProductizationStatus.main.json
+            ${{ runner.temp }}/searchReplacementEvidence.main.json
             ${{ runner.temp }}/searchCutover.main.json
             ${{ runner.temp }}/searchProofBundle.main/**

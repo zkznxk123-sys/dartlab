@@ -148,6 +148,77 @@ def test_search_records_raw_query_log_when_enabled(monkeypatch, tmp_path) -> Non
     assert rows[0]["params"]["limit"] == 2
 
 
+def test_auto_search_prefers_title_lane_for_disclosure_event(monkeypatch) -> None:
+    import polars as pl
+
+    import dartlab.providers.dart.search.unified as unified
+    from dartlab.providers.dart.search import api
+
+    def fakeTitle(query, *, corpCode, stockCode, limit):
+        return pl.DataFrame(
+            {
+                "rcept_no": ["title-hit"],
+                "section_order": [0],
+                "sourceRef": ["dart:allFilings:title-hit#section=0"],
+                "report_nm": ["주요사항보고서(무상증자결정)"],
+                "score": [10.0],
+            }
+        )
+
+    def fakeContent(query, *, corpCode, stockCode, sourceKind=None, limit):
+        return pl.DataFrame(
+            {
+                "rcept_no": ["content-hit"],
+                "section_order": [0],
+                "sourceRef": ["dart:allFilings:content-hit#section=0"],
+                "report_nm": ["증권발행결과"],
+                "score": [0.03],
+            }
+        )
+
+    monkeypatch.setattr(api, "_searchTitle", fakeTitle)
+    monkeypatch.setattr(unified, "searchUnified", fakeContent)
+
+    result = api._searchAuto("무상증자 결정 공시", corpCode=None, stockCode=None, sourceKind="filing", limit=2)
+
+    assert result["rcept_no"].to_list() == ["title-hit", "content-hit"]
+    assert result["scope"].to_list() == ["title", "content"]
+
+
+def test_auto_search_keeps_content_lane_for_body_semantic_query(monkeypatch) -> None:
+    import polars as pl
+
+    import dartlab.providers.dart.search.unified as unified
+    from dartlab.providers.dart.search import api
+
+    def fakeTitle(query, *, corpCode, stockCode, limit):
+        raise AssertionError("body semantic query should not call title lane")
+
+    def fakeContent(query, *, corpCode, stockCode, sourceKind=None, limit):
+        return pl.DataFrame({"rcept_no": ["content-hit"], "score": [0.2]})
+
+    monkeypatch.setattr(api, "_searchTitle", fakeTitle)
+    monkeypatch.setattr(unified, "searchUnified", fakeContent)
+
+    result = api._searchAuto("환율 리스크 사업보고서 본문", corpCode=None, stockCode=None, sourceKind="filing", limit=1)
+
+    assert result["rcept_no"].to_list() == ["content-hit"]
+    assert result["scope"].to_list() == ["auto"]
+
+
+def test_rank_answerable_first_preserves_answerable_order() -> None:
+    import polars as pl
+
+    from dartlab.providers.dart.search import api
+
+    result = api._rankAnswerableFirst(
+        pl.DataFrame({"id": [1, 2, 3], "answerable": [False, True, True]}),
+        limit=3,
+    )
+
+    assert result["id"].to_list() == [2, 3, 1]
+
+
 def test_resolve_corp_accepts_company_name_with_name_to_code(monkeypatch) -> None:
     from dartlab.providers.dart.search import api
 

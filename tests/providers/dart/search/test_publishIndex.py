@@ -199,7 +199,11 @@ def test_publish_content_index_files_writes_manifest_file_sources(tmp_path) -> N
     from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
     (tmp_path / "main.npz").write_bytes(b"main")
-    (tmp_path / "manifest.json").write_text('{"requiredFiles":["main.npz"]}', encoding="utf-8")
+    (tmp_path / "entityGraphCatalog.parquet").write_bytes(b"graph")
+    (tmp_path / "manifest.json").write_text(
+        '{"requiredFiles":["main.npz","entityGraphCatalog.parquet"]}',
+        encoding="utf-8",
+    )
     remote = tmp_path / "remote"
     api = FakeHfApi()
 
@@ -213,7 +217,7 @@ def test_publish_content_index_files_writes_manifest_file_sources(tmp_path) -> N
     publishContentIndexFiles(
         token=None,
         indexDir=tmp_path,
-        files=["main.npz", "manifest.json"],
+        files=["main.npz", "entityGraphCatalog.parquet", "manifest.json"],
         tier="full",
         runId="run3",
         api=api,
@@ -223,6 +227,10 @@ def test_publish_content_index_files_writes_manifest_file_sources(tmp_path) -> N
 
     manifest = json.loads((remote / "dart/contentIndex/manifest.json").read_text(encoding="utf-8"))
     assert manifest["fileSources"]["main.npz"] == "dart/contentIndex/_staging/full-run3/main.npz"
+    assert (
+        manifest["fileSources"]["entityGraphCatalog.parquet"]
+        == "dart/contentIndex/_staging/full-run3/entityGraphCatalog.parquet"
+    )
     assert manifest["publishMode"] == "manifestPointer"
 
 

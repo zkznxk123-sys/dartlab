@@ -77,6 +77,20 @@ def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
         ),
         encoding="utf-8",
     )
+    import polars as pl
+
+    pl.DataFrame(
+        [
+            {
+                "corpName": "삼성전자",
+                "stockCode": "005930",
+                "grade": "AA",
+                "weakAxis": "inventory",
+                "dataAsOf": "20260616",
+                "neighborsJson": "[]",
+            }
+        ]
+    ).write_parquet(tmp_path / "entityGraphCatalog.parquet")
 
     manifest = writeIndexManifest(tmp_path, tier="full", buildCommand="test")
 
@@ -88,6 +102,12 @@ def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
     assert "source_manifest_set.json" in manifest["fileHashes"]
     assert manifest["sourceManifestSetId"] == "abc123"
     assert manifest["sourceManifestSet"]["sources"][0]["source"] == "allFilings"
+    assert "entityGraphCatalog.parquet" in manifest["requiredFiles"]
+    assert "entityGraphCatalog.parquet" in manifest["fileHashes"]
+    assert manifest["entityGraphCatalog"]["schemaVersion"] == "searchEntityGraphCatalog.v1"
+    assert manifest["entityGraphCatalog"]["nEntities"] == 1
+    assert manifest["entityGraphCatalog"]["stockCodeCount"] == 1
+    assert manifest["entityGraphCatalog"]["dataAsOf"] == "20260616"
 
 
 def test_edgar_period_to_data_as_of_uses_quarter_end() -> None:

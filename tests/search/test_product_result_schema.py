@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 
+import polars as pl
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -139,3 +140,51 @@ def test_public_search_adds_query_focused_chunk_evidence(tmp_path, monkeypatch):
     chunkCards = [card for card in cards if card["label"] == "chunk"]
     assert chunkCards
     assert "전환사채" in chunkCards[0]["evidence"]
+
+
+def test_public_search_adds_entity_graph_cards_when_catalog_exists(tmp_path, monkeypatch):
+    fieldIndex = _patchIndexDir(monkeypatch, tmp_path)
+    _buildMain(
+        fieldIndex,
+        tmp_path,
+        [_row("20260615000005", "반도체 HBM 투자 후공정", section=5, date="20260616")],
+    )
+    catalogPath = tmp_path / "entityGraphCatalog.parquet"
+    pl.DataFrame(
+        [
+            {
+                "stockCode": "005930",
+                "corpName": "삼성전자",
+                "grade": "dCR-AAA",
+                "weakAxis": "사업안정성",
+                "stageName": "전공정(FAB)",
+                "chainName": "반도체",
+                "dataAsOf": "20260616",
+                "neighborsJson": json.dumps(
+                    [
+                        {
+                            "stockCode": "000660",
+                            "corpName": "SK하이닉스",
+                            "grade": "dCR-AA",
+                            "weakAxis": "현금흐름",
+                            "stageName": "전공정(FAB)",
+                        }
+                    ],
+                    ensure_ascii=False,
+                ),
+            }
+        ]
+    ).write_parquet(catalogPath)
+    monkeypatch.setenv("DARTLAB_SEARCH_ENTITY_GRAPH_CATALOG", str(catalogPath))
+
+    from dartlab.providers.dart.search import api as searchApi
+    from dartlab.providers.dart.search import entityGraph
+
+    entityGraph._CATALOG_CACHE.clear()
+    df = searchApi.search("반도체 HBM 투자", scope="content", limit=5)
+    row = df.row(0, named=True)
+    entityCards = json.loads(row["entityCards"])
+
+    assert row["entityResolved"] is True
+    assert row["entityStockCode"] == "005930"
+    assert any(card["label"] == "peer:SK하이닉스" for card in entityCards)

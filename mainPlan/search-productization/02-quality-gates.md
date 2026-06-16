@@ -1,6 +1,6 @@
 # 02. 품질 Gate — 제품 후보와 제품 졸업을 분리
 
-상태: v0.8 (2026-06-16)
+상태: v0.9 (2026-06-16)
 범위: 제품화 전후의 필수 품질 기준.
 
 ---
@@ -29,11 +29,13 @@ large corpus 기준:
 - random curatedDraft 300: readyRate 0.99.
 - miss: 3.
 - demo-ops ceiling: 301579 docs, 3 seeds × 100 rows, readyRate 0.9867, warm p95 157.9ms, max 173.9ms.
+- direct-review release gate: 462947 docs full current, 106 real reviewed userLog rows, releaseEligible=true, blockers=[].
+- direct-review coverage: filing 54 / news 20 / EDGAR 20 / noAnswer 12.
+- direct-review metrics: overallReadyRate 1.0, docHit10 1.0, memoryCitationTop3Exact 1.0, newsSourcePrecision10 1.0, noAnswerFalseAcceptRate 0.0.
 - known residual:
-  - receipt-number-only filing 의 answer field 완성도 1건.
-  - 제목/출처가 매우 비슷한 news 2건.
+  - CAPEX/AI 데이터센터 사업보고서 2개 후보는 sourceHint mismatch 로 reviewable set 에서 제외했다. 현재 품질 수치에 몰래 포함하지 않는다.
 
-제품화 전 이 3건은 "차단 결함"은 아니다. query-log gold 에서 반복되면 차단 결함으로 승격한다.
+제품화 전 proxy/curated miss 는 차단 결함이 아니었다. direct-review 이후의 신규 miss 는 miss ledger 에 기록하고 반복 유형이면 일반 정책으로만 승격한다.
 
 ---
 

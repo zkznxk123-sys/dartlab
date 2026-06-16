@@ -19,10 +19,12 @@ def test_search_main_publish_includes_manifest() -> None:
     assert "writeIndexManifest(outDir" in text
     assert '"manifest.json"' in text
     assert '"source_manifest_set.json"' in text
+    assert '"entityGraphCatalog.parquet"' in text
     assert "DARTLAB_SEARCH_SOURCE_MANIFEST_SET" in text
     assert "publishContentIndexFiles" in text
     assert "obsoleteCurrentFiles" in text
     assert "DARTLAB_SEARCH_MAIN_MODE" in text
+    assert "prepareEntityGraphCatalogArtifact" in text
     assert "rebuildMainFromCatalog" in text
 
 
@@ -52,9 +54,11 @@ def test_search_delta_publish_includes_manifest() -> None:
     assert '"manifest.json"' in text
     assert '"catalog_snapshot.parquet"' in text
     assert '"source_manifest_set.json"' in text
+    assert '"entityGraphCatalog.parquet"' in text
     assert "DARTLAB_SEARCH_SOURCE_MANIFEST_SET" in text
     assert "publishContentIndexFiles" in text
     assert "previous_manifest.json" in text
+    assert "prepareEntityGraphCatalogArtifact" in text
 
 
 def test_search_publish_helper_uses_staging_and_manifest_pointer() -> None:
@@ -97,6 +101,17 @@ def test_search_proof_bundle_script_exists() -> None:
     assert "searchProofBundle.json" in text
     assert "evaluateSearchProductizationStatus.py" in text
     assert "missingEvidence" in text
+
+
+def test_search_replacement_evidence_script_exists() -> None:
+    text = Path(".github/scripts/search/buildSearchReplacementEvidence.py").read_text(encoding="utf-8")
+    assert "buildReplacementEvidence" in text
+    assert "defaultBuildMode" in text
+    assert "scheduledBuildMode" in text
+    assert "legacyFallbackOperatorOnly" in text
+    assert "failClosedPublish" in text
+    assert "activeManifestId" in text
+    assert "previousManifestId" in text
 
 
 def test_search_delta_script_dry_run_subprocess(tmp_path) -> None:
@@ -276,6 +291,7 @@ def test_search_delta_script_catalog_mode_requires_current_catalog(tmp_path) -> 
 def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     text = Path(".github/workflows/searchIndexDelta.yml").read_text(encoding="utf-8")
     assert "delta_mode" in text
+    assert "default: 'catalog'" in text
     assert "expected_sources" in text
     assert "productization_gate" in text
     assert "quality_gold" in text
@@ -298,9 +314,15 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "evaluateSearchGold.py" in text
     assert "evaluateSearchProductizationStatus.py" in text
     assert "buildSearchProofBundle.py" in text
+    assert "buildSearchReplacementEvidence.py" in text
     assert "evaluateSearchCutover.py" in text
+    assert "--replacement-evidence" in text
+    assert "PRODUCTIZATION_GATE" in text
+    assert "--fail-on-incomplete" in text
+    assert "--fail-on-default-not-ready" in text
     assert "--fail-on-ops-not-ready" in text
     assert "--fail-on-release-not-ready" in text
+    assert 'blockers":["missingProofBundle"]' in text
     assert "searchHfRoundTrip.delta.full.json" in text
     assert "searchHfRoundTrip.delta.lite.json" in text
     assert "searchResultContract.delta.json" in text
@@ -310,6 +332,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "searchQuality.delta.json" in text
     assert "searchMissLedger.delta.jsonl" in text
     assert "searchProductizationStatus.delta.json" in text
+    assert "searchReplacementEvidence.delta.json" in text
     assert "searchCutover.delta.json" in text
     assert "searchProofBundle.delta" in text
     assert "actions/upload-artifact" in text
@@ -320,6 +343,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
 def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     text = Path(".github/workflows/searchIndexMain.yml").read_text(encoding="utf-8")
     assert "build_mode" in text
+    assert "default: catalog" in text
     assert "productization_gate" in text
     assert "quality_gold" in text
     assert "dart/searchCatalog/**" in text
@@ -342,9 +366,15 @@ def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     assert "evaluateSearchGold.py" in text
     assert "evaluateSearchProductizationStatus.py" in text
     assert "buildSearchProofBundle.py" in text
+    assert "buildSearchReplacementEvidence.py" in text
     assert "evaluateSearchCutover.py" in text
+    assert "--replacement-evidence" in text
+    assert "PRODUCTIZATION_GATE" in text
+    assert "--fail-on-incomplete" in text
+    assert "--fail-on-default-not-ready" in text
     assert "--fail-on-ops-not-ready" in text
     assert "--fail-on-release-not-ready" in text
+    assert 'blockers":["missingProofBundle"]' in text
     assert "searchHfRoundTrip.main.full.json" in text
     assert "searchHfRoundTrip.main.lite.json" in text
     assert "searchResultContract.main.json" in text
@@ -354,6 +384,7 @@ def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     assert "searchQuality.main.json" in text
     assert "searchMissLedger.main.jsonl" in text
     assert "searchProductizationStatus.main.json" in text
+    assert "searchReplacementEvidence.main.json" in text
     assert "searchCutover.main.json" in text
     assert "searchProofBundle.main" in text
     assert "actions/upload-artifact" in text

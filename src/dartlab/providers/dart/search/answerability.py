@@ -72,7 +72,7 @@ def _rowAnswerability(
         return False, "sourceIntentMismatch"
     if not _hasUsableSourceRef(row):
         return False, "missingSourceRef"
-    if not str(row.get("snippet") or row.get("text") or row.get("section_content") or "").strip():
+    if not _hasUsableEvidenceText(row):
         return False, "missingSnippet"
     if not str(row.get("dataAsOf") or row.get("sourceDataAsOf") or row.get("rcept_dt") or "").strip():
         return False, "missingDataAsOf"
@@ -105,6 +105,23 @@ def _hasUsableSourceRef(row: dict[str, Any]) -> bool:
     if ref.startswith("edgar:"):
         return ":#section=" not in ref
     return True
+
+
+def _hasUsableEvidenceText(row: dict[str, Any]) -> bool:
+    return bool(
+        str(
+            row.get("snippet")
+            or row.get("text")
+            or row.get("section_content")
+            or row.get("evidenceText")
+            or row.get("report_nm")
+            or row.get("reportName")
+            or row.get("title")
+            or row.get("section_title")
+            or row.get("sectionTitle")
+            or ""
+        ).strip()
+    )
 
 
 def _isStaleSource(row: dict[str, Any], *, facets: QueryFacets | None, today: str | None) -> bool:

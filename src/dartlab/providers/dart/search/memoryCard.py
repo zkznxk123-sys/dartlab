@@ -43,6 +43,7 @@ def buildMemoryCards(df: pl.DataFrame, *, query: str = "", limit: int = 3) -> li
                 "dataAsOf": str(row.get("dataAsOf") or ""),
                 "snippet": str(row.get("snippet") or "")[:500],
                 "fieldCards": _fieldCards(row.get("fieldCards")),
+                "entityCards": _fieldCards(row.get("entityCards")),
             }
         )
         if len(cards) >= limit:
