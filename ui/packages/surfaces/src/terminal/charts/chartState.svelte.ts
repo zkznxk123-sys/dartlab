@@ -2,7 +2,8 @@
 // ChartRibbon(전체화면)이 같은 인스턴스를 공유한다 — 상태 중복 0. 차트 인스턴스 명령(드로잉 생성 등)은
 // 상태가 아니므로 콜백으로 — "상태에 요청 넣고 effect 소비" 안티패턴 금지.
 const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
-import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp } from '../lib/backtest';
+import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp, type StrategySlot } from '../lib/backtest';
+import { STRAT_COLORS } from './btLayer';
 import { IND_DEFS } from './indicatorParams';
 import { EVENT_CAT_KEYS } from '../lib/eventRail';
 import type { IndexRef } from '@dartlab/ui-contracts';
@@ -107,16 +108,22 @@ export class ChartCtl {
 	// idx = 현재 봉(표시 시계열 인덱스), start/len 은 PriceChart.enterReplay 가 진입 시점에 기록.
 	replay = $state<{ on: boolean; idx: number; playing: boolean; start: number; len: number }>({ on: false, idx: 0, playing: false, start: 0, len: 0 });
 	replayMs = $state<400 | 150>(400); // 자동재생 간격 — 1×(400ms) / 2.5×(150ms) 2단
-	btKey = $state<BtPresetKey | null>(null);
-	btParams = $state<Record<string, number>>({});
+	// 다전략 슬롯(N≤3) — 빈 배열 = BT off. 한 차트에 A·B·(A+B 조합)을 색별로 동시 비교(01 §3.1).
+	btStrategies = $state<StrategySlot[]>([]);
+	btFocus = $state(0); // 마커·리포트·파라미터 포커스 슬롯 인덱스
 	btCosts = $state(true);
 	btCostsBp = $state<BtCostsBp>({ ...BT_COSTS });
 	btOosSplit = $state<number>(0); // OOS 학습/검증 분할 비율 (0=없음, 0.7=70:30, 0.6=60:40). 세션 한정.
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀
+	private btIdSeq = 0; // 슬롯 고유 id 카운터
 	drawCount = $state(0); // 그리기 버튼 하이라이트용 (드로잉 본체는 PriceChart drawMap)
-	activeBt = $derived(this.btKey ? (BT_PRESETS.find((d) => d.key === this.btKey) ?? null) : null);
+	// 포커스 슬롯 호환 getter — Ribbon/Menus 의 라벨·활성표시가 단일 API 로 읽던 것 보존(N-row UI 와 무관).
+	get focusSlot(): StrategySlot | null { return this.btStrategies[this.btFocus] ?? this.btStrategies[0] ?? null; }
+	get btKey(): BtPresetKey | null { return this.focusSlot?.preset ?? null; }
+	get activeBt(): BtPresetDef | null { const k = this.btKey; return k ? BT_PRESETS.find((d) => d.key === k) ?? null : null; }
+	get btOn(): boolean { return this.btStrategies.length > 0; }
 
 	constructor() {
 		this.hydrate();
@@ -242,17 +249,37 @@ export class ChartCtl {
 			this.compares = [...this.compares, p];
 		}
 	}
-	setPreset(pd: BtPresetDef) {
-		this.btKey = pd.key;
-		this.btParams = Object.fromEntries(pd.params.map((x) => [x.name, x.def]));
+	/** 전략 슬롯 추가 (≤3). 새 슬롯에 포커스 — 추가 즉시 그 전략 마커·리포트. */
+	addStrategy(pd: BtPresetDef) {
+		if (this.btStrategies.length >= 3) return;
+		const color = STRAT_COLORS[this.btStrategies.length] ?? STRAT_COLORS[0];
+		const slot: StrategySlot = { id: `s${++this.btIdSeq}`, preset: pd.key, params: Object.fromEntries(pd.params.map((x) => [x.name, x.def])), color, label: pd.kr };
+		this.btStrategies = [...this.btStrategies, slot];
+		this.btFocus = this.btStrategies.length - 1;
 	}
-	stepBtParam(pp: BtParamDef, dir: 1 | -1) {
-		const cur = this.btParams[pp.name] ?? pp.def;
-		const next = Math.max(pp.min, Math.min(pp.max, +(cur + dir * pp.step).toFixed(2)));
-		const p = { ...this.btParams, [pp.name]: next };
-		if (p.fast != null && p.slow != null && p.fast >= p.slow) return; // 단기 < 장기 (maCross·macdCross 공통)
-		this.btParams = p;
+	removeStrategy(i: number) {
+		if (i < 0 || i >= this.btStrategies.length) return;
+		this.btStrategies = this.btStrategies.filter((_, k) => k !== i);
+		this.btFocus = Math.min(this.btFocus, Math.max(0, this.btStrategies.length - 1));
 	}
+	/** 슬롯 i 의 프리셋 교체 (색·id 유지, 파라미터 기본값 리셋). */
+	setSlotPreset(i: number, pd: BtPresetDef) {
+		if (i < 0 || i >= this.btStrategies.length) return;
+		this.btStrategies = this.btStrategies.map((s, k) =>
+			k === i ? { ...s, preset: pd.key, params: Object.fromEntries(pd.params.map((x) => [x.name, x.def])), label: pd.kr } : s
+		);
+	}
+	stepSlotParam(i: number, pp: BtParamDef, dir: 1 | -1) {
+		const cur = this.btStrategies[i];
+		if (!cur) return;
+		const v = cur.params[pp.name] ?? pp.def;
+		const nv = Math.max(pp.min, Math.min(pp.max, +(v + dir * pp.step).toFixed(2)));
+		const params = { ...cur.params, [pp.name]: nv };
+		if (params.fast != null && params.slow != null && params.fast >= params.slow) return; // 단기 < 장기 (maCross·macdCross 공통)
+		this.btStrategies = this.btStrategies.map((s, k) => (k === i ? { ...s, params } : s));
+	}
+	setBtFocus(i: number) { if (i >= 0 && i < this.btStrategies.length) this.btFocus = i; }
+	clearBtAll() { this.btStrategies = []; this.btFocus = 0; }
 	// setCalcParams 는 동등성 비교 없이 무조건 전봉 재계산 — same-value 가드 필수.
 	setIndParams(name: string, next: number[]) {
 		const cur = this.indParams[name] ?? IND_DEFS[name]?.defaults;

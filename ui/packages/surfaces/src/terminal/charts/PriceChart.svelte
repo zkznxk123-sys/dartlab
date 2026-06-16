@@ -8,11 +8,11 @@
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
-	import { runPortfolioBacktest, type BtResult, type StrategySlot } from '../lib/backtest';
+	import { runPortfolioBacktest, type PortfolioBtResult } from '../lib/backtest';
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { rankCoMovers, type CoMover } from '../lib/coMovement';
 	import { loadMarketIndexSeries, MARKET_INDEX_REFS, marketIndexDef } from '../lib/marketIndex';
-	import { registerBtIndicators, buildBtExtend, applyBt, clearBt, STRAT_COLORS } from './btLayer';
+	import { registerBtIndicators, buildBtExtend, applyBt, clearBt } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
 	import { type ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type IndexControl, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
@@ -58,7 +58,7 @@
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
-	let btResult = $state<BtResult | null>(null);
+	let btPf = $state<PortfolioBtResult | null>(null); // 다전략 결과(N≤3 + 조합)
 	let btReportOpen = $state(false); // [백테스팅 상세] → BacktestDialog(전문 화면) 오픈
 	// 종목↔거시 동행(상관) — "어떤 거시가 이 종목과 같이 움직였나"(04 §5, 인과 아님). 회사전환 시 캔들 기준 재계산.
 	let coMovers = $state<CoMover[]>([]);
@@ -543,7 +543,7 @@
 		if (tfv === appliedTf) return;
 		appliedTf = tfv;
 		exitReplaySilently(); // 봉 주기 전환 — 리플레이 idx 좌표계가 깨지므로 자동 종료
-		if (tfv !== 'D') ctl.btKey = null;
+		if (tfv !== 'D') ctl.clearBtAll();
 		const code0 = hist.code;
 		(async () => {
 			if (tfv !== 'D') await backfillTo(c, KRX_MIN_YEAR);
@@ -777,20 +777,20 @@
 		applyPeriodFull(c);
 	});
 
-	// 백테스트 — 의존: 프리셋·파라미터·비용(토글+bp)·기간·dataRev(applyNewData 동행).
+	// 백테스트 — 의존: 전략 슬롯 N(프리셋·파라미터·색·라벨)·포커스·비용(토글+bp)·기간·dataRev.
 	$effect(() => {
 		const c = chart;
-		const key = ctl.btKey;
-		const p = ctl.btParams;
+		const slots = ctl.btStrategies; // 반응 의존 (배열 신참조마다 재실행)
+		const focus = ctl.btFocus;
 		const wc = ctl.btCosts;
 		const bp = ctl.btCostsBp;
 		void dataRev;
 		void ctl.period;
 		if (!c) return;
-		// 지수 subject = 거래 대상 아님 — BT 비활성(btKey 보존, 종목 복귀 시 복원, 01 §4.3)
-		if (subject === 'index' || !key) {
+		// 지수 subject = 거래 대상 아님 — BT 비활성(슬롯 보존, 종목 복귀 시 복원, 01 §4.3)
+		if (subject === 'index' || !slots.length) {
 			clearBt(c);
-			btResult = null;
+			btPf = null;
 			return;
 		}
 		void ctl.adj;
@@ -799,12 +799,11 @@
 		const all = displaySeries();
 		if (!all.length) return;
 		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
-		// 다전략 엔진 경로(N-capable) — 현 UI 는 단일 전략을 1-슬롯으로 구동(N-행 UI 는 후속 단계).
-		// look-ahead 차단은 displaySeries 절단이 상속(01 §2.2). extendData 신참조가 재계산 트리거(CMP 식).
-		const slots: StrategySlot[] = [{ id: 's0', preset: key, params: p, color: STRAT_COLORS[0], label: ctl.activeBt?.kr ?? key }];
+		// 다전략(N≤3) + 동일가중 조합. look-ahead 차단은 displaySeries 절단이 N전략에 상속(01 §2.2).
+		// extendData 신참조가 재계산 트리거(CMP 식). 슬롯별 spec.code 공통(단일종목).
 		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
-		btResult = pf.slots[0]?.result ?? null;
-		const ext = buildBtExtend(pf, all, slots, 0);
+		btPf = pf;
+		const ext = buildBtExtend(pf, all, slots, focus);
 		if (ext) applyBt(c, ext);
 		else clearBt(c);
 	});
@@ -1261,11 +1260,11 @@
 
 	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->
 
-	{#if btResult && ctl.btKey}
-		<BacktestStrip result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClear={() => (ctl.btKey = null)} onOpenReport={() => (btReportOpen = true)} />
+	{#if btPf && ctl.btStrategies.length}
+		<BacktestStrip pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClear={() => ctl.clearBtAll()} onOpenReport={() => (btReportOpen = true)} />
 	{/if}
-	{#if btResult && ctl.btKey && btReportOpen}
-		<BacktestDialog result={btResult} presetLabel={ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : ''} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
+	{#if btPf && ctl.btStrategies.length && btReportOpen}
+		<BacktestDialog pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
 	{/if}
 </div>
 

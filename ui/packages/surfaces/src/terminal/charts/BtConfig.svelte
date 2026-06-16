@@ -1,9 +1,7 @@
 <script lang="ts">
-	// 백테스트 전략 콘솔 — 전략(드롭다운 셀렉터+설명)·파라미터·비용(bp 편집). 일반 메뉴·전체화면 리본 공유.
-	// 칩 6개 평면나열 폐기 → 셀렉터로 "지표 토글"이 아닌 "전략 실행" 위계 부여(03 §0.5.9-E "버튼 약함" 직격).
-	// 선택 즉시 자동 실행(PriceChart $effect) — 초보 1클릭 보존 + 즉시 피드백(수동 실행 버튼보다 우수).
-	// 벤치마크(B&H 동일비용)는 끌 수 없는 읽기전용 라벨 = 공정 비교가 제품 약속임을 컨트롤에서 전달.
-	// 체결 모델 캡션 상시 노출 = 신뢰 표면. 결과 표시는 BacktestStrip/리포트 도크(설정/결과 분리).
+	// 백테스트 전략 콘솔 — 다전략(N≤3) 슬롯 리스트. 슬롯=색칩+프리셋 select+제거, 포커스 슬롯만 파라미터 펼침.
+	// 비용(bp)·검증(OOS)은 전 슬롯 공유. 선택 즉시 자동 실행(PriceChart $effect). 벤치마크(B&H 동일비용) 읽기전용.
+	// 정직(04 §2.2·2.4): N≥2 = selection 경고 + 단일종목 분산 라벨. 체결 모델 캡션 상시.
 	import type { Lang } from '../lib/types';
 	import type { ChartCtl } from './chartState.svelte';
 	import { BT_PRESETS, BT_COSTS } from '../lib/backtest';
@@ -23,10 +21,14 @@
 		const next = Math.max(k.min, Math.min(k.max, +(ctl.btCostsBp[k.k] + dir * k.step).toFixed(1)));
 		ctl.btCostsBp = { ...ctl.btCostsBp, [k.k]: next };
 	}
-	function pickPreset(key: string) {
-		if (!key) { ctl.btKey = null; return; }
-		const pd = BT_PRESETS.find((d) => d.key === key);
-		if (pd) ctl.setPreset(pd);
+	const presetOf = (key: string) => BT_PRESETS.find((d) => d.key === key) ?? null;
+	function addSlot(key: string) {
+		const pd = presetOf(key);
+		if (pd) ctl.addStrategy(pd);
+	}
+	function pickSlot(i: number, key: string) {
+		const pd = presetOf(key);
+		if (pd) ctl.setSlotPreset(i, pd);
 	}
 	const costsDefault = $derived(
 		ctl.btCostsBp.commissionBp === BT_COSTS.commissionBp && ctl.btCostsBp.sellTaxBp === BT_COSTS.sellTaxBp && ctl.btCostsBp.slippageBp === BT_COSTS.slippageBp
@@ -34,39 +36,49 @@
 </script>
 
 <div class="btConfig">
-	<!-- ① 전략 — 셀렉터 + 설명 (칩 그리드 폐기) -->
+	<!-- ① 전략 (N≤3) — 슬롯 리스트. 같은 차트에 색별 동시 비교. -->
 	<div class="btSection">
-		<div class="ctMenuLbl">{T('① 전략', '① Strategy')}</div>
-		<select class="btSelect mono" value={ctl.btKey ?? ''} onchange={(e) => pickPreset(e.currentTarget.value)} title={T('전략 프리셋 — 선택 즉시 실행', 'strategy preset — runs on select')}>
-			<option value="">{T('전략 선택…', 'pick strategy…')}</option>
-			{#each BT_PRESETS as pd (pd.key)}
-				<option value={pd.key}>{T(pd.kr, pd.en)}</option>
-			{/each}
-		</select>
-		{#if ctl.activeBt}<div class="btDesc">{T(ctl.activeBt.descKr, ctl.activeBt.descEn)} · {T('교육·탐색용 (추천 아님)', 'educational (not advice)')}</div>{/if}
+		<div class="ctMenuLbl">{T('① 전략 (최대 3 · 같은 차트 비교)', '① Strategies (up to 3)')}</div>
+		{#each ctl.btStrategies as s, i (s.id)}
+			{@const pd = presetOf(s.preset)}
+			<div class="btSlot" class:on={i === ctl.btFocus}>
+				<div class="btSlotHd">
+					<button class="btSwBtn" onclick={() => ctl.setBtFocus(i)} title={T('이 전략에 포커스 (마커·상세)', 'focus')} aria-label="focus"><i class="btSw" style={`background:${s.color}`}></i></button>
+					<select class="btSelect mono" value={s.preset} onchange={(e) => pickSlot(i, e.currentTarget.value)} title={T('전략 프리셋', 'preset')}>
+						{#each BT_PRESETS as p (p.key)}<option value={p.key}>{T(p.kr, p.en)}</option>{/each}
+					</select>
+					<button class="btDel" onclick={() => ctl.removeStrategy(i)} title={T('전략 삭제', 'remove')} aria-label="remove">✕</button>
+				</div>
+				{#if i === ctl.btFocus && pd}
+					{#if pd.descKr}<div class="btDesc">{T(pd.descKr, pd.descEn)} · {T('교육·탐색용 (추천 아님)', 'educational (not advice)')}</div>{/if}
+					{#each pd.params as pp (pp.name)}
+						<div class="ctRow btParamRow">
+							<span class="btParamLbl">{T(pp.kr, pp.en)}</span>
+							<button class="mItem" onclick={() => ctl.stepSlotParam(i, pp, -1)}>−</button>
+							<b class="btParamVal mono">{s.params[pp.name] ?? pp.def}</b>
+							<button class="mItem" onclick={() => ctl.stepSlotParam(i, pp, 1)}>+</button>
+						</div>
+					{/each}
+				{/if}
+			</div>
+		{/each}
+		{#if ctl.btStrategies.length < 3}
+			<select class="btSelect btAdd mono" value="" onchange={(e) => { addSlot(e.currentTarget.value); e.currentTarget.value = ''; }} title={T('전략 추가', 'add strategy')}>
+				<option value="">{ctl.btStrategies.length ? T('＋ 전략 추가…', '+ add…') : T('전략 선택…', 'pick strategy…')}</option>
+				{#each BT_PRESETS as p (p.key)}<option value={p.key}>{T(p.kr, p.en)}</option>{/each}
+			</select>
+		{/if}
+		{#if ctl.btStrategies.length >= 2}
+			<div class="btDesc warn">{T('⚠ 여러 전략 같은 데이터 비교 = 사후선택 편향 · 단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'selection bias · single-stock combo = timing not asset diversification')}</div>
+		{/if}
 	</div>
 
-	<!-- ② 파라미터 -->
-	{#if ctl.activeBt && ctl.activeBt.params.length}
-		<div class="btSection">
-			<div class="ctMenuLbl">{T('② 파라미터', '② Parameters')}</div>
-			{#each ctl.activeBt.params as pp (pp.name)}
-				<div class="ctRow btParamRow">
-					<span class="btParamLbl">{T(pp.kr, pp.en)}</span>
-					<button class="mItem" onclick={() => ctl.stepBtParam(pp, -1)}>−</button>
-					<b class="btParamVal mono">{ctl.btParams[pp.name] ?? pp.def}</b>
-					<button class="mItem" onclick={() => ctl.stepBtParam(pp, 1)}>+</button>
-				</div>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- ③ 비용 -->
+	<!-- ③ 비용 (전 슬롯 공유) -->
 	<div class="btSection">
-		<div class="ctMenuLbl">{T('③ 비용', '③ Costs')}</div>
+		<div class="ctMenuLbl">{T('③ 비용 (공유)', '③ Costs (shared)')}</div>
 		<div class="ctRow">
 			<button class={ctl.btCosts ? 'mItem on' : 'mItem'} onclick={() => (ctl.btCosts = !ctl.btCosts)}>{T('수수료·세금 포함', 'include costs')}</button>
-			{#if ctl.btKey}<button class="mItem mClear" onclick={() => (ctl.btKey = null)}>{T('전략 해제', 'clear')}</button>{/if}
+			{#if ctl.btStrategies.length}<button class="mItem mClear" onclick={() => ctl.clearBtAll()}>{T('전체 해제', 'clear all')}</button>{/if}
 		</div>
 		{#if ctl.btCosts}
 			{#each COST_FIELDS as cf (cf.k)}
@@ -84,10 +96,10 @@
 		{/if}
 	</div>
 
-	<!-- ④ 검증(OOS) — 학습/검증 분할. 고정 파라미터를 안 본 구간에 적용 (walk-forward 아님, §0.5.9-A) -->
-	{#if ctl.btKey}
+	<!-- ④ 검증(OOS) — 학습/검증 분할 (공유). walk-forward 아님(§0.5.9-A) -->
+	{#if ctl.btStrategies.length}
 		<div class="btSection">
-			<div class="ctMenuLbl">{T('④ 검증 (학습/검증 분할)', '④ Validation (train/test)')}</div>
+			<div class="ctMenuLbl">{T('④ 검증 (학습/검증 분할 · 공유)', '④ Validation (train/test)')}</div>
 			<div class="ctRow ctRowWrap">
 				{#each [{ v: 0, kr: '없음', en: 'off' }, { v: 0.7, kr: '70:30', en: '70:30' }, { v: 0.6, kr: '60:40', en: '60:40' }] as o (o.v)}
 					<button class={ctl.btOosSplit === o.v ? 'mItem on' : 'mItem'} onclick={() => (ctl.btOosSplit = o.v)}>{T(o.kr, o.en)}</button>
@@ -101,3 +113,16 @@
 	<div class="btBench">{T('비교 기준 · 보유(B&H) · 동일 비용 적용', 'benchmark · buy & hold · same costs')}</div>
 	<div class="btModelNote">{T('신호 t일 종가 → t+1일 시가 체결 · 미래참조 차단 · 과거 가정 노출형 시뮬레이션(추천 아님)', 'signal close(t) → fill open(t+1) · no look-ahead · assumption-exposed simulation (not advice)')}</div>
 </div>
+
+<style>
+	.btSlot { border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; padding: 5px 6px; margin-bottom: 4px; }
+	.btSlot.on { border-color: #2a3142; background: rgba(255, 255, 255, 0.02); }
+	.btSlotHd { display: flex; align-items: center; gap: 5px; }
+	.btSwBtn { background: none; border: none; padding: 2px; cursor: pointer; display: inline-flex; }
+	.btSw { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+	.btSelect { flex: 1 1 auto; min-width: 0; }
+	.btAdd { width: 100%; margin-top: 2px; }
+	.btDel { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 12px; padding: 0 3px; }
+	.btDel:hover { color: var(--dn, #f0616f); }
+	.btDesc.warn { color: var(--amber, #fb923c); }
+</style>

@@ -3,22 +3,32 @@
 	// 구성: ① 에쿼티·낙폭 곡선 시각화(전략 vs 보유 + OOS 음영 = "어떻게 흘러갔는지") ② 아래로 스크롤되는 읽히는 상세내역
 	//   (개요 KPI 격자 · 거래표 · 낙폭 · 가정/RunSpec). 큰 활자(11~16px) — 증권사 리포트 가독성.
 	// 거래행 클릭 → onFocusBar(날짜) + onClose → 메인차트 해당 진입봉 센터링. 정직 라벨·동일비용 B&H·추천 아님.
-	import type { BtResult } from '../lib/backtest';
+	import type { PortfolioBtResult, StrategySlot } from '../lib/backtest';
 	import { GOV_ATTRIBUTION } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
 
 	interface Props {
-		result: BtResult;
-		presetLabel: string;
+		pf: PortfolioBtResult;
+		slots: StrategySlot[]; // 전체 슬롯(메타) — pf.slots 는 워밍업 통과분만이라 id 매칭
+		focus: number;
 		period: string;
 		withCosts: boolean;
 		adjusted: boolean;
 		lang: Lang;
+		onFocus: (i: number) => void;
 		onClose: () => void;
 		onFocusBar?: (t: string) => void; // 거래/낙폭 행 클릭 → 차트 해당 봉 (PriceChart 가 scrollToTimestamp)
 	}
-	let { result, presetLabel, period, withCosts, adjusted, lang, onClose, onFocusBar }: Props = $props();
+	let { pf, slots, focus, period, withCosts, adjusted, lang, onFocus, onClose, onFocusBar }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
+	// 본문은 포커스 1전략 단수 유지(01 §5 dialog 무전면개조) — result 를 포커스 슬롯 파생으로 두면 기존 본문 무변경.
+	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
+	const result = $derived(pf.slots.find((s) => s.id === focusId)?.result ?? pf.slots[0].result);
+	const presetLabel = $derived(slots.find((s) => s.id === focusId)?.label ?? '');
+	const combo = $derived(pf.combo);
+	const multi = $derived(pf.slots.length >= 2);
+	const metaOf = (id: string) => slots.find((s) => s.id === id);
+	const idxOf = (id: string) => slots.findIndex((s) => s.id === id);
 	const m = $derived(result.metrics);
 	const rs = $derived(result.runSpec);
 	const oos = $derived(result.oos);
@@ -84,7 +94,7 @@
 	const worstTrades = $derived([...result.trades].sort((a, b) => a.retPct - b.retPct).slice(0, 6));
 	const recovered = $derived(result.mddWindow?.recoverIdx != null);
 
-	function focus(t: string) { onFocusBar?.(t); onClose(); }
+	function jumpToBar(t: string) { onFocusBar?.(t); onClose(); }
 
 	// Trades CSV — 브라우저 zero-dep Blob (egress 전체는 table-export PRD 영역, 여기선 거래내역만).
 	function exportCsv() {
@@ -122,7 +132,31 @@
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
 
+		{#if multi}
+			<!-- 전략 탭 — 포커스 전환(본문은 포커스 1전략). 조합은 아래 배너(거래 단위 없어 별도 탭 아님). -->
+			<div class="bdTabs">
+				{#each pf.slots as s (s.id)}
+					{@const meta = metaOf(s.id)}
+					<button class="bdTab" class:on={s.id === focusId} onclick={() => onFocus(idxOf(s.id))}>
+						<i class="bdSw" style={`background:${meta?.color ?? '#8b919e'}`}></i>{meta?.label ?? s.id}
+						<em class={cls(s.result.metrics.retPct)}>{sgn(s.result.metrics.retPct)}%</em>
+					</button>
+				{/each}
+			</div>
+		{/if}
+
 		<div class="bdBody">
+			{#if combo}
+				<div class="bdCombo">
+					{T('동일가중 조합 (리밸런싱 없음)', 'equal-weight combo (no rebalancing)')}
+					· {T('수익률', 'return')} <b class={'mono ' + cls(combo.metrics.retPct)}>{sgn(combo.metrics.retPct)}%</b>
+					· MDD <b class="mono tDn">{combo.metrics.mddPct.toFixed(1)}%</b>
+					· Sharpe <b class="mono">{combo.metrics.sharpe != null ? combo.metrics.sharpe.toFixed(2) : '—'}</b>
+					· Calmar <b class="mono">{combo.metrics.calmar != null ? combo.metrics.calmar.toFixed(2) : '—'}</b>
+					· {T('vs 보유', 'vs B&H')} <b class={'mono ' + cls(combo.metrics.retPct - result.bh.retPct)}>{sgn(combo.metrics.retPct - result.bh.retPct)}%p</b>
+					<i>{T('조합은 거래 단위 없음 — 승률·손익비 등 거래 KPI 미산출(equity 지표만). 단일종목 = 타이밍 분산이지 자산 분산 아님.', 'combo has no trades — equity metrics only. single-stock = timing, not asset diversification.')}</i>
+				</div>
+			{/if}
 			<!-- 정직 배너 — 단일 구간 in-sample. 다구간 교차검증은 로컬 정밀 모드. -->
 			<div class="bdBanner" class:lag={!beats}>
 				{#if !beats}{T('이 구간에선 단순 보유(B&H)가 전략을 앞섰습니다.', 'Buy & hold beat the strategy over this window.')} {/if}{T('단일 구간 시뮬레이션입니다 — 다구간 교차검증(walk-forward · DSR · PBO)은 로컬 정밀 모드. 미래 수익 보장 아님 · 추천 아님.', 'Single-window simulation. Cross-validation (walk-forward · DSR · PBO) is in local precision mode. Not a forecast, not advice.')}
@@ -210,7 +244,7 @@
 							<tbody>
 								{#each result.trades.slice().reverse() as t, i (t.entryT)}
 									{@const cum = cumPct[result.trades.length - 1 - i]}
-									<tr class="bdRow" onclick={() => focus(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
+									<tr class="bdRow" onclick={() => jumpToBar(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
 										<td>{fmtD(t.entryT)}</td>
 										<td class="r">{num(t.entryPx)}</td>
 										<td>{t.exitT ? fmtD(t.exitT) : T('보유중', 'open')}</td>
@@ -245,7 +279,7 @@
 							<thead><tr><th>{T('진입', 'entry')}</th><th>{T('청산', 'exit')}</th><th class="r">{T('수익률', 'ret')}</th><th class="r">{T('보유일', 'days')}</th></tr></thead>
 							<tbody>
 								{#each worstTrades as t (t.entryT)}
-									<tr class="bdRow" onclick={() => focus(t.entryT)}>
+									<tr class="bdRow" onclick={() => jumpToBar(t.entryT)}>
 										<td>{fmtD(t.entryT)}</td><td>{t.exitT ? fmtD(t.exitT) : T('보유중', 'open')}</td>
 										<td class={'r ' + cls(t.retPct)}>{sgn(t.retPct)}%</td><td class="r">{t.holdDays}</td>
 									</tr>
@@ -288,6 +322,15 @@
 	.bdHeadline { margin-left: auto; display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 700; }
 	.bdHeadline i { font-style: normal; font-size: 10px; font-weight: 400; color: #6b7280; }
 	.bdExcess { font-style: normal; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--dl-line, #1b2130); }
+	/* 전략 탭 */
+	.bdTabs { display: flex; gap: 4px; padding: 6px 18px 0; flex-wrap: wrap; border-bottom: 1px solid var(--dl-line, #1b2130); }
+	.bdTab { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--dl-line, #1b2130); border-bottom: none; border-radius: 5px 5px 0 0; padding: 5px 11px; cursor: pointer; font-family: inherit; font-size: 11.5px; color: #aeb6c2; }
+	.bdTab.on { background: rgba(255, 255, 255, 0.03); color: var(--dl-ink, #c8cfdb); border-color: #2a3142; }
+	.bdTab .bdSw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+	.bdTab em { font-style: normal; font-family: var(--dl-font-mono, monospace); font-size: 11px; }
+	.bdCombo { font-size: 11px; color: #cbb4f5; background: rgba(232, 121, 249, 0.07); border: 1px solid rgba(232, 121, 249, 0.25); border-radius: 4px; padding: 7px 12px; line-height: 1.6; display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+	.bdCombo b { font-weight: 700; }
+	.bdCombo i { flex-basis: 100%; font-style: normal; font-size: 10px; color: #8b94a3; }
 	.bdBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 18px; }
 	.bdBanner { font-size: 11px; color: #93c5fd; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 4px; padding: 7px 12px; line-height: 1.55; }
 	.bdBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border-color: rgba(251, 146, 60, 0.3); }
