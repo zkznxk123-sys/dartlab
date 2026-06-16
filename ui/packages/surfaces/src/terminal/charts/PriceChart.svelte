@@ -8,11 +8,11 @@
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
-	import { runBacktest, type BtResult } from '../lib/backtest';
+	import { runPortfolioBacktest, type BtResult, type StrategySlot } from '../lib/backtest';
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { rankCoMovers, type CoMover } from '../lib/coMovement';
 	import { loadMarketIndexSeries, MARKET_INDEX_REFS, marketIndexDef } from '../lib/marketIndex';
-	import { registerBtIndicators, publishBt, applyBt, clearBt } from './btLayer';
+	import { registerBtIndicators, buildBtExtend, applyBt, clearBt, STRAT_COLORS } from './btLayer';
 	import { registerEconIndicator, ECON_INDICATOR, type EconExtend } from './econOverlay';
 	import { registerExtraIndicators } from './extraIndicators';
 	import { type ChartCtl, PERIOD_N, TF_DIV, type CandleStyle, type IndexControl, type OverlayKey, type SubKey, type TfKey } from './chartState.svelte';
@@ -87,7 +87,6 @@
 	let dataRev = $state(0);
 	let dataRevSeq = 0;
 	const bumpDataRev = () => (dataRev = ++dataRevSeq);
-	let btRunSeq = 0; // 비반응 — BT calcParams 재계산 트리거용 단조 증가
 	let econOn = false; // ECON indicator 생성 여부 (비반응)
 	let econToken = 0; // stale async 가드
 	let cmpOn = false; // 종목비교(CMP) indicator 생성 여부 (비반응)
@@ -800,10 +799,13 @@
 		const all = displaySeries();
 		if (!all.length) return;
 		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
-		const res = runBacktest(all, key, p, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
-		btResult = res;
-		publishBt(res, all);
-		if (res) applyBt(c, ++btRunSeq);
+		// 다전략 엔진 경로(N-capable) — 현 UI 는 단일 전략을 1-슬롯으로 구동(N-행 UI 는 후속 단계).
+		// look-ahead 차단은 displaySeries 절단이 상속(01 §2.2). extendData 신참조가 재계산 트리거(CMP 식).
+		const slots: StrategySlot[] = [{ id: 's0', preset: key, params: p, color: STRAT_COLORS[0], label: ctl.activeBt?.kr ?? key }];
+		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
+		btResult = pf.slots[0]?.result ?? null;
+		const ext = buildBtExtend(pf, all, slots, 0);
+		if (ext) applyBt(c, ext);
 		else clearBt(c);
 	});
 
