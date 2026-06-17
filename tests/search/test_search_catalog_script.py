@@ -269,7 +269,7 @@ def test_build_search_catalog_script_blocks_previous_manifest_drop(tmp_path) -> 
     assert "previousRowDrop:1/100:maxDrop=0.05" in proc.stderr
 
 
-def test_build_search_catalog_script_merges_previous_catalog(tmp_path) -> None:
+def test_build_search_catalog_script_merges_previous_news_catalog_without_date_drop(tmp_path) -> None:
     from dartlab.providers.dart.search.catalog import normalizeCatalogRows
 
     current = tmp_path / "2026-06-16.parquet"
@@ -361,5 +361,6 @@ def test_build_search_catalog_script_merges_previous_catalog(tmp_path) -> None:
     assert manifest["deltaSource"]["catalogRows"] == 1
     assert set(catalog.get_column("url").to_list()) == {
         "https://n.example/new",
+        "https://n.example/old",
         "https://n.example/keep",
     }

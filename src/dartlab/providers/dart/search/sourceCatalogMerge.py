@@ -305,8 +305,7 @@ def _dropReplacedPartitions(
         tickers = {Path(path).stem for path in changedFiles if Path(path).stem}
         return _filterOut(previous, "ticker", tickers)
     if source == "newsPublic":
-        dates = _catalogStringSet(changed, "date")
-        return _filterOut(previous, "date", dates)
+        return previous
     return previous
 
 
