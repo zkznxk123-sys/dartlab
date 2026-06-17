@@ -43,8 +43,11 @@ def test_search_main_publish_includes_manifest() -> None:
     assert "publishContentIndexFiles" in text
     assert "obsoleteCurrentFiles" in text
     assert "DARTLAB_SEARCH_MAIN_MODE" in text
+    assert "DARTLAB_SEARCH_MAIN_ONLY" in text
+    assert 'mainOnly == "lite"' in text
     assert "prepareEntityGraphCatalogArtifact" in text
     assert "rebuildMainFromCatalog" in text
+    assert "[lite] HF_TOKEN 없음" in text
 
 
 def test_search_main_publish_file_list_includes_catalog_snapshot() -> None:
@@ -365,8 +368,12 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "verifySearchHfRoundTrip.py" in text
     assert 'DARTLAB_SEARCH_PROMOTE_CURRENT: "0"' in text
     assert '--manifest-repo-path "$DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST"' in text
+    assert "Build content lite + stage candidate" in text
+    assert 'DARTLAB_SEARCH_MAIN_ONLY: "lite"' in text
+    assert '--manifest-repo-path "$DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST"' in text
     assert "promoteSearchCandidate.py" in text
     assert "searchPromote.delta.full.json" in text
+    assert "searchPromote.delta.lite.json" in text
     assert "evaluateSearchResultContract.py" in text
     assert "evaluateSearchCanary.py" in text
     assert "runSearchQualityDrill.py" in text

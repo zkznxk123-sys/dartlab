@@ -46,9 +46,17 @@ def _buildRouterArtifact(tier: str = "full") -> int:
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
     mainMode = os.environ.get("DARTLAB_SEARCH_MAIN_MODE", "auto").strip().lower() or "auto"
+    mainOnly = os.environ.get("DARTLAB_SEARCH_MAIN_ONLY", "").strip().lower()
     if mainMode not in {"auto", "catalog", "legacy"}:
         print(f"[main] invalid DARTLAB_SEARCH_MAIN_MODE={mainMode!r}")
         return 2
+    if mainOnly and mainOnly not in {"lite"}:
+        print(f"[main] invalid DARTLAB_SEARCH_MAIN_ONLY={mainOnly!r}")
+        return 2
+    if mainOnly == "lite":
+        _buildAndUploadLite(hfToken)
+        print("[lite] 단독 완료")
+        return 0
 
     nDocs = _buildMainFromCatalog(mainMode)
     if nDocs is None:
@@ -221,6 +229,9 @@ def _buildAndUploadLite(hfToken: str) -> None:
         print(f"[lite] ✗ nDocs {nLite:,} < {minLite:,} — lite 업로드 skip (full 은 이미 배포됨)")
         return
     writeIndexManifest(liteDir, tier="lite", buildCommand="buildSearchMain.lite")
+    if not hfToken:
+        print("[lite] HF_TOKEN 없음 — 업로드 스킵")
+        return
     print(f"[lite] {nLite:,} 문서 / {liteMb:.1f} MB → HF dart/contentIndex/lite/ 업로드")
     summary = pushContentIndex(hfToken, tier="lite", promoteCurrent=_promoteCurrent())
     _printPublishSummary(summary)

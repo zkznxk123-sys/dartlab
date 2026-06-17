@@ -155,15 +155,6 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-      - name: Verify HF contentIndex round-trip (lite)
-        run: >
-          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py
-          --tier lite
-          --out "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
-          --fail-on-error
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-
       - name: Audit search result contract
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchResultContract.py
@@ -211,6 +202,45 @@ jobs:
             --tier full \
             --candidate-manifest-path "$DARTLAB_SEARCH_FULL_CANDIDATE_MANIFEST" \
             --out "$RUNNER_TEMP/searchPromote.delta.full.json" \
+            --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build content lite + stage candidate
+        run: uv run python .github/scripts/search/buildSearchMain.py
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_SEARCH_EXPECTED_SOURCES: ${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}
+          DARTLAB_SEARCH_MAIN_MODE: "catalog"
+          DARTLAB_SEARCH_MAIN_ONLY: "lite"
+          DARTLAB_SEARCH_PROMOTE_CURRENT: "0"
+
+      - name: Verify HF contentIndex candidate round-trip (lite)
+        shell: bash
+        run: |
+          if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
+            echo "No lite candidate manifest staged"
+            exit 1
+          fi
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py \
+            --tier lite \
+            --manifest-repo-path "$DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST" \
+            --out "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json" \
+            --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Promote verified contentIndex candidate (lite)
+        shell: bash
+        run: |
+          if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
+            echo "No lite candidate manifest staged"
+            exit 1
+          fi
+          uv run python -X utf8 .github/scripts/search/promoteSearchCandidate.py \
+            --tier lite \
+            --candidate-manifest-path "$DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST" \
+            --out "$RUNNER_TEMP/searchPromote.delta.lite.json" \
             --fail-on-error
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -337,6 +367,7 @@ jobs:
             ${{ runner.temp }}/searchQualityDrill.delta.labels.jsonl
             ${{ runner.temp }}/searchQualityDrill.delta.miss.jsonl
             ${{ runner.temp }}/searchPromote.delta.full.json
+            ${{ runner.temp }}/searchPromote.delta.lite.json
             ${{ runner.temp }}/searchRemoteEvidence.delta.json
             ${{ runner.temp }}/searchQuality.delta.json
             ${{ runner.temp }}/searchMissLedger.delta.jsonl
