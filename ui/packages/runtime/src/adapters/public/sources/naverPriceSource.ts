@@ -7,15 +7,14 @@
 // 옛 module Map 캐시 + 인라인 fetch 는 폐기 — fetch 코어가 read 레벨 캐시(10분 TTL)·dedup. dev/프록시
 //   분기 + URL 조립은 origins 레지스트리(naverWorker)로 흡수.
 import type { Candle } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 import { originConfigured } from '../../../data/origins/registry';
 
 const browser = typeof window !== 'undefined';
 
 // loadNaverFresh 는 publicPricePort 경유로 core 를 받지만, core 미주입 경로(레거시)도 안전하게 폴백.
 // (govPriceSource.govCore 동형 — 어댑터 주입 우선, 무주입만 모듈 폴백 lazy 생성.)
-let naverFallbackCore: DataCore | null = null;
-const naverCore = (core?: DataCore): DataCore => core ?? (naverFallbackCore ??= createDataCore());
+const naverCore = moduleFallbackCore();
 
 interface NaverFreshFile {
 	source: string;

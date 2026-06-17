@@ -1,14 +1,13 @@
 // 타입 정본 = contracts (ProductIndexItem 승격 완료 — 중복 정의 금지).
 import type { ProductIndexItem } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const PRODUCT_INDEX_PATH = 'metadata/corpList.parquet';
 
 // loadHfProductIndexMap 은 companySource(local)·createPublicRuntime 가 core 없이 호출하므로(시그니처 불변)
 // 모듈 폴백 코어를 lazy 생성한다(financeSource.financeRowsCore 동형). 어댑터가 core 를 주면 그것을 쓴다.
 // 옛 productIndexPromise 싱글턴(결과 메모이즈)은 폐기 — 코어가 read 레벨에서 캐시·dedup 한다.
-let productFallbackCore: DataCore | null = null;
-const productCore = (core?: DataCore): DataCore => core ?? (productFallbackCore ??= createDataCore());
+const productCore = moduleFallbackCore();
 
 interface ProductIndexRow extends Record<string, unknown> {
 	stockCode?: unknown;

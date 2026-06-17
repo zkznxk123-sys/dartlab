@@ -6,15 +6,14 @@
 // 옛 module Map 캐시 + 인라인 fetch 는 폐기 — fetch 코어가 read 레벨 캐시(10분 TTL)·dedup. env 게이트 +
 //   워커 URL 조립은 origins 레지스트리(newsWorker)로 흡수.
 import type { NewsItem } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 import { originConfigured } from '../../../data/origins/registry';
 
 const browser = typeof window !== 'undefined';
 
 // publicNewsPort() 는 ui/web 레거시·로컬/퍼블릭 어댑터가 core 없이 호출하므로 core 미주입 경로 전용 모듈
 // 폴백 코어를 lazy 생성한다(govPriceSource.govCore 동형). 어댑터가 core 를 주입하면 그걸 쓴다.
-let newsFallbackCore: DataCore | null = null;
-const newsCore = (core?: DataCore): DataCore => core ?? (newsFallbackCore ??= createDataCore());
+const newsCore = moduleFallbackCore();
 
 interface NewsFile {
 	code: string;

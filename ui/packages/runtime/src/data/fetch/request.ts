@@ -129,3 +129,14 @@ export function createDataCore(opts: DataCoreOptions = {}): DataCore {
 
 	return { request, requestParquetRows, requestParquetWholeFile, clear };
 }
+
+/**
+ * 레거시 무인자 포트 경로용 모듈 폴백 코어 — core 미주입 시 1회 lazy 생성(호출마다 self 격리).
+ * ui/web(localTerminalData)·core 없는 localCompanyPort 가 포트를 무인자 호출하는 동안만 쓰인다.
+ * 어댑터(createXRuntime)가 core 를 주입하면 그걸 그대로 사용. source 가 createDataCore 를 직접
+ * 부르지 않게 모아 둔다(가드 rule 4 특례 제거). 정식 해소 = 호출부 core 주입(ui-platform-refactor).
+ */
+export function moduleFallbackCore(): (core?: DataCore) => DataCore {
+	let fallback: DataCore | null = null;
+	return (core) => core ?? (fallback ??= createDataCore());
+}

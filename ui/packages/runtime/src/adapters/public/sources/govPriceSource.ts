@@ -7,7 +7,7 @@
 //   3. 프로덕션 — 캐시 읽기 전용(미스 시 호출측이 KRX 폴백). 운영자가 로컬에서 열며 공유 HF 캐시를 채운다.
 // 출처표시 의무(공공누리): gov 데이터 표시 시 contracts 의 GOV_ATTRIBUTION 노출.
 import type { Candle } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
 // vite 환경 캐스트 — 런타임 패키지 tsc 는 vite/client 타입 무의존 (origin.ts 동일 패턴)
@@ -23,8 +23,7 @@ export interface GovCandleFile {
 // publicPricePort 는 ui/web 레거시·로컬 어댑터 양쪽이 호출하므로 core 미주입 경로 전용 모듈 폴백 코어를 lazy
 // 생성한다(financeSource.financeRowsCore 동형). 어댑터는 자신의 createDataCore() 를 주입한다.
 // 옛 cache·inflight·recentPromise Map(결과/in-flight 수기 관리)은 폐기 — 코어가 read 레벨에서 캐시·dedup.
-let govFallbackCore: DataCore | null = null;
-const govCore = (core?: DataCore): DataCore => core ?? (govFallbackCore ??= createDataCore());
+const govCore = moduleFallbackCore();
 
 // HF 캐시 = 회사별 parquet (gov/prices/company 동일 schema). 필요한 OHLCV+등락률 컬럼만 projection.
 // fluctuationRate = 기준가 대비 등락률 — 수정주가(adjustCandles) 체이닝 입력.

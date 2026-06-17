@@ -6,7 +6,7 @@
 // key = `{MARKET_GROUP}-{IDX_NM 안전화}` — buildGovData.indexKey 와 1:1 (예약문자/공백 '_' 치환·한글 유지).
 import type { Candle, IndexRef } from '@dartlab/ui-contracts';
 import { KR_INDEX_PRESETS } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 import { mergeDedup } from './priceSource';
 
 const browser = typeof window !== 'undefined';
@@ -61,8 +61,7 @@ function rowToCandle(r: IdxRow): Candle | null {
 // 생성한다(financeSource.financeRowsCore 동형). 어댑터는 자신의 createDataCore() 를 주입한다.
 // 옛 cache·inflight·nameScanCache Map(결과/in-flight/universe 수기 관리)은 폐기 — 코어가 read 레벨에서
 // 캐시(per-parquet path)·dedup. universe 재빌드는 코어 캐시된 year 파일을 재그룹화(read 비용 0).
-let idxFallbackCore: DataCore | null = null;
-const idxCore = (core?: DataCore): DataCore => core ?? (idxFallbackCore ??= createDataCore());
+const idxCore = moduleFallbackCore();
 
 // per-index/date year 파일 통파일 직독 — 코어 read 캐시·dedup 공유. 지수 신선도 = 일 단위라 30분 TTL.
 function readIdxFile(core: DataCore, path: string, columns: string[], key: string): Promise<IdxRow[] | null> {

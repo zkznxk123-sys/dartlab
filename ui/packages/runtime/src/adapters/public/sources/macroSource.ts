@@ -3,7 +3,7 @@
 // 차트 오버레이(ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
 // 화이트리스트·출처표시 정본은 contracts (MACRO_SERIES·MACRO_ATTRIBUTION).
 import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
 
@@ -18,8 +18,7 @@ interface ObsRow extends Record<string, unknown> {
 // createHfMacroPort 는 ui/web 레거시(@dartlab/ui-runtime export 소비)가 core 없이 호출하므로(시그니처 불변
 // 제약), core 미주입 경로 전용 모듈 코어를 lazy 생성한다. 어댑터(createPublicRuntime/createLocalRuntime)는
 // 자신의 createDataCore() 를 주입하고, 이 폴백은 ui/web 같은 셸 직접 호출에만 쓰인다(financeSource.financeRowsCore 동형).
-let macroFallbackCore: DataCore | null = null;
-const macroCore = (core?: DataCore): DataCore => core ?? (macroFallbackCore ??= createDataCore());
+const macroCore = moduleFallbackCore();
 
 function toYmd(d: Date | string | null | undefined): string {
 	if (d == null) return '';

@@ -4,7 +4,7 @@
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
 // 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
 import type { FinCard, FinMode, FinScope, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
-import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
 
@@ -159,8 +159,7 @@ function loadRows(core: DataCore, code: string): Promise<RawRow[] | null> {
 // loadFinanceRows 는 landing(공시뷰어 provideFinanceRows)이 core 없이 (code)=>rows 콜백으로 주입한다 —
 // 시그니처 불변이 강행 제약. 따라서 이 경로 전용 core 를 모듈 내 lazy 생성(어댑터당 1 싱글턴 금지 원칙은
 // 어댑터 컨텍스트 한정 — 여기는 어댑터 밖 셸 주입 콜백이라, read 레벨 bounded 캐시 확보가 목적).
-let rowsOnlyCore: DataCore | null = null;
-const financeRowsCore = (): DataCore => (rowsOnlyCore ??= createDataCore());
+const financeRowsCore = moduleFallbackCore();
 
 // 정량재무제표 표(viewer FinanceDialog)용 raw 행 — bundle()(차트)과 같은 core read 캐시 공유라 회사당 1회만
 // 다운로드. DuckDB-WASM 제거 후 표가 이 행으로 JS 집계(financeQuery). 미존재/실패 = null.
