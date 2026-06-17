@@ -216,6 +216,13 @@ Company("005930").industry()
    peers : list[str]         # 같은 stage 종목코드
 ```
 
+## 백분위·분포 경계 (SSOT)
+
+산업 분포 위 회사 위치(백분위)는 **단일 산식 + 모집단 파라미터화**다 — 순위는 라이브 `pctRank`(모집단 무관 순수함수)로 peer 모집단(업종/시장/전체)만 바꿔 계산하고, "3갈래 분기"는 없다(터미널 `industryPercentile`·`percentileIn` 동일 산식 공유). 분포 **밴드** 소스는 의도된 이원화 — 퍼블릭은 prebuilt `industryStats.json`(KSIC 섹터·동일가중·상장 primary사 p10~p90), 로컬은 라이브 `quantileBand` 5분위. 둘 다 **KRX 시총가중 업종지수가 아니다**(분포출처 라벨 강제, 공식 업종지표는 외부 link-only).
+
+- **industry 소유**: 섹터 분포 위 1점 읽기/깔때기(읽기). peer **N사 정밀 비교**는 `compare()`(셀 정렬 매트릭스, 백분위 토큰 0) — industry 가 재구현하지 않고 교차참조만.
+- `marketShare`(상장사매출비중)는 시장점유율 아님(분모=상장 구성사 매출 합). "점유율" 라벨 사칭 금지.
+
 ## evidence 기준
 
 산업 답변은 `target` (종목코드) · `industryId` · `stage` · taxonomy `dataAsOf` (운영자 갱신 시점) 를 남긴다. `confidence < 0.5` 면 매칭 신뢰도 낮음을 답변에 명시.
