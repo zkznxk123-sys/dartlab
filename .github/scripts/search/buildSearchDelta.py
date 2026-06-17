@@ -126,9 +126,14 @@ def main() -> int:
         if rows.height == 0:
             print("[delta] catalog changed-set 없음 — 업로드 스킵")
             return 0
+        from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+
+        outDir = _contentIndexDir()
+        if _previousManifestHasDelta(outDir / "previous_manifest.json"):
+            print("[delta] previous current has delta — compact current catalog into full main")
+            return _compactCatalogMain(currentCatalog, hfToken)
         from dartlab.providers.dart.search.entityGraphCatalog import prepareEntityGraphCatalogArtifact
         from dartlab.providers.dart.search.fieldIndex import (
-            _contentIndexDir,
             buildContentSegment,
             clearCache,
             saveSegment,
@@ -136,7 +141,6 @@ def main() -> int:
         from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
 
         idx, meta = buildContentSegment(rows.to_dicts(), showProgress=True)
-        outDir = _contentIndexDir()
         saveSegment(idx, meta, "delta", outDir=outDir)
         shutil.copyfile(currentCatalog, outDir / "catalog_snapshot.parquet")
         _copySourceManifestSet(outDir)
@@ -214,6 +218,89 @@ def _printEntityGraphSummary(summary: dict) -> None:
     if mode not in {"copied", "built", "missing"}:
         return
     print(f"[graph] entityGraphCatalog {mode}: {summary}")
+
+
+def _previousManifestHasDelta(path: Path) -> bool:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return bool(data.get("hasDelta"))
+
+
+def _compactCatalogMain(currentCatalog: str, hfToken: str) -> int:
+    from dartlab.providers.dart.search.entityGraphCatalog import prepareEntityGraphCatalogArtifact
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, clearCache
+    from dartlab.providers.dart.search.fieldIndexRebuild import rebuildMainFromCatalog, writeIndexManifest
+    from dartlab.providers.dart.search.pipeline import _loadCatalog
+    from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
+
+    outDir = _contentIndexDir()
+    _removeSegment(outDir, "delta")
+    catalog = _loadCatalog(currentCatalog)
+    nDocs = rebuildMainFromCatalog(catalog, tier="full", showProgress=True)
+    shutil.copyfile(currentCatalog, outDir / "catalog_snapshot.parquet")
+    _copySourceManifestSet(outDir)
+    _buildRouterArtifact()
+    _printEntityGraphSummary(prepareEntityGraphCatalogArtifact(outDir, sourceCatalogPath=currentCatalog))
+    writeIndexManifest(outDir, tier="full", buildCommand="buildSearchDelta.catalogCompaction")
+    clearCache()
+    minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "350000"))
+    if nDocs < minDocs:
+        print(f"[delta] ✗ catalog compaction nDocs {nDocs:,} < {minDocs:,} — 업로드 중단")
+        return 1
+    print(f"[delta] catalog compaction {nDocs:,} 문서")
+    if not hfToken:
+        print("[delta] HF_TOKEN 없음 — 업로드 스킵 (로컬 빌드만)")
+        return 0
+    files = [
+        "main.npz",
+        "main_stems.json",
+        "main_meta.parquet",
+        "main_info.json",
+        "router.json",
+        "catalog_snapshot.parquet",
+        "source_manifest_set.json",
+        "entityGraphCatalog.parquet",
+        "manifest.json",
+    ]
+    summary = publishContentIndexFiles(
+        token=hfToken,
+        indexDir=outDir,
+        files=files,
+        tier="full",
+        promoteCurrent=_promoteCurrent(),
+        obsoleteCurrentFiles=[
+            "delta.npz",
+            "delta_stems.json",
+            "delta_meta.parquet",
+            "delta_info.json",
+        ],
+    )
+    _writeCandidateEnv(summary)
+    print(
+        f"  [compact] {summary.get('candidateManifestPath', '')} "
+        f"-> {summary['currentPrefix']} {summary['publishMode']} ({len(summary['uploaded'])} uploads)"
+    )
+    return 0
+
+
+def _removeSegment(outDir: Path, segment: str) -> None:
+    for suffix in (".npz", "_stems.json", "_meta.parquet", "_info.json"):
+        path = outDir / f"{segment}{suffix}"
+        if path.exists():
+            path.unlink()
+
+
+def _buildRouterArtifact() -> int:
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.router import buildRouterModel
+
+    eventsPath = Path(__file__).resolve().parent / "questionSet" / "events.json"
+    events = json.loads(eventsPath.read_text(encoding="utf-8"))["events"]
+    model = buildRouterModel(events)
+    (_contentIndexDir() / "router.json").write_text(json.dumps(model, ensure_ascii=False), encoding="utf-8")
+    return len(model["events"])
 
 
 def _promoteCurrent() -> bool:

@@ -116,6 +116,10 @@ def test_search_delta_script_exposes_catalog_dry_run() -> None:
     assert "DARTLAB_SEARCH_DELTA_DRY_RUN" in text
     assert "runCatalogDeltaDryRun" in text
     assert "DARTLAB_SEARCH_DELTA_MODE" in text
+    assert "_previousManifestHasDelta" in text
+    assert "_compactCatalogMain" in text
+    assert "buildSearchDelta.catalogCompaction" in text
+    assert "previous current has delta" in text
 
 
 def test_pull_search_current_index_script_exists() -> None:
