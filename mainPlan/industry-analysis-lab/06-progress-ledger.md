@@ -28,6 +28,15 @@
 - ★**시니어 dev 렌즈의 "catalog 1500 vs agent 600 부분 재생성" 정밀화는 채택 거부**(critic 실측 반증, artifactSync.py:99 agent=catalog 동일 _searchDoc): SKILL.md 본문 편집 시 `syncArtifacts(write=True)` 전수 재생성.
 - 검증 통과(변경 없음): `buildIndustrySummary` 첫 컬럼 `stage`·opMargin 미포함 · `Industry.edges()` amount/ratio select 누락 · 유령 모듈 4종 미존재 · calcs 3·build 13 파일.
 
+**구현 세션 3차 (2026-06-17 marketShare 라벨 토론, 4에이전트 → [07 §구멍5](07-implementation-plan.md))** — 2차의 "터미널 표시 제거(필드 보존)" 결정을 코드실측이 뒤집음:
+- ★marketShare 소비처가 터미널 2곳이 아니라 **퍼블릭 map(CompanyCard·TreemapView)·scan(metrics·presets)·compare 까지 7곳**, 전부 '점유율' 사칭. 2차 결정은 과소 범위 + 멀쩡한 metric(트리맵 크기·scan industry-leader 프리셋) 기능손실.
+- ★3렌즈 만장일치 **제거 아닌 정직 재라벨**: 값(상장사 내 매출비중)은 정직, 이름만 사칭 → 전 소비처 '점유율'→'상장사매출비중'(키·metric·preset 보존, 회귀 0). map/scan 은 라벨만이라 SSOT 경계 무침범(별도 변경 단위). 로컬 100·industryRank:1·peerCount:1 은 단독유니버스 동어반복 날조라 값 제거.
+
+**구현 진행 (Phase A, 2026-06-17 — 커밋, push 보류)**:
+- 구멍2 ✅ `buildIndustrySummary` 파생 컬럼(영업이익률·coverageRatio)+테스트(872bd2888) + SKILL.md/카탈로그 동기화(b3a0e30c8, 기존 search 부채 동반 해소)
+- 구멍1 퍼블릭 격자 ✅ `/industry/[id]` profit-pool 2D + `ui-surfaces/map/industryPool.ts` rollup + profitPoolParity.mts(6a0d34666). 터미널 CenterStack 버블(신규 lazy 채널)은 후속
+- 구멍5 marketShare 재라벨 ✅ CU1~CU5(5fc87658f·5feb51359·b49e1b491·36edae6ab). 문서 정정 동반
+
 ---
 
 ## 2. 토론 출처

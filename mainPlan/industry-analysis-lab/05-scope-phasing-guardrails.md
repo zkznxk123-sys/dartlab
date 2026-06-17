@@ -12,7 +12,7 @@
 **생존 조건**: 이 업그레이드는 *세계 메커니즘 매칭*이 아니라 **(a) 못 풀던 질문 1개를 답하거나 (b) 묻어둔 함수를 배선하거나 (c) 분기 통일·inert dead 정리를 하는 곳**에서만 산다.
 - (a) profit-pool 격자 = 회사별 사일로 제품이 구조적으로 못 푸는 "이익은 어느 단계가 버나". 신규 데이터 0이라 싸고, born-structured 격자라 우리만.
 - (b) hop2·summary·HHI/CR4 *함수*를 Industry verb DataFrame·화면에 꺼내는 배선 + summary/timeline 화면 노출 = "함수는 만들고 화면엔 안 꺼낸 부채" 상환. (★lifecycle은 industryBadge.phase로 이미 런타임 자동 부착·live이라 "화면 노출"만 — orphan 아님. recipe 층 8 curated도 이미 RunPython 런타임 분석 제공 → 중복 신설 금지, [03 §5.1](03-architecture-and-reuse.md).)
-- (c) 백분위 경계 통일(★실측 정정: "3분기 분기"가 아니라 단일 pctRank+모집단 파라미터화, cross-universe-percentile이 이미 통일 — [07 §구멍5](07-implementation-plan.md)) + `marketShare` 표시 컬럼 선제 제거(표시층 한정 CenterStack.svelte·ScreenerModal.svelte, EcoNode 필드 보존 — 라벨 사칭+로컬 100 날조 시정. "inert dead·producer 전무"는 사실오류) = 회귀 차단.
+- (c) 백분위 경계 통일(★실측 정정: "3분기 분기"가 아니라 단일 pctRank+모집단 파라미터화, cross-universe-percentile이 이미 통일 — [07 §구멍5](07-implementation-plan.md)) + `marketShare` 정직 재라벨(전 소비처 '점유율'→'상장사매출비중', 키·metric·preset 보존 — 로컬 100만 값 제거. "inert dead·producer 전무"·"표시 제거"는 사실오류 — [07 §구멍5](07-implementation-plan.md) 토론 정정) = 회귀 차단.
 
 이게 없으면 "세계 제품 흉내"라 안 하느니만 못하다.
 

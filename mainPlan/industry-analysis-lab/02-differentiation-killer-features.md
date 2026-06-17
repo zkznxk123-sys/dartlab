@@ -67,12 +67,12 @@
 
 **데이터 지원**:
 - 퍼블릭: 회사값을 industryStats p10~p90 밴드 위 마커로(읽기). compare로 funnel 링크.
-- 로컬: engine.ts industryPercentile([engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 표시 컬럼 제거(CenterStack.svelte·ScreenerModal.svelte).
+- 로컬: engine.ts industryPercentile([engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 전 소비처 정직 재라벨(→'상장사매출비중', 키 보존)·로컬 100 날조 값 제거([07 §구멍5](07-implementation-plan.md)).
 
 **가드레일 (4선결)**:
 1. **percentile band만** — mean±std 박스 금지(std가 roe 86.44·opMargin 34.71 heavy outlier까지 = fake precision). mean 마커도 밴드 밖 자주 벗어나므로 percentile만.
 2. **n<10 *분포(metric)* 숨김 + "n=N" 노출.** (industryStats는 산업당 metric별 roe/opMargin/revCagr 독립 distribution이고 각자 n을 가짐 — 산업 단위 아님.)
-3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + `marketShare` 표시 컬럼 선제 제거**(표시층 한정 CenterStack.svelte:194/198·ScreenerModal.svelte:42, EcoNode 필드 보존 — 라벨 사칭+로컬 날조 시정, §문제·[07 §구멍5](07-implementation-plan.md) 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
+3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + `marketShare` 정직 재라벨**(전 소비처 '점유율'→'상장사매출비중', 키·metric 보존·로컬 100만 값 제거 — 라벨 사칭+로컬 날조 시정, §문제·[07 §구멍5](07-implementation-plan.md) 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
 4. **SSOT 경계 명문화 선결**: industry = 섹터 분포 위 1점 읽기/깔때기, compare + financial-statement-lab = 큐레이션 peer 정밀 SSOT. 이 경계를 mainPlan 문서로 박기 전 코딩 금지(fin-stmt-lab PRD와 충돌이 아니라 de-risk).
 
 > 적대렌즈가 "또 하나의 백분위 패널 신설"을 kill했다. 이 killer가 생존한 유일한 이유는 **신규 계산이 아니라 표시층 통일 + inert dead 정리**이기 때문. 새 백분위 엔진을 만들면 그 순간 kill 대상으로 회귀한다.

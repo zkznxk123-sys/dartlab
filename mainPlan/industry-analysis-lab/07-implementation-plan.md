@@ -135,24 +135,26 @@
 - `EcoNode`(types.ts:120)는 `routeLoad.ts:46`이 퍼블릭 터미널 RawData로 로드하는 **퍼블릭/로컬/landing 공통** 타입 — `landing map/+page.svelte:236`(metric 9)·`compare/+page.svelte:82`가 같은 키 소비.
 - compare(05 funnel)는 `compare.py` percentile 토큰 **0건**(셀 정렬 매트릭스) — 백분위 통일 항목에 묶은 건 범주오류.
 
-**정공법 결정**: Phase C를 "백분위 3갈래 통일"에서 **(a) 경계 문서화 (b) compare 범주오류 정정 (c) marketShare 제거 사유 교정**으로 재프레임(framing kill).
-- marketShare 제거 = **"EcoNode 필드 제거" 아님** → "터미널 표시 컴포넌트(`CenterStack.svelte:194/198`·`ScreenerModal.svelte:42`) 한정 제거 + `types.ts:120` 필드 **보존**"(landing map/compare 3곳 동시 회귀 방지). 사유 = "producer 전무"(사실오류) 삭제 → "라벨 사칭 + 로컬 100 날조 시정". "user harm 0 청소"(over-claim) → "진행 중 라벨 사칭·날조 시정"으로 격상.
+**정공법 결정**(★2026-06-17 3렌즈 토론 만장일치 — 기존 "터미널 표시 제거"를 **전 소비처 정직 재라벨**로 격상): Phase C를 "백분위 3갈래 통일"에서 **(a) 경계 문서화 (b) compare 범주오류 정정 (c) marketShare 라벨 사칭 정직 재라벨**으로 재프레임(framing kill).
+- ★**marketShare = 제거 아닌 재라벨**. 값(buildIndustryMap.py:816 `share=revenue/total*100`)은 *정직한 양*(상장사 풀 내 상대 매출규모)에 *거짓 이름*("점유율"/market share)만 붙은 것 — 멀쩡한 metric(TreemapView 크기·scan industry-leader 프리셋·정렬)을 죽이면 over-eng+기능회귀+경계침범(scan/map 소유). 정공법 = **이름만 `상장사매출비중`(en `rev share(listed)`)으로 교정, 키·metric·preset·동작 전부 보존(회귀 0)**. 04 EXCLUDED("상장사 매출=시장규모 근사만")·§3-8("분포≠공식지수")와 정확 합치.
+- ★**전 소비처 포함**(터미널만 아님 — 사칭은 값에 붙지 화면에 안 붙음, 외부 사용자 보는 퍼블릭 map 사칭 유지=정직정책 자기모순). 단 **라벨 문자열만** 교정이라 SSOT 경계(scan=횡단스크리닝·map=산업맵 소유) 무충돌 — metric 삭제·재구현 아님. 다른 PRD 소유 화면은 **별도 변경 단위**로 분리(아래 commit 단위).
+- ★**로컬 100 = 값 제거**(재라벨 불가). localTerminalData.ts:348 `marketShare:100`은 단독 유니버스(peer 1사)라 분모=자기자신 = 동어반복 날조 → 값 미설정(undefined). `industryRank:1`·`industryPeerCount:1` 동반 제거(같은 날조). optional 필드라 소비처 자동 '—' 폴백(회귀 0).
 - compare(05 funnel) = 백분위 통일에서 분리 → fin-stmt-lab/compare "셀 정밀 비교" 교차참조로만.
 - `useStatsBand` 이원화(퍼블릭 industryStats prebuilt vs 로컬 quantileBand 라이브)는 **의도된 설계** → `engine.ts:404-406` 주석을 industry SKILL.md 경계 SSOT로 승격(제거 아님).
 
-**touchpoints**:
-| 파일 | 변경 |
-|---|---|
-| `05-scope-phasing-guardrails.md:15,36,58` | "백분위 3분기"→"단일 pctRank(engine.ts:179)+모집단 파라미터(buildFundMetrics peers, engine.ts:505-508)". marketShare 제거 사유 교체. |
-| `05-...:40,70` | "compare funnel"을 백분위 통일에서 분리(compare.py percentile 0건). |
-| `03-...:48` | §2 marketShare "inert dead·producer 전무·null→—" 서사 삭제→"라벨 사칭 + 로컬 날조 시정 + 표시 한정 제거(필드 보존)". |
-| `engines/industry/SKILL.md` | 백분위 SSOT 경계 박제: 순위=pctRank 라이브 peer, band 소스=public industryStats(prebuilt)/local quantileBand(라이브) 이원화는 의도된 설계(engine.ts:404-406 승격). 구멍2 SKILL.md 편집이면 syncArtifacts 묶임. |
-| `CenterStack.svelte:194,198`·`ScreenerModal.svelte:42` | marketShare 표시 제거(필드 미제거). 제거 전 ecosystem.json 키 실재·routeLoad.ts:46 주입·landing map/compare 미회귀 1회 실측. |
-| `types.ts:120` | EcoNode.marketShare 필드 **보존**(필드 제거 금지). |
+**touchpoints (소유 경계별 변경 단위)**:
+| 변경 단위 | 파일 | 변경 |
+|---|---|---|
+| CU1 [터미널/industry-lab] | `CenterStack.svelte:194/198`·`ScreenerModal.svelte:42`·`types.ts:120` | 라벨 '점유율/M.SHARE'→'상장사매출비중/LISTED REV%'·'rev share(listed)'. 키·num accessor·필드 보존 + 주석 1줄. |
+| CU2 [퍼블릭 map·/map 소유] | `map CompanyCard.svelte:498/776`·`TreemapView.svelte:180`·`landing map/+page.svelte:994`·`compare/+page.svelte:82` | '점유율'→'상장사매출비중' 라벨만. 크기/색/정렬 기능·키 불변. landing map 수동 회귀 검수. |
+| CU3 [scan·scan 소유] | `scan/metrics.ts:113/117`·`presets.ts:144` | label '점유율'→'상장사매출비중' + definition 정직화. metric key/conds/sorts/cols 불변(industry-leader 프리셋 보존). |
+| CU4 [로컬 날조 제거] | `localTerminalData.ts:348/353/354` | marketShare:100·industryRank:1·industryPeerCount:1 제거(undefined). 소비처 자동 '—'. |
+| CU5 [데이터·build 소유] | `buildIndustryMap.py:803/816/868` | 산출 주석 '상장사매출비중(시장점유율 아님)' 정정. 키명·산식 불변. |
+| `engines/industry/SKILL.md` | 백분위 SSOT 경계 박제(band 이원화=의도된 설계). 구멍2 SKILL.md 편집이면 syncArtifacts 묶임. |
 
-**테스트**: Phase C 순수 표시층 → svelte-check + build. marketShare 표시 제거 = landing map/+page.svelte:236·compare/+page.svelte:82 미회귀 수동 확인. compare 범주오류·band 경계 = 문서 변경.
-**롤백**: 전부 표시층/문서 → svelte-check+build 통과 후 git revert. marketShare 표시 제거가 landing 회귀 시 즉시 revert(필드 미제거라 데이터층 무손상).
-**측정 AC**: (1) 05에서 "백분위 3분기"·"producer 전무" 0건(grep), (2) types.ts:120 필드 보존(제거 0), (3) 터미널 표시 제거 후 landing map metric 9·compare 미회귀(green), (4) compare가 fin-stmt-lab 교차참조로만, (5) band 이원화가 SKILL.md 경계 SSOT 박제.
+**테스트**: 순수 표시층 → svelte-check + build (터미널/landing) + ui/web build (CU4). compare 범주오류·band 경계 = 문서 변경.
+**롤백**: 변경 단위별 git revert. 라벨 교정이라 데이터층 무손상, 로컬 값 제거는 optional 필드라 소비처 가드로 안전.
+**측정 AC**: (1) 코드에 "점유율"(marketShare 맥락) 0건(grep), (2) types.ts:120 필드 보존, (3) TreemapView 크기 옵션·scan industry-leader 프리셋·compare 행 **기능 무손상**(키 불변), (4) 로컬 단일사 카드에서 상장사매출비중/순위 '—' 표시(날조 0), (5) 라벨 길이 변화('점유율'3→'상장사매출비중'7) 시각 회귀 운영자 눈검수(특히 CenterStack stat grid·ScreenerModal 헤더·TreemapView 버튼).
 
 ---
 
@@ -176,7 +178,7 @@
 
 ## 4. 착수 순서 (선결조건 게이트 반영)
 
-- **Phase A** (선결 0, 신규 데이터 0): 구멍2 위생(SKILL.md/docstring 정정 + syncArtifacts) → 구멍1 profit-pool 버블(industryPool.ts 신규 채널 + 양셸 lazy + CenterStack, **edges 무관**) → 구멍4 TestProfitPoolDerived + profitPoolParity.mts(ts 추출 선결) → 구멍5 marketShare 표시 제거 + Phase C 재프레임 문서.
+- **Phase A** (선결 0, 신규 데이터 0): 구멍2 위생(SKILL.md/docstring 정정 + syncArtifacts) → 구멍1 profit-pool 버블(industryPool.ts 신규 채널 + 양셸 lazy + CenterStack, **edges 무관**) → 구멍4 TestProfitPoolDerived + profitPoolParity.mts(ts 추출 선결) → 구멍5 marketShare 정직 재라벨(전 소비처)·로컬 날조 제거 + Phase C 재프레임 문서.
 - **Phase B** (구멍3 재빌드 진단 선결): `Industry().build()` 2단계 재빌드 → 642 vs 132 확정 → 레버 A 졸업 이관 → Industry.edges() 컬럼/인자 + test_edges.py → **그 후** RightStack hop walk.
 - **Phase C** (경계 문서화 선결): 백분위 SSOT 경계 SKILL.md 박제 + compare 범주오류 정정(대부분 문서 — 산식은 이미 단일).
 - **Phase D** (차단): 적응형 lifecycle 임계·가동률·세그먼트·US·DOL·레버 C — `_attempts` 졸업 게이트.
