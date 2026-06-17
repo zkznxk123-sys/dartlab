@@ -38,12 +38,19 @@
 - 구멍5 marketShare 재라벨 ✅ CU1~CU5(5fc87658f·5feb51359·b49e1b491·36edae6ab). 문서 정정 동반
 - Phase C 분포 밴드 ✅ `/industry/[id]` industryStats p10~p90 박스플롯(percentile만·n<10 숨김·분포출처 라벨, fd8506f59). 신규 계산 0
 - Phase B 642 진단 ✅ (read-only, cd2bb17f4) — 헤더 드리프트(exact lookup miss)가 원인, 재빌드 단독은 ~132 정상. 레버 A(퍼지화)가 커버리지 레버
-
 - 구멍1 터미널 CenterStack 버블 ✅ — 신규 lazy 채널 `CompanyPort.industryProfitPool`(industryPoolSource: map/industries/{id}.json fetch, relations 패턴·정적자산 공유) + `Company.industry` raw id + CenterStack '이익 풀' Panel(공정별 매출막대×영업이익률, 이익최대≠매출최대 통찰). 기반 d134430f8, 소비처는 멀티세션 `git add -u` sweep으로 4739222c4에 혼입(코드 온전·master green). svelte-check 0err·build 통과
+- 구멍 Killer#2 edges() ✅ — `Industry.edges()` 거래액·의존도(%) 컬럼(빈 schema+채움, None 보존) + docstring/SKILL.md(edges 반환 블록) + test_edges 2건 + 카탈로그 sync(5aaac4e12·ebd9fd210)
+- Phase B Killer#2 공개 ✅ — `/industry/[id]` 공급망 의존도(%)·출처 칩 + 정직 캡션(4418768dd)
+- Phase C 경계 SSOT ✅ — SKILL.md 백분위 경계 박제(단일 pctRank·band 이원화·compare 교차참조·marketShare≠점유율) + sync(60a3c4ecc·cf23cc295)
 
-**남은 작업 (다음 세션 / 운영자)**:
-- Phase B 실행 — ① **운영자가 `Industry().build()` 재빌드 실행**(메모리 가드, 2단계 검증→커밋. 승인됨 "재빌드도 한다"). ~132 정상 ② 레버 A 퍼지헤더 _attempts 졸업 후 이관 ③ `Industry.edges()` amount/ratio 컬럼+hop/insights ④ calcs/concentration.py 승격(Phase B 동행) ⑤ RightStack hop walk
-- **운영자 액션 2건**: (a) 프론트 시각검수 후 push 승인(profit-pool 격자·분포밴드·marketShare 라벨 길이) (b) edges 재빌드 실행
+**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool(엔진 캐논+공개 격자+터미널 버블) · #2 공급망(edges 컬럼+공개 evidence 칩) · #3 분포(공개 밴드+경계 SSOT). 정직(marketShare 재라벨) ✅. Phase B 진단 ✅.
+
+**남은 작업 (게이트/설계/운영자)**:
+- **calcs/concentration.py 승격 + `edges(hop/insights)` 배선** — "묻어둔 함수(HHI·hop2) 런타임 노출" 핵심 thesis. ★설계 모호: calcSupplyInsights는 dict 반환인데 edges()는 DataFrame → 반환계약 결정 선결(에이전트 토론 권장). 재빌드 무관, 다음 세션
+- **레버 A**(퍼지 헤더, edges.py:506-507→line 490 패턴) — `_attempts/industryAnalysisLab` ③~⑧ 졸업 후 본진. amount 커버리지 레버
+- **edges 재빌드** — 운영자 승인됨("재빌드도 한다")이나 `Industry().build()`는 전종목 panel 로드라 **메모리/시스템 크래시 가드** 영역 → 운영자 직접 실행(2단계 검증→커밋) 권장. 단독 재빌드는 ~132(레버 A 후에 실효)
+- **RightStack hop walk**(터미널 공급망) — edges 재빌드(amount 채움) 후 게이트
+- **운영자 액션**: 프론트 시각검수 후 push 승인(격자·밴드·공급망칩·marketShare 라벨 길이 '상장사매출비중' 7자)
 
 ---
 
