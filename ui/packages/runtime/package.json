@@ -16,7 +16,8 @@
 		"./data/*": "./src/data/*.ts"
 	},
 	"scripts": {
-		"check": "tsc -p tsconfig.json"
+		"check": "tsc -p tsconfig.json",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@dartlab/ui-contracts": "*",
@@ -25,6 +26,7 @@
 	},
 	"devDependencies": {
 		"svelte": "5.56.3",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"vitest": "^3.2.4"
 	}
 }
