@@ -14,7 +14,6 @@
 	import { fmtKRW } from '../lib/engine';
 	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
 	import { classifyFiling } from '../lib/eventRail'; // 비정기 공시 원문명 → DART 공시그룹 근사 분류(이벤트 레일 필터)
-	import { rollupProfitPool, type IndustryStageRollup } from '../../map/industryPool'; // profit-pool 격자 rollup(공유 순수함수)
 	import { watchlist } from '../lib/watchlist.svelte'; // 공시 워치 — 종목코드 왼쪽 ☆ 토글(좌측 패널과 공유)
 
 	interface Props {
@@ -34,30 +33,6 @@
 	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
 	// 차트 상태 — 여기서 생성해 PriceChart 로 내린다(01 §2.5 subject seam 과 동근). 상단 macro 마퀴 클릭→ctl.toggleEcon 공유의 전제.
 	const ctl = new ChartCtl();
-
-	// Profit-pool 격자 — 회사 산업의 "이익은 어느 공정 단계가 버나" (industries/{id}.json lazy fetch,
-	// rollup 은 공유 순수함수). 엔진 캐논(buildIndustrySummary)과 dual-source — 표시용. 미배선(로컬)/미존재는 null.
-	let profitPool = $state<IndustryStageRollup[] | null>(null);
-	let poolToken = 0;
-	$effect(() => {
-		const ind = co.industry;
-		profitPool = null;
-		if (!ind) return;
-		const tk = ++poolToken;
-		void rt.company.industryProfitPool(ind).then((stages) => {
-			if (tk !== poolToken) return;
-			const rolled = stages ? rollupProfitPool(stages).filter((s) => s.opMarginPct !== null && s.revenue > 0) : [];
-			profitPool = rolled.length ? rolled : null;
-		});
-	});
-	// 이익 최대 단계 vs 매출 최대 단계 — 다르면 핵심 통찰(이익집중 ≠ 매출집중)
-	const poolTop = $derived.by(() => {
-		if (!profitPool || profitPool.length === 0) return null;
-		const byMargin = [...profitPool].sort((a, b) => (b.opMarginPct ?? -1e9) - (a.opMarginPct ?? -1e9))[0];
-		const byRev = [...profitPool].sort((a, b) => b.revenue - a.revenue)[0];
-		const revMax = byRev.revenue || 1;
-		return { byMargin, byRev, diverges: byMargin.key !== byRev.key, revMax };
-	});
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
 	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
@@ -469,34 +444,6 @@
 	</div>
 </Panel>
 {#if gradeOpen}<GradeExplainDialog {co} {lang} onClose={() => (gradeOpen = false)} />{/if}
-
-<!-- 이익 풀 — "이 산업의 이익은 어느 공정 단계가 버나" (profit-pool 격자, 엔진 캐논과 dual-source 표시) -->
-{#if profitPool && poolTop}
-	<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '이익 풀', en: 'PROFIT POOL' }} sub={{ kr: '이익은 어느 단계가 버나', en: 'where profit pools' }} flush>
-		<div class="poolStrip">
-			{#each profitPool as s (s.key)}
-				<div
-					class="poolCell"
-					class:poolMax={s.key === poolTop.byMargin.key}
-					title={`${s.name} · ${lang === 'en' ? 'OPM' : '영업이익률'} ${s.opMarginPct}% · ${lang === 'en' ? 'rev' : '매출'} ${(s.revenue / 10000).toFixed(1)}${lang === 'en' ? 'T' : '조'} · ${s.companyCount}${lang === 'en' ? '' : '사'} · ${lang === 'en' ? 'coverage' : '커버리지'} ${Math.round(s.coverageRatio * 100)}%`}
-				>
-					<div class="poolBarWrap">
-						<div class="poolBar" class:neg={(s.opMarginPct ?? 0) < 0} style={`height:${Math.max(6, (s.revenue / poolTop.revMax) * 100)}%`}></div>
-					</div>
-					<span class="poolName">{s.name}</span>
-					<b class={'poolOpm mono ' + ((s.opMarginPct ?? 0) < 0 ? 'tDn' : 'tUp')}>{s.opMarginPct}%</b>
-				</div>
-			{/each}
-		</div>
-		<div class="poolNote">
-			{#if poolTop.diverges}
-				{#if lang === 'en'}Profit peak <b>{poolTop.byMargin.name}</b> ({poolTop.byMargin.opMarginPct}%) ≠ revenue peak <b>{poolTop.byRev.name}</b> — profit ≠ revenue concentration{:else}이익 최대 <b>{poolTop.byMargin.name}</b>({poolTop.byMargin.opMarginPct}%) ≠ 매출 최대 <b>{poolTop.byRev.name}</b> — 이익집중 ≠ 매출집중{/if}
-			{:else}
-				{#if lang === 'en'}Both profit & revenue peak at <b>{poolTop.byMargin.name}</b>{:else}이익·매출 모두 <b>{poolTop.byMargin.name}</b> 집중{/if}
-			{/if} · {lang === 'en' ? 'listed-only · rev-weighted' : '상장사 기준·매출가중'}
-		</div>
-	</Panel>
-{/if}
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->
 <Panel {lang} className="eQuant" prov="real"

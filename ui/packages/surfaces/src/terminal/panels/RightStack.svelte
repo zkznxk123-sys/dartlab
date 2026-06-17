@@ -25,6 +25,7 @@
 	import { gradeTone } from '../lib/engine';
 	import { forensicSignals } from '../lib/forensic'; // 풀스크린에 묻힌 결정론 적신호(감사독립성·단기상환벽) 우측 승격
 	import Panel from '../ui/Panel.svelte';
+	import { rollupProfitPool, type IndustryStageRollup } from '../../map/industryPool'; // 이익 풀 — 공정별 영업이익률×매출 rollup
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 셸 주입 lazy 로더
 	import { viewerEntry } from '../lib/viewerEntry.svelte'; // 중앙 "공시뷰어" 버튼 신호 구독
 	import { disclosureFocus } from '../lib/disclosureFocus.svelte'; // 주가차트 공시 dot 클릭 → 그 날짜 행 스크롤+하이라이트
@@ -49,6 +50,43 @@
 	let holdingsOpen = $state(false); // 출자 관계 분석 전체화면 (타법인 출자 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
 	let pctCrossOpen = $state(false); // 유니버스 교차 백분위 다이얼로그 (업종 내 백분위 패널 → 상세보기)
+
+	// 이익 풀 — 이 회사가 속한 산업의 "이익은 어느 공정 단계가 버나" (industries/{id}.json lazy fetch).
+	// 우측=테이블·수치 정체성 → 막대차트 아닌 밀도 테이블(영업이익률·매출 + 이익최대/매출최대 마커).
+	let profitPool = $state<IndustryStageRollup[] | null>(null);
+	let poolToken = 0;
+	$effect(() => {
+		const ind = co.industry;
+		profitPool = null;
+		if (!ind) return;
+		const tk = ++poolToken;
+		void rt.company.industryProfitPool(ind).then((stages) => {
+			if (tk !== poolToken) return;
+			const rolled = stages ? rollupProfitPool(stages).filter((s) => s.opMarginPct !== null && s.revenue > 0) : [];
+			profitPool = rolled.length ? rolled : null;
+		});
+	});
+	// 영업이익률 내림차순 = "어디서 버나"가 맨 위로. 이익최대·매출최대 마커로 이익≠매출 가시화.
+	const poolRows = $derived.by(() => {
+		const pp = profitPool;
+		if (!pp || pp.length === 0) return null;
+		const marginMax = Math.max(...pp.map((s) => s.opMarginPct ?? 0), 0.01);
+		const byMargin = [...pp].sort((a, b) => (b.opMarginPct ?? -1e9) - (a.opMarginPct ?? -1e9))[0];
+		const byRev = [...pp].sort((a, b) => b.revenue - a.revenue)[0];
+		const rows = [...pp]
+			.sort((a, b) => (b.opMarginPct ?? -1e9) - (a.opMarginPct ?? -1e9))
+			.map((s) => ({
+				...s,
+				isMarginMax: s.key === byMargin.key,
+				isRevMax: s.key === byRev.key,
+				barPct: Math.max(2, ((s.opMarginPct ?? 0) / marginMax) * 100)
+			}));
+		return { rows, byMargin, byRev, diverges: byMargin.key !== byRev.key };
+	});
+	function fmtPoolRev(v: number): string {
+		// industries/{id}.json revenue 단위 = 억원
+		return v >= 10000 ? `${(v / 10000).toFixed(1)}조` : `${Math.round(v).toLocaleString()}억`;
+	}
 	// 중앙 "공시뷰어" 버튼 신호(viewerEntry.pulse) 구독 — pulse 변할 때만 오버레이를 연다. seenPulse 는
 	// 비반응 plain let(추적 0)이라 viewerOpen 쓰기가 effect 를 재발화시키지 않음(루프 없음).
 	let seenViewerPulse = viewerEntry.pulse;
@@ -408,6 +446,38 @@
 	{#await import('./PercentileCrossDialog.svelte') then { default: PercentileCrossDialog }}
 		<PercentileCrossDialog {co} {lang} {percentileIn} onClose={() => (pctCrossOpen = false)} />
 	{/await}
+{/if}
+
+<!-- 이익 풀 — 이 회사 산업의 공정별 영업이익률·매출 (이익은 어느 단계가 버나) -->
+{#if poolRows}
+	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '이익 풀', en: 'PROFIT POOL' }} sub={{ kr: tx(co.sector, lang) + ' · 공정별 이익률·매출', en: tx(co.sector, lang) + ' · margin·rev by stage' }} flush>
+		<div class="poolTbl">
+			<div class="poolHd">
+				<span>{lang === 'en' ? 'stage' : '공정'}</span>
+				<span class="r">{lang === 'en' ? 'OP margin' : '영업이익률'}</span>
+				<span class="r">{lang === 'en' ? 'revenue' : '매출'}</span>
+			</div>
+			{#each poolRows.rows as s (s.key)}
+				<div class="poolRow" class:poolMax={s.isMarginMax}>
+					<span class="poolStage">
+						{s.name}{#if s.isRevMax}<i class="poolTag" title={lang === 'en' ? 'largest revenue' : '매출 최대 단계'}>{lang === 'en' ? 'rev↑' : '매출↑'}</i>{/if}
+					</span>
+					<span class="poolOpmCell r">
+						<span class="poolOpmBar" class:neg={(s.opMarginPct ?? 0) < 0} style={`width:${s.barPct}%`}></span>
+						<b class={(s.opMarginPct ?? 0) < 0 ? 'tDn' : 'tUp'}>{s.opMarginPct}%</b>
+					</span>
+					<span class="poolRev r mono">{fmtPoolRev(s.revenue)}</span>
+				</div>
+			{/each}
+		</div>
+		<div class="poolNote">
+			{#if poolRows.diverges}
+				{#if lang === 'en'}Profit pools in <b>{poolRows.byMargin.name}</b> ({poolRows.byMargin.opMarginPct}%) — not the biggest-revenue stage ({poolRows.byRev.name}){:else}이익은 <b>{poolRows.byMargin.name}</b>({poolRows.byMargin.opMarginPct}%)에서 — 매출 최대({poolRows.byRev.name})와 다른 단계{/if}
+			{:else}
+				{#if lang === 'en'}Both profit & revenue peak at <b>{poolRows.byMargin.name}</b>{:else}이익·매출 모두 <b>{poolRows.byMargin.name}</b> 집중{/if}
+			{/if} · {lang === 'en' ? 'listed-only · rev-weighted' : '상장사 기준·매출가중'}
+		</div>
+	</Panel>
 {/if}
 
 <!-- FINANCIALS -->
