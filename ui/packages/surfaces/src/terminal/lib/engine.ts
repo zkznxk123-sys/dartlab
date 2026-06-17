@@ -784,6 +784,7 @@ export function createEngine(raw: RawData): Engine {
 			marketLabel,
 			name: { kr: name, en: name },
 			sector: { kr: eco.industryName || SECTOR_KR[industry] || industry, en: SECTOR_EN[industry] || industry },
+			industry,
 			stage: eco.stageName || '',
 			role: eco.role || '',
 			eco,

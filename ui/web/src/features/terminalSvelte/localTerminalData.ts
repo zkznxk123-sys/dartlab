@@ -203,6 +203,11 @@ function buildBridgeRuntime(seed: RuntimeSeed, raw: RawData): DartLabRuntime {
 			async reportFacts() {
 				return [];
 			},
+			// 로컬 단일사 앱은 산업 격자 정적 자산(map/industries) 미배선 → null. 공개 터미널은
+			// createPublicRuntime 경유로 동작(industryPoolSource). 로컬 배선은 후속.
+			async industryProfitPool() {
+				return null;
+			},
 		},
 		price: {
 			async initial(code, year) {

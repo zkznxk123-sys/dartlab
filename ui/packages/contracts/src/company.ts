@@ -47,6 +47,18 @@ export interface LiveCompanyReportFact {
 	source: string;
 }
 
+/** profit-pool 격자 원자료 — map/industries/{id}.json 의 stages[].nodes[] (rollup 은 surface 책임). */
+export interface ProfitPoolNodeRaw {
+	revenue?: number | null;
+	opMargin?: number | null;
+}
+export interface ProfitPoolStageRaw {
+	key?: string;
+	name?: string;
+	stream?: string | null;
+	nodes?: ProfitPoolNodeRaw[];
+}
+
 export interface CompanyPort {
 	/** 단일 회사 제품/프로필 항목 — 미존재는 null. */
 	products(code: string): Promise<ProductIndexItem | null>;
@@ -55,4 +67,6 @@ export interface CompanyPort {
 	relations(code: string): Promise<CompanyRelations | null>;
 	/** 라이브 보고서 팩트 6종 — 해당 없음은 []. */
 	reportFacts(code: string): Promise<LiveCompanyReportFact[]>;
+	/** 산업 profit-pool stage 원자료 (map/industries/{id}.json) — 미존재/미지원은 null. rollup 은 소비 surface. */
+	industryProfitPool(industryId: string): Promise<ProfitPoolStageRaw[] | null>;
 }

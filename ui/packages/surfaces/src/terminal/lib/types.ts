@@ -387,6 +387,8 @@ export interface Company {
 	marketLabel: string;
 	name: Bilingual;
 	sector: Bilingual;
+	/** 산업 raw id (map/industries/{id}.json 키) — sector 는 라벨, 본 필드는 식별자. */
+	industry: string;
 	stage: string;
 	role: string;
 	eco: EcoNode;

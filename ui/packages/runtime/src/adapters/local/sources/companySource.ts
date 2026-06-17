@@ -4,6 +4,7 @@
 import type { CompanyPort, CompanyRelations, ProductIndexItem } from '@dartlab/ui-contracts';
 import { getJson } from '../fetchJson';
 import { loadHfProductIndexMap } from '../../public/sources/productIndexSource';
+import { loadIndustryProfitPool } from '../../public/sources/industryPoolSource';
 import type { CompanyMeta, LocalCaches } from '../localTypes';
 
 function loadMeta(apiBase: string, caches: LocalCaches, code: string): Promise<CompanyMeta | null> {
@@ -53,6 +54,8 @@ export function localCompanyPort(apiBase: string, caches: LocalCaches): CompanyP
 		// 라이브 보고서 팩트 — 로컬 미배선. 해당 없음 = [].
 		async reportFacts() {
 			return [];
-		}
+		},
+		// 산업 profit-pool = 공개 정적 자산(map/industries/{id}.json) 공유 — 로컬 단일사여도 산업 격자는 실데이터.
+		industryProfitPool: loadIndustryProfitPool
 	};
 }
