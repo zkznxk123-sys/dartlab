@@ -444,7 +444,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     See Also:
         - ``dartlab.industry.build.edges.extractDocsEdges`` : 비표 본문 패턴 보완
         - ``dartlab.industry.build.edges.buildAllEdges`` : 본 함수 호출 사용자
-        - ``dartlab.industry.build.insights.calcSupplyInsights`` : amount 우선 소비처
+        - ``dartlab.industry.calcs.concentration.calcSupplyInsights`` : amount 우선 소비처
 
     AIContext:
         "주요 원재료 공급사", "매입처 비중" 류 답변 데이터. ``amount`` 와 ``ratio`` 보유한 엣지만

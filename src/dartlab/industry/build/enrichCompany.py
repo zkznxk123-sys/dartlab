@@ -259,7 +259,7 @@ def enrichCompanyData(
         - blog: blogs/{code}.json (선택)
 
     See Also:
-        - ``dartlab.industry.build.insights.calcSupplyInsights`` : 공급망 종합
+        - ``dartlab.industry.calcs.concentration.calcSupplyInsights`` : 공급망 종합
         - ``dartlab.industry.build.hop2.computeHop2`` : 2-hop 데이터
         - ``dartlab.industry.Industry.__call__`` : 본 함수 결과 사용자
 
@@ -267,7 +267,7 @@ def enrichCompanyData(
         회사 카드 답변의 단일 진입점. 답변 길이가 매우 길어질 수 있으므로 ``insights.hhiRisk`` +
         ``topSuppliers[:3]`` + ``aiInsight.summary`` 핵심 3 키만 발췌 권장.
     """
-    from dartlab.industry.build.insights import calcSupplyInsights
+    from dartlab.industry.calcs.concentration import calcSupplyInsights
 
     if blogIndex is None:
         blogIndex = _loadBlogIndex()

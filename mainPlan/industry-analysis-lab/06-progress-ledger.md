@@ -42,11 +42,13 @@
 - 구멍 Killer#2 edges() ✅ — `Industry.edges()` 거래액·의존도(%) 컬럼(빈 schema+채움, None 보존) + docstring/SKILL.md(edges 반환 블록) + test_edges 2건 + 카탈로그 sync(5aaac4e12·ebd9fd210)
 - Phase B Killer#2 공개 ✅ — `/industry/[id]` 공급망 의존도(%)·출처 칩 + 정직 캡션(4418768dd)
 - Phase C 경계 SSOT ✅ — SKILL.md 백분위 경계 박제(단일 pctRank·band 이원화·compare 교차참조·marketShare≠점유율) + sync(60a3c4ecc·cf23cc295)
+- **묻어둔 집중도 함수 런타임 노출 ✅** (2026-06-17, 2에이전트 적대토론 → 정공법) — `build/insights.py` → `calcs/concentration.py` 승격(이력보존 git mv, import re-point: enrichCompany 1 + test_l2 6 + edges/coverage baseline) + **`Industry()(id, concentration=True)`** 모드(산업 매출 시장구조 HHI/CR3 + 상위5사, `_lifecycle` 선례 동형, verb 0) + TestConcentrationVerb 3건 + SKILL.md(concentration 반환블록·args·정직경계) + 카탈로그 sync(web.json). **설계 모호 해소**: dict↔DataFrame은 calc 함수 dict 유지(계약 불변)·verb 어댑터 `_concentration`만 DataFrame 래핑(`_summary`/`_lifecycle` 패턴). **데이터 정직 가드**: revenue 기반(viable)만 노출·"상장사 매출 기준" 캡션·HHI라벨 반독점 어휘 금지 박제.
+  - ★**적대토론 핵심 발견(정직 카탈로그)**: "런타임 노출" thesis는 *상당 부분 이미 충족됨* — `calcSupplyInsights` 출력은 enrichCompany→buildIndustryMap→`CompanyCard.svelte:505-550` 화면 노출 + `buildInsightRankings.py` HHI 랭킹. orphan은 *함수가 query verb DataFrame으로 안 나오는 것*뿐. 진짜 미노출 = `calcIndustryConcentration`(산업 시장구조, recipe·화면 어디에도 없음, `calcSectorMetrics` 백분위와 직교) 하나 → 이것만 노출. supply-side(amount 0.7%)는 거짓정밀이라 의도적 보류(깎아냄).
 
-**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool(엔진 캐논+공개 격자+터미널 버블) · #2 공급망(edges 컬럼+공개 evidence 칩) · #3 분포(공개 밴드+경계 SSOT). 정직(marketShare 재라벨) ✅. Phase B 진단 ✅.
+**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool(엔진 캐논+공개 격자+터미널 버블) · #2 공급망(edges 컬럼+공개 evidence 칩) · #3 분포(공개 밴드+경계 SSOT). 정직(marketShare 재라벨) ✅. Phase B 진단 ✅. 집중도 런타임 노출 ✅.
 
-**남은 작업 (게이트/설계/운영자)**:
-- **calcs/concentration.py 승격 + `edges(hop/insights)` 배선** — "묻어둔 함수(HHI·hop2) 런타임 노출" 핵심 thesis. ★설계 모호: calcSupplyInsights는 dict 반환인데 edges()는 DataFrame → 반환계약 결정 선결(에이전트 토론 권장). 재빌드 무관, 다음 세션
+**남은 작업 (게이트/운영자 — 전부 재빌드/_attempts 게이트, 비-게이트 코드작업 0)**:
+- ~~calcs/concentration.py 승격 + 런타임 노출~~ ✅ 완료(위). 잔여 `edges(insights=True/hop=2)` 배선은 **재빌드 게이트로 이관** — calcSupplyInsights는 amount 0.7%라 거짓정밀 + 이미 CompanyCard 노출 / computeHop2는 전종목 인접리스트라 캐시경계+amount 채움(재빌드) 선결. 비-게이트 부분은 없음.
 - **레버 A**(퍼지 헤더, edges.py:506-507→line 490 패턴) — `_attempts/industryAnalysisLab` ③~⑧ 졸업 후 본진. amount 커버리지 레버
 - **edges 재빌드** — 운영자 승인됨("재빌드도 한다")이나 `Industry().build()`는 전종목 panel 로드라 **메모리/시스템 크래시 가드** 영역 → 운영자 직접 실행(2단계 검증→커밋) 권장. 단독 재빌드는 ~132(레버 A 후에 실효)
 - **RightStack hop walk**(터미널 공급망) — edges 재빌드(amount 채움) 후 게이트

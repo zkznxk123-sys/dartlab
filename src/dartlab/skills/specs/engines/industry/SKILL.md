@@ -149,7 +149,9 @@ position = c.industry()
 
 `dartlab.industry(industryId)` → 해당 산업의 공정·종목 DataFrame. `stage` 로 특정 공정만 필터.
 
-`summary=True` → year 기준 공정별 매출/영업이익 집계. `timeline=True` → 연도별 공정 매출 시계열. `lifecycle=True` → 산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴 — 도입 ≥30% / 성장 10~30% / 성숙 0~10% / 쇠퇴 0% 미만 YoY). 셋 동시 사용 X — 우선순위 summary > timeline > lifecycle.
+`summary=True` → year 기준 공정별 매출/영업이익 집계. `timeline=True` → 연도별 공정 매출 시계열. `lifecycle=True` → 산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴 — 도입 ≥30% / 성장 10~30% / 성숙 0~10% / 쇠퇴 0% 미만 YoY). `concentration=True` → 산업 매출 시장구조 집중도 (HHI/CR3 + 상위 5사). 넷 동시 사용 X — 우선순위 summary > timeline > lifecycle > concentration.
+
+`concentration=True` 정직 경계: 값은 **상장사 매출 기준** 상대 집중도다 — 비상장·해외 매출 제외라 *절대 시장점유율이 아니다*. HHI 라벨("분산/중간/집중")은 DOJ 척도 차용일 뿐 시장 획정(market definition)을 거치지 않았으니 반독점 판정 어휘로 인용 금지. `calcSectorMetrics`(회사가 분포 어디 위치)와 직교 — 이건 *산업 자체가 과점이냐 분산이냐*. 회사 단위 공급망 집중도(고객/거래처 HHI)는 `recipes.industry.supplyChainConcentration` 별도.
 
 `Company.industry()` → 단일 종목의 밸류체인 위치 dict — `chainId` (산업 ID), `stage` (공정), `confidence` (0~1 매칭 신뢰도), `peers` (같은 stage 종목코드 list). 매칭 실패 시 `None`.
 
@@ -186,6 +188,21 @@ dartlab.industry("semiconductor", summary=True, year="2024")
    기업수 : int          # stage finance-join 회사수
    영업이익률(%) : float # revenue-weighted = Σ영업이익/Σ매출×100 (단순평균 아님), Σ매출 0 이면 null
    coverageRatio : float # opIncome 산출가능 / 기업수 (0~1, 결손 노출 — 0 채움 금지)
+```
+
+```text
+dartlab.industry("semiconductor", concentration=True)
+→ DataFrame  # 산업 매출 시장구조 — 상위 5사 행 + 산업 집계(반복 첨부)
+   종목코드/종목명 : str    # 상위 5사 (매출 내림차순)
+   공정 : str              # stage key
+   매출(억) : float         # 회사 매출 (억원)
+   매출비중(%) : float      # 상장사 내 상대 비중 (= 회사매출/산업총매출, 절대점유율 아님)
+   HHI : float             # 상장사 매출 기준 Herfindahl (0~10000), 전 행 동일값
+   HHI라벨 : str            # 분산/중간/집중 (DOJ 척도 차용 — 반독점 판정 어휘 아님)
+   상위3비중(%) : float     # CR3
+   기업수 : int             # 매출 양수 상장사 수
+   총매출(조) : float        # 산업 Σ매출 (조원)
+   # 매출 양수 회사 0 이면 빈 DataFrame(스키마 보존). 비상장·해외매출 제외 한계 명시 필수
 ```
 
 ```text
@@ -256,9 +273,10 @@ data.industryBadge = {
 | `dartlab.industry("semiconductor")` | `{"industryId": "semiconductor"}` |
 | `dartlab.industry("semiconductor", stage="fab")` | `{"industryId": "semiconductor", "stage": "fab"}` |
 | `dartlab.industry("semiconductor", summary=True, year="2024")` | `{"industryId": "semiconductor", "summary": true, "year": "2024"}` |
+| `dartlab.industry("semiconductor", concentration=True)` | `{"industryId": "semiconductor", "concentration": true}` |
 | `Company("005930").industry()` | `{"stockCode": "005930"}` (apiRef="Company.industry") |
 
-`summary` · `timeline` · `lifecycle` 셋 동시 X — 우선순위 summary > timeline > lifecycle.
+`summary` · `timeline` · `lifecycle` · `concentration` 동시 X — 우선순위 summary > timeline > lifecycle > concentration.
 
 ## 기본 실행 순서
 

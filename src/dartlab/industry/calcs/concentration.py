@@ -1,7 +1,8 @@
-"""공급망 인사이트 자동 계산.
+"""산업·공급망 집중도 계산 (런타임 calc).
 
-각 회사의 공급망 관계에서 HHI(허핀달 지수), 집중도, 공정 다양성 등을 계산.
-벤치마크: Interos.ai, Bloomberg SPLC — 공급망 리스크 지표.
+회사 공급망 관계의 HHI(허핀달 지수)·상위 N 비중·공정 다양성, 산업 단위 매출 집중도를 계산.
+``calcs/{companyCalcs,lifecycle,peers}`` 와 같은 런타임 calc 거처 — build 파이프라인(enrichCompany)
+과 ``Industry()`` verb(concentration 모드)가 공유한다. 벤치마크: 산업조직론(IO) CR_N·HHI.
 """
 
 from __future__ import annotations
@@ -45,8 +46,8 @@ def calcHHI(supplierAmounts: list[float]) -> float:
 
     SeeAlso
     -------
-    - ``dartlab.industry.build.insights.calcTopNRatio`` : 상위 N 사 비중
-    - ``dartlab.industry.build.insights.riskLabel`` : HHI → 위험 라벨
+    - ``dartlab.industry.calcs.concentration.calcTopNRatio`` : 상위 N 사 비중
+    - ``dartlab.industry.calcs.concentration.riskLabel`` : HHI → 위험 라벨
 
     Requires
     --------
@@ -64,8 +65,8 @@ def calcHHI(supplierAmounts: list[float]) -> float:
         양수 amount/revenue 리스트 → HHI → ``riskLabel`` 로 분산/중간/집중 라벨 변환의 1 단계.
 
     See Also:
-        - ``dartlab.industry.build.insights.calcTopNRatio`` : 상위 N 사 비중
-        - ``dartlab.industry.build.insights.riskLabel`` : HHI → 위험 라벨
+        - ``dartlab.industry.calcs.concentration.calcTopNRatio`` : 상위 N 사 비중
+        - ``dartlab.industry.calcs.concentration.riskLabel`` : HHI → 위험 라벨
     """
     total = sum(a for a in supplierAmounts if a and a > 0)
     if total == 0:
@@ -117,8 +118,8 @@ def riskLabel(hhi: float) -> str:
         - 입력은 ``calcHHI`` 가 반환한 0~10000 범위 float 값.
 
     See Also:
-        - ``dartlab.industry.build.insights.calcHHI`` : 본 함수의 입력 산출
-        - ``dartlab.industry.build.insights.calcSupplyInsights`` : 라벨 자동 결합
+        - ``dartlab.industry.calcs.concentration.calcHHI`` : 본 함수의 입력 산출
+        - ``dartlab.industry.calcs.concentration.calcSupplyInsights`` : 라벨 자동 결합
 
     AIContext:
         "분산 시장이다 / 집중도가 높다" 1 줄 답변. 정밀 엣지 부족 (preciseEdgeCount 낮음) 시
@@ -170,7 +171,7 @@ def calcTopNRatio(supplierAmounts: list[float], n: int = 3) -> float:
 
     SeeAlso
     -------
-    - ``dartlab.industry.build.insights.calcHHI`` : 분포 전체 집중도
+    - ``dartlab.industry.calcs.concentration.calcHHI`` : 분포 전체 집중도
 
     Requires
     --------
@@ -188,7 +189,7 @@ def calcTopNRatio(supplierAmounts: list[float], n: int = 3) -> float:
         ``calcSupplyInsights`` 진입점에서 top1Ratio/top3Ratio 필드로 자동 결합.
 
     See Also:
-        - ``dartlab.industry.build.insights.calcHHI`` : 분포 전체 집중도
+        - ``dartlab.industry.calcs.concentration.calcHHI`` : 분포 전체 집중도
     """
     amounts = sorted([a for a in supplierAmounts if a and a > 0], reverse=True)
     total = sum(amounts)
@@ -253,8 +254,8 @@ def calcSupplyInsights(
 
     SeeAlso
     -------
-    - ``dartlab.industry.build.insights.calcHHI`` : HHI 단독
-    - ``dartlab.industry.build.insights.calcIndustryConcentration`` : 산업 단위 집중도
+    - ``dartlab.industry.calcs.concentration.calcHHI`` : HHI 단독
+    - ``dartlab.industry.calcs.concentration.calcIndustryConcentration`` : 산업 단위 집중도
 
     Requires
     --------
@@ -275,8 +276,8 @@ def calcSupplyInsights(
         ``calcTopNRatio`` 호출 → 산업/공정 다양성 카운팅 → 단일 dict.
 
     See Also:
-        - ``dartlab.industry.build.insights.calcHHI`` : HHI 단독
-        - ``dartlab.industry.build.insights.calcIndustryConcentration`` : 산업 단위 집중도
+        - ``dartlab.industry.calcs.concentration.calcHHI`` : HHI 단독
+        - ``dartlab.industry.calcs.concentration.calcIndustryConcentration`` : 산업 단위 집중도
     """
     # 이 회사가 to인 supplier 엣지 (공급받는 관계)
     incoming = [e for e in edges if e.toCode == stockCode and e.edgeType == "supplier"]
@@ -368,7 +369,7 @@ def calcIndustryConcentration(
 
     SeeAlso
     -------
-    - ``dartlab.industry.build.insights.calcSupplyInsights`` : 회사 단위 집중도
+    - ``dartlab.industry.calcs.concentration.calcSupplyInsights`` : 회사 단위 집중도
     - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 분포 + 백분위
 
     Requires
@@ -389,7 +390,7 @@ def calcIndustryConcentration(
         → 상위 5 사 프로필 첨부 → 단일 dict.
 
     See Also:
-        - ``dartlab.industry.build.insights.calcSupplyInsights`` : 회사 단위 집중도
+        - ``dartlab.industry.calcs.concentration.calcSupplyInsights`` : 회사 단위 집중도
         - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 분포 + 백분위
     """
     members = [n for n in nodes if n.industry == industryId and n.revenue and n.revenue > 0]

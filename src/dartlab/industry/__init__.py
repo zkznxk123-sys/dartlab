@@ -84,6 +84,7 @@ class Industry:
         summary: bool = False,
         timeline: bool = False,
         lifecycle: bool = False,
+        concentration: bool = False,
         year: str = "2024",
     ) -> pl.DataFrame:
         """산업지도를 조회한다.
@@ -100,6 +101,10 @@ class Industry:
             True이면 연도별 공정 매출 추이.
         lifecycle : bool
             True이면 산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴).
+        concentration : bool
+            True이면 산업 매출 시장구조 집중도 (HHI/CR3 + 상위 5사). 분포 백분위(회사 위치)
+            가 아니라 산업 자체가 과점이냐 분산이냐를 본다. **상장사 매출 기준** — 비상장·해외
+            매출 제외라 절대 시장점유율이 아닌 *상장 유니버스 내 상대 집중도*.
         year : str
             재무 데이터 기준 연도 (summary 시 사용).
 
@@ -135,6 +140,8 @@ class Industry:
                 - industryId 지정: 공정 / 종목코드 / 종목명
                 - summary=True: 공정 / 매출합계 / 영업이익합계
                 - timeline=True: 연도 / 공정별 매출 컬럼
+                - concentration=True: 지표(기업수·총매출·HHI·HHI라벨·상위3비중) + 상위5사 행
+                  (종목코드 / 종목명 / 공정 / 매출). 상장사 매출 기준 상대 집중도.
             Prerequisites:
                 - taxonomy + nodes.json (운영자 매핑 산출물)
                 - summary=True 시 재무 데이터 (자동 다운로드)
@@ -155,6 +162,8 @@ class Industry:
             return self._timeline(industryId)
         if lifecycle:
             return self._lifecycle(industryId)
+        if concentration:
+            return self._concentration(industryId)
         return self._query(industryId, stage)
 
     def _guide(self) -> pl.DataFrame:
@@ -233,6 +242,53 @@ class Industry:
         from dartlab.industry.calcs.lifecycle import classifyLifecycle
 
         return classifyLifecycle(industryId)
+
+    def _concentration(self, industryId: str) -> pl.DataFrame:
+        """산업 매출 시장구조 집중도 (HHI/CR3 + 상위 5사).
+
+        ``calcs.concentration.calcIndustryConcentration`` (dict) 를 표면 계약(DataFrame)으로
+        감싼다. 행 = 상위 5사(매출비중% 포함), 컬럼에 산업 집계(HHI·HHI라벨·CR3·기업수·총매출)를
+        반복 첨부. **상장사 매출 기준** — 비상장·해외 매출 제외라 절대 점유율이 아닌 상대 집중도.
+        """
+        from dartlab.industry.build.pipeline import loadNodes
+        from dartlab.industry.calcs.concentration import calcIndustryConcentration
+
+        r = calcIndustryConcentration(industryId, loadNodes())
+        schema = {
+            "종목코드": pl.Utf8,
+            "종목명": pl.Utf8,
+            "공정": pl.Utf8,
+            "매출(억)": pl.Float64,
+            "매출비중(%)": pl.Float64,
+            "HHI": pl.Float64,
+            "HHI라벨": pl.Utf8,
+            "상위3비중(%)": pl.Float64,
+            "기업수": pl.Int64,
+            "총매출(조)": pl.Float64,
+        }
+        topN = r.get("topN") or []
+        if not topN:
+            return pl.DataFrame(schema=schema)
+
+        totalRev = r.get("totalRevenue") or 0
+        rows = []
+        for m in topN:
+            rev = m.get("revenue") or 0
+            rows.append(
+                {
+                    "종목코드": m.get("stockCode"),
+                    "종목명": m.get("corpName"),
+                    "공정": m.get("stage"),
+                    "매출(억)": round(rev / 1e8, 0) if rev else None,
+                    "매출비중(%)": round(rev / totalRev * 100, 1) if totalRev else None,
+                    "HHI": r.get("hhi"),
+                    "HHI라벨": r.get("hhiRisk"),
+                    "상위3비중(%)": r.get("top3Ratio"),
+                    "기업수": r.get("companyCount"),
+                    "총매출(조)": round(totalRev / 1e12, 2) if totalRev else None,
+                }
+            )
+        return pl.DataFrame(rows, schema=schema)
 
     def build(self, *, skipDocs: bool = False) -> None:
         """산업지도를 빌드한다 (4단계 파이프라인).

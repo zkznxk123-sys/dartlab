@@ -4,7 +4,7 @@
 
 대상:
 - industry/taxonomy.py (findIndustryByKsic, getIndustry, listIndustries, matchStageByKeywords)
-- industry/build/insights.py (calcHHI, calcTopNRatio, riskLabel)
+- industry/calcs/concentration.py (calcHHI, calcTopNRatio, riskLabel)
 - industry/build/table_parser.py (extractCorpNames, normalizeCorpName, parseAmount, parsePercent)
 - industry/calcs/lifecycle.py (classifyPhase)
 """
@@ -79,34 +79,34 @@ class TestMatchStageByKeywords:
 
 
 # ══════════════════════════════════════
-# industry/build/insights.py
+# industry/calcs/concentration.py
 # ══════════════════════════════════════
 
 
 class TestCalcHHI:
     def test_uniformDistribution(self):
-        from dartlab.industry.build.insights import calcHHI
+        from dartlab.industry.calcs.concentration import calcHHI
 
         # 10 개 동일 분배 → HHI = 1000
         r = calcHHI([100.0] * 10)
         assert 900 < r < 1100
 
     def test_monopoly(self):
-        from dartlab.industry.build.insights import calcHHI
+        from dartlab.industry.calcs.concentration import calcHHI
 
         # 1 개 독점 → HHI ≈ 10000
         r = calcHHI([1000.0])
         assert r > 9000
 
     def test_duopoly50_50(self):
-        from dartlab.industry.build.insights import calcHHI
+        from dartlab.industry.calcs.concentration import calcHHI
 
         r = calcHHI([500.0, 500.0])
         # 50:50 → 0.5^2 + 0.5^2 = 0.5 → 5000
         assert 4500 < r < 5500
 
     def test_emptyList(self):
-        from dartlab.industry.build.insights import calcHHI
+        from dartlab.industry.calcs.concentration import calcHHI
 
         r = calcHHI([])
         assert r == 0 or r is None
@@ -114,7 +114,7 @@ class TestCalcHHI:
 
 class TestCalcTopNRatio:
     def test_top3of10(self):
-        from dartlab.industry.build.insights import calcTopNRatio
+        from dartlab.industry.calcs.concentration import calcTopNRatio
 
         amounts = [100.0] * 10
         r = calcTopNRatio(amounts, n=3)
@@ -122,14 +122,14 @@ class TestCalcTopNRatio:
         assert 28 < r < 32
 
     def test_topNExceedsTotal(self):
-        from dartlab.industry.build.insights import calcTopNRatio
+        from dartlab.industry.calcs.concentration import calcTopNRatio
 
         r = calcTopNRatio([100.0, 100.0], n=10)
         # n > len → 전체 비중 = 100%
         assert r >= 99
 
     def test_empty(self):
-        from dartlab.industry.build.insights import calcTopNRatio
+        from dartlab.industry.calcs.concentration import calcTopNRatio
 
         r = calcTopNRatio([], n=3)
         assert r == 0 or r is None
@@ -137,25 +137,25 @@ class TestCalcTopNRatio:
 
 class TestRiskLabel:
     def test_lowConcentration(self):
-        from dartlab.industry.build.insights import riskLabel
+        from dartlab.industry.calcs.concentration import riskLabel
 
         r = riskLabel(800.0)
         assert isinstance(r, str)
 
     def test_mediumConcentration(self):
-        from dartlab.industry.build.insights import riskLabel
+        from dartlab.industry.calcs.concentration import riskLabel
 
         r = riskLabel(1800.0)
         assert isinstance(r, str)
 
     def test_highConcentration(self):
-        from dartlab.industry.build.insights import riskLabel
+        from dartlab.industry.calcs.concentration import riskLabel
 
         r = riskLabel(3000.0)
         assert isinstance(r, str)
 
     def test_monopoly(self):
-        from dartlab.industry.build.insights import riskLabel
+        from dartlab.industry.calcs.concentration import riskLabel
 
         r = riskLabel(9500.0)
         assert isinstance(r, str)
@@ -284,7 +284,7 @@ def test_industryTaxonomyEntries():
 
 
 def test_industryInsightsEntries():
-    from dartlab.industry.build.insights import (
+    from dartlab.industry.calcs.concentration import (
         calcHHI,
         calcIndustryConcentration,
         calcSupplyInsights,

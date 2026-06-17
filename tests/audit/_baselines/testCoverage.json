@@ -2342,27 +2342,27 @@
       "line": 32
     },
     {
-      "path": "industry/build/insights.py",
+      "path": "industry/calcs/concentration.py",
       "func": "calcHHI",
       "line": 12
     },
     {
-      "path": "industry/build/insights.py",
+      "path": "industry/calcs/concentration.py",
       "func": "riskLabel",
       "line": 71
     },
     {
-      "path": "industry/build/insights.py",
+      "path": "industry/calcs/concentration.py",
       "func": "calcTopNRatio",
       "line": 93
     },
     {
-      "path": "industry/build/insights.py",
+      "path": "industry/calcs/concentration.py",
       "func": "calcSupplyInsights",
       "line": 148
     },
     {
-      "path": "industry/build/insights.py",
+      "path": "industry/calcs/concentration.py",
       "func": "calcIndustryConcentration",
       "line": 260
     },

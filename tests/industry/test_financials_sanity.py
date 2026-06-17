@@ -201,3 +201,59 @@ class TestProfitPoolDerived:
             "영업이익률(%)",
             "coverageRatio",
         ]
+
+
+class TestConcentrationVerb:
+    """Industry()(id, concentration=True) 어댑터 — calcs.concentration dict → DataFrame.
+
+    묻어둔 calcIndustryConcentration(테스트만 호출)을 런타임 verb 모드로 노출
+    (mainPlan/industry-analysis-lab/07 §구멍 — 집중도 함수 런타임 노출 thesis).
+    parquet 무의존 — loadNodes monkeypatch + 합성 노드. **상장사 매출 기준** 상대 집중도.
+    """
+
+    @staticmethod
+    def _node(stockCode: str, corpName: str, stage: str, revenue, industry="synthIndustry"):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(stockCode=stockCode, corpName=corpName, industry=industry, stage=stage, revenue=revenue)
+
+    def _run(self, monkeypatch, nodes):
+        from dartlab.industry import Industry
+        from dartlab.industry.build import pipeline
+
+        monkeypatch.setattr(pipeline, "loadNodes", lambda: nodes)
+        return Industry()("synthIndustry", concentration=True)
+
+    def test_revenue_share_and_hhi_columns(self, monkeypatch):
+        """상위사 행 + 매출비중(%) + 산업 집계(HHI·CR3·기업수) 동반."""
+        nodes = [
+            self._node("a", "A사", "fab", 60e12),
+            self._node("b", "B사", "fab", 30e12),
+            self._node("c", "C사", "fab", 10e12),
+        ]
+        out = self._run(monkeypatch, nodes)
+        rows = out.to_dicts()
+        assert [r["종목명"] for r in rows] == ["A사", "B사", "C사"]  # 매출 내림차순
+        # 매출비중 = 상장사 내 상대 — 60/100, 30/100, 10/100
+        assert rows[0]["매출비중(%)"] == 60.0
+        assert rows[2]["매출비중(%)"] == 10.0
+        # HHI = 60^2+30^2+10^2 = 4600 (모든 행에 반복 첨부)
+        assert rows[0]["HHI"] == 4600.0
+        assert rows[0]["HHI라벨"] == "집중"
+        assert rows[0]["상위3비중(%)"] == 100.0
+        assert rows[0]["기업수"] == 3
+        assert rows[0]["총매출(조)"] == 100.0
+
+    def test_only_top5_rows(self, monkeypatch):
+        """7사여도 상위 5사만 행으로 반환 (calcIndustryConcentration topN=5)."""
+        nodes = [self._node(f"s{i}", f"{i}사", "fab", (10 - i) * 1e12) for i in range(7)]
+        out = self._run(monkeypatch, nodes)
+        assert out.height == 5
+
+    def test_empty_industry_returns_typed_empty(self, monkeypatch):
+        """매출 양수 회사 없으면 빈 DataFrame(스키마 보존) — 0 채움/예외 금지."""
+        nodes = [self._node("z", "Z사", "fab", None)]
+        out = self._run(monkeypatch, nodes)
+        assert out.height == 0
+        assert "매출비중(%)" in out.columns
+        assert "HHI" in out.columns
