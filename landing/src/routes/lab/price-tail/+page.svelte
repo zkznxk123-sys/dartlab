@@ -4,7 +4,7 @@
 		readParquetMetadata,
 		readParquetRows,
 		type RangeRequestStat
-	} from '@dartlab/ui-runtime/data/hfRange';
+	} from '@dartlab/ui-runtime/data/parquet/hfRange';
 
 	type Stage = 'idle' | 'running' | 'done' | 'error';
 

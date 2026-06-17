@@ -1,7 +1,7 @@
-import { readJsonCache, writeJsonCache } from './cacheStore';
+import { readJsonCache, writeJsonCache } from './cache/cacheStore';
 
 // HF resolve base URL 은 origin.ts SSOT 에서 (내부 사용 + consumers 호환 위해 re-export).
-import { HF_RESOLVE } from './origin';
+import { HF_RESOLVE } from './origins/hf';
 export { HF_RESOLVE };
 
 // static 경로 base — 옛 `$app/paths base` 의존을 주입으로 대체 (runtime 패키지는 SvelteKit 을 모른다).

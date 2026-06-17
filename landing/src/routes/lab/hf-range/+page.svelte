@@ -6,7 +6,7 @@
 		readParquetRows,
 		type ParquetMetadataSummary,
 		type RangeRequestStat
-	} from '@dartlab/ui-runtime/data/hfRange';
+	} from '@dartlab/ui-runtime/data/parquet/hfRange';
 
 	const TARGETS = [
 		{

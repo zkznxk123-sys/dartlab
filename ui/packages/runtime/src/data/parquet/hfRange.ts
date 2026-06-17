@@ -1,5 +1,5 @@
 import type { AsyncBuffer, FileMetaData, ParquetQueryFilter } from 'hyparquet';
-import { HF_RESOLVE, hfRangeUrl } from './origin';
+import { HF_RESOLVE, hfRangeUrl } from '../origins/hf';
 
 export type FetchLike = typeof fetch;
 

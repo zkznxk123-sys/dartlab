@@ -1,4 +1,4 @@
-import { readParquetRows, type FetchLike, type RangeRequestStat } from '@dartlab/ui-runtime/data/hfRange';
+import { readParquetRows, type FetchLike, type RangeRequestStat } from '@dartlab/ui-runtime/data/parquet/hfRange';
 import {
 	FINANCE_ACCOUNTS,
 	FINANCE_COMPLETED_YEARS,

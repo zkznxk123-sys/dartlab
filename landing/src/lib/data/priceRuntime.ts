@@ -1,4 +1,4 @@
-import { readParquetMetadata, readParquetRows, type RangeRequestStat } from '@dartlab/ui-runtime/data/hfRange';
+import { readParquetMetadata, readParquetRows, type RangeRequestStat } from '@dartlab/ui-runtime/data/parquet/hfRange';
 
 export interface PriceRuntimeMetrics {
 	currentPrice: number | null;

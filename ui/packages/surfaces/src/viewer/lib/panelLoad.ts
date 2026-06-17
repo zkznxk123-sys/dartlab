@@ -1,7 +1,7 @@
 // 브라우저: HF panel parquet 하나 직접 read → PanelBundle (와이드 빌드 0, 온더플라이).
 // 순수 코어 `buildPanelBundle`(panelWide.ts)와 분리 — IO 만 담당(테스트는 코어 단독).
 
-import { readParquetRows } from '@dartlab/ui-runtime/data/hfRange';
+import { readParquetRows } from '@dartlab/ui-runtime/data/parquet/hfRange';
 import { marketForCode } from './dartUrl';
 import { buildPanelBundle } from './panelWide';
 import type { LeafRow, PanelBundle } from './types';

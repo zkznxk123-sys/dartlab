@@ -1,6 +1,6 @@
 <script lang="ts">
 	// 로컬 공시 뷰어 — surface ViewerStudio 마운트(단계-6-3). 패널/TOC/검색/비교/AskDrawer 는 HF parquet 직접 read
-	// (@dartlab/ui-runtime/data/hfRange, 브라우저)로 landing 공개 뷰어와 동일 동작. 터미널 오버레이의 iframe 타깃
+	// (@dartlab/ui-runtime/data/parquet/hfRange, 브라우저)로 landing 공개 뷰어와 동일 동작. 터미널 오버레이의 iframe 타깃
 	// 이기도 하다(viewer.urlForCompany → ?terminalEmbed=1 → embedded 모드: 헤더·title 숨김·100% 높이).
 	// 정량재무 다이얼로그(DuckDB-WASM)는 local 셸이 provideDuckDb 미주입 → 빈값 정직 강등(기존 로컬 터미널 재무 패리티).
 	import { base } from '$app/paths';

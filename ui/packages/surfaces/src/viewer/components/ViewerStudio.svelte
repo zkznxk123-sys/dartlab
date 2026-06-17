@@ -22,7 +22,7 @@
 	import { buildIndexChunked, type SearchIndex, type SearchHit } from '../lib/searchIndex';
 	import { buildCompareBoard, commonPeriods } from '../lib/compare';
 	import type { PanelBundle, PanelRow } from '../lib/types';
-	import { hfUrl } from '@dartlab/ui-runtime/data/hfRange';
+	import { hfUrl } from '@dartlab/ui-runtime/data/parquet/hfRange';
 	import { marketForCode } from '../lib/dartUrl';
 	import { panelToCsv, financeToExcel, downloadText } from '../lib/dataExport';
 	import { loadFinanceStatement } from '../lib/finance/financeQuery';

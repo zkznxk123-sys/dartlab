@@ -2,7 +2,7 @@
 // 캐시 적중 / in-flight dedup / 에러 비캐시 / TTL 만료 / scope 'none' 5 케이스.
 import { describe, it, expect } from 'vitest';
 import { createDataCore } from './request';
-import type { FetchLike } from '../hfRange';
+import type { FetchLike } from '../parquet/hfRange';
 
 // 호출 횟수를 세는 fake fetch — 항상 200 OK + JSON payload 반환.
 function countingFetch(payload: unknown): { fetchFn: FetchLike; calls: () => number } {

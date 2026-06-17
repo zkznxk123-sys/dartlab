@@ -2,7 +2,7 @@
 // P1: HF 계열(hf·hfRange) 만 등록 — 기존 origin.ts(HF URL SSOT)를 흡수.
 // P2: news·naver 워커 등록 — newsSource/naverPriceSource 가 각자 복제하던 env 게이트 + dev 프록시 URL
 //   조립을 여기로 흡수. 미배선(localApi·duckdbHf·landingJson)은 후속 wave. 미등록 호출은 명시 throw(배선순서 가드).
-import { hfUrl, hfRangeUrl } from '../origin';
+import { hfUrl, hfRangeUrl } from './hf';
 
 // vite env 안전 접근 — runtime 패키지 tsc 는 vite/client 타입 없이 검사된다(origin.ts 동일 패턴, 소비 앱이 번들 시 치환).
 const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefined> }).env;

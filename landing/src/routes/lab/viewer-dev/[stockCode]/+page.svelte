@@ -8,7 +8,7 @@
 	import { brand } from '$lib/brand';
 	import Header from '$lib/components/sections/Header.svelte';
 	import AskDrawer from '$lib/viewer/dev/AskDrawer.svelte';
-	import { hfUrl } from '@dartlab/ui-runtime/data/hfRange';
+	import { hfUrl } from '@dartlab/ui-runtime/data/parquet/hfRange';
 	import {
 		loadPanelBundle,
 		PanelTocTree,

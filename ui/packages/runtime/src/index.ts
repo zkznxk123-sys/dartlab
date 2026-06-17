@@ -13,5 +13,5 @@ export { exportServiceRegistration } from './services/exportCommand';
 export { listExportableTables, selectionsToTemplate } from './adapters/export/exportShared';
 export { publicExportPort, type PublicExportShared } from './adapters/public/sources/exportSource';
 export { localExportPort } from './adapters/local/sources/exportSource';
-export { RuntimeCache, type RuntimeCacheOptions } from './cache/runtimeCache';
-export { RequestDedup } from './cache/requestDedup';
+export { RuntimeCache, type RuntimeCacheOptions } from './data/cache/runtimeCache';
+export { RequestDedup } from './data/cache/requestDedup';
