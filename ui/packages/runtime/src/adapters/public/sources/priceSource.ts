@@ -3,9 +3,14 @@
 // 전체 이력(2010~현재) lazy 로딩: 초기 = 현재+직전 연도, 이후 차트 좌측 팬 시 연도 단위 추가 로드.
 // 표시용 변환(수정주가·집계·하이킨아시)은 surface 의 candleMath — 본 모듈은 로드·캐시만.
 import { KRX_MIN_YEAR, type Candle, type CompanyPrices } from '@dartlab/ui-contracts';
-import { readParquetRows } from '../../../data/hfRange';
+import { createDataCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
+
+// 연도 parquet read 는 fetch 코어(데이터 워크벤치 SSOT)가 캐시·dedup — hfRange 직접 read 금지(가드 rule 6).
+// publicPricePort 는 ui/web 레거시 무인자 경로도 있어 core 미주입 시 모듈 폴백(govPriceSource.govCore 동형, lazy).
+let _priceCore: DataCore | null = null;
+const priceCore = (core?: DataCore): DataCore => core ?? (_priceCore ??= createDataCore());
 
 const OHLCV_COLUMNS = ['ISU_CD', 'BAS_DD', 'TDD_OPNPRC', 'TDD_HGPRC', 'TDD_LWPRC', 'TDD_CLSPRC', 'ACC_TRDVOL', 'FLUC_RT', 'ACC_TRDVAL'];
 
@@ -54,12 +59,15 @@ function toCandle(r: KrxRow): Candle | null {
 }
 
 // ISU_CD 는 KRX 주식 = 'A' + 6 자리 (예: A005930). 드물게 prefix 없는 경우 대비 $in.
-async function readYearCandles(year: number, isuA: string, isuPlain: string): Promise<Candle[]> {
-	const path = `gov/prices/date/${year}.parquet`;
+async function readYearCandles(year: number, isuA: string, isuPlain: string, core?: DataCore): Promise<Candle[]> {
 	try {
-		const { rows } = await readParquetRows<KrxRow>(path, {
+		const rows = await priceCore(core).requestParquetRows<KrxRow>({
+			origin: 'hfRange',
+			path: `gov/prices/date/${year}.parquet`,
 			columns: OHLCV_COLUMNS,
-			filter: { ISU_CD: { $in: [isuA, isuPlain] } }
+			filter: { ISU_CD: { $in: [isuA, isuPlain] } },
+			cacheKey: `gov.prices.year:${year}:${isuPlain}`,
+			cache: { scope: 'memory', ttlMs: 60 * 60_000, maxEntries: 64 }
 		});
 		return rows.map(toCandle).filter((x): x is Candle => x != null);
 	} catch {
@@ -81,21 +89,16 @@ export function mergeDedup(...lists: Candle[][]): Candle[] {
 	return out;
 }
 
-// in-flight Promise — 워밍업과 패널이 같은 회사 주가를 동시 호출해도 스캔은 1 회만
-// (전종목 날짜정렬 스캔이 가장 무거움 → 중복 = 2배 요청·연결경쟁). resolve 후엔 cache 가 응답.
-const inflight = new Map<string, Promise<CompanyPrices | null>>();
-
-/** 초기 로드 — 현재+직전 연도 (빠른 첫 페인트). null = 데이터 없음/실패. 동시 호출 dedup. */
-export function loadInitialOHLCV(stockCode: string, year: number): Promise<CompanyPrices | null> {
+/** 초기 로드 — 현재+직전 연도 (빠른 첫 페인트). null = 데이터 없음/실패. 동시 호출의 무거운 연도
+ *  스캔 dedup 은 fetch 코어(연도 parquet read 키 공유)가 담당 — 자체 in-flight Map 폐기. */
+export function loadInitialOHLCV(stockCode: string, year: number, core?: DataCore): Promise<CompanyPrices | null> {
 	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
 	if (cache.has(code)) return Promise.resolve(cache.get(code) ?? null);
-	const hit = inflight.get(code);
-	if (hit) return hit;
-	const p = (async () => {
+	return (async () => {
 		const c = code.replace(/[^0-9A-Za-z]/g, '');
 		const isuA = `A${c}`;
-		const [curr, prev] = await Promise.all([readYearCandles(year, isuA, c), readYearCandles(year - 1, isuA, c)]);
+		const [curr, prev] = await Promise.all([readYearCandles(year, isuA, c, core), readYearCandles(year - 1, isuA, c, core)]);
 		const candles = mergeDedup(prev, curr);
 		if (candles.length === 0) {
 			setCache(code, null);
@@ -104,9 +107,7 @@ export function loadInitialOHLCV(stockCode: string, year: number): Promise<Compa
 		const rec: CompanyPrices = { candles, oldestYear: year - 1 };
 		setCache(code, rec);
 		return rec;
-	})().finally(() => inflight.delete(code));
-	inflight.set(code, p);
-	return p;
+	})();
 }
 
 /** 현재까지 캐시된 전체 캔들(오름차순). 백필 후 차트 재적용·기간 윈도잉에 사용. */
@@ -124,11 +125,11 @@ export function seedCandles(stockCode: string, candles: Candle[]): CompanyPrices
 }
 
 /** 좌측 팬 시 더 오래된 연도 1 개 로드 (prepend 용). 캐시에도 병합. 빈 배열 = 데이터 없음. */
-export async function loadOlderYear(stockCode: string, targetYear: number): Promise<Candle[]> {
+export async function loadOlderYear(stockCode: string, targetYear: number, core?: DataCore): Promise<Candle[]> {
 	if (!browser || targetYear < KRX_MIN_YEAR) return [];
 	const code = stockCode.trim();
 	const c = code.replace(/[^0-9A-Za-z]/g, '');
-	const rows = await readYearCandles(targetYear, `A${c}`, c);
+	const rows = await readYearCandles(targetYear, `A${c}`, c, core);
 	const rec = cache.get(code);
 	if (rec) {
 		rec.candles = mergeDedup(rows, rec.candles);

@@ -82,9 +82,9 @@ export function publicPricePort(core?: DataCore): PricePort {
 			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c, core), loadGovRecent(core), loadNaverFresh(c, core)]);
 			const tail = recent?.[c] ?? [];
 			if ((gov && gov.length) || tail.length || fresh.length) return seedCandles(c, mergeDedup(gov ?? [], tail, fresh));
-			return loadInitialOHLCV(c, year);
+			return loadInitialOHLCV(c, year, core);
 		},
-		older: loadOlderYear,
+		older: (code, targetYear) => loadOlderYear(code, targetYear, core),
 		loaded: loadedCandles,
 		govCandles: (code) => loadGovCandles(code, core),
 		govRecent: () => loadGovRecent(core)
@@ -106,7 +106,7 @@ function publicCompanyPort(shared: PublicRuntimeSharedPorts, core: DataCore): Co
 
 function publicFilingPort(core: DataCore): FilingPort {
 	return {
-		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
+		regular: (code, limit = 500) => loadCompanyRegularFilings(core, code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(core, code), // 전 이력 — fetch 코어(캐시·dedup), 전역 1파일 stock_code 필터
 		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes), // 워치 신선도 — fetch 코어(HF allFilings 배치·10분 TTL·dedup)
 		// panel 격자 3종은 공개 뷰어 코드(landing)가 단계-6(뷰어 추출)에서 어댑터로 들어온다.

@@ -16,6 +16,8 @@
 //      EXCEPT financeSource.ts 의 loadFinanceRows 경로(landing 주입 콜백, 시그니처 불변 제약) 1건 allowlist.
 //   5. 전역: createDataCore / new RuntimeCache / new RequestDedup 인스턴스화 ≥1
 //      (죽은 작업대 재발 방지 — data/fetch/request.ts + 어댑터 스캔, 0 이면 fail).
+//   6. source 안 hfRange 저수준 로더(readParquetRows·readParquetWholeFile) 직접 import 금지 —
+//      코어(core.requestParquet*) 경유. 파서 가드 사각(직접 read = 캐시·dedup 우회) 차단. type import 는 허용.
 //
 // baseline 부채원장(uiDataWiring.baseline.json): 착수 시점 잔존 위반을 기록 → 이후 *신규 위반만* fail
 //   (회귀가드 철학, operation.testing 동일). 이관 완료 source 부터 baseline 에서 사라지며 0 으로 수렴.
@@ -54,8 +56,13 @@ const CREATE_CORE_ALLOW = [
 	{ file: 'govIndexSource.ts', fn: 'idxCore' },
 	{ file: 'productIndexSource.ts', fn: 'productCore' },
 	{ file: 'newsSource.ts', fn: 'newsCore' }, // publicNewsPort() core 미주입 레거시(ui/web) — govCore 동형 폴백.
-	{ file: 'naverPriceSource.ts', fn: 'naverCore' } // loadNaverFresh core 미주입 경로 — govCore 동형 폴백.
+	{ file: 'naverPriceSource.ts', fn: 'naverCore' }, // loadNaverFresh core 미주입 경로 — govCore 동형 폴백.
+	{ file: 'priceSource.ts', fn: 'priceCore' } // publicPricePort() core 미주입 레거시(ui/web) — govCore 동형 폴백.
 ];
+
+// rule 6 — source 안에서 직접 import 금지인 저수준 데이터 로더(코어 data/fetch.request 경유 강제).
+//   파서 가드의 사각: createDataCore 우회하고 hfRange 의 parquet read 를 직접 부르면 캐시·dedup 이 안 걸린다.
+const RAW_LOADERS = ['readParquetRows', 'readParquetWholeFile'];
 
 /** posix 상대경로(baseline 비교 안정 — OS 무관). */
 const relPosix = (abs) => relative(REPO_ROOT, abs).split('\\').join('/');
@@ -113,6 +120,21 @@ function scanSourceFile(absPath) {
 			const name = declaredVarName(node);
 			if (name && /Cache$/.test(name)) {
 				add(3, node, `module-level new Map cache: ${name} — 코어 캐시 사용`);
+			}
+		}
+		// rule 6 — hfRange 저수준 parquet 로더 직접 import(코어 우회) 금지
+		if (
+			ts.isImportDeclaration(node) &&
+			ts.isStringLiteral(node.moduleSpecifier) &&
+			/\/hfRange$/.test(node.moduleSpecifier.text) &&
+			node.importClause?.namedBindings &&
+			ts.isNamedImports(node.importClause.namedBindings)
+		) {
+			for (const spec of node.importClause.namedBindings.elements) {
+				// 값 import 만(type import·`import type {…}` 은 제외 — FetchLike 등 타입은 허용).
+				if (!node.importClause.isTypeOnly && !spec.isTypeOnly && RAW_LOADERS.includes(spec.name.text)) {
+					add(6, node, `'${spec.name.text}' 직접 import(hfRange) — core.requestParquet* 경유`);
+				}
 			}
 		}
 		// rule 2 — 데이터 오리진 URL 문자열 리터럴
@@ -234,7 +256,8 @@ function main() {
 				2: 'direct origin URL literal in source',
 				3: 'module-level new Map cache in source',
 				4: 'createDataCore() in source (financeSource.loadFinanceRows allowlisted)',
-				5: 'global: createDataCore/RuntimeCache/RequestDedup must instantiate >=1'
+				5: 'global: createDataCore/RuntimeCache/RequestDedup must instantiate >=1',
+				6: 'direct hfRange loader import (readParquetRows/WholeFile) in source'
 			},
 			violations: all.map(({ file, rule, detail }) => ({ file, rule, detail }))
 		};

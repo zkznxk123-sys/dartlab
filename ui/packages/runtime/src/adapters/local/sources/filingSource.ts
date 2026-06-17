@@ -76,7 +76,7 @@ function loadPanelInit(api: LocalApi, caches: LocalCaches, code: string): Promis
 export function localFilingPort(api: LocalApi, caches: LocalCaches, core: DataCore): FilingPort {
 	return {
 		// 공통배선 — 공개 HF 소스 그대로(정기 = regularFilingsSource, 비정기 = allFilings). 로컬 :8400 불요.
-		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
+		regular: (code, limit = 500) => loadCompanyRegularFilings(core, code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(core, code),
 		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes),
 		async panelToc(code) {
