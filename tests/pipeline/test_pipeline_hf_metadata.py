@@ -157,6 +157,9 @@ def test_data_prebuild_workflow_keeps_long_runs_observable():
     assert text.count("free -h || true") >= 6
     assert "uv run python -u -X utf8 .github/scripts/prebuild/prebuildData.py" in text
     assert text.count('PYTHONUNBUFFERED: "1"') == 2
+    assert text.count("DARTLAB_SCAN_BATCH_SIZE: '50'") == 2
+    assert text.count("POLARS_MAX_THREADS: '2'") == 2
+    assert text.count("MALLOC_ARENA_MAX: '2'") == 2
     assert text.count("DARTLAB_HF_RETRY_ATTEMPTS: '3'") == 2
     assert text.count("DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'") == 2
     assert text.count("set +e") == 2

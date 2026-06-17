@@ -119,6 +119,9 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           PYTHONUNBUFFERED: "1"
+          DARTLAB_SCAN_BATCH_SIZE: '50'
+          POLARS_MAX_THREADS: '2'
+          MALLOC_ARENA_MAX: '2'
           DARTLAB_HF_RETRY_ATTEMPTS: '3'
           DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
 
@@ -202,6 +205,9 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           PREBUILD_FULL: "1"
           PYTHONUNBUFFERED: "1"
+          DARTLAB_SCAN_BATCH_SIZE: '50'
+          POLARS_MAX_THREADS: '2'
+          MALLOC_ARENA_MAX: '2'
           DARTLAB_HF_RETRY_ATTEMPTS: '3'
           DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
 

@@ -45,6 +45,7 @@ from pathlib import Path
 from dartlab.scan.builders.kr.common import BATCH_SIZE as _BATCH
 from dartlab.scan.builders.kr.common import financeDir as _financeDir
 from dartlab.scan.builders.kr.common import mergeBatchFiles as _mergeBatchFiles
+from dartlab.scan.builders.kr.common import releaseNativeMemory as _releaseNativeMemory
 from dartlab.scan.builders.kr.common import reportDir as _reportDir
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
@@ -154,10 +155,15 @@ def buildScan(
     results: dict[str, Path | list[Path] | None] = {}
 
     results["changes"] = buildChanges(sinceYear=sinceYear, verbose=verbose, incremental=incremental)
+    _releaseNativeMemory()
     results["finance"] = buildFinance(sinceYear=sinceYear, verbose=verbose)
+    _releaseNativeMemory()
     results["finance_lite"] = buildFinanceLite(verbose=verbose)
+    _releaseNativeMemory()
     results["report"] = buildReport(sinceYear=reportSinceYear, verbose=verbose)
+    _releaseNativeMemory()
     results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose, incremental=incremental)
+    _releaseNativeMemory()
 
     if verbose:
         _say("=" * 60)
@@ -181,6 +187,7 @@ __all__ = [
     "_loadAccountMap",
     "_loadCorpProfileMap",
     "_mergeBatchFiles",
+    "_releaseNativeMemory",
     "_reportDir",
     "_sanityCheckCalendarYears",
     "_scanDir",

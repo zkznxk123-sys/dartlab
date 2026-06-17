@@ -49,6 +49,7 @@ from dartlab.core.logger import getLogger
 from dartlab.scan.builders.kr.common import BATCH_SIZE as _BATCH
 from dartlab.scan.builders.kr.common import financeDir as _financeDir
 from dartlab.scan.builders.kr.common import mergeBatchFiles as _mergeBatchFiles
+from dartlab.scan.builders.kr.common import releaseNativeMemory as _releaseNativeMemory
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
 from dartlab.scan.builders.kr.fiscal import _calendarizeFiscalColumns, _fiscalMonthMap
@@ -216,6 +217,7 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
                 del batch
                 batchChunks = []
                 batchIdx += 1
+                _releaseNativeMemory()
 
         if verbose and (i + 1) % 500 == 0:
             _say(f"  [{i + 1}/{len(allFiles)}] {success}ok {totalRows:,}rows {time.perf_counter() - t0:.0f}s")
@@ -228,6 +230,7 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
 
     _mergeBatchFiles(batchDir, outputPath, how="diagonal_relaxed")
     shutil.rmtree(batchDir, ignore_errors=True)
+    _releaseNativeMemory()
 
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024
