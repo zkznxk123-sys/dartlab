@@ -358,10 +358,16 @@ def test_search_delta_script_catalog_mode_requires_previous_catalog(tmp_path) ->
 
 def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     text = Path(".github/workflows/searchIndexDelta.yml").read_text(encoding="utf-8")
+    assert "workflow_run" in text
+    assert "Original SSOT Sync" in text
+    assert "News Archive Sync" in text
+    assert "EDGAR Data Sync (Bulk)" in text
+    assert "github.event.workflow_run.conclusion == 'success'" in text
     assert "delta_mode" in text
     assert "default: 'catalog'" in text
     assert "expected_sources" in text
     assert "productization_gate" in text
+    assert "default: 'release'" in text
     assert "quality_gold" in text
     assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "DARTLAB_SEARCH_EXPECTED_SOURCES" in text
@@ -391,6 +397,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "evaluateSearchCutover.py" in text
     assert "--replacement-evidence" in text
     assert "PRODUCTIZATION_GATE" in text
+    assert "github.event.inputs.productization_gate || 'release'" in text
     assert "--fail-on-incomplete" in text
     assert "--fail-on-default-not-ready" in text
     assert "--fail-on-ops-not-ready" in text
@@ -419,6 +426,7 @@ def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     assert "build_mode" in text
     assert "default: catalog" in text
     assert "productization_gate" in text
+    assert "default: release" in text
     assert "quality_gold" in text
     assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "dart/searchCatalog/**" in text
@@ -445,6 +453,7 @@ def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     assert "evaluateSearchCutover.py" in text
     assert "--replacement-evidence" in text
     assert "PRODUCTIZATION_GATE" in text
+    assert "inputs.productization_gate || 'release'" in text
     assert "--fail-on-incomplete" in text
     assert "--fail-on-default-not-ready" in text
     assert "--fail-on-ops-not-ready" in text
