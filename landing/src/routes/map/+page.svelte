@@ -991,7 +991,7 @@
 					<option value="holderChange">지분 변동</option>
 				</optgroup>
 				<optgroup label="구조">
-					<option value="marketShare">업종 점유율 (9)</option>
+					<option value="marketShare">상장사매출비중 (9)</option>
 					<option value="empCount">직원수</option>
 				</optgroup>
 			</select>

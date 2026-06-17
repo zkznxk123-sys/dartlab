@@ -495,7 +495,7 @@
 				<div class="rank-line">
 					{node.industryName} 매출 순위 <strong>{node.industryRank}위</strong>
 					/ {node.industryPeerCount}사
-					{#if node.marketShare}· 점유율 {node.marketShare.toFixed(1)}%{/if}
+					{#if node.marketShare}· 상장사매출비중 {node.marketShare.toFixed(1)}%{/if}
 				</div>
 			{/if}
 		</div>
@@ -773,7 +773,7 @@
 				<div class="acc-body">
 					<div class="acc-row"><span>매출 순위</span><span>{node.industryRank}위 / {node.industryPeerCount}사</span></div>
 					{#if node.marketShare}
-						<div class="acc-row"><span>점유율</span><span>{node.marketShare.toFixed(1)}%</span></div>
+						<div class="acc-row"><span>상장사매출비중</span><span>{node.marketShare.toFixed(1)}%</span></div>
 					{/if}
 					{#if peerPct !== null}
 						<div class="acc-row"><span>산업 분위</span><span>상위 {(100 - peerPct)}%</span></div>

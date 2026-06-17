@@ -177,7 +177,7 @@
 		opMargin: 'OPM',
 		revCagr: 'CAGR',
 		empCount: '직원수',
-		marketShare: '점유율',
+		marketShare: '상장사매출비중',
 		debtRatio: '부채',
 		holderPct: '지분율'
 	};

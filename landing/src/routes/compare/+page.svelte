@@ -79,7 +79,7 @@
 
 	const ROWS: Row[] = [
 		{ section: '규모', key: 'revenue', label: '매출', valueOf: (c) => c.node?.revenue, fmt: fmtKor },
-		{ section: '규모', key: 'marketShare', label: '산업 점유율', valueOf: (c) => c.node?.marketShare, fmt: (v) => pct(v, 1) },
+		{ section: '규모', key: 'marketShare', label: '상장사매출비중', valueOf: (c) => c.node?.marketShare, fmt: (v) => pct(v, 1) },
 		{ section: '규모', key: 'industryRank', label: '산업 순위', valueOf: (c) => c.node?.industryRank, fmt: (v) => v ? `${v}위` : '-' },
 		{ section: '수익성', key: 'roe', label: 'ROE', valueOf: (c) => c.node?.roe, fmt: pct, metric: 'roe' },
 		{ section: '수익성', key: 'opMargin', label: '영업이익률', valueOf: (c) => c.node?.opMargin, fmt: pct, metric: 'opMargin' },
