@@ -196,6 +196,65 @@ def test_evaluate_query_gold_rows_accepts_semantic_filing_event_hit() -> None:
     assert report["metrics"]["exactDocHit10"] == 0.0
 
 
+def test_evaluate_query_gold_rows_accepts_curated_synonym_event_hit() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "query": "대규모 수주 계약 공시",
+            "target": "filing",
+            "expectedSourceRef": "dart:allFilings:reviewed-supply-contract#section=0",
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        }
+    ]
+    results = {
+        "대규모 수주 계약 공시": [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:newer-supply-contract#section=0",
+                "report_nm": "단일판매ㆍ공급계약체결",
+                "answerable": True,
+            }
+        ]
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=1, requiredTargets=("filing",))
+
+    assert report["releaseEligible"] is True
+    assert report["rows"][0]["matchMode"] == "semantic"
+
+
+def test_evaluate_query_gold_rows_accepts_dynamic_news_semantic_hit() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "query": "뉴스로 신제품 출시",
+            "target": "news",
+            "expectedSourceRef": "news:reviewed-old",
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        }
+    ]
+    results = {
+        "뉴스로 신제품 출시": [
+            {
+                "source": "news",
+                "sourceRef": "news:fresh-relevant",
+                "section_title": "LG전자, 무선청소기 신제품 출시",
+                "answerable": True,
+            }
+        ]
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=1, requiredTargets=("news",))
+
+    assert report["releaseEligible"] is True
+    assert report["rows"][0]["matchMode"] == "semantic"
+    assert report["metrics"]["exactDocHit10"] == 0.0
+
+
 def test_evaluate_query_gold_rows_keeps_body_query_exact() -> None:
     from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
 

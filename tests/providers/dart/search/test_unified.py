@@ -30,3 +30,106 @@ def test_empty_query_returns_empty() -> None:
     df = searchUnified("")
     assert isinstance(df, pl.DataFrame)
     assert df.height == 0
+
+
+def test_body_semantic_rerank_prefers_panel_report_body_over_news_and_boilerplate() -> None:
+    from dartlab.providers.dart.search.unified import _rerankBodySemanticHits
+
+    ranked = _rerankBodySemanticHits(
+        "환율 리스크 사업보고서 본문",
+        [
+            {
+                "source": "news",
+                "report_nm": "",
+                "section_title": "환율 리스크 뉴스",
+                "text": "환율 리스크",
+                "score": 40.0,
+            },
+            {
+                "source": "allFilings",
+                "report_nm": "일괄신고서",
+                "section_title": "일괄신고서",
+                "text": "제72기 사업보고서 제출에 따른 정정 환율 리스크",
+                "score": 30.0,
+            },
+            {
+                "source": "panel",
+                "report_nm": "사업보고서",
+                "section_title": "위험관리",
+                "text": "본문 환율 리스크",
+                "score": 1.0,
+            },
+        ],
+        None,
+    )
+
+    assert ranked[0]["source"] == "panel"
+
+
+def test_event_title_rerank_prefers_requested_report_label() -> None:
+    from dartlab.providers.dart.search.unified import _rerankEventTitleHits
+
+    ranked = _rerankEventTitleHits(
+        "사업보고서 제출",
+        [
+            {
+                "source": "allFilings",
+                "report_nm": "감사보고서제출",
+                "section_title": "감사보고서 제출",
+                "rcept_dt": "20260612",
+                "score": 100.0,
+            },
+            {
+                "source": "allFilings",
+                "report_nm": "사업보고서",
+                "section_title": "사업보고서",
+                "rcept_dt": "20260318",
+                "score": 1.0,
+            },
+        ],
+        None,
+    )
+
+    assert ranked[0]["report_nm"] == "사업보고서"
+
+
+def test_report_label_candidate_lane_uses_body_when_title_metadata_missing() -> None:
+    import polars as pl
+
+    from dartlab.providers.dart.search.unified import _reportLabels, _scoreReportLabelEvidence
+
+    meta = pl.DataFrame(
+        [
+            {
+                "source": "allFilings",
+                "rcept_dt": "20250320",
+                "report_nm": "감사보고서제출",
+                "section_title": "감사보고서제출",
+                "text": "사업보고서 제출 기한 연장",
+                "evidenceText": "사업보고서 제출 기한 연장",
+            },
+            {
+                "source": "panel",
+                "rcept_dt": "20260320",
+                "report_nm": "",
+                "section_title": "0",
+                "text": "사업보고서 제출 기한 연장 신고서",
+                "evidenceText": "사업보고서 제출 기한 연장 신고서",
+            },
+        ]
+    )
+
+    scores = _scoreReportLabelEvidence(meta, _reportLabels("사업보고서 제출"), "사업보고서 제출")
+
+    assert scores[0] == 0
+    assert scores[1] > 0
+
+
+def test_event_title_weights_boost_supply_contract_for_order_query() -> None:
+    from dartlab.providers.dart.search.fieldIndex import tokenizeContent
+    from dartlab.providers.dart.search.unified import _eventTitleWeights
+
+    weights = _eventTitleWeights("대규모 수주 계약 공시", None)
+
+    for token in tokenizeContent("단일판매 공급계약체결"):
+        assert weights[token] >= 3.0

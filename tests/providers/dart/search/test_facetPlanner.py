@@ -42,3 +42,15 @@ def test_plan_query_facets_extracts_company_name_from_query(monkeypatch) -> None
 
     assert facets.companyName == "삼성전자"
     assert facets.stockCode == "005930"
+
+
+def test_report_facet_rejects_incidental_body_reference_when_report_title_is_different() -> None:
+    from dartlab.providers.dart.search.facetPlanner import QueryFacets, facetMismatchReason
+
+    row = {
+        "report_nm": "일괄신고서",
+        "section_title": "일괄신고서",
+        "snippet": "본문 정정 사유는 제72기 사업보고서 제출에 따른 정정입니다.",
+    }
+
+    assert facetMismatchReason(row, QueryFacets(reportTerms=("사업보고서",))) == "facetMismatch:report"

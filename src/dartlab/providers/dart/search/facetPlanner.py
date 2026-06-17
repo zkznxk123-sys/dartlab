@@ -160,7 +160,7 @@ def facetMismatchReason(row: dict[str, Any], facets: QueryFacets | None) -> str:
 
 
 def _rowMatchesReport(row: dict[str, Any], reportTerms: tuple[str, ...]) -> bool:
-    text = " ".join(
+    titleText = " ".join(
         str(row.get(key) or "").lower()
         for key in (
             "report_nm",
@@ -168,6 +168,14 @@ def _rowMatchesReport(row: dict[str, Any], reportTerms: tuple[str, ...]) -> bool
             "title",
             "section_title",
             "sectionTitle",
+        )
+    )
+    if _hasReportSurface(titleText):
+        return _textMatchesReport(titleText, reportTerms)
+
+    text = " ".join(
+        str(row.get(key) or "").lower()
+        for key in (
             "snippet",
             "evidenceText",
             "text",
@@ -177,6 +185,15 @@ def _rowMatchesReport(row: dict[str, Any], reportTerms: tuple[str, ...]) -> bool
     )
     if not text:
         return False
+    return _textMatchesReport(text, reportTerms)
+
+
+def _hasReportSurface(text: str) -> bool:
+    clean = re.sub(r"[\s0._-]+", "", str(text or "")).strip()
+    return bool(clean)
+
+
+def _textMatchesReport(text: str, reportTerms: tuple[str, ...]) -> bool:
     for report in reportTerms:
         aliases = next((aliases for label, aliases in _REPORT_TERMS if label == report), ())
         if any(alias in text for alias in aliases) or report.lower() in text:

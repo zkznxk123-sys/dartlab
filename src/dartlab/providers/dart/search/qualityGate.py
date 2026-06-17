@@ -121,8 +121,8 @@ def evaluateQueryGoldRows(
         top3Rows += 1
         exactHit10 = _anyExpectedMatch(gold, results[:10])
         exactHit3 = _anyExpectedMatch(gold, results[:3])
-        hit10 = exactHit10 or _anySemanticFilingEventMatch(gold, results[:10])
-        hit3 = exactHit3 or _anySemanticFilingEventMatch(gold, results[:3])
+        hit10 = exactHit10 or _anySemanticMatch(gold, results[:10])
+        hit3 = exactHit3 or _anySemanticMatch(gold, results[:3])
         if hit10:
             docHit10Hits += 1
             readyRows += 1
@@ -364,10 +364,10 @@ def _rowFailureTypes(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any
     failures = []
     if not results:
         failures.append("missingResults")
-    if not (_anyExpectedMatch(gold, results[:10]) or _anySemanticFilingEventMatch(gold, results[:10])):
+    if not (_anyExpectedMatch(gold, results[:10]) or _anySemanticMatch(gold, results[:10])):
         failures.append("docMiss10")
         failures.extend(_topResultFailureTypes(results[:10]))
-    elif not (_anyExpectedMatch(gold, results[:3]) or _anySemanticFilingEventMatch(gold, results[:3])):
+    elif not (_anyExpectedMatch(gold, results[:3]) or _anySemanticMatch(gold, results[:3])):
         failures.append("citationMissTop3")
         failures.extend(_topResultFailureTypes(results[:3]))
     if target == "news" and _sourcePrecision(results[:10], expectedSource="news") < 1.0:
@@ -419,6 +419,13 @@ def _anySemanticFilingEventMatch(gold: Mapping[str, Any], results: Sequence[Mapp
     return any(_semanticFilingEventMatch(gold, row) for row in results)
 
 
+def _anySemanticMatch(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> bool:
+    target = normalizeTargetKind(gold)
+    if target == "news":
+        return _anySemanticNewsMatch(gold, results)
+    return _anySemanticFilingEventMatch(gold, results)
+
+
 def _semanticFilingEventMatch(gold: Mapping[str, Any], row: Mapping[str, Any]) -> bool:
     if not _isAnswerable(row):
         return False
@@ -429,6 +436,23 @@ def _semanticFilingEventMatch(gold: Mapping[str, Any], row: Mapping[str, Any]) -
     query = str(gold.get("query") or "")
     evidence = " ".join(str(row.get(key) or "") for key in ("report_nm", "section_title", "title", "snippet", "text"))
     return _queryEvidenceTokenCoverage(query, evidence) >= 0.5
+
+
+def _anySemanticNewsMatch(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> bool:
+    if normalizeTargetKind(gold) != "news":
+        return False
+    from dartlab.providers.dart.search.sourceIntent import sourceFamily
+
+    query = str(gold.get("query") or "")
+    for row in results:
+        if not _isAnswerable(row) or sourceFamily(str(row.get("source") or "")) != "news":
+            continue
+        evidence = " ".join(
+            str(row.get(key) or "") for key in ("report_nm", "section_title", "title", "snippet", "text")
+        )
+        if _queryEvidenceTokenCoverage(query, evidence) >= 0.6:
+            return True
+    return False
 
 
 def _isEventTitleQuery(query: str) -> bool:
@@ -477,6 +501,7 @@ def _isEventTitleQuery(query: str) -> bool:
 
 
 def _queryEvidenceTokenCoverage(query: str, evidence: str) -> float:
+    from dartlab.providers.dart.search.curatedSyn import expandQuery
     from dartlab.providers.dart.search.fieldIndex import tokenizeContent
 
     stop = {"공시", "원문", "본문", "뉴스", "기사"}
@@ -484,9 +509,19 @@ def _queryEvidenceTokenCoverage(query: str, evidence: str) -> float:
     if not queryTokens:
         return 0.0
     evidenceTokens = set(tokenizeContent(evidence))
-    hits = sum(1 for token in queryTokens if token in evidenceTokens)
-    if len(queryTokens) <= 2 and hits < len(queryTokens):
+    coverage = _tokenCoverage(queryTokens, evidenceTokens)
+    for term in expandQuery(query):
+        expansionTokens = [token for token in dict.fromkeys(tokenizeContent(term)) if token not in stop]
+        coverage = max(coverage, _tokenCoverage(expansionTokens, evidenceTokens))
+    if len(queryTokens) <= 2 and coverage < 1.0:
         return 0.0
+    return coverage
+
+
+def _tokenCoverage(queryTokens: Sequence[str], evidenceTokens: set[str]) -> float:
+    if not queryTokens:
+        return 0.0
+    hits = sum(1 for token in queryTokens if token in evidenceTokens)
     return hits / len(queryTokens)
 
 

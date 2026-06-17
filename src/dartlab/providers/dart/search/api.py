@@ -110,29 +110,42 @@ def search(
     stockCode = stockCode or facets.stockCode
     sourceIntent = detectSourceIntent(query, explicitScope=scope)
     sourceKind = sourceIntent.sourceKind
+    retrievalLimit = _retrievalLimit(query, limit, sourceKind=sourceKind)
 
     if scope == "title":
         result = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "content":
-        result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
+        result = _searchContent(
+            query,
+            corpCode=corpCode,
+            stockCode=stockCode,
+            sourceKind=sourceKind,
+            limit=retrievalLimit,
+        )
     elif scope == "news":
-        result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+        result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=retrievalLimit)
     elif scope == "auto":
         if sourceKind == "news":
-            result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+            result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=retrievalLimit)
         else:
-            result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, sourceKind=sourceKind, limit=limit)
+            result = _searchAuto(
+                query,
+                corpCode=corpCode,
+                stockCode=stockCode,
+                sourceKind=sourceKind,
+                limit=retrievalLimit,
+            )
     else:  # both
         if sourceKind == "news":
-            result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+            result = _searchNews(query, corpCode=corpCode, stockCode=stockCode, limit=retrievalLimit)
         else:
-            titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+            titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=retrievalLimit)
             contentHits = _searchContent(
                 query,
                 corpCode=corpCode,
                 stockCode=stockCode,
                 sourceKind=sourceKind,
-                limit=limit,
+                limit=retrievalLimit,
             )
             titleHits = titleHits.with_columns(pl.lit("title").alias("scope"))
             contentHits = contentHits.with_columns(pl.lit("content").alias("scope"))
@@ -172,6 +185,13 @@ def search(
         result=result,
     )
     return result
+
+
+def _retrievalLimit(query: str, limit: int, *, sourceKind: str | None = None) -> int:
+    """Use a wider internal pool so answerability can rescue facet-correct rows."""
+    del query, sourceKind
+    requested = max(1, int(limit))
+    return max(requested, min(100, max(requested * 5, 50)))
 
 
 def _looksLikeUsTicker(corp: str | None) -> bool:

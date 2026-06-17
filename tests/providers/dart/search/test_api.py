@@ -121,7 +121,7 @@ def test_search_accepts_top_k_alias(monkeypatch) -> None:
     result = api.search("유상증자", topK=4)
 
     assert result["info"].to_list() == ["ok"]
-    assert calls["limit"] == 4
+    assert calls["limit"] == 50
 
 
 def test_search_records_raw_query_log_when_enabled(monkeypatch, tmp_path) -> None:
@@ -204,6 +204,13 @@ def test_auto_search_keeps_content_lane_for_body_semantic_query(monkeypatch) -> 
 
     assert result["rcept_no"].to_list() == ["content-hit"]
     assert result["scope"].to_list() == ["auto"]
+
+
+def test_retrieval_limit_widens_internal_candidate_pool() -> None:
+    from dartlab.providers.dart.search import api
+
+    assert api._retrievalLimit("환율 리스크 사업보고서 본문", 10, sourceKind="filing") == 50
+    assert api._retrievalLimit("대표이사 변경", 30, sourceKind="filing") == 100
 
 
 def test_rank_answerable_first_preserves_answerable_order() -> None:
