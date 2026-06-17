@@ -326,8 +326,13 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                 if targetCode and targetCode != code:
                     foundCodes.add(targetCode)
 
+            # content 2-gram 집합 — 이름 첫 2글자가 없으면 full substring 스캔 skip (조기 reject).
+            # 결과 동일(이름이 content 에 있으면 첫 2글자는 반드시 2-gram), 2800 full-scan 대부분 컷.
+            contentBigrams = {content[k : k + 2] for k in range(len(content) - 1)}
             for targetName, targetCode in targetNames.items():
                 if targetCode == code or targetCode in foundCodes:
+                    continue
+                if targetName[:2] not in contentBigrams:
                     continue
                 if targetName in content:
                     foundCodes.add(targetCode)
