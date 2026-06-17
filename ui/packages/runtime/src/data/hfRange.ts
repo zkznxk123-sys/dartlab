@@ -110,7 +110,7 @@ export async function probeHfRange(
 
 // 범위요청 + 브라우저 HTTP 캐시 충돌(net::ERR_CACHE_OPERATION_NOT_SUPPORTED 등 — Range 응답이 캐시와 어긋날 때
 // Chrome 이 던짐) → 캐시 우회(reload)로 1회 재시도. 잦은 "로드 실패" 가드.
-async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0], init?: RequestInit): Promise<Response> {
+export async function fetchResilient(fetchFn: FetchLike, input: Parameters<FetchLike>[0], init?: RequestInit): Promise<Response> {
 	// 전이적 CDN 전파(갓 업로드/콜드 캐시)는 403/429/5xx 로 반환되거나 네트워크 throw → 짧은 백오프 재시도.
 	// (lazy 이력 로드 시 콜드 parquet 의 transient 403 이 hyparquet throw → unhandled 로 새던 것 차단.)
 	//

@@ -28,6 +28,7 @@ import { loadIndustryProfitPool } from './sources/industryPoolSource';
 import { loadHfProductIndexMap } from './sources/productIndexSource';
 import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
 import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from './sources/nonRegularFilingsSource';
+import { createDataCore, type DataCore } from '../../data/fetch/request';
 import { loadCompanyNews } from './sources/newsSource';
 import {
 	loadAuditFees,
@@ -116,11 +117,11 @@ function publicCompanyPort(shared: PublicRuntimeSharedPorts): CompanyPort {
 	};
 }
 
-function publicFilingPort(): FilingPort {
+function publicFilingPort(core: DataCore): FilingPort {
 	return {
 		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(code), // 전 이력 — limit 캡 제거(전역 1파일 stock_code 필터)
-		recentForCodes: (codes) => loadRecentFilingsForCodes(codes), // 워치 신선도 — HF allFilings 배치 read(백엔드 0)
+		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes), // 워치 신선도 — fetch 코어(HF allFilings 배치·10분 TTL·dedup)
 		// panel 격자 3종은 공개 뷰어 코드(landing)가 단계-6(뷰어 추출)에서 어댑터로 들어온다.
 		panelToc: () => notWiredYet('filing.panelToc', '단계-6(viewer 추출)'),
 		panelInit: () => notWiredYet('filing.panelInit', '단계-6(viewer 추출)'),
@@ -167,12 +168,13 @@ function publicScanPort(shared: PublicRuntimeSharedPorts): ScanPort {
 
 export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRuntime {
 	const env: RuntimeEnvironment = { ...options.env, kind: 'public' };
+	const dataCore = createDataCore(); // 데이터 워크벤치 SSOT 코어(어댑터당 1) — RuntimeCache·RequestDedup 실배선
 	return {
 		env,
 		company: publicCompanyPort(options.shared),
 		price: publicPricePort(),
 		index: createPublicIndexPort(),
-		filing: publicFilingPort(),
+		filing: publicFilingPort(dataCore),
 		news: publicNewsPort(),
 		finance: publicFinancePort(),
 		viewer: options.viewer,

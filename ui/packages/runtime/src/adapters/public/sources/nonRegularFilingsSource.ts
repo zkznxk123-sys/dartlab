@@ -5,6 +5,7 @@
 // 타입 정본 = contracts (NonRegularFiling 승격 완료 — 중복 정의 금지).
 import type { NonRegularFiling } from '@dartlab/ui-contracts';
 import { readParquetRows, type FetchLike } from '../../../data/hfRange';
+import type { DataCore } from '../../../data/fetch/request';
 
 interface RecentRow extends Record<string, unknown> {
 	stock_code?: unknown;
@@ -62,23 +63,22 @@ export async function loadCompanyNonRegularFilings(
 }
 
 // 워치 신선도 — 여러 종목을 한 read 로 ($in:[codes]). 단일판과 동일 HF 파일·정규화, code→목록 그룹핑.
-// 공개/로컬 공통배선(둘 다 이 함수 호출 → 백엔드 0). 캐시 키 = 정렬된 코드 join.
-const batchCache = new Map<string, Record<string, NonRegularFiling[]>>();
-
+// 공개/로컬 공통배선(둘 다 이 함수 호출 → 백엔드 0). 캐시·dedup 은 fetch 코어(data/fetch) 담당 —
+// 신선도 데이터라 짧은 TTL(10분). 자체 batchCache Map 폐기(데이터 워크벤치 SSOT 이관 P1).
 export async function loadRecentFilingsForCodes(
-	codes: string[],
-	{ fetchFn = fetch as FetchLike }: { fetchFn?: FetchLike } = {}
+	core: DataCore,
+	codes: string[]
 ): Promise<Record<string, NonRegularFiling[]>> {
 	const valid = [...new Set(codes.map((c) => String(c).trim()).filter((c) => /^\d{6}$/.test(c)))];
 	if (!valid.length) return {};
-	const key = valid.slice().sort().join(',');
-	const hit = batchCache.get(key);
-	if (hit) return hit;
 	try {
-		const { rows } = await readParquetRows<RecentRow>('dart/allFilings/recent.parquet', {
+		const rows = await core.requestParquetRows<RecentRow>({
+			origin: 'hfRange',
+			path: 'dart/allFilings/recent.parquet',
 			columns: COLS,
 			filter: { stock_code: { $in: valid } },
-			fetchFn
+			cacheKey: `allFilings.recent:${valid.slice().sort().join(',')}`,
+			cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 32 }
 		});
 		const wanted = new Set(valid);
 		const out: Record<string, NonRegularFiling[]> = {};
@@ -100,10 +100,8 @@ export async function loadRecentFilingsForCodes(
 			});
 		}
 		for (const arr of Object.values(out)) arr.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate) || b.rceptNo.localeCompare(a.rceptNo));
-		batchCache.set(key, out);
 		return out;
 	} catch {
-		batchCache.set(key, {});
 		return {};
 	}
 }

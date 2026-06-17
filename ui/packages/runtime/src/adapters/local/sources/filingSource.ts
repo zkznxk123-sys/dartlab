@@ -11,6 +11,7 @@ import { getJson } from '../fetchJson';
 import type { ClientPanelGrid, ClientPanelInit, ClientPanelToc, LocalCaches } from '../localTypes';
 import { loadCompanyRegularFilings } from '../../public/sources/regularFilingsSource';
 import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
+import type { DataCore } from '../../../data/fetch/request';
 
 // 로컬 panel toc 는 leafType/disclosureKey 메타 미탑재 — 미제공 = null 정직 표기 (위조 금지).
 function tocToContract(toc: ClientPanelToc): PanelTocResponse {
@@ -72,12 +73,12 @@ function loadPanelInit(apiBase: string, caches: LocalCaches, code: string): Prom
 	return p;
 }
 
-export function localFilingPort(apiBase: string, caches: LocalCaches): FilingPort {
+export function localFilingPort(apiBase: string, caches: LocalCaches, core: DataCore): FilingPort {
 	return {
 		// 공통배선 — 공개 HF 소스 그대로(정기 = regularFilingsSource, 비정기 = allFilings). 로컬 :8400 불요.
 		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(code),
-		recentForCodes: (codes) => loadRecentFilingsForCodes(codes),
+		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes),
 		async panelToc(code) {
 			const toc = await getJson<ClientPanelToc>(
 				apiBase,

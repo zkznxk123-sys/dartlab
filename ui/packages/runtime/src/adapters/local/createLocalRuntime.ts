@@ -22,6 +22,7 @@ import { localAiPort } from './sources/aiSource';
 import { localStoragePort } from './sources/storageSource';
 import { localCompanyPort } from './sources/companySource';
 import { localFilingPort } from './sources/filingSource';
+import { createDataCore } from '../../data/fetch/request';
 import { localScanPort } from './sources/scanSource';
 import { localViewerPort } from './sources/viewerSource';
 
@@ -48,6 +49,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		panelInit: new Map<string, Promise<ClientPanelInit | null>>(),
 		meta: new Map<string, Promise<CompanyMeta | null>>()
 	};
+	const dataCore = createDataCore(); // 데이터 워크벤치 SSOT 코어(어댑터당 1) — RuntimeCache·RequestDedup 실배선
 	// export Port 를 먼저 만들어 서비스 레지스트리(command)와 runtime.export 양쪽이 같은 인스턴스를 공유.
 	const exportPort = localExportPort(apiBase);
 	return {
@@ -57,7 +59,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		price: publicPricePort(),
 		// 지수 = gov/indices + FRED 모두 HF 브라우저 직독 → price·macro 와 동일하게 공개 포트 그대로 재사용(백엔드 0).
 		index: createPublicIndexPort(),
-		filing: localFilingPort(apiBase, caches),
+		filing: localFilingPort(apiBase, caches, dataCore),
 		// 뉴스 = private 라 브라우저 직독 불가 → 퍼블릭 워커(/news) 포트 그대로 재사용(price 와 동일 "공유 자산").
 		news: publicNewsPort(),
 		finance: localFinancePort(),
