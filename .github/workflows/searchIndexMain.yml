@@ -106,8 +106,7 @@ jobs:
             exit 0
           fi
           if [ "${DARTLAB_SEARCH_MAIN_REQUESTED_MODE:-catalog}" = "catalog" ]; then
-            echo "catalog mode requested but source catalog inputs were not prepared"
-            exit 1
+            echo "catalog mode requested but source catalog inputs were not prepared; bootstrap from full HF pull"
           fi
           # HF 429(1000 req/5분 쿼터) 대응 — 4 폴더 패턴을 *한 번의* snapshot_download 로 통합해
           # repo tree 열거(91941 파일, 페이지네이션 ~92 req)를 attempt 당 1회로 줄인다. 옛 폴더별

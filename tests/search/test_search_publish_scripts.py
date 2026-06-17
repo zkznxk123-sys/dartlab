@@ -454,6 +454,8 @@ def test_search_index_main_workflow_prefers_source_catalog_compaction() -> None:
     assert "actions/upload-artifact" in text
     assert "for attempt in $(seq 1 12)" in text
     assert "sleep 310" in text
+    assert "bootstrap from full HF pull" in text
+    assert 'source catalog inputs were not prepared"\n            exit 1' not in text
     assert "dart/allFilings/*" in text
     assert "dart/panel/**" in text
     assert "edgar/panel/**" in text
