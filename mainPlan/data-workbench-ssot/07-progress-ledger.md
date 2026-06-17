@@ -54,6 +54,14 @@
 - **B 판정 ② 가드 false-negative 3건 발견 → 클로저 완료(03fa330b4).** priceSource·regularFilingsSource 가 hfRange `readParquetRows` 직접 호출(코어 우회). price 는 자체 LRU `cache`+`inflight` Map 으로 RuntimeCache·RequestDedup 손수 재구현. **이관 완료**: regularFilings 무캐시→코어(panel.regular 30분), price readYearCandles→코어(gov.prices.year 60분)+inflight 폐기. 조립 `cache` 는 seed·팬 변이 차트 상태라 유지(fetch 캐시 아님). **가드 rule 6 추가**(source 안 hfRange 저수준 로더 직접 import 금지·type 허용) — 같은 사각 재발 차단.
 - 검증: runtime tsc·surfaces 0 errors·vitest 5/5·가드 PASS(baseline 1 불변).
 
+## ✅ 클린코드 점검 declutter (2026-06-17, 337fed005)
+
+"클린코드 트리 튼튼?" 점검 → clutter 1건 발견·제거. 레거시 무인자 포트 폴백 core 한 줄이
+source 8곳 복붙(+가드 createDataCore 특례 8칸) = "강함은 깎아서" 위반. `data/fetch.moduleFallbackCore()`
+헬퍼 1개로 통합(per-source 격리 유지·createDataCore 가 source 밖으로 모임)·가드 rule 4 특례 8→0. 순 -8줄.
+**남은 트리 부채(정직)**: ① 폴더 미완 — `cache/`가 `data/` 밖 형제(설계=`data/cache/`)·`origin.ts`/`hfRange.ts`
+미이전·배럴 없음 = **P4 보류(파일 이동이라 활성 동시 세션과 충돌 위험 → 잠잠할 때)**. ② loadJson dedup(위 잔여).
+
 ## 잔여 (선택 polish — 작업대 본체 무관)
 
 - **loadJson in-flight dedup**(B Q2): loadJson 은 dedup 없음 → relations/industryPool 의 per-file Map 은 sync-memo+negative-cache 로 *정당*(중복 아님). 진짜 소거 원하면 loadJson 에 RequestDedup 1개 주입(전 consumer 혜택) 후 Map 축소. landingJson 오리진 정식 배선과 함께 미래 wave(persist scope). 저우선 — 현 상태 회귀 아님.
