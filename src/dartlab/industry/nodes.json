@@ -153,7 +153,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5326721292281.0
+    "revenue": 5326721292281.0,
+    "supplyFacts": [
+      {
+        "supplier": "여천NCC\n\n㈜",
+        "amount": 469330.0,
+        "ratio": 83.0
+      }
+    ]
   },
   {
     "stockCode": "000220",
@@ -218,7 +225,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 114140919000000.0
+    "revenue": 114140919000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "HMMA",
+        "amount": 31286.0,
+        "ratio": 98.0
+      }
+    ]
   },
   {
     "stockCode": "000300",
@@ -231,7 +245,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 40170942353.0
+    "revenue": 40170942353.0,
+    "supplyFacts": [
+      {
+        "supplier": "에드컴",
+        "amount": 1102.0,
+        "ratio": 41.07
+      },
+      {
+        "supplier": "ARROW",
+        "amount": 1102.0,
+        "ratio": 41.07
+      },
+      {
+        "supplier": "미래로데이타",
+        "amount": 166.0,
+        "ratio": 6.19
+      },
+      {
+        "supplier": "써키트웨이",
+        "amount": 273.0,
+        "ratio": 10.18
+      },
+      {
+        "supplier": "선우전자통신",
+        "amount": 212.0,
+        "ratio": 7.9
+      },
+      {
+        "supplier": "티에스",
+        "amount": 204.0,
+        "ratio": 7.6
+      }
+    ]
   },
   {
     "stockCode": "000320",
@@ -244,7 +290,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1239267844107.0
+    "revenue": 1239267844107.0,
+    "supplyFacts": [
+      {
+        "supplier": "금호피앤비화학",
+        "amount": null,
+        "ratio": 30.6
+      },
+      {
+        "supplier": "하나상사",
+        "amount": null,
+        "ratio": 62.7
+      },
+      {
+        "supplier": "아라온",
+        "amount": null,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "000370",
@@ -270,7 +333,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 617067546154.0
+    "revenue": 617067546154.0,
+    "supplyFacts": [
+      {
+        "supplier": "케무어스 외",
+        "amount": 15677.0,
+        "ratio": 19.03
+      }
+    ]
   },
   {
     "stockCode": "000400",
@@ -335,7 +405,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1484722098136.0
+    "revenue": 1484722098136.0,
+    "supplyFacts": [
+      {
+        "supplier": "84.8%",
+        "amount": null,
+        "ratio": 632463.0
+      },
+      {
+        "supplier": "수입 외",
+        "amount": null,
+        "ratio": 1.8
+      },
+      {
+        "supplier": "10.0%",
+        "amount": null,
+        "ratio": 74285.0
+      },
+      {
+        "supplier": "3.4%",
+        "amount": null,
+        "ratio": 25714.0
+      }
+    ]
   },
   {
     "stockCode": "0004V0",
@@ -400,7 +492,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 134870815287.0
+    "revenue": 134870815287.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)포스코",
+        "amount": 4066438.0,
+        "ratio": 4066438.0
+      },
+      {
+        "supplier": "(주)포스코",
+        "amount": 1137448.0,
+        "ratio": 1137448.0
+      }
+    ]
   },
   {
     "stockCode": "000640",
@@ -413,7 +517,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1429766810735.0
+    "revenue": 1429766810735.0,
+    "supplyFacts": [
+      {
+        "supplier": "수석",
+        "amount": 8822.0,
+        "ratio": 8822.0
+      },
+      {
+        "supplier": "수석",
+        "amount": 2558.0,
+        "ratio": 2558.0
+      },
+      {
+        "supplier": "수석",
+        "amount": 2020.0,
+        "ratio": 2020.0
+      },
+      {
+        "supplier": "동양이엔지",
+        "amount": 278.0,
+        "ratio": 278.0
+      },
+      {
+        "supplier": "롯데캐미칼",
+        "amount": 3599.0,
+        "ratio": 3599.0
+      },
+      {
+        "supplier": "한국지페이퍼",
+        "amount": 1547.0,
+        "ratio": 1547.0
+      }
+    ]
   },
   {
     "stockCode": "000650",
@@ -491,7 +627,59 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 31062912000000.0
+    "revenue": 31062912000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "MEGAWIDE",
+        "amount": null,
+        "ratio": 29.0
+      },
+      {
+        "supplier": "PAN-UNITED CONCRETE PTE LTD",
+        "amount": null,
+        "ratio": 29.0
+      },
+      {
+        "supplier": "ABRAJ AL BADR CO",
+        "amount": null,
+        "ratio": 29.0
+      },
+      {
+        "supplier": "삼표피앤씨㈜",
+        "amount": null,
+        "ratio": 29.0
+      },
+      {
+        "supplier": "GE ENERGY PRODUCTS FRANCE SNC",
+        "amount": null,
+        "ratio": 45.19
+      },
+      {
+        "supplier": "ELLIOTT EBARA TURBOMACHINERY CORPOR",
+        "amount": null,
+        "ratio": 45.19
+      },
+      {
+        "supplier": "AMEC FOSTER WHEELER ENERGIA SLU",
+        "amount": null,
+        "ratio": 45.19
+      },
+      {
+        "supplier": "SAUDI ARABIAN AMIANTIT",
+        "amount": null,
+        "ratio": 45.19
+      },
+      {
+        "supplier": "LISEGA SE",
+        "amount": null,
+        "ratio": 45.19
+      },
+      {
+        "supplier": "현대제철㈜ 외",
+        "amount": null,
+        "ratio": 63.8
+      }
+    ]
   },
   {
     "stockCode": "000760",
@@ -569,7 +757,129 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 598552862276.0
+    "revenue": 598552862276.0,
+    "supplyFacts": [
+      {
+        "supplier": "17.3",
+        "amount": null,
+        "ratio": 14367.0
+      },
+      {
+        "supplier": "대원산업(주) 외",
+        "amount": 793.0,
+        "ratio": 1.0
+      },
+      {
+        "supplier": "국도화학㈜ 외",
+        "amount": 22899.0,
+        "ratio": 27.5
+      },
+      {
+        "supplier": "유니드글로벌상사 외",
+        "amount": 15645.0,
+        "ratio": 18.8
+      },
+      {
+        "supplier": "한화토탈㈜ 외",
+        "amount": 20590.0,
+        "ratio": 24.7
+      },
+      {
+        "supplier": "삼양화인㈜ 외",
+        "amount": 8904.0,
+        "ratio": 10.7
+      },
+      {
+        "supplier": "곤산흥업 외",
+        "amount": 2215.0,
+        "ratio": 20.9
+      },
+      {
+        "supplier": "곤산장릉 외",
+        "amount": 3560.0,
+        "ratio": 33.5
+      },
+      {
+        "supplier": "상해원방 외",
+        "amount": 3263.0,
+        "ratio": 30.7
+      },
+      {
+        "supplier": "상해명태 외",
+        "amount": 1587.0,
+        "ratio": 14.9
+      },
+      {
+        "supplier": "황산헌태 외",
+        "amount": 14389.0,
+        "ratio": 22.7
+      },
+      {
+        "supplier": "안훼이산검 외",
+        "amount": 17705.0,
+        "ratio": 27.9
+      },
+      {
+        "supplier": "허남바이리엔 외",
+        "amount": 5636.0,
+        "ratio": 8.9
+      },
+      {
+        "supplier": "무석만리 외",
+        "amount": 25738.0,
+        "ratio": 40.5
+      },
+      {
+        "supplier": "우매이트 상하이 외",
+        "amount": 4370.0,
+        "ratio": 18.4
+      },
+      {
+        "supplier": "우매이트 상하이 외",
+        "amount": 1835.0,
+        "ratio": 7.7
+      },
+      {
+        "supplier": "우매이트 상하이 외",
+        "amount": 11677.0,
+        "ratio": 49.2
+      },
+      {
+        "supplier": "우매이트 상하이 외",
+        "amount": 5852.0,
+        "ratio": 24.7
+      },
+      {
+        "supplier": "48.8",
+        "amount": null,
+        "ratio": 31562.0
+      },
+      {
+        "supplier": "KPX케미칼(주) 외",
+        "amount": 33138.0,
+        "ratio": 51.2
+      },
+      {
+        "supplier": "25.2",
+        "amount": null,
+        "ratio": 4069.0
+      },
+      {
+        "supplier": "(주)경민케미칼 외",
+        "amount": 641.0,
+        "ratio": 4.0
+      },
+      {
+        "supplier": "태영소재 외",
+        "amount": 2945.0,
+        "ratio": 18.3
+      },
+      {
+        "supplier": "에이티케미칼 외",
+        "amount": 862.0,
+        "ratio": 5.3
+      }
+    ]
   },
   {
     "stockCode": "000880",
@@ -621,7 +931,64 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 202400732520.0
+    "revenue": 202400732520.0,
+    "supplyFacts": [
+      {
+        "supplier": "수입",
+        "amount": 1773432.0,
+        "ratio": 1773432.0
+      },
+      {
+        "supplier": "수입",
+        "amount": 3209743.0,
+        "ratio": 3209743.0
+      },
+      {
+        "supplier": "경기광업",
+        "amount": 1809219.0,
+        "ratio": 1809219.0
+      },
+      {
+        "supplier": "성옥산업",
+        "amount": 808270.0,
+        "ratio": 808270.0
+      },
+      {
+        "supplier": "이솔산업",
+        "amount": 3738762.0,
+        "ratio": 3738762.0
+      },
+      {
+        "supplier": "Solvay",
+        "amount": 1087139.0,
+        "ratio": 1087139.0
+      },
+      {
+        "supplier": "TMC",
+        "amount": 3015388.0,
+        "ratio": 3015388.0
+      },
+      {
+        "supplier": "한승케미칼",
+        "amount": 905000.0,
+        "ratio": 905000.0
+      },
+      {
+        "supplier": "한경",
+        "amount": 459101.0,
+        "ratio": 459101.0
+      },
+      {
+        "supplier": "UBE",
+        "amount": 323540.0,
+        "ratio": 323540.0
+      },
+      {
+        "supplier": "위너테크",
+        "amount": 764071.0,
+        "ratio": 764071.0
+      }
+    ]
   },
   {
     "stockCode": "000950",
@@ -790,7 +1157,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 16706309561513.0
+    "revenue": 16706309561513.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜한성",
+        "amount": 17093.0,
+        "ratio": 100.0
+      },
+      {
+        "supplier": "한국진공야금",
+        "amount": 17093.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "001130",
@@ -855,7 +1234,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1985265094613.0
+    "revenue": 1985265094613.0,
+    "supplyFacts": [
+      {
+        "supplier": "기전산업 外",
+        "amount": 886373.0,
+        "ratio": 39.61
+      },
+      {
+        "supplier": "절강 화달",
+        "amount": 3891.0,
+        "ratio": 0.17
+      },
+      {
+        "supplier": "절강 연흠",
+        "amount": 3891.0,
+        "ratio": 0.17
+      },
+      {
+        "supplier": "청우통운 外",
+        "amount": 96233.0,
+        "ratio": 4.3
+      },
+      {
+        "supplier": "한국휴렛팩커드 外",
+        "amount": 47299.0,
+        "ratio": 2.11
+      },
+      {
+        "supplier": "잡이스",
+        "amount": 8.0,
+        "ratio": 0.0
+      }
+    ]
   },
   {
     "stockCode": "001250",
@@ -946,7 +1357,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 93481243542.0
+    "revenue": 93481243542.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)명성인더스",
+        "amount": 231951.0,
+        "ratio": 1.5
+      }
+    ]
   },
   {
     "stockCode": "001390",
@@ -998,7 +1416,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3651585276954.0
+    "revenue": 3651585276954.0,
+    "supplyFacts": [
+      {
+        "supplier": "서울철강 외",
+        "amount": 422820.0,
+        "ratio": 61.8
+      }
+    ]
   },
   {
     "stockCode": "001440",
@@ -1011,7 +1436,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3636018215712.0
+    "revenue": 3636018215712.0,
+    "supplyFacts": [
+      {
+        "supplier": "Glencore 외",
+        "amount": 5624.0,
+        "ratio": 5624.0
+      },
+      {
+        "supplier": "LS니꼬동 외",
+        "amount": 375.0,
+        "ratio": 375.0
+      },
+      {
+        "supplier": "대한전선 외",
+        "amount": 5.0,
+        "ratio": 5.0
+      },
+      {
+        "supplier": "Glencore 외",
+        "amount": 279.0,
+        "ratio": 279.0
+      }
+    ]
   },
   {
     "stockCode": "001450",
@@ -1050,7 +1497,74 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 110992936772.0
+    "revenue": 110992936772.0,
+    "supplyFacts": [
+      {
+        "supplier": "광일철강 외",
+        "amount": null,
+        "ratio": 44.33
+      },
+      {
+        "supplier": "광일철강",
+        "amount": null,
+        "ratio": 1.32
+      },
+      {
+        "supplier": "제이에스티 외",
+        "amount": null,
+        "ratio": 1.32
+      },
+      {
+        "supplier": "유정산업",
+        "amount": null,
+        "ratio": 1.89
+      },
+      {
+        "supplier": "대덕상사",
+        "amount": null,
+        "ratio": 0.66
+      },
+      {
+        "supplier": "바인즈크리에이션 외",
+        "amount": null,
+        "ratio": 0.66
+      },
+      {
+        "supplier": "삼표",
+        "amount": null,
+        "ratio": 16.19
+      },
+      {
+        "supplier": "유진기업 외",
+        "amount": null,
+        "ratio": 16.19
+      },
+      {
+        "supplier": "경기아스콘산업",
+        "amount": null,
+        "ratio": 0.0
+      },
+      {
+        "supplier": "충주골재산업",
+        "amount": null,
+        "ratio": 0.15
+      },
+      {
+        "supplier": "세종산업",
+        "amount": null,
+        "ratio": 0.15
+      },
+      {
+        "supplier": "건축가구",
+        "amount": null,
+        "ratio": 24.35
+      },
+      {
+        "supplier": "자재 외",
+        "amount": null,
+        "ratio": 24.35
+      }
+    ]
   },
   {
     "stockCode": "001500",
@@ -1089,7 +1603,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 630627899042.0
+    "revenue": 630627899042.0,
+    "supplyFacts": [
+      {
+        "supplier": "유진기업 외",
+        "amount": 2757.0,
+        "ratio": 49.9
+      },
+      {
+        "supplier": "피닉스 외",
+        "amount": 698.0,
+        "ratio": 12.6
+      },
+      {
+        "supplier": "엘지기계산업 외",
+        "amount": 262.0,
+        "ratio": 4.7
+      },
+      {
+        "supplier": "제이티환경기술 외",
+        "amount": 1806.0,
+        "ratio": 32.7
+      }
+    ]
   },
   {
     "stockCode": "001530",
@@ -1115,7 +1651,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 306873904373.0
+    "revenue": 306873904373.0,
+    "supplyFacts": [
+      {
+        "supplier": "코아팜바이오 엠큐어바이오 외",
+        "amount": 1151200.0,
+        "ratio": 1151200.0
+      }
+    ]
   },
   {
     "stockCode": "001550",
@@ -1271,7 +1814,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 100397778375.0
+    "revenue": 100397778375.0,
+    "supplyFacts": [
+      {
+        "supplier": "포스코외",
+        "amount": 41587.0,
+        "ratio": 41587.0
+      }
+    ]
   },
   {
     "stockCode": "001780",
@@ -1362,7 +1912,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 825260643220.0
+    "revenue": 825260643220.0,
+    "supplyFacts": [
+      {
+        "supplier": "태금정",
+        "amount": 229788.0,
+        "ratio": 89.82
+      },
+      {
+        "supplier": "(주)동인철강",
+        "amount": 229788.0,
+        "ratio": 89.82
+      },
+      {
+        "supplier": "(주)동부스틸",
+        "amount": 229788.0,
+        "ratio": 89.82
+      },
+      {
+        "supplier": "(주)디비메탈",
+        "amount": 9993.0,
+        "ratio": 3.91
+      },
+      {
+        "supplier": "(주)성도에너지",
+        "amount": 954.0,
+        "ratio": 0.37
+      }
+    ]
   },
   {
     "stockCode": "002020",
@@ -1375,7 +1952,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5886133083763.0
+    "revenue": 5886133083763.0,
+    "supplyFacts": [
+      {
+        "supplier": "현대제철㈜ 외",
+        "amount": null,
+        "ratio": 21.74
+      },
+      {
+        "supplier": "유진기업㈜ 외",
+        "amount": null,
+        "ratio": 20.87
+      },
+      {
+        "supplier": "에스지이㈜ 외",
+        "amount": null,
+        "ratio": 0.06
+      }
+    ]
   },
   {
     "stockCode": "002030",
@@ -1479,7 +2073,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 87168895112.0
+    "revenue": 87168895112.0,
+    "supplyFacts": [
+      {
+        "supplier": "팜피아",
+        "amount": 522.0,
+        "ratio": 5.88
+      },
+      {
+        "supplier": "동화지앤피",
+        "amount": 288.0,
+        "ratio": 3.94
+      }
+    ]
   },
   {
     "stockCode": "002220",
@@ -1596,7 +2202,89 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 6483819486096.0
+    "revenue": 6483819486096.0,
+    "supplyFacts": [
+      {
+        "supplier": "아세아제지㈜ 외",
+        "amount": 235100.0,
+        "ratio": 15.35
+      },
+      {
+        "supplier": "금호피앤비화학주식회사 외",
+        "amount": 343313.0,
+        "ratio": 22.42
+      },
+      {
+        "supplier": "JIANGSU SHENLONG ZINC INDUSTRY CO.",
+        "amount": 108877.0,
+        "ratio": 7.11
+      },
+      {
+        "supplier": "LTD. 외",
+        "amount": 108877.0,
+        "ratio": 7.11
+      },
+      {
+        "supplier": "OKAHATA SANGYO CO.",
+        "amount": 23557.0,
+        "ratio": 1.54
+      },
+      {
+        "supplier": "LTD 외",
+        "amount": 23557.0,
+        "ratio": 1.54
+      },
+      {
+        "supplier": "Allnex Resin (China) Co.",
+        "amount": 48372.0,
+        "ratio": 3.16
+      },
+      {
+        "supplier": "Ltd. 외",
+        "amount": 48372.0,
+        "ratio": 3.16
+      },
+      {
+        "supplier": "SICO PERFORMANCE MATERIAL(SHANDONG) CO.",
+        "amount": 2889.0,
+        "ratio": 0.19
+      },
+      {
+        "supplier": "LTD. 외",
+        "amount": 2889.0,
+        "ratio": 0.19
+      },
+      {
+        "supplier": "Global Ferro",
+        "amount": 631007.0,
+        "ratio": 41.21
+      },
+      {
+        "supplier": "MGC",
+        "amount": 631007.0,
+        "ratio": 41.21
+      },
+      {
+        "supplier": "XINAN 외",
+        "amount": 631007.0,
+        "ratio": 41.21
+      },
+      {
+        "supplier": "한국내화㈜ 외",
+        "amount": 34845.0,
+        "ratio": 2.28
+      },
+      {
+        "supplier": "MASTERPLAN VINA CO.",
+        "amount": 111.0,
+        "ratio": 0.01
+      },
+      {
+        "supplier": "LTD 외",
+        "amount": 111.0,
+        "ratio": 0.01
+      }
+    ]
   },
   {
     "stockCode": "002390",
@@ -1661,7 +2349,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 659478953752.0
+    "revenue": 659478953752.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜홈센타",
+        "amount": 4318.0,
+        "ratio": 14.29
+      },
+      {
+        "supplier": "㈜보광산업",
+        "amount": 4318.0,
+        "ratio": 14.29
+      },
+      {
+        "supplier": "㈜포스코",
+        "amount": 2057.0,
+        "ratio": 6.81
+      },
+      {
+        "supplier": "㈜대림목재",
+        "amount": 851.0,
+        "ratio": 2.82
+      }
+    ]
   },
   {
     "stockCode": "002600",
@@ -1765,7 +2475,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 175496223500.0
+    "revenue": 175496223500.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)삼오제약",
+        "amount": 2684.0,
+        "ratio": 11.58
+      },
+      {
+        "supplier": "SECHAGN INT'L CORP.",
+        "amount": 755.0,
+        "ratio": 3.26
+      },
+      {
+        "supplier": "(주)삼오제약",
+        "amount": 618.0,
+        "ratio": 2.67
+      }
+    ]
   },
   {
     "stockCode": "002760",
@@ -1791,7 +2518,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 576381970077.0
+    "revenue": 576381970077.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜삼표산업",
+        "amount": 2059.0,
+        "ratio": 38.0
+      },
+      {
+        "supplier": "㈜아주산업 외",
+        "amount": 2059.0,
+        "ratio": 38.0
+      },
+      {
+        "supplier": "와이케이스틸㈜",
+        "amount": 3361.0,
+        "ratio": 62.0
+      },
+      {
+        "supplier": "환영철강공업㈜ 외",
+        "amount": 3361.0,
+        "ratio": 62.0
+      }
+    ]
   },
   {
     "stockCode": "002790",
@@ -1986,7 +2735,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 73226140158.0
+    "revenue": 73226140158.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜파마피아",
+        "amount": 673.0,
+        "ratio": 23.69
+      },
+      {
+        "supplier": "㈜파마피아",
+        "amount": 189.0,
+        "ratio": 6.65
+      },
+      {
+        "supplier": "㈜파마피아",
+        "amount": 108.0,
+        "ratio": 3.8
+      }
+    ]
   },
   {
     "stockCode": "003070",
@@ -1999,7 +2765,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2684430963154.0
+    "revenue": 2684430963154.0,
+    "supplyFacts": [
+      {
+        "supplier": "현대제철㈜ 외",
+        "amount": null,
+        "ratio": 21.74
+      },
+      {
+        "supplier": "유진기업㈜ 외",
+        "amount": null,
+        "ratio": 20.87
+      },
+      {
+        "supplier": "에스지이㈜ 외",
+        "amount": null,
+        "ratio": 0.06
+      }
+    ]
   },
   {
     "stockCode": "003080",
@@ -2025,7 +2808,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2068370455244.0
+    "revenue": 2068370455244.0,
+    "supplyFacts": [
+      {
+        "supplier": "SUMITOMO PHARMA CO.LTD",
+        "amount": 3226.0,
+        "ratio": 4.3
+      },
+      {
+        "supplier": "대웅바이오",
+        "amount": 15518.0,
+        "ratio": 20.9
+      }
+    ]
   },
   {
     "stockCode": "003100",
@@ -2116,7 +2911,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1827439561466.0
+    "revenue": 1827439561466.0,
+    "supplyFacts": [
+      {
+        "supplier": "SK종합화학\nSK가스",
+        "amount": 270749138794.0,
+        "ratio": 270749138794.0
+      }
+    ]
   },
   {
     "stockCode": "003280",
@@ -2233,7 +3035,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 25225542379502.0
+    "revenue": 25225542379502.0,
+    "supplyFacts": [
+      {
+        "supplier": "GS칼텍스",
+        "amount": 69429.0,
+        "ratio": 69429.0
+      },
+      {
+        "supplier": "S-OIL 외",
+        "amount": 69429.0,
+        "ratio": 69429.0
+      }
+    ]
   },
   {
     "stockCode": "003520",
@@ -2246,7 +3060,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 254255894053.0
+    "revenue": 254255894053.0,
+    "supplyFacts": [
+      {
+        "supplier": "Curia France SAS",
+        "amount": null,
+        "ratio": 7.54
+      },
+      {
+        "supplier": "동신관유리공업",
+        "amount": null,
+        "ratio": 1.02
+      }
+    ]
   },
   {
     "stockCode": "003530",
@@ -2285,7 +3111,99 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 615425000000.0
+    "revenue": 615425000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜포스코",
+        "amount": 14137.0,
+        "ratio": 13.3
+      },
+      {
+        "supplier": "Golden Dragon",
+        "amount": 3598.0,
+        "ratio": 3.4
+      },
+      {
+        "supplier": "Naile",
+        "amount": 3598.0,
+        "ratio": 3.4
+      },
+      {
+        "supplier": "엘지디스플레이㈜",
+        "amount": 28842.0,
+        "ratio": 37.9
+      },
+      {
+        "supplier": "BOE",
+        "amount": 28842.0,
+        "ratio": 37.9
+      },
+      {
+        "supplier": "Realtek",
+        "amount": 3726.0,
+        "ratio": 4.9
+      },
+      {
+        "supplier": "Media Tek",
+        "amount": 3726.0,
+        "ratio": 4.9
+      },
+      {
+        "supplier": "엘지디스플레이㈜",
+        "amount": 6918.0,
+        "ratio": 21.7
+      },
+      {
+        "supplier": "NXP",
+        "amount": 2310.0,
+        "ratio": 7.3
+      },
+      {
+        "supplier": "Qualcomm",
+        "amount": 2310.0,
+        "ratio": 7.3
+      },
+      {
+        "supplier": "엘지디스플레이㈜",
+        "amount": 9690.0,
+        "ratio": 63.0
+      },
+      {
+        "supplier": "BOE",
+        "amount": 9690.0,
+        "ratio": 63.0
+      },
+      {
+        "supplier": "Sony",
+        "amount": 30724.0,
+        "ratio": 30.6
+      },
+      {
+        "supplier": "ST Micro",
+        "amount": 30724.0,
+        "ratio": 30.6
+      },
+      {
+        "supplier": "Largan",
+        "amount": 11033.0,
+        "ratio": 11.0
+      },
+      {
+        "supplier": "Genius",
+        "amount": 11033.0,
+        "ratio": 11.0
+      },
+      {
+        "supplier": "Alps",
+        "amount": 23875.0,
+        "ratio": 23.8
+      },
+      {
+        "supplier": "Mitsumi",
+        "amount": 23875.0,
+        "ratio": 23.8
+      }
+    ]
   },
   {
     "stockCode": "003570",
@@ -2519,7 +3437,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 132347880383.0
+    "revenue": 132347880383.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)에스원텍스타일 외",
+        "amount": 7472.0,
+        "ratio": 7472.0
+      },
+      {
+        "supplier": "성우코리아커머스 외",
+        "amount": 2580.0,
+        "ratio": 2580.0
+      },
+      {
+        "supplier": "(주)피에이씨니트 외",
+        "amount": 4476.0,
+        "ratio": 4476.0
+      },
+      {
+        "supplier": "ZHANGJIAGANG PUKUN외",
+        "amount": 3030.0,
+        "ratio": 3030.0
+      },
+      {
+        "supplier": "(주)대화라벨앤택스 외",
+        "amount": 558.0,
+        "ratio": 558.0
+      }
+    ]
   },
   {
     "stockCode": "004080",
@@ -2623,7 +3568,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 77541223156.0
+    "revenue": 77541223156.0,
+    "supplyFacts": [
+      {
+        "supplier": "남성인터내셔널 외",
+        "amount": 19783.0,
+        "ratio": 19783.0
+      },
+      {
+        "supplier": "남성인터내셔널 외",
+        "amount": 1037.0,
+        "ratio": 1037.0
+      },
+      {
+        "supplier": "ULTIMATE SOUND 外",
+        "amount": 5008.0,
+        "ratio": 5008.0
+      }
+    ]
   },
   {
     "stockCode": "004310",
@@ -2714,7 +3676,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 223128675519.0
+    "revenue": 223128675519.0,
+    "supplyFacts": [
+      {
+        "supplier": "72%",
+        "amount": null,
+        "ratio": 30509.0
+      },
+      {
+        "supplier": "28%",
+        "amount": null,
+        "ratio": 11635.0
+      },
+      {
+        "supplier": "100%",
+        "amount": null,
+        "ratio": 42144.0
+      }
+    ]
   },
   {
     "stockCode": "004450",
@@ -2831,7 +3810,74 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1252424760923.0
+    "revenue": 1252424760923.0,
+    "supplyFacts": [
+      {
+        "supplier": "NOVATEK MICROELECTRONICS CORP.",
+        "amount": 68598.0,
+        "ratio": 68598.0
+      },
+      {
+        "supplier": "Infineon Technologies Asia Pacific Pte Ltd.",
+        "amount": 68598.0,
+        "ratio": 68598.0
+      },
+      {
+        "supplier": "SAMT CO.",
+        "amount": 68598.0,
+        "ratio": 68598.0
+      },
+      {
+        "supplier": "LTD.",
+        "amount": 68598.0,
+        "ratio": 68598.0
+      },
+      {
+        "supplier": "AU Optronics Corporation",
+        "amount": 83126.0,
+        "ratio": 83126.0
+      },
+      {
+        "supplier": "BOE TECHNOLOGY (HK) LIMITED",
+        "amount": 83126.0,
+        "ratio": 83126.0
+      },
+      {
+        "supplier": "CSOT",
+        "amount": 83126.0,
+        "ratio": 83126.0
+      },
+      {
+        "supplier": "HKC OVERSEAS LIMITED",
+        "amount": 83126.0,
+        "ratio": 83126.0
+      },
+      {
+        "supplier": "HAEM",
+        "amount": 14841.0,
+        "ratio": 14841.0
+      },
+      {
+        "supplier": "Tianjin Aiko Solar Energy Technology Co.",
+        "amount": 27414.0,
+        "ratio": 27414.0
+      },
+      {
+        "supplier": "Ltd",
+        "amount": 27414.0,
+        "ratio": 27414.0
+      },
+      {
+        "supplier": "Hunan Red Solar",
+        "amount": 27414.0,
+        "ratio": 27414.0
+      },
+      {
+        "supplier": "일진디스플레이",
+        "amount": 384.0,
+        "ratio": 384.0
+      }
+    ]
   },
   {
     "stockCode": "004720",
@@ -2844,7 +3890,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 173072508298.0
+    "revenue": 173072508298.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)미래플라스틱외",
+        "amount": 339.0,
+        "ratio": 24.14
+      }
+    ]
   },
   {
     "stockCode": "004770",
@@ -2883,7 +3936,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "티지앤컴퍼니",
+        "amount": 79458.0,
+        "ratio": 79458.0
+      },
+      {
+        "supplier": "대아하이테크",
+        "amount": 79458.0,
+        "ratio": 79458.0
+      },
+      {
+        "supplier": "효성 베트남",
+        "amount": 18888.0,
+        "ratio": 18888.0
+      },
+      {
+        "supplier": "효성 동나이",
+        "amount": 18888.0,
+        "ratio": 18888.0
+      }
+    ]
   },
   {
     "stockCode": "004830",
@@ -2922,7 +3997,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 737135000.0
+    "revenue": 737135000.0,
+    "supplyFacts": [
+      {
+        "supplier": "S-Oil 외",
+        "amount": 26776.0,
+        "ratio": 88.36
+      }
+    ]
   },
   {
     "stockCode": "004890",
@@ -2948,7 +4030,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 202667523052.0
+    "revenue": 202667523052.0,
+    "supplyFacts": [
+      {
+        "supplier": "켐리치교역(BYK) 외",
+        "amount": 5162601.0,
+        "ratio": 5.72
+      },
+      {
+        "supplier": "341",
+        "amount": 7.62,
+        "ratio": 7.62
+      },
+      {
+        "supplier": "198",
+        "amount": 10.91,
+        "ratio": 10.91
+      },
+      {
+        "supplier": "424",
+        "amount": 27.07,
+        "ratio": 27.07
+      },
+      {
+        "supplier": "011",
+        "amount": 27.97,
+        "ratio": 27.97
+      }
+    ]
   },
   {
     "stockCode": "004920",
@@ -3026,7 +4135,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 612490282785.0
+    "revenue": 612490282785.0,
+    "supplyFacts": [
+      {
+        "supplier": "JFE",
+        "amount": 61118.0,
+        "ratio": 30.5
+      },
+      {
+        "supplier": "본계강철",
+        "amount": 61118.0,
+        "ratio": 30.5
+      }
+    ]
   },
   {
     "stockCode": "005030",
@@ -3091,7 +4212,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 727764317548.0
+    "revenue": 727764317548.0,
+    "supplyFacts": [
+      {
+        "supplier": "95%",
+        "amount": 180662.0,
+        "ratio": 180662.0
+      },
+      {
+        "supplier": "NSSMC 외",
+        "amount": null,
+        "ratio": 5.0
+      },
+      {
+        "supplier": "100%",
+        "amount": 191374.0,
+        "ratio": 191374.0
+      },
+      {
+        "supplier": "81.6%",
+        "amount": 83033.0,
+        "ratio": 83033.0
+      },
+      {
+        "supplier": "중국 외",
+        "amount": null,
+        "ratio": 18.4
+      },
+      {
+        "supplier": "100%",
+        "amount": 137034.0,
+        "ratio": 137034.0
+      }
+    ]
   },
   {
     "stockCode": "005180",
@@ -3260,7 +4413,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3370480879745.0
+    "revenue": 3370480879745.0,
+    "supplyFacts": [
+      {
+        "supplier": "SPCGFS",
+        "amount": 2830477.0,
+        "ratio": 1.8
+      },
+      {
+        "supplier": "비엔아이글로벌",
+        "amount": 2830477.0,
+        "ratio": 1.8
+      },
+      {
+        "supplier": "SPCPACK",
+        "amount": 5852259.0,
+        "ratio": 25.4
+      }
+    ]
   },
   {
     "stockCode": "005670",
@@ -3286,7 +4456,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 149728576895.0
+    "revenue": 149728576895.0,
+    "supplyFacts": [
+      {
+        "supplier": "KDK",
+        "amount": 59146.0,
+        "ratio": 80.1
+      }
+    ]
   },
   {
     "stockCode": "005690",
@@ -3351,7 +4528,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 300567542574.0
+    "revenue": 300567542574.0,
+    "supplyFacts": [
+      {
+        "supplier": "한영산업",
+        "amount": 1987.0,
+        "ratio": 1987.0
+      }
+    ]
   },
   {
     "stockCode": "005800",
@@ -3364,7 +4548,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 185154553424.0
+    "revenue": 185154553424.0,
+    "supplyFacts": [
+      {
+        "supplier": "신영스타킹외",
+        "amount": 293.0,
+        "ratio": 293.0
+      }
+    ]
   },
   {
     "stockCode": "005810",
@@ -3377,7 +4568,44 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 18385622730.0
+    "revenue": 18385622730.0,
+    "supplyFacts": [
+      {
+        "supplier": "포스코",
+        "amount": 23332.0,
+        "ratio": 23332.0
+      },
+      {
+        "supplier": "일본야금",
+        "amount": 23332.0,
+        "ratio": 23332.0
+      },
+      {
+        "supplier": "LS Nikko",
+        "amount": 399630.0,
+        "ratio": 399630.0
+      },
+      {
+        "supplier": "Kennecott",
+        "amount": 161268.0,
+        "ratio": 161268.0
+      },
+      {
+        "supplier": "Kataman",
+        "amount": 161268.0,
+        "ratio": 161268.0
+      },
+      {
+        "supplier": "Trafigura",
+        "amount": 754231.0,
+        "ratio": 754231.0
+      },
+      {
+        "supplier": "Glencore",
+        "amount": 754231.0,
+        "ratio": 754231.0
+      }
+    ]
   },
   {
     "stockCode": "005820",
@@ -3468,7 +4696,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 333605938000000.0
+    "revenue": 333605938000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "CSOT",
+        "amount": 45277.0,
+        "ratio": 31.4
+      },
+      {
+        "supplier": "AUO",
+        "amount": 45277.0,
+        "ratio": 31.4
+      },
+      {
+        "supplier": "8.7%",
+        "amount": null,
+        "ratio": 10636.0
+      },
+      {
+        "supplier": "NVIDIA",
+        "amount": 2712.0,
+        "ratio": 9.4
+      },
+      {
+        "supplier": "Renesas",
+        "amount": 2712.0,
+        "ratio": 9.4
+      }
+    ]
   },
   {
     "stockCode": "005940",
@@ -3533,7 +4788,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 9583673896991.0
+    "revenue": 9583673896991.0,
+    "supplyFacts": [
+      {
+        "supplier": "케이씨글라스",
+        "amount": 77393.0,
+        "ratio": 9.24
+      },
+      {
+        "supplier": "㈜제이에이테크 외",
+        "amount": 77393.0,
+        "ratio": 9.24
+      },
+      {
+        "supplier": "㈜대원C",
+        "amount": 91046.0,
+        "ratio": 10.87
+      },
+      {
+        "supplier": "한화솔루션㈜ 외",
+        "amount": 91046.0,
+        "ratio": 10.87
+      },
+      {
+        "supplier": "C TECH 외",
+        "amount": 74874.0,
+        "ratio": 8.94
+      },
+      {
+        "supplier": "㈜광천피앤씨 외",
+        "amount": 28358.0,
+        "ratio": 3.39
+      }
+    ]
   },
   {
     "stockCode": "006050",
@@ -3572,7 +4859,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "PT BLUE SEAINDUSTRY 외",
+        "amount": 11914.0,
+        "ratio": 32.79
+      },
+      {
+        "supplier": "없음",
+        "amount": null,
+        "ratio": 1.3
+      }
+    ]
   },
   {
     "stockCode": "006110",
@@ -3637,7 +4936,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 31870031000000.0
+    "revenue": 31870031000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "LS-Nikko동제련 외 다수",
+        "amount": 1883227.0,
+        "ratio": 1883227.0
+      },
+      {
+        "supplier": "㈜태인 외 다수",
+        "amount": 548737.0,
+        "ratio": 548737.0
+      },
+      {
+        "supplier": "FPT Industrial S.p.A. 외 다수",
+        "amount": 33514.0,
+        "ratio": 33514.0
+      },
+      {
+        "supplier": "Arubis",
+        "amount": 780648.0,
+        "ratio": 780648.0
+      },
+      {
+        "supplier": "Southwire 외 다수",
+        "amount": 780648.0,
+        "ratio": 780648.0
+      }
+    ]
   },
   {
     "stockCode": "006280",
@@ -3650,7 +4976,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1991279093821.0
+    "revenue": 1991279093821.0,
+    "supplyFacts": [
+      {
+        "supplier": "대한적십자사혈장분획센터",
+        "amount": 258269.0,
+        "ratio": 61.9
+      },
+      {
+        "supplier": "Blood Centers of America",
+        "amount": 258269.0,
+        "ratio": 61.9
+      },
+      {
+        "supplier": "인백팜 외",
+        "amount": 15403.0,
+        "ratio": 3.7
+      },
+      {
+        "supplier": "한풍제약",
+        "amount": 4592.0,
+        "ratio": 1.1
+      }
+    ]
   },
   {
     "stockCode": "006340",
@@ -3676,7 +5024,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1440440000000.0
+    "revenue": 1440440000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜삼표산업",
+        "amount": 118175.0,
+        "ratio": 16.2
+      },
+      {
+        "supplier": "엘에스전선㈜",
+        "amount": 4310.0,
+        "ratio": 0.6
+      },
+      {
+        "supplier": "세원이앤씨㈜",
+        "amount": 11617.0,
+        "ratio": 1.6
+      }
+    ]
   },
   {
     "stockCode": "006370",
@@ -3832,7 +5197,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3235721337340.0
+    "revenue": 3235721337340.0,
+    "supplyFacts": [
+      {
+        "supplier": "COVESTRO외",
+        "amount": 22911.0,
+        "ratio": 25.3
+      },
+      {
+        "supplier": "해당사항 없음",
+        "amount": null,
+        "ratio": 23.3
+      },
+      {
+        "supplier": "해당사항 없음",
+        "amount": null,
+        "ratio": 11.7
+      },
+      {
+        "supplier": "애경유화-계열사",
+        "amount": null,
+        "ratio": 11.3
+      },
+      {
+        "supplier": "해당사항 없음",
+        "amount": null,
+        "ratio": 13.4
+      }
+    ]
   },
   {
     "stockCode": "006880",
@@ -3910,7 +5302,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 11957421688837.0
+    "revenue": 11957421688837.0,
+    "supplyFacts": [
+      {
+        "supplier": "오케이라이스센터 外",
+        "amount": 1662.0,
+        "ratio": 11.1
+      }
+    ]
   },
   {
     "stockCode": "007110",
@@ -4053,7 +5452,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 117974152260.0
+    "revenue": 117974152260.0,
+    "supplyFacts": [
+      {
+        "supplier": "VICTOR  TEC 외",
+        "amount": 5616.0,
+        "ratio": 5616.0
+      },
+      {
+        "supplier": "㈜파마피아",
+        "amount": 673.0,
+        "ratio": 673.0
+      },
+      {
+        "supplier": "㈜파마피아",
+        "amount": 189.0,
+        "ratio": 189.0
+      },
+      {
+        "supplier": "㈜파마피아",
+        "amount": 108.0,
+        "ratio": 108.0
+      },
+      {
+        "supplier": "OCS 외",
+        "amount": 633.0,
+        "ratio": 633.0
+      }
+    ]
   },
   {
     "stockCode": "007530",
@@ -4079,7 +5505,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 408963972960.0
+    "revenue": 408963972960.0,
+    "supplyFacts": [
+      {
+        "supplier": "N社",
+        "amount": 6909.0,
+        "ratio": 6909.0
+      },
+      {
+        "supplier": "A社",
+        "amount": 6909.0,
+        "ratio": 6909.0
+      },
+      {
+        "supplier": "R社",
+        "amount": 6909.0,
+        "ratio": 6909.0
+      }
+    ]
   },
   {
     "stockCode": "007570",
@@ -4131,7 +5574,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1088025119176.0
+    "revenue": 1088025119176.0,
+    "supplyFacts": [
+      {
+        "supplier": "PANASONIC",
+        "amount": 49158.0,
+        "ratio": 49.24
+      },
+      {
+        "supplier": "EMC",
+        "amount": 49158.0,
+        "ratio": 49.24
+      },
+      {
+        "supplier": "두산전자",
+        "amount": 49158.0,
+        "ratio": 49.24
+      }
+    ]
   },
   {
     "stockCode": "007680",
@@ -4170,7 +5630,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1933800848582.0
+    "revenue": 1933800848582.0,
+    "supplyFacts": [
+      {
+        "supplier": "BJT인터내셔날 외",
+        "amount": 13.0,
+        "ratio": 0.02
+      },
+      {
+        "supplier": "나우스 외",
+        "amount": 546.0,
+        "ratio": 0.74
+      },
+      {
+        "supplier": "대원에프앤드씨 외",
+        "amount": 73506.0,
+        "ratio": 99.24
+      }
+    ]
   },
   {
     "stockCode": "007720",
@@ -4287,7 +5764,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 297310475768.0
+    "revenue": 297310475768.0,
+    "supplyFacts": [
+      {
+        "supplier": "ELA 외",
+        "amount": 34700.0,
+        "ratio": 41.7
+      },
+      {
+        "supplier": "PT.ERNA DJULIAWATI 외",
+        "amount": 16520.0,
+        "ratio": 19.9
+      }
+    ]
   },
   {
     "stockCode": "008260",
@@ -4560,7 +6049,74 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 11314459238100.0
+    "revenue": 11314459238100.0,
+    "supplyFacts": [
+      {
+        "supplier": "SHOEI",
+        "amount": 636866.0,
+        "ratio": 53.5
+      },
+      {
+        "supplier": "GUANGBO",
+        "amount": 636866.0,
+        "ratio": 53.5
+      },
+      {
+        "supplier": "DAEJOO",
+        "amount": 636866.0,
+        "ratio": 53.5
+      },
+      {
+        "supplier": "SINOCERA",
+        "amount": 636866.0,
+        "ratio": 53.5
+      },
+      {
+        "supplier": "COSMO",
+        "amount": 108614.0,
+        "ratio": 9.1
+      },
+      {
+        "supplier": "TORAY",
+        "amount": 108614.0,
+        "ratio": 9.1
+      },
+      {
+        "supplier": "SONY",
+        "amount": 191252.0,
+        "ratio": 41.0
+      },
+      {
+        "supplier": "BROADCOM",
+        "amount": 104759.0,
+        "ratio": 22.5
+      },
+      {
+        "supplier": "ONSEMI",
+        "amount": 104759.0,
+        "ratio": 22.5
+      },
+      {
+        "supplier": "DOOSAN",
+        "amount": 55810.0,
+        "ratio": 22.2
+      },
+      {
+        "supplier": "MITSUBISHI",
+        "amount": 55810.0,
+        "ratio": 22.2
+      },
+      {
+        "supplier": "ATOTECH",
+        "amount": 29261.0,
+        "ratio": 11.7
+      },
+      {
+        "supplier": "NR G",
+        "amount": 29261.0,
+        "ratio": 11.7
+      }
+    ]
   },
   {
     "stockCode": "009160",
@@ -4573,7 +6129,44 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1179040874617.0
+    "revenue": 1179040874617.0,
+    "supplyFacts": [
+      {
+        "supplier": "SIMPAC 홀딩스 외",
+        "amount": 26375.0,
+        "ratio": 100.0
+      },
+      {
+        "supplier": "SIMPAC 홀딩스 외",
+        "amount": 19591.0,
+        "ratio": 97.4
+      },
+      {
+        "supplier": "SIMPAC 홀딩스 외",
+        "amount": 523.0,
+        "ratio": 2.6
+      },
+      {
+        "supplier": "SIMPAC 홀딩스 외",
+        "amount": 182.0,
+        "ratio": 19.0
+      },
+      {
+        "supplier": "SIMPAC 홀딩스 외",
+        "amount": 267.0,
+        "ratio": 27.8
+      },
+      {
+        "supplier": "SIMPAC 홀딩스",
+        "amount": 2217.0,
+        "ratio": 100.0
+      },
+      {
+        "supplier": "경진단조 외",
+        "amount": 10438.0,
+        "ratio": 99.6
+      }
+    ]
   },
   {
     "stockCode": "009180",
@@ -4703,7 +6296,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2174483568714.0
+    "revenue": 2174483568714.0,
+    "supplyFacts": [
+      {
+        "supplier": "없음",
+        "amount": 36790.0,
+        "ratio": 23.3
+      },
+      {
+        "supplier": "없음",
+        "amount": 29660.0,
+        "ratio": 18.8
+      },
+      {
+        "supplier": "없음",
+        "amount": 11897.0,
+        "ratio": 7.5
+      },
+      {
+        "supplier": "없음",
+        "amount": 79540.0,
+        "ratio": 50.4
+      }
+    ]
   },
   {
     "stockCode": "009420",
@@ -4976,7 +6591,59 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 4965798552980.0
+    "revenue": 4965798552980.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜포스코에스피에스",
+        "amount": 30362.0,
+        "ratio": 6.9
+      },
+      {
+        "supplier": "㈜\n원일사",
+        "amount": 30362.0,
+        "ratio": 6.9
+      },
+      {
+        "supplier": "고려금속공업\n㈜",
+        "amount": 30362.0,
+        "ratio": 6.9
+      },
+      {
+        "supplier": "㈜\n태인",
+        "amount": 407995.0,
+        "ratio": 93.1
+      },
+      {
+        "supplier": "㈜\n성신산전",
+        "amount": 407995.0,
+        "ratio": 93.1
+      },
+      {
+        "supplier": "산전정밀㈜",
+        "amount": 407995.0,
+        "ratio": 93.1
+      },
+      {
+        "supplier": "㈜\n다\n\n우산업",
+        "amount": 407995.0,
+        "ratio": 93.1
+      },
+      {
+        "supplier": "㈜원일사",
+        "amount": 1290.0,
+        "ratio": 1.2
+      },
+      {
+        "supplier": "㈜\n엘씨케이전자",
+        "amount": 109090.0,
+        "ratio": 98.8
+      },
+      {
+        "supplier": "㈜동흥엔지니어링",
+        "amount": 109090.0,
+        "ratio": 98.8
+      }
+    ]
   },
   {
     "stockCode": "010130",
@@ -5184,7 +6851,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 409727353425.0
+    "revenue": 409727353425.0,
+    "supplyFacts": [
+      {
+        "supplier": "해당사항 없음.",
+        "amount": 6706.0,
+        "ratio": 6706.0
+      },
+      {
+        "supplier": "해당사항 없음.",
+        "amount": 4377.0,
+        "ratio": 4377.0
+      },
+      {
+        "supplier": "해당사항 없음.",
+        "amount": 1502.0,
+        "ratio": 1502.0
+      }
+    ]
   },
   {
     "stockCode": "011000",
@@ -5210,7 +6894,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 196273042787.0
+    "revenue": 196273042787.0,
+    "supplyFacts": [
+      {
+        "supplier": "유일팜테크",
+        "amount": 133.0,
+        "ratio": 1.67
+      },
+      {
+        "supplier": "아성프라스틱공업",
+        "amount": 23.0,
+        "ratio": 0.29
+      },
+      {
+        "supplier": "수입",
+        "amount": 9.0,
+        "ratio": 0.11
+      },
+      {
+        "supplier": "--",
+        "amount": 7973.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "011070",
@@ -5301,7 +7007,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 8481561000000.0
+    "revenue": 8481561000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "32.0",
+        "amount": null,
+        "ratio": 8707.0
+      },
+      {
+        "supplier": "위아마그나파워트레인지엠비코리아(주)희성촉매 주식회사 外",
+        "amount": null,
+        "ratio": 52.2
+      },
+      {
+        "supplier": "비엠스틸 주식회사(주)알데코 外",
+        "amount": null,
+        "ratio": 7.3
+      },
+      {
+        "supplier": "6.2",
+        "amount": null,
+        "ratio": 1720.0
+      },
+      {
+        "supplier": "세아창원특수강㈜B/E Aerospace 外",
+        "amount": null,
+        "ratio": 2.3
+      }
+    ]
   },
   {
     "stockCode": "011230",
@@ -5327,7 +7060,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 753896340000.0
+    "revenue": 753896340000.0,
+    "supplyFacts": [
+      {
+        "supplier": "용호자원㈜",
+        "amount": 25835.0,
+        "ratio": 11.13
+      },
+      {
+        "supplier": "(주)경인물산",
+        "amount": 25835.0,
+        "ratio": 11.13
+      },
+      {
+        "supplier": "㈜한성리소스산업",
+        "amount": 25835.0,
+        "ratio": 11.13
+      },
+      {
+        "supplier": "태림페이퍼",
+        "amount": 206207.0,
+        "ratio": 88.87
+      },
+      {
+        "supplier": "동원페이퍼㈜",
+        "amount": 206207.0,
+        "ratio": 88.87
+      }
+    ]
   },
   {
     "stockCode": "011300",
@@ -5496,7 +7256,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1840036441822.0
+    "revenue": 1840036441822.0,
+    "supplyFacts": [
+      {
+        "supplier": "SK종합화학",
+        "amount": 176139.0,
+        "ratio": 176139.0
+      }
+    ]
   },
   {
     "stockCode": "011810",
@@ -5665,7 +7432,64 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 26702901249000.0
+    "revenue": 26702901249000.0,
+    "supplyFacts": [
+      {
+        "supplier": "GE",
+        "amount": 478971.0,
+        "ratio": 478971.0
+      },
+      {
+        "supplier": "PCC",
+        "amount": 478971.0,
+        "ratio": 478971.0
+      },
+      {
+        "supplier": "Carlton Forge Works",
+        "amount": 478971.0,
+        "ratio": 478971.0
+      },
+      {
+        "supplier": "Rolls-Royce Ltd. Boeing Disribution Services",
+        "amount": 478971.0,
+        "ratio": 478971.0
+      },
+      {
+        "supplier": "레스타일렉트로닉스",
+        "amount": 133345.0,
+        "ratio": 133345.0
+      },
+      {
+        "supplier": "에스에스엠티",
+        "amount": 133345.0,
+        "ratio": 133345.0
+      },
+      {
+        "supplier": "Western Digital",
+        "amount": 133345.0,
+        "ratio": 133345.0
+      },
+      {
+        "supplier": "파워산전",
+        "amount": 67689.0,
+        "ratio": 67689.0
+      },
+      {
+        "supplier": "BHGE-Nuovo Pignone S.r.L",
+        "amount": 67689.0,
+        "ratio": 67689.0
+      },
+      {
+        "supplier": "파나소닉",
+        "amount": 200337.0,
+        "ratio": 200337.0
+      },
+      {
+        "supplier": "THK",
+        "amount": 200337.0,
+        "ratio": 200337.0
+      }
+    ]
   },
   {
     "stockCode": "012510",
@@ -5717,7 +7541,44 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 948260577330.0
+    "revenue": 948260577330.0,
+    "supplyFacts": [
+      {
+        "supplier": "에이원철강",
+        "amount": 69845.0,
+        "ratio": 69845.0
+      },
+      {
+        "supplier": "천마콘크리트공업",
+        "amount": 102986.0,
+        "ratio": 102986.0
+      },
+      {
+        "supplier": "삼표산업",
+        "amount": 102986.0,
+        "ratio": 102986.0
+      },
+      {
+        "supplier": "엘지전자",
+        "amount": 33683.0,
+        "ratio": 33683.0
+      },
+      {
+        "supplier": "용원토탈솔루션",
+        "amount": 33683.0,
+        "ratio": 33683.0
+      },
+      {
+        "supplier": "오티스",
+        "amount": 10337.0,
+        "ratio": 10337.0
+      },
+      {
+        "supplier": "IS동서",
+        "amount": 9249.0,
+        "ratio": 9249.0
+      }
+    ]
   },
   {
     "stockCode": "012690",
@@ -5873,7 +7734,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 452672899287.0
+    "revenue": 452672899287.0,
+    "supplyFacts": [
+      {
+        "supplier": "금문철강㈜",
+        "amount": 4845.0,
+        "ratio": 10.9
+      }
+    ]
   },
   {
     "stockCode": "013520",
@@ -5912,7 +7780,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2887440609690.0
+    "revenue": 2887440609690.0,
+    "supplyFacts": [
+      {
+        "supplier": "대한제강 외",
+        "amount": 35410804.0,
+        "ratio": 45.8
+      },
+      {
+        "supplier": "오성철강 외",
+        "amount": 14259825.0,
+        "ratio": 23.8
+      },
+      {
+        "supplier": "현대오일뱅크 외",
+        "amount": 6633992.0,
+        "ratio": 57.9
+      }
+    ]
   },
   {
     "stockCode": "013700",
@@ -5925,7 +7810,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 297453436886.0
+    "revenue": 297453436886.0,
+    "supplyFacts": [
+      {
+        "supplier": "한국제강",
+        "amount": 7377.0,
+        "ratio": 28.8
+      },
+      {
+        "supplier": "삼표산업",
+        "amount": 1332.0,
+        "ratio": 5.2
+      },
+      {
+        "supplier": "원풍시멘트",
+        "amount": 1352.0,
+        "ratio": 5.3
+      }
+    ]
   },
   {
     "stockCode": "013720",
@@ -6185,7 +8087,44 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1372874325188.0
+    "revenue": 1372874325188.0,
+    "supplyFacts": [
+      {
+        "supplier": "케이씨글라스",
+        "amount": 41732.0,
+        "ratio": 16.3
+      },
+      {
+        "supplier": "㈜제이에이테크 외",
+        "amount": 41732.0,
+        "ratio": 16.3
+      },
+      {
+        "supplier": "㈜대원C",
+        "amount": 48303.0,
+        "ratio": 18.86
+      },
+      {
+        "supplier": "한화케미칼㈜ 외",
+        "amount": 48303.0,
+        "ratio": 18.86
+      },
+      {
+        "supplier": "태성산업㈜",
+        "amount": 24661.0,
+        "ratio": 9.63
+      },
+      {
+        "supplier": "C TECH",
+        "amount": 24661.0,
+        "ratio": 9.63
+      },
+      {
+        "supplier": "㈜동우피엔티외",
+        "amount": 14093.0,
+        "ratio": 5.5
+      }
+    ]
   },
   {
     "stockCode": "014830",
@@ -6380,7 +8319,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2282724142096.0
+    "revenue": 2282724142096.0,
+    "supplyFacts": [
+      {
+        "supplier": "LS Nikko동제련 外",
+        "amount": 169305.0,
+        "ratio": 64.82
+      },
+      {
+        "supplier": "Kistron 外",
+        "amount": 8697.0,
+        "ratio": 3.33
+      },
+      {
+        "supplier": "포스코",
+        "amount": 3757.0,
+        "ratio": 1.44
+      }
+    ]
   },
   {
     "stockCode": "015890",
@@ -6471,7 +8427,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3409830339365.0
+    "revenue": 3409830339365.0,
+    "supplyFacts": [
+      {
+        "supplier": "99.96",
+        "amount": null,
+        "ratio": 29249.0
+      },
+      {
+        "supplier": "0.04",
+        "amount": null,
+        "ratio": 11.0
+      },
+      {
+        "supplier": "100.00",
+        "amount": null,
+        "ratio": 29260.0
+      }
+    ]
   },
   {
     "stockCode": "016580",
@@ -6549,7 +8522,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1222634175867.0
+    "revenue": 1222634175867.0,
+    "supplyFacts": [
+      {
+        "supplier": "넷모바일",
+        "amount": 1101.0,
+        "ratio": 1101.0
+      },
+      {
+        "supplier": "한아IT",
+        "amount": 1101.0,
+        "ratio": 1101.0
+      }
+    ]
   },
   {
     "stockCode": "016740",
@@ -6588,7 +8573,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 358199545192.0
+    "revenue": 358199545192.0,
+    "supplyFacts": [
+      {
+        "supplier": "18",
+        "amount": null,
+        "ratio": 14714672611.0
+      },
+      {
+        "supplier": "69%",
+        "amount": null,
+        "ratio": 14714672611.0
+      },
+      {
+        "supplier": "프레스코",
+        "amount": 7279391232.0,
+        "ratio": 9.24
+      },
+      {
+        "supplier": "안진테크",
+        "amount": 7279391232.0,
+        "ratio": 9.24
+      },
+      {
+        "supplier": "승호정밀",
+        "amount": 7279391232.0,
+        "ratio": 9.24
+      },
+      {
+        "supplier": "성산기업",
+        "amount": 7279391232.0,
+        "ratio": 9.24
+      }
+    ]
   },
   {
     "stockCode": "016880",
@@ -6601,7 +8618,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1150691499139.0
+    "revenue": 1150691499139.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜김영사 외",
+        "amount": 3831.0,
+        "ratio": 3.4
+      },
+      {
+        "supplier": "문학동네",
+        "amount": 45384.0,
+        "ratio": 39.8
+      },
+      {
+        "supplier": "창비",
+        "amount": 45384.0,
+        "ratio": 39.8
+      },
+      {
+        "supplier": "김영사",
+        "amount": 45384.0,
+        "ratio": 39.8
+      },
+      {
+        "supplier": "엘북스외",
+        "amount": 1505.0,
+        "ratio": 1.3
+      },
+      {
+        "supplier": "금명문화㈜외",
+        "amount": 1699.0,
+        "ratio": 1.4
+      }
+    ]
   },
   {
     "stockCode": "016920",
@@ -6887,7 +8936,54 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 654527659913.0
+    "revenue": 654527659913.0,
+    "supplyFacts": [
+      {
+        "supplier": "81",
+        "amount": 43015.0,
+        "ratio": 43015.0
+      },
+      {
+        "supplier": "305",
+        "amount": 43015.0,
+        "ratio": 43015.0
+      },
+      {
+        "supplier": "109",
+        "amount": 122424.0,
+        "ratio": 122424.0
+      },
+      {
+        "supplier": "687",
+        "amount": 122424.0,
+        "ratio": 122424.0
+      },
+      {
+        "supplier": "134",
+        "amount": 6640.0,
+        "ratio": 6640.0
+      },
+      {
+        "supplier": "111",
+        "amount": 72099.0,
+        "ratio": 72099.0
+      },
+      {
+        "supplier": "573",
+        "amount": 72099.0,
+        "ratio": 72099.0
+      },
+      {
+        "supplier": "221",
+        "amount": 194523.0,
+        "ratio": 194523.0
+      },
+      {
+        "supplier": "260",
+        "amount": 194523.0,
+        "ratio": 194523.0
+      }
+    ]
   },
   {
     "stockCode": "018260",
@@ -6939,7 +9035,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 486678693232.0
+    "revenue": 486678693232.0,
+    "supplyFacts": [
+      {
+        "supplier": "하이호금속",
+        "amount": 311241.0,
+        "ratio": 78.9
+      },
+      {
+        "supplier": "RIO TINTO",
+        "amount": 311241.0,
+        "ratio": 78.9
+      },
+      {
+        "supplier": "하이호금속",
+        "amount": 83217.0,
+        "ratio": 21.1
+      }
+    ]
   },
   {
     "stockCode": "018500",
@@ -7199,7 +9312,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 677530806593.0
+    "revenue": 677530806593.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)알루원",
+        "amount": 23067.0,
+        "ratio": 37.0
+      }
+    ]
   },
   {
     "stockCode": "020180",
@@ -7316,7 +9436,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 4963566073111.0
+    "revenue": 4963566073111.0,
+    "supplyFacts": [
+      {
+        "supplier": "엘지전자(주) 외",
+        "amount": 13422.0,
+        "ratio": 5.1
+      },
+      {
+        "supplier": "(주)씨앤투스성진",
+        "amount": 1563.0,
+        "ratio": 0.6
+      },
+      {
+        "supplier": "(주)스타리온하나 외",
+        "amount": 4490.0,
+        "ratio": 1.7
+      },
+      {
+        "supplier": "도레이첨단소재",
+        "amount": 11208.0,
+        "ratio": 4.2
+      },
+      {
+        "supplier": "알비코리아(주) 외",
+        "amount": 29963.0,
+        "ratio": 11.4
+      },
+      {
+        "supplier": "(주)이랜시스 외",
+        "amount": 1293.0,
+        "ratio": 0.5
+      }
+    ]
   },
   {
     "stockCode": "021320",
@@ -7654,7 +9806,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 103275899079.0
+    "revenue": 103275899079.0,
+    "supplyFacts": [
+      {
+        "supplier": "해당사항없음",
+        "amount": null,
+        "ratio": 7.82
+      },
+      {
+        "supplier": "해당사항없음",
+        "amount": null,
+        "ratio": 0.32
+      }
+    ]
   },
   {
     "stockCode": "024090",
@@ -7706,7 +9870,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 630111809477.0
+    "revenue": 630111809477.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜아우라코퍼레이션",
+        "amount": 158108.0,
+        "ratio": 85.0
+      },
+      {
+        "supplier": "㈜옥수",
+        "amount": 27324.0,
+        "ratio": 14.7
+      },
+      {
+        "supplier": "㈜이우바이오",
+        "amount": 405.0,
+        "ratio": 0.2
+      },
+      {
+        "supplier": "㈜크로바케미칼",
+        "amount": 117.0,
+        "ratio": 0.1
+      }
+    ]
   },
   {
     "stockCode": "024740",
@@ -8187,7 +10373,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 73677182497.0
+    "revenue": 73677182497.0,
+    "supplyFacts": [
+      {
+        "supplier": "코스맥스 外",
+        "amount": 985078.0,
+        "ratio": 4.5
+      },
+      {
+        "supplier": "고원화성 外",
+        "amount": 11206722.0,
+        "ratio": 51.7
+      },
+      {
+        "supplier": "연우 外",
+        "amount": 9484945.0,
+        "ratio": 43.8
+      }
+    ]
   },
   {
     "stockCode": "027360",
@@ -8226,7 +10429,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 50105278206.0
+    "revenue": 50105278206.0,
+    "supplyFacts": [
+      {
+        "supplier": "Hefei Lucky Science Industry",
+        "amount": 14443.0,
+        "ratio": 14443.0
+      },
+      {
+        "supplier": "재즐엔터프라이즈",
+        "amount": 7606.0,
+        "ratio": 7606.0
+      },
+      {
+        "supplier": "도레이첨단소재",
+        "amount": 127.0,
+        "ratio": 127.0
+      }
+    ]
   },
   {
     "stockCode": "027710",
@@ -8252,7 +10472,54 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 368890857923.0
+    "revenue": 368890857923.0,
+    "supplyFacts": [
+      {
+        "supplier": "772",
+        "amount": 4671953.0,
+        "ratio": 4671953.0
+      },
+      {
+        "supplier": "055",
+        "amount": 4671953.0,
+        "ratio": 4671953.0
+      },
+      {
+        "supplier": "3.6%",
+        "amount": null,
+        "ratio": 1.7
+      },
+      {
+        "supplier": "3.5%",
+        "amount": null,
+        "ratio": 6.5
+      },
+      {
+        "supplier": "64.5%",
+        "amount": null,
+        "ratio": 62.2
+      },
+      {
+        "supplier": "20.7%",
+        "amount": null,
+        "ratio": 16.4
+      },
+      {
+        "supplier": "509",
+        "amount": 640991.0,
+        "ratio": 640991.0
+      },
+      {
+        "supplier": "042",
+        "amount": 640991.0,
+        "ratio": 640991.0
+      },
+      {
+        "supplier": "4.0%",
+        "amount": null,
+        "ratio": 4.5
+      }
+    ]
   },
   {
     "stockCode": "027830",
@@ -8330,7 +10597,49 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 40742240967149.0
+    "revenue": 40742240967149.0,
+    "supplyFacts": [
+      {
+        "supplier": "대안레미콘(주) 外",
+        "amount": 57684.0,
+        "ratio": 57684.0
+      },
+      {
+        "supplier": "동국제강(주) 外",
+        "amount": 61785.0,
+        "ratio": 61785.0
+      },
+      {
+        "supplier": "서두산업(주) 外",
+        "amount": 12986.0,
+        "ratio": 12986.0
+      },
+      {
+        "supplier": "(주)삼일씨엔에스 外",
+        "amount": 10922.0,
+        "ratio": 10922.0
+      },
+      {
+        "supplier": "한라시멘트(주) 外",
+        "amount": 1929.0,
+        "ratio": 1929.0
+      },
+      {
+        "supplier": "세원텍스타일 外",
+        "amount": 20953.0,
+        "ratio": 20953.0
+      },
+      {
+        "supplier": "Global Life SciencesSolutions Singapore 外",
+        "amount": 203436.0,
+        "ratio": 203436.0
+      },
+      {
+        "supplier": "머크주식회사 外",
+        "amount": 131386.0,
+        "ratio": 131386.0
+      }
+    ]
   },
   {
     "stockCode": "028300",
@@ -8343,7 +10652,54 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 84172574224.0
+    "revenue": 84172574224.0,
+    "supplyFacts": [
+      {
+        "supplier": "에이원이앤씨",
+        "amount": 1336436.0,
+        "ratio": 18.0
+      },
+      {
+        "supplier": "수성",
+        "amount": 705564.0,
+        "ratio": 9.5
+      },
+      {
+        "supplier": "(주)우진산업공사",
+        "amount": 627950.0,
+        "ratio": 8.4
+      },
+      {
+        "supplier": "이호켐앤텍",
+        "amount": 613228.0,
+        "ratio": 8.2
+      },
+      {
+        "supplier": "(주)D.S.N.B",
+        "amount": 510304.0,
+        "ratio": 6.9
+      },
+      {
+        "supplier": "명성씨앤피 주식회사",
+        "amount": 430767.0,
+        "ratio": 5.8
+      },
+      {
+        "supplier": "대양마린",
+        "amount": 278842.0,
+        "ratio": 3.8
+      },
+      {
+        "supplier": "기타",
+        "amount": 2930236.0,
+        "ratio": 39.4
+      },
+      {
+        "supplier": "합     계",
+        "amount": 7433327.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "028670",
@@ -8499,7 +10855,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 622991604240.0
+    "revenue": 622991604240.0,
+    "supplyFacts": [
+      {
+        "supplier": "A사 외",
+        "amount": 55747763.0,
+        "ratio": 38.87
+      }
+    ]
   },
   {
     "stockCode": "030610",
@@ -8889,7 +11252,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 35982573670.0
+    "revenue": 35982573670.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)명인씨앤씨",
+        "amount": 39078.0,
+        "ratio": 2.16
+      },
+      {
+        "supplier": "(주)명인씨앤씨",
+        "amount": 198199.0,
+        "ratio": 34.59
+      }
+    ]
   },
   {
     "stockCode": "032860",
@@ -8915,7 +11290,49 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 150734965462.0
+    "revenue": 150734965462.0,
+    "supplyFacts": [
+      {
+        "supplier": "Lumenis",
+        "amount": 4893.0,
+        "ratio": 9.42
+      },
+      {
+        "supplier": "Boston Scientific",
+        "amount": 4893.0,
+        "ratio": 9.42
+      },
+      {
+        "supplier": "Karl Storz",
+        "amount": 4893.0,
+        "ratio": 9.42
+      },
+      {
+        "supplier": "Momentive Inc",
+        "amount": 15843.0,
+        "ratio": 30.5
+      },
+      {
+        "supplier": "CyberOptics Corp.",
+        "amount": 15843.0,
+        "ratio": 30.5
+      },
+      {
+        "supplier": "(주)에치엔지",
+        "amount": 7439.0,
+        "ratio": 14.32
+      },
+      {
+        "supplier": "ALL SENSORS",
+        "amount": 16522.0,
+        "ratio": 31.81
+      },
+      {
+        "supplier": "DU PONT",
+        "amount": 16522.0,
+        "ratio": 31.81
+      }
+    ]
   },
   {
     "stockCode": "032960",
@@ -9123,7 +11540,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 72599453889.0
+    "revenue": 72599453889.0,
+    "supplyFacts": [
+      {
+        "supplier": "글로벌세인트우리인터텍스",
+        "amount": 24770.0,
+        "ratio": 24770.0
+      }
+    ]
   },
   {
     "stockCode": "033500",
@@ -9136,7 +11560,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 742186008411.0
+    "revenue": 742186008411.0,
+    "supplyFacts": [
+      {
+        "supplier": "애경유화",
+        "amount": 23520.0,
+        "ratio": 23.3
+      },
+      {
+        "supplier": "KPX케미칼 외",
+        "amount": 23520.0,
+        "ratio": 23.3
+      },
+      {
+        "supplier": "금호미쓰이",
+        "amount": 68371.0,
+        "ratio": 67.7
+      },
+      {
+        "supplier": "POSCO",
+        "amount": 68371.0,
+        "ratio": 67.7
+      },
+      {
+        "supplier": "오웬스코닝 외",
+        "amount": 68371.0,
+        "ratio": 67.7
+      },
+      {
+        "supplier": "Sanmei Chemical 외",
+        "amount": 3958.0,
+        "ratio": 3.9
+      }
+    ]
   },
   {
     "stockCode": "033530",
@@ -9201,7 +11657,64 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 6579707000000.0
+    "revenue": 6579707000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "국내경작인",
+        "amount": 105927.0,
+        "ratio": 23.5
+      },
+      {
+        "supplier": "미국브라질",
+        "amount": 105927.0,
+        "ratio": 23.5
+      },
+      {
+        "supplier": "(주)태아산업",
+        "amount": 105927.0,
+        "ratio": 23.5
+      },
+      {
+        "supplier": "(주)동양물산",
+        "amount": 216228.0,
+        "ratio": 47.9
+      },
+      {
+        "supplier": "두선산업",
+        "amount": 27684.0,
+        "ratio": 57.8
+      },
+      {
+        "supplier": "비티씨",
+        "amount": 7708.0,
+        "ratio": 16.1
+      },
+      {
+        "supplier": "대농농산",
+        "amount": 12494.0,
+        "ratio": 26.1
+      },
+      {
+        "supplier": "PGG",
+        "amount": 12494.0,
+        "ratio": 26.1
+      },
+      {
+        "supplier": "7.5%",
+        "amount": null,
+        "ratio": 1374.0
+      },
+      {
+        "supplier": "부가세 제외",
+        "amount": 3279.0,
+        "ratio": 45.2
+      },
+      {
+        "supplier": "부가세제외",
+        "amount": 3974.0,
+        "ratio": 54.8
+      }
+    ]
   },
   {
     "stockCode": "033790",
@@ -9279,7 +11792,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 25810082000000.0
+    "revenue": 25810082000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "영풍전자",
+        "amount": 13198.0,
+        "ratio": 13198.0
+      }
+    ]
   },
   {
     "stockCode": "034230",
@@ -9578,7 +12098,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1100130344137.0
+    "revenue": 1100130344137.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)유성강업",
+        "amount": null,
+        "ratio": 17.82
+      },
+      {
+        "supplier": "한라엔컴(주)(주)삼표산업",
+        "amount": null,
+        "ratio": 22.91
+      },
+      {
+        "supplier": "아주산업",
+        "amount": null,
+        "ratio": 22.91
+      }
+    ]
   },
   {
     "stockCode": "035900",
@@ -9604,7 +12141,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 10258304518.0
+    "revenue": 10258304518.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜펜타코프 외",
+        "amount": 552.0,
+        "ratio": 1.77
+      },
+      {
+        "supplier": "㈜미성아트 외",
+        "amount": 371.0,
+        "ratio": 1.19
+      },
+      {
+        "supplier": "S-Oil 외",
+        "amount": 26776.0,
+        "ratio": 85.74
+      }
+    ]
   },
   {
     "stockCode": "036010",
@@ -9734,7 +12288,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 35727336000000.0
+    "revenue": 35727336000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "카타르",
+        "amount": 9881223.0,
+        "ratio": 9881223.0
+      },
+      {
+        "supplier": "말레이시아",
+        "amount": 9881223.0,
+        "ratio": 9881223.0
+      },
+      {
+        "supplier": "미국",
+        "amount": 9881223.0,
+        "ratio": 9881223.0
+      }
+    ]
   },
   {
     "stockCode": "036480",
@@ -9773,7 +12344,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 367389147993.0
+    "revenue": 367389147993.0,
+    "supplyFacts": [
+      {
+        "supplier": "주식회사 SDS",
+        "amount": 770.0,
+        "ratio": 1.7
+      }
+    ]
   },
   {
     "stockCode": "036560",
@@ -10137,7 +12715,84 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 46291152553.0
+    "revenue": 46291152553.0,
+    "supplyFacts": [
+      {
+        "supplier": "상원 INC",
+        "amount": 2305.0,
+        "ratio": 20.48
+      },
+      {
+        "supplier": "미츠비시",
+        "amount": 2305.0,
+        "ratio": 20.48
+      },
+      {
+        "supplier": "후마이스터",
+        "amount": 2305.0,
+        "ratio": 20.48
+      },
+      {
+        "supplier": "태진전자",
+        "amount": 810.0,
+        "ratio": 7.2
+      },
+      {
+        "supplier": "에스티엔",
+        "amount": 810.0,
+        "ratio": 7.2
+      },
+      {
+        "supplier": "유진전자",
+        "amount": 810.0,
+        "ratio": 7.2
+      },
+      {
+        "supplier": "옵티맥",
+        "amount": 1668.0,
+        "ratio": 14.82
+      },
+      {
+        "supplier": "에스티씨엔지니어링",
+        "amount": 1668.0,
+        "ratio": 14.82
+      },
+      {
+        "supplier": "GS 산업",
+        "amount": 1105.0,
+        "ratio": 9.82
+      },
+      {
+        "supplier": "연태 정밀전자",
+        "amount": 1105.0,
+        "ratio": 9.82
+      },
+      {
+        "supplier": "비오엔 코리아",
+        "amount": 1448.0,
+        "ratio": 12.87
+      },
+      {
+        "supplier": "기가디스플레이",
+        "amount": 1448.0,
+        "ratio": 12.87
+      },
+      {
+        "supplier": "동해엠텍",
+        "amount": 223.0,
+        "ratio": 1.98
+      },
+      {
+        "supplier": "에스폴테크",
+        "amount": 223.0,
+        "ratio": 1.98
+      },
+      {
+        "supplier": "에스엠코퍼레이션",
+        "amount": 211.0,
+        "ratio": 1.87
+      }
+    ]
   },
   {
     "stockCode": "038010",
@@ -10358,7 +13013,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 447114517033.0
+    "revenue": 447114517033.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)알루맥스",
+        "amount": 6225.0,
+        "ratio": 6.0
+      },
+      {
+        "supplier": "(주)두현",
+        "amount": 6225.0,
+        "ratio": 6.0
+      },
+      {
+        "supplier": "Aluplast GmbH",
+        "amount": 2480.0,
+        "ratio": 2.4
+      },
+      {
+        "supplier": "(주)하나로샤시",
+        "amount": 2480.0,
+        "ratio": 2.4
+      },
+      {
+        "supplier": "ELA 외",
+        "amount": 34700.0,
+        "ratio": 33.6
+      },
+      {
+        "supplier": "PT.ERNA DJULIAWATI 외",
+        "amount": 16520.0,
+        "ratio": 16.0
+      }
+    ]
   },
   {
     "stockCode": "039030",
@@ -10865,7 +13552,19 @@
     "source": "kindlist",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 76924052907.0
+    "revenue": 76924052907.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)씨엔비케미칼",
+        "amount": 2590963200.0,
+        "ratio": 2590963200.0
+      },
+      {
+        "supplier": "(주)\n한국금거래소쓰리엠",
+        "amount": 5148788000.0,
+        "ratio": 5148788000.0
+      }
+    ]
   },
   {
     "stockCode": "042110",
@@ -10995,7 +13694,64 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 18611908600.0
+    "revenue": 18611908600.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜더블유토목/건축",
+        "amount": null,
+        "ratio": 62.37
+      },
+      {
+        "supplier": "베델인테리어",
+        "amount": null,
+        "ratio": 62.37
+      },
+      {
+        "supplier": "마벨로",
+        "amount": null,
+        "ratio": 62.37
+      },
+      {
+        "supplier": "㈜엔포스페이스",
+        "amount": null,
+        "ratio": 4.38
+      },
+      {
+        "supplier": "㈜남산배관센타",
+        "amount": null,
+        "ratio": 4.38
+      },
+      {
+        "supplier": "㈜휴먼케이블",
+        "amount": null,
+        "ratio": 31.63
+      },
+      {
+        "supplier": "㈜광진케이블",
+        "amount": null,
+        "ratio": 31.63
+      },
+      {
+        "supplier": "㈜혜성이엔디",
+        "amount": null,
+        "ratio": 31.63
+      },
+      {
+        "supplier": "동진",
+        "amount": null,
+        "ratio": 31.63
+      },
+      {
+        "supplier": "판교원 철물점",
+        "amount": null,
+        "ratio": 1.61
+      },
+      {
+        "supplier": "한양종합상사",
+        "amount": null,
+        "ratio": 1.61
+      }
+    ]
   },
   {
     "stockCode": "043090",
@@ -11060,7 +13816,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 14537599112.0
+    "revenue": 14537599112.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜도일특수강",
+        "amount": 3175.0,
+        "ratio": 74.62
+      },
+      {
+        "supplier": "㈜인천하이테크",
+        "amount": 1080.0,
+        "ratio": 25.38
+      }
+    ]
   },
   {
     "stockCode": "043260",
@@ -11307,7 +14075,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 81886784499.0
+    "revenue": 81886784499.0,
+    "supplyFacts": [
+      {
+        "supplier": "에스엠씨상사",
+        "amount": 13694.0,
+        "ratio": 29.34
+      },
+      {
+        "supplier": "엔디에스테크",
+        "amount": 13694.0,
+        "ratio": 29.34
+      },
+      {
+        "supplier": "2JH무역",
+        "amount": 2683.0,
+        "ratio": 5.75
+      },
+      {
+        "supplier": "Vectron",
+        "amount": 2683.0,
+        "ratio": 5.75
+      },
+      {
+        "supplier": "Kyocera",
+        "amount": 2683.0,
+        "ratio": 5.75
+      }
+    ]
   },
   {
     "stockCode": "045060",
@@ -11333,7 +14128,59 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1118180793899.0
+    "revenue": 1118180793899.0,
+    "supplyFacts": [
+      {
+        "supplier": "경도유니온",
+        "amount": null,
+        "ratio": 52.43
+      },
+      {
+        "supplier": "한국 인테그리스",
+        "amount": null,
+        "ratio": 52.43
+      },
+      {
+        "supplier": "대형에프아이티",
+        "amount": null,
+        "ratio": 52.43
+      },
+      {
+        "supplier": "그린테크",
+        "amount": null,
+        "ratio": 33.12
+      },
+      {
+        "supplier": "태영필트레이션시",
+        "amount": null,
+        "ratio": 33.12
+      },
+      {
+        "supplier": "엘에스티에스",
+        "amount": null,
+        "ratio": 33.12
+      },
+      {
+        "supplier": "태봉종합상사",
+        "amount": null,
+        "ratio": 5.21
+      },
+      {
+        "supplier": "한양인쇄문구",
+        "amount": null,
+        "ratio": 5.21
+      },
+      {
+        "supplier": "태봉종합상사",
+        "amount": null,
+        "ratio": 9.24
+      },
+      {
+        "supplier": "미래공구",
+        "amount": null,
+        "ratio": 9.24
+      }
+    ]
   },
   {
     "stockCode": "045300",
@@ -11463,7 +14310,44 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 15049529734.0
+    "revenue": 15049529734.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)엔지노믹스",
+        "amount": 226.0,
+        "ratio": 27.33
+      },
+      {
+        "supplier": "JK테크",
+        "amount": 173.0,
+        "ratio": 20.92
+      },
+      {
+        "supplier": "나노바이오",
+        "amount": 123.0,
+        "ratio": 14.87
+      },
+      {
+        "supplier": "(주)비엠에스대전지사",
+        "amount": 96.0,
+        "ratio": 11.61
+      },
+      {
+        "supplier": "(주)에스피상사",
+        "amount": 46.0,
+        "ratio": 5.56
+      },
+      {
+        "supplier": "기  타",
+        "amount": 162.0,
+        "ratio": 19.71
+      },
+      {
+        "supplier": "합     계",
+        "amount": 826.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "046310",
@@ -11554,7 +14438,44 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 8054627137857.0
+    "revenue": 8054627137857.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜삼표산업",
+        "amount": 128684.0,
+        "ratio": 52.3
+      },
+      {
+        "supplier": "㈜아주산업",
+        "amount": 128684.0,
+        "ratio": 52.3
+      },
+      {
+        "supplier": "삼일C",
+        "amount": 12622.0,
+        "ratio": 5.1
+      },
+      {
+        "supplier": "아주산업㈜",
+        "amount": 12622.0,
+        "ratio": 5.1
+      },
+      {
+        "supplier": "㈜원풍시멘트",
+        "amount": 2865.0,
+        "ratio": 1.2
+      },
+      {
+        "supplier": "㈜태정시멘트",
+        "amount": 2865.0,
+        "ratio": 1.2
+      },
+      {
+        "supplier": "㈜경우시멘트",
+        "amount": 2865.0,
+        "ratio": 1.2
+      }
+    ]
   },
   {
     "stockCode": "047050",
@@ -11775,7 +14696,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 113050025181.0
+    "revenue": 113050025181.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)엠에스유",
+        "amount": 329470.0,
+        "ratio": 37.64
+      },
+      {
+        "supplier": "(주)한국바이오",
+        "amount": 247358.0,
+        "ratio": 10.18
+      },
+      {
+        "supplier": "(주)브이비푸드",
+        "amount": 75800.0,
+        "ratio": 3.12
+      },
+      {
+        "supplier": "담원인터내셔날",
+        "amount": 361100.0,
+        "ratio": 14.87
+      },
+      {
+        "supplier": "한국마쯔다니",
+        "amount": 1744868.0,
+        "ratio": 71.83
+      }
+    ]
   },
   {
     "stockCode": "048910",
@@ -11905,7 +14853,59 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 69044124528.0
+    "revenue": 69044124528.0,
+    "supplyFacts": [
+      {
+        "supplier": "휘나화학",
+        "amount": 5508562909.0,
+        "ratio": 38.6
+      },
+      {
+        "supplier": "제이앤디인터내셔날",
+        "amount": 5508562909.0,
+        "ratio": 38.6
+      },
+      {
+        "supplier": "해은켐텍",
+        "amount": 3149429039.0,
+        "ratio": 22.0
+      },
+      {
+        "supplier": "덕산기업",
+        "amount": 3149429039.0,
+        "ratio": 22.0
+      },
+      {
+        "supplier": "AMES",
+        "amount": 3611761484.0,
+        "ratio": 25.3
+      },
+      {
+        "supplier": "Metalor",
+        "amount": 3611761484.0,
+        "ratio": 25.3
+      },
+      {
+        "supplier": "Kyocera",
+        "amount": 1017280272.0,
+        "ratio": 7.1
+      },
+      {
+        "supplier": "Shanghai Allwin Tech",
+        "amount": 1017280272.0,
+        "ratio": 7.1
+      },
+      {
+        "supplier": "Konica",
+        "amount": 117013175.0,
+        "ratio": 0.8
+      },
+      {
+        "supplier": "Shanghai Allwin Tech",
+        "amount": 117013175.0,
+        "ratio": 0.8
+      }
+    ]
   },
   {
     "stockCode": "049630",
@@ -11918,7 +14918,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 164545576680.0
+    "revenue": 164545576680.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜세진코리아",
+        "amount": 8902035.0,
+        "ratio": 40.36
+      },
+      {
+        "supplier": "거성정밀㈜",
+        "amount": 13156632.0,
+        "ratio": 59.64
+      }
+    ]
   },
   {
     "stockCode": "049720",
@@ -12217,7 +15229,24 @@
     "source": "override",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 6355489977342.0
+    "revenue": 6355489977342.0,
+    "supplyFacts": [
+      {
+        "supplier": "고원화성",
+        "amount": 836.0,
+        "ratio": 18.7
+      },
+      {
+        "supplier": "한국코카콜라유한회사",
+        "amount": 1796.0,
+        "ratio": 44.5
+      },
+      {
+        "supplier": "인그리디언코리아",
+        "amount": 1796.0,
+        "ratio": 44.5
+      }
+    ]
   },
   {
     "stockCode": "051910",
@@ -12386,7 +15415,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 237285712383.0
+    "revenue": 237285712383.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주) 창성인천지점",
+        "amount": 6675842.0,
+        "ratio": 10.7
+      }
+    ]
   },
   {
     "stockCode": "052770",
@@ -12867,7 +15903,84 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 84866669022.0
+    "revenue": 84866669022.0,
+    "supplyFacts": [
+      {
+        "supplier": "시큘러스",
+        "amount": 20.0,
+        "ratio": 0.1
+      },
+      {
+        "supplier": "씨에스아이시스템",
+        "amount": 650.0,
+        "ratio": 1.7
+      },
+      {
+        "supplier": "아이지",
+        "amount": 650.0,
+        "ratio": 1.7
+      },
+      {
+        "supplier": "케이탑시스템",
+        "amount": 3476.0,
+        "ratio": 9.2
+      },
+      {
+        "supplier": "세진프리시젼",
+        "amount": 3476.0,
+        "ratio": 9.2
+      },
+      {
+        "supplier": "피엔제이",
+        "amount": 3476.0,
+        "ratio": 9.2
+      },
+      {
+        "supplier": "미라클레이",
+        "amount": 193.0,
+        "ratio": 0.5
+      },
+      {
+        "supplier": "청운이엔지",
+        "amount": 193.0,
+        "ratio": 0.5
+      },
+      {
+        "supplier": "에프피에이",
+        "amount": 23647.0,
+        "ratio": 62.9
+      },
+      {
+        "supplier": "지에스아이",
+        "amount": 23647.0,
+        "ratio": 62.9
+      },
+      {
+        "supplier": "지나테크",
+        "amount": 23647.0,
+        "ratio": 62.9
+      },
+      {
+        "supplier": "Radware",
+        "amount": 8436.0,
+        "ratio": 22.4
+      },
+      {
+        "supplier": "디지탈씨오에스",
+        "amount": 8436.0,
+        "ratio": 22.4
+      },
+      {
+        "supplier": "디지탈씨오에스",
+        "amount": 1167.0,
+        "ratio": 3.1
+      },
+      {
+        "supplier": "인우아이티",
+        "amount": 1167.0,
+        "ratio": 3.1
+      }
+    ]
   },
   {
     "stockCode": "054670",
@@ -13075,7 +16188,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3789834264000.0
+    "revenue": 3789834264000.0,
+    "supplyFacts": [
+      {
+        "supplier": "한화케미칼",
+        "amount": 139794.0,
+        "ratio": 139794.0
+      }
+    ]
   },
   {
     "stockCode": "057540",
@@ -13283,7 +16403,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 977036793661.0
+    "revenue": 977036793661.0,
+    "supplyFacts": [
+      {
+        "supplier": "나노켐 외",
+        "amount": 36125.0,
+        "ratio": 96.94
+      },
+      {
+        "supplier": "나노엑스 외",
+        "amount": 4361.0,
+        "ratio": 3.06
+      }
+    ]
   },
   {
     "stockCode": "059100",
@@ -13452,7 +16584,14 @@
     "source": "override",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 244205074557.0
+    "revenue": 244205074557.0,
+    "supplyFacts": [
+      {
+        "supplier": "LS전선",
+        "amount": 206.0,
+        "ratio": 206.0
+      }
+    ]
   },
   {
     "stockCode": "060380",
@@ -13504,7 +16643,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 298824352914.0
+    "revenue": 298824352914.0,
+    "supplyFacts": [
+      {
+        "supplier": "삼영산업(주) 외",
+        "amount": 3100595.0,
+        "ratio": 38.21
+      },
+      {
+        "supplier": "대림비엔코(주) 외",
+        "amount": 5013205.0,
+        "ratio": 61.79
+      }
+    ]
   },
   {
     "stockCode": "060570",
@@ -13517,7 +16668,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 224997032269.0
+    "revenue": 224997032269.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)에프이글로벌전자코리아",
+        "amount": 2615.0,
+        "ratio": 51.0
+      },
+      {
+        "supplier": "(주)에이투지커머스",
+        "amount": 10997.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "060590",
@@ -13634,7 +16797,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 479781936611.0
+    "revenue": 479781936611.0,
+    "supplyFacts": [
+      {
+        "supplier": "유창금속공업",
+        "amount": 6415.0,
+        "ratio": 14.1
+      },
+      {
+        "supplier": "엘티메탈",
+        "amount": 18157.0,
+        "ratio": 39.9
+      },
+      {
+        "supplier": "엔엠에스",
+        "amount": 18157.0,
+        "ratio": 39.9
+      },
+      {
+        "supplier": "STEMCO",
+        "amount": 18414.0,
+        "ratio": 40.5
+      },
+      {
+        "supplier": "MATERION",
+        "amount": 2529.0,
+        "ratio": 5.6
+      },
+      {
+        "supplier": "Namics",
+        "amount": 2529.0,
+        "ratio": 5.6
+      }
+    ]
   },
   {
     "stockCode": "062040",
@@ -13686,7 +16881,54 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 160070986863.0
+    "revenue": 160070986863.0,
+    "supplyFacts": [
+      {
+        "supplier": "CRODA",
+        "amount": 2376.0,
+        "ratio": 7.9
+      },
+      {
+        "supplier": "Lallemand Bio",
+        "amount": 1700.0,
+        "ratio": 5.6
+      },
+      {
+        "supplier": "비전바이오켐",
+        "amount": 1700.0,
+        "ratio": 5.6
+      },
+      {
+        "supplier": "케이씨앤에이",
+        "amount": 1422.0,
+        "ratio": 4.7
+      },
+      {
+        "supplier": "켐오일",
+        "amount": 1377.0,
+        "ratio": 4.6
+      },
+      {
+        "supplier": "금호피앤비화학",
+        "amount": 1377.0,
+        "ratio": 4.6
+      },
+      {
+        "supplier": "주원물산",
+        "amount": 1333.0,
+        "ratio": 4.4
+      },
+      {
+        "supplier": "송림상사",
+        "amount": 1205.0,
+        "ratio": 4.0
+      },
+      {
+        "supplier": "비전바이오켐",
+        "amount": 492.0,
+        "ratio": 1.6
+      }
+    ]
   },
   {
     "stockCode": "063170",
@@ -14167,7 +17409,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1971039383.0
+    "revenue": 1971039383.0,
+    "supplyFacts": [
+      {
+        "supplier": "아나로그월드",
+        "amount": 3556954.0,
+        "ratio": 31.9
+      },
+      {
+        "supplier": "리차드슨",
+        "amount": 3556954.0,
+        "ratio": 31.9
+      },
+      {
+        "supplier": "영우테크",
+        "amount": 3556954.0,
+        "ratio": 31.9
+      },
+      {
+        "supplier": "베렉스",
+        "amount": 3556954.0,
+        "ratio": 31.9
+      }
+    ]
   },
   {
     "stockCode": "065950",
@@ -14180,7 +17444,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 268959790113.0
+    "revenue": 268959790113.0,
+    "supplyFacts": [
+      {
+        "supplier": "D社",
+        "amount": null,
+        "ratio": 45.0
+      },
+      {
+        "supplier": "L社",
+        "amount": null,
+        "ratio": 18.0
+      },
+      {
+        "supplier": "P社",
+        "amount": null,
+        "ratio": 10.0
+      }
+    ]
   },
   {
     "stockCode": "066130",
@@ -14258,7 +17539,99 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 89200882000000.0
+    "revenue": 89200882000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜포스코",
+        "amount": 7872.0,
+        "ratio": 12.2
+      },
+      {
+        "supplier": "Golden Dragon",
+        "amount": 1672.0,
+        "ratio": 2.6
+      },
+      {
+        "supplier": "Naile",
+        "amount": 1672.0,
+        "ratio": 2.6
+      },
+      {
+        "supplier": "엘지디스플레이㈜",
+        "amount": 25824.0,
+        "ratio": 62.9
+      },
+      {
+        "supplier": "BOE",
+        "amount": 25824.0,
+        "ratio": 62.9
+      },
+      {
+        "supplier": "Realtek",
+        "amount": 1626.0,
+        "ratio": 4.0
+      },
+      {
+        "supplier": "Media Tek",
+        "amount": 1626.0,
+        "ratio": 4.0
+      },
+      {
+        "supplier": "엘지디스플레이㈜",
+        "amount": 4122.0,
+        "ratio": 18.6
+      },
+      {
+        "supplier": "NXP",
+        "amount": 1182.0,
+        "ratio": 5.3
+      },
+      {
+        "supplier": "엘지디스플레이㈜",
+        "amount": 5730.0,
+        "ratio": 53.1
+      },
+      {
+        "supplier": "BOE",
+        "amount": 5730.0,
+        "ratio": 53.1
+      },
+      {
+        "supplier": "중환",
+        "amount": 661.0,
+        "ratio": 6.1
+      },
+      {
+        "supplier": "ACC",
+        "amount": 661.0,
+        "ratio": 6.1
+      },
+      {
+        "supplier": "Sony",
+        "amount": 8792.0,
+        "ratio": 23.8
+      },
+      {
+        "supplier": "Heptagon",
+        "amount": 5283.0,
+        "ratio": 14.3
+      },
+      {
+        "supplier": "Largan",
+        "amount": 5283.0,
+        "ratio": 14.3
+      },
+      {
+        "supplier": "Alps",
+        "amount": 5162.0,
+        "ratio": 14.0
+      },
+      {
+        "supplier": "Mitsumi",
+        "amount": 5162.0,
+        "ratio": 14.0
+      }
+    ]
   },
   {
     "stockCode": "066590",
@@ -14349,7 +17722,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 543196073695.0
+    "revenue": 543196073695.0,
+    "supplyFacts": [
+      {
+        "supplier": "SK에너지",
+        "amount": 2002.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "066910",
@@ -14479,7 +17859,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 81043717132.0
+    "revenue": 81043717132.0,
+    "supplyFacts": [
+      {
+        "supplier": "12%",
+        "amount": 418.0,
+        "ratio": 418.0
+      },
+      {
+        "supplier": "수입",
+        "amount": null,
+        "ratio": 11.0
+      },
+      {
+        "supplier": "수입",
+        "amount": null,
+        "ratio": 7.0
+      },
+      {
+        "supplier": "이니스트바이오",
+        "amount": null,
+        "ratio": 5.0
+      },
+      {
+        "supplier": "파마피아",
+        "amount": null,
+        "ratio": 3.0
+      },
+      {
+        "supplier": "(주)엘엠",
+        "amount": null,
+        "ratio": 5.0
+      }
+    ]
   },
   {
     "stockCode": "067310",
@@ -14544,7 +17956,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 45752222713.0
+    "revenue": 45752222713.0,
+    "supplyFacts": [
+      {
+        "supplier": "킵코㈜",
+        "amount": 5717.0,
+        "ratio": 5717.0
+      },
+      {
+        "supplier": "HLB헬스케어㈜",
+        "amount": 5126.0,
+        "ratio": 5126.0
+      },
+      {
+        "supplier": "㈜칠광사",
+        "amount": 896.0,
+        "ratio": 896.0
+      },
+      {
+        "supplier": "정원기업",
+        "amount": 345.0,
+        "ratio": 345.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 6552.0,
+        "ratio": 6552.0
+      },
+      {
+        "supplier": "합 계",
+        "amount": 100.0,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "067730",
@@ -14648,7 +18092,54 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 17691551363.0
+    "revenue": 17691551363.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주) 태성이엠씨",
+        "amount": 1243736473.0,
+        "ratio": 35.0
+      },
+      {
+        "supplier": "(주)가온테크",
+        "amount": 464378300.0,
+        "ratio": 13.0
+      },
+      {
+        "supplier": "제이원테크",
+        "amount": 301012480.0,
+        "ratio": 9.0
+      },
+      {
+        "supplier": "(주)엠디코리아",
+        "amount": 276399900.0,
+        "ratio": 8.0
+      },
+      {
+        "supplier": "주식회사삼정테크",
+        "amount": 216711310.0,
+        "ratio": 6.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 1038013261.0,
+        "ratio": 29.0
+      },
+      {
+        "supplier": "웰비안시스템",
+        "amount": 270241330.0,
+        "ratio": 79.0
+      },
+      {
+        "supplier": "Dart Sensors",
+        "amount": 2858243.0,
+        "ratio": 1.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 69311727.0,
+        "ratio": 20.0
+      }
+    ]
   },
   {
     "stockCode": "068240",
@@ -14869,7 +18360,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1570891005329.0
+    "revenue": 1570891005329.0,
+    "supplyFacts": [
+      {
+        "supplier": "SUMITOMO PHARMA CO.LTD",
+        "amount": 3226.0,
+        "ratio": 4.3
+      },
+      {
+        "supplier": "대웅바이오",
+        "amount": 15518.0,
+        "ratio": 20.9
+      }
+    ]
   },
   {
     "stockCode": "069640",
@@ -14882,7 +18385,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 248888878166.0
+    "revenue": 248888878166.0,
+    "supplyFacts": [
+      {
+        "supplier": "99.96",
+        "amount": null,
+        "ratio": 29249.0
+      },
+      {
+        "supplier": "0.04",
+        "amount": null,
+        "ratio": 11.0
+      },
+      {
+        "supplier": "100.00",
+        "amount": null,
+        "ratio": 29260.0
+      }
+    ]
   },
   {
     "stockCode": "069730",
@@ -14908,7 +18428,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 24004458754.0
+    "revenue": 24004458754.0,
+    "supplyFacts": [
+      {
+        "supplier": "아그루코리아외",
+        "amount": null,
+        "ratio": 80.0
+      },
+      {
+        "supplier": "에스에치아이외",
+        "amount": null,
+        "ratio": 20.0
+      }
+    ]
   },
   {
     "stockCode": "069960",
@@ -15025,7 +18557,44 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3998187000000.0
+    "revenue": 3998187000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "발전자회사",
+        "amount": null,
+        "ratio": 249514.0
+      },
+      {
+        "supplier": "지자체",
+        "amount": null,
+        "ratio": 249514.0
+      },
+      {
+        "supplier": "가스공사/도시가스",
+        "amount": null,
+        "ratio": 957073.0
+      },
+      {
+        "supplier": "SK에너지/한화/Toyota/Itochu",
+        "amount": null,
+        "ratio": 89022.0
+      },
+      {
+        "supplier": "삼종화",
+        "amount": null,
+        "ratio": 21912.0
+      },
+      {
+        "supplier": "810",
+        "amount": null,
+        "ratio": 1714423.0
+      },
+      {
+        "supplier": "843",
+        "amount": null,
+        "ratio": 1714423.0
+      }
+    ]
   },
   {
     "stockCode": "071670",
@@ -15090,7 +18659,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 402396221904.0
+    "revenue": 402396221904.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)티에스피",
+        "amount": 33717.0,
+        "ratio": 33717.0
+      }
+    ]
   },
   {
     "stockCode": "072020",
@@ -15259,7 +18835,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 186100825069.0
+    "revenue": 186100825069.0,
+    "supplyFacts": [
+      {
+        "supplier": "에트넷아이티㈜",
+        "amount": 1254.0,
+        "ratio": 6.74
+      },
+      {
+        "supplier": "㈜유엔아이솔루션즈",
+        "amount": 1254.0,
+        "ratio": 6.74
+      }
+    ]
   },
   {
     "stockCode": "073540",
@@ -15311,7 +18899,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 14134317596.0
+    "revenue": 14134317596.0,
+    "supplyFacts": [
+      {
+        "supplier": "국내매입",
+        "amount": 2289.0,
+        "ratio": 2289.0
+      }
+    ]
   },
   {
     "stockCode": "074430",
@@ -15428,7 +19023,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "㈜오케이스틸",
+        "amount": null,
+        "ratio": 8.73
+      },
+      {
+        "supplier": "(유)흥진해상",
+        "amount": null,
+        "ratio": 58.65
+      },
+      {
+        "supplier": "(유)흥진해상",
+        "amount": null,
+        "ratio": 31.88
+      }
+    ]
   },
   {
     "stockCode": "076610",
@@ -15610,7 +19222,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1085647521.0
+    "revenue": 1085647521.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)코스온",
+        "amount": null,
+        "ratio": 24.6
+      },
+      {
+        "supplier": "나우코스",
+        "amount": null,
+        "ratio": 24.6
+      },
+      {
+        "supplier": "씨엔에프",
+        "amount": null,
+        "ratio": 5.7
+      },
+      {
+        "supplier": "엘루오",
+        "amount": null,
+        "ratio": 5.7
+      }
+    ]
   },
   {
     "stockCode": "078590",
@@ -15623,7 +19257,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 64375014019.0
+    "revenue": 64375014019.0,
+    "supplyFacts": [
+      {
+        "supplier": "한민내장",
+        "amount": 4837.0,
+        "ratio": 33.0
+      },
+      {
+        "supplier": "성도",
+        "amount": 4837.0,
+        "ratio": 33.0
+      }
+    ]
   },
   {
     "stockCode": "078600",
@@ -15675,7 +19321,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 25184127000000.0
+    "revenue": 25184127000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "오케이라이스센터 外",
+        "amount": 1662.0,
+        "ratio": 11.1
+      }
+    ]
   },
   {
     "stockCode": "079000",
@@ -15844,7 +19497,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 596475211237.0
+    "revenue": 596475211237.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)케이이씨",
+        "amount": 60436592.0,
+        "ratio": 32.31
+      },
+      {
+        "supplier": "삼영전자공업㈜",
+        "amount": 43711454.0,
+        "ratio": 23.37
+      },
+      {
+        "supplier": "(주)트랜스온",
+        "amount": 31252642.0,
+        "ratio": 16.71
+      },
+      {
+        "supplier": "기타",
+        "amount": 14739894.0,
+        "ratio": 7.88
+      }
+    ]
   },
   {
     "stockCode": "079970",
@@ -16312,7 +19987,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1247058624052.0
+    "revenue": 1247058624052.0,
+    "supplyFacts": [
+      {
+        "supplier": "성호기업",
+        "amount": 774941.0,
+        "ratio": 85.31
+      },
+      {
+        "supplier": "경원스틸",
+        "amount": 774941.0,
+        "ratio": 85.31
+      },
+      {
+        "supplier": "삼진스틸",
+        "amount": 774941.0,
+        "ratio": 85.31
+      },
+      {
+        "supplier": "(주)대지에스텍",
+        "amount": 519933.0,
+        "ratio": 61.56
+      },
+      {
+        "supplier": "(주)우남철재",
+        "amount": 519933.0,
+        "ratio": 61.56
+      },
+      {
+        "supplier": "(주)거산",
+        "amount": 519933.0,
+        "ratio": 61.56
+      }
+    ]
   },
   {
     "stockCode": "084110",
@@ -16351,7 +20058,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 350324287104.0
+    "revenue": 350324287104.0,
+    "supplyFacts": [
+      {
+        "supplier": "Brooks",
+        "amount": 8575.0,
+        "ratio": 11.1
+      },
+      {
+        "supplier": "Chamber 내 부속품",
+        "amount": null,
+        "ratio": 9.4
+      }
+    ]
   },
   {
     "stockCode": "084440",
@@ -16403,7 +20122,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 88727496688.0
+    "revenue": 88727496688.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)미니센스",
+        "amount": 10540032.0,
+        "ratio": 39.86
+      },
+      {
+        "supplier": "Genex Watches",
+        "amount": 10540032.0,
+        "ratio": 39.86
+      },
+      {
+        "supplier": "㈜지엠피쥬얼리",
+        "amount": 10540032.0,
+        "ratio": 39.86
+      }
+    ]
   },
   {
     "stockCode": "084690",
@@ -16416,7 +20152,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5628798766399.0
+    "revenue": 5628798766399.0,
+    "supplyFacts": [
+      {
+        "supplier": "대호산업개발",
+        "amount": 144.0,
+        "ratio": 144.0
+      },
+      {
+        "supplier": "석영개발",
+        "amount": 11.0,
+        "ratio": 11.0
+      }
+    ]
   },
   {
     "stockCode": "084730",
@@ -16455,7 +20203,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 182419159355.0
+    "revenue": 182419159355.0,
+    "supplyFacts": [
+      {
+        "supplier": "주식회사 비젼21",
+        "amount": 8424861.0,
+        "ratio": 8424861.0
+      },
+      {
+        "supplier": "GEULIM C AND F.CO.",
+        "amount": 8424861.0,
+        "ratio": 8424861.0
+      },
+      {
+        "supplier": "LTD",
+        "amount": 8424861.0,
+        "ratio": 8424861.0
+      }
+    ]
   },
   {
     "stockCode": "084990",
@@ -16546,7 +20311,54 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 68676858572.0
+    "revenue": 68676858572.0,
+    "supplyFacts": [
+      {
+        "supplier": "나은",
+        "amount": 2444867.0,
+        "ratio": 36.4
+      },
+      {
+        "supplier": "(주)제이엘에스",
+        "amount": 2444867.0,
+        "ratio": 36.4
+      },
+      {
+        "supplier": "샌드빅Zigong Cemented Carbide IMP.",
+        "amount": 2444867.0,
+        "ratio": 36.4
+      },
+      {
+        "supplier": "Corp.",
+        "amount": 2444867.0,
+        "ratio": 36.4
+      },
+      {
+        "supplier": "Ltd.Tai Yu Sheng Co.",
+        "amount": 2444867.0,
+        "ratio": 36.4
+      },
+      {
+        "supplier": "Ltd",
+        "amount": 2444867.0,
+        "ratio": 36.4
+      },
+      {
+        "supplier": "현대종합특수강세아종합특수강",
+        "amount": 1187193.0,
+        "ratio": 17.7
+      },
+      {
+        "supplier": "유진정공",
+        "amount": 3080197.0,
+        "ratio": 45.9
+      },
+      {
+        "supplier": "삼영유공압",
+        "amount": 3080197.0,
+        "ratio": 45.9
+      }
+    ]
   },
   {
     "stockCode": "086040",
@@ -16650,7 +20462,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 146991337484.0
+    "revenue": 146991337484.0,
+    "supplyFacts": [
+      {
+        "supplier": "신흥메탈",
+        "amount": 2282771.0,
+        "ratio": 9.52
+      },
+      {
+        "supplier": "신흥금속",
+        "amount": 2651274.0,
+        "ratio": 11.06
+      },
+      {
+        "supplier": "기타",
+        "amount": 19046061.0,
+        "ratio": 79.42
+      },
+      {
+        "supplier": "합   계",
+        "amount": null,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "086710",
@@ -17131,7 +20965,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 771052153523.0
+    "revenue": 771052153523.0,
+    "supplyFacts": [
+      {
+        "supplier": "금호피앤비화학",
+        "amount": 53890.0,
+        "ratio": 25.2
+      },
+      {
+        "supplier": "하나상사",
+        "amount": 13239.0,
+        "ratio": 6.2
+      }
+    ]
   },
   {
     "stockCode": "090360",
@@ -17300,7 +21146,79 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 72692437385.0
+    "revenue": 72692437385.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)동화 외",
+        "amount": 1541.0,
+        "ratio": 35.46
+      },
+      {
+        "supplier": "중원산업(주) 외",
+        "amount": 1066.0,
+        "ratio": 24.53
+      },
+      {
+        "supplier": "(주)삼호테크 외",
+        "amount": 240.0,
+        "ratio": 5.52
+      },
+      {
+        "supplier": "시민적벽돌",
+        "amount": 90.0,
+        "ratio": 2.06
+      },
+      {
+        "supplier": "세주",
+        "amount": 64.0,
+        "ratio": 1.48
+      },
+      {
+        "supplier": "남양조명공업(주) 외",
+        "amount": 64.0,
+        "ratio": 1.48
+      },
+      {
+        "supplier": "성암아스콘",
+        "amount": 56.0,
+        "ratio": 1.28
+      },
+      {
+        "supplier": "(주)한국스치로폴",
+        "amount": 48.0,
+        "ratio": 1.12
+      },
+      {
+        "supplier": "(주)성암",
+        "amount": 28.0,
+        "ratio": 0.65
+      },
+      {
+        "supplier": "대명콘텍",
+        "amount": 25.0,
+        "ratio": 0.59
+      },
+      {
+        "supplier": "(주)진흥소방외",
+        "amount": 25.0,
+        "ratio": 0.59
+      },
+      {
+        "supplier": "행복나래",
+        "amount": 7.0,
+        "ratio": 0.15
+      },
+      {
+        "supplier": "세경파이프(주) 외",
+        "amount": 1.0,
+        "ratio": 0.03
+      },
+      {
+        "supplier": "로얄하우징 외",
+        "amount": 1179.0,
+        "ratio": 27.13
+      }
+    ]
   },
   {
     "stockCode": "091700",
@@ -17313,7 +21231,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1349528006319.0
+    "revenue": 1349528006319.0,
+    "supplyFacts": [
+      {
+        "supplier": "SAMT",
+        "amount": 210758.0,
+        "ratio": 43.46
+      }
+    ]
   },
   {
     "stockCode": "091810",
@@ -17833,7 +21758,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 92505989386.0
+    "revenue": 92505989386.0,
+    "supplyFacts": [
+      {
+        "supplier": "한국도키멕 부산지점",
+        "amount": 6645371.0,
+        "ratio": 52.5
+      },
+      {
+        "supplier": "경일월드텍",
+        "amount": 4785286.0,
+        "ratio": 37.8
+      },
+      {
+        "supplier": "린데코리아",
+        "amount": 1230711.0,
+        "ratio": 9.7
+      },
+      {
+        "supplier": "HOFER",
+        "amount": 1230711.0,
+        "ratio": 9.7
+      }
+    ]
   },
   {
     "stockCode": "095270",
@@ -17898,7 +21845,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 351115732341.0
+    "revenue": 351115732341.0,
+    "supplyFacts": [
+      {
+        "supplier": "Brooks",
+        "amount": 21741.0,
+        "ratio": 16.3
+      }
+    ]
   },
   {
     "stockCode": "095660",
@@ -17937,7 +21891,44 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 797357375468.0
+    "revenue": 797357375468.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜김영사 외",
+        "amount": 20527.0,
+        "ratio": 30.7
+      },
+      {
+        "supplier": "㈜웅진 외",
+        "amount": 3461.0,
+        "ratio": 5.2
+      },
+      {
+        "supplier": "문학동네",
+        "amount": 31940.0,
+        "ratio": 47.8
+      },
+      {
+        "supplier": "창비",
+        "amount": 31940.0,
+        "ratio": 47.8
+      },
+      {
+        "supplier": "다산북스  Etc.",
+        "amount": 31940.0,
+        "ratio": 47.8
+      },
+      {
+        "supplier": "교보문고 외",
+        "amount": 680.0,
+        "ratio": 1.0
+      },
+      {
+        "supplier": "금명문화㈜외",
+        "amount": 855.0,
+        "ratio": 1.3
+      }
+    ]
   },
   {
     "stockCode": "095910",
@@ -18093,7 +22084,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1999705000000.0
+    "revenue": 1999705000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "유통업체",
+        "amount": 1730.0,
+        "ratio": 67.9
+      },
+      {
+        "supplier": "유통업체",
+        "amount": 373.0,
+        "ratio": 14.6
+      },
+      {
+        "supplier": "츄코쿠삼화페인트",
+        "amount": 447.0,
+        "ratio": 17.5
+      },
+      {
+        "supplier": "아이피케이",
+        "amount": 447.0,
+        "ratio": 17.5
+      }
+    ]
   },
   {
     "stockCode": "097520",
@@ -18106,7 +22119,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1279236953303.0
+    "revenue": 1279236953303.0,
+    "supplyFacts": [
+      {
+        "supplier": "거성정밀",
+        "amount": 11173.0,
+        "ratio": 5.7
+      },
+      {
+        "supplier": "하나프로테크",
+        "amount": 11173.0,
+        "ratio": 5.7
+      }
+    ]
   },
   {
     "stockCode": "097780",
@@ -18119,7 +22144,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 217426570735.0
+    "revenue": 217426570735.0,
+    "supplyFacts": [
+      {
+        "supplier": "영풍전자",
+        "amount": null,
+        "ratio": 3.9
+      },
+      {
+        "supplier": "이레전자",
+        "amount": null,
+        "ratio": 83.3
+      },
+      {
+        "supplier": "제이앤드서키드",
+        "amount": null,
+        "ratio": 83.3
+      }
+    ]
   },
   {
     "stockCode": "097800",
@@ -18470,7 +22512,19 @@
     "source": "kindlist",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 606119987434.0
+    "revenue": 606119987434.0,
+    "supplyFacts": [
+      {
+        "supplier": "125",
+        "amount": 165113.0,
+        "ratio": 165113.0
+      },
+      {
+        "supplier": "770",
+        "amount": 165113.0,
+        "ratio": 165113.0
+      }
+    ]
   },
   {
     "stockCode": "101000",
@@ -18704,7 +22758,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1211599795389.0
+    "revenue": 1211599795389.0,
+    "supplyFacts": [
+      {
+        "supplier": "애경유화",
+        "amount": 23520.0,
+        "ratio": 23.3
+      },
+      {
+        "supplier": "KPX케미칼 외",
+        "amount": 23520.0,
+        "ratio": 23.3
+      },
+      {
+        "supplier": "금호미쓰이",
+        "amount": 68371.0,
+        "ratio": 67.7
+      },
+      {
+        "supplier": "POSCO",
+        "amount": 68371.0,
+        "ratio": 67.7
+      },
+      {
+        "supplier": "오웬스코닝 외",
+        "amount": 68371.0,
+        "ratio": 67.7
+      },
+      {
+        "supplier": "Sanmei Chemical 외",
+        "amount": 3958.0,
+        "ratio": 3.9
+      }
+    ]
   },
   {
     "stockCode": "102370",
@@ -18782,7 +22868,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5048580386639.0
+    "revenue": 5048580386639.0,
+    "supplyFacts": [
+      {
+        "supplier": "LS Nikko",
+        "amount": 399630.0,
+        "ratio": 399630.0
+      },
+      {
+        "supplier": "Kennecott",
+        "amount": 161268.0,
+        "ratio": 161268.0
+      },
+      {
+        "supplier": "Kataman",
+        "amount": 161268.0,
+        "ratio": 161268.0
+      },
+      {
+        "supplier": "Trafigura",
+        "amount": 754231.0,
+        "ratio": 754231.0
+      },
+      {
+        "supplier": "Glencore",
+        "amount": 754231.0,
+        "ratio": 754231.0
+      }
+    ]
   },
   {
     "stockCode": "103230",
@@ -18808,7 +22921,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2044552052000.0
+    "revenue": 2044552052000.0,
+    "supplyFacts": [
+      {
+        "supplier": "LS Nikko동제련 外",
+        "amount": 169305.0,
+        "ratio": 64.82
+      },
+      {
+        "supplier": "Kistron 外",
+        "amount": 8697.0,
+        "ratio": 3.33
+      },
+      {
+        "supplier": "포스코",
+        "amount": 3757.0,
+        "ratio": 1.44
+      }
+    ]
   },
   {
     "stockCode": "103660",
@@ -18873,7 +23003,44 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 396256361230.0
+    "revenue": 396256361230.0,
+    "supplyFacts": [
+      {
+        "supplier": "기호알엔디",
+        "amount": 9053288.0,
+        "ratio": 27.9
+      },
+      {
+        "supplier": "(주)대승플랜트",
+        "amount": 2830878.0,
+        "ratio": 8.7
+      },
+      {
+        "supplier": "(주)윈스틸 경인지사",
+        "amount": 2094524.0,
+        "ratio": 6.4
+      },
+      {
+        "supplier": "(주)엘앤피글로벌코퍼레이션",
+        "amount": 4847484.0,
+        "ratio": 14.9
+      },
+      {
+        "supplier": "가스파워",
+        "amount": 2668947.0,
+        "ratio": 8.2
+      },
+      {
+        "supplier": "PT SOO SYSTEM INDONESIA",
+        "amount": 2130141.0,
+        "ratio": 6.6
+      },
+      {
+        "supplier": "성일밸브공업",
+        "amount": 4176950.0,
+        "ratio": 12.9
+      }
+    ]
   },
   {
     "stockCode": "104480",
@@ -18886,7 +23053,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 345756223802.0
+    "revenue": 345756223802.0,
+    "supplyFacts": [
+      {
+        "supplier": "한화종합화학",
+        "amount": 61357.0,
+        "ratio": 61357.0
+      },
+      {
+        "supplier": "삼남석유화학",
+        "amount": 61357.0,
+        "ratio": 61357.0
+      },
+      {
+        "supplier": "SABIC",
+        "amount": 16781.0,
+        "ratio": 16781.0
+      },
+      {
+        "supplier": "한국바스프",
+        "amount": 5581.0,
+        "ratio": 5581.0
+      },
+      {
+        "supplier": "다이렌",
+        "amount": 5581.0,
+        "ratio": 5581.0
+      },
+      {
+        "supplier": "금호미쓰이",
+        "amount": 985.0,
+        "ratio": 985.0
+      }
+    ]
   },
   {
     "stockCode": "104540",
@@ -18925,7 +23124,34 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 486605490510.0
+    "revenue": 486605490510.0,
+    "supplyFacts": [
+      {
+        "supplier": "태금정",
+        "amount": 229788.0,
+        "ratio": 89.82
+      },
+      {
+        "supplier": "(주)동인철강",
+        "amount": 229788.0,
+        "ratio": 89.82
+      },
+      {
+        "supplier": "(주)동부스틸",
+        "amount": 229788.0,
+        "ratio": 89.82
+      },
+      {
+        "supplier": "(주)디비메탈",
+        "amount": 9993.0,
+        "ratio": 3.91
+      },
+      {
+        "supplier": "(주)성도에너지",
+        "amount": 954.0,
+        "ratio": 0.37
+      }
+    ]
   },
   {
     "stockCode": "104830",
@@ -19094,7 +23320,59 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 492717916275.0
+    "revenue": 492717916275.0,
+    "supplyFacts": [
+      {
+        "supplier": "휘나화학",
+        "amount": 9744898.0,
+        "ratio": 35.0
+      },
+      {
+        "supplier": "씨앤티",
+        "amount": 9744898.0,
+        "ratio": 35.0
+      },
+      {
+        "supplier": "해은켐텍",
+        "amount": 5844791.0,
+        "ratio": 21.0
+      },
+      {
+        "supplier": "덕산기업",
+        "amount": 5844791.0,
+        "ratio": 21.0
+      },
+      {
+        "supplier": "AMES",
+        "amount": 8302531.0,
+        "ratio": 29.8
+      },
+      {
+        "supplier": "Metalor",
+        "amount": 8302531.0,
+        "ratio": 29.8
+      },
+      {
+        "supplier": "Konica Minolta IJ",
+        "amount": 2285487.0,
+        "ratio": 8.2
+      },
+      {
+        "supplier": "Shanghai Allwin Tech",
+        "amount": 2285487.0,
+        "ratio": 8.2
+      },
+      {
+        "supplier": "Konica Minolta IJ",
+        "amount": 417646.0,
+        "ratio": 1.5
+      },
+      {
+        "supplier": "Shanghai Allwin Tech",
+        "amount": 417646.0,
+        "ratio": 1.5
+      }
+    ]
   },
   {
     "stockCode": "107600",
@@ -19146,7 +23424,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1639070665791.0
+    "revenue": 1639070665791.0,
+    "supplyFacts": [
+      {
+        "supplier": "에스케이하이닉스시스템아이씨",
+        "amount": 3624.0,
+        "ratio": 3624.0
+      },
+      {
+        "supplier": "엘지이노텍",
+        "amount": 3624.0,
+        "ratio": 3624.0
+      },
+      {
+        "supplier": "(주)LB루셈",
+        "amount": 1964.0,
+        "ratio": 1964.0
+      }
+    ]
   },
   {
     "stockCode": "108380",
@@ -19185,7 +23480,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3178689000000.0
+    "revenue": 3178689000000.0,
+    "supplyFacts": [
+      {
+        "supplier": "76.3",
+        "amount": 262537.0,
+        "ratio": 262537.0
+      },
+      {
+        "supplier": "23.7",
+        "amount": 81666.0,
+        "ratio": 81666.0
+      }
+    ]
   },
   {
     "stockCode": "108860",
@@ -19211,7 +23518,64 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 85403171510.0
+    "revenue": 85403171510.0,
+    "supplyFacts": [
+      {
+        "supplier": "지*",
+        "amount": 3062.0,
+        "ratio": 3062.0
+      },
+      {
+        "supplier": "동양**",
+        "amount": 3062.0,
+        "ratio": 3062.0
+      },
+      {
+        "supplier": "해당없음",
+        "amount": null,
+        "ratio": 7.63
+      },
+      {
+        "supplier": "해당없음",
+        "amount": null,
+        "ratio": 2.03
+      },
+      {
+        "supplier": "아이***",
+        "amount": 656.0,
+        "ratio": 656.0
+      },
+      {
+        "supplier": "구*",
+        "amount": 656.0,
+        "ratio": 656.0
+      },
+      {
+        "supplier": "엔텍*******",
+        "amount": 653.0,
+        "ratio": 653.0
+      },
+      {
+        "supplier": "훈*",
+        "amount": 653.0,
+        "ratio": 653.0
+      },
+      {
+        "supplier": "해당없음",
+        "amount": null,
+        "ratio": 19.7
+      },
+      {
+        "supplier": "해당없음",
+        "amount": null,
+        "ratio": 7.0
+      },
+      {
+        "supplier": "국*",
+        "amount": 1598.0,
+        "ratio": 1598.0
+      }
+    ]
   },
   {
     "stockCode": "109080",
@@ -19302,7 +23666,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 9807257584.0
+    "revenue": 9807257584.0,
+    "supplyFacts": [
+      {
+        "supplier": "OCS 외",
+        "amount": 251.0,
+        "ratio": 45.0
+      },
+      {
+        "supplier": "PCI",
+        "amount": 142.0,
+        "ratio": 25.0
+      },
+      {
+        "supplier": "PCI",
+        "amount": 67.0,
+        "ratio": 12.0
+      }
+    ]
   },
   {
     "stockCode": "110020",
@@ -19419,7 +23800,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "와이케이스틸",
+        "amount": null,
+        "ratio": 61.67
+      },
+      {
+        "supplier": "지지엠",
+        "amount": null,
+        "ratio": 61.67
+      },
+      {
+        "supplier": "케이씨레미콘",
+        "amount": null,
+        "ratio": 34.3
+      },
+      {
+        "supplier": "우림선재",
+        "amount": null,
+        "ratio": 1.16
+      },
+      {
+        "supplier": "코메스코리아",
+        "amount": null,
+        "ratio": 2.87
+      }
+    ]
   },
   {
     "stockCode": "112290",
@@ -19445,7 +23853,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2931648581449.0
+    "revenue": 2931648581449.0,
+    "supplyFacts": [
+      {
+        "supplier": "49.3%",
+        "amount": null,
+        "ratio": 55.1
+      },
+      {
+        "supplier": "11.5%",
+        "amount": null,
+        "ratio": 15.0
+      },
+      {
+        "supplier": "14.4%",
+        "amount": null,
+        "ratio": 16.2
+      },
+      {
+        "supplier": "24.9%",
+        "amount": null,
+        "ratio": 13.7
+      },
+      {
+        "supplier": "매입액",
+        "amount": 378531.0,
+        "ratio": 378531.0
+      },
+      {
+        "supplier": "100%",
+        "amount": null,
+        "ratio": 100.0
+      }
+    ]
   },
   {
     "stockCode": "113810",
@@ -19523,7 +23963,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 198830230410.0
+    "revenue": 198830230410.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜한국비철",
+        "amount": 1416.0,
+        "ratio": 27.6
+      },
+      {
+        "supplier": "㈜하이메탈 외",
+        "amount": 1416.0,
+        "ratio": 27.6
+      }
+    ]
   },
   {
     "stockCode": "114840",
@@ -19796,7 +24248,14 @@
     "source": "kindlist",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 192872605567.0
+    "revenue": 192872605567.0,
+    "supplyFacts": [
+      {
+        "supplier": "국내외 유통업체",
+        "amount": 16737.0,
+        "ratio": 57.0
+      }
+    ]
   },
   {
     "stockCode": "119830",
@@ -19835,7 +24294,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 51761856558.0
+    "revenue": 51761856558.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)포스코",
+        "amount": 4066438.0,
+        "ratio": 4066438.0
+      },
+      {
+        "supplier": "(주)포스코",
+        "amount": 1137448.0,
+        "ratio": 1137448.0
+      }
+    ]
   },
   {
     "stockCode": "120110",
@@ -19848,7 +24319,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "Methanex",
+        "amount": 169.0,
+        "ratio": 169.0
+      },
+      {
+        "supplier": "HengLi",
+        "amount": 122.0,
+        "ratio": 122.0
+      },
+      {
+        "supplier": "코오롱인더스트리",
+        "amount": 83.0,
+        "ratio": 83.0
+      },
+      {
+        "supplier": "광림섬유",
+        "amount": 79.0,
+        "ratio": 79.0
+      },
+      {
+        "supplier": "코오롱인더스트리",
+        "amount": 218.0,
+        "ratio": 218.0
+      }
+    ]
   },
   {
     "stockCode": "120240",
@@ -19874,7 +24372,44 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "한국IBM㈜",
+        "amount": 40700.0,
+        "ratio": 40700.0
+      },
+      {
+        "supplier": "유클릭",
+        "amount": 2459.0,
+        "ratio": 2459.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 20630.0,
+        "ratio": 20630.0
+      },
+      {
+        "supplier": "한국IBM㈜",
+        "amount": 4038.0,
+        "ratio": 4038.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 5692.0,
+        "ratio": 5692.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 1432.0,
+        "ratio": 1432.0
+      },
+      {
+        "supplier": "합계",
+        "amount": 70753.0,
+        "ratio": 70753.0
+      }
+    ]
   },
   {
     "stockCode": "121440",
@@ -19965,7 +24500,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 570538736376.0
+    "revenue": 570538736376.0,
+    "supplyFacts": [
+      {
+        "supplier": "제이아이금속 외",
+        "amount": null,
+        "ratio": 23.36
+      },
+      {
+        "supplier": "건화이엔지 외",
+        "amount": null,
+        "ratio": 1.44
+      }
+    ]
   },
   {
     "stockCode": "122450",
@@ -20186,7 +24733,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 48163918636.0
+    "revenue": 48163918636.0,
+    "supplyFacts": [
+      {
+        "supplier": "에드워드코리아",
+        "amount": null,
+        "ratio": 17.5
+      },
+      {
+        "supplier": "(주)원씨테크",
+        "amount": null,
+        "ratio": 10.0
+      },
+      {
+        "supplier": "(주)원씨테크",
+        "amount": null,
+        "ratio": 16.3
+      },
+      {
+        "supplier": "베스텍㈜",
+        "amount": null,
+        "ratio": 18.1
+      }
+    ]
   },
   {
     "stockCode": "123860",
@@ -20277,7 +24846,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 155882334021.0
+    "revenue": 155882334021.0,
+    "supplyFacts": [
+      {
+        "supplier": "현대모비스㈜ 외",
+        "amount": null,
+        "ratio": 60.81
+      }
+    ]
   },
   {
     "stockCode": "126340",
@@ -20836,7 +25412,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 98597670521.0
+    "revenue": 98597670521.0,
+    "supplyFacts": [
+      {
+        "supplier": "에스엘테크놀로지",
+        "amount": 2802.0,
+        "ratio": 2802.0
+      }
+    ]
   },
   {
     "stockCode": "136660",
@@ -20966,7 +25549,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 468687996616.0
+    "revenue": 468687996616.0,
+    "supplyFacts": [
+      {
+        "supplier": "Methanex",
+        "amount": 16941.0,
+        "ratio": 15.1
+      },
+      {
+        "supplier": "코오롱인더스트리",
+        "amount": 20383.0,
+        "ratio": 18.2
+      },
+      {
+        "supplier": "기타",
+        "amount": 20635.0,
+        "ratio": 18.4
+      }
+    ]
   },
   {
     "stockCode": "138610",
@@ -21005,7 +25605,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 14856214250.0
+    "revenue": 14856214250.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜엔티에스. 주식회사 아이엠아이씨티",
+        "amount": 2103454.0,
+        "ratio": 2103454.0
+      },
+      {
+        "supplier": "미래정밀",
+        "amount": 1805709.0,
+        "ratio": 1805709.0
+      },
+      {
+        "supplier": "보성기업",
+        "amount": 1805709.0,
+        "ratio": 1805709.0
+      }
+    ]
   },
   {
     "stockCode": "139130",
@@ -21031,7 +25648,49 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 28970388263858.0
+    "revenue": 28970388263858.0,
+    "supplyFacts": [
+      {
+        "supplier": "농협",
+        "amount": 164187.0,
+        "ratio": 164187.0
+      },
+      {
+        "supplier": "직수입 외",
+        "amount": 164187.0,
+        "ratio": 164187.0
+      },
+      {
+        "supplier": "농업회사법인 팜팜㈜",
+        "amount": 110668.0,
+        "ratio": 110668.0
+      },
+      {
+        "supplier": "농업회사법인안성곡산",
+        "amount": 110668.0,
+        "ratio": 110668.0
+      },
+      {
+        "supplier": "우신산업개발㈜",
+        "amount": 54115.0,
+        "ratio": 54115.0
+      },
+      {
+        "supplier": "쌍용레미콘㈜",
+        "amount": 54115.0,
+        "ratio": 54115.0
+      },
+      {
+        "supplier": "유에스 푸드서비스",
+        "amount": 10957.0,
+        "ratio": 10957.0
+      },
+      {
+        "supplier": "네이처스 프로듀스 컴퍼니",
+        "amount": 10957.0,
+        "ratio": 10957.0
+      }
+    ]
   },
   {
     "stockCode": "139670",
@@ -21057,7 +25716,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1085603129063.0
+    "revenue": 1085603129063.0,
+    "supplyFacts": [
+      {
+        "supplier": "한국 가네마쯔 주식회사",
+        "amount": null,
+        "ratio": 17.8
+      }
+    ]
   },
   {
     "stockCode": "140070",
@@ -21096,7 +25762,134 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 27901348150.0
+    "revenue": 27901348150.0,
+    "supplyFacts": [
+      {
+        "supplier": "Carrier Fire  Security",
+        "amount": 1188.0,
+        "ratio": 1188.0
+      },
+      {
+        "supplier": "하나반도체",
+        "amount": 1188.0,
+        "ratio": 1188.0
+      },
+      {
+        "supplier": "구네보코리아",
+        "amount": 4151.0,
+        "ratio": 4151.0
+      },
+      {
+        "supplier": "아사아블로이코리아",
+        "amount": 4151.0,
+        "ratio": 4151.0
+      },
+      {
+        "supplier": "(주)윈미디텍",
+        "amount": 4151.0,
+        "ratio": 4151.0
+      },
+      {
+        "supplier": "세환엠에스",
+        "amount": 4151.0,
+        "ratio": 4151.0
+      },
+      {
+        "supplier": "(주)서상이엔지",
+        "amount": 4151.0,
+        "ratio": 4151.0
+      },
+      {
+        "supplier": "대호씨엔씨",
+        "amount": 1509.0,
+        "ratio": 1509.0
+      },
+      {
+        "supplier": "(주)에이브이테크놀로지",
+        "amount": 1509.0,
+        "ratio": 1509.0
+      },
+      {
+        "supplier": "선진인포텍",
+        "amount": 1509.0,
+        "ratio": 1509.0
+      },
+      {
+        "supplier": "건아정보기술",
+        "amount": 2104.0,
+        "ratio": 2104.0
+      },
+      {
+        "supplier": "(주)아이넷뱅크",
+        "amount": 2104.0,
+        "ratio": 2104.0
+      },
+      {
+        "supplier": "(주)아이엔아이",
+        "amount": 2104.0,
+        "ratio": 2104.0
+      },
+      {
+        "supplier": "(주)아이엔아이",
+        "amount": 1331.0,
+        "ratio": 1331.0
+      },
+      {
+        "supplier": "(주)여의시스템",
+        "amount": 1331.0,
+        "ratio": 1331.0
+      },
+      {
+        "supplier": "(주)아이엔아이",
+        "amount": 1299.0,
+        "ratio": 1299.0
+      },
+      {
+        "supplier": "하나반도체",
+        "amount": 1299.0,
+        "ratio": 1299.0
+      },
+      {
+        "supplier": "Carrier Fire  Security",
+        "amount": 718.0,
+        "ratio": 718.0
+      },
+      {
+        "supplier": "(주)맨텍",
+        "amount": 718.0,
+        "ratio": 718.0
+      },
+      {
+        "supplier": "Carrier Fire  Security",
+        "amount": 1017.0,
+        "ratio": 1017.0
+      },
+      {
+        "supplier": "Leidos",
+        "amount": 568.0,
+        "ratio": 568.0
+      },
+      {
+        "supplier": "(주)동곡기정",
+        "amount": 568.0,
+        "ratio": 568.0
+      },
+      {
+        "supplier": "(주)테크스피어",
+        "amount": 568.0,
+        "ratio": 568.0
+      },
+      {
+        "supplier": "(주)웨이텍",
+        "amount": 693.0,
+        "ratio": 693.0
+      },
+      {
+        "supplier": "HID Asia Pacific",
+        "amount": 693.0,
+        "ratio": 693.0
+      }
+    ]
   },
   {
     "stockCode": "140520",
@@ -21148,7 +25941,59 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 67038479474.0
+    "revenue": 67038479474.0,
+    "supplyFacts": [
+      {
+        "supplier": "애로우 일렉트로닉스 외",
+        "amount": 7236559.0,
+        "ratio": 12.86
+      },
+      {
+        "supplier": "347",
+        "amount": null,
+        "ratio": 7.72
+      },
+      {
+        "supplier": "083",
+        "amount": null,
+        "ratio": 7.72
+      },
+      {
+        "supplier": "326",
+        "amount": null,
+        "ratio": 4.13
+      },
+      {
+        "supplier": "056",
+        "amount": null,
+        "ratio": 4.13
+      },
+      {
+        "supplier": "055",
+        "amount": null,
+        "ratio": 16.09
+      },
+      {
+        "supplier": "703",
+        "amount": null,
+        "ratio": 16.09
+      },
+      {
+        "supplier": "슈나이더일렉트릭코리아 외",
+        "amount": 33239484.0,
+        "ratio": 59.05
+      },
+      {
+        "supplier": "88",
+        "amount": null,
+        "ratio": 0.16
+      },
+      {
+        "supplier": "831",
+        "amount": null,
+        "ratio": 0.16
+      }
+    ]
   },
   {
     "stockCode": "140860",
@@ -21291,7 +26136,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 165523143709.0
+    "revenue": 165523143709.0,
+    "supplyFacts": [
+      {
+        "supplier": "(유)써모피셔사이언티픽솔루션스",
+        "amount": 6346.0,
+        "ratio": 6346.0
+      },
+      {
+        "supplier": "클리니젠코리아",
+        "amount": 6346.0,
+        "ratio": 6346.0
+      }
+    ]
   },
   {
     "stockCode": "144960",
@@ -21707,7 +26564,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 70954645139.0
+    "revenue": 70954645139.0,
+    "supplyFacts": [
+      {
+        "supplier": "대호무역(주) 외",
+        "amount": 2653.0,
+        "ratio": 8.3
+      },
+      {
+        "supplier": "매일유업(주) 외",
+        "amount": 4097.0,
+        "ratio": 12.8
+      },
+      {
+        "supplier": "코스맥스(주) 외",
+        "amount": 15813.0,
+        "ratio": 49.5
+      },
+      {
+        "supplier": "(주)복원 외",
+        "amount": 6310.0,
+        "ratio": 19.8
+      }
+    ]
   },
   {
     "stockCode": "159910",
@@ -21993,7 +26872,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 808780057197.0
+    "revenue": 808780057197.0,
+    "supplyFacts": [
+      {
+        "supplier": "벡톤디킨슨코리아",
+        "amount": 1498.0,
+        "ratio": 3.6
+      }
+    ]
   },
   {
     "stockCode": "170920",
@@ -22422,7 +27308,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 67750824736.0
+    "revenue": 67750824736.0,
+    "supplyFacts": [
+      {
+        "supplier": "국내",
+        "amount": null,
+        "ratio": 16.23
+      },
+      {
+        "supplier": "중국",
+        "amount": null,
+        "ratio": 13.34
+      },
+      {
+        "supplier": "중국",
+        "amount": null,
+        "ratio": 11.47
+      },
+      {
+        "supplier": "국내",
+        "amount": null,
+        "ratio": 10.41
+      },
+      {
+        "supplier": "국내",
+        "amount": null,
+        "ratio": 22.59
+      },
+      {
+        "supplier": "중국",
+        "amount": null,
+        "ratio": 8.86
+      }
+    ]
   },
   {
     "stockCode": "184230",
@@ -22812,7 +27730,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 463698273567.0
+    "revenue": 463698273567.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)이음",
+        "amount": 4283658.0,
+        "ratio": 15.2
+      },
+      {
+        "supplier": "(주)리더스이엔지",
+        "amount": 4444485.0,
+        "ratio": 15.7
+      },
+      {
+        "supplier": "기타",
+        "amount": 16631892.0,
+        "ratio": 59.0
+      }
+    ]
   },
   {
     "stockCode": "192650",
@@ -22929,7 +27864,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1063151055391.0
+    "revenue": 1063151055391.0,
+    "supplyFacts": [
+      {
+        "supplier": "중국 Sinolite",
+        "amount": 12929870708.0,
+        "ratio": 12929870708.0
+      },
+      {
+        "supplier": "한국엠에스디",
+        "amount": 48801278010.0,
+        "ratio": 48801278010.0
+      },
+      {
+        "supplier": "벡톤디킨슨코리아",
+        "amount": 833175000.0,
+        "ratio": 833175000.0
+      },
+      {
+        "supplier": "중국 Sensient Technologies",
+        "amount": 388741139.0,
+        "ratio": 388741139.0
+      }
+    ]
   },
   {
     "stockCode": "195990",
@@ -22981,7 +27938,59 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 258196765549.0
+    "revenue": 258196765549.0,
+    "supplyFacts": [
+      {
+        "supplier": "MITSUBISHI GAS CHEMICAL TRADING",
+        "amount": 6071.0,
+        "ratio": 21.3
+      },
+      {
+        "supplier": "INC.",
+        "amount": 6071.0,
+        "ratio": 21.3
+      },
+      {
+        "supplier": "지에스",
+        "amount": 6071.0,
+        "ratio": 21.3
+      },
+      {
+        "supplier": "해인 CNS",
+        "amount": 6071.0,
+        "ratio": 21.3
+      },
+      {
+        "supplier": "대경하이켐외",
+        "amount": 6071.0,
+        "ratio": 21.3
+      },
+      {
+        "supplier": "CoAsia Corporation",
+        "amount": 50831.0,
+        "ratio": 18.0
+      },
+      {
+        "supplier": "CoAsia CM",
+        "amount": 50831.0,
+        "ratio": 18.0
+      },
+      {
+        "supplier": "ER Vina",
+        "amount": 50831.0,
+        "ratio": 18.0
+      },
+      {
+        "supplier": "ZHEJIANG SUNNY OPTICS CO.",
+        "amount": 50831.0,
+        "ratio": 18.0
+      },
+      {
+        "supplier": "LTD. 외",
+        "amount": 50831.0,
+        "ratio": 18.0
+      }
+    ]
   },
   {
     "stockCode": "196490",
@@ -23059,7 +28068,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 259464652455.0
+    "revenue": 259464652455.0,
+    "supplyFacts": [
+      {
+        "supplier": "태영금속",
+        "amount": 1489.0,
+        "ratio": 2.1
+      },
+      {
+        "supplier": "도요타통상",
+        "amount": 3450.0,
+        "ratio": 4.9
+      }
+    ]
   },
   {
     "stockCode": "199150",
@@ -23176,7 +28197,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 574884892325.0
+    "revenue": 574884892325.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜아우라코퍼레이션",
+        "amount": 158108.0,
+        "ratio": 85.0
+      },
+      {
+        "supplier": "㈜옥수",
+        "amount": 27324.0,
+        "ratio": 14.7
+      },
+      {
+        "supplier": "㈜이우바이오",
+        "amount": 405.0,
+        "ratio": 0.2
+      },
+      {
+        "supplier": "㈜크로바케미칼",
+        "amount": 117.0,
+        "ratio": 0.1
+      }
+    ]
   },
   {
     "stockCode": "200230",
@@ -23579,7 +28622,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 4556971695180.0
+    "revenue": 4556971695180.0,
+    "supplyFacts": [
+      {
+        "supplier": "- Global Life Sciences Solutions Singapore",
+        "amount": 203436.0,
+        "ratio": 60.8
+      },
+      {
+        "supplier": "Life Technologies Corporation",
+        "amount": 203436.0,
+        "ratio": 60.8
+      },
+      {
+        "supplier": "- 머크 주식회사",
+        "amount": 131386.0,
+        "ratio": 39.2
+      },
+      {
+        "supplier": "한국폴 주식회사",
+        "amount": 131386.0,
+        "ratio": 39.2
+      },
+      {
+        "supplier": "싸토리우스코리아바이오텍",
+        "amount": 131386.0,
+        "ratio": 39.2
+      }
+    ]
   },
   {
     "stockCode": "208140",
@@ -24086,7 +29156,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 39699702190.0
+    "revenue": 39699702190.0,
+    "supplyFacts": [
+      {
+        "supplier": "브랜드별 상이",
+        "amount": 5534.0,
+        "ratio": 89.1
+      },
+      {
+        "supplier": "SNEAKER CITIZENS",
+        "amount": 673.0,
+        "ratio": 10.8
+      }
+    ]
   },
   {
     "stockCode": "215570",
@@ -24294,7 +29376,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 390690915662.0
+    "revenue": 390690915662.0,
+    "supplyFacts": [
+      {
+        "supplier": "A사 외",
+        "amount": 55747763.0,
+        "ratio": 38.87
+      }
+    ]
   },
   {
     "stockCode": "217880",
@@ -24554,7 +29643,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 35638307740.0
+    "revenue": 35638307740.0,
+    "supplyFacts": [
+      {
+        "supplier": "국내업체",
+        "amount": 250.0,
+        "ratio": 6.0
+      },
+      {
+        "supplier": "국내업체",
+        "amount": 522.0,
+        "ratio": 13.0
+      },
+      {
+        "supplier": "해외업체",
+        "amount": 408.0,
+        "ratio": 10.0
+      },
+      {
+        "supplier": "해외업체",
+        "amount": 2893.0,
+        "ratio": 71.0
+      }
+    ]
   },
   {
     "stockCode": "222670",
@@ -24580,7 +29691,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1410559919451.0
+    "revenue": 1410559919451.0,
+    "supplyFacts": [
+      {
+        "supplier": "Lg Chem",
+        "amount": 63312.0,
+        "ratio": 26.2
+      },
+      {
+        "supplier": "Ltd.",
+        "amount": 63312.0,
+        "ratio": 26.2
+      },
+      {
+        "supplier": "Doosan Electronic",
+        "amount": 63312.0,
+        "ratio": 26.2
+      },
+      {
+        "supplier": "Atotech Korea Co.",
+        "amount": 55200.0,
+        "ratio": 22.8
+      },
+      {
+        "supplier": "Ltd",
+        "amount": 55200.0,
+        "ratio": 22.8
+      }
+    ]
   },
   {
     "stockCode": "222980",
@@ -24905,7 +30043,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "한국비철",
+        "amount": 140.0,
+        "ratio": 14.0
+      },
+      {
+        "supplier": "헤드코메탈스코리아",
+        "amount": 140.0,
+        "ratio": 14.0
+      },
+      {
+        "supplier": "MATUFU",
+        "amount": 658.0,
+        "ratio": 86.0
+      },
+      {
+        "supplier": "퓨리드",
+        "amount": 1307.0,
+        "ratio": 14.0
+      }
+    ]
   },
   {
     "stockCode": "228340",
@@ -24996,7 +30156,34 @@
     "source": "override",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 960056115154.0
+    "revenue": 960056115154.0,
+    "supplyFacts": [
+      {
+        "supplier": "LS Global 외",
+        "amount": 500274.0,
+        "ratio": 500274.0
+      },
+      {
+        "supplier": "LS전선",
+        "amount": 153215.0,
+        "ratio": 153215.0
+      },
+      {
+        "supplier": "LS-VINA 외",
+        "amount": 153215.0,
+        "ratio": 153215.0
+      },
+      {
+        "supplier": "LS-VINA",
+        "amount": 6990.0,
+        "ratio": 6990.0
+      },
+      {
+        "supplier": "LS-Global 외",
+        "amount": 6990.0,
+        "ratio": 6990.0
+      }
+    ]
   },
   {
     "stockCode": "230240",
@@ -25048,7 +30235,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 272629978227.0
+    "revenue": 272629978227.0,
+    "supplyFacts": [
+      {
+        "supplier": "매커스 외",
+        "amount": 68177.0,
+        "ratio": 31.8
+      }
+    ]
   },
   {
     "stockCode": "232530",
@@ -25152,7 +30346,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 257829408646.0
+    "revenue": 257829408646.0,
+    "supplyFacts": [
+      {
+        "supplier": "우진기업",
+        "amount": 3271.0,
+        "ratio": 5.11
+      }
+    ]
   },
   {
     "stockCode": "234100",
@@ -25815,7 +31016,69 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1700246425329.0
+    "revenue": 1700246425329.0,
+    "supplyFacts": [
+      {
+        "supplier": "NOVATEK",
+        "amount": 155265.0,
+        "ratio": 52.3
+      },
+      {
+        "supplier": "Magnachip",
+        "amount": 155265.0,
+        "ratio": 52.3
+      },
+      {
+        "supplier": "삼화",
+        "amount": 39206.0,
+        "ratio": 13.2
+      },
+      {
+        "supplier": "ATUM",
+        "amount": 27546.0,
+        "ratio": 9.3
+      },
+      {
+        "supplier": "MST",
+        "amount": 27546.0,
+        "ratio": 9.3
+      },
+      {
+        "supplier": "리신",
+        "amount": 27546.0,
+        "ratio": 9.3
+      },
+      {
+        "supplier": "HUIHO",
+        "amount": 25416.0,
+        "ratio": 8.6
+      },
+      {
+        "supplier": "NIPPON",
+        "amount": 25416.0,
+        "ratio": 8.6
+      },
+      {
+        "supplier": "JIANGXI XINGTAI",
+        "amount": 40173.0,
+        "ratio": 47.3
+      },
+      {
+        "supplier": "WPG Korea",
+        "amount": 20038.0,
+        "ratio": 23.6
+      },
+      {
+        "supplier": "SAMJIN LND",
+        "amount": 6888.0,
+        "ratio": 8.1
+      },
+      {
+        "supplier": "VICTORY GIANT TECHNOLOGY",
+        "amount": 17826.0,
+        "ratio": 21.0
+      }
+    ]
   },
   {
     "stockCode": "248170",
@@ -25828,7 +31091,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 408926546791.0
+    "revenue": 408926546791.0,
+    "supplyFacts": [
+      {
+        "supplier": "N社",
+        "amount": 6909.0,
+        "ratio": 6909.0
+      },
+      {
+        "supplier": "A社",
+        "amount": 6909.0,
+        "ratio": 6909.0
+      },
+      {
+        "supplier": "R社",
+        "amount": 6909.0,
+        "ratio": 6909.0
+      }
+    ]
   },
   {
     "stockCode": "249420",
@@ -25945,7 +31225,49 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 144603566752.0
+    "revenue": 144603566752.0,
+    "supplyFacts": [
+      {
+        "supplier": "P사",
+        "amount": 9264.0,
+        "ratio": 80.24
+      },
+      {
+        "supplier": "S사",
+        "amount": 9264.0,
+        "ratio": 80.24
+      },
+      {
+        "supplier": "J사",
+        "amount": 9264.0,
+        "ratio": 80.24
+      },
+      {
+        "supplier": "D사",
+        "amount": 903.0,
+        "ratio": 7.82
+      },
+      {
+        "supplier": "N사",
+        "amount": 903.0,
+        "ratio": 7.82
+      },
+      {
+        "supplier": "S사",
+        "amount": 903.0,
+        "ratio": 7.82
+      },
+      {
+        "supplier": "J사",
+        "amount": 1378.0,
+        "ratio": 11.94
+      },
+      {
+        "supplier": "I사",
+        "amount": 1378.0,
+        "ratio": 11.94
+      }
+    ]
   },
   {
     "stockCode": "251630",
@@ -26504,7 +31826,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 57966763324.0
+    "revenue": 57966763324.0,
+    "supplyFacts": [
+      {
+        "supplier": "포스코",
+        "amount": 58948.0,
+        "ratio": 96.09
+      }
+    ]
   },
   {
     "stockCode": "263800",
@@ -27310,7 +32639,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 264778674601.0
+    "revenue": 264778674601.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)국제케이블부경케이블(주)EMTRON KFT0.4 KV Kereskedelml Kft",
+        "amount": 22135530.0,
+        "ratio": 68.0
+      },
+      {
+        "supplier": "(주)대한트레이산업신화철강(주)RAL Elektro Kft.",
+        "amount": 3860771.0,
+        "ratio": 12.0
+      },
+      {
+        "supplier": "주식회사 지오테크에스지산전주식회사Siemens",
+        "amount": 1912224.0,
+        "ratio": 6.0
+      },
+      {
+        "supplier": "(주)경성산업전기협동기업 주식회사주식회사 신화산업부산",
+        "amount": 4501401.0,
+        "ratio": 14.0
+      }
+    ]
   },
   {
     "stockCode": "282880",
@@ -27362,7 +32713,54 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2365164441719.0
+    "revenue": 2365164441719.0,
+    "supplyFacts": [
+      {
+        "supplier": "PTA - 한화종합화학",
+        "amount": 73485.0,
+        "ratio": 73485.0
+      },
+      {
+        "supplier": "태광산업\nMEG - 롯데케미칼",
+        "amount": 73485.0,
+        "ratio": 73485.0
+      },
+      {
+        "supplier": "SK종합화학",
+        "amount": 14919.0,
+        "ratio": 14919.0
+      },
+      {
+        "supplier": "데이진",
+        "amount": 5431.0,
+        "ratio": 5431.0
+      },
+      {
+        "supplier": "Shodhana",
+        "amount": 5431.0,
+        "ratio": 5431.0
+      },
+      {
+        "supplier": "(주)머크",
+        "amount": 26919.0,
+        "ratio": 26919.0
+      },
+      {
+        "supplier": "싸토리우스",
+        "amount": 26919.0,
+        "ratio": 26919.0
+      },
+      {
+        "supplier": "(주)한국엔비에스",
+        "amount": 26919.0,
+        "ratio": 26919.0
+      },
+      {
+        "supplier": "(주)삼우에스엔티",
+        "amount": 26919.0,
+        "ratio": 26919.0
+      }
+    ]
   },
   {
     "stockCode": "285490",
@@ -27531,7 +32929,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 40706149797.0
+    "revenue": 40706149797.0,
+    "supplyFacts": [
+      {
+        "supplier": "M사",
+        "amount": 4330.0,
+        "ratio": 37.9
+      }
+    ]
   },
   {
     "stockCode": "290090",
@@ -27557,7 +32962,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 355590427771.0
+    "revenue": 355590427771.0,
+    "supplyFacts": [
+      {
+        "supplier": "엘에스오토모티브테크놀로지주식회사 外",
+        "amount": 27208.0,
+        "ratio": 47.0
+      }
+    ]
   },
   {
     "stockCode": "290270",
@@ -27830,7 +33242,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3386486863.0
+    "revenue": 3386486863.0,
+    "supplyFacts": [
+      {
+        "supplier": "한미전선",
+        "amount": 146712.0,
+        "ratio": 46.83
+      }
+    ]
   },
   {
     "stockCode": "294870",
@@ -27843,7 +33262,44 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 4147006988796.0
+    "revenue": 4147006988796.0,
+    "supplyFacts": [
+      {
+        "supplier": "에이원철강",
+        "amount": 69845.0,
+        "ratio": 14.6
+      },
+      {
+        "supplier": "천마콘크리트공업",
+        "amount": 102986.0,
+        "ratio": 21.6
+      },
+      {
+        "supplier": "삼표산업",
+        "amount": 102986.0,
+        "ratio": 21.6
+      },
+      {
+        "supplier": "엘지전자",
+        "amount": 33683.0,
+        "ratio": 7.1
+      },
+      {
+        "supplier": "용원토탈솔루션",
+        "amount": 33683.0,
+        "ratio": 7.1
+      },
+      {
+        "supplier": "오티스",
+        "amount": 10337.0,
+        "ratio": 2.2
+      },
+      {
+        "supplier": "IS동서",
+        "amount": 9249.0,
+        "ratio": 1.9
+      }
+    ]
   },
   {
     "stockCode": "295310",
@@ -27947,7 +33403,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2340718244068.0
+    "revenue": 2340718244068.0,
+    "supplyFacts": [
+      {
+        "supplier": "SK어드밴스드㈜",
+        "amount": 185155.0,
+        "ratio": 185155.0
+      },
+      {
+        "supplier": "S-OIL㈜",
+        "amount": 185155.0,
+        "ratio": 185155.0
+      },
+      {
+        "supplier": "Marubeni",
+        "amount": 185155.0,
+        "ratio": 185155.0
+      },
+      {
+        "supplier": "Apex",
+        "amount": 185155.0,
+        "ratio": 185155.0
+      }
+    ]
   },
   {
     "stockCode": "298020",
@@ -27960,7 +33438,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 7694843720869.0
+    "revenue": 7694843720869.0,
+    "supplyFacts": [
+      {
+        "supplier": "BASF",
+        "amount": 372686.0,
+        "ratio": 372686.0
+      },
+      {
+        "supplier": "Dairen",
+        "amount": 372686.0,
+        "ratio": 372686.0
+      },
+      {
+        "supplier": "UBE",
+        "amount": 372686.0,
+        "ratio": 372686.0
+      },
+      {
+        "supplier": "한화종합화학",
+        "amount": 372686.0,
+        "ratio": 372686.0
+      }
+    ]
   },
   {
     "stockCode": "298040",
@@ -27973,7 +33473,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5968511616609.0
+    "revenue": 5968511616609.0,
+    "supplyFacts": [
+      {
+        "supplier": "포스코",
+        "amount": 13285.0,
+        "ratio": 13285.0
+      },
+      {
+        "supplier": "보무강철",
+        "amount": 13285.0,
+        "ratio": 13285.0
+      },
+      {
+        "supplier": "삼동",
+        "amount": 13285.0,
+        "ratio": 13285.0
+      },
+      {
+        "supplier": "티씨티",
+        "amount": 13285.0,
+        "ratio": 13285.0
+      }
+    ]
   },
   {
     "stockCode": "298050",
@@ -27986,7 +33508,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3283044948859.0
+    "revenue": 3283044948859.0,
+    "supplyFacts": [
+      {
+        "supplier": "PHP",
+        "amount": 91540.0,
+        "ratio": 91540.0
+      },
+      {
+        "supplier": "Invista",
+        "amount": 91540.0,
+        "ratio": 91540.0
+      },
+      {
+        "supplier": "Hyosung DongNai",
+        "amount": 113945.0,
+        "ratio": 113945.0
+      }
+    ]
   },
   {
     "stockCode": "298060",
@@ -28064,7 +33603,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 93832555999.0
+    "revenue": 93832555999.0,
+    "supplyFacts": [
+      {
+        "supplier": "동진기업",
+        "amount": 5422.0,
+        "ratio": 13.77
+      }
+    ]
   },
   {
     "stockCode": "299170",
@@ -28441,7 +33987,29 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 4252067261000.0
+    "revenue": 4252067261000.0,
+    "supplyFacts": [
+      {
+        "supplier": "SAP코리아",
+        "amount": 105715415.0,
+        "ratio": 19.4
+      },
+      {
+        "supplier": "HERE",
+        "amount": 105715415.0,
+        "ratio": 19.4
+      },
+      {
+        "supplier": "솔로몬테크노서플라이",
+        "amount": 105715415.0,
+        "ratio": 19.4
+      },
+      {
+        "supplier": "AUTODESK ASIA",
+        "amount": 105715415.0,
+        "ratio": 19.4
+      }
+    ]
   },
   {
     "stockCode": "308080",
@@ -28779,7 +34347,39 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1387596056216.0
+    "revenue": 1387596056216.0,
+    "supplyFacts": [
+      {
+        "supplier": "15.2",
+        "amount": null,
+        "ratio": 12515.0
+      },
+      {
+        "supplier": "(주)삼표산업",
+        "amount": 14076.0,
+        "ratio": 17.1
+      },
+      {
+        "supplier": "이너스",
+        "amount": 4482.0,
+        "ratio": 5.5
+      },
+      {
+        "supplier": "37.3",
+        "amount": null,
+        "ratio": 30678.0
+      },
+      {
+        "supplier": "엘지전자",
+        "amount": 14971.0,
+        "ratio": 18.3
+      },
+      {
+        "supplier": "6.6",
+        "amount": null,
+        "ratio": 5449.0
+      }
+    ]
   },
   {
     "stockCode": "317450",
@@ -28818,7 +34418,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3688305345.0
+    "revenue": 3688305345.0,
+    "supplyFacts": [
+      {
+        "supplier": "로봇앤드디자인",
+        "amount": 339958.0,
+        "ratio": 70.5
+      },
+      {
+        "supplier": "131",
+        "amount": 27.2,
+        "ratio": 27.2
+      },
+      {
+        "supplier": "203",
+        "amount": 27.2,
+        "ratio": 27.2
+      },
+      {
+        "supplier": "로봇앤드디자인",
+        "amount": 9501.0,
+        "ratio": 2.0
+      },
+      {
+        "supplier": "429",
+        "amount": 0.3,
+        "ratio": 0.3
+      }
+    ]
   },
   {
     "stockCode": "317770",
@@ -28896,7 +34523,54 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 23920820499.0
+    "revenue": 23920820499.0,
+    "supplyFacts": [
+      {
+        "supplier": "국내 A사외",
+        "amount": 1341.0,
+        "ratio": 21.1
+      },
+      {
+        "supplier": "중국 B사",
+        "amount": 227.0,
+        "ratio": 3.6
+      },
+      {
+        "supplier": "중국 C사",
+        "amount": 430.0,
+        "ratio": 6.8
+      },
+      {
+        "supplier": "중국 D사",
+        "amount": 316.0,
+        "ratio": 5.0
+      },
+      {
+        "supplier": "중국 E사",
+        "amount": 220.0,
+        "ratio": 3.4
+      },
+      {
+        "supplier": "국내 F사 외",
+        "amount": 3191.0,
+        "ratio": 50.1
+      },
+      {
+        "supplier": "중국 I사",
+        "amount": 169.0,
+        "ratio": 2.7
+      },
+      {
+        "supplier": "중국 J사",
+        "amount": 76.0,
+        "ratio": 1.2
+      },
+      {
+        "supplier": "중국 K사",
+        "amount": 391.0,
+        "ratio": 6.1
+      }
+    ]
   },
   {
     "stockCode": "318010",
@@ -28922,7 +34596,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 87204429934.0
+    "revenue": 87204429934.0,
+    "supplyFacts": [
+      {
+        "supplier": "T2MOBILE",
+        "amount": 12203909.0,
+        "ratio": 95.92
+      },
+      {
+        "supplier": "엘메이드",
+        "amount": 429774.0,
+        "ratio": 3.38
+      },
+      {
+        "supplier": "㈜샤인티엠피",
+        "amount": 88907.0,
+        "ratio": 0.7
+      }
+    ]
   },
   {
     "stockCode": "318060",
@@ -28935,7 +34626,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 20532799353.0
+    "revenue": 20532799353.0,
+    "supplyFacts": [
+      {
+        "supplier": "주2)",
+        "amount": 128400.0,
+        "ratio": 69.44
+      },
+      {
+        "supplier": "건영산업",
+        "amount": 17435.0,
+        "ratio": 9.43
+      },
+      {
+        "supplier": "DF Robot",
+        "amount": 21374.0,
+        "ratio": 11.56
+      },
+      {
+        "supplier": "아이씨에스",
+        "amount": 4198.0,
+        "ratio": 2.27
+      }
+    ]
   },
   {
     "stockCode": "318160",
@@ -29091,7 +34804,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 58940727170.0
+    "revenue": 58940727170.0,
+    "supplyFacts": [
+      {
+        "supplier": "브***스",
+        "amount": 35.0,
+        "ratio": 35.0
+      },
+      {
+        "supplier": "해당없음",
+        "amount": null,
+        "ratio": 21.47
+      }
+    ]
   },
   {
     "stockCode": "322310",
@@ -29169,7 +34894,34 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 26936831479.0
+    "revenue": 26936831479.0,
+    "supplyFacts": [
+      {
+        "supplier": "아크리비스시스템즈코리아",
+        "amount": 364.0,
+        "ratio": 47.96
+      },
+      {
+        "supplier": "MKS스펙트라피직스",
+        "amount": 52.0,
+        "ratio": 6.85
+      },
+      {
+        "supplier": "아이피지포토닉스코리아㈜",
+        "amount": 33.0,
+        "ratio": 4.6
+      },
+      {
+        "supplier": "에이치알시스템",
+        "amount": 176.0,
+        "ratio": 17.23
+      },
+      {
+        "supplier": "MKS스펙트라피직스",
+        "amount": 214.0,
+        "ratio": 20.9
+      }
+    ]
   },
   {
     "stockCode": "323410",
@@ -29481,7 +35233,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 8903378721.0
+    "revenue": 8903378721.0,
+    "supplyFacts": [
+      {
+        "supplier": "Sartorius",
+        "amount": 7449803.0,
+        "ratio": 67.92
+      },
+      {
+        "supplier": "Thermo Fisher",
+        "amount": 7449803.0,
+        "ratio": 67.92
+      },
+      {
+        "supplier": "BNV",
+        "amount": 3518293.0,
+        "ratio": 32.08
+      },
+      {
+        "supplier": "Thermo Fisher",
+        "amount": 3518293.0,
+        "ratio": 32.08
+      }
+    ]
   },
   {
     "stockCode": "335810",
@@ -29780,7 +35554,29 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1900606191952.0
+    "revenue": 1900606191952.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)코삭",
+        "amount": 126774.0,
+        "ratio": 48.6
+      },
+      {
+        "supplier": "태광금속",
+        "amount": 22120.0,
+        "ratio": 8.5
+      },
+      {
+        "supplier": "쌍용양회",
+        "amount": 22120.0,
+        "ratio": 8.5
+      },
+      {
+        "supplier": "동서산업",
+        "amount": 22120.0,
+        "ratio": 8.5
+      }
+    ]
   },
   {
     "stockCode": "344860",
@@ -29819,7 +35615,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 36725295188.0
+    "revenue": 36725295188.0,
+    "supplyFacts": [
+      {
+        "supplier": "MIPEX",
+        "amount": 1929348.0,
+        "ratio": 67.1
+      },
+      {
+        "supplier": "더쓰리코어",
+        "amount": 1964569.0,
+        "ratio": 29.0
+      },
+      {
+        "supplier": "에어웍스",
+        "amount": 253568.0,
+        "ratio": 20.1
+      }
+    ]
   },
   {
     "stockCode": "347700",
@@ -30066,7 +35879,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 288477800460.0
+    "revenue": 288477800460.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜ 우진트레이딩 외",
+        "amount": 5389.0,
+        "ratio": 21.59
+      },
+      {
+        "supplier": "㈜ 대동 외",
+        "amount": 19575.0,
+        "ratio": 78.41
+      }
+    ]
   },
   {
     "stockCode": "352700",
@@ -30287,7 +36112,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 258497722389.0
+    "revenue": 258497722389.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜두산전자 외",
+        "amount": 6380166852.0,
+        "ratio": 19.0
+      },
+      {
+        "supplier": "희성촉매㈜",
+        "amount": 11940080336.0,
+        "ratio": 35.0
+      }
+    ]
   },
   {
     "stockCode": "356890",
@@ -30612,7 +36449,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 46898526887.0
+    "revenue": 46898526887.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)리젠어스",
+        "amount": 4039885.0,
+        "ratio": 76.59
+      },
+      {
+        "supplier": "세창쎄미콘㈜",
+        "amount": 4039885.0,
+        "ratio": 76.59
+      },
+      {
+        "supplier": "(주)웨이브파워",
+        "amount": 251140.0,
+        "ratio": 4.76
+      }
+    ]
   },
   {
     "stockCode": "366030",
@@ -30846,7 +36700,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 7402425126660.0
+    "revenue": 7402425126660.0,
+    "supplyFacts": [
+      {
+        "supplier": "㈜삼표산업",
+        "amount": 86647.0,
+        "ratio": 21.6
+      }
+    ]
   },
   {
     "stockCode": "376180",
@@ -31223,7 +37084,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1933995926896.0
+    "revenue": 1933995926896.0,
+    "supplyFacts": [
+      {
+        "supplier": "BJT인터내셔날 외",
+        "amount": 13.0,
+        "ratio": 0.02
+      },
+      {
+        "supplier": "나우스 외",
+        "amount": 546.0,
+        "ratio": 0.74
+      },
+      {
+        "supplier": "대원에프앤드씨 외",
+        "amount": 73506.0,
+        "ratio": 99.24
+      }
+    ]
   },
   {
     "stockCode": "383310",
@@ -31249,7 +37127,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "76.3",
+        "amount": 262537.0,
+        "ratio": 262537.0
+      },
+      {
+        "supplier": "23.7",
+        "amount": 81666.0,
+        "ratio": 81666.0
+      }
+    ]
   },
   {
     "stockCode": "383930",
@@ -31327,7 +37217,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 17714780998.0
+    "revenue": 17714780998.0,
+    "supplyFacts": [
+      {
+        "supplier": "A사",
+        "amount": 801.0,
+        "ratio": 20.0
+      }
+    ]
   },
   {
     "stockCode": "388720",
@@ -31418,7 +37315,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 130971472403.0
+    "revenue": 130971472403.0,
+    "supplyFacts": [
+      {
+        "supplier": "Simens Gamesa Renewable Energy",
+        "amount": null,
+        "ratio": 75.71
+      },
+      {
+        "supplier": "지멘스코리아",
+        "amount": null,
+        "ratio": 75.71
+      },
+      {
+        "supplier": "코아케이블",
+        "amount": null,
+        "ratio": 24.29
+      }
+    ]
   },
   {
     "stockCode": "389470",
@@ -31431,7 +37345,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2938787928.0
+    "revenue": 2938787928.0,
+    "supplyFacts": [
+      {
+        "supplier": "휴템",
+        "amount": 43294.0,
+        "ratio": 43294.0
+      },
+      {
+        "supplier": "제이더블유에스미디어",
+        "amount": 43294.0,
+        "ratio": 43294.0
+      },
+      {
+        "supplier": "브이에스팜",
+        "amount": 43294.0,
+        "ratio": 43294.0
+      }
+    ]
   },
   {
     "stockCode": "389500",
@@ -31496,7 +37427,49 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 30100048633.0
+    "revenue": 30100048633.0,
+    "supplyFacts": [
+      {
+        "supplier": "에이오시스템",
+        "amount": 116.0,
+        "ratio": 1.2
+      },
+      {
+        "supplier": "(주)에이지시스템",
+        "amount": 116.0,
+        "ratio": 1.2
+      },
+      {
+        "supplier": "신신이앤씨",
+        "amount": 4434.0,
+        "ratio": 46.6
+      },
+      {
+        "supplier": "유원테크",
+        "amount": 4434.0,
+        "ratio": 46.6
+      },
+      {
+        "supplier": "Radware",
+        "amount": 4202.0,
+        "ratio": 44.1
+      },
+      {
+        "supplier": "Efficient IP",
+        "amount": 4202.0,
+        "ratio": 44.1
+      },
+      {
+        "supplier": "Radware",
+        "amount": 768.0,
+        "ratio": 8.1
+      },
+      {
+        "supplier": "(주)가드에스와이에스",
+        "amount": 768.0,
+        "ratio": 8.1
+      }
+    ]
   },
   {
     "stockCode": "393210",
@@ -31808,7 +37781,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 8482954613.0
+    "revenue": 8482954613.0,
+    "supplyFacts": [
+      {
+        "supplier": "지티텔레컴",
+        "amount": 361721.0,
+        "ratio": 13.8
+      },
+      {
+        "supplier": "준테크놀로지",
+        "amount": 379471.0,
+        "ratio": 14.4
+      }
+    ]
   },
   {
     "stockCode": "405100",
@@ -32003,7 +37988,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 95931078734.0
+    "revenue": 95931078734.0,
+    "supplyFacts": [
+      {
+        "supplier": "H사",
+        "amount": null,
+        "ratio": 26.67
+      },
+      {
+        "supplier": "H사",
+        "amount": null,
+        "ratio": 30.25
+      },
+      {
+        "supplier": "H사",
+        "amount": null,
+        "ratio": 34.32
+      }
+    ]
   },
   {
     "stockCode": "415640",
@@ -32172,7 +38174,24 @@
     "source": "override",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 88189777012.0
+    "revenue": 88189777012.0,
+    "supplyFacts": [
+      {
+        "supplier": "출판사 2",
+        "amount": null,
+        "ratio": 98.4
+      },
+      {
+        "supplier": "400여 곳",
+        "amount": null,
+        "ratio": 98.4
+      },
+      {
+        "supplier": "세걸음",
+        "amount": null,
+        "ratio": 1.6
+      }
+    ]
   },
   {
     "stockCode": "418550",
@@ -33121,7 +39140,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 4020136626.0
+    "revenue": 4020136626.0,
+    "supplyFacts": [
+      {
+        "supplier": "티바인",
+        "amount": 92318.0,
+        "ratio": 92318.0
+      },
+      {
+        "supplier": "테크라인코리아",
+        "amount": 92318.0,
+        "ratio": 92318.0
+      }
+    ]
   },
   {
     "stockCode": "456040",
@@ -33147,7 +39178,39 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5258687306.0
+    "revenue": 5258687306.0,
+    "supplyFacts": [
+      {
+        "supplier": "A사",
+        "amount": 163050.0,
+        "ratio": 163050.0
+      },
+      {
+        "supplier": "C사",
+        "amount": 5460.0,
+        "ratio": 5460.0
+      },
+      {
+        "supplier": "D사",
+        "amount": 23053.0,
+        "ratio": 23053.0
+      },
+      {
+        "supplier": "E사",
+        "amount": 20097.0,
+        "ratio": 20097.0
+      },
+      {
+        "supplier": "기타",
+        "amount": 967008.0,
+        "ratio": 967008.0
+      },
+      {
+        "supplier": "합계",
+        "amount": 1178668.0,
+        "ratio": 1178668.0
+      }
+    ]
   },
   {
     "stockCode": "456160",
@@ -33342,7 +39405,24 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 2768703132346.0
+    "revenue": 2768703132346.0,
+    "supplyFacts": [
+      {
+        "supplier": "POSCO",
+        "amount": 71020.0,
+        "ratio": 67.81
+      },
+      {
+        "supplier": "JFE",
+        "amount": 71020.0,
+        "ratio": 67.81
+      },
+      {
+        "supplier": "NSC",
+        "amount": 71020.0,
+        "ratio": 67.81
+      }
+    ]
   },
   {
     "stockCode": "460860",
@@ -33355,7 +39435,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 3203431341223.0
+    "revenue": 3203431341223.0,
+    "supplyFacts": [
+      {
+        "supplier": "기전산업(한국) 外",
+        "amount": 175273.0,
+        "ratio": 69.13
+      },
+      {
+        "supplier": "JFE STEEL(일본) 外",
+        "amount": 78279.0,
+        "ratio": 30.87
+      }
+    ]
   },
   {
     "stockCode": "460870",
@@ -33745,7 +39837,14 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 10568518218.0
+    "revenue": 10568518218.0,
+    "supplyFacts": [
+      {
+        "supplier": "엔에스테크윈",
+        "amount": 1095910.0,
+        "ratio": 20.0
+      }
+    ]
   },
   {
     "stockCode": "474610",
@@ -33797,7 +39896,24 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "국내",
+        "amount": null,
+        "ratio": 1.26
+      },
+      {
+        "supplier": "국내",
+        "amount": null,
+        "ratio": 19.39
+      },
+      {
+        "supplier": "국내",
+        "amount": null,
+        "ratio": 69.19
+      }
+    ]
   },
   {
     "stockCode": "475400",
@@ -34057,7 +40173,14 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 519735447906.0
+    "revenue": 519735447906.0,
+    "supplyFacts": [
+      {
+        "supplier": "(주)비앤비코리아",
+        "amount": 87514.0,
+        "ratio": 87514.0
+      }
+    ]
   },
   {
     "stockCode": "484120",
@@ -34135,7 +40258,19 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": null
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "효성 베트남",
+        "amount": 26902.0,
+        "ratio": 26902.0
+      },
+      {
+        "supplier": "효성 동나이",
+        "amount": 26902.0,
+        "ratio": 26902.0
+      }
+    ]
   },
   {
     "stockCode": "488280",
@@ -34200,7 +40335,34 @@
     "source": "override",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 1790921869125.0
+    "revenue": 1790921869125.0,
+    "supplyFacts": [
+      {
+        "supplier": "레스타일렉트로닉스 코리아",
+        "amount": 13840.0,
+        "ratio": 13840.0
+      },
+      {
+        "supplier": "WT Microelectronics Co.",
+        "amount": 13840.0,
+        "ratio": 13840.0
+      },
+      {
+        "supplier": "Ltd. Dongguan Yutong Optical Technology",
+        "amount": 13840.0,
+        "ratio": 13840.0
+      },
+      {
+        "supplier": "파나소닉",
+        "amount": 9142.0,
+        "ratio": 9142.0
+      },
+      {
+        "supplier": "THK",
+        "amount": 9142.0,
+        "ratio": 9142.0
+      }
+    ]
   },
   {
     "stockCode": "490470",
@@ -34486,7 +40648,69 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 152431009.0
+    "revenue": 152431009.0,
+    "supplyFacts": [
+      {
+        "supplier": "Dewolf Chem",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "Grant Industires",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "Univar USA",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "LEI",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "Essential Ingredients",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "Elizabeth Arden",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "Barnet Products",
+        "amount": 21260.0,
+        "ratio": 43.3
+      },
+      {
+        "supplier": "Cleta",
+        "amount": 27859.0,
+        "ratio": 56.7
+      },
+      {
+        "supplier": "Matic",
+        "amount": 27859.0,
+        "ratio": 56.7
+      },
+      {
+        "supplier": "Aptar",
+        "amount": 27859.0,
+        "ratio": 56.7
+      },
+      {
+        "supplier": "Albea",
+        "amount": 27859.0,
+        "ratio": 56.7
+      },
+      {
+        "supplier": "Neopac",
+        "amount": 27859.0,
+        "ratio": 56.7
+      }
+    ]
   },
   {
     "stockCode": "950160",
@@ -34551,7 +40775,19 @@
     "source": "product",
     "primary": true,
     "updatedAt": "2026-04-14",
-    "revenue": 5437813.0
+    "revenue": 5437813.0,
+    "supplyFacts": [
+      {
+        "supplier": "주1)",
+        "amount": 3145.0,
+        "ratio": 1.99
+      },
+      {
+        "supplier": "주2)",
+        "amount": 155207.0,
+        "ratio": 98.01
+      }
+    ]
   },
   {
     "stockCode": "950220",
@@ -34588,7 +40824,8 @@
     "stream": "",
     "confidence": 1.0,
     "source": "manual",
-    "evidence": "",
+    "primary": true,
+    "updatedAt": "",
     "revenue": null
   },
   {
@@ -34600,8 +40837,21 @@
     "stream": "",
     "confidence": 1.0,
     "source": "manual",
-    "evidence": "",
-    "revenue": null
+    "primary": true,
+    "updatedAt": "",
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "(주)창성택",
+        "amount": 170921.0,
+        "ratio": 170921.0
+      },
+      {
+        "supplier": "세아전자",
+        "amount": 170921.0,
+        "ratio": 170921.0
+      }
+    ]
   },
   {
     "stockCode": "034730",
@@ -34612,7 +40862,8 @@
     "stream": "",
     "confidence": 1.0,
     "source": "manual",
-    "evidence": "",
+    "primary": true,
+    "updatedAt": "",
     "revenue": null
   },
   {
@@ -34624,7 +40875,40 @@
     "stream": "",
     "confidence": 1.0,
     "source": "manual",
-    "evidence": "",
-    "revenue": null
+    "primary": true,
+    "updatedAt": "",
+    "revenue": null,
+    "supplyFacts": [
+      {
+        "supplier": "PTA - 한화종합화학",
+        "amount": 73485.0,
+        "ratio": 73485.0
+      },
+      {
+        "supplier": "태광산업\nMEG - 롯데케미칼",
+        "amount": 73485.0,
+        "ratio": 73485.0
+      },
+      {
+        "supplier": "SK네트웍\n스",
+        "amount": 73485.0,
+        "ratio": 73485.0
+      },
+      {
+        "supplier": "SK종합화학",
+        "amount": 14919.0,
+        "ratio": 14919.0
+      },
+      {
+        "supplier": "데이진",
+        "amount": 5431.0,
+        "ratio": 5431.0
+      },
+      {
+        "supplier": "Shodhana",
+        "amount": 5431.0,
+        "ratio": 5431.0
+      }
+    ]
   }
 ]
