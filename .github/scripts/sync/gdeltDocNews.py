@@ -69,7 +69,7 @@ def fetchGdeltDoc(
     nameToCode: dict[str, str],
     *,
     years: int = 1,
-    perQuery: float = 0.25,
+    perQuery: float = 5.0,  # ⚠ GDELT DOC API rate limit = 5초당 1회 — 더 빠르면 대부분 throttle(빈 응답).
     timeout: float = 30.0,
     budgetSec: float | None = None,
 ) -> pl.DataFrame:

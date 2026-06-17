@@ -272,8 +272,9 @@ def main(argv: list[str] | None = None) -> int:
         help="트랙별 종목당 최대 뉴스 건수(안전 backstop — 실데이터는 수집창·DOC 250/질의 한계로 그 아래에서 자연 수렴)",
     )
     ap.add_argument("--gdelt-years", type=int, default=1, help="GDELT DOC 질의 연도 수(1=올해 증분, 5=과거 backfill)")
+    # GDELT 는 한국 종목 커버리지 사실상 0(실측: 삼성 2년 0건) + rate limit 5초/회 → daily 기본 OFF(opt-in).
     ap.add_argument(
-        "--gdelt-budget-min", type=float, default=25.0, help="GDELT fetch 시간예산(분) — 전 종목은 누적 분할"
+        "--gdelt-budget-min", type=float, default=0.0, help="GDELT fetch 시간예산(분). 0=skip(기본·한국 커버리지 0)"
     )
     args = ap.parse_args(argv)
 

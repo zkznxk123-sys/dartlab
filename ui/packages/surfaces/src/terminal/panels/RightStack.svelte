@@ -616,9 +616,9 @@
 	</Panel>
 </div>
 
-<!-- 종목 뉴스 — 좌 네이버(검색·스니펫 O) ‖ 우 GDELT(DOC·제목+링크). 둘 다 최근까지 유지(일배치 증분).
-     private(언론사 저작권)을 워커가 서버사이드 read 해 표시(라이브 표시, 재배포 아님). 클릭=원문 이동,
-     주가차트 뉴스 dot 클릭=그 날짜 행(양 컬럼 다) 스크롤·하이라이트 동기. -->
+<!-- 종목 뉴스 — 네이버(검색·제목+스니펫). private(언론사 저작권)을 워커가 서버사이드 read 해 표시(라이브 표시,
+     재배포 아님). 클릭=원문 이동, 주가차트 뉴스 dot 클릭=그 날짜 행 스크롤·하이라이트 동기.
+     GDELT(과거 트랙)는 한국 종목 커버리지 사실상 0(실측) — 데이터 있을 때만 우측에 분할 표시(평시 단일 전폭). -->
 {#snippet newsCol(byDate: [string, NewsItem[]][])}
 	{#each byDate as [d8, items] (d8)}
 		{#each items as it (it.url)}
@@ -630,27 +630,23 @@
 		{/each}
 	{/each}
 {/snippet}
-<div class="rowSplit" bind:this={newsWrap}>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: '네이버', en: 'NAVER' }} sub={{ kr: '검색 · 제목+요약', en: 'search · title+snippet' }} flush>
+<div class={gdeltNews.length ? 'rowSplit' : ''} bind:this={newsWrap}>
+	<Panel {lang} className="eChanges" prov="real" title={gdeltNews.length ? { kr: '네이버', en: 'NAVER' } : { kr: '종목 뉴스', en: 'NEWS' }} sub={{ kr: 'naver · 제목+요약', en: 'naver · title+snippet' }} flush>
 		{#snippet right()}<span class="dim">{newsState === 'ready' ? naverNews.length : ''}</span>{/snippet}
 		{#if newsState === 'loading'}
 			<div class="storyEmpty">{lang === 'en' ? 'loading news …' : '뉴스 불러오는 중 …'}</div>
 		{:else if naverByDate.length}
 			<div class="filingList newsList">{@render newsCol(naverByDate)}</div>
 		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no naver news yet' : '아직 수집된 네이버 뉴스 없음'}</div>
+			<div class="storyEmpty">{lang === 'en' ? 'no naver news yet' : '아직 수집된 뉴스 없음'}</div>
 		{/if}
 	</Panel>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: 'GDELT', en: 'GDELT' }} sub={{ kr: 'DOC · 제목+링크', en: 'DOC · title+link' }} flush>
-		{#snippet right()}<span class="dim">{newsState === 'ready' ? gdeltNews.length : ''}</span>{/snippet}
-		{#if newsState === 'loading'}
-			<div class="storyEmpty">{lang === 'en' ? 'loading …' : '불러오는 중 …'}</div>
-		{:else if gdeltByDate.length}
+	{#if gdeltNews.length}
+		<Panel {lang} className="eChanges" prov="real" title={{ kr: 'GDELT', en: 'GDELT' }} sub={{ kr: 'DOC · 제목+링크', en: 'DOC · title+link' }} flush>
+			{#snippet right()}<span class="dim">{gdeltNews.length}</span>{/snippet}
 			<div class="filingList newsList">{@render newsCol(gdeltByDate)}</div>
-		{:else}
-			<div class="storyEmpty">{lang === 'en' ? 'no GDELT news yet' : '아직 수집된 GDELT 뉴스 없음'}</div>
-		{/if}
-	</Panel>
+		</Panel>
+	{/if}
 </div>
 
 <div class="rowSplit">
