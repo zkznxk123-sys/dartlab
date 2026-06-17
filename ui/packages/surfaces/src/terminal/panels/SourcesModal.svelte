@@ -2,7 +2,6 @@
 	// 데이터 출처 모달 — 터미널 전 패널의 원천·갱신주기·라이선스를 한 표로 명시 (공공누리 출처표시 의무 포함).
 	import type { Lang } from '../lib/types';
 	import { GOV_ATTRIBUTION, MACRO_ATTRIBUTION } from '@dartlab/ui-contracts';
-	import { FIN_TYPES } from '../lib/finType'; // 재무 유형 라벨 기준 — SSOT 에서 직접 렌더(손코딩 문안 금지)
 	import { fetchLastSync, fmtSync, syncTone } from '../lib/syncStatus'; // 동기화 실측 (HF lastCommit)
 
 	interface Props {
@@ -159,20 +158,6 @@
 						{/each}
 					</tbody>
 				</table>
-				<div class="srcCrit">
-					<div class="srcCritTitle">{T('파생 라벨 — 재무 유형 기준', 'DERIVED LABELS — FINANCIAL TYPE CRITERIA')}</div>
-					<p class="srcCritIntro">
-						{T(
-							'재무 유형 라벨(주의형·회복형·성장형·수익형·우량형)은 DART 공시 기반 dartlab scan 지표(최신 사업연도 연결 기준 · 분기 갱신, 우량형의 부채비율만 최신 연간 재무제표) 위에서 아래 임계값이 고정된 결정론 규칙으로 기계 판정한 파생 산출물입니다. 추정·예측·점수화가 아니며 아래 기준식이 전부입니다. 복수 충족 시 주의형 > 회복형 > 성장형 > 수익형 > 우량형 순으로 1개만 표시합니다. 기준에 필요한 값이 결측이면 그 라벨은 판정하지 않습니다 — 무라벨은 해당 없음(중립)이지 부정 신호가 아닙니다. 금융업 등 일부 업종은 영업이익률·유동성 지표가 구조적으로 산출되지 않아 라벨이 제한적이며, ROE 등 수치는 최신 보고기간 기준이라 통상의 연간 지표보다 낮게 보일 수 있습니다. 본 라벨은 정보 제공 목적이며 투자 권유가 아닙니다.',
-							'Financial type labels are deterministic, fixed-threshold rules over dartlab scan metrics from DART filings — not estimates or scores. When multiple match, one label is shown by fixed priority. Missing inputs mean no label (neutral, not negative). Informational only — not investment advice.'
-						)}
-					</p>
-					<div class="srcCritRows">
-						{#each FIN_TYPES as t (t.name)}
-							<div class="srcCritRow"><b class={'ft-' + t.tone}>{t.name}</b><span>{T(t.criteriaKr, t.criteriaEn)}</span></div>
-						{/each}
-					</div>
-				</div>
 				<div class="srcNotes">
 					<div class="srcNote">{GOV_ATTRIBUTION} · {MACRO_ATTRIBUTION}</div>
 					<div class="srcNote">{T('호스팅: HuggingFace dataset', 'Hosting: HuggingFace dataset')} <span class="mono">eddmpython/dartlab-data</span> ({T('공개', 'public')})</div>

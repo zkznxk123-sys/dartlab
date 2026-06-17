@@ -5,6 +5,7 @@
 	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
+	import FinTypeLegendDialog from './FinTypeLegendDialog.svelte'; // 유형 칩 범례 — TYPE 컬럼 ⓘ 에서 연다
 	import Watchlist from './Watchlist.svelte'; // 공시 워치 — 큐레이션 종목 신선도 모니터 (recentMap 공유)
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
@@ -30,6 +31,7 @@
 	// ── 통합 스크리너: 스파크라인(30거래일) + 1Y 수익률 + 유형 라벨 2칩 한 행 (제품급 조건검색기).
 	// ROE·영업이익 수치 컬럼은 라벨(finType 체인)로 대체 — 수치 다조건은 상세검색 모달 소관. ──
 	let screenerOpen = $state(false);
+	let finLegendOpen = $state(false); // 유형 칩 범례 다이얼로그
 	// 30거래일 스파크 — recent.parquet 전종목 1파일 (티커 스트립과 어댑터 캐시 공유, 추가 다운로드 0)
 	let recentMap = $state<Record<string, Candle[]> | null>(null);
 	rt.price.govRecent().then((m) => (recentMap = m));
@@ -134,7 +136,9 @@
 </Panel>
 
 <!-- 통합 스크리너 — 주가(1Y) + 재무(ROE·영업이익률) 한 행, 컬럼 클릭 정렬. 복합 조건은 상세검색 모달. -->
-<Panel {lang} className="eQuant fillCol" prov="real" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} sub={{ kr: nodes.length + '종목 · 정렬 1Y', en: 'n=' + nodes.length }} flush>
+<!-- sub(종목수) 미표기 — 우측 상세검색·조건조사↗ 2버튼이 좁은 헤더를 채워, 종목수를 넣으면 부분 잘림("2.")만 생김.
+     제목 가시성 우선(헤더 잘림 수정). 유니버스 규모는 아래 리스트로 자명. -->
+<Panel {lang} className="eQuant fillCol" prov="real" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} flush>
 	{#snippet right()}<button class="scrOpenBtn" onclick={() => (screenerOpen = true)} title="상용급 다조건 검색">{lang === 'en' ? 'SCREEN' : '상세검색'}</button><a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">조건조사 ↗</a>{/snippet}
 	<div class="filtRow">
 		<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />
@@ -149,7 +153,7 @@
 		<span class="rkHName">{lang === 'en' ? 'Company' : '종목'}</span>
 		<span class="rkHCol">{lang === 'en' ? '30D' : '추세'}</span>
 		<span class="rkHCol on">1Y ▼</span>
-		<span class="rkHCol">{lang === 'en' ? 'TYPE' : '유형'}</span>
+		<button class="rkHCol rkHType" onclick={() => (finLegendOpen = true)} title={lang === 'en' ? 'What these type labels mean — criteria' : '유형 라벨 기준 보기'}>{lang === 'en' ? 'TYPE' : '유형'} <span class="rkHTypeI">ⓘ</span></button>
 	</div>
 	<div class="rankList">
 		{#each rows as r, i (r.n.id)}
@@ -167,3 +171,5 @@
 		{/each}
 	</div>
 </Panel>
+
+{#if finLegendOpen}<FinTypeLegendDialog {lang} onClose={() => (finLegendOpen = false)} />{/if}
