@@ -428,12 +428,15 @@
 {#if pc && pc.metrics.length}
 	<Panel {lang} className="eQuant" prov="real" title={{ kr: '업종 내 백분위', en: 'INDUSTRY PERCENTILE' }} sub={{ kr: pc.industry + ' ' + pc.n + '사', en: pc.industry + ' n=' + pc.n }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => (pctCrossOpen = true)} title={lang === 'en' ? 'cross-universe percentile (industry · market · all listed)' : '유니버스 교차 백분위 — 업종·시장·전체상장사'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
+		<!-- 좌우 2분할 · 셀 2줄(라벨·값 윗줄 / 반폭 얇은 막대 아랫줄) — 가로막대+중앙선 메타포 보존하며 높이 절반 -->
 		<div class="pctList">
 			{#each pc.metrics.filter((m) => m.axis !== 'gov') as m (m.en)}
 				<div class="pctRow">
-					<span class="pctName">{txc(m, lang)}</span>
+					<div class="pctHd">
+						<span class="pctName">{txc(m, lang)}</span>
+						<span class="pctVal"><b style={`color:${pcCol(m.p)}`}>{lang === 'en' ? 'top ' + (100 - m.p + 1) + '%' : '상위 ' + (100 - m.p + 1) + '%'}</b> <span class="dim">{pcFmtV(m)}</span></span>
+					</div>
 					<div class="pctTrack"><div class="pctFill" style={`width:${m.p}%;background:${pcCol(m.p)}`}></div><div class="pctMark" style="left:50%"></div></div>
-					<span class="pctVal"><b style={`color:${pcCol(m.p)}`}>{lang === 'en' ? 'top ' + (100 - m.p + 1) + '%' : '상위 ' + (100 - m.p + 1) + '%'}</b> <span class="dim">{pcFmtV(m)}</span></span>
 				</div>
 			{/each}
 		</div>
