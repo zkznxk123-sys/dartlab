@@ -1361,7 +1361,7 @@
 	}
 	.discTipMore {
 		font-size: 9.5px;
-		color: #6b7280;
+		color: var(--dimmer);
 		margin-top: 2px;
 	}
 	.discTipFoot {

@@ -213,14 +213,14 @@
 	.btRuleTag { font-style: normal; font-size: 8.5px; color: #a3e635; border: 1px solid rgba(163, 230, 53, 0.4); border-radius: 3px; padding: 0 3px; }
 	.btSelect { flex: 1 1 auto; min-width: 0; }
 	.btAdd { width: 100%; margin-top: 2px; }
-	.btDel { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 12px; padding: 0 3px; }
+	.btDel { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 12px; padding: 0 3px; }
 	.btDel:hover { color: var(--dn, #f0616f); }
 	.btDesc.warn { color: var(--amber, #fb923c); }
 	/* 조건 빌더 */
 	.condBlk { margin-top: 5px; padding: 5px; border: 1px solid rgba(27, 33, 48, 0.7); border-radius: 4px; }
 	.condHd { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; font-weight: 700; color: #8b94a3; letter-spacing: 0.04em; margin-bottom: 4px; }
 	.combineTg { display: flex; gap: 2px; }
-	.combineTg button { font-size: 8.5px; padding: 1px 6px; background: none; border: 1px solid var(--dl-line, #1b2130); color: #6b7280; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.combineTg button { font-size: 8.5px; padding: 1px 6px; background: none; border: 1px solid var(--dl-line, #1b2130); color: var(--dimmer); border-radius: 3px; cursor: pointer; font-family: inherit; }
 	.combineTg button.on { color: #a3e635; border-color: rgba(163, 230, 53, 0.5); }
 	.condRow { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; margin-bottom: 3px; }
 	.condSel, .condOp, .condKind { font-size: 10px; background: var(--dl-bg-raised, #0e141f); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 2px 3px; font-family: inherit; }
@@ -229,7 +229,7 @@
 	.condP { display: inline-flex; align-items: center; gap: 1px; }
 	.condP button { font-size: 10px; width: 16px; height: 16px; line-height: 1; background: none; border: 1px solid var(--dl-line, #1b2130); color: #aeb6c2; border-radius: 3px; cursor: pointer; padding: 0; }
 	.condP b { font-size: 9.5px; min-width: 20px; text-align: center; font-family: var(--dl-font-mono, monospace); color: var(--dl-ink, #c8cfdb); }
-	.condDel { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 11px; padding: 0 2px; }
+	.condDel { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 11px; padding: 0 2px; }
 	.condDel:hover { color: var(--dn, #f0616f); }
 	.condAdd { font-size: 9.5px; background: none; border: 1px dashed var(--dl-line-strong, #2a3142); color: #8b94a3; border-radius: 3px; padding: 2px 8px; cursor: pointer; font-family: inherit; margin-top: 2px; }
 	.condAdd:hover { color: var(--dl-ink, #c8cfdb); }

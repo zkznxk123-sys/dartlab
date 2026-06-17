@@ -89,7 +89,7 @@
 	.btStrip.btLag { opacity: 0.92; }
 	.btHead { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 	.btRet { font-size: 12.5px; font-weight: 700; }
-	.btVs { color: #6b7280; font-size: 10px; }
+	.btVs { color: var(--dimmer); font-size: 10px; }
 	.btExcess { font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--dl-line, #1b2130); }
 	.btDot { color: #3a4456; }
 	.btChip { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 12px; padding: 1px 8px 1px 5px; cursor: pointer; font-family: inherit; font-size: 10.5px; color: #aeb6c2; }
@@ -102,10 +102,10 @@
 	.btWarn { font-size: 9.5px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 3px; padding: 0 5px; }
 	.btMore { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 10px; padding: 2px 9px; border-radius: 3px; cursor: pointer; font-family: inherit; }
 	.btMore:hover { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
-	.btClose { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 13px; padding: 0 2px; }
+	.btClose { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 13px; padding: 0 2px; }
 	.btClose:hover { color: var(--dl-ink, #c8cfdb); }
 	.btSel { font-size: 9.5px; color: #8b94a3; margin-top: 3px; line-height: 1.5; }
-	.btFoot { font-size: 9.5px; color: #6b7280; margin-top: 3px; line-height: 1.4; }
+	.btFoot { font-size: 9.5px; color: var(--dimmer); margin-top: 3px; line-height: 1.4; }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
 	.tNeu { color: #aeb6c2; }

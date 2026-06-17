@@ -42,7 +42,7 @@
 			}
 			ctx.stroke();
 		}
-		ctx.fillStyle = '#6b7280';
+		ctx.fillStyle = '#a7b2c2';
 		ctx.font = '8px "Pretendard Variable",sans-serif';
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
