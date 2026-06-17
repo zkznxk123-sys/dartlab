@@ -32,6 +32,7 @@ jobs:
             artifact_name: product-smoke-quick
             artifact_path: product-smoke-quick.json
           - gate: test-fast
+            timeout: 30
           - gate: wheel-smoke
           - gate: quality-gate
           - gate: security
