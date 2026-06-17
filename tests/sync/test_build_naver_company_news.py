@@ -156,6 +156,43 @@ def test_dedup_url_and_top_n_per_track() -> None:
     assert len(set(urls)) == 3
 
 
+def test_shared_url_preserved_across_companies() -> None:
+    """한 기사(url)가 여러 종목을 동시 언급하면 각 종목에 모두 보존 (형제 종목 커버리지 탈취 방지)."""
+    mod = _loadModule()
+    df = _naverDf(
+        [
+            {
+                "query": "에코프로",
+                "date": "2026-06-17",
+                "title": "공유",
+                "source": "s",
+                "url": "shared",
+                "description": "",
+            },
+            {
+                "query": "에코프로비엠",
+                "date": "2026-06-17",
+                "title": "공유",
+                "source": "s",
+                "url": "shared",
+                "description": "",
+            },
+            {
+                "query": "에코프로비엠",
+                "date": "2026-06-16",
+                "title": "단독",
+                "source": "s",
+                "url": "own",
+                "description": "",
+            },
+        ]
+    )
+    out = mod.buildCompanyIndex(df, {"에코프로": "086520", "에코프로비엠": "247540"}, perCompany=40)
+
+    assert [it["url"] for it in out["086520"]] == ["shared"]  # 에코프로도 공유기사 보유
+    assert {it["url"] for it in out["247540"]} == {"shared", "own"}  # 에코프로비엠은 공유+단독 둘 다
+
+
 def test_empty_inputs() -> None:
     mod = _loadModule()
     assert mod.buildCompanyIndex(_naverDf([]), {"삼성전자": "005930"}) == {}

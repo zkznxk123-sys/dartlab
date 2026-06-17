@@ -248,13 +248,17 @@ def fetchHeadlinesForArchive(
     pairs = runAsync(_gatherAll())
     capturedAt = datetime.now(tz=timezone.utc)
 
+    # dedup 은 (query, url) 단위 — 한 기사가 여러 종목을 동시 언급하면 각 종목(query)이 자기
+    # 행을 보존해야 byCompany 폴딩에서 종목별로 다 잡힌다. url 전역 dedup 은 형제 종목에 기사를
+    # 빼앗겨(에코프로비엠↔에코프로) 커버리지가 들쭉날쭉해진다. (_fetchAsync 가 query 내 url 은 이미 dedup.)
     rows: list[dict] = []
-    seen: set[str] = set()
+    seen: set[tuple[str, str]] = set()
     for q, items in pairs:
         for it in items:
-            if not it.url or it.url in seen:
+            key = (q, it.url)
+            if not it.url or key in seen:
                 continue
-            seen.add(it.url)
+            seen.add(key)
             rows.append(
                 {
                     "date": it.date,

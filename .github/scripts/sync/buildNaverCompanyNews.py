@@ -60,7 +60,7 @@ def _foldTrack(out: dict[str, list[dict[str, str]]], codedDf: pl.DataFrame, trac
         codedDf.select(["__code", *have])
         .with_columns(pl.col("date").cast(pl.Utf8).alias("__d"))
         .filter(pl.col("url").is_not_null() & (pl.col("url").str.len_chars() > 0))
-        .unique(subset=["url"], keep="first")
+        .unique(subset=["__code", "url"], keep="first")  # 코드별 url dedup — 코드 간 기사 공유 보존
         .sort("__d", descending=True)
     )
     for code in work["__code"].unique().to_list():
@@ -187,8 +187,13 @@ def _hfFrame(token: str, relPath: str) -> pl.DataFrame | None:
 
 
 def _trimSort(out: pl.DataFrame, windowDays: int) -> pl.DataFrame:
-    """url dedup + 최근 windowDays trim + date desc."""
-    out = out.unique(subset=["url"], keep="first")
+    """(query, url) dedup + 최근 windowDays trim + date desc.
+
+    url 단독 dedup 은 한 기사가 여러 종목을 언급할 때 한 종목만 남겨 형제 종목 커버리지를
+    빼앗는다(에코프로비엠↔에코프로). query 동봉 dedup 으로 종목별 행을 보존한다.
+    """
+    subset = ["query", "url"] if "query" in out.columns else ["url"]
+    out = out.unique(subset=subset, keep="first")
     maxd = out["date"].max()
     if maxd is not None:
         out = out.filter(pl.col("date") >= maxd - timedelta(days=windowDays))
