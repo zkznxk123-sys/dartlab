@@ -910,13 +910,13 @@
 .dlTerm .aiAnswer { font-size: 10px; line-height: 1.5; color: var(--txt); padding: 5px 7px; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* PERCENTILE */
-.dlTerm .pctList { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
-.dlTerm .pctRow { display: flex; flex-direction: column; gap: 3px; padding: 4px 8px; border-bottom: 1px solid var(--dl-line); min-width: 0; }
+.dlTerm .pctList { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; }
+.dlTerm .pctRow { display: flex; flex-direction: column; gap: 2px; padding: 3px 8px; border-bottom: 1px solid var(--dl-line); min-width: 0; }
 .dlTerm .pctHd { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; min-width: 0; }
 .dlTerm .pctName { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dlTerm .pctTrack { height: 4px; background: var(--dl-bg-overlay); border-radius: 2px; position: relative; overflow: hidden; }
+.dlTerm .pctTrack { height: 2px; background: var(--dl-bg-overlay); border-radius: 2px; position: relative; overflow: visible; }
 .dlTerm .pctFill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; }
-.dlTerm .pctMark { position: absolute; top: -1px; width: 1px; height: 6px; background: rgba(255, 255, 255, 0.25); }
+.dlTerm .pctMark { position: absolute; top: -1px; width: 1px; height: 4px; background: rgba(255, 255, 255, 0.35); }
 .dlTerm .pctVal { font-family: var(--mono); font-size: 9px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: baseline; justify-content: flex-end; gap: 6px; }
 .dlTerm .pctVal b { font-weight: 700; min-width: 46px; text-align: right; }
 .dlTerm .pctVal .dim { min-width: 40px; text-align: right; }
