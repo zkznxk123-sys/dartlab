@@ -1,25 +1,16 @@
-// 로컬 filing 포트 — /api/company/{code}/panel/{init,toc} + /panel?section + price-events 이벤트.
-// ui/web 브리지의 순수 정규화기(tocToContract/gridToContract/initToContract/regularFilingsFromPanel/
-// nonRegularFromEvents) 를 verbatim 포팅 — React 클라이언트 fetch 만 getJson 으로 치환.
+// 로컬 filing 포트 — 정기/비정기 공시 목록·워치 신선도는 공개 HF 소스를 공통배선 재사용(백엔드 0,
+// price·finance 와 동일 "깃헙페이지 자산 공유"). panel 격자(공시뷰어)만 로컬 /api — 인-터미널 뷰어는
+// 백엔드 보유 시 여는 로컬 전용 기능(공개 어댑터는 단계-6 까지 notWiredYet). 타입 정본 = contracts.
 import type {
 	FilingPort,
-	NonRegularFiling,
 	PanelGridResponse,
 	PanelInitResponse,
-	PanelTocResponse,
-	RegularFiling
+	PanelTocResponse
 } from '@dartlab/ui-contracts';
 import { getJson } from '../fetchJson';
-import type {
-	ClientPanelGrid,
-	ClientPanelInit,
-	ClientPanelToc,
-	LocalCaches,
-	PriceEventsPayload
-} from '../localTypes';
-import { loadPriceEvents } from './priceSource';
-// 워치 신선도는 공개 HF allFilings 소스를 공통배선 재사용(price·finance 처럼) — 로컬 :8400 없이도 동작.
-import { loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
+import type { ClientPanelGrid, ClientPanelInit, ClientPanelToc, LocalCaches } from '../localTypes';
+import { loadCompanyRegularFilings } from '../../public/sources/regularFilingsSource';
+import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
 
 // 로컬 panel toc 는 leafType/disclosureKey 메타 미탑재 — 미제공 = null 정직 표기 (위조 금지).
 function tocToContract(toc: ClientPanelToc): PanelTocResponse {
@@ -71,55 +62,6 @@ function initToContract(init: ClientPanelInit | null): PanelInitResponse | null 
 	};
 }
 
-function rceptNoFromUrl(url: string | null | undefined): string {
-	if (!url) return '';
-	const m = url.match(/rcpNo=(\d{8,})/) ?? url.match(/(\d{14})/);
-	return m?.[1] ?? '';
-}
-
-function rceptDateFromNo(rceptNo: string): string {
-	const s = rceptNo.slice(0, 8);
-	return /^\d{8}$/.test(s) ? `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}` : '';
-}
-
-function reportTypeFromPeriod(period: string): string {
-	const key = period.toUpperCase();
-	if (key.endsWith('Q4')) return '사업보고서';
-	if (key.endsWith('Q2')) return '반기보고서';
-	if (key.endsWith('Q1') || key.endsWith('Q3')) return '분기보고서';
-	return '정기보고서';
-}
-
-function regularFilingsFromPanel(panel: ClientPanelInit | null): RegularFiling[] {
-	const periods = panel?.toc.periods ?? [];
-	const urlByPeriod = panel?.grid?.dartUrlByPeriod ?? {};
-	return periods.flatMap((period) => {
-		const url = urlByPeriod[period];
-		const rceptNo = rceptNoFromUrl(url);
-		if (!rceptNo) return [];
-		return [
-			{
-				rceptNo,
-				rceptDate: rceptDateFromNo(rceptNo),
-				reportType: reportTypeFromPeriod(period),
-				year: period.slice(0, 4),
-				url: url ?? `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`
-			}
-		];
-	});
-}
-
-function nonRegularFromEvents(payload: PriceEventsPayload | null): NonRegularFiling[] {
-	const out: NonRegularFiling[] = [];
-	for (const [date, events] of Object.entries(payload?.events ?? {})) {
-		for (const d of events.disclosures ?? []) {
-			if (['사업보고서', '반기보고서', '분기보고서'].some((name) => d.title.includes(name))) continue;
-			out.push({ rceptNo: d.rceptNo, rceptDate: date, reportNm: d.title, filer: payload?.corpName ?? '', url: d.url });
-		}
-	}
-	return out.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate)); // 캡 없음 — price-events 커버리지만큼 전부(딥 심화는 백엔드 후속)
-}
-
 function loadPanelInit(apiBase: string, caches: LocalCaches, code: string): Promise<ClientPanelInit | null> {
 	const c = code.trim();
 	let p = caches.panelInit.get(c);
@@ -132,13 +74,10 @@ function loadPanelInit(apiBase: string, caches: LocalCaches, code: string): Prom
 
 export function localFilingPort(apiBase: string, caches: LocalCaches): FilingPort {
 	return {
-		async regular(code, limit = 500) {
-			return regularFilingsFromPanel(await loadPanelInit(apiBase, caches, code)).slice(0, limit);
-		},
-		async nonRegular(code) {
-			return nonRegularFromEvents(await loadPriceEvents(apiBase, caches, code));
-		},
-		recentForCodes: (codes) => loadRecentFilingsForCodes(codes), // 공통배선 — HF 직독(백엔드 0)
+		// 공통배선 — 공개 HF 소스 그대로(정기 = regularFilingsSource, 비정기 = allFilings). 로컬 :8400 불요.
+		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
+		nonRegular: (code) => loadCompanyNonRegularFilings(code),
+		recentForCodes: (codes) => loadRecentFilingsForCodes(codes),
 		async panelToc(code) {
 			const toc = await getJson<ClientPanelToc>(
 				apiBase,

@@ -52,7 +52,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 	const exportPort = localExportPort(apiBase);
 	return {
 		env,
-		company: localCompanyPort(apiBase, caches),
+		company: localCompanyPort(), // 공통배선 — 전부 HF(corpList·relations·profit-pool), 로컬 /api 불요
 		// 주가 = 공개 gov HF 포트 재사용 (백엔드 0, 브라우저 단일 경로) — 로컬 :8400 미가동에도 차트가 퍼블릭과 동일.
 		price: publicPricePort(),
 		// 지수 = gov/indices + FRED 모두 HF 브라우저 직독 → price·macro 와 동일하게 공개 포트 그대로 재사용(백엔드 0).

@@ -1,21 +1,10 @@
-// 로컬 company 포트 — relations 는 /api(로컬 Python 서버)/meta, 전 종목 product·회사정보 인덱스는
-// 공개 HF corpList.parquet 공유(macro·finance 와 동일한 "로컬이 깃헙페이지 자산을 공유"하는 단일 경로).
-// 이 데이터의 SSOT 자체가 HF parquet 이라 silent fallback 이 아니다 — 공개 어댑터와 동일 결과 = 미러.
-import type { CompanyPort, CompanyRelations, ProductIndexItem } from '@dartlab/ui-contracts';
-import { getJson } from '../fetchJson';
+// 로컬 company 포트 — 전부 공개 HF 자산 공통배선(corpList·relations·profit-pool). 로컬 :8400 불요
+// (macro·finance·price 와 동일 "로컬이 깃헙페이지 자산을 공유"). relations 도 공개 HF(map ego) 직독 —
+// 옛 /api meta 체크 후 빈 관계 반환 스텁 폐기(실관계 노출). reportFacts(라이브 duckdb)는 셸 주입 영역이라 로컬 [].
+import type { CompanyPort, ProductIndexItem } from '@dartlab/ui-contracts';
 import { loadHfProductIndexMap } from '../../public/sources/productIndexSource';
 import { loadIndustryProfitPool } from '../../public/sources/industryPoolSource';
-import type { CompanyMeta, LocalCaches } from '../localTypes';
-
-function loadMeta(apiBase: string, caches: LocalCaches, code: string): Promise<CompanyMeta | null> {
-	const c = code.trim();
-	let p = caches.meta.get(c);
-	if (!p) {
-		p = getJson<CompanyMeta>(apiBase, `/api/company/${encodeURIComponent(c)}/meta`);
-		caches.meta.set(c, p);
-	}
-	return p;
-}
+import { loadCompanyRelations } from '../../public/sources/relationsSource';
 
 // 전 종목 product/회사정보 인덱스 = 공개 HF 소스를 Record(JSON-safe 계약)로 1 회 변환·공유 (공개 어댑터와 동일).
 let productIndexPromise: Promise<Record<string, ProductIndexItem> | null> | null = null;
@@ -30,32 +19,21 @@ function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | nu
 	return productIndexPromise;
 }
 
-export function localCompanyPort(apiBase: string, caches: LocalCaches): CompanyPort {
+export function localCompanyPort(): CompanyPort {
 	return {
-		// 단일 회사 제품/프로필 = 공개 HF 인덱스 조회 (공개 products(code) 와 동일 — ceo/결산/상장/본사/홈페이지 포함).
+		// 단일 회사 제품/프로필 = 공개 HF 인덱스 조회 (ceo/결산/상장/본사/홈페이지 포함).
 		async products(code) {
 			const rec = await loadProductIndexRecord();
 			return rec?.[code.trim()] ?? null;
 		},
-		// 전 종목 인덱스 = 공개 HF 자산 공유 (옛 null = 미보유 표기는 미러 깨짐 → 깃헙페이지 자산 직접 로드로 정정).
 		productIndex: loadProductIndexRecord,
-		async relations(code) {
-			const meta = await loadMeta(apiBase, caches, code);
-			if (!meta || !meta.corpName) return null;
-			// 로컬 관계망 정규화는 단계-8(scan/map) 영역 — 회사 존재 시 빈 관계 반환(null 아님).
-			return {
-				suppliers: [],
-				customers: [],
-				peers: [],
-				neighborCount: 0,
-				blog: null
-			} satisfies CompanyRelations;
-		},
-		// 라이브 보고서 팩트 — 로컬 미배선. 해당 없음 = [].
+		// 공급망 관계 = 공개 HF(map ego) 직독 — 공개 어댑터와 동일.
+		relations: loadCompanyRelations,
+		// 라이브 보고서 팩트 — 셸 주입(duckdb-wasm) 영역. 로컬 미배선 = [].
 		async reportFacts() {
 			return [];
 		},
-		// 산업 profit-pool = 공개 정적 자산(map/industries/{id}.json) 공유 — 로컬 단일사여도 산업 격자는 실데이터.
+		// 산업 profit-pool = 공개 정적 자산(map/industries/{id}.json) 공유.
 		industryProfitPool: loadIndustryProfitPool
 	};
 }

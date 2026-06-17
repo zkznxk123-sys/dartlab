@@ -416,7 +416,7 @@
 <div class="symHead">
 	<div class="symId">
 		<div class="symTop">
-			<button class={'symWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch (this device)' : '공시 워치에 추가 (이 기기 저장)')}>{watchlist.has(co.code) ? '★' : '☆'}</button>
+			<button class={'symWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch' : '공시 워치에 추가')}>{watchlist.has(co.code) ? '★' : '☆'}</button>
 			<span class="symCode">{co.code}</span>
 			<span class="symBadge kr">{co.marketLabel}</span>
 			<span class="symName">{co.name.kr}</span>

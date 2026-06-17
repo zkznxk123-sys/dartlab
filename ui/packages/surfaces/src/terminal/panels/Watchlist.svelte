@@ -83,7 +83,6 @@
 </script>
 
 <Panel {lang} className="eWatch" prov="real" title={{ kr: '공시 워치', en: 'DISCLOSURE WATCH' }} sub={{ kr: watchlist.count + '종목 · 수시공시 신선도', en: 'n=' + watchlist.count + ' · filing freshness' }} flush>
-	{#snippet right()}<span class="dim">{lang === 'en' ? 'this device' : '이 기기 저장'}</span>{/snippet}
 	{#if !watchlist.count}
 		<div class="watchEmpty">{lang === 'en' ? 'Add companies with the header ☆ to monitor their filings here.' : '헤더의 ☆ 로 회사를 담으면 공시 신선도를 한눈에 모읍니다.'}</div>
 	{:else}
