@@ -145,3 +145,18 @@ def test_prebuild_incremental_allows_zero_panel():
     # base seed 실패로 전부 0 이면 증분이어도 실패
     with pytest.raises(SystemExit):
         mod._validateInputCoverage({"finance": 0, "report": 0, "panel": 0}, incremental=True)
+
+
+def test_data_prebuild_workflow_keeps_long_runs_observable():
+    """prebuild 장기 실행은 버퍼링/무로그 실패 없이 heartbeat 와 HF retry cap 을 갖는다."""
+    text = (ROOT / ".github/workflows/dataPrebuild.yml").read_text(encoding="utf-8")
+
+    assert "timeout-minutes: 120" in text
+    assert "uv run python -u -X utf8 .github/scripts/prebuild/prebuildData.py" in text
+    assert text.count('PYTHONUNBUFFERED: "1"') == 2
+    assert text.count("DARTLAB_HF_RETRY_ATTEMPTS: '3'") == 2
+    assert text.count("DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'") == 2
+    assert text.count("set +e") == 2
+    assert text.count("set -e") == 2
+    assert "heartbeat incremental elapsed=${elapsed}s" in text
+    assert "heartbeat full elapsed=${elapsed}s" in text
