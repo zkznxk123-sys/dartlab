@@ -451,22 +451,18 @@
 <!-- 이익 풀 — 이 회사 산업의 공정별 영업이익률·매출 (이익은 어느 단계가 버나) -->
 {#if poolRows}
 	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '이익 풀', en: 'PROFIT POOL' }} sub={{ kr: tx(co.sector, lang) + ' · 공정별 이익률·매출', en: tx(co.sector, lang) + ' · margin·rev by stage' }} flush>
-		<div class="poolTbl">
-			<div class="poolHd">
-				<span>{lang === 'en' ? 'stage' : '공정'}</span>
-				<span class="r">{lang === 'en' ? 'OP margin' : '영업이익률'}</span>
-				<span class="r">{lang === 'en' ? 'revenue' : '매출'}</span>
-			</div>
+		<div class="poolWrap">
 			{#each poolRows.rows as s (s.key)}
-				<div class="poolRow" class:poolMax={s.isMarginMax}>
-					<span class="poolStage">
-						{s.name}{#if s.isRevMax}<i class="poolTag" title={lang === 'en' ? 'largest revenue' : '매출 최대 단계'}>{lang === 'en' ? 'rev↑' : '매출↑'}</i>{/if}
-					</span>
-					<span class="poolOpmCell r">
-						<span class="poolOpmBar" class:neg={(s.opMarginPct ?? 0) < 0} style={`width:${s.barPct}%`}></span>
-						<b class={(s.opMarginPct ?? 0) < 0 ? 'tDn' : 'tUp'}>{s.opMarginPct}%</b>
-					</span>
-					<span class="poolRev r mono">{fmtPoolRev(s.revenue)}</span>
+				<div
+					class="poolCol"
+					class:poolMax={s.isMarginMax}
+					title={`${s.name} · ${lang === 'en' ? 'OP margin' : '영업이익률'} ${s.opMarginPct}% · ${lang === 'en' ? 'rev' : '매출'} ${fmtPoolRev(s.revenue)} · ${s.companyCount}${lang === 'en' ? '' : '사'} · ${lang === 'en' ? 'cov' : '커버리지'} ${Math.round(s.coverageRatio * 100)}%`}
+				>
+					<span class="poolColName">{s.name}</span>
+					<b class={'poolColOpm ' + ((s.opMarginPct ?? 0) < 0 ? 'tDn' : 'tUp')}>{s.opMarginPct}%</b>
+					<span class="poolColRev mono"
+						>{fmtPoolRev(s.revenue)}{#if s.isRevMax}<i class="poolTag">{lang === 'en' ? 'rev↑' : '매출↑'}</i>{/if}</span
+					>
 				</div>
 			{/each}
 		</div>
