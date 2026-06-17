@@ -1,4 +1,5 @@
 import { readJsonCache, writeJsonCache } from './cache/cacheStore';
+import { RequestDedup } from './cache/requestDedup';
 
 // HF resolve base URL 은 origin.ts SSOT 에서 (내부 사용 + consumers 호환 위해 re-export).
 import { HF_RESOLVE } from './origins/hf';
@@ -68,11 +69,33 @@ async function fetchJson<T>(url: string, fetchFn: FetchLike): Promise<T | null> 
 	}
 }
 
+// in-flight dedup — 동시 동일 자원(여러 패널·워밍업)이 cacheStore 읽기·fetch 사다리를 1회만 공유.
+// 옛 loadJson 은 dedup 이 없어 첫 페인트에 같은 JSON 을 중복 fetch 했다(소비자 per-file Map 이 그 구멍을
+// 메우던 이유). 데이터 워크벤치 코어의 RequestDedup 을 JSON arm 에도 재사용(dual-SSOT — 코어로 접지 않고
+// 같은 패키지 sibling arm 으로, base 전역·다중URL 폴백은 loadJson 에 남김. mainPlan/_done/data-workbench-ssot).
+const jsonDedup = new RequestDedup();
+
 export async function loadJson<T>(
 	path: string,
 	{ fetchFn, ttlMs = DEFAULT_TTL_MS, required = false, preferLocal = false }: LoadJsonOptions
 ): Promise<T | null> {
 	const normalized = normalizePath(path);
+	// 키에 preferLocal 포함 — 미스 시 local↔HF 우선순위가 달라 승자 자원이 갈릴 수 있다. required 는
+	// 자원 동일성과 무관(전부 실패 시 throw 여부만)이라 공유 계산 밖에서 호출자별 적용.
+	const result = (await jsonDedup.run(`${normalized}:${preferLocal ? 'L' : 'H'}`, () =>
+		resolveJson<T>(normalized, fetchFn, ttlMs, preferLocal)
+	)) as T | null;
+	if (result == null && required) throw new Error(`${normalized} 로드 실패`);
+	return result;
+}
+
+// cacheStore(영속·6h·stale 폴백) + local↔HF 폴백 사다리 — dedup 안에서 실행(동시 호출 공유). 순서 불변.
+async function resolveJson<T>(
+	normalized: string,
+	fetchFn: FetchLike,
+	ttlMs: number,
+	preferLocal: boolean
+): Promise<T | null> {
 	const cacheable = shouldCacheJson(normalized);
 	const cached = cacheable ? await readJsonCache<T>(normalized, ttlMs) : null;
 	if (cached != null) return cached;
@@ -109,11 +132,8 @@ export async function loadJson<T>(
 		}
 	}
 
-	const stale = cacheable ? await readJsonCache<T>(normalized, ttlMs, { allowStale: true }) : null;
-	if (stale != null) return stale;
-
-	if (required) throw new Error(`${normalized} 로드 실패`);
-	return null;
+	// 전부 실패 → 만료본이라도(stale 폴백). 없으면 null(호출자 required 가 throw 판정).
+	return cacheable ? await readJsonCache<T>(normalized, ttlMs, { allowStale: true }) : null;
 }
 
 export async function loadHfJson<T>(

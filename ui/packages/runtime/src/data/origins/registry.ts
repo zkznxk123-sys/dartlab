@@ -1,7 +1,10 @@
 // 오리진 레지스트리 — 데이터 워크벤치 SSOT 의 "어디서 가져오나" 단일 표. (mainPlan/data-workbench-ssot 02·03)
 // P1: HF 계열(hf·hfRange) 만 등록 — 기존 origin.ts(HF URL SSOT)를 흡수.
 // P2: news·naver 워커 등록 — newsSource/naverPriceSource 가 각자 복제하던 env 게이트 + dev 프록시 URL
-//   조립을 여기로 흡수. 미배선(localApi·duckdbHf·landingJson)은 후속 wave. 미등록 호출은 명시 throw(배선순서 가드).
+//   조립을 여기로 흡수. 미배선(localApi·duckdbHf)은 후속 wave. 미등록 호출은 명시 throw(배선순서 가드).
+//   landingJson(landing JSON arm)은 origin 에서 제외 — loadJson(dartlabData)이 영속 cacheStore + 다중URL
+//   폴백(local↔HF) + base 전역에 의존하는 별도 arm 이라, 코어 단일-URL origin 추상·전역금지를 어기지 않게
+//   sibling 으로 둔다(dual-SSOT, 설계 패널 적대검증 결론. mainPlan/_done/data-workbench-ssot/07).
 import { hfUrl, hfRangeUrl } from './hf';
 
 // vite env 안전 접근 — runtime 패키지 tsc 는 vite/client 타입 없이 검사된다(origin.ts 동일 패턴, 소비 앱이 번들 시 치환).
@@ -14,11 +17,13 @@ const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? 
 const NAVER_PROXY = ((viteEnv?.VITE_DARTLAB_NAVER_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const naverDev = Boolean(viteEnv?.DEV);
 
-export type OriginId = 'hf' | 'hfRange' | 'localApi' | 'newsWorker' | 'naverWorker' | 'duckdbHf' | 'landingJson';
+export type OriginId = 'hf' | 'hfRange' | 'localApi' | 'newsWorker' | 'naverWorker' | 'duckdbHf';
 
-/** 캐시 정책 — 오리진별 차등(정직 TTL, 04 §정직 TTL). scope='none' = 무캐시. */
+/** 캐시 정책 — 오리진별 차등(정직 TTL, 04 §정직 TTL). scope='none' = 무캐시.
+ *  ('persist' 는 선언만 하고 미구현이던 죽은 scope라 제거 — 영속 캐시는 JSON arm(dartlabData.loadJson)이
+ *   cacheStore 로 직접·더 풍부하게[2-tier stale] 담당. 코어에 접지 않는 dual-SSOT 결정, mainPlan/_done.) */
 export interface CachePolicy {
-	scope: 'memory' | 'persist' | 'none';
+	scope: 'memory' | 'none';
 	ttlMs: number;
 	maxEntries?: number;
 }
