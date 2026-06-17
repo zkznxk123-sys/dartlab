@@ -38,7 +38,21 @@
 - [x] **macro·gov(price·index)·productIndex·index·fred 이관** (01d3a91bd) — 코어에 `requestParquetWholeFile` 추가. 캐시 Map 다수 폐기. baseline **9→7**. legacy 무인자(ui/web·localCompanyPort)=module-local fallback(가드 allowlist 5건: finance·macro·gov·idx·product).
 - 잔여 baseline **7** = 전부 *다른 오리진*이라 P2 선행 필요: 로컬 SSE(aiSource)·export(/api ×3)·naver 워커·news 워커·gov dev `/__gov`.
 
-## NEXT (재개 시 — P2 오리진 + 로컬 게이트로 잔여 7 ratchet)
+## ✅ 작업대 완성 (2026-06-17)
+
+- [x] **P2 워커 오리진 + news·naver 이관** (7b0c2aa16) — newsWorker·naverWorker 레지스트리 등록(env 게이트 흡수)+originConfigured. baseline 7→5.
+- [x] **로컬 provider 게이트** (c063cde58) — `adapters/local/api/{localApi,stream}` 단일 :8400 진입점(getJson·postJson·fetchRaw·SSE). aiSource·export·filing·price 게이트 이관, 로컬 sources raw fetch **0**. baseline 5→1. (운영자 명시 deliverable 완료.)
+
+**작업대 = 완성·테스트·강제·문서·규칙·전소스 채택.** 코어(request·requestParquetRows·requestParquetWholeFile, vitest 5/5) + 오리진 레지스트리(hf·hfRange·newsWorker·naverWorker) + 11소스 이관 + 로컬 게이트 + 가드(baseline 1) + operation.ui + 강행규칙(로컬). 캐시 구현 ~20+ → 코어 단일 SSOT 수렴. RuntimeCache·RequestDedup 죽은코드 → 실배선.
+
+## 잔여 (선택 polish — 작업대 본체 무관)
+
+- **relations·industryPool**: loadJson(dartlabData/cacheStore) 기반 — raw fetch 아니라 가드 미플래그(위반 0). 코어 이관하려면 `landingJson` 오리진 등록 + 코어 `request` 의 `persist` scope(cacheStore 연동) 구현 선행. 저우선(이미 cacheStore 영속+local-fallback 보유).
+- **gov dev `/__gov`** (baseline 1): Vite dev 미들웨어 live-fill, dev 전용·prod 무관. acceptable debt.
+- **P4 폴더 구조화**(03): `cache/`→`data/cache/`·`hfRange`→`data/parquet/`·`origin.ts`→`data/origins/hf.ts`(re-export 다리). 순수 재배치(import churn) — 동시 세션 잠잠할 때. 저우선.
+- **module-local-core fallback 7건**(finance·macro·gov·idx·product·news·naver): legacy 무인자 호출(ui/web localTerminalData·localCompanyPort) 대응. 가드 allowlist. 정답=ui/web/localCompanyPort 에 core 주입(ui-platform-refactor 편승).
+
+## 이전 NEXT (해소됨)
 - **P2 오리진 레지스트리 확장**: `newsWorker`·`naverWorker`(env-gate·dev `/__news`·`/__naver` 분기 → 레지스트리로) → newsSource·naverPriceSource 를 `core.request`(JSON) 로 이관. `landingJson` 오리진 → relationsSource·industryPoolSource(loadJson) 이관.
 - **로컬 provider 게이트** `adapters/local/api/`: aiSource(SSE)·exportSource(/api ×3)·gov dev `/__gov` 를 단일 게이트로. localApi 오리진(어댑터 apiBase 주입형 — 정적 레지스트리와 다른 처리 필요). SSE 는 캐시 부적합 → 게이트가 stream 경로 분리.
 - 각 이관 후 가드 `--write-baseline` 로 ratchet, 0 수렴 목표.
