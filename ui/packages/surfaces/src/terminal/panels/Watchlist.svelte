@@ -44,15 +44,20 @@
 		return { new7, new30, latest };
 	}
 	let fresh = $state<Record<string, Fresh>>({});
-	const requested = new Set<string>(); // 비반응 — 중복 fetch 가드 (effect 재발화 유발 안 함)
+	// 신선도 = HF allFilings 배치 read 1 회(공개·로컬 공통배선, 백엔드 0). 워치 집합 변동 시 재호출(소스 캐시).
 	$effect(() => {
-		for (const code of watchlist.codes) {
-			if (requested.has(code)) continue;
-			requested.add(code);
-			rt.filing.nonRegular(code).then((rows) => {
-				fresh = { ...fresh, [code]: computeFresh(rows) };
-			});
-		}
+		const codes = watchlist.codes;
+		if (!codes.length) return;
+		let cancelled = false;
+		rt.filing.recentForCodes(codes).then((map) => {
+			if (cancelled) return;
+			const next = { ...fresh };
+			for (const c of codes) next[c] = computeFresh(map[c] ?? []);
+			fresh = next;
+		});
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	const nodeById = $derived(new Map((eng.raw.eco?.nodes || []).map((n) => [n.id, n])));

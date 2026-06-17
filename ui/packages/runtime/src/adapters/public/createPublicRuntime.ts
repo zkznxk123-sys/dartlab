@@ -24,9 +24,10 @@ import { createPublicIndexPort } from './sources/indexSource';
 import { loadTerminalFinance } from './sources/financeSource';
 import { createHfMacroPort } from './sources/macroSource';
 import { loadCompanyRelations } from './sources/relationsSource';
+import { loadIndustryProfitPool } from './sources/industryPoolSource';
 import { loadHfProductIndexMap } from './sources/productIndexSource';
 import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
-import { loadCompanyNonRegularFilings } from './sources/nonRegularFilingsSource';
+import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from './sources/nonRegularFilingsSource';
 import { loadCompanyNews } from './sources/newsSource';
 import {
 	loadAuditFees,
@@ -110,7 +111,8 @@ function publicCompanyPort(shared: PublicRuntimeSharedPorts): CompanyPort {
 		},
 		productIndex: loadProductIndexRecord,
 		relations: loadCompanyRelations,
-		reportFacts: shared.reportFacts
+		reportFacts: shared.reportFacts,
+		industryProfitPool: loadIndustryProfitPool
 	};
 }
 
@@ -118,6 +120,7 @@ function publicFilingPort(): FilingPort {
 	return {
 		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(code), // 전 이력 — limit 캡 제거(전역 1파일 stock_code 필터)
+		recentForCodes: (codes) => loadRecentFilingsForCodes(codes), // 워치 신선도 — HF allFilings 배치 read(백엔드 0)
 		// panel 격자 3종은 공개 뷰어 코드(landing)가 단계-6(뷰어 추출)에서 어댑터로 들어온다.
 		panelToc: () => notWiredYet('filing.panelToc', '단계-6(viewer 추출)'),
 		panelInit: () => notWiredYet('filing.panelInit', '단계-6(viewer 추출)'),
@@ -134,7 +137,9 @@ export function publicNewsPort(): NewsPort {
 	return { forCompany: loadCompanyNews };
 }
 
-function publicReportPort(): ReportPort {
+// 로컬 어댑터도 그대로 재사용 — 정기보고서 파생은 HF parquet 직독(백엔드 0). 터미널 공통배선 원칙:
+// 로컬 전용 특별기능이 아니면 공개 HF 포트를 공유한다(price·finance·macro·index 와 동일).
+export function publicReportPort(): ReportPort {
 	return {
 		workforce: loadWorkforce,
 		investments: loadInvestments,

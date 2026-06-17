@@ -18,6 +18,8 @@ import type {
 	PriceEventsPayload
 } from '../localTypes';
 import { loadPriceEvents } from './priceSource';
+// 워치 신선도는 공개 HF allFilings 소스를 공통배선 재사용(price·finance 처럼) — 로컬 :8400 없이도 동작.
+import { loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
 
 // 로컬 panel toc 는 leafType/disclosureKey 메타 미탑재 — 미제공 = null 정직 표기 (위조 금지).
 function tocToContract(toc: ClientPanelToc): PanelTocResponse {
@@ -136,6 +138,7 @@ export function localFilingPort(apiBase: string, caches: LocalCaches): FilingPor
 		async nonRegular(code) {
 			return nonRegularFromEvents(await loadPriceEvents(apiBase, caches, code));
 		},
+		recentForCodes: (codes) => loadRecentFilingsForCodes(codes), // 공통배선 — HF 직독(백엔드 0)
 		async panelToc(code) {
 			const toc = await getJson<ClientPanelToc>(
 				apiBase,

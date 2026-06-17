@@ -79,6 +79,8 @@ export interface FilingPort {
 	regular(code: string, limit?: number): Promise<RegularFiling[]>;
 	/** 비정기공시 목록 — 해당 없음은 []. */
 	nonRegular(code: string, limit?: number): Promise<NonRegularFiling[]>;
+	/** 워치 신선도용 — 여러 종목의 수시공시(allFilings)를 한 번에 읽어 code→목록. 공개/로컬 공통배선(HF 직독, 백엔드 0). 미존재는 {}. */
+	recentForCodes(codes: string[]): Promise<Record<string, NonRegularFiling[]>>;
 	panelToc(code: string): Promise<PanelTocResponse | null>;
 	panelInit(code: string): Promise<PanelInitResponse | null>;
 	panelGrid(code: string, sectionKey: string): Promise<PanelGridResponse | null>;

@@ -12,7 +12,7 @@ import type {
 import { createHfMacroPort } from '../public/sources/macroSource';
 import { createPublicIndexPort } from '../public/sources/indexSource';
 import { loadTerminalFinance } from '../public/sources/financeSource';
-import { publicPricePort, publicNewsPort } from '../public/createPublicRuntime';
+import { publicPricePort, publicNewsPort, publicReportPort } from '../public/createPublicRuntime';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { exportServiceRegistration } from '../../services/exportCommand';
 import { localExportPort } from './sources/exportSource';
@@ -22,7 +22,6 @@ import { localAiPort } from './sources/aiSource';
 import { localStoragePort } from './sources/storageSource';
 import { localCompanyPort } from './sources/companySource';
 import { localFilingPort } from './sources/filingSource';
-import { localReportPort } from './sources/reportSource';
 import { localScanPort } from './sources/scanSource';
 import { localViewerPort } from './sources/viewerSource';
 
@@ -64,7 +63,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		finance: localFinancePort(),
 		viewer: localViewerPort(),
 		macro: createHfMacroPort(),
-		report: localReportPort(),
+		report: publicReportPort(), // 공통배선 — HF parquet 직독(백엔드 0). 옛 localReportPort 는 null 스텁이라 폐기.
 		scan: localScanPort(),
 		export: exportPort,
 		get map() {

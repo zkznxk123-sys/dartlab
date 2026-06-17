@@ -59,6 +59,9 @@ function fakeCompany(): CompanyPort {
 		},
 		async reportFacts() {
 			return [];
+		},
+		async industryProfitPool() {
+			return null;
 		}
 	};
 }
@@ -129,6 +132,9 @@ function fakeFiling(): FilingPort {
 		},
 		async nonRegular() {
 			return [];
+		},
+		async recentForCodes() {
+			return {};
 		},
 		async panelToc(code) {
 			if (code !== FIXTURE_CODE) return null;

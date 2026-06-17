@@ -18,7 +18,6 @@
 	import SupportDialog from './panels/SupportDialog.svelte';
 	import { Heart } from 'lucide-svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
-	import { watchlist } from './lib/watchlist.svelte'; // 공시 워치 — 헤더 ☆ 로 현재 종목 추가/제거 (좌측 패널과 공유)
 	import { warmCompany } from './lib/warmup';
 	import { fetchGithubStars, fmtStars } from './lib/githubStars';
 
@@ -230,9 +229,6 @@
 				<span class="clock mono">{clock}</span>
 				<span class="connDot"><span class="dot"></span>HF</span>
 				<div class="hdrLinks">
-					{#if co}
-						<button class={'hdrLink hdrWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch (this device)' : '공시 워치에 추가 (이 기기 저장)')}>{watchlist.has(co.code) ? '★' : '☆'} {lang === 'en' ? 'Watch' : '워치'}</button>
-					{/if}
 					{#if allowTerminalAsk}
 						<button class="hdrLink hdrAsk" onclick={() => co && runtime.navigation.toAsk({ code: co.code })} title="AI에게 직접 질문 — 로컬 LLM 질의(/ask)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
 							<picture><source srcset="{base}/avatar-detective.webp" type="image/webp" /><img src="{base}/avatar-detective.png" alt="" width="14" height="14" style="border-radius:50%" /></picture>AI
