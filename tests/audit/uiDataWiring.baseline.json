@@ -1,0 +1,58 @@
+{
+	"_comment": "데이터 워크벤치 SSOT 가드(checkUiDataWiring.mjs) 부채원장. 착수 시점 잔존 위반. 신규 위반만 fail. 이관 완료 source 는 여기서 사라지며 0 으로 수렴(증가 0 강제). 갱신: node tests/audit/checkUiDataWiring.mjs --write-baseline.",
+	"generatedAt": "2026-06-17",
+	"ruleLegend": {
+		"1": "raw fetch() in source",
+		"2": "direct origin URL literal in source",
+		"3": "module-level new Map cache in source",
+		"4": "createDataCore() in source (financeSource.loadFinanceRows allowlisted)",
+		"5": "global: createDataCore/RuntimeCache/RequestDedup must instantiate >=1"
+	},
+	"violations": [
+		{
+			"file": "ui/packages/runtime/src/adapters/local/sources/aiSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/local/sources/exportSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/local/sources/exportSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/local/sources/exportSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/public/sources/govIndexSource.ts",
+			"rule": 3,
+			"detail": "module-level new Map cache: nameScanCache — 코어 캐시 사용"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/public/sources/govPriceSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/public/sources/macroSource.ts",
+			"rule": 3,
+			"detail": "module-level new Map cache: srcCache — 코어 캐시 사용"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/public/sources/naverPriceSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		},
+		{
+			"file": "ui/packages/runtime/src/adapters/public/sources/newsSource.ts",
+			"rule": 1,
+			"detail": "raw fetch() — data/fetch.request 경유"
+		}
+	]
+}

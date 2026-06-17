@@ -17,6 +17,7 @@
 	},
 	"scripts": {
 		"check": "tsc -p tsconfig.json",
+		"check:data-wiring": "node ../../../tests/audit/checkUiDataWiring.mjs",
 		"test": "vitest run"
 	},
 	"dependencies": {
