@@ -1,8 +1,8 @@
 // 종목 뉴스 헤드라인 로더 — 네이버 검색 API archive(private, 언론사 저작권)를 CF 워커가 read 토큰으로
 // 서버사이드 read 해 반환(라이브 표시 = 의도된 용도, 공개 벌크 재배포 아님). 브라우저는 private 직독 불가라
-// 워커 경유가 유일 경로. naverPriceSource 와 동일한 빌드-env 게이트 패턴(가역, 비우면 미동작=빈배열).
-//   dev = /__news 미들웨어(로컬 byCompany json 직독, 토큰 불필요).
-//   프로덕션 = CF 워커 /news 라우트(VITE_DARTLAB_NEWS_PROXY). 미설정 시 [] (정직한 미배선).
+// 워커 경유가 유일 경로 — 공개·로컬 동일(price·macro 와 같은 "공통 배선": 워커/HF 단일 소스).
+//   모든 환경 = CF 워커 /news 라우트(VITE_DARTLAB_NEWS_PROXY). 미설정 시 [] (정직한 미배선).
+// (옛 dev /__news 미들웨어 분기는 구현된 적 없어 로컬을 빈 상태로 만들었다 — 제거하고 워커로 통일.)
 import type { NewsItem } from '@dartlab/ui-contracts';
 
 const browser = typeof window !== 'undefined';
@@ -14,12 +14,10 @@ const cache = new Map<string, NewsItem[]>();
 // naverPriceSource NAVER_PROXY 와 동일 게이트(가역, 비우면 즉시 미동작).
 const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 
-/** dev = Vite /__news 미들웨어, 프로덕션 = CF 프록시 /news 라우트. 둘 다 없으면 null(미동작). */
+/** CF 워커 /news 라우트(공개·로컬 공통). NEWS_PROXY 미설정 시 null(미동작=빈 섹션). */
 function newsEndpoint(code: string): string | null {
-	const q = `code=${encodeURIComponent(code)}`;
-	if (viteEnv?.DEV) return `/__news?${q}`;
-	if (NEWS_PROXY) return `${NEWS_PROXY}?${q}`;
-	return null;
+	if (!NEWS_PROXY) return null;
+	return `${NEWS_PROXY}?code=${encodeURIComponent(code)}`;
 }
 
 interface NewsFile {
