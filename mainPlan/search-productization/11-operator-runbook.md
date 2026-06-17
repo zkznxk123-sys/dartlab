@@ -1,6 +1,6 @@
 # 11. 운영 런북 — Search Productization
 
-상태: v1.21 (2026-06-16)
+상태: v1.22 (2026-06-17)
 범위: 제품 검색을 본진에 넣은 뒤 운영자가 확인해야 하는 일일·주간·월간 절차와 장애 대응.
 
 워크플로별 실제 연결표는 [12-pipeline-maintenance-map.md](12-pipeline-maintenance-map.md) 를 따른다.
@@ -59,7 +59,7 @@
 1. source owner workflow 가 `dart/searchCatalog/{source}/{source}.source_manifest.json` 과 `{source}.catalog_snapshot.parquet` 를 실제로 올렸는지 확인한다. 현재 `buildSearchCatalog.py --upload` 는 두 artifact 를 단일 `create_commit` batch 로 올리고, Actions artifact `search-catalog-{source}-{job}-{run}` 으로 같은 산출물을 남긴다. source manifest 의 `producerRun.workflow/job/runId/sha/artifactName` 이 비어 있으면 S2 운영 증거로 보지 않는다.
 2. expected source set (`allFilings`, `dartPanel`, `edgarPanel`, `newsPublic`) 이 모두 있는지 확인한다. `prepareSearchDeltaInputs.py` 는 expected source set 이 빠지면 catalog mode env 를 만들지 않는다.
 3. expected source 의 `totalRows` 와 current catalog rows 가 0 이 아닌지 확인한다. 빈 full snapshot 은 catalog mode invalid 다.
-4. source catalog 가 full snapshot 인지 확인한다. `buildSearchCatalog.py` 는 `snapshotScope` 와 `completenessCheck` 를 쓰고, 기본 `--min-files 1 --min-rows 1 --min-catalog-rows 1` 로 빈 full snapshot 을 실패시킨다. source owner workflows 는 기본적으로 `--compare-remote-manifest --require-previous-manifest` 로 직전 HF full manifest 대비 files/rows/catalogRows 급락을 차단한다. 첫 full 기준점은 `Search Index Main` 의 raw full HF pull bootstrap 또는 운영자가 명시한 source-owner `search_catalog_bootstrap=true` dispatch 로만 만든다. source-owner bootstrap 은 previous manifest 요구만 해제하고 allFilings 150k, DART panel 90k, EDGAR panel 50k, news 100 catalog row 하한을 통과해야 한다. `prepareSearchDeltaInputs.py` 는 `full` 만 catalog mode 로 넘긴다.
+4. source catalog 가 full snapshot 인지 확인한다. `buildSearchCatalog.py` 는 `snapshotScope` 와 `completenessCheck` 를 쓰고, 기본 `--min-files 1 --min-rows 1 --min-catalog-rows 1` 로 빈 full snapshot 을 실패시킨다. source owner workflows 는 기본적으로 `--compare-remote-manifest --require-previous-manifest --merge-previous-catalog` 로 직전 HF full manifest/catalog 를 읽고 files/rows/catalogRows 급락을 차단하면서 현재 run 의 변경 parquet 만 병합한다. 첫 full 기준점은 `Search Index Main` 의 raw full HF pull bootstrap 또는 운영자가 명시한 source-owner `search_catalog_bootstrap=true` dispatch 로만 만든다. source-owner bootstrap 은 previous manifest 요구만 해제하고 allFilings 150k, DART panel 90k, EDGAR panel 50k, news 100 catalog row 하한을 통과해야 한다. `prepareSearchDeltaInputs.py` 는 `full` 만 catalog mode 로 넘긴다.
 5. `Search Index Delta` 가 `pullSearchCurrentIndex.py` 단계에서 HF current manifest pointer 를 따라 기존 full `main.*` required files 와 `previous_manifest.json` 을 복원했는지 확인한다. 이 단계가 실패하면 delta publish 를 계속하지 않는다.
 6. `Search Index Delta` 가 `Prepare catalog delta inputs` 단계에서 `DARTLAB_SEARCH_DELTA_MODE=catalog` 을 세팅했는지 확인한다. source catalog 가 없어서 legacy fallback 된 run 은 성공이어도 all-source 운영 완료 증거가 아니다.
 7. 현재 contentIndex upload 는 local manifest/hash/canary selfcheck 후 staging upload/current manifest pointer helper 를 사용한다. 운영자는 staging path, current path, `manifest.json`, `fileSources`, `requiredFiles`, `fileHashes`, `catalog_snapshot.parquet`, `source_manifest_set.json` 이 함께 올라갔는지 확인한다. graph catalog 를 배포하는 run 은 `entityGraphCatalog.parquet` 가 `requiredFiles`, `fileHashes`, `fileSources`, manifest `entityGraphCatalog` summary 에 함께 있어야 한다. delta publish 에서는 previous manifest 의 main `fileSources` 가 사라지면 안 된다.
@@ -74,9 +74,10 @@
 15. `searchQualityDrill.{delta,main}.json` 이 `valid=true` 인지 확인한다. 이 drill 은 query-log gold 도구 체인 smoke 이며 `releaseEvidence=false` 이므로 real query-log gold 를 대체하지 않는다.
 16. `searchPipelineDrill.{delta,main}.json` 이 `valid=true` 이고 `sourceManifestSet.id` 와 4개 source 가 기록됐는지 확인한다. 이 drill 은 raw source -> source catalog -> source manifest set -> contentIndex publish/activate/rollback 경로가 깨지지 않았다는 로컬 하한 증거이며, 실제 HF Actions round-trip 증거를 대체하지 않는다.
 
-2026-06-16 현재 실제 HF bootstrap 기준:
+2026-06-17 현재 실제 HF bootstrap/증분 병합 점검 기준:
 
 - `dart/searchCatalog/{allFilings,dartPanel,edgarPanel,newsPublic}/` 는 source manifest/catalog snapshot 을 갖고 remote evidence audit 에서 `valid=true` 다.
+- source-owner 증분 병합 dry-run 은 실제 HF previous manifest/catalog 를 내려받아 allFilings 192,096 / DART panel 104,762 / EDGAR panel 84,294 / news 81,799 rows full snapshot 으로 valid 통과했다. 업로드 없이 부분 parquet 1행씩만 넣은 검증이므로, runner partial tree 문제의 제품 해법은 이전 HF full catalog merge 이다.
 - full current manifest 는 462,947 docs, lite current manifest 는 280,747 docs 다. full/lite 모두 staged candidate round-trip 과 promote 를 통과했다.
 - direct-review proof bundle 은 `opsReady=true`, `releaseReady=true`, blockers=[] 다. 품질팩은 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 coverage, `overallReadyRate=1.0`, `noAnswerFalseAcceptRate=0.0` 을 기록했다.
 - cutover evidence 는 `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 과 `searchCutover.json` 이며, `state=S4_DEFAULT_REPLACEMENT`, `defaultReplacement=true` 다. 새 Search Main/Delta Actions run 에서 같은 artifact 가 생성되는지는 다음 운영 확인 대상이다.

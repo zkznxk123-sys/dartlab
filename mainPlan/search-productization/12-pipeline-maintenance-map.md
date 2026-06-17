@@ -1,6 +1,6 @@
 # 12. 파이프라인·유지보수 맵 - 실제 운영 연결표
 
-상태: v1.23 (2026-06-16)
+상태: v1.24 (2026-06-17)
 범위: search productization 이 실제 GitHub workflow, HF artifact, local updater, 품질 gate 로 어떻게 이어지는지 정의한다.
 
 ---
@@ -149,6 +149,8 @@ source catalog 는 "이번에 바뀐 row" 모음이 아니라 source별 canonica
 
 현재 `buildSearchCatalog.py`/`sourceCatalog.py` 는 입력 glob 에 잡힌 parquet 파일의 합계를 manifest 로 쓴다. full snapshot 기본값에서는 빈 파일/빈 row/빈 normalized catalog 를 실패시키고 `completenessCheck` 를 manifest 에 남긴다. `--upload` 는 source manifest 와 catalog snapshot 을 단일 `create_commit` batch 로 올린다. GitHub Actions 안에서 실행되면 source manifest 는 `producerRun.workflow/job/runId/sha/artifactName` 도 보존한다. source-owner incremental workflow 는 기본적으로 `--compare-remote-manifest --require-previous-manifest` 로 HF 직전 full manifest 를 읽고 files/rows/catalogRows 급락을 차단한다. 첫 canonical full source catalog 는 `searchIndexMain.yml` 의 raw full HF pull bootstrap 또는 명시적 source-owner `search_catalog_bootstrap=true` dispatch 가 만든다. bootstrap dispatch 는 previous manifest 요구만 해제하고 source별 높은 min-files/min-rows/min-catalog-rows 하한을 유지한다.
 
+2026-06-17 부터 source-owner incremental workflow 는 `--merge-previous-catalog` 를 함께 사용한다. runner 가 이번 run 에서 바뀐 parquet 일부만 갖고 있어도 HF 직전 `{source}.source_manifest.json` 과 `{source}.catalog_snapshot.parquet` 를 내려받아 변경분을 병합한 뒤 full snapshot 으로 검증한다. 병합 규칙은 source별 소유 경계에 맞춘다: `dartPanel` 은 변경 파일 stem stockCode 파티션 교체, `edgarPanel` 은 ticker 파티션 교체, `newsPublic` 은 변경 date 파티션 교체, `allFilings` 는 docKey upsert 이다. 따라서 부분 runner tree 가 거짓 full 로 승격되는 길은 여전히 막고, 정상 증분은 이전 full catalog 를 보존한 채 흡수한다.
+
 운영 기준:
 
 1. source owner workflow 는 catalog build 전에 source별 pull completeness 를 검증한다.
@@ -157,7 +159,8 @@ source catalog 는 "이번에 바뀐 row" 모음이 아니라 source별 canonica
 4. `pipeline.py` 는 expected source 누락, partial snapshot, expected source 0 row, source row count 급감을 invalid 로 처리한다.
 5. `buildSearchCatalog.py` 는 기본 `--min-files 1 --min-rows 1 --min-catalog-rows 1` 로 source owner 단계에서 빈 full snapshot 을 실패시킨다.
 6. source-owner workflow 는 이전 full manifest 없이는 canonical `snapshotScope=full` publish 를 하지 않는다.
-7. 아직 필요한 운영 증거는 실제 GitHub Actions run 에서 이 차단이 의도대로 동작하는지 확인하는 것이다.
+7. source-owner incremental run 은 이전 HF full manifest/catalog 를 내려받아 병합하지 못하면 실패해야 한다.
+8. 아직 필요한 운영 증거는 실제 GitHub Actions run 에서 이 차단과 병합이 의도대로 동작하는지 확인하는 것이다.
 
 ---
 

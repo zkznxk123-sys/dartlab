@@ -66,6 +66,9 @@ def test_build_search_catalog_script_has_upload_contract() -> None:
     text = Path(".github/scripts/search/buildSearchCatalog.py").read_text(encoding="utf-8")
     assert "--upload" in text
     assert "dart/searchCatalog" in text
+    assert "--merge-previous-catalog" in text
+    assert "--previous-catalog" in text
+    assert "writeMergedSourceCatalogArtifacts" in text
     assert "create_commit" in text
     assert "CommitOperationAdd" in text
     assert "api.upload_file" in text
@@ -264,3 +267,99 @@ def test_build_search_catalog_script_blocks_previous_manifest_drop(tmp_path) -> 
     assert proc.returncode != 0
     assert "previousFileDrop:1/100:maxDrop=0.05" in proc.stderr
     assert "previousRowDrop:1/100:maxDrop=0.05" in proc.stderr
+
+
+def test_build_search_catalog_script_merges_previous_catalog(tmp_path) -> None:
+    from dartlab.providers.dart.search.catalog import normalizeCatalogRows
+
+    current = tmp_path / "2026-06-16.parquet"
+    previousManifest = tmp_path / "newsPublic.source_manifest.json"
+    previousCatalog = tmp_path / "newsPublic.catalog_snapshot.parquet"
+    pl.DataFrame(
+        [
+            {
+                "url": "https://n.example/new",
+                "date": "20260616",
+                "title": "새 뉴스",
+                "content": "새로운 유상증자 뉴스",
+            }
+        ]
+    ).write_parquet(current)
+    normalizeCatalogRows(
+        [
+            {
+                "source": "newsPublic",
+                "url": "https://n.example/old",
+                "date": "20260616",
+                "title": "이전 뉴스",
+                "content": "이전 날짜 stale 뉴스",
+            },
+            {
+                "source": "newsPublic",
+                "url": "https://n.example/keep",
+                "date": "20260615",
+                "title": "보존 뉴스",
+                "content": "보존할 뉴스",
+            },
+        ]
+    ).write_parquet(previousCatalog)
+    previousManifest.write_text(
+        json.dumps(
+            {
+                "source": "newsPublic",
+                "snapshotScope": "full",
+                "dataAsOf": "20260616",
+                "files": [
+                    {"path": str(tmp_path / "2026-06-15.parquet").replace("\\", "/"), "rowCount": 1},
+                    {"path": str(current).replace("\\", "/"), "rowCount": 1},
+                ],
+                "totalRows": 2,
+                "completenessCheck": {"catalogRows": 2},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            ".github/scripts/search/buildSearchCatalog.py",
+            "--source",
+            "newsPublic",
+            "--input",
+            str(current),
+            "--out-dir",
+            str(tmp_path / "out"),
+            "--previous-manifest",
+            str(previousManifest),
+            "--previous-catalog",
+            str(previousCatalog),
+            "--merge-previous-catalog",
+            "--min-files",
+            "2",
+            "--min-rows",
+            "2",
+            "--min-catalog-rows",
+            "2",
+        ],
+        cwd=Path.cwd(),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout)
+    manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+    catalog = pl.read_parquet(result["catalog"])
+    assert manifest["snapshotScope"] == "full"
+    assert manifest["deltaSource"]["catalogRows"] == 1
+    assert set(catalog.get_column("url").to_list()) == {
+        "https://n.example/new",
+        "https://n.example/keep",
+    }

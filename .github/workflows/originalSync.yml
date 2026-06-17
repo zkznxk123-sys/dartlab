@@ -103,6 +103,7 @@ jobs:
             --out-dir data/dart/searchCatalog/dartPanel \
             --producer originalSync.dart-zip \
             --compare-remote-manifest \
+            --merge-previous-catalog \
             --min-files 2400 \
             --min-rows 90000 \
             --min-catalog-rows 90000 \
@@ -187,6 +188,7 @@ jobs:
             --out-dir data/dart/searchCatalog/allFilings \
             --producer originalSync.allfilings \
             --compare-remote-manifest \
+            --merge-previous-catalog \
             --min-files 300 \
             --min-rows 150000 \
             --min-catalog-rows 150000 \
@@ -248,6 +250,7 @@ jobs:
             --out-dir data/dart/searchCatalog/allFilings \
             --producer originalSync.allfilings-backfill \
             --compare-remote-manifest \
+            --merge-previous-catalog \
             --min-files 300 \
             --min-rows 150000 \
             --min-catalog-rows 150000 \
@@ -306,6 +309,7 @@ jobs:
             --out-dir data/dart/searchCatalog/edgarPanel \
             --producer originalSync.edgar \
             --compare-remote-manifest \
+            --merge-previous-catalog \
             --min-files 2000 \
             --min-rows 50000 \
             --min-catalog-rows 50000 \

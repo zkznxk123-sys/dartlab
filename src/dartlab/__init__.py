@@ -224,17 +224,19 @@ def search(
     topK: int | None = None,
     scope: str = "auto",
 ):
-    """공시 검색. **⚠ BETA — AI 사용 비권장**.
+    """공시·뉴스 통합 검색.
 
-    제목형 쿼리와 본문형 쿼리를 자동 판별하여 검색.
-    DART 공시 뷰어 링크(dartUrl) 포함.
+    제목형 쿼리와 본문형 쿼리를 자동 판별해 DART allFilings, DART panel,
+    EDGAR panel, public news 인덱스를 검색한다. DART 공시 뷰어 링크(dartUrl)와
+    sourceRef/dataAsOf/evidence card 기반 결과 계약을 포함한다.
 
-    ⚠ BETA 한계 (AI 사용 시 주의):
-        - **인덱스 신선도 부족**: 매일 증분 자동화 미완성. 최근 N일 데이터 누락 가능.
-        - **0건 반환 시 인덱스 stale 가능성**. round 낭비 금지 — 즉시 다른 경로로 전환.
-        - **AI 권장 대안**:
-            * 단일 종목 공시: ``Company(stockCode).disclosure()`` / ``.liveFilings()``
-            * 전종목 횡단: scan/macro 등 안정 엔진 우선 사용
+    운영 한계:
+        - 인덱스 신선도는 HF contentIndex manifest 기준이다. ``search.indexInfo()`` 로
+          source별 dataAsOf와 compatible 여부를 확인한다.
+        - 단일 종목의 "방금 나온 최신 공시"는 ``Company(stockCode).liveFilings()``
+          또는 ``.disclosure()`` 가 우선이다. 횡단 본문/뉴스 검색은 본 함수가 담당한다.
+        - 0건은 실제 부재 또는 인덱스 신선도 문제일 수 있으므로 source intent와 기간을
+          확인한 뒤 live path 로 전환한다.
 
     Capabilities:
         - 제목 검색: 공시 유형명/섹션 제목에서 매칭 ("유상증자", "대표이사 변경")
@@ -246,12 +248,13 @@ def search(
         데이터: stemIndex (scope=title) + contentIndex (scope=content)
 
     AIContext:
-        BETA — 우선 사용 비권장. 단일 종목 공시는 Company.disclosure/liveFilings 우선.
-        search 호출 후 0건이면 즉시 fallback (재호출/키워드 변형 round 낭비 금지).
+        횡단 공시·뉴스 검색의 단일 public surface. 단일 종목 최신 공시는
+        Company.disclosure/liveFilings 우선. search 호출 후 0건이면 기간/source intent를
+        확인하고 필요 시 live path 로 전환.
 
     Guide:
-        - "유상증자 한 회사?" -> search("유상증자") [BETA, 0건이면 stop]
-        - "반도체 투자 트렌드?" -> search("반도체 HBM 투자") [BETA, 0건이면 stop]
+        - "유상증자 한 회사?" -> search("유상증자")
+        - "반도체 투자 트렌드?" -> search("반도체 HBM 투자")
         - "삼성전자 최근 공시" -> Company("005930").disclosure() (search 아님)
 
     SeeAlso:
@@ -296,7 +299,7 @@ def search(
             - report_nm : str — 공시 유형명
             - dartUrl : str — DART 공시 뷰어 URL
         Freshness:
-            인덱스 빌드 시점 기준. BETA — 매일 자동 증분 미완성. 최근 N 일 누락 가능.
+            인덱스 manifest 의 sourceDataAsOf 기준. ``dartlab.search.indexInfo()`` 로 확인.
         TargetMarkets:
             - KR (DART)
     """

@@ -121,6 +121,9 @@
 105. `buildSearchReplacementEvidence.py` 를 추가하고 Search Main/Delta workflow 기본 모드를 catalog 로 고정했다. workflow evidence artifact 는 `searchReplacementEvidence.{main,delta}.json` 을 포함하며, S4 는 이 파일 없이는 통과하지 않는다.
 106. `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 은 `singleEngineDefault=true`, `defaultBuildMode=catalog`, `scheduledBuildMode=catalog`, `legacyFallbackOperatorOnly=true`, `failClosedPublish=true`, active/previous manifest id, rollback command/검증, run evidence 기록, surface naming review 를 모두 갖고 `valid=true` 다.
 107. `data/dart/searchCatalog/searchProofBundle.directReview/searchCutover.json` 은 blockers=[], `releaseReady=true`, `defaultReplacement=true`, state=`S4_DEFAULT_REPLACEMENT` 다. 현재 checkout 의 본진 기본값 교체 증거는 S4 까지 닫혔다. 단 새 workflow 가 원격 Actions 에서 다시 실행된 artifact 는 별도 운영 확인 대상이다.
+108. source-owner incremental catalog publish 의 구조적 실패 원인을 수정했다. 부분 runner tree 가 full source catalog 로 발행되면 `previousFileDrop/previousRowDrop` 으로 막히던 상태에서, 이제 `buildSearchCatalog.py --merge-previous-catalog` 가 HF 직전 full manifest/catalog 를 내려받아 현재 변경 parquet 를 source별 파티션/docKey 규칙으로 병합한 뒤 full snapshot 으로 검증한다.
+109. `originalSync.yml`, `newsArchiveSync.yml`, `edgarSync.yml` 의 source catalog build step 은 `--compare-remote-manifest --require-previous-manifest --merge-previous-catalog` 조합으로 바뀌었다. allFilings 는 docKey upsert, dartPanel 은 stockCode 파일 파티션 교체, edgarPanel 은 ticker 파티션 교체, newsPublic 은 date 파티션 교체로 stale row 를 제거한다.
+110. 실제 HF previous source catalog 를 내려받는 no-upload dry-run 을 4개 source 에 대해 실행했다. 결과는 allFilings 192,096 rows / DART panel 104,762 rows / EDGAR panel 84,294 rows / news 81,799 rows, 모두 `snapshotScope=full`, `valid=true`, `previousManifestId=true` 다. local `dartlab.search.indexInfo()` 는 full active 462,947 docs compatible, 실제 질의 `유상증자`, `반도체 HBM 투자`, `공시 말고 뉴스로 환율 기사` 는 answerable 결과를 반환했다. 새 workflow 가 원격 Actions 에서 성공하는지는 패치 push 후 별도 확인 대상이다.
 
 ---
 
@@ -164,6 +167,7 @@
 | direct-review proof bundle | opsReady=true, releaseReady=true, defaultReplacement=true, state=`S4_DEFAULT_REPLACEMENT` |
 | graph catalog operationalization | `entityGraphCatalog.parquet` offline/copy prep + manifest required file + publish fileSources + active contentIndex discovery verified |
 | graph catalog evidence | remote evidence/status summary includes graph catalog presence, fileSource existence, nEntities, dataAsOf |
+| source-owner merge dry-run | HF previous catalog download + partial parquet merge: allFilings 192,096 / panel 104,762 / EDGAR 84,294 / news 81,799 rows, all valid |
 
 주의: random curatedDraft 는 제품 졸업 증거가 아니라 압박 실험이다.
 

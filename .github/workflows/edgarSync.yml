@@ -136,6 +136,7 @@ jobs:
             --out-dir data/dart/searchCatalog/edgarPanel \
             --producer edgarSync.edgarPanel \
             --compare-remote-manifest \
+            --merge-previous-catalog \
             --min-files 2000 \
             --min-rows 50000 \
             --min-catalog-rows 50000 \

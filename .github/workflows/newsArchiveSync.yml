@@ -95,6 +95,7 @@ jobs:
             --out-dir data/dart/searchCatalog/newsPublic \
             --producer newsArchiveSync.newsEnrich \
             --compare-remote-manifest \
+            --merge-previous-catalog \
             --min-files 1 \
             --min-rows 100 \
             --min-catalog-rows 100 \
