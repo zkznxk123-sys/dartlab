@@ -506,7 +506,6 @@
 	{:else}
 		<div class="chartLoad" style="height:90px">{lang === 'en' ? 'loading statements …' : '재무제표 불러오는 중 …'}</div>
 	{/if}
-	<div class="finNote">c.panel · {finView ? finView.periods.length + (lang === 'en' ? 'p' : '기') : '—'} · {finUnit} KRW</div>
 </Panel>
 
 <!-- DART 정기보고서 팩트 (배당·자사주·임원·감사·대주주·회사채 — report parquet) -->
