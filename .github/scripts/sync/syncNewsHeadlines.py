@@ -139,27 +139,40 @@ _MACRO_KEYWORDS_US = [
 
 
 def _stockSeedKR(limit: int) -> list[str]:
-    """KRX 시총 상위 종목명 추출 — hfBulk.loadFiltered 의 최근 1 일 사용."""
+    """전 상장사 종목명 시드 — KRX listing(getKrxList, 가볍고 신뢰) 우선, loadFiltered fallback.
+
+    뉴스 시드는 *어떤 종목을 검색할지* 결정한다 — 전 상장사 커버가 목표라 시총 순서는
+    무의미하다. getKrxList 는 단일 KRX JSON 호출(24h 캐시, ~2875 종목)이라 OHLCV 패널
+    전체를 받는 loadFiltered 보다 빠르고 CI 에서 빈 결과로 죽지 않는다. KRX API 가 막힌
+    드문 경우만 loadFiltered(시총 패널)로 폴백한다.
+    """
+    # 1차 — KRX listing (가볍고 신뢰, 전 상장사).
+    try:
+        from dartlab.gather.krx.listing.krxList import getKrxList
+
+        kdf = getKrxList()
+        if kdf is not None and not kdf.is_empty() and "codeName" in kdf.columns:
+            names = [n for n in kdf["codeName"].to_list() if n]
+            if names:
+                return names[:limit]
+    except Exception as exc:  # noqa: BLE001 — KRX API 차단 시 loadFiltered 로 폴백.
+        _log.warning("KRX listing 시드 실패: %s — loadFiltered 폴백", exc)
+
+    # 2차 — 시총 패널 (무겁지만 listing 부재 시 최후 수단).
     try:
         from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         df = loadFiltered(adjustment="raw")
-        if df is None or df.is_empty():
+        if df is None or df.is_empty() or "ISU_NM" not in df.columns or "MKTCAP" not in df.columns:
             return []
-        if "ISU_NM" not in df.columns or "MKTCAP" not in df.columns:
-            return []
-        # 최근 1 일 + mktcap desc + 종목명 unique
         recent = (
             df.sort("BAS_DD", descending=True)
             .group_by("ISU_CD")
-            .agg(
-                pl.col("ISU_NM").first(),
-                pl.col("MKTCAP").first(),
-            )
+            .agg(pl.col("ISU_NM").first(), pl.col("MKTCAP").first())
         )
         names = recent.sort("MKTCAP", descending=True)["ISU_NM"].head(limit).to_list()
         return [n for n in names if n]
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         _log.warning("KRX stock seed 추출 실패: %s — 종목 시드 0 으로 fallback", exc)
         return []
 

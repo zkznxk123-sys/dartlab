@@ -110,7 +110,29 @@ def buildCompanyIndex(
 
 
 def _nameToCode() -> dict[str, str]:
-    """KRX listing 최근 1일 → 회사명(ISU_NM) → 종목코드(ISU_CD) 매핑. _stockSeedKR 와 동일 원천."""
+    """회사명 → 종목코드 매핑. KRX listing(getKrxList, 가볍고 신뢰) 우선 — _stockSeedKR 와 동일 원천.
+
+    시드(_stockSeedKR)와 같은 codeName 문자열을 써야 query→code 폴딩이 일치한다. getKrxList 는
+    단일 KRX JSON 호출(short_code 6자리 = ISU_CD canonical)이라 OHLCV 패널 전체를 받는
+    loadFiltered 보다 빠르고 CI 에서 빈 매핑으로 죽지 않는다. KRX API 차단 시만 loadFiltered 폴백.
+    """
+    # 1차 — KRX listing (시드와 동일 원천, 가볍고 신뢰).
+    try:
+        from dartlab.gather.krx.listing.krxList import getKrxList
+
+        kdf = getKrxList()
+        if kdf is not None and not kdf.is_empty() and "codeName" in kdf.columns and "short_code" in kdf.columns:
+            out: dict[str, str] = {}
+            for r in kdf.iter_rows(named=True):
+                nm, cd = r.get("codeName"), r.get("short_code")
+                if nm and cd:
+                    out[str(nm)] = str(cd).strip()  # short_code = 6자리 canonical
+            if out:
+                return out
+    except Exception as exc:  # noqa: BLE001 — KRX API 차단 시 loadFiltered 폴백.
+        print(f"[warn] KRX listing 매핑 실패: {exc} — loadFiltered 폴백", file=sys.stderr)
+
+    # 2차 — 시총 패널 (무겁지만 listing 부재 시 최후 수단).
     try:
         from dartlab.gather.bulkData.hfBulk import loadFiltered
 
@@ -121,12 +143,12 @@ def _nameToCode() -> dict[str, str]:
     if df is None or df.is_empty() or "ISU_NM" not in df.columns or "ISU_CD" not in df.columns:
         return {}
     recent = df.sort("BAS_DD", descending=True).group_by("ISU_CD").agg(pl.col("ISU_NM").first())
-    out: dict[str, str] = {}
+    out2: dict[str, str] = {}
     for r in recent.iter_rows(named=True):
         nm, cd = r.get("ISU_NM"), r.get("ISU_CD")
         if nm and cd:
-            out[str(nm)] = str(cd).strip()  # ISU_CD = 6자리 canonical (gov-price-migration 정규화)
-    return out
+            out2[str(nm)] = str(cd).strip()  # ISU_CD = 6자리 canonical (gov-price-migration 정규화)
+    return out2
 
 
 def _localFrames() -> list[pl.DataFrame]:
