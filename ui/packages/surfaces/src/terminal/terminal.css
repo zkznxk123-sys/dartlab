@@ -917,8 +917,9 @@
 .dlTerm .pctTrack { height: 4px; background: var(--dl-bg-overlay); border-radius: 2px; position: relative; overflow: hidden; }
 .dlTerm .pctFill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; }
 .dlTerm .pctMark { position: absolute; top: -1px; width: 1px; height: 6px; background: rgba(255, 255, 255, 0.25); }
-.dlTerm .pctVal { font-family: var(--mono); font-size: 9px; text-align: right; white-space: nowrap; flex-shrink: 0; }
-.dlTerm .pctVal b { font-weight: 700; }
+.dlTerm .pctVal { font-family: var(--mono); font-size: 9px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: baseline; justify-content: flex-end; gap: 6px; }
+.dlTerm .pctVal b { font-weight: 700; min-width: 46px; text-align: right; }
+.dlTerm .pctVal .dim { min-width: 40px; text-align: right; }
 .dlTerm .pctNote { font-family: var(--mono); font-size: 7.5px; color: var(--dimmer); padding: 2px 8px; border-top: 1px solid var(--bd); }
 
 /* RISK FLAGS */
