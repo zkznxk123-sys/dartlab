@@ -360,6 +360,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     text = Path(".github/workflows/searchIndexDelta.yml").read_text(encoding="utf-8")
     assert "workflow_run" in text
     assert "Original SSOT Sync" in text
+    assert "AllFilings Backfill" in text
     assert "News Archive Sync" in text
     assert "EDGAR Data Sync (Bulk)" in text
     assert "github.event.workflow_run.conclusion == 'success'" in text
@@ -499,9 +500,10 @@ def test_search_catalog_script_exists() -> None:
 
 def test_source_workflows_build_search_catalog_artifacts() -> None:
     original = Path(".github/workflows/originalSync.yml").read_text(encoding="utf-8")
+    backfill = Path(".github/workflows/allFilingsBackfill.yml").read_text(encoding="utf-8")
     news = Path(".github/workflows/newsArchiveSync.yml").read_text(encoding="utf-8")
     edgar = Path(".github/workflows/edgarSync.yml").read_text(encoding="utf-8")
-    combined = "\n".join([original, news, edgar])
+    combined = "\n".join([original, backfill, news, edgar])
     for source in ("dartPanel", "allFilings", "edgarPanel", "newsPublic"):
         assert f"--source {source}" in combined
         assert f"search-catalog-{source}" in combined
@@ -524,6 +526,22 @@ def test_source_workflows_build_search_catalog_artifacts() -> None:
     assert "--min-rows 100" in combined
     assert "actions/upload-artifact" in combined
     assert "if-no-files-found: ignore" in combined
+
+
+def test_allfilings_backfill_is_decoupled_from_daily_original_sync() -> None:
+    original = Path(".github/workflows/originalSync.yml").read_text(encoding="utf-8")
+    backfill = Path(".github/workflows/allFilingsBackfill.yml").read_text(encoding="utf-8")
+    assert "name: AllFilings Backfill" in backfill
+    assert "cron: '30 5 * * *'" in backfill
+    assert "timeout-minutes: 75" in backfill
+    assert "timeout-minutes: 50" in backfill
+    assert "--producer allFilingsBackfill.allfilings-backfill" in backfill
+    assert "name: search-catalog-allFilings-backfill-${{ github.run_id }}" in backfill
+    assert "github.event.inputs.jobs == 'allfilings-backfill'" in original
+    assert (
+        "github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill'"
+        not in original
+    )
 
 
 def test_search_main_workflow_bootstraps_canonical_source_catalogs() -> None:

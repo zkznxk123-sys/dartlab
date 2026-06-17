@@ -17,6 +17,7 @@ on:
   workflow_run:
     workflows:
       - Original SSOT Sync
+      - AllFilings Backfill
       - News Archive Sync
       - EDGAR Data Sync (Bulk)
     types:
