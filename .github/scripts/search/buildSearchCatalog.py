@@ -47,11 +47,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--hf-prefix", default="dart/searchCatalog", help="HF path prefix for uploaded artifacts.")
     args = parser.parse_args(argv)
 
-    from dartlab.providers.dart.search.sourceCatalog import (
-        discoverSourceFiles,
-        writeMergedSourceCatalogArtifacts,
-        writeSourceCatalogArtifacts,
-    )
+    from dartlab.providers.dart.search.sourceCatalog import discoverSourceFiles, writeSourceCatalogArtifacts
+    from dartlab.providers.dart.search.sourceCatalogMerge import writeMergedSourceCatalogArtifacts
 
     files = discoverSourceFiles(args.input)
     previousManifest = _loadPreviousManifest(args.previous_manifest)

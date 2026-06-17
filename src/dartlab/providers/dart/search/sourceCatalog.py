@@ -13,7 +13,7 @@ from typing import Any, Iterable, Iterator, Mapping
 import polars as pl
 
 from dartlab.pipeline.hashing import fileHash
-from dartlab.providers.dart.search.catalog import CATALOG_COLUMNS, normalizeCatalogRows
+from dartlab.providers.dart.search.catalog import normalizeCatalogRows
 from dartlab.providers.dart.search.freshness import DEFAULT_DATE_COLUMNS, normalizeSearchDate, periodToDataAsOf
 from dartlab.providers.dart.search.sourceManifest import SOURCE_MANIFEST_SOURCES
 
@@ -164,7 +164,7 @@ def buildSourceManifest(
     if source not in SOURCE_MANIFEST_SOURCES:
         raise ValueError(f"unknown search source: {source}")
     paths = [Path(path) for path in files]
-    fileRows = [_fileManifest(path) for path in paths]
+    fileRows = [_fileManifest(path, source=source) for path in paths]
     totalRows = sum(int(row.get("rowCount") or 0) for row in fileRows)
     dataAsOf = max((str(row.get("maxDate") or "") for row in fileRows), default="")
     manifest = {
@@ -336,187 +336,6 @@ def writeSourceCatalogArtifacts(
     return {"manifest": manifestPath, "catalog": catalogPath}
 
 
-def writeMergedSourceCatalogArtifacts(
-    source: str,
-    files: Iterable[str | Path],
-    *,
-    previousCatalog: str | Path,
-    previousManifest: Mapping[str, Any],
-    outDir: str | Path,
-    producer: str = "searchSourceCatalog",
-    sourceVersion: str = "v1",
-    schemaVersion: str = "2026-06",
-    minFiles: int = 0,
-    minRows: int = 0,
-    minCatalogRows: int = 0,
-    producerRun: Mapping[str, Any] | None = None,
-    maxFileDropRatio: float = 0.05,
-    maxRowDropRatio: float = 0.05,
-    maxCatalogRowDropRatio: float = 0.05,
-) -> dict[str, Path]:
-    """Merge changed source files into a previous full source catalog.
-
-    Args:
-        source: Search source name.
-        files: Changed parquet files available in the current source-owner run.
-        previousCatalog: Prior full ``{source}.catalog_snapshot.parquet``.
-        previousManifest: Prior full source manifest.
-        outDir: Output directory.
-        producer: Pipeline stage name.
-        sourceVersion: Source adapter version.
-        schemaVersion: Source parquet schema version.
-        minFiles: Minimum merged file count.
-        minRows: Minimum merged catalog rows.
-        minCatalogRows: Minimum merged catalog rows.
-        producerRun: Optional workflow/run lineage for durable productization
-            evidence.
-        maxFileDropRatio: Maximum accepted file-count drop vs previous manifest.
-        maxRowDropRatio: Maximum accepted row-count drop vs previous manifest.
-        maxCatalogRowDropRatio: Maximum accepted catalog-row drop vs previous
-            manifest completeness evidence.
-
-    Returns:
-        dict[str, Path]: Written manifest and catalog paths.
-
-    Raises:
-        ValueError: When previous artifacts are missing or completeness fails.
-
-    Example:
-        >>> callable(writeMergedSourceCatalogArtifacts)
-        True
-    """
-    if source not in SOURCE_MANIFEST_SOURCES:
-        raise ValueError(f"unknown search source: {source}")
-    prevCatalogPath = Path(previousCatalog)
-    if not prevCatalogPath.exists():
-        raise ValueError(f"previous source catalog not found: {prevCatalogPath}")
-    if not previousManifest:
-        raise ValueError(f"previous source manifest required for {source}")
-
-    paths = [Path(path) for path in files]
-    out = Path(outDir)
-    out.mkdir(parents=True, exist_ok=True)
-    manifestPath = out / f"{source}.source_manifest.json"
-    catalogPath = out / f"{source}.catalog_snapshot.parquet"
-    tmpDeltaPath = catalogPath.with_name(f"{catalogPath.name}.delta.tmp")
-    tmpCatalogPath = catalogPath.with_name(f"{catalogPath.name}.tmp")
-    for tmp in (tmpDeltaPath, tmpCatalogPath):
-        if tmp.exists():
-            tmp.unlink()
-
-    deltaManifest = buildSourceManifest(
-        source,
-        paths,
-        producer=producer,
-        sourceVersion=sourceVersion,
-        schemaVersion=schemaVersion,
-        snapshotScope="partial",
-        producerRun=producerRun,
-    )
-    try:
-        deltaRows = _writeCatalogSnapshot(
-            source,
-            paths,
-            tmpDeltaPath,
-            sourceDataAsOf=str(deltaManifest.get("dataAsOf") or previousManifest.get("dataAsOf") or ""),
-            sourceAdapterVersion=sourceVersion,
-        )
-        previousFrame = normalizeCatalogRows(pl.read_parquet(prevCatalogPath))
-        deltaFrame = normalizeCatalogRows(pl.read_parquet(tmpDeltaPath))
-        merged = mergeSourceCatalogSnapshot(source, previousFrame, deltaFrame, changedFiles=paths)
-        merged.write_parquet(tmpCatalogPath)
-    except Exception:
-        for tmp in (tmpDeltaPath, tmpCatalogPath):
-            if tmp.exists():
-                tmp.unlink()
-        raise
-
-    catalogRows = merged.height
-    manifest = _mergedSourceManifest(
-        source,
-        previousManifest=previousManifest,
-        deltaManifest=deltaManifest,
-        catalogRows=catalogRows,
-        producer=producer,
-        sourceVersion=sourceVersion,
-        schemaVersion=schemaVersion,
-        producerRun=producerRun,
-    )
-    completeness = validateSourceCatalogCompleteness(
-        manifest,
-        catalogRows=catalogRows,
-        minFiles=minFiles,
-        minRows=minRows,
-        minCatalogRows=minCatalogRows,
-        previousManifest=previousManifest,
-        maxFileDropRatio=maxFileDropRatio,
-        maxRowDropRatio=maxRowDropRatio,
-        maxCatalogRowDropRatio=maxCatalogRowDropRatio,
-    )
-    manifest["completenessCheck"] = completeness
-    manifest["deltaSource"] = {
-        "snapshotScope": "partial",
-        "fileCount": len(deltaManifest.get("files") or []),
-        "rawRows": _intOrZero(deltaManifest.get("totalRows")),
-        "catalogRows": int(deltaRows),
-        "dataAsOf": str(deltaManifest.get("dataAsOf") or ""),
-    }
-    if not completeness["valid"]:
-        for tmp in (tmpDeltaPath, tmpCatalogPath):
-            if tmp.exists():
-                tmp.unlink()
-        raise ValueError(f"source catalog completeness failed: {','.join(completeness['errors'])}")
-    tmpCatalogPath.replace(catalogPath)
-    manifestPath.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
-    if tmpDeltaPath.exists():
-        tmpDeltaPath.unlink()
-    return {"manifest": manifestPath, "catalog": catalogPath}
-
-
-def mergeSourceCatalogSnapshot(
-    source: str,
-    previousCatalog: pl.DataFrame,
-    changedCatalog: pl.DataFrame,
-    *,
-    changedFiles: Iterable[str | Path] = (),
-) -> pl.DataFrame:
-    """Upsert a changed source catalog subset into a previous full snapshot.
-
-    Args:
-        source: Search source name.
-        previousCatalog: Previous full catalog rows.
-        changedCatalog: Catalog rows produced from changed source files.
-        changedFiles: Source files represented by ``changedCatalog``.
-
-    Returns:
-        pl.DataFrame: Merged full catalog snapshot.
-
-    Raises:
-        None.
-
-    Example:
-        >>> mergeSourceCatalogSnapshot("newsPublic", normalizeCatalogRows([]), normalizeCatalogRows([])).height
-        0
-    """
-    previous = normalizeCatalogRows(previousCatalog)
-    changed = normalizeCatalogRows(changedCatalog)
-    if previous.height == 0:
-        return changed.filter(~pl.col("deleted")).select(CATALOG_COLUMNS)
-    if changed.height == 0:
-        return previous.select(CATALOG_COLUMNS)
-
-    liveChanged = changed.filter(~pl.col("deleted"))
-    changedDocKeys = _catalogStringSet(changed, "docKey")
-    keep = previous
-    if changedDocKeys:
-        keep = keep.filter(~pl.col("docKey").is_in(sorted(changedDocKeys)))
-    keep = _dropReplacedPartitions(source, keep, liveChanged, changedFiles)
-    if liveChanged.height == 0:
-        return keep.select(CATALOG_COLUMNS)
-    merged = pl.concat([keep.select(CATALOG_COLUMNS), liveChanged.select(CATALOG_COLUMNS)], how="vertical")
-    return merged.unique(subset=["docKey"], keep="last", maintain_order=True).select(CATALOG_COLUMNS)
-
-
 def validateSourceCatalogCompleteness(
     manifest: Mapping[str, Any],
     *,
@@ -608,124 +427,6 @@ def validateSourceCatalogCompleteness(
     }
 
 
-def _mergedSourceManifest(
-    source: str,
-    *,
-    previousManifest: Mapping[str, Any],
-    deltaManifest: Mapping[str, Any],
-    catalogRows: int,
-    producer: str,
-    sourceVersion: str,
-    schemaVersion: str,
-    producerRun: Mapping[str, Any] | None,
-) -> dict[str, Any]:
-    files = _mergeManifestFiles(previousManifest, deltaManifest)
-    rawRows = sum(_intOrZero(row.get("rowCount")) for row in files)
-    dataAsOf = max(
-        [
-            str(previousManifest.get("dataAsOf") or ""),
-            str(deltaManifest.get("dataAsOf") or ""),
-            *[str(row.get("maxDate") or "") for row in files],
-        ]
-    )
-    manifest: dict[str, Any] = {
-        "source": source,
-        "sourceVersion": sourceVersion,
-        "schemaVersion": schemaVersion,
-        "snapshotScope": "full",
-        "dataAsOf": dataAsOf,
-        "builtAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "files": files,
-        "rawRows": rawRows,
-        "totalRows": int(catalogRows),
-        "changedRows": _intOrZero(deltaManifest.get("totalRows")),
-        "deletedRows": _intOrZero(deltaManifest.get("deletedRows")),
-        "producer": producer,
-        "previousManifestId": _manifestIdentity(previousManifest),
-    }
-    if producerRun:
-        manifest["producerRun"] = {str(key): value for key, value in producerRun.items() if value is not None}
-    return manifest
-
-
-def _mergeManifestFiles(
-    previousManifest: Mapping[str, Any],
-    deltaManifest: Mapping[str, Any],
-) -> list[dict[str, Any]]:
-    merged: dict[str, dict[str, Any]] = {}
-    for row in previousManifest.get("files") or []:
-        if not isinstance(row, Mapping):
-            continue
-        path = _manifestFileKey(row)
-        if path:
-            merged[path] = dict(row)
-    for row in deltaManifest.get("files") or []:
-        if not isinstance(row, Mapping):
-            continue
-        path = _manifestFileKey(row)
-        if path:
-            merged[path] = dict(row)
-    return [merged[key] for key in sorted(merged)]
-
-
-def _manifestFileKey(row: Mapping[str, Any]) -> str:
-    return str(row.get("path") or "").replace("\\", "/")
-
-
-def _manifestIdentity(manifest: Mapping[str, Any]) -> str:
-    payload = {
-        "source": manifest.get("source"),
-        "snapshotScope": manifest.get("snapshotScope"),
-        "dataAsOf": manifest.get("dataAsOf"),
-        "builtAt": manifest.get("builtAt"),
-        "totalRows": manifest.get("totalRows"),
-        "files": [
-            {
-                "path": row.get("path"),
-                "hash": row.get("hash"),
-                "rowCount": row.get("rowCount"),
-            }
-            for row in manifest.get("files") or []
-            if isinstance(row, Mapping)
-        ],
-    }
-    import hashlib
-
-    return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
-
-
-def _dropReplacedPartitions(
-    source: str,
-    previous: pl.DataFrame,
-    changed: pl.DataFrame,
-    changedFiles: Iterable[str | Path],
-) -> pl.DataFrame:
-    if previous.height == 0 or changed.height == 0:
-        return previous
-    if source == "dartPanel":
-        stockCodes = {Path(path).stem for path in changedFiles if Path(path).stem}
-        return _filterOut(previous, "stockCode", stockCodes)
-    if source == "edgarPanel":
-        tickers = {Path(path).stem for path in changedFiles if Path(path).stem}
-        return _filterOut(previous, "ticker", tickers)
-    if source == "newsPublic":
-        dates = _catalogStringSet(changed, "date")
-        return _filterOut(previous, "date", dates)
-    return previous
-
-
-def _filterOut(frame: pl.DataFrame, column: str, values: set[str]) -> pl.DataFrame:
-    if not values or column not in frame.columns:
-        return frame
-    return frame.filter(~pl.col(column).cast(pl.Utf8).is_in(sorted(values)))
-
-
-def _catalogStringSet(frame: pl.DataFrame, column: str) -> set[str]:
-    if column not in frame.columns or frame.height == 0:
-        return set()
-    return {str(value) for value in frame.get_column(column).to_list() if value not in (None, "")}
-
-
 def _previousSnapshotSummary(previousManifest: Mapping[str, Any] | None) -> dict[str, Any]:
     if not previousManifest:
         return {}
@@ -774,8 +475,8 @@ def _dropErrors(
     return out
 
 
-def _fileManifest(path: Path) -> dict[str, Any]:
-    rowCount, minDate, maxDate = _fileStats(path)
+def _fileManifest(path: Path, *, source: str) -> dict[str, Any]:
+    rowCount, minDate, maxDate = _fileStats(path, source=source)
     return {
         "path": path.as_posix(),
         "sizeBytes": path.stat().st_size if path.exists() else 0,
@@ -985,13 +686,24 @@ def _isUsableAllFilingsRow(row: Mapping[str, Any]) -> bool:
     return bool(str(text or "").strip())
 
 
-def _fileStats(path: Path) -> tuple[int, str, str]:
+def _fileStats(path: Path, *, source: str) -> tuple[int, str, str]:
     if not path.exists():
         return 0, "", ""
     lf = pl.scan_parquet(path)
     columns = set(lf.collect_schema().names())
     dateColumn = next((name for name in DATE_COLUMNS if name in columns), None)
     if dateColumn is None:
+        if source == "dartPanel" and "rceptNo" in columns:
+            row = (
+                lf.select(
+                    pl.len().alias("rowCount"),
+                    pl.col("rceptNo").cast(pl.Utf8, strict=False).str.slice(0, 8).min().alias("minDate"),
+                    pl.col("rceptNo").cast(pl.Utf8, strict=False).str.slice(0, 8).max().alias("maxDate"),
+                )
+                .collect()
+                .row(0, named=True)
+            )
+            return int(row["rowCount"]), normalizeSearchDate(row.get("minDate")), normalizeSearchDate(row.get("maxDate"))
         if "period" in columns:
             row = (
                 lf.select(
