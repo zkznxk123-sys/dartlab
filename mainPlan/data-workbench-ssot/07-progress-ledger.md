@@ -59,8 +59,19 @@
 "클린코드 트리 튼튼?" 점검 → clutter 1건 발견·제거. 레거시 무인자 포트 폴백 core 한 줄이
 source 8곳 복붙(+가드 createDataCore 특례 8칸) = "강함은 깎아서" 위반. `data/fetch.moduleFallbackCore()`
 헬퍼 1개로 통합(per-source 격리 유지·createDataCore 가 source 밖으로 모임)·가드 rule 4 특례 8→0. 순 -8줄.
-**남은 트리 부채(정직)**: ① 폴더 미완 — `cache/`가 `data/` 밖 형제(설계=`data/cache/`)·`origin.ts`/`hfRange.ts`
-미이전·배럴 없음 = **P4 보류(파일 이동이라 활성 동시 세션과 충돌 위험 → 잠잠할 때)**. ② loadJson dedup(위 잔여).
+**남은 트리 부채(정직)**: ① loadJson dedup(위 잔여). ~~② 폴더 미완~~ → **✅ P4 완성**(아래).
+
+## ✅ P4 폴더 구조화 완성 (2026-06-17)
+
+"왜 보류? 완성해라"(운영자) → 즉시 완성. 동시 세션은 search/Python·vite.config 만 건드려 `runtime/src/data`
+는 이 세션 전용 → 충돌 위험은 과대평가였음. **정공법(임시 re-export 다리 없이 최종 이동 + 전 importer 갱신 + 옛 경로 삭제)**:
+- `src/cache/`(runtimeCache·requestDedup) + `data/cacheStore.ts` → **`data/cache/`** (캐시 3종 한곳).
+- `data/hfRange.ts` → **`data/parquet/`** · `data/origin.ts` → **`data/origins/hf.ts`**(registry 와 합침).
+- 공개 subpath `@dartlab/ui-runtime/data/hfRange` → `data/parquet/hfRange`(exports `./data/*` 와일드카드 중첩 자동 해소).
+- 동행 갱신: 내부 6 + **surfaces 4 + landing 6 + apps 1** 소비자(landing=repo 루트라 1차 스윕서 누락→재스윕 포착).
+- `financeRows.ts`는 landing SSR 전용 공개 subpath shim → 제자리 유지(트리정리 대상 아님).
+- 검증: runtime tsc·surfaces 0·**landing svelte-check 0 errors**·vitest 5/5·가드 PASS(rule 6 `/hfRange$` 매칭 유지). 시각 변경 0.
+- **최종 트리**: `data/{cache,fetch,origins,parquet}` + `dartlabData.ts`·`financeRows.ts`(공개 shim). 설계 03 형태 도달.
 
 ## 잔여 (선택 polish — 작업대 본체 무관)
 
