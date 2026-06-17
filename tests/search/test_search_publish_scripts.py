@@ -380,6 +380,8 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert (
         "github.event_name == 'workflow_run' && 'ops' || (github.event.inputs.productization_gate || 'release')" in text
     )
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '3'" in text
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'" in text
     assert "quality_gold" in text
     assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "DARTLAB_SEARCH_EXPECTED_SOURCES" in text

@@ -73,6 +73,9 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    env:
+      DARTLAB_HF_RETRY_ATTEMPTS: '3'
+      DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
 
     steps:
       - uses: actions/checkout@v6
