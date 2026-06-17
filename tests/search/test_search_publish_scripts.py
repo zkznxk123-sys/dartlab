@@ -535,6 +535,10 @@ def test_allfilings_backfill_is_decoupled_from_daily_original_sync() -> None:
     assert "cron: '30 5 * * *'" in backfill
     assert "timeout-minutes: 75" in backfill
     assert "timeout-minutes: 50" in backfill
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '3'" in original
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '3'" in backfill
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'" in original
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'" in backfill
     assert "--producer allFilingsBackfill.allfilings-backfill" in backfill
     assert "name: search-catalog-allFilings-backfill-${{ github.run_id }}" in backfill
     assert "github.event.inputs.jobs == 'allfilings-backfill'" in original

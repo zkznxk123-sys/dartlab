@@ -105,3 +105,26 @@ def test_hf_retry_promoted() -> None:
         assert calls["n"] == 2
     finally:
         hr.time.sleep = orig
+
+
+def test_hf_retry_env_caps_wait_and_attempts(monkeypatch) -> None:
+    """core.hfRetry — Actions source jobs can fail fast on long HF 429 backoff."""
+    import dartlab.core.hfRetry as hr
+    from dartlab.core.hfRetry import parseRetryWait, retryHfCall
+
+    monkeypatch.setenv("DARTLAB_HF_RETRY_ATTEMPTS", "2")
+    monkeypatch.setenv("DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS", "3")
+    assert parseRetryWait(RuntimeError("retry this action in 2 minutes"), 0) == 3
+
+    calls = {"n": 0}
+    sleeps: list[int] = []
+    monkeypatch.setattr(hr.time, "sleep", lambda seconds: sleeps.append(seconds))
+
+    def alwaysTransient():
+        calls["n"] += 1
+        raise RuntimeError("Error while uploading 'x' to the Hub.")
+
+    with pytest.raises(RuntimeError):
+        retryHfCall(alwaysTransient)
+    assert calls["n"] == 2
+    assert sleeps == [3]

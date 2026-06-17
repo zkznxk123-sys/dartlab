@@ -112,7 +112,7 @@ jobs:
             --upload
       - name: Upload DART panel search catalog evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v5
         with:
           name: search-catalog-dartPanel-${{ github.job }}-${{ github.run_id }}
           path: data/dart/searchCatalog/dartPanel/**
@@ -169,15 +169,21 @@ jobs:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: uv run python -X utf8 -m dartlab.pipeline allFilings
       - name: 비정기공시 통합 parquet 갱신 + HF push (전 이력·전역 1파일, stock_code 필터)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: uv run python -X utf8 .github/scripts/sync/buildAllFilingsRecent.py
       - name: allFilings search source manifest + catalog
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: |
           extra=()
           if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
@@ -197,7 +203,7 @@ jobs:
             --upload
       - name: Upload allFilings search catalog evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v5
         with:
           name: search-catalog-allFilings-${{ github.job }}-${{ github.run_id }}
           path: data/dart/searchCatalog/allFilings/**
@@ -229,17 +235,23 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           DART_ALLFILINGS_BACKFILL_MONTHS: '2'
           DART_ALLFILINGS_BACKFILL_FLOOR: '201501'
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: uv run python -X utf8 -m dartlab.pipeline allFilingsBackfill
       - name: 비정기공시 통합 parquet 갱신 + HF push (백필 slab 누적 — 전 이력 심화)
         # forward 잡과 동일 스크립트. 이 잡이 방금 collect 한 2개월 과거 slab 이 로컬에 있으므로
         # HF baseline + 이 slab merge → 통합 파일이 백필 cadence 대로 2015-01 까지 깊어진다(운영자 수동 0).
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: uv run python -X utf8 .github/scripts/sync/buildAllFilingsRecent.py
       - name: allFilings search source manifest + catalog
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: |
           extra=()
           if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
@@ -259,7 +271,7 @@ jobs:
             --upload
       - name: Upload allFilings search catalog evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v5
         with:
           name: search-catalog-allFilings-${{ github.job }}-${{ github.run_id }}
           path: data/dart/searchCatalog/allFilings/**
@@ -318,7 +330,7 @@ jobs:
             --upload
       - name: Upload EDGAR panel search catalog evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v5
         with:
           name: search-catalog-edgarPanel-${{ github.job }}-${{ github.run_id }}
           path: data/dart/searchCatalog/edgarPanel/**

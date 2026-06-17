@@ -59,12 +59,16 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           DART_ALLFILINGS_BACKFILL_MONTHS: ${{ github.event.inputs.months || '2' }}
           DART_ALLFILINGS_BACKFILL_FLOOR: ${{ github.event.inputs.floor || '201501' }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: uv run python -X utf8 -m dartlab.pipeline allFilingsBackfill
 
       - name: 비정기공시 통합 parquet 갱신 + HF push
         timeout-minutes: 20
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: uv run python -X utf8 .github/scripts/sync/buildAllFilingsRecent.py
 
       - name: allFilings search source manifest + catalog
@@ -72,6 +76,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SEARCH_CATALOG_BOOTSTRAP: ${{ github.event.inputs.search_catalog_bootstrap == 'true' && '1' || '0' }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
         run: |
           extra=()
           if [ "${SEARCH_CATALOG_BOOTSTRAP:-0}" != "1" ]; then
@@ -92,7 +98,7 @@ jobs:
 
       - name: Upload allFilings search catalog evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v5
         with:
           name: search-catalog-allFilings-backfill-${{ github.run_id }}
           path: data/dart/searchCatalog/allFilings/**

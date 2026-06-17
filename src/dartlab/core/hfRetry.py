@@ -18,6 +18,7 @@ HF 무료 플랜 commit 한도 128/hour — 초과 시 응답 본문에
 
 from __future__ import annotations
 
+import os
 import re
 import time
 from typing import Any, Callable
@@ -34,6 +35,24 @@ _TRANSIENT_MSG_RE = re.compile(
     r"error while uploading|timed out|timeout|connection|temporarily|throttl|rate.?limit|too many requests",
     re.IGNORECASE,
 )
+
+
+def _envInt(name: str, default: int, *, minimum: int = 1) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        return max(minimum, int(raw))
+    except ValueError:
+        return default
+
+
+def _maxSingleWait() -> int:
+    return _envInt("DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS", _MAX_SINGLE_WAIT, minimum=0)
+
+
+def _retryAttempts() -> int:
+    return _envInt("DARTLAB_HF_RETRY_ATTEMPTS", len(_BACKOFF_SECONDS_FALLBACK) + 1, minimum=1)
 
 
 def _isRetryable(exc: Exception) -> bool:
@@ -78,21 +97,21 @@ def parseRetryWait(exc: Exception, attempt: int) -> int:
         retryAfter = response.headers.get("Retry-After")
         if retryAfter:
             try:
-                return min(int(retryAfter), _MAX_SINGLE_WAIT)
+                return min(int(retryAfter), _maxSingleWait())
             except ValueError:
                 pass
 
     msg = str(exc)
     m = _RETRY_MIN_RE.search(msg)
     if m:
-        return min(int(m.group(1)) * 60 + 30, _MAX_SINGLE_WAIT)  # +30s 여유
+        return min(int(m.group(1)) * 60 + 30, _maxSingleWait())  # +30s 여유
     m = _RETRY_SEC_RE.search(msg)
     if m:
-        return min(int(m.group(1)) + 10, _MAX_SINGLE_WAIT)
+        return min(int(m.group(1)) + 10, _maxSingleWait())
 
     if attempt < len(_BACKOFF_SECONDS_FALLBACK):
-        return _BACKOFF_SECONDS_FALLBACK[attempt]
-    return _BACKOFF_SECONDS_FALLBACK[-1]
+        return min(_BACKOFF_SECONDS_FALLBACK[attempt], _maxSingleWait())
+    return min(_BACKOFF_SECONDS_FALLBACK[-1], _maxSingleWait())
 
 
 def retryHfCall(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
@@ -118,7 +137,7 @@ def retryHfCall(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         >>> retryHfCall(lambda: 1)
         1
     """
-    attempts = len(_BACKOFF_SECONDS_FALLBACK) + 1
+    attempts = _retryAttempts()
     for attempt in range(attempts):
         try:
             return fn(*args, **kwargs)
