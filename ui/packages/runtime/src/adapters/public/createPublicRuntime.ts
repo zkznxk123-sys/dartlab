@@ -12,7 +12,6 @@ import type {
 	NewsPort,
 	PricePort,
 	ProductIndexItem,
-	ReportPort,
 	RuntimeEnvironment,
 	ScanPort,
 	ViewerPort
@@ -30,20 +29,7 @@ import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
 import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from './sources/nonRegularFilingsSource';
 import { createDataCore, type DataCore } from '../../data/fetch/request';
 import { loadCompanyNews } from './sources/newsSource';
-import {
-	loadAuditFees,
-	loadAuditTrail,
-	loadCapitalChanges,
-	loadDebtProfile,
-	loadExecBoard,
-	loadInvestments,
-	loadOwnership,
-	loadShareholderPeriods,
-	loadShareholderReturn,
-	loadShareholders,
-	loadTopExecPay,
-	loadWorkforce
-} from './sources/reportSource';
+import { createReportSource } from './sources/reportSource';
 import { publicExportPort, type PublicExportShared } from './sources/exportSource';
 import { localStoragePort } from '../local/sources/storageSource';
 
@@ -138,25 +124,6 @@ export function publicNewsPort(): NewsPort {
 	return { forCompany: loadCompanyNews };
 }
 
-// 로컬 어댑터도 그대로 재사용 — 정기보고서 파생은 HF parquet 직독(백엔드 0). 터미널 공통배선 원칙:
-// 로컬 전용 특별기능이 아니면 공개 HF 포트를 공유한다(price·finance·macro·index 와 동일).
-export function publicReportPort(): ReportPort {
-	return {
-		workforce: loadWorkforce,
-		investments: loadInvestments,
-		shareholderReturn: loadShareholderReturn,
-		ownership: loadOwnership,
-		shareholders: loadShareholders,
-		shareholderPeriods: loadShareholderPeriods,
-		execBoard: loadExecBoard,
-		debtProfile: loadDebtProfile,
-		capitalChanges: loadCapitalChanges,
-		auditTrail: loadAuditTrail,
-		topExecPay: loadTopExecPay,
-		auditFees: loadAuditFees
-	};
-}
-
 function publicScanPort(shared: PublicRuntimeSharedPorts): ScanPort {
 	return {
 		changes: shared.changes,
@@ -179,7 +146,7 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		finance: publicFinancePort(),
 		viewer: options.viewer,
 		macro: createHfMacroPort(),
-		report: publicReportPort(),
+		report: createReportSource(dataCore),
 		scan: publicScanPort(options.shared),
 		export: publicExportPort(localStoragePort(), options.exportShared),
 		get map() {

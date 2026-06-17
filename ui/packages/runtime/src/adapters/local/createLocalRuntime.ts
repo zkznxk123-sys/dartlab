@@ -12,7 +12,8 @@ import type {
 import { createHfMacroPort } from '../public/sources/macroSource';
 import { createPublicIndexPort } from '../public/sources/indexSource';
 import { loadTerminalFinance } from '../public/sources/financeSource';
-import { publicPricePort, publicNewsPort, publicReportPort } from '../public/createPublicRuntime';
+import { publicPricePort, publicNewsPort } from '../public/createPublicRuntime';
+import { createReportSource } from '../public/sources/reportSource';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { exportServiceRegistration } from '../../services/exportCommand';
 import { localExportPort } from './sources/exportSource';
@@ -65,7 +66,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		finance: localFinancePort(),
 		viewer: localViewerPort(),
 		macro: createHfMacroPort(),
-		report: publicReportPort(), // 공통배선 — HF parquet 직독(백엔드 0). 옛 localReportPort 는 null 스텁이라 폐기.
+		report: createReportSource(dataCore), // 공통배선 — HF parquet 직독(백엔드 0, 어댑터 코어 주입). 옛 localReportPort 는 null 스텁이라 폐기.
 		scan: localScanPort(),
 		export: exportPort,
 		get map() {
