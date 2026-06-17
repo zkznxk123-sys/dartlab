@@ -184,8 +184,7 @@ def runAllFilings(
         res.rows = rows
         res.report.ok = 1
         print(
-            f"[pipeline] allFilings forward 수집 완료: rows={rows} · "
-            f"elapsed={time.monotonic() - started:.1f}s",
+            f"[pipeline] allFilings forward 수집 완료: rows={rows} · elapsed={time.monotonic() - started:.1f}s",
             flush=True,
         )
     except Exception as exc:  # noqa: BLE001 — 수집 실패 격리(다음 sync 자연 회복)
