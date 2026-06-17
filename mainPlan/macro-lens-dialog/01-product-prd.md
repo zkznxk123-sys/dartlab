@@ -1,6 +1,6 @@
 # 01. 제품 PRD
 
-상태: 비전 PRD v0.1
+상태: 비전 PRD v0.2
 범위: 터미널에서 여는 Macro Lens 심층분석 다이얼로그.
 
 ---
@@ -14,7 +14,8 @@
 3. 그 연결은 섹터 일반론인가, 이 회사 고유 노출인가.
 4. 차트에서 같이 움직인 지표는 진짜 설명력인가, 우연한 동행인가.
 5. 환율·금리·유가·수출 같은 변수가 변하면 매출·마진·현금흐름·가치평가 중 어디가 먼저 흔들리는가.
-6. 이 분석에서 모르는 것은 무엇인가.
+6. 어떤 연결은 강하고, 어떤 연결은 표본 부족·결손·낮은 설명력 때문에 닫아야 하는가.
+7. 이 분석에서 모르는 것은 무엇인가.
 
 Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이다. 핵심은 단정이 아니라 **전파 경로 + 신뢰도 + 반증 조건**이다.
 
@@ -32,7 +33,25 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 
 ---
 
-## 3. 다이얼로그 정보 구조
+## 3. 분석 코어 기능
+
+Macro Lens가 분석의 핵이 되려면 다이얼로그가 다음 7개 산출물을 한 흐름으로 보여줘야 한다.
+
+| 산출물 | 답하는 질문 | 소유 |
+|---|---|---|
+| `Macro Regime Evidence` | 국면 판단의 근거 지표와 기준일은 무엇인가 | `macro` |
+| `Macro Driver Registry` | 환율·금리·물가·교역 driver의 canonical id와 방향성 의미는 무엇인가 | `macro`/contracts |
+| `Transmission Edge` | driver가 어느 섹터와 재무 line으로 전파될 수 있는가 | `macro.transmission` |
+| `Company Exposure` | 이 회사가 그 driver에 실제로 노출돼 있는가 | `analysis.macroExposure` |
+| `Financial Checkpoint` | 매출·마진·부채·현금흐름 중 무엇을 봐야 하는가 | terminal/company |
+| `Valuation Lever` | 할인율·성장률·마진·multiple 중 어느 가정이 흔들리는가 | Macro Lens view-model |
+| `Falsifier` | 동행상관, peer dispersion, 회귀 품질이 이 thesis를 약하게 만드는가 | chart/analysis |
+
+단일 점수는 금지한다. 사용자가 driver 하나를 선택하면 `근거 지표 → 전파 edge → 회사 checkpoint → 반증`까지 추적되어야 한다.
+
+---
+
+## 4. 다이얼로그 정보 구조
 
 ### 헤더
 
@@ -62,7 +81,7 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 - 한 지표로 국면 단정.
 - KR 회사에 US 지표를 직접 적용하는 단정.
 
-### 탭 2 — 지표
+### 탭 2 — 지표·Driver
 
 질문: **어떤 지표가 지금 판단을 만들었나?**
 
@@ -92,7 +111,7 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 - 다이얼로그 내부 대형 차트 복제.
 - 기준일 없는 숫자.
 
-### 탭 3 — 섹터/종목 영향
+### 탭 3 — 전파 지도
 
 질문: **이 종목에는 어떤 경로로 중요할 수 있나?**
 
@@ -105,6 +124,7 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 2. `Driver Chain Map`
    - 예: `USD/KRW → 수출/환산 → 매출 성장률 → 영업이익률 → PER/PBR`.
    - 예: `금리 → 이자비용/할인율 → 순이익/밸류에이션`.
+   - 각 edge는 `source series`, `sign`, `lag`, `confidence`, `evidenceLevel`을 갖는다.
 
 3. `Company Checkpoints`
    - 수출/환율: 해외 매출, FX 손익, 원가 구조.
@@ -116,6 +136,10 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
    - 최근 N개월 월수익률 기준 동행상관.
    - 동종 peer와 비슷하게 움직였는지 여부.
    - "인과 아님" 고정 라벨.
+
+5. `Exposure Quality`
+   - `nObs`, `rSquared`, `window`, `lag`, `coverage`.
+   - 낮은 품질이면 숫자를 숨기고 "정성 경로만 표시"로 내린다.
 
 금지:
 
@@ -140,6 +164,9 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 - affected driver
 - expected direction
 - required company evidence
+- impacted financial line
+- valuation lever
+- falsifier to check
 - blocked/missing reason
 - 다음으로 볼 위치: 재무제표 분석/시나리오 시뮬레이터
 
@@ -165,27 +192,28 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 
 ---
 
-## 4. 진입점
+## 5. 진입점
 
 하나의 다이얼로그를 여러 입구에서 연다. 입구에 따라 초기 탭과 포커스만 다르다.
 
 | 입구 | 초기 탭 | 동작 |
 |---|---|---|
 | 좌측 `마켓 펄스` 헤더/국면 | 국면 | KR/US phase 설명으로 포커스 |
-| 좌측 순풍/역풍 섹터 칩 | 섹터/종목 영향 | 해당 업종 tailwind 행 포커스 |
-| 상단 KPI ticker 지표 | 지표 | 해당 `MACRO_SERIES.id` 행 포커스 |
-| 차트 `경제지표` 메뉴 | 지표 | 선택 가능한 지표 표 포커스 |
-| 차트 ECON 오버레이 legend/tooltip | 섹터/종목 영향 | co-movement falsifier 포커스 |
+| 좌측 순풍/역풍 섹터 칩 | 전파 지도 | 해당 업종 tailwind 행 포커스 |
+| 상단 KPI ticker 지표 | 지표·Driver | 해당 `MACRO_SERIES.id` 행 포커스 |
+| 차트 `경제지표` 메뉴 | 지표·Driver | 선택 가능한 지표 표 포커스 |
+| 차트 ECON 오버레이 legend/tooltip | 전파 지도 | co-movement falsifier 포커스 |
 
 ---
 
-## 5. 성공 기준
+## 6. 성공 기준
 
-사용자는 30초 안에 세 문장으로 답할 수 있어야 한다.
+사용자는 30초 안에 네 문장으로 답할 수 있어야 한다.
 
 1. 지금 KR/US macro regime은 무엇인가.
 2. 어떤 지표가 그 판단을 만들었나.
-3. 이 종목에는 어떤 경로로 중요할 수 있나.
+3. 이 종목에는 어떤 driver가 어떤 전파 경로로 중요할 수 있나.
+4. 이 연결에서 무엇이 약하거나 아직 모르는가.
 
 실패 기준:
 
@@ -193,4 +221,4 @@ Macro Lens의 목적은 이 질문을 한 다이얼로그에서 답하는 것이
 - 차트 오버레이와 같은 내용을 다시 그린다.
 - 단일 점수/등급으로 매크로 영향을 뭉갠다.
 - 매수/매도 또는 목표주가로 읽힌다.
-
+- `source/date/value`와 품질 라벨 없이 beta나 민감도를 보여준다.
