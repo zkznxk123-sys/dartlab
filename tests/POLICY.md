@@ -209,7 +209,7 @@ $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_out
 | `eval-full` | nightly | — | - | 30m |
 | `mutation-smoke` | fast | ✅ | - | 5m |
 | `test-coverage-gate` | fast | ✅ | - | 5m |
-| `test-full` | full | ✅ | python | 20m |
+| `test-full` | full | ✅ | python | 60m |
 | `fixture-integration` | full | ✅ | - | 15m |
 | `cross-os-smoke` | full | ✅ | os | 20m |
 | `product-smoke-wheel` | full | ✅ | - | 30m |

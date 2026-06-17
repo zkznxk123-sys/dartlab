@@ -312,6 +312,7 @@ GATES: dict[str, Gate] = {
             "--ignore=tests/realData "
             "{cov_flags} --benchmark-disable"
         ),
+        timeout_minutes=60,
     ),
     "fixture-integration": Gate(
         name="fixture-integration",
