@@ -88,10 +88,10 @@ export function fetchLastCheck(workflowFile: string): Promise<{ at: string; conc
 	});
 }
 
-/** ISO → '3시간 전 (06-12 23:14)' 식 상대+절대 병기 (KST 로컬 표기). */
-export function fmtSync(iso: string, lang: 'kr' | 'en'): string {
+/** ISO → { rel:'3시간 전', abs:'06-12 23:14' } (KST 로컬). 셀에서 상대=1줄·절대=다음 줄로 쌓아 렌더. */
+export function fmtSyncParts(iso: string, lang: 'kr' | 'en'): { rel: string; abs: string } {
 	const t = new Date(iso);
-	if (Number.isNaN(t.getTime())) return '—';
+	if (Number.isNaN(t.getTime())) return { rel: '—', abs: '' };
 	const mins = Math.max(0, Math.round((Date.now() - t.getTime()) / 60000));
 	const rel =
 		mins < 60
@@ -106,7 +106,13 @@ export function fmtSync(iso: string, lang: 'kr' | 'en'): string {
 					? `${Math.round(mins / 1440)}d ago`
 					: `${Math.round(mins / 1440)}일 전`;
 	const pad = (n: number) => String(n).padStart(2, '0');
-	return `${rel} (${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())})`;
+	return { rel, abs: `${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())}` };
+}
+
+/** ISO → '3시간 전 (06-12 23:14)' 한 줄 병기 (parts 합성). */
+export function fmtSync(iso: string, lang: 'kr' | 'en'): string {
+	const { rel, abs } = fmtSyncParts(iso, lang);
+	return abs ? `${rel} (${abs})` : rel;
 }
 
 /** 신선도 톤 — 기대 주기(expectDays) 대비: ≤2× 정상, ≤4× 주의, 초과 = 지연(적색). */

@@ -2,7 +2,7 @@
 	// 데이터 출처 모달 — 터미널 전 패널의 원천·갱신주기·라이선스를 한 표로 명시 (공공누리 출처표시 의무 포함).
 	import type { Lang } from '../lib/types';
 	import { GOV_ATTRIBUTION, MACRO_ATTRIBUTION } from '@dartlab/ui-contracts';
-	import { fetchLastSync, fetchLastCheck, fmtSync, syncTone } from '../lib/syncStatus'; // 동기화 실측(HF lastCommit) + 마지막 점검(cron 실행)
+	import { fetchLastSync, fetchLastCheck, fmtSyncParts, syncTone } from '../lib/syncStatus'; // 동기화 실측(HF lastCommit) + 마지막 점검(cron 실행)
 
 	interface Props {
 		lang: Lang;
@@ -169,7 +169,7 @@
 										{@const iso = syncAt[r.path]}
 										{#if iso === undefined}<span class="dim">…</span>
 										{:else if iso === null}—
-										{:else}<span class={'syncDot ' + syncTone(iso, r.sync.expectDays)}>●</span> {fmtSync(iso, lang)}{/if}
+										{:else}{@const f = fmtSyncParts(iso, lang)}<span class={'syncDot ' + syncTone(iso, r.sync.expectDays)}>●</span> {f.rel}{#if f.abs}<span class="srcAbs">{f.abs}</span>{/if}{/if}
 									{:else}—{/if}
 								</td>
 								<td class="l mono srcSync">
@@ -177,7 +177,7 @@
 										{@const c = checkAt[r.path]}
 										{#if c === undefined}<span class="dim">…</span>
 										{:else if c === null}—
-										{:else}<span class={'syncDot ' + syncTone(c.at, r.check.expectDays)} title={c.conclusion ? 'run: ' + c.conclusion : ''}>●</span> {fmtSync(c.at, lang)}{/if}
+										{:else}{@const f = fmtSyncParts(c.at, lang)}<span class={'syncDot ' + syncTone(c.at, r.check.expectDays)} title={c.conclusion ? 'run: ' + c.conclusion : ''}>●</span> {f.rel}{#if f.abs}<span class="srcAbs">{f.abs}</span>{/if}{/if}
 									{:else}—{/if}
 								</td>
 								<td class="l srcLic">{T(r.license.kr, r.license.en)}</td>

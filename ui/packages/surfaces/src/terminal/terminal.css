@@ -268,9 +268,11 @@
 .dlTerm .rkChips { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; min-width: 0; }
 .dlTerm .rkChip { font-family: var(--cond); font-size: 8.5px; line-height: 1.15; white-space: nowrap; }
 
-/* 출처 모달 — 동기화 실측 (HF lastCommit) 신선도 점 */
+/* 출처 모달 — 마지막 변경(HF lastCommit)·마지막 점검(cron) 신선도 점 */
 .dlTerm .srcSync { white-space: nowrap; font-size: 9.5px; }
 .dlTerm .syncDot { font-size: 8px; vertical-align: 1px; }
+/* 절대 일자(MM-DD HH:MM)는 상대시간 아래 줄에 — 컬럼 폭 절약 + 가독 */
+.dlTerm .srcAbs { display: block; padding-left: 11px; color: var(--dimmer); font-size: 9px; }
 
 /* 정량재무제표 다이얼로그 터미널 스킨 — viewer FinanceDialog/Pane/Table 의 --fin-* 토큰 오버라이드.
    렌더러는 viewer 와 한몸(두 입구) — 여기서는 색·각·폰트만 터미널 문법으로 바꾼다. */
@@ -776,7 +778,7 @@
 .srcTable tbody tr { cursor: default; }
 .srcTable td { vertical-align: top; line-height: 1.45; }
 .srcPath { font-size: 10px; color: var(--dl-ink-mute, #8a93a3); }
-.srcLic { color: var(--dl-ink-mute, #8a93a3); }
+.srcLic { color: var(--dl-ink-mute, #8a93a3); white-space: nowrap; }
 .srcLatest { font-size: 10px; color: var(--dl-ink, #cfd5e0); white-space: nowrap; }
 /* 재무 유형 라벨 기준 소절은 FinTypeLegendDialog(좌측 레일 TYPE 컬럼 ⓘ)로 이전 — 출처 모달은 데이터 출처만 다룬다. */
 .srcNotes { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 3px; border-top: 1px solid var(--dl-line, #1b2130); }
