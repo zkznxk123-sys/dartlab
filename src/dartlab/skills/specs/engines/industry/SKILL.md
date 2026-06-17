@@ -189,6 +189,21 @@ dartlab.industry("semiconductor", summary=True, year="2024")
 ```
 
 ```text
+Industry().edges(industryId="...", stockCode="...")
+→ DataFrame  # 공급망/거래 관계 (공시인용 evidence)
+   from코드/from이름 : str   # 공급사
+   to코드/to이름 : str       # 매출처
+   관계 : str               # supplier / customer / affiliate / investor
+   산업 : str
+   신뢰도 : float           # 0~1
+   소스 : str               # docs_table(강) / network(출자) / docs(언급, 약)
+   근거 : str               # 추출 본문 단서
+   거래액 : float | None     # 억원 (공시 「주요 매입처」 추출, 누락 None — 0 채움 금지)
+   의존도(%) : float | None  # 매입비중(supplier 매출처 의존도). 추출 천장 낮아 대부분 None
+   # ★커버리지 빈곤은 화면 1급시민 — "SPLC식"·"Leontief/IO 승수" 과대포장 금지
+```
+
+```text
 Company("005930").industry()
 → dict
    chainId : str             # "semiconductor"

@@ -302,7 +302,11 @@ class Industry:
         Returns
         -------
         pl.DataFrame
-            columns: from코드, from이름, to코드, to이름, 관계, 산업, 신뢰도, 소스, 근거
+            columns: from코드, from이름, to코드, to이름, 관계, 산업, 신뢰도, 소스, 근거, 거래액, 의존도(%)
+
+            - ``거래액``: 거래 금액(억원). 공시 「주요 매입처」 표 추출, 누락은 None(0 채움 금지).
+            - ``의존도(%)``: 매입비중(공급사 매출처 의존도, type=supplier). 추출 천장 낮음 — 대부분 None.
+              ★커버리지 빈곤(현 추출 amount 소수)은 화면 1급시민, "SPLC식"·"IO 승수" 과대포장 금지.
 
         Raises:
             없음 — manifest 없으면 빈 DataFrame.
@@ -353,6 +357,8 @@ class Industry:
                     "신뢰도": pl.Float64,
                     "소스": pl.Utf8,
                     "근거": pl.Utf8,
+                    "거래액": pl.Float64,
+                    "의존도(%)": pl.Float64,
                 }
             )
 
@@ -367,6 +373,9 @@ class Industry:
                 "신뢰도": [e.confidence for e in filtered],
                 "소스": [e.source for e in filtered],
                 "근거": [e.evidence for e in filtered],
+                # 거래액(억원)·의존도(%)=매입비중 — 공시인용 evidence (Killer#2). 추출 누락분은 None(0 채움 금지).
+                "거래액": [e.amount for e in filtered],
+                "의존도(%)": [e.ratio for e in filtered],
             }
         )
 
