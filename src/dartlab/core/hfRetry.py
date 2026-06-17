@@ -37,9 +37,11 @@ _TRANSIENT_MSG_RE = re.compile(
 
 
 def _isRetryable(exc: Exception) -> bool:
-    """transient(재시도 가치) 여부 — 직접 429/503/504, 또는 LFS 래핑 RuntimeError(원인 429·메시지 transient)."""
-    from huggingface_hub.errors import HfHubHTTPError
+    """transient 여부 — HTTP 백오프, HF cache miss, LFS 래핑 RuntimeError."""
+    from huggingface_hub.errors import HfHubHTTPError, LocalEntryNotFoundError
 
+    if isinstance(exc, LocalEntryNotFoundError):
+        return True
     if isinstance(exc, HfHubHTTPError):
         return getattr(getattr(exc, "response", None), "status_code", None) in _RETRYABLE_STATUS
     cause = getattr(exc, "__cause__", None)
@@ -96,9 +98,10 @@ def parseRetryWait(exc: Exception, attempt: int) -> int:
 def retryHfCall(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
     """HF API 호출을 transient 백오프로 감싼다.
 
-    재시도 대상: (1) HfHubHTTPError 429/503/504, (2) LFS 업로드 래핑
-    RuntimeError("Error while uploading ...") 처럼 원인이 429 이거나 메시지가
-    transient 인 경우. 그 외(인증·400 등 fatal)는 즉시 raise.
+    재시도 대상: (1) HfHubHTTPError 429/503/504, (2) HF Hub cache/metadata
+    전파 타이밍의 LocalEntryNotFoundError, (3) LFS 업로드 래핑 RuntimeError
+    ("Error while uploading ...") 처럼 원인이 429 이거나 메시지가 transient 인 경우.
+    그 외(인증·400 등 fatal)는 즉시 raise.
 
     Args:
         fn: api.create_commit · api.upload_file · api.upload_folder 등.

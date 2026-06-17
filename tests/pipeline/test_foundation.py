@@ -69,6 +69,8 @@ def test_hashing_diff(tmp_path: Path) -> None:
 
 def test_hf_retry_promoted() -> None:
     """core.hfRetry — LFS-RuntimeError-429 unwrap retry & non-transient 즉시 raise."""
+    from huggingface_hub.errors import LocalEntryNotFoundError
+
     from dartlab.core.hfRetry import parseRetryWait, retryHfCall
 
     assert parseRetryWait(RuntimeError("retry this action in 2 minutes"), 0) == 150
@@ -91,5 +93,15 @@ def test_hf_retry_promoted() -> None:
         assert calls["n"] == 2
         with pytest.raises(ValueError):
             retryHfCall(lambda: (_ for _ in ()).throw(ValueError("400 bad")))
+        calls["n"] = 0
+
+        def flakyLocalEntry():
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise LocalEntryNotFoundError("metadata propagation")
+            return "ok"
+
+        assert retryHfCall(flakyLocalEntry) == "ok"
+        assert calls["n"] == 2
     finally:
         hr.time.sleep = orig
