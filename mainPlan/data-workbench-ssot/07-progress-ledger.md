@@ -34,7 +34,15 @@
 
 작업대(코어+테스트+가드+문서+규칙)는 *완성·강제됨*. 남은 건 미이관 소스의 *채택*(가드가 신규 위반 차단·debt ratchet down).
 
-## NEXT (재개 시 — 미이관 9 baseline 부채 ratchet)
+## 추가 이관 (2026-06-17 후속 wave)
+- [x] **macro·gov(price·index)·productIndex·index·fred 이관** (01d3a91bd) — 코어에 `requestParquetWholeFile` 추가. 캐시 Map 다수 폐기. baseline **9→7**. legacy 무인자(ui/web·localCompanyPort)=module-local fallback(가드 allowlist 5건: finance·macro·gov·idx·product).
+- 잔여 baseline **7** = 전부 *다른 오리진*이라 P2 선행 필요: 로컬 SSE(aiSource)·export(/api ×3)·naver 워커·news 워커·gov dev `/__gov`.
+
+## NEXT (재개 시 — P2 오리진 + 로컬 게이트로 잔여 7 ratchet)
+- **P2 오리진 레지스트리 확장**: `newsWorker`·`naverWorker`(env-gate·dev `/__news`·`/__naver` 분기 → 레지스트리로) → newsSource·naverPriceSource 를 `core.request`(JSON) 로 이관. `landingJson` 오리진 → relationsSource·industryPoolSource(loadJson) 이관.
+- **로컬 provider 게이트** `adapters/local/api/`: aiSource(SSE)·exportSource(/api ×3)·gov dev `/__gov` 를 단일 게이트로. localApi 오리진(어댑터 apiBase 주입형 — 정적 레지스트리와 다른 처리 필요). SSE 는 캐시 부적합 → 게이트가 stream 경로 분리.
+- 각 이관 후 가드 `--write-baseline` 로 ratchet, 0 수렴 목표.
+- **P4 폴더 구조화**(03): `cache/`→`data/cache/`·`hfRange`→`data/parquet/`·`origin.ts`→`data/origins/hf.ts`(re-export 다리). 마지막.
 
 1. **reportSource 이관** — 11 load 함수의 `cached()`+11 Map 을 코어 requestParquetRows 로 교체(각 함수 `core` 인자). `publicReportPort(core)` 로 변경 + createPublicRuntime·createLocalRuntime 양쪽 `report: publicReportPort(dataCore)` 전달. 각 함수 `cacheKey=report.{metric}:{code}`. tsc+svelte-check green → 커밋.
 2. financeSource(rowsCache·bundleCache)·macroSource(srcCache)·productIndexSource·gov*·price 순 이관(05 §1).
