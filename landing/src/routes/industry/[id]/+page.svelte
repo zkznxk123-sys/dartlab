@@ -1,12 +1,39 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
-	import { FreshnessBadge } from '@dartlab/ui-surfaces/map';
+	import { FreshnessBadge, rollupProfitPool } from '@dartlab/ui-surfaces/map';
 
 	let { data }: { data: PageData } = $props();
 	let ind = $derived(data.data);
 	let stages = $derived(ind.stages || []);
 	let edges = $derived(ind.edges || []);
+
+	// Profit-pool 격자 — "이익은 어느 공정 단계가 버나" (이익집중 ≠ 매출집중).
+	// dual-source: 브라우저 표시용 롤업, 엔진 buildIndustrySummary 가 캐논 (07 §구멍1).
+	let profitPool = $derived(rollupProfitPool(stages));
+	// 마진 산출가능 stage 만 2D 플롯 (opMargin 결손 stage 는 격자 제외 — 0 채움 금지).
+	let poolPlot = $derived.by(() => {
+		const plottable = profitPool.filter((s) => s.opMarginPct !== null && s.revenue > 0);
+		if (plottable.length === 0) return null;
+		const revMax = Math.max(...plottable.map((s) => s.revenue));
+		const margins = plottable.map((s) => s.opMarginPct as number);
+		const yMin = Math.min(0, ...margins);
+		const yMax = Math.max(0, ...margins);
+		const yRange = yMax - yMin || 1;
+		const cMax = Math.max(...plottable.map((s) => s.companyCount));
+		const bubbles = plottable.map((s) => ({
+			...s,
+			xPct: revMax > 0 ? (s.revenue / revMax) * 100 : 0,
+			yPct: (((s.opMarginPct as number) - yMin) / yRange) * 100,
+			size: 22 + Math.sqrt(s.companyCount / (cMax || 1)) * 34
+		}));
+		return { bubbles, yMin, yMax, zeroPct: ((0 - yMin) / yRange) * 100 };
+	});
+	// 마진 결손 stage (플롯 제외 — 정직 가드)
+	let poolMissing = $derived(profitPool.filter((s) => s.opMarginPct === null && s.companyCount > 0));
+	function fmtMargin(v: number | null): string {
+		return v === null ? '—' : `${v}%`;
+	}
 	let stats = $derived((data as any).stats);
 	let indMovers = $derived((data as any).movers || {});
 	let meta = $derived((data as any).meta);
@@ -230,6 +257,41 @@
 					</div>
 				{/if}
 			</div>
+		</section>
+	{/if}
+
+	<!-- Profit-pool 격자 — 이익은 어느 단계가 버나 -->
+	{#if poolPlot}
+		<section class="sec">
+			<h2>이익은 어느 공정 단계가 버나</h2>
+			<p class="pool-sub">매출규모(가로) × 영업이익률(세로). 매출이 큰 단계가 이익률도 높은 건 아니다. 버블 크기 = 기업 수.</p>
+			<div class="pool-plot" style="--zero:{poolPlot.zeroPct}%">
+				<div class="pool-yaxis">
+					<span>{poolPlot.yMax}%</span>
+					<span class="pool-zero-label">0%</span>
+					<span>{poolPlot.yMin}%</span>
+				</div>
+				<div class="pool-area">
+					<div class="pool-zeroline"></div>
+					{#each poolPlot.bubbles as b}
+						<div
+							class="pool-bubble"
+							class:neg={(b.opMarginPct ?? 0) < 0}
+							style="left:{b.xPct}%; bottom:{b.yPct}%; width:{b.size}px; height:{b.size}px"
+							title="{b.name} · 영업이익률 {fmtMargin(b.opMarginPct)} · 매출 {formatRev(b.revenue)} · {b.companyCount}사 · 커버리지 {Math.round(b.coverageRatio * 100)}%"
+						>
+							<span class="pool-blabel">{b.name}<br /><strong>{fmtMargin(b.opMarginPct)}</strong></span>
+						</div>
+					{/each}
+					<div class="pool-xlabel">매출규모 →</div>
+				</div>
+			</div>
+			<p class="pool-caption">
+				상장사 기준 · 영업이익률 = 매출가중(Σ영업이익/Σ매출) · 각 단계 커버리지(opMargin 산출가능 비율) 호버 표시.
+				{#if poolMissing.length > 0}
+					<br />마진 미상 단계(opMargin 결손, 격자 제외): {poolMissing.map((s) => `${s.name}(${s.companyCount}사)`).join(', ')}.
+				{/if}
+			</p>
 		</section>
 	{/if}
 
@@ -769,5 +831,89 @@
 			transform: rotate(90deg);
 			justify-content: center;
 		}
+		.pool-area {
+			height: 220px;
+		}
+	}
+
+	/* Profit-pool 격자 */
+	.pool-sub {
+		margin: 4px 0 14px;
+		color: #8b95a7;
+		font-size: 13px;
+	}
+	.pool-plot {
+		display: flex;
+		gap: 8px;
+	}
+	.pool-yaxis {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: flex-end;
+		width: 44px;
+		padding: 6px 0 22px;
+		color: #6b7280;
+		font-size: 11px;
+		font-variant-numeric: tabular-nums;
+	}
+	.pool-zero-label {
+		color: #4b5563;
+	}
+	.pool-area {
+		position: relative;
+		flex: 1;
+		height: 280px;
+		background: #0f1219;
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+		margin-bottom: 18px;
+	}
+	.pool-zeroline {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: var(--zero, 50%);
+		border-top: 1px dashed #2a3142;
+	}
+	.pool-bubble {
+		position: absolute;
+		transform: translate(-50%, 50%);
+		border-radius: 50%;
+		background: color-mix(in srgb, #34d399 22%, transparent);
+		border: 1.5px solid #34d399;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		cursor: default;
+	}
+	.pool-bubble.neg {
+		background: color-mix(in srgb, #f87171 22%, transparent);
+		border-color: #f87171;
+	}
+	.pool-blabel {
+		font-size: 10px;
+		line-height: 1.15;
+		color: #e5e9f0;
+		white-space: nowrap;
+		pointer-events: none;
+	}
+	.pool-blabel strong {
+		font-size: 11px;
+		font-variant-numeric: tabular-nums;
+	}
+	.pool-xlabel {
+		position: absolute;
+		right: 8px;
+		bottom: 4px;
+		color: #6b7280;
+		font-size: 11px;
+	}
+	.pool-caption {
+		margin: 0;
+		color: #6b7280;
+		font-size: 12px;
+		line-height: 1.5;
 	}
 </style>

@@ -16,3 +16,6 @@ export { default as FreshnessBadge } from './components/FreshnessBadge.svelte';
 export { default as SectorHealthCard } from './components/SectorHealthCard.svelte';
 export { default as ShockSimulator } from './components/ShockSimulator.svelte';
 export { default as TutorialTour } from './components/TutorialTour.svelte';
+// profit-pool stage 롤업 (순수 데이터 변환 — industries/{id}.json → 격자, dual-source 표시층)
+export { rollupProfitPool } from './industryPool';
+export type { IndustryStageRollup, ProfitPoolStage, ProfitPoolNode } from './industryPool';
