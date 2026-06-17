@@ -152,8 +152,7 @@
 						<th class="l">{T('산출물', 'ARTIFACT')}</th>
 						<th class="l">{T('갱신', 'CADENCE')}</th>
 						<th class="l">{T('데이터 기준일', 'DATA AS-OF')}</th>
-						<th class="l" title={T('HF dataset 마지막 실제 push 시각 (tree lastCommit) — 데이터가 마지막으로 바뀐 때.', 'measured last push to HF dataset (tree lastCommit) — when the data last changed')}>{T('마지막 변경', 'LAST CHANGE')}</th>
-						<th class="l" title={T('담당 cron 워크플로의 마지막 실행 시각 (GitHub Actions). 데이터 변경이 없어도 매일 점검은 돈다 — 분기 데이터가 안 바뀌어 변경이 오래돼 보여도 점검이 살아있으면 정상.', "responsible cron workflow's last run (GitHub Actions). The daily check runs even when data doesn't change")}>{T('마지막 점검', 'LAST CHECK')}</th>
+						<th class="l" title={T('파이프라인 상태 — 점검: 담당 워크플로 마지막 실행(살아있나) · 변경: 데이터 마지막 push(바뀐 때). 분기 데이터는 변경이 없어도 점검이 돌면 정상.', 'pipeline status — check: last workflow run (alive?) · change: last data push (when it changed). Quarterly data can be unchanged yet healthy as long as checks keep running.')}>{T('상태', 'STATUS')}</th>
 						<th class="l">{T('라이선스·조건', 'LICENSE')}</th>
 					</tr></thead>
 					<tbody>
@@ -164,20 +163,16 @@
 								<td class="l mono srcPath">{r.path}</td>
 								<td class="l">{T(r.cadence.kr, r.cadence.en)}</td>
 								<td class="l mono srcLatest">{r.latest?.() || '—'}</td>
-								<td class="l mono srcSync">
-									{#if r.sync}
-										{@const iso = syncAt[r.path]}
-										{#if iso === undefined}<span class="dim">…</span>
-										{:else if iso === null}—
-										{:else}{@const f = fmtSyncParts(iso, lang)}<span class={'syncDot ' + syncTone(iso, r.sync.expectDays)}>●</span> {f.rel}{#if f.abs}<span class="srcAbs">{f.abs}</span>{/if}{/if}
-									{:else}—{/if}
-								</td>
-								<td class="l mono srcSync">
-									{#if r.check}
-										{@const c = checkAt[r.path]}
-										{#if c === undefined}<span class="dim">…</span>
-										{:else if c === null}—
-										{:else}{@const f = fmtSyncParts(c.at, lang)}<span class={'syncDot ' + syncTone(c.at, r.check.expectDays)} title={c.conclusion ? 'run: ' + c.conclusion : ''}>●</span> {f.rel}{#if f.abs}<span class="srcAbs">{f.abs}</span>{/if}{/if}
+								<td class="l mono srcStat">
+									{#if r.check || r.sync}
+										{#if r.check}
+											{@const c = checkAt[r.path]}
+											<div class="statLine"><span class="statLabel">{T('점검', 'check')}</span>{#if c === undefined}<span class="dim">…</span>{:else if c === null}<span class="dim">—</span>{:else}{@const f = fmtSyncParts(c.at, lang)}<span class={'syncDot ' + syncTone(c.at, r.check.expectDays)} title={(c.conclusion ? 'run: ' + c.conclusion + ' · ' : '') + f.abs}>●</span> {f.rel}{/if}</div>
+										{/if}
+										{#if r.sync}
+											{@const iso = syncAt[r.path]}
+											<div class="statLine"><span class="statLabel">{T('변경', 'change')}</span>{#if iso === undefined}<span class="dim">…</span>{:else if iso === null}<span class="dim">—</span>{:else}{@const f = fmtSyncParts(iso, lang)}<span class={'syncDot ' + syncTone(iso, r.sync.expectDays)} title={f.abs}>●</span> {f.rel}{/if}</div>
+										{/if}
 									{:else}—{/if}
 								</td>
 								<td class="l srcLic">{T(r.license.kr, r.license.en)}</td>

@@ -268,11 +268,12 @@
 .dlTerm .rkChips { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; min-width: 0; }
 .dlTerm .rkChip { font-family: var(--cond); font-size: 8.5px; line-height: 1.15; white-space: nowrap; }
 
-/* 출처 모달 — 마지막 변경(HF lastCommit)·마지막 점검(cron) 신선도 점 */
-.dlTerm .srcSync { white-space: nowrap; font-size: 9.5px; }
+/* 출처 모달 — 상태 컬럼: 점검(파이프라인 실행)·변경(데이터 push) 한 칸 2줄, 라벨로 구분.
+   절대일자는 점 hover title. 두 신호를 '파이프라인 건강' 하나로 묶어 직관화. */
+.dlTerm .srcStat { white-space: nowrap; font-size: 9.5px; line-height: 1.55; }
+.dlTerm .statLine { display: flex; align-items: baseline; gap: 4px; }
+.dlTerm .statLabel { flex: 0 0 22px; color: #8794a5; font-size: 8.5px; }
 .dlTerm .syncDot { font-size: 8px; vertical-align: 1px; }
-/* 절대 일자(MM-DD HH:MM)는 상대시간 아래 줄에 — 컬럼 폭 절약 + 가독 */
-.dlTerm .srcAbs { display: block; padding-left: 11px; color: #aab4c2; font-size: 9px; }
 
 /* 정량재무제표 다이얼로그 터미널 스킨 — viewer FinanceDialog/Pane/Table 의 --fin-* 토큰 오버라이드.
    렌더러는 viewer 와 한몸(두 입구) — 여기서는 색·각·폰트만 터미널 문법으로 바꾼다. */
