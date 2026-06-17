@@ -115,8 +115,8 @@ function publicFilingPort(core: DataCore): FilingPort {
 	};
 }
 
-function publicFinancePort(): FinancePort {
-	return { bundle: loadTerminalFinance };
+function publicFinancePort(core: DataCore): FinancePort {
+	return { bundle: (code, scope) => loadTerminalFinance(core, code, scope) };
 }
 
 // 로컬 어댑터도 그대로 재사용 — 뉴스는 private 라 브라우저 직독 불가, 퍼블릭·로컬 모두 워커(/news) 단일 경로.
@@ -143,7 +143,7 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		index: createPublicIndexPort(),
 		filing: publicFilingPort(dataCore),
 		news: publicNewsPort(),
-		finance: publicFinancePort(),
+		finance: publicFinancePort(dataCore),
 		viewer: options.viewer,
 		macro: createHfMacroPort(),
 		report: createReportSource(dataCore),

@@ -4,7 +4,7 @@
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
 // 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
 import type { FinCard, FinMode, FinScope, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
-import { readParquetRows } from '../../../data/hfRange';
+import { createDataCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
 
@@ -131,38 +131,42 @@ function num(v: unknown): number | null {
 }
 
 // thstrm_add_amount = 누적(YTD) 금액 — 정량재무제표 표(분기단독 Q4=연간−Q3누적·누적freq)가 쓴다. 차트 번들엔
-// 불요지만 같은 rowsCache 를 공유(표·차트 1회 다운로드)하려 컬럼셋 통일.
+// 불요지만 같은 parquet read 를 공유(표·차트 1회 다운로드)하려 컬럼셋 통일.
 const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'thstrm_add_amount', 'ord'];
 
 // 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = 분기 (계약 FinMode·번들 정의는 contracts).
 
-// raw 행 캐시 — 연결(CFS)·별도(OFS)는 같은 parquet 안이라, 범위 토글 시 재다운로드 0.
-// CenterStack·RightStack 동시 호출도 다운로드 1 회만(중복 fetch 경쟁 제거).
-const rowsCache = new Map<string, Promise<RawRow[] | null>>();
-// (code, scope) 빌드 결과 캐시 — 같은 회사·범위 재요청은 즉시 resolve.
-const bundleCache = new Map<string, Promise<TerminalFinanceBundle | null>>();
+// raw 행 캐시·번들 결과 캐시(옛 rowsCache·bundleCache Map)는 폐기 — fetch 코어가 parquet read 레벨에서
+// 캐시(60분 TTL·LRU 256)·dedup 한다(데이터 워크벤치 SSOT 이관 P1). transform(번들 빌드)은 재실행되어도
+// read 는 공유되며, 연결(CFS)·별도(OFS)·차트·표가 같은 cacheKey(finance.rows:{code}) read 1회를 나눠 쓴다.
 
-function loadRows(code: string): Promise<RawRow[] | null> {
-	const hit = rowsCache.get(code);
-	if (hit) return hit;
-	const p = (async () => {
-		try {
-			const { rows } = await readParquetRows<RawRow>(`dart/finance/${code}.parquet`, { columns: FINANCE_COLUMNS });
-			return rows;
-		} catch (e) {
+// 회사 parquet raw 행 — core 가 read 레벨 캐시·dedup. 미존재/실패 = null(정직 폴백).
+function loadRows(core: DataCore, code: string): Promise<RawRow[] | null> {
+	return core
+		.requestParquetRows<RawRow>({
+			origin: 'hfRange',
+			path: `dart/finance/${code}.parquet`,
+			columns: FINANCE_COLUMNS,
+			cacheKey: `finance.rows:${code}`,
+			cache: { scope: 'memory', ttlMs: 3_600_000, maxEntries: 256 }
+		})
+		.catch((e) => {
 			console.warn('[terminal/finance] load failed', code, e);
 			return null;
-		}
-	})();
-	rowsCache.set(code, p);
-	return p;
+		});
 }
 
-// 정량재무제표 표(viewer FinanceDialog)용 raw 행 — bundle()(차트)과 같은 rowsCache 공유라 회사당 1회만
+// loadFinanceRows 는 landing(공시뷰어 provideFinanceRows)이 core 없이 (code)=>rows 콜백으로 주입한다 —
+// 시그니처 불변이 강행 제약. 따라서 이 경로 전용 core 를 모듈 내 lazy 생성(어댑터당 1 싱글턴 금지 원칙은
+// 어댑터 컨텍스트 한정 — 여기는 어댑터 밖 셸 주입 콜백이라, read 레벨 bounded 캐시 확보가 목적).
+let rowsOnlyCore: DataCore | null = null;
+const financeRowsCore = (): DataCore => (rowsOnlyCore ??= createDataCore());
+
+// 정량재무제표 표(viewer FinanceDialog)용 raw 행 — bundle()(차트)과 같은 core read 캐시 공유라 회사당 1회만
 // 다운로드. DuckDB-WASM 제거 후 표가 이 행으로 JS 집계(financeQuery). 미존재/실패 = null.
 export function loadFinanceRows(stockCode: string): Promise<RawRow[] | null> {
 	if (!browser) return Promise.resolve(null);
-	return loadRows(stockCode.trim());
+	return loadRows(financeRowsCore(), stockCode.trim());
 }
 
 // 범위에 파싱 가능한 데이터(분기·금액)가 있는지 — 가용 범위 판정용.
@@ -175,24 +179,20 @@ function scopeHasData(rows: RawRow[], fs: FinScope): boolean {
 	return false;
 }
 
-export function loadTerminalFinance(stockCode: string, scope?: FinScope): Promise<TerminalFinanceBundle | null> {
+// 터미널 재무 번들 — core 를 어댑터당 1 인스턴스로 주입(전역 싱글턴 금지). read 는 core 가 캐시·dedup 하고,
+// 번들 빌드(transform)는 재실행돼도 무거운 read 를 공유하므로 결과 레벨 bundleCache Map 은 폐기.
+export function loadTerminalFinance(core: DataCore, stockCode: string, scope?: FinScope): Promise<TerminalFinanceBundle | null> {
 	if (!browser) return Promise.resolve(null);
 	const code = stockCode.trim();
 	return (async () => {
-		const rows = await loadRows(code);
+		const rows = await loadRows(core, code);
 		if (!rows) return null;
 		const avail: FinScope[] = (['CFS', 'OFS'] as FinScope[]).filter((s) => scopeHasData(rows, s));
 		if (avail.length === 0) return null;
 		// 기본 = 연결 우선(최신성보다 우선) — 연결이 있으면 옛 분기여도 연결, 연결이 아예 없을 때만 별도. 지정 + 가용 시 그대로.
 		const fallback: FinScope = avail.includes('CFS') ? 'CFS' : 'OFS';
 		const useScope: FinScope = scope && avail.includes(scope) ? scope : fallback;
-		const ck = `${code}:${useScope}`;
-		let bp = bundleCache.get(ck);
-		if (!bp) {
-			bp = Promise.resolve(buildBundle(rows, useScope, avail));
-			bundleCache.set(ck, bp);
-		}
-		return bp;
+		return buildBundle(rows, useScope, avail);
 	})();
 }
 

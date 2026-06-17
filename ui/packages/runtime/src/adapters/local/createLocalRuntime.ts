@@ -23,7 +23,7 @@ import { localAiPort } from './sources/aiSource';
 import { localStoragePort } from './sources/storageSource';
 import { localCompanyPort } from './sources/companySource';
 import { localFilingPort } from './sources/filingSource';
-import { createDataCore } from '../../data/fetch/request';
+import { createDataCore, type DataCore } from '../../data/fetch/request';
 import { localScanPort } from './sources/scanSource';
 import { localViewerPort } from './sources/viewerSource';
 
@@ -37,8 +37,8 @@ export interface LocalRuntimeOptions {
 // 터미널 재무 번들의 SSOT 는 발행 HF parquet(dart/finance/{code}.parquet) 이다 — 로컬 /api 엔드포인트가
 // 아니라 macro 포트와 동일하게 공개 HF 소스를 공유한다(곧 "로컬이 깃헙페이지 자산을 공유"하는 공통 배선).
 // 28 표준계정 정규화·10 카드 계산이 financeSource 한곳에 있어 공개/로컬이 동일 결과 — silent fallback 아닌 단일 경로.
-function localFinancePort(): FinancePort {
-	return { bundle: loadTerminalFinance };
+function localFinancePort(core: DataCore): FinancePort {
+	return { bundle: (code, scope) => loadTerminalFinance(core, code, scope) };
 }
 
 export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime {
@@ -63,7 +63,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		filing: localFilingPort(apiBase, caches, dataCore),
 		// 뉴스 = private 라 브라우저 직독 불가 → 퍼블릭 워커(/news) 포트 그대로 재사용(price 와 동일 "공유 자산").
 		news: publicNewsPort(),
-		finance: localFinancePort(),
+		finance: localFinancePort(dataCore),
 		viewer: localViewerPort(),
 		macro: createHfMacroPort(),
 		report: createReportSource(dataCore), // 공통배선 — HF parquet 직독(백엔드 0, 어댑터 코어 주입). 옛 localReportPort 는 null 스텁이라 폐기.
