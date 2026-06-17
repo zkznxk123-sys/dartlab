@@ -110,11 +110,11 @@ const baseMetrics: MetricDef[] = [
 	},
 	{
 		key: 'marketShare',
-		label: '점유율',
+		label: '상장사매출비중',
 		group: 'identity',
 		type: 'number',
 		unit: '%',
-		definition: '산업 내 매출 점유율.',
+		definition: 'KSIC 산업 노드 내 상장 구성사 매출 합 대비 비중. 비상장·수입 제외라 실제 시장점유율 아님.',
 		higherBetter: true,
 		source: 'ecosystem',
 		format: pct()

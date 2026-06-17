@@ -141,7 +141,7 @@ export const PRESETS: Preset[] = [
 		id: 'industry-leader',
 		title: '산업 리더',
 		subtitle: '산업 순위 3위↑ + 흑자',
-		desc: '산업 내 매출 3위 이내 + 점유율 10%↑ + 영업이익 흑자 — 시장 지배력 회사',
+		desc: '산업 내 매출 3위 이내 + 상장사매출비중 10%↑ + 영업이익 흑자 — 상장사 풀 내 상위 회사',
 		category: 'leader',
 		conds: [
 			{ metric: 'industryRank', op: '<=', value: 3 },
