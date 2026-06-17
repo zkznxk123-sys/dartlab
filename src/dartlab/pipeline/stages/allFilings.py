@@ -12,9 +12,19 @@ searchIndexDelta 의 옛 이중 push 제거됨). lookback 일수는 ``SYNC_LOOKB
 from __future__ import annotations
 
 import os
+import time
 from datetime import date, timedelta
 
 from dartlab.pipeline.types import PipelineMode, StageResult
+
+_TRANSIENT_ERROR_NAMES = (
+    "Timeout",
+    "Connect",
+    "Connection",
+    "Network",
+    "Protocol",
+    "Transport",
+)
 
 
 def _recentDates(days: int) -> list[str]:
@@ -45,6 +55,67 @@ def _monthDays(ym: str) -> list[str]:
     y, m = int(ym[:4]), int(ym[4:6])
     last = calendar.monthrange(y, m)[1]
     return [f"{ym}{d:02d}" for d in range(1, last + 1)]
+
+
+def _stageRetries() -> int:
+    """Return transient retry count for allFilings source-owner stages."""
+    raw = os.environ.get("DART_ALLFILINGS_STAGE_RETRIES", "2")
+    try:
+        return max(0, int(raw))
+    except ValueError:
+        return 2
+
+
+def _retrySleepSeconds(attempt: int) -> float:
+    """Backoff seconds for transient DART list/content failures."""
+    raw = os.environ.get("DART_ALLFILINGS_RETRY_SLEEP_SECONDS")
+    if raw is not None:
+        try:
+            return max(0.0, float(raw))
+        except ValueError:
+            return 0.0
+    return min(30.0, float(2**attempt))
+
+
+def _isTransientError(exc: Exception) -> bool:
+    """Network/API transport failures are retryable; data contract errors are not."""
+    name = type(exc).__name__
+    text = str(exc).lower()
+    if isinstance(exc, OSError):
+        return True
+    if any(part in name for part in _TRANSIENT_ERROR_NAMES):
+        return True
+    return any(
+        token in text
+        for token in (
+            "timed out",
+            "timeout",
+            "connection",
+            "temporarily unavailable",
+            "too many requests",
+            "503",
+            "504",
+        )
+    )
+
+
+def _retryTransient(label: str, fn):
+    """Run a transient-prone source call with bounded retries."""
+    retries = _stageRetries()
+    for attempt in range(retries + 1):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 — stage-level transient gate
+            if attempt >= retries or not _isTransientError(exc):
+                raise
+            wait = _retrySleepSeconds(attempt)
+            print(
+                f"[pipeline] allFilings {label} 일시 실패 "
+                f"({attempt + 1}/{retries + 1}, {type(exc).__name__}: {exc}) — retry",
+                flush=True,
+            )
+            if wait > 0:
+                time.sleep(wait)
 
 
 def runAllFilings(
@@ -83,10 +154,10 @@ def runAllFilings(
     res = StageResult(category="allFilings")
 
     try:
-        collectMetaRange(start, end, showProgress=False)
+        _retryTransient("collectMetaRange", lambda: collectMetaRange(start, end, showProgress=False))
         rows = 0
         for d in dates:
-            df = fillContent(d, showProgress=False)
+            df = _retryTransient(f"fillContent {d}", lambda d=d: fillContent(d, showProgress=False))
             if df is not None:
                 rows += df.height
         res.rows = rows

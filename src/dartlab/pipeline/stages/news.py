@@ -9,9 +9,10 @@
 - ``runGdeltForward``(D): ``syncGdeltBackfill.py --start <today-N> --end <yesterday> --step-minutes
   <s> --markets ...`` + ``bulkUploadHf.py newsGdelt --since 86400``. yesterday(완성된 UTC 일) 까지
   N일 lookback upsert(누락 자가복구). N=env GDELT_LOOKBACK_DAYS(2), s=GDELT_STEP_MINUTES(360).
-- ``runNaverNews``(N): ``syncNaverNews.py --once --max-queries`` + ``bulkUploadHf.py newsNaver
-  --since 86400``. KR 제목+스니펫 → **private** repo. 무키 시 green-noop. max-queries=env
-  NAVER_MAX_QUERIES(200). 언론사 저작권 비공개 캐시 전용(공개 dartlab-data 안 감).
+- ``runNaverNews``(N): ``syncNaverNews.py --once --max-queries --pages --days`` +
+  ``bulkUploadHf.py newsNaver --since 86400``. KR 제목+스니펫 → **private** repo.
+  무키 시 green-noop. max-queries/pages/days=env ``NAVER_MAX_QUERIES``/``NAVER_PAGES``/
+  ``NAVER_DAYS``. 언론사 저작권 비공개 캐시 전용(공개 dartlab-data 안 감).
 """
 
 from __future__ import annotations
@@ -170,11 +171,12 @@ def runNaverNews(
 ) -> StageResult:
     """네이버 뉴스 (private) — KR fetch + bulk since-upload(newsNaver, private repo).
 
-    ``syncNaverNews.py --once --max-queries`` (KR 시총상위+매크로 시드, 제목+스니펫) →
-    ``data/news/private/naver`` upsert → ``bulkUploadHf.py newsNaver --since 86400`` 로
+    ``syncNaverNews.py --once --max-queries --pages --days`` (KR 상장사+매크로 시드,
+    제목+스니펫) → ``data/news/private/naver`` upsert → ``bulkUploadHf.py newsNaver --since 86400`` 로
     **private** repo(`eddmpython/dartlab-news-private`) push. 언론사 저작권 비공개 캐시 전용 —
     공개 dartlab-data 안 감. NAVER 자격증명 미설정 시 syncNaverNews 가 무해 종료(rc=0,
-    업로드 0) → green-noop. max-queries=env NAVER_MAX_QUERIES(200).
+    업로드 0) → green-noop. ``NAVER_MAX_QUERIES`` 기본 5000, ``NAVER_PAGES``/``NAVER_DAYS``
+    기본 1.
 
     Args:
         category: 카테고리 라벨.

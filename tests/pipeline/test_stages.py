@@ -121,12 +121,21 @@ def test_gdelt_forward_faithful(monkeypatch):
 
 
 def test_naver_faithful(monkeypatch):
-    """naverNews — syncNaverNews(--once --max-queries) + bulkUploadHf(newsNaver --since 86400)."""
+    """naverNews — syncNaverNews forward args + bulkUploadHf(newsNaver --since 86400)."""
     monkeypatch.setenv("NAVER_MAX_QUERIES", "200")
     mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.news")
     res = mod.runNaverNews(upload=True)
     scripts = [c[0] for c in calls]
-    assert scripts[0] == (".github/scripts/sync/syncNaverNews.py", "--once", "--max-queries", "200")
+    assert scripts[0] == (
+        ".github/scripts/sync/syncNaverNews.py",
+        "--once",
+        "--max-queries",
+        "200",
+        "--pages",
+        "1",
+        "--days",
+        "1",
+    )
     assert scripts[1] == (".github/scripts/sync/bulkUploadHf.py", "newsNaver", "--since", "86400")
     assert res.report.ok == 1
 

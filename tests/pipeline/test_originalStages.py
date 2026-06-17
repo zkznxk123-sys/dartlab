@@ -228,6 +228,104 @@ def test_run_allfilings_callable() -> None:
     assert callable(runAllFilings)
 
 
+def test_run_allfilings_retries_transient_collect(monkeypatch) -> None:
+    """runAllFilings — collectMetaRange transient timeout 은 bounded retry 후 계속 진행."""
+    import polars as pl
+
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("SYNC_LOOKBACK_DAYS", "1")
+    monkeypatch.setenv("DART_ALLFILINGS_STAGE_RETRIES", "1")
+    monkeypatch.setenv("DART_ALLFILINGS_RETRY_SLEEP_SECONDS", "0")
+
+    attempts = {"collect": 0, "fill": 0, "push": 0}
+
+    def flakyCollect(*args, **kwargs):
+        attempts["collect"] += 1
+        if attempts["collect"] == 1:
+            raise TimeoutError("timed out")
+        return 1
+
+    def fakeFill(*args, **kwargs):
+        attempts["fill"] += 1
+        return pl.DataFrame({"rcept_no": ["1", "2"]})
+
+    def fakePush(*args, **kwargs):
+        attempts["push"] += 1
+
+    monkeypatch.setattr(coll, "collectMetaRange", flakyCollect)
+    monkeypatch.setattr(coll, "fillContent", fakeFill)
+    monkeypatch.setattr(sync, "pushAllFilings", fakePush)
+
+    res = allFilings.runAllFilings(upload=True)
+
+    assert attempts == {"collect": 2, "fill": 1, "push": 1}
+    assert res.rows == 2
+    assert res.uploaded == 1
+    assert res.report.ok == 1
+    assert res.report.err == 0
+
+
+def test_run_allfilings_retries_transient_fill(monkeypatch) -> None:
+    """runAllFilings — fillContent transient timeout 도 날짜 단위로 retry."""
+    import polars as pl
+
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("SYNC_LOOKBACK_DAYS", "1")
+    monkeypatch.setenv("DART_ALLFILINGS_STAGE_RETRIES", "1")
+    monkeypatch.setenv("DART_ALLFILINGS_RETRY_SLEEP_SECONDS", "0")
+
+    attempts = {"fill": 0}
+    monkeypatch.setattr(coll, "collectMetaRange", lambda *args, **kwargs: 1)
+
+    def flakyFill(*args, **kwargs):
+        attempts["fill"] += 1
+        if attempts["fill"] == 1:
+            raise TimeoutError("timed out")
+        return pl.DataFrame({"rcept_no": ["1"]})
+
+    monkeypatch.setattr(coll, "fillContent", flakyFill)
+    monkeypatch.setattr(sync, "pushAllFilings", lambda *args, **kwargs: None)
+
+    res = allFilings.runAllFilings(upload=True)
+
+    assert attempts["fill"] == 2
+    assert res.rows == 1
+    assert res.uploaded == 1
+    assert res.report.ok == 1
+    assert res.report.err == 0
+
+
+def test_run_allfilings_reports_after_retry_exhausted(monkeypatch) -> None:
+    """runAllFilings — retry 소진 뒤에는 기존처럼 StageResult.err 로 격리."""
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("SYNC_LOOKBACK_DAYS", "1")
+    monkeypatch.setenv("DART_ALLFILINGS_STAGE_RETRIES", "1")
+    monkeypatch.setenv("DART_ALLFILINGS_RETRY_SLEEP_SECONDS", "0")
+
+    attempts = {"collect": 0}
+
+    def failingCollect(*args, **kwargs):
+        attempts["collect"] += 1
+        raise TimeoutError("timed out")
+
+    monkeypatch.setattr(coll, "collectMetaRange", failingCollect)
+
+    res = allFilings.runAllFilings(upload=False)
+
+    assert attempts["collect"] == 2
+    assert res.report.err == 1
+    assert res.report.ok == 0
+    assert "TimeoutError" in res.report.failures[0]
+
+
 def test_run_allfilings_reconcile_maps_summary(monkeypatch) -> None:
     """runAllFilingsReconcile — reconcile summary → StageResult(rows=pulled, uploaded=pushed, ok)."""
     from dartlab.gather.dart import allFilingsSync as collector
