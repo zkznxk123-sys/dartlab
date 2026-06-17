@@ -112,6 +112,8 @@ jobs:
           --optional-file catalog_snapshot.parquet
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '5'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '300'
 
       - name: Pull source search catalogs from HF
         run: |
