@@ -28,7 +28,9 @@ parser 의 `get_text()` 등으로 변환 (lxml 은 XML/HTML 양쪽 안전). sect
 from __future__ import annotations
 
 import io
+import os
 import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import polars as pl
@@ -136,6 +138,20 @@ def _collectOneRaw(client: DartClient, rceptNo: str) -> tuple[str | None, str]:
     if "<status>014" in text or "<status>013" in text:
         return (None, "no_body")
     return (None, "error")
+
+
+def _allFilingsWorkers(client: DartClient) -> int:
+    """allFilings document.xml fetch workers; default is bounded by DART key slots."""
+    raw = os.environ.get("DART_ALLFILINGS_WORKERS")
+    if raw is not None:
+        try:
+            return max(1, int(raw))
+        except ValueError:
+            return 1
+    slots = getattr(client, "_slots", None)
+    if isinstance(slots, list) and slots:
+        return max(1, min(4, len(slots)))
+    return 1
 
 
 # ═══════════════════════════════════════════
@@ -394,9 +410,13 @@ def fillContent(
     # Step 4: 본문 수집 — 신규 + retry.
     processedRows: dict[str, dict] = {}
     okCount = noBodyCount = errorCount = 0
-    for idx, metaRow in enumerate(targets):
+    workers = _allFilingsWorkers(client)
+    if showProgress:
+        _log.info("[%s] document.xml fetch workers=%d", period, workers)
+
+    def _recordResult(done: int, metaRow: dict, content: str | None, status: str) -> None:
+        nonlocal okCount, noBodyCount, errorCount
         rceptNo = metaRow["rcept_no"]
-        content, status = _collectOneRaw(client, rceptNo)
         processedRows[rceptNo] = _rowFromMeta(metaRow, content, status)
         if status == "ok":
             okCount += 1
@@ -404,15 +424,27 @@ def fillContent(
             noBodyCount += 1
         else:
             errorCount += 1
-        if showProgress and (idx + 1) % 100 == 0:
+        if showProgress and done % 100 == 0:
             _log.info(
                 "  [%d/%d] ok=%d no_body=%d error=%d",
-                idx + 1,
+                done,
                 len(targets),
                 okCount,
                 noBodyCount,
                 errorCount,
             )
+
+    if workers <= 1 or len(targets) <= 1:
+        for done, metaRow in enumerate(targets, start=1):
+            content, status = _collectOneRaw(client, metaRow["rcept_no"])
+            _recordResult(done, metaRow, content, status)
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            futures = {ex.submit(_collectOneRaw, client, metaRow["rcept_no"]): metaRow for metaRow in targets}
+            for done, fut in enumerate(as_completed(futures), start=1):
+                metaRow = futures[fut]
+                content, status = fut.result()
+                _recordResult(done, metaRow, content, status)
 
     # Step 5: 본문 0 건 성공 안전장치 — 최초 수집만 트리거 (incremental update 는
     # 기존 데이터 보존이 0건 가드보다 우선).

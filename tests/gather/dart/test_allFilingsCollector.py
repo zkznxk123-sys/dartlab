@@ -382,6 +382,46 @@ def test_fill_content_diff_retry(monkeypatch, tmp_path) -> None:
     assert rowsByRcept["R_NEW"]["fetch_status"] == "ok"
 
 
+def test_fill_content_parallel_workers_env(monkeypatch, tmp_path) -> None:
+    """DART_ALLFILINGS_WORKERS>1 이면 document.xml fetch 병렬 경로도 parquet 로 merge."""
+    import dartlab.config as _cfg
+    from dartlab.gather.dart import allFilingsCollector as mod
+
+    monkeypatch.setattr(_cfg, "dataDir", str(tmp_path))
+    monkeypatch.setenv("DART_ALLFILINGS_WORKERS", "2")
+    meta = pl.DataFrame(
+        [
+            {
+                "corp_code": f"00{i}",
+                "corp_name": f"C{i}",
+                "stock_code": f"00000{i}",
+                "corp_cls": "Y",
+                "rcept_dt": "20260529",
+                "rcept_no": f"R{i}",
+                "report_nm": "주요사항보고서",
+                "flr_nm": f"C{i}",
+            }
+            for i in range(3)
+        ]
+    )
+    _patchListFilings(monkeypatch, mod, meta)
+    calls: list[str] = []
+
+    def stubCollect(client, rceptNo):
+        calls.append(rceptNo)
+        return (f"<DOC>{rceptNo}</DOC>", "ok")
+
+    monkeypatch.setattr(mod, "_collectOneRaw", stubCollect)
+
+    df = mod.fillContent("20260529", client=_StubClient(), showProgress=False)
+    assert df is not None
+    rowsByRcept = {r["rcept_no"]: r for r in df.iter_rows(named=True)}
+
+    assert set(calls) == {"R0", "R1", "R2"}
+    assert set(rowsByRcept) == {"R0", "R1", "R2"}
+    assert {r["fetch_status"] for r in rowsByRcept.values()} == {"ok"}
+
+
 def test_collect_meta_day_always_calls_list_filings(monkeypatch, tmp_path) -> None:
     """기존 .parquet 존재 여부와 무관하게 listFilings 가 항상 호출됨 — idempotent diff 전제."""
     import dartlab.config as _cfg
