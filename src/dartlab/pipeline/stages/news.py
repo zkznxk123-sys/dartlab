@@ -194,7 +194,18 @@ def runNaverNews(
         StageResult(category='newsNaver', ...)
     """
     maxQ = os.environ.get("NAVER_MAX_QUERIES", "5000")  # 기본=전체 상장사 커버(옛 200=시총상위 100만)
-    rc1 = runScript(".github/scripts/sync/syncNaverNews.py", "--once", "--max-queries", maxQ)
+    pages = os.environ.get("NAVER_PAGES", "1")  # 1=일별 증분(최근 100), 10=백필(쿼리당 ≤1000)
+    days = os.environ.get("NAVER_DAYS", "1")  # 1=일별 cutoff, 0=백필(cutoff 없음)
+    rc1 = runScript(
+        ".github/scripts/sync/syncNaverNews.py",
+        "--once",
+        "--max-queries",
+        maxQ,
+        "--pages",
+        pages,
+        "--days",
+        days,
+    )
     res = StageResult(category="newsNaver")
     if rc1 != 0:
         res.report.err = 1

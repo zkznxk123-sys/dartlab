@@ -30,7 +30,14 @@ _log = logging.getLogger("syncNaverNews")
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="naver news daily archive cron (private)")
-    parser.add_argument("--days", type=int, default=1, help="네이버 lookback 윈도우")
+    parser.add_argument("--days", type=int, default=1, help="네이버 lookback 윈도우 (0=cutoff 없음=깊은 백필)")
+    parser.add_argument(
+        "--pages",
+        type=int,
+        default=1,
+        help="쿼리당 start 페이징 깊이 (1=최근 100건, 최대 10=1000건). 백필=10. "
+        "⚠ 네이버 일 쿼터 25k — 종목×pages 가 이를 넘으면 --stock-seed-limit 로 슬라이스해 여러 날 나눠 실행.",
+    )
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--max-queries", type=int, default=5000, help="시드 상한 (smoke/test). 기본=전체 상장사 커버")
     parser.add_argument("--stock-seed-limit", type=int, default=5000, help="시총 상위 N 종목 (기본 5000=전체 상장사)")
@@ -69,8 +76,9 @@ def main(argv: list[str] | None = None) -> int:
         market="KR",
         days=args.days,
         concurrency=args.concurrency,
+        pages=args.pages,
     )
-    _log.info("네이버 fetch 완료 — %d 헤드라인 (dedup url 적용)", df.height)
+    _log.info("네이버 fetch 완료 — %d 헤드라인 (dedup url, pages=%d)", df.height, args.pages)
 
     if df.is_empty():
         _log.warning("결과 0 — cache 무변경")

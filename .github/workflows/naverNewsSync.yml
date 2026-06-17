@@ -26,8 +26,16 @@ on:
         description: '쿼리 상한 (smoke 테스트용)'
         default: '50'
         type: string
+      naver_pages:
+        description: '네이버 쿼리당 start 페이징 깊이 (1=일별 증분 최근100, 10=백필 최대1000). ⚠ 종목×pages ≤ 일쿼터 25k'
+        default: '1'
+        type: string
+      naver_days:
+        description: '네이버 lookback 윈도우 (1=일별 cutoff, 0=백필 cutoff 없음)'
+        default: '1'
+        type: string
       gdelt_years:
-        description: 'GDELT DOC 과거 질의 연도 수 (1=올해 증분, 5=과거 backfill)'
+        description: 'GDELT DOC 과거 질의 연도 수 (1=올해 증분, 5=과거 backfill). ⚠ 한국어 커버리지 사실상 0 — 비권장'
         default: '1'
         type: string
 
@@ -67,6 +75,8 @@ jobs:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           NAVER_MAX_QUERIES: ${{ github.event.inputs.max_queries || '5000' }}
+          NAVER_PAGES: ${{ github.event.inputs.naver_pages || '1' }}
+          NAVER_DAYS: ${{ github.event.inputs.naver_days || '1' }}
         run: uv run python -X utf8 -m dartlab.pipeline naverNews
 
       # 종목별 뉴스 인덱스(두 트랙) — naver recent.parquet + gdelt DOC archive(올해 증분) → byCompany/{code}.json.

@@ -76,15 +76,19 @@ def _parseItems(data: dict) -> list[NewsItem]:
     return items
 
 
+_NAVER_START_MAX = 1000  # 검색 API start 상한 (start+display-1 ≤ 1000 → display=100 이면 최대 10 페이지)
+
+
 async def _fetchAsync(
     query: str,
     *,
     market: str = "KR",
     display: int = 100,
     sort: str = "date",
+    pages: int = 1,
     client=None,
 ) -> list[NewsItem]:
-    """네이버 뉴스 검색 (async) — 인증 헤더 + circuit breaker. KR 전용.
+    """네이버 뉴스 검색 (async) — 인증 헤더 + circuit breaker + start 페이징. KR 전용.
 
     Parameters
     ----------
@@ -93,16 +97,19 @@ async def _fetchAsync(
     market : str
         시장. ``"KR"`` 외에는 빈 리스트 (네이버=국내 전용).
     display : int
-        반환 건수 (1~100, 네이버 상한 100).
+        페이지당 건수 (1~100, 네이버 상한 100).
     sort : str
         ``"date"`` (최신순) | ``"sim"`` (정확도순).
+    pages : int
+        ``start`` 페이징 깊이 (1=최근 100건, 최대 10=최근 1000건). 종목당 백필 깊이.
+        date desc 정렬이라 페이지가 깊을수록 과거. 빈 페이지에서 조기 종료.
     client
         시그니처 대칭용 — 내부 미사용 (격리 httpx).
 
     Returns
     -------
     list[NewsItem]
-        date·title·source·url·description. 키 미설정/실패/circuit open 시 빈 리스트.
+        date·title·source·url·description (url dedup). 키 미설정/실패/circuit open 시 빈 리스트.
     """
     if market.upper() != "KR":
         return []
@@ -115,28 +122,43 @@ async def _fetchAsync(
         log.debug("naver circuit breaker open — skip")
         return []
 
-    params = {"query": query, "display": min(max(display, 1), 100), "sort": sort}
+    disp = min(max(display, 1), 100)
     headers = {"X-Naver-Client-Id": clientId, "X-Naver-Client-Secret": clientSecret}
+    maxPages = max(1, min(pages, _NAVER_START_MAX // disp))
 
+    out: list[NewsItem] = []
+    seen: set[str] = set()
     t0 = time.monotonic()
     try:
         import httpx
 
         async with httpx.AsyncClient() as ac:
-            resp = await ac.get(_ENDPOINT, params=params, headers=headers, timeout=10.0)
-            resp.raise_for_status()
-            data = resp.json()
-        items = _parseItems(data)
+            for page in range(maxPages):
+                start = 1 + page * disp
+                if start > _NAVER_START_MAX:
+                    break
+                params = {"query": query, "display": disp, "start": start, "sort": sort}
+                resp = await ac.get(_ENDPOINT, params=params, headers=headers, timeout=10.0)
+                resp.raise_for_status()
+                batch = _parseItems(resp.json())
+                if not batch:
+                    break  # 더 이상 과거 결과 없음 → 조기 종료
+                for it in batch:
+                    if it.url and it.url not in seen:
+                        seen.add(it.url)
+                        out.append(it)
+                if len(batch) < disp:
+                    break  # 마지막 페이지 (total 소진)
         latency = time.monotonic() - t0
         _circuit_breaker.recordSuccess(_SOURCE_NAME)
         _health_tracker.record(_SOURCE_NAME, success=True, latency=latency)
-        return items
-    except Exception as exc:  # noqa: BLE001 — 네트워크/인증(401)/rate(429)/파싱은 graceful []
+        return out
+    except Exception as exc:  # noqa: BLE001 — 네트워크/인증(401)/rate(429)/파싱은 graceful (모은 만큼 반환)
         latency = time.monotonic() - t0
         _circuit_breaker.recordFailure(_SOURCE_NAME)
         _health_tracker.record(_SOURCE_NAME, success=False, latency=latency)
-        log.debug("naver fetch 실패: %s", exc)
-        return []
+        log.debug("naver fetch 실패 (page 누적 %d): %s", len(out), exc)
+        return out
 
 
 def fetchHeadlinesForArchive(
@@ -146,15 +168,17 @@ def fetchHeadlinesForArchive(
     days: int = 1,
     concurrency: int = 8,
     limit: int | None = None,
+    pages: int = 1,
 ) -> pl.DataFrame:
     """네이버 뉴스 다중 쿼리 fan-out — archive 진입점 (rss 와 동형 시그니처).
 
-    Sig: ``fetchHeadlinesForArchive(queries, *, market, days, concurrency, limit) -> pl.DataFrame``
+    Sig: ``fetchHeadlinesForArchive(queries, *, market, days, concurrency, limit, pages) -> pl.DataFrame``
 
     Capabilities:
         - N 쿼리 비동기 fan-out (Semaphore 제한)
+        - 쿼리당 start 페이징 (``pages`` 1~10, 최대 1000건/쿼리 — 백필 깊이)
         - url dedup (첫 매치 query 유지)
-        - days 윈도우 cutoff 필터 (date ≥ today-days)
+        - days 윈도우 cutoff 필터 (date ≥ today-days; ``days=0`` = cutoff 없음 = 깊은 백필)
         - canonical 17컬럼 (description=스니펫 채움, enrichment=null)
 
     AIContext:
@@ -179,9 +203,10 @@ def fetchHeadlinesForArchive(
     Args:
         queries: 검색 시드 (종목명+키워드).
         market: ``"KR"`` 외 빈 DataFrame.
-        days: 최근 N일 윈도우. 기본 1.
+        days: 최근 N일 윈도우. 기본 1. ``0`` 이면 cutoff 미적용(백필 — 모은 전부 유지).
         concurrency: 동시 fetch 상한.
         limit: 반환 행 상한 (date desc 정렬 후). None=전체.
+        pages: 쿼리당 start 페이징 깊이 (1=최근 100건, 10=최근 1000건). 백필 시 ↑.
 
     Returns:
         pl.DataFrame — newsSchema.NEWS_ARCHIVE_SCHEMA canonical 17컬럼. 빈 결과 동일 schema.
@@ -205,7 +230,7 @@ def fetchHeadlinesForArchive(
 
     async def _one(q: str) -> tuple[str, list[NewsItem]]:
         async with sem:
-            return q, await _fetchAsync(q, market=market)
+            return q, await _fetchAsync(q, market=market, pages=pages)
 
     async def _gatherAll() -> list[tuple[str, list[NewsItem]]]:
         return await asyncio.gather(*(_one(q) for q in queries))

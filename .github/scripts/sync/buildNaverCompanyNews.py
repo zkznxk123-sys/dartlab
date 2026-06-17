@@ -44,7 +44,7 @@ _CATEGORY = "newsNaver"
 _DIR = "news/private/naver"  # newsSources.naver.dir 과 일치 (drift 차단)
 _RECENT_REL = f"{_DIR}/recent.parquet"
 _GDELT_ARCHIVE_REL = f"{_DIR}/gdeltArchive.parquet"
-_WINDOW_DAYS = 365  # naver 누적창 1년 (forward-only라 깊이는 cron 시작 이후로 한정).
+_WINDOW_DAYS = 365  # naver 누적창 1년. 깊이 = start 페이징 백필(종목당 ≤1000건) + 일별 cron 누적, 1년에서 trim.
 _GDELT_WINDOW_DAYS = 1825  # gdelt 누적창 5년 (DOC 인덱스 ~2017 이후).
 
 # 표시에 쓰는 4컬럼 + dedup 키(url) + 그룹키(query). captured_at·market·enrichment 는 인덱스에 불필요.

@@ -86,3 +86,68 @@ def test_archive_non_kr_empty_canonical() -> None:
     df = naverNews.fetchHeadlinesForArchive(["q"], market="US")
     assert df.height == 0
     assert set(df.columns) == set(NEWS_ARCHIVE_SCHEMA.keys())
+
+
+class _FakeResp:
+    def __init__(self, items: list[dict]) -> None:
+        self._items = items
+
+    def raise_for_status(self) -> None:  # noqa: D401
+        pass
+
+    def json(self) -> dict:
+        return {"items": self._items}
+
+
+class _FakeClient:
+    """start 페이징 stub — page 0(start=1) 100건, page 1(start=101) 50건(짧음→마지막), 이후 호출 안 됨."""
+
+    def __init__(self, calls: list[int]) -> None:
+        self._calls = calls
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *a) -> None:
+        pass
+
+    async def get(self, url, *, params, headers, timeout):  # noqa: ANN001
+        start = params["start"]
+        self._calls.append(start)
+        if start == 1:
+            items = [
+                {"title": f"t{i}", "originallink": f"https://x/{i}", "pubDate": "Mon, 08 Jun 2026 00:00:00 +0900"}
+                for i in range(100)
+            ]
+        elif start == 101:
+            # 50건(<display) — 마지막 페이지. 1건은 page0 와 url 중복(dedup 검증).
+            items = [
+                {"title": f"t{i}", "originallink": f"https://x/{i}", "pubDate": "Mon, 08 Jun 2026 00:00:00 +0900"}
+                for i in range(99, 149)
+            ]
+        else:
+            items = []
+        return _FakeResp(items)
+
+
+def test_fetch_paging_accumulates_dedups_and_stops(monkeypatch: pytest.MonkeyPatch) -> None:
+    """pages>1 → start 페이징 누적 + url dedup + 짧은 페이지에서 조기 종료."""
+    import types
+
+    import httpx
+
+    monkeypatch.setattr(naverNews, "getKey", lambda *a, **k: "key")
+    fakeBreaker = types.SimpleNamespace(
+        isOpen=lambda *a, **k: False, recordSuccess=lambda *a, **k: None, recordFailure=lambda *a, **k: None
+    )
+    monkeypatch.setattr(naverNews, "_circuit_breaker", fakeBreaker)
+    monkeypatch.setattr(naverNews, "_health_tracker", types.SimpleNamespace(record=lambda *a, **k: None))
+    calls: list[int] = []
+    monkeypatch.setattr(httpx, "AsyncClient", lambda *a, **k: _FakeClient(calls))
+
+    items = asyncio.run(naverNews._fetchAsync("삼성전자", market="KR", pages=10))
+    # page0 100건 + page1 50건 중 신규 49건(1건 중복) = 149, page1 이 <100 이라 page2 호출 안 됨.
+    assert calls == [1, 101]
+    assert len(items) == 149
+    urls = [it.url for it in items]
+    assert len(urls) == len(set(urls))  # dedup
