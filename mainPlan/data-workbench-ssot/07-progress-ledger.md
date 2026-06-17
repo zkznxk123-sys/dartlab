@@ -34,8 +34,14 @@
 - 본 작업 = `ui/packages/runtime/src/{data,cache,adapters}` + `tests/audit` + `operation/ui.md`. surface(`ui/packages/surfaces`)·landing 미수정 → 다른 세션과 경로 분리.
 - source 이관은 1개 커밋 1 source(되돌리기 쉽게). 폴더 이동(P4)은 re-export 다리 두고 마지막에.
 
+## 해소된 결정 (2026-06-17, 운영자 위임 → 정공법 확정)
+
+- **가드 구현 = TS AST(typescript 컴파일러 API) 가드** `tests/audit/checkUiDataWiring`. 정규식/Python-lite 기각(TS 미파싱 → false pos/neg). 신규 의존 0(toolchain 의 `typescript` 재사용). baseline 부채원장. (06 §2)
+- **CLAUDE.md 강행규칙 = 추가 확정.** 아키텍처 무결성 가드 계열(4계층 import·prebuild 경계와 동급), dev=퍼블릭 위반이 실제 회귀를 냄. 한 줄 + operation 위임, 가드 green 후(P4 동행). (06 §3)
+- **operation/ui.md 데이터층 섹션 = 추가 확정.** (06 §1)
+- **SvelteKit Remote Functions = KILL.** adapter-static(서버 0) 실측 — 작동 불가 + 서버0 floor 위반 + SSOT 역행. (04)
+- **#3 페이즈 = 전체 끝까지(정공법), 순서대로.** P1 만 cherry-pick 하지 않는다. go 즉시 P1·P2(추가만·저위험) 선착수 → P3 source 1개씩(골든픽스처) → P4 폴더+가드+문서까지 완주. 각 페이즈 독립 출시·롤백.
+
 ## 열린 질문
 
-- 가드 구현 (A)Python AST-lite vs (B)TS 스캐너 — 운영자 선호? (06 §2)
-- CLAUDE.md 한 줄 추가 여부(06 §3) — "즉시 손상"급 판단.
-- P1·P2(추가만, 저위험) 를 운영자 go 즉시 선착수할지, 전체 묶어 갈지.
+- (없음 — 착수 전 결정 전부 해소. 운영자 go 만 대기.)

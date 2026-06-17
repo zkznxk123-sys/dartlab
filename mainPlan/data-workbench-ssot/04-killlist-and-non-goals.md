@@ -14,6 +14,7 @@
 - ❌ **모든 데이터 일괄 동일 TTL.** 신선도 데이터까지 길게 캐시하면 stale 회귀. 오리진별 차등(아래 §정직 TTL).
 - ❌ **새 캐시/fetch 라이브러리 도입.** 이미 있는 RuntimeCache·RequestDedup·cacheStore·fetchResilient 로 충분. 외부 의존 추가 금지.
 - ❌ **백엔드(Python) 데이터 파이프라인 손대기.** 본 PRD 는 UI 런타임 한정. HF=SSOT·CI consolidation 은 별도(`feedback_terminal_hf_ssot_local_compute`).
+- ❌ **SvelteKit Remote Functions(`query`/`form`/`command`) 도입.** 서버 런타임을 요구하는데 퍼블릭·로컬 둘 다 `@sveltejs/adapter-static`(서버 0, 정적 빌드)다 — 동적 remote function 은 작동 자체가 불가. 채택 시 "퍼블릭 서버 0 floor" 정면 위반(서버 티어 신설 강제). 타입세이프 server-call 은 이미 contracts 포트가 제공하고, remote 는 포트/어댑터와 경합하는 *세 번째 데이터 패러다임*이라 SSOT 역행. `prerender`(빌드타임) 모드조차 기존 HF 프리빌드+landing JSON 과 겹쳐 이득 0. (2026-06-17 운영자 질의·adapter 실측 확정 → 재론 금지.)
 
 ## 2. DEFER (이번 범위 밖, 후속)
 

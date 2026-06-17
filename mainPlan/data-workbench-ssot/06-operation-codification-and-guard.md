@@ -39,9 +39,11 @@
 
 현 상태: UI 용 import/패턴 가드 0(Python `tests/architecture/*` 만 AST census). TS 소스 대상 가드 신설.
 
-구현 선택지(택1, 운영자 결정):
-- **(A) Python AST-lite census** — `tests/architecture/*` 패턴 미러. `ui/packages/runtime/src/adapters/**/sources/*.ts` 를 정규식/간이 파서로 스캔(파이썬 생태계·기존 preflight 게이트와 동일 진입). CLAUDE.md 테스트 SSOT(`tests/run.py`)에 등록 쉬움.
-- **(B) TS 노드 스캐너** — `tests/audit/checkUiDataWiring.ts`(ts-morph/간이 정규식). UI 생태계 친화. 단 CI 게이트에 node 스텝 추가 필요.
+**구현 = 정공법 확정(2026-06-17): TS AST 가드.** 정규식 스캔(Python AST-lite)은 TS 를 못 파싱해 false positive/negative(문자열·주석 속 `fetch`·정당한 `new Map`)가 불가피 — 가드의 신뢰를 깬다. 가드 대상이 TypeScript 이므로 *진짜 TS 파서로* 검사하는 게 정공법이다.
+- 위치: `tests/audit/checkUiDataWiring.mjs`(또는 `.ts`) — CLAUDE.md 도메인 폴더 규칙(`tests/audit/`)·기존 audit 스크립트 문화(`noScriptsDir.py`·`docstring4Section.py`)와 정합.
+- 파서: **`typescript` 컴파일러 API**(이미 svelte-check/tsc 로 toolchain 에 존재 — 신규 무거운 의존 0). `ts.createSourceFile` → AST walk 로 `CallExpression`(fetch)·`NewExpression`(Map)·URL 문자열 리터럴·import 경로를 *의미 기반* 검출. (ts-morph 같은 추가 의존은 불필요 — 컴파일러 API 로 충분.)
+- 실행: runtime 패키지 npm script `check:data-wiring` + CI 게이트(기존 svelte-check 가 이미 node 스텝이라 toolchain 부담 0). `tests/run.py` preflight 가 UI 체크를 포함하면 거기에, 아니면 UI CI 잡에 동행.
+- baseline 부채원장: 회귀가드 철학(`operation.testing`)과 동일 — 착수 시점 잔존 위반을 `tests/audit/uiDataWiring.baseline.json` 에 기록, 이후 *증가 0* 강제. 이관 완료 source 부터 위반을 baseline 에서 제거(0 으로 수렴).
 
 가드 규칙(baseline 부채원장 = 신규 위반·증가만 fail, 회귀가드 원칙):
 1. `adapters/**/sources/*.ts` 에서 **raw `fetch(` 직접 호출 금지** — 코어/게이트 경유만.
@@ -52,9 +54,16 @@
 
 baseline: P4 시점의 잔존 위반을 원장에 기록 → 이후 *증가 0* 강제. 이관 완료 source 부터 위반 0 으로 끌어내림.
 
-## 3. CLAUDE.md 연동(선택)
+## 3. CLAUDE.md 강행규칙 — 추가 확정(2026-06-17)
 
-- 본 가드가 안정되면 CLAUDE.md 강행규칙에 한 줄(예: "UI 데이터 호출은 data/fetch 단일 진입점·오리진 레지스트리 경유. source raw fetch·직접 URL·자체 캐시 금지 — `tests/audit/checkUiDataWiring` 강제") 추가 검토. 단 CLAUDE.md 는 ≤60줄·즉시손상 가드만 — 본 규칙이 "즉시 시스템 손상"급인지 판단 후(아니면 operation 문서로 충분).
+판단: 본 규칙은 *아키텍처 무결성 가드*다. 위반(source 가 제멋대로 fetch/URL/Map)이 즉시 크래시는 아니나, **dev=퍼블릭 공통배선 위반은 이미 이번 세션에 실제 회귀를 냈고**(dev 가 :8400 없이 안 뜸), "퍼블릭 서버 0 floor" 위반(예: remote functions)은 아키텍처 손상급이다. 기존 CLAUDE.md 의 "4계층 단방향 import"·"sync/prebuild 책임경계"와 같은 *기계 강제 아키텍처 가드* 계열 → **추가한다.** 단 ≤60줄 예산이라 한 줄, 본문은 operation/가드로 위임.
+
+추가할 한 줄(강행규칙 섹션):
+```
+## ⛔ UI 데이터 호출 — 단일 작업대 SSOT·공통배선
+모든 데이터 호출은 `data/fetch` 단일 진입점 + `data/origins` 레지스트리 경유. source 의 raw fetch·직접 URL·자체 캐시 Map 금지. 터미널/공유 surface 는 무조건 공개·로컬 공통배선(dev=퍼블릭 기준, :8400 없이 떠야 정상). 로컬 전용(/api)은 `adapters/local/api` 게이트 한곳. `tests/audit/checkUiDataWiring` 강제. → `operation.ui` 데이터층 + [memory/feedback_terminal_hf_ssot_local_compute.md]
+```
+- 가드(§2)가 green 으로 안정된 뒤 추가(가드 없는 규칙은 회귀). 즉 P4 완료 동행.
 
 ## 4. 메모리 연동
 
