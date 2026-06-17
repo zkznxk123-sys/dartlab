@@ -3,7 +3,7 @@
 수집 완료 후 실행되어 scan 프리빌드 데이터를 생성하고 HuggingFace에 업로드.
 
 일일 흐름 (증분 — 기본):
-  1. base seed: finance/report(full, cacheable) + scan(직전 산출물 + _scanBuildState) 를 HF 에서 seed
+  1. base seed: finance/report 는 Actions cache 우선, scan 은 알려진 산출물 직접 seed
   2. panel listing 1 회(다운로드 0) → 직전 ledger 대비 변경/삭제 종목 가림
   3. 변경 종목 panel parquet 만 다운로드 (전 92K seed 금지 = OOM/디스크 고갈 회피)
   4. buildScan(incremental=True): changes/sharesOutstanding 는 변경분만 재계산 후 기존 parquet 에
@@ -52,13 +52,70 @@ def _isFullMode() -> bool:
     return os.environ.get("PREBUILD_FULL", "").strip().lower() in ("1", "true", "yes")
 
 
+def _categoryFileCount(dataDir: str, category: str) -> int:
+    """Return local file count for a data category."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+
+    catDir = Path(dataDir) / DATA_RELEASES[category]["dir"]
+    return sum(1 for p in catDir.rglob("*") if p.is_file()) if catDir.exists() else 0
+
+
+def _knownScanRelPaths() -> list[str]:
+    """Return fixed scan artifacts for direct seed without HF tree listing."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.scan.builders.kr.report.build import SCAN_API_TYPES
+
+    scanDir = DATA_RELEASES["scan"]["dir"]
+    base = [
+        "changes.parquet",
+        "finance.parquet",
+        "finance-lite.parquet",
+        "sharesOutstanding.parquet",
+        "docsIndex.parquet",
+        "corpProfile.parquet",
+        "_scanBuildState.json",
+    ]
+    rels = [f"{scanDir}/{name}" for name in base]
+    rels.extend(f"{scanDir}/report/{apiType}.parquet" for apiType in SCAN_API_TYPES)
+    return rels
+
+
+def _seedKnownScanArtifacts(dataDir: str) -> tuple[int, int, float]:
+    """Seed known scan outputs by direct resolve URLs, avoiding HF tree-list 429."""
+    from dartlab.pipeline.seed import downloadCategoryFiles
+
+    root = Path(dataDir)
+    missing = [rel for rel in _knownScanRelPaths() if not (root / rel).exists()]
+    if missing:
+        downloaded, skipped404 = downloadCategoryFiles("scan", missing, dataDir=dataDir)
+    else:
+        downloaded, skipped404 = 0, 0
+
+    downloadedBytes = sum((root / rel).stat().st_size for rel in missing if (root / rel).exists())
+    total = _categoryFileCount(dataDir, "scan")
+    skip = f", 404-skip {skipped404}" if skipped404 else ""
+    print(
+        f"[prebuild] base seed scan: 로컬 {total}개 (known 신규 {downloaded}{skip} / {downloadedBytes / 1024 / 1024:.1f}MB)"
+    )
+    return total, downloaded, downloadedBytes / 1024 / 1024
+
+
 def _seedBaseInputs(dataDir: str) -> None:
-    """finance/report(full 입력) + scan(직전 산출물 + ledger) 를 HF 에서 idempotent seed."""
+    """finance/report full inputs cache-first + scan known artifacts direct seed."""
     from dartlab.pipeline.seed import seedCategoriesFromHf
 
-    summary = seedCategoriesFromHf(list(BASE_SEED_CATEGORIES), dataDir=dataDir)
+    categories: list[str] = []
+    for cat in ("finance", "report"):
+        localCount = _categoryFileCount(dataDir, cat)
+        if localCount:
+            print(f"[prebuild] base seed {cat}: 로컬 {localCount}개 (Actions cache 사용, HF listing skip)")
+        else:
+            categories.append(cat)
+
+    summary = seedCategoriesFromHf(categories, dataDir=dataDir) if categories else {}
     for cat, (total, new, mb) in summary.items():
         print(f"[prebuild] base seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+    _seedKnownScanArtifacts(dataDir)
 
 
 def _seedKindAndCorpProfile(dataDir: str) -> None:
@@ -112,8 +169,14 @@ def _prepareIncrementalPanel(dataDir: str) -> tuple[list[str], list[str], dict[s
     from dartlab.pipeline.seed import downloadCategoryFiles, listRemoteFiles
     from dartlab.scan.builders.kr.common import loadScanBuildState
 
-    remote = listRemoteFiles("panel")  # {dart/panel/CODE.parquet: size}
     prior = loadScanBuildState()
+    try:
+        remote = listRemoteFiles("panel")  # {dart/panel/CODE.parquet: size}
+    except Exception as exc:  # noqa: BLE001 — HF tree 429 시 직전 ledger 로 no-change degrade
+        if prior:
+            print(f"[prebuild] ⚠ panel listing 실패 — no-change 사이클로 degrade: {type(exc).__name__}: {exc}")
+            return [], [], dict(prior)
+        raise
     print(f"[prebuild] panel listing: 원격 {len(remote)}개, 직전 ledger {len(prior)}개")
 
     if not prior:
