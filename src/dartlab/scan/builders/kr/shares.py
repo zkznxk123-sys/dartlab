@@ -39,8 +39,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import polars as pl
+
 from dartlab.scan.builders.kr.common import mergeIncremental as _mergeIncremental
 from dartlab.scan.builders.kr.common import panelDir as _panelDir
+from dartlab.scan.builders.kr.common import releaseNativeMemory as _releaseNativeMemory
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
 
@@ -65,6 +68,26 @@ _OUTPUT_COLUMNS = [
     "preferredFloating",
     "source",
 ]
+_SHARES_SCHEMA = {
+    "stock_code": pl.Utf8,
+    "corp_name": pl.Utf8,
+    "year": pl.Int32,
+    "rcept_date": pl.Utf8,
+    "rcept_no": pl.Utf8,
+    "report_type": pl.Utf8,
+    "authorizedShares": pl.Int64,
+    "issuedShares": pl.Int64,
+    "retiredShares": pl.Int64,
+    "outstandingShares": pl.Int64,
+    "treasuryShares": pl.Int64,
+    "floatingShares": pl.Int64,
+    "treasuryRatio": pl.Float64,
+    "preferredIssued": pl.Int64,
+    "preferredOutstanding": pl.Int64,
+    "preferredTreasury": pl.Int64,
+    "preferredFloating": pl.Int64,
+    "source": pl.Utf8,
+}
 
 
 def _numShares(cell: str | None) -> int | None:
@@ -134,10 +157,8 @@ def buildSharesOutstandingScan(
     Example:
         >>> buildSharesOutstandingScan(write=False)  # doctest: +SKIP
     """
-    import polars as pl
-
     from dartlab.core.listingResolver import getListingResolver
-    from dartlab.providers.dart.panel.text import panelTextRows, panelXmlTables
+    from dartlab.providers.dart.panel.text import panelTextRows, parsePanelXmlTables
 
     panelRoot = _panelDir()
     if not panelRoot.exists():
@@ -155,7 +176,12 @@ def buildSharesOutstandingScan(
         corpName = (resolver.codeToName(code) if resolver else None) or ""
         periodMap = dict(zip(sub["period"].to_list(), sub["rceptNo"].to_list(), strict=False))
         for period, rcept in periodMap.items():
-            parsed = _parseSharesTable(panelXmlTables(code, sectionPattern=_SHARES_PATTERN, period=period))
+            periodRows = sub.filter(pl.col("period") == period)
+            tables: list[list[list[str]]] = []
+            for content in periodRows["contentRaw"].to_list() if "contentRaw" in periodRows.columns else []:
+                if content and "<TR" in content:
+                    tables.extend(parsePanelXmlTables(content))
+            parsed = _parseSharesTable(tables)
             if parsed is None:
                 continue
             year = int(period[:4]) if period[:4].isdigit() else None
@@ -182,9 +208,12 @@ def buildSharesOutstandingScan(
                     "source": "panel_frame",
                 }
             )
+        del texts, sub
+        if len(records) and len(records) % 200 == 0:
+            _releaseNativeMemory()
     if not records:
         raise RuntimeError("발행주식수 추출 결과 0 건")
-    out = pl.DataFrame(records, schema_overrides={"rcept_date": pl.Utf8}).select(_OUTPUT_COLUMNS)
+    out = pl.DataFrame(records, schema_overrides=_SHARES_SCHEMA, infer_schema_length=None).select(_OUTPUT_COLUMNS)
     out = out.sort(["stock_code", "rcept_date"], descending=[False, True])
     if write:
         if outputPath is None:
@@ -195,6 +224,7 @@ def buildSharesOutstandingScan(
             _mergeIncremental(outputPath, out, key="stock_code")
         else:
             out.write_parquet(str(outputPath), compression="zstd")
+    _releaseNativeMemory()
     return out
 
 
@@ -252,7 +282,7 @@ def buildSharesOutstandingSafe(*, verbose: bool = True, incremental: bool = Fals
         if verbose:
             _say(f"[shares] 완료: 재계산 rows={df.height} stocks={df['stock_code'].n_unique()}")
         return _scanDir() / "sharesOutstanding.parquet"
-    except (FileNotFoundError, RuntimeError, OSError, ValueError) as exc:
+    except (FileNotFoundError, RuntimeError, OSError, ValueError, pl.exceptions.PolarsError) as exc:
         if verbose:
             _say(f"[shares] 실패: {exc}")
         return None

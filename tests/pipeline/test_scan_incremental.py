@@ -219,19 +219,23 @@ def test_buildSharesOutstandingScan_incremental_merges(tmp_path, monkeypatch) ->
     def fakeTextRows(code, *a, **k):
         if code != "A":
             return None
-        return pl.DataFrame({"period": ["2023Q4"], "sectionLeaf": ["주식의 총수 현황"], "rceptNo": ["20230101000001"]})
-
-    def fakeXmlTables(code, *, sectionPattern=None, period=None):
-        return [
-            [
-                ["발행할 주식의 총수", "", "", "1000"],
-                ["현재까지 발행한 주식", "", "", "800"],
-                ["발행주식의 총수", "", "", "800"],
-            ]
-        ]
+        return pl.DataFrame(
+            {
+                "period": ["2023Q4"],
+                "sectionLeaf": ["주식의 총수 현황"],
+                "rceptNo": ["20230101000001"],
+                "contentRaw": [
+                    "<TABLE>"
+                    "<TR><TH>구분</TH><TH>보통주</TH><TH>우선주</TH><TH>합계</TH></TR>"
+                    "<TR><TD>발행할 주식의 총수</TD><TD></TD><TD></TD><TD>1000</TD></TR>"
+                    "<TR><TD>현재까지 발행한 주식</TD><TD></TD><TD></TD><TD>800</TD></TR>"
+                    "<TR><TD>발행주식의 총수</TD><TD></TD><TD></TD><TD>800</TD></TR>"
+                    "</TABLE>"
+                ],
+            }
+        )
 
     monkeypatch.setattr("dartlab.providers.dart.panel.text.panelTextRows", fakeTextRows)
-    monkeypatch.setattr("dartlab.providers.dart.panel.text.panelXmlTables", fakeXmlTables)
     monkeypatch.setattr("dartlab.core.listingResolver.getListingResolver", lambda: None)
 
     shares.buildSharesOutstandingScan(incremental=True)
@@ -241,3 +245,45 @@ def test_buildSharesOutstandingScan_incremental_merges(tmp_path, monkeypatch) ->
     aRows = df.filter(pl.col("stock_code") == "A")
     assert aRows.height == 1
     assert aRows["outstandingShares"][0] == 800  # 재계산값으로 교체
+
+
+def test_buildSharesOutstandingScan_schema_handles_late_numeric_values(tmp_path, monkeypatch) -> None:
+    """초반 None 뒤 늦게 등장하는 숫자 컬럼도 Polars schema inference 실패 없이 처리."""
+    from dartlab.scan.builders.kr import shares
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+
+    panelDir = tmp_path / "panel"
+    panelDir.mkdir(parents=True)
+    pl.DataFrame({"_": [1]}).write_parquet(str(panelDir / "A.parquet"))
+
+    periods = [f"2023Q{i:03d}" for i in range(101)]
+    content = []
+    for i in range(101):
+        preferred = "123" if i == 100 else ""
+        content.append(
+            "<TABLE>"
+            "<TR><TH>구분</TH><TH>보통주</TH><TH>우선주</TH><TH>합계</TH></TR>"
+            f"<TR><TD>현재까지 발행한 주식</TD><TD></TD><TD>{preferred}</TD><TD>800</TD></TR>"
+            f"<TR><TD>발행주식의 총수</TD><TD></TD><TD>{preferred}</TD><TD>800</TD></TR>"
+            "</TABLE>"
+        )
+
+    def fakeTextRows(code, *a, **k):
+        assert code == "A"
+        return pl.DataFrame(
+            {
+                "period": periods,
+                "sectionLeaf": ["주식의 총수 현황"] * len(periods),
+                "rceptNo": [f"20230101{i:06d}" for i in range(len(periods))],
+                "contentRaw": content,
+            }
+        )
+
+    monkeypatch.setattr("dartlab.providers.dart.panel.text.panelTextRows", fakeTextRows)
+    monkeypatch.setattr("dartlab.core.listingResolver.getListingResolver", lambda: None)
+
+    df = shares.buildSharesOutstandingScan(write=False)
+
+    assert df.height == 101
+    assert df["preferredIssued"].drop_nulls().to_list() == [123]
