@@ -800,8 +800,9 @@ def buildEcosystem(
     for i, ind_id in enumerate(taxonomy.keys()):
         ind_color[ind_id] = palette[i % len(palette)]
 
-    # 산업별 순위/점유율 사전계산
-    # {industry: {stockCode: (rank, sharePct)}}
+    # 산업별 순위 + 상장사매출비중 사전계산 (분모 = 같은 KSIC 산업 노드 상장 구성사 매출 합).
+    # ★시장점유율 아님 — 비상장·수입 제외라 시장규모 분모가 아니다. 소비처 라벨은 '상장사매출비중'.
+    # {industry: {stockCode: (rank, listedRevSharePct)}}
     industryRanks: dict[str, dict[str, tuple[int, float]]] = {}
     industryRevTotals: dict[str, float] = {}
     byIndustry: dict[str, list] = {}
@@ -865,7 +866,9 @@ def buildEcosystem(
                 "revenue": n.revenue or 0,
                 "industryRank": rank,
                 "industryPeerCount": len(byIndustry.get(n.industry, [])),
-                "marketShare": round(share, 2),
+                "marketShare": round(
+                    share, 2
+                ),  # 키명 유지(전 소비처 동시 rename 회피) = 상장사매출비중, 시장점유율 아님
                 # scan 엔진 재무 지표 (색상/정렬 기준)
                 "roe": _roundOrNone(m.get("roe")),
                 "opMargin": _roundOrNone(m.get("opMargin")),
