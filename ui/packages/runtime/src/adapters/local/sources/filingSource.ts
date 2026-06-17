@@ -77,7 +77,7 @@ export function localFilingPort(apiBase: string, caches: LocalCaches, core: Data
 	return {
 		// 공통배선 — 공개 HF 소스 그대로(정기 = regularFilingsSource, 비정기 = allFilings). 로컬 :8400 불요.
 		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
-		nonRegular: (code) => loadCompanyNonRegularFilings(code),
+		nonRegular: (code) => loadCompanyNonRegularFilings(core, code),
 		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes),
 		async panelToc(code) {
 			const toc = await getJson<ClientPanelToc>(

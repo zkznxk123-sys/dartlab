@@ -4,7 +4,6 @@
 // 통합파일 생성: .github/scripts/sync/buildAllFilingsRecent.py (정기보고서는 이미 제외됨).
 // 타입 정본 = contracts (NonRegularFiling 승격 완료 — 중복 정의 금지).
 import type { NonRegularFiling } from '@dartlab/ui-contracts';
-import { readParquetRows, type FetchLike } from '../../../data/hfRange';
 import type { DataCore } from '../../../data/fetch/request';
 
 interface RecentRow extends Record<string, unknown> {
@@ -23,20 +22,17 @@ function fmtDate(s: string): string {
 	return c.length === 8 ? `${c.slice(0, 4)}-${c.slice(4, 6)}-${c.slice(6, 8)}` : String(s);
 }
 
-const cache = new Map<string, NonRegularFiling[]>();
-
-export async function loadCompanyNonRegularFilings(
-	stockCode: string,
-	{ fetchFn = fetch as FetchLike }: { fetchFn?: FetchLike } = {}
-): Promise<NonRegularFiling[]> {
+export async function loadCompanyNonRegularFilings(core: DataCore, stockCode: string): Promise<NonRegularFiling[]> {
 	const code = stockCode.trim();
 	if (!/^\d{6}$/.test(code)) return [];
-	if (cache.has(code)) return cache.get(code) as NonRegularFiling[];
 	try {
-		const { rows } = await readParquetRows<RecentRow>('dart/allFilings/recent.parquet', {
+		const rows = await core.requestParquetRows<RecentRow>({
+			origin: 'hfRange',
+			path: 'dart/allFilings/recent.parquet',
 			columns: COLS,
 			filter: { stock_code: { $in: [code] } },
-			fetchFn
+			cacheKey: `allFilings.recent:one:${code}`,
+			cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 256 } // 신선도 — 짧은 TTL, 자체 Map 폐기
 		});
 		const seen = new Set<string>();
 		const result: NonRegularFiling[] = [];
@@ -54,10 +50,8 @@ export async function loadCompanyNonRegularFilings(
 			});
 		}
 		result.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate) || b.rceptNo.localeCompare(a.rceptNo));
-		cache.set(code, result); // 전 이력 — slice 캡 없음(레일/우측패널 완결성). 폭주는 PriceChart 가시범위 skip 이 담당.
-		return result;
+		return result; // 전 이력 — slice 캡 없음(레일/우측패널 완결성). 캐시/dedup 은 코어.
 	} catch {
-		cache.set(code, []);
 		return [];
 	}
 }
