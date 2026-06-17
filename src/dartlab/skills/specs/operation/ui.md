@@ -105,6 +105,30 @@ testUniverse:
 - 진행 중에는 최근 6개 activity만 보이고, 완료 후에는 `명령어 N개 실행` 한 줄로 접는다.
 - 분석형 질문의 제품 순서는 `plan → search/read → inspect/run → verify → answer`다. 빈 chunk, 검색-only, tool 실패 은폐, 검증 실패는 성공 응답으로 release하지 않는다.
 
+## UI 런타임 데이터층 — 단일 작업대 SSOT + 공통배선
+
+데이터층의 SSOT는 본 문서다. 캐시 정책 세부는 `runtime.cacheStrategy`가 있으면 그쪽을 교차 참조하되 중복 기술하지 않는다.
+
+### 단일 작업대
+
+- 모든 데이터 호출은 `data/fetch.request()` 한 진입점을 통과한다. source는 fetch·URL 문자열·자체 캐시 Map을 직접 갖지 않고, 무엇을(path)·어느 오리진에서(origin)·어떻게 캐시(cache)하는지만 선언한다.
+- 오리진은 `data/origins` 레지스트리에 명명 항목으로만 추가한다(HF·range·CF 프록시·news/naver 워커·localApi·duckdbHf·landingJson).
+- 캐시·dedup은 어댑터당 `RuntimeCache`·`RequestDedup` 단일 인스턴스를 코어가 만들어 주입한다. 전역 싱글턴은 두지 않는다.
+
+### 공통배선 default
+
+- 터미널과 공유 surface는 공개·로컬 공통배선을 기본으로 한다. 로컬은 명시적 로컬 전용이 아니면 공개 HF source를 재사용한다.
+- 로컬 앱(dev)은 `:8400` 백엔드 없이 정적 HF로 떠야 정상이다. `/api`(localApi 오리진)는 라이브 provider·AI 스트림·공시뷰어 격자 같은 실제 로컬 전용 호출만 사용한다. 로컬 전용 호출은 `adapters/local/api` 게이트 한 곳에만 둔다.
+
+### 정직 캐시
+
+- 캐시 TTL은 오리진별로 차등한다. 신선도 데이터(`recent.parquet`·naver fresh tail)는 짧은 TTL 또는 무 TTL을 쓰고, 일괄 캐시는 두지 않는다.
+
+### 신규 추가 규칙
+
+- 새 데이터 소스는 source에 `request()` 호출 한 함수로 추가한다. 새 오리진은 레지스트리 항목 1개, 새 로컬 엔드포인트는 api 게이트 카탈로그 1줄로 추가한다.
+- source 안에서 raw fetch·직접 URL·`new Map` 캐시를 신설하지 않는다. `tests/audit/checkUiDataWiring`이 신규 위반을 차단한다(baseline 부채원장 대비 증가 0 강제).
+
 ## 실행 순서
 
 - 1. 한눈에 보기 기준을 확인한다.
