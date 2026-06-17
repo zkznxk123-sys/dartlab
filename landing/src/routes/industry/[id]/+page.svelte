@@ -34,6 +34,38 @@
 	function fmtMargin(v: number | null): string {
 		return v === null ? '—' : `${v}%`;
 	}
+
+	// 산업 분포 밴드 (Phase C) — industryStats p10~p90. percentile 밴드만(mean±std 금지),
+	// n<10 metric 숨김, 분포출처 ≠ 공식지수 라벨 (04 §3 #5/#8). 신규 계산 0.
+	let distBands = $derived.by(() => {
+		const dist = stats?.distribution;
+		if (!dist) return [];
+		const METRICS = [
+			{ key: 'roe', label: 'ROE' },
+			{ key: 'opMargin', label: '영업이익률' },
+			{ key: 'netMargin', label: '순이익률' }
+		];
+		const out = [];
+		for (const m of METRICS) {
+			const d = dist[m.key];
+			if (!d || d.n == null || d.n < 10) continue;
+			const span = d.p90 - d.p10 || 1;
+			const pos = (v: number) => Math.max(0, Math.min(100, ((v - d.p10) / span) * 100));
+			out.push({
+				label: m.label,
+				n: d.n,
+				p10: d.p10,
+				p25: d.p25,
+				median: d.median,
+				p75: d.p75,
+				p90: d.p90,
+				p25Pct: pos(d.p25),
+				medianPct: pos(d.median),
+				p75Pct: pos(d.p75)
+			});
+		}
+		return out;
+	});
 	let stats = $derived((data as any).stats);
 	let indMovers = $derived((data as any).movers || {});
 	let meta = $derived((data as any).meta);
@@ -291,6 +323,33 @@
 				{#if poolMissing.length > 0}
 					<br />마진 미상 단계(opMargin 결손, 격자 제외): {poolMissing.map((s) => `${s.name}(${s.companyCount}사)`).join(', ')}.
 				{/if}
+			</p>
+		</section>
+	{/if}
+
+	<!-- 산업 분포 밴드 (Phase C) -->
+	{#if distBands.length > 0}
+		<section class="sec">
+			<h2>산업 분포 (p10~p90)</h2>
+			<p class="pool-sub">상자 = 중위 50%(p25~p75), 세로선 = 중앙값. 절대값보다 분포 위 위치가 핵심.</p>
+			<div class="dist-rows">
+				{#each distBands as b}
+					<div class="dist-row">
+						<div class="dist-label">{b.label} <span class="dist-n">n={b.n}</span></div>
+						<div class="dist-track">
+							<span class="dist-end dist-lo">{b.p10}</span>
+							<div class="dist-bar">
+								<div class="dist-iqr" style="left:{b.p25Pct}%; right:{100 - b.p75Pct}%"></div>
+								<div class="dist-median" style="left:{b.medianPct}%"></div>
+							</div>
+							<span class="dist-end dist-hi">{b.p90}</span>
+						</div>
+					</div>
+				{/each}
+			</div>
+			<p class="pool-caption">
+				분포출처: industryStats(KSIC 섹터·동일가중·상장 primary사) — KRX 시총가중 업종지수 아님.
+				n&lt;10 지표는 표시 생략.
 			</p>
 		</section>
 	{/if}
@@ -915,5 +974,64 @@
 		color: #6b7280;
 		font-size: 12px;
 		line-height: 1.5;
+	}
+
+	/* 산업 분포 밴드 */
+	.dist-rows {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		margin-bottom: 14px;
+	}
+	.dist-row {
+		display: grid;
+		grid-template-columns: 110px 1fr;
+		align-items: center;
+		gap: 12px;
+	}
+	.dist-label {
+		font-size: 13px;
+		color: #e5e9f0;
+	}
+	.dist-n {
+		color: #6b7280;
+		font-size: 11px;
+	}
+	.dist-track {
+		display: grid;
+		grid-template-columns: 48px 1fr 48px;
+		align-items: center;
+		gap: 6px;
+	}
+	.dist-end {
+		font-size: 11px;
+		color: #6b7280;
+		font-variant-numeric: tabular-nums;
+	}
+	.dist-hi {
+		text-align: right;
+	}
+	.dist-bar {
+		position: relative;
+		height: 18px;
+		background: #0f1219;
+		border: 1px solid #1e2433;
+		border-radius: 4px;
+	}
+	.dist-iqr {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		background: color-mix(in srgb, #60a5fa 26%, transparent);
+		border-left: 1px solid #60a5fa;
+		border-right: 1px solid #60a5fa;
+	}
+	.dist-median {
+		position: absolute;
+		top: -2px;
+		bottom: -2px;
+		width: 2px;
+		background: #e5e9f0;
+		transform: translateX(-1px);
 	}
 </style>
