@@ -45,10 +45,11 @@ export interface RiskRule {
 // (RiskCatalogItem 타입은 types.ts — 순환 import 회피 위해 데이터 타입은 그곳이 SSOT)
 
 // detail 포맷 헬퍼 — 단위 명시(거짓정밀 방지: 배수/백분율 혼동 차단).
-const x1 = (v: number): string => v.toFixed(1) + '배';
 const pct0 = (v: number): string => v.toFixed(0) + '%';
 const pct1 = (v: number): string => v.toFixed(1) + '%';
 const medTail = (med: number | null, fmt: (n: number) => string): string => (med != null ? ' · 업종중앙 ' + fmt(med) : '');
+// 금융업(은행·보험·증권) — 운전자본·레버리지 정의가 일반기업과 달라(예금=부채) 유동비율·부채비율 무의미 → 판정 제외(na).
+const isFinance = (e: EcoNode): boolean => e.industry === 'finance';
 
 export const RISK_RULES: RiskRule[] = [
 	{
@@ -78,13 +79,14 @@ export const RISK_RULES: RiskRule[] = [
 		axis: 'growth',
 		whatKr: '외형이 자라는가 — 매출 추세',
 		whatEn: 'Is the top line growing — revenue trend',
-		thresholdKr: '성장 등급 "급감" → red · "역성장" → yellow',
-		thresholdEn: 'Growth grade "collapse" → red · "decline" → yellow',
+		thresholdKr: '성장 등급 "급감"·"역성장" → yellow (매출 감소는 경기순환성 — 단독 red 아님, 주의)',
+		thresholdEn: 'Growth grade "collapse"·"decline" → yellow (revenue drop is cyclical — caution, not red)',
 		source: 'EcoNode.growthGrade (detail: revCagr)',
 		hard: false,
 		evaluate: ({ e }) => {
 			const d = e.revCagr != null ? pct0(e.revCagr) : '';
-			if (e.growthGrade === '급감') return { lv: 'red', kr: '매출 급감', en: 'Revenue collapse', d };
+			// 급감을 red→yellow 강등: 다운사이클 한 해에 27% 가 점등 → red 알람으로는 cry-wolf. 구조적 부실은 적자/유동성/부채가 red 로 잡음.
+			if (e.growthGrade === '급감') return { lv: 'yellow', kr: '매출 급감', en: 'Revenue collapse', d };
 			if (e.growthGrade === '역성장') return { lv: 'yellow', kr: '매출 역성장', en: 'Revenue decline', d };
 			if (e.growthGrade != null) return { lv: 'clear', d };
 			return null;
@@ -128,23 +130,25 @@ export const RISK_RULES: RiskRule[] = [
 		}
 	},
 	{
-		id: 'icr',
-		kr: '이자보상배율',
-		en: 'Interest coverage',
+		// ICR 대체 — 현 ecosystem icr 는 분모가 finance_costs(금융비용 전체, ratios.py:857) 라 라벨-입력 불일치(중앙 0.80배,
+		// 영업흑자 91% 가 ICR<1) → 글랜스 신호로 부적합. 검증된 절대 부채비율 레벨로 대체. ICR 수치는 업종 백분위 패널에 지표로 존재.
+		id: 'debtBurden',
+		kr: '부채 부담',
+		en: 'Debt burden',
 		axis: 'debt',
-		whatKr: '영업이익으로 이자를 감당하는가 (ICR = 영업이익 ÷ 이자비용)',
-		whatEn: 'Can operating profit cover interest (ICR = OP income ÷ interest)',
-		thresholdKr: 'ICR < 1.0배(영업이익 < 이자) → red · 1.0~1.5배 → yellow · 영업적자(ICR<0)는 수익성에 양보(판정 제외)',
-		thresholdEn: 'ICR < 1.0× (OP income < interest) → red · 1.0–1.5× → yellow · operating loss (ICR<0) deferred to profitability',
-		source: 'EcoNode.icr',
+		whatKr: '자기자본 대비 부채가 과중한가 — 부채비율 절대 수준 (금융업 제외)',
+		whatEn: 'Is leverage heavy relative to equity — absolute debt ratio (financials excluded)',
+		thresholdKr: '부채비율 > 400% → red · 200~400% → yellow · 금융업 해당없음',
+		thresholdEn: 'Debt ratio > 400% → red · 200–400% → yellow · n/a for financials',
+		source: 'EcoNode.debtRatio (industry ≠ finance)',
 		hard: true,
 		evaluate: ({ e, median }) => {
-			const v = e.icr;
-			if (v == null || v < 0) return null; // 영업적자/부재 = 무판정(수익성 규칙 소관)
-			const tail = medTail(median('icr'), x1);
-			if (v < 1.0) return { lv: 'red', kr: '이자보상 1배 미만', en: 'ICR below 1×', d: x1(v) + tail };
-			if (v < 1.5) return { lv: 'yellow', kr: '이자보상 취약', en: 'Thin interest coverage', d: x1(v) + tail };
-			return { lv: 'clear', d: x1(v) + tail };
+			const v = e.debtRatio;
+			if (v == null || isFinance(e)) return null; // 금융업/부재 = 판정불가(해당없음)
+			const tail = medTail(median('debtRatio'), pct0);
+			if (v > 400) return { lv: 'red', kr: '고부채(>400%)', en: 'Heavy debt (>400%)', d: pct0(v) + tail };
+			if (v > 200) return { lv: 'yellow', kr: '부채비율 과중', en: 'Elevated leverage', d: pct0(v) + tail };
+			return { lv: 'clear', d: pct0(v) + tail };
 		}
 	},
 	{
@@ -152,39 +156,24 @@ export const RISK_RULES: RiskRule[] = [
 		kr: '유동성',
 		en: 'Liquidity',
 		axis: 'liq',
-		whatKr: '1년 내 갚을 빚을 1년 내 현금화 자산으로 덮는가 — 유동비율',
-		whatEn: 'Do near-term assets cover near-term liabilities — current ratio',
-		thresholdKr: '유동비율 < 100%(유동부채 > 유동자산) → red · 100~120% → yellow',
-		thresholdEn: 'Current ratio < 100% → red · 100–120% → yellow',
-		source: 'EcoNode.currentRatio',
+		whatKr: '1년 내 갚을 빚을 1년 내 현금화 자산으로 덮는가 — 유동비율 (금융업 제외)',
+		whatEn: 'Do near-term assets cover near-term liabilities — current ratio (financials excluded)',
+		thresholdKr: '유동비율 < 100%(유동부채 > 유동자산) → red · 금융업 해당없음',
+		thresholdEn: 'Current ratio < 100% → red · n/a for financials',
+		source: 'EcoNode.currentRatio (industry ≠ finance)',
 		hard: true,
 		evaluate: ({ e, median }) => {
 			const v = e.currentRatio;
-			if (v == null) return null;
+			if (v == null || isFinance(e)) return null; // 금융업/부재 = 판정불가
 			const tail = medTail(median('currentRatio'), pct0);
+			// red 만 글랜스 점등(yellow 100~120% 는 중앙 154% 대비 흔해 노이즈 → 제거). 절대 정의가 직접적이라 영업흑자 위양성 없음.
 			if (v < 100) return { lv: 'red', kr: '유동비율 100% 미만', en: 'Current ratio < 100%', d: pct0(v) + tail };
-			if (v < 120) return { lv: 'yellow', kr: '유동비율 취약', en: 'Thin current ratio', d: pct0(v) + tail };
 			return { lv: 'clear', d: pct0(v) + tail };
 		}
 	},
-	{
-		id: 'controlStability',
-		kr: '경영권 안정',
-		en: 'Control stability',
-		axis: 'stab',
-		whatKr: '지배구조가 흔들리는가 — 최대주주 지분 안정성',
-		whatEn: 'Is control shaky — controlling-shareholder stability',
-		thresholdKr: '경영권 등급 "경고"·"위험" → red · "취약" → yellow',
-		thresholdEn: 'Control grade "alert"·"risk" → red · "fragile" → yellow',
-		source: 'EcoNode.stability',
-		hard: false,
-		evaluate: ({ e }) => {
-			if (e.stability === '경고' || e.stability === '위험') return { lv: 'red', kr: '경영 불안정', en: 'Unstable', d: e.stability };
-			if (e.stability === '취약') return { lv: 'yellow', kr: '경영 취약', en: 'Fragile', d: e.stability };
-			if (e.stability != null) return { lv: 'clear', d: e.stability };
-			return null;
-		}
-	},
+	// ※ controlStability(경영권 등급) 규칙 제거 — stability 등급은 "최대주주 지분이 낮으면 위험"으로 매겨져
+	//   지분 분산된 우량주(삼성 20%·NAVER 9%)를 "경영 불안정 red"로 오점등(14.5%). 지분분산 ≠ 위험 → cry-wolf.
+	//   지배구조 정보는 거버넌스 패널에 stability/holderPct 로 노출. 위험 신호로는 *급감 이벤트*(ownerStakeDrop)만 유지.
 	{
 		id: 'ownerStakeDrop',
 		kr: '대주주 지분',
@@ -192,8 +181,8 @@ export const RISK_RULES: RiskRule[] = [
 		axis: 'stab',
 		whatKr: '최대주주 지분이 급감했는가 (증자·분할 등 거짓양성 가능 → yellow 한정)',
 		whatEn: 'Did the controlling stake drop sharply (issuance/spin-off can false-positive → yellow only)',
-		thresholdKr: '대주주 지분 변화 < −3%p → yellow (경영권 안정 점등 시 중복 억제)',
-		thresholdEn: 'Owner stake change < −3%p → yellow (suppressed if control-stability already lit)',
+		thresholdKr: '대주주 지분 변화 < −3%p → yellow (정적 지분율 아닌 *급감 이벤트*만)',
+		thresholdEn: 'Owner stake change < −3%p → yellow (a sharp drop event, not a static level)',
 		source: 'EcoNode.holderChange (detail: holderPct)',
 		hard: false,
 		evaluate: ({ e }) => {

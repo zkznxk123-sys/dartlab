@@ -344,8 +344,9 @@ export function createEngine(raw: RawData): Engine {
 			const ev = rule.evaluate(ctx);
 			if (ev && ev.lv !== 'clear') lit.set(rule.id, { hard: rule.hard, flag: { lv: ev.lv, kr: ev.kr, en: ev.en, d: ev.d } });
 		}
-		// 억제: 경영권 안정(controlStability) 점등 시 대주주 지분급감(ownerStakeDrop) 중복 제거(같은 지배 축).
-		if (lit.has('controlStability')) lit.delete('ownerStakeDrop');
+		// 억제: 부채 부담(레벨) red 점등 시 부채비율 급증(변화)은 같은 부채 축 중복 → 제거.
+		const db = lit.get('debtBurden');
+		if (db && db.flag.lv === 'red') lit.delete('debtRatioSpike');
 		// 정렬: red>yellow, 같은 레벨 내 절대수치 위반(hard) 우선. 집합은 불변(순서만).
 		const lvRank = (lv: string): number => (lv === 'red' ? 0 : lv === 'yellow' ? 1 : 2);
 		const out = [...lit.values()]
