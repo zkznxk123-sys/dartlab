@@ -66,20 +66,27 @@ def _fetchOne(client, name: str, year: int) -> list[dict]:
 
 
 def fetchGdeltDoc(
-    nameToCode: dict[str, str], *, years: int = 1, perQuery: float = 0.25, timeout: float = 30.0
+    nameToCode: dict[str, str],
+    *,
+    years: int = 1,
+    perQuery: float = 0.25,
+    timeout: float = 30.0,
+    budgetSec: float | None = None,
 ) -> pl.DataFrame:
     """회사명→코드 매핑의 각 회사를 GDELT DOC API 로 질의 → 뉴스 archive df (gdelt 트랙).
 
-    Sig: ``fetchGdeltDoc(nameToCode, *, years=1, perQuery=0.25, timeout=30.0) -> pl.DataFrame``
+    Sig: ``fetchGdeltDoc(nameToCode, *, years=1, perQuery=0.25, timeout=30.0, budgetSec=None) -> pl.DataFrame``
 
     최근 ``years`` 개 연도를 회사별로 질의(daily=1=올해, backfill=5=2021~). 반환 컬럼은 naver archive 와
     호환(date/title/source/url/query/description/market/captured_at) — description 은 항상 빈 문자열.
+    전 종목(~2800)은 한 job 에 다 못 도므로 ``budgetSec`` 시간예산 초과 시 중단(누적이라 다음 run 이 이어감).
 
     Args:
         nameToCode: 회사명 → 종목코드. query=회사명, 결과행에 stockCode 동봉(__code).
         years: 최근 몇 개 연도를 질의할지 (1=올해만 증분, ≥2=과거 backfill).
         perQuery: 질의 간 sleep(초) — DOC API rate 보호.
         timeout: httpx 타임아웃.
+        budgetSec: 전체 fetch 시간예산(초). 초과 시 그때까지 모은 것 반환(부분). None=무제한.
 
     Returns:
         pl.DataFrame — gdelt 트랙 뉴스(빈 결과면 빈 df, 동일 스키마). __code 컬럼 포함.
@@ -91,9 +98,15 @@ def fetchGdeltDoc(
     nowYear = datetime.now(tz=timezone.utc).year
     yearList = [y for y in range(nowYear, nowYear - max(1, years), -1) if y >= _GDELT_FLOOR_YEAR]
     capturedAt = datetime.now(tz=timezone.utc)
+    started = time.monotonic()
     rows: list[dict] = []
+    done = 0
     with httpx.Client(follow_redirects=True, timeout=timeout, headers={"User-Agent": "dartlab/news"}) as client:
         for name, code in nameToCode.items():
+            if budgetSec is not None and time.monotonic() - started > budgetSec:
+                _log.info("GDELT DOC 시간예산 %ss 초과 — %d/%d 종목에서 중단(누적)", budgetSec, done, len(nameToCode))
+                break
+            done += 1
             for year in yearList:
                 for art in _fetchOne(client, name, year):
                     url = art.get("url") or ""

@@ -184,11 +184,16 @@ def buildNaverRecent(token: str) -> pl.DataFrame:
     return _trimSort(pl.concat(frames, how="diagonal_relaxed"), _WINDOW_DAYS)
 
 
-def buildGdeltArchive(token: str, nameToCode: dict[str, str], *, years: int) -> pl.DataFrame:
-    """gdelt 트랙 — DOC API 신규 질의 + 기존 HF gdeltArchive merge → trim. __code 보존. 없으면 빈 df."""
+def buildGdeltArchive(
+    token: str, nameToCode: dict[str, str], *, years: int, budgetSec: float | None = None
+) -> pl.DataFrame:
+    """gdelt 트랙 — DOC API 신규 질의(시간예산 내) + 기존 HF gdeltArchive merge → trim. __code 보존. 없으면 빈 df.
+
+    전 종목(~2800)은 한 job 에 다 못 도니 budgetSec 로 끊고, 기존 archive 와 누적 merge 해 매 run 커버 확대.
+    """
     if not nameToCode:
         return pl.DataFrame()
-    new = fetchGdeltDoc(nameToCode, years=years)
+    new = fetchGdeltDoc(nameToCode, years=years, budgetSec=budgetSec)
     base = _hfFrame(token, _GDELT_ARCHIVE_REL)
     frames = [f for f in (new, base) if f is not None and not f.is_empty()]
     if not frames:
@@ -267,22 +272,37 @@ def main(argv: list[str] | None = None) -> int:
         help="트랙별 종목당 최대 뉴스 건수(안전 backstop — 실데이터는 수집창·DOC 250/질의 한계로 그 아래에서 자연 수렴)",
     )
     ap.add_argument("--gdelt-years", type=int, default=1, help="GDELT DOC 질의 연도 수(1=올해 증분, 5=과거 backfill)")
+    ap.add_argument(
+        "--gdelt-budget-min", type=float, default=25.0, help="GDELT fetch 시간예산(분) — 전 종목은 누적 분할"
+    )
     args = ap.parse_args(argv)
 
     token = _resolveToken()
+    canPush = (not args.no_push) and bool(token)
     nameToCode = _nameToCode()
     naverOut = buildNaverRecent(token)
-    gdeltOut = buildGdeltArchive(token, nameToCode, years=args.gdelt_years)
+
+    # Phase 1 — naver byCompany 즉시 빌드+push (gdelt 무관·빠름). GDELT 가 느리거나 timeout 나도 naver 는 항상 라이브.
+    if not naverOut.is_empty():
+        p1, j1 = _writeArtifacts(naverOut, pl.DataFrame(), nameToCode, args.per_company)
+        if canPush:
+            push(token, p1, j1)
+        print(f"[phase1] naver byCompany {len(j1)} 종목 {'push' if canPush else 'build'} 완료")
+
+    # Phase 2 — gdelt 시간예산 내 best-effort → 병합 재빌드+push (누적이라 매 run 커버 확대).
+    gdeltOut = buildGdeltArchive(token, nameToCode, years=args.gdelt_years, budgetSec=args.gdelt_budget_min * 60)
+    if not gdeltOut.is_empty():
+        p2, j2 = _writeArtifacts(naverOut, gdeltOut, nameToCode, args.per_company)
+        if canPush:
+            push(token, p2, j2)
+        print(f"[phase2] naver+gdelt byCompany {len(j2)} 종목 {'push' if canPush else 'build'} 완료")
+
     if naverOut.is_empty() and gdeltOut.is_empty():
         print("naver·gdelt 양쪽 데이터 0 — syncNaverNews 또는 GDELT 질의 먼저", file=sys.stderr)
-        return 0
-    parquets, jsonPaths = _writeArtifacts(naverOut, gdeltOut, nameToCode, args.per_company)
-    if args.no_push:
         return 0
     if not token:
         print("[HF↑] HF_TOKEN 없음 — push skip (빌드만 완료)", file=sys.stderr)
         return 1
-    push(token, parquets, jsonPaths)
     return 0
 
 
