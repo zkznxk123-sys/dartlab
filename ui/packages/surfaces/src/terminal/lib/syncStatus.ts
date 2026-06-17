@@ -43,49 +43,38 @@ export function fetchLastSync(dir: string, file?: string): Promise<string | null
 	return p;
 }
 
-// ── 마지막 점검(cron liveness) — HF push 시각(데이터 변경)과 별개. 분기 데이터(finance·report)는
+// ── 마지막 점검(파이프라인 liveness) — HF push 시각(데이터 변경)과 별개. 분기 데이터(finance·report)는
 //    매일 체크하지만 변경 없으면 push 0 → push 시각만 보면 stale 처럼 보인다. 담당 워크플로의 마지막
-//    *예약(schedule) 실행* 시각으로 "점검은 살아있나(변경이 없을 뿐)" vs "cron 사망" 을 구분한다.
-//    GitHub Actions 공개 REST(공개 repo·CORS 허용·무인증)로 event=schedule 최근 run 1회 조회(세션 캐시,
-//    워크플로 다수를 단일 요청으로 커버 → rate-limit 절약). 실패 = null('—' 정직). 수동 dispatch 는
-//    schedule 이 아니라 제외(순수 cron 생존 신호). 운영자 push 시각 노출과 동질의 공개 정보. */
-const RUNS_API =
-	'https://api.github.com/repos/eddmpython/dartlab/actions/runs?event=schedule&per_page=80';
+//    실행으로 "점검은 살아있나(변경이 없을 뿐)" vs "파이프라인 사망" 을 구분한다.
+//    ⚠ 예약(schedule)만 세면 수동 dispatch 가 빠져 "점검 < 변경" 역전이 난다(데이터는 방금 수동 회복
+//    됐는데 마지막 *예약* 은 어제). 그래서 trigger 무관 *최신 실행 1건*을 워크플로별로 조회하고,
+//    시작(run_started_at)이 아니라 *완료(updated_at)* 시각을 쓴다 — push 는 실행 도중 일어나므로
+//    완료 ≥ push → 점검 ≥ 변경 항상 성립. GitHub Actions 공개 REST(공개repo·CORS·무인증), 워크플로별
+//    1회 조회(파일명별 캐시·distinct 4개라 호출 ≤4). 실패 = null('—' 정직). */
+const checkCache = new Map<string, Promise<{ at: string; conclusion: string | null } | null>>();
 
-interface RunInfo {
-	at: string;
-	conclusion: string | null;
-	status: string;
-}
-let runsPromise: Promise<Map<string, RunInfo>> | null = null; // 워크플로 파일명 → 최신 schedule run
-function loadScheduledRuns(): Promise<Map<string, RunInfo>> {
-	if (runsPromise) return runsPromise;
-	runsPromise = (async (): Promise<Map<string, RunInfo>> => {
-		const map = new Map<string, RunInfo>();
-		try {
-			const resp = await fetch(RUNS_API, { headers: { Accept: 'application/vnd.github+json' } });
-			if (!resp.ok) return map;
-			const data = (await resp.json()) as { workflow_runs?: Array<{ path?: string; run_started_at?: string; created_at?: string; conclusion?: string | null; status?: string }> };
-			// API 는 생성 역순(최신 우선) — 워크플로별 첫 등장만 채택(= 최신).
-			for (const run of data.workflow_runs ?? []) {
-				const file = (run.path ?? '').split('/').pop();
-				if (!file || map.has(file)) continue;
-				map.set(file, { at: run.run_started_at || run.created_at || '', conclusion: run.conclusion ?? null, status: run.status ?? '' });
-			}
-		} catch {
-			/* 네트워크/rate-limit 실패 = '—' 정직 폴백 */
-		}
-		return map;
-	})();
-	return runsPromise;
-}
-
-/** 담당 워크플로의 마지막 schedule 실행 시각(ISO) + 결과. 미존재/실패 = null. */
+/** 담당 워크플로의 마지막 실행(예약+수동) 완료 시각(ISO) + 결과. 미존재/실패 = null. */
 export function fetchLastCheck(workflowFile: string): Promise<{ at: string; conclusion: string | null } | null> {
-	return loadScheduledRuns().then((m) => {
-		const hit = m.get(workflowFile);
-		return hit && hit.at ? { at: hit.at, conclusion: hit.conclusion } : null;
-	});
+	const cached = checkCache.get(workflowFile);
+	if (cached) return cached;
+	const p = (async (): Promise<{ at: string; conclusion: string | null } | null> => {
+		try {
+			const resp = await fetch(
+				`https://api.github.com/repos/eddmpython/dartlab/actions/workflows/${workflowFile}/runs?per_page=1`,
+				{ headers: { Accept: 'application/vnd.github+json' } }
+			);
+			if (!resp.ok) return null;
+			const data = (await resp.json()) as { workflow_runs?: Array<{ updated_at?: string; run_started_at?: string; created_at?: string; conclusion?: string | null }> };
+			const run = (data.workflow_runs ?? [])[0];
+			if (!run) return null;
+			const at = run.updated_at || run.run_started_at || run.created_at || '';
+			return at ? { at, conclusion: run.conclusion ?? null } : null;
+		} catch {
+			return null; /* 네트워크/rate-limit 실패 = '—' 정직 폴백 */
+		}
+	})();
+	checkCache.set(workflowFile, p);
+	return p;
 }
 
 /** ISO → { rel:'3시간 전', abs:'06-12 23:14' } (KST 로컬). 셀에서 상대=1줄·절대=다음 줄로 쌓아 렌더. */
