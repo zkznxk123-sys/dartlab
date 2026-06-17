@@ -5,14 +5,15 @@
 import type { Candle, IndexRef } from '@dartlab/ui-contracts';
 import { US_INDEX_PRESETS } from '@dartlab/ui-contracts';
 import { loadFredSeriesPoints } from './macroSource';
+import type { DataCore } from '../../../data/fetch/request';
 
 const US_BY_SERIES = new Map(US_INDEX_PRESETS.map((r) => [r.seriesId as string, r]));
 
 /** FRED 종가 시리즈 → degenerate Candle[](o=h=l=c=value, v=0). null = 미존재/미화이트리스트. */
-export async function loadFredIndexCandles(ref: IndexRef): Promise<Candle[] | null> {
+export async function loadFredIndexCandles(ref: IndexRef, core?: DataCore): Promise<Candle[] | null> {
 	const sid = ref.seriesId;
 	if (!sid || !US_BY_SERIES.has(sid)) return null; // 화이트리스트 게이팅(임의 fetch 차단)
-	const pts = await loadFredSeriesPoints(sid); // [{d:'YYYYMMDD', v}] 오름차순 or null
+	const pts = await loadFredSeriesPoints(sid, core); // [{d:'YYYYMMDD', v}] 오름차순 or null
 	if (!pts || !pts.length) return null;
 	return pts.map((p) => ({ t: p.d, o: p.v, h: p.v, l: p.v, c: p.v, v: 0, r: null, tv: null }));
 }

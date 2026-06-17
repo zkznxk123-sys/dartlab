@@ -42,8 +42,18 @@ const ORIGIN_TOKENS = ['huggingface', 'workers.dev', 'hf-proxy'];
 // 공시 표시용 링크(데이터 fetch 가 아닌 사용자 표시 URL) — http(s) 리터럴 검사에서 제외.
 const DISPLAY_URL_ALLOW = ['dart.fss.or.kr'];
 
-// rule 4 allowlist — financeSource.ts 의 loadFinanceRows 전용 core(landing 주입 콜백, 시그니처 불변).
-const CREATE_CORE_ALLOW = [{ file: 'financeSource.ts', fn: 'financeRowsCore' }];
+// rule 4 allowlist — 어댑터 밖 셸이 core 없이 호출하는 EXPORTED 소스/팩토리의 모듈 폴백 core(시그니처 불변 제약).
+//   financeSource.financeRowsCore  — landing 공시뷰어 provideFinanceRows((code)=>rows) 콜백.
+//   macroCore/govCore/idxCore/productCore — ui/web 레거시(localTerminalData)·core 없는 localCompanyPort 가
+//     createHfMacroPort()/createPublicIndexPort()/publicPricePort()/loadHfProductIndexMap() 를 무인자 호출하므로
+//     어댑터가 core 를 주입하면 그걸 쓰고, 무주입 경로만 모듈 폴백 core(lazy). financeRowsCore 와 동형 sanctioned 예외.
+const CREATE_CORE_ALLOW = [
+	{ file: 'financeSource.ts', fn: 'financeRowsCore' },
+	{ file: 'macroSource.ts', fn: 'macroCore' },
+	{ file: 'govPriceSource.ts', fn: 'govCore' },
+	{ file: 'govIndexSource.ts', fn: 'idxCore' },
+	{ file: 'productIndexSource.ts', fn: 'productCore' }
+];
 
 /** posix 상대경로(baseline 비교 안정 — OS 무관). */
 const relPosix = (abs) => relative(REPO_ROOT, abs).split('\\').join('/');

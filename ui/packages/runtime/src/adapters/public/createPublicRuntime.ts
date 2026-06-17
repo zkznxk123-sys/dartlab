@@ -54,11 +54,12 @@ function notWiredYet(what: string, stage: string): never {
 }
 
 // 전 종목 productIndex 는 Map 소스를 Record(JSON-safe 계약)로 1 회 변환해 공유.
+// (Map→Record 변환은 transform — 무거운 read 는 코어가 캐시·dedup. 이 메모이즈는 변환 결과 1회 재사용 한정.)
 let productIndexPromise: Promise<Record<string, ProductIndexItem> | null> | null = null;
-function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | null> {
+function loadProductIndexRecord(core: DataCore): Promise<Record<string, ProductIndexItem> | null> {
 	productIndexPromise ??= (async () => {
 		try {
-			const map = await loadHfProductIndexMap();
+			const map = await loadHfProductIndexMap(core);
 			return Object.fromEntries(map);
 		} catch {
 			return null;
@@ -69,7 +70,7 @@ function loadProductIndexRecord(): Promise<Record<string, ProductIndexItem> | nu
 
 // 로컬 어댑터도 이 포트를 그대로 재사용한다 — gov HF + recent + naver fresh 는 백엔드 0(브라우저 단일 경로)
 // 라, 로컬 :8400 미가동이어도 차트가 퍼블릭과 동일하게 뜬다(finance·macro·company 와 같은 "깃헙페이지 자산 공유").
-export function publicPricePort(): PricePort {
+export function publicPricePort(core?: DataCore): PricePort {
 	return {
 		// 회사파일(전종목 주간 파생, 전체 이력) ∥ recent(최근 30거래일 전종목 슬림 1파일) ∥ 네이버 fresh tail
 		// 병렬 → 병합. 회사파일이 주간 갱신이어도 recent tail 이 최신 거래일을, 네이버 fresh 가 gov 미발행
@@ -78,25 +79,25 @@ export function publicPricePort(): PricePort {
 		// dev 미스는 /__gov 라이브 채움, 네이버 fresh 는 /__naver(dev)·CF 프록시(프로덕션) 경로.
 		async initial(code, year) {
 			const c = code.trim();
-			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c), loadGovRecent(), loadNaverFresh(c)]);
+			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c, core), loadGovRecent(core), loadNaverFresh(c)]);
 			const tail = recent?.[c] ?? [];
 			if ((gov && gov.length) || tail.length || fresh.length) return seedCandles(c, mergeDedup(gov ?? [], tail, fresh));
 			return loadInitialOHLCV(c, year);
 		},
 		older: loadOlderYear,
 		loaded: loadedCandles,
-		govCandles: loadGovCandles,
-		govRecent: loadGovRecent
+		govCandles: (code) => loadGovCandles(code, core),
+		govRecent: () => loadGovRecent(core)
 	};
 }
 
-function publicCompanyPort(shared: PublicRuntimeSharedPorts): CompanyPort {
+function publicCompanyPort(shared: PublicRuntimeSharedPorts, core: DataCore): CompanyPort {
 	return {
 		async products(code) {
-			const rec = await loadProductIndexRecord();
+			const rec = await loadProductIndexRecord(core);
 			return rec?.[code.trim()] ?? null;
 		},
-		productIndex: loadProductIndexRecord,
+		productIndex: () => loadProductIndexRecord(core),
 		relations: loadCompanyRelations,
 		reportFacts: shared.reportFacts,
 		industryProfitPool: loadIndustryProfitPool
@@ -138,14 +139,14 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 	const dataCore = createDataCore(); // 데이터 워크벤치 SSOT 코어(어댑터당 1) — RuntimeCache·RequestDedup 실배선
 	return {
 		env,
-		company: publicCompanyPort(options.shared),
-		price: publicPricePort(),
-		index: createPublicIndexPort(),
+		company: publicCompanyPort(options.shared, dataCore),
+		price: publicPricePort(dataCore),
+		index: createPublicIndexPort(dataCore),
 		filing: publicFilingPort(dataCore),
 		news: publicNewsPort(),
 		finance: publicFinancePort(dataCore),
 		viewer: options.viewer,
-		macro: createHfMacroPort(),
+		macro: createHfMacroPort(dataCore),
 		report: createReportSource(dataCore),
 		scan: publicScanPort(options.shared),
 		export: publicExportPort(localStoragePort(), options.exportShared),

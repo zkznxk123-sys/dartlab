@@ -57,15 +57,15 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		env,
 		company: localCompanyPort(), // 공통배선 — 전부 HF(corpList·relations·profit-pool), 로컬 /api 불요
 		// 주가 = 공개 gov HF 포트 재사용 (백엔드 0, 브라우저 단일 경로) — 로컬 :8400 미가동에도 차트가 퍼블릭과 동일.
-		price: publicPricePort(),
+		price: publicPricePort(dataCore),
 		// 지수 = gov/indices + FRED 모두 HF 브라우저 직독 → price·macro 와 동일하게 공개 포트 그대로 재사용(백엔드 0).
-		index: createPublicIndexPort(),
+		index: createPublicIndexPort(dataCore),
 		filing: localFilingPort(apiBase, caches, dataCore),
 		// 뉴스 = private 라 브라우저 직독 불가 → 퍼블릭 워커(/news) 포트 그대로 재사용(price 와 동일 "공유 자산").
 		news: publicNewsPort(),
 		finance: localFinancePort(dataCore),
 		viewer: localViewerPort(),
-		macro: createHfMacroPort(),
+		macro: createHfMacroPort(dataCore),
 		report: createReportSource(dataCore), // 공통배선 — HF parquet 직독(백엔드 0, 어댑터 코어 주입). 옛 localReportPort 는 null 스텁이라 폐기.
 		scan: localScanPort(),
 		export: exportPort,

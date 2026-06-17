@@ -7,7 +7,7 @@
 //   3. 프로덕션 — 캐시 읽기 전용(미스 시 호출측이 KRX 폴백). 운영자가 로컬에서 열며 공유 HF 캐시를 채운다.
 // 출처표시 의무(공공누리): gov 데이터 표시 시 contracts 의 GOV_ATTRIBUTION 노출.
 import type { Candle } from '@dartlab/ui-contracts';
-import { readParquetWholeFile } from '../../../data/hfRange';
+import { createDataCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
 // vite 환경 캐스트 — 런타임 패키지 tsc 는 vite/client 타입 무의존 (origin.ts 동일 패턴)
@@ -20,8 +20,11 @@ export interface GovCandleFile {
 	candles: Candle[];
 }
 
-const cache = new Map<string, Candle[] | null>();
-const inflight = new Map<string, Promise<Candle[] | null>>();
+// publicPricePort 는 ui/web 레거시·로컬 어댑터 양쪽이 호출하므로 core 미주입 경로 전용 모듈 폴백 코어를 lazy
+// 생성한다(financeSource.financeRowsCore 동형). 어댑터는 자신의 createDataCore() 를 주입한다.
+// 옛 cache·inflight·recentPromise Map(결과/in-flight 수기 관리)은 폐기 — 코어가 read 레벨에서 캐시·dedup.
+let govFallbackCore: DataCore | null = null;
+const govCore = (core?: DataCore): DataCore => core ?? (govFallbackCore ??= createDataCore());
 
 // HF 캐시 = 회사별 parquet (gov/prices/company 동일 schema). 필요한 OHLCV+등락률 컬럼만 projection.
 // fluctuationRate = 기준가 대비 등락률 — 수정주가(adjustCandles) 체이닝 입력.
@@ -49,10 +52,16 @@ function pick(j: unknown): Candle[] | null {
 	return f && Array.isArray(f.candles) && f.candles.length ? f.candles : null;
 }
 
-async function readHf(code: string): Promise<Candle[] | null> {
+async function readHf(core: DataCore, code: string): Promise<Candle[] | null> {
 	try {
-		// 회사별 파일은 작다(~100KB) — HEAD probe 없이 GET 1 회 통파일 (핫패스 RTT 최소화)
-		const rows = await readParquetWholeFile<GovRow>(`gov/prices/company/${code}.parquet`, { columns: GOV_PARQUET_COLUMNS });
+		// 회사별 파일은 작다(~100KB) — HEAD probe 없이 GET 1 회 통파일 (핫패스 RTT 최소화). 코어가 read 캐시·dedup.
+		const rows = await core.requestParquetWholeFile<GovRow>({
+			origin: 'hf',
+			path: `gov/prices/company/${code}.parquet`,
+			columns: GOV_PARQUET_COLUMNS,
+			cacheKey: `gov.prices.company:${code}`,
+			cache: { scope: 'memory', ttlMs: 20 * 60_000, maxEntries: 128 } // 주가 신선도 — 짧은 TTL(20분), 회사 파일 주간 파생
+		});
 		if (!rows) return null;
 		const candles = rows.map(rowToCandle).filter((x): x is Candle => x != null);
 		return candles.length ? candles : null;
@@ -73,17 +82,21 @@ async function fillViaDev(code: string): Promise<Candle[] | null> {
 }
 
 // 최근 30거래일 전종목 슬림 1파일 — 회사 파일(주간 파생)과 병합하는 신선 tail.
-// 전 종목이 한 파일을 공유 → 첫 다운로드 후 회사 전환 시 tail 비용 0.
-let recentPromise: Promise<Record<string, Candle[]> | null> | null = null;
+// 전 종목이 한 파일을 공유 → 첫 다운로드 후 회사 전환 시 tail 비용 0(코어 read 캐시 공유).
 const RECENT_COLUMNS = ['stockCode', 'date', 'open', 'high', 'low', 'close', 'volume', 'fluctuationRate', 'tradedValue'];
 
-/** 최근 거래일 tail (code → 캔들 오름차순, JSON-safe Record). null = recent 파일 미존재. */
-export function loadGovRecent(): Promise<Record<string, Candle[]> | null> {
+/** 최근 거래일 tail (code → 캔들 오름차순, JSON-safe Record). null = recent 파일 미존재. 코어가 캐시·dedup. */
+export function loadGovRecent(core?: DataCore): Promise<Record<string, Candle[]> | null> {
 	if (!browser) return Promise.resolve(null);
-	if (recentPromise) return recentPromise;
-	recentPromise = (async () => {
+	return (async () => {
 		try {
-			const rows = await readParquetWholeFile<GovRow & { stockCode?: string | null }>('gov/prices/recent.parquet', { columns: RECENT_COLUMNS });
+			const rows = await govCore(core).requestParquetWholeFile<GovRow & { stockCode?: string | null }>({
+				origin: 'hf',
+				path: 'gov/prices/recent.parquet',
+				columns: RECENT_COLUMNS,
+				cacheKey: 'gov.prices.recent',
+				cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 2 } // 최근 거래일 슬림 파일 — 신선도 우선 10분 TTL
+			});
 			if (!rows) return null;
 			const map: Record<string, Candle[]> = {};
 			for (const r of rows) {
@@ -97,22 +110,15 @@ export function loadGovRecent(): Promise<Record<string, Candle[]> | null> {
 			return null;
 		}
 	})();
-	return recentPromise;
 }
 
-/** gov 캐시 주가(전체 이력, 오름차순). null = 미캐시·미지원. 동시 호출 dedup. */
-export function loadGovCandles(code: string): Promise<Candle[] | null> {
+/** gov 캐시 주가(전체 이력, 오름차순). null = 미캐시·미지원. read 캐시·dedup 은 코어(옛 cache/inflight Map 폐기). */
+export function loadGovCandles(code: string, core?: DataCore): Promise<Candle[] | null> {
 	if (!browser) return Promise.resolve(null);
 	const c = code.trim();
-	if (cache.has(c)) return Promise.resolve(cache.get(c) ?? null);
-	const hit = inflight.get(c);
-	if (hit) return hit;
-	const p = (async () => {
-		let candles = await readHf(c);
-		if (!candles) candles = await fillViaDev(c);
-		cache.set(c, candles);
-		return candles;
-	})().finally(() => inflight.delete(c));
-	inflight.set(c, p);
-	return p;
+	const dc = govCore(core);
+	return (async () => {
+		const candles = await readHf(dc, c);
+		return candles ?? (await fillViaDev(c));
+	})();
 }

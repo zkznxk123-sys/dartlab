@@ -4,7 +4,7 @@
 // 어댑터당 1 인스턴스(createDataCore) — 전역 싱글턴 금지(04 KILL: 테스트 격리·soft-swap 오염 방지).
 import { RuntimeCache } from '../../cache/runtimeCache';
 import { RequestDedup } from '../../cache/requestDedup';
-import { fetchResilient, readParquetRows, type FetchLike } from '../hfRange';
+import { fetchResilient, readParquetRows, readParquetWholeFile, type FetchLike } from '../hfRange';
 import type { ParquetQueryFilter } from 'hyparquet';
 import { originUrl, originCache, type CachePolicy, type OriginId } from '../origins/registry';
 
@@ -35,9 +35,21 @@ export interface ParquetRowsSpec<T> {
 	dedup?: boolean;
 }
 
+export interface ParquetWholeFileSpec<T> {
+	/** 소형 통파일 GET(readParquetWholeFile) — hf(프록시) URL. origin 은 표기용(기본 hf). */
+	origin?: Extract<OriginId, 'hf'>;
+	path: string;
+	columns?: string[];
+	cache?: CachePolicy;
+	cacheKey: string;
+	dedup?: boolean;
+}
+
 export interface DataCore {
 	request<T>(spec: RequestSpec<T>): Promise<T>;
 	requestParquetRows<T extends Record<string, unknown>>(spec: ParquetRowsSpec<T>): Promise<T[]>;
+	/** 소형 단일 parquet 통파일 직독(HEAD probe 생략, GET 1회). 미존재(404)는 null — read 레벨 캐시·dedup 공유. */
+	requestParquetWholeFile<T extends Record<string, unknown>>(spec: ParquetWholeFileSpec<T>): Promise<T[] | null>;
 	clear(): void;
 }
 
@@ -94,9 +106,26 @@ export function createDataCore(opts: DataCoreOptions = {}): DataCore {
 		return spec.dedup === false ? exec() : (dedup.run(key, exec) as Promise<T[]>);
 	}
 
+	async function requestParquetWholeFile<T extends Record<string, unknown>>(spec: ParquetWholeFileSpec<T>): Promise<T[] | null> {
+		const policy = spec.cache ?? DEFAULT_PARQUET_CACHE;
+		const key = spec.cacheKey;
+		if (policy.scope === 'memory') {
+			const hit = bucket(policy).get(key, now());
+			if (hit !== undefined) return hit as T[] | null;
+		}
+		const exec = async (): Promise<T[] | null> => {
+			const rows = await readParquetWholeFile<T>(spec.path, { columns: spec.columns, fetchFn });
+			// null(404) 도 캐시한다 — 미존재 파일 반복 GET 차단(음성 캐시). 호출측이 빈 결과 캐시 회피가
+			// 필요하면(예: 일시 404 poisoning) catch 후 자체 판단(govIndex universe 가 그 예).
+			if (policy.scope === 'memory') bucket(policy).set(key, rows, now());
+			return rows;
+		};
+		return spec.dedup === false ? exec() : (dedup.run(key, exec) as Promise<T[] | null>);
+	}
+
 	function clear(): void {
 		for (const b of buckets.values()) b.clear();
 	}
 
-	return { request, requestParquetRows, clear };
+	return { request, requestParquetRows, requestParquetWholeFile, clear };
 }

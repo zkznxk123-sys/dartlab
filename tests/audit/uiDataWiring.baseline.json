@@ -30,19 +30,9 @@
 			"detail": "raw fetch() — data/fetch.request 경유"
 		},
 		{
-			"file": "ui/packages/runtime/src/adapters/public/sources/govIndexSource.ts",
-			"rule": 3,
-			"detail": "module-level new Map cache: nameScanCache — 코어 캐시 사용"
-		},
-		{
 			"file": "ui/packages/runtime/src/adapters/public/sources/govPriceSource.ts",
 			"rule": 1,
 			"detail": "raw fetch() — data/fetch.request 경유"
-		},
-		{
-			"file": "ui/packages/runtime/src/adapters/public/sources/macroSource.ts",
-			"rule": 3,
-			"detail": "module-level new Map cache: srcCache — 코어 캐시 사용"
 		},
 		{
 			"file": "ui/packages/runtime/src/adapters/public/sources/naverPriceSource.ts",

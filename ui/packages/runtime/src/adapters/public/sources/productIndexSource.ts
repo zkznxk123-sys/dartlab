@@ -1,8 +1,14 @@
 // 타입 정본 = contracts (ProductIndexItem 승격 완료 — 중복 정의 금지).
 import type { ProductIndexItem } from '@dartlab/ui-contracts';
-import { readParquetRows, type FetchLike } from '../../../data/hfRange';
+import { createDataCore, type DataCore } from '../../../data/fetch/request';
 
 const PRODUCT_INDEX_PATH = 'metadata/corpList.parquet';
+
+// loadHfProductIndexMap 은 companySource(local)·createPublicRuntime 가 core 없이 호출하므로(시그니처 불변)
+// 모듈 폴백 코어를 lazy 생성한다(financeSource.financeRowsCore 동형). 어댑터가 core 를 주면 그것을 쓴다.
+// 옛 productIndexPromise 싱글턴(결과 메모이즈)은 폐기 — 코어가 read 레벨에서 캐시·dedup 한다.
+let productFallbackCore: DataCore | null = null;
+const productCore = (core?: DataCore): DataCore => core ?? (productFallbackCore ??= createDataCore());
 
 interface ProductIndexRow extends Record<string, unknown> {
 	stockCode?: unknown;
@@ -18,24 +24,17 @@ interface ProductIndexRow extends Record<string, unknown> {
 	지역?: unknown;
 }
 
-let productIndexPromise: Promise<Map<string, ProductIndexItem>> | null = null;
-
-export async function loadHfProductIndexMap(fetchFn: FetchLike = fetch): Promise<Map<string, ProductIndexItem>> {
-	if (fetchFn === fetch) {
-		productIndexPromise ??= readHfProductIndexMap(fetchFn);
-		return productIndexPromise;
-	}
-	return readHfProductIndexMap(fetchFn);
-}
-
-async function readHfProductIndexMap(fetchFn: FetchLike): Promise<Map<string, ProductIndexItem>> {
-	const data = await readParquetRows<ProductIndexRow>(PRODUCT_INDEX_PATH, {
+export async function loadHfProductIndexMap(core?: DataCore): Promise<Map<string, ProductIndexItem>> {
+	const rows = await productCore(core).requestParquetRows<ProductIndexRow>({
+		origin: 'hfRange',
+		path: PRODUCT_INDEX_PATH,
 		columns: ['종목코드', '주요제품', '홈페이지', '업종', '대표자명', '결산월', '상장일', '지역'],
-		fetchFn
+		cacheKey: 'metadata.corpList',
+		cache: { scope: 'memory', ttlMs: 60 * 60_000, maxEntries: 2 } // 분기 단위 메타 — 60분 TTL
 	});
 	const map = new Map<string, ProductIndexItem>();
 	const opt = (v: unknown): string | undefined => String(v ?? '').trim() || undefined;
-	for (const row of data.rows) {
+	for (const row of rows) {
 		const stockCode = String(row.종목코드 ?? row.stockCode ?? '').trim();
 		if (!stockCode) continue;
 		const productRaw = cleanProduct(row.주요제품 ?? row.product);
