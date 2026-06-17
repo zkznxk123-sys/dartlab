@@ -8,6 +8,7 @@
 	import FinTypeLegendDialog from './FinTypeLegendDialog.svelte'; // 유형 칩 범례 — TYPE 컬럼 ⓘ 에서 연다
 	import Watchlist from './Watchlist.svelte'; // 공시 워치 — 큐레이션 종목 신선도 모니터 (recentMap 공유)
 	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
+	import { readStore, writeStore } from '../lib/termStore'; // 하단 탭 선택 영속 (워치리스트와 동형 · 기기로컬)
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
 
@@ -33,7 +34,10 @@
 	// ROE·영업이익 수치 컬럼은 라벨(finType 체인)로 대체 — 수치 다조건은 상세검색 모달 소관. ──
 	let screenerOpen = $state(false);
 	let finLegendOpen = $state(false); // 유형 칩 범례 다이얼로그
-	let bottomTab = $state<'screener' | 'watch'>('screener'); // 하단 통합 패널 탭 — 스크리너(기본) ⇄ 공시 워치
+	// 하단 통합 패널 탭 — 스크리너(기본) ⇄ 공시 워치. 선택을 localStorage 영속(워치리스트와 동형 · 기기로컬).
+	// 기본 'screener' 는 키 미저장(쓰레기 키 방지 관례), 'watch' 선택 시에만 저장 → 새로고침해도 워치 유지.
+	let bottomTab = $state<'screener' | 'watch'>(readStore<string>('dlTerm.bottomTab', 'screener') === 'watch' ? 'watch' : 'screener');
+	$effect(() => { writeStore('dlTerm.bottomTab', bottomTab === 'watch' ? 'watch' : null); });
 	// 30거래일 스파크 — recent.parquet 전종목 1파일 (티커 스트립과 어댑터 캐시 공유, 추가 다운로드 0)
 	let recentMap = $state<Record<string, Candle[]> | null>(null);
 	rt.price.govRecent().then((m) => (recentMap = m));
