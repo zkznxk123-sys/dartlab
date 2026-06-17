@@ -66,6 +66,12 @@ def _stageRetries() -> int:
         return 2
 
 
+def _progressEnabled() -> bool:
+    """Return whether collector-level allFilings progress logs should be emitted."""
+    raw = (os.environ.get("DART_ALLFILINGS_SHOW_PROGRESS") or "1").strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
 def _retrySleepSeconds(attempt: int) -> float:
     """Backoff seconds for transient DART list/content failures."""
     raw = os.environ.get("DART_ALLFILINGS_RETRY_SLEEP_SECONDS")
@@ -151,17 +157,37 @@ def runAllFilings(
     days = int(os.environ.get("SYNC_LOOKBACK_DAYS") or os.environ.get("DART_ALLFILINGS_LOOKBACK") or "7")
     dates = _recentDates(days)
     start, end = dates[-1], dates[0]
+    progress = _progressEnabled()
     res = StageResult(category="allFilings")
+    started = time.monotonic()
 
     try:
-        _retryTransient("collectMetaRange", lambda: collectMetaRange(start, end, showProgress=False))
+        print(
+            f"[pipeline] allFilings forward 시작: {start}~{end} "
+            f"({len(dates)}일) · upload={upload} · progress={progress}",
+            flush=True,
+        )
+        _retryTransient("collectMetaRange", lambda: collectMetaRange(start, end, showProgress=progress))
         rows = 0
         for d in dates:
-            df = _retryTransient(f"fillContent {d}", lambda d=d: fillContent(d, showProgress=False))
+            dayStarted = time.monotonic()
+            print(f"[pipeline] allFilings fillContent 시작: {d}", flush=True)
+            df = _retryTransient(f"fillContent {d}", lambda d=d: fillContent(d, showProgress=progress))
+            dayRows = df.height if df is not None else 0
             if df is not None:
-                rows += df.height
+                rows += dayRows
+            print(
+                f"[pipeline] allFilings fillContent 완료: {d} · rows={dayRows} · "
+                f"elapsed={time.monotonic() - dayStarted:.1f}s",
+                flush=True,
+            )
         res.rows = rows
         res.report.ok = 1
+        print(
+            f"[pipeline] allFilings forward 수집 완료: rows={rows} · "
+            f"elapsed={time.monotonic() - started:.1f}s",
+            flush=True,
+        )
     except Exception as exc:  # noqa: BLE001 — 수집 실패 격리(다음 sync 자연 회복)
         res.report.err = 1
         res.report.failures.append(f"allFilings collect {start}~{end}: {type(exc).__name__}: {exc}")
@@ -275,7 +301,9 @@ def runAllFilingsBackfill(
 
     months = int(os.environ.get("DART_ALLFILINGS_BACKFILL_MONTHS") or "2")
     floorYm = (os.environ.get("DART_ALLFILINGS_BACKFILL_FLOOR") or "201501").strip()
+    progress = _progressEnabled()
     res = StageResult(category="allFilingsBackfill")
+    started = time.monotonic()
 
     try:
         existing = set(collectedDates()) | _remoteDates(token=token)
@@ -303,15 +331,31 @@ def runAllFilingsBackfill(
     client = DartClient()
     rows = 0
     uploaded = 0
+    print(
+        f"[pipeline] allFilings backfill 시작: months={targetMonths} · "
+        f"existing={len(existing)}일 · upload={upload} · progress={progress}",
+        flush=True,
+    )
     for ym in targetMonths:
         days = [d for d in _monthDays(ym) if d not in existing]
         collected: list[str] = []
+        monthRows = 0
+        monthStarted = time.monotonic()
+        print(f"[pipeline] allFilings backfill {ym} 시작: 대상 {len(days)}일", flush=True)
         try:
             for d in days:
-                df = fillContent(d, client=client, showProgress=False)
+                dayStarted = time.monotonic()
+                df = fillContent(d, client=client, showProgress=progress)
+                dayRows = df.height if df is not None else 0
                 if df is not None:
-                    rows += df.height
+                    rows += dayRows
+                    monthRows += dayRows
                     collected.append(d)
+                print(
+                    f"[pipeline] allFilings backfill {ym}/{d} 완료: rows={dayRows} · "
+                    f"elapsed={time.monotonic() - dayStarted:.1f}s",
+                    flush=True,
+                )
         except Exception as exc:  # noqa: BLE001 — 월 수집 실패 격리(앞 월 보존, 중단)
             res.report.err = 1
             res.report.failures.append(f"allFilings backfill {ym}: {type(exc).__name__}: {exc}")
@@ -326,14 +370,19 @@ def runAllFilingsBackfill(
                 res.report.fail = 1
                 res.report.failures.append(f"allFilings backfill push {ym}: {type(exc).__name__}: {exc}")
                 print(f"[pipeline] allFilings backfill {ym} push 실패(격리): {exc}", flush=True)
-        print(f"[pipeline] allFilings backfill {ym}: {len(collected)}일 수집·push", flush=True)
+        print(
+            f"[pipeline] allFilings backfill {ym}: {len(collected)}일 수집·push · "
+            f"rows={monthRows} · elapsed={time.monotonic() - monthStarted:.1f}s",
+            flush=True,
+        )
 
     res.rows = rows
     res.uploaded = uploaded
     res.report.ok = 1
     print(
         f"[pipeline] allFilings backfill 완료: {targetMonths} ({len(targetMonths)}개월) · "
-        f"{rows} rows · push {uploaded}일 · floor={floorYm}",
+        f"{rows} rows · push {uploaded}일 · floor={floorYm} · "
+        f"elapsed={time.monotonic() - started:.1f}s",
         flush=True,
     )
     return res

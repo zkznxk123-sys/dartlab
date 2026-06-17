@@ -301,6 +301,40 @@ def test_run_allfilings_retries_transient_fill(monkeypatch) -> None:
     assert res.report.err == 0
 
 
+def test_run_allfilings_progress_is_enabled_by_default(monkeypatch, capsys) -> None:
+    """runAllFilings — source-owner Actions 로그를 위해 progress 를 기본 활성화."""
+    from datetime import date
+
+    import polars as pl
+
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("SYNC_LOOKBACK_DAYS", "1")
+    captured: list[tuple[str, bool]] = []
+
+    def fakeCollect(*args, showProgress, **kwargs):
+        captured.append(("collect", showProgress))
+        return 1
+
+    def fakeFill(period, *, showProgress, **kwargs):
+        captured.append((period, showProgress))
+        return pl.DataFrame({"rcept_no": ["1"]})
+
+    monkeypatch.setattr(coll, "collectMetaRange", fakeCollect)
+    monkeypatch.setattr(coll, "fillContent", fakeFill)
+    monkeypatch.setattr(sync, "pushAllFilings", lambda *args, **kwargs: None)
+
+    res = allFilings.runAllFilings(upload=True)
+    out = capsys.readouterr().out
+
+    assert res.rows == 1
+    assert captured == [("collect", True), (date.today().strftime("%Y%m%d"), True)]
+    assert "allFilings forward 시작" in out
+    assert "allFilings fillContent 완료" in out
+
+
 def test_run_allfilings_reports_after_retry_exhausted(monkeypatch) -> None:
     """runAllFilings — retry 소진 뒤에는 기존처럼 StageResult.err 로 격리."""
     from dartlab.gather.dart import allFilingsCollector as coll
