@@ -89,8 +89,9 @@ def test_archive_non_kr_empty_canonical() -> None:
 
 
 class _FakeResp:
-    def __init__(self, items: list[dict]) -> None:
+    def __init__(self, items: list[dict], status_code: int = 200) -> None:
         self._items = items
+        self.status_code = status_code
 
     def raise_for_status(self) -> None:  # noqa: D401
         pass
@@ -151,3 +152,53 @@ def test_fetch_paging_accumulates_dedups_and_stops(monkeypatch: pytest.MonkeyPat
     assert len(items) == 149
     urls = [it.url for it in items]
     assert len(urls) == len(set(urls))  # dedup
+
+
+class _Rate429Client:
+    """start=1 첫 시도 429 → 재시도 시 200(items). 429 백오프 재시도 검증용."""
+
+    def __init__(self, attempts: list[int]) -> None:
+        self._attempts = attempts
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *a) -> None:
+        pass
+
+    async def get(self, url, *, params, headers, timeout):  # noqa: ANN001
+        self._attempts.append(params["start"])
+        if len(self._attempts) == 1:
+            return _FakeResp([], status_code=429)  # 첫 시도 throttle
+        return _FakeResp(
+            [{"title": "t", "originallink": "https://x/1", "pubDate": "Mon, 08 Jun 2026 00:00:00 +0900"}],
+            status_code=200,
+        )
+
+
+def test_fetch_retries_on_429(monkeypatch: pytest.MonkeyPatch) -> None:
+    """429 → 백오프 재시도 후 성공 수집 (대량 fanout 커버리지 균일화)."""
+    import types
+
+    import httpx
+
+    monkeypatch.setattr(naverNews, "getKey", lambda *a, **k: "key")
+    monkeypatch.setattr(
+        naverNews,
+        "_circuit_breaker",
+        types.SimpleNamespace(
+            isOpen=lambda *a, **k: False, recordSuccess=lambda *a, **k: None, recordFailure=lambda *a, **k: None
+        ),
+    )
+    monkeypatch.setattr(naverNews, "_health_tracker", types.SimpleNamespace(record=lambda *a, **k: None))
+
+    async def _noSleep(_):
+        return None
+
+    monkeypatch.setattr(naverNews.asyncio, "sleep", _noSleep)
+    attempts: list[int] = []
+    monkeypatch.setattr(httpx, "AsyncClient", lambda *a, **k: _Rate429Client(attempts))
+
+    items = asyncio.run(naverNews._fetchAsync("삼성전자", market="KR", pages=1))
+    assert len(attempts) == 2  # 429 1회 + 재시도 1회
+    assert len(items) == 1  # 재시도에서 수집

@@ -77,6 +77,8 @@ def _parseItems(data: dict) -> list[NewsItem]:
 
 
 _NAVER_START_MAX = 1000  # 검색 API start 상한 (start+display-1 ≤ 1000 → display=100 이면 최대 10 페이지)
+_RATE_RETRIES = 3  # 429/5xx 페이지 재시도 횟수 (대량 fanout 커버리지 균일화).
+_RATE_BACKOFF = 0.6  # 재시도 백오프 기준(초) — attempt 마다 ×(n+1) 선형 증가.
 
 
 async def _fetchAsync(
@@ -138,7 +140,15 @@ async def _fetchAsync(
                 if start > _NAVER_START_MAX:
                     break
                 params = {"query": query, "display": disp, "start": start, "sort": sort}
-                resp = await ac.get(_ENDPOINT, params=params, headers=headers, timeout=10.0)
+                # 429(rate limit)/5xx 는 백오프 재시도 — 대량 fanout 에서 종목별 커버리지 균일화.
+                resp = None
+                for attempt in range(_RATE_RETRIES + 1):
+                    resp = await ac.get(_ENDPOINT, params=params, headers=headers, timeout=10.0)
+                    if resp.status_code == 429 or resp.status_code >= 500:
+                        if attempt < _RATE_RETRIES:
+                            await asyncio.sleep(_RATE_BACKOFF * (attempt + 1))
+                            continue
+                    break
                 resp.raise_for_status()
                 batch = _parseItems(resp.json())
                 if not batch:
