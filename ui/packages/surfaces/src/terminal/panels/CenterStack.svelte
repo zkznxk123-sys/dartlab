@@ -191,11 +191,11 @@
 		{ l: '3M', v: dispRet3m == null ? '—' : sign(dispRet3m, 1) + '%', t: chgClass(dispRet3m) },
 		{ l: '1Y', v: dispRet1y == null ? '—' : sign(dispRet1y, 0) + '%', t: chgClass(dispRet1y) },
 		{ l: lang === 'en' ? 'MKT CAP' : '시가총액', v: dispMktcap, t: '' },
-		{ l: lang === 'en' ? 'M.SHARE' : '점유율', v: e.marketShare != null ? e.marketShare.toFixed(1) + '%' : '—', t: '' },
+		{ l: lang === 'en' ? 'LISTED REV%' : '상장사매출비중', v: e.marketShare != null ? e.marketShare.toFixed(1) + '%' : '—', t: '' },
 		{ l: lang === 'en' ? 'RANK' : '산업순위', v: e.industryRank != null ? e.industryRank + '/' + (e.industryPeerCount || '—') : '—', t: '' }
 	]);
 	const meta = $derived([
-		{ l: lang === 'en' ? 'M.SHARE' : '점유율', v: e.marketShare != null ? e.marketShare.toFixed(1) + '%' : '—' },
+		{ l: lang === 'en' ? 'LISTED REV%' : '상장사매출비중', v: e.marketShare != null ? e.marketShare.toFixed(1) + '%' : '—' },
 		{ l: lang === 'en' ? 'IND.RANK' : '산업순위', v: e.industryRank != null ? e.industryRank + '위/' + (e.industryPeerCount || '—') : '—' },
 		{ l: lang === 'en' ? 'OWNER' : '대주주', v: e.holderPct != null ? e.holderPct.toFixed(1) + '%' : '—' },
 		{ l: lang === 'en' ? 'EMP' : '임직원', v: e.empCount != null ? e.empCount.toLocaleString() + (lang === 'en' ? '' : '명') : '—' },

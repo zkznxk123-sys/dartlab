@@ -345,13 +345,12 @@ function buildRaw(seed: RuntimeSeed): RawData {
 		stageName: 'local',
 		role: seed.meta.products.slice(0, 2).join(' · '),
 		revenue,
-		marketShare: 100,
+		// 단독-유니버스(peer 1사)라 상장사매출비중·산업순위는 분모=자기자신 = 동어반복 날조 →
+		// 값 미설정(undefined). 소비처는 null-guard 로 '—' 폴백. (industry-analysis-lab 07 §구멍5)
 		roe,
 		opMargin,
 		debtRatio,
 		revCagr,
-		industryRank: 1,
-		industryPeerCount: 1,
 		profGrade: profitGrade(opMargin),
 		growthGrade: growthGrade(revCagr),
 		govGrade: seed.insights?.grades?.governance ?? seed.insights?.grades?.gov ?? 'B',

@@ -117,6 +117,7 @@ export interface EcoNode {
 	stageName?: string;
 	role?: string;
 	revenue?: Num;
+	/** 상장사 내 매출비중(KSIC 산업 노드 상장 구성사 매출 합 분모). 시장점유율 아님(비상장·수입 제외). */
 	marketShare?: Num;
 	roe?: Num;
 	opMargin?: Num;

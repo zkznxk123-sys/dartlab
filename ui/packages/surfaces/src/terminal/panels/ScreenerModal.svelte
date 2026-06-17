@@ -39,7 +39,7 @@
 		{ key: 'roe', kr: 'ROE', en: 'ROE', group: 'fin', unit: '%', num: (n) => n.roe ?? null },
 		{ key: 'opMargin', kr: '영업이익률', en: 'OP margin', group: 'fin', unit: '%', num: (n) => n.opMargin ?? null },
 		{ key: 'revCagr', kr: '매출성장 CAGR', en: 'rev CAGR', group: 'fin', unit: '%', num: (n) => n.revCagr ?? null },
-		{ key: 'marketShare', kr: '점유율', en: 'mkt share', group: 'fin', unit: '%', num: (n) => n.marketShare ?? null },
+		{ key: 'marketShare', kr: '상장사매출비중', en: 'rev share(listed)', group: 'fin', unit: '%', num: (n) => n.marketShare ?? null },
 		{ key: 'debtRatio', kr: '부채비율', en: 'debt ratio', group: 'fin', unit: '%', num: (n) => n.debtRatio ?? null },
 		{ key: 'revenue', kr: '매출 규모', en: 'revenue', group: 'fin', unit: '조', num: (n) => (n.revenue != null ? n.revenue / 10000 : null) },
 		{ key: 'roeDelta', kr: 'ROE 증감', en: 'ROE Δ', group: 'fin', unit: '%p', num: (n) => n.roeDelta ?? null },
