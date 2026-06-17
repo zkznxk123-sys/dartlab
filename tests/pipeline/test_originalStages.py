@@ -526,8 +526,8 @@ def test_run_allfilings_backfill_noop_at_floor(monkeypatch) -> None:
     assert res.report.ok == 1 and res.rows == 0 and res.uploaded == 0
 
 
-def test_run_allfilings_backfill_isolates_failure(monkeypatch) -> None:
-    """앵커 조회 예외는 StageResult.report.err 로 격리 — run 중단·전파 X."""
+def test_run_allfilings_backfill_anchor_failure_is_nonblocking(monkeypatch) -> None:
+    """앵커 조회 예외는 skip 으로 격리 — forward/search 자동 갱신을 막지 않는다."""
     from dartlab.gather.dart import allFilingsSync as sync
     from dartlab.pipeline.stages import allFilings
 
@@ -536,8 +536,45 @@ def test_run_allfilings_backfill_isolates_failure(monkeypatch) -> None:
 
     monkeypatch.setattr(sync, "_remoteDates", boom)
     res = allFilings.runAllFilingsBackfill()
-    assert res.report.err == 1 and res.report.ok == 0
+    assert res.report.skip == 1 and res.report.err == 0 and res.report.fail == 0
     assert any("backfill" in f for f in res.report.failures)
+
+
+def test_run_allfilings_backfill_month_failure_is_nonblocking(monkeypatch) -> None:
+    """월별 수집 중 transient 예외가 나도 skip 으로 격리하고 앞 일자 결과는 보존."""
+    import polars as pl
+
+    import dartlab.core.dartClient as dc
+    from dartlab.gather.dart import allFilingsCollector as coll
+    from dartlab.gather.dart import allFilingsSync as sync
+    from dartlab.pipeline.stages import allFilings
+
+    monkeypatch.setenv("DART_ALLFILINGS_BACKFILL_MONTHS", "1")
+    monkeypatch.setattr(dc, "DartClient", lambda *a, **k: object())
+    monkeypatch.setattr(coll, "collectedDates", lambda: [])
+    monkeypatch.setattr(sync, "_remoteDates", lambda token=None: {"20250304"})
+
+    calls = {"n": 0}
+
+    def flakyFill(period, *, client=None, showProgress=True):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return pl.DataFrame({"x": [1]})
+        raise TimeoutError("timed out")
+
+    monkeypatch.setattr(coll, "fillContent", flakyFill)
+
+    pushed: list[list[str]] = []
+    monkeypatch.setattr(sync, "pushAllFilings", lambda dates, *, token=None: pushed.append(list(dates)))
+
+    res = allFilings.runAllFilingsBackfill(upload=True)
+
+    assert res.report.ok == 1
+    assert res.report.skip == 1
+    assert res.report.err == 0 and res.report.fail == 0
+    assert res.rows == 1
+    assert pushed == []  # 실패한 월은 부분 push 하지 않고 다음 run 에서 재시도
+    assert any("TimeoutError" in f for f in res.report.failures)
 
 
 def test_allfilings_backfill_registered() -> None:

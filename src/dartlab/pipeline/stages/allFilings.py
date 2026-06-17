@@ -306,8 +306,8 @@ def runAllFilingsBackfill(
 
     try:
         existing = set(collectedDates()) | _remoteDates(token=token)
-    except Exception as exc:  # noqa: BLE001 — 앵커 조회 실패 격리
-        res.report.err = 1
+    except Exception as exc:  # noqa: BLE001 — 백필은 forward/search 갱신을 막지 않는 opportunistic 단계.
+        res.report.skip = 1
         res.report.failures.append(f"allFilings backfill 앵커 조회: {type(exc).__name__}: {exc}")
         print(f"[pipeline] allFilings backfill 앵커 조회 실패(격리): {exc}", flush=True)
         return res
@@ -355,8 +355,8 @@ def runAllFilingsBackfill(
                     f"elapsed={time.monotonic() - dayStarted:.1f}s",
                     flush=True,
                 )
-        except Exception as exc:  # noqa: BLE001 — 월 수집 실패 격리(앞 월 보존, 중단)
-            res.report.err = 1
+        except Exception as exc:  # noqa: BLE001 — 월 수집 실패는 다음 백필 run 에서 재시도.
+            res.report.skip += 1
             res.report.failures.append(f"allFilings backfill {ym}: {type(exc).__name__}: {exc}")
             print(f"[pipeline] allFilings backfill {ym} 수집 실패(격리): {exc}", flush=True)
             break
@@ -365,8 +365,8 @@ def runAllFilingsBackfill(
             try:
                 pushAllFilings(collected, token=token)
                 uploaded += len(collected)
-            except Exception as exc:  # noqa: BLE001 — push 실패 격리
-                res.report.fail = 1
+            except Exception as exc:  # noqa: BLE001 — push 실패는 다음 백필 run 에서 재시도.
+                res.report.skip += 1
                 res.report.failures.append(f"allFilings backfill push {ym}: {type(exc).__name__}: {exc}")
                 print(f"[pipeline] allFilings backfill {ym} push 실패(격리): {exc}", flush=True)
         print(
