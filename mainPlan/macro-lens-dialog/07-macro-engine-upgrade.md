@@ -15,7 +15,7 @@
 macro.transmission
   └─ 시장·섹터 레벨 driver/edge/source 산출
 
-analysis.macroExposure
+analysis macro exposure quality
   └─ 회사 레벨 노출·회귀 품질 산출
 
 macroLens view-model 또는 L2.5 조합기
@@ -65,7 +65,7 @@ USDKRW ↑
 
 ---
 
-## 3. `analysis.macroExposure`
+## 3. Analysis Macro Exposure Quality
 
 ### 목적
 
@@ -172,7 +172,7 @@ dartlab.macro("transmission", market="KR")
 analysis 공개 surface 후보:
 
 ```python
-company.analysis("macroExposure")
+company.analysis("macro", "매크로민감도")
 ```
 
 반환 후보:

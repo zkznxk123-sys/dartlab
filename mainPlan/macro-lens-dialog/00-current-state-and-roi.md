@@ -9,7 +9,7 @@
 
 요청은 명확하고 타당하다. 기존 v0.1 기획은 UI 연결을 우선한 점은 맞지만, 분석의 핵이 되기에는 약하다. v0.2의 판정은 다음이다.
 
-**Macro Lens는 다이얼로그가 아니라 매크로 전파 분석 코어다.** 다이얼로그는 그 코어를 터미널에서 조작하는 표면이고, 엔진은 `macro.transmission`(시장·섹터 전파)과 `analysis.macroExposure`(회사 노출·품질)로 나눠 강화한다.
+**Macro Lens는 다이얼로그가 아니라 매크로 전파 분석 코어다.** 다이얼로그는 그 코어를 터미널에서 조작하는 표면이고, 엔진은 `macro.transmission`(시장·섹터 전파)과 기존 analysis macro 표면의 회사 노출·품질 산출물로 나눠 강화한다.
 
 현재 DartLab은 매크로 자산을 많이 갖고 있다.
 
@@ -72,7 +72,7 @@
 - 첫 화면 구현은 터미널 UI view-model로 시작한다.
 - 분석 코어 강화는 새 독립 L2 엔진 신설이 아니라 기존 `macro` 엔진의 시장·섹터 전파 축 확장으로 한다.
 - `macro.transmission`은 회사 객체를 모르면 된다. driver, source series, sector prior, financial line, lag, sign, confidence, evidence level만 낸다.
-- 회사별 결합은 `analysis.macroExposure` 공개 surface가 맡는다. `macro`가 `analysis`를 import하지 않고, UI나 L2.5 조합기가 공개 산출물만 합친다.
+- 회사별 결합은 기존 `Company.analysis("macro", "매크로민감도")` 계열의 품질 산출물이 맡는다. `macro`가 `analysis`를 import하지 않고, UI나 L2.5 조합기가 공개 산출물만 합친다.
 - 재사용 산출물은 `dashboards/macro.json`, `macro/{fred,ecos}/observations.parquet`, `MACRO_SERIES`, `co.tailwind`, `eng.sectorTailwinds()`다.
 - 새 산출물이 필요하면 per-company artifact가 아니라 시장 단위 HF artifact만 허용한다.
 - public/local 공통배선이 불변이다. 로컬 `:8400` 없이 떠야 정상이다.

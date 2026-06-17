@@ -7,7 +7,7 @@
 
 ## 1. 거처
 
-Macro Lens의 사용 표면은 터미널 다이얼로그다. 분석 본체는 `macro.transmission`과 `analysis.macroExposure` 공개 산출물을 합친 view-model이다.
+Macro Lens의 사용 표면은 터미널 다이얼로그다. 분석 본체는 `macro.transmission`과 기존 analysis macro 표면의 공개 산출물을 합친 view-model이다.
 
 권장 파일:
 
@@ -97,9 +97,9 @@ MacroLensDialog.svelte
 - 종목별 추천/수혜/피해 산출.
 - per-company artifact 생성.
 
-### Phase C — `analysis.macroExposure`
+### Phase C — analysis macro exposure quality
 
-회사별 연결은 analysis 공개 surface가 맡는다.
+회사별 연결은 기존 `Company.analysis("macro", "매크로민감도")` 계열의 analysis 공개 surface가 맡는다. `analysis.macroExposure`는 내부 산출명 또는 alias 후보일 뿐 새 사용자 호출로 바로 노출하지 않는다.
 
 - 회사별 `calcMacroSensitivity`/`calcMacroRegression`을 제품화하려면 공개 surface를 경유해야 한다.
 - 필수 품질 라벨은 `nObs`, `rSquared`, `window`, `frequency`, `lag`, `coverage`, `sourceRef`다.

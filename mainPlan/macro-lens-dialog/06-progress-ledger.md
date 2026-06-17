@@ -55,7 +55,7 @@ NEXT:
 - Macro Lens는 UI 기능이 아니라 `Macro Driver → Transmission Edge → Company Exposure → Financial Checkpoint → Valuation Lever → Falsifier` 사슬이다.
 - `macro` 개선은 허용한다. 단, 새 독립 L2 엔진이 아니라 기존 macro의 시장·섹터 전파 축(`macro.transmission`) 후보로 둔다.
 - `macro.transmission`은 회사/analysis 내부를 import하지 않는다.
-- 회사별 민감도와 회귀 품질은 `analysis.macroExposure` 공개 surface 후보로 둔다.
+- 회사별 민감도와 회귀 품질은 기존 analysis macro 표면 확장 후보로 둔다.
 - 엔진 강화는 `tests/_attempts/macroLensEngine/` proof를 먼저 만든 뒤 src 승격을 결정한다.
 - canonical id는 `MACRO_SERIES.id`를 기준으로 한다. 레거시 id는 alias registry 없이는 edge에 쓰지 않는다.
 

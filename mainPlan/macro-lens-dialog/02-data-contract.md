@@ -134,7 +134,7 @@ export interface MacroFalsifierView {
 원칙:
 
 - `macro.transmission`은 `MacroDriverView`와 `MacroTransmissionEdgeView`를 낸다.
-- `analysis.macroExposure`는 `MacroExposureQuality`와 회사별 checkpoint를 낸다.
+- 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다.
 - UI는 두 산출물을 합쳐 보여주되 숨은 수학을 만들지 않는다.
 - `blocked` edge는 숨기지 않고 이유를 표시한다.
 
