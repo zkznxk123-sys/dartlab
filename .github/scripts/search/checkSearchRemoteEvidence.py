@@ -57,17 +57,16 @@ def auditRemoteEvidence(
     contentTiers: list[str],
     remoteRoot: Path | None = None,
 ) -> dict[str, Any]:
-    files = _listRemoteFiles(repoId=repoId, remoteRoot=remoteRoot)
-    fileSet = set(files)
+    remote = _RemoteInventory(repoId=repoId, remoteRoot=remoteRoot)
     sourceCatalog = _auditSourceCatalog(
         repoId=repoId,
-        fileSet=fileSet,
+        remote=remote,
         expectedSources=expectedSources,
         remoteRoot=remoteRoot,
     )
     contentIndex = _auditContentIndex(
         repoId=repoId,
-        fileSet=fileSet,
+        remote=remote,
         contentTiers=contentTiers,
         remoteRoot=remoteRoot,
     )
@@ -79,7 +78,9 @@ def auditRemoteEvidence(
         "blockers": blockers,
         "repoId": repoId,
         "remoteRoot": str(remoteRoot or ""),
-        "fileCount": len(files),
+        "inventoryMode": remote.inventoryMode,
+        "fileCount": remote.fileCount(),
+        "checkedFileCount": remote.checkedFileCount(),
         "sourceCatalog": sourceCatalog,
         "contentIndex": contentIndex,
     }
@@ -88,7 +89,7 @@ def auditRemoteEvidence(
 def _auditSourceCatalog(
     *,
     repoId: str,
-    fileSet: set[str],
+    remote: _RemoteInventory,
     expectedSources: list[str],
     remoteRoot: Path | None,
 ) -> dict[str, Any]:
@@ -97,8 +98,8 @@ def _auditSourceCatalog(
     for source in expectedSources:
         manifestPath = f"dart/searchCatalog/{source}/{source}.source_manifest.json"
         catalogPath = f"dart/searchCatalog/{source}/{source}.catalog_snapshot.parquet"
-        manifestExists = manifestPath in fileSet
-        catalogExists = catalogPath in fileSet
+        manifestExists = remote.exists(manifestPath)
+        catalogExists = remote.exists(catalogPath)
         if not manifestExists:
             errors.append(f"missingSourceManifest:{source}")
         if not catalogExists:
@@ -126,7 +127,7 @@ def _auditSourceCatalog(
 def _auditContentIndex(
     *,
     repoId: str,
-    fileSet: set[str],
+    remote: _RemoteInventory,
     contentTiers: list[str],
     remoteRoot: Path | None,
 ) -> dict[str, Any]:
@@ -137,14 +138,14 @@ def _auditContentIndex(
             "dart/contentIndex/manifest.json" if tier == "full" else f"dart/contentIndex/{tier}/manifest.json"
         )
         repoPrefix = "dart/contentIndex" if tier == "full" else f"dart/contentIndex/{tier}"
-        exists = manifestPath in fileSet
+        exists = remote.exists(manifestPath)
         if not exists:
             errors.append(f"missingContentManifest:{tier}")
         manifest = _loadJsonPath(repoId=repoId, repoPath=manifestPath, remoteRoot=remoteRoot) if exists else {}
         manifestSummary = _contentManifestSummary(
             manifest,
             repoPrefix=repoPrefix,
-            fileSet=fileSet,
+            remote=remote,
             repoId=repoId,
             remoteRoot=remoteRoot,
         )
@@ -165,23 +166,64 @@ def _auditContentIndex(
     }
 
 
-def _listRemoteFiles(*, repoId: str, remoteRoot: Path | None) -> list[str]:
-    if remoteRoot is not None:
-        if not remoteRoot.exists():
-            return []
-        return sorted(path.relative_to(remoteRoot).as_posix() for path in remoteRoot.rglob("*") if path.is_file())
+class _RemoteInventory:
+    def __init__(self, *, repoId: str, remoteRoot: Path | None) -> None:
+        self.repoId = repoId
+        self.remoteRoot = remoteRoot
+        self.inventoryMode = "localRecursive" if remoteRoot is not None else "targetedProbe"
+        self._localFiles: set[str] | None = None
+        self._existsCache: dict[str, bool] = {}
+        self._checked: set[str] = set()
 
-    from huggingface_hub import HfApi
+    def exists(self, repoPath: str) -> bool:
+        normalized = repoPath.strip().lstrip("/")
+        if not normalized:
+            return False
+        self._checked.add(normalized)
+        cached = self._existsCache.get(normalized)
+        if cached is not None:
+            return cached
+        if self.remoteRoot is not None:
+            exists = normalized in self._localFileSet()
+        else:
+            exists = self._hfFileExists(normalized)
+        self._existsCache[normalized] = exists
+        return exists
 
-    from dartlab.core.hfRetry import retryHfCall
+    def fileCount(self) -> int | None:
+        if self.remoteRoot is None:
+            return None
+        return len(self._localFileSet())
 
-    return sorted(
-        retryHfCall(
-            HfApi(token=os.environ.get("HF_TOKEN") or None).list_repo_files,
-            repo_id=repoId,
-            repo_type="dataset",
+    def checkedFileCount(self) -> int:
+        return len(self._checked)
+
+    def _localFileSet(self) -> set[str]:
+        if self._localFiles is None:
+            if self.remoteRoot is None or not self.remoteRoot.exists():
+                self._localFiles = set()
+            else:
+                self._localFiles = {
+                    path.relative_to(self.remoteRoot).as_posix()
+                    for path in self.remoteRoot.rglob("*")
+                    if path.is_file()
+                }
+        return self._localFiles
+
+    def _hfFileExists(self, repoPath: str) -> bool:
+        from huggingface_hub import HfApi
+
+        from dartlab.core.hfRetry import retryHfCall
+
+        return bool(
+            retryHfCall(
+                HfApi(token=os.environ.get("HF_TOKEN") or None).file_exists,
+                repo_id=self.repoId,
+                filename=repoPath,
+                repo_type="dataset",
+                token=os.environ.get("HF_TOKEN") or None,
+            )
         )
-    )
 
 
 def _loadJsonPath(*, repoId: str, repoPath: str, remoteRoot: Path | None) -> dict[str, Any]:
@@ -229,7 +271,7 @@ def _contentManifestSummary(
     manifest: dict[str, Any],
     *,
     repoPrefix: str,
-    fileSet: set[str],
+    remote: _RemoteInventory,
     repoId: str,
     remoteRoot: Path | None,
 ) -> dict[str, Any]:
@@ -244,14 +286,14 @@ def _contentManifestSummary(
             missingMappings.append(rel)
             continue
         repoPath = _repoPathFor(str(fileSources.get(rel) or rel), repoPrefix=repoPrefix)
-        if repoPath not in fileSet:
+        if not remote.exists(repoPath):
             missingSources.append(rel)
     manifestSet = _loadContentSourceManifestSet(
         manifest,
         repoPrefix=repoPrefix,
         repoId=repoId,
         remoteRoot=remoteRoot,
-        fileSet=fileSet,
+        remote=remote,
     )
     manifestSetPayload = manifestSet.get("payload") if isinstance(manifestSet.get("payload"), dict) else {}
     manifestSetSources = _sourceManifestSetSources(manifestSetPayload or manifest.get("sourceManifestSet"))
@@ -259,7 +301,7 @@ def _contentManifestSummary(
     graphCatalog = _entityGraphCatalogSummary(
         manifest,
         repoPrefix=repoPrefix,
-        fileSet=fileSet,
+        remote=remote,
     )
     return {
         "loadError": manifest.get("_loadError"),
@@ -292,7 +334,7 @@ def _loadContentSourceManifestSet(
     repoPrefix: str,
     repoId: str,
     remoteRoot: Path | None,
-    fileSet: set[str],
+    remote: _RemoteInventory,
 ) -> dict[str, Any]:
     requiredFiles = manifest.get("requiredFiles") if isinstance(manifest.get("requiredFiles"), list) else []
     if "source_manifest_set.json" not in requiredFiles:
@@ -301,7 +343,7 @@ def _loadContentSourceManifestSet(
     repoPath = _repoPathFor(
         str(fileSources.get("source_manifest_set.json") or "source_manifest_set.json"), repoPrefix=repoPrefix
     )
-    if repoPath not in fileSet:
+    if not remote.exists(repoPath):
         return {"repoPath": repoPath, "payload": {}, "loadError": "missingFile"}
     payload = _loadJsonPath(repoId=repoId, repoPath=repoPath, remoteRoot=remoteRoot)
     loadError = str(payload.get("_loadError") or "") if isinstance(payload, dict) else "notObject"
@@ -312,7 +354,7 @@ def _entityGraphCatalogSummary(
     manifest: dict[str, Any],
     *,
     repoPrefix: str,
-    fileSet: set[str],
+    remote: _RemoteInventory,
 ) -> dict[str, Any]:
     requiredFiles = manifest.get("requiredFiles") if isinstance(manifest.get("requiredFiles"), list) else []
     fileSources = manifest.get("fileSources") if isinstance(manifest.get("fileSources"), dict) else {}
@@ -325,7 +367,7 @@ def _entityGraphCatalogSummary(
         "present": True,
         "required": True,
         "repoPath": repoPath,
-        "fileSourceExists": repoPath in fileSet,
+        "fileSourceExists": remote.exists(repoPath),
         "schemaVersion": meta.get("schemaVersion") or "",
         "nEntities": meta.get("nEntities"),
         "stockCodeCount": meta.get("stockCodeCount"),
