@@ -186,7 +186,7 @@
    완전히 사라지던 회귀 가드). 패널명은 짧아 flex-shrink:0 안전. */
 .dlTerm .panelTitle { font-family: var(--cond); font-weight: 700; font-size: 10px; letter-spacing: 1.2px; color: var(--amber); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
 /* sub(메타)가 먼저 양보 — 좁아지면 제목·우측버튼보다 먼저 말줄임 */
-.dlTerm .panelSub { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
+.dlTerm .panelSub { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
 .dlTerm .panelRight { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--dim); flex-shrink: 0; white-space: nowrap; padding-left: 6px; }
 .dlTerm .panelBody { padding: 5px 6px; flex: 1; min-height: 0; }
 .dlTerm .panelBody.flush { padding: 0; }
@@ -936,7 +936,7 @@
 .dlTerm .riskDetail { font-family: var(--mono); font-size: 8.5px; color: var(--dim); }
 
 /* PROVENANCE TAG */
-.dlTerm .provTag { font-family: var(--mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.4px; padding: 1px 4px; border-radius: 2px; line-height: 1.5; flex-shrink: 0; cursor: help; }
+.dlTerm .provTag { font-family: var(--mono); font-size: 8px; font-weight: 600; letter-spacing: 0.4px; padding: 1px 4px; border-radius: 2px; line-height: 1.5; flex-shrink: 0; cursor: help; }
 .dlTerm .provTag.pReal { color: var(--good); background: rgba(52, 211, 153, 0.12); }
 .dlTerm .provTag.pDeriv { color: var(--amber); background: rgba(251, 146, 60, 0.12); }
 .dlTerm .provTag.pWire { color: var(--dn); background: rgba(29, 100, 220, 0.12); border: 1px dashed rgba(29, 100, 220, 0.4); }
