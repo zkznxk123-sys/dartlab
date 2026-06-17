@@ -34,8 +34,17 @@ def _listingLookup() -> tuple[dict[str, str], dict[str, str]]:
         df = getIndustryAccessor().fetchListing()
         if df is None:
             return {}, {}
-        c2n = dict(zip(df["종목코드"].to_list(), df["회사명"].to_list()))
-        n2c = dict(zip(df["회사명"].to_list(), df["종목코드"].to_list()))
+        cols = df.columns
+        # listing 스키마는 gov 마이그레이션으로 short_code/codeName 으로 변경됨
+        # (옛 종목코드/회사명). 신·구 양쪽 지원 (재빌드 견고성).
+        codeCol = next((c for c in ("short_code", "종목코드") if c in cols), None)
+        nameCol = next((c for c in ("codeName", "회사명") if c in cols), None)
+        if not codeCol or not nameCol:
+            return {}, {}
+        codes = df[codeCol].to_list()
+        names = df[nameCol].to_list()
+        c2n = dict(zip(codes, names))
+        n2c = dict(zip(names, codes))
         return c2n, n2c
     except (ValueError, KeyError, TypeError):
         return {}, {}
@@ -397,7 +406,13 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     Capabilities:
         DART 사업보고서 "원재료 및 생산설비" 섹션의 마크다운 테이블 (부문/품목/매입액/비중/매입처)
         을 파싱해 product/amount(억원)/ratio(%) 메타 포함 정밀 supplier 엣지를 산출. 표 헤더 매칭이
-        성공한 회사만 — 비표 형식 본문은 ``extractDocsEdges`` 가 보완.
+        성공한 회사만 — 비표 형식 본문은 ``extractDocsEdges`` 가 보완. 헤더는 퍼지 매칭(매입액/제NN기매입액
+        ·비율/비중/병합셀)으로 드리프트 흡수 (레버 A).
+
+        ★부수효과 (레버 A): 매입처가 **비상장**이면 그래프 엣지를 만들지 않되 (노드 미승격),
+        매입액/비중을 가진 leaf supply fact 를 buyer 노드의 ``supplyFacts`` 에 **할당**한다 (in-place
+        mutation, 멱등). ``calcSupplyInsights`` 가 이를 상장 엣지 amount 와 합산해 공급집중도 HHI 모수로
+        쓴다 — 비상장 매입처가 대부분이라 amount 커버리지가 132 → ~600 수준으로 확장.
 
     구조화된 데이터: 부문 / 품목 / 매입액 / 비중 / 매입처
     → 공급사 실명 + 제품 + 거래 비중이 포함된 정밀 엣지.
@@ -405,13 +420,14 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     Parameters
     ----------
     nodes : list[IndustryNode]
-        전체 노드 리스트.
+        전체 노드 리스트. 비상장 매입처 leaf fact 가 primary 노드 ``supplyFacts`` 에 in-place 기록됨.
 
     Returns
     -------
     list[IndustryEdge]
-        supplier 엣지 리스트. confidence 0.9 (테이블 직접 매칭).
+        상장 매입처 supplier 엣지 리스트. confidence 0.9 (테이블 직접 매칭).
         각 엣지에 product (품목명), amount (매입액, 억원), ratio (비중, %) 포함.
+        비상장 매입처는 엣지가 아니라 buyer 노드 ``supplyFacts`` 로 (Side Effects 참조).
 
     Raises:
         없음 — 개별 panel 로드 실패 시 해당 종목만 skip.
@@ -486,6 +502,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         table, hi = found
         rows = tableToRowDictsWithHeaderRow(table, hi, inheritColumns=["부문", "부 문"])
 
+        buyerFacts: list[dict] = []  # 레버 A: 비상장 매입처 leaf fact (멱등 — 루프 후 할당)
         for r in rows:
             supplierCol = next((k for k in r.keys() if "매입처" in k), None)
             if not supplierCol:
@@ -497,39 +514,55 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
             if not supNames:
                 continue
 
-            bumun = r.get("부 문", "").strip()
-            # 소계/총계/※ 행 제외
+            # 부문 컬럼 헤더 변형 대응 (부문/사업부문/사업부분/구분) — 소계/총계 행 제외용
+            bumunCol = next(
+                (k for k in r.keys() if k.replace(" ", "") in ("부문", "사업부문", "사업부분", "구분")), None
+            )
+            bumun = (r.get(bumunCol, "") or "").strip() if bumunCol else ""
             if any(skip in bumun for skip in ["소 계", "소계", "총 계", "총계", "※"]):
                 continue
 
             product = r.get("품 목", "").strip()
-            amount = parseAmount(r.get("매입액", ""))
-            ratio = parsePercent(r.get("비중", ""))
+            # 퍼지 헤더 (레버 A) — 실제 헤더가 매입액/제NN기매입액·비율/비중/비울(오타)·병합셀로 천차만별.
+            amountCol = next((k for k in r.keys() if "매입액" in k), None)
+            ratioCol = next((k for k in r.keys() if ("비율" in k or "비중" in k) and "매입처" not in k), None)
+            amount = parseAmount(r.get(amountCol, "") or "") if amountCol else None
+            ratio = parsePercent(r.get(ratioCol, "") or "") if ratioCol else None
+            # 합쳐진 셀 "138,272 (12.3%)" — 금액 컬럼에서 비율 보강
+            if ratio is None and amountCol:
+                ratio = parsePercent(r.get(amountCol, "") or "")
 
             for supName in supNames:
                 # 정규화 매칭
                 normName = normalizeCorpName(supName)
                 supCode = n2c.get(supName) or n2cNorm.get(normName)
-                if not supCode or supCode == code:
-                    continue
-
-                matched += 1
-                edges.append(
-                    IndustryEdge(
-                        fromCode=supCode,
-                        fromName=c2n.get(supCode, supName),
-                        toCode=code,
-                        toName=c2n.get(code, ""),
-                        edgeType="supplier",
-                        industry=node.industry,
-                        confidence=0.9,  # 테이블 직접 매칭 — 높은 신뢰도
-                        source="panel_table",
-                        evidence=f"{bumun} {product}".strip(),
-                        product=product,
-                        amount=amount,
-                        ratio=ratio,
+                if supCode and supCode != code:
+                    # 상장 매입처 → 그래프 엣지 (현행)
+                    matched += 1
+                    edges.append(
+                        IndustryEdge(
+                            fromCode=supCode,
+                            fromName=c2n.get(supCode, supName),
+                            toCode=code,
+                            toName=c2n.get(code, ""),
+                            edgeType="supplier",
+                            industry=node.industry,
+                            confidence=0.9,  # 테이블 직접 매칭 — 높은 신뢰도
+                            source="panel_table",
+                            evidence=f"{bumun} {product}".strip(),
+                            product=product,
+                            amount=amount,
+                            ratio=ratio,
+                        )
                     )
-                )
+                elif not supCode:
+                    # 비상장 매입처 → 그래프 노드 미승격, buyer leaf fact로 보존 (레버 A).
+                    # 정량값(amount/ratio) 있는 것만 — calcHHI 모수, name-only는 nodes.json 비대화만.
+                    if (amount is not None and amount > 0) or ratio is not None:
+                        buyerFacts.append({"supplier": supName, "amount": amount, "ratio": ratio})
+
+        if buyerFacts:
+            node.supplyFacts = buyerFacts  # 할당(멱등) — 재호출 시 누적 아닌 덮어쓰기
 
     logger.info("원재료 테이블 엣지: %d사 스캔, %d건 매칭", processed, matched)
     return edges

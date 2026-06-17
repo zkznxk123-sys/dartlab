@@ -161,6 +161,73 @@ class TestRiskLabel:
         assert isinstance(r, str)
 
 
+class TestCalcSupplyInsightsLeafFacts:
+    """레버 A — calcSupplyInsights 가 buyer node.supplyFacts(비상장 매입처) amount 를 HHI 에 합산.
+
+    parquet 무의존 — 합성 IndustryEdge/IndustryNode. 상장 엣지 + 비상장 leaf fact 병합 단언.
+    """
+
+    @staticmethod
+    def _edge(fromCode, toCode, amount):
+        from dartlab.industry.types import IndustryEdge
+
+        return IndustryEdge(
+            fromCode=fromCode,
+            fromName=fromCode,
+            toCode=toCode,
+            toName=toCode,
+            edgeType="supplier",
+            industry="x",
+            amount=amount,
+        )
+
+    @staticmethod
+    def _node(stockCode, supplyFacts=None):
+        from dartlab.industry.types import IndustryNode
+
+        return IndustryNode(
+            stockCode=stockCode,
+            corpName=stockCode,
+            industry="x",
+            stage="fab",
+            supplyFacts=supplyFacts or [],
+        )
+
+    def test_leaf_facts_merged_into_hhi(self):
+        """비상장 leaf fact amount 가 상장 엣지 amount 와 함께 HHI/총액/supplierCount 에 반영."""
+        from dartlab.industry.calcs.concentration import calcSupplyInsights
+
+        # buyer "B": 상장 매입처 1곳(엣지 30) + 비상장 leaf 2곳(70, 0... 무시될 None 포함)
+        edges = [self._edge("LISTED1", "B", 30.0)]
+        nodes = [
+            self._node(
+                "B",
+                supplyFacts=[
+                    {"supplier": "비상장소재", "amount": 70.0, "ratio": 70.0},
+                    {"supplier": "비상장부품", "amount": None, "ratio": None},  # amount 없음 — HHI 모수 제외
+                ],
+            ),
+            self._node("LISTED1"),
+        ]
+        r = calcSupplyInsights("B", edges, nodes)
+        # HHI = 30^2 + 70^2 = 900 + 4900 = 5800 (leaf 70 합산 확인; 엣지만이면 10000 단독)
+        assert r["hhi"] == 5800.0
+        assert r["totalSupplyAmount"] == 100.0  # 30 + 70
+        assert r["preciseEdgeCount"] == 2  # amount 보유 2개 (엣지1 + leaf1)
+        # supplierCount = 엣지 1 + leaf fact 2 (name-only 포함)
+        assert r["supplierCount"] == 3
+
+    def test_no_leaf_facts_unchanged(self):
+        """supplyFacts 빈 buyer 는 기존 동작(엣지만) — 회귀 0."""
+        from dartlab.industry.calcs.concentration import calcSupplyInsights
+
+        edges = [self._edge("L1", "B", 50.0), self._edge("L2", "B", 50.0)]
+        nodes = [self._node("B"), self._node("L1"), self._node("L2")]
+        r = calcSupplyInsights("B", edges, nodes)
+        assert r["hhi"] == 5000.0  # 50:50
+        assert r["supplierCount"] == 2
+
+
 # ══════════════════════════════════════
 # industry/build/table_parser.py
 # ══════════════════════════════════════

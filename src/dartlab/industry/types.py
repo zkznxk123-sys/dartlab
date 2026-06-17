@@ -5,7 +5,7 @@ taxonomy.json, nodes.json, edges.json의 행 단위 타입.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -78,6 +78,9 @@ class IndustryNode:
     primary: bool = True
     updatedAt: str = ""
     revenue: float | None = None  # 매출액 (원)
+    # 비상장 매입처 leaf supply fact (레버 A) — 그래프 노드 미승격, buyer 속성으로 보존.
+    # 각 항목: {"supplier": str, "amount": float|None(억원), "ratio": float|None(%)}
+    supplyFacts: list[dict] = field(default_factory=list)
 
     def toDict(self) -> dict:
         """dataclass → nodes.json 행 dict 직렬화.
@@ -104,6 +107,8 @@ class IndustryNode:
             "primary": self.primary,
             "updatedAt": self.updatedAt,
             "revenue": self.revenue,
+            # 빈 리스트는 직렬화 생략 (nodes.json 비대화 방지 — ~23%사만 보유)
+            **({"supplyFacts": self.supplyFacts} if self.supplyFacts else {}),
         }
 
     @staticmethod
@@ -132,6 +137,7 @@ class IndustryNode:
             primary=d.get("primary", True),
             updatedAt=d.get("updatedAt", ""),
             revenue=d.get("revenue"),
+            supplyFacts=d.get("supplyFacts", []),
         )
 
 

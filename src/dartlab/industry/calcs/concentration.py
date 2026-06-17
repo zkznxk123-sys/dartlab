@@ -218,16 +218,17 @@ def calcSupplyInsights(
     edges : list[Any]
         전체 IndustryEdge 리스트 (`fromCode`, `toCode`, `edgeType`, `amount` 속성 필요).
     nodes : list[Any]
-        전체 IndustryNode 리스트 (`stockCode`, `industry`, `stage` 속성 필요).
+        전체 IndustryNode 리스트 (`stockCode`, `industry`, `stage` 속성 필요). 대상 회사 노드의
+        `supplyFacts`(비상장 매입처 leaf fact, 레버 A)가 있으면 HHI 모수에 합산.
 
     Returns
     -------
     dict
-        supplierCount : int — 공급사 수 (건)
+        supplierCount : int — 공급사 수 (상장 엣지 + 비상장 leaf fact, 건)
         customerCount : int — 고객사 수 (건)
-        preciseEdgeCount : int — 거래금액 있는 정밀 엣지 수 (건)
-        totalSupplyAmount : float — 총 매입금액 (억원)
-        hhi : float — HHI (0~10000)
+        preciseEdgeCount : int — 거래금액 있는 정밀 건수 (상장 엣지 + 비상장 leaf fact)
+        totalSupplyAmount : float — 총 매입금액 (억원, 상장 + 비상장 합산)
+        hhi : float — HHI (0~10000, 상장 엣지 + 비상장 leaf fact amount 합산 — 레버 A)
         hhiRisk : str — "분산" | "중간" | "집중" | "데이터 부족"
         top1Ratio : float — 최대 공급사 비중 (%)
         top3Ratio : float — 상위 3 사 비중 (%)
@@ -283,14 +284,20 @@ def calcSupplyInsights(
     incoming = [e for e in edges if e.toCode == stockCode and e.edgeType == "supplier"]
     outgoing = [e for e in edges if e.fromCode == stockCode and e.edgeType in ("supplier", "customer")]
 
-    # HHI — 매입액 기준 (amount 있는 것만)
-    incomingAmounts = [e.amount for e in incoming if e.amount and e.amount > 0]
+    # 레버 A — buyer node leaf fact (비상장 매입처 매입액). 상장 엣지 amount 와 합산해 HHI 모수 확장.
+    nodeByCode = {n.stockCode: n for n in nodes}
+    selfNode = nodeByCode.get(stockCode)
+    leafFacts = getattr(selfNode, "supplyFacts", None) or [] if selfNode else []
+    leafAmounts = [f.get("amount") for f in leafFacts if f.get("amount") and f.get("amount") > 0]
+
+    # HHI — 매입액 기준 (상장 엣지 + 비상장 leaf fact, amount 있는 것만)
+    edgeAmounts = [e.amount for e in incoming if e.amount and e.amount > 0]
+    incomingAmounts = edgeAmounts + leafAmounts
     hhi = calcHHI(incomingAmounts)
     top3 = calcTopNRatio(incomingAmounts, n=3)
     top1 = calcTopNRatio(incomingAmounts, n=1)
 
-    # 공정 다양성 (공급사들이 어떤 공정에 속하는지)
-    nodeByCode = {n.stockCode: n for n in nodes}
+    # 공정 다양성 (공급사들이 어떤 공정에 속하는지 — 상장 엣지만, 비상장은 stage 미상)
     industrySupply: dict[str, int] = {}
     stageSupply: dict[str, int] = {}
     for e in incoming:
@@ -301,14 +308,14 @@ def calcSupplyInsights(
         if from_node.stage:
             stageSupply[from_node.stage] = stageSupply.get(from_node.stage, 0) + 1
 
-    # 총 거래금액
+    # 총 거래금액 (상장 엣지 + 비상장 leaf fact)
     totalAmount = sum(a for a in incomingAmounts)
 
-    # 정밀 엣지 개수 (amount 있는 것)
-    preciseCount = sum(1 for e in incoming if e.amount and e.amount > 0)
+    # 정밀 엣지 개수 (amount 있는 것 — 엣지 + leaf fact)
+    preciseCount = len(incomingAmounts)
 
     return {
-        "supplierCount": len(incoming),
+        "supplierCount": len(incoming) + len(leafFacts),
         "customerCount": len([e for e in outgoing if e.edgeType == "customer"]),
         "preciseEdgeCount": preciseCount,
         "totalSupplyAmount": totalAmount,  # 억원
