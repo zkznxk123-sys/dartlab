@@ -36,6 +36,13 @@
 - 구멍2 ✅ `buildIndustrySummary` 파생 컬럼(영업이익률·coverageRatio)+테스트(872bd2888) + SKILL.md/카탈로그 동기화(b3a0e30c8, 기존 search 부채 동반 해소)
 - 구멍1 퍼블릭 격자 ✅ `/industry/[id]` profit-pool 2D + `ui-surfaces/map/industryPool.ts` rollup + profitPoolParity.mts(6a0d34666). 터미널 CenterStack 버블(신규 lazy 채널)은 후속
 - 구멍5 marketShare 재라벨 ✅ CU1~CU5(5fc87658f·5feb51359·b49e1b491·36edae6ab). 문서 정정 동반
+- Phase C 분포 밴드 ✅ `/industry/[id]` industryStats p10~p90 박스플롯(percentile만·n<10 숨김·분포출처 라벨, fd8506f59). 신규 계산 0
+- Phase B 642 진단 ✅ (read-only, cd2bb17f4) — 헤더 드리프트(exact lookup miss)가 원인, 재빌드 단독은 ~132 정상. 레버 A(퍼지화)가 커버리지 레버
+
+**남은 작업 (다음 세션 / 운영자)**:
+- 구멍1 터미널 CenterStack 버블 — 신규 lazy 채널(industries/{id}.json fetch + industryPool.ts 재사용), 프론트·시각검수
+- Phase B 실행 — ① **운영자가 `Industry().build()` 재빌드 실행**(메모리 가드, 2단계 검증→커밋. 승인됨 "재빌드도 한다"). ~132 정상 ② 레버 A 퍼지헤더 _attempts 졸업 후 이관 ③ `Industry.edges()` amount/ratio 컬럼+hop/insights ④ calcs/concentration.py 승격(Phase B 동행) ⑤ RightStack hop walk
+- **운영자 액션 2건**: (a) 프론트 시각검수 후 push 승인(profit-pool 격자·분포밴드·marketShare 라벨 길이) (b) edges 재빌드 실행
 
 ---
 
