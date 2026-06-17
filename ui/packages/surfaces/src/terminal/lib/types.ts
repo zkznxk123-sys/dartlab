@@ -258,6 +258,21 @@ export interface RiskFlag {
 	en: string;
 	d: string;
 }
+// 위험 경고등 카탈로그 1행 — 다이얼로그(점검 차원 전체 + 이 회사 현상태)용. 글랜스 RiskFlag 와 별개 표면.
+// status: red/yellow 점등 · clear 임계미달(통과) · na 판정불가(데이터 부재). 규칙 SSOT = lib/riskRules.ts.
+export interface RiskCatalogItem {
+	id: string;
+	kr: string; // 차원명
+	en: string;
+	axis: string | null; // GradeExplainDialog 교차링크 키(없으면 null)
+	whatKr: string;
+	whatEn: string;
+	thresholdKr: string; // 켜지는 조건
+	thresholdEn: string;
+	source: string; // dataSource 필드
+	status: 'red' | 'yellow' | 'clear' | 'na';
+	d: string; // 현재 실측값/detail
+}
 // 히스토그램 — 동종사 전체 값 배열의 실도수(막대 높이=몰린 정도). robust 범위(p2~p98)로 outlier 클리핑.
 // 5분위 보간 곡선(band)보다 정직: 실제 봉우리·gap·왜도를 그대로 보인다.
 export interface Hist {
@@ -423,6 +438,7 @@ export interface Company {
 	percentile: { industry: string; n: number; metrics: PercentileMetric[] } | null;
 	valuation: Valuation | null;
 	risks: RiskFlag[];
+	riskCatalog: RiskCatalogItem[]; // 위험 경고등 다이얼로그용 전체 차원 카탈로그 + 현상태(글랜스 risks 와 별개)
 	tailwind: Tailwind | null;
 	verdict: Verdict;
 }

@@ -50,6 +50,7 @@
 	let holdingsOpen = $state(false); // 출자 관계 분석 전체화면 (타법인 출자 패널 ⤢)
 	let tablesOpen = $state(false); // 재무제표 원표 모달 (재무 패널 ⤢)
 	let pctCrossOpen = $state(false); // 유니버스 교차 백분위 다이얼로그 (업종 내 백분위 패널 → 상세보기)
+	let riskDlgOpen = $state(false); // 리스크 경고등 설명 다이얼로그 (점검 차원 카탈로그 + 현상태 + 조건·소스)
 
 	// 이익 풀 — 이 회사가 속한 산업의 "이익은 어느 공정 단계가 버나" (industries/{id}.json lazy fetch).
 	// 우측=테이블·수치 정체성 → 막대차트 아닌 밀도 테이블(영업이익률·매출 + 이익최대/매출최대 마커).
@@ -397,15 +398,22 @@
 	const conf = $derived(cr.healthScore >= 70 ? 'HIGH' : 'MEDIUM');
 </script>
 
-<!-- RISK FLAGS -->
+<!-- RISK FLAGS — 글랜스는 점등(red/yellow)만. 헤더 '상세보기' → 점검 차원 전체 카탈로그·조건·현상태 다이얼로그. -->
 <Panel {lang} className="eCredit" prov="real" title={{ kr: '리스크 경고등', en: 'RISK FLAGS' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }}>
-	{#snippet right()}<span><b class="tDn">{risks.filter((r) => r.lv === 'red').length}</b> <b class="tWarn">{risks.filter((r) => r.lv === 'yellow').length}</b></span>{/snippet}
+	{#snippet right()}<span><b class="tDn">{risks.filter((r) => r.lv === 'red').length}</b> <b class="tWarn">{risks.filter((r) => r.lv === 'yellow').length}</b></span><button class="finFullBtn" onclick={() => (riskDlgOpen = true)} title={lang === 'en' ? 'what each light checks — conditions & this company' : '각 경고등이 점검하는 조건 · 이 회사 현상태'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 	<div class="riskWrap">
 		{#each risks as r, i (i)}
 			<div class={'riskRow ' + r.lv}><span class={'riskDot ' + r.lv}></span><span class="riskName">{lang === 'en' ? r.en : r.kr}</span>{#if r.d}<span class="riskDetail">{r.d}</span>{/if}</div>
 		{/each}
 	</div>
 </Panel>
+
+<!-- 리스크 경고등 설명 — 점검 차원 전체 카탈로그 + 이 회사 현상태(점등/통과/판정불가) + 조건·소스. lazy: 닫혀 있으면 청크 무증가 -->
+{#if riskDlgOpen}
+	{#await import('./RiskFlagsDialog.svelte') then { default: RiskFlagsDialog }}
+		<RiskFlagsDialog {co} {lang} onClose={() => (riskDlgOpen = false)} />
+	{/await}
+{/if}
 
 <!-- 포렌식 적신호 — 풀스크린 재무탭에 묻힌 결정론 위험지표(감사독립성·단기상환벽) 승격. 임계 초과만 표시(정상=무표시). -->
 {#if forensic.length}

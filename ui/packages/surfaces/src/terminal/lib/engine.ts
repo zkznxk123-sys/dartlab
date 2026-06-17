@@ -26,7 +26,9 @@ import type {
 	CategoricalShare,
 	PriceStat,
 	Hist,
+	RiskCatalogItem,
 } from './types';
+import { RISK_RULES, evalRiskCatalog, type RiskRuleCtx } from './riskRules';
 
 const SECTOR_EN: Record<string, string> = {
 	semiconductor: 'Semiconductors', auto: 'Automobile', energy: 'Energy', electronics: 'Electronics',
@@ -324,34 +326,39 @@ export function createEngine(raw: RawData): Engine {
 		};
 	}
 
-	function riskFlagsOf(code: string): RiskFlag[] {
+	// 위험 평가 컨텍스트 — EcoNode + 업종 중앙값(industryStats distribution). riskFlagsOf·riskCatalogOf 공유.
+	// 규칙·임계·라벨은 lib/riskRules.ts SSOT (글랜스·다이얼로그 공동 소비, 로직 중복 0).
+	function riskCtxOf(code: string): RiskRuleCtx {
 		const e = ecoByCode[code] || ({} as EcoNode);
-		const f: RiskFlag[] = [];
-		const add = (lv: RiskFlag['lv'], kr: string, en: string, d = '') => f.push({ lv, kr, en, d });
-		if (e.profGrade === '적자' || (e.opMargin != null && e.opMargin < 0))
-			add('red', '영업적자', 'Operating loss', e.opMargin != null ? e.opMargin.toFixed(1) + '%' : '');
-		else if (e.profGrade === '저수익')
-			add('yellow', '저수익', 'Low margin', e.opMargin != null ? e.opMargin.toFixed(1) + '%' : '');
-		if (e.growthGrade === '급감')
-			add('red', '매출 급감', 'Revenue collapse', e.revCagr != null ? e.revCagr.toFixed(0) + '%' : '');
-		else if (e.growthGrade === '역성장')
-			add('yellow', '매출 역성장', 'Revenue decline', e.revCagr != null ? e.revCagr.toFixed(0) + '%' : '');
-		if (e.auditRisk === '고위험') add('red', '감사 고위험', 'Audit high risk');
-		else if (e.auditRisk === '주의') add('yellow', '감사 주의', 'Audit watch');
-		if (e.qualGrade === '위험') add('red', '이익질 위험', 'Earnings quality risk');
-		else if (e.qualGrade === '주의') add('yellow', '이익질 주의', 'Earnings quality watch');
-		if (e.liqGrade === '위험') add('red', '유동성 위험', 'Liquidity risk');
-		else if (e.liqGrade === '주의') add('yellow', '유동성 주의', 'Liquidity watch');
-		if (e.stability && ['경고', '위험'].includes(e.stability)) add('red', '경영 불안정', 'Unstable', e.stability);
-		else if (e.stability === '취약') add('yellow', '경영 취약', 'Fragile', e.stability);
-		if (e.cfPattern === '현금위기형') add('red', '현금위기형', 'Cash crisis pattern');
-		else if (e.cfPattern === '외부의존형') add('yellow', '외부자금 의존', 'External-dependent');
-		if (e.holderChange != null && e.holderChange < -3)
-			add('yellow', '대주주 지분 급감', 'Owner stake drop', e.holderChange.toFixed(1) + '%p');
-		if (e.debtRatioDelta != null && e.debtRatioDelta > 30)
-			add('yellow', '부채비율 급증', 'Debt spike', '+' + e.debtRatioDelta.toFixed(0) + '%p');
-		if (!f.length) add('green', '주요 위험 신호 없음', 'No major red flags', '핵심 등급 양호');
-		return f;
+		const statsRec = raw.industryStats as Record<string, IndustryStat> | null;
+		const median = (field: keyof EcoNode): number | null =>
+			statsRec?.[e.industry]?.distribution?.[field as string]?.median ?? null;
+		return { e, median };
+	}
+
+	function riskFlagsOf(code: string): RiskFlag[] {
+		const ctx = riskCtxOf(code);
+		// 점등(red/yellow)만 수집 — clear·na 는 글랜스 미표시(다이얼로그 전용).
+		const lit = new Map<string, { hard: boolean; flag: RiskFlag }>();
+		for (const rule of RISK_RULES) {
+			const ev = rule.evaluate(ctx);
+			if (ev && ev.lv !== 'clear') lit.set(rule.id, { hard: rule.hard, flag: { lv: ev.lv, kr: ev.kr, en: ev.en, d: ev.d } });
+		}
+		// 억제: 경영권 안정(controlStability) 점등 시 대주주 지분급감(ownerStakeDrop) 중복 제거(같은 지배 축).
+		if (lit.has('controlStability')) lit.delete('ownerStakeDrop');
+		// 정렬: red>yellow, 같은 레벨 내 절대수치 위반(hard) 우선. 집합은 불변(순서만).
+		const lvRank = (lv: string): number => (lv === 'red' ? 0 : lv === 'yellow' ? 1 : 2);
+		const out = [...lit.values()]
+			.sort((a, b) => lvRank(a.flag.lv) - lvRank(b.flag.lv) || (a.hard === b.hard ? 0 : a.hard ? -1 : 1))
+			.map((x) => x.flag);
+		// fallback green — '검사한 임계 중' 한정(검사 안 한 차원까지 보증 안 함 = 거짓완결성 회피).
+		if (!out.length) out.push({ lv: 'green', kr: '주요 위험 신호 없음', en: 'No major red flags', d: '검사 임계 중 초과 없음' });
+		return out;
+	}
+
+	// 다이얼로그용 — 전체 차원 카탈로그 + 이 회사 현상태(점등/통과/판정불가). 억제·정렬 없음.
+	function riskCatalogOf(code: string): RiskCatalogItem[] {
+		return evalRiskCatalog(riskCtxOf(code));
 	}
 
 	function tailwindOf(industry: string): Company['tailwind'] {
@@ -806,12 +813,13 @@ export function createEngine(raw: RawData): Engine {
 			income, balance, cashflow, ratios, credit, analysis,
 			peers: derivePeers(code, industry),
 			story: blog ? { title: blog.title, date: blog.date, readTime: blog.readTime, slug: normalizeBlogSlug(blog.slug) } : null,
-			percentile: null, valuation: null, risks: [], tailwind: null,
+			percentile: null, valuation: null, risks: [], riskCatalog: [], tailwind: null,
 			verdict: {} as Verdict
 		};
 		co.percentile = industryPercentile(code);
 		co.valuation = valuationOf(code);
 		co.risks = riskFlagsOf(code);
+		co.riskCatalog = riskCatalogOf(code);
 		co.tailwind = tailwindOf(industry);
 		co.verdict = verdictOf(co);
 		return co;
