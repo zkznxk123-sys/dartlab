@@ -8,6 +8,7 @@
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
+	import type { MacroLensTab } from '../lib/macroLens';
 	import { runPortfolioBacktest, type PortfolioBtResult } from '../lib/backtest';
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { rankCoMovers, type CoMover } from '../lib/coMovement';
@@ -44,6 +45,8 @@
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
 		onSrc?: (line: string) => void; // 출처(공공누리)를 차트 하단 대신 패널 헤더에 표기하도록 부모로 끌어올림(econ/adj 반응 유지)
+		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
+		onCoMovers?: (rows: CoMover[]) => void;
 		// 차트 주체(subject) — 'price'=회사 주가(기본) · 'index'=KR gov/US FRED 지수(01). CenterStack-local 소유(ctl 미상향).
 		subject?: 'price' | 'index';
 		// US 지수(FRED 종가전용) = 라인 강제 + 고저 파생지표 degenerate. KR 지수·주가는 false (01 §3.6).
@@ -53,7 +56,7 @@
 		// 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유, 04 §5). PriceChart 가 new 하지 않고 받는다.
 		ctl: ChartCtl;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onMacroLens, onCoMovers, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 	let el: HTMLDivElement | null = $state(null);
@@ -67,13 +70,14 @@
 	$effect(() => {
 		if (!browser) return;
 		const cs = candles;
-		if (subject === 'index' || !cs || cs.length < 14) { coMovers = []; marketCoMovers = []; return; }
+		if (subject === 'index' || !cs || cs.length < 14) { coMovers = []; marketCoMovers = []; onCoMovers?.([]); return; }
 		let alive = true;
 		(async () => {
 			// 거시 시리즈는 srcCache(파일 1회 로드) 공유라 N개 getSeries 도 저렴. yoy 정의 시 변환된 시리즈로 동행 측정(오버레이와 일치).
 			const series = await Promise.all(MACRO_SERIES.map(async (d) => ({ id: d.id, points: (await rt.macro.getSeries(d.id)) ?? [] })));
 			if (!alive) return;
 			coMovers = rankCoMovers(cs, series.filter((s) => s.points.length));
+			onCoMovers?.(coMovers);
 			// 시장지수 동행 — 모듈 캐시(회사 무관) 1회 로드. 코스피/코스닥 종가 vs 종목 월수익률.
 			const mkt = await loadMarketIndexSeries(rt.index);
 			if (!alive) return;
@@ -1123,7 +1127,7 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
-		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
+		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} {onMacroLens} />
 	{/if}
 	<div class="chartHost" bind:this={el}></div>
 
@@ -1183,7 +1187,7 @@
 	{/if}
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
+		<ChartRibbon {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} {onMacroLens} />
 		<DrawToolbar {ctl} {lang} onDraw={startDraw} onClearDraw={clearDraw} />
 
 		{#if jumpOpen}

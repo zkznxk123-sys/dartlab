@@ -7,6 +7,8 @@
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
 	import { ChartCtl, ECON_MAX } from '../charts/chartState.svelte'; // 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유)
+	import type { CoMover } from '../lib/coMovement';
+	import type { MacroLensTab } from '../lib/macroLens';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
@@ -19,20 +21,22 @@
 	interface Props {
 		co: Company;
 		lang: Lang;
+		ctl?: ChartCtl;
 		// id 보유 항목(MACRO_SERIES 시계열)은 마퀴 클릭→차트 econ 오버레이. 파생 항목(국면·순풍 등 시계열 부재)은 id 없음 = 비클릭(04 §5).
 		kpis?: { l: string; v: string; t: string; s?: number[]; id?: string }[];
 		// 전체화면 심볼 점프 (PriceChart ⌘K·/) — 검색·전환은 터미널 엔진 관통
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
+		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
+		onCoMovers?: (rows: CoMover[]) => void;
 	}
-	let { co, lang, kpis = [], suggest, onPick }: Props = $props();
+	let { co, lang, ctl = new ChartCtl(), kpis = [], suggest, onPick, onMacroLens, onCoMovers }: Props = $props();
 	const rt = useDartLabRuntime();
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
-	// 차트 상태 — 여기서 생성해 PriceChart 로 내린다(01 §2.5 subject seam 과 동근). 상단 macro 마퀴 클릭→ctl.toggleEcon 공유의 전제.
-	const ctl = new ChartCtl();
+	// 차트 상태 — TerminalSurface 가 주입하면 Macro Lens 와 ECON 토글을 공유한다. 단독 사용 시 기본 인스턴스 생성.
 
 	// 주가 캔들 (hyparquet 온디맨드) — 부팅 비차단, 회사 전환 시 재로드. 재무는 아래 별도 섹션.
 	// 주가차트 컨트롤(기간·지표·드로잉·실적·밸류·로그·전체화면)은 PriceChart 인-차트 툴바로 이전.
@@ -379,7 +383,7 @@
 			{@const on = !!k.id && ctl.econ.includes(k.id)}
 			{@const blocked = !!k.id && !on && ctl.econ.length >= ECON_MAX}
 			{#if k.id}
-				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'click → overlay on chart' : '클릭 → 차트에 겹쳐보기'} onclick={() => k.id && ctl.toggleEcon(k.id)}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
+				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'open Macro Lens + overlay on chart' : '매크로 렌즈 열기 + 차트에 겹쳐보기'} onclick={() => { if (!k.id) return; ctl.toggleEcon(k.id); onMacroLens?.('drivers', k.id); }}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
 			{:else}
 				<span class="kpiItem"><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></span>
 			{/if}
@@ -459,7 +463,7 @@
 			disclosures={subject === 'index' ? [] : disclosureEvents}
 			valBand={subject === 'index' ? null : priceValBand}
 			peers={subject === 'index' ? [] : chartPeers}
-			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} />
+			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>
 	{:else if subject === 'index'}

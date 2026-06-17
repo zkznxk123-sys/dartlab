@@ -2,6 +2,7 @@
 	// 일반(비전체화면) 모드 차트 크롬 — 기간 칩(좌상) + 드롭다운 4개(지표·그리기·표시·백테스트) + 전체화면.
 	// 상태는 ChartCtl 단일 SSOT 공유 — 전체화면 리본(ChartRibbon)과 같은 인스턴스.
 	import type { Lang } from '../lib/types';
+	import type { MacroLensTab } from '../lib/macroLens';
 	import { type ChartCtl, type IndexControl, OVERLAY_ALL, SUB_GROUPS, ECON_MAX, PERIODS, TFS, YMODES, CANDLES, DRAW_TOOLS, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
@@ -24,8 +25,9 @@
 		indexCtl?: IndexControl; // 주가/지수 토글 + 지수 picker (CenterStack 소유 → 컨트롤 바 한 줄에 통합)
 		coMovers?: { id: string; corr: number; n: number }[]; // 종목↔거시 동행(상관) 순위 — ECON 메뉴 "동행 상위" (인과 아님)
 		marketCoMovers?: { id: string; name: string; corr: number; n: number }[]; // 종목↔국내 시장지수 동행(베타) — 거시와 별도 행, 인과 아님
+		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 	}
-	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false, indexCtl, coMovers = [], marketCoMovers = [] }: Props = $props();
+	let { ctl, lang, hasBand, railCatCounts = {}, onDraw, onClearDraw, onSnapshot, subject = 'price', indexLine = false, indexCtl, coMovers = [], marketCoMovers = [], onMacroLens }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	// 동행(상관) 우선순위 — coMovers 있으면 전 목록을 |corr| 내림차순 재배치(없으면 선언순). corr 없는 시리즈는 -1 로 하단.
 	const corrById = $derived(new Map(coMovers.map((c) => [c.id, c])));
@@ -92,6 +94,7 @@
 		{#if menu === 'econ'}
 			<div class="ctMenu ctMenuWide">
 				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
+				<div class="ctRow"><button class="mItem" onclick={() => { onMacroLens?.('drivers'); menu = 'none'; }}>{T('매크로 렌즈 열기', 'Open Macro Lens')}</button></div>
 					{#if marketCoMovers.length}
 						<!-- 국내 시장지수 동행(베타) — 거시 driver 와 분리(지수 상관은 거의 최상위라 섞으면 거시를 가림). ⚠ 인과 아님. -->
 						<div class="ctMenuLbl ctMenuGrp">{T('· 국내 시장 동행 (베타 · 인과 아님)', '· domestic market beta (not causation)')}</div>

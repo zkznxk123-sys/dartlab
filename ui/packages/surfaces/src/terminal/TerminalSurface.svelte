@@ -16,6 +16,10 @@
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import GiscusPanel from './panels/GiscusPanel.svelte';
 	import SupportDialog from './panels/SupportDialog.svelte';
+	import MacroLensDialog from './panels/MacroLensDialog.svelte';
+	import { ChartCtl } from './charts/chartState.svelte';
+	import { buildMacroLensSnapshot, type MacroLensTab } from './lib/macroLens';
+	import type { CoMover } from './lib/coMovement';
 	import { Heart } from 'lucide-svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
 	import { warmCompany } from './lib/warmup';
@@ -51,6 +55,11 @@
 	let sourcesOpen = $state(false);
 	let discussOpen = $state(false); // 종목 토론 드로어 (giscus)
 	let supportOpen = $state(false); // 후원·기여 센터 다이얼로그
+	let macroLensOpen = $state(false);
+	let macroLensTab = $state<MacroLensTab>('regime');
+	let macroLensFocus = $state('');
+	let macroCoMovers = $state<CoMover[]>([]);
+	const chartCtl = new ChartCtl();
 	// GitHub 스타 수 — SNS 버튼 옆 라이브 배지(사회적 증명). null = 미조회/실패(배지 숨김).
 	let ghStars = $state<number | null>(null);
 	fetchGithubStars(links.repo).then((n) => (ghStars = n));
@@ -106,6 +115,18 @@
 	});
 
 	const co = $derived(eng.buildCompany(sym));
+	const macroLensSnapshot = $derived.by(() => co ? buildMacroLensSnapshot({
+		co,
+		macro: eng.raw.macro,
+		macroLatest,
+		sectorTailwinds: eng.sectorTailwinds(),
+		coMovers: macroCoMovers
+	}) : null);
+	$effect(() => {
+		const code = co?.code;
+		if (!code) return;
+		macroCoMovers = [];
+	});
 	// 회사 선택 시 포트 경유로 모든 온디맨드 소스를 병렬 워밍업(패널 effect 전 캐시 준비).
 	$effect(() => {
 		const c = co;
@@ -163,6 +184,11 @@
 		sym = code;
 		try { localStorage.setItem(LAST_SYM_KEY, code); } catch { /* 시크릿 모드 등 */ }
 		setFlash(code + ' · ' + built.name.kr);
+	}
+	function openMacroLens(tab: MacroLensTab = 'regime', focusId = '') {
+		macroLensTab = tab;
+		macroLensFocus = focusId;
+		macroLensOpen = true;
 	}
 	function go(e: Event) {
 		e.preventDefault();
@@ -276,8 +302,8 @@
 		</div></div>
 
 		<main class="board">
-			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} /></div>
-			<div class="col colC"><CenterStack {co} {lang} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} /></div>
+			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} /></div>
+			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} onMacroLens={openMacroLens} onCoMovers={(rows) => (macroCoMovers = rows)} /></div>
 			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} percentileIn={eng.percentileIn} /></div>
 		</main>
 
@@ -299,5 +325,17 @@
 		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} pricesAsOf={co.price.asOf} macroAsOf={eng.raw.macro?.asOf ?? ''} financeLatest={finLatest || (co.trendQuarter?.periods.at(-1) ?? '')} />
 		<GiscusPanel code={co.code} name={co.name.kr} {lang} open={discussOpen} onClose={() => (discussOpen = false)} />
 		<SupportDialog {lang} {links} {base} open={supportOpen} onClose={() => (supportOpen = false)} />
+		{#if macroLensOpen && macroLensSnapshot}
+			<MacroLensDialog
+				snapshot={macroLensSnapshot}
+				{lang}
+				tab={macroLensTab}
+				focusId={macroLensFocus}
+				activeEcon={chartCtl.econ}
+				onTab={(t) => (macroLensTab = t)}
+				onClose={() => (macroLensOpen = false)}
+				onToggleEcon={(id) => chartCtl.toggleEcon(id)}
+			/>
+		{/if}
 	{/if}
 </div>

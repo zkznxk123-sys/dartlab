@@ -2,6 +2,7 @@
 	import type { Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from '../lib/engine';
+	import type { MacroLensTab } from '../lib/macroLens';
 	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
@@ -17,8 +18,9 @@
 		lang: Lang;
 		active: string;
 		onPick: (code: string) => void;
+		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 	}
-	let { eng, lang, active, onPick }: Props = $props();
+	let { eng, lang, active, onPick, onMacroLens }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
@@ -93,7 +95,10 @@
 <!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
 {#if macro}
 	<Panel {lang} className="eMacro" prov="real" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
-		{#snippet right()}<span class="dim">{lang === 'en' ? 'daily batch' : '일배치'}</span>{/snippet}
+		{#snippet right()}
+			<button class="finFullBtn" onclick={() => onMacroLens?.('regime', 'KR')} title={lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}>{lang === 'en' ? 'Lens' : '렌즈'}</button>
+			<span class="dim">{lang === 'en' ? 'daily batch' : '일배치'}</span>
+		{/snippet}
 		<div class="quadWrap">
 			{#each [{ side: 'kr', label: 'KR' }, { side: 'us', label: 'US' }] as box (box.side)}
 				{@const m = box.side === 'kr' ? macro.kr : macro.us}

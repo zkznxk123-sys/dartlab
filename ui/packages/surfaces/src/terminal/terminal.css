@@ -735,7 +735,7 @@
 .dlTerm .filingRow.nonreg .flType { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* 조건검색 모달 (상용급 스크리너) */
-.scrimWrap { position: fixed; inset: 0; z-index: 200; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
+.scrimWrap { position: fixed; inset: 0; z-index: 10050; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
 .scrModal { width: min(960px, 96vw); max-height: 88vh; display: flex; flex-direction: column; background: var(--dl-bg-raised, #0e141f); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); overflow: hidden; font-family: var(--dl-font-ui); color: var(--dl-ink); }
 .scrModal .mono { font-family: var(--dl-font-mono); font-variant-numeric: tabular-nums; }
 .scrHead { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); }

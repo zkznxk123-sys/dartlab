@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "qualityGate": {
+    "minimumObservations": 24,
+    "preferredObservations": 48,
+    "minimumAbsCorrelationForInfo": 0.35,
+    "minimumR2ForBetaDisplay": 0.12,
+    "maxStaleDays": 45,
+    "requiredCompanyEvidenceCoverage": 0.5,
+    "blockedStatuses": ["lookahead", "staleDriver", "missingPriceOverlap", "missingCompanyEvidence"]
+  },
+  "exampleResult": {
+    "companyCode": "005930",
+    "driverId": "USDKRW",
+    "windowMonths": 48,
+    "lagMonths": 1,
+    "nObs": 44,
+    "corr": 0.41,
+    "r2": 0.17,
+    "coverage": "sectorAndPartialCompany",
+    "missingEvidence": ["FX 손익 주석 구조화"],
+    "status": "qualitativeOnly",
+    "displayRule": "상관과 방향성은 표시하되 beta 숫자는 숨긴다."
+  }
+}

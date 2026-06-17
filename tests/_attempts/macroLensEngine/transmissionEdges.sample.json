@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "edges": [
+    {
+      "id": "fx-export-revenue",
+      "driverId": "USDKRW",
+      "sectorKeys": ["semiconductor", "auto", "shipbuilding", "chemical", "battery"],
+      "financialLine": "매출 성장률 / 환산손익",
+      "valuationLever": "growth",
+      "sign": "mixed",
+      "lagMonths": [0, 3],
+      "evidenceLevel": "sectorPrior",
+      "confidenceFloor": "low",
+      "requiredCompanyEvidence": ["해외 매출 비중", "외화 매출·매입 통화", "FX 손익 주석"],
+      "falsifiers": ["달러 원가 비중이 해외 매출 효과를 상쇄", "헤지 정책으로 환산 민감도 약화"]
+    },
+    {
+      "id": "rate-debt-interest",
+      "driverId": "BASE_RATE",
+      "sectorKeys": ["all"],
+      "financialLine": "이자비용 / 차입 재조달",
+      "valuationLever": "discountRate",
+      "sign": "negative",
+      "lagMonths": [3, 12],
+      "evidenceLevel": "template",
+      "confidenceFloor": "low",
+      "requiredCompanyEvidence": ["부채비율", "단기차입금", "이자보상배율", "차입금 만기"],
+      "falsifiers": ["순현금 기업", "고정금리 장기차입 중심", "이자수익이 비용을 상쇄"]
+    },
+    {
+      "id": "hy-risk-premium",
+      "driverId": "BAMLH0A0HYM2",
+      "sectorKeys": ["all"],
+      "financialLine": "신용스프레드 / 위험프리미엄",
+      "valuationLever": "riskPremium",
+      "sign": "negative",
+      "lagMonths": [0, 3],
+      "evidenceLevel": "observed",
+      "confidenceFloor": "medium",
+      "requiredCompanyEvidence": ["신용등급", "차입 의존도", "만기 구조", "현금 보유"],
+      "falsifiers": ["무차입 또는 충분한 현금", "방어적 현금흐름", "정부/모회사 지원 가능성"]
+    },
+    {
+      "id": "oil-margin-cost",
+      "driverId": "DCOILWTICO",
+      "sectorKeys": ["chemical", "auto", "logistics", "food", "energy"],
+      "financialLine": "매출총이익률 / 원가율",
+      "valuationLever": "margin",
+      "sign": "mixed",
+      "lagMonths": [0, 3],
+      "evidenceLevel": "sectorPrior",
+      "confidenceFloor": "low",
+      "requiredCompanyEvidence": ["원재료 비중", "가격 전가력", "재고 회전", "연료비 비중"],
+      "falsifiers": ["원가 전가 계약", "재고평가 이익", "에너지 매출 비중 우세"]
+    }
+  ]
+}
