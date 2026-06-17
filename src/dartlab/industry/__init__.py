@@ -85,6 +85,7 @@ class Industry:
         timeline: bool = False,
         lifecycle: bool = False,
         concentration: bool = False,
+        dynamics: bool = False,
         year: str = "2024",
     ) -> pl.DataFrame:
         """산업지도를 조회한다.
@@ -105,6 +106,10 @@ class Industry:
             True이면 산업 매출 시장구조 집중도 (HHI/CR3 + 상위 5사). 분포 백분위(회사 위치)
             가 아니라 산업 자체가 과점이냐 분산이냐를 본다. **상장사 매출 기준** — 비상장·해외
             매출 제외라 절대 시장점유율이 아닌 *상장 유니버스 내 상대 집중도*.
+        dynamics : bool
+            True이면 이익 풀 동학 — 공정별 첫/끝해 영업이익 levels(조) + argmax 리더 교체 판정
+            (이동형 vs 집중형) + 적자전환 플래그. **share(%) 미사용·levels만**(zero-crossing 폭발
+            차단). 생존편향(현 멤버십 과거 소급)은 복원 불가라 컬럼으로 정직 표기.
         year : str
             재무 데이터 기준 연도 (summary 시 사용).
 
@@ -142,6 +147,8 @@ class Industry:
                 - timeline=True: 연도 / 공정별 매출 컬럼
                 - concentration=True: 지표(기업수·총매출·HHI·HHI라벨·상위3비중) + 상위5사 행
                   (종목코드 / 종목명 / 공정 / 매출). 상장사 매출 기준 상대 집중도.
+                - dynamics=True: 공정별 행 (공정명 / 첫해(조) / 끝해(조) / 변화(조) / 적자전환 /
+                  끝해리더 / 판정[집중형|이동형] / 리더이동 / 윈도 / 생존편향주의).
             Prerequisites:
                 - taxonomy + nodes.json (운영자 매핑 산출물)
                 - summary=True 시 재무 데이터 (자동 다운로드)
@@ -164,6 +171,8 @@ class Industry:
             return self._lifecycle(industryId)
         if concentration:
             return self._concentration(industryId)
+        if dynamics:
+            return self._dynamics(industryId)
         return self._query(industryId, stage)
 
     def _guide(self) -> pl.DataFrame:
@@ -289,6 +298,16 @@ class Industry:
                 }
             )
         return pl.DataFrame(rows, schema=schema)
+
+    def _dynamics(self, industryId: str) -> pl.DataFrame:
+        """이익 풀 동학 (집중형 vs 이동형) — 공정별 첫/끝해 영업이익 levels + argmax 리더 교체 판정.
+
+        ``calcs.profitPoolDynamics`` (dict) 를 표면 계약(DataFrame)으로 감싼다. share 미사용·levels(조)
+        만·적자전환 플래그·생존편향 고정 컬럼. 산업이 *이동형*(소재→셀)이냐 *집중형*(FAB 고착)이냐.
+        """
+        from dartlab.industry.calcs.profitPoolDynamics import _dynamicsDataFrame
+
+        return _dynamicsDataFrame(industryId)
 
     def build(self, *, skipDocs: bool = False) -> None:
         """산업지도를 빌드한다 (4단계 파이프라인).

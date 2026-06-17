@@ -153,6 +153,8 @@ position = c.industry()
 
 `concentration=True` 정직 경계: 값은 **상장사 매출 기준** 상대 집중도다 — 비상장·해외 매출 제외라 *절대 시장점유율이 아니다*. HHI 라벨("분산/중간/집중")은 DOJ 척도 차용일 뿐 시장 획정(market definition)을 거치지 않았으니 반독점 판정 어휘로 인용 금지. `calcSectorMetrics`(회사가 분포 어디 위치)와 직교 — 이건 *산업 자체가 과점이냐 분산이냐*. 회사 단위 공급망 집중도(고객/거래처 HHI)는 `recipes.industry.supplyChainConcentration` 별도.
 
+`dynamics=True` → 이익 풀 동학: 공정별 첫/끝해 영업이익 **levels(조)** + **argmax 리더 교체** 판정(끝해 1위 ≠ 첫해 1위 = **이동형**, 같으면 **집중형**) + **적자전환** 플래그(첫해>0·끝해<0). 정직 경계: **share(%) 미사용**(총합 zero-crossing 시 점유율 폭발 — 반도체 2023 -800%), levels만. **생존편향**(현 멤버십을 과거 연도에 소급 — 복원 불가)을 `생존편향주의` 컬럼으로 1급 표기. 4년 윈도라 "추세" 아닌 *방향 신호*. KO는 대부분 단일 stage 지배(집중형)·진짜 이동형은 희귀 — workhorse는 적자전환+levels이지 migration 라벨 아님. 미래 리더 예측·동학 점수화·이익흐름 Sankey 금지(folk통계/인과 함의).
+
 `Company.industry()` → 단일 종목의 밸류체인 위치 dict — `chainId` (산업 ID), `stage` (공정), `confidence` (0~1 매칭 신뢰도), `peers` (같은 stage 종목코드 list). 매칭 실패 시 `None`.
 
 분류체계 신선도는 `taxonomy.json` 의 운영자 수동 갱신 시점 — 신생 산업·신규 상장 직후엔 매칭 누락 가능.
@@ -203,6 +205,20 @@ dartlab.industry("semiconductor", concentration=True)
    기업수 : int             # 매출 양수 상장사 수
    총매출(조) : float        # 산업 Σ매출 (조원)
    # 매출 양수 회사 0 이면 빈 DataFrame(스키마 보존). 비상장·해외매출 제외 한계 명시 필수
+```
+
+```text
+dartlab.industry("battery", dynamics=True)
+→ DataFrame  # 이익 풀 동학 — 공정별 행, 끝해 영업이익 내림차순
+   공정명 : str            # stage 한글명
+   첫해(조)/끝해(조) : float # 영업이익 levels (음수 그대로, share 미사용)
+   변화(조) : float         # 끝해 - 첫해
+   적자전환 : bool          # 첫해>0 & 끝해<0 (동학의 1차자료 증거)
+   끝해리더 : bool          # 끝해 영업이익 1위 stage
+   판정 : str              # 집중형(리더 고착) | 이동형(리더 교체)
+   리더이동 : str           # "양극재 → 셀"(이동형) | "셀 고착"(집중형)
+   윈도 : str              # 유효 연도 범위 (Σ영업이익>0 연도)
+   생존편향주의 : str        # 현 멤버십 과거 소급 한계 — 답변 동반 필수
 ```
 
 ```text
@@ -274,9 +290,10 @@ data.industryBadge = {
 | `dartlab.industry("semiconductor", stage="fab")` | `{"industryId": "semiconductor", "stage": "fab"}` |
 | `dartlab.industry("semiconductor", summary=True, year="2024")` | `{"industryId": "semiconductor", "summary": true, "year": "2024"}` |
 | `dartlab.industry("semiconductor", concentration=True)` | `{"industryId": "semiconductor", "concentration": true}` |
+| `dartlab.industry("battery", dynamics=True)` | `{"industryId": "battery", "dynamics": true}` |
 | `Company("005930").industry()` | `{"stockCode": "005930"}` (apiRef="Company.industry") |
 
-`summary` · `timeline` · `lifecycle` · `concentration` 동시 X — 우선순위 summary > timeline > lifecycle > concentration.
+`summary` · `timeline` · `lifecycle` · `concentration` · `dynamics` 동시 X — 우선순위 summary > timeline > lifecycle > concentration > dynamics.
 
 ## 기본 실행 순서
 

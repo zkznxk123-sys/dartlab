@@ -257,3 +257,72 @@ class TestConcentrationVerb:
         assert out.height == 0
         assert "매출비중(%)" in out.columns
         assert "HHI" in out.columns
+
+
+class TestProfitPoolDynamics:
+    """calcProfitPoolDynamics — argmax 리더 교체로 집중형/이동형 판정 (산업 동학).
+
+    measure-first 실측(2차전지 이동·반도체 집중)이 독립 oracle. parquet 무의존 —
+    buildTimelineSummary monkeypatch + 합성 stage×연도 영업이익. share 금지·levels·적자전환·생존편향.
+    """
+
+    def _timeline(self, recs):
+        """recs = [(연도, stage, 공정명, 영업이익조, 기업수)] → buildTimelineSummary 형태 DataFrame."""
+        return pl.DataFrame(
+            [
+                {"연도": y, "stage": st, "공정명": nm, "매출(조)": 0.0, "영업이익(조)": op, "기업수": n}
+                for (y, st, nm, op, n) in recs
+            ]
+        )
+
+    def _run(self, monkeypatch, df):
+        from dartlab.industry.build import financials, pipeline
+        from dartlab.industry.calcs.profitPoolDynamics import calcProfitPoolDynamics
+
+        monkeypatch.setattr(pipeline, "loadNodes", lambda: [])
+        monkeypatch.setattr(financials, "buildTimelineSummary", lambda nodes, ind, years=None: df)
+        return calcProfitPoolDynamics("synth")
+
+    def test_migration_when_leader_changes(self, monkeypatch):
+        """2차전지형 — 양극재(첫해 1위, 적자전환) → 셀(끝해 1위) = 이동형."""
+        df = self._timeline(
+            [
+                ("2021", "cathode", "양극재", 0.3, 5),
+                ("2021", "cell", "셀", 0.2, 3),
+                ("2024", "cathode", "양극재", -0.5, 5),
+                ("2024", "cell", "셀", 0.7, 3),
+            ]
+        )
+        r = self._run(monkeypatch, df)
+        assert r["판정"] == "이동형"
+        assert r["리더_첫해"][1] == "양극재"
+        assert r["리더_끝해"][1] == "셀"
+        assert "양극재" in r["적자전환"]  # 0.3 > 0, -0.5 < 0
+        assert r["윈도"] == "2021~2024"
+
+    def test_concentration_when_leader_fixed(self, monkeypatch):
+        """반도체형 — FAB이 모든 해 1위 = 집중형. 적자전환 없음."""
+        df = self._timeline(
+            [
+                ("2021", "fab", "전공정", 64.0, 20),
+                ("2021", "design", "설계", 0.4, 13),
+                ("2024", "fab", "전공정", 56.0, 20),
+                ("2024", "design", "설계", 0.1, 13),
+            ]
+        )
+        r = self._run(monkeypatch, df)
+        assert r["판정"] == "집중형"
+        assert r["리더_첫해"][1] == r["리더_끝해"][1] == "전공정"
+        assert r["적자전환"] == []
+
+    def test_under_two_valid_years_returns_none(self, monkeypatch):
+        """유효 연도(Σ영업이익>0) < 2 면 판정 None (zero-crossing/단년 가드)."""
+        df = self._timeline(
+            [
+                ("2021", "fab", "전공정", -1.0, 5),  # Σ<0 → 무효
+                ("2024", "fab", "전공정", 5.0, 5),  # 유효 1개뿐
+            ]
+        )
+        r = self._run(monkeypatch, df)
+        assert r["판정"] is None
+        assert r["생존편향주의"]  # 고정 필드는 항상 존재
