@@ -428,6 +428,8 @@
 							<th>고객사</th>
 							<th>품목</th>
 							<th class="num">거래금액</th>
+							<th class="num">의존도</th>
+							<th>출처</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -446,11 +448,24 @@
 								</td>
 								<td class="product">{e.product || '-'}</td>
 								<td class="num amount">{formatAmount(e.amount)}원</td>
+								<td class="num dep">{e.ratio != null ? e.ratio.toFixed(1) + '%' : '—'}</td>
+								<td>
+									<span
+										class="src-chip"
+										class:strong={e.source === 'docs_table'}
+										class:weak={e.source === 'docs'}
+										title={e.source === 'docs_table' ? '공시 표 추출(강)' : e.source === 'docs' ? '본문 언급(약)' : e.source === 'network' ? '출자 관계' : e.source}
+									>{e.source || '—'}</span>
+								</td>
 							</tr>
 						{/each}
 					</tbody>
 				</table>
 			</div>
+			<p class="pool-caption">
+				의존도 = 공급사가 신고한 매출처 의존도(사업보고서 「주요 매출처/매입처」 공시 추출). 추출 누락분은 '—'(0 채움 안 함).
+				상장 그래프·금액 공개분 한정 — 전체 거래의 일부다.
+			</p>
 		</section>
 	{/if}
 </div>
@@ -1033,5 +1048,27 @@
 		width: 2px;
 		background: #e5e9f0;
 		transform: translateX(-1px);
+	}
+
+	/* 공급 관계 의존도·출처 */
+	.edge-table .dep {
+		color: #cbd5e1;
+		font-variant-numeric: tabular-nums;
+	}
+	.src-chip {
+		display: inline-block;
+		padding: 1px 6px;
+		border-radius: 4px;
+		font-size: 11px;
+		background: #1e2433;
+		color: #8b95a7;
+		border: 1px solid #2a3142;
+	}
+	.src-chip.strong {
+		color: #34d399;
+		border-color: color-mix(in srgb, #34d399 40%, transparent);
+	}
+	.src-chip.weak {
+		color: #6b7280;
 	}
 </style>
