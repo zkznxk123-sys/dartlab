@@ -45,14 +45,19 @@
 - **묻어둔 집중도 함수 런타임 노출 ✅** (2026-06-17, 2에이전트 적대토론 → 정공법) — `build/insights.py` → `calcs/concentration.py` 승격(이력보존 git mv, import re-point: enrichCompany 1 + test_l2 6 + edges/coverage baseline) + **`Industry()(id, concentration=True)`** 모드(산업 매출 시장구조 HHI/CR3 + 상위5사, `_lifecycle` 선례 동형, verb 0) + TestConcentrationVerb 3건 + SKILL.md(concentration 반환블록·args·정직경계) + 카탈로그 sync(web.json). **설계 모호 해소**: dict↔DataFrame은 calc 함수 dict 유지(계약 불변)·verb 어댑터 `_concentration`만 DataFrame 래핑(`_summary`/`_lifecycle` 패턴). **데이터 정직 가드**: revenue 기반(viable)만 노출·"상장사 매출 기준" 캡션·HHI라벨 반독점 어휘 금지 박제.
   - ★**적대토론 핵심 발견(정직 카탈로그)**: "런타임 노출" thesis는 *상당 부분 이미 충족됨* — `calcSupplyInsights` 출력은 enrichCompany→buildIndustryMap→`CompanyCard.svelte:505-550` 화면 노출 + `buildInsightRankings.py` HHI 랭킹. orphan은 *함수가 query verb DataFrame으로 안 나오는 것*뿐. 진짜 미노출 = `calcIndustryConcentration`(산업 시장구조, recipe·화면 어디에도 없음, `calcSectorMetrics` 백분위와 직교) 하나 → 이것만 노출. supply-side(amount 0.7%)는 거짓정밀이라 의도적 보류(깎아냄).
 
-**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool(엔진 캐논+공개 격자+터미널 버블) · #2 공급망(edges 컬럼+공개 evidence 칩) · #3 분포(공개 밴드+경계 SSOT). 정직(marketShare 재라벨) ✅. Phase B 진단 ✅. 집중도 런타임 노출 ✅.
+- **레버 A 졸업 + 전사 재빌드 ✅** (2026-06-17) — 비상장 매입처 미드롭 + 퍼지헤더. ② 실측(N=300 4.6x·642 정합)→본진:
+  - `IndustryNode.supplyFacts`(비상장 leaf fact, 그래프 노드 미승격·buyer 속성) + `extractRawMaterialEdges` 퍼지헤더·leaf 할당 + `calcSupplyInsights` HHI 합산(코드 `799ceb18a`, 테스트 2건)
+  - ★선결 버그 발견·수정: `_listingLookup`이 gov 마이그레이션(`종목코드`→`short_code`)으로 깨져 있었음 → 현 edges.json이 *마이그레이션 전 stale 빌드*였음 판명
+  - perf: `extractDocsEdges` O(회사×행×2800) → 2-gram 조기reject(`2b0b9ddad`, 110→40분)
+  - **전사 재빌드 산출**(`e132fbdaf`): **amount 커버리지 132 → 1,097 (8.3x)** = 상장엣지 123 + 비상장 leaf 974. supplyFacts 260사·1,152 facts. edges 18,418→20,560(supplier 3,191→6,679, listing 복구). peak RSS 2.83GB·80분. **재빌드 비용 실측 = O(n²) 80분 → 향후 CI/운영자 배치 권장(PRD 가드 확증)**
+  - 실데이터 검증: 기아 공급 HHI 2979(집중·41조), 반도체 시장구조 HHI 5778(삼성 73%)
 
-**남은 작업 (게이트/운영자 — 전부 재빌드/_attempts 게이트, 비-게이트 코드작업 0)**:
-- ~~calcs/concentration.py 승격 + 런타임 노출~~ ✅ 완료(위). 잔여 `edges(insights=True/hop=2)` 배선은 **재빌드 게이트로 이관** — calcSupplyInsights는 amount 0.7%라 거짓정밀 + 이미 CompanyCard 노출 / computeHop2는 전종목 인접리스트라 캐시경계+amount 채움(재빌드) 선결. 비-게이트 부분은 없음.
-- **레버 A**(퍼지 헤더, edges.py:506-507→line 490 패턴) — `_attempts/industryAnalysisLab` ③~⑧ 졸업 후 본진. amount 커버리지 레버
-- **edges 재빌드** — 운영자 승인됨("재빌드도 한다")이나 `Industry().build()`는 전종목 panel 로드라 **메모리/시스템 크래시 가드** 영역 → 운영자 직접 실행(2단계 검증→커밋) 권장. 단독 재빌드는 ~132(레버 A 후에 실효)
-- **RightStack hop walk**(터미널 공급망) — edges 재빌드(amount 채움) 후 게이트
-- **운영자 액션**: 프론트 시각검수 후 push 승인(격자·밴드·공급망칩·marketShare 라벨 길이 '상장사매출비중' 7자)
+**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool · #2 공급망(edges+칩+**레버A 8.3x amount**) · #3 분포. 정직(marketShare) ✅. 집중도 런타임 노출 ✅. **PRD 정의 범위(3 killer 엔진+표면+정직 라벨) 완성.**
+
+**남은 작업 (PRD 본체 외 — 보너스/게이트)**:
+- **집중도 verb 화면배선** — `concentration=True`(전사 작동)가 엔진엔 있으나 터미널/랜딩 미노출. PRD 3 killer 넘어선 보너스·UI(검수 게이트). "강하게"의 본체 레버를 화면에 노출하는 다음 후보.
+- **RightStack hop walk**(터미널 공급망) — `computeHop2` 캐시경계 후 게이트. 데이터(leaf facts)는 이제 준비됨.
+- **운영자 액션**: 프론트 시각검수 후 push 승인(누적 프론트 + 본 백엔드 커밋들).
 
 ---
 
