@@ -798,6 +798,13 @@
 .dlTerm .finTab.on { background: rgba(251, 146, 60, 0.1); color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
 .dlTerm .finTab:hover:not(.on) { color: var(--txt); }
 .dlTerm .finScroll { max-height: 248px; overflow-y: auto; }
+
+/* 좌측 하단 통합 패널 탭 (스크리너 ⇄ 공시 워치) — 패널 헤더 자리를 탭 바로 사용 */
+.dlTerm .leftTabHead { gap: 0; padding: 0; }
+.dlTerm .leftTab { height: 100%; display: inline-flex; align-items: center; font-family: var(--cond); font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--dimmer); background: transparent; border: none; border-right: 1px solid var(--bd); padding: 0 9px; cursor: pointer; white-space: nowrap; }
+.dlTerm .leftTab.on { color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
+.dlTerm .leftTab:hover:not(.on) { color: var(--txt); }
+.dlTerm .leftTabN { font-family: var(--mono); font-weight: 600; font-size: 8.5px; color: var(--dim); margin-left: 5px; }
 .dlTerm .finTable { width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.3; }
 .dlTerm .finTable th { font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 7px; text-align: right; border-bottom: 1px solid var(--bd); position: sticky; top: 0; background: var(--panel); }
 .dlTerm .finTable th.finAcct { text-align: left; }

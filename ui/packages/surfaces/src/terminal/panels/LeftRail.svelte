@@ -7,6 +7,7 @@
 	import ScreenerModal from './ScreenerModal.svelte';
 	import FinTypeLegendDialog from './FinTypeLegendDialog.svelte'; // 유형 칩 범례 — TYPE 컬럼 ⓘ 에서 연다
 	import Watchlist from './Watchlist.svelte'; // 공시 워치 — 큐레이션 종목 신선도 모니터 (recentMap 공유)
+	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
 
@@ -32,6 +33,7 @@
 	// ROE·영업이익 수치 컬럼은 라벨(finType 체인)로 대체 — 수치 다조건은 상세검색 모달 소관. ──
 	let screenerOpen = $state(false);
 	let finLegendOpen = $state(false); // 유형 칩 범례 다이얼로그
+	let bottomTab = $state<'screener' | 'watch'>('screener'); // 하단 통합 패널 탭 — 스크리너(기본) ⇄ 공시 워치
 	// 30거래일 스파크 — recent.parquet 전종목 1파일 (티커 스트립과 어댑터 캐시 공유, 추가 다운로드 0)
 	let recentMap = $state<Record<string, Candle[]> | null>(null);
 	rt.price.govRecent().then((m) => (recentMap = m));
@@ -115,13 +117,9 @@
 			</div>
 		{/if}
 	</Panel>
-
-<ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {/if}
 
-<!-- 공시 워치 — 큐레이션 종목 집합 + 절대시각 신선도(헤더 ☆ 로 추가). 매크로 펄스 아래, 히트맵 위. -->
-<Watchlist {eng} {lang} {active} {onPick} {recentMap} />
-
+<!-- 섹터 히트맵 — 스크리너 섹터 필터원이라 스크리너 바로 위로. (공시 워치는 하단 통합 탭으로 이동) -->
 <Panel {lang} className="eIndustry" prov="real" title={{ kr: '섹터 히트맵', en: 'SECTOR HEATMAP' }} sub={{ kr: '평균 1M · 클릭=필터', en: 'avg 1M · click to filter' }}>
 	<div class="sectorGrid">
 		{#each sectors as x (x.id)}
@@ -135,41 +133,53 @@
 	</div>
 </Panel>
 
-<!-- 통합 스크리너 — 주가(1Y) + 재무(ROE·영업이익률) 한 행, 컬럼 클릭 정렬. 복합 조건은 상세검색 모달. -->
-<!-- sub(종목수) 미표기 — 우측 상세검색·조건조사↗ 2버튼이 좁은 헤더를 채워, 종목수를 넣으면 부분 잘림("2.")만 생김.
-     제목 가시성 우선(헤더 잘림 수정). 유니버스 규모는 아래 리스트로 자명. -->
-<Panel {lang} className="eQuant fillCol" prov="real" title={{ kr: '주가·재무 스크리너', en: 'SCREENER' }} flush>
-	{#snippet right()}<button class="scrOpenBtn" onclick={() => (screenerOpen = true)} title="상용급 다조건 검색">{lang === 'en' ? 'SCREEN' : '상세검색'}</button><a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">조건조사 ↗</a>{/snippet}
-	<div class="filtRow">
-		<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />
-		<select class="filtSel" bind:value={market}><option value="">{lang === 'en' ? 'all market' : '전체 시장'}</option><option value="KOSPI">KOSPI</option><option value="KOSDAQ">KOSDAQ</option></select>
-	</div>
-	{#if sectorFilter}
-		<div class="filtChipRow"><button class="filtChip" onclick={() => (sectorFilter = '')}>{lang === 'en' ? 'sector: ' : '섹터: '}{activeSectorName} ✕</button></div>
-	{/if}
-	<!-- 컬럼 헤더 — 정렬 1Y 고정 (수치 다조건은 상세검색) -->
-	<div class="rkHead">
-		<span class="rkHN">#</span>
-		<span class="rkHName">{lang === 'en' ? 'Company' : '종목'}</span>
-		<span class="rkHCol">{lang === 'en' ? '30D' : '추세'}</span>
-		<span class="rkHCol on">1Y ▼</span>
-		<button class="rkHCol rkHType" onclick={() => (finLegendOpen = true)} title={lang === 'en' ? 'What these type labels mean — criteria' : '유형 라벨 기준 보기'}>{lang === 'en' ? 'TYPE' : '유형'} <span class="rkHTypeI">ⓘ</span></button>
-	</div>
-	<div class="rankList">
-		{#each rows as r, i (r.n.id)}
-			{@const fts = displayPair(finTypeOf(r.n, eng.raw.finance.companies[r.n.id], eng.priceOf(r.n.id)))}
-			{@const sp = recentMap?.[r.n.id]}
-			<div class={'rankRow' + (active === r.n.id ? ' on' : '')} role="button" tabindex="0" onclick={() => onPick(r.n.id)} onkeydown={(e) => e.key === 'Enter' && onPick(r.n.id)}>
-				<span class="rkN mono">{i + 1}</span>
-				<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}</span></span>
-				<span class="rkSpark">{#if sp && sp.length > 1}<svg class={chgClass(r.r1y)} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={sparkPts(sp.map((k) => k.c))} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}</span>
-				<span class={'rkCol mono ' + chgClass(r.r1y)}>{r.r1y == null ? '—' : sign(r.r1y, 0) + '%'}</span>
-				<span class="rkChips">
-					{#each fts as ft (ft.name)}<span class={'rkChip ' + tcls(ft.tone)} title={ft.criteriaKr}>{ft.name}</span>{/each}
-				</span>
+<!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소
+     (한 자리를 탭으로 공유 · 각 탭이 잔여 높이 전부 차지 · 내부 스크롤). 탭 바가 패널 헤더 역할. -->
+<section class="panel eQuant fillCol">
+	<header class="panelHead leftTabHead">
+		<button class={'leftTab' + (bottomTab === 'screener' ? ' on' : '')} onclick={() => (bottomTab = 'screener')}>{lang === 'en' ? 'SCREENER' : '스크리너'}</button>
+		<button class={'leftTab' + (bottomTab === 'watch' ? ' on' : '')} onclick={() => (bottomTab = 'watch')}>{lang === 'en' ? 'WATCH' : '공시 워치'}{#if watchlist.count}<span class="leftTabN">{watchlist.count}</span>{/if}</button>
+		<span class="panelRight">
+			{#if bottomTab === 'screener'}<button class="scrOpenBtn" onclick={() => (screenerOpen = true)} title="상용급 다조건 검색">{lang === 'en' ? 'SCREEN' : '상세검색'}</button><a class="lensScan" href="{base}/scan" target="_blank" rel="noopener" title="전체 조건 조사 — scan 보드">{lang === 'en' ? 'scan ↗' : '조건조사 ↗'}</a>{/if}
+		</span>
+	</header>
+	<div class="panelBody flush">
+		{#if bottomTab === 'screener'}
+			<div class="filtRow">
+				<input class="filtInput" placeholder={lang === 'en' ? 'name/code' : '이름·코드'} bind:value={query} spellcheck={false} />
+				<select class="filtSel" bind:value={market}><option value="">{lang === 'en' ? 'all market' : '전체 시장'}</option><option value="KOSPI">KOSPI</option><option value="KOSDAQ">KOSDAQ</option></select>
 			</div>
-		{/each}
+			{#if sectorFilter}
+				<div class="filtChipRow"><button class="filtChip" onclick={() => (sectorFilter = '')}>{lang === 'en' ? 'sector: ' : '섹터: '}{activeSectorName} ✕</button></div>
+			{/if}
+			<!-- 컬럼 헤더 — 정렬 1Y 고정 (수치 다조건은 상세검색) -->
+			<div class="rkHead">
+				<span class="rkHN">#</span>
+				<span class="rkHName">{lang === 'en' ? 'Company' : '종목'}</span>
+				<span class="rkHCol">{lang === 'en' ? '30D' : '추세'}</span>
+				<span class="rkHCol on">1Y ▼</span>
+				<button class="rkHCol rkHType" onclick={() => (finLegendOpen = true)} title={lang === 'en' ? 'What these type labels mean — criteria' : '유형 라벨 기준 보기'}>{lang === 'en' ? 'TYPE' : '유형'} <span class="rkHTypeI">ⓘ</span></button>
+			</div>
+			<div class="rankList">
+				{#each rows as r, i (r.n.id)}
+					{@const fts = displayPair(finTypeOf(r.n, eng.raw.finance.companies[r.n.id], eng.priceOf(r.n.id)))}
+					{@const sp = recentMap?.[r.n.id]}
+					<div class={'rankRow' + (active === r.n.id ? ' on' : '')} role="button" tabindex="0" onclick={() => onPick(r.n.id)} onkeydown={(e) => e.key === 'Enter' && onPick(r.n.id)}>
+						<span class="rkN mono">{i + 1}</span>
+						<span class="rkName"><b>{eng.nameOf(r.n.id)}</b><span class="rkInd">{r.n.industryName || ''}</span></span>
+						<span class="rkSpark">{#if sp && sp.length > 1}<svg class={chgClass(r.r1y)} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={sparkPts(sp.map((k) => k.c))} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}</span>
+						<span class={'rkCol mono ' + chgClass(r.r1y)}>{r.r1y == null ? '—' : sign(r.r1y, 0) + '%'}</span>
+						<span class="rkChips">
+							{#each fts as ft (ft.name)}<span class={'rkChip ' + tcls(ft.tone)} title={ft.criteriaKr}>{ft.name}</span>{/each}
+						</span>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<Watchlist bare {eng} {lang} {active} {onPick} {recentMap} />
+		{/if}
 	</div>
-</Panel>
+</section>
 
+<ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {#if finLegendOpen}<FinTypeLegendDialog {lang} onClose={() => (finLegendOpen = false)} />{/if}

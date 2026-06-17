@@ -17,8 +17,9 @@
 		active: string;
 		onPick: (code: string) => void;
 		recentMap: Record<string, Candle[]> | null; // 30거래일 스파크 (LeftRail 과 어댑터 캐시 공유, 추가 다운로드 0)
+		bare?: boolean; // 탭 모드 — Panel 크롬(헤더·테두리) 없이 본문만. 하단 탭(LeftRail)이 헤더·제목 제공.
 	}
-	let { eng, lang, active, onPick, recentMap }: Props = $props();
+	let { eng, lang, active, onPick, recentMap, bare = false }: Props = $props();
 	const rt = useDartLabRuntime();
 
 	// 신선도 — 수시공시(allFilings) 접수일 기준 최근 7/30 일 건수 + 최신일. 회사당 1 회 비동기 로드(요청 중복 가드).
@@ -82,7 +83,8 @@
 	});
 </script>
 
-<Panel {lang} className="eWatch" prov="real" title={{ kr: '공시 워치', en: 'DISCLOSURE WATCH' }} sub={{ kr: watchlist.count + '종목 · 수시공시 신선도', en: 'n=' + watchlist.count + ' · filing freshness' }} flush>
+<!-- 본문 — Panel 모드와 bare(탭) 모드가 공유. 헤더/테두리만 모드별로 다름. -->
+{#snippet inner()}
 	{#if !watchlist.count}
 		<div class="watchEmpty">{lang === 'en' ? 'Add companies with the header ☆ to monitor their filings here.' : '헤더의 ☆ 로 회사를 담으면 공시 신선도를 한눈에 모읍니다.'}</div>
 	{:else}
@@ -106,7 +108,15 @@
 		</div>
 		<div class="watchNote">{lang === 'en' ? 'freshness = absolute calendar time · count = allFilings non-regular' : '신선도 = 절대 시각 기준(기기 무관) · 카운트 = allFilings 수시공시'}</div>
 	{/if}
-</Panel>
+{/snippet}
+
+{#if bare}
+	<div class="watchBare">{@render inner()}</div>
+{:else}
+	<Panel {lang} className="eWatch" prov="real" title={{ kr: '공시 워치', en: 'DISCLOSURE WATCH' }} sub={{ kr: watchlist.count + '종목 · 수시공시 신선도', en: 'n=' + watchlist.count + ' · filing freshness' }} flush>
+		{@render inner()}
+	</Panel>
+{/if}
 
 <style>
 	.watchEmpty {
@@ -118,6 +128,18 @@
 	.watchList {
 		display: flex;
 		flex-direction: column;
+	}
+	/* 탭 모드 — 패널 잔여 높이를 채우고 목록만 내부 스크롤(무한 증가가 다른 패널을 밀지 않음). */
+	.watchBare {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0;
+	}
+	.watchBare .watchList {
+		flex: 1;
+		overflow-y: auto;
+		min-height: 0;
 	}
 	.watchRow {
 		display: grid;
