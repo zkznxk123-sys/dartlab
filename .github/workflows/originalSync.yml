@@ -17,12 +17,18 @@ name: Original SSOT Sync
 #                 EDGAR_FULL_REBUILD=1 일 때만 전 universe 부트스트랩(dispatch, 디스크 floor).
 #
 # cron 0 2 UTC = KST 11:00 — kindlist(00:00) 후, edgarSync(04:30) 전 빈 창(race 회피).
-# per-job concurrency 로 기존 cron 과 HF-repo-family 직렬화(412 commit-conflict 회피):
-#   dart-zip · allfilings → hf-dart-push — 둘 다 메인 public repo(eddmpython/dartlab-data,
-#     panel·allFilings 동거)에 push 하므로 dataSync/dartNewStocks/dataPrebuild/valuationSnapshot
-#     과 같은 그룹으로 직렬화(cancel-in-progress:false = 큐잉). dartOriginal(private repo)은
-#     별 repo 라 무관하나 dart-zip 한 job 이 panel+original 둘 다 다뤄 자연 직렬.
-#   edgar → hf-edgar-push(edgarSync 와 직렬).
+# HF-repo-family 직렬화(412 commit-conflict 회피) 2 축:
+#   ① 외부 cron 과의 직렬 = concurrency group hf-dart-push (dataSync/dartNewStocks/dataPrebuild/
+#     valuationSnapshot/newsArchiveSync 와 공유, cancel-in-progress:false). 메인 public repo
+#     (eddmpython/dartlab-data, panel·allFilings 동거)에 push 하는 모든 cron 을 한 줄로.
+#   ② 본 run 내부 dart 4-job 직렬 = needs 체인 (dart-zip → dart-reconcile → allfilings →
+#     allfilings-backfill). ⚠ 같은 group 을 *병렬* 로 4 job 이 선언하면 GitHub 동시성은
+#     "실행 1 + 대기 1" 만 허용 → 새 대기가 이전 대기를 취소 → 매 run 2~3 job 이 1 초 만에
+#     queue 축출(2026-06 allfilings recent.parquet 43h 동결 사고). needs 로 한 번에 한 job 만
+#     group 을 요청하게 해 자가 축출을 차단. 상위 실패가 하위(특히 daily allfilings)를 막지
+#     않도록 하위 if 에 !cancelled() 부여(skip 된 needs 도 통과).
+#   dartOriginal(private repo)은 별 repo 라 무관하나 dart-zip 한 job 이 panel+original 둘 다 다뤄 자연 직렬.
+#   edgar → hf-edgar-push(edgarSync 와 직렬, 본 run 내 dart 체인과 무관해 병렬 유지).
 # ──────────────────────────────────────────────────────────────
 
 on:
@@ -111,7 +117,8 @@ jobs:
           if-no-files-found: ignore
 
   dart-reconcile:
-    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'dart-reconcile' }}
+    needs: dart-zip  # 자가 축출 차단 — 한 번에 한 dart job 만 hf-dart-push 요청
+    if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'dart-reconcile') }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     concurrency:
@@ -138,7 +145,8 @@ jobs:
         run: uv run python -X utf8 -m dartlab.pipeline panelRceptReconcile
 
   allfilings:
-    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings' }}
+    needs: dart-reconcile  # 직렬 체인 3 번째. 상위 실패해도 daily recent.parquet 갱신 위해 !cancelled()
+    if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings') }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     concurrency:
@@ -193,7 +201,8 @@ jobs:
           if-no-files-found: ignore
 
   allfilings-backfill:
-    if: ${{ github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill' }}
+    needs: allfilings  # 직렬 체인 마지막. forward allfilings 끝난 뒤 과거 slab 누적
+    if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill') }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     concurrency:
