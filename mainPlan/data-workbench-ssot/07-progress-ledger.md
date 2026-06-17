@@ -15,19 +15,26 @@
 - [x] 조사·감사(01) 완료
 - [x] 설계(02·03) 완료
 - [x] 경계·페이즈·가드 설계(04·05·06) 완료
-- [ ] **운영자 go 대기** (착수 전)
-- [ ] P1 fetch 코어 + RuntimeCache/RequestDedup 실배선
-- [ ] P2 오리진 레지스트리
-- [ ] P3 source 이관(순서 05 §1)
-- [ ] P4 폴더 구조화 + 가드 + operation/ui.md 박제
+- [x] 운영자 go (2026-06-17, /goal)
+- [x] **P1 fetch 코어 + RuntimeCache/RequestDedup 실배선** — `data/fetch/request.ts`(createDataCore: request·requestParquetRows) + `data/origins/registry.ts`(hf·hfRange 흡수) 신설. 어댑터당 1 코어(createPublicRuntime·createLocalRuntime 생성·filing 주입). 죽어있던 RuntimeCache·RequestDedup 첫 인스턴스화. 커밋 0b0d80c11.
+- [~] **P3 source 이관 진행** — nonRegularFilingsSource 두 함수(loadRecentFilingsForCodes·loadCompanyNonRegularFilings) 완전 이관(자체 Map 2개 폐기 → 코어 캐시·dedup·10분 TTL). 커밋 77bd78160.
+- [ ] P3 잔여 source 이관 — **다음 = reportSource(11 함수·11 Map → 코어, 최대 정리; publicReportPort(core) 양 어댑터)**, 이후 finance·macro·gov·price·productIndex·relations·industryPool·news·naver(news/naver 는 P2 워커 오리진 선행).
+- [ ] **vitest 하니스** — runtime 패키지에 테스트 러너 없음(check=tsc만). 코어 단위테스트(캐시 hit/miss·동시 dedup 1fetch·에러 미캐시·TTL)는 vitest devDep+config+lock 필요 → **동시 세션 lockfile 편집 중이라 보류**. 잠잠해지면 install+테스트(또는 운영자 승인 후). 현재 검증=tsc+svelte-check 0 errors + 이관 함수 로직 불변.
+- [ ] P2 오리진 레지스트리 확장(news·naver 워커·localApi·duckdbHf·landingJson)
+- [ ] P4 폴더 구조화(`cache/`→`data/cache/` 등) + 가드(`tests/audit/checkUiDataWiring` TS AST) + operation/ui.md 박제 + 강행규칙 한 줄
 
-## NEXT (착수 시 첫 스텝)
+## NEXT (재개 시)
 
-1. 운영자 go 확인.
-2. P1: `data/fetch/request.ts` 신설 — `request<T>`·`requestParquetRows`. 내부에 RuntimeCache·RequestDedup·cacheStore·fetchResilient 합성(첫 인스턴스화). vitest 단위(캐시 hit/miss·동시호출 1 fetch·에러 미캐시·TTL).
-3. `createPublicRuntime`·`createLocalRuntime` 에 코어 인스턴스 1개 생성(주입 배선만, source 미이관).
-4. 타입체크 3패키지 0 + 코어 단위 green → 커밋.
-5. P3 첫 이관 후보 = `nonRegularFilingsSource`(이번 세션 신규·dedup 없음, 골든 픽스처 동행).
+1. **reportSource 이관** — 11 load 함수의 `cached()`+11 Map 을 코어 requestParquetRows 로 교체(각 함수 `core` 인자). `publicReportPort(core)` 로 변경 + createPublicRuntime·createLocalRuntime 양쪽 `report: publicReportPort(dataCore)` 전달. 각 함수 `cacheKey=report.{metric}:{code}`. tsc+svelte-check green → 커밋.
+2. financeSource(rowsCache·bundleCache)·macroSource(srcCache)·productIndexSource·gov*·price 순 이관(05 §1).
+3. **vitest 하니스** — lockfile 잠잠할 때 `npm i -D vitest -w @dartlab/ui-runtime` + `vitest.config` + `request.test.ts`(fetch·now 주입 결정론) + `test` script. CI 등록.
+4. P2 오리진 레지스트리 확장(news·naver 워커·localApi·duckdbHf·landingJson) → news/naver/relations/industryPool 이관.
+5. P4 폴더 이동(re-export 다리) + 가드(`tests/audit/checkUiDataWiring` TS AST·baseline) + operation/ui.md 박제 + 강행규칙 한 줄(가드 green 후).
+
+## 검증 메모
+
+- 현재 가용 검증 = `npm run check -w @dartlab/ui-runtime`(tsc) + `npm run check -w @dartlab/ui-surfaces`(svelte-check). 둘 다 0 errors 유지가 이관 게이트.
+- 이관은 변환 로직 불변 + 캐시/dedup 만 코어 위임이 원칙 — 반환 객체 동일(회귀면 = svelte-check + 추후 vitest 골든).
 
 ## 충돌 회피 메모
 
