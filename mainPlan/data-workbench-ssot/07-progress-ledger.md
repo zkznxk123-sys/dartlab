@@ -45,9 +45,19 @@
 
 **작업대 = 완성·테스트·강제·문서·규칙·전소스 채택.** 코어(request·requestParquetRows·requestParquetWholeFile, vitest 5/5) + 오리진 레지스트리(hf·hfRange·newsWorker·naverWorker) + 11소스 이관 + 로컬 게이트 + 가드(baseline 1) + operation.ui + 강행규칙(로컬). 캐시 구현 ~20+ → 코어 단일 SSOT 수렴. RuntimeCache·RequestDedup 죽은코드 → 실배선.
 
+## ✅ 적대검증 + 갭 클로저 (2026-06-17, 전문에이전트 2기)
+
+종결 전 전문에이전트 2기 적대검증 — (A) 이관 회귀 감사, (B) loadJson-arm 판정 + 누락 스윕.
+
+- **A 판정 = finalize 안전.** BLOCKER/MAJOR 0. MINOR = genuine-404 finance/report parquet negative-cache 손실(perf only·예외 케이스), loadFinanceRows landing 경로 별도 폴백코어(중복 fetch·동일 데이터). 둘 다 정확성 아님.
+- **B 판정 ① relations·industryPool = dual-SSOT 가 정답(강제 이관 금지).** loadJson(dartlabData)=IndexedDB 영속+다중오리진 폴백(local↔HF)+stale 폴백 — DataCore(메모리·parquet·단일오리진)와 *형태가 다른 arm*. 코어로 끌면 loadJson 재구현 = clutter([[feedback_always_check_clutter]]). 레지스트리가 `landingJson` OriginId 를 미배선 미래 arm 으로 이미 예약. **결론: DataCore=parquet/HF-binary arm, loadJson=영속 JSON arm — 2 arm 이 완성형.**
+- **B 판정 ② 가드 false-negative 3건 발견 → 클로저 완료(03fa330b4).** priceSource·regularFilingsSource 가 hfRange `readParquetRows` 직접 호출(코어 우회). price 는 자체 LRU `cache`+`inflight` Map 으로 RuntimeCache·RequestDedup 손수 재구현. **이관 완료**: regularFilings 무캐시→코어(panel.regular 30분), price readYearCandles→코어(gov.prices.year 60분)+inflight 폐기. 조립 `cache` 는 seed·팬 변이 차트 상태라 유지(fetch 캐시 아님). **가드 rule 6 추가**(source 안 hfRange 저수준 로더 직접 import 금지·type 허용) — 같은 사각 재발 차단.
+- 검증: runtime tsc·surfaces 0 errors·vitest 5/5·가드 PASS(baseline 1 불변).
+
 ## 잔여 (선택 polish — 작업대 본체 무관)
 
-- **relations·industryPool**: loadJson(dartlabData/cacheStore) 기반 — raw fetch 아니라 가드 미플래그(위반 0). 코어 이관하려면 `landingJson` 오리진 등록 + 코어 `request` 의 `persist` scope(cacheStore 연동) 구현 선행. 저우선(이미 cacheStore 영속+local-fallback 보유).
+- **loadJson in-flight dedup**(B Q2): loadJson 은 dedup 없음 → relations/industryPool 의 per-file Map 은 sync-memo+negative-cache 로 *정당*(중복 아님). 진짜 소거 원하면 loadJson 에 RequestDedup 1개 주입(전 consumer 혜택) 후 Map 축소. landingJson 오리진 정식 배선과 함께 미래 wave(persist scope). 저우선 — 현 상태 회귀 아님.
+- **relations·industryPool**: 위 dual-SSOT 결론대로 *현 상태가 정답*. 코어 강제 이관 안 함.
 - **gov dev `/__gov`** (baseline 1): Vite dev 미들웨어 live-fill, dev 전용·prod 무관. acceptable debt.
 - **P4 폴더 구조화**(03): `cache/`→`data/cache/`·`hfRange`→`data/parquet/`·`origin.ts`→`data/origins/hf.ts`(re-export 다리). 순수 재배치(import churn) — 동시 세션 잠잠할 때. 저우선.
 - **module-local-core fallback 7건**(finance·macro·gov·idx·product·news·naver): legacy 무인자 호출(ui/web localTerminalData·localCompanyPort) 대응. 가드 allowlist. 정답=ui/web/localCompanyPort 에 core 주입(ui-platform-refactor 편승).
