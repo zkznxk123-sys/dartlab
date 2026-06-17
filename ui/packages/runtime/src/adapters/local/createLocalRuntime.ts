@@ -62,7 +62,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		index: createPublicIndexPort(dataCore),
 		filing: localFilingPort(apiBase, caches, dataCore),
 		// 뉴스 = private 라 브라우저 직독 불가 → 퍼블릭 워커(/news) 포트 그대로 재사용(price 와 동일 "공유 자산").
-		news: publicNewsPort(),
+		news: publicNewsPort(dataCore),
 		finance: localFinancePort(dataCore),
 		viewer: localViewerPort(),
 		macro: createHfMacroPort(dataCore),

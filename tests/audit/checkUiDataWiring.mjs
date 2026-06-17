@@ -52,7 +52,9 @@ const CREATE_CORE_ALLOW = [
 	{ file: 'macroSource.ts', fn: 'macroCore' },
 	{ file: 'govPriceSource.ts', fn: 'govCore' },
 	{ file: 'govIndexSource.ts', fn: 'idxCore' },
-	{ file: 'productIndexSource.ts', fn: 'productCore' }
+	{ file: 'productIndexSource.ts', fn: 'productCore' },
+	{ file: 'newsSource.ts', fn: 'newsCore' }, // publicNewsPort() core 미주입 레거시(ui/web) — govCore 동형 폴백.
+	{ file: 'naverPriceSource.ts', fn: 'naverCore' } // loadNaverFresh core 미주입 경로 — govCore 동형 폴백.
 ];
 
 /** posix 상대경로(baseline 비교 안정 — OS 무관). */

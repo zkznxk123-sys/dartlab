@@ -79,7 +79,7 @@ export function publicPricePort(core?: DataCore): PricePort {
 		// dev 미스는 /__gov 라이브 채움, 네이버 fresh 는 /__naver(dev)·CF 프록시(프로덕션) 경로.
 		async initial(code, year) {
 			const c = code.trim();
-			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c, core), loadGovRecent(core), loadNaverFresh(c)]);
+			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c, core), loadGovRecent(core), loadNaverFresh(c, core)]);
 			const tail = recent?.[c] ?? [];
 			if ((gov && gov.length) || tail.length || fresh.length) return seedCandles(c, mergeDedup(gov ?? [], tail, fresh));
 			return loadInitialOHLCV(c, year);
@@ -121,8 +121,9 @@ function publicFinancePort(core: DataCore): FinancePort {
 }
 
 // 로컬 어댑터도 그대로 재사용 — 뉴스는 private 라 브라우저 직독 불가, 퍼블릭·로컬 모두 워커(/news) 단일 경로.
-export function publicNewsPort(): NewsPort {
-	return { forCompany: loadCompanyNews };
+// core 미주입 호출(ui/web 레거시)은 loadCompanyNews 의 모듈 폴백 코어를 쓴다(govCore 동형).
+export function publicNewsPort(core?: DataCore): NewsPort {
+	return { forCompany: (code) => loadCompanyNews(code, core) };
 }
 
 function publicScanPort(shared: PublicRuntimeSharedPorts): ScanPort {
@@ -143,7 +144,7 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		price: publicPricePort(dataCore),
 		index: createPublicIndexPort(dataCore),
 		filing: publicFilingPort(dataCore),
-		news: publicNewsPort(),
+		news: publicNewsPort(dataCore),
 		finance: publicFinancePort(dataCore),
 		viewer: options.viewer,
 		macro: createHfMacroPort(dataCore),

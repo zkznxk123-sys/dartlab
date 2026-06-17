@@ -1,24 +1,20 @@
 // 종목 뉴스 헤드라인 로더 — 네이버 검색 API archive(private, 언론사 저작권)를 CF 워커가 read 토큰으로
 // 서버사이드 read 해 반환(라이브 표시 = 의도된 용도, 공개 벌크 재배포 아님). 브라우저는 private 직독 불가라
 // 워커 경유가 유일 경로 — 공개·로컬 동일(price·macro 와 같은 "공통 배선": 워커/HF 단일 소스).
-//   모든 환경 = CF 워커 /news 라우트(VITE_DARTLAB_NEWS_PROXY). 미설정 시 [] (정직한 미배선).
-// (옛 dev /__news 미들웨어 분기는 구현된 적 없어 로컬을 빈 상태로 만들었다 — 제거하고 워커로 통일.)
+//   모든 환경 = CF 워커 /news 라우트(origins newsWorker). 미설정 시 [] (정직한 미배선).
+// (옛 dev /__news 미들웨어 분기는 구현된 적 없어 로컬을 빈 상태로 만들었다 — newsWorker 게이트로 통일.)
+// 옛 module Map 캐시 + 인라인 fetch 는 폐기 — fetch 코어가 read 레벨 캐시(10분 TTL)·dedup. env 게이트 +
+//   워커 URL 조립은 origins 레지스트리(newsWorker)로 흡수.
 import type { NewsItem } from '@dartlab/ui-contracts';
+import { createDataCore, type DataCore } from '../../../data/fetch/request';
+import { originConfigured } from '../../../data/origins/registry';
 
 const browser = typeof window !== 'undefined';
-const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefined> }).env;
 
-const cache = new Map<string, NewsItem[]>();
-
-// 프로덕션 프록시 URL (CF 워커 /news 라우트). 미설정 시 프로덕션에선 빈배열. origin.ts HF_RESOLVE ·
-// naverPriceSource NAVER_PROXY 와 동일 게이트(가역, 비우면 즉시 미동작).
-const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
-
-/** CF 워커 /news 라우트(공개·로컬 공통). NEWS_PROXY 미설정 시 null(미동작=빈 섹션). */
-function newsEndpoint(code: string): string | null {
-	if (!NEWS_PROXY) return null;
-	return `${NEWS_PROXY}?code=${encodeURIComponent(code)}`;
-}
+// publicNewsPort() 는 ui/web 레거시·로컬/퍼블릭 어댑터가 core 없이 호출하므로 core 미주입 경로 전용 모듈
+// 폴백 코어를 lazy 생성한다(govPriceSource.govCore 동형). 어댑터가 core 를 주입하면 그걸 쓴다.
+let newsFallbackCore: DataCore | null = null;
+const newsCore = (core?: DataCore): DataCore => core ?? (newsFallbackCore ??= createDataCore());
 
 interface NewsFile {
 	code: string;
@@ -27,27 +23,16 @@ interface NewsFile {
 }
 
 /** 종목별 최근 뉴스 (date 내림차순). [] = 미지원·실패·미배선·해당없음. */
-export function loadCompanyNews(code: string): Promise<NewsItem[]> {
+export function loadCompanyNews(code: string, core?: DataCore): Promise<NewsItem[]> {
 	if (!browser) return Promise.resolve([]);
+	if (!originConfigured('newsWorker')) return Promise.resolve([]); // 프록시 미설정 → 빈 섹션(코어 호출 생략)
 	const c = code.trim();
-	const url = newsEndpoint(c);
-	if (!url) return Promise.resolve([]); // 프로덕션 + 프록시 미설정 → 빈 섹션
-	const hit = cache.get(c);
-	if (hit) return Promise.resolve(hit);
-	return (async () => {
-		try {
-			const res = await fetch(url);
-			if (!res.ok) {
-				cache.set(c, []);
-				return [];
-			}
-			const j = (await res.json()) as NewsFile;
-			const items = Array.isArray(j.items) ? j.items : [];
-			cache.set(c, items);
-			return items;
-		} catch {
-			cache.set(c, []);
-			return [];
-		}
-	})();
+	return newsCore(core)
+		.request<NewsFile>({
+			origin: 'newsWorker',
+			path: c,
+			parse: (r) => (r.ok ? (r.json() as Promise<NewsFile>) : Promise.resolve({ code: c } as NewsFile))
+		})
+		.then((j) => (Array.isArray(j.items) ? j.items : []))
+		.catch(() => []);
 }
