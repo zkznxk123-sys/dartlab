@@ -325,9 +325,7 @@ def _catalogDataAsOf(frame: pl.DataFrame) -> str:
     values: list[str] = []
     for column in columns:
         values.extend(
-            str(value)
-            for value in frame.get_column(column).cast(pl.Utf8).to_list()
-            if value not in (None, "")
+            str(value) for value in frame.get_column(column).cast(pl.Utf8).to_list() if value not in (None, "")
         )
     return max(values, default="")
 

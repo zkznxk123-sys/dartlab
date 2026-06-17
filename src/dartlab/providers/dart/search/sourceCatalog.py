@@ -703,7 +703,11 @@ def _fileStats(path: Path, *, source: str) -> tuple[int, str, str]:
                 .collect()
                 .row(0, named=True)
             )
-            return int(row["rowCount"]), normalizeSearchDate(row.get("minDate")), normalizeSearchDate(row.get("maxDate"))
+            return (
+                int(row["rowCount"]),
+                normalizeSearchDate(row.get("minDate")),
+                normalizeSearchDate(row.get("maxDate")),
+            )
         if "period" in columns:
             row = (
                 lf.select(
