@@ -23,7 +23,18 @@
 - [ ] P2 오리진 레지스트리 확장(news·naver 워커·localApi·duckdbHf·landingJson)
 - [ ] P4 폴더 구조화(`cache/`→`data/cache/` 등) + 가드(`tests/audit/checkUiDataWiring` TS AST) + operation/ui.md 박제 + 강행규칙 한 줄
 
-## NEXT (재개 시)
+## 구현 진척 (2026-06-17, 에이전트 돌파 wave)
+
+- [x] **P1 코어 + 죽은 작업대 실배선** (0b0d80c11) — createDataCore(request·requestParquetRows), RuntimeCache·RequestDedup 첫 인스턴스화, 어댑터당 1 코어.
+- [x] **vitest 하니스 + 코어 5 단위테스트** (323aba7df) — 캐시 hit·dedup·에러미캐시·TTL·scope none. 5/5 통과.
+- [x] **P3 이관 4 소스 (~16 캐시 구현 소멸)**: nonRegularFilingsSource 2함수(77bd78160) · reportSource 11 Map factory(6806c1d94) · financeSource rowsCache·bundleCache(a0f7181fa).
+- [x] **P4 가드** (4a76c021c) — tests/audit/checkUiDataWiring.mjs (TS AST) + uiDataWiring.baseline.json(9건 미이관 부채). 신규 위반 fail·이관 시 ratchet.
+- [x] **P4 운영문서 박제** (4b1c9c439) — operation/ui.md 데이터층 SSOT 섹션 + web.json 동기화(artifactSync).
+- [x] **P4 강행규칙** (로컬) — CLAUDE.md(gitignore L-local) UI 데이터 호출 단일 작업대 규칙 1줄.
+
+작업대(코어+테스트+가드+문서+규칙)는 *완성·강제됨*. 남은 건 미이관 소스의 *채택*(가드가 신규 위반 차단·debt ratchet down).
+
+## NEXT (재개 시 — 미이관 9 baseline 부채 ratchet)
 
 1. **reportSource 이관** — 11 load 함수의 `cached()`+11 Map 을 코어 requestParquetRows 로 교체(각 함수 `core` 인자). `publicReportPort(core)` 로 변경 + createPublicRuntime·createLocalRuntime 양쪽 `report: publicReportPort(dataCore)` 전달. 각 함수 `cacheKey=report.{metric}:{code}`. tsc+svelte-check green → 커밋.
 2. financeSource(rowsCache·bundleCache)·macroSource(srcCache)·productIndexSource·gov*·price 순 이관(05 §1).
