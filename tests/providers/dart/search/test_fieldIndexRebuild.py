@@ -91,6 +91,15 @@ def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
             }
         ]
     ).write_parquet(tmp_path / "entityGraphCatalog.parquet")
+    pl.DataFrame(
+        [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:20260615000001#section=0",
+                "text": "유상증자",
+            }
+        ]
+    ).write_parquet(tmp_path / "catalog_snapshot.parquet")
 
     manifest = writeIndexManifest(tmp_path, tier="full", buildCommand="test")
 
@@ -98,6 +107,8 @@ def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
     assert manifest["sourceCanaryPack"][0]["expectedSource"] == "allFilings"
     assert manifest["sourceCanaryPack"][0]["expectedSourceRef"] == "dart:allFilings:20260615000001#section=0"
     assert manifest["sourceCanaryPack"][-1]["target"] == "noAnswer"
+    assert "catalog_snapshot.parquet" in manifest["requiredFiles"]
+    assert "catalog_snapshot.parquet" in manifest["fileHashes"]
     assert "source_manifest_set.json" in manifest["requiredFiles"]
     assert "source_manifest_set.json" in manifest["fileHashes"]
     assert manifest["sourceManifestSetId"] == "abc123"

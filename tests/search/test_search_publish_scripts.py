@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
 import os
@@ -12,6 +13,24 @@ from pathlib import Path
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+def _assignedStringList(path: Path, functionName: str, variableName: str) -> list[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.FunctionDef) or node.name != functionName:
+            continue
+        for stmt in node.body:
+            if not isinstance(stmt, ast.Assign):
+                continue
+            if not any(isinstance(target, ast.Name) and target.id == variableName for target in stmt.targets):
+                continue
+            if not isinstance(stmt.value, ast.List):
+                continue
+            return [
+                elt.value for elt in stmt.value.elts if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+            ]
+    return []
 
 
 def test_search_main_publish_includes_manifest() -> None:
@@ -26,6 +45,20 @@ def test_search_main_publish_includes_manifest() -> None:
     assert "DARTLAB_SEARCH_MAIN_MODE" in text
     assert "prepareEntityGraphCatalogArtifact" in text
     assert "rebuildMainFromCatalog" in text
+
+
+def test_search_main_publish_file_list_includes_catalog_snapshot() -> None:
+    files = _assignedStringList(Path(".github/scripts/search/buildSearchMain.py"), "main", "files")
+
+    assert "catalog_snapshot.parquet" in files
+
+
+def test_push_content_index_file_list_includes_catalog_snapshot() -> None:
+    files = _assignedStringList(
+        Path("src/dartlab/providers/dart/search/fieldIndexRebuild.py"), "pushContentIndex", "names"
+    )
+
+    assert "catalog_snapshot.parquet" in files
 
 
 def test_search_main_lite_catalog_filter_uses_date() -> None:
@@ -266,6 +299,9 @@ def test_search_main_script_catalog_build_subprocess(tmp_path) -> None:
     assert (outDir / "main.npz").exists()
     assert (outDir / "manifest.json").exists()
     assert (outDir / "catalog_snapshot.parquet").exists()
+    manifestData = json.loads((outDir / "manifest.json").read_text(encoding="utf-8"))
+    assert "catalog_snapshot.parquet" in manifestData["requiredFiles"]
+    assert "catalog_snapshot.parquet" in manifestData["fileHashes"]
 
 
 def test_search_delta_script_catalog_mode_requires_current_catalog(tmp_path) -> None:

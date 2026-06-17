@@ -934,6 +934,8 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
                 sourceDataAsOf[source] = dataAsOf
     if (base / "router.json").exists():
         requiredFiles.append("router.json")
+    if (base / "catalog_snapshot.parquet").exists():
+        requiredFiles.append("catalog_snapshot.parquet")
     sourceManifestSet = _loadSourceManifestSet(base / "source_manifest_set.json")
     if sourceManifestSet:
         requiredFiles.append("source_manifest_set.json")
@@ -1084,6 +1086,7 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCur
         "delta_meta.parquet",
         "delta_info.json",
         "router.json",
+        "catalog_snapshot.parquet",
         "source_manifest_set.json",
         ENTITY_GRAPH_CATALOG_NAME,
     ]

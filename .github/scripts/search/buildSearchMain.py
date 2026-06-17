@@ -104,6 +104,7 @@ def main() -> int:
         "main_meta.parquet",
         "main_info.json",
         "router.json",
+        "catalog_snapshot.parquet",
         "source_manifest_set.json",
         "entityGraphCatalog.parquet",
         "manifest.json",
