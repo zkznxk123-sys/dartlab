@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type {
+		AuditFeeYear,
 		CompanyRelations,
+		DebtProfileBundle,
 		FinMode,
 		FinScope,
 		InvestmentPeriod,
@@ -21,6 +23,7 @@
 	import type { Company, Lang, Universe, UniversePercentile } from '../lib/types';
 	import type { TerminalHosts } from '../lib/hosts';
 	import { gradeTone } from '../lib/engine';
+	import { forensicSignals } from '../lib/forensic'; // 풀스크린에 묻힌 결정론 적신호(감사독립성·단기상환벽) 우측 승격
 	import Panel from '../ui/Panel.svelte';
 	import ViewerOverlay from './ViewerOverlay.svelte'; // 얇은 셸 — 본체(ViewerStudio)는 셸 주입 lazy 로더
 	import { viewerEntry } from '../lib/viewerEntry.svelte'; // 중앙 "공시뷰어" 버튼 신호 구독
@@ -137,8 +140,17 @@
 		invPeriods = [];
 		shareholders = null;
 		shPeriods = [];
+		auditFees = null;
+		debtProfile = null;
 		let cancelled = false;
 		// 정기보고서 3패널 — 독립 스트림-인 (가벼운 인력·배당 먼저, 무거운 출자 나중)
+		// 포렌식 적신호 소스(감사보수·부채프로파일) — 임계 초과 시에만 우측 프리뷰 렌더(forensicSignals).
+		rt.report.auditFees(code).then((b) => {
+			if (!cancelled) auditFees = b;
+		});
+		rt.report.debtProfile(code).then((b) => {
+			if (!cancelled) debtProfile = b;
+		});
 		rt.report.workforce(code).then((b) => {
 			if (!cancelled) wf = b ?? [];
 		});
@@ -249,6 +261,21 @@
 	let invTrend = $state<InvestmentTrendYear[]>([]); // 출자 추이 — 다이얼로그 보조(자본 잠김 방향)
 	let invPeriods = $state<InvestmentPeriod[]>([]); // 출자 시계열 — 다이얼로그 기간축/재생
 	let shPeriods = $state<ShareholdersView[]>([]); // 최대주주 시계열 — 다이얼로그 기간축
+	let auditFees = $state<AuditFeeYear[] | null>(null); // 포렌식 — 감사/비감사 보수(독립성 비율)
+	let debtProfile = $state<DebtProfileBundle | null>(null); // 포렌식 — 사채 잔존만기(단기 상환벽)
+	// 최신 연간 현금성자산 (BS 'cash', 조 단위) → 원 환산. 단기 상환벽 신호의 분모.
+	const cashLatestWon = $derived.by<number | null>(() => {
+		const av = finBundle?.views.annual;
+		if (!av) return null;
+		const row = av.statements.BS.find((r) => r.key === 'cash');
+		if (!row) return null;
+		for (let i = row.values.length - 1; i >= 0; i--) {
+			const v = row.values[i];
+			if (v != null) return v * 1e12;
+		}
+		return null;
+	});
+	const forensic = $derived(forensicSignals({ auditFees, debtProfile, cashLatestWon }));
 	const wfLast = $derived(wf.length ? wf[wf.length - 1] : null);
 	// 연간 매출(조) ÷ 인원 = 1인당 매출(억) — finBundle annual 과 연도 매칭 (추가 fetch 없음)
 	const revByYear = $derived.by<Map<string, number>>(() => {
@@ -341,6 +368,23 @@
 		{/each}
 	</div>
 </Panel>
+
+<!-- 포렌식 적신호 — 풀스크린 재무탭에 묻힌 결정론 위험지표(감사독립성·단기상환벽) 승격. 임계 초과만 표시(정상=무표시). -->
+{#if forensic.length}
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '포렌식 적신호', en: 'FORENSIC FLAGS' }} sub={{ kr: '감사·부채 기준 · report', en: 'audit·debt · report' }} flush>
+		{#snippet right()}<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'open financials fullscreen' : '재무 전체화면에서 상세 보기'}>⤢</button>{/snippet}
+		<div class="riskWrap">
+			{#each forensic as f (f.id)}
+				<div class={'riskRow ' + (f.level === 'red' ? 'red' : 'yellow')}>
+					<span class={'riskDot ' + (f.level === 'red' ? 'red' : 'yellow')}></span>
+					<span class="riskName">{lang === 'en' ? f.en : f.kr}</span>
+					<span class="riskDetail mono">{f.val}</span>
+				</div>
+			{/each}
+		</div>
+		<div class="finNote">{lang === 'en' ? 'breached thresholds only — not a completeness check' : '임계 초과만 표시 · 전체 점검 아님'}</div>
+	</Panel>
+{/if}
 
 <!-- PERCENTILE -->
 {#if pc && pc.metrics.length}

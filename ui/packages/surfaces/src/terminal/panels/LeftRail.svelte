@@ -5,6 +5,7 @@
 	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
+	import Watchlist from './Watchlist.svelte'; // 공시 워치 — 큐레이션 종목 신선도 모니터 (recentMap 공유)
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
 
@@ -115,6 +116,10 @@
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {/if}
+
+<!-- 공시 워치 — 큐레이션 종목 집합 + 절대시각 신선도(헤더 ☆ 로 추가). 매크로 펄스 아래, 히트맵 위. -->
+<Watchlist {eng} {lang} {active} {onPick} {recentMap} />
+
 <Panel {lang} className="eIndustry" prov="real" title={{ kr: '섹터 히트맵', en: 'SECTOR HEATMAP' }} sub={{ kr: '평균 1M · 클릭=필터', en: 'avg 1M · click to filter' }}>
 	<div class="sectorGrid">
 		{#each sectors as x (x.id)}
