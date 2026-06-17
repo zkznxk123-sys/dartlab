@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "qualityGate": {
     "minimumObservations": 24,
     "preferredObservations": 48,
@@ -7,19 +7,50 @@
     "minimumR2ForBetaDisplay": 0.12,
     "maxStaleDays": 45,
     "requiredCompanyEvidenceCoverage": 0.5,
-    "blockedStatuses": ["lookahead", "staleDriver", "missingPriceOverlap", "missingCompanyEvidence"]
+    "blockedStatuses": ["lookahead", "staleDriver", "missingPriceOverlap"]
   },
-  "exampleResult": {
-    "companyCode": "005930",
-    "driverId": "USDKRW",
-    "windowMonths": 48,
-    "lagMonths": 1,
-    "nObs": 44,
-    "corr": 0.41,
-    "r2": 0.17,
-    "coverage": "sectorAndPartialCompany",
-    "missingEvidence": ["FX 손익 주석 구조화"],
-    "status": "qualitativeOnly",
-    "displayRule": "상관과 방향성은 표시하되 beta 숫자는 숨긴다."
-  }
+  "examples": [
+    {
+      "companyCode": "005930",
+      "driverId": "USDKRW",
+      "windowMonths": 48,
+      "lagMonths": 1,
+      "nObs": 44,
+      "corr": 0.41,
+      "rSquared": 0.17,
+      "coverage": "sectorAndPartialCompany",
+      "companyEvidenceCoverage": 0.67,
+      "missingEvidence": ["FX 손익 주석 구조화"],
+      "status": "open",
+      "displayRule": "품질 라벨과 함께 beta/corr를 표시할 수 있다."
+    },
+    {
+      "companyCode": "005930",
+      "driverId": "DCOILWTICO",
+      "windowMonths": 36,
+      "lagMonths": 0,
+      "nObs": 32,
+      "corr": -0.28,
+      "rSquared": 0.08,
+      "coverage": "sectorOnly",
+      "companyEvidenceCoverage": 0.25,
+      "missingEvidence": ["원재료 비중", "가격 전가력"],
+      "status": "qualitativeOnly",
+      "displayRule": "전파 경로는 표시하되 beta 숫자는 숨긴다."
+    },
+    {
+      "companyCode": "005930",
+      "driverId": "BASE_RATE",
+      "windowMonths": 18,
+      "lagMonths": 3,
+      "nObs": 17,
+      "corr": 0.13,
+      "rSquared": 0.02,
+      "coverage": "missing",
+      "companyEvidenceCoverage": 0.0,
+      "missingEvidence": ["단기차입금", "차입금 만기", "이자보상배율"],
+      "status": "blocked",
+      "displayRule": "표본 부족 또는 stale/lookahead면 분석 block을 닫는다."
+    }
+  ]
 }

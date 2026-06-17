@@ -20,7 +20,6 @@ export interface MacroDriverView {
 	directionSemantics: string;
 	defaultLagMonths: number | null;
 	relevance: 'primary' | 'secondary' | 'context';
-	pressureScore: number;
 	pressureLevel: 'high' | 'medium' | 'low' | 'blocked';
 	pressureReason: string;
 	coMovement: {
@@ -36,6 +35,7 @@ export interface MacroDriverView {
 	};
 	transform: string;
 	sourceLineage: string;
+	qualityHint: string;
 }
 
 export interface MacroTransmissionEdgeView {
@@ -82,8 +82,16 @@ export interface MacroScenarioView {
 	driverId: string;
 	shock: string;
 	firstBreak: string;
+	expectedDirection: string;
+	impactedFinancialLine: string;
+	valuationLever: string;
+	falsifier: string;
 	requiredEvidence: string[];
 	nextSurface: string;
+	readiness: {
+		status: 'ready' | 'needsEvidence' | 'blocked';
+		reason: string;
+	};
 }
 
 export interface MacroLensSnapshot {
@@ -114,6 +122,10 @@ export interface MacroLensSnapshot {
 	exposureQuality: {
 		status: 'qualitativeOnly' | 'blocked';
 		reason: string;
+		nObs: number | null;
+		rSquared: number | null;
+		window: string | null;
+		lagMonths: number | null;
 		coverage: 'sectorOnly' | 'missing';
 	};
 	falsifiers: MacroFalsifierView[];
@@ -349,12 +361,12 @@ const EDGE_TEMPLATES: EdgeTemplate[] = [
 	}
 ];
 
-const SCENARIOS: MacroScenarioView[] = [
-	{ id: 'fx10', label: '원/달러 +10%', driverId: 'USDKRW', shock: 'USDKRW +10%', firstBreak: '수출 환산매출 또는 수입원가', requiredEvidence: ['해외 매출 비중', '외화 원가', 'FX 손익'], nextSurface: '재무제표 분석 · 매출/원가/주석' },
-	{ id: 'rate100', label: '기준금리 +100bp', driverId: 'BASE_RATE', shock: 'BASE_RATE +1.0%p', firstBreak: '이자비용과 할인율', requiredEvidence: ['부채비율', '단기차입', '이자보상배율'], nextSurface: '재무제표 분석 · 안정성/현금흐름' },
-	{ id: 'oil30', label: 'WTI +30%', driverId: 'DCOILWTICO', shock: 'WTI +30%', firstBreak: '원재료·연료비 또는 에너지 매출', requiredEvidence: ['원재료 비중', '가격 전가력', '재고'], nextSurface: '재무제표 분석 · 마진/재고' },
-	{ id: 'exportDown', label: '수출 YoY -10%', driverId: 'EXPORT', shock: 'EXPORT YoY -10%', firstBreak: '외부수요와 가동률', requiredEvidence: ['수출 매출', '수주', '재고'], nextSurface: '산업/동종업종 비교' },
-	{ id: 'hy200', label: 'HY spread +200bp', driverId: 'BAMLH0A0HYM2', shock: 'HY spread +2.0%p', firstBreak: '위험프리미엄과 차입 접근성', requiredEvidence: ['신용등급', '만기', '현금 보유'], nextSurface: '신용/리스크 경고등' }
+const SCENARIOS: Omit<MacroScenarioView, 'readiness'>[] = [
+	{ id: 'fx10', label: '원/달러 +10%', driverId: 'USDKRW', shock: 'USDKRW +10%', firstBreak: '수출 환산매출 또는 수입원가', expectedDirection: '수출 환산매출과 달러 원가가 동시에 움직임', impactedFinancialLine: '매출 성장률 / 매출총이익률', valuationLever: 'growth / margin', falsifier: '달러 원가·부채·헤지 정책 확인 전 방향 단정 금지', requiredEvidence: ['해외 매출 비중', '외화 원가', 'FX 손익'], nextSurface: '재무제표 분석 · 매출/원가/주석' },
+	{ id: 'rate100', label: '기준금리 +100bp', driverId: 'BASE_RATE', shock: 'BASE_RATE +1.0%p', firstBreak: '이자비용과 할인율', expectedDirection: '차입 의존 기업에는 비용·할인율 부담', impactedFinancialLine: '이자비용 / 순이익 / multiple', valuationLever: 'discountRate', falsifier: '순현금·고정금리 장기차입이면 약화', requiredEvidence: ['부채비율', '단기차입', '이자보상배율'], nextSurface: '재무제표 분석 · 안정성/현금흐름' },
+	{ id: 'oil30', label: 'WTI +30%', driverId: 'DCOILWTICO', shock: 'WTI +30%', firstBreak: '원재료·연료비 또는 에너지 매출', expectedDirection: '에너지는 매출 순풍, 제조·물류는 원가 부담 가능', impactedFinancialLine: '매출총이익률 / 원가율', valuationLever: 'margin', falsifier: '가격 전가·재고평가·원가 계약 확인 전 단정 금지', requiredEvidence: ['원재료 비중', '가격 전가력', '재고'], nextSurface: '재무제표 분석 · 마진/재고' },
+	{ id: 'exportDown', label: '수출 YoY -10%', driverId: 'EXPORT', shock: 'EXPORT YoY -10%', firstBreak: '외부수요와 가동률', expectedDirection: '수출 제조업 매출·가동률 압박 가능', impactedFinancialLine: '매출 성장률 / 재고 / 가동률', valuationLever: 'growth', falsifier: '시장점유율·제품 믹스·단가가 반대 방향이면 약화', requiredEvidence: ['수출 매출', '수주', '재고'], nextSurface: '산업/동종업종 비교' },
+	{ id: 'hy200', label: 'HY spread +200bp', driverId: 'BAMLH0A0HYM2', shock: 'HY spread +2.0%p', firstBreak: '위험프리미엄과 차입 접근성', expectedDirection: '레버리지 기업의 요구수익률·차입 접근성 부담', impactedFinancialLine: '신용스프레드 / 금융비용 / multiple', valuationLever: 'riskPremium', falsifier: '현금 보유·모회사 지원·만기 여유 확인 전 단정 금지', requiredEvidence: ['신용등급', '만기', '현금 보유'], nextSurface: '신용/리스크 경고등' }
 ];
 
 const CORE_DRIVER_IDS = ['USDKRW', 'BASE_RATE', 'CPI', 'EXPORT', 'DGS10', 'BAMLH0A0HYM2', 'DCOILWTICO'];
@@ -429,10 +441,12 @@ function coMovementOf(cm?: CoMover): MacroDriverView['coMovement'] | null {
 	};
 }
 
-function pressureLevel(score: number, freshness: MacroDriverView['freshness']): MacroDriverView['pressureLevel'] {
+function pressureLevel(relevance: MacroDriverView['relevance'], m: MacroLatest, coMovement: MacroDriverView['coMovement'] | null, freshness: MacroDriverView['freshness']): MacroDriverView['pressureLevel'] {
 	if (freshness.status === 'stale') return 'blocked';
-	if (score >= 70) return 'high';
-	if (score >= 45) return 'medium';
+	if (relevance === 'primary' && coMovement?.status === 'candidate') return 'high';
+	if (relevance === 'primary') return changeIntensity(m) >= 10 ? 'high' : 'medium';
+	if (relevance === 'secondary' && coMovement?.status === 'candidate') return 'medium';
+	if (relevance === 'secondary' && changeIntensity(m) >= 12) return 'medium';
 	return 'low';
 }
 
@@ -441,6 +455,14 @@ function pressureReason(relevance: MacroDriverView['relevance'], m: MacroLatest,
 	const chg = m.chg == null ? '최근 변화 없음' : `최근 변화 ${fmtChange(m)}`;
 	const co = coMovement ? coMovement.label : '동행상관 미확인';
 	return `${rel} · ${chg} · ${co} · ${freshness.label}`;
+}
+
+function qualityHintOf(relevance: MacroDriverView['relevance'], coMovement: MacroDriverView['coMovement'] | null, freshness: MacroDriverView['freshness']): string {
+	if (freshness.status === 'stale') return 'blocked: stale macro observation';
+	if (coMovement?.status === 'candidate') return 'co-movement candidate; company evidence still required';
+	if (relevance === 'primary') return 'sector path available; regression quality pending';
+	if (relevance === 'secondary') return 'macro context; company-specific exposure pending';
+	return 'context only';
 }
 
 function phaseView(market: 'KR' | 'US', side?: MacroSide): MacroPhaseView | null {
@@ -524,11 +546,8 @@ function buildDrivers(latest: MacroLatest[], industry: string, coMovers: CoMover
 			relevant.has(def.id) ? 'primary' : CORE_DRIVER_IDS.includes(def.id) ? 'secondary' : 'context';
 		const freshness = freshnessOf(def, m.d);
 		const coMovement = coMovementOf(coById.get(def.id));
-		const relevanceScore = relevance === 'primary' ? 42 : relevance === 'secondary' ? 25 : 8;
-		const movementScore = coMovement ? coMovement.status === 'candidate' ? 18 : 7 : 0;
-		const freshScore = freshness.status === 'fresh' ? 8 : freshness.status === 'watch' ? 3 : freshness.status === 'stale' ? -28 : 0;
-		const pressureScore = Math.max(0, Math.min(100, Math.round(relevanceScore + changeIntensity(m) + movementScore + freshScore)));
 		const transform = transformOf(def);
+		const level = pressureLevel(relevance, m, coMovement, freshness);
 		return {
 			id: def.id,
 			label: def.kr,
@@ -543,17 +562,20 @@ function buildDrivers(latest: MacroLatest[], industry: string, coMovers: CoMover
 			directionSemantics: meta.direction,
 			defaultLagMonths: meta.lag,
 			relevance,
-			pressureScore,
-			pressureLevel: pressureLevel(pressureScore, freshness),
+			pressureLevel: level,
 			pressureReason: pressureReason(relevance, m, coMovement, freshness),
 			coMovement,
 			freshness,
 			transform,
-			sourceLineage: `${source} · obs ${fmtDate(m.d)} · ${transform} · ${freshness.label}`
+			sourceLineage: `${source} · obs ${fmtDate(m.d)} · ${transform} · ${freshness.label}`,
+			qualityHint: qualityHintOf(relevance, coMovement, freshness)
 		};
 	}).sort((a, b) => {
 		const r = { primary: 0, secondary: 1, context: 2 };
-		return r[a.relevance] - r[b.relevance] || b.pressureScore - a.pressureScore || a.group.localeCompare(b.group) || a.label.localeCompare(b.label);
+		const p = { high: 0, medium: 1, low: 2, blocked: 3 };
+		const ac = a.coMovement ? Math.abs(a.coMovement.corr) : 0;
+		const bc = b.coMovement ? Math.abs(b.coMovement.corr) : 0;
+		return r[a.relevance] - r[b.relevance] || p[a.pressureLevel] - p[b.pressureLevel] || bc - ac || a.group.localeCompare(b.group) || a.label.localeCompare(b.label);
 	});
 }
 
@@ -562,14 +584,14 @@ function buildEdges(co: Company, drivers: MacroDriverView[]): MacroTransmissionE
 	const sectorLabel = co.sector.kr || co.industry;
 	const selected = EDGE_TEMPLATES
 		.filter((e) => e.sectors.includes('all') || e.sectors.includes(co.industry))
-		.filter((e) => driverById.has(e.driverId))
 		.slice(0, 8);
 	return selected.map((e, i) => {
-		const driver = driverById.get(e.driverId)!;
+		const driver = driverById.get(e.driverId);
+		const blocked = !driver;
 		return {
 			id: `${e.driverId}-${e.channel}-${i}`,
 			driverId: e.driverId,
-			driverLabel: driver.label,
+			driverLabel: driver?.label ?? e.driverId,
 			market: e.market,
 			sectorKey: co.industry,
 			sectorLabel,
@@ -578,11 +600,11 @@ function buildEdges(co: Company, drivers: MacroDriverView[]): MacroTransmissionE
 			valuationLever: e.valuationLever,
 			sign: e.sign,
 			lagMonths: e.lagMonths,
-			confidence: e.confidence,
+			confidence: blocked ? 'blocked' : e.confidence,
 			evidenceLevel: e.evidenceLevel,
 			requiredCompanyEvidence: e.requiredCompanyEvidence,
-			sourceRefs: [driver.seriesId, 'sector prior', 'company checkpoints'],
-			note: e.note
+			sourceRefs: [driver?.seriesId ?? e.driverId, blocked ? 'notWiredYet' : 'sector prior', 'company checkpoints'],
+			note: blocked ? `${e.note} 최신 시계열이 MacroPort에 없어서 전파 edge는 차단 상태로만 표시한다.` : e.note
 		};
 	});
 }
@@ -611,7 +633,7 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 			driverId: d.id,
 			label: `${d.label} 기준일 stale`,
 			severity: 'warning',
-			detail: `${d.sourceLineage}. 최신 국면 판단과 압력 점수는 낮춰서 읽는다.`,
+			detail: `${d.sourceLineage}. 최신 국면 판단과 전파 경로 우선순위는 낮춰서 읽는다.`,
 			sourceRef: d.sourceLineage
 		});
 	}
@@ -642,6 +664,28 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 	return out;
 }
 
+function buildScenarios(drivers: MacroDriverView[], edges: MacroTransmissionEdgeView[]): MacroScenarioView[] {
+	const driverById = new Map(drivers.map((d) => [d.id, d]));
+	const edgeByDriver = new Map(edges.map((e) => [e.driverId, e]));
+	return SCENARIOS.map((s) => {
+		const driver = driverById.get(s.driverId);
+		const edge = edgeByDriver.get(s.driverId);
+		const missing = edge?.requiredCompanyEvidence ?? s.requiredEvidence;
+		const readiness: MacroScenarioView['readiness'] =
+			!driver ? { status: 'blocked', reason: 'driver observation missing or not wired' } :
+			edge?.confidence === 'blocked' ? { status: 'blocked', reason: 'transmission edge is not wired' } :
+			driver.coMovement?.status === 'candidate' ? { status: 'needsEvidence', reason: 'co-movement exists; company evidence and regression quality pending' } :
+			{ status: 'needsEvidence', reason: 'sector path only; company evidence required' };
+		return {
+			...s,
+			requiredEvidence: missing,
+			impactedFinancialLine: edge?.financialLine ?? s.impactedFinancialLine,
+			valuationLever: edge?.valuationLever ?? s.valuationLever,
+			readiness
+		};
+	}).slice(0, 5);
+}
+
 export function buildMacroLensSnapshot(args: {
 	co: Company;
 	macro: MacroFile | null;
@@ -651,9 +695,10 @@ export function buildMacroLensSnapshot(args: {
 }): MacroLensSnapshot {
 	const { co, macro, macroLatest, sectorTailwinds, coMovers } = args;
 	const drivers = buildDrivers(macroLatest, co.industry, coMovers);
+	const priorityRank = { high: 0, medium: 1, low: 2, blocked: 3 };
 	const topPressures = [...drivers]
 		.filter((d) => d.relevance !== 'context' && d.pressureLevel !== 'blocked')
-		.sort((a, b) => b.pressureScore - a.pressureScore)
+		.sort((a, b) => priorityRank[a.pressureLevel] - priorityRank[b.pressureLevel])
 		.slice(0, 3);
 	const edges = buildEdges(co, drivers);
 	const missing: string[] = [];
@@ -690,10 +735,14 @@ export function buildMacroLensSnapshot(args: {
 		exposureQuality: {
 			status: 'qualitativeOnly',
 			reason: '회사별 회귀/민감도는 nObs/R²/window/lag/coverage 공개 계약 전까지 정성 경로만 표시',
+			nObs: null,
+			rSquared: null,
+			window: null,
+			lagMonths: null,
 			coverage: 'sectorOnly'
 		},
 		falsifiers: buildFalsifiers(coMovers, drivers, macro),
-		scenarios: SCENARIOS.filter((s) => drivers.some((d) => d.id === s.driverId)).slice(0, 5),
+		scenarios: buildScenarios(drivers, edges),
 		sourceRefs: [
 			MACRO_ATTRIBUTION,
 			'dashboards/macro.json',

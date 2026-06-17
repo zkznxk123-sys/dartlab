@@ -1,6 +1,43 @@
 # 06. 진행 원장
 
-상태: v0.2
+상태: v0.3
+
+---
+
+## 2026-06-18
+
+### v0.3 — Phase 1~4 구현 완료
+
+완료:
+
+- 터미널 Macro Lens 다이얼로그가 `국면`, `지표·Driver`, `전파 지도`, `시나리오`, `출처·한계` 5탭으로 구현됐다.
+- 기존 마켓 펄스, KPI ticker, 차트 ECON 메뉴/리본 입구를 재사용한다.
+- `MacroLensSnapshot` view-model이 driver, transmission edge, company checkpoint, falsifier, scenario, source/limit를 만든다.
+- UI의 단일 숫자 pressure score 노출을 제거했다. 대신 `우선 경로`, `품질`, `company evidence`, `readiness`를 표시한다.
+- 모바일/좁은 폭에서도 driver row의 ECON 토글 액션이 사라지지 않게 했다.
+- `tests/_attempts/macroLensEngine/`가 샘플 계약 저장소에서 순수 실행 proof로 강화됐다.
+  - `macroLensEngine.py`: driver registry + transmission edge + lagged co-movement + exposure quality + scenario readiness 조립.
+  - `test_macroLensEngine.py`: 최소 driver/sector, lag/R² 후보, partial evidence, look-ahead, stale, source/date/value lineage, snapshot shape 검증.
+  - `validateSamples.py`: JSON 필드 검증 + 실제 attempt snapshot 생성 검증.
+  - sample JSON v2: `confidence`, `rSquared`, `sourceSeriesId`, `sourceRefs`, alias registry를 production 후보 이름으로 고정.
+
+검증:
+
+- `python -X utf8 tests/_attempts/macroLensEngine/validateSamples.py` 통과.
+- `python -X utf8 -m pytest tests/_attempts/macroLensEngine/test_macroLensEngine.py -q` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning만 남음).
+
+판정:
+
+- Phase 1~3 터미널 제품 단위와 Phase 4 attempts proof는 완료.
+- `macro.transmission`과 `analysis.macroExposure`의 `src/dartlab` 승격은 아직 하지 않는다. 승격 전에는 attempts 계약을 production API로 옮기고 architecture guard를 통과해야 한다.
+
+NEXT:
+
+1. `macro.transmission` 축 후보를 `src/dartlab/macro`에 추가한다. 반환은 `drivers`, `edges`, `regimeEvidence`, `sourceRefs`, `missing`으로 제한하고 회사 import 0을 지킨다.
+2. 기존 `Company.analysis("macro", "매크로민감도")` 표면을 유지한 채 `analysis.macroExposure` 품질 라벨(`nObs/rSquared/window/frequency/lag/coverage/status/blockedReason/missingEvidence/sourceRef`)을 보강한다. 후보 문구였던 `company.analysis("macroExposure")`는 현재 registry와 맞지 않으므로 바로 쓰지 않는다.
+3. source/date/value lineage는 실제 observation artifact 경로, 원본 series id, 기준일, 값, 단위, asOf policy까지 검증한다.
+4. src 승격 시 targeted test + `dartlabGuard.py quick` + architecture/cycle guard를 통과시킨다.
 
 ---
 

@@ -26,7 +26,8 @@
 	const signText: Record<string, string> = { positive: '+', negative: '-', mixed: '±', unknown: '?' };
 	const confidenceText: Record<string, string> = { high: 'HIGH', medium: 'MED', low: 'LOW', blocked: 'BLOCK' };
 	const severityCls: Record<string, string> = { info: 'info', warning: 'warn', blocker: 'block' };
-	const pressureText: Record<string, string> = { high: 'HIGH', medium: 'MED', low: 'LOW', blocked: 'BLOCK' };
+	const pressureText: Record<string, string> = { high: '핵심', medium: '검토', low: '맥락', blocked: '차단' };
+	const readinessText: Record<string, string> = { ready: 'READY', needsEvidence: 'EVIDENCE', blocked: 'BLOCK' };
 	const relevantDrivers = $derived(snapshot.drivers.filter((d) => d.relevance !== 'context').slice(0, 16));
 	const contextDrivers = $derived(snapshot.drivers.filter((d) => d.relevance === 'context').slice(0, 18));
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
@@ -72,9 +73,18 @@
 				<button class:active={tab === t.k} onclick={() => onTab(t.k)}>{T(t.kr, t.en)}</button>
 			{/each}
 		</div>
+		<div class="mlAlwaysNote">
+			{T('매크로 렌즈는 배치 데이터 기반의 전파 경로 분석입니다. 상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않습니다.', 'Macro Lens is batch-data transmission analysis. Correlation is not causation, and indicator moves do not guarantee company results.')}
+		</div>
 
 		<div class="mlBody">
 			{#if tab === 'regime'}
+				<section class="mlFour">
+					<div><span>1</span><b>{T('국면', 'Regime')}</b><em>{snapshot.marketPhase.kr?.label ?? 'KR —'} / {snapshot.marketPhase.us?.label ?? 'US —'}</em></div>
+					<div><span>2</span><b>{T('근거 지표', 'Driver')}</b><em>{snapshot.topPressures[0]?.label ?? T('계산 전', 'pending')} · {snapshot.topPressures[0]?.pressureReason ?? T('driver 없음', 'no driver')}</em></div>
+					<div><span>3</span><b>{T('전파 경로', 'Path')}</b><em>{snapshot.transmissionEdges[0] ? `${snapshot.transmissionEdges[0].driverLabel} → ${snapshot.transmissionEdges[0].financialLine}` : T('sector edge 없음', 'no sector edge')}</em></div>
+					<div><span>4</span><b>{T('약한 점', 'Limit')}</b><em>{snapshot.falsifiers[0]?.label ?? snapshot.exposureQuality.reason}</em></div>
+				</section>
 				<section class="mlGrid two">
 					{#each [snapshot.marketPhase.kr, snapshot.marketPhase.us] as p (p?.market ?? 'x')}
 						<div class="mlBlock">
@@ -91,12 +101,12 @@
 						</div>
 					{/each}
 				</section>
-				<section class="mlGrid pressureGrid" aria-label="Top Macro Pressure">
+				<section class="mlGrid pressureGrid" aria-label="Priority Macro Paths">
 					{#each snapshot.topPressures as d (d.id)}
 						<button class={'mlPressure ' + d.pressureLevel} onclick={() => onTab('drivers')}>
-							<div class="mlPressureTop"><span class="mlBlockK">{T('핵심 압력', 'Top pressure')}</span><b>{d.label}</b><em>{pressureText[d.pressureLevel]}</em></div>
-							<div class="mlGauge"><i style={`width:${d.pressureScore}%`}></i></div>
+							<div class="mlPressureTop"><span class="mlBlockK">{T('우선 경로', 'Priority path')}</span><b>{d.label}</b><em>{pressureText[d.pressureLevel]}</em></div>
 							<p>{d.pressureReason}</p>
+							<div class="mlMiniList"><span>{d.qualityHint}</span></div>
 						</button>
 					{/each}
 				</section>
@@ -119,26 +129,26 @@
 						<div><b>{focusDriver.label}</b><span>{focusDriver.directionSemantics}</span></div>
 					</section>
 				{/if}
-				<section class="mlGrid pressureGrid" aria-label="Top Macro Pressure">
+				<section class="mlGrid pressureGrid" aria-label="Priority Macro Paths">
 					{#each snapshot.topPressures as d (d.id)}
 						<div class={'mlPressure ' + d.pressureLevel}>
-							<div class="mlPressureTop"><span class="mlBlockK">PRESSURE</span><b>{d.label}</b><em>{d.pressureScore}</em></div>
-							<div class="mlGauge"><i style={`width:${d.pressureScore}%`}></i></div>
+							<div class="mlPressureTop"><span class="mlBlockK">{T('우선 경로', 'Priority path')}</span><b>{d.label}</b><em>{pressureText[d.pressureLevel]}</em></div>
 							<p>{d.pressureReason}</p>
+							<div class="mlMiniList"><span>{d.qualityHint}</span></div>
 						</div>
 					{/each}
 				</section>
 				<div class="mlDriverTable">
 					<div class="mlDriverHead">
-						<span>{T('Driver', 'Driver')}</span><span>{T('압력', 'Pressure')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
+						<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
 					</div>
 					{#each visibleDrivers as d (d.id)}
 						<div class={'mlDriverRow ' + d.relevance} class:focused={focusId === d.id}>
 							<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
-							<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{d.pressureScore}</b><em>{pressureText[d.pressureLevel]}</em></span>
+							<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText[d.pressureLevel]}</b><em>{d.qualityHint}</em></span>
 							<span class="mono">{d.value}</span>
 							<span class="mono">{d.change}</span>
-							<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em>{/if}</span>
+							<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em><small>{T('동행상관 · 인과 아님', 'co-movement · not causal')}</small>{/if}</span>
 							<span>
 								<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
 									<LineChart size={12} />{activeEcon.includes(d.id) ? 'ON' : econBlocked(d.id) ? 'MAX' : 'ECON'}
@@ -198,13 +208,20 @@
 			{:else if tab === 'scenario'}
 				<section class="mlGrid scenarioGrid">
 					{#each snapshot.scenarios as s (s.id)}
-						<div class="mlScenario">
-							<span class="mlBlockK">{s.shock}</span>
+						<div class={'mlScenario ' + s.readiness.status}>
+							<div class="mlPressureTop"><span class="mlBlockK">{s.shock}</span><em>{readinessText[s.readiness.status]}</em></div>
 							<b>{s.label}</b>
 							<p>{T('먼저 흔들리는 곳', 'First break')}: {s.firstBreak}</p>
+							<p>{T('예상 방향', 'Expected direction')}: {s.expectedDirection}</p>
+							<div class="mlMiniList">
+								<span>{s.impactedFinancialLine}</span>
+								<span>{s.valuationLever}</span>
+							</div>
 							<div class="mlEvidence">
 								{#each s.requiredEvidence as x (x)}<span>{x}</span>{/each}
 							</div>
+							<p>{T('반증', 'Falsifier')}: {s.falsifier}</p>
+							<div class="mlSrc warn">{s.readiness.reason}</div>
 							<em>{s.nextSurface}</em>
 						</div>
 					{/each}
@@ -220,6 +237,7 @@
 						<div class="mlBlockTop"><span class="mlBlockK">{T('한계', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
 						{#each snapshot.missing as m (m)}<div class="mlSrc warn">{m}</div>{/each}
 						<div class="mlSrc warn">{snapshot.exposureQuality.reason}</div>
+						<div class="mlSrc warn">nObs/R²/window/lag: {snapshot.exposureQuality.nObs ?? '—'} / {snapshot.exposureQuality.rSquared ?? '—'} / {snapshot.exposureQuality.window ?? '—'} / {snapshot.exposureQuality.lagMonths ?? '—'}</div>
 						<div class="mlSrc">{T('상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않는다.', 'Correlation is not causation; indicator moves do not guarantee company results.')}</div>
 					</div>
 				</section>
@@ -242,6 +260,7 @@
 	.mlTabs button { border: 1px solid transparent; border-bottom: 0; background: transparent; color: var(--dl-ink-dim, #5b6473); font-size: 11px; font-weight: 700; padding: 6px 10px; cursor: pointer; border-radius: 4px 4px 0 0; }
 	.mlTabs button:hover { color: var(--amber); }
 	.mlTabs button.active { color: var(--dl-ink); border-color: var(--dl-line, #1b2130); background: var(--dl-bg-raised, #0e141f); }
+	.mlAlwaysNote { padding: 6px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); color: var(--dl-ink-dim, #5b6473); background: rgba(251,146,60,.035); font-size: 10.5px; line-height: 1.4; }
 	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 	.mlGrid { display: grid; gap: 10px; }
 	.mlGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -249,6 +268,11 @@
 	.scenarioGrid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 	.pressureGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.mlBlock, .mlEdge, .mlScenario, .mlFocus { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 10px; min-width: 0; }
+	.mlFour { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+	.mlFour div { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 8px; display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 6px; row-gap: 2px; align-items: start; }
+	.mlFour span { grid-row: span 2; width: 18px; height: 18px; border: 1px solid var(--dl-line, #1b2130); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--amber); font-family: var(--dl-font-mono); font-size: 10px; }
+	.mlFour b { min-width: 0; font-size: 10.5px; }
+	.mlFour em { min-width: 0; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
 	.mlPressure { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; min-width: 0; text-align: left; color: var(--dl-ink); cursor: pointer; }
 	.mlPressure.high { border-color: rgba(52,211,153,.42); background: rgba(52,211,153,.045); }
 	.mlPressure.medium { border-color: rgba(251,146,60,.36); background: rgba(251,146,60,.04); }
@@ -258,8 +282,6 @@
 	.mlPressureTop b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlPressureTop em { font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; color: var(--amber); }
 	.mlPressure p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.38; }
-	.mlGauge { height: 4px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 7px; }
-	.mlGauge i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--amber), var(--good)); }
 	.mlBlockTop, .mlEdgeTop { display: flex; align-items: center; gap: 7px; min-width: 0; }
 	.mlBlockK { font-size: 9px; font-weight: 800; color: var(--amber); letter-spacing: .06em; text-transform: uppercase; }
 	.mlBig { margin-top: 8px; font-size: 20px; font-weight: 800; }
@@ -288,15 +310,16 @@
 	.mlDriverRow.focused, .mlEdge.focused { outline: 1px solid var(--amber); outline-offset: -1px; }
 	.mlDriverName { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
 	.mlDriverName em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlDriverScore { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
-	.mlDriverScore em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8.5px; font-family: var(--dl-font-mono); }
-	.mlScore { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 18px; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; font-family: var(--dl-font-mono); font-size: 10px; }
+	.mlDriverScore { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+	.mlDriverScore em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8.5px; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlScore { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 18px; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; font-family: var(--dl-font-mono); font-size: 10px; padding: 0 4px; }
 	.mlScore.high { color: var(--good); border-color: rgba(52,211,153,.45); }
 	.mlScore.medium { color: var(--amber); border-color: rgba(251,146,60,.45); }
 	.mlScore.low { color: var(--dl-ink-dim, #5b6473); }
 	.mlScore.blocked { color: var(--dn); border-color: rgba(248,113,113,.45); }
 	.mlDriverLine { display: flex; flex-direction: column; gap: 1px; min-width: 0; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.25; }
 	.mlDriverLine em { color: var(--amber); font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlDriverLine small { width: max-content; max-width: 100%; color: var(--warn); border: 1px solid rgba(251,146,60,.35); border-radius: 999px; padding: 1px 5px; font-size: 8.5px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlIconBtn { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 72px; border: 1px solid var(--dl-line, #1b2130); background: var(--dl-bg-base, #080d16); color: var(--dl-ink-dim, #5b6473); border-radius: 3px; padding: 3px 4px; cursor: pointer; font-size: 9px; font-weight: 700; }
 	.mlIconBtn:hover, .mlIconBtn.on { color: var(--amber); border-color: var(--amber); }
 	.mlIconBtn:disabled { cursor: not-allowed; opacity: .48; color: var(--dl-ink-dim, #5b6473); border-color: var(--dl-line, #1b2130); }
@@ -318,13 +341,15 @@
 	.mlFalse div { display: flex; flex-direction: column; gap: 2px; }
 	.mlFalse span { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; }
 	.mlScenario b { display: block; margin-top: 5px; }
+	.mlScenario.needsEvidence { border-color: rgba(251,146,60,.36); }
+	.mlScenario.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.035); }
 	.mlScenario em { display: block; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; margin-top: 8px; }
 	.mlSrc { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.045); color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
 	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
 		.mlModal { height: min(780px, 94vh); }
-		.mlGrid.two, .pressureGrid { grid-template-columns: 1fr; }
-		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(135px, 1.3fr) 58px .7fr; }
-		.mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverHead span:nth-child(6), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5), .mlDriverRow > span:nth-child(6) { display: none; }
+		.mlGrid.two, .pressureGrid, .mlFour { grid-template-columns: 1fr; }
+		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
+		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
 	}
 </style>
