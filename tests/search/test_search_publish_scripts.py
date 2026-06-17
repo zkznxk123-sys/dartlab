@@ -369,6 +369,17 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "expected_sources" in text
     assert "productization_gate" in text
     assert "default: 'release'" in text
+    assert (
+        "github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release'"
+        in text
+    )
+    assert (
+        "github.event_name == 'workflow_run' || (github.event.inputs.productization_gate || 'release') != 'release'"
+        in text
+    )
+    assert (
+        "github.event_name == 'workflow_run' && 'ops' || (github.event.inputs.productization_gate || 'release')" in text
+    )
     assert "quality_gold" in text
     assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "DARTLAB_SEARCH_EXPECTED_SOURCES" in text

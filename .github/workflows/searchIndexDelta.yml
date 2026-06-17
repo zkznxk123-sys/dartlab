@@ -191,7 +191,7 @@ jobs:
           --fail-on-error
 
       - name: Evaluate real query-log quality
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') == 'release' }}
+        if: ${{ always() && github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py
           --gold "${{ github.event.inputs.quality_gold || 'tests/fixtures/search/queryLogGold.real.jsonl' }}"
@@ -265,7 +265,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Evaluate search productization status (ops gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') != 'release' }}
+        if: ${{ always() && (github.event_name == 'workflow_run' || (github.event.inputs.productization_gate || 'release') != 'release') }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -280,7 +280,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Evaluate search productization status (release gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') == 'release' }}
+        if: ${{ always() && github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -296,7 +296,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build search proof bundle (ops gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') != 'release' }}
+        if: ${{ always() && (github.event_name == 'workflow_run' || (github.event.inputs.productization_gate || 'release') != 'release') }}
         run: >
           uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -309,7 +309,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build search proof bundle (release gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') == 'release' }}
+        if: ${{ always() && github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -358,7 +358,7 @@ jobs:
             exit 1
           fi
         env:
-          PRODUCTIZATION_GATE: ${{ github.event.inputs.productization_gate || 'release' }}
+          PRODUCTIZATION_GATE: ${{ github.event_name == 'workflow_run' && 'ops' || (github.event.inputs.productization_gate || 'release') }}
 
       - name: Upload search evidence reports
         if: always()
