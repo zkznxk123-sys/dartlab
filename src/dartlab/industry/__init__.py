@@ -86,6 +86,7 @@ class Industry:
         lifecycle: bool = False,
         concentration: bool = False,
         dynamics: bool = False,
+        polarization: bool = False,
         year: str = "2024",
     ) -> pl.DataFrame:
         """산업지도를 조회한다.
@@ -110,6 +111,10 @@ class Industry:
             True이면 이익 풀 동학 — 공정별 첫/끝해 영업이익 levels(조) + argmax 리더 교체 판정
             (이동형 vs 집중형) + 적자전환 플래그. **share(%) 미사용·levels만**(zero-crossing 폭발
             차단). 생존편향(현 멤버십 과거 소급)은 복원 불가라 컬럼으로 정직 표기.
+        polarization : bool
+            True이면 산업 양극화 — 마진분산(OPM IQR 다년 방향)·밸류분산(P/B p90/p10 스냅샷) **두
+            독립 자료원 교차검증**으로 승자독식 심화 vs 동질 평준화 판정. 2행 two-lens 표(마진·밸류
+            나란히)에 일치/불일치 라벨 첨부. 음수자본 제외수·생존편향·5점 윈도(방향신호) 정직 표기.
         year : str
             재무 데이터 기준 연도 (summary 시 사용).
 
@@ -149,6 +154,9 @@ class Industry:
                   (종목코드 / 종목명 / 공정 / 매출). 상장사 매출 기준 상대 집중도.
                 - dynamics=True: 공정별 행 (공정명 / 첫해(조) / 끝해(조) / 변화(조) / 적자전환 /
                   끝해리더 / 판정[집중형|이동형] / 리더이동 / 윈도 / 생존편향주의).
+                - polarization=True: 2행 two-lens (렌즈[마진/밸류] / 분산지표 / 첫해값 / 끝해값 /
+                  방향레벨 / n / 음수자본제외 / 양극화판정[승자독식 심화|동질 평준화|혼재] /
+                  교차검증[일치|불일치] / 윈도 / 생존편향주의). 재무·시장 두 자료원 교차검증.
             Prerequisites:
                 - taxonomy + nodes.json (운영자 매핑 산출물)
                 - summary=True 시 재무 데이터 (자동 다운로드)
@@ -173,6 +181,8 @@ class Industry:
             return self._concentration(industryId)
         if dynamics:
             return self._dynamics(industryId)
+        if polarization:
+            return self._polarization(industryId)
         return self._query(industryId, stage)
 
     def _guide(self) -> pl.DataFrame:
@@ -308,6 +318,17 @@ class Industry:
         from dartlab.industry.calcs.profitPoolDynamics import _dynamicsDataFrame
 
         return _dynamicsDataFrame(industryId)
+
+    def _polarization(self, industryId: str) -> pl.DataFrame:
+        """산업 양극화 — 마진분산(재무)·밸류분산(시장) 두 렌즈 교차검증 (승자독식 vs 평준화).
+
+        ``calcs.polarization`` (dict) 를 표면 계약(2행 two-lens DataFrame)으로 감싼다. 마진=OPM IQR
+        다년 방향, 밸류=P/B p90/p10 스냅샷. 두 독립 자료원이 일치하면 강건(folk통계 방어). 음수자본
+        제외수·생존편향·5점 윈도(방향신호) 정직 표기.
+        """
+        from dartlab.industry.calcs.polarization import _polarizationDataFrame
+
+        return _polarizationDataFrame(industryId)
 
     def build(self, *, skipDocs: bool = False) -> None:
         """산업지도를 빌드한다 (4단계 파이프라인).

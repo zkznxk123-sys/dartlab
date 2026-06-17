@@ -14,6 +14,19 @@
 
 ---
 
+## 1.05 졸업 완료 — 산업 양극화(polarization) verb (2026-06-18)
+
+`tests/_attempts/industryAnalysisLab/` 전수 발굴(9 루트 measure-first)의 산물을 본진 졸업. **거처=엔진 EXTEND**(새 패널·새 데이터 채널 0 — `Industry().__call__` 플래그 1개 + `calcs/` 모듈 1개).
+
+- **무엇**: `dartlab.industry(id, polarization=True)` — 산업이 *승자독식으로 갈라지나 vs 동질 평준화* 를 **독립 두 자료원 교차검증**으로 판정. ① 마진 렌즈 = 멤버 OPM IQR(p75−p25) 다년 방향 ② 밸류 렌즈 = 멤버 P/B p90/p10 분산. 둘 다 넓음→승자독식·`교차검증=일치`, 갈리면→혼재·`불일치(렌즈 갈림)`.
+- **왜 졸업 1순위였나**: 루트1(마진분산, 발산 8:2)·루트3(밸류괴리, 발산 3.3x) 둘이 robust PASS + **서로 교차검증**(제약이 양 렌즈 극단 일치). 단일 각도보다 교차검증이 folk통계 방어. 실측 일치: 제약 33→78·P/B 22.5 / 반도체 13→26·11.7 / 철강=마진좁음·밸류넓음 → **불일치 정직 포착**(렌즈 갈림 자체가 통찰).
+- **산출 파일**: [polarization.py](../../src/dartlab/industry/calcs/polarization.py)(9섹션 docstring·`_distribution` 재사용) + [__init__.py](../../src/dartlab/industry/__init__.py) verb 배선 + `test_financials_sanity::TestPolarization`(7 테스트: `_crossVerdict` 4 + monkeypatch end-to-end 3) + SKILL.md/web.json 동기.
+- **정직 경계(코드 1급)**: 음수자본 제외수 인용·생존편향(현 멤버십 소급)·5점 윈도(방향신호)·밸류 스냅샷(시점 1)·임계는 `_attempts` 실측 분포 기반 라벨(절대 진리 아님). 점유율·인과 금지. `concentration`(산업이 과점이냐)과 직교.
+- **게이트 통과**: docstring4Section·camelcase strict·industry unit 61·architecture 39(L2→L1 prices import = 방향·cycle 위반 0).
+- **남은 루트(졸업 보류)**: 4 accrual(de-mean 후 PASS, 다음 후보)·2 ΔHHI/7 상대강도(BORDERLINE·가드 선결)·5 수출/8 CAR(약함/보류). 카탈로그 SSOT=`_attempts/industryAnalysisLab/ROUTES.md`.
+
+---
+
 ## 1.1 정정 이력 (2026-06-17 코드 재실측)
 
 **검토 세션 1차(2건)** — PRD v0.2 사실 주장 재대조:

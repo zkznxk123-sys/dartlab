@@ -326,3 +326,120 @@ class TestProfitPoolDynamics:
         r = self._run(monkeypatch, df)
         assert r["판정"] is None
         assert r["생존편향주의"]  # 고정 필드는 항상 존재
+
+
+class TestPolarization:
+    """calcPolarization — 마진분산(재무)·밸류분산(시장) 두 렌즈 교차검증.
+
+    measure-first 실측(제약 양 렌즈 극단 일치·철강 렌즈 갈림)이 독립 oracle. parquet 무의존 —
+    데이터 소스 monkeypatch + 합성 분포. 음수자본 제외·생존편향·교차검증 라벨 검증.
+    """
+
+    def test_cross_verdict_both_wide_is_polarized_agree(self):
+        """두 렌즈 모두 넓음 → 승자독식 심화 + 교차검증 일치 (제약형)."""
+        from dartlab.industry.calcs.polarization import _crossVerdict
+
+        v, c = _crossVerdict({"레벨": "넓음"}, {"레벨": "넓음"})
+        assert v == "승자독식 심화"
+        assert c == "일치"
+
+    def test_cross_verdict_both_narrow_is_homogeneous_agree(self):
+        """두 렌즈 모두 좁음 → 동질 평준화 + 일치."""
+        from dartlab.industry.calcs.polarization import _crossVerdict
+
+        v, c = _crossVerdict({"레벨": "좁음"}, {"레벨": "좁음"})
+        assert v == "동질 평준화"
+        assert c == "일치"
+
+    def test_cross_verdict_split_is_mixed_disagree(self):
+        """한 렌즈 넓음·다른 렌즈 좁음 → 혼재 + 불일치(철강형, 렌즈 갈림이 통찰)."""
+        from dartlab.industry.calcs.polarization import _crossVerdict
+
+        v, c = _crossVerdict({"레벨": "좁음"}, {"레벨": "넓음"})
+        assert v == "혼재"
+        assert c.startswith("불일치")
+
+    def test_cross_verdict_single_lens_cannot_crosscheck(self):
+        """한 렌즈 결손이면 교차검증 불가 명시 (단독 판정만)."""
+        from dartlab.industry.calcs.polarization import _crossVerdict
+
+        v, c = _crossVerdict({"레벨": "넓음"}, {})
+        assert v == "승자독식 심화"
+        assert c == "불가(한 렌즈 결손)"
+
+    def _wire(self, monkeypatch, *, opmFirst, opmLast, pbVals, eqNeg=0):
+        """데이터 4소스 monkeypatch — 합성 5사. opm 첫/끝해 분포 + P/B 분포(+음수자본 eqNeg 사)."""
+        import importlib
+        from types import SimpleNamespace
+
+        from dartlab.gather.bulkData import hfBulk
+        from dartlab.industry.build import pipeline
+
+        # 모듈 자체를 잡아야 함 (finance/__init__ 재내보내기 함수 아님) — polarization 은
+        # ``from ...finance.scanRatio import scanRatio`` 로 호출 시점에 모듈 속성을 재조회.
+        scanRatioMod = importlib.import_module("dartlab.providers.dart.finance.scanRatio")
+        scanAccountMod = importlib.import_module("dartlab.providers.dart.finance.scanAccount")
+
+        codes = [f"00000{i}" for i in range(1, len(pbVals) + 1)]
+        nodes = [SimpleNamespace(stockCode=c, primary=True, industry="synth") for c in codes]
+        monkeypatch.setattr(pipeline, "loadNodes", lambda: nodes)
+
+        opmDf = pl.DataFrame({"stockCode": codes, "2021": opmFirst, "2025": opmLast})
+        monkeypatch.setattr(scanRatioMod, "scanRatio", lambda name, freq="Y": opmDf)
+
+        # 음수자본 eqNeg 사 — 앞 eqNeg 개 자본을 음수로, P/B 입력은 그만큼 무효
+        eq = [(-100.0 if i < eqNeg else 100.0) for i in range(len(codes))]
+        mcap = [pb * 100.0 for pb in pbVals]
+        eqDf = pl.DataFrame({"stockCode": codes, "2025": eq})
+        monkeypatch.setattr(scanAccountMod, "scanAccount", lambda name, freq="Y": eqDf)
+
+        pxDf = pl.DataFrame({"ISU_CD": codes, "MKTCAP": mcap, "BAS_DD": ["2025-12-30"] * len(codes)})
+        monkeypatch.setattr(hfBulk, "loadFiltered", lambda *a, **k: pxDf)
+
+    def test_end_to_end_polarized_agree(self, monkeypatch):
+        """배선 end-to-end — 마진 IQR 확대(넓음) + P/B 분산 넓음 → 승자독식 심화/일치."""
+        from dartlab.industry.calcs.polarization import calcPolarization
+
+        # 첫해 OPM 좁음 [5,8,10,12,15] IQR=4 → 끝해 넓음 [0,5,20,40,60] IQR=35
+        # P/B [0.5,1,3,8,20] p90/p10 ≈ 21.7 > 8
+        self._wire(
+            monkeypatch,
+            opmFirst=[5.0, 8.0, 10.0, 12.0, 15.0],
+            opmLast=[0.0, 5.0, 20.0, 40.0, 60.0],
+            pbVals=[0.5, 1.0, 3.0, 8.0, 20.0],
+        )
+        r = calcPolarization("synth")
+        assert r["판정"] == "승자독식 심화"
+        assert r["교차검증"] == "일치"
+        assert r["마진"]["방향"] == "확대"
+        assert r["마진"]["레벨"] == "넓음"
+        assert r["밸류"]["레벨"] == "넓음"
+
+    def test_end_to_end_excludes_negative_equity(self, monkeypatch):
+        """음수자본 회사는 P/B에서 제외 + 제외수 인용 (folk통계 가드)."""
+        from dartlab.industry.calcs.polarization import calcPolarization
+
+        self._wire(
+            monkeypatch,
+            opmFirst=[5.0, 8.0, 10.0, 12.0, 15.0],
+            opmLast=[0.0, 5.0, 20.0, 40.0, 60.0],
+            pbVals=[0.5, 1.0, 3.0, 8.0, 20.0],
+            eqNeg=2,
+        )
+        r = calcPolarization("synth")
+        assert r["밸류"]["음수자본제외"] == 2
+
+    def test_dataframe_adapter_two_lens_rows(self, monkeypatch):
+        """표면 계약 = 2행 two-lens(마진·밸류) + 교차검증 컬럼."""
+        from dartlab.industry.calcs.polarization import _polarizationDataFrame
+
+        self._wire(
+            monkeypatch,
+            opmFirst=[5.0, 8.0, 10.0, 12.0, 15.0],
+            opmLast=[0.0, 5.0, 20.0, 40.0, 60.0],
+            pbVals=[0.5, 1.0, 3.0, 8.0, 20.0],
+        )
+        df = _polarizationDataFrame("synth")
+        assert df.height == 2
+        assert set(df["렌즈"].to_list()) == {"마진(제출재무)", "밸류(시장가치)"}
+        assert "교차검증" in df.columns
