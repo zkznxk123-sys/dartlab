@@ -1,7 +1,7 @@
-// 로컬 AiPort — 로컬 Python 서버의 AG-UI 게이트웨이(POST /api/agent/runs SSE) 연결.
+// 로컬 AiPort — 로컬 provider 게이트(adapters/local/api) 경유로 로컬 Python 서버(AG-UI 게이트웨이) 연결.
 // capabilities() 는 /api/status 로 provider 구성 여부 probe → 있으면 advanced, 없으면 deterministic(throw 금지·정직 강등).
-// streamAsk 는 SSE 를 AiStreamEvent 로 매핑 — 서버 emitter(agentGateway._event)가 data 에 type+계약 필드명을 그대로
-// 실어 보내므로(AG-UI allowlist = ai.ts 계약 SSOT) 파싱한 객체를 그대로 통과시킨다.
+// streamAsk 는 게이트 SSE 경로(api.streamAgentRun) — SSE 파싱/요청 본문 구성은 게이트(api/stream.ts)에 있다.
+// raw fetch·SSE 파싱은 이 source 가 직접 갖지 않는다(로컬 /api 호출 단일 게이트 집결, 02 §5).
 import type {
 	AiAskInput,
 	AiAskResult,
@@ -15,78 +15,16 @@ import type {
 	EvidenceExplainResult,
 	EvidenceRef
 } from '@dartlab/ui-contracts';
-import { getJson } from '../fetchJson';
+import type { LocalApi } from '../api/localApi';
 
 interface StatusProbe {
 	providers?: Record<string, { available?: boolean | null; secretConfigured?: boolean }>;
 }
 
-function buildRequestBody(input: AiAskInput): string {
-	return JSON.stringify({
-		messages: [{ role: 'user', content: input.prompt }],
-		agentId: 'dartlab-research',
-		stream: true,
-		workspaceContext: input.code ? { stockCode: input.code, mode: input.mode } : { mode: input.mode }
-	});
-}
-
-// SSE 블록(`event:`/`data:` 라인 묶음) → AiStreamEvent. data JSON 의 type 으로 판별, 계약 필드명 일치라 그대로 통과.
-function parseSseBlock(raw: string): AiStreamEvent | null {
-	if (!raw.trim()) return null;
-	const dataLines: string[] = [];
-	for (const line of raw.split('\n')) {
-		if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
-	}
-	const dataStr = dataLines.join('\n');
-	if (!dataStr) return null;
-	let obj: Record<string, unknown>;
-	try {
-		obj = JSON.parse(dataStr) as Record<string, unknown>;
-	} catch {
-		return null;
-	}
-	if (typeof obj.type !== 'string') return null;
-	return obj as unknown as AiStreamEvent;
-}
-
-async function* streamAgentRun(apiBase: string, input: AiAskInput): AsyncGenerator<AiStreamEvent> {
-	let resp: Response;
-	try {
-		resp = await fetch(`${apiBase}/api/agent/runs`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-			body: buildRequestBody(input)
-		});
-	} catch (e) {
-		yield { type: 'RUN_ERROR', runId: '', message: String(e), code: 'network_error' };
-		return;
-	}
-	if (!resp.ok || !resp.body) {
-		yield { type: 'RUN_ERROR', runId: '', message: `HTTP ${resp.status}`, code: 'http_error' };
-		return;
-	}
-	const reader = resp.body.getReader();
-	const decoder = new TextDecoder();
-	let buffer = '';
-	for (;;) {
-		const { value, done } = await reader.read();
-		if (done) break;
-		buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
-		let sep = buffer.indexOf('\n\n');
-		while (sep !== -1) {
-			const block = buffer.slice(0, sep);
-			buffer = buffer.slice(sep + 2);
-			const ev = parseSseBlock(block);
-			if (ev) yield ev;
-			sep = buffer.indexOf('\n\n');
-		}
-	}
-}
-
-async function collectAsk(apiBase: string, input: AiAskInput): Promise<AiAskResult> {
+async function collectAsk(api: LocalApi, input: AiAskInput): Promise<AiAskResult> {
 	let text = '';
 	const refs: EvidenceRef[] = [];
-	for await (const ev of streamAgentRun(apiBase, input)) {
+	for await (const ev of api.streamAgentRun(input)) {
 		if (ev.type === 'TEXT_MESSAGE_CONTENT') text += ev.delta;
 		else if (ev.type === 'TOOL_CALL_RESULT') refs.push(...ev.refDetails);
 		else if (ev.type === 'RUN_ERROR') throw new Error(ev.message);
@@ -94,11 +32,11 @@ async function collectAsk(apiBase: string, input: AiAskInput): Promise<AiAskResu
 	return { text, refs };
 }
 
-export function localAiPort(apiBase: string): AiPort {
+export function localAiPort(api: LocalApi): AiPort {
 	let mode: AiModeId = 'terminal';
 	return {
 		async capabilities(): Promise<AiCapabilities> {
-			const status = await getJson<StatusProbe>(apiBase, '/api/status');
+			const status = await api.getJson<StatusProbe>('/api/status');
 			const providers = status?.providers ?? {};
 			const configured = Object.values(providers).some(
 				(p) => p?.available === true || p?.secretConfigured === true
@@ -124,10 +62,10 @@ export function localAiPort(apiBase: string): AiPort {
 			};
 		},
 		ask(input) {
-			return collectAsk(apiBase, input);
+			return collectAsk(api, input);
 		},
-		streamAsk(input) {
-			return streamAgentRun(apiBase, input);
+		streamAsk(input): AsyncGenerator<AiStreamEvent> {
+			return api.streamAgentRun(input);
 		},
 		// 로컬은 단일 도구 직접 실행 엔드포인트 미보유(도구는 streamAsk 내부에서 에이전트가 실행) — honest error(throw 아님).
 		async runTool(input: AiToolRunInput): Promise<AiToolRunResult> {

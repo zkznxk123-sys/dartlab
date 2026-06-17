@@ -10,26 +10,6 @@
 	},
 	"violations": [
 		{
-			"file": "ui/packages/runtime/src/adapters/local/sources/aiSource.ts",
-			"rule": 1,
-			"detail": "raw fetch() — data/fetch.request 경유"
-		},
-		{
-			"file": "ui/packages/runtime/src/adapters/local/sources/exportSource.ts",
-			"rule": 1,
-			"detail": "raw fetch() — data/fetch.request 경유"
-		},
-		{
-			"file": "ui/packages/runtime/src/adapters/local/sources/exportSource.ts",
-			"rule": 1,
-			"detail": "raw fetch() — data/fetch.request 경유"
-		},
-		{
-			"file": "ui/packages/runtime/src/adapters/local/sources/exportSource.ts",
-			"rule": 1,
-			"detail": "raw fetch() — data/fetch.request 경유"
-		},
-		{
 			"file": "ui/packages/runtime/src/adapters/public/sources/govPriceSource.ts",
 			"rule": 1,
 			"detail": "raw fetch() — data/fetch.request 경유"

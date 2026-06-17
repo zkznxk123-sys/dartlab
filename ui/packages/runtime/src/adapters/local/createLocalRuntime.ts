@@ -17,6 +17,7 @@ import { createReportSource } from '../public/sources/reportSource';
 import { createServiceRegistry } from '../../services/serviceRegistry';
 import { exportServiceRegistration } from '../../services/exportCommand';
 import { localExportPort } from './sources/exportSource';
+import { createLocalApi } from './api/localApi';
 import { notWiredYet } from './fetchJson';
 import type { ClientPanelInit, CompanyMeta, LocalCaches, PriceEventsPayload } from './localTypes';
 import { localAiPort } from './sources/aiSource';
@@ -44,6 +45,9 @@ function localFinancePort(core: DataCore): FinancePort {
 export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime {
 	const env: RuntimeEnvironment = { ...options.env, kind: 'local' };
 	const apiBase = options.apiBase ?? '';
+	// 로컬 provider 게이트 — 모든 /api(:8400) 호출이 통과하는 단일 진입점(런타임 인스턴스당 1개, 02 §5).
+	// HF 데이터 코어(아래 createDataCore)와 분리된 별도 로컬 레인이다(SSE·blob·CRUD = 캐시 부적합).
+	const api = createLocalApi(apiBase);
 	// 회사 단위 fetch 1회 공유 (런타임 인스턴스 범위) — price·filing·company 포트가 같은 응답 재사용.
 	const caches: LocalCaches = {
 		priceEvents: new Map<string, Promise<PriceEventsPayload | null>>(),
@@ -52,7 +56,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 	};
 	const dataCore = createDataCore(); // 데이터 워크벤치 SSOT 코어(어댑터당 1) — RuntimeCache·RequestDedup 실배선
 	// export Port 를 먼저 만들어 서비스 레지스트리(command)와 runtime.export 양쪽이 같은 인스턴스를 공유.
-	const exportPort = localExportPort(apiBase);
+	const exportPort = localExportPort(api);
 	return {
 		env,
 		company: localCompanyPort(), // 공통배선 — 전부 HF(corpList·relations·profit-pool), 로컬 /api 불요
@@ -60,7 +64,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		price: publicPricePort(dataCore),
 		// 지수 = gov/indices + FRED 모두 HF 브라우저 직독 → price·macro 와 동일하게 공개 포트 그대로 재사용(백엔드 0).
 		index: createPublicIndexPort(dataCore),
-		filing: localFilingPort(apiBase, caches, dataCore),
+		filing: localFilingPort(api, caches, dataCore),
 		// 뉴스 = private 라 브라우저 직독 불가 → 퍼블릭 워커(/news) 포트 그대로 재사용(price 와 동일 "공유 자산").
 		news: publicNewsPort(dataCore),
 		finance: localFinancePort(dataCore),
@@ -75,7 +79,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		get search() {
 			return notWiredYet('search', '단계-8(search 추출)');
 		},
-		ai: localAiPort(apiBase),
+		ai: localAiPort(api),
 		// 로컬 명령 레지스트리 — export.tablesToExcel 등록(엔진 완전판 .xlsx). 다운로드 트리거는 surface 가 toast.payload 로.
 		services: createServiceRegistry([exportServiceRegistration(exportPort)]),
 		navigation: options.navigation, // 셸 주입 (framework-agnostic 유지)

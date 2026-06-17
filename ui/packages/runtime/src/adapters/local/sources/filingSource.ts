@@ -7,7 +7,7 @@ import type {
 	PanelInitResponse,
 	PanelTocResponse
 } from '@dartlab/ui-contracts';
-import { getJson } from '../fetchJson';
+import type { LocalApi } from '../api/localApi';
 import type { ClientPanelGrid, ClientPanelInit, ClientPanelToc, LocalCaches } from '../localTypes';
 import { loadCompanyRegularFilings } from '../../public/sources/regularFilingsSource';
 import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
@@ -63,36 +63,34 @@ function initToContract(init: ClientPanelInit | null): PanelInitResponse | null 
 	};
 }
 
-function loadPanelInit(apiBase: string, caches: LocalCaches, code: string): Promise<ClientPanelInit | null> {
+function loadPanelInit(api: LocalApi, caches: LocalCaches, code: string): Promise<ClientPanelInit | null> {
 	const c = code.trim();
 	let p = caches.panelInit.get(c);
 	if (!p) {
-		p = getJson<ClientPanelInit>(apiBase, `/api/company/${encodeURIComponent(c)}/panel/init`);
+		p = api.getJson<ClientPanelInit>(`/api/company/${encodeURIComponent(c)}/panel/init`);
 		caches.panelInit.set(c, p);
 	}
 	return p;
 }
 
-export function localFilingPort(apiBase: string, caches: LocalCaches, core: DataCore): FilingPort {
+export function localFilingPort(api: LocalApi, caches: LocalCaches, core: DataCore): FilingPort {
 	return {
 		// 공통배선 — 공개 HF 소스 그대로(정기 = regularFilingsSource, 비정기 = allFilings). 로컬 :8400 불요.
 		regular: (code, limit = 500) => loadCompanyRegularFilings(code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(core, code),
 		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes),
 		async panelToc(code) {
-			const toc = await getJson<ClientPanelToc>(
-				apiBase,
+			const toc = await api.getJson<ClientPanelToc>(
 				`/api/company/${encodeURIComponent(code.trim())}/panel/toc`
 			);
 			return toc ? tocToContract(toc) : null;
 		},
 		async panelInit(code) {
-			return initToContract(await loadPanelInit(apiBase, caches, code));
+			return initToContract(await loadPanelInit(api, caches, code));
 		},
 		async panelGrid(code, sectionKey) {
 			const qs = new URLSearchParams({ section: sectionKey });
-			const grid = await getJson<ClientPanelGrid>(
-				apiBase,
+			const grid = await api.getJson<ClientPanelGrid>(
 				`/api/company/${encodeURIComponent(code.trim())}/panel?${qs.toString()}`
 			);
 			return grid ? gridToContract(grid) : null;
