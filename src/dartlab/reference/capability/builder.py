@@ -270,11 +270,15 @@ def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
 # ─── 런타임 capability 카탈로그 생성 ──────────────────────────
 
 
-# scan/macro/gather 라이브 축 레지스트리 — 모듈 이동 추종 (AST-소스 의존 0, install-robust).
+# axis-engine 라이브 축 레지스트리 — 모듈 이동 추종 (AST-소스 의존 0, install-robust).
+# gather 표준(engine(axis, target)) 전 엔진을 {engine}.{axis} 로 카탈로그 등록.
 _AXIS_REGISTRIES: tuple[tuple[str, str, str], ...] = (
     ("scan", "dartlab.scan.router", "_AXIS_REGISTRY"),
     ("macro", "dartlab.macro", "_AXIS_REGISTRY"),
     ("gather", "dartlab.gather.entry.dispatch", "AXIS_REGISTRY"),
+    ("industry", "dartlab.industry", "_AXIS_REGISTRY"),
+    ("credit", "dartlab.credit", "_AXIS_REGISTRY"),
+    ("quant", "dartlab.quant", "_AXIS_REGISTRY"),
 )
 
 

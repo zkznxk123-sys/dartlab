@@ -63,7 +63,29 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
         return _scan(call_plan)
     if apiRef == "capabilities":
         return _capabilities(call_plan)
+    # gather 표준 {engine}.{axis} 일반 디스패치 (gather.price·industry.theme·credit.grade·quant.모멘텀).
+    head = apiRef.split(".", 1)[0]
+    if "." in apiRef and head in _AXIS_ENGINES:
+        return _axisEngineCall(head, apiRef.split(".", 1)[1], call_plan)
     return _genericPublicCall(apiRef, call_plan)
+
+
+# gather 표준 axis-dispatch 엔진 (scan 은 위 전용 핸들러). credit/analysis 는 함수형이나 axis-first 동일.
+_AXIS_ENGINES = frozenset({"gather", "macro", "industry", "quant", "credit", "analysis"})
+
+
+def _axisEngineCall(engine: str, axis: str, plan: dict[str, Any]) -> ToolResult:
+    """``{engine}.{axis}`` → ``dartlab.{engine}(axis, target, **kwargs)`` 위임 (gather 표준 통일)."""
+    import dartlab
+
+    fn = getattr(dartlab, engine, None)
+    if fn is None or not callable(fn):
+        return ToolResult(False, f"axis-engine 을 찾지 못했습니다: {engine}", error="unknown_engine")
+    target = plan.get("target") or plan.get("stockCode") or None
+    kwargs = dict(plan.get("kwargs") or {})
+    with _quietExecutionNoise():
+        result = fn(axis, target, **kwargs)
+    return _resultToRefs(f"{engine}.{axis}", result, target=str(target or ""))
 
 
 _RESERVED_PLAN_KEYS = frozenset({"apiRef", "engine", "method", "target", "stockCode", "args", "kwargs", "apiKey"})
