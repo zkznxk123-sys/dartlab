@@ -185,6 +185,42 @@ def test_auto_search_prefers_title_lane_for_disclosure_event(monkeypatch) -> Non
     assert result["scope"].to_list() == ["title", "content"]
 
 
+def test_auto_search_does_not_let_title_lane_starve_content(monkeypatch) -> None:
+    import polars as pl
+
+    import dartlab.providers.dart.search.unified as unified
+    from dartlab.providers.dart.search import api
+
+    def fakeTitle(query, *, corpCode, stockCode, limit):
+        return pl.DataFrame(
+            {
+                "rcept_no": [f"title-{index}" for index in range(limit)],
+                "section_order": [0] * limit,
+                "sourceRef": [f"dart:allFilings:title-{index}#section=0" for index in range(limit)],
+                "report_nm": ["투자설명서"] * limit,
+                "score": [1.0] * limit,
+            }
+        )
+
+    def fakeContent(query, *, corpCode, stockCode, sourceKind=None, limit):
+        return pl.DataFrame(
+            {
+                "rcept_no": ["exact-content"],
+                "section_order": [0],
+                "sourceRef": ["dart:allFilings:20260617000006#section=0"],
+                "report_nm": ["투자설명서"],
+                "score": [200.0],
+            }
+        )
+
+    monkeypatch.setattr(api, "_searchTitle", fakeTitle)
+    monkeypatch.setattr(unified, "searchUnified", fakeContent)
+
+    result = api._searchAuto("공시 원문 투자설명서", corpCode=None, stockCode=None, sourceKind="filing", limit=10)
+
+    assert "exact-content" in result["rcept_no"].to_list()
+
+
 def test_auto_search_keeps_content_lane_for_body_semantic_query(monkeypatch) -> None:
     import polars as pl
 
@@ -206,6 +242,33 @@ def test_auto_search_keeps_content_lane_for_body_semantic_query(monkeypatch) -> 
     assert result["scope"].to_list() == ["auto"]
 
 
+def test_auto_search_keeps_content_lane_for_topic_original_filing_query(monkeypatch) -> None:
+    import polars as pl
+
+    import dartlab.providers.dart.search.unified as unified
+    from dartlab.providers.dart.search import api
+
+    def fakeTitle(query, *, corpCode, stockCode, limit):
+        raise AssertionError("topic original-filing query should not call title lane")
+
+    def fakeContent(query, *, corpCode, stockCode, sourceKind=None, limit):
+        return pl.DataFrame({"rcept_no": ["hbm-body-hit"], "score": [4.2]})
+
+    monkeypatch.setattr(api, "_searchTitle", fakeTitle)
+    monkeypatch.setattr(unified, "searchUnified", fakeContent)
+
+    result = api._searchAuto(
+        "HBM 설비투자와 TC bonder 증설을 언급한 공시 원문",
+        corpCode=None,
+        stockCode=None,
+        sourceKind="filing",
+        limit=1,
+    )
+
+    assert result["rcept_no"].to_list() == ["hbm-body-hit"]
+    assert result["scope"].to_list() == ["auto"]
+
+
 def test_retrieval_limit_widens_internal_candidate_pool() -> None:
     from dartlab.providers.dart.search import api
 
@@ -224,6 +287,45 @@ def test_rank_answerable_first_preserves_answerable_order() -> None:
     )
 
     assert result["id"].to_list() == [2, 3, 1]
+
+
+def test_mark_low_confidence_rows_marks_answerable_false() -> None:
+    import polars as pl
+
+    from dartlab.providers.dart.search.answerability import markLowConfidenceRows
+
+    result = markLowConfidenceRows(
+        pl.DataFrame(
+            {
+                "id": [1, 2],
+                "score": [0.016, 0.01],
+                "answerable": [True, True],
+                "notAnswerableReason": ["", ""],
+            }
+        )
+    )
+
+    assert result["answerable"].to_list() == [False, False]
+    assert result["notAnswerableReason"].to_list() == ["lowConfidence", "lowConfidence"]
+
+
+def test_mark_low_confidence_rows_keeps_high_confidence_pool() -> None:
+    import polars as pl
+
+    from dartlab.providers.dart.search.answerability import markLowConfidenceRows
+
+    result = markLowConfidenceRows(
+        pl.DataFrame(
+            {
+                "id": [1, 2],
+                "score": [0.03, 0.01],
+                "answerable": [True, True],
+                "notAnswerableReason": ["", ""],
+            }
+        )
+    )
+
+    assert result["answerable"].to_list() == [True, True]
 
 
 def test_resolve_corp_accepts_company_name_with_name_to_code(monkeypatch) -> None:

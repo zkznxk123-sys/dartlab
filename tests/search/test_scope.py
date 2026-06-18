@@ -155,6 +155,11 @@ def test_segment_save_load_roundtrip(tmp_path):
     assert loadedIdx["nDocs"] == idx["nDocs"]
     assert loadedIdx["stemDict"] == idx["stemDict"]
     assert loadedMeta.height == meta.height
+    assert "evidenceText" not in loadedMeta.columns
+
+    loadedWithEvidence = loadSegment("test_main", inDir=tmp_path, includeEvidenceText=True)
+    assert loadedWithEvidence is not None
+    assert "evidenceText" in loadedWithEvidence[1].columns
 
 
 def test_load_segment_missing_returns_none(tmp_path):

@@ -17,6 +17,7 @@ _FRESHNESS_MAX_AGE_DAYS: tuple[tuple[str, int], ...] = (
     ("edgar-panel", 30),
     ("edgarPanel", 30),
 )
+LOW_CONFIDENCE_SCORE_FLOOR = 0.02
 
 
 def applyAnswerability(
@@ -56,6 +57,45 @@ def applyAnswerability(
     return pl.DataFrame(rows)
 
 
+def markLowConfidenceRows(result: pl.DataFrame, *, minScore: float = LOW_CONFIDENCE_SCORE_FLOOR) -> pl.DataFrame:
+    """Mark the whole candidate set unanswerable when every score is below confidence floor.
+
+    Args:
+        result: Search result DataFrame after row-level answerability policy.
+        minScore: Minimum score that keeps the candidate pool answerable.
+
+    Returns:
+        pl.DataFrame: Result rows with low-confidence answerable rows downgraded.
+
+    Raises:
+        None.
+
+    Example:
+        >>> markLowConfidenceRows(pl.DataFrame()).height
+        0
+    """
+    if result is None or result.height == 0 or "info" in result.columns:
+        return result
+    if "score" not in result.columns or "answerable" not in result.columns:
+        return result
+    scores: list[float] = []
+    for value in result["score"].to_list():
+        try:
+            scores.append(float(value))
+        except (TypeError, ValueError):
+            continue
+    if not scores or max(scores) >= float(minScore):
+        return result
+    rows = []
+    for row in result.iter_rows(named=True):
+        out = dict(row)
+        if out.get("answerable") is True:
+            out["answerable"] = False
+            out["notAnswerableReason"] = "lowConfidence"
+        rows.append(out)
+    return pl.DataFrame(rows)
+
+
 def _rowAnswerability(
     row: dict[str, Any],
     *,
@@ -76,6 +116,9 @@ def _rowAnswerability(
         return False, "missingSnippet"
     if not str(row.get("dataAsOf") or row.get("sourceDataAsOf") or row.get("rcept_dt") or "").strip():
         return False, "missingDataAsOf"
+    constraintReason = str(row.get("constraintViolationReason") or "").strip()
+    if constraintReason:
+        return False, constraintReason.split(",", maxsplit=1)[0]
     facetReason = facetMismatchReason(row, facets)
     if facetReason:
         return False, facetReason

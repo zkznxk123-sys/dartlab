@@ -1,6 +1,6 @@
 # 11. 운영 런북 — Search Productization
 
-상태: v1.22 (2026-06-17)
+상태: v1.23 (2026-06-18)
 범위: 제품 검색을 본진에 넣은 뒤 운영자가 확인해야 하는 일일·주간·월간 절차와 장애 대응.
 
 워크플로별 실제 연결표는 [12-pipeline-maintenance-map.md](12-pipeline-maintenance-map.md) 를 따른다.
@@ -74,14 +74,16 @@
 15. `searchQualityDrill.{delta,main}.json` 이 `valid=true` 인지 확인한다. 이 drill 은 query-log gold 도구 체인 smoke 이며 `releaseEvidence=false` 이므로 real query-log gold 를 대체하지 않는다.
 16. `searchPipelineDrill.{delta,main}.json` 이 `valid=true` 이고 `sourceManifestSet.id` 와 4개 source 가 기록됐는지 확인한다. 이 drill 은 raw source -> source catalog -> source manifest set -> contentIndex publish/activate/rollback 경로가 깨지지 않았다는 로컬 하한 증거이며, 실제 HF Actions round-trip 증거를 대체하지 않는다.
 
-2026-06-17 현재 실제 HF bootstrap/증분 병합 점검 기준:
+2026-06-18 현재 실제 HF bootstrap/증분 병합 점검 기준:
 
 - `dart/searchCatalog/{allFilings,dartPanel,edgarPanel,newsPublic}/` 는 source manifest/catalog snapshot 을 갖고 remote evidence audit 에서 `valid=true` 다.
 - source-owner 증분 병합 dry-run 은 실제 HF previous manifest/catalog 를 내려받아 allFilings 192,096 / DART panel 104,762 / EDGAR panel 84,294 / news 81,799 rows full snapshot 으로 valid 통과했다. 업로드 없이 부분 parquet 1행씩만 넣은 검증이므로, runner partial tree 문제의 제품 해법은 이전 HF full catalog merge 이다.
 - full current manifest 는 462,947 docs, lite current manifest 는 280,747 docs 다. full/lite 모두 staged candidate round-trip 과 promote 를 통과했다.
-- direct-review proof bundle 은 `opsReady=true`, `releaseReady=true`, blockers=[] 다. 품질팩은 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 coverage, `overallReadyRate=1.0`, `noAnswerFalseAcceptRate=0.0` 을 기록했다.
-- cutover evidence 는 `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 과 `searchCutover.json` 이며, `state=S4_DEFAULT_REPLACEMENT`, `defaultReplacement=true` 다. 새 Search Main/Delta Actions run 에서 같은 artifact 가 생성되는지는 다음 운영 확인 대상이다.
+- direct-review 106행 proof bundle 은 historical 기준 `opsReady=true`, `releaseReady=true`, blockers=[] 였다. 최신 HF current 기준 품질팩은 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 coverage, `overallReadyRate=0.9811`, `docHit10=0.9787`, `memoryCitationTop3Exact=0.9468`, `newsSourcePrecision10=1.0`, `noAnswerFalseAcceptRate=0.0` 을 기록했다. 단 2026-06-18 이후 이 결과만으로는 베타 제거를 선언하지 않는다.
+- cutover evidence 는 `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 과 `searchCutover.json` 이며, historical `state=S4_DEFAULT_REPLACEMENT`, `defaultReplacement=true` 다. 2026-06-18 `Search Index Delta` release dispatch `27734759585` 는 candidate full/lite round-trip, result contract, canary, real query-log quality, remote evidence, productization status, proof bundle, replacement evidence, cutover state 를 모두 success 로 통과했다. 이 run 이 새 hard-negative 300행 reviewer gate 를 대체하지는 않는다. 월간 `Search Index Main` 은 다음 scheduled/dispatch run 에서 같은 artifact 와 최신 hard-negative gate 를 재확인한다.
 - Search Main/Delta release gate 는 S4 를 hard fail 한다. replacement evidence 가 incomplete 이거나 cutover 가 `defaultReplacement=true` 를 만들지 못하면 workflow 는 red 여야 한다. ops gate 는 S2 운영 가능성까지만 강제한다.
+- 2026-06-18 이후 release gate 는 hard-negative 300행과 noAnswer coverage 를 추가로 요구한다. 106행 direct-review 통과만으로는 제품 졸업이나 베타 제거를 선언하지 않는다. current-data candidate 360행 최신 실측은 `.tmp/search-hard-negative/qualityReport.hardNegative.withNoAnswer.eventOnly.candidate.json` 기준 `overallReadyRate=0.9806`, `docHit10=0.9767`, `exactDocHit10=0.9667`, `hardNegativeExactDocHit10=0.9667`, `hardNegativeWinRate=0.9667`, `noAnswerFalseAcceptRate=0.0`, `forbiddenTop3Rate=0.0`, `forbiddenTop10Rate=0.0`, `sourceIntentLeakRate=0.0`, `constraintViolationRate=0.0` 으로 metric gate 와 noAnswer gate 는 통과한다. 하지만 `goldOrigin=currentDataHardNegative`, `reviewStatus=candidate`, `realReviewedRows=0/300`, `proxyGoldRows=360`, `unreviewedGoldRows=360` 이므로 `productizationStatus` 는 `releaseReady=false` 다.
+- runtime 성능 최신 실측은 `.tmp/search-hard-negative/perfReport.afterSlimMeta.warm.json` 기준 coldWarmup 9273.9ms, warm p50 419.0ms, p95 2015.8ms, max 2099.5ms, RSS afterWarmup 1.76GB, afterQueries 1.81GB, warm query delta 43MB 다. `fieldIndex.loadSegment()` 는 기본적으로 runtime 필수 metadata 만 읽고 `evidenceText` 는 opt-in 으로 분리한다. 이 수치는 운영 가능 하한이지만 cold load/p95 최적화는 계속 추적한다.
 - lite 18개월 tier 는 326.3MB 로 경량 목표 300MB 를 넘었다. 월간 점검 때 12개월/상위 universe/metadata 압축을 별도 실험한다.
 - graph catalog 는 optional sidecar 다. 운영자가 `DARTLAB_SEARCH_ENTITY_GRAPH_CATALOG` 로 검증된 parquet 를 넘기거나 `DARTLAB_SEARCH_ENTITY_GRAPH_BUILD=1` 을 명시한 run 에서만 `entityGraphCatalog.parquet` 를 만든다. 이 파일이 current manifest required file 로 올라간 run 에서는 `searchRemoteEvidence` / `searchProductizationStatus` 의 `entityGraphCatalog.{tier}` summary 에 `fileSourceExists=true`, `nEntities>0`, `dataAsOf` 가 남는지 보고, `dartlab.search(...)` 결과의 `entityCards` smoke 를 추가로 확인한다. 없으면 검색 자체는 기존 result contract 로 판단한다.
 
@@ -151,6 +153,55 @@ uv run python -X utf8 -c "import dartlab; dartlab.search('삼성전자 대표이
 ```
 
 `DARTLAB_SEARCH_QUERY_LOG` 에 파일 경로를 직접 넣으면 그 위치에 JSONL 을 쓴다. 이 raw row 는 `goldOrigin=userLog`, `reviewStatus=candidate` 이며, top sourceRef/source/answerability/dataAsOf 를 reviewer 참고용으로 보존한다. raw capture 만으로는 release gold 가 아니다. reviewer label 에 `targetKind`, `expectedSourceRef` 또는 `expectedSourceRefs`, no-answer 여부, `reviewStatus=reviewed` 가 붙은 뒤에만 release gate 후보가 된다.
+
+### Hard-negative review
+
+목표:
+
+- 같은 회사 다른 연도, 형제공시, 유사 이벤트 다른 회사, report-type mismatch, news/filing confusion, EDGAR/DART confusion, panel/filing confusion 을 release gate 에 넣는다.
+- source-family leak 은 `forbiddenSourceFamilies` 로, 가까운 오답 문서는 `forbiddenSourceRefs` 로 남긴다.
+- 생성 candidate 는 실제 HF/current catalog 기반이어도 reviewer 승인 전에는 release gold 가 아니다.
+
+candidate 생성:
+
+```powershell
+uv run python -X utf8 .github/scripts/search/buildSearchHardNegativeGold.py `
+  --catalog .tmp/hf-contentIndex/catalog_snapshot.parquet `
+  --out .tmp/search-hard-negative/queryLogGold.hardNegative.withNoAnswer.eventOnly.candidate.jsonl `
+  --summary-out .tmp/search-hard-negative/hardNegativeSummary.withNoAnswer.eventOnly.candidate.json `
+  --limit 360 `
+  --per-type 120 `
+  --no-answer-rows 60
+```
+
+실제 current index 평가:
+
+```powershell
+$env:DARTLAB_DATA_DIR = (Resolve-Path .tmp).Path
+$env:DARTLAB_NO_HF_DOWNLOAD = "1"
+uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py `
+  --gold .tmp/search-hard-negative/queryLogGold.hardNegative.withNoAnswer.eventOnly.candidate.jsonl `
+  --out .tmp/search-hard-negative/qualityReport.hardNegative.withNoAnswer.eventOnly.candidate.json `
+  --miss-ledger .tmp/search-hard-negative/missLedger.hardNegative.withNoAnswer.eventOnly.candidate.jsonl `
+  --min-rows 300 `
+  --required-targets filing,news,noAnswer,edgar `
+  --limit 10 `
+  --scope auto
+```
+
+release 판정:
+
+- `hardNegativeRows >= 300` 필수.
+- `hardNegativeExactDocHit10 >= 0.95`.
+- `hardNegativeWinRate >= 0.95`.
+- `forbiddenTop3Rate == 0.0`.
+- `forbiddenTop10Rate <= 0.02`.
+- `sourceIntentLeakRate == 0.0`.
+- `constraintViolationRate <= 0.05`.
+- `noAnswerFalseAcceptRate <= 0.1`.
+- `goldOrigin`/`reviewStatus` 는 reviewer-approved real/operator/userLog 계열이어야 한다.
+
+현재 metric 미달 유형은 본진 data-compiled semantic mapper + constraint-filtered ranking 으로 해소됐다. 남은 미달은 품질 수치가 아니라 review state 다. 360행 current-data candidate 를 운영자가 검토해 `goldOrigin` 을 real/operator/userLog 계열로, `reviewStatus` 를 reviewed/approved 계열로 승격해야 release evidence 가 된다.
 
 금지:
 

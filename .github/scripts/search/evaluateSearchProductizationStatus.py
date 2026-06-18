@@ -20,9 +20,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 DEFAULT_SOURCES = "allFilings,dartPanel,edgarPanel,newsPublic"
 DEFAULT_TIERS = "full,lite"
 DEFAULT_MIN_QUALITY_ROWS = 100
+DEFAULT_MIN_HARD_NEGATIVE_ROWS = 300
 DEFAULT_REQUIRED_TARGETS = ("filing", "news", "noAnswer", "edgar")
 REAL_GOLD_ORIGINS = {"real", "operator", "operatorReal", "userLog", "production"}
 REVIEWED_STATUSES = {"reviewed", "approved", "accepted", "gold"}
+HARD_NEGATIVE_REQUIRED_METRICS = (
+    "hardNegativeExactDocHit10",
+    "hardNegativeWinRate",
+    "forbiddenTop3Rate",
+    "forbiddenTop10Rate",
+    "sourceIntentLeakRate",
+    "constraintViolationRate",
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -202,10 +211,18 @@ def _qualityBlockers(report: dict[str, Any]) -> list[str]:
         blockers.append("qualityNotReleaseEligible")
     totalRows = _int(report.get("totalRows"), 0)
     realReviewedRows = _int(report.get("realReviewedRows"), 0)
+    metrics = report.get("metrics") if isinstance(report.get("metrics"), dict) else {}
+    hardNegativeRows = _int(metrics.get("hardNegativeRows"), 0)
     if totalRows < DEFAULT_MIN_QUALITY_ROWS:
         blockers.append(f"qualityMinRows:{totalRows}/{DEFAULT_MIN_QUALITY_ROWS}")
     if realReviewedRows < DEFAULT_MIN_QUALITY_ROWS:
         blockers.append(f"qualityRealReviewedRows:{realReviewedRows}/{DEFAULT_MIN_QUALITY_ROWS}")
+    if hardNegativeRows < DEFAULT_MIN_HARD_NEGATIVE_ROWS:
+        blockers.append(f"qualityHardNegativeRows:{hardNegativeRows}/{DEFAULT_MIN_HARD_NEGATIVE_ROWS}")
+    elif metrics:
+        for metric in HARD_NEGATIVE_REQUIRED_METRICS:
+            if metric not in metrics:
+                blockers.append(f"qualityMissingHardNegativeMetric:{metric}")
     coverage = report.get("coverageByKind") if isinstance(report.get("coverageByKind"), dict) else {}
     for target in DEFAULT_REQUIRED_TARGETS:
         if _int(coverage.get(target), 0) <= 0:

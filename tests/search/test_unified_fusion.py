@@ -26,14 +26,24 @@ def _buildSegment(fieldIndex, tmp_path, rows):
     fieldIndex.clearCache()
 
 
-def _row(rcept, content, *, source="allFilings", report="공시", title="", corp="00000000", stock="000000"):
+def _row(
+    rcept,
+    content,
+    *,
+    source="allFilings",
+    report="공시",
+    title="",
+    corp="00000000",
+    stock="000000",
+    date="20260101",
+):
     return {
         "rcept_no": rcept,
         "section_order": 0,
         "corp_code": corp,
         "corp_name": "테스트",
         "stock_code": stock,
-        "rcept_dt": "20260101",
+        "rcept_dt": date,
         "report_nm": report,
         "section_title": title,
         "section_content": content,
@@ -180,8 +190,8 @@ def test_expansion_preserves_plain_top(tmp_path, monkeypatch):
     assert df.row(0, named=True)["rcept_no"] == "20260101000030"
 
 
-def test_title_weighting_prefers_decision_original_for_event_query(tmp_path, monkeypatch):
-    """공시 원문형 질의는 본문 반복어보다 report title 의 사건 정규형을 우선한다."""
+def test_title_weighting_prefers_decision_original_for_unscoped_event_query(tmp_path, monkeypatch):
+    """회사 미지정 공시유형 질의는 기존 title 사건 정규형을 보존한다."""
     fieldIndex, unified = _patchIndexDir(monkeypatch, tmp_path)
     _buildSegment(
         fieldIndex,
@@ -201,5 +211,57 @@ def test_title_weighting_prefers_decision_original_for_event_query(tmp_path, mon
     )
 
     df = unified.searchUnified("유상증자 공시 원문", limit=5)
+
+    assert df.row(0, named=True)["rcept_no"] == "20260317000681"
+
+
+def test_title_weighting_prefers_result_original_for_entity_event_query(tmp_path, monkeypatch):
+    """회사·연도 제약이 있는 원문 질의는 결정 공시보다 결과/완료 공시를 우선한다."""
+    fieldIndex, unified = _patchIndexDir(monkeypatch, tmp_path)
+    _buildSegment(
+        fieldIndex,
+        tmp_path,
+        [
+            _row(
+                "20260617000040",
+                "유상증자 유상증자 주식관련사채 발행결과 청약결과",
+                report="유상증자또는주식관련사채등의발행결과(자율공시)",
+                date="20260617",
+            ),
+            _row(
+                "20260609000681",
+                "유상증자 결정 신주 발행 자금조달",
+                report="주요사항보고서(유상증자결정)",
+                date="20260609",
+            ),
+        ],
+    )
+
+    df = unified.searchUnified("테스트 2026 유상증자 공시 원문", limit=5)
+
+    assert df.row(0, named=True)["rcept_no"] == "20260617000040"
+
+
+def test_title_weighting_prefers_decision_original_for_decision_query(tmp_path, monkeypatch):
+    """결정을 명시한 질의는 결과 공시보다 결정 공시를 우선한다."""
+    fieldIndex, unified = _patchIndexDir(monkeypatch, tmp_path)
+    _buildSegment(
+        fieldIndex,
+        tmp_path,
+        [
+            _row(
+                "20260101000040",
+                "유상증자 유상증자 주식관련사채 발행결과 청약결과",
+                report="유상증자또는주식관련사채등의발행결과(자율공시)",
+            ),
+            _row(
+                "20260317000681",
+                "유상증자 결정 신주 발행 자금조달",
+                report="주요사항보고서(유상증자결정)",
+            ),
+        ],
+    )
+
+    df = unified.searchUnified("유상증자 결정 공시 원문", limit=5)
 
     assert df.row(0, named=True)["rcept_no"] == "20260317000681"

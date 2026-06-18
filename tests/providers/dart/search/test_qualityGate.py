@@ -311,6 +311,76 @@ def test_evaluate_query_gold_rows_reports_metrics_by_kind_for_edgar() -> None:
     assert report["metricsByKind"]["edgar"]["docHit10"] == 1.0
 
 
+def test_evaluate_query_gold_rows_blocks_forbidden_hard_negative_top3() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "query": "삼성전자 2024 유상증자 결정 공시",
+            "target": "filing",
+            "expectedSourceRef": "dart:allFilings:decision#section=0",
+            "forbiddenSourceRefs": ["dart:allFilings:correction#section=0"],
+            "constraintTags": ["same-company-sibling-filing"],
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        }
+    ]
+    results = {
+        "삼성전자 2024 유상증자 결정 공시": [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:correction#section=0",
+                "answerable": True,
+            },
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:decision#section=0",
+                "answerable": True,
+            },
+        ]
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=1, requiredTargets=("filing",))
+
+    assert report["releaseEligible"] is False
+    assert report["metrics"]["exactDocHit10"] == 1.0
+    assert report["metrics"]["hardNegativeExactDocHit10"] == 1.0
+    assert report["metrics"]["hardNegativeWinRate"] == 0.0
+    assert report["metrics"]["forbiddenTop3Rate"] == 1.0
+    assert report["metrics"]["constraintViolationRate"] == 1.0
+    assert "metric:forbiddenTop3Rate:1.0000>0.0000" in report["blockers"]
+
+
+def test_evaluate_query_gold_rows_blocks_forbidden_source_family_leak() -> None:
+    from dartlab.providers.dart.search.qualityGate import evaluateQueryGoldRows
+
+    rows = [
+        {
+            "query": "공시 말고 뉴스로 현대차 배당 확대",
+            "target": "news",
+            "expectedSourceRef": "news:hyundai-dividend",
+            "forbiddenSourceFamilies": ["filing"],
+            "constraintTags": ["news-filing-confusion"],
+            "goldOrigin": "real",
+            "reviewStatus": "reviewed",
+        }
+    ]
+    results = {
+        "공시 말고 뉴스로 현대차 배당 확대": [
+            {"source": "news", "sourceRef": "news:hyundai-dividend", "answerable": True},
+            {"source": "allFilings", "sourceRef": "dart:allFilings:dividend", "answerable": True},
+        ]
+    }
+
+    report = evaluateQueryGoldRows(rows, results, minRows=1, requiredTargets=("news",))
+
+    assert report["releaseEligible"] is False
+    assert report["metrics"]["hardNegativeWinRate"] == 1.0
+    assert report["metrics"]["sourceIntentLeakRate"] == 1.0
+    assert report["metrics"]["forbiddenTop3Rate"] == 1.0
+    assert "metric:sourceIntentLeakRate:1.0000>0.0000" in report["blockers"]
+
+
 def test_build_miss_ledger_rows_records_policy_taxonomy_from_answerability() -> None:
     from dartlab.providers.dart.search.qualityGate import buildMissLedgerRows
 

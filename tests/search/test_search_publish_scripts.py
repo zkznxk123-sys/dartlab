@@ -256,6 +256,72 @@ def test_search_delta_script_catalog_build_subprocess(tmp_path) -> None:
     assert (outDir / "manifest.json").exists()
 
 
+def test_search_delta_script_no_change_restages_manifest_env(tmp_path) -> None:
+    import polars as pl
+
+    catalog = tmp_path / "catalog.parquet"
+    manifest = tmp_path / "source.json"
+    dataDir = tmp_path / "data"
+    envFile = tmp_path / "github.env"
+    row = {"source": "allFilings", "rcept_no": "A", "text": "투자설명서 케이티스카이라이프"}
+    pl.DataFrame([row]).write_parquet(catalog)
+    manifest.write_text(
+        json.dumps(
+            {
+                "source": "allFilings",
+                "sourceVersion": "v1",
+                "schemaVersion": "2026-06",
+                "snapshotScope": "full",
+                "dataAsOf": "20260617",
+                "builtAt": "2026-06-17T00:00:00",
+                "files": [{"path": "x.parquet", "rowCount": 1}],
+                "totalRows": 1,
+                "changedRows": 0,
+                "deletedRows": 0,
+                "producer": "test",
+            }
+        ),
+        encoding="utf-8",
+    )
+    env = {
+        **os.environ,
+        "HF_TOKEN": "",
+        "GITHUB_ENV": str(envFile),
+        "DARTLAB_DATA_DIR": str(dataDir),
+        "DARTLAB_SEARCH_DELTA_MODE": "catalog",
+        "DARTLAB_SEARCH_PREVIOUS_CATALOG": str(catalog),
+        "DARTLAB_SEARCH_CURRENT_CATALOG": str(catalog),
+        "DARTLAB_SEARCH_SOURCE_MANIFESTS": str(manifest),
+        "DARTLAB_SEARCH_EXPECTED_SOURCES": "allFilings",
+    }
+    subprocess.run(
+        [sys.executable, "-X", "utf8", ".github/scripts/search/buildSearchMain.py"],
+        cwd=Path.cwd(),
+        env={**env, "DARTLAB_SEARCH_MAIN_MODE": "catalog", "DARTLAB_SEARCH_MIN_DOCS": "1"},
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+        check=True,
+    )
+    proc = subprocess.run(
+        [sys.executable, "-X", "utf8", ".github/scripts/search/buildSearchDelta.py"],
+        cwd=Path.cwd(),
+        env=env,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    assert "DARTLAB_SEARCH_DELTA_NO_CHANGE=1" in envFile.read_text(encoding="utf-8")
+    manifestData = json.loads((dataDir / "dart/contentIndex/manifest.json").read_text(encoding="utf-8"))
+    assert manifestData["buildCommand"] == "buildSearchDelta.noChangeManifest"
+
+
 def test_search_main_script_catalog_build_subprocess(tmp_path) -> None:
     import polars as pl
 
@@ -360,6 +426,7 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     text = Path(".github/workflows/searchIndexDelta.yml").read_text(encoding="utf-8")
     assert "workflow_run" in text
     assert "Original SSOT Sync" in text
+    assert "AllFilings Backfill" in text
     assert "News Archive Sync" in text
     assert "EDGAR Data Sync (Bulk)" in text
     assert "github.event.workflow_run.conclusion == 'success'" in text
@@ -368,6 +435,21 @@ def test_search_index_delta_workflow_exposes_catalog_mode_inputs() -> None:
     assert "expected_sources" in text
     assert "productization_gate" in text
     assert "default: 'release'" in text
+    assert (
+        "github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release'"
+        in text
+    )
+    assert (
+        "github.event_name == 'workflow_run' || (github.event.inputs.productization_gate || 'release') != 'release'"
+        in text
+    )
+    assert (
+        "github.event_name == 'workflow_run' && 'ops' || (github.event.inputs.productization_gate || 'release')" in text
+    )
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '3'" in text
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'" in text
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '5'" in text
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '300'" in text
     assert "quality_gold" in text
     assert "tests/fixtures/search/queryLogGold.real.jsonl" in text
     assert "DARTLAB_SEARCH_EXPECTED_SOURCES" in text
@@ -499,9 +581,10 @@ def test_search_catalog_script_exists() -> None:
 
 def test_source_workflows_build_search_catalog_artifacts() -> None:
     original = Path(".github/workflows/originalSync.yml").read_text(encoding="utf-8")
+    backfill = Path(".github/workflows/allFilingsBackfill.yml").read_text(encoding="utf-8")
     news = Path(".github/workflows/newsArchiveSync.yml").read_text(encoding="utf-8")
     edgar = Path(".github/workflows/edgarSync.yml").read_text(encoding="utf-8")
-    combined = "\n".join([original, news, edgar])
+    combined = "\n".join([original, backfill, news, edgar])
     for source in ("dartPanel", "allFilings", "edgarPanel", "newsPublic"):
         assert f"--source {source}" in combined
         assert f"search-catalog-{source}" in combined
@@ -524,6 +607,26 @@ def test_source_workflows_build_search_catalog_artifacts() -> None:
     assert "--min-rows 100" in combined
     assert "actions/upload-artifact" in combined
     assert "if-no-files-found: ignore" in combined
+
+
+def test_allfilings_backfill_is_decoupled_from_daily_original_sync() -> None:
+    original = Path(".github/workflows/originalSync.yml").read_text(encoding="utf-8")
+    backfill = Path(".github/workflows/allFilingsBackfill.yml").read_text(encoding="utf-8")
+    assert "name: AllFilings Backfill" in backfill
+    assert "cron: '30 5 * * *'" in backfill
+    assert "timeout-minutes: 75" in backfill
+    assert "timeout-minutes: 50" in backfill
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '3'" in original
+    assert "DARTLAB_HF_RETRY_ATTEMPTS: '3'" in backfill
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'" in original
+    assert "DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'" in backfill
+    assert "--producer allFilingsBackfill.allfilings-backfill" in backfill
+    assert "name: search-catalog-allFilings-backfill-${{ github.run_id }}" in backfill
+    assert "github.event.inputs.jobs == 'allfilings-backfill'" in original
+    assert (
+        "github.event_name == 'schedule' || github.event.inputs.jobs == 'all' || github.event.inputs.jobs == 'allfilings-backfill'"
+        not in original
+    )
 
 
 def test_search_main_workflow_bootstraps_canonical_source_catalogs() -> None:

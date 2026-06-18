@@ -7,7 +7,7 @@ import json
 import polars as pl
 
 
-def test_merged_news_source_catalog_replaces_changed_date_partition(tmp_path) -> None:
+def test_merged_news_source_catalog_upserts_urls_without_dropping_same_article_date(tmp_path) -> None:
     from dartlab.providers.dart.search.catalog import normalizeCatalogRows
     from dartlab.providers.dart.search.sourceCatalogMerge import writeMergedSourceCatalogArtifacts
 
@@ -28,10 +28,17 @@ def test_merged_news_source_catalog_replaces_changed_date_partition(tmp_path) ->
         [
             {
                 "source": "newsPublic",
+                "url": "https://n.example/new",
+                "date": "20260616",
+                "title": "이전 같은 URL",
+                "content": "같은 URL의 이전 내용",
+            },
+            {
+                "source": "newsPublic",
                 "url": "https://n.example/old",
                 "date": "20260616",
                 "title": "이전 뉴스",
-                "content": "이전 날짜 파티션 stale",
+                "content": "오늘 수집에 다시 안 보이지만 forward archive 에서는 보존",
             },
             {
                 "source": "newsPublic",
@@ -48,10 +55,10 @@ def test_merged_news_source_catalog_replaces_changed_date_partition(tmp_path) ->
         "dataAsOf": "20260616",
         "files": [
             {"path": keepPath.as_posix(), "rowCount": 1, "maxDate": "20260615"},
-            {"path": changed.as_posix(), "rowCount": 1, "maxDate": "20260616"},
+            {"path": changed.as_posix(), "rowCount": 2, "maxDate": "20260616"},
         ],
-        "totalRows": 2,
-        "completenessCheck": {"catalogRows": 2},
+        "totalRows": 3,
+        "completenessCheck": {"catalogRows": 3},
     }
 
     result = writeMergedSourceCatalogArtifacts(
@@ -61,17 +68,20 @@ def test_merged_news_source_catalog_replaces_changed_date_partition(tmp_path) ->
         previousManifest=previousManifest,
         outDir=tmp_path / "out",
         minFiles=2,
-        minRows=2,
-        minCatalogRows=2,
+        minRows=3,
+        minCatalogRows=3,
     )
 
     manifest = json.loads(result["manifest"].read_text(encoding="utf-8"))
     catalog = pl.read_parquet(result["catalog"])
     urls = set(catalog.get_column("url").to_list())
+    texts = set(catalog.get_column("searchText").to_list())
     assert manifest["snapshotScope"] == "full"
     assert manifest["deltaSource"]["catalogRows"] == 1
     assert manifest["completenessCheck"]["valid"] is True
-    assert urls == {"https://n.example/new", "https://n.example/keep"}
+    assert urls == {"https://n.example/new", "https://n.example/old", "https://n.example/keep"}
+    assert "유상증자 새 기사" in texts
+    assert "같은 URL의 이전 내용" not in texts
 
 
 def test_merged_panel_source_catalog_replaces_changed_company_partition(tmp_path) -> None:

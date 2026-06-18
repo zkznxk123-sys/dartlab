@@ -172,6 +172,8 @@ def _rowMatchesReport(row: dict[str, Any], reportTerms: tuple[str, ...]) -> bool
     )
     if _hasReportSurface(titleText):
         return _textMatchesReport(titleText, reportTerms)
+    if _rowAllowsUnknownReport(row):
+        return True
 
     text = " ".join(
         str(row.get(key) or "").lower()
@@ -183,14 +185,19 @@ def _rowMatchesReport(row: dict[str, Any], reportTerms: tuple[str, ...]) -> bool
             "contentRaw",
         )
     )
-    if not text:
-        return False
+    if not text.strip():
+        return _rowAllowsUnknownReport(row)
     return _textMatchesReport(text, reportTerms)
 
 
 def _hasReportSurface(text: str) -> bool:
     clean = re.sub(r"[\s0._-]+", "", str(text or "")).strip()
-    return bool(clean)
+    return bool(clean) and clean.lower() not in {"0", "none", "nan", "null"}
+
+
+def _rowAllowsUnknownReport(row: dict[str, Any]) -> bool:
+    source = str(row.get("source") or "")
+    return source in {"panel", "dartPanel"}
 
 
 def _textMatchesReport(text: str, reportTerms: tuple[str, ...]) -> bool:
@@ -202,10 +209,7 @@ def _textMatchesReport(text: str, reportTerms: tuple[str, ...]) -> bool:
 
 
 def _rowMatchesYear(row: dict[str, Any], years: tuple[str, ...]) -> bool:
-    text = " ".join(
-        str(row.get(key) or "")
-        for key in ("rcept_dt", "date", "dataAsOf", "sourceDataAsOf", "report_nm", "reportName", "title")
-    )
+    text = " ".join(str(row.get(key) or "") for key in ("rcept_dt", "date", "report_nm", "reportName", "title"))
     return any(year in text for year in years)
 
 

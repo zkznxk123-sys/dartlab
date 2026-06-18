@@ -54,3 +54,41 @@ def test_report_facet_rejects_incidental_body_reference_when_report_title_is_dif
     }
 
     assert facetMismatchReason(row, QueryFacets(reportTerms=("사업보고서",))) == "facetMismatch:report"
+
+
+def test_year_facet_ignores_source_freshness_date() -> None:
+    from dartlab.providers.dart.search.facetPlanner import QueryFacets, facetMismatchReason
+
+    row = {
+        "rcept_dt": "20251231",
+        "sourceDataAsOf": "20260617",
+        "report_nm": "10-Q",
+    }
+
+    assert facetMismatchReason(row, QueryFacets(years=("2026",))) == "facetMismatch:year"
+
+
+def test_panel_unknown_report_surface_does_not_fail_report_facet() -> None:
+    from dartlab.providers.dart.search.facetPlanner import QueryFacets, facetMismatchReason
+
+    row = {
+        "source": "panel",
+        "section_title": "0",
+        "report_nm": "",
+        "snippet": "",
+    }
+
+    assert facetMismatchReason(row, QueryFacets(reportTerms=("사업보고서",))) == ""
+
+
+def test_panel_body_chunk_report_text_is_not_a_report_identity() -> None:
+    from dartlab.providers.dart.search.facetPlanner import QueryFacets, facetMismatchReason
+
+    row = {
+        "source": "panel",
+        "section_title": "0",
+        "report_nm": "",
+        "snippet": "반기보고서 본문 일부",
+    }
+
+    assert facetMismatchReason(row, QueryFacets(reportTerms=("사업보고서",))) == ""

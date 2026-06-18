@@ -9,6 +9,14 @@ from typing import Any, Iterable, Mapping, Sequence
 REAL_GOLD_ORIGINS = {"real", "operator", "operatorReal", "userLog", "production"}
 REVIEWED_STATUSES = {"reviewed", "approved", "accepted", "gold"}
 DEFAULT_REQUIRED_TARGETS = ("filing", "news", "noAnswer")
+MAXIMUM_THRESHOLD_METRICS = {
+    "noAnswerFalseAcceptRate",
+    "forbiddenTop1Rate",
+    "forbiddenTop3Rate",
+    "forbiddenTop10Rate",
+    "sourceIntentLeakRate",
+    "constraintViolationRate",
+}
 
 
 def loadQueryGold(path: str | Path) -> list[dict[str, Any]]:
@@ -86,6 +94,14 @@ def evaluateQueryGoldRows(
     newsPrecisionRows = 0
     noAnswerRows = 0
     noAnswerFalseAccepts = 0
+    hardNegativeRows = 0
+    hardNegativeExactDocHit10Hits = 0
+    hardNegativeWins = 0
+    forbiddenTop1Violations = 0
+    forbiddenTop3Violations = 0
+    forbiddenTop10Violations = 0
+    sourceIntentLeakRows = 0
+    sourceIntentLeaks = 0
 
     rowEvaluations: list[dict[str, Any]] = []
     for gold in rows:
@@ -97,6 +113,11 @@ def evaluateQueryGoldRows(
         originCounts[origin] = originCounts.get(origin, 0) + 1
         reviewCounts[review] = reviewCounts.get(review, 0) + 1
         results = [dict(row) for row in _resultsForGold(gold, resultsByQuery)]
+        hasHardNegative = target != "noAnswer" and _hasForbiddenGold(gold)
+        forbiddenTop1 = _anyForbiddenMatch(gold, results[:1])
+        forbiddenTop3 = _anyForbiddenMatch(gold, results[:3])
+        forbiddenTop10 = _anyForbiddenMatch(gold, results[:10])
+        sourceIntentLeak = _sourceIntentLeak(gold, results[:10])
         if target == "noAnswer":
             noAnswerRows += 1
             falseAccept = any(_isAnswerable(row) for row in results[:10])
@@ -113,6 +134,12 @@ def evaluateQueryGoldRows(
                     "docHit10": None,
                     "memoryCitationTop3Exact": None,
                     "newsSourcePrecision10": None,
+                    "forbiddenTop1": None,
+                    "forbiddenTop3": None,
+                    "forbiddenTop10": None,
+                    "sourceIntentLeak": None,
+                    "constraintViolation": None,
+                    "hardNegativeWin": None,
                 }
             )
             continue
@@ -132,6 +159,26 @@ def evaluateQueryGoldRows(
             top3Hits += 1
         if exactHit3:
             exactTop3Hits += 1
+        hardNegativeWin = None
+        if hasHardNegative:
+            hardNegativeRows += 1
+            if exactHit10:
+                hardNegativeExactDocHit10Hits += 1
+            if forbiddenTop1:
+                forbiddenTop1Violations += 1
+            if forbiddenTop3:
+                forbiddenTop3Violations += 1
+            if forbiddenTop10:
+                forbiddenTop10Violations += 1
+            expectedRank = _expectedRank(gold, results[:10])
+            forbiddenRanks = _forbiddenRanks(gold, results[:10])
+            hardNegativeWin = bool(expectedRank is not None and all(expectedRank < rank for rank in forbiddenRanks))
+            if hardNegativeWin:
+                hardNegativeWins += 1
+        if _forbiddenSourceFamilies(gold):
+            sourceIntentLeakRows += 1
+            if sourceIntentLeak:
+                sourceIntentLeaks += 1
         precision = None
         if target == "news":
             newsPrecisionRows += 1
@@ -149,6 +196,12 @@ def evaluateQueryGoldRows(
                 "exactMemoryCitationTop3": exactHit3,
                 "newsSourcePrecision10": precision,
                 "matchMode": "exact" if exactHit10 else ("semantic" if hit10 else "miss"),
+                "forbiddenTop1": forbiddenTop1 if hasHardNegative else None,
+                "forbiddenTop3": forbiddenTop3 if hasHardNegative else None,
+                "forbiddenTop10": forbiddenTop10 if hasHardNegative else None,
+                "sourceIntentLeak": sourceIntentLeak if _forbiddenSourceFamilies(gold) else None,
+                "constraintViolation": forbiddenTop1 if hasHardNegative else None,
+                "hardNegativeWin": hardNegativeWin,
             }
         )
 
@@ -164,10 +217,19 @@ def evaluateQueryGoldRows(
         "newsSourcePrecision10": _ratio(newsPrecisionSum, newsPrecisionRows),
         "noAnswerFalseAcceptRate": _ratio(noAnswerFalseAccepts, noAnswerRows),
         "noAnswerNegativeRejectRate": _ratio(noAnswerRows - noAnswerFalseAccepts, noAnswerRows),
+        "hardNegativeRows": float(hardNegativeRows),
+        "hardNegativeExactDocHit10": _ratio(hardNegativeExactDocHit10Hits, hardNegativeRows),
+        "hardNegativeWinRate": _ratio(hardNegativeWins, hardNegativeRows),
+        "forbiddenTop1Rate": _ratio(forbiddenTop1Violations, hardNegativeRows),
+        "forbiddenTop3Rate": _ratio(forbiddenTop3Violations, hardNegativeRows),
+        "forbiddenTop10Rate": _ratio(forbiddenTop10Violations, hardNegativeRows),
+        "sourceIntentLeakRate": _ratio(sourceIntentLeaks, sourceIntentLeakRows),
+        "constraintViolationRate": _ratio(forbiddenTop1Violations, hardNegativeRows),
     }
     blockers = _releaseBlockers(
         rows=rows,
         targetCounts=targetCounts,
+        hardNegativeRows=hardNegativeRows,
         realReviewedRows=realReviewedRows,
         minRows=minRows,
         requiredTargets=requiredTargets,
@@ -298,6 +360,7 @@ def _releaseBlockers(
     *,
     rows: Sequence[Mapping[str, Any]],
     targetCounts: Mapping[str, int],
+    hardNegativeRows: int,
     realReviewedRows: int,
     minRows: int,
     requiredTargets: Iterable[str],
@@ -322,10 +385,10 @@ def _releaseBlockers(
         if unreviewedCount:
             blockers.append(f"unreviewedGoldRows:{unreviewedCount}")
     for metric, minimum in thresholds.items():
-        if _skipMetricThreshold(metric, targetCounts):
+        if _skipMetricThreshold(metric, targetCounts, hardNegativeRows):
             continue
         value = metrics.get(metric, 0.0)
-        if metric.endswith("FalseAcceptRate"):
+        if metric in MAXIMUM_THRESHOLD_METRICS:
             if value > minimum:
                 blockers.append(f"metric:{metric}:{value:.4f}>{minimum:.4f}")
         elif value < minimum:
@@ -333,7 +396,7 @@ def _releaseBlockers(
     return blockers
 
 
-def _skipMetricThreshold(metric: str, targetCounts: Mapping[str, int]) -> bool:
+def _skipMetricThreshold(metric: str, targetCounts: Mapping[str, int], hardNegativeRows: int) -> bool:
     docTargets = sum(count for target, count in targetCounts.items() if target != "noAnswer")
     if metric in {"docHit10", "memoryCitationTop3Exact"}:
         return docTargets <= 0
@@ -341,6 +404,16 @@ def _skipMetricThreshold(metric: str, targetCounts: Mapping[str, int]) -> bool:
         return int(targetCounts.get("news") or 0) <= 0
     if metric == "noAnswerFalseAcceptRate":
         return int(targetCounts.get("noAnswer") or 0) <= 0
+    if metric in {
+        "hardNegativeExactDocHit10",
+        "hardNegativeWinRate",
+        "forbiddenTop1Rate",
+        "forbiddenTop3Rate",
+        "forbiddenTop10Rate",
+        "sourceIntentLeakRate",
+        "constraintViolationRate",
+    }:
+        return hardNegativeRows <= 0
     return False
 
 
@@ -351,6 +424,12 @@ def _thresholds(overrides: Mapping[str, float] | None) -> dict[str, float]:
         "memoryCitationTop3Exact": 0.9,
         "newsSourcePrecision10": 0.9,
         "noAnswerFalseAcceptRate": 0.1,
+        "hardNegativeExactDocHit10": 0.95,
+        "hardNegativeWinRate": 0.95,
+        "forbiddenTop3Rate": 0.0,
+        "forbiddenTop10Rate": 0.02,
+        "sourceIntentLeakRate": 0.0,
+        "constraintViolationRate": 0.05,
     }
     if overrides:
         base.update({str(k): float(v) for k, v in overrides.items()})
@@ -373,6 +452,12 @@ def _rowFailureTypes(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any
     if target == "news" and _sourcePrecision(results[:10], expectedSource="news") < 1.0:
         failures.append("newsSourcePrecision10")
         failures.append("sourceIntentMiss")
+    if _anyForbiddenMatch(gold, results[:3]):
+        failures.append("hardNegativeForbiddenTop3")
+    elif _anyForbiddenMatch(gold, results[:10]):
+        failures.append("hardNegativeForbiddenTop10")
+    if _sourceIntentLeak(gold, results[:10]):
+        failures.append("sourceIntentLeak")
     return failures
 
 
@@ -538,6 +623,57 @@ def _expectedSourceRefs(gold: Mapping[str, Any]) -> set[str]:
     return refs
 
 
+def _forbiddenSourceRefs(gold: Mapping[str, Any]) -> set[str]:
+    return _stringSet(gold.get("forbiddenSourceRefs") or gold.get("forbiddenSourceRef"))
+
+
+def _forbiddenSourceFamilies(gold: Mapping[str, Any]) -> set[str]:
+    return _stringSet(gold.get("forbiddenSourceFamilies") or gold.get("forbiddenSourceFamily"))
+
+
+def _hasForbiddenGold(gold: Mapping[str, Any]) -> bool:
+    return bool(_forbiddenSourceRefs(gold) or _forbiddenSourceFamilies(gold))
+
+
+def _anyForbiddenMatch(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> bool:
+    return bool(_forbiddenRanks(gold, results))
+
+
+def _forbiddenRanks(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> list[int]:
+    refs = _forbiddenSourceRefs(gold)
+    families = _forbiddenSourceFamilies(gold)
+    if not refs and not families:
+        return []
+    out: list[int] = []
+    for index, row in enumerate(results, start=1):
+        if not _isAnswerable(row):
+            continue
+        ref = _sourceRef(row)
+        if refs and ref in refs:
+            out.append(index)
+            continue
+        if families and _rowSourceFamily(row) in families:
+            out.append(index)
+    return out
+
+
+def _expectedRank(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> int | None:
+    refs = _expectedSourceRefs(gold)
+    if not refs:
+        return None
+    for index, row in enumerate(results, start=1):
+        if _isAnswerable(row) and _sourceRef(row) in refs:
+            return index
+    return None
+
+
+def _sourceIntentLeak(gold: Mapping[str, Any], results: Sequence[Mapping[str, Any]]) -> bool:
+    families = _forbiddenSourceFamilies(gold)
+    if not families:
+        return False
+    return any(_isAnswerable(row) and _rowSourceFamily(row) in families for row in results)
+
+
 def _expectedSourceRefText(gold: Mapping[str, Any]) -> str:
     refs = sorted(_expectedSourceRefs(gold))
     return ",".join(refs)
@@ -552,6 +688,21 @@ def _sourcePrecision(results: Sequence[Mapping[str, Any]], *, expectedSource: st
 
 def _sourceRef(row: Mapping[str, Any]) -> str:
     return str(row.get("sourceRef") or row.get("rcept_no") or "")
+
+
+def _rowSourceFamily(row: Mapping[str, Any]) -> str:
+    from dartlab.providers.dart.search.sourceIntent import sourceFamily
+
+    source = row.get("source") or row.get("sourceKind") or ""
+    return sourceFamily(str(source))
+
+
+def _stringSet(value: Any) -> set[str]:
+    if isinstance(value, str):
+        return {part.strip() for part in value.split(",") if part.strip()}
+    if isinstance(value, Sequence):
+        return {str(item).strip() for item in value if str(item).strip()}
+    return set()
 
 
 def _isAnswerable(row: Mapping[str, Any]) -> bool:
@@ -591,6 +742,9 @@ def _policyCandidate(failureType: str) -> str:
         "bodyEvidenceMiss": "evidencePackPolicy",
         "staleSource": "sourceFreshnessOrCoveragePolicy",
         "goldReviewRequired": "queryGoldReview",
+        "hardNegativeForbiddenTop3": "constraintRankingPolicy",
+        "hardNegativeForbiddenTop10": "constraintRankingPolicy",
+        "sourceIntentLeak": "sourceIntentPolicy",
     }.get(failureType, "policyReview")
 
 

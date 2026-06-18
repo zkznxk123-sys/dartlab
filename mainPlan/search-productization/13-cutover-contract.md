@@ -1,6 +1,6 @@
 # 13. Cutover Contract — 제품 검색 교체 기준
 
-상태: v0.8 (2026-06-16)
+상태: v0.9 (2026-06-18)
 범위: `dartlab.search(...)` 를 제품 검색 엔진으로 교체할 때 필요한 운영·품질·증거 계약.
 
 ---
@@ -25,39 +25,40 @@
 | S0 experiment | 실험 또는 회귀 압박 | `_attempts`, synthetic/proxy gold, local smoke | 제품 주장 |
 | S1 designReady | 본진 이식 가능한 설계·코드 | source intent, answerability, result schema, catalog delta, local updater, proof bundle CLI | 운영 가능 주장 |
 | S2 opsReady | 기본값 교체 가능한 운영 증거 | source catalog 4종 + producerRun lineage + previous-manifest drop guard 통과, full/lite contentIndex current manifest, full/lite HF round-trip activate/rollback, canary, result contract, local indexInfo, proof bundle missingEvidence 없음 | release graduation 주장 |
-| S3 releaseReady | 제품 졸업 가능 | S2 + reviewed real query-log gold 100~300 rows + miss ledger triage + quality report pass | proxy/generated gold 로 졸업 |
+| S3 releaseReady | 제품 졸업 가능 | S2 + reviewed real query-log gold 100~300 rows + reviewer-approved hard-negative 300 rows + miss ledger triage + quality report pass | proxy/generated/candidate gold 로 졸업 |
 | S4 defaultReplacement | 본진 기본값 교체 완료 | S2 이상, `defaultBuildMode=catalog`, `scheduledBuildMode=catalog`, legacy fallback 운영자 전용, fail-closed publish, rollback manifest, 운영 런북 증거 슬롯 작성, 본진 surface 명칭 정리 | 장기 이중선 |
 
-현재 checkout 기준 cutover 는 direct-review proof 로 S4 까지 닫았다. 다음 목표는 새 workflow 가 원격 Actions 에서 같은 replacement evidence 를 남기는지 확인하고, query-log gold/miss ledger 를 운영 루프로 계속 누적하는 것이다.
+현재 checkout 기준 cutover 는 direct-review proof 로 defaultReplacement 배선을 한 번 닫았다. 2026-06-18 hard-negative 300행 gate 추가 뒤 최신 제품 졸업 판정은 `releaseReady=false` 다. 다음 목표는 새 workflow 가 원격 Actions 에서 같은 replacement evidence 를 남기는지 확인하고, query-log/hard-negative gold 와 miss ledger 를 운영 루프로 계속 누적하는 것이다.
 
 ---
 
 ## 3. 현재 판정
 
-2026-06-16 direct-review proof bundle 기준:
+2026-06-18 최신 판정 기준:
 
 | 항목 | 상태 |
 |---|---|
 | designReady | true |
 | opsReady | true |
-| releaseReady | true |
-| defaultReplacement | true |
-| cutover state | `S4_DEFAULT_REPLACEMENT` |
+| releaseReady | false |
+| defaultReplacement | historical true |
+| cutover state | historical `S4_DEFAULT_REPLACEMENT`; latest release blocked |
 | full docs | 462,947 |
 | lite docs | 280,747 |
 | source counts | full: allFilings 192,095 / panel 104,761 / edgar-panel 84,293 / news 81,798 |
 | source freshness | allFilings 20260612 / panel 20260615 / edgar-panel 20260616 / news 20260615 |
 | result contract | valid |
 | canary | passRate 1.0 |
-| quality report | 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 |
-| quality metrics | overallReadyRate 1.0 / docHit10 1.0 / memoryCitationTop3Exact 1.0 / newsSourcePrecision10 1.0 / noAnswerFalseAcceptRate 0.0 |
-| blockers | none |
+| historical direct-review quality report | 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 |
+| latest hard-negative quality report | 360 currentDataHardNegative candidate rows, filing 116 / news 47 / EDGAR 137 / noAnswer 60 |
+| latest hard-negative metrics | overallReadyRate 0.9806 / docHit10 0.9767 / exactDocHit10 0.9667 / hardNegativeWinRate 0.9667 / noAnswerFalseAcceptRate 0.0 / forbiddenTop3Rate 0.0 / forbiddenTop10Rate 0.0 / sourceIntentLeakRate 0.0 / constraintViolationRate 0.0 |
+| blockers | realReviewedRows 0/300, proxyGoldRows 360, unreviewedGoldRows 360 |
 
 해석:
 
 - HF source catalog/current full/lite manifest 와 runtime 계약은 S2 운영 기준을 넘었다.
-- direct-review 품질팩이 S3 releaseReady 를 통과했고, replacement evidence 가 S4 defaultReplacement 를 통과했다.
-- 이 증거는 현재 checkout 의 direct-review/local-HF bootstrap cycle 이므로, 동일 순서의 GitHub Actions evidence artifact 는 다음 Actions run 에서 별도로 확인한다.
+- direct-review 품질팩과 replacement evidence 는 historical S3/S4 를 통과했고, 최신 current-data 360행은 hard-negative/noAnswer metric gate 를 통과했다. 하지만 최신 S3 releaseReady 는 reviewer-approved hard-negative/noAnswer gold 승격 전까지 닫히지 않는다.
+- 이 증거는 현재 checkout 의 direct-review/local-HF bootstrap cycle 이므로, 동일 순서의 GitHub Actions evidence artifact 와 최신 hard-negative gate 는 다음 Actions run 에서 별도로 확인한다.
 - lite 18개월 tier 는 326.3MB 로 경량 목표를 넘었으므로 기본 검색 교체를 막지는 않지만, 다음 품질/운영 사이클에서 12개월 또는 top-universe lite 정책을 실험한다.
 
 ---
@@ -90,6 +91,7 @@
 |---|---|
 | real gold | `goldOrigin=userLog`, `reviewStatus=reviewed`, 100~300 rows |
 | coverage | filing/news/noAnswer/EDGAR/company-facet trap 포함 |
+| hard-negative gold | reviewer-approved 300 rows, same-company-different-year, sibling filing, report-type mismatch, news/filing confusion, EDGAR/DART confusion, panel/filing confusion 포함 |
 | answerable quality | readyRate/docHit/sourceRef 기준 통과 |
 | no-answer | falseAcceptRate 0 |
 | miss ledger | open miss 가 blocker/non-blocker 로 분류됨 |

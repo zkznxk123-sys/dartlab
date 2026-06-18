@@ -100,12 +100,21 @@ def test_productization_status_accepts_complete_evidence_bundle(tmp_path: Path) 
         tmp_path / "quality.json",
         {
             "releaseEligible": True,
-            "totalRows": 120,
-            "realReviewedRows": 120,
-            "coverageByKind": {"filing": 50, "news": 30, "noAnswer": 20, "edgar": 20},
-            "goldOriginCounts": {"userLog": 120},
-            "reviewStatusCounts": {"reviewed": 120},
-            "metrics": {"overallReadyRate": 0.95},
+            "totalRows": 320,
+            "realReviewedRows": 320,
+            "coverageByKind": {"filing": 170, "news": 70, "noAnswer": 20, "edgar": 60},
+            "goldOriginCounts": {"userLog": 320},
+            "reviewStatusCounts": {"reviewed": 320},
+            "metrics": {
+                "overallReadyRate": 0.95,
+                "hardNegativeRows": 300,
+                "hardNegativeExactDocHit10": 0.98,
+                "hardNegativeWinRate": 0.97,
+                "forbiddenTop3Rate": 0.0,
+                "forbiddenTop10Rate": 0.01,
+                "sourceIntentLeakRate": 0.0,
+                "constraintViolationRate": 0.02,
+            },
             "blockers": [],
         },
     )
@@ -200,6 +209,7 @@ def test_productization_status_revalidates_quality_report_counts(tmp_path: Path)
     assert report["opsReady"] is True
     assert report["releaseReady"] is False
     assert "qualityRealReviewedRows:0/100" in report["blockers"]
+    assert "qualityHardNegativeRows:0/300" in report["blockers"]
     assert "qualityMissingTarget:news" in report["blockers"]
     assert "qualityProxyGoldRows:120" in report["blockers"]
     assert "qualityUnreviewedGoldRows:120" in report["blockers"]

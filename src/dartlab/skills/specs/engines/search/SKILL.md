@@ -138,7 +138,7 @@ recent = c.liveFilings()        # 라이브
 
 ## 호출 동작
 
-`scope="auto"` (기본): **통합 검색 R\*** — plain BM25(음절 bigram) ⊕ 확장 BM25(큐레이션 동의어 + 결정론 라우팅 canon, 0.5 가중) RRF 융합. 구어·약어("자사주 샀어?")를 공시 용어(자기주식취득)로 회수하되, 확장이 틀려도 plain lane 이 보존돼 최악이 plain 과 동급(always-safe). held-out 실측: 자유구어 nDCG@10 0.237(word·무확장) → 0.502, 정식어 0.618 → 0.943. router.json 부재 시 라우팅 lane 만 생략(동의어는 코드 내장), 확장 미발화 시 plain 단독 graceful degrade. (인덱스 빌드: 월간 `searchIndexMain`.)
+`scope="auto"` (기본): **통합 검색 R\*** — plain BM25(음절 bigram) ⊕ 확장 BM25(큐레이션 동의어 + 결정론 라우팅 canon, 0.5 가중) RRF 융합 뒤, 현재 content index metadata 에서 컴파일한 semantic constraint plan 으로 source/entity/year/topic/report phase 를 재랭킹한다. 구어·약어("자사주 샀어?")를 공시 용어(자기주식취득)로 회수하되, source intent 와 entity/year 제약은 hard mask/answerability 로 지킨다. router.json 부재 시 라우팅 lane 만 생략(동의어는 코드 내장), 확장 미발화 시 plain 단독 graceful degrade. 런타임 metadata load 는 기본적으로 결과 생성에 필요한 slim column 만 읽고 긴 `evidenceText` 는 opt-in 이다. (인덱스 빌드: 월간 `searchIndexMain`.)
 
 `scope="content"`: `section_content` 본문 BM25 단독 (의미확장 없이 순수 키워드). 디버그/비교용.
 
@@ -187,7 +187,7 @@ dartlab.search("유상증자")
 
 ## 제품 gate / 운영 품질
 
-release graduation 은 실제 query-log gold 100~300 rows 통과 후에만 가능하다. generated/proxy gold 는 회귀 압박 전용이다.
+release graduation 은 실제 query-log gold 100~300 rows 와 reviewer-approved hard-negative 300 rows 통과 후에만 가능하다. generated/proxy/candidate gold 는 회귀 압박 전용이다.
 
 ```powershell
 uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py `
@@ -214,6 +214,8 @@ uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.
 ```
 
 canary pack 은 source intent, source coverage, expected sourceRef, no-answer false accept 를 빠르게 본다. query-log gold 는 제품 졸업 gate 다. productization status 는 remote evidence, local indexInfo, HF round-trip, result contract, canary, quality report 를 한 번에 묶어 ops/release 가능 여부를 판정한다. source catalog 는 HF 파일 존재만으로 ops 증거가 아니며, `producerRun` lineage 와 previous full 대비 files/rows/catalogRows drop guard 통과 증거가 필요하다.
+
+Hard-negative gate 는 same-company-different-year, sibling filing, report-type mismatch, news/filing confusion, EDGAR/DART confusion, panel/filing confusion, noAnswer missing-event rows 를 포함한다. current-data candidate 360 rows 에서 metric/noAnswer gate 가 통과해도 `goldOrigin` 과 `reviewStatus` 가 real/reviewed 계열이 아니면 release evidence 로 보지 않는다. 2026-06-18 기준 current-data 360행은 `overallReadyRate=0.9806`, `exactDocHit10=0.9667`, `hardNegativeWinRate=0.9667`, `noAnswerFalseAcceptRate=0.0` 으로 metric gate 를 통과했지만 reviewer-approved 상태가 아니라 `releaseReady=false` 다.
 
 운영자가 실제 품질 후보를 쌓을 때는 새 API 를 만들지 않고 기존 `dartlab.search(...)` 를 그대로 쓴다. `DARTLAB_SEARCH_QUERY_LOG=1` 이면 `{dartlab.dataDir}/search/queryLogRaw.jsonl` 에 raw candidate row 를 남긴다. 각 row 는 `goldOrigin=userLog`, `reviewStatus=candidate`, top sourceRef/source/answerability/dataAsOf 를 가진다. 이 raw row 는 reviewer label 이 붙기 전까지 release gold 가 아니며, `prepareSearchGold.py` 를 거쳐 reviewed real gold 로 승격돼야 한다.
 

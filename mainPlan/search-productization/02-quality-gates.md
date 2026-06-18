@@ -1,6 +1,6 @@
 # 02. 품질 Gate — 제품 후보와 제품 졸업을 분리
 
-상태: v0.9 (2026-06-16)
+상태: v1.1 (2026-06-18)
 범위: 제품화 전후의 필수 품질 기준.
 
 ---
@@ -36,6 +36,14 @@ large corpus 기준:
   - CAPEX/AI 데이터센터 사업보고서 2개 후보는 sourceHint mismatch 로 reviewable set 에서 제외했다. 현재 품질 수치에 몰래 포함하지 않는다.
 
 제품화 전 proxy/curated miss 는 차단 결함이 아니었다. direct-review 이후의 신규 miss 는 miss ledger 에 기록하고 반복 유형이면 일반 정책으로만 승격한다.
+
+2026-06-18 live runtime spot check 에서 `HBM 설비투자와 TC bonder 증설을 언급한 공시 원문` 은 본문 의미 질의로 분류되어 panel/allFilings HBM 근거가 top-5 에 들어왔고, `화성 지하도시에 상장사가 얼음광산을 매입했다` 는 후보 score 가 전부 confidence floor 아래라 `answerable=false`, `notAnswerableReason=lowConfidence` 로 차단됐다. 이 기준은 query별 mapper 가 아니라 본문 의미 rerank + low-confidence no-answer 정책이다.
+
+2026-06-18 full query-log gold 는 `releaseEligible=true` 로 회복됐다. `overallReadyRate=0.9811`, `docHit10=0.9787`, `memoryCitationTop3Exact=0.9468`, `newsSourcePrecision10=1.0`, `noAnswerFalseAcceptRate=0.0` 이다. 본문/주석/위험요인 같은 정형 content 질의는 content lane 점수를 보존하고, `언급/다룬/수혜/증설/설비투자/전력/인프라` 같은 주제형 의미 질의만 body semantic rerank 를 탄다.
+
+2026-06-18 hard-negative 300행 current-data gate 를 추가한 뒤 위 direct-review 106행 결과는 제품 졸업 증거로 충분하지 않다. `.github/scripts/search/buildSearchHardNegativeGold.py` 로 `.tmp/hf-contentIndex/catalog_snapshot.parquet` 475,549 rows 에서 hard-negative 300 rows + noAnswer 60 rows 를 생성했고, 실제 `.tmp` active index 475,611 docs 에 대해 본진 constraint-filtered semantic retrieval 을 평가했다. 최신 결과는 `.tmp/search-hard-negative/qualityReport.hardNegative.withNoAnswer.eventOnly.candidate.json` 기준 `overallReadyRate=0.9806`, `docHit10=0.9767`, `exactDocHit10=0.9667`, `hardNegativeExactDocHit10=0.9667`, `hardNegativeWinRate=0.9667`, `noAnswerFalseAcceptRate=0.0`, `forbiddenTop3Rate=0.0`, `forbiddenTop10Rate=0.0`, `sourceIntentLeakRate=0.0`, `constraintViolationRate=0.0` 이다. 품질 metric blocker 와 noAnswer coverage blocker 는 해소됐지만 `goldOrigin=currentDataHardNegative`, `reviewStatus=candidate`, `realReviewedRows=0/300` 이므로 release evidence 는 아니다. 현재 졸업 판정은 **불가**이며, 다음 blocker 는 reviewer-approved hard-negative/noAnswer gold 승격이다.
+
+같은 run 에서 runtime metadata load 를 slim column 으로 바꿔 메모리 병목도 낮췄다. `main_meta.parquet` 전체 `evidenceText` 로드 대신 runtime 필수 컬럼만 읽고 `evidenceText` 는 opt-in 으로 분리했다. warm benchmark `.tmp/search-hard-negative/perfReport.afterSlimMeta.warm.json` 기준 cold warmup 9273.9ms, warm p50 419.0ms, p95 2015.8ms, max 2099.5ms, RSS start 74MB -> afterWarmup 1.76GB -> afterQueries 1.81GB, warm query delta 43MB 다. 이전 full meta 경로의 afterQueries 약 4.36GB 대비 운영 메모리 여유는 개선됐지만, cold load 와 EDGAR filing 류 p95 는 계속 최적화 대상이다.
 
 ---
 
@@ -123,10 +131,22 @@ uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py `
 - news sourcePrecision10 >= 0.9.
 - noAnswer negativeRejectRate >= 0.9.
 - noAnswer falseAcceptRate <= 0.1.
+- hard-negative gold rows >= 300 필수.
+- hard-negative required types: same-company-different-year, same-company-sibling-filing, similar-event-other-company, report-type-mismatch, news-filing-confusion, edgar-dart-confusion, panel-filing-confusion.
+- hard-negative exactDocHit10 >= 0.95.
+- hard-negative hardNegativeWinRate >= 0.95.
+- hard-negative forbiddenTop3Rate == 0.0.
+- hard-negative forbiddenTop10Rate <= 0.02.
+- hard-negative sourceIntentLeakRate == 0.0.
+- hard-negative top1ConstraintViolationRate <= 0.05.
 
 제품 후보에서 제품 졸업으로 바꿀 때는 strict primary citation 을 별도 warning track 으로 유지한다. 같은 날짜 형제공시 때문에 strict exact 가 낮아져도 sourceRef set 과 report intent preference 가 맞으면 운영 품질에는 치명적이지 않다.
 
 `docHit10` 과 `memoryCitationTop3Exact` 는 `answerable=True` 인 결과에서만 인정한다. sourceRef 가 맞아도 `missingDataAsOf`, `staleSource`, `facetMismatch:*` 같은 no-answer reason 이 붙은 row 는 release hit 가 아니다.
+
+search runtime 은 후보를 반환하더라도 전체 후보군 score 가 confidence floor 아래면 `answerable=false` 로 내려야 한다. noAnswer gate 와 memory-card 생성은 이 플래그를 기준으로 false accept 를 판정한다.
+
+2026-06-18 `tests/_attempts/searchConstraintRerank/`의 7행 deterministic 실험은 constraint-first rerank 가 bodyCue/BM25/RRF 보다 hard-negative 를 잘 눌렀다는 설계 후보 증거다. 이후 ablation 은 rank sink 만으로는 금지 후보가 top3 evidence 에 남는다는 점도 드러냈다. 따라서 release gold row 는 `forbiddenSourceRefs` 또는 `forbiddenSourceFamilies` 를 가질 수 있고, `qualityGate.py` 는 `hardNegativeExactDocHit10`, `hardNegativeWinRate`, `forbiddenTop3Rate`, `forbiddenTop10Rate`, `sourceIntentLeakRate`, `constraintViolationRate` 를 계산한다. HF current allFilings/panel/news/EDGAR 300행 candidate hard-negative 에서 본진 data-compiled mapper + constraint-filtered ranking 은 metric gate 를 통과했다. 단 synthetic/auto candidate 는 제품 졸업 증거가 아니므로, 같은 300행 또는 확장본을 reviewer-approved real/userLog/operator gold 로 승격해야 release gate 로 인정한다.
 
 ---
 

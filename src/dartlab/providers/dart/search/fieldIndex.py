@@ -57,6 +57,23 @@ TITLE_WEIGHT_REPEAT = 4
 
 _HANGUL_RE = re.compile(r"[가-힣]+")
 _ASCII_RE = re.compile(r"[A-Za-z]{2,20}")
+_RUNTIME_META_COLUMNS: tuple[str, ...] = (
+    "rcept_no",
+    "section_order",
+    "corp_code",
+    "corp_name",
+    "stock_code",
+    "rcept_dt",
+    "report_nm",
+    "section_title",
+    "text",
+    "source",
+    "sourceRef",
+    "sourceDataAsOf",
+    "contentLen",
+    "url",
+)
+_EVIDENCE_META_COLUMNS: tuple[str, ...] = ("evidenceText",)
 
 
 def _contentIndexDir(tier: str | None = None) -> Path:
@@ -517,12 +534,19 @@ def saveShardedSegment(idx: dict, meta: pl.DataFrame, name: str = "main", outDir
     return {**files, "nDocs": int(idx["nDocs"]), "nTerms": nTerms}
 
 
-def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFrame] | None:
+def loadSegment(
+    name: str,
+    inDir: Path | None = None,
+    *,
+    includeEvidenceText: bool = False,
+) -> tuple[dict, pl.DataFrame] | None:
     """세그먼트를 디스크에서 로드. 파일이 없으면 None.
 
     Args:
         name: 인자.
         inDir: 인자.
+        includeEvidenceText: True 면 긴 evidenceText 컬럼까지 로드. 기본 검색 경로는
+            slim meta 만 로드해 full index RSS 를 낮춘다.
 
     Raises:
         없음.
@@ -540,7 +564,8 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
     arrs = np.load(npzPath)
     stemDict = json.loads((inDir / f"{name}_stems.json").read_text(encoding="utf-8"))
     info = json.loads((inDir / f"{name}_info.json").read_text(encoding="utf-8"))
-    meta = pl.read_parquet(inDir / f"{name}_meta.parquet")
+    metaPath = inDir / f"{name}_meta.parquet"
+    meta = pl.read_parquet(metaPath, columns=_segmentMetaColumns(metaPath, includeEvidenceText=includeEvidenceText))
     idx = {
         "stemDict": stemDict,
         "offsets": arrs["offsets"],
@@ -551,6 +576,19 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
         "nDocs": int(info["nDocs"]),
     }
     return idx, meta
+
+
+def _segmentMetaColumns(metaPath: Path, *, includeEvidenceText: bool) -> list[str] | None:
+    """Return bounded metadata columns for runtime segment loading."""
+    try:
+        schema = pl.read_parquet_schema(metaPath)
+    except Exception:  # noqa: BLE001 - corrupt schema should fail through normal full read path.
+        return None
+    wanted = list(_RUNTIME_META_COLUMNS)
+    if includeEvidenceText:
+        wanted.extend(_EVIDENCE_META_COLUMNS)
+    columns = [column for column in wanted if column in schema]
+    return columns or None
 
 
 # ── 검색 ──
