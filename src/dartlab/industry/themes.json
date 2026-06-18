@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "purpose": "횡단(cross-industry) 투자 테마 사전. 표준 KSIC 업종을 가로지르는 테마만 둔다(단일 업종 매핑=동어반복). keywords=KIND 주요제품 텍스트에 실제 등장 표현. segmentKeywords=NT_D871100 영업부문 멤버명(매출노출% 등급용). 사람 큐레이션 SSOT — 자동 생성 도구 금지(taxonomy.json·productIndicators.py 와 동일 운영방식, '사전은 손, 인덱싱은 기계').",
+    "scoring": "태깅(recall)=keywords substring(주요제품). 등급(노출%)=segmentRevenueExposure × segmentKeywords. segmentKeywords 미정의 테마는 등급 미산출(정직). keyword 단독 등급 금지.",
+    "version": "2026-06-18"
+  },
+  "themes": {
+    "secondaryBattery": {
+      "name": "2차전지/배터리",
+      "desc": "리튬이온 배터리 셀·소재·장비·재활용 밸류체인. 화학(소재)·비철금속(동박)·기계(장비)·전기장비(셀)를 가로지름.",
+      "keywords": ["2차전지", "이차전지", "배터리", "리튬이온", "양극재", "양극활물질", "음극재", "음극활물질", "활물질", "전해질", "전해액", "분리막", "동박", "전구체", "BMS", "배터리팩"],
+      "negative": ["배터리 충전기", "건전지"],
+      "segmentKeywords": ["energysolution", "에너지솔루션", "battery", "전지", "sdi"]
+    },
+    "robotics": {
+      "name": "로봇/자동화",
+      "desc": "산업용·협동·서비스 로봇 및 부품(감속기·센서·구동기). 기계·전기장비·SW를 가로지름.",
+      "keywords": ["로봇", "협동로봇", "감속기", "액추에이터", "구동기", "로보틱스", "자동화 설비", "머신비전", "AGV", "AMR", "휴머노이드"],
+      "negative": ["로봇청소기"]
+    },
+    "shipbuilding": {
+      "name": "조선/해양",
+      "desc": "선박 건조·해양플랜트·기자재·친환경 추진. 조선·기계·철강을 가로지름.",
+      "keywords": ["선박", "조선", "해양플랜트", "LNG선", "선박엔진", "기자재", "추진", "친환경 선박", "암모니아 추진"],
+      "negative": []
+    }
+  }
+}

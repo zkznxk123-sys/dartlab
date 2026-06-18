@@ -528,6 +528,160 @@ class Industry:
 
         return getIndustry(industryId)
 
+    def theme(
+        self,
+        themeId: str | None = None,
+        *,
+        grade: bool = False,
+        discover: bool = False,
+    ) -> pl.DataFrame:
+        """횡단 투자 테마 → 멤버 종목 (+선택적 매출노출 등급·공급망 발견).
+
+        Capabilities:
+            themes.json 키워드를 KIND 주요제품에 substring 매칭해 테마 멤버를 태깅(근거 동반).
+            ``grade=True`` 면 멤버별 부문 매출노출%(테마-인지, panel SSOT) 추가, ``discover=True``
+            면 공급망 거래엣지로 키워드 미언급 수혜주 발견. 인포스탁 리스트와 달리 *근거 투명*.
+
+        Parameters
+        ----------
+        themeId : str | None
+            테마 ID. None 이면 등록 테마 목록(themeId/name/gradeable) 반환.
+        grade : bool
+            True 면 ``노출%``·``등급근거`` 컬럼 추가 (멤버별 panel 조회 — 느림).
+        discover : bool
+            True 면 공급망 거래엣지(supplier/customer)로 발견한 비키워드 종목 추가(``발견`` = 공급망).
+
+        Returns
+        -------
+        pl.DataFrame
+            themeId=None: ``themeId, name, keywords, gradeable``.
+            themeId 지정: ``종목코드, 회사명, 업종, 근거, 발견`` (+grade: ``노출%, 등급근거``).
+            ``노출%``=None 은 미산출(추출실패/단일사업/테마 segmentKeywords 부재) — 100% 등치 금지.
+
+        Raises:
+            없음 — 미등록 테마면 빈 DataFrame.
+
+        Example:
+            >>> from dartlab.industry import Industry
+            >>> Industry().theme("secondaryBattery", grade=True).filter(
+            ...     pl.col("회사명") == "LG화학"
+            ... )["노출%"][0]
+            48.4
+
+        Guide:
+            ``노출%``>=50 pure-play / 10~50 quasi / <10 곁다리(거짓양성 의심) / None 미산출. 답변 시
+            ``근거``(키워드)·``등급근거``(basis) 를 evidence 로 명시.
+
+        When:
+            "이 테마 종목·순도", "왜 이 테마", AI 워크벤치 테마 근거 답변.
+
+        How:
+            ``industry.themes.matchThemeText`` (태깅) + ``themeRevenueExposure`` (등급) +
+            ``build.pipeline.loadEdges`` (발견, supplyOnly).
+
+        Requires:
+            - ``industry/themes.json`` + KIND 상장목록. grade=True: panel 주석 데이터.
+
+        See Also:
+            - ``dartlab.industry.themes.themeRevenueExposure`` : 등급 위임.
+            - ``dartlab.industry.Industry.edges`` : 공급망 관계 원천.
+
+        AIContext:
+            테마 단일 진입점. 멤버십(근거)·노출%(등급근거)를 cite. None 노출은 "미산출"로 정직 표기.
+        """
+        from dartlab.industry.themes import listThemes, loadThemes, matchThemeText
+
+        if themeId is None:
+            return pl.DataFrame(
+                listThemes(),
+                schema={"themeId": pl.Utf8, "name": pl.Utf8, "keywords": pl.Int64, "gradeable": pl.Boolean},
+            )
+
+        theme = loadThemes().get(themeId)
+        emptySchema = {
+            "종목코드": pl.Utf8,
+            "회사명": pl.Utf8,
+            "업종": pl.Utf8,
+            "근거": pl.Utf8,
+            "발견": pl.Utf8,
+        }
+        if theme is None:
+            return pl.DataFrame(schema=emptySchema)
+
+        from dartlab.gather.krx.listing.registry import getKindList
+
+        kind = getKindList()
+        members: list[dict] = []
+        memberCodes: set[str] = set()
+        for r in kind.iter_rows(named=True):
+            hits = matchThemeText(theme, r.get("주요제품") or "")
+            if hits:
+                code = r["종목코드"]
+                memberCodes.add(code)
+                members.append(
+                    {
+                        "종목코드": code,
+                        "회사명": r.get("회사명"),
+                        "업종": r.get("업종"),
+                        "근거": ", ".join(hits),
+                        "발견": "키워드",
+                    }
+                )
+
+        if discover:
+            members.extend(self._themeDiscover(memberCodes, members, kind))
+
+        if grade:
+            import gc
+
+            from dartlab.industry.themes import themeRevenueExposure
+
+            for m in members:
+                g = themeRevenueExposure(m["종목코드"], themeId) or {}
+                m["노출%"] = g.get("exposurePct")
+                m["등급근거"] = g.get("basis")
+                gc.collect()
+
+        if not members:
+            return pl.DataFrame(schema=emptySchema)
+        return pl.DataFrame(members)
+
+    @staticmethod
+    def _themeDiscover(memberCodes: set[str], members: list[dict], kind: pl.DataFrame) -> list[dict]:
+        """공급망 거래엣지(supplier/customer)로 키워드 미언급 수혜주 발견 (덕지덕지 가드: 거래엣지만).
+
+        고신뢰 시드(근거 키워드 2+)의 1-hop 거래 이웃 중 멤버 아닌 상장사. investor/affiliate
+        엣지는 동어반복/노이즈라 제외(E6 실측: 금융 노이즈 차단). amount 는 희소(랭킹 보조).
+        """
+        from dartlab.industry.build.pipeline import loadEdges
+
+        seeds = {m["종목코드"] for m in members if m.get("발견") == "키워드" and m["근거"].count(",") >= 1}
+        if not seeds:
+            return []
+        listed = set(kind["종목코드"].to_list())
+        nameMap = dict(zip(kind["종목코드"], kind["회사명"]))
+        prodMap = dict(zip(kind["종목코드"], kind["업종"]))
+        supplyTypes = ("supplier", "customer")
+        found: dict[str, str] = {}
+        for e in loadEdges():
+            et = (e.edgeType or "").lower()
+            if not any(t in et for t in supplyTypes):
+                continue
+            if e.fromCode in seeds and e.toCode and e.toCode in listed and e.toCode not in memberCodes:
+                found.setdefault(e.toCode, e.fromName or "")
+            if e.toCode in seeds and e.fromCode and e.fromCode in listed and e.fromCode not in memberCodes:
+                found.setdefault(e.fromCode, e.toName or "")
+        return [
+            {
+                "종목코드": code,
+                "회사명": nameMap.get(code),
+                "업종": prodMap.get(code),
+                "근거": f"공급망 ←{via}" if via else "공급망",
+                "발견": "공급망",
+            }
+            for code, via in found.items()
+        ]
+
 
 def addOverride(
     industryId: str,
