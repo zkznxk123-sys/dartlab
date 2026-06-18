@@ -219,6 +219,6 @@
 	<button class="chartTool" onclick={() => onSnapshot?.()} title={T('차트 PNG 저장 (출처 띠 포함)', 'save PNG')} aria-label="snapshot">
 		<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h2.4L6 3.2h4L11.6 5H14v8H2z"/><circle cx="8" cy="8.6" r="2.5"/></svg>
 	</button>
-	<button class="chartTool" onclick={() => (ctl.full = true)} title={T('전체화면 (Shift+F)', 'Fullscreen (Shift+F)')} aria-label="fullscreen">⤢</button>
+	<button class="chartTool" onclick={() => (ctl.full = true)} title={T('전체화면 (Shift+F)', 'Fullscreen (Shift+F)')} aria-label="fullscreen">{T('상세보기', 'detail')}</button>
 </div>
 </div>
