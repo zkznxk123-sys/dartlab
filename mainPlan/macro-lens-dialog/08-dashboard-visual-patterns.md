@@ -102,6 +102,7 @@
 | 방식 | 쓰임 | 데이터 계약 | 주의 |
 |---|---|---|---|
 | Contribution bar | 복합 지수의 구성요소별 기여 | `component/contribution/sign/updateDate` | 단일 pressure score의 오해를 줄인다. |
+| Evidence contribution lens | driver가 화면에 올라온 근거 분해 | `component/value/status/detail/sourceRef` | 축이 다르므로 합산하거나 재무 기여도로 읽지 않는다. |
 | Waterfall | GDPNow처럼 headline 변화 원인 분해 | `prev/current/delta/component` | 모델 산식이 없으면 쓰지 않는다. |
 | Bridge chart | macro driver가 재무 line으로 이어지는 중간 계산 | `macroDelta/channelBeta/financialDelta/quality` | beta 품질 gate가 열려야 한다. |
 
@@ -283,7 +284,8 @@ Macro Lens에 바로 쓸 강한 조합은 다섯 개다.
 
 ### P1
 
-- Contribution Waterfall
+- Evidence contribution lens
+- Contribution Waterfall (requires `prev/current/delta/component`)
 - Update/Vintage Path
 - Co-movement Scatter
 - Model Card Drawer

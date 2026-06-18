@@ -1,10 +1,36 @@
 # 06. 진행 원장
 
-상태: v1.4
+상태: v1.5
 
 ---
 
 ## 2026-06-18
+
+### v1.5 — Evidence Contribution Lens 구현
+
+배경:
+
+- `Contribution Waterfall`은 P1 후보였지만, 현재 계약은 `prev/current/delta/component`가 아니라 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`의 근거 개방도다.
+- 전문 UI/퀀트 검토 결과, 실제 모델 산식 없는 waterfall 명칭은 원인분해·재무 기여도처럼 읽힐 위험이 있어 같은 위치에서 Evidence Contribution Lens로 낮추는 방향이 맞았다.
+
+완료:
+
+- `전파 지도` drilldown 아래에 `Evidence Contribution` 패널을 추가했다.
+- 5개 component를 `OPEN/WATCH/LOCK`, `0~100` 근거 개방도, `detail`, `sourceRef`가 보이는 시각 블록으로 표시한다.
+- 패널 상단에 `재무 기여도 아님 · 합산 금지`를 고정 표시했다.
+- 중앙 연결선과 waterfall 명칭은 쓰지 않았다. 실제 `prev/current/delta/component` 계약이 열릴 때까지 원인분해 waterfall은 금지다.
+- 기존 4칸 drilldown 카드와 `Co-movement Gate` 사이에만 배치해 첫 화면을 늘리지 않았다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+- Playwright desktop: `Evidence Contribution` 라벨, 5개 근거 블록, `재무 기여도 아님 · 합산 금지`, `Waterfall` 문구 미노출, `Co-movement Gate`가 Evidence 패널 뒤에 오는 순서, 수평 overflow 없음 확인.
+- Playwright mobile: `Mobile Drill Rail` 경유 후 `Evidence Contribution` 라벨, 5개 근거 블록, `재무 기여도 아님 · 합산 금지`, `Waterfall` 문구 미노출, 페이지/모달 수평 overflow 없음 확인. 근거 블록은 패널 내부 가로 스크롤로만 처리한다.
+
+NEXT:
+
+1. 진짜 waterfall은 `prev/current/delta/component/modelFormula` 계약이 생길 때까지 보류한다.
+2. 실제 발표 캘린더/빈티지 데이터가 생기면 산점도와 별도로 release reaction view를 검토한다. 현재 scatter는 발표일 반응 분석이 아니다.
 
 ### v1.4 — 모바일 드릴다운 포커스 보강
 

@@ -83,7 +83,7 @@ export interface MacroLensSnapshot {
 - `exposureIndicators`: analysis/prebuild가 선택한 회사별 매크로 지표 후보. UI가 회귀를 재계산하지 않고 source packet과 model card로만 표시한다.
 - `releaseRail`: driver별 마지막 관측일, 빈도, freshness 상태, 다음 확인 시점. 실제 발표 캘린더가 아니라 현재 관측 artifact의 freshness policy다.
 - `sourcePackets`: driver별 `seriesId/source/unit/frequency/asOf/latest/transform/artifactPath/lineage` 구조화 패킷. UI가 문자열을 파싱하지 않는다.
-- `contributionStacks`: 선택 driver가 화면에 올라온 이유를 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`로 분해한 미니 stacked bar용 입력. 투자 방향 점수가 아니다.
+- `contributionStacks`: 선택 driver가 화면에 올라온 이유를 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`로 분해한 Evidence Contribution 입력. 각 값은 축이 다른 근거 개방도이며 재무 기여도, 원인분해 waterfall, 투자 방향 점수가 아니다.
 - `coMoveGates`: corr/n/window/status와 최근 관측점 배열을 가진 동행 후보 gate. 점 배열이 있으면 `x=거시 월말값 1차차분`, `y=종목 월수익률` 산점도로 표시하고, 점 배열이 없으면 corr 위치 플롯으로만 표시한다. corr 계산 표본(`n`)과 화면 표시점 수가 다를 수 있으므로 UI는 `shown`을 별도 표기한다.
 - `evidenceGates`: 첫 화면의 시계열/경로/동행/회사노출/민감도 gate. UI가 재계산하지 않는다.
 - `falsifiers`: 상관, peer dispersion, 회귀 품질, stale data처럼 thesis를 약하게 만드는 조건.

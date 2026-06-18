@@ -38,6 +38,7 @@
 	const pressureText: Record<string, string> = { high: '검토우선', medium: '보조', low: '맥락', blocked: '차단' };
 	const readinessText: Record<string, string> = { ready: 'READY', needsEvidence: 'EVIDENCE', blocked: 'BLOCK' };
 	const exposureQualityText: Record<string, string> = { quantCandidate: 'OPEN', qualitativeOnly: 'QUAL', blocked: 'LOCK' };
+	const componentStatusText: Record<string, string> = { ok: 'OPEN', watch: 'WATCH', blocked: 'LOCK' };
 	const relevantDrivers = $derived(snapshot.drivers.filter((d) => d.relevance !== 'context').slice(0, 16));
 	const contextDrivers = $derived(snapshot.drivers.filter((d) => d.relevance === 'context').slice(0, 18));
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
@@ -319,6 +320,31 @@
 							{#each focusFalsifiers.slice(0, 1) as f (f.id)}<em>{f.label}: {f.detail}</em>{/each}
 						</div>
 					</section>
+					{#if focusContribution}
+						<section class="mlContributionPanel" aria-label="Evidence contribution breakdown">
+							<div class="mlRailTitle">
+								<span class="mlBlockK">Evidence Contribution</span>
+								<b>{focusContribution.label}</b>
+								<em>{T('재무 기여도 아님 · 합산 금지', 'not financial contribution · not additive')}</em>
+							</div>
+							<div class="mlEvidenceBreakdown">
+								{#each focusContribution.components as c (c.id)}
+									<div class={'mlEvidenceStep ' + c.status} title={`${c.detail} · ${c.sourceRef}`}>
+										<i style={`height:${pct(c.value)}`}></i>
+										<span>{c.label}</span>
+										<b>{Math.round(c.value * 100)}/100</b>
+										<em>{componentStatusText[c.status] ?? c.status.toUpperCase()}</em>
+										<small>{c.detail}</small>
+										<code>{c.sourceRef}</code>
+									</div>
+								{/each}
+							</div>
+							<div class="mlEvidenceMeta">
+								<span>{focusContribution.summary}</span>
+								<span>{T('최근 변화 / 전파 경로 / 동행 후보 / 신선도 / 회사 품질', 'move / path / co-move / freshness / company quality')}</span>
+							</div>
+						</section>
+					{/if}
 					{#if focusCoMove}
 						<section class={'mlCoMovePanel ' + focusCoMove.status}>
 							<div class="mlRailTitle"><span class="mlBlockK">Co-movement Gate</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
@@ -544,6 +570,24 @@
 	.mlStackFill.ok { background: rgba(52,211,153,.72); }
 	.mlStackFill.watch { background: rgba(251,146,60,.72); }
 	.mlStackFill.blocked { background: rgba(248,113,113,.65); }
+	.mlContributionPanel { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
+	.mlEvidenceBreakdown { display: grid; grid-template-columns: repeat(5, minmax(98px, 1fr)); gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 1px; }
+	.mlEvidenceStep { position: relative; min-width: 0; height: 112px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); overflow: hidden; padding: 7px; }
+	.mlEvidenceStep.ok { border-color: rgba(52,211,153,.36); }
+	.mlEvidenceStep.watch { border-color: rgba(251,146,60,.38); }
+	.mlEvidenceStep.blocked { border-color: rgba(248,113,113,.42); }
+	.mlEvidenceStep i { position: absolute; left: 0; right: 0; bottom: 0; min-height: 4px; opacity: .32; background: var(--dl-ink-dim, #5b6473); }
+	.mlEvidenceStep.ok i { background: rgba(52,211,153,.78); }
+	.mlEvidenceStep.watch i { background: rgba(251,146,60,.76); }
+	.mlEvidenceStep.blocked i { background: rgba(248,113,113,.72); }
+	.mlEvidenceStep span, .mlEvidenceStep b, .mlEvidenceStep em, .mlEvidenceStep small, .mlEvidenceStep code { position: relative; z-index: 1; display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlEvidenceStep span { color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 800; }
+	.mlEvidenceStep b { margin-top: 6px; font-family: var(--dl-font-mono); font-size: 15px; }
+	.mlEvidenceStep em { margin-top: 4px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
+	.mlEvidenceStep small { margin-top: 6px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; line-height: 1.25; }
+	.mlEvidenceStep code { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; }
+	.mlEvidenceMeta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; }
+	.mlEvidenceMeta span { border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; padding: 2px 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlPacketGrid { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 7px; margin-top: 7px; align-items: baseline; }
 	.mlPacketGrid span { color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
 	.mlPacketGrid b { display: block; margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
