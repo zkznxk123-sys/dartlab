@@ -85,6 +85,41 @@ function runPortfolioBacktest(candles, slots, opts): PortfolioBtResult
 ```
 - `engine.ts`·`presets.ts` 변경 0. P2(stop·sizing)는 `runPass` 확장(별도 §03). P3(리밸런싱)은 `runComboBacktest` 별도 패스로 격리(부분노출 일반화, 단일전략 경로 무손상).
 
+## 3.5 ★`decisionT < fillT` PIT 불변식 — 세 엔진 통합 SSOT
+
+세 백테스트(단일종목 N전략·유니버스 횡단면·펀더게이트)를 묶는 축은 `runPass`가 아니라 **인과율 불변식**이다. 현 코드에 *이미* 표현돼 있다(단일=`target[i-1]` shift, 유니버스=`decisionT/fillT` 05 §2) → 통합 = 신규 추상이 아니라 *공통 불변식의 명시화*.
+```ts
+// 모든 백테스트가 공유하는 인과율 불변식 (엔진 계약 진짜 SSOT)
+interface PitDecision<T> {
+  decisionT: string;   // 결정에 쓰인 마지막 거래봉 (t)
+  fillT: string;       // 체결봉 (t+1) — decisionT < fillT 코드 assert (테스트 강제)
+  payload: T;          // 단일: target 0/1 | 유니버스: Holding[] | 게이트: gateOpen
+}
+// 단일종목  = runPass(target[i-1])              의 special case
+// 유니버스  = rebalances[].{decisionT,fillT,selected}  (05 §2)
+// 펀더게이트 = gate.series[i] = (candle[i].t >= rcept_dt) ? quarterValue : null  (공시 전 봉 null=진입차단)
+```
+세 엔진은 fill/accounting 루프는 다르나 **`decisionT < fillT` + 비용 적용 지점을 공유**. floor는 vectorized 유지(불변식 충족하므로 event-driven 재작성 불필요). **단 P2 stop은 봉내 이벤트 순서가 필요** → `runPass` 내부에 *봉당 미니 우선순위*(전체 재작성 아님):
+```
+봉 i 처리(P2): 1.갭 체결(시가가 전일 손절선 갭통과)→시가, "갭손절"  2.인트라바 손절(low≤stopPx)→stopPx(보수: 같은봉 high 무시)  3.신호 청산→시가
+// 우선순위 고정 = look-ahead 0. low/high 동시성은 "최악 가정"으로 봉인("당일 인트라바 가정" 라벨)
+```
+
+## 3.6 ★한국 비용·체결 모델 — 비용은 *점추정이 아니라 밴드*
+
+현 `BT_COSTS` 고정의 toy 신호 #1 = **슬리피지가 유동성/주문규모와 직교**(삼성전자와 소형주가 같은 10bp). 단 적대검증 정정: √-impact 함수의 계수 `k`도 *EOD에 없는 정보를 지어낸 folk-stat*(U-G1이 금지한 "임의 숫자"와 동죄). → **점추정 함수 금지, 두 길만**:
+```ts
+interface KrFillModel {
+  tickRound: (px) => number;          // 호가단위 스냅 (소형주 0.5% 비용 — 가격대별)
+  priceLimit: (fillPx, prevClose) => number | null;  // 상하한가 ±30% 클램프, 갇힘=null=이연(deferredBars 재사용)
+  // 슬리피지: 두 정직 경로 중 택1 (점추정 금지)
+  //  (A) "슬리피지=사용자 입력 가정, 우리가 추정 안 함" (현 bp 고정 + "가정값" 라벨) — 가장 정직
+  //  (B) 유동성 비례를 *밴드*로: slip ∈ [k_lo·√(orderValue/ADV), k_hi·√(...)] 이중실행(U-G1식) — 불확실성 노출
+}
+```
+- ADV = `volSma(v,20)·close`(이미 indicators에 있음, 신규 데이터 0). **세금**: 매도만(이미 정확), 2025 거래세 인하 스케줄 반영. **VI/단일가**: EOD로 복원 불가 → "체결 ±15% 봉=VI 가능성" 라벨(가짜 정밀 금지). **비용 4성분 워터폴**: `costDragPct` 한 줄 → 세금/수수료/슬리피지/충격 분해(기관급 표식이 아니라 *투명성*).
+- 세계급 floor의 진짜 상한 = "더 정교한 비용 함수"가 아니라 **"비용 불확실성을 밴드/가정으로 정직하게 노출"**. local(Python)만 일중 VWAP·비선형 충격(`vectorBacktest` 갭 슬리피지 이미 보유).
+
 ## 4. 상태 계약 (`chartState.svelte.ts`)
 - 단수→배열: `btKey/btParams/activeBt/setPreset/stepBtParam` → `btStrategies:StrategySlot[]` + `addStrategy/removeStrategy/setSlotPreset(i)/stepSlotParam(i)`. 공유 단수 유지: `btCosts/btCostsBp/btOosSplit`. 포커스 `btFocus:number`.
 - P2: `btStop:{lossPct;gainPct;trailPct;timeBars}` (슬롯별 또는 공유). P3: `rebalances:{t;weights}[]` + append-only `replaySession{tuningPasses}`. P5: `mode:'live'|'simulate'` + `sim.play`.

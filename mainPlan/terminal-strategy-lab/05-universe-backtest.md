@@ -41,26 +41,28 @@ interface UniverseSpec {
   costBp: BtCostsBp;                           // 기존 타입 재사용 (턴오버 기반 적용)
   windowFrom: string; windowTo: string;
 }
+type DelistReason = 'none' | 'merger' | 'unknown' | 'codeChange';  // §3.1 F1 — bool 격상
 interface RebalanceSnapshot {
   t: string; decisionT: string; fillT: string; // decisionT < fillT 불변 (look-ahead 차단)
-  selected: { code; rankValue; weight }[];
+  selected: { code; rankValue; weight; delistReason?: DelistReason }[];
   turnover: number; nHeld: number; nEligible: number;
-  delistedExits: number; advBreaches: number;   // 정직 카운터
+  mergerExits: number; unknownExits: number; advBreaches: number;  // 정직 카운터 (합병/unknown 분리)
 }
-interface UniverseRun {                          // 한 청산가정의 1회 실행
-  navByBucket: Record<number, number[]>;         // 분위별 NAV (시작 100)
+interface UniverseRun {                          // 한 청산가정의 1회 실행 (unknown 폐지만 분기)
+  navByBucket: Record<number, number[]>;         // 분위별 NAV (시작 100). 합병=last-close 고정(밴드 무관)
   ewBench: number[]; indexBench: number[];       // 동일가중 전체 + 지수 (둘 다)
   metrics: UniverseMetrics;                      // equity 헬퍼 재사용 + 턴오버·집중도
   cashDragPct: number;
 }
 interface UniverseBtResult {
-  optimistic: UniverseRun;                       // ⓐ 폐지=0손실(마지막 종가)
-  conservative: UniverseRun;                     // ⓑ 폐지=−100손실(완전손실) — 헤드라인 기준
-  delistDependence: number;                      // 두 실행 종착 차이(%p) = 밴드 폭 = 폐지 의존도(U-G1)
+  optimistic: UniverseRun;                       // ⓐ unknown 폐지=0손실(마지막 종가) · 합병=last-close
+  conservative: UniverseRun;                     // ⓑ unknown 폐지=−100손실 · 합병=last-close — 헤드라인 기준
+  unknownDependence: number;                     // 두 실행 종착 차이(%p) = 밴드 폭 = *진짜 unknown* 의존도(U-G1)
+  headlineSuppressed: boolean;                   // 밴드 폭>30%p → hero 숫자 차단(U-G1 ④)
   rebalances: RebalanceSnapshot[];               // 청산가정 무관(선정·턴오버 동일)
   status: 'ok' | 'invalid';
 }
-// 엔진은 동일 랭킹·체결 경로를 청산가정 2값으로 2회 — 선정/턴오버는 공유, 소멸 청산만 분기(저비용).
+// 엔진은 동일 랭킹·체결 경로를 청산가정 2값으로 2회 — 선정/턴오버·합병 청산은 공유, unknown 청산만 분기(저비용).
 ```
 - **회계 루프**(일별 마킹 + 리밸일 execute): `nav = cash + Σ shares·close(code,t)`. 리밸일 = 신호는 `decisionT`(직전 거래일) 종가까지로 랭킹 → `fillT`(t+1) 시가 청산·매수, 비용 = `turnover × costBp`. 정지(v=0)·결측 = 체결 이연 + cashDrag(forward-fill 금지).
 - **재사용 vs 신규**: 헬퍼 6종 그대로 / 랭킹·eligibility·분위 버킷·holdings 루프·턴오버·이중 벤치 전부 신규.
@@ -73,7 +75,23 @@ interface UniverseBtResult {
   - 브라우저는 1파일 로드 → DuckDB-wasm `NTILE` 크로스섹셔널 랭킹 + forward port return 루프.
   - **월말 = `MAX(BAS_DD) per (ym,stockCode)`**(캘린더 월말 아닌 그 월 마지막 거래봉).
 - **local(:8400 bonus) = Python 일별 full-resolution**(date 샤드 17파일 직독, t+1 시가 체결·정지 이연 정밀). floor 월말 근사를 일별 정밀로 격상.
-- **선결 의존**: ① `buildUniversePanel.py` 산출물(없으면 floor가 67만행 클라 로드 = 죽음) ② OPFS 캐시 재활성(`duckdb.ts:142` 현재 비활성 — 재방문 0다운로드).
+- **선결 의존**: ① `buildUniversePanel.py` 산출물 — ⚠ **스크립트는 이미 존재**(`.github/scripts/prebuild/buildUniversePanel.py`, 8157B, Jun 16). 따라서 게이트는 "작성"이 아니라 **"측정·결함수정·실행"**(§3.1). ② OPFS 캐시 재활성(`duckdb.ts` 현재 비활성 — 재방문 0다운로드).
+
+## 3.1 ★데이터층 결함 수정 (적대검증 발견 — U1 출시 필요조건, 측정으로 닫음)
+
+`buildUniversePanel.py`가 *존재하나* 데이터층에 U-G1·수익률을 깨는 결함 2종이 박혀 있다. **코딩 착수 첫 스텝 = `--skip-upload`로 측정 + 아래 수정.**
+
+- **🔴 F1 `delisted` 오염**(`:128` `(_lastYm < globalMaxYm)`): "최근 2개월 미출현"을 폐지로 보나 **합병·정지·코드변경·실폐지를 한 bool로 뭉갬**. U-G1 양극단 밴드가 이 bool 위에 서므로 → 합병(주주 인수가+프리미엄)을 −100% 처리 → 보수 헤드라인 *허구 과소평가* = 밴드가 분류버그 증폭기(04 §2.8 U-G1).
+  - **측정**: 이 bool로 잡힌 "폐지" 중 합병/정지/코드변경 비율(allFilings mna 공시 + gov 재상장 코드 cross).
+  - **★수정 방법 (재사용 자산 명시 — 텍스트 완벽판정 불가라 정직 휴리스틱)**:
+    1. **합병 추정**: `quant/signal/event.py:18 _EVENT_RULES`의 mna 분류(`["합병","인수","분할","영업양수","영업양도"]`)를 allFilings `report_nm`에 적용 → **폐지일 직전 ±3개월 윈도에 mna 공시 있는 종목 = `delistReason='merger'`(추정)**. ⚠ 방향(소멸/존속)·종목귀속은 report_nm 텍스트로 완벽판정 불가 → **"합병 추정" 라벨**(확정 아님). `gather/transforms/corporateAction.py`의 `action_type='merger'` SSOT는 *수동 입력 원장*이라 보강 cross(있으면 우선).
+    2. **코드변경**: gov 재상장 코드 cross(같은 corp 다른 ISU_CD) = `delistReason='codeChange'` → 가격 연결(폐지 아님).
+    3. **나머지 폐지** = `delistReason='unknown'`(상폐·정지 혼재) → 양극단 밴드.
+    4. `delisted: bool` → `delistReason: str(none/merger/unknown/codeChange)` 컬럼 격상. **휴리스틱 자체가 근사라 "사유=추정" 라벨 상존**(완벽 분류 주장 금지 — never-claim 정신).
+- **🔴 F2 forward-return stitching**(`:118-119` `shift(-1).over("stockCode")`, "ym 정렬 전제"): 정지로 월 빠진 종목의 `retFwd1m`이 *건너뛴 다음 존재월*을 가리켜 실제 2~3개월 → 조용한 구간왜곡/look-ahead.
+  - **측정**: 월 간격이 1이 아닌 (stockCode,ym) 쌍 비율.
+  - **수정**: **완전 월 그리드 reindex**(전 종목×전 월 outer join) 후 shift → 결측월은 명시 null(forward-fill 금지). `momMonthly`·`volMonthly6m`도 동일 reindex 위에서.
+- **산출 스키마 변경**: `delisted: bool` → `delistReason: str`(none/merger/unknown/codeChange). 합병 식별 join이 prebuild의 신규 의존(offline 가드 유지 — allFilings도 HF 다운로드).
 
 ## 4. 팩터 — 가격 P1 / 재무 랭킹 금지
 
@@ -110,7 +128,7 @@ interface UniverseBtResult {
 
 | 가드 | 내용 |
 |---|---|
-| **U-G1 생존 = 양극단 이중실행 밴드** | 폐지 청산가는 사유 미구분이라 *알 수 없다* → **임의 숫자(−30% 등) 금지**(folk-stat). 대신 **두 극단으로 백테스트 2회 실행**: ⓐ 0손실(마지막 종가 청산, 낙관) ⓑ −100%(완전손실, 보수). 결과는 **밴드**로 표시 — "전략 +X%(0손실) ~ +Y%(완전손실)". **밴드 폭 = 폐지 종목 의존도**(폐지명 미보유면 폭 0). 단일 hero 숫자 금지(폐지명 보유 시). 헤드라인 정렬·비교는 보수(−100%) 끝 기준. 중간값·합병 프리미엄 상향 보정 없음(사유 미구분 = 양극단 사이 어딘가, 그걸 밴드가 정직히 노출). |
+| **U-G1 생존 = 합병식별 + 양극단 이중실행 밴드** | 폐지 청산가는 사유 미구분이라 *알 수 없다* → **임의 숫자(−30% 등) 금지**(folk-stat). ★v0.2 정정(적대검증): "사유 미구분"을 미덕으로 두면 **합병(주주 인수가+프리미엄)이 −100%에 들어가 보수 헤드라인 허구 과소평가** → 밴드가 분류버그 증폭기. **4단계**: ① **합병 식별**(§3.1 F1: allFilings mna 분류 폐지일 근접 휴리스틱) → 합병 추정 = last-close 청산(**밴드에서 제외**), ② **unknown 폐지만** 두 극단 2회 실행 ⓐ 0손실(낙관) ⓑ −100%(보수) → **밴드 폭 = *진짜 unknown 폐지 의존도***(폐지명 없으면 폭 0), ③ 상한은 last-close(0손실)에 고정 + "합병 프리미엄은 이 위 — 낙관 끝도 보수적일 수 있음" 라벨(*비대칭 무지의 방향 정직*: 밴드 전체가 진실의 하방), ④ 밴드 폭>30%p면 **hero 숫자 차단**(라벨 아닌 차단). 헤드라인 정렬·비교는 보수(−100%) 끝 기준. |
 | **U-G2 PIT 멤버십** | 유니버스·필터(시총/거래대금 컷)는 *그 리밸 시점 그날 date 샤드*로만(코드 assert: 필터 입력 ts ≤ rebalanceT). IPO = 상장+룩백 충족 후만. forward-fill 금지. |
 | **U-G3 턴오버·ADV P1 승격** | 단일종목 P4 아님 — **턴오버율·추정비용·ADV 초과 주문비율 KPI 동급 상시 노출**. 주문>ADV X% = "실거래 불가능" 빨강. bp 고정=소형주 비용 과소 경고. |
 | **U-G4 이중 벤치** | EW 유니버스 + 지수 둘 다 표시 의무. size 틸트 라벨. 필요조건이지 충분조건 아님 명시. |
@@ -128,7 +146,7 @@ interface UniverseBtResult {
 
 ## 9. 위험 · 선결 의존
 
-1. **floor 라이브 일별 유혹 = iOS 즉사** → prebuilt 월말 패널이 **P1 진짜 선결**(아직 HF/prebuild에 없음). `buildUniversePanel.py` 신설이 코딩 착수 전 1순위.
+1. **floor 라이브 일별 유혹 = iOS 즉사** → prebuilt 월말 패널이 **U1 진짜 선결**. `buildUniversePanel.py`는 *이미 작성됨* → 착수 전 1순위 = **결함수정(§3.1 F1·F2) + 측정(G-M1·M2) + 실행·HF push**. (문서 v0.1의 "미작성" 단언은 실태와 불일치였음 — 설계가 자기 산출물을 몰랐던 함정.)
 2. **생존 청산가 미지**(U2 적대 발견 — 00 §4.11 "사유 미구분=무관"은 크로스섹셔널에서 거짓) → 임의 숫자 대신 U-G1 **양극단 이중실행 밴드**(0손실/−100%)로 불확실성 자체를 노출. 밴드가 비현실적으로 넓은 전략 = "폐지명 의존 과다" 경고(G-M4).
 3. **자유도 폭발**(팩터×분위×K×주기×필터 = 수천 조합) → U-G7 카운터+OOS+사전규칙.
 4. **OPFS 비활성** → 재방문 재다운로드. 월말 패널 작아 견디나 재활성이 헤드룸.

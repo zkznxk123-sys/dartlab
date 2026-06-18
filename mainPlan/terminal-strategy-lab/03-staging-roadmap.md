@@ -1,125 +1,136 @@
-# 03. Staging Roadmap — 단계별 확실한 실행 명세
+# 03. Staging Roadmap — 무게중심 역전 (기반·W·S·D)
 
-상태: v0.1 (2026-06-16). 거처 = `ui/packages/surfaces/src/terminal/`.
+상태: v0.2 (2026-06-18). 거처 = `ui/packages/surfaces/src/terminal/` + `ui/packages/surfaces/src/scan/universe/`.
 
-> 단계는 *기능을 깎은 MVP가 아니라* 회귀위험을 시간축 단방향으로 격리한 진입 경로. 각 단계 = 독립 출시 가능 + 다음 단계가 그 위에 단방향으로 쌓임. 종착 = 목표 종착(00 §3) 전체.
-
----
-
-## P1 — 다전략 캔버스 (엔진 무수정)
-
-### AC (수용 기준)
-1. 콘솔에서 전략 ≤3개 추가/삭제/설정, 각 색칩.
-2. 캔들에 포커스 전략 진입/청산 마커(N≥2면 포커스 1개만, 클러터 LOD).
-3. 에쿼티 서브페인에 N전략+조합+B&H가 **공유 절대축**(시작 100)에 — "+30% vs +12%"가 한 자 비교(per-series 정규화 함정 회귀 0).
-4. 조합 = 동일가중 equity 가중합. 조합 MDD 음영이 개별보다 얕으면 분산효과 시각 노출.
-5. 리플레이 재생 시 N전략 동시 절단 재계산(look-ahead 차단 상속).
-6. combo 거래 KPI = 명시적 "—"(거짓 0 금지). 곡선마다 OOS 2열·vs B&H·selection 경고·단일종목 분산 라벨.
-
-### 타입 계약 (01 §3)
-`StrategySlot` · `ComboMetrics`(equity계만) · `ComboResult` · `PortfolioBtResult` · `BtLayerExtend`.
-
-### 영향 파일/함수
-- **신규** `lib/backtest/portfolio.ts`: `runPortfolioBacktest`(runBacktest N회 + combo 가중합 + 순수헬퍼 메트릭). `lib/backtest/types.ts` 타입 추가. `engine.ts`/`presets.ts` 변경 0.
-- **`charts/btLayer.ts`**: `publishBt`→`publishPortfolio`, `BT_EQUITY` `figures:[]`+공유축 draw 신규(공통 lo/hi·재기준·forEach·tooltip 직접), `BT_TRADES` extendData forEach·LOD, `STRAT_COLORS`, `applyBt`/`clearBt` 시그니처(extendData 신참조 재계산).
-- **`charts/chartState.svelte.ts`**: `btKey/btParams/activeBt/setPreset/stepBtParam`→`btStrategies[]`+`add/remove/setSlotPreset/stepSlotParam`+`btFocus`. 공유 유지 `btCosts/btCostsBp/btOosSplit`.
-- **`charts/PriceChart.svelte`**: BT effect(`:784`) `runPortfolioBacktest(displaySeries(),...)`. `tfv!=='D'` 가드(`:547`) `btStrategies=[]`. strip/dialog props N-aware. 마운트(`:1262`).
-- **UI**: `StrategyConsole.svelte`(신규 인셋, BtConfig 흡수), `BacktestStrip.svelte`(헤드라인+combo+N미니행+분산라벨), `BacktestDialog.svelte`(포커스1 단수 유지+전략 탭), `ChartMenus.svelte`(`:211`)·`ChartRibbon.svelte`(`:234`) `btStrategies.length`, `btViz/EquityCurve.svelte`(공유축).
-
-### 테스트
-- svelte-check 0. 엔진 단위: N=1 경로 = 현 `runBacktest` byte 동일(회귀). combo[startIdx]=100·전부 non-null·equity 메트릭=직접계산 일치·거래 KPI null. 레이어: 공유축 비교(정규화 함정 회귀)·LOD. Playwright(`:5173/terminal`): 전략 2개→2색 마커+에쿼티 2라인+combo 동시·조합 MDD<개별·가독·리플레이 동시 절단·콘솔 0. 005930+거래多 종목.
-
-### 롤백 / 회귀위험
-가역(portfolio.ts·btLayer N슬롯·chartState 배열·UI N-aware 제거→단수 복원). 위험: **btLayer 공유축 draw 신규(중)** + chartState 배열 파급 9지점(중). 엔진 무수정(저).
+> 단계는 *기능을 깎은 MVP가 아니라* 회귀위험을 격리한 진입 경로. 각 단계 = 독립 출시 + 단방향 적층. moat(간판 W) 우선, commodity(살 S)는 세계급 마감, 위험·의존 미충족은 이연(D).
 
 ---
 
-## P1.5 — 프리셋 다양화 + 조건 빌더 조작 패널 + 펀더 게이트 (★운영자 강조)
+## 기반 — persistent dock + 정직 3단 tiering (UX 토대, 현 엔진 무수정)
 
-> "6 드롭다운"을 깨는 핵심 단계. 프리셋 다양화 + **전문가급 조작 패널(조건 빌더)** + **단일종목 펀더 게이트(moat)** + 조건 레인 시각화(02 §1.5).
+> 깨진 드롭다운 루프(02 §0)를 먼저 닫는다. 전 탭(단일·유니버스·게이트)의 토대 — 이게 없으면 무엇도 못 쌓음.
 
 ### AC
-1. **프리셋 다양화**(close-only 탈피): 거래량 확인 MA(VWMA+OBV)·변동성 필터·Supertrend·Stochastic RSI·ROC + 스타일 8종(`quant/strategy/styles` 재사용). 입력에 high/low/volume 활용.
-2. **조건 빌더 조작 패널**: 진입/청산 조건 다중 조합(AND/OR), 각 조건 = 지표 비교 또는 펀더 게이트. `quant/strategy/rule.py` DSL 브라우저 이식(01 §2.4). best/optimal/추천 단어 금지·OOS 강제·거래<10 수치 숨김(과적합 가드).
-3. **펀더 게이트(moat)**: `quant/alphas` 9개(Piotroski·Altman Z·Beneish 등)를 진입 게이트로. PIT 근사(`rcept_dt` 이후)·계단·단일종목(생존편향 무관) 라벨.
-4. **조건 레인 시각화**(02 §1.5): 조건별 on/off 스트립 서브페인 + 펀더 게이트 배경 음영 + AND 합성↔진입 마커 수직 정렬. 리플레이 동시 절단.
+1. `[BT]` 드롭다운 → **persistent docked 레일**(리사이즈·28px spine 접힘, 자동닫힘 0). config·result·chart 동시 가시.
+2. `BtConfig`(룰빌더 포함)를 dock에 무손실 흡수. 차트 클릭해도 빌더 안 사라짐.
+3. 정직 = `HonestyFooter`(11px·3단 tiering: spec 중립/caution slate/active amber + `ⓘ 방법론` 원장). 9.5px 위반 전수 교정.
+4. 진입 side-effect 명시(`[BT]`→tf 강제 전환에 라벨/empty-state).
 
 ### 영향 파일/함수
-- **엔진**: `lib/backtest/conditions.ts`(신규) — `Condition`/`StrategyRule` 평가, `signal` 일반화(01 §2.4). `synth/indicators` 미러(vatr·vobv·vstochastic) 또는 브라우저 지표 재사용. 펀더 게이트 시계열 = prebuilt(floor) 또는 로컬 라이브.
-- **데이터**: 펀더 게이트용 PIT 시계열 — panel account/alphas를 `rcept_dt` join으로 분기 계단 생성(`rt` PricePort/FilingPort 경유). 생존편향 무관(단일종목).
-- **레이어**: `btLayer` 조건 레인 draw(서브페인 `figures:[]` on/off) + 가격 페인 게이트 배경 음영.
-- **UI**: `StrategyConsole` 조건 빌더 섹션(조건 행 추가/삭제·지표/펀더 선택·연산자·임계·AND/OR).
+- **신규** `StrategyDock.svelte`(BtConfig 흡수+자동닫힘 제거), `HonestyFooter.svelte`(tiering+원장).
+- **교체** `ChartMenus.svelte`(`:214` 드롭다운 마운트→dock 토글), `BacktestStrip.svelte`(→HonestyFooter+헤드라인). `PriceChart.svelte`(`:1268` dock 레이아웃).
+- **재사용** `BtConfig` 룰빌더 내부 무수정(컨테이너만 dropdown→dock).
 
 ### 테스트 / 롤백 / 위험
-조건 평가 단위(AND/OR·PIT 게이트 계단)·조건 레인↔진입 정렬·펀더 게이트 PIT(공시일 이전 미적용). 위험: **조건 빌더 UI+엔진(높)**·펀더 PIT 조인 데이터 배선(중). 가역(conditions.ts·레인 draw·빌더 UI 제거→프리셋 select 복원).
+svelte-check 0. Playwright: dock 열고 차트 클릭→빌더 잔존·spine 접힘·정직 11px 측정·empty-state. 위험: 레이아웃 회귀(중) — 차트 폭/리사이즈. 가역(dock→드롭다운 복원). **엔진 0 변경.**
 
 ---
 
-## P2 — 포지션·거래 정밀 (`runPass` 확장)
+## W1 — 유니버스 U1 (간판① · 별도 폴더 · 완전 가역)
+
+> 17년 가격보존 횡단면 분위 백테스트. dartlab만 가진 A− moat. 단일종목 가드 비상속(05 §2.8 신규 가드). **코딩 첫 스텝 = 데이터 게이트 측정·수정(아래 선결).**
+
+### 🔴 선결 (코딩 전 측정으로 닫음 — 추측 금지)
+`buildUniversePanel.py`는 *이미 존재*(Jun 16). 단 데이터층 결함 2종 + 측정 미실행:
+- **🔴 F1 `delisted` 오염**(`:128` `_lastYm < globalMaxYm`): 폐지/정지/합병/코드변경 혼재 → U-G1 밴드 위에 거짓 표본. **수정 = allFilings 합병공시로 합병 식별 → 합병은 last-close 처리(밴드 제외), unknown 폐지만 양극단**(05 §3.1·§7 U-G1).
+- **🔴 F2 forward-return stitching**(`:118-119` `shift(-1).over("stockCode")`, 캘린더 reindex 없음): 정지로 월 빠진 종목의 "1개월 수익"이 2~3개월 → 조용한 구간왜곡. **수정 = 완전 월 그리드 reindex 후 shift**(05 §3.1).
+- **G-M1/M2 측정**: `buildUniversePanel.py --skip-upload` → 행수·MB·iOS 콜드로드·floor/local 괴리. FAIL 분기(05 §11).
 
 ### AC
-1. 전략별 손절%·익절%·트레일%·N봉 청산. 손절 청산 마커 색 구분(✖ 적), `exitReason:'stop'`.
-2. 포지션 사이징 — fixed-fractional·vol-target(규칙적 리스케일). **Kelly 수치 금지**(개념만).
-3. 거래 분석: 거래당 MAE/MFE·expectancy·R-multiple·연속승패·보유분포·수익 히스토그램. 위험지표: Calmar·MAR·Ulcer·tail ratio·롤링 Sharpe·월별 히트맵·underwater.
-4. 손절 = 당일 인트라바 가정 라벨 강제(t+1 체결과 시점 충돌 명시).
+1. 단일 가격 팩터(모멘텀 12-1) · 5분위 · 분기 리밸 · 동일가중 · long-only.
+2. NAV 분위 곡선 *공유 절대축*(공통 lo/hi·계단). 이중 벤치(EW+지수) 동시·택일불가.
+3. **폐지 양극단 밴드**(0손실/−100%, 합병 식별 후 unknown만)·폭>30%p면 hero 숫자 차단.
+4. 시도 조합 카운터 상존·OOS 강제(2010~19/2020~26, 끌 수 없음)·정직 라벨(근사·월말·size틸트·추천아님).
+5. `decisionT<fillT` assert·PIT 필터 ts≤rebalanceT assert. 재무 팩터 신호 = 비활성(회색).
+6. 킬러뷰: NAV 분위 + 스프레드(Q5−Q1) + 턴오버. 현 종목 앵커 백분위. 행클릭→단일종목 drill.
 
 ### 영향 파일/함수
-- **`engine.ts` `runPass`**: 보유 중 stop 체크(`low≤손절`·`high≥익절`·트레일 피크·N봉) → 청산, `exitReason:'stop'`. 거래당 `maePct/mfePct` 기록. 사이징 = shares 비례(fixed-frac/vol-target). `btStop=null`이면 현 동작(회귀 0).
-- **`types.ts`**: `BtTrade`에 `maePct/mfePct`·`exitReason:'stop'`. `BtStopConfig`·`BtSizingConfig`. 위험지표 `BtMetrics` 확장.
-- **`btViz/`**: `MaeMfeScatter`·`ReturnHistogram`·`MonthlyHeatmap`·`RollingSharpe`·`Underwater`. **`BacktestDialog`** 거래분석/낙폭 탭 확장.
-- **`StrategyConsole`**: ⚙ 스탑·사이징 섹션.
+- **신규 폴더** `scan/universe/`: `UniverseBacktester.svelte`·`engine.ts`(N종목 holdings 회계)·`ranking.ts`·`types.ts`·`viz/{NavCurves,QuantileSpread,RebalanceWalk,HoldingsTurnover}.svelte`.
+- **수정** `.github/scripts/prebuild/buildUniversePanel.py`(F1·F2). **신규 산출** `gov/prices/universe-monthly.parquet`.
+- **재사용** 헬퍼 6종(`terminal/lib/backtest/engine.ts`)·`btLayer` 공유축 draw 패턴·`scan/duckSql.ts`·`origin.ts`.
 
 ### 테스트 / 롤백 / 위험
-손절 trade 비용 정합·equity↔trades reconcile(`engine.ts:213` NaN 가드)·MAE/MFE∈[worst,best]·N=1 stop=null byte 동일. 위험: **runPass 확장(중~높)** — entry/exit 의미·비용 모델 재적용. 가역(stop/sizing 분기 제거).
+엔진 단위(holdings 보존·턴오버·decisionT<fillT·이중실행 청산만 분기)·DuckDB NTILE 결정론·PIT 미래행 미접근·정직 grep. 위험: F1/F2 미측정 착수=밴드 거짓(높) → 선결로 차단. 가역(폴더+버튼 삭제, 기존 무수정). 상세 = 05.
 
 ---
 
-## P3 — 커서바인딩 리밸런싱 (`runComboBacktest` 별도 패스)
+## S1 — 다전략 캔버스 (살A · 엔진 배선됨 · dock 흡수)
 
 ### AC
-1. 리플레이 일시정지 시 가중치 슬라이더 활성(전체차트·재생 중 잠금).
-2. t시점 변경은 t 이후만 적용(displaySeries 절단 상속). ⚖ 타임라인 마커·구간별 유효가중.
-3. **append-only**: 되감아 결정 수정 → 그 이후 폐기·재포크(새 runId). **반복재생 카운터**: 같은 구간 N회→과적합 경고.
-4. 부분노출 = `runComboBacktest` 별도 패스(단일전략 `runPass` 무손상).
+1. dock에서 전략 ≤3개, 각 색칩(ID 해시 고정). 포커스 전략 마커(N≥2 클러터 LOD).
+2. 에쿼티 N전략+조합+B&H **공유 절대축**(시작 100, per-series 정규화 회귀 0).
+3. 조합=동일가중 가중합. MDD 음영 개별보다 얕으면 분산효과 노출.
+4. 리플레이 N전략 동시 절단(look-ahead 상속). combo 거래 KPI=명시 "—". 곡선마다 OOS 2열·vs B&H·selection 경고·단일종목 분산 라벨.
 
 ### 영향 파일/함수
-- **`engine.ts`** 신규 `runComboBacktest(candles, slots, rebalances, opts)`: `runPass` 부분노출 일반화(weight 비례 shares, 리밸 시점 재배분, 비용=전환분만). 기존 `runPass`/`runBacktest` 보존.
-- **`chartState`**: `rebalances:{t;weights}[]`·`setWeightAt`·`replaySession{tuningPasses}`·append-only fork. **`PriceChart`** BT effect `void ctl.rebalances`. **`btLayer`** ⚖ 마커 draw(OOS분할선 패턴 재사용). **`StrategyConsole`** 가중치 바(일시정지 게이트).
+- **배선됨**: `runPortfolioBacktest`([portfolio.ts](../../ui/packages/surfaces/src/terminal/lib/backtest/portfolio.ts))가 [PriceChart.svelte:808](../../ui/packages/surfaces/src/terminal/charts/PriceChart.svelte) 동작 중 + btLayer N슬롯 공유축. **S1 = dock UX 흡수 + btViz 세계급 마감**(`btViz/EquityCurve` 공유축).
+- 마감: 승자강조 0·정렬 입력순·분산효과 미니라벨·헤드라인 11px footer.
 
 ### 테스트 / 롤백 / 위험
-커서<cut 가중치만 적용·되감기 재포크·t+1 정직·반복카운터. 위험: **부분노출 일반화(높)** — 별도 패스 격리가 핵심. 가역(combo 패스·rebalances 제거).
+N=1 byte 동일(회귀)·공유축 정규화 함정·LOD. Playwright: 2전략 2색+에쿼티+combo 동시·MDD<개별·리플레이 동시절단. 위험: dock 흡수 레이아웃(중). 가역.
 
 ---
 
-## P4 — 강건성 진단 (로컬 bonus + 퍼블릭 민감도)
+## W2 — 펀더게이트 + 조건빌더 + 시간레인 (간판② · panel 칼날)
+
+> TradingView `request.financial()`이 한국 재무를 엮으므로 차별은 "재무 쓴다"가 아니라 **DART 계정 정규화 + 학술팩터 9 사전구현 + PIT 근사 정직 라벨**. 단일종목이라 생존편향 무관.
 
 ### AC
-1. **퍼블릭**: 파라미터 민감도 히트맵(IS/OOS 나란히, **argmax/추천 금지**)·Monte Carlo 거래 재배열(경로의존 스트레스, 곡선 fan).
-2. **로컬**: walk-forward(재학습, 폴드별 거래수 동반)·CPCV. DSR/PBO/haircut **수치는 게이트**(parity+nTrials+다전략, 단일종목 영구 DEFER).
+1. **펀더게이트**: `quant/alphas` 9개(Piotroski·Altman Z·Beneish 등)를 진입 게이트로. **PIT = `rcept_dt` 이후 봉만 채움**(공시 전 봉 null=진입차단, 코드 assert). 정정공시 별도 rcept면 정정일 이후 적용·아니면 "공시일 근사" 라벨. 계단·매끈한 선 금지.
+2. **조건빌더**(배선됨, [conditions.ts](../../ui/packages/surfaces/src/terminal/lib/backtest/conditions.ts)·`evalRule`·`runBacktestRule`): dock 노출. AND/OR, 각 조건=지표비교 또는 펀더게이트. best/optimal/추천 금지·OOS 강제·거래<10 수치 숨김.
+3. **조건 레인 시각화**(02 §3.1, opt-in): 핀한 조건 on/off 스트립 서브페인 + 펀더게이트 배경음영(한 겹) + AND 합성↔진입 마커 수직정렬. 리플레이 동시절단.
+4. 출력 boolean 음영만 — 점수·등급·"저평가" 라벨 0(JUDGE 경계).
+
+### ★PIT 빌더 명세 (적대검증 발견 — alphas는 스냅샷 아니라 *연도 재실행 가능*)
+- **공시일 소스**: `financeBuild.py`가 finance.parquet에 `rceptNo`/`rcept_dt`(정기보고서 공시일)를 fiscal period별 보유 → 이게 PIT 앵커(allFilings recent는 *정기 제외*라 못 씀). 정정공시 별도 rcept면 정정일 적용·아니면 "공시일 근사" 라벨.
+- **alphas 시계열화**: `quant/alphas/*.calc*Factor(..., year=Y)`는 *이미 연도 인자로 과거 슬라이스 필터*([piotroski.py:202-210](../../src/dartlab/quant/alphas/piotroski.py)) → **연도 루프로 (stockCode, fiscalYear, factorValue) 시계열 생성**(스냅샷 9종을 전기간 재계산). 9개(Piotroski·Altman·Beneish…) 동일 패턴.
+- **신규 빌더**: `.github/scripts/prebuild/buildFundamentalGate.py`(offline·`enforceOffline()`) → `gov/fundamental-gate.parquet`(long-form: `stockCode·rceptDt·piotroski·altmanZ·beneishM·…`). 브라우저 floor가 1파일 로드 → `rcept_dt` 이후 봉부터 계단. local=라이브 `calc*Factor` 직호출.
 
 ### 영향 파일/함수
-- **퍼블릭**: `engine.ts` `sweep(...)`(격자 재실행, argmax 미반환)·`bootstrapTrades(...)`(거래 재배열 N회). `btViz/SensitivityHeatmap`·`McFan`.
-- **로컬**: `rt` PricePort 경유 Python `walkForward`/`cpcv`(`src/dartlab/quant/strategy/_backtestAdvanced.py` 기존) 배선 + golden parity fixture. DSR/PBO 수치는 04 게이트.
+- **데이터**: 위 PIT 빌더(`buildFundamentalGate.py` 신설) + finance `rcept_dt` 앵커. floor=prebuilt parquet, local=라이브.
+- **레이어**: `btLayer` 조건 레인 draw(opt-in 핀) + 가격페인 게이트 배경음영. **UI**: `StrategyDock` 조건빌더 섹션 + 펀더 선택 + `◉` 차트핀.
 
-### 테스트 / 위험
-sweep 셀=격자·argmax 미반환. MC fan 결정론(seed). parity fixture(TS↔Python ±ε). 위험: parity gate(중). DSR/PBO 노출 회귀(grep 0).
+### 테스트 / 롤백 / 위험
+조건 평가 단위(AND/OR·PIT 계단)·**PIT assert(공시 전 봉 미적용)**·레인↔진입 정렬. 위험: PIT 조인 데이터 배선(중)·레인 LOD(중). 가역(게이트·레인 제거→프리셋 복원).
 
 ---
 
-## P5 — 미래 연속 (시뮬 코어 졸업 의존)
+## S2 — 거래 정밀 + 한국 비용·체결 모델 (살B · `runPass` 확장)
 
 ### AC
-1. `mode:'live'|'simulate'` 토글(replay·sim.play 상호배타). live 여백 0 불변.
-2. 리플레이 끝봉 → asOf 포트 상태(전략별 포지션·자본·가중치) → `sim.play` 초기조건.
-3. 미래 fan band(점선·반투명·워터마크·단일 path 금지). 조합 곡선 asOf 연속.
+1. 전략별 손절%·익절%·트레일%·N봉 청산. 손절 마커 색구분(✖ 적), `exitReason:'stop'|'gapStop'`. **봉내 우선순위 고정**(갭→손절→신호, look-ahead 0, "당일 인트라바 가정" 라벨).
+2. **한국 비용·체결 모델**(01 §3.5): 호가단위 스냅·상하한가 클램프(갇힘=이연, deferredBars 재사용)·**유동성 비례 슬리피지를 *밴드*로**(점추정 `k` 금지 — folk-stat). 비용 4성분 워터폴(세금/수수료/슬리피지/충격).
+3. 거래 분석: MAE/MFE·expectancy·R-multiple·연속승패·보유분포·수익 히스토그램. Calmar·MAR·Ulcer·롤링 Sharpe·월별 히트맵·underwater.
+4. 포지션 사이징 fixed-frac·vol-target. **Kelly 수치 금지**(개념만).
 
 ### 영향 파일/함수
-- **`chartState`** `mode`·`sim.play`(05 §1 동형). **`PriceChart`** 바통 터치 캡처·mode xAxis 패딩. **`btViz/FanBand`**(multi-point figure). **실제 path = `scenario-simulator/` 코어 졸업 후**(09 Phase 0 MC seed kill-test 선결).
+- **`engine.ts` `runPass`**: stop 체크(high/low 봉내)·`exitReason`·`maePct/mfePct`·사이징. **`btStop=null`이면 현 동작(N=1 byte 동일 회귀)**. `types.ts` 한국 비용 함수(`KrFillModel`)·`BtStopConfig`.
+- **`btViz/`**: `MaeMfeScatter`·`ReturnHistogram`·`MonthlyHeatmap`·`RollingSharpe`·`Underwater`·비용 워터폴. `BacktestDialog` Diagnose 탭 확장.
 
-### 테스트 / 위험
-mode 상호배타·asOf 연속·미래 정직 가드. 위험: 코어 미완(P5는 계약·토글·anchor까지, path 주입 후속).
+### 테스트 / 롤백 / 위험
+손절 trade 비용 정합·equity↔trades reconcile·MAE/MFE∈[worst,best]·N=1 stop=null byte 동일·비용밴드 양끝 실행. 위험: runPass 확장(중~높). 가역(stop/sizing/비용함수 분기 제거).
+
+---
+
+## W3 — 유니버스 U2 + drill-down 동선 (깔때기 완성 · 서사 검증)
+
+### AC
+1. 가격/기술 팩터 다양화(저변동성·52주·유동성·반전)·리밸 walk(읽기전용 점프)·보유 회전 테이블.
+2. **drill-down**: Q5 행→`/terminal?symbol=` 단일종목(단방향, 역방향 금지). "구성원이지 추천 아님" 툴팁.
+3. **★통합 서사 검증**: drill-down 전환율 측정 → "panel 두 방향 절단=한 제품" 가설 증명. 낮으면 통합 OS 서사 조용히 내림(코드 이미 격리).
+
+### 영향 / 위험
+`scan/universe/` 확장 + 단일종목 진입 파라미터. 위험: 동선 측정(저). 가역.
+
+---
+
+## 이연 — D1 리밸런싱 / D2 강건성 / D3 미래·재무유니버스
+
+- **D1 P3 리밸런싱**: `runComboBacktest` 별도 패스(부분노출 일반화, 단일전략 무손상). 커서바인딩·append-only·반복재생 카운터(04 §2.1). 위험 高·ROI 재검 후.
+- **D2 P4 강건성 / U3 local**: 퍼블릭 민감도(argmax 금지·**색=분산**, 04 §6)·MC 거래 재배열·multi-split anchored OOS(floor 정직 가능). 로컬 walk-forward(refit)·CPCV·DSR/PBO 수치는 04 §1 G2 게이트(영구 DEFER). `_backtestAdvanced.py` 이미 보유.
+- **D3 P5 미래연속 / U4 재무유니버스**: mode 토글·asOf→시뮬 초기조건(시뮬 코어 졸업 후). 재무 팩터 랭킹=상폐사 재무 재수집 선결(영구 금지까지).
 
 ---
 
 ## 순서·게이트
-P1→P2→P3→P4→P5 단방향. 각 단계 commit 자율·**push 운영자 명시 승인 후**(UI 시각 회귀·공개 무중단). P4 로컬·P5는 별도 선결(parity gate·시뮬 코어). 운영자 go로 P1 착수.
+기반(dock) → W1(유니버스, 데이터게이트 선결) ∥ S1(캔버스) → W2(펀더게이트) → S2(거래정밀) → W3(drill-down) → D1~D3. 각 단계 commit 자율·**push 운영자 명시 승인 후**(UI 시각 회귀·공개 무중단). 운영자 go로 기반 착수.
