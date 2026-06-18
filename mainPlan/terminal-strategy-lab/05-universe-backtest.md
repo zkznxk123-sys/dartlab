@@ -71,7 +71,7 @@ interface UniverseBtResult {
 
 - **date 샤드 실측**: 연도당 12.5~16.6MB, 17파일 ≈ 230MB, 일별 전체 ≈ 1,200만행. **라이브 일별 17파일 쿼리 = floor 불가**(iOS WASM 힙 200~512MB 즉사, scan이 2년 윈도에도 30/60초 타임아웃 — `duckSql.ts`).
 - **floor(퍼블릭 서버0) = prebuilt 월말 리샘플 패널**. 신규 `.github/scripts/prebuild/buildUniversePanel.py`(offline only, `buildPricesSnapshot.py` 템플릿·`enforceOffline()`):
-  - 산출물 `gov/prices/universe-monthly.parquet` (long-form, 월말 1행/종목/월). 스키마: `ym·stockCode·close·mktcap·ret_fwd_1m·ret_fwd_3m·mom_12_1·vol_60d·high52w_prox·turnover·delisted`. ~58만행 = **5~15MB 단일 파일**(가격/기술 팩터만, 재무 EXCLUDE).
+  - 산출물 `gov/prices/universe-monthly.parquet` (long-form, 월말 1행/종목/월). **실측 스키마**: `ym·stockCode·close·mktcap·turnover·momMonthly·volMonthly6m·high52wProx·retFwd1m·retFwd3m·delistReason`. **실측 443,422행 = 11.91MB 단일 파일**(가격/기술 팩터만, 재무 EXCLUDE).
   - 브라우저는 1파일 로드 → DuckDB-wasm `NTILE` 크로스섹셔널 랭킹 + forward port return 루프.
   - **월말 = `MAX(BAS_DD) per (ym,stockCode)`**(캘린더 월말 아닌 그 월 마지막 거래봉).
 - **local(:8400 bonus) = Python 일별 full-resolution**(date 샤드 17파일 직독, t+1 시가 체결·정지 이연 정밀). floor 월말 근사를 일별 정밀로 격상.
@@ -79,7 +79,12 @@ interface UniverseBtResult {
 
 ## 3.1 ★데이터층 결함 수정 (적대검증 발견 — U1 출시 필요조건, 측정으로 닫음)
 
-`buildUniversePanel.py`가 *존재하나* 데이터층에 U-G1·수익률을 깨는 결함 2종이 박혀 있다. **코딩 착수 첫 스텝 = `--skip-upload`로 측정 + 아래 수정.**
+> **★실측 완료 (2026-06-18, commit `34dde130c`)**: F1·F2 수정 + 로컬 17샤드 전체 build.
+> - **G-M1 PASS**: 443,422행 · 3,693종목 · ym 201001~202606 · **11.91MB(<20MB)** → floor 단일파일 로드 OK.
+> - **폐지 886종목** · **F2 reindex 적용**(정지월 stitching 차단, 합성+실데이터 로직검증 PASS).
+> - ⚠ **F1 merger=0 (중요 한계)**: 검출윈도(last ym≥202406) 폐지 151종목이 **allFilings recent에 0 출현** — `recent.parquet`(2024-09+)은 *활성기업* 수시공시라 *폐지기업 공시를 안 담음*. 즉 F1 merger 검출은 *코드는 정상(합성검증 PASS)이나 현 데이터로 실질 no-op* → **밴드가 전부 conservative(886 unknown)**. 정직-degradation 설계대로(거짓 제외 0)지만, 진짜 merger 제외 = **정밀 폐지사유 데이터 소스(KRX 상폐사유)가 별도 트랙**(U4와 함께). 현재는 밴드 폭이 진짜보다 넓을 수 있음을 라벨(보수 안전).
+
+`buildUniversePanel.py`가 *존재하나* 데이터층에 U-G1·수익률을 깨는 결함 2종이 박혀 있다(아래 = 수정 전 진단). **코딩 착수 첫 스텝 = `--skip-upload`로 측정 + 아래 수정.**
 
 - **🔴 F1 `delisted` 오염**(`:128` `(_lastYm < globalMaxYm)`): "최근 2개월 미출현"을 폐지로 보나 **합병·정지·코드변경·실폐지를 한 bool로 뭉갬**. U-G1 양극단 밴드가 이 bool 위에 서므로 → 합병(주주 인수가+프리미엄)을 −100% 처리 → 보수 헤드라인 *허구 과소평가* = 밴드가 분류버그 증폭기(04 §2.8 U-G1).
   - **측정**: 이 bool로 잡힌 "폐지" 중 합병/정지/코드변경 비율(allFilings mna 공시 + gov 재상장 코드 cross).
