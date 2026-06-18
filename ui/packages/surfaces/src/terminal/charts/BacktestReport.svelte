@@ -6,6 +6,7 @@
 	import { GOV_ATTRIBUTION } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
 	import EquityChart from './EquityChart.svelte';
+	import { tradeShuffleCone } from './tradeShuffle';
 	import MonthlyReturnsHeatmap from './MonthlyReturnsHeatmap.svelte';
 	import TradeScatter from './TradeScatter.svelte';
 	import YearlyReturnsBars from './YearlyReturnsBars.svelte';
@@ -101,6 +102,9 @@
 		return { tier: T('서술적 · 단일구간', 'descriptive · single window'), tone: 'evMid' };
 	});
 
+	// 거래순서 몬테카를로(경로운) — 실현 거래만 재배열. 표본<15면 null(거짓 좁은 밴드 차단).
+	const mcCone = $derived.by(() => tradeShuffleCone(result.trades.map((t) => t.retPct)));
+
 	function jumpToBar(t: string) { onFocusBar?.(t); }
 
 	function exportCsv() {
@@ -181,6 +185,20 @@
 			<div class="brOosLine">{T('학습 → 검증(OOS)', 'train → test (OOS)')} · {T('수익률', 'ret')} <b class={cls(oos.train.retPct)}>{sgn(oos.train.retPct)}%</b> → <b class={cls(oos.test.retPct)}>{sgn(oos.test.retPct)}%</b>{#if oosDecay != null} · <b class={'brDecay ' + (oosDecay < -2 ? 'tDn' : oosDecay > 2 ? 'tUp' : 'tNeu')}>Sharpe {oosDecay >= 0 ? '+' : ''}{oosDecay.toFixed(0)}%</b>{/if} <i>{T('고정 파라미터 · walk-forward 아님', 'fixed params · not walk-forward')}</i></div>
 		{/if}
 	</section>
+
+	<!-- 거래순서 몬테카를로(경로운) — 한 경로는 한 번의 운. 표본<15면 정직하게 생략. -->
+	{#if mcCone}
+		<section class="brSec">
+			<div class="brSecHd">{T('거래순서 몬테카를로 — 경로운', 'trade-shuffle Monte Carlo — path luck')}</div>
+			<div class="brMc">
+				<span>{T('최종수익 5~95%', 'terminal 5–95%')} <b class={cls(mcCone.p5)}>{sgn(mcCone.p5, 0)}%</b> ~ <b class={cls(mcCone.p95)}>{sgn(mcCone.p95, 0)}%</b> <i>({T('중앙', 'median')} {sgn(mcCone.p50, 0)}%)</i></span>
+				<span>{T('최악 5% 최대낙폭', 'MDD worst 5%')} <b class="tDn">{mcCone.mddP95.toFixed(0)}%</b></span>
+				<i class="brMcNote">{T('실현 거래 순서만 재배열 — 예측 아님. 헤드라인은 한 경로(운)일 뿐 · 자본은 최악낙폭 기준.', 'reshuffle of realized trades only — not a forecast; the headline is one lucky path.')}</i>
+			</div>
+		</section>
+	{:else if result.trades.length}
+		<div class="brMcSkip">{T('거래 표본 부족(<15) — 경로운 추정 정직하게 생략', 'too few trades (<15) — path-luck estimate honestly skipped')}</div>
+	{/if}
 
 	<!-- 소형 다중 — 월별·연간·분포 -->
 	<section class="brSec">
@@ -303,6 +321,11 @@
 	.brN { font-family: var(--dl-font-mono, monospace); font-size: 11px; color: var(--dimmer, #5b6573); font-weight: 400; }
 	.brCsv { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 11px; padding: 1px 8px; border-radius: 3px; cursor: pointer; font-family: inherit; }
 	.brHint { font-size: 10px; color: var(--dimmer, #5b6573); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: auto; }
+	.brMc { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; font-size: 12px; color: #aeb6c2; font-variant-numeric: tabular-nums; padding: 7px 11px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; }
+	.brMc b { font-weight: 700; }
+	.brMc i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 10.5px; }
+	.brMcNote { flex-basis: 100%; line-height: 1.5; }
+	.brMcSkip { font-size: 10.5px; color: var(--dimmer, #5b6573); padding: 2px 2px; }
 	.brOosLine { font-size: 11.5px; color: #aeb6c2; font-variant-numeric: tabular-nums; }
 	.brOosLine i { font-style: normal; font-size: 10px; color: var(--dimmer, #5b6573); margin-left: 4px; }
 	.brOosLine b { font-weight: 700; }
