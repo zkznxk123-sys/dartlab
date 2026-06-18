@@ -307,3 +307,61 @@ def calcPiotroskiFactor(
             f"weak {grades['weak']['pct']}%."
         ),
     }
+
+
+def calcPiotroskiSeries(*, market: str = "KR") -> pl.DataFrame | None:
+    """Piotroski F-Score 시계열 — (stockCode, bsns_year, piotroski) 전종목·전연도.
+
+    Sig:
+        calcPiotroskiSeries(*, market="KR") -> pl.DataFrame | None
+
+    펀더게이트(terminal-strategy-lab W2) PIT 시계열 빌더용. calcPiotroskiFactor 는 *최신 1기*만
+    내므로 백테스트 진입 게이트의 과거 시계열을 못 만든다. 본 함수는 전 연도를 루프하며 동일
+    ``_scoreOne`` (단일 SSOT) 으로 채점한다. rcept_dt(공시일) PIT 앵커 join 은 호출부(buildFundamentalGate).
+
+    Args:
+        market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.
+
+    Returns:
+        pl.DataFrame[stockCode(str), bsns_year(str), piotroski(int 0~9)] · 데이터 없으면 None.
+
+    Example:
+        >>> df = calcPiotroskiSeries(market="KR")
+        >>> df.filter(pl.col("stockCode") == "005930").sort("bsns_year")
+    """
+    try:
+        lf = loadScanParquet("finance", market)
+        if lf is None:
+            return None
+        snap = extractAnnualConsolidated(lf.collect(engine="streaming"))
+    except (OSError, ValueError, KeyError, AttributeError) as exc:
+        log.warning("calcPiotroskiSeries 로드 실패: %s", type(exc).__name__)
+        return None
+
+    yearCol = "fy" if isEdgarSchema(snap) else "bsns_year"
+    byYear: dict[str, pl.DataFrame] = {}
+    for k, g in snap.partition_by(yearCol, as_dict=True).items():
+        key = k[0] if isinstance(k, tuple) else k
+        byYear[str(key)] = g
+
+    out: list[dict] = []
+    for yStr in sorted(byYear):
+        cur = byYear[yStr]
+        try:
+            prev = byYear.get(str(int(yStr) - 1))
+        except ValueError:
+            prev = None
+        curParts = cur.partition_by("stockCode", as_dict=True)
+        prevParts = prev.partition_by("stockCode", as_dict=True) if prev is not None else {}
+        for ck, sCur in curParts.items():
+            code = ck[0] if isinstance(ck, tuple) else ck
+            if not isinstance(code, str):
+                continue
+            sPrev = prevParts.get(ck)
+            res = _scoreOne(sCur, sPrev if sPrev is not None and not sPrev.is_empty() else None)
+            if res is None:
+                continue
+            out.append({"stockCode": code, "bsns_year": yStr, "piotroski": int(res["total"])})
+    if not out:
+        return None
+    return pl.DataFrame(out)
