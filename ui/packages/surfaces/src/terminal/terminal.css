@@ -320,24 +320,7 @@
 .dlTerm .sChg { font-family: var(--mono); font-size: 10px; font-weight: 600; }
 
 /* INDUSTRY SWEEP — 거시 깔때기 산업층(섹터 히트맵 대체). 렌즈 picker + 산업 행(분포막대·값·n·tailwind). */
-.dlTerm .swLensRow { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px 3px 5px; }
-.dlTerm .swLens { font-family: var(--cond); font-size: 9px; padding: 1px 6px; border-radius: 2px; border: 1px solid var(--bd); background: var(--dl-bg-deep); color: var(--dimmer); cursor: pointer; transition: color 0.12s, border-color 0.12s; }
-.dlTerm .swLens:hover { color: var(--txt); }
-.dlTerm .swLens.on { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 55%, transparent); background: color-mix(in srgb, var(--amber) 12%, transparent); }
-.dlTerm .swList { display: flex; flex-direction: column; }
-.dlTerm .swRow { display: grid; grid-template-columns: 14px 1fr 50px 24px; align-items: center; gap: 6px; padding: 1.5px 5px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
-.dlTerm .swRow:hover { background: var(--dl-bg-overlay); }
-.dlTerm .swRow.on { box-shadow: inset 2px 0 0 var(--amber); background: var(--dl-bg-overlay); }
-.dlTerm .swRk { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-align: center; }
-.dlTerm .swName { font-family: var(--cond); font-size: 10.5px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; }
-.dlTerm .swTw { font-style: normal; font-size: 9px; font-weight: 700; flex: 0 0 auto; }
-.dlTerm .swTw.tw-up { color: var(--up); }
-.dlTerm .swTw.tw-dn { color: var(--dn); }
-.dlTerm .swTw.tw-nu { color: var(--dimmer); }
-.dlTerm .swVal { font-size: 10.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-.dlTerm .swVal i { font-style: normal; font-size: 8px; color: var(--dimmer); margin-left: 1px; }
-.dlTerm .swN { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-align: right; font-variant-numeric: tabular-nums; }
-.dlTerm .swN.warn { color: var(--warn); }
+.dlTerm .swMap { padding: 4px 4px 2px; }
 .dlTerm .swMore { width: 100%; background: none; border: 0; border-top: 1px solid var(--bd); margin-top: 2px; padding: 4px 5px; font-family: var(--cond); font-size: 9px; color: var(--amberDim, #b9863b); cursor: pointer; text-align: left; letter-spacing: 0.2px; }
 .dlTerm .swMore:hover { color: var(--amber); }
 .dlTerm .swNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); padding: 3px 5px 2px; line-height: 1.3; }
@@ -456,24 +439,24 @@
 .dlTerm .btDockX:hover { color: var(--dl-ink, #c8cfdb); }
 .dlTerm .btDockBody { overflow-y: auto; padding: 7px; display: flex; flex-direction: column; gap: 4px; }
 .dlTerm .btParamRow { align-items: center; gap: 4px; }
-.dlTerm .btParamLbl { font-size: 9px; color: var(--dim); min-width: 42px; }
-.dlTerm .btParamVal { font-size: 10px; color: var(--txt); min-width: 28px; text-align: center; }
+.dlTerm .btParamLbl { font-size: 11px; color: var(--dim); min-width: 42px; }
+.dlTerm .btParamVal { font-size: 13px; color: var(--txt); min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
 
 /* 백테스트 결과 바 — 차트 하단 슬림 1줄(읽히는 헤드라인만). 상세 전부는 [백테스팅 상세]→BacktestDialog. */
 .dlTerm .btStrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: rgba(10, 14, 21, 0.95); border-top: 1px solid var(--bdHi, #2a3142); padding: 5px 12px 4px; backdrop-filter: blur(2px); }
 .dlTerm .btStrip.btLag .btHead { opacity: 0.8; }
 .dlTerm .btHead { display: flex; align-items: baseline; gap: 9px; }
 .dlTerm .btPreset { font-family: var(--cond); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
-.dlTerm .btRet { font-size: 14px; font-weight: 700; }
+.dlTerm .btRet { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .dlTerm .btVs { font-size: 10px; color: var(--dimmer); }
-.dlTerm .btExcess { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--bd); }
+.dlTerm .btExcess { font-size: 13px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--bd); font-variant-numeric: tabular-nums; }
 .dlTerm .btSpacer { flex: 1; }
-.dlTerm .btWarn { font-family: var(--mono); font-size: 9px; color: var(--amber); border: 1px solid rgba(251, 146, 60, 0.45); border-radius: 2px; padding: 0 4px; line-height: 1.6; }
+.dlTerm .btWarn { font-family: var(--mono); font-size: 11px; color: var(--amber); border: 1px solid rgba(251, 146, 60, 0.45); border-radius: 2px; padding: 0 4px; line-height: 1.6; }
 .dlTerm .btMore { background: rgba(251, 146, 60, 0.12); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber); font-family: var(--sans); font-size: 11px; font-weight: 600; cursor: pointer; padding: 2px 11px; border-radius: 3px; }
 .dlTerm .btMore:hover { background: rgba(251, 146, 60, 0.22); }
 .dlTerm .btClose { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 12px; padding: 0 2px; }
 .dlTerm .btClose:hover { color: var(--amber); }
-.dlTerm .btFoot { font-size: 9px; color: var(--dimmer); margin-top: 3px; line-height: 1.5; }
+.dlTerm .btFoot { font-size: 10px; color: var(--dimmer); margin-top: 3px; line-height: 1.5; }
 
 /* 백테스트 스트립(.btStrip, 하단 도킹)이 뜨면 공시 레일 숨김 — 같은 하단 띠 점유 겹침 방지. (출처는 패널 헤더 sub 로 이동) */
 .dlTerm .chartWrap:has(.btStrip) .discRail { display: none; }
@@ -567,20 +550,20 @@
 .dlTerm .crMenuWideR { min-width: 280px; }
 .dlTerm .crClose { margin-left: auto; flex: none; }
 .dlTerm .mItem.mGear { padding: 4px 4px; margin-left: -2px; border-left: 0; }
-.dlTerm .btModelNote { font-size: 8.5px; color: var(--dimmer); border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; margin-top: 2px; max-width: 250px; line-height: 1.5; }
+.dlTerm .btModelNote { font-size: 10px; color: var(--dimmer); border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; margin-top: 2px; max-width: 250px; line-height: 1.5; }
 /* 백테스트 전략 콘솔 — 섹션 그룹·셀렉터·설명·벤치마크 라벨 (03 §0.5.9-E) */
 .dlTerm .btConfig { display: flex; flex-direction: column; gap: 6px; min-width: 240px; }
 .dlTerm .btSection { display: flex; flex-direction: column; gap: 3px; }
 .dlTerm .btSelect { width: 100%; background: var(--dl-bg-deep); color: var(--txt); border: 1px solid var(--bd); border-radius: 2px; padding: 3px 6px; font-size: 11px; line-height: 1.3; cursor: pointer; outline: none; }
 .dlTerm .btSelect:hover, .dlTerm .btSelect:focus { border-color: var(--amber); }
-.dlTerm .btDesc { font-size: 9px; color: var(--dim); line-height: 1.45; }
-.dlTerm .btBench { font-size: 9px; color: var(--dim); padding: 3px 6px; border: 1px dashed var(--dl-line, #1b2130); border-radius: 2px; }
+.dlTerm .btDesc { font-size: 11px; color: var(--dim); line-height: 1.45; }
+.dlTerm .btBench { font-size: 11px; color: var(--dim); padding: 3px 6px; border: 1px dashed var(--dl-line, #1b2130); border-radius: 2px; }
 .dlTerm .ipEditor { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--dl-line, #1b2130); padding-top: 4px; }
 .dlTerm .mItem { background: var(--dl-bg-base); color: var(--dim); font-family: var(--sans); font-size: 10px; line-height: 1.2; border: 1px solid var(--bd); border-radius: 2px; padding: 4px 7px; cursor: pointer; white-space: nowrap; }
 .dlTerm .mItem:hover { color: var(--txt); border-color: var(--amber); }
 .dlTerm .mItem.on { background: var(--amber); color: #1a1206; font-weight: 600; border-color: var(--amber); }
 .dlTerm .mItem.mClear { width: 100%; color: var(--dl-red, #f0616f); }
-.dlTerm .ctMenuLbl { font-family: var(--cond); font-size: 7.5px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; margin: 3px 1px 0; }
+.dlTerm .ctMenuLbl { font-family: var(--cond); font-size: 10px; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.4px; margin: 3px 1px 0; }
 /* 지표 그룹 sub-라벨 (추세/모멘텀/거래량 + ECON 상한 안내, 04 §3-4) — 그룹 구분 강조 표지 */
 .dlTerm .ctMenuLbl.ctMenuGrp { color: var(--amber); opacity: 0.7; margin-top: 5px; }
 /* 동행 상관 배지 — 거시 칩 옆 corr 값(정=초록·역=빨강). 인과 아님(라벨로 명시). */

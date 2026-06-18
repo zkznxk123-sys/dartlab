@@ -2,7 +2,7 @@
 	import type { Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine, IndustryMacro } from '../lib/engine';
-	import { INDUSTRY_LENSES, lensByKey } from '../lib/industryLens';
+	import ScatterMap, { type ScatterPt } from './ScatterMap.svelte';
 	import type { MacroLensTab } from '../lib/macroLens';
 	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
@@ -87,20 +87,15 @@
 
 	// ── 산업 sweep — 거시 깔때기 산업층. 34산업을 선택 렌즈로 cross-section 비교(섹터 시세 히트맵 대체). ──
 	// 전부 baked 합성(industryStats·ecosystem·gov 시총), 새 fetch 0. 측정근거=_attempts/macroIndustrySweep.
-	let sweepLens = $state('prof');
-	const lens = $derived(lensByKey(sweepLens));
 	const industryIds = $derived([...new Set((eng.raw.eco?.nodes || []).map((n) => n.industry))]);
 	const sweepAll = $derived(industryIds.map((id) => eng.industryMacro(id)).filter((m): m is IndustryMacro => m != null));
-	// 선택 렌즈 값 보유 산업만, lower 반영 정렬(좋은 순 위로). 멤버 n<10 산업 제외(04 §3 표본 가드).
-	const sweep = $derived.by(() => {
-		const rows = sweepAll
-			.filter((m) => m.count >= 10 && lens.valueOf(m) != null)
-			.map((m) => ({ m, v: lens.valueOf(m) as number }));
-		rows.sort((a, b) => (lens.lower ? a.v - b.v : b.v - a.v));
-		return rows;
-	});
-	const fmtLensVal = (v: number): string => (lens.unit === '배' ? v.toFixed(1) : Math.round(v).toString());
-	const twTone = (t: number | null): string => (t == null ? '' : t >= 0.55 ? 'tw-up' : t <= 0.35 ? 'tw-dn' : 'tw-nu');
+	// 미니 지형도 — 산업 = (영업이익률 중앙값 × 마진 격차 IQR). 위치=구조 관측. 현재 종목 산업 강조·클릭=스크리너 필터+상세.
+	const industryPts = $derived.by((): ScatterPt[] =>
+		sweepAll
+			.filter((s) => s.count >= 10 && s.dist.opMargin?.median != null && s.marginIqr != null)
+			.map((s) => ({ id: s.id, x: s.dist.opMargin!.median, y: s.marginIqr as number, size: s.count, label: lang === 'en' ? s.en : s.kr, faint: s.count < 15 }))
+	);
+	const curIndustry = $derived(sectorFilter || (eng.raw.eco?.nodes || []).find((n) => n.id === active)?.industry || '');
 	const activeSectorName = $derived(sectorFilter ? (sweepAll.find((s) => s.id === sectorFilter)?.kr || sectorFilter) : '');
 	function pickIndustry(id: string) {
 		toggleSector(id); // 스크리너 필터(기존 깔때기) — 한 번 더 누르면 해제
@@ -149,31 +144,17 @@
 	</Panel>
 {/if}
 
-<!-- 산업 sweep — 거시 깔때기 산업층(매크로→★산업→종목). 패널 = 핵심(렌즈별 상위 7산업)만 compact.
-     전체 랭킹·분포·산업 4질문 *상세는 다이얼로그*(공간 절약). 시세 아닌 *구조*로 산업을 가른다. -->
+<!-- 산업 sweep — 거시 깔때기 산업층(매크로→★산업→종목). 패널 = 미니 지형도(읽기 아닌 *시각화*).
+     전 산업을 (수익 수준×마진 격차) 점구름으로 — 현재 산업 강조·클릭=스크리너 필터+상세. 상세는 다이얼로그. -->
 <Panel {lang} className="eIndustry" prov="real" title={{ kr: '산업 스윕', en: 'INDUSTRY SWEEP' }} sub={{ kr: '구조 · 클릭=상세', en: 'structure · click=detail' }}>
 	{#snippet right()}
 		<button class="scrOpenBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'Detail ↗' : '상세보기 ↗'}</button>
 	{/snippet}
-	<div class="swLensRow">
-		{#each INDUSTRY_LENSES as l (l.key)}
-			<button class={'swLens' + (sweepLens === l.key ? ' on' : '')} onclick={() => (sweepLens = l.key)} title={l.note}>{lang === 'en' ? l.en : l.kr}</button>
-		{/each}
+	<div class="swMap">
+		<ScatterMap pts={industryPts} compact highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX yFloor0 />
 	</div>
-	<div class="swList">
-		{#each sweep.slice(0, 7) as r, i (r.m.id)}
-			<div class={'swRow' + (sectorFilter === r.m.id ? ' on' : '')} role="button" tabindex="0"
-				onclick={() => pickIndustry(r.m.id)} onkeydown={(e) => e.key === 'Enter' && pickIndustry(r.m.id)}
-				title={`${r.m.kr} · n=${r.m.count}${r.m.tailwind != null ? ' · tailwind ' + r.m.tailwind.toFixed(2) : ''} · 클릭=산업 분석`}>
-				<span class="swRk mono">{i + 1}</span>
-				<span class="swName">{lang === 'en' ? r.m.en : r.m.kr}{#if r.m.tailwind != null}<i class={'swTw ' + twTone(r.m.tailwind)}>{r.m.tailwind >= 0.55 ? '↑' : r.m.tailwind <= 0.35 ? '↓' : '·'}</i>{/if}</span>
-				<span class={'swVal mono ' + (lens.lower ? 'tNeu' : 'tUp')}>{fmtLensVal(r.v)}<i>{lens.unit}</i></span>
-				<span class="swN mono" class:warn={r.m.count < 15} title={r.m.count < 15 ? (lang === 'en' ? 'small sample — rank less stable' : '표본 작아 순위 불안정') : ''}>{r.m.count}{#if r.m.count < 15}⚠{/if}</span>
-			</div>
-		{/each}
-	</div>
-	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${sweep.length} industries · distribution · drill →` : `상세보기 · ${sweep.length}산업 · 분포 · 4질문 →`}</button>
-	<div class="swNote">ⓘ {lang === 'en' ? 'listed equal-weight · snapshot · n<15 (⚠) unstable · not KRX index' : '상장 동일가중 · 스냅샷 · n<15(⚠) 불안정 · KRX 지수 아님'}</div>
+	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${industryPts.length} industries · companies →` : `상세보기 · ${industryPts.length}산업 · 회사 산포 →`}</button>
+	<div class="swNote">ⓘ {lang === 'en' ? 'x = margin · y = spread · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=마진격차 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}</div>
 </Panel>
 
 <!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소

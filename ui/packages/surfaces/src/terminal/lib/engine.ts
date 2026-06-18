@@ -228,6 +228,7 @@ export interface Engine {
 	percentileIn(code: string, universe: Universe): UniversePercentile | null;
 	// 거시 산업 sweep — 한 산업의 cross-industry 비교 스냅샷(분포·scan grade 버킷%·gov 밸류·tailwind·멤버). 좌측 sweep·산업 다이얼로그 전용.
 	industryMacro(id: string): IndustryMacro | null;
+	industryMembers(id: string): IndustryMember[];
 }
 
 // ── 거시 산업 sweep 모델 (좌측 LeftRail 산업층 · IndustryDialog) ──
@@ -244,6 +245,14 @@ export interface IndustryMacroMember {
 	code: string;
 	name: string;
 	value: number;
+}
+export interface IndustryMember {
+	code: string;
+	name: string;
+	margin: number; // opMargin % (가로)
+	growth: number; // revCagr % (세로)
+	cap: number; // gov 시총(크기) — 0 가능
+	grade: string; // profGrade (색=gradeTone)
 }
 export interface IndustryMacro {
 	id: string;
@@ -1068,9 +1077,27 @@ export function createEngine(raw: RawData): Engine {
 		};
 	}
 
+	// 산업 내 회사 점들 — 회사 산포도(드릴). 가로=수익성(opMargin) · 세로=성장(revCagr) · 크기=gov 시총 · 색=수익성등급.
+	// 위치 = 회사 실측값(사실, 판정 아님). margin·growth 둘 다 있는 회사만(양축 plot). cap 없으면 0(최소 크기).
+	function industryMembers(id: string): IndustryMember[] {
+		const out: IndustryMember[] = [];
+		for (const n of industryNodes(id)) {
+			if (typeof n.opMargin !== 'number' || typeof n.revCagr !== 'number') continue;
+			out.push({
+				code: n.id,
+				name: byCode[n.id]?.corpName || n.id,
+				margin: +n.opMargin.toFixed(2),
+				growth: +n.revCagr.toFixed(2),
+				cap: raw.prices.data[n.id]?.marketCap ?? 0,
+				grade: n.profGrade || ''
+			});
+		}
+		return out;
+	}
+
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn, industryMacro,
+		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn, industryMacro, industryMembers,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};
