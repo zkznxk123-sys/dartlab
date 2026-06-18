@@ -775,8 +775,35 @@ function freshnessScore(status: MacroDriverView['freshness']['status']): number 
 	return status === 'fresh' ? 1 : status === 'watch' ? 0.55 : status === 'unknown' ? 0.25 : 0.05;
 }
 
+function hasCompanyExposureEvidence(q: MacroExposureQualityView): boolean {
+	return q.coverage === 'company' && q.nObs != null;
+}
+
+function quantEvidenceOpen(q: MacroExposureQualityView): boolean {
+	return q.status === 'quantCandidate'
+		&& hasCompanyExposureEvidence(q)
+		&& q.rSquared != null
+		&& !!q.window
+		&& !!q.frequency
+		&& (q.minObs == null || q.nObs! >= q.minObs);
+}
+
+function quantEvidenceBlocks(q: MacroExposureQualityView): string[] {
+	const out: string[] = [];
+	if (q.status !== 'quantCandidate') out.push(`status ${q.status}`);
+	if (q.coverage !== 'company') out.push(`coverage ${q.coverage}`);
+	if (q.nObs == null) out.push('nObs missing');
+	else if (q.minObs != null && q.nObs < q.minObs) out.push(`nObs ${q.nObs} < minObs ${q.minObs}`);
+	if (q.rSquared == null) out.push('R² missing');
+	if (!q.window) out.push('window missing');
+	if (!q.frequency) out.push('frequency missing');
+	return out.length ? out : [q.blockedReason || 'quality gate closed'];
+}
+
 function exposureQualityScore(q: MacroExposureQualityView): number {
-	return q.status === 'quantCandidate' ? 0.86 : q.status === 'qualitativeOnly' ? 0.42 : 0.08;
+	if (quantEvidenceOpen(q)) return 0.86;
+	if (q.status === 'qualitativeOnly' || hasCompanyExposureEvidence(q) || q.coverage === 'sectorOnly') return 0.42;
+	return 0.08;
 }
 
 function changeIntensity(m: MacroLatest): number {
@@ -832,7 +859,7 @@ function impactDirectionLabel(edge: MacroTransmissionEdgeView | undefined, signe
 	en: string;
 } {
 	if (edge?.sign === 'mixed') return { direction: 'mixed', kr: '양방향', en: 'mixed' };
-	if (Math.abs(signedImpact) < 0.03) return verdictDirectionLabel(edge);
+	if (Math.abs(signedImpact) < 0.03) return { direction: 'unknown', kr: '변화 미약', en: 'weak move' };
 	return signedImpact > 0
 		? { direction: 'supportive', kr: '순풍', en: 'supportive' }
 		: { direction: 'pressure', kr: '역풍', en: 'pressure' };
@@ -929,16 +956,17 @@ function buildMacroVerdict(args: {
 	const sectorTilt = clamp01(sectorScore) - 0.5;
 	const directionalScore = clamp01(0.5 + (net / 100) * 0.45 + sectorTilt * 0.16);
 	const hardBlocks = args.evidenceGates.filter((gate) => gate.status === 'blocked' && (gate.id === 'macroData' || gate.id === 'path'));
-	const score = hardBlocks.length ? roundScore(blendedScore) : roundScore(directionalScore);
+	const score = hardBlocks.length ? Math.min(44, roundScore(blendedScore)) : roundScore(directionalScore);
 	const companyLocked = args.evidenceGates.some((gate) => gate.id === 'company' && gate.status === 'blocked');
 	const quantLocked = args.evidenceGates.some((gate) => gate.id === 'quant' && gate.status === 'blocked');
+	const quantOpen = quantEvidenceOpen(args.exposureQuality);
 	const claimLevel: MacroVerdictClaimLevel = hardBlocks.length
 		? 'locked'
 		: args.marketOnly
 			? 'marketMap'
-			: args.exposureQuality.status === 'quantCandidate'
+			: quantOpen
 				? 'companyCandidate'
-				: args.exposureQuality.coverage === 'sectorOnly'
+				: args.exposureQuality.coverage === 'sectorOnly' || hasCompanyExposureEvidence(args.exposureQuality)
 					? 'sectorPrior'
 					: 'locked';
 	const direction: MacroVerdictDirection = hardBlocks.length
@@ -984,16 +1012,30 @@ function buildMacroVerdict(args: {
 		? '시계열·전파 경로 결손부터 복구'
 		: args.marketOnly
 			? '섹터 칩 또는 종목 선택으로 회사 노출 확인'
-			: args.exposureQuality.status === 'quantCandidate'
+			: quantOpen
 				? '민감도 탭에서 nObs/R²/window 검산'
 				: '회사 증거가 열릴 때까지 정량 claim 금지';
 	const nextActionEn = hardBlocks.length
 		? 'Repair missing series/path first'
 		: args.marketOnly
 			? 'Select a sector chip or company for exposure'
-			: args.exposureQuality.status === 'quantCandidate'
+			: quantOpen
 				? 'Inspect nObs/R²/window in sensitivity'
 				: 'No quantitative claim until company evidence opens';
+	const summaryTailKr = args.marketOnly
+		? '시장·섹터 전파 지도만 열린 상태다. 종목 선택 전에는 회사 claim을 잠근다.'
+		: claimLevel === 'companyCandidate'
+			? '회사 표본 후보까지 열려 있다.'
+			: claimLevel === 'sectorPrior'
+				? '섹터 prior까지만 열려 있으며 회사 정량 claim은 잠근다.'
+				: '전파·회사 증거가 부족해 claim을 잠근다.';
+	const summaryTailEn = args.marketOnly
+		? 'Only the market/sector map is open; company claims stay locked until a company is selected.'
+		: claimLevel === 'companyCandidate'
+			? 'Company sample candidate is open.'
+			: claimLevel === 'sectorPrior'
+				? 'Only the sector prior is open; quantitative company claims stay locked.'
+				: 'Transmission or company evidence is insufficient, so claims stay locked.';
 	return {
 		score,
 		direction,
@@ -1003,8 +1045,8 @@ function buildMacroVerdict(args: {
 		titleEn: title.en,
 		stanceKr: `${quality.kr} · ${score}/100`,
 		stanceEn: `${quality.en} · ${score}/100`,
-		summaryKr: primary ? `${primary.label}가 1순위 경로다. ${claimLevel === 'companyCandidate' ? '회사 표본 후보까지 열려 있다.' : '회사별 beta는 아직 잠겨 있으므로 방향 claim만 허용한다.'}` : '표시 가능한 driver 경로가 부족하다.',
-		summaryEn: primary ? `${primary.label} is the first path. ${claimLevel === 'companyCandidate' ? 'Company sample candidate is open.' : 'Company beta remains locked, so only directional claims are allowed.'}` : 'Driver path evidence is insufficient.',
+		summaryKr: primary ? `${primary.label}가 1순위 경로다. ${summaryTailKr}` : '표시 가능한 driver 경로가 부족하다.',
+		summaryEn: primary ? `${primary.label} is the first path. ${summaryTailEn}` : 'Driver path evidence is insufficient.',
 		primaryChainKr,
 		primaryChainEn,
 		nextActionKr,
@@ -1630,7 +1672,7 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 		detail: 'macro.asOf가 없으면 최신 국면 해석으로 단정하지 않는다.',
 		sourceRef: 'dashboards/macro.json'
 	});
-	if (exposureQuality.status === 'quantCandidate') {
+	if (quantEvidenceOpen(exposureQuality)) {
 		out.push({
 			id: 'company-exposure-quality',
 			type: 'quality',
@@ -1763,15 +1805,24 @@ function buildEvidenceGates(args: {
 	exposureQuality: MacroExposureQualityView;
 	edgeSourceRef: string;
 }): MacroEvidenceGateView[] {
-	const top = args.topPressures.length ? args.topPressures : args.drivers.slice(0, 3);
-	const stale = top.filter((d) => d.freshness.status === 'stale');
-	const watch = top.filter((d) => d.freshness.status === 'watch');
+	const criticalDrivers = args.drivers.filter((d) => d.relevance === 'primary');
+	const freshnessScope = criticalDrivers.length ? criticalDrivers : args.drivers.filter((d) => d.relevance !== 'context').slice(0, 5);
+	const stale = freshnessScope.filter((d) => d.freshness.status === 'stale');
+	const watch = freshnessScope.filter((d) => d.freshness.status === 'watch');
 	const observed = args.edges.filter((e) => e.evidenceLevel === 'observed' && e.confidence !== 'blocked');
+	const usableEdges = args.edges.filter((e) => e.confidence !== 'blocked');
+	const pathSourceMissing = !args.edges.length || /missing|template/i.test(args.edgeSourceRef);
+	const pathBlocks = pathSourceMissing
+		? [args.edges.length ? 'macro.transmission source missing; fallback template is not claim evidence' : 'macro transmission edge missing']
+		: args.edges.filter((e) => e.confidence === 'blocked').map((e) => `${e.driverId}: ${e.sourceRefs.join(' · ')}`);
+	const pathStatus: MacroEvidenceGateView['status'] = pathSourceMissing || !usableEdges.length ? 'blocked' : observed.length ? 'ok' : 'watch';
 	const candidates = args.drivers.filter((d) => d.coMovement?.status === 'candidate');
 	const coWindows = candidates.map((d) => `${d.id}:${d.coMovement?.window ?? 'window?'}`);
 	const companyHasEvidence = args.exposureQuality.coverage === 'company' && args.exposureQuality.nObs != null;
-	const quantOpen = args.exposureQuality.status === 'quantCandidate';
+	const quantOpen = quantEvidenceOpen(args.exposureQuality);
 	const qualityDetail = `nObs ${args.exposureQuality.nObs ?? '—'} · R² ${args.exposureQuality.rSquared ?? '—'} · ${args.exposureQuality.window ?? 'window 없음'}`;
+	const companyBlocks = companyHasEvidence ? [] : (args.exposureQuality.missingEvidence.length ? args.exposureQuality.missingEvidence : [`coverage ${args.exposureQuality.coverage}`, 'company sample absent']);
+	const quantBlocks = quantOpen ? [] : quantEvidenceBlocks(args.exposureQuality);
 	return [
 		{
 			id: 'macroData',
@@ -1788,12 +1839,12 @@ function buildEvidenceGates(args: {
 			id: 'path',
 			labelKr: '경로',
 			labelEn: 'Path',
-			value: `${observed.length}/${args.edges.length}`,
-			detailKr: '관측 edge',
-			detailEn: 'observed edges',
-			status: observed.length ? 'ok' : 'watch',
+			value: pathStatus === 'blocked' ? 'LOCK' : `${observed.length}/${args.edges.length}`,
+			detailKr: pathSourceMissing ? '전파 source 결손' : observed.length ? '관측 edge' : '섹터 prior/template',
+			detailEn: pathSourceMissing ? 'transmission source missing' : observed.length ? 'observed edges' : 'sector prior/template',
+			status: pathStatus,
 			sourceRef: args.edgeSourceRef,
-			blocks: args.edges.filter((e) => e.confidence === 'blocked').map((e) => `${e.driverId}: ${e.sourceRefs.join(' · ')}`)
+			blocks: pathBlocks
 		},
 		{
 			id: 'comove',
@@ -1815,7 +1866,7 @@ function buildEvidenceGates(args: {
 			detailEn: companyHasEvidence ? qualityDetail : 'company sample absent',
 			status: companyHasEvidence ? (quantOpen ? 'ok' : 'watch') : 'blocked',
 			sourceRef: args.exposureQuality.sourceRef,
-			blocks: args.exposureQuality.missingEvidence.length ? args.exposureQuality.missingEvidence : []
+			blocks: companyBlocks
 		},
 		{
 			id: 'quant',
@@ -1826,7 +1877,7 @@ function buildEvidenceGates(args: {
 			detailEn: quantOpen ? qualityDetail : (args.exposureQuality.blockedReason || 'quality gate closed'),
 			status: quantOpen ? 'ok' : 'blocked',
 			sourceRef: args.exposureQuality.sourceRef,
-			blocks: quantOpen ? [] : [args.exposureQuality.blockedReason || 'quality gate closed']
+			blocks: quantBlocks
 		}
 	];
 }

@@ -1,8 +1,40 @@
 # 06. Progress Ledger
 
-상태: 구현 v1.4
+상태: 구현 v1.5
 
 ## 2026-06-19
+
+### v1.5 — Command Bar / Evidence Cockpit / hard-lock guards
+
+배경:
+
+- 판정-first UI는 구조를 만들었지만, 사용자가 첫 화면에서 바로 검증 행동을 실행하는 조작성이 부족했다.
+- 엔진 red-team에서 stale 핵심 driver, missing transmission, invalid quantCandidate, zero-change polarity가 claim 과장 위험으로 확인됐다.
+
+완료:
+
+- `MacroLensDialog` 판정 화면에 `Command Bar`를 추가했다. 핵심 지표 차트 오버레이, 전파 경로 탭, 출처/반증 탭으로 즉시 이동한다.
+- `Evidence Cockpit`을 첫 화면에 추가해 시계열/경로/동행/회사노출/민감도 5개 gate와 핵심 release freshness를 항상 보이게 했다.
+- 모바일 mechanism rail을 3x2 압축 그리드로 바꾸고, cockpit/mobile overflow를 검증했다.
+- `buildMacroVerdict()`와 evidence gate를 보강했다. stale primary driver, missing/fallback transmission, unusable edge는 hard lock으로 처리한다.
+- `quantCandidate`는 `coverage=company`, `nObs>=minObs`, `R²`, `window`, `frequency`가 있어야만 `companyCandidate`로 승격한다.
+- 변화가 0인 negative/positive edge는 pressure/supportive로 라벨링하지 않는다. mixed edge는 계속 mixed로 유지한다.
+- locked verdict score는 `<=44`로 제한해 잠김 상태가 강한 신호처럼 보이지 않게 했다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과. 12개 테스트.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning 45개, error 0.
+- `npm run check --prefix landing` 통과. 기존 warning 56개, error 0.
+- Playwright smoke: command button 3개, cockpit 1개, gate 5개, 경로/출처 탭 이동, desktop/mobile overflow 0, page/console error 0.
+- QA screenshots: `output/playwright/macro-verdict-command-cockpit-desktop.png`, `output/playwright/macro-verdict-command-cockpit-mobile.png`.
+
+NEXT:
+
+1. 실제 release calendar/vintage 데이터가 열리면 release reaction gate를 추가한다.
+2. 탭 본문 컴포넌트 분리는 별도 유지보수 리팩터로만 처리한다.
+
+---
 
 ### v1.4 — Dialog keyboard/focus shell
 

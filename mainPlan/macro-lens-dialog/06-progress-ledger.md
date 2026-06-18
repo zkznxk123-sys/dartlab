@@ -1,10 +1,45 @@
 # 06. 진행 원장
 
-상태: v1.9
+상태: v1.10
 
 ---
 
 ## 2026-06-19
+
+### v1.10 — Command Bar / Evidence Cockpit / hard-lock guards
+
+배경:
+
+- v1.9까지는 키보드 조작은 좋아졌지만, 첫 화면의 `다음 행동`이 문장으로만 남아 있어 사용자가 바로 검증 행동으로 넘어가기 어려웠다.
+- 접힌 상세 안에 있던 evidence gate/release 정보는 다이얼로그의 핵심 근거인데도 첫 화면에서 보이지 않았다.
+- 엔진 red-team 결과 stale 핵심 driver, fallback transmission template, 불완전한 `quantCandidate`, 변화 0 polarity가 과장 claim을 열 수 있는 위험으로 확인됐다.
+
+완료:
+
+- `Macro Verdict Hero` 우측에 `Command Bar`를 추가했다. 핵심 driver 차트 오버레이, 전파 경로 탭 이동, 출처/반증 탭 이동을 버튼으로 제공한다.
+- `Evidence Cockpit`을 첫 화면 상시 영역으로 추가했다. 시계열/경로/동행/회사노출/민감도 5개 gate와 핵심 driver release freshness를 한 줄에서 확인한다.
+- 모바일에서 mechanism rail을 6칸 가로 스크롤에서 3x2 압축 그리드로 바꿨고, evidence cockpit은 독립 줄로 내려가게 했다.
+- `buildMacroVerdict()`가 `quantCandidate` 상태값만으로 `companyCandidate`를 열지 않게 했다. `coverage=company`, `nObs`, `minObs`, `R²`, `window`, `frequency` gate가 통과해야 한다.
+- 핵심 primary driver stale, `macro.transmission` 결손 또는 fallback template 경로, usable edge 부재는 hard lock으로 처리한다.
+- 변화가 0이거나 방향 영향이 미약한 negative/positive edge는 edge polarity만으로 `pressure/supportive` 라벨을 찍지 않는다.
+- `locked` verdict는 방향/claim level뿐 아니라 score도 잠금 영역(`<=44`)으로 제한한다.
+- market-only summary에서 회사별 beta 표현을 제거하고, 종목 선택 전 company claim lock을 명시했다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과. 12개 테스트.
+- 추가 회귀: stale primary driver hard lock, invalid `quantCandidate` 차단, missing transmission hard lock, zero-change pressure 방지, mixed edge 유지.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning 45개, error 0.
+- `npm run check --prefix landing` 통과. 기존 warning 56개, error 0.
+- Playwright smoke 통과: command button 3개, evidence cockpit 1개, gate 5개, 경로/출처 탭 이동, desktop/mobile screenshot, 모바일 overflow 0, page/console error 0.
+- QA screenshots: `output/playwright/macro-verdict-command-cockpit-desktop.png`, `output/playwright/macro-verdict-command-cockpit-mobile.png`.
+
+NEXT:
+
+1. 실제 release calendar/vintage 데이터가 열리면 `Release` 카드를 freshness가 아니라 발표 반응 gate로 승격한다.
+2. 탭 본문 컴포넌트 분리는 기능 변경 없이 별도 리팩터로만 처리한다.
+
+---
 
 ### v1.9 — Dialog interaction shell / 키보드 UX 보강
 

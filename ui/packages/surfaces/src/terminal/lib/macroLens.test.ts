@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { MACRO_SERIES, type MacroLatest } from '@dartlab/ui-contracts';
 import { CURRENT_MACRO_EDGE_SECTOR_KEYS, EDGE_SECTOR_TO_TAILWIND } from './macroMappings';
-import { buildMacroGlanceView, buildMacroPath, buildMarketMacroLensSnapshot, buildRegimeQuadrant } from './macroLens';
-import type { MacroFile } from './types';
+import { buildMacroGlanceView, buildMacroLensSnapshot, buildMacroPath, buildMarketMacroLensSnapshot, buildRegimeQuadrant } from './macroLens';
+import type { Company, MacroFile } from './types';
 
 const macro = JSON.parse(
 	readFileSync(new URL('../../../../../../landing/static/dashboards/macro.json', import.meta.url), 'utf8')
@@ -38,6 +38,91 @@ const macroLatest = (): MacroLatest[] =>
 			spark: [value - 2, value - 1, value]
 		}];
 	});
+
+const cloneMacro = (): MacroFile => JSON.parse(JSON.stringify(macro)) as MacroFile;
+
+const companyFixture = (overrides: Partial<Company> = {}): Company => ({
+	code: '005930',
+	marketLabel: 'KOSPI',
+	name: { kr: '삼성전자', en: 'Samsung Electronics' },
+	sector: { kr: '반도체', en: 'Semiconductor' },
+	industry: 'semiconductor',
+	stage: '',
+	role: '',
+	eco: { id: '005930', label: '삼성전자', industry: 'semiconductor' },
+	grades: [],
+	radar: [],
+	changes: [],
+	price: {
+		last: 70000,
+		mktcap: '0',
+		mktcapRaw: 0,
+		ret1m: null,
+		ret3m: null,
+		ret1y: null,
+		vol1y: null,
+		hi52: null,
+		lo52: null,
+		vol: null,
+		asOf: '2026-06-18'
+	},
+	fundamentals: { per: null, pbr: null, psr: null, npm: null, roe: null, opm: 12, dr: 40 },
+	financials: {
+		years: [],
+		sales: [],
+		op: [],
+		net: [],
+		opMargin: [],
+		netMargin: [],
+		roe: [],
+		assetTurn: [],
+		equityMult: [],
+		deRatio: [],
+		currRatio: [],
+		dupont: { netMargin: null, assetTurn: null, equityMult: null, roe: null },
+		assetMix: [],
+		fundMix: [],
+		cf: { op: null, inv: null, fin: null, fcf: null }
+	},
+	trendAnnual: { periods: ['2025'], sales: [], op: [], net: [], opMargin: [], freq: 'annual' },
+	trendQuarter: null,
+	income: { periods: [], rows: [] },
+	balance: { periods: [], rows: [] },
+	cashflow: { periods: [], rows: [] },
+	ratios: [],
+	credit: { grade: 'NA', healthScore: 0, pd: '—', tone: 'neutral', tracks: [], basis: { debtRatio: null, curr: null, opm: null } },
+	analysis: { summary: { kr: '', en: '' }, tracks: [] },
+	macroExposure: null,
+	peers: [],
+	story: null,
+	percentile: null,
+	valuation: null,
+	risks: [],
+	riskCatalog: [],
+	tailwind: null,
+	verdict: { composite: 0, band: { kr: '', en: '', tone: 'neutral' }, strengths: [], concerns: [], riskRed: 0, riskYellow: 0 },
+	...overrides
+} as unknown as Company);
+
+const macroWithSingleMixedEdge = (): MacroFile => {
+	const m = cloneMacro();
+	const driver = m.transmission!.drivers.find((d) => d.id === 'USDKRW')!;
+	const edge = m.transmission!.edges.find((e) => e.driverId === 'USDKRW')!;
+	m.transmission = {
+		...m.transmission!,
+		drivers: [driver],
+		edges: [{
+			...edge,
+			id: 'test-mixed-edge',
+			sectorKeys: ['all'],
+			sign: 'mixed',
+			confidence: 'high',
+			evidenceLevel: 'observed',
+			sourceRef: 'test:mixed'
+		}]
+	};
+	return m;
+};
 
 describe('macroLens builders — current macro v19 artifact', () => {
 	it('builds a 2x2 regime model without leaking raw coordinate signals', () => {
@@ -110,6 +195,103 @@ describe('macroLens builders — current macro v19 artifact', () => {
 			snapshot.verdict.nextActionKr,
 			snapshot.verdict.primaryChainKr
 		].join(' ');
-		expect(forbidden).not.toMatch(/매수|매도|목표가|보장|추천/);
+		expect(forbidden).not.toMatch(/매수|매도|목표가|보장|추천|beta|베타/);
+	});
+
+	it('locks the verdict when a critical primary macro driver is stale', () => {
+		const staleLatest = macroLatest().map((row) => row.def.id === 'USDKRW' ? { ...row, d: '20200101', chg: 35 } : row);
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture(),
+			macro,
+			macroLatest: staleLatest,
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		const gate = snapshot.evidenceGates.find((g) => g.id === 'macroData');
+		expect(gate?.status).toBe('blocked');
+		expect(gate?.blocks.join(' ')).toContain('USDKRW');
+		expect(snapshot.verdict.direction).toBe('locked');
+		expect(snapshot.verdict.score).toBeLessThanOrEqual(44);
+	});
+
+	it('does not open companyCandidate when quantCandidate lacks required evidence fields', () => {
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture({
+				macroExposure: {
+					exposureQuality: {
+						status: 'quantCandidate',
+						reason: 'fixture invalid quant candidate',
+						blockedReason: '',
+						missingEvidence: [],
+						sourceRef: 'test:macroExposure',
+						nObs: null,
+						rSquared: null,
+						window: null,
+						frequency: null,
+						lagMonths: null,
+						coverage: 'missing',
+						minObs: 24,
+						method: 'ols',
+						modelVersion: 'test',
+						targetMetric: 'sales'
+					},
+					selected: []
+				}
+			}),
+			macro,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		expect(snapshot.verdict.claimLevel).not.toBe('companyCandidate');
+		expect(snapshot.evidenceGates.find((g) => g.id === 'quant')?.status).toBe('blocked');
+		expect(snapshot.evidenceGates.find((g) => g.id === 'quant')?.blocks.join(' ')).toContain('nObs missing');
+	});
+
+	it('hard-locks fallback transmission templates when macro.transmission is missing', () => {
+		const noTransmission = cloneMacro();
+		noTransmission.transmission = null;
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture(),
+			macro: noTransmission,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		expect(snapshot.evidenceGates.find((g) => g.id === 'path')?.status).toBe('blocked');
+		expect(snapshot.verdict.direction).toBe('locked');
+		expect(snapshot.verdict.claimLevel).toBe('locked');
+		expect(snapshot.verdict.score).toBeLessThanOrEqual(44);
+	});
+
+	it('does not label zero-change negative-rate exposure as pressure', () => {
+		const flatLatest = macroLatest().map((row) => ({ ...row, chg: 0, spark: [row.v, row.v, row.v] }));
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture({
+				industry: 'finance',
+				sector: { kr: '금융', en: 'Finance' }
+			}),
+			macro,
+			macroLatest: flatLatest,
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		const baseRate = snapshot.verdict.drivers.find((d) => d.driverId === 'BASE_RATE');
+		expect(baseRate?.direction).not.toBe('pressure');
+		expect(snapshot.verdict.direction).not.toBe('pressure');
+	});
+
+	it('keeps mixed edges mixed even with a large latest move', () => {
+		const latest = macroLatest()
+			.filter((row) => row.def.id === 'USDKRW')
+			.map((row) => ({ ...row, chg: 50, spark: [row.v - 10, row.v, row.v + 50] }));
+		const snapshot = buildMarketMacroLensSnapshot({
+			macro: macroWithSingleMixedEdge(),
+			macroLatest: latest,
+			sectorTailwinds: sectorTailwinds()
+		});
+		expect(snapshot.verdict.direction).toBe('mixed');
+		expect(snapshot.verdict.drivers[0]?.direction).toBe('mixed');
+		expect(snapshot.verdict.titleKr).not.toMatch(/우호 경로 우세|부담 경로 우세/);
 	});
 });

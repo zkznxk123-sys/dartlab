@@ -75,6 +75,8 @@
 		?? ''
 	);
 	const activeFocusId = $derived(localFocus && focusableIds.has(localFocus) ? localFocus : defaultFocusId);
+	const verdictFocusId = $derived(topVerdictDriver?.driverId ?? activeFocusId);
+	const topVerdictRelease = $derived(verdictFocusId ? snapshot.releaseRail.find((r) => r.driverId === verdictFocusId) : null);
 	const focusDriver = $derived(activeFocusId ? snapshot.drivers.find((d) => d.id === activeFocusId) : null);
 	const focusEdge = $derived(activeFocusId ? snapshot.transmissionEdges.find((e) => e.driverId === activeFocusId || e.sectorKey === activeFocusId) : null);
 	const focusIndicator = $derived(activeFocusId ? snapshot.exposureIndicators.find((x) => x.seriesId === activeFocusId || x.sourceRefs.includes(activeFocusId)) : null);
@@ -163,6 +165,21 @@
 		localFocus = id || activeFocusId;
 		localTab = tabName;
 		onTab(tabName);
+	}
+	function showVerdictOnChart() {
+		if (!verdictFocusId || econBlocked(verdictFocusId)) return;
+		localFocus = verdictFocusId;
+		onToggleEcon?.(verdictFocusId);
+	}
+	function inspectVerdictPath() {
+		goto('transmission', verdictFocusId);
+	}
+	function inspectVerdictSources() {
+		goto('sources', verdictFocusId);
+	}
+	function inspectEvidenceGate(id: MacroLensSnapshot['evidenceGates'][number]['id']) {
+		const target: MacroLensTab = id === 'macroData' ? 'drivers' : id === 'path' ? 'transmission' : 'sources';
+		goto(target, verdictFocusId);
 	}
 	function selectTab(tabName: MacroLensTab) {
 		localTab = tabName;
@@ -289,6 +306,20 @@
 						<span>{T('다음 행동', 'Next action')}</span>
 						<b>{T(verdict.nextActionKr, verdict.nextActionEn)}</b>
 						<em>{T(verdict.stanceKr, verdict.stanceEn)}</em>
+						<div class="mlCommandBar" aria-label={T('판정 조작 버튼', 'Verdict command buttons')}>
+							<button
+								onclick={showVerdictOnChart}
+								disabled={!verdictFocusId || !onToggleEcon || econBlocked(verdictFocusId)}
+								class:on={!!verdictFocusId && activeEcon.includes(verdictFocusId)}
+								title={econBlocked(verdictFocusId) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('핵심 지표를 가격 차트에 올립니다', 'overlay the key driver on the price chart')}
+							><LineChart size={13} />{T('차트', 'Chart')}</button>
+							<button onclick={inspectVerdictPath} disabled={!verdictFocusId} title={T('전파 경로 탭에서 근거를 확인합니다', 'inspect the transmission path')}>
+								<GitBranch size={13} />{T('경로', 'Path')}
+							</button>
+							<button onclick={inspectVerdictSources} disabled={!verdictFocusId} title={T('출처와 반증 조건을 확인합니다', 'inspect sources and falsifiers')}>
+								<ShieldAlert size={13} />{T('반증', 'Test')}
+							</button>
+						</div>
 					</div>
 				</section>
 
@@ -330,6 +361,26 @@
 						<b>{T(verdict.qualityLabelKr, verdict.qualityLabelEn)}</b>
 						<p>{T('추천·목표가가 아니라 매크로 노출 판정이다.', 'Macro exposure verdict, not a recommendation or price target.')}</p>
 					</div>
+				</section>
+
+				<section class="mlEvidenceCockpit" aria-label="Evidence cockpit">
+					<div class="mlCockpitHead">
+						<span class="mlBlockK">{T('근거 조종판', 'Evidence cockpit')}</span>
+						<b>{verdict.blockers.length ? verdict.blockers[0] : T('하드락 없음', 'No hard lock')}</b>
+					</div>
+					<div class="mlCockpitGates">
+						{#each gateRows as g (g.id)}
+							<button class={'mlCockpitGate ' + g.status} onclick={() => inspectEvidenceGate(g.id)} title={`${gateDetail(g)} · ${g.sourceRef}`}>
+								<span>{gateLabel(g)}</span>
+								<b>{g.value}</b>
+							</button>
+						{/each}
+					</div>
+					<button class={'mlCockpitRelease ' + (topVerdictRelease?.status ?? 'unknown')} onclick={() => goto('sources', verdictFocusId)} title={topVerdictRelease?.sourceRef ?? T('릴리즈 레일 없음', 'release rail missing')}>
+						<span>Release</span>
+						<b>{topVerdictRelease ? `${topVerdictRelease.label} · ${topVerdictRelease.status.toUpperCase()}` : '—'}</b>
+						<em>{topVerdictRelease ? `${topVerdictRelease.lastObservation} · next ${topVerdictRelease.nextCheck}` : T('재확인 기준 없음', 'recheck point missing')}</em>
+					</button>
 				</section>
 
 				<section class="mlVerdictDrivers" aria-label="Top macro verdict drivers">
@@ -793,12 +844,36 @@
 	.mlVerdictAction { display: flex; flex-direction: column; justify-content: center; gap: 7px; border-left: 1px solid rgba(255,255,255,.06); padding-left: 10px; }
 	.mlVerdictAction b { color: var(--dl-ink); font-size: 13px; line-height: 1.28; }
 	.mlVerdictAction em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; }
+	.mlCommandBar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
+	.mlCommandBar button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 28px; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; background: rgba(0,0,0,.18); color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; cursor: pointer; }
+	.mlCommandBar button:hover, .mlCommandBar button.on { color: var(--amber); border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.055); }
+	.mlCommandBar button:disabled { cursor: not-allowed; opacity: .45; color: var(--dl-ink-muted, #7b8493); border-color: var(--dl-line, #1b2130); background: rgba(255,255,255,.012); }
 	.mlDecisionGrid { display: grid; grid-template-columns: 1.3fr .85fr .85fr; gap: 8px; }
 	.mlDecisionCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
 	.mlDecisionCard.falsifier { border-color: rgba(251,146,60,.36); background: rgba(251,146,60,.03); }
 	.mlDecisionCard b, .mlDecisionCard p { display: block; min-width: 0; }
 	.mlDecisionCard b { margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11.5px; }
 	.mlDecisionCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
+	.mlEvidenceCockpit { display: grid; grid-template-columns: minmax(150px, .72fr) minmax(0, 1.38fr) minmax(190px, .9fr); gap: 8px; align-items: stretch; border: 1px solid rgba(251,146,60,.24); border-radius: 6px; background: rgba(251,146,60,.02); padding: 8px; }
+	.mlCockpitHead, .mlCockpitRelease, .mlCockpitGate { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.12); padding: 7px; }
+	.mlCockpitHead b, .mlCockpitRelease b, .mlCockpitRelease em, .mlCockpitGate span, .mlCockpitGate b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlCockpitHead b { margin-top: 5px; color: var(--dl-ink); font-size: 11px; line-height: 1.25; white-space: normal; overflow-wrap: anywhere; }
+	.mlCockpitGates { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; min-width: 0; }
+	.mlCockpitGate, .mlCockpitRelease { color: var(--dl-ink); text-align: left; cursor: pointer; }
+	.mlCockpitGate span, .mlCockpitRelease span { color: var(--dl-ink-dim, #5b6473); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+	.mlCockpitGate b { margin-top: 5px; font-family: var(--dl-font-mono); font-size: 11px; }
+	.mlCockpitGate.ok { border-color: rgba(52,211,153,.38); }
+	.mlCockpitGate.watch { border-color: rgba(251,146,60,.42); }
+	.mlCockpitGate.blocked { border-color: rgba(248,113,113,.42); }
+	.mlCockpitGate.ok b { color: var(--good); }
+	.mlCockpitGate.watch b { color: var(--warn); }
+	.mlCockpitGate.blocked b { color: var(--dn); }
+	.mlCockpitGate:hover, .mlCockpitRelease:hover { border-color: rgba(251,146,60,.6); background: rgba(251,146,60,.045); }
+	.mlCockpitRelease.fresh { border-color: rgba(52,211,153,.32); }
+	.mlCockpitRelease.watch, .mlCockpitRelease.unknown { border-color: rgba(251,146,60,.38); }
+	.mlCockpitRelease.stale { border-color: rgba(248,113,113,.42); }
+	.mlCockpitRelease b { margin-top: 5px; color: var(--dl-ink); font-size: 11px; }
+	.mlCockpitRelease em { margin-top: 4px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
 	.mlMechanismPanel { border: 1px solid rgba(251,146,60,.22); border-radius: 6px; background: rgba(251,146,60,.022); padding: 9px; }
 	.mlMechanismTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
 	.mlMechanismTitle div { min-width: 0; }
@@ -1116,7 +1191,7 @@
 	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
 		.mlModal { height: min(780px, 94vh); }
-		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows, .mlVerdictHero, .mlDecisionGrid, .mlVerdictDrivers { grid-template-columns: 1fr; }
+		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows, .mlVerdictHero, .mlDecisionGrid, .mlVerdictDrivers, .mlEvidenceCockpit { grid-template-columns: 1fr; }
 		.mlTabs { min-height: 38px; padding-left: 8px; padding-right: 8px; }
 		.mlTabs button { min-width: 50px; min-height: 30px; padding: 8px 9px; text-align: center; }
 		.mlVerdictHero { gap: 8px; }
@@ -1125,9 +1200,14 @@
 		.mlVerdictChain { grid-template-columns: 58px minmax(0, 1fr); }
 		.mlVerdictChain b { white-space: normal; line-height: 1.25; }
 		.mlVerdictAction { border-left: 0; border-top: 1px solid rgba(255,255,255,.06); padding: 9px 0 0; }
+		.mlCommandBar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+		.mlEvidenceCockpit { gap: 6px; padding: 7px; }
+		.mlCockpitGates { grid-template-columns: repeat(5, minmax(66px, 1fr)); overflow-x: auto; padding-bottom: 1px; }
 		.mlMechanismTitle { align-items: flex-start; flex-direction: column; gap: 6px; }
-		.mlMechanismRail { grid-template-columns: repeat(6, minmax(96px, 1fr)); overflow-x: auto; padding-bottom: 2px; }
-		.mlMechanismStep { min-height: 74px; }
+		.mlMechanismRail { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; padding-bottom: 0; }
+		.mlMechanismStep { min-height: 56px; padding: 6px; }
+		.mlMechanismStep em { display: none; }
+		.mlMechanismStep b { font-size: 16px; }
 		.mlDecisionCard b { white-space: normal; line-height: 1.3; }
 		.mlVerdictDriver { min-height: 84px; }
 		.mlMatrix { overflow-x: auto; }
