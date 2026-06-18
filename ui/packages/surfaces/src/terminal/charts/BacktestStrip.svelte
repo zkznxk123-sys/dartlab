@@ -33,11 +33,12 @@
 	const headRet = $derived(pf.combo ? pf.combo.metrics.retPct : focusRes?.metrics.retPct ?? 0);
 	const headLabel = $derived(pf.combo ? T('조합', 'combo') : slots.find((s) => s.id === focusId)?.label ?? '');
 	// 조합 MDD < 개별 MDD = 분산효과 시각 증거(타이밍 분산). null 안전.
-	const comboMddBetter = $derived.by(() => {
-		if (!pf.combo) return false;
+	const comboMddNums = $derived.by(() => {
+		if (!pf.combo || !pf.slots.length) return null;
 		const worst = Math.min(...pf.slots.map((s) => s.result.metrics.mddPct));
-		return pf.combo.metrics.mddPct > worst; // 덜 깊으면(0 에 가까우면) 개선
+		return { combo: pf.combo.metrics.mddPct, worst, better: pf.combo.metrics.mddPct > worst };
 	});
+	const comboMddBetter = $derived(comboMddNums?.better ?? false);
 	const metaOf = (id: string) => slots.find((s) => s.id === id);
 	const idxOf = (id: string) => slots.findIndex((s) => s.id === id);
 	const WARN_LABEL: Record<BtWarning['kind'], { kr: string; en: string }> = {
@@ -81,7 +82,7 @@
 		<div class="btTier btTierCaution">
 			{T('여러 전략 같은 데이터 비교 = 사후선택 편향(위 곡선이 미래 최고 아님)', 'comparing strategies on the same data = selection bias (top curve ≠ best future)')}
 			· {T('단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'single-stock combo = timing, not asset diversification')}
-			{#if pf.combo}· {T('조합 = 동일가중 보유합성(리밸런싱 없음)', 'combo = equal-weight, no rebalancing')}{#if comboMddBetter} · {T('조합 낙폭이 개별보다 얕음', 'combo MDD shallower than singles')}{/if}{/if}
+			{#if pf.combo}· {T('조합 = 동일가중 보유합성(리밸런싱 없음)', 'combo = equal-weight, no rebalancing')}{#if comboMddBetter && comboMddNums} · <b class="btDiv">{T('분산효과: 조합 MDD', 'diversification: combo MDD')} {comboMddNums.combo.toFixed(0)}% &lt; {comboMddNums.worst.toFixed(0)}%</b>{/if}{/if}
 		</div>
 	{/if}
 	<div class="btTier btTierSpec">
@@ -127,6 +128,7 @@
 	.btTierActive { display: flex; flex-wrap: wrap; gap: 5px; }
 	.btWarnChip { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 6px; }
 	.btTierCaution { color: #8b94a3; font-style: italic; }
+	.btDiv { font-weight: 600; font-style: normal; color: #aeb6c2; } /* 분산효과 증거 — 중립 강조(승자 축포 금지) */
 	.btTierSpec { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--dimmer); }
 	.btStamp { color: #8b94a3; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 6px; letter-spacing: 0.01em; }
 	.btMethod { font-size: 11px; background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; border-radius: 3px; padding: 0 7px; cursor: pointer; font-family: inherit; }
