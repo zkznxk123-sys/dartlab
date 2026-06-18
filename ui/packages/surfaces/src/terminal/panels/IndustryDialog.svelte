@@ -20,6 +20,8 @@
 
 	let view = $state(industryId); // '' = 랜드스케이프, 그 외 = 드릴 산업 id
 	let landLens = $state('prof');
+	let landView = $state<'rank' | 'map'>('rank'); // 순위표 ↔ 지형도(구조 관측)
+	let hoverId = $state(''); // 지형도 hover 산업
 	const lens = $derived(lensByKey(landLens));
 
 	const industryIds = $derived([...new Set((eng.raw.eco?.nodes || []).map((n) => n.industry))]);
@@ -33,6 +35,40 @@
 		return rows;
 	});
 	const landVals = $derived(landRows.map((r) => r.v));
+
+	// ── 지형도(map): 산업 = (수익 수준 × 마진 격차) 평면. 위치 = 구조 관측, 판정 아님.
+	//   x = 영업이익률 median(수익 수준) · y = marginIqr(산업 내 회사 간 격차) · 크기 = n · 중앙 십자 = 중앙값 기준선.
+	//   y(격차)는 정의상 좋고나쁨 아님(04 §3) → 2D 위치의 절반이 구조적으로 verdict-free.
+	const _med = (arr: number[]): number => { const s = [...arr].sort((a, b) => a - b); const k = Math.floor(s.length / 2); return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
+	const mapGeo = $derived.by(() => {
+		const pts = all
+			.map((x) => ({ x, mx: x.dist.opMargin?.median ?? null, my: x.marginIqr }))
+			.filter((p): p is { x: IndustryMacro; mx: number; my: number } => p.mx != null && p.my != null);
+		if (pts.length < 3) return null;
+		const W = 700, H = 360, ml = 52, mr = 70, mt = 14, mb = 28;
+		const x0 = ml, x1 = W - mr, y0 = mt, y1 = H - mb;
+		const xs = pts.map((p) => p.mx), ys = pts.map((p) => p.my);
+		let xmin = Math.min(...xs), xmax = Math.max(...xs);
+		const xpad = (xmax - xmin || 1) * 0.08; xmin -= xpad; xmax += xpad;
+		const ymax = Math.max(...ys, 1) * 1.08;
+		const maxN = Math.max(...pts.map((p) => p.x.count));
+		const sx = (v: number) => x0 + ((v - xmin) / (xmax - xmin)) * (x1 - x0);
+		const sy = (v: number) => y1 - (v / ymax) * (y1 - y0);
+		const rOf = (n: number) => 3.5 + ((Math.sqrt(n) - Math.sqrt(10)) / (Math.sqrt(maxN) - Math.sqrt(10) || 1)) * 10;
+		const dots = pts.map((p) => ({ x: p.x, cx: sx(p.mx), cy: sy(p.my), r: rOf(p.x.count), mx: p.mx, my: p.my, faint: p.x.count < 15, showLbl: false }));
+		// 라벨 충돌 제거(greedy): 큰 점 우선 배치, 겹치면 라벨만 숨김(점은 유지·hover 시 full). 위치 불변(정직).
+		const placed: { x1: number; y1: number; x2: number; y2: number }[] = [];
+		[...dots].sort((a, b) => b.r - a.r).forEach((d) => {
+			if (d.faint) return;
+			const nm = (d.x.kr || '').slice(0, 5);
+			const lx = d.cx + d.r + 2, ly = d.cy - 6, lw = nm.length * 8 + 12, lh = 12;
+			const box = { x1: lx, y1: ly, x2: lx + lw, y2: ly + lh };
+			const hit = placed.some((p) => !(box.x2 < p.x1 || box.x1 > p.x2 || box.y2 < p.y1 || box.y1 > p.y2));
+			if (!hit) { d.showLbl = true; placed.push(box); }
+		});
+		return { W, H, x0, x1, y0, y1, cx: sx(_med(xs)), cy: sy(_med(ys)), zx: xmin < 0 && xmax > 0 ? sx(0) : null, dots, xmin, xmax, ymax };
+	});
+	const hover = $derived(mapGeo ? (mapGeo.dots.find((d) => d.x.id === hoverId) ?? null) : null);
 
 	// 드릴 지표 cross-industry rank — 이 산업 median 이 34산업 중 위치(거시 핵심).
 	function rankOf(getter: (x: IndustryMacro) => number | null, lower: boolean): { pct: number; pos: number; tot: number } | null {
@@ -169,10 +205,17 @@
 			{:else}
 				<!-- ── 랜드스케이프: 전체 산업 랭킹 + 분포 ── -->
 				<div class="indLensRow">
-					{#each INDUSTRY_LENSES as l (l.key)}
-						<button class={'indLensBtn' + (landLens === l.key ? ' on' : '')} onclick={() => (landLens = l.key)} title={l.note}>{lang === 'en' ? l.en : l.kr}</button>
-					{/each}
+					<div class="indViewTog">
+						<button class={'indVBtn' + (landView === 'rank' ? ' on' : '')} onclick={() => (landView = 'rank')}>{lang === 'en' ? 'Rank' : '순위'}</button>
+						<button class={'indVBtn' + (landView === 'map' ? ' on' : '')} onclick={() => (landView = 'map')} title={lang === 'en' ? 'margin level x spread terrain' : '수익 수준 x 마진 격차 지형'}>{lang === 'en' ? 'Map' : '지형도'}</button>
+					</div>
+					{#if landView === 'rank'}
+						{#each INDUSTRY_LENSES as l (l.key)}
+							<button class={'indLensBtn' + (landLens === l.key ? ' on' : '')} onclick={() => (landLens = l.key)} title={l.note}>{lang === 'en' ? l.en : l.kr}</button>
+						{/each}
+					{/if}
 				</div>
+				{#if landView === 'rank'}
 				<div class="indLand">
 					{#each landRows as r, i (r.x.id)}
 						{@const band = lens.bandOf(r.x)}
@@ -186,6 +229,44 @@
 						</button>
 					{/each}
 				</div>
+				{:else}
+					{#if mapGeo}
+						{@const g = mapGeo}
+						<div class="indMapWrap">
+							<svg viewBox={`0 0 ${g.W} ${g.H}`} class="indMap" role="img" aria-label={lang === 'en' ? 'Industry margin-level vs spread map' : '산업 수익수준 x 마진격차 지형도'}>
+								<line x1={g.x0} y1={g.y1} x2={g.x1} y2={g.y1} class="mapAx" />
+								<line x1={g.x0} y1={g.y0} x2={g.x0} y2={g.y1} class="mapAx" />
+								{#if g.zx != null}<line x1={g.zx} y1={g.y0} x2={g.zx} y2={g.y1} class="mapZero" /><text x={g.zx} y={g.y1 + 10} class="mapTick" text-anchor="middle">0%</text>{/if}
+								<line x1={g.cx} y1={g.y0} x2={g.cx} y2={g.y1} class="mapCross" />
+								<line x1={g.x0} y1={g.cy} x2={g.x1} y2={g.cy} class="mapCross" />
+								<text x={g.cx + 2} y={g.y0 + 8} class="mapCrossLbl">{lang === 'en' ? 'median' : '중앙값'}</text>
+								{#each g.dots as d (d.x.id)}
+									<g class={'mapDot' + (hoverId === d.x.id ? ' on' : '')} role="button" tabindex="0" aria-label={d.x.kr} onclick={() => (view = d.x.id)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); view = d.x.id; } }} onmouseenter={() => (hoverId = d.x.id)} onmouseleave={() => (hoverId = '')} onfocus={() => (hoverId = d.x.id)} onblur={() => (hoverId = '')}>
+										<circle cx={d.cx} cy={d.cy} r={d.r} class="mapC" class:faint={d.faint} />
+										{#if d.showLbl}<text x={d.cx + d.r + 2} y={d.cy + 3} class="mapLbl">{(lang === 'en' ? d.x.en : d.x.kr).slice(0, 5)}{#if d.x.tailwind != null && (d.x.tailwind >= 0.55 || d.x.tailwind <= 0.35)} <tspan class={d.x.tailwind >= 0.55 ? 'tUp' : 'tDn'}>{d.x.tailwind >= 0.55 ? '↑' : '↓'}</tspan>{/if}</text>{/if}
+									</g>
+								{/each}
+								{#if hover}
+									<circle cx={hover.cx} cy={hover.cy} r={hover.r} class="mapC mapCtop" pointer-events="none" />
+									<text x={hover.cx + hover.r + 2} y={hover.cy + 3} class="mapLbl mapLtop" pointer-events="none">{lang === 'en' ? hover.x.en : hover.x.kr}</text>
+								{/if}
+								<text x={(g.x0 + g.x1) / 2} y={g.H - 2} class="mapAxLbl" text-anchor="middle">{lang === 'en' ? 'op-margin median →' : '영업이익률 중앙값(수익 수준) →'}</text>
+								<text x={13} y={(g.y0 + g.y1) / 2} class="mapAxLbl" text-anchor="middle" transform={`rotate(-90 13 ${(g.y0 + g.y1) / 2})`}>{lang === 'en' ? 'margin spread IQR ↑' : '마진 격차(IQR) ↑'}</text>
+								<text x={g.x0} y={g.y1 + 10} class="mapTick" text-anchor="start">{Math.round(g.xmin)}%</text>
+								<text x={g.x1} y={g.y1 + 10} class="mapTick" text-anchor="end">{Math.round(g.xmax)}%</text>
+								<text x={g.x0 - 5} y={g.y1} class="mapTick" text-anchor="end">0</text>
+								<text x={g.x0 - 5} y={g.y0 + 8} class="mapTick" text-anchor="end">{Math.round(g.ymax)}</text>
+							</svg>
+							<div class="indMapInfo">
+								{#if hover}
+									<b>{lang === 'en' ? hover.x.en : hover.x.kr}</b> · n={hover.x.count}{#if hover.x.count < 15}⚠{/if} · {lang === 'en' ? 'margin' : '마진'} {hover.mx.toFixed(1)}% · {lang === 'en' ? 'spread' : '격차'} {hover.my.toFixed(1)}%p{#if hover.x.tailwind != null} · <span class={hover.x.tailwind >= 0.55 ? 'tUp' : hover.x.tailwind <= 0.35 ? 'tDn' : 'tNeu'}>{twLabel(hover.x.tailwind)}</span>{/if} · <em>{lang === 'en' ? 'click → detail' : '클릭 → 상세'}</em>
+								{:else}
+									{lang === 'en' ? '※ dot = industry · x = margin level (op-margin median) · y = within-industry spread (IQR) · position = structural observation, not a verdict · larger = more members · faint = n<15' : '※ 점=산업 · 가로=수익 수준(영업이익률 중앙값) · 세로=산업 내 격차(IQR) · 위치=구조 관측이지 판정 아님 · 클수록 멤버 많음 · 흐림=n<15'}
+								{/if}
+							</div>
+						</div>
+					{/if}
+				{/if}
 			{/if}
 
 			<div class="indNotes">
@@ -253,6 +334,31 @@
 	.swTw.tw-up { color: var(--up, #3fb950); }
 	.swTw.tw-dn { color: var(--dn, #f85149); }
 	.swTw.tw-nu { color: #aeb6c2; }
+	/* 뷰 토글 + 지형도(구조 관측) */
+	.indViewTog { display: inline-flex; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; overflow: hidden; margin-right: 4px; }
+	.indVBtn { font-size: 10px; padding: 2px 9px; border: 0; background: rgba(255, 255, 255, 0.02); color: #aeb6c2; cursor: pointer; }
+	.indVBtn:hover { color: var(--dl-ink, #c8cfdb); }
+	.indVBtn.on { color: var(--amber, #fb923c); background: color-mix(in srgb, var(--amber, #fb923c) 14%, transparent); }
+	.indMapWrap { margin-bottom: 10px; }
+	.indMap { width: 100%; height: auto; display: block; }
+	.mapAx { stroke: var(--dl-line, #2a3142); stroke-width: 1; }
+	.mapZero { stroke: color-mix(in srgb, var(--dl-ink, #c8cfdb) 22%, transparent); stroke-width: 1; stroke-dasharray: 1 3; }
+	.mapCross { stroke: color-mix(in srgb, var(--amber, #fb923c) 26%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+	.mapCrossLbl { fill: color-mix(in srgb, var(--amber, #fb923c) 70%, transparent); font-size: 8px; }
+	.mapDot { cursor: pointer; outline: none; }
+	.mapC { fill: color-mix(in srgb, #6aa3ff 42%, transparent); stroke: #6aa3ff; stroke-width: 1; transition: fill 0.12s; }
+	.mapC.faint { fill: color-mix(in srgb, #6aa3ff 16%, transparent); stroke: color-mix(in srgb, #6aa3ff 45%, transparent); }
+	.mapDot.on .mapC, .mapCtop { fill: color-mix(in srgb, var(--amber, #fb923c) 60%, transparent); stroke: var(--amber, #fb923c); }
+	.mapDot:focus-visible .mapC { stroke: var(--amber, #fb923c); stroke-width: 2; }
+	.mapLbl { fill: #8b93a0; font-size: 8.5px; pointer-events: none; }
+	.mapDot.on .mapLbl, .mapLtop { fill: var(--dl-ink, #c8cfdb); font-weight: 700; }
+	.mapLbl .tUp { fill: var(--up, #3fb950); }
+	.mapLbl .tDn { fill: var(--dn, #f85149); }
+	.mapAxLbl { fill: #aeb6c2; font-size: 9px; }
+	.mapTick { fill: #6b7280; font-size: 8px; }
+	.indMapInfo { font-size: 9.5px; color: #aeb6c2; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 26px; }
+	.indMapInfo b { color: var(--dl-ink, #c8cfdb); }
+	.indMapInfo em { font-style: normal; color: var(--amber, #fb923c); }
 	.indNotes { margin-top: 4px; display: flex; flex-direction: column; gap: 3px; }
 	.indNotes div { font-size: 9px; line-height: 1.45; color: #aeb6c2; }
 	.tUp { color: var(--up, #3fb950); }
