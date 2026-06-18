@@ -181,52 +181,52 @@
 </div>
 
 <style>
-	.indModal { width: min(760px, 95vw); }
-	.indBack { background: none; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; color: #c2cad6; font-size: 10px; padding: 1px 7px; cursor: pointer; }
+	.indModal { width: min(1060px, 96vw); }
+	.indBack { background: none; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; color: #c2cad6; font-size: 11.5px; padding: 2px 8px; cursor: pointer; }
 	.indBack:hover { color: var(--dl-ink, #c8cfdb); border-color: var(--amber, #fb923c); }
-	.indWho { font-size: 12px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
-	.indWho i { font-style: normal; font-weight: 400; margin-left: 7px; font-size: 10px; color: #c2cad6; }
-	.indLens { font-size: 10px; color: #c2cad6; font-style: italic; }
+	.indWho { font-size: 13.5px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
+	.indWho i { font-style: normal; font-weight: 400; margin-left: 7px; font-size: 11.5px; color: #c2cad6; }
+	.indLens { font-size: 11.5px; color: #c2cad6; font-style: italic; }
 	.indBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 10px 14px 14px; }
 	/* 드릴 — 회사 산포도 헤더 + 등급 범례 */
 	.indScatterHd { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
-	.indScatterT { font-size: 11px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
-	.indGradeLeg { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; color: #c2cad6; }
+	.indScatterT { font-size: 13px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
+	.indGradeLeg { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: #c2cad6; }
 	.indGradeLeg i { font-style: normal; margin-right: 4px; }
-	.indLegDot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+	.indLegDot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 	.indLegDot.up { background: #3fb950; }
 	.indLegDot.good { background: #6fbf73; }
 	.indLegDot.neutral { background: #8b93a0; }
 	.indLegDot.warn { background: #d29922; }
 	.indLegDot.down { background: #f85149; }
-	.indFactStrip { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 10px; color: #c2cad6; }
+	.indFactStrip { display: flex; flex-wrap: wrap; gap: 5px 16px; margin-top: 10px; font-size: 12px; color: #c2cad6; }
 	.indFactStrip b { color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.indFactStrip em { font-style: normal; font-weight: 700; margin-left: 2px; }
-	.indHint { font-size: 9.5px; color: #c2cad6; line-height: 1.45; margin-top: 6px; font-style: italic; }
+	.indHint { font-size: 11.5px; color: #c2cad6; line-height: 1.5; margin-top: 8px; font-style: italic; }
 	/* 뷰 토글 + 순위표(보조) */
 	.indLensRow { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; align-items: center; }
 	.indViewTog { display: inline-flex; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; overflow: hidden; margin-right: 4px; }
-	.indVBtn { font-size: 10px; padding: 2px 9px; border: 0; background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
+	.indVBtn { font-size: 11.5px; padding: 3px 11px; border: 0; background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
 	.indVBtn:hover { color: var(--dl-ink, #c8cfdb); }
 	.indVBtn.on { color: var(--amber, #fb923c); background: color-mix(in srgb, var(--amber, #fb923c) 14%, transparent); }
-	.indLensBtn { font-size: 10px; padding: 2px 9px; border-radius: 3px; border: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
+	.indLensBtn { font-size: 11.5px; padding: 3px 11px; border-radius: 3px; border: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
 	.indLensBtn:hover { color: var(--dl-ink, #c8cfdb); }
 	.indLensBtn.on { color: var(--amber, #fb923c); border-color: color-mix(in srgb, var(--amber, #fb923c) 55%, transparent); background: color-mix(in srgb, var(--amber, #fb923c) 12%, transparent); }
 	.indLand { display: flex; flex-direction: column; margin-bottom: 10px; max-height: 56vh; overflow-y: auto; }
 	.indLandRow { display: grid; grid-template-columns: 18px 96px 1fr 56px 26px; align-items: center; gap: 9px; padding: 2px 4px; background: none; border: 0; border-bottom: 1px solid var(--dl-line, #1b2130); cursor: pointer; text-align: left; }
 	.indLandRow:hover { background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.04)); }
-	.indLR { font-size: 9px; color: #c2cad6; text-align: center; }
-	.indLName { font-size: 11px; color: var(--dl-ink, #c8cfdb); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; }
+	.indLR { font-size: 10.5px; color: #c2cad6; text-align: center; }
+	.indLName { font-size: 12.5px; color: var(--dl-ink, #c8cfdb); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; }
 	.indLCurve { min-width: 0; line-height: 0; }
-	.indLVal { font-size: 11px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-	.indLN { font-size: 9px; color: #c2cad6; text-align: right; font-variant-numeric: tabular-nums; }
+	.indLVal { font-size: 12.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+	.indLN { font-size: 10.5px; color: #c2cad6; text-align: right; font-variant-numeric: tabular-nums; }
 	.indLN.warn { color: var(--warn, #d29922); }
 	.swTw { font-style: normal; font-size: 9px; font-weight: 700; }
 	.swTw.tw-up { color: var(--up, #3fb950); }
 	.swTw.tw-dn { color: var(--dn, #f85149); }
 	.swTw.tw-nu { color: #c2cad6; }
-	.indNotes { margin-top: 10px; display: flex; flex-direction: column; gap: 3px; }
-	.indNotes div { font-size: 9.5px; line-height: 1.5; color: #c2cad6; }
+	.indNotes { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+	.indNotes div { font-size: 11px; line-height: 1.5; color: #c2cad6; }
 	.tUp { color: var(--up, #3fb950); }
 	.tDn { color: var(--dn, #f85149); }
 	.tNeu { color: #c2cad6; }

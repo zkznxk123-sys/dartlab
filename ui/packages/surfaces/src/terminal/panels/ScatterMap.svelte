@@ -68,7 +68,7 @@
 			[...dots].sort((a, b) => b.r - a.r).forEach((d) => {
 				if (d.p.faint) return;
 				const nm = (d.p.label || '').slice(0, 5);
-				const lx = d.cx + d.r + 2, ly = d.cy - 6, lw = nm.length * 8 + 12, lh = 12;
+				const lx = d.cx + d.r + 2, ly = d.cy - 7, lw = nm.length * 9.5 + 12, lh = 14;
 				const box = { x1: lx, y1: ly, x2: lx + lw, y2: ly + lh };
 				const hit = placed.some((q) => !(box.x2 < q.x1 || box.x1 > q.x2 || box.y2 < q.y1 || box.y1 > q.y2));
 				if (!hit) { d.lbl = true; placed.push(box); }
@@ -142,12 +142,12 @@
 	.smHiRing { fill: none; stroke: var(--amber, #fb923c); stroke-width: 1.3; }
 	.smDot:focus-visible .smC { stroke: var(--amber, #fb923c); stroke-width: 2; }
 	.smCtop { fill: none; stroke-width: 2; }
-	.smLbl { fill: #c2cad6; font-size: 9.5px; pointer-events: none; }
-	.sm-mini .smLbl { font-size: 8.5px; }
+	.smLbl { fill: #c2cad6; font-size: 11px; pointer-events: none; }
+	.sm-mini .smLbl { font-size: 10px; }
 	.smDot.on .smLbl, .smDot.hi .smLbl, .smLtop { fill: #f0f3f7; font-weight: 700; }
-	.smAxLbl { fill: #d2d8e2; font-size: 10px; }
-	.smTick { fill: #aab2bf; font-size: 9px; }
-	.smInfo { font-size: 10.5px; color: #c2cad6; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 26px; }
+	.smAxLbl { fill: #d2d8e2; font-size: 12.5px; }
+	.smTick { fill: #aab2bf; font-size: 11px; }
+	.smInfo { font-size: 12.5px; color: #c2cad6; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 28px; }
 	.smInfo b { color: #f0f3f7; }
 	.smInfo em { font-style: normal; color: var(--amber, #fb923c); }
 	.smEmpty { font-size: 10px; color: #aab2bf; padding: 12px; text-align: center; }
