@@ -270,9 +270,13 @@ def _filterAxis(result: dict, axis: str) -> dict | None:
 
 
 def credit(
-    stockCode: str | None = None, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None
+    axis: str | None = None, target: str | None = None, *, detail: bool = False, basePeriod: str | None = None
 ) -> dict | "pl.DataFrame" | None:
-    """신용등급 산출 단일 진입점.
+    """신용등급 산출 단일 진입점 — gather 표준 ``credit(axis, target)`` axis-first.
+
+    gather 표준: ``credit("채무상환", "005930")`` (axis, target=stockCode). 종합등급은
+    ``credit("등급", "005930")`` 또는 단축 ``credit("005930")``. **backward-compat**: 옛
+    id-first ``credit("005930", "채무상환")`` 은 자동 swap + DeprecationWarning 으로 흡수.
 
     Capabilities:
         DART/EDGAR 공시 재무제표만으로 dCR 독립 신용등급을 산출하는 단일 진입점. 무인자 호출 시
@@ -375,6 +379,22 @@ def credit(
         TargetMarkets:
             - KR (DART)
     """
+    # gather 표준 axis-first 정규화 + 옛 id-first swap (quant 패턴).
+    if axis is not None and (axis in _AXIS_REGISTRY or axis in _ALIASES or axis in _GRADE_ALIASES):
+        stockCode = target  # 신형: credit("채무상환","005930")
+    elif axis is not None and target is not None:
+        import warnings
+
+        warnings.warn(
+            f'dartlab.credit("{axis}", "{target}") 호출은 deprecated — '
+            f'dartlab.credit("{target}", "{axis}") (axis-first) 를 사용하세요.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        stockCode, axis = axis, target  # 옛형 swap
+    else:
+        stockCode, axis = axis, None  # credit() 가이드 / credit("005930") 종합등급
+
     if stockCode is None:
         return guide()
 
