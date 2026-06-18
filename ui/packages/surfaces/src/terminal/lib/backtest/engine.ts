@@ -271,10 +271,16 @@ export function runBacktest(candles: Candle[], preset: BtPresetKey, params: Reco
 	return runBacktestCore(candles, def.signal(candles.map((c) => c.c), params), opts, { id: preset, params });
 }
 
-/** 조건 빌더 룰(커스텀 조립 + OHLCV rule 프리셋) 경로 — target 을 evalRule 로 산출(전문가급 패널). */
-export function runBacktestRule(candles: Candle[], rule: StrategyRule, opts: BtOpts): BtResult | null {
+/** 조건 빌더 룰(커스텀 조립 + OHLCV rule 프리셋) 경로 — target 을 evalRule 로 산출(전문가급 패널).
+ *  gate = 펀더게이트 PIT 시계열(있으면 fundGate 조건 소비, 공시 전 봉 진입차단 — look-ahead 0, W2 간판②). */
+export function runBacktestRule(
+	candles: Candle[],
+	rule: StrategyRule,
+	opts: BtOpts,
+	gate: (number | null)[] | null = null
+): BtResult | null {
 	if (candles.length < ruleWarmup(rule) + 5) return null;
-	return runBacktestCore(candles, evalRule(candles, rule).target, opts, { id: 'custom', params: {} });
+	return runBacktestCore(candles, evalRule(candles, rule, gate).target, opts, { id: 'custom', params: {} });
 }
 
 function runBacktestCore(candles: Candle[], target: Int8Array, opts: BtOpts, specStrat: StrategyForSpec): BtResult | null {

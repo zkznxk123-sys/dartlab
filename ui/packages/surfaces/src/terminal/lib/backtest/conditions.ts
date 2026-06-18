@@ -10,7 +10,8 @@ const closesOf = (cs: Candle[]) => cs.map((c) => c.c);
 // 조건 빌더가 노출하는 좌변/우변 지표 카탈로그 — 이게 "조작패널"이 보여주는 building block 목록.
 export type SeriesKey =
 	| 'price' | 'ma' | 'ema' | 'rsi' | 'stochK' | 'macdHist' | 'bbPctB'
-	| 'volRatio' | 'atrPct' | 'realizedVol' | 'momRet' | 'high20Prox';
+	| 'volRatio' | 'atrPct' | 'realizedVol' | 'momRet' | 'high20Prox'
+	| 'fundGate'; // ★펀더게이트 — 캔들 파생 아닌 *외부 PIT 시계열*(Piotroski 등) 주입. SERIES_CATALOG 비포함(별도 게이트 UI). W2
 
 export interface SeriesDef {
 	key: SeriesKey;
@@ -61,12 +62,15 @@ function seriesOf(cs: Candle[], key: SeriesKey, params: Record<string, number>):
 	return def.calc(cs, p);
 }
 
-/** 조건 1개 → 봉별 만족 0/1 (좌·우 결측 봉 = 0, cross 는 직전봉 필요). */
-export function evalCondition(cs: Candle[], cond: Condition): Uint8Array {
-	const L = seriesOf(cs, cond.left, cond.leftParams);
+/** 조건 1개 → 봉별 만족 0/1 (좌·우 결측 봉 = 0, cross 는 직전봉 필요).
+ *  gate = 펀더게이트 PIT 시계열(공시일 이후 봉부터 값, 그 전 null). left/right='fundGate' 일 때 주입. */
+export function evalCondition(cs: Candle[], cond: Condition, gate: (number | null)[] | null = null): Uint8Array {
+	const sel = (key: SeriesKey, params: Record<string, number>): (number | null)[] =>
+		key === 'fundGate' ? gate ?? cs.map(() => null) : seriesOf(cs, key, params);
+	const L = sel(cond.left, cond.leftParams);
 	let R: (number | null)[];
 	if (cond.right.kind === 'const') { const v = cond.right.value; R = cs.map(() => v); }
-	else R = seriesOf(cs, cond.right.key, cond.right.params);
+	else R = sel(cond.right.key, cond.right.params);
 	const out = new Uint8Array(cs.length);
 	for (let i = 0; i < cs.length; i++) {
 		const l = L[i];
@@ -106,11 +110,12 @@ export interface RuleEval {
 	exitCombined: Uint8Array;
 }
 
-/** 룰 → target(long/flat 상태기계) + 조건 레인. 진입조건 충족시 진입, 보유중 청산조건 충족시 청산. */
-export function evalRule(cs: Candle[], rule: StrategyRule): RuleEval {
+/** 룰 → target(long/flat 상태기계) + 조건 레인. 진입조건 충족시 진입, 보유중 청산조건 충족시 청산.
+ *  gate = 펀더게이트 PIT 시계열(있으면 fundGate 조건이 이를 소비 — 공시 전 봉 null=진입차단, look-ahead 0). */
+export function evalRule(cs: Candle[], rule: StrategyRule, gate: (number | null)[] | null = null): RuleEval {
 	const n = cs.length;
-	const entrySat = rule.entry.map((c) => evalCondition(cs, c));
-	const exitSat = rule.exit.map((c) => evalCondition(cs, c));
+	const entrySat = rule.entry.map((c) => evalCondition(cs, c, gate));
+	const exitSat = rule.exit.map((c) => evalCondition(cs, c, gate));
 	const entryCombined = combine(entrySat, rule.entryCombine, n);
 	const exitCombined = combine(exitSat, rule.exitCombine, n);
 	const target = new Int8Array(n);
