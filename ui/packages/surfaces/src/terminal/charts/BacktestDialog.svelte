@@ -92,14 +92,23 @@
 		return result.trades.map((t) => { acc *= 1 + t.retPct / 100; return (acc - 1) * 100; });
 	});
 	const worstTrades = $derived([...result.trades].sort((a, b) => a.retPct - b.retPct).slice(0, 6));
+	// 거래 분석 — 기대값(거래당 평균수익)·평균 MAE/MFE(역행/순행). 전문 트레이더 핵심어(S2).
+	const tradeStats = $derived.by(() => {
+		const ts = result.trades.filter((t) => t.maePct != null);
+		if (!result.trades.length) return null;
+		const exp = result.trades.reduce((s, t) => s + t.retPct, 0) / result.trades.length;
+		const mae = ts.length ? ts.reduce((s, t) => s + (t.maePct ?? 0), 0) / ts.length : null;
+		const mfe = ts.length ? ts.reduce((s, t) => s + (t.mfePct ?? 0), 0) / ts.length : null;
+		return { exp, mae, mfe };
+	});
 	const recovered = $derived(result.mddWindow?.recoverIdx != null);
 
 	function jumpToBar(t: string) { onFocusBar?.(t); onClose(); }
 
 	// Trades CSV — 브라우저 zero-dep Blob (egress 전체는 table-export PRD 영역, 여기선 거래내역만).
 	function exportCsv() {
-		const head = ['entry', 'entryPx', 'exit', 'exitPx', 'retPct', 'cumPct', 'holdDays', 'exitReason'];
-		const rows = result.trades.map((t, i) => [t.entryT, t.entryPx.toFixed(2), t.exitT ?? '', t.exitPx != null ? t.exitPx.toFixed(2) : '', t.retPct.toFixed(2), cumPct[i].toFixed(2), t.holdDays, t.exitReason]);
+		const head = ['entry', 'entryPx', 'exit', 'exitPx', 'retPct', 'maePct', 'mfePct', 'cumPct', 'holdDays', 'exitReason'];
+		const rows = result.trades.map((t, i) => [t.entryT, t.entryPx.toFixed(2), t.exitT ?? '', t.exitPx != null ? t.exitPx.toFixed(2) : '', t.retPct.toFixed(2), t.maePct != null ? t.maePct.toFixed(2) : '', t.mfePct != null ? t.mfePct.toFixed(2) : '', cumPct[i].toFixed(2), t.holdDays, t.exitReason]);
 		const csv = [head, ...rows].map((r) => r.join(',')).join('\n');
 		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
 		const url = URL.createObjectURL(blob);
@@ -206,6 +215,12 @@
 					<div class="bdCard"><span>MDD</span><b class="mono tDn">{m.mddPct.toFixed(1)}%</b><i>{T('보유', 'B&H')} {result.bh.mddPct.toFixed(1)}%</i></div>
 					<div class="bdCard"><span>{T('승률', 'win rate')}</span><b class="mono">{m.winRatePct != null ? m.winRatePct.toFixed(0) + '%' : '—'}</b><i>{result.trades.filter((t) => t.retPct > 0).length}/{m.tradeCount}</i></div>
 					<div class="bdCard"><span>{T('손익비', 'profit factor')}</span><b class="mono">{m.profitFactor != null ? m.profitFactor.toFixed(2) : '—'}</b></div>
+					{#if tradeStats}
+						<div class="bdCard" title={T('거래당 기대 수익(평균) — 양수면 우위', 'expected return per trade')}><span>{T('기대값/거래', 'expectancy')}</span><b class={'mono ' + (tradeStats.exp >= 0 ? 'tUp' : 'tDn')}>{tradeStats.exp >= 0 ? '+' : ''}{tradeStats.exp.toFixed(2)}%</b></div>
+						{#if tradeStats.mae != null && tradeStats.mfe != null}
+							<div class="bdCard" title={T('평균 최대역행/최대순행 — 보유 중 worst/best 미실현', 'avg max adverse/favorable excursion')}><span>{T('평균 MAE / MFE', 'avg MAE/MFE')}</span><b class="mono">{tradeStats.mae.toFixed(1)} / +{tradeStats.mfe.toFixed(1)}%</b><i>{T('역행 / 순행', 'adverse/favorable')}</i></div>
+						{/if}
+					{/if}
 					<div class="bdCard" title={T('거래당 평균 (최고/최악)', 'avg per trade')}><span>{T('평균 거래', 'avg trade')}</span><b class={'mono ' + (m.avgTradePct != null ? cls(m.avgTradePct) : 'tNeu')}>{m.avgTradePct != null ? sgn(m.avgTradePct) + '%' : '—'}</b>{#if m.bestTradePct != null && m.worstTradePct != null}<i>{sgn(m.bestTradePct, 0)}/{sgn(m.worstTradePct, 0)}</i>{/if}</div>
 					<div class="bdCard"><span>{T('노출', 'exposure')}</span><b class="mono">{m.exposurePct.toFixed(0)}%</b></div>
 					<div class="bdCard"><span>{T('비용 드래그', 'cost drag')}</span><b class="mono tDn">{m.costDragPct.toFixed(1)}%p</b></div>
