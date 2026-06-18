@@ -149,7 +149,7 @@
 	.smDot.on .smLbl, .smDot.hi .smLbl, .smLtop { fill: #f0f3f7; font-weight: 700; }
 	.smAxLbl { fill: #d2d8e2; font-size: 10px; }
 	.smTick { fill: #aab2bf; font-size: 9px; }
-	.smInfo { font-size: 10.5px; color: #c2cad6; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 26px; }
+	.smInfo { font-size: 10.5px; color: #c2cad6; line-height: 1.45; margin-top: 14px; padding: 0 2px; min-height: 26px; }
 	.smInfo b { color: #f0f3f7; }
 	.smInfo em { font-style: normal; color: var(--amber, #fb923c); }
 	.smEmpty { font-size: 10px; color: #aab2bf; padding: 12px; text-align: center; }
