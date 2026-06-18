@@ -39,6 +39,9 @@ function collectBlogAssets(dir: string, result = new Map<string, string>()) {
 			if (entry.name === 'assets') {
 				for (const asset of fs.readdirSync(fullPath, { withFileTypes: true })) {
 					if (!asset.isFile()) continue;
+					// imagegen 추출 매니페스트 — 게시 자산이 아니라 추출 로그(회사별 동일 파일명이라 전역 유일성 검사에서 충돌).
+					// 게시 자산은 .webp/.svg 이미지. 매니페스트는 수집·서빙 대상이 아니므로 스킵(파일 삭제 아님).
+					if (asset.name === 'imagegen-extract.json') continue;
 					const assetPath = path.resolve(fullPath, asset.name);
 					const duplicate = result.get(asset.name);
 					if (duplicate) {
