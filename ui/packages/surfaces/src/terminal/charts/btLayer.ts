@@ -153,7 +153,7 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 			}
 			return out;
 		},
-		draw: ({ ctx, indicator, kLineDataList, visibleRange, xAxis, bounding }: any): boolean => {
+		draw: ({ ctx, indicator, visibleRange, xAxis, bounding }: any): boolean => {
 			const ext = indicator.extendData as BtLayerExtend | null;
 			const result = indicator.result as EqRow[];
 			if (!ext?.strategies?.length || !result?.length) return true;
@@ -173,16 +173,47 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 			if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi <= lo) return true;
 			const yOf = (v: number) => padY + (H - 2 * padY) * (1 - (v - lo) / (hi - lo));
 
-			// 2. MDD 음영(combo 기준 1개)
-			if (ext.mdd) {
-				let x0: number | null = null; let x1: number | null = null;
-				for (let i = from; i < to; i++) {
-					const ts = kLineDataList[i]?.timestamp;
-					if (ts == null || ts < ext.mdd.peak || (ext.mdd.recover != null && ts > ext.mdd.recover)) continue;
-					const x = xAxis.convertToPixel(i);
-					if (x0 == null) x0 = x; x1 = x;
+			// 2. 수중(underwater) 연속 음영 — 포커스 전략 고점(high-water mark) 대비 하락분을 equity 라인 아래 채움.
+			//    (이전: 최악 1구간 full-height 음영 → 연속 수중으로 교체. 깊이뿐 아니라 '물밑에 얼마나 오래' 머물렀는지를
+			//     차트에서 직접 읽힘. 공유 절대축 위 — 고점/equity 모두 같은 axis 값이라 스케일 충돌 0. focus 1전략만 클러터 차단.)
+			{
+				const fi = ext.focus;
+				const peakAt: (number | null)[] = new Array(to).fill(null);
+				let pk = -Infinity;
+				for (let i = 0; i < to; i++) {
+					const v = result[i]?.e[fi] ?? null;
+					if (v != null) { if (v > pk) pk = v; peakAt[i] = pk; }
 				}
-				if (x0 != null && x1 != null) { ctx.fillStyle = 'rgba(240,97,111,0.10)'; ctx.fillRect(x0, 0, Math.max(1, x1 - x0), H); }
+				ctx.save();
+				ctx.beginPath();
+				let started = false;
+				for (let i = from; i < to; i++) {
+					const p = peakAt[i]; const v = result[i]?.e[fi] ?? null;
+					if (p == null || v == null) continue;
+					const x = xAxis.convertToPixel(i); const y = yOf(p);
+					if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+				}
+				if (started) {
+					for (let i = to - 1; i >= from; i--) {
+						const v = result[i]?.e[fi] ?? null;
+						if (v == null) continue;
+						ctx.lineTo(xAxis.convertToPixel(i), yOf(v));
+					}
+					ctx.closePath();
+					ctx.fillStyle = 'rgba(240,97,111,0.12)'; // 하락 빨강 저알파 — equity 라인 아래 수중 영역
+					ctx.fill();
+					// 고점 라인(수중 기준선) — 아주 연한 빨강 점선
+					ctx.strokeStyle = 'rgba(240,97,111,0.28)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+					ctx.beginPath();
+					let s2 = false;
+					for (let i = from; i < to; i++) {
+						const p = peakAt[i]; if (p == null) continue;
+						const x = xAxis.convertToPixel(i); const y = yOf(p);
+						if (!s2) { ctx.moveTo(x, y); s2 = true; } else ctx.lineTo(x, y);
+					}
+					ctx.stroke(); ctx.setLineDash([]);
+				}
+				ctx.restore();
 			}
 
 			// 3. 100 기준선(시작=100 → 손익분기) — 가시범위 안일 때만

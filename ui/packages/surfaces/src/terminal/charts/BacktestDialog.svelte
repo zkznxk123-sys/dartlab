@@ -8,6 +8,9 @@
 	import type { Lang } from '../lib/types';
 	import EquityChart from './EquityChart.svelte';
 	import MonthlyReturnsHeatmap from './MonthlyReturnsHeatmap.svelte';
+	import TradeScatter from './TradeScatter.svelte';
+	import YearlyReturnsBars from './YearlyReturnsBars.svelte';
+	import ReturnHistogram from './ReturnHistogram.svelte';
 
 	interface Props {
 		pf: PortfolioBtResult;
@@ -39,6 +42,11 @@
 	const m = $derived(result.metrics);
 	const rs = $derived(result.runSpec);
 	const oos = $derived(result.oos);
+	// OOS Sharpe 감쇠 — 검증/학습 비율(−면 열화, 과최적화의 정량 신호). train.sharpe>0 & 둘 다 산출 시만(분모 음/0 무의미).
+	const oosDecay = $derived.by<number | null>(() => {
+		if (!oos || oos.train.sharpe == null || oos.test.sharpe == null || oos.train.sharpe <= 0) return null;
+		return (oos.test.sharpe / oos.train.sharpe - 1) * 100;
+	});
 	const sgn = (v: number, d = 1) => (v >= 0 ? '+' : '') + v.toFixed(d);
 	const cls = (v: number) => (v > 0 ? 'tUp' : v < 0 ? 'tDn' : 'tNeu');
 	const fmtD = (t: string) => (t && t.length >= 8 ? `${t.slice(0, 4)}.${t.slice(4, 6)}.${t.slice(6, 8)}` : '—');
@@ -218,7 +226,13 @@
 								<div class="bdOosRow"><span>MDD</span><b class="mono tDn">{oos.train.mddPct.toFixed(1)}%</b></div>
 								<div class="bdOosRow"><span>{T('거래', 'trades')}</span><b class="mono">{oos.train.tradeCount}</b></div>
 							</div>
-							<div class="bdOosArrow">→</div>
+							<div class="bdOosArrow">
+								<span class="bdOosArr">→</span>
+								{#if oosDecay != null}
+									<span class="bdOosDecay" class:dn={oosDecay < -2} class:up={oosDecay > 2}>Sharpe {oosDecay >= 0 ? '+' : ''}{oosDecay.toFixed(0)}%</span>
+									<span class="bdOosDecayCap">{T('감쇠', 'decay')}</span>
+								{/if}
+							</div>
 							<div class="bdOosCol test">
 								<div class="bdOosTtl">{T('검증 (OOS)', 'test (OOS)')}</div>
 								<div class="bdOosRow"><span>{T('수익률', 'return')}</span><b class={'mono ' + cls(oos.test.retPct)}>{sgn(oos.test.retPct)}%</b></div>
@@ -264,6 +278,20 @@
 					<MonthlyReturnsHeatmap {eq} ts={tsWin} {lang} />
 				</section>
 
+				<!-- 연간 수익률 — 전략 vs 보유. 연도 의존성(한두 해 몰아주기 여부) 노출 -->
+				<section class="bdSec">
+					<div class="bdSecHd">{T('연간 수익률 — 전략 vs 보유', 'yearly returns — strategy vs B&H')}</div>
+					<YearlyReturnsBars {eq} {bhq} ts={tsWin} {lang} />
+				</section>
+
+				<!-- 거래별 수익률 분포 — 꼬리·치우침(Sharpe가 가리는 것) -->
+				{#if result.trades.length >= 2}
+					<section class="bdSec">
+						<div class="bdSecHd">{T('거래 수익률 분포', 'trade return distribution')}</div>
+						<ReturnHistogram rets={result.trades.map((t) => t.retPct)} {lang} />
+					</section>
+				{/if}
+
 				<!-- 낙폭 분석 -->
 				<section class="bdSec">
 					<div class="bdSecHd">{T('낙폭 분석', 'drawdown analysis')}</div>
@@ -293,6 +321,13 @@
 			{/if}
 
 			{#if viewTab === 'trades'}
+				{#if result.trades.some((t) => t.maePct != null)}
+					<section class="bdSec">
+						<div class="bdSecHd">{T('거래별 위험·보상 (MAE 산점)', 'per-trade risk/reward (MAE scatter)')}</div>
+						<TradeScatter trades={result.trades} {lang} onPick={jumpToBar} />
+						<div class="bdNote">{T('각 점 = 한 거래. 왼쪽일수록 보유 중 깊은 역행(MAE)을 견딘 거래 — 왼쪽 위(초록)는 거의 손실 볼 뻔하다 살아난 승자. 점 클릭 → 차트의 진입봉.', 'each dot = one trade. Further left = endured a deeper drawdown while held; top-left greens nearly turned losing. Click a dot → entry bar on chart.')}</div>
+					</section>
+				{/if}
 				<section class="bdSec">
 					<div class="bdSecHd">{T('거래 내역', 'trades')} <span class="bdN">{m.tradeCount}</span><button class="bdCsv" onclick={exportCsv}>{T('CSV 내보내기', 'export CSV')}</button><span class="bdHint">{T('행 클릭 → 차트의 해당 진입봉으로', 'click row → jump to chart')}</span></div>
 					{#if result.trades.length}
@@ -605,6 +640,12 @@
 		margin-top: 8px;
 		letter-spacing: 0.02em;
 	}
+	.bdNote {
+		font-size: 10.5px;
+		color: var(--dim, #8b94a3);
+		line-height: 1.55;
+		padding: 0 2px;
+	}
 	/* OOS 2열 */
 	.bdOos {
 		display: flex;
@@ -645,8 +686,35 @@
 	}
 	.bdOosArrow {
 		align-self: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1px;
+	}
+	.bdOosArr {
 		color: var(--dimmer);
 		font-size: 16px;
+		line-height: 1;
+	}
+	.bdOosDecay {
+		font-family: var(--dl-font-mono, monospace);
+		font-size: 12px;
+		font-weight: 700;
+		color: #aeb6c2;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.bdOosDecay.dn {
+		color: var(--dn, #f0616f);
+	}
+	.bdOosDecay.up {
+		color: var(--up, #34d399);
+	}
+	.bdOosDecayCap {
+		font-size: 9.5px;
+		color: var(--dimmer);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 	.bdOosWarn {
 		flex-basis: 100%;
