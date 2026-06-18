@@ -531,30 +531,35 @@ class Industry:
     def theme(
         self,
         themeId: str | None = None,
+        stockCode: str | None = None,
         *,
         grade: bool = False,
         discover: bool = False,
     ) -> pl.DataFrame:
-        """횡단 투자 테마 → 멤버 종목 (테마 스코프). 회사 스코프는 ``Company(code).themes()``.
+        """횡단 투자 테마 — industry 엔진의 테마 능력. 테마→멤버 또는 종목→소속 테마.
 
         Capabilities:
-            ``themeId`` → 그 테마 멤버 종목(주요제품 substring 태깅, 근거 동반). None 이면 테마 목록.
-            ``grade`` 면 멤버별 매출노출%(테마-인지), ``discover`` 면 공급망 거래엣지로 비키워드
-            수혜주 발견. 인포스탁 리스트와 달리 *근거 투명*. (``edges``·``map`` 과 동일 verb 형태.)
+            테마는 *industry 엔진의 하위 능력*(별도 엔진 아님). ``themeId`` → 그 테마 멤버 종목
+            (주요제품 substring 태깅, 근거 동반). ``stockCode`` → 그 종목의 소속 테마+근거+매출
+            노출%. 둘 다 없으면 테마 목록. 인포스탁 리스트와 달리 *근거 투명*. (``edges``·``map``
+            과 동일 — Industry 엔진 메서드.)
 
         Parameters
         ----------
         themeId : str | None
-            테마 ID. None 이면 등록 테마 목록(themeId/name/gradeable).
+            테마 ID. (themeId·stockCode 모두 None) 이면 테마 목록. stockCode 와 함께면 stockCode 우선.
+        stockCode : str | None
+            6자리 종목코드. 지정 시 그 종목의 소속 테마 도시에(근거+노출%).
         grade : bool
-            멤버별 ``노출%``·``등급근거`` 컬럼 추가 (멤버별 panel 조회 — 느림).
+            themeId 모드 멤버별 ``노출%``·``등급근거`` 추가 (멤버별 panel 조회 — 느림).
         discover : bool
-            공급망 거래엣지(supplier/customer)로 발견한 비키워드 종목 추가(``발견`` = 공급망).
+            themeId 모드 공급망 거래엣지(supplier/customer)로 비키워드 수혜주 추가(``발견``=공급망).
 
         Returns
         -------
         pl.DataFrame
-            themeId=None: ``themeId, name, keywords, gradeable``.
+            (인자 없음): ``themeId, name, keywords, gradeable``.
+            stockCode 지정: ``themeId, 테마, 근거, 노출%, 등급근거`` (그 종목의 테마들).
             themeId 지정: ``종목코드, 회사명, 업종, 근거, 발견`` (+grade: ``노출%, 등급근거``).
             ``노출%``=None 은 미산출(추출실패/단일사업/테마 segmentKeywords 부재) — 100% 등치 금지.
 
@@ -563,33 +568,34 @@ class Industry:
 
         Example:
             >>> from dartlab.industry import Industry
-            >>> Industry().theme("secondaryBattery", grade=True).filter(
-            ...     pl.col("회사명") == "LG화학"
-            ... )["노출%"][0]
+            >>> Industry().theme(stockCode="051910")["노출%"][0]  # LG화학 2차전지
             48.4
 
         Guide:
-            ``노출%``>=50 pure-play / 10~50 quasi / <10 곁다리(거짓양성 의심) / None 미산출. 답변 시
-            ``근거``(키워드)·``등급근거``(basis) 를 evidence 로 명시.
+            ``노출%``>=50 pure-play / 10~50 quasi / <10 곁다리 / None 미산출. 답변 시 ``근거``·
+            ``등급근거`` 를 evidence 로 명시.
 
         When:
-            "이 테마 종목·순도", "왜 이 테마", AI 워크벤치 테마 근거 답변.
+            "이 테마 종목·순도", "이 종목 무슨 테마·왜", AI 워크벤치 테마 근거 답변.
 
         How:
-            ``industry.themes.matchThemeText`` (태깅) + ``themeRevenueExposure`` (등급) +
-            ``build.pipeline.loadEdges`` (발견, supplyOnly).
+            ``industry.themes`` 백엔드(``_matchTheme`` 태깅 / ``_themeExposure`` 등급 / ``_stockThemes``
+            종목 도시에) + ``build.pipeline.loadEdges`` (발견, supplyOnly).
 
         Requires:
-            - ``industry/themes.json`` + KIND 상장목록. grade=True: panel 주석 데이터.
+            - ``industry/themes.json`` + KIND 상장목록. grade/stockCode: panel 주석 데이터.
 
         See Also:
-            - ``Company(code).themes()`` : 회사 스코프(종목 → 소속 테마).
-            - ``dartlab.industry.Industry.edges`` : 공급망 관계 원천.
+            - ``dartlab.industry.Industry.edges`` : 공급망 관계 원천 (동일 industry 엔진 메서드).
+            - ``dartlab.industry.Industry.map`` : 산업 정의 메타.
 
         AIContext:
-            테마 스코프 진입(회사 스코프는 Company.themes). 멤버십(근거)·노출%(등급근거)를 cite.
+            industry 엔진의 테마 메서드(별도 엔진 아님). 멤버십(근거)·노출%(등급근거)를 cite.
         """
-        from dartlab.industry.themes import _loadThemes, _matchTheme, _themeExposure
+        from dartlab.industry.themes import _loadThemes, _matchTheme, _stockThemes, _themeExposure
+
+        if stockCode is not None:
+            return _stockThemes(stockCode)
 
         themes = _loadThemes()
         if themeId is None:

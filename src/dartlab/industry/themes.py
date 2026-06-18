@@ -12,7 +12,6 @@ import json
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
 
 import polars as pl
 
@@ -89,22 +88,21 @@ def _themeExposure(themeId: str, code: str) -> dict | None:
     return {"exposurePct": round(pct, 1), "basis": "graded"}
 
 
-def _companyThemes(company: Any) -> pl.DataFrame:
-    """회사 객체 → 소속 테마 도시에 (``Company.themes()`` 백엔드, ``calcChainPosition(company)`` 동형).
+def _stockThemes(code: str) -> pl.DataFrame:
+    """한 종목의 소속 테마 도시에 (``Industry().theme(stockCode=...)`` 백엔드).
 
-    회사 *객체*를 받아 ``company.stockCode`` + 공개 listing 파사드로 주요제품 획득(gather 내부
-    직접 호출 아님). 컬럼 ``themeId·테마·근거·노출%·등급근거``. 매칭 테마 없으면 빈 DataFrame.
+    공개 listing 파사드로 주요제품 획득(gather 내부 직접 호출 아님) → 소속 테마·근거·노출%.
+    컬럼 ``themeId·테마·근거·노출%·등급근거``. 매칭 테마 없으면 빈 DataFrame.
     """
     import gc
 
-    stockCode = getattr(company, "stockCode", "")
-    if not stockCode:
+    if not code:
         return pl.DataFrame([], schema=_DOSSIER_SCHEMA)
 
     from dartlab._listingDispatch import listing as _listing
 
     df = _listing()
-    row = df.filter(df["종목코드"] == stockCode) if "종목코드" in df.columns else df.head(0)
+    row = df.filter(df["종목코드"] == code) if "종목코드" in df.columns else df.head(0)
     product = row["주요제품"][0] if row.height and "주요제품" in row.columns else ""
 
     rows: list[dict] = []
@@ -112,7 +110,7 @@ def _companyThemes(company: Any) -> pl.DataFrame:
         hits = _matchTheme(theme, product or "")
         if not hits:
             continue
-        g = _themeExposure(tid, stockCode) or {}
+        g = _themeExposure(tid, code) or {}
         rows.append(
             {
                 "themeId": tid,

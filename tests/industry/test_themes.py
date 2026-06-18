@@ -48,42 +48,28 @@ def test_theme_exposure_branches():
 
 
 @pytest.mark.requires_data
-def test_theme_scope_industry_verb():
-    """테마 스코프 공개계약 — Industry().theme(themeId) = 테마 → 멤버 (edges/map 동형)."""
+def test_theme_is_industry_engine_method():
+    """theme 은 *industry 엔진의 메서드* (별도 엔진 아님) — Industry().theme() 단일 진입.
+
+    테마→멤버(themeId), 종목→소속 테마(stockCode), 목록(무인자). edges/map 과 동일 industry 메서드.
+    """
     from dartlab.industry import Industry
 
     ind = Industry()
-    assert ind.theme().height == 3  # 시드 3테마
-    members = ind.theme("secondaryBattery")
+    assert ind.theme().height == 3  # 무인자 = 목록
+    members = ind.theme("secondaryBattery")  # 테마 스코프
     assert members.height > 50 and "051910" in members["종목코드"].to_list()
-    assert set(members.columns) >= {"종목코드", "회사명", "근거", "발견"}
-
-
-@pytest.mark.requires_data
-def test_company_scope_facade():
-    """회사 스코프 공개계약 — Company(code).themes() = 종목 → 소속 테마 (c.industry() 동형)."""
-    from dartlab.company import Company
-
-    lg = Company("051910").themes()  # LG화학
-    bat = lg.filter(lg["themeId"] == "secondaryBattery").to_dicts()[0]
+    dossier = ind.theme(stockCode="051910")  # 종목 스코프 (LG화학)
+    bat = dossier.filter(dossier["themeId"] == "secondaryBattery").to_dicts()[0]
     assert bat["근거"] and 40 < bat["노출%"] < 60 and bat["등급근거"] == "graded"
 
 
-def test_call_contract_is_apiref_not_separate_tool():
-    """호출계약 = apiRef 점 호출명 ``Company.themes`` (별도 도구 아님 — capability allowlist 자동등록)."""
+def test_themes_not_a_separate_engine_or_tool():
+    """themes 는 엔진 아님 — Company.themes accessor·ThemeExposure 도구·Company.themes apiRef 모두 없음."""
+    from dartlab.ai.tools import registry as rg
+    from dartlab.company import Company
     from dartlab.reference.capability import loadCapabilities
 
-    assert "Company.themes" in loadCapabilities()
-    # 별도 ThemeExposure 도구는 제거됨 — EngineCall apiRef 가 유일 계약.
-    from dartlab.ai.tools import registry as rg
-
-    assert "ThemeExposure" not in rg._TOOLS
-
-
-@pytest.mark.requires_data
-def test_call_contract_engine_call_dispatch():
-    """EngineCall(apiRef='Company.themes', args={stockCode}) 점 호출명 실행."""
-    from dartlab.ai.tools.engineCall import engineCall
-
-    r = engineCall({"apiRef": "Company.themes", "args": {"stockCode": "051910"}})
-    assert r.ok and r.data["rowCount"] >= 1
+    assert not hasattr(Company("005930"), "themes")  # 회사급 엔진 accessor 아님
+    assert "ThemeExposure" not in rg._TOOLS  # 별도 도구 아님
+    assert "Company.themes" not in loadCapabilities()  # 회사급 apiRef 아님

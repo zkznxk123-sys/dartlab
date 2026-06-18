@@ -5317,59 +5317,6 @@ class Company:
 
         return calcChainPosition(self)
 
-    def themes(self):
-        """이 회사가 속한 횡단 투자 테마 + 근거 + 매출노출% (회사 스코프).
-
-        Returns:
-            pl.DataFrame: ``themeId, 테마, 근거, 노출%, 등급근거``. 매칭 테마 없으면 빈 DataFrame.
-                ``노출%``=None 은 미산출(추출실패/단일사업/segmentKeywords 부재) — 100% 등치 금지.
-
-        Example::
-
-            c = Company("051910")  # LG화학
-            c.themes()
-            # themeId=secondaryBattery, 테마=2차전지/배터리, 근거=리튬이온, 노출%=48.4, 등급근거=graded
-
-        LLM Specifications:
-            AntiPatterns:
-                - 노출%=None 을 0% / 100% 로 단정 (미산출은 "부문 미공시" 정직 표기)
-                - 테마 ↔ 섹터/업종 혼동 (테마 = KSIC 가로지르는 투자 테마)
-            OutputSchema:
-                - themeId : str — 테마 ID
-                - 테마 : str — 한글 테마명
-                - 근거 : str — 매칭된 주요제품 키워드 (왜 이 테마)
-                - 노출% : float | None — 테마 귀속 부문매출% (pure-play>=50/quasi 10~50/곁다리<10)
-                - 등급근거 : str — graded/pure_play_candidate/no_segment_data/theme_no_segment_keywords
-            Freshness:
-                themes.json 정의 시점 (운영자 수동 큐레이션) + 최신 분기 부문매출.
-
-        Raises:
-            없음.
-
-        SeeAlso:
-            - ``industry`` — 가치사슬 산업 위치 (테마와 다른 차원).
-            - ``dartlab.industry.Industry.theme`` — 테마 → 멤버 종목 (테마 스코프).
-            - ``dartlab.industry.themes._companyThemes`` — 본 함수 backend (private).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - 회사가 속한 횡단 테마(2차전지·로봇 등) + 소속 근거(주요제품 키워드) + 테마별 매출
-              노출%(테마-인지 등급). 인포스탁 black-box 리스트와 달리 근거 투명.
-
-        Guide:
-            - "이 회사 무슨 테마" → 본 함수.
-            - "이 테마 종목들" → ``dartlab.industry.Industry().theme(themeId)``.
-
-        AIContext:
-            테마 답변 시 근거(키워드)·노출%(등급근거)를 cite. 노출% None 은 "부문 미공시" 정직 표기.
-        """
-        from dartlab.industry.themes import _companyThemes
-
-        return _companyThemes(self)
-
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 엽니다.
 
