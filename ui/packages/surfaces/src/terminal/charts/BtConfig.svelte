@@ -38,6 +38,11 @@
 		else if (v.startsWith('rule:')) { const rp = RULE_PRESETS.find((r) => r.key === v.slice(5)); if (rp) ctl.addRulePreset(rp); }
 		else if (v.startsWith('preset:')) { const pd = BT_PRESETS.find((d) => d.key === v.slice(7)); if (pd) ctl.addStrategy(pd); }
 	}
+	// 빈 상태 원클릭 — 골든크로스(maCross)로 즉시 시작해 차트에 마커·자산곡선이 바로 뜨게('안 뜬다' 해소).
+	function startGolden() {
+		const pd = BT_PRESETS.find((d) => d.key === 'maCross') ?? BT_PRESETS[0];
+		if (pd) ctl.addStrategy(pd);
+	}
 
 	// ── 룰 불변 편집 — 슬롯의 rule 을 clone·변형 후 setSlotRule ──
 	function editRule(i: number, fn: (r: StrategyRule) => void) {
@@ -75,8 +80,19 @@
 </script>
 
 <div class="btConfig">
+	<!-- 비파괴 일봉 안내 — 차트를 강제 전환하지 않고 사용자가 선택(파괴 side-effect 제거 동행). -->
+	{#if ctl.tf !== 'D'}
+		<div class="btTfNote">{T('백테스트는 일봉 기준입니다 — 현재 차트는 일봉이 아닙니다.', 'Backtest runs on daily bars — your chart is not on daily.')} <button class="btTfSwitch" onclick={() => (ctl.tf = 'D')}>{T('일봉으로 전환', 'switch to daily')}</button></div>
+	{/if}
 	<div class="btSection">
 		<div class="ctMenuLbl">{T('① 전략 (최대 3 · 같은 차트 비교)', '① Strategies (up to 3)')}</div>
+		{#if ctl.btStrategies.length === 0}
+			<!-- 빈 상태 — '안 뜬다' 해소: 무엇을 하면 무엇이 보이는지 + 원클릭 시작. -->
+			<div class="btEmpty">
+				<div class="btEmptyDesc">{T('전략을 추가하면 차트 위에 매수 ▲·매도 ▼ 마커와 자산곡선(전략 vs 보유)이 바로 그려집니다.', 'Add a strategy — buy ▲ / sell ▼ markers and an equity curve (strategy vs B&H) appear right on the chart.')}</div>
+				<button class="btEmptyCta" onclick={startGolden}>{T('골든크로스로 바로 시작 →', 'Start with golden cross →')}</button>
+			</div>
+		{/if}
 		{#each ctl.btStrategies as s, i (s.id)}
 			<div class="btSlot" class:on={i === ctl.btFocus}>
 				<div class="btSlotHd">
@@ -249,6 +265,15 @@
 	.btDel { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 12px; padding: 0 3px; }
 	.btDel:hover { color: var(--dn, #f0616f); }
 	.btDesc.warn { color: var(--amber, #fb923c); }
+	/* 일봉 안내(비파괴 전환) */
+	.btTfNote { font-size: 11px; color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 4px; padding: 6px 8px; margin-bottom: 6px; line-height: 1.5; }
+	.btTfSwitch { font-size: 10.5px; background: rgba(251, 146, 60, 0.16); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber, #fb923c); border-radius: 3px; padding: 1px 8px; cursor: pointer; font-family: inherit; margin-left: 2px; }
+	.btTfSwitch:hover { background: rgba(251, 146, 60, 0.26); }
+	/* 빈 상태 CTA — '안 뜬다' 해소(무엇을 하면 무엇이 보이나 + 원클릭) */
+	.btEmpty { display: flex; flex-direction: column; gap: 7px; padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--dl-line-strong, #2a3142); border-radius: 5px; margin-bottom: 4px; }
+	.btEmptyDesc { font-size: 11px; color: #aeb6c2; line-height: 1.55; }
+	.btEmptyCta { align-self: flex-start; font-size: 11.5px; font-weight: 600; background: rgba(251, 146, 60, 0.12); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber, #fb923c); border-radius: 4px; padding: 5px 12px; cursor: pointer; font-family: inherit; }
+	.btEmptyCta:hover { background: rgba(251, 146, 60, 0.22); }
 	/* 조건 빌더 */
 	.condBlk { margin-top: 5px; padding: 5px; border: 1px solid rgba(27, 33, 48, 0.7); border-radius: 4px; }
 	.condHd { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: #aeb6c2; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px; }

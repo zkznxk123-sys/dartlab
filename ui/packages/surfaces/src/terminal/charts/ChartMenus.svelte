@@ -214,12 +214,16 @@
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={(btOpen || ctl.btStrategies.length) && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } btOpen = !btOpen; menu = 'none'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : T('전략 백테스트 — 고정 패널(차트 조작해도 안 닫힘)', 'Strategy Lab — pinned panel')}>{T('백테스트', 'BT')}</button>
+		<button class={(btOpen || ctl.btStrategies.length) && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; btOpen = !btOpen; menu = 'none'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 — 고정 패널(차트 조작해도 안 닫힘, 차트는 안 건드림)', 'Strategy Lab — pinned panel (never alters your chart)')}>{T('백테스트', 'BT')}</button>
 		{#if btOpen && subject !== 'index'}
 			<!-- ★persistent dock — .ctMenu 클래스 유지(자식 스타일) + .btDock(고정·헤더). 차트 클릭에 안 닫힘. -->
 			<div class="ctMenu btDock">
 				<div class="btDockHd">
-					<span class="btDockTtl">{T('전략 백테스트', 'Strategy Lab')}</span>
+					<span class="btDockMark" aria-hidden="true"></span>
+					<div class="btDockTtlWrap">
+						<span class="btDockTtl">{T('전략 백테스트', 'STRATEGY LAB')}</span>
+						<span class="btDockSub">{T('규칙을 조립하면 차트 위에서 바로 검증됩니다', 'compose a rule · verify right on the chart')}</span>
+					</div>
 					<span class="btDockPin" title={T('고정됨 — 차트를 조작해도 닫히지 않음', 'pinned — survives chart interaction')}>📌</span>
 					<button class="btDockX" onclick={() => (btOpen = false)} aria-label="close" title={T('패널 닫기', 'close panel')}>✕</button>
 				</div>

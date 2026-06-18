@@ -232,9 +232,8 @@
 			</span>
 		</div>
 		<div class="crGrp crPop">
-			<!-- BT 는 일봉 전용 — disabled 로 막으면 봉주기 영속(주/월) 사용자가 "백테스트 고장"으로 오인.
-			     클릭 시 일봉 자동 전환 후 열기 (도구가 필요한 모드로 전환하는 HTS 관행). -->
-			<button class={ctl.btKey && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : ''} onclick={() => { if (subject === 'index') return; if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } pop = pop === 'bt' ? 'none' : 'bt'; }}>
+			<!-- BT 는 일봉 기준 — 차트를 강제 변형하지 않는다(사용자가 보던 tf/기간 보존). tf≠D 안내·전환은 BtConfig 패널 안에서. -->
+			<button class={ctl.btKey && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 (일봉 기준)', 'Strategy backtest (daily-based)')} onclick={() => { if (subject === 'index') return; pop = pop === 'bt' ? 'none' : 'bt'; }}>
 				{ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : `＋ ${T('전략 백테스트', 'Backtest')}`}
 			</button>
 			{#if pop === 'bt'}<div class="crMenu crMenuR"><BtConfig {ctl} {lang} /></div>{/if}
