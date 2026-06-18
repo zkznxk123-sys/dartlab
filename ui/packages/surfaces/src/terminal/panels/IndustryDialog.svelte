@@ -21,6 +21,9 @@
 
 	let view = $state(industryId); // '' = 지형도/랜드스케이프, 그 외 = 드릴 산업 id
 	let landView = $state<'map' | 'rank'>('map'); // 지형도(기본) ↔ 순위표(보조)
+	let drillView = $state<'map' | 'rank'>('map'); // 드릴: 회사 산포(기본) ↔ 회사 순위표(보조)
+	let drillSort = $state<'cap' | 'margin' | 'growth'>('cap'); // 표 정렬 키 (기본 시총 큰 순)
+	let drillDesc = $state(true);
 	let landLens = $state('prof');
 	const lens = $derived(lensByKey(landLens));
 
@@ -61,6 +64,14 @@
 		}))
 	);
 	const plotted = $derived(memberPts.length);
+
+	// 드릴 표(보조) — 산포와 동일 데이터(members), 정렬만. 행 클릭=종목 점프. 산포=모양·표=정확수치 스캔.
+	const sortedMembers = $derived.by((): IndustryMember[] =>
+		[...members].sort((a, b) => (drillDesc ? b[drillSort] - a[drillSort] : a[drillSort] - b[drillSort]))
+	);
+	const setDrillSort = (k: 'cap' | 'margin' | 'growth') => { if (drillSort === k) drillDesc = !drillDesc; else { drillSort = k; drillDesc = true; } };
+	const fmtCap = (v: number): string => (v >= 1e11 ? (v / 1e12).toFixed(2) + '조' : v > 0 ? Math.round(v / 1e8) + '억' : '—');
+	const sortArrow = (k: 'cap' | 'margin' | 'growth'): string => (drillSort === k ? (drillDesc ? ' ▾' : ' ▴') : '');
 
 	// 랜드스케이프 순위표(보조) — 선택 렌즈 정렬(lower 반영)
 	const landRows = $derived.by(() => {
@@ -114,13 +125,43 @@
 			{#if view && m}
 				<!-- ── 드릴: 회사 산포도(수익성 × 성장) — 양극화·스타·부실이 보임 ── -->
 				<div class="indScatterHd">
-					<span class="indScatterT">{lang === 'en' ? 'Companies — profitability × growth' : '회사 지형 — 수익성 × 성장'}</span>
-					<span class="indGradeLeg">
-						{#each GRADE_LEG as g (g.t)}<span class={'indLegDot ' + g.t}></span><i>{lang === 'en' ? g.e : g.k}</i>{/each}
-					</span>
+					<span class="indScatterT">{lang === 'en' ? 'Companies' : '회사'} <em class="indScatterSub">{drillView === 'map' ? (lang === 'en' ? 'profitability × growth' : '수익성 × 성장') : (lang === 'en' ? 'ranked table' : '순위표')}</em></span>
+					<div class="indDrillRight">
+						<div class="indViewTog">
+							<button class={'indVBtn' + (drillView === 'map' ? ' on' : '')} onclick={() => (drillView = 'map')}>{lang === 'en' ? 'Map' : '산포'}</button>
+							<button class={'indVBtn' + (drillView === 'rank' ? ' on' : '')} onclick={() => (drillView = 'rank')}>{lang === 'en' ? 'Table' : '표'}</button>
+						</div>
+						{#if drillView === 'map'}<span class="indGradeLeg">
+							{#each GRADE_LEG as g (g.t)}<span class={'indLegDot ' + g.t}></span><i>{lang === 'en' ? g.e : g.k}</i>{/each}
+						</span>{/if}
+					</div>
 				</div>
-				<ScatterMap pts={memberPts} xLabel={lang === 'en' ? 'op-margin %' : '수익성(영업이익률 %)'} yLabel={lang === 'en' ? 'rev CAGR %' : '성장(매출 CAGR %)'} showLabels zeroX onPick={onPick}
-					hint={lang === 'en' ? `※ dot = company · size = gov market-cap · color = financial health (debt grade) · position = actual values (${plotted} plotted, extremes pinned to edge) · click → company` : `※ 점=회사 · 크기=gov 시총 · 색=재무 건전성(부채등급) · 위치=실측값 (${plotted}사 · 극단값 가장자리·hover=실제) · 클릭 → 종목`} />
+				{#if drillView === 'map'}
+					<ScatterMap pts={memberPts} xLabel={lang === 'en' ? 'op-margin %' : '수익성(영업이익률 %)'} yLabel={lang === 'en' ? 'rev CAGR %' : '성장(매출 CAGR %)'} showLabels zeroX onPick={onPick}
+						hint={lang === 'en' ? `※ dot = company · size = gov market-cap · color = financial health (debt grade) · position = actual values (${plotted} plotted, extremes pinned to edge) · click → company` : `※ 점=회사 · 크기=gov 시총 · 색=재무 건전성(부채등급) · 위치=실측값 (${plotted}사 · 극단값 가장자리·hover=실제) · 클릭 → 종목`} />
+				{:else}
+					<!-- 회사 순위표 — 산포와 동일 데이터, 열 클릭=정렬, 행 클릭=종목 점프. 정확 수치 스캔용. -->
+					<div class="indMem">
+						<div class="indMemHd">
+							<span class="indMR">#</span>
+							<span class="indMName">{lang === 'en' ? 'company' : '회사'}</span>
+							<button class={'indMemSort' + (drillSort === 'margin' ? ' on' : '')} onclick={() => setDrillSort('margin')}>{lang === 'en' ? 'margin' : '이익률'}<i>{sortArrow('margin')}</i></button>
+							<button class={'indMemSort' + (drillSort === 'growth' ? ' on' : '')} onclick={() => setDrillSort('growth')}>{lang === 'en' ? 'growth' : '성장'}<i>{sortArrow('growth')}</i></button>
+							<button class={'indMemSort' + (drillSort === 'cap' ? ' on' : '')} onclick={() => setDrillSort('cap')}>{lang === 'en' ? 'mkt cap' : '시총'}<i>{sortArrow('cap')}</i></button>
+							<span class="indMGrHd">{lang === 'en' ? 'debt' : '부채'}</span>
+						</div>
+						{#each sortedMembers as c, i (c.code)}
+							<button class="indMemRow" onclick={() => onPick(c.code)} title={`${c.name} · ${lang === 'en' ? 'click → company' : '클릭 → 종목'}`}>
+								<span class="indMR mono">{i + 1}</span>
+								<span class="indMName">{c.name}</span>
+								<span class="indMV mono">{fmt1(c.margin, '%')}</span>
+								<span class="indMV mono">{fmt1(c.growth, '%')}</span>
+								<span class="indMV mono">{fmtCap(c.cap)}</span>
+								<span class={'indMGr ' + gradeTone('debt', c.debtGrade)}>{c.debtGrade || '—'}</span>
+							</button>
+						{/each}
+					</div>
+				{/if}
 				<!-- 비공간 사실 — 얇은 칩 한 줄(표 아님) -->
 				<div class="indFactStrip">
 					<span>{lang === 'en' ? 'spread(IQR)' : '마진 격차'} <b>{fmt1(m.marginIqr)}%p</b> {polarLabel}</span>
@@ -131,7 +172,7 @@
 					{#if m.cfSignature}<span>{lang === 'en' ? 'CF' : '현금'} <b>{m.cfSignature.pattern}</b></span>{/if}
 					{#if m.tailwind != null}<span class={m.tailwind >= 0.55 ? 'tUp' : m.tailwind <= 0.35 ? 'tDn' : 'tNeu'}>{twLabel(m.tailwind)} {m.tailwind.toFixed(2)}</span>{/if}
 				</div>
-				<div class="indHint">※ {lang === 'en' ? 'CAGR (y) = multi-year average; the YoY chip = recent change. Divergence (high CAGR but −YoY) = possible cyclical peak (observation, not forecast).' : 'CAGR(세로)=다년 평균 · YoY 칩=최근 변화. 둘이 갈리면(높은 CAGR 인데 −YoY) 순환 고점 가능성(관측이지 예측 아님).'}</div>
+				{#if drillView === 'map'}<div class="indHint">※ {lang === 'en' ? 'CAGR (y) = multi-year average; the YoY chip = recent change. Divergence (high CAGR but −YoY) = possible cyclical peak (observation, not forecast).' : 'CAGR(세로)=다년 평균 · YoY 칩=최근 변화. 둘이 갈리면(높은 CAGR 인데 −YoY) 순환 고점 가능성(관측이지 예측 아님).'}</div>{/if}
 			{:else}
 				<!-- ── 지형도(기본) ↔ 순위표(보조) ── -->
 				<div class="indLensRow">
@@ -206,6 +247,26 @@
 	.indFactStrip b { color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.indFactStrip em { font-style: normal; font-weight: 700; margin-left: 2px; }
 	.indHint { font-size: 9.5px; color: #c2cad6; line-height: 1.45; margin-top: 6px; font-style: italic; }
+	.indScatterSub { font-style: normal; font-weight: 400; font-size: 10px; color: #c2cad6; margin-left: 5px; }
+	.indDrillRight { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+	/* 드릴 회사 순위표(보조) — 산포와 동일 데이터, 열 클릭=정렬, 행 클릭=종목 점프 */
+	.indMem { display: flex; flex-direction: column; margin-bottom: 6px; max-height: 56vh; overflow-y: auto; }
+	.indMemHd, .indMemRow { display: grid; grid-template-columns: 22px 1fr 54px 54px 62px 42px; align-items: center; gap: 6px; padding: 2px 4px; text-align: left; }
+	.indMemHd { position: sticky; top: 0; background: var(--dl-bg, #0d1117); border-bottom: 1px solid var(--dl-line, #2a3142); z-index: 1; }
+	.indMemHd > span { font-size: 9px; color: #c2cad6; }
+	.indMemSort { background: none; border: 0; color: #c2cad6; cursor: pointer; font-size: 9px; text-align: right; padding: 0; font-family: inherit; }
+	.indMemSort:hover { color: var(--dl-ink, #c8cfdb); }
+	.indMemSort.on { color: var(--amber, #fb923c); }
+	.indMemSort i { font-style: normal; }
+	.indMGrHd { text-align: center; }
+	.indMemRow { background: none; border: 0; border-bottom: 1px solid var(--dl-line, #1b2130); cursor: pointer; }
+	.indMemRow:hover { background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.04)); }
+	.indMR { font-size: 9px; color: #c2cad6; text-align: center; }
+	.indMName { font-size: 11px; color: var(--dl-ink, #c8cfdb); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.indMemHd .indMName { font-size: 9px; color: #c2cad6; }
+	.indMV { font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; color: var(--dl-ink, #c8cfdb); }
+	.indMGr { font-size: 10px; font-weight: 700; text-align: center; }
+	.indMGr.up { color: #3fb950; } .indMGr.good { color: #6fbf73; } .indMGr.neutral { color: #8b93a0; } .indMGr.warn { color: #d29922; } .indMGr.down { color: #f85149; }
 	/* 뷰 토글 + 순위표(보조) */
 	.indLensRow { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; align-items: center; }
 	.indViewTog { display: inline-flex; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; overflow: hidden; margin-right: 4px; }
